@@ -228,6 +228,9 @@ struct SNeutrinoSettings
 	// pictureviewer
 	char   picviewer_slide_time[3];
 	int    picviewer_scaling;
+
+   //mp3player
+   int   mp3player_display;
 };
 
 struct SglobalInfo

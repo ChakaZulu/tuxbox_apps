@@ -76,6 +76,8 @@ class CMP3PlayerGui : public CMenuTarget
 			FF,
 			REV
 		};
+   enum DisplayOrder {ARTIST_TITLE = 0, TITLE_ARTIST=1};
+
  private:
 	CFrameBuffer * frameBuffer;
 	CFileBrowser * filebrowser;

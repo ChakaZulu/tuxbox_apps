@@ -661,6 +661,9 @@ mp3player.keylevel key level
 mp3player.fastforward fast forw.
 mp3player.pause pause
 mp3player.rewind rewind
+mp3player.artist_title Artist, Title
+mp3player.title_artist Title, Artist
+mp3player.display_order display order
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter

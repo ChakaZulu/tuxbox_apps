@@ -500,6 +500,8 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
 	
+   g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
+
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
@@ -722,7 +724,9 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "picviewer_slide_time", g_settings.picviewer_slide_time );
 	configfile.setInt32( "picviewer_scaling", g_settings.picviewer_scaling );
 
-	if(configfile.getModifiedFlag())
+	configfile.setInt32( "mp3player_display", g_settings.mp3player_display );
+	
+   if(configfile.getModifiedFlag())
 	{
 		dprintf(DEBUG_INFO, "saveing neutrino txt-config\n");
 		configfile.saveConfig(CONFIGDIR "/neutrino.conf");
@@ -1299,6 +1303,12 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
 	miscSettings.addItem( oj );
 	miscSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
+	
+   oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
+	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title"); 
+	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist"); 
+   miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
+	miscSettings.addItem( oj );
 }
 
 
@@ -3317,7 +3327,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.424 2003/03/10 21:22:37 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.425 2003/03/12 20:36:29 zwen Exp $\n\n");
 
 	tzset();
 	initGlobals();

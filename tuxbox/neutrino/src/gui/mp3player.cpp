@@ -565,27 +565,21 @@ void CMP3PlayerGui::paintItem(int pos)
 		char sNr[20];
 		sprintf(sNr, "%2d : ", liststart+pos+1);
 		std::string tmp=sNr;
- 		if ((!playlist[liststart+pos].Artist.empty()) &&
-		    (!playlist[liststart+pos].Album.empty()) &&
-		    (!playlist[liststart+pos].Title.empty()))
-			tmp +=  playlist[liststart+pos].Title  + ", " +
-				playlist[liststart+pos].Artist + " (" +
-				playlist[liststart+pos].Album  + ")";
+ 		std::string artist="Aritst?";
+      std::string title="Title?";
+      std::string album="";
+      
+      if (!playlist[liststart+pos].Artist.empty())
+         artist=playlist[liststart+pos].Artist;
+      if (!playlist[liststart+pos].Title.empty())
+			title= playlist[liststart+pos].Title;
+      if (!playlist[liststart+pos].Album.empty())
+         album=" (" + playlist[liststart+pos].Album + ")";
+      if(g_settings.mp3player_display == TITLE_ARTIST)
+         tmp += title + ", " + artist + album;
+      else //if(g_settings.mp3player_display == ARTIST_TITLE)
+         tmp += artist + ", " + title + album;
 
-		else
-		{
-			if (playlist[liststart+pos].Title.empty())
-				tmp += "Title?";
-			else
-				tmp += playlist[liststart+pos].Title;
-			tmp += ", "; 
- 			if (playlist[liststart+pos].Artist.empty())
-				tmp += "Artist?";
-			else
-				tmp += playlist[liststart+pos].Artist;
-			if (!(playlist[liststart+pos].Album.empty()))
-				tmp += " (" + playlist[liststart+pos].Album + ")";
- 		}  
 		int w=g_Fonts->menu->getRenderWidth(playlist[liststart+pos].Duration)+5;
 		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-30-w, tmp.c_str(), color, fheight, true); // UTF-8
 		g_Fonts->menu->RenderString(x+width-15-w,ypos+fheight, w, playlist[liststart+pos].Duration, color, fheight);
@@ -711,8 +705,11 @@ void CMP3PlayerGui::paintInfo()
 		g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED, 0, true); // UTF-8
 		if (playlist[current].Title.empty() || playlist[current].Artist.empty())
 			tmp=playlist[current].Title + playlist[current].Artist;
-		else
+      else if(g_settings.mp3player_display == TITLE_ARTIST)
 			tmp=playlist[current].Title + " / " + playlist[current].Artist;
+      else //if(g_settings.mp3player_display == ARTIST_TITLE)
+			tmp=playlist[current].Artist + " / " + playlist[current].Title;
+
 		w=g_Fonts->menu->getRenderWidth(tmp, true); // UTF-8
 		xstart=(width-w)/2;
 		if(xstart < 10)
@@ -753,9 +750,10 @@ void CMP3PlayerGui::paint()
 }
 
 //------------------------------------------------------------------------
-#define BUFFER_SIZE 2016*1 // at least 1 frame
+#define BUFFER_SIZE 2100
 void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 {
+//   printf("get_mp3info %s\n",mp3->Filename.c_str());
    FILE* in;
    struct mad_stream	Stream;
 	struct mad_header	Header;
@@ -766,18 +764,18 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
    if(in==NULL)
       return;
 
-	mad_stream_init(&Stream);
    ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
 
 	if(m_state!=STOP)
 		usleep(15000);
-	
+	bool foundSyncmark=true;
 	// Check for sync mark (some encoder produce data befor 1st frame in mp3 stream)
 	if(InputBuffer[0]!=0xff || (InputBuffer[1]&0xe0)!=0xe0)
 	{
+      foundSyncmark=false;
 		//skip to first sync mark
 		int n=0,j=0;
-		while((InputBuffer[n]!=0xff || (InputBuffer[n+1]&0xe0)!=0xe0) && ReadSize > 0)
+		while((InputBuffer[n]!=0xff || (InputBuffer[n+1]&0xe0)!=0xe0) && ReadSize > 1)
 		{
 			n++;
 			j++;
@@ -787,71 +785,77 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 				n=0;
 				fseek(in, -1, SEEK_CUR);
 				ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-            if(ReadSize < 2)
-               return;
 				if(m_state!=STOP)
 					usleep(15000);
 			}
 		}
-		if(ReadSize > 0)
+		if(ReadSize > 1)
 		{
 			fseek(in, j, SEEK_SET);
 			ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
 			if(m_state!=STOP)
 				usleep(15000);
+         foundSyncmark=true;
 		}
-		else
-			return;
 	}
-   mad_stream_buffer(&Stream,InputBuffer,ReadSize);
-   mad_header_decode(&Header,&Stream);
+   if(foundSyncmark)
+   {
+//      printf("found syncmark...\n");
+      mad_stream_init(&Stream);
+      mad_stream_buffer(&Stream,InputBuffer,ReadSize);
+      mad_header_decode(&Header,&Stream);
 
-	mp3->VBR=false;
-	
-	if(m_state!=STOP)
-		usleep(15000);
-	mad_stream_finish(&Stream);
-   // filesize
-	fseek(in, 0, SEEK_END);
-   filesize=ftell(in);
-   fclose(in);
+      mp3->VBR=false;
 
-   char tmp[20];
-	sprintf(tmp,"%lu kbps",Header.bitrate / 1000);
-   mp3->Bitrate=tmp;
-	sprintf(tmp,"%u kHz",Header.samplerate / 1000);
-   mp3->Samplerate=tmp;
-   sprintf(tmp, "%lu:%02lu", filesize*8/Header.bitrate/60, filesize*8/Header.bitrate%60);
-   mp3->Duration=tmp;
-	/* Convert the layer number to it's printed representation. */
-	switch(Header.layer)
-	{
-		case MAD_LAYER_I:
-			mp3->Layer="layer I";
-			break;
-		case MAD_LAYER_II:
-			mp3->Layer="layer II";
-			break;
-		case MAD_LAYER_III:
-			mp3->Layer="layer III";
-			break;
-	}
-	/* Convert the audio mode to it's printed representation. */
-	switch(Header.mode)
-	{
-		case MAD_MODE_SINGLE_CHANNEL:
-			mp3->ChannelMode="single channel";
-			break;
-		case MAD_MODE_DUAL_CHANNEL:
-			mp3->ChannelMode="dual channel";
-			break;
-		case MAD_MODE_JOINT_STEREO:
-			mp3->ChannelMode="joint stereo";
-			break;
-		case MAD_MODE_STEREO:
-			mp3->ChannelMode="normal stereo";
-			break;
-	}
+      if(m_state!=STOP)
+         usleep(15000);
+      mad_stream_finish(&Stream);
+      // filesize
+      fseek(in, 0, SEEK_END);
+      filesize=ftell(in);
+      fclose(in);
+
+      char tmp[20];
+      sprintf(tmp,"%lu kbps",Header.bitrate / 1000);
+      mp3->Bitrate=tmp;
+      sprintf(tmp,"%u kHz",Header.samplerate / 1000);
+      mp3->Samplerate=tmp;
+      sprintf(tmp, "%lu:%02lu", filesize*8/Header.bitrate/60, filesize*8/Header.bitrate%60);
+      mp3->Duration=tmp;
+      /* Convert the layer number to it's printed representation. */
+      switch(Header.layer)
+      {
+         case MAD_LAYER_I:
+            mp3->Layer="layer I";
+            break;
+         case MAD_LAYER_II:
+            mp3->Layer="layer II";
+            break;
+         case MAD_LAYER_III:
+            mp3->Layer="layer III";
+            break;
+      }
+      /* Convert the audio mode to it's printed representation. */
+      switch(Header.mode)
+      {
+         case MAD_MODE_SINGLE_CHANNEL:
+            mp3->ChannelMode="single channel";
+            break;
+         case MAD_MODE_DUAL_CHANNEL:
+            mp3->ChannelMode="dual channel";
+            break;
+         case MAD_MODE_JOINT_STEREO:
+            mp3->ChannelMode="joint stereo";
+            break;
+         case MAD_MODE_STEREO:
+            mp3->ChannelMode="normal stereo";
+            break;
+      }
+   }
+   else
+   {
+      mp3->Duration="?:??";
+   }
 }
 
 
