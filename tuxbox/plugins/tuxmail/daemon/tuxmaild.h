@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.11  2005/03/24 13:12:11  lazyt
+ * cosmetics, support for syslog-server (start with -syslog)
+ *
  * Revision 1.10  2005/03/22 13:31:48  lazyt
  * support for english osd (OSD=G/E)
  *
@@ -55,6 +58,7 @@
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <arpa/inet.h>
+#include <syslog.h>
 
 #include "audio.h"
 
@@ -69,11 +73,11 @@
 #define PIDFILE "/tmp/tuxmaild.pid"
 #define LCKFILE "/tmp/lcd.locked"
 
-//pop3 commands
+// pop3 commands
 
 enum {INIT, USER, PASS, STAT, UIDL, TOP, DELE, QUIT};
 
-//account database
+// account database
 
 struct
 {
@@ -86,7 +90,7 @@ struct
 
 }account_db[10];
 
-//spam database
+// spam database
 
 struct
 {
@@ -94,15 +98,16 @@ struct
 
 }spamfilter[100];
 
-//some data
+// some data
 
 FILE *fd_pid;
+int slog = 0;
 int pid;
 int webport;
 char webuser[32], webpass[32];
 char plainstring[64], encodedstring[64];
 char decodedstring[512];
-int startdelay, intervall;
+int startdelay, intervall, skin;
 char pop3log, logmode, audio, lcd, osd, admin, savedb;
 int video;
 char online = 1;
