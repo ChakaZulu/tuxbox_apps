@@ -55,7 +55,7 @@ using namespace std;
 #define RED "#CB0303"
 #define GREEN "#1FCB12"
 #define YELLOW "#F5FF3C"
-#define LIGHTGREY "#F4F4EC"
+#define LIGHTGREY "#FEFEFE"
 #define DARKGREY "#D9E0E7"
 #define LEFTNAVICOLOR "#D9E0E7"
 #define TOPNAVICOLOR "#D9E0E7"
