@@ -151,7 +151,7 @@ void CScanTs::startScan()
 		st_rmsg		sendmessage;
 
 		sendmessage.version=1;
-		sendmessage.param2=g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk;
+		sendmessage.param2=g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk | g_settings.scan_bouquet;
 		printf("sending scanparam: %d\n", sendmessage.param2 );
 		sendmessage.cmd = 'g';
 

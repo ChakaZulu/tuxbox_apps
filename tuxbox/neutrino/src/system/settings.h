@@ -60,6 +60,7 @@ struct SNeutrinoSettings
 	int scan_eutel;
 	int scan_kopernikus;
 	int scan_digituerk;
+	int scan_bouquet;
 
 	//colors
 	unsigned char menu_Head_alpha;

@@ -197,6 +197,10 @@ scants.kopernikus kopernikus
 scants.digituerk digituerk
 scants.transponders TRANSPONDER:
 scants.services SERVIS:
+scants.bouquet Bouquet
+scants.bouquet_leave leave current
+scants.bouquet_create create new
+scants.bouquet_erase erase all
 
 mainsettings.update Software Update
 flashupdate.head Software Update

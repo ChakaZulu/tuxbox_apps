@@ -198,6 +198,11 @@ scants.kopernikus Kopernikus
 scants.digituerk Digituerk
 scants.transponders Transponder:
 scants.services Services:
+scants.bouquet Bouquets
+scants.bouquet_leave nicht ändern
+scants.bouquet_create neu erstellen
+scants.bouquet_erase löschen
+
 
 mainsettings.update Software-Aktualisierung
 flashupdate.head Aktualisierung
