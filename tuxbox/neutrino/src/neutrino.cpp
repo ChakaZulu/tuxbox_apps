@@ -3067,9 +3067,8 @@ void CNeutrinoApp::tvMode( bool rezap )
 
 	//printf( "tv-mode\n" );
 
-	if(frameBuffer->getActive())
-		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 	frameBuffer->useBackground(false);
+	frameBuffer->paintBackground();
 
 	g_RemoteControl->tvMode();
 	if( rezap )
@@ -3092,8 +3091,9 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 	if( bOnOff )
 	{
 		// SCART AN
-		if(frameBuffer->getActive())
-			memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
+		frameBuffer->useBackground(false);
+		frameBuffer->paintBackground();
+
 		g_Controld->setScartMode( 1 );
 		CLCD::getInstance()->setMode(CLCD::MODE_SCART);
 		lastMode = mode;
@@ -3143,8 +3143,8 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 			g_Controld->setScartMode( 0 );
 		}
 
-		if(frameBuffer->getActive())
-			memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
+		frameBuffer->useBackground(false);
+		frameBuffer->paintBackground();
 
 		CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
@@ -3372,7 +3372,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.404 2003/02/12 14:16:40 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.405 2003/02/12 14:27:26 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
