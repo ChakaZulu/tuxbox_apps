@@ -39,6 +39,8 @@ int md5_file (const char *filename, int binary, unsigned char *md5_result)
   FILE *fp;
   int err;
 
+  (void)binary;
+
   if (STREQ (filename, "-"))
     {
       have_read_stdin = 1;
