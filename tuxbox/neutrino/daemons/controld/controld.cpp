@@ -748,11 +748,25 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.56 2002/03/28 08:50:04 obi Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.57 2002/03/29 15:47:18 obi Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
-	if (fork() != 0)
+	switch (fork())
+	{
+	case -1:
+		perror("[controld] fork");
+		return -1;
+	case 0:
+		break;
+	default:
 		return 0;
+	}
+
+	if (setsid() == -1)
+	{
+		perror("[controld] setsid");
+		return -1;
+	}
 
     //printf("[controld] forkedThread-pid: %d\n", getpid());
 	eventServer = new CEventServer;
