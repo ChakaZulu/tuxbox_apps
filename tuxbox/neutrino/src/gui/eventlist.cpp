@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.30 2002/01/15 22:08:13 McClean Exp $
+// $Id: eventlist.cpp,v 1.31 2002/01/16 00:28:30 McClean Exp $
 //
 //  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.31  2002/01/16 00:28:30  McClean
+// cleanup
+//
 // Revision 1.30  2002/01/15 22:08:13  McClean
 // cleanups
 //
@@ -433,7 +436,7 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 			{
 				hide();
 
-				g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
+				g_EpgData->show(channelname, onidSid, evt->epg.id, &evt->epg.startzeit);
 
 				key = g_RCInput->getKey(0);
 				if ((key!=CRCInput::RC_red) &&

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.32 2002/01/15 23:17:59 McClean Exp $
+// $Id: epgview.cpp,v 1.33 2002/01/16 00:28:04 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.33  2002/01/16 00:28:04  McClean
+// cleanup
+//
 // Revision 1.32  2002/01/15 23:17:59  McClean
 // cleanup
 //
@@ -363,7 +366,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 					g_FrameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 					g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 1);
 
-					show("", 0, prev_id, &prev_zeit, false);
+					show(channelName, onid_tsid, prev_id, &prev_zeit, false);
 				}
 
 			}
@@ -374,7 +377,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 					g_FrameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 					g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 1);
 
-					show("", 0, next_id, &next_zeit, false);
+					show(channelName, onid_tsid, next_id, &next_zeit, false);
 				}
 
 			}
@@ -517,17 +520,7 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 
 			#ifdef USEACTIONLOG
 				char buf[1000];
-				static string channelName2 = 0; 
-				static unsigned int onid_tsid2 = 0;
-				if(channelName!="")
-				{
-					channelName2=channelName;
-				}
-				if(onid_tsid!=0)
-				{
-					onid_tsid2=onid_tsid;
-				}
-				sprintf((char*) buf, "epg: %08x \"%s\" %02d.%02d.%04d, %02d:%02d - \"%s\"", onid_tsid2, channelName2.c_str(), nSDay, nSMon, nSYear, nSH, nSM, epgData.title );
+				sprintf((char*) buf, "epg: %08x \"%s\" %02d.%02d.%04d, %02d:%02d - \"%s\"", onid_tsid, channelName.c_str(), nSDay, nSMon, nSYear, nSH, nSM, epgData.title );
 				g_ActionLog->println(buf);
 			#endif
 
