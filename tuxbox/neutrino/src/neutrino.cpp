@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.268 2002/05/10 15:07:32 rasc Exp $
+        $Id: neutrino.cpp,v 1.269 2002/05/10 15:48:07 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -892,7 +892,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart", true, CRCInput::RC_yellow, "gelb.raw") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, "blau.raw") );
 
-	mainMenu.addItem( new CMenuForwarder("mainmenu.SleepTimer", true, "", new CSleepTimerWidget, "",true) );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.sleeptimer", true, "", new CSleepTimerWidget, "",true) );
 
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -2540,7 +2540,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.268 2002/05/10 15:07:32 rasc Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.269 2002/05/10 15:48:07 rasc Exp $\n\n");
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
 	tzset();
