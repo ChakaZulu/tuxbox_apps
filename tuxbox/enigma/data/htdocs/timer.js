@@ -75,11 +75,11 @@ function addTimerEvent(timer)
 		if (document.channelselector.su.checked)
 			su = "on";
 			
-		url = '/addTimerEvent2?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event;
+		url = '/addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event;
 	}
 	else
 	{
-		url = '/addTimerEvent2?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event;
+		url = '/addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event;
 	}
 	
 	NewWindow(url, 'add', '200', '200', 'no', '5000');

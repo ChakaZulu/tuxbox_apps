@@ -52,7 +52,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.4.8"
+#define WEBXFACEVERSION "1.4.9"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -976,15 +976,6 @@ static eString version(eString request, eString dirpath, eString opt, eHTTPConne
 	return result;
 }
 
-#ifndef DISABLE_FILE
-static eString setFakeRecordingState(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	int state = (opt == "on") ? 1 : 0;
-	eZapMain::getInstance()->setFakeRecordingState(state);
-	return "+ok";
-}
-#endif
-
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
@@ -1584,8 +1575,9 @@ class eWebNavigatorListDirectory2: public Object
 	eString origpath;
 	eString path;
 	eServiceInterface &iface;
+	bool addEPG;
 public:
-	eWebNavigatorListDirectory2(eString &result1, eString &result2, eString origpath, eString path, eServiceInterface &iface): result1(result1), result2(result2), origpath(origpath), path(path), iface(iface)
+	eWebNavigatorListDirectory2(eString &result1, eString &result2, eString origpath, eString path, eServiceInterface &iface, bool addEPG): result1(result1), result2(result2), origpath(origpath), path(path), iface(iface), addEPG(addEPG)
 	{
 		eDebug("path: %s", path.c_str());
 	}
@@ -1635,7 +1627,7 @@ public:
 			eEPGCache::getInstance()->Unlock();
 
 			eString tmp = filter_string(service->service_name);
-			if (short_description && (zapMode != ZAPMODERECORDINGS))
+			if (short_description && addEPG)
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
 			if (!((zapSubMode == ZAPSUBMODESATELLITES) && (tmp.find("Provider") != eString::npos)))
@@ -1691,7 +1683,7 @@ static eString getZapContent(eString mode, eString path)
 	return result;
 }
 
-static eString getZapContent2(eString mode, eString path)
+static eString getZapContent2(eString mode, eString path, int depth, bool addEPG)
 {
 	eString result, result1, result2;
 	eString tpath;
@@ -1714,94 +1706,6 @@ static eString getZapContent2(eString mode, eString path)
 		eServiceReference current_service = string2ref(tpath);
 		eServiceInterface *iface = eServiceInterface::getInstance();
 
-		// first pass thru is to get all user bouquets
-		eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
-		Signal1<void, const eServiceReference&> signal;
-		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
-		iface->enterDirectory(current_service, signal);
-		tmp.str(result1.left(result1.length() - 1));
-		bouquetrefs = result1.left(result1.length() - 2);
-		bouquets = result2.left(result2.length() - 2);
-		eDebug("entered");
-		iface->leaveDirectory(current_service);
-		eDebug("exited");
-
-		// go thru all bouquets to get the channels
-		int i = 0;
-		while (tmp)
-		{
-			result1 = ""; result2 =""; tpath = "";
-			tmp >> tpath;
-			if (tpath)
-			{
-				tpath = tpath.mid(1, tpath.length() - 3);
-				eServiceReference current_service = string2ref(tpath);
-
-				eWebNavigatorListDirectory2 navlist(result1, result2, tpath, tpath, *iface);
-				Signal1<void, const eServiceReference&> signal;
-				signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
-
-				channels += "channels[";
-				channels += eString().sprintf("%d", i);
-				channels += "] = new Array(";
-				channelrefs += "channelRefs[";
-				channelrefs += eString().sprintf("%d", i);
-				channelrefs += "] = new Array(";
-
-				iface->enterDirectory(current_service, signal);
-
-				channels += result2.left(result2.length() - 2);
-				channels += ");";
-				channelrefs += result1.left(result1.length() - 2);
-				channelrefs += ");";
-
-				eDebug("entered");
-				iface->leaveDirectory(current_service);
-				eDebug("exited");
-				i++;
-			}
-		}
-
-		result = readFile(HTDOCS_DIR + "zapdata.js");
-		result.strReplace("#BOUQUETS#", bouquets);
-		result.strReplace("#BOUQUETREFS#", bouquetrefs);
-		result.strReplace("#CHANNELS#", channels);
-		result.strReplace("#CHANNELREFS#", channelrefs);
-		result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
-		result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
-		int autobouquetchange = 0;
-		eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autobouquetchange);
-		result.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", autobouquetchange));
-		result.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
-		result.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
-	}
-
-	return result;
-}
-
-static eString getZapContent3(eString mode, eString path)
-{
-	eString result, result1, result2;
-	eString bouquets, bouquetrefs, channels, channelrefs;
-	eString tpath;
-	eServiceReference current_service;
-
-	unsigned int pos = 0, lastpos = 0, temp = 0;
-
-	if ((path.find(";", 0)) == eString::npos)
-		path = ";" + path;
-
-	while ((pos = path.find(";", lastpos)) != eString::npos)
-	{
-		lastpos = pos + 1;
-		if ((temp = path.find(";", lastpos)) != eString::npos)
-			tpath = path.mid(lastpos, temp - lastpos);
-		else
-			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
-
-		current_service = string2ref(tpath);
-		eServiceInterface *iface = eServiceInterface::getInstance();
-
 		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 		{
 			playService(current_service);
@@ -1809,59 +1713,85 @@ static eString getZapContent3(eString mode, eString path)
 		}
 		else
 		{
-			eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface);
+			// first pass thru is to get all user bouquets
+			eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface, addEPG);
 			Signal1<void, const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
-
-			channels += "channels[0] = new Array(";
-			channelrefs += "channelRefs[0] = new Array(";
-
 			iface->enterDirectory(current_service, signal);
+			tmp.str(result1.left(result1.length() - 1));
+			bouquetrefs = result1.left(result1.length() - 2);
+			bouquets = result2.left(result2.length() - 2);
 			eDebug("entered");
-
-			channels += result2.left(result2.length() - 2);
-			channels += ");";
-			channelrefs += result1.left(result1.length() - 2);
-			channelrefs += ");";
-
 			iface->leaveDirectory(current_service);
 			eDebug("exited");
+
+			if (depth > 1)
+			{
+				// go thru all bouquets to get the channels
+				int i = 0;
+				while (tmp)
+				{
+					result1 = ""; result2 =""; tpath = "";
+					tmp >> tpath;
+					if (tpath)
+					{
+						tpath = tpath.mid(1, tpath.length() - 3);
+						eServiceReference current_service = string2ref(tpath);
+
+						eWebNavigatorListDirectory2 navlist(result1, result2, tpath, tpath, *iface, addEPG);
+						Signal1<void, const eServiceReference&> signal;
+						signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+
+						channels += "channels[";
+						channels += eString().sprintf("%d", i);
+						channels += "] = new Array(";
+						channelrefs += "channelRefs[";
+						channelrefs += eString().sprintf("%d", i);
+						channelrefs += "] = new Array(";
+
+						iface->enterDirectory(current_service, signal);
+
+						channels += result2.left(result2.length() - 2);
+						channels += ");";
+						channelrefs += result1.left(result1.length() - 2);
+						channelrefs += ");";
+
+						eDebug("entered");
+						iface->leaveDirectory(current_service);
+						eDebug("exited");
+						i++;
+					}
+				}
+			}
+			else
+			{
+				channels = "channels[0] = new Array(" + bouquets + ");";
+				channelrefs = "channelRefs[0] = new Array(" + bouquetrefs + ");";
+				bouquets = "\"Dummy bouquet\"";
+				bouquetrefs = "\"Dummy bouquet ref\"";
+			}
+
+			result = readFile(HTDOCS_DIR + "zapdata.js");
+			result.strReplace("#BOUQUETS#", bouquets);
+			result.strReplace("#BOUQUETREFS#", bouquetrefs);
+			result.strReplace("#CHANNELS#", channels);
+			result.strReplace("#CHANNELREFS#", channelrefs);
+			result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
+			result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+			int autobouquetchange = 0;
+			eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autobouquetchange);
+			result.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", autobouquetchange));
+			result.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
+			result.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
 		}
 	}
 
-	if (current_service.flags&eServiceReference::isDirectory)
-	{
-		bouquets = "\"dummy bouquet\"";
-		bouquetrefs = "\"dummy bouquet ref\"";
-
-		eString tmpFile = readFile(HTDOCS_DIR + "zapdata.js");
-		tmpFile.strReplace("#BOUQUETS#", bouquets);
-		tmpFile.strReplace("#BOUQUETREFS#", bouquetrefs);
-		tmpFile.strReplace("#CHANNELS#", channels);
-		tmpFile.strReplace("#CHANNELREFS#", channelrefs);
-		tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
-		tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
-		tmpFile.strReplace("#AUTOBOUQUETCHANGE#", "0");
-		tmpFile.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
-		tmpFile.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
-
-		result = readFile(TEMPLATE_DIR + "rec.tmp");
-		result.strReplace("#ZAPDATA#", tmpFile);
-		if (screenWidth > 1024)
-			result.strReplace("#SELSIZE#", "25");
-		else
-			result.strReplace("#SELSIZE#", "10");
-		if (zapMode == ZAPMODERECORDINGS)
-			result.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()"));
-		else
-			result.strReplace("#BUTTON#", "");
-	}
 	return result;
 }
 
 static eString getZap(eString mode, eString path)
 {
-	eString result;
+	eString result, tmp;
 
 	if (pdaScreen == 0)
 	{
@@ -1869,18 +1799,34 @@ static eString getZap(eString mode, eString path)
 #ifndef DISABLE_FILE
 		if (zapMode == ZAPMODERECORDINGS) // recordings
 		{
-			eString tmpFile = readFile(TEMPLATE_DIR + "videocontrols.tmp");
-			tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
-			result += tmpFile;
-			result += getZapContent3(mode, path);
+			eString tmp = readFile(TEMPLATE_DIR + "videocontrols.tmp");
+			tmp.strReplace("#VIDEOBAR#", getVideoBar());
+			result += tmp;
+
+			tmp = readFile(TEMPLATE_DIR + "rec.tmp");
+			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false));
+			if (screenWidth > 1024)
+				tmp.strReplace("#SELSIZE#", "25");
+			else
+				tmp.strReplace("#SELSIZE#", "10");
+			tmp.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()"));
+			result += tmp;
 		}
 		else
 #endif
 		if (zapMode == ZAPMODEROOT) // root
 		{
-			eString tmp = getZapContent3(mode, path);
+			result += readFile(TEMPLATE_DIR + "rec.tmp");
+			eString tmp = getZapContent2(mode, path, 1, false);
 			if (tmp != "")
-				result += tmp;
+			{
+				result.strReplace("#ZAPDATA#", tmp);
+				if (screenWidth > 1024)
+					result.strReplace("#SELSIZE#", "25");
+				else
+					result.strReplace("#SELSIZE#", "10");
+				result.strReplace("#BUTTON#", "");
+			}
 			else
 				result = "";
 		}
@@ -1891,7 +1837,7 @@ static eString getZap(eString mode, eString path)
 				tmp.strReplace("#SELSIZE#", "30");
 			else
 				tmp.strReplace("#SELSIZE#", "15");
-			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
+			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path, 2, true));
 			result += tmp;
 		}
 	}
@@ -2429,7 +2375,7 @@ static eString getContent(eString mode, eString path)
 		}
 
 		result = getTitle(tmp);
-		eString tmp = getZap(mode, path);
+		tmp = getZap(mode, path);
 		if (tmp != "")
 			result += tmp;
 		else
@@ -2796,7 +2742,7 @@ public:
 						eString ext_description;
 						eString short_description;
 						eString genre;
-						int genreCategory = 16; //none
+						int genreCategory = 0; //none
 						EITEvent event(*It->second);
 						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 						{
@@ -2810,20 +2756,25 @@ public:
 							if (descriptor->Tag() == DESCR_CONTENT)
 							{
 								genre = "";
+								genreCategory = 0;
 								ContentDescriptor *cod = (ContentDescriptor *)descriptor;
 
 								for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
 								{
-									genreCategory = ce->content_nibble_level_1;
+									if (genreCategory == 0)
+										genreCategory = ce->content_nibble_level_1;
 									if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
 									{
 										if (genre != "")
-											genre += " ";
+											genre += ", ";
 										genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
 									}
 								}
 							}
 						}
+
+						if (genre == "")
+							genre = "n/a";
 
 						time_t eventStart = adjust2FifteenMinutes(event.start_time);
 						time_t eventEnd = eventStart + adjust2FifteenMinutes(event.duration);
@@ -2849,10 +2800,18 @@ public:
 						{
 							eventDuration = eventStart - tableTime;
 							colUnits = eventDuration / 60 / 15;
-							result << "<td colspan=" << colUnits << ">&nbsp;</td>";
-							tableTime = eventStart;
-							tablePos += colUnits * 15 * d_min;
-							eventDuration = adjust2FifteenMinutes(event.duration);
+							if (colUnits == 1)
+							{
+								eventStart = tableTime;
+								eventDuration += adjust2FifteenMinutes(event.duration);
+							}
+							else
+							{
+								result << "<td colspan=" << colUnits << ">&nbsp;</td>";
+								tableTime = eventStart;
+								tablePos += colUnits * 15 * d_min;
+								eventDuration = adjust2FifteenMinutes(event.duration);
+							}
 						}
 
 						if ((eventDuration > 0) && (eventDuration < 15 * 60))
@@ -2870,7 +2829,6 @@ public:
 #ifndef DISABLE_FILE
 							result  << "<a href=\"javascript:record('"
 								<< "ref=" << ref2string(ref)
-								<< "&ID=" << std::hex << event.event_id << std::dec
 								<< "&start=" << event.start_time
 								<< "&duration=" << event.duration;
 							eString tmp = filter_string(short_description);
@@ -2892,8 +2850,6 @@ public:
 								<< "<span class=\"duration\">"
 								<< " (" << event.duration / 60 << " min)"
 								<< "</span>"
-								<< "<br>"
-								<< "Genre: " << genre
 								<< "<br>";
 							if ((eventStart <= now) && (eventEnd >= now))
 								result << "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\", \"0\", \"-1\")\'>";
@@ -2903,7 +2859,9 @@ public:
 							if ((eventStart <= now) && (eventEnd >= now))
 								result << "</a>";
 
-							result	<< "<br>";
+							result	<< "<br>"
+								<< "Genre: " << genre
+								<< "<br>";
 
 							if ((eventDuration >= 15 * 60) && (pdaScreen == 0))
 							{
@@ -3002,7 +2960,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 {
 	std::stringstream result;
 	eString description, ext_description, genre;
-	int genreCategory = 16;
+	int genreCategory = 0;
 	result << std::setfill('0');
 
 	eService* current;
@@ -3053,20 +3011,25 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				if (descriptor->Tag() == DESCR_CONTENT)
 				{
 					genre = "";
+					genreCategory = 0;
 					ContentDescriptor *cod = (ContentDescriptor *)descriptor;
 
 					for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
 					{
-						genreCategory = ce->content_nibble_level_1;
+						if (genreCategory == 0)
+							genreCategory = ce->content_nibble_level_1;
 						if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
 						{
 							if (genre != "")
-								genre += " ";
+								genre += ", ";
 							genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
 						}
 					}
 				}
 			}
+
+			if (genre == "")
+				genre = "n/a";
 
 			tm* t = localtime(&event.start_time);
 			result << "<tr valign=\"middle\">"
@@ -3082,7 +3045,6 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 			result << "<td>"
 				<< "<a href=\"javascript:record('"
 				<< "ref=" << ref2string(ref)
-				<< "&ID=" << std::hex << event.event_id << std::dec
 				<< "&start=" << event.start_time
 				<< "&duration=" << event.duration;
 			eString tmp = filter_string(description);
@@ -3786,43 +3748,6 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 	return closeWindow(content, "", 500);
 }
 
-static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	eString result;
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString serviceRef = opt["ref"];
-	eString eventID = opt["ID"];
-	eString eventStartTime = opt["start"];
-	eString eventDuration = opt["duration"];
-	eString channel = httpUnescape(opt["channel"]);
-	eString description = httpUnescape(opt["descr"]);
-	if (description == "")
-		description = "No description available";
-
-	int eventid;
-	sscanf(eventID.c_str(), "%x", &eventid);
-	eDebug("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
-
-	int timeroffset = 0;
-	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
-		timeroffset = 0;
-
-	int start = atoi(eventStartTime.c_str()) - (timeroffset * 60);
-	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
-
-	ePlaylistEntry entry(string2ref(serviceRef), start, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-	entry.service.descr = channel + "/" + description;
-
-	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
-	else
-		result += "Timer event was created successfully.";
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	return result;
-}
-
 static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result, result1;
@@ -4140,13 +4065,15 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	return result;
 }
 
-static eString addTimerEvent2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString serviceRef = opt["ref"];
+	eString eventStartTimeS = opt["start"];
+	eString eventDurationS = opt["duration"];
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
 	eString shour = opt["shour"];
@@ -4169,50 +4096,60 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
 
-	tm start = *localtime(&now);
-	if (timer == "repeating")
+	int eventDuration = 0;
+	time_t eventStartTime, eventEndTime;
+
+	if (eventStartTimeS && eventDurationS)
 	{
-		start.tm_year = 70;  // 1.1.1970
-		start.tm_mon = 0;
-		start.tm_mday = 1;
+		eventStartTime = atoi(eventStartTimeS.c_str());
+		eventDuration = atoi(eventDurationS.c_str());
 	}
 	else
 	{
-		start.tm_mday = atoi(sday.c_str());
-		start.tm_mon = atoi(smonth.c_str()) - 1;
-	}
-	start.tm_hour = atoi(shour.c_str());
-	start.tm_min = atoi(smin.c_str());
-	start.tm_sec = 0;
+		tm start = *localtime(&now);
+		if (timer == "repeating")
+		{
+			start.tm_year = 70;  // 1.1.1970
+			start.tm_mon = 0;
+			start.tm_mday = 1;
+		}
+		else
+		{
+			start.tm_mday = atoi(sday.c_str());
+			start.tm_mon = atoi(smonth.c_str()) - 1;
+		}
+		start.tm_hour = atoi(shour.c_str());
+		start.tm_min = atoi(smin.c_str());
+		start.tm_sec = 0;
 
-	tm end = *localtime(&now);
-	if (timer == "repeating")
-	{
-		end.tm_year = 70;  // 1.1.1970
-		end.tm_mon = 0;
-		end.tm_mday = 1;
-	}
-	else
-	{
-		end.tm_mday = atoi(eday.c_str());
-		end.tm_mon = atoi(emonth.c_str()) -1;
-	}
-	end.tm_hour = atoi(ehour.c_str());
-	end.tm_min = atoi(emin.c_str());
-	end.tm_sec = 0;
+		tm end = *localtime(&now);
+		if (timer == "repeating")
+		{
+			end.tm_year = 70;  // 1.1.1970
+			end.tm_mon = 0;
+			end.tm_mday = 1;
+		}
+		else
+		{
+			end.tm_mday = atoi(eday.c_str());
+			end.tm_mon = atoi(emonth.c_str()) -1;
+		}
+		end.tm_hour = atoi(ehour.c_str());
+		end.tm_min = atoi(emin.c_str());
+		end.tm_sec = 0;
 
-	time_t eventStartTime = mktime(&start);
-	time_t eventEndTime = mktime(&end);
-	int duration = eventEndTime - eventStartTime;
-	int eventid = -1;
+		eventStartTime = mktime(&start);
+		eventEndTime = mktime(&end);
+		eventDuration = eventEndTime - eventStartTime;
+	}
 
 	int timeroffset = 0;
 	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
 
-	time_t start1 = eventStartTime - (timeroffset * 60);
-	duration = duration + (2 * timeroffset * 60);
+	eventStartTime = eventStartTime - (timeroffset * 60);
+	eventDuration = eventDuration + (2 * timeroffset * 60);
 
-	int type = atoi(after_event.c_str());
+	int type = (after_event) ? atoi(after_event.c_str()) : 0;
 	type |= ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR;
 
 	if (timer == "repeating")
@@ -4234,7 +4171,7 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 			type |= ePlaylistEntry::Su;
 	}
 
-	ePlaylistEntry entry(string2ref(serviceRef), start1, duration, eventid, type);
+	ePlaylistEntry entry(string2ref(serviceRef), eventStartTime, eventDuration, -1, type);
 	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
@@ -4363,7 +4300,7 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
 
-	result.strReplace("#ZAPDATA#", getZapContent2("zap", zap[ZAPMODETV][ZAPSUBMODEBOUQUETS]));
+	result.strReplace("#ZAPDATA#", getZapContent2("zap", zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, false));
 	if (pdaScreen == 1)
 		result = "<html><head><title>Info</title></head><body>This function is not available for PDAs.</body></html>";
 
@@ -4556,7 +4493,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume, lockWeb);
 	dyn_resolver->addDyn("GET", "/setVideo", setVideo, lockWeb);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, lockWeb);
-	dyn_resolver->addDyn("GET", "/addTimerEvent2", addTimerEvent2, lockWeb);
 	dyn_resolver->addDyn("GET", "/TVBrowserTimerEvent", TVBrowserTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/deleteTimerEvent", deleteTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/editTimerEvent", editTimerEvent, lockWeb);
@@ -4612,9 +4548,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 // functions needed by dreamtv
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getServices", getServices, lockWeb);
-#ifndef DISABLE_FILE
-	dyn_resolver->addDyn("GET", "/cgi-bin/setFakeRecordingState", setFakeRecordingState, lockWeb);
-#endif
 	dyn_resolver->addDyn("GET", "/control/zapto", getCurrentVpidApid, false); // this dont really zap.. only used to return currently used pids;
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist, lockWeb);
