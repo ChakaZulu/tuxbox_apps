@@ -22,6 +22,7 @@ typedef struct channelstruct {
 typedef struct channel_msg_struct {
 	uint chan_nr;
 	char name[30];
+	char mode;
 } channel_msg;
 
 typedef struct pids{

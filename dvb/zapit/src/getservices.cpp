@@ -27,12 +27,116 @@ uint channel_nr;
 int serv_mode;
 uint curr_diseqc;
 
+void addlist(chanptr item)
+{
+	if (top != NULL) {
+		//cur_c = top;
+		if (strcasecmp(cur_c->name,item->name) < 0) 
+		{
+			//printf("Going forward\n");
+			
+			while (strcasecmp(cur_c->name,item->name) < 0 && cur_c->next != NULL)
+			{
+				//printf("Going forward\n");
+				cur_c = cur_c->next;
+			}
+			
+				if (cur_c == top)
+				{
+					//printf("inserting at top\n");
+					if (top->next != NULL)
+					{
+						item->next = top->next;
+						top->next->prev = item;
+					}
+					
+					top->next = item;
+					item->prev = top;
+					//printf("Inserted %d %s at top\n", item->chan_nr, item->name);
+				}
+				else if (cur_c->next != NULL && cur_c->prev != NULL)
+				{
+					item->next = cur_c;
+					item->prev = cur_c->prev;
+					cur_c->prev->next = item;
+					cur_c->prev = item;
+				}
+				else if (cur_c->next == NULL && strcasecmp(cur_c->name, item->name) >= 0)
+				{
+					item->prev = cur_c->prev;
+					cur_c->prev->next = item;
+					cur_c->prev = item;
+					item->next = cur_c;
+				}
+				else
+				{
+					item->next = NULL;
+					cur_c->next = item;
+					item->prev = cur_c;
+					
+				//printf("inserting last item\n");
+				}
+				
+					
+		}
+		else
+		{
+			//printf("Going backwards\n");
+			
+			while (strcasecmp(cur_c->name,item->name) >= 0 && cur_c != top)
+			{
+				//printf("Going backwards\n");
+				cur_c = cur_c->prev;
+			}
+	
+			if (cur_c == top && strcasecmp(cur_c->name,item->name) >= 0)
+			{
+			
+				top->prev = item;
+				item->next = top;
+				top = item;
+				top->prev = NULL;
+				//printf("Inserted %d %s at top\n", item->chan_nr, item->name);
+			}
+			else if (cur_c == top && strcasecmp(cur_c->name,item->name) < 0)
+			{
+		  		item->next = top->next;
+		  		if (top->next != NULL)
+		  			top->next->prev = item;
+		  		item->prev = top;
+		  	}														
+			else if (cur_c->next != NULL && cur_c->prev != NULL)
+			{
+				item->prev = cur_c;
+				item->next = cur_c->next;
+				cur_c->next->prev = item;
+				cur_c->next = item;
+			}
+			else
+			{
+				item->prev = cur_c;
+				item->next = NULL;
+				cur_c->next = item;
+				//printf("inserting last item\n");
+				}
+		}	
+	}
+	else{
+		//printf("Inserting first item\n");
+		top = item;
+		top->prev = NULL;
+		top->next = NULL;
+		cur_c = top;
+	}
+}
+
 
 void ParseTransponder(XMLTreeNode *transponder) {
   uint curr_freq = 0;
   uint curr_symbolrate = 0;	
   ushort curr_polarity = 0;
   ushort curr_fec = 0;
+  uint curr_servid = 0;
   
   for (XMLTreeNode *services=transponder->GetChild(); services; services=services->GetNext())
     {
@@ -62,15 +166,24 @@ void ParseTransponder(XMLTreeNode *transponder) {
 	    //printf("Will build a channel of type %d.\n",serv_mode);
 	    tmp_chan = (chanptr) malloc(sizeof(channel));
 	    memset(tmp_chan, 0, sizeof(channel));
-	    if (tmp_chan == NULL) printf("tmp_chan konnte nicht erstellt werden.\n");
+	    if (tmp_chan == NULL){
+	    	printf("tmp_chan konnte nicht erstellt werden.\n");
+	    	exit(0);
+	}
+	    services = services->GetChild();
+	    sscanf(services->GetAttributeValue("vpid"), "%x", &tmp_chan->vpid);	
+	    sscanf(services->GetAttributeValue("apid"), "%x", &tmp_chan->apid);		
+	    services = services->GetParent();
 	    
-	    channel_nr++;
+	    //sscanf(services->GetAttributeValue("channelNR"), "%x", &channel_nr);
+	    sscanf(services->GetAttributeValue("serviceID"), "%x", &curr_servid); 
+	    sscanf(services->GetAttributeValue("onid"), "%x", &tmp_chan->onid);
 
 	    sscanf(services->GetAttributeValue("pmt"), "%x", &tmp_chan->pmt);
 	    sscanf(services->GetAttributeValue("ecmpid"), "%x", &tmp_chan->ecmpid);
-	    sscanf(services->GetAttributeValue("onid"), "%x", &tmp_chan->onid);
 	    sscanf(services->GetAttributeValue("tsid"), "%x", &tmp_chan->tsid);
-	    tmp_chan->prev = cur_c;
+	    tmp_chan->prev = NULL;
+	    tmp_chan->next = NULL;
 	    tmp_chan->chan_nr = channel_nr;
 	    tmp_chan->frequency = curr_freq;
 	    tmp_chan->symbolrate = curr_symbolrate;
@@ -82,8 +195,9 @@ void ParseTransponder(XMLTreeNode *transponder) {
 	    tmp_chan->name = (char*) malloc(30);
 	    strncpy(tmp_chan->name, services->GetAttributeValue("name"),30);
 	    //printf("%d Kanalname: %s, Pmt: %04x\n",channel_nr, tmp_chan->name, tmp_chan->pmt);
-	    cur_c->next = tmp_chan;
-	    cur_c = tmp_chan;
+	    //cur_c->next = tmp_chan;
+	    //cur_c = tmp_chan;
+	    addlist(tmp_chan);
 	 
 	} else { 
 		//printf("Channelname is empty\n");
@@ -142,13 +256,26 @@ void FindTransponder(XMLTreeNode *root)
 	search = search->GetNext();
       }
     } else {
-    	if (channel_nr == 0)
-    	      printf("No cable or satellite found\n");
+    	//if (channel_nr == 0)
+    	//      printf("No cable or satellite found\n");
     }
     search = search->GetNext();
   }
 }
 
+void correct_numbers()
+{
+	int number = 0;
+	
+	cur_c = top;
+	do 
+	{
+		cur_c->chan_nr = ++number;
+		cur_c = cur_c->next;
+	} while (cur_c->next != NULL);
+	cur_c = top;
+}
+	
 chanptr LoadServices(int mode)
 {
   top = NULL;
@@ -185,7 +312,7 @@ chanptr LoadServices(int mode)
 	  return NULL;
 	}
     } while (!done);
-  top = (chanptr) malloc(sizeof(channel));
+  //top = (chanptr) malloc(sizeof(channel));
   //current = (chanptr) malloc(sizeof(channel));
   cur_c = top;
   if (parser->RootNode()) 
@@ -195,7 +322,9 @@ chanptr LoadServices(int mode)
   delete parser;
   
   fclose(in);
-  cur_c = top->next;
-  return cur_c;
+  //cur_c = top->next;
+  top->prev = 0;
+  correct_numbers();
+  return top;
 }
 
