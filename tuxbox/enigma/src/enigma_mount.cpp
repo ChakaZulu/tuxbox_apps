@@ -320,8 +320,13 @@ int eMountMgr::mountMountPoint(int id)
 {
 	int rc = 0;
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
 		if (mp_it->mp.id == id)
+		{
 			rc = mp_it->mount();
+			break;
+		}
+	}
 	return rc;
 }
 
@@ -329,9 +334,24 @@ int eMountMgr::unmountMountPoint(int id)
 {
 	int rc = 0;
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
 		if (mp_it->mp.id == id)
+		{
 			rc = mp_it->unmount();
+			break;
+		}
+	}
 	return rc;
+}
+
+void eMountMgr::automountMountPoints(void)
+{
+	int rc;
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
+		if (mp_it->mp.automount == 1)
+			rc = mp_it->mount();
+	}
 }
 
 eString eMountMgr::listMountPoints(eString skelleton)

@@ -60,6 +60,7 @@ public:
 	t_mount getMountPointData(int);
 	int mountMountPoint(int);
 	int unmountMountPoint(int);
+	void automountMountPoints(void);
 	void save();
 	void init();
 
