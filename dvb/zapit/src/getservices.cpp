@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.87 2005/01/09 16:56:55 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.88 2005/01/12 19:38:13 thegoodguy Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -97,10 +97,10 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 				transponder
 				(
 					transport_stream_id,
+					original_network_id,
 					feparams,
 					polarization,
-					DiSEqC,
-					original_network_id
+					DiSEqC
 				)
 			)
 		);

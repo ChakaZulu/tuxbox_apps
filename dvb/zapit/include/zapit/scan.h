@@ -1,5 +1,5 @@
 /*
- *  $Id: scan.h,v 1.26 2003/03/14 07:31:50 obi Exp $
+ *  $Id: scan.h,v 1.27 2005/01/12 19:38:13 thegoodguy Exp $
  */
 
 #ifndef __scan_h__
@@ -14,26 +14,12 @@
 
 #include "bouquets.h"
 
-struct transpondermap
-{
-	t_transport_stream_id transport_stream_id;
-	t_original_network_id original_network_id;
-	dvb_frontend_parameters    feparams;
-	uint8_t               polarization;
-	uint8_t               DiSEqC;
+#include "getservices.h"
 
-	transpondermap(const t_transport_stream_id p_transport_stream_id, const t_original_network_id p_original_network_id, const dvb_frontend_parameters p_feparams, const uint8_t p_polarization = 0, const uint8_t p_DiSEqC = 0)
-	{
-		transport_stream_id = p_transport_stream_id;
-		original_network_id = p_original_network_id;
-		feparams            = p_feparams;
-		polarization        = p_polarization;
-		DiSEqC              = p_DiSEqC;
-	}
-};
-
-extern std::map <uint32_t, transpondermap> scantransponders;
-typedef std::map <uint32_t, transpondermap>::iterator stiterator;
+extern std::map <scantransponder_id_t, transponder> scantransponders;
+typedef std::map <scantransponder_id_t, transponder>::iterator stiterator;
+#define GET_ORIGINAL_NETWORK_ID_FROM_SCANTRANSPONDER_ID(transponder_id) ((t_original_network_id)(transponder_id      ))
+#define GET_TRANSPORT_STREAM_ID_FROM_SCANTRANSPONDER_ID(transponder_id) ((t_transport_stream_id)(transponder_id >> 16))
 
 extern CBouquetManager* scanBouquetManager;
 

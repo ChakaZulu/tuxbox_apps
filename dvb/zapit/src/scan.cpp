@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.139 2005/01/12 18:33:27 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.140 2005/01/12 19:38:13 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -194,7 +194,7 @@ void get_transponder (TP_params *TP)
 	return;
 }
 
-int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(uint32_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
+int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(scantransponder_id_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
 {
 	if (TsidOnid == 0)
 		return 1;
@@ -213,10 +213,10 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(uint32_t TsidOnid, struct
 
 		scantransponders.insert
 		(
-			std::pair <unsigned int, transpondermap>
+			std::pair <scantransponder_id_t, transponder>
 			(
 				TsidOnid,
-				transpondermap
+				transponder
 				(
 					(TsidOnid >> 16) &0xFFFF,
 					TsidOnid &0xFFFF,
@@ -255,10 +255,9 @@ int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, uin
 
 int get_sdts(char * frontendType)
 {
-	stiterator tI;
 	uint32_t TsidOnid;
 
-	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++) {
+	for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++) {
 		/* msg to neutrino */
 		processed_transponders++;
 
@@ -335,7 +334,7 @@ void write_bouquets(const char * const providerName)
 		scanBouquetManager->saveBouquets(bouquetMode, providerName);
 }
 
-void write_transponder(FILE *fd, const transpondermap & transponder)
+void write_transponder(FILE *fd, const transponder & transponder)
 {
 	static bool emptyTransponder = false;
 	switch (frontend->getInfo()->type) {

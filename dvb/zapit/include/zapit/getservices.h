@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.58 2005/01/09 16:56:54 thegoodguy Exp $
+ * $Id: getservices.h,v 1.59 2005/01/12 19:38:13 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -47,28 +47,19 @@ int LoadServices      (fe_type_t, diseqc_t);
 
 struct transponder
 {
-	t_transport_stream_id transport_stream_id;
+	t_transport_stream_id   transport_stream_id;
+	t_original_network_id   original_network_id;
 	dvb_frontend_parameters feparams;
-	unsigned char polarization;
-	unsigned char DiSEqC;
-	t_original_network_id original_network_id;
+	uint8_t                 polarization;
+	uint8_t                 DiSEqC;
 
-	transponder (t_transport_stream_id p_transport_stream_id, dvb_frontend_parameters p_feparams)
+	inline transponder(const t_transport_stream_id p_transport_stream_id, const t_original_network_id p_original_network_id, const dvb_frontend_parameters p_feparams, const uint8_t p_polarization = 0, const uint8_t p_DiSEqC = 0)
 	{
 		transport_stream_id = p_transport_stream_id;
-		feparams = p_feparams;
-		polarization = 0;
-		DiSEqC = 0;
-		original_network_id = 0;
-	}
-
-	transponder (t_transport_stream_id p_transport_stream_id, dvb_frontend_parameters p_feparams, unsigned short p_polarization, unsigned char p_DiSEqC, t_original_network_id p_original_network_id)
-	{
-		transport_stream_id = p_transport_stream_id;
-		feparams = p_feparams;
-		polarization = p_polarization;
-		DiSEqC = p_DiSEqC;
 		original_network_id = p_original_network_id;
+		feparams            = p_feparams;
+		polarization        = p_polarization;
+		DiSEqC              = p_DiSEqC;
 	}
 };
 

@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.36 2004/04/17 19:44:04 derget Exp $
+ * $Id: nit.cpp,v 1.37 2005/01/12 19:38:14 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,7 +31,7 @@
 
 #define NIT_SIZE 1024
 
-extern std::map<unsigned int, transponder> transponders;
+extern transponder_list_t transponders;
 
 int parse_nit(unsigned char DiSEqC)
 {
@@ -133,12 +133,12 @@ int parse_nit(unsigned char DiSEqC)
 						break;
 
 					case 0x43:
-						if (satellite_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id, DiSEqC) < 0)
+						if (satellite_delivery_system_descriptor(buffer + pos2, (transport_stream_id << 16) | original_network_id, DiSEqC) < 0)
 							return -2;
 						break;
 
 					case 0x44:
-						if (cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id) < 0)
+						if (cable_delivery_system_descriptor(buffer + pos2, (transport_stream_id << 16) | original_network_id) < 0)
 							return -2;
 						break;
 
