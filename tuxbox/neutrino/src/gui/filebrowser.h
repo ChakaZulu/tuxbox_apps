@@ -147,7 +147,7 @@ class CFileBrowser
 		time_t m_oldKeyTime;
 		unsigned char m_oldKey;
 
-		void paintItem(unsigned pos, unsigned int spalte = 0);
+		void paintItem(unsigned pos);
 		void paint();
 		void paintHead();
 		void paintFoot();

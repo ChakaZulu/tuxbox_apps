@@ -742,6 +742,8 @@ filebrowser.mark Mark
 filebrowser.scan Scaning folder
 filebrowser.sort.name (filename)
 filebrowser.sort.date (date)
+filebrowser.nextpage Next Page
+filebrowser.prevpage Prev. Page
 
 nfs.mount Mount NFS/CIFS volume
 nfs.ip NFS/CIFS Server IP

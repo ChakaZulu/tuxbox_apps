@@ -743,6 +743,8 @@ filebrowser.mark Markieren
 filebrowser.scan Durchsuche Verzeichnisse
 filebrowser.sort.name (Dateiname)
 filebrowser.sort.date (Datum)
+filebrowser.nextpage Seite vor
+filebrowser.prevpage Seite zurück
 
 nfs.mount NFS/CIFS Verzeichnis mounten
 nfs.ip NFS/CIFS Server IP

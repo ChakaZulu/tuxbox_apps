@@ -175,31 +175,22 @@ CFileBrowser::CFileBrowser()
 	selected = 0;
 	smode = 0;
 
-	width  = 500;
-	height = 380;
-   if((g_settings.screen_EndX- g_settings.screen_StartX) < width)
-      width=(g_settings.screen_EndX- g_settings.screen_StartX);
-	if((g_settings.screen_EndY- g_settings.screen_StartY) < height)
-      height=(g_settings.screen_EndY- g_settings.screen_StartY);
-	
-	foheight = 30;
+  x = g_settings.screen_StartX + 20;
+  y = g_settings.screen_StartY + 20;
+
+	width = (g_settings.screen_EndX - g_settings.screen_StartX - 40);
+	height = (g_settings.screen_EndY - g_settings.screen_StartY - 40);
 
 	theight = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->getHeight();
 	fheight = g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->getHeight();
+	foheight = 30;
 
-
-	listmaxshow = std::max(1,(int)(height - theight - foheight)/fheight);
-
-	height = theight+foheight+listmaxshow*fheight; // recalc height
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	if(x+width > 720)
-		x=720-width;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
-	if(y+height > 576)
-		x=576-width;
-	
 	liststart = 0;
+	listmaxshow = std::max(1,(int)(height - theight - 2 * foheight)/fheight);
 
+	//recalc height
+	height = theight + listmaxshow * fheight + 2 * foheight;
+	
 	m_oldKeyTime = 0;
 	m_oldKey = 0;
 }
@@ -602,8 +593,8 @@ bool CFileBrowser::exec(std::string Dirname)
 				loop = false;
 			}
 		}
-		if(!CRCInput::isNumeric(msg))
-			frameBuffer->paintBoxRel(x+width-20, y+height- (foheight ), 20, (foheight ), COL_MENUHEAD);
+		//if(!CRCInput::isNumeric(msg))
+		//	frameBuffer->paintBoxRel(x + width, y + height, 20, (foheight ), COL_MENUHEAD);
 	}
 
 	hide();
@@ -713,13 +704,12 @@ void CFileBrowser::hide()
 
 //------------------------------------------------------------------------
 
-void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
+void CFileBrowser::paintItem(unsigned int pos)
 {
 	int color;
 	int ypos = y+ theight+0 + pos*fheight;
 	CFile * actual_file = NULL;
 	std::string fileicon;
-
 
 	if (liststart+pos==selected)
 	{
@@ -762,11 +752,11 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 						fileicon = "file.raw";
 			}
 			frameBuffer->paintIcon(fileicon, x+5 , ypos + (fheight-16) / 2 );
-			
+	
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color); // ISO-8859-1
+			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x+35, ypos+ fheight, width -(35+190) , actual_file->getFileName(), color); // ISO-8859-1
 #else
-			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x+35, ypos+ fheight, width -(35+190) , actual_file->getFileName(), color, 0, true); // UTF-8
 #endif
 
 			if( S_ISREG(actual_file->Mode) )
@@ -813,7 +803,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 				rawtime = actual_file->Time;
 				strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&rawtime));
 				int breite = g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->getRenderWidth(timestring);
-				g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + width - 20 - breite , ypos+ fheight, breite+1, timestring, color);
+    g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + width - 20 - breite , ypos+ fheight, breite+1, timestring, color);
 			}
 		}
 	}
@@ -842,44 +832,59 @@ void CFileBrowser::paintHead()
 
 void CFileBrowser::paintFoot()
 {
-//	int ButtonWidth = 25;
 	int dx = (width-20) / 4;
 	int type;
-	int by = y + height - (foheight -4);
+	//First Line (bottom, top)
+	int by = y + height - 2 * (foheight - 4);
 	int ty = by + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
+  //Second Line (bottom, top)
+	int by2 = y + height - (foheight - 4);
+	int ty2 = by2 + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
 
-	frameBuffer->paintBoxRel(x, y+height- (foheight ), width-20, (foheight ), COL_MENUHEAD);
+	//Background
+	frameBuffer->paintBoxRel(x, y + height - (2 * foheight ), width - 20, (2 * foheight ), COL_MENUHEAD);
 
 	if (!(filelist.empty()))
 	{
 		std::string nextsort;
 		type = filelist[selected].getType();
 
-		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
+		//Red Button
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x + 3, by + 1);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20, ty, dx - 20, g_Locale->getText("filebrowser.nextpage"), COL_INFOBAR, 0, true); // UTF-8
+    //Green Button
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x + (1 * dx), by + 1);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20 + (1 * dx), ty, dx - 20, g_Locale->getText("filebrowser.prevpage"), COL_INFOBAR, 0, true); // UTF-8
+
+    //Yellow Button
+		if(Multi_Select)
 		{
-			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x +3 , by -3);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + (2 * dx), by + 1);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20 + (2 * dx), ty, dx - 20, g_Locale->getText("filebrowser.mark"), COL_INFOBAR, 0, true); // UTF-8
 		}
 
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by -3);
+    //Blue Button
+		if(Filter != NULL)
+		{
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x + (3 * dx), by + 1);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 20 + (3 * dx), ty, dx - 20, use_filter?g_Locale->getText("filebrowser.filter.inactive"):g_Locale->getText("filebrowser.filter.active"), COL_INFOBAR, 0, true); // UTF-8
+		}
+
+		//OK-Button
+		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
+		{
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x +3 , by2 - 3);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35, ty2, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
+		}
+
+		//?-Button
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by2 - 3);
 		if( smode == 1 )
 			nextsort = g_Locale->getText("filebrowser.sort.name");
 		else
 			nextsort = g_Locale->getText("filebrowser.sort.date");
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty, dx - 35, nextsort, COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, nextsort, COL_INFOBAR, 0, true); // UTF-8
 
-		if(Multi_Select)
-		{
-			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + (2 * dx), by);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark"), COL_INFOBAR, 0, true); // UTF-8
-			
-		}
-
-		if(Filter != NULL)
-		{
-			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x + (3 * dx), by);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.inactive"):g_Locale->getText("filebrowser.filter.active"), COL_INFOBAR, 0, true); // UTF-8
-		}
 	}
 }
 
@@ -892,7 +897,7 @@ void CFileBrowser::paint()
 //	if (filelist[0].Name.length() != 0)
 //		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("filebrowser.head") );
-
+	
 	for(unsigned int count=0;count<listmaxshow;count++)
 		paintItem(count);
 
