@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.28 2002/11/08 09:25:22 Zwen Exp $
+	$Id: timermanager.h,v 1.29 2002/11/21 18:26:49 Zwen Exp $
 
 	License: GPL
 
@@ -187,6 +187,7 @@ class CTimerManager
 		CEventServer		*eventServer;
 		CTimerEventMap		events;
 		pthread_t			thrTimer;
+      bool              m_saveEvents;
 
 		CTimerManager();
 		static void* timerThread(void *arg);

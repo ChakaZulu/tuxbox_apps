@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.54 2002/11/13 20:44:44 Zwen Exp $
+   $Id: timermanager.cpp,v 1.55 2002/11/21 18:26:49 Zwen Exp $
 
 	License: GPL
 
@@ -43,6 +43,7 @@ CTimerManager::CTimerManager()
 {
 	eventID = 0;
 	eventServer = new CEventServer;
+   m_saveEvents = false;
 
 	//thread starten
 	if(pthread_create (&thrTimer, NULL, timerThread, (void *) this) != 0 )
@@ -66,12 +67,9 @@ CTimerManager* CTimerManager::getInstance()
 void* CTimerManager::timerThread(void *arg)
 {
 	CTimerManager *timerManager = (CTimerManager*) arg;
-	bool saveEvents;
-	int wait = ((int)time(NULL)) % 20; // Start at a multiple of 20 sec
-	sleep(wait);
+	int sleeptime=(debug)?10:20;
 	while(1)
 	{
-		saveEvents = false;
 		time_t now = time(NULL);
 		dprintf("Timer Thread time: %u\n", (uint) now);
 
@@ -88,7 +86,7 @@ void* CTimerManager::timerThread(void *arg)
 				{
 					event->setState(CTimerd::TIMERSTATE_PREANNOUNCE);
 					event->announceEvent();							// event specific announce handler
-					saveEvents = true;
+					timerManager->m_saveEvents = true;
 				}
 
 			if(event->alarmTime > 0 && (event->eventState == CTimerd::TIMERSTATE_SCHEDULED || event->eventState == CTimerd::TIMERSTATE_PREANNOUNCE) )	// if event wants to be fired
@@ -98,7 +96,7 @@ void* CTimerManager::timerThread(void *arg)
 					event->fireEvent();										// fire event specific handler
 					if(event->stopTime == 0)					// if event needs no stop event
 						event->setState(CTimerd::TIMERSTATE_HASFINISHED);
-					saveEvents = true;
+					timerManager->m_saveEvents = true;
 				}
 
 			if(event->stopTime > 0 && event->eventState == CTimerd::TIMERSTATE_ISRUNNING  )		// check if stopevent is wanted
@@ -106,7 +104,7 @@ void* CTimerManager::timerThread(void *arg)
 				{
 					event->stopEvent();							//  event specific stop handler
 					event->setState(CTimerd::TIMERSTATE_HASFINISHED); 
-					saveEvents = true;
+					timerManager->m_saveEvents = true;
 				}
 
 			if(event->eventState == CTimerd::TIMERSTATE_HASFINISHED)
@@ -115,25 +113,25 @@ void* CTimerManager::timerThread(void *arg)
 					event->Reschedule();
 				else
 					event->setState(CTimerd::TIMERSTATE_TERMINATED);
-				saveEvents = true;
+				timerManager->m_saveEvents = true;
 			}
 
 			if(event->eventState == CTimerd::TIMERSTATE_TERMINATED)				// event is terminated, so delete it
 			{
 				delete pos->second;										// delete event
 				timerManager->events.erase(pos);				// remove from list
-				saveEvents = true;
+				timerManager->m_saveEvents = true;
 			}
 		}
-/*	
-	minutes = (int) (zeit - time(NULL)) / 60;
-	if (ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &minutes)<0)
-			perror("FP_IOCTL_SET_WAKEUP_TIMER");
-*/
-
-		if(saveEvents)
+      // save events if requested
+		if(timerManager->m_saveEvents)
+      {
+         timerManager->m_saveEvents=false;
 			timerManager->saveEventsToConfig();
-		(debug)?usleep(10 * 1000000):usleep(20 * 1000000);		// sleep for 10 / 20 seconds
+      }
+      int wait = sleeptime-(((int)time(NULL)) % sleeptime);
+      if(wait==0) wait=sleeptime;
+      usleep(wait*1000000);
 	}
 	return 0;
 }
@@ -159,10 +157,7 @@ int CTimerManager::addEvent(CTimerEvent* evt, bool save)
 	eventID++;						// increase unique event id
 	evt->eventID = eventID;
 	events[eventID] = evt;			// insert into events
-	if(save)
-	{
-		saveEventsToConfig();
-	}
+	m_saveEvents=save;
 	return eventID;					// return unique id
 }
 
@@ -210,7 +205,7 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 		event->stopTime = stopTime;
 		event->eventState = CTimerd::TIMERSTATE_SCHEDULED;
 		event->eventRepeat = evrepeat;
-		saveEventsToConfig();
+		m_saveEvents=true;
 		return eventID;
 	}
 	else
@@ -226,7 +221,7 @@ int CTimerManager::modifyEvent(int eventID, uint apid)
 		if(event->eventType == CTimerd::TIMER_RECORD)
 		{
 			((CTimerEvent_Record*) (event))->eventInfo.apid = apid;
-			saveEventsToConfig();
+         m_saveEvents=true;
 			return eventID;
 		}
 	}
@@ -245,7 +240,7 @@ int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alar
 		if(event->stopTime > 0)
 			event->stopTime += stopTime;
 		event->eventState = CTimerd::TIMERSTATE_SCHEDULED;
-		saveEventsToConfig();
+		m_saveEvents=true;
 		return eventID;
 	}
 	else
@@ -272,7 +267,9 @@ bool CTimerManager::shutdown()
 
 	time_t nextAnnounceTime=0;
 	CTimerEventMap::iterator pos = events.begin();
-	for(;pos != events.end();pos++)
+	if(m_saveEvents)
+      saveEventsToConfig();
+   for(;pos != events.end();pos++)
 	{
 		CTimerEvent *event = pos->second;
 		if((event->eventType == CTimerd::TIMER_RECORD ||
