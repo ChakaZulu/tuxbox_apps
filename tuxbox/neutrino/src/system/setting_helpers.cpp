@@ -58,6 +58,7 @@ bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
 		satMenu->setActive(true);
 		extMenu->setActive(false);
 		motorMenu->setActive(false);
+		extMotorMenu->setActive(false);
 		repeatMenu->setActive(false);
 	}
 	else
@@ -66,12 +67,15 @@ bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
 		satMenu->setActive(true);
 		extMenu->setActive(true);
 		motorMenu->setActive(true);
+		extMotorMenu->setActive(true);
 		repeatMenu->setActive(true);
 	}
 	else
 	{
 		satMenu->setActive(false);
 		extMenu->setActive(true);
+		motorMenu->setActive(false);
+		extMotorMenu->setActive(false);
 		repeatMenu->setActive((*((int*) Data) != DISEQC_1_0));
 	}
 	return true;
