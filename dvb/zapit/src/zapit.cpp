@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.228 2002/09/18 10:06:29 obi Exp $
+ * $Id: zapit.cpp,v 1.229 2002/09/18 20:00:05 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -647,16 +647,16 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				CZapitClient::commandZaptoServiceID msgZaptoServiceID;
 				CZapitClient::responseZapComplete msgResponseZapComplete;
 				read(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
-				msgResponseZapComplete.zapStatus = zapTo_ChannelID(msgZaptoServiceID.serviceID, (rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID));
+				msgResponseZapComplete.zapStatus = zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID));
 				send(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete), 0);
 				break;
 			}
 			case CZapitClient::CMD_ZAPTO_SERVICEID_NOWAIT:
 			case CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT:
 			{
-				CZapitClient::commandZaptoServiceID msgZaptoServiceID2;
-				read(connfd, &msgZaptoServiceID2, sizeof(msgZaptoServiceID2));
-				zapTo_ChannelID(msgZaptoServiceID2.serviceID, (rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
+				CZapitClient::commandZaptoServiceID msgZaptoServiceID;
+				read(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
+				zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
 				break;
 			}
 			case CZapitClient::CMD_GET_LAST_CHANNEL:
@@ -1101,7 +1101,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.228 2002/09/18 10:06:29 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.229 2002/09/18 20:00:05 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{

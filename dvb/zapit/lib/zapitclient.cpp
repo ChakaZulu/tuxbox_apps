@@ -196,11 +196,11 @@ void CZapitClient::setAudioChannel( unsigned channel )
 }
 
 /* zaps to onid_sid, returns the "zap-status" */
-unsigned int CZapitClient::zapTo_serviceID( unsigned serviceID )
+unsigned int CZapitClient::zapTo_serviceID(const t_channel_id channel_id)
 {
 	commandZaptoServiceID msg;
 
-	msg.serviceID = serviceID;
+	msg.channel_id = channel_id;
 
 	send(CMD_ZAPTO_SERVICEID, (char*)&msg, sizeof(msg));
 
@@ -212,11 +212,11 @@ unsigned int CZapitClient::zapTo_serviceID( unsigned serviceID )
 	return response.zapStatus;
 }
 
-unsigned int CZapitClient::zapTo_subServiceID( unsigned serviceID )
+unsigned int CZapitClient::zapTo_subServiceID(const t_channel_id channel_id)
 {
 	commandZaptoServiceID msg;
 
-	msg.serviceID = serviceID;
+	msg.channel_id = channel_id;
 
 	send(CMD_ZAPTO_SUBSERVICEID, (char*)&msg, sizeof(msg));
 
@@ -229,11 +229,11 @@ unsigned int CZapitClient::zapTo_subServiceID( unsigned serviceID )
 }
 
 /* zaps to channel, does NOT wait for completion (uses event) */
-void CZapitClient::zapTo_serviceID_NOWAIT( unsigned serviceID )
+void CZapitClient::zapTo_serviceID_NOWAIT(const t_channel_id channel_id)
 {
 	commandZaptoServiceID msg;
 
-	msg.serviceID = serviceID;
+	msg.channel_id = channel_id;
 
 	send(CMD_ZAPTO_SERVICEID_NOWAIT, (char*)&msg, sizeof(msg));
 
@@ -241,11 +241,11 @@ void CZapitClient::zapTo_serviceID_NOWAIT( unsigned serviceID )
 }
 
 /* zaps to subservice, does NOT wait for completion (uses event) */
-void CZapitClient::zapTo_subServiceID_NOWAIT( unsigned serviceID )
+void CZapitClient::zapTo_subServiceID_NOWAIT(const t_channel_id channel_id)
 {
 	commandZaptoServiceID msg;
 
-	msg.serviceID = serviceID;
+	msg.channel_id = channel_id;
 
 	send(CMD_ZAPTO_SUBSERVICEID_NOWAIT, (char*)&msg, sizeof(msg));
 

@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.33 2002/09/11 15:43:39 obi Exp $
+ * $Id: pat.cpp,v 1.34 2002/09/18 20:00:05 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -117,7 +117,7 @@ int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_ne
 			{
 				if ((service_id != 0x0000) && (original_network_id != 0x0000))
 				{
-					sciterator I = scanchannels.find((original_network_id << 16) | service_id);
+					sciterator I = scanchannels.find(CREATE_CHANNEL_ID);
 
 					if (I == scanchannels.end())
 					{
@@ -135,9 +135,9 @@ int parse_pat (int demux_fd, CZapitChannel * channel, unsigned short original_ne
 
 						scanchannels.insert
 						(
-							std::pair <uint32_t, scanchannel>
+							std::pair <t_channel_id, scanchannel>
 							(
-								(transport_stream_id << 16) | service_id,
+								CREATE_CHANNEL_ID,
 								scanchannel
 								(
 									string(service_name),
