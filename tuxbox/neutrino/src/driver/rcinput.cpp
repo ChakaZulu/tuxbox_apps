@@ -225,6 +225,8 @@ void CRCInput::close()
 	}
 */
 #endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
+
+	calculateMaxFd();
 }
 
 void CRCInput::calculateMaxFd()
