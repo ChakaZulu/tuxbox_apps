@@ -1888,8 +1888,12 @@ void eTimerEditView::applyPressed()
 			evt.free_CA_mode = -1;
 			evt.event_id = -1;
 		}
-		evt.start_time = newEventBegin;
-		evt.duration = newEventDuration;
+		int timeroffset = 0;
+		if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
+			timeroffset = 0;
+			
+		evt.start_time = newEventBegin - (timeroffset * 60);
+		evt.duration = newEventDuration + (2* timeroffset * 60);
 
 		eString sname = getLeft(tmpService.descr,'/');
 		eString descr = event_name->getText();
