@@ -51,6 +51,7 @@ function loadChannels(bouquet, channel)
 	deleteChannelOptions();
 	addChannelOptions(bouquet);
 	document.channelselector.channel.selectedIndex = channel;
+	document.channelselector.channel.focus();
 }
 function addChannelOptions(bouquet)
 {
