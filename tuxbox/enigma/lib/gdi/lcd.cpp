@@ -69,7 +69,11 @@ color;return; RightAndUp2: AfbAddr+=fbXYincr; BfbAddr-=fbXYincr; P+=dPru; if ((d
 
 eDBoxLCD::eDBoxLCD(): eLCD(QSize(120, 64))
 {
+#ifndef NO_LCD
 	lcdfd=open("/dev/dbox/lcd0", O_RDWR);
+#else
+	lcdfd=-1;
+#endif
 	if (lcdfd<0)
 		qWarning("couldn't open LCD - load lcd.o!");
 	else
