@@ -1630,10 +1630,12 @@ public:
 			tm* t = localtime(&i);
 			result << "<td width=" << d_min * 15 << ">"
 				<< std::setfill('0')
+				<< std::setw(2) << t->tm_mday << '.'
+				<< std::setw(2) << t->tm_mon+1 << ". - "
 				<< std::setw(2) << t->tm_hour << ':'
 				<< std::setw(2) << t->tm_min << ' '
 				<< "</td>";
-			i += 15*60;
+			i += 15 * 60;
 		}
 
 		result << "</tr>"
@@ -1677,11 +1679,6 @@ public:
 								time_t eventEnd = event.start_time + event.duration;
 								int eventDuration = 0;
 								int colWidth = 0;
-								if ((eventEnd < tableTime) || (eventStart > end))
-								{
-									eventDuration = 0;
-								}
-								else	
 								if ((eventStart < tableTime) && (eventEnd > tableTime))
 								{
 									eventDuration = eventEnd - tableTime;
@@ -1702,25 +1699,19 @@ public:
 									eventDuration = event.duration;
 								}
 
+								if (eventDuration < 15 * 60)
+									eventDuration = 15 * 60;
+
+								if (tableTime + eventDuration > end)
+									eventDuration = end - tableTime;
+
 								colWidth = eventDuration  / 60 * d_min;
-								if (tablePos + colWidth > tableWidth)
-									colWidth = tableWidth - tablePos;
 								if (colWidth > 0)
 								{
-									result << "<td width=" << colWidth << ">";
-								
-									eString rec = "javascript:record(\"ref=";
-										rec += ref2string(ref).c_str();
-										rec += "&ID=";
-										rec += eString().sprintf("%d", event.event_id);
-										rec += "&start=";
-										rec += eString().sprintf("%d", event.start_time);
-										rec += "&duration=";
-										rec += eString().sprintf("%d", event.duration);
-										rec += "\")";
-									tm* t = localtime(&event.start_time);
 									tm* t2 = localtime(&tableTime);
-									result << "<span class=\"epg\">"
+									result << "<td width=" << colWidth << ">"
+										<< "<span class=\"epg\">";
+#if 0
 										<< tablePos << "/" << colWidth << ":"
 										<< std::setfill('0')
 										<< std::setw(2) << t2->tm_mday << '.'
@@ -1728,10 +1719,20 @@ public:
 										<< std::setw(2) << t2->tm_hour << ':'
 										<< std::setw(2) << t2->tm_min << ' '
 										<< "<br>";
-#ifndef DISABLE_FILE							
-									result << button(50, "REC", RED, rec)
+#endif
+#ifndef DISABLE_FILE
+									result << "<a href=\"javascript:record('ref="
+										<< ref2string(ref)
+										<< "&ID="
+										<< event.event_id
+										<< "&start="
+										<< event.start_time
+										<< "&duration="
+										<< event.duration
+										<< "')\"><img src=\"kalarm.png\" border=0></a>"
 										<< "&nbsp;&nbsp;";
 #endif
+									tm* t = localtime(&event.start_time);
 									result << std::setfill('0')
 										<< std::setw(2) << t->tm_mday << '.'
 										<< std::setw(2) << t->tm_mon+1 << ". - "
@@ -1744,7 +1745,7 @@ public:
 										<< "<br>"
 										<< ((ShortEventDescriptor*)descriptor)->event_name
 										<< "</a></span></u><br>\n";
-								
+
 									result << "</td>";
 									tablePos += colWidth;
 									tableTime += eventDuration;
@@ -1753,7 +1754,7 @@ public:
 						}
 					}
 					if (tablePos < tableWidth)
-						result << "<td width=" << tableWidth - tablePos << ">n/a</td>";
+						result << "<td width=" << tableWidth - tablePos << ">&nbsp;</td>";
 
 					result << "</tr></table>";
 				}
@@ -1768,13 +1769,11 @@ eMEPG mepg;
 
 void callbackFunction(const eServiceReference& s)
 {
-//	printf("[ENIGMA_DYN] fetching EPG %s\n", ref2string(s).c_str());
 	mepg.getcurepg(s);
 }
 
 static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString>opt = getRequestOptions(opts);
 	eString refs = opt["ref"];
@@ -1792,7 +1791,9 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
 	eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
 
-	return "<html>" CHARSETMETA "<head><title>Multi-EPG</title></head><body>" + mepg.getTimeScale() + mepg.getMultiEPG() + "</body></html>";
+	eString result = read_file(TEMPLATE_DIR + "mepg.tmp");
+	result.strReplace("#BODY#", mepg.getTimeScale() + mepg.getMultiEPG());
+	return result;
 }
 
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1838,19 +1839,18 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				Descriptor *descriptor=*d;
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
-					eString rec = "javascript:record(\"ref=";
-						rec += serviceRef;
-						rec += "&ID=";
-						rec += eString().sprintf("%d", event.event_id);
-						rec += "&start=";
-						rec += eString().sprintf("%d", event.start_time);
-						rec += "&duration=";
-						rec += eString().sprintf("%d", event.duration);
-						rec += "\")";
 					tm* t = localtime(&event.start_time);
 					result << "<span class=\"epg\">";
 #ifndef DISABLE_FILE
-					result << button(50, "REC", RED, rec)
+					result << "<a href=\"javascript:record('ref="
+						<< ref2string(ref)
+						<< "&ID="
+						<< event.event_id
+						<< "&start="
+						<< event.start_time
+						<< "&duration="
+						<< event.duration
+						<< "')\"><img src=\"kalarm.png\" border=0></a>"
 						<< "&nbsp;&nbsp;";
 #endif
 					result << std::setw(2) << t->tm_mday << '.'
@@ -1867,7 +1867,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 		}
 	}
 
-	eString tmp2 = read_file(TEMPLATE_DIR+"EPG.tmp");
+	eString tmp2 = read_file(TEMPLATE_DIR+"epg.tmp");
 	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
 	tmp2.strReplace("#BODY#", result.str());
 	return tmp2;
@@ -2661,7 +2661,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/version", version);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg2", getcurepg2);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getMultiEPG", getMultiEPG);
+	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
