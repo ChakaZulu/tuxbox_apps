@@ -4,6 +4,11 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.h,v $
+ * Revision 1.37  2003/09/10 04:16:56  carjay
+ * added error handling: "doubleheight" should not to be used in line 23 of
+ * teletext but it seems this does not impress the broadcasters much
+ * additionally: some optimisations and bugfixes
+ *
  * Revision 1.36  2003/03/08 16:17:48  happydude
  * national subset detection for TV Romania Int
  *
@@ -47,7 +52,7 @@
 
 #include "config.h"
 
-#define PAGESIZE 40*24
+#define PAGESIZE (40*24)
 
 //devices
 

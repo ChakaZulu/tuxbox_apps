@@ -4,6 +4,11 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.50  2003/09/10 04:16:56  carjay
+ * added error handling: "doubleheight" should not to be used in line 23 of
+ * teletext but it seems this does not impress the broadcasters much
+ * additionally: some optimisations and bugfixes
+ *
  * Revision 1.49  2003/07/02 15:40:03  lazyt
  * fix language display
  *
@@ -38,7 +43,7 @@
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.49 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.50 $", versioninfo[16];
 
 	//show versioninfo
 
@@ -532,11 +537,11 @@ void CleanUp()
 
 	//free pagebuffers
 
-		for(clear_page = 0; clear_page < 0x8FF; clear_page++)
+		for(clear_page = 0; clear_page < 0x900; clear_page++)
 		{
-			for(clear_subpage = 0; clear_subpage < 0x79; clear_subpage++)
+			for(clear_subpage = 0; clear_subpage < 0x80; clear_subpage++)
 			{
-				if(cachetable[clear_page][clear_subpage] != 0);
+				if(cachetable[clear_page][clear_subpage] != 0)
 				{
 					free(cachetable[clear_page][clear_subpage]);
 				}
@@ -2246,14 +2251,11 @@ void SwitchTranspMode()
 void SwitchHintMode()
 {
 	//toggle mode
-
-		hintmode++;
-		hintmode &= 1;
+		hintmode ^= 1;
 
 		printf("TuxTxt <SwitchHintMode: %d>\n", hintmode);
 
 	//update page
-
 		pageupdate = 1;
 }
 
@@ -2303,8 +2305,7 @@ void RenderCharFB(int Char, int Attribute)
 		}
 		else
 		{
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc1, Char + ((((Attribute>>8) & 3) - 1) * 96) + 1
-, &sbit)))
+			if((error = FTC_SBit_Cache_Lookup(cache, &desc1, Char + ((((Attribute>>8) & 3) - 1) * 96) + 1, &sbit)))
 			{
 				printf("TuxTxt <FTC_SBit_Cache_Lookup (G1): 0x%.2X>\n", error);
 				PosX += desc1.font.pix_width;
@@ -2359,8 +2360,7 @@ void RenderCharFB(int Char, int Attribute)
 				case 0x7E:	Char = 0x0C;
 			}
 
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc2, Char + national_subset*13
- + 1, &sbit)))
+			if((error = FTC_SBit_Cache_Lookup(cache, &desc2, Char + national_subset*13+ 1, &sbit)))
 			{
 				printf("TuxTxt <FTC_SBit_Cache_Lookup (NS): 0x%.2X>\n", error);
 				PosX += desc2.font.pix_width;
@@ -2485,8 +2485,7 @@ void RenderCharBB(int Char, int Attribute)
 		}
 		else
 		{
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc1, Char + ((((Attribute>>8) & 3) - 1) * 96) + 1
-, &sbit)))
+			if((error = FTC_SBit_Cache_Lookup(cache, &desc1, Char + ((((Attribute>>8) & 3) - 1) * 96) + 1, &sbit)))
 			{
 				printf("TuxTxt <FTC_SBit_Cache_Lookup (G1): 0x%.2X>\n", error);
 				PosX += desc1.font.pix_width;
@@ -2541,8 +2540,7 @@ void RenderCharBB(int Char, int Attribute)
 				case 0x7E:	Char = 0x0C;
 			}
 
-			if((error = FTC_SBit_Cache_Lookup(cache, &desc2, Char + national_subset*13
- + 1, &sbit)))
+			if((error = FTC_SBit_Cache_Lookup(cache, &desc2, Char + national_subset*13 + 1, &sbit)))
 			{
 				printf("TuxTxt <FTC_SBit_Cache_Lookup (NS): 0x%.2X>\n", error);
 				PosX += desc2.font.pix_width;
@@ -2783,7 +2781,6 @@ void RenderPage()
 					{
 						RenderCharBB(page_char[row*40 + col], page_atrb[row*40 + col]);
 					}
-
 					PosY += fixfontheight;
 				}
 
@@ -3220,7 +3217,7 @@ void DecodePage()
 												break;
 
 						case double_height:		page_atrb[row*40 + col] = doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												doubleheight = 1;
+												if (row < 23) doubleheight = 1;
 												break;
 
 						case double_width:		page_atrb[row*40 + col] = doubleheight<<10 | charset<<8 | background<<4 | foreground;
@@ -3458,9 +3455,17 @@ int GetRCCode()
 
 void *CacheThread(void *arg)
 {
+	const unsigned char rev_lut[32]={ 0x00,0x08,0x04,0x0c,	// upper nibble
+					  0x02,0x0a,0x06,0x0e,
+					  0x01,0x09,0x05,0x0d,
+					  0x03,0x0b,0x07,0x0f,
+					  0x00,0x80,0x40,0xc0,	// lower nibble
+					  0x20,0xa0,0x60,0xe0,
+					  0x10,0x90,0x50,0xd0,
+					  0x30,0xb0,0x70,0xf0 };
 	unsigned char pes_packet[184];
-	unsigned char vtxt_row[1+45];
-	int line, byte, bit;
+	unsigned char vtxt_row[42];
+	int line, byte/*, bit*/;
 	int b1, b2, b3, b4;
 	int packet_number;
 	unsigned char magazine;
@@ -3479,29 +3484,25 @@ void *CacheThread(void *arg)
 
 			for(line = 0; line < 4; line++)
 			{
-				if((pes_packet[line*0x2E] == 0x02 || pes_packet[line*0x2E] == 0x03) && (pes_packet[line*0x2E + 1] == 0x2C))
+				unsigned char *vtx_rowbyte = &pes_packet[line*0x2e];
+				if((vtx_rowbyte[0] == 0x02 || vtx_rowbyte[0] == 0x03) && (vtx_rowbyte[1] == 0x2C))
 				{
 					//clear rowbuffer
 
-						memset(&vtxt_row, 0, sizeof(vtxt_row));
 
 					//convert row from lsb to msb (begin with magazin number)
-
-						for(byte = 4; byte <= 45; byte++)
+						for(byte = 4; byte < 46; byte++)
 						{
-							for(bit = 0; bit <= 7; bit++)
-							{
-								if(pes_packet[line*0x2E + byte] & 1<<bit)
-								{
-									vtxt_row[byte] |= 128>>bit;
-								}
-							}
+								unsigned char upper,lower;
+								upper = (vtx_rowbyte[byte] >> 4) & 0xf;
+								lower = vtx_rowbyte[byte] & 0xf;
+								vtxt_row[byte-4] = (rev_lut[upper]) | (rev_lut[lower+16]);
 						}
 
 					//get packet number
 
-						b1 = dehamming[vtxt_row[4]];
-						b2 = dehamming[vtxt_row[5]];
+						b1 = dehamming[vtxt_row[0]];
+						b2 = dehamming[vtxt_row[1]];
 
 						if(b1 == 0xFF || b2 == 0xFF)
 						{
@@ -3515,7 +3516,7 @@ void *CacheThread(void *arg)
 
 					//get magazine number
 
-						magazine = dehamming[vtxt_row[4]] & 7;
+						magazine = dehamming[vtxt_row[0]] & 7;
 						if (!magazine) magazine = 8;
 
 					//analyze row
@@ -3524,7 +3525,7 @@ void *CacheThread(void *arg)
 						{
 							//check parity
 
-								for(byte = 14; byte <= 45; byte++)
+								for(byte = 10; byte < 42; byte++)
 								{
 									if((vtxt_row[byte]&1) ^ ((vtxt_row[byte]>>1)&1) ^ ((vtxt_row[byte]>>2)&1) ^ ((vtxt_row[byte]>>3)&1) ^ ((vtxt_row[byte]>>4)&1) ^ ((vtxt_row[byte]>>5)&1) ^ ((vtxt_row[byte]>>6)&1) ^ (vtxt_row[byte]>>7)) vtxt_row[byte] &= 127;
 									else vtxt_row[byte] = ' ';
@@ -3532,9 +3533,9 @@ void *CacheThread(void *arg)
 
 							//get pagenumber
 
-								b1 = dehamming[vtxt_row[4]];
-								b2 = dehamming[vtxt_row[7]];
-								b3 = dehamming[vtxt_row[6]];
+								b1 = dehamming[vtxt_row[0]];
+								b2 = dehamming[vtxt_row[3]];
+								b3 = dehamming[vtxt_row[2]];
 
 								if(b1 == 0xFF || b2 == 0xFF || b3 == 0xFF)
 								{
@@ -3563,10 +3564,10 @@ void *CacheThread(void *arg)
 
 							//get subpagenumber
 
-								b1 = dehamming[vtxt_row[11]];
-								b2 = dehamming[vtxt_row[10]];
-								b3 = dehamming[vtxt_row[9]];
-								b4 = dehamming[vtxt_row[8]];
+								b1 = dehamming[vtxt_row[7]];
+								b2 = dehamming[vtxt_row[6]];
+								b3 = dehamming[vtxt_row[5]];
+								b4 = dehamming[vtxt_row[4]];
 
 								if(b1 == 0xFF || b2 == 0xFF || b3 == 0xFF || b4 == 0xFF)
 								{
@@ -3590,7 +3591,7 @@ void *CacheThread(void *arg)
 
 							//get country control bits
 
-								b1 = dehamming[vtxt_row[13]];
+								b1 = dehamming[vtxt_row[9]];
 
 								if (b1 == 0xFF)
 								{
@@ -3617,7 +3618,7 @@ void *CacheThread(void *arg)
 
 							//copy timestring
 
-								memcpy(&timestring, &vtxt_row[38], 8);
+								memcpy(&timestring, &vtxt_row[34], 8);
 
 							//set update flag
 
@@ -3630,7 +3631,7 @@ void *CacheThread(void *arg)
 
 							//check controlbits
 
-								if(dehamming[vtxt_row[9]] & 8)	//C4 -> erase page
+								if(dehamming[vtxt_row[5]] & 8)	//C4 -> erase page
 								{
 									memset(cachetable[current_page[magazine]][current_subpage[magazine]], ' ', PAGESIZE);
 								}
@@ -3639,7 +3640,7 @@ void *CacheThread(void *arg)
 						{
 							//check parity
 
-								for(byte = 6; byte <= 45; byte++)
+								for(byte = 2; byte < 42; byte++)
 								{
 									if((vtxt_row[byte]&1) ^ ((vtxt_row[byte]>>1)&1) ^ ((vtxt_row[byte]>>2)&1) ^ ((vtxt_row[byte]>>3)&1) ^ ((vtxt_row[byte]>>4)&1) ^ ((vtxt_row[byte]>>5)&1) ^ ((vtxt_row[byte]>>6)&1) ^ (vtxt_row[byte]>>7)) vtxt_row[byte] &= 127;
 									else vtxt_row[byte] = ' ';
@@ -3650,7 +3651,7 @@ void *CacheThread(void *arg)
 
 						if(current_page[magazine] != -1 && current_subpage[magazine] != -1 && packet_number < 24)
 						{
-							memcpy(cachetable[current_page[magazine]][current_subpage[magazine]] + packet_number*40, &vtxt_row[6], 40);
+							memcpy(cachetable[current_page[magazine]][current_subpage[magazine]] + packet_number*40, &vtxt_row[2], 40);
 
 							//set update flag
 
