@@ -3,6 +3,11 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.6  2004/04/03 17:33:08  lazyt
+ * remove curl stuff
+ * fix audio
+ * add new options PORT=n, SAVEDB=Y/N
+ *
  * Revision 1.5  2004/03/31 13:55:36  thegoodguy
  * use UTF-8 encoding for ü (\xC3\xBC)
  *
@@ -54,8 +59,10 @@ int ReadConf()
 			fprintf(fd_conf, "INTERVALL=15\n\n");
 			fprintf(fd_conf, "POP3LOG=Y\n");
 			fprintf(fd_conf, "LOGMODE=S\n\n");
+			fprintf(fd_conf, "SAVEDB=Y\n\n");
 			fprintf(fd_conf, "AUDIO=Y\n");
-			fprintf(fd_conf, "VIDEO=1\n\n");
+			fprintf(fd_conf, "VIDEO=1\n");
+			fprintf(fd_conf, "PORT=80\n\n");
 			fprintf(fd_conf, "NAME0=\n");
 			fprintf(fd_conf, "HOST0=\n");
 			fprintf(fd_conf, "USER0=\n");
@@ -69,7 +76,7 @@ int ReadConf()
 	//clear database
 
 		memset(account_db, 0, sizeof(account_db));
-		startdelay = intervall = pop3log = logmode = audio = video = 0;
+		startdelay = intervall = pop3log = logmode = savedb = audio = video = port = 0;
 
 	//fill database
 
@@ -83,9 +90,13 @@ int ReadConf()
 
 			else if((ptr = strstr(line_buffer, "LOGMODE="))) sscanf(ptr + 8, "%c", &logmode);
 
+			else if((ptr = strstr(line_buffer, "SAVEDB="))) sscanf(ptr + 7, "%c", &savedb);
+
 			else if((ptr = strstr(line_buffer, "AUDIO="))) sscanf(ptr + 6, "%c", &audio);
 
 			else if((ptr = strstr(line_buffer, "VIDEO="))) sscanf(ptr + 6, "%d", &video);
+
+			else if((ptr = strstr(line_buffer, "PORT="))) sscanf(ptr + 5, "%d", &port);
 
 			else if((ptr = strstr(line_buffer, "NAME0="))) sscanf(ptr + 6, "%s", account_db[0].name);
 			else if((ptr = strstr(line_buffer, "HOST0="))) sscanf(ptr + 6, "%s", account_db[0].host);
@@ -140,7 +151,7 @@ int ReadConf()
 
 	//check for update
 
-		if(!startdelay || !intervall || !pop3log || !logmode || !audio || !video)
+		if(!startdelay || !intervall || !pop3log || !logmode || !savedb || !audio || !video || !port)
 		{
 			printf("TuxMailD <missing Param(s), update Config>\n");
 
@@ -148,17 +159,21 @@ int ReadConf()
 
 			if(!startdelay) startdelay = 30;
 			if(!intervall) intervall = 15;
-			if(!pop3log) pop3log = 'Y';	
+			if(!pop3log) pop3log = 'Y';
 			if(!logmode) logmode = 'S';
+			if(!savedb) savedb = 'Y';
 			if(!audio) audio = 'Y';
 			if(!video) video = 1;
+			if(!port) port = 80;
 
 			fprintf(fd_conf, "STARTDELAY=%d\n", startdelay);
 			fprintf(fd_conf, "INTERVALL=%d\n\n", intervall);
 			fprintf(fd_conf, "POP3LOG=%c\n", pop3log);
 			fprintf(fd_conf, "LOGMODE=%c\n\n", logmode);
+			fprintf(fd_conf, "SAVEDB=%c\n\n", savedb);
 			fprintf(fd_conf, "AUDIO=%c\n", audio);
 			fprintf(fd_conf, "VIDEO=%d\n", video);
+			fprintf(fd_conf, "PORT=%d\n", port);
 
 			for(loop = 0; loop < 10; loop++)
 			{
@@ -200,6 +215,12 @@ int ReadConf()
 			logmode = 'S';
 		}
 
+		if(savedb != 'Y' && savedb != 'N')
+		{
+			printf("TuxMailD <SAVEDB=%c invalid, set to \"Y\">\n", savedb);
+			savedb = 'Y';
+		}
+
 		if(audio != 'Y' && audio != 'N')
 		{
 			printf("TuxMailD <AUDIO=%c invalid, set to \"Y\">\n", audio);
@@ -210,6 +231,12 @@ int ReadConf()
 		{
 			printf("TuxMailD <VIDEO=%d invalid, set to \"1\">\n", video);
 			video = 1;
+		}
+
+		if(port < 1 || port > 65535)
+		{
+			printf("TuxMailD <PORT=%d invalid, set to \"80\">\n", port);
+			port = 80;
 		}
 
 		accounts = 0;
@@ -810,44 +837,47 @@ int CheckAccount(int account)
 
 void PlaySound()
 {
-	int dsp, format = AFMT_S16_LE, channels = 1, speed = 12000, count = 0;
-	unsigned char *audio = audiodata;
+	int dsp, format = AFMT_S16_LE, channels = 1, speed = 12000;
 
 	if((dsp = open(DSP, O_WRONLY)) == -1)
 	{
-		printf("TuxMailD <could not open DSP (%s), sounds disabled>\n", strerror(errno));
+		printf("TuxMailD <could not open DSP (%s), Sound disabled>\n", strerror(errno));
 		return;
 	}
 
 	if(ioctl(dsp, SNDCTL_DSP_SETFMT, &format) == -1)
 	{
-		printf("TuxMailD <could not set DSP-Format (%s), sounds disabled>\n", strerror(errno));
+		printf("TuxMailD <could not set DSP-Format (%s), Sound disabled>\n", strerror(errno));
 		close(dsp);
 		return;
 	}
 
 	if(ioctl(dsp, SNDCTL_DSP_CHANNELS, &channels) == -1)
 	{
-		printf("TuxMailD <could not set DSP-Channels (%s), sounds disabled>\n", strerror(errno));
+		printf("TuxMailD <could not set DSP-Channels (%s), Sound disabled>\n", strerror(errno));
 		close(dsp);
 		return;
 	}
 
 	if(ioctl(dsp, SNDCTL_DSP_SPEED, &speed) == -1)
 	{
-		printf("TuxMailD <could not set DSP-Samplingrate (%s), sounds disabled>\n", strerror(errno));
+		printf("TuxMailD <could not set DSP-Samplingrate (%s), Sound disabled>\n", strerror(errno));
 		close(dsp);
 		return;
 	}
 
+#ifdef DREAMBOX
+
+	write(dsp, &audiodata, sizeof(audiodata));
+#else
+	int count = 0;
+
 	while(count < sizeof(audiodata))
 	{
-		write(dsp, &audio[count], 16);
-
-		ioctl(dsp, SNDCTL_DSP_SYNC);
-
-		count += 16;
+	    write(dsp, &audiodata[count += 16], 16);
 	}
+#endif
+	ioctl(dsp, SNDCTL_DSP_SYNC);
 
 	close(dsp);
 }
@@ -858,14 +888,13 @@ void PlaySound()
 
 void NotifyUser()
 {
-	CURL *curl;
-	CURLcode res;
 	int loop;
-	char errorbuffer[CURL_ERROR_SIZE], http_cmd[1024], tmp_buffer[128];
-	char http_cmd1[] = "http://127.0.0.1/cgi-bin/startPlugin?name=tuxmail.cfg";
-	char http_cmd2[] = "http://127.0.0.1/cgi-bin/message?Es%20liegen%20neue%20Nachrichten%20auf%20dem%20Server:\\n\\n";
-	char http_cmd3[] = "http://127.0.0.1/control/message?nmsg=Es%20liegen%20neue%20Nachrichten%20auf%20dem%20Server:%0A%0A";
-	char http_cmd4[] = "http://127.0.0.1/control/message?popup=Es%20liegen%20neue%20Nachrichten%20auf%20dem%20Server:%0A%0A";
+	struct sockaddr_in SockAddr;
+	char http_cmd[1024], tmp_buffer[128];
+	char http_cmd1[] = "GET /cgi-bin/startPlugin?name=tuxmail.cfg HTTP/1.1\n\n";
+	char http_cmd2[] = "GET /cgi-bin/xmessage?timeout=5&caption=TuxMail%20Information&body=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A";
+	char http_cmd3[] = "GET /control/message?nmsg=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A";
+	char http_cmd4[] = "GET /control/message?popup=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A";
 
 	//audio notify
 
@@ -893,25 +922,36 @@ void NotifyUser()
 			{
 				if(account_db[loop].mail_new)
 				{
-					if(video == 2) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s\\n", loop, account_db[loop].mail_new, account_db[loop].name);
+					if(video == 2) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
 					if(video == 3 || video == 4) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
 					strcat(http_cmd, tmp_buffer);
+
 				}
 			}
+
+			strcat(http_cmd, " HTTP/1.1\n\n");
 		}
 
-		if((curl = curl_easy_init()))
+		if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		{
-			curl_easy_setopt(curl, CURLOPT_URL, http_cmd);
-			curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
-//			curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-			res = curl_easy_perform(curl);
-			curl_easy_cleanup(curl);
-
-			if(res) printf("TuxMailD <HTTP-Command failed: %s>\n", errorbuffer);
-			else    printf("TuxMailD <HTTP-Command sended>\n");
+			printf("TuxMailD <could not create Socket>\n");
+			return;
 		}
-		else printf("TuxMailD <HTTP-Commands not available>\n");
+
+		SockAddr.sin_family = AF_INET;
+		SockAddr.sin_port = htons(port);
+		inet_aton("127.0.0.1", &SockAddr.sin_addr);
+
+		if(connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
+		{
+			printf("TuxMailD <could not connect to WebServer>\n");
+			close(sock);
+			return;
+		}
+
+		send(sock, http_cmd, strlen(http_cmd), 0);
+
+		close(sock);
 }
 
 /******************************************************************************
@@ -941,7 +981,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.5 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.6 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -1033,8 +1073,12 @@ int main(int argc, char **argv)
 
 	//restore database
 
-		system("cp /var/tuxbox/config/tuxmail/tuxmail.[0-9] /tmp 2>/dev/null");
-
+		if(savedb == 'Y')
+		{
+		    printf("TuxMailD <restore Mail-DB>\n");
+		    system("cp /var/tuxbox/config/tuxmail/tuxmail.[0-9] /tmp 2>/dev/null");
+		}
+		
 	//check accounts
 
 		if(argc > 1 && !strcmp(argv[1], "-nodelay")) printf("TuxMailD <override Startdelay>\n");
@@ -1071,8 +1115,12 @@ int main(int argc, char **argv)
 		pthread_cancel(thread_id);
 		pthread_join(thread_id, thread_result);
 
-		system("cp /tmp/tuxmail.[0-9] /var/tuxbox/config/tuxmail 2>/dev/null");
-
+		if(savedb == 'Y')
+		{
+		    printf("TuxMailD <backup Mail-DB>\n");
+		    system("cp /tmp/tuxmail.[0-9] /var/tuxbox/config/tuxmail 2>/dev/null");
+		}
+		
 		remove(PIDFILE);
 
 		time(&tt);

@@ -3,6 +3,11 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.5  2004/04/03 17:33:08  lazyt
+ * remove curl stuff
+ * fix audio
+ * add new options PORT=n, SAVEDB=Y/N
+ *
  * Revision 1.4  2003/05/16 15:07:23  lazyt
  * skip unused accounts via "plus/minus", add mailaddress to spamlist via "blue"
  *
@@ -31,7 +36,7 @@
 #include <sys/soundcard.h>
 #include <sys/stat.h>
 #include <sys/un.h>
-#include <curl/curl.h>
+#include <arpa/inet.h>
 
 #include "audio.h"
 
@@ -73,8 +78,9 @@ struct
 
 FILE *fd_pid;
 int pid;
+int port;
 int startdelay, intervall;
-char pop3log, logmode, audio;
+char pop3log, logmode, audio, savedb;
 int video;
 char online = 1;
 int accounts;
