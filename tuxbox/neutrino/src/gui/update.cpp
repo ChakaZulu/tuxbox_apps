@@ -197,6 +197,12 @@ bool CFlashUpdate::checkVersion4Update()
 
 		CFlashVersionInfo versionInfo(cramfsName);
 
+if ( strcmp("1.6", versionInfo.getBaseImageVersion().c_str()) )
+{
+	ShowHint ( "messagebox.error", "Die Basisimage Version weicht ab, bitte\nzuerst neues Basisimage installieren!" );
+	return false;
+}
+
 		char msg[400];
 		sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox_manual").c_str(), versionInfo.getDate().c_str(), 
 				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.getType().c_str() );
@@ -214,6 +220,12 @@ bool CFlashUpdate::checkVersion4Update()
 
 	//bestimmung der CramfsDaten
 	CFlashVersionInfo versionInfo(newVersion);
+
+if ( strcmp("1.6", versionInfo.getBaseImageVersion().c_str()) )
+{
+	ShowHint ( "messagebox.error", "Die Basisimage Version weicht ab, bitte\nzuerst neues Basisimage installieren!" );
+	return false;
+}
 	
 	char msg[250];
 	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), versionInfo.getDate().c_str(), 
