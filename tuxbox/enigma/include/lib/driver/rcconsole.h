@@ -1,6 +1,7 @@
 #ifndef __lib_driver_rcconsole_h
 #define __lib_driver_rcconsole_h
 
+#include <termios.h>
 #include <lib/driver/rc.h>
 
 class eRCConsoleDriver: public eRCDriver
