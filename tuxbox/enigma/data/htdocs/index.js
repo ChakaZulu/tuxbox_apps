@@ -23,7 +23,7 @@ function switchChannel(xy, bouquet, channel)
 {
 	win=window.open("/?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel, "switchStatus","width=1,height=1,left=0,top=0");
 	win.focus();
-	parent.setTimeout("reload()", 100);
+	parent.setTimeout("reload()", 3000);
 }
 
 function deleteMovie(xy)
