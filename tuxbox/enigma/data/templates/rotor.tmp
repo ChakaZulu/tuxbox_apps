@@ -37,7 +37,7 @@ function motor(cmd, parm)
 		if (parm == "0")
 			alert("Invalid motor position");
 		else
-			document.location = "cgi-bin/sendDiSEqCCmd?addr=31&cmd=6B&parms=" + parm;
+			document.location = "cgi-bin/sendDiSEqCCmd?addr=31&cmd=6B&params=" + parm;
 	}
 	else
 	if (cmd == "storetopos")
@@ -45,7 +45,7 @@ function motor(cmd, parm)
 		if (parm == "0")
 			alert("Invalid motor position");
 		else
-			document.location = "cgi-bin/sendDiSEqCCmd?addr=31&cmd=6A&parms=" + parm;
+			document.location = "cgi-bin/sendDiSEqCCmd?addr=31&cmd=6A&params=" + parm;
 	}
 }
 </script>
