@@ -96,6 +96,10 @@ class AudioStream: public eListBoxEntryText
 {
 	friend class eListBox<AudioStream>;
 	friend class eAudioSelector;
+  int isAC3;
+  int component_tag;
+  void EITready(int error);
+  void parseEIT(EIT* eit);
 public:
 	enum
   {
@@ -103,7 +107,6 @@ public:
 	};
 	AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream);
 	PMTEntry *stream;
-
 	bool operator < ( const AudioStream& e) const	{	return 0;	}
 };
 

@@ -270,11 +270,9 @@ void eNVODSelector::add(NVODReferenceEntry *ref)
 }
 
 AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox), stream(stream)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox), isAC3(0), component_tag(-1), stream(stream)
 {
-	int isAC3=0;
-	int component_tag=-1;
-	for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
+  for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
 	{
 		if (c->Tag()==DESCR_AC3)
 			isAC3=1;
@@ -290,25 +288,52 @@ AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
 	}
 	if (!text)
 		text.sprintf("PID %04x", stream->elementary_PID);
-	if (component_tag!=-1)
-	{
-		eServiceHandler *service=eServiceInterface::getInstance()->getService();
-		if (service)
-		{
-			EIT *eit=service->getEIT();
-			if (eit)
-			{
-				for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
-					if ((e->running_status>=2)||(!e->running_status))		// currently running service
-						for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
-							if (d->Tag()==DESCR_COMPONENT && ((ComponentDescriptor*)*d)->component_tag == component_tag)
-									text=((ComponentDescriptor*)*d)->text;
-	 			eit->unlock();
-			}
-		}
-	}
 	if (isAC3)
 		text+=" (AC3)";
+  if (component_tag!=-1)
+	{
+    eServiceHandler *service=eServiceInterface::getInstance()->getService();
+		if (service)
+		{
+      EIT *eit=service->getEIT();
+			if (eit)
+        parseEIT(eit);
+      else
+        CONNECT( eDVB::getInstance()->tEIT.tableReady, AudioStream::EITready );
+		}
+	}
+}
+
+void AudioStream::parseEIT(EIT* eit)
+{
+  for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
+  {
+  	if ((e->running_status>=2)||(!e->running_status))		// currently running service
+    {
+  		for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+      {
+				if (d->Tag()==DESCR_COMPONENT)
+        {
+          if (((ComponentDescriptor*)*d)->component_tag == component_tag )
+          {
+  					text=((ComponentDescriptor*)*d)->text;
+            if (isAC3)
+              text+=" (AC3)";
+          }
+        }
+      }
+    }
+  }
+	eit->unlock();  
+}
+
+void AudioStream::EITready(int error)
+{
+  if (!error)
+	{
+		EIT *eit=eDVB::getInstance()->tEIT.getCurrent();
+    parseEIT(eit);
+  }
 }
 
 void eAudioSelector::selected(AudioStream *l)

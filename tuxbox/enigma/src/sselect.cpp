@@ -523,7 +523,7 @@ void eServiceSelector::serviceSelChanged(eListBoxEntryService *entry)
 			ci->clear();
 			if ( selected.type == eServiceReference::idDVB &&
 						(!(selected.flags & eServiceReference::isDirectory)))
-  			ciDelay.start(selected.path.size() ? 100 : 200, true );
+  			ciDelay.start(selected.path.size() ? 100 : 500, true );
 		}
 	}
 }
