@@ -81,7 +81,7 @@ bool CScanTs::scanReady(int *ts, int *services)
 			exit(-1);
 		}
 	
-		printf("scan: %s", return_buf);
+		//printf("scan: %s", return_buf);
 		if (return_buf[0] == '-')
 		{
 			free(return_buf);
@@ -98,8 +98,8 @@ bool CScanTs::scanReady(int *ts, int *services)
 				perror("recv(zapit)");
 				exit(-1);
 			}
-			printf("Found transponders: %d\n", *ts);
-			printf("Found channels: %d\n", *services);
+			//printf("Found transponders: %d\n", *ts);
+			//printf("Found channels: %d\n", *services);
 			free(return_buf);
 			close(sock_fd);
 			return false;
@@ -169,20 +169,44 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	char buf[100];
 	int ts = 0;
 	int services = 0;
-	while (!scanReady(&ts, &services))
+	int ypos=y;
+	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
+	ypos= y+ hheight + (mheight >>1);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.transponders").c_str(), COL_MENUCONTENT);
+	ypos+= mheight;
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.services").c_str(), COL_MENUCONTENT);
+	
+
+	int xpos1 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.transponders").c_str());
+	int xpos2 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.services").c_str());
+	g_FrameBuffer->loadPal("radar.pal", 20, 100);
+	int pos = 0;
+	bool finish = false;
+	while (!finish)
 	{
-		int ypos=y;
-		g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
-		ypos+= hheight + (mheight >>1);
-		
-		sprintf(buf, "%s %d", g_Locale->getText("scants.transponders").c_str(), ts);
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+		if(pos==0)
+		{	//query zapit every xth loop
+			finish = scanReady(&ts, &services);
+		}
+
+		ypos= y+ hheight + (mheight >>1);
+	
+		char filename[30];
+		sprintf(filename, "radar%d.raw", pos);
+		pos = (pos+1)%10;
+		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 20);
+
+		sprintf(buf, "%d", ts);
+		g_FrameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, buf, COL_MENUCONTENT); 
 		ypos+= mheight;
 
-		sprintf(buf, "%s %d", g_Locale->getText("scants.services").c_str(), services);
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
+		sprintf(buf, "%d", services);
+		g_FrameBuffer->paintBoxRel(xpos2, ypos, 80, mheight, COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(xpos2, ypos+ mheight, width, buf, COL_MENUCONTENT);
+		
 		//g_RCInput->getKey(190);
-		sleep(3);
+		usleep(100000);
 	}
 
 
