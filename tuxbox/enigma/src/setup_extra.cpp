@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.17 2004/12/07 14:28:14 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.18 2004/12/07 18:16:41 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -159,7 +159,7 @@ void eExpertSetup::factory_reset()
 		switch( eSystemInfo::getInstance()->getHwType() )
 		{
 			case eSystemInfo::DM7020:
-				system("rm /etc/enigma/* && cp /etc/enigma_defaults/* /etc/enigma/ && killall -9 enigma");
+				system("rm -R /etc/enigma && killall -9 enigma");
 				break;
 			case eSystemInfo::DM7000:
 			case eSystemInfo::DM500:
