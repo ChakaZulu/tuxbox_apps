@@ -2137,12 +2137,14 @@ static eString getEITC2()
 	result = readFile(TEMPLATE_DIR + "header.tmp");
 	result.strReplace("#NOWT#", now_time);
 	if (now_duration != "&nbsp;")
-		now_duration += " min";
+		if (atoi(now_duration.c_str()) < 1000)
+			now_duration += " min";
 	result.strReplace("#NOWD#", now_duration);
 	result.strReplace("#NOWST#", now_text);
 	result.strReplace("#NEXTT#", next_time);
 	if (next_duration != "&nbsp;")
-		next_duration += " min";
+		if (atoi(next_duration.c_str()) < 1000)
+			next_duration += " min";
 	result.strReplace("#NEXTD#", next_duration);
 	result.strReplace("#NEXTST#", next_text);
 	result.strReplace("#VOLBAR#", getVolBar());
