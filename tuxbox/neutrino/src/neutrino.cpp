@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.18 2001/08/22 00:03:24 ge0rg Exp $
+        $Id: neutrino.cpp,v 1.19 2001/08/22 07:39:12 faralla Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.19  2001/08/22 07:39:12  faralla
+  works with zapit again
+
   Revision 1.18  2001/08/22 00:03:24  ge0rg
   verständliche Fehlermeldungen
 
@@ -519,10 +522,13 @@ void CNeutrinoApp::channelsInit()
 		char rip[]="127.0.0.1";
 		char *return_buf;
 
-//tw??	
+		printf("Getting Channellist\n");
+//deleting old channelList for mode-switching.	
 	delete channelList;
-	channelList = new CChannelList(&settings, 1,"All Services");
+	channelList = new CChannelList(&settings, 1,"All Services",fonts);
 	
+		printf("Getting Channellist\n");
+		
 		sendmessage.version=1;
 		sendmessage.cmd = 5;
 
