@@ -87,7 +87,8 @@ public:
 		flagHaveMultipleAudioStreams=4,
 		flagIsSeekable=8,                // supports seek commands
 		flagSupportPosition=16,          // supports position read
-		flagIsTrack=32                   // behaves like an audio track
+		flagIsTrack=32,                  // behaves like an audio track
+		flagStartTimeshift=64
 	};
 	enum
 	{

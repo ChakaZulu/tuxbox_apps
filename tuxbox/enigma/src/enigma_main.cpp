@@ -3279,7 +3279,8 @@ void eZapMain::startSkip(int dir)
 					break;
 			}
 
-			if(!eServiceInterface::getInstance()->service.path && (state & stateRecording))
+			if(!eServiceInterface::getInstance()->service.path && (state & stateRecording)
+				&& eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef == eServiceInterface::getInstance()->service )
 			{
 				if(dir!=skipForward)
 				{ // necessary to enable skipmode, because file end
@@ -5588,7 +5589,14 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	{
 		serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
 		if ( timeshift && !(serviceFlags & eServiceHandler::flagIsSeekable) )
+		{
+			if ( eDVB::getInstance()->recorder &&
+				eServiceInterface::getInstance()->service != eDVB::getInstance()->recorder->recRef )
+				playService(eDVB::getInstance()->recorder->recRef, psNoUser|psSetMode);
 			timeshift=0;
+		}
+		if ( serviceFlags & eServiceHandler::flagStartTimeshift )
+			timeshift=1;
 		setSmartcardLogo( serviceFlags & eServiceHandler::flagIsScrambled );
 		if (serviceFlags & eServiceHandler::flagSupportPosition)
 			progresstimer.start(1000);
