@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.cpp,v 1.5 2003/03/20 14:07:32 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.cpp,v 1.6 2003/03/20 15:32:52 thegoodguy Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -202,6 +202,10 @@ bool write_interface(const std::string filename, const std::string name, const b
 	if (!found)
 	{
 		std::ostringstream out;
+
+		if (automatic_start)
+			line.push_back("auto " + name);
+
 		out << "iface " << name << ' ' << family << ' ' << method;
 		line.push_back(out.str());
 		add_attributes(attribute, line, line.end());
