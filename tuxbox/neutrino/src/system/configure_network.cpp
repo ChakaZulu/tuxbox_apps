@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.cpp,v 1.3 2003/03/10 21:22:41 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/system/configure_network.cpp,v 1.4 2003/03/20 14:08:10 thegoodguy Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -64,10 +64,12 @@ void CNetworkConfig::commitConfig(void)
 		if (inet_static)
 		{
 			netSetNameserver(nameserver.c_str());
+			addLoopbackDevice("eth0", true);
 			setStaticAttributes("eth0", automatic_start, address, netmask, broadcast, gateway);
 		}
 		else
 		{
+			addLoopbackDevice("eth0", true);
 			setDhcpAttributes("eth0", automatic_start);
 		}
 	}

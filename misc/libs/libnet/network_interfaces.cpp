@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.cpp,v 1.4 2003/03/10 21:22:38 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.cpp,v 1.5 2003/03/20 14:07:32 thegoodguy Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -336,6 +336,13 @@ bool getInetAttributes(const std::string name, bool &automatic_start, std::strin
 			gateway = (*it).second;
 	}
 	return true;
+}
+
+bool addLoopbackDevice(const std::string name, const bool automatic_start)
+{
+	std::map<std::string, std::string> attribute;
+
+	return write_interface("/etc/network/interfaces", name, automatic_start, "inet", "loopback", attribute);
 }
 
 bool setStaticAttributes(const std::string name, const bool automatic_start, const std::string address, const std::string netmask, const std::string broadcast, const std::string gateway)
