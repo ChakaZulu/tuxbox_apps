@@ -38,6 +38,7 @@ class eAVSwitchNokia: public eAVSwitch
 	
 	int active;
 	eAVAspectRatio aspect;
+	eAVColorFormat colorformat;
 public:
 	eAVSwitchNokia();
 	~eAVSwitchNokia();

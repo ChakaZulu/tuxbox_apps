@@ -100,22 +100,27 @@ int eAVSwitchNokia::setTVPin8(int vol)
 
 int eAVSwitchNokia::setColorFormat(eAVColorFormat c)
 {
-	int arg=0;
+	colorformat=c;
+	int arg=0, fblk;
 	switch (c)
 	{
 	case cfNull:
 		return -1;
 	case cfCVBS:
 		arg=SAA_MODE_FBAS;
+		fblk=0;
 		break;
 	case cfRGB:
 		arg=SAA_MODE_RGB;
+		fblk=1;
 		break;
 	case cfYC:
 		arg=SAA_MODE_SVIDEO;
+		fblk=0;
 		break;
 	}
-	return ioctl(saafd, SAAIOSMODE, &arg);
+	ioctl(saafd, SAAIOSMODE, &arg);
+	ioctl(fd, AVSIOSFBLK, &fblk);
 }
 
 int eAVSwitchNokia::setAspectRatio(eAVAspectRatio as)
@@ -147,7 +152,7 @@ int eAVSwitchNokia::setInput(int v)
 		ioctl(fd, AVSIOSASW1, &v);
 		v=7;
 		ioctl(fd, AVSIOSVSW2, &v);
-		v=1;
+		v=3;
 		ioctl(fd, AVSIOSFBLK, &v);
 		break;
 	case 1:
@@ -157,8 +162,7 @@ int eAVSwitchNokia::setInput(int v)
 		ioctl(fd, AVSIOSASW1, &v);
 		v=7;
 		ioctl(fd, AVSIOSVSW2, &v);
-		v=2;
-		ioctl(fd, AVSIOSFBLK, &v);
+		setColorFormat(colorformat);
 		break;
 	}
 	return 0;
