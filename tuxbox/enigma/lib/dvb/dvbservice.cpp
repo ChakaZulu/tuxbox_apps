@@ -442,13 +442,14 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 		eDebug("is same service..");
 		return 0;
 	}
-
+/*
 #ifndef DISABLE_CI
 	if ( DVBCI )
 		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::suspendPoll, 0));
 	if ( DVBCI2 )
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::suspendPoll, 0));
 #endif
+*/
 	Decoder::Flush();
 	/*emit*/ dvb.leaveService(service);
 
