@@ -52,7 +52,7 @@ mainsettings.keybinding Taste-Iischdellige
 mainsettings.misc Diversi Iischdellige
 mainsettings.scan Iischdellige Kanalsürch
 
-mp3picsettings.general unset
+mp3picsettings.general MP3 Player / Bildbetrachter
 
 miscsettings.head Diverse Iischdellige
 miscsettings.shutdown_real Sdändbymodus
@@ -60,7 +60,7 @@ miscsettings.boxtype DBox Hersdeller
 miscsettings.startneutrinodirect Neutrino diräkt starte
 miscsettings.general Allg'mein
 miscsettings.fb_destination EXPERT! Boot-Chonsole
-miscsettings.infobar_sat_display unset
+miscsettings.infobar_sat_display Infobar Satellite-A'zeig
 
 languagesetup.head Sproochischellige
 languagesetup.select Sprooch
@@ -222,9 +222,9 @@ lcdmenu.head LCD Iistellige
 lcdmenu.inverse Inverdiere
 lcdmenu.power Pfuus
 lcdmenu.lcdcontroler Kontrast / Hälligkeit
-lcdmenu.statusline unset
-lcdmenu.statusline.volume unset
-lcdmenu.statusline.playtime unset
+lcdmenu.statusline Statusziile
+lcdmenu.statusline.volume Lutstärki
+lcdmenu.statusline.playtime Sendigsfortschritt
 
 lcdcontroler.head LCD Stettings
 lcdcontroler.contrast Kontrast
@@ -320,7 +320,7 @@ nvod.proz (%d%% umme)
 scants.head Kanalsuechi
 scants.startnow Kanalsuechi starde
 scants.actsatellite Sadellid:
-scants.actcable unset
+scants.actcable Kabel:
 scants.astra Astra
 scants.hotbird Hotbörd
 scants.kopernikus Kopernikus
@@ -329,8 +329,8 @@ scants.thor Thor
 scants.digituerk Digituerk
 scants.tuerksat Tuerksat
 scants.transponders Transponder:
-scants.freqdata	unset
-scants.servicenames unset
+scants.freqdata Frequenz:
+scants.servicenames TV     Radio  Data
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave nidd ändere
@@ -674,19 +674,19 @@ mp3player.keylevel Taschde-Umschaldig
 mp3player.fastforward schnälle Vorl.
 mp3player.pause Pause
 mp3player.rewind schnälle Rückl.
-mp3player.artist_title unset
-mp3player.title_artist unset
-mp3player.display_order unset
-mp3player.follow unset
+mp3player.artist_title Interpret, Titel
+mp3player.title_artist Titel, Interpret
+mp3player.display_order Anzeig'
+mp3player.follow Selektiere akt. Track
 
 filebrowser.head Filebrowser
-filebrowser.filter.active unset
-filebrowser.filter.inactive unset
+filebrowser.filter.active Filter aah
+filebrowser.filter.inactive Filter uus
 filebrowser.select Usswähle
 filebrowser.mark Markiere
 filebrowser.scan Verzeichnisse durchsürche
-filebrowser.sort.name unset
-filebrowser.sort.date unset
+filebrowser.sort.name (Dateiname)
+filebrowser.sort.date (Datum)
 
 nfs.mount Verzeichniss i'hänge
 nfs.ip NFS Server IP
