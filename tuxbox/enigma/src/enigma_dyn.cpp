@@ -1771,7 +1771,8 @@ static eString getUSBInfo(void)
 {
 	std::stringstream result;
 	eString usbStick = "none";
-	system("cat /proc/scsi/usb-storage-0/0 > /tmp/usbstick.tmp");
+	system("cat /proc/scsi/usb-storage-0/0 > /tmp/usbstick.tmp"); // 2.4.20
+	system("cat /proc/scsi/usb-storage/0 >> /tmp/usbstick.tmp");  // 2.6.5
 	eString line;
 	ifstream infile("/tmp/usbstick.tmp");
 	if (infile)
