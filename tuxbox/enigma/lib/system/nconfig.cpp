@@ -347,5 +347,7 @@ eConfigOld::eConfigOld()
 
 eConfigOld::~eConfigOld()
 {
-	system("mv /var/tuxbox/config/enigma/registry /var/tuxbox/config/enigma/registry_unneeded");
+	struct stat s;
+	if (!::stat("/var/tuxbox/config/enigma/registry", &s))
+		system("mv /var/tuxbox/config/enigma/registry /var/tuxbox/config/enigma/registry_unneeded");
 }

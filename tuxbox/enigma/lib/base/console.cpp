@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.8 2004/05/01 09:03:48 ghostrider Exp $
+ * $Id: console.cpp,v 1.9 2004/11/26 02:05:15 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -169,7 +169,7 @@ void eConsoleAppContainer::kill()
 	{
 		eDebug("user kill console App");
 		killstate=-1;
-		system( eString().sprintf("kill %d", pid).c_str() );
+		::kill(pid, SIGKILL);
 		closePipes();
 	}
 }

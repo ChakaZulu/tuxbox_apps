@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.20 2004/11/10 21:32:48 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.21 2004/11/26 02:05:17 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -503,8 +503,7 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 	{
 		case eWidgetEvent::execBegin:
 		{
-			system("killall nmbd");
-			system("killall smbd");
+			system("killall nmbd smbd");
 			eEPGCache::getInstance()->messages.send(eEPGCache::Message(eEPGCache::Message::pause));
 			eEPGCache::getInstance()->messages.send(eEPGCache::Message(eEPGCache::Message::flush));
 			eString fs = getPartFS(dev,"/hdd"),

@@ -62,6 +62,10 @@ void eZapStandby::renewSleep()
 	if (sapi)
 		sapi->transponder=0;
 	::sync();
+
+	struct stat s;
+	if (::stat("/sbin/hdparm", &s))
+		return;
 	system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
 	system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
 }
@@ -83,12 +87,9 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 	{
 		eConfig::getInstance()->flush();
 		/*emit*/ enterStandby();
-		FILE *f = fopen("/var/etc/enigma_enter_standby.sh", "r");
-		if (f)
-		{
-			fclose(f);
+		struct stat s;
+		if (!::stat("/var/etc/enigma_enter_standby.sh", &s))
 			system("/var/etc/enigma_enter_standby.sh");
-		}
 #ifndef DISABLE_LCD
 		eZapLCD *pLCD=eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
@@ -151,12 +152,9 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 			::close(fd);
 		}
 		/*emit*/ leaveStandby();
-		FILE *f = fopen("/var/etc/enigma_leave_standby.sh", "r");
-		if (f)
-		{
-			fclose(f);
+		struct stat s;
+		if (!::stat("/var/etc/enigma_leave_standby.sh", &s))
 			system("/var/etc/enigma_leave_standby.sh");
-		}
 		break;
 	}
 	default:

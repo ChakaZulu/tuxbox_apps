@@ -685,8 +685,7 @@ void eDVB::restartSamba()
 		{
 			for (unsigned int i=3; i < 90; ++i )
 				close(i);
-			system("killall nmbd");
-			system("killall smbd");
+			system("killall nmbd smbd");
 			system("smbd -D");
 			system("nmbd -D");
 			_exit(0);
@@ -746,12 +745,10 @@ void eDVB::configureNetwork()
 				char buf[256];
 				fgets(buf,sizeof(buf),file);
 				fclose(file);
-				file = fopen("/var/share/udhcpc/default.script","r");
-				if ( file )
-				{
-					fclose(file);
+
+				struct stat s;
+				if ( !stat("/var/share/udhcpc/default.script", &s) )
 					cmd.sprintf("/bin/udhcpc --hostname=%s --foreground --script=/var/share/udhcpc/default.script", buf);
-				}
 				else
 					cmd.sprintf("/bin/udhcpc --hostname=%s --foreground", buf);
 			}
