@@ -1076,39 +1076,14 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, "", mtdexpert ) );
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		
-
 		//get current flash-version
 		FILE* fd = fopen("/.version", "r");
 		strcpy(g_settings.softupdate_currentversion, "1.0.0");
-
-		if(!fd)
-		{
-			fd = fopen("/var/etc/version", "r");
-			if(!fd)
-			{
-				dperror("cannot read flash-versioninfo");
-			}
-			else
-			{
-				if(fgets(g_settings.softupdate_currentversion,90,fd)==NULL)
-					fclose(fd);
-			//printf("versiondata: ->%s<-\n", g_settings.softupdate_currentversion);
-			for (unsigned int x=0;x<strlen(g_settings.softupdate_currentversion);x++)
-			{
-				if( (g_settings.softupdate_currentversion[x]!='.') && ((g_settings.softupdate_currentversion[x]>'9') || (g_settings.softupdate_currentversion[x]<'0') ) )
-				{
-					g_settings.softupdate_currentversion[x]=0;
-				}
-			}
-
-			}
-		}
-		else
+		if(fd)
 		{
 			if(fgets(g_settings.softupdate_currentversion,90,fd)==NULL)
 				fclose(fd);
 		}
-
 
 		dprintf(DEBUG_INFO, "current flash-version: %s\n", g_settings.softupdate_currentversion);
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
@@ -2634,7 +2609,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.281 2002/05/21 18:36:11 rasc Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.282 2002/05/21 21:56:38 McClean Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

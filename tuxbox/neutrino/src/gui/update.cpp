@@ -132,75 +132,75 @@ bool CFlashUpdate::checkVersion4Update(string &sFileName)
 	{
 		if(!getInfo())
 		{
+			hide();
 			ShowHint("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
+			return false;
+		}
+
+		showLocalStatus(100);
+		showGlobalStatus(20);
+		showStatusMessage(g_Locale->getText("flashupdate.versioncheck").c_str());
+
+		//installierte version...
+		installed_major = installed_provider = 0;
+		strcpy(installed_minor, "0");
+		sscanf(g_settings.softupdate_currentversion, "%d.%d.%s", &installed_major, &installed_provider, (char*) &installed_minor);
+
+		//neue version?
+		new_major = new_provider = 0;
+		strcpy(new_minor, "0");
+
+		sFileName = gTmpPath+VersionFile;
+		FILE* fd = fopen(sFileName.c_str(), "r");
+		if(!fd)
+		{
+			sFileName= sFileName+ ".txt";
+			fd = fopen(sFileName.c_str(), "r");
+		}
+
+		hide();
+		if(!fd)
+		{
+			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
+			return false;
+		}
+		char buf[100];
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			//printf("vstr: %s\n", buf);
+			buf[28]= 0;
+			sscanf(buf, "version: %d.%d.%s\n", &new_major, &new_provider, (char*) &new_minor);
+		}
+		else
+		{
+			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
+			return false;
+		}
+		fclose(fd);
+
+		//printf("installed - %d : %d : %s\n", installed_major, installed_provider, installed_minor);
+		//printf("new - %d : %d : %s\n", new_major, new_provider, new_minor);
+		if(installed_major!=new_major)
+		{
+			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.majorversiondiffer1") + "\n" + g_Locale->getText("flashupdate.majorversiondiffer2") );
+			return false;
+		}
+
+		if(installed_provider!=new_provider)
+		{
+			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.providerversiondiffer1") + "\n" + g_Locale->getText("flashupdate.providerversiondiffer2") );
+			return false;
+		}
+		if(strcmp(installed_minor,new_minor)== 0)
+		{
+			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.nonewversion1") );
 			return false;
 		}
 	}
 
 	showLocalStatus(100);
 	showGlobalStatus(20);
-	showStatusMessage(g_Locale->getText("flashupdate.versioncheck").c_str());
 
-	//installierte version...
-	installed_major = installed_provider = 0;
-	strcpy(installed_minor, "0");
-	sscanf(g_settings.softupdate_currentversion, "%d.%d.%s", &installed_major, &installed_provider, (char*) &installed_minor);
-
-	//neue version?
-	new_major = new_provider = 0;
-	strcpy(new_minor, "0");
-	strcpy(new_md5sum, "");
-
-	sFileName = gTmpPath+VersionFile;
-	FILE* fd = fopen(sFileName.c_str(), "r");
-	if(!fd)
-	{
-		sFileName= sFileName+ ".txt";
-		fd = fopen(sFileName.c_str(), "r");
-	}
-
-	hide();
-	if(!fd)
-	{
-		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
-		return false;
-	}
-	char buf[100];
-	if(fgets(buf,sizeof(buf),fd)!=NULL)
-	{
-		//printf("vstr: %s\n", buf);
-		buf[28]= 0;
-		sscanf(buf, "version: %d.%d.%s\n", &new_major, &new_provider, (char*) &new_minor);
-	}
-	else
-	{
-		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
-		return false;
-	}
-	if(fgets(buf,sizeof(buf),fd)!=NULL)
-	{
-		sscanf(buf, "md5sum: %s\n", (char*) &new_md5sum);
-	}
-	fclose(fd);
-
-	//printf("installed - %d : %d : %s\n", installed_major, installed_provider, installed_minor);
-	//printf("new - %d : %d : %s\n", new_major, new_provider, new_minor);
-	if(installed_major!=new_major)
-	{
-		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.majorversiondiffer1") + "\n" + g_Locale->getText("flashupdate.majorversiondiffer2") );
-		return false;
-	}
-
-	if(installed_provider!=new_provider)
-	{
-		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.providerversiondiffer1") + "\n" + g_Locale->getText("flashupdate.providerversiondiffer2") );
-		return false;
-	}
-	if(strcmp(installed_minor,new_minor)== 0)
-	{
-		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.nonewversion1") );
-		return false;
-	}
 	char msg[250];
 	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), new_major, new_provider, new_minor);
     if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
@@ -241,26 +241,14 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 
 	showGlobalStatus(40);
 
-	//md5check...
-	unsigned char   md5buffer[16];
-	char            md5string[40]="";
+	CFlashTool ft;
+	ft.setMTDDevice("/dev/mtd/3");
+	ft.setStatusViewer(this);
 
 	sFileName = gTmpPath+ ImageFile;
+	//image-check
 	showStatusMessage(g_Locale->getText("flashupdate.md5check") );
-	if( md5_file(sFileName.c_str(), 1, (unsigned char*) &md5buffer))
-	{
-		hide();
-		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.cantopenfile") );
-		return menu_return::RETURN_REPAINT;
-	}
-	for(int count=0;count<16;count++)
-	{
-		char tmp[6];
-		sprintf((char*) &tmp, "%02x", md5buffer[count] );
-		strcat(md5string, tmp);
-	}
-	printf("%s\n%s\n\n", new_md5sum, md5string);
-	if(strcmp(md5string, new_md5sum)!=0)
+	if(!ft.check_cramfs(sFileName))
 	{
 		hide();
 		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.md5sumerror") );
@@ -269,21 +257,12 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	showGlobalStatus(60);
 
 	//flash it...
-	CFlashTool ft;
-	ft.setMTDDevice("/dev/mtd/3");
-	ft.setStatusViewer(this);
 	if(!ft.program(sFileName, 80, 100))
 	{
 		hide();
 		ShowHint ( "messagebox.error", ft.getErrorMessage() );
 		return menu_return::RETURN_REPAINT;
 	}
-
-	//versionsinfo schreiben
-	FILE* fd2 = fopen("/var/etc/version", "w");
-	fprintf(fd2, "%d.%d.%s\n", new_major, new_provider, new_minor);
-	fflush(fd2);
-	fclose(fd2);
 
 	//status anzeigen
 	showGlobalStatus(100);
