@@ -139,6 +139,7 @@ int eDBoxLCD::setLCDParameter(int brightness, int contrast)
 		eDebug("[LCD] can't set lcd brightness");
 	}
 	eDebug("[LCD] set brightness %d, contrast %d", brightness, contrast);
+	close(fp);
 	return(0);
 }
 
