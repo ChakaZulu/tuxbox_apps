@@ -36,6 +36,17 @@
 #include "libnet.h"
 #include "libucodes/libucodes.h"
 
+class CSatDiseqcNotifier : public CChangeObserver
+{
+	private:
+		CMenuItem* satMenu;
+		CMenuItem* extMenu;
+	protected:
+		CSatDiseqcNotifier( ) : CChangeObserver(){};  // prevent calling constructor without data we need
+	public:
+		CSatDiseqcNotifier( CMenuItem* SatMenu, CMenuItem* ExtMenu) : CChangeObserver() { satMenu = SatMenu; extMenu = ExtMenu;};
+		bool changeNotify(string OptionName, void*);
+};
 
 class CCableSpectalInversionNotifier : public CChangeObserver
 {

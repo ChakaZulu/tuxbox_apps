@@ -34,6 +34,21 @@
 
 extern "C" int pinghost( const char *hostname );
 
+bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
+{
+	if( *((int*) Data)==0)   // diseqc off
+	{
+		satMenu->setActive(false);
+		extMenu->setActive(true);
+	}
+	else
+	{
+		satMenu->setActive(true);
+		extMenu->setActive(false);
+	}
+}
+
+
 bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 {
 	static bool messageShowed = false;
