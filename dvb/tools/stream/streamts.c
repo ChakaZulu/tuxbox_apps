@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.12 2003/05/21 17:26:50 obi Exp $
+ * $Id: streamts.c,v 1.13 2003/05/29 07:33:13 obi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -351,6 +351,9 @@ main (int argc, char ** argv) {
 		return EXIT_FAILURE;
 	}
 
+	/* yeah, evil, no need to patch mpegtools */
+	fclose(stderr);
+
 	bp = buf;
 
 	/* read one line */
@@ -366,7 +369,7 @@ main (int argc, char ** argv) {
 
 	/* send response to http client */
 	if (!strncmp(buf, "GET /", 5)) {
-		printf("HTTP/1.1 200 OK\r\nServer: d-Box network\r\n\r\n");
+		printf("HTTP/1.1 200 OK\r\nServer: streamts (%s)\r\n\r\n", &argv[1][1]);
 		fflush(stdout);
 		bp += 5;
 	}
