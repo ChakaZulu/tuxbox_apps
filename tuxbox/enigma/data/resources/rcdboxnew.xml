@@ -27,8 +27,8 @@
 			<key name="yellow" code="12" />
 			<key name="red" code="13" />
 			<key name="blue" code="14" />
-			<key name="+" code="16" />
-			<key name="-" code="15" />
+			<key name="+" code="15" />
+			<key name="-" code="16" />
 			<key name="?" code="17" />
 			<key name="d-box" code="18" />
 			<key name="home" code="1f" />
