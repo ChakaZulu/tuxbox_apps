@@ -449,14 +449,7 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 		eDebug("is same service..");
 		return 0;
 	}
-/*
-#ifndef DISABLE_CI
-	if ( DVBCI )
-		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::suspendPoll, 0));
-	if ( DVBCI2 )
-		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::suspendPoll, 0));
-#endif
-*/
+
 	Decoder::Flush();
 	/*emit*/ dvb.leaveService(service);
 
@@ -511,6 +504,7 @@ void eDVBServiceController::scanPMT()
 	Decoder::parms.ecmpid=Decoder::parms.emmpid=Decoder::parms.casystemid=-1;
 
 	int isca=0;
+	int wasca=usedCASystems.size();
 
 	if ( eSystemInfo::getInstance()->hasCI() )
 		calist.clear();
@@ -614,6 +608,7 @@ void eDVBServiceController::scanPMT()
 		}
 		case 0xC1:
 		{
+			/*
 			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 				if (i->Tag()==DESCR_MHW_DATA)
 				{
@@ -625,23 +620,42 @@ void eDVBServiceController::scanPMT()
 							delete tMHWEIT;
 							tMHWEIT=0;
 						}
-/*						eDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service.getServiceID().get());
+						eDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service.getServiceID().get());
 						tMHWEIT=new MHWEIT(pe->elementary_PID, service.getServiceID().get());
 						CONNECT(tMHWEIT->ready, eDVBServiceController::MHWEITready);
-						tMHWEIT->start();*/
+						tMHWEIT->start();
 						break;
 					}
 				}
+			*/
 			break;
 		}
 		}
 	}
 
 #ifndef DISABLE_CI
-	if ( DVBCI )
-		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
-	if ( DVBCI2 )
-		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+	if ( isca )
+	{
+		if ( DVBCI )
+			DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+		if ( DVBCI2 )
+			DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+
+		if ( wasca != isca )
+		{
+			if ( DVBCI )
+				DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::enable_ts));
+			if ( DVBCI2 )
+				DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::enable_ts));
+		}
+	}
+	else if ( wasca != isca )
+	{
+		if ( DVBCI )
+			DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::disable_ts));
+		if ( DVBCI2 )
+			DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::disable_ts));
+	}
 #endif
 
 	int needAC3Workaround=0;

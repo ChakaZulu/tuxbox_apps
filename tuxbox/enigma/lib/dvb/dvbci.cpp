@@ -83,9 +83,6 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 {
 	switch (message.type)
 	{
-	case eDVBCIMessage::suspendPoll:
-		stopTimer();
-		break;
 	case eDVBCIMessage::start:
 		if (state == stateInit)
 		{
@@ -156,6 +153,29 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 	case eDVBCIMessage::PMTaddDescriptor:
 //		eDebug("[DVBCI] got PMTaddDescriptor message..");
 		PMTaddDescriptor(message.data);
+		break;
+	case eDVBCIMessage::enable_ts:
+	{
+		int present=0;
+
+		stopTimer();
+
+		if (::ioctl(fd,CI_GET_STATUS,&present)<0)
+		{
+			eDebug("CI_GET_STATUS failed (%m)");
+			break;
+		}
+
+		if( present )
+		{
+			if ( ::ioctl(fd, CI_TS_ACTIVATE) < 0 )
+				eDebug("CI_TS_ACTIVATE failed (%m)");
+		}
+		break;
+	}
+	case eDVBCIMessage::disable_ts:
+		if ( ::ioctl(fd, CI_TS_DEACTIVATE) < 0 )
+			eDebug("CI_TS_DEACTIVATE failed (%m)");
 		break;
 	}
 }
@@ -577,8 +597,13 @@ void eDVBCI::ca_manager(unsigned int session)
 				unsigned char buffer[12];
 				sessions[session].internal_state=1;
 
-				if (::ioctl(fd,CI_TS_ACTIVATE)<0)
+				eServiceHandler *serviceHandler =
+					eServiceInterface::getInstance()->getService();
+				if ( serviceHandler && serviceHandler->getFlags() & eServiceHandler::flagIsScrambled )
+				{
+					if ( ::ioctl(fd,CI_TS_ACTIVATE)<0 )
 					eDebug("CI_TS_ACTIVATE failed (%m)");
+				}
 
 				clearCAIDs();
 				eDebug("[DVBCI] [CA MANAGER] up to now nothing happens -> ca_info_enq");
@@ -1096,11 +1121,13 @@ void eDVBCI::dataAvailable(int what)
 	{
 		eDebug("[DVBCI] module removed");	
 
+		// clear sendqueue
 		while(queue.size())
 		{
 			delete [] queue.top().data;
 			queue.pop();
 		}
+
 		memset(appName,0,sizeof(appName));
 		ci_progress(_("no module"));
 
@@ -1143,6 +1170,14 @@ void eDVBCI::dataAvailable(int what)
 			return;
 		}
 
+		// clear sendqueue
+		while ( queue.size() )
+		{
+			eDebug("clear queue");
+			delete [] queue.top().data;
+			queue.pop();
+		}
+				
 		ci_state=1;
 	}
 
