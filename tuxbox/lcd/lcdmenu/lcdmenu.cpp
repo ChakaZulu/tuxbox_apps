@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.13 2002/01/03 17:18:59 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.14 2002/01/08 14:53:33 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.14  2002/01/08 14:53:33  obi
+ * added menu->update() to timeout method :)
+ *
  * Revision 1.13  2002/01/03 17:18:59  obi
  * some reorganization.
  * removed buffer classes.
@@ -268,6 +271,7 @@ void CLCDMenu::timeout(int signal)
 	else
 	{
 		menu->draw_fill_rect (0, 0, 119, 63, CLCDDisplay::PIXEL_OFF);
+		menu->update();
 		exit(menu->selectedEntry);
 	}
 }
