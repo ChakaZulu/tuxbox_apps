@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.176 2002/05/11 23:34:11 McClean Exp $
+ * $Id: zapit.cpp,v 1.177 2002/05/12 00:07:16 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -167,10 +167,11 @@ void signal_handler (int signum)
 {
 	switch (signum)
 	{
-			case SIGUSR1:
+		case SIGUSR1:
 			debug = (debug ? false : true);
 			break;
-			default:
+
+		default:
 			CZapitDestructor();
 	}
 }
@@ -755,7 +756,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				read( connfd, &msgZaptoServiceID2, sizeof(msgZaptoServiceID2));
 				zapTo_Onid_Sid( msgZaptoServiceID2.serviceID , ( rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT ) );
 				break;
-			
+
 			case CZapitClient::CMD_GET_LAST_CHANNEL :
 				channel_msg mysettings;
 				mysettings = load_settings();
@@ -878,7 +879,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				}
 				break;
 				}
-			
+
 			case CZapitClient::CMD_SCANSETSCANSATLIST:
 				CZapitClient::commandSetScanSatelliteList sat;
 				scanProviders.clear();
@@ -888,7 +889,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 					scanProviders[sat.diseqc] = sat.satName;
 				}
 				break;
-				
+
 			case CZapitClient::CMD_SCANSETDISEQCTYPE :
 				diseqc_t diseqc;
 				read(connfd, &diseqc, sizeof(diseqc));
@@ -963,7 +964,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				// -- for some unknown reason BQ-IDs are externally  1..n
 				// -- internally BQ-IDs are 0..n-1, so subtract 1!!
 				responseBool.status = g_BouquetMan->existsChannelInBouquet(
-				                          msgExistsChInBq.bouquet-1, msgExistsChInBq.onid_sid);
+							  msgExistsChInBq.bouquet-1, msgExistsChInBq.onid_sid);
 				send( connfd, &responseBool, sizeof(responseBool),0);
 				break;
 
@@ -1046,17 +1047,17 @@ void parse_command (CZapitClient::commandHead &rmsg)
 					(
 					    std::pair <int, CZapitChannel>
 					    (
-					        msgAddSubService.onidsid,
-					        CZapitChannel
-					        (
-					            "NVOD",
-					            (msgAddSubService.onidsid&0xFFFF),
-					            msgAddSubService.tsid,
-					            (msgAddSubService.onidsid>>16),
-					            1,
-					            0,
-					            channel->getDiSEqC()
-					        )
+						msgAddSubService.onidsid,
+						CZapitChannel
+						(
+						    "NVOD",
+						    (msgAddSubService.onidsid&0xFFFF),
+						    msgAddSubService.tsid,
+						    (msgAddSubService.onidsid>>16),
+						    1,
+						    0,
+						    channel->getDiSEqC()
+						)
 					    )
 					);
 				}
@@ -1096,122 +1097,6 @@ void parse_command (CZapitClient::commandHead &rmsg)
 	}
 }
 
-void sendBouquetList()
-{
-	uint32_t i;
-	char* status = "00q";
-
-	if (send(connfd, status, strlen(status),0) == -1)
-	{
-		perror("[zapit] could not send any return\n");
-		return;
-	}
-
-	uint nBouquetCount = 0;
-	for (i = 0; i < g_BouquetMan->Bouquets.size(); i++)
-	{
-		if ((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size() > 0) ||
-		        (currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size() > 0))
-		{
-			nBouquetCount++;
-		}
-	}
-
-	if (send(connfd, &nBouquetCount, sizeof(nBouquetCount), 0) == -1)
-	{
-		perror("[zapit] could not send any return\n");
-		return;
-	}
-	else
-	{
-		for (i = 0; i < g_BouquetMan->Bouquets.size(); i++)
-		{
-			// send bouquet only if there are channels in it
-			if ((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size() > 0) ||
-			        (currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size() > 0))
-			{
-				bouquet_msg msgBouquet;
-				// we'll send name and i+1 as bouquet number
-				strncpy(msgBouquet.name, g_BouquetMan->Bouquets[i]->Name.c_str(), 30);
-				msgBouquet.bouquet_nr = i + 1;
-
-				if (send(connfd, &msgBouquet, sizeof(msgBouquet), 0) == -1)
-				{
-					perror("[zapit] could not send any return\n");
-					return;
-				}
-			}
-		}
-	}
-}
-
-void sendChannelListOfBouquet(uint nBouquet)
-{
-	char* status;
-	uint32_t i;
-
-	// we get the bouquet number as 1-beginning but need it 0-beginning
-	nBouquet--;
-
-	if (nBouquet < 0 || nBouquet>g_BouquetMan->Bouquets.size())
-	{
-		printf("[zapit] invalid bouquet number: %d",nBouquet);
-		status = "-0r";
-	}
-	else
-	{
-		status = "00r";
-	}
-
-	if (send(connfd, status, strlen(status), 0) == -1)
-	{
-		perror("[zapit] could not send any return\n");
-		return;
-	}
-
-	std::vector<CZapitChannel*> channels;
-
-	if (currentMode & RADIO_MODE)
-	{
-		channels = g_BouquetMan->Bouquets[nBouquet]->radioChannels;
-	}
-	else
-	{
-		channels = g_BouquetMan->Bouquets[nBouquet]->tvChannels;
-	}
-
-	if (!channels.empty())
-	{
-		for (i = 0; i < channels.size(); i++)
-		{
-			if ((currentMode & RECORD_MODE) && (channels[i]->getTsidOnid() != frontend->getTsidOnid()))
-				continue;
-
-			channel_msg_2 chanmsg;
-			strncpy(chanmsg.name, channels[i]->getName().c_str(), 30);
-			chanmsg.onid_tsid = channels[i]->getOnidSid();
-			chanmsg.chan_nr = channels[i]->getChannelNumber();
-
-			if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
-			{
-				perror("[zapit] could not send any return\n");
-				return;
-			}
-		}
-	}
-	else
-	{
-		printf("[zapit] channel list of bouquet %d is empty\n", nBouquet + 1);
-		status = "-0r";
-
-		if (send(connfd, status, strlen(status), 0) < 0)
-		{
-			perror("[zapit] could not send any return\n");
-			return;
-		}
-	}
-}
-
 int main (int argc, char **argv)
 {
 	int listenfd;
@@ -1220,12 +1105,12 @@ int main (int argc, char **argv)
 
 	channel_msg testmsg;
 	int i;
-#if DEBUG
 
+#if DEBUG
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.176 2002/05/11 23:34:11 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.177 2002/05/12 00:07:16 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1449,12 +1334,12 @@ void sendBouquets(bool emptyBouquetsToo)
 	for (uint i=0; i<g_BouquetMan->Bouquets.size(); i++)
 	{
 		if (emptyBouquetsToo ||
-		        ((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden)) ||
-		        (currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden))
+			((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden)) ||
+			(currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden))
 		{
 			if ((!(currentMode & RECORD_MODE)) || ((currentMode & RECORD_MODE) &&
-			                                       (((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->recModeRadioSize( frontend->getTsidOnid())) > 0 ) ||
-			                                        (currentMode & TV_MODE)    && (g_BouquetMan->Bouquets[i]->recModeTVSize( frontend->getTsidOnid())) > 0 )))
+							       (((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->recModeRadioSize( frontend->getTsidOnid())) > 0 ) ||
+								(currentMode & TV_MODE)    && (g_BouquetMan->Bouquets[i]->recModeTVSize( frontend->getTsidOnid())) > 0 )))
 			{
 				CZapitClient::responseGetBouquets msgBouquet;
 				// we'll send name and i+1 as bouquet number
