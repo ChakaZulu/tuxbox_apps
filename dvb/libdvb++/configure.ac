@@ -1,17 +1,13 @@
-AC_INIT([libdvb++],[0.2],[obi@saftware.de])
-VERSION=0.2
-
-AM_INIT_AUTOMAKE([libdvb++],[$VERSION])
+AC_INIT([libdvb++],[0.2],[obi@saftware.de],[libdvb++])
+AM_INIT_AUTOMAKE([dist-bzip2 no-define nostdinc])
 
 AC_PROG_CXX
 AC_PROG_LIBTOOL
-
+PKG_CHECK_MODULES([LIBDVBSIPP],[libdvbsi++])
 AC_CHECK_HEADER([linux/dvb/version.h],[],
 	[AC_MSG_ERROR([linux dvb api headers are required to build libdvb++])])
 
-PKG_CHECK_MODULES([LIBDVBSIPP],[libdvbsi++])
-
-LT_RELEASE=$VERSION
+LT_RELEASE=$PACKAGE_VERSION
 AC_SUBST([LT_RELEASE])
 
 AC_OUTPUT([
