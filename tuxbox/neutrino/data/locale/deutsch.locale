@@ -340,7 +340,10 @@ scants.bouquet_leave nicht ändern
 scants.bouquet_create neu erstellen
 scants.bouquet_erase löschen
 scants.failed Kanalsuche fehlgeschlagen!
-scants.finished Kanalsuche erfolgreich beendet! 
+scants.finished Kanalsuche erfolgreich beendet!
+scants.motorcontrol Manueller Motor-Setup
+
+motorcontrol.head Motor-Setup
 
 flashupdate.head Aktualisierung
 flashupdate.action Aktion:
