@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 
-	$Id: timerdMsg.h,v 1.14 2002/09/05 22:31:24 dirch Exp $
+	$Id: timerdMsg.h,v 1.15 2002/09/23 17:19:57 Zwen Exp $
 
 	License: GPL
 
@@ -141,6 +141,10 @@ class CTimerd
 		typedef std::vector<responseGetTimer> TimerList;
 
 
+		struct responseStatus
+		{
+			bool status;
+		};
 };
 
 #endif

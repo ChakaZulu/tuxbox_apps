@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.16 2002/08/31 22:30:28 obi Exp $
+   $Id: timerd.cpp,v 1.17 2002/09/23 17:21:39 Zwen Exp $
 
    License: GPL
 
@@ -323,14 +323,25 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
          break;
 
       case CTimerd::CMD_RESCHEDULETIMER:        // event nach vorne oder hinten schieben
+		{
          read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
-         CTimerManager::getInstance()->rescheduleEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
+         int ret=CTimerManager::getInstance()->rescheduleEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
+			CTimerd::responseStatus rspStatus;
+         rspStatus.status = (ret!=0);
+         write( connfd, &rspStatus, sizeof(rspStatus));
          break;
+		}
 
       case CTimerd::CMD_MODIFYTIMER:            // neue zeiten setzen
+		{
          read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
-         CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
+		   int ret=CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime,
+																			  msgModifyTimer.eventRepeat );
+			CTimerd::responseStatus rspStatus;
+         rspStatus.status = (ret!=0);
+         write( connfd, &rspStatus, sizeof(rspStatus));
          break;
+		}
 
       case CTimerd::CMD_ADDTIMER:                  // neuen timer hinzufügen
          CTimerd::commandAddTimer msgAddTimer;

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.18 2002/09/05 22:31:24 dirch Exp $
+	$Id: timerdclient.cpp,v 1.19 2002/09/23 17:19:57 Zwen Exp $
 
 	License: GPL
 
@@ -230,6 +230,9 @@ bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t al
 	send((char*)&msg, sizeof(msg));
 	send((char*) &msgModifyTimer, sizeof(msgModifyTimer));
 
+	CTimerd::responseStatus response;
+	receive((char*)&response, sizeof(response));
+
 	timerd_close();
 	return true;
 }
@@ -257,9 +260,12 @@ bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_
 	timerd_connect();
 	send((char*)&msg, sizeof(msg));
 	send((char*) &msgModifyTimer, sizeof(msgModifyTimer));
+	
+	CTimerd::responseStatus response;
+	receive((char*)&response, sizeof(response));
 
 	timerd_close();
-	return true;
+	return response.status;
 }
 //-------------------------------------------------------------------------
 

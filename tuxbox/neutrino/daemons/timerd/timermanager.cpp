@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.27 2002/09/05 22:35:54 dirch Exp $
+	$Id: timermanager.cpp,v 1.28 2002/09/23 17:21:39 Zwen Exp $
 
 	License: GPL
 
@@ -203,8 +203,10 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 		event->eventState = CTimerEvent::TIMERSTATE_SCHEDULED;
 		event->eventRepeat = evrepeat;
 		saveEventsToConfig();
+		return eventID;
 	}
-	return eventID;
+	else
+		return 0;
 }
 
 int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime)
@@ -220,8 +222,10 @@ int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alar
 			event->stopTime += stopTime;
 		event->eventState = CTimerEvent::TIMERSTATE_SCHEDULED;
 		saveEventsToConfig();
+		return eventID;
 	}
-	return eventID;
+	else
+		return 0;
 }
 
 void CTimerManager::saveEventsToConfig()
