@@ -299,8 +299,8 @@ flashupdate.proxyusername_hint2 Ein leerer Eintrag bedeutet keine Authentifizier
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Geben sie das Proxy-Passwort ein
 flashupdate.proxypassword_hint2
-flashupdate.msgbox Found the following new image: %s\nDo you want to download and install this version now?
-flashupdate.msgbox_manual Found the following new image: %s\nDo you want to install this version now?
+flashupdate.msgbox Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to download and install this version now?
+flashupdate.msgbox_manual Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to install this version now?
 flashupdate.expertfunctions Expert-functions
 flashupdate.readflash Read hole image
 flashupdate.writeflash Write hole image

@@ -42,7 +42,8 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
-#include "libmd5sum/libmd5sum.h"
+#include <libmd5sum/libmd5sum.h>
+#include <libcramfs/libcramfs.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -188,9 +189,16 @@ bool CFlashUpdate::checkVersion4Update()
 			return false;
 		}
 		hide();
-		newVersion = "(todo)"; //vom cramfs holen!
-		char msg[250];
-		sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox_manual").c_str(), newVersion.c_str() );
+		
+		//bestimmung der CramfsDaten
+		char cramfsName[30];
+		int retval = cramfs_name( (char*) (string(gTmpPath+ImageFile)).c_str(), (char*) &cramfsName);
+
+		CFlashVersionInfo versionInfo(cramfsName);
+
+		char msg[400];
+		sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox_manual").c_str(), versionInfo.getDate().c_str(), 
+				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.isSnapShot()?"Snapshot":"Release" );
 		if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
 		{
 			return false;
@@ -201,10 +209,14 @@ bool CFlashUpdate::checkVersion4Update()
 	
 	showLocalStatus(100);
 	showGlobalStatus(20);
-
 	hide();
+
+	//bestimmung der CramfsDaten
+	CFlashVersionInfo versionInfo(newVersion);
+	
 	char msg[250];
-	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), newVersion.c_str());
+	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), versionInfo.getDate().c_str(), 
+				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.isSnapShot()?"Snapshot":"Release" );
     if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
     {
 		return false;

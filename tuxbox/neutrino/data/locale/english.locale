@@ -303,8 +303,8 @@ flashupdate.proxyusername_hint2 a empty entry means no proxy-auth
 flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 enter the proxyserver password
 flashupdate.proxypassword_hint2
-flashupdate.msgbox Found the following new image: %s\nDo you want to download and install this version now?
-flashupdate.msgbox_manual Found the following new image: %s\nDo you want to install this version now?
+flashupdate.msgbox Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to download and install this version now?
+flashupdate.msgbox_manual Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to install this version now?
 flashupdate.expertfunctions Expert-functions
 flashupdate.readflash Read hole image
 flashupdate.writeflash Write hole image
