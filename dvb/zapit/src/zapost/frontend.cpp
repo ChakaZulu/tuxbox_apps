@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.23 2002/08/27 16:00:42 obi Exp $
+ * $Id: frontend.cpp,v 1.24 2002/08/27 20:01:38 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -38,8 +38,8 @@
 
 #include "frontend.h"
 
-#define FRONTEND_DEVICE	"/dev/ost/frontend0"
-#define SEC_DEVICE	"/dev/ost/sec0"
+#define FRONTEND_DEVICE	"/dev/dvb/card0/frontend0"
+#define SEC_DEVICE	"/dev/dvb/card0/sec0"
 
 extern std::map <uint32_t, transponder> transponders;
 
