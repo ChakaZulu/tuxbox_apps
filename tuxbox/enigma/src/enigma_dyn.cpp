@@ -2087,6 +2087,7 @@ static eString showTimerList(eString request, eString dirpath, eString opt, eHTT
 #endif
 
 #ifndef DISABLE_FILE
+#ifdef ENABLE_DYN_CONF
 eString getConfigSwapFile(void)
 {
 	eString result;
@@ -2102,7 +2103,6 @@ eString getConfigSwapFile(void)
 	return result;
 }
 
-#ifdef ENABLE_DYN_CONF
 eString getConfigMultiBoot(void)
 {
 	eString result;
