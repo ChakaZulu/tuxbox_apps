@@ -27,6 +27,8 @@
 */
 
 #include <string>
+#include <stdio.h>    /* printf       */
+#include <sys/time.h> /* gettimeofday */
 
 class CPictureViewer
 {
@@ -104,4 +106,6 @@ class CPictureViewer
 #define FH_ERROR_FORMAT 2	/* file format error */
 #define FH_ERROR_MALLOC 3	/* error during malloc */
 
+#define dbout(fmt, args...) {struct timeval tv; gettimeofday(&tv,NULL); \
+        printf( "PV[%ld|%02ld] " fmt, (long)tv.tv_sec, (long)tv.tv_usec/10000, ## args);}
 #endif

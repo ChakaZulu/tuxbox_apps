@@ -206,7 +206,13 @@ void CPictureViewer::SetVisible(int startx, int endx, int starty, int endy)
 bool CPictureViewer::ShowImage(std::string filename, bool unscaled)
 {
 //	dbout("Show Image {\n");
-	DecodeImage(filename, false, unscaled);
+	// Wird eh ueberschrieben ,also schonmal freigeben... (wenig speicher)
+   if(m_CurrentPic_Buffer != NULL)
+	{
+		free(m_CurrentPic_Buffer);
+		m_CurrentPic_Buffer=NULL;
+	}
+	DecodeImage(filename, true, unscaled);
    DisplayNextImage();
 //	dbout("Show Image }\n");
    return true;
@@ -214,15 +220,15 @@ bool CPictureViewer::ShowImage(std::string filename, bool unscaled)
 bool CPictureViewer::DisplayNextImage()
 {
 //	dbout("DisplayNextImage {\n");
-   if(m_NextPic_Buffer != NULL)
-      fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan,
-                 m_NextPic_XPos, m_NextPic_YPos);
-//	dbout("DisplayNextImage fb_disp done\n");
 	if(m_CurrentPic_Buffer != NULL)
 	{
 		free(m_CurrentPic_Buffer);
 		m_CurrentPic_Buffer=NULL;
 	}
+   if(m_NextPic_Buffer != NULL)
+      fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan,
+                 m_NextPic_XPos, m_NextPic_YPos);
+//	dbout("DisplayNextImage fb_disp done\n");
 	m_CurrentPic_Buffer = m_NextPic_Buffer;
 	m_NextPic_Buffer    = NULL;
    m_CurrentPic_Name   = m_NextPic_Name;
@@ -239,9 +245,11 @@ bool CPictureViewer::DisplayNextImage()
 void CPictureViewer::Zoom(float factor)
 { 
 //	dbout("Zoom %f\n",factor);
-
-	int oldx=m_CurrentPic_X;
+   showBusy(m_startx+3,m_starty+3,10,0xff,0xff,00);
+	
+   int oldx=m_CurrentPic_X;
 	int oldy=m_CurrentPic_Y;
+   unsigned char *oldBuf=m_CurrentPic_Buffer;
 	m_CurrentPic_X=(int)(factor*m_CurrentPic_X);
 	m_CurrentPic_Y=(int)(factor*m_CurrentPic_Y);
 	 
@@ -249,6 +257,13 @@ void CPictureViewer::Zoom(float factor)
 		m_CurrentPic_Buffer=color_average_resize(m_CurrentPic_Buffer, oldx, oldy, m_CurrentPic_X,m_CurrentPic_Y);
 	else
 		m_CurrentPic_Buffer=simple_resize(m_CurrentPic_Buffer, oldx, oldy, m_CurrentPic_X,m_CurrentPic_Y);
+
+   if(m_CurrentPic_Buffer==oldBuf)
+   {
+      // resize failed
+      hideBusy();
+      return;
+   }
 
 	if(m_CurrentPic_X<(m_endx-m_startx)) 
 		m_CurrentPic_XPos=(m_endx-m_startx-m_CurrentPic_X)/2+m_startx; 
@@ -273,7 +288,9 @@ void CPictureViewer::Zoom(float factor)
 void CPictureViewer::Move(int dx, int dy)
 { 
 //	dbout("Move %d %d\n",dx,dy);
-	int xs,ys;
+   showBusy(m_startx+3,m_starty+3,10,0x00,0xff,00);
+	
+   int xs,ys;
 	getCurrentRes(&xs,&ys);
 	m_CurrentPic_XPan+=dx;
 	if(m_CurrentPic_XPan + xs >= m_CurrentPic_X)
@@ -329,6 +346,8 @@ CPictureViewer::CPictureViewer()
 	m_endx   = xs-1;
 	m_starty = 0;
 	m_endy   = ys-1;
+
+   m_busy_buffer=NULL;
 	
 	init_handlers();																     
 }
@@ -352,6 +371,11 @@ void CPictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	{
 		printf("Error: malloc\n");
 		return;
+	}
+	if(m_busy_buffer!=NULL)
+	{
+		free(m_busy_buffer);
+		m_busy_buffer=NULL;
 	}
 	m_busy_buffer = (unsigned char*) malloc(width*width*cpp);
 	if(m_busy_buffer==NULL)
@@ -407,7 +431,6 @@ void CPictureViewer::Cleanup()
 	{
 		free(m_busy_buffer);
 		m_busy_buffer=NULL;
-		dbout("Free busy_buffer\n");
 	}
 	if(m_NextPic_Buffer!=NULL)
 	{

@@ -80,7 +80,12 @@ CPictureViewerGui::CPictureViewerGui()
 	picture_filter.addFilter("jpg");
 	picture_filter.addFilter("gif");
 	m_filebrowser->Filter = &picture_filter;
-	Path = "/";
+   if(strlen(g_settings.network_nfs_local_dir[1])!=0)
+      Path = g_settings.network_nfs_local_dir[1];
+   else if(strlen(g_settings.network_nfs_local_dir[0])!=0)
+      Path = g_settings.network_nfs_local_dir[0];
+   else
+      Path = "/";
 }
 
 //------------------------------------------------------------------------
@@ -277,8 +282,7 @@ int CPictureViewerGui::show()
 			}
 			else
 			{
-				endView();
-				update=true;
+            view(selected);
 			}
 		}
 		else if(msg==CRCInput::RC_red )
@@ -371,7 +375,7 @@ int CPictureViewerGui::show()
 			}
 			else
 			{
-				m_viewer->Zoom(1.5);
+				m_viewer->Zoom(2.0/3);
 			}
 
 		}
@@ -382,7 +386,7 @@ int CPictureViewerGui::show()
 			}
 			else
 			{
-				m_viewer->Zoom(2.0/3);
+				m_viewer->Zoom(1.5);
 			}
 
 		}
