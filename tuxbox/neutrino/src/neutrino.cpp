@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.74 2001/11/03 15:43:17 field Exp $
+        $Id: neutrino.cpp,v 1.75 2001/11/03 22:22:43 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.75  2001/11/03 22:22:43  McClean
+  radiomode backgound paint fix
+
   Revision 1.74  2001/11/03 15:43:17  field
   Perspektiven
 
@@ -1523,7 +1526,7 @@ void CNeutrinoApp::AudioMuteToggle()
     }
     else
     {
-        g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
+        g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
     	g_Controld->UnMute();
     }
 	mute = !mute;
@@ -1577,7 +1580,7 @@ void CNeutrinoApp::setVolume(int key)
 
 	} while ( key != CRCInput::RC_timeout );
 
-	g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_BACKGROUND);
+	g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
 }
 
 void CNeutrinoApp::tvMode()
@@ -1674,7 +1677,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.74 2001/11/03 15:43:17 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.75 2001/11/03 22:22:43 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
