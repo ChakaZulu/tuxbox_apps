@@ -49,7 +49,7 @@
 #include "semaphore.h"
 #include <sys/wait.h>
 #include <signal.h>
-#include "../../../zapit/getservices.h"
+#include "zapit/getservices.h"
 
 using namespace std;
 #include <vector>

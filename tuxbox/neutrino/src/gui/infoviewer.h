@@ -32,12 +32,12 @@
 #ifndef __infoview__
 #define __infoview__
 
-#include "../driver/rcinput.h"
-#include "../driver/framebuffer.h"
-#include "../driver/fontrenderer.h"
-#include "../widget/color.h"
-#include "../helpers/settings.h"
-#include "../options.h"
+#include "driver/rcinput.h"
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "widget/color.h"
+#include "helpers/settings.h"
+#include "options.h"
 #include "streaminfo.h"
 
 #include "pthread.h"
@@ -45,7 +45,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#include "sectionsdMsg.h"
+#include "sections/sectionsdMsg.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>

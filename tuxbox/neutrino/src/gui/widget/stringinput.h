@@ -33,9 +33,9 @@
 #define __stringinput__
 
 #include <stdio.h>
-#include "../driver/framebuffer.h"
-#include "../driver/fontrenderer.h"
-#include "../driver/rcinput.h"
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
 
 #include "menue.h"
 #include "color.h"

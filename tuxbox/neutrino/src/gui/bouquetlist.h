@@ -1,12 +1,12 @@
 #ifndef __bouquetlist__
 #define __bouquetlist__
 
-#include "../driver/framebuffer.h"
-#include "../driver/fontrenderer.h"
-#include "../driver/rcinput.h"
-#include "../daemonc/remotecontrol.h"
-#include "../helpers/infoviewer.h"
-#include "../helpers/settings.h"
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "daemonc/remotecontrol.h"
+#include "helpers/infoviewer.h"
+#include "helpers/settings.h"
 #include "eventlist.hpp"
 #include "menue.h"
 #include "color.h"

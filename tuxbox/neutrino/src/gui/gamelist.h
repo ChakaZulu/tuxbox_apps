@@ -32,12 +32,12 @@
 #ifndef __gamelist__
 #define __gamelist__
 
-#include "../driver/framebuffer.h"
-#include "../driver/fontrenderer.h"
-#include "../driver/rcinput.h"
-#include "../daemonc/remotecontrol.h"
-#include "../helpers/settings.h"
-#include "../plugins/gameplugins.h"
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "daemonc/remotecontrol.h"
+#include "helpers/settings.h"
+#include "plugins/gameplugins.h"
 #include "menue.h"
 #include "color.h"
 

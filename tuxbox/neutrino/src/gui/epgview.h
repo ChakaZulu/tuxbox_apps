@@ -44,14 +44,14 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "../driver/framebuffer.h"
-#include "../driver/rcinput.h"
-#include "../driver/fontrenderer.h"
-#include "../widget/color.h"
-#include "../helpers/settings.h"
-#include "../options.h"
+#include "driver/framebuffer.h"
+#include "driver/rcinput.h"
+#include "driver/fontrenderer.h"
+#include "widget/color.h"
+#include "helpers/settings.h"
+#include "options.h"
 
-#include "sectionsdMsg.h"
+#include "sections/sectionsdMsg.h"
 
 #include "pthread.h"
 

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.25 2001/11/23 17:29:10 McClean Exp $
+// $Id: epgview.cpp,v 1.26 2001/11/26 02:34:04 McClean Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.26  2001/11/26 02:34:04  McClean
+// include (.../../stuff) changed - correct unix-formated files now
+//
 // Revision 1.25  2001/11/23 17:29:10  McClean
 // no timeout dont worxx!!!!!!!!
 //

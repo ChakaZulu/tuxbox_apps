@@ -30,10 +30,13 @@
 */
 
 /*
-$Id: framebuffer.h,v 1.7 2001/11/15 11:42:41 McClean Exp $
+$Id: framebuffer.h,v 1.8 2001/11/26 02:34:03 McClean Exp $
 
 
 $Log: framebuffer.h,v $
+Revision 1.8  2001/11/26 02:34:03  McClean
+include (.../../stuff) changed - correct unix-formated files now
+
 Revision 1.7  2001/11/15 11:42:41  McClean
 gpl-headers added
 

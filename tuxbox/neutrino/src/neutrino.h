@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.32 2001/11/23 16:58:41 McClean Exp $
+//  $Id: neutrino.h,v 1.33 2001/11/26 02:34:03 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.33  2001/11/26 02:34:03  McClean
+//  include (.../../stuff) changed - correct unix-formated files now
+//
 //  Revision 1.32  2001/11/23 16:58:41  McClean
 //  update-functions
 //
@@ -123,7 +126,7 @@
 #include "widget/gamelist.h"
 #include "helpers/setting_helpers.h"
 
-#include "../zapit/getservices.h"
+#include "zapit/getservices.h"
 
 #include "daemonc/remotecontrol.h"
 #include "daemonc/controld.h"

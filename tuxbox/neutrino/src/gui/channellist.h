@@ -32,9 +32,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.20 2001/11/19 22:50:28 Simplex Exp $
+// $Id: channellist.h,v 1.21 2001/11/26 02:34:04 McClean Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.21  2001/11/26 02:34:04  McClean
+// include (.../../stuff) changed - correct unix-formated files now
+//
 // Revision 1.20  2001/11/19 22:50:28  Simplex
 // Neutrino can handle bouquets now.
 // There are surely some bugs and todo's but it works
@@ -91,12 +94,13 @@
 //
 //
 
-#include "../driver/framebuffer.h"
-#include "../driver/fontrenderer.h"
-#include "../driver/rcinput.h"
-#include "../daemonc/remotecontrol.h"
-#include "../helpers/infoviewer.h"
-#include "../helpers/settings.h"
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "daemonc/remotecontrol.h"
+#include "helpers/infoviewer.h"
+#include "helpers/settings.h"
+#include "channels/lastchannel.h"
 #include "eventlist.hpp"
 #include "menue.h"
 #include "color.h"
@@ -104,7 +108,6 @@
 #include <string>
 #include <vector>
 
-#include "../channels/lastchannel.h"
 
 using namespace std;
 

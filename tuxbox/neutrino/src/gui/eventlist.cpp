@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.25 2001/11/15 11:42:41 McClean Exp $
+// $Id: eventlist.cpp,v 1.26 2001/11/26 02:34:04 McClean Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.26  2001/11/26 02:34:04  McClean
+// include (.../../stuff) changed - correct unix-formated files now
+//
 // Revision 1.25  2001/11/15 11:42:41  McClean
 // gpl-headers added
 //

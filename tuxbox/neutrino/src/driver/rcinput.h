@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.8 2001/11/15 11:42:41 McClean Exp $
+$Id: rcinput.h,v 1.9 2001/11/26 02:34:04 McClean Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.9  2001/11/26 02:34:04  McClean
+ include (.../../stuff) changed - correct unix-formated files now
+
  Revision 1.8  2001/11/15 11:42:41  McClean
  gpl-headers added
 

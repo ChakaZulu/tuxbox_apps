@@ -33,10 +33,10 @@
 #define __screensetup__
 
 #include <stdio.h>
-#include "../driver/framebuffer.h"
-#include "../driver/fontrenderer.h"
-#include "../driver/rcinput.h"
-#include "../helpers/settings.h"
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "helpers/settings.h"
 
 #include "menue.h"
 #include "color.h"

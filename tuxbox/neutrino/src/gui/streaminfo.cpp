@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.11 2001/11/15 11:42:41 McClean Exp $
+$Id: streaminfo.cpp,v 1.12 2001/11/26 02:34:04 McClean Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.12  2001/11/26 02:34:04  McClean
+ include (.../../stuff) changed - correct unix-formated files now
+
  Revision 1.11  2001/11/15 11:42:41  McClean
  gpl-headers added
 

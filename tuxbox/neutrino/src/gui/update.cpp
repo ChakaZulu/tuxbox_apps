@@ -199,6 +199,7 @@ bool CFlashTool::erase()
 CHTTPUpdater::CHTTPUpdater()
 {
 	BasePath = "http://mcclean.cyberphoria.org/";
+	statusViewer = NULL;
 }
 
 void CHTTPUpdater::setStatusViewer( CFlashTool_StatusViewer* statusview )
@@ -217,12 +218,14 @@ int CHTTPUpdater::show_progress( void *clientp, size_t dltotal, size_t dlnow, si
 
 bool CHTTPUpdater::getInfo()
 {
+	printf("http->get versioninfo\n");
 	statusViewer->showStatusMessage( g_Locale->getText("flashupdate.getInfoFile") );
+	printf("status set...\n");
 	CURL *curl;
 	CURLcode res;
 	FILE *headerfile;
 	headerfile = fopen("/var/tmp/version", "w");
-    res = (CURLcode) 1;
+	res = (CURLcode) 1;
 	curl = curl_easy_init();
 	if(curl)
 	{
@@ -447,8 +450,8 @@ void CFlashUpdate::paint()
 	showGlobalStatus(25);
 	//md5check...
 	/*
-    unsigned char   md5buffer[16];
-    char            md5string[40]="";
+	unsigned char   md5buffer[16];
+	char            md5string[40]="";
 	
 	if( md5_file("/var/tmp/cramfs.img", 1, (unsigned char*) &md5buffer))
 	{

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.32 2001/11/22 12:54:39 field Exp $
+// $Id: remotecontrol.cpp,v 1.33 2001/11/26 02:34:03 McClean Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.33  2001/11/26 02:34:03  McClean
+// include (.../../stuff) changed - correct unix-formated files now
+//
 // Revision 1.32  2001/11/22 12:54:39  field
 // Kleinere Bugfixes (CDs und Infoviewer)
 //

@@ -33,13 +33,13 @@
 #define __scants__
 
 #include <stdio.h>
-#include "../driver/framebuffer.h"
-#include "../driver/fontrenderer.h"
-#include "../driver/rcinput.h"
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
 
-#include "../widget/menue.h"
-#include "../widget/color.h"
-#include "../../../libucodes/libucodes.h"
+#include "widget/menue.h"
+#include "widget/color.h"
+#include "libucodes/libucodes.h"
 
 #include <string>
 

@@ -32,13 +32,13 @@
 #ifndef __update__
 #define __update__
 
-#include "../driver/framebuffer.h"
-#include "../driver/fontrenderer.h"
-#include "../driver/rcinput.h"
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
 
-#include "../widget/menue.h"
-#include "../widget/color.h"
-#include "../../../libmd5sum/libmd5sum.h"
+#include "widget/menue.h"
+#include "widget/color.h"
+#include "libmd5sum/libmd5sum.h"
 
 #include <stdio.h>
 #include <unistd.h>
