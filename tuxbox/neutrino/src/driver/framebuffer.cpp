@@ -1,10 +1,13 @@
 /*
 
-$Id: framebuffer.cpp,v 1.8 2001/10/16 19:11:16 rasc Exp $
+$Id: framebuffer.cpp,v 1.9 2001/11/04 01:04:18 McClean Exp $
 
 
 
 $Log: framebuffer.cpp,v $
+Revision 1.9  2001/11/04 01:04:18  McClean
+fix transparency bug
+
 Revision 1.8  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
 
@@ -260,7 +263,10 @@ bool CFrameBuffer::paintIcon8(string filename, int x, int y, unsigned char offse
 		for (int count2=0; count2<width; count2 ++ )
 		{
 			unsigned char color = *pixpos;
-			*d2 = color + offset;
+			if (color!=tr)
+			{
+				*d2 = color + offset;
+			}
 			d2++;
 			pixpos++;
 		}
