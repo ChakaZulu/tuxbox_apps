@@ -542,10 +542,6 @@ void eUpgrade::flashImage(int checkmd5)
 			mb.hide();
 			if (res == eMessageBox::btYes)
 			{
-				eMessageBox mb(
-					_("Please wait... do NOT switch off the receiver!"),
-					_("upgrade in progress"), eMessageBox::iconInfo);
-				mb.show();
 				::sync();
 				Decoder::Flush();
 				char mtd[20];
@@ -573,7 +569,6 @@ void eUpgrade::flashImage(int checkmd5)
 
 				if( (fd1 = open( TMP_IMAGE, O_RDONLY )) < 0 )
 				{
-					mb.hide();
 					eMessageBox box(_("Can't read flashimage.img!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
 					box.show();
 					box.exec();
@@ -587,14 +582,13 @@ void eUpgrade::flashImage(int checkmd5)
 
 				if(filesize==0)
 				{
-					mb.hide();
 					eMessageBox box(_("flashimage.img has filesize of 0byte!"), _("Flash"), eMessageBox::iconInfo|eMessageBox::btOK );
 					box.show();
 					box.exec();
 					box.hide();
 					return;
 				}
-				close(fd1);
+				::close(fd1);
 
 				if ( flashext )
 				{
@@ -621,64 +615,62 @@ void eUpgrade::flashImage(int checkmd5)
 							_("Please wait... do NOT switch off the receiver!"),
 							_("upgrade in progress"), eMessageBox::iconInfo);
 						mb.show();
-						ProgressWindow wnd(_("Erasing Flash..."));
-						wnd.show();
-						while(gRC::getInstance().mustDraw())
-							usleep(1000);
-//						if ( !savePNG("/tmp/update1.png", &pixmap) )
-//							eDebug("saved update pic 1");
-						int fd = open("/tmp/update1.raw", O_CREAT|O_WRONLY|O_TRUNC);
-						if ( fd >= 0 )
 						{
-							ePoint pos = wnd.progress.getAbsolutePosition();
-							int x = 2+pos.x(); // borderwidth+xpos..
-							int y = 2+pos.y(); // borderwidth+ypos..
-							int fillColor = eSkin::getActive()->queryScheme("eProgress.left").color;
-							int width = wnd.progress.getSize().width()-4;
-							int height = wnd.progress.getSize().height()-4;
-							write(fd, &x, sizeof(x));
-							write(fd, &y, sizeof(y));
-							write(fd, &width, sizeof(width));
-							write(fd, &height, sizeof(height));
-							write(fd, &fillColor, sizeof(fillColor));
-							write(fd, pixmap.data, 720*576*pixmap.bpp/8);
-							close(fd);
+							ProgressWindow wnd(_("Erasing Flash..."));
+							wnd.show();
+							while(gRC::getInstance().mustDraw())
+								usleep(1000);
+//							if ( !savePNG("/tmp/update1.png", &pixmap) )
+//								eDebug("saved update pic 1");
+							int fd = open("/tmp/update1.raw", O_CREAT|O_WRONLY|O_TRUNC);
+							if ( fd >= 0 )
+							{
+								ePoint pos = wnd.progress.getAbsolutePosition();
+								int x = 2+pos.x(); // borderwidth+xpos..
+								int y = 2+pos.y(); // borderwidth+ypos..
+								int fillColor = eSkin::getActive()->queryScheme("eProgress.left").color;
+								int width = wnd.progress.getSize().width()-4;
+								int height = wnd.progress.getSize().height()-4;
+								write(fd, &x, sizeof(x));
+								write(fd, &y, sizeof(y));
+								write(fd, &width, sizeof(width));
+								write(fd, &height, sizeof(height));
+								write(fd, &fillColor, sizeof(fillColor));
+								write(fd, pixmap.data, 720*576*pixmap.bpp/8);
+								::close(fd);
+							}
 						}
-					}
-					{
-						eMessageBox mb(
-							_("Please wait... do NOT switch off the receiver!"),
-							_("upgrade in progress"), eMessageBox::iconInfo);
-						mb.show();
-						ProgressWindow wnd(_("Writing Software to Flash..."));
-						wnd.show();
-						while(gRC::getInstance().mustDraw())
-							usleep(1000);
-//						if ( !savePNG("/tmp/update2.png", &pixmap) )
-//							eDebug("saved update pic 2");
-						int fd = open("/tmp/update2.raw", O_CREAT|O_WRONLY|O_TRUNC);
-						if ( fd >= 0 )
 						{
-							ePoint pos = wnd.progress.getAbsolutePosition();
-							int x = 2+pos.x(); // borderwidth+xpos..
-							int y = 2+pos.y(); // borderwidth+ypos..
-							int fillColor = eSkin::getActive()->queryScheme("eProgress.left").color;
-							int width = wnd.progress.getSize().width()-4;
-							int height = wnd.progress.getSize().height()-4;
-							write(fd, &x, sizeof(x));
-							write(fd, &y, sizeof(y));
-							write(fd, &width, sizeof(width));
-							write(fd, &height, sizeof(height));
-							write(fd, &fillColor, sizeof(fillColor));
-							write(fd, pixmap.data, 720*576*pixmap.bpp/8);
-							close(fd);
+							ProgressWindow wnd(_("Writing Software to Flash..."));
+							wnd.show();
+							while(gRC::getInstance().mustDraw())
+								usleep(1000);
+//							if ( !savePNG("/tmp/update2.png", &pixmap) )
+//								eDebug("saved update pic 2");
+							int fd = open("/tmp/update2.raw", O_CREAT|O_WRONLY|O_TRUNC);
+							if ( fd >= 0 )
+							{
+								ePoint pos = wnd.progress.getAbsolutePosition();
+								int x = 2+pos.x(); // borderwidth+xpos..
+								int y = 2+pos.y(); // borderwidth+ypos..
+								int fillColor = eSkin::getActive()->queryScheme("eProgress.left").color;
+								int width = wnd.progress.getSize().width()-4;
+								int height = wnd.progress.getSize().height()-4;
+								write(fd, &x, sizeof(x));
+								write(fd, &y, sizeof(y));
+								write(fd, &width, sizeof(width));
+								write(fd, &height, sizeof(height));
+								write(fd, &fillColor, sizeof(fillColor));
+								write(fd, pixmap.data, 720*576*pixmap.bpp/8);
+								::close(fd);
+							}
 						}
 					}
 					int fd = open("/tmp/mtd.txt", O_WRONLY|O_CREAT|O_TRUNC);
 					if ( fd >= 0 )
 					{
 						write(fd, mtd, strlen(mtd));
-						close(fd);
+						::close(fd);
 					}
 					struct fb_cmap* cmap = fbClass::getInstance()->CMAP();
 					fd = open("/tmp/cmap", O_WRONLY|O_CREAT|O_TRUNC);
@@ -690,13 +682,18 @@ void eUpgrade::flashImage(int checkmd5)
 						write(fd, cmap->green, cmap->len*sizeof(__u16));
 						write(fd, cmap->blue, cmap->len*sizeof(__u16));
 						write(fd, cmap->transp, cmap->len*sizeof(__u16));
-						close(fd);
+						::close(fd);
 					}
 					eZap::getInstance()->getDesktop(eZap::desktopFB)->makeRoot();
 					fbClass::getInstance()->lock();
 				}
 				else
 				{
+					eMessageBox mb(
+						_("Please wait... do NOT switch off the receiver!"),
+						_("upgrade in progress"), eMessageBox::iconInfo);
+					mb.show();
+
 					// without this nice we have not enough priority for
 					// file operations... then the update ist very slow on the
 					// dreambox
@@ -799,14 +796,14 @@ bool erase(char mtd[30], const char *titleText)
 
 		if(ioctl( fd, MEMERASE, &erase) != 0)
 		{
-			close(fd);
+			::close(fd);
 			wnd.hide();
 			return false;
 		}
 	}
 	wnd.hide();
 
-	close(fd);
+	::close(fd);
 
 	return true;
 }

@@ -1,7 +1,7 @@
 #ifdef ENABLE_FLASHTOOL
 /**********************************************
 *
-*	$Revision: 1.7 $
+*	$Revision: 1.8 $
 *
 **********************************************/
 
@@ -204,7 +204,7 @@ void eFlashtool::programm(char filename[])
 			box.show();
 			box.exec();
 			box.hide();
-			close(fd2);
+			::close(fd2);
 			return;
 		}
 
@@ -277,8 +277,8 @@ void eFlashtool::programm(char filename[])
 			wnd.progress.setPerc(((filesize - fsize) * 100) / filesize);
 		}
 
-		close(fd1);
-		close(fd2);
+		::close(fd1);
+		::close(fd2);
 		wnd.hide();
 		mb.hide();
 		printf("finished\n");
@@ -332,12 +332,12 @@ bool eFlashtool::erase()
 		wnd.progress.setPerc(erase.start * 100 / meminfo.size);
 		if (ioctl(fd, MEMERASE, &erase) != 0)
 		{
-			close(fd);
+			::close(fd);
 			return false;
 		}
 	}
 
-	close(fd);
+	::close(fd);
 	wnd.hide();
 	return true;
 }
@@ -387,7 +387,7 @@ bool eFlashtool::readmtd(char destination[])
 		box.show();
 		box.exec();
 		box.hide();
-		close(fd1);
+		::close(fd1);
 		return false;
 	}
 
@@ -410,8 +410,8 @@ bool eFlashtool::readmtd(char destination[])
 		fsize -= block;
 		wnd.progress.setPerc(((filesize - fsize) * 100) / filesize);
 	}
-	close(fd1);
-	close(fd2);
+	::close(fd1);
+	::close(fd2);
 	wnd.hide();
 
 	eString message = eString(_("Image saved to: ")) + eString(filename);
