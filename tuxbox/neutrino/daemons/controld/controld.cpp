@@ -77,6 +77,8 @@ struct Ssettings
 	int  volume_avs;
 	bool mute;
 	bool mute_avs;
+	bool scale_logarithmic;
+	bool scale_logarithmic_avs;
 	int  videooutput;
 	int  videoformat;
 	int  csync;
@@ -672,26 +674,15 @@ void setBoxType()
 // output:  0 (min volume) <= map_volume(., false) <= 255 (max volume)
 const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 {
-	int res = 0;
-	if( to_AVS )
+	if (to_AVS)
 	{
-		res = lrint(64 - 32 * log(volume/13.5)) & 0xFFFFFFFF;
-		if (res < 0)
-		{
-			res = 0;
-		}
-		else if (res > 63)
-		{
-			res = 63;
-		}
-
+		return settings.scale_logarithmic_avs ? 124 - (int)(61 * log10(10 + volume)) : 63 - ((((unsigned int)volume) * 63) / 100);
 	}
 	else
-		res = (int) (volume * 2.55);
-
-	return res;
+	{
+		return settings.scale_logarithmic ? (int)(245 * log10(10 + volume)) - 245 : ((((unsigned int)volume) * 255) / 100);
+	}
 }
-
 
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
@@ -881,7 +872,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.113 2003/12/28 23:27:37 thegoodguy Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.114 2004/01/01 18:49:49 thegoodguy Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -937,14 +928,15 @@ int main(int argc, char **argv)
 		printf("[controld] %s not found\n", CONF_FILE);
 	}
 
-
-	settings.volume      = config->getInt32("volume", 100);
-	settings.volume_avs  = config->getInt32("volume_avs", 100);
-	settings.mute        = config->getBool("mute", false);
-	settings.mute_avs    = config->getBool("mute_avs", false);
-	settings.videooutput = config->getInt32("videooutput", 1); // fblk1 - rgb
-	settings.videoformat = config->getInt32("videoformat", 2); // fnc2 - 4:3
-	settings.csync       = config->getInt32("csync", 0);
+	settings.volume                = config->getInt32("volume", 100);
+	settings.volume_avs            = config->getInt32("volume_avs", 100);
+	settings.mute                  = config->getBool("mute", false);
+	settings.mute_avs              = config->getBool("mute_avs", false);
+	settings.scale_logarithmic     = config->getBool("scale_logarithmic", true);
+	settings.scale_logarithmic_avs = config->getBool("scale_logarithmic_avs", true);
+	settings.videooutput           = config->getInt32("videooutput", 1); // fblk1 - rgb
+	settings.videoformat           = config->getInt32("videoformat", 2); // fnc2 - 4:3
+	settings.csync                 = config->getInt32("csync", 0);
 	printf("cync %d\n",settings.csync);
 	setBoxType(); // dummy set - liest den aktuellen Wert aus!
 
