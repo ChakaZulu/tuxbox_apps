@@ -3,6 +3,7 @@ SUBDIRS = gui daemonc driver system
 INCLUDES = \
 	-I$(top_srcdir)/daemons \
 	-I$(top_srcdir)/lib \
+	@CONNECTION_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
@@ -28,6 +29,7 @@ neutrino_LDADD = \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
 	@CONFIGFILE_LIBS@ \
+	@CONNECTION_LIBS@ \
 	@CRAMFS_LIBS@ \
 	@CURL_LIBS@ \
 	@FREETYPE_LIBS@ \
