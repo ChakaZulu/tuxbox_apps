@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.6 2004/04/29 07:42:16 thegoodguy Exp $
+ * $Id: streamfile.c,v 1.7 2004/04/29 08:04:55 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -146,7 +146,7 @@ void *FileThread (void *v_arg)
 	while (!exit_flag)
 	{
 		ringbuffer_get_read_vector(ringbuf, &(vec[0]));
-		readsize = vec[0].len;
+		readsize = vec[0].len + vec[1].len;
 		if ( readsize ) {
 			if (readsize > maxreadsize) {
 				maxreadsize = readsize;
@@ -171,14 +171,32 @@ void *FileThread (void *v_arg)
 
 			if (poll(pfd, 1, 5000)>0) {
 				if (pfd[0].revents & POLLOUT) {
-					ssize_t todo = readsize;
 					ssize_t written;
+					const char * buf = vec[0].buf;
+					ssize_t todo = vec[0].len;
+					
+					/* readsize has been reduced to a multiple of TS_SIZE, hence might be smaller than vec[0].len */
+					if (todo > readsize)
+						todo = readsize;
+					ssize_t todo2 = readsize - todo;
+
 					do {
-						if (((written = write(fd2, vec[0].buf+(readsize-todo), todo)) < 0)&&(errno!=EAGAIN))
+						if (((written = write(fd2, buf, todo)) < 0) && 
+						    (errno != EAGAIN))
 							perror("[streamfile]: write");	// CIFS returns EINVAL all the time :S
 						else
 						{
-							todo -= written;
+							if (todo == written)
+							{
+								todo = todo2;
+								buf = vec[1].buf;
+								todo2 = 0;
+							}
+							else
+							{
+								todo -= written;
+								buf += written;
+							}
 							ringbuffer_read_advance(ringbuf, written);
 						}
 					} while (todo>0 && !exit_flag);
