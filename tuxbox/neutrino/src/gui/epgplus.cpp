@@ -1517,44 +1517,10 @@ int EpgPlus::exec
 					, savedScreen
 					);
 
-        CMenuWidget menuWidgetActions(LOCALE_EPGPLUS_ACTIONS, "features.raw", 400);
-				menuWidgetActions.addItem
-          ( new CMenuForwarder
-            ( LOCALE_EPGPLUS_RECORD
-            , true
-            , NULL
-            , new MenuTargetAddRecordTimer(this)
-            , NULL
-            , CRCInput::RC_red
-            , NEUTRINO_ICON_BUTTON_RED
-            )
-          , false
-          );
-
-        menuWidgetActions.addItem
-          ( new CMenuForwarder
-            ( LOCALE_EPGPLUS_REFRESH_EPG
-            , true
-            , NULL
-            , new MenuTargetRefreshEpg(this)
-            , NULL
-            , CRCInput::RC_green
-            , NEUTRINO_ICON_BUTTON_GREEN
-            )
-          , false
-          );
-				menuWidgetActions.addItem
-          ( new CMenuForwarder
-            ( LOCALE_EPGPLUS_REMIND
-            , true
-            , NULL
-            , new MenuTargetAddReminder(this)
-            , NULL
-            , CRCInput::RC_yellow
-            , NEUTRINO_ICON_BUTTON_YELLOW
-            )
-          , false
-          );
+				CMenuWidget menuWidgetActions(LOCALE_EPGPLUS_ACTIONS, "features.raw", 400);
+				menuWidgetActions.addItem(new CMenuForwarder(LOCALE_EPGPLUS_RECORD     , true, NULL, new MenuTargetAddRecordTimer(this), NULL, CRCInput::RC_red   , NEUTRINO_ICON_BUTTON_RED   ), false);
+				menuWidgetActions.addItem(new CMenuForwarder(LOCALE_EPGPLUS_REFRESH_EPG, true, NULL, new MenuTargetRefreshEpg    (this), NULL, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ), false);
+				menuWidgetActions.addItem(new CMenuForwarder(LOCALE_EPGPLUS_REMIND     , true, NULL, new MenuTargetAddReminder   (this), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
 				menuWidgetActions.exec(NULL, "");
 
@@ -2519,77 +2485,18 @@ EpgPlus::MenuWidgetSettings::MenuWidgetSettings
 	this->epgPlus = epgPlus;
 }
 
-int EpgPlus::MenuWidgetSettings::exec
-	( CMenuTarget* parent
-	, const std::string& actionKey
-	)
+int EpgPlus::MenuWidgetSettings::exec(CMenuTarget* parent, const std::string & actionKey)
 {
-  Settings settings(this->epgPlus->settings);
+	Settings settings(this->epgPlus->settings);
 
-  this->addItem
-    ( new CMenuForwarder
-      ( LOCALE_EPGPLUS_SAVE_SETTINGS    
-      , true
-      , NULL
-      , new MenuTargetSaveSettings
-        ( this->epgPlus
-        )
-      , NULL
-      , CRCInput::RC_red
-      , NEUTRINO_ICON_BUTTON_RED
-      )
-    , false
-    );
+	this->addItem(new CMenuForwarder(LOCALE_EPGPLUS_SAVE_SETTINGS , true, NULL, new MenuTargetSaveSettings (this->epgPlus                        ), NULL, CRCInput::RC_red   , NEUTRINO_ICON_BUTTON_RED   ), false);
+	this->addItem(new CMenuForwarder(LOCALE_EPGPLUS_RESET_SETTINGS, true, NULL, new MenuTargetResetSettings(this->epgPlus, &settings             ), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
+	this->addItem(new CMenuForwarder(LOCALE_EPGPLUS_EDIT_FONTS    , true, NULL, new MenuTargetFontSettings (this->epgPlus, &settings.fontSettings), NULL, CRCInput::RC_1                                  ), false);
+	this->addItem(new CMenuForwarder(LOCALE_EPGPLUS_EDIT_SIZES    , true, NULL, new MenuTargetSizeSettings (this->epgPlus, &settings.sizeSettings), NULL, CRCInput::RC_2                                  ), false);
 
-  this->addItem
-    ( new CMenuForwarder
-      ( LOCALE_EPGPLUS_RESET_SETTINGS
-      , true
-      , NULL
-      , new MenuTargetResetSettings
-        ( this->epgPlus
-        , &settings
-        )
-      , NULL
-      , CRCInput::RC_yellow
-      , NEUTRINO_ICON_BUTTON_YELLOW
-      )
-    , false
-    );
+	CMenuWidget::exec(parent, "");
 
-  this->addItem
-    ( new CMenuForwarder
-      ( LOCALE_EPGPLUS_EDIT_FONTS
-      , true
-      , NULL
-      , new MenuTargetFontSettings
-        ( this->epgPlus
-        , &settings.fontSettings
-        )
-      , NULL
-      , CRCInput::RC_1
-      )
-    , false
-    );
-
-  this->addItem
-    ( new CMenuForwarder
-      ( LOCALE_EPGPLUS_EDIT_SIZES
-      , true
-      , NULL
-      , new MenuTargetSizeSettings
-        ( this->epgPlus
-        , &settings.sizeSettings
-        )
-      , NULL
-      , CRCInput::RC_2
-      )
-    , false
-    );
-
-  CMenuWidget::exec(parent, "");
-
-  this->epgPlus->settings = settings;
+	this->epgPlus->settings = settings;
 
 	return menu_return::RETURN_EXIT;
 }
@@ -2745,52 +2652,15 @@ EpgPlus::MenuWidgetFontSetting::MenuWidgetFontSetting
   this->fontSetting = fontSetting;
 }
 
-int EpgPlus::MenuWidgetFontSetting::exec
-	( CMenuTarget* parent
-	, const std::string& actionKey
-	)
+int EpgPlus::MenuWidgetFontSetting::exec(CMenuTarget* parent, const std::string & actionKey)
 {
-  this->addItem
-    ( new CMenuForwarder
-      ( LOCALE_EPGPLUS_SELECT_FONT_NAME
-      , true
-      , NULL
-      , new MenuTargetSelectFontName
-        ( this->epgPlus
-        , this->fontSetting
-        )
-      , NULL
-      , CRCInput::RC_red
-      , NEUTRINO_ICON_BUTTON_RED
-      )
-    , false
-    );
+	this->addItem(new CMenuForwarder(LOCALE_EPGPLUS_SELECT_FONT_NAME, true, NULL, new MenuTargetSelectFontName(this->epgPlus, this->fontSetting), NULL, CRCInput::RC_red   , NEUTRINO_ICON_BUTTON_RED   ), false);
 
-	this->addItem
-    ( new MenuOptionChooserFontStyle
-        ( this->epgPlus
-        , this->fontSetting
-        )
-    , false
-    );
+	this->addItem(new MenuOptionChooserFontStyle(this->epgPlus, this->fontSetting), false);
 
-  this->addItem
-    ( new CMenuForwarder
-      ( LOCALE_EPGPLUS_CHANGE_FONT_SIZE
-      , true
-      , NULL
-      , new MenuTargetChangeFontSize
-        ( this->epgPlus
-        , this->fontSetting
-        )
-      , NULL
-      , CRCInput::RC_yellow
-      , NEUTRINO_ICON_BUTTON_YELLOW
-      )
-    , false
-    );
+	this->addItem(new CMenuForwarder(LOCALE_EPGPLUS_CHANGE_FONT_SIZE, true, NULL, new MenuTargetChangeFontSize(this->epgPlus, this->fontSetting), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
-  return CMenuWidget::exec(parent, "");
+	return CMenuWidget::exec(parent, "");
 }
 
 EpgPlus::MenuWidgetFontSettings::MenuWidgetFontSettings
@@ -2808,34 +2678,20 @@ int EpgPlus::MenuWidgetFontSettings::exec
   , const std::string& actionKey
   )
 {
-  int index = 0;
-  for ( FontSettings::iterator It = this->fontSettings->begin()
-      ; It != this->fontSettings->end()
-      ;   ++It
-      )
-  {
-    if (It->second.isConfigurable)
-    {
-      this->addItem
-        ( new CMenuForwarder
-          ( setting2LocaleConverter[It->first]
-          , true
-          , NULL
-          , new MenuTargetEditFont
-            ( this->epgPlus
-            , &(It->second)
-            )
-          , NULL
-          , CRCInput::RC_1 + index
-          )
-        , false
-        );
+	int digit = 1;
+	for ( FontSettings::iterator It = this->fontSettings->begin()
+		      ; It != this->fontSettings->end()
+		      ;   ++It
+		)
+	{
+		if (It->second.isConfigurable)
+		{
+			this->addItem(new CMenuForwarder(setting2LocaleConverter[It->first], true, NULL, new MenuTargetEditFont(this->epgPlus, &(It->second)), NULL, CRCInput::convertDigitToKey(digit)), false);
+			digit++;
+		}
+	}
 
-      ++index;
-    }
-  }
-
-  return CMenuWidget::exec(parent, "");
+	return CMenuWidget::exec(parent, "");
 }
 
 EpgPlus::MenuWidgetFontSettings::MenuTargetEditFont::MenuTargetEditFont
@@ -2870,34 +2726,21 @@ int EpgPlus::MenuWidgetSizeSettings::exec
   , const std::string& actionKey
   )
 {
-  int index = 0;
-  for ( SizeSettings::iterator It = this->sizeSettings->begin()
-      ; It != this->sizeSettings->end()
-      ;   ++It
-      )
-  {
-    if (It->second.isConfigurable)
-    {
-      this->addItem
-        ( new CMenuForwarder
-          ( setting2LocaleConverter[It->first]
-          , true
-          , NULL
-          , new MenuTargetEditSize
-            ( this->epgPlus
-            , &(It->second)
-            )
-          , NULL
-          , CRCInput::RC_1 + index
-          )
-        , false
-        );
+	int digit = 0;
+	for (SizeSettings::iterator It = this->sizeSettings->begin()
+		     ; It != this->sizeSettings->end()
+		     ;   ++It
+		)
+	{
+		if (It->second.isConfigurable)
+		{
+			this->addItem(new CMenuForwarder(setting2LocaleConverter[It->first], true, NULL, new MenuTargetEditFont(this->epgPlus, &(It->second)), NULL, CRCInput::convertDigitToKey(digit)), false);
 
-      ++index;
-    }
-  }
+			digit++;
+		}
+	}
 
-  return CMenuWidget::exec(parent, "");
+	return CMenuWidget::exec(parent, "");
 }
 
 EpgPlus::MenuWidgetSizeSettings::MenuTargetEditSize::MenuTargetEditSize
