@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.71 2001/10/22 14:27:24 field Exp $
+//  $Id: sectionsd.cpp,v 1.72 2001/10/24 17:03:42 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.72  2001/10/24 17:03:42  field
+//  Deadlock behoben, Geschwindigkeit gesteigert
+//
 //  Revision 1.71  2001/10/22 14:27:24  field
 //  Kleinigkeiten
 //
@@ -726,6 +729,7 @@ class DMX {
     bool isOpen(void) {
       return fd ? true : false;
     }
+    int pauseCounter;
   private:
     int fd;
     sem_t dmxsem;
@@ -734,7 +738,7 @@ class DMX {
     unsigned char pID, filter1, mask1, filter2, mask2;
     unsigned short dmxBufferSizeInKB;
     int noCRC; // = 1 -> der 2. Filter hat keine CRC
-    int pauseCounter;
+
 };
 
 int DMX::start(void)
@@ -780,13 +784,15 @@ int DMX::pause(void)
     pthread_mutex_unlock(&pauselock);
     return 0;
   }
-  lock();
-  pthread_mutex_unlock(&pauselock);
-  if (ioctl (fd, DMX_STOP, 0) == -1) {
+//  lock();
+//  pthread_mutex_unlock(&pauselock);
+/*  if (ioctl (fd, DMX_STOP, 0) == -1) {
     closefd();
     perror ("[sectionsd] DMX: DMX_STOP");
     return 2;
   }
+*/
+  pthread_mutex_unlock(&pauselock);
   return 0;
 }
 
@@ -799,14 +805,16 @@ int DMX::unpause(void)
     pthread_mutex_unlock(&pauselock);
     return 0;
   }
-  pthread_mutex_unlock(&pauselock);
-  if (ioctl (fd, DMX_START, 0) == -1) {
+//  pthread_mutex_unlock(&pauselock);
+/*  if (ioctl (fd, DMX_START, 0) == -1) {
     closefd();
     perror ("[sectionsd] DMX: DMX_START");
     unlock();
     return 2;
   }
-  unlock();
+*/
+//  unlock();
+  pthread_mutex_unlock(&pauselock);
   return 0;
 }
 
@@ -1280,7 +1288,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.71 2001/10/22 14:27:24 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.72 2001/10/24 17:03:42 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1324,8 +1332,8 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
 
   if(dmxEIT.pause()) // -> lock
     return;
-  lockEvents();
   lockServices();
+  lockEvents();
   SItime zeitEvt1(0, 0);
   const SIevent &evt=findActualSIeventForServiceName(data, zeitEvt1);
   unlockServices();
@@ -1412,8 +1420,8 @@ static void commandCurrentComponentTagsChannelID(struct connectionData *client, 
   if(dmxEIT.pause()) // -> lock
     return;
 
-  lockEvents();
   lockServices();
+  lockEvents();
   SItime zeitEvt1(0, 0);
   const SIevent &evt=findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1);
   unlockServices();
@@ -1451,86 +1459,98 @@ static void commandCurrentComponentTagsChannelID(struct connectionData *client, 
 
 static void commandCurrentNextInfoChannelID(struct connectionData *client, char *data, const unsigned dataLength)
 {
-  int nResultDataSize=0;
-  char* pResultData=0;
+    int nResultDataSize=0;
+    char* pResultData=0;
 
-  if(dataLength!=4)
-    return;
-  unsigned* uniqueServiceKey=(unsigned *)data;
-  dprintf("Request of current/next information for 0x%x\n", *uniqueServiceKey);
-
-  if(dmxEIT.pause()) // -> lock
-    return;
-  lockEvents();
-  lockServices();
-  SItime zeitEvt1(0, 0);
-  const SIevent &evt=findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1);
-  unlockServices();
-  if(evt.serviceID!=0) {//Found
-    dprintf("current EPG found.\n");
-    SItime zeitEvt2(zeitEvt1);
-    const SIevent &nextEvt=findNextSIevent(evt.uniqueKey(), zeitEvt2);
-    if(nextEvt.serviceID!=0) {
-      dprintf("next EPG found.\n");
-      nResultDataSize=
-	sizeof(unsigned long long)+       // Unique-Key 
-        sizeof(sectionsd::sectionsdTime)+ // zeit 
-        strlen(evt.name.c_str())+1+	  // name + 0
-	sizeof(unsigned long long)+       // Unique-Key
-        sizeof(sectionsd::sectionsdTime)+ // zeit
-        strlen(nextEvt.name.c_str())+1;   // name + 0
-      pResultData = new char[nResultDataSize];
-      if(!pResultData) {
-        fprintf(stderr, "low on memory!\n");
-  	unlockEvents();
-        dmxEIT.unpause();
+    if(dataLength!=4)
         return;
-      }
-      char *p=pResultData;
-      *((unsigned long long *)p)=evt.uniqueKey();
-      p+=sizeof(unsigned long long);
-      sectionsd::sectionsdTime zeit;
-      zeit.startzeit=zeitEvt1.startzeit;
-      zeit.dauer=zeitEvt1.dauer;
-      *((sectionsd::sectionsdTime *)p)=zeit;
-      p+=sizeof(sectionsd::sectionsdTime);
-      strcpy(p, evt.name.c_str());
-      p+=strlen(evt.name.c_str())+1;
-      *((unsigned long long *)p)=nextEvt.uniqueKey();
-      p+=sizeof(unsigned long long);
-      zeit.startzeit=zeitEvt2.startzeit;
-      zeit.dauer=zeitEvt2.dauer;
-      *((sectionsd::sectionsdTime *)p)=zeit;
-      p+=sizeof(sectionsd::sectionsdTime);
-      strcpy(p, nextEvt.name.c_str());
-//      p+=strlen(nextEvt.name.c_str())+1;
-    }
-  }
-  unlockEvents();
-  dmxEIT.unpause(); // -> unlock
+    unsigned* uniqueServiceKey=(unsigned *)data;
+    dprintf("Request of current/next information for 0x%x\n", *uniqueServiceKey);
+    //dprintf("commandCurrentNextInfoChannelID: before dmxEIT.pause\n");
+    if(dmxEIT.pause()) // -> lock
+        return;
+    //dprintf("commandCurrentNextInfoChannelID: before lockServices\n");
+    lockServices();
+    //dprintf("commandCurrentNextInfoChannelID: before lockEvents\n");
+    lockEvents();
+    SItime zeitEvt1(0, 0);
+    const SIevent &evt=findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1);
+    //dprintf("commandCurrentNextInfoChannelID: before unlockServices\n");
+    unlockServices();
+    //dprintf("commandCurrentNextInfoChannelID: after unlockServices\n");
 
-  // response
-  struct sectionsd::msgResponseHeader pmResponse;
-  pmResponse.dataLength=nResultDataSize;
-  int rc=writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
-  if( nResultDataSize > 0 ) {
-    if(rc>0)
-      writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+    if(evt.serviceID!=0)
+    {//Found
+        dprintf("current EPG found.\n");
+        SItime zeitEvt2(zeitEvt1);
+        const SIevent &nextEvt=findNextSIevent(evt.uniqueKey(), zeitEvt2);
+        if(nextEvt.serviceID!=0)
+        {
+            dprintf("next EPG found.\n");
+            nResultDataSize=
+                sizeof(unsigned long long)+       // Unique-Key
+                sizeof(sectionsd::sectionsdTime)+ // zeit
+                strlen(evt.name.c_str())+1+	  // name + 0
+                sizeof(unsigned long long)+       // Unique-Key
+                sizeof(sectionsd::sectionsdTime)+ // zeit
+                strlen(nextEvt.name.c_str())+1;   // name + 0
+            pResultData = new char[nResultDataSize];
+            if(!pResultData)
+            {
+                fprintf(stderr, "low on memory!\n");
+                unlockEvents();
+                dmxEIT.unpause();
+                return;
+            }
+            char *p=pResultData;
+            *((unsigned long long *)p)=evt.uniqueKey();
+            p+=sizeof(unsigned long long);
+            sectionsd::sectionsdTime zeit;
+            zeit.startzeit=zeitEvt1.startzeit;
+            zeit.dauer=zeitEvt1.dauer;
+            *((sectionsd::sectionsdTime *)p)=zeit;
+            p+=sizeof(sectionsd::sectionsdTime);
+            strcpy(p, evt.name.c_str());
+            p+=strlen(evt.name.c_str())+1;
+            *((unsigned long long *)p)=nextEvt.uniqueKey();
+            p+=sizeof(unsigned long long);
+            zeit.startzeit=zeitEvt2.startzeit;
+            zeit.dauer=zeitEvt2.dauer;
+            *((sectionsd::sectionsdTime *)p)=zeit;
+            p+=sizeof(sectionsd::sectionsdTime);
+            strcpy(p, nextEvt.name.c_str());
+    //      p+=strlen(nextEvt.name.c_str())+1;
+        }
+    }
+    //dprintf("commandCurrentNextInfoChannelID: before unlockEvents\n");
+    unlockEvents();
+    //dprintf("commandCurrentNextInfoChannelID: before dmxEIT.unpause\n");
+    dmxEIT.unpause(); // -> unlock
+    //dprintf("commandCurrentNextInfoChannelID: after dmxEIT.unpause\n");
+
+    // response
+    struct sectionsd::msgResponseHeader pmResponse;
+    pmResponse.dataLength=nResultDataSize;
+    int rc=writeNbytes(client->connectionSocket, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+    if( nResultDataSize > 0 )
+    {
+        if(rc>0)
+            writeNbytes(client->connectionSocket, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+        else
+            dputs("[sectionsd] Fehler/Timeout bei write");
+        delete[] pResultData;
+#ifdef NO_ZAPD_NEUTRINO_HACK
+        currentNextWasOk=1;
+#endif
+    }
     else
-      dputs("[sectionsd] Fehler/Timeout bei write");
-    delete[] pResultData;
+    {
+        dprintf("current/next EPG not found!\n");
 #ifdef NO_ZAPD_NEUTRINO_HACK
-    currentNextWasOk=1;
+        currentNextWasOk=0;
 #endif
-  }
-  else
-  {
-    dprintf("current/next EPG not found!\n");
-#ifdef NO_ZAPD_NEUTRINO_HACK
-    currentNextWasOk=0;
-#endif
-  }
-  return;
+    }
+    return;
 }
 
 // Sendet ein EPG, unlocked die events, unpaused dmxEIT
@@ -1575,8 +1595,11 @@ struct sectionsd::msgResponseHeader responseHeader;
       e.text.c_str(),
       e.extendedText.c_str()
     );
+  //dprintf("sendEPG: before unlockEvents\n");
   unlockEvents();
+  //dprintf("sendEPG: before dmxEIT.unpause\n");
   dmxEIT.unpause(); // -> unlock
+  //dprintf("sendEPG: after dmxEIT.unpause\n");
 
   int rc=writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
   if(rc>0)
@@ -1619,9 +1642,12 @@ static void commandActualEPGchannelID(struct connectionData *client, char *data,
     return;
   unsigned* uniqueServiceKey=(unsigned *)data;
   dprintf("Request of actual EPG for 0x%x\n", * uniqueServiceKey);
+  //dprintf("commandActualEPGchannelID: before dmxEIT.pause\n");
   if(dmxEIT.pause()) // -> lock
     return;
+  //dprintf("commandActualEPGchannelID: before lockEvents\n");
   lockEvents();
+  //dprintf("commandActualEPGchannelID: after lockEvents\n");
   SItime zeit(0, 0);
   const SIevent &evt=findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeit);
   if(evt.serviceID!=0) {
@@ -1704,8 +1730,8 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 
   if(dmxEIT.pause()) // -> lock
     return;
-  lockEvents();
   lockServices();
+  lockEvents();
   SItime zeitEvt(0,0);
   const SIevent &evt=findActualSIeventForServiceName(data, zeitEvt);
   unlockServices();
@@ -2048,8 +2074,8 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
   dprintf("Request of NVOD times for 0x%x\n", uniqueServiceKey);
   if(dmxEIT.pause()) // -> lock
     return;
-  lockEvents();
   lockServices();
+  lockEvents();
   MySIservicesNVODorderUniqueKey::iterator si=mySIservicesNVODorderUniqueKey.find(uniqueServiceKey);
   char *msgData=0;
   struct sectionsd::msgResponseHeader responseHeader;
@@ -2061,8 +2087,8 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
       msgData=new char[responseHeader.dataLength];
       if(!msgData) {
 	fprintf(stderr, "low on memory!\n");
-	unlockServices();
 	unlockEvents();
+	unlockServices();
 	dmxEIT.unpause(); // -> unlock
 	return;
       }
@@ -2116,8 +2142,9 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
   else
     dputs("[sectionsd] Fehler/Timeout bei write");
 
-  unlockServices();
   unlockEvents();
+  unlockServices();
+
   dmxEIT.unpause(); // -> unlock
 }
 
@@ -2284,7 +2311,7 @@ const unsigned timeoutInSeconds=2;
       dmxSDT.unpause(); // -> unlock
       continue;
     }
-    if(header.current_next_indicator) {
+    if((header.current_next_indicator) && (!dmxSDT.pauseCounter)){
       // Wir wollen nur aktuelle sections
       SIsectionSDT sdt(SIsection(sizeof(header)+header.section_length-5, buf));
       lockServices();
@@ -2512,165 +2539,197 @@ struct SI_section_header header;
 char *buf;
 const unsigned timeoutInSeconds=1;
 
-  try {
-  dprintf("eit-thread started.\n");
-  int timeoutsDMX=0;
-  dmxEIT.lock();
-  if(dmxEIT.start()) // -> unlock
-    return 0;
-  for(;;) {
-    if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS) {
-      // sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
-      timeoutsDMX=0;
-      dmxEIT.stop(); // -> lock
-      lockEvents();
-      if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000) {
-        // kleiner als 1 Tag machen wir den Cache nicht,
-	// da die timeouts ja auch von einem Sender ohne EPG kommen koennen
-	// Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
-	// Man koennte auch ab 3000 Events nur noch jedes 3 Event o.ae. einsortieren
-        dmxSDT.pause();
-        lockServices();
-        unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
-        secondsToCache-=5*60L*60L; // 5h weniger
-        dprintf("decreasing cache 5h (now %ldh)\n", secondsToCache/(60*60L));
-        removeNewEvents();
-        removeOldEvents(oldEventsAre);
-	if(anzEventsAlt>mySIeventsOrderUniqueKey.size())
-	  dprintf("Removed %u Events (%u -> %u)\n", anzEventsAlt-mySIeventsOrderUniqueKey.size(), anzEventsAlt, mySIeventsOrderUniqueKey.size());
-        unlockServices();
-        dmxSDT.unpause();
-      }
-      unlockEvents();
-      if(dmxEIT.start()) // -> unlock
-        return 0;
-      dputs("dmxEIT restarted");
-    }
-    time_t zeit=time(NULL);
-    if(timeset) { // Nur wenn ne richtige Uhrzeit da ist
-      if(dmxEIT.isScheduled) {
-        if(zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED)
-          dmxEIT.change(); // -> lock, unlock
-      }
-      else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
-        dmxEIT.change(); // -> lock, unlock
-    }
-    dmxEIT.lock();
-    int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
-    if(!rc) {
-      dmxEIT.unlock();
-      dputs("dmxEIT.read timeout");
-      timeoutsDMX++;
-      continue; // timeout -> kein EPG
-    }
-    else if(rc<0) {
-      dmxEIT.unlock();
-      // DMX neu starten
-      dmxEIT.pause();
-      dmxEIT.unpause();
-      continue;
-    }
-    timeoutsDMX=0;
-    buf=new char[sizeof(header)+header.section_length-5];
-    if(!buf) {
-      dmxEIT.closefd();
-      dmxEIT.unlock();
-      fprintf(stderr, "Not enough memory!\n");
-      break;
-    }
-    // Den Header kopieren
-    memcpy(buf, &header, sizeof(header));
-    rc=dmxEIT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
-    dmxEIT.unlock();
-    if(!rc) {
-      delete[] buf;
-      dputs("dmxEIT.read timeout after header");
-      // DMX neu starten, noetig, da bereits der Header gelesen wurde
-      dmxEIT.pause(); // -> lock
-      dmxEIT.unpause(); // -> unlock
-      continue; // timeout -> kein EPG
-    }
-    else if(rc<0) {
-      delete[] buf;
-      // DMX neu starten
-      dmxEIT.pause(); // -> lock
-      dmxEIT.unpause(); // -> unlock
-      continue;
-    }
-    if(header.current_next_indicator)
+    try
     {
-        // Wir wollen nur aktuelle sections
-
-/*        // Zum debuggen
-//        if(dmxEIT.isScheduled)
+        dprintf("eit-thread started.\n");
+        int timeoutsDMX=0;
+        dmxEIT.lock();
+        if(dmxEIT.start()) // -> unlock
+            return 0;
+        for(;;)
         {
-            printf("%hhx\n", header.section_number);
-            //if(header.section_number==0xb1)
+            if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS)
             {
-                printf("length: %hd\n", header.section_length);
-                dmxEIT.pause();
-                char    dn[100];
-                sprintf(dn, "eit.debug.%d", header.section_number);
-                FILE *file=fopen(dn, "wb");
-                if(file)
+                // sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
+                timeoutsDMX=0;
+                dmxEIT.stop(); // -> lock
+                lockEvents();
+                if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000)
                 {
-                    fwrite(buf, sizeof(header)+header.section_length-5, 1, file);
-                    fclose(file);
-                }
-                dmxEIT.unpause();
-            }
-        }
-*/
-        SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
-        if(eit.header())
-        { // == 0 -> kein event
-            zeit=time(NULL);
-            // Nicht alle Events speichern
-            for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
-            {
-                if(e->times.size()>0)
-                {
-                    if( e->times.begin()->startzeit < zeit+secondsToCache &&
-                        e->times.begin()->startzeit+(long)e->times.begin()->dauer > zeit-oldEventsAre )
-                    {
-                        lockEvents();
-                        addEvent(*e);
-                        unlockEvents();
-                    }
-                }
-                else
-                {
-                    // pruefen ob nvod event
+                    // kleiner als 1 Tag machen wir den Cache nicht,
+                    // da die timeouts ja auch von einem Sender ohne EPG kommen koennen
+                    // Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
+                    // Man koennte auch ab 3000 Events nur noch jedes 3 Event o.ae. einsortieren
+                    dmxSDT.pause();
                     lockServices();
-                    MySIservicesNVODorderUniqueKey::iterator si=mySIservicesNVODorderUniqueKey.find(SIservice::makeUniqueKey(e->originalNetworkID, e->serviceID));
-                    if(si!=mySIservicesNVODorderUniqueKey.end())
-                    {
-                        // Ist ein nvod-event
-                        lockEvents();
-                        for(SInvodReferences::iterator i=si->second->nvods.begin(); i!=si->second->nvods.end(); i++)
-                            mySIeventUniqueKeysMetaOrderServiceUniqueKey.insert(std::make_pair(i->uniqueKey(), e->uniqueKey()));
-                        unlockServices();
-                        addNVODevent(*e);
-                        unlockEvents();
-                    }
-                    else
-                        unlockServices();
+                    unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
+                    secondsToCache-=5*60L*60L; // 5h weniger
+                    dprintf("decreasing cache 5h (now %ldh)\n", secondsToCache/(60*60L));
+                    removeNewEvents();
+                    removeOldEvents(oldEventsAre);
+                    if(anzEventsAlt>mySIeventsOrderUniqueKey.size())
+                        dprintf("Removed %u Events (%u -> %u)\n", anzEventsAlt-mySIeventsOrderUniqueKey.size(), anzEventsAlt, mySIeventsOrderUniqueKey.size());
+                    unlockServices();
+                    dmxSDT.unpause();
                 }
-            } // for
-        } // if serviceID
-    } // if
-    else
-      delete[] buf;
-  } // for
-  } // try
-  catch (std::exception& e) {
-    fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
-  }
-  catch (...) {
-    fprintf(stderr, "Caught exception in eit-thread!\n");
-  }
-  dprintf("eit-thread ended\n");
-  return 0;
+                unlockEvents();
+                if(dmxEIT.start()) // -> unlock
+                    return 0;
+                dputs("dmxEIT restarted");
+            }
+            time_t zeit=time(NULL);
+            if(timeset)
+            { // Nur wenn ne richtige Uhrzeit da ist
+                if(dmxEIT.isScheduled)
+                {
+                    if(zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED)
+                    dmxEIT.change(); // -> lock, unlock
+                }
+                else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
+                    dmxEIT.change(); // -> lock, unlock
+            }
+            //dprintf("eitThread: before dmxEIT.lock\n");
+            dmxEIT.lock();
+            //dprintf("eitThread: after dmxEIT.lock\n");
+            int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
+            //dprintf("eitThread: after dmxEIT.read 1 (%d)\n", rc);
+            if(!rc)
+            {
+                //dprintf("eitThread: before dmxEIT.unlock\n");
+                dmxEIT.unlock();
+                //dprintf("eitThread: after dmxEIT.unlock\n");
+                dputs("dmxEIT.read timeout");
+                timeoutsDMX++;
+                continue; // timeout -> kein EPG
+            }
+            else if(rc<0)
+            {
+                //dprintf("eitThread: before 2 dmxEIT.unlock\n");
+                dmxEIT.unlock();
+                //dprintf("eitThread: after 2 dmxEIT.unlock\n");
+                // DMX neu starten
+                //dprintf("eitThread: before 2 dmxEIT.pause\n");
+                dmxEIT.pause();
+                //dprintf("eitThread: before 2 dmxEIT.unpause\n");
+                dmxEIT.unpause();
+                //dprintf("eitThread: after 2 dmxEIT.unpause\n");
+                continue;
+            }
+            timeoutsDMX=0;
+            buf=new char[sizeof(header)+header.section_length-5];
+            if(!buf)
+            {
+                dmxEIT.closefd();
+                dmxEIT.unlock();
+                fprintf(stderr, "Not enough memory!\n");
+                break;
+            }
+            // Den Header kopieren
+            memcpy(buf, &header, sizeof(header));
+            //dprintf("eitThread: before 3 dmxEIT.read\n");
+            rc=dmxEIT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+            //dprintf("eitThread: before 3 dmxEIT.unlock\n");
+            dmxEIT.unlock();
+            //dprintf("eitThread: after 3 dmxEIT.unlock\n");
+            if(!rc)
+            {
+                delete[] buf;
+                dputs("dmxEIT.read timeout after header");
+                // DMX neu starten, noetig, da bereits der Header gelesen wurde
+                dmxEIT.pause(); // -> lock
+                dmxEIT.unpause(); // -> unlock
+                continue; // timeout -> kein EPG
+            }
+            else if(rc<0)
+            {
+                delete[] buf;
+                // DMX neu starten
+                dmxEIT.pause(); // -> lock
+                dmxEIT.unpause(); // -> unlock
+                continue;
+            }
+
+            if((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
+            {
+                // Wir wollen nur aktuelle sections
+
+/*                // Zum debuggen
+        //        if(dmxEIT.isScheduled)
+                {
+                    printf("%hhx\n", header.section_number);
+                    //if(header.section_number==0xb1)
+                    {
+                        printf("length: %hd\n", header.section_length);
+                        dmxEIT.pause();
+                        char    dn[100];
+                        sprintf(dn, "eit.debug.%d", header.section_number);
+                        FILE *file=fopen(dn, "wb");
+                        if(file)
+                        {
+                            fwrite(buf, sizeof(header)+header.section_length-5, 1, file);
+                            fclose(file);
+                        }
+                        dmxEIT.unpause();
+                    }
+                }
+*/
+                SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
+                if(eit.header())
+                { // == 0 -> kein event
+                    zeit=time(NULL);
+                    // Nicht alle Events speichern
+                    for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
+                    {
+                        if(e->times.size()>0)
+                        {
+                            if( e->times.begin()->startzeit < zeit+secondsToCache &&
+                                e->times.begin()->startzeit+(long)e->times.begin()->dauer > zeit-oldEventsAre )
+                            {
+                                lockEvents();
+                                addEvent(*e);
+                                unlockEvents();
+                            }
+                        }
+                        else
+                        {
+                            // pruefen ob nvod event
+                            lockServices();
+                            MySIservicesNVODorderUniqueKey::iterator si=mySIservicesNVODorderUniqueKey.find(SIservice::makeUniqueKey(e->originalNetworkID, e->serviceID));
+                            if(si!=mySIservicesNVODorderUniqueKey.end())
+                            {
+                                // Ist ein nvod-event
+                                lockEvents();
+                                for(SInvodReferences::iterator i=si->second->nvods.begin(); i!=si->second->nvods.end(); i++)
+                                    mySIeventUniqueKeysMetaOrderServiceUniqueKey.insert(std::make_pair(i->uniqueKey(), e->uniqueKey()));
+                                addNVODevent(*e);
+                                unlockEvents();
+                                unlockServices();
+                            }
+                            else
+                                unlockServices();
+                        }
+                    } // for
+                } // if serviceID
+            } // if
+            else
+            {
+                delete[] buf;
+                dprintf("skipped sections: pc %d\n", dmxEIT.pauseCounter);
+                if (dmxEIT.pauseCounter>1)
+                    break;
+            }
+        } // for
+    } // try
+    catch (std::exception& e)
+    {
+        fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
+    }
+    catch (...)
+    {
+        fprintf(stderr, "Caught exception in eit-thread!\n");
+    }
+    dprintf("eit-thread ended\n");
+    return 0;
 }
 
 //---------------------------------------------------------------------
@@ -2779,7 +2838,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.71 2001/10/22 14:27:24 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.72 2001/10/24 17:03:42 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
@@ -2823,7 +2882,6 @@ struct sockaddr_in serverAddr;
   }
 
   // SDT-Thread starten
-
   rc=pthread_create(&threadSDT, 0, sdtThread, 0);
   if(rc) {
     fprintf(stderr, "failed to create sdt-thread (rc=%d)\n", rc);
