@@ -52,7 +52,7 @@ tv 1 250
 tv av 250
 amplifier power 500
 </PRE>
-<B>Volume +/-:</B><BR>
+<B>Volume +/- (Mute):</B><BR>
 Bei erhöhen der Lautstärke wird die Kommando-Datei <b>volplus.lirc</b> bei
 erniedrigen der Lautstärke <b>volminus</b> ausgeführt. Dies ist für Leute
 interessant, die Audio nicht über den Fernseher, sondern digital über einen
@@ -61,6 +61,13 @@ Lautstärke verändert werden. <br>
 Dabei ist zu beachten, dass die Dauer, die die Kommados gesendet werden,
 relativ kurz sein sollte, da sonst der Neutrino-Programmablauf sehr
 unflüssig wirkt. Ich arbeite hier mit Werten zwischen 50 und 100 ms.<BR>
+
+Ergänzung: In den neueren Images muss die Volume-Steuerung in den Settings
+ auf lirc gestellt werden. Zusätzlich gibt es noch die Datei mute.lirc
+Die Lautstärke die über Scart an den TV geht, entspricht der zuletzt
+eingestellten, bevor in den Settings die Volume-Steuerung auf lirc
+geschaltet wurde.
+
 Bsp. /var/tuxbox/config/lirc/volplus.lirc:
 <PRE>
 amplifier vol_inc 60
