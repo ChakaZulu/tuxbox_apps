@@ -62,6 +62,7 @@
 #include <time.h>
 
 #include <string>
+#include <controldclient.h>
 
 using namespace std;
 
@@ -92,7 +93,7 @@ class CInfoViewer
 
 		int		InfoHeightY;
 		int		InfoHeightY_Info;
-		bool		ShowInfo_Info;
+		bool	showButtonBar;
 		int		BoxEndX;
 		int		BoxEndY;
 		int		BoxStartX;
@@ -117,14 +118,17 @@ class CInfoViewer
 		char runningPercent;
 		unsigned char       Flag;
 
+		char aspectRatio;
+
 		static void * InfoViewerThread (void *arg);
 		static void * LangViewerThread (void *arg);
 		bool getEPGData( string channelName, unsigned int onid_tsid );
-		int GetVideoFormat();
+
 		void showData();
 		void showWarte();
 		void showButtonAudio();
 		void showButtonNVOD(bool CalledFromShowData = false);
+		void show16_9();
 	public:
 
 		bool			is_visible;
@@ -140,6 +144,8 @@ class CInfoViewer
 
 		void setDuration( int Duration );
 		const std::string getActiveChannelID();
+
+		int handleMsg(uint msg, uint data);
 };
 
 

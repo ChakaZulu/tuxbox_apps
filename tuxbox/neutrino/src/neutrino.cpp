@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.189 2002/03/06 11:18:38 field Exp $
+        $Id: neutrino.cpp,v 1.190 2002/03/07 15:14:30 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1793,6 +1793,12 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 int CNeutrinoApp::handleMsg(uint msg, uint data)
 {
+	int res;
+
+	res = g_InfoViewer->handleMsg(msg, data);
+
+	if ( res != messages_return::unhandled )
+		return res;
 
     if ( msg == messages::EVT_VCRCHANGED )
 	{
@@ -2299,7 +2305,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.189 2002/03/06 11:18:38 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.190 2002/03/07 15:14:30 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

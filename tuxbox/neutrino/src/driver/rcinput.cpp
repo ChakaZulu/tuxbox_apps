@@ -171,6 +171,31 @@ void CRCInput::restartInput()
 	open();
 }
 
+long long CRCInput::calcTimeoutEnd( int Timeout )
+{
+	struct timeval tv;
+
+	gettimeofday( &tv, NULL );
+	long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
+	return ( timeNow + Timeout* 1000000 );
+}
+
+void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, long long TimeoutEnd, bool bAllowRepeatLR= false)
+{
+	struct timeval tv;
+
+	gettimeofday( &tv, NULL );
+	long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
+	int diff = ( TimeoutEnd - timeNow ) / 100000;
+
+	if ( diff < 0 )
+		diff = 0;
+
+	getMsg( msg, data, diff, bAllowRepeatLR );
+}
+
 /**************************************************************************
 *	get rc-key - timeout can be specified
 *
