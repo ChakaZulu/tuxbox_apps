@@ -331,6 +331,52 @@ void CFlashTool::reboot()
 
 //-----------------------------------------------------------------------------------------------------------------
 
+
+CFlashVersionInfo::CFlashVersionInfo(string versionString)
+{
+	//SBBBYYYYMMTTHHMM -- formatsting
+
+	char tmp[100];
+
+	//snapshot erfragen
+	snapshot = versionString[0]=='1';
+
+	//Baseimage Version ermitteln
+	int baseMayor = atoi( versionString.substr(1,1).c_str() );
+	int baseMinor = atoi( versionString.substr(2,2).c_str() );	
+	sprintf(tmp, "%d.%d", baseMayor, baseMinor);
+	baseImageVersion = tmp;
+
+	//Datum ermitteln
+	date = versionString.substr(10,2) + "." + versionString.substr(8,2) + "." + versionString.substr(4,4);
+
+	//Zeit ermitteln
+	time = versionString.substr(12,2) + ":" + versionString.substr(14,2);
+}
+
+string CFlashVersionInfo::getDate()
+{
+	return date;
+}
+
+string CFlashVersionInfo::getTime()
+{
+	return time;
+}
+
+string CFlashVersionInfo::getBaseImageVersion()
+{
+	return baseImageVersion;
+}
+
+bool CFlashVersionInfo::isSnapShot()
+{
+	return snapshot;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+
 CMTDInfo::CMTDInfo()
 {
 	getPartitionInfo();

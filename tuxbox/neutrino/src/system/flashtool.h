@@ -68,6 +68,25 @@ class CFlashTool
 };
 
 
+class CFlashVersionInfo
+{
+	private:
+
+		string	date;
+		string	time;
+		string	baseImageVersion;
+		bool	snapshot;
+
+	public:
+		CFlashVersionInfo(string versionString);
+
+		string getDate();
+		string getTime();
+		string getBaseImageVersion();
+		bool isSnapShot();
+};
+
+
 class CMTDInfo
 {
 	private:

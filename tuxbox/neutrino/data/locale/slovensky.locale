@@ -279,7 +279,11 @@ flashupdate.reboot Die DBox wird neu gestartet
 flashupdate.updatemode Updatemodus
 flashupdate.updatemode_manual manuell (ftp)
 flashupdate.updatemode_internet internet
-flashupdate.currentversion Installierte Version
+flashupdate.currentversion_sep Current version
+flashupdate.currentversiondate Date
+flashupdate.currentversiontime Time
+flashupdate.currentversionbaseversion Baseimage
+flashupdate.currentversionsnapshot ImageType
 flashupdate.checkupdate nach neuer Version suchen
 flashupdate.versioncheck Versionsüberprüfung
 flashupdate.nonewversion keine neue Version verfügbar

@@ -279,7 +279,11 @@ flashupdate.reboot rebooting box....
 flashupdate.updatemode Updatemode
 flashupdate.updatemode_manual manual (ftp)
 flashupdate.updatemode_internet internet
-flashupdate.currentversion Current version
+flashupdate.currentversion_sep Current version
+flashupdate.currentversiondate Date
+flashupdate.currentversiontime Time
+flashupdate.currentversionbaseversion Baseimage
+flashupdate.currentversionsnapshot ImageType
 flashupdate.checkupdate search for new version
 flashupdate.versioncheck checking version
 flashupdate.nonewversion no new version available

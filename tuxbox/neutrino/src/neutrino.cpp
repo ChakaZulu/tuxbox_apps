@@ -69,7 +69,7 @@
 #include "system/setting_helpers.h"
 #include "system/settings.h"
 #include "system/debug.h"
-
+#include "system/flashtool.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -1072,9 +1072,14 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		mtdexpert->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd", true, "", fe, "readflashmtd") );
 		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd", true, "", fe, "writeflashmtd") );
-
 		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, "", mtdexpert ) );
+		
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		CMenuOptionChooser *oj = new CMenuOptionChooser("flashupdate.updatemode", &g_settings.softupdate_mode,true);
+			oj->addOption(0, "flashupdate.updatemode_manual");
+			oj->addOption(1, "flashupdate.updatemode_internet");
+		updateSettings->addItem( oj );
+		
 		
 		//get current flash-version SBBBYYYYMMTTHHMM -- formatsting
 		CConfigFile configfile('\t');
@@ -1089,12 +1094,23 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		}
 		dprintf(DEBUG_INFO, "current flash-version: %s\n", g_settings.softupdate_currentversion);
 
-		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
+		//aktuelle Version anzeigen
+		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.currentversion_sep") );
 
-		CMenuOptionChooser *oj = new CMenuOptionChooser("flashupdate.updatemode", &g_settings.softupdate_mode,true);
-			oj->addOption(0, "flashupdate.updatemode_manual");
-			oj->addOption(1, "flashupdate.updatemode_internet");
-		updateSettings->addItem( oj );
+		//updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
+		CFlashVersionInfo versionInfo(g_settings.softupdate_currentversion);
+		static char date[50];
+		strcpy(date, versionInfo.getDate().c_str());
+		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversiondate", false, (char*) &date, NULL ));
+		static char time[50];
+		strcpy(time, versionInfo.getTime().c_str());
+		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversiontime", false, (char*) &time, NULL ));
+		static char baseimage[50];
+		strcpy(baseimage, versionInfo.getBaseImageVersion().c_str());
+		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionbaseversion", false, (char*) &baseimage, NULL ));
+		static char releasetype[50];
+		strcpy(releasetype, versionInfo.isSnapShot()?"Snapshot":"Release");
+		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionsnapshot", false, (char*) &releasetype, NULL ));
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
 
@@ -2612,7 +2628,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.284 2002/05/28 22:22:57 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.285 2002/05/30 12:52:09 McClean Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
