@@ -93,6 +93,7 @@ public:
 	 * \sa eWidget::close
 	 */
 	void reject();
+	void setActive( bool, eWidget* w=0, bool b=false );
 	/**
 	 * \brief Signal is send, when the focus Changed
 	 *

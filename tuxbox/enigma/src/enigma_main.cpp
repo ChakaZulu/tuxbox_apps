@@ -166,9 +166,9 @@ eString getISO639Description(char *iso)
 {
 	for (unsigned int i=0; i<sizeof(iso639)/sizeof(*iso639); ++i)
 	{
-		if (!strnicmp(iso639[i].iso639foreign, iso, 3))
+		if (!strncasecmp(iso639[i].iso639foreign, iso, 3))
 			return iso639[i].description1;
-		if (!strnicmp(iso639[i].iso639int, iso, 3))
+		if (!strncasecmp(iso639[i].iso639int, iso, 3))
 			return iso639[i].description1;
 	}
 	return eString()+iso[0]+iso[1]+iso[2];
@@ -4346,7 +4346,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			showServiceSelector(-1);
 		else if (event.action == &i_enigmaMainActions->showSubservices )
 		{
-#ifndef DISABE_FILE
+#ifndef DISABLE_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )
@@ -4370,7 +4370,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->nextService)
 		{
-#ifndef DISABE_FILE
+#ifndef DISABEL_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )
@@ -4384,7 +4384,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->prevService)
 		{
-#ifndef DISABE_FILE
+#ifndef DISABLE_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )
@@ -4393,7 +4393,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->playlistNextService)
 		{
-#ifndef DISABE_FILE
+#ifndef DISABLE_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )
@@ -4402,7 +4402,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->playlistPrevService)
 		{
-#ifndef DISABE_FILE
+#ifndef DISABLE_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )
@@ -4526,7 +4526,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			showEPG_Streaminfo();
 		else if (event.action == &i_numberActions->key0)
 		{
-#ifndef DISABE_FILE
+#ifndef DISABLE_FILE
 			if ( (eDVB::getInstance()->recorder || handleState()) && !playlistmode && playlist->getConstList().size() > 1 )
 #else
 			if ( handleState() && !playlistmode && playlist->getConstList().size() > 1 )
@@ -4583,7 +4583,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 		else if (event.action == &i_enigmaMainActions->modeRadio)
 		{
-#ifndef DISABE_FILE
+#ifndef DISABLE_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )
@@ -4600,7 +4600,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->modeTV)
 		{
-#ifndef DISABE_FILE
+#ifndef DISABLE_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )
@@ -4617,7 +4617,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if (event.action == &i_enigmaMainActions->modeFile)
 		{
-#ifndef DISABE_FILE
+#ifndef DISABLE_FILE
 			if ( eDVB::getInstance()->recorder || handleState() )
 #else
 			if ( handleState() )

@@ -40,7 +40,6 @@
 #undef strcpy
 #undef strcmp
 #undef strlen
-#undef strnicmp
 #undef strncmp
 
 #ifdef OLD_VBI  // oldvbi header

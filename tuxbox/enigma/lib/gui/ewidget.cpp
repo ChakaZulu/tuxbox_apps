@@ -62,6 +62,35 @@ eWidget::~eWidget()
 		delete childlist.front();
 }
 
+void eWidget::setActive( bool active, eWidget *insert, bool after )
+{
+	if (active && !takefocus)
+	{
+		ePtrList<eWidget> &list = *getTLW()->focusList();
+		if ( insert )
+		{
+			ePtrList<eWidget>::iterator it =
+				std::find( list.begin(), list.end(), insert );
+			if ( it != list.end() )
+				list.insert( after ? ++it : it, this );
+			else
+				list.push_back(this);
+		}
+		else
+			list.push_back(this);
+		getTLW()->takeFocus();
+		takefocus=1;
+	}
+	else if (!active && takefocus)
+	{
+		if ( have_focus )
+			lostFocus();
+		getTLW()->releaseFocus();
+		getTLW()->focusList()->remove(this);
+		takefocus=0;
+	}
+}
+
 void eWidget::takeFocus()
 {
 		// desktop shouldnt receive global focus

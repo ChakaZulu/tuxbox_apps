@@ -185,12 +185,11 @@ again_wizard:
 
 			}
 		}
-		else do // cable or dvb-t
+		else // cable or dvb-t
 		{
 			TransponderScan scan(0, 0, TransponderScan::stateMenu);
 			res=scan.exec();
 		}
-		while ( res );
 
 		eZapMain::getInstance()->showServiceSelector( eServiceSelector::dirFirst, eZapMain::pathAll );
 		diseqc=1;

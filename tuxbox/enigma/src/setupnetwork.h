@@ -41,7 +41,6 @@ class eNFSSetup: public eWindow
 	void nextPressed();
 	void mountPressed();
 	void umountPressed();
-	bool ismounted();
 	void mountTimeout();
 public:
 	eNFSSetup();
@@ -55,7 +54,7 @@ class eZapNetworkSetup: public eWindow
 {
 	eNumber *ip, *netmask, *dns, *gateway, *port;
 	eButton *ok, *abort;
-	eCheckbox *dosetup;
+	eCheckbox *dosetup, *dhcp;
 	eLabel *lNameserver, *lGateway;
 	eComboBox *combo_type;
 	eStatusBar *statusbar;
@@ -75,6 +74,7 @@ private:
 	void fieldSelected(int *number);
 	void okPressed();
 	void abortPressed();
+	void dhcpStateChanged(int);
 #ifdef ENABLE_PPPOE
 	void typeChanged(eListBoxEntryText*);
 	void passwordSelected();

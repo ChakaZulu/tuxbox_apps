@@ -3,6 +3,7 @@
 #include <setupnetwork.h>
 
 #include <netinet/in.h>
+#include <linux/route.h>
 
 #ifndef DISABLE_NFS
 #include <sys/mount.h>
@@ -122,7 +123,7 @@ public:
 	}
 };
 
-bool readSecretString( eString &str )
+static bool readSecretString( eString &str )
 {
 	FILE *f = fopen("/etc/ppp/pap-secrets", "r");
 	if (!f)
@@ -144,7 +145,7 @@ bool readSecretString( eString &str )
 	return true;
 }
 
-void writeSecretString( const eString &str )
+static void writeSecretString( const eString &str )
 {
 	FILE *f = fopen("/etc/ppp/pap-secrets", "w");
 	if (!f)
@@ -162,7 +163,7 @@ void writeSecretString( const eString &str )
 	fclose(f);
 }
 
-void helper( char *&source, char *&dest, uint &spos, uint &dpos, const char* option, const char* value )
+static void helper( char *&source, char *&dest, uint &spos, uint &dpos, const char* option, const char* value )
 {
 	char *p = strstr( source+spos, option );
 	if( !p )
@@ -186,7 +187,7 @@ void helper( char *&source, char *&dest, uint &spos, uint &dpos, const char* opt
 	}
 }
 
-char *getOptionString( char *buf, const char *option )
+static char *getOptionString( char *buf, const char *option )
 {
 	char *p = strstr( buf, option );
 	if( !p )
@@ -196,7 +197,7 @@ char *getOptionString( char *buf, const char *option )
 	return p;
 }
 
-int getRejectFlags()
+static int getRejectFlags()
 {
 	char buf[8192];
 	FILE *f = fopen("/etc/ppp/pppoe.conf", "r" );
@@ -213,22 +214,22 @@ int getRejectFlags()
 	}
 	int flags=0;
 	char *p = getOptionString(buf, "REJECT_WWW=");
-	if ( p && !strnicmp(p,"yes",3) )
+	if ( p && !strncasecmp(p,"yes",3) )
 		flags|=1;
 	p = getOptionString(buf, "REJECT_TELNET=");
-	if ( p && !strnicmp(p,"yes",3) )
+	if ( p && !strncasecmp(p,"yes",3) )
 		flags|=2;
 	p = getOptionString(buf, "REJECT_SAMBA=");
-	if ( p && !strnicmp(p,"yes",3) )
+	if ( p && !strncasecmp(p,"yes",3) )
 		flags|=4;
 	p = getOptionString(buf, "REJECT_FTP=");
-	if ( p && !strnicmp(p,"yes",3) )
+	if ( p && !strncasecmp(p,"yes",3) )
 		flags|=8;
 	fclose(f);
 	return flags;
 }
 
-void updatePPPConfig( const eString &secrets, int flags )
+static void updatePPPConfig( const eString &secrets, int flags )
 {
 	char sourceA[8192];  // source buffer
 	char destA[8192]; // dest buffer
@@ -285,6 +286,75 @@ void updatePPPConfig( const eString &secrets, int flags )
 
 #endif
 
+static void getNameserver( __u32 &ip )
+{
+	char buf[256];
+
+	FILE *file=fopen("/etc/resolv.conf","r");
+	if (!file)
+		return;
+
+	int tmp1,tmp2,tmp3,tmp4;
+
+	while (fgets(buf,sizeof(buf),file))
+	{
+		if (sscanf(buf,"nameserver %d.%d.%d.%d", &tmp1, &tmp2, &tmp3, &tmp4) == 4)
+		{
+			ip=tmp1<<24|tmp2<<16|tmp3<<8|tmp4;
+//			sprintf(ip, "0x%02x%02x%02x%02x", tmp1, tmp2, tmp3, tmp4);
+			break;
+		}
+	}
+	fclose(file);
+}
+
+static void getDefaultGateway(__u32 &ip)
+{
+	char iface[9];
+	unsigned int dest=0, gw=0;
+	char buf[256];
+
+	FILE *file=fopen("/proc/net/route","r");
+	if (!file)
+		return;
+	fgets(buf,sizeof(buf),file);
+	while(fgets(buf,sizeof(buf),file))
+	{
+		sscanf(buf,"%8s %x %x", iface, &dest, &gw);
+		if (!dest)
+		{
+			ip = gw;
+			break;
+		}
+	}
+	fclose(file);
+}
+
+static void getIP( char *dev, __u32 &ip, __u32 &mask)
+{
+	int fd;
+	struct ifreq req;
+	struct sockaddr_in *saddr;
+	unsigned char *addr;
+
+	fd=socket(AF_INET,SOCK_DGRAM,0);
+	if ( !fd )
+		return;
+
+	bzero(&req,sizeof(req));
+	strcpy(req.ifr_name,dev);
+	saddr = (struct sockaddr_in *) &req.ifr_addr;
+	addr = (unsigned char*) &saddr->sin_addr.s_addr;
+
+	if( !ioctl(fd,SIOCGIFADDR,&req) )
+		ip = addr[0]<<24|addr[1]<<16|addr[2]<<8|addr[3];
+
+	if( !ioctl(fd,SIOCGIFNETMASK,&req) )
+		mask = addr[0]<<24|addr[1]<<16|addr[2]<<8|addr[3];
+
+	close(fd);
+}
+
 eZapNetworkSetup::eZapNetworkSetup():
 	eWindow(0)
 {
@@ -292,17 +362,33 @@ eZapNetworkSetup::eZapNetworkSetup():
 	cmove(ePoint(130, 110));
 	cresize(eSize(450, 400));
 
-	__u32 sip=ntohl(0x0a000061), snetmask=ntohl(0xFF000000), sdns=ntohl(0x7f000001), sgateway=ntohl(0x7f000001);
+	__u32 sip=ntohl(0x0a000061),
+				snetmask=ntohl(0xFF000000),
+				sdns=ntohl(0x7f000001),
+				sgateway=ntohl(0x7f000001);
+
 	int de[4];
 	int sdosetup=0;
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 	int connectionType=0;
 	int webifport=80;
 
-	eConfig::getInstance()->getKey("/elitedvb/network/ip", sip);
-	eConfig::getInstance()->getKey("/elitedvb/network/netmask", snetmask);
-	eConfig::getInstance()->getKey("/elitedvb/network/dns", sdns);
-	eConfig::getInstance()->getKey("/elitedvb/network/gateway", sgateway);
+	int useDHCP=0;
+	eConfig::getInstance()->getKey("/elitedvb/network/usedhcp", useDHCP);
+
+	if (useDHCP)
+	{
+		getIP("eth0", sip, snetmask);
+		getNameserver(sdns);
+		getDefaultGateway(sgateway);
+	}
+	else
+	{
+		eConfig::getInstance()->getKey("/elitedvb/network/ip", sip);
+		eConfig::getInstance()->getKey("/elitedvb/network/netmask", snetmask);
+		eConfig::getInstance()->getKey("/elitedvb/network/dns", sdns);
+		eConfig::getInstance()->getKey("/elitedvb/network/gateway", sgateway);
+	}
 	eConfig::getInstance()->getKey("/elitedvb/network/dosetup", sdosetup);
 	eConfig::getInstance()->getKey("/elitedvb/network/connectionType", connectionType);
 	eConfig::getInstance()->getKey("/elitedvb/network/webifport", webifport);
@@ -313,13 +399,20 @@ eZapNetworkSetup::eZapNetworkSetup():
 	l->resize(eSize(150, fd+4));
 
 	eNumber::unpack(sip, de);
-	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
+	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l, !useDHCP);
 	ip->move(ePoint(160, 10));
-	ip->resize(eSize(200, fd+10));
+	ip->resize(eSize(170, fd+10));
 	ip->setFlags(eNumber::flagDrawPoints);
 	ip->setHelpText(_("enter IP Address of the box (0..9, left, right)"));
 	ip->loadDeco();
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
+
+	dhcp = new eCheckbox(this, useDHCP, 1);
+	dhcp->setText("DHCP");
+	dhcp->move(ePoint(340, 10));
+	dhcp->resize(eSize(100,fd+4));
+	dhcp->setHelpText(_("get Network data from a DHCP Server in the local Network"));
+	CONNECT(dhcp->checked, eZapNetworkSetup::dhcpStateChanged);
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
@@ -327,9 +420,9 @@ eZapNetworkSetup::eZapNetworkSetup():
 	l->resize(eSize(150, fd+4));
 
 	eNumber::unpack(snetmask, de);
-	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
+	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l, !useDHCP);
 	netmask->move(ePoint(160, 50));
-	netmask->resize(eSize(200, fd+10));
+	netmask->resize(eSize(170, fd+10));
 	netmask->setFlags(eNumber::flagDrawPoints);
 	netmask->setHelpText(_("enter netmask of your network (0..9, left, right)"));
 	netmask->loadDeco();
@@ -343,7 +436,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	eListBoxEntryText *sel=0;
 	combo_type=new eComboBox(this, 3, l);
 	combo_type->move(ePoint(160,90));
-	combo_type->resize(eSize(200, fd+10));
+	combo_type->resize(eSize(170, fd+10));
 	combo_type->loadDeco();
 	combo_type->setHelpText(_("press ok to change connection type"));
 	((eZapNetworkSetup*)combo_type)->setProperty("showEntryHelp", "");
@@ -362,8 +455,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	}
 	CONNECT(combo_type->selchanged, eZapNetworkSetup::typeChanged);
 	tdsl = new eButton(this);
-	tdsl->move(ePoint(370,90));
-	tdsl->resize(eSize(70, fd+10));
+	tdsl->move(ePoint(340,90));
+	tdsl->resize(eSize(100, fd+10));
 	tdsl->setText("T-DSL");
 	tdsl->loadDeco();
 	tdsl->hide();
@@ -371,15 +464,15 @@ eZapNetworkSetup::eZapNetworkSetup():
 	CONNECT( tdsl->selected, eZapNetworkSetup::tdslPressed );
 #endif
 
-	lNameserver=new eLabel(this);
+	lNameserver=new eLabel(this, 0);
 	lNameserver->setText("Nameserver:");
 	lNameserver->move(ePoint(20, 130));
 	lNameserver->resize(eSize(140, fd+4));
 
 	eNumber::unpack(sdns, de);
-	dns=new eNumber(this, 4, 0, 255, 3, de, 0, lNameserver);
+	dns=new eNumber(this, 4, 0, 255, 3, de, 0, lNameserver, !useDHCP);
 	dns->move(ePoint(160, 130));
-	dns->resize(eSize(200, fd+10));
+	dns->resize(eSize(170, fd+10));
 	dns->setFlags(eNumber::flagDrawPoints);
 	dns->setHelpText(_("enter your domain name server (0..9, left, right)"));
 	dns->loadDeco();
@@ -412,9 +505,9 @@ eZapNetworkSetup::eZapNetworkSetup():
 	lGateway->resize(eSize(140, fd+4));
 
 	eNumber::unpack(sgateway, de);
-	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
+	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l, !useDHCP);
 	gateway->move(ePoint(160, 170));
-	gateway->resize(eSize(200, fd+10));
+	gateway->resize(eSize(170, fd+10));
 	gateway->setFlags(eNumber::flagDrawPoints);
 	gateway->setHelpText(_("enter your gateways IP Address (0..9, left, right)"));
 	gateway->loadDeco();
@@ -437,10 +530,10 @@ eZapNetworkSetup::eZapNetworkSetup():
 #endif
 
 	dosetup=new eCheckbox(this, sdosetup, 1);
-	dosetup->setText(_("Configure Network"));
+	dosetup->setText(_("Enable Network"));
 	dosetup->move(ePoint(20, 215));
 	dosetup->resize(eSize(fd+4+240, fd+4));
-	dosetup->setHelpText(_("enable/disable network config (ok)"));
+	dosetup->setHelpText(_("enable/disable network (ok)"));
 
 	l = new eLabel(this);
 	l->setText("Port:");
@@ -547,6 +640,14 @@ void eZapNetworkSetup::fieldSelected(int *number)
 	focusNext(eWidget::focusDirNext);
 }
 
+void eZapNetworkSetup::dhcpStateChanged(int state)
+{
+	ip->setActive(!state, dhcp);
+	netmask->setActive(!state, combo_type);
+	gateway->setActive(!state, dosetup);
+	dns->setActive(!state, gateway);
+}
+
 void eZapNetworkSetup::okPressed()
 {
 	int eIP[4], eMask[4], eDNS[4], eGateway[4];
@@ -563,12 +664,7 @@ void eZapNetworkSetup::okPressed()
 	eNumber::pack(sdns, eDNS);
 	eNumber::pack(sgateway, eGateway);
 
-	eDebug("IP: %d.%d.%d.%d, Netmask: %d.%d.%d.%d, gateway %d.%d.%d.%d, DNS: %d.%d.%d.%d",
-		eIP[0], eIP[1],  eIP[2], eIP[3],
-		eMask[0], eMask[1],  eMask[2], eMask[3],
-		eGateway[0], eGateway[1], eGateway[2], eGateway[3],
-		eDNS[0], eDNS[1],  eDNS[2], eDNS[3]);
-
+	int useDHCP=dhcp->isChecked();
 	int sdosetup=dosetup->isChecked();
 	int type = (int) combo_type->getCurrent()->getKey();
 
@@ -582,6 +678,7 @@ void eZapNetworkSetup::okPressed()
 	eConfig::getInstance()->setKey("/elitedvb/network/dosetup", sdosetup);
 	eConfig::getInstance()->setKey("/elitedvb/network/connectionType", type );
 	eConfig::getInstance()->setKey("/elitedvb/network/webifport", port->getNumber());
+	eConfig::getInstance()->setKey("/elitedvb/network/usedhcp", useDHCP);
 	eConfig::getInstance()->flush();
 
 #ifdef ENABLE_PPPOE
@@ -601,8 +698,7 @@ void eZapNetworkSetup::okPressed()
 	}
 #endif
 
-	if ( sdosetup )
-		eDVB::getInstance()->configureNetwork();
+	eDVB::getInstance()->configureNetwork();
 
 	if ( oldport != port->getNumber() )
 		eZap::getInstance()->reconfigureHTTPServer();
@@ -732,10 +828,25 @@ static void errorMessage(const eString message, int type=0)
 eNFSSetup::eNFSSetup()
 	:eWindow(0), timeout(eApp), mountContainer(0)
 {
+	bool have_cifs=false;
+	FILE *f=fopen("/proc/filesystems", "rt");
+	if (f)
+	{
+		while (1)
+		{
+			char buffer[128];
+			if (!fgets(buffer, 128, f))
+				break;
+			if ( strstr(buffer, "cifs") )
+				have_cifs=true;
+		}
+		fclose(f);
+	}
+
 	CONNECT(timeout.timeout, eNFSSetup::mountTimeout);
 	cur_entry=0;
 	headline.sprintf("NFS/CIFS Setup (%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
-	
+
 	setText(headline);
 	cmove(ePoint(140,90));
 	cresize(eSize(450,400));
@@ -766,7 +877,8 @@ eNFSSetup::eNFSSetup()
 	combo_fstype->loadDeco();
 	combo_fstype->setHelpText(_("press ok to change mount type"));
 	new eListBoxEntryText( *combo_fstype, "NFS", (void*)0, 0, "Network File System");
-	new eListBoxEntryText( *combo_fstype, "CIFS", (void*)1, 0, "Common Internet File System");
+	if (have_cifs)
+		new eListBoxEntryText( *combo_fstype, "CIFS", (void*)1, 0, "Common Internet File System");
 	combo_fstype->setCurrent(0,true);
 	CONNECT(combo_fstype->selchanged, eNFSSetup::fstypeChanged);
 	
@@ -1069,7 +1181,7 @@ void eNFSSetup::okPressed()
 		eConfig::getInstance()->setKey((cmd+"password").c_str(), pass->getText().c_str());
 		eConfig::getInstance()->setKey((cmd+"automount").c_str(), (int)doamount->isChecked());
 	}
-	
+
 	eMessageBox msg(
 		_("NFS/CIFS-Entry stored. Further entry?\n"),
 		_("NFS/CIFS-Setup..."),
@@ -1085,88 +1197,7 @@ void eNFSSetup::okPressed()
 		nextPressed();
 }
 
-static eString resolvSymlinks(const eString &path)
-{
-	char buffer[128];
-	eString tmpPath;
-	char *tok, *str, *org;
-	str=org=strdup( path ? path.c_str() : "");
-// simple string tokenizer
-	if ( *str == '/' )
-		str++;
-	while(1)
-	{
-		tmpPath+='/';
-		tok=strchr(str, '/');
-
-		if ( tok )
-			*tok=0;
-
-		tmpPath+=str;
-
-///////////////////////////
-		while(1)
-		{
-			struct stat s;
-			lstat(tmpPath.c_str(), &s);
-			if (S_ISLNK(s.st_mode))						// is this a sym link ?
-			{
-				int count = readlink(tmpPath.c_str(), buffer, 255);
-				if (buffer[0] == '/')			// is absolute path?
-				{
-					tmpPath.assign(buffer,count);	// this is our new path
-//					eDebug("new realPath is %s", tmpPath.c_str());
-				}
-				else
-				{
-					// add resolved substr
-					tmpPath.replace(
-						tmpPath.rfind('/')+1,
-						sizeof(str),
-						eString(buffer,count));
-//					eDebug("after add dest realPath is %s", tmpPath.c_str());
-				}
-			}
-			else
-				break;
-		}
-		if (tok)
-		{
-			str=tok;
-			str++;
-		}
-		else
-			break;
-	}
-//	eDebug("rp is %s", tmpPath.c_str() );
-	free(org);											// we have used strdup.. must free
-
-	return tmpPath;
-}
-
-bool eNFSSetup::ismounted()
-{
-	char buffer[200+1],mountDev[100],mountOn[100],mountType[20];    
-
-	eString realPath = resolvSymlinks(ldir->getText());
-	FILE *mounts=0;
-	mounts=fopen("/proc/mounts","rt");
-	if(mounts)
-	{
-		while(fgets(buffer, 200, mounts))
-		{
-			mountDev[0] = mountOn[0] = mountType[0] = 0;
-			sscanf(buffer,"%s %s %s ", mountDev, mountOn, mountType);
-			if( realPath == mountOn )
-			{
-				fclose(mounts);
-				return true;
-			}
-		}
-		fclose(mounts);
-	}
-	return false;
-}
+extern bool ismounted( eString mountpoint );
 
 void eNFSSetup::mountPressed()
 {
@@ -1177,7 +1208,7 @@ void eNFSSetup::mountPressed()
 	}
 	else 
 	{
-		if(ismounted())
+		if(ismounted(ldir->getText()))
 		{
 			errorMessage(_("NFS/CIFS mount error already mounted"));
 			return;
@@ -1277,7 +1308,7 @@ void eNFSSetup::appClosed(int)
 		ip->getNumber(2),ip->getNumber(3),
 		sdir->getText().c_str(),
 		ldir->getText().c_str(),
-		ismounted()?"OK!":"FAILED!" );
+		ismounted(ldir->getText())?"OK!":"FAILED!" );
 		errorMessage(error);
 }
 
@@ -1298,15 +1329,13 @@ void eNFSSetup::automount()
 
 int eNFSSetup::eventHandler(const eWidgetEvent &e)
 {
-	if (e.type == eWidgetEvent::execBegin )
+	if (e.type == eWidgetEvent::execBegin && combo_fstype->getCount() > 1 )
 	{
 		errorMessage(
 		_("Recording on CIFS shares is unstable.\n"
 			"Therefore CIFS support is not included "
-			"in the standard distribution. To use it "
-			"you must copy a driver called 'cifs.o' to "
-			"the '/var' directory and load it at system "
-			"startup.") );
+			"in the standard distribution. Use it at "
+			"your own risk!"));
 		return 1;
 	}
 	return eWindow::eventHandler(e);

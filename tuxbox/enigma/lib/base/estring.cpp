@@ -91,18 +91,6 @@ eString& eString::strReplace(const char* fstr, const eString& rstr)
 	return *this;
 }
 
-int strnicmp(const char *s1, const char *s2, int len)
-{
-//	makes a case insensitive string compare with len Chars
-	while ( *s1 && *s2 && len-- )
-		if ( tolower(*s1) != tolower(*s2) )
-			return tolower(*s1) < tolower(*s2) ? -1 : 1;
-		else
-			s1++, s2++;
-
-	return 0;
-}
-
 /////////////////////////////////////// eString icompare(const eString&) ////////////////////////////////////////////////
 int eString::icompare(const eString& s)
 {
