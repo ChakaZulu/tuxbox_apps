@@ -58,7 +58,7 @@ eMountPoint::eMountPoint(eString plocalDir, int pfstype, eString ppassword, eStr
 	id         = pid;
 }
 
-void eMountPoint::save(FILE *out) 
+void eMountPoint::save(FILE *out)
 {
 	fprintf(out,"ip_%d=%d.%d.%d.%d\n", id, ip[0], ip[1], ip[2], ip[3]);
 	fprintf(out,"fstype_%d=%d\n", id, fstype);
@@ -89,7 +89,7 @@ bool eMountPoint::in_proc_filesystems(eString fsname)
 	}
 	in.close();
 
-	if (fsname == "nfs") 
+	if (fsname == "nfs")
 	{
 #ifdef HAVE_MODPROBE
 		system("modprobe nfs");
@@ -266,11 +266,47 @@ void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword,
 	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pid));
 }
 
+void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pid)
+{
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+		if (mp_it->id == pid)
+		{
+			mp_it->localDir = plocalDir;
+			mp_it->fstype = pfstype;
+			mp_it->password = ppassword;
+			mp_it->userName = puserName;
+			mp_it->mountDir = pmountDir;
+			mp_it->automount = pautomount;
+			mp_it->rsize = prsize;
+			mp_it->wsize = pwsize;
+			mp_it->options = poptions;
+			mp_it->ownOptions = pownOptions;
+		}
+}
+
 void eMountMgr::removeMountPoint(int id)
 {
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		if (mp_it->id == id)
 			mountPoints.erase(mp_it);
+}
+
+int eMountMgr::mountMountPoint(int id)
+{
+	int rc = 0;
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+		if (mp_it->id == id)
+			rc = mp_it->mount();
+	return rc;
+}
+
+bool eMountMgr::unmountMountPoint(int id)
+{
+	bool rc = true;
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+		if (mp_it->id == id)
+			rc = mp_it->unmount();
+	return rc;
 }
 
 void eMountMgr::init()

@@ -46,9 +46,13 @@ private:
 public:
 	void removeMountPoint(int);
 	void addMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
+	void changeMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int);
+	int mountMountPoint(int);
+	bool unmountMountPoint(int);
 	void save();
 	void init();
 	std::vector<eMountPoint> *mountPointList() {return &mountPoints;}
+	eMountPoint *mountPoint(int);
 
 	static eMountMgr *getInstance() {return (instance) ? instance : new eMountMgr();}
 
