@@ -1659,7 +1659,7 @@ eZapMain::~eZapMain()
 		getServiceSelectorPath(modeLast[mode]);
 
   // save last mode to registry
-	eConfig::getInstance()->setKey("ezap/ui/lastmode", mode );
+	eConfig::getInstance()->setKey("/ezap/ui/lastmode", mode );
 
 	// save for all modes the servicePath to registry
 	for (mode=modeTV; mode < modeEnd; mode++ )
@@ -2830,7 +2830,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 			{
 				filename.erase(filename.length()-2, 2);
 				filename+="eit";
-				int fd = open(filename.c_str(), O_CREAT|O_WRONLY);
+				int fd = open(filename.c_str(), O_CREAT|O_WRONLY, 0777);
 				if (fd>-1)
 				{
 					int evLen=HILO(event->descriptors_loop_length)+12/*EIT_LOOP_SIZE*/;
@@ -4543,14 +4543,14 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_numberActions->key9)
 			num=9;
 		else if (mode != modeFile && event.action == &i_enigmaMainActions->showUserBouquets)
-			showServiceSelector( -1, pathBouquets );
+			showServiceSelector( -1, state&stateRecording ? 0 : pathBouquets );
 		else if (mode != modeFile && event.action == &i_enigmaMainActions->showDVBBouquets)
-			showServiceSelector( -1, pathProvider );
+			showServiceSelector( -1, state&stateRecording ? 0 : pathProvider );
 #ifndef DISABLE_FILE
 		else if (event.action == &i_enigmaMainActions->showRecMovies)
-			showServiceSelector( eServiceSelector::dirLast, pathRecordings );
+			showServiceSelector( state&stateRecording ? -1 : eServiceSelector::dirLast, state&stateRecording ? 0 : pathRecordings );
 		else if (event.action == &i_enigmaMainActions->showPlaylist)
-			showServiceSelector( -1, pathPlaylist );
+			showServiceSelector( -1, state&stateRecording ? 0 : pathPlaylist );
 #endif
 		else if (event.action == &i_enigmaMainActions->modeRadio)
 		{
@@ -5319,7 +5319,7 @@ void eZapMain::gotPMT()
 void eZapMain::timeOut()
 {
 	int state=1;
-	eConfig::getInstance()->getKey("/ezap/osd/anableAutohideOSDOn", state);
+	eConfig::getInstance()->getKey("/ezap/osd/enableAutohideOSDOn", state);
 	if (pRotorMsg && pRotorMsg->isVisible() )
 	{
 		pRotorMsg->hide();

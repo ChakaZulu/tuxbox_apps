@@ -1571,7 +1571,7 @@ send:
 		lastcsw = csw;
 		lastucsw = ucsw;
 		lastToneBurst = ToneBurst;
-		lastLNB = lnb;  /* important.. for the right timeout
+		lastLNB = lnb;  /* important.. for the correct timeout
 											 between normal diseqc cmd and rotor cmd */
 
 		// delete allocated memory

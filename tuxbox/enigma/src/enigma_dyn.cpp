@@ -1011,10 +1011,7 @@ struct getEntryString
 
 		if (se->type & ePlaylistEntry::stateFinished)
 			result << "<tr><td align=center><img src=\"on.gif\"></td>";
-		else if (se->type & (ePlaylistEntry::errorNoSpaceLeft |
-				ePlaylistEntry::errorUserAborted |
-				ePlaylistEntry::errorZapFailed|
-				ePlaylistEntry::errorOutdated))
+		else if (se->type & ePlaylistEntry::stateError)
 			result << "<td align=center><img src=\"off.gif\"></td>";
 		else
 			result << "<td>&nbsp;</td>";

@@ -6,6 +6,7 @@
 
 #ifndef DISABLE_NFS
 #include <sys/mount.h>
+#include <sys/stat.h>
 #include <signal.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -1077,10 +1078,70 @@ void eNFSSetup::okPressed()
 		nextPressed();
 }
 
+static eString resolvSymlinks(const eString &path)
+{
+	char buffer[128];
+	eString tmpPath;
+	char *tok, *str, *org;
+	str=org=strdup( path ? path.c_str() : "");
+// simple string tokenizer
+	if ( *str == '/' )
+		str++;
+	while(1)
+	{
+		tmpPath+='/';
+		tok=strchr(str, '/');
+
+		if ( tok )
+			*tok=0;
+
+		tmpPath+=str;
+
+///////////////////////////
+		while(1)
+		{
+			struct stat s;
+			lstat(tmpPath.c_str(), &s);
+			if (S_ISLNK(s.st_mode))						// is this a sym link ?
+			{
+				int count = readlink(tmpPath.c_str(), buffer, 255);
+				if (buffer[0] == '/')			// is absolute path?
+				{
+					tmpPath.assign(buffer,count);	// this is our new path
+//					eDebug("new realPath is %s", tmpPath.c_str());
+				}
+				else
+				{
+					// add resolved substr
+					tmpPath.replace(
+						tmpPath.rfind('/')+1,
+						sizeof(str),
+						eString(buffer,count));
+//					eDebug("after add dest realPath is %s", tmpPath.c_str());
+				}
+			}
+			else
+				break;
+		}
+		if (tok)
+		{
+			str=tok;
+			str++;
+		}
+		else
+			break;
+	}
+//	eDebug("rp is %s", tmpPath.c_str() );
+	free(org);											// we have used strdup.. must free
+
+	return tmpPath;
+}
+
 bool eNFSSetup::ismounted()
 {
 	char buffer[200+1],mountDev[100],mountOn[100],mountType[20];    
-    
+
+	eString realPath = resolvSymlinks(ldir->getText());
 	FILE *mounts=0;
 	mounts=fopen("/proc/mounts","rt");
 	if(mounts)
@@ -1089,7 +1150,7 @@ bool eNFSSetup::ismounted()
 		{
 			mountDev[0] = mountOn[0] = mountType[0] = 0;
 			sscanf(buffer,"%s %s %s ", mountDev, mountOn, mountType);
-			if(ldir->getText()==mountOn)
+			if( realPath == mountOn )
 			{
 				fclose(mounts);
 				return true;
@@ -1168,7 +1229,7 @@ void eNFSSetup::mountPressed()
 
 		if (!mountContainer)
 		{
-			eDebug("%s", opt.c_str() );
+//			eDebug("%s", opt.c_str() );
 			mountContainer = new eConsoleAppContainer(opt.c_str());
 			CONNECT(mountContainer->appClosed, eNFSSetup::appClosed);
 		}

@@ -786,6 +786,11 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 	{
 		if (entry->flags & eListBoxEntryService::flagIsReturn)
 		{
+			// dont change path in radio and tv mode when recording is running
+			if ( eZap::getInstance()->getServiceSelector() == this
+				&& eDVB::getInstance()->recorder
+				&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+				return;
 			pathUp();
 			return;
 		}
@@ -1001,6 +1006,11 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_serviceSelectorActions->prevBouquet && !movemode && path.size() > 1)
 			{
+				// dont change path in radio and tv mode when recording is running
+				if ( eZap::getInstance()->getServiceSelector() == this
+					&& eDVB::getInstance()->recorder
+					&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+					return 1;
 				ci->clear();
 				services->beginAtomic();
 				if (style == styleCombiColumn)
@@ -1027,6 +1037,11 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_serviceSelectorActions->nextBouquet && !movemode && path.size()>1 )
 			{
+				// dont change path in radio and tv mode when recording is running
+				if ( eZap::getInstance()->getServiceSelector() == this
+					&& eDVB::getInstance()->recorder
+					&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+					return 1;
 				ci->clear();
 				services->beginAtomic();
 				if (style == styleCombiColumn)
@@ -1077,7 +1092,14 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				}
 			}
 			else if (event.action == &i_serviceSelectorActions->pathUp)
+			{
+				// dont change path in radio and tv mode when recording is running
+				if ( eZap::getInstance()->getServiceSelector() == this
+					&& eDVB::getInstance()->recorder
+					&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+					return 1;
 				pathUp();
+			}
 			else if (event.action == &i_serviceSelectorActions->toggleStyle && !movemode && !editMode)
 			{
 				int newStyle = lastSelectedStyle;
@@ -1274,6 +1296,11 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				break;
 			if (enterPath.size())
 			{
+				// dont change path in radio and tv mode when recording is running
+				if ( eZap::getInstance()->getServiceSelector() == this
+					&& eDVB::getInstance()->recorder
+					&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+					return 1;
 				ci->clear();
 				if ( path.bottom() == enterPath.bottom() )
 					pathUp();
