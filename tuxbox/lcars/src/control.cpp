@@ -158,6 +158,10 @@ command_class control::parseCommand(std::string cmd)
 	{
 		tmp_command.cmd_class = TUNER;
 	}
+	else if (tmp_string == "ZAP")
+	{
+		tmp_command.cmd_class = ZAP;
+	}
 	else
 	{
 		std::cout << "Error in Command: Unknown Commandclass (" << tmp_string << ") on String:" << std::endl << cmd << std::endl;
@@ -271,6 +275,10 @@ command_class control::parseCommand(std::string cmd)
 	else if (tmp_string == "Tune")
 	{
 		tmp_command.command = C_Tune;
+	}
+	else if (tmp_string == "Stop")
+	{
+		tmp_command.command = C_Stop;
 	}
 	else
 	{
@@ -1224,6 +1232,19 @@ int control::runCommand(command_class command, bool val)
 			else if (command.args[0] == "Sat")
 			{
 				tuner_obj->tune(atoi(command.args[1].c_str()), atoi(command.args[2].c_str()), atoi(command.args[3].c_str()), atoi(command.args[4].c_str()), atoi(command.args[5].c_str()));
+			}
+		}
+		break;
+	case ZAP:
+		if (command.command == C_Stop)
+		{
+			if (command.args[0] == "Demux")
+			{
+				zap_obj->zap_allstop();				
+			}
+			else if (command.args[0] == "Devices")
+			{
+				zap_obj->close_dev();
 			}
 		}
 		break;

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.7  2002/09/17 12:20:24  TheDOC
+start/stop devices
+
 Revision 1.6  2002/06/08 20:21:09  TheDOC
 adding the cam-sources with slight interface-changes
 
@@ -100,9 +103,10 @@ zap::~zap()
 void zap::close_dev()
 {
 	close(vid);
+	close(aud);
 	close(video);
 	close(audio);
-
+	close(pcr);
 }
 
 void zap::zap_allstop()
