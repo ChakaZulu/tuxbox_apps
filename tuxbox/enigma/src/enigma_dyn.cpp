@@ -1489,7 +1489,6 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result;
-	eString tmp;
 	eService* current;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -1530,8 +1529,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 			{
 				tm* t = localtime(&event.start_time);
 				result+=eString().sprintf("<!-- ID: %04x -->", event.event_id);
-				tmp.sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
-				result+=tmp;
+				result+=eString().sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
 				result+=((ShortEventDescriptor*)descriptor)->event_name;
 				result+="</span><br>\n";
 			}
@@ -1565,7 +1563,6 @@ eString genEPGString(eServiceReference ref, EITEvent event)
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
-	eString tmp;
 	eService* current;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -1610,10 +1607,11 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 					result += genRecordString(ref, event);
 					result += "\'>Record</a></u>";
 					result += "&nbsp;&nbsp;";
+					result += eString().sprintf("%02d.%02d - %02d:%02d", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
+					result += "&nbsp;&nbsp;";
 					result += "<span class=\"epg\"><a  href=\'";
 					result += genEPGString(ref, event);
-					result += eString().sprintf("\')>%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
-					result += tmp;
+					result += "\')>";
 					result += ((ShortEventDescriptor*)descriptor)->event_name;
 					result += "</span></a></u><br>\n";
 				}
@@ -2324,6 +2322,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 {
 	eString result;
 	eService *current = NULL;
+	eString ext_description;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
@@ -2331,7 +2330,6 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	eString eventID = opt["ID"];
 	int eventid = atoi(eventID.c_str());
 	eString description = "No description available";
-	eString ext_description =" No detailed description available";
 
 	printf("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %s\n", serviceRef.c_str(), eventID.c_str());
 
@@ -2343,38 +2341,37 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 		current = eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)ref);
 		if(current)
 		{
-			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid );
+			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid);
 			if(event)
 			{
 				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 				{
 					if (d->Tag() == DESCR_SHORT_EVENT)
 					{
-						// ok, we probably found the event...
+						// ok, we probably found the short description...
 						description = ((ShortEventDescriptor*)*d)->event_name;
 						printf("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
-						break;
 					}
 					if (d->Tag() == DESCR_EXTENDED_EVENT)
 					{
-						// ok, we probably found the event...
-						ext_description = ((ExtendedEventDescriptor*)*d)->item_description;
+						// ok, we probably found the detailed description...
+						ext_description += ((ExtendedEventDescriptor*)*d)->item_description;
 						printf("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
-						break;
 					}
 				}
 				delete event;
 			}
 		}
 	}
-
+	if (!ext_description)
+		ext_description = "No detailed description available";
 	description = filter_string(description);
 	ext_description = filter_string(ext_description);
 
-	result = "<html>" + eString(CHARSETMETA) + "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#ffffff>";
-	result += "<span class=\"title\"><b>" + description + "</b></span>";
-	result += "<br>";
-	result = ext_description;
+	result = "<html>" + eString(CHARSETMETA) + "<head><title>EPG Details</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#ffffff>";
+	result += "<span class=\"titel\"><b>" + description + "</b></span>";
+	result += "<p>";
+	result += ext_description;
 	result += "</body>";
 	result += "</html>";
 
