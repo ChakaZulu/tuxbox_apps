@@ -1,6 +1,6 @@
 /**********************************************
 *
-*	$Revision: 1.2 $
+*	$Revision: 1.3 $
 *
 **********************************************/
 
@@ -518,7 +518,7 @@ eFlashtoolSource::eFlashtoolSource(int direction)
 	move(ePoint(150, 100));
 	//new eListBoxEntryText(&list, _("back"), (void*)"back");
 	new eListBoxEntryText(&list, "tmp", (void*)"/tmp");
-#ifdef	DISABLE_FILE
+#ifndef DISABLE_FILE
 	new eListBoxEntryText(&list, "HDD", (void*)"/hdd/images");
 	new eListBoxEntryText(&list, "USB", (void*)"/var/mnt/USB/images");
 #endif
