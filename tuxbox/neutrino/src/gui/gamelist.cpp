@@ -259,19 +259,10 @@ void CGameList::runGame(int selected )
 	int				argc;
 	int				i;
 	char			depstring[129];
-	const char		*dep;
 
 	string pluginname = gamelist[selected]->filename;
 
-	dep=gamelist[selected]->depend.c_str();
-
-	/* first we need depend-libs */
-	depstring[0] = 0;
-	if ( strlen( dep ))
-	{
-		memcpy(depstring,dep,sizeof(dep));
-		depstring[128] = 0;
-	}
+	strcpy(depstring, gamelist[selected]->depend.c_str());
 
 	argc=0;
 	if ( depstring[0] )
