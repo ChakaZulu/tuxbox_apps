@@ -125,8 +125,9 @@ void show_time()
 	ftime(&tm);
 	strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
 
+
 	display.draw_fill_rect (90,54,120,64, CLCDDisplay::PIXEL_OFF);
-	fonts.time->RenderString(92,63, 50, timestr, CLCDDisplay::PIXEL_ON);
+	fonts.time->RenderString(93,63, 50, timestr, CLCDDisplay::PIXEL_ON);
 	display.update();
 }
 
@@ -207,7 +208,7 @@ void * TimeThread (void *)
 {
 	while(1)
 	{
-		sleep(10);
+		sleep(1);
 		show_time();
 	}
 	return NULL;
@@ -219,9 +220,9 @@ int main(int argc, char **argv)
 
 	fontRenderer = new fontRenderClass( &display );
 	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 12);
-	fonts.time=fontRenderer->getFont("Arial", "Regular", 10);
+	fonts.time=fontRenderer->getFont("Arial", "Regular", 8);
 	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
-	fonts.menu=fontRenderer->getFont("Arial", "Regular", 13);
+	fonts.menu=fontRenderer->getFont("Arial", "Regular", 12);
 	display.setIconBasePath("/usr/lib/icons/");
 
 	if(!display.isAvailable())
@@ -256,11 +257,6 @@ int main(int argc, char **argv)
 	show_channelname("");
 	show_time();
 
-	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )
-	{
-		perror("timer thread create failed\n");
-	}
-
 
 	int listenfd, connfd;
 	socklen_t clilen;
@@ -290,6 +286,12 @@ int main(int argc, char **argv)
 
 	/* alles geladen, daemonize Now! ;) */
 	if (fork() != 0) return 0;
+
+	/* Thread erst nach dem forken erstellen, da sonst Abbruch */
+	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )
+	{
+		perror("lcdd: pthread_create(TimeThread)");
+	}
 
 	shall_exit = false;
 	while(!shall_exit)
