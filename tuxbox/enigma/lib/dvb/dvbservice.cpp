@@ -330,6 +330,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		break;
 	}	
 	case eDVBServiceEvent::eventServiceGotPMT:
+	{
 		service_state=0;
 		scanPMT();
 		PMT *pmt=dvb.tPMT.ready()?dvb.tPMT.getCurrent():0;
@@ -343,6 +344,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		else
 			eDebug("nee, doch nicht (state ist %d)", (int)dvb.getState());
 		break;
+	}
 	case eDVBServiceEvent::eventServiceGotSDT:
 	{
 		if (dvb.getState() != eDVBServiceState::stateServiceGetSDT)

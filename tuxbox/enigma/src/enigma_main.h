@@ -17,7 +17,6 @@
 #include <lib/gui/numberactions.h>
 #include <lib/dvb/service.h>
 #include <lib/gui/eprogress.h>
-#include <lib/dvb/subtitling.h>
 
 class eProgress;
 
