@@ -17,13 +17,13 @@ neutrino_SOURCES = neutrino.cpp
 
 neutrino_LDADD = \
 	daemonc/libneutrino_daemonc.a \
-	driver/libneutrino_driver.a \
 	gui/bedit/libneutrino_gui_bedit.a \
 	gui/widget/libneutrino_gui_widget.a \
 	gui/libtimerlist.a \
 	gui/libneutrino_gui.a \
 	gui/widget/libneutrino_gui_widget2.a \
 	driver/pictureviewer/libneutrino_pictureviewer.a \
+	driver/libneutrino_driver.a \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
@@ -33,6 +33,7 @@ neutrino_LDADD = \
 	@CONNECTION_LIBS@ \
 	@CRAMFS_LIBS@ \
 	@CURL_LIBS@ \
+	@DIRECTFB_LIBS@ \
 	@FREETYPE_LIBS@ \
 	@LIRCDCLIENT_LIBS@ \
 	@NET_LIBS@ \

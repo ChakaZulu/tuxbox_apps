@@ -1,0 +1,50 @@
+#ifndef __fb_window_h__
+#define __fb_window_h__
+/*
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.h,v 1.1 2003/02/22 23:17:13 thegoodguy Exp $
+ *
+ * abstract fb_window class - d-box2 linux project
+ *
+ * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+
+#include <string>
+
+class CFBWindow
+{
+ public:
+	typedef unsigned char color_t;
+	typedef void *        font_t;
+	typedef void *        private_data_t;
+
+ private:
+	private_data_t private_data;
+
+ public:
+	int x, y;   /* upper left corner */
+	int dx, dy; /* dimension         */
+
+	CFBWindow(const int _x, const int _y, const int _dx, const int _dy);
+	~CFBWindow();
+
+	void paintBoxRel(const int _x, const int _y, const int _dx, const int _dy, const color_t _col);
+	bool paintIcon(const std::string _filename, const int _x, const int _y, const color_t _offset = 1);
+	void RenderString(const font_t _font, const int _x, const int _y, const int _width, const std::string _text, const color_t _color, const int _boxheight = 0, const bool _utf8_encoded = false);
+};
+
+#endif /* __fb_window_h__ */

@@ -33,13 +33,12 @@
 #ifndef __messagebox__
 #define __messagebox__
 
-#include <string>
-#include <vector>
-
-#include <driver/framebuffer.h>
-#include <driver/fontrenderer.h>
+#include <driver/fb_window.h>
 
 #include "menue.h"
+
+#include <string>
+#include <vector>
 
 
 class CMessageBoxNotifier
@@ -53,44 +52,41 @@ class CMessageBoxNotifier
 
 class CMessageBox
 {
+ private:
 
-	private:
+	CFBWindow *              window;
 
-		CFrameBuffer			*frameBuffer;
-		int				width;
-		int				height;
-		int				x;
-		int				y;
-		int				fheight;
-		int				theight;
+	int                      width, height;
 
-		std::string              caption;
-		std::vector<std::string> text;
-		std::string              iconfile;
-		CMessageBoxNotifier*     notifier;
+	int                      fheight;
+	int                      theight;
+	
+	std::string              caption;
+	std::vector<std::string> text;
+	std::string              iconfile;
+	CMessageBoxNotifier*     notifier;
 
-		int                      selected;
-		int                      showbuttons;
-		bool                     utf8;        // utf8_encoded: Caption & Text
+	int                      selected;
+	int                      showbuttons;
+	bool                     utf8;        // utf8_encoded: Caption & Text
+	
+	void paintHead();
+	void paintButtons();
+	
+	void yes();
+	void no();
+	void cancel();
 
-		void paintHead();
-		void paintButtons();
-		void hide();
-
-		void yes();
-		void no();
-		void cancel();
-
-	public:
-		enum result_
+ public:
+	enum result_
 		{
 			mbrYes,
 			mbrNo,
 			mbrCancel,
 			mbrBack
 		} result;
-
-		enum buttons_
+	
+	enum buttons_
 		{
 			mbYes= 0x01,
 			mbNo = 0x02,
@@ -98,11 +94,13 @@ class CMessageBox
 			mbAll = 0x07,
 			mbBack = 0x08
 		} buttons;
+	
+	// utf8_encoded: Caption & Text
+	CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier* Notifier, const std::string Icon = "", int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll, const bool utf8_encoded = false);
+	~CMessageBox(void);
 
-		// utf8_encoded: Caption & Text
-		CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier* Notifier, const std::string Icon = "", int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll, const bool utf8_encoded = false);
-		int exec(int timeout = -1);
-
+	int exec(int timeout = -1);
+	
 };
 
 // utf8_encoded: Caption & Text
