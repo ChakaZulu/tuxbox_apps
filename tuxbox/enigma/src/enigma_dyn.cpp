@@ -92,7 +92,7 @@ static eString zap[4][5] =
 	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:"},
 	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:"},
 	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ ""},
-	{"Recordings", "", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ";4097:7:0:1:0:0:0:0:0:0:"}
+	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
 };
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
@@ -559,18 +559,15 @@ static eString admin2(eString command)
 	}
 	else
 	if (command == "reboot")
-	{
 		eZap::getInstance()->quit(4);
-	}
 	else
 	if (command == "restart")
-	{
 		eZap::getInstance()->quit(2);
-	}
 	else
 	if (command == "wakeup")
 		eZapMain::getInstance()->wakeUp();
-	else if (command == "standby")
+	else
+	if (command == "standby")
 		eZapMain::getInstance()->gotoStandby();
 
 	return "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Command " + command + " initiated.</p></card></wml>";
@@ -814,6 +811,9 @@ static eString getZapNavi(eString mode, eString path)
 	result += button(100, "TV", RED, "?path=" + zap[ZAPMODETV][ZAPMODECATEGORY]);
 	result += button(100, "Radio", GREEN, "?path=" + zap[ZAPMODERADIO][ZAPMODECATEGORY]);
 	result += button(100, "Data", BLUE, "?path=" + zap[ZAPMODEDATA][ZAPMODECATEGORY]);
+#ifndef DISABLE_FILE
+	result += button(100, "Recordings", OCKER,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
+#endif
 	result += "<br><br>";
 	return result;
 }
@@ -825,15 +825,21 @@ static eString getLeftNavi(eString mode, eString path)
 	{
 		if (smallScreen == 0)
 		{
-			result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
-			result += "<br>";
-			result += button(110, "Providers", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEPROVIDERS]);
-			result += "<br>";
-			result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEBOUQUETS]);
-#ifndef DISABLE_FILE
-			result += "<br><br>";
-			result += button(110, "Recordings", LEFTNAVICOLOR,  "?path=;4097:7:0:1:0:0:0:0:0:0:");
-#endif
+			if (zap[zapMode][ZAPSUBMODESATELLITES])
+			{
+				result += button(110, "Satellites", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODESATELLITES]);
+				result += "<br>";
+			}
+			if (zap[zapMode][ZAPSUBMODEPROVIDERS])
+			{
+				result += button(110, "Providers", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEPROVIDERS]);
+				result += "<br>";
+			}
+			if (zap[zapMode][ZAPSUBMODEBOUQUETS])
+			{
+				result += button(110, "Bouquets", LEFTNAVICOLOR, "?path=" + zap[zapMode][ZAPSUBMODEBOUQUETS]);
+				result += "<br>";
+			}
 		}
 		else
 		{
@@ -1855,6 +1861,7 @@ static eString getZap(eString mode, eString path)
 {
 	eString result;
 
+	result += getZapNavi(mode, path);
 #ifndef DISABLE_FILE
 	if (path == ";4097:7:0:1:0:0:0:0:0:0:") // recordings
 	{
@@ -1868,7 +1875,6 @@ static eString getZap(eString mode, eString path)
 	{
 		if (smallScreen == 0)
 		{
-			result += getZapNavi(mode, path);
 			eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
 			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
 			result += tmp;
