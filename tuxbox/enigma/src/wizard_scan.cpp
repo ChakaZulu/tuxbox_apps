@@ -129,6 +129,8 @@ class eWizardScanInit
 public:
 	eWizardScanInit()
 	{
+		if ( eApp->isAppQuitNowSet() )
+			return;
 		int res = 0;
 		int diseqc=0;
 		eConfig::getInstance()->getKey("/elitedvb/wizards/diseqc", diseqc);

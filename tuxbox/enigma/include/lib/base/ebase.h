@@ -232,6 +232,7 @@ public:
 	void quit(int ret=0); // leave all pending loops (recursive leave())
 	void enter_loop();
 	void exit_loop();
+	bool isAppQuitNowSet() { return app_quit_now; }
 	void recalcAllTimers( int difference );
 };
 

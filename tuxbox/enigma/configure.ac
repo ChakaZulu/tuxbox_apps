@@ -47,6 +47,7 @@ data/pictures/keypics/Makefile
 data/pictures/small/Makefile
 data/resources/Makefile
 data/skins/Makefile
+data/sysconfig/Makefile
 data/templates/Makefile
 data/lirc/Makefile
 doc/Makefile

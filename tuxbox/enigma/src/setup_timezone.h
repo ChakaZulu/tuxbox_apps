@@ -17,13 +17,12 @@ class eZapTimeZoneSetup: public eWindow
 	eLabel *ltimeZone;
 	eStatusBar* statusbar;
 	eComboBox* timeZone;
-	eCheckbox *useDst;
 	eButton *ok;
 private:
 	void okPressed();
 
 	int loadTimeZones();
-	const char *cmdTimeZones();
+	char *cmdTimeZones();
 public:
 	eZapTimeZoneSetup();
 	~eZapTimeZoneSetup();

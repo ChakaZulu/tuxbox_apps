@@ -399,7 +399,10 @@ int main(int argc, char **argv)
 
 	{
 		eZap ezap(argc, argv);
-		res=ezap.exec();
+		if ( !ezap.isAppQuitNowSet() )
+			res=ezap.exec();
+		else
+			res=2;  // restart... (timezone changed)
 	}
 
 	Decoder::Flush();

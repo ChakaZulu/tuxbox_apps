@@ -5,5 +5,5 @@ SUBDIRS = \
 	resources \
 	skins \
 	templates \
-	lirc
-
+	lirc \
+	sysconfig

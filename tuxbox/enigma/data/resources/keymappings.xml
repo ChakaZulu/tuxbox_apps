@@ -27,6 +27,20 @@
 		<codes lower="/,.&amp;!?" upper="/,.&lt;=&gt;+" />
 		<codes lower="-_:()@#°" upper="-_:()@#°" />
 	</keymapping>
+	<keymapping code="es_ES" >
+		<codes lower="" upper="" />
+		<codes lower=" " upper=" " />
+		<codes lower="abcáà" upper="ABCÁÀ" />
+		<codes lower="deéèf" upper="DEFÉÈ" />
+		<codes lower="ghiíì" upper="GHIÍÌ" />
+		<codes lower="jkl" upper="JKL" />
+		<codes lower="mnoóò" upper="MNOÓÒ" />
+		<codes lower="pqrs" upper="PQRS" />
+		<codes lower="tuvúù" upper="TUVÚÙ" />
+		<codes lower="wxyz" upper="WXYZ" />
+		<codes lower="/,.&amp;!?" upper="/,.&lt;=&gt;+" />
+		<codes lower="-_:()@#°" upper="-_:()@#°" />
+	</keymapping>
 	<keymapping code="ru_RU" >
 		<codes lower="+-.,:?!';_" upper="+-.,:?!';_" />
 		<codes lower=" #@&amp;/()&lt;=&gt;%" upper=" #@&amp;/()&lt;=&gt;%" />
