@@ -29,7 +29,7 @@ uint curr_diseqc;
 
 
 void ParseTransponder(XMLTreeNode *transponder) {
-  ushort curr_freq = 0;
+  uint curr_freq = 0;
   uint curr_symbolrate = 0;	
   ushort curr_polarity = 0;
   ushort curr_fec = 0;
@@ -48,7 +48,7 @@ void ParseTransponder(XMLTreeNode *transponder) {
       }
       else if (!strcmp("sat", type)){
 	//printf("In sat-section\n");
-	sscanf(services->GetAttributeValue("frequency"),"%hu", &curr_freq);
+	sscanf(services->GetAttributeValue("frequency"),"%u", &curr_freq);
 	sscanf(services->GetAttributeValue("symbolRate"), "%u", &curr_symbolrate);
 	curr_symbolrate = curr_symbolrate * 1000;
 	sscanf(services->GetAttributeValue("Polarity"), "%hu", &curr_polarity);
