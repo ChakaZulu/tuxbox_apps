@@ -186,6 +186,10 @@ keybindingmenu.cancel zatvoriti listu kanala
 keybindingmenu.cancel_head zatvoriti listu kanala
 keybindingmenu.sort promijeniti smjer sortiranja
 keybindingmenu.sort_head promijeniti smjer sortiranja
+keybindingmenu.addrecord unset
+keybindingmenu.addrecord_head unset
+keybindingmenu.addremind unset
+keybindingmenu.addremind_head unset
 keybindingmenu.channelup kanal gore
 keybindingmenu.channelup_head tipka za kanal gore
 keybindingmenu.channeldown kanal dole
@@ -319,6 +323,7 @@ scants.services servisi:
 scants.bouquet bukete
 scants.bouquet_leave ne promijeniti
 scants.bouquet_create novo sastaviti
+scants.failed Neuspjesno trazenje kanala!
 scants.bouquet_erase izbrisati
 scants.finished Uspjesno izvrseno trazenje kanala!
 
@@ -380,7 +385,7 @@ bouqueteditor.name namjestiti buket
 bouqueteditor.delete izbrisati
 bouqueteditor.add dodati
 bouqueteditor.move pomaknuti
-bouqueteditor.rename promijeniti ime
+bouqueteditor.rename preimenovati
 bouqueteditor.hide sakriti
 bouqueteditor.lock zabraniti
 bouqueteditor.newbouquetname novo ime buketa
@@ -677,3 +682,13 @@ nfsmenu.head unset
 
 apids.hint_1 Utipkajte heksadecimalne apids
 apids.hint_2 za streaming razdvojene sa ' '.
+
+mainmenu.pictureviewer promatrac slika
+pictureviewer.head promatrac slika
+pictureviewer.sortorder promijeniti smjer sortiranja
+pictureviewer.sortorder.date (datum)
+pictureviewer.sortorder.filename (ime datoteke)
+pictureviewer.show pokazati
+pictureviewer.slideshow pokazivanje slika
+pictureviewer.slide_time trajanje pokazivanja slika
+pictureviewer.scaling skaliranje
