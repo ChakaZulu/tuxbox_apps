@@ -52,7 +52,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.4.7"
+#define WEBXFACEVERSION "1.4.8"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -2051,7 +2051,7 @@ bool rec_movies()
 	FILE *rec = fopen("/hdd/movie/recordings.epl", "w");
 	if (rec)
 	{
-		fprintf(rec, _("#NAME Aufgenommene Filme\n"));
+		fprintf(rec, "#NAME Aufgenommene Filme\n");
 
 		struct dirent **namelist;
 		int n = scandir("/hdd/movie", &namelist, 0, alphasort);
@@ -2142,11 +2142,11 @@ struct getEntryString
 				channel = filter_string(service->service_name);
 		}
 		if (!channel)
-			channel = _("No channel available");
+			channel = "No channel available";
 
 		description = getRight(description, '/');
 		if (!description)
-			description = _("No description available");
+			description = "No description available";
 
 		result << "<tr>"
 			<< "<td align=center><a href=\"javascript:deleteTimerEvent(\'"
@@ -2155,20 +2155,15 @@ struct getEntryString
 			<< "&type=" << se->type
 			<< "&force=no"
 			<< "\')\"><img src=\"trash.gif\" border=0 height=20></a></td>";
-		if (!repeating)
-		{
-			result << "<td align=center><a href=\"javascript:editTimerEvent(\'"
-				<< "ref=" << ref2string(se->service)
-				<< "&start=" << se->time_begin
-				<< "&duration=" << se->duration
-				<< "&ID=" << std::hex << se->event_id << std::dec
-				<< "&channel=" << channel
-				<< "&descr=" << description
-				<< "&type=" << se->type
-				<< "\')\"><img src=\"edit.gif\" border=0 height=20></a></td>";
-		}
-		else
-			result << "<td>&nbsp;</td>";
+
+		result << "<td align=center><a href=\"javascript:editTimerEvent(\'"
+			<< "ref=" << ref2string(se->service)
+			<< "&start=" << se->time_begin
+			<< "&duration=" << se->duration
+			<< "&channel=" << channel
+			<< "&descr=" << description
+			<< "&type=" << se->type
+			<< "\')\"><img src=\"edit.gif\" border=0 height=20></a></td>";
 
 		if (se->type & ePlaylistEntry::stateFinished)
 			result << "<td align=center><img src=\"on.gif\"></td>";
@@ -2222,7 +2217,7 @@ static eString genTimerListTableBody(int type)
 	std::stringstream result;
 	result << std::setfill('0');
 	if (!eTimerManager::getInstance()->getTimerCount())
-		result << "<tr><td>" << eString(_("No timer events available")) << "</td></tr>";
+		result << "<tr><td>" << eString("No timer events available") << "</td></tr>";
 	else
 		eTimerManager::getInstance()->forEachEntry(getEntryString(result, type));
 
@@ -2240,7 +2235,7 @@ static eString getControlTimerList()
 	if (count)
 		tableBody = genTimerListTableBody(0);
 	else
-		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No regular timer events available")) + "</td></tr>";
+		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString("No regular timer events available") + "</td></tr>";
 	result.strReplace("#TIMER_REGULAR#", tableBody);
 
 	// repeating timers
@@ -2249,13 +2244,14 @@ static eString getControlTimerList()
 	if (count)
 		tableBody = genTimerListTableBody(1);
 	else
-		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No repeating timer events available")) + "</td></tr>";
+		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString("No repeating timer events available") + "</td></tr>";
 	result.strReplace("#TIMER_REPEATED#", tableBody);
 
 	// buttons
 	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()"));
 	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()"));
-	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()"));
+	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow('regular')"));
+	result.strReplace("#BUTTONADD2#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow('repeating')"));
 
 	return result;
 }
@@ -3815,7 +3811,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString channel = httpUnescape(opt["channel"]);
 	eString description = httpUnescape(opt["descr"]);
 	if (description == "")
-		description = _("No description available");
+		description = "No description available";
 
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
@@ -3832,9 +3828,9 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
+		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
 	else
-		result += _("Timer event was created successfully.");
+		result += "Timer event was created successfully.";
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return result;
 }
@@ -4012,7 +4008,6 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString oldEventType = opt["old_type"];
 	eString oldStartTime = opt["old_stime"];
 
-	eString eventID = opt["ID"];
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
 	eString shour = opt["shour"];
@@ -4025,17 +4020,43 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString channel = httpUnescape(opt["channel"]);
 	eString after_event = opt["after_event"];
 	eString force = opt["force"];
+	eString mo = opt["mo"];
+	eString tu = opt["tu"];
+	eString we = opt["we"];
+	eString th = opt["th"];
+	eString fr = opt["fr"];
+	eString sa = opt["sa"];
+	eString su = opt["su"];
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
-	start.tm_mday = atoi(sday.c_str());
-	start.tm_mon = atoi(smonth.c_str()) - 1;
+	if (atoi(oldEventType.c_str()) & ePlaylistEntry::isRepeating)
+	{
+		start.tm_year = 70;  // 1.1.1970
+		start.tm_mon = 0;
+		start.tm_mday = 1;
+	}
+	else
+	{
+		start.tm_mday = atoi(sday.c_str());
+		start.tm_mon = atoi(smonth.c_str()) - 1;
+	}
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
+
 	tm end = *localtime(&now);
-	end.tm_mday = atoi(eday.c_str());
-	end.tm_mon = atoi(emonth.c_str()) -1 ;
+	if (atoi(oldEventType.c_str()) & ePlaylistEntry::isRepeating)
+	{
+		end.tm_year = 70;  // 1.1.1970
+		end.tm_mon = 0;
+		end.tm_mday = 1;
+	}
+	else
+	{
+		end.tm_mday = atoi(eday.c_str());
+		end.tm_mon = atoi(emonth.c_str()) -1;
+	}
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
@@ -4044,11 +4065,6 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	time_t eventEndTime = mktime(&end);
 	int duration = eventEndTime - eventStartTime;
 	int oldType = atoi(oldEventType.c_str());
-
-	int eventid;
-	sscanf(eventID.c_str(), "%x", &eventid);
-	// eDebug("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
-	//								end.tm_mday, end.tm_mon, end.tm_hour, end.tm_min);
 
 	eServiceReference ref = string2ref(serviceRef);
 
@@ -4073,12 +4089,30 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 		oldType |= atoi(after_event.c_str());
 	}
 
+	if (atoi(oldEventType.c_str()) & ePlaylistEntry::isRepeating)
+	{
+		if (mo == "on")
+			oldType |= ePlaylistEntry::Mo;
+		if (tu == "on")
+			oldType |= ePlaylistEntry::Tue;
+		if (we == "on")
+			oldType |= ePlaylistEntry::Wed;
+		if (th == "on")
+			oldType |= ePlaylistEntry::Thu;
+		if (fr == "on")
+			oldType |= ePlaylistEntry::Fr;
+		if (sa == "on")
+			oldType |= ePlaylistEntry::Sa;
+		if (su == "on")
+			oldType |= ePlaylistEntry::Su;
+	}
+
 	ref.descr = channel + "/" + description;
 	ePlaylistEntry newEvent(
 		ref,
 		eventStartTime,
 		duration,
-		eventid,
+		-1,
 		oldType);
 
 	int ret = eTimerManager::getInstance()->modifyEventInTimerList(oldEvent, newEvent, (force == "yes"));
@@ -4087,7 +4121,10 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	{
 		// ask user if he wants to update only after_event action and duration
 		// then call modifyEvent again.. with true as third parameter..
-		result = readFile(TEMPLATE_DIR + "queryEditTimer.tmp");
+		if (atoi(oldEventType.c_str()) & ePlaylistEntry::isRepeating)
+			result = readFile(TEMPLATE_DIR + "queryEditRepeatingTimer.tmp");
+		else
+			result = readFile(TEMPLATE_DIR + "queryEditTimer.tmp");
 		opts.strReplace("force=no", "force=yes");
 		if (opts.find("?") != 0)
 			opts = "?" + opts;
@@ -4096,7 +4133,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	else
 	{
 		result = "<script language=\"javascript\">window.close();</script>";
-		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)	
+		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	}
 	return result;
 }
@@ -4119,17 +4156,45 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	eString description = httpUnescape(opt["descr"]);
 	eString channel = httpUnescape(opt["channel"]);
 	eString after_event = opt["after_event"];
+	eString timer = opt["timer"];
+	eString mo = opt["mo"];
+	eString tu = opt["tu"];
+	eString we = opt["we"];
+	eString th = opt["th"];
+	eString fr = opt["fr"];
+	eString sa = opt["sa"];
+	eString su = opt["su"];
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
+
 	tm start = *localtime(&now);
-	start.tm_mday = atoi(sday.c_str());
-	start.tm_mon = atoi(smonth.c_str()) - 1;
+	if (timer == "repeating")
+	{
+		start.tm_year = 70;  // 1.1.1970
+		start.tm_mon = 0;
+		start.tm_mday = 1;
+	}
+	else
+	{
+		start.tm_mday = atoi(sday.c_str());
+		start.tm_mon = atoi(smonth.c_str()) - 1;
+	}
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
+
 	tm end = *localtime(&now);
-	end.tm_mday = atoi(eday.c_str());
-	end.tm_mon = atoi(emonth.c_str()) -1 ;
+	if (timer == "repeating")
+	{
+		end.tm_year = 70;  // 1.1.1970
+		end.tm_mon = 0;
+		end.tm_mday = 1;
+	}
+	else
+	{
+		end.tm_mday = atoi(eday.c_str());
+		end.tm_mon = atoi(emonth.c_str()) -1;
+	}
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
@@ -4148,15 +4213,34 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	int type = atoi(after_event.c_str());
 	type |= ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR;
 
+	if (timer == "repeating")
+	{
+		type |= ePlaylistEntry::isRepeating;
+		if (mo == "on")
+			type |= ePlaylistEntry::Mo;
+		if (tu == "on")
+			type |= ePlaylistEntry::Tue;
+		if (we == "on")
+			type |= ePlaylistEntry::Wed;
+		if (th == "on")
+			type |= ePlaylistEntry::Thu;
+		if (fr == "on")
+			type |= ePlaylistEntry::Fr;
+		if (sa == "on")
+			type |= ePlaylistEntry::Sa;
+		if (su == "on")
+			type |= ePlaylistEntry::Su;
+	}
+
 	ePlaylistEntry entry(string2ref(serviceRef), start1, duration, eventid, type);
 	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
+		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
 	else
 	{
-		result += _("Timer event was created successfully.");
-		eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+		result += "Timer event was created successfully.";
+		eTimerManager::getInstance()->saveTimerList();
 	}
 
 	return result;
@@ -4169,13 +4253,13 @@ static eString buildAfterEventOpts(int type)
 		afterOpts << "<option value=\"0\">";
 	else
 		afterOpts << "<option selected value=\"0\">";
-	afterOpts << _("Nothing")
+	afterOpts << "Nothing"
 		<< "</option>";
 	if ( type & ePlaylistEntry::doGoSleep )
 		afterOpts << "<option selected value=\"" << ePlaylistEntry::doGoSleep << "\">";
 	else
 		afterOpts << "<option value=\"" << ePlaylistEntry::doGoSleep << "\">";
-	afterOpts << _("Standby")
+	afterOpts << "Standby"
 		<< "</option>";
 	if ( eSystemInfo::getInstance()->canShutdown() )
 	{
@@ -4183,7 +4267,7 @@ static eString buildAfterEventOpts(int type)
 			afterOpts << "<option selected value=\"" << ePlaylistEntry::doShutdown << "\">";
 		else
 			afterOpts << "<option value=\"" << ePlaylistEntry::doShutdown << "\">";
-		afterOpts << _("Shutdown")
+		afterOpts << "Shutdown"
 		<< "</option>";
 	}
 	return afterOpts.str();
@@ -4194,7 +4278,6 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString serviceRef = opt["ref"];
-	eString eventID = opt["ID"];
 	eString eventStartTime = opt["start"];
 	eString eventDuration = opt["duration"];
 	eString description = httpUnescape(opt["descr"]);
@@ -4202,7 +4285,6 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	// this is only for renamed services ( or subservices )... changing this in the edit dialog has no effect to
 	// the recording service
 	eString channel = httpUnescape(opt["channel"]);
-
 	eString eventType = opt["type"];
 
 	time_t eventStart = atoi(eventStartTime.c_str());
@@ -4213,16 +4295,15 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	tm end = *localtime(&eventEnd);
 	int evType = atoi(eventType.c_str());
 
-	// eDebug("[ENIGMA_DYN] editTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+	eString result;
+	if (evType & ePlaylistEntry::isRepeating)
+		result = readFile(TEMPLATE_DIR + "editRepeatingTimerEvent.tmp");
+	else
+		result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
 
-	// TODO: check if ( type & ePlaylistEntry::isRepeating )
-	// .. then load another template.. with checkboxes for weekdays..
-	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
 	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
 
-	result.strReplace("#AFTERTEXT#", _("After Event:"));
 	result.strReplace("#AFTEROPTS#", buildAfterEventOpts(evType));
-	result.strReplace("#EVENTID#", eventID);
 // these three values we need to find the old event in timerlist...
 	result.strReplace("#SERVICEREF#", serviceRef);
 	result.strReplace("#OLD_TYPE#", eventType);
@@ -4239,7 +4320,14 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, end.tm_min));
 	result.strReplace("#CHANNEL#", channel);
 	result.strReplace("#DESCRIPTION#", description);
-	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	result.strReplace("#MO#", (evType & ePlaylistEntry::Mo) ? "checked" : "");
+	result.strReplace("#TU#", (evType & ePlaylistEntry::Tue) ? "checked" : "");
+	result.strReplace("#WE#", (evType & ePlaylistEntry::Wed) ? "checked" : "");
+	result.strReplace("#TH#", (evType & ePlaylistEntry::Thu) ? "checked" : "");
+	result.strReplace("#FR#", (evType & ePlaylistEntry::Fr) ? "checked" : "");
+	result.strReplace("#SA#", (evType & ePlaylistEntry::Sa) ? "checked" : "");
+	result.strReplace("#SU#", (evType & ePlaylistEntry::Su) ? "checked" : "");
+	eTimerManager::getInstance()->saveTimerList();
 	return result;
 }
 
@@ -4247,15 +4335,20 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString timer = opt["timer"];
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
 	tm end = *localtime(&now);
 
-	eString result = readFile(TEMPLATE_DIR + "addTimerEvent.tmp");
+	eString result;
+	if (timer == "repeating")
+		result = readFile(TEMPLATE_DIR + "addRepeatingTimerEvent.tmp");
+	else
+		result = readFile(TEMPLATE_DIR + "addTimerEvent.tmp");
+
 	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
 
-	result.strReplace("#AFTERTEXT#", _("After Event:"));
 	result.strReplace("#AFTEROPTS#", buildAfterEventOpts(0));
 
 	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
@@ -4286,7 +4379,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	eString serviceRef = opt["ref"];
 	eString eventID = opt["ID"];
 	int eventid;
-	eString description = _("No description available");
+	eString description = "No description available";
 
 	sscanf(eventID.c_str(), "%x", &eventid);
 	eDebug("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %04x", serviceRef.c_str(), eventid);
@@ -4320,7 +4413,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 		}
 	}
 	if (!ext_description)
-		ext_description = _("No detailed description available");
+		ext_description = "No detailed description available";
 
 	result = readFile(TEMPLATE_DIR + "epgDetails.tmp");
 	result.strReplace("#EVENT#", filter_string(description));

@@ -43,7 +43,7 @@
 						<input type="checkbox" name="th" value="on" #TH#>&nbsp;Th&nbsp;&nbsp;
 						<input type="checkbox" name="fr" value="on" #FR#>&nbsp;Fr&nbsp;&nbsp;
 						<input type="checkbox" name="sa" value="on" #SA#>&nbsp;Sa&nbsp;&nbsp;
-						<input type="checkbox" name="so" value="on" #SO#>&nbsp;Su&nbsp;&nbsp;
+						<input type="checkbox" name="su" value="on" #SU#>&nbsp;Su&nbsp;&nbsp;
 					</td>
 				</tr>
 				<tr>
