@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.48 2002/09/23 13:31:15 thegoodguy Exp $
+ * $Id: getservices.h,v 1.49 2002/10/12 20:19:44 obi Exp $
  */
 
 #ifndef __getservices_h__
@@ -15,11 +15,11 @@
 
 #include <eventserver.h>
 
+#include "ci.h"
+#include "descriptors.h"
+#include "sdt.h"
 #include "types.h"
 #include "xmlinterface.h"
-#include <zapci/ci.h>
-#include <zapsi/descriptors.h>
-#include <zapsi/sdt.h>
 
 #define zapped_chan_is_nvod 0x80
 

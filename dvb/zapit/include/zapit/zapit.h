@@ -1,11 +1,11 @@
 /*
- * $Id: zapit.h,v 1.62 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Id: zapit.h,v 1.63 2002/10/12 20:19:44 obi Exp $
  */
 
 #ifndef __zapit_h__
 #define __zapit_h__
 
-#include <zapitclient.h>
+#include "client/zapitclient.h"
 
 #include "bouquets.h"
 

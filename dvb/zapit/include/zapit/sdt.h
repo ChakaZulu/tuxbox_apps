@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.10 2002/09/24 16:46:17 thegoodguy Exp $
+ * $Id: sdt.h,v 1.11 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,7 +22,7 @@
 #ifndef __sdt_h__
 #define __sdt_h__
 
-#include <types.h>
+#include "types.h"
 
 enum service_type_e
 {

@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.46 2002/10/06 22:18:26 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.47 2002/10/12 20:19:45 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,16 +26,13 @@
 /* libevent */
 #include <eventserver.h>
 
-#include <zapitclient.h>
-#include <zapost/frontend.h>
-
-#include <bouquets.h>
-#include <scan.h>
-
-#include <dvbstring.h>
-
-#include "descriptors.h"
-#include "sdt.h"
+#include <zapit/bouquets.h>
+#include <zapit/client/zapitclient.h>
+#include <zapit/descriptors.h>
+#include <zapit/dvbstring.h>
+#include <zapit/frontend.h>
+#include <zapit/scan.h>
+#include <zapit/sdt.h>
 
 extern tallchans allchans;   //  defined in zapit.cpp
 std::map <uint32_t, transpondermap> scantransponders;

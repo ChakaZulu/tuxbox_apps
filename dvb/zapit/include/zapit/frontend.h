@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.15 2002/09/20 16:53:39 thegoodguy Exp $
+ * $Id: frontend.h,v 1.16 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -30,7 +30,7 @@
 #include <ost/sec.h>
 
 /* zapit */
-#include <channel.h>
+#include "channel.h"
 
 #define MAX_LNBS	4
 

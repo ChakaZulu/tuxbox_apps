@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.8 2002/10/07 22:52:13 obi Exp $
+ * $Id: audio.cpp,v 1.9 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -27,8 +27,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "audio.h"
-#include "settings.h"
+#include <zapit/audio.h>
+#include <zapit/settings.h>
 
 CAudio::CAudio()
 {

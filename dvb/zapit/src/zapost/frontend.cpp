@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.28 2002/10/07 22:50:22 obi Exp $
+ * $Id: frontend.cpp,v 1.29 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -34,12 +34,11 @@
 #include <iostream>
 
 /* zapit */
-#include <getservices.h>
-#include <zapsi/nit.h>
-#include <zapsi/sdt.h>
-
-#include "frontend.h"
-#include "settings.h"
+#include <zapit/frontend.h>
+#include <zapit/getservices.h>
+#include <zapit/nit.h>
+#include <zapit/sdt.h>
+#include <zapit/settings.h>
 
 extern std::map <uint32_t, transponder> transponders;
 

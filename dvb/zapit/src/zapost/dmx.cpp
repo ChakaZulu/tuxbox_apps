@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.9 2002/10/08 22:25:12 obi Exp $
+ * $Id: dmx.cpp,v 1.10 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -23,7 +23,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
-#include "dmx.h"
+#include <zapit/dmx.h>
 
 int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask)
 {

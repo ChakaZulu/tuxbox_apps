@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.8 2002/09/11 20:24:03 thegoodguy Exp $
+ * $Id: bat.cpp,v 1.9 2002/10/12 20:19:45 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -30,10 +30,9 @@
 /* debug */
 #include <stdlib.h>
 
-#include <zapost/dmx.h>
-
-#include "bat.h"
-#include "descriptors.h"
+#include <zapit/bat.h>
+#include <zapit/descriptors.h>
+#include <zapit/dmx.h>
 
 #define BAT_SIZE 1024
 

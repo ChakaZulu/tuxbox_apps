@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.8 2002/10/08 00:55:44 obi Exp $
+ * $Id: ci.cpp,v 1.9 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -19,7 +19,7 @@
  *
  */
 
-#include "ci.h"
+#include <zapit/ci.h>
 
 unsigned int write_length_field (unsigned char * buffer, unsigned int length)
 {

@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.14 2002/09/24 16:46:17 thegoodguy Exp $
+ * $Id: channel.h,v 1.15 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -28,7 +28,7 @@
 #include <stdint.h>
 
 /* zapit */
-#include <zapci/ci.h>
+#include "ci.h"
 #include "types.h"
 
 class CZapitAudioChannel

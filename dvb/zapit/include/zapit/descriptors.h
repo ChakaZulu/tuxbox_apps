@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.h,v 1.14 2002/09/24 16:46:17 thegoodguy Exp $
+ * $Id: descriptors.h,v 1.15 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -22,7 +22,7 @@
 #ifndef __descriptors_h__
 #define __descriptors_h__
 
-#include <types.h>
+#include "types.h"
 
 uint8_t generic_descriptor (uint8_t *buffer);
 uint8_t video_stream_descriptor (uint8_t *buffer);

@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.26 2002/09/25 15:37:03 thegoodguy Exp $
+ * $Id: cam.cpp,v 1.27 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -20,10 +20,9 @@
  *
  */
 
-#include "cam.h"
-
 /* zapit */
-#include <settings.h>   // CAMD_UDS_NAME
+#include <zapit/cam.h>
+#include <zapit/settings.h>   // CAMD_UDS_NAME
 
 bool CCam::sendMessage(char* data, const size_t length)
 {

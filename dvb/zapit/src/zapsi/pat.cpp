@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.38 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Id: pat.cpp,v 1.39 2002/10/12 20:19:45 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -27,11 +27,10 @@
 /* libevent */
 #include <eventserver.h>
 
-#include <zapitclient.h>
-#include <scan.h>
-#include <zapost/dmx.h>
-
-#include "pat.h"
+#include <zapit/client/zapitclient.h>
+#include <zapit/dmx.h>
+#include <zapit/pat.h>
+#include <zapit/scan.h>
 
 #define PAT_SIZE 1024
 

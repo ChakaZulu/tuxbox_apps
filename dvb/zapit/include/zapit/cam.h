@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.20 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Id: cam.h,v 1.21 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -24,7 +24,7 @@
 #define __cam_h__
 
 #include "ci.h"
-#include <basicclient.h>
+#include "client/basicclient.h"
 
 class CCam : public CBasicClient
 {

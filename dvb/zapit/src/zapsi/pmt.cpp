@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.26 2002/09/10 18:34:26 obi Exp $
+ * $Id: pmt.cpp,v 1.27 2002/10/12 20:19:45 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -28,10 +28,9 @@
 #include <string>
 
 /* zapit */
-#include <zapost/dmx.h>
-
-#include "descriptors.h"
-#include "pmt.h"
+#include <zapit/descriptors.h>
+#include <zapit/dmx.h>
+#include <zapit/pmt.h>
 
 #define PMT_SIZE 1024
 

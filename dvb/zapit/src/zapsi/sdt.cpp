@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.33 2002/09/24 16:46:17 thegoodguy Exp $
+ * $Id: sdt.cpp,v 1.34 2002/10/12 20:19:45 obi Exp $
  */
 
 /* system c */
@@ -11,12 +11,12 @@
 #include <unistd.h>
 
 /* zapit */
-#include <zapost/dmx.h>
-#include <types.h>
-#include <settings.h>  // DEMUX_DEVICE
+#include <zapit/descriptors.h>
+#include <zapit/dmx.h>
+#include <zapit/sdt.h>
+#include <zapit/settings.h>  // DEMUX_DEVICE
+#include <zapit/types.h>
 
-#include "descriptors.h"
-#include "sdt.h"
 
 #define SDT_SIZE 1024
 

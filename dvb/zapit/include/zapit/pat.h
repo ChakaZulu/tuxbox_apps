@@ -1,5 +1,5 @@
 /*
- * $Id: pat.h,v 1.14 2002/09/24 16:46:17 thegoodguy Exp $
+ * $Id: pat.h,v 1.15 2002/10/12 20:19:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,8 +22,8 @@
 #ifndef __pat_h__
 #define __pat_h__
 
-#include <channel.h>
-#include <zapost/frontend.h>
+#include "channel.h"
+#include "frontend.h"
 
 int parse_pat (const int demux_fd, CZapitChannel * channel, const t_original_network_id original_network_id = 0x0000, const uint8_t DiSEqC = 0);
 int fake_pat (uint32_t TsidOnid, FrontendParameters feparams, uint8_t polarity, uint8_t DiSEqC);
