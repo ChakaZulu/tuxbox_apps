@@ -27,3 +27,5 @@ test_tt_SOURCES = test_tt.c hex_dump.c
 test_av_SOURCES = test_av.c
 test_stillimage_SOURCES = test_stillimage.c
 
+AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+
