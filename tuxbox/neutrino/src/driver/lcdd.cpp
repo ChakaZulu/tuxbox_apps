@@ -83,6 +83,8 @@ void CLCD::wake_up() {
 		atoi(g_settings.lcd_setting_dim_brightness) > 0 ?
 			setBrightness(g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS]) : setPower(1);
 	}
+	else
+		setPower(1);
 }
 
 void* CLCD::TimeThread(void *)
