@@ -511,7 +511,8 @@ void CTimerList::paintHead()
 		real_width-=15; //no scrollbar
 	}
 	frameBuffer->paintBoxRel(x,y, real_width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, real_width- 20, strCaption.c_str(), COL_MENUHEAD);
+	frameBuffer->paintIcon("timer.raw",x+5,y+4);
+	g_Fonts->menu_title->RenderString(x+35,y+theight+0, real_width- 45, strCaption.c_str(), COL_MENUHEAD);
 
 /*	frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
 	if (bouquetList!=NULL)

@@ -5,7 +5,7 @@ EXTRA_DIST = \
 	radar4.raw radar5.raw radar6.raw radar7.raw radar8.raw radar9.raw \
 	rot.raw settings.raw shutdown.raw video.raw volume.raw volumebody.raw \
 	volumeslider2.raw volumeslider2alpha.raw volumeslider2blue.raw \
-	volumeslider2green.raw volumeslider2red.raw
+	volumeslider2green.raw volumeslider2red.raw timer.raw lcd.raw
 
 install-data-local:
 	install -d $(DATADIR)/neutrino/icons
