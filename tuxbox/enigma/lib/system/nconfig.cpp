@@ -89,6 +89,12 @@ void NConfig::close()
 	}
 }
 
+void NConfig::flush()
+{
+	close();
+	open(omode);
+}
+
 int NConfig::setName(const char *name)
 {
 	if (!name)

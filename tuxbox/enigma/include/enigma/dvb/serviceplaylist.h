@@ -6,18 +6,46 @@
 
 struct ePlaylistEntry
 {
+	enum
+	{
+		PlaylistEntry=1, SwitchTimerEntry=2, RecTimerEntry=4,	
+		stateWaiting=64, stateRunning=128, statePaused=256,
+		stateFinished=512, stateEventOutdated=1024,	stateNoSpaceLeft=2048,
+		stateUserAborted=4096, stateZapFailed=8192, typeSmartTimer=32768
+	};
+
 	eServiceReference service;
-	int current_position;
-	time_t time_begin, time_end;
-	
-	ePlaylistEntry(const eServiceReference &ref): service(ref), current_position(-1), time_begin(-1), time_end(-1) { }
-	ePlaylistEntry(const eServiceReference &ref, int current_position): service(ref), current_position(current_position), time_begin(-1), time_end(-1) { }
-	ePlaylistEntry(const eServiceReference &ref, int time_begin, int time_end): service(ref), current_position(-1), time_begin(time_begin), time_end(time_end) { }
+	union
+	{
+		int current_position;
+		int event_id;
+	};
+	time_t time_begin;
+	int duration,
+			type;  // event type and current state of timer events...
+	ePlaylistEntry(const eServiceReference &ref)
+		:service(ref), current_position(-1), time_begin(-1), duration(-1), type(PlaylistEntry)
+	{ }
+	ePlaylistEntry(const eServiceReference &ref, int current_position)
+		:service(ref), current_position(current_position), time_begin(-1), duration(-1), type(PlaylistEntry)
+	{ }
+	ePlaylistEntry(const eServiceReference &ref, int time_begin, int duration, int event_id=-1, int type=SwitchTimerEntry )
+		:service(ref), event_id(event_id), time_begin(time_begin), duration(duration), type(type)
+	{ }
 	operator eServiceReference &() { return service; }
 	operator const eServiceReference &() const { return service; }
 	bool operator == (const eServiceReference &r) const
 	{
-		return r == service;
+			return r == service;
+	}
+	bool operator == (const ePlaylistEntry &e) const
+	{
+		if ( type == PlaylistEntry )
+			return e.service == service;
+		else if ( e.event_id != -1 && event_id != -1 )
+			return e.service == service && e.event_id == event_id;
+		else
+			return e.service == service && e.time_begin == time_begin;
 	}
 };
 

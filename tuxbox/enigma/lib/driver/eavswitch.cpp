@@ -1,14 +1,19 @@
+#define VIDEO_DEV "/dev/dvb/card0/video0"
+#define AUDIO_DEV "/dev/dvb/card0/audio0"
+
 #include "eavswitch.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <dbox/avs_core.h>
 #include <ost/audio.h>
+#include <ost/video.h>
 #include <sys/ioctl.h>
 
 #include "config.h"
 
 #include <core/system/econfig.h>
 #include <core/dvb/edvb.h>
+#include <core/dvb/decoder.h>
 
 /* sucks */
 
@@ -17,7 +22,7 @@
 #define SAAIOSOUT               3 /* output control                     */
 #define SAAIOSENC               4 /* set encoder (pal/ntsc)             */
 #define SAAIOSMODE              5 /* set mode (rgb/fbas/svideo) */
-#define SAAIOSWSS		10 /* set wide screen signaling data */
+#define SAAIOSWSS							 10 /* set wide screen signaling data */
 
 #define SAA_MODE_RGB    0
 #define SAA_MODE_FBAS   1
@@ -44,9 +49,7 @@ eAVSwitch::eAVSwitch()
 	if (!instance)
 		instance=this;
 
-	fd=open("/dev/dbox/avs0", O_RDWR);
-
-	fdost=open("/dev/dvb/card0/audio0", O_RDWR);
+	avsfd=open("/dev/dbox/avs0", O_RDWR);
 
 	saafd=open("/dev/dbox/saa0", O_RDWR);
 }
@@ -84,12 +87,10 @@ eAVSwitch::~eAVSwitch()
 	if (instance==this)
 		instance=0;
 
-	if (fd>=0)
-		close(fd);
+	if (avsfd>=0)
+		close(avsfd);
 	if (saafd>=0)
 		close(saafd);
-	if (fdost>=0)
-		close(fdost);
 }
 
 void eAVSwitch::reloadSettings()
@@ -114,11 +115,19 @@ int eAVSwitch::setVolume(int vol)
 		audioMixer_t mix;
 		mix.volume_left=(vol*vol)/64;
 		mix.volume_right=(vol*vol)/64;
+
+		int fd = Decoder::getAudioDevice();
+
+		if ( fd == -1 )
+			fd = open( AUDIO_DEV, O_RDWR );
 	
-		if(ioctl(fdost, AUDIO_SET_MIXER, &mix))
+		if(ioctl(fd, AUDIO_SET_MIXER, &mix))
 			perror("AUDIO_SET_MIXER");
+		
+		if (Decoder::getAudioDevice() == -1)
+			close(fd);
 	}
-	return ioctl(fd, AVSIOSVOL, &vol);
+	return ioctl(avsfd, AVSIOSVOL, &vol);
 }
 
 void eAVSwitch::changeVolume(int abs, int vol)
@@ -172,11 +181,18 @@ void eAVSwitch::changeVCRVolume(int abs, int vol)
 
 void eAVSwitch::muteOstAudio(bool b)
 {
-	if (ioctl(fdost, AUDIO_SET_MUTE, b?1:0) < 0)
+	int fd = Decoder::getAudioDevice();
+
+	if (fd == -1)
+		fd = open(AUDIO_DEV, O_RDWR);
+
+	if (ioctl(fd, AUDIO_SET_MUTE, b?1:0) < 0)
 	{
 		perror("OST SET MUTE:");
 		return;
 	}
+	if (Decoder::getAudioDevice() == -1)
+		close(fd);
 }
 
 void eAVSwitch::sendVolumeChanged()
@@ -186,18 +202,23 @@ void eAVSwitch::sendVolumeChanged()
 
 void eAVSwitch::toggleMute()
 {
+	eString s = eDVB::getInstance()->getInfo("mID");
 	mute = !mute;
 	if (mute)
 	{
 //		setVolume(63);
-//		muteOstAudio(1);
-		muteAvsAudio(1);
+		if ( s == "05" )
+			muteOstAudio(1);
+		else
+			muteAvsAudio(1);
 	}
 	else
 	{
 //		changeVolume(1,volume);
-//		muteOstAudio(0);
-		muteAvsAudio(0);
+		if ( s == "05" )
+			muteOstAudio(0);
+		else
+			muteAvsAudio(0);
 	}
 	sendVolumeChanged();
 }
@@ -211,7 +232,7 @@ void eAVSwitch::muteAvsAudio(bool m)
 	else
 		a=AVS_UNMUTE;
 
-	if (ioctl(fd, AVSIOSMUTE, &a) < 0)
+	if (ioctl(avsfd, AVSIOSMUTE, &a) < 0)
 	{
 		perror("AVSIOSMUTE:");
 		return;
@@ -238,7 +259,7 @@ int eAVSwitch::setTVPin8(int vol)
 		fnc=(Type==PHILIPS?3:2);
 		break;
 	}
-	return ioctl(fd, AVSIOSFNC, &fnc);
+	return ioctl(avsfd, AVSIOSFNC, &fnc);
 }
 
 int eAVSwitch::setColorFormat(eAVColorFormat c)
@@ -261,22 +282,22 @@ int eAVSwitch::setColorFormat(eAVColorFormat c)
 	}
 	int fblk = (c == cfRGB)?1:0;
 	ioctl(saafd, SAAIOSMODE, &arg);
-	ioctl(fd, AVSIOSFBLK, &fblk);
+	ioctl(avsfd, AVSIOSFBLK, &fblk);
 	return 0;
 }
 
 int eAVSwitch::setInput(int v)
 {	
-	eDebug("[eAVSwitch] setInput %d, fd=%d", v, fd);
+	eDebug("[eAVSwitch] setInput %d, avsfd=%d", v, avsfd);
 	switch (v)
 	{
 	case 0:	//	Switch to DVB
-		ioctl(fd, AVSIOSVSW1, dvb);
-		ioctl(fd, AVSIOSASW1, dvb+1);
-		ioctl(fd, AVSIOSVSW2, dvb+2);
-		ioctl(fd, AVSIOSASW2, dvb+3);
-		ioctl(fd, AVSIOSVSW3, dvb+4);
-		ioctl(fd, AVSIOSASW3, dvb+5);
+		ioctl(avsfd, AVSIOSVSW1, dvb);
+		ioctl(avsfd, AVSIOSASW1, dvb+1);
+		ioctl(avsfd, AVSIOSVSW2, dvb+2);
+		ioctl(avsfd, AVSIOSASW2, dvb+3);
+		ioctl(avsfd, AVSIOSVSW3, dvb+4);
+		ioctl(avsfd, AVSIOSASW3, dvb+5);
 		changeVolume(1, volume);  // set Volume to TV Volume
 		if (mute)
 		{
@@ -287,13 +308,13 @@ int eAVSwitch::setInput(int v)
 		break;
 	case 1:   // Switch to VCR
 		v = (Type == SAGEM)? 0 : 2;
-		ioctl(fd, AVSIOSFBLK, &v);
-		ioctl(fd, AVSIOSVSW1, scart);
-		ioctl(fd, AVSIOSASW1, scart+1);
-		ioctl(fd, AVSIOSVSW2, scart+2);
-		ioctl(fd, AVSIOSASW2, scart+3);
-		ioctl(fd, AVSIOSVSW3, scart+4);
-		ioctl(fd, AVSIOSASW3, scart+5);
+		ioctl(avsfd, AVSIOSFBLK, &v);
+		ioctl(avsfd, AVSIOSVSW1, scart);
+		ioctl(avsfd, AVSIOSASW1, scart+1);
+		ioctl(avsfd, AVSIOSVSW2, scart+2);
+		ioctl(avsfd, AVSIOSASW2, scart+3);
+		ioctl(avsfd, AVSIOSVSW3, scart+4);
+		ioctl(avsfd, AVSIOSASW3, scart+5);
 		if (mute)
 			muteAvsAudio(0);
 		changeVCRVolume(1, VCRVolume);
@@ -368,3 +389,18 @@ bool eAVSwitch::loadScartConfig()
 
 	return 0;
 }
+
+void eAVSwitch::setVideoFormat( int format )
+{
+	int fd = Decoder::getVideoDevice();
+
+	if ( fd == -1 )
+		fd = open ( VIDEO_DEV, O_RDWR );
+
+	if (ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, format))
+		perror("VIDEO SET DISPLAY FORMAT:");
+
+	if (Decoder::getVideoDevice() == -1)
+		close(fd);
+}
+

@@ -17,11 +17,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.22 2002/09/22 12:24:00 Ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.23 2002/10/03 18:13:36 Ghostrider Exp $
  */
 
 #include "enigma_setup.h"
 
+#include <apps/enigma/timer.h>
 #include <apps/enigma/enigma_scan.h>
 #include <apps/enigma/setupnetwork.h>
 #include <apps/enigma/setupvideo.h>
@@ -38,20 +39,20 @@
 #include <core/gui/elabel.h>
 
 eZapSetup::eZapSetup()
-	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 9, 220, true)
+	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 10, 220, true)
 {
 	eDebug("statusbar = %p", statusbar);
 	move(ePoint(150, 136));
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("back to Mainmenu") ))->selected, eZapSetup::sel_close);
 	CONNECT((new eListBoxEntryMenu(&list, _("Channels..."), _("open channel setup") ))->selected, eZapSetup::sel_channels);
 	CONNECT((new eListBoxEntryMenu(&list, _("Network..."), _("open network setup") ))->selected, eZapSetup::sel_network);
-//	CONNECT((list, _("Audio...")))->selected, sel_sound);
 	CONNECT((new eListBoxEntryMenu(&list, _("OSD..."), _("open osd setup") ))->selected, eZapSetup::sel_osd);
 	CONNECT((new eListBoxEntryMenu(&list, _("LCD..."), _("open lcd setup") ))->selected, eZapSetup::sel_lcd);
 	CONNECT((new eListBoxEntryMenu(&list, _("RC..."), _("open remotecontrol setup") ))->selected, eZapSetup::sel_rc);
 	CONNECT((new eListBoxEntryMenu(&list, _("Video..."), _("open video setup") ))->selected, eZapSetup::sel_video);
 	CONNECT((new eListBoxEntryMenu(&list, _("Skin..."), _("open skin selector") ))->selected, eZapSetup::sel_skin);
 	CONNECT((new eListBoxEntryMenu(&list, _("Language..."), _("open language selector") ))->selected, eZapSetup::sel_language);
+	CONNECT((new eListBoxEntryMenu(&list, _("Timer..."), _("open timer view") ))->selected, eZapSetup::sel_timer);
 	CONNECT(list.selchanged, eZapSetup::onSelChanged );
 }
 
@@ -164,6 +165,17 @@ void eZapSetup::sel_language()
 {
 	hide();
 	eZapLanguageSetup setup;
+	setup.setLCD(LCDTitle, LCDElement);
+	setup.show();
+	setup.exec();
+	setup.hide();
+	show();
+}
+
+void eZapSetup::sel_timer()
+{
+	hide();
+	eTimerView setup;
 	setup.setLCD(LCDTitle, LCDElement);
 	setup.show();
 	setup.exec();

@@ -112,6 +112,7 @@ void eZapVideoSetup::okPressed()
 		eConfig::getInstance()->delKey("/elitedvb/video/pin8");
 		eDebug("Write v_pin8 with error %i", eConfig::getInstance()->setKey("/elitedvb/video/pin8", v_pin8 ));
 	}
+	eConfig::getInstance()->flush();
 	eAVSwitch::getInstance()->reloadSettings();
 	eStreamWatchdog::getInstance()->reloadSettings();
 	close(1);

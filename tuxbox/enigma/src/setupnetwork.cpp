@@ -169,6 +169,7 @@ void eZapNetworkSetup::okPressed()
 	eConfig::getInstance()->setKey("/elitedvb/network/dns", sdns);
 	eConfig::getInstance()->setKey("/elitedvb/network/gateway", sgateway);
 	eConfig::getInstance()->setKey("/elitedvb/network/dosetup", sdosetup);
+	eConfig::getInstance()->flush();
 	
 	eDVB::getInstance()->configureNetwork();
 	close(1);

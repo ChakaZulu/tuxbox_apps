@@ -109,8 +109,10 @@
 
 			<action name="showMenu" key="red" flags="m" />
 			<action name="showFavourite" key="blue" flags="m" />
-			<action name="addService" key="yellow" flags="m" />
-			<action name="addServiceToFavourite" key="green" flags="m" />
+			<action name="addService" key="green" flags="m" />
+			<action name="toggleStyle" key="dream" flags="m" />
+			<action name="toggleFocus" key="yellow" flags="m" />
+			<!--action name="addServiceToFavourite" key="green" flags="m" /-->
 			
 			<action name="modeTV" key="tv" flags="m" />
 			<action name="modeRadio" key="radio" flags="m" />
@@ -134,6 +136,13 @@
 		<actionmap name="enigmaVCR">
 			<action name="volumeUp" key="volup" flags="mr" />
 			<action name="volumeDown" key="voldown" flags="mr" />
+		</actionmap>
+		<actionmap name="epgSelector">
+			<action name="addTimerEvent" key="green" flags="m" />
+			<action name="removeTimerEvent" key="red" flags="m" />
+		</actionmap>
+		<actionmap name="timerView">
+			<action name="removeTimerEntry" key="red" flags="m" />
 		</actionmap>
 	</device>
 </rcdefaults>

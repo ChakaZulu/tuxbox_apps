@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.8 2002/08/11 00:52:24 Ghostrider Exp $
+ * $Id: setupskin.cpp,v 1.9 2002/10/03 18:13:36 Ghostrider Exp $
  */
 
 #include "setupskin.h"
@@ -90,6 +90,7 @@ void eSkinSetup::skinSelected(eListBoxEntrySkin *skin)
 	}
 
 	eConfig::getInstance()->setKey("/ezap/ui/skin", skin->getESML().c_str());
+	eConfig::getInstance()->flush();
 
 	close(0);
 }

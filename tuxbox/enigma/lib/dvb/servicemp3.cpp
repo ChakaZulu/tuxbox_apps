@@ -26,7 +26,7 @@
 	of luck. shouldn't happen.
 */
 
-eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): handler(handler), input(8*1024), output(256*1024), messages(this)
+eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): handler(handler), input(8*1024), output(256*1024), messages(this, 1)
 {
 	state=stateInit;
 
@@ -550,7 +550,7 @@ int eServiceHandlerMP3::serviceCommand(const eServiceCommand &cmd)
 	return 0;
 }
 
-eServiceHandlerMP3::eServiceHandlerMP3(): eServiceHandler(0x1000), messages(eApp)
+eServiceHandlerMP3::eServiceHandlerMP3(): eServiceHandler(0x1000), messages(eApp, 0)
 {
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);

@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-eDVRPlayerThread::eDVRPlayerThread(const char *filename, eServiceHandlerDVB *handler): handler(handler), buffer(64*1024), messages(this)
+eDVRPlayerThread::eDVRPlayerThread(const char *filename, eServiceHandlerDVB *handler): handler(handler), buffer(64*1024), lock(), messages(this, 1)
 {
 	state=stateInit;
 
@@ -46,8 +46,10 @@ eDVRPlayerThread::eDVRPlayerThread(const char *filename, eServiceHandlerDVB *han
 
 void eDVRPlayerThread::thread()
 {
+	lock.lock();
 	messages.start();
 	exec();
+	lock.unlock();
 }
 
 void eDVRPlayerThread::outputReady(int what)
@@ -119,7 +121,8 @@ void eDVRPlayerThread::readMore(int what)
 
 eDVRPlayerThread::~eDVRPlayerThread()
 {
-	kill(); // wait for thread exit.
+	lock.lock();		// wait for message loop exit
+	kill(); // join the thread
 
 	delete inputsn;
 	delete outputsn;
@@ -302,7 +305,8 @@ void eServiceHandlerDVB::aspectRatioChanged(int isanamorph)
 	serviceEvent(eServiceEvent(eServiceEvent::evtAspectChanged));
 }
 
-eServiceHandlerDVB::eServiceHandlerDVB(): eServiceHandler(eServiceReference::idDVB), messages(eApp), cache(*this), flags(0)
+eServiceHandlerDVB::eServiceHandlerDVB()
+	:eServiceHandler(eServiceReference::idDVB), messages(eApp, 0), flags(0), cache(*this)
 {
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);
@@ -492,6 +496,7 @@ int eServiceHandlerDVB::stop()
 	{
 		decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::exit));
 		delete decoder;
+		decoder=0;
 	}
 
 	return 0;

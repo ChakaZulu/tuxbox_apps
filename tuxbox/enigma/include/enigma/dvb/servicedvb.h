@@ -25,6 +25,7 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	void readMore(int what);
 	void outputReady(int what);
 	int maxBufferSize;
+	eLock lock;
 	
 	void dvrFlush();
 public:

@@ -1,8 +1,9 @@
 #ifndef __core_base_message_h
 #define __core_base_message_h
 
-#include "ebase.h"
+#include <core/base/ebase.h>
 #include <unistd.h>
+#include <core/system/elock.h>
 
 /**
  * \brief A generic messagepump.
@@ -13,8 +14,10 @@
 class eMessagePump
 {
 	int fd[2];
+	eLock content;
+	int ismt;
 public:
-	eMessagePump();
+	eMessagePump(int mt=0);
 	~eMessagePump();
 	int send(const void *data, int len);
 	int recv(void *data, int len); // blockierend
@@ -37,26 +40,21 @@ class eFixedMessagePump: private eMessagePump, public Object
 		T msg;
 		recv(&msg, sizeof(msg));
 		/*emit*/ recv_msg(msg);
-		msg_count--;
 	}
-	int msg_count;
 public:
 	Signal1<void,const T&> recv_msg;
 	void send(const T &msg)
 	{
 		eMessagePump::send(&msg, sizeof(msg));
-		msg_count++;
 	}
-	eFixedMessagePump(eMainloop *context)
+	eFixedMessagePump(eMainloop *context, int mt): eMessagePump(mt)
 	{
-		msg_count=0;
 		sn=new eSocketNotifier(context, getOutputFD(), eSocketNotifier::Read);
 		CONNECT(sn->activated, eFixedMessagePump<T>::do_recv);
 		sn->start();
 	}
 	~eFixedMessagePump()
 	{
-		while (msg_count) usleep(50);
 		delete sn;
 	}
 	void start() { sn->start(); }

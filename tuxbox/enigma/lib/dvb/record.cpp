@@ -11,7 +11,7 @@ void eDVBRecorder::dataAvailable(int what)
 	int r=::read(dvrfd, buffer, BSIZE);
 	if (r<=0)
 	{
-		eDebug("reading failed..");
+		eDebug("reading failed..(err %d)", -r);
 		return;
 	}
 	::write(outfd, buffer, r);
@@ -23,6 +23,7 @@ void eDVBRecorder::thread()
 	messagepump.start();
 	enter_loop();
 	eDebug("leave recording thread");
+	lock.unlock();
 }
 
 void eDVBRecorder::gotMessage(const eDVBRecorderMessage &msg)
@@ -179,13 +180,15 @@ void eDVBRecorder::s_exit()
 	exit_loop(); 
 }
 
-eDVBRecorder::eDVBRecorder(): messagepump(this)
+eDVBRecorder::eDVBRecorder(): messagepump(this, 1)
 {
 	CONNECT(messagepump.recv_msg, eDVBRecorder::gotMessage);
+	lock.lock();
 	run();
 }
 
 eDVBRecorder::~eDVBRecorder()
 {
 	messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mExit));
+	lock.lock();
 }

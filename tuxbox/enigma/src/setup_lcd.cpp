@@ -120,6 +120,7 @@ void eZapLCDSetup::okPressed()
 	eConfig::getInstance()->setKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->setKey("/ezap/lcd/contrast", lcdcontrast);
 	eConfig::getInstance()->setKey("/ezap/lcd/standby", lcdstandby);
+	eConfig::getInstance()->flush();
 	close(1);
 }
 

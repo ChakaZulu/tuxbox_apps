@@ -11,7 +11,7 @@ eRect eNumber::getNumberRect(int n)
 	if (deco_selected && have_focus)
 		return eRect( deco_selected.borderLeft + n * space_selected, deco_selected.borderTop, dspace, crect_selected.height() );
 	else if (deco)
-		return eRect( deco.borderLeft-1 + n * dspace, deco.borderTop, dspace, crect.height() );
+		return eRect( deco.borderLeft + n * dspace, deco.borderTop, dspace, crect.height() );
 	else
 		return eRect( n * dspace, 0, dspace, height() );
 }

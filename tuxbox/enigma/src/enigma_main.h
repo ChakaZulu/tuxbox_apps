@@ -1,6 +1,7 @@
 #ifndef __enigma_main_h
 #define __enigma_main_h
 
+#include <apps/enigma/epgwindow.h>
 #include <apps/enigma/enigma_lcd.h>
 #include <core/dvb/si.h>
 #include <core/dvb/dvb.h>
@@ -159,6 +160,9 @@ class eZapMain: public eWidget
 {
 public:
 	enum { modeTV, modeRadio, modeFile, modePlaylist, modeEnd };
+	enum { stateRunning, stateSleeping, stateRunningTimerEvent };
+// todo handle ServiceZapping in TimerMode.... msgbox... do you in Timermode...
+// bla... this stops the Timer... really zap ?
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext,
 		*EINowDuration, *EINextDuration, *EINowTime, *EINextTime,
@@ -192,8 +196,6 @@ private:
 	eServiceReference playlistref;
 	ePlaylist *favourite[modeFile+1];
 	eServiceReference favouriteref[modeFile+1];
-	ePlaylist *timerlist;
-	eServiceReference timerlistref;
 	int playlistmode; // curlist is a list controlled by the user (not just a history).
 	int entered_playlistmode;
 	
@@ -265,7 +267,7 @@ private:
 	static eZapMain *instance;
 	
 	eServicePath modeLast[modeEnd];
-	int mode, last_mode;
+	int mode, last_mode, state;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
@@ -298,6 +300,8 @@ public:
 	void setMode(int mode, int user=0); // user made change?
 	void setModeD(int mode);
 	int getRealMode() { return last_mode==-1 ? mode : last_mode; }
+	int getState() { return state; }
+	void setState( int newState ) { state = newState; }
 	
 	void setServiceSelectorPath(eServicePath path);
 	void getServiceSelectorPath(eServicePath &path);

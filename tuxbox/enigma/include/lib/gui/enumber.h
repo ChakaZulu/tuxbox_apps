@@ -26,6 +26,7 @@ private:
 	eWidget* descr;
 	eLabel* tmpDescr; // used for description Label in LCD
 protected:
+	int getActive()	{ return active; }
 	int keyDown(int key);
 	void gotFocus();
 	void lostFocus();
@@ -50,5 +51,23 @@ public:
 	void setNumber(int n);
 	int getNumber();
 };
-
+/*
+class eDateTime: public eNumber
+{
+	void redrawNumber(gPainter *, int n, const eRect &rect);
+	void redrawWidget(gPainter *, const eRect &rect);
+	time_t datetime;
+public:
+	eDateTime( time_t t )
+	{
+		setDateTime(t);
+	}
+	time_t getDateTime()
+	{
+	}
+	void setDateTime( time_t )
+	{
+	}		
+};
+*/
 #endif

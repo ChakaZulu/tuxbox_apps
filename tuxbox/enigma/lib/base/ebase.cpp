@@ -42,7 +42,9 @@ void eTimer::start(long msek, bool singleShot)
 	bSingleShot = singleShot;
 	interval = msek;
  	gettimeofday(&nextActivation, 0);		
+//	eDebug("this = %p\nnow sec = %d, usec = %d\nadd %d msec", this, nextActivation.tv_sec, nextActivation.tv_usec, msek);
 	nextActivation += msek;
+//	eDebug("next Activation sec = %d, usec = %d", nextActivation.tv_sec, nextActivation.tv_usec );
 	context.addTimer(this);
 }
 
@@ -73,6 +75,9 @@ void eTimer::changeInterval(long msek)
 
 void eTimer::activate()   // Internal Funktion... called from eApplication
 {
+	timeval now;
+	gettimeofday(&now, 0);
+//	eDebug("this = %p\nnow sec = %d, usec = %d\nnextActivation sec = %d, usec = %d", this, now.tv_sec, now.tv_usec, nextActivation.tv_sec, nextActivation.tv_usec );
 //	eDebug("Timer emitted");
 	context.removeTimer(this);
 

@@ -53,20 +53,26 @@ int ePlaylist::load(const char *filename)
 				list.push_back(ref);
 				ignore_next=1;
 			}
+			if (!strncmp(line, "#DESCRIPTION: ", 14))
+			{
+				list.back().service.descr=line+14;				
+				ignore_next=1;
+			}
 			if (!strcmp(line, "#CURRENT"))
 			{
 				current=list.end();
 				current--;
 			}
 			if (!strncmp(line, "#CURRENT_POSITION ", 18))
-			{
 				list.back().current_position=atoi(line+18);
-				eDebug("parsed current_position (of %s) to %d", list.back().service.toString().c_str(), list.back().current_position);
-			}
+			if (!strncmp(line, "#TYPE ", 6))
+				list.back().type=atoi(line+6);		
+			if (!strncmp(line, "#EVENT_ID ", 10))
+				list.back().event_id=atoi(line+10);
 			if (!strncmp(line, "#TIME_BEGIN ", 12))
 				list.back().time_begin=atoi(line+12);
-			if (!strncmp(line, "#TIME_END ", 10))
-				list.back().time_end=atoi(line+10);
+			if (!strncmp(line, "#DURATION ", 10))
+				list.back().duration=atoi(line+10);
 			if (!strncmp(line, "#NAME ", 6))
 			{
 				service_name=line+6;
@@ -113,12 +119,18 @@ int ePlaylist::save(const char *filename)
 	for (std::list<ePlaylistEntry>::iterator i(list.begin()); i != list.end(); ++i)
 	{
 		fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str());
-		if (i->current_position != -1)
+		if (i->service.descr)
+			fprintf(f, "#DESCRIPTION: %s\r\n", i->service.descr.c_str());
+		if (i->type & ePlaylistEntry::PlaylistEntry && i->current_position != -1)
 			fprintf(f, "#CURRENT_POSITION %d\r\n", i->current_position);
+		else if (i->event_id != -1)
+			fprintf(f, "#EVENT_ID %d\r\n", i->event_id);
+		if ((int)i->type != ePlaylistEntry::PlaylistEntry)
+			fprintf(f, "#TYPE %d\r\n", i->type);
 		if ((int)i->time_begin != -1)
 			fprintf(f, "#TIME_BEGIN %d\r\n", (int)i->time_begin);
-		if ((int)i->time_end != -1)
-			fprintf(f, "#TIME_END %d\r\n", (int)i->time_end);
+		if ((int)i->duration != -1)
+			fprintf(f, "#DURATION %d\r\n", (int)i->duration);
 		if (current == i)
 			fprintf(f, "#CURRENT\n");
 		if (i->service.path.size())

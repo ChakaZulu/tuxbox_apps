@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.7 2002/08/20 15:13:13 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.8 2002/10/03 18:13:36 Ghostrider Exp $
  */
 
 #include "setup_language.h"
@@ -78,6 +78,7 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 void eZapLanguageSetup::okPressed()
 {
 	eConfig::getInstance()->setKey("/elitedvb/language", ((eString*) language->getCurrent()->getKey())->c_str() );
+	eConfig::getInstance()->flush();
 	setlocale(LC_ALL, ((eString*)language->getCurrent()->getKey())->c_str() );
 
 	close(1);

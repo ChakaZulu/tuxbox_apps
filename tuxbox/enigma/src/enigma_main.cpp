@@ -12,7 +12,6 @@
 #include <apps/enigma/enigma_lcd.h>
 #include <apps/enigma/enigma_plugins.h>
 #include <apps/enigma/download.h>
-#include <apps/enigma/epgwindow.h>
 #include <apps/enigma/enigma.h>
 #include <core/base/i18n.h>
 #include <core/system/init.h>
@@ -407,8 +406,12 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 }
 
 eZapMain::eZapMain()
-	:eWidget(0, 1), mute( eZap::getInstance()->getDesktop( eZap::desktopFB ) ), volume( eZap::getInstance()->getDesktop( eZap::desktopFB ) ),
-	VolumeBar( &volume ), pMsg(0), message_notifier(eApp), timeout(eApp), clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp), volumeTimer(eApp)
+	:eWidget(0, 1)
+	,mute( eZap::getInstance()->getDesktop( eZap::desktopFB ) )
+	,volume( eZap::getInstance()->getDesktop( eZap::desktopFB ) )
+	,VolumeBar( &volume ), pMsg(0), message_notifier(eApp, 0), timeout(eApp)
+	,clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)
+	,volumeTimer(eApp), state( stateRunning )
 {
 	if (!instance)
 		instance=this;
@@ -563,12 +566,6 @@ eZapMain::eZapMain()
 	if (!curlist)
 		eFatal("couldn't allocate playlist!");
 
-	timerlistref=eServiceReference(eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 1, 1);
-	timerlist=(ePlaylist*)eServiceInterface::getInstance()->addRef(timerlistref);
-	ASSERT(timerlist);
-	timerlist->service_name=_("Timerlist");
-	timerlist->load(CONFIGDIR "/enigma/timer.epl");
-
 	for (int i = modeTV; i <= modeFile; i++)
 	{
 		favouriteref[i]=eServiceReference(eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 2, i);
@@ -621,9 +618,8 @@ eZapMain::eZapMain()
 	int style;
 	if ( eConfig::getInstance()->getKey("/ezap/ui/serviceSelectorStyle", style ) )
 		style=eServiceSelector::styleSingleColumn;  // default we use single Column Style
-	
-	eZap::getInstance()->getServiceSelector()->setStyle(style);  // set the style..
 
+	eZap::getInstance()->getServiceSelector()->setStyle(style);	
 	// now we set the last mode
 	setMode(tmp);
 
@@ -646,9 +642,6 @@ eZapMain::~eZapMain()
 	mode=0;	
 	while ( mode < modeEnd )
 		eConfig::getInstance()->setKey( eString().sprintf("/ezap/ui/modes/%i", mode).c_str(), modeLast[mode++].toString().c_str() );
-
-	timerlist->save(CONFIGDIR "/enigma/timer.epl");
-	eServiceInterface::getInstance()->removeRef(timerlistref);
 
 	for (int i = modeTV; i <= modeFile; i++)
 	{
@@ -1103,7 +1096,10 @@ void eZapMain::standbyPress()
 void eZapMain::standbyRepeat()
 {
 	if (standbyTime == -1)		// just waking up
+	{
+		state=stateRunning;
 		return;
+	}
 	int diff = time(0) - standbyTime;
 	if (diff > 2)
 		standbyRelease();
@@ -1112,7 +1108,10 @@ void eZapMain::standbyRepeat()
 void eZapMain::standbyRelease()
 {
 	if (standbyTime == -1)		// just waking up
+	{
+		state=stateRunning;
 		return;
+	}
 	int diff = time(0) - standbyTime;
 	standbyTime=-1;
 	if (diff > 2)
@@ -1123,6 +1122,7 @@ void eZapMain::standbyRelease()
 		if (isVisible())
 			hide();
 		standby.show();
+		state=stateSleeping;
 		standby.exec();
 		standby.hide();
 	}
@@ -1193,10 +1193,10 @@ void eZapMain::record()
 		return;
 	if (!recording)
 	{
-//		#ifdef DBOX
-//		Decoder::parms.recordmode=1;
-//		Decoder::Set();
-//		#endif
+/*		#ifdef DBOX
+		Decoder::parms.recordmode=1;
+		Decoder::Set();
+		#endif*/
 
 		eDebug("start recording...");
 		if (handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordOpen)))
@@ -1213,10 +1213,10 @@ void eZapMain::record()
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordStop));
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordClose));
 		recording=0;
-//		#ifdef DBOX
-//		Decoder::parms.recordmode=0;
-//		Decoder::Set();
-//		#endif
+/*		#ifdef DBOX
+		Decoder::parms.recordmode=0;
+		Decoder::Set();
+		#endif*/
 	}
 }
 
@@ -1402,10 +1402,16 @@ void eZapMain::addService(const eServiceReference &service)
 		eServiceInterface::getInstance()->leaveDirectory(service);
 	} else
 	{
+		int last=0;
 		if (curlist->current != curlist->list.end() && *curlist->current == service)
+		{
 			++curlist->current;
+			last=1;
+		}
 		curlist->list.remove(service);
 		curlist->list.push_back(ePlaylistEntry(service));
+		if (last)
+			--curlist->current;
 	}
 }
 
@@ -1554,7 +1560,6 @@ void eZapMain::runVTXT()
 
 void eZapMain::showEPGList()
 {
-#if 1
 	eServiceReferenceDVB &service=(eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
 	if (service.type != eServiceReference::idDVB)
 		return;
@@ -1576,14 +1581,6 @@ void eZapMain::showEPGList()
 		pLCD->lcdMenu->hide();
 		pLCD->lcdMain->show();
 	}
-#else
-	VCR bla;
-	hide();
-	bla.show();
-	bla.exec();
-	bla.hide();
-	show();
-#endif
 }
 
 void eZapMain::showEPG()

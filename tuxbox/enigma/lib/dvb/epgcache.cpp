@@ -101,7 +101,7 @@ bool eEPGCache::finishEPG()
 			eDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
 			
 			tmpMap::iterator It = temp.begin();
-
+	
 			while (It != temp.end())
 			{
 				if ( It->second.second == SCHEDULE || ( It->second.second == NOWNEXT && firstScheduleEventId == -1 ) )

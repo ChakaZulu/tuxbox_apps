@@ -126,6 +126,12 @@ eZap::eZap(int argc, char **argv)
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxnew.xml");
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
 
+	char *language=0;
+	if (eConfig::getInstance()->getKey("/elitedvb/language", language))
+		language=strdup("");
+	setlocale(LC_ALL, language);
+	free(language);
+
 	eDVB::getInstance()->configureNetwork();
 	eDebug("<-- network");
 

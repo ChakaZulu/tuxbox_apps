@@ -11,7 +11,6 @@
 
 #include <core/base/eerror.h>
 #include <core/dvb/edvb.h>
-#include <core/dvb/decoder.h>
 #include <core/system/init.h>
 #include <core/system/econfig.h>
 
@@ -113,7 +112,7 @@ void eStreamWatchdog::reloadSettings()
 		break;
 	}
 
-	Decoder::setVideoFormat( videoDisplayFormat );
+	eAVSwitch::getInstance()->setVideoFormat( videoDisplayFormat );
 
 	eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
 }

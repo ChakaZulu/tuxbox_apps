@@ -21,7 +21,7 @@ class eAVSwitch
 	static eAVSwitch *instance;
 	int volume, VCRVolume, mute;
 
-	int fd, saafd, fdost;
+	int avsfd, saafd;
 	eAVAspectRatio aspect;
 	eAVColorFormat colorformat;
 
@@ -64,6 +64,7 @@ public:
 	int setInput(int v);	// 0: dbox, 1: vcr
 	void changeVCRVolume(int abs, int vol);
 	void toggleMute();
+	void setVideoFormat( int );
 };
 
 class eAVSwitchNokia: public eAVSwitch

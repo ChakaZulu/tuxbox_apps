@@ -67,6 +67,7 @@ void eZapOsdSetup::okPressed()
 {
 	eConfig::getInstance()->setKey("/ezap/osd/showOSDOnEITUpdate", showOSDOnEITUpdate->isChecked());
 	eConfig::getInstance()->setKey("/ezap/osd/showConsoleOnFB", showConsoleOnFB->isChecked());
+	eConfig::getInstance()->flush();
 	close(1);
 }
 

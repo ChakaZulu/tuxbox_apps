@@ -36,6 +36,27 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 			perror(sec);
 			return;
 		}
+
+		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
+
+		secCmdSequence seq;
+		secCommand cmd;
+		secDiseqcCmd DiSEqC;
+		DiSEqC.addr=0;
+		DiSEqC.cmd=0;
+		DiSEqC.numParams=0;
+ 		cmd.type = SEC_CMDTYPE_DISEQC;
+		cmd.u.diseqc=DiSEqC;
+		seq.miniCommand=SEC_MINI_NONE;
+		seq.numCommands=1;
+		seq.commands=&cmd;
+		seq.voltage=SEC_VOLTAGE_13;
+		seq.continuousTone=SEC_TONE_OFF;
+		if (ioctl(secfd, SEC_SEND_SEQUENCE, &seq)<0)
+		{
+			perror("SEC_SEND_SEQUENCE");
+			exit(0);
+		}
 	} else
 		secfd=-1;
 		
@@ -243,8 +264,6 @@ int eFrontend::tune(eTransponder *trans,
 		DiSEqC.params[0] |= lnb->getDiSEqC().DiSEqCParam<<2;
 
 		cmd.u.diseqc=DiSEqC;
-
-		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
 
 		if ((DiSEqC.params[0] ^ lastcsw))		// only when changing satellites or pol.
 		{

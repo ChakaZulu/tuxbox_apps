@@ -39,6 +39,8 @@
 		<map name="eServiceSelector.singleColumn.Entry.Number" font="Nimbus" size="20" />
 		<map name="eServiceSelector.multiColumn.Entry.Number" font="Nimbus" size="18" />	
 		<map name="eServiceSelector.multiColumn.Entry.Name" font="Nimbus" size="18" />
+		<map name="eServiceSelector.combiColumn.Entry.Number" font="Nimbus" size="18" />	
+		<map name="eServiceSelector.combiColumn.Entry.Name" font="Nimbus" size="18" />
 
 		<map name="eEPGSelector.Entry.Description" font="Nimbus" size="24" />
 		<map name="eEPGSelector.Entry.DateTime" font="Nimbus" size="20" />
@@ -96,6 +98,10 @@
 		<img name="icon_error" src="icon-error-fs8.png" />
 		<img name="icon_warning" src="icon-warning-fs8.png" />
 		<img name="sselect_folder" src="folder-fs8.png" />
+		<img name="timer_symbol" src="clock-fs8.png" />
+		<img name="timer_rec_symbol" src="clock_rec-fs8.png" />
+		<img name="ok_symbol" src="event_ok-fs8.png" />
+		<img name="failed_symbol" src="event_failed-fs8.png" />	
 	</images>
 	
 	<colors>
@@ -110,6 +116,11 @@
 		<color name="volume2" color="#acb6c3" />
 		<color name="volume3" color="#586d88" />
 		<color name="volume4" color="#41719b" />
+		<color name="folder1" color="#ffcc00" />
+		<color name="folder2" color="#9e7e00" />
+		<color name="folder3" color="#808080" />
+		<color name="folder4" color="#c0c0c0" />
+		<color name="folder5" color="#efe6e6" />
 	</colors>
 
 	<colorscheme>
@@ -132,7 +143,7 @@
 	</object>
  
 	<object name="eventview">
-		<eWindow cposition="50:80" csize="590:400" name="title">
+		<eWindow cposition="60:80" csize="590:400" name="title">
 			<eLabel position="10:5" size="e:e-35" name="epg_description" font="eventview.description" wrap="on"/>
 			<eWidget position="0:e-35" size="600:e-10" />
 			<eLabel position="10:e-35" size="130:e-10" name="date" font="eventview.date" backgroundColor="eWindow.titleBar" foregroundColor="eWindow.titleBarFont" />
@@ -330,8 +341,15 @@
 
 	<object name="eServiceSelector_multiColumn">
 		<eServiceSelector cposition="70:90" csize="590:450" text="Services">
+			<eListbox name="services" columns="3" position="0:0" size="e:e-80" />
+			<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
+		</eServiceSelector>
+	</object>
+
+	<object name="eServiceSelector_combiColumn">
+		<eServiceSelector cposition="70:90" csize="590:450" text="Services">
 			<eListbox name="bouquets" position="5:5" size="150:e-85" loadDeco="" />
-			<eListbox name="services" position="155:5" size="e-5:e-85" loadDeco="" />
+			<eListbox name="services" columns="2" position="155:5" size="e-5:e-85" loadDeco="" />
 			<eChannelInfo name="channelinfo" position="0:e-80" size="e:80" loadDeco="" />
 		</eServiceSelector>
 	</object>
@@ -343,7 +361,7 @@
 	</object>
 
 	<object name="eEPGSelector">
-		<eBouquetSelector cposition="70:100" csize="600:420" text="EPG">
+		<eBouquetSelector cposition="70:100" csize="590:420" text="EPG">
 			<eListbox name="events" position="0:0" size="e:e" />
 		</eBouquetSelector>
 	</object>

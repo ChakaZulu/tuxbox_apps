@@ -26,6 +26,8 @@ class Decoder
 	} fd;
 	static decoderParameters current;
 public:
+	static int getAudioDevice()	{ return fd.audio; }
+	static int getVideoDevice()	{ return fd.video; }
 	static decoderParameters parms;
 	static int Initialize();
 	static void Close();

@@ -101,7 +101,8 @@ class eSchedule: public eSection
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
 	eSchedule()  // 0x50, Filter 0xF0
-		:eSection(0x12, 80, -1, -1, SECREAD_CRC, 240)
+//		:eSection(0x12, 80, -1, -1, SECREAD_CRC, 240)
+			:eSection(0x12, 0x50, -1, -1, SECREAD_CRC, 0xF0)
 	{
 	}
 };
@@ -112,7 +113,8 @@ class eNowNext: public eSection
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
 	eNowNext()  // 0x4E, 0x4F
-		:eSection(0x12, 78 , -1, -1, SECREAD_CRC, 254)
+//		:eSection(0x12, 78 , -1, -1, SECREAD_CRC, 254)
+		:eSection(0x12, 0x4E, -1, -1, SECREAD_CRC, 0xFE)
 	{
 	}
 };

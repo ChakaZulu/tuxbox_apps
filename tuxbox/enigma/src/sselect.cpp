@@ -51,7 +51,7 @@ struct serviceSelectorActions
 eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selector actions");
 
 eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service)
-	:eListBoxEntry((eListBox<eListBoxEntry>*)lb), service(service)
+	:eListBoxEntry((eListBox<eListBoxEntry>*)lb),	numPara(0), namePara(0), descrPara(0), nameXOffs(0), service(service)
 {
 #if 0
 	sort=eString().sprintf("%06d", service->service_number);
@@ -61,7 +61,6 @@ eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, c
 	sort.upper();
 	eServiceInterface::getInstance()->removeRef(service);
 #endif
-	numPara=namePara=descrPara=0;
 }
 
 eListBoxEntryService::~eListBoxEntryService()
@@ -71,13 +70,9 @@ eListBoxEntryService::~eListBoxEntryService()
 
 int eListBoxEntryService::getEntryHeight()
 {
-	if (!serviceFont.pointSize)
-	{
-		numberFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Number");
-		serviceFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Name");
+	if (!descrFont.pointSize)
 		descrFont = eSkin::getActive()->queryFont("eServiceSelector.Entry.Description");
-		folder = eSkin::getActive()->queryImage("sselect_folder");
-	}
+
 	return calcFontHeight(serviceFont)+4;
 }
 
@@ -111,6 +106,11 @@ void eListBoxEntryService::invalidateDescr()
 
 eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
+  bool b;
+
+	if ( (b = (hilited == 2)) )
+		hilited = 0;
+
 	drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited );
 
 	eString sname;
@@ -120,7 +120,13 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 	if (pservice)
 		sname=pservice->service_name;
 
-	if (/*service.type == eServiceReference::idDVB &&*/ !(service.flags & eServiceReference::isDirectory) )
+	if ( service.flags & eServiceReference::isDirectory && folder )  // we draw the folder pixmap
+	{
+		nameXOffs = folder->x + 20;
+  	int ypos = (rect.height() - folder->y) / 2;
+		rc->blit( *folder, ePoint(10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);		
+	}
+	else if (!service.flags & eServiceReference::isDirectory)
 	{
 		if (!numPara)
 		{
@@ -132,12 +138,6 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 			nameXOffs = maxNumSize+numPara->getBoundBox().height();
 		}
 		rc->renderPara(*numPara, ePoint( rect.left(), rect.top() + numYOffs ) );
-	}
-	else  // we draw the folder pixmap
-	{
-		nameXOffs = folder->x + 20;
-  	int ypos = (rect.height() - folder->y) / 2;
-		rc->blit( *folder, ePoint(10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);		
 	}
 
 	if (!namePara)
@@ -179,9 +179,25 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 		descrXOffs = nameXOffs+namePara->getBoundBox().width()+numPara->getBoundBox().height();
 		descrYOffs = ((rect.height() - descrPara->getBoundBox().height()) / 2 ) - descrPara->getBoundBox().top();
 	}
-
 	if (descrPara)  // only render descr Para, when avail...
 		rc->renderPara(*descrPara, ePoint( rect.left()+descrXOffs, rect.top() + descrYOffs ) );
+
+	if (b)
+	{
+		rc->setForegroundColor(coActiveB);
+		rc->line( ePoint(rect.left(), rect.bottom()-1), ePoint(rect.right()-1, rect.bottom()-1) );
+		rc->line( ePoint(rect.left(), rect.top()), ePoint(rect.right()-1, rect.top()) );
+		rc->line( ePoint(rect.left(), rect.top()), ePoint(rect.left(), rect.bottom()-1) );
+		rc->line( ePoint(rect.right()-1, rect.top()), ePoint(rect.right()-1, rect.bottom()-1) );
+		rc->line( ePoint(rect.left()+1, rect.bottom()-2), ePoint(rect.right()-2, rect.bottom()-2) );
+		rc->line( ePoint(rect.left()+1, rect.top()+1), ePoint(rect.right()-2, rect.top()+1) );
+		rc->line( ePoint(rect.left()+1, rect.top()+2), ePoint(rect.left()+1, rect.bottom()-3) );
+		rc->line( ePoint(rect.right()-2, rect.top()+2), ePoint(rect.right()-2, rect.bottom()-3) );
+		rc->line( ePoint(rect.left()+2, rect.bottom()-3), ePoint(rect.right()-3, rect.bottom()-3) );
+		rc->line( ePoint(rect.left()+2, rect.top()+2), ePoint(rect.right()-3, rect.top()+2) );
+		rc->line( ePoint(rect.left()+2, rect.top()+3), ePoint(rect.left()+2, rect.bottom()-4) );
+		rc->line( ePoint(rect.right()-3, rect.top()+3), ePoint(rect.right()-3, rect.bottom()-4) );
+	}
 
 	return sort;
 }
@@ -189,6 +205,11 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 void eServiceSelector::addService(const eServiceReference &ref)
 {
 	new eListBoxEntryService(services, ref);
+}
+
+void eServiceSelector::addBouquet(const eServiceReference &ref)
+{
+	new eListBoxEntryService(bouquets, ref);
 }
 
 struct renumber: public std::unary_function<const eListBoxEntryService&, void>
@@ -208,14 +229,22 @@ struct renumber: public std::unary_function<const eListBoxEntryService&, void>
 
 void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 {
+	eString windowDescr;
+	eServicePath p = path;
+
+	eServiceReference ref;
+	do
 	{
-		const eService *pservice=eServiceInterface::getInstance()->addRef(_ref);
-	  if (pservice)
-			setText( pservice->service_name );
-		else
-			setText("");
-		eServiceInterface::getInstance()->removeRef(_ref);
+		const eService *pservice=eServiceInterface::getInstance()->addRef(p.current());
+	  if (pservice && pservice->service_name.length() )
+			windowDescr=pservice->service_name+" > "+windowDescr;
+		ref = p.current();
+		p.up();
+		eServiceInterface::getInstance()->removeRef	(p.current());
 	}
+	while ( ref != p.current() );
+	windowDescr.erase( windowDescr.rfind(">") );
+	setText( windowDescr );	
 
 	services->beginAtomic();
 	services->clearList();
@@ -226,7 +255,7 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	Signal1<void,const eServiceReference&> signal;
 	CONNECT(signal, eServiceSelector::addService);
 	
-	eServiceReference ref=_ref;
+	ref=_ref;
 	
 	iface->enterDirectory(ref, signal);
 	iface->leaveDirectory(ref);	// we have a copy.
@@ -250,6 +279,28 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 		eListBoxEntryService::maxNumSize=10;
 
 	services->endAtomic();
+}
+
+void eServiceSelector::fillBouquetList( const eServiceReference& _ref)
+{
+	bouquets->beginAtomic();
+	bouquets->clearList();
+
+	eServiceInterface *iface=eServiceInterface::getInstance();
+	ASSERT(iface);
+	
+	Signal1<void,const eServiceReference&> signal;
+	CONNECT(signal, eServiceSelector::addBouquet );
+	
+	eServiceReference ref=_ref;
+	
+	iface->enterDirectory(ref, signal);
+	iface->leaveDirectory(ref);	// we have a copy.
+
+	if (ref.flags & eServiceReference::shouldSort)
+		bouquets->sort();
+
+	bouquets->endAtomic();
 }
 
 struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, void>
@@ -423,7 +474,7 @@ void eServiceSelector::EPGUpdated( const tmpMap *m)
 	services->forEachEntry( updateEPGChangedService( m ) );
 }
 
-void eServiceSelector::entrySelected(eListBoxEntryService *entry)
+void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 {
 	if (entry && entry->service)
 	{
@@ -439,7 +490,12 @@ void eServiceSelector::entrySelected(eListBoxEntryService *entry)
 	}
 }
 
-void eServiceSelector::selchanged(eListBoxEntryService *entry)
+void eServiceSelector::bouquetSelected(eListBoxEntryService*)
+{
+	setFocus(services);
+}
+
+void eServiceSelector::serviceSelChanged(eListBoxEntryService *entry)
 {
 	if (entry)
 	{
@@ -447,7 +503,6 @@ void eServiceSelector::selchanged(eListBoxEntryService *entry)
 		if (ci->isVisible())				
 		{
 			ci->clear();
-//			eDebug("tsid = %i, type = %i, isDirectory=%i", ((const eServiceReferenceDVB&)selected).getTransportStreamID().get(), selected.type, selected.flags & eServiceReference::isDirectory  );
 			if ( selected.type == eServiceReference::idDVB &&
 						!(selected.flags & eServiceReference::isDirectory) &&
 							(((const eServiceReferenceDVB&)selected).getTransportStreamID().get() > 0))
@@ -485,32 +540,42 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			else if (event.action == &i_serviceSelectorActions->prevBouquet)
 			{
 				services->beginAtomic();
-				eServiceReference last=path.current();
-				path.up();
-				fillServiceList(path.current());
-				selectService( last );
-				eListBoxEntryService* p = services->goPrev();
-				if (p)
+				if (style == styleCombiColumn)
+					bouquets->goPrev();
+				else
 				{
-					path.down( p->service );
-					fillServiceList( p->service );
-					selectService( eServiceInterface::getInstance()->service );
+					eServiceReference last=path.current();
+					path.up();
+					fillServiceList(path.current());
+					selectService( last );
+					eListBoxEntryService* p = services->goPrev();
+					if (p)
+					{
+						path.down( p->service );
+						fillServiceList( p->service );
+						selectService( eServiceInterface::getInstance()->service );
+					}
 				}
 				services->endAtomic();
 			}
 			else if (event.action == &i_serviceSelectorActions->nextBouquet)
 			{
 				services->beginAtomic();
-				eServiceReference last=path.current();
-				path.up();
-				fillServiceList(path.current());
-				selectService( last );
-				eListBoxEntryService* p = services->goNext();
-				if (p)
+				if (style == styleCombiColumn)
+					bouquets->goNext();
+				else
 				{
-					path.down( p->service );
-					fillServiceList( p->service );
-					selectService( eServiceInterface::getInstance()->service );
+					eServiceReference last=path.current();
+					path.up();
+					fillServiceList(path.current());
+					selectService( last );
+					eListBoxEntryService* p = services->goNext();
+					if (p)
+					{
+						path.down( p->service );
+						fillServiceList( p->service );
+						selectService( eServiceInterface::getInstance()->service );
+					}
 				}
 				services->endAtomic();
 			}
@@ -538,15 +603,25 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				eServiceReference last=path.current();
 				path.up();
 				if (last != path.current())
-				{
-					services->beginAtomic();
-					fillServiceList(path.current());
-					selectService(last);
-					services->endAtomic();
-				}
+					actualize();
 			}
 			else if (event.action == &i_serviceSelectorActions->toggleStyle)
-				setStyle(-1);
+			{
+				int newStyle = style;
+				if (newStyle == styleMultiColumn)
+					newStyle = styleCombiColumn;
+				else
+					newStyle++;
+				setStyle(newStyle);			
+			}
+			else if (event.action == &i_serviceSelectorActions->toggleFocus)
+			{
+				if ( style == styleCombiColumn )
+					if (focus == services)
+						setFocus( bouquets );
+					else
+						setFocus( services );
+			}
 			else if (event.action == &i_serviceSelectorActions->showMenu)
 				showMenu(this);
 			else if (event.action == &i_serviceSelectorActions->showFavourite)
@@ -568,100 +643,6 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			break;
 	}
 	return eWindow::eventHandler(event);
-}
-
-void eServiceSelector::setStyle(int newstyle)
-{
-/*	int safedStyle=-1;
-	if ( eZapMain::getInstance()->getRealMode() == eZapMain::modeTV || eZapMain::getInstance()->getRealMode() == eZapMain::modeRadio )
-	{
-		if (newstyle == -1)  //the we toggle current Style
-		{
-			if (style == styleClassic)
-				style=styleMultiColumn;
-			else if (style == styleMultiColumn)
-				style=styleClassic;
-		}
-		else
-			style = newstyle;
-	}
-	else
-	{
-		safedStyle=style;
-		style = styleClassic;
-	}
-	services->setColumns( style==styleClassic ? 1 : eSkin::getActive()->queryValue( "eServiceSelector.columns", 2 ) );
-	switch (style)
-	{
-		case styleClassic:
-			if ( bouquets )
-			{
-				delete bouquets;
-				bouquets=0;
-				services->beginAtomic();
-				services->resize( eSize( clientrect.size().width(), services->getSize().height()+10 ) );
-				services->move( ePoint(0,0) );
-				services->loadDeco();
-				services->endAtomic();
-			}
-		break;
-		case styleMultiColumn:
-			if (!bouquets)
-			{
-				bouquets=new eListBox<eListBoxEntryService>( this );
-				bouquets->move( ePoint( 5, 5 ) );
-				bouquets->resize( eSize( 200, services->getSize().height()-10 ) );
-				bouquets->loadDeco();
-				bouquets->show();
-				services->beginAtomic();
-				services->move( ePoint(210, 5) );
-				services->resize( eSize( clientrect.size().width()-215, services->getSize().height()-10 ) );
-				services->endAtomic();
-			}
-		break;
-	}
-
-
-	if (safedStyle != -1)
-		style = safedStyle;
-*/
-}
-
-void eServiceSelector::actualize()
-{
-	fillServiceList(path.current());
-}
-
-eServiceSelector::eServiceSelector()
-								:eWindow(0), result(0), BrowseChar(0), bouquets(0), BrowseTimer(eApp), ciDelay(eApp)
-{
-	services = new eListBox<eListBoxEntryService>(this);
-	services->setName("services");
-	services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
-
-	bouquets = new eListBox<eListBoxEntryService>(this);
-	bouquets->setName("bouquets");
-	bouquets->hide();
-
-	ci = new eChannelInfo(this);
-	ci->setName("channelinfo");
-
-	CONNECT(eDVB::getInstance()->bouquetListChanged, eServiceSelector::actualize);
-	CONNECT(services->selected, eServiceSelector::entrySelected);
-	CONNECT(services->selchanged, eServiceSelector::selchanged);
-	CONNECT(BrowseTimer.timeout, eServiceSelector::ResetBrowseChar);
-	CONNECT(ciDelay.timeout, eServiceSelector::updateCi );
-	CONNECT(eEPGCache::getInstance()->EPGUpdated, eServiceSelector::EPGUpdated);
-
-	if (eSkin::getActive()->build(this, "eServiceSelector_singleColumn"))
-		eFatal("Service selector widget build failed!");
-
-	addActionMap(&i_serviceSelectorActions->map);
-	addActionMap(&i_numberActions->map);
-}
-
-eServiceSelector::~eServiceSelector()
-{
 }
 
 struct _selectService: public std::unary_function<const eListBoxEntryService&, void>
@@ -689,11 +670,141 @@ void eServiceSelector::selectService(const eServiceReference &ref)
 		services->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
 }
 
+void eServiceSelector::setStyle(int newStyle)
+{
+	ci->hide();
+	eServicePath p = path;
+	eServiceReference currentService;
+ 	if (style != newStyle)
+	{
+			if ( services )
+			{
+				// safe currentSelected Service
+				if ( services->getCount() )
+					currentService = services->getCurrent()->service;
+	
+				services->hide();
+				delete services;
+			}
+			if ( bouquets )
+			{
+				bouquets->hide();
+				delete bouquets;
+			}
+			if (newStyle == styleSingleColumn)
+			{
+				eListBoxEntryService::folder = eSkin::getActive()->queryImage("sselect_folder");
+				eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Number");
+				eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Name");
+			}
+			else if (style == styleMultiColumn)
+			{
+				eListBoxEntryService::folder = 0;	
+				eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Number");
+				eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Name");
+			}
+			else
+			{
+				eListBoxEntryService::folder = 0;	
+				eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Number");
+				eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Name");
+			}
+			services = new eListBox<eListBoxEntryService>(this);
+			services->setName("services");
+			services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
+			services->hide();
+		
+			bouquets = new eListBox<eListBoxEntryService>(this);
+			bouquets->setName("bouquets");
+			bouquets->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
+			bouquets->hide();
+	
+			if ( newStyle == styleSingleColumn )
+			{
+				if (eSkin::getActive()->build(this, "eServiceSelector_singleColumn"))
+					eFatal("Service selector widget build failed!");
+			}
+			else if ( newStyle == styleMultiColumn )
+			{
+				if (eSkin::getActive()->build(this, "eServiceSelector_multiColumn"))
+					eFatal("Service selector widget build failed!");
+			}
+			else
+			{
+				if (eSkin::getActive()->build(this, "eServiceSelector_combiColumn"))
+					eFatal("Service selector widget build failed!");
+				CONNECT( bouquets->selchanged, eServiceSelector::bouquetSelChanged );
+				CONNECT( bouquets->selected, eServiceSelector::bouquetSelected );
+				bouquets->show();
+			}
+			style = newStyle;
+			actualize();
+			selectService( currentService );  // select the old service
+			CONNECT(services->selected, eServiceSelector::serviceSelected);
+			CONNECT(services->selchanged, eServiceSelector::serviceSelChanged);
+			services->show();
+			setFocus(services);
+	}
+	ci->show();
+}
+
+void eServiceSelector::bouquetSelChanged( eListBoxEntryService *entry)
+{
+	if ( entry && entry->service != eServiceReference() )
+	{
+		services->beginAtomic();
+		path.up();
+		path.down(entry->service);
+		fillServiceList( entry->service );
+		selectService( eServiceInterface::getInstance()->service );
+		services->endAtomic();
+	}
+}
+
+void eServiceSelector::actualize()
+{
+	if (style == styleCombiColumn)
+	{
+		eServiceReference currentBouquet = path.current();
+		path.up();
+		eServiceReference allBouquets = path.current();
+		path.down( currentBouquet );
+		bouquets->beginAtomic();
+		fillBouquetList( allBouquets );
+
+		if ( bouquets->forEachEntry( _selectService( currentBouquet ) ) )
+			bouquets->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
+
+		bouquets->endAtomic();
+	}
+	else
+		fillServiceList(path.current());
+}
+
+eServiceSelector::eServiceSelector()
+								:eWindow(0), result(0), services(0), bouquets(0), style(styleInvalid), BrowseChar(0), BrowseTimer(eApp), ciDelay(eApp)
+{
+	ci = new eChannelInfo(this);
+	ci->setName("channelinfo");
+
+	CONNECT(eDVB::getInstance()->bouquetListChanged, eServiceSelector::actualize);
+	CONNECT(BrowseTimer.timeout, eServiceSelector::ResetBrowseChar);
+	CONNECT(ciDelay.timeout, eServiceSelector::updateCi );
+	CONNECT(eEPGCache::getInstance()->EPGUpdated, eServiceSelector::EPGUpdated);
+
+	addActionMap(&i_serviceSelectorActions->map);
+	addActionMap(&i_numberActions->map);
+}
+
+eServiceSelector::~eServiceSelector()
+{
+}
+
 void eServiceSelector::enterDirectory(const eServiceReference &ref)
 {
 	services->beginAtomic();
 	path.down(ref);
-	fillServiceList( ref );
+	actualize();
 	selectService( eServiceInterface::getInstance()->service );
 	services->endAtomic();
 }
@@ -707,7 +818,6 @@ const eServiceReference *eServiceSelector::choose(int irc)
 {
 	ASSERT(this);
 	services->beginAtomic();
-//	actualize();
 	selectService( eServiceInterface::getInstance()->service );
 	result=0;
 
@@ -761,9 +871,12 @@ const eServiceReference *eServiceSelector::prev()
 
 void eServiceSelector::setPath(const eServicePath &newpath, const eServiceReference &select)
 {
-	services->beginAtomic();
 	path=newpath;
-	fillServiceList(path.current());
-	selectService(select);
-	services->endAtomic();
+	if (services)
+	{
+		actualize();
+		services->beginAtomic();
+		selectService(select);
+		services->endAtomic();
+	}
 }

@@ -50,8 +50,10 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 	
 	int dvrfd;
 	int outfd;
-	
+
 	eSocketNotifier *sn;
+	
+	eLock lock;
 	
 	void dataAvailable(int what);
 

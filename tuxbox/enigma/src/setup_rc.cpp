@@ -100,6 +100,7 @@ void eZapRCSetup::okPressed()
 {
 	eConfig::getInstance()->setKey("/ezap/rc/repeatRate", rrate);
 	eConfig::getInstance()->setKey("/ezap/rc/repeatDelay", rdelay);
+	eConfig::getInstance()->flush();
 	close(1);
 }
 

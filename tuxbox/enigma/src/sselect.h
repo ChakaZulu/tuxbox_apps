@@ -61,23 +61,27 @@ class eServiceSelector: public eWindow
 	eServicePath path;
 	
 	void addService(const eServiceReference &service);
+	void addBouquet(const eServiceReference &service);
 	int style;
-	char BrowseChar;
 
+	char BrowseChar;
 	eTimer BrowseTimer;
 	eTimer ciDelay;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
 	void fillServiceList(const eServiceReference &ref);
-	void entrySelected(eListBoxEntryService *entry);
-	void selchanged(eListBoxEntryService *entry);
+	void fillBouquetList(const eServiceReference &ref);
+	void serviceSelected(eListBoxEntryService *entry);
+	void bouquetSelected(eListBoxEntryService *entry);
+	void serviceSelChanged(eListBoxEntryService *entry);
+	void bouquetSelChanged( eListBoxEntryService *entry);
 	void ResetBrowseChar();
 	void gotoChar(char c);
 	void EPGUpdated( const tmpMap* );
 	void updateCi();
 public:
-	enum { styleMultiColumn, styleSingleColumn };
+	enum { styleInvalid, styleCombiColumn, styleSingleColumn, styleMultiColumn };
 	enum { dirNo, dirUp, dirDown };
 
 	eServiceSelector();

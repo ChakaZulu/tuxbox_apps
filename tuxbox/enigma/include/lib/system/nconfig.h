@@ -137,6 +137,8 @@ public:
 		 */
 		void close();
 		
+		void flush(); // flush file if not mmap'ed
+		
 		/*
 		 * Create a new file
 		 * resize is filesize increment is system pages
