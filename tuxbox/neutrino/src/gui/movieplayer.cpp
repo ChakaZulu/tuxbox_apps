@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.47 2003/09/15 20:30:09 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.48 2003/09/16 17:14:41 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -61,6 +61,7 @@
 #include <gui/infoviewer.h>
 #include <gui/nfs.h>
 
+#include <gui/widget/buttons.h>
 #include <gui/widget/icons.h>
 #include <gui/widget/menue.h>
 #include <gui/widget/messagebox.h>
@@ -1427,10 +1428,25 @@ CMoviePlayerGui::paintImg ()
 }
 
 //------------------------------------------------------------------------
+const struct button_label MoviePlayerButtons[4] =
+{
+/*
+	{ .button = NEUTRINO_ICON_BUTTON_RED   , .locale = "movieplayer.choosestreamfile" },
+	{ .button = NEUTRINO_ICON_BUTTON_GREEN , .locale = "movieplayer.choosets"         },
+	{ .button = NEUTRINO_ICON_BUTTON_YELLOW, .locale = "movieplayer.choosestreamdvd"  },
+	{ .button = NEUTRINO_ICON_BUTTON_BLUE  , .locale = "movieplayer.choosestreamsvcd" }
+*/
+	{ NEUTRINO_ICON_BUTTON_RED   , "movieplayer.choosestreamfile" },
+	{ NEUTRINO_ICON_BUTTON_GREEN , "movieplayer.choosets"         },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, "movieplayer.choosestreamdvd"  },
+	{ NEUTRINO_ICON_BUTTON_BLUE  , "movieplayer.choosestreamsvcd" }
+};
+
 void
 CMoviePlayerGui::paintFoot ()
 {
 	int ButtonWidth = (width - 20) / 4;
+
 	frameBuffer->paintBoxRel (x,
 				  y + (height -
 				       info_height
@@ -1442,23 +1458,13 @@ CMoviePlayerGui::paintFoot ()
 				 y + (height -
 				      info_height
 				      - 2 * buttonHeight), COL_INFOBAR_SHADOW);
+
+	::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + (height - info_height - 2 * buttonHeight) + 4, ButtonWidth, 4, MoviePlayerButtons);
+
 /*  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_RED, x + 0 * ButtonWidth + 10,
     y + (height - info_height - 2 * buttonHeight) + 4);
     g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.bookmark"), COL_INFOBAR, 0, true);	// UTF-8
 */
-	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_RED, x + 0 * ButtonWidth + 10,
-				y + (height - info_height - 2 * buttonHeight) + 4);
-	g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamfile"), COL_INFOBAR, 0, true); // UTF-8
-
-	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_GREEN, x + 1 * ButtonWidth + 10,
-				y + (height - info_height - 2 * buttonHeight) + 4);
-	g_Fonts->infobar_small->RenderString (x + 1 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosets"), COL_INFOBAR, 0, true); // UTF-8
-	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_YELLOW, x + 2 * ButtonWidth + 10,
-				y + (height - info_height - 2 * buttonHeight) + 4);
-	g_Fonts->infobar_small->RenderString (x + 2 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamdvd"), COL_INFOBAR, 0, true); // UTF-8
-	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_BLUE, x + 3 * ButtonWidth + 10,
-				y + (height - info_height - 2 * buttonHeight) + 4);
-	g_Fonts->infobar_small->RenderString (x + 3 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamsvcd"), COL_INFOBAR, 0, true); // UTF-8
 }
 
 void

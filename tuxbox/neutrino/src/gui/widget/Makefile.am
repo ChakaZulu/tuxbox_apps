@@ -11,6 +11,7 @@ INCLUDES = \
 noinst_LIBRARIES = libneutrino_gui_widget.a libneutrino_gui_widget2.a 
 
 libneutrino_gui_widget_a_SOURCES = \
+	buttons.cpp \
 	colorchooser.cpp keychooser.cpp \
 	menue.cpp stringinput.cpp stringinput_ext.cpp \
 	messagebox.cpp hintbox.cpp listbox.cpp listbox_legacy.cpp \

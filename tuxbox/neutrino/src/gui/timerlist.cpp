@@ -42,10 +42,11 @@
 #include <gui/eventlist.h>
 #include <gui/infoviewer.h>
 
-#include <gui/widget/menue.h>
-#include <gui/widget/messagebox.h>
+#include <gui/widget/buttons.h>
 #include <gui/widget/hintbox.h>
 #include <gui/widget/icons.h>
+#include <gui/widget/menue.h>
+#include <gui/widget/messagebox.h>
 #include <gui/widget/stringinput.h>
 #include <gui/widget/stringinput_ext.h>
 
@@ -566,28 +567,28 @@ void CTimerList::paintHead()
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_DBOX, x+ width- 60, y+ 5 );*/
 }
 
+const struct button_label TimerListButtons[3] =
+{
+	{ NEUTRINO_ICON_BUTTON_RED   , "timerlist.delete" },
+	{ NEUTRINO_ICON_BUTTON_GREEN , "timerlist.new"    },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, "timerlist.reload" }
+};
+
 void CTimerList::paintFoot()
 {
-	int ButtonWidth = (width-28) / 4;
+	int ButtonWidth = (width - 20) / 4;
 	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	if(timerlist.size()>0)
+	if (timerlist.empty())
+		::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + ButtonWidth + 10, y + height + 4, ButtonWidth, 2, &(TimerListButtons[1]));
+	else
 	{
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+width- 4* ButtonWidth - 20, y+height+4);
-		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete"), COL_INFOBAR, 0, true); // UTF-8
+		::paintButtons(frameBuffer, g_Fonts->infobar_small, g_Locale, x + 10, y + height + 4, ButtonWidth, 3, TimerListButtons);
 
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 1* ButtonWidth - 30, y+height);
-		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify"), COL_INFOBAR, 0, true); // UTF-8
-
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 1* ButtonWidth + 10, y+height);
+		g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth + 38, y+height+24 - 2, ButtonWidth- 28, g_Locale->getText("timerlist.modify"), COL_INFOBAR, 0, true); // UTF-8
 	}
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+width- 3* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new"), COL_INFOBAR, 0, true); // UTF-8
-
-	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+width- 2* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload"), COL_INFOBAR, 0, true); // UTF-8
-
 }
 
 void CTimerList::paint()
