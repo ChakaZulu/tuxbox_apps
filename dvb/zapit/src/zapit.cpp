@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.189 2002/05/31 16:33:48 happydude Exp $
+ * $Id: zapit.cpp,v 1.190 2002/06/27 20:03:47 Homar Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1123,7 +1123,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.189 2002/05/31 16:33:48 happydude Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.190 2002/06/27 20:03:47 Homar Exp $\n\n");
 
 	if (argc > 1)
 	{
