@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.19 2003/12/19 23:35:46 derget Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.20 2004/03/06 10:41:42 thegoodguy Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -38,7 +38,7 @@
 class CZapitMessages
 {
  public:
-	static const char ACTVERSION = 6;
+	static const char ACTVERSION = 7;
 
 	enum commands
 		{
@@ -118,7 +118,8 @@ class CZapitMessages
 			CMD_NVOD_SUBSERVICE_NUM,
 			CMD_SEND_MOTOR_COMMAND,
 
-			CMD_GET_CHANNEL_NAME
+			CMD_GET_CHANNEL_NAME,
+			CMD_IS_TV_CHANNEL
 		};
 
 	struct commandBoolean

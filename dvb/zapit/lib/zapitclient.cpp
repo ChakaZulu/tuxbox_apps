@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.97 2003/12/19 23:35:46 derget Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.98 2004/03/06 10:41:42 thegoodguy Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -398,7 +398,11 @@ bool CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode,
 	return return_value;
 }
 
-/* get the name of a channel */
+
+
+/* request information about a particular channel_id */
+
+/* channel name */
 std::string CZapitClient::getChannelName(const t_channel_id channel_id)
 {
 	send(CZapitMessages::CMD_GET_CHANNEL_NAME, (char *) & channel_id, sizeof(channel_id));
@@ -408,6 +412,20 @@ std::string CZapitClient::getChannelName(const t_channel_id channel_id)
 	close_connection();
 	return std::string(response.name);
 }
+
+/* is channel a TV channel ? */
+bool CZapitClient::isChannelTVChannel(const t_channel_id channel_id)
+{
+	send(CZapitMessages::CMD_IS_TV_CHANNEL, (char *) & channel_id, sizeof(channel_id));
+
+	CZapitMessages::responseGeneralTrueFalse response;
+	CBasicClient::receive_data((char* )&response, sizeof(response));
+	close_connection();
+	return response.status;
+}
+
+
+
 
 /* restore bouquets so as if they where just loaded*/
 void CZapitClient::restoreBouquets()

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.344 2004/02/25 10:45:35 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.345 2004/03/06 10:41:43 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -709,21 +709,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
-	case CZapitMessages::CMD_GET_CHANNEL_NAME:
-	{
-		t_channel_id                           requested_channel_id;
-		CZapitMessages::responseGetChannelName response;
-		CBasicServer::receive_data(connfd, &requested_channel_id, sizeof(requested_channel_id));
-		tallchans_iterator it = allchans.find(requested_channel_id);
-		if (it == allchans.end())
-			response.name[0] = 0;
-		else
-			strncpy(response.name, it->second.getName().c_str(), 30);
-
-		CBasicServer::send_data(connfd, &response, sizeof(response));
-		break;
-	}
-
 	case CZapitMessages::CMD_GET_CURRENT_TP:
 	{
 		TP_params TP;
@@ -1170,6 +1155,38 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
+	case CZapitMessages::CMD_GET_CHANNEL_NAME:
+	{
+		t_channel_id                           requested_channel_id;
+		CZapitMessages::responseGetChannelName response;
+		CBasicServer::receive_data(connfd, &requested_channel_id, sizeof(requested_channel_id));
+		tallchans_iterator it = allchans.find(requested_channel_id);
+		if (it == allchans.end())
+			response.name[0] = 0;
+		else
+			strncpy(response.name, it->second.getName().c_str(), 30);
+
+		CBasicServer::send_data(connfd, &response, sizeof(response));
+		break;
+	}
+
+	case CZapitMessages::CMD_IS_TV_CHANNEL:
+	{
+		t_channel_id                             requested_channel_id;
+		CZapitMessages::responseGeneralTrueFalse response;
+		CBasicServer::receive_data(connfd, &requested_channel_id, sizeof(requested_channel_id));
+		tallchans_iterator it = allchans.find(requested_channel_id);
+		if (it == allchans.end())
+			/* if in doubt (i.e. unknown channel) answer no */
+			response.status = false;
+		else
+			/* FIXME: the following check is no even remotely accurate */
+			response.status = (it->second.getServiceType() != ST_DIGITAL_RADIO_SOUND_SERVICE);
+
+		CBasicServer::send_data(connfd, &response, sizeof(response));
+		break;
+	}
+
 	default:
 		WARN("unknown command %d (version %d)", rmsg.cmd, CZapitMessages::ACTVERSION);
 		break;
@@ -1605,7 +1622,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.344 2004/02/25 10:45:35 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.345 2004/03/06 10:41:43 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
