@@ -1,10 +1,13 @@
 /*
-$Id: rcinput.h,v 1.4 2001/09/23 21:34:07 rasc Exp $
+$Id: rcinput.h,v 1.5 2001/10/01 20:41:08 McClean Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.5  2001/10/01 20:41:08  McClean
+ plugin interface for games - beta but nice.. :)
+
  Revision 1.4  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
@@ -59,6 +62,7 @@ class CRCInput
 		int translate(int code);
 		int getKeyInt();	//don't use!
 		void start();
+
 		
 		static void * InputThread (void *arg);
 		static void * TimerThread (void *arg);
@@ -76,6 +80,10 @@ class CRCInput
 			RC_timeout=-1, RC_nokey=-2
 		};
 		
+		int getFileHandle(){return fd;}; //only used for plugins (games) !!
+		void stopInput();
+		void restartInput();
+
         int repeat_block;
 		CRCInput();      //constructor - opens rc-device and starts needed threads
 		~CRCInput();     //destructor - closes rc-device

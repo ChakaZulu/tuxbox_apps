@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.19 2001/09/20 19:21:37 fnbrd Exp $
+//  $Id: neutrino.h,v 1.20 2001/10/01 20:41:08 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.20  2001/10/01 20:41:08  McClean
+//  plugin interface for games - beta but nice.. :)
+//
 //  Revision 1.19  2001/09/20 19:21:37  fnbrd
 //  Channellist mit IDs.
 //
@@ -64,6 +67,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <dlfcn.h>
+
 
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
@@ -131,6 +136,8 @@ class CNeutrinoApp : public CMenuTarget
     CAPIDChangeExec         *APIDChanger;
 
 	CChannelList		*channelList;
+
+	void PluginDemo(); //demo only --- remove!
 
 	void firstChannel();
 	void channelsInit();

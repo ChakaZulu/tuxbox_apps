@@ -20,6 +20,7 @@ mainmenu.video Vidéo
 mainmenu.network Réseau
 mainmenu.colors Couleurs / Thèmes
 mainmenu.keybinding Ajuster des clés
+mainmenu.games Play Pacman
 
 languagesetup.head Ajuster un langue
 languagesetup.select Langue

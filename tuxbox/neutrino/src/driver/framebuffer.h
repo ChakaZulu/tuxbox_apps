@@ -42,6 +42,8 @@ class CFrameBuffer
 		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
 
 	public:
+		int getFileHandle(){return fd;}; //only used for plugins (games) !!
+
 		//pointer to framebuffer
 		unsigned char *lfb;
 		unsigned int Stride() { return stride; }

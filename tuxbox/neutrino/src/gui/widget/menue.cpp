@@ -1,9 +1,12 @@
 /*
-$Id: menue.cpp,v 1.16 2001/09/23 21:34:07 rasc Exp $
+$Id: menue.cpp,v 1.17 2001/10/01 20:41:08 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.17  2001/10/01 20:41:08  McClean
+ plugin interface for games - beta but nice.. :)
+
  Revision 1.16  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
@@ -138,7 +141,7 @@ void CMenuWidget::paint()
     g_lcdd->setMode(LCDM_MENU, l_name);
 
 	width = 400;
-	height = 450; // height(menu_title)+10+...
+	height = 470; // height(menu_title)+10+...
 	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
 

@@ -1,10 +1,13 @@
 /*
- $Id: rcinput.cpp,v 1.8 2001/09/23 21:34:07 rasc Exp $
+ $Id: rcinput.cpp,v 1.9 2001/10/01 20:41:08 McClean Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.9  2001/10/01 20:41:08  McClean
+ plugin interface for games - beta but nice.. :)
+
  Revision 1.8  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
@@ -39,7 +42,6 @@ CRCInput::CRCInput()
 
     tv_prev.tv_sec = 0;
     repeat_block = 0;
-
 }
 
 /**************************************************************************
@@ -52,6 +54,36 @@ CRCInput::~CRCInput()
 		close(fd);
 }
 
+/**************************************************************************
+*	stopInput - stop reading rcin for plugins
+*
+**************************************************************************/
+void CRCInput::stopInput()
+{
+	printf("rcstop requested....\n");
+	pthread_cancel(thrInput);
+	pthread_cancel(thrTimer);
+}
+
+
+/**************************************************************************
+*	restartInput - restart reading rcin after calling plugins
+*
+**************************************************************************/
+void CRCInput::restartInput()
+{
+	if (fd>=0)
+		close(fd);
+
+	fd=open("/dev/dbox/rc0", O_RDONLY);
+	if (fd<0)
+	{
+		perror("/dev/dbox/rc0");
+		exit(-1);
+	}
+	ioctl(fd, RC_IOCTL_BCODES, 1);
+	start();
+}
 
 /**************************************************************************
 *	get rc-key - timeout can be specified
@@ -326,6 +358,7 @@ void * CRCInput::InputThread (void *arg)
 				sem_post (&RCInput->waitforkey);
 			}
         }
+		printf("rcinput endend.....\n");
         return NULL;
 }
 

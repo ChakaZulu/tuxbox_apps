@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.49 2001/09/27 11:25:38 field Exp $
+        $Id: neutrino.cpp,v 1.50 2001/10/01 20:41:08 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.50  2001/10/01 20:41:08  McClean
+  plugin interface for games - beta but nice.. :)
+
   Revision 1.49  2001/09/27 11:25:38  field
   Numzap gefixt, kleinere Bugfixes
 
@@ -191,6 +194,68 @@ static void initGlobals(void)
 
 }
 // Ende globale Variablen
+
+
+struct SPluginInfo
+{
+	char name[20];
+	char desc[100];
+	int  type;
+
+	unsigned char needfb;
+	unsigned char needrc;
+	unsigned char needlcd;
+};
+
+//int getInfo(SPluginInfo* Info);
+
+void CNeutrinoApp::PluginDemo()
+{
+	printf("PLUGINDEMO------------------------------------------------\n\n");
+	void		*handle;
+	//typedef int   (*getInfo)( SPluginInfo * info);//
+	int			(*getInfo) (SPluginInfo*);
+	int			(*execPlugin) (int fb, int rc, int lcd);
+	char		*error;
+	SPluginInfo	info;
+
+	handle = dlopen ("/pacman.so", RTLD_LAZY);
+	if (!handle)
+	{
+		fputs (dlerror(), stderr);
+		return;
+	}
+	
+	getInfo = (int(*)(SPluginInfo*)) dlsym(handle, "pacman_getInfo");
+	if ((error = dlerror()) != NULL)
+	{
+		fputs(error, stderr);
+		return;
+	}
+	execPlugin = (int(*)(int fb, int rc, int lcd)) dlsym(handle, "pacman_exec");
+	if ((error = dlerror()) != NULL)
+	{
+		fputs(error, stderr);
+		return;
+	}
+
+
+	(*getInfo)(&info);
+	printf("Plugin Name: %s\n", info.name);
+	printf("Plugin Desc: %s\n", info.desc);
+	printf("try exec...\n");
+
+	g_RCInput->stopInput();
+	(*execPlugin)(g_FrameBuffer->getFileHandle(), g_RCInput->getFileHandle(), -1);
+	printf("exec done...\n");
+	dlclose(handle);
+	g_RCInput->restartInput();
+	//restore framebuffer...
+	g_FrameBuffer->paletteSet();
+	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+}
+
+
 
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -728,6 +793,8 @@ void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audi
 	mainSettings.addItem( new CMenuForwarder("mainmenu.network", true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainmenu.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainmenu.keybinding", true,"", &keySettings) );
+	mainSettings.addItem( new CMenuForwarder("mainmenu.games", true, "", this, "pacman") );
+
 }
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
@@ -1453,6 +1520,11 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		setupNetwork( true );
 	}
+	else if(actionKey=="pacman")
+	{
+		///plugin demo todo remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		PluginDemo();
+	}
 
 	return returnval;
 }
@@ -1466,9 +1538,8 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.49 2001/09/27 11:25:38 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.50 2001/10/01 20:41:08 McClean Exp $\n\n");
     tzset();
-
     initGlobals();
 	neutrino = new CNeutrinoApp;
 	return neutrino->run(argc, argv);
