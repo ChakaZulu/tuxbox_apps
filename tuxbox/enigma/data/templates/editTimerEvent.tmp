@@ -3,7 +3,7 @@
 		<title>Edit Timer Event</title>
 		<link rel="stylesheet" type="text/css" href="webif.css">
 	</head>
-	<body>
+	<body onUnload="parent.window.opener.location.reload(true)">
 		<form action="/changeTimerEvent">
 			<input type="hidden" name="ref" value="#SERVICEREF#">
 			<input type="hidden" name="old_type" value="#OLD_TYPE#">

@@ -1,13 +1,13 @@
 <html>
 	<head>
-		<title>Add Timer Event</title>
+		<title>Add Repeating Timer Event</title>
 		<link rel="stylesheet" type="text/css" href="#CSS#">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="timer.js"></script>
 		<script language="javascript" type="text/javascript" src="zap.js"></script>
 		<script language="javascript" type="text/javascript">#ZAPDATA#</script>
 	</head>
-	<body onLoad="init()">
+	<body onLoad="init()" onUnload="parent.window.opener.location.reload(true)">
 		<form name="channelselector">
 			<table border=0 cellpadding=0 cellspacing=10>
 				<tr>
