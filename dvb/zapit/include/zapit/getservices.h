@@ -18,6 +18,7 @@ typedef struct channelstruct {
 	uint ecmpid;
 	uint onid;
 	uint tsid;
+    uint sid;
 	chanptr next;
 	chanptr prev;
 } channel;

@@ -289,7 +289,7 @@ void ParseTransponder(XMLTreeNode *transponder) {
 	    services = services->GetParent();
 	    
 	    sscanf(services->GetAttributeValue("channelNR"), "%d", &tmp_chan->chan_nr);
-	    sscanf(services->GetAttributeValue("serviceID"), "%x", &curr_servid); 
+	    sscanf(services->GetAttributeValue("serviceID"), "%x", &tmp_chan->sid);
 	    sscanf(services->GetAttributeValue("onid"), "%x", &tmp_chan->onid);
 
 	    sscanf(services->GetAttributeValue("pmt"), "%x", &tmp_chan->pmt);
@@ -481,4 +481,5 @@ chanptr LoadServices(int mode)
   printf("%d channels added\nPlease report to faralla@gmx.de if you see less in your neutrino-channellist\n",count);
   return top;
 }
+
 
