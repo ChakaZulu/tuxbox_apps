@@ -44,6 +44,7 @@ videomenu.videosignal_composite Composite
 videomenu.videoformat Format de Télévision
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
+videomenu.videoformat_autodetect autodetect
 
 networkmenu.head Ajuster un Réseau
 networkmenu.setupnow utiliser maintenant des réglages de Réseau

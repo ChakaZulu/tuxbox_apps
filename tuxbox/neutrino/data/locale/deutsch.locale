@@ -44,6 +44,7 @@ videomenu.videosignal_composite Composite
 videomenu.videoformat Bildschirmformat
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
+videomenu.videoformat_autodetect automatisch
 
 networkmenu.head Netzwerk Einstellungen
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen

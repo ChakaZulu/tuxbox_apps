@@ -44,6 +44,7 @@ videomenu.videosignal_composite Composite
 videomenu.videoformat Format Obrazu
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
+videomenu.videoformat_autodetect autodetect
 
 networkmenu.head Ustawienia Sieciowe
 networkmenu.setupnow Ustawienia teraz przekazac

@@ -44,6 +44,7 @@ videomenu.videosignal_composite COMPOSITE
 videomenu.videoformat EKRAN FORMATI
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
+videomenu.videoformat_autodetect autodetect
 
 networkmenu.head AG AYARLARI
 networkmenu.setupnow AG AYARINI SIMDI KAYID ED
