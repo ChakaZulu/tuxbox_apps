@@ -35,15 +35,14 @@ void eTransponder::cable::set(const CableDeliverySystemDescriptor *descriptor)
 	symbol_rate=descriptor->symbol_rate;
 	modulation=descriptor->modulation;
 	fec_inner=descriptor->FEC_inner;
-	inversion=0;
+	inversion=2;  // conversion to INVERSION_AUTO in eFrontend..
 	valid=1;
 }
 
 int eTransponder::cable::tune(eTransponder *trans)
 {
 	eDebug("[TUNE] tuning to %d/%d", frequency, symbol_rate);
-	int inv=0;
-	return eFrontend::getInstance()->tune_qam(trans, frequency, symbol_rate, fec_inner, inv, modulation);
+	return eFrontend::getInstance()->tune_qam(trans, frequency, symbol_rate, fec_inner, inversion, modulation);
 }
 
 void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descriptor)
@@ -58,7 +57,7 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 	if (!descriptor->west_east_flag)
 		orbital_position=-orbital_position;
 //	eDebug("%d %d", descriptor->orbital_position, descriptor->west_east_flag);
-	inversion=INVERSION_AUTO;
+	inversion=2;  // conversion to INVERSION_AUTO in eFrontend..
 	valid=1;
 }
 
@@ -90,7 +89,7 @@ void eTransponder::terrestrial::set(const TerrestrialDeliverySystemDescriptor *d
 	code_rate_lp=descriptor->code_rate_lp_stream;
 	guard_interval=descriptor->guard_interval;
 	transmission_mode=descriptor->transmission_mode;
-	inversion=INVERSION_AUTO;
+	inversion=2;  // conversion to INVERSION_AUTO in eFrontend..
 	valid=1;
 }
 
@@ -566,7 +565,7 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 			if (!asymbol_rate)
 				asymbol_rate="6900000";
 			if (!ainversion)
-				ainversion="0";
+				ainversion="2"; // auto
 			if (!amodulation)
 				amodulation="3";
 			int frequency=atoi(afrequency)/*/1000*/,

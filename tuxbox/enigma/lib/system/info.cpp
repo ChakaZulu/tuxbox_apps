@@ -41,8 +41,7 @@ eSystemInfo::eSystemInfo()
 					break;
 				default:
 				case FE_OFDM:
-					eDebug("COOL: dvb-t is out. less cool: enigma doesn't support it yet...");
-					fetype = feCable;
+					fetype = feTerrestrial;
 					break;
 			}
 			::close (fd);
@@ -52,7 +51,6 @@ eSystemInfo::eSystemInfo()
 	}
 	else
 		eDebug("open demod failed (%m)");
-
 #else
 	if ( eSystemInfo::getInstance()->getHwType() < eSystemInfo::DM7000 )
 	{
@@ -86,8 +84,7 @@ eSystemInfo::eSystemInfo()
 						break;
 					default:
 					case FE_OFDM:
-						eDebug("COOL: dvb-t is out. less cool: enigma doesn't support it yet...");
-						fetype = feCable;
+						fetype = feTerrestrial;
 						break;
 				}
 			}

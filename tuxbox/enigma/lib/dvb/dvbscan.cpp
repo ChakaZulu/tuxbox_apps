@@ -264,6 +264,9 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 						case DESCR_CABLE_DEL_SYS:
 							tp.setCable((CableDeliverySystemDescriptor*)*d);
 							break;
+						case DESCR_TERR_DEL_SYS:
+							tp.setTerrestrial((TerrestrialDeliverySystemDescriptor*)*d);
+							break;
 						}
 					}
 					

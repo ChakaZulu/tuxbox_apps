@@ -295,6 +295,17 @@ struct saveTransponder
 				fprintf(f, "\tc %d:%d:%d:%d", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion, t.cable.modulation);
 			if (t.satellite.valid)
 				fprintf(f, "\ts %d:%d:%d:%d:%d:%d", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.orbital_position, t.satellite.inversion);
+			if (t.terrestrial.valid)
+				fprintf(f, "\tt %d:%d:%d:%d:%d:%d:%d:%d:%d", 
+					t.terrestrial.centre_frequency, 
+					t.terrestrial.code_rate_hp, 
+					t.terrestrial.code_rate_lp,
+					t.terrestrial.bandwidth,
+					t.terrestrial.constellation,
+					t.terrestrial.guard_interval,
+					t.terrestrial.hierarchy_information,
+					t.terrestrial.transmission_mode,
+					t.terrestrial.inversion);
 			fprintf(f, ":%d\n/\n", t.state & eTransponder::stateOnlyFree );
 		}
 	}
@@ -367,6 +378,13 @@ void eDVBSettings::loadServices()
 				sscanf(line+2, "%d:%d:%d:%d:%d", &frequency, &symbol_rate, &inversion, &modulation, &onlyFree);
 				t.setCable(frequency, symbol_rate, inversion, modulation);
 			}
+			if (line[1]=='t')
+			{
+				int centre_frequency, code_rate_hp, code_rate_lp, bandwidth, constellation, guard_interval, hierarchy_information, transmission_mode, inversion=INVERSION_OFF;
+				sscanf(line+2, "%d:%d:%d:%d:%d:%d:%d:%d:%d:%d", 
+					&centre_frequency, &code_rate_hp, &code_rate_lp, &bandwidth, &constellation, &guard_interval, &hierarchy_information, &transmission_mode, &inversion );
+				t.setTerrestrial(centre_frequency, bandwidth, constellation, hierarchy_information, code_rate_hp, code_rate_lp, guard_interval, transmission_mode, inversion);
+			}
 			if ( onlyFree )
 				t.state |= eTransponder::stateOnlyFree;
 		}
@@ -380,7 +398,7 @@ void eDVBSettings::loadServices()
 
 	if (transponderlist)
 		transponderlist->clearAllServices();
-	
+
 	int count=0;
 
 	while (!feof(f))

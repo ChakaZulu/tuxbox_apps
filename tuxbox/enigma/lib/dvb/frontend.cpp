@@ -418,6 +418,97 @@ static Modulation getModulation(int mod)
 	}
 }
 
+// converstions etsi -> API for DVB-T
+static Modulation getConstellation(int mod)
+{
+	switch (mod)
+	{
+		case 0:
+			return QPSK;
+		case 1: 
+			return QAM_16;
+		case 2:
+			return QAM_64;
+	}
+	return (Modulation)QAM_AUTO;
+}
+
+static CodeRate getCodeRate(int rate)
+{
+	switch(rate)
+	{
+		case 0:
+			return FEC_1_2;
+		case 1:
+			return FEC_2_3;
+		case 2:
+			return FEC_3_4;
+		case 3:
+			return FEC_5_6;
+		case 4:
+			return FEC_7_8;
+	}
+	return (CodeRate)FEC_AUTO;
+}
+
+static BandWidth getBandWidth(int bwidth)
+{
+	switch(bwidth)
+	{
+		case 0: 
+			return BANDWIDTH_8_MHZ;
+		case 1: 
+			return BANDWIDTH_7_MHZ;
+		case 2:
+			return BANDWIDTH_6_MHZ;
+	}
+	return (BandWidth)BANDWIDTH_AUTO;
+}
+
+GuardInterval getGuardInterval( int interval )
+{
+	switch(interval)
+	{
+		case 0:
+			return GUARD_INTERVAL_1_32;
+		case 1:
+			return GUARD_INTERVAL_1_16;
+		case 2:
+			return GUARD_INTERVAL_1_8;
+		case 3:
+			return GUARD_INTERVAL_1_4;
+	}
+	return (GuardInterval)GUARD_INTERVAL_AUTO;
+}
+
+TransmitMode getTransmitMode( int mode )
+{
+	switch(mode)  // !! IS THIS CORRECT ?? 
+	{
+		case 2:
+			return TRANSMISSION_MODE_8K;
+		case 1:
+			return TRANSMISSION_MODE_2K;
+	}
+	return (TransmitMode)TRANSMISSION_MODE_AUTO;
+}
+
+Hierarchy getHierarchyInformation( int hierarchy )
+{
+	switch(hierarchy)
+	{
+		case 0:
+			return HIERARCHY_NONE;
+		case 1:
+			return HIERARCHY_1;
+		case 2:
+			return HIERARCHY_2;
+		case 3:
+			return HIERARCHY_4;
+	}
+	return (Hierarchy)HIERARCHY_AUTO;
+}
+                                      
 int gotoXTable[10] = { 0x00, 0x02, 0x03, 0x05, 0x06, 0x08, 0x0A, 0x0B, 0x0D, 0x0E };
 
 int eFrontend::readInputPower()
@@ -1253,14 +1344,13 @@ void eFrontend::updateTransponder()
 	}
 }
 
-int eFrontend::tune(eTransponder *trans,
+int eFrontend::tune_qpsk(eTransponder *trans, 
 		uint32_t Frequency, 		// absolute frequency in kHz
 		int polarisation, 			// polarisation (polHor, polVert, ...)
-		uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
-		CodeRate FEC_inner,			// FEC_inner api
-		SpectralInversion Inversion,	// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
-		eSatellite* sat,
-		Modulation QAM)					// Modulation, QAM_xx
+		uint32_t SymbolRate,		// symbolrate in symbols/s (e.g. 27500000)
+		uint8_t FEC_inner,			// FEC_inner (-1 for none, 0 for auto, but please don't use that)
+		int Inversion,					// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
+		eSatellite &sat)				// Satellite Data.. LNB, DiSEqC, switch..
 {
 //	eDebug("op = %d", trans->satellite.orbital_position );
 	tries=0;
@@ -1298,289 +1388,299 @@ int eFrontend::tune(eTransponder *trans,
 #else
 		curContTone = curVoltage = -1;
 #endif
-		// reset all diseqc devices
-		if (type==eSystemInfo::feSatellite)
-			InitDiSEqC();
+		InitDiSEqC();
 		needreset=0;
 	}
 
 	transponder=trans;
 
-	if ( sat )   // then we must do Satellite Stuff
-	{
-		eSwitchParameter &swParams = sat->getSwitchParams();
-		eLNB *lnb = sat->getLNB();
-		// Variables to detect if DiSEqC must sent .. or not
-		int csw = lnb->getDiSEqC().DiSEqCParam,
-				ucsw = (lnb->getDiSEqC().uncommitted_cmd ?
-					lnb->getDiSEqC().uncommitted_cmd : lastucsw),
-				ToneBurst = (lnb->getDiSEqC().MiniDiSEqCParam ?
-					lnb->getDiSEqC().MiniDiSEqCParam : lastToneBurst),
-				RotorCmd = lastRotorCmd,
-				sendRotorCmd=0;
+	eSwitchParameter &swParams = sat.getSwitchParams();
+	eLNB *lnb = sat.getLNB();
+	// Variables to detect if DiSEqC must sent .. or not
+	int csw = lnb->getDiSEqC().DiSEqCParam,
+			ucsw = (lnb->getDiSEqC().uncommitted_cmd ?
+				lnb->getDiSEqC().uncommitted_cmd : lastucsw),
+			ToneBurst = (lnb->getDiSEqC().MiniDiSEqCParam ?
+				lnb->getDiSEqC().MiniDiSEqCParam : lastToneBurst),
+			RotorCmd = lastRotorCmd,
+			sendRotorCmd=0;
 //				SmatvFreq = -1;
 
-		if ( !transponder->satellite.useable( lnb ) )
-		{
+	if ( !transponder->satellite.useable( lnb ) )
+	{
 //			eDebug("!!!!!!!!!!!!!!!! TUNED IN ETIMEDOUT 2 !!!!!!!!!!!!!!!!");
-			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
-			return 0;
-		}
+		/*emit*/ tunedIn(transponder, -ETIMEDOUT);
+		return 0;
+	}
 
-		eSecCmdSequence seq;
+	eSecCmdSequence seq;
 #if HAVE_DVB_API_VERSION < 3
-		secCommand *commands=0; // pointer to all sec commands
+	secCommand *commands=0; // pointer to all sec commands
 #else
-		dvb_diseqc_master_cmd *commands=0;
+	dvb_diseqc_master_cmd *commands=0;
 #endif
     
-		// num command counter
-		int cmdCount=0;
+	// num command counter
+	int cmdCount=0;
 
-		if (csw <= eDiSEqC::SENDNO)  // use AA/AB/BA/BB/SENDNO
-		{
+	if (csw <= eDiSEqC::SENDNO)  // use AA/AB/BA/BB/SENDNO
+	{
 //			eDebug("csw=%d, csw<<2=%d", csw, csw << 2);
-			if ( csw != eDiSEqC::SENDNO )
-				csw = 0xF0 | ( csw << 2 );
-			if ( polarisation==polHor)
-			{
-				csw |= 2;  // Horizontal
-				eDebug("Horizontal");
-			}
-			else
-				eDebug("Vertikal");
-
-			if ( Frequency > lnb->getLOFThreshold() )
-			{
-				csw |= 1;   // 22 Khz enabled
-				eDebug("Hi Band");
-			}
-			else
-				eDebug("Low Band");
-		}
-		//else we sent directly the cmd 0xF0..0xFF
-
 		if ( csw != eDiSEqC::SENDNO )
-			eDebug("DiSEqC Switch cmd = %04x", csw);
+			csw = 0xF0 | ( csw << 2 );
+		if ( polarisation==polHor)
+		{
+			csw |= 2;  // Horizontal
+			eDebug("Horizontal");
+		}
 		else
-			eDebug("send no committed diseqc cmd !");
-			
-		// Rotor Support
-		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && !noRotorCmd )
-		{           
-			bool useGotoXX=false;
-#define SPECIAL_MODE
-#ifdef SPECIAL_MODE
-			std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( sat->getOrbitalPosition() );
+			eDebug("Vertikal");
 
-			if (it != lnb->getDiSEqC().RotorTable.end())  // position for selected sat found ?
-				RotorCmd=it->second;
-			else  // entry not in table found
-#else
-			if ( lnb->getDiSEqC().useGotoXX )
-#endif
+		if ( Frequency > lnb->getLOFThreshold() )
+		{
+			csw |= 1;   // 22 Khz enabled
+			eDebug("Hi Band");
+		}
+		else
+			eDebug("Low Band");
+	}
+	//else we sent directly the cmd 0xF0..0xFF
+
+	if ( csw != eDiSEqC::SENDNO )
+		eDebug("DiSEqC Switch cmd = %04x", csw);
+	else
+		eDebug("send no committed diseqc cmd !");
+
+	// Rotor Support
+	if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && !noRotorCmd )
+	{           
+		bool useGotoXX=false;
+
+		std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( sat.getOrbitalPosition() );
+
+		if (it != lnb->getDiSEqC().RotorTable.end())  // position for selected sat found ?
+			RotorCmd=it->second;
+		else  // entry not in table found
+		{
+			eDebug("Entry for %d,%d° not in Rotor Table found... i try gotoXX°", sat.getOrbitalPosition() / 10, sat.getOrbitalPosition() % 10 );
+
+			useGotoXX=true;
+			int pos = sat.getOrbitalPosition();
+			int satDir = pos < 0 ? eDiSEqC::WEST : eDiSEqC::EAST;
+
+			double SatLon = abs(pos)/10.00,
+						 SiteLat = lnb->getDiSEqC().gotoXXLatitude,
+						 SiteLon = lnb->getDiSEqC().gotoXXLongitude;
+
+			if ( lnb->getDiSEqC().gotoXXLaDirection == eDiSEqC::SOUTH )
+				SiteLat = -SiteLat;
+
+			if ( lnb->getDiSEqC().gotoXXLoDirection == eDiSEqC::WEST )
+				SiteLon = 360 - SiteLon;
+
+			if (satDir == eDiSEqC::WEST )
+				SatLon = 360 - SatLon;
+
+			eDebug("siteLatitude = %lf, siteLongitude = %lf, %lf degrees", SiteLat, SiteLon, SatLon );
+			double azimuth=calcAzimuth(SatLon, SiteLat, SiteLon );
+			double elevation=calcElevation( SatLon, SiteLat, SiteLon );
+			double declination=calcDeclination( SiteLat, azimuth, elevation );
+			double satHourAngle=calcSatHourangle( azimuth, elevation, declination, SiteLat );
+			eDebug("azimuth=%lf, elevation=%lf, declination=%lf, PolarmountHourAngle=%lf", azimuth, elevation, declination, satHourAngle );
+
+			//
+			// xphile: USALS fix for southern hemisphere
+			//		
+			if (SiteLat >= 0)
 			{
-#ifdef SPECIAL_MODE
-				eDebug("Entry for %d,%d° not in Rotor Table found... i try gotoXX°", sat->getOrbitalPosition() / 10, sat->getOrbitalPosition() % 10 );
-#endif
-				useGotoXX=true;
-				int pos = sat->getOrbitalPosition();
-				int satDir = pos < 0 ? eDiSEqC::WEST : eDiSEqC::EAST;
-
-				double SatLon = abs(pos)/10.00,
-							 SiteLat = lnb->getDiSEqC().gotoXXLatitude,
-							 SiteLon = lnb->getDiSEqC().gotoXXLongitude;
-
-				if ( lnb->getDiSEqC().gotoXXLaDirection == eDiSEqC::SOUTH )
-					SiteLat = -SiteLat;
-
-				if ( lnb->getDiSEqC().gotoXXLoDirection == eDiSEqC::WEST )
-					SiteLon = 360 - SiteLon;
-
-				if (satDir == eDiSEqC::WEST )
-					SatLon = 360 - SatLon;
-
-				eDebug("siteLatitude = %lf, siteLongitude = %lf, %lf degrees", SiteLat, SiteLon, SatLon );
-				double azimuth=calcAzimuth(SatLon, SiteLat, SiteLon );
-				double elevation=calcElevation( SatLon, SiteLat, SiteLon );
-				double declination=calcDeclination( SiteLat, azimuth, elevation );
-				double satHourAngle=calcSatHourangle( azimuth, elevation, declination, SiteLat );
-				eDebug("azimuth=%lf, elevation=%lf, declination=%lf, PolarmountHourAngle=%lf", azimuth, elevation, declination, satHourAngle );
-
 				//
-				// xphile: USALS fix for southern hemisphere
-				//		
-				if (SiteLat >= 0)
-				{
-					//
-					// Northern Hemisphere
-					//
-					int tmp=(int)round( fabs( 180 - satHourAngle ) * 10.0 );
-					RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
+				// Northern Hemisphere
+				//
+				int tmp=(int)round( fabs( 180 - satHourAngle ) * 10.0 );
+				RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
 	
-					if (satHourAngle < 180)  // the east
-						RotorCmd |= 0xE000;
-					else                     // west
-						RotorCmd |= 0xD000;
+				if (satHourAngle < 180)  // the east
+					RotorCmd |= 0xE000;
+				else                     // west
+					RotorCmd |= 0xD000;
+			}
+			else
+			{
+				//
+				// Southern Hemisphere
+				//
+				if (satHourAngle < 180)  // the east
+				{
+					int tmp=(int)round( fabs( satHourAngle ) * 10.0 );
+					RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
+					RotorCmd |= 0xD000;
 				}
 				else
-				{
-					//
-					// Southern Hemisphere
-					//
-					if (satHourAngle < 180)  // the east
-					{
-						int tmp=(int)round( fabs( satHourAngle ) * 10.0 );
-						RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
-						RotorCmd |= 0xD000;
-					}
-					else
-					{                     // west
-						int tmp=(int)round( fabs( 360 - satHourAngle ) * 10.0 );
-						RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
-						RotorCmd |= 0xE000;
-					}
+				{                     // west
+					int tmp=(int)round( fabs( 360 - satHourAngle ) * 10.0 );
+					RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
+					RotorCmd |= 0xE000;
 				}
-
-				eDebug("RotorCmd = %04x", RotorCmd);
 			}
-#ifndef SPECIAL_MODE
-			else  // we use builtin rotor sat table
-			{
-				std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( sat->getOrbitalPosition() );
 
-				if (it != lnb->getDiSEqC().RotorTable.end())  // position for selected sat found ?
-					RotorCmd=it->second;
-				else  // entry not in table found
-					eDebug("Entry for %d,%d° not in Rotor Table found... please add", sat->getOrbitalPosition() / 10, sat->getOrbitalPosition() % 10 );
-			}
-#endif
+			eDebug("RotorCmd = %04x", RotorCmd);
+		}
 
-			if ( RotorCmd != lastRotorCmd || curRotorPos >= 5000 )  // rotorCmd must sent?
-			{
-				cmdCount=1; // this is the RotorCmd
-				if ( ucsw != lastucsw )
-					cmdCount++;
-				if ( csw != lastcsw && csw & 0xF0) // NOT SENDNO
-					cmdCount++;
-				cmdCount += (cmdCount-1)*lnb->getDiSEqC().DiSEqCRepeats;
+		if ( RotorCmd != lastRotorCmd || curRotorPos >= 5000 )  // rotorCmd must sent?
+		{
+			cmdCount=1; // this is the RotorCmd
+			if ( ucsw != lastucsw )
+				cmdCount++;
+			if ( csw != lastcsw && csw & 0xF0) // NOT SENDNO
+				cmdCount++;
+			cmdCount += (cmdCount-1)*lnb->getDiSEqC().DiSEqCRepeats;
 
 #if HAVE_DVB_API_VERSION < 3
 			// allocate memory for all DiSEqC commands
-				commands = new secCommand[cmdCount];
-				commands[cmdCount-1].type = SEC_CMDTYPE_DISEQC_RAW;
-				commands[cmdCount-1].u.diseqc.addr=0x31;     // normal positioner
-				commands[cmdCount-1].u.diseqc.cmdtype=0xE0;  // no replay... first transmission
+			commands = new secCommand[cmdCount];
+			commands[cmdCount-1].type = SEC_CMDTYPE_DISEQC_RAW;
+			commands[cmdCount-1].u.diseqc.addr=0x31;     // normal positioner
+			commands[cmdCount-1].u.diseqc.cmdtype=0xE0;  // no replay... first transmission
 #else
-				commands = new dvb_diseqc_master_cmd[cmdCount];
-				commands[cmdCount-1].msg[0]=0xE0;
-				commands[cmdCount-1].msg[1]=0x31;
+			commands = new dvb_diseqc_master_cmd[cmdCount];
+			commands[cmdCount-1].msg[0]=0xE0;
+			commands[cmdCount-1].msg[1]=0x31;
 #endif
-				if ( useGotoXX )
-				{
-					eDebug("Rotor DiSEqC Param = %04x (useGotoXX)", RotorCmd);
+			if ( useGotoXX )
+			{
+				eDebug("Rotor DiSEqC Param = %04x (useGotoXX)", RotorCmd);
 #if HAVE_DVB_API_VERSION < 3
-					commands[cmdCount-1].u.diseqc.cmd=0x6E; // gotoXX Drive Motor to Angular Position
-					commands[cmdCount-1].u.diseqc.numParams=2;
-					commands[cmdCount-1].u.diseqc.params[0]=((RotorCmd & 0xFF00) / 0x100);
-					commands[cmdCount-1].u.diseqc.params[1]=RotorCmd & 0xFF;
+				commands[cmdCount-1].u.diseqc.cmd=0x6E; // gotoXX Drive Motor to Angular Position
+				commands[cmdCount-1].u.diseqc.numParams=2;
+				commands[cmdCount-1].u.diseqc.params[0]=((RotorCmd & 0xFF00) / 0x100);
+				commands[cmdCount-1].u.diseqc.params[1]=RotorCmd & 0xFF;
 #else
-					commands[cmdCount-1].msg[2]=0x6E;
-					commands[cmdCount-1].msg[3]=((RotorCmd & 0xFF00) / 0x100);
-					commands[cmdCount-1].msg[4]=RotorCmd & 0xFF;
-					commands[cmdCount-1].msg_len=5;
+				commands[cmdCount-1].msg[2]=0x6E;
+				commands[cmdCount-1].msg[3]=((RotorCmd & 0xFF00) / 0x100);
+				commands[cmdCount-1].msg[4]=RotorCmd & 0xFF;
+				commands[cmdCount-1].msg_len=5;
 #endif
-				}
-				else
-				{
-					eDebug("Rotor DiSEqC Param = %02x (use stored position)", RotorCmd);
-#if HAVE_DVB_API_VERSION < 3
-					commands[cmdCount-1].u.diseqc.cmd=0x6B;  // goto stored sat position
-					commands[cmdCount-1].u.diseqc.numParams=1;
-					commands[cmdCount-1].u.diseqc.params[0]=RotorCmd;
-#else
-					commands[cmdCount-1].msg[2]=0x6B;
-					commands[cmdCount-1].msg[3]=RotorCmd;
-					commands[cmdCount-1].msg_len=4;
-#endif
-				}
-				sendRotorCmd++;
 			}
+			else
+			{
+				eDebug("Rotor DiSEqC Param = %02x (use stored position)", RotorCmd);
+#if HAVE_DVB_API_VERSION < 3
+				commands[cmdCount-1].u.diseqc.cmd=0x6B;  // goto stored sat position
+				commands[cmdCount-1].u.diseqc.numParams=1;
+				commands[cmdCount-1].u.diseqc.params[0]=RotorCmd;
+#else
+				commands[cmdCount-1].msg[2]=0x6B;
+				commands[cmdCount-1].msg[3]=RotorCmd;
+				commands[cmdCount-1].msg_len=4;
+#endif
+			}
+			sendRotorCmd++;
 		}
-			
-/*		else if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::SMATV )
-		{
-			SmatvFreq=Frequency;
-			if ( lastSmatvFreq != SmatvFreq )
-			{
-				if ( lnb->getDiSEqC().uncommitted_cmd && lastucsw != ucsw)
-					cmdCount=3;
-				else
-					cmdCount=2;
-				cmdCount += (cmdCount-1)*lnb->getDiSEqC().DiSEqCRepeats;
+	}
 
-				// allocate memory for all DiSEqC commands
-				commands = new secCommand[cmdCount];
-
-				commands[cmdCount-1].type = SEC_CMDTYPE_DISEQC_RAW;
-				commands[cmdCount-1].u.diseqc.addr = 0x71;	// intelligent slave interface for multi-master bus
-				commands[cmdCount-1].u.diseqc.cmd = 0x58;	  // write channel frequency
-				commands[cmdCount-1].u.diseqc.cmdtype = 0xE0;
-				commands[cmdCount-1].u.diseqc.numParams = 3;
-				commands[cmdCount-1].u.diseqc.params[0] = (((Frequency / 10000000) << 4) & 0xF0) | ((Frequency / 1000000) & 0x0F);
-				commands[cmdCount-1].u.diseqc.params[1] = (((Frequency / 100000) << 4) & 0xF0) | ((Frequency / 10000) & 0x0F);
-				commands[cmdCount-1].u.diseqc.params[2] = (((Frequency / 1000) << 4) & 0xF0) | ((Frequency / 100) & 0x0F);
-			}
-		}*/
-		if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 )
+#if 0
+	else if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::SMATV )
+	{
+		SmatvFreq=Frequency;
+		if ( lastSmatvFreq != SmatvFreq )
 		{
+			if ( lnb->getDiSEqC().uncommitted_cmd && lastucsw != ucsw)
+				cmdCount=3;
+			else
+				cmdCount=2;
+			cmdCount += (cmdCount-1)*lnb->getDiSEqC().DiSEqCRepeats;
+
+			// allocate memory for all DiSEqC commands
+			commands = new secCommand[cmdCount];
+
+			commands[cmdCount-1].type = SEC_CMDTYPE_DISEQC_RAW;
+			commands[cmdCount-1].u.diseqc.addr = 0x71;	// intelligent slave interface for multi-master bus
+			commands[cmdCount-1].u.diseqc.cmd = 0x58;	  // write channel frequency
+			commands[cmdCount-1].u.diseqc.cmdtype = 0xE0;
+			commands[cmdCount-1].u.diseqc.numParams = 3;
+			commands[cmdCount-1].u.diseqc.params[0] = (((Frequency / 10000000) << 4) & 0xF0) | ((Frequency / 1000000) & 0x0F);
+			commands[cmdCount-1].u.diseqc.params[1] = (((Frequency / 100000) << 4) & 0xF0) | ((Frequency / 10000) & 0x0F);
+			commands[cmdCount-1].u.diseqc.params[2] = (((Frequency / 1000) << 4) & 0xF0) | ((Frequency / 100) & 0x0F);
+		}
+	}
+#endif
+	if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 )
+	{
 //			eDebug("ucsw=%d lastucsw=%d csw=%d lastcsw=%d", ucsw, lastucsw, csw, lastcsw);
-			if ( ucsw != lastucsw || csw != lastcsw || (ToneBurst && ToneBurst != lastToneBurst) )
+		if ( ucsw != lastucsw || csw != lastcsw || (ToneBurst && ToneBurst != lastToneBurst) )
+		{
+//			eDebug("cmdCount=%d", cmdCount);
+			int loops;
+			if ( cmdCount )  // Smatv or Rotor is avail...
+				loops = cmdCount - 1;  // do not overwrite rotor cmd
+			else // no rotor or smatv
 			{
-//				eDebug("cmdCount=%d", cmdCount);
-				int loops;
-				if ( cmdCount )  // Smatv or Rotor is avail...
-					loops = cmdCount - 1;  // do not overwrite rotor cmd
-				else // no rotor or smatv
-				{
-					// DiSEqC Repeats and uncommitted switches only when DiSEqC >= V1_1
-					if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1	&& ucsw != lastucsw )
-						cmdCount++;
-					if ( csw != lastcsw && csw & 0xF0 )
-						cmdCount++;
-					cmdCount += cmdCount*lnb->getDiSEqC().DiSEqCRepeats;
-					loops = cmdCount;
+				// DiSEqC Repeats and uncommitted switches only when DiSEqC >= V1_1
+				if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1	&& ucsw != lastucsw )
+					cmdCount++;
+				if ( csw != lastcsw && csw & 0xF0 )
+					cmdCount++;
+				cmdCount += cmdCount*lnb->getDiSEqC().DiSEqCRepeats;
+				loops = cmdCount;
 
-					if ( cmdCount )
+				if ( cmdCount )
 #if HAVE_DVB_API_VERSION < 3
-						commands = new secCommand[cmdCount];
+					commands = new secCommand[cmdCount];
 #else
-						commands = new dvb_diseqc_master_cmd[cmdCount];
+					commands = new dvb_diseqc_master_cmd[cmdCount];
+#endif
+			}
+
+			for ( int i = 0; i < loops;)  // fill commands...
+			{
+				enum { UNCOMMITTED, COMMITTED } cmdbefore = COMMITTED;
+#if HAVE_DVB_API_VERSION < 3
+				commands[i].type = SEC_CMDTYPE_DISEQC_RAW;
+				commands[i].u.diseqc.cmdtype= i ? 0xE1 : 0xE0; // repeated or not repeated transm.
+				commands[i].u.diseqc.numParams=1;
+				commands[i].u.diseqc.addr=0x10;
+#else
+				commands[i].msg[0]= i ? 0xE1 : 0xE0;
+				commands[i].msg[1]=0x10;
+				commands[i].msg_len=4;
+#endif
+				if ( ( lnb->getDiSEqC().SwapCmds
+					&& lnb->getDiSEqC().DiSEqCMode > eDiSEqC::V1_0
+					&& ucsw != lastucsw )
+					|| !(csw & 0xF0) )
+				{
+					cmdbefore = UNCOMMITTED;
+#if HAVE_DVB_API_VERSION < 3
+					commands[i].u.diseqc.params[0] = ucsw;
+					commands[i].u.diseqc.cmd=0x39;
+#else
+					commands[i].msg[2]=0x39;
+					commands[i].msg[3]=ucsw;
 #endif
 				}
-
-				for ( int i = 0; i < loops;)  // fill commands...
+				else
 				{
-					enum { UNCOMMITTED, COMMITTED } cmdbefore = COMMITTED;
 #if HAVE_DVB_API_VERSION < 3
-					commands[i].type = SEC_CMDTYPE_DISEQC_RAW;
-					commands[i].u.diseqc.cmdtype= i ? 0xE1 : 0xE0; // repeated or not repeated transm.
-					commands[i].u.diseqc.numParams=1;
-					commands[i].u.diseqc.addr=0x10;
+					commands[i].u.diseqc.params[0] = csw;
+					commands[i].u.diseqc.cmd=0x38;
 #else
-					commands[i].msg[0]= i ? 0xE1 : 0xE0;
-					commands[i].msg[1]=0x10;
-					commands[i].msg_len=4;
+					commands[i].msg[2]=0x38;
+					commands[i].msg[3]=csw;
 #endif
-					if ( ( lnb->getDiSEqC().SwapCmds
-						&& lnb->getDiSEqC().DiSEqCMode > eDiSEqC::V1_0
-						&& ucsw != lastucsw )
-						|| !(csw & 0xF0) )
+				}
+//				eDebug("normalCmd");
+//				eDebug("0x%02x,0x%02x,0x%02x,0x%02x", commands[i].u.diseqc.cmdtype, commands[i].u.diseqc.addr, commands[i].u.diseqc.cmd, commands[i].u.diseqc.params[0]);
+				i++;
+				if ( i < loops
+					&& ( ( (cmdbefore == COMMITTED) && ucsw )
+						|| ( (cmdbefore == UNCOMMITTED) && csw & 0xF0 ) ) )
+				{
+					memcpy( &commands[i], &commands[i-1], sizeof(commands[i]) );
+					if ( cmdbefore == COMMITTED )
 					{
-						cmdbefore = UNCOMMITTED;
 #if HAVE_DVB_API_VERSION < 3
-						commands[i].u.diseqc.params[0] = ucsw;
 						commands[i].u.diseqc.cmd=0x39;
+						commands[i].u.diseqc.params[0]=ucsw;
 #else
 						commands[i].msg[2]=0x39;
 						commands[i].msg[3]=ucsw;
@@ -1589,235 +1689,166 @@ int eFrontend::tune(eTransponder *trans,
 					else
 					{
 #if HAVE_DVB_API_VERSION < 3
-						commands[i].u.diseqc.params[0] = csw;
 						commands[i].u.diseqc.cmd=0x38;
+						commands[i].u.diseqc.params[0]=csw;
 #else
 						commands[i].msg[2]=0x38;
 						commands[i].msg[3]=csw;
 #endif
 					}
-//					eDebug("normalCmd");
-//					eDebug("0x%02x,0x%02x,0x%02x,0x%02x", commands[i].u.diseqc.cmdtype, commands[i].u.diseqc.addr, commands[i].u.diseqc.cmd, commands[i].u.diseqc.params[0]);
-					i++;
-					if ( i < loops
-						&& ( ( (cmdbefore == COMMITTED) && ucsw )
-							|| ( (cmdbefore == UNCOMMITTED) && csw & 0xF0 ) ) )
-					{
-						memcpy( &commands[i], &commands[i-1], sizeof(commands[i]) );
-						if ( cmdbefore == COMMITTED )
-						{
-#if HAVE_DVB_API_VERSION < 3
-							commands[i].u.diseqc.cmd=0x39;
-							commands[i].u.diseqc.params[0]=ucsw;
-#else
-							commands[i].msg[2]=0x39;
-							commands[i].msg[3]=ucsw;
-#endif
-						}
-						else
-						{
-#if HAVE_DVB_API_VERSION < 3
-							commands[i].u.diseqc.cmd=0x38;
-							commands[i].u.diseqc.params[0]=csw;
-#else
-							commands[i].msg[2]=0x38;
-							commands[i].msg[3]=csw;
-#endif
-						}
 //						eDebug("0x%02x,0x%02x,0x%02x,0x%02x", commands[i].u.diseqc.cmdtype, commands[i].u.diseqc.addr, commands[i].u.diseqc.cmd, commands[i].u.diseqc.params[0]);
-						i++;
-					}
+					i++;
 				}
 			}
 		}
-		if ( !cmdCount)
-		{
-			eDebug("send no DiSEqC");
-			seq.commands=0;
-		}
-
-		seq.numCommands=cmdCount;
-		eDebug("%d DiSEqC cmds to send", cmdCount);
-
-		seq.toneBurst = eSecCmdSequence::NONE;
-		if ( ucsw != lastucsw || csw != lastcsw || (ToneBurst && ToneBurst != lastToneBurst) )
-		{
-			if ( lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::A )
-			{
-				eDebug("Toneburst A");
-				seq.toneBurst=eSecCmdSequence::TONEBURST_A;
-			}
-			else if ( lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::B )
-			{
-				eDebug("Toneburst B");
-				seq.toneBurst=eSecCmdSequence::TONEBURST_B;
-			}
-			else
-				eDebug("no Toneburst (MiniDiSEqC)");
-		}
-     
-			// no DiSEqC related Stuff
-		
-		// calc Frequency
-		int local = Frequency - ( Frequency > lnb->getLOFThreshold() ? lnb->getLOFHi() : lnb->getLOFLo() );
-#if HAVE_DVB_API_VERSION < 3
-		front.Frequency = abs(local);
-#else
-		front.frequency = abs(local);
-#endif
-
-		// set Continuous Tone ( 22 Khz... low - high band )
-		if ( (swParams.HiLoSignal == eSwitchParameter::ON) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency > lnb->getLOFThreshold()) ) )
-			seq.continuousTone = eSecCmdSequence::TONE_ON;
-		else if ( (swParams.HiLoSignal == eSwitchParameter::OFF) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency <= lnb->getLOFThreshold()) ) )
-			seq.continuousTone = eSecCmdSequence::TONE_OFF;
-
-		seq.increasedVoltage = lnb->getIncreasedVoltage();
-
-		// Voltage( 0/14/18V  vertical/horizontal )
-		if ( swParams.VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams.VoltageMode == eSwitchParameter::HV )  )
-			voltage = eSecCmdSequence::VOLTAGE_13;
-		else if ( swParams.VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams.VoltageMode == eSwitchParameter::HV)  )
-			voltage = eSecCmdSequence::VOLTAGE_18;
-		else
-			voltage = eSecCmdSequence::VOLTAGE_OFF;
-     
-		// set cmd ptr in sequence..
-		seq.commands=commands;
-
-		// handle DiSEqC Rotor
-		if ( sendRotorCmd )
-		{
-//			eDebug("handle DISEqC Rotor.. cmdCount = %d", cmdCount);
-/*			eDebug("0x%02x,0x%02x,0x%02x,0x%02x,0x%02x",
-				commands[cmdCount-1].u.diseqc.cmdtype,
-				commands[cmdCount-1].u.diseqc.addr,
-				commands[cmdCount-1].u.diseqc.cmd,
-				commands[cmdCount-1].u.diseqc.params[0],
-				commands[cmdCount-1].u.diseqc.params[1]);*/
-
-			// drive rotor with 18V when we can measure inputpower
-			// or we know which orbital pos currently is selected
-			if ( lnb->getDiSEqC().useRotorInPower&1 )
-				seq.voltage = eSecCmdSequence::VOLTAGE_18;
-			else
-				seq.voltage = voltage;
-
-			lastRotorCmd=RotorCmd;
-
-			increased = seq.increasedVoltage;
-			newPos = sat->getOrbitalPosition();
-
-			if ( lnb->getDiSEqC().useRotorInPower&1 )
-			{
-				curRotorPos=5000;
-				DeltaA=(lnb->getDiSEqC().useRotorInPower & 0x0000FF00) >> 8;
-				RotorUseInputPower(seq, lnb );
-				finalTune=0;
-			}
-			else
-			{
-				curRotorPos=10000;
-				if ( !eDVB::getInstance()->getScanAPI() )
-				{
-					eDebug("ROTOR RUNNING EMIT");
-					/* emit */ s_RotorRunning( newPos );
-				}
-				RotorUseTimeout(seq, lnb );
-			}
-		}
-		else if ( lastucsw != ucsw || ( ToneBurst && lastToneBurst != ToneBurst) )
-		{
-send:
-			seq.voltage=voltage;
-			if ( SendSequence(seq) < 0 )
-			{
-				eDebug("SendSequence failed (%m)");
-				return -1;
-			}
-			else if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1 && lnb->getDiSEqC().SeqRepeat )  // Sequence Repeat ?
-			{
-				usleep( 100000 ); // between seq repeats we wait 80ms
-				SendSequence(seq);  // just do it *g*
-			}
-		}
-		else if ( lastcsw != csw )
-		{
-			// faster zap workaround... send only diseqc when satpos changed
-			if ( lnb->getDiSEqC().FastDiSEqC && csw && (csw / 4) == (lastcsw / 4) )
-			{
-				eDebug("Satellite has not changed.. don't send DiSEqC cmd (Fast DiSEqC)");
-				seq.numCommands=0;
-			}
-			goto send; // jump above...
-		}
-		else
-			eDebug("no Band or Polarisation changed .. don't send Sequence");
-
-		lastcsw = csw;
-		lastucsw = ucsw;
-		lastToneBurst = ToneBurst;
-		lastLNB = lnb;  /* important.. for the correct timeout
-											 between normal diseqc cmd and rotor cmd */
-
-		// delete allocated memory
-		delete [] commands;
 	}
-
-#if HAVE_DVB_API_VERSION < 3
-	front.Inversion = Inversion;
-#else
-	front.inversion = Inversion;
-#endif
-	switch (type)
+	if ( !cmdCount)
 	{
-		case eSystemInfo::feCable:
-			eDebug("Cable Frontend detected");
-#if HAVE_DVB_API_VERSION < 3
-			front.Frequency = Frequency;
-			front.u.qam.QAM=QAM;
-			front.u.qam.FEC_inner=FEC_inner;
-			front.u.qam.SymbolRate=SymbolRate;
-#else
-			front.frequency = Frequency * 1000;
-			front.u.qam.modulation=QAM;
-			front.u.qam.fec_inner=FEC_inner;
-			front.u.qam.symbol_rate=SymbolRate;
-#endif
-			break;
-		case eSystemInfo::feSatellite:
-			eDebug("Sat Frontend detected");
-#if HAVE_DVB_API_VERSION < 3
-			front.u.qpsk.FEC_inner=FEC_inner;
-			front.u.qpsk.SymbolRate=SymbolRate;
-#else
-			front.u.qpsk.fec_inner=FEC_inner;
-			front.u.qpsk.symbol_rate=SymbolRate;
-#endif
-			break;
-		case eSystemInfo::feTerrestrial:
-			eDebug("DVB-T Frontend detected");
-#if HAVE_DVB_API_VERSION < 3
-			// FIXME: v1 has no *_AUTO parameters for DVB-T
-			front.u.ofdm.bandWidth=BANDWIDTH_8_MHZ;	// random
-			front.u.ofdm.HP_CodeRate=FEC_AUTO;
-			front.u.ofdm.LP_CodeRate=FEC_AUTO;
-			front.u.ofdm.Constellation=QAM_16; // random
-			front.u.ofdm.TransmissionMode=TRANSMISSION_MODE_2K; // random
-			front.u.ofdm.guardInterval=GUARD_INTERVAL_1_32;	// random
-			front.u.ofdm.HierarchyInformation=HIERARCHY_NONE; // random
-#else
-			// FIXME: no frontend can handle all these AUTOs
-			front.u.ofdm.bandwidth=BANDWIDTH_AUTO;
-			front.u.ofdm.code_rate_HP=FEC_AUTO;
-			front.u.ofdm.code_rate_LP=FEC_AUTO;
-			front.u.ofdm.constellation=QAM_AUTO;
-			front.u.ofdm.transmission_mode=TRANSMISSION_MODE_AUTO;
-			front.u.ofdm.guard_interval=GUARD_INTERVAL_AUTO;
-			front.u.ofdm.hierarchy_information=HIERARCHY_AUTO;
-#endif
-			break;
+		eDebug("send no DiSEqC");
+		seq.commands=0;
 	}
+
+	seq.numCommands=cmdCount;
+	eDebug("%d DiSEqC cmds to send", cmdCount);
+
+	seq.toneBurst = eSecCmdSequence::NONE;
+	if ( ucsw != lastucsw || csw != lastcsw || (ToneBurst && ToneBurst != lastToneBurst) )
+	{
+		if ( lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::A )
+		{
+			eDebug("Toneburst A");
+			seq.toneBurst=eSecCmdSequence::TONEBURST_A;
+		}
+		else if ( lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::B )
+		{
+			eDebug("Toneburst B");
+			seq.toneBurst=eSecCmdSequence::TONEBURST_B;
+		}
+		else
+			eDebug("no Toneburst (MiniDiSEqC)");
+	}
+     
+	// no DiSEqC related Stuff
+
+	// calc Frequency
+	int local = Frequency - ( Frequency > lnb->getLOFThreshold() ? lnb->getLOFHi() : lnb->getLOFLo() );
+#if HAVE_DVB_API_VERSION < 3
+	front.Frequency = abs(local);
+#else
+	front.frequency = abs(local);
+#endif
+
+	// set Continuous Tone ( 22 Khz... low - high band )
+	if ( (swParams.HiLoSignal == eSwitchParameter::ON) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency > lnb->getLOFThreshold()) ) )
+		seq.continuousTone = eSecCmdSequence::TONE_ON;
+	else if ( (swParams.HiLoSignal == eSwitchParameter::OFF) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency <= lnb->getLOFThreshold()) ) )
+		seq.continuousTone = eSecCmdSequence::TONE_OFF;
+
+	seq.increasedVoltage = lnb->getIncreasedVoltage();
+
+	// Voltage( 0/14/18V  vertical/horizontal )
+	if ( swParams.VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams.VoltageMode == eSwitchParameter::HV )  )
+		voltage = eSecCmdSequence::VOLTAGE_13;
+	else if ( swParams.VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams.VoltageMode == eSwitchParameter::HV)  )
+		voltage = eSecCmdSequence::VOLTAGE_18;
+	else
+		voltage = eSecCmdSequence::VOLTAGE_OFF;
+     
+	// set cmd ptr in sequence..
+	seq.commands=commands;
+
+	// handle DiSEqC Rotor
+	if ( sendRotorCmd )
+	{
+#if 0
+		eDebug("handle DISEqC Rotor.. cmdCount = %d", cmdCount);
+		eDebug("0x%02x,0x%02x,0x%02x,0x%02x,0x%02x",
+			commands[cmdCount-1].u.diseqc.cmdtype,
+			commands[cmdCount-1].u.diseqc.addr,
+			commands[cmdCount-1].u.diseqc.cmd,
+			commands[cmdCount-1].u.diseqc.params[0],
+			commands[cmdCount-1].u.diseqc.params[1]);
+#endif
+
+		// drive rotor with 18V when we can measure inputpower
+		// or we know which orbital pos currently is selected
+		if ( lnb->getDiSEqC().useRotorInPower&1 )
+			seq.voltage = eSecCmdSequence::VOLTAGE_18;
+		else
+			seq.voltage = voltage;
+
+		lastRotorCmd=RotorCmd;
+
+		increased = seq.increasedVoltage;
+		newPos = sat.getOrbitalPosition();
+
+		if ( lnb->getDiSEqC().useRotorInPower&1 )
+		{
+			curRotorPos=5000;
+			DeltaA=(lnb->getDiSEqC().useRotorInPower & 0x0000FF00) >> 8;
+			RotorUseInputPower(seq, lnb );
+			finalTune=0;
+		}
+		else
+		{
+			curRotorPos=10000;
+			if ( !eDVB::getInstance()->getScanAPI() )
+			{
+				eDebug("ROTOR RUNNING EMIT");
+				/* emit */ s_RotorRunning( newPos );
+			}
+			RotorUseTimeout(seq, lnb );
+		}
+	}
+	else if ( lastucsw != ucsw || ( ToneBurst && lastToneBurst != ToneBurst) )
+	{
+send:
+		seq.voltage=voltage;
+		if ( SendSequence(seq) < 0 )
+		{
+			eDebug("SendSequence failed (%m)");
+			return -1;
+		}
+		else if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1 && lnb->getDiSEqC().SeqRepeat )  // Sequence Repeat ?
+		{
+			usleep( 100000 ); // between seq repeats we wait 80ms
+			SendSequence(seq);  // just do it *g*
+		}
+	}
+	else if ( lastcsw != csw )
+	{
+		// faster zap workaround... send only diseqc when satpos changed
+		if ( lnb->getDiSEqC().FastDiSEqC && csw && (csw / 4) == (lastcsw / 4) )
+		{
+			eDebug("Satellite has not changed.. don't send DiSEqC cmd (Fast DiSEqC)");
+			seq.numCommands=0;
+		}
+		goto send; // jump above...
+	}
+	else
+		eDebug("no Band or Polarisation changed .. don't send Sequence");
+
+	lastcsw = csw;
+	lastucsw = ucsw;
+	lastToneBurst = ToneBurst;
+	lastLNB = lnb;  /* important.. for the correct timeout
+										 between normal diseqc cmd and rotor cmd */
+
+	// delete allocated memory
+	delete [] commands;
+
+// fill in Frontend data
+#if HAVE_DVB_API_VERSION < 3
+	front.Inversion=(Inversion == 2 ? INVERSION_AUTO :
+		(Inversion?INVERSION_ON:INVERSION_OFF) );
+	front.u.qpsk.FEC_inner=getFEC(FEC_inner);
+	front.u.qpsk.SymbolRate=SymbolRate;
+#else
+	front.inversion=(Inversion == 2 ? INVERSION_AUTO :
+		(Inversion?INVERSION_ON:INVERSION_OFF) );
+	front.u.qpsk.fec_inner=getFEC(FEC_inner)
+	front.u.qpsk.symbol_rate=SymbolRate;
+#endif
 
 	if (finalTune)
 		return setFrontend();
@@ -1825,28 +1856,34 @@ send:
 	return 0;
 }
 
-int eFrontend::tune_qpsk(eTransponder *transponder, 
-		uint32_t Frequency, 		// absolute frequency in kHz
-		int polarisation, 			// polarisation (polHor, polVert, ...)
-		uint32_t SymbolRate,		// symbolrate in symbols/s (e.g. 27500000)
-		uint8_t FEC_inner,			// FEC_inner (-1 for none, 0 for auto, but please don't use that)
-		int Inversion,					// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
-		eSatellite &sat)				// Satellite Data.. LNB, DiSEqC, switch..
-{
-	return tune(transponder, Frequency, polarisation, SymbolRate, getFEC(FEC_inner), Inversion==2?INVERSION_AUTO:Inversion?INVERSION_ON:INVERSION_OFF, &sat, QPSK);
-}
-
-int eFrontend::tune_qam(eTransponder *transponder, 
+int eFrontend::tune_qam(eTransponder *trans, 
 		uint32_t Frequency,			// absolute frequency in kHz
 		uint32_t SymbolRate,		// symbolrate in symbols/s (e.g. 6900000)
 		uint8_t FEC_inner,			// FEC_inner (-1 for none, 0 for auto, but please don't use that). normally -1.
 		int Inversion,					// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
 		int QAM)								// Modulation, QAM_xx
 {
-	return tune(transponder, Frequency, 0, SymbolRate, getFEC(FEC_inner), Inversion==2?INVERSION_AUTO:Inversion?INVERSION_ON:INVERSION_OFF, 0, getModulation(QAM));
+	eDebug("Cable Frontend detected");
+	transponder=trans;
+#if HAVE_DVB_API_VERSION < 3
+	front.Inversion=(Inversion == 2 ? INVERSION_AUTO :
+		(Inversion?INVERSION_ON:INVERSION_OFF) );
+	front.Frequency = Frequency;
+	front.u.qam.QAM=getModulation(QAM);
+	front.u.qam.FEC_inner=getFEC(FEC_inner);
+	front.u.qam.SymbolRate=SymbolRate;
+#else
+	front.inversion=(Inversion == 2 ? INVERSION_AUTO :
+		(Inversion?INVERSION_ON:INVERSION_OFF) );
+	front.frequency = Frequency * 1000;
+	front.u.qam.modulation=getModulation(QAM);
+	front.u.qam.fec_inner=getFEC(FEC_inner);
+	front.u.qam.symbol_rate=SymbolRate;
+#endif
+	return setFrontend();
 }
 
-int eFrontend::tune_ofdm(eTransponder *transponder,
+int eFrontend::tune_ofdm(eTransponder *trans,
 		int centre_frequency,
 		int bandwidth,
 		int constellation,
@@ -1857,8 +1894,28 @@ int eFrontend::tune_ofdm(eTransponder *transponder,
 		int transmission_mode,
 		int inversion)
 {
-	// FIXME add all the other parameters
-	return tune(transponder, centre_frequency, 0, 0, FEC_AUTO, inversion==2?INVERSION_AUTO:inversion?INVERSION_ON:INVERSION_OFF, 0, QAM_16);
+	eDebug("DVB-T Frontend detected");
+	transponder=trans;
+#if HAVE_DVB_API_VERSION < 3
+	front.Frequency = centre_frequency;
+	front.u.ofdm.bandWidth=getBandWidth(bandwidth);
+	front.u.ofdm.HP_CodeRate=getCodeRate(code_rate_lp);
+	front.u.ofdm.LP_CodeRate=getCodeRate(code_rate_hp);
+	front.u.ofdm.Constellation=getConstellation(constellation);
+	front.u.ofdm.TransmissionMode=getTransmitMode(transmission_mode);
+	front.u.ofdm.guardInterval=getGuardInterval(guard_interval);
+	front.u.ofdm.HierarchyInformation=getHierarchyInformation(hierarchy_information);
+#else
+	front.frequency = centre_frequency;
+	front.u.ofdm.bandwidth=getBandWidth(bandwidth);
+	front.u.ofdm.code_rate_HP=getCodeRate(code_rate_lp);
+	front.u.ofdm.code_rate_LP=getCodeRate(code_rate_hp);
+	front.u.ofdm.constellation=getConstellation(constellation);
+	front.u.ofdm.transmission_mode=getTransmitMode(transmission_mode);
+	front.u.ofdm.guard_interval=getGuardInterval(guard_interval);
+	front.u.ofdm.hierarchy_information=getHierarchyInformation(hierarchy_information);
+#endif
+	return setFrontend();
 }
 
 int eFrontend::savePower()

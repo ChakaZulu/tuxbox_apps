@@ -30,6 +30,10 @@
 #define CodeRate fe_code_rate_t
 #define SpectralInversion fe_spectral_inversion_t
 #define Modulation fe_modulation_t
+#define TransmitMode fe_transmit_mode_t
+#define BandWidth fe_bandwidth_t
+#define GuardInterval fe_guard_interval_t
+#define Hierarchy fe_hierarchy_t
 #endif
 
 #include <lib/base/ebase.h>
@@ -110,11 +114,6 @@ class eFrontend: public Object
 #endif
 
 	eFrontend(int type, const char *demod=DEMOD_DEV, const char *sec=SEC_DEV);
-	int tune(eTransponder *transponder, 
-			uint32_t Frequency, int polarisation,
-			uint32_t SymbolRate,
-			CodeRate FEC_inner,
-			SpectralInversion Inversion, eSatellite* sat, Modulation QAM);
 
 	int RotorUseTimeout(eSecCmdSequence& seq, eLNB *lnb);
 	int RotorUseInputPower(eSecCmdSequence& seq, eLNB *lnb);

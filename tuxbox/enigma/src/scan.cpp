@@ -351,10 +351,13 @@ tsAutomatic::tsAutomatic(eWidget *parent)
 	{
 		case eSystemInfo::feSatellite:
 			l_status->setText(_("To begin searching for a valid satellite press OK, or choose your desired satellite manually and press OK"));
-		break;
+			break;
 		case eSystemInfo::feCable:
 			l_status->setText(_("To begin searching for a valid cable provider press OK, or choose your desired cable provider manually and press OK"));
-		break;
+			break;
+		case eSystemInfo::feTerrestrial:
+			l_status->setText(_("To begin searching for a valid transponder press OK, or choose your desired location manually and press OK"));
+			break;
 	}
 
 	setFocus(l_network);
@@ -467,7 +470,7 @@ int tsAutomatic::loadNetworks()
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 			for ( std::list<tpPacket>::const_iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
-				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable) )
+				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite) )
 					new eListBoxEntryText(*l_network, i->name, (void*)&*i, eTextPara::dirCenter);
 
 	return 0;
@@ -880,7 +883,7 @@ tsMultiSatScan::tsMultiSatScan(eWidget *parent)
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 			for ( std::list<tpPacket>::iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
-				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable) )
+				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite) )
 					new eListBoxEntrySat(satellites, &*i );
 
 	CONNECT( satellites->selected, tsMultiSatScan::entrySelected );
@@ -1074,6 +1077,9 @@ int TransponderScan::Exec()
 				case eSystemInfo::feSatellite:
 					transponder.setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 0);	// some astra transponder
 					break;
+				case eSystemInfo::feTerrestrial:
+					// most is AUTO
+					transponder.setTerrestrial(522000000, 0, 1, 4, 5, 5, 4, 3, 2);
 				default:
 					break;
 				}
