@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.19 2003/03/02 01:20:22 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.20 2003/03/02 13:05:59 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -36,8 +36,10 @@
 #include <string>
 
 
-/*
+/**/
 #define PAUSE_EQUALS_STOP 1
+/**/
+/*
 #define DEBUG_MUTEX 1
 */
 
@@ -378,8 +380,10 @@ int DMX::request_unpause(void)
 
 int DMX::pause(void)
 {
+#ifndef PAUSE_EQUALS_STOP	       
 	if (!isOpen())
 		return 1;
+#endif
 
 	pthread_mutex_lock(&pauselock);
 
@@ -393,8 +397,10 @@ int DMX::pause(void)
 
 int DMX::unpause(void)
 {
+#ifndef PAUSE_EQUALS_STOP	       
 	if (!isOpen())
 		return 1;
+#endif
 
 	pthread_mutex_lock(&pauselock);
 
@@ -408,18 +414,23 @@ int DMX::unpause(void)
 
 int DMX::change(const int new_filter_index)
 {
-	if (!isOpen())
-		return 1;
-
 	showProfiling("changeDMX: before pthread_mutex_lock(&start_stop_mutex)");
         lock();
 
 	showProfiling("changeDMX: after pthread_mutex_lock(&start_stop_mutex)");
 
+	filter_index = new_filter_index;
+
+	if (!isOpen())
+	{
+		unlock();
+		return 1;
+	}
+
 	if (real_pauseCounter > 0)
 	{
-		pthread_mutex_unlock(&start_stop_mutex);
 		dprintf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", filters[new_filter_index].filter);
+		unlock();
 		return 0;	// läuft nicht (zB streaming)
 	}
 
@@ -440,7 +451,7 @@ int DMX::change(const int new_filter_index)
 
 //	if (new_filter_index != filter_index)
 	{
-		filter_index = new_filter_index;
+/*		filter_index = new_filter_index; */
 
 		int rc = immediate_start();
 
