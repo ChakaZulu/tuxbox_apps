@@ -146,6 +146,7 @@ void show_time()
 {
 	char timestr[50];
 	struct timeb tm;
+	//printf("[lcdd] clock event\n");
 	if (showclock)
 	{
 		ftime(&tm);
@@ -331,6 +332,7 @@ int main(int argc, char **argv)
 
 	mode = CLcddClient::MODE_TVRADIO;
 	show_servicename("");
+	showclock=true;
 	show_time();
 
 
