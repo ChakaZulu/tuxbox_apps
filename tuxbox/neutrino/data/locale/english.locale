@@ -741,7 +741,9 @@ filebrowser.select Select
 filebrowser.mark Mark
 filebrowser.scan Scaning folder
 filebrowser.sort.name (filename)
+filebrowser.sort.namedirsfirst (filename2)
 filebrowser.sort.date (date)
+filebrowser.sort.type (type)
 filebrowser.nextpage Next Page
 filebrowser.prevpage Prev. Page
 

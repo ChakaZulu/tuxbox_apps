@@ -742,7 +742,9 @@ filebrowser.select Auswählen
 filebrowser.mark Markieren
 filebrowser.scan Durchsuche Verzeichnisse
 filebrowser.sort.name (Dateiname)
+filebrowser.sort.namedirsfirst (Dateiname2)
 filebrowser.sort.date (Datum)
+filebrowser.sort.type (Typ)
 filebrowser.nextpage Seite vor
 filebrowser.prevpage Seite zurück
 

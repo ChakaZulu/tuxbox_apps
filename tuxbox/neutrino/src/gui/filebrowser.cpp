@@ -147,12 +147,34 @@ bool sortByName (const CFile& a, const CFile& b)
 */
 }
 
+bool sortByNameDirsFirst(CFile a, CFile b)
+// Sorts alphabetically with Directories first
+{
+	int typea, typeb;
+	typea = a.getType();
+	typeb = b.getType();
+	
+	if (typea == CFile::FILE_DIR)
+		if (typeb == CFile::FILE_DIR)
+			//both directories
+			return sortByName(a, b);
+		else
+			//only a is directory
+			return true;
+	else if (typeb == CFile::FILE_DIR)
+		//only b is directory
+		return false;
+	else
+		//no directory
+		return sortByName(a, b);
+}
+
 bool sortByType (const CFile& a, const CFile& b)
 {
 	if(a.Mode == b.Mode)
-		return a.Name > b.Name;
+		return sortByName(a, b);
 	else
-		return a.Mode < b.Mode ;
+		return a.Mode < b.Mode;
 
 }
 
@@ -275,8 +297,12 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 		filelist.push_back(*file);
 	}
 	// sort result
-	if( smode == 0 )
+	if (smode == 0)
 		sort(filelist.begin(), filelist.end(), sortByName);
+	else if (smode == 1)
+		sort(filelist.begin(), filelist.end(), sortByNameDirsFirst);
+	else if (smode == 2)
+		sort(filelist.begin(), filelist.end(), sortByType);
 	else
 		sort(filelist.begin(), filelist.end(), sortByDate);
 
@@ -574,12 +600,18 @@ bool CFileBrowser::exec(std::string Dirname)
 		else if (msg==CRCInput::RC_help)
 		{
 			smode++;
-			if( smode > 1 )
+			if( smode > 3 )
 				smode = 0;
-			if( smode == 0 )
+			// sort result
+			if (smode == 0)
 				sort(filelist.begin(), filelist.end(), sortByName);
+			else if (smode == 1)
+				sort(filelist.begin(), filelist.end(), sortByNameDirsFirst);
+			else if (smode == 2)
+				sort(filelist.begin(), filelist.end(), sortByType);
 			else
 				sort(filelist.begin(), filelist.end(), sortByDate);
+
 			paint();
 		}
 		else if(CRCInput::isNumeric(msg))
@@ -593,8 +625,6 @@ bool CFileBrowser::exec(std::string Dirname)
 				loop = false;
 			}
 		}
-		//if(!CRCInput::isNumeric(msg))
-		//	frameBuffer->paintBoxRel(x + width, y + height, 20, (foheight ), COL_MENUHEAD);
 	}
 
 	hide();
@@ -846,7 +876,7 @@ void CFileBrowser::paintFoot()
 
 	if (!(filelist.empty()))
 	{
-		std::string nextsort;
+		std::string currentsort;
 		type = filelist[selected].getType();
 
 		//Red Button
@@ -879,11 +909,16 @@ void CFileBrowser::paintFoot()
 
 		//?-Button
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by2 - 3);
-		if( smode == 1 )
-			nextsort = g_Locale->getText("filebrowser.sort.name");
-		else
-			nextsort = g_Locale->getText("filebrowser.sort.date");
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, nextsort, COL_INFOBAR, 0, true); // UTF-8
+		if (smode == 0)
+			currentsort = g_Locale->getText("filebrowser.sort.name");
+		else if (smode == 1)
+			currentsort = g_Locale->getText("filebrowser.sort.namedirsfirst");
+		else if (smode == 2)
+			currentsort = g_Locale->getText("filebrowser.sort.type");
+		else 
+			currentsort = g_Locale->getText("filebrowser.sort.date");
+
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, currentsort, COL_INFOBAR, 0, true); // UTF-8
 
 	}
 }
