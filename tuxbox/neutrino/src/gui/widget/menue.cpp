@@ -473,11 +473,7 @@ int CMenuOptionChooser::paint( bool selected )
 	}
 	else if (CRCInput::isNumeric(directKey))
 	{
-		//number
-		char tmp[10];
-		sprintf((char*) tmp, "%d", CRCInput::getNumericValue(directKey));
-
-		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, tmp, color, height);
+		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
 	}
 
 
@@ -670,11 +666,7 @@ int CMenuForwarder::paint(bool selected)
 	}
 	else if (CRCInput::isNumeric(directKey))
 	{
-		//number
-		char tmp[10];
-		sprintf((char*) tmp, "%d", CRCInput::getNumericValue(directKey));
-
-		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, tmp, color, height);
+		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
 	}
 
 	if (option)
