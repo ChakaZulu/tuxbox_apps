@@ -1,4 +1,4 @@
-<html>
+:<html>
 <head>
 <script type="text/javascript" src="data.js"></script>
 </head>
@@ -33,7 +33,6 @@
 	var format = #FORMAT#;
 	<!-- recording -->
 	var recording = #RECORDING2#;
-	update();
 </script>
 </body>
 </html>
