@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.2 2001/11/15 22:39:22 obi Exp $
+ * $Id: lcdmenu.h,v 1.3 2001/11/16 20:05:36 obi Exp $
  *
  * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
  *
@@ -66,6 +66,9 @@ class CLCDMenu : public CLCDDisplay
 	bool isPinProtected(int);
 	void addPinProtection(int);
 
+	const char *getCurrentSalt();
+	char *getNewSalt();
+
 	CConfigManager *getConfig() { return config; }
 
     private:
@@ -90,9 +93,7 @@ class CLCDMenu : public CLCDDisplay
 	vector<int> pinEntries;
 
 	string cryptedPin;
-	char newSalt[2];
-	char oldSalt[2];
-
+	char *newSalt;
 };
 
 #endif /* __LCDMENU_H_ */

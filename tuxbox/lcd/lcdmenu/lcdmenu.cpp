@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.4 2001/11/16 14:07:25 McClean Exp $
+ * $Id: lcdmenu.cpp,v 1.5 2001/11/16 20:05:36 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.5  2001/11/16 20:05:36  obi
+ * - pin does really work now, can be checked, changed and saved :)
+ * - default selection is visible again on startup
+ * - fontsize parameter might work better now
+ *
  * Revision 1.4  2001/11/16 14:07:25  McClean
  * fixed missing index-check
  *
@@ -82,15 +87,22 @@ CLCDMenu::CLCDMenu()
     pinEntries = config->getIntVector("pin_protect");
     entryCount = entries.size();
 
-    /* get salt from old password */
-    strncpy(oldSalt, cryptedPin.c_str(), 2);
-
-    /* get salt for new password */
-    FILE *random = fopen("/dev/urandom", "r");
-    fread(&newSalt, 1, 2, random);
-    fclose(random);
-
+    newSalt = getNewSalt();
     menuFont = fontRenderer->getFont("Arial", "Bold", fontSize);
+}
+
+const char *CLCDMenu::getCurrentSalt()
+{
+	return cryptedPin.substr(0,2).c_str();
+}
+
+char *CLCDMenu::getNewSalt()
+{
+    char *salt = (char *) malloc(2);
+    FILE *fd = fopen("/dev/urandom", "r");
+    fread(salt, 1, 2, fd);
+    fclose(fd);
+    return salt;
 }
 
 CLCDMenu::~CLCDMenu()
@@ -183,7 +195,7 @@ bool CLCDMenu::drawString(string text, int top, int align, int color)
 {
     int left, maxWidth;
     
-    int width = menuFont->getRenderWidth(text.c_str()) + 5;
+    int width = menuFont->getRenderWidth(text.c_str()) + fontSize/2;
 
     if (align == 1)
     {
@@ -262,13 +274,17 @@ bool CLCDMenu::rcLoop()
 		break;
 
 	    default:
+#ifdef DEBUG
 		cout << "pressedKey: " << pressedKey << endl;
+#endif
+		break;
 	}
 
 	/* check pin if selected entry is protected  */
 	if ((selected) && (isPinProtected(selectedEntry)) && (!checkPin("Enter PIN")))
 	{
-	    selectEntry(defaultEntry);
+	    drawMenu();
+	    selectEntry(selectedEntry);
 	    selected = false;
 	}
     }
@@ -300,10 +316,19 @@ bool CLCDMenu::changePin()
 	if (newCryptedPin == pinScreen("Confirm PIN", true))
 	{
 	    /* ... dann kann der alte pin durch den neuen ersetzt werden. */
-	    cryptedPin = newCryptedPin;
-	    config->setModifiedFlag(false);
+	    config->setString("pin", newCryptedPin);
+	    cryptedPin = config->getString("pin");
+
+            /* und die welt soll erfahren dass die config veraendert wurde. */
+	    config->setModifiedFlag(true);
+
+            /* get salt for next password */
+	    newSalt = getNewSalt();
+
 	    // TODO: notify successful change via lcd
-	    printf("pin changed successfully.\n");
+#ifdef DEBUG
+	    cout << "pin changed successfully." << endl;
+#endif
 	    return true;
 	}
 	else
@@ -338,9 +363,11 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
     {
 
 #ifndef X86_BUILD
-	pin += rc->getKey(300);
+	char *digit = (char *) malloc(1);
+	sprintf(digit, "%d", rc->getKey(300));
+	pin += string(digit);
 #else
-	pin[i] = '0';
+	pin += string("0");
 #endif
 
 #ifdef DEBUG
@@ -361,20 +388,25 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
     }
     else
     {
-        return string(crypt(pin.c_str(), oldSalt));
+        return string(crypt(pin.c_str(), getCurrentSalt()));
     }
 }
 
 bool CLCDMenu::checkPin(string title)
 {
-    if (cryptedPin ==  pinScreen(title, false))
+    if (cryptedPin != pinScreen(title, false))
     {
         /* TODO: complain about invalid pin on lcd */
-	cerr << "invalid pin entered." << endl;
+#ifdef DEBUG
+	cout << "invalid pin entered." << endl;
+#endif
         return false;
     }
     else
     {
+#ifdef DEBUG
+	cout << "pin accepted" << endl;
+#endif
         return true;
     }
 }
@@ -382,7 +414,7 @@ bool CLCDMenu::checkPin(string title)
 int main(int argc, char **argv)
 {
     /* print version information */
-    cout << "$Id: lcdmenu.cpp,v 1.4 2001/11/16 14:07:25 McClean Exp $" << endl;
+    cout << "$Id: lcdmenu.cpp,v 1.5 2001/11/16 20:05:36 obi Exp $" << endl;
 
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();
@@ -391,7 +423,7 @@ int main(int argc, char **argv)
     menu->drawMenu();
 
     /* select default entry */
-    menu->selectEntry(menu->getDefaultEntry());
+    menu->selectEntry(menu->getDefaultEntry()+1);
 
     /* get command from remote control */
     menu->rcLoop();
@@ -399,6 +431,9 @@ int main(int argc, char **argv)
     if (menu->getConfig()->getModifiedFlag())
     {
 	/* save configuraion */
+#ifdef DEBUG
+	cout << "saving configuration..." << endl;
+#endif
 	menu->getConfig()->saveConfig("/var/etc/lcdmenu.conf");
 
 	/* reset modified flag */
