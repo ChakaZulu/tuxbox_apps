@@ -58,10 +58,9 @@ void eZapStandby::renewSleep()
 		}
 	}
 	eFrontend::getInstance()->savePower();
-
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 ||
-		( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-			&& eSystemInfo::getInstance()->hasStandbyWakeupTimer() ) )
+	if ( eDVB::getInstance()->time_difference &&
+		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+		&& eSystemInfo::getInstance()->hasStandbyWakeupTimer() )
 	{
 		time_t nowTime=time(0)+eDVB::getInstance()->time_difference;
 		extern void setRTC(time_t); // defined in dvb/dvbservice.cpp
