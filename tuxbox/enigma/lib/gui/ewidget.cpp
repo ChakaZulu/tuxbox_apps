@@ -526,20 +526,98 @@ gPainter *eWidget::getPainter(QRect area)
 	return p;
 }
 
+static int parse(const char *p, int *v, int *e, int max)
+{
+	int i=0;
+	while ((i<max) && (*p))
+	{
+		int ea=0;
+		if (*p=='e')
+		{
+			p++;
+			ea=1;
+		}
+		char *x;
+		v[i]=strtol(p, &x, 10);
+		p=x;
+		if (*p && *p!=':')
+			 return -3;
+		if (*p==':')
+			p++;
+		if (ea)
+			v[i]+=e[i];
+		i++;
+	}
+	if (*p)
+		return -1;
+	if (i<max)
+		return -2;
+	return 0;
+}
+
 int eWidget::setProperty(const QString &prop, const QString &value)
 {
 	if (prop=="position")
 	{
-		int x, y;
-		if (sscanf(value, "%d:%d", &x, &y)!=2)
-			return -EINVAL;
-		move(QPoint(x, y));
+		int v[2], e[2]={0, 0};
+		if (parent)
+		{
+			e[0]=parent->clientrect.width();
+			e[1]=parent->clientrect.height();
+			qDebug("e(pos) is %d, %d", e[0], e[1]);
+		}
+		int err=parse(value, v, e, 2);
+		if (err)
+			return err;
+		move(QPoint(v[0], v[1]));
+	} else if (prop=="cposition")
+	{
+		int v[2], e[2];
+		e[0]=e[1]=0;
+		if (parent)
+		{
+			e[0]=parent->clientrect.width();
+			e[1]=parent->clientrect.height();
+			qDebug("e(size) is %d, %d", e[0], e[1]);
+		}
+		int err=parse(value, v, e, 2);
+		if (err)
+			return err;
+
+		recalcClientRect();
+		v[0]-=clientrect.x();
+		v[1]-=clientrect.y();
+		
+		move(QPoint(v[0], v[1]));
 	} else if (prop=="size")
 	{
-		int x, y;
-		if (sscanf(value, "%d:%d", &x, &y)!=2)
-			return -EINVAL;
-		resize(QSize(x, y));
+		int v[2], e[2];
+		e[0]=e[1]=0;
+		if (parent)
+		{
+			e[0]=parent->clientrect.width()-position.x();
+			e[1]=parent->clientrect.height()-position.y();
+		}
+		int err=parse(value, v, e, 2);
+		if (err)
+			return err;		
+		resize(QSize(v[0], v[1]));
+	} else if (prop=="csize")
+	{
+		int v[2], e[2];
+		e[0]=e[1]=0;
+		if (parent)
+		{
+			e[0]=parent->clientrect.width()-position.x();
+			e[1]=parent->clientrect.height()-position.y();
+		}
+		int err=parse(value, v, e, 2);
+		if (err)
+			return err;
+		recalcClientRect();
+		v[0]+=size.width()-clientrect.width();
+		v[1]+=size.height()-clientrect.height();
+		resize(QSize(v[0], v[1]));
 	} else if (prop=="text")
 	{
 		QString text;
