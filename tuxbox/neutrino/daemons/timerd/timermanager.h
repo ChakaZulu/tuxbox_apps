@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.7 2002/05/14 23:10:36 dirch Exp $
+	$Id: timermanager.h,v 1.8 2002/05/17 03:27:28 dirch Exp $
 
 	License: GPL
 
@@ -33,7 +33,7 @@
 #include <string>
 
 #include "timerdclient.h"
-#include "clientlib/zapitclient.h"
+#include "../../zapit/clientlib/zapitclient.h"
 #include "eventserver.h"
 
 using namespace std;
@@ -64,10 +64,7 @@ class CTimerManager
 		int addEvent(CTimerEvent*);
 		void removeEvent(int eventID);
 		CTimerEvent* getNextEvent();
-		CTimerEventMap getEvents(){return events;};
 		void listEvents(CTimerEventMap &Events);
-
-
 };
 
 
