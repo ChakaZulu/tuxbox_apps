@@ -1,7 +1,4 @@
-INCLUDES = \
-	-I$(top_srcdir)/mczap/libevent \
-	-I$(top_srcdir)/zapit \
-	-I$(DRIVER)/include
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/lib
 
 noinst_LIBRARIES = libzapsi.a
 
