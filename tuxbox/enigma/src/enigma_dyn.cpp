@@ -1589,14 +1589,45 @@ public:
 					 return;
 		}
 #endif
-		eString serviceRef = ref2string(e);
+		eString short_description;
+		eService* current;
+		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+		if (sapi)
+		{
+			current = eDVB::getInstance()->settings->getTransponders()->searchService(e);
+			if (current)
+			{
+				eEPGCache::getInstance()->Lock();
+				const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)e);
+				if (evt)
+				{
+					timeMap::const_iterator It;
+					for (It = evt->begin(); It != evt->end(); It++)
+					{
+						EITEvent event(*It->second);
+						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+						{
+							Descriptor *descriptor=*d;
+							if (descriptor->Tag() == DESCR_SHORT_EVENT)
+							{
+								short_description = ((ShortEventDescriptor*)descriptor)->event_name;
+							}
+						}
+					}
+				}
+				eEPGCache::getInstance()->Unlock();
+			}
+		}
+
 		eService *service = iface.addRef(e);
 		if (service)
 		{
-			result1 += "\"" + serviceRef + "\", ";
+			result1 += "\"" + ref2string(e) + "\", ";
 			eString tmp = filter_string(service->service_name);
 			tmp.strReplace("\"", "'");
-			result2 += "\"" + tmp + "\", ";
+			if (short_description)
+				short_description = " - " + short_description;
+			result2 += "\"" + tmp + short_description + "\", ";
 			iface.removeRef(e);
 		}
 	}
@@ -2967,7 +2998,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 static eString wapEPG(int page)
 {
 	std::stringstream result;
-	eString description/*, ext_description*/;
+	eString description;
 	result << std::setfill('0');
 
 	eService* current;
