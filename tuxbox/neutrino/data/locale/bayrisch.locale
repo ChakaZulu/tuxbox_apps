@@ -394,7 +394,7 @@ flashupdate.versioncheck Version obcheckn
 flashupdate.nonewversion koa neie Version do
 flashupdate.md5check Image obchecken
 flashupdate.md5sumerror Des Image is hi
-flashupdate.url_file unset
+flashupdate.url_file Eistellungsdatei
 flashupdate.proxyserver_sep Proxyserva
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Gems an Proxynama oderd IP ei (Host:Port)
@@ -405,7 +405,7 @@ flashupdate.proxyusername_hint2 Wans nix eigem wer koa Authentifizierung gmacht
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Gems as Proxy-Passwort ei
 flashupdate.proxypassword_hint2
-flashupdate.selectimage unset
+flashupdate.selectimage Vorhandne Images
 flashupdate.msgbox Des Image hob i gfundn:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWoins des Image runterlon \nund installiern?
 flashupdate.msgbox_manual A neas Image hob i gfundn:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWoins des instaliern?
 flashupdate.expertfunctions Experten-Funktionen
@@ -423,7 +423,7 @@ flashupdate.actionwriteflash schreib in flash
 flashupdate.flashreadyreboot Des Imag is gflasht worn.\nJetz start ma de Box nei.
 flashupdate.reallyflashmtd Woins echt flashen?\n\nWann was schiaflaft oder des Image hi is\wer de Box nimma startn.\n\nImagenama: %s\nZiel: %s
 flashupdate.wrongbase Des Baseimage hot net de richtige Version, bitte an andres Baseimage installiern
-flashupdate.experimentalimage unset
+flashupdate.experimentalimage Sie ham an Schnappshuss ausgwaiht,\nbitte bedenkens, dass de Version ned durchprobiert is.\n Wenns bled laft, geht Ihr Box danoch nimma.\n\nWoins de Version wirklich hernemma?
 
 bouqueteditor.name Bouquets verwoitn
 bouqueteditor.delete Wegmacha

@@ -70,7 +70,7 @@ miscsettings.head Diverse Iischdellige
 miscsettings.shutdown_real Sdändbymodus
 miscsettings.shutdown_real_rcdelay V'rzögerede Shudown
 miscsettings.boxtype DBox Hersdeller
-miscsettings.bootinfo unset
+miscsettings.bootinfo Infos bim Boote a'zeige
 miscsettings.startbhdriver BH-Mode Triiber lade
 miscsettings.general Allg'mein
 miscsettings.fb_destination EXPERT! Boot-Chonsole
@@ -84,12 +84,12 @@ audiomenu.analogout Analog-Usgang
 audiomenu.monoright mono rächts
 audiomenu.monoleft mono lings
 audiomenu.stereo stereo
-audiomenu.dolbydigital Dolby Digidaal
+audiomenu.dolbydigital Dolby Digital automatisch
 audiomenu.avs_control Luutstärgi Stüürig avs/os
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
-audiomenu.PCMOffset unset
+audiomenu.PCMOffset Lutstärkeabsänkig PCM
 
 videomenu.head Video-Iischdellige
 videomenu.screensetup Bildbereich ischelle
@@ -140,7 +140,7 @@ streamingmenu.streaming_server_cddrive DVD Laufwerk
 streamingmenu.streaming_server_startdir Verzeichniss (VLC)
 streamingmenu.streaming_videorate Daterade Video
 streamingmenu.streaming_audiorate Daterade Audio
-streamingmenu.streaming_ac3_enabled unset
+streamingmenu.streaming_ac3_enabled AC3 Understützig
 streamingmenu.off Deaktiviert
 streamingmenu.on Aktiviert
 streamingmenu.streaming_force_transcode Transcode Forcieren
@@ -241,7 +241,7 @@ colorchooser.alpha alpha
 lcdmenu.head LCD Iistellige
 lcdmenu.inverse Inverdiere
 lcdmenu.power Pfuus
-lcdmenu.autodimm unset
+lcdmenu.autodimm Automatisch dimme
 lcdmenu.lcdcontroler Kontrast / Hälligkeit
 lcdmenu.statusline Statusziile
 lcdmenu.statusline.volume Lutstärki
@@ -360,7 +360,7 @@ scants.bouquet_leave nidd ändere
 scants.bouquet_create neu mache
 scants.bouquet_erase lösche
 scants.bouquet_satellite Satellite-Bouquet:
-scants.bouquet_update unset
+scants.bouquet_update erneuere
 scants.failed Kanalsuechii fehlg'schlage!
 scants.finished Kanalsueche erfolgrich beändet!
 
@@ -376,7 +376,7 @@ flashupdate.getupdatefileerror ka Öpdate nidd lade
 flashupdate.cantopenfile ka Datei nidd uffmache
 flashupdate.fileis0bytes d'Dateigrößi isch 0 Byte
 flashupdate.eraseingflash lösch' grad s'Fläsh
-flashupdate.erasefailed unset
+flashupdate.erasefailed Flash lösche fehlg'schlage
 flashupdate.programmingflash programmier grad s'Fläsh
 flashupdate.cantopenmtd ka's MTD-Device nidd uffmache
 flashupdate.ready ferdig
@@ -394,7 +394,7 @@ flashupdate.versioncheck Versionsueberpruefig
 flashupdate.nonewversion kei neue Version verfuigbar
 flashupdate.md5check Imagepruefig
 flashupdate.md5sumerror Des Image isch fehlerhaft
-flashupdate.url_file unset
+flashupdate.url_file Konfigfile
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Proxyname
 flashupdate.proxyserver_hint1 Gib de Proxyname oder d'IP ii (Host:Port)
@@ -405,7 +405,7 @@ flashupdate.proxyusername_hint2 E leere Iintrag bedüded kei Authentifizierig
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Gib's Proxy-Passwort Ii
 flashupdate.proxypassword_hint2
-flashupdate.selectimage unset
+flashupdate.selectimage Verfügbari Images
 flashupdate.msgbox S'het folgendi neui Images:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWillsch die neui Version jetz abelade\nund installiere?
 flashupdate.msgbox_manual S'het s'folgend neu Image:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWillsch die neui Version jetz installiere?
 flashupdate.expertfunctions Experte-Funktione
@@ -423,7 +423,7 @@ flashupdate.actionwriteflash schrieb grad s'flash
 flashupdate.flashreadyreboot S'Image isch erfolgriich g'flasht.\nd'DBox wird jetz neu g'starded.
 flashupdate.reallyflashmtd Willsch dä Flashvorgang wirklich mache?\n\nFalls es e'Fehler gitt odder s'Image nidd\nfunktionfäähig isch, wird d'DBox nümmi boote.\n\nImagename: %s\nZiel: %s
 flashupdate.wrongbase Die Basisimage Version weicht ab, bitte\nzuerst neues Basisimage installieren!
-flashupdate.experimentalimage unset
+flashupdate.experimentalimage Sie henn ä Snapshot usgwählt, bitte beachte Sie, dass\ndie Version untestet isch un u.U. Ihre Box nach dem Update\nnümmi funktionsfähig isch.\n\nSoll die Version wirklich installiert werde?
 
 bouqueteditor.name Bouquet-Verwaltig
 bouqueteditor.delete Lösche
@@ -718,16 +718,16 @@ movieplayer.head Movieplayer
 movieplayer.play Abspiele
 movieplayer.choosets TS abspiele
 movieplayer.chooseps PS abspiele
-movieplayer.choosestream unset
+movieplayer.choosestream Streame
 movieplayer.choosepes PES abspiele
 movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile unset
+movieplayer.choosestreamfile Datei via VLC
 movieplayer.pleasewait Bitte warde.\nD'Verbindig zuem Streamingserver wird herg'stellt.
 movieplayer.nostreamingserver Es het kei Verbindig\nzuem Streamingserver herg'stellt werde chönne.
 movieplayer.defdir Start-Verz.
-movieplayer.buffering unset
+movieplayer.buffering Puffere...
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter aah
@@ -755,7 +755,7 @@ nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username CIFS Benutzername
 nfs.password CIFS Passwort
-nfs.mounterror_notsup unset
+nfs.mounterror_notsup Dateisystem-Typ wird nit understützt
 nfsmenu.head NFS/CIFS Iischdellige
 
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,

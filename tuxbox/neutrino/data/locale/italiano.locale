@@ -70,7 +70,7 @@ miscsettings.head Altre Impostazioni
 miscsettings.shutdown_real Modo Standby
 miscsettings.shutdown_real_rcdelay shutdown ritardato
 miscsettings.boxtype DBox Costruttore
-miscsettings.bootinfo unset
+miscsettings.bootinfo Informazioni all'invio
 miscsettings.startbhdriver Carica Driver BH-Mode
 miscsettings.general Generale
 miscsettings.fb_destination EXPERT! Boot-Konsole
@@ -84,12 +84,12 @@ audiomenu.analogout Uscita-Analogica
 audiomenu.monoright mono destro
 audiomenu.monoleft mono sinistro
 audiomenu.stereo stereo
-audiomenu.dolbydigital Dolby Digitale
+audiomenu.dolbydigital Dolby Digital automatico
 audiomenu.avs_control controllo Volume avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
-audiomenu.PCMOffset unset
+audiomenu.PCMOffset Abbassamento Volume PCM
 
 videomenu.head Impostazioni-Video
 videomenu.screensetup Impostazioni Margine Video
@@ -140,7 +140,7 @@ streamingmenu.streaming_server_cddrive dvd
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate brzina videa
 streamingmenu.streaming_audiorate brzina audia
-streamingmenu.streaming_ac3_enabled unset
+streamingmenu.streaming_ac3_enabled Sopporto AC3
 streamingmenu.off ugaseno
 streamingmenu.on upaljeno
 streamingmenu.streaming_force_transcode Force Transcoding
@@ -241,7 +241,7 @@ colorchooser.alpha alpha
 lcdmenu.head LCD Settings
 lcdmenu.inverse Inversione
 lcdmenu.power Power
-lcdmenu.autodimm unset
+lcdmenu.autodimm Dimmer Automatico
 lcdmenu.lcdcontroler Contrasto / Luminosita
 lcdmenu.statusline Linia Progresso
 lcdmenu.statusline.volume Volume
@@ -360,7 +360,7 @@ scants.bouquet_leave Non Cambiare
 scants.bouquet_create Crea Nuovi
 scants.bouquet_erase Cancellare
 scants.bouquet_satellite Bouquets Satellite
-scants.bouquet_update unset
+scants.bouquet_update Rinnovare
 scants.failed Ricerca Canali fallita!
 scants.finished Ricerca Canali finita con Successo!
 
@@ -394,7 +394,7 @@ flashupdate.versioncheck Controllo Versione
 flashupdate.nonewversion Nessuna Versione Nuova
 flashupdate.md5check Controllo Image
 flashupdate.md5sumerror Image e difettosa
-flashupdate.url_file unset
+flashupdate.url_file File Configurazione
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Proxynome
 flashupdate.proxyserver_hint1 Inserire Proxynome oppure IP  (Host:Port)
@@ -405,7 +405,7 @@ flashupdate.proxyusername_hint2 Un Inserimento Vuoto non vuol dire una Identific
 flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 Inserire la Proxy-Passwort
 flashupdate.proxypassword_hint2
-flashupdate.selectimage unset
+flashupdate.selectimage Images Disponibili
 flashupdate.msgbox Sono state trovate queste Image:\nData: %s, %s\nBasisImage: %s\nImageTipo: %s\n\nVuole scaricare questa versione\ned Installarla?
 flashupdate.msgbox_manual E stata trovata una nuova Image:\nData: %s, %s\nBasisImage: %s\nImageTipo: %s\n\nVuole Installare questa Versione?
 flashupdate.expertfunctions Funzione-Esperti
@@ -423,7 +423,7 @@ flashupdate.actionwriteflash Scrivo-Flash
 flashupdate.flashreadyreboot La Image e stata scritta con Successo.\nIl vostro DBox verra Riavviato.
 flashupdate.reallyflashmtd Vuole veramente scrivere il Flash?\n\nIn caso di un errore\nil vostro, DBox non potra piu riavviarsi.\n\nImagename: %s\nZiel: %s
 flashupdate.wrongbase Versione Baseimage errata\nPrima istallare una nuova Versione!
-flashupdate.experimentalimage unset
+flashupdate.experimentalimage Ai scelto un Snapshot sperimentale,\nprego di fare attenzione che questa versione non e stata provata,e provabile\nche dopo un\n\nUpdate il suo Box non funziona piu,vuole veramente installare questa\nVersione?
 
 bouqueteditor.name Gestione-Bouquet
 bouqueteditor.delete Cancella
@@ -718,16 +718,16 @@ movieplayer.head movieplayer
 movieplayer.play Play
 movieplayer.choosets TS Play
 movieplayer.chooseps PS Play
-movieplayer.choosestream unset
+movieplayer.choosestream Streamen
 movieplayer.choosepes PES Play
 movieplayer.bookmark bookmark
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.choosestreamfile unset
+movieplayer.choosestreamfile File via VLC
 movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...
 movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
 movieplayer.defdir Start-Directory.
-movieplayer.buffering unset
+movieplayer.buffering Buffering...
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on
@@ -755,15 +755,15 @@ nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username ime korisnika za cifs
 nfs.password lozinka za cifs
-nfs.mounterror_notsup unset
+nfs.mounterror_notsup Tipo File non sopportato
 nfsmenu.head Impostazioni NFS /CIFS
 
 apids.hint_1 Inoltrare i dati APIDs per Streamen,
 apids.hint_2 Diviso con ' ' in Formato hexadecimale
 
 pictureviewer.head Lettore immaggini
-pictureviewer.sortorder.date unset
-pictureviewer.sortorder.filename unset
+pictureviewer.sortorder.date (Data)
+pictureviewer.sortorder.filename (Nome File)
 pictureviewer.slideshow vedi immagine in slideshow 
 pictureviewer.show Vedi
 pictureviewer.slideshow Vedi tipo Diashow
