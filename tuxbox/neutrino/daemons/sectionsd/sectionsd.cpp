@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.88 2002/01/06 03:03:13 McClean Exp $
+//  $Id: sectionsd.cpp,v 1.89 2002/01/06 18:23:44 McClean Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.89  2002/01/06 18:23:44  McClean
+//  better busybox-handling
+//
 //  Revision 1.88  2002/01/06 03:03:13  McClean
 //  busybox 0.60 workarround
 //
@@ -1411,7 +1414,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.88 2002/01/06 03:03:13 McClean Exp $\n"
+    "$Id: sectionsd.cpp,v 1.89 2002/01/06 18:23:44 McClean Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -3081,7 +3084,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.88 2002/01/06 03:03:13 McClean Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.89 2002/01/06 18:23:44 McClean Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
@@ -3106,6 +3109,13 @@ struct sockaddr_in serverAddr;
   // from here on forked
 
   //catch all signals... (busybox workaround)
+  signal(SIGHUP, signalHandler);
+  signal(SIGINT, signalHandler);
+  signal(SIGKILL, signalHandler);
+  signal(SIGQUIT, signalHandler);
+  signal(SIGTERM, signalHandler);
+
+
   for(int x=0;x<32;x++)
      signal(x,signalHandler);
 
