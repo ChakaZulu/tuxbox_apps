@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.20 2002/04/05 01:14:18 rasc Exp $
+  $Id: bouquets.cpp,v 1.21 2002/04/05 15:12:13 rasc Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.21  2002/04/05 15:12:13  rasc
+  -- existsChannelInBouquet  (True/False)
+
   Revision 1.20  2002/04/05 01:14:18  rasc
   -- Favorites Bouquet handling (Easy Add Channels)
 
@@ -137,6 +140,10 @@ channel* CBouquet::getChannelByName(char* serviceName, uint serviceType)
 
 	return( result);
 }
+
+//
+// -- servicetype 0 queries TV and Radio Channels
+//
 
 channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
 {
@@ -694,6 +701,25 @@ int CBouquetManager::existsBouquet( string name)
 	return (i<Bouquets.size()) ?(int)i :(int)-1;
 }
 
+
+//
+// -- Check if channel exists in BQ   (2002-04-05 rasc)
+// -- Return: True/false
+//
+bool CBouquetManager::existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid)
+{
+	bool     status = false;
+	channel  *ch = NULL;
+
+	if (bq_id >= 0 && bq_id <= Bouquets.size()) {
+		// query TV-Channels  && Radio channels
+		ch = Bouquets[bq_id]->getChannelByOnidSid (onid_sid, 0);
+		if (ch)  status = true;
+	}
+
+	return status;
+
+}
 
 
 void CBouquetManager::moveBouquet( uint oldId, uint newId)

@@ -1,7 +1,10 @@
-// $Id: bouquets.h,v 1.13 2002/04/04 14:41:08 rasc Exp $
+// $Id: bouquets.h,v 1.14 2002/04/05 15:12:13 rasc Exp $
 //
 //
 // $Log: bouquets.h,v $
+// Revision 1.14  2002/04/05 15:12:13  rasc
+// -- existsChannelInBouquet  (True/False)
+//
 // Revision 1.13  2002/04/04 14:41:08  rasc
 // - New functions in zapitclient for handling favorites
 //   - test if a bouquet exists
@@ -56,7 +59,6 @@ class CBouquet
 {
 	private:
 		channel* getChannelByName(char* serviceName, uint serviceType = 0);
-		channel* getChannelByOnidSid(uint onidSid, uint serviceType = 0);
 
 	public:
 		string Name;
@@ -80,6 +82,8 @@ class CBouquet
 		void moveService(  char* serviceName, uint newPosition, uint serviceType);
 //		void moveService(  uint onidSid, uint newPosition);
 		void moveService(  uint oldPosition, uint newPosition, uint serviceType);
+
+		channel* getChannelByOnidSid(uint onidSid, uint serviceType = 0);
 };
 
 typedef vector<CBouquet*> BouquetList;
@@ -142,8 +146,9 @@ class CBouquetManager
 		CBouquet* addBouquet( string name);
 		void deleteBouquet( uint id);
 		void deleteBouquet( string name);
-		int  CBouquetManager::existsBouquet( string name);
+		int  existsBouquet( string name);
 		void moveBouquet( uint oldId, uint newId);
+		bool existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid);
 
 		void saveAsLast( uint BouquetId, uint channelNr);
 		void getLast( uint* BouquetId, uint* channelNr);

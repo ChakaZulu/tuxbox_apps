@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.21 2002/04/05 01:14:18 rasc Exp $
+  $Id: zapitclient.cpp,v 1.22 2002/04/05 15:12:13 rasc Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.22  2002/04/05 15:12:13  rasc
+  -- existsChannelInBouquet  (True/False)
+
   Revision 1.21  2002/04/05 01:14:18  rasc
   -- Favorites Bouquet handling (Easy Add Channels)
 
@@ -544,6 +547,32 @@ unsigned int CZapitClient::existsBouquet( string name)
 	receive((char* )&response, sizeof(response));
         zapit_close();
 	return (unsigned int) response.number;
+}
+ 
+
+//
+// -- check if Channel already is in Bouquet (2002-04-02 rasc)
+// -- Return: true/false
+//
+bool CZapitClient::existsChannelInBouquet( unsigned int bouquet, unsigned int onid_sid)
+{
+        commandHead msgHead;
+        commandExistsChannelInBouquet msg;
+	responseGeneralTrueFalse response;
+
+        msgHead.version=ACTVERSION;
+        msgHead.cmd=CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET;
+
+	msg.bouquet    = bouquet;
+	msg.onid_sid   = onid_sid;
+
+        zapit_connect();
+        send((char*)&msgHead, sizeof(msgHead));
+        send((char*)&msg, sizeof(msg));
+
+	receive((char* )&response, sizeof(response));
+        zapit_close();
+	return (unsigned int) response.status;
 }
  
 

@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.119 2002/04/05 01:14:18 rasc Exp $
+  $Id: zapit.cpp,v 1.120 2002/04/05 15:12:13 rasc Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -93,6 +93,9 @@
 
 
 $Log: zapit.cpp,v $
+Revision 1.120  2002/04/05 15:12:13  rasc
+-- existsChannelInBouquet  (True/False)
+
 Revision 1.119  2002/04/05 01:14:18  rasc
 -- Favorites Bouquet handling (Easy Add Channels)
 
@@ -1954,6 +1957,7 @@ void parse_command()
 	{
 		CZapitClient::responseCmd              response;
 		CZapitClient::responseGeneralInteger   responseInteger;		// 2002-04-03 rasc
+		CZapitClient::responseGeneralTrueFalse responseBool;		// 2002-04-05 rasc
 
 		switch( rmsg.cmd)
 		{
@@ -2096,6 +2100,16 @@ void parse_command()
 				// -- This also means "not found (-1)" get's to zero (0)
 				responseInteger.number = g_BouquetMan->existsBouquet(msgExistsBouquet.name)+1;
 				send( connfd, &responseInteger, sizeof(responseInteger),0);
+			break;
+
+			case CZapitClient::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET :	// 2002-04-05 rasc
+				CZapitClient::commandExistsChannelInBouquet msgExistsChInBq;
+				read( connfd, &msgExistsChInBq, sizeof(msgExistsChInBq));
+				// -- for some unknown reason BQ-IDs are externally  1..n
+				// -- internally BQ-IDs are 0..n-1, so subtract 1!!
+				responseBool.status = g_BouquetMan->existsChannelInBouquet(
+						msgExistsChInBq.bouquet-1, msgExistsChInBq.onid_sid);
+				send( connfd, &responseBool, sizeof(responseBool),0);
 			break;
 
 
@@ -2313,7 +2327,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.119 2002/04/05 01:14:18 rasc Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.120 2002/04/05 15:12:13 rasc Exp $\n\n");
 
 	if (argc > 1)
 	{
