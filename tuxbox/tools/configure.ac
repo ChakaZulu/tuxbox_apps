@@ -11,6 +11,7 @@ TUXBOX_APPS_DRIVER
 AC_OUTPUT([
 Makefile
 camd/Makefile
+misc/Makefile
 satfind/Makefile
 ])
 
