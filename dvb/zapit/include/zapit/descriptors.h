@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.h,v 1.10 2002/04/19 14:53:29 obi Exp $
+ * $Id: descriptors.h,v 1.11 2002/04/20 10:27:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -39,6 +39,19 @@ uint8_t Multiplex_buffer_utilization_descriptor (uint8_t *buffer);
 uint8_t Copyright_descriptor (uint8_t *buffer);
 uint8_t Maximum_bitrate_descriptor (uint8_t *buffer);
 uint8_t Private_data_indicator_descriptor (uint8_t *buffer);
+uint8_t Smoothing_buffer_descriptor (uint8_t *buffer);
+uint8_t STD_descriptor (uint8_t *buffer);
+uint8_t IBP_descriptor (uint8_t *buffer);
+uint8_t MPEG4_video_descriptor (uint8_t *buffer);
+uint8_t MPEG4_audio_descriptor (uint8_t *buffer);
+uint8_t IOD_descriptor (uint8_t *buffer);
+uint8_t SL_descriptor (uint8_t *buffer);
+uint8_t FMC_descriptor (uint8_t *buffer);
+uint8_t External_ES_ID_descriptor (uint8_t *buffer);
+uint8_t MuxCode_descriptor (uint8_t *buffer);
+uint8_t FmxBufferSize_descriptor (uint8_t *buffer);
+uint8_t MultiplexBuffer_descriptor (uint8_t *buffer);
+uint8_t FlexMuxTiming_descriptor (uint8_t *buffer);
 uint8_t network_name_descriptor (uint8_t *buffer);
 uint8_t service_list_descriptor (uint8_t *buffer);
 uint8_t stuffing_descriptor (uint8_t *buffer);
@@ -63,7 +76,7 @@ uint8_t content_descriptor (uint8_t *buffer);
 uint8_t parental_rating_descriptor (uint8_t *buffer);
 uint8_t teletext_descriptor (uint8_t *buffer);
 uint8_t telephone_descriptor (uint8_t *buffer);
-uint8_t local_time_offset_descriptor (uint8_t *buffer);
+uint8_t local_time_offset_descriptor (uint8_t* buffer);
 uint8_t subtitling_descriptor (uint8_t *buffer);
 uint8_t terrestrial_delivery_system_descriptor (uint8_t *buffer);
 uint8_t multilingual_network_name_descriptor (uint8_t *buffer);

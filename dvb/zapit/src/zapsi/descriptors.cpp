@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.23 2002/04/19 14:53:29 obi Exp $
+ * $Id: descriptors.cpp,v 1.24 2002/04/20 10:27:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -177,8 +177,90 @@ uint8_t Private_data_indicator_descriptor (uint8_t *buffer)
 	return buffer[1];
 }
 
+/* 0x10 */
+uint8_t Smoothing_buffer_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x11 */
+uint8_t STD_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x12 */
+uint8_t IBP_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
 /*
- * more to come...
+ * 0x13 ... 0x1A: Defined in ISO/IEC 13818-6
+ */
+
+/* 0x1B */
+uint8_t MPEG4_video_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x1C */
+uint8_t MPEG4_audio_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x1D */
+uint8_t IOD_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x1E */
+uint8_t SL_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x1F */
+uint8_t FMC_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x20 */
+uint8_t External_ES_ID_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x21 */
+uint8_t MuxCode_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x22 */
+uint8_t FmxBufferSize_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x23 */
+uint8_t MultiplexBuffer_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/* 0x24 */
+uint8_t FlexMuxTiming_descriptor (uint8_t *buffer)
+{
+	return buffer[1];
+}
+
+/*
+ * 0x25 ... 0x39:  ITU-T H.222.0 | ISO/IEC 13818-1 Reserved
  */
 
 /* 0x40 */
@@ -655,4 +737,8 @@ uint8_t announcement_support_descriptor (uint8_t *buffer)
 {
 	return buffer[1];
 }
+
+/* 0x6F ... 0x7F: reserved */
+/* 0x80 ... 0xFE: user private */
+/* 0xFF: forbidden */
 

@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.7 2002/04/19 14:53:29 obi Exp $
+ * $Id: pmt.cpp,v 1.8 2002/04/20 10:27:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -83,12 +83,22 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 
 		switch (descriptor_tag)
 		{
-			case 0x09: /* CA_descriptor */
-				if ((ecm_pid == NONE) || (ecm_pid == INVALID))
-					CA_descriptor(buffer + descr_pos, ca_system_id, &ecm_pid);
+			case 0x02:
+				video_stream_descriptor(buffer + descr_pos);
 				break;
 
-			case 0x0a: /* ISO_639_language_descriptor */
+			case 0x03:
+				audio_stream_descriptor(buffer + descr_pos);
+				break;
+
+			case 0x09:
+				if ((ecm_pid == NONE) || (ecm_pid == INVALID))
+				{
+					CA_descriptor(buffer + descr_pos, ca_system_id, &ecm_pid);
+				}
+				break;
+
+			case 0x0A: /* ISO_639_language_descriptor */
 				if (ap_count < max_num_apids && (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06))
 				{
 					if (ret_pids->apids[ap_count].desc[0] == 0)
@@ -97,6 +107,22 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 						ret_pids->apids[ap_count].desc[3] = 0;
 					}
 				}
+				break;
+
+			case 0x0E:
+				Maximum_bitrate_descriptor(buffer + descr_pos);
+				break;
+
+			case 0x0F:
+				Private_data_indicator_descriptor(buffer + descr_pos);
+				break;
+
+			case 0x11:
+				STD_descriptor(buffer + descr_pos);
+				break;
+
+			case 0x45:
+				VBI_data_descriptor(buffer + descr_pos);
 				break;
 
 			case 0x52: /* stream_identifier_descriptor */
@@ -108,6 +134,14 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 
 			case 0x56: /* teletext descriptor */
 				ret_pids->vtxtpid = elementary_PID;
+				break;
+
+			case 0x59:
+				subtitling_descriptor(buffer + descr_pos);
+				break;
+
+			case 0x66:
+				data_broadcast_id_descriptor(buffer + descr_pos);
 				break;
 
 			case 0x6a: /* AC3 descriptor */
@@ -155,7 +189,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 				break;
 
 			default:
-				printf("[pmt.cpp] descriptor_tag: %02x\n", descriptor_tag);
+				printf("[pmt.cpp] descriptor_tag (b): %02x\n", descriptor_tag);
 				break;
 		}
 	}
@@ -286,7 +320,7 @@ pids parse_pmt (dvb_pid_t pmt_pid, uint16_t ca_system_id, uint16_t program_numbe
 				break;
 
 			default:
-				printf("[pmt.cpp] decriptor_tag: %02x\n", buffer[pos]);
+				printf("[pmt.cpp] decriptor_tag (a): %02x\n", buffer[pos]);
 				break;
 			}
 		}
