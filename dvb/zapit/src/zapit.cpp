@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.343 2004/02/17 16:26:06 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.344 2004/02/25 10:45:35 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -210,7 +210,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 			cit = nvodchannels.find(channel_id);
 
 			if (cit == nvodchannels.end()) {
-				DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
+				DBG("channel_id " PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS " not found", channel_id);
 				return -1;
 			}
 		}
@@ -220,13 +220,13 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 
 			if (currentMode & RADIO_MODE) {
 				if ((cit == allchans.end()) || (cit->second.getServiceType() != ST_DIGITAL_RADIO_SOUND_SERVICE)) {
-					DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
+					DBG("channel_id " PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS " not found", channel_id);
 					return -1;
 				}
 			}
 			else {
 				if (cit == allchans.end() || (cit->second.getServiceType() == ST_DIGITAL_RADIO_SOUND_SERVICE)) {
-					DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
+					DBG("channel_id " PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS " not found", channel_id);
 					return -1;
 				}
 			}
@@ -1190,7 +1190,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 void addChannelToBouquet(const unsigned int bouquet, const t_channel_id channel_id)
 {
-	DBG("addChannelToBouquet(%d, %d)", bouquet, channel_id);
+	DBG("addChannelToBouquet(%d, " PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS ")", bouquet, channel_id);
 
 	CZapitChannel* chan = bouquetManager->findChannelByChannelID(channel_id);
 
@@ -1605,7 +1605,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.343 2004/02/17 16:26:06 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.344 2004/02/25 10:45:35 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
