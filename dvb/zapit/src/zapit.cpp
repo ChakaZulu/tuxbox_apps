@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.210 2002/08/31 22:59:08 obi Exp $
+ * $Id: zapit.cpp,v 1.211 2002/09/01 22:03:21 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -102,7 +102,7 @@ bool playbackStopForced = false;
 bool debug = false;
 
 /* near video on demand */
-std::map <uint32_t, CZapitChannel> nvodchannels;
+tallchans nvodchannels;         //  tallchans defined in "bouquets.h"
 std::string nvodname;
 bool current_is_nvod;
 
@@ -114,15 +114,10 @@ int dmx_video_fd = -1;
 int vbi_fd = -1;
 
 /* channellists */
-std::map <uint32_t, transponder>transponders;
-
-std::map <uint32_t, CZapitChannel> allchans_tv;  // Key: (original_network_id << 16) | service_id
-std::map <std::string, uint32_t> namechans_tv;
-
-std::map <uint32_t, CZapitChannel> allchans_radio;
-std::map <std::string, uint32_t> namechans_radio;
+tallchans allchans_tv, allchans_radio;         //  tallchans defined in "bouquets.h"
 
 /* transponder scan */
+std::map <uint32_t, transponder>transponders;
 pthread_t scan_thread;
 extern int found_transponders;
 extern int found_channels;
@@ -231,24 +226,12 @@ void save_settings (bool write)
 {
 	if (channel != NULL)
 	{
-		if (currentMode & RADIO_MODE)
-		{
-			CBouquetManager::ChannelIterator cit = bouquetManager->radioChannelsFind(channel->getOnidSid());
-			if (!(cit.EndOfChannels()))
-			{
-				config->setInt32("lastChannelRadio", (*cit)->getChannelNumber());
-				config->setInt32("lastChannelMode", 1);
-			}
-		}
-		else
-		{
-			CBouquetManager::ChannelIterator cit = bouquetManager->tvChannelsFind(channel->getOnidSid());
-			if (!(cit.EndOfChannels()))
-			{
-				config->setInt32("lastChannelTV", (*cit)->getChannelNumber());
-				config->setInt32("lastChannelMode", 0);
-			}
-		}
+		config->setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
+
+		// now save the lowest channel number with the current OnidSid
+		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithOnidSid(channel->getOnidSid());
+		if (c >= 0)
+			config->setInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", c + 1);
 	}
 
 	if (write)
@@ -293,7 +276,7 @@ channel_msg load_settings()
 int zapit (uint32_t onid_sid, bool in_nvod)
 {
 	bool transponder_change;
-	std::map <uint, CZapitChannel>::iterator cit;
+	tallchans_iterator cit;
 
 	if (in_nvod)
 	{
@@ -551,20 +534,15 @@ int prepare_channels ()
 	// by LoadServices() and LoadBouquets()
 	transponders.clear();
 	allchans_tv.clear();
-	namechans_tv.clear();
 	allchans_radio.clear();
-	namechans_radio.clear();
 	bouquetManager->clearAll();
 
 	if (LoadServices() < 0)
-	{
 		return -1;
-	}
-	printf("[zapit] services have been loaded successfully\n");
+
+	printf("[zapit] LoadServices: success\n");
 
 	bouquetManager->loadBouquets();
-	printf("[zapit] bouquets have been loaded successfully\n");
-	bouquetManager->renumServices();
 
 	return 0;
 }
@@ -582,8 +560,6 @@ int start_scan ()
 	}
 
 	transponders.clear();
-	namechans_tv.clear();
-	namechans_radio.clear();
 	allchans_tv.clear();
 	allchans_radio.clear();
 	found_transponders = 0;
@@ -671,6 +647,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 	debug("  Version: %d\n", rmsg.version);
 	debug("  Command: %d\n", rmsg.cmd);
 #endif
+	printf("[zapit] Command %d received (Version: %d).\n", rmsg.cmd, rmsg.version);
 
 	if (rmsg.version == CZapitClient::ACTVERSION)
 	{
@@ -1101,7 +1078,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				break;
 			}
 			default:
-				printf("[zapit] unknown command (version %d)\n", CZapitClient::ACTVERSION);
+				printf("[zapit] unknown command %d (version %d)\n", rmsg.cmd, CZapitClient::ACTVERSION);
 				break;
 		}
 	}
@@ -1110,6 +1087,10 @@ void parse_command (CZapitClient::commandHead &rmsg)
 		perror("[zapit] unknown cmd version\n");
 		return;
 	}
+#ifdef DEBUG
+	debug("[zapit] Command %d processed.\n", rmsg.cmd);
+#endif
+	printf("[zapit] Command %d processed.\n", rmsg.cmd);
 }
 
 int main (int argc, char **argv)
@@ -1121,7 +1102,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.210 2002/08/31 22:59:08 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.211 2002/09/01 22:03:21 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1342,6 +1323,7 @@ void sendBouquets(bool emptyBouquetsToo)
 			((currentMode & RADIO_MODE) && (bouquetManager->Bouquets[i]->radioChannels.size()> 0) && (!bouquetManager->Bouquets[i]->bHidden)) ||
 			(currentMode & TV_MODE) && (bouquetManager->Bouquets[i]->tvChannels.size()> 0) && (!bouquetManager->Bouquets[i]->bHidden))
 		{
+// ATTENTION: in RECORD_MODE empty bouquets are not send!
 			if ((!(currentMode & RECORD_MODE)) || ((currentMode & RECORD_MODE) &&
 							       (((currentMode & RADIO_MODE) && (bouquetManager->Bouquets[i]->recModeRadioSize( frontend->getTsidOnid())) > 0 ) ||
 								(currentMode & TV_MODE)    && (bouquetManager->Bouquets[i]->recModeTVSize( frontend->getTsidOnid())) > 0 )))
@@ -1414,13 +1396,9 @@ void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode)
 	ChannelList channels;
 
 	if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode == CZapitClient::MODE_RADIO))
-	{
 		channels = bouquetManager->Bouquets[bouquet]->radioChannels;
-	}
 	else
-	{
 		channels = bouquetManager->Bouquets[bouquet]->tvChannels;
-	}
 
 	internalSendChannels( &channels);
 }
@@ -1431,32 +1409,21 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 
 	if (order == CZapitClient::SORT_BOUQUET)
 	{
-		if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode==CZapitClient::MODE_RADIO))
-		{
-			for (CBouquetManager::ChannelIterator radiocit = bouquetManager->radioChannelsBegin(); !(radiocit.EndOfChannels()); radiocit++)
-				channels.push_back(*radiocit);
-		}
-		else
-		{
-			for (CBouquetManager::ChannelIterator tvcit = bouquetManager->tvChannelsBegin(); !(tvcit.EndOfChannels()); tvcit++)
-				channels.push_back(*tvcit);
-		}
+		CBouquetManager::ChannelIterator cit = (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode==CZapitClient::MODE_RADIO)) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin();
+		for (; !(cit.EndOfChannels()); cit++)
+			channels.push_back(*cit);
 	}
-	else if (order == CZapitClient::SORT_ALPHA)
+	else if (order == CZapitClient::SORT_ALPHA)   // ATTENTION: in this case response.nr (getChannelNumber()) does not return the actual number of the channel!
 	{
 		if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode==CZapitClient::MODE_RADIO))
 		{
-			for ( map<uint, CZapitChannel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
-			{
-				channels.insert( channels.end(), &(it->second));
-			}
+			for (tallchans_iterator it = allchans_radio.begin(); it != allchans_radio.end(); it++)
+				channels.push_back(&(it->second));
 		}
 		else
 		{
-			for ( map<uint, CZapitChannel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
-			{
-				channels.insert( channels.end(), &(it->second));
-			}
+			for (tallchans_iterator it = allchans_tv.begin(); it != allchans_tv.end(); it++)
+				channels.push_back(&(it->second));
 		}
 		sort(channels.begin(), channels.end(), CmpChannelByChName());
 	}

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.31 2002/09/01 09:37:58 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.32 2002/09/01 22:03:21 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -8,6 +8,9 @@
 #include <algorithm>
 #include <functional>
 #include <vector>
+#include <ext/hash_set>
+#include <ext/hash_map>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "channel.h"
@@ -21,16 +24,12 @@
 
 using namespace std;
 
-typedef vector<CZapitChannel*> ChannelList;
+//typedef map <uint32_t, CZapitChannel> tallchans;                      // Key: (original_network_id << 16) | service_id
+//typedef map<uint32_t, CZapitChannel>::iterator tallchans_iterator;
+typedef __gnu_cxx::hash_map<uint32_t, CZapitChannel> tallchans;                      // Key: (original_network_id << 16) | service_id
+typedef __gnu_cxx::hash_map<uint32_t, CZapitChannel>::iterator tallchans_iterator;
 
-/* struct for comparing channels by channel number*/
-struct CmpChannelByChNr: public binary_function <CZapitChannel* , CZapitChannel* , bool>
-{
-	bool operator() (CZapitChannel* c1, CZapitChannel* c2)
-	{
-		return (c1->getChannelNumber() < c2->getChannelNumber());
-	};
-};
+typedef vector<CZapitChannel*> ChannelList;
 
 /* struct for comparing channels by channel name*/
 struct CmpChannelByChName: public binary_function <CZapitChannel* , CZapitChannel* , bool>
@@ -53,8 +52,6 @@ class CBouquet
 		ChannelList tvChannels;
 
 		CBouquet(string name) { Name=name; bHidden = false; bLocked = false; }
-		CBouquet(const CBouquet& bouquet);
-
 		~CBouquet();
 
 		void addService (CZapitChannel* newChannel);
@@ -76,8 +73,9 @@ class CBouquetManager
 {
 	private:
 		CBouquet* remainChannels;
-		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr, string strTitle);
-		void parseBouquetsXml(const XMLTreeNode *root, int &nChNrTv, int &nChNrRadio);
+		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr, __gnu_cxx::hash_set <uint32_t> *tvchans_processed, __gnu_cxx::hash_set <uint32_t> *radiochans_processed, const string strTitle);
+//		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr, const string strTitle);
+		void parseBouquetsXml(const XMLTreeNode *root);
 		string convertForXML( string s);
 		void storeBouquets();
 	public:
@@ -95,14 +93,12 @@ class CBouquetManager
 				ChannelIterator operator ++(int);
 				CZapitChannel* operator *();
 				ChannelIterator FindChannelNr(const unsigned int channel);
+				int getLowestChannelNumberWithOnidSid(const unsigned int onid_sid);
 				bool EndOfChannels() { return (c == -2); };
 		};
 
 		ChannelIterator tvChannelsBegin() { return ChannelIterator(this, true); };
-		ChannelIterator tvChannelsFind(const unsigned int onid_sid);
-
 		ChannelIterator radioChannelsBegin() { return ChannelIterator(this, false); };
-		ChannelIterator radioChannelsFind(const unsigned int onid_sid);
 
 		BouquetList Bouquets;
 		BouquetList storedBouquets;

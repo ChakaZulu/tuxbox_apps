@@ -1,72 +1,18 @@
 /*
- * $Id: getservices.cpp,v 1.42 2002/08/30 14:04:08 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.43 2002/09/01 22:03:21 thegoodguy Exp $
  */
 
 #include <stdio.h>
 
 #include <zapost/frontend.h>
 
+#include "bouquets.h"
 #include "getservices.h"
 
 uint8_t curr_diseqc = 0;
 
 extern std::map <uint32_t, transponder> transponders;
-extern std::map <uint32_t, CZapitChannel> allchans_tv;
-extern std::map <std::string, uint32_t> namechans_tv;
-extern std::map <uint32_t, CZapitChannel> allchans_radio;
-extern std::map <std::string, uint32_t> namechans_radio;
-
-void nameinsert (std::string name, uint16_t original_network_id, uint16_t service_id, uint8_t service_type)
-{
-	int number = 0;
-	char cnumber[3];
-	std::string newname = name;
-
-	switch (service_type)
-	{
-	case DIGITAL_TELEVISION_SERVICE:
-	case NVOD_REFERENCE_SERVICE:
-		while (namechans_tv.count(newname) != 0)
-		{
-			sprintf(cnumber, "%2d", ++number);
-			newname = name + cnumber;
-		}
-
-		namechans_tv.insert
-		(
-			std::pair <std::string, uint32_t>
-			(
-				newname,
-				(original_network_id << 16) | service_id
-			)
-		);
-
-		allchans_tv.find((original_network_id << 16) | service_id)->second.setName(newname);
-		break;
-
-	case DIGITAL_RADIO_SOUND_SERVICE:
-		while (namechans_radio.count(newname) != 0)
-		{
-			sprintf(cnumber, "%2d", ++number);
-			newname = name + cnumber;
-		}
-
-		namechans_radio.insert
-		(
-			std::pair <std::string, uint32_t>
-			(
-				newname,
-				(original_network_id << 16) | service_id
-			)
-		);
-
-		allchans_radio.find((original_network_id << 16) | service_id)->second.setName(newname);
-		break;
-
-	default:
-		break;
-	}
-}
+extern tallchans allchans_tv, allchans_radio;
 
 void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 {
@@ -169,8 +115,6 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 				)
 			);
 
-			if (channel_number == 0)
-				nameinsert(name, original_network_id, service_id, service_type);
 			break;
 
 		case DIGITAL_RADIO_SOUND_SERVICE:
@@ -191,9 +135,6 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 					)
 				)
 			);
-
-			if (channel_number == 0)
-				nameinsert(name, original_network_id, service_id, service_type);
 			break;
 
 		default:
