@@ -4492,7 +4492,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 			break;
 		case -ENOCASYS:
 		{
-			if (1/*hideerror*/) break;
+			if (hideerror) break;
 
 			int serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
 			if( serviceFlags & eServiceHandler::flagIsScrambled )
