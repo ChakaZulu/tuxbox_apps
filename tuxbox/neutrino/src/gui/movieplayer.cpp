@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.71 2004/02/07 15:34:39 zwen Exp $
+  $Id: movieplayer.cpp,v 1.72 2004/02/07 21:50:09 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -122,6 +122,8 @@ int jumpminutes = 1;
 size_t
 CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 {
+	std::string* pStr = (std::string*) data;
+	*pStr += (char*) ptr;
 	return size * nmemb;
 }
 
@@ -184,6 +186,8 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	g_Sectionsd->setPauseScanning (true);
 
     isBookmark=false;
+    startfilename = "";
+    startposition = 0;
     isTS=false;
     isPES=false;
     
@@ -211,6 +215,12 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
         startposition = 8807424;
         PlayFile();
 	}*/
+	/*else if (actionKey=="bookmarkplayback") {
+        isBookmark = true;
+        startfilename = "vlc://p:/PREMIERE_NOSTALGIE_Der_gro_e_Wolf_ruft_20040131_0516051.mpg";
+        startposition = 500;
+        PlayStream (STREAMTYPE_FILE);	
+	}*/
 	
 	bookmarkmanager->flush();
 
@@ -228,16 +238,14 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 }
 
 //------------------------------------------------------------------------
-CURLcode sendGetRequest (const std::string & url) {
+CURLcode sendGetRequest (const std::string & url, std::string & response) {
 	CURL *curl;
 	CURLcode httpres;
-
-	std::string response = "";
   
 	curl = curl_easy_init ();
 	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
-	curl_easy_setopt (curl, CURLOPT_FILE, (void *) &response);
+	curl_easy_setopt (curl, CURLOPT_FILE, (void *)&response);
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true); 
 	httpres = curl_easy_perform (curl);
 	//printf ("[movieplayer.cpp] HTTP Result: %d\n", httpres);
@@ -257,7 +265,8 @@ bool VlcSendPlaylist(char* mrl)
 	
 	// empty playlist
 	std::string emptyurl = baseurl + "?control=empty";
-	httpres = sendGetRequest(emptyurl);
+	std::string response ="";
+	httpres = sendGetRequest(emptyurl, response);
 	printf ("[movieplayer.cpp] HTTP Result (emptyurl): %d\n", httpres);
 	if (httpres != 0)
 	{
@@ -274,7 +283,7 @@ bool VlcSendPlaylist(char* mrl)
 	   - SVCD: vcd:D:@1:1
 	*/
 	std::string addurl = baseurl + "?control=add&mrl=" + (char*) mrl;
-	httpres = sendGetRequest(addurl);
+	httpres = sendGetRequest(addurl, response);
 	return (httpres==0);
 }
 #define TRANSCODE_VIDEO_OFF 0
@@ -355,11 +364,12 @@ bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
 	printf("[movieplayer.cpp] URL(enc) : %s?sout=%s\n",baseurl.c_str(), tmp);
 	std::string url = baseurl + "?sout=" + tmp;
 	curl_free(tmp);
-	httpres = sendGetRequest(url);
+	std::string response ="";
+	httpres = sendGetRequest(url, response);
 
 	// play MRL
 	std::string playurl = baseurl + "?control=play&item=0";
-	httpres = sendGetRequest(playurl);
+	httpres = sendGetRequest(playurl, response);
 
 	return true; // TODO error checking
 }
@@ -643,6 +653,7 @@ PlayStreamThread (void *mrl)
 	std::string pauseurl   = baseurl + "?control=pause";
 	std::string unpauseurl = baseurl + "?control=pause";
 	std::string skipurl;
+	std::string response = "";
 
 	while (playstate > CMoviePlayerGui::STOPPED)
 	{
@@ -704,6 +715,15 @@ PlayStreamThread (void *mrl)
 
 			len = ringbuffer_read (ringbuf, buf, (readsize / 188) * 188);
 
+			if (startposition > 0) {
+			    printf ("[movieplayer.cpp] Was Bookmark. Skipping to startposition\n");
+			    char tmpbuf[30];
+			    sprintf(tmpbuf,"%lld",startposition);
+			    skipvalue = tmpbuf;
+			    startposition = 0;
+			    playstate = CMoviePlayerGui::SKIP;
+			}
+
 			switch (playstate)
 			{
 			case CMoviePlayerGui::PAUSE:
@@ -711,7 +731,7 @@ PlayStreamThread (void *mrl)
 				ioctl (dmxa, DMX_STOP);
 
 				// pause VLC
-				httpres = sendGetRequest(pauseurl);
+	            httpres = sendGetRequest(pauseurl, response);
 
 				while (playstate == CMoviePlayerGui::PAUSE)
 				{
@@ -720,7 +740,7 @@ PlayStreamThread (void *mrl)
 					usleep(100000); // no busy wait
 				}
 				// unpause VLC
-				httpres = sendGetRequest(unpauseurl);
+				httpres = sendGetRequest(unpauseurl, response);
 				speed = 1;
 				break;
 			case CMoviePlayerGui::SKIP:
@@ -732,7 +752,7 @@ PlayStreamThread (void *mrl)
 				skipurl += tmp;
 				curl_free(tmp);
 				printf("[movieplayer.cpp] skipping URL(enc) : %s\n",skipurl.c_str());
-				httpres = sendGetRequest(skipurl);
+	            httpres = sendGetRequest(skipurl, response);
 				playstate = CMoviePlayerGui::PLAY;
 			}
 			break;
@@ -815,7 +835,7 @@ PlayStreamThread (void *mrl)
 
 	// stop VLC
 	std::string stopurl = baseurl + "?control=stop";
-	httpres = sendGetRequest(stopurl);
+	httpres = sendGetRequest(stopurl, response);
 
 	printf ("[movieplayer.cpp] Waiting for RCST to stop\n");
 	pthread_join (rcst, NULL);
@@ -968,6 +988,7 @@ PlayPESFileThread (void *filename)
 				break;
 			case CMoviePlayerGui::PLAY:
 			case CMoviePlayerGui::STOPPED:
+			case CMoviePlayerGui::SKIP:
 			    break;
 			}
 
@@ -1179,6 +1200,7 @@ PlayFileThread (void *filename)
 			case CMoviePlayerGui::STREAMERROR:
 			case CMoviePlayerGui::PLAY:
 			case CMoviePlayerGui::RESYNC:
+			case CMoviePlayerGui::SKIP:
 				break;
 			}
 
@@ -1320,6 +1342,22 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			}
 		}
 
+		if (isBookmark) {
+    	    open_filebrowser = false;
+    	    isBookmark = false;
+    	    filename = startfilename.c_str();
+			int namepos = startfilename.rfind("vlc://");
+			std::string mrl_str = startfilename.substr(namepos + 6);
+			char *tmp = curl_escape (mrl_str.c_str (), 0);
+			strncpy (mrl, tmp, sizeof (mrl) - 1);
+			curl_free (tmp);
+			printf ("[movieplayer.cpp] Generated Bookmark FILE MRL: %s\n", mrl);
+    	    // TODO: What to use for LCD? Bookmarkname? Filename? 
+    	    sel_filename = "Bookmark Playback";
+    	    update_info=true;
+    	    start_play=true;
+		}
+		
 		if (open_filebrowser)
 		{
 			open_filebrowser = false;
@@ -1407,12 +1445,26 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 			if (playstate == CMoviePlayerGui::PLAY) playstate = CMoviePlayerGui::RESYNC;
 		}
-		/*else if (msg == CRCInput::RC_blue)
+		else if (msg == CRCInput::RC_blue)
 		{
 			if (bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount()) {
-    			std::string bookmarkurl = "URL";
-    			std::string bookmarktime = "Time";
-    			bookmarkmanager->createBookmark(bookmarkurl, bookmarktime);
+    			std::string bookmarkurl = filename;
+    			std::string positionurl = "http://";
+            	positionurl += g_settings.streaming_server_ip;
+            	positionurl += ':';
+            	positionurl += g_settings.streaming_server_port;
+            	positionurl += "/admin/dboxfiles.html?stream_time=true";
+    			printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
+    			std::string response = "";
+    			CURLcode httpres = sendGetRequest(positionurl, response);
+    			printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_time = %s\n",httpres,response.length(),response.c_str());
+    			if (httpres == 0 && response.length()>0) {
+        			// TODO calculate REAL position as position returned by VLC does not take the ringbuffer into consideration
+        			bookmarkmanager->createBookmark(bookmarkurl, response);
+    			}
+    			else {
+        			DisplayErrorMessage(g_Locale->getText("movieplayer.wrongvlcversion")); // UTF-8
+    			}
 			}
 			else {
     			//popup error message
@@ -1420,7 +1472,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
     			DisplayErrorMessage(g_Locale->getText("movieplayer.toomanybookmarks")); // UTF-8
 			}
 		}
-		*/
+		
 		else if (msg == CRCInput::RC_1)
 		{
 			skipBox.paint();
@@ -1483,7 +1535,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.71 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.72 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1648,7 +1700,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.71 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.72 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else if (msg == CRCInput::RC_left)
