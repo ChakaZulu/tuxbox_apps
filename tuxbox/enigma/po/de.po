@@ -4558,7 +4558,7 @@ msgstr "TV-System Assistent"
 
 #: src/software_update.cpp:34
 msgid "Internet Update"
-msgstr "Internet-Update"
+msgstr "Internet Aktualisierung"
 
 #: src/software_update.cpp:34
 msgid "open internet update"
