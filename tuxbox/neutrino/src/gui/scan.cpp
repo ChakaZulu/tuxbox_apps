@@ -11,6 +11,89 @@ CScanTs::CScanTs()
 	y=(576-height)>>1;
 }
 
+bool CScanTs::scanReady(int *ts, int *services)
+{
+		int sock_fd;
+		SAI servaddr;
+		char rip[]="127.0.0.1";
+		char *return_buf;
+		st_rmsg		sendmessage;
+
+		sendmessage.version=1;
+		sendmessage.cmd = 'h';
+
+		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		memset(&servaddr,0,sizeof(servaddr));
+		servaddr.sin_family=AF_INET;
+		servaddr.sin_port=htons(1505);
+		inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+		#ifdef HAS_SIN_LEN
+ 			servaddr.sin_len = sizeof(servaddr); // needed ???
+		#endif
+
+
+		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+		{
+ 	 		perror("neutrino: connect(zapit)");
+			exit(-1);
+		}
+
+		write(sock_fd, &sendmessage, sizeof(sendmessage));
+		return_buf = (char*) malloc(4);
+		memset(return_buf, 0, 4);
+		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
+			perror("recv(zapit)");
+			exit(-1);
+		}
+	
+		printf("scan: %s", return_buf);
+		free(return_buf);
+		close(sock_fd);
+		return false;
+}
+
+void CScanTs::startScan()
+{
+		int sock_fd;
+		SAI servaddr;
+		char rip[]="127.0.0.1";
+		char *return_buf;
+		st_rmsg		sendmessage;
+
+		sendmessage.version=1;
+		sendmessage.cmd = 'g';
+
+		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		memset(&servaddr,0,sizeof(servaddr));
+		servaddr.sin_family=AF_INET;
+		servaddr.sin_port=htons(1505);
+		inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+		#ifdef HAS_SIN_LEN
+ 			servaddr.sin_len = sizeof(servaddr); // needed ???
+		#endif
+
+
+		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+		{
+ 	 		perror("neutrino: connect(zapit)");
+			exit(-1);
+		}
+
+		write(sock_fd, &sendmessage, sizeof(sendmessage));
+		return_buf = (char*) malloc(4);
+		memset(return_buf, 0, 4);
+		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
+			perror("recv(zapit)");
+			exit(-1);
+		}
+	
+		printf("startscan: %s", return_buf);
+		free(return_buf);
+		close(sock_fd);
+}
+
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
@@ -27,15 +110,23 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		return CMenuTarget::RETURN_REPAINT;
 	}
 
-	int ypos=y;
-	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
-	ypos+= hheight + (mheight >>1);
-	
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.transponders").c_str(), COL_MENUCONTENT);
-	ypos+= mheight;
+	startScan();
 
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.services").c_str(), COL_MENUCONTENT);
-	g_RCInput->getKey(190);
+	int ts;
+	int services;
+	while (!scanReady(&ts, &services))
+	{
+		int ypos=y;
+		g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
+		ypos+= hheight + (mheight >>1);
+		
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.transponders").c_str(), COL_MENUCONTENT);
+		ypos+= mheight;
+
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.services").c_str(), COL_MENUCONTENT);
+		g_RCInput->getKey(190);
+	}
+
 
 	hide();
 	return CMenuTarget::RETURN_REPAINT;

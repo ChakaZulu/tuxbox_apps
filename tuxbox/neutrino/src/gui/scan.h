@@ -24,6 +24,8 @@ class CScanTs : public CMenuTarget
 		int hheight,mheight; // head/menu font height
 		
 		void paint();
+		bool scanReady(int *ts, int *services);
+		void startScan();
 
 	public:
 

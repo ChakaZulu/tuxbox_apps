@@ -177,4 +177,9 @@ date.Dec  Dec
 nvod.starting (starting in %d min)
 nvod.proz (%d%% over)
 
-
+scants.head Scan transponder
+scants.info1 Please press OK to start scan
+scants.info2 home cancels...
+scants.transponders Transponders:
+scants.services Services:
+mainsettings.scants Servicescan
