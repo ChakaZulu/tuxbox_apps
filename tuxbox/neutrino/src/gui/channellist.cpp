@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.38 2001/11/19 22:50:28 Simplex Exp $
+// $Id: channellist.cpp,v 1.39 2001/11/23 13:18:18 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.39  2001/11/23 13:18:18  McClean
+// radiomode-paint bug removed
+//
 // Revision 1.38  2001/11/19 22:50:28  Simplex
 // Neutrino can handle bouquets now.
 // There are surely some bugs and todo's but it works
@@ -599,7 +602,7 @@ void CChannelList::numericZap(int key)
 		};
 	}
 
-	g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_BACKGROUND);
+	g_FrameBuffer->paintBackgroundBoxRel(ox, oy, sx, sy);
 
 	chn--;
 	if (chn<0)
