@@ -227,11 +227,15 @@ bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 
 bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
 {
-	int ip_1, ip_2, ip_3, ip_4;
-	char broadcast[16];
-	sscanf( (char*) Data, "%d.%d.%d.%d", &ip_1, &ip_2, &ip_3, &ip_4 );
-	sprintf(broadcast, "%d.%d.%d.255", ip_1, ip_2, ip_3 );
+	char ip[16];
+	unsigned char _ip[4];
+	sscanf((char*) Data, "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
+
+	sprintf(ip, "%hhu.%hhu.%hhu.255", _ip[0], _ip[1], _ip[2]);
 	CNeutrinoApp::getInstance()->networkConfig.broadcast = broadcast;
+
+	CNeutrinoApp::getInstance()->networkConfig.netmask = (_ip[0] == 10) ? "255.0.0.0" : "255.255.255.0";
+
 	return true;
 }
 
