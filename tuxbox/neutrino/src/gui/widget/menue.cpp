@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.30 2001/12/29 02:17:00 McClean Exp $
+$Id: menue.cpp,v 1.31 2001/12/31 16:27:13 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.31  2001/12/31 16:27:13  McClean
+ use lcddclient
+
  Revision 1.30  2001/12/29 02:17:00  McClean
  make some settings get from controld
 
@@ -236,9 +239,11 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
    } while ( key!=CRCInput::RC_timeout );
 
-   hide();
-   if(!parent)
-	   g_lcdd->setMode(LCDM_TV, g_Locale->getText(name));
+	hide();
+	if(!parent)
+	{
+		g_lcdd->setMode(CLcddClient::MODE_TVRADIO, g_Locale->getText(name));
+	}
 
    return retval;
 }
@@ -251,7 +256,7 @@ void CMenuWidget::hide()
 void CMenuWidget::paint()
 {
     string  l_name = g_Locale->getText(name);
-    g_lcdd->setMode(LCDM_MENU, l_name);
+	g_lcdd->setMode(CLcddClient::MODE_MENU, l_name);
 
 //	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
@@ -370,8 +375,8 @@ int CMenuOptionChooser::paint( bool selected )
 
     if(selected)
     {
-        g_lcdd->setText(0, l_optionName);
-        g_lcdd->setText(1, l_option);
+		g_lcdd->setMenuText(0, l_optionName);
+		g_lcdd->setMenuText(1, l_option);
     }
 
 	return y+height;
@@ -452,8 +457,8 @@ int CMenuOptionStringChooser::paint( bool selected )
 
     if(selected)
     {
-        g_lcdd->setText(0, l_optionName);
-        g_lcdd->setText(1, l_option);
+        g_lcdd->setMenuText(0, l_optionName);
+        g_lcdd->setMenuText(1, l_option);
     }
 
 	return y+height;
@@ -499,12 +504,12 @@ int CMenuForwarder::paint(bool selected)
 
         if(selected)
         {
-            g_lcdd->setText(0, l_text);
+            g_lcdd->setMenuText(0, l_text);
 
     		if (option)
-                g_lcdd->setText(1, option);
+                g_lcdd->setMenuText(1, option);
             else
-                g_lcdd->setText(1, "");
+                g_lcdd->setMenuText(1, "");
         }
 
 	unsigned char color = COL_MENUCONTENT;
@@ -582,8 +587,8 @@ int CMenuSeparator::paint(bool selected)
 
         if(selected)
         {
-            g_lcdd->setText(0, l_text);
-            g_lcdd->setText(1, "");
+            g_lcdd->setMenuText(0, l_text);
+            g_lcdd->setMenuText(1, "");
         }
 	}
 	return y+ height;

@@ -159,7 +159,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 	//int selected = 0;
 	while(loop)
 	{
-		g_lcdd->setText(1, value, selected+1);
+		g_lcdd->setMenuText(1, value, selected+1);
 		key = g_RCInput->getKey(300);
 		if (key==CRCInput::RC_left)
 		{

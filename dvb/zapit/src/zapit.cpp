@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.54 2001/12/30 18:38:37 Simplex Exp $
+  $Id: zapit.cpp,v 1.55 2001/12/31 16:27:36 McClean Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.55  2001/12/31 16:27:36  McClean
+  use lcddclient
+
   Revision 1.54  2001/12/30 18:38:37  Simplex
   intregration of CBouquetManager (part I)
 
@@ -290,7 +293,10 @@
 
 
 #include "zapit.h"
-#include "../../apps/mczap/lcdd/lcdd.h"
+#include "lcddclient.h"
+
+
+CLcddClient lcdd;
 
 static int debug=0;
 
@@ -348,27 +354,6 @@ void termination_handler (int signum)
   keep_going = 0;
   close(connfd);
   system("cp /tmp/zapit_last_chan " CONFIGDIR "/zapit/last_chan");
-}
-
-void write_lcd(char *name) {
-  int lcdd_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  struct lcdd_msg lmsg;
-  memset(&servaddr,0,sizeof(servaddr));
-  servaddr.sin_family=AF_INET;
-  servaddr.sin_port=htons(1510);
-  inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr);
-
-  //printf("Writing name %s to lcdd", name);
-  if(connect(lcdd_fd, (SA *)&servaddr, sizeof(servaddr))!=-1)
-    {
-      lmsg.version=LCDD_VERSION;
-      lmsg.cmd=LC_CHANNEL;
-      strcpy(lmsg.param3, name);
-      write(lcdd_fd,&lmsg,sizeof(lmsg));
-    } else {
-      perror("[zapit] couldn't connect to lcdd");
-    }
-  close(lcdd_fd);
 }
 
 // nachdem #include "gen_vbi.h" noch nicht geht (noch nicht offiziell im cdk...)
@@ -1088,10 +1073,14 @@ else
     //	cit->second.last_update = current_time;
   }
 
-  if (in_nvod)
-    write_lcd((char*) nvodname.c_str());
-  else
-    write_lcd((char*) cit->second.name.c_str());
+	if (in_nvod)
+	{
+		lcdd.setServiceName(nvodname);
+	}
+	else
+	{
+		lcdd.setServiceName(cit->second.name);
+	}
 
   if (cit->second.vpid != 0x1fff || cit->second.apid != 0x8191)
     {
@@ -2318,7 +2307,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.54 2001/12/30 18:38:37 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.55 2001/12/31 16:27:36 McClean Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;

@@ -36,7 +36,7 @@
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
-#include "daemonc/lcdd.h"
+#include "lcddclient.h"
 #include "color.h"
 
 

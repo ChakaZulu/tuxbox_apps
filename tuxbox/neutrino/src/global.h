@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.16 2001/12/28 16:31:09 Simplex Exp $
+// $Id: global.h,v 1.17 2001/12/31 16:27:13 McClean Exp $
 //
 // $Log: global.h,v $
+// Revision 1.17  2001/12/31 16:27:13  McClean
+// use lcddclient
+//
 // Revision 1.16  2001/12/28 16:31:09  Simplex
 // libcontroldclient is now used
 //
@@ -73,8 +76,8 @@
 //
 //
 #include "neutrino.h"
-#include "daemonc/lcdd.h"
-#include <controldclient.h>
+#include "controldclient.h"
+#include "lcddclient.h"
 #include "daemonc/remotecontrol.h"
 
 #include "driver/fontrenderer.h"
@@ -101,7 +104,7 @@
 NEUTRINO_CPP  CNeutrinoApp        *neutrino;
 NEUTRINO_CPP  SNeutrinoSettings   g_settings;
 
-NEUTRINO_CPP  CLCDD           *g_lcdd;
+NEUTRINO_CPP  CLcddClient     *g_lcdd;
 NEUTRINO_CPP  CControldClient *g_Controld;
 NEUTRINO_CPP  CRemoteControl  *g_RemoteControl;
 
