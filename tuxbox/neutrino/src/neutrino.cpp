@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.163 2002/02/23 13:57:17 field Exp $
+        $Id: neutrino.cpp,v 1.164 2002/02/23 17:34:28 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.163  2002/02/23 13:57:17  field
-  Menue-Updates
+  Revision 1.164  2002/02/23 17:34:28  field
+  Update gefixt, Fronttasten implementiert ;)
 
   Revision 1.161  2002/02/22 22:47:20  field
   Features-Menue verbessert
@@ -1371,13 +1371,14 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 			if(fgets(g_settings.softupdate_currentversion,90,fd)==NULL)
 				fclose(fd);
 			//printf("versiondata: ->%s<-\n", g_settings.softupdate_currentversion);
-			for (unsigned int x=0;x<strlen(g_settings.softupdate_currentversion);x++)
+/*			for (unsigned int x=0;x<strlen(g_settings.softupdate_currentversion);x++)
 			{
 				if( (g_settings.softupdate_currentversion[x]!='.') && ((g_settings.softupdate_currentversion[x]>'9') || (g_settings.softupdate_currentversion[x]<'0') ) )
 				{
 					g_settings.softupdate_currentversion[x]=0;
 				}
 			}
+*/
 		}
 		printf("current flash-version: %s\n", g_settings.softupdate_currentversion);
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
@@ -2479,7 +2480,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.163 2002/02/23 13:57:17 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.164 2002/02/23 17:34:28 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.28 2002/02/19 23:41:48 McClean Exp $
+ $Id: rcinput.cpp,v 1.29 2002/02/23 17:34:28 field Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.29  2002/02/23 17:34:28  field
+ Update gefixt, Fronttasten implementiert ;)
+
  Revision 1.28  2002/02/19 23:41:48  McClean
  add neutrino-direct-start option (for alexW's-Images only at the moment)
 
@@ -303,16 +306,19 @@ int CRCInput::getKey(int Timeout, bool bAllowRepeatLR)
 						rc_last_repeat_key = 0;
 					}
 					rc_last_key = rc_key;
-
+                    //printf("!!!!!!!  native key: %04x %04x\n", rc_key, rc_key&0x1f );
 					if(abs(now_pressed-last_keypress)>repeat_block_generic)
 					{
 						if(keyok)
 						{
 							last_keypress = now_pressed;
-							return translate(rc_key);
+							int trkey= translate(rc_key);
+							//printf("--!!!!!  translated key: %04x\n", trkey );
+							if (trkey!=RC_nokey)
+								return trkey;
 						}
 					}
-					//printf("!!!!!!!eat  native key: %04x %04x\n", rc_key, rc_key&0x1f );
+
 				}
 			}
 		}
@@ -453,6 +459,7 @@ string CRCInput:: getKeyName(int code)
 **************************************************************************/
 int CRCInput::translate(int code)
 {
+
 	if ((code&0xFF00)==0x5C00)
 	{
 		switch (code&0xFF)
@@ -518,8 +525,35 @@ int CRCInput::translate(int code)
 				return RC_nokey;
 		}
 	}
+	else if ((code&0xFF00)==0xFF00)
+	{
+		//Fronttasten
+		//printf("-!!!!!!  before 0xFF key: %04x\n", code );
+		switch (code&0xFF)
+		{
+				case 0x12:
+				case 0x9d:
+				return RC_standby;
+				case 0x48:
+				case 0xab:
+				return RC_down;
+				case 0x24:
+				case 0xc7:
+				return RC_up;
+				case 0x20:
+				case 0x40:
+				case 0x10:
+				case 0x9f:
+				case 0xaf:
+				case 0xcf:
+				return RC_nokey;
+		}
+	}
 	else if (!(code&0x00))
+	{
+		//printf("-!!!!!!  before not-translated key: %04x\n", code );
 		return code&0x3F;
+	}
 	//else
 	//perror("unknown rc code");
 	return RC_nokey;

@@ -426,7 +426,7 @@ void CFlashUpdate::showLocalStatus(int prog)
 void CFlashUpdate::showStatusMessage(string text)
 {
 	g_FrameBuffer->paintBox(statusTextX-5, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(statusTextX, statusTextY, width, text.c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(statusTextX, statusTextY, width -(statusTextX- x), text.c_str(), COL_MENUCONTENT);
 }
 
 
@@ -441,12 +441,12 @@ void CFlashUpdate::paint()
 
 	int ypos=y;
 	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("flashupdate.head").c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText("flashupdate.head").c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	ypos+= hheight + (mheight >>1);
 
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width,  g_Locale->getText("flashupdate.action").c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10,  g_Locale->getText("flashupdate.action").c_str(), COL_MENUCONTENT);
 	statusTextY = ypos+mheight;
 	statusTextX = x+10 + g_Fonts->menu->getRenderWidth(g_Locale->getText("flashupdate.action").c_str())+10;
 	ypos+= mheight;
@@ -498,6 +498,8 @@ void CFlashUpdate::paint()
 	char buf[100];
 	if(fgets(buf,sizeof(buf),fd)!=NULL)
 	{
+		//printf("vstr: %s\n", buf);
+		buf[19]= 0;
 		sscanf(buf, "version: %d.%d.%s\n", &new_major, &new_provider, (char*) &new_minor);
 	}
 	else
@@ -512,34 +514,36 @@ void CFlashUpdate::paint()
 	}
 	fclose(fd);
 
+	//printf("installed - %d : %d : %s\n", installed_major, installed_provider, installed_minor);
+	//printf("new - %d : %d : %s\n", new_major, new_provider, new_minor);
 	if(installed_major!=new_major)
 	{
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.majorversiondiffer1").c_str() , COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.majorversiondiffer1").c_str() , COL_MENUCONTENT);
 		ypos+= mheight;
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.majorversiondiffer2").c_str() , COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.majorversiondiffer2").c_str() , COL_MENUCONTENT);
 		close(fp_fd);
 		return;
 	}
 	if(installed_provider!=new_provider)
 	{
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.providerversiondiffer1").c_str() , COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.providerversiondiffer1").c_str() , COL_MENUCONTENT);
 		ypos+= mheight;
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.providerversiondiffer2").c_str() , COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.providerversiondiffer2").c_str() , COL_MENUCONTENT);
 		close(fp_fd);
 		return;
 	}
-	if(installed_minor==new_minor)
+	if(strcmp(installed_minor,new_minor)== 0)
 	{
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.nonewversion1").c_str() , COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.nonewversion1").c_str() , COL_MENUCONTENT);
 		ypos+= mheight;
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.nonewversion2").c_str() , COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.nonewversion2").c_str() , COL_MENUCONTENT);
 		close(fp_fd);
 		return;
 	}
 
 
 	//start update
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.globalprogress").c_str() , COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.globalprogress").c_str() , COL_MENUCONTENT);
 	ypos+= mheight;
 
 	globalstatusY = ypos+ mheight-20;
@@ -607,7 +611,7 @@ void CFlashUpdate::paint()
 	sleep(2);
 
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x+ 10, y+ mheight*3, width, g_Locale->getText("flashupdate.reboot").c_str() , COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, y+ mheight*3, width- 10, g_Locale->getText("flashupdate.reboot").c_str() , COL_MENUCONTENT);
 
 	sleep(2);
 	if (ioctl(fp_fd,FP_IOCTL_REBOOT)< 0)
