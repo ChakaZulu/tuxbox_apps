@@ -1103,7 +1103,7 @@ void find_avpids(int fd, uint16_t *vpid, uint16_t *apid)
 }
 
 // 1200000 bytes should be enough to receive every audio pid at least once
-#define TSREADSIZE 1200000
+#define TSREADSIZE 2000000
 
 void find_all_avpids(int fd, uint16_t *vpid, uint16_t *apids, unsigned short *ac3flags, uint16_t *numpida)
 {
