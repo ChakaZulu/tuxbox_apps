@@ -31,7 +31,7 @@
 						&nbsp;
 					</td>
 					<td>
-						Note: For recurring events start/end day/month are don't care.
+						Note: For recurring events start/end day/month are not required.
 					</td>
 				</tr>
 				<tr>
@@ -79,7 +79,7 @@
 						&nbsp;
 					</td>
 					<td>
-						Note: For one-time events days are don't care.
+						Note: For one-time events days are not required.
 					</td>
 				</tr>
 				<tr>
