@@ -1,7 +1,12 @@
 /*
-  $Id: tuxbox.c,v 1.3 2003/01/01 22:14:51 Jolt Exp $
+  $Id: tuxbox.c,v 1.4 2003/01/03 11:13:09 Jolt Exp $
   
   $Log: tuxbox.c,v $
+  Revision 1.4  2003/01/03 11:13:09  Jolt
+  - Added tag defines
+  - Renamed *manufacturer* to *vendor*
+  - Added some caps
+
   Revision 1.3  2003/01/01 22:14:51  Jolt
   - Renamed files
   - Merged in tuxbox.h
@@ -25,45 +30,45 @@ unsigned int tuxbox_get_capabilities(void)
 
 	char *value;
 
-	if (!(value = getenv("TUXBOX_CAPABILITIES")))
+	if (!(value = getenv(TUXBOX_TAG_CAPABILITIES)))
 		return 0;
 		
 	return strtoul(value, NULL, 0);
 
 }
 
-unsigned int tuxbox_get_manufacturer(void)
+unsigned int tuxbox_get_vendor(void)
 {
 
 	char *value;
 
-	if (!(value = getenv("TUXBOX_MANUFACTURER")))
-		return TUXBOX_MANUFACTURER_UNKNOWN;
+	if (!(value = getenv(TUXBOX_TAG_VENDOR)))
+		return TUXBOX_VENDOR_UNKNOWN;
 		
 	return strtoul(value, NULL, 0);
 
 }
 
-char *tuxbox_get_manufacturer_str(void)
+char *tuxbox_get_vendor_str(void)
 {
 
-	switch(tuxbox_get_manufacturer()) {
+	switch(tuxbox_get_vendor()) {
 	
-		case TUXBOX_MANUFACTURER_NOKIA:
+		case TUXBOX_VENDOR_NOKIA:
 		
 			return "Nokia";
 			
-		case TUXBOX_MANUFACTURER_SAGEM:
+		case TUXBOX_VENDOR_SAGEM:
 		
 			return "Sagem";
 			
-		case TUXBOX_MANUFACTURER_PHILIPS:
+		case TUXBOX_VENDOR_PHILIPS:
 			
 			return "Philips";
 			
-		case TUXBOX_MANUFACTURER_DREAM_MM:
+		case TUXBOX_VENDOR_DREAM_MM:
 		
-			return "Dream Multimedia";
+			return "Dream Multimedia TV";
 			
 		default:
 		
@@ -78,7 +83,7 @@ unsigned int tuxbox_get_model(void)
 
 	char *value;
 
-	if (!(value = getenv("TUXBOX_MODEL")))
+	if (!(value = getenv(TUXBOX_TAG_MODEL)))
 		return TUXBOX_MODEL_UNKNOWN;
 		
 	return strtoul(value, NULL, 0);
@@ -115,7 +120,7 @@ unsigned int tuxbox_get_version(void)
 
 	char *value;
 
-	if (!(value = getenv("TUXBOX_VERSION")))
+	if (!(value = getenv(TUXBOX_TAG_VERSION)))
 		return 0;
 		
 	return strtoul(value, NULL, 0);
