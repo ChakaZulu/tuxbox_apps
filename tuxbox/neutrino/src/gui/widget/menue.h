@@ -173,7 +173,7 @@ class CMenuWidget : public CMenuTarget
 
 	public:
 		CMenuWidget(){name="";iconfile="";selected=-1;};
-		CMenuWidget(string Name, string Icon="");
+		CMenuWidget(string Name, string Icon="", int mwidth=400, int mheight=370);
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, bool defaultselected=false);

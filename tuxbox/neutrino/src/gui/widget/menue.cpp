@@ -1,9 +1,12 @@
 /*
-$Id: menue.cpp,v 1.21 2001/10/22 15:00:18 McClean Exp $
+$Id: menue.cpp,v 1.22 2001/10/22 21:48:22 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.22  2001/10/22 21:48:22  McClean
+ design-update
+
  Revision 1.21  2001/10/22 15:00:18  McClean
  icon update
 
@@ -39,11 +42,13 @@ History:
 #include "../include/debug.h"
 #include "../global.h"
 
-CMenuWidget::CMenuWidget(string Name, string Icon)
+CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight)
 {
 	name = Name;
 	iconfile = Icon;
 	selected = -1;
+	width = mwidth;
+	height = mheight; // height(menu_title)+10+...
 }
 
 CMenuWidget::~CMenuWidget()
@@ -162,8 +167,6 @@ void CMenuWidget::paint()
     string  l_name = g_Locale->getText(name);
     g_lcdd->setMode(LCDM_MENU, l_name);
 
-	width = 400;
-	height = 370; // height(menu_title)+10+...
 	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
 
