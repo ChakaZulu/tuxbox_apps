@@ -102,8 +102,6 @@ class CAudioPlayerGui : public CMenuTarget
 	bool           m_select_title_by_name;
 	bool           m_show_playlist;
 
-/* 	bool           m_displayConfigHasChanged; */
-/* 	int            m_oldDisplayConfig; */
 	bool           m_playlistHasChanged;
 
 	CAudioPlayList      m_playlist;
@@ -143,11 +141,7 @@ class CAudioPlayerGui : public CMenuTarget
 	void ff(unsigned int seconds=0);
 	void rev(unsigned int seconds=0);
 	int getNext();
-//<<<<<<< audioplayer.h
 	void GetMetaData(CAudiofileExt &File);
-//=======
-//	void GetMetaData(CAudiofile* const File);
-//>>>>>>> 1.11
 	void updateMetaData();
 	void updateTimes(const bool force = false);
 	void showMetaData();
