@@ -368,14 +368,16 @@ int eFrontend::Status()
 uint32_t eFrontend::BER()
 {
 	uint32_t ber=0;
-	ioctl(fd, FE_READ_BER, &ber);
+	if (ioctl(fd, FE_READ_BER, &ber) < 0)
+		eDebug("FE_READ_BER failed (%m)");
 	return ber;
 }
 
 int eFrontend::SignalStrength()
 {
 	uint16_t strength=0;
-	ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength);
+	if (ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength) < 0)
+		eDebug("FE_READ_SIGNAL_STRENGTH failed (%m)");
 #if 0
 	if ((strength<0) || (strength>65535))
 	{
@@ -389,7 +391,8 @@ int eFrontend::SignalStrength()
 int eFrontend::SNR()
 {
 	uint16_t snr=0;
-	ioctl(fd, FE_READ_SNR, &snr);
+	if (ioctl(fd, FE_READ_SNR, &snr) < 0)
+		eDebug("FE_READ_SNR failed (%m)");
 #if 0
 	if ((snr<0) || (snr>65535))
 	{
@@ -403,7 +406,8 @@ int eFrontend::SNR()
 uint32_t eFrontend::UncorrectedBlocks()
 {
 	uint32_t ublocks=0;
-	ioctl(fd, FE_READ_UNCORRECTED_BLOCKS, &ublocks);
+	if (ioctl(fd, FE_READ_UNCORRECTED_BLOCKS, &ublocks) < 0)
+		eDebug("FE_READ_UNCORRECTED_BLOCKS failed (%m)");
 	return ublocks;
 }
 
@@ -450,7 +454,7 @@ static Modulation getModulation(int mod)
 	}
 }
 
-// converstions etsi -> API for DVB-T
+// conversions etsi -> API for DVB-T
 static Modulation getConstellation(int mod)
 {
 	switch (mod)
@@ -540,7 +544,25 @@ Hierarchy getHierarchyInformation( int hierarchy )
 	}
 	return (Hierarchy)HIERARCHY_AUTO;
 }
-                                      
+
+int dvbtApiToEtsiCodeRate(CodeRate cr)
+{
+	switch (cr) {
+	case FEC_1_2:
+		return 0;
+	case FEC_2_3:
+		return 1;
+	case FEC_3_4:
+		return 2;
+	case FEC_5_6:
+		return 3;
+	case FEC_7_8:
+		return 4;
+	default:
+		return -1;
+	}
+}
+
 int gotoXTable[10] = { 0x00, 0x02, 0x03, 0x05, 0x06, 0x08, 0x0A, 0x0B, 0x0D, 0x0E };
 
 int eFrontend::readInputPower()
@@ -1331,51 +1353,71 @@ double calcSatHourangle( double Azimuth, double Elevation, double Declination, d
 
 void eFrontend::updateTransponder()
 {
-	if ( Locked() && transponder && transponder->satellite.valid && eSystemInfo::getInstance()->canUpdateTransponder())
-	{
-#if HAVE_DVB_API_VERSION < 3
-		FrontendParameters front;
-#else
-		dvb_frontend_event front;
-#endif
-		if (ioctl(fd, FE_GET_FRONTEND, &front)<0)
-			eDebug("FE_GET_FRONTEND (%m)");
-		else
-		{
-			eDebug("[FE] update transponder data");
-			eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
-			if (sat)
-			{
-				eLNB *lnb = sat->getLNB();
-				if (lnb)
-				{
-//					eDebug("oldFreq = %d", transponder->satellite.frequency );
-#if HAVE_DVB_API_VERSION < 3
-					transponder->satellite.frequency =
-						transponder->satellite.frequency > lnb->getLOFThreshold() ?
-							front.Frequency + lnb->getLOFHi() :
-							front.Frequency + lnb->getLOFLo();
+	if (!transponder)
+		return;
+	if (!eSystemInfo::getInstance()->canUpdateTransponder())
+		return;
+	if (!Locked())
+		return;
 
-					transponder->satellite.symbol_rate = front.u.qpsk.SymbolRate;
-//					eDebug("newSR = %d", transponder->satellite.symbol_rate);
-#else
-						transponder->satellite.frequency =
-							transponder->satellite.frequency > lnb->getLOFThreshold() ?
-							front.parameters.frequency + lnb->getLOFHi() :
-							front.parameters.frequency + lnb->getLOFLo();
-#endif
-//					eDebug("newFreq = %d", transponder->satellite.frequency );
-				}
-			}
-/*				transponder->satellite.fec = front.u.qpsk.FEC_inner;
-			transponder->satellite.symbol_rate = front.u.qpsk.SymbolRate;*/
 #if HAVE_DVB_API_VERSION < 3
-			transponder->satellite.inversion=front.Inversion;
+	FrontendParameters front;
 #else
-			transponder->satellite.inversion=front.parameters.inversion;
+	struct dvb_frontend_parameters front;
 #endif
-//			eDebug("NEW INVERSION = %d", front.Inversion );
+	if (ioctl(fd, FE_GET_FRONTEND, &front)<0) {
+		eDebug("FE_GET_FRONTEND (%m)");
+		return;
+	}
+
+	if ((type==eSystemInfo::feSatellite) && (transponder->satellite.valid))
+	{
+		unsigned int freq, inv, sr;
+#if HAVE_DVB_API_VERSION < 3
+		freq = front.Frequency;
+		inv = front.Inversion;
+		sr = front.u.qpsk.SymbolRate;
+#else
+		freq = front.frequency;
+		inv = front.inversion;
+		sr = front.u.qpsk.symbol_rate;
+#endif
+		eDebug("[FE] update transponder data");
+		eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
+		if (sat)
+		{
+			eLNB *lnb = sat->getLNB();
+			if (lnb)
+			{
+				transponder->satellite.frequency =
+					transponder->satellite.frequency > lnb->getLOFThreshold() ?
+						freq + lnb->getLOFHi() :
+						freq + lnb->getLOFLo();
+			}
 		}
+/*		transponder->satellite.fec = front.u.qpsk.FEC_inner; */
+		transponder->satellite.inversion = inv;
+		transponder->satellite.symbol_rate = sr;
+	}
+	else if ((type==eSystemInfo::feCable) && (transponder->cable.valid)) {
+#if HAVE_DVB_API_VERSION < 3
+		// FIXME
+#else
+		// FIXME
+#endif
+	}
+	else if ((type==eSystemInfo::feTerrestrial) && (transponder->terrestrial.valid)) {
+#if HAVE_DVB_API_VERSION < 3
+		eDebug("[FE] update transponder data");
+		transponder->terrestrial.code_rate_hp = dvbtApiToEtsiCodeRate(front.u.ofdm.HP_CodeRate);
+		transponder->terrestrial.code_rate_lp = dvbtApiToEtsiCodeRate(front.u.ofdm.LP_CodeRate);
+		transponder->terrestrial.constellation = front.u.ofdm.Constellation;
+		transponder->terrestrial.transmission_mode = front.u.ofdm.TransmissionMode;
+		transponder->terrestrial.guard_interval = front.u.ofdm.guardInterval;
+		transponder->terrestrial.hierarchy_information = front.u.ofdm.HierarchyInformation;
+#else
+		// FIXME
+#endif
 	}
 }
 
