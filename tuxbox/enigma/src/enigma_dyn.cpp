@@ -524,7 +524,7 @@ eString filter_string(eString string)
 {
 	string.strReplace("\xc2\x86","");
 	string.strReplace("\xc2\x87","");
-	string.strReplace("\xc2\x8a","<br>");
+	string.strReplace("\xc2\x8a"," ");
 	return string;
 }
 
