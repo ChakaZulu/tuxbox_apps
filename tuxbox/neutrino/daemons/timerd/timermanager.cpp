@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.47 2002/10/23 18:55:25 Zwen Exp $
+   $Id: timermanager.cpp,v 1.48 2002/10/26 12:37:14 Zwen Exp $
 
 	License: GPL
 
@@ -401,72 +401,85 @@ CTimerEvent::CTimerEvent(CTimerd::CTimerEventTypes evtype,CConfigFile *config, i
 //------------------------------------------------------------
 void CTimerEvent::Reschedule()
 {
-	time_t diff = 0;
-	printf("Reschedule\n");
-	struct tm *t= localtime(&alarmTime);
-	switch(eventRepeat)
-	{
-		case CTimerd::TIMERREPEAT_ONCE :
-			break;
-		case CTimerd::TIMERREPEAT_DAILY: 
-			t->tm_mday++;
-			break;
-		case CTimerd::TIMERREPEAT_WEEKLY: 
-			t->tm_mday+=7;
-			break;
-		case CTimerd::TIMERREPEAT_BIWEEKLY: 
-			t->tm_mday+=14;
-			break;
-		case CTimerd::TIMERREPEAT_FOURWEEKLY: 
-			t->tm_mday+=28;
-			break;
-		case CTimerd::TIMERREPEAT_MONTHLY: 
-		{
-		   t->tm_mon++;
-			break;
-		}
-		case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION :
-			// todo !!
-			break;
-		default:
-			if(eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
-			{
-				int weekdays = ((int)eventRepeat) >> 9;
-				if(weekdays > 0)
-				{
-					bool weekday_arr[7];
-					weekday_arr[0]=((weekdays & 0x40) > 0); //So
-					weekday_arr[1]=((weekdays & 0x1) > 0); //Mo
-					weekday_arr[2]=((weekdays & 0x2) > 0); //Di
-					weekday_arr[3]=((weekdays & 0x4) > 0); //Mi
-					weekday_arr[4]=((weekdays & 0x8) > 0); //Do
-					weekday_arr[5]=((weekdays & 0x10) > 0); //Fr
-					weekday_arr[6]=((weekdays & 0x20) > 0); //Sa
-					struct tm *t= localtime(&alarmTime);
-					int day;
-					for(day=t->tm_wday+1 ; !weekday_arr[day%7] ; day++){}
-					t->tm_mday+=day;
-				}
-			}
-			else
-				dprintf("unknown repeat type %d\n",eventRepeat);
-	}
-	diff = mktime(t)-alarmTime;
-	if(diff != 0)
-	{
-		if(announceTime > 0)
-			announceTime += diff;
-		if(alarmTime > 0)
-			alarmTime += diff;
-		if(stopTime > 0)
-			stopTime += diff;
-		eventState = CTimerd::TIMERSTATE_SCHEDULED;
-		dprintf("event %d rescheduled\n",eventID);
-	}
-	else
+	if(eventRepeat == CTimerd::TIMERREPEAT_ONCE)
 	{
 		eventState = CTimerd::TIMERSTATE_TERMINATED;
 		dprintf("event %d not rescheduled, event will be terminated\n",eventID);
+	}
+	else
+	{
+		time_t now = time(NULL);
+		while(alarmTime < now)
+		{
+			time_t diff = 0;
+			struct tm *t= localtime(&alarmTime);
+			int isdst1=t->tm_isdst;
+			switch(eventRepeat)
+			{
+				case CTimerd::TIMERREPEAT_ONCE :
+					break;
+				case CTimerd::TIMERREPEAT_DAILY: 
+					t->tm_mday++;
+				break;
+				case CTimerd::TIMERREPEAT_WEEKLY: 
+					t->tm_mday+=7;
+				break;
+				case CTimerd::TIMERREPEAT_BIWEEKLY: 
+					t->tm_mday+=14;
+				break;
+				case CTimerd::TIMERREPEAT_FOURWEEKLY: 
+					t->tm_mday+=28;
+				break;
+				case CTimerd::TIMERREPEAT_MONTHLY: 
+					t->tm_mon++;
+				break;
+				case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION :
+					// todo !!
+					break;
+				default:
+					if(eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
+					{
+						int weekdays = ((int)eventRepeat) >> 9;
+						if(weekdays > 0)
+						{
+							bool weekday_arr[7];
+							weekday_arr[0]=((weekdays & 0x40) > 0); //So
+							weekday_arr[1]=((weekdays & 0x1) > 0); //Mo
+							weekday_arr[2]=((weekdays & 0x2) > 0); //Di
+							weekday_arr[3]=((weekdays & 0x4) > 0); //Mi
+							weekday_arr[4]=((weekdays & 0x8) > 0); //Do
+							weekday_arr[5]=((weekdays & 0x10) > 0); //Fr
+							weekday_arr[6]=((weekdays & 0x20) > 0); //Sa
+							struct tm *t= localtime(&alarmTime);
+							int day;
+							for(day=t->tm_wday+1 ; !weekday_arr[day%7] ; day++){}
+							t->tm_mday+=day;
+						}
+					}
+					else
+						dprintf("unknown repeat type %d\n",eventRepeat);
+			}
+			diff = mktime(t)-alarmTime;
+			alarmTime += diff;
+			t = localtime(&alarmTime);
+			int isdst2 = t->tm_isdst;
+			if(isdst2 > isdst1) //change from winter to summer
+			{
+				diff-=3600;
+				alarmTime-=3600;
+			}
+			else if(isdst1 > isdst2) //change from summer to winter
+			{
+				diff+=3600;
+				alarmTime+=3600;
+			}
+			if(announceTime > 0)
+				announceTime += diff;
+			if(stopTime > 0)
+				stopTime += diff;
+		}
+		eventState = CTimerd::TIMERSTATE_SCHEDULED;
+		dprintf("event %d rescheduled\n",eventID);
 	}
 }
 
