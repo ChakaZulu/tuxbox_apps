@@ -55,13 +55,13 @@
 	</object>
 
 	<object name="eDownloadWindow">
-		<eDownloadWindow position="50:70" size="600:300" text="HTTP Download">
+		<eDownloadWindow cposition="50:70" csize="600:300" text="HTTP Download">
 			<eProgress position="0:50" size="100:20" name="progress" />
 		</eDownloadWindow>
 	</object>
 
 	<object name="eSatelliteConfigurationManager">
-		<eSatelliteConfigurationManager position="120:80" size="500:370" text="Satellitenkonfiguration">
+		<eSatelliteConfigurationManager cposition="120:80" csize="500:370" text="Satellitenkonfiguration">
 			
 			<eLabel text="Satelliten:" position="0:0" size="400:30" font="NimbusSansL-Regular Sans L Regular;25" />
 			<eListbox name="list" position="0:30" size="400:300" />
@@ -72,7 +72,7 @@
 	</object>
 
 	<object name="tsSelectType">
-		<tsSelectType position="0:0" size="400:100">
+		<tsSelectType cposition="0:0" csize="400:100">
 			<eLabel text="Sendersuchlauf" position="0:0" size="400:30" font="NimbusSansL-Regular Sans L Regular;25" />
 			<eListbox name="menu" position="0:30" size="400:0" />
 		</tsSelectType>
