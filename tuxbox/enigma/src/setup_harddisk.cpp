@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.19 2004/11/08 20:37:07 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.20 2004/11/10 21:32:48 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -31,6 +31,7 @@
 #include <lib/gui/emessage.h>
 #include <lib/gui/statusbar.h>
 #include <lib/dvb/epgcache.h>
+#include <lib/system/info.h>
 #include <sys/vfs.h> // for statfs
 #include <unistd.h>
 #include <signal.h>
@@ -136,6 +137,8 @@ static int numPartitions(int dev)
 	return numpart;
 }
 
+extern eString resolvSymlinks(const eString &path);
+
 eString getPartFS(int dev, eString mp="")
 {
 	FILE *f=fopen("/proc/mounts", "rb");
@@ -146,6 +149,8 @@ eString getPartFS(int dev, eString mp="")
 	int bus=!!(dev&2);
 	int target=!!(dev&1);
 	path.sprintf("/dev/ide/host%d/bus%d/target%d/lun0/", host, bus, target);
+
+	eString tmp=resolvSymlinks(mp);
 
 	while (1)
 	{
@@ -159,21 +164,18 @@ eString getPartFS(int dev, eString mp="")
 			mountpoint=mountpoint.mid(mountpoint.find(' ')+1);
 			mountpoint=mountpoint.left(mountpoint.find(' '));
 //			eDebug("mountpoint: %s", mountpoint.c_str());
-			if ( mp && mountpoint != mp )
+			if ( tmp && mountpoint != tmp )
 				continue;
 
-			if (!strncmp(line, path.c_str(), path.size()))
-			{
-				eString fs=line;
-				fs=fs.mid(fs.find(' ')+1);
-				fs=fs.mid(fs.find(' ')+1);
-				fs=fs.left(fs.find(' '));
-				eString mpath=line;
-				mpath=mpath.left(mpath.find(' '));
-				mpath=mpath.mid(mpath.rfind('/')+1);
-				fclose(f);
-				return fs+','+mpath;
-			}
+			eString fs=line;
+			fs=fs.mid(fs.find(' ')+1);
+			fs=fs.mid(fs.find(' ')+1);
+			fs=fs.left(fs.find(' '));
+			eString mpath=line;
+			mpath=mpath.left(mpath.find(' '));
+			mpath=mpath.mid(mpath.rfind('/')+1);
+			fclose(f);
+			return fs+','+mpath;
 		}
 	}
 	fclose(f);
@@ -550,7 +552,30 @@ int ePartitionCheck::eventHandler( const eWidgetEvent &e )
 					CONNECT( fsck->appClosed, ePartitionCheck::fsckClosed );
 				}
 			}
-			else if ( fs == "reiserfs" )
+			else if ( fs == "ext2" )
+			{
+				eWindow::globalCancel(eWindow::OFF);
+				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/fsck.ext2 -f -y /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
+
+				if ( !fsck->running() )
+				{
+					eMessageBox msg(
+						_("sorry, couldn't find fsck.ext2 utility to check the ext2 filesystem."),
+						_("check filesystem..."),
+						eMessageBox::btOK|eMessageBox::iconError);
+					msg.show();
+					msg.exec();
+					msg.hide();
+					close(-1);
+				}
+				else
+				{
+					eDebug("fsck.ext2 opened");
+					CONNECT( fsck->dataAvail, ePartitionCheck::getData );
+					CONNECT( fsck->appClosed, ePartitionCheck::fsckClosed );
+				}
+			}
+			else if ( fs == "reiserfs" && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 			{
 				eWindow::globalCancel(eWindow::OFF);
 				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/reiserfsck -y --fix-fixable /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
