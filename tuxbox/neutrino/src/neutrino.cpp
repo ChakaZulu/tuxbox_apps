@@ -2519,15 +2519,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		{
 			string command;
 			command = "ether-wake "+ string(g_settings.recording_server_mac);
-			if(system(command.c_str()) != NULL)
+			if(system(command.c_str()) != 0)
 				perror("ether-wake failed");
 		}
 		if( mode != mode_scart )
 			ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
-		CTimerd::EventInfo * eventinfo; 
-		eventinfo = (CTimerd::EventInfo *) data;
-//			channelList->zapTo_ChannelID(eventinfo->channel_id); // dann umschalten
-//				g_Zapit->zapTo_serviceID(eventinfo->channel_id);		
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
@@ -3090,7 +3086,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.354 2002/11/01 21:49:38 McClean Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.355 2002/11/03 11:31:47 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
