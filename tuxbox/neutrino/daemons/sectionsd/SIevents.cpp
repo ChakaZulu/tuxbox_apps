@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.17 2002/08/27 19:00:45 obi Exp $
+// $Id: SIevents.cpp,v 1.18 2002/09/20 23:07:42 thegoodguy Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.18  2002/09/20 23:07:42  thegoodguy
+// Speed up code
+//
 // Revision 1.17  2002/08/27 19:00:45  obi
 // use devfs device names
 //
@@ -471,24 +474,24 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
 	insert(newEvent); // und das erweiterte Event wieder einfuegen
       }
     }
-  // Jetzt loeschen wir alle Events die eine Service-ID haben deren Service vom Typ 0 ist
-  // Untenstehender Algo ist so zwar relativ langsam, aber es funktioniert
-  // Bei Gelegenheit mach ich das mal anders
-  for(;;) {
-    int erased=0;
-    for(iterator e=begin(); e!=end(); e++) {
-      SIservices::iterator s=services.find(SIservice(e->serviceID, e->originalNetworkID));
-      if(s!=services.end())
-        if(s->serviceTyp==0) {
-	  erase(e); // -> e wird ungueltig
-	  erased=1;
-	  break;
-        }
+//
+//  delete all events with serviceID that have a service type 0
+//
+    for (iterator it = begin(); it != end(); )
+    {
+	SIservices::iterator s = services.find(SIservice(it->serviceID, it->originalNetworkID));
+	if ((s != services.end()) && (s->serviceTyp == 0))
+	{
+//	    Set is a Sorted Associative Container
+//	    Erasing an element from a set also does not invalidate any iterators,
+//	    except, of course, for iterators that actually point to the element
+//	    that is being erased. 
+
+	    iterator jt = it;
+	    it++;             // the iterator it points to the next element
+	    erase(jt);        // hence it is not invalidated
+	}
+	else
+	    it++;
     }
-    if(!erased)
-      break;
-  }
-  // Hiermit loeschen wir ungewollte Events (oben aussortierte)
-//  for(iterator e=eventsToDelete.begin(); e!=eventsToDelete.end(); e++)
-//    erase(*e);
 }
