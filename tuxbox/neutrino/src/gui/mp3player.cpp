@@ -503,17 +503,34 @@ void CMP3PlayerGui::paintItem(int pos)
 		char sNr[20];
 		sprintf(sNr, "%2d : ", liststart+pos+1);
 		string tmp=sNr;
-		if(playlist[liststart+pos].Artist != "" && playlist[liststart+pos].Title!="")
-			tmp += playlist[liststart+pos].Artist + " / " + playlist[liststart+pos].Title;
-		else if(playlist[liststart+pos].Artist != "")
-			tmp += playlist[liststart+pos].Artist;
-		else if(playlist[liststart+pos].Title != "")
-			tmp += playlist[liststart+pos].Title;
+ 		if(playlist[liststart+pos].Artist != "" && playlist[liststart+pos].Album  != "" &&
+			playlist[liststart+pos].Title  != "")
+			tmp += playlist[liststart+pos].Title  + ", " + playlist[liststart+pos].Artist + " (" +
+			playlist[liststart+pos].Album  + ")";
+
 		else
-			tmp += "???";
+		{
+			if(playlist[liststart+pos].Title != "")
+				tmp += playlist[liststart+pos].Title;
+			else
+				tmp += "Title?";
+			tmp += ", "; 
+ 			if(playlist[liststart+pos].Artist != "")
+				tmp += playlist[liststart+pos].Artist;
+			else
+				tmp += "Artist?"; 
+			if(playlist[liststart+pos].Album != "")
+				tmp += " (" + playlist[liststart+pos].Album + ")";
+ 		}
+		
+		
+		
+		
+
 		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-25, tmp.c_str(), color, fheight);
 		if(liststart+pos==selected && m_state==STOP)
-			CLCD::getInstance()->showMP3(playlist[liststart+pos].Artist, playlist[liststart+pos].Title);
+			CLCD::getInstance()->showMP3(playlist[liststart+pos].Artist, playlist[liststart+pos].Title, 
+												  playlist[liststart+pos].Album);
 
 	}
 //	printf("paintItem}\n");
@@ -675,6 +692,8 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 							mp3->Artist = (char *) latin1;
 						if(strcmp(name,"Year") == 0)
 							mp3->Year = (char *) latin1;
+						if(strcmp(name,"Album") == 0)
+							mp3->Album = (char *) latin1;
 						//printf("%s%s: %s\n", &spaces[namelen], name, latin1);
 					}
 					else
@@ -787,7 +806,7 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 				mp3->Title = tmp.substr(i+1);
 			}
 			else
-				mp3->Artist	= tmp;
+				mp3->Title	= tmp;
 		}
 	}
 	if(0)
@@ -843,13 +862,11 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 			frameBuffer->paintBoxRel(x,         ypos2, width ,info_height, col1);
 			// paint id3 infobox 
 			frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK);
-			//
 			g_Fonts->menu->RenderString(x+10, ypos2 + 2+ 1*fheight, width- 20, playlist[selected].Title.c_str(), COL_MENUCONTENTDARK);
-			g_Fonts->menu->RenderString(x+10, ypos2 + 2+ 2*fheight, width- 20, playlist[selected].Artist.c_str(), COL_MENUCONTENTDARK);
-
-
-
-
+ 			string tmp = playlist[selected].Artist;
+			if(playlist[selected].Album!="")
+				tmp += " (" + playlist[selected].Album + ")";
+			g_Fonts->menu->RenderString(x+10, ypos2 + 2+ 2*fheight, width- 20, tmp.c_str(), COL_MENUCONTENTDARK);
 		}
 }
 
@@ -884,7 +901,7 @@ void CMP3PlayerGui::play(int pos)
 	m_mp3info="";
 	//LCD
 	CLCD::getInstance()->showMP3Play(true);
-	CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title);
+	CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title, playlist[liststart+pos].Album);
 	// Display
 	unsigned char colFrame = COL_MENUCONTENT+6;
 	frameBuffer->paintBoxRel(x,         y, width, title_height-10, colFrame);
@@ -896,11 +913,11 @@ void CMP3PlayerGui::play(int pos)
 	if(xstart < 10)
 		xstart=10;
 	g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, g_Locale->getText("mp3player.playing") + sNr, COL_MENUCONTENTSELECTED);
-	w=g_Fonts->menu->getRenderWidth(playlist[current].Artist + " / " + playlist[current].Title);
+	w=g_Fonts->menu->getRenderWidth(playlist[current].Title + " / " + playlist[current].Artist);
 	xstart=(width-w)/2;
 	if(xstart < 10)
 		xstart=10;
-	g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, playlist[current].Artist + " / " + playlist[current].Title, COL_MENUCONTENTSELECTED);
+	g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, playlist[current].Title + " / " + playlist[current].Artist, COL_MENUCONTENTSELECTED);
 	//g_Fonts->menu->RenderString(x+10, y + 5 +3*g_Fonts->channellist->getHeight(), width- 20, g_Locale->getText("mp3player.title") + ": " + playlist[current].Title, COL_MENUCONTENT);
 	//g_Fonts->menu->RenderString(x+10, y + 5 +3*g_Fonts->channellist->getHeight(), width- 20, "Comment: " + playlist[current].Comment, COL_MENUCONTENT);
 	//int w= g_Fonts->menu->getRenderWidth("Year: " + playlist[current].Year);

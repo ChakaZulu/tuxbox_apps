@@ -312,17 +312,20 @@ void CLCD::showMenuText(const int position, const std::string text, const int hi
 	display.update();
 }
 
-void CLCD::showMP3(const std::string artist, const std::string title)
+void CLCD::showMP3(const std::string artist, const std::string title,
+						 const std::string album)
 {
 	if (mode != MODE_MP3) 
 	{
 		return;
 	}
 	// reload specified line
-	display.draw_fill_rect (-1,13,106,30, CLCDDisplay::PIXEL_OFF);
-	display.draw_fill_rect (-1,30,121,49, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,28, 111, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
-	fonts.menu->RenderString(0,45, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	display.draw_fill_rect (-1,10,106,24, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (-1,20,121,37, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (-1,33,121,50, CLCDDisplay::PIXEL_OFF);
+	fonts.menu->RenderString(0,22, 111, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	fonts.menu->RenderString(0,35, 125, album.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	fonts.menu->RenderString(0,48, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0);
 	display.update();
 }
 

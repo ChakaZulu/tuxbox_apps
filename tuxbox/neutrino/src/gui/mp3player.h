@@ -47,6 +47,7 @@ public:
 	string Filename;
 	string Title;
 	string Artist;
+	string Album;
 	string Year;
 	string Comment;
 	int Index;
