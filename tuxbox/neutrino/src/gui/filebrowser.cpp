@@ -228,7 +228,7 @@ CFileBrowser::CFileBrowser()
 	Dirs_Selectable = false;
 	Dir_Mode = false;
 	selected = 0;
-	smode = 0;
+	smode = g_settings.filebrowser_sortmethod;
 
   x = g_settings.screen_StartX + 20;
   y = g_settings.screen_StartY + 20;
@@ -635,6 +635,7 @@ bool CFileBrowser::exec(std::string Dirname)
 			else
 				smode++;
 
+			g_settings.filebrowser_sortmethod = smode;
 			sort(filelist.begin(), filelist.end(), sortBy[smode]);
 
 			paint();

@@ -582,7 +582,8 @@ int CNeutrinoApp::loadSetup()
 
 	//Filebrowser
 	g_settings.filebrowser_showrights =  configfile.getInt32("filebrowser_showrights", 1);
-	
+	g_settings.filebrowser_sortmethod = configfile.getInt32("filebrowser_sortmethod", 0);
+		
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
@@ -891,6 +892,7 @@ void CNeutrinoApp::saveSetup()
 
 	//Filebrowser
 	configfile.setInt32("filebrowser_showrights", g_settings.filebrowser_showrights);
+	configfile.setInt32("filebrowser_sortmethod", g_settings.filebrowser_sortmethod);
 
 	if (configfile.getModifiedFlag())
 	{
