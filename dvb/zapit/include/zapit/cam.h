@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.18 2002/09/25 14:53:58 thegoodguy Exp $
+ * $Id: cam.h,v 1.19 2002/09/25 15:37:03 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -29,7 +29,7 @@
 class CCam : public CBasicClient
 {
 	private:
-		bool sendMessage (char* data, const unsigned short length);
+		bool sendMessage (char* data, const size_t length);
 	public:
 		bool setCaPmt (CCaPmt* caPmt);
 };

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.1 2002/09/25 14:53:58 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.2 2002/09/25 15:37:03 thegoodguy Exp $
  *
  * Basic Client Class (Neutrino) - DBoxII-Project
  *
@@ -75,7 +75,7 @@ void CBasicClient::close_connection()
 	}
 }
 
-bool CBasicClient::send_data(char* data, const unsigned int size)
+bool CBasicClient::send_data(char* data, const size_t size)
 {
 	if (sock_fd == -1)
 	    return false;
@@ -89,7 +89,7 @@ bool CBasicClient::send_data(char* data, const unsigned int size)
 	return true;
 }
 
-bool CBasicClient::receive_data(char* data, const unsigned int size)
+bool CBasicClient::receive_data(char* data, const size_t size)
 {
 	if (sock_fd == -1)
 		return false;

@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.25 2002/09/25 15:25:59 thegoodguy Exp $
+ * $Id: cam.cpp,v 1.26 2002/09/25 15:37:03 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -25,7 +25,7 @@
 /* zapit */
 #include <settings.h>   // CAMD_UDS_NAME
 
-bool CCam::sendMessage(char* data, const unsigned short length)
+bool CCam::sendMessage(char* data, const size_t length)
 {
 	if (!open_connection(CAMD_UDS_NAME))
 		return false;
@@ -44,7 +44,7 @@ bool CCam::setCaPmt(CCaPmt * caPmt)
 
 	char buffer[caPmt->getLength()];
 
-	unsigned int pos = caPmt->writeToBuffer((unsigned char*)buffer);
+	size_t pos = caPmt->writeToBuffer((unsigned char*)buffer);
 
 	return sendMessage(buffer, pos);
 }
