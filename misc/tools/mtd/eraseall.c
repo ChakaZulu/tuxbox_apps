@@ -16,7 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA  
 
-   $Id: eraseall.c,v 1.1 2003/10/16 19:48:08 obi Exp $
+   $Id: eraseall.c,v 1.2 2003/10/16 20:18:48 obi Exp $
 */
 #include <sys/types.h>
 #include <stdio.h>
@@ -39,6 +39,13 @@
 
 #include <linux/mtd/mtd.h>
 #include "linux/jffs2.h"
+
+#ifndef cpu_to_je16
+#define cpu_to_je16(x) (x)
+#endif
+#ifndef cpu_to_je32
+#define cpu_to_je32(x) (x)
+#endif
 
 #define PROGRAM "eraseall"
 #define VERSION "0.1.2"
