@@ -14,6 +14,7 @@
 #define AUDIO_DEV "/dev/dvb/adapter0/audio0"
 #define DEMUX_DEV "/dev/dvb/adapter0/demux0"
 #define FRONTEND_DEV "/dev/dvb/adapter0/frontend0"
+#define CAM_DEV "/dev/dvb/adapter0/ca0"
 #define PIG_DEV "/dev/v4l/video0"
 
 #elif HAVE_OST_DMX_H
@@ -31,6 +32,7 @@
 #define AUDIO_DEV "/dev/dvb/card0/audio0"
 #define DEMUX_DEV "/dev/dvb/card0/demux0"
 #define FRONTEND_DEV "/dev/dvb/card0/frontend0"
+#define CAM_DEV "/dev/dvb/card0/ca0"
 #define PIG_DEV "/dev/dbox/pig0"
 
 #define fe_code_rate_t CodeRate

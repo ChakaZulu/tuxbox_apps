@@ -140,10 +140,10 @@ cam::cam()
 	cmdEMM.unknowna = 0x1;
 	cmdEMM.unknownb = 0x4;
 
-	camfd = open("/dev/dvb/adapter0/ca0", O_RDWR);
+	camfd = open(CAM_DEV, O_RDWR);
 
 	if (camfd < 0) {
-		perror("/dev/dvb/adapter0/ca0");
+		perror(CAM_DEV);
 		exit(1);
 	}
 }
