@@ -16,6 +16,10 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.8  2001/12/17 01:30:02  obi
+use /dev/ost/frontend0 for new tuner api.
+code for the new tuner api is still disabled by default.
+
 Revision 1.7  2001/12/16 16:09:16  rasc
 new dvb tuner API  FE_SET_FRONTEND.
 Not tested (drivers have to be changed first), only compile test!
@@ -308,7 +312,7 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 	frontp.Inversion = INVERSION_OFF;
 
 	
-	frontend = open("/dev/ost/qpskfe0", O_RDWR);
+	frontend = open("/dev/ost/frontend0", O_RDWR);
 	ioctl(frontend, FE_SET_FRONTEND, &frontp);
 
 
