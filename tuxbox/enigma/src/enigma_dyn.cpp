@@ -1666,9 +1666,9 @@ static eString getZap(eString mode, eString path)
 	{
 		result += getZapNavi(mode, path);
 		zap_result += getZapContent2(mode, path);
+		result += getEITC();
 	}
 
-	result += getEITC();
 	eString curService = filter_string(getCurService());
 	if (curService == "n/a")
 		curService =
@@ -3116,6 +3116,8 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 
 	if (!spath)
 	{
+		if (zapMode == ZAPMODERECORDINGS)
+			zapMode = ZAPMODETV;
 		spath = zap[zapMode][ZAPSUBMODEBOUQUETS];
 		zapSubMode = ZAPSUBMODEBOUQUETS;
 	}
@@ -3174,7 +3176,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 		result.strReplace("#BOX#", "dBox");
 	}
 
-	if ((mode == "zap") /* && (spath != ";4097:7:0:1:0:0:0:0:0:0:")*/)
+	if (mode == "zap")
 		result.strReplace("#ONLOAD#", "onLoad=init()");
 
 	return result;
