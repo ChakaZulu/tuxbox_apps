@@ -56,20 +56,55 @@ and combinations of this -->
 		<transponder frequency="11641000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 		<transponder frequency="11676000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 	</sat>
-	<sat name="Intelsat 707, Thor 2/3 1.0W" flags="5" position="-10">
+	<sat name="Intelsat 707 1.0W" flags="5" position="-10">
 		<!-- intelsat 707 -->
-		<transponder frequency="10969000" symbol_rate="2142000" polarization="0" fec_inner="3"/>
-		<transponder frequency="10974000" symbol_rate="4203000" polarization="1" fec_inner="2"/>
+		<transponder frequency="10968000" symbol_rate="5632000" polarization="1" fec_inner="3"/>
+		<transponder frequency="10978000" symbol_rate="2000000" polarization="1" fec_inner="2"/>
+		<transponder frequency="10984000" symbol_rate="3255000" polarization="1" fec_inner="3"/>
+		<transponder frequency="10987000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="10997000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11006000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
 		<transponder frequency="11014000" symbol_rate="26000000" polarization="0" fec_inner="3"/>
-		<transponder frequency="11029000" symbol_rate="2816000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11015000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11024000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11029000" symbol_rate="2815000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11045000" symbol_rate="5630000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11055000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11065000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11125000" symbol_rate="3617000" polarization="0" fec_inner="3"/>
 		<transponder frequency="11162000" symbol_rate="4203000" polarization="0" fec_inner="2"/>
-		<transponder frequency="11185000" symbol_rate="2048000" polarization="0" fec_inner="1"/>
+		<transponder frequency="11166000" symbol_rate="2295000" polarization="1" fec_inner="7"/>
+		<transponder frequency="11168000" symbol_rate="3100000" polarization="0" fec_inner="7"/>
+		<transponder frequency="11172000" symbol_rate="3250000" polarization="0" fec_inner="7"/>
+		<transponder frequency="11179000" symbol_rate="6666000" polarization="0" fec_inner="7"/>
+		<transponder frequency="11189000" symbol_rate="2142000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11464000" symbol_rate="5632000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11483000" symbol_rate="4220000" polarization="0" fec_inner="2"/>
+		<transponder frequency="11491000" symbol_rate="6140000" polarization="0" fec_inner="7"/>
+		<transponder frequency="11500000" symbol_rate="6110000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11510000" symbol_rate="5632000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11519000" symbol_rate="6110000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11528000" symbol_rate="6111000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11536000" symbol_rate="5632000" polarization="0" fec_inner="3"/>
 		<transponder frequency="11540000" symbol_rate="26000000" polarization="1" fec_inner="3"/>
-		<transponder frequency="11608000" symbol_rate="1620000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11546000" symbol_rate="6135000" polarization="0" fec_inner="7"/>
+		<transponder frequency="11556000" symbol_rate="5632000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11585000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11587000" symbol_rate="5632000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11596000" symbol_rate="6110000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11597000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11606000" symbol_rate="6110000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11654000" symbol_rate="5632000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11665000" symbol_rate="5632000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11672000" symbol_rate="5632000" polarization="1" fec_inner="3"/>
 		<transponder frequency="11677000" symbol_rate="26000000" polarization="0" fec_inner="3"/>
+	</sat>
+	<sat name="Thor 2/3 0.8W" flags="5" position="-8">
 		<!-- thor 2 northern europe -->
+		<transponder frequency="11216000" symbol_rate="24500000" polarization="1" fec_inner="7"/>
 		<transponder frequency="11229000" symbol_rate="24500000" polarization="0" fec_inner="7"/>
 		<transponder frequency="11247000" symbol_rate="24500000" polarization="1" fec_inner="7"/>
+		<transponder frequency="11261000" symbol_rate="24500000" polarization="0" fec_inner="7"/>
 		<transponder frequency="11278000" symbol_rate="24500000" polarization="1" fec_inner="7"/>
 		<transponder frequency="11293000" symbol_rate="24500000" polarization="0" fec_inner="7"/>
 		<transponder frequency="11309000" symbol_rate="24500000" polarization="1" fec_inner="7"/>
@@ -80,9 +115,8 @@ and combinations of this -->
 		<transponder frequency="12054000" symbol_rate="28000000" polarization="0" fec_inner="7"/>
 		<transponder frequency="12169000" symbol_rate="28000000" polarization="0" fec_inner="7"/>
 		<transponder frequency="12226000" symbol_rate="28000000" polarization="1" fec_inner="7"/>
-		<transponder frequency="12303000" symbol_rate="27800000" polarization="1" fec_inner="3"/>
 		<transponder frequency="12322000" symbol_rate="27800000" polarization="0" fec_inner="3"/>
-		<transponder frequency="12398000" symbol_rate="28000000" polarization="0" fec_inner="7"/>
+		<transponder frequency="12399000" symbol_rate="27800000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12456000" symbol_rate="28000000" polarization="1" fec_inner="3"/>
 		<transponder frequency="12476000" symbol_rate="27800000" polarization="0" fec_inner="3"/>
 	</sat>
