@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.31 2001/11/14 13:02:38 faralla Exp $
+  $Id: zapit.cpp,v 1.32 2001/11/14 17:44:28 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.32  2001/11/14 17:44:28  faralla
+  some optimizations
+
   Revision 1.31  2001/11/14 13:02:38  faralla
   threaded descrambling
 
@@ -385,7 +388,8 @@ pids parse_pmt(int pid, int ca_system_id)
   dmx_fd.revents = 0;
   
   // wenn er ordentlich tuned, dann hat er nach 250ms die pmt, wenn nicht, dann hilft längeres warten auch nicht....
-  pt = poll(&dmx_fd, 1, 250);  // war 500;
+  // Bei mir kommt trotzdem manchmal nen timeout. Setze auf 400 (faralla)
+  pt = poll(&dmx_fd, 1, 400);  // war 500;
   
   if (!pt)
     {
@@ -777,7 +781,8 @@ void *decode_thread(void *ptr)
 	int emmpid = 0;
 	
 	dprintf("[zapit] starting decode_thread\n");
-	cam_reset();
+	if (vals->do_cam_reset)
+			cam_reset();
 	descramble(vals->onid, vals->tsid, 0x104, caid, vals->ecmpid, vals->parse_pmt_pids);
 	  if (vals->do_search_emmpids)
 	    {
@@ -803,10 +808,11 @@ int zapit (uint onid_sid,boolean in_nvod) {
   pids parse_pmt_pids;
   std::map<uint, channel>::iterator cit;
   //  time_t current_time = 0;
-  uint16_t emmpid;
+  //uint16_t emmpid;
   boolean do_search_emmpid;
   //std::map<uint,channel>::iterator cI;
   pthread_t dec_thread;
+  bool do_cam_reset = false;
  
   if (in_nvod)
     {
@@ -873,6 +879,7 @@ int zapit (uint onid_sid,boolean in_nvod) {
   
   if (cit->second.tsid != old_tsid)
     {
+    	do_cam_reset = true;
       dprintf("[zapit] tunig to tsid %04x\n", cit->second.tsid);
       if (tune(cit->second.tsid) < 0)
 	{
@@ -892,20 +899,6 @@ else
         curr_onid_sid = onid_sid;
         save_settings();
 
-      //printf("Getting sdt for NVOD\n");
-      //sdt(cit->second.sid,false);
-      //printf("Got sdt\n");
-      //if (!nvodchannels.empty())
-	//{
-	  //curr_onid_sid = onid_sid;
-	  //save_settings();
-	  //printf("Trying to zap to %08x\n", nvodchannels.begin()->first);
-	  //if (zapit(nvodchannels.begin()->first, true) > 0)
-	    //return 3;
-	  //else
-	    //return -3;
-	//}
-      //else
        return 3;
     }
 
@@ -970,9 +963,6 @@ else
       
       dprintf("[zapit] zapping to sid: %04x %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", cit->second.sid, cit->second.name.c_str(), cit->second.vpid, cit->second.apid, cit->second.pmt);
       
-      
-      //        descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
-      
 
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid != no_ecmpid_found ) )
 	{
@@ -983,12 +973,9 @@ else
 		vals->ecmpid = cit->second.ecmpid;
 		vals->parse_pmt_pids = &parse_pmt_pids;
 		vals->do_search_emmpids = do_search_emmpid;
+		vals->do_cam_reset = do_cam_reset;
 	
 		pthread_create(&dec_thread, 0,decode_thread, (void*) vals);
-	}
-	else
-	{
-		cam_reset();
 	}
 		
 
@@ -1982,7 +1969,7 @@ int main(int argc, char **argv) {
     }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.31 2001/11/14 13:02:38 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.32 2001/11/14 17:44:28 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;

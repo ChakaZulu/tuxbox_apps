@@ -44,23 +44,6 @@
 
 int dvb_device;
 
-typedef enum {
-  DVB_FEC_1_2,
-  DVB_FEC_2_3,
-  DVB_FEC_3_4,
-  DVB_FEC_4_5,
-  DVB_FEC_5_6,
-  DVB_FEC_6_7,
-  DVB_FEC_7_8,
-  DVB_FEC_8_9,
-  DVB_FEC_AUTO
-} DvbFEC;
-
-typedef enum {
-  DVB_POL_HOR,
-  DVB_POL_VERT
-} DvbPol;
-
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
@@ -86,6 +69,7 @@ typedef struct decode_struct{
 	uint ecmpid;
 	pids *parse_pmt_pids;
 	bool do_search_emmpids;
+	bool do_cam_reset;
 } decode_vals;
 
 int LoadServices();
