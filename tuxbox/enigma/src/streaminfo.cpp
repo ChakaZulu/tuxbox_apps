@@ -21,6 +21,8 @@
 #include <lib/dvb/service.h>
 #include <lib/system/info.h>
 
+eStreaminfo *eStreaminfo::instance;
+
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
@@ -132,7 +134,7 @@ static void clearCA()
 		caids[i].flag=0;
 }
 
-static eString getCAName(int casysid, int always)
+eString eStreaminfo::getCAName(int casysid, int always)
 {
 	for (unsigned int i=0; i< sizeof(caids)/sizeof(*caids); ++i)
 		if ((casysid & caids[i].mask) == caids[i].value)
@@ -485,7 +487,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 		{
 			if (!numsys)
 				availcas="";
-			eString caname=getCAName(*i, 0);
+			eString caname=eStreaminfo::getInstance()->getCAName(*i, 0);
 			if (caname)
 			{
 				availcas+= caname + "\n";
@@ -528,7 +530,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 			usedcas+="...\n";
 			break;
 		}
-		eString caname=getCAName(*i, 1);
+		eString caname=eStreaminfo::getInstance()->getCAName(*i, 1);
 		usedcas+=eString().sprintf("%04xh:  ", *i) + caname + "\n";
 	}
 	
@@ -543,6 +545,9 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 
 eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParameters *parms): eWindow(1), statusbar(this)
 {
+	if (!instance)
+		instance = this;
+		
 	setText(mode?_("Record mode - read manual"):_("Streaminfo"));
 	cmove(ePoint(140, 100));
 	cresize(eSize(470, 420));

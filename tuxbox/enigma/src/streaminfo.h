@@ -17,11 +17,14 @@ class eStreaminfo: public eWindow
 	eStatusBar statusbar;
 	eLabel* descr;
 	eListBox<eListBoxEntryMenu>* lb;
+	static eStreaminfo *instance;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:
 	eStreaminfo(int mode, const eServiceReference &ref, decoderParameters *parms=0);
 	~eStreaminfo();
+	static eStreaminfo *getInstance() {return instance;}
+	eString getCAName(int casysid, int always);
 };
 
 #endif
