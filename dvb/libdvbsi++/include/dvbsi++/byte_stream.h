@@ -1,5 +1,5 @@
 /*
- * $Id: byte_stream.h,v 1.1 2004/02/13 17:51:07 obi Exp $
+ * $Id: byte_stream.h,v 1.2 2004/02/14 21:57:43 obi Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -28,9 +28,9 @@
 #define r16(p)		*(const uint16_t * const)(p)
 #define r32(p)		*(const uint32_t * const)(p)
 #define r64(p)		*(const uint64_t * const)(p)
-#define w16(p,v)	*(const uint16_t * const)(p) = ((const uint16_t)v)
-#define w32(p,v)	*(const uint32_t * const)(p) = ((const uint32_t)v)
-#define w64(p,v)	*(const uint64_t * const)(p) = ((const uint64_t)v)
+#define w16(p,v)	*(uint16_t * const)(p) = ((const uint16_t)v)
+#define w32(p,v)	*(uint32_t * const)(p) = ((const uint32_t)v)
+#define w64(p,v)	*(uint64_t * const)(p) = ((const uint64_t)v)
 #else
 #define r16(p)		bswap_16(*(const uint16_t * const)p)
 #define r32(p)		bswap_32(*(const uint32_t * const)p)
