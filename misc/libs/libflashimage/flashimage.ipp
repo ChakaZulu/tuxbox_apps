@@ -17,12 +17,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimage.ipp,v 1.1 2002/05/28 18:51:27 waldi Exp $
+ * $Id: flashimage.ipp,v 1.2 2002/06/29 13:07:49 waldi Exp $
  */
 
 #ifndef INLINE
 #define inline /* nix */
 #endif
+
+inline FlashImage::FlashImageSign FlashImage::FlashImage::sign_image ()
+{
+  return FlashImageSign ( fs, control );
+}
+
+inline FlashImage::FlashImageVerify FlashImage::FlashImage::verify_image ()
+{
+  return FlashImageVerify ( fs, control );
+}
 
 inline std::string FlashImage::FlashImage::get_control_field ( std::string field )
 {

@@ -1,5 +1,5 @@
 /*
- * flashimagearchive.cpp
+ * flashimagecramfs.cpp
  *
  * Copyright (C) 2002 Bastian Blank <waldi@tuxbox.org>
  *
@@ -17,18 +17,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimagecramfs.cpp,v 1.3 2002/05/30 11:43:45 waldi Exp $
+ * $Id: flashimagecramfs.cpp,v 1.4 2002/06/29 13:07:49 waldi Exp $
  */
 
 #include <flashimagecramfs.hpp>
 
 #include <sstream>
 #include <stdexcept>
-
-#include <libcrypto++/bio.hpp>
-#include <libcrypto++/evp.hpp>
-#include <libcrypto++/lib.hpp>
-#include <libcrypto++/rand.hpp>
 
 extern "C"
 {
@@ -37,15 +32,10 @@ extern "C"
 }
 
 FlashImage::FlashImageCramFS::FlashImageCramFS ( std::iostream & stream )
-: stream ( stream )
+: stream ( stream ), buf ( new char[4096] )
 {
-  char * buf = new char[1024];
-  unsigned long cramfssize;
-
   try
   {
-    Crypto::lib::init ();
-
     stream.seekg ( 0 );
     stream.read ( buf, 1024 );
 
@@ -54,14 +44,15 @@ FlashImage::FlashImageCramFS::FlashImageCramFS ( std::iostream & stream )
       if ( super -> magic != CRAMFS_32 ( CRAMFS_MAGIC ) )
         throw std::runtime_error ( "cramfs: wrong magic" );
       cramfssize = CRAMFS_32 ( super -> size );
+      cramfsblocks = cramfssize / 4096;
     }
 
     stream.seekg ( 0, std::ios::end );
-    size = stream.tellg ();
+    imagesize = stream.tellg ();
 
-    if ( size != ( ( ( size - 1 ) | 0xfff ) + 1 ) )
+    if ( imagesize != ( ( ( imagesize - 1 ) | 0xfff ) + 1 ) )
       throw std::runtime_error ( "cramfs: not correct alligned" );
-    if ( cramfssize > size - 4096 )
+    if ( cramfssize > imagesize - 4096 )
       throw std::runtime_error ( "cramfs: to short for signature" );
   }
 
@@ -70,14 +61,15 @@ FlashImage::FlashImageCramFS::FlashImageCramFS ( std::iostream & stream )
     delete buf;
     throw;
   }
+}
 
+FlashImage::FlashImageCramFS::~FlashImageCramFS ()
+{
   delete buf;
 }
 
-void FlashImage::FlashImageCramFS::file ( const std::string & name, std::ostream & out )
+void FlashImage::FlashImageCramFS::get_file ( const std::string & name, std::ostream & out )
 {
-  char * buf = new char[1024];
-
   try
   {
     stream.seekg ( 0 );
@@ -93,124 +85,212 @@ void FlashImage::FlashImageCramFS::file ( const std::string & name, std::ostream
 
   catch ( std::runtime_error & )
   {
-    delete buf;
     throw std::runtime_error ( std::string ( "cramfs: can't find file " ) + name );
   }
-
-  catch ( ... )
-  {
-    delete buf;
-    throw;
-  }
-
-  delete buf;
 }
 
+int FlashImage::FlashImageCramFS::get_size ()
+{
+  return cramfssize;
+}
+
+int FlashImage::FlashImageCramFS::get_size_block ()
+{
+  return cramfsblocks;
+}
+
+void FlashImage::FlashImageCramFS::get_signature ( std::ostream & sigstream )
+{
+  stream.clear ();
+  stream.seekg ( cramfssize, std::ios::beg );
+  stream.read ( buf, 4096 );
+
+  {
+    signatureinfo * info = (signatureinfo *) buf;
+    unsigned int i;
+    if ( info -> magic != CRAMFS_32 ( magic ) )
+      throw std::runtime_error ( "cramfs (signatureinfo): wrong magic" );
+    if ( info -> version != CRAMFS_32 ( 1 ) )
+      throw std::runtime_error ( "cramfs (signatureinfo): unknown version" );
+    i = CRAMFS_32 ( info -> size );
+    if ( i > 4096 - sizeof ( signatureinfo ) )
+      throw std::runtime_error ( "cramfs (signatureinfo): signature too long" );
+    sigstream.write ( ( buf + sizeof ( signatureinfo ) ), i );
+  }
+}
+
+void FlashImage::FlashImageCramFS::set_signature ( std::istream & sigstream )
+{
+  stream.clear ();
+  stream.seekg ( cramfssize, std::ios::beg );
+
+  sigstream.read ( buf, 4096 );
+
+  if ( sigstream.gcount () > static_cast < int > ( 4096 - sizeof ( signatureinfo ) ) )
+    throw std::runtime_error ( "cramfs: signature too long" );
+
+  {
+    signatureinfo info;
+    info.magic = CRAMFS_32 ( magic );
+    info.version = CRAMFS_32 ( 1 );
+    info.size = CRAMFS_32 ( sigstream.gcount () );
+    info.reserved = 0;
+    stream.write ( ( char * ) &info, sizeof ( signatureinfo ) );
+  }
+
+  stream.write ( buf, sigstream.gcount () );
+}
+
+void FlashImage::FlashImageCramFS::get_block ( unsigned int block, char * buf )
+{
+  if ( block >= cramfsblocks )
+    throw std::length_error ( "cramfs: wrong block number" );
+
+  stream.clear ();
+  stream.seekg ( 4096 * block, std::ios::beg );
+  stream.read ( buf, 4096 );
+}
+
+/*
 void FlashImage::FlashImageCramFS::sign ( Crypto::evp::key::privatekey & key, const Crypto::evp::md::md & md )
 {
-  char * buf = new char[4096];
+  stream.clear ();
+  stream.seekg ( 0 );
 
-  try
+  Crypto::evp::sign sign;
+  sign.init ( md );
+
+  unsigned int i = cramfsblocks;
+
+  while ( i )
   {
-    stream.seekg ( 0, std::ios::end );
-    int i = stream.tellg ();
-    i /= 4096;
+    stream.read ( buf, 4096 );
+    sign.update ( buf, 4096 );
     i--;
-    stream.seekg ( 0 );
-
-    Crypto::evp::sign sign;
-    sign.init ( md );
-
-    while ( i )
-    {
-      stream.read ( buf, 4096 );
-      sign.update ( buf, 4096 );
-      i--;
-    }
-
-    stream.clear ();
-
-    std::string sig ( sign.final ( key ) );
-
-    if ( sig.size () > 4096 - sizeof ( signatureinfo ) )
-      throw std::runtime_error ( "cramfs: signature too long" );
-
-    stream.seekg ( -4096, std::ios::end );
-
-    {
-      signatureinfo info;
-      info.magic = CRAMFS_32 ( magic );
-      info.version = CRAMFS_32 ( 1 );
-      info.size = CRAMFS_32 ( sig.length () );
-      info.reserved = 0;
-      stream.write ( ( char * ) &info, sizeof ( signatureinfo ) );
-    }
-
-    stream.write ( sig.data (), sig.length () );
   }
 
-  catch ( ... )
+  stream.clear ();
+
+  std::string sig ( sign.final ( key ) );
+
+  if ( sig.size () > 4096 - sizeof ( signatureinfo ) )
+    throw std::runtime_error ( "cramfs: signature too long" );
+
+  stream.seekg ( cramfssize );
+
   {
-    delete buf;
-    throw;
+    signatureinfo info;
+    info.magic = CRAMFS_32 ( magic );
+    info.version = CRAMFS_32 ( 1 );
+    info.size = CRAMFS_32 ( sig.length () );
+    info.reserved = 0;
+    stream.write ( ( char * ) &info, sizeof ( signatureinfo ) );
   }
 
-  delete buf;
+  stream.write ( sig.data (), sig.length () );
 }
 
 int FlashImage::FlashImageCramFS::verify ( Crypto::evp::key::key & key, const Crypto::evp::md::md & md )
 {
-  char * buf = new char[4096];
+  stream.clear ();
+  stream.seekg ( cramfssize, std::ios::end );
+  stream.read ( buf, 4096 );
 
-  try
+  std::string sig;
+
   {
-    stream.seekg ( 0, std::ios::end );
-    unsigned int i = stream.tellg ();
-    i /= 4096;
-    i--;
+    signatureinfo * info = (signatureinfo *) buf;
+    unsigned int i;
+    if ( info -> magic != CRAMFS_32 ( magic ) )
+      throw std::runtime_error ( "cramfs (signatureinfo): wrong magic" );
+    i = CRAMFS_32 ( info -> size );
+    if ( i > 4096 - sizeof ( signatureinfo ) )
+      throw std::runtime_error ( "cramfs (signatureinfo): signature too long" );
+    sig = std::string ( ( buf + sizeof ( signatureinfo ) ), i );
+  }
 
-    stream.seekg ( -4096, std::ios::end );
+  stream.clear ();
+  stream.seekg ( 0 );
+
+  Crypto::evp::verify verify;
+  verify.init ( md );
+
+  unsigned i = cramfsblocks;
+  while ( i )
+  {
     stream.read ( buf, 4096 );
-
-    std::string sig;
-
-    {
-      signatureinfo * info = (signatureinfo *) buf;
-      unsigned int i;
-      if ( info -> magic != CRAMFS_32 ( magic ) )
-        throw std::runtime_error ( "cramfs (signatureinfo): wrong magic" );
-      i = CRAMFS_32 ( info -> size );
-      if ( i > 4096 - sizeof ( signatureinfo ) )
-        throw std::runtime_error ( "cramfs (signatureinfo): signature too long" );
-      sig = std::string ( ( buf + sizeof ( signatureinfo ) ), i );
-    }
-
-    stream.clear ();
-    stream.seekg ( 0 );
-
-    Crypto::evp::verify verify;
-    verify.init ( md );
-
-    while ( i )
-    {
-      stream.read ( buf, 4096 );
-      verify.update ( buf, 4096 );
-      i--;
-    }
-
-    stream.clear ();
-
-    delete buf;
-
-    return verify.final ( sig, key );
+    verify.update ( buf, 4096 );
+    i--;
   }
 
-  catch ( ... )
-  {
-    delete buf;
-    throw;
-  }
+  stream.clear ();
+
+  return verify.final ( sig, key );
 }
+
+void FlashImage::FlashImageCramFS::verify_block_init ( const Crypto::evp::md::md & md )
+{
+  if ( block )
+    delete block;
+
+  block = new verify_block;
+
+  block -> blocks = cramfsblocks;
+
+  stream.clear ();
+  stream.seekg ( cramfssize, std::ios::end );
+  stream.read ( buf, 4096 );
+
+  std::string sig;
+
+  {
+    signatureinfo * info = (signatureinfo *) buf;
+    unsigned int i;
+    if ( info -> magic != CRAMFS_32 ( magic ) )
+      throw std::runtime_error ( "cramfs (signatureinfo): wrong magic" );
+    i = CRAMFS_32 ( info -> size );
+    if ( i > 4096 - sizeof ( signatureinfo ) )
+      throw std::runtime_error ( "cramfs (signatureinfo): signature too long" );
+    block -> sig = std::string ( ( buf + sizeof ( signatureinfo ) ), i );
+  }
+
+  stream.clear ();
+  stream.seekg ( 0 );
+
+  block -> _verify.init ( md );
+}
+
+bool FlashImage::FlashImageCramFS::verify_block_update ()
+{
+  if ( ! block )
+    throw "";
+
+  stream.read ( buf, 4096 );
+  block -> _verify.update ( buf, 4096 );
+  block -> blocks--;
+
+  if ( ! block -> blocks )
+  {
+    stream.clear ();
+    return false;
+  }
+
+  return true;
+}
+
+int FlashImage::FlashImageCramFS::verify_block_final ( Crypto::evp::key::key & key )
+{
+  if ( ! block )
+    throw "";
+
+  int ret = block -> _verify.final ( block -> sig, key );
+
+  delete block;
+  block = NULL;
+
+  return ret;
+}
+*/
 
 unsigned long FlashImage::FlashImageCramFS::readdir ( std::istream &, unsigned long offset, unsigned long size, std::istream & filename )
 {

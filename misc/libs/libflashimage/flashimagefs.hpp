@@ -17,13 +17,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimagefs.hpp,v 1.2 2002/05/30 11:43:45 waldi Exp $
+ * $Id: flashimagefs.hpp,v 1.3 2002/06/29 13:07:49 waldi Exp $
  */
 
 #ifndef __LIBFLASHIMAGE_LIBFLASHIMAGEFS_HPP
 #define __LIBFLASHIMAGE_LIBFLASHIMAGEFS_HPP
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
 #include <libcrypto++/evp.hpp>
@@ -33,9 +34,12 @@ namespace FlashImage
   class FlashImageFS
   {
     public:
-      virtual void file ( const std::string &, std::ostream & ) = 0;
-      virtual void sign ( Crypto::evp::key::privatekey &, const Crypto::evp::md::md & ) = 0;
-      virtual int verify ( Crypto::evp::key::key &, const Crypto::evp::md::md & ) = 0;
+      virtual void get_file ( const std::string &, std::ostream & ) = 0;
+      virtual int get_size () = 0;
+      virtual int get_size_block () = 0;
+      virtual void get_signature ( std::ostream & ) = 0;
+      virtual void set_signature ( std::istream & ) { throw std::runtime_error ( "unsupported" ); }
+      virtual void get_block ( unsigned int, char * ) = 0;
   };
 }
 

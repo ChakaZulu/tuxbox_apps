@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimage.cpp,v 1.2 2002/05/30 11:43:45 waldi Exp $
+ * $Id: flashimage.cpp,v 1.3 2002/06/29 13:07:49 waldi Exp $
  */
 
 #include <flashimage.hpp>
@@ -26,6 +26,7 @@
 #include <stdexcept>
 
 #include <libcrypto++/bio.hpp>
+#include <libcrypto++/lib.hpp>
 #include <libcrypto++/x509.hpp>
 
 std::map < int, std::string > FlashImage::FlashImage::errors;
@@ -33,8 +34,10 @@ std::map < int, std::string > FlashImage::FlashImage::errors;
 FlashImage::FlashImage::FlashImage ( FlashImageFS & fs )
 : fs ( fs )
 {
+  Crypto::lib::init ();
+
   std::stringstream stream;
-  fs.file ( "control", stream );
+  fs.get_file ( "control", stream );
   control = parse_control ( stream );
   stream.clear ();
 
@@ -51,7 +54,6 @@ FlashImage::FlashImage::FlashImage ( FlashImageFS & fs )
 
   if ( control["Status"] == "" )
     throw std::runtime_error ( std::string ( "Status: field empty" ) );
-
   if ( ! ( control["Status"] == "Unofficial" || control["Status"] == "Official" ) )
     throw std::runtime_error ( std::string ( "Status: unknown:" ) + control["Status"] );
 
@@ -60,25 +62,24 @@ FlashImage::FlashImage::FlashImage ( FlashImageFS & fs )
 
   if ( control["Digest"] == "" )
     throw std::runtime_error ( std::string ( "Digest: field empty" ) );
-
   if ( ! ( control["Digest"] == "MD5" || control["Digest"] == "SHA1" || control["Digest"] == "RIPEMD160" ) )
     throw std::runtime_error ( std::string ( "Digest: unknown:" ) + control["Digest"] );
 }
 
-bool FlashImage::FlashImage::verify_cert ( const std::string & certchain )
+int FlashImage::FlashImage::verify_cert ( const std::string & certchain )
 {
   std::map < int, std::string > temp;
   return verify_cert ( certchain, temp );
 }
 
-bool FlashImage::FlashImage::verify_cert ( const std::string & certchain, std::map < int, std::string > & reterrors )
+int FlashImage::FlashImage::verify_cert ( const std::string & certchain, std::map < int, std::string > & reterrors )
 {
   std::stringstream stream;
   Crypto::x509::cert cert;
 
   try
   {
-    fs.file ( "signcert", stream );
+    fs.get_file ( "signcert", stream );
     cert.read ( stream );
   }
 
@@ -89,47 +90,26 @@ bool FlashImage::FlashImage::verify_cert ( const std::string & certchain, std::m
 
   Crypto::x509::store store;
 
+  if ( certchain != "" )
+    store.add_file ( certchain );
+
   errors.clear ();
 
-  cert.verify ( store, &verify_cert_callback );
+  int ret = cert.verify ( store, &verify_cert_callback );
+
+  if ( ! errors.size () )
+    if ( ret <= 0 )
+      return -1;
+    else
+      return 0;
 
   for ( std::map < int, std::string > ::iterator it = errors.begin (); it != errors.end (); ++it )
     reterrors.insert ( *it );
 
-  return errors.size () == 0;
-}
-
-bool FlashImage::FlashImage::verify_image ()
-{
-  std::stringstream stream;
-  std::stringstream stream_out;
-  Crypto::x509::cert cert;
-
-  try
-  {
-    fs.file ( "signcert", stream );
-    cert.read ( stream );
-  }
-
-  catch ( std::runtime_error & )
-  {
-    throw std::runtime_error ( "verification failed: no certificate" );
-  }
-
-  Crypto::evp::key::key key = cert.get_publickey ();
-
-  int verify;
-
-  if ( control["Digest"] == "MD5" )
-    verify = fs.verify ( key, Crypto::evp::md::md5 () );
-  else if ( control["Digest"] == "SHA1" )
-    verify = fs.verify ( key, Crypto::evp::md::sha1 () );
-  else if ( control["Digest"] == "RIPEMD160" )
-    verify = fs.verify ( key, Crypto::evp::md::ripemd160 () );
+  if ( ret <= 0 )
+    return -3;
   else
-    throw std::runtime_error ( std::string ( "Digest: unknown: " ) + control["Digest"] );
-
-  return verify;
+    return -2;
 }
 
 std::map < std::string, std::string > FlashImage::FlashImage::parse_control ( std::istream & stream )
@@ -161,13 +141,28 @@ int FlashImage::FlashImage::verify_cert_callback ( int ok, libcrypto::X509_STORE
 {
   if ( ! ok )
   {
+    std::cerr << "error " << ctx -> error << " at " << ctx -> error_depth
+      << " depth lookup: " << libcrypto::X509_verify_cert_error_string ( ctx -> error ) << std::endl;
+
     switch ( ctx -> error )
     {
+      case X509_V_ERR_CERT_NOT_YET_VALID:
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "not yet valid" ) );
+        return 1;
       case X509_V_ERR_CERT_HAS_EXPIRED:
         errors.insert ( std::pair < int, std::string > ( ctx -> error, "cert expired" ) );
         return 1;
       case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-        errors.insert ( std::pair < int, std::string > ( ctx -> error, "selfsigned cert" ) );
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "self signed cert" ) );
+        return 1;
+      case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "unable to get issuer cert" ) );
+        return 1;
+      case X509_V_ERR_CERT_CHAIN_TOO_LONG:
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "cert chain too long" ) );
+        return 1;
+      case X509_V_ERR_CERT_REVOKED:
+        errors.insert ( std::pair < int, std::string > ( ctx -> error, "cert revoked" ) );
         return 1;
       case X509_V_ERR_INVALID_CA:
         errors.insert ( std::pair < int, std::string > ( ctx -> error, "invalid CA" ) );
@@ -178,7 +173,95 @@ int FlashImage::FlashImage::verify_cert_callback ( int ok, libcrypto::X509_STORE
     }
   }
 
-  return 0;
+  return ok;
+}
+
+FlashImage::FlashImageSignature::FlashImageSignature ( FlashImageFS & fs, std::map < std::string, std::string > & control, Crypto::evp::digest & digest )
+: fs ( fs ), control ( control ), digest ( digest ), block ( 0 ), buf ( NULL )
+{
+  if ( fs.get_size_block () <= 0 )
+    throw std::length_error ( "verify: no blocks" );
+
+  if ( control["Digest"] == "MD5" )
+    digest.init ( Crypto::evp::md::md5 () );
+  else if ( control["Digest"] == "SHA1" )
+    digest.init ( Crypto::evp::md::sha1 () );
+  else if ( control["Digest"] == "RIPEMD160" )
+    digest.init ( Crypto::evp::md::ripemd160 () );
+  else
+    throw std::runtime_error ( std::string ( "Digest: unknown: " ) + control["Digest"] );
+
+  buf = new char[4096];
+}
+
+FlashImage::FlashImageSignature::~FlashImageSignature ()
+{
+  delete buf;
+}
+
+int FlashImage::FlashImageSignature::update ()
+{
+  if ( block >= fs.get_size_block () - 1 )
+    std::length_error ( "verify: behind end of image" );
+
+  fs.get_block ( block, buf );
+  block++;
+  digest.update ( buf, 4096 );
+  return fs.get_size_block () - block;
+}
+
+FlashImage::FlashImageSign::FlashImageSign ( FlashImageFS & fs, std::map < std::string, std::string > & control )
+: FlashImageSignature ( fs, control, sign )
+{ }
+
+FlashImage::FlashImageVerify::FlashImageVerify ( FlashImageFS & fs, std::map < std::string, std::string > & control )
+: FlashImageSignature ( fs, control, verify )
+{ }
+
+void FlashImage::FlashImageSign::final ( Crypto::evp::key::privatekey & key )
+{
+  while ( block < fs.get_size_block () )
+  {
+    fs.get_block ( block, buf );
+    block++;
+    digest.update ( buf, 4096 );
+  }
+
+  std::stringstream sigstream;
+  sigstream.str ( sign.final ( key ) );
+  fs.set_signature ( sigstream );
+}
+
+int FlashImage::FlashImageVerify::final ()
+{
+  while ( block < fs.get_size_block () )
+  {
+    fs.get_block ( block, buf );
+    block++;
+    digest.update ( buf, 4096 );
+  }
+
+  std::stringstream stream;
+  Crypto::x509::cert cert;
+
+  try
+  {
+    fs.get_file ( "signcert", stream );
+    cert.read ( stream );
+  }
+
+  catch ( std::runtime_error & )
+  {
+    throw std::runtime_error ( "verification failed: no certificate" );
+  }
+
+  Crypto::evp::key::key key = cert.get_publickey ();
+
+  stream.str ( "" );
+
+  fs.get_signature ( stream );
+
+  return verify.final ( stream.str (), key );
 }
 
 #ifndef INLINE
