@@ -58,13 +58,6 @@ static eString getRight(const eString& str, char c )
 	return str.mid( beg, len-beg );
 }
 
-static int getDate()
-{
-	time_t tmp = time(0)+eDVB::getInstance()->time_difference;
-	tm now = *localtime(&tmp);
-	return ((100+now.tm_mday)*1000000)+((100+now.tm_mon+1)*1000)+now.tm_year;
-}
-
 static eString getLeft( const eString& str, char c )
 {
 	unsigned int found = str.find(c);
@@ -218,6 +211,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+	printf("[ENIGMA_DYN] switchService...\n");
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	int service_id=-1, dvb_namespace=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
@@ -521,6 +515,72 @@ eString filter_string(eString string)
 		removeChars('\x05');
 }
 
+#ifndef DISABLE_FILE
+extern int freeRecordSpace(void);
+
+static eString getDiskSpace(void)
+{
+	eString result = "";
+	eString tmp;
+	result = "<span class=\"white\">";
+	result += "Remaining Disk Space: ";
+	int fds = freeRecordSpace();
+	if (fds != -1)
+	{
+		if (fds < 1024)
+			tmp.sprintf("%d MB", fds);
+		else
+			tmp.sprintf("%d.%02d GB", fds/1024, (int)((fds%1024)/10.34));
+		result += tmp;
+		result += "/";
+		int min = fds/33;
+		if (min < 60)
+			tmp.sprintf("~%d min", min);
+		else
+			tmp.sprintf("~%dh%02dmin", min/60, min%60);
+		result += tmp;
+	}
+	else
+		result += "unknown";
+
+	result += "</span>";
+	return result;
+}
+#endif
+
+static eString getStats()
+{
+	eString result = "";
+	eString apid, vpid;
+	int bootcount = 0;
+
+	result +="<span class=\"white\">";
+#ifndef DISABLE_FILE
+	result += getDiskSpace();
+	result += " | ";
+#endif
+	int sec = atoi(read_file("/proc/uptime").c_str());
+	result += eString().sprintf("%d:%02dh up", sec/3600, (sec%3600)/60);
+	result += " | ";
+
+	result += getIP();
+	result += " | ";
+
+	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
+	result += eString().sprintf("booted %d times", bootcount);
+	result +=" | ";
+
+	vpid = (Decoder::current.vpid == -1) ? "none" : vpid.sprintf("0x%x", Decoder::current.vpid);
+	result += "vpid: " + vpid + " | ";
+
+	apid = (Decoder::current.apid == -1) ? "none" : apid.sprintf("0x%x", Decoder::current.apid);
+	result += "<u><a href=\"/audio.m3u\">apid: " + apid + "</a></u>";
+
+	result += "</span>";
+
+	return result;
+}
+
 static eString getVolBar()
 {
 // returns the volumebar
@@ -625,10 +685,10 @@ static eString getZapContent(eString mode, eString path)
 	if((path.find(";", 0))==(unsigned)-1)
 		path=";"+path;
 
-	while((pos=path.find(";", lastpos))!=-1)
+	while ((pos=path.find(";", lastpos))!=-1)
 	{
 		lastpos=pos+1;
-		if((temp=path.find(";", lastpos))!=-1)
+		if ((temp=path.find(";", lastpos))!=-1)
 		{
 			tpath=path.mid(lastpos, temp-lastpos);
 		}
@@ -640,14 +700,14 @@ static eString getZapContent(eString mode, eString path)
 		eServiceReference current_service=string2ref(tpath);
 		eServiceInterface *iface=eServiceInterface::getInstance();
 
-		if (! (current_service.flags&eServiceReference::isDirectory))	// is playable
+		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 		{
 			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 //			iface->play(current_service);
 //			result+="ok, hear the music..";
 		}
-		else
-		{
+//		else
+//		{
 			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
 			Signal1<void,const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
@@ -657,7 +717,7 @@ static eString getZapContent(eString mode, eString path)
 			eDebug("entered");
 			iface->leaveDirectory(current_service);
 			eDebug("exited");
-		}
+//		}
 	}
 
 	return result;
@@ -791,12 +851,239 @@ static eString aboutDreambox(void)
 	return result;
 }
 
+static eString getCurService()
+{
+	eString result;
+
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return "n/a";
+
+	eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+	if(current)
+		return current->service_name.c_str();
+	else
+		return "n/a";
+}
+
+struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
+{
+	eString &result;
+	eString begin;
+	eString end;
+
+	getEntryString(eString &result): result(result)
+	{
+	}
+
+	void operator()(ePlaylistEntry* se)
+	{
+		result += "<tr>";
+		begin = "";
+		end = "";
+		tm startTime = *localtime(&se->time_begin);
+		time_t time_end = se->time_begin + se->duration;
+		tm endTime = *localtime(&time_end);
+		begin.sprintf("%02d.%02d.- %02d:%02d", startTime.tm_mday, startTime.tm_mon+1, startTime.tm_hour, startTime.tm_min);
+		end.sprintf("%02d.%02d.- %02d:%02d", endTime.tm_mday, endTime.tm_mon+1, endTime.tm_hour, endTime.tm_min);
+		if (se->type & ePlaylistEntry::stateFinished)
+			result += "<td><img src=\"on.gif\"></td>";
+		else
+		if (se->type & (ePlaylistEntry::errorNoSpaceLeft |
+				ePlaylistEntry::errorUserAborted |
+				ePlaylistEntry::errorZapFailed|
+				ePlaylistEntry::errorOutdated))
+			result += "<td><img src=\"off.gif\"></td>";
+		else
+			result += "<td>&nbsp;</td>";
+
+		result += "<td>" + begin + "</td>";
+		result += "<td>" + end + "</td>";
+
+		eString description = se->service.descr;
+		eString channel = getLeft(description, '/');
+		if (!channel)
+			channel = "No channel available";
+		result += "<td>" + channel + "</td>";
+		description = getRight(description, '/');
+		if (!description)
+			description = "No description available";
+		result += "<td>" + description + "</td>";
+		result += "</tr>";
+	}
+};
+
+static eString genTimerListBody(void)
+{
+	eString result = "";
+	eString tbody = "";
+	eString tmpFile = "";
+	eTimerManager::getInstance()->forEachEntry(getEntryString(tbody));
+	if (tbody == "")
+		result = "No Timer Events available";
+	else
+	{
+		result += "<table width=100% border=1 rules=all>";
+		result += "<thead>";
+		result += "<th align=\"left\">";
+		result += "Status";
+		result += "</th>";
+		result += "<th align=\"left\">";
+		result += "Start Time";
+		result += "</th>";
+		result += "<th align=\"left\">";
+		result += "End Time";
+		result += "</th>";
+		result += "<th align=\"left\">";
+		result += "Channel";
+		result += "</th>";
+		result += "<th align=\"left\">";
+		result += "Description";
+		result += "</th>";
+		result += "</thead>";
+		result += "<tbody>";
+		result += tbody;
+		result += "</tbody>";
+		result += "</table>";
+	}
+	return result;
+}
+
+static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result = "";
+	eString tmpFile = "";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	result = genTimerListBody();
+	tmpFile += read_file(TEMPLATE_DIR + "timerList.tmp");
+	tmpFile.strReplace("#BODY#", result);
+	return tmpFile;
+}
+
+static eString getEITC()
+{
+	eString result;
+
+	EIT *eit=eDVB::getInstance()->getEIT();
+
+	if(eit)
+	{
+		eString now_time, now_duration, now_text, now_longtext;
+		eString next_time, next_duration, next_text, next_longtext;
+
+		int p=0;
+
+		for(ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
+		{
+			if(*event)
+			{
+				if(p==0)
+				{
+					if(event->start_time!=0) {
+						now_time.sprintf("%s", ctime(&event->start_time));
+						now_time=now_time.mid(10, 6);
+					} else {
+						now_time="";
+					}
+					now_duration.sprintf("%d", (int)(event->duration/60));
+				}
+				if(p==1)
+				{
+					if(event->start_time!=0) {
+ 						next_time.sprintf("%s", ctime(&event->start_time));
+						next_time=next_time.mid(10,6);
+						next_duration.sprintf("%d", (int)(event->duration/60));
+					} else {
+						now_time="";
+					}
+				}
+				for(ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
+				{
+					if(descriptor->Tag()==DESCR_SHORT_EVENT)
+					{
+						ShortEventDescriptor *ss=(ShortEventDescriptor*)*descriptor;
+						switch(p)
+						{
+							case 0:
+								now_text=ss->event_name;
+								break;
+							case 1:
+								next_text=ss->event_name;
+								break;
+						}
+					}
+					if(descriptor->Tag()==DESCR_EXTENDED_EVENT)
+					{
+						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*descriptor;
+						switch(p)
+						{
+							case 0:
+								now_longtext+=ss->item_description;
+								break;
+							case 1:
+								next_longtext+=ss->item_description;
+								break;
+						}
+					}
+				}
+				p++;
+		 	}
+		}
+
+		if(now_time!="")
+		{
+			result=read_file(TEMPLATE_DIR+"eit.tmp");
+			result.strReplace("#NOWT#", now_time);
+			result.strReplace("#NOWD#", now_duration);
+			result.strReplace("#NOWST#", now_text);
+			result.strReplace("#NOWLT#", filter_string(now_longtext));
+			result.strReplace("#NEXTT#", next_time);
+			result.strReplace("#NEXTD#", next_duration);
+			result.strReplace("#NEXTST#", next_text);
+			result.strReplace("#NEXTLT#", filter_string(next_longtext));
+		}
+		else
+		{
+			result="eit undefined";
+		}
+		eit->unlock();
+	}
+	else
+	{
+		result="";
+	}
+
+	return result;
+}
+
 static eString getContent(eString mode, eString path)
 {
-	eString result("");
+	eString result = "";
+	eString zap_result = "";
 	if (mode == "zap")
 	{
-		result = getZapContent(mode, path);
+		zap_result += getZapContent(mode, path);
+		if (path)
+		{
+			path = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
+			zap_result += getZapContent(mode, path);
+		}
+		result += getEITC();
+		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
+
+		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+
+		if(sapi && sapi->service)
+		{
+			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">EPG-Info</a></u>");
+			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">Stream-Info</a></u>");
+		}
+		else
+		{
+			DELETE(#EPG#);
+			DELETE(#SI#);
+		}
+		result += zap_result;
 	}
 	else
 	if (mode == "links")
@@ -922,66 +1209,65 @@ static eString getContent(eString mode, eString path)
 		}
 	}
 	else
+	if (mode == "menuTimerList")
+	{
+		result = genTimerListBody();
+		result += "<br>";
+		result += "<u><a href=\"javascript:cleanupTimerList()\">Delete completed/failed timer events</a></u>";
+		result += "<br>";
+		result += "<u><a href=\"javascript:clearTimerList()\">Delete all events</a></u>";
+	}
+	else
 		result = mode + " is not available yet";
 
 	return result;
 }
 
-static eString getCurService()
+static eString getEITC2()
 {
-	eString result;
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "n/a";
-
-	eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
-	if(current)
-		return current->service_name.c_str();
-	else
-		return "n/a";
-}
-
-static eString getEITC()
-{
+	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;", now_longtext = "&nbsp;";
+	eString next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;", next_longtext = "&nbsp;";
 	eString result;
 
 	EIT *eit=eDVB::getInstance()->getEIT();
 
 	if(eit)
 	{
-		eString now_time, now_duration, now_text, now_longtext;
-		eString next_time, next_duration, next_text, next_longtext;
-
 		int p=0;
 
-		for(ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
+		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
 		{
-			if(*event)
+			if (*event)
 			{
-				if(p==0)
+				if (p == 0)
 				{
-					if(event->start_time!=0) {
+					if (event->start_time != 0)
+					{
 						now_time.sprintf("%s", ctime(&event->start_time));
 						now_time=now_time.mid(10, 6);
-					} else {
+					}
+					else
+					{
 						now_time="";
 					}
 					now_duration.sprintf("%d", (int)(event->duration/60));
 				}
-				if(p==1)
+				if (p == 1)
 				{
-					if(event->start_time!=0) {
+					if (event->start_time != 0)
+					{
  						next_time.sprintf("%s", ctime(&event->start_time));
 						next_time=next_time.mid(10,6);
 						next_duration.sprintf("%d", (int)(event->duration/60));
-					} else {
+					}
+					else
+					{
 						now_time="";
 					}
 				}
-				for(ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
+				for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
 				{
-					if(descriptor->Tag()==DESCR_SHORT_EVENT)
+					if (descriptor->Tag() == DESCR_SHORT_EVENT)
 					{
 						ShortEventDescriptor *ss=(ShortEventDescriptor*)*descriptor;
 						switch(p)
@@ -994,7 +1280,7 @@ static eString getEITC()
 								break;
 						}
 					}
-					if(descriptor->Tag()==DESCR_EXTENDED_EVENT)
+					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
 					{
 						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*descriptor;
 						switch(p)
@@ -1011,149 +1297,29 @@ static eString getEITC()
 				p++;
 		 	}
 		}
-
-		if(now_time!="")
-		{
-			result=read_file(TEMPLATE_DIR+"eit.tmp");
-			result.strReplace("#NOWT#", now_time);
-			result.strReplace("#NOWD#", now_duration);
-			result.strReplace("#NOWST#", now_text);
-			result.strReplace("#NOWLT#", filter_string(now_longtext));
-			result.strReplace("#NEXTT#", next_time);
-			result.strReplace("#NEXTD#", next_duration);
-			result.strReplace("#NEXTST#", next_text);
-			result.strReplace("#NEXTLT#", filter_string(next_longtext));
-		}
-		else
-		{
-			result="eit undefined";
-		}
 		eit->unlock();
 	}
-	else
-	{
-		result="no eit";
-	}
 
-	return result;
-}
-
-#ifndef DISABLE_FILE
-extern int freeRecordSpace(void);
-
-static eString getDiskSpace(void)
-{
-	eString result = "";
-	eString tmp;
-	result = "<span class=\"white\">";
-	result += "Remaining Disk Space: ";
-	int fds = freeRecordSpace();
-	if (fds != -1)
-	{
-		if (fds < 1024)
-			tmp.sprintf("%d MB", fds);
-		else
-			tmp.sprintf("%d.%02d GB", fds/1024, (int)((fds%1024)/10.34));
-		result += tmp;
-		result += "/";
-		int min = fds/33;
-		if (min < 60)
-			tmp.sprintf("~%d min", min);
-		else
-			tmp.sprintf("~%dh%02dmin", min/60, min%60);
-		result += tmp;
-	}
-	else
-		result += "unknown";
-
-	result += "</span>";
-	return result;
-}
-#endif
-
-static eString getStats()
-{
-	eString result = "";
-	eString apid, vpid;
-	eString tmp;
-	int iapid=0, ivpid=0, bootcount=0;
-
-#ifndef DISABLE_FILE
-	result += getDiskSpace() + " | ";
-#endif
-	int sec=atoi(read_file("/proc/uptime").c_str());
-
-	result+="<span class=\"white\">";
-	result+=eString().sprintf("%d:%02dh up", sec/3600, (sec%3600)/60);
-	result+="</span> | ";
-
-	tmp=read_file("/proc/mounts");
-	if ((tmp.find("cramfs") != eString::npos) || (tmp.find("/dev/root / jffs2") != eString::npos))
-	{
-//		result+="<span class=\"white\">running from flash</span>";
-//		result+=" | ";
-		result+="";
-	}
-	else
-	{
-		result+="<span class=\"white\">running via net</span>";
-		result+=" | ";
-	}
-
-	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
-
-	result+="<span class=\"white\">"+getIP()+"</span>";
-
-	result+=" | ";
-	tmp.sprintf("<span class=\"white\">booted %d times</span>", bootcount);
-	result+=tmp;
-	result+=" | ";
-
-	ivpid=Decoder::current.vpid;
-	iapid=Decoder::current.apid;
-	if(ivpid==-1)
-		vpid="none";
-	else
-		vpid.sprintf("0x%x", ivpid);
-	if(iapid==-1)
-		apid="none";
-	else
-		apid.sprintf("0x%x", iapid);
-	tmp.sprintf("<span class=\"white\">vpid: %s</span> | <a class=\"audio\" href=\"/audio.m3u\">apid: %s</a>", vpid.c_str(), apid.c_str());
-	result+=tmp;
-
-	return result;
-}
-
-static eString getNavi(eString mode)
-{
-	eString zapc, aboutc, linksc, updatesc;
-	eString result;
-
-	zapc="normal";
-	aboutc="normal";
-	linksc="normal";
-	updatesc="normal";
-
-	if(mode=="zap")
-		zapc="white";
-	if(mode=="about")
-		aboutc="white";
-	if(mode=="links")
-		linksc="white";
-	if(mode=="updates")
-		updatesc="white";
-
-
-	result="<a class=\"";
-	result+=zapc;
-	result+="\" href=\"/?mode=zap\">zap</a> | <a class=\"";
-	result+=aboutc;
-	result+="\" href=\"/?mode=about\">about</a> | <a class=\"";
-	result+=linksc;
-	result+="\" href=\"/?mode=links\">links</a> | <a class=\"";
-	result+=updatesc;
-	result+="\" href=\"/?mode=updates\">updates</a>";
+	now_text = now_text.left(30);
+	next_text = next_text.left(30);
+	result = read_file(TEMPLATE_DIR+"header.tmp");
+	result.strReplace("#NOWT#", now_time);
+	if (now_duration != "&nbsp;")
+		now_duration += " min";
+	result.strReplace("#NOWD#", now_duration);
+	result.strReplace("#NOWST#", now_text);
+	result.strReplace("#NEXTT#", next_time);
+	if (next_duration != "&nbsp;")
+		next_duration += " min";
+	result.strReplace("#NEXTD#", next_duration);
+	result.strReplace("#NEXTST#", next_text);
+	result.strReplace("#VOLBAR#", getVolBar());
+	eString curService = filter_string(getCurService());
+	if (curService == "n/a")
+		curService = "";
+	result.strReplace("#SERVICENAME#", curService);
+	result.strReplace("#STATS#", getStats());
+	result.strReplace("#EMPTYCELL#", "&nbsp;");
 
 	return result;
 }
@@ -1668,56 +1834,36 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 	return res;
 }
 
+static eString getCurrentServiceRef(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if ( eServiceInterface::getInstance()->service )
+		return eServiceInterface::getInstance()->service.toString();
+	else
+		return "E:no service running";
+}
+
 static eString web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	eString mode=opt["mode"];
-	eString spath=opt["path"];
+	eString mode = opt["mode"];
+	eString spath = opt["path"];
 
-	if(!spath)
+	printf("[ENIGMA_DYN] web_root: mode = %s, spath = %s\n", mode.c_str(), spath.c_str());
+
+	if (!spath)
 		spath=eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
 		//ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
 
-	if(!mode)
-		mode="zap";
+	if (!mode)
+		mode = "zap";
 
-	result=read_file(TEMPLATE_DIR+"index.tmp");
-
-	result.strReplace("#STATS#", getStats());
-	result.strReplace("#NAVI#", getNavi(mode));
-	result.strReplace("#MODE#", getMode(mode));
+	result = read_file(TEMPLATE_DIR+"index.tmp");
 	result.strReplace("#COP#", getContent(mode, spath));
-
-	if(mode=="zap")
-	{
-		result.strReplace("#EIT#", getEITC() );
-		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
-
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-
-		if(sapi && sapi->service)
-		{
-			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">EPG-Info</a></u>");
-			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">Stream-Info</a></u>");
-		}
-		else
-		{
-			DELETE(#EPG#);
-			DELETE(#SI#);
-		}
-	}
-	else
-	{
-		DELETE(#SERVICENAME#);
-		DELETE(#EPG#);
-		DELETE(#SI#);
-		DELETE(#EIT#);
-	}
-
-	result.strReplace("#VOLBAR#", getVolBar());
+	result.strReplace("#MODE#", getMode(mode));
+	result.strReplace("#HEADER#", getEITC2());
 
 	return result;
 }
@@ -1893,14 +2039,6 @@ static eString neutrino_suck_getonidsid(eString request, eString dirpath, eStrin
 	return eString().sprintf("%d\n", onidsid);
 }
 
-static eString getCurrentServiceRef(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	if ( eServiceInterface::getInstance()->service )
-		return eServiceInterface::getInstance()->service.toString();
-	else
-		return "E:no service running";
-}
-
 struct addToString
 {
 	eString &dest;
@@ -1993,96 +2131,6 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 	return result;
 }
 
-// extern eString buildDayString(int type);
-
-struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
-{
-	eString &result;
-	eString begin;
-	eString end;
-
-	getEntryString(eString &result): result(result)
-	{
-	}
-
-	void operator()(ePlaylistEntry* se)
-	{
-		result += "<tr>";
-		begin = "";
-		end = "";
-		tm startTime = *localtime(&se->time_begin);
-		time_t time_end = se->time_begin + se->duration;
-		tm endTime = *localtime(&time_end);
-//		printf(" - isRepeating event (days %s)", buildDayString(se->type).c_str());
-		begin.sprintf("%02d.%02d.- %02d:%02d", startTime.tm_mday, startTime.tm_mon+1, startTime.tm_hour, startTime.tm_min);
-		end.sprintf("%02d.%02d.- %02d:%02d", endTime.tm_mday, endTime.tm_mon+1, endTime.tm_hour, endTime.tm_min);
-		if (se->type & ePlaylistEntry::stateFinished)
-			result += "<td><img src=\"on.gif\"></td>";
-		else
-		if (se->type & (ePlaylistEntry::errorNoSpaceLeft |
-				ePlaylistEntry::errorUserAborted |
-				ePlaylistEntry::errorZapFailed|
-				ePlaylistEntry::errorOutdated))
-			result += "<td><img src=\"off.gif\"></td>";
-		else
-			result += "<td>&nbsp;</td>";
-
-		result += "<td>" + begin + "</td>";
-//		result += " (" + eString().sprintf("%d", se->duration / 60) + " min) ";
-		result += "<td>" + end + "</td>";
-
-		eString description = se->service.descr;
-		eString channel = getLeft(description, '/');
-		if (!channel)
-			channel = "No channel available";
-		result += "<td>" + channel + "</td>";
-		description = getRight(description, '/');
-		if (!description)
-			description = "No description available";
-		result += "<td>" + description + "</td>";
-		result += "</tr>";
-	}
-};
-
-static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	eString result = "";
-	eString tbody = "";
-	eString tmpFile = "";
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eTimerManager::getInstance()->forEachEntry(getEntryString(tbody));
-	if (tbody == "")
-		result = "No Timer Events available";
-	else
-	{
-		result += "<table border=1 rules=all>";
-		result += "<thead>";
-		result += "<th align=\"left\">";
-		result += "Status";
-		result += "</th>";
-		result += "<th align=\"left\">";
-		result += "Start Time";
-		result += "</th>";
-		result += "<th align=\"left\">";
-		result += "End Time";
-		result += "</th>";
-		result += "<th align=\"left\">";
-		result += "Channel";
-		result += "</th>";
-		result += "<th align=\"left\">";
-		result += "Description";
-		result += "</th>";
-		result += "</thead>";
-		result += "<tbody>";
-		result += tbody;
-		result += "</tbody>";
-		result += "</table>";
-	}
-	tmpFile += read_file(TEMPLATE_DIR + "timerList.tmp");
-	tmpFile.strReplace("#BODY#", result);
-	return tmpFile;
-}
-
 static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result = "";
@@ -2104,18 +2152,12 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	if (sapi)
 	{
 		eServiceReference ref = string2ref(serviceRef);
-
-		printf("[ENIGMA_DYN] addTimerEvent: opts = %s, serviceRef = %s\n", opts.c_str(), serviceRef.c_str());
-
 		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
-
 		if(current)
 		{
-			printf("[ENIGMA_DYN] if current = true...\n");
 			const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
 			if(evt)
 			{
-				printf("[ENIGMA_DYN] if evt = true...\n");
 				timeMap::const_iterator It;
 
 				for(It=evt->begin(); It!= evt->end(); It++)
@@ -2140,29 +2182,20 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	description = filter_string(current->service_name) + "/" + description;
 
 	int timeroffset = 0;
-//	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
-//		timeroffset = 0;
-
-	printf("[ENIGMA_DYN] timeroffset = %d\n", timeroffset);
+	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
+		timeroffset = 0;
 
 	int start = atoi(eventStartTime.c_str()) - (timeroffset * 60);
 	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
-
-	printf("[ENIGMA_DYN] start = %d, duration = %d\n", start, duration);
 
 	ePlaylistEntry entry(string2ref(serviceRef), start, duration, atoi(eventID.c_str()), ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
 	printf("[ENIGMA_DYN] description = %s\n", description.c_str());
 	entry.service.descr = description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-	{
 		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
-	}
 	else
-	{
 		result += "Timer event was created successfully.";
-	}
-
 
 	return result;
 }
