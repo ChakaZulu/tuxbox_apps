@@ -89,7 +89,7 @@ Index:
 3
 +++
 Init:
-	FB direct SETFADE 0 24 81 84 255 255 255
+	#FB direct SETFADE 0 24 81 84 255 255 255
 	PLUGINS Plugins Load
 	PLUGINS Plugins Dump
 	CONTROL Var Set PLUGINMENU true
