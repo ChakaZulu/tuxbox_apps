@@ -44,9 +44,6 @@
 /****************************************************************************
  * Global variables.														*
  ****************************************************************************/
-const char	*ProgName;
-FILE *soundfd;
-
 /****************************************************************************
  * Return an error string associated with a mad error code.					*
  ****************************************************************************/
@@ -60,7 +57,7 @@ FILE *soundfd;
       (MAD_VERSION_MINOR>14)))
 #define MadErrorString(x) mad_stream_errorstr(x)
 #else
-static const char *MadErrorString(const struct mad_stream *Stream)
+const char *CMP3Player::MadErrorString(const struct mad_stream *Stream)
 {
 	switch(Stream->error)
 	{
@@ -123,7 +120,7 @@ static const char *MadErrorString(const struct mad_stream *Stream)
  * Converts a sample from mad's fixed point number format to an unsigned	*
  * short (16 bits).															*
  ****************************************************************************/
-static unsigned short MadFixedToUshort(mad_fixed_t Fixed)
+unsigned short CMP3Player::MadFixedToUshort(mad_fixed_t Fixed)
 {
 	/* A fixed point number is formed of the following bit pattern:
 	 *
@@ -150,7 +147,7 @@ static unsigned short MadFixedToUshort(mad_fixed_t Fixed)
 /****************************************************************************
  * Print human readable informations about an audio MPEG frame.				*
  ****************************************************************************/
-static int PrintFrameInfo(FILE *fp, struct mad_header *Header)
+int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
 {
 	const char	*Layer,
 				*Mode,
@@ -224,8 +221,10 @@ static int PrintFrameInfo(FILE *fp, struct mad_header *Header)
  ****************************************************************************/
 #define INPUT_BUFFER_SIZE	(5*8192)
 #define OUTPUT_BUFFER_SIZE	8192 /* Must be an integer multiple of 4. */
-static int MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
+int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 {
+	printf("Start audio decoder\n");
+
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
 	struct mad_synth	Synth;
@@ -249,6 +248,8 @@ static int MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 	 */
 
 	/* This is the decoding loop. */
+	do_loop = true;
+	state = PLAY;
 	do
 	{
 		/* The input bucket must be filled if it becomes empty or if
@@ -428,7 +429,7 @@ static int MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 				OutputPtr=OutputBuffer;
 			}
 		}
-	}while(1);
+	}while(do_loop);
 
 	/* Mad is no longer used, the structures that were initialized must
      * now be cleared.
@@ -480,13 +481,14 @@ static int MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 	}
 
 	/* That's the end of the world (in the H. G. Wells way). */
+	state = STOP;
 	return(Status);
 }
 
 /****************************************************************************
  * Program entry point.														*
  ****************************************************************************/
-void  CMP3Player::ResetDSP()
+void  CMP3Player::ResetDSP(FILE *soundfd)
 {
     long dsp_speed=44100;
     long channels=2;
@@ -501,38 +503,72 @@ void  CMP3Player::ResetDSP()
         if(::ioctl(fileno(soundfd), SNDCTL_DSP_SETFMT, &fmt))
                 printf("setfmt failed\n");
 }
-int CMP3Player::play(char *filename)
+
+void CMP3Player::stop()
 {
-	int		Status;
+	do_loop = false;
+}
 
-	ProgName=__FILE__;
+CMP3Player* CMP3Player::getInstance()
+{
+	static CMP3Player* mp3player = NULL;
+	if(mp3player == NULL)
+	{
+		mp3player = new CMP3Player();
+	}
+	return mp3player;
+}
 
-	FILE *fp = fopen(filename,"r");
-
-
-	soundfd=::fopen("/dev/sound/dsp","w");
-
-	ResetDSP();
+void* CMP3Player::PlayThread(void * filename)
+{
+	FILE *fp = fopen((char *)filename,"r");
+	FILE *soundfd=::fopen("/dev/sound/dsp","w");
+	CMP3Player::getInstance()->ResetDSP(soundfd);
 
 	/* Decode stdin to stdout. */
-	Status=MpegAudioDecoder(fp,soundfd);
- 	
+	int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);
+	if(Status > 0)
+		fprintf(stderr,"Error %d occured during decoding.\n",Status);
+
+	fclose(fp);
+	fclose(soundfd);
+	return NULL;
+}
+
+bool CMP3Player::play(const char *filename)
+{
+
+	ProgName=__FILE__;
+	if(false)
+	{
+		if (pthread_create (&thrPlay, NULL, PlayThread,(void *) filename) != 0 )
+		{
+			perror("mp3play: pthread_create(PlayThread)");
+			return false;
+		}
+	}
+	else
+		PlayThread((void *) filename);
+	return true;
+
+/* 	
 	if(Status)
 		fprintf(stderr,"%s: an error occured during decoding.\n",ProgName);
 
 		fclose(fp);
 		fclose(soundfd);
-		
+*/		
 	/* All done. */
-	return(Status);
+//	return(Status);
+
 }
 
-/*
- * Local Variables:
- * tab-width: 4
- * End:
- */
+CMP3Player::CMP3Player()
+{
+	init();
+}
 
-/****************************************************************************
- * End of file madllc.c														*
- ****************************************************************************/
+void CMP3Player::init()
+{
+	state = STOP;
+}

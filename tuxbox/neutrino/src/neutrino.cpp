@@ -70,6 +70,7 @@
 #include "driver/rcinput.h"
 #include "driver/vcrcontrol.h"
 #include "driver/irsend.h"
+#include "driver/mp3play.h"
 
 #include "gui/widget/menue.h"
 #include "gui/widget/messagebox.h"
@@ -96,6 +97,7 @@
 #include "gui/dboxinfo.h"
 #include "gui/timerlist.h"
 #include "gui/alphasetup.h"
+#include "gui/mp3player.h"
 
 #include "system/setting_helpers.h"
 #include "system/settings.h"
@@ -499,6 +501,9 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.fontsize_infobar_info     , configfile.getString( "fontsize_infobar_info", "20").c_str() );
 	strcpy( g_settings.fontsize_infobar_small    , configfile.getString( "fontsize_infobar_small", "14").c_str() );
 
+	strcpy( g_settings.fontsize_filebrowser_itemfolder, configfile.getString( "fontsize_filebrowser_itemfolder", "16").c_str() );
+	strcpy( g_settings.fontsize_filebrowser_itemfile , configfile.getString( "fontsize_filebrowser_itemfile", "14").c_str() );
+
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
 	strcpy( g_settings.softupdate_currentversion, configfile.getString( "softupdate_currentversion", "" ).c_str() );
@@ -697,6 +702,9 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "fontsize_infobar_channame", g_settings.fontsize_infobar_channame );
 	configfile.setString( "fontsize_infobar_info", g_settings.fontsize_infobar_info );
 	configfile.setString( "fontsize_infobar_small", g_settings.fontsize_infobar_small );
+
+	configfile.setString( "fontsize_filebrowser_itemfolder", g_settings.fontsize_filebrowser_itemfolder );
+	configfile.setString( "fontsize_filebrowser_itemfile", g_settings.fontsize_filebrowser_itemfile );
 
 	//Software-update
 	configfile.setInt32( "softupdate_mode", g_settings.softupdate_mode );
@@ -935,6 +943,9 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->infobar_info      =  g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_infobar_info) + fontsSizeOffset );
 	g_Fonts->infobar_small     =  g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_infobar_small) + fontsSizeOffset );
 
+	g_Fonts->filebrowser_itemFolder =   g_fontRenderer->getFont(fontName.c_str(), "Bold",  atoi(g_settings.fontsize_filebrowser_itemfolder) + fontsSizeOffset );
+	g_Fonts->filebrowser_itemFile =   g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_filebrowser_itemfile) + fontsSizeOffset );
+
 }
 
 /**************************************************************************************
@@ -1010,6 +1021,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio", true, CRCInput::RC_green, "gruen.raw") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart", true, CRCInput::RC_yellow, "gelb.raw") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, "blau.raw") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.mp3player", true, "", new CMP3PlayerGui(), "", true) );
 
 	mainMenu.addItem( new CMenuForwarder("mainmenu.sleeptimer", true, "", new CSleepTimerWidget, "",true) );
 
@@ -1981,6 +1993,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 
 	StreamFeatureSelector.exec(NULL, "");
+
 }
 
 
@@ -2271,6 +2284,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	RealRun(mainMenu);
 
 	ExitRun();
+
 	return 0;
 }
 
@@ -2560,7 +2574,12 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if( ( !g_InfoViewer->is_visible ) && data )
 			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
+		t_channel_id old_id = channelList->getActiveChannel_ChannelID();
+
 		channelsInit();
+
+		if((old_id == 0) || (!(channelList->adjustToChannelID(old_id))))
+			channelList->zapTo(0);
 	}
 //	else if ( ( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED ) ||   // EVT_BOUQUETSCHANGED: initiated by zapit
 //		  ( msg == NeutrinoMessages::EVT_SERVICESCHANGED ) )    // EVT_SERVICESCHANGED: no longer used
@@ -2696,7 +2715,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == NeutrinoMessages::STANDBY_TOGGLE )
 	{
-		standbyMode( mode != mode_standby );
+		standbyMode( !(mode & mode_standby) );
 		g_RCInput->clearRCMsg();
 		return messages_return::handled;
 	}
@@ -3243,6 +3262,14 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 		g_settings.timing_epg = atoi(g_settings.timing_epg_string);
 		g_settings.timing_infobar = atoi(g_settings.timing_infobar_string);
 	}
+
+	else if(OptionName.substr(0,3).compare("mp3.") == 0)
+	{
+// this code will never be reached
+		CMP3Player::getInstance()->init();
+//		p.play("/neutrino.mp3");
+	}
+
 	else if(OptionName.substr(0,18).compare("mainmenu.recording") == 0)
 	{
 		CTimerd::EventInfo eventinfo;
@@ -3289,7 +3316,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.378 2002/12/18 19:11:07 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.379 2002/12/19 13:55:18 dirch Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

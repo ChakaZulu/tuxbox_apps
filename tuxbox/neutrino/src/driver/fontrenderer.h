@@ -141,7 +141,10 @@ class FontsDef
 		*infobar_number,
 		*infobar_channame,
 		*infobar_info,
-		*infobar_small;
+		*infobar_small,
+
+		*filebrowser_itemFolder,
+		*filebrowser_itemFile;
 };
 
 

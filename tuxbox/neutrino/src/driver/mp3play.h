@@ -43,15 +43,39 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <linux/soundcard.h>
+#include <pthread.h>
 
 
 
 
 class CMP3Player
 {
-	public:
-	  void ResetDSP();
-		int play(char *filename);
+
+	const char	*ProgName;
+	FILE		*soundfd;
+	bool		do_loop;
+	pthread_t	thrPlay;
+	FILE		*fp;
+	static void* PlayThread(void*);
+
+
+	const char		*MadErrorString(const struct mad_stream *Stream);
+	unsigned short	MadFixedToUshort(mad_fixed_t Fixed);
+	int				PrintFrameInfo(FILE *fp, struct mad_header *Header);
+	int				MpegAudioDecoder(FILE *InputFp,FILE *OutputFp);
+
+
+public:
+	enum State {STOP = 0, PLAY};
+	State state;
+	static CMP3Player* getInstance();
+	void ResetDSP(FILE *soundfd);
+	bool play(const char *filename);
+	void stop();
+	void init();
+	CMP3Player::CMP3Player();
+	CMP3Player::~CMP3Player();
+
 };
 
 
