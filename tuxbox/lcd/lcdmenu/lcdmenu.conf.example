@@ -1,5 +1,5 @@
 #
-#  /var/etc/lcdmenu.conf
+#  $(CONFIGDIR)/lcdmenu.conf
 #
 # 1.) do not change this file while lcdmenu is running!
 # 2.) a number can be any combination of 0-9.
@@ -57,7 +57,7 @@ pin=__lUISdFwUYjg
 # option: menu_items (string, ...)
 # default: EliteDVB,Neutrino,Lcars,Maintenance
 #
-menu_items=Enigma,Neutrino,Lcars,Maintenance
+menu_items=Enigma,Neutrino,Lcars,Maintenance,Put,Your,Start,Items,Here
 
 #
 # option: pin_protect (number, ...)
@@ -66,8 +66,16 @@ menu_items=Enigma,Neutrino,Lcars,Maintenance
 pin_protect=
 
 #
-# option: timeout
+# option: timeout (number)
 # default: 10 seconds
 #
 timeout=10
+
+#
+# option: visible_entries (number)
+# default: 4
+#
+# number of visible entries at once
+#
+visible_entries=4
 

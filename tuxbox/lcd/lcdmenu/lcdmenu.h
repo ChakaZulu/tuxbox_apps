@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.12 2002/06/03 22:09:08 obi Exp $
+ * $Id: lcdmenu.h,v 1.13 2002/08/17 08:04:58 obi Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -92,6 +92,7 @@ class CLCDMenu : public CLCDDisplay
 		fontRenderClass *fontRenderer;
 		Font *menuFont;
 
+		int upperRow;
 		int fontSize;
 		int lineSpacing;
 		int textAlign;
@@ -101,6 +102,7 @@ class CLCDMenu : public CLCDDisplay
 		int selectedEntry;
 		int entryCount;
 		int defaultEntry;
+		int visibleEntries;
 
 		std::vector <std::string> entries;
 		std::vector <int> pinEntries;

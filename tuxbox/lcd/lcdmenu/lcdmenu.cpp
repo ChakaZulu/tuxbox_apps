@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.18 2002/06/05 19:46:35 dirch Exp $
+ * $Id: lcdmenu.cpp,v 1.19 2002/08/17 08:04:58 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -51,6 +51,7 @@ CLCDMenu::CLCDMenu (std::string configFilename)
 		addEntry("Lcars");
 		addEntry("Maintenance");
 		config->setStringVector("menu_items", entries);
+		config->setInt("visible_entries", 4);
 		//addPinProtection(3);
 		config->setIntVector("pin_protect", pinEntries);
 	}
@@ -65,7 +66,17 @@ CLCDMenu::CLCDMenu (std::string configFilename)
 	cryptedPin = config->getString("pin");
 	entries = config->getStringVector("menu_items");
 	pinEntries = config->getIntVector("pin_protect");
+	visibleEntries = config->getInt("visible_entries");
 	entryCount = entries.size();
+
+	if (defaultEntry >= visibleEntries)
+	{
+		upperRow = defaultEntry - visibleEntries + 1;
+	}
+	else
+	{
+		upperRow = 0;
+	}
 
 	if (showNumbers)
 		addNumberPrefix();
@@ -123,11 +134,20 @@ bool CLCDMenu::selectEntry (int index)
 {
 	if ((index < entryCount) && (index >= 0))
 	{
+		if (index < upperRow)
+		{
+			upperRow--;
+		}
+		else if (index >= upperRow + visibleEntries)
+		{
+			upperRow++;
+		}
+
 		selectedEntry = index;
 		drawMenu();
 
-		int border = (entryCount * fontSize + (entryCount - 1) * lineSpacing - 63) / -2;
-		int top = border + (index+1) * fontSize + (index) * lineSpacing;
+		int border = (visibleEntries * fontSize + (visibleEntries - 1) * lineSpacing - 63) / -2;
+		int top = border + (index-upperRow+1) * fontSize + (index-upperRow) * lineSpacing;
 
 		draw_fill_rect (0, top-fontSize-1, 119, top+3, CLCDDisplay::PIXEL_ON);
 		drawString(entries[index], top, textAlign, CLCDDisplay::PIXEL_OFF);
@@ -146,13 +166,13 @@ bool CLCDMenu::drawMenu ()
 	if (entryCount > 0)
 	{
 		int i, top;
-		int border = (entryCount * fontSize + (entryCount - 1) * lineSpacing - 63) / -2;
+		int border = (visibleEntries * fontSize + (visibleEntries - 1) * lineSpacing - 63) / -2;
 
 		draw_fill_rect (0, 0, 119, 63, CLCDDisplay::PIXEL_OFF);
-		for (i = 0; i < entryCount; i++)
+		for (i = 0; i < visibleEntries; i++)
 		{
 			top = border + (i+1) * fontSize + (i) * lineSpacing;
-			drawString(entries[i], top, textAlign, CLCDDisplay::PIXEL_ON);
+			drawString(entries[i + upperRow], top, textAlign, CLCDDisplay::PIXEL_ON);
 		}
 		
 		update();
