@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.71 2002/03/11 17:25:57 Simplex Exp $
+// $Id: channellist.cpp,v 1.72 2002/03/11 18:52:41 Simplex Exp $
 //
 // $Log: channellist.cpp,v $
-// Revision 1.71  2002/03/11 17:25:57  Simplex
-// locked bouquets work
+// Revision 1.72  2002/03/11 18:52:41  Simplex
+// fix
 //
 // Revision 1.70  2002/03/06 11:18:39  field
 // Fixes & Updates
@@ -235,7 +235,6 @@
 
 #include "channellist.h"
 #include "../global.h"
-#include "pincheck.h"
 
 #define info_height 60
 
