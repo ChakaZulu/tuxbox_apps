@@ -59,7 +59,7 @@ class CEpgData
 		int			botheight,botboxheight;
 		int			medlineheight,medlinecount;
 
-		void GetEPGData( string channelName );
+		void GetEPGData( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit );
 		void addTextToArray( string text );
 		void processTextToArray( char* text );
 		void showText( int startPos, int ypos );
@@ -68,7 +68,7 @@ class CEpgData
 
 		CEpgData();
 		void start( );
-		void show( string channelName );
+		void show( string channelName, unsigned int onid_tsid, unsigned long long id = 0, time_t* startzeit = NULL);
 		void hide();
 };
 

@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.11 2001/09/20 13:44:57 field Exp $
+// $Id: epgview.cpp,v 1.12 2001/09/20 17:02:16 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.12  2001/09/20 17:02:16  field
+// event-liste zeigt jetzt auch epgs an...
+//
 // Revision 1.11  2001/09/20 13:44:57  field
 // epg-Anzeige verbessert
 //
@@ -150,14 +153,14 @@ void CEpgData::showText( int startPos, int ypos )
 	}
 }
 
-void CEpgData::show( string channelName )
+void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
 {
 	int height;
 	height = g_Fonts->epg_date->getHeight();
 	g_FrameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_INFOBAR);
 	g_Fonts->epg_date->RenderString(g_settings.screen_StartX+10, g_settings.screen_StartY+height, 40, "-@-", COL_INFOBAR);
 
-	GetEPGData( channelName );
+	GetEPGData( channelName, onid_tsid, id, startzeit );
 	g_FrameBuffer->paintBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5, COL_BACKGROUND);
 
 	if(strlen(epgData.title)==0)
@@ -212,12 +215,14 @@ void CEpgData::show( string channelName )
 	showText(showPos, textypos);
 
 	//show progressbar
-	int progress = atoi(epgData.done);
-	printf("prog: %d\n", progress);
-	int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
-	g_FrameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUHEAD+7);
-	g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUHEAD+2);
-	g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, progress, height-10, COL_MENUHEAD+5);
+    if ( strlen(epgData.done)!= 0 )
+    {
+    	int progress = atoi(epgData.done);
+    	int pbx = sx + 10 + widthl + 10 + ((ox-104-widthr-widthl-10-10-20)>>1);
+    	g_FrameBuffer->paintBoxRel(pbx, sy+oy-height, 104, height-6, COL_MENUHEAD+7);
+    	g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, 100, height-10, COL_MENUHEAD+2);
+    	g_FrameBuffer->paintBoxRel(pbx+2, sy+oy-height+2, progress, height-10, COL_MENUHEAD+5);
+    }
 
 	bool loop=true;
 	int scrollCount;
@@ -253,7 +258,7 @@ void CEpgData::show( string channelName )
 			if (toShow)
 				showText(showPos,textypos);
 		}
-		else if ((key==CRCInput::RC_ok) || (key==CRCInput::RC_help))
+		else if ( (key==CRCInput::RC_ok) || (key==CRCInput::RC_help)  || (key==g_settings.key_channelList_cancel) )
 		{
 			loop = false;
 		}
@@ -266,7 +271,7 @@ void CEpgData::hide()
 	g_FrameBuffer->paintBoxRel (sx, sy, ox+10, oy+10, 255);
 }
 
-void CEpgData::GetEPGData( string channelName )
+void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
 {
 	int sock_fd;
 	SAI servaddr;
@@ -296,6 +301,81 @@ void CEpgData::GetEPGData( string channelName )
 
 	#ifdef EPG_SECTIONSD
 		//use new sectionsd-daemon
+
+    if ( (( onid_tsid != 0 ) && ( g_settings.epg_byname == 0 ) )||
+         ( id!= 0 ) )
+    {
+        if ( id!= 0 )
+        {
+            // query EPG für bestimmtes Event
+    		sectionsd::msgRequestHeader req;
+    		req.version = 2;
+    		req.command = sectionsd::epgEPGid;
+    		req.dataLength = 12;
+    		write(sock_fd,&req,sizeof(req));
+
+            write(sock_fd, &id, sizeof(id));
+            write(sock_fd, startzeit, sizeof(*startzeit));
+            printf("query epg for evt_id >%llx<, time %lx\n", id, *startzeit);
+        }
+        else
+        {
+            // query EPG normal
+    		sectionsd::msgRequestHeader req;
+    		req.version = 2;
+    		req.command = sectionsd::actualEPGchannelID;
+    		req.dataLength = 4;
+    		write(sock_fd,&req,sizeof(req));
+
+            write(sock_fd, &onid_tsid, sizeof(onid_tsid));
+            printf("query epg for onid_tsid >%x< (%s)\n", onid_tsid, channelName.c_str());
+        }
+
+		sectionsd::msgResponseHeader resp;
+		memset(&resp, 0, sizeof(resp));
+		read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
+
+		int nBufSize = resp.dataLength;
+		if(nBufSize>0)
+		{
+			char* pData = new char[nBufSize] ;
+			read(sock_fd, pData, nBufSize);
+
+            unsigned long long          tmp_id;
+            sectionsd::sectionsdTime    epg_times;
+            char* dp = pData;
+
+            sscanf(dp, "%012llx\xFF", &tmp_id);
+            dp+= 13;
+            dp = ocopyStringto( dp, epgData.title, sizeof(epgData.title) );
+            dp = ocopyStringto( dp, epgData.info1, sizeof(epgData.info1) );
+			dp = ocopyStringto( dp, epgData.info2, sizeof(epgData.info2) );
+            sscanf(dp, "%08lx\xFF%08x\xFF", &epg_times.startzeit, &epg_times.dauer );
+
+            struct tm *pStartZeit = localtime(&epg_times.startzeit);
+            int nSDay(pStartZeit->tm_mday), nSMon(pStartZeit->tm_mon+1), nSYear(pStartZeit->tm_year+1900),
+                nSH(pStartZeit->tm_hour), nSM(pStartZeit->tm_min);
+            sprintf( epgData.date, "%02d.%02d.%04d", nSDay, nSMon, nSYear );
+            sprintf( epgData.start, "%02d:%02d", nSH, nSM );
+
+            long int uiEndTime(epg_times.startzeit+ epg_times.dauer);
+            struct tm *pEndeZeit = localtime((time_t*)&uiEndTime);
+            int nFH(pEndeZeit->tm_hour), nFM(pEndeZeit->tm_min);
+            sprintf( epgData.end, "%02d:%02d", nFH, nFM );
+
+
+            if (( time(NULL)- epg_times.startzeit )>= 0 )
+            {
+                unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-epg_times.startzeit)/(float)epg_times.dauer*100.);
+                if (nProcentagePassed<= 100)
+                    sprintf( epgData.done, "%03u", nProcentagePassed );
+            }
+
+			delete[] pData;
+		}
+    }
+    else
+    {
 		sectionsd::msgRequestHeader req;
 		req.version = 2;
 		req.command = sectionsd::actualEPGchannelName;
@@ -343,6 +423,7 @@ void CEpgData::GetEPGData( string channelName )
 			delete[] pData;
 //			printf("copied\n");
 		}
+    }
 	#else
 		//for old epgd users
 		struct  msgEPGRequest

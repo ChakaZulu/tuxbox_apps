@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.9 2001/09/20 11:55:58 fnbrd Exp $
+// $Id: eventlist.cpp,v 1.10 2001/09/20 17:02:16 field Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.10  2001/09/20 17:02:16  field
+// event-liste zeigt jetzt auch epgs an...
+//
 // Revision 1.9  2001/09/20 11:55:58  fnbrd
 // removed warning.
 //
@@ -98,35 +101,38 @@ void EventList::readEvents(const std::string& channelname)
         char ename[100];
         char *actPos=pData;
 
-        struct  tm   *tmZeit;
-        int     mm, dd, hh, mn, evtTime, aktTime;
+        struct  tm tmZeit;
+        struct  tm *tmZeit_now;
+        int     evtTime, aktTime;
         time_t  tZeit  = time(NULL);
-        tmZeit = localtime(&tZeit);
-        aktTime = (tmZeit->tm_mon+ 1)* 1000000+ (tmZeit->tm_mday)* 10000+ (tmZeit->tm_hour)* 100+ tmZeit->tm_min;
+        tmZeit_now = localtime(&tZeit);
+        aktTime = (tmZeit_now->tm_mon+ 1)* 1000000+ (tmZeit_now->tm_mday)* 10000+ (tmZeit_now->tm_hour)* 100+ tmZeit_now->tm_min;
+        tmZeit = *tmZeit_now;
 
         while(*actPos && actPos<pData+resp.dataLength)
         {
             *epgID=0;
             actPos = copyStringto( actPos, epgID, sizeof(epgID), ' ');
-//    printf("id: %s\n", epgID);
             *edate=0;
             actPos = copyStringto( actPos, edate, sizeof(edate), ' ');
-//    printf("date: %s\n", edate);
             *etime=0;
             actPos = copyStringto( actPos, etime, sizeof(etime), ' ');
-//    printf("time: %s\n", etime);
             *eduration=0;
             actPos = copyStringto( actPos, eduration, sizeof(eduration), ' ');
-//    printf("duration: %s\n", eduration);
             *ename=0;
             actPos = copyStringto( actPos, ename, sizeof(ename), '\n');
-//    printf("desc: %s\n", channelDescription);
 
             event* evt = new event();
 
-            sscanf(edate, "%02d.%02d", &dd, &mm);
-            sscanf(etime, "%02d:%02d", &hh, &mn);
-            evtTime = mm* 1000000+ dd* 10000+ hh* 100+ mn;
+            sscanf(epgID, "%llx", &evt->id);
+            sscanf(edate, "%02d.%02d", &tmZeit.tm_mday, &tmZeit.tm_mon);
+            tmZeit.tm_mon--;
+            sscanf(etime, "%02d:%02d", &tmZeit.tm_hour, &tmZeit.tm_min);
+            evtTime = (tmZeit.tm_mon+ 1)* 1000000+ (tmZeit.tm_mday)* 10000+ (tmZeit.tm_hour)* 100+ tmZeit.tm_min;
+            tmZeit.tm_sec= 0;
+
+            evt->startzeit = mktime(&tmZeit);
+//            printf("Time: %02d.%02d %02d:%02d %lx\n", tmZeit.tm_mday, tmZeit.tm_mon+ 1, tmZeit.tm_hour, tmZeit.tm_min, evt->startzeit);
 
             if ( (evtTime- aktTime) < 0 )
                 current_event++;
@@ -156,6 +162,7 @@ void EventList::readEvents(const std::string& channelname)
 
         evt->name= g_Locale->getText("epglist.noevents") ;
         evt->datetimeduration= std::string("");
+        evt->id = 0;
         evtlist.insert(evtlist.end(), evt);
         current_event++;
     }
@@ -194,6 +201,7 @@ EventList::~EventList()
 
 void EventList::exec(const std::string& channelname)
 {
+  int key;
   name = channelname;
   paintHead();
   readEvents(channelname);
@@ -203,7 +211,7 @@ void EventList::exec(const std::string& channelname)
 	bool loop=true;
 	while (loop)
 	{
-		int key = g_RCInput->getKey(100);
+		key = g_RCInput->getKey(100);
 		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
 			selected = oldselected;
@@ -264,10 +272,22 @@ void EventList::exec(const std::string& channelname)
 		}
 		else if (key==CRCInput::RC_ok)
 		{
-			loop=false;
+            event* evt = evtlist[selected];
+            if ( evt->id != 0 )
+            {
+                hide();
+
+                g_EpgData->show("", 0, evt->id, &evt->startzeit);
+
+                paintHead();
+                paint();
+            }
+            else
+                loop= false;
 		}
 	}
-	hide();
+
+    hide();
 }
 
 void EventList::hide()
@@ -286,7 +306,7 @@ void EventList::paintItem(unsigned int pos)
 	}
     else if (liststart+pos == current_event )
 	{
-		color = COL_MENUCONTENTINACTIVE;
+		color = COL_MENUCONTENT+ 1; //COL_MENUCONTENTINACTIVE+ 4;
 	}
     else
    	{
