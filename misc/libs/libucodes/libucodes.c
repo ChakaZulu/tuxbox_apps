@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.21 2003/01/30 13:50:39 thegoodguy Exp $
+  $Id: libucodes.c,v 1.22 2003/04/02 17:12:20 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.22  2003/04/02 17:12:20  obi
+  added cam_01_02_106E md5sum
+
   Revision 1.21  2003/01/30 13:50:39  thegoodguy
   libucodes requires libmd5sum
 
@@ -89,6 +92,7 @@ static struct Sucode ucodes[] =
 	{"997b1f858f1efee525e6842558edbe3c","cam_01_01_005E"},
 	{"7f56e693a916b39a6e2734dc9b5aab7a","cam_01_02_002E"},
 	{"bac1970b0e865c00015b3d78a209b5bf","cam_01_02_105E"},
+	{"ed944f0450fbeec867b7377f39b205a8","cam_01_02_106E"},
 	{"c734207ddea7b8ceafa2505f1360f3bf","cam_01_01_004F"},
 	{"a5984825ff554ea530efc4733ffd7473","cam_01_01_005F"},
 	{"704cb8d9965babbdc7d4e7cae6e5584e","cam_01_02_002F"},
