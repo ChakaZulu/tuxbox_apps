@@ -1,7 +1,7 @@
 /*
- * $Id: audio.h,v 1.11 2002/11/18 00:27:56 obi Exp $
+ * $Id: audio.h,v 1.12 2003/01/30 17:21:16 obi Exp $
  *
- * (C) 2002 by Steffen Hehn 'McClean' &
+ * (C) 2002-2003 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,9 @@
  *
  */
 
-#ifndef __audio_h__
-#define __audio_h__
+#ifndef __zapit_audio_h__
+#define __zapit_audio_h__
 
-/* nokia api */
 #include <linux/dvb/audio.h>
 
 class CAudio
@@ -32,46 +31,37 @@ class CAudio
 		/* dvb audio device */
 		int fd;
 
-		/* current audio settings */
-		struct audio_status status;
-
 		/* internal methods */
-		int setMute (bool mute);
-		int setBypassMode (bool bypass);
-
-		/* true if constructor had success */
-		bool initialized;
+		int setMute(int enable);
+		int setBypassMode(int disable);
 
 	public:
 		/* construct & destruct */
-		CAudio();
-		~CAudio();
-
-		/* check if initialitation failed before rocking */
-		bool isInitialized () { return initialized; }
+		CAudio(void);
+		~CAudio(void);
 
 		/* shut up */
-		int mute ();
-		int unmute ();
+		int mute(void);
+		int unmute(void);
 
 		/* bypass audio to external decoder */
-		int enableBypass ();
-		int disableBypass ();
+		int enableBypass(void);
+		int disableBypass(void);
 
 		/* volume, min = 0, max = 255 */
-		int setVolume (unsigned char left, unsigned char right);
+		int setVolume(unsigned int left, unsigned int right);
 
 		/* start and stop audio */
-		int start ();
-		int stop ();
+		int start(void);
+		int stop(void);
 
 		/* stream source */
-		audio_stream_source_t getSource () { return status.stream_source; }
-		int setSource (audio_stream_source_t source);
+		audio_stream_source_t getSource(void);
+		int setSource(audio_stream_source_t source);
 
 		/* select channels */
-		int selectChannel (audio_channel_select_t sel);
-		audio_channel_select_t getSelectedChannel ();
+		int setChannel(audio_channel_select_t channel);
+		audio_channel_select_t getChannel(void);
 };
 
-#endif /* __audio_h__ */
+#endif /* __zapit_audio_h__ */

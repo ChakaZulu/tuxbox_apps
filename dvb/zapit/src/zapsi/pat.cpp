@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.43 2002/12/13 12:41:13 thegoodguy Exp $
+ * $Id: pat.cpp,v 1.44 2003/01/30 17:21:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -25,8 +25,10 @@
 
 #define PAT_SIZE 1024
 
-int parse_pat (const int demux_fd, CZapitChannel * channel)
+int parse_pat(CZapitChannel * const channel)
 {
+	CDemux dmx;
+	
 	/* buffer for program association table */
 	unsigned char buffer[PAT_SIZE];
 
@@ -45,27 +47,22 @@ int parse_pat (const int demux_fd, CZapitChannel * channel)
 	mask[0] = 0xFF;
 	mask[4] = 0xFF;
 
-	do
-	{
+	do {
 		/* set filter for program association section */
 		/* read section */
-		if ((setDmxSctFilter(demux_fd, 0x0000, filter, mask) < 0) ||
-		    (readDmx(demux_fd, buffer, PAT_SIZE) < 0))
+		if ((dmx.sectionFilter(0, filter, mask) < 0) || (dmx.read(buffer, PAT_SIZE) < 0))
 			return -1;
 
 		/* loop over service id / program map table pid pairs */
-		for (i = 8; i < (((buffer[1] & 0x0F) << 8) | buffer[2]) + 3; i += 4)
-		{
+		for (i = 8; i < (((buffer[1] & 0x0F) << 8) | buffer[2]) + 3; i += 4) {
 			/* compare service id */
-			if (channel->getServiceId() == ((buffer[i] << 8) | buffer[i+1]))
-			{
+			if (channel->getServiceId() == ((buffer[i] << 8) | buffer[i+1])) {
 				/* store program map table pid */
 				channel->setPmtPid(((buffer[i+2] & 0x1F) << 8) | buffer[i+3]);
 				return 0;
 			}
 		}
-	}
-	while (filter[4]++ != buffer[7]);
+	} while (filter[4]++ != buffer[7]);
 
 	return -1;
 }

@@ -12,8 +12,8 @@ pzapit_SOURCES = \
 	pzapit.cpp
 
 pzapit_LDADD = \
-	@CONNECTION_LIBS@ \
-	$(top_builddir)/lib/libzapitclient.la
+	$(top_builddir)/lib/libzapitclient.la \
+	@CONNECTION_LIBS@
 
 zapit_SOURCES = \
 	bouquets.cpp channel.cpp dvbstring.cpp \
@@ -21,18 +21,14 @@ zapit_SOURCES = \
 	zapit.cpp
 
 zapit_LDADD = \
+	$(top_builddir)/lib/libzapitclient.la \
+	$(top_builddir)/src/zapci/libzapci.la \
+	$(top_builddir)/src/zapost/libzapost.la \
+	$(top_builddir)/src/zapsi/libzapsi.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
 	@XML_LIBS@ \
-	$(top_builddir)/lib/libzapitclient.la \
-	zapci/libzapci.la \
-	zapost/libzapost.la \
-	zapsi/libzapsi.la \
 	-lpthread
-
-AM_CPPFLAGS = -pedantic -Werror
-AM_CXXFLAGS = -fno-rtti -fno-exceptions
 
 install-data-local:
 	$(INSTALL) -d $(CONFIGDIR)/zapit
-

@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.32 2002/12/13 12:41:13 thegoodguy Exp $
+ * $Id: nit.cpp,v 1.33 2003/01/30 17:21:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -19,29 +19,24 @@
  *
  */
 
-/* system c */
-#include <fcntl.h>
-#include <stdio.h>
-#include <unistd.h>
-
 /* system c++ */
 #include <map>
 
 /* zapit */
+#include <zapit/debug.h>
 #include <zapit/descriptors.h>
 #include <zapit/dmx.h>
-#include <zapit/debug.h>
 #include <zapit/getservices.h>
 #include <zapit/nit.h>
-#include <zapit/settings.h>  // DEMUX_DEVICE
 
 #define NIT_SIZE 1024
 
-extern std::map <unsigned int, transponder> transponders;
+extern std::map<unsigned int, transponder> transponders;
 
-int parse_nit (unsigned char DiSEqC)
+int parse_nit(unsigned char DiSEqC)
 {
-	int demux_fd;
+	CDemux dmx;
+
 	unsigned char buffer[NIT_SIZE];
 
 	/* position in buffer */
@@ -68,20 +63,9 @@ int parse_nit (unsigned char DiSEqC)
 	mask[0] = 0xFF;
 	mask[4] = 0xFF;
 
-	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
-	{
-		ERROR(DEMUX_DEVICE);
-		return -1;
-	}
-
-	do
-	{
-		if ((setDmxSctFilter(demux_fd, 0x0010, filter, mask) < 0) ||
-		    (readDmx(demux_fd, buffer, NIT_SIZE) < 0))
-		{
-			close(demux_fd);
+	do {
+		if ((dmx.sectionFilter(0x10, filter, mask) < 0) || (dmx.read(buffer, NIT_SIZE) < 0))
 			return -1;
-		}
 
 		section_length = ((buffer[1] & 0x0F) << 8) + buffer[2];
 		network_id = ((buffer[3] << 8)| buffer [4]);
@@ -123,15 +107,10 @@ int parse_nit (unsigned char DiSEqC)
 			}
 		}
 
-		if (!(transport_stream_loop_length = (((buffer[pos] & 0x0F) << 8) | buffer[pos + 1])))
-		{
-			/* WTF? */
-			WARN("nit parsing failed");
-			close(demux_fd);
-			return -3;
-		}
-
 		transport_stream_loop_length = ((buffer[pos] & 0x0F) << 8) | buffer[pos + 1];
+
+		if (!transport_stream_loop_length)
+			return -3;
 
 		for (pos += 2; pos < section_length - 3; pos += transport_descriptors_length + 6)
 		{
@@ -154,11 +133,18 @@ int parse_nit (unsigned char DiSEqC)
 						break;
 
 					case 0x43:
-						if(!satellite_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id, DiSEqC)) return -2;
+						if (satellite_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id, DiSEqC) < 0)
+							return -2;
 						break;
 
 					case 0x44:
-						if(!cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id)) return -2;
+						if (cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id) < 0);
+							return -2;
+						break;
+
+					case 0x5A:
+						if (terrestrial_delivery_system_descriptor(buffer + pos2) < 0)
+							return -2;
 						break;
 
 					case 0x5F:
@@ -179,10 +165,8 @@ int parse_nit (unsigned char DiSEqC)
 				}
 			}
 		}
-	}
-	while (filter[4]++ != buffer[7]);
+	} while (filter[4]++ != buffer[7]);
 
-	close(demux_fd);
 	return 0;
 }
 

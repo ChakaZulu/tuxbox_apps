@@ -1,22 +1,35 @@
 /*
- * $Id: scan.cpp,v 1.94 2002/12/30 19:47:50 obi Exp $
+ * $Id: scan.cpp,v 1.95 2003/01/30 17:21:16 obi Exp $
+ *
+ * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
 
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 /* libevent */
 #include <eventserver.h>
 
-#include <zapit/bat.h>
 #include <zapit/bouquets.h>
 #include <zapit/client/zapitclient.h>
 #include <zapit/debug.h>
 #include <zapit/frontend.h>
 #include <zapit/nit.h>
-#include <zapit/pat.h>
 #include <zapit/scan.h>
 #include <zapit/sdt.h>
 #include <zapit/settings.h>
@@ -40,10 +53,9 @@ extern CFrontend *frontend;
 extern xmlDocPtr scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
 extern CZapitClient::bouquetMode bouquetMode;
-
 extern CEventServer *eventServer;
 
-void stop_scan()
+void stop_scan(void)
 {
 	/* notify client about end of scan */
 	scan_runs = 0;
@@ -63,7 +75,7 @@ void stop_scan()
 }
 
 
-int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun (uint32_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
+int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(uint32_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
 {
 	if (scantransponders.find(TsidOnid) == scantransponders.end())
 	{
@@ -103,16 +115,16 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun (uint32_t TsidOnid, struc
 /* build transponder for cable-users with sat-feed*/
 int build_bf_transponder(struct dvb_frontend_parameters *feparams)
 {
-	if (!frontend->tuneFrequency(feparams, 0, 0))
+	if (frontend->setParameters(feparams, 0, 0) < 0)
 		return -1;
 
 	return bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(get_sdt_TsidOnid(), feparams, 0, 0);
 }
 
 
-int get_nits (struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t DiSEqC)
+int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t DiSEqC)
 {
-	if (!frontend->tuneFrequency(feparams, polarization, DiSEqC))
+	if (frontend->setParameters(feparams, polarization, DiSEqC) < 0)
 		return -1;
 
 	if ((status = parse_nit(DiSEqC)) <= -2) /* nit unavailable */
@@ -122,13 +134,13 @@ int get_nits (struct dvb_frontend_parameters *feparams, uint8_t polarization, ui
 }
 
 
-int get_sdts()
+int get_sdts(void)
 {
 	stiterator tI;
 
 	for (tI = scantransponders.begin(); tI != scantransponders.end(); tI++) {
 
-		if (!frontend->tuneFrequency(&tI->second.feparams, tI->second.polarization, tI->second.DiSEqC))
+		if (frontend->setParameters(&tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) < 0)
 			continue;
 
 		INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
@@ -139,7 +151,7 @@ int get_sdts()
 	return 0;
 }
 
-FILE *write_xml_header (const char *filename)
+FILE *write_xml_header(const char *filename)
 {
 	FILE *fd = fopen(filename, "w");
 
@@ -165,7 +177,7 @@ int write_xml_footer(FILE *fd)
 	return -1;
 }
 
-void write_bouquets()
+void write_bouquets(void)
 {
 	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS) {
 		INFO("removing existing bouquets");
@@ -466,25 +478,20 @@ void *start_scanthread(void *param)
 	pthread_exit(0);
 }
 
-char * getFrontendName()
+char *getFrontendName(void)
 {
-    if ((frontend == NULL) || (frontend->isInitialized() == false))
-	return NULL;
+	if (!frontend)
+		return NULL;
 
-    switch (frontend->getInfo()->type) {
-        case FE_QPSK:   /* satellite frontend */
-	    return "sat";
-	    break;
-
-        case FE_QAM:    /* cable frontend */
-	    return "cable";
-	    break;
-
-        case FE_OFDM:   /* terrestrial frontend */
-	    return "terrestrial";
-	    break;
-
-        default:        /* unsupported frontend */
-	    return NULL;
-    }
+	switch (frontend->getInfo()->type) {
+	case FE_QPSK:   /* satellite frontend */
+		return "sat";
+	case FE_QAM:    /* cable frontend */
+		return "cable";
+	case FE_OFDM:   /* terrestrial frontend */
+		return "terrestrial";
+	default:        /* unsupported frontend */
+		return NULL;
+	}
 }
+

@@ -1,7 +1,7 @@
 /*
- * $Id: descriptors.h,v 1.16 2002/12/10 00:44:00 Homar Exp $
+ * $Id: descriptors.h,v 1.17 2003/01/30 17:21:16 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,85 +19,85 @@
  *
  */
 
-#ifndef __descriptors_h__
-#define __descriptors_h__
+#ifndef __zapit_descriptors_h__
+#define __zapit_descriptors_h__
 
 #include "types.h"
 
-uint8_t generic_descriptor (uint8_t *buffer);
-uint8_t video_stream_descriptor (uint8_t *buffer);
-uint8_t audio_stream_descriptor (uint8_t *buffer);
-uint8_t hierarchy_descriptor (uint8_t *buffer);
-uint8_t registration_descriptor (uint8_t *buffer);
-uint8_t data_stream_alignment_descriptor (uint8_t *buffer);
-uint8_t target_background_grid_descriptor (uint8_t *buffer);
-uint8_t Video_window_descriptor (uint8_t *buffer);
-uint8_t CA_descriptor (uint8_t *buffer, uint16_t ca_system_id, uint16_t* ca_pid);
-uint8_t ISO_639_language_descriptor (uint8_t *buffer);
-uint8_t System_clock_descriptor (uint8_t *buffer);
-uint8_t Multiplex_buffer_utilization_descriptor (uint8_t *buffer);
-uint8_t Copyright_descriptor (uint8_t *buffer);
-uint8_t Maximum_bitrate_descriptor (uint8_t *buffer);
-uint8_t Private_data_indicator_descriptor (uint8_t *buffer);
-uint8_t Smoothing_buffer_descriptor (uint8_t *buffer);
-uint8_t STD_descriptor (uint8_t *buffer);
-uint8_t IBP_descriptor (uint8_t *buffer);
-uint8_t MPEG4_video_descriptor (uint8_t *buffer);
-uint8_t MPEG4_audio_descriptor (uint8_t *buffer);
-uint8_t IOD_descriptor (uint8_t *buffer);
-uint8_t SL_descriptor (uint8_t *buffer);
-uint8_t FMC_descriptor (uint8_t *buffer);
-uint8_t External_ES_ID_descriptor (uint8_t *buffer);
-uint8_t MuxCode_descriptor (uint8_t *buffer);
-uint8_t FmxBufferSize_descriptor (uint8_t *buffer);
-uint8_t MultiplexBuffer_descriptor (uint8_t *buffer);
-uint8_t FlexMuxTiming_descriptor (uint8_t *buffer);
-uint8_t network_name_descriptor (uint8_t *buffer);
-uint8_t service_list_descriptor (uint8_t *buffer, uint16_t original_network_id);
-uint8_t stuffing_descriptor (uint8_t *buffer);
-uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC);
-uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_stream_id, uint16_t original_network_id);
-uint8_t VBI_data_descriptor (uint8_t *buffer);
-uint8_t VBI_teletext_descriptor (uint8_t *buffer);
-uint8_t bouquet_name_descriptor (uint8_t *buffer);
-uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const uint8_t DiSEqC, bool free_CA_mode);
-uint8_t country_availability_descriptor (uint8_t *buffer);
-uint8_t linkage_descriptor (uint8_t *buffer);
-uint8_t NVOD_reference_descriptor (uint8_t *buffer);
-uint8_t time_shifted_service_descriptor (uint8_t *buffer);
-uint8_t short_event_descriptor (uint8_t *buffer);
-uint8_t extended_event_descriptor (uint8_t *buffer);
-uint8_t time_shifted_event_descriptor (uint8_t *buffer);
-uint8_t component_descriptor (uint8_t *buffer);
-uint8_t mosaic_descriptor (uint8_t *buffer);
-uint8_t stream_identifier_descriptor (uint8_t *buffer);
-uint8_t CA_identifier_descriptor (uint8_t *buffer);
-uint8_t content_descriptor (uint8_t *buffer);
-uint8_t parental_rating_descriptor (uint8_t *buffer);
-uint8_t teletext_descriptor (uint8_t *buffer);
-uint8_t telephone_descriptor (uint8_t *buffer);
-uint8_t local_time_offset_descriptor (uint8_t* buffer);
-uint8_t subtitling_descriptor (uint8_t *buffer);
-uint8_t terrestrial_delivery_system_descriptor (uint8_t *buffer);
-uint8_t multilingual_network_name_descriptor (uint8_t *buffer);
-uint8_t multilingual_bouquet_name_descriptor (uint8_t *buffer);
-uint8_t multilingual_service_name_descriptor (uint8_t *buffer);
-uint8_t multilingual_component_descriptor (uint8_t *buffer);
-uint8_t private_data_specifier_descriptor (uint8_t *buffer);
-uint8_t service_move_descriptor (uint8_t *buffer);
-uint8_t short_smoothing_buffer_descriptor (uint8_t *buffer);
-uint8_t frequency_list_descriptor (uint8_t *buffer);
-uint8_t partial_transport_stream_descriptor (uint8_t *buffer);
-uint8_t data_broadcast_descriptor (uint8_t *buffer);
-uint8_t CA_system_descriptor (uint8_t *buffer);
-uint8_t data_broadcast_id_descriptor (uint8_t *buffer);
-uint8_t transport_stream_descriptor (uint8_t *buffer);
-uint8_t DSNG_descriptor (uint8_t *buffer);
-uint8_t PDC_descriptor (uint8_t *buffer);
-uint8_t AC3_descriptor (uint8_t *buffer);
-uint8_t ancillary_data_descriptor (uint8_t *buffer);
-uint8_t cell_list_descriptor (uint8_t *buffer);
-uint8_t cell_frequency_link_descriptor (uint8_t *buffer);
-uint8_t announcement_support_descriptor (uint8_t *buffer);
+void generic_descriptor(const unsigned char * const buffer);
+void video_stream_descriptor(const unsigned char * const buffer);
+void audio_stream_descriptor(const unsigned char * const buffer);
+void hierarchy_descriptor(const unsigned char * const buffer);
+void registration_descriptor(const unsigned char * const buffer);
+void data_stream_alignment_descriptor(const unsigned char * const buffer);
+void target_background_grid_descriptor(const unsigned char * const buffer);
+void Video_window_descriptor(const unsigned char * const buffer);
+void CA_descriptor(const unsigned char * const buffer, uint16_t ca_system_id, uint16_t* ca_pid);
+void ISO_639_language_descriptor(const unsigned char * const buffer);
+void System_clock_descriptor(const unsigned char * const buffer);
+void Multiplex_buffer_utilization_descriptor(const unsigned char * const buffer);
+void Copyright_descriptor(const unsigned char * const buffer);
+void Maximum_bitrate_descriptor(const unsigned char * const buffer);
+void Private_data_indicator_descriptor(const unsigned char * const buffer);
+void Smoothing_buffer_descriptor(const unsigned char * const buffer);
+void STD_descriptor(const unsigned char * const buffer);
+void IBP_descriptor(const unsigned char * const buffer);
+void MPEG4_video_descriptor(const unsigned char * const buffer);
+void MPEG4_audio_descriptor(const unsigned char * const buffer);
+void IOD_descriptor(const unsigned char * const buffer);
+void SL_descriptor(const unsigned char * const buffer);
+void FMC_descriptor(const unsigned char * const buffer);
+void External_ES_ID_descriptor(const unsigned char * const buffer);
+void MuxCode_descriptor(const unsigned char * const buffer);
+void FmxBufferSize_descriptor(const unsigned char * const buffer);
+void MultiplexBuffer_descriptor(const unsigned char * const buffer);
+void FlexMuxTiming_descriptor(const unsigned char * const buffer);
+void network_name_descriptor(const unsigned char * const buffer);
+void service_list_descriptor(const unsigned char * const buffer, uint16_t original_network_id);
+void stuffing_descriptor(const unsigned char * const buffer);
+int satellite_delivery_system_descriptor(const unsigned char * const buffer, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t DiSEqC);
+int cable_delivery_system_descriptor(const unsigned char * const buffer, uint16_t transport_stream_id, uint16_t original_network_id);
+void VBI_data_descriptor(const unsigned char * const buffer);
+void VBI_teletext_descriptor(const unsigned char * const buffer);
+void bouquet_name_descriptor(const unsigned char * const buffer);
+void service_descriptor(const unsigned char * const buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const uint8_t DiSEqC, bool free_CA_mode);
+void country_availability_descriptor(const unsigned char * const buffer);
+void linkage_descriptor(const unsigned char * const buffer);
+int NVOD_reference_descriptor(const unsigned char * const buffer, const unsigned int num, t_transport_stream_id * const, t_original_network_id * const, t_service_id * const);
+void time_shifted_service_descriptor(const unsigned char * const buffer);
+void short_event_descriptor(const unsigned char * const buffer);
+void extended_event_descriptor(const unsigned char * const buffer);
+void time_shifted_event_descriptor(const unsigned char * const buffer);
+void component_descriptor(const unsigned char * const buffer);
+void mosaic_descriptor(const unsigned char * const buffer);
+void stream_identifier_descriptor(const unsigned char * const buffer);
+void CA_identifier_descriptor(const unsigned char * const buffer);
+void content_descriptor(const unsigned char * const buffer);
+void parental_rating_descriptor(const unsigned char * const buffer);
+void teletext_descriptor(const unsigned char * const buffer);
+void telephone_descriptor(const unsigned char * const buffer);
+void local_time_offset_descriptor(const unsigned char * const buffer);
+void subtitling_descriptor(const unsigned char * const buffer);
+int terrestrial_delivery_system_descriptor(const unsigned char * const buffer);
+void multilingual_network_name_descriptor(const unsigned char * const buffer);
+void multilingual_bouquet_name_descriptor(const unsigned char * const buffer);
+void multilingual_service_name_descriptor(const unsigned char * const buffer);
+void multilingual_component_descriptor(const unsigned char * const buffer);
+void private_data_specifier_descriptor(const unsigned char * const buffer);
+void service_move_descriptor(const unsigned char * const buffer);
+void short_smoothing_buffer_descriptor(const unsigned char * const buffer);
+void frequency_list_descriptor(const unsigned char * const buffer);
+void partial_transport_stream_descriptor(const unsigned char * const buffer);
+void data_broadcast_descriptor(const unsigned char * const buffer);
+void CA_system_descriptor(const unsigned char * const buffer);
+void data_broadcast_id_descriptor(const unsigned char * const buffer);
+void transport_stream_descriptor(const unsigned char * const buffer);
+void DSNG_descriptor(const unsigned char * const buffer);
+void PDC_descriptor(const unsigned char * const buffer);
+void AC3_descriptor(const unsigned char * const buffer);
+void ancillary_data_descriptor(const unsigned char * const buffer);
+void cell_list_descriptor(const unsigned char * const buffer);
+void cell_frequency_link_descriptor(const unsigned char * const buffer);
+void announcement_support_descriptor(const unsigned char * const buffer);
 
-#endif /* __descriptors_h__ */
+#endif /* __zapit_descriptors_h__ */

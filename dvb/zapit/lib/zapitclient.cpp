@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.74 2003/01/02 13:14:03 obi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.75 2003/01/30 17:21:16 obi Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -270,6 +270,17 @@ void CZapitClient::getPIDS( responseGetPIDs& pids )
 	pids.APIDs.clear();
 	while ( CBasicClient::receive_data((char*)&responseAPID, sizeof(responseAPID)))
 		pids.APIDs.push_back(responseAPID );
+	close_connection();
+}
+
+void CZapitClient::zaptoNvodSubService(int num)
+{
+	CZapitMessages::commandInt msg;
+
+	msg.val = num;
+
+	send(CZapitMessages::CMD_NVOD_SUBSERVICE_NUM, (char*)&msg, sizeof(msg));
+
 	close_connection();
 }
 

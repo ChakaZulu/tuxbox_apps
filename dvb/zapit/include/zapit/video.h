@@ -1,7 +1,7 @@
 /*
- * $Id: video.h,v 1.4 2002/11/02 17:21:15 obi Exp $
+ * $Id: video.h,v 1.5 2003/01/30 17:21:16 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,8 @@
  *
  */
 
-#ifndef __video_h__
-#define __video_h__
-
-#include <time.h>
+#ifndef __zapit_video_h__
+#define __zapit_video_h__
 
 #include <linux/dvb/video.h>
 
@@ -32,41 +30,33 @@ class CVideo
 		/* video device */
 		int fd;
 
-		/* video status */
-		struct video_status status;
-
-		/* true when construction was complete */
-		bool initialized;
-
 	public:
 		/* constructor & destructor */
-		CVideo ();
-		~CVideo ();
-
-		bool isInitialized () { return initialized; }
+		CVideo(void);
+		~CVideo(void);
 
 		/* aspect ratio */
-		video_format_t getAspectRatio () { return status.video_format; }
-		int setAspectRatio (video_format_t format);
+		video_format_t getAspectRatio(void);
+		int setAspectRatio(video_format_t format);
 
 		/* cropping mode */
-		video_displayformat_t getCroppingMode () { return status.display_format; }
-		int setCroppingMode (video_displayformat_t format);
+		video_displayformat_t getCroppingMode(void);
+		int setCroppingMode(video_displayformat_t format);
 
 		/* stream source */
-		video_stream_source_t getSource () { return status.stream_source; }
-		int setSource (video_stream_source_t source);
+		video_stream_source_t getSource(void);
+		int setSource(video_stream_source_t source);
 
 		/* blank on freeze */
-		bool getBlank () { return status.video_blank; }
-		int setBlank (bool blank);
+		int getBlank(void);
+		int setBlank(int enable);
 
 		/* get play state */
-		bool isPlaying () { return (status.play_state == VIDEO_PLAYING); }
+		video_play_state_t getPlayState(void);
 
 		/* change video play state */
-		int start ();
-		int stop ();
+		int start(void);
+		int stop(void);
 };
 
-#endif /* __video_h__ */
+#endif /* __zapit_video_h__ */

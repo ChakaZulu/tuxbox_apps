@@ -1,7 +1,7 @@
 /*
- * $Id: dmx.cpp,v 1.14 2002/12/27 16:59:41 obi Exp $
+ * $Id: dmx.cpp,v 1.15 2003/01/30 17:21:17 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
  *
  */
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -26,13 +27,23 @@
 
 #include <zapit/dmx.h>
 #include <zapit/debug.h>
+#include <zapit/settings.h>
 
-int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigned char * mask)
+CDemux::CDemux(void)
+{
+	if ((fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
+		ERROR(DEMUX_DEVICE);
+}
+
+CDemux::~CDemux(void)
+{
+	if (fd >= 0)
+		close(fd);
+}
+
+int CDemux::sectionFilter(const unsigned short pid, const unsigned char * const filter, const unsigned char * const mask)
 {
 	struct dmx_sct_filter_params sctFilterParams;
-
-	if (fd < 0)
-		return -1;
 
 	memset(&sctFilterParams.filter, 0, sizeof(struct dmx_filter));
 	memcpy(&sctFilterParams.filter.filter, filter, DMX_FILTER_SIZE);
@@ -130,29 +141,17 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 		return -1;
 	}
 
-	if (ioctl(fd, DMX_SET_FILTER, &sctFilterParams) < 0)
-	{
-		ERROR("DMX_SET_FILTER");
-		return -1;
-	}
-
-	return 0;
+	return fop(ioctl, DMX_SET_FILTER, &sctFilterParams);
 }
 
-int setDmxPesFilter (int fd, dmx_output_t output, dmx_pes_type_t pes_type, unsigned short pid)
+int CDemux::pesFilter(const unsigned short pid, const dmx_output_t output, const dmx_pes_type_t pes_type)
 {
 	dmx_pes_filter_params pesFilterParams;
-
-	if (fd < 0)
-		return -1;
 
 	if ((pid <= 0x0001) && (pes_type != DMX_PES_PCR))
 		return -1;
 
-	if ((pid >= 0x0002) && (pid <= 0x0000F))
-		return -1;
-
-	if (pid >= 0x1FFF)
+	if (((pid >= 0x0002) && (pid <= 0x0000F)) || (pid >= 0x1FFF))
 		return -1;
 
 	pesFilterParams.pid = pid;
@@ -161,49 +160,21 @@ int setDmxPesFilter (int fd, dmx_output_t output, dmx_pes_type_t pes_type, unsig
 	pesFilterParams.pes_type = pes_type;
 	pesFilterParams.flags = 0;
 
-	if (ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)
-	{
-		ERROR("DMX_SET_PES_FILTER");
-		return -1;
-	}
-
-	return 0;
+	return fop(ioctl, DMX_SET_PES_FILTER, &pesFilterParams);
 }
 
-int startDmxFilter (int fd)
+int CDemux::start(void)
 {
-	if (fd < 0)
-		return -1;
-
-	if (ioctl(fd, DMX_START) < 0)
-	{
-		ERROR("DMX_START");
-		return -1;
-	}
-
-	return 0;
+	return fop(ioctl, DMX_START);
 }
 
-int stopDmxFilter (int fd)
+int CDemux::stop(void)
 {
-	if (fd < 0)
-		return -1;
-
-	if (ioctl(fd, DMX_STOP) < 0)
-	{
-		ERROR("DMX_STOP");
-		return -1;
-	}
-
-	return 0;
+	return fop(ioctl, DMX_STOP);
 }
 
-int readDmx(int fd, unsigned char * buf, const size_t n)
+int CDemux::read(unsigned char * const buf, const size_t n)
 {
-	int return_value = read(fd, buf, n);
-	
-	if (return_value < 0)
-		ERROR("DMX_READ");
-
-	return return_value;
+	return fop(read, buf, n);
 }
+

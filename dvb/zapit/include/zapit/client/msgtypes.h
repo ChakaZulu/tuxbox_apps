@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.10 2003/01/02 13:14:03 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.11 2003/01/30 17:21:16 obi Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -105,7 +105,9 @@ class CZapitMessages
 			CMD_SET_AUDIOCHAN,
 			CMD_MUTE,
 			CMD_SET_VOLUME,
-			CMD_SET_STANDBY
+			CMD_SET_STANDBY,
+
+			CMD_NVOD_SUBSERVICE_NUM
 		};
 
 	struct commandBoolean

@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.30 2002/12/26 06:47:31 obi Exp $
+ * $Id: cam.cpp,v 1.31 2003/01/30 17:21:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
  *             thegoodguy         <thegoodguy@berlios.de>
@@ -26,17 +26,17 @@
 #include <connection/messagetools.h>  /* get_length_field_size */
 
 
-const unsigned char   CCam::getVersion   () const
+const unsigned char CCam::getVersion(void) const
 {
 	return 0x9F;
 }
 
-const          char * CCam::getSocketName() const
+const char *CCam::getSocketName(void) const
 {
 	return CAMD_UDS_NAME;
 }
 
-bool CCam::sendMessage(const char* data, const size_t length)
+bool CCam::sendMessage(const char * const data, const size_t length)
 {
 	if (!open_connection())
 		return false;
@@ -48,9 +48,9 @@ bool CCam::sendMessage(const char* data, const size_t length)
 	return return_value;
 }
 
-bool CCam::setCaPmt(CCaPmt * caPmt)
+bool CCam::setCaPmt(CCaPmt * const caPmt)
 {
-	if (caPmt == NULL)
+	if (!caPmt)
 		return true;
 
 	unsigned int size = caPmt->getLength();

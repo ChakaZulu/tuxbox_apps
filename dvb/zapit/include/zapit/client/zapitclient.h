@@ -272,6 +272,8 @@ class CZapitClient:public CBasicClient
 	/* get dvb transmission type */
 	delivery_system_t getDeliverySystem(void);
 
+	void zaptoNvodSubService(int num);
+
 	/****************************************/
 	/*					*/
 	/* Scanning stuff			*/

@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.42 2003/01/17 16:26:42 obi Exp $
+ * $Id: sdt.cpp,v 1.43 2003/01/30 17:21:17 obi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -34,9 +34,10 @@
 #define SDT_SIZE 1024
 
 
-uint32_t get_sdt_TsidOnid(void)
+unsigned long get_sdt_TsidOnid(void)
 {
-	int demux_fd;
+	CDemux dmx;
+	
 	unsigned char buffer[SDT_SIZE];
 
 	/* service_description_section elements */
@@ -52,34 +53,86 @@ uint32_t get_sdt_TsidOnid(void)
 	filter[0] = 0x42;
 	mask[0] = 0xFF;
 
-	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
-	{
-		ERROR(DEMUX_DEVICE);
+	if ((dmx.sectionFilter(0x11, filter, mask) < 0) || (dmx.read(buffer, SDT_SIZE) < 0))
 		return 0;
-	}
-
-	if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) ||
-	    (readDmx(demux_fd, buffer, SDT_SIZE) < 0))
-	{
-		close(demux_fd);
-		return 0;
-	}
-
-	close(demux_fd);
 
 	transport_stream_id = (buffer[3] << 8) | buffer[4];
 	original_network_id = (buffer[8] << 8) | buffer[9];
 
-	return ((transport_stream_id << 16) | original_network_id );
+	return ((transport_stream_id << 16) | original_network_id);
 }
 
+int nvod_service_ids(
+	const t_transport_stream_id ref_tsid,
+	const t_original_network_id ref_onid,
+	const t_service_id ref_sid,
+	const unsigned int num,
+	t_transport_stream_id * const tsid,
+	t_original_network_id * const onid,
+	t_service_id * const sid)
+{
+	CDemux dmx;
+
+	/* position in buffer */
+	unsigned short pos;
+	unsigned short pos2;
+
+	/* service_description_section elements */
+	unsigned short section_length;
+	unsigned short service_id;
+	unsigned short descriptors_loop_length;
+
+	unsigned char buffer[SDT_SIZE];
+	unsigned char filter[DMX_FILTER_SIZE];
+	unsigned char mask[DMX_FILTER_SIZE];
+
+	filter[0] = 0x42;
+	filter[1] = (ref_tsid >> 8) & 0xff;
+	filter[2] = ref_tsid & 0xff;
+	filter[3] = 0x00;
+	filter[4] = 0x00;
+	filter[5] = 0x00;
+	filter[6] = (ref_onid >> 8) & 0xff;
+	filter[7] = ref_onid & 0xff;
+	memset(&filter[8], 0x00, 8);
+
+	mask[0] = 0xFF;
+	mask[1] = 0xFF;
+	mask[2] = 0xFF;
+	mask[3] = 0x00;
+	mask[4] = 0xFF;
+	mask[5] = 0x00;
+	mask[6] = 0xFF;
+	mask[7] = 0xFF;
+	memset(&mask[8], 0x00, 8);
+
+	do {
+		if ((dmx.sectionFilter(0x11, filter, mask) < 0) || (dmx.read(buffer, SDT_SIZE) < 0))
+			return -1;
+
+		section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
+
+		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5) {
+			service_id = (buffer[pos] << 8) | buffer[pos + 1];
+			descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
+			if (service_id == ref_sid)
+				for (pos2 = pos + 5; pos2 < pos + descriptors_loop_length + 5; pos2 += buffer[pos2 + 1] + 2)
+					if (buffer[pos2] == 0x4b)
+						return NVOD_reference_descriptor(&buffer[pos2], num, tsid, onid, sid);
+		}
+	}
+	while (filter[4]++ != buffer[7]);
+
+	return -1;
+}
 
 int parse_sdt(
 	const t_transport_stream_id p_transport_stream_id,
 	const t_original_network_id p_original_network_id,
-	const uint8_t DiSEqC)
+	const unsigned char DiSEqC)
 {
-	int demux_fd;
+	CDemux dmx;
+
 	unsigned char buffer[SDT_SIZE];
 
 	/* position in buffer */
@@ -121,23 +174,15 @@ int parse_sdt(
 	mask[7] = 0xFF;
 	memset(&mask[8], 0x00, 8);
 
-	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
-		ERROR(DEMUX_DEVICE);
-		return -1;
-	}
-
 	do {
-		if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) || (readDmx(demux_fd, buffer, SDT_SIZE) < 0)) {
-			close(demux_fd);
+		if ((dmx.sectionFilter(0x11, filter, mask) < 0) || (dmx.read(buffer, SDT_SIZE) < 0))
 			return -1;
-		}
 
 		section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
 		transport_stream_id = (buffer[3] << 8) | buffer[4];
 		original_network_id = (buffer[8] << 8) | buffer[9];
 
-		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5)
-		{
+		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5) {
 			service_id = (buffer[pos] << 8) | buffer[pos + 1];
 			EIT_schedule_flag = buffer[pos + 2] & 0x02;
 			EIT_present_following_flag = buffer[pos + 2] & 0x01;
@@ -145,10 +190,8 @@ int parse_sdt(
 			free_CA_mode = buffer [pos + 3] & 0x10;
 			descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
 
-			for (pos2 = pos + 5; pos2 < pos + descriptors_loop_length + 5; pos2 += ((sdt_generic_descriptor*)(&buffer[pos2]))->descriptor_length + sizeof(sdt_generic_descriptor))
-			{
-				switch (((sdt_generic_descriptor*)(&buffer[pos2]))->descriptor_tag)
-				{
+			for (pos2 = pos + 5; pos2 < pos + descriptors_loop_length + 5; pos2 += buffer[pos2 + 1] + 2) {
+				switch (buffer[pos2]) {
 				case 0x0A:
 					ISO_639_language_descriptor(buffer + pos2);
 					break;
@@ -178,7 +221,7 @@ int parse_sdt(
 					break;
 
 				case 0x4B:
-					NVOD_reference_descriptor(buffer + pos2);
+					//NVOD_reference_descriptor(buffer + pos2);
 					break;
 
 				case 0x4C:
@@ -253,7 +296,6 @@ int parse_sdt(
 	}
 	while (filter[4]++ != buffer[7]);
 
-	close(demux_fd);
 	return 0;
 }
 

@@ -1,8 +1,8 @@
 /*
- * $Id: cam.h,v 1.23 2002/12/08 10:46:10 thegoodguy Exp $
+ * $Id: cam.h,v 1.24 2003/01/30 17:21:16 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
- *             thegoodguy         <thegoodguy@berlios.de>
+ * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>,
+ *               thegoodguy         <thegoodguy@berlios.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,22 +20,21 @@
  *
  */
 
-#ifndef __cam_h__
-#define __cam_h__
+#ifndef __zapit_cam_h__
+#define __zapit_cam_h__
 
 #include "ci.h"
 #include <connection/basicclient.h>
 
 class CCam : public CBasicClient
 {
- private:
-	virtual const unsigned char   getVersion   () const;
-	virtual const          char * getSocketName() const;
+	private:
+		virtual const unsigned char getVersion(void) const;
+		virtual const char *getSocketName(void) const;
+		bool sendMessage(const char * const data, const size_t length);
 
-	bool sendMessage(const char* data, const size_t length);
-
- public:
-	bool setCaPmt (CCaPmt* caPmt);
+	public:
+		bool setCaPmt(CCaPmt * const caPmt);
 };
 
 #endif /* __cam_h__ */

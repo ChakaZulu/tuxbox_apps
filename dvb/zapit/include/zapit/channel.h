@@ -1,8 +1,8 @@
 /*
- * $Id: channel.h,v 1.18 2003/01/17 16:26:41 obi Exp $
+ * $Id: channel.h,v 1.19 2003/01/30 17:21:16 obi Exp $
  *
- * (C) 2002 by Steffen Hehn <mcclean@berlios.de>
- * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002 Steffen Hehn <mcclean@berlios.de>
+ * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef __channel_h__
-#define __channel_h__
+#ifndef __zapit_channel_h__
+#define __zapit_channel_h__
 
 /* system */
 #include <string>
@@ -117,4 +117,4 @@ class CZapitChannel
 		void resetPids(void);
 };
 
-#endif /* __channel_h__ */
+#endif /* __zapit_channel_h__ */

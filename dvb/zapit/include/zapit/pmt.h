@@ -1,7 +1,7 @@
 /*
- * $Id: pmt.h,v 1.7 2002/10/12 20:19:44 obi Exp $
+ * $Id: pmt.h,v 1.8 2003/01/30 17:21:16 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,12 @@
  *
  */
 
-#ifndef __pmt_h__
-#define __pmt_h__
+#ifndef __zapit_pmt_h__
+#define __zapit_pmt_h__
 
 #include "channel.h"
 #include "ci.h"
 
-int parse_pmt (int demux_fd, CZapitChannel * channel);
-unsigned short parse_ES_info (unsigned char *buffer, CZapitChannel * channel, CCaPmt * caPmt);
+int parse_pmt(CZapitChannel * const channel);
 
-#endif /* __pmt_h__ */
+#endif /* __zapit_pmt_h__ */

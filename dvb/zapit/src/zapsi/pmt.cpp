@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.29 2002/12/13 12:41:13 thegoodguy Exp $
+ * $Id: pmt.cpp,v 1.30 2003/01/30 17:21:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -19,12 +19,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
-
-/* system c */
-#include <stdio.h>
-
-/* system c++ */
-#include <string>
 
 /* zapit */
 #include <zapit/descriptors.h>
@@ -51,7 +45,7 @@
  * 0xc6 User Private (Canal+)
  */
 
-unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, CCaPmt * caPmt)
+unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel * const channel, CCaPmt * const caPmt)
 {
 	unsigned short ES_info_length;
 	unsigned short pos;
@@ -64,7 +58,7 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 	unsigned char componentTag = 0xFF;
 
 	/* elementary stream info for ca pmt */
-	CEsInfo * esInfo = new CEsInfo();
+	CEsInfo *esInfo = new CEsInfo();
 
 	esInfo->stream_type = buffer[0];
 	esInfo->reserved1 = buffer[1] >> 5;
@@ -73,13 +67,11 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 
 	ES_info_length = ((buffer[3] & 0x0F) << 8) | buffer[4];
 
-	for (pos = 5; pos < ES_info_length + 5; pos += descriptor_length + 2)
-	{
+	for (pos = 5; pos < ES_info_length + 5; pos += descriptor_length + 2) {
 		descriptor_tag = buffer[pos];
 		descriptor_length = buffer[pos + 1];
 
-		switch (descriptor_tag)
-		{
+		switch (descriptor_tag) {
 			case 0x02:
 				video_stream_descriptor(buffer + pos);
 				break;
@@ -94,9 +86,7 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 
 			case 0x0A: /* ISO_639_language_descriptor */
 				for (i = 0; i < 3; i++)
-				{
 					description += buffer[pos + i + 2];
-				}
 				break;
 
 			case 0x13: /* Defined in ISO/IEC 13818-6 */
@@ -188,8 +178,7 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 		}
 	}
 
-	switch (esInfo->stream_type)
-	{
+	switch (esInfo->stream_type) {
 	case 0x01:
 	case 0x02:
 		channel->setVideoPid(esInfo->elementary_PID);
@@ -198,9 +187,7 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 	case 0x03:
 	case 0x04:
 		if (description == "")
-		{
 			description = esInfo->elementary_PID;
-		}
 		channel->addAudioChannel(esInfo->elementary_PID, false, description, componentTag);
 		break;
 
@@ -208,10 +195,8 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 		break;
 
 	case 0x06:
-		if (isAc3)
-		{
-			if (description == "")
-			{
+		if (isAc3) {
+			if (description == "") {
 				description = esInfo->elementary_PID;
 				description += " (AC3)";
 			}
@@ -247,8 +232,10 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 	return ES_info_length;
 }
 
-int parse_pmt (int demux_fd, CZapitChannel * channel)
+int parse_pmt(CZapitChannel * const channel)
 {
+	CDemux dmx;
+
 	unsigned char buffer[PMT_SIZE];
 
 	/* current position in buffer */
@@ -275,15 +262,12 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 	mask[2] = 0xFF;
 
 	if (channel->getPmtPid() == 0)
-	{
-		return -1;
-	}
-
-	if ((setDmxSctFilter(demux_fd, channel->getPmtPid(), filter, mask) < 0) ||
-	    (readDmx(demux_fd, buffer, PMT_SIZE) < 0))
 		return -1;
 
-	CCaPmt * caPmt = new CCaPmt();
+	if ((dmx.sectionFilter(channel->getPmtPid(), filter, mask) < 0) || (dmx.read(buffer, PMT_SIZE) < 0))
+		return -1;
+
+	CCaPmt *caPmt = new CCaPmt();
 
 	/* ca pmt */
 	caPmt->program_number = (buffer[3] << 8) + buffer[4];
@@ -297,22 +281,16 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 	channel->setPcrPid(((buffer[8] & 0x1F) << 8) + buffer[9]);
 	program_info_length = ((buffer[10] & 0x0F) << 8) | buffer[11];
 
-	if (program_info_length != 0)
-	{
+	if (program_info_length)
 		for (i = 12; i < 12 + program_info_length; i += buffer[i + 1] + 2)
-		{
-			switch (buffer[i])
-			{
+			switch (buffer[i]) {
 			case 0x09:
 				caPmt->addCaDescriptor(buffer + i);
 				break;
-
 			default:
 				DBG("decriptor_tag: %02x", buffer[i]);
 				break;
 			}
-		}
-	}
 
 	/* pmt */
 	for (i = 12 + program_info_length; i < section_length - 1; i += ES_info_length + 5)
@@ -320,7 +298,6 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 
 	channel->setCaPmt(caPmt);
 	channel->setPidsFlag();
-
 	return 0;
 }
 

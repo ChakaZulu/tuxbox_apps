@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.11 2002/11/18 00:27:57 obi Exp $
+ * $Id: audio.cpp,v 1.12 2003/01/30 17:21:17 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -23,182 +23,93 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include <zapit/audio.h>
 #include <zapit/debug.h>
 #include <zapit/settings.h>
 
-
-
-CAudio::CAudio()
+CAudio::CAudio(void)
 {
-	initialized = false;
-
 	if ((fd = open(AUDIO_DEVICE, O_RDWR)) < 0)
-	{
 		ERROR(AUDIO_DEVICE);
-	}
-	else if (ioctl(fd, AUDIO_GET_STATUS, &status) < 0)
-	{
-		ERROR("AUDIO_GET_STATUS");
-		close(fd);
-	}
-	else
-	{
-		initialized = true;
-	}
 }
 
-CAudio::~CAudio()
+CAudio::~CAudio(void)
 {
-	if (initialized)
+	if (fd >= 0)
 		close(fd);
 }
 
-int CAudio::setBypassMode (bool enable)
+int CAudio::setBypassMode(int disable)
 {
-	if (ioctl(fd, AUDIO_SET_BYPASS_MODE, enable ? 0 : 1) < 0)
-	{
-		ERROR("AUDIO_SET_BYPASS_MODE");
-		return -1;
-	}
-
-	status.bypass_mode = enable;
-
-	return 0;
+	return fop(ioctl, AUDIO_SET_BYPASS_MODE, disable);
 }
 
-int CAudio::setMute (bool enable)
+int CAudio::setMute(int enable)
 {
-	if (ioctl(fd, AUDIO_SET_MUTE, enable) < 0)
-	{
-		ERROR("AUDIO_SET_MUTE");
-		return -1;
-	}
-
-	status.mute_state = enable;
-
-	return 0;
+	return fop(ioctl, AUDIO_SET_MUTE, enable);
 }
 
-int CAudio::mute ()
+int CAudio::enableBypass(void)
 {
-	if (status.mute_state == false)
-		return setMute(true);
-
-	return -1;
-
+	return setBypassMode(0);
 }
 
-int CAudio::unmute ()
+int CAudio::disableBypass(void)
 {
-	if (status.mute_state == true)
-		return setMute(false);
-
-	return -1;
+	return setBypassMode(1);
 }
 
-int CAudio::enableBypass ()
+int CAudio::mute(void)
 {
-	if (status.bypass_mode == false)
-		return setBypassMode(true);
-
-	return -1;
+	return setMute(1);
 }
 
-int CAudio::disableBypass ()
+int CAudio::unmute(void)
 {
-	if (status.bypass_mode == true)
-		return setBypassMode(false);
-
-	return -1;
+	return setMute(0);
 }
 
-int CAudio::setVolume (unsigned char left, unsigned char right)
+int CAudio::setVolume(unsigned int left, unsigned int right)
 {
-	if ((status.mixer_state.volume_left == left) && (status.mixer_state.volume_right == right))
-		return 0;
-
-	status.mixer_state.volume_left = left;
-	status.mixer_state.volume_right = right;
-
-	if (ioctl(fd, AUDIO_SET_MIXER, &status.mixer_state) < 0)
-	{
-		ERROR("AUDIO_SET_MIXER");
-		return -1;
-	}
-
-	return -1;
+	struct audio_mixer mixer;
+	mixer.volume_left = left;
+	mixer.volume_right = right;
+	return fop(ioctl, AUDIO_SET_MIXER, &mixer);
 }
 
-int CAudio::setSource (audio_stream_source_t source)
+int CAudio::setSource(audio_stream_source_t source)
 {
-	if (status.stream_source == source)
-		return 0;
-
-	if (status.play_state != AUDIO_STOPPED)
-		return -1;
-
-	if (ioctl(fd, AUDIO_SELECT_SOURCE, source) < 0)
-	{
-		ERROR("AUDIO_SELECT_SOURCE");
-		return -1;
-	}
-
-	status.stream_source = source;
-	return 0;
+	return fop(ioctl, AUDIO_SELECT_SOURCE, source);
 }
 
-int CAudio::start ()
+audio_stream_source_t CAudio::getSource(void)
 {
-	if (status.play_state == AUDIO_PLAYING)
-		return 0;
-
-	if (ioctl(fd, AUDIO_PLAY) < 0)
-	{
-		ERROR("AUDIO_PLAY");
-		return -1;
-	}
-
-	status.play_state = AUDIO_PLAYING;
-
-	return 0;
+	struct audio_status status;
+	fop(ioctl, AUDIO_GET_STATUS, &status);
+	return status.stream_source;
 }
 
-int CAudio::stop ()
+int CAudio::start(void)
 {
-	if (status.play_state == AUDIO_STOPPED)
-		return 0;
-
-	if (ioctl(fd, AUDIO_STOP) < 0)
-	{
-		ERROR("AUDIO_STOP");
-		return -1;
-	}
-
-	status.play_state = AUDIO_STOPPED;
-
-	return 0;
+	return fop(ioctl, AUDIO_PLAY);
 }
 
-int CAudio::selectChannel (audio_channel_select_t sel)
+int CAudio::stop(void)
 {
-	if (ioctl(fd, AUDIO_CHANNEL_SELECT, &sel) < 0)
-	{
-		ERROR("AUDIO_CHANNEL_SELECT");
-		return -1;
-	}
-
-	status.channel_select = sel;
-
-	return 0;
+	return fop(ioctl, AUDIO_STOP);
 }
 
-audio_channel_select_t CAudio::getSelectedChannel ()
+int CAudio::setChannel(audio_channel_select_t channel)
 {
+	return fop(ioctl, AUDIO_CHANNEL_SELECT, channel);
+}
+
+audio_channel_select_t CAudio::getChannel(void)
+{
+	struct audio_status status;
+	fop(ioctl, AUDIO_GET_STATUS, &status);
 	return status.channel_select;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.10 2002/12/07 13:37:07 thegoodguy Exp $
+ * $Id: ci.cpp,v 1.11 2003/01/30 17:21:17 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -25,7 +25,7 @@
 /*
  * conditional access descriptors
  */
-CCaDescriptor::CCaDescriptor (unsigned char * buffer)
+CCaDescriptor::CCaDescriptor(const unsigned char * const buffer)
 {
 	descriptor_tag = buffer[0];
 	descriptor_length = buffer[1];
@@ -36,7 +36,7 @@ CCaDescriptor::CCaDescriptor (unsigned char * buffer)
 	private_data_byte = std::vector<unsigned char>(&(buffer[6]), &(buffer[descriptor_length + 2]));
 }
 
-unsigned int CCaDescriptor::writeToBuffer (unsigned char * buffer) // returns number of bytes written
+unsigned int CCaDescriptor::writeToBuffer(unsigned char * const buffer) // returns number of bytes written
 {
 	buffer[0] = descriptor_tag;
 	buffer[1] = descriptor_length;
@@ -54,16 +54,17 @@ unsigned int CCaDescriptor::writeToBuffer (unsigned char * buffer) // returns nu
 /*
  * generic table containing conditional access descriptors
  */
-void CCaTable::addCaDescriptor (unsigned char * buffer)
+void CCaTable::addCaDescriptor(const unsigned char * const buffer)
 {
 	CCaDescriptor* dummy = new CCaDescriptor(buffer);
 	ca_descriptor.push_back(dummy);
+	
 	if (info_length == 0)
 	    info_length = 1;
 	info_length += dummy->getLength();
 }
 
-unsigned int CCaTable::writeToBuffer (unsigned char * buffer) // returns number of bytes written
+unsigned int CCaTable::writeToBuffer(unsigned char * const buffer) // returns number of bytes written
 {
 	buffer[0] = (reserved2 << 4) | (info_length >> 8);
 	buffer[1] = info_length;
@@ -79,7 +80,7 @@ unsigned int CCaTable::writeToBuffer (unsigned char * buffer) // returns number 
 	return pos;
 }
 
-CCaTable::~CCaTable ()
+CCaTable::~CCaTable(void)
 {
 	for (unsigned int i = 0; i < ca_descriptor.size(); i++)
 		delete ca_descriptor[i];
@@ -89,7 +90,7 @@ CCaTable::~CCaTable ()
 /*
  * elementary stream information
  */
-unsigned int CEsInfo::writeToBuffer (unsigned char * buffer) // returns number of bytes written
+unsigned int CEsInfo::writeToBuffer(unsigned char * const buffer) // returns number of bytes written
 {
 	buffer[0] = stream_type;
 	buffer[1] = (reserved1 << 5) | (elementary_PID >> 8);
@@ -101,13 +102,13 @@ unsigned int CEsInfo::writeToBuffer (unsigned char * buffer) // returns number o
 /*
  * contitional access program map table
  */
-CCaPmt::~CCaPmt ()
+CCaPmt::~CCaPmt(void)
 {
 	for (unsigned int i = 0; i < es_info.size(); i++)
 		delete es_info[i];
 }
 
-unsigned int CCaPmt::writeToBuffer (unsigned char * buffer) // returns number of bytes written
+unsigned int CCaPmt::writeToBuffer(unsigned char * const buffer) // returns number of bytes written
 {
 	unsigned int pos = 0;
 	unsigned int i;
@@ -131,7 +132,7 @@ unsigned int CCaPmt::writeToBuffer (unsigned char * buffer) // returns number of
 	return pos;
 }
 
-unsigned int CCaPmt::getLength ()  // the (3 + length_field()) initial bytes are not counted !
+unsigned int CCaPmt::getLength(void)  // the (3 + length_field()) initial bytes are not counted !
 {
 	unsigned int size = 4 + CCaTable::getLength();
 

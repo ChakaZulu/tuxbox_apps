@@ -1,7 +1,7 @@
 /*
- * $Id: pat.h,v 1.17 2002/11/27 03:42:36 obi Exp $
+ * $Id: pat.h,v 1.18 2003/01/30 17:21:16 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +19,11 @@
  *
  */
 
-#ifndef __pat_h__
-#define __pat_h__
+#ifndef __zapit_pat_h__
+#define __zapit_pat_h__
 
 #include "channel.h"
 
-int parse_pat (const int demux_fd, CZapitChannel * channel);
+int parse_pat(CZapitChannel * const channel);
 
-#endif /* __pat_h__ */
+#endif /* __zapit_pat_h__ */
