@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.29 2002/05/17 13:05:47 woglinde Exp $
+ * $Id: bouquets.cpp,v 1.30 2002/08/21 09:48:56 obi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -378,50 +378,54 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 
 void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 {
-	FILE* in;
-	XMLTreeParser* parser;
-	if (!ignoreBouquetFile)
+	FILE * in;
+	XMLTreeParser * parser;
+	
+	if (ignoreBouquetFile == false)
 	{
-		parser=new XMLTreeParser("ISO-8859-1");
-		in=fopen(CONFIGDIR "/zapit/bouquets.xml", "r");
+		char buf[2048];
+		int done;
+
+		in = fopen(CONFIGDIR "/zapit/bouquets.xml", "r");
+
 		if (!in)
 		{
 			perror("[zapit] " CONFIGDIR "/zapit/bouquets.xml");
-			ignoreBouquetFile = true;
 		}
-	}
-
-	if (!ignoreBouquetFile)
-	{
-		char buf[2048];
-
-		int done;
-		do
+		else
 		{
-			unsigned int len=fread(buf, 1, sizeof(buf), in);
-			done=len<sizeof(buf);
-			if (!parser->Parse(buf, len, done))
+			parser = new XMLTreeParser("ISO-8859-1");
+
+			do
 			{
-				printf("[zapit] parse error: %s at line %d\n",
-				parser->ErrorString(parser->GetErrorCode()),
-				parser->GetCurrentLineNumber());
-				fclose(in);
-				delete parser;
-				return;
+				unsigned int len = fread(buf, 1, sizeof(buf), in);
+				done = len < sizeof(buf);
+
+				if (!parser->Parse(buf, len, done))
+				{
+					printf("[zapit] parse error: %s at line %d\n",
+					parser->ErrorString(parser->GetErrorCode()),
+					parser->GetCurrentLineNumber());
+					fclose(in);
+					delete parser;
+					return;
+				}
 			}
-		} while (!done);
+			while (!done);
 
-		if (parser->RootNode())
-			parseBouquetsXml(parser->RootNode());
+			if (parser->RootNode())
+				parseBouquetsXml(parser->RootNode());
 
-		delete parser;
+			delete parser;
 
-		fclose(in);
+			fclose(in);
+		}
 	}
 	else
 	{
 		makeRemainingChannelsBouquet( 1, 1, "Alle Kanäle");    // TODO: use locales
 	}
+
 	storeBouquets();
 }
 
