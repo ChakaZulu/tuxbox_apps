@@ -3768,7 +3768,10 @@ bool CNeutrinoApp::changeNotify(const std::string & OptionName, void *Data)
 			if(recordingstatus == 1)
 			{
 				recording_id=0;
-				eventinfo.channel_id = g_RemoteControl->current_channel_id;
+				CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
+				t_original_network_id original_network_id = si.onid;
+				t_service_id          service_id          = si.sid;
+				eventinfo.channel_id = CREATE_CHANNEL_ID;
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
 				eventinfo.epg_starttime = 0;
 				strcpy(eventinfo.apids, "");
