@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.78 2001/11/20 23:23:10 Simplex Exp $
+        $Id: neutrino.cpp,v 1.79 2001/11/23 13:47:37 faralla Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.79  2001/11/23 13:47:37  faralla
+  check if card fits camalpha.bin
+
   Revision 1.78  2001/11/20 23:23:10  Simplex
   Fix for unassigned bouquetList
 
@@ -603,6 +606,73 @@ void CNeutrinoApp::firstChannel()
 	//firstchannel.chan_nr = ((firstchannel.chan_nr & 0x00ff) << 8) | ((firstchannel.chan_nr & 0xff00) >> 8);
 }
 
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  isCamValid, check if card fits cam		              *
+*                                                                                     *
+**************************************************************************************/
+
+void CNeutrinoApp::isCamValid()
+{
+	int sock_fd;
+	SAI servaddr;
+	char rip[]="127.0.0.1";
+	char *return_buf;
+	int ca_verid = 0;
+	
+	sendmessage.version=1;
+	sendmessage.cmd = 't';
+
+	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(1505);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+	#ifdef HAS_SIN_LEN
+ 		servaddr.sin_len = sizeof(servaddr); // needed ???
+	#endif
+
+
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+  		perror("neutrino: connect(zapit)");
+		exit(-1);
+	}
+
+	write(sock_fd, &sendmessage, sizeof(sendmessage));
+	return_buf = (char*) malloc(4);
+	memset(return_buf, 0, 4);
+
+	if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
+		perror("recv(zapit)");
+		exit(-1);
+	}
+
+	printf("That was returned: %s\n", return_buf);
+
+	if (strncmp(return_buf,"00t",3))
+	{
+		printf("Wrong Command was sent for isCamValid(). Exiting.\n");
+		free(return_buf);
+		return;
+	}
+	free(return_buf);
+	
+	if (recv(sock_fd, &ca_verid, sizeof(int),0) <= 0 ) {
+		perror("Nothing could be received\n");
+		exit(-1);
+	}
+	
+	printf("ca_verid: %d\n", ca_verid);
+	if (ca_verid != 33 && ca_verid != 18 && ca_verid != 68)
+	{
+		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+	}
+	 
+}
+
+		
 /**************************************************************************************
 *                                                                                     *
 *          CNeutrinoApp -  channelsInit, get the Channellist from daemon              *
@@ -1390,6 +1460,7 @@ void CNeutrinoApp::InitZapper()
 
 	if (zapit)
 	{
+		isCamValid();
 		firstChannel();
 		if (firstchannel.mode == 't')
 		{
@@ -1836,7 +1907,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.78 2001/11/20 23:23:10 Simplex Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.79 2001/11/23 13:47:37 faralla Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.30 2001/11/19 22:53:33 Simplex Exp $
+//  $Id: neutrino.h,v 1.31 2001/11/23 13:47:37 faralla Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.31  2001/11/23 13:47:37  faralla
+//  check if card fits camalpha.bin
+//
 //  Revision 1.30  2001/11/19 22:53:33  Simplex
 //  Neutrino can handle bouquets now.
 //  There are surely some bugs and todo's but it works :)
@@ -173,7 +176,8 @@ class CNeutrinoApp : public CMenuTarget
 	CBouquetList		*bouquetList;
 
 	void PluginDemo(); //demo only --- remove!
-
+	
+	void isCamValid();
 	void firstChannel();
 	void setupDefaults();
 	void setupColors_classic();
