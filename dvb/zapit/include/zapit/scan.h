@@ -63,7 +63,7 @@ struct transpondermap
 	}
 };
 
-#define NVOD_HACK
+// #define NVOD_HACK
 
 extern std::map<int, transpondermap> scantransponders;
 extern std::map<int, scanchannel> scanchannels;
