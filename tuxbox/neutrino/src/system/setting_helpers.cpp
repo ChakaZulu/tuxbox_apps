@@ -133,7 +133,7 @@ bool CRecordingNotifier::changeNotify(string OptionName, void*)
 {
    if(g_settings.recording_type==0)
    {
-      for(int i=0;i<8;i++)
+      for(int i=0;i<7;i++)
          toDisable[i]->setActive(false);
    }
    else if(g_settings.recording_type==1)
