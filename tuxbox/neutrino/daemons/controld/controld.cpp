@@ -532,6 +532,7 @@ void disableVideoOutput(bool disable)
 	{
 		//zapit.setStandby(false);
 		zapit.muteAudio(false);
+		audioControl::setMute(settings.mute_avs);
 		setvideooutput(settings.videooutput, false);
 		setVideoFormat(settings.videoformat, false);
 	}
@@ -541,6 +542,7 @@ void disableVideoOutput(bool disable)
 		setVideoFormat(-1, false);
 		//zapit.setStandby(true);
 		zapit.muteAudio(true);
+		audioControl::setMute(true);
 	}
 }
 
@@ -799,7 +801,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.106 2003/04/23 13:00:12 alexw Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.107 2003/06/26 05:08:58 alexw Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
