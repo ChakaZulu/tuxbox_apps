@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.18 2002/05/15 21:00:21 obi Exp $
+ * $Id: nit.cpp,v 1.19 2002/06/27 19:46:00 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -130,11 +130,11 @@ int parse_nit (unsigned char DiSEqC)
 						break;
 
 					case 0x43:
-						satellite_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id, DiSEqC);
+						if(!satellite_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id, DiSEqC)) return -2;
 						break;
 
 					case 0x44:
-						cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id);
+						if(!cable_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id)) return -2;
 						break;
 
 					case 0x5F:

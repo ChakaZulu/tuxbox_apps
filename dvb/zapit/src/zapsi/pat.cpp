@@ -1,5 +1,5 @@
 /*
- * $Id: pat.cpp,v 1.24 2002/05/13 17:17:05 obi Exp $
+ * $Id: pat.cpp,v 1.25 2002/06/27 19:46:00 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  *
@@ -34,7 +34,7 @@
 extern CEventServer * eventServer;
 extern unsigned int found_transponders;
 
-int fake_pat (unsigned short onid, FrontendParameters feparams)
+int fake_pat (unsigned short onid, FrontendParameters feparams, uint8_t polarity, uint8_t DiSEqC)
 {
 	unsigned short tsid;
 	int demux_fd;
@@ -86,8 +86,8 @@ int fake_pat (unsigned short onid, FrontendParameters feparams)
 					tsid,
 					onid,
 					feparams,
-					0,
-					0
+					polarity,
+					DiSEqC
 				)
 			)
 		);

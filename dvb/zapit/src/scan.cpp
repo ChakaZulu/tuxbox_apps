@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.50 2002/05/12 01:56:18 obi Exp $
+ * $Id: scan.cpp,v 1.51 2002/06/27 19:46:00 Homar Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -39,6 +39,35 @@ extern CZapitClient::bouquetMode bouquetMode;
 
 extern CEventServer *eventServer;
 
+/* build transponder for cable-users with sat-feed*/
+void build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, Modulation modulation)
+{
+	FrontendParameters feparams;
+	feparams.Frequency = frequency;
+	feparams.Inversion = INVERSION_AUTO;
+	if (frontend->getInfo()->type == FE_QPSK)
+	{
+		feparams.u.qpsk.SymbolRate = symbol_rate;
+		feparams.u.qpsk.FEC_inner = FEC_inner;
+	}
+	else
+	{
+		feparams.u.qam.SymbolRate = symbol_rate;
+		feparams.u.qam.FEC_inner = FEC_inner;
+		feparams.u.qam.QAM = modulation;
+	}
+
+	if (frontend->tuneFrequency(feparams, 0, 0) == true)
+	{
+		uint16_t onid = get_onid();
+		fake_pat(onid, feparams,0,0);
+	}
+	else
+	{
+		printf("No signal found on transponder\n");
+	}
+}
+
 int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
 {
 	FrontendParameters feparams;
@@ -59,7 +88,12 @@ int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint
 
 	if (frontend->tuneFrequency(feparams, polarity, DiSEqC) == true)
 	{
-		parse_nit(DiSEqC);
+		if(parse_nit(DiSEqC) == -2)
+		{
+			uint16_t onid = get_onid();
+			fake_pat(onid, feparams, polarity, DiSEqC);
+		}
+
 		return 0;
 	}
 	else
@@ -87,26 +121,6 @@ void get_sdts()
 	}
 }
 
-/* build transponder for cable-users with sat-feed*/
-void build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, Modulation modulation)
-{
-	FrontendParameters feparams;
-	feparams.Frequency = frequency;
-	feparams.Inversion = INVERSION_AUTO;
-	feparams.u.qam.SymbolRate = symbol_rate;
-	feparams.u.qam.FEC_inner = FEC_inner;
-	feparams.u.qam.QAM = modulation;
-
-	if (frontend->tuneFrequency(feparams, 0, 0) == true)
-	{
-		uint16_t onid = get_onid();
-		fake_pat(onid, feparams);
-	}
-	else
-	{
-		printf("No signal found on transponder\n");
-	}
-}
 FILE *write_xml_header (const char *filename)
 {
 	FILE *fd = fopen(filename, "w");

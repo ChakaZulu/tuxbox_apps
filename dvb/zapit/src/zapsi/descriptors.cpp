@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.30 2002/05/13 17:17:05 obi Exp $
+ * $Id: descriptors.cpp,v 1.31 2002/06/27 19:46:00 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -40,6 +40,7 @@ uint32_t found_transponders;
 uint32_t found_channels;
 std::string lastProviderName;
 
+extern CFrontend *frontend;
 extern CEventServer *eventServer;
 
 std::string charToXML (uint8_t character)
@@ -301,6 +302,10 @@ uint8_t satellite_delivery_system_descriptor (uint8_t *buffer, uint16_t transpor
 		((buffer[5] >> 4)	* 100) +
 		((buffer[5] & 0x0F)	* 10)
 	);
+	if (frontend->getInfo()->type == FE_QAM)
+	{
+		if (feparams.Frequency > 810000) return 0;
+	}
 
 	feparams.Inversion = INVERSION_AUTO;
 
@@ -365,6 +370,8 @@ uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_st
 		((buffer[4] & 0x0F)	* 10) +
 		((buffer[5] >> 4)	* 1)
 	);
+
+	if (feparams.Frequency > 810000) return 0;
 
 	feparams.Inversion = INVERSION_AUTO;
 
