@@ -1,8 +1,10 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
-#include <fcntl.h>
+#include <string.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
+
 #include <ost/dmx.h>
 
 int camfd;
@@ -172,7 +174,7 @@ void set_key(void)
 
 int find_emmpid(int ca_system_id) {
 	char buffer[1000];
-	int fd, r=1000,emm_pid=0,count;
+	int fd, r=1000,count;
 	struct dmxSctFilterParams flt;
 
 	fd=open("/dev/ost/demux0", O_RDWR);
@@ -323,7 +325,7 @@ int main(int argc, char **argv)
 	
 	int cardslot0,cardslot1;
 
-	int descrlen;
+	int descrlen=0;
 	char buf[2048];
 
 	cardslot0=0;
@@ -581,4 +583,5 @@ int main(int argc, char **argv)
 	}
 	
 	close(camfd);
+	return 0;
 }

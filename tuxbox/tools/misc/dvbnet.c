@@ -1,5 +1,5 @@
 /*
- *   $Id: dvbnet.c,v 1.2 2001/06/25 19:04:01 gillem Exp $
+ *   $Id: dvbnet.c,v 1.3 2002/08/21 08:25:47 obi Exp $
  *
  *   dvbnet.c - setup dvb net device (dbox-II-project)
  *
@@ -23,18 +23,24 @@
  *
  *
  *   $Log: dvbnet.c,v $
+ *   Revision 1.3  2002/08/21 08:25:47  obi
+ *   no more compile warnings
+ *
  *   Revision 1.2  2001/06/25 19:04:01  gillem
  *   - some changes
  *
  *
 */
 
-#include <stdio.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
 #include <ost/net.h>
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int fd;
 	struct dvb_net_if net_if;

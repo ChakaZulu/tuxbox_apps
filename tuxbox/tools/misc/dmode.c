@@ -1,10 +1,10 @@
-#include <sys/ioctl.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <stdint.h>
-//#include <sys/types.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -12,9 +12,8 @@
 #include <ost/frontend.h>
 #include <ost/sec.h>
 #include <ost/video.h>
-#include <sys/poll.h>
 
-#define VERSION 0.1
+#define VERSION "0.1"
 void help(char *prog_name) {
   printf("Version %s\n",VERSION);
   printf("Usage: %s <switches> <number/name/keyword>\n\n",prog_name);
@@ -29,12 +28,12 @@ void help(char *prog_name) {
   exit(0);
 }
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int fd;
 	int count=1;
-	videoDisplayFormat_t vdf;
-	videoFormat_t vf;
+	videoDisplayFormat_t vdf = VIDEO_PAN_SCAN;
+	videoFormat_t vf = VIDEO_FORMAT_4_3;
 	int mode;
 
 	if (argc < 2)
