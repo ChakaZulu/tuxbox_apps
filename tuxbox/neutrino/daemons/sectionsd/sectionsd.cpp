@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.10 2001/07/15 04:32:46 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.11 2001/07/15 11:58:20 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.11  2001/07/15 11:58:20  fnbrd
+//  Vergangene Zeit in Prozent beim EPG
+//
 //  Revision 1.10  2001/07/15 04:32:46  fnbrd
 //  neuer sectionsd (mit event-liste)
 //
@@ -71,7 +74,6 @@
 #include <malloc.h>
 #include <arpa/inet.h>
 #include <errno.h>
-
 #include <stdio.h>
 #include <time.h>
 
@@ -205,7 +207,8 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
       strlen(evt.extendedText.c_str())+2+	//ext + del
       3+3+4+1+					//dd.mm.yyyy + del
       3+2+1+					//std:min + del
-      3+2+1+1;				//std:min+ del + 0
+      3+2+1+					//std:min+ del
+      3+1+1;					//100 + del + 0
     pResultData = new char[nResultDataSize];
     SItime siStart = *(evt.times.begin());
     struct tm *pStartZeit = localtime(&siStart.startzeit);
@@ -216,10 +219,12 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
     struct tm *pEndeZeit = localtime((time_t*)&uiEndTime);
     int nFH(pEndeZeit->tm_hour), nFM(pEndeZeit->tm_min);
 
-    sprintf(pResultData, "%s\xFF%s\xFF%s\xFF%02d.%02d.%04d\xFF%02d:%02d\xFF%02d:%02d\xFF",
+    unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-siStart.startzeit)/(float)siStart.dauer*100.);
+
+    sprintf(pResultData, "%s\xFF%s\xFF%s\xFF%02d.%02d.%04d\xFF%02d:%02d\xFF%02d:%02d\xFF%03u\xFF",
       evt.name.c_str(),
       evt.text.c_str(),
-      evt.extendedText.c_str(), nSDay, nSMon, nSYear, nSH, nSM, nFH, nFM );
+      evt.extendedText.c_str(), nSDay, nSMon, nSYear, nSH, nSM, nFH, nFM, nProcentagePassed );
   }
   else
     printf("actual EPG not found!\n");
@@ -246,12 +251,12 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
   for(SIservices::iterator s=services.begin(); s!=services.end(); s++)
     if(s->serviceTyp==0x01) { // TV
       const SIevent &evt=findActualSIeventForService(*s);
-      if(evt.serviceID!=0) {//Found
-        strcat(evtList, s->serviceName.c_str());
-	strcat(evtList, "\n");
+      strcat(evtList, s->serviceName.c_str());
+      strcat(evtList, "\n");
+      if(evt.serviceID!=0)
+        //Found
         strcat(evtList, evt.name.c_str());
-	strcat(evtList, "\n");
-      } // if found
+      strcat(evtList, "\n");
     } // if TV
   struct msgSectionsdResponseHeader msgResponse;
   msgResponse.dataLength=strlen(evtList)+1;
@@ -720,7 +725,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.10 2001/07/15 04:32:46 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.11 2001/07/15 11:58:20 fnbrd Exp $\n");
 
   tzset(); // TZ auswerten
 
