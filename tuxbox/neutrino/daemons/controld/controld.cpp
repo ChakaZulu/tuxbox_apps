@@ -196,7 +196,9 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 	{
 		format=3;
 	}
-	settings.videoformat = format;
+
+	if ((format==0) || bUnregNotifier) // only set settings if we dont come from watchdog
+		settings.videoformat = format;
 
 	if (format==0) // automatic switch
 	{
