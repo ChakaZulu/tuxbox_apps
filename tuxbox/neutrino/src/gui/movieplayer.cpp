@@ -52,7 +52,7 @@
  - LCD support
 
 */
-
+#define MORE_THAN_TS 1
 #include <config.h>
 #if HAVE_DVB_API_VERSION >= 3
 #undef _FILE_OFFSET_BITS
@@ -104,6 +104,11 @@
 
 #define ConnectLineBox_Width	15
 
+static int playstate;
+static const char *filename;
+static std::string Path;
+static CFileBrowser * filebrowser;
+
 //------------------------------------------------------------------------
 
 CMoviePlayerGui::CMoviePlayerGui()
@@ -124,11 +129,6 @@ CMoviePlayerGui::CMoviePlayerGui()
       		Path = g_settings.network_nfs_local_dir[0];
 	else
       		Path = "/";
-/*
-        if ((debugfile = fopen("/tmp/movieplayer.log","w")) == NULL){
-			fprintf(stdout,"Could not open movieplayer log file");
-		}
-*/
 }
 
 //------------------------------------------------------------------------
@@ -147,10 +147,12 @@ int CMoviePlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 	m_state=STOP;
 	current=-1;
 	selected = 0;
+
 	//define screen width
 	width = 710;
 	if((g_settings.screen_EndX- g_settings.screen_StartX) < width+ConnectLineBox_Width)
 		width=(g_settings.screen_EndX- g_settings.screen_StartX)-ConnectLineBox_Width;
+
 	//define screen height
 	height = 570;
 	if((g_settings.screen_EndY- g_settings.screen_StartY) < height)
@@ -201,32 +203,243 @@ int CMoviePlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 	return menu_return::RETURN_EXIT_ALL;
 }
 
+void* RcThread( void* dummy )
+{
+	uint msg, data;
+
+	while( playstate >= 1 )
+	{
+		g_RCInput->getMsg( &msg, &data, 100 );	// 10 secs..
+
+		if( msg == CRCInput::RC_red ||
+		    msg == CRCInput::RC_home )
+		{
+			//exit play
+			playstate = 0;
+		}
+		else if( msg == CRCInput::RC_yellow )
+		{
+		  	if( playstate == 1 )
+		  	{
+		  		// pause play
+		  		playstate = 2;
+		  	}
+		  	else
+		  	{
+		  		// resume play
+		  		playstate = 1;
+		  	}
+		}
+		else if( msg == CRCInput::RC_left ||
+		         msg == CRCInput::RC_right )
+		{
+			// todo: next/prev file
+			filename = NULL;
+
+			if( filebrowser->exec(Path) )
+			{
+				Path = filebrowser->getCurrentDir();
+				if( (filename = filebrowser->getSelectedFile()->Name.c_str()) != NULL )
+					playstate = -1;
+			}
+		}
+		else if(msg == NeutrinoMessages::RECORD_START ||
+				  msg == NeutrinoMessages::ZAPTO ||
+				  msg == NeutrinoMessages::STANDBY_ON ||
+				  msg == NeutrinoMessages::SHUTDOWN ||
+				  msg == NeutrinoMessages::SLEEPTIMER)
+		{
+			// Exit for Record/Zapto Timers
+			playstate = 0;
+			g_RCInput->postMsg( msg, data );
+		}
+		else
+		{
+			if( CNeutrinoApp::getInstance()->handleMsg( msg, data ) == messages_return::cancel_all )
+				playstate = 0;
+		}
+	}
+
+	pthread_exit(NULL);
+}
+
+int CMoviePlayerGui::PlayStream( bool isTS )
+{
+	unsigned char buf[384*188];
+	unsigned short pida, pidv;
+	int file, done, fd, dmxa, dmxv, dvr, adec, vdec;
+	struct dmx_pes_filter_params p;
+	ssize_t wr;
+	size_t r;
+
+	//INFO("Green (Play TS File");
+	playstate = -1;
+	filename = NULL;
+
+	if( filebrowser->exec(Path) )
+	{
+		Path = filebrowser->getCurrentDir();
+		filename = filebrowser->getSelectedFile()->Name.c_str();
+	}
+
+	while( playstate < 0 )
+	{
+		pida = pidv = fd = dmxa = dmxv = dvr = adec = vdec = 0;
+
+		if( filename == NULL )
+			return -1;
+		//printf("[movieplayer.cpp] TS Filename %s\n", filename);
+
+		if( (fd = open(filename, O_RDONLY|O_LARGEFILE)) < 0 )
+			return -1;
+
+		// todo: check if file is valid ts or pes
+		if( isTS )
+		{
+			find_avpids( fd, &pidv, &pida );
+			fprintf( stdout, "[movieplayer.cpp] found pida: 0x%04X ; pidv: 0x%04X\n", pida, pidv );
+		}
+		else
+		{	// Play PES
+			pida=0x900;
+			pidv=0x8ff;
+		}
+		lseek( fd, 0, SEEK_SET );
+
+		if( (dmxa = open(DMX, O_RDWR)) < 0 ||
+		    (dmxv = open(DMX, O_RDWR)) < 0 ||
+		    (dvr  = open(DVR, O_WRONLY)) < 0 ||
+		    (adec = open(ADEC, O_RDWR)) < 0 ||
+		    (vdec = open(VDEC, O_RDWR)) < 0 ||
+		    (file   = open(filename, O_RDONLY)) < 0 ) {
+			close(fd);
+			close(dmxa);
+			close(dmxv);
+			close(dvr);
+			close(adec);
+			close(vdec);
+		    	return -1;
+		}
+	
+		p.input = DMX_IN_DVR;
+		p.output = DMX_OUT_DECODER;
+		p.flags = DMX_IMMEDIATE_START;
+
+		p.pid = pida;
+		p.pes_type = DMX_PES_AUDIO;
+		if( ioctl(dmxa, DMX_SET_PES_FILTER, &p) < 0 ||
+		    ioctl(adec, AUDIO_STOP) < 0 ||
+		    ioctl(vdec, VIDEO_STOP) < 0 ) {
+			close(fd);
+			close(dmxa);
+			close(dmxv);
+			close(dvr);
+			close(adec);
+			close(vdec);
+		    	return -1;
+		}
+
+		p.pid = pidv;
+		p.pes_type = DMX_PES_VIDEO;
+		if( ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0 ||
+		    ioctl(adec, AUDIO_PLAY) < 0 ||
+		    ioctl(vdec, VIDEO_PLAY) < 0 ) {
+			close(fd);
+			close(dmxa);
+			close(dmxv);
+			close(dvr);
+			close(adec);
+			close(vdec);
+		    	return -1;
+		}
+
+		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+		CLCD::getInstance()->showServicename(filebrowser->getSelectedFile()->getFileName().c_str());
+
+		if( isTS )
+		{
+			playstate = 1;
+			pthread_create(&rct, 0, RcThread, 0);
+
+			while( (r = read(file, buf, sizeof(buf))) > 0 && playstate >= 1 )
+			{
+				done = 0;
+	
+				if( playstate == 2 )
+				{	// pause play
+					CLCD::getInstance()->showServicename("("+filebrowser->getSelectedFile()->getFileName()+")");
+		
+					while( playstate == 2 )
+						usleep(200000);
+	
+					/* Filters need to be re-set, or playback will not work correctly */
+					p.pid = pida;
+					p.pes_type = DMX_PES_AUDIO;
+					ioctl(dmxa, DMX_SET_PES_FILTER, &p);
+					p.pid = pidv;
+					p.pes_type = DMX_PES_VIDEO;
+					ioctl(dmxv, DMX_SET_PES_FILTER, &p);
+					CLCD::getInstance()->showServicename(filebrowser->getSelectedFile()->getFileName());
+				}
+	
+				while( r > 0 )
+				{
+					if( (wr = write(dvr, &buf[done], r)) <= 0 )
+						continue;
+					r -= wr;
+					done += wr;
+				}
+			}
+		}
+		else
+		{
+			playstate = 0;	// no rc support
+			pes_to_ts2( file, dvr, pida, pidv );	// VERY bad performance!!!
+		}
+
+		ioctl(vdec, VIDEO_STOP);
+		ioctl(adec, AUDIO_STOP);
+		ioctl(dmxv, DMX_STOP);
+		ioctl(dmxa, DMX_STOP);
+
+		close(file);
+		close(fd);
+		close(dmxa);
+		close(dmxv);
+		close(dvr);
+		close(adec);
+		close(vdec);
+	}
+
+	if( playstate >= 1 )
+	{	// exit rcthread
+		g_RCInput->postMsg( CRCInput::RC_home, 0 );	// force faster exit of rcthread
+		pthread_join( rct, NULL );
+	}
+
+	return 1;
+}
+
 int CMoviePlayerGui::show()
 {
 	int res = -1;
+	uint msg, data;
+	bool loop = true, update = true;
 
-	//TODO: Own LCD support
-	CLCD::getInstance()->setMode(CLCD::MODE_MP3);
-
-	uint msg; uint data;
-	uint msg2;
-
-	bool loop=true;
-	bool update=true;
-	key_level=0;
+	key_level = 0;
 
 	while(loop)
 	{
 		if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_ts)
 		{
 			// stop if mode was changed in another thread
-			loop=false;
+			loop = false;
 		}
 
 		if(update)
 		{
 			hide();
-			update=false;
+			update = false;
 			paint();
 		}
 
@@ -234,344 +447,28 @@ int CMoviePlayerGui::show()
 
 		g_RCInput->getMsg( &msg, &data, 10 ); // 1 sec timeout to update play/stop state display
 
-		if( msg == CRCInput::RC_home)
+		if( msg == CRCInput::RC_home )
 		{ //Exit after cancel key
-			loop=false;
+			loop = false;
 		}
 		else if( msg == CRCInput::RC_timeout )
 		{
 			// do nothing
 		}
 //------------ GREEN --------------------
-		else if(msg==CRCInput::RC_green)
+		else if( msg==CRCInput::RC_green )
 		{
-		//INFO("Green (Play TS File");
-		hide();
-		const char *tsfilename=NULL;
-		if(filebrowser->exec(Path))
-		{
-			Path=filebrowser->getCurrentDir();
-			tsfilename = filebrowser->getSelectedFile()->Name.c_str();
-			//INFO("TS Filename %s",tsfilename);
-		}
-		if( tsfilename != NULL )
-		{
-		unsigned char buf[384*188];
-		unsigned short pida=0;
-		unsigned short pidv=0;
-		int dmxa, dmxv, dvr, adec, vdec, ts;
-		struct dmx_pes_filter_params p;
-		ssize_t wr;
-		size_t r;
-		int done;
-
-		int fd;
-
-		if ((fd = open(tsfilename,O_RDONLY|O_LARGEFILE)) < 0){
-			//handle error
-		}
-		find_avpids(fd, &pidv, &pida);
-
-//		fprintf(debugfile, "movieplayer: found pida: 0x%04X\n",pida);
-//		fprintf(debugfile, "movieplayer: found pidv: 0x%04X\n",pidv);
-
-                fprintf(stdout, "movieplayer: found pida: 0x%04X\n",pida);
-		fprintf(stdout, "movieplayer: found pidv: 0x%04X\n",pidv);
-		
-		// close and re-open file
-		close(fd);
-                if ((fd = open(tsfilename,O_RDONLY|O_LARGEFILE)) < 0){
-			//handle error
-		}
-
-		if ((dmxa = open(DMX, O_RDWR)) < 0) {
-		 //handle error
-		}
-
-
-		if ((dmxv = open(DMX, O_RDWR)) < 0) {
-		 //handle error
-		}
-
-		if ((dvr = open(DVR, O_WRONLY)) < 0) {
-		 //handle error
-		}
-
-		if ((adec = open(ADEC, O_RDWR)) < 0) {
-		 //handle error
-		}
-
-		if ((vdec = open(VDEC, O_RDWR)) < 0) {
-		 //handle error
-		}
-
-		if ((ts = open(tsfilename, O_RDONLY)) < 0) {
-		 //handle error
-		}
-
-		p.pid = pida;
-		p.input = DMX_IN_DVR;
-		p.output = DMX_OUT_DECODER;
-		p.pes_type = DMX_PES_AUDIO;
-		p.flags = DMX_IMMEDIATE_START;
-
-		if (ioctl(dmxa, DMX_SET_PES_FILTER, &p) < 0) {
-		 //handle error
-		}
-
-		if (ioctl(adec, AUDIO_STOP) < 0) {
-			//perror("AUDIO_STOP");
-			//return 1;
-		}
-
-		if (ioctl(vdec, VIDEO_STOP) < 0) {
-			//perror("VIDEO_STOP");
-			//return 1;
-		}
-
-	    	p.pid = pidv;
-		p.input = DMX_IN_DVR;
-		p.output = DMX_OUT_DECODER;
-		p.pes_type = DMX_PES_VIDEO;
-		p.flags = DMX_IMMEDIATE_START;
-
-		if (ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0) {
-		 //handle error
-		}
-
-		if (ioctl(adec, AUDIO_PLAY) < 0) {
-		 //handle error
-		}
-
-		if (ioctl(vdec, VIDEO_PLAY) < 0) {
-		 //handle error
-		}
-                int fbcount = 0;
-		while ((r = read(ts, buf, sizeof(buf))) > 0) {
-			done = 0;
-			while (r > 0) {
-				if ((wr = write(dvr, &buf[done], r)) <= 0)
-					continue;
-				r -= wr;
-				done += wr;
-
-			}
-
-			fbcount++;
-                        if (fbcount > 10) {
-                           fbcount = 0;
-                           g_RCInput->getMsg_us( &msg, &data, 1 ); // 1/10 sec timeout to update play/stop state display
-			   if( msg == CRCInput::RC_red || msg == CRCInput::RC_home) {
-				//loop=false;
-				break;
-			   }
-			   else if (msg == CRCInput::RC_yellow) {
-				while (true) {
-					g_RCInput->getMsg (&msg2, &data,10);
-					if (msg2 == CRCInput::RC_yellow || msg2 == CRCInput::RC_home) {
-                                		ioctl(vdec, VIDEO_STOP);
-                                		ioctl(adec, AUDIO_STOP);
-                                		ioctl(dmxv, DMX_STOP);
-                                		ioctl(dmxa, DMX_STOP);
-                                
-                                		close(vdec);
-                                		close(adec);
-                                		close(dvr);
-                                		close(dmxv);
-                                		close(dmxa);
-                                		if ((dmxa = open(DMX, O_RDWR)) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                
-                                		if ((dmxv = open(DMX, O_RDWR)) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                		if ((dvr = open(DVR, O_WRONLY)) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                		if ((adec = open(ADEC, O_RDWR)) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                		if ((vdec = open(VDEC, O_RDWR)) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                		p.pid = pida;
-                                		p.input = DMX_IN_DVR;
-                                		p.output = DMX_OUT_DECODER;
-                                		p.pes_type = DMX_PES_AUDIO;
-                                		p.flags = DMX_IMMEDIATE_START;
-
-                                		if (ioctl(dmxa, DMX_SET_PES_FILTER, &p) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                		if (ioctl(adec, AUDIO_STOP) < 0) {
-                                			//perror("AUDIO_STOP");
-                                			//return 1;
-                                		}
-                                
-                                		if (ioctl(vdec, VIDEO_STOP) < 0) {
-                                			//perror("VIDEO_STOP");
-                                			//return 1;
-                                		}
-                                
-                                	    	p.pid = pidv;
-                                		p.input = DMX_IN_DVR;
-                                		p.output = DMX_OUT_DECODER;
-                                		p.pes_type = DMX_PES_VIDEO;
-                                		p.flags = DMX_IMMEDIATE_START;
-                                
-                                		if (ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                		if (ioctl(adec, AUDIO_PLAY) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                		if (ioctl(vdec, VIDEO_PLAY) < 0) {
-                                		 //handle error
-                                		}
-                                
-                                                break;
-					}
-				}
-			   }
-			}
-			
-
-		}
-
-		ioctl(vdec, VIDEO_STOP);
-		ioctl(adec, AUDIO_STOP);
-		ioctl(dmxv, DMX_STOP);
-		ioctl(dmxa, DMX_STOP);
-
-		close(ts);
-		close(vdec);
-		close(adec);
-		close(dvr);
-		close(dmxv);
-		close(dmxa);
-		}
-		paint();
+			hide();
+			PlayStream( true );
+			paint();
 		}
 //------------ YELLOW --------------------
 #ifdef MORE_THAN_TS
 		else if(msg==CRCInput::RC_yellow)
 		{
-		//INFO("Yellow: Play PS file");
-		hide();
-		const char *psfilename=NULL;
-		if(filebrowser->exec(Path))
-		{
-			Path=filebrowser->getCurrentDir();
-			psfilename = filebrowser->getSelectedFile()->Name.c_str();
-			//INFO("PS Filename %s",psfilename);
-		}
-		if( psfilename != NULL )
-		{
-		unsigned short pida, pidv;
-		int dmxa, dmxv, dvr, adec, vdec, ps;
-		struct dmx_pes_filter_params p;
-
-		//define a pida and pidv however you want
-		pida=0x900;
-		pidv=0x8ff;
-		int fd;
-
-		if ((fd = open(psfilename,O_RDONLY|O_LARGEFILE)) < 0){
-			//handle error
-		}
-		//find_avpids(fd, &pidv, &pida);
-		fprintf(stdout,"movieplayer: preset pida: 0x%04X",pida);
-		fprintf(stdout,"movieplayer: preset pidv: 0x%04X",pidv);
-
-		if ((dmxa = open(DMX, O_RDWR)) < 0) {
-		 //handle error
-		}
-
-
-		if ((dmxv = open(DMX, O_RDWR)) < 0) {
-		 //handle error
-		}
-
-		if ((dvr = open(DVR, O_WRONLY)) < 0) {
-		 //handle error
-		}
-
-		if ((adec = open(ADEC, O_RDWR)) < 0) {
-		 //handle error
-		}
-
-		if ((vdec = open(VDEC, O_RDWR)) < 0) {
-		 //handle error
-		}
-
-		if ((ps = open(psfilename, O_RDONLY)) < 0) {
-		 //handle error
-		}
-
-		p.pid = pida;
-		p.input = DMX_IN_DVR;
-		p.output = DMX_OUT_DECODER;
-		p.pes_type = DMX_PES_AUDIO;
-		p.flags = DMX_IMMEDIATE_START;
-
-		if (ioctl(dmxa, DMX_SET_PES_FILTER, &p) < 0) {
-		 //handle error
-		}
-
-		if (ioctl(adec, AUDIO_STOP) < 0) {
-			//perror("AUDIO_STOP");
-			//return 1;
-		}
-
-		if (ioctl(vdec, VIDEO_STOP) < 0) {
-			//perror("VIDEO_STOP");
-			//return 1;
-		}
-
-	    	p.pid = pidv;
-		p.input = DMX_IN_DVR;
-		p.output = DMX_OUT_DECODER;
-		p.pes_type = DMX_PES_VIDEO;
-		p.flags = DMX_IMMEDIATE_START;
-
-		if (ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0) {
-		 //handle error
-		}
-
-		if (ioctl(adec, AUDIO_PLAY) < 0) {
-		 //handle error
-		}
-
-		if (ioctl(vdec, VIDEO_PLAY) < 0) {
-		 //handle error
-		}
-		//INFO("Writing to fd %i",dvr);
-                // Use the pida and pidv as defined above
-                pes_to_ts2( ps, dvr, 0x900, 0x8ff);
-                // ^ VERY bad performance!!!
-
-		ioctl(vdec, VIDEO_STOP);
-		ioctl(adec, AUDIO_STOP);
-		ioctl(dmxv, DMX_STOP);
-		ioctl(dmxa, DMX_STOP);
-
-		close(ps);
-		close(vdec);
-		close(adec);
-		close(dvr);
-		close(dmxv);
-		close(dmxa);
-		}
-		paint();
+			hide();
+			PlayStream( false );
+			paint();
 		}
 #endif	
 		else if(msg == NeutrinoMessages::CHANGEMODE)
@@ -684,15 +581,12 @@ void CMoviePlayerGui::paintFoot()
 						     ButtonWidth- 20, g_Locale->getText("movieplayer.chooseps").c_str(), COL_INFOBAR, 0, true); // UTF-8
 #endif
 }
-//------------------------------------------------------------------------
-void CMoviePlayerGui::paintInfo()
-{
-}
-//------------------------------------------------------------------------
 
 void CMoviePlayerGui::paint()
 {
-        frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+	CLCD::getInstance()->showServicename("Movieplayer");
+	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
 	frameBuffer->loadBackground("radiomode.raw");
 	frameBuffer->useBackground(true);
 	frameBuffer->paintBackground();
@@ -704,9 +598,4 @@ void CMoviePlayerGui::paint()
 	visible = true;
 }
 
-//------------------------------------------------------------------------
-
-void CMoviePlayerGui::paintLCD()
-{
-}
 #endif

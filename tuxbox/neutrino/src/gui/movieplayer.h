@@ -65,8 +65,8 @@ class CMoviePlayerGui : public CMenuTarget
 		};
 
  private:
+	pthread_t      rct;
 	CFrameBuffer * frameBuffer;
-	CFileBrowser * filebrowser;
 	unsigned int   selected;
 	int            current;
 	unsigned int   liststart;
@@ -80,27 +80,23 @@ class CMoviePlayerGui : public CMenuTarget
 	int            key_level;
 	bool           visible;
         State          m_state;
-	std::string    Path;
 
 	int            width;
 	int            height;
 	int            x;
 	int            y;
 	int            m_title_w;
-
 	int            m_LastMode;
 
+	int  PlayStream(bool isTS);
 	void paintItem(int pos);
 	void paint();
 	void paintHead();
 	void paintImg();
 	void paintFoot();
-	void paintInfo();
-	void paintLCD();
 	void hide();
 
 	CFileFilter videofilefilter;
-	FILE* debugfile;
 
  public:
 	CMoviePlayerGui();
