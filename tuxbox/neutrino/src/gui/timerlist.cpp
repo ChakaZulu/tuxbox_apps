@@ -589,7 +589,8 @@ void CTimerList::paintFoot()
 
 void CTimerList::paint()
 {
-	liststart = (selected/listmaxshow)*listmaxshow;
+	unsigned int page_nr = (listmaxshow == 0) ? 0 : (selected / listmaxshow);
+	liststart = page_nr * listmaxshow;
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("timerlist.name") );
 
@@ -607,9 +608,8 @@ void CTimerList::paint()
 
 		int sbc= ((timerlist.size()- 1)/ listmaxshow)+ 1;
 		float sbh= (sb- 4)/ sbc;
-		int sbs= (selected/listmaxshow);
 
-		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(page_nr * sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 	}
 
 	paintFoot();
