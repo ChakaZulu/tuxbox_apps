@@ -49,6 +49,8 @@ class CStreamInfo2 : public CMenuTarget
 		enum {	COL_WHITE=0x60, COL_RED, COL_GREEN,
 			COL_BLUE, COL_YELLOW, COL_BLACK };
 
+		int  paint_mode;
+
 		int  font_head;
 		int  font_info;
 		int  font_small;
@@ -74,7 +76,7 @@ class CStreamInfo2 : public CMenuTarget
 
 
 		int  doSignalStrengthLoop();
-		void paint();
+		void paint(int mode);
 		void paint_pig(int x, int y, int w, int h);
 		void paint_techinfo(int x, int y);
 		void paint_signal_fe_box(int x, int y, int w, int h);

@@ -81,6 +81,7 @@ CStreamInfo2::CStreamInfo2()
 	frameBuffer->paletteSet();
 
 	sigBox_pos = 0;
+	paint_mode = 0;
 
 }
 
@@ -104,7 +105,7 @@ int CStreamInfo2::exec(CMenuTarget* parent, const std::string &)
 	{
 		parent->hide();
 	}
-	paint();
+	paint(paint_mode);
 
 	doSignalStrengthLoop ();
 
@@ -122,11 +123,6 @@ int CStreamInfo2::doSignalStrengthLoop ()
 	neutrino_msg_t      msg;
 	CZapitClient::responseFESignal s;
 
-
-	signal.old_sig = -1;
-	signal.old_snr = -1;
-	signal.old_ber = -1;
-	
 
 	while (1) {
 		neutrino_msg_data_t data;
@@ -151,12 +147,18 @@ int CStreamInfo2::doSignalStrengthLoop ()
 		signal.old_ber = signal.ber;
 
 
+		// switch paint mode
+		if (msg == CRCInput::RC_red || msg == CRCInput::RC_blue || msg == CRCInput::RC_green ) {
+			hide ();
+			paint_mode = ++paint_mode % 2;
+			paint (paint_mode);
+			continue;
+		}
 
 		// -- any key --> abort
 		if (msg <= CRCInput::RC_MaxRC) {
 			break;
 		}
-
 
 		// -- push other events
 		if ( msg >  CRCInput::RC_MaxRC && msg != CRCInput::RC_timeout) {
@@ -221,8 +223,15 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	sig_text_sig_x = x+05+xd*2;
 
 
-	//  first draw of dummy signal
+	// --  first draw of dummy signal
+	// --  init some values
 	{
+		sigBox_pos = 0;
+
+		signal.old_sig = 1;
+		signal.old_snr = 1;
+		signal.old_ber = 1;
+
 		struct feSignal s = {0,0,  0,0,   0,0 };
 		paint_signal_fe(s);
 	}
@@ -248,7 +257,7 @@ void CStreamInfo2::paint_signal_fe(struct feSignal  s)
 	if (s.ber != s.old_ber) {
 		SignalRenderStr (s.ber,sig_text_ber_x,y);
 	}
-	yd = y_signal_fe (s.ber, 2000, sigBox_h);
+	yd = y_signal_fe (s.ber, 4000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_RED);
 
 
@@ -287,14 +296,14 @@ void CStreamInfo2::SignalRenderStr (unsigned long value, int x, int y)
 	char str[30];
 
 	frameBuffer->paintBoxRel(x, y-iheight+1, 50, iheight-1, COL_MENUHEAD_PLUS_0);
-	sprintf(str,"%6d",value);
+	sprintf(str,"%6lu",value);
 	g_Font[font_small]->RenderString(x, y, 50, str, COL_MENUCONTENT, 0, true);
 }
 
 
 
 
-void CStreamInfo2::paint()
+void CStreamInfo2::paint(int mode)
 {
 	const char * head_string;
 	int ypos = y;
@@ -302,30 +311,36 @@ void CStreamInfo2::paint()
 
 
 
+	if (paint_mode == 0) {
 
-	head_string = g_Locale->getText(LOCALE_STREAMINFO_HEAD);
+		// -- tech Infos, PIG, small signal graph
 
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, head_string);
+		head_string = g_Locale->getText(LOCALE_STREAMINFO_HEAD);
+		CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, head_string);
+		// paint backround, title pig, etc.
+		frameBuffer->paintBoxRel(0, 0, max_width, max_height, COL_MENUHEAD_PLUS_0);
+		g_Font[font_head]->RenderString(xpos, ypos+ hheight+1, width, head_string, COL_MENUHEAD, 0, true); // UTF-8
+		ypos+= hheight;
 
-	// paint backround, title pig, etc.
-	frameBuffer->paintBoxRel(0, 0, max_width, max_height, COL_MENUHEAD_PLUS_0);
+		// paint PIG
+		paint_pig( width-240,  y+10 , 240, 190);
 
-	g_Font[font_head]->RenderString(xpos, ypos+ hheight+1, width, head_string, COL_MENUHEAD, 0, true); // UTF-8
+		// Info Output
+		ypos += (iheight >>1);
+		paint_techinfo ( xpos, ypos);
 
-	ypos+= hheight;
+		paint_signal_fe_box ( width-240,  (y + 190 + hheight), 240, 190);
 
+	} else {
 
+		// --  small PIG, small signal graph
 
-	// paint PIG
-	paint_pig( width-240,  y+10 , 240, 190);
+		// -- paint backround, title pig, etc.
+		frameBuffer->paintBoxRel(0, 0, max_width, max_height, COL_MENUHEAD_PLUS_0);
 
-
-
-	// Info Output
-	ypos += (iheight >>1);
-	paint_techinfo ( xpos, ypos);
-
-	paint_signal_fe_box ( width-240,  (y + 190 + hheight), 240, 190);
+		// -- paint large signal graph
+		paint_signal_fe_box ( x,  y, width, height);
+	}
 
 }
 
