@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.38 2002/12/20 19:19:46 obi Exp $
+ * $Id: pzapit.cpp,v 1.39 2002/12/26 07:11:53 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -236,7 +236,7 @@ int main (int argc, char** argv)
 		}
 		else if (i < argc - 1)
 		{
-			if ((sscanf(argv[i], "%d", &bouquet) > 0) && (sscanf(argv[++i], "%d", &channel) > 0))
+			if ((sscanf(argv[i], "%d", &bouquet) > 0) && (sscanf(argv[++i], "%u", &channel) > 0))
 			{
 				continue;
 			}
