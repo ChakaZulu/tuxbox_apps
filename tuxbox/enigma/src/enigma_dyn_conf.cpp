@@ -142,12 +142,12 @@ void initHDDparms(void)
 
 	eConfig::getInstance()->getKey("/extras/hdparm-s", ti);
 	eConfig::getInstance()->getKey("/extras/hdparm-m", ac);
-	if (ac)
+	if (ti)
 	{
 		cmd.sprintf("hdparm -S %d /dev/ide/host0/bus0/target0/lun0/disc", ti);
 		system(cmd.c_str());
 	}
-	if (ti)
+	if (ac)
 	{
 		cmd.sprintf("hdparm -M %d /dev/ide/host0/bus0/target0/lun0/disc", ac);
 		system(cmd.c_str());
@@ -204,12 +204,12 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 	eString showsatpos = opt["showsatpos"];
 	eString webiflock = opt["webiflock"];
 	eString audiochannelspriority = opt["audiochannelspriority"];
-	
+
 	int oldti = 0;
 	eConfig::getInstance()->getKey("/extras/hdparm-s", oldti);
 	int oldac = 0;
 	eConfig::getInstance()->getKey("/extras/hdparm-m", oldac);
-	
+
 //	eConfig::getInstance()->setKey("/extras/fastshutdown", (fastshutdown == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/elitedvb/network/samba", (samba == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/ezap/webif/webIfLock", (webiflock == "on" ? 1 : 0));
