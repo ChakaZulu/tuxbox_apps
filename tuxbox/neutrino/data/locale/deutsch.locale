@@ -62,6 +62,7 @@ miscsettings.head Diverse Einstellungen
 miscsettings.shutdown_real Standbymodus
 miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino direkt starten
+miscsettings.startbhdriver BH-Mode Treiber laden
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.infobar_sat_display Infobar Satellitenanzeige

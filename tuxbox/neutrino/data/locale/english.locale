@@ -30,6 +30,8 @@ cablesetup.provider cable provider
 satsetup.disqeqc DiSEqC
 satsetup.satellite Satellite
 satsetup.extended DiSEqC-setings
+satsetup.extended_lnb unset
+satsetup.extended_motor unset
 satsetup.nodiseqc no DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
@@ -37,6 +39,8 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-repeats
+satsetup.savesettingsnow unset
+satsetup.motorcontrol unset
 
 mainsettings.head Settings
 mainsettings.savesettingsnow save settings now
@@ -58,6 +62,7 @@ miscsettings.head Misc settings
 miscsettings.shutdown_real Enable standby
 miscsettings.boxtype DBox type
 miscsettings.startneutrinodirect start neutrino directly
+miscsettings.startbhdriver unset
 miscsettings.general General
 miscsettings.fb_destination Expert! Boot-Console
 miscsettings.infobar_sat_display Satellite display on infobar
@@ -338,6 +343,8 @@ scants.bouquet_create create new
 scants.bouquet_erase erase all
 scants.failed Transponderscan failed!
 scants.finished Transponderscan finished successfully!
+
+motorcontrol.head unset
 
 flashupdate.head Software Update
 flashupdate.action Action:

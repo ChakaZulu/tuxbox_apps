@@ -232,6 +232,25 @@ bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 	return true;
 }
 
+bool CBHDriverNotifier::changeNotify(string OptionName, void* Data)
+{
+	if( *((int*) Data)!=0)
+	{	//file anlegen (BH Treiber laden)
+		FILE* fd = fopen("/var/etc/.bh", "w");
+		if(fd)
+		{
+			fclose(fd);
+		}
+		else
+			return false;
+	}
+	else
+	{
+		remove("/var/etc/.bh");
+	}
+	return true;
+}
+
 bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
 {
 	char ip[16];

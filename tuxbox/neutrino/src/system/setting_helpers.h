@@ -103,6 +103,12 @@ class CStartNeutrinoDirectNotifier : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 };
 
+class CBHDriverNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(string OptionName, void*);
+};
+
 class CColorSetupNotifier : public CChangeObserver
 {
 	public:

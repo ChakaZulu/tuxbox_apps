@@ -30,6 +30,8 @@ cablesetup.provider Kabiobieta
 satsetup.disqeqc DiSEqC
 satsetup.satellite Satellit
 satsetup.extended DiSEqC-Eistellunga
+satsetup.extended_lnb unset
+satsetup.extended_motor unset
 satsetup.nodiseqc Koa DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
@@ -37,6 +39,8 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-Wiederholunga
+satsetup.savesettingsnow unset
+satsetup.motorcontrol unset
 
 mainsettings.head Eistellunga
 mainsettings.savesettingsnow Eistellunga jetz speichan
@@ -58,6 +62,7 @@ miscsettings.head Diverse Eistellunga
 miscsettings.shutdown_real bissi ausmacha
 miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino glei startn
+miscsettings.startbhdriver unset
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.infobar_sat_display Satelitn Informationsleistn
@@ -338,6 +343,8 @@ scants.bouquet_create nei macha
 scants.bouquet_erase wegmacha
 scants.failed Sendasuacha is gescheitat
 scants.finished Senda sand gfundn worn!
+
+motorcontrol.head unset
 
 flashupdate.head Aktualisiern
 flashupdate.action Jetzad:

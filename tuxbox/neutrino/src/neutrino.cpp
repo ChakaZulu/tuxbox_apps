@@ -770,7 +770,7 @@ void CNeutrinoApp::doChecks()
 	if(fd)
 		fclose(fd);
 	ucodes_ok= ucodes_ok||(fd);
-/* ucode.bin no longer needed since buildin
+/*	ucode.bin no longer needed, since built-in *
 	fd = fopen(UCODEDIR "/ucode.bin", "r");
 	if(fd)
 		fclose(fd);
@@ -1314,6 +1314,19 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 			fclose(fd);
 		}
 		oj = new CMenuOptionChooser("miscsettings.startneutrinodirect", &dummy, true, new CStartNeutrinoDirectNotifier );
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
+		miscSettings.addItem( oj );
+
+
+		static int dummy2 = 0;
+		fd = fopen("/var/etc/.bh", "r");
+		if(fd)
+		{
+			dummy2=1;
+			fclose(fd);
+		}
+		oj = new CMenuOptionChooser("miscsettings.startbhdriver", &dummy2, true, new CBHDriverNotifier );
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 		miscSettings.addItem( oj );
@@ -3406,7 +3419,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.445 2003/05/15 19:24:31 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.446 2003/05/17 12:23:41 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();

@@ -30,6 +30,8 @@ cablesetup.provider provider kablowy
 satsetup.disqeqc DiSEqC
 satsetup.satellite Satelity
 satsetup.extended DiSEqC-ustawienia
+satsetup.extended_lnb unset
+satsetup.extended_motor unset
 satsetup.nodiseqc bez DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
@@ -37,6 +39,8 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote Strojenie SMATV
 satsetup.diseqcrepeat DiSEqC-powtórzenia
+satsetup.savesettingsnow unset
+satsetup.motorcontrol unset
 
 mainsettings.head Glówne ustawienia
 mainsettings.savesettingsnow Zapisz natychmiast ustawienia
@@ -58,6 +62,7 @@ miscsettings.head Inne Ustawienia
 miscsettings.shutdown_real Zalacz Standby
 miscsettings.boxtype Tyb DBox'a
 miscsettings.startneutrinodirect Bezposrednio Neutrino
+miscsettings.startbhdriver unset
 miscsettings.general Glówne
 miscsettings.fb_destination Ekspert! -konsola
 miscsettings.infobar_sat_display Nazwa satelity na pasku
@@ -338,6 +343,8 @@ scants.bouquet_create utworz nowe
 scants.bouquet_erase kasuj wszystkie
 scants.failed Brak transpondera!
 scants.finished Strojenie zakonczone sukcesem!
+
+motorcontrol.head unset
 
 flashupdate.head Aktualizacja oprogramowania
 flashupdate.action Stan:

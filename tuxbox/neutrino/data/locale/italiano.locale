@@ -30,6 +30,8 @@ cablesetup.provider Gestore
 satsetup.disqeqc DiSEqC
 satsetup.satellite Satellite
 satsetup.extended DiSEqC-Controllo
+satsetup.extended_lnb unset
+satsetup.extended_motor unset
 satsetup.nodiseqc nessun DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
@@ -37,6 +39,8 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-Ripetizioni
+satsetup.savesettingsnow unset
+satsetup.motorcontrol unset
 
 mainsettings.head Impostazioni
 mainsettings.savesettingsnow Salvare le Impostazioni
@@ -58,6 +62,7 @@ miscsettings.head Altre Impostazioni
 miscsettings.shutdown_real Modo Standby
 miscsettings.boxtype DBox Costruttore
 miscsettings.startneutrinodirect Esecuzione diretta Neutrino
+miscsettings.startbhdriver unset
 miscsettings.general Generale
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.infobar_sat_display Infobar Display Satellite
@@ -338,6 +343,8 @@ scants.bouquet_create Crea Nuovi
 scants.bouquet_erase Cancellare
 scants.failed Ricerca Canali fallita!
 scants.finished Ricerca Canali finita con Successo!
+
+motorcontrol.head unset
 
 flashupdate.head Aggiornamento
 flashupdate.action in Azione:
