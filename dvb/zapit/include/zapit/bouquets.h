@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.43 2002/10/07 22:47:26 obi Exp $
+ * $Id: bouquets.h,v 1.44 2002/10/08 19:39:13 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -18,7 +18,7 @@
 using namespace std;
 
 typedef map<t_channel_id, CZapitChannel> tallchans;
-typedef map<t_channel_id, CZapitChannel>::iterator tallchans_iterator;
+typedef tallchans::iterator tallchans_iterator;
 
 typedef vector<CZapitChannel*> ChannelList;
 
