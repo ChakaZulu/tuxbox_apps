@@ -613,7 +613,10 @@ bool CFileBrowser::exec(std::string Dirname)
 		{
 			std::string msg = g_Locale->getText("filebrowser.dodelete1");
 			msg += " ";
-			msg += filelist[selected].getFileName();
+			if (filelist[selected].getFileName().length() > 10)
+				msg += filelist[selected].getFileName().substr(0,10) + "...";
+			else
+				msg += filelist[selected].getFileName();
 			msg += " ";
 			msg += g_Locale->getText("filebrowser.dodelete2");
 			if (ShowMsgUTF("", msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
