@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.41 2001/07/26 00:58:09 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.42 2001/07/26 01:12:46 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.42  2001/07/26 01:12:46  fnbrd
+//  Removed a warning.
+//
 //  Revision 1.41  2001/07/26 00:58:09  fnbrd
 //  Fixed one bug when time was not set.
 //
@@ -157,7 +160,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <time.h>
-#include <sys/resource.h> // getrusage
+//#include <sys/resource.h> // getrusage
 #include <set>
 #include <map>
 #include <algorithm>
@@ -925,13 +928,13 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 //  unsigned anzServices=services.size();
   unlockServices();
   struct mallinfo speicherinfo=mallinfo();
-  struct rusage resourceUsage;
+//  struct rusage resourceUsage;
 //  getrusage(RUSAGE_CHILDREN, &resourceUsage);
 //  getrusage(RUSAGE_SELF, &resourceUsage);
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.41 2001/07/26 00:58:09 fnbrd Exp $"
+    "$Id: sectionsd.cpp,v 1.42 2001/07/26 01:12:46 fnbrd Exp $"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1835,7 +1838,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.41 2001/07/26 00:58:09 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.42 2001/07/26 01:12:46 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
