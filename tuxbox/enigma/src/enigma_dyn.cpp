@@ -24,7 +24,11 @@
 #include <core/gdi/fb.cpp>
 #include <core/dvb/decoder.h>
 #include <core/dvb/dvbservice.h>
+#include <core/gui/emessage.h>
 #include <core/driver/eavswitch.h>
+
+
+// #include <core/dvr/dvrsocket.h>
 
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 
@@ -401,15 +405,19 @@ static eString getWatchContent(eString mode, int bouquetid)
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageTV(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
 		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 		{
-			tmp=eString(filter_string(i->bouquet_name.c_str()));
-			if(tmp.find("[TV]")!=eString::npos)
+			for(std::list<eServiceReference>::iterator s = i->list.begin(); s != i->list.end(); s++)
 			{
-				result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
-				if(i->bouquet_id==bouquetid)
+				if(s->service_type==1 || s->service_type==4)
 				{
-					result+=" selected";
+					tmp=eString(filter_string(i->bouquet_name.c_str()));
+					result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
+					if(i->bouquet_id==bouquetid)
+					{
+						result+=" selected";
+					}
+					result+=">" + tmp + "</option>";
+					break;
 				}
-				result+=">" + tmp + "</option>";
 			}
 		}
 		result+="</select>";
@@ -422,16 +430,19 @@ static eString getWatchContent(eString mode, int bouquetid)
 		esref=act->list;
 		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
-			result+="<option value=\"";
-			tmp.sprintf("%x:%x:%x:%x", j->service_id.get(), j->transport_stream_id.get(), j->original_network_id.get(), j->service_type);
-			result+=tmp;
-			result+="\">";
 			es=eDVB::getInstance()->settings->getTransponders()->searchService(*j);
 			if (es)
-				result+=filter_string(es->service_name.c_str());
-			else
-				result+="...";
-			result+="</option>";
+			{
+				if(es->service_type==1||es->service_type==4)
+				{
+					result+="<option value=\"";
+					tmp.sprintf("%x:%x:%x:%x", j->service_id.get(), j->transport_stream_id.get(), j->original_network_id.get(), j->service_type);
+					result+=tmp;
+					result+="\">";
+					result+=filter_string(es->service_name.c_str());
+					result+="</option>";
+				}
+			}
 		}
 		result+="</select>";
 		result+="</form>";
@@ -443,15 +454,19 @@ static eString getWatchContent(eString mode, int bouquetid)
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageRadio(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
 		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 		{
-			tmp=eString(filter_string(i->bouquet_name.c_str()));
-			if(tmp.find("[Radio]")!=eString::npos)
+			for(std::list<eServiceReference>::iterator s = i->list.begin(); s != i->list.end(); s++)
 			{
-				result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
-				if(i->bouquet_id==bouquetid)
+				if(s->service_type==2)
 				{
-					result+=" selected";
+					tmp=eString(filter_string(i->bouquet_name.c_str()));
+					result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
+					if(i->bouquet_id==bouquetid)
+					{
+						result+=" selected";
+					}
+					result+=">" + tmp + "</option>";
+					break;
 				}
-				result+=">" + tmp + "</option>";
 			}
 		}
 		result+="</select>";
@@ -461,16 +476,19 @@ static eString getWatchContent(eString mode, int bouquetid)
 		esref=act->list;
 		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
-			result+="<option value=\"";
-			tmp.sprintf("%x:%x:%x:%x", j->service_id.get(), j->transport_stream_id.get(), j->original_network_id.get(), j->service_type);
-			result+=tmp;
-			result+="\">";
 			es=eDVB::getInstance()->settings->getTransponders()->searchService(*j);
 			if (es)
-				result+=filter_string(es->service_name.c_str());
-			else
-				result+="...";
-			result+="</option>";
+			{
+				if(es->service_type==2)
+				{
+					result+="<option value=\"";
+					tmp.sprintf("%x:%x:%x:%x", j->service_id.get(), j->transport_stream_id.get(), j->original_network_id.get(), j->service_type);
+					result+=tmp;
+					result+="\">";
+					result+=filter_string(es->service_name.c_str());
+					result+="</option>";
+				}
+			}
 		}
 		result+="</select>";
 		result+="</form>";
@@ -961,18 +979,55 @@ static eString neutrino_suck_zapto(eString request, eString path, eString opt, e
 		return(eString().sprintf("%u\n%u\n", Decoder::parms.vpid, Decoder::parms.apid));
 }
 
+static eString message(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+	if(eZap::getInstance()->focus==0)
+	{
+		opt.strReplace("%20", " ");
+		eMessageBox msg(opt, "message");
+		msg.show();
+		msg.exec();
+		msg.hide();
+		return(eString("ok\n"));
+	}	
+	return eString("error\n");
+}
+
+/*
+static eString record_off(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+	DVRSocket *dvr;
+	dvr=new DVRSocket(eString("10.0.0.2"), 3000, NGRAB);
+	dvr->stopRecording();
+	delete dvr;
+	return "ok";
+}
+
+static eString record_on(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+	DVRSocket *dvr;
+	dvr=new DVRSocket(eString("10.0.0.2"), 3000, NGRAB);;
+	dvr->startRecording();
+	return "ok";
+}
+*/
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
 	dyn_resolver->addDyn("GET", "/switchTo", switchServiceWeb);
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
-
+/*
+	dyn_resolver->addDyn("GET", "/record/on", record_on);
+	dyn_resolver->addDyn("GET", "/record/off", record_off);
+*/
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/listServices", listServices);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
+	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
 
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
