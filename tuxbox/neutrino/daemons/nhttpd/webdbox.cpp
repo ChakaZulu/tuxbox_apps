@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.32 2002/05/31 20:29:01 dirch Exp $
+	$Id: webdbox.cpp,v 1.33 2002/06/11 21:20:47 dirch Exp $
 
 	License: GPL
 
@@ -62,7 +62,8 @@ void TWebDbox::ZapTo(string target)
 		if(Parent->DEBUG) printf("Kanal ist aktuell\n");
 		return;
 	}
-	zapit->zapTo_serviceID(sidonid);
+	int status = zapit->zapTo_serviceID(sidonid);
+	printf("Zapto Status: %d\n",status);
 	sectionsd->setServiceChanged(sidonid,false);
 
 }
@@ -194,7 +195,7 @@ string TWebDbox::GetServiceName(int onid_sid)
 bool TWebDbox::GetBouquets(void)
 {
 	BouquetList.clear();
-	zapit->getBouquets(BouquetList); 
+	zapit->getBouquets(BouquetList,true); 
 	return true;
 }
 
