@@ -3293,6 +3293,15 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 		networkConfig.automatic_start = (network_automatic_start == 1);
 		networkConfig.commitConfig();
 		saveSetup();
+		
+		/* send motor position list to zapit */
+		if (scanSettings.diseqcMode == DISEQC_1_2)
+		{
+			printf("[neutrino] sending motor positions list to zapit...\n");
+			CZapitClient::ScanMotorPosList motorPosList;
+			CNeutrinoApp::getInstance()->getScanSettings().toMotorPosList(motorPosList);
+			g_Zapit->setScanMotorPosList(motorPosList);
+		}
 	}
 	else if(actionKey=="recording")
 	{
@@ -3376,7 +3385,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.452 2003/05/21 20:13:26 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.453 2003/05/22 20:36:34 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();
