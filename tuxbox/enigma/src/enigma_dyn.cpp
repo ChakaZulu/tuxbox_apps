@@ -3866,7 +3866,7 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 		result.strReplace("#URL#", "/deleteTimerEvent" + opts);
 	}
 	else
-		result = "<html><body>Timer event deleted successfully.</body></html>";
+		result = readFile(TEMPLATE_DIR + "deleteTimerComplete.tmp");
 
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 

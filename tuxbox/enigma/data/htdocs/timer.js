@@ -17,8 +17,7 @@ function editTimerEvent(xy)
 
 function deleteTimerEvent(xy)
 {
-	NewWindow('/deleteTimerEvent?'+xy, 'deleteTimer', '300', '150', 'no', '5000');
-	setTimeout("reload()", 2000);
+	NewWindow('/deleteTimerEvent?'+xy, 'deleteTimer', '300', '150', 'no');
 }
 
 function addTimerEvent()

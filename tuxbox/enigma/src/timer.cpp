@@ -1348,14 +1348,14 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 			eString str1, str2, str3;
 			if (type == erase)
 			{
-				str1 = _("You would to delete the running event..\nthis stops the timer mode (recording)!");
-				str2 = _("Delete the event from the timerlist");
+				str1 = _("You would delete the running event..\nthis stops the timer mode (recording)!");
+				str2 = _("Delete the event from the timer list");
 				str3 = _("Really delete this event?");
 			}
 			else if (type == update)
 			{
-				str1 = _("You would to update the running event.. \nthis stops the timer mode (recording)!");
-				str2 = _("Update event in timerlist");
+				str1 = _("You would update the running event.. \nthis stops the timer mode (recording)!");
+				str2 = _("Update event in timer list");
 				str3 = _("Really update this event?");
 			}
 
@@ -1420,23 +1420,21 @@ void eTimerManager::clearEvents()
 
 int eTimerManager::deleteEventFromTimerList(const ePlaylistEntry &entry, bool force)
 {
-	if ( nextStartingEvent != timerlist->getConstList().end() 
-		&& *nextStartingEvent == entry && nextStartingEvent->type & ePlaylistEntry::stateRunning )
+	if (nextStartingEvent != timerlist->getConstList().end()
+		&& *nextStartingEvent == entry && nextStartingEvent->type & ePlaylistEntry::stateRunning)
 	{
-		if ( force ) 
-		{
-			abortEvent( ePlaylistEntry::errorUserAborted );
-			return 0;
-		}
-		return -1;
+		if (force)
+			abortEvent( ePlaylistEntry::errorUserAborted);
+		else
+			return -1;
 	}
 	for (std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end(); i++)
 	{
 		if (*i == entry)
 		{
 			timerlist->getList().erase(i);
-			if ( nextStartingEvent == timerlist->getList().end() 
-				|| (!(nextStartingEvent->type & ePlaylistEntry::stateRunning)) )
+			if ( nextStartingEvent == timerlist->getList().end()
+				|| (!(nextStartingEvent->type & ePlaylistEntry::stateRunning)))
 			{
 				nextAction=setNextEvent;
 				actionTimer.start(0,true);
@@ -1449,7 +1447,7 @@ int eTimerManager::deleteEventFromTimerList(const ePlaylistEntry &entry, bool fo
 
 int eTimerManager::modifyEventInTimerList(const ePlaylistEntry &old_entry, const ePlaylistEntry &new_entry, bool force)
 {
-	if ( nextStartingEvent != timerlist->getConstList().end() 
+	if ( nextStartingEvent != timerlist->getConstList().end()
 		&& *nextStartingEvent == old_entry && nextStartingEvent->type & ePlaylistEntry::stateRunning )
 	{
 		if (force) // change only duration and 'after_event' action
