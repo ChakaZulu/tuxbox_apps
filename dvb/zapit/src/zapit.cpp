@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.106 2002/03/25 00:07:26 McClean Exp $
+  $Id: zapit.cpp,v 1.107 2002/03/27 20:02:52 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -177,7 +177,7 @@ void termination_handler (int signum)
 #ifdef USE_EXTERNAL_CAMD
 	if (camdpid != -1)
 	{
-		kill(camdpid, SIGKILL);
+		kill(camdpid, SIGTERM);
 		waitpid(camdpid, 0, 0);
 	}
 #endif
@@ -1082,7 +1082,7 @@ int zapit (uint onid_sid, bool in_nvod)
 	caid = 0x1702;
 	if (camdpid != -1)
 	{
-		kill(camdpid, SIGKILL);
+		kill(camdpid, SIGTERM);
 		waitpid(camdpid, 0, 0);
 		camdpid = -1;
 	}
@@ -1795,6 +1795,13 @@ void start_scan(unsigned short do_diseqc)
 	set_vtxt(0);
 #endif /* DVBS */
 
+#ifdef USE_EXTERNAL_CAMD
+	if (camdpid != -1)
+	{
+		kill(camdpid, SIGTERM);
+		waitpid(camdpid, 0, 0);
+	}
+#endif
 	if (audio_fd != -1)
 	{
 		close(audio_fd);
@@ -2838,7 +2845,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.106 2002/03/25 00:07:26 McClean Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.107 2002/03/27 20:02:52 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
