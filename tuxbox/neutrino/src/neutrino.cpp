@@ -246,9 +246,9 @@ void CNeutrinoApp::setupColors_neutrino()
 	g_settings.menu_Content_inactive_blue  = 0x23;
 
 	g_settings.menu_Content_inactive_Text_alpha  = 0x00;
-	g_settings.menu_Content_inactive_Text_red    = 0x1e;
-	g_settings.menu_Content_inactive_Text_green  = 0x28;
-	g_settings.menu_Content_inactive_Text_blue   = 0x3c;
+	g_settings.menu_Content_inactive_Text_red    = 55;
+	g_settings.menu_Content_inactive_Text_green  = 70;
+	g_settings.menu_Content_inactive_Text_blue   = 85;
 
 	g_settings.infobar_alpha = 0x14;
 	g_settings.infobar_red   = 0x00;
@@ -401,9 +401,9 @@ int CNeutrinoApp::loadSetup()
 	g_settings.menu_Content_inactive_blue = configfile.getInt( "menu_Content_inactive_blue", 0x23 );
 
 	g_settings.menu_Content_inactive_Text_alpha = configfile.getInt( "menu_Content_inactive_Text_alpha", 0x00 );
-	g_settings.menu_Content_inactive_Text_red = configfile.getInt( "menu_Content_inactive_Text_red", 0x1e );
-	g_settings.menu_Content_inactive_Text_green = configfile.getInt( "menu_Content_inactive_Text_green", 0x28 );
-	g_settings.menu_Content_inactive_Text_blue = configfile.getInt( "menu_Content_inactive_Text_blue", 0x3c );
+	g_settings.menu_Content_inactive_Text_red = configfile.getInt( "menu_Content_inactive_Text_red", 55 );
+	g_settings.menu_Content_inactive_Text_green = configfile.getInt( "menu_Content_inactive_Text_green", 70 );
+	g_settings.menu_Content_inactive_Text_blue = configfile.getInt( "menu_Content_inactive_Text_blue", 85 );
 
 	g_settings.infobar_alpha = configfile.getInt( "infobar_alpha", 0x14 );
 	g_settings.infobar_red = configfile.getInt( "infobar_red", 0x00 );
@@ -2628,7 +2628,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.285 2002/05/30 12:52:09 McClean Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.286 2002/05/30 13:35:14 McClean Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

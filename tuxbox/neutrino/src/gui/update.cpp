@@ -63,9 +63,9 @@ CFlashUpdate::CFlashUpdate()
 {
 	setTitle( g_Locale->getText("flashupdate.head") );
 
-	BasePath = "http://dboxupdate.berlios.de/update/";
+	BasePath = "http://dboxupdate.berlios.de/images/";
 	ImageFile = "cdk.cramfs";
-	VersionFile = "version";
+	VersionFile = "cdk.cramfs.version";
 
 	installedVersion = g_settings.softupdate_currentversion;
 	newVersion = "";
@@ -114,7 +114,7 @@ bool CFlashUpdate::getInfo()
 	string gURL = BasePath + VersionFile;
 	string sFileName = gTmpPath+ VersionFile;
 
-	//printf("get versioninfo (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
+	printf("get versioninfo (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
 	return httpTool.downloadFile( gURL, sFileName, 20 );
 }
 
@@ -127,6 +127,7 @@ bool CFlashUpdate::getUpdateImage( string version )
 	string gURL = BasePath + ImageFile;
 	string sFileName = gTmpPath+ ImageFile;
 
+	printf("get update (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
 	return httpTool.downloadFile( gURL, sFileName, 40 );
 }
 
