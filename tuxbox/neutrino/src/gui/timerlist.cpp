@@ -660,42 +660,42 @@ std::string CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepe
 {
 	switch(rep)
 	{
-		case CTimerd::TIMERREPEAT_ONCE : return g_Locale->getText("timerlist.repeat.once");
-		case CTimerd::TIMERREPEAT_DAILY : return g_Locale->getText("timerlist.repeat.daily");
-		case CTimerd::TIMERREPEAT_WEEKLY : return g_Locale->getText("timerlist.repeat.weekly");
-		case CTimerd::TIMERREPEAT_BIWEEKLY : return g_Locale->getText("timerlist.repeat.biweekly");
-		case CTimerd::TIMERREPEAT_FOURWEEKLY : return g_Locale->getText("timerlist.repeat.fourweekly");
-		case CTimerd::TIMERREPEAT_MONTHLY : return g_Locale->getText("timerlist.repeat.monthly");
-		case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION : return g_Locale->getText("timerlist.repeat.byeventdescription");
+		case CTimerd::TIMERREPEAT_ONCE               : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_ONCE              );
+		case CTimerd::TIMERREPEAT_DAILY              : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_DAILY             );
+		case CTimerd::TIMERREPEAT_WEEKLY             : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_WEEKLY            );
+		case CTimerd::TIMERREPEAT_BIWEEKLY           : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_BIWEEKLY          );
+		case CTimerd::TIMERREPEAT_FOURWEEKLY         : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_FOURWEEKLY        );
+		case CTimerd::TIMERREPEAT_MONTHLY            : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_MONTHLY           );
+		case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_BYEVENTDESCRIPTION);
 		default: 
 			if(rep >=CTimerd::TIMERREPEAT_WEEKDAYS)
 			{
 				int weekdays = (((int)rep) >> 9);
 				std::string weekdayStr="";
 				if(weekdays & 1)
-					weekdayStr+= g_Locale->getText("timerlist.repeat.monday");
+					weekdayStr+= g_Locale->getText(LOCALE_TIMERLIST_REPEAT_MONDAY);
 				weekdays >>= 1;
 				if(weekdays & 1)
-					weekdayStr+= g_Locale->getText("timerlist.repeat.tuesday");
+					weekdayStr+= g_Locale->getText(LOCALE_TIMERLIST_REPEAT_TUESDAY);
 				weekdays >>= 1;
 				if(weekdays & 1)
-					weekdayStr+= g_Locale->getText("timerlist.repeat.wednesday");
+					weekdayStr+= g_Locale->getText(LOCALE_TIMERLIST_REPEAT_WEDNESDAY);
 				weekdays >>= 1;
 				if(weekdays & 1)
-					weekdayStr+= g_Locale->getText("timerlist.repeat.thursday");
+					weekdayStr+= g_Locale->getText(LOCALE_TIMERLIST_REPEAT_THURSDAY);
 				weekdays >>= 1;
 				if(weekdays & 1)
-					weekdayStr+= g_Locale->getText("timerlist.repeat.friday");
+					weekdayStr+= g_Locale->getText(LOCALE_TIMERLIST_REPEAT_FRIDAY);
 				weekdays >>= 1;
 				if(weekdays & 1)
-					weekdayStr+= g_Locale->getText("timerlist.repeat.saturday");
+					weekdayStr+= g_Locale->getText(LOCALE_TIMERLIST_REPEAT_SATURDAY);
 				weekdays >>= 1;
 				if(weekdays & 1)
-					weekdayStr+= g_Locale->getText("timerlist.repeat.sunday");
+					weekdayStr+= g_Locale->getText(LOCALE_TIMERLIST_REPEAT_SUNDAY);
 				return weekdayStr;
 			}
 			else
-				return g_Locale->getText("timerlist.repeat.unknown");
+				return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_UNKNOWN);
 	}
 }
 
@@ -708,6 +708,18 @@ std::string CTimerList::convertChannelId2String(const t_channel_id id) // UTF-8
    
 	return name;
 }
+
+#define TIMER_REPEAT_OPTION_COUNT 7
+const CMenuOptionChooser::keyval TIMER_REPEAT_OPTIONS[TIMER_REPEAT_OPTION_COUNT] =
+{
+	{(int)CTimerd::TIMERREPEAT_ONCE       , LOCALE_TIMERLIST_REPEAT_ONCE      },
+	{(int)CTimerd::TIMERREPEAT_DAILY      , LOCALE_TIMERLIST_REPEAT_DAILY     },
+	{(int)CTimerd::TIMERREPEAT_WEEKLY     , LOCALE_TIMERLIST_REPEAT_WEEKLY    },
+	{(int)CTimerd::TIMERREPEAT_BIWEEKLY   , LOCALE_TIMERLIST_REPEAT_BIWEEKLY  },
+	{(int)CTimerd::TIMERREPEAT_FOURWEEKLY , LOCALE_TIMERLIST_REPEAT_FOURWEEKLY},
+	{(int)CTimerd::TIMERREPEAT_MONTHLY    , LOCALE_TIMERLIST_REPEAT_MONTHLY   },
+	{(int)CTimerd::TIMERREPEAT_WEEKDAYS   , LOCALE_TIMERLIST_REPEAT_WEEKDAYS  }
+};
 
 int CTimerList::modifyTimer()
 {
@@ -739,14 +751,10 @@ int CTimerList::modifyTimer()
 	CMenuForwarder *m4 = new CMenuForwarder("timerlist.weekdays", ((int)timer->eventRepeat) >= (int)CTimerd::TIMERREPEAT_WEEKDAYS,
 														  m_weekdaysStr, &timerSettings_weekdays );
 	CTimerListRepeatNotifier notifier((int *)&timer->eventRepeat,m4);
-	CMenuOptionChooser* m3 = new CMenuOptionChooser("timerlist.repeat", (int *)&timer->eventRepeat, true, &notifier);
-	m3->addOption((int)CTimerd::TIMERREPEAT_ONCE , "timerlist.repeat.once");
-	m3->addOption((int)CTimerd::TIMERREPEAT_DAILY , "timerlist.repeat.daily");
-	m3->addOption((int)CTimerd::TIMERREPEAT_WEEKLY , "timerlist.repeat.weekly");
-	m3->addOption((int)CTimerd::TIMERREPEAT_BIWEEKLY , "timerlist.repeat.biweekly");
-	m3->addOption((int)CTimerd::TIMERREPEAT_FOURWEEKLY , "timerlist.repeat.fourweekly");
-	m3->addOption((int)CTimerd::TIMERREPEAT_MONTHLY , "timerlist.repeat.monthly");
-	m3->addOption((int)CTimerd::TIMERREPEAT_WEEKDAYS , "timerlist.repeat.weekdays");
+	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timer->eventRepeat, true, &notifier);
+	for (int i = 0; i < TIMER_REPEAT_OPTION_COUNT; i++)
+		m3->addOption(TIMER_REPEAT_OPTIONS[i].key, TIMER_REPEAT_OPTIONS[i].value);
+
 	timerSettings.addItem(m3);
 	timerSettings.addItem(m4);
 
@@ -789,14 +797,9 @@ int CTimerList::newTimer()
 	CMenuForwarder *m4 = new CMenuForwarder("timerlist.weekdays", false,  m_weekdaysStr, 
 														 &timerSettings_weekdays );
 	CTimerListRepeatNotifier notifier((int *)&timerNew.eventRepeat,m4);
-	CMenuOptionChooser* m3 = new CMenuOptionChooser("timerlist.repeat", (int *)&timerNew.eventRepeat, true, &notifier); 
-	m3->addOption((int)CTimerd::TIMERREPEAT_ONCE , "timerlist.repeat.once");
-	m3->addOption((int)CTimerd::TIMERREPEAT_DAILY , "timerlist.repeat.daily");
-	m3->addOption((int)CTimerd::TIMERREPEAT_WEEKLY , "timerlist.repeat.weekly");
-	m3->addOption((int)CTimerd::TIMERREPEAT_BIWEEKLY , "timerlist.repeat.biweekly");
-	m3->addOption((int)CTimerd::TIMERREPEAT_FOURWEEKLY , "timerlist.repeat.fourweekly");
-	m3->addOption((int)CTimerd::TIMERREPEAT_MONTHLY , "timerlist.repeat.monthly");
-	m3->addOption((int)CTimerd::TIMERREPEAT_WEEKDAYS , "timerlist.repeat.weekdays");
+	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timerNew.eventRepeat, true, &notifier);
+	for (int i = 0; i < TIMER_REPEAT_OPTION_COUNT; i++)
+		m3->addOption(TIMER_REPEAT_OPTIONS[i].key, TIMER_REPEAT_OPTIONS[i].value);
 
 	CZapitClient zapit;
 	CZapitClient::BouquetList bouquetlist;

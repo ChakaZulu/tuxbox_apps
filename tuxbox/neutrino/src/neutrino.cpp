@@ -1313,10 +1313,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			dprintf(DEBUG_DEBUG, "got scanprovider (sat): %s\n", satList[i].satName );
 		}
 
-		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQCREPEAT, (int *)&scanSettings.diseqcRepeat, (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0)/*, new CSatelliteNotifier*/, NULL, false);
-		ojDiseqcRepeats->addOption(0, "0");
-		ojDiseqcRepeats->addOption(1, "1");
-		ojDiseqcRepeats->addOption(2, "2");
+		CMenuOptionNumberChooser * ojDiseqcRepeats = new CMenuOptionNumberChooser(LOCALE_SATSETUP_DISEQCREPEAT, (int *)&scanSettings.diseqcRepeat, (scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode != DISEQC_1_0), 0, 2);
 
 		CMenuWidget* extSatSettings = new CMenuWidget(LOCALE_SATSETUP_EXTENDED, NEUTRINO_ICON_SETTINGS);
 		extSatSettings->addItem(GenericMenuSeparator);
@@ -1326,15 +1323,9 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		CMenuForwarder* ojExtSatSettings = new CMenuForwarder(LOCALE_SATSETUP_EXTENDED, (scanSettings.diseqcMode != NO_DISEQC), NULL, extSatSettings);
 		for( uint i=0; i < satList.size(); i++)
 		{
-			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
-			oj->addOption( -1, LOCALE_OPTIONS_OFF);
-			for(uint j=0; j < satList.size(); j++)
-			{
-				char jj[2 + 1];
-				sprintf( jj, "%d", j + 1);
-				oj->addOption( j, jj);
-			}
-			extSatSettings->addItem( oj);
+			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.diseqscOfSat(satList[i].satName), true, -1, satList.size() - 1, 1, -1, LOCALE_OPTIONS_OFF, satList[i].satName);
+
+			extSatSettings->addItem(oj);
 		}
 
 		CMenuWidget* extMotorSettings = new CMenuWidget(LOCALE_SATSETUP_EXTENDED_MOTOR, NEUTRINO_ICON_SETTINGS);
@@ -1348,14 +1339,8 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		for( uint i=0; i < satList.size(); i++)
 		{
-			CMenuOptionChooser* oj = new CMenuOptionChooser(satList[i].satName, scanSettings.motorPosOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
-			oj->addOption(0, LOCALE_OPTIONS_OFF);
-			for(uint j=1; j<=satList.size(); j++)
-			{
-				char jj[2 + 1];
-				sprintf(jj, "%d", j);
-				oj->addOption(j, jj);
-			}
+			CMenuOptionNumberChooser * oj = new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, scanSettings.motorPosOfSat(satList[i].satName), true, 0, satList.size(), 0, 0, LOCALE_OPTIONS_OFF, satList[i].satName);
+
 			extMotorSettings->addItem(oj);
 		}
 
@@ -2406,7 +2391,7 @@ void CNeutrinoApp::SelectNVOD()
 		if( g_RemoteControl->are_subchannels )
 		{
 			NVODSelector.addItem(GenericMenuSeparatorLine);
-			CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NVODSELECTOR_DIRECTORMODE, &g_RemoteControl->director_mode, true, NULL, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
+			CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NVODSELECTOR_DIRECTORMODE, &g_RemoteControl->director_mode, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
 			oj->addOption(0, LOCALE_OPTIONS_OFF);
 			oj->addOption(1, LOCALE_OPTIONS_ON );
 			NVODSelector.addItem( oj );
@@ -2472,7 +2457,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// start/stop recording
 	if (g_settings.recording_type != RECORDING_OFF)
 	{
-		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, true, this, true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
+		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
 		oj->addOption(0, LOCALE_MAINMENU_RECORDING_START);
 		oj->addOption(1, LOCALE_MAINMENU_RECORDING_STOP);
 		StreamFeatureSelector.addItem( oj );

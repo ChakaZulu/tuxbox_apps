@@ -59,16 +59,6 @@ CMenuForwarder * const GenericMenuBack = &CGenericMenuBack;
 
 
 
-bool isNumber(const std::string& str)
-{
-	for (std::string::const_iterator i = str.begin(); i != str.end(); i++)
-	{
-		if (!std::isdigit(*i)) return false;
-	}
-	return true;
-}
-
-
 CMenuWidget::CMenuWidget(const char * const Name, const std::string & Icon, const int mwidth, const int mheight, const bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
@@ -392,19 +382,94 @@ void CMenuWidget::paintItems()
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
+CMenuOptionNumberChooser::CMenuOptionNumberChooser(const neutrino_locale_t name, int * const OptionValue, const bool Active, const int min_value, const int max_value, const int print_offset, const int special_value, const neutrino_locale_t special_value_name, const char * non_localized_name)
+{
+	height               = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	optionName           = name;
+	active               = Active;
+	optionValue          = OptionValue;
+
+	lower_bound          = min_value;
+	upper_bound          = max_value;
+
+	display_offset       = print_offset;
+
+	localized_value      = special_value;
+	localized_value_name = special_value_name;
+
+	optionString         = non_localized_name;
+}
+
+int CMenuOptionNumberChooser::exec(CMenuTarget*)
+{
+	if (((*optionValue) >= upper_bound) || ((*optionValue) < lower_bound))
+		*optionValue = lower_bound;
+	else
+		(*optionValue)++;
+
+	paint(true);
+
+	return menu_return::RETURN_NONE;
+}
+
+int CMenuOptionNumberChooser::paint(bool selected)
+{
+	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
+
+	unsigned char color   = COL_MENUCONTENT;
+	fb_pixel_t    bgcolor = COL_MENUCONTENT_PLUS_0;
+	if (selected)
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
+	if (!active)
+	{
+		color   = COL_MENUCONTENTINACTIVE;
+		bgcolor = COL_MENUCONTENTINACTIVE_PLUS_0;
+	}
+
+	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor);
+
+	const char * l_option;
+	char option_value[11];
+
+	if ((localized_value_name == NONEXISTANT_LOCALE) || ((*optionValue) != localized_value))
+	{
+		sprintf(option_value, "%d", ((*optionValue) + display_offset));
+		l_option = option_value;
+	}
+	else
+		l_option = g_Locale->getText(localized_value_name);
+
+	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_option, true); // UTF-8
+	int stringstartposName = x + offx + 10;
+	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
+
+	const char * l_optionName = (optionString != NULL) ? optionString : g_Locale->getText(optionName);
+
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color, 0, true); // UTF-8
+
+	if (selected)
+	{
+		CLCD::getInstance()->showMenuText(0, l_optionName, -1, true); // UTF-8
+		CLCD::getInstance()->showMenuText(1, l_option, -1, true); // UTF-8
+	}
+
+	return y+height;
+}
 
 
 
 
-
-CMenuOptionChooser::CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const bool Localizing, const neutrino_msg_t DirectKey, const std::string & IconName)
+CMenuOptionChooser::CMenuOptionChooser(const neutrino_locale_t OptionName, int * const OptionValue, const bool Active, CChangeObserver * const Observ, const neutrino_msg_t DirectKey, const std::string & IconName)
 {
 	height = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	optionName = OptionName;
 	active = Active;
 	optionValue = OptionValue;
 	observ=Observ;
-	localizing= Localizing;
 	directKey = DirectKey;
 	iconName = IconName;
 }
@@ -415,7 +480,7 @@ CMenuOptionChooser::~CMenuOptionChooser()
 	removeAllOptions();
 }
 
-void CMenuOptionChooser::addOption(const int key, const char * const value_utf8_encoded)
+void CMenuOptionChooser::addOption(const int key, const neutrino_locale_t value_utf8_encoded)
 {
 	keyval *tmp = new keyval();
 	tmp->key=key;
@@ -482,7 +547,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 	frameBuffer->paintBoxRel(x, y, dx, height, bgcolor);
 
-	std::string option = "error";
+	const char * option = "error";
 
 	for(unsigned int count=0;count<options.size();count++)
 	{
@@ -504,11 +569,7 @@ int CMenuOptionChooser::paint( bool selected )
 	}
 
 
-	const char * l_option;
-	if (localizing && (!isNumber(option)))
-		l_option = g_Locale->getText(option);
-	else
-		l_option = option.c_str();
+	const char * l_option = g_Locale->getText(option);
 
 	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_option, true); // UTF-8
 	int stringstartposName = x + offx + 10;
@@ -787,7 +848,7 @@ int CMenuSeparator::paint(bool selected)
 bool CPINProtection::check()
 {
 	char cPIN[4];
-	const char * hint = NULL;
+	const char * hint = NONEXISTANT_LOCALE;
 	do
 	{
 		cPIN[0] = 0;
@@ -805,7 +866,7 @@ bool CZapProtection::check()
 
 	int res;
 	char cPIN[5];
-	const char * hint2 = NULL;
+	const char * hint2 = NONEXISTANT_LOCALE;
 	do
 	{
 		cPIN[0] = 0;

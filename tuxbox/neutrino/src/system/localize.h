@@ -68,6 +68,8 @@ class CLocaleManager
 		static neutrino_locale_t getWeekday(const struct tm * struct_tm_p);
 };
 
+#define NONEXISTANT_LOCALE                                   NULL
+
 #define LOCALE_EPGMENU_EPGPLUS                               "EPGMenu.epgplus"
 #define LOCALE_EPGMENU_EVENTINFO                             "EPGMenu.eventinfo"
 #define LOCALE_EPGMENU_EVENTLIST                             "EPGMenu.eventlist"
@@ -620,6 +622,25 @@ class CLocaleManager
 #define LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_VIDEO_CODEC "streamingmenu.streaming_transcode_video_codec"
 #define LOCALE_STREAMINGMENU_STREAMING_TYPE                  "streamingmenu.streaming_type"
 #define LOCALE_STREAMINGMENU_STREAMING_VIDEORATE             "streamingmenu.streaming_videorate"
+
+
+#define LOCALE_TIMERLIST_REPEAT                              "timerlist.repeat"
+#define LOCALE_TIMERLIST_REPEAT_BIWEEKLY                     "timerlist.repeat.biweekly"
+#define LOCALE_TIMERLIST_REPEAT_BYEVENTDESCRIPTION           "timerlist.repeat.byeventdescription"
+#define LOCALE_TIMERLIST_REPEAT_DAILY                        "timerlist.repeat.daily"
+#define LOCALE_TIMERLIST_REPEAT_FOURWEEKLY                   "timerlist.repeat.fourweekly"
+#define LOCALE_TIMERLIST_REPEAT_FRIDAY                       "timerlist.repeat.friday"
+#define LOCALE_TIMERLIST_REPEAT_MONDAY                       "timerlist.repeat.monday"
+#define LOCALE_TIMERLIST_REPEAT_MONTHLY                      "timerlist.repeat.monthly"
+#define LOCALE_TIMERLIST_REPEAT_ONCE                         "timerlist.repeat.once"
+#define LOCALE_TIMERLIST_REPEAT_SATURDAY                     "timerlist.repeat.saturday"
+#define LOCALE_TIMERLIST_REPEAT_SUNDAY                       "timerlist.repeat.sunday"
+#define LOCALE_TIMERLIST_REPEAT_THURSDAY                     "timerlist.repeat.thursday"
+#define LOCALE_TIMERLIST_REPEAT_TUESDAY                      "timerlist.repeat.tuesday"
+#define LOCALE_TIMERLIST_REPEAT_UNKNOWN                      "timerlist.repeat.unknown"
+#define LOCALE_TIMERLIST_REPEAT_WEDNESDAY                    "timerlist.repeat.wednesday"
+#define LOCALE_TIMERLIST_REPEAT_WEEKDAYS                     "timerlist.repeat.weekdays"
+#define LOCALE_TIMERLIST_REPEAT_WEEKLY                       "timerlist.repeat.weekly"
 
 
 #define LOCALE_TIMING_CHANLIST                               "timing.chanlist"

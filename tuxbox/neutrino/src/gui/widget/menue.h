@@ -35,6 +35,7 @@
 
 #include <driver/framebuffer.h>
 #include <driver/rcinput.h>
+#include <system/localize.h>
 
 #include <string>
 #include <vector>
@@ -166,42 +167,71 @@ class CMenuForwarder : public CMenuItem
 		}
 };
 
-class CMenuOptionChooser : public CMenuItem
+class CAbstractMenuOptionChooser : public CMenuItem
 {
-		struct keyval
-		{
-			int key;
-			std::string value;
-		};
+ protected:
+	int   height;
+	int * optionValue;
 
-		std::vector<keyval *> options;
-		int                   height;
-		std::string           optionName;
-		int *                 optionValue;
-		CChangeObserver *     observ;
-		bool                  localizing;
-
-	public:
-		CMenuOptionChooser(const char * const OptionName, int * const OptionValue, const bool Active = false, CChangeObserver * const Observ = NULL, const bool Localizing = true, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const std::string & IconName= ""); // UTF-8
-		~CMenuOptionChooser();
-
-
-		void addOption(const int key, const char * const value_utf8_encoded); // UTF-8
-		void removeAllOptions();
-		void setOptionValue(const int newvalue);
-		int getOptionValue(void) const;
-
-		int paint(bool selected);
-		int getHeight(void) const
+	int getHeight(void) const
 		{
 			return height;
 		}
-		bool isSelectable(void) const
+	
+	bool isSelectable(void) const
 		{
 			return active;
 		}
+};
 
-		int exec(CMenuTarget* parent);
+class CMenuOptionNumberChooser : public CAbstractMenuOptionChooser
+{
+	neutrino_locale_t  optionName;
+	const char *       optionString;
+
+	int                lower_bound;
+	int                upper_bound;
+
+	int                display_offset;
+
+	int                localized_value;
+	neutrino_locale_t  localized_value_name;
+
+ public:
+	CMenuOptionNumberChooser(const neutrino_locale_t name, int * const OptionValue, const bool Active, const int min_value, const int max_value, const int print_offset = 0, const int special_value = 0, const neutrino_locale_t special_value_name = NONEXISTANT_LOCALE, const char * non_localized_name = NULL);
+	
+	int paint(bool selected);
+
+	int exec(CMenuTarget* parent);
+};
+
+class CMenuOptionChooser : public CAbstractMenuOptionChooser
+{
+ public:
+	struct keyval
+	{
+		int               key;
+		neutrino_locale_t value;
+	};
+
+ private:
+	std::vector<keyval *> options;
+	neutrino_locale_t     optionName;
+	CChangeObserver *     observ;
+	bool                  localizing;
+
+ public:
+	CMenuOptionChooser(const neutrino_locale_t OptionName, int * const OptionValue, const bool Active = false, CChangeObserver * const Observ = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const std::string & IconName= ""); // UTF-8
+	~CMenuOptionChooser();
+
+	void addOption(const int key, const neutrino_locale_t value_utf8_encoded); // UTF-8
+	void removeAllOptions();
+	void setOptionValue(const int newvalue);
+	int getOptionValue(void) const;
+
+	int paint(bool selected);
+
+	int exec(CMenuTarget* parent);
 };
 
 class CMenuOptionStringChooser : public CMenuItem
