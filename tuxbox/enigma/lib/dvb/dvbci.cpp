@@ -437,7 +437,7 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 		sendTPDU(0xA0,10,1,buffer);
 	}
 
-	if(data[4]==0x9f && data[5]==0x88 && data[6]==0x09)
+	if(data[4]==0x9f && data[5]==0x88)
 	{
 		char buffer[len+1];
 		eDebug("[DVBCI] [APPLICATION MANAGER] -> mmi_menu");

@@ -97,12 +97,15 @@ void enigmaCImmi::getmmi(const char *data)
 
 	if(data[5] == 0x9F && data[6] == 0x88)
 	{
-		int pos=12;
 		int menupos=0;
-		if(data[7]== 0x09)		//t_menu_last
+		if(data[7]== 0x09 || data[7]==0xC)		//t_menu_last
 		{
+			int pos=12;
 			int len=data[8];
 			int choice=data[8];
+
+			if(data[7]==0xc)
+				pos=10;
 			
 			eDebug("entering t_menu_last");
 			
