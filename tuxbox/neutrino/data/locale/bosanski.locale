@@ -55,6 +55,7 @@ miscsettings.boxtype proizvodjac dbox2
 miscsettings.startneutrinodirect direktni start neutrina 
 miscsettings.general generalno 
 miscsettings.fb_destination majstori! boot konsola 
+miscsettings.spdif_control upravljanje spdifa 
 
 languagesetup.head izabrati jezik 
 languagesetup.select jezik 
@@ -65,9 +66,9 @@ audiomenu.monoright mono desno
 audiomenu.monoleft mono lijevo 
 audiomenu.stereo stereo 
 audiomenu.dolbydigital dolby digital 
-audiomenu.avs_control Volume Control avs/ost
-audiomenu.avs avs
-audiomenu.ost ost
+audiomenu.avs_control upravljanje glasnosti avs/ost 
+audiomenu.avs avs 
+audiomenu.ost ost 
 
 videomenu.head namjestiti video 
 videomenu.screensetup namjestiti ekran 
@@ -531,19 +532,19 @@ timerlist.repeat.weekly sedmicno
 timerlist.repeat.biweekly dvosedmnicno 
 timerlist.repeat.fourweekly cetvorosedmicno 
 timerlist.repeat.monthly mjesecno 
-timerlist.repeat.byeventdescription vidi timer 
+timerlist.repeat.byeventdescription vidi vremenski brojac 
 timerlist.repeat.unknown nepoznato 
-timerlist.repeat.weekdays unset
-timerlist.repeat.sunday unset
-timerlist.repeat.monday unset
-timerlist.repeat.tuesday unset
-timerlist.repeat.wednesday unset
-timerlist.repeat.thursday unset
-timerlist.repeat.friday unset
-timerlist.repeat.saturday unset
-timerlist.weekdays unset
-timerlist.weekdays.hint_1 unset
-timerlist.weekdays.hint_2 unset
+timerlist.repeat.weekdays ovim danima 
+timerlist.repeat.sunday ned 
+timerlist.repeat.monday pon 
+timerlist.repeat.tuesday uto 
+timerlist.repeat.wednesday sri 
+timerlist.repeat.thursday cet 
+timerlist.repeat.friday pet 
+timerlist.repeat.saturday sub 
+timerlist.weekdays dani 
+timerlist.weekdays.hint_1 pon uto sri cet pet sub ned 
+timerlist.weekdays.hint_2 'X'=vremenski brojac '-' nema vremenskog brojaca 
 timerlist.program.unknown nepoznati program 
 timerlist.standby.off budjenje iz pripravnosti 
 timerlist.standby.on idi u pripravnost 
@@ -563,8 +564,8 @@ timerlist.message obavijest
 timerlist.apid audio pid 
 timersettings.separator namjescenje vremenskog brojaca 
 timersettings.record_safety_time ispraviti snimanje 
-timersettings.record_safety_time.hint_1 unset
-timersettings.record_safety_time.hint_2 unset
+timersettings.record_safety_time.hint_1 vrijeme u minutama koje se odbija od 
+timersettings.record_safety_time.hint_2  vremeskog brojaca (00=ugaseno) 
 
 fontsize.menu tekst u izboru 
 fontsize.menu_title naslov izbora 
@@ -591,4 +592,4 @@ fontmenu.head namjescenje velicine slova
 fontmenu.channellist lista kanala 
 fontmenu.eventlist lista dogadjaja 
 fontmenu.epg epg 
-fontmenu.infobar informativna traka
+fontmenu.infobar informativna traka 
