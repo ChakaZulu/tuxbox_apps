@@ -663,7 +663,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CControld::CMD_SETVOLUME:
 	case CControld::CMD_SETVOLUME_AVS:
 		CControld::commandVolume msg_commandVolume;
-		read(connfd, &msg_commandVolume, sizeof(msg_commandVolume));
+		CBasicServer::receive_data(connfd, &msg_commandVolume, sizeof(msg_commandVolume));
 
 		if (rmsg.cmd == CControld::CMD_SETVOLUME)
 		{
@@ -712,37 +712,37 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		
 	case CControld::CMD_SETANALOGMODE:
 		CControld::commandAnalogMode msgmd;
-		read(connfd, &msgmd, sizeof(msgmd));
+		CBasicServer::receive_data(connfd, &msgmd, sizeof(msgmd));
 		zapit.setAudioMode(msgmd.mode);
 		break;
 	case CControld::CMD_SETVIDEOFORMAT:
 		//printf("[controld] set videoformat\n");
 		CControld::commandVideoFormat msg2;
-		read(connfd, &msg2, sizeof(msg2));
+		CBasicServer::receive_data(connfd, &msg2, sizeof(msg2));
 		setVideoFormat(msg2.format);
 		break;
 	case CControld::CMD_SETVIDEOOUTPUT:
 		//printf("[controld] set videooutput\n");
 		CControld::commandVideoOutput msg3;
-		read(connfd, &msg3, sizeof(msg3));
+		CBasicServer::receive_data(connfd, &msg3, sizeof(msg3));
 		setvideooutput(msg3.output);
 		break;
 	case CControld::CMD_SETBOXTYPE:
 		//printf("[controld] set boxtype\n");    //-------------------dummy!!!!!!!!!!
 		CControld::commandBoxType msg4;
-		read(connfd, &msg4, sizeof(msg4));
+		CBasicServer::receive_data(connfd, &msg4, sizeof(msg4));
 		setBoxType();
 		break;
 	case CControld::CMD_SETSCARTMODE:
 		//printf("[controld] set scartmode\n");
 		CControld::commandScartMode msg5;
-		read(connfd, &msg5, sizeof(msg5));
+		CBasicServer::receive_data(connfd, &msg5, sizeof(msg5));
 		setScartMode(msg5.mode);
 		break;
 	case CControld::CMD_SETVIDEOPOWERDOWN:
 		//printf("[controld] set scartmode\n");
 		CControld::commandVideoPowerSave msg10;
-		read(connfd, &msg10, sizeof(msg10));
+		CBasicServer::receive_data(connfd, &msg10, sizeof(msg10));
 		disableVideoOutput(msg10.powerdown);
 		break;
 		
@@ -750,39 +750,39 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CControld::CMD_GETVOLUME_AVS:
 		CControld::responseVolume msg_responseVolume;
 		msg_responseVolume.volume = (rmsg.cmd == CControld::CMD_GETVOLUME) ? settings.volume : settings.volume_avs;
-		write(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
+		CBasicServer::send_data(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
 		break;
 
 	case CControld::CMD_GETMUTESTATUS:
 	case CControld::CMD_GETMUTESTATUS_AVS:
 		CControld::responseMute msg_responseMute;
 		msg_responseMute.mute = (rmsg.cmd == CControld::CMD_GETMUTESTATUS) ? settings.mute : settings.mute_avs;
-		write(connfd, &msg_responseMute, sizeof(msg_responseMute));
+		CBasicServer::send_data(connfd, &msg_responseMute, sizeof(msg_responseMute));
 		break;
 
 	case CControld::CMD_GETVIDEOFORMAT:
 		//printf("[controld] get videoformat (fnc)\n");
 		CControld::responseVideoFormat msg8;
 		msg8.format = settings.videoformat;
-		write(connfd,&msg8,sizeof(msg8));
+		CBasicServer::send_data(connfd,&msg8,sizeof(msg8));
 		break;
 	case CControld::CMD_GETASPECTRATIO:
 		//printf("[controld] get videoformat (fnc)\n");
 		CControld::responseAspectRatio msga;
 		msga.aspectRatio = aspectRatio;
-		write(connfd,&msga,sizeof(msga));
+		CBasicServer::send_data(connfd,&msga,sizeof(msga));
 		break;
 	case CControld::CMD_GETVIDEOOUTPUT:
 		//printf("[controld] get videooutput (fblk)\n");
 		CControld::responseVideoOutput msg9;
 		msg9.output = settings.videooutput;
-		write(connfd,&msg9,sizeof(msg9));
+		CBasicServer::send_data(connfd,&msg9,sizeof(msg9));
 		break;
 	case CControld::CMD_GETBOXTYPE:
 		//printf("[controld] get boxtype\n");
 		CControld::responseBoxType msg0;
 		msg0.boxtype = settings.boxtype;
-		write(connfd,&msg0,sizeof(msg0));
+		CBasicServer::send_data(connfd,&msg0,sizeof(msg0));
 		break;
 
 	case CControld::CMD_REGISTEREVENT:
@@ -816,7 +816,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.96 2003/02/20 20:16:34 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.97 2003/02/25 14:21:26 thegoodguy Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;

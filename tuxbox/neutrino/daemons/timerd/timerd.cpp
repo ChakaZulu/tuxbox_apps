@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.45 2003/01/26 15:07:10 zwen Exp $
+	$Id: timerd.cpp,v 1.46 2003/02/25 14:26:00 thegoodguy Exp $
 
 	License: GPL
 
@@ -27,7 +27,7 @@
 #include <string.h>
 #include <sstream>
 #include <signal.h>
-#include <unistd.h>
+#include <unistd.h> /* fork */
 
 #include <timermanager.h>
 #include <debug.h>
@@ -53,11 +53,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		
 		case CTimerdMsg::CMD_REGISTEREVENT :
-			CTimerManager::getInstance()->getEventServer()->registerEvent( connfd );
+			CTimerManager::getInstance()->getEventServer()->registerEvent(connfd);
 			break;
 
 		case CTimerdMsg::CMD_UNREGISTEREVENT :
-			CTimerManager::getInstance()->getEventServer()->unRegisterEvent( connfd );
+			CTimerManager::getInstance()->getEventServer()->unRegisterEvent(connfd);
 			break;
 
 		case CTimerdMsg::CMD_GETSLEEPTIMER:
@@ -77,13 +77,13 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					}
 				}
 			}
-			write( connfd, &rspGetSleeptimer, sizeof(rspGetSleeptimer));
+			CBasicServer::send_data(connfd, &rspGetSleeptimer, sizeof(rspGetSleeptimer));
 			break;
 
 		case CTimerdMsg::CMD_GETTIMER:						// timer daten abfragen
 			CTimerdMsg::commandGetTimer msgGetTimer;
 			CTimerd::responseGetTimer resp;
-			read(connfd,&msgGetTimer, sizeof(msgGetTimer));
+			CBasicServer::receive_data(connfd,&msgGetTimer, sizeof(msgGetTimer));
 			if(CTimerManager::getInstance()->listEvents(events))
 			{
 				if(events[msgGetTimer.eventID])
@@ -137,7 +137,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					}
 				}
 			}
-			write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
+			CBasicServer::send_data(connfd, &resp, sizeof(CTimerd::responseGetTimer));
 			break;
 
 		case CTimerdMsg::CMD_GETTIMERLIST:				// liste aller timer 
@@ -193,35 +193,35 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					{
 						strcpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message);
 					}
-					write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
+					CBasicServer::send_data(connfd, &resp, sizeof(CTimerd::responseGetTimer));
 				}
 			}
 			break;
 
 		case CTimerdMsg::CMD_RESCHEDULETIMER:			// event nach vorne oder hinten schieben
 			{
-				read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
+				CBasicServer::receive_data(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
 				int ret=CTimerManager::getInstance()->rescheduleEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
 				CTimerdMsg::responseStatus rspStatus;
 				rspStatus.status = (ret!=0);
-				write( connfd, &rspStatus, sizeof(rspStatus));
+				CBasicServer::send_data(connfd, &rspStatus, sizeof(rspStatus));
 				break;
 			}
 
 		case CTimerdMsg::CMD_MODIFYTIMER:				// neue zeiten setzen
 			{
-				read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
+				CBasicServer::receive_data(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
 				int ret=CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime,
-																				  msgModifyTimer.eventRepeat );
+																				  msgModifyTimer.eventRepeat);
 				CTimerdMsg::responseStatus rspStatus;
 				rspStatus.status = (ret!=0);
-				write( connfd, &rspStatus, sizeof(rspStatus));
+				CBasicServer::send_data(connfd, &rspStatus, sizeof(rspStatus));
 				break;
 			}
 
 		case CTimerdMsg::CMD_ADDTIMER:						// neuen timer hinzufügen
 			CTimerdMsg::commandAddTimer msgAddTimer;
-			read(connfd,&msgAddTimer, sizeof(msgAddTimer));
+			CBasicServer::receive_data(connfd,&msgAddTimer, sizeof(msgAddTimer));
 
 			CTimerdMsg::responseAddTimer rspAddTimer;
 			CTimerEvent* event;
@@ -230,14 +230,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			{
 				case CTimerd::TIMER_STANDBY :
 					CTimerdMsg::commandSetStandby standby;
-					read( connfd, &standby, sizeof(CTimerdMsg::commandSetStandby));
+					CBasicServer::receive_data(connfd, &standby, sizeof(CTimerdMsg::commandSetStandby));
 
 					event = new CTimerEvent_Standby(
 															 msgAddTimer.announceTime,
 															 msgAddTimer.alarmTime,
 															 standby.standby_on,
 															 msgAddTimer.eventRepeat);
-					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
 				case CTimerd::TIMER_SHUTDOWN :
@@ -245,7 +245,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 															  msgAddTimer.announceTime,
 															  msgAddTimer.alarmTime,
 															  msgAddTimer.eventRepeat);
-					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
 				case CTimerd::TIMER_SLEEPTIMER :
@@ -253,11 +253,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 																 msgAddTimer.announceTime,
 																 msgAddTimer.alarmTime,
 																 msgAddTimer.eventRepeat);
-					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
 				case CTimerd::TIMER_RECORD :
-					read( connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
+					CBasicServer::receive_data(connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
 					event = new CTimerEvent_Record(
 															msgAddTimer.announceTime,
 															msgAddTimer.alarmTime,
@@ -268,11 +268,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 															evInfo.apids,
 															evInfo.mode,
 															msgAddTimer.eventRepeat);
-					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
 				case CTimerd::TIMER_ZAPTO :
-					read( connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
+					CBasicServer::receive_data(connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
 					if(evInfo.channel_id > 0)
 					{
 						event = new CTimerEvent_Zapto(
@@ -283,15 +283,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 															  evInfo.epg_starttime,
 															  evInfo.mode,
 															  msgAddTimer.eventRepeat);
-						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					}
 					break;
 
 				case CTimerd::TIMER_NEXTPROGRAM :
 //					CTimerd::EventInfo evInfo;
-					read( connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
+					CBasicServer::receive_data(connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
 /*
-					it = CTimerEvent_NextProgram::events.find( evInfo.uniqueKey);
+					it = CTimerEvent_NextProgram::events.find(evInfo.uniqueKey);
 					if (it == CTimerEvent_NextProgram::events.end())
 					{
 						event = new CTimerEvent_NextProgram(
@@ -301,7 +301,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 							msgAddTimer.eventRepeat);
 						static_cast<CTimerEvent_NextProgram*>(event)->eventInfo = evInfo;
 						CTimerEvent_NextProgram::events.insert(make_pair(static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.uniqueKey, static_cast<CTimerEvent_NextProgram*>(event)));
-						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					}
 					else
 					{
@@ -317,34 +317,34 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					break;
 				case CTimerd::TIMER_REMIND :
 					CTimerdMsg::commandRemind remind;
-					read( connfd, &remind, sizeof(CTimerdMsg::commandRemind));
+					CBasicServer::receive_data(connfd, &remind, sizeof(CTimerdMsg::commandRemind));
 					event = new CTimerEvent_Remind(msgAddTimer.announceTime,
 															 msgAddTimer.alarmTime,
 															 remind.message,
 															 msgAddTimer.eventRepeat);
-					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
 				default:
 					printf("[timerd] Unknown TimerType\n");
 			}
 
-			write( connfd, &rspAddTimer, sizeof(rspAddTimer));
+			CBasicServer::send_data(connfd, &rspAddTimer, sizeof(rspAddTimer));
 
 			break;
 		case CTimerdMsg::CMD_REMOVETIMER:						//	timer entfernen
 			dprintf("TIMERD: command remove\n");
 			CTimerdMsg::commandRemoveTimer msgRemoveTimer;
-			read(connfd,&msgRemoveTimer, sizeof(msgRemoveTimer));
-			dprintf("TIMERD: command remove %d\n",msgRemoveTimer.eventID );
-			CTimerManager::getInstance()->removeEvent( msgRemoveTimer.eventID);
+			CBasicServer::receive_data(connfd,&msgRemoveTimer, sizeof(msgRemoveTimer));
+			dprintf("TIMERD: command remove %d\n",msgRemoveTimer.eventID);
+			CTimerManager::getInstance()->removeEvent(msgRemoveTimer.eventID);
 			break;
 
 		case CTimerdMsg::CMD_TIMERDAVAILABLE:					// testen ob server läuft ;)
 			{
 				CTimerdMsg::responseAvailable rspAvailable;
 				rspAvailable.available = true;
-				write( connfd, &rspAvailable, sizeof(rspAvailable));
+				CBasicServer::send_data(connfd, &rspAvailable, sizeof(rspAvailable));
 			}
 			break;
 		case CTimerdMsg::CMD_SHUTDOWN:
@@ -352,15 +352,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				bool ret=CTimerManager::getInstance()->shutdown();
 				CTimerdMsg::responseStatus rspStatus;
 				rspStatus.status = ret;
-				write( connfd, &rspStatus, sizeof(rspStatus));
+				CBasicServer::send_data(connfd, &rspStatus, sizeof(rspStatus));
 				return false;
 			}
 			break;
 		case CTimerdMsg::CMD_SETAPID:				  // apid setzen
 			{
 				CTimerdMsg::commandSetAPid data;
-				read(connfd,&data, sizeof(data));
-				CTimerManager::getInstance()->modifyEvent(data.eventID , data.apids );
+				CBasicServer::receive_data(connfd,&data, sizeof(data));
+				CTimerManager::getInstance()->modifyEvent(data.eventID , data.apids);
 			}
 			break;
 		default:
