@@ -542,9 +542,9 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 				default:
 						fileicon = "file.raw";
 			}
-			frameBuffer->paintIcon(fileicon, x+5 , ypos +7 );
+			frameBuffer->paintIcon(fileicon, x+5 , ypos +5 );
 			
-			g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight+3, width -(35+170) , actual_file->getFileName().c_str(), color);
+			g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight-1, width -(35+170) , actual_file->getFileName().c_str(), color);
 
 			if( S_ISREG(actual_file->Mode) )
 			{
@@ -555,12 +555,12 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 					modestring += string((actual_file->Mode & (2 << (m*3)))?"w":"-");
 					modestring += string((actual_file->Mode & (1 << (m*3)))?"x":"-");
 				}
-				g_Fonts->filebrowser_itemFile->RenderString(x + width - 160 , ypos+ fheight+3, 80, modestring.c_str(), color);
+				g_Fonts->filebrowser_itemFile->RenderString(x + width - 160 , ypos+ fheight-1, 80, modestring.c_str(), color);
 
 				char tmpstr[256];
 				snprintf(tmpstr,sizeof(tmpstr),"%d kb", (int)((actual_file->Size / 1024) +0.9));
 				int breite = g_Fonts->filebrowser_itemFile->getRenderWidth(tmpstr)< 70?g_Fonts->filebrowser_itemFile->getRenderWidth(tmpstr):60;
-				g_Fonts->filebrowser_itemFile->RenderString(x + width - 80 + (60 - breite), ypos+ fheight+3, breite, tmpstr, color);
+				g_Fonts->filebrowser_itemFile->RenderString(x + width - 80 + (60 - breite), ypos+ fheight-1, breite, tmpstr, color);
 			}
 		}
 	}
@@ -587,10 +587,10 @@ void CFileBrowser::paintFoot()
 //	int ButtonWidth = 25;
 	int dx = width / 4;
 	int type = filelist[selected].getType();
-	int by = y + height - (foheight -8);
+	int by = y + height - (foheight -4);
 	int ty = by + g_Fonts->infobar_small->getHeight();
 
-	frameBuffer->paintBoxRel(x, y+height- (foheight -5), width, (foheight -5), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y+height- (foheight ), width, (foheight ), COL_MENUHEAD);
 
 	if(filelist.size()>0)
 	{
