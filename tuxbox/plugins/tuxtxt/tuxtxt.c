@@ -409,11 +409,24 @@ void ClearB(int color)
 {
 	memset(lfb, color, 2*var_screeninfo.xres*var_screeninfo.yres);
 }
-
+void SetPosX(int column)
+{
+#if CFGTTF
+		int abx = ((displaywidth)%(40-nofirst) == 0 ? displaywidth+1 : (displaywidth)/(((displaywidth)%(40-nofirst))));// distance between 'inserted' pixels
+//		int abx = (displaywidth)/(((displaywidth)%(40-nofirst))+1);// distance between 'inserted' pixels
+		PosX = StartX;
+		int i;
+		for (i = 0; i < column-nofirst; i++)
+			PosX += fontwidth+(((PosX-sx) / abx) < ((PosX+fontwidth+1-sx) /abx) ? 1 : 0);
+//		PosX = StartX + (column-nofirst)*fontwidth + ((column-nofirst)*fontwidth/abx);
+#else
+		PosX = StartX + (column-nofirst)*fontwidth;
+#endif
+}
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.78 $";
+	char cvs_revision[] = "$Revision: 1.79 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -442,7 +455,7 @@ void plugin_exec(PluginParam *par)
 			ey = atoi(par->val);
 	}
 
-	if (vtxtpid == -1 || fb == -1 || lcd == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
+	if (vtxtpid == -1 || fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
 	{
 		printf("TuxTxt <Invalid Param(s)>\n");
 		return;
@@ -644,6 +657,7 @@ int Init()
 	UpdateLCD();
 
 	/* load config */
+	screenmode = 0;
 	screen_mode1 = 0;
 	screen_mode2 = 0;
 	color_mode   = 1;
@@ -652,6 +666,7 @@ int Init()
 	auto_national   = 1;
 	swapupdown      = 0;
 	showhex         = 0;
+	showflof        = 1;
 
 	if ((conf = fopen(TUXTXTCONF, "rt")) == 0)
 	{
@@ -691,10 +706,17 @@ int Init()
 				showhex = ival & 1;
 			else if (1 == sscanf(line, "OverlayTransparency %x", &ival))
 				tr1[transp2-1] = tr2[transp2-1] = ival & 0xFFFF;
+			else if (1 == sscanf(line, "TTFWidthFactor %d", &ival))
+	            TTFWIDTHFACTOR = ival;
+			else if (1 == sscanf(line, "Screenmode %d", &ival))
+	            screenmode = ival;
+			else if (1 == sscanf(line, "ShowFLOF %d", &ival))
+	            showflof = ival;
 		}
 		fclose(conf);
 	}
 	saveconfig = 0;
+	savedscreenmode = screenmode;
 	
 	/* init fontlibrary */
 	if ((error = FT_Init_FreeType(&library)))
@@ -721,18 +743,19 @@ int Init()
 #if CFGTTF 
 
 	/* calculate font dimensions */
+	displaywidth = (ex-sx);
 	fontheight = (ey-sy) / 25;
 	fontwidth = fontwidth_normal = (ex-sx) / 40;
-	fontwidth_topmenumain = (ex-sx) * 3 / 4 / 40;
-	fontwidth_topmenusmall = (ex-sx - 40*fontwidth_topmenumain) / TOPMENUCHARS;
-	fontwidth_small = (ex-sx) / 2 / 40;
+	fontwidth_topmenumain = (TV43STARTX-sx) / 40;
+	fontwidth_topmenusmall = (ex- TV43STARTX) / TOPMENUCHARS;
+	fontwidth_small = (TV169FULLSTARTX-sx)  / 40;
 	ymosaic[0] = 0; /* y-offsets for 2*3 mosaic */
 	ymosaic[1] = (fontheight + 1) / 3;
 	ymosaic[2] = (fontheight * 2 + 1) / 3;
 	ymosaic[3] = fontheight;
 
 	/* center screen */
-	StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
+	StartX = sx; //+ (((ex-sx) - 40*fontwidth) / 2);
 	StartY = sy + (((ey-sy) - 25*fontheight) / 2);
 
 	typettf.font.face_id = (FTC_FaceID) TUXTXTTTF;
@@ -953,6 +976,7 @@ int Init()
 	}
 
 	gethotlist();
+	SwitchScreenMode(screenmode);
 
 	/* init successfull */
 	return 1;
@@ -964,7 +988,7 @@ int Init()
 
 void CleanUp()
 {
-	int i, n;
+	int i, n, curscreenmode = screenmode;
 	
 	/* hide pig */
 	if (screenmode)
@@ -1038,7 +1062,7 @@ void CleanUp()
 		savehotlist();
 				
 	/* save config */
-	if (saveconfig)
+	if (saveconfig || curscreenmode != savedscreenmode)
 	{
 		if ((conf = fopen(TUXTXTCONF, "wt")) == 0)
 		{
@@ -1056,6 +1080,8 @@ void CleanUp()
 			fprintf(conf, "SwapUpDown %d\n", swapupdown);
 			fprintf(conf, "ShowHexPages %d\n", showhex);
 			fprintf(conf, "OverlayTransparency %X\n", tr1[transp2-1]);
+			fprintf(conf, "TTFWidthFactor %d\n", TTFWIDTHFACTOR);
+			fprintf(conf, "Screenmode %d\n", curscreenmode);
 			fclose(conf);
 		}
 	}
@@ -2069,19 +2095,19 @@ void PageInput(int Number)
 	switch (inputcounter)
 	{
 	case 2:
-		PosX = StartX + 8*fontwidth;
+		SetPosX(8);
 		RenderCharFB(Number | '0', black<<4 | white);
 		RenderCharFB('-', black<<4 | white);
 		RenderCharFB('-', black<<4 | white);
 		break;
 
 	case 1:
-		PosX = StartX + 9*fontwidth;
+		SetPosX(9);
 		RenderCharFB(Number | '0', black<<4 | white);
 		break;
 
 	case 0:
-		PosX = StartX + 10*fontwidth;
+		SetPosX(10);
 		RenderCharFB(Number | '0', black<<4 | white);
 		break;
 	}
@@ -2329,6 +2355,7 @@ void GetPrevSubPage()
 
 void Prev100()
 {
+	if (prev_100 == 0) return;
 	if (zoommode == 2)
 		zoommode = 1;
 
@@ -2349,6 +2376,7 @@ void Prev100()
 
 void Prev10()
 {
+	if (prev_10 == 0) return;
 	if (zoommode == 2)
 		zoommode = 1;
 
@@ -2369,6 +2397,7 @@ void Prev10()
 
 void Next10()
 {
+	if (next_10 == 0) return;
 	if (zoommode == 2)
 		zoommode = 1;
 
@@ -2389,6 +2418,7 @@ void Next10()
 
 void Next100()
 {
+	if (next_100 == 0) return;
 	if (zoommode == 2)
 		zoommode = 1;
 
@@ -2421,7 +2451,7 @@ void PageCatching()
 	zoommode = 0;
 	PosX = StartX;
 	PosY = StartY + 24*fontheight;
-	for (byte = 0; byte < 40; byte++)
+	for (byte = 0; byte < 40-nofirst; byte++)
 		RenderCharFB(catchmenutext[menulanguage][byte], catchmenutext[menulanguage][byte+40]);
 	zoommode = oldzoommode;
 
@@ -2617,7 +2647,7 @@ void RenderCatchedPage()
 	if (pc_old_row || pc_old_col) /* not at first call */
 	{
 		/* restore pagenumber */
-		PosX = StartX + pc_old_col*fontwidth;
+		SetPosX(pc_old_col);
 
 		if (zoommode == 2)
 			PosY = StartY + (pc_old_row-12)*fontheight*((zoom>>10)+1);
@@ -2643,8 +2673,8 @@ void RenderCatchedPage()
 		zoommode = 1;
 		CopyBB2FB();
 	}
+	SetPosX(catch_col);
 
-	PosX = StartX + catch_col*fontwidth;
 
 	if (zoommode == 2)
 		PosY = StartY + (catch_row-12)*fontheight*((zoom>>10)+1);
@@ -2719,6 +2749,7 @@ void SwitchScreenMode(int newscreenmode)
 #endif
 	ClearBB(clearbbcolor);
 
+
 	/* set mode */
 	if (screenmode)								 /* split */
 	{
@@ -2726,16 +2757,19 @@ void SwitchScreenMode(int newscreenmode)
 		if ( screenmode == 2 && zoommode )
 			ClearFB(clearbbcolor);
 #endif
+
 		int fw, fh, tx, ty, tw, th;
 		int sm = 0;
+
 
 		if (screenmode==1) /* split with topmenu */
 		{
 			fw = fontwidth_topmenumain;
 			fh = fontheight;
 			tw = TV43WIDTH;
+			displaywidth= (TV43STARTX     -sx);
 #if CFGTTF 
-			StartX = sx + (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
+		StartX = sx; //+ (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
 #endif
 			tx = TV43STARTX;
 			ty = TV43STARTY;
@@ -2749,6 +2783,7 @@ void SwitchScreenMode(int newscreenmode)
 			ty = TV169FULLSTARTY;
 			tw = TV169FULLWIDTH;
 			th = TV169FULLHEIGHT;
+			displaywidth= (TV169FULLSTARTX-sx);
 		}
 		
 #if CFGTTF 
@@ -2789,9 +2824,10 @@ void SwitchScreenMode(int newscreenmode)
 #endif
 
 #if CFGTTF 
+		displaywidth= (ex             -sx);
 		fontwidth = fontwidth_normal;
 		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
-		StartX = sx + (ex-sx - 40*fontwidth) / 2; /* center screen */
+		StartX = sx; //+ (ex-sx - 40*fontwidth) / 2; /* center screen */
 #else	 /* !TTF */
 		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fontwidth_normal;
 		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = fontheight+2;
@@ -2893,10 +2929,12 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	int factor;
 	unsigned char *sbitbuffer;
 
+	int abx = ((displaywidth)%(40-nofirst) == 0 ? displaywidth+1 : (displaywidth)/(((displaywidth)%(40-nofirst))));// distance between 'inserted' pixels
+	int curfontwidth = fontwidth+(((PosX-sx) / abx) < ((PosX+fontwidth+1-sx) /abx) ? 1 : 0);
 
 	if (Char == 0xFF)	/* skip doubleheight chars in lower line */
 	{
-		PosX += fontwidth;
+		PosX += curfontwidth;
 		return;
 	}
 
@@ -2916,8 +2954,8 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	if ((Attribute & 0x300) &&
 		 ((Char&0xA0) == 0x20))
 	{
-		int w1 = fontwidth / 2;
-		int w2 = fontwidth - w1;
+		int w1 = curfontwidth / 2;
+		int w2 = curfontwidth - w1;
 		int y;
 		
 		Char = (Char & 0x1f) | ((Char & 0x40) >> 1);
@@ -2936,7 +2974,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 				Char >>= 2;
 			}
 		
-		PosX += fontwidth;
+		PosX += curfontwidth;
 		return;
 	}
 	
@@ -2952,8 +2990,8 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	{
 	case 0x00:
 	case 0x20:
-		FillRect(PosX, PosY + yoffset, fontwidth, factor*fontheight, bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX, PosY + yoffset, curfontwidth, factor*fontheight, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0x23:
 	case 0x24:
@@ -2977,80 +3015,80 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		Char = nationaltable7b[national_subset][Char-0x7B];
 		break;
 	case 0x7F:
-		FillRect(PosX, PosY + yoffset, fontwidth, factor*ascender, fgcolor);
-		FillRect(PosX, PosY + yoffset + factor*ascender, fontwidth, factor*(fontheight-ascender), bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX, PosY + yoffset, curfontwidth, factor*ascender, fgcolor);
+		FillRect(PosX, PosY + yoffset + factor*ascender, curfontwidth, factor*(fontheight-ascender), bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE0: /* |- */
-		DrawHLine(PosX, PosY + yoffset, fontwidth, fgcolor);
+		DrawHLine(PosX, PosY + yoffset, curfontwidth, fgcolor);
 		DrawVLine(PosX, PosY + yoffset +1, fontheight -1, fgcolor);
-		FillRect(PosX +1, PosY + yoffset +1, fontwidth-1, fontheight-1, bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX +1, PosY + yoffset +1, curfontwidth-1, fontheight-1, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE1: /* - */
-		DrawHLine(PosX, PosY + yoffset, fontwidth, fgcolor);
-		FillRect(PosX, PosY + yoffset +1, fontwidth, fontheight-1, bgcolor);
-		PosX += fontwidth;
+		DrawHLine(PosX, PosY + yoffset, curfontwidth, fgcolor);
+		FillRect(PosX, PosY + yoffset +1, curfontwidth, fontheight-1, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE2: /* -| */
-		DrawHLine(PosX, PosY + yoffset, fontwidth, fgcolor);
-		DrawVLine(PosX + fontwidth -1, PosY + yoffset +1, fontheight -1, fgcolor);
-		FillRect(PosX, PosY + yoffset +1, fontwidth-1, fontheight-1, bgcolor);
-		PosX += fontwidth;
+		DrawHLine(PosX, PosY + yoffset, curfontwidth, fgcolor);
+		DrawVLine(PosX + curfontwidth -1, PosY + yoffset +1, fontheight -1, fgcolor);
+		FillRect(PosX, PosY + yoffset +1, curfontwidth-1, fontheight-1, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE3: /* |  */
 		DrawVLine(PosX, PosY + yoffset, fontheight, fgcolor);
-		FillRect(PosX +1, PosY + yoffset, fontwidth -1, fontheight, bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX +1, PosY + yoffset, curfontwidth -1, fontheight, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE4: /*  | */
-		DrawVLine(PosX + fontwidth -1, PosY + yoffset, fontheight, fgcolor);
-		FillRect(PosX, PosY + yoffset, fontwidth -1, fontheight, bgcolor);
-		PosX += fontwidth;
+		DrawVLine(PosX + curfontwidth -1, PosY + yoffset, fontheight, fgcolor);
+		FillRect(PosX, PosY + yoffset, curfontwidth -1, fontheight, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE5: /* |_ */
-		DrawHLine(PosX, PosY + yoffset + fontheight -1, fontwidth, fgcolor);
+		DrawHLine(PosX, PosY + yoffset + fontheight -1, curfontwidth, fgcolor);
 		DrawVLine(PosX, PosY + yoffset, fontheight -1, fgcolor);
-		FillRect(PosX +1, PosY + yoffset, fontwidth-1, fontheight-1, bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX +1, PosY + yoffset, curfontwidth-1, fontheight-1, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE6: /* _ */
-		DrawHLine(PosX, PosY + yoffset + fontheight -1, fontwidth, fgcolor);
-		FillRect(PosX, PosY + yoffset, fontwidth, fontheight-1, bgcolor);
-		PosX += fontwidth;
+		DrawHLine(PosX, PosY + yoffset + fontheight -1, curfontwidth, fgcolor);
+		FillRect(PosX, PosY + yoffset, curfontwidth, fontheight-1, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE7: /* _| */
-		DrawHLine(PosX, PosY + yoffset + fontheight -1, fontwidth, fgcolor);
-		DrawVLine(PosX + fontwidth -1, PosY + yoffset, fontheight -1, fgcolor);
-		FillRect(PosX, PosY + yoffset, fontwidth-1, fontheight-1, bgcolor);
-		PosX += fontwidth;
+		DrawHLine(PosX, PosY + yoffset + fontheight -1, curfontwidth, fgcolor);
+		DrawVLine(PosX + curfontwidth -1, PosY + yoffset, fontheight -1, fgcolor);
+		FillRect(PosX, PosY + yoffset, curfontwidth-1, fontheight-1, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xE8: /* Ii */
-		FillRect(PosX +1, PosY + yoffset, fontwidth -1, fontheight, bgcolor);
-		for (Row = 0; Row < fontwidth/2; Row++)
+		FillRect(PosX +1, PosY + yoffset, curfontwidth -1, fontheight, bgcolor);
+		for (Row=0; Row < curfontwidth/2; Row++)
 			DrawVLine(PosX + Row, PosY + yoffset + Row, fontheight - Row, fgcolor);
-		PosX += fontwidth;
+		PosX += curfontwidth;
 		return;
 	case 0xE9: /* II */
-		FillRect(PosX, PosY + yoffset, fontwidth/2, fontheight, fgcolor);
-		FillRect(PosX + fontwidth/2, PosY + yoffset, (fontwidth+1)/2, fontheight, bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX, PosY + yoffset, curfontwidth/2, fontheight, fgcolor);
+		FillRect(PosX + curfontwidth/2, PosY + yoffset, (curfontwidth+1)/2, fontheight, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xEA: /* °  */
-		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
-		FillRect(PosX, PosY + yoffset, fontwidth/2, fontwidth/2, fgcolor);
-		PosX += fontwidth;
+		FillRect(PosX, PosY + yoffset, curfontwidth, fontheight, bgcolor);
+		FillRect(PosX, PosY + yoffset, curfontwidth/2, curfontwidth/2, fgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xEB: /* ¬ */
-		FillRect(PosX, PosY + yoffset +1, fontwidth, fontheight -1, bgcolor);
-		for (Row = 0; Row < fontwidth/2; Row++)
-			DrawHLine(PosX + Row, PosY + yoffset + Row, fontwidth - Row, fgcolor);
-		PosX += fontwidth;
+		FillRect(PosX, PosY + yoffset +1, curfontwidth, fontheight -1, bgcolor);
+		for (Row=0; Row < curfontwidth/2; Row++)
+			DrawHLine(PosX + Row, PosY + yoffset + Row, curfontwidth - Row, fgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xEC: /* -- */
-		FillRect(PosX, PosY + yoffset, fontwidth, fontwidth/2, fgcolor);
-		FillRect(PosX, PosY + yoffset + fontwidth/2, fontwidth, fontheight - fontwidth/2, bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX, PosY + yoffset, curfontwidth, curfontwidth/2, fgcolor);
+		FillRect(PosX, PosY + yoffset + curfontwidth/2, curfontwidth, fontheight - curfontwidth/2, bgcolor);
+		PosX += curfontwidth;
 		return;
 	case 0xED:
 	case 0xEE:
@@ -3073,11 +3111,12 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 #if DEBUG
 		printf("TuxTxt <FT_Get_Char_Index for Char %x \"%c\" failed\n", Char, Char);
 #endif
-		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX, PosY + yoffset, curfontwidth, fontheight, bgcolor);
+		PosX += curfontwidth;
 		return;
 	}
 
+	typettf.font.pix_width  = (FT_UShort) curfontwidth * TTFWIDTHFACTOR - 2;
 #ifndef DREAMBOX
 	if ((error = FTC_SBitCache_Lookup(cache, &typettf, glyph, &sbit, NULL)) != 0)
 #else
@@ -3086,10 +3125,10 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	{
 #if DEBUG
 		printf("TuxTxt <FTC_SBitCache_Lookup: 0x%x> c%x a%x g%x w%d h%d x%d y%d\n",
-				 error, Char, Attribute, glyph, fontwidth, fontheight, PosX, PosY);
+				 error, Char, Attribute, glyph, curfontwidth, fontheight, PosX, PosY);
 #endif
-		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
-		PosX += fontwidth;
+		FillRect(PosX, PosY + yoffset, curfontwidth, fontheight, bgcolor);
+		PosX += curfontwidth;
 		return;
 	}
 
@@ -3101,7 +3140,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		int f; /* runningh counter for zoom factor */
 		
 		Row = factor * (ascender - sbit->top);
-		FillRect(PosX, PosY + yoffset, fontwidth, Row, bgcolor); /* fill upper margin */
+		FillRect(PosX, PosY + yoffset, curfontwidth, Row, bgcolor); /* fill upper margin */
 
 		p = lfb + PosX + (yoffset + PosY + Row) * var_screeninfo.xres; /* running pointer into framebuffer */
 		for (Row = sbit->height; Row; Row--) /* row counts up, but down may be a little faster :) */
@@ -3141,9 +3180,9 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 			}
 
 #if 1
-			for (Bit = fontwidth - sbit->width - sbit->left; Bit > 0; Bit--) /* fill rest of char width */
+			for (Bit = curfontwidth - sbit->width - sbit->left; Bit > 0; Bit--) /* fill rest of char width */
 #else
-			for (Bit = fontwidth - sbit->width; Bit > 0; Bit--) /* fill rest of char width */
+			for (Bit = curfontwidth - sbit->width; Bit > 0; Bit--) /* fill rest of char width */
 #endif
 			{
 				for (f = factor-1; f >= 0; f--)
@@ -3155,9 +3194,9 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		}
 
 		Row = ascender - sbit->top + sbit->height;
-		FillRect(PosX, PosY + yoffset + Row*factor, fontwidth, (fontheight - Row) * factor, bgcolor); /* fill lower margin */
+		FillRect(PosX, PosY + yoffset + Row*factor, curfontwidth, (fontheight - Row) * factor, bgcolor); /* fill lower margin */
 
-		PosX += fontwidth;
+		PosX += curfontwidth;
 
 	}
 	else /* yoffset<0: LCD */
@@ -3494,7 +3533,6 @@ void RenderMessage(int Message)
 /* 	char message_9[] = "γ     Seite 100 existiert nicht!    δι"; */
 
 	memcpy(&message_1[24], versioninfo, 4);
-
 	/* reset zoom */
 	zoommode = 0;
 
@@ -3603,9 +3641,11 @@ void RenderPage()
 	/* update lcd */
 	UpdateLCD();
 
+
 	/* update page or timestring */
 	if (transpmode != 2 && pageupdate && page_receiving != page && inputcounter == 2)
 	{
+
 		/* get national subset */
 		if (auto_national)
 		{
@@ -3627,6 +3667,24 @@ void RenderPage()
 			return;
 		}
 
+		/* display first column?  */
+		nofirst = 1;
+		for (row = 1; row < 24; row++)
+		{
+			if (page_char[row*40] != ' ' && page_char[row*40] != 0x00 && page_char[row*40] != 0xFF && page_atrb[row*40] != (black <<4 | black)) {nofirst = 0; break;}
+		}
+#if CFGTTF
+		fontwidth = fontwidth_normal = (ex-sx) / (40-nofirst);
+		fontwidth_topmenumain = (TV43STARTX-sx) / (40-nofirst);
+		fontwidth_topmenusmall = (ex- TV43STARTX - TOPMENUINDENTDEF) / TOPMENUCHARS;
+		fontwidth_small = (TV169FULLSTARTX-sx)  / (40-nofirst);
+		switch(screenmode)
+		{
+			case 0:	fontwidth = fontwidth_normal     ; displaywidth= (ex             -sx);break;
+			case 1: fontwidth = fontwidth_topmenumain; displaywidth= (TV43STARTX     -sx);break;
+			case 2: fontwidth = fontwidth_small      ; displaywidth= (TV169FULLSTARTX-sx);break;
+		}
+#endif
 		if (transpmode || (boxed && !screenmode))
 		{
 			ClearBB(transp);
@@ -3640,7 +3698,7 @@ void RenderPage()
 		{
 			PosX = StartX;
 
-			for (col = 0; col < 40; col++)
+			for (col = nofirst; col < 40; col++)
 				RenderCharBB(page_char[row*40 + col], page_atrb[row*40 + col]);
 
 			PosY += fontheight;
@@ -3652,7 +3710,7 @@ void RenderPage()
 	else if (transpmode != 2 && zoommode != 2)
 	{
 		/* update timestring */
-		PosX = StartX + 32*fontwidth;
+		SetPosX(32);
 		PosY = StartY;
 
 		for (byte = 0; byte < 8; byte++)
@@ -3675,18 +3733,29 @@ void showlink(int column, int linkpage, int Attrib)
 	else
 		yoffset = var_screeninfo.yres;
 	
+#if CFGTTF
+	int abx = (displaywidth)/(((displaywidth)%(40-nofirst))+1);// distance between 'inserted' pixels
+	int width = displaywidth /4;
+#else
+	int width = ((40-nofirst)*oldfontwidth)/4;
+#endif
 	
-	PosX = StartX + column*oldfontwidth;
 	PosY = StartY + 24*fontheight;
 
 	if (boxed)
 	{
+		PosX = StartX + column*width;
+#if CFGTTF
+		FillRect(PosX, PosY+yoffset, displaywidth, fontheight, transp);
+#else
 		FillRect(PosX, PosY+yoffset, 40*oldfontwidth, fontheight, transp);
+#endif
 		return;
 	}
 	
 	if (adip[linkpage][0])
 	{
+		PosX = StartX + column*width;
 #if CFGTTF
 		int l = strlen(adip[linkpage]);
 		
@@ -3695,8 +3764,8 @@ void showlink(int column, int linkpage, int Attrib)
 			fontwidth = oldfontwidth * 10 / (l+1);
 			typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 		}
-		FillRect(PosX, PosY+yoffset, 10*oldfontwidth, fontheight, Attrib >> 4);
-		PosX += ((10*oldfontwidth) - (l*fontwidth))/2; /* center */
+		FillRect(PosX, PosY+yoffset, width+(displaywidth%4), fontheight, Attrib >> 4);
+		PosX += ((width) - (l*fontwidth+l*fontwidth/abx))/2; /* center */
 		for (p = adip[linkpage]; *p; p++)
 			RenderCharBB(*p, Attrib);
 		fontwidth = oldfontwidth;
@@ -3708,6 +3777,47 @@ void showlink(int column, int linkpage, int Attrib)
 	}
 	else
 	{
+
+		if (showflof && flofpages[page][0] != 0) // FLOF-Navigation present
+		{
+			if (column == 0)
+			{
+				PosX = StartX;
+#if CFGTTF
+				FillRect(PosX, PosY+yoffset, displaywidth, fontheight, black);
+#else
+				FillRect(PosX, PosY+yoffset, 40*oldfontwidth, fontheight, black);
+#endif
+			}
+			p = page_char+24*40;
+			char* l;
+			char p1[41];
+			memset(p1,0,41);
+			strncpy(p1,p,40);
+			char* p2 = strchr(p1,(char)(column+1));
+			if (!p2 && column == 3) p2 = strchr(p1,(char)(6));
+			if (p2)
+			{
+				char* p3 = strchr(p2,(char)(column+2));
+			    if (!p3) p3 = strchr(p2,(char)(6));
+
+				if (p3) *p3= 0x00;
+				if (nofirst == 0 || column > 0)
+				{
+					FillRect(PosX, PosY+yoffset, (fontwidth/2), fontheight, Attrib>>4);
+					PosX += (fontwidth/2);
+				}
+				for (l = p2+1; *l; l++)
+				{
+					RenderCharBB(*l , Attrib);
+				}
+				FillRect(PosX, PosY+yoffset, (StartX+displaywidth)-PosX, fontheight, Attrib>>4);
+				PosX += (fontwidth/2);
+			}
+		}
+		else
+		{
+			PosX = StartX + column*width;
 		if (linkpage < page)
 		{
 			line[6] = '<';
@@ -3719,6 +3829,7 @@ void showlink(int column, int linkpage, int Attrib)
 			RenderCharBB(*p, Attrib);
 	}
 }
+}
 
 void CreateLine25()
 {
@@ -3727,6 +3838,15 @@ void CreateLine25()
 	if (maxadippg >= 0)
 		decode_adip();
 
+	if (showflof && flofpages[page][0] != 0) // FLOF-Navigation present
+	{
+		prev_100 = flofpages[page][0];
+		prev_10  = flofpages[page][1];
+		next_10  = flofpages[page][2];
+		next_100 = flofpages[page][3];
+	}
+	else
+	{
 /*  1: blk-1, grp-1, grp+1, blk+1 */
 /*  2: blk-1, grp+1, grp+2, blk+1 */
 #if (LINE25MODE == 1)
@@ -3745,11 +3865,12 @@ void CreateLine25()
 	next_10  = toptext_getnext(prev_10, 1, 1);
 #endif
 	next_100 = toptext_getnext(next_10, 1, 0);
-
+	}
 	showlink(0, prev_100, red<<4 | white);
-	showlink(10, prev_10, green<<4 | black);
-	showlink(20, next_10, yellow<<4 | black);
-	showlink(30, next_100, blue<<4 | white);
+	showlink(1, prev_10, green<<4 | black);
+	showlink(2, next_10, yellow<<4 | black);
+	showlink(3, next_100, blue<<4 | white);
+
 	
 	if (bttok && screenmode == 1) /* TOP-Info present, divided screen -> create TOP overview */
 	{
@@ -3760,6 +3881,8 @@ void CreateLine25()
 		int attr;
 
 #if CFGTTF 
+		int olddisplaywidth = displaywidth;
+		displaywidth = fontwidth_topmenusmall*(40-nofirst);
 		fontwidth = fontwidth_topmenusmall;
 		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 #else	 /* !TTF */
@@ -3852,6 +3975,7 @@ void CreateLine25()
 			RenderClearMenuLineBB(line, attrcol, attr);
 		}
 #if CFGTTF 
+		displaywidth = olddisplaywidth;
 		fontwidth = fontwidth_topmenumain;
 		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 #else	 /* !TTF */
@@ -3919,17 +4043,18 @@ void CopyBB2FB()
 		unsigned char *topdst = dst;
 		
 		screenwidth = TV43STARTX;
+
 		topsrc += screenwidth;
 		topdst += screenwidth;
 		for (i = 0; i < 25*fontheight; i++)
 		{
-			memcpy(topdst, topsrc, fontwidth_topmenusmall*TOPMENUCHARS);
+			memcpy(topdst, topsrc,screenwidth);
 			topdst += var_screeninfo.xres;
 			topsrc += var_screeninfo.xres;
 		}
 	}
 	else if (screenmode == 2)
-		screenwidth = TV169FULLSTARTX;
+		screenwidth = TV169FULLSTARTX+sx;
 	else
 		screenwidth = var_screeninfo.xres;
 		
@@ -3956,6 +4081,7 @@ void UpdateLCD()
 	static int init_lcd = 1, old_cached_pages = -1, old_page = -1, old_subpage = -1, old_subpage_max = -1, old_hintmode = -1;
 	int  x, y, subpage_max = 0, update_lcd = 0;
 
+	if (lcd == -1) return; // for Dreamboxes without LCD-Display (5xxx)
 	/* init or update lcd */
 	if (init_lcd)
 	{
@@ -4519,6 +4645,7 @@ void allocate_cache(int magazine)
 	{
 		cachetable[current_page[magazine]][current_subpage[magazine]] = malloc(PAGESIZE);
 		memset(cachetable[current_page[magazine]][current_subpage[magazine]], ' ', PAGESIZE);
+		memset(flofpages[current_page[magazine]], 0 , FLOFSIZE);
 		cached_pages++;
 	}
 }
@@ -4696,7 +4823,7 @@ void *CacheThread(void *arg)
 					if (dehamming[vtxt_row[5]] & 8)   /* C4 -> erase page */
 						memset(cachetable[current_page[magazine]][current_subpage[magazine]], ' ', PAGESIZE);
 				}
-				else if (packet_number < 24)
+				else if (packet_number <= 24)
 				{
 					if ((current_page[magazine] & 0x0F0) <= 0x090 &&
 					    (current_page[magazine] & 0x00F) <= 0x009)
@@ -4715,9 +4842,39 @@ void *CacheThread(void *arg)
 						}
 					}
 				}
+				else if ((packet_number == 27) && (dehamming[vtxt_row[2]] == 0)) // reading FLOF-Pagelinks
+				{
+					if (current_page[magazine] != -1)
+					{
+						b1 = dehamming[vtxt_row[0]];
+						if (b1 != 0xff)
+						{
+							b1 &= 7;
+
+							for (byte = 0; byte < FLOFSIZE; byte++)
+							{
+								b2 = dehamming[vtxt_row[4+byte*6]];
+								b3 = dehamming[vtxt_row[3+byte*6]];
+
+								if (b2 != 0xff && b3 != 0xff)
+								{
+									b4 =  ((b1 &4) ^((dehamming[vtxt_row[8+byte*6]]>>1) & 4)) |
+										  ((b1 &2) ^((dehamming[vtxt_row[8+byte*6]]>>1) & 2)) |
+										  ((b1 &1) ^((dehamming[vtxt_row[6+byte*6]]>>3) & 1));
+									if (b4 == 0)
+										b4 = 8;
+									if (b2 <= 9 && b3 <= 9)
+										flofpages[current_page[magazine] ][byte] = b4<<8 | b2<<4 | b3;
+								}
+							}
+						}
+
+					}
+				}
+
 				/* copy row to pagebuffer */
 				if (current_page[magazine] != -1 && current_subpage[magazine] != -1 &&
-				    packet_number < 24 && cachetable[current_page[magazine]][current_subpage[magazine]]) /* avoid segfault */
+				    packet_number <= 24 && cachetable[current_page[magazine]][current_subpage[magazine]]) /* avoid segfault */
 				{
 					memcpy(cachetable[current_page[magazine]][current_subpage[magazine]] + packet_number*40, &vtxt_row[2], 40);
 

@@ -41,7 +41,7 @@
 #include FT_CACHE_H
 #include FT_CACHE_SMALL_BITMAPS_H
 
-#define PAGESIZE (40*24)
+#define PAGESIZE (40*25)
 
 /* devices */
 #define AVS "/dev/dbox/avs0"
@@ -63,7 +63,7 @@
 #define TUXTXT2 FONTDIR "/tuxtxt2.fon"  /* NS 8+16pt */
 #if 0
 #if CFGTTF 
-#define TUXTXTTTF "/var/tuxtxt/TuxTxt.ttf" /* TTF */
+#define TUXTXTTTF "/var/tuxtxt/tuxtxt.ttf" /* TTF */
 #else
 #define TUXTXT0R "/var/tuxtxt/tuxtxt0r.fon" /* G0 12pt */
 #define TUXTXT1R "/var/tuxtxt/tuxtxt1r.fon" /* G1 12pt */
@@ -82,8 +82,8 @@
 #if CFGTTF 
 int fontheight, fontwidth, fontwidth_normal, fontwidth_small, fontwidth_topmenumain, fontwidth_topmenusmall, ascender;
 int ymosaic[4];
-#define TTFWIDTHFACTOR 4 /* FIXME: otherwise too much space btw chars */
-
+int TTFWIDTHFACTOR = 4; /* FIXME: otherwise too much space btw chars */
+int displaywidth;
 #define fontwidth_small_lcd 8
 #else
 #define fontheight 20
@@ -94,18 +94,24 @@ int ymosaic[4];
 #define fontwidth_topmenusmall 8
 #endif
 
+#if CFGTTF
+#define TV43STARTX (ex - 146) //(StartX + 2 + (40-nofirst)*fontwidth_topmenumain + (40*fontwidth_topmenumain/abx))
+#define TV169FULLSTARTX (sx + (ex - sx)/2) //(StartX + (40-nofirst)*fontwidth_small + ((40-nofirst)*fontwidth_small/abx))
+#define TVENDX ex
+#else
 #define TV43STARTX (StartX + 2 + 40*fontwidth_topmenumain)
+#define TV169FULLSTARTX (StartX + 2 + 40*fontwidth_small)
 #define TVENDX (StartX + 40*fontwidth_normal)
+#endif
 #define TVENDY (StartY + 25*fontheight)
 #define TV43WIDTH 144 /* 120 */
 #define TV43HEIGHT 116 /* 96 */
 #define TV43STARTY (TVENDY - TV43HEIGHT)
-#define TV169FULLSTARTX (StartX + 2 + 40*fontwidth_small)
-#define TV169FULLSTARTY 25
-#define TV169FULLWIDTH 320
-#define TV169FULLHEIGHT 576
+#define TV169FULLSTARTY sy
+#define TV169FULLWIDTH  (ex - sx)/2
+#define TV169FULLHEIGHT (ey - sy)
 
-#define TOPMENUSTARTX TV43STARTX
+#define TOPMENUSTARTX TV43STARTX+2
 #define TOPMENUENDX TVENDX
 #define TOPMENUSTARTY StartY
 #define TOPMENUENDY TV43STARTY
@@ -115,8 +121,9 @@ int ymosaic[4];
 #define TOPMENUINDENTGRP 1
 #define TOPMENUINDENTDEF 2
 #define TOPMENUSPC 0
-#define TOPMENUCHARS (TOPMENUINDENTDEF+12+TOPMENUSPC+3+5)
+#define TOPMENUCHARS (TOPMENUINDENTDEF+12+TOPMENUSPC+4)
 
+#define FLOFSIZE 4
 /*  1: blk-1, grp-1, grp+1, blk+1 */
 /*  2: blk-1, grp+1, grp+2, blk+1 */
 #define LINE25MODE 2
@@ -362,6 +369,7 @@ FONTTYPE type0r, type1r, type2r;
 
 
 /* some data */
+int flofpages[0x900][FLOFSIZE];
 unsigned char basictop[0x900];
 unsigned char adip[0x900][13];  /* FIXME: pointers and malloc? */
 char versioninfo[16];
@@ -379,7 +387,7 @@ int cached_pages, page_receiving, current_page[9], current_subpage[9];
 int page, subpage, lastpage, pageupdate, zap_subpage_manual;
 int current_national_subset;
 int inputcounter;
-int zoommode, screenmode, transpmode, hintmode, boxed;
+int zoommode, screenmode, transpmode, hintmode, boxed, nofirst, savedscreenmode, showflof;
 int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
 int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, national_subset, auto_national, swapupdown, showhex, menulanguage;
