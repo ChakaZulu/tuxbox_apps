@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.157 2003/02/27 22:13:05 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.158 2003/03/01 19:26:51 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -27,6 +27,7 @@
 
 #include <malloc.h>
 #include <dmx.h>
+#include <dmxapi.h>
 #include <debug.h>
 
 #include <sys/socket.h>
@@ -478,11 +479,9 @@ inline bool writeNbytes(int fd, const char *buf,  const size_t numberOfBytes, co
 /*
 static DMX dmxEIT(0x12, 0x4f, (0xff- 0x01), 0x50, (0xff- 0x0f), 256);
 static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
-static DMX dmxTOT(0x14, 0x73, 0xff, 0x70, (0xff- 0x03), 256, 1);
 */
 static DMX dmxEIT(0x12, 256);
 static DMX dmxSDT(0x11, 256);
-static DMX dmxTOT(0x14, 256, 1);
 
 //------------------------------------------------------------
 // misc. functions
@@ -740,14 +739,12 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 	{
 		dmxEIT.request_pause();
 		dmxSDT.request_pause();
-		//dmxTOT.real_pause();
 		scanning = 0;
 	}
 	else if (!pause && !scanning)
 	{
 		dmxSDT.request_unpause();
 		dmxEIT.request_unpause();
-		//dmxTOT.real_unpause();
 		scanning = 1;
 	}
 
@@ -1050,7 +1047,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.157 2003/02/27 22:13:05 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.158 2003/03/01 19:26:51 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2833,64 +2830,6 @@ static void *sdtThread(void *)
 // updates system time according TOT every 30 minutes
 //---------------------------------------------------------------------
 
-struct SI_section_TOT_header
-{
-
-unsigned char table_id :
-	8;
-	// 1 byte
-
-unsigned char section_syntax_indicator :
-	1;
-
-unsigned char reserved_future_use :
-	1;
-
-unsigned char reserved1 :
-	2;
-
-unsigned short section_length :
-	12;
-	// 3 bytes
-
-unsigned long long UTC_time :
-	40;
-	// 8 bytes
-
-unsigned char reserved2 :
-	4;
-
-unsigned short descriptors_loop_length :
-	12;
-}
-
-__attribute__ ((packed)) ; // 10 bytes
-
-struct SI_section_TDT_header
-{
-
-unsigned char table_id :
-	8;
-	// 1 byte
-
-unsigned char section_syntax_indicator :
-	1;
-
-unsigned char reserved_future_use :
-	1;
-
-unsigned char reserved1 :
-	2;
-
-unsigned short section_length :
-	12;
-	// 3 bytes
-
-unsigned long long UTC_time :
-	40;
-}
-
-__attribute__ ((packed)) ; // 8 bytes
 
 /*
 // BR schickt falschen Time-Offset, daher per TZ und Rest hier auskommentiert
@@ -2954,193 +2893,56 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
 */
 static void *timeThread(void *)
 {
-	unsigned timeoutInMSeconds = 31 * 1000;
-	char *buf;
+	UTC_t UTC;
 	time_t tim;
-
-	dmxTOT.addfilter(0x73, 0xff);
-	dmxTOT.addfilter(0x70, (0xff - 0x03));
-
+	unsigned int seconds;
+	bool first_time = true; /* we don't sleep the first time (we try to get a TOT header) */
+	
 	try
 	{
 		dprintf("[%sThread] pid %d start\n", "time", getpid());
 
-		do
+		while(1)
 		{
-			if (!dmxTOT.isOpen())
+			if (getUTC(&UTC, !timeset)) /* initially: TDT (no CRC - but mandatory field), later: TOT (CRC - yet not mandatory)*/
 			{
-				dmxTOT.start(); // -> unlock
-			}
-
-			if (dmxTOT.change(1)) // von TOT nach TDT wechseln
-
-				;
-
-			struct SI_section_TDT_header tdt_tot_header;
-
-			dmxTOT.lock();
-
-			int rc = dmxTOT.read((char *) & tdt_tot_header, sizeof(tdt_tot_header), timeoutInMSeconds);
-
-			if (!rc)
-			{
-				dmxTOT.unlock();
-				dputs("dmxTOT.read timeout");
-				continue; // timeout -> keine Zeit
-			}
-			else if (rc < 0)
-			{
-				dmxTOT.unlock();
-				dmxTOT.closefd();
-				continue;
-			}
-
-			switch ( tdt_tot_header.table_id )
-			{
-
-			case 0x73:
+				tim = changeUTCtoCtime((const unsigned char *) &UTC);
+				
+				if (tim)
 				{
-					// TOT - Rest einlesen!
-					buf = new char[tdt_tot_header.section_length - 5];
-
-					if (!buf)
-					{
-						dmxTOT.unlock();
-						fprintf(stderr, "Not enough memory!\n");
-						dmxTOT.closefd();
-						continue;
-					}
-
-					rc = dmxTOT.read(buf, tdt_tot_header.section_length - 5, timeoutInMSeconds);
-					delete[] buf;
-					// und weiter unterhalb  ...
-					dprintf("TDT/TOT: got local time via TOT :)");
+					if (!messaging_neutrino_sets_time)
+						if (stime(&tim) < 0)
+						{
+							perror("[sectionsd] FATAL: cannot set date"); /* EPERM  The caller is not the super-user. */
+							return 0;
+						}
+					timeset = true;
+					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim));
 				}
-
-			case 0x70:
-				{
-					dmxTOT.unlock();
-					tim = changeUTCtoCtime(((const unsigned char *) & tdt_tot_header) + 3);
-
-					if (tim)
-					{
-						if ( !messaging_neutrino_sets_time )
-							if (stime(&tim) < 0)
-							{
-								perror("[sectionsd] cannot set date");
-								dmxTOT.closefd();
-								continue;
-							}
-
-						timeset = true;
-					}
-
-					break;
-				}
-
-			default:
-				dmxTOT.unlock();
 			}
-		}
-		while (!timeset);
-
-		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim) );
-
-		dprintf("dmxTOT: changing from TDT/TOT to TOT.\n");
-		dmxTOT.change(0);
-
-		dmxTOT.closefd();
-
-		// Jetzt wird die Uhrzeit nur noch per TOT gesetzt (CRC)
-		for (;;)
-		{
-			if (!dmxTOT.isOpen())
+			
+			if (timeset && first_time)
 			{
-				dmxTOT.start(); // -> unlock
-			}
-
-			struct SI_section_TOT_header header;
-
-			dmxTOT.lock();
-
-			int rc = dmxTOT.read((char *) & header, sizeof(header), timeoutInMSeconds);
-
-			if (!rc)
-			{
-				dmxTOT.unlock();
-				dputs("dmxTOT.read timeout");
-				continue; // timeout -> keine Zeit
-			}
-			else if (rc < 0)
-			{
-				dmxTOT.unlock();
-				dmxTOT.closefd();
-				break;
-			}
-
-			buf = new char[header.section_length - 7];
-
-			if (!buf)
-			{
-				dmxTOT.unlock();
-				fprintf(stderr, "Not enough memory!\n");
-				dmxTOT.closefd();
-				break;
-			}
-
-			rc = dmxTOT.read(buf, header.section_length - 7, timeoutInMSeconds);
-
-			dmxTOT.unlock();
-			delete[] buf;
-
-			if (!rc)
-			{
-				dputs("dmxTOT.read timeout after header");
-				// DMX neu starten, noetig, da bereits der Header gelesen wurde
-				dmxTOT.real_pause(); // -> lock
-				dmxTOT.real_unpause(); // -> unlock
-				continue; // timeout -> kein TDT
-			}
-			else if (rc < 0)
-			{
-				dmxTOT.closefd();
-				break;
-			}
-
-			time_t tim = changeUTCtoCtime(((const unsigned char *) & header) + 3);
-
-			if (tim)
-			{
-				if ( !messaging_neutrino_sets_time )
-					if (stime(&tim) < 0)
-					{
-						perror("[sectionsd] cannot set date");
-						dmxTOT.closefd();
-						continue;
-					}
-
-				eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim) );
-			}
-
-			dmxTOT.closefd();
-
-			if (timeset)
-			{
-				rc = 60 * 30;  // sleep 30 minutes
-				dprintf("dmxTOT: going to sleep for 30mins...\n");
+				first_time = false;
 			}
 			else
-				//rc=60;  // sleep 1 minute
-				rc = 1;
-
-			while (rc)
-				rc = sleep(rc);
-
-		} // for
-	} // try
+			{
+				if (timeset)
+				{
+					seconds = 60 * 30;
+					dprintf("dmxTOT: going to sleep for %d seconds.\n", seconds);
+				}
+				else
+					seconds = 1;
+				
+				while (seconds)
+					seconds = sleep(seconds);
+			}
+		}
+	}
 	catch (std::exception& e)
 	{
-		fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
+		fprintf(stderr, "Caught std-exception in time-thread %s!\n", e.what());
 	}
 	catch (...)
 	{
@@ -3657,7 +3459,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.157 2003/02/27 22:13:05 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.158 2003/03/01 19:26:51 thegoodguy Exp $\n");
 
 	try
 	{

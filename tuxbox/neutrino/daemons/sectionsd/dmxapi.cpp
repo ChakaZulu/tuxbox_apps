@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.cpp,v 1.1 2003/02/06 17:52:18 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmxapi.cpp,v 1.2 2003/03/01 19:26:51 thegoodguy Exp $
  *
  * DMX low level functions (sectionsd) - d-box2 linux project
  *
@@ -24,9 +24,11 @@
 
 #include <dmxapi.h>
 
-#include <stdio.h>         /* perror */
-#include <string.h>        /* memset */
-#include <sys/ioctl.h>     /* ioctl  */
+#include <stdio.h>         /* perror      */
+#include <string.h>        /* memset      */
+#include <sys/ioctl.h>     /* ioctl       */
+#include <fcntl.h>         /* open        */
+#include <unistd.h>        /* close, read */
 
 bool setfilter(const int fd, const uint16_t pid, const uint8_t filter, const uint8_t mask, const uint32_t flags)
 {
@@ -40,10 +42,74 @@ bool setfilter(const int fd, const uint16_t pid, const uint8_t filter, const uin
 	flt.timeout          = 0;
 	flt.flags            = flags;
 
-	if (ioctl(fd, DMX_SET_FILTER, &flt) == -1)
+	if (::ioctl(fd, DMX_SET_FILTER, &flt) == -1)
 	{
 		perror("[sectionsd] DMX: DMX_SET_FILTER");
 		return false;
 	}
+	return true;
+}
+
+struct SI_section_TOT_header
+{
+	unsigned char      table_id                 :  8;
+	unsigned char      section_syntax_indicator :  1;
+	unsigned char      reserved_future_use      :  1;
+	unsigned char      reserved1                :  2;
+	unsigned short     section_length           : 12;
+	unsigned long long UTC_time                 : 40;
+	unsigned char      reserved2                :  4;
+	unsigned short     descriptors_loop_length  : 12;
+}
+__attribute__ ((packed)); /* 10 bytes */
+
+struct SI_section_TDT_header
+{
+	unsigned char      table_id                 :  8;
+	unsigned char      section_syntax_indicator :  1;
+	unsigned char      reserved_future_use      :  1;
+	unsigned char      reserved1                :  2;
+	unsigned short     section_length           : 12;
+/*	unsigned long long UTC_time                 : 40;*/
+	UTC_t              UTC_time;
+}
+__attribute__ ((packed)); /* 8 bytes */
+
+
+bool getUTC(UTC_t * const UTC, const bool TDT)
+{
+	int fd;
+	struct dmx_sct_filter_params flt;
+	struct SI_section_TDT_header tdt_tot_header;
+
+	if ((fd = ::open(DEMUX_DEVICE, O_RDWR)) < 0)
+	{
+		perror("[sectionsd] getUTC: open");
+		return false;
+	}
+
+	memset(&flt.filter, 0, sizeof(struct dmx_filter));
+
+	flt.pid              = 0x0014;
+	flt.filter.filter[0] = TDT ? 0x70 : 0x73;
+	flt.filter.mask  [0] = 0xFF;
+	flt.timeout          = 31000;
+	flt.flags            = TDT ? (DMX_ONESHOT | DMX_IMMEDIATE_START) : (DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START);
+
+	if (::ioctl(fd, DMX_SET_FILTER, &flt) == -1)
+	{
+		perror("[sectionsd] getUTC: set filter");
+		return false;
+	}
+
+	if (::read(fd, &tdt_tot_header, sizeof(tdt_tot_header)) != sizeof(tdt_tot_header))
+	{
+		perror("[sectionsd] getUTC: read");
+		return false;
+	}
+
+	(*UTC) = tdt_tot_header.UTC_time;
+
+	::close(fd);
 	return true;
 }
