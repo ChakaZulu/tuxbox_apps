@@ -47,9 +47,9 @@ CKeyChooser::CKeyChooser( int* Key, const char * const title, std::string Icon )
 	keyDeleter = new CKeyChooserItemNoKey(key);
 
 	addItem( new CMenuSeparator(CMenuSeparator::STRING, " ") );
-	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	addItem( new CMenuForwarder("menu.back") );
-	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	addItem(GenericMenuSeparatorLine);
+	addItem(GenericMenuBack);
+	addItem(GenericMenuSeparatorLine);
 	addItem(new CMenuForwarder("keychoosermenu.setnew", true, NULL, keyChooser) );
 	addItem(new CMenuForwarder("keychoosermenu.setnone", true, NULL, keyDeleter) );
 }

@@ -388,15 +388,15 @@ void CFlashExpert::showMTDSelector(std::string actionkey)
 {
 	//mtd-selector erzeugen
 	CMenuWidget* mtdselector = new CMenuWidget("flashupdate.mtdselector", "softupdate.raw");
-	mtdselector->addItem( new CMenuSeparator() );
-	mtdselector->addItem( new CMenuForwarder("messagebox.cancel") );
-	mtdselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	mtdselector->addItem(GenericMenuSeparator);
+	mtdselector->addItem(new CMenuForwarder("messagebox.cancel"));
+	mtdselector->addItem(GenericMenuSeparatorLine);
 	CMTDInfo* mtdInfo =CMTDInfo::getInstance();
 	for(int x=0;x<mtdInfo->getMTDCount();x++)
 	{
 		char sActionKey[20];
 		sprintf(sActionKey, "%s%d", actionkey.c_str(), x);
-		mtdselector->addItem(new CMenuForwarder( mtdInfo->getMTDName(x).c_str(), true, "", this, sActionKey));
+		mtdselector->addItem(new CMenuForwarder(mtdInfo->getMTDName(x).c_str(), true, NULL, this, sActionKey));
 	}
 	mtdselector->exec(NULL,"");
 }
@@ -404,9 +404,9 @@ void CFlashExpert::showMTDSelector(std::string actionkey)
 void CFlashExpert::showFileSelector(std::string actionkey)
 {
 	CMenuWidget* fileselector = new CMenuWidget("flashupdate.fileselector", "softupdate.raw");
-	fileselector->addItem( new CMenuSeparator() );
-	fileselector->addItem( new CMenuForwarder("messagebox.cancel") );
-	fileselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fileselector->addItem(GenericMenuSeparator);
+	fileselector->addItem(new CMenuForwarder("messagebox.cancel"));
+	fileselector->addItem(GenericMenuSeparatorLine);
 	struct dirent **namelist;
 	int n = scandir("/tmp", &namelist, 0, alphasort);
 	if (n < 0)
@@ -422,7 +422,7 @@ void CFlashExpert::showFileSelector(std::string actionkey)
 			int pos = filen.find(".img");
 			if(pos!=-1)
 			{
-				fileselector->addItem(  new CMenuForwarder( filen.c_str(), true, "", this, actionkey + filen ) );
+				fileselector->addItem(new CMenuForwarder(filen.c_str(), true, NULL, this, actionkey + filen));
 #warning TODO: make sure filen is UTF-8 encoded
 			}
 			free(namelist[count]);

@@ -252,9 +252,9 @@ int CNFSMountGui::exec( CMenuTarget* parent, std::string actionKey )
 int CNFSMountGui::menu()
 {
 	CMenuWidget mountMenuW("nfs.mount", "network.raw", 720);
-	mountMenuW.addItem(new CMenuSeparator());
-	mountMenuW.addItem(new CMenuForwarder("menu.back"));
-	mountMenuW.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mountMenuW.addItem(GenericMenuSeparator);
+	mountMenuW.addItem(GenericMenuBack);
+	mountMenuW.addItem(GenericMenuSeparatorLine);
 	std::string s1;
 	char s2[12];
 
@@ -296,9 +296,9 @@ int CNFSMountGui::menuEntry(int nr)
       (m_nfs_sup != CNFSMountGui::FS_UNSUPPORTED && *type != (int)NFS);
 
 	CMenuWidget mountMenuEntryW("nfs.mount", "network.raw",720);
-	mountMenuEntryW.addItem(new CMenuSeparator());
-	mountMenuEntryW.addItem(new CMenuForwarder("menu.back"));
-	mountMenuEntryW.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	mountMenuEntryW.addItem(GenericMenuSeparator);
+	mountMenuEntryW.addItem(GenericMenuBack);
+	mountMenuEntryW.addItem(GenericMenuSeparatorLine);
 	CIPInput ipInput("nfs.ip", g_settings.network_nfs_ip[nr]);
 	CStringInputSMS dirInput("nfs.dir", dir, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuOptionChooser *automountInput= new CMenuOptionChooser("nfs.automount", automount, true);
@@ -488,9 +488,9 @@ int CNFSUmountGui::menu()
 	std::ifstream in("/proc/mounts", std::ifstream::in);
 	int count=0;
 	CMenuWidget umountMenu("nfs.umount", "network.raw",720);
-	umountMenu.addItem(new CMenuSeparator());
-	umountMenu.addItem(new CMenuForwarder("menu.back"));
-	umountMenu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	umountMenu.addItem(GenericMenuSeparator);
+	umountMenu.addItem(GenericMenuBack);
+	umountMenu.addItem(GenericMenuSeparatorLine);
 	while(in.good())
 	{
 		mountDev[0] = 0; /* strcpy(mountDev,""); */
@@ -554,11 +554,10 @@ int CNFSSmallMenu::exec( CMenuTarget* parent, std::string actionKey )
 	CMenuWidget menu("nfsmenu.head", "network.raw");
 	CNFSMountGui mountGui;
 	CNFSUmountGui umountGui;
-	menu.addItem(new CMenuSeparator());
-	menu.addItem(new CMenuForwarder("menu.back"));
-	menu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
-	menu.addItem( new CMenuForwarder("nfs.mount", true, NULL, &mountGui));
-	menu.addItem( new CMenuForwarder("nfs.umount", true, NULL, &umountGui));
+	menu.addItem(GenericMenuSeparator);
+	menu.addItem(GenericMenuBack);
+	menu.addItem(GenericMenuSeparatorLine);
+	menu.addItem(new CMenuForwarder("nfs.mount", true, NULL, &mountGui));
+	menu.addItem(new CMenuForwarder("nfs.umount", true, NULL, &umountGui));
 	return menu.exec(parent, actionKey);
 }
-
