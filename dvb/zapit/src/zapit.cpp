@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.316 2003/05/28 19:05:33 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.317 2003/05/29 07:02:35 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -561,6 +561,13 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitClient::responseGetLastChannel responseGetLastChannel;
 		responseGetLastChannel = load_settings();
 		CBasicServer::send_data(connfd, &responseGetLastChannel, sizeof(responseGetLastChannel)); // bouquet & channel number are already starting at 0!
+		break;
+	}
+	
+	case CZapitMessages::CMD_GET_CURRENT_SATELLITE_POSITION:
+	{
+		int32_t currentSatellitePosition = frontend->getCurrentSatellitePosition();
+		CBasicServer::send_data(connfd, &currentSatellitePosition, sizeof(currentSatellitePosition));
 		break;
 	}
 	
@@ -1501,7 +1508,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.316 2003/05/28 19:05:33 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.317 2003/05/29 07:02:35 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
