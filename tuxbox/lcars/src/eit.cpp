@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.8  2002/06/08 14:40:23  TheDOC
+made lcars tuxvision-compatible
+
 Revision 1.7  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -414,6 +417,8 @@ void eit::receiveNow(int SID)
 		vars->setvalue("%IS_MULTIPERSPECTIVE", "false");
 		osd_obj->setPerspectiveAvailable(false);
 	}
+
+	gotNow = true;
 
 
 	//printf("endeit\n");

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.h,v $
+Revision 1.7  2002/06/08 14:40:23  TheDOC
+made lcars tuxvision-compatible
+
 Revision 1.6  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -178,6 +181,9 @@ public:
 	event getNow() { return now; }
 	event getNext() { return next; }
 	void receiveNow(int SID);
+	bool gotNow;
+
+	event waitForNow() { while(!gotNow) usleep(1000); return now; }
 
 	int start_thread();
 	void addCommand(std::string command);

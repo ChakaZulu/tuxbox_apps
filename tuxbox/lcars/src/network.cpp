@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.13  2002/06/08 14:40:23  TheDOC
+made lcars tuxvision-compatible
+
 Revision 1.12  2002/06/02 22:05:53  TheDOC
 http-network-stuff again
 
@@ -232,7 +235,7 @@ void *network::startlistening(void *object)
 		n->inbound_connection = inbound_connection;
 
 		address_holder = (unsigned char*) &inbound_address.sin_addr.s_addr;
-		//printf("Connection from %d.%d.%d.%d\n", address_holder[0], address_holder[1], address_holder[2], address_holder[3]);
+		printf("Connection from %d.%d.%d.%d\n", address_holder[0], address_holder[1], address_holder[2], address_holder[3]);
 
 		char command[20][10000];
 		if ((read_size = read(inbound_connection, buffer, 10000)) < 0)
@@ -267,13 +270,14 @@ void *network::startlistening(void *object)
 		command[parm_count][act_pos - 1] = '\0';
 		parm_count++;
 
-		//printf ("%d Parameter\n", parm_count);
+		printf ("%d Parameter\n", parm_count);
 		for (int i = 0; i < parm_count; i++)
 		{
-			//printf("Parameter %d: %s\n", i, command[i]);
+			printf("Parameter %d: %s\n", i, command[i]);
 		}
 
 		std::string headerok = "HTTP/1.1 200 OK\nConnection: close\nContent-Type: text/html\n\r\n";
+		std::string headertextok = "HTTP/1.0 200 OK \nContent-Type: text/plain\n\n";
 		std::string headerfailed = "HTTP/1.1 404 Not found\nConnection: close\nContent-Type: text/html\n\r\n";
 		char writebuffer[1024];
 		bool post = false;
@@ -313,11 +317,68 @@ void *network::startlistening(void *object)
 					path[2] = "start.htm";
 					counter2 = 4;
 				}
+
+				
+
 				if (path[1] == "command")
 				{
 					std::string response = "<html><body><form action=\"/command\" method=post><input type=text name=command size=80><br><input type=submit name=submit value=\"Befehl ausfuehren\"><br></form><form action=\"http://192.168.40.4/command\" method=post><input type=text name=sub size=80><br><input type=submit name=submit value=\"Sub starten\"></form></body></html>";
 					write(inbound_connection, headerok.c_str(), headerok.length());
 					write(inbound_connection, response.c_str(), response.length());
+				}
+				else if (path[1] == "control")
+				{
+					if (path[2] == "channellist")
+					{
+						write(inbound_connection, headertextok.c_str(), headertextok.length());
+						for (int count = 0; count < (*n->channels_obj).numberChannels(); count++)
+						{
+							channel tmp_chan = (*n->channels_obj).getChannelByNumber(count);
+							sprintf(writebuffer, "%d %s\n", count + 1, (*n->channels_obj).getServiceName(count).c_str());
+							write(inbound_connection, writebuffer, strlen(writebuffer));
+						}
+					}
+					else if (path[2] == "zapto" && path[2].length() == 5)
+					{
+						write(inbound_connection, headertextok.c_str(), headertextok.length());
+						sprintf(writebuffer, "%d", (*n->channels_obj).getCurrentChannelNumber() + 1);
+						write(inbound_connection, writebuffer, strlen(writebuffer));
+					}
+					else if (path[2].substr(0, 5) == "zapto")
+					{
+						int number = atoi(path[2].substr(6).c_str());
+						if (path[2].substr(6) == "getpids")
+						{
+							write(inbound_connection, headertextok.c_str(), headertextok.length());
+							sprintf(writebuffer, "%d\n%d\n", (*n->channels_obj).getCurrentVPID(), (*n->channels_obj).getCurrentAPID());
+							write(inbound_connection, writebuffer, strlen(writebuffer));
+						}
+						else if (number > 0)
+						{
+							(*n->channels_obj).setCurrentChannel(number - 1);
+							
+							(*n->channels_obj).zapCurrentChannel();
+							(*n->channels_obj).setCurrentOSDProgramInfo();
+							n->eit_obj->gotNow = false;
+							(*n->channels_obj).receiveCurrentEIT();
+							(*n->channels_obj).setCurrentOSDProgramEIT();
+							(*n->channels_obj).updateCurrentOSDProgramAPIDDescr();
+							
+							write(inbound_connection, headerok.c_str(), headerok.length());
+
+						}
+					}
+					else if (path[2].substr(0, 3) == "epg")
+					{
+						int number = atoi(path[2].substr(4).c_str());
+						write(inbound_connection, headertextok.c_str(), headertextok.length());
+
+						event tmp_event = n->eit_obj->waitForNow();
+						sprintf(writebuffer, "%s\n%s\n%s\n", tmp_event.event_name, tmp_event.event_short_text, tmp_event.event_extended_text);
+						write(inbound_connection, writebuffer, strlen(writebuffer));
+
+					}
+					
 				}
 				else if (path[1] == "file" && counter2 > 3)
 				{
@@ -393,6 +454,7 @@ void *network::startlistening(void *object)
 					}
 					else if (path[2] == "getchannels")
 					{
+						std::cout << "Sending Channellist" << std::endl;
 						write(inbound_connection, headerok.c_str(), headerok.length());
 						for (int count = 0; count < (*n->channels_obj).numberChannels(); count++)
 						{
