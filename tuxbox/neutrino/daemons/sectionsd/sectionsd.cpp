@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.171 2004/02/25 00:28:12 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.172 2004/04/14 13:08:18 rasc Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -105,7 +105,8 @@
 //static long secondsToCache=4*24*60L*60L; // 4 Tage - weniger Prozessorlast?!
 static long secondsToCache = 21*24*60L*60L; // 21 Tage - Prozessorlast <3% (rasc)
 // Ab wann ein Event als alt gilt (in Sekunden)
-static long oldEventsAre = 60*60L; // 1h
+//static long oldEventsAre = 60*60L; // 1h
+static long oldEventsAre = 180*60L; // 3h  (sometimes want to now something about current/last movie)
 static int scanning = 1;
 
 
@@ -1059,7 +1060,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.171 2004/02/25 00:28:12 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.172 2004/04/14 13:08:18 rasc Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3470,7 +3471,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.171 2004/02/25 00:28:12 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.172 2004/04/14 13:08:18 rasc Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
