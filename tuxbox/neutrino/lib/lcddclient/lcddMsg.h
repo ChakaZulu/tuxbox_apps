@@ -26,7 +26,7 @@
 */
 
 
-#include <zapit/client/basicmessage.h>
+#include <connection/basicmessage.h>
 
 
 #define LCDD_UDS_NAME "/tmp/lcdd.sock"

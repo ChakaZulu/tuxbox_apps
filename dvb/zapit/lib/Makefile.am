@@ -3,4 +3,4 @@ INCLUDES = \
 
 lib_LTLIBRARIES = libzapitclient.la
 
-libzapitclient_la_SOURCES = basicclient.cpp zapitclient.cpp
+libzapitclient_la_SOURCES = zapitclient.cpp

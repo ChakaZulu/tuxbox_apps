@@ -1,9 +1,10 @@
 SUBDIRS = driver
 
 INCLUDES = \
-	@ZAPIT_CFLAGS@ \
 	-I$(top_srcdir)/lib \
-	@EVENTSERVER_CFLAGS@
+	@CONNECTION_CFLAGS@ \
+	@EVENTSERVER_CFLAGS@ \
+	@ZAPIT_CFLAGS@
 
 bin_PROGRAMS = controld
 
@@ -12,6 +13,7 @@ controld_LDADD = \
 	$(top_builddir)/lib/lcddclient/liblcddclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
 	@CONFIGFILE_LIBS@ \
+	@CONNECTION_LIBS@ \
 	@EVENTSERVER_LIBS@ \
 	@ZAPIT_LIBS@ \
 	-lpthread

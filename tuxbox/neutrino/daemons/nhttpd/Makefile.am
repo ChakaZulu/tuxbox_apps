@@ -3,6 +3,7 @@ SUBDIRS = data
 INCLUDES = \
 	@ZAPIT_CFLAGS@ \
 	-I$(top_srcdir)/src \
+	@CONNECTION_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@ \
 	-I@DRIVER@ \
 	-I$(top_srcdir)/lib
@@ -19,6 +20,7 @@ nhttpd_LDADD = \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	@CONFIGFILE_LIBS@ \
+	@CONNECTION_LIBS@ \
 	@MD5SUM_LIBS@ \
 	@UCODES_LIBS@ \
 	@ZAPIT_LIBS@ \

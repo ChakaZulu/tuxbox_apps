@@ -27,7 +27,7 @@
 
 /* zapit */
 #include "zapittypes.h"
-#include "basicclient.h"
+#include <connection/basicclient.h>
 
 
 class CZapitClient:public CBasicClient

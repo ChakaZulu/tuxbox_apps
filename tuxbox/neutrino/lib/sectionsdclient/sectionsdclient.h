@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <zapit/client/basicclient.h>
+#include <connection/basicclient.h>
 #include <zapit/client/zapittypes.h>  // t_channel_id
 
 

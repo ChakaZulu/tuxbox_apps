@@ -26,7 +26,7 @@
 
 #include <string>
 
-#include <zapit/client/basicclient.h>
+#include <connection/basicclient.h>
 
 using namespace std;
 

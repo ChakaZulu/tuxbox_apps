@@ -1,7 +1,8 @@
 INCLUDES = \
 	-I$(top_srcdir)/lib \
-	@ZAPIT_CFLAGS@ \
-	@EVENTSERVER_CFLAGS@
+        @CONNECTION_CFLAGS@ \
+	@EVENTSERVER_CFLAGS@ \
+	@ZAPIT_CFLAGS@
 
 lib_LTLIBRARIES  = libtimerdclient.la
 

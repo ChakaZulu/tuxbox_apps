@@ -13,14 +13,16 @@ pzapit_SOURCES = \
 	pzapit.cpp
 
 pzapit_LDADD = \
+	@CONNECTION_LIBS@ \
 	$(top_builddir)/lib/libzapitclient.la
 
 zapit_SOURCES = \
-	zapit.cpp basicserver.cpp bouquets.cpp channel.cpp dvbstring.cpp \
+	zapit.cpp bouquets.cpp channel.cpp dvbstring.cpp \
 	getservices.cpp scan.cpp xmlinterface.cpp $(DBOX2)
 
 zapit_LDADD = \
 	@CONFIGFILE_LIBS@ \
+	@CONNECTION_LIBS@ \
 	@XMLTREE_LIBS@ \
 	$(top_builddir)/lib/libzapitclient.la \
 	zapci/libzapci.a \
