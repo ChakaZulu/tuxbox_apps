@@ -1,5 +1,5 @@
 /*
-$Id: emm_ecm.c,v 1.4 2002/08/17 20:36:12 obi Exp $
+$Id: emm_ecm.c,v 1.5 2003/07/05 21:22:45 rasc Exp $
 
 
    -- EMM / ECM Data packet
@@ -8,6 +8,9 @@ $Id: emm_ecm.c,v 1.4 2002/08/17 20:36:12 obi Exp $
 
 
 $Log: emm_ecm.c,v $
+Revision 1.5  2003/07/05 21:22:45  rasc
+TypoFix - Tnx MWS
+
 Revision 1.4  2002/08/17 20:36:12  obi
 no more compiler warnings
 
@@ -68,7 +71,7 @@ void decode_EMM_ECM (u_char *b, int len)
 
  out_SB_NL (3,"section_syntax_indicator: ",e.section_syntax_indicator);
  out_SB_NL (6,"reserved_1: ",e.reserved_1);
- out_SB_NL (6,"reserved_2: ",e.reserved_1);
+ out_SB_NL (6,"reserved_2: ",e.reserved_2);
  out_SW_NL (5,"Section_length: ",e.section_length);
 
 
