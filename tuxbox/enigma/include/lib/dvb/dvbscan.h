@@ -69,13 +69,7 @@ class eDVBScanController: public eDVBController, public Object
 	Signal0<void> freeCheckFinishedCallback;
 	int cancel;
 public:
-	bool abort()
-	{
-		if (!knownTransponder.size())
-			return false;
-		cancel=1;
-		return true;
-	}
+	bool abort();
 	enum
 	{
 			// not compatible to xml-flags!
