@@ -11,13 +11,13 @@ class eComboBox: public eButton
 	gPixmap *pm;
 	int entries;
 	eListBoxEntryText *current;
-	void onOkPressed();
 	void onEntrySelected( eListBoxEntryText* );	
 	void onSelChanged( eListBoxEntryText* ); // für setzen des HelpTextes ( Statusbar )
 	int eventHandler( const eWidgetEvent& );
 	eString oldHelpText;
 	int setProperty( const eString&, const eString& );
 public:
+	void onOkPressed();
 	~eComboBox();
 	void setOpenWidth( int w ) { listbox.resize( eSize(w, listbox.getSize().height()) ); }
 	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8	};
