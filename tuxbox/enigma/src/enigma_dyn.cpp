@@ -55,7 +55,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.2.0"
+#define WEBIFVERSION "2.2.1"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -1535,7 +1535,6 @@ public:
 			}
 			else
 				result += "&#160;";
-			result += "</td><td><a href=\'javascript:switchChannel(\"" + serviceRef + "\", \"0\", \"-1\")\'>";
 		}
 		else
 		{
@@ -1545,8 +1544,8 @@ public:
 				result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
 			else
 				result += "&#160;";
-			result += eString("</td><td><a href=\"/")+ "?mode=zap&path=" + serviceRef + "\">";
 		}
+		result += eString("</td><td><a href=\"/")+ "?mode=zap&path=" + serviceRef + "\">";
 
 		eService *service = iface.addRef(e);
 		if (!service)
@@ -1641,7 +1640,7 @@ static eString getZapContent(eString mode, eString path)
 	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 	{
 		playService(current_service);
-		result += "<script language=\"javascript\">window.close();</script>";
+		result = "";
 	}
 	else
 	{
@@ -1815,7 +1814,11 @@ static eString getZap(eString mode, eString path)
 	{
 		result += getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"));
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
-		result += getZapContent(mode, path);
+		eString tmp = getZapContent(mode, path);
+		if (tmp)
+			result += tmp;
+		else
+			result = "";
 	}
 
 	return result;
@@ -3483,7 +3486,12 @@ eString getPDAContent(eString mode, eString path, eString opts)
 		mode = "zap";
 
 	result = readFile(TEMPLATE_DIR + "index_small.tmp");
-	result.strReplace("#CONTENT#", getContent(mode, path, opts));
+	eString tmp = getContent(mode, path, opts);
+	if (tmp)
+		result += tmp;
+	else
+		result = "";
+	result.strReplace("#CONTENT#", tmp);
 	result.strReplace("#VOLBAR#", getVolBar());
 	result.strReplace("#MUTE#", getMute());
 	result.strReplace("#TOPNAVI#", getTopNavi(false));
@@ -3500,6 +3508,8 @@ eString getPDAContent(eString mode, eString path, eString opts)
 	else
 //	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
 		result.strReplace("#TOPBALK#", "topbalk4_small.png");
+	if (!result)
+		result = "<html><body>Please wait...<script language=\"javascript\">window.close();</script></body></html>";
 	return result;
 }
 
