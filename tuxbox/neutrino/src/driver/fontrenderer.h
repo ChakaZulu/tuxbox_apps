@@ -59,7 +59,6 @@ class fontRenderClass
 		FTC_Image_Cache	imageCache;          /* the glyph image cache           */
 		FTC_SBit_Cache	sbitsCache;          /* the glyph small bitmaps cache   */
 
-		int AddFont(const char *filename);
 		FTC_FaceID getFaceID(const char *family, const char *style);
 		FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 
@@ -76,6 +75,9 @@ class fontRenderClass
 
 		//FT_Face getFace(const char *family, const char *style);
 		Font *getFont(const char *family, const char *style, int size);
+
+		int AddFont(const char *filename);
+
 		fontRenderClass();
 		~fontRenderClass();
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.236 2002/04/20 19:38:39 Simplex Exp $
+        $Id: neutrino.cpp,v 1.237 2002/04/20 20:23:24 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -685,10 +685,12 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
-	#define FONTNAME "Arial"
-	//#define FONTNAME "GillSans"
-	//#define FONTNAME "Switzerland"
-	/*
+	#define FONTNAME "Micron"
+
+	g_fontRenderer->AddFont(FONTDIR "/micron.ttf");
+	g_fontRenderer->AddFont(FONTDIR "/micron_bold.ttf");
+	g_fontRenderer->AddFont(FONTDIR "/micron_italic.ttf");
+	
 	g_Fonts->menu =         g_fontRenderer->getFont(FONTNAME, "Bold", 20);
 	g_Fonts->menu_title =   g_fontRenderer->getFont(FONTNAME, "Bold", 30);
 	g_Fonts->menu_info =    g_fontRenderer->getFont(FONTNAME, "Regular", 16);
@@ -718,39 +720,6 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->infobar_channame =	g_fontRenderer->getFont(FONTNAME, "Bold", 30);
 	g_Fonts->infobar_info =		g_fontRenderer->getFont(FONTNAME, "Regular", 20);
 	g_Fonts->infobar_small =	g_fontRenderer->getFont(FONTNAME, "Regular", 14);
-*/
-
-
-	g_Fonts->menu =         g_fontRenderer->getFont("GillSans", "Bold", 20);
-	g_Fonts->menu_title =   g_fontRenderer->getFont("GillSans", "Bold", 30);
-	g_Fonts->menu_info =    g_fontRenderer->getFont("GillSans", "Regular", 16);
-
-	g_Fonts->epg_title =    g_fontRenderer->getFont("GillSans", "Regular", 26);
-
-	g_Fonts->epg_info1 =	g_fontRenderer->getFont("GillSans", "Italic", 19); // info1 must be same size as info2, but italic
-	g_Fonts->epg_info2 =	g_fontRenderer->getFont("GillSans", "Regular", 19);
-
-	g_Fonts->epg_date =		g_fontRenderer->getFont("GillSans", "Regular", 17);
-	g_Fonts->alert =		g_fontRenderer->getFont("GillSans", "Regular", 100);
-
-	g_Fonts->eventlist_title =		g_fontRenderer->getFont("GillSans", "Regular", 30);
-	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont("GillSans", "Bold", 21);
-	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont("GillSans", "Regular", 15);
-	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont("GillSans", "Regular", 17);
-
-	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont("GillSans", "Bold", 21);
-	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont("GillSans", "Regular", 17);
-
-	g_Fonts->channellist =			g_fontRenderer->getFont("GillSans", "Bold", 21);
-	g_Fonts->channellist_descr =	g_fontRenderer->getFont("GillSans", "Regular", 21);
-	g_Fonts->channellist_number =	g_fontRenderer->getFont("GillSans", "Bold", 16);
-	g_Fonts->channel_num_zap =		g_fontRenderer->getFont("GillSans", "Bold", 40);
-
-	g_Fonts->infobar_number =	g_fontRenderer->getFont("GillSans", "Bold", 50);
-	g_Fonts->infobar_channame =	g_fontRenderer->getFont("GillSans", "Bold", 30);
-	g_Fonts->infobar_info =		g_fontRenderer->getFont("GillSans", "Regular", 21);
-	g_Fonts->infobar_small =	g_fontRenderer->getFont("GillSans", "Regular", 15);
-
 }
 
 
@@ -2389,7 +2358,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.236 2002/04/20 19:38:39 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.237 2002/04/20 20:23:24 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
