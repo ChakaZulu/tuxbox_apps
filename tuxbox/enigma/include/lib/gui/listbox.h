@@ -187,7 +187,7 @@ inline void eListBox<T>::remove(T* entry)
 template <class T>
 inline void eListBox<T>::clearList()
 {
-	while (!childs.empty)
+	while (!childs.empty())
 		delete childs.first();
 }
 
@@ -195,8 +195,9 @@ template <class T>
 inline void eListBox<T>::sort()
 {
 	childs.sort();
+	init();
 }
-         	
+
 template <class T>
 inline eRect eListBox<T>::getEntryRect(int pos)
 {
@@ -234,10 +235,10 @@ inline void eListBox<T>::setActiveColor(gColor active)
 			{
 				invalidateEntry(i);
 				break;
-			}
+			} else if (it == childs.end())
+				break;
 		}
 	}
-
 }
 
 template <class T>
@@ -284,10 +285,10 @@ inline eListBox<T>::~eListBox()
 template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
-	ePtrList_T_iterator entry(top);   // refresh bottom here...
-
 	int i=0;
-  do
+	for (ePtrList_T_iterator entry(top); 
+			(entry != bottom) && (entry != childs.end());
+			++entry)
 	{
 		eRect rect = getEntryRect(i);
 
@@ -296,7 +297,6 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 		
 		i++;
 	}
-	while (entry++ != bottom);
 
 	target->flush();
 }
@@ -311,7 +311,7 @@ inline void eListBox<T>::gotFocus()
 
 	ePtrList_T_iterator entry(top);
 	
-	for (int i=0; i<entries; i++, ++entry)
+	for (int i=0; (i<entries) && (entry != childs.end()); i++, ++entry)
 		if (*entry == *current)
 			invalidateEntry(i);
 }
@@ -328,7 +328,7 @@ inline void eListBox<T>::lostFocus()
 
 	if (isVisible())
 	{
-		for (int i=0; i<entries; i++, ++entry)
+		for (int i=0; (i<entries) && (entry != childs.end()); i++, ++entry)
 			if (*entry == *current)
 				invalidateEntry(i);
 	}
@@ -344,9 +344,9 @@ inline void eListBox<T>::init()
 
 	current = top = bottom = childs.begin();
 
-	for (int i=1; i < entries; i++, bottom++)
+	for (int i=0; i < entries; i++, bottom++)
 	{
-		if (bottom == --childs.end() )
+		if (bottom == childs.end() )
 			break;	
 	}
 }
@@ -362,12 +362,14 @@ inline int eListBox<T>::moveSelection(int dir)
 	switch (dir)
 	{
 		case dirPageDown:
-			if (bottom == --childs.end() )
-				current = bottom;
-			else
+			if (bottom == childs.end())
+			{
+				current = bottom;		// --bottom always valid because !childs.empty()
+				--current;
+			} else
 				for (int i = 0; i < entries; i++)
 				{
-					if (bottom == --childs.end())
+					if (bottom == childs.end())
 						break;
 					bottom++;
 					top++;
@@ -392,7 +394,8 @@ inline int eListBox<T>::moveSelection(int dir)
 		case dirUp:
 			if ( current == childs.begin() )				// wrap around?
 			{
-				top = bottom = current = --childs.end();					// select last
+				top = current = --childs.end();					// select last
+				bottom = childs.end();
 				for (int i = 1; i < entries; i++, top--)
 					if (top == childs.begin())
 						break;
@@ -410,15 +413,15 @@ inline int eListBox<T>::moveSelection(int dir)
 			if ( current == --childs.end() )				// wrap around?
 			{
 				top = current = bottom = childs.begin(); 	// goto first;
-				for (int i = 1; i < entries; i++, bottom++)
-					if ( bottom == --childs.end() )
+				for (int i = 0; i < entries; i++, bottom++)
+					if ( bottom == childs.end() )
 						break;
 			}
 			else
-				if (current++ == bottom)
+				if (++current == bottom)
 				{
 					for (int i=0; i<entries; i++, top++, bottom++)
-						if ( bottom == --childs.end() )
+						if ( bottom == childs.end() )
 							break;
 				}
 		break;
@@ -439,13 +442,15 @@ inline int eListBox<T>::moveSelection(int dir)
 		{
 			int i=0;
 			int old=-1, cur=-1;
-
+			
 			for (ePtrList_T_iterator entry(top); i<entries; i++, ++entry)
-				if ( *entry == oldptr)
+				if ( entry == childs.end())
+					break;
+				else if ( *entry == oldptr)
 					old=i;
 				else if ( *entry == *current )
 					cur=i;
-				
+			
 			if (old != -1)
 				invalidateEntry(old);
 
@@ -516,12 +521,13 @@ inline void eListBox<T>::setCurrent(T *c)
 		for (; i<entries; ++i, ++it)
 			if (it == current)
 				break;
-
-		if (i == entries)
+			else if (it == childs.end())
+				break;
+		if ((i == entries) || (it == childs.end()))
 		{
 			top=bottom=current;
-			for (int i=1; i<entries; i++, bottom++)
-				if (bottom == --childs.end() )
+			for (int i=0; i<entries; i++, bottom++)
+				if (bottom == childs.end() )
 					break;
 		}
 	}
