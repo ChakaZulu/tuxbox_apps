@@ -84,7 +84,7 @@ class CPlugins
 		void scanDir(const char *dir);
 		bool plugin_exists(const std::string & filename);
 		int find_plugin(const std::string & filename);
-
+		bool pluginfile_exists(const std::string & filename);
 	public:
 
 		~CPlugins();

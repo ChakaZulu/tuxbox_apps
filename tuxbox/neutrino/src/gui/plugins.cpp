@@ -79,6 +79,19 @@ int CPlugins::find_plugin(const std::string & filename)
 	return -1;
 }
 
+bool CPlugins::pluginfile_exists(const std::string & filename)
+{
+	FILE *file = fopen(filename.c_str(),"r");
+	if (file != NULL)
+	{
+		fclose(file);
+		return true;
+	} else
+	{
+		return false;
+	}
+}
+
 void CPlugins::scanDir(const char *dir)
 {
 	struct dirent **namelist;
@@ -103,9 +116,23 @@ void CPlugins::scanDir(const char *dir)
 			parseCfg(&new_plugin);
 			new_plugin.pluginfile = fname;
 			if (new_plugin.type == PLUGIN_TYPE_SCRIPT)
+			{
 				new_plugin.pluginfile.append(".sh");
-			else
+				if (!pluginfile_exists(new_plugin.pluginfile))
+				{
+					printf("[CPlugins] could not find %s,\nperhaps wrong plugin type in %s\n",
+						   new_plugin.pluginfile.c_str(), new_plugin.cfgfile.c_str());
+					continue;
+				}
+			} else {
 				new_plugin.pluginfile.append(".so");
+				if (!pluginfile_exists(new_plugin.pluginfile))
+				{
+					printf("[CPlugins] could not find %s,\nperhaps wrong plugin type in %s\n",
+						   new_plugin.pluginfile.c_str(), new_plugin.cfgfile.c_str());
+					continue;
+				}
+			}
 			if(!plugin_exists(new_plugin.filename))
 			{
 				plugin_list.push_back(new_plugin);
@@ -244,41 +271,37 @@ void CPlugins::startPlugin(const char * const name)
 
 void CPlugins::startScriptPlugin(int number)
 {
-
 	const char *script = plugin_list[number].pluginfile.c_str();
 	FILE *f = fopen(script,"r");
 	if (f != NULL)
 	{
 		fclose(f);
-		printf("executing %s\n",script);
+		printf("[CPlugins] executing %s\n",script);
 		f = popen(script,"r");
 		if (f != NULL)
 		{
 			char output[1024];
-			char o[1024];
 			while (fgets(output,1024,f))
 			{
-				if (strcmp(output,o) == 0)
-					printf("same: %s\n",o);
-				strcpy(o,output);
 				scriptOutput += output; 
 			}
 			pclose(f);
 		} 
 		else 
 		{	
-			printf("can't execute %s\n",script);
+			printf("[CPlugins] can't execute %s\n",script);
 		}
 	} 
 	else
 	{
-		printf("file not found %s\n",script);
+		printf("[CPlugins] file not found %s\n",script);
 	}
 }
 
 
 void CPlugins::startPlugin(int number)
 {
+	// always delete old output
 	delScriptOutput();
 
 	if (plugin_list[number].type == PLUGIN_TYPE_SCRIPT)
@@ -346,7 +369,7 @@ void CPlugins::startPlugin(int number)
 	PluginParam *par = startparam;
 	for( ; par; par=par->next )
 	{
-		printf("[gamelist.cpp] (id,val):(%s,%s)\n", par->id, par->val);
+		printf("[CPlugins] (id,val):(%s,%s)\n", par->id, par->val);
 	}
 
 	std::string pluginname = plugin_list[number].filename;
