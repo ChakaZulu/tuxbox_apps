@@ -27,6 +27,7 @@ TUXBOX_APPS_LIB_PKGCONFIG(PLUGINS,tuxbox-plugins)
 TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
+TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 
 AC_ARG_ENABLE(keyboard-no-rc,
          [  --enable-keyboard-no-rc    enable keyboard control, disable rc control],
