@@ -275,8 +275,8 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
 	parent->hide();
 	if (sel==-1)
 	{
-//		CStreamInfo StreamInfo();
-//		StreamInfo.exec(NULL, "");
+		CStreamInfo StreamInfo;
+		StreamInfo.exec(NULL, "");
 	}
 	else if (sel>=0)
 	{
