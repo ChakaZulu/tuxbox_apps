@@ -53,6 +53,13 @@ class CChangeObserver
 		virtual bool changeNotify(string OptionName){return false;};
 };
 
+class COnPaintNotifier
+{
+	public:
+		virtual ~COnPaintNotifier(){};
+		virtual bool onPaintNotify(string MenuName){return false;};
+};
+
 class CMenuTarget
 {
 	public:
@@ -192,9 +199,10 @@ class CMenuOptionStringChooser : public CMenuItem
 class CMenuWidget : public CMenuTarget
 {
 	protected:
+		COnPaintNotifier*	onPaintNotifier;
 		vector<CMenuItem*>	items;
-		string			name;
-		string			iconfile;
+		string				name;
+		string				iconfile;
 
 		int			width;
 		int			height;
@@ -203,7 +211,7 @@ class CMenuWidget : public CMenuTarget
 		int			selected;
 
 	public:
-		CMenuWidget(){name="";iconfile="";selected=-1;};
+		CMenuWidget(){name="";iconfile="";selected=-1; onPaintNotifier=NULL;};
 		CMenuWidget(string Name, string Icon="", int mwidth=400, int mheight=390);
 		~CMenuWidget();
 
@@ -212,6 +220,7 @@ class CMenuWidget : public CMenuTarget
 		virtual void hide();
 		virtual int exec(CMenuTarget* parent, string actionKey);
 
+		void setOnPaintNotifier( COnPaintNotifier* );
 		void setName(string Name){name=Name;};
 		void setIcon(string Icon){iconfile=Icon;};
 };

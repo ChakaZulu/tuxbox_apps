@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.29 2001/12/25 11:40:30 McClean Exp $
+$Id: menue.cpp,v 1.30 2001/12/29 02:17:00 McClean Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.30  2001/12/29 02:17:00  McClean
+ make some settings get from controld
+
  Revision 1.29  2001/12/25 11:40:30  McClean
  better pushback handling
 
@@ -96,6 +99,7 @@ History:
 
 CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight)
 {
+	onPaintNotifier = NULL;
 	name = Name;
 	iconfile = Icon;
 	selected = -1;
@@ -119,6 +123,10 @@ void CMenuWidget::addItem(CMenuItem* menuItem, bool defaultselected)
 	items.insert(items.end(), menuItem);
 }
 
+void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
+{
+	onPaintNotifier = nf;
+}
 
 int CMenuWidget::exec(CMenuTarget* parent, string)
 {
@@ -126,7 +134,11 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
     int key;
 
 
-    if ( parent ) parent->hide();
+    if (parent) 
+		parent->hide();
+
+	if (onPaintNotifier)
+		onPaintNotifier->onPaintNotify(name);
 
     paint();
     int retval = CMenuItem::RETURN_REPAINT;

@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.37 2001/12/28 16:31:09 Simplex Exp $
+//  $Id: neutrino.h,v 1.38 2001/12/29 02:17:00 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.38  2001/12/29 02:17:00  McClean
+//  make some settings get from controld
+//
 //  Revision 1.37  2001/12/28 16:31:09  Simplex
 //  libcontroldclient is now used
 //
@@ -162,7 +165,7 @@ using namespace std;
 *                                                                                     *
 **************************************************************************************/
 
-class CNeutrinoApp : public CMenuTarget
+class CNeutrinoApp : public CMenuTarget, COnPaintNotifier
 {
   private:
 	enum
@@ -245,6 +248,8 @@ class CNeutrinoApp : public CMenuTarget
 	int run(int argc, char **argv);
 	//callback stuff only....
 	int exec(CMenuTarget* parent, string actionKey);
+	//callback for menue
+	bool onPaintNotify(string MenuName);
 };
 
 #endif
