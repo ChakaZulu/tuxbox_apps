@@ -29,9 +29,23 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "channellist.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
+
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "daemonc/remotecontrol.h"
+#include "helpers/infoviewer.h"
+#include "helpers/settings.h"
+#include "channels/lastchannel.h"
+#include "eventlist.hpp"
+#include "menue.h"
+#include "color.h"
+#include "messagebox.h"
+#include "sectionsdclient.h"
+
 
 #define info_height 60
 

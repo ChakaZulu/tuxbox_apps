@@ -32,13 +32,8 @@
 #ifndef __MENU__
 #define __MENU__
 
-#include <stdio.h>
 #include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
-#include "lcddclient.h"
-#include "color.h"
-
 #include <string>
 #include <vector>
 

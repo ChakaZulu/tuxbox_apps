@@ -29,9 +29,19 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "menue.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
+
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "lcddclient.h"
+#include "color.h"
+#include "stringinput.h"
+
+#include <stdio.h>
+
 
 
 bool isDigit(const char ch)

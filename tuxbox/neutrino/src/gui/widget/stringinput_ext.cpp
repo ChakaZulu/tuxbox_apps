@@ -29,9 +29,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "stringinput_ext.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
+
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "color.h"
+
+
+#include <stdio.h>
 
 
 CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ, bool Localizing)

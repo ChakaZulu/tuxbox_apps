@@ -29,13 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
 
 #include "bouqueteditor_bouquets.h"
+#include "neutrino.h"
+
+#include "driver/fontrenderer.h"
 #include "messagebox.h"
 #include "hintbox.h"
+#include "stringinput.h"
 #include "bouqueteditor_channels.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "zapitclient.h"
+
 
 
 CBEBouquetWidget::CBEBouquetWidget()

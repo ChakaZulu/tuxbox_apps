@@ -44,7 +44,6 @@
 
 #include "helpers/epgdata.h"
 #include "helpers/infoviewer.h"
-#include "helpers/streaminfo.h"
 
 #include "widget/screensetup.h"
 #include "widget/bouquetlist.h"
@@ -73,12 +72,12 @@ NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 
 NEUTRINO_CPP  fontRenderClass	*g_fontRenderer;
 NEUTRINO_CPP  FontsDef			*g_Fonts;
+
 NEUTRINO_CPP  CRCInput			*g_RCInput;
 
 NEUTRINO_CPP  CEpgData			*g_EpgData;
 NEUTRINO_CPP  CInfoViewer		*g_InfoViewer;
 NEUTRINO_CPP  EventList			*g_EventList;
-NEUTRINO_CPP  CStreamInfo		*g_StreamInfo;
 NEUTRINO_CPP  CScanTs			*g_ScanTS;
 NEUTRINO_CPP  CFlashUpdate		*g_Update;
 

@@ -30,8 +30,17 @@
 */
 
 #include "scan.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "global.h"
+#include "neutrino.h"
+
+#include "driver/rcinput.h"
+
+#include "widget/menue.h"
+#include "widget/color.h"
+#include "widget/messagebox.h"
+#include "libucodes/libucodes.h"
+
+#include <stdio.h>
 
 
 CScanTs::CScanTs()

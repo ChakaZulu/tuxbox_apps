@@ -29,10 +29,14 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "bouqueteditor_channels.h"
 #include "bouqueteditor_chanselect.h"
-#include "../global.h"
-#include "../neutrino.h"
+
+#include "neutrino.h"
+#include "driver/fontrenderer.h"
+#include "zapitclient.h"
 
 
 CBEChannelWidget::CBEChannelWidget(string Caption, unsigned int Bouquet)

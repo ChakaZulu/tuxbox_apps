@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.232 2002/04/20 12:04:52 Simplex Exp $
+        $Id: neutrino.cpp,v 1.233 2002/04/20 15:21:14 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -35,15 +35,66 @@
 
 #include <config.h>
 
-#include "neutrino.h"
-
 #define NEUTRINO_CPP
 #include "global.h"
+#include "neutrino.h"
+
+#include "driver/framebuffer.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+
+#include "widget/eventlist.hpp"
+#include "widget/color.h"
+#include "widget/menue.h"
+#include "widget/channellist.h"
+#include "widget/colorchooser.h"
+#include "widget/keychooser.h"
+#include "widget/stringinput.h"
+#include "widget/stringinput_ext.h"
+#include "widget/screensetup.h"
+#include "widget/gamelist.h"
+#include "widget/bouqueteditor_bouquets.h"
+
+#include "zapit/getservices.h"
+#include "daemonc/remotecontrol.h"
+
+
+#include "helpers/infoviewer.h"
+#include "helpers/epgdata.h"
+#include "helpers/setting_helpers.h"
+#include "helpers/settings.h"
+#include "helpers/locale.h"
+#include "widget/messagebox.h"
+
+#include "favorites/favorites.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <dlfcn.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
+#include <map>
 
 using namespace std;
+
+
 // Globale Variablen - to use import global.h
 
 // I don't like globals, I would have hidden them in classes,
@@ -64,7 +115,6 @@ static void initGlobals(void)
 	g_EpgData = NULL;
 	g_InfoViewer = NULL;
 	g_EventList = NULL;
-	g_StreamInfo = NULL;
 	g_ScreenSetup = NULL;
 
 	g_Locale = NULL;
@@ -502,68 +552,6 @@ void CNeutrinoApp::firstChannel()
 
 void CNeutrinoApp::doChecks()
 {
-/*
-	int sock_fd;
-	SAI servaddr;
-	char rip[]="127.0.0.1";
-	char *return_buf;
-	int ca_verid = 0;
-
-	sendmessage.version=1;
-	sendmessage.cmd = 't';
-
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(1505);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("neutrino: connect(zapit)");
-		exit(-1);
-	}
-
-	write(sock_fd, &sendmessage, sizeof(sendmessage));
-	return_buf = (char*) malloc(4);
-	memset(return_buf, 0, 4);
-
-	if (recv(sock_fd, return_buf, 3,0) <= 0 )
-	{
-		perror("recv(zapit)");
-		exit(-1);
-	}
-
-	//printf("That was returned: %s\n", return_buf);
-
-	if (strncmp(return_buf,"00t",3))
-	{
-		printf("Wrong Command was sent for isCamValid(). Exiting.\n");
-		free(return_buf);
-		return;
-	}
-	free(return_buf);
-
-	if (recv(sock_fd, &ca_verid, sizeof(int),0) <= 0 )
-	{
-		perror("Nothing could be received\n");
-		exit(-1);
-	}
-
-	if  ( (ca_verid != 33 && ca_verid != 18 && ca_verid != 68) )
-	{
-		printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!\t\t\t\t\t\t\t!!\n!!\tATTENTION, YOUR CARD DOES NOT MATCH CAMALPHA.BIN!!\n!!\t\t\t\t\t\t\t!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-
-		if (g_settings.show_camwarning)
-		{
-			if( ShowMsg ( "messagebox.error", g_Locale->getText("cam.wrong"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo ) == CMessageBox::mbrNo )
-			{
-				g_settings.show_camwarning = 0;
-				saveSetup();
-			}
-		}
-	}
-*/
 	FILE* fd;
 	fd = fopen(UCODEDIR "/avia500.ux", "r");
 	if(fd)
@@ -693,37 +681,41 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
-/*
-	g_Fonts->menu =         g_fontRenderer->getFont("Arial", "Bold", 20);
-	g_Fonts->menu_title =   g_fontRenderer->getFont("Arial", "Bold", 30);
-	g_Fonts->menu_info =    g_fontRenderer->getFont("Arial", "Regular", 16);
+	#define FONTNAME "Arial"
+	//#define FONTNAME "GillSans"
+	//#define FONTNAME "Switzerland"
+	/*
+	g_Fonts->menu =         g_fontRenderer->getFont(FONTNAME, "Bold", 20);
+	g_Fonts->menu_title =   g_fontRenderer->getFont(FONTNAME, "Bold", 30);
+	g_Fonts->menu_info =    g_fontRenderer->getFont(FONTNAME, "Regular", 16);
 
-	g_Fonts->epg_title =    g_fontRenderer->getFont("Arial", "Regular", 25);
+	g_Fonts->epg_title =    g_fontRenderer->getFont(FONTNAME, "Regular", 25);
 
-	g_Fonts->epg_info1 =	g_fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
-	g_Fonts->epg_info2 =	g_fontRenderer->getFont("Arial", "Regular", 17);
+	g_Fonts->epg_info1 =	g_fontRenderer->getFont(FONTNAME, "Italic", 17); // info1 must be same size as info2, but italic
+	g_Fonts->epg_info2 =	g_fontRenderer->getFont(FONTNAME, "Regular", 17);
 
-	g_Fonts->epg_date =		g_fontRenderer->getFont("Arial", "Regular", 15);
-	g_Fonts->alert =		g_fontRenderer->getFont("Arial", "Regular", 100);
+	g_Fonts->epg_date =		g_fontRenderer->getFont(FONTNAME, "Regular", 15);
+	g_Fonts->alert =		g_fontRenderer->getFont(FONTNAME, "Regular", 100);
 
-	g_Fonts->eventlist_title =		g_fontRenderer->getFont("Arial", "Regular", 30);
-	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont("Arial", "Bold", 20);
-	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont("Arial", "Regular", 14);
-	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont("Arial", "Regular", 16);
+	g_Fonts->eventlist_title =		g_fontRenderer->getFont(FONTNAME, "Regular", 30);
+	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont(FONTNAME, "Bold", 20);
+	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont(FONTNAME, "Regular", 14);
+	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont(FONTNAME, "Regular", 16);
 
-	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont("Arial", "Bold", 20);
-	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont("Arial", "Regular", 16);
+	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont(FONTNAME, "Bold", 20);
+	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont(FONTNAME, "Regular", 16);
 
-	g_Fonts->channellist =			g_fontRenderer->getFont("Arial", "Bold", 20);
-	g_Fonts->channellist_descr =	g_fontRenderer->getFont("Arial", "Regular", 20);
-	g_Fonts->channellist_number =	g_fontRenderer->getFont("Arial", "Bold", 14);
-	g_Fonts->channel_num_zap =		g_fontRenderer->getFont("Arial", "Bold", 40);
+	g_Fonts->channellist =			g_fontRenderer->getFont(FONTNAME, "Bold", 20);
+	g_Fonts->channellist_descr =	g_fontRenderer->getFont(FONTNAME, "Regular", 20);
+	g_Fonts->channellist_number =	g_fontRenderer->getFont(FONTNAME, "Bold", 14);
+	g_Fonts->channel_num_zap =		g_fontRenderer->getFont(FONTNAME, "Bold", 40);
 
-	g_Fonts->infobar_number =	g_fontRenderer->getFont("Arial", "Bold", 50);
-	g_Fonts->infobar_channame =	g_fontRenderer->getFont("Arial", "Bold", 30);
-	g_Fonts->infobar_info =		g_fontRenderer->getFont("Arial", "Regular", 20);
-	g_Fonts->infobar_small =	g_fontRenderer->getFont("Arial", "Regular", 14);
+	g_Fonts->infobar_number =	g_fontRenderer->getFont(FONTNAME, "Bold", 50);
+	g_Fonts->infobar_channame =	g_fontRenderer->getFont(FONTNAME, "Bold", 30);
+	g_Fonts->infobar_info =		g_fontRenderer->getFont(FONTNAME, "Regular", 20);
+	g_Fonts->infobar_small =	g_fontRenderer->getFont(FONTNAME, "Regular", 14);
 */
+
 
 	g_Fonts->menu =         g_fontRenderer->getFont("GillSans", "Bold", 20);
 	g_Fonts->menu_title =   g_fontRenderer->getFont("GillSans", "Bold", 30);
@@ -754,6 +746,7 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->infobar_channame =	g_fontRenderer->getFont("GillSans", "Bold", 30);
 	g_Fonts->infobar_info =		g_fontRenderer->getFont("GillSans", "Regular", 21);
 	g_Fonts->infobar_small =	g_fontRenderer->getFont("GillSans", "Regular", 15);
+
 }
 
 
@@ -1563,7 +1556,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_RemoteControl = new CRemoteControl;
 	g_EpgData = new CEpgData;
 	g_InfoViewer = new CInfoViewer;
-	g_StreamInfo = new CStreamInfo;
 	g_ScanTS = new CScanTs;
 	g_ScreenSetup = new CScreenSetup;
 	g_EventList = new EventList;
@@ -2396,7 +2388,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.232 2002/04/20 12:04:52 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.233 2002/04/20 15:21:14 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

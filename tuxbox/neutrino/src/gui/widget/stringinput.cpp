@@ -29,9 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "stringinput.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
+
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "color.h"
+#include "messagebox.h"
+
+
+#include <stdio.h>
 
 
 CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )

@@ -28,10 +28,15 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
+#include "global.h"
+#include "neutrino.h"
 #include "setting_helpers.h"
-#include "../global.h"
-#include "../neutrino.h"
+
+#include "libnet.h"
+#include "helpers/streaminfo.h"
+#include "widget/messagebox.h"
+#include "libucodes/libucodes.h"
+
 
 extern "C" int pinghost( const char *hostname );
 
@@ -270,10 +275,10 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
 	parent->hide();
 	if (sel==-1)
 	{
-		g_StreamInfo->exec(NULL, "");
+		CStreamInfo StreamInfo;
+		StreamInfo.exec(NULL, "");
 	}
-	else
-	if (sel>=0)
+	else if (sel>=0)
 	{
 		g_PluginList->setvtxtpid( g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 		g_PluginList->startPlugin( sel );

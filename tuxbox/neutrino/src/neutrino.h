@@ -34,61 +34,12 @@
 #define __neutrino__
 
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <dlfcn.h>
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
 #include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
-#include "widget/eventlist.hpp"
-#include "widget/color.h"
-#include "widget/menue.h"
-#include "widget/channellist.h"
-#include "widget/colorchooser.h"
-#include "widget/keychooser.h"
-#include "widget/stringinput.h"
-#include "widget/stringinput_ext.h"
-#include "widget/screensetup.h"
-#include "widget/gamelist.h"
-#include "widget/bouqueteditor_bouquets.h"
 #include "helpers/setting_helpers.h"
 
-#include "zapit/getservices.h"
-
-#include "daemonc/remotecontrol.h"
-#include <controldclient.h>
-
-#include "helpers/infoviewer.h"
-#include "helpers/epgdata.h"
-#include "helpers/settings.h"
-#include "helpers/streaminfo.h"
-#include "helpers/locale.h"
-#include "widget/messagebox.h"
-
-#include "favorites/favorites.h"
-
 #include <string>
-#include <vector>
-#include <map>
 
 using namespace std;
-
 
 
 #define widest_number "1"

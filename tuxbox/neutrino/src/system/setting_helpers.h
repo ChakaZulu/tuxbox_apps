@@ -33,8 +33,7 @@
 #define __setting_helpers__
 
 #include "widget/menue.h"
-#include "libnet.h"
-#include "libucodes/libucodes.h"
+
 
 class CSatDiseqcNotifier : public CChangeObserver
 {
@@ -126,8 +125,7 @@ class CUCodeCheckExec : public CMenuTarget
 void setDefaultGateway(char* ip);
 void setNetworkAddress(char* ip, char* netmask, char* broadcast);
 void setNameServer(char* ip);
-void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway
-, char* nameserver);
+void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway, char* nameserver);
 
 unsigned long long getcurrenttime();
 

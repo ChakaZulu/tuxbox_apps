@@ -33,9 +33,7 @@
 #define __bouqueteditor_chanselect__
 
 #include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
 #include "menue.h"
-#include <zapitclient.h>
 
 #include <string>
 #include <vector>

@@ -32,25 +32,15 @@
 #ifndef __channellist__
 #define __channellist__
 
-
 #include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "daemonc/remotecontrol.h"
-#include "helpers/infoviewer.h"
-#include "helpers/settings.h"
 #include "channels/lastchannel.h"
-#include "eventlist.hpp"
-#include "menue.h"
-#include "color.h"
-#include "sectionsdclient.h"
-
 
 #include <string>
 #include <vector>
 
-
 using namespace std;
+
+
 
 class CChannelList
 {
@@ -84,10 +74,10 @@ class CChannelList
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
 		unsigned int		numwidth;
-		int			fheight; // Fonthoehe Channellist-Inhalt
-		int			theight; // Fonthoehe Channellist-Titel
+		int					fheight; // Fonthoehe Channellist-Inhalt
+		int					theight; // Fonthoehe Channellist-Titel
 
-		string			name;
+		string				name;
 		vector<CChannel*>	chanlist;
 		CZapProtection* 	zapProtection;
 

@@ -29,9 +29,19 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
+
 #include "colorchooser.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
+
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+#include "color.h"
+#include "messagebox.h"
+
+#include <stdio.h>
+
+
 
 CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
 {

@@ -32,13 +32,8 @@
 #ifndef __stringinput_ext__
 #define __stringinput_ext__
 
-#include <stdio.h>
 #include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-
 #include "menue.h"
-#include "color.h"
 
 #include <string>
 #include <vector>

@@ -24,11 +24,14 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "../global.h"
-#include "../neutrino.h"
-#include "../widget/channellist.h"
-#include "../widget/hintbox.h"
+#include "global.h"
+#include "neutrino.h"
 #include "favorites.h"
+#include "zapitclient.h"
+
+#include "widget/channellist.h"
+#include "widget/messagebox.h"
+#include "widget/hintbox.h"
 
 
 //
