@@ -49,7 +49,16 @@ bool CAudioSetupNotifier::changeNotify(string OptionName)
 
 bool CVideoSetupNotifier::changeNotify(string OptionName)
 {
-	printf("notify: %s\n", OptionName.c_str() );
+	if(OptionName=="videomenu.videosignal")
+	{
+		g_Controld->setVideoOutput( g_settings.video_Signal );
+	}
+	else if(OptionName=="videomenu.videoformat")
+	{
+		g_Controld->setVideoFormat( g_settings.video_Format );
+	}
+	
+	printf("video notify: %s\n", OptionName.c_str() );
     return false;
 };
 
