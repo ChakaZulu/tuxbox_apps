@@ -713,9 +713,10 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 		if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 		{
-			int rest = ( (info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer) - jetzt ) / 60;
-
 			int seit = ( jetzt - info_CurrentNext.current_zeit.startzeit ) / 60;
+         if ((jetzt - info_CurrentNext.current_zeit.startzeit ) % 60 > 30)
+            seit++;
+			int rest = ( info_CurrentNext.current_zeit.dauer / 60) - seit ;
 			if ( seit< 0 )
 			{
 				runningPercent= 0;
@@ -913,6 +914,8 @@ void CInfoViewer::showLcdPercentOver()
       {
          time_t jetzt=time(NULL);
          int seit = ( jetzt - info_CurrentNext.current_zeit.startzeit ) / 60;
+         if ((jetzt - info_CurrentNext.current_zeit.startzeit ) % 60 > 30)
+           seit++;
          if ( seit< 0 )
             runningPercent= 0;
          else
