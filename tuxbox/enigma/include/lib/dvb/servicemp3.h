@@ -74,11 +74,10 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	int maxOutputBufferSize, minOutputBufferSize;
 	
 	eAudioDecoder::pcmSettings pcmsettings;
-	
-	int filelength;
 
-	int length;
-	int position;
+	off64_t filelength, length, position;	// in bytes
+	int divisor;
+
 	int seekbusy;
 	pthread_mutex_t lock;
 	int audio_tracks;

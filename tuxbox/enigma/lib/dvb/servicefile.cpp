@@ -57,7 +57,7 @@ void eServiceFileHandler::loadNode(eServiceCache<eServiceFileHandler>::eNode &no
 		DIR *d=opendir(ref.path.c_str());
 		if (!d)
 			return;
-		while (struct dirent *e=readdir(d))
+		while (struct dirent64 *e=readdir64(d))
 		{
 			if (!(strcmp(e->d_name, ".") && strcmp(e->d_name, "..")))
 				continue;
@@ -66,8 +66,8 @@ void eServiceFileHandler::loadNode(eServiceCache<eServiceFileHandler>::eNode &no
 			filename=ref.path;
 			filename+=e->d_name;
 			
-			struct stat s;
-			if (stat(filename.c_str(), &s)<0)
+			struct stat64	 s;
+			if (stat64(filename.c_str(), &s)<0)
 				continue;
 		
 			if (S_ISDIR(s.st_mode))

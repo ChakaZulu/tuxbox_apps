@@ -192,7 +192,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	
 	if (filename) // not streaming
 	{
-		sourcefd=::open(filename, O_RDONLY);
+		sourcefd=::open(filename, O_RDONLY|O_LARGEFILE);
 		if (sourcefd<0)
 		{
 			error=errno;
@@ -200,7 +200,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 			state=stateError;
 		} else
 		{
-			filelength=::lseek(sourcefd, 0, SEEK_END);
+			filelength=lseek64(sourcefd, 0, SEEK_END);
 			lseek(sourcefd, 0, SEEK_SET);
 		}
 	} else
@@ -210,6 +210,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 
 	if (type != codecMPG)
 	{
+		divisor=1;
 		pcmsettings.reconfigure=1;
 		dspfd[1]=-1;
 
@@ -230,6 +231,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 		outputsn[1]=0;
 	} else
 	{
+		divisor=1024;
 		Decoder::parms.vpid=0x1FFF;
 		Decoder::parms.apid=0x1FFF;
 		Decoder::parms.pcrpid=-1;
@@ -553,7 +555,7 @@ void eMP3Decoder::recalcPosition()
 			length=-1;
 		if (sourcefd > 0)
 		{
-			position=::lseek(sourcefd, 0, SEEK_CUR);
+			position=::lseek64(sourcefd, 0, SEEK_CUR);
 			position+=input.size();
 			position/=(audiodecoder->getAverageBitrate()>>3);
 			if (type != codecMPG)
@@ -712,7 +714,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 				if ( type == codecMPG )
 				{
 					singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
-					::lseek(sourcefd, getPosition(1), SEEK_SET);
+					::lseek64(sourcefd, getPosition(1)*divisor, SEEK_SET);
 					input.clear();
 					output.clear();
 					output2.clear();
@@ -753,7 +755,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			int position = getPosition(1);
 			Decoder::Pause(0);
 			((eMPEGDemux*)audiodecoder)->setAudioStream(message.parm);
-			::lseek(sourcefd, position, SEEK_SET);
+			::lseek64(sourcefd, ((off64_t)position)*divisor, SEEK_SET);
 			input.clear();
 			output.clear();
 			output2.clear();
@@ -820,7 +822,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 				offset=0;
 		}
 		else
-			offset=message.parm;
+			offset=((off64_t)message.parm)*divisor;
 
 		singleLock s(lock); // must protect access on all eIOBuffer and position
 		input.clear();
@@ -861,7 +863,7 @@ int eMP3Decoder::getPosition(int real)
 	singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 	if ( type == codecMPG && real)
 	{
-		unsigned int position=::lseek(sourcefd, 0, SEEK_CUR);
+		off64_t position=::lseek64(sourcefd, 0, SEEK_CUR);
 		if ( !position )
 			return 0;
 		if ( position > (1024*1024*2) )
@@ -884,13 +886,13 @@ int eMP3Decoder::getPosition(int real)
 			position-=getOutputDelay(0);
 		else
 			return 0;
-		return position;
+		return position / divisor;
 	}
 	recalcPosition();
 	if (real)
 	{
 			// our file pos
-		size_t real = ::lseek(sourcefd, 0, SEEK_CUR);
+		off_t real = ::lseek(sourcefd, 0, SEEK_CUR);
 			// minus bytes still in input buffer
 		real -= input.size();
 			// minus not yet played data in a.) output buffers and b.) dsp buffer
@@ -910,7 +912,7 @@ int eMP3Decoder::getPosition(int real)
 		} else
 			nyp = 0;
 
-		return real - nyp;
+		return (real-nyp)/divisor;
 	}
 	return position;
 }
@@ -921,7 +923,7 @@ int eMP3Decoder::getLength(int real)
 		return -1;
 	singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 	if (real)
-		return filelength;
+		return filelength / divisor;
 	return length+output.size()/(outputbr/8);
 }
 
@@ -951,8 +953,8 @@ int eServiceHandlerMP3::play(const eServiceReference &service, int workaround )
 {
 	if ( service.path )
 	{
-		FILE *f = fopen( service.path.c_str(), "r" );
-		if (!f)
+		struct stat64 s;
+		if (::stat64(service.path.c_str(), &s))
 		{
 			if ( service.path.find("://") == eString::npos )
 			{
@@ -960,8 +962,6 @@ int eServiceHandlerMP3::play(const eServiceReference &service, int workaround )
 				return -1;
 			}
 		}
-		else
-			fclose(f);
 	}
 	else
 		return -1;
@@ -1063,27 +1063,27 @@ void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 {
 	if (filename.left(7) == "http://")
 		eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id, 0, filename));
-	else if (filename.right(4).upper()==".MP3")
+	else
 	{
-		struct stat s;
-		if (::stat(filename.c_str(), &s))
+		struct stat64 s;
+		if (::stat64(filename.c_str(), &s))
 			return;
-		eServiceReference ref(id, 0, filename);
-		ref.data[0]=eMP3Decoder::codecMP3;
-		eServiceFileHandler::getInstance()->addReference(node, ref);
-	} else if ((filename.right(5).upper()==".MPEG")
-		|| (filename.right(4).upper()==".MPG")
-		|| (filename.right(4).upper()==".VOB")
-		|| (filename.right(4).upper()==".DAT")
-		|| (filename.right(4).upper()==".BIN")
-		|| (filename.right(4).upper()==".VDR"))
-	{
-		struct stat s;
-		if (::stat(filename.c_str(), &s))
-			return;
-		eServiceReference ref(id, 0, filename);
-		ref.data[0]=eMP3Decoder::codecMPG;
-		eServiceFileHandler::getInstance()->addReference(node, ref);
+		if (filename.right(4).upper()==".MP3")
+		{
+			eServiceReference ref(id, 0, filename);
+			ref.data[0]=eMP3Decoder::codecMP3;
+			eServiceFileHandler::getInstance()->addReference(node, ref);
+		} else if ((filename.right(5).upper()==".MPEG")
+			|| (filename.right(4).upper()==".MPG")
+			|| (filename.right(4).upper()==".VOB")
+			|| (filename.right(4).upper()==".DAT")
+			|| (filename.right(4).upper()==".BIN")
+			|| (filename.right(4).upper()==".VDR"))
+		{
+			eServiceReference ref(id, 0, filename);
+			ref.data[0]=eMP3Decoder::codecMPG;
+			eServiceFileHandler::getInstance()->addReference(node, ref);
+		}
 	}
 }
 

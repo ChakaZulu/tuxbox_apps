@@ -1257,8 +1257,8 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 			if (slice)
 				filename+=eString().sprintf(".%03d", slice);
 			slice++;
-			struct stat s;
-			if (::stat(filename.c_str(), &s) < 0)
+			struct stat64 s;
+			if (::stat64(filename.c_str(), &s) < 0)
 				break;
 			eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 		}
@@ -3453,13 +3453,13 @@ static eString listDirectory(eString request, eString dirpath, eString opt, eHTT
 		char buffer[255];
 		int dircount, filecount, linkcount;
 		dircount = filecount = linkcount = 0;
-		while (struct dirent *e = readdir(d))
+		while (struct dirent64 *e = readdir64(d))
 		{
 			eString filename = opt;
 			filename += e->d_name;
 
-			struct stat s;
-			if (lstat(filename.c_str(), &s) < 0)
+			struct stat64 s;
+			if (lstat64(filename.c_str(), &s) < 0)
 				continue;
 			if (S_ISLNK(s.st_mode))
 			{
@@ -3475,7 +3475,7 @@ static eString listDirectory(eString request, eString dirpath, eString opt, eHTT
 			}
 			else if (S_ISREG(s.st_mode))
 			{
-				answer+=eString().sprintf("\t<object type=\"file\" name=\"%s\" size=\"%d\"/>\n",
+				answer+=eString().sprintf("\t<object type=\"file\" name=\"%s\" size=\"%lld\"/>\n",
 					e->d_name,
 					s.st_size);
 				++filecount;

@@ -222,8 +222,8 @@ int ePlaylist::deleteService(std::list<ePlaylistEntry>::iterator it)
 				if (slice)
 					filename+=eString().sprintf(".%03d", slice);
 				slice++;
-				struct stat s;
-				if (::stat(filename.c_str(), &s) < 0)
+				struct stat64 s;
+				if (::stat64(filename.c_str(), &s) < 0)
 					break;
 				eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 			}

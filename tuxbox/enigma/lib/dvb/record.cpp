@@ -236,8 +236,8 @@ int eDVBRecorder::openFile(int suffix)
 	if (outfd >= 0)
 		::close(outfd);
 
-	struct stat s;
-	if ( !stat(tfilename.c_str(), &s) )
+	struct stat64 s;
+	if ( !stat64(tfilename.c_str(), &s) )
 	{
 		rename(tfilename.c_str(), (tfilename+".$$$").c_str() );
 		eBackgroundFileEraser::getInstance()->erase((tfilename+".$$$").c_str());

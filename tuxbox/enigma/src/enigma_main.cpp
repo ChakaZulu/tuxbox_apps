@@ -2314,9 +2314,7 @@ void eZapMain::getPlaylistPosition()
 		time=handler->getPosition(eServiceHandler::posQueryRealCurrent);
 
 		if ( playlist->current != playlist->getConstList().end() && playlist->current->service == eServiceInterface::getInstance()->service )
-		{
 			playlist->current->current_position=time;
-		}
 	}
 }
 
@@ -3128,7 +3126,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		}
 
 		int suffix=0;
-		struct stat s;
+		struct stat64 s;
 		do
 		{
 			filename=MOVIEDIR "/";
@@ -3137,7 +3135,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 				filename+=eString().sprintf(" [%d]", suffix);
 			suffix++;
 			filename+=".ts";
-		} while (!stat(filename.c_str(), &s));
+		} while (!stat64(filename.c_str(), &s));
 
 		if (handler->serviceCommand(
 			eServiceCommand(
@@ -3946,8 +3944,8 @@ void eZapMain::deleteFile( eServiceSelector *sel )
 					filename+=eString().sprintf(".%03d", slice);
 				slice++;
 			}
-			struct stat s;
-			if (::stat(filename.c_str(), &s) < 0)
+			struct stat64 s;
+			if (::stat64(filename.c_str(), &s) < 0)
 				break;
 			eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 		}
@@ -4424,7 +4422,7 @@ zap:
 
 			if (i != playlist->getList().end())
 			{
-//			eDebug("we have stored PlaylistPosition.. get this... and set..");
+//				eDebug("we have stored PlaylistPosition.. get this... and set..");
 				eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 				if (!handler)
 					return;

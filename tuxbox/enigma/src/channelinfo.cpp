@@ -255,9 +255,9 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 		// should be moved to eService
 		eString filename=service.path;
 		int slice=0;
-		struct stat s;
+		struct stat64 s;
 		int filelength=0;
-		while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+		while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 		{
 			filelength+=s.st_size/1024;
 			slice++;

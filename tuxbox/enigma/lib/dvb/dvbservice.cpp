@@ -344,7 +344,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			if ( service.path ) // recorded ts
 			{
 				// we try to find manual the correct sid
-				int fd = open( service.path.c_str(), O_RDONLY );
+				int fd = open( service.path.c_str(), O_RDONLY|O_LARGEFILE );
 				if ( fd < 0 )
 					eDebug("open %s failed");
 				else

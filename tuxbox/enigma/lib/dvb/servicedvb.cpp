@@ -81,9 +81,9 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	inputsn=0;
 
 	slice=0;
-	struct stat s;
+	struct stat64 s;
 	filelength=0;
-	while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+	while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 	{
 		filelength+=s.st_size/1880;
 		slice++;
@@ -135,7 +135,7 @@ int eDVRPlayerThread::openFile(int slice)
 	sourcefd=::open(tfilename.c_str(), O_RDONLY|O_LARGEFILE);
 	if (sourcefd >= 0)
 	{
-		int slicesize=this->slicesize;
+		off64_t slicesize=this->slicesize;
 		eDebug("opened slice %d", slice);
 		if (!slice)
 		{
@@ -250,11 +250,11 @@ void eDVRPlayerThread::readMore(int what)
 			next=1;
 			if (livemode)
 			{
-				struct stat s;
+				struct stat64 s;
 				eString tfilename=filename;
 				tfilename += eString().sprintf(".%03d", slice+1);
 
-				if (::stat(tfilename.c_str(), &s) < 0)
+				if (::stat64(tfilename.c_str(), &s) < 0)
 				{
 					eDebug("no next file, stateFileEnd");
 					flushbuffer=1;
@@ -324,9 +324,9 @@ eDVRPlayerThread::~eDVRPlayerThread()
 void eDVRPlayerThread::updatePosition()
 {
 	int slice=0;
-	struct stat s;
+	struct stat64 s;
 	int filelength=0;
-	while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+	while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 	{
 		filelength+=s.st_size/1880;
 		slice++;
@@ -346,7 +346,7 @@ void eDVRPlayerThread::updatePosition()
 int eDVRPlayerThread::getPosition(int real)
 {
 	singleLock s(poslock);
-	int ret = (position / 1880) + slice * (slicesize/1880);
+	int ret = (position / 1880) + slice * (slicesize/1880);	
 	if (!real)
 		ret /= 250;
 	return ret;
@@ -464,7 +464,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 
 		if (state != stateError)
 		{
-			int newpos=::lseek64(sourcefd, offset%slicesize, SEEK_SET);
+			off64_t newpos=::lseek64(sourcefd, offset%slicesize, SEEK_SET);
 			dvrFlush();
 			singleLock s(poslock);
 			position=newpos;
@@ -902,8 +902,8 @@ void eServiceHandlerDVB::addFile(void *node, const eString &filename)
 {
 	if (filename.right(3).upper()==".TS")
 	{
-		struct stat s;
-		if (::stat(filename.c_str(), &s))
+		struct stat64 s;
+		if (::stat64(filename.c_str(), &s))
 			return;
 		eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id, 0, filename));
 	}

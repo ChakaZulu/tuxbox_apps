@@ -65,8 +65,8 @@ eHTTPMovie::eHTTPMovie(eHTTPConnection *c, int _fd, int method, const char *mime
 	if (method == methodGET)
 	{
 		int slice=0;
-		struct stat s;
-		while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+		struct stat64 s;
+		while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 		{
 			size+=s.st_size;
 			++slice;

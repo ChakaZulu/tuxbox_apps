@@ -32,7 +32,7 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	void updatePosition();
 
 	int filelength; // in 1880 packets
-	int position;
+	off64_t position;
 	pthread_mutex_t poslock;
 
 	off64_t slicesize;
