@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.5  2003/06/24 07:19:35  alexw
+ * bugfix & cleanup
+ *
  * Revision 1.4  2003/06/23 15:18:49  alexw
  * hmpf, oldapi
  *
@@ -75,19 +78,16 @@ int ControlDaemon(int command)
 
 int GetRCCode()
 {
-#if HAVE_DVB_API_VERSION == 3
 	static __u16 rc_last_key = KEY_RESERVED;
-#endif
 	//get code
 
 	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
 	{
 		if(ev.value)
 		{
-#if HAVE_DVB_API_VERSION == 3
 			if(ev.code != rc_last_key)
 			{
-#endif
+				rc_last_key = ev.code;
 				switch(ev.code)
 				{
 					case KEY_UP:		rccode = RC_UP;
@@ -166,17 +166,18 @@ int GetRCCode()
 								break;
 
 					case KEY_POWER:		rccode = RC_STANDBY;
+								break;
+
+					default:		rccode = -1;
 				}
-#if HAVE_DVB_API_VERSION == 3
 			}
-#endif
+			else
+				rccode = -1;
 		}
 		else
 		{
 			rccode = -1;
-#if HAVE_DVB_API_VERSION == 3
 			rc_last_key = KEY_RESERVED;
-#endif
 		}
 	}
 
@@ -836,7 +837,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.4 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.5 $", versioninfo[12];
 	int loop, account, mailindex;
 	FILE *fd_run;
 
