@@ -495,7 +495,7 @@ bool CVCRControl::CFileDevice::Stop()
 {
 	printf("Stop\n");
 
-	bool return_value = ::stop_recording();
+	bool return_value = (::stop_recording() == STREAM2FILE_OK);
 
 	RestoreNeutrino();
 
