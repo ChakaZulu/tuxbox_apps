@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.13 2001/07/15 15:09:27 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.14 2001/07/16 11:49:31 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.14  2001/07/16 11:49:31  fnbrd
+//  Neuer Befehl, Zeichen fuer codetable aus den Texten entfernt
+//
 //  Revision 1.13  2001/07/15 15:09:27  fnbrd
 //  Informative Ausgabe.
 //
@@ -163,6 +166,24 @@ static SIevent nullEvt; // Null-Event, falls keins gefunden
   return nullEvt;
 }
 
+static const SIevent &findNextSIeventForService(const unsigned short serviceID, const time_t end_time_last_evt)
+{
+static SIevent nullEvt; // Null-Event, falls keins gefunden
+
+  SIevent& nextEvt=nullEvt;
+  for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
+    if(e->serviceID==serviceID)
+      for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
+        if(t->startzeit>=end_time_last_evt)
+	  if(nextEvt.times.size()) {
+            if(t->startzeit<nextEvt.times.begin()->startzeit)
+	      nextEvt=*e;
+          }
+          else
+	    nextEvt=*e;
+  return nextEvt;
+}
+
 static const SIevent &findActualSIeventForService(const SIservice &s)
 {
 static SIevent nullEvt; // Null-Event, falls keins gefunden
@@ -222,6 +243,75 @@ struct connectionData {
 };
 
 // Mostly copied from epgd (something bugfixed ;) )
+static void commandCurrentNextInfoChannelName(struct connectionData *client, char *data, unsigned dataLength)
+{
+  int nResultDataSize=0;
+  char* pResultData=0;
+
+  data[dataLength-1]=0; // to be sure it has an trailing 0
+  printf("Request of current/next information for '%s'\n", data);
+
+  if(stopDMXeit())
+    return;
+  pthread_mutex_lock(&eventsLock);
+  pthread_mutex_lock(&servicesLock);
+  const SIevent &evt=findActualSIeventForServiceName(data);
+  pthread_mutex_unlock(&servicesLock);
+
+//  readSection(request.Name, &pResultData, &nResultDataSize);
+
+  if(evt.serviceID!=0) {//Found
+    printf("current EPG found.\n");
+    SItime siStart = *(evt.times.begin());
+    const SIevent &nextEvt=findNextSIeventForService(evt.serviceID, siStart.startzeit+siStart.dauer);
+    if(nextEvt.serviceID!=0) {
+      printf("next EPG found.\n");
+
+      // Folgendes ist grauenvoll, habs aber einfach kopiert aus epgd
+      // und keine Lust das grossartig zu verschoenern
+      nResultDataSize=
+        strlen(evt.name.c_str())+1+		//Name + del
+        3+2+1+					//std:min + del
+        4+1+					//dauer (mmmm) + del
+        3+1+					//100 + del
+        strlen(nextEvt.name.c_str())+1+		//Name + del
+        3+2+1+					//std:min + del
+        4+1+1;					//dauer (mmmm) + del + 0
+      pResultData = new char[nResultDataSize];
+      struct tm *pStartZeit = localtime(&siStart.startzeit);
+      int nSH(pStartZeit->tm_hour), nSM(pStartZeit->tm_min);
+      unsigned dauer=siStart.dauer/60;
+      unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-siStart.startzeit)/(float)siStart.dauer*100.);
+
+      siStart = *(nextEvt.times.begin());
+      pStartZeit = localtime(&siStart.startzeit);
+      int nSH2(pStartZeit->tm_hour), nSM2(pStartZeit->tm_min);
+      unsigned dauer2=siStart.dauer/60;
+
+      sprintf(pResultData,
+      "%s\n%02d:%02d\n%04u\n%03u\n%s\n%02d:%02d\n%04u\n",
+        evt.name.c_str(),
+        nSH, nSM, dauer, nProcentagePassed,
+        nextEvt.name.c_str(),
+        nSH2, nSM2, dauer2);
+    }
+  }
+  pthread_mutex_unlock(&eventsLock);
+  startDMXeit();
+
+  // response
+  struct msgSectionsdResponseHeader pmResponse;
+  pmResponse.dataLength=nResultDataSize;
+  write(client->connectionSocket, &pmResponse, sizeof(pmResponse));
+  if( nResultDataSize > 0 ) {
+    write(client->connectionSocket, pResultData, nResultDataSize);
+    delete[] pResultData;
+  }
+  else
+    printf("current/next EPG not found!\n");
+}
+
+// Mostly copied from epgd (something bugfixed ;) )
 static void commandActualEPGchannelName(struct connectionData *client, char *data, unsigned dataLength)
 {
   int nResultDataSize=0;
@@ -241,9 +331,9 @@ static void commandActualEPGchannelName(struct connectionData *client, char *dat
 
   if(evt.serviceID!=0) {//Found
     printf("EPG found.\n");
-    nResultDataSize=strlen(evt.name.c_str())+2+		//Name + del
-      strlen(evt.text.c_str())+2+		//Text + del
-      strlen(evt.extendedText.c_str())+2+	//ext + del
+    nResultDataSize=strlen(evt.name.c_str())+1+		//Name + del
+      strlen(evt.text.c_str())+1+		//Text + del
+      strlen(evt.extendedText.c_str())+1+	//ext + del
       3+3+4+1+					//dd.mm.yyyy + del
       3+2+1+					//std:min + del
       3+2+1+					//std:min+ del
@@ -318,7 +408,8 @@ static void commandEventListTV(struct connectionData *client, char *data, unsign
 
 static void (*connectionCommands[NUMBER_OF_SECTIONSD_COMMANDS]) (struct connectionData *, char *, unsigned)  = {
   commandActualEPGchannelName,
-  commandEventListTV
+  commandEventListTV,
+  commandCurrentNextInfoChannelName
 };
 
 static void *connectionThread(void *conn)
@@ -805,7 +896,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.13 2001/07/15 15:09:27 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.14 2001/07/16 11:49:31 fnbrd Exp $\n");
   printf("caching %d hours\n", HOURS_TO_CACHE);
 
   tzset(); // TZ auswerten
