@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.5 2001/12/03 22:43:26 McClean Exp $
+ * $Id: lcdmenu.h,v 1.6 2001/12/10 06:25:34 obi Exp $
  *
  * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
  *
@@ -22,6 +22,7 @@
 #ifndef __LCDMENU_H_
 #define __LCDMENU_H_
 
+#include <config.h>
 #include <crypt.h>
 
 #include "configManager.h"
