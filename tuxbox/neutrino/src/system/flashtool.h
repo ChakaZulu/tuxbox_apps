@@ -44,7 +44,6 @@ class CFlashTool
 {
 	private:
 	
-		int		fd_fp;
 		CProgress_StatusViewer* statusViewer;
 		std::string mtdDevice;
 		std::string ErrorMessage;

@@ -31,11 +31,10 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mount.h>
+#include <sys/reboot.h>
 
 #include <linux/mtd/mtd.h>
 #include <libcramfs.h>
-
-#include <dbox/fp.h>
 
 #include <driver/encoding.h>
 #include <global.h>
@@ -43,7 +42,6 @@
 
 CFlashTool::CFlashTool()
 {
-	fd_fp = -1;
 	statusViewer = NULL;
 	mtdDevice = 	"";
 	ErrorMessage = 	"";
@@ -51,10 +49,6 @@ CFlashTool::CFlashTool()
 
 CFlashTool::~CFlashTool()
 {
-	if(fd_fp!=-1)
-	{
-		close(fd_fp);
-	}
 }
 
 std::string CFlashTool::getErrorMessage()
@@ -192,13 +186,6 @@ bool CFlashTool::program( std::string filename, int globalProgressEndErase, int 
 		statusViewer->showStatusMessageUTF(g_Locale->getText("flashupdate.eraseingflash")); // UTF-8
 	}
 
-	//jetzt wirds kritisch - daher filehandle auf fp öffen um reset machen zu können
-	if ((fd_fp = open("/dev/dbox/fp0",O_RDWR)) <= 0)
-	{
-		perror("[neutrino] open fp0");
-		fd_fp = -1;
-	}
-
 	if(!erase(globalProgressEndErase))
 	{
 		return false;
@@ -324,23 +311,9 @@ bool CFlashTool::check_cramfs( std::string filename )
 
 void CFlashTool::reboot()
 {
-	if(fd_fp!=-1)
-	{
-		/* Nokia FP_IOCTL_REBOOT does not work after writing directly to flash */
-		if(g_info.box_Type == CControldClient::TUXBOX_MAKER_NOKIA)
-		{
-			if (ioctl(fd_fp,FP_IOCTL_POWEROFF)< 0)
-			{
-				perror("FP_IOCTL_POWEROFF:");
-			}
-		}
-		if (ioctl(fd_fp,FP_IOCTL_REBOOT)< 0)
-		{
-			perror("FP_IOCTL_REBOOT:");
-		}
-		close(fd_fp);
-		fd_fp = -1;
-	}
+	::sync();
+	::reboot(RB_AUTOBOOT);
+	::exit(0);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
