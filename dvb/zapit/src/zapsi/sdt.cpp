@@ -36,7 +36,7 @@ int sdt(uint osid, bool scan_mode)
   flt.filter.filter[0] = 0x42;
   flt.filter.mask[0]  =0xFF;
   flt.timeout=25000;
-  flt.flags=DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+  flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
   
   if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
     perror("DMX_SET_FILTER");
@@ -85,7 +85,11 @@ int sdt(uint osid, bool scan_mode)
     tsid = (buffer[3]<<8) | buffer[4];
     printf("TSid: %04x\n",tsid);
     if (scan_mode && tsid != osid)
+    {	
+    	printf("We are looking for another TSid.. Why does this happen?\n");
     	return -2;
+    }
+
     //printf("section_number: %04x\n",buffer[6]);
     //printf("last_section_number: %04x\n",buffer[7]);
     network_id = (buffer[8]<<8)|buffer[9];

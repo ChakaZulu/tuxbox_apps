@@ -42,6 +42,7 @@ struct transpondermap
 	int symbolrate;
 	int fec_inner;
 	int polarization;
+	int diseqc;
 	
 	
 	transpondermap(int Tsid, int Freq, int Symbolrate, int Fec_inner)
@@ -53,13 +54,14 @@ struct transpondermap
 		polarization = 0;
 	}
 	
-	transpondermap(int Tsid, int Freq, int Symbolrate, int Fec_inner,int Polarization)
+	transpondermap(int Tsid, int Freq, int Symbolrate, int Fec_inner,int Polarization,int Diseqc)
 	{
 		tsid = Tsid;
 		freq = Freq;
 		symbolrate = Symbolrate;
 		fec_inner = Fec_inner;
 		polarization = Polarization;
+		diseqc = Diseqc;
 	}
 };
 

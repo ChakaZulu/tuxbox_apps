@@ -56,6 +56,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
   	if (!pt)
   	{
   		printf("Poll Timeout\n");
+  		close(demux);
   		return -1;
   	}
   	else
@@ -124,6 +125,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
   	if (!pt)
   	{
   		printf("Poll Timeout\n");
+  		close(demux);
   		return 0;
   	}
   	else

@@ -79,16 +79,16 @@ int cable_deliv_system_desc(char *buffer, int tsid)
     	found_transponders++;
     	printf("New transponder\n");
 	printf("tsid: %04x\n",tsid);
-	printf("frequency: %d\n", freq);
+	/*printf("frequency: %d\n", freq);
 	printf("Symbolrate: %d\n", symbolrate);
-	printf("FEC_inner: %d\n",fec_inner);
+	printf("FEC_inner: %d\n",fec_inner);*/
       	scantransponders.insert(std::pair<int,transpondermap>(tsid, transpondermap(tsid,freq,symbolrate,fec_inner)));
       }
 
   return len+2;
 }
 
-int sat_deliv_system_desc(char *buffer, int tsid)
+int sat_deliv_system_desc(char *buffer, int tsid,int diseqc)
 {
   int len = buffer[1];
   int freq = (((buffer[2] & 0xf0) >> 4) * 100000) + ((buffer[2] & 0xf) * 10000) + (((buffer[3] & 0xf0) >> 4) * 1000) + ((buffer[3] & 0xf)*100) + (((buffer[4]&0xf0)>>4)*10) + (buffer[4]&0xf);
@@ -103,11 +103,11 @@ int sat_deliv_system_desc(char *buffer, int tsid)
 	  found_transponders++;
 	  printf("New transponder\n");
 	  printf("tsid: %04x\n",tsid);
-	  printf("frequency: %d\n", freq);
+	  /*printf("frequency: %d\n", freq);
 	  printf("Polarization: %d\n", polarization);
 	  printf("Symbolrate: %d\n", symbolrate);
-	  printf("FEC_inner: %d\n",fec_inner);
-	  scantransponders.insert(std::pair<int,transpondermap>(tsid, transpondermap(tsid,freq,symbolrate,fec_inner,polarization)));
+	  printf("FEC_inner: %d\n",fec_inner);*/
+	  scantransponders.insert(std::pair<int,transpondermap>(tsid, transpondermap(tsid,freq,symbolrate,fec_inner,polarization,diseqc)));
 
 	}
 	
@@ -130,13 +130,13 @@ int multilingual_network_name_desc(char *buffer)
 int freq_list_desc(char *buffer)
 {
 	int len = buffer[1];
-	int current = 3;
+	/*int current = 3;
 	
 	printf("Coding-type: %d\n", (buffer[2]&0x3));
 	
 	while (current < len)
 		printf("Center Frequency: %d", (buffer[++current]<<24)|(buffer[++current]<<16)|(buffer[++current]<<8)|buffer[++current]);		
-		
+	*/	
 	return len+2;
 }
 
@@ -170,7 +170,7 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 	int service_type = buffer[2];
 	
 	
-	printf("service-type %d\n",service_type);
+	//printf("service-type %d\n",service_type);
 	
 	for (i = 0; i<name_len; i++)
 	{
@@ -261,7 +261,7 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 		}
 	}
 	
-	printf("provider: %s\n",provname.c_str());
+	//printf("provider: %s\n",provname.c_str());
 	printf("service: %s\n",servicename.c_str());
 	
 	if (scan_mode)
@@ -305,7 +305,7 @@ int bouquet_name_desc(char *buffer)
 
 int country_availability_desc(char *buffer)
 {
-  printf("country_availability_desc to be implemented\n");
+  //printf("country_availability_desc to be implemented\n");
   return buffer[1]+2;
 }
 	
@@ -325,7 +325,7 @@ int nvod_ref_desc(char *buffer,int tsid,bool scan_mode)
 
 		sprintf(number_c,"%d", number++);
 		servicename = curr_chan_name + "/" + number_c;
-		printf("\n\nFound nvod-reference: %s\n\n",servicename.c_str());
+		//printf("\n\nFound nvod-reference: %s\n\n",servicename.c_str());
 		tsid = (buffer[i+2]<<16)|buffer[(++i)+2];
 		onid = (buffer[(++i)+2]<<16)|buffer[(++i)+2];
 		sid = (buffer[(++i)+2]<<16)|buffer[(++i)+2];
@@ -335,7 +335,7 @@ int nvod_ref_desc(char *buffer,int tsid,bool scan_mode)
 		{
 			if (scanchannels.count((tsid<<16)+sid) != 0)
 		  	{
-		    	printf("Found a channel in map\n");
+		    	//printf("Found a channel in map\n");
 		    	std::map<int,scanchannel>::iterator I = scanchannels.find((tsid<<16)+sid);
 		    	I->second.name = servicename;
 		    	I->second.onid = onid;
@@ -360,36 +360,36 @@ int nvod_ref_desc(char *buffer,int tsid,bool scan_mode)
 
 int time_shift_service_desc(char *buffer)
 {
-  printf("Time-shifted service descriptor\n");
+  //printf("Time-shifted service descriptor\n");
   return buffer[1]+2;
 }
 
 int mosaic_desc(char *buffer)
 {
-  printf("mosaic-descriptor\n");
+  //printf("mosaic-descriptor\n");
   return buffer[1]+2;
 }
 
 int ca_ident_desc(char *buffer)
 {
-  printf("ca-identifier descriptor\n");
+  //printf("ca-identifier descriptor\n");
   return buffer[1]+2;
 }
 
 int telephone_desc(char *buffer)
 {
-  printf("Telephone descriptor\n");
+  //printf("Telephone descriptor\n");
   return buffer[1]+2;
 }
 
 int multilingual_service_name_desc(char *buffer)
 {
-  printf("Multilingual service name descriptor\nGerman should be enough for us.\n");
+  //printf("Multilingual service name descriptor\nGerman should be enough for us.\n");
   return buffer[1]+2;
 }
 
 int data_broadcast_desc(char *buffer)
 {
-  printf("Data descriptor\n");
+  //printf("Data descriptor\n");
   return buffer[1]+2;
 }

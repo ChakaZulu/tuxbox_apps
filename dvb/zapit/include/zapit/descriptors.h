@@ -7,7 +7,7 @@ int priv_data_desc(char *buffer);
 int network_name_desc(char *buffer);
 int service_list_desc(char *buffer);
 int cable_deliv_system_desc(char *buffer, int tsid);
-int sat_deliv_system_desc(char *buffer, int tsid);
+int sat_deliv_system_desc(char *buffer, int tsid, int diseqc);
 int terr_deliv_system_desc(char *buffer);
 int multilingual_network_name_desc(char *buffer);
 int freq_list_desc(char *buffer);

@@ -18,11 +18,15 @@
 
 using namespace std;
 
-void nit()
+void nit(int diseqc)
 {
 	struct dmxSctFilterParams flt;
-	int demux;
-	
+	struct pollfd dmx_fd;
+	int demux,pt;
+  	char buffer[1024];
+  	int r;
+  	int current, sec_len;
+  	
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
     		perror("/dev/ost/demux0");
@@ -34,7 +38,7 @@ void nit()
   	flt.pid=0x10;
   	flt.filter.filter[0] = 0x40;
     	flt.filter.mask[0]  =0xFF;
-  	flt.timeout=10000;
+  	flt.timeout=12000;
   	flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
   	
   	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
@@ -43,10 +47,20 @@ void nit()
   
   	ioctl(demux, DMX_START, 0);
   
+  	dmx_fd.fd = demux;
+  	dmx_fd.events = POLLIN;
+  	dmx_fd.revents = 0;
+	
+  
+  	pt = poll(&dmx_fd, 1, 10000);
+  
+  	if (!pt)
+  	{
+		printf("Poll timeout\n");
+		close(demux);
+		return;
+  	}
   	
-  	char buffer[1024];
-  	int r;
-  	int current, sec_len;
   	
   	if ((r=read(demux, buffer, 3))<=0)  {
    		perror("read");
@@ -55,13 +69,14 @@ void nit()
     	}
     	
   	sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
-  	printf("Section-length: %d bytes\n", sec_len);
+  	//printf("Section-length: %d bytes\n", sec_len);
   	
     	if ((r=read(demux, buffer+3, sec_len))<=0)  {
     		perror("read");
     		close(demux);
     		exit(0);
 	}
+	close(demux);
 	/*
 	printf("<NIT>\n");
 	printf("Network-ID %04x\n", (buffer[3]<<8)|buffer[4]);
@@ -90,7 +105,7 @@ void nit()
 					current += stuffing_desc(&buffer[current]);
 					break;
 				case 0x43:
-					current += sat_deliv_system_desc(&buffer[current],tsid);
+					current += sat_deliv_system_desc(&buffer[current],tsid,diseqc);
 					break;
 				case 0x44:
 					current += cable_deliv_system_desc(&buffer[current],tsid);
@@ -160,7 +175,7 @@ void nit()
 					    desc_tot += stuffing_desc(&buffer[current+desc_tot]);
 					    break;
 					  case 0x43:
-					    desc_tot += sat_deliv_system_desc(&buffer[current+desc_tot],tsid);
+					    desc_tot += sat_deliv_system_desc(&buffer[current+desc_tot],tsid,diseqc);
 					    break;
 					  case 0x44:
 					    desc_tot += cable_deliv_system_desc(&buffer[current+desc_tot],tsid);

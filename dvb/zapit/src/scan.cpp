@@ -34,7 +34,7 @@ std::string curr_chan;
 std::string services_xml = "/var/zapit/services.xml";
 int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr);
 int finaltune(int freq, int symbolrate, int polarity, int fec,int diseq);
-int nit();
+int nit(int diseqc);
 int sdt(uint osid, bool scan_mode);
 int prepare_channels();
 short scan_runs;     	
@@ -46,10 +46,10 @@ int issatbox()
 
 void get_nits(int freq, int symbolrate, int polarity, int fec,int diseq)
 {
-  if (finaltune(freq,symbolrate,polarity,fec,diseq)>0)
-    nit();
-  else
-    printf("No signal found on transponder\n");
+  finaltune(freq,symbolrate,polarity,fec,diseq);
+  nit(diseq);
+  //else
+    //printf("No signal found on transponder\n");
 }
 
 void get_sdts()
@@ -57,7 +57,7 @@ void get_sdts()
   for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
     {
       finaltune(tI->second.freq,tI->second.symbolrate,tI->second.polarization,tI->second.fec_inner,0);
-      //if (pat(tI->second.freq,tI->second.symbolrate) >0)
+        //if (pat(tI->second.freq,tI->second.symbolrate) >0)
 	//{
 	  printf("GETTING SDT FOR TSID: %04x\n",tI->second.tsid);
 	  while (sdt(tI->second.tsid,true) == -2);
@@ -140,7 +140,7 @@ void write_transponder(int tsid, FILE *fd)
 	      transponder += "\t\t</channel>\n";
 	      
 	      
-	      printf("%30s tsid: %04x sid: %04x pmt: %04x onid: %04x\n", cI->second.name.c_str(),cI->second.tsid, cI->second.sid, cI->second.pmt, cI->second.onid);
+	      //printf("%30s tsid: %04x sid: %04x pmt: %04x onid: %04x\n", cI->second.name.c_str(),cI->second.tsid, cI->second.sid, cI->second.pmt, cI->second.onid);
 	    }
 	}
     }
@@ -160,10 +160,12 @@ void *start_scanthread(void *)
       int symbolrate = 6900;
       for (int freq = 3300; freq<=4500; freq +=80)
 	{
-	  if (finaltune(freq,symbolrate,0,0,0)>0)
-    		fake_pat(&scantransponders, freq, symbolrate);
-  	  else
-    		printf("No signal found on transponder\n"); 
+	  //get_nits(freq,symbolrate,0,0,0);
+	  //printf("get_nits() done\n");
+	  finaltune(freq,symbolrate,0,0,0);
+    	  fake_pat(&scantransponders, freq, symbolrate);
+  	  //else
+    		//printf("No signal found on transponder\n"); 
 	}
 	get_sdts();
       if (!scantransponders.empty())
@@ -245,7 +247,7 @@ void *start_scanthread(void *)
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	 	fprintf(fd,"<ZAPIT>\n");
       	}
-	fprintf(fd, "<satellite name=\"Hotbird 13.0E\" diseqc=\"0\">\n");
+	fprintf(fd, "<satellite name=\"Hotbird 13.0E\" diseqc=\"1\">\n");
 	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	    {
 	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid); 
