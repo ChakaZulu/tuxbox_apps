@@ -42,11 +42,14 @@
 #include <gui/widget/stringinput.h>
 #include <gui/widget/stringinput_ext.h>
 
+#include <fstream>
+
+#include <global.h>
+
+#include <errno.h>
+#include <pthread.h>
 #include <sys/mount.h>
 #include <unistd.h>
-#include <fstream>
-#include <global.h>
-#include <pthread.h>
 
 #include <zapit/client/zapittools.h>
 
