@@ -300,16 +300,14 @@ Beispiel:
 Handler: http://dbox/control/zapto
 
 Parameter: keine
-Rückgabe:
+Rueckgabe:
 
-Es wird die ONIDSID des aktuell laufenden Senders zurückgegeben
-
-Rückgabe-Format: ONIDSID
+Es wird die channel_id (hex-value, 64 bit, kein 0x-prefix) des aktuell laufenden Senders zurueckgegeben.
 
 Beispiel:
 
 >>>http://dbox/control/zapto
-69531
+16dcb
  
  
 

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.32 2004/02/21 08:52:27 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.33 2004/02/24 16:45:41 thegoodguy Exp $
 
 	License: GPL
 
@@ -658,10 +658,11 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 
-	if (request->ParameterList.size() == 0)
+	if (request->ParameterList.empty())
 	{
-		//paramlos - aktuelles programm anzeigen
-		request->printf("%u\n", Parent->Zapit->getCurrentServiceID());
+		request->printf(PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				"\n",
+				Parent->Zapit->getCurrentServiceID());
 		return true;
 	}
 	else if (request->ParameterList.size() == 1)
