@@ -117,7 +117,7 @@ infoviewer.epgwait waiting for EPG...
 
 epgviewer.notfound no epg found
 epglist.head Event-list - %s
-epglist.noevents no EPG found
+epglist.noevents EPG is not available...
 
 streaminfo.head Stream-Information
 streaminfo.resolution Resulution
