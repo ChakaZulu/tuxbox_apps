@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 
-	$Id: timerdMsg.h,v 1.17 2002/09/24 21:10:42 Zwen Exp $
+	$Id: timerdMsg.h,v 1.18 2002/10/06 02:02:49 Zwen Exp $
 
 	License: GPL
 
@@ -35,6 +35,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 #include "../timermanager.h"
@@ -127,7 +128,7 @@ class CTimerd
 		};
 
 		struct responseGetTimer
-		{			
+		{		
 			int								eventID;
 			CTimerEvent::CTimerEventTypes	eventType;
 			CTimerEvent::CTimerEventStates	eventState;
@@ -138,9 +139,13 @@ class CTimerd
 			t_channel_id channel_id; //only filled if applicable
 			unsigned long long epgID; //only filled if applicable
 			bool standby_on; //only filled if applicable
+			bool operator< (const responseGetTimer& a) const
+			{
+				return this->alarmTime < a.alarmTime ;
+			}
 		};
+		
 		typedef std::vector<responseGetTimer> TimerList;
-
 
 		struct responseStatus
 		{

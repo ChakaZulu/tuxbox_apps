@@ -49,7 +49,6 @@
 #include "gui/infoviewer.h"
 
 
-
 #define info_height 60
 
 class CTimerListNewNotifier : public CChangeObserver
@@ -200,6 +199,8 @@ void CTimerList::updateEvents(void)
 			break;
 		}
 	}
+	sort(timerlist.begin(), timerlist.end());
+
 	height = 450;
 	listmaxshow = (height-theight-0)/(fheight*2);
 	height = theight+0+listmaxshow*fheight*2; // recalc height

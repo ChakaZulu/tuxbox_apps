@@ -36,6 +36,7 @@
 #include "driver/framebuffer.h"
 #include "gui/widget/menue.h"
 #include "timerdclient.h"
+#include "zapitclient.h"
 
 using namespace std;
 
