@@ -1,5 +1,5 @@
 //
-// $Id: epgMini.cpp,v 1.1 2001/06/10 14:55:51 fnbrd Exp $
+// $Id: epgMini.cpp,v 1.2 2001/06/10 15:21:22 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epgMini.cpp,v $
+// Revision 1.2  2001/06/10 15:21:22  fnbrd
+// mit XML-Ausgabe
+//
 // Revision 1.1  2001/06/10 14:55:51  fnbrd
 // Kleiner Aenderungen und Ergaenzungen (epgMini).
 //
@@ -52,7 +55,6 @@ int main(int argc, char **argv)
 
   sdtset.readSections();
 
-  SIservices services;
   // Die for-Schleifen sind laestig,
   // Evtl. sollte man aus den sets maps machen, damit man den key einfacher aendern
   // kann und somit find() funktioniert
@@ -70,7 +72,8 @@ int main(int argc, char **argv)
         // Event (serviceid) suchen
         SIevent evt=SIevent::readActualEvent(ks->serviceID);
 	if(evt.serviceID!=0)
-	  evt.dump(); // gefunden
+	  evt.saveXML(stdout); // gefunden
+//	  evt.dump(); // gefunden
         else
 	  printf("Kein aktuelles EPG fuer %s gefunden!\n", argv[1]);
         return 0;
