@@ -5730,6 +5730,9 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		{
 			playlist->current->current_position=-1;
 			++playlist->current;
+		}
+		if (playlist->current != playlist->getConstList().end())
+		{
 			eServiceReference &ref = *playlist->current;
 			if ( ref.path )  // is the current playlist entry a file?
 			{
