@@ -1,3 +1,5 @@
+// misc font / text rendering functions
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "fontrenderer.h"
@@ -23,7 +25,7 @@ FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
 
 fontRenderClass::fontRenderClass(CFrameBuffer *fb)
 {
-	framebuffer = fb;
+  framebuffer = fb;
   printf("[FONT] initializing core...");
   if (FT_Init_FreeType(&library))
   {
@@ -144,7 +146,7 @@ Font *fontRenderClass::getFont(const char *family, const char *style, int size)
 
 Font::Font(CFrameBuffer *fb, fontRenderClass *render, FTC_FaceID faceid, int isize)
 {
-	framebuffer=fb;
+  framebuffer=fb;
   renderer=render;
   font.font.face_id=faceid;
   font.font.pix_width  = isize;
@@ -171,11 +173,7 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
   {
     FTC_SBit glyph;
     //if ((x + size->metrics.x_ppem > (left+width)) || (*string=='\n'))
-	if (x + size->metrics.x_ppem > (left+width))
-	{ //width clip
-		return;
-	}
-	if (*string=='\n')
+    if (*string=='\n')
     {
       x  = left;
       y += step_y;
@@ -189,6 +187,10 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
       continue;
     }
     
+    // width clip
+    if(x+glyph->xadvance >= left+width)
+	return;
+    
     int rx=x+glyph->left;
     int ry=y-glyph->top;
     
@@ -201,11 +203,11 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
       int ax=0;
       int w=glyph->width;
   
-	  for (; ax<w; ax++)
+      for (; ax<w; ax++)
       {
   		int c = (*s++>>5);
 		*td++=color + c;
-	  }
+      }
       s+=glyph->pitch-ax;
       d+=framebuffer->Stride();
     }
