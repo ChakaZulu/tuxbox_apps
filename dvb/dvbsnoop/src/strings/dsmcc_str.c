@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.11 2003/12/27 22:02:44 rasc Exp $
+$Id: dsmcc_str.c,v 1.12 2003/12/28 22:53:41 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.11 2003/12/27 22:02:44 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.12  2003/12/28 22:53:41  rasc
+some minor changes/cleanup
+
 Revision 1.11  2003/12/27 22:02:44  rasc
 dsmcc INT UNT descriptors started
 
@@ -450,6 +453,7 @@ char *dsmccStrUpdateType_ID (u_int id)
 char *dsmccStrOUI  (u_int id)
 
 {
+	// http://standards.ieee.org/cgi-bin/ouisearch?hex-id
 	return (char *) "http://standards.ieee.org/regauth/oui/";
 }
 

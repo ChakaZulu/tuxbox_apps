@@ -1,6 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.12 2003/12/28 14:00:25 rasc Exp $
-
+$Id: dmx_sect.c,v 1.13 2003/12/28 22:53:40 rasc Exp $
 
 
  DVBSNOOP
@@ -11,15 +10,17 @@ $Id: dmx_sect.c,v 1.12 2003/12/28 14:00:25 rasc Exp $
  (c) 2001-2003   Rainer.Scherg@gmx.de
 
 
-
  --  Sections Streams
  --  For more information please see:
  --  ISO 13818 (-1) and ETSI 300 468
 
- -- Verbose Level >= 1
+
 
 
 $Log: dmx_sect.c,v $
+Revision 1.13  2003/12/28 22:53:40  rasc
+some minor changes/cleanup
+
 Revision 1.12  2003/12/28 14:00:25  rasc
 bugfix: section read from input file
 some changes on packet header output
@@ -167,13 +168,6 @@ int  doReadSECT (OPTION *opt)
 
        indent (0);
        print_packet_header (opt, "SECT", opt->pid, count, n, 0);
-
-//       out_nl (1,"");
-//       out_nl (1,"---------------------------------------------------------");
-//       out_nl (1,"SECT-Packet: %08ld   PID: %u (0x%04x), Length: %d (0x%04x)",
-//		count, opt->pid,opt->pid,n,n);
-//       out_receive_time (1, opt);
-//       out_nl (1,"---------------------------------------------------------");
 
 
        if (opt->printhex) {

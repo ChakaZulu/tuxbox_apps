@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.18 2003/12/28 14:00:26 rasc Exp $
+$Id: cmdline.c,v 1.19 2003/12/28 22:53:41 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: cmdline.c,v 1.18 2003/12/28 14:00:26 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.19  2003/12/28 22:53:41  rasc
+some minor changes/cleanup
+
 Revision 1.18  2003/12/28 14:00:26  rasc
 bugfix: section read from input file
 some changes on packet header output
@@ -115,18 +118,19 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->printdecode = -1;
   opt->binary_out = 0;
   opt->inpPidFile = (char *) NULL;
-  opt->help = 0;
   opt->devDemux = DEMUX_DEVICE;
   opt->devDvr = DVR_DEVICE;
-  opt->pid = 0xFFFF;		/* invaild PID */
+  opt->pid = INVALID_PID;
   opt->filter = 0;
   opt->mask = 0;
+  // opt->timeout_ms = 0;		// no timeout or default timeout in ms (SECTIONS)
   opt->crc = 0;
   opt->packet_count = 0;
   opt->packet_header_sync = 0;
   opt->packet_mode = SECT;
   opt->time_mode = FULL_TIME;
   opt->hide_copyright= 0;
+  opt->help = 0;
 
 
 

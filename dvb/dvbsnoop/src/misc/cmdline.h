@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.11 2003/12/28 14:00:27 rasc Exp $
+$Id: cmdline.h,v 1.12 2003/12/28 22:53:41 rasc Exp $
 
 
  DVBSNOOP
@@ -36,16 +36,17 @@ typedef struct _OPTIONS {
   int         printdecode;
   int         binary_out;
   char        *inpPidFile;		// read from file instead of dmux if not NULL
-  int         help;
   char        *devDemux;
   char        *devDvr;
   u_int       pid;
   u_int       filter;
   u_int       mask;
   int         crc;
+  // long        timeout_ms;		// read timeout in ms
   long        packet_count;
   int         time_mode;
-  int         hide_copyright;  	// suppress message at prog start
+  int         hide_copyright;  		// suppress message at prog start
+  int         help;
 } OPTION;
 
 
@@ -57,6 +58,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt);
 
 #define MAX_PID    0x1FFF
 #define DUMMY_PID  0xFFFF	/* special if no pid is needed */
+#define INVALID_PID  0xFEFE	/* a invalid PID*/
 
 
 #endif

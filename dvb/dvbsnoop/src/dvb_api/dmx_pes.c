@@ -1,19 +1,27 @@
 /*
-$Id: dmx_pes.c,v 1.14 2003/12/28 14:00:25 rasc Exp $
+$Id: dmx_pes.c,v 1.15 2003/12/28 22:53:40 rasc Exp $
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
 
  -- PE Streams
  --  For more information please see:
  --  ISO 13818 (-1) and ETSI 300 468
 
 
- http://dvbsnoop.sourceforge.net/
-
- (c) 2001-2003   Rainer.Scherg@gmx.de
-
 
 
 
 $Log: dmx_pes.c,v $
+Revision 1.15  2003/12/28 22:53:40  rasc
+some minor changes/cleanup
+
 Revision 1.14  2003/12/28 14:00:25  rasc
 bugfix: section read from input file
 some changes on packet header output
@@ -188,16 +196,6 @@ int  doReadPES (OPTION *opt)
 
        indent (0);
        print_packet_header (opt, "PES", opt->pid, count, n, skipped_bytes);
-
-//       out_nl (1,"");
-//       out_nl (1,"---------------------------------------------------------");
-//       out_nl (1,"PES-Packet: %08ld   PID: %u (0x%04x), Length: %d (0x%04x)",
-//		count, opt->pid,opt->pid,n,n);
-//       out_receive_time (1, opt);
-//       if (skipped_bytes) {
-//	       out_nl (1,"Syncing PES... (%ld bytes skipped)",skipped_bytes);
-//       }
-//       out_nl (1,"---------------------------------------------------------");
 
 
        if (opt->printhex) {
