@@ -1553,48 +1553,16 @@ public:
 	bool operator < (const myService &a) const {return serviceName < a.serviceName;}
 };
 
-void sortServices(eString &serviceRefList, eString &serviceList)
+void sortServices(bool sortList, std::list <myService> &myList, eString &serviceRefList, eString &serviceList)
 {
-	std::list <myService> myList;
 	std::list <myService>::iterator myIt;
 	eString serviceRef, serviceName;
 
 	eDebug("[ENIGMA_DYN] start sorting...");
 
-	myList.clear();
-	while (serviceRefList)
-	{
-		serviceRef = "";
-		serviceName = "";
-		unsigned int pos1 = serviceRefList.find("\",") + 1;
-		if (pos1 != eString::npos)
-		{
-			serviceRef = serviceRefList.left(pos1);
-			serviceRefList = serviceRefList.right(serviceRefList.length() - pos1 - 2);
-		}
-		else
-			serviceRefList = "";
+	if (sortList)
+		myList.sort();
 
-		unsigned int pos2 = serviceList.find("\",") + 1;
-		if (pos2 != eString::npos)
-		{
-			serviceName = serviceList.left(pos2);
-			serviceList = serviceList.right(serviceList.length() - pos2 - 2);
-		}
-		else
-			serviceList = "";
-
-		if (serviceRef)
-			serviceRef = serviceRef.mid(1, serviceRef.length() - 2);
-
-		if (serviceName)
-			serviceName = serviceName.mid(1, serviceName.length() - 2);
-
-		if (serviceRef && serviceName)
-			myList.push_back(myService(serviceRef, serviceName));
-	}
-
-	myList.sort();
 	serviceRefList = "";
 	serviceList = "";
 
@@ -1604,8 +1572,6 @@ void sortServices(eString &serviceRefList, eString &serviceList)
 		serviceList += "\"" + myIt->serviceName + "\", ";
 //		eDebug("[ENIGMA_DYN] adding: %s - %s", myIt->serviceRef.c_str(), myIt->serviceName.c_str());
 	}
-
-	myList.clear();
 
 	eDebug("[ENIGMA_DYN] sorting done.");
 }
@@ -1683,14 +1649,12 @@ public:
 
 class eWebNavigatorListDirectory2: public Object
 {
-	eString &result1;
-	eString &result2;
-	eString origpath;
+	std::list <myService> &myList;
 	eString path;
 	eServiceInterface &iface;
 	bool addEPG;
 public:
-	eWebNavigatorListDirectory2(eString &result1, eString &result2, eString origpath, eString path, eServiceInterface &iface, bool addEPG): result1(result1), result2(result2), origpath(origpath), path(path), iface(iface), addEPG(addEPG)
+	eWebNavigatorListDirectory2(std::list <myService> &myList, eString path, eServiceInterface &iface, bool addEPG): myList(myList), path(path), iface(iface), addEPG(addEPG)
 	{
 		eDebug("[eWebNavigatorListDirectory2:] path: %s", path.c_str());
 	}
@@ -1743,11 +1707,10 @@ public:
 			if (short_description && addEPG)
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
+
 			if (!((zapSubMode == ZAPSUBMODESATELLITES) && (tmp.find("Provider") != eString::npos)))
-			{
-				result1 += "\"" + ref2string(e) + "\", ";
-				result2 += "\"" + tmp + "\", ";
-			}
+				myList.push_back(myService(ref2string(e), tmp));
+
 			iface.removeRef(e);
 		}
 	}
@@ -1798,6 +1761,7 @@ static eString getZapContent(eString mode, eString path)
 
 static eString getZapContent2(eString mode, eString path, int depth, bool addEPG, bool sortList)
 {
+	std::list <myService> myList;
 	eString result, result1, result2;
 	eString tpath;
 	eString bouquets, bouquetrefs, channels, channelrefs;
@@ -1827,7 +1791,8 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 		else
 		{
 			// first pass thru is to get all user bouquets
-			eWebNavigatorListDirectory2 navlist(result1, result2, path, tpath, *iface, addEPG);
+			myList.sort();
+			eWebNavigatorListDirectory2 navlist(myList, tpath, *iface, addEPG);
 			Signal1<void, const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 			iface->enterDirectory(current_service, signal);
@@ -1835,8 +1800,8 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 			iface->leaveDirectory(current_service);
 			eDebug("exited");
 
-			if (sortList)
-				sortServices(result1, result2);
+			sortServices(sortList, myList, result1, result2);
+
 			tmp.str(result1.left(result1.length() - 1));
 			bouquetrefs = result1.left(result1.length() - 2);
 			bouquets = result2.left(result2.length() - 2);
@@ -1853,7 +1818,8 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 						tpath = tpath.mid(1, tpath.length() - 3);
 						eServiceReference current_service = string2ref(tpath);
 
-						eWebNavigatorListDirectory2 navlist(result1, result2, tpath, tpath, *iface, addEPG);
+						myList.clear();
+						eWebNavigatorListDirectory2 navlist(myList, tpath, *iface, addEPG);
 						Signal1<void, const eServiceReference&> signal;
 						signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 
@@ -1869,8 +1835,7 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 						iface->leaveDirectory(current_service);
 						eDebug("exited");
 
-						if (sortList)
-							sortServices(result1, result2);
+						sortServices(sortList, myList, result1, result2);
 
 						channels += result2.left(result2.length() - 2);
 						channels += ");";
