@@ -32,6 +32,25 @@
 #define RC_PAGE_DOWN		KEY_PAGEDOWN
 #define RC_PAGE_UP		KEY_PAGEUP
 
+/* SAGEM remote controls have the following additional keys */
+
+#ifndef KEY_TOPLEFT
+#define KEY_TOPLEFT      0x1a2
+#endif
+
+#ifndef KEY_TOPRIGHT
+#define KEY_TOPRIGHT     0x1a3
+#endif
+
+#ifndef KEY_BOTTOMLEFT
+#define KEY_BOTTOMLEFT   0x1a4
+#endif
+
+#ifndef KEY_BOTTOMRIGHT
+#define KEY_BOTTOMRIGHT  0x1a5
+#endif
+
+
 extern	void			RcGetActCode( void );
 extern	int				RcInitialize( int extfd );
 extern	void			RcClose( void );
