@@ -5,7 +5,7 @@
 # *************************************
 #
 msgid ""
-msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Fri Nov 14 0:03:23 CET 2003\nLast-Translator: unknown\nLanguage-Team: Italian / language-ita@dmmtv.de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Wed Nov 19 17:55:08 CET 2003\nLast-Translator: unknown\nLanguage-Team: Italian / language-ita@dmmtv.de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
 
 #: lib/dvb/serviceplaylist.cpp:123
 #, c-format
@@ -1087,10 +1087,9 @@ msgid "create new empty bouquet"
 msgstr "creare un nuovo bouquet"
 
 #: src/sselect.cpp:130
-#, fuzzy
 
 msgid "create new marker entry"
-msgstr "creare un nuovo bouquet"
+msgstr "creare nuovo marchio"
 
 #: src/setup_harddisk.cpp:384
 
@@ -3836,10 +3835,9 @@ msgid "Rename File"
 msgstr "rinominare utente"
 
 #: src/sselect.cpp:129
-#, fuzzy
 
 msgid "rename selected entry"
-msgstr "cancellare selezione"
+msgstr "rinominare iscrizione selezionata"
 
 #: src/enigma_main.cpp:5590
 #, fuzzy
@@ -4725,10 +4723,9 @@ msgid "Show BN version"
 msgstr "visualizzare versione BN"
 
 #: src/sselect.cpp:125
-#, fuzzy
 
 msgid "show bouquet list"
-msgstr "mostra i propri bouquet"
+msgstr "mostra lista bouquet"
 
 #: src/setup_extra.cpp:47
 #, fuzzy
