@@ -702,13 +702,15 @@ CMenuSeparator::CMenuSeparator(const int Type, const char * const Text)
 	iconName = "";
 
 	height = g_Fonts->menu->getHeight();
-	if(Text=="")
+	if( Text == 0 )
 	{
 		height = 10;
+		text = "";
 	}
-	text = Text;
+	else
+		text = Text;
 
-	if ( (Type & ALIGN_LEFT) || (Type & ALIGN_CENTER) || (Type & ALIGN_RIGHT) )
+	if( (Type & ALIGN_LEFT) || (Type & ALIGN_CENTER) || (Type & ALIGN_RIGHT) )
 	{
 		type=Type;
 	}

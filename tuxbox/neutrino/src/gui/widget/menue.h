@@ -149,7 +149,7 @@ class CMenuSeparator : public CMenuItem
 		};
 
 
-		CMenuSeparator(const int Type = 0, const char * const Text = ""); // UTF-8
+		CMenuSeparator(const int Type = 0, const char * const Text = 0); // UTF-8
 
 		int paint(bool selected=false);
 		int getHeight(void) const
