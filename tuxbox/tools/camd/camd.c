@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.18 2003/10/14 15:36:49 obi Exp $
+ * $Id: camd.c,v 1.19 2003/11/13 22:37:00 carjay Exp $
  *
  * (C) 2001, 2002, 2003 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -450,7 +450,7 @@ int parse_ca_pmt(const unsigned char *buffer, const unsigned int length)
 
 #if 0
 	printf("ca_pmt_list_management: %02x\n", pmt->ca_pmt_list_management);
-	printf("prugram number: %04x\n", pmt->program_number);
+	printf("program number: %04x\n", pmt->program_number);
 	printf("program_info_length: %04x\n", pmt->program_info_length);
 #endif
 
