@@ -51,7 +51,7 @@ void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, c
 	{
 		if (strcmp(xaction->GetType(), "action"))
 		{
-			eDebug("illegal type %s, expected 'action'", xaction->GetType());
+			eFatal("illegal type %s, expected 'action'", xaction->GetType());
 			continue;
 		}
 		const char *name=xaction->GetAttributeValue("name");
@@ -60,10 +60,10 @@ void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, c
 			action=findAction(name);
 		if (!action)
 		{
-			eDebug("please specify a valid action with name=. valid actions are:");
+			eWarning("please specify a valid action with name=. valid actions are:");
 			for (actionList::iterator i(actions.begin()); i != actions.end(); ++i)
-				eDebug("  %s (%s)", (*i)->getIdentifier(), (*i)->getDescription());
-			eDebug("but NOT %s", name);
+				eWarning("  %s (%s)", (*i)->getIdentifier(), (*i)->getDescription());
+			eFatal("but NOT %s", name);
 			continue;
 		}
 		const char *code=xaction->GetAttributeValue("code");
@@ -73,13 +73,13 @@ void eActionMap::loadXML(eRCDevice *device, std::map<std::string,int> &keymap, c
 			const char *key=xaction->GetAttributeValue("key");
 			if (!key)
 			{
-				eWarning("please specify a number as code= or a defined key with key=.");
+				eFatal("please specify a number as code= or a defined key with key=.");
 				continue;
 			}
 			std::map<std::string,int>::iterator i=keymap.find(std::string(key));
 			if (i == keymap.end())
 			{
-				eWarning("undefined key %s specified!", key);
+				eFatal("undefined key %s specified!", key);
 				continue;
 			}
 			icode=i->second;
@@ -189,7 +189,10 @@ int eActionMapList::loadXML(const char *filename)
 {
 	FILE *in=fopen(filename, "rt");
 	if (!in)
+	{
+		eFatal("cannot open %s", filename);
 		return -1;
+	}
 
 	XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
 	char buf[2048];
@@ -201,7 +204,7 @@ int eActionMapList::loadXML(const char *filename)
 		done=len<sizeof(buf);
 		if (!parser->Parse(buf, len, done))
 		{
-			eDebug("parse error: %s at line %d",
+			eFatal("parse error: %s at line %d",
 				parser->ErrorString(parser->GetErrorCode()),
 				parser->GetCurrentLineNumber());
 			delete parser;
@@ -217,7 +220,7 @@ int eActionMapList::loadXML(const char *filename)
 		return -1;
 	if (strcmp(root->GetType(), "rcdefaults"))
 	{
-		eDebug("not an rcdefaults file.");
+		eFatal("not an rcdefaults file.");
 		return -1;
 	}
 	
@@ -229,14 +232,18 @@ int eActionMapList::loadXML(const char *filename)
 		if (!strcmp(node->GetType(), "device"))
 		{
 			const char *identifier=node->GetAttributeValue("identifier");
-			eDebug("Device = %s", identifier);
+			if (!identifier)
+			{
+				eFatal("please specify an remote control identifier!");
+				continue;
+			}
 			
 			eRCDevice *device=0;
 			if (identifier)
 				device=eRCInput::getInstance()->getDevice(identifier);
 			if (!device)
 			{
-				eDebug("please specify an remote control identifier!");
+				eFatal("please specify an remote control identifier, '%s' is invalid!", identifier);
 				continue;
 			}
 			
@@ -249,10 +256,11 @@ int eActionMapList::loadXML(const char *filename)
 						am=findActionMap(name);
 					if (!am)
 					{
-						eDebug("please specify a valid actionmap name (with name=)");
-						eDebug("valid actionmaps are:");
+						eWarning("please specify a valid actionmap name (with name=)");
+						eWarning("valid actionmaps are:");
 						for (actionMapList::iterator i(actionmaps.begin()); i != actionmaps.end(); ++i)
-							eDebug("  %s", i->first);
+							eWarning("  %s", i->first);
+						eFatal("end.");
 						continue;
 					}
 					am->loadXML(device, keymap, xam);
@@ -272,9 +280,9 @@ int eActionMapList::loadXML(const char *filename)
 									sscanf(acode, "%x", &code);
 									keymap.insert(std::pair<std::string,int>(name, code));
 								} else
-									eWarning("no code specified for key %s!", name);
+									eFatal("no code specified for key %s!", name);
 							} else
-								eWarning("no name specified in keys!");
+								eFatal("no name specified in keys!");
 						}
 					}
 				}
