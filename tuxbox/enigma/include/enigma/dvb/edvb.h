@@ -169,7 +169,7 @@ private:
 signals:
 	void stateChanged(int newstate);
 	void eventOccured(int event);
-
+	void timeUpdated();
 		/* public general signals */
 signals:
 	void serviceListChanged();

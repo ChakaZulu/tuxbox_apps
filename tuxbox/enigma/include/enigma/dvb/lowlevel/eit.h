@@ -161,4 +161,5 @@ struct eit_extended_descriptor_struct {
 	u_char item_description_length : 8;
 };
 
+
 #endif	

@@ -774,6 +774,7 @@ void eDVB::TDTready(int error)
 	{
 		qDebug("[TIME] time update to %s", ctime(&tdt->UTC_time));
 		time_difference=tdt->UTC_time-time(0);
+		emit timeUpdated();
 	}
 }
 
