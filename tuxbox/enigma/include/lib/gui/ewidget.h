@@ -397,6 +397,7 @@ public:
 	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
 	void setName(const char *name);
 	eWidget*& getParent() { return parent; }
+	const gFont& getFont() { return font; }
 	
 	const gColor& getBackgroundColor() { return backgroundColor; }
 	const gColor& getForegroundColor() { return foregroundColor; }

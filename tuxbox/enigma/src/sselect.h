@@ -13,6 +13,7 @@ class eListBoxEntryService: public eListBoxEntry
 {
 	friend class eListBox<eListBoxEntryService>;
 	eString sort;
+	eString short_name;
 public:
 	eService *service;
 	eBouquet *bouquet;
@@ -34,8 +35,7 @@ class eServiceSelector: public eWindow
 	eService *result, *selected;
 	
 	eListBox<eListBoxEntryService> *services;
-	eLabel *l_bouquet, *l_bouquet_prev, *l_bouquet_next;
-	
+
 	eBouquetSelector* pbs;
 protected:
 	int eventHandler(const eWidgetEvent &event);

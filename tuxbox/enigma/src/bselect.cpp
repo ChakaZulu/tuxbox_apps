@@ -45,7 +45,7 @@ void eBouquetSelector::entrySelected(eListBoxEntryBouquet *entry)
 }
 
 eBouquetSelector::eBouquetSelector()
-								:eListBoxWindow<eListBoxEntryBouquet>("Select Bouquet...", 17, eSkin::getActive()->queryValue("fontsize", 20), 400)
+								:eListBoxWindow<eListBoxEntryBouquet>("Select Bouquet...", 17, 400)
 {
 	move(ePoint(80, 60));
 	CONNECT(list.selected, eBouquetSelector::entrySelected);

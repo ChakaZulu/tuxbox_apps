@@ -105,7 +105,7 @@ void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, const gColor 
 		return;
 	gColor col=highlighted?coActive:coNormal;
 	rc->setForegroundColor(col);
-	rc->setFont(listbox->getEntryFnt());
+	rc->setFont(listbox->getFont());
 	if (col != -1)
 		rc->fill(rect);
 	rc->renderText(rect, sname);
@@ -223,15 +223,6 @@ eServiceSelector::eServiceSelector()
 	services->setName("services");
 	services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 	
-	l_bouquet = new eLabel(this);
-	l_bouquet->setName("bouquet");
-	
-	l_bouquet_prev = new eLabel(this);
-	l_bouquet_prev->setName("bouquet_prev");
-	
-	l_bouquet_next = new eLabel(this);
-	l_bouquet_next->setName("bouquet_next");
-	
 	pbs = new eBouquetSelector();
 	fillServiceList();
 	CONNECT(services->selected, eServiceSelector::entrySelected);
@@ -256,7 +247,7 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 	services->clearList();
 	if (bouquet)
 	{
-		l_bouquet->setText(bouquet->bouquet_name);
+		setText(bouquet->bouquet_name);
 		for (std::list<eServiceReference>::iterator i(bouquet->list.begin()); i != bouquet->list.end(); i++)
 		{
 			if (!i->service)

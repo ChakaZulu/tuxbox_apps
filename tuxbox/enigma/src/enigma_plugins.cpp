@@ -120,7 +120,7 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile)
 
 eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 {
-	window=new eListBoxWindow<ePlugin>(_("Plugins"), 10, eSkin::getActive()->queryValue("fontsize", 20), 400);
+	window=new eListBoxWindow<ePlugin>(_("Plugins"), 10, 400);
 	window->move(ePoint(150, 136));
 	window->setLCD(lcdTitle, lcdElement);
 	new ePlugin(&window->list, 0);

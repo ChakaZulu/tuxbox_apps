@@ -12,7 +12,7 @@
 #include <core/base/i18n.h>
 
 eMainMenu::eMainMenu()
-	:window("enigma" , 7, eSkin::getActive()->queryValue("fontsize", 20), 200)
+	:window("enigma" , 7, 200)
 {
 	window.cmove(ePoint(150, 150));
 	CONNECT((new eListBoxEntryMenu(&window.list, _("[back]")))->selected, eMainMenu::sel_close);

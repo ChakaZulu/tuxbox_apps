@@ -225,7 +225,7 @@ void eNVODSelector::selected(NVODStream* nv)
 }
 
 eNVODSelector::eNVODSelector()
-	:eListBoxWindow<NVODStream>(_("NVOD"), 10, eSkin::getActive()->queryValue("fontsize", 20), 440)
+	:eListBoxWindow<NVODStream>(_("NVOD"), 10, 440)
 {
 	move(ePoint(100, 100));
 	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
@@ -290,7 +290,7 @@ void AudioStream::redraw(gPainter *rc, const eRect& rect, const gColor& coActive
 			language+=" (AC3)";
 
 		rc->setForegroundColor(highlited?coActive:coNormal);
-		rc->setFont(listbox->getEntryFnt());
+		rc->setFont(listbox->getFont());
 
 		if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
 				rc->fill(rect);
@@ -314,7 +314,7 @@ void eAudioSelector::selected(AudioStream *l)
 }
 
 eAudioSelector::eAudioSelector()
-	:eListBoxWindow<AudioStream>(_("Audio"), 10, eSkin::getActive()->queryValue("fontsize", 20), 330)
+	:eListBoxWindow<AudioStream>(_("Audio"), 10, 330)
 {
 	move(ePoint(100, 100));
 	CONNECT(list.selected, eAudioSelector::selected);
@@ -340,7 +340,7 @@ SubService::SubService(eListBox<SubService> *listbox, LinkageDescriptor *descr)
 }
 
 eSubServiceSelector::eSubServiceSelector()
-	:eListBoxWindow<SubService>(_("Regie"), 10, eSkin::getActive()->queryValue("fontsize", 20), 330)
+	:eListBoxWindow<SubService>(_("Regie"), 10, 330)
 {
 	move(ePoint(100, 100));
 	CONNECT(list.selected, eSubServiceSelector::selected);
@@ -702,7 +702,9 @@ void eZapMain::showServiceSelector(int dir)
 	eZapLCD* pLCD = eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
 	pLCD->lcdMenu->show();
-	eService *service=eZap::getInstance()->getServiceSelector()->choose(0, dir);
+	eServiceSelector *e = eZap::getInstance()->getServiceSelector();
+	e->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+	eService* service = e->choose(0, dir);
 	pLCD->lcdMain->show();
 	pLCD->lcdMenu->hide();
 	if (!service)

@@ -25,7 +25,7 @@ protected:
 	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
 	{
 			rc->setForegroundColor(highlited?coActive:coNormal);
-			rc->setFont(listbox->getEntryFnt());
+			rc->setFont(listbox->getFont());
 
 			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
 					rc->fill(rect);

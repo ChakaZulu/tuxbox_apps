@@ -19,9 +19,8 @@ class eListBox: public eWidget
 	ePtrList<T> childs;
 	ePtrList_T_iterator top, bottom, current;
 
-	int entries, font_size, item_height, flags;
+	int entries, item_height, flags;
 	gColor col_active;
-	gFont entryFnt;
 
 	void gotFocus();
 	void lostFocus();
@@ -32,8 +31,7 @@ protected:
 public:
 	void append(T* e);
 	void remove(T* e);
-	const gFont& getEntryFnt()	{		return entryFnt;	}
-	eListBox(eWidget *parent, int FontSize=20);
+	eListBox(eWidget *parent);
 	~eListBox();
 
 	Signal1<void, T*> selected;	
@@ -115,7 +113,7 @@ protected:
 	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
 	{
 			rc->setForegroundColor(highlited?coActive:coNormal);
-			rc->setFont(listbox->getEntryFnt());
+			rc->setFont(listbox->getFont());
 
 			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
 					rc->fill(rect);
@@ -149,7 +147,7 @@ protected:
 	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
 	{
 			rc->setForegroundColor(highlited?coActive:coNormal);
-			rc->setFont(listbox->getEntryFnt());
+			rc->setFont(listbox->getFont());
 
 			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
 					rc->fill(rect);
@@ -270,14 +268,12 @@ inline T* eListBox<T>::goPrev()
 }
 
 template <class T>
-inline eListBox<T>::eListBox(eWidget *parent, int ih)
+inline eListBox<T>::eListBox(eWidget *parent)
 	 :eWidget(parent, 1),
 		top(childs.end()), bottom(childs.end()), current(childs.end()),
-		font_size(ih),
-		item_height(ih+2),
+		item_height(font.pointSize+2),
 		flags(0),
 		col_active(eSkin::getActive()->queryScheme("focusedColor")),
-		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size)),
 		have_focus(0)
 {
 	childs.setAutoDelete(false);	// machen wir selber
@@ -305,8 +301,15 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 		eRect rect = getEntryRect(i);
 
 		if ( where.contains(rect) )
+		{
 			entry->redraw(target, rect, col_active, getBackgroundColor(), have_focus && (entry == current));
-		
+
+			if (pixmap && (entry == current) )
+			{
+				ePoint pixmap_pos( getEntryRect(i).right() - (pixmap->getSize().width()+10), getEntryRect(i).top()+1 );
+				target->blit(*pixmap, pixmap_pos, eRect(), gPixmap::blitAlphaTest);
+			}
+		}
 		i++;
 	}
 
@@ -563,15 +566,15 @@ protected:
 	int width;
 public:
 	eListBox<T> list;
-	eListBoxWindow(eString Title="", int Entrys=0, int FontSize=0, int width=400);
+	eListBoxWindow(eString Title="", int Entrys=0, int width=400);
 };
 
 template <class T>
-inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int FontSize, int width)
-	: eWindow(0), Entrys(Entrys), width(width), list(this, FontSize)
+inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width)
+	: eWindow(0), Entrys(Entrys), width(width), list(this)
 {
 	setText(Title);
-	cresize(eSize(width, 10+Entrys*(FontSize+4)));
+	cresize(eSize(width, 10+Entrys*(list.getFont().pointSize+4)));
 	
 	list.move(ePoint(10, 5));
 	eSize size = getClientSize();

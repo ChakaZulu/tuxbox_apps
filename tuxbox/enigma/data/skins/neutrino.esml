@@ -60,6 +60,7 @@
 		<img name="enigma_logo" src="enigma2.png" nomerge="yes" />
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="video.png" nomerge="yes" />
+		<img name="lb_arrow" src="lb_arrow.png" />
 	</images>
 
 	<object name="eventview">
@@ -70,6 +71,12 @@
 			<eLabel position="130:e-30" size="230:e" name="time" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
 			<eLabel position="360:e-30" size="230:e" name="channel" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" align="right"/>
 		</eWindow>
+	</object>
+
+	<object name="eServiceSelector">
+		<eServiceSelector cposition="70:70" csize="580:460" text="Services">
+			<eListbox name="services" position="10:5" size="e:e" font="NimbusSansL-Regular Sans L Regular;24" pixmap="lb_arrow"/>
+		</eServiceSelector>
 	</object>
 
 	<object name="ezap_main">

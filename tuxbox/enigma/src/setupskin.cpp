@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.5 2002/06/29 23:56:33 tmbinc Exp $
+ * $Id: setupskin.cpp,v 1.6 2002/07/02 00:19:33 Ghostrider Exp $
  */
 
 #include "setupskin.h"
@@ -96,7 +96,7 @@ eSkinSetup::eSkinSetup()
 	baccept->setName("accept");
 	breject=new eButton(this);
 	breject->setName("reject");
-	lskins=new eListBox<eListBoxEntrySkin>(this, eSkin::getActive()->queryValue("fontsize", 20));
+	lskins=new eListBox<eListBoxEntrySkin>(this);
 	lskins->setName("skins");
 	CONNECT(baccept->selected, eSkinSetup::accept);
 	CONNECT(breject->selected, eSkinSetup::reject);
