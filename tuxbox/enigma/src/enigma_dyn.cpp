@@ -14,6 +14,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 #include <linux/if_ether.h>
+#include <iomanip>
 
 #include <enigma.h>
 #include <timer.h>
@@ -81,11 +82,12 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 {
 	std::stringstream result;
 	result << "<button name=\"" << buttonText << "\""
-		"type=\"button\" style='width: " << eString().sprintf("%d", width) << "px; height: 22px; background-color: #" << buttonColor << "' "
-		"value=\"" << buttonText << "\" "
-		"onclick=\"self.location.href='" << buttonRef << "'\">"
-		"<span class=\"button\">" << buttonText << "</class>"
-		"</button>";
+		"type=\"button\" style='width: " << width <<
+		"px; height: 22px; background-color: #" << buttonColor <<
+		"' value=\"" << buttonText <<
+		"\" onclick=\"self.location.href='" << buttonRef <<
+		"'\"><span class=\"button\">" << buttonText <<
+		"</class></button>";
 	return result.str();
 }
 
@@ -519,11 +521,10 @@ static eString getIP()
 
 eString filter_string(eString string)
 {
-	return string.
-		removeChars('\x86').
-		removeChars('\x87').
-		removeChars('\xC2').
-		removeChars('\x05');
+	string.strReplace("\xc2\x86","");
+	string.strReplace("\xc2\x87","");
+	string.strReplace("\xc2\x8a","<br>");
+	return string;
 }
 
 static eString getNavi(eString mode, eString path)
@@ -944,37 +945,17 @@ static eString getCurService()
 
 struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 {
-	eString &result;
-	eString begin;
-	eString end;
+	std::stringstream &result;
 
-	getEntryString(eString &result): result(result)
+	getEntryString(std::stringstream &result): result(result)
 	{
 	}
 
 	void operator()(ePlaylistEntry* se)
 	{
-		result += "<tr>";
-		begin = "";
-		end = "";
 		tm startTime = *localtime(&se->time_begin);
 		time_t time_end = se->time_begin + se->duration;
 		tm endTime = *localtime(&time_end);
-		begin.sprintf("%02d.%02d.- %02d:%02d", startTime.tm_mday, startTime.tm_mon+1, startTime.tm_hour, startTime.tm_min);
-		end.sprintf("%02d.%02d.- %02d:%02d", endTime.tm_mday, endTime.tm_mon+1, endTime.tm_hour, endTime.tm_min);
-		if (se->type & ePlaylistEntry::stateFinished)
-			result += "<td align=center><img src=\"on.gif\"></td>";
-		else
-		if (se->type & (ePlaylistEntry::errorNoSpaceLeft |
-				ePlaylistEntry::errorUserAborted |
-				ePlaylistEntry::errorZapFailed|
-				ePlaylistEntry::errorOutdated))
-			result += "<td align=center><img src=\"off.gif\"></td>";
-		else
-			result += "<td>&nbsp;</td>";
-
-		result += "<td>" + begin + "</td>";
-		result += "<td>" + end + "</td>";
 
 		eString description = se->service.descr;
 		eString channel = getLeft(description, '/');
@@ -985,50 +966,70 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 				channel=filter_string(service->service_name);
 		}
 		if (!channel)
-			channel = "No channel available";
-		result += "<td>" + channel + "</td>";
+			channel = _("No channel available");
+
 		description = getRight(description, '/');
 		if (!description)
-			description = "No description available";
-		result += "<td>" + description + "</td>";
-		result += "</tr>";
+			description = _("No description available");
+
+		if (se->type & ePlaylistEntry::stateFinished)
+			result << "<tr><td align=center><img src=\"on.gif\"></td>";
+		else if (se->type & (ePlaylistEntry::errorNoSpaceLeft |
+				ePlaylistEntry::errorUserAborted |
+				ePlaylistEntry::errorZapFailed|
+				ePlaylistEntry::errorOutdated))
+			result << "<td align=center><img src=\"off.gif\"></td>";
+		else
+			result << "<td>&nbsp;</td>";
+
+		result  << "<td>"
+						<< std::setw(2) << startTime.tm_mday << '.'
+						<< std::setw(2) << startTime.tm_mon+1 << " - "
+						<< std::setw(2) << startTime.tm_hour << ':'
+						<< std::setw(2) << startTime.tm_min
+						<< "</td><td>"
+						<< std::setw(2) << endTime.tm_mday << '.'
+						<< std::setw(2) << endTime.tm_mon+1 << " - "
+						<< std::setw(2) << endTime.tm_hour << ':'
+						<< std::setw(2) << endTime.tm_min
+						<< "</td><td>" << channel
+						<< "</td><td>" << description
+						<< "</td></tr>";
 	}
 };
 
 static eString genTimerListBody(void)
 {
-	eString result;
-	eString tbody;
-	eString tmpFile;
-	eTimerManager::getInstance()->forEachEntry(getEntryString(tbody));
-	if (tbody == "")
-		result = "No timer events available.<br>";
+	std::stringstream result;
+	result << std::setfill('0');
+	if (!eTimerManager::getInstance()->getTimerCount())
+		result << _("No timer events available") << ".<br>";
 	else
 	{
-		result += "<table width=100% border=1 rules=all>";
-		result += "<thead>";
-		result += "<th align=\"left\">";
-		result += "Status";
-		result += "</th>";
-		result += "<th align=\"left\">";
-		result += "Start Time";
-		result += "</th>";
-		result += "<th align=\"left\">";
-		result += "End Time";
-		result += "</th>";
-		result += "<th align=\"left\">";
-		result += "Channel";
-		result += "</th>";
-		result += "<th align=\"left\">";
-		result += "Description";
-		result += "</th>";
-		result += "</thead>";
-		result += "<tbody>";
-		result += tbody;
-		result += "</tbody>";
-		result += "</table>";
+		result << "<table width=100% border=1 rules=all>"
+							"<thead>"
+							"<th align=\"left\">"
+							"Status"
+							"</th>"
+							"<th align=\"left\">"
+							"Start Time"
+							"</th>"
+							"<th align=\"left\">"
+							"End Time"
+							"</th>"
+							"<th align=\"left\">"
+							"Channel"
+							"</th>"
+							"<th align=\"left\">"
+							"Description"
+							"</th>"
+							"</thead>"
+							"<tbody>";
+		eTimerManager::getInstance()->forEachEntry(getEntryString(result));
+		result << "</tbody>"
+							"</table>";
 	}
-	return result;
+	return result.str();
 }
 
 static eString showTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1374,8 +1375,10 @@ static eString getContent(eString mode, eString path)
 
 static eString getEITC2()
 {
-	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;", now_longtext = "&nbsp;";
-	eString next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;", next_longtext = "&nbsp;";
+	eString now_time = "&nbsp;", now_duration = "&nbsp;",
+					now_text = "&nbsp;";//, now_longtext = "&nbsp;";
+	eString next_time = "&nbsp;", next_duration = "&nbsp;",
+					next_text = "&nbsp;";//, next_longtext = "&nbsp;";
 	eString result;
 
 	EIT *eit=eDVB::getInstance()->getEIT();
@@ -1428,7 +1431,10 @@ static eString getEITC2()
 								next_text=ss->event_name;
 								break;
 						}
+						if ( p )  // we have all we need
+							break;
 					}
+/*
 					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
 					{
 						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*descriptor;
@@ -1441,7 +1447,7 @@ static eString getEITC2()
 								next_longtext+=ss->item_description;
 								break;
 						}
-					}
+					}*/
 				}
 				p++;
 		 	}
@@ -1534,35 +1540,16 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 				result+="</span><br>\n";
 			}
 		}
-
 	}
 	result+="</body></html>";
 	return result;
 }
 
-eString genRecordString(eServiceReference ref, EITEvent event)
-{
-	eString result;
-	result += "javascript:record(\"ref=" + ref2string(ref);
-	result += "&ID=" + eString().sprintf("%d", event.event_id);
-	result += "&start=" + eString().sprintf("%d", event.start_time);
-	result += "&duration=" + eString().sprintf("%d", event.duration);
-	result += "\")";
-	return result;
-}
-
-eString genEPGString(eServiceReference ref, EITEvent event)
-{
-	eString result;
-	result += "javascript:EPGDetails(\"ref=" + ref2string(ref);
-	result += "&ID=" + eString().sprintf("%d", event.event_id);
-	result += "\")";
-	return result;
-}
-
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result;
+	std::stringstream result;
+	result << std::setfill('0');
+
 	eService* current;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -1580,14 +1567,12 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 
 	if(!current)
-		return eString("EPG is not yet ready.");
+		return "EPG is not yet ready.";
 
 	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
 
 	if(!evt)
-	{
-		result = "EPG is not yet available.";
-	}
+		result << "EPG is not yet available.";
 	else
 	{
 		timeMap::const_iterator It;
@@ -1596,34 +1581,37 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 		{
 			EITEvent event(*It->second);
 			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-
 			{
 				Descriptor *descriptor=*d;
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
 					tm* t = localtime(&event.start_time);
-					result += eString().sprintf("<!-- ID: %04x -->", event.event_id);
-					result += "<u><a href=\'";
-					result += genRecordString(ref, event);
-					result += "\'>Record</a></u>";
-					result += "&nbsp;&nbsp;";
-					result += eString().sprintf("%02d.%02d - %02d:%02d", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
-					result += "&nbsp;&nbsp;";
-					result += "<span class=\"epg\"><a  href=\'";
-					result += genEPGString(ref, event);
-					result += "\')>";
-					result += ((ShortEventDescriptor*)descriptor)->event_name;
-					result += "</span></a></u><br>\n";
+					result << "<u><a href=\'"
+										"javascript:record(\"ref=" << serviceRef
+								<< "&ID=" << event.event_id
+								<< "&start=" << event.start_time
+								<< "&duration=" << event.duration
+								<< "\")\'>Record"
+										"</a></u>&nbsp;&nbsp;"
+										"<span class=\"epg\">"
+										"<a href=\'"
+										"javascript:EPGDetails(\"ref=" << serviceRef
+								<< "&ID=" << event.event_id
+								<< "\")\'>"
+								<< std::setw(2) << t->tm_mday << '.'
+								<< std::setw(2) << t->tm_mon+1 << " - "
+								<< std::setw(2) << t->tm_hour << ':'
+								<< std::setw(2) << t->tm_min << ' '
+								<< ((ShortEventDescriptor*)descriptor)->event_name
+								<< "</a></span></u><br>\n";
 				}
 			}
-
 		}
 	}
 
 	eString tmp2 = read_file(TEMPLATE_DIR+"EPG.tmp");
 	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
-	tmp2.strReplace("#BODY#", result);
-
+	tmp2.strReplace("#BODY#", result.str());
 	return tmp2;
 }
 
@@ -2267,7 +2255,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	int eventid = atoi(eventID.c_str());
 	eString eventStartTime = opt["start"];
 	eString eventDuration = opt["duration"];
-	eString description = "No description available";
+	eString description = _("No description available");
 
 	eDebug("[ENIGMA_DYN] addTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
@@ -2307,13 +2295,13 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	int duration = atoi(eventDuration.c_str()) + (2 * timeroffset * 60);
 
 	ePlaylistEntry entry(string2ref(serviceRef), start, duration, atoi(eventID.c_str()), ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-	eDebug("[ENIGMA_DYN] description = %s\n", description.c_str());
+	eDebug("[ENIGMA_DYN] description = %s", description.c_str());
 	entry.service.descr = description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
+		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
 	else
-		result += "Timer event was created successfully.";
+		result += _("Timer event was created successfully.");
 
 	return result;
 }
@@ -2327,11 +2315,10 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
-	eString eventID = opt["ID"];
-	int eventid = atoi(eventID.c_str());
-	eString description = "No description available";
+	int eventid = atoi(opt["ID"].c_str());
+	eString description = _("No description available");
 
-	printf("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %s\n", serviceRef.c_str(), eventID.c_str());
+	eDebug("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %04x", serviceRef.c_str(), eventid);
 
 	// search for the event... to get the description...
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
@@ -2350,13 +2337,13 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 					{
 						// ok, we probably found the short description...
 						description = ((ShortEventDescriptor*)*d)->event_name;
-						printf("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
+						eDebug("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
 					}
 					if (d->Tag() == DESCR_EXTENDED_EVENT)
 					{
 						// ok, we probably found the detailed description...
 						ext_description += ((ExtendedEventDescriptor*)*d)->item_description;
-						printf("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
+						eDebug("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
 					}
 				}
 				delete event;
@@ -2364,7 +2351,7 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 		}
 	}
 	if (!ext_description)
-		ext_description = "No detailed description available";
+		ext_description = _("No detailed description available");
 	description = filter_string(description);
 	ext_description = filter_string(ext_description);
 
@@ -2432,3 +2419,4 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_suck_getonidsid );
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_suck_getchannellist );
 }
+
