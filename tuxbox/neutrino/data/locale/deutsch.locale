@@ -368,7 +368,7 @@ lcdmenu.statusline.volume Lautstärke
 mainmenu.games Spiele
 mainmenu.head Hauptmenü
 mainmenu.movieplayer Movieplayer
-mainmenu.mp3player MP3 Player
+mainmenu.mp3player Audioplayer
 mainmenu.pausesectionsd EPG auslesen
 mainmenu.pictureviewer Bildbetrachter
 mainmenu.radiomode Radio-Modus
@@ -438,7 +438,7 @@ movieplayer.tsplayback TS Abspielen
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pause/Weiter\nBLAU Bookmark setzen\nd-box Zeit einblenden\nv Sprung\n1 ca. 1 Minute zurück\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zurück\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zurück\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.wrongvlcversion Funktion ist mit der benutzten Version des VLC nicht möglich
-mp3picsettings.general MP3-Player / Bildbetrachter
+mp3picsettings.general Audioplayer / Bildbetrachter
 mp3player.add Hinzufügen
 mp3player.artist_title Interpret, Titel
 mp3player.defdir Start-Verz.
@@ -447,11 +447,11 @@ mp3player.deleteall Alle löschen
 mp3player.display_order Anzeige
 mp3player.fastforward schneller Vorl.
 mp3player.follow Selektiere akt. Track
-mp3player.head Mp3 Playlist
+mp3player.head Audio Playlist
 mp3player.highprio Hohe Decodier-Priorität
 mp3player.id3scan Scanne ID3-Tags
 mp3player.keylevel Tasten-Umschaltung
-mp3player.name MP3 Player
+mp3player.name Audioplayer
 mp3player.pause Pause
 mp3player.play Abspielen
 mp3player.playing Aktueller Track
@@ -518,6 +518,9 @@ parentallock.parentallock Jugendschutz
 parentallock.prompt PIN-Eingabe
 pictureviewer.defdir Start-Verz.
 pictureviewer.head Bildbetrachter
+pictureviewer.resize.color_average aufwendig
+pictureviewer.resize.none keine
+pictureviewer.resize.simple einfach
 pictureviewer.scaling Skalierung
 pictureviewer.show Anzeigen
 pictureviewer.slide_time Diaschau-Anzeigedauer

@@ -140,7 +140,7 @@ struct NeutrinoMessages {
 		mode_radio = 2,
 		mode_scart = 3,
 		mode_standby = 4,
-		mode_mp3 = 5,
+		mode_audio = 5,
 		mode_pic = 6,
 		mode_ts = 7,
 		mode_mask = 0xFF,

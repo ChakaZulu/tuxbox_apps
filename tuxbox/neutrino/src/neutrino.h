@@ -85,7 +85,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 			mode_radio = 2,
 			mode_scart = 3,
 			mode_standby = 4,
-			mode_mp3 = 5,
+			mode_audio = 5,
 			mode_pic = 6,
 			mode_ts = 7,
 			mode_mask = 0xFF,
@@ -170,7 +170,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitRecordingSettings(CMenuWidget &recordingSettings);
 		void InitStreamingSettings(CMenuWidget &streamingSettings);
 		void InitScreenSettings(CMenuWidget &);
-		void InitMp3PicSettings(CMenuWidget &);
+		void InitAudioplPicSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);
 		void InitScanSettings(CMenuWidget &);
 		void InitParentalLockSettings(CMenuWidget &);
@@ -179,7 +179,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings, CMenuWidget &networkSettings,
 		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
 		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service, CMenuWidget &fontSettings,
-                        	  CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer);
+                        	  CMenuWidget &audioplPicSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer);
 		void SetupFonts();
 		void SetupTiming();
 		void SetupFrameBuffer();

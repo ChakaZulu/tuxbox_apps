@@ -356,7 +356,6 @@ int CPictureViewerGui::show()
 					else if (m_sort == DATE)
 						std::sort(playlist.begin(), playlist.end(), comparePictureByDate);
 				}
-	//				CLCD::getInstance()->setMode(CLCD::MODE_MP3);
 				update=true;
 			}
 		}
@@ -577,9 +576,9 @@ void CPictureViewerGui::paintHead()
 //------------------------------------------------------------------------
 const struct button_label PictureViewerButtons[4] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_MP3PLAYER_DELETE        },
-	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_MP3PLAYER_ADD           },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_MP3PLAYER_DELETEALL     },
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_DELETE        },
+	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_ADD           },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_DELETEALL     },
 	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_PICTUREVIEWER_SLIDESHOW }
 };
 

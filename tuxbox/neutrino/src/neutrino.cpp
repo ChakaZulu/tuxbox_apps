@@ -1199,7 +1199,7 @@ void CNeutrinoApp::SetupTiming()
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
 				CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
 				CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
-				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &mp3picSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer)
+				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &audiopl_picSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem(GenericMenuSeparator);
@@ -1209,7 +1209,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CGameList(LOCALE_MAINMENU_GAMES), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainMenu.addItem(GenericMenuSeparatorLine);
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MP3PLAYER, true, NULL, new CAudioPlayerGui(), NULL, true, CRCInput::RC_1));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, true, CRCInput::RC_1));
 
 	#if HAVE_DVB_API_VERSION >= 3
 	//mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, new CMoviePlayerGui()));
@@ -1259,7 +1259,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_COLORS    , true, NULL, &colorSettings    , NULL, true, CRCInput::RC_9));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD       , true, NULL, &lcdSettings      , NULL, true, CRCInput::RC_0));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, true, CRCInput::RC_blue  , NEUTRINO_ICON_BUTTON_BLUE  ));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MP3PICSETTINGS_GENERAL , true, NULL, &mp3picSettings   , NULL, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, true, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ));
 }
 
@@ -1492,42 +1492,41 @@ const CMenuOptionChooser::keyval MESSAGEBOX_NO_YES_OPTIONS[MESSAGEBOX_NO_YES_OPT
 #define PICTUREVIEWER_SCALING_OPTION_COUNT 3
 const CMenuOptionChooser::keyval PICTUREVIEWER_SCALING_OPTIONS[PICTUREVIEWER_SCALING_OPTION_COUNT] =
 {
-#warning TODO: localize pictureviewer scaling option
-	{ CPictureViewer::SIMPLE, "Simple"        },
-	{ CPictureViewer::COLOR , "Color Average" },
-	{ CPictureViewer::NONE  , "None"          }
+	{ CPictureViewer::SIMPLE, LOCALE_PICTUREVIEWER_RESIZE_SIMPLE        },
+	{ CPictureViewer::COLOR , LOCALE_PICTUREVIEWER_RESIZE_COLOR_AVERAGE },
+	{ CPictureViewer::NONE  , LOCALE_PICTUREVIEWER_RESIZE_NONE          }
 };
 
-#define MP3PLAYER_DISPLAY_ORDER_OPTION_COUNT 2
-const CMenuOptionChooser::keyval MP3PLAYER_DISPLAY_ORDER_OPTIONS[MP3PLAYER_DISPLAY_ORDER_OPTION_COUNT] =
+#define AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT 2
+const CMenuOptionChooser::keyval AUDIOPLAYER_DISPLAY_ORDER_OPTIONS[AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT] =
 {
-	{ CAudioPlayerGui::ARTIST_TITLE, LOCALE_MP3PLAYER_ARTIST_TITLE },
-	{ CAudioPlayerGui::TITLE_ARTIST, LOCALE_MP3PLAYER_TITLE_ARTIST }
+	{ CAudioPlayerGui::ARTIST_TITLE, LOCALE_AUDIOPLAYER_ARTIST_TITLE },
+	{ CAudioPlayerGui::TITLE_ARTIST, LOCALE_AUDIOPLAYER_TITLE_ARTIST }
 };
 
-void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
+void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 {
-	mp3PicSettings.addItem(GenericMenuSeparator);
-	mp3PicSettings.addItem(GenericMenuBack);
+	audioplPicSettings.addItem(GenericMenuSeparator);
+	audioplPicSettings.addItem(GenericMenuBack);
 	
-	mp3PicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PICTUREVIEWER_HEAD));
-	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_PICTUREVIEWER_SCALING  , &g_settings.picviewer_scaling     , PICTUREVIEWER_SCALING_OPTIONS  , PICTUREVIEWER_SCALING_OPTION_COUNT  , true ));
+	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PICTUREVIEWER_HEAD));
+	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_PICTUREVIEWER_SCALING  , &g_settings.picviewer_scaling     , PICTUREVIEWER_SCALING_OPTIONS  , PICTUREVIEWER_SCALING_OPTION_COUNT  , true ));
 	CStringInput * pic_timeout= new CStringInput(LOCALE_PICTUREVIEWER_SLIDE_TIME, g_settings.picviewer_slide_time, 2, NULL, NULL, "0123456789 ");
-	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_SLIDE_TIME, true, g_settings.picviewer_slide_time, pic_timeout));
-	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DEFDIR, true, g_settings.network_nfs_picturedir, this, "picturedir"));
+	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_SLIDE_TIME, true, g_settings.picviewer_slide_time, pic_timeout));
+	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_PICTUREVIEWER_DEFDIR, true, g_settings.network_nfs_picturedir, this, "picturedir"));
 
-	mp3PicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MP3PLAYER_NAME));
-	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_MP3PLAYER_DISPLAY_ORDER, &g_settings.mp3player_display     , MP3PLAYER_DISPLAY_ORDER_OPTIONS, MP3PLAYER_DISPLAY_ORDER_OPTION_COUNT, true ));
-	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_MP3PLAYER_FOLLOW       , &g_settings.mp3player_follow      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
+	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_AUDIOPLAYER_NAME));
+	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_DISPLAY_ORDER, &g_settings.mp3player_display     , AUDIOPLAYER_DISPLAY_ORDER_OPTIONS, AUDIOPLAYER_DISPLAY_ORDER_OPTION_COUNT, true ));
+	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_FOLLOW       , &g_settings.mp3player_follow      , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
 
-	CStringInput * mp3_screensaver= new CStringInput(LOCALE_MP3PLAYER_SCREENSAVER_TIMEOUT, g_settings.mp3player_screensaver, 2, NULL, NULL, "0123456789 ");
-	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_MP3PLAYER_SCREENSAVER_TIMEOUT, true, g_settings.mp3player_screensaver, mp3_screensaver));
+	CStringInput * audio_screensaver= new CStringInput(LOCALE_AUDIOPLAYER_SCREENSAVER_TIMEOUT, g_settings.mp3player_screensaver, 2, NULL, NULL, "0123456789 ");
+	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYER_SCREENSAVER_TIMEOUT, true, g_settings.mp3player_screensaver, audio_screensaver));
 
-	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_MP3PLAYER_HIGHPRIO     , &g_settings.mp3player_highprio    , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
-	mp3PicSettings.addItem(new CMenuForwarder(LOCALE_MP3PLAYER_DEFDIR, true, g_settings.network_nfs_mp3dir, this, "mp3dir"));
+	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_AUDIOPLAYER_HIGHPRIO     , &g_settings.mp3player_highprio    , MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
+	audioplPicSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYER_DEFDIR, true, g_settings.network_nfs_mp3dir, this, "mp3dir"));
 
-	mp3PicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
-	mp3PicSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS , &g_settings.filebrowser_showrights, MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
+	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
+	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS , &g_settings.filebrowser_showrights, MESSAGEBOX_NO_YES_OPTIONS      , MESSAGEBOX_NO_YES_OPTION_COUNT      , true ));
 
 }
 
@@ -2724,14 +2723,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD             , "lcd.raw"             );
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD      , "keybinding.raw"      , 400);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD        , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    mp3picSettings      (LOCALE_MP3PICSETTINGS_GENERAL   , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL   , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS       , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD         , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD         , "streaming.raw"       );
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
-					 service, fontSettings, mp3picSettings, streamingSettings, moviePlayer);
+					 service, fontSettings, audioplPicSettings, streamingSettings, moviePlayer);
 
 	//service
 	InitServiceSettings(service, scanSettings);
@@ -2739,8 +2738,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//language Setup
 	InitLanguageSettings(languageSettings);
 
-	//mp3/picviewer Setup
-	InitMp3PicSettings(mp3picSettings);
+	//audioplayer/picviewer Setup
+	InitAudioplPicSettings(audioplPicSettings);
 
    	//misc Setup
 	InitMiscSettings(miscSettings);
@@ -3439,10 +3438,10 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			if(mode != mode_standby)
 				standbyMode( true );
 		}
-		if((data &mode_mask)== mode_mp3)
+		if((data &mode_mask)== mode_audio)
 		{
 			lastMode=mode;
-			mode=mode_mp3;
+			mode=mode_audio;
 		}
 		if((data &mode_mask)== mode_pic)
 		{
@@ -3556,7 +3555,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
          }
       }
 
-      if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic))
+      if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic))
       {
 	      // anzeigen NUR, wenn es vom Event kommt
 	      if( current_muted )
