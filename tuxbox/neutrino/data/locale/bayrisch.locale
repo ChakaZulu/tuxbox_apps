@@ -6,7 +6,7 @@ options.serial seriell
 options.fb framebuffa
 options.null null
 
-mainmenu.head HauptmenÃ¼
+mainmenu.head Hauptmenü
 mainmenu.tvmode Fernseh schaugn
 mainmenu.radiomode Radio hern
 mainmenu.scartmode Scart hernemma
@@ -44,7 +44,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.recording Streamingserva
 mainsettings.colors Forbn / Themes
-mainsettings.lcd LC-DisblÃ¤i
+mainsettings.lcd LC-Disbläi
 mainsettings.keybinding Tasdn-Eistellunga
 mainsettings.misc No a boar Eistellunga
 mainsettings.scan Eistellunga Senda-suacha
@@ -93,7 +93,7 @@ networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserva
 
 recordingmenu.head Streamingserva Eistellunga
-recordingmenu.recording_type GrÃ¤t zum Aufnemma
+recordingmenu.recording_type Grät zum Aufnemma
 recordingmenu.server_ip Aufnahmeserva IP
 recordingmenu.server_port Aunahmeserva Port
 recordingmenu.stopplayback Fuim ohoitn
@@ -115,24 +115,24 @@ ipsetup.hint_2 Mit OK speichan, mit HOME obbrecha
 
 colormenu.head Farb-Eistellunga
 colormenu.statusbar Statusboikn
-colormenu.themeselect Theme auswÃ¤hn
-colormenu.font SchriftgrÃ¤ÃŸn
-colormenu.menucolors MenÃ¼farbn
+colormenu.themeselect Theme auswähn
+colormenu.font Schriftgräßn
+colormenu.menucolors Menüfarbn
 colormenu.background Hintergrundfarb
 colormenu.background_head Hintergrundfarbe
 colormenu.textcolor Textfarb
 colormenu.textcolor_head Textfarb
-colormenu.fade MenÃ¼s faden
+colormenu.fade Menüs faden
 
-colorthememenu.head Theme auswÃ¤hn
+colorthememenu.head Theme auswähn
 colorthememenu.neutrino_theme Neutrino Theme
 colorthememenu.classic_theme Klassik
 
-colormenusetup.head MenÃ¼farbn
+colormenusetup.head Menüfarbn
 colormenusetup.menuhead Titelleistn
 colormenusetup.menucontent Fenstainhoit
 colormenusetup.menucontent_inactive Fenstainhoit deaktiviert
-colormenusetup.menucontent_selected Fenstainhoit ausgwÃ¤hit
+colormenusetup.menucontent_selected Fenstainhoit ausgwähit
 
 colorstatusbar.head Statusboikn-Farbn
 colorstatusbar.text Statusboikn
@@ -141,8 +141,8 @@ repeatblocker.hint_1 Mindestzeit (ms) zwischn zwoa Dasdndrucka
 repeatblocker.hint_2 0 schoitt an Blocka aus (Rot is " ")
 
 keybindingmenu.RC Fernbedienung
-keybindingmenu.repeatblock WiederholungsverzÃ¶gerung
-keybindingmenu.repeatblockgeneric OnfangsverzÃ¶gerung
+keybindingmenu.repeatblock Wiederholungsverzögerung
+keybindingmenu.repeatblockgeneric Onfangsverzögerung
 keybindingmenu.head Dasdn-Eistellunga
 keybindingmenu.modechange Modus wexln
 keybindingmenu.channellist Sendalistn
@@ -155,8 +155,8 @@ keybindingmenu.pagedown Seitn obiblatln
 keybindingmenu.pagedown_head Seitn obiblatln
 keybindingmenu.cancel Sendalistn zuamacha
 keybindingmenu.cancel_head Sendalistn zuamacha
-keybindingmenu.sort Sortierfoige Ã¤ndan
-keybindingmenu.sort_head Sortierfoige Ã¤ndan
+keybindingmenu.sort Sortierfoige ändan
+keybindingmenu.sort_head Sortierfoige ändan
 keybindingmenu.channelup Senda aufi
 keybindingmenu.channelup_head Senda aufi Dasdn
 keybindingmenu.channeldown Senda obe
@@ -165,7 +165,7 @@ keybindingmenu.bouquetup Bouquet weida
 keybindingmenu.bouquetup_head Bouquet weida Dasdn
 keybindingmenu.bouquetdown Bouquet zruck
 keybindingmenu.bouquetdown_head Bouquet zruck Dasdn
-keybindingmenu.bouquethandling OK-Dasdn fÃ¼r
+keybindingmenu.bouquethandling OK-Dasdn für
 keybindingmenu.bouquetchannels_on_ok Bouquet-Senda
 keybindingmenu.bouquetlist_on_ok Bouquetlistn
 keybindingmenu.allchannels_on_ok Sendalistn
@@ -198,10 +198,10 @@ keychooser.text1 Dasdn drucka
 keychooser.text2 Wanst ne wuist, wartn
 
 screensetup.upperleft rot = Buidlrand om, links
-screensetup.lowerright grÃ¼n = Buidlrand untn, rechts
+screensetup.lowerright grün = Buidlrand untn, rechts
 
 channellist.head Olle Senda
-channellist.nonefound Es san koane Senda gfundn worn!\nMachas bittschÃ¶n a Sendersuach\n(dbox-Taste -> Service)
+channellist.nonefound Es san koane Senda gfundn worn!\nMachas bittschön a Sendersuach\n(dbox-Taste -> Service)
 channellist.since seid %02d:%02d
 
 infoviewer.epgnotload Informationen no ned glon...
@@ -224,16 +224,16 @@ epglist.head Vorschau - %s
 epglist.noevents Koa EPG do.
 
 streaminfo.head Informationen
-streaminfo.resolution AuflÃ¶sung
+streaminfo.resolution Auflösung
 streaminfo.bitrate Bitrate
-streaminfo.aratio VerhÃ¤ltnis
-streaminfo.aratio_unknown VerhÃ¤ltnis: ken i ned
+streaminfo.aratio Verhältnis
+streaminfo.aratio_unknown Verhältnis: ken i ned
 streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: ken i ned
 streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: ken i ned
-streaminfo.not_crypted ned verschlÃ¼sselt
-streaminfo.ecm_invalid ungÃ¼ltiges CA-System
+streaminfo.not_crypted ned verschlüsselt
+streaminfo.ecm_invalid ungültiges CA-System
 streaminfo.not_available kumt nix
 
 streamfeatures.head Features
@@ -261,7 +261,7 @@ date.Sun  So
 
 date.Jan  Jan
 date.Feb  Feb
-date.Mar  MÃ¤r
+date.Mar  Mär
 date.Apr  Apr
 date.May  Mai
 date.Jun  Jun
@@ -302,7 +302,7 @@ flashupdate.getupdatefile Update werd glon
 flashupdate.getupdatefileerror kon des Update ned lon
 flashupdate.cantopenfile kon de Datei ned aufmacha
 flashupdate.fileis0bytes de Datei hod 0 Byte
-flashupdate.eraseingflash lÃ¶sch des Flash
+flashupdate.eraseingflash lösch des Flash
 flashupdate.programmingflash programmier des Flash
 flashupdate.cantopenmtd kon des MTD-Device ned aufmacha
 flashupdate.ready hobs
@@ -338,10 +338,10 @@ flashupdate.writeflash ganzes Flashimage eispuin
 flashupdate.readflashmtd einzelne Partition aussalesn
 flashupdate.writeflashmtd einzelne Partition eispuin
 flashupdate.savesuccess Des Image is unter\nDateinamen %s gspeichat worn.
-flashupdate.mtdselector Partition auswÃ¤hn
+flashupdate.mtdselector Partition auswähn
 flashupdate.titlereadflash Flash auslesn
 flashupdate.actionreadflash flash lesn
-flashupdate.fileselector Datei auswÃ¤hn
+flashupdate.fileselector Datei auswähn
 flashupdate.titlewriteflash Flash schreim
 flashupdate.actionwriteflash schreib in flash
 flashupdate.flashreadyreboot Des Imag is gflasht worn.\nJetz start ma de Box nei.
@@ -356,9 +356,9 @@ bouqueteditor.hide Vastecka
 bouqueteditor.lock Sperrn
 bouqueteditor.newbouquetname Da neie Nama vom Bouquet
 bouqueteditor.bouquetname Nama vom Bouquet
-bouqueteditor.savechanges? Soin de Ã„nderunga gspeichat wern?
-bouqueteditor.savingchanges D Ã„nderunga wern gspeichat. An Moment ...
-bouqueteditor.discardingchanges D Ã„nderunga wern verworfa. Kloana Moment ...
+bouqueteditor.savechanges? Soin de Änderunga gspeichat wern?
+bouqueteditor.savingchanges D Änderunga wern gspeichat. An Moment ...
+bouqueteditor.discardingchanges D Änderunga wern verworfa. Kloana Moment ...
 bouqueteditor.switch Senda dazuadoa/wegmacha
 bouqueteditor.switchmode TV/Radio
 bouqueteditor.return Jetz hammas
@@ -367,17 +367,17 @@ messagebox.yes Scho
 messagebox.no Ned
 messagebox.cancel Abbrecha
 messagebox.back Zruck
-messagebox.error BlÃ¤d glaffa
-messagebox.discard Woins de Ã„nderunga verwerfa?
+messagebox.error Bläd glaffa
+messagebox.discard Woins de Änderunga verwerfa?
 messagebox.info Information
 
 settings.noconffile De Eistellunga von Neutrino san ned\ngfundn worn. Mia nemma de Standardwerte.
 settings.missingoptionsconffile Es gibt neie Eistellunga.\nDe stenga jetz erstmoi auf Standard.
 
 cam.wrong Obacht, Eana CAM_ALPHA.BIN passt\nned zu Eanara Smart-Card!!!\n\nWoins de Warnung numoi seagn?
-ucodes.failure Obacht, de ÂµCodes san ned gfundn worn!\n\nLoans de doch bittschen mit FTP \nauffi, und startns de Box numoi!
+ucodes.failure Obacht, de µCodes san ned gfundn worn!\n\nLoans de doch bittschen mit FTP \nauffi, und startns de Box numoi!
 
-stringinput.caps GroÃŸ-/Koabuchstobm
+stringinput.caps Groß-/Koabuchstobm
 
 streamingserver.noconnect Kao Verbindung zum Streamingserva.\nDe Aufnahme werd obbrocha.
 
@@ -403,9 +403,9 @@ GENRE.SHOW.2 varietee
 GENRE.SHOW.3 Talkshow
 
 GENRE.SPORTS.0 Sport
-GENRE.SPORTS.1 GroÃŸereignisse (Olympische Spiele, Weltmeisterschaften usw.)
+GENRE.SPORTS.1 Großereignisse (Olympische Spiele, Weltmeisterschaften usw.)
 GENRE.SPORTS.2 Sportsmagazine
-GENRE.SPORTS.3 FuÃŸball
+GENRE.SPORTS.3 Fußball
 GENRE.SPORTS.4 Tennis
 GENRE.SPORTS.5 Mannschaftssport
 GENRE.SPORTS.6 Leichtathletik
@@ -416,9 +416,9 @@ GENRE.SPORTS.10 equestrian
 GENRE.SPORTS.11 martial sports
 
 GENRE.CHILDRENs_PROGRAMMES.0 Kinder / Jugendprogramm
-GENRE.CHILDRENs_PROGRAMMES.1 Programm fÃ¼r Vorschulkinder
-GENRE.CHILDRENs_PROGRAMMES.2 Unterhaltungsprogramm fÃ¼r 6 bis 14-JÃ¤hrige
-GENRE.CHILDRENs_PROGRAMMES.3 Unterhaltungsprogramm fÃ¼r 10 bis 16-JÃ¤hrige
+GENRE.CHILDRENs_PROGRAMMES.1 Programm für Vorschulkinder
+GENRE.CHILDRENs_PROGRAMMES.2 Unterhaltungsprogramm für 6 bis 14-Jährige
+GENRE.CHILDRENs_PROGRAMMES.3 Unterhaltungsprogramm für 10 bis 16-Jährige
 GENRE.CHILDRENs_PROGRAMMES.4 Informations- und Bildungsprogramm
 GENRE.CHILDRENs_PROGRAMMES.5 Trickfilm
 
@@ -431,7 +431,7 @@ GENRE.MUSIC_DANCE.5 Musical/Oper
 GENRE.MUSIC_DANCE.6 Ballet
 
 GENRE.ARTS.0 Kunst / Kultur
-GENRE.ARTS.1 Darstellende KÃ¼nste
+GENRE.ARTS.1 Darstellende Künste
 GENRE.ARTS.2 fine arts
 GENRE.ARTS.3 Religion
 GENRE.ARTS.4 Volkskunst
@@ -518,7 +518,7 @@ timerlist.name Timerlistn
 timerlist.delete wegmacha
 timerlist.empty Grod hammer koane Timer
 timerlist.type.shutdown Ausmacha
-timerlist.type.nextprogram NÃ¤chsta Senda
+timerlist.type.nextprogram Nächsta Senda
 timerlist.type.zapto Umschoitn
 timerlist.type.standby Bissl Ausmacha
 timerlist.type.record Aufnemma
@@ -558,7 +558,7 @@ timerlist.standby SB
 timerlist.channel Kanoi
 timerlist.menunew Neia Timer
 timerlist.reload akualisiern
-timerlist.modify Ã¤ndan
+timerlist.modify ändan
 timerlist.message Nochricht
 timerlist.apid Audio PID
 timersettings.separator Timer Eistellunga
@@ -575,7 +575,7 @@ fontsize.epg_info2 EPG Info 2
 fontsize.epg_date EPG Datum
 fontsize.alert Alarm
 fontsize.eventlist_title Eventlistn Titl
-fontsize.eventlist_itemlarge Eventlistn groÃŸ
+fontsize.eventlist_itemlarge Eventlistn groß
 fontsize.eventlist_itemsmall Eventlistn kloa
 fontsize.eventlist_datetime Eventlistn Datum/Zeid
 fontsize.channellist Kanallistn
@@ -587,7 +587,7 @@ fontsize.infobar_channame Nama
 fontsize.infobar_info Infobar Info
 fontsize.infobar_small Infobar kloa
 
-fontmenu.head SchriftgrÃ¶ssn Eistellunga
+fontmenu.head Schriftgrössn Eistellunga
 fontmenu.channellist Kanallistn
 fontmenu.eventlist Eventlistn
 fontmenu.epg EPG
