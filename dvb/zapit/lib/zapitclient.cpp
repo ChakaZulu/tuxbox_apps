@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.5 2002/02/04 23:17:31 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.6 2002/02/06 19:37:27 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.6  2002/02/06 19:37:27  Simplex
+  added command "zapto channelnumber"
+
   Revision 1.5  2002/02/04 23:17:31  Simplex
   reinit channels, saving bouquets
 
@@ -94,7 +97,7 @@ bool CZapitClient::receive(char* data, int size)
 /*                                             */
 /***********************************************/
 
-/* zaps to channel of specifeid bouquet */
+/* zaps to channel of specified bouquet */
 void CZapitClient::zapTo( unsigned int bouquet, unsigned int channel )
 {
 	commandHead msgHead;
@@ -103,6 +106,23 @@ void CZapitClient::zapTo( unsigned int bouquet, unsigned int channel )
 	msgHead.cmd=CMD_ZAPTO;
 
 	msg.bouquet = bouquet;
+	msg.channel = channel;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+
+	zapit_close();
+}
+
+/* zaps to channel by nr */
+void CZapitClient::zapTo( unsigned int channel )
+{
+	commandHead msgHead;
+	commandZaptoChannelNr msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_ZAPTO_CHANNELNR;
+
 	msg.channel = channel;
 
 	zapit_connect();
