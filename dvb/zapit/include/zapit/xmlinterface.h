@@ -1,5 +1,5 @@
 /*
- * Header: /cvsroot/tuxbox/apps/zapit/xmlinterface.h,v 1.2 2002/09/19 10:24:50 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.4 2002/09/19 10:44:57 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
