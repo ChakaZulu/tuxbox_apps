@@ -4117,6 +4117,8 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	else
 	{
 		tm start = *localtime(&now);
+		start.tm_isdst=-1;
+
 		if (timer == "repeating")
 		{
 			start.tm_year = 70;  // 1.1.1970
@@ -4133,6 +4135,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 		start.tm_sec = 0;
 
 		tm end = *localtime(&now);
+		end.tm_isdst=-1;
 		if (timer == "repeating")
 		{
 			end.tm_year = 70;  // 1.1.1970

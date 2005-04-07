@@ -2517,6 +2517,8 @@ void eTimerEditView::applyPressed()
 
 bool eTimerEditView::getData( time_t &bTime, int &duration )
 {
+	beginTime.tm_isdst=-1;
+	endTime.tm_isdst=-1;
 	if ( multiple->isChecked() )
 	{
 		beginTime.tm_year = 70;  // 1.1.1970
