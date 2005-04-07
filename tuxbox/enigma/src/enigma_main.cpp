@@ -7317,22 +7317,22 @@ void eRecTimeInput::setPressed()
 	int min = num->getNumber(1);
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
-	struct tm *t = localtime( &now );
-
-	if ( hour*60+min < t->tm_hour*60+t->tm_min )
+	tm t = *localtime( &now );
+	t.tm_isdst=-1;
+	if ( hour*60+min < t.tm_hour*60+t.tm_min )
 	{
-		t->tm_mday++;
-		t->tm_hour = hour;
-		t->tm_min = min;
-		normalize(*t);
+		t.tm_mday++;
+		t.tm_hour = hour;
+		t.tm_min = min;
+		normalize(t);
 	}
 	else
 	{
-		t->tm_hour = hour;
-		t->tm_min = min;
+		t.tm_hour = hour;
+		t.tm_min = min;
 	}
 
-	time_t tmp = mktime( t );
+	time_t tmp = mktime(&t);
 
 	EITEvent *evt = new EITEvent();
 	evt->start_time = time(0)+eDVB::getInstance()->time_difference;

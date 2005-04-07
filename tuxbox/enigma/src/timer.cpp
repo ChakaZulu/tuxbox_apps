@@ -99,6 +99,9 @@ static time_t getNextEventStartTime( time_t t, int duration, int type, int last_
 	tm tmp = *localtime( &now ),  // now
 		tmp2 = *localtime( &t );    // activation hour:min
 
+	tmp.tm_isdst=-1;
+	tmp2.tm_isdst=-1;
+
 // calc mask for today weekday
 	int i = ePlaylistEntry::Su;
 	for ( int x = 0; x < tmp.tm_wday; x++ )

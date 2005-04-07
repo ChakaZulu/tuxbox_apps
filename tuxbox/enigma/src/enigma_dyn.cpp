@@ -3754,12 +3754,14 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
+	start.tm_isdst=-1;
 	tm end = *localtime(&now);
 	end.tm_mday = atoi(eday.c_str());
 	end.tm_mon = atoi(emonth.c_str()) -1 ;
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
+	end.tm_isdst=-1;
 
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
@@ -3929,6 +3931,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
+	start.tm_isdst=-1;
 	if (oldType & ePlaylistEntry::isRepeating)
 	{
 		start.tm_year = 70;  // 1.1.1970
@@ -3945,6 +3948,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	start.tm_sec = 0;
 
 	tm end = *localtime(&now);
+	end.tm_isdst=-1;
 	if (oldType & ePlaylistEntry::isRepeating)
 	{
 		end.tm_year = 70;  // 1.1.1970

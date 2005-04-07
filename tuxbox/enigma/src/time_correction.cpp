@@ -114,6 +114,7 @@ void eTimeCorrectionEditWindow::savePressed()
 	time_t now = time(0)+dvb.time_difference;
 
 	tm nowTime = *localtime( &now );
+	nowTime.tm_isdst=-1;
 	nowTime.tm_hour = nTime->getNumber(0);
 	nowTime.tm_min = nTime->getNumber(1);
 	nowTime.tm_mday = (int)cday->getCurrent()->getKey();
