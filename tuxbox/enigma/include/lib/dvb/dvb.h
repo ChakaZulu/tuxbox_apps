@@ -187,7 +187,7 @@ public:
 			if (inversion != 2 && c.inversion != 2 && inversion != c.inversion)
 				return 0;
 //			eDebug("orbital_position -> %i != %i", orbital_position, c.orbital_position);
-			if (orbital_position != c.orbital_position)
+			if (abs(orbital_position - c.orbital_position) > 5)
 				return 0;
 //			eDebug("Satellite Data is equal");
 			return 1;
@@ -197,7 +197,8 @@ public:
 			if ( frequency == s.frequency )
 			{
 				if ( symbol_rate == s.symbol_rate )
-					return orbital_position < s.orbital_position;
+					return abs(orbital_position - s.orbital_position) < 6 ? 0
+						: orbital_position < s.orbital_position;
 				else
 					return symbol_rate < s.symbol_rate;
 			}
@@ -710,6 +711,14 @@ public:
 	}
 };                     
 
+struct Orbital_Position_Compare
+{
+	inline bool operator()(const int &i1, const int &i2) const
+	{
+		return abs(i1-i2) < 6 ? false: i1 < i2;
+	}
+};
+
 struct eDiSEqC
 {
 	enum { AA=0, AB=1, BA=2, BB=3, SENDNO=4 /* and 0xF0 .. 0xFF*/  }; // DiSEqC Parameter
@@ -721,7 +730,7 @@ struct eDiSEqC
 	enum tMiniDiSEqCParam  { NO=0, A=1, B=2 };
 	tMiniDiSEqCParam MiniDiSEqCParam;
 
-	std::map< int, int > RotorTable; // used for Rotors does not support gotoXX Cmd
+	std::map< int, int, Orbital_Position_Compare > RotorTable; // used for Rotors does not support gotoXX Cmd
 	int DiSEqCRepeats;      // for cascaded switches
 	int FastDiSEqC;         // send no DiSEqC on H/V or Lo/Hi change
 	int SeqRepeat;          // send the complete DiSEqC Sequence twice...

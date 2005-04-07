@@ -141,9 +141,9 @@ RotorConfig::RotorConfig(eLNB *lnb )
 
 struct savePosition
 {
-	std::map<int,int> &map;
+	std::map<int,int,Orbital_Position_Compare> &map;
 
-	savePosition(std::map<int,int> &map): map(map)
+	savePosition(std::map<int,int,Orbital_Position_Compare> &map): map(map)
 	{
 	}
 

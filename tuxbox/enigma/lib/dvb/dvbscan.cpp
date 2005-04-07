@@ -12,7 +12,7 @@ inline int isValidONIDTSID(eOriginalNetworkID onid, eTransportStreamID tsid, int
 		case 0x00B1:
 			return tsid != 0x00B0;
 		case 0x0002:
-			return orbital_position == 282;
+			return abs(orbital_position-282) < 6;
 		default:
 			return onid.get() < 0xFF00;
 	}
@@ -240,6 +240,8 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 						{
 						case DESCR_SAT_DEL_SYS:
 							tp.setSatellite((SatelliteDeliverySystemDescriptor*)*d);
+							if ( abs(tp.satellite.orbital_position - knownTransponder.front().satellite.orbital_position) < 6 )
+								tp.satellite.orbital_position = knownTransponder.front().satellite.orbital_position;
 							break;
 						case DESCR_CABLE_DEL_SYS:
 							tp.setCable((CableDeliverySystemDescriptor*)*d);
@@ -469,7 +471,7 @@ bool eDVBScanController::addTransponder(const eTransponder &transponder)
 		transponder.transport_stream_id.get() );
 #endif
 	if ( transponder.satellite.valid &&
-			 abs(transponder.satellite.orbital_position-knownTransponder.front().satellite.orbital_position) > 4
+			 abs(transponder.satellite.orbital_position-knownTransponder.front().satellite.orbital_position) > 5
 			 && flags & flagSkipOtherOrbitalPositions )
 	{
 #if DEBUG_TO_FILE

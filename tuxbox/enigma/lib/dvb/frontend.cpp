@@ -1556,7 +1556,9 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 	{           
 		bool useGotoXX=false;
 
-		std::map<int,int>::iterator it = lnb->getDiSEqC().RotorTable.find( sat.getOrbitalPosition() );
+
+		std::map<int,int,Orbital_Position_Compare>::iterator it =
+			lnb->getDiSEqC().RotorTable.find( sat.getOrbitalPosition() );
 
 		if (it != lnb->getDiSEqC().RotorTable.end())  // position for selected sat found ?
 			RotorCmd=it->second;
@@ -1676,6 +1678,12 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 			}
 			sendRotorCmd++;
 		}
+	}
+
+	if ( curRotorPos > 10000 && !sendRotorCmd )
+	{
+		eDebug("reset Rotor cmd");
+		curRotorPos = 10000;
 	}
 
 #if 0
