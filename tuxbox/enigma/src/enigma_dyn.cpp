@@ -2604,6 +2604,7 @@ public:
 							eString tmp = filter_string(short_description);
 							tmp.strReplace("\'", "\\\'");
 							tmp.strReplace("\"", "\\\"");
+							tmp.strReplace("&", "~");
 							result  << "&descr=" << tmp
 								<< "&channel=" << filter_string(current->service_name)
 								<< "')\"><img src=\"timer.gif\" border=0></a>"
@@ -2825,6 +2826,7 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 				eString tmp = filter_string(description);
 				tmp.strReplace("\'", "\\\'");
 				tmp.strReplace("\"", "\\\"");
+				tmp.strReplace("&", "~");
 				result  << "&descr=" << tmp
 					<< "&channel=" << filter_string(current->service_name)
 					<< "')\"><img src=\"timer.gif\" border=0></a>"
@@ -4105,6 +4107,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString ehour = opt["ehour"];
 	eString emin = opt["emin"];
 	eString description = httpUnescape(opt["descr"]);
+	description.strReplace("~", "&");
 	eString channel = httpUnescape(opt["channel"]);
 	eString after_event = opt["after_event"];
 	eString timer = opt["timer"];
