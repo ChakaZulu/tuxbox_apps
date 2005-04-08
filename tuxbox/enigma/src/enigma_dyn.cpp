@@ -3736,10 +3736,12 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	eString command = opt["command"];
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
+	eString syear = opt["syear"];
 	eString shour = opt["shour"];
 	eString smin = opt["smin"];
 	eString eday = opt["eday"];
 	eString emonth = opt["emonth"];
+	eString eyear = opt["eyear"];
 	eString ehour = opt["ehour"];
 	eString emin = opt["emin"];
 	eString channel = httpUnescape(opt["channel"]);
@@ -3751,13 +3753,15 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	tm start = *localtime(&now);
 	start.tm_mday = atoi(sday.c_str());
 	start.tm_mon = atoi(smonth.c_str()) - 1;
+	start.tm_year = atoi(syear.c_str() - 1900);
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
 	start.tm_isdst=-1;
 	tm end = *localtime(&now);
 	end.tm_mday = atoi(eday.c_str());
-	end.tm_mon = atoi(emonth.c_str()) -1 ;
+	end.tm_mon = atoi(emonth.c_str()) - 1;
+	end.tm_year = atoi(eyear.c_str() - 1900);
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
@@ -3910,10 +3914,12 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
+	eString syear = opt["syear"];
 	eString shour = opt["shour"];
 	eString smin = opt["smin"];
 	eString eday = opt["eday"];
 	eString emonth = opt["emonth"];
+	eString eyear = opt["eyear"];
 	eString ehour = opt["ehour"];
 	eString emin = opt["emin"];
 	eString description = unHtmlChars(httpUnescape(opt["descr"]));
@@ -3942,6 +3948,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	{
 		start.tm_mday = atoi(sday.c_str());
 		start.tm_mon = atoi(smonth.c_str()) - 1;
+		start.tm_year = atoi(syear.c_str() - 1900);
 	}
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
@@ -3959,6 +3966,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	{
 		end.tm_mday = atoi(eday.c_str());
 		end.tm_mon = atoi(emonth.c_str()) -1;
+		end.tm_year = atoi(eyear.c_str() - 1900);
 	}
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
@@ -4089,6 +4097,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString eventDurationS = opt["duration"];
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
+	eString syear = opt["syear"];
 	eString shour = opt["shour"];
 	eString smin = opt["smin"];
 	eString eday = opt["eday"];
@@ -4133,6 +4142,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 		{
 			start.tm_mday = atoi(sday.c_str());
 			start.tm_mon = atoi(smonth.c_str()) - 1;
+			start.tm_year = atoi(syear.c_str() - 1900);
 		}
 		start.tm_hour = atoi(shour.c_str());
 		start.tm_min = atoi(smin.c_str());
@@ -4302,11 +4312,13 @@ static eString showEditTimerEventWindow(eString request, eString dirpath, eStrin
 
 	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
 	result.strReplace("#SMONTHOPTS#", genOptions(1, 12, 1, start.tm_mon + 1));
+	result.strReplace("#SYEAROPTS#", genOptions(start.tm_year + 1900, start.tm_year + 1904, 1, start.tm_year + 1900));
 	result.strReplace("#SHOUROPTS#", genOptions(0, 23, 1, start.tm_hour));
 	result.strReplace("#SMINOPTS#", genOptions(0, 55, 5, (start.tm_min / 5) * 5));
 
 	result.strReplace("#EDAYOPTS#", genOptions(1, 31, 1, end.tm_mday));
 	result.strReplace("#EMONTHOPTS#", genOptions(1, 12, 1, end.tm_mon + 1));
+	result.strReplace("#EYEAROPTS#", genOptions(start.tm_year + 1900, start.tm_year + 1904, 1, start.tm_year + 1900));
 	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, end.tm_min));
 	result.strReplace("#CHANNEL#", channel);
@@ -4344,11 +4356,13 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 
 	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
 	result.strReplace("#SMONTHOPTS#", genOptions(1, 12, 1, start.tm_mon + 1));
+	result.strReplace("#SYEAROPTS#", genOptions(start.tm_year + 1900, start.tm_year + 1904, 1, start.tm_year + 1900));
 	result.strReplace("#SHOUROPTS#", genOptions(0, 23, 1, start.tm_hour));
 	result.strReplace("#SMINOPTS#", genOptions(0, 55, 5, (start.tm_min / 5) * 5));
 
 	result.strReplace("#EDAYOPTS#", genOptions(1, 31, 1, end.tm_mday));
 	result.strReplace("#EMONTHOPTS#", genOptions(1, 12, 1, end.tm_mon + 1));
+	result.strReplace("#EYEAROPTS#", genOptions(start.tm_year + 1900, start.tm_year + 1904, 1, start.tm_year + 1900));
 	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
 

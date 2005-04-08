@@ -54,6 +54,10 @@
 						<select name="smonth" size="1">
 							#SMONTHOPTS#
 						</select>
+						.
+						<select name="syear" size="1">
+							#SYEAROPTS#
+						</select>
 						&nbsp;-&nbsp;
 						<select name="shour" size="1">
 							#SHOUROPTS#
@@ -74,6 +78,10 @@
 						<select name="emonth" size="1">
 							#EMONTHOPTS#
 						</select>
+						.
+						<select name="eyear" size="1">
+							#EYEAROPTS#
+						</select>
 						&nbsp;-&nbsp;
 						<select name="ehour" size="1">
 							#EHOUROPTS#
@@ -89,7 +97,7 @@
 						&nbsp;
 					</td>
 					<td>
-						Note: For one-time events days are not required.
+						Note: For one-time events the "days" field doesn't have to be specified.
 					</td>
 				</tr>
 				<tr>
