@@ -137,10 +137,22 @@ void eChannelInfo::ParseEITInfo(EITEvent *e)
 			
 		if(e->start_time!=0)
 		{
-			tm *time=localtime(&e->start_time);
-			starttime.sprintf("%02d:%02d", time->tm_hour, time->tm_min);
-							
-			t.sprintf("  (%dmin)", (int)(e->duration/60));
+			tm *stime=localtime(&e->start_time);
+			starttime.sprintf("%02d:%02d", stime->tm_hour, stime->tm_min);
+			int show_current_remaining=1;
+			eConfig::getInstance()->getKey("/ezap/osd/showCurrentRemaining", show_current_remaining);
+			if (show_current_remaining)
+			{
+				time_t now = time(0) + eDVB::getInstance()->time_difference;
+				int duration = e->duration - (now - e->start_time);
+				if ( duration > e->duration )
+					duration = e->duration;
+				else if ( duration < 0 )
+					duration = 0;
+				t.sprintf("  (+%dmin)", (int)(duration/60));
+			}
+			else
+				t.sprintf("  (%dmin)", (int)(e->duration/60));
 		}
 
 		if (e->free_CA_mode )
