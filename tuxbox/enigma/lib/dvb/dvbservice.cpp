@@ -710,13 +710,15 @@ void eDVBServiceController::TDTready(int error)
 			new_diff=enigma_diff;
 		}
 
+		time_t t = nowTime+new_diff;
+		lastTpTimeDifference=tdt->UTC_time-t;
+
 		if (!new_diff)
 		{
 			eDebug("[TIME] not changed");
 			return;
 		}
 
-		time_t t = nowTime+new_diff;
 		tm now = *localtime(&t);
 		eDebug("[TIME] time update to %02d:%02d:%02d",
 			now.tm_hour,
@@ -744,7 +746,6 @@ void eDVBServiceController::TDTready(int error)
 		else if ( !dvb.time_difference )
 			dvb.time_difference=1;
 
-		lastTpTimeDifference=tdt->UTC_time-t;
 		/*emit*/ dvb.timeUpdated();
 	}
 	else if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 ||
