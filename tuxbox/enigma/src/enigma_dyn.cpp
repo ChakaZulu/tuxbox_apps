@@ -61,7 +61,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.8.2"
+#define WEBIFVERSION "2.8.3"
 
 #define KEYBOARDTV 0
 #define KEYBOARDVIDEO 1
@@ -3756,7 +3756,7 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	start.tm_mday = atoi(sday.c_str());
 	start.tm_mon = atoi(smonth.c_str()) - 1;
 	if (syear)
-		start.tm_year = atoi(syear.c_str() - 1900);
+		start.tm_year = (atoi(syear.c_str()) % 100) + 100;
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
@@ -3765,7 +3765,7 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	end.tm_mday = atoi(eday.c_str());
 	end.tm_mon = atoi(emonth.c_str()) - 1;
 	if (eyear)
-		end.tm_year = atoi(eyear.c_str() - 1900);
+		end.tm_year = (atoi(eyear.c_str()) % 100) + 100;
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
