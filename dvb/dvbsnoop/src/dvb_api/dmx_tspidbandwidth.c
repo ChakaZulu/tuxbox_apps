@@ -1,17 +1,21 @@
 /*
-$Id: dmx_tspidbandwidth.c,v 1.9 2004/12/07 22:25:10 rasc Exp $
+$Id: dmx_tspidbandwidth.c,v 1.10 2005/04/09 10:59:00 rasc Exp $
 
 
  DVBSNOOP
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 $Log: dmx_tspidbandwidth.c,v $
+Revision 1.10  2005/04/09 10:59:00  rasc
+bandwidth for transponder pid 0x2000  (untested)
+(-s bandwidth  -tsraw)
+
 Revision 1.9  2004/12/07 22:25:10  rasc
  - New: bad ts packet counter  on -s bandwidth (tnx to W.J. Beksi, setabox for basic patch)
 
@@ -106,7 +110,11 @@ int ts_pidbandwidth (OPTION *opt)
 
 
 
-   pid = opt->pid;
+   if (opt->ts_raw_mode) {
+	   pid = PID_FULL_TS;
+   } else {
+	   pid = opt->pid;
+   }
 
 
 
@@ -114,10 +122,15 @@ int ts_pidbandwidth (OPTION *opt)
    out_nl (2,"");
    out_nl (2,"---------------------------------------------------------");
    out_nl (2,"PID bandwidth statistics...");
-    if (opt->rd_packet_count == 0) 
-	out_nl (2,"PID: %u (0x%04x)", pid, pid);
-    else 
-	out_nl (2,"PID: %u (0x%04x)    - max packet count: %ld ", pid, pid, opt->rd_packet_count);
+    if (opt->ts_raw_mode) {
+	out (2,"Full Transponder");
+    } else {
+	out (2,"PID: %u (0x%04x)", pid, pid);
+    }
+    if (opt->rd_packet_count != 0) {
+	out (2,"   - max packet count: %ld ", opt->rd_packet_count);
+    }
+    out_nl (2,"");
    out_nl (2,"---------------------------------------------------------");
 
 
@@ -328,4 +341,5 @@ static int ts_error_count (u_char *buf, int len)
 
 //
 // $$$ TODO:  TS continuity_counter check, if passed thru by firmware
-//
+// t.continuity_counter		 = getBits (b, 0,28, 4);
+
