@@ -3755,7 +3755,8 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	tm start = *localtime(&now);
 	start.tm_mday = atoi(sday.c_str());
 	start.tm_mon = atoi(smonth.c_str()) - 1;
-	start.tm_year = atoi(syear.c_str() - 1900);
+	if (syear)
+		start.tm_year = atoi(syear.c_str() - 1900);
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
@@ -3763,7 +3764,8 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	tm end = *localtime(&now);
 	end.tm_mday = atoi(eday.c_str());
 	end.tm_mon = atoi(emonth.c_str()) - 1;
-	end.tm_year = atoi(eyear.c_str() - 1900);
+	if (eyear)
+		end.tm_year = atoi(eyear.c_str() - 1900);
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
