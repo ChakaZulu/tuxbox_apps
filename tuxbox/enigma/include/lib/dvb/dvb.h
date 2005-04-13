@@ -367,9 +367,9 @@ public:
 
 	enum
 	{
-		dxNoDVB=1,
+		dxNoSDT=1,    // don't get SDT
 		dxDontshow=2,
-		dxNoPMT=4,
+		dxNoDVB=4,
 		dxHoldName=8
 	};
 	int dxflags;

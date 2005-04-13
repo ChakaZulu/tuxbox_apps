@@ -260,7 +260,7 @@ int eTransponder::isValid()
 
 void eServiceDVB::update(const SDTEntry *sdtentry)
 {
-	if (dxflags & dxNoDVB) // never ever update "manual" pids.
+	if (dxflags & dxNoSDT) // never ever update "manual" pids.
 		return;
 	if (eServiceID(sdtentry->service_id) != service_id)
 	{
@@ -921,7 +921,7 @@ void eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOr
 	bool changed=false;
 
 	for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator i(services.begin()); i != services.end(); ++i)
-		if ((!(i->second.dxflags & eServiceDVB::dxNoDVB)) &&  // never ever touch non-dvb services
+		if ((!(i->second.dxflags & eServiceDVB::dxNoSDT)) &&  // never ever touch non-dvb services
 				(i->first.getOriginalNetworkID() == onid)	&& // if service on this on
 				(i->first.getTransportStreamID() == tsid) && 	// and on this transponder (war das "first" hier wichtig?)
 				(i->first.getDVBNamespace() == dvbnamespace) && // and in this namespace

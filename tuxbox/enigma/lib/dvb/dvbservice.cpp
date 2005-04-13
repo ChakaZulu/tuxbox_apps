@@ -202,7 +202,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 	{
 //		eDebug("apid = %04x, vpid = %04x, pcrpid = %04x, tpid = %04x", Decoder::current.apid, Decoder::current.vpid, Decoder::current.pcrpid, Decoder::current.tpid );
 		/*emit*/ dvb.enterTransponder(event.transponder);
-		int nopmt=0;
+		int nodvb=0;
 
 		spSID=service.getServiceID().get();
   // do we haved fixed or cached PID values?
@@ -238,8 +238,8 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 // start yet...
 				Decoder::Set();
 
-				if (sp->dvb->dxflags & eServiceDVB::dxNoPMT)
-					nopmt=1;
+				if (sp->dvb->dxflags & eServiceDVB::dxNoDVB)
+					nodvb=1;  // dont use pat/pmt
 
 				spSID=sp->dvb->service_id.get();
 			}
@@ -253,7 +253,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 
 			break;
 		}
-		if (nopmt)  // dont get PMT and other..
+		if (nodvb)  // dont get PAT/PMT and other..
 		{
 			dvb.tEIT.start(new EIT(EIT::typeNowNext, spSID, EIT::tsActual));
 			service_state=0;
@@ -262,7 +262,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			dvb.setState(eDVBServiceState(eDVBServiceState::stateIdle));
 			break;
 		}
-		else if ( spSID ) // if not a dvb service, don't even try to search a PAT, PMT etc.
+		else if ( spSID )
 		{
 // workaround for zap in background before recordings
 			if ( Decoder::locked == 2 && !dvb.recorder )
@@ -334,7 +334,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		PAT *pat=dvb.tPAT.getCurrent();
 		PATEntry *pe=pat->searchService(spSID);
 		if (!pe)
-  {
+		{
 #ifndef DISABLE_FILE
 			if ( service.path ) // recorded ts
 			{
@@ -412,7 +412,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			eDebug("start PMT on demux0");
 			dvb.tPMT.start(new PMT(pmtpid, spSID));
 		}
-
 		break;
 	}	
 	case eDVBServiceEvent::eventServiceGotPMT:

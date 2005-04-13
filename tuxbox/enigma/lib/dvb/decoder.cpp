@@ -123,7 +123,7 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 
 int Decoder::Initialize()
 {
-	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = -1;
+	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = parms.pmtpid = -1;
 	parms.audio_type=0;
 	parms.descriptor_length=0;
 	parms.restart_camd=0;
@@ -142,7 +142,7 @@ void Decoder::Close()
 void Decoder::Flush()
 {
 //	eDebug("Decoder::Flush()");
-	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = -1;
+	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = parms.pmtpid = -1;
 	parms.audio_type=parms.descriptor_length=parms.restart_camd=0;
 	Set();
 }
