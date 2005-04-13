@@ -2077,7 +2077,7 @@ void ManualPIDWindow::hexdec()
 	int maxchars=4;
 	if (!hex)
 	{
-		eConfig::getInstance()->setKey("/elitedvb/scan/manualpids/hexdec", 1);
+		eConfig::getInstance()->setKey("/elitedvb/scan/manualpids/hexdec", 2);
 		useablechars = "1234567890";
 		maxchars=5;
 		bHexDec->setText("HEX");
@@ -2085,7 +2085,7 @@ void ManualPIDWindow::hexdec()
 	}
 	else
 	{
-		eConfig::getInstance()->setKey("/elitedvb/scan/manualpids/hexdec", 2);
+		eConfig::getInstance()->setKey("/elitedvb/scan/manualpids/hexdec", 1);
 		bHexDec->setText("DEC");
 		bHexDec->setHelpText(_("show/enter values as decimal"));
 	}
