@@ -1445,24 +1445,6 @@ int TransponderScan::eventHandler( const eWidgetEvent &event )
 	return eWindow::eventHandler( event );
 }
 
-#if 0
-class ManualPIDWindow: public eWindow
-{
-	eTextInputField *name, *provider;
-	eTextInputField *vpid, *apid, *pcrpid, *tpid, *pmtpid,
-					*tsid, *onid, *sid;
-	eButton *bReadPMT, *bSetPIDs, *bReadNIT, *bStore, *bHexDec;
-	PMT *pmt;
-	void gotPMT(int);
-	void readPMT();
-	void setPIDs();
-	void store();
-	void hexdec();
-public:
-	ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &ref = eServiceReferenceDVB() );
-};
-#endif
-
 class testWidget : public eWidget
 {
 	int eventHandler( const eWidgetEvent &evt )
