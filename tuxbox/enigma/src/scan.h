@@ -15,6 +15,7 @@ class eTransponderWidget;
 class eFEStatusWidget;
 class eDVBEvent;
 class eDVBState;
+class eTextInputField;
 
 struct scanEntry
 {
@@ -41,16 +42,14 @@ public:
 class tsManual: public eWidget
 {
 	eTransponder transponder;
-	eButton *b_start;
+	eButton *b_start, *b_manual_pids;
 	eTransponderWidget *transponder_widget;
 	eFEStatusWidget *festatus_widget;
 	eCheckbox *c_onlyFree, *c_searchnit, *c_useonit, *c_usebat;
-	eTimer updateTimer;
 	void start();
 	void abort();
 	void retune();
-	void update();
-	int eventHandler(const eWidgetEvent &event);
+	void manual_pids();
 public:
 	tsManual(eWidget *parent, const eTransponder &transponder, eWidget* LCDTitle=0, eWidget* LCDElement=0);
 	eTransponder &getTransponder() { return transponder; }
@@ -180,6 +179,29 @@ public:
 	int Exec();
 private:
 	tState stateInitial;
+};
+
+class ManualPIDWindow: public eWindow
+{
+	bool hex;
+	eTransponder transponder;
+	eServiceReferenceDVB service;
+	eTextInputField *name, *provider,
+					*vpid, *apid, *pcrpid, *tpid,
+					*tsid, *onid, *sid;
+	eCheckbox *cNoDVB, *cUseSDT, *cHoldName, *isAC3Pid;
+	eButton *bReadNIT, *bSetPIDs, *bStore, *bHexDec;
+	PAT *pat;
+	NIT *nit;
+	void gotPAT(int);
+	void gotNIT(int);
+	void startNIT();
+	void setPIDs();
+	void store();
+	void hexdec();
+public:
+	ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &ref = eServiceReferenceDVB() );
+	~ManualPIDWindow();
 };
 
 #endif

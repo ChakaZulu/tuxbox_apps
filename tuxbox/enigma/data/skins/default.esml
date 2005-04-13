@@ -514,7 +514,8 @@
 			<eCheckbox text="use BAT" name="usebat" position="240:e-110" size="200:30" helptext="enable/disable use BAT for scan (if exists)" />
 			<eCheckbox text="only Free" name="onlyFree" position="10:e-80" size="230:30" helptext="add only not scrambled services" />
 			<eCheckbox text="network search" name="searchnit" position="240:e-80" size="200:30" helptext="enable/disable initiate network search" />
-			<eButton text="start scan" name="start" position="10:e-40" size="260:40" helptext="start the transponder scan" loadDeco="" vcenter="on" shortcut="green" />
+			<eButton text="start scan" name="start" position="10:e-40" size="215:40" helptext="start the transponder scan" loadDeco="" vcenter="on" shortcut="green" />
+			<eButton text="enter pids" name="manual_pids" position="235:e-40" size="215:40" helptext="enter manual pids" loadDeco="" vcenter="on" shortcut="yellow" />
 		</tsManual>
 	</object>
 

@@ -65,7 +65,7 @@ int tsSelectType::eventHandler(const eWidgetEvent &event)
 }
 
 tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LCDTitle, eWidget *LCDElement)
-:eWidget(parent), transponder(transponder), updateTimer(eApp)
+:eWidget(parent), transponder(transponder)
 {
 #ifndef DISABLE_LCD
 	setLCD(LCDTitle, LCDElement);
@@ -106,6 +106,9 @@ tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LC
 	b_start=new eButton(this);
 	b_start->setName("start");
 
+	b_manual_pids=new eButton(this);
+	b_manual_pids->setName("manual_pids");
+
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "tsManual"))
 		eFatal("skin load of \"tsManual\" failed");
@@ -114,19 +117,9 @@ tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LC
 	transponder_widget->setTransponder(&transponder);
 
 	CONNECT(b_start->selected, tsManual::start);
+	CONNECT(b_manual_pids->selected, tsManual::manual_pids);
 	CONNECT(transponder_widget->updated, tsManual::retune);
-//	CONNECT(updateTimer.timeout, tsManual::update );
 	setHelpID(62);
-}
-
-void tsManual::update()
-{
-	int status=eFrontend::getInstance()->Status();
-	if (!(status & FE_HAS_LOCK))
-	{
-		if (!transponder_widget->getTransponder(&transponder))
-			transponder.tune();
-	}
 }
 
 void tsManual::start()
@@ -148,26 +141,25 @@ void tsManual::start()
 	}
 }
 
+void tsManual::manual_pids()
+{
+	parent->hide();
+	transponder.original_network_id=0;
+	transponder.transport_stream_id=0;
+	ManualPIDWindow wnd(&transponder);
+#ifndef DISABLE_LCD
+	wnd.setLCD(LCDTitle, LCDElement);
+#endif
+	wnd.show();
+	wnd.exec();
+	wnd.hide();
+	parent->show();
+}
+
 void tsManual::retune()
 {
 	if (!transponder_widget->getTransponder(&transponder))
 		transponder.tune();
-}
-
-int tsManual::eventHandler(const eWidgetEvent &event)
-{
-	switch (event.type)
-	{
-	case eWidgetEvent::execBegin:
-		updateTimer.start(1000);
-		break;
-	case eWidgetEvent::execDone:
-		updateTimer.stop();
-	default:
-		return eWidget::eventHandler(event);
-		break;
-	}
-	return 0;
 }
 
 tsTryLock::tsTryLock(eWidget *parent, tpPacket *packet, eString ttext)
@@ -284,6 +276,8 @@ int tsTryLock::eventHandler(const eWidgetEvent &e)
 				ev.parameter=-1;
 				return eWidget::eventHandler(ev);
 			}
+		default:
+			break;
 	}
 	return eWidget::eventHandler(e);
 }
@@ -1449,4 +1443,679 @@ int TransponderScan::eventHandler( const eWidgetEvent &event )
 			break;
 	}
 	return eWindow::eventHandler( event );
+}
+
+#if 0
+class ManualPIDWindow: public eWindow
+{
+	eTextInputField *name, *provider;
+	eTextInputField *vpid, *apid, *pcrpid, *tpid, *pmtpid,
+					*tsid, *onid, *sid;
+	eButton *bReadPMT, *bSetPIDs, *bReadNIT, *bStore, *bHexDec;
+	PMT *pmt;
+	void gotPMT(int);
+	void readPMT();
+	void setPIDs();
+	void store();
+	void hexdec();
+public:
+	ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &ref = eServiceReferenceDVB() );
+};
+#endif
+
+class testWidget : public eWidget
+{
+	int eventHandler( const eWidgetEvent &evt )
+	{
+		if ( evt.type == eWidgetEvent::evtAction )
+		{
+			close(0);
+			return 1;
+		}
+		return eWidget::eventHandler(evt);
+	}
+public:
+	testWidget()
+		:eWidget(0,1)
+	{
+		addActionMap(&i_cursorActions->map);
+		addActionMap(&i_listActions->map);
+		addActionMap(&i_focusActions->map);
+		addActionMap(&i_numberActions->map);
+	}
+};
+
+ManualPIDWindow::ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &ref )
+	:eWindow(0), hex(false), transponder(*eDVB::getInstance()->settings->getTransponders())
+	,service(ref), pat(0), nit(0)
+{
+	if ( tp )
+		transponder = *tp;
+	setText(_("Manual PIDs"));
+	cmove(ePoint(140, 98));
+	cresize(eSize(470, 425));
+
+	eSize s(clientrect.size());
+	s.setHeight( s.height() - 50 );
+
+	int yOffs=10;
+	int fs=24;
+	gFont fontfixed=eSkin::getActive()->queryFont("global.fixed");
+
+	eLabel *l = new eLabel(this);
+	l->move(ePoint(10, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setFlags(eLabel::flagVCenter);
+	l->setText("Name:");
+
+	name = new eTextInputField(this, l);
+	name->setFont(fontfixed);
+	name->move(ePoint(140, yOffs));
+	name->resize(eSize(s.width()-160, fs+10));
+	name->loadDeco();
+	name->setHelpText(_("to enter service name press OK"));
+	name->setEditHelpText(_("enter service name"));
+
+	yOffs += 40;
+
+	l = new eLabel(this);
+	l->move(ePoint(10, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setText("Provider:");
+	l->setFlags(eLabel::flagVCenter);
+
+	provider = new eTextInputField(this, l);
+	provider->setFont(fontfixed);
+	provider->move(ePoint(140, yOffs));
+	provider->resize(eSize(s.width()-160, fs+10));
+	provider->loadDeco();
+	provider->setHelpText(_("to enter provider name press OK"));
+	provider->setEditHelpText(_("enter provider name"));
+
+	yOffs += 40;
+
+	l = new eLabel(this);
+	l->move(ePoint(10, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setText("Video PID:");
+	l->setFlags(eLabel::flagVCenter);
+
+	vpid = new eTextInputField(this, l);
+	vpid->setFont(fontfixed);
+	vpid->move(ePoint(140, yOffs));
+	vpid->resize(eSize(75, fs+10));
+	vpid->loadDeco();
+	vpid->setHelpText(_("to enter video pid press OK"));
+	vpid->setEditHelpText(_("enter video pid"));
+
+	l = new eLabel(this);
+	l->move(ePoint(245, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setText("PCR PID:");
+	l->setFlags(eLabel::flagVCenter);
+
+	pcrpid = new eTextInputField(this, l);
+	pcrpid->move(ePoint(375, yOffs));
+	pcrpid->resize(eSize(75, fs+10));
+	pcrpid->setFont(fontfixed);
+	pcrpid->loadDeco();
+	pcrpid->setHelpText(_("to enter pcr pid press OK"));
+	pcrpid->setEditHelpText(_("enter pcr pid (in most case the same pid as the video pid)"));
+
+	yOffs += 40;
+
+	l = new eLabel(this);
+	l->move(ePoint(10, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setText("Audio PID:");
+	l->setFlags(eLabel::flagVCenter);
+
+	apid = new eTextInputField(this, l);
+	apid->setFont(fontfixed);
+	apid->move(ePoint(140, yOffs));
+	apid->resize(eSize(75, fs+10));
+	apid->loadDeco();
+	apid->setHelpText(_("to enter audio pid press OK"));
+	apid->setEditHelpText(_("enter audio pid"));
+
+	isAC3Pid = new eCheckbox(this, 0, 1);
+	isAC3Pid->move(ePoint(245, yOffs));
+	isAC3Pid->resize(eSize(140, fs+8));
+	isAC3Pid->loadDeco();
+	isAC3Pid->setText(_("is AC3 Pid"));
+	isAC3Pid->setHelpText(_("set this check when the entered audio pid is a ac3 audio pid"));
+
+	yOffs += 40;
+
+	l = new eLabel(this);
+	l->move(ePoint(10, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setText("Text PID:");
+	l->setFlags(eLabel::flagVCenter);
+
+	tpid = new eTextInputField(this, l);
+	tpid->setFont(fontfixed);
+	tpid->move(ePoint(140, yOffs));
+	tpid->resize(eSize(75, fs+10));
+	tpid->loadDeco();
+	tpid->setHelpText(_("to enter (video) text pid press OK"));
+	tpid->setEditHelpText(_("enter (video) text pid"));
+
+	l = new eLabel(this);
+	l->move(ePoint(245, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setText("Service ID:");
+	l->setFlags(eLabel::flagVCenter);
+
+	sid = new eTextInputField(this, l);
+	sid->setFont(fontfixed);
+	sid->move(ePoint(375, yOffs));
+	sid->resize(eSize(75, fs+10));
+	sid->loadDeco();
+	sid->setHelpText(_("to enter service id press OK"));
+	sid->setEditHelpText(_("enter service id"));
+
+	yOffs += 40;
+
+	l = new eLabel(this);
+	l->move(ePoint(10, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setText("TSID:");
+	l->setFlags(eLabel::flagVCenter);
+
+	tsid = new eTextInputField(this, l);
+	tsid->setFont(fontfixed);
+	tsid->move(ePoint(140, yOffs));
+	tsid->resize(eSize(75, fs+10));
+	tsid->loadDeco();
+	tsid->setHelpText(_("to enter tsid (transport stream id) press OK"));
+	tsid->setEditHelpText(_("enter tsid (transport stream id)"));
+
+	l = new eLabel(this);
+	l->move(ePoint(245, yOffs));
+	l->resize(eSize(120, fs+10));
+	l->setText("ONID:");
+	l->setFlags(eLabel::flagVCenter);
+
+	onid = new eTextInputField(this, l);
+	onid->setFont(fontfixed);
+	onid->move(ePoint(375, yOffs));
+	onid->resize(eSize(75, fs+10));
+	onid->loadDeco();
+	onid->setHelpText(_("to enter onid (original network id) press OK"));
+	onid->setEditHelpText(_("enter onid (original network id)"));
+
+	yOffs += 40;
+
+	cNoDVB = new eCheckbox(this, 0, 1);
+	cNoDVB->move(ePoint(10, yOffs));
+	cNoDVB->resize(eSize(140, fs+8));
+	cNoDVB->loadDeco();
+	cNoDVB->setText(_("no DVB"));
+	cNoDVB->setHelpText(_("don't read PAT/PMT/SDT for this service (only use cached pids)"));
+
+	cUseSDT = new eCheckbox(this, 0, 1);
+	cUseSDT->move(ePoint(165, yOffs));
+	cUseSDT->resize(eSize(140, fs+8));
+	cUseSDT->loadDeco();
+	cUseSDT->setText(_("use sdt"));
+	cUseSDT->setHelpText(_("update name/provider/service type with content of the sdt (and auto remove service)"));
+
+	cHoldName = new eCheckbox(this, 0, 1);
+	cHoldName->move(ePoint(320, yOffs));
+	cHoldName->resize(eSize(140, fs+8));
+	cHoldName->loadDeco();
+	cHoldName->setText(_("hold name"));
+	cHoldName->setHelpText(_("don't update the service name with content of the sdt"));
+
+	bHexDec = new eButton(this);
+	bHexDec->move(ePoint(10, clientrect.height()-40-10-80));
+	bHexDec->resize(eSize((clientrect.width()-40)/2, 35));
+	bHexDec->setShortcut("red");
+	bHexDec->setShortcutPixmap("red");
+	bHexDec->loadDeco();
+	CONNECT(bHexDec->selected, ManualPIDWindow::hexdec);
+
+	bReadNIT = new eButton(this);
+	bReadNIT->move(ePoint(10+(clientrect.width()-40)/2+10, clientrect.height()-40-10-80));
+	bReadNIT->resize(eSize((clientrect.width()-40)/2, 35));
+	bReadNIT->setText("read NIT");
+	bReadNIT->setHelpText(_("read tsid and onid from the nit (this can take up to 10 seconds)"));
+	bReadNIT->setShortcut("green");
+	bReadNIT->setShortcutPixmap("green");
+	bReadNIT->loadDeco();
+	CONNECT(bReadNIT->selected, ManualPIDWindow::startNIT);
+
+	bSetPIDs = new eButton(this);
+	bSetPIDs->move(ePoint(10, clientrect.height()-40-10-35));
+	bSetPIDs->resize(eSize((clientrect.width()-40)/2, 35));
+	bSetPIDs->setText("test values");
+	bSetPIDs->setHelpText(_("test entered values"));
+	bSetPIDs->setShortcut("yellow");
+	bSetPIDs->setShortcutPixmap("yellow");
+	bSetPIDs->loadDeco();
+	CONNECT(bSetPIDs->selected, ManualPIDWindow::setPIDs);
+
+	bStore = new eButton(this);
+	bStore->move(ePoint(10+(clientrect.width()-40)/2+10, clientrect.height()-40-10-35));
+	bStore->resize(eSize((clientrect.width()-40)/2, 35));
+	bStore->setText("save");
+	bStore->setHelpText(_("save data and close window (the new channel could be found in the all services list)"));
+	bStore->setShortcut("blue");
+	bStore->setShortcutPixmap("blue");
+	bStore->loadDeco();
+	CONNECT(bStore->selected, ManualPIDWindow::store);
+
+	eStatusBar *statusbar = new eStatusBar(this);
+	statusbar->loadDeco();
+	statusbar->move( ePoint(0, clientrect.height()-45) );
+	statusbar->resize( eSize(clientrect.width(), 45) );
+
+	int bla=1;
+	eConfig::getInstance()->getKey("/elitedvb/scan/manualpids/hexdec", bla);
+	while (bla--)
+		hexdec();
+
+	if ( service )
+	{
+		if ( !transponder.isValid() )
+		{
+			eTransponder *tmp =
+				eDVB::getInstance()->settings->getTransponders()->searchTS(
+					service.getDVBNamespace(), service.getTransportStreamID(), service.getOriginalNetworkID());
+			if ( tmp )
+				transponder = *tmp;
+		}
+		eService *sp=eServiceInterface::getInstance()->addRef(service);
+		if ( sp )
+		{
+			if ( sp->dvb )  // get cached pids when avail
+			{
+				int val=-1;
+				char tmp[6];
+				sprintf(tmp, hex?"%04x":"%d", sp->dvb->service_id.get());
+				sid->setText(tmp);
+				val=sp->dvb->get(eServiceDVB::cVPID);
+				if ( val != -1 )
+				{
+					sprintf(tmp, hex?"%04x":"%d", val);
+					vpid->setText(tmp);
+				}
+				else
+					vpid->setText("0");
+				val=sp->dvb->get(eServiceDVB::cAPID);
+				if ( val != -1 )
+				{
+					sprintf(tmp, hex?"%04x":"%d", val);
+					apid->setText(tmp);
+				}
+				else
+				{
+					val=sp->dvb->get(eServiceDVB::cAC3PID);
+					if ( val != -1 )
+					{
+						isAC3Pid->setCheck(1);
+						sprintf(tmp, hex?"%04x":"%d", val);
+						apid->setText(tmp);
+					}
+					else
+						apid->setText("0");
+				}
+				val=sp->dvb->get(eServiceDVB::cPCRPID);
+				if ( val != -1 )
+				{
+					sprintf(tmp, hex?"%04x":"%d", val);
+					pcrpid->setText(tmp);
+				}
+				else
+					pcrpid->setText("0");
+				val=sp->dvb->get(eServiceDVB::cTPID);
+				if ( val != -1 )
+				{
+					sprintf(tmp, hex?"%04x":"%d", val);
+					tpid->setText(tmp);
+				}
+			}
+			cUseSDT->setCheck( !(sp->dvb->dxflags & eServiceDVB::dxNoSDT) );
+			cHoldName->setCheck( sp->dvb->dxflags & eServiceDVB::dxHoldName );
+			cNoDVB->setCheck( sp->dvb->dxflags & eServiceDVB::dxNoDVB );
+			eServiceInterface::getInstance()->removeRef(service);
+		}
+	}
+	else
+	{
+		cNoDVB->setCheck(1);
+		cHoldName->setCheck(1);
+		name->setText("unnamed service");
+		eString service_provider;
+		if ( transponder.satellite.isValid() )
+		{
+			service_provider.sprintf("%d %d.%d°%c",
+				transponder.satellite.frequency/1000,
+				abs(transponder.satellite.orbital_position)/10,
+				abs(transponder.satellite.orbital_position)%10,
+				transponder.satellite.orbital_position > 0 ? 'E' : 'W');
+		}
+		else if ( transponder.cable.isValid() )
+			service_provider.sprintf("%d", transponder.cable.frequency/1000);
+		else if ( transponder.terrestrial.isValid() )
+			service_provider.sprintf("%d", transponder.terrestrial.centre_frequency/1000);
+		provider->setText(service_provider);
+	}
+	char tmp[6];
+	sprintf(tmp, hex?"%04x":"%d", transponder.transport_stream_id.get());
+	tsid->setText(tmp);
+	sprintf(tmp, hex?"%04x":"%d", transponder.original_network_id.get());
+	onid->setText(tmp);
+}
+
+ManualPIDWindow::~ManualPIDWindow()
+{
+	delete nit;
+	delete pat;
+}
+
+void ManualPIDWindow::startNIT()
+{
+	delete nit;
+	nit=0;
+	delete pat;
+	pat = new PAT();
+	CONNECT(pat->tableReady, ManualPIDWindow::gotNIT);
+	pat->start();
+}
+
+void ManualPIDWindow::gotNIT(int err)
+{
+	int nitpid = 0x10;
+	bool found=false;
+	if (!nit) // pat scan to find nit pid
+	{
+		if (!err)
+		{
+			PATEntry *p = pat->searchService(0); // NIT PID
+			if ( p )
+				nitpid = p->program_map_PID;
+		}
+		nit = new NIT(nitpid);
+		CONNECT(nit->tableReady, ManualPIDWindow::gotNIT);
+		nit->start();
+	}
+	else
+	{
+		if ( err )
+		{
+			eMessageBox mb(_("Reading NIT failed... this transponder have no NIT..\nso you can use random values for tsid and onid or set both to 0"),
+				_("Error"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK);
+			mb.show();
+			mb.exec();
+			mb.hide();
+		}
+		else
+		{
+			for (ePtrList<NITEntry>::iterator ne(nit->entries); ne != nit->entries.end(); ++ne)
+			{
+				eTransponder tmp(*eDVB::getInstance()->settings->getTransponders());
+				ePtrList<Descriptor>::iterator de(ne->transport_descriptor);
+				for (; de != ne->transport_descriptor.end(); ++de)
+				{
+					if ( transponder.satellite.isValid() && de->Tag() == DESCR_SAT_DEL_SYS )
+					{
+						tmp.setSatellite( (SatelliteDeliverySystemDescriptor*)*de );
+						break;
+					}
+					else if ( transponder.cable.isValid() && de->Tag() == DESCR_CABLE_DEL_SYS )
+					{
+						tmp.setCable( (CableDeliverySystemDescriptor*)*de );
+						break;
+					}
+					else if ( transponder.terrestrial.isValid() && de->Tag() == DESCR_TERR_DEL_SYS )
+					{
+						tmp.setTerrestrial( (TerrestrialDeliverySystemDescriptor*)*de );
+						break;
+					}
+				}
+				if (de != ne->transport_descriptor.end())
+				{
+					if ( tmp.satellite.isValid() )
+					{
+						if ( transponder.satellite == tmp.satellite )
+							found=true;
+						else if ( transponder.cable == tmp.cable )
+							found=true;
+						else if ( transponder.terrestrial == tmp.terrestrial )
+							found=true;
+						if ( found )
+						{
+							char tmp[6];
+							sprintf(tmp, hex?"%04x":"%d", ne->transport_stream_id);
+							tsid->setText( tmp );
+							sprintf(tmp, hex?"%04x":"%d", ne->original_network_id);
+							onid->setText( tmp );
+							return;
+						}
+					}
+				}
+			}
+		}
+		if ( !found )
+		{
+			eMessageBox mb(_("No NIT Entry for current transponder values found...\nso you can use random values for tsid and onid or set both to 0"),
+				_("Error"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK);
+			mb.show();
+			mb.exec();
+			mb.hide();
+		}
+	}
+}
+
+void ManualPIDWindow::setPIDs()
+{
+	Decoder::locked=0;
+	hide();
+	int val=0;
+	sscanf( vpid->getText().c_str(), hex?"%x":"%d", &val);
+	if ( val != 0 )
+	{
+		Decoder::parms.vpid = val;
+		val=0;
+	}
+	sscanf( apid->getText().c_str(), hex?"%x":"%d", &val);
+	if ( val != 0 )
+	{
+		Decoder::parms.apid = val;
+		val=0;
+	}
+	sscanf( tpid->getText().c_str(), hex?"%x":"%d", &val);
+	if ( val != 0 )
+	{
+		Decoder::parms.tpid = val;
+		val=0;
+	}
+	sscanf( pcrpid->getText().c_str(), hex?"%x":"%d", &val);
+	if ( val != 0 )
+		Decoder::parms.pcrpid = val;
+	Decoder::parms.audio_type =
+		isAC3Pid->isChecked() ? DECODE_AUDIO_AC3 : DECODE_AUDIO_MPEG;
+	Decoder::Set();
+	testWidget w;
+	w.show();
+	w.exec();
+	w.hide();
+	show();
+	Decoder::Flush();
+	Decoder::locked=1;
+	showScanPic();
+}
+
+void ManualPIDWindow::store()
+{
+	eDVBNamespace dvb_namespace;
+	int tsid=0,
+		onid=0;
+
+	eTransponderList &tlist =
+		*eTransponderList::getInstance();
+
+	if ( service )
+		tlist.removeService(service);
+	else
+		service.type = eServiceReference::idDVB;
+
+	if ( transponder.isValid() )
+	{
+		if ( !tlist.countServices(
+			transponder.dvb_namespace,
+			transponder.transport_stream_id,
+			transponder.original_network_id) )
+			tlist.removeTransponder(transponder);
+	}
+
+	sscanf(this->tsid->getText().c_str(), hex?"%x":"%d", &tsid);
+	sscanf(this->onid->getText().c_str(), hex?"%x":"%d", &onid);
+
+		// build "namespace" to work around buggy satellites
+	if (transponder.satellite.valid)
+		dvb_namespace=eTransponder::buildNamespace(onid, tsid,
+			transponder.satellite.orbital_position,
+			transponder.satellite.frequency,
+			transponder.satellite.polarisation);
+	else
+		dvb_namespace=0;
+
+	transponder.dvb_namespace=dvb_namespace;
+
+	eTransponder *tmp = 0;
+	if ( transponder.satellite.valid &&
+		dvb_namespace.get() & 0xFFFF )  // feeds.. scpc.. or muxxers with default values
+	{
+		// we must search transponder via freq pol usw..
+		transponder.transport_stream_id = -1;
+		transponder.original_network_id = -1;
+		tmp = tlist.searchTransponder(transponder);
+		transponder.transport_stream_id = tsid;
+		transponder.original_network_id = onid;
+	}
+
+	// ok we found the transponder, it seems to be valid
+	// get Reference to the new Transponder
+	eTransponder &real = tmp?*tmp:tlist.createTransponder(dvb_namespace, tsid, onid);
+
+	// replace referenced transponder with new transponderdata
+	if ( tmp )  // use existing transponder
+	{
+		dvb_namespace=tmp->dvb_namespace;
+		tsid=tmp->transport_stream_id.get();
+		onid=tmp->original_network_id.get();
+	}
+	else
+		real=transponder;  // save our frequency/sr/pol to transponderlist..
+
+	real.state=eTransponder::stateOK;
+
+	service.setTransportStreamID(real.transport_stream_id);
+	service.setOriginalNetworkID(real.original_network_id);
+	service.setDVBNamespace(real.dvb_namespace);
+	int tmpval=0;
+	sscanf(sid->getText().c_str(), hex?"%x":"%d", &tmpval);
+	service.setServiceID(eServiceID(tmpval));
+
+	if ( vpid->getText() != hex ? "0000" : "0" )
+		service.setServiceType(1);
+	else if ( apid->getText() != hex ? "0000" : "0" )
+		service.setServiceType(2);
+	else
+		service.setServiceType(100); // Data
+
+	eServiceDVB &s =
+		tlist.createService( service, -1, 0 );
+
+	// provider
+	s.service_provider = provider->getText();
+
+	// service name
+	s.service_name = name->getText();
+
+	// reset cached pids
+	s.clearCache();  
+
+	tmpval=0;
+	// video pid
+	sscanf( vpid->getText().c_str(), hex?"%x":"%d", &tmpval);
+	if (tmpval)
+	{
+		s.cache[eServiceDVB::cVPID]=tmpval;
+		tmpval=0;
+	}
+
+	// audio / ac3 pid
+	sscanf( apid->getText().c_str(), hex?"%x":"%d", &tmpval);
+	if (tmpval)
+	{
+		s.cache[isAC3Pid->isChecked()?eServiceDVB::cAC3PID:eServiceDVB::cAPID] = tmpval;
+		tmpval=0;
+	}
+
+	// text pid
+	sscanf( tpid->getText().c_str(), hex?"%x":"%d", &tmpval);
+	if (tmpval)
+	{
+		s.cache[eServiceDVB::cTPID]=tmpval;
+		tmpval=0;
+	}
+
+	// pcr pid
+	sscanf( pcrpid->getText().c_str(), hex?"%x":"%d", &tmpval);
+	if (tmpval)
+		s.cache[eServiceDVB::cPCRPID]=tmpval;
+
+	// DX Flags
+	s.dxflags=0;
+	if (cNoDVB->isChecked())
+		s.dxflags |= 4;
+	if (cUseSDT->isChecked())
+		s.dxflags |= 1;
+	if (cHoldName->isChecked())
+		s.dxflags |= 8;
+
+	s.service_type = service.getServiceType();
+
+	eDVB &dvb = *eDVB::getInstance();
+	dvb.settings->saveServices();
+	dvb.settings->sortInChannels();
+	dvb.settings->saveBouquets();
+
+	close(0);
+}
+
+void ManualPIDWindow::hexdec()
+{
+	hex = !hex;
+	const char *useablechars = "1234567890abcdefABCDEF";
+	int maxchars=4;
+	if (!hex)
+	{
+		eConfig::getInstance()->setKey("/elitedvb/scan/manualpids/hexdec", 1);
+		useablechars = "1234567890";
+		maxchars=5;
+		bHexDec->setText("HEX");
+		bHexDec->setHelpText(_("show/enter values as hexadecimal"));
+	}
+	else
+	{
+		eConfig::getInstance()->setKey("/elitedvb/scan/manualpids/hexdec", 2);
+		bHexDec->setText("DEC");
+		bHexDec->setHelpText(_("show/enter values as decimal"));
+	}
+	eTextInputField **p = ( &vpid < &sid ) ? &vpid : &sid;
+	for (int i=0; i < 7; ++i, ++p)
+	{
+		int val=0;
+		char tmp[6];
+		(*p)->setMaxChars(maxchars);
+		(*p)->setUseableChars(useablechars);
+		sscanf((*p)->getText().c_str(), hex?"%d":"%x", &val);
+		sprintf(tmp, hex?"%04x":"%d", val);
+		(*p)->setText(tmp);
+	}
 }

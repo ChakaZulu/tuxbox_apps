@@ -511,10 +511,7 @@ void eDVBServiceController::SDTready(int error)
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
 		if (sdt)
 		{
-			if ( transponder->state & eTransponder::stateOnlyFree )
-				dvb.settings->getTransponders()->handleSDT(sdt, service.getDVBNamespace(), -1, -1, &freeCheckFinishedCallback );
-			else
-				dvb.settings->getTransponders()->handleSDT(sdt, service.getDVBNamespace());
+			dvb.settings->getTransponders()->startHandleSDT(sdt, service.getDVBNamespace(), -1, -1, &freeCheckFinishedCallback, transponder->state & eTransponder::stateOnlyFree ? eTransponderList::SDT_SCAN_FREE : eTransponderList::SDT_SCAN );
 			sdt->unlock();
 		}
 	}

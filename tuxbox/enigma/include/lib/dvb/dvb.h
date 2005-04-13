@@ -808,6 +808,9 @@ protected:
 
 class eTransponderList: public existNetworks, public Object
 {
+public:
+	enum { SDT_SCAN_FREE, SDT_SCAN, SDT_SCAN_FINISHED, PAT_SCAN };
+private:
 	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
 	std::map<eServiceReferenceDVB,eServiceDVB> services;
@@ -819,8 +822,11 @@ class eTransponderList: public existNetworks, public Object
 
 	eServiceReferenceDVB newService;
 	ePtrList<SDTEntry>::const_iterator curSDTEntry;
+	ePtrList<PATEntry>::const_iterator curPATEntry;
 	Signal0<void> *callback;
 	std::set<eServiceID> newServiceIds;
+	std::set<eServiceID> checkedServiceIds;
+	int sdtscanstate;
 	void gotPMT(int);
 	void addService();
 	PMT *pmt; // for only free check
@@ -855,6 +861,7 @@ public:
 
 	eTransponder &createTransponder(eDVBNamespace dvb_namespace,eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eServiceDVB &createService(const eServiceReferenceDVB &service, int service_number=-1, bool *newService=0);
+	void startHandleSDT(const SDT *sdt, eDVBNamespace dvb_namespace, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1, Signal0<void> *callback=0, int sdtscanstate=SDT_SCAN );
 	void handleSDT(const SDT *sdt, eDVBNamespace dvb_namespace, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1, Signal0<void> *callback=0 );
 	Signal1<void, eTransponder*> transponder_added;
 	Signal2<void, const eServiceReferenceDVB &, bool> service_found;
@@ -865,6 +872,23 @@ public:
 	eServiceDVB *searchService(const eServiceReference &service);
 	const eServiceReferenceDVB *searchService(eDVBNamespace dvbnamespace, eOriginalNetworkID original_network_id, eServiceID service_id);
 	eServiceReferenceDVB searchServiceByNumber(int channel_number);
+	int countServices( eDVBNamespace dvbnamespace, eTransportStreamID tsid, eOriginalNetworkID onid )
+	{
+		int cnt=0;
+		for ( std::map<eServiceReferenceDVB,eServiceDVB>::iterator it(services.begin());
+			it != services.end(); ++it )
+		{
+			if ( it->first.getDVBNamespace() == dvbnamespace &&
+				it->first.getTransportStreamID() == tsid &&
+				it->first.getOriginalNetworkID() == onid )
+				++cnt;
+		}
+		return cnt;
+	}
+	void removeTransponder( const tsref ts )
+	{
+		transponders.erase(ts);
+	}
 
 	template <class T> 
 	void forEachService(T ob)

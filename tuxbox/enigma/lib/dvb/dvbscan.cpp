@@ -181,22 +181,15 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 	case eDVBScanEvent::eventScanGotSDT:
 	{
 		eDebug("[SCAN] eventScanGotSDT");
+		dvb.setState(eDVBScanState(eDVBScanState::stateScanWait));
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
 		if (sdt)
 		{
 			handleSDT(sdt);
 			sdt->unlock();
-			if ( flags & flagOnlyFree )
-			{
-				dvb.setState(eDVBScanState(eDVBScanState::stateScanWait));
-				break;
-			}
 		}
-
-		scanOK|=1;
-		eDebug("scanOK %d", scanOK);
-		if (scanOK==15)
-			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanComplete));
+		else
+			handleSDT(0);
 
 		if (flags & flagUseBAT)
 			dvb.tBAT.start(new BAT());
@@ -377,9 +370,9 @@ void eDVBScanController::BATready(int error)
 void eDVBScanController::handleSDT(const SDT *sdt)
 {
 	eTransponder *old=0;
-// update tsid / onid
-	eTransportStreamID tsid=sdt->transport_stream_id;
-	eOriginalNetworkID onid=sdt->original_network_id;
+	// update tsid / onid
+	eTransportStreamID tsid=sdt?sdt->transport_stream_id:transponder->transport_stream_id;
+	eOriginalNetworkID onid=sdt?sdt->original_network_id:transponder->original_network_id;
 
 	if (transponder->transport_stream_id != tsid.get() ||
 			transponder->original_network_id != onid.get())
@@ -403,7 +396,8 @@ void eDVBScanController::handleSDT(const SDT *sdt)
 	transponder->dvb_namespace=dvb_namespace;
 
 	eTransponder *tmp = 0;
-	if ( transponder->satellite.valid && !isValidONIDTSID(onid,tsid,transponder->satellite.orbital_position) )  // feeds.. scpc.. or muxxers with default values
+	if ( transponder->satellite.valid &&
+		dvb_namespace.get() & 0xFFFF )  // feeds.. scpc.. or muxxers with default values
 	{
 		eDebug("[SCAN] SCPC detected... compare complete transponder");
 		// we must search transponder via freq pol usw..
@@ -444,10 +438,7 @@ void eDVBScanController::handleSDT(const SDT *sdt)
 				it->state=eTransponder::stateError;
 			}
 
-	if ( flags & flagOnlyFree )
-		dvb.settings->getTransponders()->handleSDT(sdt,dvb_namespace,onid,tsid,&freeCheckFinishedCallback );
-	else
-		dvb.settings->getTransponders()->handleSDT(sdt,dvb_namespace,onid,tsid);
+	dvb.settings->getTransponders()->startHandleSDT(sdt,dvb_namespace,onid,tsid,&freeCheckFinishedCallback, flags&flagOnlyFree?eTransponderList::SDT_SCAN_FREE:eTransponderList::SDT_SCAN );
 }
 
 #if DEBUG_TO_FILE
