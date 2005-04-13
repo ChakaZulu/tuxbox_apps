@@ -78,6 +78,7 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 	switch (event.type)
 	{
 		case eWidgetEvent::evtShortcut:
+			parent->setFocus(this);
 			onOkPressed();
 			break;
 		case eWidgetEvent::changedPosition:

@@ -489,29 +489,29 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 					parent->reject();
 				break;
 			}
-			else if (event.action == &i_numberActions->key0)
+			else if (event.action == &i_numberActions->key0 && editMode )
 				key=0;
-			else if (event.action == &i_numberActions->key1)
+			else if (event.action == &i_numberActions->key1 && editMode )
 				key=1;
-			else if (event.action == &i_numberActions->key2)
+			else if (event.action == &i_numberActions->key2 && editMode )
 				key=2;
-			else if (event.action == &i_numberActions->key3)
+			else if (event.action == &i_numberActions->key3 && editMode )
 				key=3;
-			else if (event.action == &i_numberActions->key4)
+			else if (event.action == &i_numberActions->key4 && editMode )
 				key=4;
-			else if (event.action == &i_numberActions->key5)
+			else if (event.action == &i_numberActions->key5 && editMode )
 				key=5;
-			else if (event.action == &i_numberActions->key6)
+			else if (event.action == &i_numberActions->key6 && editMode )
 				key=6;
-			else if (event.action == &i_numberActions->key7)
+			else if (event.action == &i_numberActions->key7 && editMode )
 				key=7;
-			else if (event.action == &i_numberActions->key8)
+			else if (event.action == &i_numberActions->key8 && editMode )
 				key=8;
-			else if (event.action == &i_numberActions->key9)
+			else if (event.action == &i_numberActions->key9 && editMode )
 				key=9;
-			else if (event.action == &i_numberActions->keyExt1)
+			else if (event.action == &i_numberActions->keyExt1 && editMode )
 				key=10;
-			else if (event.action == &i_numberActions->keyExt2)
+			else if (event.action == &i_numberActions->keyExt2 && editMode )
 				key=11;
 			else
 				return eButton::eventHandler( event );
