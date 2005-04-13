@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.105 2005/02/19 16:52:02 metallica Exp $
+  $Id: movieplayer.cpp,v 1.106 2005/04/13 17:19:40 mogway Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -185,7 +185,7 @@ CMoviePlayerGui::CMoviePlayerGui()
 	Path_vlc_settings = g_settings.streaming_server_startdir;
 
 	if(g_settings.filebrowser_denydirectoryleave)
-		filebrowser = new CFileBrowser (Path_local.c_str());	// with filebrowser patch 
+		filebrowser = new CFileBrowser (Path_local.c_str());	// with filebrowser patch
 	else
 		filebrowser	= new CFileBrowser();
 	filebrowser->Multi_Select = false;
@@ -272,7 +272,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 
 	if(actionKey=="fileplayback")
 	{
-		PlayStream (STREAMTYPE_FILE);  
+		PlayStream (STREAMTYPE_FILE);
 	}
 	else if(actionKey=="dvdplayback")
 	{
@@ -302,7 +302,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 			int vlcpos = startfilename.rfind("vlc://");
 			if(vlcpos==0)
 			{
-				PlayStream (STREAMTYPE_FILE);   
+				PlayStream (STREAMTYPE_FILE);
 			}
 			else
 			{
@@ -352,7 +352,7 @@ CURLcode sendGetRequest (const std::string & url, std::string & response, bool u
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
 	curl_easy_setopt (curl, CURLOPT_FILE, (void *)&response);
 	if(useAuthorization)	curl_easy_setopt (curl, CURLOPT_USERPWD, "admin:admin");	/* !!! make me customizable */
-	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true); 
+	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
 	httpres = curl_easy_perform (curl);
 	//printf ("[movieplayer.cpp] HTTP Result: %d\n", httpres);
 	curl_easy_cleanup (curl);
@@ -549,7 +549,7 @@ ReceiveStreamThread (void *mrl)
 	std::string sMRL=(char*)mrl;
 	//Menu Option Force Transcode: Transcode all Files, including mpegs.
 	if((!memcmp((char*)mrl, "vcd:", 4) ||
-		 !strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "mpg") || 
+		 !strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "mpg") ||
 		 !strcasecmp(sMRL.substr(sMRL.length()-4).c_str(), "mpeg") ||
 		 !strcasecmp(sMRL.substr(sMRL.length()-3).c_str(), "m2p")))
 	{
@@ -647,6 +647,11 @@ ReceiveStreamThread (void *mrl)
 				found = 0;
 			}
 		}
+		if(g_playstate == CMoviePlayerGui::STOPPED)
+		{
+			close(skt);
+			pthread_exit(NULL);
+		}
 	}
 	vlc_is_sending:
 	printf ("[movieplayer.cpp] Now VLC is sending. Read sockets created\n");
@@ -688,7 +693,7 @@ ReceiveStreamThread (void *mrl)
 			else
 			{
 				printf("[movieplayer.cpp] Searching for vpid and apid\n");
-				// find apid and vpid. Easiest way to do that is to write the TS to a file 
+				// find apid and vpid. Easiest way to do that is to write the TS to a file
 				// and use the usual find_avpids function. This is not even overhead as the
 				// buffer needs to be prefilled anyway
 				close (fd);
@@ -752,7 +757,7 @@ ReceiveStreamThread (void *mrl)
 					if(nothingreceived > (buffer_time + 3)*100) // wait at least buffer time secs +3 to play buffer when stream ends
 					{
 						printf ("[movieplayer.cpp] ReceiveStreamthread: Didn't receive for a while. Stopping.\n");
-						g_playstate = CMoviePlayerGui::STOPPED;   
+						g_playstate = CMoviePlayerGui::STOPPED;
 					}
 					usleep(10000);	//sleep 10 ms
 				}
@@ -907,7 +912,7 @@ PlayStreamThread (void *mrl)
 
 					while(g_playstate == CMoviePlayerGui::PAUSE)
 					{
-						//ioctl (dmxv, DMX_STOP);	
+						//ioctl (dmxv, DMX_STOP);
 						//ioctl (dmxa, DMX_STOP);
 						usleep(100000); // no busy wait
 					}
@@ -935,7 +940,7 @@ PlayStreamThread (void *mrl)
 					ioctl (dmxa, DMX_STOP);
 					printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
 					/*
-					 * always call bufferingBox->paint() before setting bufferfilled to false 
+					 * always call bufferingBox->paint() before setting bufferfilled to false
 					 * to ensure that it is painted completely before bufferingBox->hide()
 					 * might be called by ReceiveStreamThread (otherwise the hintbox's window
 					 * variable is deleted while being used)
@@ -950,7 +955,7 @@ PlayStreamThread (void *mrl)
 					{
 						printf("[movieplayer.cpp] Buffering approx. 3 seconds\n");
 						/*
-						 * always call bufferingBox->paint() before setting bufferfilled to false 
+						 * always call bufferingBox->paint() before setting bufferfilled to false
 						 * to ensure that it is painted completely before bufferingBox->hide()
 						 * might be called by ReceiveStreamThread (otherwise the hintbox's window
 						 * variable is deleted while being used)
@@ -1092,28 +1097,28 @@ void updateLcd(const std::string & sel_filename)
 	}
 
 	CLCD::getInstance()->showServicename(lcd);
-}  
+}
 
 // GMO snip start ...
 
-//===========================	
+//===========================
 //== PlayFile Thread Stuff ==
 //===========================
-#define PF_BUF_SIZE   (800*188)	
+#define PF_BUF_SIZE   (800*188)
 #define PF_DMX_SIZE   (PF_BUF_SIZE + PF_BUF_SIZE/2)
 #define PF_RD_TIMEOUT 3000
 #define PF_EMPTY      0
 #define PF_READY      1
 #define PF_LST_ITEMS  30
 #define PF_SKPOS_OFFS MINUTEOFFSET
-#define PF_JMP_DIV    4  
+#define PF_JMP_DIV    4
 #define PF_JMP_START  0
 #define PF_JMP_MID    5555
 #define PF_JMP_END    9999
 
 //-- live stream item --
 //----------------------
-typedef struct 
+typedef struct
 {
 	std::string        pname;
 	std::string        ip;
@@ -1145,7 +1150,7 @@ typedef struct
 	off_t pos;
 	off_t fileSize;
 
-	int   readSize;  
+	int   readSize;
 	char  dvrBuf[PF_BUF_SIZE];
 	bool  refillBuffer;
 	bool  startDMX;
@@ -1176,7 +1181,7 @@ static void mp_analyze(MP_CTX *ctx);
 //== seek to pos with sync to next proper TS packet ==
 //== returns offset to start of TS packet or actual ==
 //== pos on failure.                                ==
-//==================================================== 
+//====================================================
 #define SIZE_TS_PKT 188
 #define SIZE_PROBE  (100*SIZE_TS_PKT)
 
@@ -1185,7 +1190,7 @@ static off_t mp_seekSync(int fd, off_t pos)
 	off_t   npos = pos;
 	uint8_t pkt[SIZE_TS_PKT];
 
-	lseek(fd, npos, SEEK_SET); 
+	lseek(fd, npos, SEEK_SET);
 	while( read(fd, pkt, 1) > 0 )
 	{
 		//-- check every byte until sync word reached --
@@ -1198,7 +1203,7 @@ static off_t mp_seekSync(int fd, off_t pos)
 				if(pkt[SIZE_TS_PKT-1] == 0x47)
 					return lseek(fd, npos-1, SEEK_SET);	// assume sync ok
 				else
-					lseek(fd, npos, SEEK_SET);	 // ups, next pkt doesn't start with sync 
+					lseek(fd, npos, SEEK_SET);	 // ups, next pkt doesn't start with sync
 			}
 		}
 
@@ -1206,7 +1211,7 @@ static off_t mp_seekSync(int fd, off_t pos)
 		if(npos > (pos+SIZE_PROBE)) break;
 	}
 
-	//-- on error stay on actual position -- 
+	//-- on error stay on actual position --
 	return lseek(fd, 0, SEEK_CUR);
 }
 
@@ -1287,7 +1292,7 @@ static void mp_softReset(MP_CTX *ctx, bool refill = true)
 	//-- setup DMX devices (again) --
 	ctx->p.input    = DMX_IN_DVR;
 	ctx->p.output   = DMX_OUT_DECODER;
-	ctx->p.flags    = 0; 
+	ctx->p.flags    = 0;
 
 	ctx->p.pid      = ctx->pida;
 	ctx->p.pes_type = DMX_PES_AUDIO;
@@ -1300,7 +1305,7 @@ static void mp_softReset(MP_CTX *ctx, bool refill = true)
 	ioctl (ctx->dmxv, DMX_SET_BUFFER_SIZE, PF_DMX_SIZE);
 	ioctl (ctx->dmxv, DMX_SET_PES_FILTER, &(ctx->p));
 
-	//-- switch audio decoder bypass depending on audio type --  
+	//-- switch audio decoder bypass depending on audio type --
 	if(ctx->ac3 == 1)
 		ioctl(ctx->adec, AUDIO_SET_BYPASS_MODE,0UL);	// bypass on
 	else
@@ -1327,7 +1332,7 @@ static void mp_freezeAV(MP_CTX *ctx)
 	ioctl(ctx->vdec, VIDEO_FREEZE);
 	ioctl(ctx->adec, AUDIO_PAUSE);
 
-	//-- workaround: switch off decoder bypass for AC3 audio -- 
+	//-- workaround: switch off decoder bypass for AC3 audio --
 	if(ctx->ac3 == 1)
 		ioctl(ctx->adec, AUDIO_SET_BYPASS_MODE, 1UL);
 }
@@ -1347,7 +1352,7 @@ static void mp_unfreezeAV(MP_CTX *ctx)
 	ioctl (ctx->dmxa, DMX_START);
 
 	ioctl(ctx->adec, AUDIO_PLAY);					// audio
-	
+
 	ioctl(ctx->vdec, VIDEO_PLAY);					// video
 	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);	// needs sync !
 }
@@ -1395,7 +1400,7 @@ static void mp_checkEvent(MP_CTX *ctx)
 			break;
 
 			//-- next item of program/play-list   --
-			//-------------------------------------- 
+			//--------------------------------------
 		case CMoviePlayerGui::ITEMSELECT:
 			g_playstate = CMoviePlayerGui::PLAY;
 
@@ -1438,7 +1443,7 @@ static void mp_checkEvent(MP_CTX *ctx)
 
 			}
 			// Note: "itChanged" event will cause exit of the main reader
-			// loop to select another ts file with full reinitialzing 
+			// loop to select another ts file with full reinitialzing
 			// of the player thread (including FreezeAV/SoftReset) ...
 			break;
 
@@ -1473,7 +1478,7 @@ static void mp_checkEvent(MP_CTX *ctx)
 					break;
 
 				case PF_JMP_END:
-					ctx->pos = ctx->pos = ctx->fileSize - PF_SKPOS_OFFS; 
+					ctx->pos = ctx->pos = ctx->fileSize - PF_SKPOS_OFFS;
 					break;
 
 				default:
@@ -1485,9 +1490,9 @@ static void mp_checkEvent(MP_CTX *ctx)
 			if(ctx->pos >= ctx->fileSize)	ctx->pos = ctx->fileSize - PF_SKPOS_OFFS;
 			if(ctx->pos < ((off_t)0)) ctx->pos = (off_t)0;
 
-			//-- jump to desired file position --  
+			//-- jump to desired file position --
 			ctx->pos = mp_seekSync(ctx->inFd, ctx->pos);
-			fprintf(stderr,"[mp] jump to pos (%lld) of total (%lld)\n", 
+			fprintf(stderr,"[mp] jump to pos (%lld) of total (%lld)\n",
 					  ctx->pos, ctx->fileSize);
 
 			//-- Note: the following "SoftReset" call will --
@@ -1574,13 +1579,13 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 {
 	FILE *fp;
 
-	ctx->isStream  = false; 
+	ctx->isStream  = false;
 	ctx->itChanged = false;
 	ctx->lst_cnt   = 0;
 	ctx->it        = 0;
 
 	if( (fp = fopen(fname, "r")) == NULL )
-		return false; // error 
+		return false; // error
 
 	if(fgets(ctx->dvrBuf, PF_BUF_SIZE-1, fp))
 	{
@@ -1601,11 +1606,11 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 				//-- "<progran name>=<ip>;<port>;<vpid>;<apid>;<zapto-id>\n" --
 				//-- example:                                                --
 				//--   PREMIERE1=dbox;31339;0x1ff;0x2ff;0x20085000a          --
-				//-- Note:                                                   -- 
+				//-- Note:                                                   --
 				//--   <zapto-id> can be "0" or "-1" to prevent zapping.     --
 				//--    with "-1" pause function will be enabled also.       --
 				//-------------------------------------------------------------
-				ntokens = 0;        
+				ntokens = 0;
 
 				//-- program name --
 				s1 = ctx->dvrBuf;
@@ -1684,7 +1689,7 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 				ctx->lst_cnt++;
 
 				if(ctx->lst_cnt==PF_LST_ITEMS) break; // prevent overflow
-			} 
+			}
 		}
 	}
 
@@ -1696,7 +1701,7 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 				  (ctx->isStream)?"(live)stream desc":"playlist", ctx->lst_cnt);
 	}
 
-	return true;  
+	return true;
 
 }
 
@@ -1712,7 +1717,7 @@ static void mp_analyze(MP_CTX *ctx)
 
 	for(int i=0; i<numpida; i++)
 	{
-		fprintf(stderr, "[mp] found pida[%d]: 0x%04X, ac3=%d\n", 
+		fprintf(stderr, "[mp] found pida[%d]: 0x%04X, ac3=%d\n",
 				  i, apids[i], ac3flags[i]);
 	}
 
@@ -1772,13 +1777,13 @@ static int mp_tcpOpen(const char *serverIp, unsigned short serverPort)
 	{
 		if( connect(fd, (struct sockaddr *)&ads, adsLen) == -1 )
 		{
-			close(fd); 
+			close(fd);
 			fd = -1;
 		}
 	}
 
 	return fd;
-}  
+}
 
 static void mp_tcpClose(int fd)
 {
@@ -1837,7 +1842,7 @@ void *mp_playFileThread (void *filename)
 	do
 	{
 		//-- (live) stream or ... --
-		//--------------------------  
+		//--------------------------
 		if(ctx->isStream)
 		{
 			MP_LST_ITEM *lstIt = &(ctx->lst[ctx->it]);
@@ -1855,11 +1860,11 @@ void *mp_playFileThread (void *filename)
 				//-- connect to dbox http-server --
 				if( (zapFd = mp_tcpOpen(lstIt->ip.c_str(), 80)) != -1 )
 				{
-					//-- request zapping -- 
+					//-- request zapping --
 					sprintf
 					(
 					ctx->dvrBuf,
-					"GET /control/zapto?0x%llx HTTP/1.0\r\n", 
+					"GET /control/zapto?0x%llx HTTP/1.0\r\n",
 					lstIt->zapid
 					);
 
@@ -1869,7 +1874,7 @@ void *mp_playFileThread (void *filename)
 					mp_tcpClose(zapFd);
 				}
 			}
-			usleep(250000);  
+			usleep(250000);
 
 			//-- connect to (dbox) ts stream server --
 			if( (ctx->inFd = mp_tcpOpen(lstIt->ip.c_str(), lstIt->port)) != -1 )
@@ -1877,8 +1882,8 @@ void *mp_playFileThread (void *filename)
 				//-- send command line (vpid/apid) --
 				sprintf
 				(
-				ctx->dvrBuf, 
-				"GET /0x%03x,0x%03x HTTP/1.0\r\n", 
+				ctx->dvrBuf,
+				"GET /0x%03x,0x%03x HTTP/1.0\r\n",
 				lstIt->vpid, lstIt->apid
 				);
 
@@ -1898,7 +1903,7 @@ void *mp_playFileThread (void *filename)
 			}
 			else
 			{
-				fprintf(stderr, "error: connecting %s:%d\n", 
+				fprintf(stderr, "error: connecting %s:%d\n",
 						  lstIt->ip.c_str(), lstIt->port );
 				break; // error
 			}
@@ -1935,7 +1940,7 @@ void *mp_playFileThread (void *filename)
 
 		fprintf
 		(
-		stderr, 
+		stderr,
 		"[mp] %s with vpid=(0x%04X) apid=(0x%04X) ac3=(%d)\n",
 		(ctx->isStream)?"(live) stream":"plain TS file",
 		ctx->pidv, ctx->pida, ctx->ac3
@@ -1943,7 +1948,7 @@ void *mp_playFileThread (void *filename)
 
 		//-- DVB devices softreset --
 		//---------------------------
-		mp_softReset(ctx);  
+		mp_softReset(ctx);
 
 		//-- aspect ratio init --
 		checkAspectRatio(ctx->vdec, true);
@@ -1959,7 +1964,7 @@ void *mp_playFileThread (void *filename)
 		while( (ctx->itChanged == false) &&
 				 (g_playstate >= CMoviePlayerGui::PLAY) )
 		{
-			//-- after device reset read double amount of stream data -- 
+			//-- after device reset read double amount of stream data --
 			rSize = (ctx->refillBuffer)? ctx->readSize*2 : ctx->readSize;
 			ctx->refillBuffer = false;
 
@@ -1986,7 +1991,7 @@ void *mp_playFileThread (void *filename)
 
 			//-- write stream data now --
 			write(ctx->dvr, ctx->dvrBuf, rd);
-		} 
+		}
 
 		fprintf(stderr,"[mp] leaving reader loop\n");
 
@@ -2043,7 +2048,7 @@ void *mp_playFileThread (void *filename)
 	{
 		g_playstate = CMoviePlayerGui::STOPPED;
 		//g_RCInput->postMsg (CRCInput::RC_red, 0);	// end movieplayer
-		g_RCInput->postMsg (CRCInput::RC_ok, 0); // start filebrowser 
+		g_RCInput->postMsg (CRCInput::RC_ok, 0); // start filebrowser
 	}
 
 	fprintf(stderr, "[mp] mp_playFileThread terminated\n");
@@ -2058,7 +2063,7 @@ void CMoviePlayerGui::ParentalEntrance(void)
 	CZapProtection pin(g_settings.parentallock_pincode, 18);
 	if(pin.check())
 	{
-		PlayFile(1);  
+		PlayFile(1);
 	}
 }
 
@@ -2137,7 +2142,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			//-- ... regular exit --
 			if(!start_play && (g_playstate == CMoviePlayerGui::STOPPED) )
 			{
-				break; 
+				break;
 			}
 
 			CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
@@ -2161,7 +2166,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			if(g_playstate >= CMoviePlayerGui::PLAY)
 			{
 				//-- request player-thread to stop --
-				g_playstate = CMoviePlayerGui::STOPPED; 
+				g_playstate = CMoviePlayerGui::STOPPED;
 				pthread_join (rct, NULL);
 			}
 
@@ -2173,7 +2178,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- regular error exit, no need to wait for termination  --
 				g_playstate = CMoviePlayerGui::STOPPED;
-				break;  
+				break;
 			}
 		}
 
@@ -2182,7 +2187,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 		//         ac3flags[numpida]               --
 		//         currentapid = 0                 --
 		// ouptut: currentapid (may be remain 0,   --
-		//           if nothing happened)          -- 
+		//           if nothing happened)          --
 		//         currentac3                      --
 		//         apidchanged (0/1, but not used) --
 		//-------------------------------------------
@@ -2203,7 +2208,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				std::string apidtitle = "Stream ";
 				apidtitle.append(show_pid_number);
 
-				if(ac3flags[count] == 2) 
+				if(ac3flags[count] == 2)
 				{
 					apidtitle.append(" (Teletext)");
 					pidt=apids[count];
@@ -2211,14 +2216,14 @@ void CMoviePlayerGui::PlayFile (int parental)
 					(
 					new CMenuForwarderNonLocalized
 					(
-					apidtitle.c_str(), false, NULL, APIDChanger, apidnumber, 
+					apidtitle.c_str(), false, NULL, APIDChanger, apidnumber,
 					CRCInput::convertDigitToKey(count+1)
-					), 
+					),
 					(count == 0)
 					);
 				};
-				
-				if(ac3flags[count] == 1) 
+
+				if(ac3flags[count] == 1)
 				{
 					apidtitle.append(" (AC3)");
 
@@ -2226,25 +2231,25 @@ void CMoviePlayerGui::PlayFile (int parental)
 					(
 					new CMenuForwarderNonLocalized
 					(
-					apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, 
+					apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,
 					CRCInput::convertDigitToKey(count+1)
-					), 
+					),
 					(count == 0)
 					);
 				};
-				
-				if(!ac3flags[count]) 
+
+				if(!ac3flags[count])
 				{
 					APIDSelector.addItem
 					(
 					new CMenuForwarderNonLocalized
 					(
-					apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, 
+					apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,
 					CRCInput::convertDigitToKey(count+1)
-					), 
+					),
 					(count == 0)
 					);
-					
+
 				};
 			}
 
@@ -2252,7 +2257,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			showaudioselectdialog = false;
 		}
 
-		//-- filetime display -- 
+		//-- filetime display --
 		//----------------------
 		if(FileTime.IsVisible())
 		{
@@ -2364,7 +2369,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				FileTime.hide();
 				break;
 
-				//-- jump 1 minute forward --    
+				//-- jump 1 minute forward --
 			case CRCInput::RC_3:
 				g_jumpminutes = 1 * PF_JMP_DIV;
 				g_playstate   = CMoviePlayerGui::JF;
@@ -2396,7 +2401,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				FileTime.hide();
 				break;
 
-				//-- jump 10 minutes back -- 
+				//-- jump 10 minutes back --
 			case CRCInput::RC_7:
 				g_jumpminutes = -10 * PF_JMP_DIV;
 				g_playstate   = CMoviePlayerGui::JB;
@@ -2420,7 +2425,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				FileTime.hide();
 				break;
 
-				//-- select previous item (in playlist) --  
+				//-- select previous item (in playlist) --
 			case CRCInput::RC_up:
 				g_playstate = CMoviePlayerGui::ITEMSELECT;
 				g_itno      = -2;
@@ -2459,11 +2464,11 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- force exit on cancel requests --
 				if(CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
 				{
-					fprintf(stderr, "[mp] terminating due to cancel_all request\n");  
-					requestStop = true;  
+					fprintf(stderr, "[mp] terminating due to cancel_all request\n");
+					requestStop = true;
 				}
 
-				rc_blocked = false;   
+				rc_blocked = false;
 				break;
 		}
 	}
@@ -2553,7 +2558,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			strncpy (mrl, tmp, sizeof (mrl) - 1);
 			curl_free (tmp);
 			printf ("[movieplayer.cpp] Generated Bookmark FILE MRL: %s\n", mrl);
-			// TODO: What to use for LCD? Bookmarkname? Filename? 
+			// TODO: What to use for LCD? Bookmarkname? Filename?
 			sel_filename = "Bookmark Playback";
 			update_info=true;
 			start_play=true;
@@ -2777,7 +2782,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 void checkAspectRatio (int vdec, bool init)
 {
 
-	static video_size_t size; 
+	static video_size_t size;
 	static time_t last_check=0;
 
 	// only necessary for auto mode, check each 5 sec. max
@@ -2793,7 +2798,7 @@ void checkAspectRatio (int vdec, bool init)
 	}
 	else
 	{
-		video_size_t new_size; 
+		video_size_t new_size;
 		if(ioctl(vdec, VIDEO_GET_SIZE, &new_size) < 0)
 			perror("[movieplayer.cpp] VIDEO_GET_SIZE");
 		if(size.aspect_ratio != new_size.aspect_ratio)
@@ -2828,7 +2833,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.105 $");
+	helpbox.addLine("Version: $Revision: 1.106 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2849,7 +2854,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.105 $");
+	helpbox.addLine("Version: $Revision: 1.106 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
