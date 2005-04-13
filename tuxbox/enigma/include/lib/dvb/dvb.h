@@ -324,28 +324,20 @@ public:
 
 };
 
+class eServiceDVB;
+class eServiceID3;
+
 class eService
 {
 public:
-	eService(const eString &service_name, int spflags=0);
+	eService(const eString &service_name);
 	virtual ~eService();
 
 	eString service_name;
-		// flags used for display in the service menu.
-	enum
-	{
-		spfOwnerdraw=1,
-		spfColDontChange=0,		// don't change
-		spfColSingle=2,				// i.e. 1 column only
-		spfColMulti=4,				// i.e. 3 columns
-		spfColCombi=6,				// i.e. 1 column "bouquets", 2 columns services
-		spfColMask=6
-	};
-	int spflags;
 
-	class eServiceDVB *dvb;
+	eServiceDVB *dvb;
 #ifndef DISABLE_FILE
-	class eServiceID3 *id3;
+	eServiceID3 *id3;
 #endif
 };
 

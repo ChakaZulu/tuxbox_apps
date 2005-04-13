@@ -710,43 +710,43 @@ eServiceHandlerDVB::eServiceHandlerDVB()
 
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, (1<<4)|(1<<1), 0xFFFFFFFF),
-			new eService( _("Providers (TV)"), eService::spfColCombi)
+			new eService( _("Providers (TV)"))
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, 1<<2, 0xFFFFFFFF ),
-			new eService( _("Providers (Radio)"), eService::spfColCombi)
+			new eService( _("Providers (Radio)"))
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, data, 0xFFFFFFFF),
-			new eService( _("Providers (Data)"), eService::spfColCombi)
+			new eService( _("Providers (Data)"))
 		);
 
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -2, (1<<4)|(1<<1), 0xFFFFFFFF ), // TV and NVOD
-			new eService( _("All services (TV)"), eService::spfColMulti)
+			new eService( _("All services (TV)"))
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -2, 1<<2, 0xFFFFFFFF ), // radio
-			new eService( _("All services (Radio)"), eService::spfColMulti)
+			new eService( _("All services (Radio)"))
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -2, data, 0xFFFFFFFF),
-			new eService( _("All services (Data)"), eService::spfColMulti)
+			new eService( _("All services (Data)"))
 		);
 
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 	{
 		cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -4, (1<<4)|(1<<1)),
-			new eService( _("Satellites (TV)"), eService::spfColSingle)
+			new eService( _("Satellites (TV)"))
 		);
 		cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -4, 1<<2),
-			new eService( _("Satellites (Radio)"), eService::spfColSingle)
+			new eService( _("Satellites (Radio)"))
 		);
 		cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -4, data),
-			new eService( _("Satellites (Data)"), eService::spfColSingle)
+			new eService( _("Satellites (Data)"))
 		);
 }
 #ifndef DISABLE_FILE
@@ -1016,7 +1016,7 @@ struct eServiceHandlerDVB_addService
 		eService *s = eTransponderList::getInstance()->searchService( service );
 		if ( !s )  // dont show "removed services"
 			return;
-		else if ( s->spflags & eServiceDVB::dxDontshow )
+		else if ( s->dvb && s->dvb->dxflags & eServiceDVB::dxDontshow )
 			return;
 		int t = ((eServiceReferenceDVB&)service).getServiceType();
 		int nspace = ((eServiceReferenceDVB&)service).getDVBNamespace().get()&0xFFFF0000;
@@ -1134,7 +1134,7 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 		if ( it == eTransponderList::getInstance()->getNetworkNameMap().end() )
 			return 0;
 		else
-			return new eService( it->second.name+ _(" - provider"), eService::spfColCombi);
+			return new eService( it->second.name+ _(" - provider"));
 	}
 	case -2: // for satellites...
 	{
@@ -1142,14 +1142,14 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 		if ( it == eTransponderList::getInstance()->getNetworkNameMap().end() )
 			return 0;
 		else
-			return new eService( it->second.name+ _(" - services"), eService::spfColMulti);
+			return new eService( it->second.name+ _(" - services"));
 	}
 	case -3:
 	{
 		eBouquet *b=eDVB::getInstance()->settings->getBouquet(node.data[2]);
 		if (!b)
 			return 0;
-		return new eService(b->bouquet_name.c_str(), eService::spfColCombi);
+		return new eService(b->bouquet_name.c_str());
 	}
 	}
 	return 0;

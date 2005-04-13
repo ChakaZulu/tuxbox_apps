@@ -104,8 +104,8 @@ int eTransponder::terrestrial::tune(eTransponder *trans)
 	return eFrontend::getInstance()->tune_ofdm(trans, centre_frequency, bandwidth, constellation, hierarchy_information, code_rate_hp, code_rate_lp, guard_interval, transmission_mode, inversion);
 }
 
-eService::eService(const eString &service_name, int spflags)
-	: service_name(service_name), spflags(spflags), dvb(0)
+eService::eService(const eString &service_name)
+	: service_name(service_name), dvb(0)
 #ifndef DISABLE_FILE
 	, id3(0)
 #endif

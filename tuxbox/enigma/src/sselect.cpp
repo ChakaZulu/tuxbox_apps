@@ -1722,7 +1722,6 @@ eServiceSelector::~eServiceSelector()
 void eServiceSelector::enterDirectory(const eServiceReference &ref)
 {
 	path.down(ref);
-	doSPFlags(ref);
 	services->beginAtomic();
 	actualize();
 	if (!selectService( eServiceInterface::getInstance()->service ))
@@ -1762,32 +1761,6 @@ void eServiceSelector::showMultiEPG()
 	}
 	else
 		show();
-}
-
-void eServiceSelector::doSPFlags(const eServiceReference &ref)
-{
-#if 0
-	const eService *pservice=eServiceInterface::getInstance()->addRef(ref);
-	if (pservice)
-	{
-		switch (pservice->spflags & eService::spfColMask)
-		{
-		case eService::spfColSingle:
-			setStyle(styleSingleColumn);
-			break;
-		case eService::spfColMulti:
-			setStyle(styleMultiColumn);
-			break;
-		case eService::spfColCombi:
-			setStyle(styleCombiColumn);
-			break;
-		case eService::spfColDontChange:
-			setStyle(lastSelectedStyle);
-			break;
-		}
-	}
-	eServiceInterface::getInstance()->removeRef(ref);
-#endif
 }
 
 void eServiceSelector::ResetBrowseChar()
@@ -1874,7 +1847,6 @@ const eServiceReference *eServiceSelector::prev()
 void eServiceSelector::setPath(const eServicePath &newpath, const eServiceReference &select)
 {
 	path=newpath;
-	doSPFlags(path.current());
 	if (services)
 	{
 		services->beginAtomic();
