@@ -65,20 +65,76 @@ void subtitle_process_line(struct subtitle_ctx *sub, struct subtitle_page *page,
 	}
 }
 
+static int map_2_to_4_bit_table[4] = { 0, 8, 7, 15 };
+
 int subtitle_process_pixel_data(struct subtitle_ctx *sub, struct subtitle_page *page, int object_id, int *linenr, int *linep, __u8 *data)
 {
 	int data_type = *data++;
 	static __u8 line[720];
+	struct bitstream bit;
+	bit.size=0;
 	switch (data_type)
 	{
 	case 0x10: // 2bit pixel data
-		eDebug("[SUB] 2 bit pixel data");
-		exit(0);
-		break;
-	case 0x11:
-	{
-		struct bitstream bit;
-//		//eDebug("  4 bit pixel data");
+		bitstream_init(&bit, data, 2);
+		while (1)
+		{
+			int len=0, col=0;
+			int code = bitstream_get(&bit);
+			if (code)
+			{
+				col = code;
+				len = 1;
+			} else
+			{
+				code = bitstream_get(&bit);
+				if (!code)
+				{
+					code = bitstream_get(&bit);
+					if (code == 1)
+					{
+						col = 0;
+						len = 2;
+					} else if (code == 2)
+					{
+						len = bitstream_get(&bit) << 2;
+						len |= bitstream_get(&bit);
+						len += 12;
+						col = bitstream_get(&bit);
+					} else if (code == 3)
+					{
+						len = bitstream_get(&bit) << 6;
+						len |= bitstream_get(&bit) << 4;
+						len |= bitstream_get(&bit) << 2;
+						len |= bitstream_get(&bit);
+						len += 29;
+						col = bitstream_get(&bit);
+					} else
+						break;
+				} else if (code==1)
+				{
+					col = 0;
+					len = 1;
+				} else if (code&2)  
+				{
+					if (code&1)
+						len = 3 + 4 + bitstream_get(&bit);
+					else
+						len = 3 + bitstream_get(&bit);
+					col = bitstream_get(&bit);
+				}
+			}
+			col = map_2_to_4_bit_table[col];
+			while (len && ((*linep) < 720))
+			{
+				line[(*linep)++] = col | 0xF0;
+				len--;
+			}
+		}
+		while (bit.avail != 8)
+			bitstream_get(&bit);
+		return bit.consumed + 1;
+	case 0x11: // 4bit pixel data
 		bitstream_init(&bit, data, 4);
 		while (1)
 		{
@@ -130,18 +186,56 @@ int subtitle_process_pixel_data(struct subtitle_ctx *sub, struct subtitle_page *
 		while (bit.avail != 8)
 			bitstream_get(&bit);
 		return bit.consumed + 1;
+	case 0x12: // 8bit pixel data
+		bitstream_init(&bit, data, 8);
+		while(1)
+		{
+			int len=0, col=0;
+			int code = bitstream_get(&bit);
+			if (code)
+			{
+				col = code;
+				len = 1;
+			} else
+			{
+				code = bitstream_get(&bit);
+				if ((code & 0x80) == 0x80)
+				{
+					len = code&0x7F;
+					col = bitstream_get(&bit);
+				} else if (code&0x7F)
+				{
+					len = code&0x7F;
+					col = 0;
+				} else
+					break;
+			}
+			col = col >>= 4; // 8 -> 4 bit reduction
+			while (len && ((*linep) < 720))
+			{
+				line[(*linep)++] = col | 0xF0;
+				len--;
+			}
+		}
+		return bit.consumed + 1;
+	case 0x20:  // 2 -> 4bit map table
 		break;
-	}
-	case 0x12:
-		eDebug("[SUB]  8 bit pixel data");
-		exit(0);
+	case 0x21:  // ignore 2 -> 8bit map table
+		bitstream_init(&bit, data, 8);
+		for ( int i=0; i < 4; ++i )
+			bitstream_get(&bit);
 		break;
-	case 0x20:
-	case 0x21:
-	case 0x22:
-		//eDebug("[SUB] maps.");
+	case 0x22:  // ignore 4 -> 8bit map table
+		bitstream_init(&bit, data, 8);
+		for ( int i=0; i < 16; ++i )
+			bitstream_get(&bit);
 		break;
 	case 0xF0:
+		// recreate default map
+		map_2_to_4_bit_table[0] = 0;
+		map_2_to_4_bit_table[1] = 8;
+		map_2_to_4_bit_table[2] = 7;
+		map_2_to_4_bit_table[3] = 15;
 		subtitle_process_line(sub, page, object_id, *linenr, line, *linep);
 /*		{
 			int i;
@@ -877,7 +971,10 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 			sub->set_palette(clut);
 	}
 	else
-		eDebug("[SUB] CLUT NOT FOUND.");
+	{
+		if (!fbClass::getInstance()->islocked())
+			sub->set_palette(0);
+	}
 }
 
 void subtitle_screen_enable(struct subtitle_ctx *sub, int enable)

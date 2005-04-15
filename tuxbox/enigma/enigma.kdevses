@@ -3,19 +3,13 @@
 <KDevPrjSession>
  <LastCompileConfig>(Default)</LastCompileConfig>
  <Mainframe MaximizeMode="1" />
- <DocsAndViews NumberOfDocuments="4" >
-  <Doc0 CursorPosLine="39" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/hdb/tuxbox-cvs-dm7000/apps/tuxbox/enigma/include/lib/codecs/codecmpg.h" >
-   <View0 Top="27" Width="400" Attach="1" Height="300" Left="3" Focus="0" Type="KWriteView" MinMaxMode="0" />
+ <DocsAndViews NumberOfDocuments="2" >
+  <Doc0 CursorPosLine="83" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/hdb/tuxbox-cvs-dm7000/apps/tuxbox/enigma/lib/dvb/subtitle.cpp" >
+   <View0 Top="0" Width="406" Attach="1" Height="330" Left="0" Focus="1" Type="KWriteView" MinMaxMode="2" />
   </Doc0>
-  <Doc1 CursorPosLine="933" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="2" FileName="/home/ghost/hdb/tuxbox-cvs-dm7000/apps/tuxbox/enigma/lib/codecs/codecmpg.cpp" >
-   <View0 Top="25" Width="406" Attach="1" Height="330" Left="25" Focus="1" Type="KWriteView" MinMaxMode="2" />
+  <Doc1 CursorPosLine="83" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/hdb/OpenEmbedded/build/tmp/work/enigma-cvs-20050414-r0/enigma/lib/dvb/subtitle.cpp" >
+   <View0 Top="52" Width="797" Attach="1" Height="592" Left="28" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc1>
-  <Doc2 CursorPosLine="33" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/ghost/hdb/tuxbox-cvs-dm7000/apps/tuxbox/enigma/include/lib/dvb/servicemp3.h" >
-   <View0 Top="77" Width="809" Attach="1" Height="513" Left="53" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc2>
-  <Doc3 CursorPosLine="290" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="84" FileName="/home/ghost/hdb/tuxbox-cvs-dm7000/apps/tuxbox/enigma/lib/dvb/servicemp3.cpp" >
-   <View0 Top="102" Width="400" Attach="1" Height="300" Left="78" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc3>
  </DocsAndViews>
  <pluginList>
   <kdevbookmarks>

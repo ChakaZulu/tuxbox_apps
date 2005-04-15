@@ -268,35 +268,72 @@ void eSubtitleWidget::start(int pid, const std::set<int> &ppageids)
 
 static void subtitle_set_palette(struct subtitle_clut *pal)
 {
-//	eDebug("updating palette!");
-	gRGB palette[pal->size];
-	
-	for (int i=0; i<pal->size; ++i)
-	{
-		int y = pal->entries[i].Y, cr = pal->entries[i].Cr, cb = pal->entries[i].Cb;
-		
-		if (y >= 16)
-		{
-			y -= 16;
-			cr -= 128;
-			cb -= 128;
-			palette[i].r = ((1164 * y + 1596 * cr) + 500) / 1000;
-			palette[i].g = ((1164 * y - 813 * cr - 392 * cb) + 500) / 1000;
-			palette[i].b = ((1164 * y + 2017 * cb) + 500) / 1000;
-			palette[i].a = (pal->entries[i].T) & 0xFF;
-		} else
-		{
-			palette[i].r = 0;
-			palette[i].g = 0;
-			palette[i].b = 0;
-			palette[i].a = 0xFF;
-		}
-		
-//		eDebug("%d: %d %d %d %d", i, palette[i].r, palette[i].g, palette[i].b, palette[i].a);
-	}
-	
+	static gRGB def_palette[16];
+	static bool def_palette_initialized;
+
 	gPainter p(*gFBDC::getInstance());
-	p.setPalette(palette, 240, pal->size);
+	if ( !pal )// use default pallette
+	{
+		if ( !def_palette_initialized )  // fill default palette
+		{
+			for (int i=0; i < 16; ++i)
+			{
+				if (!i)
+					def_palette[i].a = 0xFF;
+				else if (i&8)
+				{
+					if (i & 1)
+						def_palette[i].r = 0x80;
+					if (i & 2)
+						def_palette[i].g = 0x80;
+					if (i & 4)
+						def_palette[i].b = 0x80;
+				}
+				else
+				{
+					if (i & 1)
+						def_palette[i].r = 0xFF;
+					if (i & 2)
+						def_palette[i].g = 0xFF;
+					if (i & 4)
+						def_palette[i].b = 0xFF;
+				}
+//				eDebug("%d %02x%02x%02x%02x",
+//					i, def_palette[i].r, def_palette[i].g, def_palette[i].b, def_palette[i].a);
+			}
+			def_palette_initialized=1;
+		}
+		p.setPalette(def_palette, 240, 16);
+	}
+	else
+	{
+	//	eDebug("updating palette!");
+		gRGB palette[pal->size];
+
+		for (int i=0; i<pal->size; ++i)
+		{
+			int y = pal->entries[i].Y, cr = pal->entries[i].Cr, cb = pal->entries[i].Cb;
+		
+			if (y >= 16)
+			{
+				y -= 16;
+				cr -= 128;
+				cb -= 128;
+				palette[i].r = ((1164 * y + 1596 * cr) + 500) / 1000;
+				palette[i].g = ((1164 * y - 813 * cr - 392 * cb) + 500) / 1000;
+				palette[i].b = ((1164 * y + 2017 * cb) + 500) / 1000;
+				palette[i].a = (pal->entries[i].T) & 0xFF;
+			} else
+			{
+				palette[i].r = 0;
+				palette[i].g = 0;
+				palette[i].b = 0;
+				palette[i].a = 0xFF;
+			}
+//		eDebug("%d: %d %d %d %d", i, palette[i].r, palette[i].g, palette[i].b, palette[i].a);
+		}
+		p.setPalette(palette, 240, pal->size);
+	}
 //	eDebug("palette changed");
 }
 
