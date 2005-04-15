@@ -219,6 +219,9 @@ int subtitle_process_pixel_data(struct subtitle_ctx *sub, struct subtitle_page *
 		}
 		return bit.consumed + 1;
 	case 0x20:  // 2 -> 4bit map table
+		bitstream_init(&bit, data, 4);
+		for ( int i=0; i < 4; ++i )
+			map_2_to_4_bit_table[i] = bitstream_get(&bit);
 		break;
 	case 0x21:  // ignore 2 -> 8bit map table
 		bitstream_init(&bit, data, 8);
