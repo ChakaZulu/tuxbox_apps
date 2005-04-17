@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.27 2005/01/09 16:56:54 thegoodguy Exp $
+ * $Id: channel.h,v 1.28 2005/04/17 06:56:14 metallica Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -66,6 +66,8 @@ class CZapitChannel
 		t_network_id			network_id;
 		unsigned char			DiSEqC;
 		t_satellite_position		satellitePosition;
+		/* used for Eutelsat 13e dup transponders */
+		frequency_kHz_t			frequency;
 
 		/* read/write properties (write possibility needed by scan) */
 		unsigned char			serviceType;
@@ -75,7 +77,7 @@ class CZapitChannel
 
 	public:
 		/* constructor, desctructor */
-		CZapitChannel(const std::string & p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, t_satellite_position p_satellite_position);
+		CZapitChannel(const std::string & p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, t_satellite_position p_satellite_position, frequency_kHz_t frequency);
 		~CZapitChannel(void);
 
 		/* get methods - read only variables */
@@ -86,11 +88,12 @@ class CZapitChannel
 		unsigned char        	getServiceType(void)       	const { return serviceType; }
 		unsigned char        	getDiSEqC(void)            	const { return DiSEqC; }
 		t_channel_id            getChannelID(void)              const { return CREATE_CHANNEL_ID; }
-		transponder_id_t        getTransponderId(void)          const { return CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellitePosition,original_network_id,transport_stream_id); }
+		transponder_id_t        getTransponderId(void)          const { return CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(frequency, satellitePosition,original_network_id,transport_stream_id); }
 		
 		/* get methods - read and write variables */
 		const std::string	getName(void)			const { return name; }
 		t_satellite_position	getSatellitePosition(void)	const { return satellitePosition; }
+		frequency_kHz_t		getFrequency(void)       	const { return frequency; }
 		unsigned char 		getAudioChannelCount(void)	{ return audioChannels.size(); }
 		unsigned short		getPcrPid(void)			{ return pcrPid; }
 		unsigned short		getPmtPid(void)			{ return pmtPid; }

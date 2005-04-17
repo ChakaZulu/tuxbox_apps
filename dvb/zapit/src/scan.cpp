@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.148 2005/03/03 19:59:33 diemade Exp $
+ * $Id: scan.cpp,v 1.149 2005/04/17 06:56:15 metallica Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -239,10 +239,13 @@ uint32_t fake_tid, fake_nid;
 
 int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, const t_satellite_position satellite_position, uint8_t DiSEqC)
 {
+	frequency_kHz_t zfrequency;
+	
+	zfrequency = FREQUENCY_IN_KHZ(feparams->frequency);
 	if(scan_mode)
 	{
 		fake_tid++; fake_nid++;
-		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellite_position,fake_nid,fake_tid), feparams, polarization, DiSEqC);
+		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(zfrequency, satellite_position,fake_nid,fake_tid), feparams, polarization, DiSEqC);
 		return status;
 	}
  	eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &(feparams->frequency),sizeof(feparams->frequency));
@@ -254,7 +257,7 @@ int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, con
 	{
 		uint32_t tsid_onid = get_sdt_TsidOnid();
 	
-		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellite_position,(t_original_network_id)tsid_onid, (t_transport_stream_id)(tsid_onid >> 16)), feparams, polarization, DiSEqC);
+		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(zfrequency, satellite_position,(t_original_network_id)tsid_onid, (t_transport_stream_id)(tsid_onid >> 16)), feparams, polarization, DiSEqC);
 	}
 
 	return status;
@@ -293,12 +296,12 @@ int get_sdts(const t_satellite_position satellite_position, const char * const f
 				tI->second.original_network_id = TsidOnid &0xFFFF;
 
 				INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-				parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+				parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq);
 			}
 			else
 			{
 				INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-				status = parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+				status = parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq);
 		
 				if (status == -1)
 				{
@@ -311,7 +314,7 @@ int get_sdts(const t_satellite_position satellite_position, const char * const f
 						tI->second.original_network_id = TsidOnid &0xFFFF;
 
 						INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-						parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+						parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq);
 					}
 				}
 			}
@@ -451,6 +454,7 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 bool write_provider(FILE *fd, const char * const frontendType, const char * const provider_name)
 {
 	bool transponders_found = false;
+	transponder_id_t old_tansponderid = 0;
 
 	t_satellite_position satellite_position = getSatellitePosition(provider_name);
 
@@ -474,7 +478,11 @@ bool write_provider(FILE *fd, const char * const frontendType, const char * cons
 					fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\">\n", frontendType, provider_name, tI->second.DiSEqC);
 				}
 			}
-			write_transponder(fd, CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first), tI->second.original_network_id, tI->second.transport_stream_id), tI->second);
+			if (old_tansponderid != CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(GET_FREQUENCY_FROM_TRANSPONDER_ID(tI->first), GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first), tI->second.original_network_id, tI->second.transport_stream_id)) {
+				old_tansponderid = CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(GET_FREQUENCY_FROM_TRANSPONDER_ID(tI->first), GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first), tI->second.original_network_id, tI->second.transport_stream_id);
+				write_transponder(fd, old_tansponderid, tI->second);
+			}
+			else printf("tansponder " PRINTF_TRANSPONDER_ID_TYPE " not written\n", old_tansponderid );
 		}
 	}
 	
@@ -854,7 +862,7 @@ int scan_transponder(TP_params *TP)
 	{
 		/* channels */
 		for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
-			write_transponder(fd, CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first), tI->second.original_network_id, tI->second.transport_stream_id), tI->second);
+			write_transponder(fd, CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(GET_FREQUENCY_FROM_TRANSPONDER_ID(tI->first), GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first), tI->second.original_network_id, tI->second.transport_stream_id), tI->second);
 		fprintf(fd, "\t</%s>\n", frontendType);
 		allchans.clear();
 		transponders.clear();

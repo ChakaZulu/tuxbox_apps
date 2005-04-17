@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.70 2005/01/25 18:50:19 thegoodguy Exp $
+ * $Id: descriptors.cpp,v 1.71 2005/04/17 06:56:16 metallica Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -224,11 +224,12 @@ void stuffing_descriptor(const unsigned char * const)
 }
 
 /* 0x43 */
-int satellite_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id, unsigned char DiSEqC)
+int satellite_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id2, unsigned char DiSEqC)
 {
 	dvb_frontend_parameters feparams;
 	uint8_t polarization;
-
+	frequency_kHz_t zfrequency;
+	
 	if (frontend->getInfo()->type != FE_QPSK)
 		return -1;
 
@@ -266,6 +267,9 @@ int satellite_delivery_system_descriptor(const unsigned char * const buffer, con
 	if (feparams.u.qpsk.symbol_rate >= 50000000)
 		feparams.u.qpsk.symbol_rate /= 10;
 
+	zfrequency = FREQUENCY_IN_KHZ(feparams.frequency);
+	const transponder_id_t transponder_id = (transponder_id2) | (((transponder_id_t)zfrequency)<<48);
+	
 	if (transponders.find(transponder_id) == transponders.end())
 	{
 		found_transponders++;
@@ -299,8 +303,10 @@ int satellite_delivery_system_descriptor(const unsigned char * const buffer, con
 }
 
 /* 0x44 */
-int cable_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id)
+int cable_delivery_system_descriptor(const unsigned char * const buffer, const transponder_id_t transponder_id2)
 {
+	frequency_kHz_t zfrequency;
+	
 	if (frontend->getInfo()->type != FE_QAM)
 		return -1;
 
@@ -334,6 +340,9 @@ int cable_delivery_system_descriptor(const unsigned char * const buffer, const t
 	feparams.u.qam.fec_inner = CFrontend::getCodeRate(buffer[12] & 0x0F);
 	feparams.u.qam.modulation = CFrontend::getModulation(buffer[8]);
 
+	zfrequency = FREQUENCY_IN_KHZ(feparams.frequency);
+	const transponder_id_t transponder_id = (transponder_id2) | (((transponder_id_t)zfrequency)<<48);
+	
 	if (transponders.find(transponder_id) == transponders.end())
 	{
 		found_transponders++;
@@ -380,8 +389,9 @@ void bouquet_name_descriptor(const unsigned char * const)
 }
 
 /* 0x48 */
-void service_descriptor(const unsigned char * const buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const t_satellite_position satellite_position, const uint8_t DiSEqC)
+void service_descriptor(const unsigned char * const buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const t_satellite_position satellite_position, const uint8_t DiSEqC, const uint32_t frequency)
 {
+	frequency_kHz_t zfrequency;
 	tallchans_iterator I = allchans.find(CREATE_CHANNEL_ID);
 
 	if (I != allchans.end())
@@ -434,6 +444,7 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 		sizeof(found_channels)
 	);
 
+	zfrequency = FREQUENCY_IN_KHZ(frequency);
 	allchans.insert
 	(
 		std::pair <t_channel_id, CZapitChannel>
@@ -447,7 +458,8 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 				original_network_id,
 				service_type,
 				DiSEqC,
-				satellite_position
+				satellite_position,
+				zfrequency 
 			)
 		)
 	);
@@ -503,7 +515,8 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
  		lastServiceName = serviceName;
  		eventServer->sendEvent(CZapitClient::EVT_SCAN_SERVICENAME, CEventServer::INITID_ZAPIT, (void *) lastServiceName.c_str(), lastServiceName.length() + 1);
 
-		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, satellite_position));
+//		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, satellite_position));
+		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, satellite_position, zfrequency ));
 
  // thegoodguy schau dir das hier mal an
  //		scaninfo  test;

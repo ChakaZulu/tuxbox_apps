@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.17 2003/10/14 12:48:59 thegoodguy Exp $
+ * $Id: channel.cpp,v 1.18 2005/04/17 06:56:15 metallica Exp $
  *
  * (C) 2002 by Steffen Hehn <mcclean@berlios.de>
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
@@ -22,7 +22,7 @@
 
 #include <zapit/channel.h>
 
-CZapitChannel::CZapitChannel(const std::string & p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, t_satellite_position p_satellite_position)
+CZapitChannel::CZapitChannel(const std::string & p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, t_satellite_position p_satellite_position, frequency_kHz_t p_frequency)
 {
 	name = p_name;
 	service_id = p_sid;
@@ -31,7 +31,7 @@ CZapitChannel::CZapitChannel(const std::string & p_name, t_service_id p_sid, t_t
 	serviceType = p_service_type;
 	DiSEqC = p_DiSEqC;
 	satellitePosition = p_satellite_position;
-
+	frequency = p_frequency;
 	caPmt = NULL;
 	resetPids();
 }

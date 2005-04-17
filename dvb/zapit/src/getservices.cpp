@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.90 2005/01/30 18:14:13 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.91 2005/04/17 06:56:15 metallica Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -41,7 +41,8 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 	t_original_network_id original_network_id;
 	struct dvb_frontend_parameters feparams;
 	uint8_t polarization = 0;
-
+	frequency_kHz_t frequency;
+	
 	memset(&feparams, 0, sizeof(struct dvb_frontend_parameters));
 
 	/* read all transponders */
@@ -78,19 +79,21 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 			polarization = xmlGetNumericAttribute(node, "polarization", 0);
 		}
 
+		if(feparams.frequency < 20000) feparams.frequency = feparams.frequency*1000;
+		if(feparams.u.qpsk.symbol_rate < 50000) feparams.u.qpsk.symbol_rate = feparams.u.qpsk.symbol_rate * 1000;
+		frequency = FREQUENCY_IN_KHZ(feparams.frequency);
+		
 		/* add current transponder to list */
-		if (transponders.find(CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellitePosition,original_network_id,transport_stream_id)) != transponders.end())
+		if (transponders.find(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(frequency,satellitePosition,original_network_id,transport_stream_id)) != transponders.end())
 		{
 			printf("[getservices] dup transponder id %X onid %X\n", transport_stream_id, original_network_id);
 		}
-		if(feparams.frequency < 20000) feparams.frequency = feparams.frequency*1000;
-		if(feparams.u.qpsk.symbol_rate < 50000) feparams.u.qpsk.symbol_rate = feparams.u.qpsk.symbol_rate * 1000;
 
 		transponders.insert
 		(
 			std::pair <transponder_id_t, transponder>
 			(
-				CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(satellitePosition,original_network_id,transport_stream_id),
+				CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(frequency,satellitePosition,original_network_id,transport_stream_id),
 				transponder
 				(
 					transport_stream_id,
@@ -103,7 +106,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 		);
 
 		/* read channels that belong to the current transponder */
-		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC, satellitePosition);
+		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC, satellitePosition, feparams.frequency);
 
 		/* hop to next transponder */
 		node = node->xmlNextNode;
@@ -112,12 +115,13 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 	return;
 }
 
-void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, t_satellite_position satellitePosition)
+void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, t_satellite_position satellitePosition, const uint32_t frequency)
 {
 	t_service_id service_id;
 	std::string  name;
 	uint8_t      service_type;
 
+	frequency_kHz_t zfrequency = FREQUENCY_IN_KHZ(frequency);
 	while ((node = xmlGetNextOccurence(node, "channel")) != NULL)
 	{
 		service_id = xmlGetNumericAttribute(node, "service_id", 16);
@@ -142,7 +146,8 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 						original_network_id,
 						service_type,
 						DiSEqC, 
-						satellitePosition
+						satellitePosition,
+						zfrequency
 					)
 				)
 			);

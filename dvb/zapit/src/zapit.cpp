@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.370 2005/03/14 19:58:48 mws Exp $
+ * $Id: zapit.cpp,v 1.371 2005/04/17 06:56:15 metallica Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -317,7 +317,9 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 						GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(transponder_id),
 						1,
 						frontend->getDiseqcPosition(),
-						channel->getSatellitePosition());
+						channel->getSatellitePosition(),
+						GET_FREQUENCY_FROM_TRANSPONDER_ID(transponder_id)
+						);
 	}
 
 	/* search pids if they are unknown */
@@ -396,7 +398,7 @@ int select_nvod_subservice_num(int num)
 
 	DBG("tsid: %04x, onid: %04x, sid: %04x\n", transport_stream_id, original_network_id, service_id);
 
-	return zapit(CREATE_CHANNEL_ID, false, CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(channel->getSatellitePosition(), original_network_id, transport_stream_id));
+	return zapit(CREATE_CHANNEL_ID, false, CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(channel->getFrequency(), channel->getSatellitePosition(), original_network_id, transport_stream_id));
 }
 
 int change_audio_pid(uint8_t index)
@@ -1146,6 +1148,25 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		{
 			t_original_network_id original_network_id = msgAddSubService.original_network_id;
 			t_service_id          service_id          = msgAddSubService.service_id;
+			transponder_list_t::iterator t;
+			frequency_kHz_t frequency = channel->getFrequency();
+
+	/* following lines are because the current_transponder_id(nvod channels) might not have the correct frequency (but the frequency of the 'master' channel),
+	  either complete the CSubService struct in remotecontrol.cpp, but frequency doesn't seem to be available there 
+	  or look for the correct transponder (search without frequency) */
+			if (transponders.find(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(frequency, channel->getSatellitePosition(), original_network_id, msgAddSubService.transport_stream_id)) == transponders.end())
+				for (t = transponders.begin(); t != transponders.end(); t++)
+				{
+					if((GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(t->first) == channel->getSatellitePosition()) &&
+					   (GET_ORIGINAL_NETWORK_ID_FROM_TRANSPONDER_ID(t->first) == original_network_id) &&
+					   (GET_TRANSPORT_STREAM_ID_FROM_TRANSPONDER_ID(t->first) == msgAddSubService.transport_stream_id))
+					{
+						/* transponder found: (lets hope that it is not a duplicate one) leave for loop */
+						frequency = GET_FREQUENCY_FROM_TRANSPONDER_ID(t->first);
+						break;
+					}
+				}
+			
 			nvodchannels.insert
 			(
 				std::pair <t_channel_id, CZapitChannel>
@@ -1159,7 +1180,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					    original_network_id,
 					    1,
 					    channel->getDiSEqC(),
-					    channel->getSatellitePosition()
+					    channel->getSatellitePosition(),
+//					    channel->getFrequency()
+					    frequency
 					)
 				)
 			);
@@ -1767,7 +1790,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.370 2005/03/14 19:58:48 mws Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.371 2005/04/17 06:56:15 metallica Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
