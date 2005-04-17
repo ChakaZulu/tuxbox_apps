@@ -310,7 +310,15 @@ public:
 		if ((original_network_id == -1) && (transport_stream_id == -1))
 		{
 			if ((c.original_network_id == -1) && (c.transport_stream_id == -1))
-				return cable.valid?cable<c.cable:satellite<c.satellite;
+			{
+				if (satellite.valid && c.satellite.valid)
+					return satellite < c.satellite;
+				if (cable.valid && c.cable.valid)
+					return cable < c.cable;
+				if (terrestrial.valid && c.terrestrial.valid)
+					return terrestrial < c.terrestrial;
+				return 1;
+			}
 			else
 				return 1;
 		}
@@ -334,6 +342,10 @@ public:
 	virtual ~eService();
 
 	eString service_name;
+
+	int dummy; // this was no more used spflags
+	// this dummy is for binary compatibility with already existing(compiled)
+	// enigma plugins..
 
 	eServiceDVB *dvb;
 #ifndef DISABLE_FILE
@@ -523,7 +535,9 @@ public:
 	{
 		if (type != c.type)
 			return 0;
-		return /* (flags == c.flags) && */ (memcmp(data, c.data, sizeof(int)*8)==0) && (path == c.path);
+		if ( type == idDVB )
+			return (memcmp(data+1, c.data+1, sizeof(int)*7)==0) && (path == c.path);
+		return (memcmp(data, c.data, sizeof(int)*8)==0) && (path == c.path);
 	}
 	bool operator!=(const eServiceReference &c) const
 	{
@@ -537,12 +551,10 @@ public:
 		if (type > c.type)
 			return 0;
 
-/*		if (flags < c.flags)
-			return 1;
-		if (flags > c.flags)
-			return 0; */
+		int r = ( type == idDVB ) ?
+			memcmp(data+1, c.data+1, sizeof(int)*7) :
+			memcmp(data, c.data, sizeof(int)*8);
 
-		int r=memcmp(data, c.data, sizeof(int)*8);
 		if (r)
 			return r < 0;
 		return path < c.path;
@@ -870,7 +882,6 @@ public:
 	eTransponder *searchTransponder(const eTransponder &);
 	eTransponder *searchTS(eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eServiceDVB *searchService(const eServiceReference &service);
-	const eServiceReferenceDVB *searchService(eDVBNamespace dvbnamespace, eOriginalNetworkID original_network_id, eServiceID service_id);
 	eServiceReferenceDVB searchServiceByNumber(int channel_number);
 	int countServices( eDVBNamespace dvbnamespace, eTransportStreamID tsid, eOriginalNetworkID onid )
 	{

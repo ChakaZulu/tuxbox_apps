@@ -1967,30 +1967,55 @@ void ManualPIDWindow::store()
 
 	transponder.dvb_namespace=dvb_namespace;
 
-	eTransponder *tmp = 0;
-	if ( transponder.satellite.valid &&
-		dvb_namespace.get() & 0xFFFF )  // feeds.. scpc.. or muxxers with default values
+	eTransponder *tmp = tlist.searchTS(dvb_namespace, eTransportStreamID(tsid), eOriginalNetworkID(onid));
+
+	if( tmp ) // we found a transponder with the same namespace/tsid/onid
+	{
+		bool do_abort=true;
+		if ( tmp->satellite.isValid() && transponder.satellite.isValid() )
+		{
+			if ( tmp->satellite == transponder.satellite )
+				do_abort=false;
+		}
+		else if ( tmp->cable.isValid() && transponder.cable.isValid() )
+		{
+			if ( tmp->cable == transponder.cable )
+				do_abort=false;
+		}
+		else if ( tmp->terrestrial.isValid() && transponder.terrestrial.isValid() )
+		{
+			if ( tmp->cable == transponder.cable )
+				do_abort=false;
+		}
+		if (do_abort)
+		{
+			eMessageBox mb(_("A transponder with the same tsid / onid but other frequency/pol/... already exist.. create a new transponder with the same data is no possible.. please do change tsid and/or onid"),
+				_("Error"),
+				eMessageBox::iconError|eMessageBox::btOK, eMessageBox::btOK);
+			mb.show();
+			mb.exec();
+			mb.hide();
+			return;
+		}
+	}
+
+	if ( !tmp )
 	{
 		// we must search transponder via freq pol usw..
 		transponder.transport_stream_id = -1;
 		transponder.original_network_id = -1;
 		tmp = tlist.searchTransponder(transponder);
-		transponder.transport_stream_id = tsid;
-		transponder.original_network_id = onid;
 	}
 
 	// ok we found the transponder, it seems to be valid
 	// get Reference to the new Transponder
 	eTransponder &real = tmp?*tmp:tlist.createTransponder(dvb_namespace, tsid, onid);
 
+	transponder.transport_stream_id = real.transport_stream_id;
+	transponder.original_network_id = real.original_network_id;
+
 	// replace referenced transponder with new transponderdata
-	if ( tmp )  // use existing transponder
-	{
-		dvb_namespace=tmp->dvb_namespace;
-		tsid=tmp->transport_stream_id.get();
-		onid=tmp->original_network_id.get();
-	}
-	else
+	if ( !tmp )  // use existing transponder
 		real=transponder;  // save our frequency/sr/pol to transponderlist..
 
 	real.state=eTransponder::stateOK;
@@ -1998,28 +2023,56 @@ void ManualPIDWindow::store()
 	service.setTransportStreamID(real.transport_stream_id);
 	service.setOriginalNetworkID(real.original_network_id);
 	service.setDVBNamespace(real.dvb_namespace);
+
 	int tmpval=0;
 	sscanf(sid->getText().c_str(), hex?"%x":"%d", &tmpval);
 	service.setServiceID(eServiceID(tmpval));
 
-	if ( vpid->getText() != hex ? "0000" : "0" )
-		service.setServiceType(1);
-	else if ( apid->getText() != hex ? "0000" : "0" )
-		service.setServiceType(2);
-	else
-		service.setServiceType(100); // Data
+	bool newAdded=false;
 
 	eServiceDVB &s =
-		tlist.createService( service, -1, 0 );
+		tlist.createService( service, -1, &newAdded );
 
-	// provider
-	s.service_provider = provider->getText();
+	if ( !newAdded )
+	{
+		eString service_name =  s.service_name ? s.service_name : eString("unnamed service");
+		eString service_provider =  s.service_provider ? s.service_provider : eString("unnamed provider");
 
-	// service name
-	s.service_name = name->getText();
+		eMessageBox mb(eString().sprintf(_("A service named '%s' with this sid/onid/tsid/namespace is already exist\n"
+			"in provider '%s'.\nShould i use this service name and provider name?"), service_name.c_str(), service_provider.c_str() ),
+			_("Service already exist"),
+			eMessageBox::iconQuestion|eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btYes);
+		mb.show();
+		int ret = mb.exec();
+		mb.hide();
+
+		if ( ret == eMessageBox::btYes )  // change provider and service name...
+			;
+		else
+		{
+			// provider
+			s.service_provider = provider->getText();
+			// service name
+			s.service_name = name->getText();
+		}
+	}
+	else
+	{
+		// provider
+		s.service_provider = provider->getText();
+		// service name
+		s.service_name = name->getText();
+	}
 
 	// reset cached pids
 	s.clearCache();  
+
+	if ( vpid->getText() != hex ? "0000" : "0" )
+		s.service_type = 1;
+	else if ( apid->getText() != hex ? "0000" : "0" )
+		s.service_type = 2;
+	else
+		s.service_type = 100; // Data
 
 	tmpval=0;
 	// video pid
@@ -2059,8 +2112,6 @@ void ManualPIDWindow::store()
 		s.dxflags |= 1;
 	if (cHoldName->isChecked())
 		s.dxflags |= 8;
-
-	s.service_type = service.getServiceType();
 
 	eDVB &dvb = *eDVB::getInstance();
 	dvb.settings->saveServices();

@@ -779,7 +779,7 @@ eTransponder &eTransponderList::createTransponder(eDVBNamespace dvb_namespace, e
 eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service, int chnum, bool *newService)
 {
 	std::map<eServiceReferenceDVB,eServiceDVB>::iterator i=services.find(service);
-                                                  	
+                                                  
 	if (newService)
 			*newService = ( i == services.end() );
 
@@ -1183,16 +1183,6 @@ eServiceDVB *eTransponderList::searchService(const eServiceReference &service)
 	if (i==services.end())
 		return 0;
 	return &i->second;
-}
-
-const eServiceReferenceDVB *eTransponderList::searchService(eDVBNamespace dvb_namespace, eOriginalNetworkID original_network_id, eServiceID service_id)
-{
-	for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator i(services.begin()); i != services.end(); ++i)
-		if ((i->first.getDVBNamespace() == dvb_namespace) &&
-				(i->first.getOriginalNetworkID() == original_network_id) &&
-				(i->first.getServiceID() == service_id))
-					return &i->first;
-	return 0;
 }
 
 eServiceReferenceDVB eTransponderList::searchServiceByNumber(int chnum)
