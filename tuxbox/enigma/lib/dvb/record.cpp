@@ -82,31 +82,52 @@ int eDVBRecorder::flushBuffer()
 {
 	if (!bufptr)
 		return 0;
-	int towrite = splitsize-size>bufptr ? bufptr : splitsize-size;
-	int wr = ::write(outfd, buf, towrite);
 
-	if ( wr < towrite )  // to less bytes written?
+	int towrite = splitsize-size>bufptr ? bufptr : splitsize-size;
+
+	int retrycount=5; // 5 write retrys..
+	int written=0;
+	while( written < towrite )
+	{
+		int wr = ::write(outfd, buf+written, towrite-written);
+		if ( wr < towrite )  // to less bytes written?
+		{
+			if ( wr < 0 )
+				goto Error;
+			if ( !retrycount-- )
+				goto Error;
+		}
+		written += wr;
+		size += wr;
+	}
+
+	if ( !retrycount )
 		goto Error;
 
-	size+=wr;
 	if (size >= splitsize)
 	{
 		if ( openFile(++splits) ) // file creation failed?
 			goto Error;
 
-		if ( wr < bufptr )  // must flush remaining bytes from buffer..
+		retrycount=5; // 5 write retrys..
+		while ( written < bufptr )  // must flush remaining bytes from buffer..
 		{
-			towrite=bufptr-wr;
-			wr = ::write(outfd, buf+wr, towrite);
-
+			towrite=bufptr-written;
+			int wr = ::write(outfd, buf+written, towrite);
 			if ( wr < towrite ) // to less bytes written?
-				goto Error;
-
-			size+=wr;
+			{
+				if ( wr < 0 )
+					goto Error;
+				if ( !retrycount-- )
+					goto Error;
+			}
+			written += wr;
+			size += wr;
 		}
 	}
 	bufptr=0;
 	return 0;
+
 Error:
 	eDebug("recording write error, maybe disk full");
 	state = stateError;
