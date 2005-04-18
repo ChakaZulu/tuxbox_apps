@@ -101,9 +101,6 @@ int eDVBRecorder::flushBuffer()
 		size += wr;
 	}
 
-	if ( !retrycount )
-		goto Error;
-
 	if (size >= splitsize)
 	{
 		if ( openFile(++splits) ) // file creation failed?
