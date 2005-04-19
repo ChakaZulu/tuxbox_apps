@@ -36,7 +36,6 @@ extern int sx,ex;
 void
 overlay_destructor(void *p) {
 	fbvnc_overlay_t *this = p;
-
 	//if(this->pixels) free(this->pixels); 
 	if(this->data) free(this->data);
     if (manager )
@@ -1174,6 +1173,16 @@ overlays_init() {
 
 }
 
+void cleanupFT()
+{
+	dprintf("cleanupFT()\n");
+	if (manager )
+		FTC_Manager_Done(manager);
+	if (library)
+		FT_Done_FreeType(library);
+	manager = NULL;
+	library = NULL;
+}
 #define MAXSERVERS 10
 int
 selectServer(char* szServerNr, int rc_fd)

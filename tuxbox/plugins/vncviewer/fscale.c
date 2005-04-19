@@ -169,6 +169,7 @@ img_read(struct viewport *vport, FILE *f)
 	vport->v_ysize = ys;
 
 	vport->v_buf = (Pixel *)malloc(xs*ys*2);
+	printf("0x%X : Alloc %d bytes in img_read\n",vport->v_buf,xs*ys*2);
 	if (!vport->v_buf) FAIL("out of memory");
 
 	read_img_pixels(vport, f, format);
@@ -304,6 +305,7 @@ img_scale(struct img *out, struct img *in, int scale)
 	out->ysize = yso;
 
 	out->pix = (Pixel *)malloc(xso*yso*2);
+	printf("Warning: leaking %d bytes in img_scale\n",xso*yso*2);
 	if (!out->pix) die("out of memory!");
 
 	if (scale > PBASE) die("scale >1 not implemented yet!");

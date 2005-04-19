@@ -79,6 +79,8 @@ cleanup_and_exit(char *msg, int ret) {
 		if(msg) fprintf(stderr, "%s\n", msg);
 	}
 	fbvnc_close();
+	list_destroy(global_framebuffer.overlays);
+	list_destroy(sched);
 	terminate=1;
 }
 
@@ -265,6 +267,7 @@ fbvnc_close() {
 		free(global_framebuffer.v_buf);
 	}
 	DisconnectFromRFBServer();
+
 	//restore videoformat
 	ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
 	ioctl(saa, SAAIOSWSS, &saa_old);
@@ -1367,7 +1370,11 @@ show_pnm_image() {
 			}
 		}
 	}
-	if(!img_saved)	free(v_img.v_buf);
+	if(!img_saved)
+	{
+		printf("0x%X : Freeed\n",v_img.v_buf);
+		free(v_img.v_buf);
+	}
 
 	fn_action = 0;
 	activate_viewport(&v_save);
@@ -1435,6 +1442,11 @@ extern "C" {
 #endif
 		if (selectServer(szServerNr, rc_fd) == 0)
 		{
+			cleanupFT();
+			if( munmap ( (void *)global_framebuffer.p_buf, global_framebuffer.smem_len ) == -1 )
+			{
+				printf("FBclose: munmap failed");
+			}
 			restore_screen();
 			return;
 		}
@@ -1522,6 +1534,12 @@ extern "C" {
 			MessageBox("Cannot connect", rc_fd);
 			dprintf("Cannot connect\n");
 			restore_screen();
+			list_destroy(sched);
+			if( munmap ( (void *)global_framebuffer.p_buf, global_framebuffer.smem_len ) == -1 )
+			{
+				printf("FBclose: munmap failed");
+			}
+			cleanupFT();
 			return;
 		}
 
@@ -1531,6 +1549,12 @@ extern "C" {
 			MessageBox("Cannot initialize", rc_fd);
 			dprintf("Cannot initialize\n");
 			restore_screen();
+			list_destroy(sched);
+			if( munmap ( (void *)global_framebuffer.p_buf, global_framebuffer.smem_len ) == -1 )
+			{
+				printf("FBclose: munmap failed");
+			}
+			cleanupFT();
 			return;
 		}
 

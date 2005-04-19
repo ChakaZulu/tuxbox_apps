@@ -158,10 +158,15 @@ InitialiseRFBConnection(int sock)
 
 			reason = malloc(reasonLen);
 
-			if(!ReadExact(sock, reason, reasonLen)) return False;
+			if(!ReadExact(sock, reason, reasonLen))
+			{
+				free(reason);
+				return False;
+			}
 
 			fprintf(stderr,"%s: VNC connection failed: %.*s\n",
 					  programName, (int)reasonLen, reason);
+			free(reason);
 			return False;
 
 		case rfbNoAuth:
@@ -252,12 +257,17 @@ InitialiseRFBConnection(int sock)
 
 	desktopName = malloc(si.nameLength + 1);
 
-	if(!ReadExact(sock, desktopName, si.nameLength)) return False;
+	if(!ReadExact(sock, desktopName, si.nameLength))
+	{
+		free(desktopName);
+		return False;
+	}
 
 	desktopName[si.nameLength] = 0;
 
 	fprintf(stderr,"%s: Desktop name \"%s\"\n",programName,desktopName);
-
+	free(desktopName);
+	
 	fprintf(stderr,
 			  "%s: Connected to VNC server, using protocol version %d.%d\n",
 			  programName, rfbProtocolMajorVersion, rfbProtocolMinorVersion);
@@ -800,7 +810,10 @@ HandleRFBServerMessage()
 				str = malloc(msg.sct.length);
 
 				if(!ReadExact(rfbsock, str, msg.sct.length))
+				{
+					free(str);
 					return False;
+				}
 /*
 	XSelectInput(dpy, DefaultRootWindow(dpy), 0);
 	XStoreBytes(dpy, str, msg.sct.length);

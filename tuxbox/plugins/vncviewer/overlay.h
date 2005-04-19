@@ -69,3 +69,4 @@ extern int ev_battery(fbvnc_event_t *ev, fbvnc_overlay_t *this_overlay);
 
 extern int selectServer(char* szServerNr, int rc_fd);
 extern void MessageBox(const char* szMsg, int rc_fd);
+extern void cleanupFT();
