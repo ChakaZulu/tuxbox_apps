@@ -471,7 +471,7 @@ typedef struct font_sizes
 #define FONT_STYLE_BOLD    1
 #define FONT_STYLE_ITALIC  2
 
-const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] = 
+const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] =
 {
 	{LOCALE_FONTSIZE_MENU               ,  20, FONT_STYLE_BOLD   , 0},
 	{LOCALE_FONTSIZE_MENU_TITLE         ,  30, FONT_STYLE_BOLD   , 0},
@@ -511,7 +511,7 @@ const lcd_setting_struct_t lcd_setting[LCD_SETTING_COUNT] =
 	{"lcd_power"            , DEFAULT_LCD_POWER            },
 	{"lcd_inverse"          , DEFAULT_LCD_INVERSE          },
 	{"lcd_show_volume"      , DEFAULT_LCD_SHOW_VOLUME      },
-	{"lcd_autodimm"         , DEFAULT_LCD_AUTODIMM         }		
+	{"lcd_autodimm"         , DEFAULT_LCD_AUTODIMM         }
 };
 
 
@@ -531,14 +531,14 @@ int CNeutrinoApp::loadSetup()
 		erg = 1;
 	}
         std::ifstream checkParentallocked(NEUTRINO_PARENTALLOCKED_FILE);
-	if(checkParentallocked) 	 
-	{ 	 
-	        parentallocked = true; 	 
-	        checkParentallocked.close(); 	 
-	} 
+	if(checkParentallocked)
+	{
+	        parentallocked = true;
+	        checkParentallocked.close();
+	}
 	//video
 	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
-	g_settings.video_csync = configfile.getInt32( "video_csync", 0 ); 
+	g_settings.video_csync = configfile.getInt32( "video_csync", 0 );
 
 	//fb-alphawerte für gtx
 	g_settings.gtx_alpha1 = configfile.getInt32( "gtx_alpha1", 0);
@@ -724,15 +724,15 @@ int CNeutrinoApp::loadSetup()
 	g_settings.bouquetlist_mode = configfile.getInt32( "bouquetlist_mode", 0 );
 
 	// parentallock
-	if (!parentallocked) 	 
-  	{	 
+	if (!parentallocked)
+  	{
 	  	g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
 		g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
-	} 	 
-	else 	 
-	{ 	 
-	        g_settings.parentallock_prompt = 3; 	 
-	        g_settings.parentallock_lockage = 18; 	 
+	}
+	else
+	{
+	        g_settings.parentallock_prompt = 3;
+	        g_settings.parentallock_lockage = 18;
 	}
 	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
@@ -766,7 +766,7 @@ int CNeutrinoApp::loadSetup()
 	if ((g_settings.filebrowser_sortmethod < 0) || (g_settings.filebrowser_sortmethod >= FILEBROWSER_NUMBER_OF_SORT_VARIANTS))
 		g_settings.filebrowser_sortmethod = 0;
 	g_settings.filebrowser_denydirectoryleave = configfile.getBool("filebrowser_denydirectoryleave", false);
-		
+
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
@@ -783,12 +783,12 @@ int CNeutrinoApp::loadSetup()
 		g_settings.uboot_console	= 0;
 		g_settings.uboot_lcd_inverse	= -1;
 		g_settings.uboot_lcd_contrast	= -1;
-	
+
 		FILE* fd = fopen("/var/tuxbox/boot/boot.conf", "r");
 		if(fd)
 		{
 			char buffer[100];
-	
+
 			while(fgets(buffer, 99, fd) != NULL)
 			{
 				if(strncmp(buffer,"console=",8) == 0)
@@ -811,7 +811,7 @@ int CNeutrinoApp::loadSetup()
 				else
 					printf("unknown entry found in boot.conf\n");
 			}
-	
+
 			fclose(fd);
 		}
 		g_settings.uboot_console_bak = g_settings.uboot_console;
@@ -955,23 +955,23 @@ void CNeutrinoApp::saveSetup()
 	for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
 	{
 		sprintf(cfg_key, "network_nfs_ip_%d", i);
-		configfile.setString( cfg_key, g_settings.network_nfs_ip[i] );		
+		configfile.setString( cfg_key, g_settings.network_nfs_ip[i] );
 		sprintf(cfg_key, "network_nfs_dir_%d", i);
-		configfile.setString( cfg_key, g_settings.network_nfs_dir[i] );		
+		configfile.setString( cfg_key, g_settings.network_nfs_dir[i] );
 		sprintf(cfg_key, "network_nfs_local_dir_%d", i);
-		configfile.setString( cfg_key, g_settings.network_nfs_local_dir[i] );		
+		configfile.setString( cfg_key, g_settings.network_nfs_local_dir[i] );
 		sprintf(cfg_key, "network_nfs_automount_%d", i);
-		configfile.setInt32( cfg_key, g_settings.network_nfs_automount[i]);		
+		configfile.setInt32( cfg_key, g_settings.network_nfs_automount[i]);
 		sprintf(cfg_key, "network_nfs_type_%d", i);
-		configfile.setInt32( cfg_key, g_settings.network_nfs_type[i]);		
+		configfile.setInt32( cfg_key, g_settings.network_nfs_type[i]);
 		sprintf(cfg_key,"network_nfs_username_%d", i);
-		configfile.setString( cfg_key, g_settings.network_nfs_username[i] );		
+		configfile.setString( cfg_key, g_settings.network_nfs_username[i] );
 		sprintf(cfg_key, "network_nfs_password_%d", i);
-		configfile.setString( cfg_key, g_settings.network_nfs_password[i] );		
+		configfile.setString( cfg_key, g_settings.network_nfs_password[i] );
 		sprintf(cfg_key, "network_nfs_mount_options1_%d", i);
-		configfile.setString( cfg_key, g_settings.network_nfs_mount_options1[i]);		
+		configfile.setString( cfg_key, g_settings.network_nfs_mount_options1[i]);
 		sprintf(cfg_key, "network_nfs_mount_options2_%d", i);
-		configfile.setString( cfg_key, g_settings.network_nfs_mount_options2[i]);	
+		configfile.setString( cfg_key, g_settings.network_nfs_mount_options2[i]);
 		sprintf(cfg_key, "network_nfs_mac_%d", i);
 		configfile.setString( cfg_key, g_settings.network_nfs_mac[i]);
 	}
@@ -1289,13 +1289,13 @@ void CNeutrinoApp::SetupFrameBuffer()
 *                                                                                     *
 **************************************************************************************/
 
-const neutrino_font_descr_struct predefined_font[2] = 
+const neutrino_font_descr_struct predefined_font[2] =
 {
 	{"Micron"            , {FONTDIR "/micron.ttf"        , FONTDIR "/micron_bold.ttf", FONTDIR "/micron_italic.ttf"}, 0},
 	{"MD King KhammuRabi", {FONTDIR "/md_khmurabi_10.ttf", NULL                      , NULL                        }, 0}
 };
 
-const char* predefined_lcd_font[2][6] = 
+const char* predefined_lcd_font[2][6] =
 {
 	{FONTDIR "/12.pcf.gz", "Fix12", FONTDIR "/14B.pcf.gz", "Fix14", FONTDIR "/15B.pcf.gz", "Fix15"},
 	{FONTDIR "/md_khmurabi_10.ttf", "MD King KhammuRabi", NULL, NULL,  NULL, NULL}
@@ -1388,10 +1388,10 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "",
 											CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(GenericMenuSeparatorLine);
-	
+
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL,
 										CRCInput::convertDigitToKey(shortcut++)));
-	mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.parentallock_pincode, false, true, NULL, &service, NULL, 
+	mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.parentallock_pincode, false, true, NULL, &service, NULL,
 											  CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 
@@ -1607,7 +1607,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	settings.addItem(GenericMenuSeparatorLine);
 
 	CMenuOptionChooser* onoff = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
-	
+
 	CStringInput* freq = new CStringInput(LOCALE_SCANTP_FREQ, (char *) scanSettings.TP_freq, 8, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 	CStringInput* rate = new CStringInput(LOCALE_SCANTP_RATE, (char *) scanSettings.TP_rate, 8, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 
@@ -1738,7 +1738,7 @@ void CNeutrinoApp::InitAudioplPicSettings(CMenuWidget &audioplPicSettings)
 {
 	audioplPicSettings.addItem(GenericMenuSeparator);
 	audioplPicSettings.addItem(GenericMenuBack);
-	
+
 	audioplPicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PICTUREVIEWER_HEAD));
 	audioplPicSettings.addItem(new CMenuOptionChooser(LOCALE_PICTUREVIEWER_SCALING  , &g_settings.picviewer_scaling     , PICTUREVIEWER_SCALING_OPTIONS  , PICTUREVIEWER_SCALING_OPTION_COUNT  , true ));
 	CStringInput * pic_timeout= new CStringInput(LOCALE_PICTUREVIEWER_SLIDE_TIME, g_settings.picviewer_slide_time, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
@@ -1833,7 +1833,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_SUBCHAN_DISP_POS, &g_settings.infobar_subchan_disp_pos, INFOBAR_SUBCHAN_DISP_POS_OPTIONS, INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT, true));
-	
+
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
 
 	CSPTSNotifier *sptsNotifier = new CSPTSNotifier;
@@ -1849,10 +1849,10 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		}
 		else
 			g_settings.misc_option[i] = 0;
-		
+
 		miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CTouchFileNotifier(misc_setting_files[i].filename)));
 	}
-	
+
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_FB_DESTINATION, &g_settings.uboot_console, MISCSETTINGS_FB_DESTINATION_OPTIONS, MISCSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
 
 	keySetupNotifier = new CKeySetupNotifier;
@@ -1864,7 +1864,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCK, true, g_settings.repeat_blocker, keySettings_repeatBlocker));
  	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, true, g_settings.repeat_genericblocker, keySettings_repeat_genericblocker));
 	miscSettings.addItem(m1);
-	
+
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILESYSTEM_IS_UTF8            , &g_settings.filesystem_is_utf8            , MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTIONS, MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTION_COUNT, true ));
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS        , &g_settings.filebrowser_showrights        , MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
@@ -1878,7 +1878,6 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	languageSettings.addItem(GenericMenuBack);
 	languageSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_LANGUAGESETUP_SELECT, (char*)&g_settings.language, true, this);
 	//search available languages....
 
 	struct dirent **namelist;
@@ -1886,7 +1885,6 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	//		printf("scanning locale dir now....(perhaps)\n");
 
 	char *pfad[] = {DATADIR "/neutrino/locale","/var/tuxbox/config/locale"};
-	char * locale;	
 
 	for(int p = 0;p < 2;p++)
 	{
@@ -1899,19 +1897,19 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 		{
 			for(int count=0;count<n;count++)
 			{
-				locale = namelist[count]->d_name;
+				char * locale = namelist[count]->d_name;
 				char * pos = strstr(locale, ".locale");
 				if(pos != NULL)
 				{
 					*pos = '\0';
+					CMenuOptionLanguageChooser* oj = new CMenuOptionLanguageChooser((char*)locale, this);
 					oj->addOption(locale);
+					languageSettings.addItem( oj );
 				}
-				free(namelist[count]);
 			}
 			free(namelist);
 		}
 	}
-	languageSettings.addItem( oj );
 }
 
 #define AUDIOMENU_ANALOGOUT_OPTION_COUNT 3
@@ -1999,7 +1997,7 @@ public:
 			}
 
 			addItem(oj);
-			
+
 			addItem(new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSWITCH, &g_settings.vcr_AutoSwitch, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
 			addItem(GenericMenuSeparatorLine);
@@ -2029,7 +2027,7 @@ public:
 			SyncControlerForwarder->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == 3) || (video_out_signal == 4));
 
 			g_settings.video_Format = g_Controld->getVideoFormat();
-			
+
 			CMenuWidget::paint();
 		};
 };
@@ -2140,7 +2138,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMenuForwarder * mf3 = new CMenuForwarder(LOCALE_RECORDINGMENU_SERVER_MAC, ((g_settings.recording_type == RECORDING_SERVER) && g_settings.recording_server_wakeup==1), g_settings.recording_server_mac, recordingSettings_server_mac);
 
 	CRecordingNotifier2 * RecordingNotifier2 = new CRecordingNotifier2(mf3);
-	
+
 	CMenuOptionChooser * oj2 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SERVER_WAKEUP, &g_settings.recording_server_wakeup, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER), RecordingNotifier2);
 
 	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPPLAYBACK, &g_settings.recording_stopplayback, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER));
@@ -2165,7 +2163,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	// for direct recording
 	CMenuWidget *directRecordingSettings = new CMenuWidget(LOCALE_RECORDINGMENU_FILESETTINGS, NEUTRINO_ICON_RECORDING);
-	
+
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_RECORDINGMENU_FILESETTINGS,(g_settings.recording_type == RECORDING_FILE),NULL,directRecordingSettings);
 
 	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, true, g_settings.network_nfs_recordingdir,this,"recordingdir");
@@ -2173,9 +2171,9 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMenuForwarder* mf9 = new CMenuForwarder(LOCALE_RECORDINGMENU_SPLITSIZE, true, g_settings.recording_splitsize,recordingSettings_splitsize);
 
 	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_O_SYNC, &g_settings.recording_use_o_sync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
-	
+
 	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_FDATASYNC, &g_settings.recording_use_fdatasync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
-	
+
 	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
 	CMenuOptionChooser* oj9 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_VTXT_PID, &g_settings.recording_stream_vtxt_pid, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
@@ -2272,9 +2270,9 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.network_nfs_moviedir,this,"moviedir");
  	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFPLUGIN, true, g_settings.movieplayer_plugin,this,"movieplugin");
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TRANSCODE_AUDIO      , &g_settings.streaming_transcode_audio      , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-                                             
+
 	CMenuOptionChooser* oj2 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_AVI_RAWAUDIO   , &g_settings.streaming_force_avi_rawaudio   , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-                                             
+
 	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_FORCE_TRANSCODE_VIDEO, &g_settings.streaming_force_transcode_video, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
 
 // not yet supported by VLC
@@ -2293,12 +2291,12 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf4);                          //Video-Rate
 	streamingSettings.addItem( oj3);
-	streamingSettings.addItem( oj4);                          
-	streamingSettings.addItem( oj5);                          
+	streamingSettings.addItem( oj4);
+	streamingSettings.addItem( oj5);
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf5);                          //Audiorate
-	streamingSettings.addItem( oj1);                          
-	streamingSettings.addItem( oj2);                          
+	streamingSettings.addItem( oj1);
+	streamingSettings.addItem( oj2);
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf7);                          //default dir
 	streamingSettings.addItem( mf8);				//default movieplugin
@@ -2326,7 +2324,7 @@ protected:
 			configfile->setInt32(locale_real_names[text], atoi(value));
 			return observer->changeNotify(OptionName, Data);
 		}
-  
+
 
 public:
 	CMenuNumberInput(const neutrino_locale_t Text, const int32_t DefaultValue, CChangeObserver * const _observer, CConfigFile * const _configfile) : CMenuForwarder(Text, true, NULL, this)
@@ -2719,9 +2717,9 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	for (int i = KEY_CHANNEL_UP; i <= KEY_SUBCHANNEL_DOWN; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
-  
+
 	keySettings.addItem(new CMenuForwarder(keydescription[KEY_ZAP_HISTORY], true, NULL, keychooser[KEY_ZAP_HISTORY]));
-	
+
 	keySettings.addItem(new CMenuForwarder(keydescription[KEY_LASTCHANNEL], true, NULL, keychooser[KEY_LASTCHANNEL]));
 }
 
@@ -2834,7 +2832,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 			sprintf(id, "%d", count);
 
 			enabled_count++;
-			
+
 			StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, (cnt== 0) ? CRCInput::RC_blue : CRCInput::convertDigitToKey(enabled_count-1), (cnt == 0) ? NEUTRINO_ICON_BUTTON_BLUE : ""), (cnt == 0));
 			cnt++;
 		}
@@ -2870,7 +2868,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 	StreamFeatureSelector.addItem(oj);
 
 	// -- Stream Info
-	// -- !! obsolete (rasc 2004-03-06) 
+	// -- !! obsolete (rasc 2004-03-06)
 	// StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_STREAMFEATURES_INFO, true, NULL, StreamFeaturesChanger, id, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL), false);
 
 
@@ -2925,7 +2923,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 				// preselectedDir != NULL -> called after stream problem so do not show a dialog again
 				if(preselectedDir == NULL && g_settings.recording_choose_direct_rec_dir) {
 					int userDecision = -1;
-					
+
 					CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&userDecision,NULL,g_settings.network_nfs_recordingdir);
 					if (recDirs.hasItem()) {
 						recDirs.exec(NULL,"");
@@ -2935,14 +2933,14 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 							recDir = g_settings.network_nfs_local_dir[userDecision];
 							if (!CFSMounter::isMounted(g_settings.network_nfs_local_dir[userDecision]))
 							{
-								CFSMounter::MountRes mres = 
+								CFSMounter::MountRes mres =
 									CFSMounter::mount(g_settings.network_nfs_ip[userDecision].c_str(),
-											  g_settings.network_nfs_dir[userDecision], 
+											  g_settings.network_nfs_dir[userDecision],
 											  g_settings.network_nfs_local_dir[userDecision],
 											  (CFSMounter::FSType) g_settings.network_nfs_type[userDecision],
 											  g_settings.network_nfs_username[userDecision],
 											  g_settings.network_nfs_password[userDecision],
-											  g_settings.network_nfs_mount_options1[userDecision], 
+											  g_settings.network_nfs_mount_options1[userDecision],
 											  g_settings.network_nfs_mount_options2[userDecision]);
 								if (mres != CFSMounter::MRES_OK)
 								{
@@ -2953,12 +2951,12 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 									strcpy(msg,merr);
 									strcat(msg,"\nDir: ");
 									strcat(msg,g_settings.network_nfs_local_dir[userDecision]);
-									
+
 									ShowMsgUTF(LOCALE_MESSAGEBOX_ERROR, msg,
 										   CMessageBox::mbrBack, CMessageBox::mbBack,NEUTRINO_ICON_ERROR, 450, 10); // UTF-8
 								}
-							}	
-						} else 
+							}
+						} else
 						{
 							doRecord = false;
 						}
@@ -3041,7 +3039,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		unsigned int splitsize, ringbuffers;
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
 		sscanf(g_settings.recording_ringbuffers, "%u", &ringbuffers);
-		
+
 		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_all_audio_pids, g_settings.recording_stream_vtxt_pid, ringbuffers);
 
 		CVCRControl::getInstance()->registerDevice(recordingdevice);
@@ -3080,9 +3078,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	if (font.name == NULL) /* no font specified in command line */
 	{
 		unsigned int use_true_unicode_font = (loadLocale_ret == CLocaleManager::ISO_8859_1_FONT) ? 0 : 1;
-		
+
 		font = predefined_font[use_true_unicode_font];
-		CLCD::getInstance()->init(predefined_lcd_font[use_true_unicode_font][0], 
+		CLCD::getInstance()->init(predefined_lcd_font[use_true_unicode_font][0],
 		                          predefined_lcd_font[use_true_unicode_font][1],
 		                          predefined_lcd_font[use_true_unicode_font][2],
 		                          predefined_lcd_font[use_true_unicode_font][3],
@@ -3441,8 +3439,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				channelList->numericZap( msg );
 			}
 			else if (CRCInput::isNumeric(msg))
-			{ 
-				//numeric zap 
+			{
+				//numeric zap
 				channelList->numericZap( msg );
 			}
 			else
@@ -3462,7 +3460,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					if(CVCRControl::getInstance()->isDeviceRegistered())
 					{
 						if ((CVCRControl::getInstance()->Device->getDeviceType() == CVCRControl::DEVICE_VCR) &&
-						    (CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || 
+						    (CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD ||
 						     CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE))
 						{
 							CVCRControl::getInstance()->Stop();
@@ -3616,7 +3614,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		dprintf(DEBUG_DEBUG, "neutino - recordmode %s\n", ( data ) ? "on":"off" );
 
 		recordingstatus = data;
-		
+
 		if( ( !g_InfoViewer->is_visible ) && data )
 			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
@@ -3755,8 +3753,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
 			{
 				if (strcmp(g_settings.network_nfs_local_dir[i],recDir) == 0)
-				{			
-					printf("[neutrino] waking up %s (%s)\n",g_settings.network_nfs_ip[i].c_str(),recDir); 
+				{
+					printf("[neutrino] waking up %s (%s)\n",g_settings.network_nfs_ip[i].c_str(),recDir);
 					std::string command = "etherwake ";
 					command += g_settings.network_nfs_mac[i];
 					if(system(command.c_str()) != 0)
@@ -3850,7 +3848,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		if (mode != mode_scart)
 		{
 			neutrino_locale_t msgbody;
-			
+
 			if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_IDLE)
 				msgbody = LOCALE_STREAMING_SUCCESS;
 			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_BUFFER_OVERFLOW)
@@ -3863,7 +3861,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 				goto skip_message;
 
 			/*
-			 * use a short timeout of only 5 seconds in case it was only a temporary network problem 
+			 * use a short timeout of only 5 seconds in case it was only a temporary network problem
 			 * in case of STREAM2FILE_STATUS_IDLE we might even have to immediately start the next recording
 			 */
 #warning TODO: it might make some sense to have some log-file (but where do we store this information? nfs/flash/ram?) that collects these messages and maybe a menu-entry to view the lasted XXX messages
@@ -3874,7 +3872,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		}
 		if ((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_IDLE)
 		{
-			/* 
+			/*
 			 * note that changeNotify does not distinguish between LOCALE_MAINMENU_RECORDING_START and LOCALE_MAINMENU_RECORDING_STOP
 			 * instead it checks the state of the variable recordingstatus
 			 */
@@ -4076,7 +4074,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	unsigned long long timeoutEnd;
 
 	char current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
-	
+
 	do
 	{
 		if (msg <= CRCInput::RC_MaxRC)
@@ -4114,9 +4112,9 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 				g_RCInput->postMsg(msg, data);
 				break;
 			}
-			
+
 			g_Controld->setVolume(current_volume, (CControld::volume_type)g_settings.audio_avs_Control);
-			
+
 			if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
 			{
 				current_volume = 50;
@@ -4133,26 +4131,26 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			g_RCInput->postMsg(msg, data);
 			break;
 		}
-		
+
 		if (bDoPaint)
 		{
 			int vol = current_volume << 1;
 			frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR_PLUS_3);
 			frameBuffer->paintBoxRel(x + 40 + vol, y + 12, 200 - vol, 15, COL_INFOBAR_PLUS_1);
 		}
-		
+
 		CLCD::getInstance()->showVolume(current_volume);
 		if (msg != CRCInput::RC_timeout)
 		{
 			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
 		}
-		
+
 		}
 	while (msg != CRCInput::RC_timeout);
-	
+
 	if( (bDoPaint) && (pixbuf!= NULL) )
 		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
-}	
+}
 
 void CNeutrinoApp::tvMode( bool rezap )
 {
@@ -4255,7 +4253,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
-	
+
 		puts("[neutrino.cpp] executing " NEUTRINO_ENTER_STANDBY_SCRIPT ".");
 		if (system(NEUTRINO_ENTER_STANDBY_SCRIPT) != 0)
 		perror(NEUTRINO_ENTER_STANDBY_SCRIPT "failed");
@@ -4360,9 +4358,9 @@ void CNeutrinoApp::startNextRecording()
 					for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
 					{
 						if (strcmp(g_settings.network_nfs_local_dir[i],recDir) == 0)
-						{			
-							CFSMounter::MountRes mres = 
-								CFSMounter::mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i], 
+						{
+							CFSMounter::MountRes mres =
+								CFSMounter::mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i],
 										  g_settings.network_nfs_local_dir[i], (CFSMounter::FSType) g_settings.network_nfs_type[i],
 										  g_settings.network_nfs_username[i], g_settings.network_nfs_password[i],
 										  g_settings.network_nfs_mount_options1[i], g_settings.network_nfs_mount_options2[i]);

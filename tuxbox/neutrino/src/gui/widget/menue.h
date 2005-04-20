@@ -257,6 +257,30 @@ class CMenuOptionStringChooser : public CMenuItem
 		int exec(CMenuTarget* parent);
 };
 
+class CMenuOptionLanguageChooser : public CMenuItem
+{
+		int                      height;
+		char *                   optionValue;
+		std::vector<std::string> options;
+		CChangeObserver *        observ;
+
+	public:
+		CMenuOptionLanguageChooser(char* OptionValue, CChangeObserver* Observ = NULL);
+		~CMenuOptionLanguageChooser();
+
+		void addOption(const char * value);
+		int paint(bool selected);
+		int getHeight(void) const
+		{
+			return height;
+		}
+		bool isSelectable(void) const
+		{
+			return true;
+		}
+
+		int exec(CMenuTarget* parent);
+};
 
 class CMenuWidget : public CMenuTarget
 {

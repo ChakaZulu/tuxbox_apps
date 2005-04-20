@@ -333,7 +333,7 @@ void CMenuWidget::paint()
 	// shrink menu if less items
 	if(hheight+itemHeightTotal < height)
 		height=hheight+itemHeightTotal;
-	
+
 	y= ( ( ( g_settings.screen_EndY- g_settings.screen_StartY ) - height) >> 1 ) + g_settings.screen_StartY;
 	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
 
@@ -354,7 +354,7 @@ void CMenuWidget::paint()
 void CMenuWidget::paintItems()
 {
 	int item_height=height-(item_start_y-y);
-	
+
 	//Item not currently on screen
 	if (selected >= 0)
 	{
@@ -363,7 +363,7 @@ void CMenuWidget::paintItems()
 		while(selected >= (int)page_start[current_page + 1])
 			current_page++;
 	}
-	
+
 	// Scrollbar
 	if(total_pages>1)
 	{
@@ -376,7 +376,7 @@ void CMenuWidget::paintItems()
 	for (unsigned int count = 0; count < items.size(); count++)
 	{
 		CMenuItem* item = items[count];
-		
+
 		if ((count >= page_start[current_page]) &&
 		    (count < page_start[current_page + 1]))
 		{
@@ -673,6 +673,79 @@ int CMenuOptionStringChooser::paint( bool selected )
 }
 
 
+//-------------------------------------------------------------------------------------------------------------------------------
+
+CMenuOptionLanguageChooser::CMenuOptionLanguageChooser(char* OptionValue, CChangeObserver* Observ)
+{
+	height      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	optionValue = OptionValue;
+	observ      = Observ;
+
+	directKey   = CRCInput::RC_nokey;
+	iconName    = "";
+}
+
+
+CMenuOptionLanguageChooser::~CMenuOptionLanguageChooser()
+{
+	options.clear();
+}
+
+void CMenuOptionLanguageChooser::addOption(const char * const value)
+{
+	options.push_back(std::string(value));
+}
+
+int CMenuOptionLanguageChooser::exec(CMenuTarget*)
+{
+	bool wantsRepaint = false;
+
+	//select value
+	for(unsigned int count = 0; count < options.size(); count++)
+	{
+		if (strcmp(options[count].c_str(), optionValue) == 0)
+		{
+			strcpy(g_settings.language, options[(count + 1) % options.size()].c_str());
+			break;
+		}
+	}
+
+	paint(true);
+	if(observ)
+	{
+		wantsRepaint = observ->changeNotify(LOCALE_LANGUAGESETUP_SELECT, optionValue);
+	}
+	if ( wantsRepaint )
+		return menu_return::RETURN_REPAINT;
+	else
+		return menu_return::RETURN_NONE;
+}
+
+int CMenuOptionLanguageChooser::paint( bool selected )
+{
+	unsigned char color   = COL_MENUCONTENT;
+	fb_pixel_t    bgcolor = COL_MENUCONTENT_PLUS_0;
+	if (selected)
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
+
+	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor);
+
+	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(optionValue);
+	int stringstartposOption = x + offx + 10;
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), optionValue, color);
+
+	if (selected)
+	{
+		CLCD::getInstance()->showMenuText(1, optionValue);
+	}
+
+	return y+height;
+}
+
+
 
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuForwarder::CMenuForwarder(const neutrino_locale_t Text, const bool Active, const char * const Option, CMenuTarget* Target, const char * const ActionKey, neutrino_msg_t DirectKey, const char * const IconName)
@@ -828,7 +901,7 @@ int CMenuSeparator::paint(bool selected)
 	int height;
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 	height = getHeight();
-	
+
 	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT_PLUS_0);
 	if ((type & LINE))
 	{
