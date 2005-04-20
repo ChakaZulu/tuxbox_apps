@@ -200,12 +200,12 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 
 		case NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY:
 			sprintf(buffer, "%u", data);
-			paintLine(xpos2, ypos_frequency, 100, buffer);
+			paintLine(xpos2, ypos_frequency, 110, buffer);
 			break;
 			
 		case NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP:
 			(data == 0) ? sprintf(buffer, "-H") : sprintf(buffer, "-V");
-			paintLine(xpos2 + 100, ypos_frequency, 30, buffer);
+			paintLine(xpos2 + 110, ypos_frequency, 30, buffer);
 			break;
 			
 		case NeutrinoMessages::EVT_SCAN_PROVIDER:
