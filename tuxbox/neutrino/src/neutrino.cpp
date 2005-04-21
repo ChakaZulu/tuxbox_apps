@@ -4326,8 +4326,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 		g_Controld->setVideoFormat(CControldClient::VIDEOFORMAT_4_3);
 
 	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	frameBuffer->loadBackground("radiomode.raw");
-	frameBuffer->useBackground(true);
+	frameBuffer->useBackground(frameBuffer->loadBackground("radiomode.raw"));// set useBackground true or false
 	frameBuffer->paintBackground();
 
 	g_RemoteControl->radioMode();

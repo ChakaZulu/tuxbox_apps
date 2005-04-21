@@ -198,7 +198,7 @@ CFrameBuffer::~CFrameBuffer()
 		munmap(lfb, available);
 		*/
 	
-	if (virtual_fb == NULL)
+	if (virtual_fb)
 		delete[] virtual_fb;
 }
 
@@ -804,9 +804,8 @@ bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned c
 
 	if (!loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, 0, background))
 	{
-		//delete[] background;
-		for (int i = 0; i < BACKGROUNDIMAGEWIDTH * 576; i++)
-			background[i] = 0;
+		delete[] background;
+		background=0;
 		return false;
 	}
 
@@ -952,7 +951,7 @@ void CFrameBuffer::switch_signal (int signal)
 {
 	CFrameBuffer * thiz = CFrameBuffer::getInstance();
 	if (signal == SIGUSR1) {
-		if (virtual_fb == NULL)
+		if (virtual_fb != NULL)
 			delete[] virtual_fb;
 		virtual_fb = new uint8_t[thiz->stride * thiz->yRes];
 		thiz->active = false;

@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.106 2005/04/13 17:19:40 mogway Exp $
+  $Id: movieplayer.cpp,v 1.107 2005/04/21 10:07:37 metallica Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -175,6 +175,7 @@ int CAPIDSelectExec::exec(CMenuTarget* parent, const std::string & actionKey)
 CMoviePlayerGui::CMoviePlayerGui()
 {
 	frameBuffer = CFrameBuffer::getInstance();
+	bookmarkmanager=0;
 
 	if(strlen (g_settings.network_nfs_moviedir) != 0)
 		Path_local = g_settings.network_nfs_moviedir;
@@ -206,7 +207,8 @@ CMoviePlayerGui::CMoviePlayerGui()
 CMoviePlayerGui::~CMoviePlayerGui ()
 {
 	delete filebrowser;
-	delete bookmarkmanager;
+	if(bookmarkmanager)
+		delete bookmarkmanager;
 	g_Zapit->setStandby (false);
 	g_Sectionsd->setPauseScanning (false);
 
@@ -224,7 +226,8 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		Path_vlc += g_settings.streaming_server_startdir;
 		Path_vlc_settings = g_settings.streaming_server_startdir;
 	}
-	bookmarkmanager = new CBookmarkManager ();
+	if(!bookmarkmanager)
+		bookmarkmanager = new CBookmarkManager ();
 
 	if(parent)
 	{
@@ -339,6 +342,11 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 
 	CLCD::getInstance()->showServicename(g_RemoteControl->getCurrentChannelName());
 	// always exit all
+	if(bookmarkmanager)
+	{
+		delete bookmarkmanager;
+		bookmarkmanager=0;
+	}
 	return menu_return::RETURN_REPAINT;
 }
 
@@ -1024,6 +1032,9 @@ PlayStreamThread (void *mrl)
 				case CMoviePlayerGui::JF:
 				case CMoviePlayerGui::JB:
 				case CMoviePlayerGui::AUDIOSELECT:
+				case CMoviePlayerGui::ITEMSELECT:
+					break;
+				default:
 					break;
 			}
 		}
@@ -2254,6 +2265,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			}
 
 			APIDSelector.exec(NULL, "");
+			delete APIDChanger;
 			showaudioselectdialog = false;
 		}
 
@@ -2833,7 +2845,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.106 $");
+	helpbox.addLine("Version: $Revision: 1.107 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2854,7 +2866,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.106 $");
+	helpbox.addLine("Version: $Revision: 1.107 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
