@@ -215,8 +215,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	if (usedBackground)
 		m_frameBuffer->saveBackgroundImage();
 	m_frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	m_frameBuffer->loadBackground("radiomode.raw");
-	m_frameBuffer->useBackground(true);
+	m_frameBuffer->useBackground(m_frameBuffer->loadBackground("radiomode.raw"));// set useBackground true or false
 	m_frameBuffer->paintBackground();
 
 	// set zapit in standby mode
@@ -1645,8 +1644,7 @@ void CAudioPlayerGui::screensaver(bool on)
 	{
 		m_screensaver = false;
 		m_frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-		m_frameBuffer->loadBackground("radiomode.raw");
-		m_frameBuffer->useBackground(true);
+		m_frameBuffer->useBackground(m_frameBuffer->loadBackground("radiomode.raw"));// set useBackground true or false
 		m_frameBuffer->paintBackground();
 		paint();
 		m_idletime = time(NULL);
