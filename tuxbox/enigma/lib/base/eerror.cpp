@@ -31,8 +31,8 @@ void eFatal(const char* fmt, ...)
 	{
 		singleLock s(signalLock);
 		logOutput(lvlFatal, buf);
+		fprintf(stderr, "%s\n",buf );
 	}
-	fprintf(stderr, "%s\n",buf );
 	if (!infatal)
 	{
 		infatal=1;
@@ -51,13 +51,11 @@ void eDebug(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
+	singleLock s(signalLock);
 	if (logOutputConsole)
 		fprintf(stderr, "%s\n", buf);
 	else
-	{
-		singleLock s(signalLock);
 		logOutput(lvlDebug, eString(buf) + "\n");
-	}
 }
 
 void eDebugNoNewLine(const char* fmt, ...)
@@ -67,13 +65,11 @@ void eDebugNoNewLine(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
+	singleLock s(signalLock);
 	if (logOutputConsole)
 		fprintf(stderr, buf);
 	else
-	{
-		singleLock s(signalLock);
 		logOutput(lvlDebug, buf);
-	}
 }
 
 void eWarning(const char* fmt, ...)
@@ -83,12 +79,10 @@ void eWarning(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
+	singleLock s(signalLock);
 	if (logOutputConsole)
 		fprintf(stderr, "%s\n", buf);
 	else
-	{
-		singleLock s(signalLock);
 		logOutput(lvlWarning, eString(buf) + "\n");
-	}
 }
 #endif // DEBUG
