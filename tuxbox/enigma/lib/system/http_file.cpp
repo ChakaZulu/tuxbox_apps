@@ -218,7 +218,9 @@ int checkAuth(const eString cauth)
 eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString path, eHTTPConnection *conn)
 {
 	int method;
+#ifdef DEBUG_HTTP_FILE
 	eDebug("request = %s, path = %s", request.c_str(), path.c_str());
+#endif
 	if (request == "GET")
 		method=eHTTPFile::methodGET;
 	else if (request == "PUT")

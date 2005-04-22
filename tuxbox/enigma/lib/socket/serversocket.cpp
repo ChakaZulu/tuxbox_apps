@@ -10,7 +10,9 @@ void eServerSocket::notifier(int)
 	int clientfd, clientlen;
 	struct sockaddr_in client_addr;
 
+#ifdef DEBUG_SERVERSOCKET
 	eDebug("[SERVERSOCKET] incoming connection!");
+#endif
 
 	clientlen=sizeof(client_addr);
 	clientfd=accept(getDescriptor(),
