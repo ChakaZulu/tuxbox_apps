@@ -47,9 +47,7 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 	mp.userName = opt["username"];
 	mp.mountDir = opt["mountdir"];
 	mp.automount = (opt["automount"] == "on") ? 1 : 0;
-	mp.rsize = (opt["rsize"]) ? atoi(opt["rsize"].c_str()) : -1;
-	mp.wsize = (opt["wsize"]) ? atoi(opt["wsize"].c_str()) : -1;
-	mp.ownOptions = opt["ownoptions"];
+	eString options = opt["options"];
 	mp.ip[0] = atoi(opt["ip0"].c_str());
 	mp.ip[1] = atoi(opt["ip1"].c_str());
 	mp.ip[2] = atoi(opt["ip2"].c_str());
@@ -98,6 +96,7 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 		mp.options += "udp,";
 	if (mp.options.length() > 0)
 		mp.options = mp.options.substr(0, mp.options.length() - 1); //remove last comma
+	mp.options += (options) ? ("," + options) : "";
 
 	eString result;
 	if (action == "change")
@@ -146,15 +145,14 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 	else
 	{
 		result.strReplace("#TITLE#", "Add Mount Point");
-		mp.rsize = 4096;
-		mp.wsize = 4096;
-		mp.options = "nolock,intr,soft,udp";
+		mp.options = "nolock,intr,soft,udp,rsize=4096,wsize=4096";
 		mp.ip[0] = 0;
 		mp.ip[1] = 0;
 		mp.ip[2] = 0;
 		mp.ip[3] = 0;
 		mp.fstype = 0;
 		mp.automount = 0;
+		mp.isMovieSource = 0;
 		cmd = "add";
 	}
 
@@ -162,7 +160,7 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 	result.strReplace("#CMD#", cmd);
 
 	unsigned int pos = 0;
-	eString option;
+	eString options, option;
 	while (mp.options.length() > 0)
 	{
 		if ((pos = mp.options.find(",")) != eString::npos)
@@ -214,6 +212,8 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 		else
 		if (option == "udp")
 			udp = "checked";
+		else
+			options += (options) ? ("," + option) : option;
 	}
 
 	result.strReplace("#ID#", eString().sprintf("%d", mp.id));
@@ -223,9 +223,7 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 	result.strReplace("#USER#", mp.userName);
 	result.strReplace("#MDIR#", mp.mountDir);
 	result.strReplace("#AUTO#", (mp.automount == 1) ? "checked" : "");
-	result.strReplace("#RSIZE#", eString().sprintf("%d", mp.rsize));
-	result.strReplace("#WSIZE#", eString().sprintf("%d", mp.wsize));
-	result.strReplace("#OWNOPTIONS#", mp.ownOptions);
+	result.strReplace("#OPTIONS#", options);
 	result.strReplace("#IP0#", eString().sprintf("%d", mp.ip[0]));
 	result.strReplace("#IP1#", eString().sprintf("%d", mp.ip[1]));
 	result.strReplace("#IP2#", eString().sprintf("%d", mp.ip[2]));
@@ -285,7 +283,8 @@ static eString mountMountPoint(eString request, eString dirpath, eString opts, e
 			break;
 	}
 
-	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">" + result + "</body></html>";
+//	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">" + result + "</body></html>";
+	return closeWindow(content, "", 500);
 }
 
 static eString unmountMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -303,7 +302,8 @@ static eString unmountMountPoint(eString request, eString dirpath, eString opts,
 	else
 		result = "Mount point unmount failed.";
 
-	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">" + result + "</body></html>";
+//	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">" + result + "</body></html>";
+	return closeWindow(content, "", 500);
 }
 
 void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)

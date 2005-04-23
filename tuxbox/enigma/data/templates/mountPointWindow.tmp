@@ -16,7 +16,7 @@
 			</tr>
 			<tr>
 				<td>Filesystem Type: </td>
-				<td><input name="fstype" type="text" size="1" maxlength="1" value="#FSTYPE#">&nbsp;&nbsp;(0 = NFS, 1 = CIFS, 2 = DEVICE)</td>
+				<td><input name="fstype" type="text" size="1" maxlength="1" value="#FSTYPE#">&nbsp;&nbsp;(0 = NFS, 1 = CIFS, 2 = DEVICE, 3 = SMBFS)</td>
 			</tr>
 			<tr>
 				<td>Auto Mount: </td>
@@ -48,24 +48,13 @@
 				<td><input name="password" type="text" size="50" maxlength="50" value="#PW#"></td>
 			</tr>
 			<tr>
-				<td>RSize: </td>
-				<td><input name="rsize" type="text" size="10" maxlength="10" value="#RSIZE#"></td>
-			</tr>
-			<tr>
-				<td>WSize: </td>
-				<td><input name="wsize" type="text" size="10" maxlength="10" value="#WSIZE#"></td>
-			</tr>
-			<tr>
-				<td>Own Options: </td>
-				<td><input name="ownoptions" type="text" size="50" maxlength="50" value="#OWNOPTIONS#"></td>
+				<td>Options: </td>
+				<td><input name="options" type="text" size="50" maxlength="50" value="#OPTIONS#"></td>
 			</tr>
 			</table>
 		</td>
 		<td>
 			<table border=0 cellspacing=5 cellpadding=0>
-			<tr>
-				<td>Options:</td>
-			</tr>
 			<tr>
 				<td>sync: </td>
 				<td><input type="checkbox" name="sync" value="on" #SYNC#></td>

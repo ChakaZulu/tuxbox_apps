@@ -61,7 +61,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.8.3"
+#define WEBIFVERSION "2.9.0"
 
 #define KEYBOARDTV 0
 #define KEYBOARDVIDEO 1

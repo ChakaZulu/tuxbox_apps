@@ -21,11 +21,6 @@ using namespace std;
 
 eMountMgr *eMountMgr::instance;
 
-pthread_mutex_t g_mut1;
-pthread_cond_t g_cond1;
-pthread_t g_mnt1;
-int g_mntstatus1;
-
 eMountPoint::~eMountPoint()
 {
 }
@@ -38,10 +33,8 @@ eMountPoint::eMountPoint(CConfigFile *config, int i)
 	mp.userName = config->getString(eString().sprintf("username_%d", i));
 	mp.mountDir = config->getString(eString().sprintf("mountdir_%d", i));
 	mp.automount = config->getInt32(eString().sprintf("automount_%d", i));
-	mp.rsize = config->getInt32(eString().sprintf("rsize_%d",i), 4096);
-	mp.wsize = config->getInt32(eString().sprintf("wsize_%d",i), 4096);
+	mp.isMovieSource = config->getInt32(eString().sprintf("ismoviesource_%d", i));
 	mp.options = config->getString(eString().sprintf("options_%d", i));
-	mp.ownOptions = config->getString(eString().sprintf("ownoptions_%d", i));
 	mp.description = config->getString(eString().sprintf("description_%d", i));
 	eString sip = config->getString(eString().sprintf("ip_%d", i));
 	sscanf(sip.c_str(), "%d.%d.%d.%d", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
@@ -64,69 +57,26 @@ void eMountPoint::save(FILE *out, int pid)
 	fprintf(out,"username_%d=%s\n", mp.id, mp.userName.c_str());
 	fprintf(out,"password_%d=%s\n", mp.id, mp.password.c_str());
 	fprintf(out,"options_%d=%s\n", mp.id, mp.options.c_str());
-	fprintf(out,"ownoptions_%d=%s\n", mp.id, mp.ownOptions.c_str());
 	fprintf(out,"description_%d=%s\n", mp.id, mp.description.c_str());
 	fprintf(out,"automount_%d=%d\n", mp.id, mp.automount);
-	fprintf(out,"rsize_%d=%d\n", mp.id, mp.rsize);
-	fprintf(out,"wsize_%d=%d\n", mp.id, mp.wsize);
-	fprintf(out,"--------------------------------------\n");
+	fprintf(out,"ismoviesource_%d=%d\n", mp.id, mp.isMovieSource);
 }
 
-bool fileSystemAvailable(eString fsname)
+bool eMountPoint::fileSystemIsSupported(eString fsname)
 {
 	eString s;
+	bool found = false;
 	fsname = fsname.upper();
 	std::ifstream in("/proc/filesystems", std::ifstream::in);
 
 	while (in >> s)
 	{
-		if (s.upper() == fsname)
-	  	{
-			in.close();
-			return true;
-		}
+		if (found = (s.upper() == fsname))
+			break;
 	}
+			
 	in.close();
-	return false;
-}
-
-bool eMountPoint::fileSystemIsSupported(eString fsname)
-{
-	if (fileSystemAvailable(fsname))
-		return true;
-		
-	if (fsname == "NFS")
-	{
-		if (access("/bin/modprobe", X_OK) || access("/sbin/modprobe", X_OK))
-		{
-			system("modprobe nfs");
-			sleep(2);
-			if (fileSystemAvailable(fsname))
-				return true;
-		}
-		else
-		{
-			system("insmod sunrpc");
-			system("insmod lockd");
-			system("insmod nfs");
-			sleep(2);
-			if (fileSystemAvailable(fsname))
-				return true;
-		}
-	}
-	else
-	if (fsname == "CIFS")
-	{
-		system("insmod cifs");
-		system("insmod /lib/modules/`uname -r`/kernel/fs/cifs/cifs.ko");
-		sleep(2);
-		if (fileSystemAvailable(fsname))
-			return true;
-	}
-	else
-		eDebug("[enigma_mount] filesystem %s not supported.", fsname.c_str());
-
-	return false;
+	return found;
 }
 
 bool eMountPoint::isMounted()
@@ -156,6 +106,7 @@ bool eMountPoint::isMounted()
 bool eMountPoint::isIdentical(eString mountOn, eString mountDev)
 {
 	bool found = false;
+	eString dir;
 	
 	switch(mp.fstype)
 	{
@@ -167,6 +118,10 @@ bool eMountPoint::isIdentical(eString mountOn, eString mountDev)
 			break;
 		case 2: //DEVICE
 			found = ((mountOn == mp.localDir) && (mountDev == mp.mountDir) && (mp.ip[0] == 0) && (mp.ip[1] == 0) && (mp.ip[2] == 0) && (mp.ip[3] == 0));
+			break;
+		case 3: //SMBFS
+			dir = mp.mountDir;
+			found = ((mountOn == mp.localDir) && (mountDev.upper() == dir.upper()));
 			break;
 		default:
 			break;
@@ -181,9 +136,6 @@ int eMountPoint::mount()
 	int rc = 0;
 	if (!mp.mounted)
 	{
-		pthread_mutex_init(&g_mut1, NULL);
-		pthread_cond_init(&g_cond1, NULL);
-		g_mntstatus1 = -1;
 		if (!isMounted())
 		{
 			if (access(mp.localDir.c_str(), R_OK) == -1)
@@ -196,23 +148,9 @@ int eMountPoint::mount()
 					case 0:	/* NFS */
 						if (fileSystemIsSupported("nfs"))
 						{
-							eString options = mp.options;
 							cmd = "mount -t nfs ";
 							cmd += ip + ":" + mp.mountDir + " " + mp.localDir;
-							
-							if (mp.rsize != -1)
-							{
-								options += (options) ? "," : "";
-								options += eString().sprintf("rsize=%d", mp.rsize);
-							}
-							if (mp.wsize != -1)
-							{
-								options += (options) ? "," : "";
-								options += eString().sprintf(",wsize=%d", mp.wsize);
-							}
-							options += (options && mp.ownOptions) ? "," : "";
-							options += mp.ownOptions;
-							cmd += " -o " + options;
+							cmd += (mp.options) ? (" -o " + mp.options) : "";
 						}
 						else
 							rc = -4; //NFS filesystem not supported
@@ -223,13 +161,9 @@ int eMountPoint::mount()
 							cmd = "mount -t cifs //";
 							cmd += ip + "/" + mp.mountDir + " " + mp.localDir + " -o user=";
 							cmd += (mp.userName) ? mp.userName : "anonymous";
-							if (mp.password)
-								cmd += "pass=" + mp.password;
+							cmd += (mp.password) ? ("pass=" + mp.password) : "";
 							cmd += ",unc=//" + ip + "/" + mp.mountDir;
-							cmd += (mp.options) ? "," : "";
-							cmd += mp.options;
-							cmd += (mp.ownOptions && mp.options) ? "," : "";
-							cmd += mp.ownOptions;
+							cmd += (mp.options) ? ("," + mp.options) : "";
 						}
 						else
 							rc = -3; //CIFS filesystem not supported
@@ -237,29 +171,40 @@ int eMountPoint::mount()
 					case 2:
 						cmd = "mount " + mp.mountDir + " " + mp.localDir;
 						break;
+					case 3: /* SMBFS */
+						if (fileSystemIsSupported("smbfs"))
+						{
+							cmd = "smbmount ";
+							cmd += mp.mountDir;
+							cmd += " " + ((mp.password) ? mp.password : "guest");
+							cmd += " -U " + ((mp.userName) ? mp.userName : "guest");
+							cmd += " -I " + ip;
+							cmd += " -c \"mount " + mp.localDir + "\"";
+						}
+						else
+							rc = -3; //SMBFS filesystem not supported
+						break;
 				}
 
 				if (rc == 0)
 				{
-					pthread_create(&g_mnt1, 0, mountThread, (void *)cmd.c_str());
+					eDebug("[ENIGMA_MOUNT] mounting: %s", cmd.c_str());
 
-					struct timespec timeout;
-					int rc1;
+					switch (fork())
+					{
+						case -1:
+							eDebug("fork failed!");
+							return -5;
+						case 0:
+						{
+							for (unsigned int i=0; i < 90; ++i )
+								close(i);
 
-					pthread_mutex_lock(&g_mut1);
-					timeout.tv_sec = time(NULL) + 8;
-					timeout.tv_nsec = 0;
-					rc1 = pthread_cond_timedwait(&g_cond1, &g_mut1, &timeout);
-					if (rc1 == ETIMEDOUT)
-						pthread_cancel(g_mnt1);
-					pthread_mutex_unlock(&g_mut1);
-					pthread_mutex_destroy(&g_mut1);
-					pthread_cond_destroy(&g_cond1);
-
-					if (g_mntstatus1)
-						rc = -5; //mount failed (timeout)
-					else
-						mp.mounted = true; //everything is fine :-)
+							system(cmd.c_str());
+							_exit(0);
+							break;
+						}
+					}
 				}
 			}
 			else
@@ -270,6 +215,7 @@ int eMountPoint::mount()
 	}
 	else
 		rc = -1; //mount point is already mounted
+	eDebug("[ENIGMA_MOUNT] mount rc = %d", rc);
 	return rc;
 /*
  -1: "Mountpoint is already mounted.";
@@ -379,10 +325,15 @@ int eMountMgr::unmountMountPoint(int id)
 
 void eMountMgr::automountMountPoints(void)
 {
+	eDebug("[ENIGMA_MOUNT] automountMountPoints...");
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 	{
+		eDebug("[ENIGMA_MOUNT] automountMountPoints: %s - %d", mp_it->mp.mountDir.c_str(), mp_it->mp.automount);
 		if (mp_it->mp.automount == 1)
+		{
+			eDebug("[ENIGMA_MOUNT] automounting %s", mp_it->mp.mountDir.c_str());
 			mp_it->mount();
+		}
 	}
 }
 
@@ -428,14 +379,12 @@ eString eMountMgr::listMountPoints(eString skelleton)
 			else
 			if (mp_it->mp.fstype == 1)
 				type = "CIFS";
+			else
+			if (mp_it->mp.fstype == 3)
+				type = "SMBFS";
 			tmp.strReplace("#FSTYPE#", type);
 			tmp.strReplace("#AUTO#", eString().sprintf("%d", mp_it->mp.automount));
-			eString options = mp_it->mp.options;
-			if (mp_it->mp.ownOptions)
-				options += ", " + mp_it->mp.ownOptions;
 			tmp.strReplace("#OPTIONS#", mp_it->mp.options);
-			tmp.strReplace("#RSIZE#", (mp_it->mp.rsize != -1) ? eString().sprintf("%d", mp_it->mp.rsize) : "");
-			tmp.strReplace("#WSIZE#", (mp_it->mp.wsize != -1) ? eString().sprintf("%d", mp_it->mp.wsize) : "");
 			tmp.strReplace("#DESCRIPTION#", mp_it->mp.description);
 			result += tmp + "\n";
 		}
@@ -484,10 +433,8 @@ void eMountMgr::addMountedFileSystems()
 					mp.password = "";
 					mp.userName = "";
 					mp.automount = 0;
-					mp.rsize = 0;
-					mp.wsize = 0;
+					mp.isMovieSource = 0;
 					mp.options = "";
-					mp.ownOptions = "";
 					mp.description = "";
 					mp.mounted = true;
 					mp.id = -1; //don't care
@@ -505,10 +452,8 @@ void eMountMgr::addMountedFileSystems()
 				mp.password = "";
 				mp.userName = "";
 				mp.automount = 0;
-				mp.rsize = 0;
-				mp.wsize = 0;
+				mp.isMovieSource = 0;
 				mp.options = "";
-				mp.ownOptions = "";
 				mp.description = "";
 				mp.mounted = true;
 				mp.id = -1; //don't care
@@ -516,7 +461,7 @@ void eMountMgr::addMountedFileSystems()
 			}
 			else
 			if (!((mountOn == "/") ||(mountOn == "/dev") || (mountOn == "/tmp") || (mountOn == "/proc") || (mountOn == "/dev/pts") ||
-			     (mountDev.find("/dev/mtdblock") != eString::npos) || (mountOn == "")))
+			     (mountDev.find("/dev/mtdblock") != eString::npos) || (mountDev == "usbfs") || (mountOn == "")))
 			{
 				//other file system
 				sscanf("//0.0.0.0/nothing", "//%d.%d.%d.%d/%*s", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
@@ -526,10 +471,8 @@ void eMountMgr::addMountedFileSystems()
 				mp.password = "";
 				mp.userName = "";
 				mp.automount = 0;
-				mp.rsize = 0;
-				mp.wsize = 0;
+				mp.isMovieSource = 0;
 				mp.options = "";
-				mp.ownOptions = "";
 				mp.description = "";
 				mp.mounted = true;
 				mp.id = -1; //don't care
@@ -553,6 +496,8 @@ t_mount loadMPFromConfig(int i)
 	eNumber::unpack(sip, mp.ip);
 
 	eConfig::getInstance()->getKey((cmd + "fstype").c_str(), mp.fstype);
+	if (mp.fstype == 2)
+		mp.fstype = 3; 
 
 	if (!eConfig::getInstance()->getKey((cmd + "sdir").c_str(), ctmp))
 	{
@@ -592,19 +537,13 @@ t_mount loadMPFromConfig(int i)
 
 	if (!eConfig::getInstance()->getKey((cmd + "extraoptions").c_str(), ctmp))
 	{
-		if (strstr(ctmp, "rsize") == 0)
-			sscanf(ctmp, "%*srsize=%d%*s", &mp.rsize);
-		if (strstr(ctmp, "wsize") == 0)
-			sscanf(ctmp, "%*swsize=%d%*s", &mp.wsize);
-		mp.ownOptions = eString(ctmp);
+		mp.options += eString(ctmp) ? ("," + eString(ctmp)) : "";
 		free(ctmp);
 	}
 	else 
 	if (!itmp)
 	{
-		mp.ownOptions = "nolock";
-		mp.rsize = 8192;
-		mp.wsize = 8192;
+		mp.options = "nolock";
 	}
 
 	if (!eConfig::getInstance()->getKey((cmd + "username").c_str(), ctmp))
@@ -677,7 +616,7 @@ void eMountMgr::save()
 		int i = 0;
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		{
-			if ((mp_it->mp.fstype < 2) || (mp_it->mp.mountDir.find("disc") != eString::npos) || (mp_it->mp.mountDir.find("part1") != eString::npos)) // just save NFS and CIFS
+			if ((mp_it->mp.fstype != 2) || (mp_it->mp.mountDir.find("disc") != eString::npos) || (mp_it->mp.mountDir.find("part1") != eString::npos)) // just save NFS, CIFS, and SMBFS
 			{
 				mp_it->save(out, i);
 				i++;
@@ -685,16 +624,6 @@ void eMountMgr::save()
 		}
 		fclose(out);
 	}
-}
-
-void *mountThread(void *cmd)
-{
-	int ret = system((char *)cmd);
-	pthread_mutex_lock(&g_mut1);
-	g_mntstatus1 = ret;
-	pthread_cond_broadcast(&g_cond1);
-	pthread_mutex_unlock(&g_mut1);
-	pthread_exit(NULL);
 }
 
 #endif

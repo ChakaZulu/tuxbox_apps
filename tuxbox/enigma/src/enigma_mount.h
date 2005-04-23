@@ -17,17 +17,16 @@ typedef struct
 	eString	localDir;	// local mount dir
 	eString	mountDir;	// directory which should be mounted
 	int ip[4];		// ip address from machine
-	int fstype;		// 0...NFS, 1...CIFS
+	int fstype;		// 0 = NFS, 1 = CIFS, 2 = DEV, 3 = SMBFS
 	int automount;		// mount at startup
 	eString options;	// rw, intr, soft, udp, nolock
-	eString ownOptions;	// rw, intr, soft, udp, nolock
+//	eString ownOptions;	// rw, intr, soft, udp, nolock
 	bool mounted;		// if already mounted or not
-	int rsize;		// read size
-	int wsize;		// write size
-	eString description;
+//	int rsize;		// read size
+//	int wsize;		// write size
+	int isMovieSource;     // mount point that where /hdd/movies is on
+	eString description;    // description
 } t_mount;
-
-void *mountThread(void *cmd);
 
 class eMountPoint
 {
@@ -55,7 +54,7 @@ private:
 	std::vector <eMountPoint>::iterator mp_it;
 	void addMountedFileSystems(void);
 public:
-	eString listMountPoints(eString); // for webif
+	eString listMountPoints(eString); // webif
 	void removeMountPoint(int);
 	int addMountPoint(t_mount);
 	void changeMountPoint(int, t_mount);

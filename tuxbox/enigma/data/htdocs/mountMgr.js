@@ -1,11 +1,13 @@
 function mountMountPoint(id)
 {
-	NewWindow('/control/mountMountPoint?id='+id, 'mount', '200', '200', 'no', '5000');
+	document.location = "/control/mountMountPoint?id=" + id;
+	window.setTimeout("document.location.reload()", 12000);
 }
 
 function unmountMountPoint(id)
 {
-	NewWindow('/control/unmountMountPoint?id='+id, 'unmount', '200', '200', 'no', '5000');
+	document.location = "/control/unmountMountPoint?id=" + id;
+	window.setTimeout("document.location.reload()", 3000);
 }
 
 function deleteMountPoint(id)
