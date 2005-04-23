@@ -236,12 +236,6 @@ eZap::eZap(int argc, char **argv)
 #endif
 	eDVB::getInstance()->configureNetwork();
 
-#ifdef ENABLE_DYN_MOUNT
-	eMountMgr *mountMgr = new eMountMgr();
-	mountMgr->automountMountPoints();
-	delete mountMgr;
-#endif
-
 	// build Service Selector
 	serviceSelector = new eServiceSelector();
 
@@ -254,6 +248,12 @@ eZap::eZap(int argc, char **argv)
 #endif
 
 	reconfigureHTTPServer();
+	
+#ifdef ENABLE_DYN_MOUNT
+	eMountMgr *mountMgr = new eMountMgr();
+	mountMgr->automountMountPoints();
+	delete mountMgr;
+#endif
 
 	eDebug("[ENIGMA] ok, beginning mainloop");
 
