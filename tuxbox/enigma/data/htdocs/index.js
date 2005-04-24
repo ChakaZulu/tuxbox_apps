@@ -133,7 +133,10 @@ function recoverMovies()
 		if (window.screen.width < 800)
 			document.location = "cgi-bin/recoverRecordings";
 		else
+		{
 			NewWindow("cgi-bin/recoverRecordings", "recoverRecordings", "200", "100", "no", "5000");
+			window.setTimeout("document.location.reload()", 2000);
+		}
 	}
 }
 
