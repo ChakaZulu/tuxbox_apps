@@ -1578,7 +1578,7 @@ static eString getZap(eString mode, eString path)
 			result = readFile(TEMPLATE_DIR + "movies.tmp");
 			result.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false, false));
 			selsize = (screenWidth > 1024) ? 25 : 10;
-#ifdef ENABLE_DYN_CONF
+#ifdef ENABLE_DYN_MOUNT
 			tmp = readFile(TEMPLATE_DIR + "movieSources.tmp");
 			tmp.strReplace("#OPTIONS#", eMountMgr::getInstance()->listMovieSources());
 			result.strReplace("#MOVIESOURCES#", tmp);
