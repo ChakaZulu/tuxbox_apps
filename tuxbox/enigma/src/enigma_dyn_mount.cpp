@@ -21,6 +21,7 @@
 #include <enigma_dyn.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_mount.h>
+#include <enigma_main.h>
 #include <enigma_mount.h>
 
 using namespace std;
@@ -152,7 +153,6 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 		mp.ip[3] = 0;
 		mp.fstype = 0;
 		mp.automount = 0;
-		mp.isMovieSource = 0;
 		cmd = "add";
 	}
 
@@ -282,8 +282,8 @@ static eString mountMountPoint(eString request, eString dirpath, eString opts, e
 			result = "Mount point mounted successfully.";
 			break;
 	}
+	eDebug("[ENIGMA_DYN_MOUNT] mount: rc = %d (%s)", rc, result.c_str());
 
-//	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">" + result + "</body></html>";
 	return closeWindow(content, "", 500);
 }
 
@@ -301,8 +301,38 @@ static eString unmountMountPoint(eString request, eString dirpath, eString opts,
 		result = "Mount point unmounted successfully.";
 	else
 		result = "Mount point unmount failed.";
+	
+	eDebug("[ENIGMA_DYN_MOUNT] unmount: rc = %d (%s)", rc, result.c_str());
 
-//	return "<html><body onUnload=\"parent.window.opener.location.reload(true)\">" + result + "</body></html>";
+	return closeWindow(content, "", 500);
+}
+
+extern bool rec_movies();
+
+static eString selectMovieSource(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+	eString id = opt["id"];
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	eZapMain::getInstance()->saveRecordings();
+	eMountMgr::getInstance()->selectMovieSource(atoi(id.c_str()));
+	if (access("/hdd/movie/recordings.epl", R_OK) == 0)
+	{
+		eDebug("[ENIGMA_DYN_MOUNT] recordings.epl available");
+		eZapMain::getInstance()->loadRecordings();
+	}
+	else
+	{
+		eDebug("[ENIGMA_DYN_MOUNT] recordings.epl not available, recovering...");
+		rec_movies();
+	}
+	
+	eDebug("[ENIGMA_DYN_MOUNT] selectMovieSource.");
+
 	return closeWindow(content, "", 500);
 }
 
@@ -313,6 +343,7 @@ void ezapMountInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/control/mountPointWindow", mountPointWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/mountMountPoint", mountMountPoint, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/unmountMountPoint", unmountMountPoint, lockWeb);
+	dyn_resolver->addDyn("GET", "/control/selectMovieSource", selectMovieSource, lockWeb);
 }
 
 #endif

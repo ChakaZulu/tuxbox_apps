@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/wait.h>
 #include <sys/mount.h>
 #include <iostream>
 #include <sstream>
@@ -33,7 +34,6 @@ eMountPoint::eMountPoint(CConfigFile *config, int i)
 	mp.userName = config->getString(eString().sprintf("username_%d", i));
 	mp.mountDir = config->getString(eString().sprintf("mountdir_%d", i));
 	mp.automount = config->getInt32(eString().sprintf("automount_%d", i));
-	mp.isMovieSource = config->getInt32(eString().sprintf("ismoviesource_%d", i));
 	mp.options = config->getString(eString().sprintf("options_%d", i));
 	mp.description = config->getString(eString().sprintf("description_%d", i));
 	eString sip = config->getString(eString().sprintf("ip_%d", i));
@@ -59,7 +59,7 @@ void eMountPoint::save(FILE *out, int pid)
 	fprintf(out,"options_%d=%s\n", mp.id, mp.options.c_str());
 	fprintf(out,"description_%d=%s\n", mp.id, mp.description.c_str());
 	fprintf(out,"automount_%d=%d\n", mp.id, mp.automount);
-	fprintf(out,"ismoviesource_%d=%d\n", mp.id, mp.isMovieSource);
+	fprintf(out,"\n");
 }
 
 bool eMountPoint::fileSystemIsSupported(eString fsname)
@@ -134,6 +134,15 @@ int eMountPoint::mount()
 	eString cmd;
 	eString ip;
 	int rc = 0;
+	
+	static int lastpid=-1;
+	if (lastpid != -1)
+	{
+		kill(lastpid, SIGKILL);
+		waitpid(lastpid, 0, 0);
+		lastpid=-1;
+	}
+	
 	if (!mp.mounted)
 	{
 		if (!isMounted())
@@ -190,17 +199,18 @@ int eMountPoint::mount()
 				{
 					eDebug("[ENIGMA_MOUNT] mounting: %s", cmd.c_str());
 
-					switch (fork())
+					switch (lastpid = fork())
 					{
 						case -1:
 							eDebug("fork failed!");
 							return -5;
 						case 0:
 						{
-							for (unsigned int i=0; i < 90; ++i )
+							for (unsigned int i = 0; i < 90; ++i )
 								close(i);
 
-							system(cmd.c_str());
+							int rc = system(cmd.c_str());
+							eDebug("[ENIGMA_MOUNT] mount rc = %d", rc);
 							_exit(0);
 							break;
 						}
@@ -215,7 +225,7 @@ int eMountPoint::mount()
 	}
 	else
 		rc = -1; //mount point is already mounted
-	eDebug("[ENIGMA_MOUNT] mount rc = %d", rc);
+
 	return rc;
 /*
  -1: "Mountpoint is already mounted.";
@@ -323,6 +333,43 @@ int eMountMgr::unmountMountPoint(int id)
 	return rc;
 }
 
+int eMountMgr::selectMovieSource(int id)
+{
+	int rc = 0;
+	eDebug("[ENIGMA_MOUNT] selectMovieSource id: %d", id);
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
+		if ((mp_it->mp.localDir == "/hdd") && mp_it->mp.mounted)
+		{
+			eDebug("[ENIGMA_MOUNT] selectMovieSource unmounting: %s", mp_it->mp.mountDir.c_str());
+			rc = mp_it->unmount();
+		}
+	}
+	sleep(3);
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
+		if (mp_it->mp.id == id)
+		{
+			eDebug("[ENIGMA_MOUNT] selectMovieSource mounting: %s", mp_it->mp.mountDir.c_str());
+			mp_it->mp.localDir = "/hdd"; // force /hdd 
+			rc = mp_it->mount();
+			break;
+		}
+	}
+	
+	int time;
+	rc = 12;
+	do
+	{
+		time = rc;
+		rc = sleep(time);
+	}
+	while ((rc > 0) && (rc < time));
+	
+	eDebug("[ENIGMA_MOUNT] selectMovieSource rc: %d", rc);
+	return rc;
+}
+
 void eMountMgr::automountMountPoints(void)
 {
 	eDebug("[ENIGMA_MOUNT] automountMountPoints...");
@@ -394,6 +441,30 @@ eString eMountMgr::listMountPoints(eString skelleton)
 	return result;
 }
 
+eString eMountMgr::listMovieSources()
+{
+	eString tmp, result;
+	init();
+	if (mountPoints.size() > 0)
+		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+		{
+			tmp = "<option #SEL# value=\"" + eString().sprintf("%d", mp_it->mp.id) + "\">" + ((mp_it->mp.description) ? mp_it->mp.description : mp_it->mp.mountDir) + "</option>";
+			if (mp_it->mp.mounted && (mp_it->mp.localDir == "/hdd"))
+				tmp.strReplace("#SEL#", "selected");
+			else
+				tmp.strReplace("#SEL#", "");
+
+			result += tmp + "\n";
+		}
+	else
+		result = "<option selected value=\"0\">No movie source available.</option>";
+		
+	if (result.find("selected") == eString::npos)
+		result = "<option selected value=\"0\">No movie source selected.</option>\n" + result;
+
+	return result;
+}
+
 void eMountMgr::addMountedFileSystems()
 {
 	std::ifstream in;
@@ -433,7 +504,6 @@ void eMountMgr::addMountedFileSystems()
 					mp.password = "";
 					mp.userName = "";
 					mp.automount = 0;
-					mp.isMovieSource = 0;
 					mp.options = "";
 					mp.description = "";
 					mp.mounted = true;
@@ -452,7 +522,6 @@ void eMountMgr::addMountedFileSystems()
 				mp.password = "";
 				mp.userName = "";
 				mp.automount = 0;
-				mp.isMovieSource = 0;
 				mp.options = "";
 				mp.description = "";
 				mp.mounted = true;
@@ -471,7 +540,6 @@ void eMountMgr::addMountedFileSystems()
 				mp.password = "";
 				mp.userName = "";
 				mp.automount = 0;
-				mp.isMovieSource = 0;
 				mp.options = "";
 				mp.description = "";
 				mp.mounted = true;

@@ -58,10 +58,16 @@
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
+#ifdef ENABLE_DYN_MOUNT
+#include <enigma_mount.h>
+#endif
 
 using namespace std;
-
-#define WEBIFVERSION "2.9.0"
+#if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
+#define WEBIFVERSION "3.0-Expert"
+#else
+#define WEBIFVERSION "3.0-Base"
+#endif
 
 #define KEYBOARDTV 0
 #define KEYBOARDVIDEO 1
@@ -1572,6 +1578,13 @@ static eString getZap(eString mode, eString path)
 			result = readFile(TEMPLATE_DIR + "movies.tmp");
 			result.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false, false));
 			selsize = (screenWidth > 1024) ? 25 : 10;
+#ifdef ENABLE_DYN_CONF
+			tmp = readFile(TEMPLATE_DIR + "movieSources.tmp");
+			tmp.strReplace("#OPTIONS#", eMountMgr::getInstance()->listMovieSources());
+			result.strReplace("#MOVIESOURCES#", tmp);
+#else
+			result.strReplace("#MOVIESOURCES#", "");
+#endif
 		}
 		else
 #endif
