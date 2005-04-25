@@ -351,7 +351,8 @@ int request_file(URL *url)
 
 		  /* if the header indicated a zero length document or an */
 		  /* error, then close the cache, if there is any */
-		  if((slot >= 0) && (rval <= 0))
+		  /* 25.04.05 ChakaZulu: zero length can be a stream so let's try playing */
+		  if((slot >= 0) && (rval < 0))
 		    cache[slot].closed = 1;
 		  
 		  /* return on error */
@@ -533,13 +534,14 @@ int parse_response(URL *url, void *opt, CSTATE *state)
   strcpy(str, "audio/mpeg");
   getHeaderStr("Content-Type:", str);
   f_type(url->stream, str);
-  
+  dprintf(stderr,"type %s\n",str);
+
   /* if we got a content length from the server, i.e. rval >= 0 */
   /* then return now with the content length as return value */
   getHeaderVal("Content-Length:", rval);
-   // dprintf(stderr, "file size: %d\n", rval);
+//  dprintf(stderr, "file size: %d\n", rval);
   if(rval >= 0) return rval;
-
+  
   /* yet another hack: this is only implemented to be able to fetch */
   /* the playlists from shoutcast */
   if(strstr(header, "Transfer-Encoding: chunked"))
@@ -548,7 +550,6 @@ int parse_response(URL *url, void *opt, CSTATE *state)
     sscanf(str, "%x", &rval);
     return rval;
   }
-
   /* no content length indication from the server ? Then treat it as stream */
   getHeaderVal("icy-metaint:", meta_interval);
   if(meta_interval < 0) meta_interval = 0;
@@ -556,7 +557,8 @@ int parse_response(URL *url, void *opt, CSTATE *state)
   getHeaderStr("icy-genre:", state->genre);
   getHeaderStr("icy-name:", state->station);
   getHeaderStr("icy-url:", state->station_url);
-  getHeaderVal("icy-br:", state->bitrate);
+  if (state != NULL)
+	  getHeaderVal("icy-br:", state->bitrate);
 
   /********************* dirty hack ***********************/
   /* we parse the stream header sent by the server and    */
