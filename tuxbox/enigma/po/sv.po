@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-03-07 16:21+0100\n"
-"PO-Revision-Date: Mon Mar 7 16:17:57 CET 2005\n"
+"POT-Creation-Date: 2005-04-25 20:09+0200\n"
+"PO-Revision-Date: Mon Apr 25 19:53:29 CEST 2005\n"
 "Last-Translator: unknown\n"
 "Language-Team: Swedish / Scand Vision Svenska AB <info@scandvision.net>\n"
 "MIME-Version: 1.0\n"
@@ -20,13 +20,13 @@ msgstr ""
 msgid "FF "
 msgstr "FF"
 
-#: default.esml:878
+#: default.esml:879
 msgid "&#53;"
 msgstr ""
 
 #: default.esml:385
 msgid "here you can change your sat/lnb mapping"
-msgstr ""
+msgstr "här kan du byta dina kläder sat/lnb matning"
 
 #: default.esml:420 src/enigma_scan.cpp:49
 msgid "Satfind"
@@ -45,7 +45,7 @@ msgstr ""
 msgid "send the complete DiSEqC sequence twice"
 msgstr "sänd den fullständiga DiSEqC-sekvensen två gånger"
 
-#: default.esml:435 default.esml:483 default.esml:586 src/rotorconfig.cpp:588
+#: default.esml:435 default.esml:483 default.esml:587 src/rotorconfig.cpp:588
 msgid "Satellite:"
 msgstr "Satellit:"
 
@@ -53,7 +53,7 @@ msgstr "Satellit:"
 msgid "send no DiSEqC when only Hi/Lo or H/V changes"
 msgstr ""
 
-#: default.esml:653
+#: default.esml:654
 msgid "SNR"
 msgstr "SNR"
 
@@ -62,7 +62,7 @@ msgstr "SNR"
 msgid "Uncommitted Switch:"
 msgstr "Ej använd omkopplare"
 
-#: default.esml:592 default.esml:610 default.esml:629
+#: default.esml:593 default.esml:611 default.esml:630
 msgid "enable/disable inversion here (ok)"
 msgstr "aktivera/avaktivera inversion här (OK)"
 
@@ -74,19 +74,19 @@ msgstr "föreg. sida"
 msgid "LOF/L:"
 msgstr "LOF/L:"
 
-#: default.esml:755 src/timer.cpp:2636
+#: default.esml:756 src/timer.cpp:2641
 msgid "Wednesday"
 msgstr "Onsdag"
 
-#: default.esml:848
+#: default.esml:849
 msgid "Partition Check"
 msgstr "Delningskontroll"
 
-#: default.esml:796 default.esml:820
+#: default.esml:797 default.esml:821
 msgid "enter recording end time (0..9, left, right, ok)"
 msgstr "ange stopptid för inspelningen (0..9, vänster, höger, OK)"
 
-#: default.esml:760 default.esml:764
+#: default.esml:761 default.esml:765
 msgid "select year (ok)"
 msgstr "välj år (OK)"
 
@@ -94,38 +94,38 @@ msgstr "välj år (OK)"
 msgid "increased voltage"
 msgstr "ökad nätspänning"
 
-#: default.esml:423 default.esml:656
+#: default.esml:423 default.esml:657
 #, fuzzy
 msgid "LOCK"
 msgstr "OK"
 
-#: default.esml:641
+#: default.esml:642
 #, fuzzy
 msgid "choose the code rate HP (left, right)"
 msgstr "välj FEC (vänster, höger)"
 
 #: default.esml:393
 msgid "turn 12V output on (for 12V relais) (ok)"
-msgstr ""
+msgstr "vänd 12V utput av (till 12V trappan) (OK)"
 
 #: default.esml:515
 msgid "enable/disable use BAT for scan (if exists)"
 msgstr "aktivera/avaktivera BAT för sökning (om den finns)"
 
-#: default.esml:576
+#: default.esml:577
 msgid "Skin Selector"
 msgstr "öppna utseendeväljaren"
 
-#: default.esml:556
+#: default.esml:557
 msgid "transponder scanned:"
 msgstr "Antal funna transpondrar:"
 
-#: default.esml:748
+#: default.esml:749
 #, fuzzy
 msgid "press ok to change event name manually"
 msgstr "Tryck på OK för att ange namn"
 
-#: default.esml:819
+#: default.esml:820
 msgid "recording end time:"
 msgstr "Stopptid för inspelningen:"
 
@@ -133,23 +133,23 @@ msgstr "Stopptid för inspelningen:"
 msgid "Use motor input power for running detection.. else use timeout"
 msgstr "Justera motorns strömstyrka manuellt enligt önskat värde"
 
-#: default.esml:528
+#: default.esml:529
 msgid "no circ polariz."
-msgstr ""
+msgstr "ingen cirk polariz."
 
 #: default.esml:467 default.esml:488
 msgid "Direction:"
 msgstr "Riktning:"
 
-#: default.esml:591 default.esml:609
+#: default.esml:592 default.esml:610
 msgid "MHz"
 msgstr "MHz"
 
-#: default.esml:555
+#: default.esml:556
 msgid "services scanned     :"
 msgstr "Antal funna kanaler:"
 
-#: default.esml:579 src/parentallock.cpp:101 src/setup_lcd.cpp:112
+#: default.esml:580 src/parentallock.cpp:101 src/setup_lcd.cpp:112
 #: src/setup_keyboard.cpp:55 src/setup_osd.cpp:263 src/setup_rc.cpp:121
 #: src/setup_timezone.cpp:47 src/setupengrab.cpp:102 src/setupnetwork.cpp:643
 #: src/setupvideo.cpp:174 src/setupvideo.cpp:412 src/tpeditwindow.cpp:112
@@ -157,12 +157,12 @@ msgstr "Antal funna kanaler:"
 msgid "save changes and return"
 msgstr "spara ändringar och återgå"
 
-#: default.esml:538
+#: default.esml:539
 #, fuzzy
 msgid "aborts the transponder scan"
 msgstr "startar transpondersökningen"
 
-#: default.esml:471 default.esml:739 default.esml:899 default.esml:936
+#: default.esml:471 default.esml:740 default.esml:900 default.esml:937
 msgid "remove"
 msgstr "ta bort"
 
@@ -174,11 +174,11 @@ msgstr "Motorkonfig."
 msgid "remove selected entry"
 msgstr "avlägsna vald proceduringång"
 
-#: default.esml:894
+#: default.esml:895
 msgid "abc &lt;-&gt; ABC"
 msgstr ""
 
-#: default.esml:888
+#: default.esml:889
 msgid "&lt;"
 msgstr ""
 
@@ -188,7 +188,7 @@ msgstr "välj DiSEqC-läge (OK)"
 
 #: default.esml:413
 msgid "Swap Commands"
-msgstr ""
+msgstr "Swap commandos"
 
 #: default.esml:391
 msgid "enter LNB threshold frequency (0..9, ok)"
@@ -203,24 +203,24 @@ msgstr "stäng motorinstallationen"
 msgid "insert rotor memory cell for this orbital position"
 msgstr "ange var denna satellitposition ska sparas i motorn"
 
-#: default.esml:527 default.esml:546
+#: default.esml:528 default.esml:547
 #, fuzzy
 msgid "add only unscrambled services"
 msgstr "Radera program"
 
-#: default.esml:538 default.esml:863
+#: default.esml:539 default.esml:864
 msgid "abort"
 msgstr "avbryt"
 
-#: default.esml:842
+#: default.esml:843
 msgid "select filsystem to format"
-msgstr ""
+msgstr "välj ditt filsystem till matbordet"
 
-#: default.esml:851
+#: default.esml:852
 msgid "close window"
 msgstr "stäng fönstret "
 
-#: default.esml:431 default.esml:655
+#: default.esml:431 default.esml:656
 msgid "BER"
 msgstr "BER"
 
@@ -228,11 +228,11 @@ msgstr "BER"
 msgid "Recalc Params:"
 msgstr "Omberäkn. parametrar:"
 
-#: default.esml:590 default.esml:608 default.esml:627
+#: default.esml:591 default.esml:609 default.esml:628
 msgid "enter transponder frequeny (0..9, left, right)"
 msgstr "ange transponderfrekvens (0..9, vänster, höger)"
 
-#: default.esml:470 default.esml:740 default.esml:934
+#: default.esml:470 default.esml:741 default.esml:935
 msgid "add"
 msgstr "lägg till"
 
@@ -240,46 +240,46 @@ msgstr "lägg till"
 msgid "start the transponder scan"
 msgstr "starta transpondersökningen"
 
-#: default.esml:518 default.esml:529 default.esml:548 default.esml:571
+#: default.esml:518 default.esml:530 default.esml:549 default.esml:572
 msgid "start scan"
 msgstr "starta sökning"
 
-#: default.esml:840
+#: default.esml:841
 msgid "check"
 msgstr "kontroll"
 
-#: default.esml:669 default.esml:676 default.esml:683 default.esml:691
-#: default.esml:702 default.esml:713
+#: default.esml:670 default.esml:677 default.esml:684 default.esml:692
+#: default.esml:703 default.esml:714
 msgid "Services"
 msgstr "Kanaler"
 
-#: default.esml:880
+#: default.esml:881
 msgid "&#54;"
 msgstr ""
 
-#: default.esml:874
+#: default.esml:875
 msgid "&#51;"
 msgstr ""
 
-#: default.esml:638
+#: default.esml:639
 msgid "Coderate LP:"
-msgstr ""
+msgstr "sammarbeta LP:"
 
 #: stone.esml:463 silver.esml:470
 #, fuzzy
 msgid "subservices"
 msgstr "Kanaler"
 
-#: default.esml:635
+#: default.esml:636
 #, fuzzy
 msgid "choose the bandwidth (left, right)"
 msgstr "välj FEC (vänster, höger)"
 
-#: default.esml:892
+#: default.esml:893
 msgid "&gt;"
 msgstr ""
 
-#: default.esml:761 default.esml:765
+#: default.esml:762 default.esml:766
 msgid "select month (ok)"
 msgstr "välj månad (OK)"
 
@@ -295,7 +295,7 @@ msgstr "DiSEqC:"
 msgid "LNB Configuration"
 msgstr "LNB-konfiguration"
 
-#: default.esml:535 default.esml:554 src/scan.cpp:675
+#: default.esml:536 default.esml:555 src/scan.cpp:654
 msgid "scanning..."
 msgstr "sökning pågår..."
 
@@ -303,14 +303,14 @@ msgstr "sökning pågår..."
 msgid "calc param 3 (see your motor manual or let it 00)"
 msgstr "beräkn. param. 3 (se bruksanvisningen till motorn eller välj 00)"
 
-#: default.esml:654
+#: default.esml:655
 msgid "AGC"
 msgstr "AGC"
 
 #: default.esml:409
 #, fuzzy
 msgid "select uncommitted input"
-msgstr "Ej använd omkopplare"
+msgstr "Ej påtänd omkopplare"
 
 #: default.esml:446
 msgid "Use Motor Input Power"
@@ -320,11 +320,11 @@ msgstr "Justera motorns strömstyrka"
 msgid "when the motor support this, then use"
 msgstr "Använd denna funktion om motorn stöder den."
 
-#: default.esml:749
+#: default.esml:750
 msgid "Starttime"
-msgstr ""
+msgstr "statartid"
 
-#: default.esml:628
+#: default.esml:629
 #, fuzzy
 msgid "KHz"
 msgstr "MHz"
@@ -341,24 +341,24 @@ msgstr "gå till föreg. sida (LNB)"
 msgid "Use gotoXX Function"
 msgstr "Använd funktionen gotoXX"
 
-#: default.esml:896
+#: default.esml:897
 msgid "vol+"
 msgstr ""
 
-#: default.esml:634
+#: default.esml:635
 msgid "Bandwidth:"
-msgstr ""
+msgstr "Bredband:"
 
-#: default.esml:751
+#: default.esml:752
 msgid "for a multiple event enable this"
-msgstr ""
+msgstr "för dina multi bröst koppla then"
 
-#: default.esml:738
+#: default.esml:739
 #, fuzzy
 msgid "press ok to select another event"
 msgstr "tryck på OK för att välja ett annat 22 KHz-läge"
 
-#: default.esml:798 default.esml:810 default.esml:822
+#: default.esml:799 default.esml:811 default.esml:823
 #, fuzzy
 msgid "shutdown  "
 msgstr "stäng av"
@@ -371,44 +371,44 @@ msgstr "Transponder:"
 msgid "22Khz"
 msgstr "22 KHz"
 
-#: default.esml:821
+#: default.esml:822
 msgid "o'clock"
-msgstr "klockan"
+msgstr "klockat"
 
 #: default.esml:389
 msgid "LOF/H:"
 msgstr "LOF/H:"
 
-#: default.esml:872
+#: default.esml:873
 msgid "&#50;"
 msgstr ""
 
-#: default.esml:777 src/enigma_info.cpp:43
+#: default.esml:778 src/enigma_info.cpp:43
 msgid "About..."
 msgstr "Om..."
 
-#: default.esml:740
+#: default.esml:741
 msgid "add new Timer (ok)"
 msgstr "lägg till en ny timer (OK)"
 
-#: default.esml:769
+#: default.esml:770
 msgid "to change service press ok"
 msgstr "tryck på OK för att ändra tjänst"
 
-#: default.esml:882
+#: default.esml:883
 msgid "&#55;"
 msgstr ""
 
-#: default.esml:771
+#: default.esml:772
 msgid "scan EPG"
-msgstr ""
+msgstr "svan EPG"
 
 #: stone.esml:464 silver.esml:471
 #, fuzzy
 msgid "audio track"
 msgstr "tillbaka"
 
-#: default.esml:759
+#: default.esml:760
 #, fuzzy
 msgid "Su"
 msgstr "Sön"
@@ -417,7 +417,7 @@ msgstr "Sön"
 msgid "new"
 msgstr "ny"
 
-#: default.esml:807
+#: default.esml:808
 #, fuzzy
 msgid "duration:"
 msgstr "Modulation:"
@@ -427,7 +427,7 @@ msgstr "Modulation:"
 msgid "Fast DiSEqC"
 msgstr "Stäng av DiSEqC"
 
-#: default.esml:755 src/epgwindow.cpp:113 src/timer.cpp:217
+#: default.esml:756 src/epgwindow.cpp:113 src/timer.cpp:220
 msgid "Wed"
 msgstr "Ons"
 
@@ -439,11 +439,11 @@ msgstr "Longitud:"
 msgid "choose direction"
 msgstr "välj riktning"
 
-#: default.esml:833
+#: default.esml:834
 msgid "capacity:"
 msgstr "kapacitet:"
 
-#: default.esml:639
+#: default.esml:640
 #, fuzzy
 msgid "choose the code rate LP (left, right)"
 msgstr "välj FEC (vänster, höger)"
@@ -456,37 +456,37 @@ msgstr "beräkn. param. 1 (se bruksanvisningen till motorn eller välj 00)"
 msgid "prev page"
 msgstr "föreg. sida"
 
-#: default.esml:756 src/epgwindow.cpp:113 src/timer.cpp:217
+#: default.esml:757 src/epgwindow.cpp:113 src/timer.cpp:220
 msgid "Thu"
 msgstr "Tor"
 
-#: default.esml:636
+#: default.esml:637
 #, fuzzy
 msgid "Transm. Mode:"
 msgstr "Transponder:"
 
 #: default.esml:393
 msgid "12V output on"
-msgstr ""
+msgstr "12V utput på"
 
-#: default.esml:810
+#: default.esml:811
 #, fuzzy
 msgid "shutdown the box to deepstandby (ok)"
 msgstr "stäng av mottagaren efter inspelning (OK)"
 
-#: default.esml:767
+#: default.esml:768
 msgid "edit the end time (0..9, left, right)"
 msgstr "ange stopptid (0..9, vänster, höger)"
 
-#: default.esml:754 src/timer.cpp:2636
+#: default.esml:755 src/timer.cpp:2641
 msgid "Tuesday"
 msgstr "Tisdag"
 
-#: default.esml:795
+#: default.esml:796
 msgid "recording duration:"
 msgstr "inspelningstid:"
 
-#: default.esml:741
+#: default.esml:742
 #, fuzzy
 msgid "delete expired timer (ok)"
 msgstr "radera vald timer (OK)"
@@ -495,15 +495,15 @@ msgstr "radera vald timer (OK)"
 msgid "choose the Transponder you wish to find"
 msgstr "Välj den transponder du önskar hitta"
 
-#: default.esml:934
+#: default.esml:935
 msgid "add new Transponder to selected sat (ok)"
-msgstr ""
+msgstr "dra av din transponder till sviskonet sat(OK)"
 
-#: default.esml:756 src/timer.cpp:2637
+#: default.esml:757 src/timer.cpp:2642
 msgid "Thursday"
 msgstr "Torsdag"
 
-#: default.esml:812
+#: default.esml:813
 #, fuzzy
 msgid "set sleeptimer and close window (ok)"
 msgstr "ange stopptid och stäng fönstret (OK)"
@@ -517,7 +517,7 @@ msgstr "Frontend: Satellit"
 msgid "open transponder scan"
 msgstr "öppna transpondersökning"
 
-#: default.esml:797 default.esml:809
+#: default.esml:798 default.esml:810
 msgid "min"
 msgstr "min"
 
@@ -529,19 +529,19 @@ msgstr "mA"
 msgid "goto advanced motor setup"
 msgstr "gå till avancerad motorinstallation"
 
-#: default.esml:752 src/timer.cpp:2636
+#: default.esml:753 src/timer.cpp:2641
 msgid "Monday"
 msgstr "Måndag"
 
-#: default.esml:839
+#: default.esml:840
 msgid "format"
 msgstr "format"
 
-#: default.esml:529 default.esml:548
+#: default.esml:530 default.esml:549
 msgid "starts the transponder scan"
 msgstr "startar transpondersökningen"
 
-#: default.esml:933
+#: default.esml:934
 #, fuzzy
 msgid "sat"
 msgstr "ange"
@@ -550,26 +550,26 @@ msgstr "ange"
 msgid "Voltage"
 msgstr "nätspänning"
 
-#: default.esml:637
+#: default.esml:638
 #, fuzzy
 msgid "choose the transmission mode (left, right)"
 msgstr "välj FEC (vänster, höger)"
 
-#: default.esml:662
+#: default.esml:663
 msgid "Help"
 msgstr "Hjälp"
 
-#: default.esml:897
+#: default.esml:898
 #, fuzzy
 msgid "insert"
 msgstr "ange"
 
-#: default.esml:771
+#: default.esml:772
 msgid "search event name for this beg-/end time in epg"
 msgstr ""
 
 #: default.esml:369 default.esml:394 default.esml:415 default.esml:473
-#: default.esml:579 src/parentallock.cpp:96 src/setup_lcd.cpp:107
+#: default.esml:580 src/parentallock.cpp:96 src/setup_lcd.cpp:107
 #: src/setup_keyboard.cpp:50 src/setup_osd.cpp:258 src/setup_rc.cpp:116
 #: src/setup_rfmod.cpp:139 src/setup_timezone.cpp:42 src/setupengrab.cpp:97
 #: src/setupnetwork.cpp:638 src/setupnetwork.cpp:1110 src/setupvideo.cpp:169
@@ -577,7 +577,7 @@ msgstr ""
 msgid "save"
 msgstr "spara"
 
-#: default.esml:754 src/epgwindow.cpp:113 src/timer.cpp:217
+#: default.esml:755 src/epgwindow.cpp:113 src/timer.cpp:220
 msgid "Tue"
 msgstr "Tis"
 
@@ -594,15 +594,15 @@ msgstr "välj den satellit du önskar söka efter"
 msgid "choose entry to edit or remove"
 msgstr "ange proceduringång för editering eller avlägsna"
 
-#: default.esml:780
+#: default.esml:781
 msgid "processor: "
 msgstr "processor"
 
-#: default.esml:750
+#: default.esml:751
 msgid "Endtime"
-msgstr ""
+msgstr "ändtid:"
 
-#: default.esml:876
+#: default.esml:877
 msgid "&#52;"
 msgstr ""
 
@@ -611,11 +611,11 @@ msgstr ""
 msgid "add to table/existing will be overwritten"
 msgstr "lägg till tabell/ den befintliga skrivs över"
 
-#: default.esml:781
+#: default.esml:782
 msgid "frontend: "
 msgstr "frontend:"
 
-#: default.esml:886
+#: default.esml:887
 msgid "&#57;"
 msgstr ""
 
@@ -623,21 +623,26 @@ msgstr ""
 msgid "AGC:"
 msgstr "AGC:"
 
+#: default.esml:519
+#, fuzzy
+msgid "enter manual pids"
+msgstr "öppna manuell transpondersökning"
+
 #: default.esml:402
 #, fuzzy
 msgid "Toneburst:"
 msgstr "Kontrast:"
 
-#: default.esml:799 default.esml:811 default.esml:823
+#: default.esml:800 default.esml:812 default.esml:824
 #, fuzzy
 msgid "standby  "
 msgstr "Viloläge:"
 
-#: default.esml:596 default.esml:614
+#: default.esml:597 default.esml:615
 msgid "FEC:"
 msgstr "FEC:"
 
-#: default.esml:428 default.esml:657
+#: default.esml:428 default.esml:658
 msgid "SYNC"
 msgstr "Sync"
 
@@ -645,24 +650,24 @@ msgstr "Sync"
 msgid "Latitude:"
 msgstr "Latitud:"
 
-#: default.esml:577
+#: default.esml:578
 msgid "Skins:"
 msgstr "Utseenden:"
 
-#: default.esml:787
+#: default.esml:788
 #, fuzzy
 msgid "ok"
 msgstr "klockan"
 
-#: default.esml:595
+#: default.esml:596
 msgid "choose polarity (left, right)"
 msgstr "välj polaritet (vänster, höger)"
 
-#: default.esml:592 default.esml:610 default.esml:629
+#: default.esml:593 default.esml:611 default.esml:630
 msgid "Inv:"
 msgstr "Inv:"
 
-#: default.esml:763
+#: default.esml:764
 msgid "edit the start time (0..9, left, right)"
 msgstr "ange stopptid (0..9, vänster, höger)"
 
@@ -675,20 +680,20 @@ msgstr "ange UNI-LNB:ns lågbandsfrekvens (MF9,750) (0..9, OK)"
 msgid "Record "
 msgstr "Spela in"
 
-#: default.esml:613 default.esml:631
+#: default.esml:614 default.esml:632
 #, fuzzy
 msgid "choose modulation (left, right)"
 msgstr "välj polaritet (vänster, höger)"
 
-#: default.esml:757 src/timer.cpp:2637
+#: default.esml:758 src/timer.cpp:2642
 msgid "Friday"
 msgstr "Fredag"
 
-#: default.esml:870
+#: default.esml:871
 msgid "&#49;"
 msgstr ""
 
-#: default.esml:753
+#: default.esml:754
 #, fuzzy
 msgid "select what todo after event"
 msgstr "tryck på OK för att välja ett annat 22 KHz-läge"
@@ -705,31 +710,31 @@ msgstr "DiSEqC-repetition: "
 msgid "enter LNB highband offset frequency (0..9, ok)"
 msgstr "ange LNB:ns högbandsfrekvens (L.O. 10.600) (0..9, OK)"
 
-#: default.esml:798 default.esml:822
+#: default.esml:799 default.esml:823
 msgid "shutdown the box after recording (ok)"
 msgstr "stäng av mottagaren efter inspelning (OK)"
 
-#: default.esml:922
+#: default.esml:923
 msgid "Please choose your DiSEqC-Configuration:"
-msgstr ""
+msgstr "välj inte din DiSEqC-konfugration"
 
-#: default.esml:794 default.esml:818
+#: default.esml:795 default.esml:819
 msgid "Stop Record"
 msgstr "Avbryt inspelning"
 
-#: default.esml:741
+#: default.esml:742
 msgid "cleanup"
-msgstr ""
+msgstr "dammsug"
 
 #: default.esml:481
 msgid "Mode:"
 msgstr "Läge:"
 
-#: default.esml:601 default.esml:619
+#: default.esml:602 default.esml:620
 msgid "KSymb/s"
 msgstr "KSymb/s"
 
-#: default.esml:559
+#: default.esml:560
 msgid "Progress:"
 msgstr "Sökförlopp:"
 
@@ -741,14 +746,14 @@ msgstr "SNR:"
 msgid "Satellite Configuration"
 msgstr "Satellitkonfiguration"
 
-#: default.esml:770
+#: default.esml:771
 #, fuzzy
 msgid "save data and close window"
 msgstr "spara ändringar och återgå"
 
 #: default.esml:390
 msgid "Threshold:"
-msgstr "Tröskel:"
+msgstr "Triskel:"
 
 #: default.esml:415
 #, fuzzy
@@ -760,7 +765,7 @@ msgstr "spara ändringar och återgå"
 msgid "plugins"
 msgstr "Plugin"
 
-#: default.esml:935
+#: default.esml:936
 #, fuzzy
 msgid "edit selected transponder (ok)"
 msgstr "avbryt transpondersökning"
@@ -769,23 +774,23 @@ msgstr "avbryt transpondersökning"
 msgid "save in motor"
 msgstr "spara i motorn"
 
-#: default.esml:594
+#: default.esml:595
 msgid "Polarity:"
 msgstr "Polaritet:"
 
-#: default.esml:840
+#: default.esml:841
 msgid "do a filesystem check"
 msgstr "gör en kontroll av filsystemet"
 
-#: default.esml:839
+#: default.esml:840
 msgid "initialize the disk for use with the dreambox"
-msgstr "initialisera hårddisken som ska användas i Dreambox"
+msgstr "initialisera hyrddisken som ska användas i Dreambox"
 
 #: default.esml:364
 msgid "LNB"
 msgstr "LNB"
 
-#: default.esml:752
+#: default.esml:753
 #, fuzzy
 msgid "Mo"
 msgstr "Mån"
@@ -794,32 +799,32 @@ msgstr "Mån"
 msgid "select DiSEqC parameter (ok)"
 msgstr "välj DiSEqC-parametrar (OK)"
 
-#: default.esml:851
+#: default.esml:852
 msgid "close"
 msgstr "stäng"
 
-#: default.esml:589 default.esml:607 default.esml:626
+#: default.esml:590 default.esml:608 default.esml:627
 msgid "Frequency:"
 msgstr "Frekvens:"
 
-#: default.esml:936
+#: default.esml:937
 #, fuzzy
 msgid "remove selected satellite"
 msgstr "avlägsna den valda satelliten"
 
-#: default.esml:600 default.esml:618
+#: default.esml:601 default.esml:619
 msgid "enter symbol rate (0..9, left, right)"
 msgstr "ange symbolvärde (0..9, vänster, höger)"
 
-#: default.esml:906
+#: default.esml:907
 msgid "press ok to enter the name"
 msgstr "Tryck på OK för att ange namn"
 
-#: default.esml:640
+#: default.esml:641
 msgid "Coderate HP:"
-msgstr ""
+msgstr "samarbeta med HP:"
 
-#: default.esml:739
+#: default.esml:740
 msgid "delete the current selected timer (ok)"
 msgstr "radera vald timer (OK)"
 
@@ -827,7 +832,7 @@ msgstr "radera vald timer (OK)"
 msgid "select MiniDiSEqC parameter (ok)"
 msgstr "välj parametrar för MiniDiSEqC (OK)"
 
-#: default.esml:784
+#: default.esml:785
 msgid "Software Version:"
 msgstr "Mjukvaruversion"
 
@@ -835,7 +840,7 @@ msgstr "Mjukvaruversion"
 msgid "enter your longitude (0..9, +, -, ok)"
 msgstr "ange din longitud (0..9, +, -, OK)"
 
-#: default.esml:895
+#: default.esml:896
 msgid "abc2 &lt;-&gt; 2abc"
 msgstr ""
 
@@ -843,16 +848,16 @@ msgstr ""
 msgid "remove the selected Satellite"
 msgstr "avlägsna den valda satelliten"
 
-#: default.esml:811
+#: default.esml:812
 #, fuzzy
 msgid "goto standby (ok)"
 msgstr "gå till viloläge (tryck)"
 
-#: default.esml:587
+#: default.esml:588
 msgid "choose wished satellite (ok)"
 msgstr "välj önskad satellit (OK)"
 
-#: default.esml:841
+#: default.esml:842
 msgid "show extended configuration"
 msgstr "visa utvidgad konfiguration"
 
@@ -860,7 +865,7 @@ msgstr "visa utvidgad konfiguration"
 msgid "choose what you want to do"
 msgstr "välj vad du önskar göra"
 
-#: default.esml:759 src/timer.cpp:2636
+#: default.esml:760 src/timer.cpp:2641
 msgid "Sunday"
 msgstr "Söndag"
 
@@ -868,7 +873,7 @@ msgstr "Söndag"
 msgid "Number in motor:"
 msgstr "Lagrad pos. i motorn: "
 
-#: default.esml:831
+#: default.esml:832
 msgid "model:"
 msgstr "modell:"
 
@@ -904,7 +909,7 @@ msgstr "DiSEqC-parametrar:"
 msgid "0,5V higher LNB Voltage (for long cables) (ok)"
 msgstr "0,5 V högre LNB-spänning (för långa kablar) (OK)"
 
-#: default.esml:612
+#: default.esml:613
 #, fuzzy
 msgid "Modulation:"
 msgstr "Modulation:"
@@ -913,16 +918,16 @@ msgstr "Modulation:"
 msgid "enable/disable check ONIT on any transponder"
 msgstr "aktivera/avaktivera kontroll av ONIT på varje transponder"
 
-#: default.esml:782
+#: default.esml:783
 msgid "harddisk: "
 msgstr "hårddisk:"
 
-#: default.esml:786
+#: default.esml:787
 #, fuzzy
 msgid "FP Version:"
 msgstr "Inversion:"
 
-#: default.esml:837
+#: default.esml:838
 msgid "status:"
 msgstr "status:"
 
@@ -931,17 +936,17 @@ msgstr "status:"
 msgid "use BAT"
 msgstr "använd BAT"
 
-#: default.esml:806
+#: default.esml:807
 #, fuzzy
 msgid "Set Sleeptimer"
 msgstr "Ange stopptid"
 
-#: default.esml:570
+#: default.esml:571
 #, fuzzy
 msgid "press ok to change"
 msgstr "Tryck på OK för att ange namn"
 
-#: default.esml:930
+#: default.esml:931
 #, fuzzy
 msgid "Transponders"
 msgstr "Transponder:"
@@ -951,7 +956,7 @@ msgstr "Transponder:"
 msgid "FR "
 msgstr "FF"
 
-#: default.esml:800 default.esml:824
+#: default.esml:801 default.esml:825
 msgid "set recording end time and close window (ok)"
 msgstr "ange stopptid och stäng fönstret (OK)"
 
@@ -959,21 +964,21 @@ msgstr "ange stopptid och stäng fönstret (OK)"
 msgid "close Satellite Configuration"
 msgstr "stäng satellitkonfigurationen"
 
-#: default.esml:731 default.esml:737 stone.esml:462 silver.esml:469
+#: default.esml:732 default.esml:738 stone.esml:462 silver.esml:469
 msgid "EPG"
 msgstr "EPG"
 
-#: default.esml:935
+#: default.esml:936
 #, fuzzy
 msgid "edit"
 msgstr "genomför detta"
 
-#: default.esml:758
+#: default.esml:759
 #, fuzzy
 msgid "Sa"
 msgstr "Lör"
 
-#: default.esml:835
+#: default.esml:836
 msgid "connected:"
 msgstr "ansluten:"
 
@@ -981,11 +986,11 @@ msgstr "ansluten:"
 msgid "next page"
 msgstr "nästa sida"
 
-#: default.esml:599 default.esml:617
+#: default.esml:600 default.esml:618
 msgid "Symbol Rate:"
 msgstr "Symbolvärde:"
 
-#: default.esml:800 default.esml:812 default.esml:824
+#: default.esml:801 default.esml:813 default.esml:825
 msgid "set"
 msgstr "ange"
 
@@ -997,11 +1002,11 @@ msgstr "tryck vänster eller höger för att köra motorn"
 msgid "calc param 2 (see your motor manual or let it 00)"
 msgstr "beräkn. param. 2 (se bruksanvisningen till motorn eller välj 00)"
 
-#: default.esml:768
+#: default.esml:769
 msgid "select the timer type (ok)"
 msgstr "välj timertyp (OK)"
 
-#: default.esml:524 default.esml:544
+#: default.esml:525 default.esml:545
 msgid "choose satellite/cable provider (ok)"
 msgstr "välj satellit-/programoperatör (OK)"
 
@@ -1021,9 +1026,9 @@ msgstr "Räkneverk (för hastighet)"
 msgid "enable/disable initiate network search"
 msgstr "aktivera/avaktivera nätverkssökningen"
 
-#: default.esml:632
+#: default.esml:633
 msgid "Guard:"
-msgstr ""
+msgstr "vakt:"
 
 #: chk_blue2.esml:317
 msgid "Stop "
@@ -1034,7 +1039,7 @@ msgstr "Stopp"
 msgid "select your configuration here"
 msgstr "välj timertyp (OK)"
 
-#: default.esml:884
+#: default.esml:885
 msgid "&#56;"
 msgstr ""
 
@@ -1042,63 +1047,68 @@ msgstr ""
 msgid "select DiSEqC repeats (ok)"
 msgstr "välj antal repetitioner av DiSEqC-pulser (OK)"
 
-#: default.esml:597 default.esml:615 default.esml:633
+#: default.esml:598 default.esml:616 default.esml:634
 msgid "choose the FEC (left, right)"
 msgstr "välj FEC (vänster, höger)"
 
-#: default.esml:857
-msgid "Software upgrade..."
-msgstr "Uppdaterar mjukvaran..."
-
-#: default.esml:913 src/system_settings.cpp:60
+#: default.esml:914 src/system_settings.cpp:60
 #, fuzzy
 msgid "OSD Language"
 msgstr "Språk:"
 
-#: default.esml:921
+#: default.esml:858
+msgid "Software upgrade..."
+msgstr "Uppdaterar mjukvaran..."
+
+#: default.esml:922
 #, fuzzy
 msgid "DiSEqC..."
 msgstr "Ändra DiSEqC-typ..."
 
-#: default.esml:578
+#: default.esml:579
 msgid "select skin and press ok or choose save"
 msgstr "välj utseende och tryck på OK eller välj spara"
 
-#: default.esml:762 default.esml:766
+#: default.esml:763 default.esml:767
 msgid "select day (ok)"
 msgstr "välj dag (OK)"
 
-#: default.esml:528
+#: default.esml:529
 msgid "change circular to linear polarization"
-msgstr ""
+msgstr "avbryt circular utan lijar polarization"
 
 #: default.esml:395
 msgid "goto next page (DiSEqC)"
 msgstr "gå till nästa sida (DiSEqC)"
 
-#: default.esml:933
+#: default.esml:934
 msgid "select sat(up/down), ok(edit), green(add new), red(delete)"
 msgstr ""
 
-#: default.esml:747
+#: default.esml:748
 #, fuzzy
 msgid "Timer Edit"
 msgstr "Timerlista"
 
-#: default.esml:770
+#: default.esml:771
 msgid "apply"
 msgstr ""
 
-#: default.esml:890
+#: default.esml:891
 msgid "&#48;"
 msgstr ""
 
-#: default.esml:757
+#: default.esml:758
 #, fuzzy
 msgid "Fr"
 msgstr "Fre"
 
-#: default.esml:751
+#: default.esml:519
+#, fuzzy
+msgid "enter pids"
+msgstr "Sport"
+
+#: default.esml:752
 #, fuzzy
 msgid "Repeated timer"
 msgstr "Rep.hastighet:"
@@ -1111,11 +1121,11 @@ msgstr "ange sparad satellitposition"
 msgid "Sequence repeat"
 msgstr "Upprepning av sekvens"
 
-#: default.esml:849
+#: default.esml:850
 msgid "status output:"
 msgstr "Utgångsstatus:"
 
-#: default.esml:830
+#: default.esml:831
 msgid "Harddisk"
 msgstr "Hårddisk"
 
@@ -1123,24 +1133,24 @@ msgstr "Hårddisk"
 msgid "bla"
 msgstr ""
 
-#: default.esml:799 default.esml:823
+#: default.esml:800 default.esml:824
 msgid "goto standby after recording (ok)"
 msgstr "gå till viloläge efter inspelning (OK)"
 
-#: default.esml:516 default.esml:527 default.esml:546
+#: default.esml:516 default.esml:528 default.esml:547
 msgid "only Free"
 msgstr ""
 
-#: default.esml:630
+#: default.esml:631
 #, fuzzy
 msgid "Constellation:"
 msgstr "Kontrast:"
 
-#: default.esml:758 src/timer.cpp:2637
+#: default.esml:759 src/timer.cpp:2642
 msgid "Saturday"
 msgstr "Lördag"
 
-#: default.esml:808
+#: default.esml:809
 #, fuzzy
 msgid "(0..9, left, right, ok)"
 msgstr "ange frekvens (0..9, vänster, höger)"
@@ -1150,7 +1160,7 @@ msgstr "ange frekvens (0..9, vänster, höger)"
 msgid "swaps committed and uncommitted DiSEqC Commands"
 msgstr "sänder DiSEqC cmd B/B"
 
-#: default.esml:898
+#: default.esml:899
 msgid "vol-"
 msgstr ""
 
@@ -1209,8 +1219,8 @@ msgid "QPSK"
 msgstr ""
 
 #: lib/dvb/service.cpp:202 lib/dvb/service.cpp:230 src/enigma_bouquet.cpp:212
-#: src/enigma_main.cpp:4242 src/enigma_main.cpp:4254 src/parentallock.cpp:123
-#: src/parentallock.cpp:155 src/timer.cpp:2355
+#: src/enigma_main.cpp:4245 src/enigma_main.cpp:4257 src/parentallock.cpp:123
+#: src/parentallock.cpp:155 src/timer.cpp:2358
 msgid "parental"
 msgstr ""
 
@@ -1269,15 +1279,15 @@ msgstr "Film"
 msgid " - services"
 msgstr "Kanaler"
 
-#: lib/dvb/servicemp3.cpp:185
+#: lib/dvb/servicemp3.cpp:186
 msgid "Connecting..."
 msgstr "Ansluter..."
 
-#: lib/dvb/servicemp3.cpp:381
+#: lib/dvb/servicemp3.cpp:397
 msgid "buffering..."
-msgstr ""
+msgstr "frukostbuffet..."
 
-#: lib/dvb/servicemp3.cpp:537
+#: lib/dvb/servicemp3.cpp:553
 msgid "playing..."
 msgstr "avspelning..."
 
@@ -1309,7 +1319,7 @@ msgstr "Filläge"
 msgid "TV/Radio"
 msgstr "Tv/radio"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7381
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7392
 #: src/sselect.cpp:384 src/sselect.cpp:391
 #, fuzzy
 msgid "Bouquets"
@@ -1659,7 +1669,7 @@ msgstr "Pratshow"
 
 #: src/channelinfo.cpp:111
 msgid "Handicraft"
-msgstr ""
+msgstr "handarbete"
 
 #: src/channelinfo.cpp:111
 #, fuzzy
@@ -1673,7 +1683,7 @@ msgstr "Ljusstyrka:"
 
 #: src/channelinfo.cpp:111
 msgid "Cooking"
-msgstr ""
+msgstr "tillaga"
 
 #: src/channelinfo.cpp:112
 msgid "Shopping"
@@ -1694,34 +1704,34 @@ msgstr ""
 
 #: src/channelinfo.cpp:115
 msgid "Unpublished"
-msgstr ""
+msgstr "opiskad"
 
 #: src/channelinfo.cpp:115
 msgid "Live"
-msgstr ""
+msgstr "leva"
 
-#: src/channelinfo.cpp:232
+#: src/channelinfo.cpp:244
 msgid "no data for this service avail"
 msgstr "ingen data tillgänglig för denna kanal"
 
-#: src/channelinfo.cpp:264
+#: src/channelinfo.cpp:276
 #, fuzzy, c-format
 msgid ""
 "\n"
 "Filesize: %d MB"
 msgstr "Filstorlek:"
 
-#: src/channelinfo.cpp:265
+#: src/channelinfo.cpp:277
 #, fuzzy
 msgid "Filename: "
 msgstr "Filstorlek:"
 
 #: src/engrab.cpp:37 src/enigma_event.cpp:298 src/enigma_event.cpp:307
-#: src/timer.cpp:2292
+#: src/timer.cpp:2295
 msgid "no description is available"
 msgstr "ingen beskrivning är tillgänglig"
 
-#: src/enigma.cpp:263
+#: src/enigma.cpp:266
 msgid ""
 "Welcome to enigma.\n"
 "\n"
@@ -1733,7 +1743,7 @@ msgstr ""
 " Gör först en transpondersökning. \n"
 "(huvudmeny > setup > kanaler > transpondersökning)"
 
-#: src/enigma.cpp:265
+#: src/enigma.cpp:268
 msgid "First start of enigma"
 msgstr "Första start av enigma"
 
@@ -1788,7 +1798,7 @@ msgstr "Lägg till kanal i favoritlistan"
 
 #: src/enigma_bouquet.cpp:44
 msgid "sort,rename,delete services/bouquets "
-msgstr ""
+msgstr "sortera bytväst tagbort servicen/blombuketten"
 
 #: src/enigma_bouquet.cpp:48
 #, fuzzy
@@ -1797,7 +1807,7 @@ msgstr "Kanaler"
 
 #: src/enigma_bouquet.cpp:48
 msgid "lock,unlock services (parental locking)"
-msgstr ""
+msgstr "lås, avlås services (parental låsning)"
 
 #: src/enigma_ci.cpp:29
 msgid "Common Interface Modules"
@@ -1909,7 +1919,7 @@ msgstr "Frontend: Terrestric"
 msgid "none"
 msgstr "Ingen"
 
-#: src/enigma_info.cpp:211 src/timer.cpp:2701 src/upgrade.cpp:276
+#: src/enigma_info.cpp:211 src/timer.cpp:2706 src/upgrade.cpp:276
 msgid "unknown"
 msgstr "okänd"
 
@@ -2037,7 +2047,7 @@ msgstr "sänk volym"
 
 #: src/enigma_main.cpp:115 src/enigma_main.cpp:172
 msgid "toggle mute flag"
-msgstr ""
+msgstr "tugga mutan flaggan"
 
 #: src/enigma_main.cpp:117 src/enigma_main.cpp:130
 msgid "stop playback"
@@ -2051,33 +2061,33 @@ msgstr "pausa avspelning"
 msgid "resume playback"
 msgstr "fortsätt avspelning"
 
-#: src/enigma_main.cpp:120 src/enigma_main.cpp:133 src/enigma_main.cpp:3023
+#: src/enigma_main.cpp:120 src/enigma_main.cpp:133 src/enigma_main.cpp:3024
 msgid "record"
 msgstr "spela in"
 
 #: src/enigma_main.cpp:122 src/enigma_main.cpp:135
 msgid "start skipping forward"
-msgstr ""
+msgstr "stata skepparen framåt"
 
 #: src/enigma_main.cpp:123 src/enigma_main.cpp:136
 msgid "repeat skipping forward"
-msgstr ""
+msgstr "ändra skepparen frammåt"
 
 #: src/enigma_main.cpp:124 src/enigma_main.cpp:137
 msgid "stop skipping forward"
-msgstr ""
+msgstr "stopa skepparen framåt"
 
 #: src/enigma_main.cpp:126 src/enigma_main.cpp:139
 msgid "start skipping reverse"
-msgstr ""
+msgstr "starta skepparen bakåt"
 
 #: src/enigma_main.cpp:127 src/enigma_main.cpp:140
 msgid "repeat skipping reverse"
-msgstr ""
+msgstr "ändra skepparen bakåt"
 
 #: src/enigma_main.cpp:128 src/enigma_main.cpp:141
 msgid "stop skipping reverse"
-msgstr ""
+msgstr "stop skepparen bakåt"
 
 #: src/enigma_main.cpp:143
 #, fuzzy
@@ -2091,7 +2101,7 @@ msgstr "lägg till kanal i favoriter"
 
 #: src/enigma_main.cpp:145
 msgid "open the serviceselector and show recorded movies"
-msgstr ""
+msgstr "oppna dina byxor och se om den finns kvar filmer"
 
 #: src/enigma_main.cpp:146
 msgid "open the serviceselector and shows the playlist"
@@ -2177,7 +2187,7 @@ msgstr "tillbaka"
 
 #: src/enigma_main.cpp:880
 msgid "no subtitles"
-msgstr ""
+msgstr "ina tittlar"
 
 #: src/enigma_main.cpp:921
 msgid "multiple Services"
@@ -2248,84 +2258,84 @@ msgstr "Favoriter ("
 msgid "Favourites (File)"
 msgstr "Favoriter ("
 
-#: src/enigma_main.cpp:1856
+#: src/enigma_main.cpp:1857
 #, fuzzy
 msgid "please wait while initializing Common Interface ..."
 msgstr ""
 "Var god vänta medan hårddisken initieras.\n"
 "Detta kan ta några minuter.\n"
 
-#: src/enigma_main.cpp:2153
+#: src/enigma_main.cpp:2154
 msgid "no EPG available"
 msgstr "ingen EPG tillgänglig"
 
-#: src/enigma_main.cpp:2807
+#: src/enigma_main.cpp:2808
 #, fuzzy
 msgid "ShutdownTimer"
 msgstr "Stäng av"
 
-#: src/enigma_main.cpp:2807
+#: src/enigma_main.cpp:2808
 #, fuzzy
 msgid "SleepTimer"
 msgstr "Timer"
 
-#: src/enigma_main.cpp:3023
+#: src/enigma_main.cpp:3024
 msgid "Sorry, you cannot record this service."
 msgstr "Du kan inte spela in detta program."
 
-#: src/enigma_main.cpp:3228
+#: src/enigma_main.cpp:3229
 #, fuzzy
 msgid "Show recorded movies?"
 msgstr "inspelade filmer"
 
-#: src/enigma_main.cpp:3228
+#: src/enigma_main.cpp:3229
 #, fuzzy
 msgid "recording finished"
 msgstr "Stopptid för inspelningen:"
 
-#: src/enigma_main.cpp:3568
+#: src/enigma_main.cpp:3571
 #, fuzzy
 msgid "Shutdown your Receiver now?"
 msgstr "stäng av"
 
-#: src/enigma_main.cpp:3568 src/enigma_main.cpp:3588
+#: src/enigma_main.cpp:3571 src/enigma_main.cpp:3591
 #, fuzzy
 msgid "Timer Message"
 msgstr "Meddelande"
 
-#: src/enigma_main.cpp:3588
+#: src/enigma_main.cpp:3591
 #, fuzzy
 msgid "Go to Standby now?"
 msgstr "gå till viloläge (tryck)"
 
-#: src/enigma_main.cpp:3645 src/enigma_main.cpp:3707
+#: src/enigma_main.cpp:3648 src/enigma_main.cpp:3710
 msgid "Enter new name:"
-msgstr ""
+msgstr "skriv ditt nya efternamn"
 
-#: src/enigma_main.cpp:3646 src/enigma_main.cpp:3708
+#: src/enigma_main.cpp:3649 src/enigma_main.cpp:3711
 msgid "Rename entry"
 msgstr ""
 
-#: src/enigma_main.cpp:3770
+#: src/enigma_main.cpp:3773
 msgid "Sorry, you cannot delete this service."
 msgstr "Du kan inte radera detta program. "
 
-#: src/enigma_main.cpp:3770
+#: src/enigma_main.cpp:3773
 msgid "delete service"
 msgstr "Radera program"
 
-#: src/enigma_main.cpp:3797 src/enigma_main.cpp:3883
+#: src/enigma_main.cpp:3800 src/enigma_main.cpp:3886
 #, c-format
 msgid ""
 "You are trying to delete '%s'.\n"
 "Really do this?"
 msgstr ""
 
-#: src/enigma_main.cpp:3798
+#: src/enigma_main.cpp:3801
 msgid "Delete recorded stream"
 msgstr "Radera inspelad dataström"
 
-#: src/enigma_main.cpp:3829
+#: src/enigma_main.cpp:3832
 #, fuzzy
 msgid ""
 "This is a complete Bouquet!\n"
@@ -2334,70 +2344,70 @@ msgstr ""
 "Detta är en inspelad dataström!\n"
 "Ska du verkligen radera?"
 
-#: src/enigma_main.cpp:3830
+#: src/enigma_main.cpp:3833
 #, fuzzy
 msgid "Delete bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:3884
+#: src/enigma_main.cpp:3887
 #, fuzzy
 msgid "Delete File"
 msgstr "Radera"
 
-#: src/enigma_main.cpp:3942
+#: src/enigma_main.cpp:3945
 #, fuzzy
 msgid "Enter new Filename:"
 msgstr "Filstorlek:"
 
-#: src/enigma_main.cpp:3943
+#: src/enigma_main.cpp:3946
 #, fuzzy
 msgid "Rename File"
 msgstr "ta bort"
 
-#: src/enigma_main.cpp:4007
+#: src/enigma_main.cpp:4010
 msgid "Enter new name for the bouquet:"
 msgstr ""
 
-#: src/enigma_main.cpp:4008
+#: src/enigma_main.cpp:4011
 #, fuzzy
 msgid "Rename bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:4033
+#: src/enigma_main.cpp:4036
 msgid "Enter name for the new bouquet:"
-msgstr ""
+msgstr "kom på ett namn till din blombukett"
 
-#: src/enigma_main.cpp:4034
+#: src/enigma_main.cpp:4037
 #, fuzzy
 msgid "Add new bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:4089
+#: src/enigma_main.cpp:4092
 #, fuzzy
 msgid "unnamed"
 msgstr "ta bort"
 
-#: src/enigma_main.cpp:4090
+#: src/enigma_main.cpp:4093
 msgid "Enter marker name:"
 msgstr ""
 
-#: src/enigma_main.cpp:4091
+#: src/enigma_main.cpp:4094
 msgid "create marker"
 msgstr ""
 
-#: src/enigma_main.cpp:4132
+#: src/enigma_main.cpp:4135
 msgid "unnamed bouquet"
 msgstr ""
 
-#: src/enigma_main.cpp:4456 src/enigma_main.cpp:4457
+#: src/enigma_main.cpp:4459 src/enigma_main.cpp:4460
 msgid "This directory doesn't contain anything playable!"
 msgstr "Detta register innehåller inget spelbart!"
 
-#: src/enigma_main.cpp:4457
+#: src/enigma_main.cpp:4460
 msgid "Play"
 msgstr "Spela upp"
 
-#: src/enigma_main.cpp:4943
+#: src/enigma_main.cpp:4946
 #, fuzzy
 msgid ""
 "A timer based recording is currently in progress!\n"
@@ -2406,7 +2416,7 @@ msgstr ""
 "För närvarande pågår en timerprogrammerad digital inspelning! \n"
 "Detta stoppar timern och avbryter den digitala inspelningen!"
 
-#: src/enigma_main.cpp:4953
+#: src/enigma_main.cpp:4956
 #, fuzzy
 msgid ""
 "A recording is currently in progress!\n"
@@ -2415,7 +2425,7 @@ msgstr ""
 "För närvarande pågår en digital inspelning!\n"
 "Detta avbryter den digitala inspelningen!"
 
-#: src/enigma_main.cpp:4965
+#: src/enigma_main.cpp:4968
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2423,359 +2433,359 @@ msgstr ""
 "För närvarande pågår en timerinspelning!\n"
 " Detta avbryter timerinspelningen!"
 
-#: src/enigma_main.cpp:4973
+#: src/enigma_main.cpp:4976
 msgid "Really do this?"
 msgstr "Ska du verkligen göra detta!"
 
-#: src/enigma_main.cpp:5067
+#: src/enigma_main.cpp:5070
 msgid "please wait until the timer has started the recording (max 10 seconds)"
-msgstr ""
+msgstr "vänta med insplelningent has stannat påinspelning (max 10sec)"
 
-#: src/enigma_main.cpp:5068
+#: src/enigma_main.cpp:5071
 #, fuzzy
 msgid "information"
 msgstr "Information"
 
-#: src/enigma_main.cpp:5720
+#: src/enigma_main.cpp:5723
 msgid "Record failed due to inaccessable storage."
 msgstr ""
 
-#: src/enigma_main.cpp:5722
+#: src/enigma_main.cpp:5725
 msgid ""
 "Record stopped due to full harddisk. Delete some recordings and try again."
 msgstr ""
 
-#: src/enigma_main.cpp:5724
+#: src/enigma_main.cpp:5727
 msgid ""
 "Record failed due to an write error during recording. Check for filesystem "
 "corruption."
 msgstr ""
 
-#: src/enigma_main.cpp:5726
+#: src/enigma_main.cpp:5729
 #, fuzzy
 msgid "record failed"
 msgstr "Stopptid för inspelningen:"
 
-#: src/enigma_main.cpp:5962 src/enigma_main.cpp:5963
+#: src/enigma_main.cpp:5965 src/enigma_main.cpp:5966
 msgid "One moment please..."
 msgstr "Vänta en stund..."
 
-#: src/enigma_main.cpp:5963 src/enigma_main.cpp:5967 src/enigma_main.cpp:5975
-#: src/enigma_main.cpp:5982 src/enigma_main.cpp:5988 src/enigma_main.cpp:5993
-#: src/enigma_main.cpp:5998 src/timer.cpp:2236
+#: src/enigma_main.cpp:5966 src/enigma_main.cpp:5970 src/enigma_main.cpp:5978
+#: src/enigma_main.cpp:5985 src/enigma_main.cpp:5991 src/enigma_main.cpp:5996
+#: src/enigma_main.cpp:6001 src/timer.cpp:2239
 msgid "switch"
 msgstr "omkopplare"
 
-#: src/enigma_main.cpp:5966 src/enigma_main.cpp:5967
+#: src/enigma_main.cpp:5969 src/enigma_main.cpp:5970
 msgid "Service could not be found !"
 msgstr "Denna kanal kunde kunde inte hittas!"
 
-#: src/enigma_main.cpp:5974 src/enigma_main.cpp:5975
+#: src/enigma_main.cpp:5977 src/enigma_main.cpp:5978
 msgid "This service could not be descrambled"
 msgstr "Denna kanal kunde inte avkodas"
 
-#: src/enigma_main.cpp:5981 src/enigma_main.cpp:5982
+#: src/enigma_main.cpp:5984 src/enigma_main.cpp:5985
 msgid "This service doesn't currently send a signal"
 msgstr "Denna kanal sänder för närvarande ingen signal"
 
-#: src/enigma_main.cpp:5986 src/enigma_main.cpp:5988
+#: src/enigma_main.cpp:5989 src/enigma_main.cpp:5991
 msgid "This content could not be displayed"
 msgstr "Innehållet kunde inte visas"
 
-#: src/enigma_main.cpp:5991 src/enigma_main.cpp:5993
+#: src/enigma_main.cpp:5994 src/enigma_main.cpp:5996
 msgid "NVOD Service - please select a starttime"
 msgstr "NVOD-tjänst - var god välj starttid"
 
-#: src/enigma_main.cpp:5996 src/enigma_main.cpp:5998
+#: src/enigma_main.cpp:5999 src/enigma_main.cpp:6001
 msgid "Unknown error!!"
 msgstr "Okänt fel!!"
 
-#: src/enigma_main.cpp:6488 src/sselect.cpp:390
+#: src/enigma_main.cpp:6499 src/sselect.cpp:390
 #, fuzzy
 msgid "Playlist"
 msgstr "Spela upp"
 
-#: src/enigma_main.cpp:6490
+#: src/enigma_main.cpp:6501
 #, fuzzy
 msgid "History"
 msgstr "spara"
 
-#: src/enigma_main.cpp:6926
+#: src/enigma_main.cpp:6937
 msgid "Service Menu"
 msgstr "Programmeny"
 
-#: src/enigma_main.cpp:6938 src/sselect.cpp:128
+#: src/enigma_main.cpp:6949 src/sselect.cpp:128
 msgid "add service to playlist"
 msgstr "lägg till program i spellista"
 
-#: src/enigma_main.cpp:6938
+#: src/enigma_main.cpp:6949
 #, fuzzy
 msgid "add selected service to the playlist"
 msgstr "lägg till program i spellista"
 
-#: src/enigma_main.cpp:6947
+#: src/enigma_main.cpp:6958
 #, fuzzy
 msgid "create new bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:6947
+#: src/enigma_main.cpp:6958
 #, fuzzy
 msgid "select to create a new bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:6959
+#: src/enigma_main.cpp:6970
 #, fuzzy
 msgid "duplicate bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:6959
+#: src/enigma_main.cpp:6970
 msgid "duplicate the complete bouquet with all content"
 msgstr ""
 
-#: src/enigma_main.cpp:6965 src/enigma_main.cpp:7018 src/enigma_main.cpp:7023
-#: src/enigma_main.cpp:7038
+#: src/enigma_main.cpp:6976 src/enigma_main.cpp:7029 src/enigma_main.cpp:7034
+#: src/enigma_main.cpp:7049
 #, fuzzy
 msgid "add to specific bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:6965
+#: src/enigma_main.cpp:6976
 #, fuzzy
 msgid "add the selected service to another bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:6967
+#: src/enigma_main.cpp:6978
 msgid "add marker"
 msgstr ""
 
-#: src/enigma_main.cpp:6967
+#: src/enigma_main.cpp:6978
 #, fuzzy
 msgid "create a new marker in the current bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:6976 src/enigma_main.cpp:6990 src/enigma_main.cpp:7025
+#: src/enigma_main.cpp:6987 src/enigma_main.cpp:7001 src/enigma_main.cpp:7036
 #: src/sselect.cpp:369
 #, fuzzy
 msgid "rename"
 msgstr "ta bort"
 
-#: src/enigma_main.cpp:6976
+#: src/enigma_main.cpp:6987
 #, fuzzy
 msgid "rename the current selected bouquet"
 msgstr "radera vald timer (OK)"
 
-#: src/enigma_main.cpp:6990 src/enigma_main.cpp:7025
+#: src/enigma_main.cpp:7001 src/enigma_main.cpp:7036
 #, fuzzy
 msgid "rename the current selected service/movie"
 msgstr "radera vald timer (OK)"
 
-#: src/enigma_main.cpp:6994 src/enigma_main.cpp:7026 src/sselect.cpp:367
+#: src/enigma_main.cpp:7005 src/enigma_main.cpp:7037 src/sselect.cpp:367
 #, fuzzy
 msgid "delete"
 msgstr "Radera"
 
-#: src/enigma_main.cpp:6994 src/enigma_main.cpp:7026
+#: src/enigma_main.cpp:7005 src/enigma_main.cpp:7037
 #, fuzzy
 msgid "delete the current selected service/movie"
 msgstr "radera vald timer (OK)"
 
-#: src/enigma_main.cpp:7001
+#: src/enigma_main.cpp:7012
 msgid "disable move mode"
 msgstr "avaktivera flyttningsfunktionen"
 
-#: src/enigma_main.cpp:7001
+#: src/enigma_main.cpp:7012
 #, fuzzy
 msgid "switch move mode off"
 msgstr "växla till filläge"
 
-#: src/enigma_main.cpp:7003
+#: src/enigma_main.cpp:7014
 msgid "enable move mode"
 msgstr "aktivera flyttningsfunktionen"
 
-#: src/enigma_main.cpp:7003
+#: src/enigma_main.cpp:7014
 msgid "activate mode to simply change the entry order"
-msgstr ""
+msgstr "aktivera möte och ändra dörren till vänsterhängd"
 
-#: src/enigma_main.cpp:7012
+#: src/enigma_main.cpp:7023
 #, fuzzy
 msgid "copy to bouquet list"
 msgstr "Lägg till kanal i favoritlistan"
 
-#: src/enigma_main.cpp:7012
+#: src/enigma_main.cpp:7023
 #, fuzzy
 msgid "copy the selected provider to the bouquet list"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:7018 src/enigma_main.cpp:7023
+#: src/enigma_main.cpp:7029 src/enigma_main.cpp:7034
 #, fuzzy
 msgid "add the selected service to a selectable bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:7038
+#: src/enigma_main.cpp:7049
 #, fuzzy
 msgid "add the selected file to a selectable bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:7040
+#: src/enigma_main.cpp:7051
 #, fuzzy
 msgid "delete file"
 msgstr "Radera"
 
-#: src/enigma_main.cpp:7040
+#: src/enigma_main.cpp:7051
 msgid "delete the selected file (and all corresponding ts files"
 msgstr ""
 
-#: src/enigma_main.cpp:7041
+#: src/enigma_main.cpp:7052
 #, fuzzy
 msgid "rename file"
 msgstr "ta bort"
 
-#: src/enigma_main.cpp:7041
+#: src/enigma_main.cpp:7052
 msgid "rename the selected file (and all corresponding ts files"
-msgstr ""
+msgstr "byt namn på filen (och på din bortblåst ts files"
 
-#: src/enigma_main.cpp:7055
+#: src/enigma_main.cpp:7066
 #, fuzzy
 msgid "disable edit mode"
 msgstr "avaktivera flyttningsfunktionen"
 
-#: src/enigma_main.cpp:7055
+#: src/enigma_main.cpp:7066
 #, fuzzy
 msgid "disable the edit mode"
 msgstr "avaktivera flyttningsfunktionen"
 
-#: src/enigma_main.cpp:7057
+#: src/enigma_main.cpp:7068
 #, fuzzy
 msgid "enable edit mode"
 msgstr "aktivera flyttningsfunktionen"
 
-#: src/enigma_main.cpp:7057
+#: src/enigma_main.cpp:7068
 #, fuzzy
 msgid "activate mode to simply add many services to a selectable bouquet"
 msgstr "lägg till kanal i favoriter"
 
-#: src/enigma_main.cpp:7067
+#: src/enigma_main.cpp:7078
 #, fuzzy
 msgid "unlock"
 msgstr "klockan"
 
-#: src/enigma_main.cpp:7067
+#: src/enigma_main.cpp:7078
 msgid "do parental-unlock the selected service or file"
 msgstr ""
 
-#: src/enigma_main.cpp:7069
+#: src/enigma_main.cpp:7080
 #, fuzzy
 msgid "lock"
 msgstr "klockan"
 
-#: src/enigma_main.cpp:7069
+#: src/enigma_main.cpp:7080
 msgid "do parentallock the selected service or file"
-msgstr ""
+msgstr "do parentallåset till servicen eller filen"
 
-#: src/enigma_main.cpp:7073
+#: src/enigma_main.cpp:7084
 #, fuzzy
 msgid "disable parental lock"
 msgstr "avaktivera flyttningsfunktionen"
 
-#: src/enigma_main.cpp:7073
+#: src/enigma_main.cpp:7084
 #, fuzzy
 msgid "temporary disable the parental locking"
 msgstr "avaktivera flyttningsfunktionen"
 
-#: src/enigma_main.cpp:7075
+#: src/enigma_main.cpp:7086
 #, fuzzy
 msgid "enable parental lock"
 msgstr "öppna kanalinstallationen"
 
-#: src/enigma_main.cpp:7075
+#: src/enigma_main.cpp:7086
 #, fuzzy
 msgid "re-enable the parental locking"
 msgstr "öppna kanalinstallationen"
 
-#: src/enigma_main.cpp:7093
+#: src/enigma_main.cpp:7104
 msgid "Shutdown/Standby Menu"
-msgstr ""
+msgstr "stäng av /Standby menu"
 
-#: src/enigma_main.cpp:7104 src/enigma_main.cpp:7107
+#: src/enigma_main.cpp:7115 src/enigma_main.cpp:7118
 msgid "reboot now"
 msgstr "starta om"
 
-#: src/enigma_main.cpp:7104 src/enigma_main.cpp:7112
+#: src/enigma_main.cpp:7115 src/enigma_main.cpp:7123
 msgid "restart your dreambox"
-msgstr ""
+msgstr "drag ur strömkabeln till mottagaren"
 
-#: src/enigma_main.cpp:7107
+#: src/enigma_main.cpp:7118
 msgid "restart your receiver"
-msgstr ""
+msgstr "drag ur strömkabeln till mottagaren"
 
-#: src/enigma_main.cpp:7111 src/enigma_main.cpp:7115
+#: src/enigma_main.cpp:7122 src/enigma_main.cpp:7126
 msgid "shutdown now"
 msgstr "stäng av"
 
-#: src/enigma_main.cpp:7111
+#: src/enigma_main.cpp:7122
 msgid "shutdown your dreambox"
 msgstr "stäng av"
 
-#: src/enigma_main.cpp:7112 src/enigma_main.cpp:7116
+#: src/enigma_main.cpp:7123 src/enigma_main.cpp:7127
 msgid "restart"
 msgstr "starta om"
 
-#: src/enigma_main.cpp:7115
+#: src/enigma_main.cpp:7126
 #, fuzzy
 msgid "shutdown your dbox-2"
 msgstr "stäng av"
 
-#: src/enigma_main.cpp:7116
+#: src/enigma_main.cpp:7127
 msgid "restart your dbox-2"
-msgstr ""
+msgstr "stäng av din dbox-2"
 
-#: src/enigma_main.cpp:7120
+#: src/enigma_main.cpp:7131
 msgid "goto standby"
 msgstr "gå till viloläge (tryck)"
 
-#: src/enigma_main.cpp:7120
+#: src/enigma_main.cpp:7131
 msgid "goto standby mode"
 msgstr "gå till viloläge (tryck)"
 
-#: src/enigma_main.cpp:7121
+#: src/enigma_main.cpp:7132
 msgid "set sleeptimer"
-msgstr ""
+msgstr "sätt suptimer"
 
-#: src/enigma_main.cpp:7121
+#: src/enigma_main.cpp:7132
 #, fuzzy
 msgid "set a sleep timer"
 msgstr "Ange stopptid"
 
-#: src/enigma_main.cpp:7241
+#: src/enigma_main.cpp:7252
 msgid "Record Menu"
 msgstr "Inspelningsmeny"
 
-#: src/enigma_main.cpp:7247
+#: src/enigma_main.cpp:7258
 msgid "stop record now"
 msgstr "avbryt inspelning"
 
-#: src/enigma_main.cpp:7247
+#: src/enigma_main.cpp:7258
 msgid "immediate stop the recording"
-msgstr ""
+msgstr "nu stanna bilen i nedförsbaken"
 
-#: src/enigma_main.cpp:7249
+#: src/enigma_main.cpp:7260
 msgid "set record duration"
 msgstr "ange inspelningstid"
 
-#: src/enigma_main.cpp:7249
+#: src/enigma_main.cpp:7260
 #, fuzzy
 msgid "set the recording time (in minutes)"
 msgstr "ange stopptid och stäng fönstret (OK)"
 
-#: src/enigma_main.cpp:7250
+#: src/enigma_main.cpp:7261
 msgid "set record stop time"
 msgstr "ange stopptid för inspelningen"
 
-#: src/enigma_main.cpp:7250
+#: src/enigma_main.cpp:7261
 #, fuzzy
 msgid "set the recording end time"
 msgstr "Stopptid för inspelningen:"
 
-#: src/enigma_main.cpp:7345
+#: src/enigma_main.cpp:7356
 #, fuzzy
 msgid "press ok to start edit mode"
 msgstr "tryck på OK för att välja ett annat 22 KHz-läge"
@@ -2809,11 +2819,11 @@ msgstr "Filläge"
 
 #: src/enigma_mainmenu.cpp:66 src/enigma_mainmenu.cpp:85
 #: src/enigma_mainmenu.cpp:198 src/enigma_mainmenu.cpp:208
-#: src/rotorconfig.cpp:908 src/timer.cpp:2680
+#: src/rotorconfig.cpp:908 src/timer.cpp:2685
 msgid "Information"
 msgstr "Information"
 
-#: src/enigma_mainmenu.cpp:69 src/enigma_mainmenu.cpp:200 src/timer.cpp:2140
+#: src/enigma_mainmenu.cpp:69 src/enigma_mainmenu.cpp:200 src/timer.cpp:2143
 msgid "Shutdown"
 msgstr "Stäng av"
 
@@ -2862,22 +2872,23 @@ msgstr "välj plugin och tryck på OK"
 msgid "Couldn't read plugin directory %s"
 msgstr "Kunde inte läsa plugin-registret"
 
-#: src/enigma_plugins.cpp:156
+#: src/enigma_plugins.cpp:156 src/scan.cpp:1831 src/scan.cpp:1886
+#: src/scan.cpp:1993
 msgid "Error"
 msgstr "Fel"
 
 #: src/enigma_plugins.cpp:230
 msgid "E: currently another plugin is running..."
-msgstr ""
+msgstr "E: nu annvänder en annan pusselbit"
 
 #: src/enigma_plugins.cpp:237
 #, c-format
 msgid "plugin '%s' not found"
-msgstr ""
+msgstr "pusselbiten %s´inte hittad"
 
 #: src/enigma_plugins.cpp:240
 msgid "E: no name given"
-msgstr ""
+msgstr "E: inte namn given"
 
 #: src/enigma_scan.cpp:40 src/enigma_setup.cpp:41
 #, fuzzy
@@ -2984,11 +2995,11 @@ msgstr "visa tjänsteselektorn"
 
 #: src/enigma_setup.cpp:43 src/system_settings.cpp:37
 msgid "System Settings"
-msgstr ""
+msgstr "system sittner"
 
 #: src/enigma_setup.cpp:43
 msgid "open system settings"
-msgstr ""
+msgstr "öppna system sittner"
 
 #: src/enigma_setup.cpp:46
 #, fuzzy
@@ -3049,19 +3060,19 @@ msgstr "ta bort denna post från timerlistan"
 msgid "show extended event information"
 msgstr "visa utvidgad konfiguration"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:217
+#: src/epgwindow.cpp:113 src/timer.cpp:220
 msgid "Sun"
 msgstr "Sön"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:217
+#: src/epgwindow.cpp:113 src/timer.cpp:220
 msgid "Mon"
 msgstr "Mån"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:217
+#: src/epgwindow.cpp:113 src/timer.cpp:220
 msgid "Fri"
 msgstr "Fre"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:217
+#: src/epgwindow.cpp:113 src/timer.cpp:220
 msgid "Sat"
 msgstr "Lör"
 
@@ -3079,7 +3090,7 @@ msgstr "stäng fönstret "
 
 #: src/helpwindow.cpp:22
 msgid "scroll up"
-msgstr ""
+msgstr "skålla upp"
 
 #: src/helpwindow.cpp:23
 #, fuzzy
@@ -3088,7 +3099,7 @@ msgstr "sänk volym"
 
 #: src/parentallock.cpp:25
 msgid "please enter pin:"
-msgstr ""
+msgstr "snälla trycka PIN"
 
 #: src/parentallock.cpp:45
 #, fuzzy
@@ -3097,7 +3108,7 @@ msgstr "öppna kanalinstallationen"
 
 #: src/parentallock.cpp:52
 msgid "Parental lock"
-msgstr ""
+msgstr "parental lås"
 
 #: src/parentallock.cpp:55
 #, fuzzy
@@ -3106,11 +3117,11 @@ msgstr "aktivera/avaktivera inversion (OK)"
 
 #: src/parentallock.cpp:59 src/parentallock.cpp:76
 msgid "change PIN"
-msgstr ""
+msgstr "Ändra PIN"
 
 #: src/parentallock.cpp:62
 msgid "change Parental PIN (ok)"
-msgstr ""
+msgstr "Ändra Parental PIN (OK)"
 
 #: src/parentallock.cpp:69
 #, fuzzy
@@ -3124,7 +3135,7 @@ msgstr "aktivera/avaktivera inversion (OK)"
 
 #: src/parentallock.cpp:79
 msgid "change Setup PIN (ok)"
-msgstr ""
+msgstr "ändra sittner PIN (OK)"
 
 #: src/parentallock.cpp:86
 #, fuzzy
@@ -3133,17 +3144,17 @@ msgstr "Radera program"
 
 #: src/parentallock.cpp:89
 msgid "don't show locked services in any list"
-msgstr ""
+msgstr "visa inte showen låst servicen på listans"
 
 #: src/parentallock.cpp:171
 #, c-format
 msgid "New %s PIN"
-msgstr ""
+msgstr "Ny %s PIN"
 
 #: src/parentallock.cpp:178
 #, c-format
 msgid "Reenter %s PIN"
-msgstr ""
+msgstr "tryck %s PIN"
 
 #: src/parentallock.cpp:186
 msgid ""
@@ -3151,14 +3162,17 @@ msgid ""
 "\n"
 "Do you want to retry?"
 msgstr ""
+"PIN är utan jobb \n"
+"\n"
+" vill du vänta med tillbakadragningen"
 
 #: src/parentallock.cpp:187 src/parentallock.cpp:268
 msgid "PIN validation failed"
-msgstr ""
+msgstr "PIN iprem tabletter"
 
 #: src/parentallock.cpp:204
 msgid "PIN change completed"
-msgstr ""
+msgstr "PIN ändrad avslutad"
 
 #: src/parentallock.cpp:205
 #, fuzzy
@@ -3168,13 +3182,13 @@ msgstr "Utseendet ändrat"
 #: src/parentallock.cpp:256
 #, c-format
 msgid "current %s PIN"
-msgstr ""
+msgstr "morot %s PIN"
 
 #: src/parentallock.cpp:267
 msgid ""
 "The entered PIN is incorrect.\n"
 "Do you want to retry?"
-msgstr ""
+msgstr "den här PIN är framtidsäker/ vill du prova på nytt"
 
 #: src/rotorconfig.cpp:50 src/rotorconfig.cpp:94 src/tpeditwindow.cpp:83
 msgid "East"
@@ -3421,7 +3435,7 @@ msgstr "2 satelliter via 22Khz"
 
 #: src/satconfig.cpp:61
 msgid "2 LNBs via 22Khz Signal.. special for old analog switches"
-msgstr ""
+msgstr "2 satelliter via 22Khz signal..special för pesionerer analog switsar"
 
 #: src/satconfig.cpp:62
 msgid "2 satellites via DiSEqC A/B"
@@ -3670,7 +3684,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1194
 msgid "Input 1"
-msgstr ""
+msgstr "inskjut 1"
 
 #: src/satconfig.cpp:1194
 #, fuzzy
@@ -3679,7 +3693,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1195
 msgid "Input 2"
-msgstr ""
+msgstr "inskjut 2"
 
 #: src/satconfig.cpp:1195
 #, fuzzy
@@ -3688,7 +3702,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1196
 msgid "Input 3"
-msgstr ""
+msgstr "inskjut 3"
 
 #: src/satconfig.cpp:1196
 #, fuzzy
@@ -3697,7 +3711,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1197
 msgid "Input 4"
-msgstr ""
+msgstr "inskjut 4"
 
 #: src/satconfig.cpp:1197
 #, fuzzy
@@ -3706,7 +3720,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1198
 msgid "Input 5"
-msgstr ""
+msgstr "inskjut 5"
 
 #: src/satconfig.cpp:1198
 #, fuzzy
@@ -3715,7 +3729,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1199
 msgid "Input 6"
-msgstr ""
+msgstr "inskjut 6"
 
 #: src/satconfig.cpp:1199
 #, fuzzy
@@ -3724,7 +3738,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1200
 msgid "Input 7"
-msgstr ""
+msgstr "inskjut 7"
 
 #: src/satconfig.cpp:1200
 #, fuzzy
@@ -3733,7 +3747,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1201
 msgid "Input 8"
-msgstr ""
+msgstr "inskjut 8"
 
 #: src/satconfig.cpp:1201
 #, fuzzy
@@ -3742,7 +3756,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1202
 msgid "Input 9"
-msgstr ""
+msgstr "inskjut 9"
 
 #: src/satconfig.cpp:1202
 #, fuzzy
@@ -3751,7 +3765,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1203
 msgid "Input 10"
-msgstr ""
+msgstr "inskjut 10"
 
 #: src/satconfig.cpp:1203
 #, fuzzy
@@ -3760,7 +3774,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1204
 msgid "Input 11"
-msgstr ""
+msgstr "inskjut 11"
 
 #: src/satconfig.cpp:1204
 #, fuzzy
@@ -3769,7 +3783,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1205
 msgid "Input 12"
-msgstr ""
+msgstr "inskjut 12"
 
 #: src/satconfig.cpp:1205
 #, fuzzy
@@ -3778,7 +3792,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1206
 msgid "Input 13"
-msgstr ""
+msgstr "inskjut 13"
 
 #: src/satconfig.cpp:1206
 #, fuzzy
@@ -3787,7 +3801,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1207
 msgid "Input 14"
-msgstr ""
+msgstr "inskjut 14"
 
 #: src/satconfig.cpp:1207
 #, fuzzy
@@ -3796,7 +3810,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1208
 msgid "Input 15"
-msgstr ""
+msgstr "inskjut 15"
 
 #: src/satconfig.cpp:1208
 #, fuzzy
@@ -3805,7 +3819,7 @@ msgstr "Ej använd omkopplare"
 
 #: src/satconfig.cpp:1209
 msgid "Input 16"
-msgstr ""
+msgstr "inskjut 16"
 
 #: src/satconfig.cpp:1209
 #, fuzzy
@@ -3816,11 +3830,11 @@ msgstr "Ej använd omkopplare"
 msgid "manual scan.."
 msgstr "manuell sökning"
 
-#: src/scan.cpp:221
+#: src/scan.cpp:210
 msgid "Waiting for tuner lock on:"
-msgstr ""
+msgstr "väntas att tuner skall läsa på"
 
-#: src/scan.cpp:356
+#: src/scan.cpp:345
 msgid ""
 "To begin searching for a valid satellite press OK, or choose your desired "
 "satellite manually and press OK"
@@ -3828,7 +3842,7 @@ msgstr ""
 "För att påbörja sökning efter en satellit, tryck på knappen OK, eller välj "
 "den önskade satelliten manuellt och tryck på OK. "
 
-#: src/scan.cpp:359
+#: src/scan.cpp:348
 msgid ""
 "To begin searching for a valid cable provider press OK, or choose your "
 "desired cable provider manually and press OK"
@@ -3836,7 +3850,7 @@ msgstr ""
 "För att påbörja sökning efter en programoperatör, tryck på OK, eller välj "
 "önskad programoperatör manuellt och tryck på OK. "
 
-#: src/scan.cpp:362
+#: src/scan.cpp:351
 #, fuzzy
 msgid ""
 "To begin searching for a valid transponder press OK, or choose your desired "
@@ -3845,12 +3859,12 @@ msgstr ""
 "För att påbörja sökning efter en satellit, tryck på knappen OK, eller välj "
 "den önskade satelliten manuellt och tryck på OK. "
 
-#: src/scan.cpp:457
+#: src/scan.cpp:443
 msgid ""
 "A valid transponder has been found. Verify that the right network is selected"
 msgstr "En transponder har hittats. Bekräfta att rätt nätverk har valts. "
 
-#: src/scan.cpp:539
+#: src/scan.cpp:525
 msgid ""
 "All known transponders have been tried, but no lock was possible. Verify "
 "antenna-/cable-setup or try manual search if its some obscure satellite/"
@@ -3859,7 +3873,7 @@ msgstr ""
 "Ingen transponder kunde hittas. Kontrollera inställningarna för antennen och "
 "kablarna eller försök att söka manuellt."
 
-#: src/scan.cpp:547
+#: src/scan.cpp:533
 msgid ""
 "All known transponders have been tried, but no lock was possible. Verify "
 "antenna-/cable-setup or try another satellite/network."
@@ -3867,51 +3881,51 @@ msgstr ""
 "Ingen transponder kunde hittas. Kontrollera inställningarna för antennen och "
 "kablarna eller försök med en annan satellit eller ett annat nätverk."
 
-#: src/scan.cpp:556
+#: src/scan.cpp:542
 msgid "Search in progress "
 msgstr "Sökning pågår"
 
-#: src/scan.cpp:729
+#: src/scan.cpp:708
 #, c-format
 msgid "%02i minutes and %02i seconds left"
 msgstr "%02i minuter och %02i sekunder kvar"
 
-#: src/scan.cpp:731
+#: src/scan.cpp:710
 #, c-format
 msgid "%02i seconds left"
 msgstr "%02i sekunder kvar"
 
-#: src/scan.cpp:806
+#: src/scan.cpp:785
 #, fuzzy
 msgid "Vertical"
 msgstr "vertikal"
 
-#: src/scan.cpp:872
+#: src/scan.cpp:851
 msgid "[only free]"
-msgstr ""
+msgstr "( ledig idag)"
 
-#: src/scan.cpp:873
+#: src/scan.cpp:852
 msgid "[all]"
-msgstr ""
+msgstr "(alla)"
 
-#: src/scan.cpp:873
+#: src/scan.cpp:852
 msgid "[nothing]"
-msgstr ""
+msgstr "(hänger ner)"
 
-#: src/scan.cpp:981
+#: src/scan.cpp:946
 msgid "Transponder Scan"
 msgstr "Transpondersökning"
 
-#: src/scan.cpp:1273
+#: src/scan.cpp:1238
 #, fuzzy
 msgid "Waiting for tuner lock... please wait"
 msgstr "Sökning pågår...var god vänta"
 
-#: src/scan.cpp:1320 src/scan.cpp:1373
+#: src/scan.cpp:1286 src/scan.cpp:1341
 msgid "Scan is in progress... please wait"
 msgstr "Sökning pågår...var god vänta"
 
-#: src/scan.cpp:1341 src/scan.cpp:1377
+#: src/scan.cpp:1308 src/scan.cpp:1346
 #, c-format
 msgid ""
 "The transponder scan has finished and found \n"
@@ -3925,36 +3939,210 @@ msgstr ""
 "kanaler, %i nya radiokanaler och %i nya datakanaler har hittats. %i "
 "transpondrar inom %i kanaler har genomsökts."
 
-#: src/scan.cpp:1389
+#: src/scan.cpp:1358
 msgid "Done."
 msgstr "Klar."
 
-#: src/scan.cpp:1396
+#: src/scan.cpp:1366
 msgid "Scan is in finished, press ok to close window"
 msgstr "Sökningen har avslutats, tryck på OK för att stänga fönstret. "
 
-#: src/scan.cpp:1402
+#: src/scan.cpp:1374
 #, c-format
 msgid ""
 "Do you want\n"
 "to scan another\n"
 "%s?"
 msgstr ""
+"vill du ha \n"
+"to scan korv\n"
+"%s?"
 
-#: src/scan.cpp:1402
+#: src/scan.cpp:1374
 #, c-format
 msgid "Transponder"
 msgstr "Transponder:"
 
-#: src/scan.cpp:1402
+#: src/scan.cpp:1374
 #, c-format
 msgid "Satellite"
 msgstr "Satellit:"
 
-#: src/scan.cpp:1403
+#: src/scan.cpp:1375
 #, fuzzy
 msgid "Scan finished"
 msgstr "Stopptid för inspelningen:"
+
+#: src/scan.cpp:1476
+msgid "Manual PIDs"
+msgstr ""
+
+#: src/scan.cpp:1498
+#, fuzzy
+msgid "to enter service name press OK"
+msgstr "tryck på OK för att ändra tjänst"
+
+#: src/scan.cpp:1499
+#, fuzzy
+msgid "enter service name"
+msgstr "Radera program"
+
+#: src/scan.cpp:1514
+msgid "to enter provider name press OK"
+msgstr ""
+
+#: src/scan.cpp:1515
+#, fuzzy
+msgid "enter provider name"
+msgstr "skriv ditt nya efternamn"
+
+#: src/scan.cpp:1530
+#, fuzzy
+msgid "to enter video pid press OK"
+msgstr "tryck på OK för att ändra tjänst"
+
+#: src/scan.cpp:1531
+msgid "enter video pid"
+msgstr ""
+
+#: src/scan.cpp:1544
+msgid "to enter pcr pid press OK"
+msgstr ""
+
+#: src/scan.cpp:1545
+msgid "enter pcr pid (in most case the same pid as the video pid)"
+msgstr ""
+
+#: src/scan.cpp:1560
+msgid "to enter audio pid press OK"
+msgstr ""
+
+#: src/scan.cpp:1561
+msgid "enter audio pid"
+msgstr ""
+
+#: src/scan.cpp:1567
+msgid "is AC3 Pid"
+msgstr ""
+
+#: src/scan.cpp:1568
+msgid "set this check when the entered audio pid is a ac3 audio pid"
+msgstr ""
+
+#: src/scan.cpp:1583
+msgid "to enter (video) text pid press OK"
+msgstr ""
+
+#: src/scan.cpp:1584
+msgid "enter (video) text pid"
+msgstr ""
+
+#: src/scan.cpp:1597
+#, fuzzy
+msgid "to enter service id press OK"
+msgstr "tryck på OK för att ändra tjänst"
+
+#: src/scan.cpp:1598
+#, fuzzy
+msgid "enter service id"
+msgstr "Radera program"
+
+#: src/scan.cpp:1613
+msgid "to enter tsid (transport stream id) press OK"
+msgstr ""
+
+#: src/scan.cpp:1614
+msgid "enter tsid (transport stream id)"
+msgstr ""
+
+#: src/scan.cpp:1627
+msgid "to enter onid (original network id) press OK"
+msgstr ""
+
+#: src/scan.cpp:1628
+msgid "enter onid (original network id)"
+msgstr ""
+
+#: src/scan.cpp:1636
+msgid "no DVB"
+msgstr ""
+
+#: src/scan.cpp:1637
+msgid "don't read PAT/PMT/SDT for this service (only use cached pids)"
+msgstr ""
+
+#: src/scan.cpp:1643
+#, fuzzy
+msgid "use sdt"
+msgstr "Paus"
+
+#: src/scan.cpp:1644
+msgid ""
+"update name/provider/service type with content of the sdt (and auto remove "
+"service)"
+msgstr ""
+
+#: src/scan.cpp:1650
+msgid "hold name"
+msgstr ""
+
+#: src/scan.cpp:1651
+msgid "don't update the service name with content of the sdt"
+msgstr ""
+
+#: src/scan.cpp:1665
+msgid "read tsid and onid from the nit (this can take up to 10 seconds)"
+msgstr ""
+
+#: src/scan.cpp:1675
+msgid "test entered values"
+msgstr ""
+
+#: src/scan.cpp:1685
+msgid ""
+"save data and close window (the new channel could be found in the all "
+"services list)"
+msgstr ""
+
+#: src/scan.cpp:1830
+msgid ""
+"Reading NIT failed... this transponder have no NIT..\n"
+"so you can use random values for tsid and onid or set both to 0"
+msgstr ""
+
+#: src/scan.cpp:1885
+msgid ""
+"No NIT Entry for current transponder values found...\n"
+"so you can use random values for tsid and onid or set both to 0"
+msgstr ""
+
+#: src/scan.cpp:1992
+msgid ""
+"A transponder with the same tsid / onid but other frequency/pol/... already "
+"exist.. create a new transponder with the same data is no possible.. please "
+"do change tsid and/or onid"
+msgstr ""
+
+#: src/scan.cpp:2041
+#, c-format
+msgid ""
+"A service named '%s' with this sid/onid/tsid/namespace is already exist\n"
+"in provider '%s'.\n"
+"Should i use this service name and provider name?"
+msgstr ""
+
+#: src/scan.cpp:2043
+#, fuzzy
+msgid "Service already exist"
+msgstr "Kanaler"
+
+#: src/scan.cpp:2135
+msgid "show/enter values as hexadecimal"
+msgstr ""
+
+#: src/scan.cpp:2141
+msgid "show/enter values as decimal"
+msgstr ""
 
 #: src/setup_extra.cpp:49
 #, fuzzy
@@ -3968,7 +4156,7 @@ msgstr "öppna videoinstallationen"
 
 #: src/setup_extra.cpp:50
 msgid "Ngrab Streaming Setup"
-msgstr ""
+msgstr "Ngrab strömkabeln inställning"
 
 #: src/setup_extra.cpp:50
 #, fuzzy
@@ -3993,11 +4181,11 @@ msgstr "öppna installationen av fjärrkontroll"
 
 #: src/setup_extra.cpp:57 src/setup_extra.cpp:185
 msgid "Factory reset"
-msgstr ""
+msgstr "fabriks rester"
 
 #: src/setup_extra.cpp:57
 msgid "all settings will set to factory defaults"
-msgstr ""
+msgstr "alla sittningar till fabriks rester"
 
 #: src/setup_extra.cpp:63
 #, fuzzy
@@ -4021,15 +4209,15 @@ msgstr "spara nya sat. positioner"
 
 #: src/setup_extra.cpp:81
 msgid "show sat position in the infobar"
-msgstr ""
+msgstr "visa sat positioner i öl baren"
 
 #: src/setup_extra.cpp:83
 msgid "Enable fast zapping"
-msgstr ""
+msgstr "stäng av snabb zapping"
 
 #: src/setup_extra.cpp:83
 msgid "enables faster zapping.. but with visible sync"
-msgstr ""
+msgstr "sätt på snabb zapping... skinka med synligt sync"
 
 #: src/setup_extra.cpp:84
 #, fuzzy
@@ -4043,11 +4231,11 @@ msgstr "aktivera/avaktivera inversion (OK)"
 
 #: src/setup_extra.cpp:85
 msgid "Hide error windows"
-msgstr ""
+msgstr "göm dig bakom fönstret"
 
 #: src/setup_extra.cpp:85
 msgid "don't show zap error messages"
-msgstr ""
+msgstr "visa inte zap bakom dina brev"
 
 #: src/setup_extra.cpp:86
 msgid "Auto show Infobar"
@@ -4065,23 +4253,23 @@ msgstr "visa huvudmeny"
 
 #: src/setup_extra.cpp:87
 msgid "show event remaining time in the infobar"
-msgstr ""
+msgstr "visa kvällens filmer med tider i infobaren"
 
 #: src/setup_extra.cpp:88
 msgid "Use http authentification"
-msgstr ""
+msgstr "använd http avindicationen"
 
 #: src/setup_extra.cpp:88
 msgid "enables the http (user/password) authentification"
-msgstr ""
+msgstr "påkopplad http(användare/password) avindicationen"
 
 #: src/setup_extra.cpp:89
 msgid "Don't open serial port"
-msgstr ""
+msgstr "nu öppna serial porten"
 
 #: src/setup_extra.cpp:89
 msgid "don't write debug messages to /dev/tts/0"
-msgstr ""
+msgstr "nu skriv debug brev till /dev/tts/0"
 
 #: src/setup_extra.cpp:90
 #, fuzzy
@@ -4090,7 +4278,7 @@ msgstr "lägg till kanal i favoriter"
 
 #: src/setup_extra.cpp:90
 msgid "change into next bouquet when end of current bouquet is reached"
-msgstr ""
+msgstr "ändra din blombukett när slutet an pågående blombukett är bortkastad"
 
 #: src/setup_extra.cpp:181
 msgid ""
@@ -4100,10 +4288,15 @@ msgid ""
 "\n"
 "Really do factory reset?"
 msgstr ""
+"Om du hittar några fabriksrester, kan du säga till ALLA.din kofurigation "
+"data\n"
+"(inkluderar blomsterbuketter,servic,satellite,data...)äfter fiskat klart på "
+"dina fabriks rester .din räka startar automatika!//riktigt till dina fabriks "
+"rester?"
 
 #: src/setup_extra.cpp:203
 msgid "Factory reset..."
-msgstr ""
+msgstr "fabriks rester..."
 
 #: src/setup_harddisk.cpp:186
 msgid "Harddisk Setup"
@@ -4247,15 +4440,15 @@ msgstr "välj timertyp (OK)"
 
 #: src/setup_osd.cpp:40
 msgid "PluginOffsetActions"
-msgstr ""
+msgstr "PluginOffsetActions"
 
 #: src/setup_osd.cpp:41
 msgid "enable set the leftTop Point of the rectangle"
-msgstr ""
+msgstr "möjlig sett vänstertopp prick av rektangeln"
 
 #: src/setup_osd.cpp:42
 msgid "enable set the rightBottom Point of the rectangle"
-msgstr ""
+msgstr "möjlig sett högertopp prick av rektangeln"
 
 #: src/setup_osd.cpp:43
 msgid "saves the current positions"
@@ -4292,11 +4485,11 @@ msgstr "justering av kontrast"
 
 #: src/setup_osd.cpp:229
 msgid "Show Mainmenu like Listbox"
-msgstr ""
+msgstr "visa havudmeny liknar listbax"
 
 #: src/setup_osd.cpp:230
 msgid "show the Mainmenu in normal listbox style"
-msgstr ""
+msgstr "visa havudmeny liknar normal listbax stialar"
 
 #: src/setup_osd.cpp:238
 #, fuzzy
@@ -4314,7 +4507,7 @@ msgstr "TuxText position"
 
 #: src/setup_osd.cpp:249
 msgid "here you can center the Tuxtxt (builtin videotext)"
-msgstr ""
+msgstr "här kann du center Tuxtxt ( bigga in videotext)"
 
 #: src/setup_osd.cpp:331
 #, fuzzy
@@ -4344,12 +4537,16 @@ msgid ""
 "change remote control repeat rate\n"
 "left => less, right => more (... repeats)"
 msgstr ""
+"ändra fjärren kontrollen till rate /fönster=>skottet, höger=>långre(..."
+"repetera)"
 
 #: src/setup_rc.cpp:70
 msgid ""
 "change remote control repeat delay\n"
 "left => shorter, right => longer (...delay)"
 msgstr ""
+"ändra fjärren kontrollen till bordet /fönster=>skottet, höger=>långre(..."
+"delay)"
 
 #: src/setup_rc.cpp:80
 msgid "select your favourite RC style (ok)"
@@ -4357,11 +4554,11 @@ msgstr "välj din favoritkonfig. för fjärrkontrollen (OK)"
 
 #: src/setup_rc.cpp:102
 msgid "Next Char Timeout:"
-msgstr ""
+msgstr "nästa spel timeout:"
 
 #: src/setup_rc.cpp:111
 msgid "cursor to next char timeout(msek) in textinputfields"
-msgstr ""
+msgstr "pilen till nesta spel (msek) in textinputfilelds"
 
 #: src/setup_rfmod.cpp:22
 msgid "UHF-Modulator Setup"
@@ -4395,7 +4592,7 @@ msgstr "aktivera ljudet"
 
 #: src/setup_rfmod.cpp:58
 msgid "Sound Subcarrier:"
-msgstr ""
+msgstr "Lud budläggare:"
 
 #: src/setup_rfmod.cpp:70
 msgid "4.5 MHz"
@@ -4479,27 +4676,27 @@ msgstr "ange mottagarens IP-adress (0..9, vänster, höger)"
 
 #: src/setupengrab.cpp:61
 msgid "enter ngrab server port (standard is 4000)"
-msgstr ""
+msgstr "tryck ngrab server port (standared är 4000)"
 
 #: src/setupengrab.cpp:72
 msgid "enter MAC address of server (for wake on lan)"
-msgstr ""
+msgstr "tryck MAC adres till server (för att vakna till LAN)"
 
 #: src/setupengrab.cpp:91
 msgid "detect MAC Adress"
-msgstr ""
+msgstr "detecterad MAC adres"
 
 #: src/setupengrab.cpp:92
 msgid "try to autodetect server MAC address"
-msgstr ""
+msgstr "fritera till autodetect server MAC adres"
 
 #: src/setupengrab.cpp:180
 msgid "Please check your NGrab Server or the IP"
-msgstr ""
+msgstr "snälla en ny keck NGrab server eller IP"
 
 #: src/setupengrab.cpp:181
 msgid "HW Address(MAC) detection failed"
-msgstr ""
+msgstr "HW adres (MAC) infikation avböj"
 
 #: src/setupnetwork.cpp:380
 #, fuzzy
@@ -4512,7 +4709,7 @@ msgstr "ange mottagarens IP-adress (0..9, vänster, höger)"
 
 #: src/setupnetwork.cpp:459
 msgid "get Network data from a DHCP Server in the local Network"
-msgstr ""
+msgstr "få nätverket data fram till DHCP server till lokala netverk"
 
 #: src/setupnetwork.cpp:472
 msgid "enter netmask of your network (0..9, left, right)"
@@ -4529,19 +4726,19 @@ msgstr "LAN"
 
 #: src/setupnetwork.cpp:492 src/setupnetwork.cpp:500
 msgid "communicate to Local Area Network"
-msgstr ""
+msgstr "kommunisera till local bara nätverk"
 
 #: src/setupnetwork.cpp:494 src/setupnetwork.cpp:501
 msgid "WAN(PPPoE)"
-msgstr ""
+msgstr "WAN(PPPoE)"
 
 #: src/setupnetwork.cpp:494 src/setupnetwork.cpp:501
 msgid "communicate to the Internet via DSL"
-msgstr ""
+msgstr "kommunisresa med Internet på DSL"
 
 #: src/setupnetwork.cpp:510
 msgid "T-Online User press ok here"
-msgstr ""
+msgstr "T-pålinan använndare tryck OK hire"
 
 #: src/setupnetwork.cpp:524
 msgid "enter your domain name server (0..9, left, right)"
@@ -4562,7 +4759,7 @@ msgstr "ange IP-adress för din gateway (0..9, vänster, höger)"
 
 #: src/setupnetwork.cpp:565
 msgid "Password:"
-msgstr ""
+msgstr "pissord:"
 
 #: src/setupnetwork.cpp:574
 #, fuzzy
@@ -4586,27 +4783,27 @@ msgstr "ange mottagarens IP-adress (0..9, vänster, höger)"
 
 #: src/setupnetwork.cpp:605
 msgid "reject incoming connections on port 80"
-msgstr ""
+msgstr "avböj inkommna karameller på påttan 80"
 
 #: src/setupnetwork.cpp:619
 msgid "reject incoming connections on port 23"
-msgstr ""
+msgstr "avböj inkommna karameller på påttan 23"
 
 #: src/setupnetwork.cpp:626
 msgid "reject incoming connections on ports 137,138,139"
-msgstr ""
+msgstr "avböj inkommna karameller på påttan 137,138,139"
 
 #: src/setupnetwork.cpp:633
 msgid "reject incoming connections on ports 21"
-msgstr ""
+msgstr "avböj inkommna karameller på påttan 21"
 
 #: src/setupnetwork.cpp:651
 msgid "mounts"
-msgstr ""
+msgstr "montering"
 
 #: src/setupnetwork.cpp:656
 msgid "here you can setup nfs/cifs mounts"
-msgstr ""
+msgstr "här kann du sitta ner nfs/cifs montering"
 
 #: src/setupnetwork.cpp:981
 #, fuzzy
@@ -4620,11 +4817,11 @@ msgstr "Tryck på OK för att ange namn"
 
 #: src/setupnetwork.cpp:993
 msgid "Samba File System(to mount share from another Dreambox)"
-msgstr ""
+msgstr "Samba filen system ( måste rakas från en annan Dreambox)"
 
 #: src/setupnetwork.cpp:1014
 msgid "enter name of the local mount point with trailing slash"
-msgstr ""
+msgstr "Tryck namnet på den lokala pinnen med att talla på frugans slask"
 
 #: src/setupnetwork.cpp:1023
 #, fuzzy
@@ -4678,27 +4875,27 @@ msgstr "välj program"
 
 #: src/setupnetwork.cpp:1173
 msgid "enter the name of the share without trailing slash"
-msgstr ""
+msgstr "tryck namnet på rakklappen utan talla på frugans slask"
 
 #: src/setupnetwork.cpp:1176
 msgid "enter the name of the share (//DreamBOX/harddisk)"
-msgstr ""
+msgstr "tryck namnet på rakklappen (//DreamBOX/Hårdfisk)"
 
 #: src/setupnetwork.cpp:1295 src/setupnetwork.cpp:1336
 msgid "invalid or missing dir or local dir"
-msgstr ""
+msgstr "invalid rullstol dir eller local dir"
 
 #: src/setupnetwork.cpp:1313
 msgid "NFS/CIFS-Entry stored. Further entry?\n"
-msgstr ""
+msgstr "NFS/CIFS-ingång låst.framtida ingång?\n"
 
 #: src/setupnetwork.cpp:1314
 msgid "NFS/CIFS-Setup..."
-msgstr ""
+msgstr "NFS/CIFS-sittupp"
 
 #: src/setupnetwork.cpp:1343
 msgid "NFS/CIFS mount error already mounted"
-msgstr ""
+msgstr "NFS/CIFS monterad kerror alltjämt muterad"
 
 #: src/setupvideo.cpp:51 src/system_settings.cpp:43
 #, fuzzy
@@ -4711,7 +4908,7 @@ msgstr "Färgformat:"
 
 #: src/setupvideo.cpp:66
 msgid "CVBS"
-msgstr ""
+msgstr "CVBS"
 
 #: src/setupvideo.cpp:67
 msgid "RGB"
@@ -4723,7 +4920,7 @@ msgstr "SVideo"
 
 #: src/setupvideo.cpp:69
 msgid "YPbPr"
-msgstr ""
+msgstr "YpbPr"
 
 #: src/setupvideo.cpp:76
 #, fuzzy
@@ -4753,11 +4950,11 @@ msgstr "16:9"
 
 #: src/setupvideo.cpp:96
 msgid "always 16:9"
-msgstr ""
+msgstr "Vingresor 16:9"
 
 #: src/setupvideo.cpp:101 src/setupvideo.cpp:365
 msgid "TV System:"
-msgstr ""
+msgstr "TV system:"
 
 #: src/setupvideo.cpp:124 src/setupvideo.cpp:389
 #, fuzzy
@@ -4766,15 +4963,15 @@ msgstr "välj FEC (vänster, höger)"
 
 #: src/setupvideo.cpp:144
 msgid "Disable WSS on 4:3"
-msgstr ""
+msgstr "diskutera WSS på 4:3"
 
 #: src/setupvideo.cpp:145
 msgid "don't send WSS signal when A-ratio is 4:3"
-msgstr ""
+msgstr "sänd inte WSS signalet när A-ratio är 4:3"
 
 #: src/setupvideo.cpp:152
 msgid "AC3 default output"
-msgstr ""
+msgstr "AC3 fel utgång"
 
 #: src/setupvideo.cpp:155
 #, fuzzy
@@ -4783,7 +4980,7 @@ msgstr "aktivera/avaktivera nätverkskonfiguration (OK)"
 
 #: src/setupvideo.cpp:161
 msgid "Auto VCR switching"
-msgstr ""
+msgstr "auto VCR svetsning"
 
 #: src/setupvideo.cpp:164
 #, fuzzy
@@ -4797,15 +4994,15 @@ msgstr "Väst"
 
 #: src/setupvideo.cpp:185
 msgid "show testpicture"
-msgstr ""
+msgstr "visa fest bilden"
 
 #: src/setupvideo.cpp:360
 msgid "TV System Wizard"
-msgstr ""
+msgstr "TV Sytstem trollkarl"
 
 #: src/software_update.cpp:34
 msgid "Internet Update"
-msgstr ""
+msgstr "Internet uppgradering"
 
 #: src/software_update.cpp:34
 #, fuzzy
@@ -4824,7 +5021,7 @@ msgstr "öppna manuell transpondersökning"
 
 #: src/software_update.cpp:37
 msgid "Expert Flash Save/Restore"
-msgstr ""
+msgstr "Expert blixt rakning/Restore"
 
 #: src/software_update.cpp:37
 #, fuzzy
@@ -4837,6 +5034,9 @@ msgid ""
 "'root.cramfs' and press ok.In the upcomming list select 'manual update' and "
 "follow the instructions."
 msgstr ""
+"ladda up din mage från FTP eller Samba till '/tmp' påse,och byt namn till "
+"'root.cramfs' och tryck ok. in uppkommna lisatan välj 'manuell uppdatering' "
+"och följ inte instruktionerna"
 
 #: src/software_update.cpp:61
 #, fuzzy
@@ -4864,15 +5064,15 @@ msgstr "Kanal EPG"
 
 #: src/sselect.cpp:70
 msgid "open EPG for selected Channel"
-msgstr ""
+msgstr "öppna EPG för selectrad kanel"
 
 #: src/sselect.cpp:71
 msgid "Multi EPG"
-msgstr ""
+msgstr "Multi EPG"
 
 #: src/sselect.cpp:71
 msgid "open EPG for next five channels"
-msgstr ""
+msgstr "Öppna EPG for nexta fira kaneler"
 
 #: src/sselect.cpp:77
 #, fuzzy
@@ -4881,11 +5081,11 @@ msgstr "intern"
 
 #: src/sselect.cpp:77
 msgid "open external plugin EPG"
-msgstr ""
+msgstr "öppna extrn plugin EPG"
 
 #: src/sselect.cpp:122
 msgid "service selector"
-msgstr "val av kanal"
+msgstr "val av kaval"
 
 #: src/sselect.cpp:123
 msgid "switch to next bouquet"
@@ -4923,11 +5123,11 @@ msgstr "växla mellan program- och bouquetlistan"
 
 #: src/sselect.cpp:135
 msgid "go to the prev Marker if exist.. else goto first service"
-msgstr ""
+msgstr "gå tillbaka till Marker om ecrosisten.. annaras goto försata service"
 
 #: src/sselect.cpp:136
 msgid "go to the next Marker if exist.. else goto last service"
-msgstr ""
+msgstr "gå förbaka till Marker om ecrosisten.. annaras goto sisata service"
 
 #: src/sselect.cpp:138
 msgid "show all services"
@@ -4969,7 +5169,7 @@ msgstr "lägg till kanal i favoriter"
 
 #: src/sselect.cpp:287
 msgid "[GO UP]"
-msgstr ""
+msgstr "(Go UP)"
 
 #: src/sselect.cpp:289
 msgid "(removed service)"
@@ -4977,11 +5177,11 @@ msgstr "(raderade program)"
 
 #: src/sselect.cpp:368
 msgid "mark"
-msgstr ""
+msgstr "mark"
 
 #: src/sselect.cpp:370
 msgid "marker"
-msgstr ""
+msgstr "marker"
 
 #: src/sselect.cpp:378
 #, fuzzy
@@ -5000,7 +5200,7 @@ msgstr "Film"
 
 #: src/sselect.cpp:388
 msgid "Root"
-msgstr ""
+msgstr "root"
 
 #: src/sselect.cpp:389
 #, fuzzy
@@ -5009,11 +5209,11 @@ msgstr "Film"
 
 #: src/sselect.cpp:847
 msgid "Select No or press Abort to lock/unlock the complete directory"
-msgstr ""
+msgstr "välj No eller pressa Abort för upplåsning/ låsning av lånebibloteket"
 
 #: src/sselect.cpp:847
 msgid "Enter Directory"
-msgstr ""
+msgstr "gå till lånebibloteket"
 
 #: src/streaminfo.cpp:174
 msgid "album"
@@ -5059,7 +5259,7 @@ msgstr "Följande kodningssystem stöds:"
 
 #: src/streaminfo.cpp:514
 msgid "Systems used in service:"
-msgstr ""
+msgstr "systemer använd i srevicen"
 
 #: src/streaminfo.cpp:551
 msgid "Record mode - read manual"
@@ -5077,11 +5277,11 @@ msgstr "Information om kodningssystem (vänster, höger)"
 msgid "Transponder information (left)"
 msgstr "Transponderinformation (vänster)"
 
-#: src/timer.cpp:279
+#: src/timer.cpp:282
 msgid "Timerlist"
 msgstr "Timerlista"
 
-#: src/timer.cpp:1539
+#: src/timer.cpp:1542
 #, fuzzy
 msgid ""
 "You would delete the running event..\n"
@@ -5089,16 +5289,16 @@ msgid ""
 msgstr ""
 "Du önskar radera den pågående aktiviteten? Detta avbryter timerinspelningen!"
 
-#: src/timer.cpp:1540
+#: src/timer.cpp:1543
 #, fuzzy
 msgid "Delete the event from the timer list"
 msgstr "Radera programmet från timerlistan?"
 
-#: src/timer.cpp:1541
+#: src/timer.cpp:1544
 msgid "Really delete this event?"
 msgstr "Ska du verkligen radera detta program?"
 
-#: src/timer.cpp:1545
+#: src/timer.cpp:1548
 #, fuzzy
 msgid ""
 "You would update the running event.. \n"
@@ -5107,32 +5307,32 @@ msgstr ""
 "Du önskar uppdatera den pågående aktiviteten? Detta avbryter "
 "timerinspelningen!"
 
-#: src/timer.cpp:1546
+#: src/timer.cpp:1549
 #, fuzzy
 msgid "Update event in timer list"
 msgstr "Updatera program i timerlistan?"
 
-#: src/timer.cpp:1547 src/timer.cpp:2457
+#: src/timer.cpp:1550 src/timer.cpp:2460
 msgid "Really update this event?"
 msgstr "Ska du verkligen uppdatera detta program?"
 
-#: src/timer.cpp:1697
+#: src/timer.cpp:1700
 msgid "This event is already in the timerlist."
 msgstr "Detta program finns redan i timerlistan. "
 
-#: src/timer.cpp:1698 src/timer.cpp:1749
+#: src/timer.cpp:1701 src/timer.cpp:1752
 msgid "Add event to timerlist"
 msgstr "Lägg till program i timerlistan. "
 
-#: src/timer.cpp:1738
+#: src/timer.cpp:1741
 msgid "The Endtime overlaps with another event in the timerlist"
 msgstr "Stopptiden sammanfaller med ett annat program i timerlistan. "
 
-#: src/timer.cpp:1738
+#: src/timer.cpp:1741
 msgid "Set Stop Time"
 msgstr "Ange stopptid"
 
-#: src/timer.cpp:1747
+#: src/timer.cpp:1750
 msgid ""
 "This event cannot added to the timerlist.\n"
 "The event overlaps with another event in the timerlist\n"
@@ -5142,154 +5342,156 @@ msgstr ""
 " Programmet sammanfaller med ett annat program i timerlistan. \n"
 " Var god kontrollera timerlistan manuellt."
 
-#: src/timer.cpp:1826
+#: src/timer.cpp:1829
 msgid "timerView"
 msgstr "visa timer"
 
-#: src/timer.cpp:1827
+#: src/timer.cpp:1830
 #, fuzzy
 msgid "add new event to Timerlist"
 msgstr "Lägg till program i timerlistan. "
 
-#: src/timer.cpp:1828
+#: src/timer.cpp:1831
 msgid "remove this entry from timer list"
 msgstr "ta bort denna post från timerlistan"
 
-#: src/timer.cpp:2027
+#: src/timer.cpp:2030
 msgid "Timer list"
 msgstr "Timerlista"
 
-#: src/timer.cpp:2105
+#: src/timer.cpp:2108
 #, fuzzy
 msgid "Timer Edit View"
 msgstr "Timerlista"
 
-#: src/timer.cpp:2106
-msgid "increase the event begin time in 1 minute steps"
-msgstr ""
-
-#: src/timer.cpp:2107
-msgid "decrease the event begin time in 1 minute steps"
-msgstr ""
-
-#: src/timer.cpp:2108
-msgid "increase the event end time in 1 minute steps"
-msgstr ""
-
 #: src/timer.cpp:2109
-msgid "decrease the event end time in 1 minute steps"
-msgstr ""
+msgid "increase the event begin time in 1 minute steps"
+msgstr "sammandraga tillfället på start tid 1 minut stepar"
 
-#: src/timer.cpp:2118
+#: src/timer.cpp:2110
+msgid "decrease the event begin time in 1 minute steps"
+msgstr "avdraga tillfället på start tid 1 minut stepar"
+
+#: src/timer.cpp:2111
+msgid "increase the event end time in 1 minute steps"
+msgstr "sammandraga tillfället på stop tid 1 minut stepar"
+
+#: src/timer.cpp:2112
+msgid "decrease the event end time in 1 minute steps"
+msgstr "avdraga tillfället på stop tid 1 minut stepar"
+
+#: src/timer.cpp:2121
 msgid "January"
 msgstr "Januari"
 
-#: src/timer.cpp:2118
+#: src/timer.cpp:2121
 msgid "February"
 msgstr "Februari"
 
-#: src/timer.cpp:2118
+#: src/timer.cpp:2121
 msgid "March"
 msgstr "Mars"
 
-#: src/timer.cpp:2119
+#: src/timer.cpp:2122
 msgid "April"
 msgstr "April"
 
-#: src/timer.cpp:2119
+#: src/timer.cpp:2122
 msgid "May"
 msgstr "Maj"
 
-#: src/timer.cpp:2119
+#: src/timer.cpp:2122
 msgid "June"
 msgstr "Juni"
 
-#: src/timer.cpp:2119
+#: src/timer.cpp:2122
 msgid "July"
 msgstr "Juli"
 
-#: src/timer.cpp:2120
+#: src/timer.cpp:2123
 msgid "August"
 msgstr "Augusti"
 
-#: src/timer.cpp:2120
+#: src/timer.cpp:2123
 msgid "September"
 msgstr "September"
 
-#: src/timer.cpp:2120
+#: src/timer.cpp:2123
 msgid "October"
 msgstr "Oktober"
 
-#: src/timer.cpp:2121
+#: src/timer.cpp:2124
 msgid "November"
 msgstr "November"
 
-#: src/timer.cpp:2121
+#: src/timer.cpp:2124
 msgid "December"
 msgstr "December"
 
-#: src/timer.cpp:2137
+#: src/timer.cpp:2140
 #, fuzzy
 msgid "Nothing"
 msgstr "Nord"
 
-#: src/timer.cpp:2137
+#: src/timer.cpp:2140
 msgid "do nothing"
-msgstr ""
+msgstr "gör någonting"
 
-#: src/timer.cpp:2138
+#: src/timer.cpp:2141
 #, fuzzy
 msgid "Standby"
 msgstr "Viloläge:"
 
-#: src/timer.cpp:2138
+#: src/timer.cpp:2141
 #, fuzzy
 msgid "put box into standby"
 msgstr "gå till viloläge (tryck)"
 
-#: src/timer.cpp:2140
+#: src/timer.cpp:2143
 #, fuzzy
 msgid "put box into deep standby"
 msgstr "stäng av mottagaren efter inspelning (OK)"
 
-#: src/timer.cpp:2239
+#: src/timer.cpp:2242
 msgid "record DVR"
 msgstr "inspelning DVR"
 
-#: src/timer.cpp:2243
+#: src/timer.cpp:2246
 msgid "Ngrab"
 msgstr "Ngrab"
 
-#: src/timer.cpp:2249
+#: src/timer.cpp:2252
 #, fuzzy
 msgid "Record VCR"
 msgstr "Spela in"
 
-#: src/timer.cpp:2319
+#: src/timer.cpp:2322
 #, fuzzy
 msgid "unknown service"
 msgstr "okänd"
 
-#: src/timer.cpp:2455
+#: src/timer.cpp:2458
 msgid ""
 "The new endtime is before now time!\n"
 "This stops the running timer(recording)\n"
 msgstr ""
+"then nya stoptiden är efter then nya tiden!/den stoppar springningen av timer"
+"(avspelning)\n"
 
-#: src/timer.cpp:2461 src/timer.cpp:2476 src/timer.cpp:2489 src/timer.cpp:2510
+#: src/timer.cpp:2464 src/timer.cpp:2479 src/timer.cpp:2492 src/timer.cpp:2513
 msgid "Update event in timerlist"
 msgstr "Updatera program i timerlistan?"
 
-#: src/timer.cpp:2475
+#: src/timer.cpp:2478
 msgid "New endtime are now adjusted"
-msgstr ""
+msgstr "ny stoptid är nu avjusterad"
 
-#: src/timer.cpp:2488
+#: src/timer.cpp:2491
 #, fuzzy
 msgid "The event has already finished... you can not change endtime!"
 msgstr "Detta program finns redan i timerlistan. "
 
-#: src/timer.cpp:2510
+#: src/timer.cpp:2513
 msgid ""
 "Invalid begin or end time.!\n"
 "Please check time and date"
@@ -5297,13 +5499,15 @@ msgstr ""
 "Ogiltig start- eller stopptid!\n"
 " Var god kontrollera tid och datum. "
 
-#: src/timer.cpp:2680
+#: src/timer.cpp:2685
 msgid ""
 "Sorry, you can not add a time shifted service manually to the timer.\n"
 "Please close the Timer and use the EPG of the service you wish to add!"
 msgstr ""
+"Ursäkta, du kan inte lägga dig med grannens fru manellt till timer,/ snälla "
+"stäng timern och använd te EPG på servicen du vill använda"
 
-#: src/timer.cpp:2741
+#: src/timer.cpp:2746
 msgid "no description found"
 msgstr "ingen beskrivning är tillgänglig"
 
@@ -5330,7 +5534,7 @@ msgstr "nätverkssökning"
 msgid ""
 "scan Network Information Table(s)\n"
 "this is recommend"
-msgstr ""
+msgstr "Skanna nätvärk informationen bord (s)nthis is utbytbar"
 
 #: src/tpeditwindow.cpp:96
 #, fuzzy
@@ -5341,7 +5545,7 @@ msgstr "nätverkssökning"
 msgid ""
 "scan NITs of other transponders\n"
 "this is slower, but sometimes needed)"
-msgstr ""
+msgstr "Skanna NIT´s annan transpondurnthis är snabbare, men ibland behöver)"
 
 #: src/tpeditwindow.cpp:102
 msgid "Use BAT"
@@ -5349,7 +5553,7 @@ msgstr "använd BAT"
 
 #: src/tpeditwindow.cpp:103
 msgid "use Provider DVB Bouquet Tables if exist"
-msgstr ""
+msgstr "använd provider DVB blombukett bord om denna exsistera"
 
 #: src/tpeditwindow.cpp:178
 msgid "add new Network"
@@ -5451,48 +5655,48 @@ msgstr "Är du säker på att du önskar uppdatera till den nya versionen?"
 msgid "Ready to upgrade"
 msgstr "Klar för uppdatering"
 
-#: src/upgrade.cpp:546 src/upgrade.cpp:621 src/upgrade.cpp:650
+#: src/upgrade.cpp:572
+msgid "Can't read flashimage.img!"
+msgstr "kan inte läsa blixtmage. img!"
+
+#: src/upgrade.cpp:572 src/upgrade.cpp:585 src/upgrade.cpp:708
+#: src/upgrade.cpp:719
+msgid "Flash"
+msgstr "blixt"
+
+#: src/upgrade.cpp:585
+msgid "flashimage.img has filesize of 0byte!"
+msgstr "blixtmage. img har fiolstorlek av 0byte"
+
+#: src/upgrade.cpp:615 src/upgrade.cpp:693
 #, fuzzy
 msgid "Please wait... do NOT switch off the receiver!"
 msgstr ""
 "Raderar...\n"
 "Var god vänta...Stäng inte av mottagaren nu!"
 
-#: src/upgrade.cpp:547 src/upgrade.cpp:622 src/upgrade.cpp:651
+#: src/upgrade.cpp:616 src/upgrade.cpp:694
 msgid "upgrade in progress"
 msgstr "uppdatering pågår"
 
-#: src/upgrade.cpp:577
-msgid "Can't read flashimage.img!"
-msgstr ""
-
-#: src/upgrade.cpp:577 src/upgrade.cpp:591 src/upgrade.cpp:711
-#: src/upgrade.cpp:722
-msgid "Flash"
-msgstr ""
-
-#: src/upgrade.cpp:591
-msgid "flashimage.img has filesize of 0byte!"
-msgstr ""
-
-#: src/upgrade.cpp:624 src/upgrade.cpp:708
+#: src/upgrade.cpp:619 src/upgrade.cpp:705
 msgid "Erasing Flash..."
-msgstr ""
+msgstr "Sudda ut flash"
 
-#: src/upgrade.cpp:653 src/upgrade.cpp:737
+#: src/upgrade.cpp:644 src/upgrade.cpp:734
 msgid "Writing Software to Flash..."
-msgstr ""
+msgstr "skriver mjukvara till blixt..."
 
-#: src/upgrade.cpp:711
+#: src/upgrade.cpp:708
 #, fuzzy
 msgid "Erase error!"
 msgstr "Fel!"
 
-#: src/upgrade.cpp:722
+#: src/upgrade.cpp:719
 msgid "Can't open mtd!"
-msgstr ""
+msgstr "Kan inte öppna mtd,"
 
-#: src/upgrade.cpp:759
+#: src/upgrade.cpp:756
 msgid ""
 "upgrade successful!\n"
 "restarting..."
@@ -5500,27 +5704,27 @@ msgstr ""
 "uppdateringen lyckades!\n"
 " startar om..."
 
-#: src/upgrade.cpp:760
+#: src/upgrade.cpp:757
 msgid "upgrade ok"
 msgstr "Uppdatera OK"
 
-#: src/upgrade.cpp:822
+#: src/upgrade.cpp:819
 msgid "This is the currently installed release."
 msgstr "Detta är den senast installerade versionen."
 
-#: src/upgrade.cpp:825
+#: src/upgrade.cpp:822
 msgid "This is an older release."
 msgstr "Detta är en äldre version."
 
-#: src/upgrade.cpp:828
+#: src/upgrade.cpp:825
 msgid "No changelog data available."
 msgstr "Ingen förändringslogg tillgänglig."
 
-#: src/upgrade.cpp:842
+#: src/upgrade.cpp:839
 msgid "No new features were added in this release."
 msgstr "Inga nya funktioner har tillkommit i denna version."
 
-#: src/upgrade.cpp:845
+#: src/upgrade.cpp:842
 msgid "The following new features were added in this release:\n"
 msgstr "Följande nya funktioner har tillkommit i denna version:\n"
 
@@ -5530,6 +5734,8 @@ msgid ""
 "Your Dreambox must upgrade now!\n"
 "DO NOT TURN OFF THE POWER DURING UPDATE !!!."
 msgstr ""
+"Nymjukvara för proffesorn är tillgänglig, Din Dreambox måste uppgraderas."
+"stäng nu av din Dreambox omgående."
 
 #: src/wizard_fpupdate.cpp:16
 #, fuzzy
@@ -5542,6 +5748,8 @@ msgid ""
 "DO NOT TURN OFF THE POWER!\n"
 "THE DREAMBOX WILL AUTOMATICALLY REBOOT!\n"
 msgstr ""
+"Uppgradering av prosesorn. Drag ur strömkabeln omgående. Dreamboxen kommer "
+"att uppgradera sig själv\n"
 
 #: src/wizard_fpupdate.cpp:27
 #, fuzzy
@@ -5551,11 +5759,11 @@ msgstr "uppdatering pågår"
 #: src/wizard_language.cpp:172
 #, fuzzy
 msgid "Choose your language..."
-msgstr "Ditt språk"
+msgstr "Ditt sprk"
 
 #: src/wizard_language.cpp:173
 msgid "press up/down/ok"
-msgstr ""
+msgstr "Tryck ner/ upp / OK"
 
 #: src/wizard_scan.cpp:116
 #, fuzzy
@@ -5564,11 +5772,11 @@ msgstr "direkt anslutning"
 
 #: src/wizard_scan.cpp:119
 msgid "Simple DiSEqC (2 LNBs/satellites)"
-msgstr ""
+msgstr "Förenklad DiSEqC ( 2LNBs/ Sattelliter)"
 
 #: src/wizard_scan.cpp:122
 msgid "Complex configuration (including DiSEqC 1.2)"
-msgstr ""
+msgstr "kompliserrad cofiguration (inkludera DiSEqC 1,2)"
 
 #: src/system_settings.cpp:41 src/time_settings.cpp:32
 #, fuzzy
@@ -5582,7 +5790,7 @@ msgstr "öppna videoinstallationen"
 
 #: src/system_settings.cpp:43
 msgid "open A/V settings"
-msgstr ""
+msgstr "öpna A7V sättning"
 
 #: src/system_settings.cpp:46
 #, fuzzy
@@ -5620,15 +5828,15 @@ msgstr "öppna språkmenyn"
 
 #: src/system_settings.cpp:63
 msgid "LCD Settings"
-msgstr ""
+msgstr "LSD ställning"
 
 #: src/system_settings.cpp:63
 msgid "open LCD settings"
-msgstr ""
+msgstr "öppna LSD ställning"
 
 #: src/system_settings.cpp:126
 msgid "sorry, no harddisks found!"
-msgstr "hårddisken kan inte hittas"
+msgstr "hårddisken kan  hittas"
 
 #: src/system_settings.cpp:126
 msgid "Harddisk setup..."
@@ -5651,12 +5859,12 @@ msgstr "Riktning:"
 
 #: src/time_settings.cpp:37
 msgid "open time correction window"
-msgstr ""
+msgstr "öppna tids correktur dörr"
 
 #: src/time_settings.cpp:72
 msgid "To change time correction you must tune first to any transponder"
-msgstr ""
+msgstr "för att tids correktur du måste furst tuta till någon faster "
 
 #: src/time_settings.cpp:72
 msgid "time correction change error"
-msgstr ""
+msgstr "tids correktur utan byte"
