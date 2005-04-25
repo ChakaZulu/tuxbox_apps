@@ -8,5 +8,6 @@ install_DATA = \
 	silver.esml silver.info \
 	small.esml small.info \
 	small169.esml small169.info \
-	carbon.esml carbon.info
+	carbon.esml carbon.info \
+	blueqt.esml blueqt.info
 
