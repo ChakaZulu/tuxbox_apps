@@ -70,6 +70,7 @@ data/pictures/shortcut/Makefile
 data/pictures/keypics/Makefile
 data/pictures/small/Makefile
 data/pictures/carbon/Makefile
+data/pictures/blueqt/Makefile
 data/resources/Makefile
 data/skins/Makefile
 data/sysconfig/Makefile
