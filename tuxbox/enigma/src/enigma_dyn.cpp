@@ -64,9 +64,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.0-Expert"
+#define WEBIFVERSION "3.0.1-Expert"
 #else
-#define WEBIFVERSION "3.0-Base"
+#define WEBIFVERSION "3.0.1-Base"
 #endif
 
 #define KEYBOARDTV 0
@@ -3773,7 +3773,7 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
-	start.tm_isdst=-1;
+	start.tm_isdst = -1;
 	tm end = *localtime(&now);
 	end.tm_mday = atoi(eday.c_str());
 	end.tm_mon = atoi(emonth.c_str()) - 1;
@@ -3782,7 +3782,7 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
-	end.tm_isdst=-1;
+	end.tm_isdst = -1;
 
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
@@ -3951,39 +3951,28 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString sa = opt["sa"];
 	eString su = opt["su"];
 	eString action = opt["action"];
+	eDebug("[ENIGMA_DYN] changeTimerEvent %s.%s.%s - %s:%s, %s.%s.%s - %s:%s", sday.c_str(), smonth.c_str(), syear.c_str(), shour.c_str(), smin.c_str(), eday.c_str(), emonth.c_str(), eyear.c_str(), ehour.c_str(), emin.c_str());
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
-	start.tm_isdst=-1;
-	if (oldType & ePlaylistEntry::isRepeating)
-	{
-		start.tm_year = 70;  // 1.1.1970
-		start.tm_mon = 0;
-		start.tm_mday = 1;
-	}
-	else
+	start.tm_isdst = -1;
+	if (!(oldType & ePlaylistEntry::isRepeating))
 	{
 		start.tm_mday = atoi(sday.c_str());
 		start.tm_mon = atoi(smonth.c_str()) - 1;
-		start.tm_year = atoi(syear.c_str() - 1900);
+		start.tm_year = atoi(syear.c_str()) - 1900;
 	}
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
 
 	tm end = *localtime(&now);
-	end.tm_isdst=-1;
-	if (oldType & ePlaylistEntry::isRepeating)
-	{
-		end.tm_year = 70;  // 1.1.1970
-		end.tm_mon = 0;
-		end.tm_mday = 1;
-	}
-	else
+	end.tm_isdst = -1;
+	if (!(oldType & ePlaylistEntry::isRepeating))
 	{
 		end.tm_mday = atoi(eday.c_str());
-		end.tm_mon = atoi(emonth.c_str()) -1;
-		end.tm_year = atoi(eyear.c_str() - 1900);
+		end.tm_mon = atoi(emonth.c_str()) - 1;
+		end.tm_year = atoi(eyear.c_str()) - 1900;
 	}
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
@@ -4119,6 +4108,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString smin = opt["smin"];
 	eString eday = opt["eday"];
 	eString emonth = opt["emonth"];
+	eString eyear = opt["eyear"];
 	eString ehour = opt["ehour"];
 	eString emin = opt["emin"];
 	eString description = httpUnescape(opt["descr"]);
@@ -4134,6 +4124,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString sa = opt["sa"];
 	eString su = opt["su"];
 	eString action = opt["action"];
+	eDebug("[ENIGMA_DYN] addTimerEvent %s.%s.%s - %s:%s, %s.%s.%s - %s:%s", sday.c_str(), smonth.c_str(), syear.c_str(), shour.c_str(), smin.c_str(), eday.c_str(), emonth.c_str(), eyear.c_str(), ehour.c_str(), emin.c_str());
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
 
@@ -4148,36 +4139,25 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	else
 	{
 		tm start = *localtime(&now);
-		start.tm_isdst=-1;
+		start.tm_isdst = -1;
 
-		if (timer == "repeating")
-		{
-			start.tm_year = 70;  // 1.1.1970
-			start.tm_mon = 0;
-			start.tm_mday = 1;
-		}
-		else
+		if (timer == "regular")
 		{
 			start.tm_mday = atoi(sday.c_str());
 			start.tm_mon = atoi(smonth.c_str()) - 1;
-			start.tm_year = atoi(syear.c_str() - 1900);
+			start.tm_year = atoi(syear.c_str()) - 1900;
 		}
 		start.tm_hour = atoi(shour.c_str());
 		start.tm_min = atoi(smin.c_str());
 		start.tm_sec = 0;
 
 		tm end = *localtime(&now);
-		end.tm_isdst=-1;
-		if (timer == "repeating")
-		{
-			end.tm_year = 70;  // 1.1.1970
-			end.tm_mon = 0;
-			end.tm_mday = 1;
-		}
-		else
+		end.tm_isdst = -1;
+		if (timer == "regular")
 		{
 			end.tm_mday = atoi(eday.c_str());
-			end.tm_mon = atoi(emonth.c_str()) -1;
+			end.tm_mon = atoi(emonth.c_str()) - 1;
+			end.tm_year = atoi(eyear.c_str()) - 1900;
 		}
 		end.tm_hour = atoi(ehour.c_str());
 		end.tm_min = atoi(emin.c_str());
@@ -4336,7 +4316,7 @@ static eString showEditTimerEventWindow(eString request, eString dirpath, eStrin
 
 	result.strReplace("#EDAYOPTS#", genOptions(1, 31, 1, end.tm_mday));
 	result.strReplace("#EMONTHOPTS#", genOptions(1, 12, 1, end.tm_mon + 1));
-	result.strReplace("#EYEAROPTS#", genOptions(start.tm_year + 1900, start.tm_year + 1904, 1, start.tm_year + 1900));
+	result.strReplace("#EYEAROPTS#", genOptions(end.tm_year + 1900, end.tm_year + 1904, 1, end.tm_year + 1900));
 	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, end.tm_min));
 	result.strReplace("#CHANNEL#", channel);
@@ -4380,7 +4360,7 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 
 	result.strReplace("#EDAYOPTS#", genOptions(1, 31, 1, end.tm_mday));
 	result.strReplace("#EMONTHOPTS#", genOptions(1, 12, 1, end.tm_mon + 1));
-	result.strReplace("#EYEAROPTS#", genOptions(start.tm_year + 1900, start.tm_year + 1904, 1, start.tm_year + 1900));
+	result.strReplace("#EYEAROPTS#", genOptions(end.tm_year + 1900, end.tm_year + 1904, 1, end.tm_year + 1900));
 	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
 
