@@ -5892,7 +5892,10 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 
 		eService *rservice=0;
 
-		if ( refservice != serviceref  // linkage or nvod
+		  // linkage or nvod ?
+		if ( ( refservice != serviceref ||
+  // need this compare since the dvb service type is no more compared in eServiceReference ==, !=, <
+			refservice.getServiceType() != serviceref.getServiceType() )
 			&& !( refservice.flags & eServiceReference::flagDirectory )
 			&& !serviceref.path.length() )
 		{
