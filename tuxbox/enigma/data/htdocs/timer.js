@@ -43,6 +43,8 @@ function addTimerEvent()
 		var sday = document.channelselector.sday.options[currentSday].text;
 		var currentSmonth = document.channelselector.smonth.selectedIndex;
 		var smonth = document.channelselector.smonth.options[currentSmonth].text;
+		var currentSyear = document.channelselector.syear.selectedIndex;
+		var syear = document.channelselector.syear.options[currentSyear].text;
 	}
 	var currentShour = document.channelselector.shour.selectedIndex;
 	var shour = document.channelselector.shour.options[currentShour].text;
@@ -54,6 +56,8 @@ function addTimerEvent()
 		var eday = document.channelselector.eday.options[currentEday].text;
 		var currentEmonth = document.channelselector.emonth.selectedIndex;
 		var emonth = document.channelselector.emonth.options[currentEmonth].text;
+		var currentEyear = document.channelselector.eyear.selectedIndex;
+		var eyear = document.channelselector.eyear.options[currentEyear].text;
 	}
 	var currentEhour = document.channelselector.ehour.selectedIndex;
 	var ehour = document.channelselector.ehour.options[currentEhour].text;
@@ -92,7 +96,7 @@ function addTimerEvent()
 		url = 'addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
 	}
 	else
-		url = 'addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
+		url = 'addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&syear=' + syear + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&eyear=' + eyear + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
 
 	NewWindow(url, 'add', '200', '200', 'no', '5000');
 }
