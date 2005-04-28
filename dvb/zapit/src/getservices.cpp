@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.91 2005/04/17 06:56:15 metallica Exp $
+ * $Id: getservices.cpp,v 1.92 2005/04/28 21:37:21 chakazulu Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,6 +26,11 @@
 #include <zapit/getservices.h>
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
+
+// In a final version, the following two lines should be put somewhere else,
+// in an include file.
+#define MYSERVICES_XML ZAPITCONFIGDIR "/myservices.xml"
+#define ANTISERVICES_XML ZAPITCONFIGDIR "/antiservices.xml"
 
 extern transponder_list_t transponders;
 extern tallchans allchans;
@@ -163,6 +168,25 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 	return;
 }
 
+void NukeChannels(xmlNodePtr search) {
+  while (search) {
+    xmlNodePtr transponder = search->xmlChildrenNode;
+    while ((transponder = xmlGetNextOccurence(transponder, "transponder"))) {
+      t_transport_stream_id transport_stream_id = xmlGetNumericAttribute(transponder, "id", 16);
+      t_original_network_id original_network_id = xmlGetNumericAttribute(transponder, "onid", 16);
+      xmlNodePtr channel = transponder->xmlChildrenNode;
+      while ((channel = xmlGetNextOccurence(channel, "channel"))) {
+	t_service_id service_id = xmlGetNumericAttribute(channel, "service_id", 16);
+	printf("[getservices]: Nuking %d \t%d \t%d \t(%s)\n", service_id, transport_stream_id, original_network_id, xmlGetAttribute(channel, "name"));
+	allchans.erase(CREATE_CHANNEL_ID);
+	channel = channel->xmlNextNode;
+      }
+      transponder = transponder->xmlNextNode;
+    }
+    search = search->xmlNextNode;
+  }
+}
+
 void FindTransponder(xmlNodePtr search)
 {
 	uint8_t DiSEqC;
@@ -276,6 +300,19 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType)
 
 	FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
 	xmlFreeDoc(parser);
+
+	if ((parser = parseXmlFile(MYSERVICES_XML))) {
+		printf("[getservices] " MYSERVICES_XML "  found.\n");
+		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
+		xmlFreeDoc(parser);
+	}
+
+	if ((parser = parseXmlFile(ANTISERVICES_XML))) {
+		printf("[getservices] " ANTISERVICES_XML " found.\n");
+		NukeChannels(xmlDocGetRootElement(parser)->xmlChildrenNode);
+		xmlFreeDoc(parser);
+	}
+
 	return 0;
 }
 
