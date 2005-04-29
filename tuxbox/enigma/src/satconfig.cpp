@@ -119,7 +119,7 @@ void eSatelliteConfigurationManager::focusChanged( const eWidget* focus )
 void eSatelliteConfigurationManager::typeChanged(eListBoxEntryText* newtype)
 {
 	int newcomplexity=(int)newtype->getKey();
-  if ( newcomplexity == complexity )
+	if ( newcomplexity == complexity )
 		return;
 	// check if the new type is less complex than our current setup...
 	int newComp = newcomplexity > 4 ? 1 : newcomplexity;
@@ -134,9 +134,9 @@ void eSatelliteConfigurationManager::typeChanged(eListBoxEntryText* newtype)
 		int res=mb.exec();
 		mb.hide();
 		show();
-		if (res == eMessageBox::btCancel)
+		if (res != eMessageBox::btYes)
 		{
-			combo_type->setCurrent((void*)complexity);
+			combo_type->setCurrent((void*)complexity, false);
 			return;
 		}
 	}
