@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.15  2005/04/29 17:24:00  lazyt
+ * use 8bit audiodata, fix skin and osd
+ *
  * Revision 1.14  2005/03/28 14:14:14  lazyt
  * support for userdefined audio notify (put your 12/24/48KHz pcm wavefile to /var/tuxbox/config/tuxmail/tuxmail.wav)
  *
@@ -107,11 +110,11 @@ void ReadConf()
 			osd = 'G';
 		}
 
-		if(skin != 0 && skin != 1)
+		if(skin != 1 && skin != 2)
 		{
-			printf("TuxMail <SKIN=%d invalid, set to \"0\">\n", skin);
+			printf("TuxMail <SKIN=%d invalid, set to \"1\">\n", skin);
 
-			skin = 0;
+			skin = 1;
 		}
 }
 
@@ -1296,7 +1299,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.14 $";
+	char cvs_revision[] = "$Revision: 1.15 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -1369,7 +1372,7 @@ void plugin_exec(PluginParam *par)
 			return;
 		}
 
-		if(ioctl(fb, FBIOPUTCMAP, skin ? &colormap2 : &colormap1) == -1)
+		if(ioctl(fb, FBIOPUTCMAP, (skin == 1) ? &colormap1 : &colormap2) == -1)
 		{
 			printf("TuxMail <FBIOPUTCMAP failed>\n");
 

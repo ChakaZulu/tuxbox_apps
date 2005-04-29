@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.11  2005/04/29 17:24:00  lazyt
+ * use 8bit audiodata, fix skin and osd
+ *
  * Revision 1.10  2005/03/28 14:14:14  lazyt
  * support for userdefined audio notify (put your 12/24/48KHz pcm wavefile to /var/tuxbox/config/tuxmail/tuxmail.wav)
  *
@@ -162,7 +165,7 @@ char versioninfo_p[12], versioninfo_d[12] = "?.??";
 
 char admin = 'Y';
 char osd = 'G';
-int skin = 0;
+int skin = 1;
 
 // mail database
 

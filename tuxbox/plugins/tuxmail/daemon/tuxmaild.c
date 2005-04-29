@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.16  2005/04/29 17:24:01  lazyt
+ * use 8bit audiodata, fix skin and osd
+ *
  * Revision 1.15  2005/03/28 14:14:15  lazyt
  * support for userdefined audio notify (put your 12/24/48KHz pcm wavefile to /var/tuxbox/config/tuxmail/tuxmail.wav)
  *
@@ -98,8 +101,8 @@ int ReadConf()
 			fprintf(fd_conf, "AUDIO=Y\n");
 			fprintf(fd_conf, "VIDEO=1\n\n");
 			fprintf(fd_conf, "LCD=Y\n");
-			fprintf(fd_conf, "OSD=Y\n\n");
-			fprintf(fd_conf, "SKIN=0\n\n");
+			fprintf(fd_conf, "OSD=G\n\n");
+			fprintf(fd_conf, "SKIN=1\n\n");
 			fprintf(fd_conf, "ADMIN=Y\n\n");
 			fprintf(fd_conf, "WEBPORT=80\n");
 			fprintf(fd_conf, "WEBUSER=\n");
@@ -397,7 +400,7 @@ int ReadConf()
 
 			if(!skin)
 			{
-				skin = 0;
+				skin = 1;
 			}
 
 			if(!admin)
@@ -489,7 +492,7 @@ int ReadConf()
 			audio = 'Y';
 		}
 
-		if(video < 1 || video > 4)
+		if(video < 1 || video > 5)
 		{
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "VIDEO=%d invalid, set to \"1\"", video) : printf("TuxMailD <VIDEO=%d invalid, set to \"1\">\n", video);
 
@@ -510,11 +513,11 @@ int ReadConf()
 			osd = 'G';
 		}
 
-		if(skin != 0 && skin != 1)
+		if(skin != 1 && skin != 2)
 		{
-			slog ? syslog(LOG_DAEMON | LOG_INFO, "SKIN=%d invalid, set to \"0\"", skin) : printf("TuxMailD <SKIN=%d invalid, set to \"0\">\n", skin);
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "SKIN=%d invalid, set to \"1\"", skin) : printf("TuxMailD <SKIN=%d invalid, set to \"1\">\n", skin);
 
-			skin = 0;
+			skin = 1;
 		}
 
 		if(admin != 'Y' && admin != 'N')
@@ -1482,7 +1485,7 @@ void PlaySound()
 
 		if(!(fd_wav = fopen(CFGPATH SNDFILE, "rb")))
 		{
-			format = AFMT_S16_LE;
+			format = AFMT_U8;
 			channels = 1;
 			speed = 12000;
 			wave->ChunkSize3 = sizeof(audiodata);
@@ -1739,85 +1742,88 @@ void NotifyUser(int mails)
 
 	// video notify
 
-		switch(video)
+		if(video != 5)
 		{
-			case 4:
-				strcpy(http_cmd, http_cmd4);
-
-				break;
-
-			case 3:
-				strcpy(http_cmd, http_cmd3);
-
-				break;
-
-			case 2:
-				strcpy(http_cmd, http_cmd2);
-
-				break;
-
-			default:
-
-				strcpy(http_cmd, http_cmd1);
-		}
-
-		if(video > 1)
-		{
-			for(loop = 0; loop < 10; loop++)
+			switch(video)
 			{
-				if(account_db[loop].mail_new)
+				case 4:
+					strcpy(http_cmd, http_cmd4);
+
+					break;
+
+				case 3:
+					strcpy(http_cmd, http_cmd3);
+
+					break;
+
+				case 2:
+					strcpy(http_cmd, http_cmd2);
+
+					break;
+
+				default:
+
+					strcpy(http_cmd, http_cmd1);
+			}
+
+			if(video > 1)
+			{
+				for(loop = 0; loop < 10; loop++)
 				{
-					if(video == 2)
+					if(account_db[loop].mail_new)
 					{
-						sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
-					}
+						if(video == 2)
+						{
+							sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
+						}
 
-					if(video == 3 || video == 4)
-					{
-						sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
-					}
+						if(video == 3 || video == 4)
+						{
+							sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
+						}
 
-					strcat(http_cmd, tmp_buffer);
+						strcat(http_cmd, tmp_buffer);
+					}
+				}
+
+				strcat(http_cmd, " HTTP/1.1\n");
+
+				if(webuser[0])
+				{
+					strcat(http_cmd, "Authorization: Basic ");
+					strcat(http_cmd, &encodedstring[0]);
+					strcat(http_cmd, "\n\n");			
+				}
+				else
+				{
+			    		strcat(http_cmd, "\n");
 				}
 			}
 
-			strcat(http_cmd, " HTTP/1.1\n");
-			
-			if(webuser[0])
+			if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 			{
-			    strcat(http_cmd, "Authorization: Basic ");
-			    strcat(http_cmd, &encodedstring[0]);
-			    strcat(http_cmd, "\n\n");			
+				slog ? syslog(LOG_DAEMON | LOG_INFO, "could not create Socket") : printf("TuxMailD <could not create Socket>\n");
+
+				return;
 			}
-			else
+
+			SockAddr.sin_family = AF_INET;
+			SockAddr.sin_port = htons(webport);
+			inet_aton("127.0.0.1", &SockAddr.sin_addr);
+
+			if(connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
 			{
-			    strcat(http_cmd, "\n");
+				slog ? syslog(LOG_DAEMON | LOG_INFO, "could not connect to WebServer") : printf("TuxMailD <could not connect to WebServer>\n");
+
+				close(sock);
+
+				return;
 			}
-		}
 
-		if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-		{
-			slog ? syslog(LOG_DAEMON | LOG_INFO, "could not create Socket") : printf("TuxMailD <could not create Socket>\n");
-
-			return;
-		}
-
-		SockAddr.sin_family = AF_INET;
-		SockAddr.sin_port = htons(webport);
-		inet_aton("127.0.0.1", &SockAddr.sin_addr);
-
-		if(connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
-		{
-			slog ? syslog(LOG_DAEMON | LOG_INFO, "could not connect to WebServer") : printf("TuxMailD <could not connect to WebServer>\n");
+			send(sock, http_cmd, strlen(http_cmd), 0);
 
 			close(sock);
-
-			return;
 		}
-
-		send(sock, http_cmd, strlen(http_cmd), 0);
-
-		close(sock);
 }
 
 /******************************************************************************
@@ -1872,7 +1878,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.15 $";
+	char cvs_revision[] = "$Revision: 1.16 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
