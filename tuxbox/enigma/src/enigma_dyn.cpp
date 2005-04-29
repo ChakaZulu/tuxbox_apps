@@ -2398,14 +2398,14 @@ eString getEITC(eString result)
 	if (now_duration)
 		now_duration = "(" + now_duration + ")";
 	result.strReplace("#NOWD#", now_duration);
-	result.strReplace("#NOWST#", now_text);
-	result.strReplace("#NOWLT#", now_longtext);
+	result.strReplace("#NOWST#", now_text.strReplace("\"", "'"));
+	result.strReplace("#NOWLT#", now_longtext.strReplace("\"", "'"));
 	result.strReplace("#NEXTT#", next_time);
 	if (next_duration)
 		next_duration = "(" + next_duration + ")";
 	result.strReplace("#NEXTD#", next_duration);
-	result.strReplace("#NEXTST#", next_text);
-	result.strReplace("#NEXTLT#", next_longtext);
+	result.strReplace("#NEXTST#", next_text.strReplace("\"", "'"));
+	result.strReplace("#NEXTLT#", next_longtext.strReplace("\"", "'"));
 
 	eString curService = getCurService();
 	eString curServiceRef;
