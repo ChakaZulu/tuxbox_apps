@@ -535,7 +535,7 @@ public:
 	{
 		if (type != c.type)
 			return 0;
-		if ( type == idDVB && !(c.flags&isMarker) && !(flags&isMarker) )
+		if ( type == idDVB && !c.flags && !flags )
 			return (memcmp(data+1, c.data+1, sizeof(int)*7)==0) && (path == c.path);
 		return (memcmp(data, c.data, sizeof(int)*8)==0) && (path == c.path);
 	}
@@ -551,7 +551,7 @@ public:
 		if (type > c.type)
 			return 0;
 
-		int r = type == idDVB && !(c.flags&isMarker) && !(flags&isMarker) ?
+		int r = type == idDVB && !c.flags && !flags ?
 			memcmp(data+1, c.data+1, sizeof(int)*7) :
 			memcmp(data, c.data, sizeof(int)*8);
 
