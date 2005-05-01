@@ -52,7 +52,7 @@ function remoteControl(box)
 	if (box == "dbox2")
 		NewWindow("showRemoteControl", "RC", "165", "500", "no");
 	else
-		NewWindow("showRemoteControl", "RC", "230", "640", "no");
+		NewWindow("showRemoteControl", "RC", "1000", "640", "no");
 }
 
 function tuneTransponder(transponder)

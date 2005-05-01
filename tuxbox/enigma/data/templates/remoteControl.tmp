@@ -6,10 +6,20 @@
 			function key(code)
 			{
 				document.location="/cgi-bin/rc?" + code;
+				window.setTimeout("osdShot()", 250);
 			}
+			function osdShot()
+			{
+				document.location="/cgi-bin/osdshot?display=no";
+			 	window.setTimeout("document.location.reload()", 250);	
+			}
+			
 		</script>
 	</head>
 	<body>
+	<table border="0" cellspacing="0" cellpadding="0">
+	<tr>
+	<td>
 	<map name="remotecontrol">
 		<area shape="circle" coords="129, 54, 10" href="javascript:key(116)" alt="Power">
 		
@@ -60,5 +70,11 @@
 		<area shape="circle" coords="153, 460, 10" href="javascript:key(138)" alt="help">
 	</map>
 	<img src="rc_big.jpg" height="607" width="220" border="0" alt="Remote Control" usemap="#remotecontrol">
+	</td>
+	<td>
+		<img style="background-color: #000000" src="#OSDSHOTPNG#" border="0">
+	</td>
+	</tr>
+	</table>
 	</body>
 </html>

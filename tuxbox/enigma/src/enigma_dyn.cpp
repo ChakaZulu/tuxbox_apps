@@ -64,9 +64,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.0.1-Expert"
+#define WEBIFVERSION "3.1.0-Expert"
 #else
-#define WEBIFVERSION "3.0.1-Base"
+#define WEBIFVERSION "3.1.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -148,12 +148,20 @@ static int getOSDShot(eString mode)
 static eString osdshot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt=getRequestOptions(opts, '&');
+	eString display = opt["display"];
+	if (display == "")
+		display = "yes";
 
 	if (getOSDShot(opt["mode"]) == 0)
 	{
-		content->local_header["Location"]="/root/tmp/osdshot.png";
-		content->code = 307;
-		return "+ok";
+		if (display == "yes")
+		{
+			content->local_header["Location"]="/root/tmp/osdshot.png";
+			content->code = 307;
+			return "+ok";
+		}
+		else
+			return closeWindow(content, "", 500);
 	}
 	else
 		return "-error";
@@ -339,7 +347,7 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 			return "-1";
 		eServiceReferenceDVB *ref = new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
 #ifndef DISABLE_FILE
-		if ( !canPlayService(*ref) )
+		if (!canPlayService(*ref))
 		{
 			delete ref;
 			return "-1";
@@ -2116,14 +2124,186 @@ static eString getControlSatFinder(eString opts)
 	return result;
 }
 
+#define CLAMP(x)     ((x < 0) ? 0 : ((x > 255) ? 255 : x))
+
+inline unsigned short avg2(unsigned short a, unsigned short b)
+{
+	return
+		(((a & 0xFF) + (b & 0xFF)) >> 1) |
+		(((((a>>8) & 0xFF) + ((b>>8) & 0xFF)) >> 1) << 8);
+}
+
+struct 
+{
+	int hor, vert;
+	char *name;
+} subsamplings[]={
+	{1, 1, "4:4:4"},
+	{2, 1, "4:2:2"},
+	{2, 2, "4:2:0"},
+	{4, 2, "4:2:0-half"},
+	{4, 1, "4:1:1"},
+	{4, 4, "4:1:0"}};
+
+int genScreenShot()
+{
+	unsigned char frame[720*576*3+16]; // max. size
+
+	int fd = open("/dev/video", O_RDONLY);
+	if (fd < 0)
+	{
+		eDebug("could not open /dev/video");
+		return 1;
+	}
+	
+	FILE *fd2 = fopen("/tmp/screenshot.bmp", "wr");
+	if (fd2 < 0)
+	{
+		eDebug("could not open /tmp/screenshot.bmp");
+		return 1;
+	}
+	
+	int genhdr = 1;
+	
+	int r = read(fd, frame, 720*576*3+16);
+	if (r < 16)
+	{
+		fprintf(stderr, "read failed\n");
+		return 1;
+	}
+	
+	int *size = (int*)frame;
+	int luma_x = size[0], luma_y = size[1];
+	int chroma_x = size[2], chroma_y = size[3];
+	
+	unsigned char *luma = frame + 16;
+	unsigned short *chroma = (unsigned short*)(frame + 16 + luma_x * luma_y);
+	
+	eDebug("Picture resolution: %dx%d", luma_x, luma_y);
+	
+	int sub[2] = {luma_x / chroma_x, luma_y / chroma_y};
+	
+	int ssid;
+	char *d = "unknown";
+	for (ssid=0; ssid<(int)(sizeof(subsamplings)/sizeof(*subsamplings)); ++ssid)
+		if ((subsamplings[ssid].hor == sub[0]) && (subsamplings[ssid].vert == sub[1]))
+		{
+			d = subsamplings[ssid].name;
+			break;
+		}
+		
+	eDebug("Chroma  subsampling: %s", d);
+	
+	if (genhdr)
+	{
+		eDebug("generating bitmap.");
+		unsigned char hdr[14+40];
+		int i = 0;
+#define PUT32(x) hdr[i++] = ((x)&0xFF); hdr[i++] = (((x)>>8)&0xFF); hdr[i++] = (((x)>>16)&0xFF); hdr[i++] = (((x)>>24)&0xFF);
+#define PUT16(x) hdr[i++] = ((x)&0xFF); hdr[i++] = (((x)>>8)&0xFF);
+#define PUT8(x) hdr[i++] = ((x)&0xFF);
+		PUT8('B'); PUT8('M');
+		PUT32( (((luma_x*luma_y)*3 + 3)&~3) + 14 + 40);
+		PUT16(0); PUT16(0); PUT32(14+40);
+		PUT32(40); PUT32(luma_x); PUT32(luma_y);
+		PUT16(1);
+		PUT16(24);
+		PUT32(0); PUT32(0); PUT32(0); PUT32(0); PUT32(0); PUT32(0);
+#undef PUT32
+#undef PUT16
+#undef PUT8
+		fwrite(hdr, 1, i, fd2);
+	}
+	
+	int x, y;
+	
+	for (y=luma_y-1; y>=0; --y)
+	{
+		unsigned char line[luma_x * 3];
+		for (x=0; x<luma_x; ++x)
+		{
+			int l = luma[y * luma_x + x];
+			int c = 0x8080;
+			switch (ssid)
+			{
+			case 0: // 4:4:4
+				c = chroma[y * chroma_x + x];
+				break;
+			case 1: // 4:2:2
+				if (!(x & 1))
+					c = chroma[y * chroma_x + (x>>1)];
+				else
+					c = avg2(chroma[y * chroma_x + (x>>1)], chroma[y * chroma_x + (x>>1) + 1]);
+				break;
+			case 2: // 4:2:0
+				if (!((x|y) & 1))
+					c = chroma[(y>>1) * chroma_x + (x>>1)];
+				else if (!(y & 1))
+					c = avg2(chroma[(y>>1) * chroma_x + (x>>1)], chroma[(y>>1) * chroma_x + (x>>1) + 1]);
+				else if (!(x & 1))
+					c = avg2(chroma[(y>>1) * chroma_x + (x>>1)], chroma[((y>>1)+1) * chroma_x + (x>>1)]);
+				else
+					c = avg2(
+						avg2(chroma[(y>>1) * chroma_x + (x>>1)], chroma[(y>>1) * chroma_x + (x>>1) + 1]),
+						avg2(chroma[((y>>1)+1) * chroma_x + (x>>1)], chroma[((y>>1)+1) * chroma_x + (x>>1) + 1]));
+				break;
+			case 3:	// 4:2:0-half
+				if (!(((x>>1)|y) & 1))
+					c = chroma[(y>>1) * chroma_x + (x>>2)];
+				else if (!(y & 1))
+					c = avg2(chroma[(y>>1) * chroma_x + (x>>2)], chroma[(y>>1) * chroma_x + (x>>2) + 1]);
+				else if (!(x & 2))
+					c = avg2(chroma[(y>>1) * chroma_x + (x>>2)], chroma[((y>>1)+1) * chroma_x + (x>>2)]);
+				else
+					c = avg2(
+						avg2(chroma[(y>>1) * chroma_x + (x>>2)], chroma[(y>>1) * chroma_x + (x>>2) + 1]),
+						avg2(chroma[((y>>1)+1) * chroma_x + (x>>2)], chroma[((y>>1)+1) * chroma_x + (x>>2) + 1]));
+				break;
+			case 4:	// 4:1:1
+				if (!((x>>1) & 1))
+					c = chroma[y * chroma_x + (x>>2)];
+				else
+					c = avg2(chroma[y * chroma_x + (x>>2)], chroma[y * chroma_x + (x>>2) + 1]);
+				break;
+			case 5:
+				if (!((x>>1) & 1))
+					c = chroma[(y>>2) * chroma_x + (x>>2)];
+				else
+					c = avg2(chroma[(y>>2) * chroma_x + (x>>2)], chroma[(y>>2) * chroma_x + (x>>2) + 1]);
+				break;
+			}
+			
+			signed char cr = (c & 0xFF) - 128;
+			signed char cb = (c >> 8) - 128;
+
+			l -= 16;
+			
+			int r, g, b;
+			
+			r = 104635 * cr + l * 76310;
+			g = -25690 * cb - 53294 * cr + l * 76310;
+			b = 132278 * cb + l * 76310;
+			
+			line[x * 3 + 2] = CLAMP(r>>16);
+			line[x * 3 + 1] = CLAMP(g>>16);
+			line[x * 3 + 0] = CLAMP(b>>16);
+		}
+		fwrite(line, 1, luma_x*3, fd2);
+	}
+	fclose(fd2);
+	return 0;
+}
+
 static eString getControlScreenShot(void)
 {
 	eString result;
 
-	int ret = system("grabpic bmp > /tmp/screenshot.bmp");
-	eDebug("ret is %d", ret);
-	if (ret >> 8)
-		result = "grabpic tool is required but not existing or working";
+	int rc = genScreenShot();
+	eDebug("rc is %d", rc);
+	if (rc != 0)
+	{
+		eDebug("could not generate /tmp/screenshot.bmp");
+	}
 	else
 	{
 		FILE *bitstream = 0;
@@ -3541,7 +3721,13 @@ static eString showRemoteControl(eString request, eString dirpath, eString opts,
 		 || eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
 			result = readFile(TEMPLATE_DIR + "remoteControlDbox2.tmp");
 		else
+		{
 			result = readFile(TEMPLATE_DIR + "remoteControl.tmp");
+			if (access("/tmp/osdshot.png", R_OK) == 0)
+				result.strReplace("#OSDSHOTPNG#", "/root/tmp/osdshot.png");
+			else
+				result.strReplace("#OSDSHOTPNG#", "trans.gif");
+		}
 	}
 	else
 	{
@@ -4423,6 +4609,7 @@ static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPCon
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "leftnavi.tmp");
 
+	result.strReplace("#MODE#", mode);
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, true));
 	return result;
 }

@@ -4,10 +4,12 @@
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
 		<script>
+		var mode = "#MODE#";
 		function leftnavi(command)
 		{
 			parent.body.location = "body" + command;
-			document.location.reload();
+			if (mode == "zap")
+				window.setTimeout("document.location.reload()", 500);
 		}
 		</script>
 	</head>
