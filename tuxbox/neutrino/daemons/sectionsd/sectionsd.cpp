@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.183 2005/05/02 15:15:22 rasc Exp $
+//  $Id: sectionsd.cpp,v 1.184 2005/05/02 19:06:35 rasc Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1064,7 +1064,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.183 2005/05/02 15:15:22 rasc Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.184 2005/05/02 19:06:35 rasc Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2917,7 +2917,7 @@ static void *timeThread(void *)
 		  if ((tmTime->tm_year + 1900) >= 2005) {
 			first_time = false;
 			timeset = true;
-		  	dprintf("we arlready have a time set\n");
+		  	dprintf("we already have a time set\n");
 		  }
 		}
 
@@ -3517,7 +3517,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.183 2005/05/02 15:15:22 rasc Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.184 2005/05/02 19:06:35 rasc Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
