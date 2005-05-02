@@ -746,7 +746,7 @@ void eUpgrade::flashImage(int checkmd5)
 						fsize -= write( fd2, buf, rbytes );
 						wnd.progress.setPerc( ((filesize-fsize)*100)/filesize );
 					}
-					:close(fd1);
+					::close(fd1);
 					::close(fd2);
 
 					nice(0);
