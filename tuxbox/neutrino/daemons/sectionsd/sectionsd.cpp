@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.182 2005/05/02 08:39:34 rasc Exp $
+//  $Id: sectionsd.cpp,v 1.183 2005/05/02 15:15:22 rasc Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -91,7 +91,7 @@
 // 12h Pause für SDT
 //#define TIME_SDT_SCHEDULED_PAUSE 12* 60* 60
 // -- shorter time for pause should  result in better behavior  (rasc, 2005-05-02)
-#define TIME_SDT_SCHEDULED_PAUSE 1* 60* 60
+#define TIME_SDT_SCHEDULED_PAUSE 2* 60* 60
 #define TIME_SDT_SKIPPING 5
 
 
@@ -1064,7 +1064,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.182 2005/05/02 08:39:34 rasc Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.183 2005/05/02 15:15:22 rasc Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2904,6 +2904,25 @@ static void *timeThread(void *)
 	{
 		dprintf("[%sThread] pid %d start\n", "time", getpid());
 
+
+		// -- check if time is already on box (e.g. using rdate/ntpd)  (2005-05-02 rasc)
+		// -- if so skip first_time, etc. flags for better/quick EPG startup
+		{
+		  time_t actTime;
+		  struct tm *tmTime;
+		  actTime=time(NULL);
+		  tmTime = localtime(&actTime);
+
+		  // -- do we already have a valid(???) date/time?
+		  if ((tmTime->tm_year + 1900) >= 2005) {
+			first_time = false;
+			timeset = true;
+		  	dprintf("we arlready have a time set\n");
+		  }
+		}
+
+
+
 		while(1)
 		{
 			if (scanning && (getUTC(&UTC, true))) // always use TDT, a lot of transponders don't provide a TOT
@@ -3498,7 +3517,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.182 2005/05/02 08:39:34 rasc Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.183 2005/05/02 15:15:22 rasc Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
