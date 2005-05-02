@@ -588,10 +588,10 @@ void eUpgrade::flashImage(int checkmd5)
 					box.hide();
 					return;
 				}
-				::close(fd1);
 
 				if ( flashext )
 				{
+					::close(fd1);
 					__u8 data[720*576];
 					gPixmap pixmap;
 					pixmap.x=720;
@@ -746,6 +746,8 @@ void eUpgrade::flashImage(int checkmd5)
 						fsize -= write( fd2, buf, rbytes );
 						wnd.progress.setPerc( ((filesize-fsize)*100)/filesize );
 					}
+					:close(fd1);
+					::close(fd2);
 
 					nice(0);
 
