@@ -58,6 +58,8 @@ void eZapStandby::renewSleep()
 			eServiceInterface::getInstance()->stop();
 		}
 	}
+	else
+		rezap=1;
 	if ( !eDVB::getInstance()->recorder )
 	{
 		::sync();
