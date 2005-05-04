@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.149 2005/04/17 06:56:15 metallica Exp $
+ * $Id: scan.cpp,v 1.150 2005/05/04 06:14:59 metallica Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -771,7 +771,7 @@ int copy_to_satellite_inc(TP_params * TP, FILE * fd, FILE * fd1, char * provider
 			if( (ptr = strstr(buffer, " id=")))
 				sscanf(ptr+5, "%4x", &one_tpid);
 			if( (ptr = strstr(buffer, " onid=")))
-				sscanf(ptr+5, "%4x", &one_onid);
+				sscanf(ptr+7, "%4x", &one_onid);
 			one_flag = true;
 
 			DBG("found id %x/%x %s %s %s %s", one_tpid, one_onid, freq, rate, fec, pol);
