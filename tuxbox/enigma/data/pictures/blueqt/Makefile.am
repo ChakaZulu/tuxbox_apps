@@ -18,5 +18,6 @@ install_DATA = \
 	scart.png scart_sel.png separator.png setup.png setup_sel.png \
 	short_blue.png short_green.png short_red.png short_yellow.png \
 	shutdown.png shutdown_sel.png stereo_on.png timer.png timer_sel.png \
-	tv.png tv_sel.png unchecked.png volume.png yellow_off.png
+	tv.png tv_sel.png unchecked.png volume.png yellow_off.png \
+	lcd_shutdown.png lcd_video.png
 
