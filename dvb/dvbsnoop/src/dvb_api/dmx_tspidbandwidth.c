@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidbandwidth.c,v 1.10 2005/04/09 10:59:00 rasc Exp $
+$Id: dmx_tspidbandwidth.c,v 1.11 2005/05/08 23:23:06 rasc Exp $
 
 
  DVBSNOOP
@@ -12,6 +12,9 @@ $Id: dmx_tspidbandwidth.c,v 1.10 2005/04/09 10:59:00 rasc Exp $
 
 
 $Log: dmx_tspidbandwidth.c,v $
+Revision 1.11  2005/05/08 23:23:06  rasc
+display bandwidth average at end of poll
+
 Revision 1.10  2005/04/09 10:59:00  rasc
 bandwidth for transponder pid 0x2000  (untested)
 (-s bandwidth  -tsraw)
@@ -103,10 +106,15 @@ int ts_pidbandwidth (OPTION *opt)
   int 		 dmxfd;
   struct timeval tv,last_tv, first_tv;
   int		 pid;
+  unsigned long long      b_total;
   long           b;
   long           packets_bad;
   long           packets_total;
-  unsigned long long      b_total;
+  struct {				// simple struct for storing last average bandwidth
+	  unsigned long  kb_sec;
+	  unsigned long  b_sec;
+  } last_avg;
+
 
 
 
@@ -195,7 +203,11 @@ int ts_pidbandwidth (OPTION *opt)
 				}
 
 				b = b_len - b_start;
-				if (b <= 0) continue;
+				if (b == 0) continue;
+				if (b < 0) {
+				   IO_error("read");
+				   continue;
+				}
 
 				b_total += b;
 
@@ -220,19 +232,26 @@ int ts_pidbandwidth (OPTION *opt)
 				   out (3, "packets read: %3d/(%ld)   d_time: %2ld.%03ld s  = ",
 					packets, packets_total, d_tim_ms / 1000UL, d_tim_ms % 1000UL);
 
-				   /* cast to unsigned long long so it doesn't overflow as early,
-				    * add time / 2 before division for correct rounding */
-				   bit_s = (((unsigned long long)b * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL)) / (unsigned long long)d_tim_ms;
+				   // -- current bandwidth in kbit/sec
+				   // --- cast to unsigned long long so it doesn't overflow as
+				   // --- early, add time / 2 before division for correct rounding
+				   bit_s = (((unsigned long long)b * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL))
+					   / (unsigned long long)d_tim_ms;
 
-				   out (1, "%5llu.%03llu kbit/s", bit_s / 1000UL, bit_s % 1000UL);
+				   out (1, "%5llu.%03llu kbit/s", bit_s / 1000ULL, bit_s % 1000ULL);
+
 
 				   // -- average bandwidth
 				   d_tim_ms = delta_time_ms (&tv,&first_tv);
 				   if (d_tim_ms <= 0) d_tim_ms = 1;   //  ignore usecs 
 
-				   bit_s = ((b_total * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL)) / (unsigned long long)d_tim_ms;
+				   bit_s = ((b_total * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL))
+					   / (unsigned long long)d_tim_ms;
 
-				   out (2, "   (Avrg: %5llu.%03llu kbit/s)", bit_s / 1000UL, bit_s % 1000UL);
+				   last_avg.kb_sec = (unsigned long) (bit_s / 1000ULL);
+				   last_avg.b_sec  = (unsigned long) (bit_s % 1000ULL);
+
+				   out (2, "   (Avrg: %5lu.%03lu kbit/s)", last_avg.kb_sec, last_avg.b_sec);
 
 				   
 				   // -- bad packet(s) check in buffer
@@ -267,10 +286,21 @@ int ts_pidbandwidth (OPTION *opt)
 	}
 
 
-	// -- bad packets stats
-	out_nl (4, "bad/total packets: %ld/%ld (= %1.1Lf%%)",
+	// -- packets stats
+
+	out (4, "## ");
+
+	if (opt->ts_raw_mode) { out (2,"PID: <ALL>");
+	} else {                out (2,"PID: %u (0x%04x)", pid, pid);
+        }
+
+	out (4, "   bad/total packets: %ld/%ld (= %1.1Lf%%)",
 		packets_bad, packets_total,
                 (((long double) packets_bad)*100)/packets_total );
+        out (4, "   Avrg: %5lu.%03lu kbit/s",
+		last_avg.kb_sec, last_avg.b_sec);
+	out_NL(4);
+
 
 
 
@@ -342,4 +372,7 @@ static int ts_error_count (u_char *buf, int len)
 //
 // $$$ TODO:  TS continuity_counter check, if passed thru by firmware
 // t.continuity_counter		 = getBits (b, 0,28, 4);
+//
+// $$$ TODO:  distinguish between TS bandwidth an payload bandwidth...
+//
 
