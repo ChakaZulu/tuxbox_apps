@@ -64,9 +64,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.1.0-Expert"
+#define WEBIFVERSION "3.2.0-Expert"
 #else
-#define WEBIFVERSION "3.1.0"
+#define WEBIFVERSION "3.2.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -2643,6 +2643,15 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 	return "http://" + getIP() + ":31339/0," + pmtpid + "," + vpid  + apids + "," + pcrpid;
 }
 
+static eString setStreamingServiceRef(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	streamingActive = true;
+	eStreamer::getInstance()->setServiceReference(string2ref(opt["sref"]));
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	return closeWindow(content, "", 10);
+}
+
 #define CHANNELWIDTH 200
 
 class eMEPG: public Object
@@ -4915,6 +4924,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadEncodingTable", reload_encoding_table, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServiceRef", setStreamingServiceRef, lockWeb);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadRecordings", load_recordings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveRecordings", save_recordings, lockWeb);

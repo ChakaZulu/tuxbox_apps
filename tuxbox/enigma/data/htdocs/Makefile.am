@@ -10,7 +10,7 @@ EXTRA_DIST = \
 	webif_small.css topbalk2_small.png topbalk3_small.png \
 	topbalk4_small.png videobar1.jpg videobar2.jpg videobar3.jpg \
 	locked.png unlocked.png 1rightarrow.png 1leftarrow.png player_stop.png \
-	player_fwd.png player_rew.png filesave.png today.png
+	player_fwd.png player_rew.png filesave.png today.png vlc.png
 
 install-data-local:
 	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/htdocs

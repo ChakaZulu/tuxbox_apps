@@ -35,10 +35,10 @@ function switchChannel(xy, bouquet, channel)
 		else
 			document.location = "?path="+xy+"&mode=zap&zapmode=4&zapsubmode=1";
 
-		if (parent.data.streaming == "1")
-			setTimeout("vlc()", 2500);
 		setTimeout("parent.data.location.reload()", 2000);
 		setTimeout("parent.channavi.location.reload()", 2000);
+		vlcStop();
+		setTimeout("vlcStart()", 200);
 	}
 }
 
@@ -52,7 +52,7 @@ function remoteControl(box)
 	if (box == "dbox2")
 		NewWindow("showRemoteControl", "RC", "165", "500", "no");
 	else
-		NewWindow("showRemoteControl", "RC", "1000", "640", "no");
+		NewWindow("showRemoteControl", "RC", "1024", "640", "no");
 }
 
 function tuneTransponder(transponder)
@@ -135,8 +135,8 @@ function recoverMovies()
 		else
 		{
 			NewWindow("cgi-bin/recoverRecordings", "recoverRecordings", "200", "100", "no", "5000");
-			window.setTimeout("document.location.reload()", 2000);
-		}
+			window.setTimeout("document.location.reload()", 3000);
+		}		
 	}
 }
 
@@ -175,16 +175,6 @@ function DVRrecord(xy)
 	setTimeout("reload()", 500);
 }
 
-function startPlugin(xy)
-{
-	document.location = "cgi-bin/startPlugin?requester=webif&name="+xy;
-}
-
-function stopPlugin()
-{
-	document.location = "cgi-bin/stopPlugin?requester=webif";
-}
-
 function sendMessage2TV()
 {
 	NewWindow("tvMessageWindow", "msg", "780", "150", "no");
@@ -214,5 +204,37 @@ function vlc()
 	if (parent.data.serviceReference)
 		document.location = "video.pls?sref=" + parent.data.serviceReference;
 	else
-		setTimeout("vlc()", 500);
+		setTimeout("vlc()", 100);
 }
+
+function vlcStop()
+{
+	vlccmd.location = "http://127.0.0.1:8000/?control=stop";
+	vlccmd.location = "http://127.0.0.1:8080/?control=empty";
+}
+
+function vlcStart()
+{
+	if (parent.data.ip)
+	{
+		vlccmd.location.href = "http://127.0.0.1:8080/?control=add&mrl=http://" + parent.data.ip + "/video.pls";
+		setTimeout("vlcStartItem()", 2000);
+	}
+	else
+		setTimeout("vlcStart()", 200);
+}
+
+function vlcStartItem()
+{
+	vlccmd.location.href = "http://127.0.0.1:8080/?control=play&item=0";
+	setTimeout("setStreamingServiceRef()", 200);
+}
+
+function setStreamingServiceRef()
+{
+	if (parent.data.serviceReference)
+		document.location = "cgi-bin/setStreamingServiceRef?sref=" + parent.data.serviceReference;
+	else
+		setTimeout("setStreamingServiceRef()", 200);
+}
+
