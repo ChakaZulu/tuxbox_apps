@@ -183,11 +183,6 @@
 		<img name="lcd_scart" src="video.png" nomerge="yes" />
 		<img name="speaker" src="lcd-speaker.png" nomerge="yes" />
 		<img name="lcd-clock" src="lcd-clock.png" nomerge="yes" />
-		<img name="eListBox.arrow.updown" src="barrow.png" />
-		<img name="eListBox.arrow.left" src="lbarrow_left.png" />
-		<img name="eListBox.arrow.right" src="lbarrow_right.png" />
-		<img name="eListBox.arrow.up" src="lbarrow_up.png" />
-		<img name="eListBox.arrow.down" src="lbarrow_down.png" />
 		<img name="eWindow.top" src="top.png" />
 		<img name="eWindow.topLeft" src="top_left.png" />
 		<img name="eWindow.topRight" src="top_right.png" />
