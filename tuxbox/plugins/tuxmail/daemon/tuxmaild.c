@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.17  2005/05/09 19:41:53  robspr1
+ * support for mail reading
+ *
  * Revision 1.16  2005/04/29 17:24:01  lazyt
  * use 8bit audiodata, fix skin and osd
  *
@@ -59,6 +62,78 @@
  ******************************************************************************/
 
 #include "tuxmaild.h"
+
+// maximum number of chars in a line
+#define cnRAND  	78
+// maximum charcters in a word
+#define cnMaxWordLen	20
+
+FILE *fd_mail;
+int  nStartSpalte, nCharInLine, nCharInWord, nRead, nWrite, nStrich ; 
+int  nIn, nSo, nTr; 
+char  cLast; 
+bool  fPre; 							//! pre-formated HTML code
+bool  fHtml; 							//! HTML code
+int  nCRLF = 0; 
+int  nLine = 1; 
+int  nRef  = 1;
+int   nHyp  = 0 ;
+char  sSond[355],sRef[355], sWord[85];
+static enum  t_state { cNorm, cInTag, cSond, cInComment, cTrans } state ;
+
+
+#define szsize 64
+
+char *szTab[szsize] = {
+  /*192 */ "Agrave"  ,   /*193 */ "Aacute"  ,
+  /*194 */ "Acirc"   ,   /*195 */ "Atilde"  ,
+  /*196 */ "Auml"    ,   /*197 */ "Aring"   ,
+  /*198 */ "Aelig"   ,   /*199 */ "Ccedil"  ,
+  /*200 */ "Egrave"  ,   /*201 */ "Eacute"  ,
+  /*202 */ "Ecirc"   ,   /*203 */ "Euml"    ,
+  /*204 */ "Igrave"  ,   /*205 */ "Iacute"  ,
+  /*206 */ "Icirc"   ,   /*207 */ "Iuml"    ,
+  /*208 */ "ETH"     ,   /*209 */ "Ntilde"  ,
+  /*210 */ "Ograve"  ,   /*211 */ "Oacute"  ,
+  /*212 */ "Ocirc"   ,   /*213 */ "Otilde"  ,
+  /*214 */ "Ouml"    ,   /*215 */ "XXXXXX"  ,
+  /*216 */ "Oslash"  ,   /*217 */ "Ugrave"  ,
+  /*218 */ "Uacute"  ,   /*219 */ "Ucirc"   ,
+  /*220 */ "Uuml"    ,   /*221 */ "Yacute"  ,
+  /*222 */ "THORN"   ,   /*223 */ "szlig"   ,
+  /*224 */ "agrave"  ,   /*225 */ "aacute"  ,
+  /*226 */ "acirc"   ,   /*227 */ "atilde"  ,
+  /*228 */ "auml"    ,   /*229 */ "aring"   ,
+  /*230 */ "aelig"   ,   /*231 */ "ccedil"  ,
+  /*232 */ "egrave"  ,   /*233 */ "eacute"  ,
+  /*234 */ "ecirc"   ,   /*235 */ "euml"    ,
+  /*236 */ "igrave"  ,   /*237 */ "iacute"  ,
+  /*238 */ "icirc"   ,   /*239 */ "iuml"    ,
+  /*240 */ "eth"     ,   /*241 */ "ntilde"  ,
+  /*242 */ "ograve"  ,   /*243 */ "oacute"  ,
+  /*244 */ "ocirc"   ,   /*245 */ "otilde"  ,
+  /*246 */ "ouml"    ,   /*247 */ "XXXXXX"  ,
+  /*248 */ "oslash"  ,   /*249 */ "ugrave"  ,
+  /*250 */ "uacute"  ,   /*251 */ "ucirc"   ,
+  /*252 */ "uuml"    ,   /*253 */ "yacute"  ,
+  /*254 */ "thorn"   ,   /*255 */ "yuml"
+};
+
+#define ttsize  9
+
+char ttable[ttsize*3] = {
+	'F','C', 252,
+  	'D','F', 223,
+	'E','4', 228,
+	'F','6', 246,
+	'D','6', 214,
+	'3','D', '=',
+	'2','0',  20,
+	'0','D',  13,
+	13 , 10,  0
+};
+
+void writeFOut( char *s);
 
 /******************************************************************************
  * ReadConf (0=fail, 1=done)
@@ -644,6 +719,8 @@ void ReadSpamList()
 	}
 }
 
+int SaveMail(int account, char* uid);
+
 /******************************************************************************
  * InterfaceThread
  ******************************************************************************/
@@ -654,6 +731,8 @@ void *InterfaceThread(void *arg)
 	struct sockaddr_un srvaddr;
 	socklen_t addrlen;
 	char command;
+	char mailcmd[86];
+	int mailidx;
 
 	// setup connection
 
@@ -719,6 +798,21 @@ void *InterfaceThread(void *arg)
 
 					break;
 
+				case 'M':
+
+					recv(fd_conn,&mailcmd,85,0);
+					mailidx=mailcmd[0]-'0';
+					mailread = 0;
+					if (!inPOPCmd)
+					{
+						inPOPCmd = 1;
+						mailread = SaveMail(mailidx,&mailcmd[5]);
+						inPOPCmd = 0;
+					}
+					send(fd_conn,&mailread , 1, 0);
+					
+					break;
+					
 				case 'V':
 
 					send(fd_conn, &versioninfo, 12, 0);
@@ -839,6 +933,569 @@ int DecodeHeader(char *encodedstring)
 }
 
 /******************************************************************************
+ * void AddChar2Mail( char c)
+ *
+ * output whole words in text-only mode
+ ******************************************************************************/
+void AddChar2Mail( char c)
+{
+	if (c=='\0') return;
+	if ((c!=' ') && (c!='\n') && (c!=10) && (c!='.') && (c!=':') && (c!='-'))
+	{
+		if ((nCharInLine+nCharInWord+nStartSpalte) > cnRAND)
+		{
+			if (nCharInWord < cnMaxWordLen)
+			{
+				fputc('\n',fd_mail);
+				if (nStartSpalte)
+				{
+					char i;
+					for (i=0;i<nStartSpalte;i++)
+						fputc(' ',fd_mail);
+				}
+				nCharInLine=0;	
+				sWord[nCharInWord++]=c;
+			}
+			else
+			{
+				sWord[nCharInWord++]='\n';
+				if (nStartSpalte)
+				{
+					char i;
+					for (i=0;i<nStartSpalte;i++)
+						sWord[nCharInWord++]=' ';
+				}
+				sWord[nCharInWord]=0;
+				fputs(sWord,fd_mail);
+				sWord[0]=c;
+				nCharInWord=1;
+				nCharInLine=0;							
+			}
+		} 
+		else sWord[nCharInWord++]=c;
+	}
+	else 
+	{
+		sWord[nCharInWord++]=c;
+		sWord[nCharInWord]=0;
+		nCharInLine+=nCharInWord;
+		fputs(sWord,fd_mail);
+		nCharInWord=0;
+		if ((c==10) || (c=='\n')) 
+		{	
+			nCharInLine=0;
+			if (nStartSpalte)
+			{
+				char i;
+				for (i=0;i<nStartSpalte;i++)
+					fputc(' ',fd_mail);
+			}
+		}
+	}
+}
+
+/******************************************************************************
+ * void doOneChar (char c)
+ *
+ * before we print a character we wait for a whole word/tag
+ ******************************************************************************/
+void doOneChar( char c )
+{
+	char  sHack[4];
+	bool  fDo;
+
+//	printf("N: (%c:%u) word:%u line:%u bytes:%lu\r\n",c,c,nCharInWord,nCharInLine,nRead);
+	switch(state) 
+	{
+		// normal, not in a tag, translation or special char    	
+		case cNorm :
+           		switch (c) 
+           		{
+           			// first check if a special char, a tag or a translation starts
+              			case '<' : 	state = cInTag; 
+              					nIn = 0; 
+              					break;
+              					
+              			case '=' : 	sWord[nCharInWord++]=c; 
+              					state = cTrans; 
+              					nTr = 0; 
+              					break;
+              					
+              			case '&' : 	if(fHtml) 
+              					{ 
+              						state = cSond;  
+              						nSo = 0; 
+              						break; 
+              					}
+              					// if not in HTML mode fall-through to default handling
+              					
+              			default  : 	fDo = 0;
+                         			if( !fPre ) 
+                         			{
+                         				if(fHtml)
+                         				{
+                         					// we can do some conversions
+                            					if( c=='\t' )
+                            					{
+                            						c=' ';
+                            					}
+                            					if( c==10 )
+                            					{
+                            						c='\n';
+                            					}
+                            					if( c=='\n' ) 
+                            					{
+									if( cLast != ' ' )
+									{
+										c = ' ';
+									}
+									else
+									{
+										fDo = 0;
+									}
+                        					}
+                        				}
+                        				AddChar2Mail(c);
+                        			}
+						cLast = c;
+			} //switch
+           		break; // case cNorm 
+	
+		// normal, not in a tag, translation or special char    	
+		case cTrans :
+			{
+//				printf("U: (%c:%u) nTr:%u\r\n",c,c,nTr);
+				if(nTr == 0)
+				{
+					sWord[nCharInWord++] = c;
+					nTr++;
+				}
+				else
+				{
+					char c1 = sWord[nCharInWord-1];
+					sWord[nCharInWord++] = c;
+					nTr++;
+					char i;
+					char* ptable = ttable;
+					for (i=0; i<ttsize;i++)
+					{
+						char t1 = *ptable++;
+						char t2 = *ptable++;
+						if(( t1 == c1 ) && ( t2 == c ))
+						{
+							nCharInWord -= 3;
+							state = cNorm;
+							if (*ptable) 
+							{
+								AddChar2Mail(*ptable);
+							}
+							break;
+						}
+						ptable++;
+					}
+					state = cNorm;	
+				}
+			} break;
+		
+		// check for html-tag
+		case cInTag:
+			nIn++;
+		
+//			printf("T: (%c:%u) In:%u sSond:%s\r\n",c,c,nIn,sSond);
+
+			// for the first tag prepare variables
+			if( nIn == 1 )
+			{
+				sSond[0] = '\0'; 
+				nStrich = 0; 
+			}
+
+			// check if it is a html-comment
+			if( (nIn == 4) && (!strcmp(sSond, "!--")) ) 
+			{
+				state = cInComment;
+				nHyp = 0;
+			}
+			
+			
+			if( (c == '>') || (nIn >= sizeof(sSond)) ) 
+			{
+				char *pc, sArgs[400];
+
+				// search for the first SPACE
+				pc = strstr(sSond," ");
+				if( pc != NULL ) 
+				{
+					*pc='\0';
+					strcpy(sArgs,++pc);
+				}
+
+				if( !strcmp(sSond, "HTML"))		
+				{ 
+					strcpy(sSond,"\n"); 
+					fHtml = 1; 
+				}
+				else if( !strcmp(sSond, "/HTML"))	
+				{ 
+					strcpy(sSond,"\n"); 
+					fHtml = 0; 
+				}
+				else if( !strcmp(sSond, "BR") )
+				{
+					strcpy(sSond,"\n");
+				}
+				else if( !strcmp(sSond, "P") )		
+				{
+					strcpy(sSond,"\n\n");
+				}
+				else if( !strcmp(sSond, "LI") )		
+				{
+					strcpy(sSond,"\n* ");
+				}
+				else if( !strcmp(sSond, "/UL") )	
+				{
+					strcpy(sSond,"\n");
+				}
+				else if( !strcmp(sSond, "/OL") )	
+				{
+					strcpy(sSond,"\n");
+				}
+				else if( !strcmp(sSond, "DL") )		
+				{
+					strcpy(sSond,"\n");
+				}
+				else if( !strcmp(sSond, "/DL") )	
+				{ 
+					strcpy(sSond,"\n"); 
+					nStartSpalte = 0; 
+				}
+				else if( !strcmp(sSond, "DT") )		
+				{ 
+					strcpy(sSond,"\n* "); 
+					nStartSpalte = 0; 
+				}
+				else if( !strcmp(sSond, "DD") )		
+				{ 
+					strcpy(sSond,"\n "); 
+					nStartSpalte = 8; 
+				}
+				else if( !strcmp(sSond, "PRE"))		
+				{ 
+					strcpy(sSond,"\n"); 
+					fPre = 1; 
+				}
+				else if( !strcmp(sSond, "/PRE"))	
+				{ 
+					strcpy(sSond,"\n"); 
+					fPre = 0; 
+				}
+				else if( !strcmp(sSond, "TR") )		
+				{ 
+					strcpy(sSond,"\n"); 
+					nStartSpalte = 0;
+				}
+				else if( !strcmp(sSond, "TD") )		
+				{ 
+					strcpy(sSond,"  "); 
+				}
+				else if( !strcmp(sSond, "TABLE") )	
+				{ 
+					strcpy(sSond,"\n"); 
+					nStartSpalte = 4;
+				}
+				else if( !strcmp(sSond, "/TABLE") )	
+				{ 
+					strcpy(sSond,"\n"); 
+					nStartSpalte = 0;
+				}
+				else if( !strcmp(sSond, "A") ) 
+				{ 
+					// href= analysieren 
+					// test auf # 
+					strcpy(sRef,sArgs); 
+					strcpy(sSond,"");
+				}
+				else if( !strcmp(sSond, "/A") ) 
+				{ 
+					//  suchen von sRef im Speicher 
+					//  nRef,sRef 
+					// sprintf(sSond," [%d] ",nRef); 
+					sSond[0] = '\0';
+					nRef++;
+					sRef[0] = '\0';
+				}  
+				else if( !strcmp(sSond, "HR" ) ) 
+				{
+					strcpy(sSond,"\n---------------------------------------------------------------------\n");
+				}
+				else if(  !strcmp(sSond,"H1")
+					|| !strcmp(sSond,"H2")
+					|| !strcmp(sSond,"H3")
+					|| !strcmp(sSond,"H4")
+					|| !strcmp(sSond,"H5")
+					|| !strcmp(sSond,"H6") ) 
+				{
+					strcpy(sSond,"\n\n");
+				}
+				else if( ((sSond[0] == '/') && (sSond[1] == 'H') && (sSond[2] >= '0')&& (sSond[2] <= '6'))
+					|| !strcmp(sSond,"/TITLE") ) 
+				{
+					// Einen Strich unterm Titel 
+					strcpy(sSond,"\n\n");
+					nStrich = nCharInLine+1;
+				}
+				else if( !strcmp(sSond,"/TD") )
+				{ 
+					int i;
+					sSond[0] = '\0';
+					for( i=1; i <= (nCharInLine % 10); i++)
+						strncat(sSond," ",1);
+					nStartSpalte = nCharInLine + strlen(sSond);
+				}
+           			else 
+				{
+					// strstr(sArgs,"ALT=");
+					if(!fHtml)
+					{
+						int i;		
+						int iLen = strlen(sSond);
+						state = cNorm;
+						sSond[iLen++] = '>';
+						sSond[iLen++] = '\0';
+						AddChar2Mail('<');
+						for (i = 0; i < iLen; i++)
+						{
+							if (sSond[i]) doOneChar(sSond[i]);
+						}
+					} 
+					sSond[0] = '\0';
+				}
+//				printf("H: (%c:%u) In:%u spalte:%u\r\n",sSond[0],sSond[0],nIn,nStartSpalte);
+				if(sSond[0]!='\0') 
+				{
+					writeFOut(sSond);
+				}
+				state = cNorm;
+			} 
+			else 
+			{
+				if(( c >= 'a' ) && ( c <= 'z' )) 
+				{
+					c -= ('a'-'A');
+				}
+				sHack[0] = c; 
+				sHack[1] = '\0';
+				strcat(sSond, sHack);
+			}
+			break; // InTag 
+
+		// character conversion
+		case cSond :
+//			printf("S: (%c:%u) nSo:%u sSond:%s\r\n",c,c,nSo,sSond);
+
+			nSo++;
+			if( nSo == 1 )  
+			{
+				sSond[0] = '\0';
+			}
+
+			if( (c == '&') || (c == ' ') || (c == ';') || (nSo>7) ) 
+			{
+				int i = 0;
+				int fFound = 0;
+
+				if( sSond[0] =='#' ) 
+				{
+					i = atoi( &sSond[1] );
+					if( i == 153 ) strcpy(sSond,"(TM)");
+					else 
+					{
+						sSond[0] = (char)i;
+						sSond[1] = '\0';
+					}
+					fFound = 1;
+				} 
+				else 
+				{
+					fFound = 1;
+					if( !strcmp(sSond, "lt"  ) )
+					{
+						strcpy( sSond,"<");
+					}
+					else if( !strcmp(sSond, "gt"  ) )  
+					{
+						strcpy( sSond,">");
+					}
+					else if( !strcmp(sSond, "quot") )  
+					{
+						strcpy( sSond,"\"");
+					}
+					else if( !strcmp(sSond, "amp" ) )  
+					{
+						strcpy( sSond,"&");
+					}
+					else if( !strcmp(sSond, "nbsp") )  
+					{
+						strcpy( sSond," ");
+					}
+					else if( !strcmp(sSond, "copy") )  
+					{
+						strcpy( sSond,"(c)");
+					}
+					else if( !strcmp(sSond, "reg" ) )  
+					{
+						strcpy( sSond,"(R)");
+					}
+					else 
+					{
+						fFound = 0;
+						for ( i = 0; i < szsize; i++) 
+						{
+							if( !strcmp(sSond, szTab[i]) ) 
+							{
+								sSond[0] = (char)i+192;
+								sSond[1] = '\0';
+								fFound = 1;
+								break;
+							}
+						}
+					}
+				}
+
+				state = cNorm;
+				if( fFound ) 
+				{
+					int iLen = strlen(sSond);
+					for (i=0; i<iLen; i++)
+					{
+						if ((sSond[i]) && (sSond[i]!='&'))
+						{
+							doOneChar(sSond[i]);
+						}
+						else
+						{
+							AddChar2Mail(sSond[i]);
+						}	
+					}
+				} 
+				else 
+				{ // we didn't find a conversion
+					char sTmp[300];
+
+					sprintf(sTmp,"&%s%c",sSond,c);					
+					int iLen = strlen(sTmp);
+					for( i = 0 ; i < iLen; i++)
+					{
+						if(( sTmp[i] ) && ( sTmp[i] != '&' ))
+						{
+							doOneChar(sTmp[i]);
+						}
+						else
+						{
+							AddChar2Mail(sTmp[i]);
+						}
+					}
+				}
+			} 
+			else
+			{
+				sHack[0] = c; 
+				sHack[1] = '\0';
+				strcat(sSond,sHack);
+			}
+			break;
+
+		case cInComment:
+			if( (nHyp == 2) & (c=='>') ) 
+			{
+				state = cNorm;
+			} 
+			else 
+			{
+				if( c=='-' )    
+				{
+					nHyp++;
+				}
+				else            
+				{
+					nHyp=0;
+				}
+			}
+			break;
+
+		}  //case
+}
+
+
+
+/******************************************************************************
+ * void writeFOut (char* s)
+ ******************************************************************************/
+void writeFOut( char *s)
+{
+	char sSond[255];
+
+	// paint a line ?
+	if( s[0] == '\n' ) 
+	{
+		nCharInLine = 0;
+		if( nStrich > 0 ) 
+		{
+			/* Eine Zeile mit Strichen erzeugen */
+			if( nStrich > 80 )  nStrich = 75;
+			{ 
+				int i=0; char* p = sSond;
+				for(;i<nStrich;i++,p++)
+				{
+					*p = '-';
+				}
+			}
+			sSond[nStrich] = '\0';
+			fprintf(fd_mail, "\n%s", sSond);
+			nLine++;
+//			nWrite += nStrich;
+			nStrich = 0;
+		}
+		if( !strcmp(s, "\n" ) ) 
+		{
+			nCRLF++;
+		}
+	} 
+	else 
+	{
+		nCRLF = 0;
+	}
+
+	if( nCRLF < 3 ) 
+	{ 
+		int i,l;
+		l = strlen(s);
+		for( i = 0 ; i < l ; i++)
+		{
+//			s[i] = iso2ascii[(int)s[i]];
+			if( s[i] == '\n' )
+			{
+				nLine++;
+			}
+		}
+		fputs(s, fd_mail);
+	}
+
+	// Einrueckung durchfuehren 
+	if( s[0] == '\n' ) 
+	{
+		if( nStartSpalte >0 ) 
+		{
+			int i;
+			for( i = 0 ; i < nStartSpalte; i++)
+			{
+				fputc(' ',fd_mail);
+			}
+		}
+	}
+}
+
+/******************************************************************************
  * SendPOPCommand (0=fail, 1=done)
  ******************************************************************************/
 
@@ -850,6 +1507,7 @@ int SendPOPCommand(int command, char *param)
 	char send_buffer[128], recv_buffer[4096], month[4];
 	char *ptr, *ptr1, *ptr2;
 	int loop, day, hour, minute;
+	char linelen;
 
 	// build commandstring
 
@@ -916,6 +1574,12 @@ int SendPOPCommand(int command, char *param)
 
 				break;
 
+			case RETR:
+
+				sprintf(send_buffer, "RETR %s\r\n", param);
+
+				break;
+
 			case DELE:
 
 				sprintf(send_buffer, "DELE %s\r\n", param);
@@ -923,7 +1587,6 @@ int SendPOPCommand(int command, char *param)
 				break;
 
 			case QUIT:
-
 				sprintf(send_buffer, "QUIT\r\n");
 		}
 
@@ -948,10 +1611,56 @@ int SendPOPCommand(int command, char *param)
 			}
 		}
 
-	// get server response
+		// get server response
 
 		stringindex = 0;
-
+		linelen = 0;
+    		state = cNorm;
+    		nStrich = 0;
+    		nStartSpalte = 1;
+    		nCharInLine = 0;
+    		nCharInWord = 0;
+    		cLast = 0;
+    		nRead = nWrite = 0;
+    		fPre = 0;
+    		fHtml = 0;
+    		
+		if(command == RETR)
+		{
+   			while(recv(sock, &recv_buffer[3], 1, 0) > 0)
+			{
+				// scan for header-end
+  				if(!nRead && recv_buffer[3] == '\n' && recv_buffer[1] == '\n')
+  				{
+					nRead++;
+				}
+				if(nRead) 
+				{
+					nRead++;
+					doOneChar( recv_buffer[stringindex] );
+				}
+			
+				// this is normally the end of an email
+				if(recv_buffer[3] == '\n' && recv_buffer[1] == 46 && recv_buffer[0] == '\n')
+				{
+					strcpy(recv_buffer,"+OK");
+					break;
+				}
+				if(nRead < 40000)
+				{
+					recv_buffer[0]=recv_buffer[1];
+					recv_buffer[1]=recv_buffer[2];
+					recv_buffer[2]=recv_buffer[3];
+				}
+				else
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "Buffer Overflow") : printf("TuxMailD <Buffer Overflow>\n");
+					strcpy(recv_buffer,"+ERROR");
+					break;
+				}
+			}
+		}
+		else
 		while(recv(sock, &recv_buffer[stringindex], 1, 0) > 0)
 		{
 			if(command == TOP)
@@ -970,15 +1679,15 @@ int SendPOPCommand(int command, char *param)
 				break;
 			}
 
-			if(stringindex < sizeof(recv_buffer) - 1)
+			if(stringindex < sizeof(recv_buffer) - 4)
 			{
 				stringindex++;
 			}
 			else
 			{
 				slog ? syslog(LOG_DAEMON | LOG_INFO, "Buffer Overflow") : printf("TuxMailD <Buffer Overflow>\n");
-
-				stringindex = 0;
+				recv_buffer[stringindex+1] = '\0';
+				break;
 			}
 		}
 
@@ -1017,7 +1726,8 @@ int SendPOPCommand(int command, char *param)
 				case TOP:
 
 					stringindex = 0;
-
+					headersize = strlen(recv_buffer);
+					
 					memset(header, 0, sizeof(header));
 
 					if((ptr = strstr(recv_buffer, "\nDate:")))
@@ -1155,6 +1865,9 @@ int SendPOPCommand(int command, char *param)
 					header[stringindex] = '\0';
 
 					break;
+					
+				case RETR:
+					break;
 
 				case QUIT:
 
@@ -1176,6 +1889,109 @@ int SendPOPCommand(int command, char *param)
 		}
 
 	return 1;
+}
+
+/******************************************************************************
+ * SaveMail (0 = fail)
+ ******************************************************************************/
+
+int SaveMail(int account, char* mailuid)
+{
+	int loop;
+	char mailnumber[12];
+
+	
+	if((fd_mail = fopen(MAILFILE, "w")))
+	{
+
+	// timestamp
+
+	// get mail count
+
+		if(!SendPOPCommand(INIT, account_db[account].host))
+		{
+			if(fd_mail)
+			{
+				fclose(fd_mail);
+			}
+			return 0;
+		}
+
+		if(!SendPOPCommand(USER, account_db[account].user))
+		{
+			if(fd_mail)
+			{
+				fclose(fd_mail);
+			}
+			SendPOPCommand(QUIT, "");
+			return 0;
+		}
+
+		if(!SendPOPCommand(PASS, account_db[account].pass))
+		{
+			if(fd_mail)
+			{
+				fclose(fd_mail);
+			}
+			SendPOPCommand(QUIT, "");
+			return 0;
+		}
+
+		if(!SendPOPCommand(STAT, ""))
+		{
+			if(fd_mail)
+			{
+				fclose(fd_mail);
+			}
+			SendPOPCommand(QUIT, "");
+			return 0;
+		}
+
+
+		if (!messages) return 0;
+
+		for(loop = messages; loop != 0; loop--)
+		{
+			sprintf(mailnumber, "%d", loop);
+
+			if(!SendPOPCommand(UIDL, mailnumber))
+			{
+				if(fd_mail)
+				{
+					fclose(fd_mail);
+				}
+
+
+				SendPOPCommand(QUIT, "");
+				return 0;
+			}
+//			printf("TuxMailD <SaveFile idx(%u) uid(%s)>\n", loop,uid);
+			if(!strcmp(uid,mailuid))
+			{
+				printf("TuxMailD <SaveFile idx(%u) uid(%s)>\n", loop,uid);
+				if(!SendPOPCommand(RETR, mailnumber))
+				{
+					if(fd_mail)
+					{
+						fclose(fd_mail);
+					}
+
+					SendPOPCommand(QUIT, "");
+					return 0;
+				}
+				
+				fclose(fd_mail);
+				SendPOPCommand(QUIT, "");
+				return 1;
+				
+			}
+		}
+
+		fclose(fd_mail);
+		SendPOPCommand(QUIT, "");
+	}
+	return 0;
+
 }
 
 /******************************************************************************
@@ -1205,16 +2021,19 @@ int CheckAccount(int account)
 
 		if(!SendPOPCommand(USER, account_db[account].user))
 		{
+			SendPOPCommand(QUIT, "");	
 			return 0;
 		}
 
 		if(!SendPOPCommand(PASS, account_db[account].pass))
 		{
+			SendPOPCommand(QUIT, "");	
 			return 0;
 		}
 
 		if(!SendPOPCommand(STAT, ""))
 		{
+			SendPOPCommand(QUIT, "");	
 			return 0;
 		}
 
@@ -1285,6 +2104,7 @@ int CheckAccount(int account)
 							fclose(fd_status);
 						}
 
+						SendPOPCommand(QUIT, "");	
 						return 0;
 					}
 
@@ -1299,6 +2119,7 @@ int CheckAccount(int account)
 								fclose(fd_status);
 							}
 
+							SendPOPCommand(QUIT, "");	
 							return 0;
 						}
 
@@ -1313,6 +2134,7 @@ int CheckAccount(int account)
 									fclose(fd_status);
 								}
 
+								SendPOPCommand(QUIT, "");	
 								return 0;
 							}
 						}
@@ -1341,6 +2163,7 @@ int CheckAccount(int account)
 										fclose(fd_status);
 									}
 
+									SendPOPCommand(QUIT, "");	
 									return 0;
 								}
 
@@ -1372,6 +2195,7 @@ int CheckAccount(int account)
 									fclose(fd_status);
 								}
 
+								SendPOPCommand(QUIT, "");	
 								return 0;
 							}
 
@@ -1386,6 +2210,7 @@ int CheckAccount(int account)
 										fclose(fd_status);
 									}
 
+									SendPOPCommand(QUIT, "");	
 									return 0;
 								}
 							}
@@ -1741,10 +2566,9 @@ void NotifyUser(int mails)
 		}
 
 	// video notify
-
 		if(video != 5)
 		{
-			switch(video)
+ 			switch(video)
 			{
 				case 4:
 					strcpy(http_cmd, http_cmd4);
@@ -1787,16 +2611,16 @@ void NotifyUser(int mails)
 				}
 
 				strcat(http_cmd, " HTTP/1.1\n");
-
+			
 				if(webuser[0])
 				{
-					strcat(http_cmd, "Authorization: Basic ");
-					strcat(http_cmd, &encodedstring[0]);
-					strcat(http_cmd, "\n\n");			
+				    strcat(http_cmd, "Authorization: Basic ");
+				    strcat(http_cmd, &encodedstring[0]);
+				    strcat(http_cmd, "\n\n");			
 				}
 				else
 				{
-			    		strcat(http_cmd, "\n");
+				    strcat(http_cmd, "\n");
 				}
 			}
 
@@ -1824,7 +2648,7 @@ void NotifyUser(int mails)
 
 			close(sock);
 		}
-}
+}		
 
 /******************************************************************************
  * SigHandler
@@ -1878,7 +2702,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.16 $";
+	char cvs_revision[] = "$Revision: 1.17 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -2039,19 +2863,23 @@ int main(int argc, char **argv)
 				}
 
 				mailstatus = 0;
-
-				for(account = 0; account < accounts; account++)
+				if (!inPOPCmd)
 				{
-					if(CheckAccount(account))
+					inPOPCmd = 1;
+					for(account = 0; account < accounts; account++)
 					{
-						slog ? syslog(LOG_DAEMON | LOG_INFO, "Account %d = %.3d/%.3d Mail(s) for %s", account, account_db[account].mail_new, account_db[account].mail_all - deleted_messages, account_db[account].name) : printf("TuxMailD <Account %d = %.3d/%.3d Mail(s) for %s>\n", account, account_db[account].mail_new, account_db[account].mail_all - deleted_messages, account_db[account].name);
-
-						mailstatus += account_db[account].mail_new;
+						if(CheckAccount(account))
+						{
+							slog ? syslog(LOG_DAEMON | LOG_INFO, "Account %d = %.3d/%.3d Mail(s) for %s", account, account_db[account].mail_new, account_db[account].mail_all - deleted_messages, account_db[account].name) : printf("TuxMailD <Account %d = %.3d/%.3d Mail(s) for %s>\n", account, account_db[account].mail_new, account_db[account].mail_all - deleted_messages, account_db[account].name);
+	
+							mailstatus += account_db[account].mail_new;
+						}
+						else
+						{
+							slog ? syslog(LOG_DAEMON | LOG_INFO, "Account %d skipped", account) : printf("TuxMailD <Account %d skipped>\n", account);
+						}
 					}
-					else
-					{
-						slog ? syslog(LOG_DAEMON | LOG_INFO, "Account %d skipped", account) : printf("TuxMailD <Account %d skipped>\n", account);
-					}
+					inPOPCmd = 0;
 				}
 
 				if(mailstatus)
