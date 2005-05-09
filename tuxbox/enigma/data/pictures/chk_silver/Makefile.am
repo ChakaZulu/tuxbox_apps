@@ -4,7 +4,7 @@ installdir = $(TUXBOXDATADIR)/enigma/pictures/chk_silver
 
 install_DATA = \
 	3D_border_unselected_corner.png 3D_border_unselected_corner_dark.png \
-	3D_border_unselected_corner_darkLight.png 3D_border_unselected_corner_darkLight_neu.png \
+	3D_border_unselected_corner_darkLight.png \
 	3D_border_unselected_corner_darkLight_swap.png 3D_border_unselected_corner_dark_swap.png \
 	3D_border_unselected_corner_light.png 3D_border_unselected_corner_lightDark.png \
 	3D_border_unselected_corner_lightDark_swap.png 3D_border_unselected_corner_light_swap.png \
