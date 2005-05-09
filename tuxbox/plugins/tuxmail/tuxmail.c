@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.16  2005/05/09 19:30:20  robspr1
+ * support for mail reading
+ *
  * Revision 1.15  2005/04/29 17:24:00  lazyt
  * use 8bit audiodata, fix skin and osd
  *
@@ -118,15 +121,18 @@ void ReadConf()
 		}
 }
 
+
+void ShowMessage(int message);
 /******************************************************************************
  * ControlDaemon (0=fail, 1=done)
  ******************************************************************************/
 
-int ControlDaemon(int command)
+int ControlDaemon(int command, int account, int mailindex)
 {
 	int fd_sock;
 	struct sockaddr_un srvaddr;
 	socklen_t addrlen;
+	char sendcmd[88];
 
 	// setup connection
 
@@ -178,6 +184,18 @@ int ControlDaemon(int command)
 
 				send(fd_sock, "V", 1, 0);
 				recv(fd_sock, &versioninfo_d, sizeof(versioninfo_d), 0);
+				
+				break;
+			
+			case GET_MAIL:
+			
+				ShowMessage(GETMAIL);
+				send(fd_sock, "M", 1, 0);
+				sprintf(sendcmd,"%d-%02d-%s",account,mailindex,maildb[account].mailinfo[mailindex].uid);
+				send(fd_sock, sendcmd, 5+sizeof(maildb[account].mailinfo[mailindex].uid), 0);
+				recv(fd_sock, &mailfile, 1, 0);
+				
+				break;
 		}
 
 		close(fd_sock);
@@ -918,6 +936,176 @@ void RenderCircle(int sy, char type)
 }
 
 /******************************************************************************
+ * ShowMailHeader                                                                   *
+ ******************************************************************************/
+#define BORDERSIZE 2
+#define FONTHEIGHT_BIG 40
+#define FONTHEIGHT_SMALL 24
+#define FONT_OFFSET_BIG 10
+#define FONT_OFFSET 5
+
+void ShowMailHeader(char* szAction, int viewx, int viewy)
+{
+	char *p;
+	
+	RenderBox(0, 0, viewx, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, FILL, SKIN0);
+	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, viewx,viewy, FILL, SKIN1);
+	RenderBox(0, 0, viewx, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, GRID, SKIN2);
+	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, viewx, viewy, GRID, SKIN2);
+	
+	p=strchr(szAction, '\n');
+	if(p)
+	{
+		*p = 0;
+		RenderString((osd == 'G') ? "Absender:" : "From:", 2*BORDERSIZE, BORDERSIZE+FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
+		szAction = ++p;
+	}
+	if(p) 
+	{
+		p = strchr(szAction, '\n');
+	}
+	if(p)
+	{
+		*p = 0;
+		RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
+		szAction = ++p;
+	}
+	if(p)
+	{
+		p = strchr(szAction,'\n');
+	}
+	if(p)
+	{
+		*p = 0;
+		RenderString((osd == 'G') ? "Datum:" : "Date:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2 , viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
+		szAction = ++p;
+	}
+	
+}
+
+/******************************************************************************
+ * ShowFile                                                                   *
+ ******************************************************************************/
+void ShowFile(FILE* pipe, char* szAction)
+{
+	// Code from splugin (with some modifications...)
+	char *p;
+	char line[256];
+	int viewx = 619;
+	int viewy = 504;
+	int framerows = 17;
+	int iPage;
+	long iPagePos[100];
+	char szHeader[256];
+
+
+	// Render output window
+	strcpy(szHeader,szAction);
+	ShowMailHeader(szHeader,viewx,viewy);
+
+	int row = 0;
+	iPage = 0;
+	// position of 1 bytes of all the pages
+	iPagePos[0] = ftell(pipe);
+	while(1)
+	{
+		while( fgets( line, 83, pipe ) )
+		{
+			p = strchr(line,'\n');
+			if( p )
+			{
+				*p = 0;
+			}
+			row++;
+			RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*FONTHEIGHT_SMALL -FONT_OFFSET, viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
+
+			if(row > framerows - 2)
+			{
+				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+				while(1)
+				{
+					GetRCCode();
+					if(rccode == RC_HOME || rccode == RC_OK || rccode == RC_RIGHT)
+					{
+						if (iPage < 99) 
+						{
+							iPage++;
+						}
+						break;
+					}
+					if(rccode == RC_LEFT)
+					{
+						if (iPage) 
+						{
+							iPage--;
+							fseek(pipe, iPagePos[iPage], SEEK_SET);
+						}
+						else
+						{
+							fseek(pipe, 0, SEEK_SET);
+						}
+						break;
+					}
+				}
+				row = 0;
+				iPagePos[iPage] = ftell(pipe);
+				if(rccode == RC_HOME) 
+				{
+					break;
+				}
+				// Render output window
+				strcpy(szHeader, szAction);
+				ShowMailHeader(szHeader, viewx, viewy);
+
+			}
+		}
+		if(row > 0)
+		{
+			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+			while(1)
+			{
+				GetRCCode();
+				if( rccode == RC_HOME || rccode == RC_OK )
+				{
+					break;
+				}
+				if( rccode == RC_LEFT )
+				{
+					if( iPage ) 
+					{
+						iPage--;
+						fseek(pipe, iPagePos[iPage], SEEK_SET);
+					}
+					else
+					{
+						fseek(pipe, 0, SEEK_SET);
+					}
+					row = 0;
+					iPagePos[iPage] = ftell(pipe);
+					if (rccode == RC_HOME)
+					{
+						break;
+					}
+					// Render output window
+					strcpy(szHeader, szAction);
+					ShowMailHeader(szHeader, viewx, viewy);
+					break;
+				}
+			}
+		}
+		if(rccode == RC_HOME)
+		{
+			break;	
+		}
+	}
+	rccode = -1;
+}
+
+
+/******************************************************************************
  * ShowMessage
  ******************************************************************************/
 
@@ -995,9 +1183,22 @@ void ShowMessage(int message)
 
 				break;
 
+			case GETMAIL:
+
+				RenderString((osd == 'G') ? "Mail wird gelesen." : "Reading mail.", 157, 265, 306, CENTER, BIG, WHITE);
+				RenderString((osd == 'G') ? "Moment bitte..." : "Please wait...", 157, 305, 306, CENTER, BIG, WHITE);
+
+				break;
+
+			case GETMAILFAIL:
+
+				RenderString((osd == 'G') ? "Mail lesen fehlgeschlagen!" : "Reading mail failed!", 157, 265, 306, CENTER, BIG, WHITE);
+
+				break;
+
 			case INFO:
 
-				ControlDaemon(GET_VERSION);
+				ControlDaemon(GET_VERSION,0,0);
 
 				sprintf(info, "TuxMail (P%s/D%s)", versioninfo_p, versioninfo_d);
 
@@ -1005,11 +1206,17 @@ void ShowMessage(int message)
 				RenderString("(C) 2003-2005 Thomas \"LazyT\" Loewe", 157, 265, 306, CENTER, SMALL, WHITE);
 		}
 
-		RenderBox(285, 286, 334, 310, FILL, SKIN2);
-		RenderString("OK", 287, 305, 46, CENTER, SMALL, WHITE);
+		if(message != GETMAIL)
+		{
+		    RenderBox(285, 286, 334, 310, FILL, SKIN2);
+		    RenderString("OK", 287, 305, 46, CENTER, SMALL, WHITE);
+		}
 		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 
-		while(GetRCCode() != RC_OK);
+		if(message!=GETMAIL)
+		{
+			while(GetRCCode() != RC_OK);
+		}
 }
 
 /******************************************************************************
@@ -1299,7 +1506,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.15 $";
+	char cvs_revision[] = "$Revision: 1.16 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -1465,7 +1672,7 @@ void plugin_exec(PluginParam *par)
 
 	// get daemon status
 
-		if(!ControlDaemon(GET_STATUS))
+		if(!ControlDaemon(GET_STATUS,0,0))
 		{
 			online = 2;
 		}
@@ -1507,6 +1714,8 @@ void plugin_exec(PluginParam *par)
 
 	// main loop
 
+
+		
 		do{
 			switch((rccode = GetRCCode()))
 			{
@@ -1692,11 +1901,11 @@ void plugin_exec(PluginParam *par)
 							if(maildb[account].mailinfo[mailindex].type[0] != 'D')
 							{
 						    		maildb[account].mailinfo[mailindex].type[0] = 'D';
-							}
+						    		}
 							else
 							{
 								maildb[account].mailinfo[mailindex].type[0] = maildb[account].mailinfo[mailindex].save[0];
-
+								
 								if(maildb[account].mailinfo[mailindex].type[0] == 'D')
 								{
 									maildb[account].mailinfo[mailindex].type[0] = 'O';
@@ -1805,22 +2014,25 @@ void plugin_exec(PluginParam *par)
 
 				case RC_BLUE:
 
-					if(Add2SpamList(account, mailindex))
+					if(admin == 'Y')
 					{
-						maildb[account].mailinfo[mailindex].type[0] = 'D';
-						ControlDaemon(RELOAD_SPAMLIST);
-						ShowMessage(ADD2SPAM);
-					}
-					else
-					{
-						ShowMessage(SPAMFAIL);
+						if(Add2SpamList(account, mailindex))
+						{
+							maildb[account].mailinfo[mailindex].type[0] = 'D';
+							ControlDaemon(RELOAD_SPAMLIST,0,0);
+							ShowMessage(ADD2SPAM);
+						}
+						else
+						{
+							ShowMessage(SPAMFAIL);
+						}
 					}
 
 					break;
 
 				case RC_MUTE:
 
-					if(!ControlDaemon(GET_STATUS))
+					if(!ControlDaemon(GET_STATUS,0,0))
 					{
 						online = 2;
 						ShowMessage(NODAEMON);
@@ -1830,7 +2042,7 @@ void plugin_exec(PluginParam *par)
 						online++;
 						online &= 1;
 
-						if(!ControlDaemon(SET_STATUS))
+						if(!ControlDaemon(SET_STATUS,0,0))
 						{
 							if(online)
 							{
@@ -1877,6 +2089,31 @@ void plugin_exec(PluginParam *par)
 
 				case RC_HELP:
 
+					ControlDaemon(GET_MAIL,account,mailindex);
+
+					if(!mailfile)
+					{
+						ShowMessage(GETMAILFAIL);
+					}
+					else
+					{
+						FILE* pFile;
+						pFile = fopen("/tmp/popmail","r");
+						if  (pFile != NULL)
+						{
+							char szInfo[256];
+							sprintf(szInfo,"%s\n%s\n%s %s\n",maildb[account].mailinfo[mailindex].from,maildb[account].mailinfo[mailindex].subj,maildb[account].mailinfo[mailindex].date,maildb[account].mailinfo[mailindex].time);
+							ShowFile(pFile, szInfo);
+							fclose(pFile);
+						}
+							
+						rccode = 0;
+					}
+
+					break;
+
+				case RC_DBOX:
+
 					ShowMessage(INFO);
 
 					break;
@@ -1913,3 +2150,4 @@ void plugin_exec(PluginParam *par)
 
 		return;
 }
+ 

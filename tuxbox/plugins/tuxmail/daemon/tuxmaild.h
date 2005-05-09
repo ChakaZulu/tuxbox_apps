@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.13  2005/05/09 19:33:15  robspr1
+ * support for mail reading
+ *
  * Revision 1.12  2005/03/28 14:14:15  lazyt
  * support for userdefined audio notify (put your 12/24/48KHz pcm wavefile to /var/tuxbox/config/tuxmail/tuxmail.wav)
  *
@@ -82,10 +85,15 @@
 #define LOGFILE "/tmp/tuxmaild.log"
 #define PIDFILE "/tmp/tuxmaild.pid"
 #define LCKFILE "/tmp/lcd.locked"
+#define MAILFILE "/tmp/popmail"
 
 // pop3 commands
 
-enum {INIT, USER, PASS, STAT, UIDL, TOP, DELE, QUIT};
+#define bool char
+#define true 1
+#define false 0
+
+enum {INIT, USER, PASS, STAT, UIDL, TOP, DELE, QUIT, RETR};
 
 // account database
 
@@ -140,9 +148,11 @@ char webuser[32], webpass[32];
 char plainstring[64], encodedstring[64];
 char decodedstring[512];
 int startdelay, intervall, skin;
-char pop3log, logmode, audio, lcd, osd, admin, savedb;
+char pop3log, logmode, audio, lcd, osd, admin, savedb, mailrd;
 int video;
 char online = 1;
+char mailread = 0;
+char inPOPCmd = 0;
 int accounts;
 int sock;
 int messages, deleted_messages;
@@ -150,6 +160,7 @@ int stringindex;
 int use_spamfilter, spam_entries, spam_detected;
 char uid[128];
 char header[1024];
+int headersize;
 char timeinfo[22];
 time_t tt;
 

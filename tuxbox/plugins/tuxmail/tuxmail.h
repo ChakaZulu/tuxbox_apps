@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.12  2005/05/09 19:32:32  robspr1
+ * support for mail reading
+ *
  * Revision 1.11  2005/04/29 17:24:00  lazyt
  * use 8bit audiodata, fix skin and osd
  *
@@ -201,13 +204,13 @@ int fb, rc, lcd;
 
 // daemon commands
 
-enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST, GET_VERSION};
+enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST, GET_VERSION, GET_MAIL};
 
 // framebuffer stuff
 
 enum {FILL, GRID};
 enum {TRANSP, WHITE, SKIN0, SKIN1, SKIN2, ORANGE, GREEN, YELLOW, RED};
-enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, SPAMFAIL, INFO};
+enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, SPAMFAIL, INFO, GETMAIL, GETMAILFAIL};
 
 unsigned char *lfb = 0, *lbb = 0;
 
@@ -229,6 +232,7 @@ struct fb_cmap colormap2 = {1, 8, rd2, gn2, bl2, tr2};
 
 int startx, starty, sx, ex, sy, ey;
 char online;
+char mailfile;
 
 #if HAVE_DVB_API_VERSION == 3
 
