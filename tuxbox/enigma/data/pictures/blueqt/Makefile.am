@@ -5,7 +5,7 @@ install_DATA = \
 	butto_r.png butto_u.png butto_ul.png butto_ur.png button_blue.png \
 	button_green.png button_red.png button_yellow.png checked.png \
 	clock.png clock_rec.png combo_arrow.png corner.png crypt_off.png \
-	crypt_on.png crypt_on_small.png cvs_expert.png cvs_expert_sel.png \
+	crypt_on.png crypt_on_small.png  \
 	dolby_off.png dolby_on.png dvr-fs8.png epginfo.png event_failed.png \
 	event_ok.png evnext.png file.png file_sel.png folder.png \
 	format_off.png format_on.png format_on_small.png games.png \
