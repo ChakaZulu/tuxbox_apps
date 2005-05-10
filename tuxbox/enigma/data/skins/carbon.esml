@@ -177,10 +177,7 @@
 		<img name="osd_dolby_on" src="dolby_on.png" />
 		<img name="sselect_folder" src="folder.png" />
 		<img name="dvrtable" src="dvr.png" />
-		<img name="osd_crypt_off" src="crypt_off.png" />
-		<img name="osd_format_off" src="format_off.png" />
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
-		<img name="lcd_scart" src="video.png" nomerge="yes" />
 		<img name="speaker" src="lcd-speaker.png" nomerge="yes" />
 		<img name="lcd-clock" src="lcd-clock.png" nomerge="yes" />
 		<img name="eWindow.top" src="top.png" />
@@ -191,7 +188,6 @@
 		<img name="eWindow.bottomLeft" src="bottom_left.png" />
 		<img name="eWindow.bottom" src="bottom.png" />
 		<img name="eWindow.bottomRight" src="bottom_right.png" />
-		<img name="rec_symbol" src="rec_symbol.png" />
 		<img name="mainmenu.background" src="background.png" />
 		<img name="mainmenu.info" src="info-fs8.png" />
 		<img name="mainmenu.info.sel" src="info_sel-fs8.png" />
