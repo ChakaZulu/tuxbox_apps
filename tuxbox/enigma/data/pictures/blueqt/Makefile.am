@@ -13,7 +13,7 @@ install_DATA = \
 	icon-question.png icon-warning.png info.png info_sel.png line-h.png \
 	line-test.png line-v.png listbox_l.png listbox_o.png listbox_ol.png \
 	listbox_or.png listbox_r.png listbox_u.png listbox_ul.png \
-	listbox_ur.png logolcd.png mainline.png mute.png oben.png \
+	listbox_ur.png logolcd.png mainline.png mute.png \
 	progress.png radio.png radio_sel.png record.png red_off.png \
 	scart.png scart_sel.png separator.png setup.png setup_sel.png \
 	short_blue.png short_green.png short_red.png short_yellow.png \
