@@ -3,6 +3,12 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.14  2005/05/10 12:55:16  lazyt
+ * - LCD-Fix for DM500
+ * - Autostart for DM7020 (use -DOE, put Init-Script to /etc/init.d/tuxmail)
+ * - try again after 10s if first DNS-Lookup failed
+ * - don't try to read Mails on empty Accounts
+ *
  * Revision 1.13  2005/05/09 19:33:15  robspr1
  * support for mail reading
  *
@@ -87,11 +93,83 @@
 #define LCKFILE "/tmp/lcd.locked"
 #define MAILFILE "/tmp/popmail"
 
-// pop3 commands
-
 #define bool char
 #define true 1
 #define false 0
+
+// maximum number of chars in a line
+#define cnRAND  	78
+// maximum charcters in a word
+#define cnMaxWordLen	20
+
+FILE *fd_mail;
+int  nStartSpalte, nCharInLine, nCharInWord, nRead, nWrite, nStrich ; 
+int  nIn, nSo, nTr; 
+char  cLast; 
+bool  fPre; 							//! pre-formated HTML code
+bool  fHtml; 							//! HTML code
+int  nCRLF = 0; 
+int  nLine = 1; 
+int  nRef  = 1;
+int   nHyp  = 0 ;
+char  sSond[355],sRef[355], sWord[85];
+static enum  t_state { cNorm, cInTag, cSond, cInComment, cTrans } state ;
+
+#define szsize 64
+
+char *szTab[szsize] = {
+  /*192 */ "Agrave"  ,   /*193 */ "Aacute"  ,
+  /*194 */ "Acirc"   ,   /*195 */ "Atilde"  ,
+  /*196 */ "Auml"    ,   /*197 */ "Aring"   ,
+  /*198 */ "Aelig"   ,   /*199 */ "Ccedil"  ,
+  /*200 */ "Egrave"  ,   /*201 */ "Eacute"  ,
+  /*202 */ "Ecirc"   ,   /*203 */ "Euml"    ,
+  /*204 */ "Igrave"  ,   /*205 */ "Iacute"  ,
+  /*206 */ "Icirc"   ,   /*207 */ "Iuml"    ,
+  /*208 */ "ETH"     ,   /*209 */ "Ntilde"  ,
+  /*210 */ "Ograve"  ,   /*211 */ "Oacute"  ,
+  /*212 */ "Ocirc"   ,   /*213 */ "Otilde"  ,
+  /*214 */ "Ouml"    ,   /*215 */ "XXXXXX"  ,
+  /*216 */ "Oslash"  ,   /*217 */ "Ugrave"  ,
+  /*218 */ "Uacute"  ,   /*219 */ "Ucirc"   ,
+  /*220 */ "Uuml"    ,   /*221 */ "Yacute"  ,
+  /*222 */ "THORN"   ,   /*223 */ "szlig"   ,
+  /*224 */ "agrave"  ,   /*225 */ "aacute"  ,
+  /*226 */ "acirc"   ,   /*227 */ "atilde"  ,
+  /*228 */ "auml"    ,   /*229 */ "aring"   ,
+  /*230 */ "aelig"   ,   /*231 */ "ccedil"  ,
+  /*232 */ "egrave"  ,   /*233 */ "eacute"  ,
+  /*234 */ "ecirc"   ,   /*235 */ "euml"    ,
+  /*236 */ "igrave"  ,   /*237 */ "iacute"  ,
+  /*238 */ "icirc"   ,   /*239 */ "iuml"    ,
+  /*240 */ "eth"     ,   /*241 */ "ntilde"  ,
+  /*242 */ "ograve"  ,   /*243 */ "oacute"  ,
+  /*244 */ "ocirc"   ,   /*245 */ "otilde"  ,
+  /*246 */ "ouml"    ,   /*247 */ "XXXXXX"  ,
+  /*248 */ "oslash"  ,   /*249 */ "ugrave"  ,
+  /*250 */ "uacute"  ,   /*251 */ "ucirc"   ,
+  /*252 */ "uuml"    ,   /*253 */ "yacute"  ,
+  /*254 */ "thorn"   ,   /*255 */ "yuml"
+};
+
+#define ttsize  9
+
+char ttable[ttsize*3] = {
+	'F','C', 252,
+  	'D','F', 223,
+	'E','4', 228,
+	'F','6', 246,
+	'D','6', 214,
+	'3','D', '=',
+	'2','0',  20,
+	'0','D',  13,
+	13 , 10,  0
+};
+
+void writeFOut( char *s);
+int SaveMail(int account, char* uid);
+
+// pop3 commands
 
 enum {INIT, USER, PASS, STAT, UIDL, TOP, DELE, QUIT, RETR};
 

@@ -3,6 +3,12 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.13  2005/05/10 12:55:15  lazyt
+ * - LCD-Fix for DM500
+ * - Autostart for DM7020 (use -DOE, put Init-Script to /etc/init.d/tuxmail)
+ * - try again after 10s if first DNS-Lookup failed
+ * - don't try to read Mails on empty Accounts
+ *
  * Revision 1.12  2005/05/09 19:32:32  robspr1
  * support for mail reading
  *
@@ -79,6 +85,11 @@
 #define CFGPATH "/var/tuxbox/config/tuxmail/"
 #define CFGFILE "tuxmail.conf"
 #define SPMFILE "spamlist"
+#define MAILFILE "/tmp/popmail"
+
+#define OE_START "/etc/rc2.d/S99tuxmail"
+#define OE_KILL0 "/etc/rc0.d/K00tuxmail"
+#define OE_KILL6 "/etc/rc6.d/K00tuxmail"
 
 #define MAXMAIL 100
 
@@ -141,6 +152,8 @@
 #define	RC_HELP		0x17
 #define	RC_DBOX		0x18
 #define	RC_HOME		0x1F
+
+void ShowMessage(int message);
 
 // freetype stuff
 

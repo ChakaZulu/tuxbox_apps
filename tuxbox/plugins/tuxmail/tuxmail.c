@@ -3,6 +3,12 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.17  2005/05/10 12:55:15  lazyt
+ * - LCD-Fix for DM500
+ * - Autostart for DM7020 (use -DOE, put Init-Script to /etc/init.d/tuxmail)
+ * - try again after 10s if first DNS-Lookup failed
+ * - don't try to read Mails on empty Accounts
+ *
  * Revision 1.16  2005/05/09 19:30:20  robspr1
  * support for mail reading
  *
@@ -121,8 +127,6 @@ void ReadConf()
 		}
 }
 
-
-void ShowMessage(int message);
 /******************************************************************************
  * ControlDaemon (0=fail, 1=done)
  ******************************************************************************/
@@ -184,17 +188,18 @@ int ControlDaemon(int command, int account, int mailindex)
 
 				send(fd_sock, "V", 1, 0);
 				recv(fd_sock, &versioninfo_d, sizeof(versioninfo_d), 0);
-				
+
 				break;
-			
+
 			case GET_MAIL:
-			
+
 				ShowMessage(GETMAIL);
+
 				send(fd_sock, "M", 1, 0);
-				sprintf(sendcmd,"%d-%02d-%s",account,mailindex,maildb[account].mailinfo[mailindex].uid);
-				send(fd_sock, sendcmd, 5+sizeof(maildb[account].mailinfo[mailindex].uid), 0);
+				sprintf(sendcmd, "%d-%02d-%s", account, mailindex, maildb[account].mailinfo[mailindex].uid);
+				send(fd_sock, sendcmd, 5 + sizeof(maildb[account].mailinfo[mailindex].uid), 0);
 				recv(fd_sock, &mailfile, 1, 0);
-				
+
 				break;
 		}
 
@@ -936,8 +941,9 @@ void RenderCircle(int sy, char type)
 }
 
 /******************************************************************************
- * ShowMailHeader                                                                   *
+ * ShowMailHeader                                                             *
  ******************************************************************************/
+
 #define BORDERSIZE 2
 #define FONTHEIGHT_BIG 40
 #define FONTHEIGHT_SMALL 24
@@ -948,47 +954,52 @@ void ShowMailHeader(char* szAction, int viewx, int viewy)
 {
 	char *p;
 	
-	RenderBox(0, 0, viewx, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, FILL, SKIN0);
-	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, viewx,viewy, FILL, SKIN1);
-	RenderBox(0, 0, viewx, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, GRID, SKIN2);
-	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, viewx, viewy, GRID, SKIN2);
+	RenderBox(0, 0, viewx, 3*FONTHEIGHT_SMALL + 2*BORDERSIZE + 2, FILL, SKIN0);
+	RenderBox(0, 3*FONTHEIGHT_SMALL + 2*BORDERSIZE, viewx, viewy, FILL, SKIN1);
+	RenderBox(0, 0, viewx, 3*FONTHEIGHT_SMALL + 2*BORDERSIZE + 2, GRID, SKIN2);
+	RenderBox(0, 3*FONTHEIGHT_SMALL + 2*BORDERSIZE, viewx, viewy, GRID, SKIN2);
 	
-	p=strchr(szAction, '\n');
+	p = strchr(szAction, '\n');
+
 	if(p)
 	{
 		*p = 0;
-		RenderString((osd == 'G') ? "Absender:" : "From:", 2*BORDERSIZE, BORDERSIZE+FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, ORANGE);
-		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
+		RenderString((osd == 'G') ? "Absender:" : "From:", 2*BORDERSIZE, BORDERSIZE + FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE + 100, BORDERSIZE + FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, WHITE);
 		szAction = ++p;
 	}
+
 	if(p) 
 	{
 		p = strchr(szAction, '\n');
 	}
+
 	if(p)
 	{
 		*p = 0;
-		RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, ORANGE);
-		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
+		RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE + 2*FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE + 100, BORDERSIZE + 2*FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, WHITE);
 		szAction = ++p;
 	}
+
 	if(p)
 	{
 		p = strchr(szAction,'\n');
 	}
+
 	if(p)
 	{
 		*p = 0;
-		RenderString((osd == 'G') ? "Datum:" : "Date:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , viewx-4*BORDERSIZE, LEFT, SMALL, ORANGE);
-		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2 , viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
+		RenderString((osd == 'G') ? "Datum:" : "Date:", 2*BORDERSIZE, BORDERSIZE + 3*FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE + 100, BORDERSIZE + 3*FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, WHITE);
 		szAction = ++p;
 	}
-	
 }
 
 /******************************************************************************
  * ShowFile                                                                   *
  ******************************************************************************/
+
 void ShowFile(FILE* pipe, char* szAction)
 {
 	// Code from splugin (with some modifications...)
@@ -1001,33 +1012,38 @@ void ShowFile(FILE* pipe, char* szAction)
 	long iPagePos[100];
 	char szHeader[256];
 
-
 	// Render output window
-	strcpy(szHeader,szAction);
-	ShowMailHeader(szHeader,viewx,viewy);
+	strcpy(szHeader, szAction);
+	ShowMailHeader(szHeader, viewx, viewy);
 
 	int row = 0;
 	iPage = 0;
+
 	// position of 1 bytes of all the pages
 	iPagePos[0] = ftell(pipe);
+
 	while(1)
 	{
 		while( fgets( line, 83, pipe ) )
 		{
-			p = strchr(line,'\n');
+			p = strchr(line, '\n');
+
 			if( p )
 			{
 				*p = 0;
 			}
+
 			row++;
-			RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*FONTHEIGHT_SMALL -FONT_OFFSET, viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
+			RenderString(line, 2*BORDERSIZE + 2, 2*BORDERSIZE + 3*FONTHEIGHT_SMALL + 2 + row*FONTHEIGHT_SMALL -FONT_OFFSET, viewx - 4*BORDERSIZE, LEFT, SMALL, WHITE);
 
 			if(row > framerows - 2)
 			{
 				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+
 				while(1)
 				{
 					GetRCCode();
+
 					if(rccode == RC_HOME || rccode == RC_OK || rccode == RC_RIGHT)
 					{
 						if (iPage < 99) 
@@ -1036,6 +1052,7 @@ void ShowFile(FILE* pipe, char* szAction)
 						}
 						break;
 					}
+
 					if(rccode == RC_LEFT)
 					{
 						if (iPage) 
@@ -1050,8 +1067,10 @@ void ShowFile(FILE* pipe, char* szAction)
 						break;
 					}
 				}
+
 				row = 0;
 				iPagePos[iPage] = ftell(pipe);
+
 				if(rccode == RC_HOME) 
 				{
 					break;
@@ -1059,15 +1078,17 @@ void ShowFile(FILE* pipe, char* szAction)
 				// Render output window
 				strcpy(szHeader, szAction);
 				ShowMailHeader(szHeader, viewx, viewy);
-
 			}
 		}
+
 		if(row > 0)
 		{
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+
 			while(1)
 			{
 				GetRCCode();
+
 				if( rccode == RC_HOME || rccode == RC_OK )
 				{
 					break;
@@ -1083,12 +1104,15 @@ void ShowFile(FILE* pipe, char* szAction)
 					{
 						fseek(pipe, 0, SEEK_SET);
 					}
+
 					row = 0;
 					iPagePos[iPage] = ftell(pipe);
+
 					if (rccode == RC_HOME)
 					{
 						break;
 					}
+
 					// Render output window
 					strcpy(szHeader, szAction);
 					ShowMailHeader(szHeader, viewx, viewy);
@@ -1101,9 +1125,9 @@ void ShowFile(FILE* pipe, char* szAction)
 			break;	
 		}
 	}
+
 	rccode = -1;
 }
-
 
 /******************************************************************************
  * ShowMessage
@@ -1211,9 +1235,10 @@ void ShowMessage(int message)
 		    RenderBox(285, 286, 334, 310, FILL, SKIN2);
 		    RenderString("OK", 287, 305, 46, CENTER, SMALL, WHITE);
 		}
+
 		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 
-		if(message!=GETMAIL)
+		if(message != GETMAIL)
 		{
 			while(GetRCCode() != RC_OK);
 		}
@@ -1230,7 +1255,14 @@ void ShowMailInfo(int account, int mailindex)
 
 	// lcd
 
-		UpdateLCD(account);
+		if(lcd != -1)
+		{
+		    UpdateLCD(account);
+		}
+		else
+		{
+		    printf("TuxMail <no LCD found>\n");
+		}
 
 	// layout
 
@@ -1506,7 +1538,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.16 $";
+	char cvs_revision[] = "$Revision: 1.17 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -1552,7 +1584,7 @@ void plugin_exec(PluginParam *par)
 			}
 		}
 
-		if(fb == -1 || rc == -1 || lcd == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
+		if(fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
 		{
 			printf("TuxMail <missing Param(s)>\n");
 
@@ -1713,10 +1745,9 @@ void plugin_exec(PluginParam *par)
 		ShowMailInfo(account, mailindex);
 
 	// main loop
-
-
 		
-		do{
+		do
+		{
 			switch((rccode = GetRCCode()))
 			{
 				case RC_0:
@@ -2077,11 +2108,21 @@ void plugin_exec(PluginParam *par)
 					{
 						fclose(fd_run);
 						unlink(RUNFILE);
+#ifdef OE
+						unlink(OE_START);
+						unlink(OE_KILL0);
+						unlink(OE_KILL6);
+#endif
 						ShowMessage(BOOTOFF);
 					}
 					else
 					{
 						fclose(fopen(RUNFILE, "w"));
+#ifdef OE
+					        symlink("../init.d/tuxmail", OE_START);
+						symlink("../init.d/tuxmail", OE_KILL0);
+						symlink("../init.d/tuxmail", OE_KILL6);
+#endif
 						ShowMessage(BOOTON);
 					}
 
@@ -2089,25 +2130,29 @@ void plugin_exec(PluginParam *par)
 
 				case RC_HELP:
 
-					ControlDaemon(GET_MAIL,account,mailindex);
+					if(maildb[account].mails)
+					{
+					    ControlDaemon(GET_MAIL, account, mailindex);
 
-					if(!mailfile)
-					{
+					    if(!mailfile)
+					    {
 						ShowMessage(GETMAILFAIL);
-					}
-					else
-					{
+					    }
+					    else
+					    {
 						FILE* pFile;
-						pFile = fopen("/tmp/popmail","r");
+						pFile = fopen(MAILFILE, "r");
+
 						if  (pFile != NULL)
 						{
-							char szInfo[256];
-							sprintf(szInfo,"%s\n%s\n%s %s\n",maildb[account].mailinfo[mailindex].from,maildb[account].mailinfo[mailindex].subj,maildb[account].mailinfo[mailindex].date,maildb[account].mailinfo[mailindex].time);
-							ShowFile(pFile, szInfo);
-							fclose(pFile);
+						    char szInfo[256];
+						    sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
+						    ShowFile(pFile, szInfo);
+						    fclose(pFile);
 						}
 							
 						rccode = 0;
+					    }
 					}
 
 					break;
@@ -2125,7 +2170,8 @@ void plugin_exec(PluginParam *par)
 
 			ShowMailInfo(account, mailindex);
 
-		}while(rccode != RC_HOME);
+		}
+		while(rccode != RC_HOME);
 
 	// reset lcd lock
 
@@ -2150,4 +2196,3 @@ void plugin_exec(PluginParam *par)
 
 		return;
 }
- 
