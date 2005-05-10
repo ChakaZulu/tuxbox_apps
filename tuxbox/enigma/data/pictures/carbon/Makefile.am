@@ -10,5 +10,5 @@ install_DATA = \
 	radio-fs8.png radio_sel-fs8.png rectime-fs8.png rectime_sel-fs8.png \
 	right.png scart-fs8.png scart_sel-fs8.png setup-fs8.png setup_sel-fs8.png shutdown-fs8.png \
 	shutdown_sel-fs8.png top_left.png top.png top_right.png tv-fs8.png tv_sel-fs8.png unchecked.png \
-	video.png volumeslider.png v.png
+	volumeslider.png v.png
 
