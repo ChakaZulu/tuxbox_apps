@@ -6,7 +6,7 @@ install_DATA = \
 	corner.png crypt_on.png dolby_on.png dvr.png file-fs8.png file_sel-fs8.png \
 	folder.png format_on.png games-fs8.png games_sel-fs8.png h.png info-fs8.png \
 	info_sel-fs8.png lbarrow_down.png lbarrow_left.png lbarrow.png lbarrow_right.png \
-	lbarrow_up.png lcd-clock.png lcdmenu.png lcd-speaker.png left.png osd.png \
+	lbarrow_up.png lcdmenu.png left.png osd.png \
 	radio-fs8.png radio_sel-fs8.png rectime-fs8.png rectime_sel-fs8.png \
 	right.png scart-fs8.png scart_sel-fs8.png setup-fs8.png setup_sel-fs8.png shutdown-fs8.png \
 	shutdown_sel-fs8.png top_left.png top.png top_right.png tv-fs8.png tv_sel-fs8.png unchecked.png \
