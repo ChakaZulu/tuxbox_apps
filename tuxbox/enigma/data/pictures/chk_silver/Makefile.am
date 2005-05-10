@@ -3,20 +3,16 @@ SUBDIRS = mainmenu
 installdir = $(TUXBOXDATADIR)/enigma/pictures/chk_silver
 
 install_DATA = \
-	3D_border_unselected_corner.png 3D_border_unselected_corner_dark.png \
+	3D_border_unselected_corner_dark.png \
 	3D_border_unselected_corner_darkLight.png \
 	3D_border_unselected_corner_darkLight_swap.png 3D_border_unselected_corner_dark_swap.png \
 	3D_border_unselected_corner_light.png 3D_border_unselected_corner_lightDark.png \
 	3D_border_unselected_corner_lightDark_swap.png 3D_border_unselected_corner_light_swap.png \
 	3D_border_unselected_hor_dark.png 3D_border_unselected_hor_light.png \
 	3D_border_unselected_ver_dark.png 3D_border_unselected_ver_light.png \
-	b.png bl.png bl2.png blue-button.png br.png br2.png checked.png \
+	b.png bl.png blue-button.png br.png checked.png \
 	combo_arrow.png crypt_off.png crypt_on.png dolby_off.png dolby_on.png dvr-fs8.png \
 	folder.png format_off.png format_on.png green-button.png info-bg.png l.png lbarrow.png \
 	lbarrow_down.png lbarrow_left.png lbarrow_right.png lbarrow_up.png lcdmenu.png logo.png \
-	no-button.png r.png rec_symbol-fs8.png red-button.png status_big_break.png \
-	status_big_b_break.png status_big_b_left.png status_big_b_middle.png status_big_b_right.png \
-	status_big_left.png status_big_middle.png status_big_right.png status_small_b_break.png \
-	status_small_b_left.png status_small_b_middle.png status_small_b_right.png status_small_break.png \
-	status_small_left.png status_small_middle.png status_small_right.png t.png \
+	no-button.png r.png rec_symbol-fs8.png red-button.png \
 	tl.png tr.png unchecked.png yellow-button.png
