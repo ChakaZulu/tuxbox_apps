@@ -147,7 +147,7 @@
 	</values>
 
 	<images basepath="chk_silver" target="fb">	
-		<img name="mainmenu.background" src="background-fs8.png" />
+		<img name="mainmenu.background" src="mainmenu/background-fs8.png" />
 		<img name="eComboBox.arrow" src="combo_arrow.png" />
 		<img name="eCheckbox.checked" src="checked.png" />
 		<img name="eCheckbox.unchecked" src="unchecked.png" />
