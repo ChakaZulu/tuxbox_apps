@@ -3236,7 +3236,7 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 	if (msg.length())
 	{
 		msg = httpUnescape(msg);
-		eZapMain::getInstance()->postMessage(eZapMessage(1, "External Message", msg, 10), 0);
+		eZapMain::getInstance()->postMessage(eZapMessage(1, _("External Message"), msg, 10), 0);
 		result = "+ok";
 	}
 	if (opts.find("msg") == opts.end())
