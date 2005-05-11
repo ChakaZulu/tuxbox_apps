@@ -99,7 +99,7 @@
 	</values>
 
 	<images basepath="" target="fb">
-		<img name="eComboBox.arrow" src="combo_arrow.png" />
+		<img name="eComboBox.arrow" src="neutrino/combo_arrow.png" />
 		<img name="button_red" src="button_red.png" />
 		<img name="button_green" src="button_green.png" />
 		<img name="button_yellow" src="button_yellow.png" />
