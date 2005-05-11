@@ -82,11 +82,15 @@ void eRCConfig::set( int delay, int repeat )
 
 void eRCConfig::reload()
 {
+	bool mustStore=false;
 	rdelay=500;
 	rrate=100;
 	if ( eConfig::getInstance()->getKey("/ezap/rc/repeatRate", rrate) )
+		mustStore=true;
+	if ( eConfig::getInstance()->getKey("/ezap/rc/repeatDelay", rdelay) )
+		mustStore=true;
+	if ( mustStore )
 		save();
-	eConfig::getInstance()->getKey("/ezap/rc/repeatDelay", rdelay);
 }
 
 void eRCConfig::save()
