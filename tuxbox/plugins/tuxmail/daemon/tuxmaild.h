@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.15  2005/05/11 12:01:23  lazyt
+ * Protect Mailreader with optional PIN-Code
+ *
  * Revision 1.14  2005/05/10 12:55:16  lazyt
  * - LCD-Fix for DM500
  * - Autostart for DM7020 (use -DOE, put Init-Script to /etc/init.d/tuxmail)
@@ -181,6 +184,7 @@ struct
 	char host[64];
 	char user[64];
 	char pass[64];
+	char code[8];
 	int  mail_all;
 	int  mail_new;
 

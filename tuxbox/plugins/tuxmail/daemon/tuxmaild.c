@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.19  2005/05/11 12:01:23  lazyt
+ * Protect Mailreader with optional PIN-Code
+ *
  * Revision 1.18  2005/05/10 12:55:16  lazyt
  * - LCD-Fix for DM500
  * - Autostart for DM7020 (use -DOE, put Init-Script to /etc/init.d/tuxmail)
@@ -120,6 +123,7 @@ int ReadConf()
 			fprintf(fd_conf, "HOST0=\n");
 			fprintf(fd_conf, "USER0=\n");
 			fprintf(fd_conf, "PASS0=\n");
+			fprintf(fd_conf, "CODE0=\n");
 
 			fclose(fd_conf);
 
@@ -208,6 +212,10 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[0].pass);
 			}
+			else if((ptr = strstr(line_buffer, "CODE0=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[0].code);
+			}
 			else if((ptr = strstr(line_buffer, "NAME1=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[1].name);
@@ -223,6 +231,10 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS1=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[1].pass);
+			}
+			else if((ptr = strstr(line_buffer, "CODE1=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[1].code);
 			}
 			else if((ptr = strstr(line_buffer, "NAME2=")))
 			{
@@ -240,6 +252,10 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[2].pass);
 			}
+			else if((ptr = strstr(line_buffer, "CODE2=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[2].code);
+			}
 			else if((ptr = strstr(line_buffer, "NAME3=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[3].name);
@@ -255,6 +271,10 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS3=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[3].pass);
+			}
+			else if((ptr = strstr(line_buffer, "CODE3=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[3].code);
 			}
 			else if((ptr = strstr(line_buffer, "NAME4=")))
 			{
@@ -272,6 +292,10 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[4].pass);
 			}
+			else if((ptr = strstr(line_buffer, "CODE4=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[4].code);
+			}
 			else if((ptr = strstr(line_buffer, "NAME5=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[5].name);
@@ -287,6 +311,10 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS5=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[5].pass);
+			}
+			else if((ptr = strstr(line_buffer, "CODE5=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[5].code);
 			}
 			else if((ptr = strstr(line_buffer, "NAME6=")))
 			{
@@ -304,6 +332,10 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[6].pass);
 			}
+			else if((ptr = strstr(line_buffer, "CODE6=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[6].code);
+			}
 			else if((ptr = strstr(line_buffer, "NAME7=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[7].name);
@@ -319,6 +351,10 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS7=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[7].pass);
+			}
+			else if((ptr = strstr(line_buffer, "CODE7=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[7].code);
 			}
 			else if((ptr = strstr(line_buffer, "NAME8=")))
 			{
@@ -336,6 +372,10 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[8].pass);
 			}
+			else if((ptr = strstr(line_buffer, "CODE8=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[8].code);
+			}
 			else if((ptr = strstr(line_buffer, "NAME9=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[9].name);
@@ -351,6 +391,10 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS9=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[9].pass);
+			}
+			else if((ptr = strstr(line_buffer, "CODE9=")))
+			{
+				sscanf(ptr + 6, "%4s", account_db[9].code);
 			}
 		}
 
@@ -443,6 +487,7 @@ int ReadConf()
 				fprintf(fd_conf, "HOST%d=%s\n", loop, account_db[loop].host);
 				fprintf(fd_conf, "USER%d=%s\n", loop, account_db[loop].user);
 				fprintf(fd_conf, "PASS%d=%s\n", loop, account_db[loop].pass);
+				fprintf(fd_conf, "CODE%d=%s\n", loop, account_db[loop].code);
 
 				if(!account_db[loop + 1].name[0])
 				{
@@ -2680,7 +2725,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.18 $";
+	char cvs_revision[] = "$Revision: 1.19 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;

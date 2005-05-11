@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.18  2005/05/11 12:01:21  lazyt
+ * Protect Mailreader with optional PIN-Code
+ *
  * Revision 1.17  2005/05/10 12:55:15  lazyt
  * - LCD-Fix for DM500
  * - Autostart for DM7020 (use -DOE, put Init-Script to /etc/init.d/tuxmail)
@@ -98,6 +101,46 @@ void ReadConf()
 			else if((ptr = strstr(line_buffer, "SKIN=")))
 			{
 				sscanf(ptr + 5, "%d", &skin);
+			}
+			else if((ptr = strstr(line_buffer, "CODE0=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[0].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE1=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[1].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE2=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[2].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE3=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[3].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE4=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[4].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE5=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[5].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE6=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[6].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE7=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[7].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE8=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[8].code);
+			}
+			else if((ptr = strstr(line_buffer, "CODE9=")))
+			{
+				sscanf(ptr + 6, "%4s", maildb[9].code);
 			}
 		}
 
@@ -1533,16 +1576,154 @@ int Add2SpamList(int account, int mailindex)
 }
 
 /******************************************************************************
+ * CheckPIN (0=wrong, 1=ok)
+ ******************************************************************************/
+
+int CheckPIN(int Account)
+{
+	int result = 0;
+	int skip;
+	int count = 0;
+	char code[4];
+
+	// pin active?
+
+		if(!maildb[Account].code[0])
+		{
+			return 1;
+		}
+
+	// layout
+
+		RenderBox(155, 178, 464, 220, FILL, SKIN0);
+		RenderBox(155, 220, 464, 327, FILL, SKIN1);
+		RenderBox(155, 178, 464, 327, GRID, SKIN2);
+		RenderBox(155, 220, 464, 327, GRID, SKIN2);
+
+		RenderString((osd == 'G') ? "Sicherheitsabfrage" : "Security Check", 157, 213, 306, CENTER, BIG, ORANGE);
+		RenderString("PIN-Code :", 219, 265, 120, RIGHT, BIG, WHITE);
+		RenderString("????", 346, 265, 100, LEFT, BIG, WHITE);
+
+		RenderBox(285, 286, 334, 310, FILL, SKIN2);
+		RenderString("EXIT", 287, 305, 46, CENTER, SMALL, WHITE);
+
+		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+
+    	// get pin
+
+		do
+		{
+			skip = 0;
+
+			switch((rccode = GetRCCode()))
+			{
+				case RC_0:
+					code[count] = '0';
+					break;
+
+				case RC_1:
+					code[count] = '1';
+					break;
+
+				case RC_2:
+					code[count] = '2';
+					break;
+
+				case RC_3:
+					code[count] = '3';
+					break;
+
+				case RC_4:
+					code[count] = '4';
+					break;
+
+				case RC_5:
+					code[count] = '5';
+					break;
+
+				case RC_6:
+					code[count] = '6';
+					break;
+
+				case RC_7:
+					code[count] = '7';
+					break;
+
+				case RC_8:
+					code[count] = '8';
+					break;
+
+				case RC_9:
+					code[count] = '9';
+					break;
+
+				default:
+					skip = 1;
+			}
+
+			if(!skip)
+			{
+				RenderBox(341, 236, 393, 270, FILL, SKIN1);
+
+				switch(++count)
+				{
+					case 1:
+						RenderString("*???", 346, 265, 100, LEFT, BIG, WHITE);
+						break;
+
+					case 2:
+						RenderString("**??", 346, 265, 100, LEFT, BIG, WHITE);
+						break;
+
+					case 3:
+						RenderString("***?", 346, 265, 100, LEFT, BIG, WHITE);
+						break;
+
+					case 4:
+						RenderString("****", 346, 265, 100, LEFT, BIG, WHITE);
+				}
+
+				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+			}
+		}
+		while(rccode != RC_HOME && count < 4);
+
+	// check pin
+
+		if(count == 4)
+		{
+			if(strncmp(code, maildb[Account].code, 4))
+			{
+				RenderBox(157, 222, 462, 325, FILL, SKIN1);
+				RenderString((osd == 'G') ? "Falsche PIN!" : "Wrong PIN!", 157, 265, 306, CENTER, BIG, WHITE);
+				RenderString((osd == 'G') ? "Nächster Versuch in 5 Sekunden..." : "Try again in 5 Seconds...", 157, 305, 306, CENTER, SMALL, WHITE);
+				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+
+				sleep(5);
+			}
+			else
+			{
+				maildb[Account].code[0] = 0;
+				result = 1;
+			}
+		}
+
+		rccode = -1;
+
+		return result;
+}
+
+/******************************************************************************
  * plugin_exec
  ******************************************************************************/
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.17 $";
+	char cvs_revision[] = "$Revision: 1.18 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
-	
+
 	// show versioninfo
 
 		sscanf(cvs_revision, "%*s %s", versioninfo_p);
@@ -1591,9 +1772,18 @@ void plugin_exec(PluginParam *par)
 			return;
 		}
 
+	// fill database
+
+		memset(maildb, 0, sizeof(maildb));
+
+		for(loop = 0; loop < 10; loop++)
+		{
+			FillDB(loop);
+		}
+
 	// read config
 
-	    ReadConf();
+		ReadConf();
 
 	// init framebuffer
 
@@ -1681,7 +1871,6 @@ void plugin_exec(PluginParam *par)
 #else
 		desc.flags = FT_LOAD_MONOCHROME;
 #endif
-
 	// init backbuffer
 
 		if(!(lbb = malloc(var_screeninfo.xres*var_screeninfo.yres)))
@@ -1707,15 +1896,6 @@ void plugin_exec(PluginParam *par)
 		if(!ControlDaemon(GET_STATUS,0,0))
 		{
 			online = 2;
-		}
-
-	// fill database
-
-		memset(maildb, 0, sizeof(maildb));
-
-		for(loop = 0; loop < 10; loop++)
-		{
-			FillDB(loop);
 		}
 
 	// remove last key & set rc to blocking mode
@@ -2132,27 +2312,30 @@ void plugin_exec(PluginParam *par)
 
 					if(maildb[account].mails)
 					{
-					    ControlDaemon(GET_MAIL, account, mailindex);
-
-					    if(!mailfile)
-					    {
-						ShowMessage(GETMAILFAIL);
-					    }
-					    else
-					    {
-						FILE* pFile;
-						pFile = fopen(MAILFILE, "r");
-
-						if  (pFile != NULL)
+						if(CheckPIN(account))
 						{
-						    char szInfo[256];
-						    sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
-						    ShowFile(pFile, szInfo);
-						    fclose(pFile);
-						}
+							ControlDaemon(GET_MAIL, account, mailindex);
+
+							if(!mailfile)
+							{
+								ShowMessage(GETMAILFAIL);
+							}
+							else
+							{
+								FILE* pFile;
+								pFile = fopen(MAILFILE, "r");
+
+								if(pFile != NULL)
+								{
+									char szInfo[256];
+									sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
+									ShowFile(pFile, szInfo);
+									fclose(pFile);
+								}
 							
-						rccode = 0;
-					    }
+								rccode = 0;
+							}
+						}
 					}
 
 					break;
