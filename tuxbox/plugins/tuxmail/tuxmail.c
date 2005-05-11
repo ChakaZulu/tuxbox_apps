@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.19  2005/05/11 19:00:21  robspr1
+ * minor Mailreader changes / add to Spamlist undo
+ *
  * Revision 1.18  2005/05/11 12:01:21  lazyt
  * Protect Mailreader with optional PIN-Code
  *
@@ -983,111 +986,137 @@ void RenderCircle(int sy, char type)
 		}
 }
 
+
+/******************************************************************************
+ * PaintMailHeader                                                                   *
+ ******************************************************************************/
+
+void PaintMailHeader( void )
+{
+	RenderBox(0, 0, VIEWX, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, FILL, SKIN0);
+	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, VIEWX,VIEWY, FILL, SKIN1);
+	RenderBox(0, 0, VIEWX, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, GRID, SKIN2);
+	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, VIEWX, VIEWY, GRID, SKIN2);
+}
+
 /******************************************************************************
  * ShowMailHeader                                                             *
  ******************************************************************************/
 
-#define BORDERSIZE 2
-#define FONTHEIGHT_BIG 40
-#define FONTHEIGHT_SMALL 24
-#define FONT_OFFSET_BIG 10
-#define FONT_OFFSET 5
-
-void ShowMailHeader(char* szAction, int viewx, int viewy)
+void ShowMailHeader(char* szAction)
 {
 	char *p;
 	
-	RenderBox(0, 0, viewx, 3*FONTHEIGHT_SMALL + 2*BORDERSIZE + 2, FILL, SKIN0);
-	RenderBox(0, 3*FONTHEIGHT_SMALL + 2*BORDERSIZE, viewx, viewy, FILL, SKIN1);
-	RenderBox(0, 0, viewx, 3*FONTHEIGHT_SMALL + 2*BORDERSIZE + 2, GRID, SKIN2);
-	RenderBox(0, 3*FONTHEIGHT_SMALL + 2*BORDERSIZE, viewx, viewy, GRID, SKIN2);
 	
-	p = strchr(szAction, '\n');
-
+	p=strchr(szAction, '\n');
 	if(p)
 	{
 		*p = 0;
-		RenderString((osd == 'G') ? "Absender:" : "From:", 2*BORDERSIZE, BORDERSIZE + FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, ORANGE);
-		RenderString(szAction, 2*BORDERSIZE + 100, BORDERSIZE + FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, WHITE);
+		RenderString((osd == 'G') ? "Absender:" : "From:", 2*BORDERSIZE, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
 		szAction = ++p;
 	}
-
 	if(p) 
 	{
 		p = strchr(szAction, '\n');
 	}
-
 	if(p)
 	{
 		*p = 0;
-		RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE + 2*FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, ORANGE);
-		RenderString(szAction, 2*BORDERSIZE + 100, BORDERSIZE + 2*FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, WHITE);
+		RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
 		szAction = ++p;
 	}
-
 	if(p)
 	{
 		p = strchr(szAction,'\n');
 	}
-
 	if(p)
 	{
 		*p = 0;
-		RenderString((osd == 'G') ? "Datum:" : "Date:", 2*BORDERSIZE, BORDERSIZE + 3*FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, ORANGE);
-		RenderString(szAction, 2*BORDERSIZE + 100, BORDERSIZE + 3*FONTHEIGHT_SMALL - 2, viewx - 4*BORDERSIZE, LEFT, SMALL, WHITE);
+		RenderString((osd == 'G') ? "Datum:" : "Date:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2 , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
 		szAction = ++p;
 	}
+	if(p)
+	{
+		p = strchr(szAction,'\n');
+	}
+	if(p)
+	{
+		*p = 0;
+		RenderString((osd == 'G') ? "Seite:" : "Page:", 2*BORDERSIZE+450, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString(szAction, 2*BORDERSIZE+500, BORDERSIZE+3*FONTHEIGHT_SMALL-2 , VIEWX-4*BORDERSIZE-500, LEFT, SMALL, WHITE);
+		szAction = ++p;
+	}
+	
 }
 
 /******************************************************************************
- * ShowFile                                                                   *
+ * ShowMailFile                                                                   *
  ******************************************************************************/
-
-void ShowFile(FILE* pipe, char* szAction)
+void ShowMailFile(char* filename, char* szAction)
 {
 	// Code from splugin (with some modifications...)
 	char *p;
 	char line[256];
-	int viewx = 619;
-	int viewy = 504;
-	int framerows = 17;
 	int iPage;
+	int iMaxPages = 0;
 	long iPagePos[100];
 	char szHeader[256];
 
+	FILE* pipe;
+	pipe = fopen(filename,"r");
+
+	if  (pipe == NULL)
+	{
+		return;
+	}
+
+
 	// Render output window
-	strcpy(szHeader, szAction);
-	ShowMailHeader(szHeader, viewx, viewy);
-
+	PaintMailHeader();
 	int row = 0;
+	
+	// calculate number of pages
+	while( fgets( line, 83, pipe ))
+	{
+		if ( ++row > (FRAMEROWS) )
+		{
+			row = 0;
+			iMaxPages ++;
+		}
+	}
+	iMaxPages ++;
+	
+	row = 0;
 	iPage = 0;
-
-	// position of 1 bytes of all the pages
+	// position of 1. byte of all the pages
+	fseek(pipe, 0, SEEK_SET);
 	iPagePos[0] = ftell(pipe);
-
 	while(1)
 	{
 		while( fgets( line, 83, pipe ) )
 		{
-			p = strchr(line, '\n');
-
+			p = strchr(line,'\n');
 			if( p )
 			{
 				*p = 0;
 			}
-
 			row++;
-			RenderString(line, 2*BORDERSIZE + 2, 2*BORDERSIZE + 3*FONTHEIGHT_SMALL + 2 + row*FONTHEIGHT_SMALL -FONT_OFFSET, viewx - 4*BORDERSIZE, LEFT, SMALL, WHITE);
+			RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*FONTHEIGHT_SMALL -FONT_OFFSET, VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
 
-			if(row > framerows - 2)
+			if(row > FRAMEROWS)
 			{
+				// Render output window
+				sprintf(szHeader,"%s%u / %u\n", szAction, iPage+1, iMaxPages);
+				ShowMailHeader(szHeader);
 				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 
 				while(1)
 				{
 					GetRCCode();
-
-					if(rccode == RC_HOME || rccode == RC_OK || rccode == RC_RIGHT)
+					if( rccode == RC_HOME || rccode == RC_OK || rccode == RC_RIGHT || rccode == RC_DOWN )
 					{
 						if (iPage < 99) 
 						{
@@ -1095,8 +1124,7 @@ void ShowFile(FILE* pipe, char* szAction)
 						}
 						break;
 					}
-
-					if(rccode == RC_LEFT)
+					if( rccode == RC_LEFT || rccode == RC_UP )
 					{
 						if (iPage) 
 						{
@@ -1110,33 +1138,32 @@ void ShowFile(FILE* pipe, char* szAction)
 						break;
 					}
 				}
-
 				row = 0;
 				iPagePos[iPage] = ftell(pipe);
-
 				if(rccode == RC_HOME) 
 				{
 					break;
 				}
 				// Render output window
-				strcpy(szHeader, szAction);
-				ShowMailHeader(szHeader, viewx, viewy);
+				PaintMailHeader();
+
 			}
 		}
-
 		if(row > 0)
 		{
+			// Render output window
+			iMaxPages = iPage+1;
+			sprintf(szHeader,"%s%u / %u\n",szAction,iPage+1,iMaxPages);
+			ShowMailHeader(szHeader);
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
-
 			while(1)
 			{
 				GetRCCode();
-
-				if( rccode == RC_HOME || rccode == RC_OK )
+				if( rccode == RC_HOME || rccode == RC_OK || rccode == RC_DOWN )
 				{
 					break;
 				}
-				if( rccode == RC_LEFT )
+				if( rccode == RC_LEFT || rccode == RC_UP )
 				{
 					if( iPage ) 
 					{
@@ -1147,30 +1174,26 @@ void ShowFile(FILE* pipe, char* szAction)
 					{
 						fseek(pipe, 0, SEEK_SET);
 					}
-
 					row = 0;
 					iPagePos[iPage] = ftell(pipe);
-
 					if (rccode == RC_HOME)
 					{
 						break;
 					}
-
-					// Render output window
-					strcpy(szHeader, szAction);
-					ShowMailHeader(szHeader, viewx, viewy);
 					break;
 				}
 			}
 		}
+		PaintMailHeader();
 		if(rccode == RC_HOME)
 		{
 			break;	
 		}
 	}
-
-	rccode = -1;
+	rccode = 0;
+	fclose(pipe);
 }
+
 
 /******************************************************************************
  * ShowMessage
@@ -1241,6 +1264,12 @@ void ShowMessage(int message)
 			case ADD2SPAM:
 
 				RenderString((osd == 'G') ? "Spamliste wurde erweitert." : "Added to Spamlist.", 157, 265, 306, CENTER, BIG, WHITE);
+
+				break;
+
+			case DELSPAM:
+
+				RenderString((osd == 'G') ? "von Spamliste entfernt." : "Removed from Spamlist.", 157, 265, 306, CENTER, BIG, WHITE);
 
 				break;
 
@@ -1518,7 +1547,7 @@ void UpdateDB(int account)
 }
 
 /******************************************************************************
- * Add2SpamList (0=fail, 1=done)
+ * Add2SpamList (0=fail, 1=added, 2=removed)
  ******************************************************************************/
 
 int Add2SpamList(int account, int mailindex)
@@ -1526,15 +1555,11 @@ int Add2SpamList(int account, int mailindex)
 	FILE *fd_spam;
 	char *ptr1, *ptr2;
 	char mailaddress[256];
-
+	char linebuffer[256];
+	char filebuffer[4096];
+	char bRemove = 0;
+	
 	// open or create spamlist
-
-		if(!(fd_spam = fopen(CFGPATH SPMFILE, "a")))
-		{
-			printf("TuxMail <could not create Spamlist: %s>\n", strerror(errno));
-
-			return 0;
-		}
 
 	// find address
 
@@ -1559,20 +1584,57 @@ int Add2SpamList(int account, int mailindex)
 		{
 			printf("TuxMail <Mailaddress \"%s\" invalid, not added to Spamlist>\n", maildb[account].mailinfo[mailindex].from);
 
+			return 0;
+		}
+
+		if((fd_spam = fopen(CFGPATH SPMFILE, "r")))
+		{
+
+	// now we check if this address is already in the spamlist, if so we remove it
+			while ( fgets( linebuffer, sizeof(linebuffer), fd_spam ) )
+			{
+				if( !strstr(linebuffer, mailaddress) )
+				{
+					sprintf(filebuffer, "%s\n", linebuffer);
+				}
+				else
+				{
+					bRemove = 1;
+				}
+			}
 			fclose(fd_spam);
+		}
+		
+		if(!(fd_spam = fopen(CFGPATH SPMFILE, "w")))
+		{
+			printf("TuxMail <could not create Spamlist: %s>\n", strerror(errno));
 
 			return 0;
 		}
 
+		if( !bRemove )
+		{		
 	// add address to spamlist
+	
+			printf("TuxMail <Mailaddress \"%s\" added to Spamlist>\n", mailaddress);
 
-		printf("TuxMail <Mailaddress \"%s\" added to Spamlist>\n", mailaddress);
+			fprintf(fd_spam, "%s\n", mailaddress);
 
-		fprintf(fd_spam, "%s\n", mailaddress);
+			fclose(fd_spam);
 
-		fclose(fd_spam);
+			return 1;
+		}
 
-		return 1;
+	// remove address to spamlist
+
+			printf("TuxMail <Mailaddress \"%s\" removed from Spamlist>\n", mailaddress);
+
+			fprintf(fd_spam, "%s", filebuffer);
+
+			fclose(fd_spam);
+
+			return 2;
+
 }
 
 /******************************************************************************
@@ -1719,7 +1781,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.18 $";
+	char cvs_revision[] = "$Revision: 1.19 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -2227,11 +2289,18 @@ void plugin_exec(PluginParam *par)
 
 					if(admin == 'Y')
 					{
-						if(Add2SpamList(account, mailindex))
+						int iRet = Add2SpamList(account, mailindex);
+						if(iRet == 1)
 						{
 							maildb[account].mailinfo[mailindex].type[0] = 'D';
 							ControlDaemon(RELOAD_SPAMLIST,0,0);
 							ShowMessage(ADD2SPAM);
+						}
+						else if(iRet == 2)
+						{
+							maildb[account].mailinfo[mailindex].type[0] = 'O';
+							ControlDaemon(RELOAD_SPAMLIST,0,0);
+							ShowMessage(DELSPAM);
 						}
 						else
 						{
@@ -2322,18 +2391,9 @@ void plugin_exec(PluginParam *par)
 							}
 							else
 							{
-								FILE* pFile;
-								pFile = fopen(MAILFILE, "r");
-
-								if(pFile != NULL)
-								{
-									char szInfo[256];
-									sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
-									ShowFile(pFile, szInfo);
-									fclose(pFile);
-								}
-							
-								rccode = 0;
+								char szInfo[256];
+								sprintf(szInfo,"%s\n%s\n%s %s\n",maildb[account].mailinfo[mailindex].from,maildb[account].mailinfo[mailindex].subj,maildb[account].mailinfo[mailindex].date,maildb[account].mailinfo[mailindex].time);
+								ShowMailFile(MAILFILE, szInfo);					
 							}
 						}
 					}

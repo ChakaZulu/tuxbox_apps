@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.15  2005/05/11 19:00:38  robspr1
+ * minor Mailreader changes / add to Spamlist undo
+ *
  * Revision 1.14  2005/05/11 12:01:21  lazyt
  * Protect Mailreader with optional PIN-Code
  *
@@ -156,6 +159,17 @@
 #define	RC_DBOX		0x18
 #define	RC_HOME		0x1F
 
+// defines for mail-reading
+ 
+#define BORDERSIZE 2
+#define FONTHEIGHT_BIG 40
+#define FONTHEIGHT_SMALL 24
+#define FONT_OFFSET_BIG 10
+#define FONT_OFFSET 5
+#define VIEWX  619
+#define VIEWY  504
+#define FRAMEROWS  15
+
 void ShowMessage(int message);
 
 // freetype stuff
@@ -227,7 +241,7 @@ enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST, GET_VERSION, GET_MAIL};
 
 enum {FILL, GRID};
 enum {TRANSP, WHITE, SKIN0, SKIN1, SKIN2, ORANGE, GREEN, YELLOW, RED};
-enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, SPAMFAIL, INFO, GETMAIL, GETMAILFAIL};
+enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, DELSPAM, SPAMFAIL, INFO, GETMAIL, GETMAILFAIL};
 
 unsigned char *lfb = 0, *lbb = 0;
 
