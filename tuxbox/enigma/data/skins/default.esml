@@ -90,10 +90,8 @@
 		<img name="eCheckbox.unchecked" src="unchecked.png" />
 		<img name="eCheckboxLCD.checked" src="checked_lcd.png" nomerge="yes" />
 		<img name="eCheckboxLCD.unchecked" src="unchecked_lcd.png" nomerge="yes" />
-		<img name="eComboBox.arrow" src="combo_arrow.png" />
 		<img name="lcd_standby" src="lcd_standby.png" nomerge="yes" />
 		<img name="lcd_shutdown" src="lcd_shutdown.png" nomerge="yes" />
-		<img name="lcd_enigma_logo" src="enigma2.png" nomerge="yes" />
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="video.png" nomerge="yes" />
 
@@ -139,7 +137,6 @@
 		<img name="failed_symbol" src="event_failed-fs8.png" />
 		<img name="dreamlogo" src="dreamlogo-fs8.png" />
 		<img name="triaxlogo" src="triaxlogo-fs8.png" />
-		<img name="textinput_white" src="zahlen_w.png" />
 		
 		<img name="diseqc_0" src="diseqc_0-fs8.png" />
 		<img name="diseqc_1" src="diseqc_1-fs8.png" />
@@ -220,7 +217,6 @@
 		<img name="key.25" src="button_arrow_right.png" />
 		<img name="key.26" src="button_+.png" />
 		<img name="key.27" src="button_-.png" />
-		<img name="key.28" src="button_?.png" />
 		<img name="key.29" src="button_dbox.png" />
 		<img name="key.30" src="button_home.png" />
 		<img name="key.31" src="button_mute.png" />
