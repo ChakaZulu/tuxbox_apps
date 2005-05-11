@@ -523,7 +523,6 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			break;
 		if (seekbusy)
 			break;
-		seekbusy=256*1024; // next seek only after 128k (video) data
 		off64_t offset=0;
 		if (message.type != eDVRPlayerThreadMessage::seekreal)
 		{
@@ -537,6 +536,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			if (offset<0)
 				offset=0;
 			curBufferFullness=0;
+			seekbusy=256*1024; // next seek only after 128k (video) data
 		} else
 		{
 			buffer.clear();
