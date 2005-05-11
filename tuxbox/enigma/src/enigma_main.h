@@ -549,7 +549,8 @@ private:
 	void EPGAvail(bool);
 
 public:
-	eServicePath getRoot(int list, int mode=-1);
+	bool checkRecordState() { return handleState(); }
+    	eServicePath getRoot(int list, int mode=-1);
 	int getFirstBouquetServiceNum( eServiceReference ref, int mode=-1);
 	void deleteService(eServiceSelector *);
 	void renameBouquet(eServiceSelector *);

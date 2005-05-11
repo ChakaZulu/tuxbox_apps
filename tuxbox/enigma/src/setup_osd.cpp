@@ -2,6 +2,7 @@
 
 #include <setupskin.h>
 #include <enigma.h>
+#include <enigma_main.h>
 #include <lib/base/i18n.h>
 #include <lib/dvb/edvb.h>
 #include <lib/gdi/gfbdc.h>
@@ -330,8 +331,13 @@ void eZapOsdSetup::skinPressed()
 	{
 		eMessageBox msg(_("You have to restart enigma to apply the new skin\nRestart now?"), _("Skin changed"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes );
 		msg.show();
-		if ( msg.exec() == eMessageBox::btYes )
-			eZap::getInstance()->quit(2);
+		int ret = msg.exec();
+		msg.hide();
+		if ( ret == eMessageBox::btYes )
+		{
+			if ( eZapMain::getInstance()->checkRecordState() )
+				eZap::getInstance()->quit(2);
+		}
 		msg.hide();
 	}
 	show();
