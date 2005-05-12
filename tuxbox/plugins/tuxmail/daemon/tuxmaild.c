@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.21  2005/05/12 14:28:28  lazyt
+ * - PIN-Protection for complete Account
+ * - Preparation for sending Mails ;-)
+ *
  * Revision 1.20  2005/05/11 19:01:35  robspr1
  * minor Mailreader changes / add to Spamlist undo
  *
@@ -711,6 +715,7 @@ void *InterfaceThread(void *arg)
 	struct sockaddr_un srvaddr;
 	socklen_t addrlen;
 	char command;
+	char mailsend;
 	char mailcmd[86];
 	int mailidx;
 
@@ -794,7 +799,15 @@ void *InterfaceThread(void *arg)
 					send(fd_conn, &mailread, 1, 0);
 
 					break;
-					
+
+				case 'W':
+
+					mailsend = SendMail();
+
+					send(fd_conn, &mailsend, 1, 0);
+
+					break;
+
 				case 'V':
 
 					send(fd_conn, &versioninfo, 12, 0);
@@ -1913,6 +1926,290 @@ int SendPOPCommand(int command, char *param)
 }
 
 /******************************************************************************
+ * SendSMTPCommand (0=fail, 1=done)
+ ******************************************************************************/
+
+int SendSMTPCommand(int command, char *param)
+{
+	static int sock;
+	struct hostent *server;
+	struct sockaddr_in SockAddr;
+	char send_buffer[128], recv_buffer[4096];
+
+	// clear buffers
+
+		memset(send_buffer, 0, sizeof(send_buffer));
+		memset(recv_buffer, 0, sizeof(recv_buffer));
+
+	// build commandstring
+
+		switch(command)
+		{
+			case INIT:
+
+				if(!(server = gethostbyname(param)))
+				{
+				    sleep(10);	/* give some routers a second chance */
+
+				    if(!(server = gethostbyname(param)))
+				    {
+					return 0;
+				    }
+				}
+
+				if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+				{
+					return 0;
+				}
+
+				SockAddr.sin_family = AF_INET;
+				SockAddr.sin_port = htons(25);
+				SockAddr.sin_addr = *(struct in_addr*) server->h_addr_list[0];
+
+				if(connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
+				{
+					close(sock);
+
+					return 0;
+				}
+
+				break;
+
+			case HELO:
+
+				sprintf(send_buffer, "HELO %s\r\n", param);
+				break;
+
+			case MAIL:
+
+				sprintf(send_buffer, "MAIL FROM: %s\r\n", param);
+				break;
+
+			case RCPT:
+
+				sprintf(send_buffer, "RCPT TO: %s\r\n", param);
+				break;
+
+			case DATA1:
+
+				sprintf(send_buffer, "DATA\r\n");
+				break;
+
+			case DATA2:
+
+				sprintf(send_buffer, "%s\r\n", param);
+				break;
+
+			case DATA3:
+
+				sprintf(send_buffer, ".\r\n");
+				break;
+
+			case QUIT:
+
+				sprintf(send_buffer, "QUIT\r\n");
+		}
+
+	// send command to server
+
+		if(command != INIT)
+		{
+			send(sock, &send_buffer, strlen(send_buffer), 0);
+		}
+
+	// get server response
+
+		if(command == DATA2)
+		{
+			return 1;
+		}
+
+		recv(sock, &recv_buffer, sizeof(recv_buffer), 0);
+
+	// check server response
+
+		switch(command)
+		{
+			case INIT:
+
+				if(strncmp(recv_buffer, "220", 3))
+				{
+					close(sock);
+
+					return 0;
+				}
+
+				break;
+
+			case HELO:
+			case MAIL:
+			case RCPT:
+			case DATA3:
+
+				if(strncmp(recv_buffer, "250", 3))
+				{
+					close(sock);
+
+					return 0;
+				}
+
+				break;
+
+			case DATA1:
+
+				if(strncmp(recv_buffer, "354", 3))
+				{
+					close(sock);
+
+					return 0;
+				}
+
+				break;
+
+			case QUIT:
+
+				close(sock);
+
+				if(strncmp(recv_buffer, "221", 3))
+				{
+					return 0;
+				}
+		}
+
+	// success
+
+		return 1;
+}
+
+/******************************************************************************
+ * SendMail (0=fail, 1=done)
+ ******************************************************************************/
+
+int SendMail()
+{
+	FILE *mail;
+	char linebuffer[1024];
+
+	// open mailfile
+
+		if(!(mail = fopen(SMTPFILE, "r")))
+		{
+			return 0;
+		}
+
+	// send init
+
+		memset(linebuffer, 0, sizeof(linebuffer));
+
+		if(fgets(linebuffer, sizeof(linebuffer), mail))
+		{
+			linebuffer[strlen(linebuffer) - 1] = '\0';
+
+			if(!SendSMTPCommand(INIT, linebuffer))
+			{
+				fclose(mail);
+
+				return 0;
+			}
+		}
+
+	// send helo
+
+		memset(linebuffer, 0, sizeof(linebuffer));
+
+		if(fgets(linebuffer, sizeof(linebuffer), mail))
+		{
+			linebuffer[strlen(linebuffer) - 1] = '\0';
+
+			if(!SendSMTPCommand(HELO, linebuffer))
+			{
+				fclose(mail);
+
+				return 0;
+			}
+		}
+
+	// send mail
+
+		memset(linebuffer, 0, sizeof(linebuffer));
+
+		if(fgets(linebuffer, sizeof(linebuffer), mail))
+		{
+			linebuffer[strlen(linebuffer) - 1] = '\0';
+
+			if(!SendSMTPCommand(MAIL, linebuffer))
+			{
+				fclose(mail);
+
+				return 0;
+			}
+		}
+
+	// send rcpt
+
+		memset(linebuffer, 0, sizeof(linebuffer));
+
+		if(fgets(linebuffer, sizeof(linebuffer), mail))
+		{
+			linebuffer[strlen(linebuffer) - 1] = '\0';
+
+			if(!SendSMTPCommand(RCPT, linebuffer))
+			{
+				fclose(mail);
+
+				return 0;
+			}
+		}
+
+	// send data
+
+		if(!SendSMTPCommand(DATA1, ""))
+		{
+			fclose(mail);
+
+			return 0;
+		}
+
+		memset(linebuffer, 0, sizeof(linebuffer));
+
+		while(fgets(linebuffer, sizeof(linebuffer), mail))
+		{
+			linebuffer[strlen(linebuffer) - 1] = '\0';
+
+			if(!SendSMTPCommand(DATA2, linebuffer))
+			{
+				fclose(mail);
+
+				return 0;
+			}
+
+			memset(linebuffer, 0, sizeof(linebuffer));
+		}
+
+		if(!SendSMTPCommand(DATA3, ""))
+		{
+			fclose(mail);
+
+			return 0;
+		}
+
+	// send quit
+
+		if(!SendSMTPCommand(QUIT, ""))
+		{
+			fclose(mail);
+
+			return 0;
+		}
+
+	// success
+
+		fclose(mail);
+
+		return 1;
+}
+
+/******************************************************************************
  * SaveMail (0 = fail)
  ******************************************************************************/
 
@@ -1922,7 +2219,7 @@ int SaveMail(int account, char* mailuid)
 	char mailnumber[12];
 
 	
-	if((fd_mail = fopen(MAILFILE, "w")))
+	if((fd_mail = fopen(POP3FILE, "w")))
 	{
 
 	// timestamp
@@ -2728,7 +3025,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.20 $";
+	char cvs_revision[] = "$Revision: 1.21 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;

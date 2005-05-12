@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.16  2005/05/12 14:28:28  lazyt
+ * - PIN-Protection for complete Account
+ * - Preparation for sending Mails ;-)
+ *
  * Revision 1.15  2005/05/11 19:00:38  robspr1
  * minor Mailreader changes / add to Spamlist undo
  *
@@ -91,7 +95,8 @@
 #define CFGPATH "/var/tuxbox/config/tuxmail/"
 #define CFGFILE "tuxmail.conf"
 #define SPMFILE "spamlist"
-#define MAILFILE "/tmp/popmail"
+#define POP3FILE "/tmp/tuxmail.pop3"
+#define SMTPFILE "/tmp/tuxmail.smtp"
 
 #define OE_START "/etc/rc2.d/S99tuxmail"
 #define OE_KILL0 "/etc/rc0.d/K00tuxmail"
@@ -170,7 +175,10 @@
 #define VIEWY  504
 #define FRAMEROWS  15
 
+// functions
+
 void ShowMessage(int message);
+int CheckPIN(int Account);
 
 // freetype stuff
 
@@ -224,6 +232,7 @@ struct
 	char time[6];	/* 00:00 */
 	char name[32];
 	char status[8];	/* 000/000 */
+	int pincount;
 	char code[5];
 	struct mi mailinfo[MAXMAIL];
 
@@ -235,7 +244,7 @@ int fb, rc, lcd;
 
 // daemon commands
 
-enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST, GET_VERSION, GET_MAIL};
+enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST, GET_VERSION, GET_MAIL, SEND_MAIL};
 
 // framebuffer stuff
 

@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.16  2005/05/12 14:28:28  lazyt
+ * - PIN-Protection for complete Account
+ * - Preparation for sending Mails ;-)
+ *
  * Revision 1.15  2005/05/11 12:01:23  lazyt
  * Protect Mailreader with optional PIN-Code
  *
@@ -94,7 +98,8 @@
 #define LOGFILE "/tmp/tuxmaild.log"
 #define PIDFILE "/tmp/tuxmaild.pid"
 #define LCKFILE "/tmp/lcd.locked"
-#define MAILFILE "/tmp/popmail"
+#define POP3FILE "/tmp/tuxmail.pop3"
+#define SMTPFILE "/tmp/tuxmail.smtp"
 
 #define bool char
 #define true 1
@@ -169,12 +174,20 @@ char ttable[ttsize*3] = {
 	13 , 10,  0
 };
 
+// functions
+
 void writeFOut( char *s);
 int SaveMail(int account, char* uid);
+int SendMail();
 
-// pop3 commands
+// pop3 and smtp commands
 
-enum {INIT, USER, PASS, STAT, UIDL, TOP, DELE, QUIT, RETR};
+enum
+{
+	INIT, QUIT,
+	USER, PASS, STAT, UIDL, TOP, DELE, RETR,
+	HELO, MAIL, RCPT, DATA1, DATA2, DATA3
+};
 
 // account database
 

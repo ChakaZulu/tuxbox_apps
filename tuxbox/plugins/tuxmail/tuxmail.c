@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.20  2005/05/12 14:28:28  lazyt
+ * - PIN-Protection for complete Account
+ * - Preparation for sending Mails ;-)
+ *
  * Revision 1.19  2005/05/11 19:00:21  robspr1
  * minor Mailreader changes / add to Spamlist undo
  *
@@ -183,6 +187,7 @@ int ControlDaemon(int command, int account, int mailindex)
 	struct sockaddr_un srvaddr;
 	socklen_t addrlen;
 	char sendcmd[88];
+	char mailsend;
 
 	// setup connection
 
@@ -247,6 +252,11 @@ int ControlDaemon(int command, int account, int mailindex)
 				recv(fd_sock, &mailfile, 1, 0);
 
 				break;
+
+			case SEND_MAIL:
+
+				send(fd_sock, "W", 1, 0);
+				recv(fd_sock, &mailsend, 1, 0);
 		}
 
 		close(fd_sock);
@@ -1281,14 +1291,14 @@ void ShowMessage(int message)
 
 			case GETMAIL:
 
-				RenderString((osd == 'G') ? "Mail wird gelesen." : "Reading mail.", 157, 265, 306, CENTER, BIG, WHITE);
+				RenderString((osd == 'G') ? "Mail wird gelesen." : "Reading Mail.", 157, 265, 306, CENTER, BIG, WHITE);
 				RenderString((osd == 'G') ? "Moment bitte..." : "Please wait...", 157, 305, 306, CENTER, BIG, WHITE);
 
 				break;
 
 			case GETMAILFAIL:
 
-				RenderString((osd == 'G') ? "Mail lesen fehlgeschlagen!" : "Reading mail failed!", 157, 265, 306, CENTER, BIG, WHITE);
+				RenderString((osd == 'G') ? "Mail lesen fehlgeschlagen!" : "Reading Mail failed!", 157, 265, 306, CENTER, BIG, WHITE);
 
 				break;
 
@@ -1324,6 +1334,7 @@ void ShowMailInfo(int account, int mailindex)
 {
 	int scrollbar_len, scrollbar_ofs, scrollbar_cor, loop;
 	int sy = 61;
+	int selectbar_mailindex = mailindex;
 
 	// lcd
 
@@ -1345,12 +1356,12 @@ void ShowMailInfo(int account, int mailindex)
 		RenderBox(592, 42, 619, 69, GRID, SKIN2);
 		RenderBox(592, 477, 619, 504, GRID, SKIN2);
 
-	// selectbar
+	// status
 
-		if(maildb[account].mails)
-		{
-			RenderBox(2, 44 + (mailindex%10)*46, 591, 44 + (mailindex%10)*46 + 44, FILL, SKIN2);
-		}
+		RenderString(maildb[account].nr, 12, 34, 20, LEFT, BIG, ORANGE);
+		RenderString(maildb[account].time, 32, 34, 75, RIGHT, BIG, ORANGE);
+		RenderString(maildb[account].name, 122, 34, 371, CENTER, BIG, ORANGE);
+		RenderString(maildb[account].status, 503, 34, 105, RIGHT, BIG, ORANGE);
 
 	// scrollbar
 
@@ -1367,12 +1378,25 @@ void ShowMailInfo(int account, int mailindex)
 		scrollbar_cor = 403 - ((403/scrollbar_len)*scrollbar_len);
 		RenderBox(596, 72 + scrollbar_ofs, 615, 72 + scrollbar_ofs + scrollbar_len + scrollbar_cor - 1, FILL, SKIN2);
 
-	// status and mails
+	// check pin
 
-		RenderString(maildb[account].nr, 12, 34, 20, LEFT, BIG, ORANGE);
-		RenderString(maildb[account].time, 32, 34, 75, RIGHT, BIG, ORANGE);
-		RenderString(maildb[account].name, 122, 34, 371, CENTER, BIG, ORANGE);
-		RenderString(maildb[account].status, 503, 34, 105, RIGHT, BIG, ORANGE);
+		if(!CheckPIN(account))
+		{
+			return;
+		}
+		else
+		{
+			RenderBox(155, 178, 464, 327, FILL, SKIN1);
+		}
+
+	// selectbar
+
+		if(maildb[account].mails)
+		{
+			RenderBox(2, 44 + (selectbar_mailindex%10)*46, 591, 44 + (selectbar_mailindex%10)*46 + 44, FILL, SKIN2);
+		}
+
+	// mails
 
 		for(loop = 0; loop < 10; loop++)
 		{
@@ -1625,7 +1649,7 @@ int Add2SpamList(int account, int mailindex)
 			return 1;
 		}
 
-	// remove address to spamlist
+	// remove address from spamlist
 
 			printf("TuxMail <Mailaddress \"%s\" removed from Spamlist>\n", mailaddress);
 
@@ -1653,6 +1677,24 @@ int CheckPIN(int Account)
 		if(!maildb[Account].code[0])
 		{
 			return 1;
+		}
+
+	// account locked?
+
+		if(maildb[Account].pincount == 3)
+		{
+			RenderBox(155, 178, 464, 220, FILL, SKIN0);
+			RenderBox(155, 220, 464, 327, FILL, SKIN1);
+			RenderBox(155, 178, 464, 327, GRID, SKIN2);
+			RenderBox(155, 220, 464, 327, GRID, SKIN2);
+
+			RenderString((osd == 'G') ? "Sicherheitsabfrage" : "Security Check", 157, 213, 306, CENTER, BIG, ORANGE);
+			RenderString((osd == 'G') ? "Konto gesperrt!" : "Account locked!", 157, 265, 306, CENTER, BIG, WHITE);
+			RenderString((osd == 'G') ? "Bitte anderes Konto wählen..." : "Try another Account...", 157, 305, 306, CENTER, SMALL, WHITE);
+
+			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+
+			return 0;
 		}
 
 	// layout
@@ -1756,6 +1798,8 @@ int CheckPIN(int Account)
 		{
 			if(strncmp(code, maildb[Account].code, 4))
 			{
+				maildb[Account].pincount++;
+
 				RenderBox(157, 222, 462, 325, FILL, SKIN1);
 				RenderString((osd == 'G') ? "Falsche PIN!" : "Wrong PIN!", 157, 265, 306, CENTER, BIG, WHITE);
 				RenderString((osd == 'G') ? "Nächster Versuch in 5 Sekunden..." : "Try again in 5 Seconds...", 157, 305, 306, CENTER, SMALL, WHITE);
@@ -1770,6 +1814,15 @@ int CheckPIN(int Account)
 			}
 		}
 
+		if(!result)
+		{
+			RenderBox(157, 222, 462, 325, FILL, SKIN1);
+			RenderString((osd == 'G') ? "Zugriff verweigert!" : "Access denied!", 157, 265, 306, CENTER, BIG, WHITE);
+			RenderString((osd == 'G') ? "Bitte anderes Konto wählen..." : "Try another Account...", 157, 305, 306, CENTER, SMALL, WHITE);
+
+			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+		}
+
 		rccode = -1;
 
 		return result;
@@ -1781,7 +1834,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.19 $";
+	char cvs_revision[] = "$Revision: 1.20 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -2381,20 +2434,17 @@ void plugin_exec(PluginParam *par)
 
 					if(maildb[account].mails)
 					{
-						if(CheckPIN(account))
-						{
-							ControlDaemon(GET_MAIL, account, mailindex);
+						ControlDaemon(GET_MAIL, account, mailindex);
 
-							if(!mailfile)
-							{
-								ShowMessage(GETMAILFAIL);
-							}
-							else
-							{
-								char szInfo[256];
-								sprintf(szInfo,"%s\n%s\n%s %s\n",maildb[account].mailinfo[mailindex].from,maildb[account].mailinfo[mailindex].subj,maildb[account].mailinfo[mailindex].date,maildb[account].mailinfo[mailindex].time);
-								ShowMailFile(MAILFILE, szInfo);					
-							}
+						if(!mailfile)
+						{
+							ShowMessage(GETMAILFAIL);
+						}
+						else
+						{
+							char szInfo[256];
+							sprintf(szInfo,"%s\n%s\n%s %s\n",maildb[account].mailinfo[mailindex].from,maildb[account].mailinfo[mailindex].subj,maildb[account].mailinfo[mailindex].date,maildb[account].mailinfo[mailindex].time);
+							ShowMailFile(POP3FILE, szInfo);					
 						}
 					}
 
