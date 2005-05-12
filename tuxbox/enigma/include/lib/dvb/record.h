@@ -67,7 +67,7 @@ class eDVBRecorder: private eThread, public Object
 
 	eString filename;
 
-	char buf[65424]; 
+	char buf[524144]; 
 	int bufptr;
 
 	void thread();
