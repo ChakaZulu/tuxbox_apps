@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.17  2005/05/12 22:24:23  lazyt
+ * - PIN-Fix
+ * - add Messageboxes for send Mail done/fail
+ *
  * Revision 1.16  2005/05/12 14:28:28  lazyt
  * - PIN-Protection for complete Account
  * - Preparation for sending Mails ;-)
@@ -250,7 +254,7 @@ enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST, GET_VERSION, GET_MAIL, SEND_MAIL}
 
 enum {FILL, GRID};
 enum {TRANSP, WHITE, SKIN0, SKIN1, SKIN2, ORANGE, GREEN, YELLOW, RED};
-enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, DELSPAM, SPAMFAIL, INFO, GETMAIL, GETMAILFAIL};
+enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, ADD2SPAM, DELSPAM, SPAMFAIL, INFO, GETMAIL, GETMAILFAIL, SENDMAILDONE, SENDMAILFAIL};
 
 unsigned char *lfb = 0, *lbb = 0;
 
@@ -281,6 +285,7 @@ struct input_event ev;
 #endif
 
 unsigned short rccode;
+int sim_key = 0;
 
 char scroll_up[] =
 {

@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.21  2005/05/12 22:24:23  lazyt
+ * - PIN-Fix
+ * - add Messageboxes for send Mail done/fail
+ *
  * Revision 1.20  2005/05/12 14:28:28  lazyt
  * - PIN-Protection for complete Account
  * - Preparation for sending Mails ;-)
@@ -257,6 +261,8 @@ int ControlDaemon(int command, int account, int mailindex)
 
 				send(fd_sock, "W", 1, 0);
 				recv(fd_sock, &mailsend, 1, 0);
+
+				mailsend ? ShowMessage(SENDMAILDONE) : ShowMessage(SENDMAILFAIL);
 		}
 
 		close(fd_sock);
@@ -273,6 +279,13 @@ int ControlDaemon(int command, int account, int mailindex)
 int GetRCCode()
 {
 	static __u16 rc_last_key = KEY_RESERVED;
+
+	if(sim_key)
+	{
+		sim_key = 0;
+
+		return rccode;
+	}
 
 	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
 	{
@@ -465,6 +478,13 @@ int GetRCCode()
 int GetRCCode()
 {
 	static unsigned short LastKey = -1;
+
+	if(sim_key)
+	{
+		sim_key = 0;
+
+		return rccode;
+	}
 
 	read(rc, &rccode, sizeof(rccode));
 
@@ -1302,6 +1322,18 @@ void ShowMessage(int message)
 
 				break;
 
+			case SENDMAILDONE:
+
+				RenderString((osd == 'G') ? "Mail wurde gesendet." : "Mailing successful.", 157, 265, 306, CENTER, BIG, WHITE);
+
+				break;
+
+			case SENDMAILFAIL:
+
+				RenderString((osd == 'G') ? "Mail nicht gesendet!" : "Mailing failed!", 157, 265, 306, CENTER, BIG, WHITE);
+
+				break;
+
 			case INFO:
 
 				ControlDaemon(GET_VERSION,0,0);
@@ -1382,6 +1414,14 @@ void ShowMailInfo(int account, int mailindex)
 
 		if(!CheckPIN(account))
 		{
+			do
+			{
+				GetRCCode();
+			}
+			while(rccode != RC_HOME && rccode != RC_0 && rccode != RC_1 && rccode != RC_2 && rccode != RC_3 && rccode != RC_4 && rccode != RC_5 && rccode != RC_6 && rccode != RC_7 && rccode != RC_8 && rccode != RC_9 && rccode != RC_PLUS && rccode != RC_MINUS);
+
+			sim_key = 1;
+
 			return;
 		}
 		else
@@ -1823,8 +1863,6 @@ int CheckPIN(int Account)
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 		}
 
-		rccode = -1;
-
 		return result;
 }
 
@@ -1834,7 +1872,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.20 $";
+	char cvs_revision[] = "$Revision: 1.21 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -2040,7 +2078,7 @@ void plugin_exec(PluginParam *par)
 		ShowMailInfo(account, mailindex);
 
 	// main loop
-		
+
 		do
 		{
 			switch((rccode = GetRCCode()))
@@ -2462,7 +2500,6 @@ void plugin_exec(PluginParam *par)
 			}
 
 			ShowMailInfo(account, mailindex);
-
 		}
 		while(rccode != RC_HOME);
 
