@@ -69,6 +69,7 @@ gImage *loadPNG(const char *filename)
 //		case PNG_COLOR_TYPE_RGB:		// in theory, gImage can handle RGB pics - but enigma can't blit them, so
 										// until this is fixed, imho we should reject RGB pictures right here
 										// because later on we get an fatal blitting error followed by an enigma shutdown
+		{
 			res=new gImage(eSize(width, height), bit_depth);
 			
 			png_bytep *rowptr=new png_bytep[height];
@@ -114,6 +115,7 @@ gImage *loadPNG(const char *filename)
 				}
 			}
 			break;
+		}
 		default:
 			eDebug("[ePNG] unsupported color_type in %s", filename);
 			goto pngerror2;
