@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.22  2005/05/13 23:17:14  robspr1
+ * - first Mail writing GUI\n- add parameters for Mail sending
+ *
  * Revision 1.21  2005/05/12 22:24:23  lazyt
  * - PIN-Fix
  * - add Messageboxes for send Mail done/fail
@@ -113,6 +116,32 @@ void ReadConf()
 			{
 				sscanf(ptr + 5, "%d", &skin);
 			}
+			else if((ptr = strstr(line_buffer, "SMTP")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", maildb[index-'0'].smtp);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "FROM")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+//					strncpy(maildb[index-'0'].from,ptr+6,63);
+					sscanf(ptr + 6, "%s", maildb[index-'0'].from);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "CODE")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%4s", maildb[index-'0'].code);
+				}
+			}
+/*
 			else if((ptr = strstr(line_buffer, "CODE0=")))
 			{
 				sscanf(ptr + 6, "%4s", maildb[0].code);
@@ -153,6 +182,7 @@ void ReadConf()
 			{
 				sscanf(ptr + 6, "%4s", maildb[9].code);
 			}
+*/
 		}
 
 		fclose(fd_conf);
@@ -876,6 +906,10 @@ void RenderString(unsigned char *string, int sx, int sy, int maxwidth, int layou
 		{
 			desc.font.pix_width = desc.font.pix_height = 24;
 		}
+		else if(size == NORMAL)
+		{
+			desc.font.pix_width = desc.font.pix_height = 32;
+		}
 		else
 		{
 			desc.font.pix_width = desc.font.pix_height = 40;
@@ -971,9 +1005,9 @@ void RenderBox(int sx, int sy, int ex, int ey, int mode, int color)
  * RenderCircle
  ******************************************************************************/
 
-void RenderCircle(int sy, char type)
+void RenderCircle(int sx, int sy, char type)
 {
-	int sx = 56, x, y, color;
+	int x, y, color;
 
 	// set color
 
@@ -1226,6 +1260,450 @@ void ShowMailFile(char* filename, char* szAction)
 
 
 /******************************************************************************
+ * PaintSmtpMailHeader                                                                   *
+ ******************************************************************************/
+
+void PaintSmtpMailHeader( void )
+{
+	RenderBox(0, 0, VIEWX, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, FILL, SKIN0);
+	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, VIEWX,VIEWY-INFOBOXY, FILL, SKIN1);
+	RenderBox(0, VIEWY-INFOBOXY, VIEWX,VIEWY, FILL, SKIN0);
+	RenderBox(0, 0, VIEWX, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, GRID, SKIN2);
+	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, VIEWX,VIEWY-INFOBOXY, GRID, SKIN2);
+	RenderBox(0, VIEWY-INFOBOXY, VIEWX,VIEWY, GRID, SKIN2);	
+	RenderBox(300, VIEWY-INFOBOXY, VIEWX,VIEWY, GRID, SKIN2);	
+
+	RenderString((osd == 'G') ? "Absender:" : "From:", 2*BORDERSIZE, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+	RenderString((osd == 'G') ? "Empfänger:" : "To:", 2*BORDERSIZE, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+	RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+
+	int x, y;
+	
+	for( x = 0; x < 3; x++ )
+	{
+		for( y = 0; y < 4; y++)
+		{
+			RenderBox(10 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),              VIEWY-INFOBOXY + KEYBOX_SPACE + y*(KEYBOX_HEIGHT+KEYBOX_SPACE), 
+			          10 + x*(KEYBOX_WIDTH+KEYBOX_SPACE)+KEYBOX_WIDTH, VIEWY-INFOBOXY + KEYBOX_SPACE + y*(KEYBOX_HEIGHT+KEYBOX_SPACE)+KEYBOX_HEIGHT, FILL, SKIN1);
+			RenderBox(10 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),              VIEWY-INFOBOXY + KEYBOX_SPACE + y*(KEYBOX_HEIGHT+KEYBOX_SPACE), 
+			          10 + x*(KEYBOX_WIDTH+KEYBOX_SPACE)+KEYBOX_WIDTH, VIEWY-INFOBOXY + KEYBOX_SPACE + y*(KEYBOX_HEIGHT+KEYBOX_SPACE)+KEYBOX_HEIGHT, GRID, SKIN2);
+			RenderString(szKeyBoxKey[x+y*3],15 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3 + y*(KEYBOX_HEIGHT+KEYBOX_SPACE),25,LEFT, SMALL, WHITE);
+			RenderString(szKeyBoxInfo[x+y*3],30 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3+ y*(KEYBOX_HEIGHT+KEYBOX_SPACE),60, RIGHT, SMALL, ORANGE);
+
+		}
+	}
+	
+	char info[32];
+	sprintf(info, "TuxMail (P%s/D%s)", versioninfo_p, versioninfo_d);
+	RenderString(info, 330, VIEWY-22, 280, RIGHT, SMALL, GREEN);
+	RenderString("(C) 2003-2005 Thomas \"LazyT\" Loewe", 330, VIEWY-5, 280, RIGHT, SMALL, GREEN);	
+}
+
+/******************************************************************************
+ * EditMailFile                                                                   *
+ ******************************************************************************/
+void EditMailFile(char* filename, int account, int mailindex )
+{
+	#define MAXINFOLINES 14
+	char szSmtp[80];
+	char szFrom[80];
+	int nEditLine = 2;		// start to edit at body
+	int nEditPos = 0;		// start to edit at body
+	char nEditType = 0;		// type of edit: 0:letters, 1:T9 or 2:direct
+	int  nTextFileIdx = 0;
+	char szTextFile[80];
+	char TextFileValid = 0;
+	char linebuffer[80];
+	char szInfo[MAXINFOLINES][80];
+	char cChar;
+	
+	FILE* pipe;
+	pipe = fopen(filename,"w");
+
+	if(pipe == NULL)
+	{
+		return;
+	}
+
+	// prepare main strings
+	strcpy(szSmtp,maildb[account].smtp);
+	strcpy(szFrom,maildb[account].from);
+	strncpy(szInfo[0],maildb[account].mailinfo[mailindex].from,79);
+	strcpy(szInfo[1],"Re: ");
+	strncpy(&szInfo[1][4],maildb[account].mailinfo[mailindex].subj,75);
+	
+	while(1)
+	{
+		PaintSmtpMailHeader();
+
+		RenderString( szFrom, 2*BORDERSIZE+100, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
+		
+		if( nEditType < 2 )
+		{
+			if( nEditLine < 2 )
+			{
+				RenderString( szInfo[0], 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, (nEditLine)?SMALL:NORMAL, (nEditLine)?WHITE:RED);
+				RenderString( szInfo[1], 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, (nEditLine)?NORMAL:SMALL, (nEditLine)?RED:WHITE);
+			}
+			else
+			{
+				RenderString( szInfo[0], 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
+				RenderString( szInfo[1], 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
+			}
+		}
+
+		int y = nEditType * 30;
+		RenderCircle( 310, VIEWY-INFOBOXY+10, 'D');
+		RenderString((osd == 'G') ? "Texte" : "Letters", 325, VIEWY-INFOBOXY+30  , 100, CENTER, (nEditType == 0) ? NORMAL : SMALL, (nEditType == 0) ? ORANGE : WHITE);
+		RenderCircle( 310, VIEWY-INFOBOXY+40, 'N');
+		RenderString((osd == 'G') ? "T9" : "T9", 325, VIEWY-INFOBOXY+60  , 100, CENTER,  (nEditType == 1) ? NORMAL : SMALL, (nEditType == 1) ? ORANGE : WHITE);
+		RenderCircle( 310, VIEWY-INFOBOXY+70, 'O');
+		RenderString((osd == 'G') ? "direkt" : "direct", 325, VIEWY-INFOBOXY+90  , 100,  CENTER, (nEditType == 2) ? NORMAL : SMALL, (nEditType == 2) ? ORANGE : WHITE);
+		RenderBox(330, VIEWY-INFOBOXY+y+5  , 430, VIEWY-INFOBOXY+35+y, GRID, SKIN2);
+	
+		// print text-blocks
+		if( nEditType == 0 )
+		{			
+			sprintf(szTextFile,"%s.%02u",TEXTFILE,nTextFileIdx);
+
+			FILE* pipe;
+			pipe = fopen(szTextFile,"r");
+			int i;
+			for( i=2; i<MAXINFOLINES; i++ )
+			{
+				szInfo[i][0] = '\0';
+			}
+			if(pipe == NULL)
+			{
+				RenderString((osd == 'G') ? "kein Textblock" : "no Letter", 2*BORDERSIZE,  BORDERSIZE+5*FONTHEIGHT_SMALL  , 200,  LEFT, BIG, ORANGE);				
+				TextFileValid = 0;
+			}
+			else
+			{
+				nEditLine = 2;
+				memset(linebuffer, 0, sizeof(linebuffer));
+				while(fgets(linebuffer, sizeof(linebuffer), pipe))
+				{
+					strcpy(szInfo[nEditLine], linebuffer);
+					if( szInfo[nEditLine][strlen(linebuffer)-1] == '\n' )
+					{
+						szInfo[nEditLine][strlen(linebuffer)-1] = '\0';
+					}
+					RenderString( linebuffer, 2*BORDERSIZE, BORDERSIZE+(2+nEditLine)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);	
+					nEditLine++;
+					memset(linebuffer, 0, sizeof(linebuffer));
+				}
+				
+				fclose(pipe);
+				TextFileValid = 1;
+			}
+		}
+		else if( nEditType == 2 )
+		{
+			int i;
+			int xoff;
+			for( i=0; i<MAXINFOLINES; i++ )
+			{
+				if( i<2 )
+				{
+					xoff = 100;
+				}
+				else
+				{
+					xoff = 0;
+				}
+				
+				if( nEditLine ==  i )
+				{
+					if( szInfo[i][0] == '\0' )
+					{
+						RenderString( "_", 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, ORANGE);					
+					}
+					else
+					{
+						int linelen, x;
+						char linepart[80];
+						
+						linelen = strlen( szInfo[i] );
+						
+						if( nEditPos > linelen )
+						{
+							nEditPos = linelen;
+						}
+						
+						desc.font.pix_width = desc.font.pix_height = 32;
+						x = 0;
+						
+						if( nEditPos )
+						{
+							strncpy(linepart, szInfo[i], nEditPos);
+							linepart[nEditPos] = '\0';
+							x = GetStringLen( linepart );
+							RenderString( linepart, 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, WHITE);
+						}
+						
+						linepart[0] = szInfo[i][nEditPos];
+						if(( linepart[0] < 0x21 ) || ( linepart[0] > 0x7E ))
+						{
+							linepart[0] = '_';
+						}
+						linepart[1] = '\0';
+						RenderString( linepart, 2*BORDERSIZE+xoff+x, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, ORANGE);
+						x += GetStringLen( linepart );
+						
+						if( nEditPos != linelen )
+						{
+							strncpy(linepart, &szInfo[i][nEditPos+1], linelen - nEditPos - 1);
+							linepart[linelen - nEditPos - 1] = '\0';
+							RenderString( linepart, 2*BORDERSIZE+xoff+x, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, WHITE);
+						}
+					}
+				}
+				else
+				{
+					RenderString( szInfo[i], 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
+				}
+			}
+		}
+/*	
+		char szTmpOut[80];
+		sprintf(szTmpOut,"%d %d",nEditLine,nEditPos);
+		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
+*/		
+			
+		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+		
+		GetRCCode();
+		
+		int iIndex = 0;
+		cChar = 'A';
+		switch ( rccode )
+		{
+			case RC_9: iIndex++;
+			case RC_8: iIndex++;
+			case RC_7: iIndex++;
+			case RC_6: iIndex++;
+			case RC_5: iIndex++;
+			case RC_4: iIndex++;
+			case RC_3: iIndex++;
+			case RC_2: iIndex++;
+			case RC_1: iIndex++;
+			case RC_0: 
+				if(nEditType == 2)
+				{
+					char c;
+				
+					if(( c = szInfo[nEditLine][nEditPos] ))
+					{
+						if( iIndex )
+						{
+							szInfo[nEditLine][nEditPos] = szKeyBoxInfo[iIndex-1][0];
+						}
+						else
+						{
+							szInfo[nEditLine][nEditPos] = '0';
+						}
+					}
+				}			
+				break;
+				
+			case RC_HOME:
+			case RC_OK:
+			case RC_DBOX:
+					cChar = '\0';
+				break;
+
+			case RC_RED:
+				nEditType = 0;
+				break;
+				
+			case RC_GREEN:
+				nEditType = 1;
+				break;
+				
+			case RC_YELLOW:
+				nEditType = 2;
+				nEditLine = 2;
+				break;
+				
+			case RC_BLUE:
+				if(nEditType == 2)
+				{
+					int len;
+							
+					len = strlen( szInfo[nEditLine] );
+				
+					if( !len )
+					{
+						szInfo[nEditLine][0] = cChar;
+						szInfo[nEditLine][1] = '\0';
+					}
+					else
+					{
+						char linepart[80];
+						
+						if( !nEditPos )
+						{
+							strcpy( linepart, szInfo[nEditLine]);
+							sprintf( szInfo[nEditLine], "%c%s", cChar, linepart);
+						}
+						else if( nEditPos < len )
+						{
+							strcpy( linepart, &szInfo[nEditLine][nEditPos] );
+							szInfo[nEditLine][nEditPos] = cChar;
+							szInfo[nEditLine][nEditPos+1] = '\0';
+							strcat( szInfo[nEditLine], linepart );
+						}
+					}				
+				}
+				break;
+				
+			case RC_PLUS:
+				if((nEditType == 0) && ( TextFileValid ))
+				{
+					nTextFileIdx++;	
+				}
+				else if((nEditType == 2) && ( nEditLine < (MAXINFOLINES-1) ))
+				{
+					nEditLine --;
+				}
+				break;
+				
+			case RC_MINUS:
+				if((nEditType == 0) && ( nTextFileIdx ))
+				{
+					nTextFileIdx--;
+				}
+				else if((nEditType == 2) && ( nEditLine ))
+				{
+					nEditLine ++;
+				}
+				break;
+				
+			case RC_DOWN:
+				if(nEditType == 2) 
+				{
+					char c;
+				
+					if(( c = szInfo[nEditLine][nEditPos] ))
+					{
+						if( c > 0x21 )
+						{
+							szInfo[nEditLine][nEditPos] = --c;
+						}
+						else
+						{
+							szInfo[nEditLine][nEditPos] = ' ';
+						}
+					}
+					else
+					{
+						szInfo[nEditLine][nEditPos] = cChar;
+						szInfo[nEditLine][nEditPos+1] = '\0';
+					}
+				}
+				break;
+					
+			case RC_UP:
+				if(nEditType == 2)
+				{
+					char c;
+					
+					if(( c = szInfo[nEditLine][nEditPos] ))
+					{
+						if( c < 0x7D )
+						{
+							szInfo[nEditLine][nEditPos] = ++c;
+						}
+						else
+						{
+							szInfo[nEditLine][nEditPos] = '~';
+						}
+					}
+					else
+					{
+						szInfo[nEditLine][nEditPos] = cChar;
+						szInfo[nEditLine][nEditPos+1] = '\0';
+					}
+				}
+				break;
+				
+			case RC_LEFT:
+				if((nEditType == 2) && ( nEditPos ))
+				{
+					nEditPos --;
+				}
+				break;
+				
+			case RC_RIGHT:
+				if(nEditType == 2)
+				{
+					if( nEditPos < strlen(szInfo[nEditLine]))
+					{
+						nEditPos ++;
+					}
+				}
+				break;
+				
+			case RC_MUTE:
+				if(nEditType == 2)
+				{
+					if( szInfo[nEditLine][nEditPos] )
+					{
+						char linepart[80];
+						int len;
+						
+						len = strlen( szInfo[nEditLine] );
+						szInfo[nEditLine][nEditPos] = '\0';
+						
+						if( !nEditPos )
+						{		
+							strcpy(	linepart, &szInfo[nEditLine][1] );
+							strcpy( szInfo[nEditLine], linepart );
+						}
+						else if( nEditPos < (len - 1) )
+						{
+							strcpy( linepart, &szInfo[nEditLine][ nEditPos + 1 ] );
+							strcat( szInfo[nEditLine], linepart );							
+						}
+					}
+				}
+				break;
+		}
+		
+		if( cChar == '\0' )
+		{
+			break;
+		}
+				
+	}
+	
+	if( rccode == RC_OK)
+	{
+		fprintf(pipe,"%s\n",szSmtp);
+		fputs("tuxmaild\n",pipe);
+		fprintf(pipe,"%s\n",szFrom);
+		fprintf(pipe,"%s\n",szInfo[0]);
+		fprintf(pipe,"From: %s\n",szFrom);
+		fprintf(pipe,"To: %s\n",szInfo[0]);
+		fprintf(pipe,"Subject: %s\n\n",szInfo[1]);
+		
+		int i;
+		for( i=2; i<MAXINFOLINES; i++)
+		{
+			fprintf(pipe,"%s\n",szInfo[i]);
+		}
+	}
+	else
+	{
+		rccode = 0;
+	}
+	fclose(pipe);
+}
+
+
+
+/******************************************************************************
  * ShowMessage
  ******************************************************************************/
 
@@ -1445,7 +1923,7 @@ void ShowMailInfo(int account, int mailindex)
 			RenderString((char*)&maildb[account].mailinfo[mailindex + loop].from, 75, sy, 517, LEFT, SMALL, WHITE);
 			RenderString((char*)&maildb[account].mailinfo[mailindex + loop].subj, 75, sy + 22, 517, LEFT, SMALL, WHITE);
 
-			RenderCircle(sy - 4, maildb[account].mailinfo[mailindex + loop].type[0]);
+			RenderCircle( 56, sy - 4, maildb[account].mailinfo[mailindex + loop].type[0]);
 
 			sy += 46;
 		}
@@ -1872,7 +2350,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.21 $";
+	char cvs_revision[] = "$Revision: 1.22 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -2490,7 +2968,18 @@ void plugin_exec(PluginParam *par)
 
 				case RC_DBOX:
 
-					ShowMessage(INFO);
+					if(maildb[account].mails)
+					{
+						
+//						ShowMessage(INFO);
+						ControlDaemon(GET_VERSION,0,0);
+						EditMailFile(SMTPFILE, account, mailindex);
+						
+						if( rccode == RC_OK )
+						{
+							ControlDaemon(SEND_MAIL, account, mailindex);
+						}
+					}
 
 					break;
 

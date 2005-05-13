@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.17  2005/05/13 23:16:33  robspr1
+ * - first Mail writing GUI\n- add parameters for Mail sending
+ *
  * Revision 1.16  2005/05/12 14:28:28  lazyt
  * - PIN-Protection for complete Account
  * - Preparation for sending Mails ;-)
@@ -197,6 +200,8 @@ struct
 	char host[64];
 	char user[64];
 	char pass[64];
+	char smtp[64];
+	char from[64];
 	char code[8];
 	int  mail_all;
 	int  mail_new;

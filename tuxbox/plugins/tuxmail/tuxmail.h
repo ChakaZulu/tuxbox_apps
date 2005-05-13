@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.18  2005/05/13 23:16:57  robspr1
+ * - first Mail writing GUI\n- add parameters for Mail sending
+ *
  * Revision 1.17  2005/05/12 22:24:23  lazyt
  * - PIN-Fix
  * - add Messageboxes for send Mail done/fail
@@ -101,6 +104,7 @@
 #define SPMFILE "spamlist"
 #define POP3FILE "/tmp/tuxmail.pop3"
 #define SMTPFILE "/tmp/tuxmail.smtp"
+#define TEXTFILE "/var/tuxbox/config/tuxmail/mailtext"
 
 #define OE_START "/etc/rc2.d/S99tuxmail"
 #define OE_KILL0 "/etc/rc0.d/K00tuxmail"
@@ -168,7 +172,7 @@
 #define	RC_DBOX		0x18
 #define	RC_HOME		0x1F
 
-// defines for mail-reading
+// defines for mail-reading/writing
  
 #define BORDERSIZE 2
 #define FONTHEIGHT_BIG 40
@@ -178,6 +182,26 @@
 #define VIEWX  619
 #define VIEWY  504
 #define FRAMEROWS  15
+#define INFOBOXY   125
+#define KEYBOX_SPACE  5
+#define KEYBOX_HEIGHT 25
+#define KEYBOX_WIDTH  90
+
+#define KEYBOX_KEYS 12
+
+char *szKeyBoxInfo[KEYBOX_KEYS] = {
+  ".,-?!@"   , "ABC" , "DEF" ,
+  "GHI" , "JKL" , "MNO" ,
+  "PQRS", "TUV" , "WXYZ",
+  "next" , "0"   , "prev." } ;
+
+char *szKeyBoxKey[KEYBOX_KEYS] = {
+  "1"   , "2" , "3" ,
+  "4" , "5" , "6" ,
+  "7", "8" , "9",
+  "+" , "0"   , "-" } ;
+
+// functions
 
 // functions
 
@@ -189,7 +213,7 @@ int CheckPIN(int Account);
 #define FONT FONTDIR "/pakenham.ttf"
 
 enum {LEFT, CENTER, RIGHT};
-enum {SMALL, BIG};
+enum {SMALL, NORMAL, BIG};
 
 FT_Library		library;
 FTC_Manager		manager;
@@ -237,6 +261,8 @@ struct
 	char name[32];
 	char status[8];	/* 000/000 */
 	int pincount;
+	char smtp[64];
+	char from[64];
 	char code[5];
 	struct mi mailinfo[MAXMAIL];
 
@@ -277,6 +303,7 @@ struct fb_cmap colormap2 = {1, 8, rd2, gn2, bl2, tr2};
 int startx, starty, sx, ex, sy, ey;
 char online;
 char mailfile;
+char mailsend;
 
 #if HAVE_DVB_API_VERSION == 3
 

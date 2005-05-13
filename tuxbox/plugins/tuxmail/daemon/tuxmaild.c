@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.22  2005/05/13 23:16:19  robspr1
+ * - first Mail writing GUI\n- add parameters for Mail sending
+ *
  * Revision 1.21  2005/05/12 14:28:28  lazyt
  * - PIN-Protection for complete Account
  * - Preparation for sending Mails ;-)
@@ -130,6 +133,8 @@ int ReadConf()
 			fprintf(fd_conf, "HOST0=\n");
 			fprintf(fd_conf, "USER0=\n");
 			fprintf(fd_conf, "PASS0=\n");
+			fprintf(fd_conf, "SMTP0=\n");
+			fprintf(fd_conf, "FROM0=\n");
 			fprintf(fd_conf, "CODE0=\n");
 
 			fclose(fd_conf);
@@ -203,6 +208,63 @@ int ReadConf()
 			{
 				sscanf(ptr + 8, "%s", &webpass[0]);
 			}
+			else if((ptr = strstr(line_buffer, "NAME")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", account_db[index-'0'].name);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "HOST")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", account_db[index-'0'].host);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "USER")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", account_db[index-'0'].user);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "PASS")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", account_db[index-'0'].pass);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "SMTP")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", account_db[index-'0'].smtp);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "FROM")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					strncpy(account_db[index-'0'].from,ptr+6,63);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "CODE")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%4s", account_db[index-'0'].code);
+				}
+			}
+/*			
 			else if((ptr = strstr(line_buffer, "NAME0=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[0].name);
@@ -218,6 +280,14 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS0=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[0].pass);
+			}
+			else if((ptr = strstr(line_buffer, "SMTP0=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[0].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM0=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[0].from);
 			}
 			else if((ptr = strstr(line_buffer, "CODE0=")))
 			{
@@ -239,6 +309,14 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[1].pass);
 			}
+			else if((ptr = strstr(line_buffer, "SMTP1=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[1].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM1=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[1].from);
+			}
 			else if((ptr = strstr(line_buffer, "CODE1=")))
 			{
 				sscanf(ptr + 6, "%4s", account_db[1].code);
@@ -258,6 +336,14 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS2=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[2].pass);
+			}
+			else if((ptr = strstr(line_buffer, "SMTP2=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[2].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM2=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[2].from);
 			}
 			else if((ptr = strstr(line_buffer, "CODE2=")))
 			{
@@ -279,6 +365,14 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[3].pass);
 			}
+			else if((ptr = strstr(line_buffer, "SMTP3=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[3].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM3=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[3].from);
+			}
 			else if((ptr = strstr(line_buffer, "CODE3=")))
 			{
 				sscanf(ptr + 6, "%4s", account_db[3].code);
@@ -298,6 +392,14 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS4=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[4].pass);
+			}
+			else if((ptr = strstr(line_buffer, "SMTP4=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[4].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM4=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[4].from);
 			}
 			else if((ptr = strstr(line_buffer, "CODE4=")))
 			{
@@ -319,6 +421,14 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[5].pass);
 			}
+			else if((ptr = strstr(line_buffer, "SMTP5=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[5].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM5=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[5].from);
+			}
 			else if((ptr = strstr(line_buffer, "CODE5=")))
 			{
 				sscanf(ptr + 6, "%4s", account_db[5].code);
@@ -338,6 +448,14 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS6=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[6].pass);
+			}
+			else if((ptr = strstr(line_buffer, "SMTP6=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[6].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM6=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[6].from);
 			}
 			else if((ptr = strstr(line_buffer, "CODE6=")))
 			{
@@ -359,6 +477,14 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[7].pass);
 			}
+			else if((ptr = strstr(line_buffer, "SMTP7=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[7].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM7=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[7].from);
+			}
 			else if((ptr = strstr(line_buffer, "CODE7=")))
 			{
 				sscanf(ptr + 6, "%4s", account_db[7].code);
@@ -378,6 +504,14 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS8=")))
 			{
 				sscanf(ptr + 6, "%s", account_db[8].pass);
+			}
+			else if((ptr = strstr(line_buffer, "SMTP8=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[8].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM8=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[8].from);
 			}
 			else if((ptr = strstr(line_buffer, "CODE8=")))
 			{
@@ -399,10 +533,19 @@ int ReadConf()
 			{
 				sscanf(ptr + 6, "%s", account_db[9].pass);
 			}
+			else if((ptr = strstr(line_buffer, "SMTP9=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[9].smtp);
+			}
+			else if((ptr = strstr(line_buffer, "FROM9=")))
+			{
+				sscanf(ptr + 6, "%s", account_db[9].from);
+			}
 			else if((ptr = strstr(line_buffer, "CODE9=")))
 			{
 				sscanf(ptr + 6, "%4s", account_db[9].code);
 			}
+*/			
 		}
 
 	// check for update
@@ -494,6 +637,8 @@ int ReadConf()
 				fprintf(fd_conf, "HOST%d=%s\n", loop, account_db[loop].host);
 				fprintf(fd_conf, "USER%d=%s\n", loop, account_db[loop].user);
 				fprintf(fd_conf, "PASS%d=%s\n", loop, account_db[loop].pass);
+				fprintf(fd_conf, "SMTP%d=%s\n", loop, account_db[loop].smtp);
+				fprintf(fd_conf, "FROM%d=%s\n", loop, account_db[loop].from);
 				fprintf(fd_conf, "CODE%d=%s\n", loop, account_db[loop].code);
 
 				if(!account_db[loop + 1].name[0])
@@ -3025,7 +3170,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.21 $";
+	char cvs_revision[] = "$Revision: 1.22 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
