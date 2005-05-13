@@ -21,7 +21,6 @@ class eZapLCDSetup: public eWindow
 	int lcdbrightness;
 	int lcdcontrast;
 	int lcdstandby;
-	unsigned char lcdinverted;
 
 	eButton *ok;
 	void okPressed();

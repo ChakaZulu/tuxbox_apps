@@ -57,7 +57,7 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby );
 	int tmp;
 	eConfig::getInstance()->getKey("/ezap/lcd/inverted", tmp );
-	lcdinverted = (unsigned char) tmp;
+	unsigned char lcdinverted = (unsigned char) tmp;
 
 	bbrightness=new eLabel(this);
 	bbrightness->setText(_("Brightness:"));
@@ -147,7 +147,7 @@ int eZapLCDSetup::eventHandler( const eWidgetEvent& e)
 		case eWidgetEvent::execDone:
 			eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
 			eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
-			eDBoxLCD::getInstance()->setInverted( lcdinverted );
+			eDBoxLCD::getInstance()->setInverted( inverted->isChecked()?255:0 );
 			update(lcdbrightness, lcdcontrast);
 			break;
 		default:
