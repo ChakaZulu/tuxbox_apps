@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.20  2005/05/14 18:54:40  robspr1
+ * - Bugfix Mailreader - Mailwriter SMS style
+ *
  * Revision 1.19  2005/05/14 08:59:51  lazyt
  * - fix Spamfunction
  * - new Keydefinitions: RED=delete Mail, GREEN=send Mail, YELLOW=read Mail, ?=About (DBOX reserved for Configmenu)
@@ -194,16 +197,19 @@
 #define KEYBOX_KEYS 12
 
 char *szKeyBoxInfo[KEYBOX_KEYS] = {
-  ".,-?!@"   , "ABC" , "DEF" ,
-  "GHI" , "JKL" , "MNO" ,
-  "PQRS", "TUV" , "WXYZ",
-  "next" , "0"   , "prev." } ;
+  " !""#$%&'()*+-./[]\\1"   , "ABC2" , "DEF3" ,
+  "GHI4" , "JKL5" , "MNO6" ,
+  "PQRS7", "TUV8" , "WXYZ9",
+  "0"    ,     "" ,  "" } ;
 
 char *szKeyBoxKey[KEYBOX_KEYS] = {
-  "1"   , "2" , "3" ,
+  "1" , "2" , "3" ,
   "4" , "5" , "6" ,
-  "7", "8" , "9",
-  "+" , "0"   , "-" } ;
+  "7" , "8" , "9",
+  "0" , "+" , "-" } ;
+
+char *szDirectStyle[3] = {
+"ABC", "Abc", "abc" };
 
 // functions
 

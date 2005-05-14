@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.24  2005/05/14 18:54:28  robspr1
+ * - Bugfix Mailreader - Mailwriter SMS style
+ *
  * Revision 1.23  2005/05/14 08:59:51  lazyt
  * - fix Spamfunction
  * - new Keydefinitions: RED=delete Mail, GREEN=send Mail, YELLOW=read Mail, ?=About (DBOX reserved for Configmenu)
@@ -1152,7 +1155,10 @@ void ShowMailFile(char* filename, char* szAction)
 		if ( ++row > (FRAMEROWS) )
 		{
 			row = 0;
-			iMaxPages ++;
+			if( !feof(pipe) )
+			{
+				iMaxPages ++;
+			}
 		}
 	}
 	iMaxPages ++;
@@ -1186,15 +1192,19 @@ void ShowMailFile(char* filename, char* szAction)
 					GetRCCode();
 					if( rccode == RC_HOME || rccode == RC_OK || rccode == RC_RIGHT || rccode == RC_DOWN )
 					{
-						if (iPage < 99) 
+						if((iPage < 99) && ((iPage +1) < iMaxPages) && (!feof(pipe)))
 						{
 							iPage++;
+						}
+						else
+						{
+							fseek(pipe, 0, SEEK_SET);
 						}
 						break;
 					}
 					if( rccode == RC_LEFT || rccode == RC_UP )
 					{
-						if (iPage) 
+						if(iPage) 
 						{
 							iPage--;
 							fseek(pipe, iPagePos[iPage], SEEK_SET);
@@ -1207,7 +1217,14 @@ void ShowMailFile(char* filename, char* szAction)
 					}
 				}
 				row = 0;
-				iPagePos[iPage] = ftell(pipe);
+				if( !feof(pipe) )
+				{
+					iPagePos[iPage] = ftell(pipe);
+					if(iPagePos[iPage] == -1)
+					{
+						iPagePos[iPage] = 0;
+					}
+				}
 				if(rccode == RC_HOME) 
 				{
 					break;
@@ -1227,7 +1244,7 @@ void ShowMailFile(char* filename, char* szAction)
 			while(1)
 			{
 				GetRCCode();
-				if( rccode == RC_HOME || rccode == RC_OK || rccode == RC_DOWN )
+				if( rccode == RC_HOME )
 				{
 					break;
 				}
@@ -1243,7 +1260,14 @@ void ShowMailFile(char* filename, char* szAction)
 						fseek(pipe, 0, SEEK_SET);
 					}
 					row = 0;
-					iPagePos[iPage] = ftell(pipe);
+					if( !feof(pipe) )
+					{
+						iPagePos[iPage] = ftell(pipe);
+						if(iPagePos[iPage] == -1)
+						{
+							iPagePos[iPage] = 0;
+						}
+					}
 					if (rccode == RC_HOME)
 					{
 						break;
@@ -1306,9 +1330,10 @@ void EditMailFile(char* filename, int account, int mailindex )
 	#define MAXINFOLINES 14
 	char szSmtp[80];
 	char szFrom[80];
-	int nEditLine = 2;		// start to edit at body
-	int nEditPos = 0;		// start to edit at body
-	char nEditType = 0;		// type of edit: 0:letters, 1:T9 or 2:direct
+	int nEditLine = 2;					// start to edit at body
+	int nEditPos = 0;						// start to edit at body
+	char nEditType = 0;					// type of edit: 0:letters, 1:T9 or 2:direct
+	int nEditDirectStyle = 0;		// 0: ABC, 1: Abc, 2: abc
 	int  nTextFileIdx = 0;
 	char szTextFile[80];
 	char TextFileValid = 0;
@@ -1357,7 +1382,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 		RenderCircle( 310, VIEWY-INFOBOXY+40, 'N');
 		RenderString((osd == 'G') ? "T9" : "T9", 325, VIEWY-INFOBOXY+60  , 100, CENTER,  (nEditType == 1) ? NORMAL : SMALL, (nEditType == 1) ? ORANGE : WHITE);
 		RenderCircle( 310, VIEWY-INFOBOXY+70, 'O');
-		RenderString((osd == 'G') ? "direkt" : "direct", 325, VIEWY-INFOBOXY+90  , 100,  CENTER, (nEditType == 2) ? NORMAL : SMALL, (nEditType == 2) ? ORANGE : WHITE);
+		RenderString(szDirectStyle[nEditDirectStyle], 325, VIEWY-INFOBOXY+90  , 100,  CENTER, (nEditType == 2) ? NORMAL : SMALL, (nEditType == 2) ? ORANGE : WHITE);
 		RenderBox(330, VIEWY-INFOBOXY+y+5  , 430, VIEWY-INFOBOXY+35+y, GRID, SKIN2);
 	
 		// print text-blocks
@@ -1403,6 +1428,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 			int xoff;
 			for( i=0; i<MAXINFOLINES; i++ )
 			{
+				// the first two lines are 100 pixels to the right
 				if( i<2 )
 				{
 					xoff = 100;
@@ -1490,18 +1516,76 @@ void EditMailFile(char* filename, int account, int mailindex )
 			case RC_0: 
 				if(nEditType == 2)
 				{
-					char c;
+					char cNew, cAkt;
 				
-					if(( c = szInfo[nEditLine][nEditPos] ))
+					cAkt = szInfo[nEditLine][nEditPos];
+					
+					if( !iIndex )
 					{
-						if( iIndex )
+						iIndex = 9;
+					}
+					else
+					{
+						iIndex --;
+					}
+					cNew = szKeyBoxInfo[iIndex][0];
+
+					if( !cAkt )
+					{
+						if(((cNew >= 'A') && (cNew <= 'Z')) &&
+						   ((nEditDirectStyle == 2) ||
+						    ((nEditDirectStyle == 1) && (nEditPos) && (((szInfo[nEditLine][nEditPos-1]>='A') && (szInfo[nEditLine][nEditPos-1]<='z')) || (szInfo[nEditLine][nEditPos-1]==' ')))
+						   )) 
 						{
-							szInfo[nEditLine][nEditPos] = szKeyBoxInfo[iIndex-1][0];
+							cNew += ('a' - 'A');
 						}
-						else
+						szInfo[nEditLine][nEditPos] = cNew;
+						szInfo[nEditLine][nEditPos+1] = '\0';
+					}
+					else
+					{
+						// now we do some SMS style calculation
+						int j;
+						char bFound = 0;
+						char bLowerCase = 0;
+						
+						if( (cAkt >= 'a') && (cAkt <= 'z') )
 						{
-							szInfo[nEditLine][nEditPos] = '0';
+							bLowerCase = 1;
+							cAkt -= ('a'-'A');
 						}
+						
+						for( j = 0; j < strlen(szKeyBoxInfo[iIndex]); j++)
+						{
+							if( szKeyBoxInfo[iIndex][j] == cAkt )
+							{
+								if( (j+1) < strlen(szKeyBoxInfo[iIndex]) )
+								{
+									j++;
+								}
+								else
+								{
+									j=0;
+								}
+								cNew = szKeyBoxInfo[iIndex][j];
+								bFound = 1;
+								break;
+							}
+							if( bFound )
+							{
+								break;
+							}
+						}
+						
+						if(((cNew >= 'A') && (cNew <= 'Z')) && 
+							 (((nEditDirectStyle == 1) && (nEditPos) && 
+							   (((szInfo[nEditLine][nEditPos-1]>='A') && (szInfo[nEditLine][nEditPos-1]<='z')) || (szInfo[nEditLine][nEditPos-1]==' '))) ||
+							  (nEditDirectStyle == 2)
+							 ))
+						{
+							cNew += ('a' - 'A');
+						}
+						szInfo[nEditLine][nEditPos] = cNew;
 					}
 				}			
 				break;
@@ -1521,8 +1605,27 @@ void EditMailFile(char* filename, int account, int mailindex )
 				break;
 				
 			case RC_YELLOW:
-				nEditType = 2;
-				nEditLine = 2;
+				if( nEditType == 2 )
+				{
+					if( ++nEditDirectStyle > 2 )
+					{
+						nEditDirectStyle = 0;
+					}
+					char c = szInfo[nEditLine][nEditPos];
+					if( (nEditDirectStyle == 0) && (c >= 'a') && (c <= 'z'))
+					{
+						szInfo[nEditLine][nEditPos] = c - ('a'-'A');
+					}
+					else if( (nEditDirectStyle == 2) && (c >= 'A') && (c <= 'Z'))
+					{
+						szInfo[nEditLine][nEditPos] = c + ('a'-'A');
+					}
+				}
+				else
+				{
+					nEditType = 2;
+					nEditLine = 2;
+				}
 				break;
 				
 			case RC_BLUE:
@@ -1562,9 +1665,26 @@ void EditMailFile(char* filename, int account, int mailindex )
 				{
 					nTextFileIdx++;	
 				}
-				else if((nEditType == 2) && ( nEditLine < (MAXINFOLINES-1) ))
+				else if(nEditType == 2)
 				{
-					nEditLine --;
+					char c;
+					
+					if(( c = szInfo[nEditLine][nEditPos] ))
+					{
+						if( c < 0x7D )
+						{
+							szInfo[nEditLine][nEditPos] = ++c;
+						}
+						else
+						{
+							szInfo[nEditLine][nEditPos] = '~';
+						}
+					}
+					else
+					{
+						szInfo[nEditLine][nEditPos] = cChar;
+						szInfo[nEditLine][nEditPos+1] = '\0';
+					}
 				}
 				break;
 				
@@ -1573,14 +1693,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 				{
 					nTextFileIdx--;
 				}
-				else if((nEditType == 2) && ( nEditLine ))
-				{
-					nEditLine ++;
-				}
-				break;
-				
-			case RC_DOWN:
-				if(nEditType == 2) 
+				else if(nEditType == 2) 
 				{
 					char c;
 				
@@ -1602,28 +1715,18 @@ void EditMailFile(char* filename, int account, int mailindex )
 					}
 				}
 				break;
+				
+			case RC_DOWN:
+				if((nEditType == 2) && ( nEditLine < (MAXINFOLINES-1) ))
+				{
+					nEditLine ++;
+				}
+				break;
 					
 			case RC_UP:
-				if(nEditType == 2)
+				if((nEditType == 2) && ( nEditLine ))
 				{
-					char c;
-					
-					if(( c = szInfo[nEditLine][nEditPos] ))
-					{
-						if( c < 0x7D )
-						{
-							szInfo[nEditLine][nEditPos] = ++c;
-						}
-						else
-						{
-							szInfo[nEditLine][nEditPos] = '~';
-						}
-					}
-					else
-					{
-						szInfo[nEditLine][nEditPos] = cChar;
-						szInfo[nEditLine][nEditPos+1] = '\0';
-					}
+					nEditLine --;
 				}
 				break;
 				
@@ -2352,7 +2455,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.23 $";
+	char cvs_revision[] = "$Revision: 1.24 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
