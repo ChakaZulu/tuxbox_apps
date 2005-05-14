@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.23  2005/05/14 08:59:51  lazyt
+ * - fix Spamfunction
+ * - new Keydefinitions: RED=delete Mail, GREEN=send Mail, YELLOW=read Mail, ?=About (DBOX reserved for Configmenu)
+ *
  * Revision 1.22  2005/05/13 23:17:14  robspr1
  * - first Mail writing GUI\n- add parameters for Mail sending
  *
@@ -1050,9 +1054,8 @@ void RenderCircle(int sx, int sy, char type)
 		}
 }
 
-
 /******************************************************************************
- * PaintMailHeader                                                                   *
+ * PaintMailHeader
  ******************************************************************************/
 
 void PaintMailHeader( void )
@@ -1064,7 +1067,7 @@ void PaintMailHeader( void )
 }
 
 /******************************************************************************
- * ShowMailHeader                                                             *
+ * ShowMailHeader
  ******************************************************************************/
 
 void ShowMailHeader(char* szAction)
@@ -1117,8 +1120,9 @@ void ShowMailHeader(char* szAction)
 }
 
 /******************************************************************************
- * ShowMailFile                                                                   *
+ * ShowMailFile
  ******************************************************************************/
+
 void ShowMailFile(char* filename, char* szAction)
 {
 	// Code from splugin (with some modifications...)
@@ -1258,9 +1262,8 @@ void ShowMailFile(char* filename, char* szAction)
 	fclose(pipe);
 }
 
-
 /******************************************************************************
- * PaintSmtpMailHeader                                                                   *
+ * PaintSmtpMailHeader
  ******************************************************************************/
 
 void PaintSmtpMailHeader( void )
@@ -1292,16 +1295,12 @@ void PaintSmtpMailHeader( void )
 
 		}
 	}
-	
-	char info[32];
-	sprintf(info, "TuxMail (P%s/D%s)", versioninfo_p, versioninfo_d);
-	RenderString(info, 330, VIEWY-22, 280, RIGHT, SMALL, GREEN);
-	RenderString("(C) 2003-2005 Thomas \"LazyT\" Loewe", 330, VIEWY-5, 280, RIGHT, SMALL, GREEN);	
 }
 
 /******************************************************************************
- * EditMailFile                                                                   *
+ * EditMailFile
  ******************************************************************************/
+
 void EditMailFile(char* filename, int account, int mailindex )
 {
 	#define MAXINFOLINES 14
@@ -1701,8 +1700,6 @@ void EditMailFile(char* filename, int account, int mailindex )
 	fclose(pipe);
 }
 
-
-
 /******************************************************************************
  * ShowMessage
  ******************************************************************************/
@@ -1819,7 +1816,8 @@ void ShowMessage(int message)
 				sprintf(info, "TuxMail (P%s/D%s)", versioninfo_p, versioninfo_d);
 
 				RenderString(info, 157, 213, 306, CENTER, BIG, ORANGE);
-				RenderString("(C) 2003-2005 Thomas \"LazyT\" Loewe", 157, 265, 306, CENTER, SMALL, WHITE);
+				RenderString("(c) 2003-2005 Thomas \"LazyT\" Loewe", 157, 247, 306, CENTER, SMALL, WHITE);
+				RenderString("(c) 2005 Robert \"robspr1\" Spreitzer", 157, 273, 306, CENTER, SMALL, WHITE);
 		}
 
 		if(message != GETMAIL)
@@ -2101,8 +2099,6 @@ int Add2SpamList(int account, int mailindex)
 	char filebuffer[4096];
 	char bRemove = 0;
 	
-	// open or create spamlist
-
 	// find address
 
 		if((ptr1 = strchr(maildb[account].mailinfo[mailindex].from, '@')))
@@ -2129,34 +2125,39 @@ int Add2SpamList(int account, int mailindex)
 			return 0;
 		}
 
+	// now we check if this address is already in the spamlist, if so we remove it
+
 		if((fd_spam = fopen(CFGPATH SPMFILE, "r")))
 		{
+			memset(filebuffer, 0, sizeof(filebuffer));
 
-	// now we check if this address is already in the spamlist, if so we remove it
-			while ( fgets( linebuffer, sizeof(linebuffer), fd_spam ) )
+			while(fgets(linebuffer, sizeof(linebuffer), fd_spam))
 			{
-				if( !strstr(linebuffer, mailaddress) )
+				if(!strstr(linebuffer, mailaddress))
 				{
-					sprintf(filebuffer, "%s\n", linebuffer);
+					strcat(filebuffer, linebuffer);
 				}
 				else
 				{
 					bRemove = 1;
 				}
 			}
+
 			fclose(fd_spam);
 		}
-		
-		if(!(fd_spam = fopen(CFGPATH SPMFILE, "w")))
+
+	// add or remove
+
+		if(!(fd_spam = fopen(CFGPATH SPMFILE, bRemove ? "w" : "a")))
 		{
 			printf("TuxMail <could not create Spamlist: %s>\n", strerror(errno));
 
 			return 0;
 		}
 
-		if( !bRemove )
+		if(!bRemove)
 		{		
-	// add address to spamlist
+			// add address to spamlist
 	
 			printf("TuxMail <Mailaddress \"%s\" added to Spamlist>\n", mailaddress);
 
@@ -2166,8 +2167,9 @@ int Add2SpamList(int account, int mailindex)
 
 			return 1;
 		}
-
-	// remove address from spamlist
+		else
+		{
+			// remove address from spamlist
 
 			printf("TuxMail <Mailaddress \"%s\" removed from Spamlist>\n", mailaddress);
 
@@ -2176,7 +2178,7 @@ int Add2SpamList(int account, int mailindex)
 			fclose(fd_spam);
 
 			return 2;
-
+		}
 }
 
 /******************************************************************************
@@ -2350,7 +2352,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.22 $";
+	char cvs_revision[] = "$Revision: 1.23 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -2734,7 +2736,11 @@ void plugin_exec(PluginParam *par)
 
 					break;
 
-				case RC_OK:
+//				case RC_OK:
+
+//					break;
+
+				case RC_RED:
 
 					if(admin == 'Y')
 					{
@@ -2758,69 +2764,15 @@ void plugin_exec(PluginParam *par)
 
 					break;
 
-				case RC_RED:
-
-					if(admin == 'Y')
-					{
-						if(maildb[account].mark_green && maildb[account].mark_yellow)
-						{
-							maildb[account].mark_red = 1;
-						}
-						else if(!maildb[account].mark_green && !maildb[account].mark_yellow)
-						{
-							maildb[account].mark_red = 0;
-						}
-
-						maildb[account].mark_red++;
-						maildb[account].mark_red &= 1;
-
-						if(maildb[account].mark_red)
-						{
-							for(loop = 0;loop < maildb[account].mails; loop++)
-							{
-								maildb[account].mailinfo[loop].type[0] = 'D';
-							}
-
-							maildb[account].mark_green = 1;
-							maildb[account].mark_yellow = 1;
-						}
-						else
-						{
-							for(loop = 0;loop < maildb[account].mails; loop++)
-							{
-								maildb[account].mailinfo[loop].type[0] = maildb[account].mailinfo[loop].save[0];
-							}
-
-							maildb[account].mark_green = 0;
-							maildb[account].mark_yellow = 0;
-						}
-					}
-
-					break;
-
 				case RC_GREEN:
 
-					maildb[account].mark_green++;
-					maildb[account].mark_green &= 1;
-
-					if(maildb[account].mark_green)
+					if(maildb[account].mails)
 					{
-						for(loop = 0;loop < maildb[account].mails; loop++)
+						EditMailFile(SMTPFILE, account, mailindex);
+						
+						if( rccode == RC_OK )
 						{
-							if(maildb[account].mailinfo[loop].type[0] == 'N')
-							{
-								maildb[account].mailinfo[loop].type[0] = 'D';
-							}
-						}
-					}
-					else
-					{
-						for(loop = 0;loop < maildb[account].mails; loop++)
-						{
-							if(maildb[account].mailinfo[loop].save[0] == 'N')
-							{
-								maildb[account].mailinfo[loop].type[0] = 'N';
-							}
+							ControlDaemon(SEND_MAIL, account, mailindex);
 						}
 					}
 
@@ -2828,27 +2780,19 @@ void plugin_exec(PluginParam *par)
 
 				case RC_YELLOW:
 
-					maildb[account].mark_yellow++;
-					maildb[account].mark_yellow &= 1;
+					if(maildb[account].mails)
+					{
+						ControlDaemon(GET_MAIL, account, mailindex);
 
-					if(maildb[account].mark_yellow)
-					{
-						for(loop = 0;loop < maildb[account].mails; loop++)
+						if(!mailfile)
 						{
-							if(maildb[account].mailinfo[loop].type[0] == 'O')
-							{
-								maildb[account].mailinfo[loop].type[0] = 'D';
-							}
+							ShowMessage(GETMAILFAIL);
 						}
-					}
-					else
-					{
-						for(loop = 0;loop < maildb[account].mails; loop++)
+						else
 						{
-							if(maildb[account].mailinfo[loop].save[0] == 'O')
-							{
-								maildb[account].mailinfo[loop].type[0] = 'O';
-							}
+							char szInfo[256];
+							sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
+							ShowMailFile(POP3FILE, szInfo);
 						}
 					}
 
@@ -2859,16 +2803,17 @@ void plugin_exec(PluginParam *par)
 					if(admin == 'Y')
 					{
 						int iRet = Add2SpamList(account, mailindex);
+
 						if(iRet == 1)
 						{
 							maildb[account].mailinfo[mailindex].type[0] = 'D';
-							ControlDaemon(RELOAD_SPAMLIST,0,0);
+							ControlDaemon(RELOAD_SPAMLIST, 0, 0);
 							ShowMessage(ADD2SPAM);
 						}
 						else if(iRet == 2)
 						{
 							maildb[account].mailinfo[mailindex].type[0] = 'O';
-							ControlDaemon(RELOAD_SPAMLIST,0,0);
+							ControlDaemon(RELOAD_SPAMLIST, 0, 0);
 							ShowMessage(DELSPAM);
 						}
 						else
@@ -2881,7 +2826,7 @@ void plugin_exec(PluginParam *par)
 
 				case RC_MUTE:
 
-					if(!ControlDaemon(GET_STATUS,0,0))
+					if(!ControlDaemon(GET_STATUS, 0, 0))
 					{
 						online = 2;
 						ShowMessage(NODAEMON);
@@ -2891,7 +2836,7 @@ void plugin_exec(PluginParam *par)
 						online++;
 						online &= 1;
 
-						if(!ControlDaemon(SET_STATUS,0,0))
+						if(!ControlDaemon(SET_STATUS, 0, 0))
 						{
 							if(online)
 							{
@@ -2948,40 +2893,13 @@ void plugin_exec(PluginParam *par)
 
 				case RC_HELP:
 
-					if(maildb[account].mails)
-					{
-						ControlDaemon(GET_MAIL, account, mailindex);
-
-						if(!mailfile)
-						{
-							ShowMessage(GETMAILFAIL);
-						}
-						else
-						{
-							char szInfo[256];
-							sprintf(szInfo,"%s\n%s\n%s %s\n",maildb[account].mailinfo[mailindex].from,maildb[account].mailinfo[mailindex].subj,maildb[account].mailinfo[mailindex].date,maildb[account].mailinfo[mailindex].time);
-							ShowMailFile(POP3FILE, szInfo);					
-						}
-					}
+					ShowMessage(INFO);
 
 					break;
 
-				case RC_DBOX:
+//				case RC_DBOX:
 
-					if(maildb[account].mails)
-					{
-						
-//						ShowMessage(INFO);
-						ControlDaemon(GET_VERSION,0,0);
-						EditMailFile(SMTPFILE, account, mailindex);
-						
-						if( rccode == RC_OK )
-						{
-							ControlDaemon(SEND_MAIL, account, mailindex);
-						}
-					}
-
-					break;
+//					break;
 
 				default:
 

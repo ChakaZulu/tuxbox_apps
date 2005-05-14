@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.19  2005/05/14 08:59:51  lazyt
+ * - fix Spamfunction
+ * - new Keydefinitions: RED=delete Mail, GREEN=send Mail, YELLOW=read Mail, ?=About (DBOX reserved for Configmenu)
+ *
  * Revision 1.18  2005/05/13 23:16:57  robspr1
  * - first Mail writing GUI\n- add parameters for Mail sending
  *
@@ -203,8 +207,6 @@ char *szKeyBoxKey[KEYBOX_KEYS] = {
 
 // functions
 
-// functions
-
 void ShowMessage(int message);
 int CheckPIN(int Account);
 
@@ -253,9 +255,6 @@ struct
 {
 	int inactive;
 	int mails;
-	int mark_red;	/* del all */
-	int mark_green;	/* del new */
-	int mark_yellow;/* del old */
 	char nr[2];	/* 0...9 */
 	char time[6];	/* 00:00 */
 	char name[32];
