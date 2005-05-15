@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.107 2005/04/21 10:07:37 metallica Exp $
+  $Id: movieplayer.cpp,v 1.108 2005/05/15 08:55:39 metallica Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1972,6 +1972,8 @@ void *mp_playFileThread (void *filename)
 		//-- reader loop --
 		//-----------------
 		fprintf(stderr,"[mp] entering player loop\n");
+		//lcd 
+		short prozent=0,last_prozent=1,lcdSetting=g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME];
 		while( (ctx->itChanged == false) &&
 				 (g_playstate >= CMoviePlayerGui::PLAY) )
 		{
@@ -1999,13 +2001,21 @@ void *mp_playFileThread (void *filename)
 			//-- after device reset, DMX devices --
 			//-- has to be started here ...      --
 			mp_startDMX(ctx);	// starts only if stopped !
-
+			//lcd 
+			prozent=(ctx->pos*100)/ctx->fileSize;
+			if(last_prozent !=prozent && lcdSetting!=1)
+			{
+				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
+				last_prozent=prozent;
+				CLCD::getInstance()->showPercentOver(prozent);
+				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=1;
+			}
 			//-- write stream data now --
 			write(ctx->dvr, ctx->dvrBuf, rd);
 		}
 
 		fprintf(stderr,"[mp] leaving reader loop\n");
-
+		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
 		//-- close input stream --
 		//------------------------
 		if(ctx->inFd != -1)
@@ -2845,7 +2855,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.107 $");
+	helpbox.addLine("Version: $Revision: 1.108 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2866,7 +2876,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.107 $");
+	helpbox.addLine("Version: $Revision: 1.108 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
