@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.23  2005/05/15 10:16:19  lazyt
+ * - add SMTP-Logging
+ * - change Parameters (POP3LOG now LOGGING, HOST? now POP3?)
+ *
  * Revision 1.22  2005/05/13 23:16:19  robspr1
  * - first Mail writing GUI\n- add parameters for Mail sending
  *
@@ -117,7 +121,7 @@ int ReadConf()
 
 			fprintf(fd_conf, "STARTDELAY=30\n");
 			fprintf(fd_conf, "INTERVALL=15\n\n");
-			fprintf(fd_conf, "POP3LOG=Y\n");
+			fprintf(fd_conf, "LOGGING=Y\n");
 			fprintf(fd_conf, "LOGMODE=S\n\n");
 			fprintf(fd_conf, "SAVEDB=Y\n\n");
 			fprintf(fd_conf, "AUDIO=Y\n");
@@ -130,7 +134,7 @@ int ReadConf()
 			fprintf(fd_conf, "WEBUSER=\n");
 			fprintf(fd_conf, "WEBPASS=\n\n");
 			fprintf(fd_conf, "NAME0=\n");
-			fprintf(fd_conf, "HOST0=\n");
+			fprintf(fd_conf, "POP30=\n");
 			fprintf(fd_conf, "USER0=\n");
 			fprintf(fd_conf, "PASS0=\n");
 			fprintf(fd_conf, "SMTP0=\n");
@@ -146,7 +150,7 @@ int ReadConf()
 
 		memset(account_db, 0, sizeof(account_db));
 
-		startdelay = intervall = pop3log = logmode = savedb = audio = video = lcd = osd = skin = admin = webport = webuser[0] = webpass[0] = 0;
+		startdelay = intervall = logging = logmode = savedb = audio = video = lcd = osd = skin = admin = webport = webuser[0] = webpass[0] = 0;
 
 	// fill database
 
@@ -160,9 +164,9 @@ int ReadConf()
 			{
 				sscanf(ptr + 10, "%d", &intervall);
 			}
-			else if((ptr = strstr(line_buffer, "POP3LOG=")))
+			else if((ptr = strstr(line_buffer, "LOGGING=")))
 			{
-				sscanf(ptr + 8, "%c", &pop3log);
+				sscanf(ptr + 8, "%c", &logging);
 			}
 			else if((ptr = strstr(line_buffer, "LOGMODE=")))
 			{
@@ -216,7 +220,7 @@ int ReadConf()
 					sscanf(ptr + 6, "%s", account_db[index-'0'].name);
 				}
 			}
-			else if((ptr = strstr(line_buffer, "HOST")) && (*(ptr+5) == '='))
+			else if((ptr = strstr(line_buffer, "POP3")) && (*(ptr+5) == '='))
 			{
 				char index = *(ptr+4);
 				if((index >= '0') && (index <= '9'))
@@ -550,7 +554,7 @@ int ReadConf()
 
 	// check for update
 
-		if(!startdelay || !intervall || !pop3log || !logmode || !savedb || !audio || !video || !lcd || !osd || !skin || !admin || !webport)
+		if(!startdelay || !intervall || !logging || !logmode || !savedb || !audio || !video || !lcd || !osd || !skin || !admin || !webport)
 		{
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "missing Param(s), update Config") : printf("TuxMailD <missing Param(s), update Config>\n");
 
@@ -566,9 +570,9 @@ int ReadConf()
 				intervall = 15;
 			}
 
-			if(!pop3log)
+			if(!logging)
 			{
-				pop3log = 'Y';
+				logging = 'Y';
 			}
 
 			if(!logmode)
@@ -618,7 +622,7 @@ int ReadConf()
 
 			fprintf(fd_conf, "STARTDELAY=%d\n", startdelay);
 			fprintf(fd_conf, "INTERVALL=%d\n\n", intervall);
-			fprintf(fd_conf, "POP3LOG=%c\n", pop3log);
+			fprintf(fd_conf, "LOGGING=%c\n", logging);
 			fprintf(fd_conf, "LOGMODE=%c\n\n", logmode);
 			fprintf(fd_conf, "SAVEDB=%c\n\n", savedb);
 			fprintf(fd_conf, "AUDIO=%c\n", audio);
@@ -634,7 +638,7 @@ int ReadConf()
 			for(loop = 0; loop < 10; loop++)
 			{
 				fprintf(fd_conf, "\nNAME%d=%s\n", loop, account_db[loop].name);
-				fprintf(fd_conf, "HOST%d=%s\n", loop, account_db[loop].host);
+				fprintf(fd_conf, "POP3%d=%s\n", loop, account_db[loop].host);
 				fprintf(fd_conf, "USER%d=%s\n", loop, account_db[loop].user);
 				fprintf(fd_conf, "PASS%d=%s\n", loop, account_db[loop].pass);
 				fprintf(fd_conf, "SMTP%d=%s\n", loop, account_db[loop].smtp);
@@ -670,11 +674,11 @@ int ReadConf()
 			intervall = 15;
 		}
 
-		if(pop3log != 'Y' && pop3log != 'N')
+		if(logging != 'Y' && logging != 'N')
 		{
-			slog ? syslog(LOG_DAEMON | LOG_INFO, "POP3LOG=%c invalid, set to \"N\"", pop3log) : printf("TuxMailD <POP3LOG=%c invalid, set to \"N\">\n", pop3log);
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "LOGGING=%c invalid, set to \"N\"", logging) : printf("TuxMailD <LOGGING=%c invalid, set to \"N\">\n", logging);
 
-			pop3log = 'N';
+			logging = 'N';
 		}
 
 		if(logmode != 'A' && logmode != 'S')
@@ -783,7 +787,7 @@ int ReadConf()
 
 		if(accounts)
 		{
-			if(pop3log == 'N')
+			if(logging == 'N')
 			{
 				slog ? syslog(LOG_DAEMON | LOG_INFO, "check %d Account(s) every %dmin without Logging", accounts, intervall) : printf("TuxMailD <check %d Account(s) every %dmin without Logging>\n", accounts, intervall);
 			}
@@ -1773,13 +1777,11 @@ int SendPOPCommand(int command, char *param)
 
 		if(command != INIT)
 		{
-			send(sock, send_buffer, strlen(send_buffer), 0);
-
-			if(pop3log == 'Y')
+			if(logging == 'Y')
 			{
 				if((fd_log = fopen(LOGFILE, "a")))
 				{
-					fprintf(fd_log, "%s", send_buffer);
+					fprintf(fd_log, "POP3 <- %s", send_buffer);
 
 					fclose(fd_log);
 				}
@@ -1788,6 +1790,8 @@ int SendPOPCommand(int command, char *param)
 					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not log POP3-Command") : printf("TuxMailD <could not log POP3-Command>\n");
 				}
 			}
+
+			send(sock, send_buffer, strlen(send_buffer), 0);
 		}
 
 		// get server response
@@ -1840,41 +1844,43 @@ int SendPOPCommand(int command, char *param)
 			}
 		}
 		else
-		while(recv(sock, &recv_buffer[stringindex], 1, 0) > 0)
 		{
-			if(command == TOP)
+			while(recv(sock, &recv_buffer[stringindex], 1, 0) > 0)
 			{
-				if(recv_buffer[stringindex] == '\n' && recv_buffer[stringindex - 3] == '\n')
+				if(command == TOP)
+				{
+					if(recv_buffer[stringindex] == '\n' && recv_buffer[stringindex - 3] == '\n')
+					{
+						recv_buffer[stringindex+1] = '\0';
+
+						break;
+					}
+				}
+				else if(recv_buffer[stringindex] == '\n')
 				{
 					recv_buffer[stringindex+1] = '\0';
 
 					break;
 				}
-			}
-			else if(recv_buffer[stringindex] == '\n')
-			{
-				recv_buffer[stringindex+1] = '\0';
 
-				break;
-			}
-
-			if(stringindex < sizeof(recv_buffer) - 4)
-			{
-				stringindex++;
-			}
-			else
-			{
-				slog ? syslog(LOG_DAEMON | LOG_INFO, "Buffer Overflow") : printf("TuxMailD <Buffer Overflow>\n");
-				recv_buffer[stringindex + 1] = '\0';
-				break;
+				if(stringindex < sizeof(recv_buffer) - 4)
+				{
+					stringindex++;
+				}
+				else
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "Buffer Overflow") : printf("TuxMailD <Buffer Overflow>\n");
+					recv_buffer[stringindex + 1] = '\0';
+					break;
+				}
 			}
 		}
 
-		if(pop3log == 'Y')
+		if(logging == 'Y')
 		{
 			if((fd_log = fopen(LOGFILE, "a")))
 			{
-				fprintf(fd_log, "%s", recv_buffer);
+				fprintf(fd_log, "POP3 -> %s", recv_buffer);
 
 				fclose(fd_log);
 			}
@@ -2076,6 +2082,7 @@ int SendPOPCommand(int command, char *param)
 
 int SendSMTPCommand(int command, char *param)
 {
+	FILE *fd_log;
 	static int sock;
 	struct hostent *server;
 	struct sockaddr_in SockAddr;
@@ -2159,6 +2166,20 @@ int SendSMTPCommand(int command, char *param)
 
 		if(command != INIT)
 		{
+			if(logging == 'Y')
+			{
+				if((fd_log = fopen(LOGFILE, "a")))
+				{
+					fprintf(fd_log, "SMTP <- %s", send_buffer);
+
+					fclose(fd_log);
+				}
+				else
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not log SMTP-Command") : printf("TuxMailD <could not log SMTP-Command>\n");
+				}
+			}
+
 			send(sock, &send_buffer, strlen(send_buffer), 0);
 		}
 
@@ -2170,6 +2191,20 @@ int SendSMTPCommand(int command, char *param)
 		}
 
 		recv(sock, &recv_buffer, sizeof(recv_buffer), 0);
+
+		if(logging == 'Y')
+		{
+			if((fd_log = fopen(LOGFILE, "a")))
+			{
+				fprintf(fd_log, "SMTP -> %s", recv_buffer);
+
+				fclose(fd_log);
+			}
+			else
+			{
+				slog ? syslog(LOG_DAEMON | LOG_INFO, "could not log SMTP-Command") : printf("TuxMailD <could not log SMTP-Command>\n");
+			}
+		}
 
 	// check server response
 
@@ -3170,7 +3205,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.22 $";
+	char cvs_revision[] = "$Revision: 1.23 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -3325,7 +3360,7 @@ int main(int argc, char **argv)
 		{
 			if(online)
 			{
-				if(pop3log == 'Y' && logmode == 'S')
+				if(logging == 'Y' && logmode == 'S')
 				{
 					fclose(fopen(LOGFILE, "w"));
 				}

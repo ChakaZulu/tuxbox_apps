@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.18  2005/05/15 10:16:19  lazyt
+ * - add SMTP-Logging
+ * - change Parameters (POP3LOG now LOGGING, HOST? now POP3?)
+ *
  * Revision 1.17  2005/05/13 23:16:33  robspr1
  * - first Mail writing GUI\n- add parameters for Mail sending
  *
@@ -248,7 +252,7 @@ char webuser[32], webpass[32];
 char plainstring[64], encodedstring[64];
 char decodedstring[512];
 int startdelay, intervall, skin;
-char pop3log, logmode, audio, lcd, osd, admin, savedb, mailrd;
+char logging, logmode, audio, lcd, osd, admin, savedb, mailrd;
 int video;
 char online = 1;
 char mailread = 0;
