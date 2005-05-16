@@ -60,6 +60,8 @@ extern "C" {
 #define HTTP11		1
 #define SHOUTCAST	2
 
+#define MAX_REDIRECTS 5  /* follow this amount of redirects */
+
 #define CONNECTING	1	/* not used */
 #define BUFFERING	2	/* not used */
 #define RUNNING		3

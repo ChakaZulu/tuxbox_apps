@@ -97,7 +97,7 @@
 /*
 TODO:
 	- ICECAST support
-	- follow redirection errors (server error codes 302, 301)
+	- follow redirection errors (server error codes 302, 301) (done for HTTP, 2005-05-16 ChakaZulu)
 	- support for automatic playlist processing (shoutcast pls files)
 
 known bugs:
@@ -157,11 +157,10 @@ magic_t known_magic[] =
 #define known_magic_count 2
 #endif
 
-
-
-
+#define is_redirect(a) ((a == 301) || (a == 302))
 
 char err_txt[2048];		/* human readable error message */
+char redirect_url[2048];        /* new url if we've been redirected (HTTP 301/302) */
 static int debug = 0;		/* print debugging output or not */
 static char logfile[255];	/* redirect errors from stderr */
 static int retry_num = 10;	/* number of retries for failed connections */
@@ -187,6 +186,8 @@ static STREAM_FILTER *ShoutCAST_InitFilter(int);
 static void ShoutCAST_ParseMetaData(char *, CSTATE *);
 
 static void getOpts(void);
+
+static void parseURL_url(URL& url);
 
 /***************************************/
 /* this is a simple options parser     */
@@ -309,7 +310,6 @@ int request_file(URL *url)
     strcpy(url->entity, ptr + 1);
     *ptr = 0;
   }
-  
   switch(url->proto_version)
   {
   /* send a HTTP/1.0 request */
@@ -346,7 +346,6 @@ int request_file(URL *url)
 		  send(url->fd, str, strlen(str), 0);
 		  
 		  rval = parse_response(url, NULL, NULL);
-
 		  dprintf(stderr, "server response parser: return value = %d\n", rval);
 
 		  /* if the header indicated a zero length document or an */
@@ -357,8 +356,7 @@ int request_file(URL *url)
 		  
 		  /* return on error */
 		  if( rval < 0 )
-		    return -1;
-
+		    return rval;
 		  }
 		  break;
 
@@ -516,6 +514,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
   case 302:	/* 'file not found' error */
   		  errno = ENOENT;
   		  strcpy(err_txt, ptr);
+		  getHeaderStr("Location",redirect_url);
 		  return -1 * response;
 		  break;
 		  
@@ -724,56 +723,7 @@ FILE *f_open(const char *filename, const char *acctype)
 #endif
 			 
   /* now lets see what we have ... */
-
-  ptr = strstr(url.url, "://");
-
-  if (!ptr)
-  {
-    url.access_mode = MODE_FILE;
-    strcpy(url.file, url.url);
-    url.host[0] = 0;
-    url.port = 0;
-  }
-  else
-  {
-    strcpy(url.host, ptr + 3);
-
-    /* select the appropriate transport modes */
-    transport("http",  MODE_HTTP, HTTP11);
-    transport("icy",   MODE_HTTP, SHOUTCAST);
-    transport("scast", MODE_SCAST, SHOUTCAST);
-//findme
-    transport("icast", MODE_ICAST, SHOUTCAST);
-
-    /* if we fetch a playlist file, then set the access mode */
-    /* that it will be parsed and processed automatically. If */
-    /* it does not fail, then the call returns with an opened stream */
-
-/* this currently results in an endless loop due to recursive calls of f_open()
-    if((url.access_mode == HTTP11) && (strstr(url.url, ".pls")))
-    {
-      url.access_mode = MODE_PLS;
-      url.proto_version = SHOUTCAST;
-    }
-*/    
-
-    /* extract the file path from the url */
-    ptr = strchr(ptr + 3, '/');
-    if(ptr) strcpy(url.file, ptr);
-    else    strcpy(url.file, "/");
-
-    /* extract the host part from the url */
-    ptr = strchr(url.host, '/');
-    if(ptr) *ptr = 0;
-
-    ptr = strrchr(url.host, ':');
-
-    if(ptr)
-    {
-      url.port = atoi(ptr + 1);
-      *ptr = 0;
-    }
-  }
+  parseURL_url(url);
 
   dprintf(stderr, "URL  to open: %s, access mode %s%s\n", 
   	url.url, 
@@ -793,6 +743,12 @@ FILE *f_open(const char *filename, const char *acctype)
   switch(url.access_mode)
   {
   case MODE_HTTP:	{
+	  int follow_url = 1; // used for redirects
+	  int redirects = 0;
+	  *redirect_url = '\0';
+	  while (follow_url)
+	  {
+		  
   			   int retries = retry_num;
 			   
 			   do
@@ -866,17 +822,30 @@ FILE *f_open(const char *filename, const char *acctype)
 			       
 			       /* send the file request and check it'S revurn value */
 			       /* if it failed, then close the stream */
-			       if(request_file(&url) < 0)
+			       int request_res = request_file(&url);
+			       if(request_res < 0)
 			       {
 			         /* we need out own f_close() function here, because everything */
 			         /* already has been set up and f_close() deinitializes it all correctly */
 			         f_close(url.stream);
 			         fd = NULL;
 			       }
+			       follow_url = 0;
+			       if (is_redirect(-1*request_res)) {
+				       redirects++;
+				       dprintf(stderr,"redirected to %s\n",redirect_url);
+				       strcpy(url.url,redirect_url);
+				       parseURL_url(url);
+				       if (redirects <= MAX_REDIRECTS)
+					       follow_url = 1;
+				       else
+					       dprintf(stderr, "too many redirects: %d (max: %d)\n",redirects,MAX_REDIRECTS);
+			       }
 			     }
 			   }
-			 }
-  			 break;
+	  }
+  }
+	  break;
 			 
   case MODE_ICAST:
   case MODE_SCAST:	/* pseude transport mode; create the url to fetch the shoutcast */
@@ -1778,3 +1747,60 @@ dprintf(stderr, "filter : meta_int : %d\n", filterdata->meta_int);
     }
   }
 }
+
+/**************************** utility functions ******************************/
+void parseURL_url(URL& url) {
+	
+  /* now lets see what we have ... */
+
+  char *ptr = strstr(url.url, "://");
+
+  if (!ptr)
+  {
+    url.access_mode = MODE_FILE;
+    strcpy(url.file, url.url);
+    url.host[0] = 0;
+    url.port = 0;
+  }
+  else
+  {
+    strcpy(url.host, ptr + 3);
+
+    /* select the appropriate transport modes */
+    transport("http",  MODE_HTTP, HTTP11);
+    transport("icy",   MODE_HTTP, SHOUTCAST);
+    transport("scast", MODE_SCAST, SHOUTCAST);
+//findme
+    transport("icast", MODE_ICAST, SHOUTCAST);
+
+    /* if we fetch a playlist file, then set the access mode */
+    /* that it will be parsed and processed automatically. If */
+    /* it does not fail, then the call returns with an opened stream */
+
+/* this currently results in an endless loop due to recursive calls of f_open()
+    if((url.access_mode == HTTP11) && (strstr(url.url, ".pls")))
+    {
+      url.access_mode = MODE_PLS;
+      url.proto_version = SHOUTCAST;
+    }
+*/    
+
+    /* extract the file path from the url */
+    ptr = strchr(ptr + 3, '/');
+    if(ptr) strcpy(url.file, ptr);
+    else    strcpy(url.file, "/");
+
+    /* extract the host part from the url */
+    ptr = strchr(url.host, '/');
+    if(ptr) *ptr = 0;
+
+    ptr = strrchr(url.host, ':');
+
+    if(ptr)
+    {
+      url.port = atoi(ptr + 1);
+      *ptr = 0;
+    }
+  }
+}
+
