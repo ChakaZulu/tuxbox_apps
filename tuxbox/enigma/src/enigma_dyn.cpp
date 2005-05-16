@@ -64,9 +64,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.2.0-Expert"
+#define WEBIFVERSION "3.2.1-Expert"
 #else
-#define WEBIFVERSION "3.2.0"
+#define WEBIFVERSION "3.2.1"
 #endif
 
 #define KEYBOARDTV 0
@@ -77,9 +77,6 @@ int keyboardMode = KEYBOARDTV;
 int pdaScreen = 0;
 int screenWidth = 1024;
 eString lastTransponder;
-bool streamingActive = false;
-
-eString playStatus = "Off";
 
 int currentBouquet = 0;
 int currentChannel = -1;
@@ -288,6 +285,7 @@ static bool playService(const eServiceReference &ref)
 }
 
 #ifndef DISABLE_FILE
+#if 0
 static eString pause(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -308,6 +306,7 @@ static eString stop(eString request, eString dirpath, eString opt, eHTTPConnecti
 	eZapMain::getInstance()->stop();
 	return "+ok";
 }
+#endif
 
 static eString record(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -995,10 +994,7 @@ static eString getTopNavi(bool javascript)
 static eString version(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain";
-	eString result;
-	result = "enigma";
-//	result.sprintf("EliteDVB Version : %s\r\n, eZap Version : doof\r\n",eDVB::getInstance()->getVersion().c_str());
-	return result;
+	return firmwareLevel(getAttribute("/.version", "version"));
 }
 
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1058,7 +1054,7 @@ eString getIP()
 {
 	int sd;
 	struct ifreq ifr;
-	sd=socket(AF_INET, SOCK_DGRAM, 0);
+	sd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sd < 0)
 		return "?.?.?.?-socket-error";
 	memset(&ifr, 0, sizeof(ifr));
@@ -1207,8 +1203,10 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 		eString filename = ref.path;
 		filename.erase(filename.length() - 2, 2);
 		filename += "eit";
-		::unlink(filename.c_str());
-		::unlink((ref.path + ".indexmarks").c_str());
+		eDebug("[ENIGMA_DYN] deleting %s", filename.c_str());
+		remove(filename.c_str());
+		eDebug("[ENIGMA_DYN] deleting %s", eString(ref.path + ".indexmarks").c_str());
+		remove((ref.path + ".indexmarks").c_str());
 		
 		int slice = 0;
 		while (1)
@@ -1220,6 +1218,7 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 			struct stat64 s;
 			if (::stat64(filename.c_str(), &s) < 0)
 				break;
+			eDebug("[ENIGMA_DYN] deleting %s", filename.c_str());
 			eBackgroundFileEraser::getInstance()->erase(filename.c_str());
 		}
 	}
@@ -2611,22 +2610,12 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 	return "http://" + getIP() + ":31338/" + eString().sprintf("%02x\n", Decoder::current.apid);
 }
 
-static eString videopls(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getvideopls()
 {
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eStreamer::getInstance()->setServiceReference(string2ref(opt["sref"]));
-
-	eProcessUtils::killProcess("streamts");
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
 	eString apid = eString().sprintf("%04x", Decoder::current.apid);
 	eString pmtpid = eString().sprintf("%04x", Decoder::current.pmtpid);
 	eString pcrpid = eString().sprintf("%04x", Decoder::current.pcrpid);
-
-	content->local_header["Content-Type"]="video/mpegfile";
-	content->local_header["Cache-Control"] = "no-cache";
-	content->local_header["vpid"] = vpid;
-	content->local_header["apid"] = apid;
-	content->local_header["pmt"] = pmtpid;
 
 	eString apids;	
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
@@ -2643,10 +2632,20 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 	return "http://" + getIP() + ":31339/0," + pmtpid + "," + vpid  + apids + "," + pcrpid;
 }
 
+
+static eString videopls(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eProcessUtils::killProcess("streamts");
+	
+	content->local_header["Content-Type"]="video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache";
+
+	return getvideopls();
+}
+
 static eString setStreamingServiceRef(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	streamingActive = true;
 	eStreamer::getInstance()->setServiceReference(string2ref(opt["sref"]));
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	return closeWindow(content, "", 10);
@@ -3230,19 +3229,12 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 {
 	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 	eString msg = opts["msg"];
-	eString result = "-error";
 	if (!msg)
-		msg = opt;
-	if (msg.length())
-	{
-		msg = httpUnescape(msg);
-		eZapMain::getInstance()->postMessage(eZapMessage(1, _("External Message"), msg, 10), 0);
-		result = "+ok";
-	}
-	if (opts.find("msg") == opts.end())
-		return result;
-	else
-		return "<script language=\"javascript\">window.close();</script>";
+		msg = "Error: No message text available.";
+		
+	eZapMain::getInstance()->postMessage(eZapMessage(1, _("External Message"), httpUnescape(msg), 10), 0);
+		
+	return closeWindow(content, "", 10);
 }
 
 static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -3341,14 +3333,8 @@ static eString save_userBouquets(eString request, eString dirpath, eString opt, 
 
 static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result;
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
-	eServiceReference streamingRef;
-	std::stringstream audiochannels;
-	eString audiochannel;
 
-	eString mode = opt["mode"];
-	eString path = opt["path"];
 	eString curBouquet = opt["curBouquet"];
 	if (curBouquet)
 		currentBouquet = atoi(curBouquet.c_str());
@@ -3356,15 +3342,15 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	if (curChannel)
 		currentChannel = atoi(curChannel.c_str());
 
-	eServiceReference current_service = string2ref(path);
+	eServiceReference current_service = string2ref(opt["path"]);
 
-	if (!(current_service.flags&eServiceReference::isDirectory))
+	if (!(current_service.flags&eServiceReference::isDirectory) && current_service)
 	{
-		streamingActive = eStreamer::getInstance()->getServiceReference(streamingRef);
+		eProcessUtils::killProcess("streamts");
 		playService(current_service);
-		result = closeWindow(content, "Please wait...", 3000);
 	}
-	return result;
+	
+	return closeWindow(content, "Please wait...", 3000);
 }
 
 static eString getCurrentServiceRef(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -3433,8 +3419,6 @@ static eString pda_root(eString request, eString dirpath, eString opts, eHTTPCon
 static eString web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
-
-	streamingActive = false;
 
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -4668,6 +4652,12 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 
 	// apid
 	result.strReplace("#APID#", (Decoder::current.apid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.apid));
+	
+	// vlc parameters
+	result.strReplace("#VLCPARMS#", getvideopls());
+	
+	// pmtpid
+	result.strReplace("#PMTPID#", (Decoder::current.pmtpid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.pmtpid));
 
 	// free recording space on disk
 #ifndef DISABLE_FILE
@@ -4713,14 +4703,13 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 #endif
 	// vlc streaming
 	result.strReplace("#SERVICEREFERENCE#", (eServiceInterface::getInstance()->service) ? eServiceInterface::getInstance()->service.toString() : "");
-	result.strReplace("#STREAMING#", (streamingActive) ? "1" : "0");
 
 	return result;
 }
 
 static eString videodata(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Content-Type"] = "text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "videodata.tmp");
 
 	int videopos = 0;
@@ -4743,7 +4732,6 @@ static eString videodata(eString request, eString dirpath, eString opt, eHTTPCon
 
 	result.strReplace("#VIDEOPOSITION#", eString().sprintf("%d", videopos));
 	result.strReplace("#VIDEOTIME#", eString().sprintf("%d:%02d", min, sec));
-	result.strReplace("#PLAYSTATUS#", playStatus);
 
 	return result;
 }
@@ -4827,11 +4815,6 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString, eString> opts = getRequestOptions(opt, '&');
-	eString requester = opts["requester"];
-	eString result;
-
-/*	if (opts.find("path") == opts.end())
-		return "E: no path set";*/
 
 	if (opts.find("name") == opts.end())
 		return "E: no plugin name given";
@@ -4847,11 +4830,7 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 	if (ePluginThread::getInstance())
 		ePluginThread::getInstance()->kill(true);
 
-	result = plugins.execPluginByName((path + opts["name"]).c_str());
-	if (requester == "webif")
-		result = closeWindow(content, "", 500);
-
-	return result;
+	return plugins.execPluginByName((path + opts["name"]).c_str());
 }
 
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
@@ -4873,9 +4852,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/mv", moveFile, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/ln", createSymlink, lockWeb);
 #ifndef DISABLE_FILE
-	dyn_resolver->addDyn("GET", "/cgi-bin/stop", stop, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/pause", pause, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/play", play, lockWeb);
+//	dyn_resolver->addDyn("GET", "/cgi-bin/stop", stop, lockWeb);
+//	dyn_resolver->addDyn("GET", "/cgi-bin/pause", pause, lockWeb);
+//	dyn_resolver->addDyn("GET", "/cgi-bin/play", play, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/record", record, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/videocontrol", videocontrol, lockWeb);
 #endif

@@ -15,17 +15,6 @@ function NewWindow(mypage, myname, w, h, scroll, timeout)
 		document.location = mypage;
 }
 
-function reload()
-{
-	document.location.reload();
-}
-
-function confirmAction(xy)
-{
-	var check = window.confirm(xy);
-	return(check);
-}
-
 function maximizeWindow()
 {
 	top.window.moveTo(0, 0);

@@ -34,6 +34,8 @@
 	<!-- recording -->
 	var recording = #RECORDING#;
 	<!-- vlc streaming -->
+	var vlcparms = "#VLCPARMS#";
+	var pmtpid = "#PMTPID#";
 	var serviceReference = "#SERVICEREFERENCE#";
 	var streaming = "#STREAMING#";
 </script>

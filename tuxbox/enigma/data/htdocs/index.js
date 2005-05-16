@@ -2,7 +2,7 @@ function setVol(volume)
 {
 	document.location = "setVolume?volume=" + volume;
 	if (window.screen.width < 800)
-		setTimeout("reload()", 1000);
+		setTimeout("document.location.reload()", 1000);
 	else
 	{
 		headerUpdateVolumeBar(volume, 0);
@@ -14,7 +14,7 @@ function toggleMute(xy)
 {
 	document.location = "setVolume?mute="+xy;
 	if (window.screen.width < 800)
-		setTimeout("reload()", 1000);
+		setTimeout("document.location.reload()", 1000);
 	else
 	{
 		headerUpdateVolumeBar(data.volume, 0);
@@ -38,7 +38,7 @@ function switchChannel(xy, bouquet, channel)
 		setTimeout("parent.data.location.reload()", 2000);
 		setTimeout("parent.channavi.location.reload()", 2000);
 		vlcStop();
-		setTimeout("vlcStart()", 200);
+		setTimeout("vlcStart()", 2500);
 	}
 }
 
@@ -77,7 +77,7 @@ function satFinder(transponder)
 
 function deleteMovie(xy)
 {
-	if (confirmAction('Do you really want to delete this movie?'))
+	if (window.confirm('Do you really want to delete this movie?'))
 	{
 		if (window.screen.width < 800)
 		{
@@ -92,7 +92,7 @@ function deleteMovie(xy)
 				currentChannel = selChannel;
 				channel = document.channelselector.channel.options[selChannel].value;
 				document.location = "cgi-bin/deleteMovie?ref="+channel;
-				setTimeout("reload()", 3000);
+				setTimeout("document.location.reload()", 3000);
 			}
 			else
 				alert("Please select a movie first!");
@@ -128,7 +128,7 @@ function downloadMovie()
 
 function recoverMovies()
 {
-	if (confirmAction('Do you really want to rebuild the movie playlist?'))
+	if (window.confirm('Do you really want to rebuild the movie playlist?'))
 	{
 		if (window.screen.width < 800)
 			document.location = "cgi-bin/recoverRecordings";
@@ -172,7 +172,7 @@ function DVRrecord(xy)
 	NewWindow("cgi-bin/record?command="+xy, "record", "200", "100", "no", "5000");
 	if (parent.data.updateCycleTime)
 		parent.data.location.reload();
-	setTimeout("reload()", 500);
+	setTimeout("document.location.reload()", 500);
 }
 
 function sendMessage2TV()
@@ -196,15 +196,13 @@ function configSwapFile()
 	if (swapfileconfig.swap.checked)
 		activate = "on";
 	document.location = "cgi-bin/setConfigSwapFile?swap="+activate+"&swapfile="+swapfileconfig.swapfile.value;
-	setTimeout("reload()", 500);
+	setTimeout("document.location.reload()", 500);
 }
 
 function vlc()
 {
-	if (parent.data.serviceReference)
-		document.location = "video.pls?sref=" + parent.data.serviceReference;
-	else
-		setTimeout("vlc()", 100);
+ 	document.location = "video.pls";
+ 	setTimeout("setStreamingServiceRef()", 200);	
 }
 
 function vlcStop()
@@ -215,13 +213,23 @@ function vlcStop()
 
 function vlcStart()
 {
-	if (parent.data.ip)
+	if (parent.data.vlcparms)
 	{
-		vlccmd.location.href = "http://127.0.0.1:8080/?control=add&mrl=http://" + parent.data.ip + "/video.pls";
-		setTimeout("vlcStartItem()", 2000);
+		if (parent.data.vlcparms.indexOf("ffffffff") == -1)
+		{
+			vlccmd.location.href = "http://127.0.0.1:8080/?control=add&mrl=" + parent.data.vlcparms;
+			setTimeout("vlcStartItem()", 200);
+		}
+		else
+		{
+			parent.data.location.reload();
+			setTimeout("vlcStart()", 200);
+		}
 	}
 	else
+	{
 		setTimeout("vlcStart()", 200);
+	}
 }
 
 function vlcStartItem()

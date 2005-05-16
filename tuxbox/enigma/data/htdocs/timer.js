@@ -1,18 +1,18 @@
 function cleanupTimerList()
 {
-	if (confirmAction('Do you really want to delete ALL COMPLETED timer events?'))
+	if (window.confirm('Do you really want to delete ALL COMPLETED timer events?'))
 	{
 		document.location = "cleanupTimerList";
-		setTimeout("reload()", 500);
+		setTimeout("document.location.reload()", 500);
 	}
 }
 
 function clearTimerList()
 {
-	if (confirmAction('Do you really want to delete ALL timer events?'))
+	if (window.confirm('Do you really want to delete ALL timer events?'))
 	{
 		document.location = "clearTimerList";
-		setTimeout("reload()", 500);
+		setTimeout("document.location.reload()", 500);
 	}
 }
 
@@ -23,10 +23,10 @@ function editTimerEvent(xy)
 
 function deleteTimerEvent(xy)
 {
-	if (confirmAction('Do you really want to delete this timer event?'))
+	if (window.confirm('Do you really want to delete this timer event?'))
 	{
 		NewWindow('deleteTimerEvent?'+xy, 'deleteTimer', '300', '150', 'no');
-		setTimeout("reload()", 1000);
+		setTimeout("document.location.reload()", 1000);
 	}
 }
 

@@ -3,7 +3,7 @@
 <script>
 function update()
 {
-	parent.updateVideoBar(playStatus, videoPosition, videoTime);
+	parent.updateVideoBar("", videoPosition, videoTime);
 }
 </script>
 </head>
@@ -11,7 +11,6 @@ function update()
 <script>
 	var videoTime = "#VIDEOTIME#";
 	var videoPosition = #VIDEOPOSITION#;
-	var playStatus = "#PLAYSTATUS#";
 </script>
 </body>
 </html>
