@@ -290,6 +290,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 int CAudioPlayerGui::show()
 {
+	RandomNumber rnd;
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
@@ -711,7 +712,7 @@ int CAudioPlayerGui::show()
 						m_current = 0;
 					}
 				
-					std::random_shuffle((m_current != 0) ? m_playlist.begin() : m_playlist.begin() + 1, m_playlist.end());
+					std::random_shuffle((m_current != 0) ? m_playlist.begin() : m_playlist.begin() + 1, m_playlist.end(), rnd);
 					if (m_select_title_by_name)
 					{
 						buildSearchTree();

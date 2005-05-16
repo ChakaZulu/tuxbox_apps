@@ -44,6 +44,8 @@
 #include <set>
 #include <map>
 
+#include <cstdlib>
+#include <ctime>
 
 typedef std::set<long> CPosList;
 
@@ -67,6 +69,21 @@ public:
 };
 
 typedef std::vector<CAudiofileExt> CAudioPlayList;
+
+class RandomNumber
+{
+ public:
+	RandomNumber()
+	{
+		srand(time(0));
+	}
+
+	int operator()(int n)
+	{
+		return static_cast<int>(static_cast<double>(n) * rand() /
+								(RAND_MAX + 1.0));
+	}
+};
 
 class CAudioPlayerGui : public CMenuTarget
 {
