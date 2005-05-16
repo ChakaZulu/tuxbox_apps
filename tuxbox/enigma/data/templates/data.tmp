@@ -37,7 +37,6 @@
 	var vlcparms = "#VLCPARMS#";
 	var pmtpid = "#PMTPID#";
 	var serviceReference = "#SERVICEREFERENCE#";
-	var streaming = "#STREAMING#";
 </script>
 </body>
 </html>

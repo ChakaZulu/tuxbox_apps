@@ -35,10 +35,10 @@ function switchChannel(xy, bouquet, channel)
 		else
 			document.location = "?path="+xy+"&mode=zap&zapmode=4&zapsubmode=1";
 
-		setTimeout("parent.data.location.reload()", 2000);
+		setTimeout("parent.data.location.reload()", 500);
 		setTimeout("parent.channavi.location.reload()", 2000);
 		vlcStop();
-		setTimeout("vlcStart()", 2500);
+		setTimeout("vlcStart()", 1000);
 	}
 }
 
@@ -223,7 +223,7 @@ function vlcStart()
 		else
 		{
 			parent.data.location.reload();
-			setTimeout("vlcStart()", 200);
+			setTimeout("vlcStart()", 500);
 		}
 	}
 	else
