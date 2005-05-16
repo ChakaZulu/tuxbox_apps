@@ -22,7 +22,7 @@ EPGPlus.footer_fontbouquetchannelname Valitse kanavanipun/kanavan nimi
 EPGPlus.footer_fontbuttons Näppäimet
 EPGPlus.footer_fonteventdescription Ohjelman kuvaus
 EPGPlus.footer_fonteventshortdescription Ohjelman kuvaus lyhyesti
-EPGPlus.head Ohjelmaopas (EPG Plus)
+EPGPlus.head Header
 EPGPlus.header_font Header
 EPGPlus.horgap1_height height hor. gap 1
 EPGPlus.horgap2_height height hor. gap 2
@@ -47,8 +47,13 @@ EPGPlus.timeline_fonttime Aika Kirjaisin
 EPGPlus.vergap1_width width ver. gap 1
 EPGPlus.vergap2_width width ver. gap 2
 EPGPlus.view_mode Tila
+EPG.language_title EPG Kieli
+EPG.language_onoff Priorisointi
+EPG.primary 1. Kieli
+EPG.secondary 2. Kieli
+EPG.tertiary 3. Kieli
 GENRE.ARTS.0 taide / kulttuuri
-GENRE.ARTS.1 performanssitaide
+GENRE.ARTS.1 muoti
 GENRE.ARTS.10 taide / kulttuuri
 GENRE.ARTS.11 muoti
 GENRE.ARTS.2 fine arts
@@ -103,7 +108,7 @@ GENRE.SOCIAL_POLITICAL.1 Raportit ja makasiinit
 GENRE.SOCIAL_POLITICAL.2 Talousneuvontaa
 GENRE.SOCIAL_POLITICAL.3 Kuuluisuuksia
 GENRE.SPORTS.0 urheilu
-GENRE.SPORTS.1 urheilutapahtumat (Olympialaiset,MM-kilpailut jne.)
+GENRE.SPORTS.1 martial sports
 GENRE.SPORTS.10 equestrian
 GENRE.SPORTS.11 martial sports
 GENRE.SPORTS.2 urheilumakasiini
@@ -128,8 +133,8 @@ apids.hint_2 hexalukuina välilyönneillä erotettuna
 apidselector.head Valitse kieli
 audiomenu.PCMOffset Volume Decrease PCM
 audiomenu.analogout Analoginen lähtö
-audiomenu.avs avs
-audiomenu.avs_control Äänenvoimakkuuden säätö avs/ost
+audiomenu.avs Äänenvoimak. säätö avs/ost
+audiomenu.avs_control Äänenvoimak. säätö avs/ost
 audiomenu.dolbydigital Dolby Digital
 audiomenu.head Äänen asetukset
 audiomenu.lirc lirc
@@ -143,7 +148,7 @@ audioplayer.building_search_index Luon hakutietokantaa
 audioplayer.button_select_title_by_id etsi ID:llä
 audioplayer.button_select_title_by_name etsi nimellä
 audioplayer.defdir Aloitus hakemisto/suunta
-audioplayer.delete Poista
+audioplayer.delete poista kaikki
 audioplayer.deleteall poista kaikki
 audioplayer.display_order järjestys
 audioplayer.enable_sc_metadata Näytä shoutcastin metadata
@@ -160,13 +165,13 @@ audioplayer.jump_forwards Hyppä eteenpäin
 audioplayer.keylevel näppäin taso
 audioplayer.name Musiikkisoitin
 audioplayer.pause Tauko
-audioplayer.play Toista
+audioplayer.play Pääte .m3u lisätään automaattisesti
 audioplayer.playing Current Track
 audioplayer.playlist_fileerror_msg Tiedoston luonti epäonnistui:
 audioplayer.playlist_fileerror_title Virhe
 audioplayer.playlist_fileoverwrite_msg Haluatko ylikirjoittaa tiedoston:
 audioplayer.playlist_fileoverwrite_title Ylikirjoita?
-audioplayer.playlist_name soittolistan tiedostonimi
+audioplayer.playlist_name Pääte .m3u lisätään automaattisesti
 audioplayer.playlist_name_hint1 Syötä soittolistan nimi
 audioplayer.playlist_name_hint2 Pääte .m3u lisätään automaattisesti
 audioplayer.reading_files Luetaan metadataa
@@ -191,13 +196,13 @@ bouqueteditor.discardingchanges Kumotaan muutokset. Odota hetki.
 bouqueteditor.hide Piilota
 bouqueteditor.lock Lukitse
 bouqueteditor.move Siirrä
-bouqueteditor.name kanvanippu editori
-bouqueteditor.newbouquetname Uusi nimi kanavanipuille
-bouqueteditor.rename Uudelleen nimeä
-bouqueteditor.return valmis
+bouqueteditor.name Kanavaniput
+bouqueteditor.newbouquetname Uusi nimi kanavanipulle
+bouqueteditor.rename Uudelleennimeä
+bouqueteditor.return Valmis
 bouqueteditor.savechanges? Tallennetaanko muutokset?
 bouqueteditor.savingchanges Tallennetaan muutoksia. Odota hetki.
-bouqueteditor.switch lisää/poista
+bouqueteditor.switch TV/Radio
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Kanavaniput
 cablesetup.provider Kaapeli-tv tarjoaja
@@ -221,7 +226,7 @@ colormenu.textcolor_head Tekstin väri
 colormenu.themeselect valitse teema
 colormenu.timing OSD ajoitus
 colormenusetup.head Valikon värit
-colormenusetup.menucontent Ikkunan sisältö
+colormenusetup.menucontent Valitun ikkunan sisältö
 colormenusetup.menucontent_inactive Passiivisen ikkunan sisältö
 colormenusetup.menucontent_selected Valitun ikkunan sisältö
 colormenusetup.menuhead Valikon otsikko
@@ -281,11 +286,11 @@ filebrowser.scan Selaan kansiota
 filebrowser.select Valitse
 filebrowser.showrights Näytä tiedosto-oikeudet
 filebrowser.sort.date (pvm)
-filebrowser.sort.name (tiedostonimi)
+filebrowser.sort.name (tiedostonimi2)
 filebrowser.sort.namedirsfirst (tiedostonimi2)
 filebrowser.sort.size (koko)
 filebrowser.sort.type (tyyppi)
-filesystem.is.utf8 tiedostojärjestelmä
+filesystem.is.utf8 UTF-8
 filesystem.is.utf8.option.iso8859.1 ISO-8859-1
 filesystem.is.utf8.option.utf8 UTF-8
 flashupdate.actionreadflash Luen
@@ -304,29 +309,29 @@ flashupdate.expertfunctions Erikoistoiminnot
 flashupdate.fileis0bytes tiedoston koko on 0 tavua
 flashupdate.fileselector Tiedosto-valitsin
 flashupdate.flashreadyreboot Ohjelmistopäivitys onnistui.\nDBox käynnistyy uudelleen nyt.
-flashupdate.getinfofile luen versiotietoja
+flashupdate.getinfofile versiotietoja ei voitu lukea
 flashupdate.getinfofileerror versiotietoja ei voitu lukea
-flashupdate.getupdatefile haen päivitystä
+flashupdate.getupdatefile päivityksen hakeminen epäonnistui
 flashupdate.getupdatefileerror päivityksen hakeminen epäonnistui
 flashupdate.globalprogress Kokonaiskesto:
 flashupdate.head Ohjelmistopäivitys
 flashupdate.md5check tarkistan ohjelmistoa
 flashupdate.md5sumerror virheellinen ohjelmisto
-flashupdate.msgbox Uusi ohjelmistoversio löydetty:\nPvm: %s, %s\nOhjelmistopohja: %s\nTyyppi: %s\n\nHaluatko ladata ja asentaa tämän ohjelmistoversion?
+flashupdate.msgbox Uusi ohjelmistoversio löydetty:\nPvm: %s, %s\nOhjelmistopohja: %s\nTyyppi: %s\n\nHaluatko asentaa tämän ohjelmistoversion?
 flashupdate.msgbox_manual Uusi ohjelmistoversio löydetty:\nPvm: %s, %s\nOhjelmistopohja: %s\nTyyppi: %s\n\nHaluatko asentaa tämän ohjelmistoversion?
 flashupdate.mtdselector Osio-valitsin
 flashupdate.programmingflash Ohjelmoin flash-muistin
-flashupdate.proxypassword Salasana
+flashupdate.proxypassword Jätä tyhjäksi, jos salasana ei ole käytössä.
 flashupdate.proxypassword_hint1 Anna välityspalvelimen (proxy) salasana
 flashupdate.proxypassword_hint2 Jätä tyhjäksi, jos salasana ei ole käytössä.
-flashupdate.proxyserver Palvelimen nimi
+flashupdate.proxyserver Välityspalvelin (proxy)
 flashupdate.proxyserver_hint1 Anna palvelimen nimi tai IP osoite, muotoa palvelin:portti
 flashupdate.proxyserver_hint2 tyhjä kenttä tarkoittaa, ettei välityspalvelinta käytetä
 flashupdate.proxyserver_sep Välityspalvelin (proxy)
-flashupdate.proxyusername Käyttäjänimi
+flashupdate.proxyusername tyhjä kenttä tarkoittaa, että käyttänimeä ei ole käytössä
 flashupdate.proxyusername_hint1 välityspalvelimen käyttäjänimi
 flashupdate.proxyusername_hint2 tyhjä kenttä tarkoittaa, että käyttänimeä ei ole käytössä
-flashupdate.readflash Lue koko ohjelmisto
+flashupdate.readflash Lue yksi osio
 flashupdate.readflashmtd Lue yksi osio
 flashupdate.ready valmis
 flashupdate.reallyflashmtd Haluatko varmasti päivittää?\n\nMikäli päivityksessä menee jokin pieleen tai\nohjelmisto on viallinen, laite ei enää käynnisty uudelleen.\n\nOhjelmisto: %s\nKohde: %s
@@ -335,12 +340,12 @@ flashupdate.selectimage Saatavilla olevat ohjelmistot
 flashupdate.squashfs.noversion SquashFS versiotarkastus ei toimi webin kautta päivitettäessä.\nHaluatko jatkaa?
 flashupdate.titlereadflash Luen Flashia
 flashupdate.titlewriteflash Kirjaitan Flashia
-flashupdate.updatemode Päivitys tila
+flashupdate.updatemode Manuaalinen (ftp)
 flashupdate.updatemode_internet internet
 flashupdate.updatemode_manual Manuaalinen (ftp)
 flashupdate.url_file configuraatio tiedosto 
 flashupdate.versioncheck tarkistan version
-flashupdate.writeflash Kirjoita koko ohjelmisto
+flashupdate.writeflash Kirjoita yksi partitio
 flashupdate.writeflashmtd Kirjoita yksi partitio
 flashupdate.wrongbase Sinun versio eroaa uudesta. Päivitys ei ole\nmahdollinen mikäli ohjelmistoversio ei ole oikea!
 fontmenu.channellist Kanavalista
@@ -350,7 +355,7 @@ fontmenu.gamelist Pelit
 fontmenu.head Kirjasin koon asetukset
 fontmenu.infobar Infopalkki
 fontsize.channel_num_zap Kanavan suoravalinta
-fontsize.channellist Kanavalista
+fontsize.channellist Numero
 fontsize.channellist_descr Kuvaus
 fontsize.channellist_number Numero
 fontsize.epg_date EPG Pvm
@@ -369,7 +374,7 @@ fontsize.infobar_channame Kanavan nimi
 fontsize.infobar_info info
 fontsize.infobar_number Numero
 fontsize.infobar_small pieni
-fontsize.menu Menutext
+fontsize.menu Menu Title
 fontsize.menu_info Menu Info
 fontsize.menu_title Menu Title
 gtxalpha.alpha1 Alpha 1
@@ -396,35 +401,35 @@ keybindingmenu.addremind Lisää kanavanvaihto ajastin
 keybindingmenu.addremind_head Lisää kanavanvaihto ajastin
 keybindingmenu.allchannels_on_ok kaikki palvelut
 keybindingmenu.bouquetchannels_on_ok nykyinen kanavanippu
-keybindingmenu.bouquetdown edellinen kanavanippu
+keybindingmenu.bouquetdown edellisen kanavanipun näppäin
 keybindingmenu.bouquetdown_head edellisen kanavanipun näppäin
 keybindingmenu.bouquethandling Kanavanippu-kontrolli
 keybindingmenu.bouquetlist_on_ok Kanavanippu-lista
-keybindingmenu.bouquetup seuraava kanavanippu
+keybindingmenu.bouquetup seuraavan kanavanipun näppäin
 keybindingmenu.bouquetup_head seuraavan kanavanipun näppäin
 keybindingmenu.cancel sulje kanavalista
 keybindingmenu.cancel_head sulje kanavalista
-keybindingmenu.channeldown edellinen kanava
+keybindingmenu.channeldown edellisen kanavan näppäin
 keybindingmenu.channeldown_head edellisen kanavan näppäin
 keybindingmenu.channellist Kanavalista
-keybindingmenu.channelup seuraava kanava
+keybindingmenu.channelup Seuraavan kanavan näppäin
 keybindingmenu.channelup_head Seuraavan kanavan näppäin
 keybindingmenu.head Näppäinasetukset
-keybindingmenu.lastchannel Pikavaihto
+keybindingmenu.lastchannel Pikavaihto edelliselle kanavalle
 keybindingmenu.lastchannel_head Pikavaihto edelliselle kanavalle
 keybindingmenu.modechange Tilanvaihto
-keybindingmenu.pagedown seuraava sivu
+keybindingmenu.pagedown Seuraavan sivun näppäin
 keybindingmenu.pagedown_head Seuraavan sivun näppäin
-keybindingmenu.pageup edellinen sivu
+keybindingmenu.pageup Edellisen sivun näppäin
 keybindingmenu.pageup_head Edellisen sivun näppäin
 keybindingmenu.quickzap Pikavaihto
-keybindingmenu.repeatblock toiston viive
+keybindingmenu.repeatblock viive
 keybindingmenu.repeatblockgeneric viive
-keybindingmenu.sort vaihda lajittelujärjestystä
+keybindingmenu.sort lajittelujärjestyksen näppän
 keybindingmenu.sort_head lajittelujärjestyksen näppän
-keybindingmenu.subchanneldown edellinen alikanava
+keybindingmenu.subchanneldown edellisen alikanavan näppäin
 keybindingmenu.subchanneldown_head edellisen alikanavan näppäin
-keybindingmenu.subchannelup seuraava alikanava
+keybindingmenu.subchannelup seuraavan alikanavan näppäin
 keybindingmenu.subchannelup_head seuraavan alikanavan näppäin
 keybindingmenu.tvradiomode TV/Radio
 keybindingmenu.tvradiomode_head TV/Radio
@@ -436,9 +441,9 @@ keychooser.text2 Odota hetki keskeyttääksesi
 keychoosermenu.currentkey nykyinen näppäin
 keychoosermenu.setnew aseta uusi näppäin
 keychoosermenu.setnone ei näppäintä
-languagesetup.head Kieli valikko
+languagesetup.head Kielivalikko
 languagesetup.select Kieli
-lcdcontroler.brightness Normaali kirkkaus
+lcdcontroler.brightness Valmiustilan kirkkaus
 lcdcontroler.brightnessstandby Valmiustilan kirkkaus
 lcdcontroler.contrast Kontrasti
 lcdcontroler.head LCD asetukset
@@ -449,9 +454,9 @@ lcdmenu.head LCD Asetukset
 lcdmenu.inverse Käänteinen
 lcdmenu.lcdcontroler Kontrasti / Kirkkaus
 lcdmenu.power Virta
-lcdmenu.statusline Tilarivi
-lcdmenu.statusline.both äänenvoimakkuus / esitysaika-jana
-lcdmenu.statusline.playtime esitysaika
+lcdmenu.statusline äänenvoimakkuus
+lcdmenu.statusline.both äänenvoim. / aikajana
+lcdmenu.statusline.playtime aikajana
 lcdmenu.statusline.volume äänenvoimakkuus
 mainmenu.audioplayer Musiikkisoitin
 mainmenu.games Pelit
@@ -460,11 +465,11 @@ mainmenu.movieplayer Mediasoitin
 mainmenu.pausesectionsd Lue EPG
 mainmenu.pictureviewer Kuvankatselu
 mainmenu.radiomode Radio
-mainmenu.recording Tallennus
+mainmenu.recording Pysäytys
 mainmenu.recording_start Käynnistys
 mainmenu.recording_stop Pysäytys
 mainmenu.scartmode Scart
-mainmenu.scripts Komentojonot
+mainmenu.scripts Laajennukset
 mainmenu.service Huoltovalikko
 mainmenu.settings Asetukset
 mainmenu.shutdown Sammuta
@@ -476,12 +481,12 @@ mainsettings.head Asetukset
 mainsettings.keybinding Näppäinasetukset
 mainsettings.language Kieli
 mainsettings.lcd LCD näyttö
-mainsettings.misc Muut asetukset
+mainsettings.misc Lisäasetukset
 mainsettings.network Verkko
 mainsettings.recording Tallennus
 mainsettings.savesettingsnow Tallenna asetukset
 mainsettings.savesettingsnow_hint Asetuksien tallennus,\nodota hetki...
-mainsettings.streaming Mediatoistin
+mainsettings.streaming Mediasoitin
 mainsettings.video Video
 menu.back Palaa
 messagebox.back Palaa
@@ -493,6 +498,8 @@ messagebox.no Ei
 messagebox.yes Kyllä
 miscsettings.bootinfo Näytä tiedot käynnistyksessä
 miscsettings.bootmenu Näytä käynnistysvalikko
+miscsettings.tekstimaatti tekstimaatti-tekstitys
+miscsettings.cabledriver load Nokia kaapeli ajuri
 miscsettings.driver_boot Ajurien ja käynnistysksen asetukset
 miscsettings.fb_destination Käynnistys-konsoli
 miscsettings.general Yleiset
@@ -502,13 +509,13 @@ miscsettings.infobar_sat_display Näytä satelliitin nimi
 miscsettings.noaviawatchdog Käytä AVIA valvontaa
 miscsettings.noenxwatchdog Käytä eNX valvontaa
 miscsettings.pmtupdate Käytä PMT päivitystä
-miscsettings.shutdown_real Käytä valmiustilaa
+miscsettings.shutdown_real Viivästetty sammutus
 miscsettings.shutdown_real_rcdelay Viivästetty sammutus
 miscsettings.sptsmode Käytä spts tilaa
 miscsettings.startbhdriver Lataa BH-tilan ajurit
 motorcontrol.head Kääntömoottorin asetukset
-movieplayer.bookmark Kirjanmerkit
-movieplayer.bookmarkname Kirjanmerkin nimi
+movieplayer.bookmark 
+movieplayer.bookmarkname 
 movieplayer.bookmarkname_hint1 Syötä nimi uudelle kirjanmerkille
 movieplayer.bookmarkname_hint2 
 movieplayer.buffering Puskuroin...
@@ -516,14 +523,14 @@ movieplayer.defdir Oletus hakemisto
 movieplayer.defplugin Käynnistys-laajennus
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Toisto VLC:n kautta
-movieplayer.goto Hyppää kohtaan ...
+movieplayer.goto +,- -> suhteellinen hyppy
 movieplayer.goto.h1 = -> absoluuttinen hyppy
 movieplayer.goto.h2 +,- -> suhteellinen hyppy
 movieplayer.head Mediatoistin
 movieplayer.nostreamingserver Videon lähettäjäpalvelimeen ei saatu yhteyttä.
 movieplayer.pleasewait Odota hetki.\nYhdistän videopalvelimeen...
 movieplayer.toomanybookmarks Liian monta kirjanmerkkiä.\nPoista vähintään yksi ensin.
-movieplayer.tshelp1 Seis
+movieplayer.tshelp1 Ohjeet: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tshelp10 n. 10 minuuttia taaksepäin
 movieplayer.tshelp11 n. 10 minuuttia eteenpäin
 movieplayer.tshelp12 Ohjeet: http://www.giggo.de/dbox2/movieplayer.html\n
@@ -535,10 +542,10 @@ movieplayer.tshelp6 n. minuutti taaksepäin
 movieplayer.tshelp7 n. minuutti eteenpäin
 movieplayer.tshelp8 n. 5 minuuttia taaksepäin
 movieplayer.tshelp9 n. 5 minuuttia eteenpäin
-movieplayer.tsplayback Toista TS
-movieplayer.tsplayback_pc Toista PIN koodilla suojattu TS
+movieplayer.tsplayback Toista tiedosto
+movieplayer.tsplayback_pc Toista PIN koodilla suojattu tiedosto
 movieplayer.vcdplayback (S)VCD
-movieplayer.vlchelp1 Seis
+movieplayer.vlchelp1 Ohjeet: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.vlchelp10 n. 10 minuuttia taaksepäin
 movieplayer.vlchelp11 n. 10 minuuttia eteenpäin
 movieplayer.vlchelp12 Ohjeet: http://www.giggo.de/dbox2/movieplayer.html\n
@@ -560,7 +567,7 @@ networkmenu.mount NFS/CIFS/FTPFS
 networkmenu.nameserver nimipalvelin
 networkmenu.netmask Verkkomaski
 networkmenu.setupnow Ota asetukset käyttöön nyt
-networkmenu.setuponstartup Ota asetukset käyttöön uudelleenkäynnistettäessä
+networkmenu.setuponstartup Asetukset käyttöön käynnistettäessä
 networkmenu.show Näytä nykyiset verkkoasetukset
 networkmenu.test Testaa verkkoasetukset
 nfs.alreadymounted Hakemisto jo liitetty
@@ -568,21 +575,21 @@ nfs.automount Liitä käynnistyksessä
 nfs.dir hakemisto/resurssi
 nfs.ip Palvelimen IP
 nfs.localdir Paikallinen hakemisto
-nfs.mount Liitä verkkohakemisto
+nfs.mount Liitä verkkolevy
 nfs.mount_options Liitoksen asetukset
-nfs.mounterror Liitos virhe
+nfs.mounterror Tuntematon tiedostojärjestelmä
 nfs.mounterror_notsup Tuntematon tiedostojärjestelmä
 nfs.mountnow Liitä nyt
 nfs.mountok Liitos onnistui
 nfs.mounttimeout Liitos epäonnistui: aikakatkaisu
 nfs.password Salasana
-nfs.remount Uudelleen liitä hakemistot
-nfs.type Tyyppi
+nfs.remount Uudelleen liitä 
+nfs.type NFS
 nfs.type_cifs CIFS
 nfs.type_lufs FTPFS
 nfs.type_nfs NFS
-nfs.umount Katkaise yhteys verkkolevyyn
-nfs.umounterror Virhe liitetäessä verkkolevyä
+nfs.umount Vapauta verkkolevy
+nfs.umounterror Virhe vapauttaessa verkkolevyä
 nfs.username Käyttäjänimi
 nfsmenu.head NFS/CIFS/FTPFS asetukset
 nvod.percentage (%d%% jäljellä)
@@ -596,11 +603,11 @@ options.null null
 options.off Pois
 options.on Päällä
 options.serial Sarjaportti
-parentallock.changepin Muuta PIN kood
+parentallock.changepin Syötä uusi lapsilukon PIN koodi tähän!
 parentallock.changepin_hint1 Syötä uusi lapsilukon PIN koodi tähän!
 parentallock.changetolocked lukituille kanavanipuille
 parentallock.head Syötä lapsilukon PIN kood
-parentallock.lockage Lukitse ohjelma
+parentallock.lockage alle 18 vuotiailta
 parentallock.lockage12 alle 12 vuotiailta
 parentallock.lockage16 alle 16 vuotiailta
 parentallock.lockage18 alle 18 vuotiailta
@@ -614,7 +621,7 @@ pictureviewer.decode_server_ip palvelimen IP-osoite
 pictureviewer.decode_server_port palvelimen portti
 pictureviewer.defdir Aloitushakemisto
 pictureviewer.head Kuvankatselu
-pictureviewer.help1 Valikko tila
+pictureviewer.help1 siirry alas
 pictureviewer.help10 Katselu tila
 pictureviewer.help11 lue uudelleen kuva
 pictureviewer.help12 edellinen kuva
@@ -625,7 +632,7 @@ pictureviewer.help16 siirry ylös
 pictureviewer.help17 siirry vasemmalle
 pictureviewer.help18 siirry oikealle
 pictureviewer.help19 siirry alas
-pictureviewer.help2 näytä kuva
+pictureviewer.help2 poistu
 pictureviewer.help20 vaihda järjestystä
 pictureviewer.help21 lue kuva uudelleen (ei skaalausta)
 pictureviewer.help22 poistu
@@ -643,7 +650,7 @@ pictureviewer.scaling skaalaus
 pictureviewer.show näytä
 pictureviewer.slide_time diaesityksessä kuvan näyttöaika
 pictureviewer.slideshow diaesitys
-pictureviewer.sortorder vaihda järjestystä
+pictureviewer.sortorder (tiedostonimi)
 pictureviewer.sortorder.date (pvm)
 pictureviewer.sortorder.filename (tiedostonimi)
 ping.ok on tavoitettavissa (ping)
@@ -660,20 +667,20 @@ rclock.unlockmsg Kaukosäätimen lukitus avattu
 recordingmenu.choose_direct_rec_dir Valitse hakemisto välittömälle tallennukselle
 recordingmenu.defdir Tallenushakemisto
 recordingmenu.epg_for_filename Pitkät tiedostonimet (sisältäen EPG tiedon)
-recordingmenu.file Välitön (tiedosto)
-recordingmenu.filesettings Välittömän tallennuksen asetukset
+recordingmenu.file tallennus tiedostoon
+recordingmenu.filesettings Tiedostotallennuksen asetukset
 recordingmenu.head Tallennus asetukset
 recordingmenu.help Tallennus mediat:\n--------------------------\nserver:\nkäyttäen PC:ssä olevaa ohjelmistoa\n\n(analoginen) vcr:\nkäyttäen VCR scart-liitäntää\n\nsuora (tiedosto):\nSuoraan NFS:lle tiedostoon\ntai sisäiselle kiintolevylle\nTS: käytä spts tilaa\nPES: Älä käytä spts tilaa\n\n\nSuurin tied. koko:\n---------------------\nNFS V2: 2 GB (2048 MB)\nNFS V3: lähes rajoittamaton (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
 recordingmenu.no_scart älä vaihda scart-tilaan
 recordingmenu.off pois
 recordingmenu.record_in_spts_mode vaihda spts tilaan ennen tallennusta
-recordingmenu.recording_type tallennusväline
+recordingmenu.recording_type tallennus
 recordingmenu.ringbuffers rengaspuskureiden määrä
-recordingmenu.server palvelin
-recordingmenu.server_ip tallennuspalvelimen IP
+recordingmenu.server Palvelimelle (WOL)
+recordingmenu.server_ip Tallennuspalvelimen IP
 recordingmenu.server_mac MAC osoite
 recordingmenu.server_port portti
-recordingmenu.server_wakeup tallennuspalvelimen WOL
+recordingmenu.server_wakeup Palvelimen WOL
 recordingmenu.setupnow vahvista muutokset
 recordingmenu.splitsize Suurin tied. koko(MB)
 recordingmenu.stopplayback pysäytä toisto
@@ -686,12 +693,12 @@ recordingmenu.vcr videonauhuri
 recordtimer.announce Tallennus alkaa muutaman minuutin kuluttua
 repeatblocker.hint_1 Pienin aikaväli (ms) 2 näppäinpainalluksen tunnistamiseen
 repeatblocker.hint_2 Syötä 0 vaihtaaksesi kursori (punainen = välilyönti)
-satsetup.diseqc DiSEqC
+satsetup.diseqc DiSEqC-toisto
 satsetup.diseqc10 DiSEqC 1.0
 satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.diseqcrepeat DiSEqC-toisto
-satsetup.extended DiSEqC-asetukset
+satsetup.extended Moottorin asetukset
 satsetup.extended_motor Moottorin asetukset
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.motorcontrol Manaalinen moottorin asennus
@@ -699,32 +706,32 @@ satsetup.nodiseqc no DiSEqC
 satsetup.satellite Satelliitti
 satsetup.savesettingsnow Tallenna asetukset
 satsetup.smatvremote SMATV Remote Tuning
-scantp.fec FEC
+scantp.fec 7/8
 scantp.fec_1_2 1/2
 scantp.fec_2_3 2/3
 scantp.fec_3_4 3/4
 scantp.fec_5_6 5/6
 scantp.fec_7_8 7/8
 scantp.freq Taajuus
-scantp.pol Polarisaatio
+scantp.pol V
 scantp.pol_h H
 scantp.pol_v V
 scantp.rate Symbolinopeus
-scantp.scan Käsin etsintä
+scantp.scan Nopea etsintä
 scantp.scanmode Nopea etsintä
 scants.abort_body Keskeytetäänkö etsintä?
 scants.abort_header Kanavan etsintä keskeytetty
-scants.actcable Cable:
-scants.actsatellite Satellite:
-scants.bouquet Kanaavanippu
+scants.actcable Kaapeli:
+scants.actsatellite Sateliitti:
+scants.bouquet päivitä
 scants.bouquet_create luo uusi
 scants.bouquet_erase poista kaikki
 scants.bouquet_leave jätä nykyinen
 scants.bouquet_satellite Satelliitti-nippu
 scants.bouquet_update päivitä
 scants.channel Kanava:
-scants.failed Lähetinskannaus epäonnistui!
-scants.finished Lähetin skannaus valmis!
+scants.failed Lähetinhaku epäonnistui!
+scants.finished Lähetinhaku valmis!
 scants.freqdata Taajuuss:
 scants.head Skannaa lähetin
 scants.numberofdataservices Data
@@ -732,16 +739,16 @@ scants.numberofradioservices Radio
 scants.numberoftotalservices Yhteensä
 scants.numberoftvservices TV
 scants.provider Palveluntarjoaja:
-scants.startnow aloita skannaus
+scants.startnow Aloita haku
 scants.transponders lähettimet:
 screensetup.lowerright vihreä = aseta oikea alakulma
 screensetup.upperleft punainen = aseta vasen yläkulma
-servicemenu.getplugins Lataa laajennokset uudelleen
+servicemenu.getplugins Päivitä laajennokset
 servicemenu.getplugins_hint Ladataan laajennoksia,\nodota hetki.
 servicemenu.head Asetukset
-servicemenu.reload Lataa uudelleen kanavalistat
+servicemenu.reload Päivitä kanavalista
 servicemenu.reload_hint Ladataan kanavalistoja,\nodota hetki.
-servicemenu.scants Palveluskannaus
+servicemenu.scants Kanavahaku
 servicemenu.ucodecheck Tarkista UCode:t
 servicemenu.update Ohjelmistopäivitys
 settings.help Ohje
@@ -757,12 +764,12 @@ sleeptimerbox.hint1 Sammutusaika. (000=ei sammutusta)
 sleeptimerbox.hint2 Laite sammuu tässä asetetun ajan kuluttua.
 sleeptimerbox.title Uniajastin
 streamfeatures.head Valikko
-streaminfo.aratio Kuvasuhde
+streaminfo.aratio Tuntematon kuvasuhde
 streaminfo.aratio_unknown Tuntematon kuvasuhde
-streaminfo.audiotype Ääni
+streaminfo.audiotype Tuntematon ääniraita
 streaminfo.audiotype_unknown Tuntematon ääniraita
 streaminfo.bitrate Bittinopeus
-streaminfo.framerate Framerate
+streaminfo.framerate Tuntematon Framerate
 streaminfo.framerate_unknown Tuntematon Framerate
 streaminfo.head Läetteen tiedot
 streaminfo.not_available ei saatavilla
@@ -772,7 +779,7 @@ streaming.buffer_overflow Tallennus keskeytyi,\nkoska videota ei pystytty tallen
 streaming.busy Yksi tai useampi tallennus käynnissä.\nMikäli olet varma, että tallennusta ei ole, käynnistä laite uudelleen.
 streaming.dir_not_writable Tallennushakemistoon ei voida kirjoittaa\nTallennus ei toimi.
 streaming.success Tallennus onnistui.
-streaming.write_error Tallennus keskeytyi,\nkoska tallenteen kirjoitusoperaatiossa tapahtui virhe.
+streaming.write_error Tallennus keskeytyi,\nkoska tallennustiedostoa ei voitu luoda.
 streaming.write_error_open Tallennus keskeytyi,\nkoska tallennustiedostoa ei voitu luoda.
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
@@ -784,21 +791,21 @@ streamingmenu.mpeg2 MPEG2
 streamingmenu.off Off
 streamingmenu.on On
 streamingmenu.server_ip Streamingserver IP
-streamingmenu.server_port Streamingserver Port
+streamingmenu.server_port Streamingserver Portti
 streamingmenu.streaming_audiorate Datarate Audio
-streamingmenu.streaming_force_avi_rawaudio Force AC3 for AVI
+streamingmenu.streaming_force_avi_rawaudio Pakota AC3 AVI:lle
 streamingmenu.streaming_force_transcode_video Transcode MPG/VCD video
-streamingmenu.streaming_resolution Resolution
-streamingmenu.streaming_server_cddrive DVD Drive
-streamingmenu.streaming_server_startdir Directory (VLC)
-streamingmenu.streaming_transcode_audio Transcode audio (DVD/VCD/MPG)
-streamingmenu.streaming_transcode_video_codec MPEG video codec
-streamingmenu.streaming_type Streamingserver
+streamingmenu.streaming_resolution Resoluutio
+streamingmenu.streaming_server_cddrive DVD Asema
+streamingmenu.streaming_server_startdir Hakemisto (VLC)
+streamingmenu.streaming_transcode_audio Muunna audio (DVD/VCD/MPG)
+streamingmenu.streaming_transcode_video_codec MPEG video
+streamingmenu.streaming_type Stream-palvelin
 streamingmenu.streaming_videorate Datarate Video
-streamingserver.noconnect No connection to streamingserver.\nRecording canceled.
+streamingserver.noconnect Tallennuspalvelimelle ei saatu yhteyttä.\nTallennus keskeytetty.
 stringinput.caps ABC / abc
 stringinput.clear poista kaikki
-timer.eventrecord.msg   ... tehdäkkö vaiko eikö tehdä
+timer.eventrecord.msg Oletko varma?
 timer.eventrecord.title Ajasta tallennus
 timer.eventtimed.msg Tapahtuma ajastettu.\nLaite käynnistyy ja vaihtaa\nkanavalle tähän aikaan.
 timer.eventtimed.title Ajasta tapahtuma
@@ -807,7 +814,7 @@ timerbar.recordevent Tallenna
 timerlist.alarmtime Hälytysaika
 timerlist.apids Audio PIDit
 timerlist.bouquetselect valitse kanavanippu
-timerlist.channel Kanava
+timerlist.channel valitse kanava
 timerlist.channelselect valitse kanava
 timerlist.delete Poista
 timerlist.menumodify Muokkaa ajastinta
@@ -824,7 +831,7 @@ timerlist.plugin Laajennos
 timerlist.program.unknown Tuntematon ohjelma
 timerlist.recording_dir tallennushakemisto
 timerlist.reload Lataa uudelleen
-timerlist.repeat toista
+timerlist.repeat 0 rajoittamaton toisto
 timerlist.repeat.biweekly joka toinen viikko
 timerlist.repeat.byeventdescription kuvaksen mukaan
 timerlist.repeat.daily päivittäinen
@@ -841,15 +848,15 @@ timerlist.repeat.unknown ei tiedossa
 timerlist.repeat.wednesday Ke
 timerlist.repeat.weekdays päivittäin
 timerlist.repeat.weekly viikottain
-timerlist.repeatcount toistot
+timerlist.repeatcount 0 rajoittamaton toisto
 timerlist.repeatcount.help1 montako toistoa
 timerlist.repeatcount.help2 0 rajoittamaton toisto
 timerlist.save Tallenna ajastin
-timerlist.standby Valmiustila
+timerlist.standby Siirry valmiustilaan
 timerlist.standby.off Poistu valmiustilasta
 timerlist.standby.on Siirry valmiustilaan
 timerlist.stoptime Lopetusaika
-timerlist.type Ajastimen tyyppi
+timerlist.type Vaihda kanavalle
 timerlist.type.execplugin Suorita laajennos
 timerlist.type.nextprogram Seuraava ohjelma
 timerlist.type.record Tallennus
@@ -859,13 +866,13 @@ timerlist.type.sleeptimer Uniajastin
 timerlist.type.standby Valmiustila
 timerlist.type.unknown Tuntematon
 timerlist.type.zapto Vaihda kanavalle
-timerlist.weekdays Viikonpäivät
+timerlist.weekdays 'X'=ajastus '-' ei ajastusta
 timerlist.weekdays.hint_1 Ma Ti Ke To Pe La Su
 timerlist.weekdays.hint_2 'X'=ajastus '-' ei ajastusta
-timersettings.record_safety_time_after Pidennä tallennusaikaa
+timersettings.record_safety_time_after jokaisen ajastimen päätymisaikaan.
 timersettings.record_safety_time_after.hint_1 Pidennysaika. (00=off). Tämä aika lisätään
 timersettings.record_safety_time_after.hint_2 jokaisen ajastimen päätymisaikaan.
-timersettings.record_safety_time_before Record Ajastimen aikaistus
+timersettings.record_safety_time_before jokaista ajastusta aikaistetaan.
 timersettings.record_safety_time_before.hint_1 Aikaistus. (00=off). Tämän ajan verran
 timersettings.record_safety_time_before.hint_2 jokaista ajastusta aikaistetaan.
 timersettings.separator Ajastinasetukset
@@ -889,20 +896,20 @@ videomenu.head Video asetukset
 videomenu.rgb_centering RGB keskitys
 videomenu.screensetup Näytön asetukset
 videomenu.vcrswitch Vaihda scarttia automaatisesti
-videomenu.videoformat Kuvasuhde
+videomenu.videoformat automaattinen
 videomenu.videoformat_169 16:9
-videomenu.videoformat_43 4:3 (LB)
+videomenu.videoformat_43 4:3 (PS)
 videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_autodetect automaattinen
-videomenu.videosignal Videosignaali
+videomenu.videosignal YUV + VBS
 videomenu.videosignal_composite CVBS
 videomenu.videosignal_rgb RGB + CVBS
 videomenu.videosignal_svideo S-Video
 videomenu.videosignal_yuv_c YUV + CVBS
 videomenu.videosignal_yuv_v YUV + VBS
-zapit.scantype scannaa palvelut 
+zapit.scantype tv ja radio kanavat
 zapit.scantype.all kaikki palvelut
 zapit.scantype.radio vain radiokanavat
-zapit.scantype.tv only tv kanavat
+zapit.scantype.tv tv ja radio kanavat
 zapit.scantype.tvradio tv ja radio kanavat
 zaptotimer.announce Kanava vaihtuu ajastetulle kanavalle minuutin kuluttua
