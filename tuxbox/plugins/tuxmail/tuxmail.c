@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.25  2005/05/17 20:40:34  robspr1
+ * - add addressbook to mailwriter
+ *
  * Revision 1.24  2005/05/14 18:54:28  robspr1
  * - Bugfix Mailreader - Mailwriter SMS style
  *
@@ -1135,6 +1138,7 @@ void ShowMailFile(char* filename, char* szAction)
 	int iMaxPages = 0;
 	long iPagePos[100];
 	char szHeader[256];
+	char bBig = 0;
 
 	FILE* pipe;
 	pipe = fopen(filename,"r");
@@ -1178,7 +1182,15 @@ void ShowMailFile(char* filename, char* szAction)
 				*p = 0;
 			}
 			row++;
-			RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*FONTHEIGHT_SMALL -FONT_OFFSET, VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
+			
+			if( !bBig )
+			{
+				RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*FONTHEIGHT_SMALL -FONT_OFFSET, VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
+			}
+			else
+			{
+				RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*FONTHEIGHT_BIG -FONT_OFFSET, VIEWX-4*BORDERSIZE, LEFT, BIG, WHITE);
+			}
 
 			if(row > FRAMEROWS)
 			{
@@ -1202,7 +1214,7 @@ void ShowMailFile(char* filename, char* szAction)
 						}
 						break;
 					}
-					if( rccode == RC_LEFT || rccode == RC_UP )
+					else if( rccode == RC_LEFT || rccode == RC_UP )
 					{
 						if(iPage) 
 						{
@@ -1215,6 +1227,12 @@ void ShowMailFile(char* filename, char* szAction)
 						}
 						break;
 					}
+/*
+					else if( rccode == RC_YELLOW )
+					{
+						bBig = ( bBig ) ? 0 : 1 ;
+					}
+*/					
 				}
 				row = 0;
 				if( !feof(pipe) )
@@ -1328,17 +1346,21 @@ void PaintSmtpMailHeader( void )
 void EditMailFile(char* filename, int account, int mailindex )
 {
 	#define MAXINFOLINES 14
-	char szSmtp[80];
-	char szFrom[80];
+	#define MAXLINELEN	 80
+	char szSmtp[MAXLINELEN];
+	char szFrom[MAXLINELEN];
 	int nEditLine = 2;					// start to edit at body
 	int nEditPos = 0;						// start to edit at body
 	char nEditType = 0;					// type of edit: 0:letters, 1:T9 or 2:direct
 	int nEditDirectStyle = 0;		// 0: ABC, 1: Abc, 2: abc
 	int  nTextFileIdx = 0;
-	char szTextFile[80];
+	int  nAddrFileIdx = 0;
+	char szTextFile[MAXLINELEN];
 	char TextFileValid = 0;
-	char linebuffer[80];
-	char szInfo[MAXINFOLINES][80];
+	char linebuffer[MAXLINELEN];
+	char szInfo[MAXINFOLINES][MAXLINELEN];
+//	FILE* pipeT9 = NULL;
+//	char szT9Code[10];
 	char cChar;
 	
 	FILE* pipe;
@@ -1352,9 +1374,11 @@ void EditMailFile(char* filename, int account, int mailindex )
 	// prepare main strings
 	strcpy(szSmtp,maildb[account].smtp);
 	strcpy(szFrom,maildb[account].from);
-	strncpy(szInfo[0],maildb[account].mailinfo[mailindex].from,79);
+	strncpy(szInfo[0],maildb[account].mailinfo[mailindex].from,MAXLINELEN-1);
+	szInfo[0][MAXLINELEN-1]='\0';
 	strcpy(szInfo[1],"Re: ");
-	strncpy(&szInfo[1][4],maildb[account].mailinfo[mailindex].subj,75);
+	strncpy(&szInfo[1][4],maildb[account].mailinfo[mailindex].subj,MAXLINELEN-5);
+	szInfo[1][MAXLINELEN-1]='\0';
 	
 	while(1)
 	{
@@ -1362,18 +1386,11 @@ void EditMailFile(char* filename, int account, int mailindex )
 
 		RenderString( szFrom, 2*BORDERSIZE+100, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
 		
+
 		if( nEditType < 2 )
 		{
-			if( nEditLine < 2 )
-			{
-				RenderString( szInfo[0], 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, (nEditLine)?SMALL:NORMAL, (nEditLine)?WHITE:RED);
-				RenderString( szInfo[1], 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, (nEditLine)?NORMAL:SMALL, (nEditLine)?RED:WHITE);
-			}
-			else
-			{
-				RenderString( szInfo[0], 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
-				RenderString( szInfo[1], 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
-			}
+			RenderString( szInfo[0], 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
+			RenderString( szInfo[1], 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
 		}
 
 		int y = nEditType * 30;
@@ -1388,7 +1405,15 @@ void EditMailFile(char* filename, int account, int mailindex )
 		// print text-blocks
 		if( nEditType == 0 )
 		{			
-			sprintf(szTextFile,"%s.%02u",TEXTFILE,nTextFileIdx);
+			// for index 0 we use the previously read mail file
+			if( !nTextFileIdx )
+			{
+				strcpy(szTextFile, POP3FILE);
+			}
+			else
+			{
+				sprintf(szTextFile,"%s.%02u",TEXTFILE,nTextFileIdx);
+			}
 
 			FILE* pipe;
 			pipe = fopen(szTextFile,"r");
@@ -1399,7 +1424,14 @@ void EditMailFile(char* filename, int account, int mailindex )
 			}
 			if(pipe == NULL)
 			{
-				RenderString((osd == 'G') ? "kein Textblock" : "no Letter", 2*BORDERSIZE,  BORDERSIZE+5*FONTHEIGHT_SMALL  , 200,  LEFT, BIG, ORANGE);				
+				if( !nTextFileIdx )
+				{
+					RenderString((osd == 'G') ? "keine gelesene email" : "no read email", 2*BORDERSIZE,  BORDERSIZE+5*FONTHEIGHT_SMALL  , 500,  LEFT, BIG, ORANGE);				
+				}
+				else
+				{
+					RenderString((osd == 'G') ? "kein Textblock" : "no Letter", 2*BORDERSIZE,  BORDERSIZE+5*FONTHEIGHT_SMALL  , 500,  LEFT, BIG, ORANGE);				
+				}
 				TextFileValid = 0;
 			}
 			else
@@ -1414,12 +1446,53 @@ void EditMailFile(char* filename, int account, int mailindex )
 						szInfo[nEditLine][strlen(linebuffer)-1] = '\0';
 					}
 					RenderString( linebuffer, 2*BORDERSIZE, BORDERSIZE+(2+nEditLine)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);	
-					nEditLine++;
+					if( ++nEditLine == MAXINFOLINES)
+					{
+						break;
+					}
 					memset(linebuffer, 0, sizeof(linebuffer));
 				}
 				
 				fclose(pipe);
 				TextFileValid = 1;
+			}
+		}
+		else if( nEditType == 1 )
+		{
+	/*
+			if( pipeT9 )
+			{
+				int i=nEditPos;
+				while( (i) && (szInfo[nEditLine][i]>='A') && (szInfo[nEditLine][i]>='z') )
+				{
+					i--;
+				}
+				int iStart=i;
+				while( i!=nEditPos )
+				{
+					char x = szInfo[nEditLine][i] & 0x5F;
+					int j,k,l=0;
+					
+					for( k = 1; k < 9; k++ )
+					{
+						for( j = 0; j < strlen(szKeyBoxInfo[k]); j++)
+						{
+							if( szKeyBoxInfo[k][j] == x )
+							{
+								l = k + '0';
+								break;
+							}
+						}
+					}					
+					szT9Code[i-iStart]=k;
+					i++;
+				}
+				szT9Code[i-iStart]='\0';
+			}
+			else
+*/
+			{
+				RenderString((osd == 'G') ? "kein T9 Wörterbuch gefunden" : "no T9 dictionary found", 2*BORDERSIZE,  BORDERSIZE+5*FONTHEIGHT_SMALL  , 500,  LEFT, BIG, ORANGE);				
 			}
 		}
 		else if( nEditType == 2 )
@@ -1442,7 +1515,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 				{
 					if( szInfo[i][0] == '\0' )
 					{
-						RenderString( "_", 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, ORANGE);					
+						RenderString( "_", 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE-xoff, LEFT, NORMAL, ORANGE);					
 					}
 					else
 					{
@@ -1464,7 +1537,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 							strncpy(linepart, szInfo[i], nEditPos);
 							linepart[nEditPos] = '\0';
 							x = GetStringLen( linepart );
-							RenderString( linepart, 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, WHITE);
+							RenderString( linepart, 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE-xoff, LEFT, NORMAL, WHITE);
 						}
 						
 						linepart[0] = szInfo[i][nEditPos];
@@ -1473,26 +1546,27 @@ void EditMailFile(char* filename, int account, int mailindex )
 							linepart[0] = '_';
 						}
 						linepart[1] = '\0';
-						RenderString( linepart, 2*BORDERSIZE+xoff+x, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, ORANGE);
+						RenderString( linepart, 2*BORDERSIZE+xoff+x, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE-xoff, LEFT, NORMAL, ORANGE);
 						x += GetStringLen( linepart );
 						
 						if( nEditPos != linelen )
 						{
 							strncpy(linepart, &szInfo[i][nEditPos+1], linelen - nEditPos - 1);
 							linepart[linelen - nEditPos - 1] = '\0';
-							RenderString( linepart, 2*BORDERSIZE+xoff+x, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, WHITE);
+							RenderString( linepart, 2*BORDERSIZE+xoff+x, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE-xoff, LEFT, NORMAL, WHITE);
 						}
 					}
 				}
 				else
 				{
-					RenderString( szInfo[i], 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
+					RenderString( szInfo[i], 2*BORDERSIZE+xoff, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE-xoff, LEFT, SMALL, WHITE);
 				}
 			}
 		}
+		
 /*	
 		char szTmpOut[80];
-		sprintf(szTmpOut,"%d %d",nEditLine,nEditPos);
+		sprintf(szTmpOut,"Line:%d Pos:%d Type:%d T9:<%s>",nEditLine,nEditPos,nEditType,szT9Code);
 		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
 */		
 			
@@ -1539,8 +1613,11 @@ void EditMailFile(char* filename, int account, int mailindex )
 						{
 							cNew += ('a' - 'A');
 						}
-						szInfo[nEditLine][nEditPos] = cNew;
-						szInfo[nEditLine][nEditPos+1] = '\0';
+						if( strlen(szInfo[nEditLine]) < (MAXLINELEN-2) )
+						{
+							szInfo[nEditLine][nEditPos] = cNew;
+							szInfo[nEditLine][nEditPos+1] = '\0';
+						}
 					}
 					else
 					{
@@ -1598,13 +1675,30 @@ void EditMailFile(char* filename, int account, int mailindex )
 
 			case RC_RED:
 				nEditType = 0;
+				nEditPos = 0;
+/*
+				if( pipeT9 )
+				{
+					fclose (pipeT9 );
+					pipeT9 = NULL;
+				}
+*/
 				break;
 				
 			case RC_GREEN:
 				nEditType = 1;
+				nEditPos = 0;
+//				pipeT9 = fopen(T9FILE,"r");
 				break;
 				
 			case RC_YELLOW:
+/*
+				if( pipeT9 )
+				{
+					fclose (pipeT9 );
+					pipeT9 = NULL;
+				}
+*/	
 				if( nEditType == 2 )
 				{
 					if( ++nEditDirectStyle > 2 )
@@ -1625,6 +1719,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 				{
 					nEditType = 2;
 					nEditLine = 2;
+					nEditPos = 0;
 				}
 				break;
 				
@@ -1642,7 +1737,12 @@ void EditMailFile(char* filename, int account, int mailindex )
 					}
 					else
 					{
-						char linepart[80];
+						if( len == MAXLINELEN )
+						{
+							break;
+						}
+						
+						char linepart[MAXLINELEN];
 						
 						if( !nEditPos )
 						{
@@ -1661,12 +1761,42 @@ void EditMailFile(char* filename, int account, int mailindex )
 				break;
 				
 			case RC_PLUS:
-				if((nEditType == 0) && ( TextFileValid ))
+				if((nEditType == 0) && (( TextFileValid ) || ( !nTextFileIdx )))
 				{
 					nTextFileIdx++;	
 				}
 				else if(nEditType == 2)
 				{
+					if( !nEditLine )
+					{
+						FILE* pipe;
+						pipe = fopen(ADDRFILE,"r");
+						if(pipe != NULL)
+						{
+							nAddrFileIdx++;
+							int i=0;
+							while(fgets(linebuffer, sizeof(linebuffer), pipe))
+							{
+								if( nAddrFileIdx==i )
+								{
+									strcpy( szInfo[nEditLine], linebuffer );
+									if( szInfo[nEditLine][strlen(linebuffer)-1] == '\n' )
+									{
+										szInfo[nEditLine][strlen(linebuffer)-1] = '\0';
+									}
+									break;
+								}
+								i++;
+							}
+							if( i < nAddrFileIdx )
+							{
+								nAddrFileIdx = i;
+							}
+							fclose( pipe );
+						}
+						break;
+					}
+					
 					char c;
 					
 					if(( c = szInfo[nEditLine][nEditPos] ))
@@ -1695,6 +1825,36 @@ void EditMailFile(char* filename, int account, int mailindex )
 				}
 				else if(nEditType == 2) 
 				{
+					if( !nEditLine )
+					{
+						FILE* pipe;
+						pipe = fopen(ADDRFILE,"r");
+						if(pipe != NULL)
+						{
+							if( nAddrFileIdx )
+							{
+								nAddrFileIdx--;
+							}
+							
+							int i=0;
+							while(fgets(linebuffer, sizeof(linebuffer), pipe))
+							{
+								if( nAddrFileIdx==i )
+								{
+									strcpy( szInfo[nEditLine], linebuffer );
+									if( szInfo[nEditLine][strlen(linebuffer)-1] == '\n' )
+									{
+										szInfo[nEditLine][strlen(linebuffer)-1] = '\0';
+									}
+									break;
+								}
+								i++;
+							}
+							fclose( pipe );
+						}
+						break;
+					}
+
 					char c;
 				
 					if(( c = szInfo[nEditLine][nEditPos] ))
@@ -1720,6 +1880,18 @@ void EditMailFile(char* filename, int account, int mailindex )
 				if((nEditType == 2) && ( nEditLine < (MAXINFOLINES-1) ))
 				{
 					nEditLine ++;
+					int len=strlen( szInfo[nEditLine] );
+					if( len < (nEditPos + 1) )
+					{
+						if( len )
+						{
+							nEditPos = len - 1;
+						}
+						else
+						{ 
+							nEditPos = 0;
+						}
+					}
 				}
 				break;
 					
@@ -1727,6 +1899,18 @@ void EditMailFile(char* filename, int account, int mailindex )
 				if((nEditType == 2) && ( nEditLine ))
 				{
 					nEditLine --;
+					int len=strlen( szInfo[nEditLine] );
+					if( len < (nEditPos + 1) )
+					{
+						if( len )
+						{
+							nEditPos = len - 1;
+						}
+						else
+						{ 
+							nEditPos = 0;
+						}
+					}
 				}
 				break;
 				
@@ -1740,9 +1924,17 @@ void EditMailFile(char* filename, int account, int mailindex )
 			case RC_RIGHT:
 				if(nEditType == 2)
 				{
-					if( nEditPos < strlen(szInfo[nEditLine]))
+					if( nEditPos < (MAXLINELEN-1) )
 					{
-						nEditPos ++;
+						if( nEditPos < strlen(szInfo[nEditLine]))
+						{
+							nEditPos ++;
+						}
+						else
+						{
+							szInfo[nEditLine][nEditPos++]=' ';
+							szInfo[nEditLine][nEditPos]='\0';
+						}
 					}
 				}
 				break;
@@ -1752,7 +1944,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 				{
 					if( szInfo[nEditLine][nEditPos] )
 					{
-						char linepart[80];
+						char linepart[MAXLINELEN];
 						int len;
 						
 						len = strlen( szInfo[nEditLine] );
@@ -1782,16 +1974,44 @@ void EditMailFile(char* filename, int account, int mailindex )
 	
 	if( rccode == RC_OK)
 	{
+		// check from:
+		char *ptr1, *ptr2;
+		if( (ptr1=strchr(maildb[account].from,'<')) )
+		{
+			if( (ptr2=strchr(ptr1,'>')) )
+			{
+				*ptr2 = '\0';
+				strcpy(szFrom,ptr1);	
+			}
+		}		
+		// check to: (and ptr1 to result)
+		if( (ptr1=strchr(szInfo[0],'<')) )
+		{
+			if( (ptr2=strchr(ptr1,'>')) )
+			{
+				*ptr2 = '\0';
+			}
+		}		
+		else
+		{
+			ptr1 = szInfo[0];
+		}
 		fprintf(pipe,"%s\n",szSmtp);
 		fputs("tuxmaild\n",pipe);
-		fprintf(pipe,"%s\n",szFrom);
-		fprintf(pipe,"%s\n",szInfo[0]);
+		fprintf(pipe,"<%s>\n",szFrom);
+		fprintf(pipe,"<%s>\n",ptr1);
 		fprintf(pipe,"From: %s\n",szFrom);
 		fprintf(pipe,"To: %s\n",szInfo[0]);
 		fprintf(pipe,"Subject: %s\n\n",szInfo[1]);
 		
-		int i;
-		for( i=2; i<MAXINFOLINES; i++)
+		int i,j;
+		j=MAXINFOLINES-1;
+		// skip empty lines
+		while( szInfo[j][0] == '\0' )
+		{
+			j--;
+		}
+		for( i=2; i<=j; i++)
 		{
 			fprintf(pipe,"%s\n",szInfo[i]);
 		}
@@ -1800,6 +2020,12 @@ void EditMailFile(char* filename, int account, int mailindex )
 	{
 		rccode = 0;
 	}
+/*
+	if( pipeT9 )
+	{
+		fclose (pipeT9 );
+	}
+*/
 	fclose(pipe);
 }
 
@@ -2455,7 +2681,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.24 $";
+	char cvs_revision[] = "$Revision: 1.25 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;

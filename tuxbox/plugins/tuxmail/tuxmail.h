@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.21  2005/05/17 20:40:17  robspr1
+ * - add addressbook to mailwriter
+ *
  * Revision 1.20  2005/05/14 18:54:40  robspr1
  * - Bugfix Mailreader - Mailwriter SMS style
  *
@@ -112,6 +115,8 @@
 #define POP3FILE "/tmp/tuxmail.pop3"
 #define SMTPFILE "/tmp/tuxmail.smtp"
 #define TEXTFILE "/var/tuxbox/config/tuxmail/mailtext"
+#define ADDRFILE "/var/tuxbox/config/tuxmail/tuxmail.addr"
+#define T9FILE   "/var/tuxbox/config/tuxmail/tuxmail.t9"
 
 #define OE_START "/etc/rc2.d/S99tuxmail"
 #define OE_KILL0 "/etc/rc0.d/K00tuxmail"
