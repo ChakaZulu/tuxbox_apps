@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: helper.cpp,v 1.2 2005/05/18 20:47:26 mws Exp $
+	$Id: helper.cpp,v 1.3 2005/05/18 20:56:19 mws Exp $
 	
 	License: GPL
 
@@ -37,6 +37,6 @@ void StrSearchReplace( std::string &s, const std::string &to_find, const std::st
 	{
 		s.erase(location,to_find.size());
 		s.insert(location,repl_with);
-		s.location = s.find(to_find, location);
+		location = s.find(to_find, location);
 	}
 }
