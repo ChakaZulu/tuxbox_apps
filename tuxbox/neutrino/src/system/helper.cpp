@@ -3,7 +3,9 @@
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+	
+	$Id: helper.cpp,v 1.2 2005/05/18 20:47:26 mws Exp $
+	
 	License: GPL
 
 	This program is free software; you can redistribute it and/or modify
@@ -26,21 +28,15 @@
 
 void StrSearchReplace( std::string &s, const std::string &to_find, const std::string& repl_with )
 {
-	std::string result;
-	std::string::size_type pos = 0;
-	while(true)
+	unsigned int location = s.find(to_find);
+	if ( location == std::string::npos )
 	{
-		std::string::size_type next = s.find(to_find, pos);
-		result.append(s, pos, next-pos);
-		if( next != std::string::npos )
-		{
-			result.append(repl_with);
-			pos = next + to_find.size();
-		}
-		else
-		{
-			break;  // exit loop
-		}
+		return;
 	}
-	s.swap(result);
+	while ( location != std::string::npos )
+	{
+		s.erase(location,to_find.size());
+		s.insert(location,repl_with);
+		s.location = s.find(to_find, location);
+	}
 }
