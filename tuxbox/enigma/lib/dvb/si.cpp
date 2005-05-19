@@ -1377,6 +1377,17 @@ int EIT::data(__u8 *data)
 	original_network_id=HILO(eit->original_network_id);
 	int len=HILO(eit->section_length)+3-4;
 	int ptr=EIT_SIZE;
+      
+	//
+	// This fixed the EPG on the Multichoice irdeto systems
+	// the EIT packet is non-compliant.. their EIT packet stinks
+
+	if (data[ptr-1] < 0x40)
+	{
+		eDebug("[EPGC] EIT Check [%2.2x] [%2.2x] [%2.2x]",data[ptr-2],data[ptr-1],data[ptr]);
+		ptr--;
+	}
+
 	while (ptr<len)
 	{
 		int evLength=HILO(((eit_event_struct*)(data+ptr))->
