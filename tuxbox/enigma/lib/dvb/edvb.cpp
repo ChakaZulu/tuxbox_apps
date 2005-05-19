@@ -681,14 +681,14 @@ void eDVB::doMounts()
 						{
 							// local copy after fork..
 							eString SDIR = sdir, LDIR = ldir, OPT = opt;
-							execlp("busybox", "mount", "-t", "nfs", SDIR.c_str(), LDIR.c_str(), "-o", OPT.c_str(), NULL);
+							execlp("busybox", "mount", "-t", "nfs", SDIR.c_str(), LDIR.c_str(), "-o", OPT.c_str(), (char*)NULL);
 							break;
 						}
 						case 1:
 						{
 						 	// local copy after fork..
 							eString LDIR = ldir, OPT = opt;  // local copy after fork..
-							execlp("busybox", "mount", "-t", "cifs", "//bla", "-o", OPT.c_str(), LDIR.c_str(), NULL);
+							execlp("busybox", "mount", "-t", "cifs", "//bla", "-o", OPT.c_str(), LDIR.c_str(), (char*)NULL);
 							break;
 						}
 						case 2:

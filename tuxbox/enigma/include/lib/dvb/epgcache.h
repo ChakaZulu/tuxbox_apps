@@ -4,8 +4,9 @@
 #include <vector>
 #include <list>
 #include <ext/hash_map>
-#if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 4  // check if gcc version >= 3.4
-#include <ext/hash_fun.h>
+
+// check if gcc version >= 3.4
+#if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || __GNUC__ == 4 )
 #else
 #include <ext/stl_hash_fun.h>
 #endif
@@ -108,7 +109,8 @@ public:
 #define tmpMap std::map<uniqueEPGKey, std::pair<time_t, int> >
 #define nvodMap std::map<uniqueEPGKey, std::list<NVODReferenceEntry> >
 
-#if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 1  // check if gcc version >= 3.1
+
+#if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 1) || __GNUC__ == 4 )  // check if gcc version >= 3.1
 	#define eventCache __gnu_cxx::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal>
 	#define updateMap __gnu_cxx::hash_map<uniqueEPGKey, time_t, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal >
 	namespace __gnu_cxx

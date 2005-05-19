@@ -5,7 +5,7 @@
 #include <vector>
 #include <lib/base/eerror.h>
 
-template <class T>
+template <typename T>
 class ePtrList : public std::list<T*>
 {
 public:
@@ -70,55 +70,55 @@ private:
 	bool autoDelete;
 
 public:
-	iterator ePtrList<T>::begin()
+	iterator begin()
 	{				
 	//	makes implicit type conversion form std::list::iterator to ePtrList::iterator
 		return std::list<T*>::begin();		
 	}
 
-	iterator ePtrList<T>::end()
+	iterator end()
 	{				
 	//	makes implicit type conversion form std::list::iterator to ePtrList::iterator
 		return std::list<T*>::end();		
 	}
 
-	const_iterator ePtrList<T>::begin() const
+	const_iterator begin() const
 	{				
 	//	makes implicit type conversion form std::list::const_iterator to ePtrList::const_iterator
 		return std::list<T*>::begin();		
 	}
 
-	const_iterator ePtrList<T>::end() const
+	const_iterator end() const
 	{				
 	//	makes implicit type conversion form std::list::const_iterator to ePtrList::const_iterator
 		return std::list<T*>::end();		
 	}
 
-	reverse_iterator ePtrList<T>::rbegin()
+	reverse_iterator rbegin()
 	{				
 	//	makes implicit type conversion form std::list::reverse:_iterator to ePtrList::reverse_iterator
 		return std::list<T*>::rbegin();		
 	}
 
-	reverse_iterator ePtrList<T>::rend()
+	reverse_iterator rend()
 	{				
 	//	makes implicit type conversion form std::list::reverse_iterator to ePtrList::reverse_iterator
 		return std::list<T*>::rend();		
 	}
 
-	const_reverse_iterator ePtrList<T>::rbegin() const
+	const_reverse_iterator rbegin() const
 	{				
 	//	makes implicit type conversion form std::list::const_reverse_iterator to ePtrList::const_reverse_iterator
 		return std::list<T*>::rbegin();		
 	}
 
-	const_reverse_iterator ePtrList<T>::rend() const
+	const_reverse_iterator rend() const
 	{				
 	//	makes implicit type conversion form std::list::const_reverse_iterator to ePtrList::const_reverse_iterator
 		return std::list<T*>::rend();		
 	}
 
-	iterator ePtrList<T>::erase(iterator it)
+	iterator erase(iterator it)
 	{
 	// 	Remove the item it, if auto-deletion is enabled, than the list call delete for this item
 	//  If current is equal to the item that was removed, current is set to the next item in the list
@@ -131,7 +131,7 @@ public:
 			return std::list<T*>::erase(it);
 	}
 
-	iterator ePtrList<T>::erase(iterator from, iterator to)
+	iterator erase(iterator from, iterator to)
 	{
 	// 	Remove all items between the to iterators from and to
 	//	If auto-deletion is enabled, than the list call delete for all removed items
@@ -171,7 +171,7 @@ public:
 		// returns a pointer to this new vector ( the reserved memory must deletet from the receiver !! )
 		std::vector<T>* v=new std::vector<T>();
 		v->reserve( std::list<T*>::size() );
-    for ( std_list_T_iterator it( std::list<T*>::begin() ); it != std::list<T*>::end(); it++)
+    	for ( std_list_T_iterator it( std::list<T*>::begin() ); it != std::list<T*>::end(); it++)
 			v->push_back( **it );
 
 		return v;

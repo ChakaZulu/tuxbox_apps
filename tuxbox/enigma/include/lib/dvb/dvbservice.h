@@ -48,6 +48,7 @@ public:
 	virtual void handlePMT(const eServiceReferenceDVB &, PMT *pmt) { }
 	virtual void enterService(const eServiceReferenceDVB &) { }
 	virtual void leaveService(const eServiceReferenceDVB &) { }
+	virtual ~eDVBCaPMTClient() { }
 };
 
 class eDVBCaPMTClientHandler

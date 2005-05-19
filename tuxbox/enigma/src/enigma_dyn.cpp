@@ -2132,7 +2132,7 @@ inline unsigned short avg2(unsigned short a, unsigned short b)
 		(((((a>>8) & 0xFF) + ((b>>8) & 0xFF)) >> 1) << 8);
 }
 
-struct 
+struct blasel
 {
 	int hor, vert;
 	char *name;
