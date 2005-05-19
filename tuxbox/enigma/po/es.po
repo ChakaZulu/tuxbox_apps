@@ -1889,7 +1889,7 @@ msgstr "Mostrar aplicaciones adicionales"
 
 #: src/enigma_main.cpp:100
 msgid "show epg schedule list"
-msgstr "Ver guía electónica"
+msgstr "Ver guía electrónica"
 
 #: src/enigma_main.cpp:101
 msgid "show extended info"
@@ -2841,7 +2841,7 @@ msgstr "Abrir configuración avanzada"
 
 #: src/epgactions.h:14
 msgid "EPG selector"
-msgstr "Guía electónica"
+msgstr "Guía electrónica"
 
 #: src/epgactions.h:15
 msgid "add this event as DVR Event to timer list"
@@ -3791,7 +3791,7 @@ msgstr "PID audio"
 
 #: src/scan.cpp:1592
 msgid "is AC3 Pid"
-msgstr "es un PID AC3"
+msgstr "PID AC3"
 
 #: src/scan.cpp:1593
 msgid "set this check when the entered audio pid is a ac3 audio pid"
@@ -4823,7 +4823,7 @@ msgstr "Subir un directorio"
 
 #: src/sselect.cpp:127
 msgid "shows the EPG selector for the highlighted channel"
-msgstr "Ver guía electónica para canal elegido"
+msgstr "Ver guía electrónica para canal elegido"
 
 #: src/sselect.cpp:128
 msgid "show service selector menu"
