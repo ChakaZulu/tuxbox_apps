@@ -8,7 +8,7 @@
 #ifdef MEMLEAK_CHECK
 #define BACKTRACE_DEPTH 5
 // when you have c++filt and corresponding libs on your platform
-// then add -DHAVE_CPP_FILE to CPP_FLAGS in configure.ac
+// then add -DHAVE_CPP_FILT to CPP_FLAGS in configure.ac
 #include <map>
 #include <lib/system/elock.h>
 #include <execinfo.h>
