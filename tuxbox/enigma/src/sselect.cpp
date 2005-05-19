@@ -36,6 +36,7 @@ gFont eListBoxEntryService::numberFont;
 gPixmap *eListBoxEntryService::folder=0;
 gPixmap *eListBoxEntryService::marker=0;
 gPixmap *eListBoxEntryService::locked=0;
+gPixmap *eListBoxEntryService::newfound=0;
 int eListBoxEntryService::maxNumSize=0;
 std::set<eServiceReference> eListBoxEntryService::hilitedEntrys;
 eListBoxEntryService *eListBoxEntryService::selectedToMove=0;
@@ -253,7 +254,7 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 		int ypos = (rect.height() - marker->y) / 2;
 		rc->blit( *marker, ePoint(10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);
 	}
-	else if (flags & flagShowNumber && listbox->getColumns() == 1)
+	else if (flags & flagShowNumber && listbox->getColumns() == 1 )
 	{
 		int n=-1;
 		if (flags & flagOwnNumber)
@@ -276,6 +277,14 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 		}
 	}
 
+	int newNameXOffs = nameXOffs;
+	if ( pservice && pservice->dvb && pservice->dvb->dxflags & eServiceDVB::dxNewFound && newfound )
+	{
+		int ypos = (rect.height() - locked->y) / 2;
+		rc->blit( *newfound, ePoint(rect.left() + nameXOffs, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);
+		newNameXOffs += newfound->x+5;
+	}
+
 	if (!namePara)
 	{
 		eString sname;
@@ -288,7 +297,7 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 		else
 			sname=_("(removed service)");
 
-		namePara = new eTextPara( eRect( 0, 0, rect.width()-nameXOffs, rect.height() ) );
+		namePara = new eTextPara( eRect( 0, 0, rect.width()-newNameXOffs, rect.height() ) );
 		namePara->setFont( serviceFont );
 		namePara->renderString( sname );
 		if (flags & flagIsReturn )
@@ -296,12 +305,12 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 		nameYOffs = ((rect.height() - namePara->getBoundBox().height()) / 2 ) - namePara->getBoundBox().top();	
 	}
 	// we can always render namePara
-	rc->renderPara(*namePara, ePoint( rect.left() + nameXOffs, rect.top() + nameYOffs ) );
+	rc->renderPara(*namePara, ePoint( rect.left() + newNameXOffs, rect.top() + nameYOffs ) );
 
 	if ( service.isLocked() && locked && eConfig::getInstance()->getParentalPin() )
 	{
 		int ypos = (rect.height() - locked->y) / 2;
-		rc->blit( *locked, ePoint(nameXOffs+namePara->getBoundBox().width()+10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);
+		rc->blit( *locked, ePoint(newNameXOffs+namePara->getBoundBox().width()+10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);
 	}
 
 	if ( listbox->getColumns() == 1 )
@@ -333,7 +342,7 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 						descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
 						descrPara->setFont( descrFont );
 						descrPara->renderString( sdescr );
-						descrXOffs = nameXOffs+namePara->getBoundBox().width();
+						descrXOffs = newNameXOffs+namePara->getBoundBox().width();
 						if ( service.isLocked() && locked && eConfig::getInstance()->getParentalPin() )
 							descrXOffs = descrXOffs + locked->x;
 						if (numPara)
@@ -1544,6 +1553,7 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 			eListBoxEntryService::folder = eSkin::getActive()->queryImage("sselect_folder");
 			eListBoxEntryService::marker = eSkin::getActive()->queryImage("sselect_marker");
 			eListBoxEntryService::locked = eSkin::getActive()->queryImage("sselect_locked");
+			eListBoxEntryService::newfound = eSkin::getActive()->queryImage("sselect_newfound");
 			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Number");
 			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.singleColumn.Entry.Name");
 		}
@@ -1552,6 +1562,7 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 			eListBoxEntryService::folder = 0;
 			eListBoxEntryService::marker = eSkin::getActive()->queryImage("sselect_marker_small");
 			eListBoxEntryService::locked = eSkin::getActive()->queryImage("sselect_locked_small");
+			eListBoxEntryService::newfound = eSkin::getActive()->queryImage("sselect_newfound_small");
 			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Number");
 			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.multiColumn.Entry.Name");
 		}
@@ -1560,6 +1571,7 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 			eListBoxEntryService::folder = 0;
 			eListBoxEntryService::marker = eSkin::getActive()->queryImage("sselect_marker_small");
 			eListBoxEntryService::locked = eSkin::getActive()->queryImage("sselect_locked_small");
+			eListBoxEntryService::newfound = eSkin::getActive()->queryImage("sselect_newfound_small");
 			eListBoxEntryService::numberFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Number");
 			eListBoxEntryService::serviceFont = eSkin::getActive()->queryFont("eServiceSelector.combiColumn.Entry.Name");
 		}
@@ -1887,7 +1899,6 @@ int eServiceSelector::toggleMoveMode()
 		eZapMain::getInstance()->toggleEditMode(this);
 
 	services->beginAtomic();
-
 	movemode^=1;
 	if (!movemode)
 	{

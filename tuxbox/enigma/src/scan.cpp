@@ -398,7 +398,7 @@ void tsAutomatic::start()
 		sapi->setSkipOtherOrbitalPositions(1);
 		sapi->setOnlyFree(c_onlyFree->isChecked());
 		sapi->setNoCircularPolarization(snocircular);
-		sapi->setClearList(1);
+//		sapi->setClearList(1);
 
 		close(0);
 	}
@@ -722,30 +722,27 @@ void tsScan::serviceFound(const eServiceReferenceDVB &service, bool newService)
 	service_provider->setText(s->service_provider);
 	
 	if (newService)
-	switch(s->service_type)
-	{
-		case 4:	// NVOD reference service
-		case 1:	// digital television service
-			newTVServices++;
-		break;
-
-		case 2:	// digital radio service
-			newRadioServices++;
-		break;
-
-		case 3:	// teletext service
-		break;
-
-		case 5:	// NVOD time shifted service
-		break;
-
-		case 6:	// mosaic service
-		break;
-
-		default: // data
-			newDataServices++;
-		break;
-	}
+		switch(s->service_type)
+		{
+			case 4:	// NVOD reference service
+			case 1:	// digital television service
+				newTVServices++;
+				break;
+			case 2:	// digital radio service
+				newRadioServices++;
+				break;
+			case 3:	// teletext service
+				break;
+			case 5:	// NVOD time shifted service
+				break;
+			case 6:	// mosaic service
+				break;
+			default: // data
+				newDataServices++;
+			break;
+		}
+	else
+		only_new_services=false;
 }
 
 void tsScan::addedTransponder( eTransponder* )
@@ -770,6 +767,7 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 			tpLeft = sapi->getknownTransponderSize();
 			progress->setPerc(0);
 			tpScanned = newTVServices = newRadioServices = newDataServices = servicesScanned = newTransponders = 0;
+			only_new_services=true;
 		break;
 	case eDVBScanEvent::eventScanTPadded:
 			tpLeft++;
@@ -940,7 +938,7 @@ TransponderScan::TransponderScan( eWidget *LCDTitle, eWidget *LCDElement, tState
 #ifndef DISABLE_LCD
 	,LCDElement(LCDElement), LCDTitle(LCDTitle)
 #endif
-	,closeTimer(eApp), last_orbital_pos(0), stateInitial(init)
+	,closeTimer(eApp), last_orbital_pos(0), remove_new_flags(false), stateInitial(init)
 {
 	addActionMap(&i_cursorActions->map);
 	setText(_("Transponder Scan"));
@@ -1139,6 +1137,7 @@ int TransponderScan::Exec()
 			switch (automatic_scan.exec())
 			{
 			case 0:
+				remove_new_flags=true;
 				state=stateScan;
 				break;
 			default:
@@ -1267,12 +1266,17 @@ int TransponderScan::Exec()
 
 					// macht nur Probleme...bzw dauert recht lang...
 					sapi->setSkipOtherOrbitalPositions(1);
-					sapi->setClearList(1);
+//					sapi->setClearList(1);
 					sapi->setNoCircularPolarization(snocircular);
 				}
 
 				eString str = ' '+toScan.front().packet->name;
 				str += eString().sprintf("        (%d/%d)", satScanned+1, toScan.size()+satScanned);
+
+				if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
+					eTransponderList::getInstance()->removeNewFlags(sapi->getOrbitalPosition());
+				else
+					eTransponderList::getInstance()->removeNewFlags(-1);
 
 				tsScan scan(this, str );
 				current = &scan;
@@ -1294,6 +1298,14 @@ int TransponderScan::Exec()
 				newDataServices += scan.newDataServices;
 				tpScanned += scan.tpScanned;
 				servicesScanned += scan.servicesScanned;
+
+				if ( scan.only_new_services )
+				{
+					if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
+						eTransponderList::getInstance()->removeNewFlags(sapi->getOrbitalPosition());
+					else
+						eTransponderList::getInstance()->removeNewFlags(-1);
+				}
 
 				toScan.erase(toScan.begin());
 				++satScanned;
@@ -1327,7 +1339,11 @@ int TransponderScan::Exec()
 					if ( service && service.path && service.type == eServiceReference::idDVB )
 						eServiceInterface::getInstance()->stop();
 				}
+				if ( remove_new_flags )
+					eTransponderList::getInstance()->removeNewFlags(last_orbital_pos);
 			}
+			else if ( remove_new_flags )
+				eTransponderList::getInstance()->removeNewFlags(-1);
 
 			tsScan scan(this);
 			current = &scan;
@@ -1342,6 +1358,15 @@ int TransponderScan::Exec()
 			scan.exec();
 			current=0;
 			scan.hide();
+
+			if ( scan.only_new_services && remove_new_flags )
+			{
+				if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
+					eTransponderList::getInstance()->removeNewFlags(last_orbital_pos);
+				else
+					eTransponderList::getInstance()->removeNewFlags(-1);
+				remove_new_flags=false;
+			}
 
 			text.sprintf(_("The transponder scan has finished and found \n   %i new Transponders,\n   %i new TV Services,\n   %i new Radio Services and\n   %i new Data Services.\n%i Transponders with %i Services scanned."), scan.newTransponders, scan.newTVServices, scan.newRadioServices, scan.newDataServices, scan.tpScanned, scan.servicesScanned );
 

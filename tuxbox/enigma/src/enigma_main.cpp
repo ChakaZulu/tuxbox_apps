@@ -4275,6 +4275,13 @@ void eZapMain::showServiceMenu(eServiceSelector *sel)
 		renameFile(sel);
 		break;
 #endif
+	case 16:
+	{
+		eServiceDVB *s = eTransponderList::getInstance()->searchService(ref);
+		if (s)
+			s->dxflags &= ~eServiceDVB::dxNewFound;
+		break;
+	}
 	default:
 		break;
 	}
@@ -6956,8 +6963,13 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 	if ( ref.data[0]==-3 ) // rename Provider
 		new eListBoxEntryText(&list, _("rename"), (void*)7);*/
 
+	// remove newflag from dvb service
+
+	eServiceDVB *service = eTransponderList::getInstance()->searchService(ref);
+	if ( service && service->dxflags & eServiceDVB::dxNewFound )
+		prev = new eListBoxEntryText(&list, _("remove 'new found flag'"), (void*)16, 0, _("select to remove the 'new found flag'"));
+	
 	// create new bouquet
-//	if ( eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 	prev = new eListBoxEntryText(&list, _("create new bouquet"), (void*)6, 0, _("select to create a new bouquet"));
 
 	if (path.type == eServicePlaylistHandler::ID)

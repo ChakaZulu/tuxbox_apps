@@ -115,6 +115,7 @@ protected:
 	void serviceFound( const eServiceReferenceDVB &, bool );
 	void addedTransponder( eTransponder* );
 public:
+	bool only_new_services;
 	int tpScanned, newTVServices, newRadioServices, newDataServices, servicesScanned, newTransponders;
 	tsScan(eWidget *parent, eString satText="");
 };
@@ -162,6 +163,7 @@ class TransponderScan: public eWindow
 	int eventHandler(const eWidgetEvent &);
 	void Close();
 	unsigned int last_orbital_pos;
+	bool remove_new_flags;
 public:
 	enum tState
 	{

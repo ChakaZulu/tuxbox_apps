@@ -1005,11 +1005,10 @@ struct eServiceHandlerDVB_addService
 	Signal1<void,const eServiceReference&> &callback;
 	int type;
 	int DVBNamespace;
-//	int pLockActive;
-	eServiceHandlerDVB_addService(Signal1<void,const eServiceReference&> &callback, int type, int DVBNamespace)
-	: callback(callback), type(type), DVBNamespace(DVBNamespace)//, pLockActive(0)
+	bool onlyNew;
+	eServiceHandlerDVB_addService(Signal1<void,const eServiceReference&> &callback, int type, int DVBNamespace, bool onlyNew=false)
+	: callback(callback), type(type), DVBNamespace(DVBNamespace), onlyNew(onlyNew)
 	{
-//		pLockActive = eConfig::getInstance()->pLockActive();
 	}
 	void operator()(const eServiceReference &service)
 	{
@@ -1018,6 +1017,8 @@ struct eServiceHandlerDVB_addService
 			return;
 		else if ( s->dvb && s->dvb->dxflags & eServiceDVB::dxDontshow )
 			return;
+		if ( onlyNew && !(s->dvb && s->dvb->dxflags & eServiceDVB::dxNewFound ) )
+			return;
 		int t = ((eServiceReferenceDVB&)service).getServiceType();
 		int nspace = ((eServiceReferenceDVB&)service).getDVBNamespace().get()&0xFFFF0000;
 		if (t < 0)
@@ -1025,7 +1026,7 @@ struct eServiceHandlerDVB_addService
 		if (t >= 31)
 			t=31;
 		if ( type & (1<<t) && // right dvb service type
-				 ( ( DVBNamespace == (int)0xFFFFFFFF) || // ignore namespace
+				 ( (DVBNamespace==(int)0xFFFFFFFF) || // ignore namespace
 				 ( (DVBNamespace&(int)0xFFFF0000) == nspace ) // right satellite
 				 )
 			 )
@@ -1042,6 +1043,9 @@ void eServiceHandlerDVB::enterDirectory(const eServiceReference &ref, Signal1<vo
 		{
 		case -2:  // all TV or all Radio Services
 			eTransponderList::getInstance()->forEachServiceReference(eServiceHandlerDVB_addService(callback, ref.data[1], ref.data[2] ));
+			break;
+		case -5:  // all TV or all Radio Services (only services marked as new)
+			eTransponderList::getInstance()->forEachServiceReference(eServiceHandlerDVB_addService(callback, ref.data[1], ref.data[2], true ));
 			break;
 		case -3:  // normal dvb bouquet
 		{
@@ -1143,6 +1147,14 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 			return 0;
 		else
 			return new eService( it->second.name+ _(" - services"));
+	}
+	case -5: // for satellites...
+	{
+		std::map<int,tpPacket>::const_iterator it( eTransponderList::getInstance()->getNetworkNameMap().find( node.data[2] >> 16 ));
+		if ( it == eTransponderList::getInstance()->getNetworkNameMap().end() )
+			return 0;
+		else
+			return new eService( it->second.name+ _(" - new found"));
 	}
 	case -3:
 	{
@@ -1262,6 +1274,7 @@ void eServiceHandlerDVB::loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node
 			{
 				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -1, ref.data[1], *it<<16 ));
 				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -2, ref.data[1], *it<<16 ));
+				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -5, ref.data[1], *it<<16 ));
 			}
 			break;
 		}

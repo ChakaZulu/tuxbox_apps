@@ -27,16 +27,14 @@ void eDiSEqC::setRotorDefaultOptions()
 void eTransponder::cable::set(const CableDeliverySystemDescriptor *descriptor)
 {
 			// reject <100Mhz, >1000Mhz
-	if (descriptor->frequency < 100*1000)
-		return;
-	if (descriptor->frequency > 1000*1000)
-		return;
+	if (descriptor->frequency >= 100*1000 &&
+		descriptor->frequency <= 1000*1000)
+		valid=1;
 	frequency=descriptor->frequency;
 	symbol_rate=descriptor->symbol_rate;
 	modulation=descriptor->modulation;
 	fec_inner=descriptor->FEC_inner;
 	inversion=2;  // conversion to INVERSION_AUTO in eFrontend..
-	valid=1;
 }
 
 int eTransponder::cable::tune(eTransponder *trans)
@@ -47,8 +45,8 @@ int eTransponder::cable::tune(eTransponder *trans)
 
 void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descriptor)
 {
-	if (descriptor->frequency < 3500*1000) // reject < 3.5GHz
-		return;
+	if (descriptor->frequency >= 3500*1000) // reject < 3.5GHz
+		valid=1;
 	frequency=descriptor->frequency;
 	symbol_rate=descriptor->symbol_rate;
 	polarisation=descriptor->polarisation;
@@ -58,7 +56,6 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 		orbital_position=-orbital_position;
 //	eDebug("%d %d", descriptor->orbital_position, descriptor->west_east_flag);
 	inversion=2;  // conversion to INVERSION_AUTO in eFrontend..
-	valid=1;
 }
 
 eString eTransponder::satellite::toString()
@@ -760,6 +757,31 @@ void eTransponderList::removeOrbitalPosition(int orbital_position)
 	}
 }
 
+void eTransponderList::removeNewFlags(int orbital_position)
+{
+	std::set<tsref> transponders_on_pos;
+
+	if ( orbital_position != -1 )
+		for (std::map<tsref,eTransponder>::iterator it(transponders.begin()); it != transponders.end(); ++it)
+		{
+			if ( abs(it->second.satellite.orbital_position-orbital_position) < 6 )
+				transponders_on_pos.insert(it->first);
+		}
+
+	for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator sit=services.begin();
+		sit != services.end(); ++sit)
+	{
+		if ( orbital_position == -1 )
+			sit->second.dxflags &= ~eServiceDVB::dxNewFound;
+		else
+		{
+			tsref ref( sit->second.dvb_namespace, sit->second.transport_stream_id, sit->second.original_network_id );
+			if ( transponders_on_pos.find(ref) != transponders_on_pos.end() )
+				sit->second.dxflags &= ~eServiceDVB::dxNewFound;
+		}
+	}
+}
+
 eTransponder &eTransponderList::createTransponder(eDVBNamespace dvb_namespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)
 {
 	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(dvb_namespace, transport_stream_id, original_network_id));
@@ -779,30 +801,18 @@ eTransponder &eTransponderList::createTransponder(eDVBNamespace dvb_namespace, e
 eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service, int chnum, bool *newService)
 {
 	std::map<eServiceReferenceDVB,eServiceDVB>::iterator i=services.find(service);
-                                                  
-	if (newService)
-			*newService = ( i == services.end() );
 
+	if ( newService )
+		*newService = (i == services.end());
+                                                                                             
 	if ( i == services.end() )
 	{
-/*		if (chnum==-1)
-			chnum=beautifyChannelNumber(service.getTransportStreamID().get(), service.getOriginalNetworkID().get(), service.getServiceID().get()); */
-		
-/*		if (chnum==-1)
-		{
-
-			if (channel_number.end()==channel_number.begin())
-				chnum=200;
-			else
-			{
-				std::map<int,eServiceReferenceDVB>::iterator i=channel_number.end();
-				--i;
-				chnum=i->first+1;	// letzte kanalnummer +1
-			}
-		}	*/
-
+		bool setNewFoundFlag=false;
 		if (chnum == -1)
+		{
 			chnum=200;
+			setNewFoundFlag = true;
+		}
 
 		while (channel_number.find(chnum)!=channel_number.end())
 			++chnum;
@@ -817,10 +827,14 @@ eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service
 							).first->second;
 
 		channel_number.insert(std::pair<int,eServiceReferenceDVB>(chnum,service));
-
+		if ( setNewFoundFlag )
+			n->dxflags |= eServiceDVB::dxNewFound;
 		return *n;
 	}
-	return (*i).second;
+	else if (chnum == -1 && eDVB::getInstance()->getScanAPI() )
+		i->second.dxflags &= ~eServiceDVB::dxNewFound;
+
+	return i->second;
 }
 
 void eTransponderList::leaveService( const eServiceReferenceDVB& )

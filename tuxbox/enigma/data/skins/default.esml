@@ -131,6 +131,8 @@
 		<img name="sselect_marker_small" src="marker_small-fs8.png" />
 		<img name="sselect_locked" src="padlock-fs8.png" />
 		<img name="sselect_locked_small" src="padlock_small-fs8.png" />
+		<img name="sselect_newfound" src="newfound-fs8.png" />
+		<img name="sselect_newfound_small" src="newfound_small-fs8.png" />
 		<img name="timer_symbol" src="clock-fs8.png" />
 		<img name="timer_rec_symbol" src="clock_rec-fs8.png" />
 		<img name="ok_symbol" src="event_ok-fs8.png" />

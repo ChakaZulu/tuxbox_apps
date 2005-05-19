@@ -382,7 +382,8 @@ public:
 		dxNoSDT=1,    // don't get SDT
 		dxDontshow=2,
 		dxNoDVB=4,
-		dxHoldName=8
+		dxHoldName=8,
+		dxNewFound=64 // found in prev scan
 	};
 	int dxflags;
 
@@ -854,6 +855,7 @@ public:
 	void clearAllTransponders()	{	transponders.clear(); }
 	void removeService( const eServiceReferenceDVB& );
 	void removeOrbitalPosition(int orbital_position);
+	void removeNewFlags(int orbital_position);
 
 	static eTransponderList* getInstance()	{ return instance; }
 	eTransponderList();

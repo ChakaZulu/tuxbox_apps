@@ -255,7 +255,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 					if (flags&flagNoCircularPolarization)
 						tp.satellite.polarisation&=1;
 
-					if ( addTransponder(tp) )
+					if ( tp.isValid() && addTransponder(tp) )
 						dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanTPadded));
 				}
 			}
@@ -486,14 +486,17 @@ bool eDVBScanController::addTransponder(const eTransponder &transponder)
 	{
 #if DEBUG_TO_FILE
 		fprintf(out,"COMPARE -> %d, %d, %c, %s, %s, %s, %d onid = %d, tsid = %d\n",
-		n->satellite.frequency, transponder.satellite.symbol_rate,
-		n->satellite.polarisation?'H':'V', FEC[transponder.satellite.fec],
-		n->satellite.valid?"SAT":transponder.cable.valid?"CAB":"UNK",
-		!n->satellite.inversion?"NO":transponder.satellite.inversion==2?"AUTO":"INV",
-		n->satellite.orbital_position, transponder.original_network_id.get(),
+		n->satellite.frequency, n->satellite.symbol_rate,
+		n->satellite.polarisation?'H':'V', FEC[n->satellite.fec],
+		n->satellite.valid?"SAT":n->cable.valid?"CAB":"UNK",
+		!n->satellite.inversion?"NO":n->satellite.inversion==2?"AUTO":"INV",
+		n->satellite.orbital_position, n->original_network_id.get(),
 		n->transport_stream_id.get() );                                      
 #endif
-		if (*n == transponder)  // no duplicate Transponders
+		eTransponder tmp = transponder;
+		tmp.transport_stream_id = -1;
+		tmp.original_network_id = -1;
+		if (*n == transponder || *n == tmp)  // no duplicate Transponders
 		{
 #if DEBUG_TO_FILE
 			fprintf(out, "Don't add %d, %d, %c, %s, %s, %s, %d onid = %d, tsid = %d\n",
