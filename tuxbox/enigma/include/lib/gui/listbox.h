@@ -30,6 +30,8 @@ class eListBoxBase: public eDecoWidget
 	int movemode, MaxEntries, flags, item_height, columns, in_atomic, atomic_redraw, atomic_old, atomic_new;
 	bool atomic_selchanged;
 	bool atomic_selected;
+	int entries;
+	int currentPos;
 protected:
 	ePtrList<eListBoxEntry>::iterator top, bottom, current;
 	eListBoxBase(eWidget* parent, const eWidget* descr=0, int takefocus=1, int item_height=0, const char *deco="eListBox" );
@@ -71,7 +73,7 @@ public:
 	void take(eListBoxEntry *e, bool holdCurrent=false);
 	inline void remove(eListBoxEntry* entry, bool holdCurrent=false);
 	void clearList();
-	int getCount() { return childs.size(); }
+	int getCount() { return entries; }
 	int setCurrent(const eListBoxEntry *c, bool sendSelected=false);
 	void sort();
 	int moveSelection(int dir, bool sendSelected=false);

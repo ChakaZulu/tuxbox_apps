@@ -16,7 +16,7 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, int takefocus,
 		colorActiveB(eSkin::getActive()->queryScheme("listbox.selected.background")),
 		colorActiveF(eSkin::getActive()->queryScheme("listbox.selected.foreground")),
 		movemode(0), MaxEntries(0), flags(0), item_height(item_height),
-		columns(1), in_atomic(0), top(childs.end()), bottom(childs.end()), current(childs.end())
+		columns(1), in_atomic(0), entries(0), currentPos(-1), top(childs.end()), bottom(childs.end()), current(childs.end())
 {
 	scrollbar = new eProgress(this);
 	scrollbar->setDirection(1);
@@ -114,7 +114,7 @@ void eListBoxBase::recalcMaxEntries()
 eRect eListBoxBase::getEntryRect(int pos)
 {
 	bool sbar =
-		( (int)childs.size() > MaxEntries*columns && MaxEntries*columns > 1 );
+		( entries > MaxEntries*columns && MaxEntries*columns > 1 );
 
 	int lme=MaxEntries;
 			// in case we show partial last lines (which only works in single-column),
@@ -223,7 +223,7 @@ int eListBoxBase::eventHandler(const eWidgetEvent &event)
 				moveSelection(dirPageUp);
 			else if ((event.action == &i_listActions->pagedown) && !(flags & flagNoPageMovement))
 				moveSelection(dirPageDown);
-			else if ( !childs.empty() && current->eventHandler(event) )
+			else if ( entries && current->eventHandler(event) )
 				return 1;
 			else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement) && !(flags&flagLostFocusOnFirst && current == childs.begin()) )
 				moveSelection(dirUp);
@@ -277,17 +277,20 @@ int eListBoxBase::setCurrent(const eListBoxEntry *c, bool sendSelected )
 /*	if (childs.empty() || ((current != childs.end()) && (*current == c)))  // no entries or current is equal the entry to search
 		return E_ALLREADY_SELECTED;	// do nothing*/
 
-	if ( childs.empty() )
+	if ( !entries )
 		return E_COULDNT_FIND;
 
 	ePtrList<eListBoxEntry>::iterator item(childs.begin()), it(childs.begin());
 
-	for ( ; item != childs.end(); ++item)
+	int cnt=0;
+	for ( ; item != childs.end(); ++item, ++cnt)
 		if ( *item == c )
 			break;
 
 	if ( item == childs.end() ) // entry not in listbox... do nothing
 		return E_COULDNT_FIND;
+
+	currentPos=cnt;
 
 	int newCurPos=-1;
 	int oldCurPos=-1;
@@ -319,30 +322,30 @@ int eListBoxBase::setCurrent(const eListBoxEntry *c, bool sendSelected )
 				}
 				if (atomic_redraw == arCurrentOld)
 					atomic_new = newCurPos;
-			} else
+			}else
 			{
 				invalidateEntry(newCurPos);
 				if (oldCurPos != -1)
 					invalidateEntry(oldCurPos);
 			}
 		}
-	}	else // then we start to search from begin
+	} else // then we start to search from begin
 	{
 		bottom = childs.begin();
 
-		while (newCurPos == -1 && MaxEntries )  // MaxEntries is already checked above...
+		while (newCurPos == -1 && MaxEntries)  // MaxEntries is already checked above...
 		{
 			if ( bottom != childs.end() )
 				top = bottom;		// nächster Durchlauf
 
-			for (	i = 0; (i < (MaxEntries*columns) ) && (bottom != childs.end()); ++bottom, ++i)
+			for (i = 0; (i < (MaxEntries*columns) ) && (bottom != childs.end()); ++bottom, ++i)
 			{
 				if (bottom == item)
 				{
 					current = bottom;  // we have found
 					++newCurPos;
 				}
-      }
+			}
 		}
 		if (isVisible())
 		{
@@ -351,15 +354,14 @@ int eListBoxBase::setCurrent(const eListBoxEntry *c, bool sendSelected )
 			else
 				atomic_redraw=arAll;
 		}
-  }
+	}
 
 	if (!in_atomic)
 	{
 		/*emit*/ SendSelChanged(*current);
 		if ( sendSelected )
 			/*emit*/ SendSelected(*current);
-	}
-	else
+	}else
 	{
 		atomic_selchanged=1;
 		if ( sendSelected )
@@ -379,6 +381,7 @@ void eListBoxBase::append(eListBoxEntry* entry, bool holdCurrent, bool front)
 		childs.push_front(entry);
 	else
 		childs.push_back(entry);
+	++entries;
 	init();
 
 	if (cur)
@@ -392,10 +395,12 @@ void eListBoxBase::take(eListBoxEntry* entry, bool holdCurrent)
 	if (holdCurrent && current != entry)
 		cur = current;
 
-	unsigned int oldsize = childs.size();
 	childs.take(entry);
-	if ( oldsize != childs.size() )
+	if ( entries != childs.size() )
+	{
+		--entries;
 		init();
+	}
 
 	if (cur)
 		setCurrent(cur);
@@ -404,11 +409,12 @@ void eListBoxBase::take(eListBoxEntry* entry, bool holdCurrent)
 void eListBoxBase::clearList()
 {
 	ePtrList<eListBoxEntry>::iterator it(childs.begin());
-	while (it != childs.end())
+	while (entries)
 	{
 		it->clearLB();
 		delete *it;
 		childs.erase(it++);
+		--entries;
 	}
 	current = top = bottom = childs.end();
 	if (!in_atomic)
@@ -423,6 +429,7 @@ void eListBoxBase::clearList()
 		atomic_new=0;
 		atomic_old=0;
 	}
+	currentPos=-1;
 }
 
 eListBoxEntry *eListBoxBase::goNext()
@@ -459,15 +466,19 @@ void eListBoxBase::redrawWidget(gPainter *target, const eRect &where)
 	else
 		rc = where;
 
-	if ( (int)childs.size() > MaxEntries*columns && MaxEntries*columns > 1 )
+	if ( currentPos == -1 )
 	{
-		int currentPos=0;
+		currentPos = 0;
 		ePtrList<eListBoxEntry>::iterator it = childs.begin();
 		for (; it != childs.end() ;++it, ++currentPos )
 			if ( it == current )
 				break;
-		int pages = childs.size() / (MaxEntries*columns);
-		if ( pages*MaxEntries*columns < (int)childs.size() )
+	}
+
+	if ( entries > MaxEntries*columns && MaxEntries*columns > 1 )
+	{
+		int pages = entries / (MaxEntries*columns);
+		if ( pages*MaxEntries*columns < entries )
 			pages++;
 		int start=(currentPos/(MaxEntries*columns)*MaxEntries*columns*100)/(pages*MaxEntries*columns);
 		int vis=MaxEntries*columns*100/(pages*MaxEntries*columns);
@@ -483,7 +494,6 @@ void eListBoxBase::redrawWidget(gPainter *target, const eRect &where)
 	for (ePtrList<eListBoxEntry>::iterator entry(top); ((flags & flagShowPartial) || (entry != bottom)) && (entry != childs.end()); ++entry)
 	{
 		eRect rect = getEntryRect(i);
-
 		if ( rc.intersects(rect) )
 		{
 			target->clip(rect & rc);
@@ -534,7 +544,7 @@ void eListBoxBase::gotFocus()
 		}
 #endif
 	++have_focus;
-	if (!childs.empty())
+	if (entries)
 	{
 		if ( newFocus() )   // recalced ?
 		{
@@ -567,7 +577,7 @@ void eListBoxBase::lostFocus()
 	}
 #endif
 	--have_focus;
-	if (!childs.empty())
+	if (entries)
 		if ( newFocus() ) //recalced ?
 		{
 			ePtrList<eListBoxEntry>::iterator it = current;
@@ -598,6 +608,7 @@ void eListBoxBase::invalidateCurrent()
 
 void eListBoxBase::init()
 {
+	currentPos=entries?0:-1;
 	current = top = bottom = childs.begin();
 	for (int i = 0; i < (MaxEntries*columns); ++i, ++bottom)
 		if (bottom == childs.end() )
@@ -616,7 +627,7 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 {
 	int direction=0, forceredraw=0;
 
-	if (childs.empty())
+	if (!entries)
 		return 0;
 
 	ePtrList<eListBoxEntry>::iterator oldptr=current, oldtop=top;
@@ -627,10 +638,12 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 			direction=+1;
 			for (int i = 0; i < MaxEntries; ++i)
 			{
+				++currentPos;
 				if (++current == bottom) // unten (rechts) angekommen? page down
 				{
 					if (bottom == childs.end()) // einzige ausnahme: unten (rechts) angekommen
 					{
+						--currentPos;
 						--current;
 						break;
 					}
@@ -644,7 +657,10 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 				}
 			}
 			if( !current->isSelectable() )
-				current++;
+			{
+				++current;
+				++currentPos;
+			}
 		break;
 
 		case dirPageUp:
@@ -653,7 +669,7 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 			{
 				if (current == childs.begin())
 					break;
-
+				--currentPos;
 				if (current-- == top/* && current != childs.begin()*/ )	// oben (links) angekommen? page up
 				{
 					for (int i = 0; i < MaxEntries * columns; ++i)
@@ -670,7 +686,10 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 				}
 			}
 			if( !current->isSelectable() )
-				current++;
+			{
+				++current;
+				++currentPos;
+			}
 			break;
 
 		case dirUp:
@@ -684,14 +703,16 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 					direction=+1;
 					top = bottom = current = childs.end();
 					--current;
-					int cnt = childs.size()%(MaxEntries*columns);
+					currentPos=entries-1;
+					int cnt = entries%(MaxEntries*columns);
 					for (int i = 0; i < (cnt?cnt:MaxEntries*columns); ++i, --top)
 						if (top == childs.begin())
 							break;
-				} 
+				}
 				else
 				{
 					direction=-1;
+					--currentPos;
 					if (current-- == top) // new top must set
 					{
 						for (int i = 0; i < MaxEntries*columns; ++i, --top)
@@ -716,6 +737,7 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 				if ( current == --ePtrList<eListBoxEntry>::iterator(childs.end()) )				// wrap around?
 				{
 					direction=-1;
+					currentPos=0;
 					top = current = bottom = childs.begin(); 	// goto first
 					for (int i = 0; i < MaxEntries * columns; ++i, ++bottom)
 						if ( bottom == childs.end() )
@@ -724,6 +746,7 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 				else
 				{
 					direction=+1;
+					++currentPos;
 					if (++current == bottom)   // ++current ??
 					{
 						for (int i = 0; i<MaxEntries * columns; ++i)
@@ -740,6 +763,7 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 		}
 		case dirFirst:
 			direction=-1;
+			currentPos=0;
 			top = current = bottom = childs.begin(); 	// goto first;
 			for (int i = 0; i < MaxEntries * columns; ++i, ++bottom)
 				if ( bottom == childs.end() )
@@ -752,7 +776,8 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 			direction=1;
 			top = bottom = current = childs.end();
 			--current;
-			int cnt = childs.size()%(MaxEntries*columns);
+			currentPos=entries-1;
+			int cnt = entries%(MaxEntries*columns);
 			for (int i = 0; i < (cnt?cnt:MaxEntries*columns); ++i, --top)
 				if (top == childs.begin())
 					break;
@@ -902,13 +927,13 @@ void eListBoxBase::endAtomic()
 				invalidateEntry(atomic_old);
 		}
 		if (atomic_selchanged)
-			if (childs.empty())
+			if (!entries)
 				/*emit*/ SendSelChanged(0);
 			else
 				/*emit*/ SendSelChanged(*current);
 
 		if (atomic_selected)
-			if (childs.empty())
+			if (!entries)
 				/*emit*/ SendSelected(0);
 			else
 				/*emit*/ SendSelected(*current);
@@ -1066,7 +1091,7 @@ void eListBoxBaseExt::lostFocus()
 	browseText="";
 	browseHistory.clear();
 }
- 
+
 void eListBoxEntry::drawEntryBorder(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF )
 {
 	rc->setForegroundColor(coActiveB);
@@ -1241,7 +1266,7 @@ const eString& eListBoxEntryCheck::redraw(gPainter *rc, const eRect& rect, gColo
 	if ( (b = (state == 2)) )
 		state = 0;
 
-	eListBoxEntryText::redraw( rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state );	
+	eListBoxEntryText::redraw( rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state );
 
 	if ( pm && checked )
 	{
