@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.25  2005/05/19 21:55:58  robspr1
+ * - bugfix cached mailreading
+ *
  * Revision 1.24  2005/05/19 10:03:50  robspr1
  * - add cached mailreading
  *
@@ -1832,15 +1835,16 @@ int SendPOPCommand(int command, char *param)
 		{
    		while(recv(sock, &recv_buffer[3], 1, 0) > 0)
 			{
+				if((nRead) && (nRead < 75000)) 
+				{
+					nRead++;
+					doOneChar( recv_buffer[3] );
+				}
+
 				// scan for header-end
   			if(!nRead && recv_buffer[3] == '\n' && recv_buffer[1] == '\n')
   			{
 					nRead++;
-				}
-				if((nRead) && (nRead < 75000)) 
-				{
-					nRead++;
-					doOneChar( recv_buffer[stringindex] );
 				}
 			
 				// this is normally the end of an email
@@ -2518,7 +2522,7 @@ int AddNewMailFile(int account, char *mailnumber)
 	char *stored_uids = 0, *ptr = 0;
 	int filesize = 0;
 	int idx1 = 0;
-	char idxfile[] = "/tmp/tuxmail.idx?";
+	char idxfile[256];
 	char mailfile[256];
 	FILE *fd_mailidx;
 	
@@ -2528,7 +2532,7 @@ int AddNewMailFile(int account, char *mailnumber)
 		return 0;
 	}
 	
-	idxfile[sizeof(idxfile) - 2] = account | '0';
+	sprintf(idxfile,"%stuxmail.idx%u",maildir,account);
 	
 	if((fd_mailidx = fopen(idxfile,"r")))
 	{
@@ -2624,7 +2628,7 @@ int AddNewMailFile(int account, char *mailnumber)
 int CheckAccount(int account)
 {
 	int loop;
-	FILE *fd_status;
+	FILE *fd_status, *fd_idx;
 	int filesize, skip_uid_check = 0;
 	char statusfile[] = "/tmp/tuxmail.?";
 	char *known_uids = 0, *ptr = 0;
@@ -2708,6 +2712,8 @@ int CheckAccount(int account)
 					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not create Status for Account %d", account) : printf("TuxMailD <could not create Status for Account %d>\n", account);
 				}
 
+				fd_idx = fopen("/tmp/tuxmaild.idx", "w+");
+				
 			// generate listing
 
 				if(fd_status)
@@ -2766,12 +2772,10 @@ int CheckAccount(int account)
 						{
 							account_db[account].mail_new++;
 
-							if( readmails < mailcache )
+							if((fd_idx) && (readmails < mailcache))
 							{
-								if( AddNewMailFile(account, mailnumber) )
-								{ 
-									readmails++;
-								}
+								fprintf(fd_idx,"|%4d|%s\n",loop,uid);
+								readmails++;
 							}
 							
 							if(fd_status)
@@ -2850,12 +2854,10 @@ int CheckAccount(int account)
 							{
 								account_db[account].mail_new++;
 	
-								if( readmails < mailcache )
+								if((fd_idx) && (readmails < mailcache))
 								{
-									if( AddNewMailFile(account, mailnumber) )
-									{ 
-										readmails++;
-									}
+									fprintf(fd_idx,"|%4d|%s\n",loop,uid);
+									readmails++;
 								}
 
 								if(fd_status)
@@ -2867,6 +2869,33 @@ int CheckAccount(int account)
 					}
 				}
 
+				if((fd_status) && (fd_idx) && (account_db[account].mail_new))
+				{
+					char linebuffer[256];
+					int i, j;
+					
+					for( i=0; i<readmails; i++)
+					{
+						rewind(fd_idx);
+						j = readmails-i;
+						while(fgets(linebuffer,sizeof(linebuffer),fd_idx))
+						{
+//							printf("idx:%d j:%d line:%s\n",i,j,linebuffer);
+							j--;
+							if( !j ) break;							
+						}				
+						linebuffer[strlen(linebuffer)-1]='\0';
+						linebuffer[5]='\0';
+						sscanf(&linebuffer[1],"%s",&mailnumber[0]);
+						sscanf(&linebuffer[6],"%s",&uid[0]);
+//						printf("mail: %d  number: %s  uid: %s \n",i,mailnumber,uid);
+						if( !AddNewMailFile(account, mailnumber) )
+						{
+//							printf("not found\n");
+						}
+					}
+				}
+				
 				if(fd_status)
 				{
 					rewind(fd_status);
@@ -2876,6 +2905,11 @@ int CheckAccount(int account)
 
 				free(known_uids);
 
+				if(fd_idx)
+				{
+					fclose(fd_idx);
+				}
+				
 				if(fd_status)
 				{
 					fclose(fd_status);
@@ -3342,7 +3376,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.24 $";
+	char cvs_revision[] = "$Revision: 1.25 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
