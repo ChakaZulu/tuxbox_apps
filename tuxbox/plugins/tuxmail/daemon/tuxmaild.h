@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.19  2005/05/19 10:04:01  robspr1
+ * - add cached mailreading
+ *
  * Revision 1.18  2005/05/15 10:16:19  lazyt
  * - add SMTP-Logging
  * - change Parameters (POP3LOG now LOGGING, HOST? now POP3?)
@@ -266,6 +269,8 @@ char uid[128];
 char header[1024];
 int headersize;
 char timeinfo[22];
+char maildir[256];
+int mailcache = 0;
 time_t tt;
 
 // lcd stuff

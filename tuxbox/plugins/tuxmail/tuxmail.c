@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.26  2005/05/19 10:04:31  robspr1
+ * - add cached mailreading
+ *
  * Revision 1.25  2005/05/17 20:40:34  robspr1
  * - add addressbook to mailwriter
  *
@@ -117,6 +120,14 @@ void ReadConf()
 			if((ptr = strstr(line_buffer, "ADMIN=")))
 			{
 				sscanf(ptr + 6, "%c", &admin);
+			}
+			else if((ptr = strstr(line_buffer, "MAILCACHE=")))
+			{
+				sscanf(ptr + 10, "%d", &mailcache);
+			}
+			else if((ptr = strstr(line_buffer, "MAILDIR=")))
+			{
+				sscanf(ptr + 8, "%s", &maildir[0]);
 			}
 			else if((ptr = strstr(line_buffer, "OSD=")))
 			{
@@ -1362,6 +1373,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 //	FILE* pipeT9 = NULL;
 //	char szT9Code[10];
 	char cChar;
+	unsigned short cLastKey=RC_UP;
 	
 	FILE* pipe;
 	pipe = fopen(filename,"w");
@@ -1564,9 +1576,9 @@ void EditMailFile(char* filename, int account, int mailindex )
 			}
 		}
 		
-/*	
+/*
 		char szTmpOut[80];
-		sprintf(szTmpOut,"Line:%d Pos:%d Type:%d T9:<%s>",nEditLine,nEditPos,nEditType,szT9Code);
+		sprintf(szTmpOut,"Line:%d Pos:%d Type:%d T9:<%x>",nEditLine,nEditPos,nEditType,cLastKey);
 		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
 */		
 			
@@ -1576,6 +1588,10 @@ void EditMailFile(char* filename, int account, int mailindex )
 		
 		int iIndex = 0;
 		cChar = 'A';
+		if( (rccode > RC_9) && (rccode != 0xFFFF) )
+		{
+			cLastKey = rccode;
+		} 
 		switch ( rccode )
 		{
 			case RC_9: iIndex++;
@@ -1592,6 +1608,22 @@ void EditMailFile(char* filename, int account, int mailindex )
 				{
 					char cNew, cAkt;
 				
+					if( (cLastKey != rccode) && (cLastKey <= RC_9) )
+					{
+						if( nEditPos < (MAXLINELEN-1) )
+						{
+							if( nEditPos < strlen(szInfo[nEditLine]))
+							{
+								nEditPos ++;
+							}
+							else
+							{
+								szInfo[nEditLine][nEditPos++]=' ';
+								szInfo[nEditLine][nEditPos]='\0';
+							}
+						}
+					}
+					cLastKey = rccode;
 					cAkt = szInfo[nEditLine][nEditPos];
 					
 					if( !iIndex )
@@ -1987,7 +2019,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 		// check to: (and ptr1 to result)
 		if( (ptr1=strchr(szInfo[0],'<')) )
 		{
-			if( (ptr2=strchr(ptr1,'>')) )
+			if( (ptr2=strchr(ptr1++,'>')) )
 			{
 				*ptr2 = '\0';
 			}
@@ -2003,7 +2035,12 @@ void EditMailFile(char* filename, int account, int mailindex )
 		fprintf(pipe,"From: %s\n",szFrom);
 		fprintf(pipe,"To: %s\n",szInfo[0]);
 		fprintf(pipe,"Subject: %s\n\n",szInfo[1]);
-		
+/*
+		char szTmpOut[80];
+		sprintf(szTmpOut,"from:<%s> to:<%s>",szFrom,ptr1);
+		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
+		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+*/		
 		int i,j;
 		j=MAXINFOLINES-1;
 		// skip empty lines
@@ -2681,7 +2718,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.25 $";
+	char cvs_revision[] = "$Revision: 1.26 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -3095,7 +3132,7 @@ void plugin_exec(PluginParam *par)
 
 				case RC_GREEN:
 
-					if(maildb[account].mails)
+					if(maildb[account].smtp[0] != '\0')
 					{
 						EditMailFile(SMTPFILE, account, mailindex);
 						
@@ -3111,6 +3148,48 @@ void plugin_exec(PluginParam *par)
 
 					if(maildb[account].mails)
 					{
+						if( mailcache )
+						{
+							char *stored_uids = 0, *ptr = 0;
+							int idx1 = 0;
+							int filesize = 0;
+							char idxfile[] = "/tmp/tuxmail.idx?";
+							char mailfile[256];
+							FILE *fd_mailidx;
+
+							idxfile[sizeof(idxfile) - 2] = account | '0';
+	
+							if((fd_mailidx = fopen(idxfile,"r")))
+							{
+								fseek(fd_mailidx, 0, SEEK_END);
+
+								if((filesize = ftell(fd_mailidx)))
+								{
+									stored_uids = malloc(filesize + 1);
+									memset(stored_uids, 0, filesize + 1);
+				
+									rewind(fd_mailidx);
+									fread(stored_uids, filesize, 1, fd_mailidx);
+								}
+							
+								if((ptr = strstr(stored_uids, maildb[account].mailinfo[mailindex].uid)))
+								{
+									// we already have this mail read
+									sscanf(ptr-3,"%02u",&idx1);
+									if( idx1 )
+									{
+										char szInfo[256];
+										sprintf(mailfile,"%stuxmail.idx%u.%u",maildir,account,idx1);
+										sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
+//										printf("cached file: %s",mailfile);
+										ShowMailFile(mailfile, szInfo);
+										break;
+									}
+								}
+								free(stored_uids);
+								fclose(fd_mailidx);
+							}
+						}
 						ControlDaemon(GET_MAIL, account, mailindex);
 
 						if(!mailfile)

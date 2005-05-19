@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.22  2005/05/19 10:04:16  robspr1
+ * - add cached mailreading
+ *
  * Revision 1.21  2005/05/17 20:40:17  robspr1
  * - add addressbook to mailwriter
  *
@@ -314,6 +317,8 @@ int startx, starty, sx, ex, sy, ey;
 char online;
 char mailfile;
 char mailsend;
+char maildir[256];
+int mailcache = 0;
 
 #if HAVE_DVB_API_VERSION == 3
 

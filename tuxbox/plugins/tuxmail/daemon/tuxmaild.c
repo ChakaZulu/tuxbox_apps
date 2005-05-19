@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.24  2005/05/19 10:03:50  robspr1
+ * - add cached mailreading
+ *
  * Revision 1.23  2005/05/15 10:16:19  lazyt
  * - add SMTP-Logging
  * - change Parameters (POP3LOG now LOGGING, HOST? now POP3?)
@@ -130,6 +133,8 @@ int ReadConf()
 			fprintf(fd_conf, "OSD=G\n\n");
 			fprintf(fd_conf, "SKIN=1\n\n");
 			fprintf(fd_conf, "ADMIN=Y\n\n");
+			fprintf(fd_conf, "MAILCACHE=0\n");
+			fprintf(fd_conf, "MAILDIR=\\tmp\\\n\n");		
 			fprintf(fd_conf, "WEBPORT=80\n");
 			fprintf(fd_conf, "WEBUSER=\n");
 			fprintf(fd_conf, "WEBPASS=\n\n");
@@ -150,7 +155,7 @@ int ReadConf()
 
 		memset(account_db, 0, sizeof(account_db));
 
-		startdelay = intervall = logging = logmode = savedb = audio = video = lcd = osd = skin = admin = webport = webuser[0] = webpass[0] = 0;
+		startdelay = intervall = logging = logmode = savedb = audio = video = lcd = osd = skin = admin = maildir[0] = webport = webuser[0] = webpass[0] = 0;
 
 	// fill database
 
@@ -199,6 +204,14 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "ADMIN=")))
 			{
 				sscanf(ptr + 6, "%c", &admin);
+			}
+			else if((ptr = strstr(line_buffer, "MAILCACHE=")))
+			{
+				sscanf(ptr + 10, "%d", &mailcache);
+			}
+			else if((ptr = strstr(line_buffer, "MAILDIR=")))
+			{
+				sscanf(ptr + 8, "%s", &maildir[0]);
 			}
 			else if((ptr = strstr(line_buffer, "WEBPORT=")))
 			{
@@ -631,6 +644,8 @@ int ReadConf()
 			fprintf(fd_conf, "OSD=%c\n\n", osd);
 			fprintf(fd_conf, "SKIN=%d\n\n", skin);
 			fprintf(fd_conf, "ADMIN=%c\n\n", admin);
+			fprintf(fd_conf, "MAILCACHE=%d\n", mailcache);
+			fprintf(fd_conf, "MAILDIR=%s\n\n", maildir);
 			fprintf(fd_conf, "WEBPORT=%d\n", webport);
 			fprintf(fd_conf, "WEBUSER=%s\n", webuser);
 			fprintf(fd_conf, "WEBPASS=%s\n", webpass);
@@ -785,6 +800,11 @@ int ReadConf()
 			}
 		}
 
+		if(maildir[0])
+		{
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "store max. %d mails in %s\n", mailcache,maildir) : printf("TuxMailD <store max. %d mails in %s>\n", mailcache, maildir);
+		}
+		
 		if(accounts)
 		{
 			if(logging == 'N')
@@ -1759,7 +1779,7 @@ int SendPOPCommand(int command, char *param)
 
 			case RETR:
 
-				sprintf(send_buffer, "RETR %s\r\n", param);
+				sprintf(send_buffer, "TOP %s 5000\r\n", param);
 
 				break;
 
@@ -1810,14 +1830,14 @@ int SendPOPCommand(int command, char *param)
     		
 		if(command == RETR)
 		{
-   			while(recv(sock, &recv_buffer[3], 1, 0) > 0)
+   		while(recv(sock, &recv_buffer[3], 1, 0) > 0)
 			{
 				// scan for header-end
-  				if(!nRead && recv_buffer[3] == '\n' && recv_buffer[1] == '\n')
-  				{
+  			if(!nRead && recv_buffer[3] == '\n' && recv_buffer[1] == '\n')
+  			{
 					nRead++;
 				}
-				if(nRead) 
+				if((nRead) && (nRead < 75000)) 
 				{
 					nRead++;
 					doOneChar( recv_buffer[stringindex] );
@@ -1826,21 +1846,13 @@ int SendPOPCommand(int command, char *param)
 				// this is normally the end of an email
 				if(recv_buffer[3] == '\n' && recv_buffer[1] == 46 && recv_buffer[0] == '\n')
 				{
-					strcpy(recv_buffer, "+OK");
+					strcpy(recv_buffer, "+OK\r\n");
 					break;
 				}
-				if(nRead < 75000)
-				{
-					recv_buffer[0] = recv_buffer[1];
-					recv_buffer[1] = recv_buffer[2];
-					recv_buffer[2] = recv_buffer[3];
-				}
-				else
-				{
-					slog ? syslog(LOG_DAEMON | LOG_INFO, "Buffer Overflow") : printf("TuxMailD <Buffer Overflow>\n");
-					strcpy(recv_buffer, "+OK");
-					break;
-				}
+
+				recv_buffer[0] = recv_buffer[1];
+				recv_buffer[1] = recv_buffer[2];
+				recv_buffer[2] = recv_buffer[3];
 			}
 		}
 		else
@@ -2498,6 +2510,114 @@ int SaveMail(int account, char* mailuid)
 }
 
 /******************************************************************************
+ * AddNewMailFile (0=fail, 1=done)
+ ******************************************************************************/
+
+int AddNewMailFile(int account, char *mailnumber)
+{
+	char *stored_uids = 0, *ptr = 0;
+	int filesize = 0;
+	int idx1 = 0;
+	char idxfile[] = "/tmp/tuxmail.idx?";
+	char mailfile[256];
+	FILE *fd_mailidx;
+	
+	// if we do not store the mails
+	if( !mailcache )
+	{
+		return 0;
+	}
+	
+	idxfile[sizeof(idxfile) - 2] = account | '0';
+	
+	if((fd_mailidx = fopen(idxfile,"r")))
+	{
+		fseek(fd_mailidx, 0, SEEK_END);
+
+		if((filesize = ftell(fd_mailidx)))
+		{
+			stored_uids = malloc(filesize + 1);
+			memset(stored_uids, 0, filesize + 1);
+	
+			rewind(fd_mailidx);
+			fread(stored_uids, filesize, 1, fd_mailidx);
+		}
+		fclose(fd_mailidx);
+		fd_mailidx = NULL;
+	}
+
+	if((filesize) && (ptr = strstr(stored_uids, uid)))
+	{
+		// we already have this mail read
+		free(stored_uids);
+		return 1;
+	}
+	
+	if(!(fd_mailidx = fopen(idxfile, "w")))
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "could not create Idx-File for Account %d", account) : printf("TuxMailD <could not create Idx-File for Account %d>\n", account);
+	}
+
+	if(fd_mailidx)
+	{
+	  if( !filesize	)
+	  {
+	  	idx1 = 1;
+	  }
+	  else
+	  {
+			sscanf(&stored_uids[1],"%02u",&idx1);
+			if( ++idx1 > mailcache )
+			{
+				idx1 = 1;
+			}
+	  }
+ 	  
+		sprintf(mailfile,"%stuxmail.idx%u.%u",maildir,account,idx1);
+//		printf("%stuxmail.idx%u.%u\n",maildir,account,idx1);
+		fd_mail=fopen(mailfile,"w");
+		
+		if(fd_mail)
+		{
+			if(!SendPOPCommand(RETR, mailnumber))
+			{
+				idx1 = 0;
+			}
+			else
+			{
+//				printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
+			}
+			fclose(fd_mail);
+		}
+
+		if( idx1 )
+		{
+			fprintf(fd_mailidx, "|%02u|%s\n", idx1, uid);
+			
+			char cComp[5];
+			sprintf(cComp,"|%02u|",idx1);
+			if( filesize	)
+			{
+				if( (ptr = strstr(stored_uids,cComp)) )
+				{
+					*ptr = '\0';
+				}
+				fprintf(fd_mailidx, "%s", stored_uids);
+			}
+		}
+
+		fclose(fd_mailidx);	
+	}
+	
+	free(stored_uids);
+	if( idx1 )
+	{
+		return 1;
+	}
+	return 0;
+}
+
+/******************************************************************************
  * CheckAccount (0=fail, 1=done)
  ******************************************************************************/
 
@@ -2509,7 +2629,8 @@ int CheckAccount(int account)
 	char statusfile[] = "/tmp/tuxmail.?";
 	char *known_uids = 0, *ptr = 0;
 	char mailnumber[12];
-
+	int readmails = 0;
+	
 	// timestamp
 
 		time(&tt);
@@ -2645,6 +2766,14 @@ int CheckAccount(int account)
 						{
 							account_db[account].mail_new++;
 
+							if( readmails < mailcache )
+							{
+								if( AddNewMailFile(account, mailnumber) )
+								{ 
+									readmails++;
+								}
+							}
+							
 							if(fd_status)
 							{
 								fprintf(fd_status, "|N|%s|%s\n", uid, header);
@@ -2721,6 +2850,14 @@ int CheckAccount(int account)
 							{
 								account_db[account].mail_new++;
 	
+								if( readmails < mailcache )
+								{
+									if( AddNewMailFile(account, mailnumber) )
+									{ 
+										readmails++;
+									}
+								}
+
 								if(fd_status)
 								{
 									fprintf(fd_status, "|N|%s|%s\n", uid, header);
@@ -3205,7 +3342,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.23 $";
+	char cvs_revision[] = "$Revision: 1.24 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
