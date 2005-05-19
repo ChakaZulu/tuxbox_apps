@@ -3407,7 +3407,14 @@ void eZapMain::skipLoop()
 				ts=0;
 			}
 			else
+			{
 				ts=1;
+				if ( time == 2 && skipspeed < 0 )
+				{
+					time*=3;
+					time/=2;
+				}
+			}
 
 			// Skip
 			if(ts && skipspeed==1) 
