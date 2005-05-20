@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.23  2005/05/20 18:01:24  lazyt
+ * - Preparation for Keyboard
+ * - don't try add to Spamlist for empty Account
+ *
  * Revision 1.22  2005/05/19 10:04:16  robspr1
  * - add cached mailreading
  *
@@ -187,6 +191,21 @@
 #define	RC_DBOX		0x18
 #define	RC_HOME		0x1F
 
+// kb codes
+
+#define KBC_UP		0x01
+#define KBC_DOWN	0x02
+#define KBC_RIGHT	0x03
+#define KBC_LEFT	0x04
+#define KBC_INS		0x05
+#define KBC_DEL		0x06
+#define KBC_POS1	0x07
+#define KBC_BACKSPACE	0x08
+#define KBC_END		0x0A
+#define KBC_PAGEUP	0x0B
+#define KBC_PAGEDOWN	0x0C
+#define KBC_RETURN	0x0D
+
 // defines for mail-reading/writing
  
 #define BORDERSIZE 2
@@ -283,7 +302,7 @@ struct
 
 // devs
 
-int fb, rc, lcd;
+int fb, rc, kb, lcd;
 
 // daemon commands
 
@@ -327,6 +346,7 @@ struct input_event ev;
 #endif
 
 unsigned short rccode;
+unsigned char kbcode;
 int sim_key = 0;
 
 char scroll_up[] =

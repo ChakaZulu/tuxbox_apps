@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.28  2005/05/20 18:01:24  lazyt
+ * - Preparation for Keyboard
+ * - don't try add to Spamlist for empty Account
+ *
  * Revision 1.27  2005/05/19 21:56:19  robspr1
  * - bugfix cached mailreading
  *
@@ -721,6 +725,104 @@ int GetRCCode()
 }
 
 #endif
+
+/******************************************************************************
+ * GetKBCode
+ ******************************************************************************/
+
+unsigned char GetKBCode()
+{
+	int available;
+	unsigned char keycode[8];
+
+	kbcode = 0;
+
+	if(kb != -1)
+	{
+		ioctl(kb, FIONREAD, &available);
+
+		if(available)
+		{
+			read(kb, &keycode, available);
+
+			switch(available)
+			{
+				case 1:
+
+					if(keycode[0] == 0x0A)
+					{
+						kbcode = KBC_RETURN;
+					}
+					else if(keycode[0] == 0x7F)
+					{
+						kbcode = KBC_BACKSPACE;
+					}
+					else
+					{
+						kbcode = keycode[0];
+					}
+
+					break;
+
+				case 3:
+
+					if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x41)
+					{
+						kbcode = KBC_UP;
+					}
+					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x42)
+					{
+						kbcode = KBC_DOWN;
+					}
+					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x43)
+					{
+						kbcode = KBC_RIGHT;
+					}
+					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x44)
+					{
+						kbcode = KBC_LEFT;
+					}
+
+					break;
+
+				case 4:
+
+					if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x31 && keycode[3] == 0x7E)
+					{
+						kbcode = KBC_POS1;
+					}
+					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x32 && keycode[3] == 0x7E)
+					{
+						kbcode = KBC_INS;
+					}
+					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x33 && keycode[3] == 0x7E)
+					{
+						kbcode = KBC_DEL;
+					}
+					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x34 && keycode[3] == 0x7E)
+					{
+						kbcode = KBC_END;
+					}
+					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x35 && keycode[3] == 0x7E)
+					{
+						kbcode = KBC_PAGEUP;
+					}
+					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x36 && keycode[3] == 0x7E)
+					{
+						kbcode = KBC_PAGEDOWN;
+					}
+
+					break;
+			}
+		}
+		else
+		{
+			usleep(1000000/100);
+		}
+	}
+
+	return kbcode;
+}
 
 /******************************************************************************
  * MyFaceRequester
@@ -2788,7 +2890,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.27 $";
+	char cvs_revision[] = "$Revision: 1.28 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -2840,6 +2942,10 @@ void plugin_exec(PluginParam *par)
 
 			return;
 		}
+
+	// keyboard
+
+		kb = open("/dev/vc/0", O_RDONLY);
 
 	// fill database
 
@@ -3280,7 +3386,7 @@ void plugin_exec(PluginParam *par)
 
 				case RC_BLUE:
 
-					if(admin == 'Y')
+					if(admin == 'Y' && maildb[account].mails)
 					{
 						int iRet = Add2SpamList(account, mailindex);
 
@@ -3410,6 +3516,8 @@ void plugin_exec(PluginParam *par)
 		munmap(lfb, fix_screeninfo.smem_len);
 
 		fcntl(rc, F_SETFL, O_NONBLOCK);
+
+		close(kb);
 
 		return;
 }
