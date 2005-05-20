@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.76 2005/01/12 20:18:33 chakazulu Exp $
+   $Id: timermanager.cpp,v 1.77 2005/05/20 13:49:30 chakazulu Exp $
 
 	License: GPL
 
@@ -84,6 +84,7 @@ void* CTimerManager::timerThread(void *arg)
 			CSectionsdClient sectionsd;
 			if (sectionsd.getIsTimeSet())
 			{
+				dprintf("sectionsd says \"time ok\"\n");
 				timerManager->m_isTimeSet=true;
 				timerManager->loadEventsFromConfig();
 			}
@@ -193,6 +194,10 @@ int CTimerManager::addEvent(CTimerEvent* evt, bool save)
 		evt->eventRepeat=CTimerd::TIMERREPEAT_ONCE;
 	events[eventID] = evt;			// insert into events
 	m_saveEvents=save;
+	if (timerd_debug) {
+		dprintf("adding event:\n");
+		evt->printEvent();
+	}
 	return eventID;					// return unique id
 }
 
@@ -557,7 +562,7 @@ void CTimerManager::saveEventsToConfig()
 	// Sperren !!!
 	CConfigFile config(',');
 	config.clear();
-	dprintf("[Timerd] save %d events to config ... saving ", events.size());
+	dprintf("save %d events to config ... saving ", events.size());
 	CTimerEventMap::iterator pos = events.begin();
 	for(;pos != events.end();pos++)
 	{
@@ -811,11 +816,11 @@ void CTimerEvent::Reschedule()
 void CTimerEvent::printEvent(void)
 {
 	struct tm *alarmtime, *announcetime;
-	dprintf("eventID: %03d type: %d state: %d repeat: %d ,repeatCount %d",eventID,eventType,eventState,((int)eventRepeat)&0x1FF,repeatCount);
+	dprintf("eventID: %03d type: %d state: %d repeat: %d ,repeatCount %d\n",eventID,eventType,eventState,((int)eventRepeat)&0x1FF,repeatCount);
 	announcetime = localtime(&announceTime);
-	dprintf("announce: %u %02d.%02d. %02d:%02d:%02d ",(uint) announceTime,announcetime->tm_mday,announcetime->tm_mon+1,announcetime->tm_hour,announcetime->tm_min,announcetime->tm_sec);
+	dprintf("announce: %u %02d.%02d. %02d:%02d:%02d\n",(uint) announceTime,announcetime->tm_mday,announcetime->tm_mon+1,announcetime->tm_hour,announcetime->tm_min,announcetime->tm_sec);
 	alarmtime = localtime(&alarmTime);
-	dprintf("alarm: %u %02d.%02d. %02d:%02d:%02d ",(uint) alarmTime,alarmtime->tm_mday,alarmtime->tm_mon+1,alarmtime->tm_hour,alarmtime->tm_min,alarmtime->tm_sec);
+	dprintf("alarm: %u %02d.%02d. %02d:%02d:%02d\n",(uint) alarmTime,alarmtime->tm_mday,alarmtime->tm_mon+1,alarmtime->tm_hour,alarmtime->tm_min,alarmtime->tm_sec);
 	switch(eventType)
 	{
 		case CTimerd::TIMER_ZAPTO :
@@ -840,7 +845,7 @@ void CTimerEvent::printEvent(void)
 			break;
 
 		default:
-			dprintf("(no extra data)\n");
+			dprintf("(no extra data)\n\n");
 	}
 }
 //------------------------------------------------------------
