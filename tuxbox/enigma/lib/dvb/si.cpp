@@ -1381,12 +1381,8 @@ int EIT::data(__u8 *data)
 	//
 	// This fixed the EPG on the Multichoice irdeto systems
 	// the EIT packet is non-compliant.. their EIT packet stinks
-
 	if (data[ptr-1] < 0x40)
-	{
-		eDebug("[EPGC] EIT Check [%2.2x] [%2.2x] [%2.2x]",data[ptr-2],data[ptr-1],data[ptr]);
-		ptr--;
-	}
+		--ptr;
 
 	while (ptr<len)
 	{

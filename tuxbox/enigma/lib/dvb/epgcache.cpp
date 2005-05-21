@@ -59,6 +59,13 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 	int ptr=EIT_SIZE;
 	if ( ptr >= len )
 		return 0;
+
+	//
+	// This fixed the EPG on the Multichoice irdeto systems
+	// the EIT packet is non-compliant.. their EIT packet stinks
+	if ( data[ptr-1] < 0x40 )
+		--ptr;
+
 	uniqueEPGKey service( HILO(eit->service_id), HILO(eit->original_network_id), HILO(eit->transport_stream_id) );
 	eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 	int eit_event_size;
