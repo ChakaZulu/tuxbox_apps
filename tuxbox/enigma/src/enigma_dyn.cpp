@@ -2144,7 +2144,7 @@ struct blasel
 	{4, 1, "4:1:1"},
 	{4, 4, "4:1:0"}};
 
-int genScreenShot()
+int genScreenShot(int index)
 {
 	unsigned char frame[720*576*3+16]; // max. size
 
@@ -2155,10 +2155,11 @@ int genScreenShot()
 		return 1;
 	}
 	
-	FILE *fd2 = fopen("/tmp/screenshot.bmp", "wr");
+	eString filename = "/tmp/screenshot" + ((index > 0) ? eString().sprintf("%d", index) : "") + ".bmp";
+	FILE *fd2 = fopen(filename.c_str(), "wr");
 	if (fd2 < 0)
 	{
-		eDebug("could not open /tmp/screenshot.bmp");
+		eDebug("could not open %s", filename.c_str());
 		return 1;
 	}
 	
@@ -2297,7 +2298,7 @@ static eString getControlScreenShot(void)
 {
 	eString result;
 
-	int rc = genScreenShot();
+	int rc = genScreenShot(0);
 	eDebug("rc is %d", rc);
 	if (rc != 0)
 	{
