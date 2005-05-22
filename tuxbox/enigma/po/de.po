@@ -1210,7 +1210,7 @@ msgstr "- Sender"
 
 #: lib/dvb/servicedvb.cpp:1157
 msgid " - new found"
-msgstr ""
+msgstr "- Neue Sender"
 
 #: lib/dvb/servicemp3.cpp:186
 msgid "Connecting..."
