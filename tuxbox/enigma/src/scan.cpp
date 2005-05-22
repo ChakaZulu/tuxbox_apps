@@ -1656,21 +1656,21 @@ ManualPIDWindow::ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &r
 
 	cNoDVB = new eCheckbox(this, 0, 1);
 	cNoDVB->move(ePoint(10, yOffs));
-	cNoDVB->resize(eSize(140, fs+8));
+	cNoDVB->resize(eSize(125, fs+8));
 	cNoDVB->loadDeco();
 	cNoDVB->setText(_("no DVB"));
 	cNoDVB->setHelpText(_("don't read PAT/PMT/SDT for this service (only use cached pids)"));
 
 	cUseSDT = new eCheckbox(this, 0, 1);
-	cUseSDT->move(ePoint(165, yOffs));
-	cUseSDT->resize(eSize(140, fs+8));
+	cUseSDT->move(ePoint(150, yOffs));
+	cUseSDT->resize(eSize(130, fs+8));
 	cUseSDT->loadDeco();
 	cUseSDT->setText(_("use sdt"));
 	cUseSDT->setHelpText(_("update name/provider/service type with content of the sdt (and auto remove service)"));
 
 	cHoldName = new eCheckbox(this, 0, 1);
-	cHoldName->move(ePoint(320, yOffs));
-	cHoldName->resize(eSize(140, fs+8));
+	cHoldName->move(ePoint(295, yOffs));
+	cHoldName->resize(eSize(160, fs+8));
 	cHoldName->loadDeco();
 	cHoldName->setText(_("hold name"));
 	cHoldName->setHelpText(_("don't update the service name with content of the sdt"));
@@ -1686,7 +1686,7 @@ ManualPIDWindow::ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &r
 	bReadNIT = new eButton(this);
 	bReadNIT->move(ePoint(10+(clientrect.width()-40)/2+10, clientrect.height()-40-10-80));
 	bReadNIT->resize(eSize((clientrect.width()-40)/2, 35));
-	bReadNIT->setText("read NIT");
+	bReadNIT->setText(_("read NIT"));
 	bReadNIT->setHelpText(_("read tsid and onid from the nit (this can take up to 10 seconds)"));
 	bReadNIT->setShortcut("green");
 	bReadNIT->setShortcutPixmap("green");
@@ -1696,7 +1696,7 @@ ManualPIDWindow::ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &r
 	bSetPIDs = new eButton(this);
 	bSetPIDs->move(ePoint(10, clientrect.height()-40-10-35));
 	bSetPIDs->resize(eSize((clientrect.width()-40)/2, 35));
-	bSetPIDs->setText("test values");
+	bSetPIDs->setText(_("test values"));
 	bSetPIDs->setHelpText(_("test entered values"));
 	bSetPIDs->setShortcut("yellow");
 	bSetPIDs->setShortcutPixmap("yellow");
@@ -1706,7 +1706,7 @@ ManualPIDWindow::ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &r
 	bStore = new eButton(this);
 	bStore->move(ePoint(10+(clientrect.width()-40)/2+10, clientrect.height()-40-10-35));
 	bStore->resize(eSize((clientrect.width()-40)/2, 35));
-	bStore->setText("save");
+	bStore->setText(_("save"));
 	bStore->setHelpText(_("save data and close window (the new channel could be found in the all services list)"));
 	bStore->setShortcut("blue");
 	bStore->setShortcutPixmap("blue");
