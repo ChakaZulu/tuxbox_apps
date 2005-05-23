@@ -1,5 +1,5 @@
 /*
-	LCD-Daemon  -   DBoxII-Project
+	Shutdown Counter  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
