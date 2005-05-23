@@ -3400,8 +3400,11 @@ void eZapMain::skipLoop()
 			if( ref.type == eServiceReference::idUser &&
 				((ref.data[0] ==  eMP3Decoder::codecMPG) ||
 				 (ref.data[0] ==  eMP3Decoder::codecMP3) ) )
-			{ 
-				time <<= (faktor<0) ? 4 : 2; // ermittelt per trial & error (bitrate?)
+			{
+				if ( ref.data[0] == eMP3Decoder::codecMP3 )
+					time <<= (faktor<0) ? 4 : 2; // ermittelt per trial & error (bitrate?)
+				else
+					time <<= (faktor<0) ? 3 : 2; // ermittelt per trial & error (bitrate?)
 				time *= 3;
 				time /= 2;
 				ts=0;
