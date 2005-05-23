@@ -64,9 +64,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.2.1-Expert"
+#define WEBIFVERSION "3.2.2-Expert"
 #else
-#define WEBIFVERSION "3.2.1"
+#define WEBIFVERSION "3.2.2"
 #endif
 
 #define KEYBOARDTV 0
@@ -655,20 +655,20 @@ eString getSubChannels(void)
 		EIT *eit = eDVB::getInstance()->getEIT();
 		if (eit)
 		{
-			int p=0;
+			int p = 0;
 			for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
 			{
-				EITEvent *event=*i;
-				if ((event->running_status>=2) || ((!p) && (!event->running_status)))
+				EITEvent *event = *i;
+				if ((event->running_status >= 2) || ((!p) && (!event->running_status)))
 				{
 					for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 					{
 						if (d->Tag() == DESCR_LINKAGE)
 						{
-							LinkageDescriptor *ld =(LinkageDescriptor *)*d;
+							LinkageDescriptor *ld = (LinkageDescriptor *)*d;
 							if (ld->linkage_type == 0xB0) //subchannel
 							{
-								eString subService((char*)ld->private_data, ld->priv_len);
+								eString subService((char *)ld->private_data, ld->priv_len);
 								eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
 									+ eString(nspace) + ":0:0:0:";
 								if (subServiceRef == curServiceRef)
@@ -694,7 +694,7 @@ eString getSubChannels(void)
 
 static eString selectSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Content-Type"] = "text/html; charset=utf-8";
 	content->local_header["Cache-Control"] = "no-cache";
 	eString subChannels = getSubChannels();
 
@@ -771,7 +771,7 @@ eString getCurService(void)
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
-		eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		eService *current = eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 		if (current)
 			result = current->service_name.c_str();
 	}
@@ -1540,7 +1540,9 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 					channels += ");";
 					channelrefs += result1.left(result1.length() - 2);
 					channelrefs += ");";
-
+					
+					channels += "\n";
+					channelrefs += "\n";
 					i++;
 				}
 			}
