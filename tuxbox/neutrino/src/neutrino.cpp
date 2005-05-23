@@ -67,6 +67,7 @@
 #include <driver/rcinput.h>
 #include <driver/stream2file.h>
 #include <driver/vcrcontrol.h>
+#include <driver/shutdown_count.h>
 #include <irsend/irsend.h>
 
 #include "gui/widget/colorchooser.h"
@@ -547,6 +548,7 @@ int CNeutrinoApp::loadSetup()
 	//misc
 	g_settings.shutdown_real            = configfile.getBool("shutdown_real"             , true );
 	g_settings.shutdown_real_rcdelay    = configfile.getBool("shutdown_real_rcdelay"     , true );
+	strcpy(g_settings.shutdown_count, configfile.getString("shutdown_count","0").c_str());
 	g_settings.infobar_sat_display      = configfile.getBool("infobar_sat_display"       , true );
 	g_settings.infobar_subchan_disp_pos = configfile.getInt32("infobar_subchan_disp_pos" , 0 );
 	g_settings.misc_spts                = configfile.getBool("misc_spts"                 , false );
@@ -880,6 +882,7 @@ void CNeutrinoApp::saveSetup()
 	//misc
 	configfile.setBool("shutdown_real"             , g_settings.shutdown_real);
 	configfile.setBool("shutdown_real_rcdelay"     , g_settings.shutdown_real_rcdelay);
+	configfile.setString("shutdown_count"           , g_settings.shutdown_count);
 	configfile.setBool("infobar_sat_display"       , g_settings.infobar_sat_display);
 	configfile.setInt32("infobar_subchan_disp_pos" , g_settings.infobar_subchan_disp_pos);
 	configfile.setBool("misc_spts"                 , g_settings.misc_spts);
@@ -1829,6 +1832,12 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	CMiscNotifier* miscNotifier = new CMiscNotifier( m1 );
 
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL, &g_settings.shutdown_real, OPTIONS_OFF1_ON0_OPTIONS, OPTIONS_OFF1_ON0_OPTION_COUNT, true, miscNotifier));
+
+	CShutdownCountNotifier *shutdownCountNotifier = new CShutdownCountNotifier;
+
+	CStringInput * miscSettings_shutdown_count = new CStringInput(LOCALE_MISCSETTINGS_SHUTDOWN_COUNT, g_settings.shutdown_count, 3, LOCALE_MISCSETTINGS_SHUTDOWN_COUNT_HINT1, LOCALE_MISCSETTINGS_SHUTDOWN_COUNT_HINT2, "0123456789 ", shutdownCountNotifier);
+
+	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_SHUTDOWN_COUNT, true, g_settings.shutdown_count, miscSettings_shutdown_count));
 
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
@@ -3305,6 +3314,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	InitKeySettings(keySettings);
 
 	AudioMute( g_Controld->getMute((CControld::volume_type)g_settings.audio_avs_Control), true );
+
+	// shutdown counter
+	SHTDCNT::getInstance()->init();
 
 	RealRun(mainMenu);
 

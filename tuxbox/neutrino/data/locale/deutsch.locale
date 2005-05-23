@@ -438,7 +438,7 @@ keychoosermenu.setnew Neue Taste einstellen
 keychoosermenu.setnone Keine Taste
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
-lcdcontroler.brightness normale Helligkeit 
+lcdcontroler.brightness normale Helligkeit
 lcdcontroler.brightnessstandby Standby Helligkeit
 lcdcontroler.contrast Kontrast
 lcdcontroler.head LCD Einstellungen
@@ -502,6 +502,9 @@ miscsettings.infobar_sat_display Infobar Satellitenanzeige
 miscsettings.noaviawatchdog AVIA-Watchdog aktivieren
 miscsettings.noenxwatchdog eNX-Watchdog aktivieren
 miscsettings.pmtupdate PMT Update verwenden
+miscsettings.shutdown_count Komplett ausschalten nach
+miscsettings.shutdown_count_hint1 Zeit (in Minuten) nach dem vom Standbymodus
+miscsettings.shutdown_count_hint2 komplett ausgeschaltet wird (0 = aus).
 miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.sptsmode SPTS-Mode Treiber laden
@@ -654,7 +657,7 @@ pinprotection.head PIN-Abfrage
 pinprotection.wrongcode Geben Sie den Code nocheinmal ein!
 plugins.result Pluginausgabe
 rclock.lockmsg Die Fernbedienung der dbox2 wird gesperrt.\nUm die Sperre aufzuheben, bitte\n<ROT> und <DBOX> auf der Fernbedienung\ndrücken.
-rclock.menueadd FB sperren 
+rclock.menueadd FB sperren
 rclock.title Fernbedienung sperren
 rclock.unlockmsg Fernbedienung reaktiviert...
 recordingmenu.choose_direct_rec_dir Bei Sofortaufn. Verzeichnisauswahl

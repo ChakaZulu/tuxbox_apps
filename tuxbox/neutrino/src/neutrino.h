@@ -120,6 +120,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CColorSetupNotifier		*colorSetupNotifier;
 		CAudioSetupNotifier		*audioSetupNotifier;
 		CKeySetupNotifier       	*keySetupNotifier;
+		CShutdownCountNotifier		*shutdownCountNotifier;
 		CAPIDChangeExec         	*APIDChanger;
 		CNVODChangeExec         	*NVODChanger;
 		CUCodeCheckExec			*UCodeChecker;
@@ -139,7 +140,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void setupNetwork( bool force= false );
 		void setupNFS();
 		void setupRecordingDevice(void);
-		
+
 		void startNextRecording();
 
 		void saveSetup();

@@ -502,6 +502,9 @@ miscsettings.infobar_sat_display Satellite display on infobar
 miscsettings.noaviawatchdog enable AVIA watchdog
 miscsettings.noenxwatchdog enable eNX watchdog
 miscsettings.pmtupdate enable pmt update
+miscsettings.shutdown_count switch off after
+miscsettings.shutdown_count_hint1 time (in minutes) to switch from standby
+miscsettings.shutdown_count_hint2 to deep standby (0 = off).
 miscsettings.shutdown_real Enable standby
 miscsettings.shutdown_real_rcdelay Delayed shutdown
 miscsettings.sptsmode use spts mode
@@ -510,7 +513,7 @@ motorcontrol.head Motor-Setup
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmarkname
 movieplayer.bookmarkname_hint1 Enter a name for your new bookmark
-movieplayer.bookmarkname_hint2 
+movieplayer.bookmarkname_hint2
 movieplayer.buffering Buffering...
 movieplayer.defdir start dir.
 movieplayer.defplugin Start-Plugin
@@ -654,7 +657,7 @@ pinprotection.head Enter PIN code
 pinprotection.wrongcode PIN-Code was wrong! Try again.
 plugins.result plugin output
 rclock.lockmsg Your DBOX2 remote control will be locked.\nTo unlock it, press <RED>\nand <DBOX> on your remote control.
-rclock.menueadd Lock RC 
+rclock.menueadd Lock RC
 rclock.title Lock Remote Control
 rclock.unlockmsg Remote control reactivated.
 recordingmenu.choose_direct_rec_dir choose dir on imm. recording
@@ -900,7 +903,7 @@ videomenu.videosignal_rgb RGB + CVBS
 videomenu.videosignal_svideo S-Video
 videomenu.videosignal_yuv_c YUV + CVBS
 videomenu.videosignal_yuv_v YUV + VBS
-zapit.scantype scan for services 
+zapit.scantype scan for services
 zapit.scantype.all all services
 zapit.scantype.radio only radio
 zapit.scantype.tv only tv

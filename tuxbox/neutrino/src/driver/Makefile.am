@@ -29,7 +29,8 @@ libneutrino_driver_a_SOURCES = \
 	slotbuffer.c \
 	file.cpp \
 	audiometadata.cpp \
-	audiofile.cpp
+	audiofile.cpp \
+	shutdown_count.cpp
 
 libneutrino_driver_netfile_a_SOURCES = netfile.cpp
 

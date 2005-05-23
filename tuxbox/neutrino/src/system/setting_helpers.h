@@ -160,6 +160,12 @@ class CKeySetupNotifier : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void *);
 };
 
+class CShutdownCountNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const neutrino_locale_t, void *);
+};
+
 class CIPChangeNotifier : public CChangeObserver
 {
 	public:

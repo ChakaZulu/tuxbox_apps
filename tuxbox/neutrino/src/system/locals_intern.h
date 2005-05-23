@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.45 2005/03/26 12:01:17 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.46 2005/05/23 21:55:28 mogway Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -529,6 +529,9 @@ const char * locale_real_names[] =
 	"miscsettings.noaviawatchdog",
 	"miscsettings.noenxwatchdog",
 	"miscsettings.pmtupdate",
+	"miscsettings.shutdown_count",
+	"miscsettings.shutdown_count_hint1",
+	"miscsettings.shutdown_count_hint2",
 	"miscsettings.shutdown_real",
 	"miscsettings.shutdown_real_rcdelay",
 	"miscsettings.sptsmode",

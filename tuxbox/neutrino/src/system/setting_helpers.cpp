@@ -348,6 +348,12 @@ bool CKeySetupNotifier::changeNotify(const neutrino_locale_t, void *)
 	return false;
 }
 
+bool CShutdownCountNotifier::changeNotify(const neutrino_locale_t, void *)
+{
+ 	printf("[neutrino] shutdown counter changed to %d minutes\n", atoi(g_settings.shutdown_count));
+	return true;
+}
+
 bool CIPChangeNotifier::changeNotify(const neutrino_locale_t, void * Data)
 {
 	char ip[16];
