@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.26  2005/05/24 16:37:22  lazyt
+ * - fix WebIF Auth
+ * - add SMTP Auth
+ *
  * Revision 1.25  2005/05/19 21:55:58  robspr1
  * - bugfix cached mailreading
  *
@@ -100,10 +104,8 @@ int ReadConf()
 {
 	FILE *fd_conf;
 	char *ptr;
-	char encodingtable[64] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 	char line_buffer[256];
 	int loop;
-	int src_index, dst_index;
 
 	// open config
 
@@ -241,7 +243,7 @@ int ReadConf()
 				char index = *(ptr+4);
 				if((index >= '0') && (index <= '9'))
 				{
-					sscanf(ptr + 6, "%s", account_db[index-'0'].host);
+					sscanf(ptr + 6, "%s", account_db[index-'0'].pop3);
 				}
 			}
 			else if((ptr = strstr(line_buffer, "USER")) && (*(ptr+5) == '='))
@@ -656,7 +658,7 @@ int ReadConf()
 			for(loop = 0; loop < 10; loop++)
 			{
 				fprintf(fd_conf, "\nNAME%d=%s\n", loop, account_db[loop].name);
-				fprintf(fd_conf, "POP3%d=%s\n", loop, account_db[loop].host);
+				fprintf(fd_conf, "POP3%d=%s\n", loop, account_db[loop].pop3);
 				fprintf(fd_conf, "USER%d=%s\n", loop, account_db[loop].user);
 				fprintf(fd_conf, "PASS%d=%s\n", loop, account_db[loop].pass);
 				fprintf(fd_conf, "SMTP%d=%s\n", loop, account_db[loop].smtp);
@@ -761,39 +763,12 @@ int ReadConf()
 
 			webport = 80;
 		}
-		
-		if(webuser[0])
-		{
-		    // build encoded string
-
-    			strcpy(plainstring, &webuser[0]);
-    			strcat(plainstring, ":");
-			strcat(plainstring, &webpass[0]);
-
-			for(src_index = dst_index = 0; src_index < strlen(plainstring); src_index += 3, dst_index += 4)
-			{
-		    		encodedstring[0 + dst_index] = encodingtable[plainstring[0 + src_index] >> 2];
-				encodedstring[1 + dst_index] = encodingtable[(plainstring[0 + src_index] & 3) << 4 | plainstring[1 + src_index] >> 4];
-				encodedstring[2 + dst_index] = encodingtable[(plainstring[1 + src_index] & 15) << 2 | plainstring[2 + src_index] >> 6];
-				encodedstring[3 + dst_index] = encodingtable[plainstring[2 + src_index] & 63];
-			}
-
-			encodedstring[dst_index] = '\0';
-
-			if(strlen(plainstring) % 3)
-			{
-			    for(src_index = 0; src_index < (3 - strlen(plainstring) % 3); src_index++, dst_index--)
-			    {
-				    encodedstring[dst_index - 1] = '=';
-			    }
-			}
-		}
 
 		accounts = 0;
 
 		for(loop = 0; loop <= 9; loop++)
 		{
-			if(account_db[loop].name[0] && account_db[loop].host[0] && account_db[loop].user[0] && account_db[loop].pass[0])
+			if(account_db[loop].name[0] && account_db[loop].pop3[0] && account_db[loop].user[0] && account_db[loop].pass[0])
 			{
 				accounts++;
 			}
@@ -974,7 +949,9 @@ void *InterfaceThread(void *arg)
 
 				case 'W':
 
-					mailsend = SendMail();
+					recv(fd_conn, &mailcmd, 1, 0);
+
+					mailsend = SendMail(mailcmd[0] - '0');
 
 					send(fd_conn, &mailsend, 1, 0);
 
@@ -989,6 +966,40 @@ void *InterfaceThread(void *arg)
 		}
 
 	return 0;
+}
+
+/******************************************************************************
+ * EncodeBase64
+ ******************************************************************************/
+
+void EncodeBase64(char *decodedstring, int decodedlen)
+{
+	char encodingtable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	int src_index, dst_index;
+
+	memset(encodedstring, 0, sizeof(encodedstring));
+
+	for(src_index = dst_index = 0; src_index < decodedlen; src_index += 3, dst_index += 4)
+	{
+		encodedstring[0 + dst_index] = encodingtable[decodedstring[src_index] >> 2];
+		encodedstring[1 + dst_index] = encodingtable[(decodedstring[src_index] & 3) << 4 | decodedstring[1 + src_index] >> 4];
+		encodedstring[2 + dst_index] = encodingtable[(decodedstring[1 + src_index] & 15) << 2 | decodedstring[2 + src_index] >> 6];
+		encodedstring[3 + dst_index] = encodingtable[decodedstring[2 + src_index] & 63];
+	}
+
+	if(decodedlen % 3)
+	{
+		switch(3 - decodedlen%3)
+		{
+			case 2:
+
+				encodedstring[strlen(encodedstring) - 2] = '=';
+
+			case 1:
+
+				encodedstring[strlen(encodedstring) - 1] = '=';
+		}
+	}
 }
 
 /******************************************************************************
@@ -2103,6 +2114,7 @@ int SendSMTPCommand(int command, char *param)
 	struct hostent *server;
 	struct sockaddr_in SockAddr;
 	char send_buffer[128], recv_buffer[4096];
+	bool cancel = false;
 
 	// clear buffers
 
@@ -2143,9 +2155,14 @@ int SendSMTPCommand(int command, char *param)
 
 				break;
 
-			case HELO:
+			case EHLO:
 
-				sprintf(send_buffer, "HELO %s\r\n", param);
+				sprintf(send_buffer, "EHLO %s\r\n", param);
+				break;
+
+			case AUTH:
+
+				sprintf(send_buffer, "AUTH PLAIN %s\r\n", param);
 				break;
 
 			case MAIL:
@@ -2230,23 +2247,28 @@ int SendSMTPCommand(int command, char *param)
 
 				if(strncmp(recv_buffer, "220", 3))
 				{
-					close(sock);
-
-					return 0;
+					cancel = true;
 				}
 
 				break;
 
-			case HELO:
+			case AUTH:
+
+				if(strncmp(recv_buffer, "235", 3))
+				{
+					cancel = true;
+				}				
+
+				break;
+
+			case EHLO:
 			case MAIL:
 			case RCPT:
 			case DATA3:
 
 				if(strncmp(recv_buffer, "250", 3))
 				{
-					close(sock);
-
-					return 0;
+					cancel = true;
 				}
 
 				break;
@@ -2255,9 +2277,7 @@ int SendSMTPCommand(int command, char *param)
 
 				if(strncmp(recv_buffer, "354", 3))
 				{
-					close(sock);
-
-					return 0;
+					cancel = true;
 				}
 
 				break;
@@ -2272,6 +2292,51 @@ int SendSMTPCommand(int command, char *param)
 				}
 		}
 
+	// cancel operation?
+
+		if(cancel)
+		{
+			sprintf(send_buffer, "QUIT\r\n");
+
+			if(logging == 'Y')
+			{
+				if((fd_log = fopen(LOGFILE, "a")))
+				{
+					fprintf(fd_log, "SMTP <- %s", send_buffer);
+
+					fclose(fd_log);
+				}
+				else
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not log SMTP-Command") : printf("TuxMailD <could not log SMTP-Command>\n");
+				}
+			}
+
+			send(sock, &send_buffer, strlen(send_buffer), 0);
+
+			memset(recv_buffer, 0, sizeof(recv_buffer));
+
+			recv(sock, &recv_buffer, sizeof(recv_buffer), 0);
+
+			if(logging == 'Y')
+			{
+				if((fd_log = fopen(LOGFILE, "a")))
+				{
+					fprintf(fd_log, "SMTP -> %s", recv_buffer);
+
+					fclose(fd_log);
+				}
+				else
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not log SMTP-Command") : printf("TuxMailD <could not log SMTP-Command>\n");
+				}
+			}
+
+			close(sock);
+
+			return 0;
+		}
+
 	// success
 
 		return 1;
@@ -2281,7 +2346,7 @@ int SendSMTPCommand(int command, char *param)
  * SendMail (0=fail, 1=done)
  ******************************************************************************/
 
-int SendMail()
+int SendMail(int account)
 {
 	FILE *mail;
 	char linebuffer[1024];
@@ -2309,7 +2374,7 @@ int SendMail()
 			}
 		}
 
-	// send helo
+	// send ehlo
 
 		memset(linebuffer, 0, sizeof(linebuffer));
 
@@ -2317,12 +2382,26 @@ int SendMail()
 		{
 			linebuffer[strlen(linebuffer) - 1] = '\0';
 
-			if(!SendSMTPCommand(HELO, linebuffer))
+			if(!SendSMTPCommand(EHLO, linebuffer))
 			{
 				fclose(mail);
 
 				return 0;
 			}
+		}
+
+	// send auth
+
+		memset(decodedstring, 0, sizeof(decodedstring));
+		memcpy(decodedstring + 1, account_db[account].user, strlen(account_db[account].user));
+		memcpy(decodedstring + 1 + strlen(account_db[account].user) + 1, account_db[account].pass, strlen(account_db[account].pass));
+		EncodeBase64(decodedstring, strlen(account_db[account].user) + strlen(account_db[account].pass) + 2);
+
+		if(!SendSMTPCommand(AUTH, encodedstring))
+		{
+			fclose(mail);
+
+			return 0;
 		}
 
 	// send mail
@@ -2422,7 +2501,7 @@ int SaveMail(int account, char* mailuid)
 
 	// get mail count
 
-		if(!SendPOPCommand(INIT, account_db[account].host))
+		if(!SendPOPCommand(INIT, account_db[account].pop3))
 		{
 			if(fd_mail)
 			{
@@ -2642,7 +2721,7 @@ int CheckAccount(int account)
 
 	// get mail count
 
-		if(!SendPOPCommand(INIT, account_db[account].host))
+		if(!SendPOPCommand(INIT, account_db[account].pop3))
 		{
 			return 0;
 		}
@@ -3240,6 +3319,7 @@ void NotifyUser(int mails)
 		}
 
 	// video notify
+
 		if(video != 5)
 		{
  			switch(video)
@@ -3288,13 +3368,19 @@ void NotifyUser(int mails)
 			
 				if(webuser[0])
 				{
-				    strcat(http_cmd, "Authorization: Basic ");
-				    strcat(http_cmd, &encodedstring[0]);
-				    strcat(http_cmd, "\n\n");			
+					strcat(http_cmd, "Authorization: Basic ");
+
+					strcpy(decodedstring, webuser);
+					strcat(decodedstring, ":");
+					strcat(decodedstring, webpass);
+					EncodeBase64(decodedstring, strlen(decodedstring));
+
+					strcat(http_cmd, encodedstring);
+					strcat(http_cmd, "\n\n");			
 				}
 				else
 				{
-				    strcat(http_cmd, "\n");
+					strcat(http_cmd, "\n");
 				}
 			}
 
@@ -3376,7 +3462,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.25 $";
+	char cvs_revision[] = "$Revision: 1.26 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;

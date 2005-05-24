@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.20  2005/05/24 16:37:23  lazyt
+ * - fix WebIF Auth
+ * - add SMTP Auth
+ *
  * Revision 1.19  2005/05/19 10:04:01  robspr1
  * - add cached mailreading
  *
@@ -188,7 +192,7 @@ char ttable[ttsize*3] = {
 
 void writeFOut( char *s);
 int SaveMail(int account, char* uid);
-int SendMail();
+int SendMail(int account);
 
 // pop3 and smtp commands
 
@@ -196,7 +200,7 @@ enum
 {
 	INIT, QUIT,
 	USER, PASS, STAT, UIDL, TOP, DELE, RETR,
-	HELO, MAIL, RCPT, DATA1, DATA2, DATA3
+	EHLO, AUTH, MAIL, RCPT, DATA1, DATA2, DATA3
 };
 
 // account database
@@ -204,7 +208,7 @@ enum
 struct
 {
 	char name[32];
-	char host[64];
+	char pop3[64];
 	char user[64];
 	char pass[64];
 	char smtp[64];
@@ -252,8 +256,7 @@ int slog = 0;
 int pid;
 int webport;
 char webuser[32], webpass[32];
-char plainstring[64], encodedstring[64];
-char decodedstring[512];
+char encodedstring[512], decodedstring[512];
 int startdelay, intervall, skin;
 char logging, logmode, audio, lcd, osd, admin, savedb, mailrd;
 int video;

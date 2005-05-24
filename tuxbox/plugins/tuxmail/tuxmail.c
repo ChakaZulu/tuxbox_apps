@@ -3,6 +3,10 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.29  2005/05/24 16:37:22  lazyt
+ * - fix WebIF Auth
+ * - add SMTP Auth
+ *
  * Revision 1.28  2005/05/20 18:01:24  lazyt
  * - Preparation for Keyboard
  * - don't try add to Spamlist for empty Account
@@ -317,7 +321,8 @@ int ControlDaemon(int command, int account, int mailindex)
 
 			case SEND_MAIL:
 
-				send(fd_sock, "W", 1, 0);
+				sprintf(sendcmd, "W%d", account);
+				send(fd_sock, sendcmd, 2, 0);
 				recv(fd_sock, &mailsend, 1, 0);
 
 				mailsend ? ShowMessage(SENDMAILDONE) : ShowMessage(SENDMAILFAIL);
@@ -2890,7 +2895,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.28 $";
+	char cvs_revision[] = "$Revision: 1.29 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
