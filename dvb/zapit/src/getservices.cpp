@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.92 2005/04/28 21:37:21 chakazulu Exp $
+ * $Id: getservices.cpp,v 1.93 2005/05/24 19:13:40 mogway Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -301,15 +301,15 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType)
 	FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
 	xmlFreeDoc(parser);
 
+        if ((parser = parseXmlFile(ANTISERVICES_XML))) {
+                printf("[getservices] " ANTISERVICES_XML " found.\n");
+                NukeChannels(xmlDocGetRootElement(parser)->xmlChildrenNode);
+                xmlFreeDoc(parser);
+        }
+
 	if ((parser = parseXmlFile(MYSERVICES_XML))) {
 		printf("[getservices] " MYSERVICES_XML "  found.\n");
 		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
-		xmlFreeDoc(parser);
-	}
-
-	if ((parser = parseXmlFile(ANTISERVICES_XML))) {
-		printf("[getservices] " ANTISERVICES_XML " found.\n");
-		NukeChannels(xmlDocGetRootElement(parser)->xmlChildrenNode);
 		xmlFreeDoc(parser);
 	}
 
