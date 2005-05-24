@@ -3231,7 +3231,7 @@ static eString satFinder(eString request, eString dirpath, eString opts, eHTTPCo
 static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString, eString> opts = getRequestOptions(opt, '&');
-	eString msg = opts["msg"];
+	eString msg = opts["message"];
 	if (!msg)
 		msg = "Error: No message text available.";
 		
