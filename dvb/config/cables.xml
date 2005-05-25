@@ -151,6 +151,8 @@
 		<transponder frequency="442000000" symbol_rate="6900000" fec_inner="9" modulation="3"/>
 		<transponder frequency="450000000" symbol_rate="6900000" fec_inner="9" modulation="3"/>
 		<transponder frequency="458000000" symbol_rate="6900000" fec_inner="9" modulation="3"/>
+		<transponder frequency="666000000" symbol_rate="6900000" fec_inner="9" modulation="6"/> 
+		<transponder frequency="674000000" symbol_rate="6900000" fec_inner="9" modulation="6"/>
 	</cable>
 	<cable name="LIWEST" satfeed="true">
 		<transponder frequency="402000000" symbol_rate="6900000" fec_inner="0" modulation="4"/>
