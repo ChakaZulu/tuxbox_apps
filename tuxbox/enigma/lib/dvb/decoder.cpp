@@ -239,7 +239,6 @@ void Decoder::SetStreamType(int type)
 		eDebug("AUDIO_SET_STREAMTYPE failed (%m)");
 }
 
-int priorityApid(int);
 int Decoder::Set()
 {
 	if (locked)
