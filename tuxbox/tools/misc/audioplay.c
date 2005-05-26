@@ -1,9 +1,9 @@
 /*
  * Tool for testing all possible PCM-stream parameters
  *
- * $Id: audioplay.c,v 1.1 2005/05/26 19:18:48 carjay Exp $
+ * $Id: audioplay.c,v 1.2 2005/05/26 19:20:39 carjay Exp $
  *
- * Copyright (C) 2004 Carsten Juttner <carjay@gmx.met>
+ * Copyright (C) 2004 Carsten Juttner <carjay@gmx.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
