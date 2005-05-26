@@ -1,5 +1,5 @@
 /*
- * $Id: saa.c,v 1.12 2004/12/01 03:04:49 carjay Exp $
+ * $Id: saa.c,v 1.13 2005/05/26 19:14:43 carjay Exp $
  * 
  * Test tool for the SAA 7126H/7127H-driver
  *
@@ -71,7 +71,7 @@ void help(char *prog_name) {
 		"                      6    4:3 with 14:9 center letterbox\n"
 		"                      7    16:9 full format (anamorphic)\n"
 		"                      8    turned off\n"
-		" -t, --ttx [<x>]      teletext VBI reinsertion\n"
+		" -t, --ttx <x>        teletext VBI reinsertion\n"
 		"                      none get teletext reinsertion state\n"
 		"                      0    turned off\n"
 		"                      1    turned on\n");
