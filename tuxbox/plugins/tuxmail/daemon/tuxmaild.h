@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.21  2005/05/26 09:37:46  robspr1
+ * - add param for SMTP AUTH  - support just playing audio (call tuxmaild -play wavfile)
+ *
  * Revision 1.20  2005/05/24 16:37:23  lazyt
  * - fix WebIF Auth
  * - add SMTP Auth
@@ -214,6 +217,7 @@ struct
 	char smtp[64];
 	char from[64];
 	char code[8];
+	int  auth;
 	int  mail_all;
 	int  mail_new;
 

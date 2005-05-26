@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.27  2005/05/26 09:37:35  robspr1
+ * - add param for SMTP AUTH  - support just playing audio (call tuxmaild -play wavfile)
+ *
  * Revision 1.26  2005/05/24 16:37:22  lazyt
  * - fix WebIF Auth
  * - add SMTP Auth
@@ -150,6 +153,7 @@ int ReadConf()
 			fprintf(fd_conf, "SMTP0=\n");
 			fprintf(fd_conf, "FROM0=\n");
 			fprintf(fd_conf, "CODE0=\n");
+			fprintf(fd_conf, "AUTH0=0\n");
 
 			fclose(fd_conf);
 
@@ -286,288 +290,14 @@ int ReadConf()
 					sscanf(ptr + 6, "%4s", account_db[index-'0'].code);
 				}
 			}
-/*			
-			else if((ptr = strstr(line_buffer, "NAME0=")))
+			else if((ptr = strstr(line_buffer, "AUTH")) && (*(ptr+5) == '='))
 			{
-				sscanf(ptr + 6, "%s", account_db[0].name);
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%d", &account_db[index-'0'].auth);
+				}
 			}
-			else if((ptr = strstr(line_buffer, "HOST0=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[0].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER0=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[0].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS0=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[0].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP0=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[0].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM0=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[0].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE0=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[0].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME1=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[1].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST1=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[1].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER1=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[1].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS1=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[1].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP1=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[1].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM1=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[1].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE1=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[1].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME2=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[2].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST2=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[2].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER2=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[2].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS2=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[2].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP2=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[2].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM2=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[2].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE2=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[2].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME3=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[3].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST3=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[3].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER3=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[3].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS3=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[3].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP3=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[3].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM3=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[3].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE3=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[3].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME4=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[4].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST4=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[4].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER4=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[4].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS4=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[4].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP4=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[4].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM4=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[4].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE4=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[4].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME5=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[5].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST5=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[5].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER5=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[5].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS5=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[5].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP5=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[5].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM5=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[5].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE5=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[5].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME6=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[6].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST6=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[6].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER6=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[6].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS6=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[6].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP6=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[6].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM6=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[6].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE6=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[6].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME7=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[7].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST7=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[7].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER7=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[7].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS7=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[7].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP7=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[7].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM7=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[7].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE7=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[7].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME8=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[8].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST8=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[8].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER8=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[8].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS8=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[8].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP8=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[8].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM8=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[8].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE8=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[8].code);
-			}
-			else if((ptr = strstr(line_buffer, "NAME9=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[9].name);
-			}
-			else if((ptr = strstr(line_buffer, "HOST9=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[9].host);
-			}
-			else if((ptr = strstr(line_buffer, "USER9=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[9].user);
-			}
-			else if((ptr = strstr(line_buffer, "PASS9=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[9].pass);
-			}
-			else if((ptr = strstr(line_buffer, "SMTP9=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[9].smtp);
-			}
-			else if((ptr = strstr(line_buffer, "FROM9=")))
-			{
-				sscanf(ptr + 6, "%s", account_db[9].from);
-			}
-			else if((ptr = strstr(line_buffer, "CODE9=")))
-			{
-				sscanf(ptr + 6, "%4s", account_db[9].code);
-			}
-*/			
 		}
 
 	// check for update
@@ -664,6 +394,7 @@ int ReadConf()
 				fprintf(fd_conf, "SMTP%d=%s\n", loop, account_db[loop].smtp);
 				fprintf(fd_conf, "FROM%d=%s\n", loop, account_db[loop].from);
 				fprintf(fd_conf, "CODE%d=%s\n", loop, account_db[loop].code);
+				fprintf(fd_conf, "AUTH%d=%d\n", loop, account_db[loop].auth);
 
 				if(!account_db[loop + 1].name[0])
 				{
@@ -2199,6 +1930,7 @@ int SendSMTPCommand(int command, char *param)
 
 		if(command != INIT)
 		{
+
 			if(logging == 'Y')
 			{
 				if((fd_log = fopen(LOGFILE, "a")))
@@ -2390,20 +2122,22 @@ int SendMail(int account)
 			}
 		}
 
+		if(account_db[account].auth == 1)
+		{
 	// send auth
 
-		memset(decodedstring, 0, sizeof(decodedstring));
-		memcpy(decodedstring + 1, account_db[account].user, strlen(account_db[account].user));
-		memcpy(decodedstring + 1 + strlen(account_db[account].user) + 1, account_db[account].pass, strlen(account_db[account].pass));
-		EncodeBase64(decodedstring, strlen(account_db[account].user) + strlen(account_db[account].pass) + 2);
+			memset(decodedstring, 0, sizeof(decodedstring));
+			memcpy(decodedstring + 1, account_db[account].user, strlen(account_db[account].user));
+			memcpy(decodedstring + 1 + strlen(account_db[account].user) + 1, account_db[account].pass, strlen(account_db[account].pass));
+			EncodeBase64(decodedstring, strlen(account_db[account].user) + strlen(account_db[account].pass) + 2);
 
-		if(!SendSMTPCommand(AUTH, encodedstring))
-		{
-			fclose(mail);
+			if(!SendSMTPCommand(AUTH, encodedstring))
+			{
+				fclose(mail);
 
-			return 0;
+				return 0;
+			}
 		}
-
 	// send mail
 
 		memset(linebuffer, 0, sizeof(linebuffer));
@@ -3051,7 +2785,7 @@ void SwapEndian(unsigned char *header)
  * PlaySound
  ******************************************************************************/
 
-void PlaySound()
+void PlaySound(unsigned char *file)
 {
 	FILE *fd_wav;
 	unsigned char header[sizeof(struct WAVEHEADER)];
@@ -3061,7 +2795,7 @@ void PlaySound()
 
 	// check for userdefined soundfile
 
-		if(!(fd_wav = fopen(CFGPATH SNDFILE, "rb")))
+		if(!(fd_wav = fopen(file, "rb")))
 		{
 			format = AFMT_U8;
 			channels = 1;
@@ -3315,7 +3049,7 @@ void NotifyUser(int mails)
 
 		if(audio == 'Y')
 		{
-			PlaySound();
+			PlaySound(CFGPATH SNDFILE);
 		}
 
 	// video notify
@@ -3462,7 +3196,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.26 $";
+	char cvs_revision[] = "$Revision: 1.27 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -3482,6 +3216,12 @@ int main(int argc, char **argv)
 					slog = 1;
 
 					openlog("TuxMailD", LOG_ODELAY, LOG_DAEMON);
+				}
+				else if(!strcmp(argv[param], "-play"))
+				{
+					param++;
+					PlaySound(argv[param]);
+					exit(0);
 				}
 			}
 		}
