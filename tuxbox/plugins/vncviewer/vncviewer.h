@@ -29,6 +29,13 @@
 #include <X11/Xmd.h>
 #include <rfbproto.h>
 
+#define ICO_TRANS 4787
+#define ICO_BLACK 0
+#define ICO_WHITE 65535
+#define ICO_FG ICO_BLACK
+#define ICO_BORDER 52810
+#define ICO_BG 25381
+
 
 #define USE_SVGALIB
 

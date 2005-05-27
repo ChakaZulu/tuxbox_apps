@@ -9,7 +9,6 @@
 #include "vncviewer.h"
 #include "fbgl.h"
 #include "overlay.h"
-#include "icons.h"
 #include "list.h"
 #include "input_fake.h"
 
@@ -29,7 +28,6 @@ static	FTC_Image_Desc		desc;
 static	FTC_ImageTypeRec	desc;
 #endif
 static	FT_Face			face;
-
 
 
 extern int sx,ex;
@@ -72,12 +70,12 @@ static char* keyboardlayout[KEYBOARD_ROWS*2][KEYBOARD_KEYCOLS] = {
 {"Tab"  ,"q"  ,"w"    ,"e"  ,"r" ,"t" ,"y" ,"u","i","o","p","["    ,"]"    ,"<<" ,"","" },
 {"Ctrl" ,"a"  ,"s"    ,"d"  ,"f" ,"g" ,"h" ,"j","k","l",";","'"    ,"Enter",""  ,"" ,"" },
 {"Shift","z"  ,"x"    ,"c"  ,"v" ,"b" ,"n" ,"m",",",".","/","Shift",""     ,""  ,"" ,"" },
-{"Fn"   ,"Alt","Space","Alt","Fn","<-","->","^","v","" ,"" ,""     ,""     ,""  ,"" ,"" },
+{"Fn"   ,"Alt","Space","Alt","Del","<-","->","^","v","C-A-D","" ,""     ,""     ,""  ,"" ,"" },
 {"Esc"  ,"!"  ,"@"    ,"#"  ,"$" ,"%" ,"^" ,"&","*","(",")","_"    ,"+"    ,"","~",""   },
 {"Tab"  ,"Q"  ,"W"    ,"E"  ,"R" ,"T" ,"Y" ,"U","I","O","P","{"    ,"}"    ,"<<" ,"","" },
 {"Ctrl" ,"A"  ,"S"    ,"D"  ,"F" ,"G" ,"H" ,"J","K","L",":","\""   ,"Enter",""  ,"" ,"" },
 {"Shift","Z"  ,"X"    ,"C"  ,"V" ,"B" ,"N" ,"M","<",">","?","Shift",""     ,""  ,"" ,"" },
-{"Fn"   ,"Alt","Space","Alt","Fn","<-","->","^","v","" ,"" ,""     ,""     ,""  ,"" ,"" }
+{"Fn"   ,"Alt","Space","Alt","Del","<-","->","^","v","C-A-D","" ,"",""     ,""  ,"" ,"" }
 };
 
 static keymap_t keytable[KEYBOARD_ROWS][KEYBOARD_KEYCOLS] = {
@@ -156,14 +154,14 @@ static keymap_t keytable[KEYBOARD_ROWS][KEYBOARD_KEYCOLS] = {
 {
 	{3,	XK_Hyper_L,	XK_Hyper_L	},
 	{3,	XK_Alt_L,	XK_Alt_L	},
-	{10,	XK_space,	XK_space	},
+	{6,	XK_space,	XK_space	},
 	{3,	XK_Alt_R,	XK_Alt_R	},
-	{3,	XK_Hyper_L,	XK_Hyper_L	},
+	{3,	XK_Delete,	XK_Delete   },
 	{2,	XK_Left,	XK_Left		},
 	{2,	XK_Right,	XK_Right	},
 	{2,	XK_Up,		XK_Up		},
 	{2,	XK_Down,	XK_Down		},
-	{0,	0,		0		},
+	{4,	-1,		-1		}, // Ctrl-Alt-Delete
 	{0,	0,		0		},
 	{0,	0,		0		},
 	{0,	0,		0		},
@@ -178,6 +176,8 @@ static keymap_t keytable[KEYBOARD_ROWS][KEYBOARD_KEYCOLS] = {
 #define MOD_ALT 	3
 #define MOD_ALTGR	4
 #define MOD_FN		5
+static int posx = 0;
+static int posy = 0;
 
 static keymap_t *mod_key[NUM_MOD+1];
 void
@@ -475,6 +475,28 @@ void ov_fill(fbvnc_overlay_t *ov, int x, int y, int w, int h, int c) {
 		}
 	}
 }
+void ov_change_color(fbvnc_overlay_t *ov, int x, int y, int w, int h, int oldcolor, int newcolor) {
+	int j;
+	int o_xsize = ov->w;
+	IMPORT_FRAMEBUFFER_VARS
+
+	for (j=0; j<h; j++) {
+		Pixel *buf_ov  = ico_keybd + (y+j)*o_xsize + x;
+		Pixel *buf_ov2 = ico_keybd_shifted + (y+j)*o_xsize + x;
+		int i;
+
+		for (i=0; i<w; i++) {
+			if ( buf_ov[i] == oldcolor)
+				buf_ov[i] = newcolor;
+			if ( buf_ov[i] == ~oldcolor)
+				buf_ov[i] = ~newcolor;
+			if ( buf_ov2[i] == oldcolor)
+				buf_ov2[i] = newcolor;
+			if ( buf_ov2[i] == ~oldcolor)
+				buf_ov2[i] = ~newcolor;
+		}
+	}
+}
 
 void
 invert_key(keymap_t *km, fbvnc_overlay_t *ov) {
@@ -485,6 +507,7 @@ invert_key(keymap_t *km, fbvnc_overlay_t *ov) {
 	w=km->width*COL_WIDTH;
 	h=ROW_HEIGHT;
 
+	ov_change_color(ov, x ,y, w,h, ICO_BORDER, ICO_BG);
 	ov_invert(ov, x, y, w, h);
 	ov_redraw_part(ov, x, y, w, h);
 }
@@ -508,7 +531,7 @@ void print_keyboard(fbvnc_overlay_t *ov, Pixel* dest,int mode)
 		sx = 0;
 		for (j = 0; j < KEYBOARD_KEYCOLS; j++)
 		{		
-			RenderString(ov->w,dest,keyboardlayout[(mode == MOD_SHIFT ? 1 : 0)*KEYBOARD_ROWS+i][j], sx, (i+1)*ROW_HEIGHT, keytable[i][j].width*COL_WIDTH, CENTER, ICO_WHITE, ICO_BG);
+			RenderString(ov->w,dest,keyboardlayout[(mode == MOD_SHIFT ? 1 : 0)*KEYBOARD_ROWS+i][j], sx, (i+1)*ROW_HEIGHT, keytable[i][j].width*COL_WIDTH, CENTER, ICO_WHITE, (i==posy && j==posx ? ICO_BORDER : ICO_BG));
 			sx +=keytable[i][j].width*COL_WIDTH;
 			
 
@@ -545,20 +568,26 @@ ev_keybd(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	int mod = 0;
 	static int key = 0;
 	static keymap_t *inverted_key;
-	static keymap_t *move_key = NULL;
 	static int mod_now = 0;
 	static int mod_locked = 0;
 
-	if (ev->evtype == FBVNC_EVENT_TS_UP) {
+	if (ev->evtype == FBVNC_EVENT_TS_UP)
+	{
+		x = 0;
+		for (i = 0; i < posx; i++)
+		{
+			x +=keytable[posy][i].width*COL_WIDTH;
+		}
 		if (key) {
-			move_key = NULL;
 			SendKeyEvent(key, 0);
 			invert_key(inverted_key, ov);
 			key = 0;
 		}
+		ov_change_color(ov, x ,posy*ROW_HEIGHT, keytable[posy][posx].width*COL_WIDTH, ROW_HEIGHT, ICO_BG, ICO_BORDER);
+		ov_redraw_part(ov,0,0,480,160);
 		return 1;
 	}
-	
+#if 0
 	x = ev->x;
 	y = ev->y;
 
@@ -575,23 +604,39 @@ ev_keybd(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 		if (col >= i && col < i+km->width) break;
 		i += km->width;
 	}
-
-	if (!km) return 1;
-
-/*	if (ev->evtype == FBVNC_EVENT_TS_MOVE) 
+#endif
+	if (ev->key != KEY_OK)
 	{
-		if (key != km->key) 
+		x = 0;
+
+		for (i = 0; i < posx; i++)
 		{
-			if (move_key)
-				invert_key(move_key, ov);
-			invert_key(km, ov);
-			move_key = km;
-			key = km->key;
-			ov_redraw_part(ov,0,0,480,160);
+			x +=keytable[posy][i].width*COL_WIDTH;
 		}
+		ov_change_color(ov, x ,posy*ROW_HEIGHT, keytable[posy][posx].width*COL_WIDTH, ROW_HEIGHT, ICO_BORDER, ICO_BG);
+
+		switch (ev->key )
+		{
+			case KEY_TOPLEFT    : posx--;posy--; break;
+			case KEY_UP         :        posy--; break;
+			case KEY_TOPRIGHT   : posx++;posy--; break;
+			case KEY_LEFT       : posx--;        break;
+			case KEY_RIGHT      : posx++;        break;
+			case KEY_BOTTOMLEFT : posx--;posy++; break;
+			case KEY_DOWN       :        posy++; break;
+			case KEY_BOTTOMRIGHT: posx++;posy++; break;
+		}
+		if (posy <  0) posy = 0;
+		if (posy >= KEYBOARD_ROWS) posy = KEYBOARD_ROWS-1;
+		if (posx <  0) posx = 0;
+		if (posx >=  KEYBOARD_KEYCOLS) posx = KEYBOARD_KEYCOLS-1;
+		while  (strlen(keyboardlayout[posy][posx]) == 0) posx--;
+		key = 0;
 		return 1;
 	}
-*/
+	km = &keytable[posy][posx];
+	if (!km) return 1;
+
 	key = km->key;
 
 	if (key == XK_Shift_L)   mod=MOD_SHIFT;
@@ -599,7 +644,20 @@ ev_keybd(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 	if (key == XK_Alt_L)     mod=MOD_ALT;
 	if (key == XK_Alt_R)     mod=MOD_ALTGR;
 	if (key == XK_Hyper_L)   mod=MOD_FN;
-
+	if (key == -1) // Ctrl-Alt-Delete
+	{
+		SendKeyEvent(XK_Control_L, 1);
+		SendKeyEvent(XK_Alt_L, 1);
+		SendKeyEvent(XK_Delete, 1);
+		SendKeyEvent(XK_Delete, 0);
+		SendKeyEvent(XK_Alt_L, 0);
+		SendKeyEvent(XK_Control_L, 0);
+//		invert_key(km, ov);
+		key = 0;
+		return 1;
+	}
+	else
+	{
 
 
 	if (mod) {
@@ -640,14 +698,15 @@ ev_keybd(fbvnc_event_t *ev, fbvnc_overlay_t *ov) {
 			if (mod_now & (1<<m)) {
 				SendKeyEvent(mod_key[m]->key, 0);
 				invert_key(mod_key[m], ov);
-				if (mod==MOD_SHIFT) shift_keyboard(ov);
 			}
 		}
+			if (mod_now & (1<<MOD_SHIFT)) shift_keyboard(ov);
 		if (mod_now & (1<<MOD_FN)) {
 			invert_key(mod_key[MOD_FN], ov);
 		}
 		
 		mod_now = 0;
+	}
 	}
 
 	if (key) {
@@ -1032,7 +1091,6 @@ overlay_event(fbvnc_event_t *ev, fbvnc_overlay_t *ov, bool check_hit) {
 	fbvnc_event_t new_ev;
 	int x, y;
 	IMPORT_FRAMEBUFFER_VARS
-	
 	if (! (ov->events_wanted & ev->evtype)) {
 		return 0;
 	}
@@ -1041,6 +1099,7 @@ overlay_event(fbvnc_event_t *ev, fbvnc_overlay_t *ov, bool check_hit) {
 	x = ev->x;
 	y = ev->y;
 
+#if 0
 	if (check_hit && (
 			x < ov->x || x >= ov->x + ov->w ||
 			y < ov->y || y >= ov->y + ov->h
@@ -1048,14 +1107,13 @@ overlay_event(fbvnc_event_t *ev, fbvnc_overlay_t *ov, bool check_hit) {
 	) {
 	  	return 0;
 	}
-
+#endif
 	x -= ov->x;
 	y -= ov->y;
 	if (x<0) x=0;
 	if (y<0) y=0;
 	if (x>ov->w) x=ov->w;
 	if (y>ov->h) y=ov->h;
-
 	new_ev = *ev;
 	new_ev.x = x;
 	new_ev.y = y;

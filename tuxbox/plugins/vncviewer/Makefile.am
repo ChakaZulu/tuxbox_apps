@@ -9,7 +9,7 @@ vnc_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @FREETYPE_LIBS@ @CON
 endif
 noinst_LTLIBRARIES = vnc.la
 
-vnc_la_SOURCES = args.c fbdraw.c fscale.c fbgl.c icons.c keyboard.c \
+vnc_la_SOURCES = args.c fbdraw.c fscale.c fbgl.c keyboard.c \
                  list.c overlay.c rfbproto.c sockets.c fbvnc.cpp 
 
 

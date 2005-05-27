@@ -24,18 +24,6 @@
 #include <dbox/fb.h>
 #endif
 
-#ifndef KEY_TOPLEFT
-	#define KEY_TOPLEFT      0x1a2
-#endif
-#ifndef KEY_TOPRIGHT
-	#define KEY_TOPRIGHT     0x1a3
-#endif
-#ifndef KEY_BOTTOMLEFT
-	#define KEY_BOTTOMLEFT   0x1a4
-#endif
-#ifndef KEY_BOTTOMRIGHT
-	#define KEY_BOTTOMRIGHT  0x1a5
-#endif
 #include <X11/keysym.h>
 
 #define STEP_PAN 30
@@ -44,7 +32,6 @@ extern "C" {
 #include "vncviewer.h"
 #include "fbgl.h"
 #include "overlay.h"
-#include "icons.h"
 #include "keyboard.h"
 #include "list.h"
 }
@@ -64,7 +51,14 @@ int ms_fd_usb;
 int blev;
 char terminate;
 int gScale,sx,sy,ex,ey;
+int usepointer = 0;
 void fbvnc_close(void);
+Pixel ico_mouse[] = {
+ICO_WHITE,ICO_WHITE,ICO_WHITE,ICO_WHITE,
+ICO_WHITE,ICO_BLACK,ICO_BLACK,ICO_WHITE,
+ICO_WHITE,ICO_BLACK,ICO_BLACK,ICO_WHITE,
+ICO_WHITE,ICO_WHITE,ICO_WHITE,ICO_WHITE,
+};
 
 void
 cleanup_and_exit(char *msg, int ret) {
@@ -437,6 +431,15 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 	static int next_mb = -1, countevt=0;
 	IMPORT_FRAMEBUFFER_VARS
 
+    if (usepointer)
+    {
+		// draw additional mousepointer
+		int mx = mouse_x + (mouse_x > 2 ? -2 : 0)
+		                 + (mouse_x < pv_xsize -2 ? 0 : -2);
+		int my = mouse_y + (mouse_y > 2 ? -2 : 0)
+		                 + (mouse_y < pv_ysize -2 ? 0 : -2);
+		draw_pixmap(ico_mouse, mx, my, 4, 4);
+	}
 	if(nextev.evtype!=0)
 	{
 		ev->dx = nextev.dx;
@@ -616,7 +619,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 #endif
 		struct input_event iev;
 		int count = 0;
-		static int rc_dx=0, rc_dy=0, step=5;
+		static int rc_dx=0, rc_dy=0, step=5, keyboard_active = 0;
 		static char rc_pan=0;
 
 		memset(&iev, 0, sizeof(struct input_event));
@@ -799,6 +802,15 @@ dprintf("reading ms_fd\n");
                   RetEvent(FBVNC_EVENT_NULL);
                }
 #endif
+			   if (keyboard_active)
+			   {
+				   nextev.evtype = FBVNC_EVENT_TS_UP;
+                   nextev.x = global_framebuffer.mouse_x;
+                   nextev.y = global_framebuffer.mouse_y;
+                   nextev.key = iev.code;
+                   ev->key = iev.code;
+				   RetEvent(FBVNC_EVENT_TS_DOWN);
+			   }
                if(rc_pan)
                   step=STEP_PAN;
                else
@@ -983,12 +995,20 @@ dprintf("reading ms_fd\n");
             }
             else if(iev.code == KEY_OK)
             {
-               if(iev.value==1)
+               if(iev.value==1 && !keyboard_active)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                nextev.x =global_framebuffer.mouse_x;
                nextev.y =global_framebuffer.mouse_y;  
+               nextev.key = 0;
                nextev.evtype = FBVNC_EVENT_TS_UP;
                next_mb=0;
+               mouse_button=0;
+               if (keyboard_active)
+               {
+	               nextev.key = KEY_OK;
+               	   ev->key = KEY_OK;
+			   }
+			   else
                mouse_button=1;
                retval=FBVNC_EVENT_TS_DOWN;
             }
@@ -1025,6 +1045,7 @@ dprintf("reading ms_fd\n");
                if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                toggle_keyboard();
+               keyboard_active = 1- keyboard_active;
             }
             else if(iev.code == KEY_SETUP)
             {
@@ -1379,6 +1400,7 @@ show_pnm_image() {
 	fn_action = 0;
 	activate_viewport(&v_save);
 	vp_pan(0, 0);
+
 }
 
 extern "C" {
@@ -1436,6 +1458,7 @@ extern "C" {
 		char szScale[20];
 		char szServerScale[20];
 		char szPasswd[20];
+		char szMouse[20];
 #ifdef HAVE_DREAMBOX_HARDWARE
 		unsigned short dummy;
 		while (read(rc_fd, &dummy, 2) > 0);
@@ -1455,6 +1478,7 @@ extern "C" {
 		sprintf(szScale       ,"scale%s",szServerNr);
 		sprintf(szServerScale ,"server_scale%s",szServerNr);
 		sprintf(szPasswd      ,"passwd%s",szServerNr);
+		sprintf(szMouse       ,"mouse%s",szServerNr);
 		
 		
 #ifdef HAVE_DREAMBOX_HARDWARE
@@ -1491,6 +1515,7 @@ extern "C" {
 				else if ( !strcmp(line,"rc_cycle_duration") ) rcCycleDuration  = atoi(p)*1000;
 				else if ( !strcmp(line,"rc_test"          ) ) rcTest = atoi(p);
 				else if ( !strcmp(line,szPasswd           ) ) strcpy(passwdString, p);
+				else if ( !strcmp(line,szMouse            ) ) usepointer = atoi(p);
 				else if ( !strcmp(line,"debug"            ) ) debug = atoi(p);
 				else if ( !strcmp(line,"screenmode"       ) ) screenmode = atoi(p);
 			}

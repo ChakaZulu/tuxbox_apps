@@ -3,7 +3,6 @@
 #include "vncviewer.h"
 #include "fbgl.h"
 #include "overlay.h"
-#include "icons.h"
 #include "keyboard.h"
 #include <linux/input.h>
 

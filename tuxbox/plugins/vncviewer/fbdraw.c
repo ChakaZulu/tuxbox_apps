@@ -310,7 +310,7 @@ draw_border(int xp, int yp, int wp, int hp,
 	int oxp, int oyp, int owp, int ohp)
 {
 	Pixel *buf;
-	int j,k;
+	int j;
 	IMPORT_FRAMEBUFFER_VARS
 
 #ifdef DEBUG_CLIP
