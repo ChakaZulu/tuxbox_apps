@@ -599,6 +599,8 @@ void eDVBServiceController::EITready(int error)
 #define FP_IOCTL_SET_RTC         0x101
 #define FP_IOCTL_GET_RTC         0x102
 
+static time_t prev_time;
+
 void setRTC(time_t time)
 {
 	int fd = open("/dev/dbox/fp0", O_RDWR);
@@ -606,6 +608,8 @@ void setRTC(time_t time)
 	{
 		if ( ::ioctl(fd, FP_IOCTL_SET_RTC, (void*)&time ) < 0 )
 			eDebug("FP_IOCTL_SET_RTC failed(%m)");
+		else
+			prev_time = time;
 		close(fd);
 	}
 }
@@ -620,7 +624,7 @@ time_t getRTC()
 			eDebug("FP_IOCTL_GET_RTC failed(%m)");
 		close(fd);
 	}
-	return rtc_time;
+	return rtc_time != prev_time ? rtc_time : 0;
 }
 
 void eDVBServiceController::TDTready(int error)
@@ -1414,7 +1418,6 @@ void eDVBServiceController::disableFrontend()
 		{
 			eDebug("set RTC when frontend is disabled..");
 			time_t nowTime=time(0)+eDVB::getInstance()->time_difference;
-			extern void setRTC(time_t); // defined in dvb/dvbservice.cpp
 			setRTC(nowTime);
 		}
 	}
