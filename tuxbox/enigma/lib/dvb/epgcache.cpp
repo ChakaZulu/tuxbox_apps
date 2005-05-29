@@ -52,9 +52,11 @@ void eEPGCache::timeUpdated()
 
 int eEPGCache::sectionRead(__u8 *data, int source)
 {
-	if ( !data )
+	if ( !data || state == 2 )
 		return -ECANCELED;
+
 	eit_t *eit = (eit_t*) data;
+
 	int len=HILO(eit->section_length)-1;//+3-4;
 	int ptr=EIT_SIZE;
 	if ( ptr >= len )
@@ -74,48 +76,19 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 	time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5);
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 
-	if ( TM != 3599 )
+	if ( TM != 3599 && TM > -1)
 	{
-		uniqueEvent event( TM, HILO(eit_event->event_id), service );
-		switch (source)
+		switch(source)
 		{
-			case SCHEDULE:
-				if ( !firstScheduleEvent.valid() )
-				{
-					eDebug("[EPGC] schedule data begin");
-					firstScheduleEvent=event;
-				}
-				else if ( firstScheduleEvent == event )  // epg around
-				{
-					eDebug("[EPGC] schedule data ready");
-					return -ECANCELED;
-				}
-				break;
-			case SCHEDULE_OTHER:
-				if ( !firstScheduleOtherEvent.valid() )
-				{
-					eDebug("[EPGC] schedule other data begin");
-					firstScheduleOtherEvent=event;
-				}
-				else if ( firstScheduleOtherEvent == event )  // epg around
-				{
-					eDebug("[EPGC] schedule other data ready");
-					return -ECANCELED;
-				}
-				break;
-			case NOWNEXT:
-				if ( !firstNowNextEvent.valid() )
-				{
-					eDebug("[EPGC] nownext data begin");
-					firstNowNextEvent = event;
-				}
-				else if ( firstNowNextEvent == event ) // now next ready
-				{
-					eDebug("[EPGC] nownext data ready");
-					abortTimer.start(3000,true);
-					return -ECANCELED;
-				}
-				break;
+		case NOWNEXT:
+			haveData |= 2;
+			break;
+		case SCHEDULE:
+			haveData |= 1;
+			break;
+		case SCHEDULE_OTHER:
+			haveData |= 4;
+			break;
 		}
 	}
 
@@ -318,13 +291,17 @@ next:
 	tmpMap::iterator it = temp.find( service );
 	if ( it != temp.end() )
 	{
-		it->second.first=now;
-		it->second.second=source;
+		if ( source > it->second.second )
+		{
+			it->second.first=now;
+			it->second.second=source;
+		}
 	}
 	else
 		temp[service] = std::pair< time_t, int> (now, source);
 
 	Unlock();
+
 	return 0;
 }
 
@@ -338,12 +315,13 @@ bool eEPGCache::finishEPG()
 
 		singleLock l(cache_lock);
 		tmpMap::iterator It = temp.begin();
+		abortTimer.stop();
 
 		while (It != temp.end())
 		{
-//		eDebug("sid = %02x, onid = %02x, opos = %d", It->first.sid, It->first.onid, It->first.opos);
+//			eDebug("sid = %02x, onid = %02x, type %d", It->first.sid, It->first.onid, It->second.second );
 			if ( It->second.second == SCHEDULE
-				|| ( It->second.second == NOWNEXT && !firstScheduleEvent.valid() ) 
+				|| ( It->second.second == NOWNEXT && !(haveData&1) ) 
 				)
 			{
 //				eDebug("ADD to last updated Map");
@@ -574,6 +552,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 		if (!t)
 			t = time(0)+eDVB::getInstance()->time_difference;
 
+#ifdef NVOD
 		if (service.getServiceType() == 4)// NVOD
 		{
 			// get NVOD Refs from this NVDO Service
@@ -617,6 +596,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 				}
 			}
 		}
+#endif
 
 		timeMap::iterator i = It->second.second.lower_bound(t);
 		if ( i != It->second.second.end() )
@@ -701,17 +681,15 @@ void eEPGCache::startEPG()
 		temp.clear();
 		Unlock();
 		eDebug("[EPGC] start caching events");
-		firstScheduleEvent.invalidate();
-		firstNowNextEvent.invalidate();
-		firstScheduleOtherEvent.invalidate();
+		state=0;
+		haveData=0;
 		scheduleReader.start();
 		isRunning |= 1;
 		nownextReader.start();
 		isRunning |= 2;
 		scheduleOtherReader.start();
 		isRunning |= 4;
-		abortTimer.start(15000,true);  
-	// when after 15seks non data is received.. this service have no epg
+		abortTimer.start(5000,true);
 	}
 	else
 	{
@@ -722,25 +700,29 @@ void eEPGCache::startEPG()
 
 void eEPGCache::abortNonAvail()
 {
-	if ( !firstNowNextEvent.valid() && (isRunning&2) )
+	if (!state)
 	{
-		eDebug("[EPGC] abort non avail nownext reading");
-		isRunning &= ~2;
-		nownextReader.abort();
+		if ( !(haveData&2) && (isRunning&2) )
+		{
+			eDebug("[EPGC] abort non avail nownext reading");
+			isRunning &= ~2;
+			nownextReader.abort();
+		}
+		if ( !(haveData&1) && (isRunning&1) )
+		{
+			eDebug("[EPGC] abort non avail schedule reading");
+			isRunning &= ~1;
+			scheduleReader.abort();
+		}
+		if ( !(haveData&4) && (isRunning&4) )
+		{
+			eDebug("[EPGC] abort non avail schedule_other reading");
+			isRunning &= ~4;
+			scheduleOtherReader.abort();
+		}
+		abortTimer.start(20000, true);
 	}
-	if ( !firstScheduleEvent.valid() && (isRunning&1) )
-	{
-		eDebug("[EPGC] abort non avail schedule reading");
-		isRunning &= ~1;
-		scheduleReader.abort();
-	}
-	if ( !firstScheduleOtherEvent.valid() && (isRunning&4) )
-	{
-		eDebug("[EPGC] abort non avail schedule_other reading");
-		isRunning &= ~4;
-		scheduleOtherReader.abort();
-	}
-	finishEPG();
+	++state;
 }
 
 void eEPGCache::enterService(const eServiceReferenceDVB& ref, int err)
@@ -819,7 +801,7 @@ void eEPGCache::changedService(const uniqueEPGKey &service, int err)
 void eEPGCache::abortEPG()
 {
 	abortTimer.stop();
-	zapTimer.stop();   
+	zapTimer.stop();
 	if (isRunning)
 	{
 		if (isRunning & 1)

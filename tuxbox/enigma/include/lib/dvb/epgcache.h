@@ -66,41 +66,6 @@ struct uniqueEPGKey
 	};
 };
 
-class uniqueEvent
-{
-public:
-	time_t beginTime;
-	int event_id;
-	uniqueEPGKey service;		
-	uniqueEvent()
-		:beginTime(-1), event_id(0)
-	{
-	}
-	uniqueEvent( time_t t, int id, uniqueEPGKey key )
-		:beginTime(t), event_id(id), service(key)
-	{
-	}
-	bool valid()
-	{
-		return beginTime > -1;
-	}
-	bool operator == ( const uniqueEvent& e )
-	{
-		return (beginTime == e.beginTime) && (event_id == e.event_id) && (service.sid == e.service.sid) && (service.onid == e.service.onid);
-	}
-	uniqueEvent& operator = ( const uniqueEvent& e )
-	{
-		beginTime = e.beginTime;
-		event_id = e.event_id;
-		service = e.service;
-		return *this;
-	}
-	void invalidate()
-	{
-		beginTime=-1;
-	}
-};
-
 //eventMap is sorted by event_id
 #define eventMap std::map<__u16, eventData*>
 //timeMap is sorted by beginTime
@@ -182,7 +147,7 @@ class eSchedule: public eSection
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
 	eSchedule()  // 0x50 .. 0x5F	
-			:eSection(0x12, 0x50, -1, -1, SECREAD_CRC, 0xF0)
+			:eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
 	{
 	}
 };
@@ -193,7 +158,7 @@ class eScheduleOther: public eSection
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
 	eScheduleOther()  // 0x60 .. 0x6F
-			:eSection(0x12, 0x60, -1, -1, SECREAD_CRC, 0xF0)
+			:eSection(0x12, 0x60, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
 	{
 	}
 };
@@ -204,7 +169,7 @@ class eNowNext: public eSection
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
 	eNowNext()  // 0x4E, 0x4F	
-		:eSection(0x12, 0x4E, -1, -1, SECREAD_CRC, 0xFE)
+		:eSection(0x12, 0x4E, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFE)
 	{
 	}
 };
@@ -252,11 +217,10 @@ public:
 private:
 	static pthread_mutex_t cache_lock;
 	uniqueEPGKey current_service;
-	uniqueEvent firstScheduleEvent,
-							firstScheduleOtherEvent,
-							firstNowNextEvent;
 	int paused;
-	__u8 isRunning, firstStart;
+
+	int state;
+	__u8 isRunning, firstStart, haveData;
 	int sectionRead(__u8 *data, int source);
 	static eEPGCache *instance;
 
@@ -356,7 +320,7 @@ inline void eSchedule::sectionFinish(int err)
 	if ( (e->isRunning & 1) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		e->isRunning &= ~1;
-		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() || e->firstScheduleOtherEvent.valid() )
+		if (e->haveData)
 			e->finishEPG();
 	}
 }
@@ -367,7 +331,7 @@ inline void eScheduleOther::sectionFinish(int err)
 	if ( (e->isRunning & 4) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		e->isRunning &= ~4;
-		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() || e->firstScheduleOtherEvent.valid() )
+		if (e->haveData)
 			e->finishEPG();
 	}
 }
@@ -378,7 +342,7 @@ inline void eNowNext::sectionFinish(int err)
 	if ( (e->isRunning & 2) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		e->isRunning &= ~2;
-		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() || e->firstScheduleOtherEvent.valid() )
+		if (e->haveData)
 			e->finishEPG();
 	}
 }
