@@ -15,7 +15,7 @@ gImage *loadPNG(const char *filename)
 	
 	if (!(fp = fopen(filename, "rb")))
 	{
-		eDebug("[ePNG] %s not found\n", filename);
+//		eDebug("[ePNG] %s not found\n", filename);
 		return 0;
 	}
 
