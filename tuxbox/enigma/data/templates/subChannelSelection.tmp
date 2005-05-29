@@ -8,10 +8,11 @@
 				var i = document.subchannelselector.subchannel.selectedIndex;
 				var subChannel = document.subchannelselector.subchannel.options[i].value;
 				document.location = "/cgi-bin/zapTo?path="+subChannel;
+				setTimeout("window.close()", 1000);
 			}
 		</script>
 	</head>
-	<body>
+	<body onUnload="parent.window.opener.vlc2()">
 		Please select subchannel:
 		<br>
 		<form name="subchannelselector">
