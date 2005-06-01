@@ -865,5 +865,5 @@ void eEPGCache::thread()
 	exec();
 }
 
-eAutoInitP0<eEPGCache> init_eEPGCacheInit(eAutoInitNumbers::dvb+1, "EPG cache");
+eAutoInitP0<eEPGCache> init_eEPGCacheInit(eAutoInitNumbers::service+3, "EPG cache");
 
