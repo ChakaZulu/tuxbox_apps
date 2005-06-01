@@ -5,6 +5,8 @@
 
 #include <time.h>
 #include <unistd.h>  // for usleep
+#include <sys/vfs.h> // for statfs
+#include <libmd5sum.h>
 #include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
@@ -861,9 +863,116 @@ void eEPGCache::gotMessage( const Message &msg )
 void eEPGCache::thread()
 {
 	nice(4);
-	CleanTimer.start(CLEAN_INTERVAL,true);
+	load();
+	cleanLoop();
 	exec();
+	save();
+}
+
+void eEPGCache::load()
+{
+	FILE *f = fopen("/hdd/epg.dat", "r");
+	if (f)
+	{
+		unsigned char md5_saved[16];
+		unsigned char md5[16];
+		int size=0;
+		int cnt=0;
+		bool md5ok=false;
+		if (!md5_file("/hdd/epg.dat", 1, md5))
+		{
+			FILE *f = fopen("/hdd/epg.dat.md5", "r");
+			if (f)
+			{
+				fread( md5_saved, 16, 1, f);
+				fclose(f);
+				if ( !memcmp(md5_saved, md5, 16) )
+					md5ok=true;
+			}
+		}
+		if ( md5ok )
+		{
+			fread( &size, sizeof(int), 1, f);
+			while(size--)
+			{
+				uniqueEPGKey key;
+				eventMap evMap;
+				timeMap tmMap;
+				int size=0;
+				fread( &key, sizeof(uniqueEPGKey), 1, f);
+				fread( &size, sizeof(int), 1, f);
+				while(size--)
+				{
+					int len=0;
+					int type=0;
+					eventData *event=0;
+					fread( &type, sizeof(int), 1, f);
+					fread( &len, sizeof(int), 1, f);
+					event = new eventData(0, len, type);
+					fread( event->EITdata, len, 1, f);
+					evMap[ event->getEventID() ]=event;
+					tmMap[ event->getStartTime() ]=event;
+					++cnt;
+				}
+				eventDB[key]=std::pair<eventMap,timeMap>(evMap,tmMap);
+			}
+			eDebug("%d events read from /hdd/epg.dat.md5", cnt);
+		}
+		fclose(f);
+	}
+}
+
+void eEPGCache::save()
+{
+	struct statfs s;
+	off64_t tmp;
+	if (statfs("/hdd", &s)<0)
+		tmp=0;
+	else
+	{
+		tmp=s.f_blocks;
+		tmp*=s.f_bsize;
+	}
+	if ( tmp < 1024*1024*1024*150 ) // storage size < 150MB
+		return;
+	tmp=s.f_bfree;
+	tmp*=s.f_bsize;
+	if ( tmp < 1024*1024*1024*10 ) // less than 10MB free..dont save epg
+		return;
+	FILE *f = fopen("/hdd/epg.dat", "w");
+	int cnt=0;
+	if ( f )
+	{
+		int size = eventDB.size();
+		fwrite( &size, sizeof(int), 1, f );
+		for (eventCache::iterator service_it(eventDB.begin()); service_it != eventDB.end(); ++service_it)
+		{
+			timeMap &timemap = service_it->second.second;
+			fwrite( &service_it->first, sizeof(uniqueEPGKey), 1, f);
+			size = timemap.size();
+			fwrite( &size, sizeof(int), 1, f);
+			for (timeMap::iterator time_it(timemap.begin()); time_it != timemap.end(); ++time_it)
+			{
+				int len = time_it->second->ByteSize;
+				fwrite( &time_it->second->type, sizeof(int), 1, f );
+				fwrite( &len, sizeof(int), 1, f);
+				fwrite( time_it->second->EITdata, len, 1, f);
+				++cnt;
+			}
+		}
+		eDebug("%d events written to /hdd/epg.dat", cnt);
+		fclose(f);
+		unsigned char md5[16];
+		if (!md5_file("/hdd/epg.dat", 1, md5))
+		{
+			FILE *f = fopen("/hdd/epg.dat.md5", "w");
+			if (f)
+			{
+				fwrite( md5, 16, 1, f);
+				fclose(f);
+			}
+		}
+	}
 }
 
 eAutoInitP0<eEPGCache> init_eEPGCacheInit(eAutoInitNumbers::service+3, "EPG cache");
-

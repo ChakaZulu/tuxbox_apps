@@ -98,6 +98,7 @@ template<> struct hash<uniqueEPGKey>
 
 class eventData
 {
+ 	friend class eEPGCache;
 private:
 	__u8* EITdata;
 	int ByteSize;
@@ -109,7 +110,8 @@ public:
 	{
 		CacheSize+=size;
 		EITdata = new __u8[size];
-		memcpy(EITdata, (__u8*) e, size);
+		if (e)
+			memcpy(EITdata, (__u8*) e, size);
 	}
 	~eventData()
 	{
@@ -252,6 +254,8 @@ private:
 	void thread();
 	void gotMessage(const Message &message);
 	void timeUpdated();
+	void save();
+	void load();
 public:
 	eEPGCache();
 	~eEPGCache();
