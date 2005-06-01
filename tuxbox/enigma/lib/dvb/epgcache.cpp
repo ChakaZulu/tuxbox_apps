@@ -933,12 +933,17 @@ void eEPGCache::save()
 		tmp=s.f_blocks;
 		tmp*=s.f_bsize;
 	}
-	if ( tmp < 1024*1024*1024*150 ) // storage size < 150MB
+
+	// prevent writes to builtin flash
+	if ( tmp < 1024*1024*1024*50 ) // storage size < 50MB
 		return;
+
+	// check for enough free space on storage
 	tmp=s.f_bfree;
 	tmp*=s.f_bsize;
-	if ( tmp < 1024*1024*1024*10 ) // less than 10MB free..dont save epg
+	if ( tmp < (eventData::CacheSize*12)/10 ) // 20% overhead
 		return;
+
 	FILE *f = fopen("/hdd/epg.dat", "w");
 	int cnt=0;
 	if ( f )
