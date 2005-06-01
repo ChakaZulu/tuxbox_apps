@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.54 2005/05/31 16:44:42 metallica Exp $
+	$Id: controlapi.cpp,v 1.55 2005/06/01 10:25:16 metallica Exp $
 
 	License: GPL
 
@@ -1074,6 +1074,11 @@ void CControlAPI::SendcurrentVAPid(CWebserverRequest* request)
 void CControlAPI::SendAllCurrentVAPid(CWebserverRequest* request)
 {
 	static bool init_iso=true;
+	if(init_iso)
+	{
+		if(initialize_iso639_map())
+			init_iso=false;
+	}
 	bool eit_not_ok=true;
 	CZapitClient::responseGetPIDs pids;
 
@@ -1099,11 +1104,16 @@ void CControlAPI::SendAllCurrentVAPid(CWebserverRequest* request)
 						if(!(isalnum(tags[i].component[0])))
 							tags[i].component=tags[i].component.substr(1,tags[i].component.length()-1);
 						request->printf("%05u %s\n",pids.APIDs[j].pid,tags[i].component.c_str());
-						eit_not_ok=false;
 					}
 					else
-						request->printf("%05u %s\n",pids.APIDs[j].pid,pids.APIDs[j].is_ac3 ? " (AC3)": " ");
-
+					{
+						if(!(init_iso))
+						{
+							strcpy( pids.APIDs[j].desc, getISO639Description( pids.APIDs[j].desc ) );
+						}
+			 			request->printf("%05u %s %s\n",pids.APIDs[j].pid,pids.APIDs[j].desc,pids.APIDs[j].is_ac3 ? " (AC3)": " ");
+					}
+					eit_not_ok=false;
 					break;
 				}
 			}
@@ -1112,11 +1122,6 @@ void CControlAPI::SendAllCurrentVAPid(CWebserverRequest* request)
 	if(eit_not_ok)
 	{
 		unsigned short i = 0;
-		if(init_iso)
-		{
-			if(initialize_iso639_map())
-				init_iso=false;
-		}
 		for (CZapitClient::APIDList::iterator it = pids.APIDs.begin(); it!=pids.APIDs.end(); it++)
 		{
 			if(!(init_iso))
