@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.24 2004/12/07 21:01:41 rasc Exp $
+$Id: dmx_sect.c,v 1.25 2005/06/02 09:26:11 ghostrider Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dmx_sect.c,v 1.24 2004/12/07 21:01:41 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.25  2005/06/02 09:26:11  ghostrider
+filtering sections up to 4 bytes is now possible,
+do 'dvbsnoop -f 0x4e2f1c -m 0xFFFFFF 0x12' for filtering only now/next table for VOX on the correct transponder
+
 Revision 1.24  2004/12/07 21:01:41  rasc
 Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
 
@@ -187,6 +191,7 @@ static int  doReadSECT_2 (OPTION *opt)
   int     openMode;
   int     dmxMode;
   long    dmx_buffer_size = SECT_BUF_SIZE;
+  int     idx=0;
 
 
 
@@ -230,8 +235,23 @@ static int  doReadSECT_2 (OPTION *opt)
     memset (&flt, 0, sizeof (struct dmx_sct_filter_params));
 
     flt.pid = opt->pid;
-    flt.filter.filter[0] = opt->filter;
-    flt.filter.mask[0] = opt->mask;
+    if ( opt->filter > 0xFFFFFF )  // we have 4 byte filter
+	flt.filter.filter[idx++] = (opt->filter >> 24)&0xFF;
+    if ( opt->filter > 0xFFFF )
+	flt.filter.filter[idx++] = (opt->filter >> 16)&0xFF;
+    if ( opt->filter > 0xFF )
+	flt.filter.filter[idx++] = (opt->filter >> 8)&0xFF;
+    flt.filter.filter[idx++] = opt->filter&0xFF;
+
+    idx=0;
+    if ( opt->mask > 0xFFFFFF )  // we have 4 byte filter
+	flt.filter.mask[idx++] = (opt->mask >> 24)&0xFF;
+    if ( opt->mask > 0xFFFF )
+	flt.filter.mask[idx++] = (opt->mask >> 16)&0xFF;
+    if ( opt->mask > 0xFF )
+	flt.filter.mask[idx++] = (opt->mask >> 8)&0xFF;
+    flt.filter.mask[idx++] = opt->mask&0xFF;
+
     flt.timeout = opt->timeout_ms;
     flt.flags = DMX_IMMEDIATE_START;
     if (opt->crc) flt.flags |= DMX_CHECK_CRC;
