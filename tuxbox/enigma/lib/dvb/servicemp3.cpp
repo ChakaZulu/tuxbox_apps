@@ -1082,7 +1082,7 @@ void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 	else
 	{
 		struct stat64 s;
-		if (::stat64(filename.c_str(), &s))
+		if (::stat64(filename.c_str(), &s) || filename == "epg.dat")
 			return;
 		if (filename.right(4).upper()==".MP3")
 		{
