@@ -1,5 +1,5 @@
 
-
+ - New:    Multibyte section filtering e.g. -f 0x4e2f1c -m 0xFFFFFF (tnx to ghostrider, tuxbox-team)
  - Bugfix: dvr device open set to read only 
  - Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 
@@ -19,15 +19,15 @@
  - Bugfix: multilingual component descriptor  (tnx to Karsten Siebert, dpi AG)
  - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
  - Change: FE adaptions (due to change defines on API)
- - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)
+ - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert, dpi AG)
  - New: MetaData Section  (Basic) (H.222.0 AMD1)
  - New: MPEG Metadata STD descriptor (H.222.0 AMD1)
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
- - Bugfix: cell list descriptors (tnx to Karsten Siebert)
- - Bugfix: cable descriptors frequency (tnx to Karsten Siebert)
+ - Bugfix: cell list descriptors (tnx to Karsten Siebert, dpi AG)
+ - Bugfix: cable descriptors frequency (tnx to Karsten Siebert, dpi AG)
  - New: TV-Anytime (TS 102 323) RNT descriptors
- - Bugfix: UNT/INT table mixup, misc. descriptor stuff  (tnx to Karsten Siebert)
+ - Bugfix: UNT/INT table mixup, misc. descriptor stuff  (tnx to Karsten Siebert, dpi AG)
  - Update: misc. tables
  - New: resolution_authority/provider_notification_section (RNT) (TS 102 323)
  - New: content_identifier_descriptor (TS 102 323)
