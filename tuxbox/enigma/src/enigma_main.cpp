@@ -4874,7 +4874,10 @@ void eZapMain::showEPG()
 	}
 
 	ePtrList<EITEvent> events;
-	if (isEPG)
+	if (isEPG &&
+		ref.getOriginalNetworkID().get() != 0x0085 &&
+		ref.getTransportStreamID().get() != 0x0003 &&
+		ref.getServiceID().get() != 0x0011)
 	{
 		eEPGCache::getInstance()->Lock();
 		const timeMap* pMap = eEPGCache::getInstance()->getTimeMap( ref );

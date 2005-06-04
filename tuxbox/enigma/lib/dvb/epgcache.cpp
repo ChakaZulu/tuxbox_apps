@@ -420,15 +420,15 @@ void eEPGCache::cleanLoop()
 					if ( b != DBIt->second.first.end() )
 					{
 						// release Heap Memory for this entry   (new ....)
-						eDebug("[EPGC] delete old event (evmap)");
+//						eDebug("[EPGC] delete old event (evmap)");
 						DBIt->second.first.erase(b);
 					}
 
 					// remove entry from timeMap
-					eDebug("[EPGC] release heap mem");
+//					eDebug("[EPGC] release heap mem");
 					delete It->second;
 					DBIt->second.second.erase(It);
-					eDebug("[EPGC] delete old event (timeMap)");
+//					eDebug("[EPGC] delete old event (timeMap)");
 					It=DBIt->second.second.begin();  // start at begin
 
 					// add this (changed) service to temp map...
@@ -462,7 +462,7 @@ void eEPGCache::cleanLoop()
 #ifdef NVOD
 		for (nvodMap::iterator it(NVOD.begin()); it != NVOD.end(); ++it )
 		{
-			eDebug("check NVOD Service");
+//			eDebug("check NVOD Service");
 			eventCache::iterator evIt(eventDB.find(it->first));
 			if ( evIt != eventDB.end() && evIt->second.first.size() )
 			{
