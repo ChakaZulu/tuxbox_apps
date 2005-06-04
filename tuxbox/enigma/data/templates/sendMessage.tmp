@@ -12,7 +12,7 @@
 			<input type="reset" size="100px" value="Clear">
 		</form>
 		<script>
-			document.tv.msg.focus();
+			document.tv.message.focus();
 		</script>
 	</body>
 </html>
