@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.25 2005/06/02 09:26:11 ghostrider Exp $
+$Id: dmx_sect.c,v 1.26 2005/06/06 17:37:03 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.25 2005/06/02 09:26:11 ghostrider Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.26  2005/06/06 17:37:03  rasc
+minor error msg change
+
 Revision 1.25  2005/06/02 09:26:11  ghostrider
 filtering sections up to 4 bytes is now possible,
 do 'dvbsnoop -f 0x4e2f1c -m 0xFFFFFF 0x12' for filtering only now/next table for VOX on the correct transponder
@@ -281,8 +284,10 @@ static int  doReadSECT_2 (OPTION *opt)
     // -- error or eof?
     if (n < 0) {
 	int err;
-	
-	err = IO_error("read");
+	char s[64];
+
+	sprintf (s,"read (PID 0x%04x)",opt->pid);
+	err = IO_error(s);
 	if (err == ETIMEDOUT) break;		// Timout, abort
 	continue;
     }
