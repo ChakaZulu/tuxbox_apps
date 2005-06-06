@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.30  2005/06/06 21:27:48  robspr1
+ * using dBox Keyboard
+ *
  * Revision 1.29  2005/05/24 16:37:22  lazyt
  * - fix WebIF Auth
  * - add SMTP Auth
@@ -173,48 +176,6 @@ void ReadConf()
 					sscanf(ptr + 6, "%4s", maildb[index-'0'].code);
 				}
 			}
-/*
-			else if((ptr = strstr(line_buffer, "CODE0=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[0].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE1=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[1].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE2=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[2].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE3=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[3].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE4=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[4].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE5=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[5].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE6=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[6].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE7=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[7].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE8=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[8].code);
-			}
-			else if((ptr = strstr(line_buffer, "CODE9=")))
-			{
-				sscanf(ptr + 6, "%4s", maildb[9].code);
-			}
-*/
 		}
 
 		fclose(fd_conf);
@@ -342,6 +303,7 @@ int ControlDaemon(int command, int account, int mailindex)
 int GetRCCode()
 {
 	static __u16 rc_last_key = KEY_RESERVED;
+	static __u16 rc_last_code = KEY_RESERVED;
 
 	if(sim_key)
 	{
@@ -360,93 +322,9 @@ int GetRCCode()
 
 				switch(ev.code)
 				{
-					case KEY_UP:
-
-						rccode = RC_UP;
-
-						break;
-
-					case KEY_DOWN:
-
-						rccode = RC_DOWN;
-
-						break;
-
-					case KEY_LEFT:
-
-						rccode = RC_LEFT;
-
-						break;
-
-					case KEY_RIGHT:
-
-						rccode = RC_RIGHT;
-
-						break;
-
 					case KEY_OK:
 
 						rccode = RC_OK;
-
-						break;
-
-					case KEY_0:
-
-						rccode = RC_0;
-
-						break;
-
-					case KEY_1:
-
-						rccode = RC_1;
-
-						break;
-
-					case KEY_2:
-
-						rccode = RC_2;
-
-						break;
-
-					case KEY_3:
-
-						rccode = RC_3;
-
-						break;
-
-					case KEY_4:
-
-						rccode = RC_4;
-
-						break;
-
-					case KEY_5:
-
-						rccode = RC_5;
-
-						break;
-
-					case KEY_6:
-
-						rccode = RC_6;
-
-						break;
-
-					case KEY_7:
-
-						rccode = RC_7;
-
-						break;
-
-					case KEY_8:
-
-						rccode = RC_8;
-
-						break;
-
-					case KEY_9:
-
-						rccode = RC_9;
 
 						break;
 
@@ -474,24 +352,6 @@ int GetRCCode()
 
 						break;
 
-					case KEY_VOLUMEUP:
-
-						rccode = RC_PLUS;
-
-						break;
-
-					case KEY_VOLUMEDOWN:
-
-						rccode = RC_MINUS;
-
-						break;
-
-					case KEY_MUTE:
-
-						rccode = RC_MUTE;
-
-						break;
-
 					case KEY_HELP:
 
 						rccode = RC_HELP;
@@ -504,22 +364,35 @@ int GetRCCode()
 
 						break;
 
-					case KEY_HOME:
-
-						rccode = RC_HOME;
-
-						break;
-
-					case KEY_POWER:
-
-						rccode = RC_STANDBY;
-
-						break;
-
 					default:
-
-						rccode = -1;
+						if( ev.code > 0x7F )
+						{
+							rccode = 0;
+						}
+						else
+						{
+							rccode = rctable[ev.code & 0x7F];
+						}
+						if( rc_last_code == RC_LSHIFT )
+						{
+							if( ev.code <= 0x56 )
+							{
+								rccode = rcshifttable[ev.code];
+							}
+						}
+						else if( rc_last_code == RC_ALTGR )
+						{
+							if( ev.code <= 0x1B )
+							{
+								rccode = rcaltgrtable[ev.code];
+							}
+						}
+						if( !rccode )
+						{
+							rccode = -1;
+						}
 				}
+				rc_last_code = rccode;
 			}
 			else
 			{
@@ -530,6 +403,7 @@ int GetRCCode()
 		{
 			rccode = -1;
 			rc_last_key = KEY_RESERVED;
+			rc_last_code = KEY_RESERVED;
 		}
 	}
 
@@ -1259,8 +1133,11 @@ void ShowMailFile(char* filename, char* szAction)
 	int iMaxPages = 0;
 	long iPagePos[100];
 	char szHeader[256];
-	char bBig = 0;
-
+	int fSize = SMALL;
+	int fLines = 15;
+	int fHeight = FONTHEIGHT_SMALL;
+	int fAssign = LEFT;
+  int iRetfgets;
 	FILE* pipe;
 	pipe = fopen(filename,"r");
 
@@ -1277,7 +1154,7 @@ void ShowMailFile(char* filename, char* szAction)
 	// calculate number of pages
 	while( fgets( line, 83, pipe ))
 	{
-		if ( ++row > (FRAMEROWS) )
+		if ( ++row > (fLines) )
 		{
 			row = 0;
 			if( !feof(pipe) )
@@ -1295,7 +1172,8 @@ void ShowMailFile(char* filename, char* szAction)
 	iPagePos[0] = ftell(pipe);
 	while(1)
 	{
-		while( fgets( line, 83, pipe ) )
+		iRetfgets=(int)fgets( line, 83, pipe );
+		if( iRetfgets )
 		{
 			p = strchr(line,'\n');
 			if( p )
@@ -1304,92 +1182,44 @@ void ShowMailFile(char* filename, char* szAction)
 			}
 			row++;
 			
-			if( !bBig )
-			{
-				RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*FONTHEIGHT_SMALL -FONT_OFFSET, VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
-			}
-			else
-			{
-				RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*FONTHEIGHT_BIG -FONT_OFFSET, VIEWX-4*BORDERSIZE, LEFT, BIG, WHITE);
-			}
-
-			if(row > FRAMEROWS)
-			{
-				// Render output window
-				sprintf(szHeader,"%s%u / %u\n", szAction, iPage+1, iMaxPages);
-				ShowMailHeader(szHeader);
-				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
-
-				while(1)
-				{
-					GetRCCode();
-					if( rccode == RC_HOME || rccode == RC_OK || rccode == RC_RIGHT || rccode == RC_DOWN )
-					{
-						if((iPage < 99) && ((iPage +1) < iMaxPages) && (!feof(pipe)))
-						{
-							iPage++;
-						}
-						else
-						{
-							fseek(pipe, 0, SEEK_SET);
-						}
-						break;
-					}
-					else if( rccode == RC_LEFT || rccode == RC_UP )
-					{
-						if(iPage) 
-						{
-							iPage--;
-							fseek(pipe, iPagePos[iPage], SEEK_SET);
-						}
-						else
-						{
-							fseek(pipe, 0, SEEK_SET);
-						}
-						break;
-					}
-/*
-					else if( rccode == RC_YELLOW )
-					{
-						bBig = ( bBig ) ? 0 : 1 ;
-					}
-*/					
-				}
-				row = 0;
-				if( !feof(pipe) )
-				{
-					iPagePos[iPage] = ftell(pipe);
-					if(iPagePos[iPage] == -1)
-					{
-						iPagePos[iPage] = 0;
-					}
-				}
-				if(rccode == RC_HOME) 
-				{
-					break;
-				}
-				// Render output window
-				PaintMailHeader();
-
-			}
+			RenderString(line, 2*BORDERSIZE+2, 2*BORDERSIZE+3*FONTHEIGHT_SMALL+2+row*fHeight -FONT_OFFSET, VIEWX-4*BORDERSIZE, fAssign, fSize, WHITE);
 		}
-		if(row > 0)
+		
+		if((row > fLines) || (!iRetfgets))
 		{
 			// Render output window
-			iMaxPages = iPage+1;
-			sprintf(szHeader,"%s%u / %u\n",szAction,iPage+1,iMaxPages);
+			sprintf(szHeader,"%s%u / %u\n", szAction, iPage+1, iMaxPages);
 			ShowMailHeader(szHeader);
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+
 			while(1)
 			{
 				GetRCCode();
-				if( rccode == RC_HOME )
+				if( rccode == RC_HOME || rccode == RC_OK || rccode == RC_DOWN )
 				{
+					if((iPage < 99) && ((iPage +1) < iMaxPages) && (!feof(pipe)))
+					{
+						iPage++;
+					}
+					else
+					{
+						fseek(pipe, 0, SEEK_SET);
+					}
 					break;
 				}
-				if( rccode == RC_LEFT || rccode == RC_UP )
+				else if( rccode == RC_RIGHT )
 				{
-					if( iPage ) 
+					fAssign = RIGHT;
+					fseek(pipe, iPagePos[iPage], SEEK_SET);
+				}
+				else if( rccode == RC_LEFT )
+				{
+					fAssign = LEFT;
+					fseek(pipe, iPagePos[iPage], SEEK_SET);
+				}
+				else if( rccode == RC_UP )
+				{
+					if(iPage) 
 					{
 						iPage--;
 						fseek(pipe, iPagePos[iPage], SEEK_SET);
@@ -1398,27 +1228,48 @@ void ShowMailFile(char* filename, char* szAction)
 					{
 						fseek(pipe, 0, SEEK_SET);
 					}
-					row = 0;
-					if( !feof(pipe) )
-					{
-						iPagePos[iPage] = ftell(pipe);
-						if(iPagePos[iPage] == -1)
-						{
-							iPagePos[iPage] = 0;
-						}
-					}
-					if (rccode == RC_HOME)
-					{
-						break;
-					}
 					break;
 				}
+				else if( rccode == RC_YELLOW )
+				{
+					switch( fSize )
+					{
+						case SMALL:
+							fSize = NORMAL;
+							fLines = 12;
+							fHeight = FONTHEIGHT_NORMAL;
+							fAssign = LEFT;
+							break;
+						case NORMAL:
+							fSize = BIG;
+							fLines = 9;
+							fHeight = FONTHEIGHT_BIG;
+							fAssign = LEFT;
+							break;
+						case BIG:
+							fSize = SMALL;
+							fLines = 15;
+							fHeight = FONTHEIGHT_SMALL;
+							fAssign = LEFT;
+					}
+					fseek(pipe, iPagePos[iPage], SEEK_SET);
+				}
 			}
-		}
-		PaintMailHeader();
-		if(rccode == RC_HOME)
-		{
-			break;	
+			row = 0;
+			if( !feof(pipe) )
+			{
+				iPagePos[iPage] = ftell(pipe);
+				if(iPagePos[iPage] == -1)
+				{
+					iPagePos[iPage] = 0;
+				}
+			}
+			if(rccode == RC_HOME) 
+			{
+				break;
+			}
+			// Render output window
+			PaintMailHeader();
 		}
 	}
 	rccode = 0;
@@ -1429,7 +1280,7 @@ void ShowMailFile(char* filename, char* szAction)
  * PaintSmtpMailHeader
  ******************************************************************************/
 
-void PaintSmtpMailHeader( void )
+void PaintSmtpMailHeader( int nEditDirectStyle )
 {
 	RenderBox(0, 0, VIEWX, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, FILL, SKIN0);
 	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, VIEWX,VIEWY-INFOBOXY, FILL, SKIN1);
@@ -1444,7 +1295,6 @@ void PaintSmtpMailHeader( void )
 	RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
 
 	int x, y;
-	
 	for( x = 0; x < 3; x++ )
 	{
 		for( y = 0; y < 4; y++)
@@ -1453,9 +1303,16 @@ void PaintSmtpMailHeader( void )
 			          10 + x*(KEYBOX_WIDTH+KEYBOX_SPACE)+KEYBOX_WIDTH, VIEWY-INFOBOXY + KEYBOX_SPACE + y*(KEYBOX_HEIGHT+KEYBOX_SPACE)+KEYBOX_HEIGHT, FILL, SKIN1);
 			RenderBox(10 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),              VIEWY-INFOBOXY + KEYBOX_SPACE + y*(KEYBOX_HEIGHT+KEYBOX_SPACE), 
 			          10 + x*(KEYBOX_WIDTH+KEYBOX_SPACE)+KEYBOX_WIDTH, VIEWY-INFOBOXY + KEYBOX_SPACE + y*(KEYBOX_HEIGHT+KEYBOX_SPACE)+KEYBOX_HEIGHT, GRID, SKIN2);
-			RenderString(szKeyBoxKey[x+y*3],15 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3 + y*(KEYBOX_HEIGHT+KEYBOX_SPACE),25,LEFT, SMALL, WHITE);
-			RenderString(szKeyBoxInfo[x+y*3],30 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3+ y*(KEYBOX_HEIGHT+KEYBOX_SPACE),60, RIGHT, SMALL, ORANGE);
-
+			if( nEditDirectStyle == 3 )
+			{
+				RenderString(szKeyBBoxKey[x+y*3],15 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3 + y*(KEYBOX_HEIGHT+KEYBOX_SPACE),25,LEFT, SMALL, WHITE);
+				RenderString(szKeyBBoxInfo[x+y*3],30 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3+ y*(KEYBOX_HEIGHT+KEYBOX_SPACE),60, RIGHT, SMALL, ORANGE);
+			}
+			else
+			{
+				RenderString(szKeyBoxKey[x+y*3],15 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3 + y*(KEYBOX_HEIGHT+KEYBOX_SPACE),25,LEFT, SMALL, WHITE);
+				RenderString(szKeyBoxInfo[x+y*3],30 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3+ y*(KEYBOX_HEIGHT+KEYBOX_SPACE),60, RIGHT, SMALL, ORANGE);
+			}
 		}
 	}
 }
@@ -1472,8 +1329,8 @@ void EditMailFile(char* filename, int account, int mailindex )
 	char szFrom[MAXLINELEN];
 	int nEditLine = 2;					// start to edit at body
 	int nEditPos = 0;						// start to edit at body
-	char nEditType = 0;					// type of edit: 0:letters, 1:T9 or 2:direct
-	int nEditDirectStyle = 0;		// 0: ABC, 1: Abc, 2: abc
+	char nEditType = 0;					// type of edit: 0:letters, 1:T9, 2:direct, 3:keyboard
+	int nEditDirectStyle = 0;		// 0: ABC, 1: Abc, 2: abc, 3: keyboard
 	int  nTextFileIdx = 0;
 	int  nAddrFileIdx = 0;
 	char szTextFile[MAXLINELEN];
@@ -1504,7 +1361,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 	
 	while(1)
 	{
-		PaintSmtpMailHeader();
+		PaintSmtpMailHeader(nEditDirectStyle);
 
 		RenderString( szFrom, 2*BORDERSIZE+100, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
 		
@@ -1727,451 +1584,548 @@ void EditMailFile(char* filename, int account, int mailindex )
 		char szTmpOut[80];
 		sprintf(szTmpOut,"Line:%d Pos:%d Type:%d T9:<%x>",nEditLine,nEditPos,nEditType,cLastKey);
 		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
+*/
+/*		
+		char szTmpOut[80];
+		sprintf(szTmpOut,"Key:%x    %c",rccode, rccode);
+		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
 */		
-
 		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 		
-		GetRCCode();
-		
+		int valid = 1;
+		do
+		{
+				GetRCCode();
+			// don't show error-key, shift or alt
+			switch(rccode)
+			{
+				case 0xFFFF:
+				case RC_LSHIFT:
+				case RC_ALT:
+				case RC_ALTGR:
+					valid = 0;
+					break;
+				default:
+					valid = 1;
+			}
+		}while( !valid ); 
+	
 		int iIndex = 0;
 		cChar = 'A';
-		if( (rccode > RC_9) && (rccode != 0xFFFF) )
+		if( ((rccode < RC_0) || (rccode > RC_9)) && (rccode != 0xFFFF) )
 		{
 			cLastKey = rccode;
 		} 
-		switch ( rccode )
+		
+		// for keyboard-input
+		if( nEditDirectStyle == 3 )	
 		{
-			case RC_9: iIndex++;
-			case RC_8: iIndex++;
-			case RC_7: iIndex++;
-			case RC_6: iIndex++;
-			case RC_5: iIndex++;
-			case RC_4: iIndex++;
-			case RC_3: iIndex++;
-			case RC_2: iIndex++;
-			case RC_1: iIndex++;
-			case RC_0: 
-				if(nEditType == 2)
+			if( (rccode>=0x20) && (rccode<0x100) )
+			{
+				if( nEditPos < (MAXLINELEN-1) )
 				{
-					char cNew, cAkt;
-				
-					if( (cLastKey != rccode) && (cLastKey <= RC_9) )
+					if( nEditPos < strlen(szInfo[nEditLine]))
 					{
-						if( nEditPos < (MAXLINELEN-1) )
-						{
-							if( nEditPos < strlen(szInfo[nEditLine]))
-							{
-								nEditPos ++;
-							}
-							else
-							{
-								szInfo[nEditLine][nEditPos++]=' ';
-								szInfo[nEditLine][nEditPos]='\0';
-							}
-						}
-					}
-					cLastKey = rccode;
-					cAkt = szInfo[nEditLine][nEditPos];
-					
-					if( !iIndex )
-					{
-						iIndex = 9;
+						nEditPos ++;
 					}
 					else
 					{
-						iIndex --;
-					}
-					cNew = szKeyBoxInfo[iIndex][0];
-
-					if( !cAkt )
-					{
-						if(((cNew >= 'A') && (cNew <= 'Z')) &&
-						   ((nEditDirectStyle == 2) ||
-						    ((nEditDirectStyle == 1) && (nEditPos>1) && (((szInfo[nEditLine][nEditPos-1]>='A') && (szInfo[nEditLine][nEditPos-1]<='z')) 
-						       || ((szInfo[nEditLine][nEditPos-1]==' ') && (szInfo[nEditLine][nEditPos-2]!='.') && (szInfo[nEditLine][nEditPos-2]!='!') && (szInfo[nEditLine][nEditPos-2]!='?'))
-						     ))
-						   )) 
-						{
-							cNew += ('a' - 'A');
-						}
-						if( strlen(szInfo[nEditLine]) < (MAXLINELEN-2) )
-						{
-							szInfo[nEditLine][nEditPos] = cNew;
-							szInfo[nEditLine][nEditPos+1] = '\0';
-						}
-					}
-					else
-					{
-						// now we do some SMS style calculation
-						int j;
-						char bFound = 0;
-						char bLowerCase = 0;
-						
-						if( (cAkt >= 'a') && (cAkt <= 'z') )
-						{
-							bLowerCase = 1;
-							cAkt -= ('a'-'A');
-						}
-						
-						for( j = 0; j < strlen(szKeyBoxInfo[iIndex]); j++)
-						{
-							if( szKeyBoxInfo[iIndex][j] == cAkt )
-							{
-								if( (j+1) < strlen(szKeyBoxInfo[iIndex]) )
-								{
-									j++;
-								}
-								else
-								{
-									j=0;
-								}
-								cNew = szKeyBoxInfo[iIndex][j];
-								bFound = 1;
-								break;
-							}
-							if( bFound )
-							{
-								break;
-							}
-						}
-						
-						if(((cNew >= 'A') && (cNew <= 'Z')) && 
-							 (((nEditDirectStyle == 1) && (nEditPos) && 
-							   (((szInfo[nEditLine][nEditPos-1]>='A') && (szInfo[nEditLine][nEditPos-1]<='z')) || (szInfo[nEditLine][nEditPos-1]==' '))) ||
-							  (nEditDirectStyle == 2)
-							 ))
-						{
-							cNew += ('a' - 'A');
-						}
-						szInfo[nEditLine][nEditPos] = cNew;
-					}
-				}			
-				break;
-				
-			case RC_OK:
-				RenderBox(155, 178, 464, 220, FILL, SKIN0);
-				RenderBox(155, 220, 464, 327, FILL, SKIN1);
-				RenderBox(155, 178, 464, 327, GRID, SKIN2);
-				RenderBox(155, 220, 464, 327, GRID, SKIN2);
-
-				RenderString((osd == 'G') ? "Mail senden?" : "send mail?", 157, 213, 306, CENTER, BIG, ORANGE);
-				RenderString((osd == 'G') ? "Mail jetzt senden?" : "send mail now?", 157, 265, 306, CENTER, BIG, WHITE);
-
-		    RenderBox(235, 286, 284, 310, FILL, SKIN2);
-		    RenderString("OK", 237, 305, 46, CENTER, SMALL, WHITE);
-				RenderBox(335, 286, 384, 310, FILL, SKIN2);
-				RenderString("EXIT", 337, 305, 46, CENTER, SMALL, WHITE);
-
-				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
-				while( GetRCCode() )
-				{
-					if( rccode == RC_OK )
-					{
-						cChar = '\0';
-						break;
-					}
-					if( rccode == RC_HOME )
-					{
-						break;
+						szInfo[nEditLine][nEditPos++]=' ';
+						szInfo[nEditLine][nEditPos]='\0';
 					}
 				}
-				break;
-
-			case RC_HOME:	
-			case RC_DBOX:
-					cChar = '\0';
-				break;
-
-			case RC_RED:
-				nEditType = 0;
+				szInfo[nEditLine][nEditPos-1]=rccode;
+				rccode = -1;
+			}
+			else if( rccode == RC_BS )
+			{
+				if( nEditPos )
+				{
+					nEditPos--;
+				}
+				rccode = RC_MUTE;	
+			}
+			else if( rccode == RC_ENTF )
+			{
+				rccode = RC_MUTE;				
+			}
+			else if( rccode == RC_INS )
+			{
+				rccode = RC_BLUE;		
+				cChar = ' ';		
+			}
+			else if( rccode == RC_F5 )
+			{
+				rccode = RC_OK;				
+			}
+			else if( rccode == RC_F6 )
+			{
+				rccode = RC_HOME;				
+			}
+			else if( rccode == RC_F7 )
+			{
 				nEditPos = 0;
-/*
-				if( pipeT9 )
-				{
-					fclose (pipeT9 );
-					pipeT9 = NULL;
-				}
-*/
-				break;
-				
-			case RC_GREEN:
-				nEditType = 1;
+				rccode = -1;				
+			}
+			else if( rccode == RC_F8 )
+			{
+				nEditPos = strlen(szInfo[nEditLine]);
+				rccode = -1;				
+			}
+			else if( rccode == RC_F9 )
+			{
 				nEditPos = 0;
-//				pipeT9 = fopen(T9FILE,"r");
-				break;
-				
-			case RC_YELLOW:
-/*
-				if( pipeT9 )
+				szInfo[nEditLine][nEditPos]='\0';
+				rccode = -1;
+			}
+			else if( rccode == RC_F10 )
+			{
+				int i;
+				for( i=2; i<MAXINFOLINES; i++ )
 				{
-					fclose (pipeT9 );
-					pipeT9 = NULL;
+					szInfo[i][0] = '\0';
 				}
-*/	
-				if( nEditType == 2 )
-				{
-					if( ++nEditDirectStyle > 2 )
-					{
-						nEditDirectStyle = 0;
-					}
-					char c = szInfo[nEditLine][nEditPos];
-					if( (nEditDirectStyle == 0) && (c >= 'a') && (c <= 'z'))
-					{
-						szInfo[nEditLine][nEditPos] = c - ('a'-'A');
-					}
-					else if( (nEditDirectStyle == 2) && (c >= 'A') && (c <= 'Z'))
-					{
-						szInfo[nEditLine][nEditPos] = c + ('a'-'A');
-					}
-				}
-				else
-				{
-					nEditType = 2;
-					nEditLine = 2;
-					nEditPos = 0;
-				}
-				break;
-				
-			case RC_BLUE:
-				if(nEditType == 2)
-				{
-					int len;
-							
-					len = strlen( szInfo[nEditLine] );
-				
-					if( !len )
-					{
-						szInfo[nEditLine][0] = cChar;
-						szInfo[nEditLine][1] = '\0';
-					}
-					else
-					{
-						if( len == MAXLINELEN )
-						{
-							break;
-						}
-						
-						char linepart[MAXLINELEN];
-						
-						if( !nEditPos )
-						{
-							strcpy( linepart, szInfo[nEditLine]);
-							sprintf( szInfo[nEditLine], "%c%s", cChar, linepart);
-						}
-						else if( nEditPos < len )
-						{
-							strcpy( linepart, &szInfo[nEditLine][nEditPos] );
-							szInfo[nEditLine][nEditPos] = cChar;
-							szInfo[nEditLine][nEditPos+1] = '\0';
-							strcat( szInfo[nEditLine], linepart );
-						}
-					}				
-				}
-				break;
-				
-			case RC_PLUS:
-				if((nEditType == 0) && (( TextFileValid ) || ( !nTextFileIdx )))
-				{
-					nTextFileIdx++;	
-				}
-				else if(nEditType == 2)
-				{
-					if( !nEditLine )
-					{
-						FILE* pipe;
-						pipe = fopen(ADDRFILE,"r");
-						if(pipe != NULL)
-						{
-							nAddrFileIdx++;
-							int i=0;
-							while(fgets(linebuffer, sizeof(linebuffer), pipe))
-							{
-								if( nAddrFileIdx==i )
-								{
-									strcpy( szInfo[nEditLine], linebuffer );
-									if( szInfo[nEditLine][strlen(linebuffer)-1] == '\n' )
-									{
-										szInfo[nEditLine][strlen(linebuffer)-1] = '\0';
-									}
-									break;
-								}
-								i++;
-							}
-							if( i < nAddrFileIdx )
-							{
-								nAddrFileIdx = i;
-							}
-							fclose( pipe );
-						}
-						break;
-					}
-					
-					char c;
-					
-					if(( c = szInfo[nEditLine][nEditPos] ))
-					{
-						if( c < 0x7D )
-						{
-							szInfo[nEditLine][nEditPos] = ++c;
-						}
-						else
-						{
-							szInfo[nEditLine][nEditPos] = '~';
-						}
-					}
-					else
-					{
-						szInfo[nEditLine][nEditPos] = cChar;
-						szInfo[nEditLine][nEditPos+1] = '\0';
-					}
-				}
-				break;
-				
-			case RC_MINUS:
-				if((nEditType == 0) && ( nTextFileIdx ))
-				{
-					nTextFileIdx--;
-				}
-				else if(nEditType == 2) 
-				{
-					if( !nEditLine )
-					{
-						FILE* pipe;
-						pipe = fopen(ADDRFILE,"r");
-						if(pipe != NULL)
-						{
-							if( nAddrFileIdx )
-							{
-								nAddrFileIdx--;
-							}
-							
-							int i=0;
-							while(fgets(linebuffer, sizeof(linebuffer), pipe))
-							{
-								if( nAddrFileIdx==i )
-								{
-									strcpy( szInfo[nEditLine], linebuffer );
-									if( szInfo[nEditLine][strlen(linebuffer)-1] == '\n' )
-									{
-										szInfo[nEditLine][strlen(linebuffer)-1] = '\0';
-									}
-									break;
-								}
-								i++;
-							}
-							fclose( pipe );
-						}
-						break;
-					}
-
-					char c;
-				
-					if(( c = szInfo[nEditLine][nEditPos] ))
-					{
-						if( c > 0x21 )
-						{
-							szInfo[nEditLine][nEditPos] = --c;
-						}
-						else
-						{
-							szInfo[nEditLine][nEditPos] = ' ';
-						}
-					}
-					else
-					{
-						szInfo[nEditLine][nEditPos] = cChar;
-						szInfo[nEditLine][nEditPos+1] = '\0';
-					}
-				}
-				break;
-				
-			case RC_DOWN:
-				if((nEditType == 2) && ( nEditLine < (MAXINFOLINES-1) ))
-				{
-					nEditLine ++;
-					int len=strlen( szInfo[nEditLine] );
-					if( len < (nEditPos + 1) )
-					{
-						if( len )
-						{
-							nEditPos = len - 1;
-						}
-						else
-						{ 
-							nEditPos = 0;
-						}
-					}
-				}
-				break;
-					
-			case RC_UP:
-				if((nEditType == 2) && ( nEditLine ))
-				{
-					nEditLine --;
-					int len=strlen( szInfo[nEditLine] );
-					if( len < (nEditPos + 1) )
-					{
-						if( len )
-						{
-							nEditPos = len - 1;
-						}
-						else
-						{ 
-							nEditPos = 0;
-						}
-					}
-				}
-				break;
-				
-			case RC_LEFT:
-				if((nEditType == 2) && ( nEditPos ))
-				{
-					nEditPos --;
-				}
-				break;
-				
-			case RC_RIGHT:
-				if(nEditType == 2)
-				{
-					if( nEditPos < (MAXLINELEN-1) )
-					{
-						if( nEditPos < strlen(szInfo[nEditLine]))
-						{
-							nEditPos ++;
-						}
-						else
-						{
-							szInfo[nEditLine][nEditPos++]=' ';
-							szInfo[nEditLine][nEditPos]='\0';
-						}
-					}
-				}
-				break;
-				
-			case RC_MUTE:
-				if(nEditType == 2)
-				{
-					if( szInfo[nEditLine][nEditPos] )
-					{
-						char linepart[MAXLINELEN];
-						int len;
-						
-						len = strlen( szInfo[nEditLine] );
-						szInfo[nEditLine][nEditPos] = '\0';
-						
-						if( !nEditPos )
-						{		
-							strcpy(	linepart, &szInfo[nEditLine][1] );
-							strcpy( szInfo[nEditLine], linepart );
-						}
-						else if( nEditPos < (len - 1) )
-						{
-							strcpy( linepart, &szInfo[nEditLine][ nEditPos + 1 ] );
-							strcat( szInfo[nEditLine], linepart );							
-						}
-					}
-				}
-				break;
+				nEditPos = 0;
+				nEditLine = 2;
+				rccode = -1;
+			}
+		}
+		
+		{
+  		switch ( rccode )
+  		{
+  			case RC_9: iIndex++;
+  			case RC_8: iIndex++;
+  			case RC_7: iIndex++;
+  			case RC_6: iIndex++;
+  			case RC_5: iIndex++;
+  			case RC_4: iIndex++;
+  			case RC_3: iIndex++;
+  			case RC_2: iIndex++;
+  			case RC_1: iIndex++;
+  			case RC_0: 
+  				if(nEditType == 2)
+  				{
+  					char cNew, cAkt;
+  				
+  					if( (cLastKey != rccode) && ((cLastKey>= RC_0) && (cLastKey <= RC_9)) )
+  					{
+  						if( nEditPos < (MAXLINELEN-1) )
+  						{
+  							if( nEditPos < strlen(szInfo[nEditLine]))
+  							{
+  								nEditPos ++;
+  							}
+  							else
+  							{
+  								szInfo[nEditLine][nEditPos++]=' ';
+  								szInfo[nEditLine][nEditPos]='\0';
+  							}
+  						}
+  					}
+  					cLastKey = rccode;
+  					cAkt = szInfo[nEditLine][nEditPos];
+  					
+  					if( !iIndex )
+  					{
+  						iIndex = 9;
+  					}
+  					else
+  					{
+  						iIndex --;
+  					}
+  					cNew = szKeyBoxInfo[iIndex][0];
+  
+  					if( !cAkt )
+  					{
+  						if(((cNew >= 'A') && (cNew <= 'Z')) &&
+  						   ((nEditDirectStyle == 2) ||
+  						    ((nEditDirectStyle == 1) && (nEditPos>1) && (((szInfo[nEditLine][nEditPos-1]>='A') && (szInfo[nEditLine][nEditPos-1]<='z')) 
+  						       || ((szInfo[nEditLine][nEditPos-1]==' ') && (szInfo[nEditLine][nEditPos-2]!='.') && (szInfo[nEditLine][nEditPos-2]!='!') && (szInfo[nEditLine][nEditPos-2]!='?'))
+  						     ))
+  						   )) 
+  						{
+  							cNew += ('a' - 'A');
+  						}
+  						if( strlen(szInfo[nEditLine]) < (MAXLINELEN-2) )
+  						{
+  							szInfo[nEditLine][nEditPos] = cNew;
+  							szInfo[nEditLine][nEditPos+1] = '\0';
+  						}
+  					}
+  					else
+  					{
+  						// now we do some SMS style calculation
+  						int j;
+  						char bFound = 0;
+  						char bLowerCase = 0;
+  						
+  						if( (cAkt >= 'a') && (cAkt <= 'z') )
+  						{
+  							bLowerCase = 1;
+  							cAkt -= ('a'-'A');
+  						}
+  						
+  						for( j = 0; j < strlen(szKeyBoxInfo[iIndex]); j++)
+  						{
+  							if( szKeyBoxInfo[iIndex][j] == cAkt )
+  							{
+  								if( (j+1) < strlen(szKeyBoxInfo[iIndex]) )
+  								{
+  									j++;
+  								}
+  								else
+  								{
+  									j=0;
+  								}
+  								cNew = szKeyBoxInfo[iIndex][j];
+  								bFound = 1;
+  								break;
+  							}
+  							if( bFound )
+  							{
+  								break;
+  							}
+  						}
+  						
+  						if(((cNew >= 'A') && (cNew <= 'Z')) && 
+  							 (((nEditDirectStyle == 1) && (nEditPos) && 
+  							   (((szInfo[nEditLine][nEditPos-1]>='A') && (szInfo[nEditLine][nEditPos-1]<='z')) || (szInfo[nEditLine][nEditPos-1]==' '))) ||
+  							  (nEditDirectStyle == 2)
+  							 ))
+  						{
+  							cNew += ('a' - 'A');
+  						}
+  						szInfo[nEditLine][nEditPos] = cNew;
+  					}
+  				}			
+  				break;
+  				
+  			case RC_OK:
+  				RenderBox(155, 178, 464, 220, FILL, SKIN0);
+  				RenderBox(155, 220, 464, 327, FILL, SKIN1);
+  				RenderBox(155, 178, 464, 327, GRID, SKIN2);
+  				RenderBox(155, 220, 464, 327, GRID, SKIN2);
+  
+  				RenderString((osd == 'G') ? "Mail senden?" : "send mail?", 157, 213, 306, CENTER, BIG, ORANGE);
+  				RenderString((osd == 'G') ? "Mail jetzt senden?" : "send mail now?", 157, 265, 306, CENTER, BIG, WHITE);
+  
+  		    RenderBox(235, 286, 284, 310, FILL, SKIN2);
+  		    RenderString("OK", 237, 305, 46, CENTER, SMALL, WHITE);
+  				RenderBox(335, 286, 384, 310, FILL, SKIN2);
+  				RenderString("EXIT", 337, 305, 46, CENTER, SMALL, WHITE);
+  
+  				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+  				while( GetRCCode() )
+  				{
+  					if( rccode == RC_OK )
+  					{
+  						cChar = '\0';
+  						break;
+  					}
+  					if( rccode == RC_HOME )
+  					{
+  						break;
+  					}
+  				}
+  				break;
+  
+  			case RC_HOME:	
+  			case RC_DBOX:
+  					cChar = '\0';
+  				break;
+  
+  			case RC_RED:
+  				nEditType = 0;
+  				nEditPos = 0;
+  /*
+  				if( pipeT9 )
+  				{
+  					fclose (pipeT9 );
+  					pipeT9 = NULL;
+  				}
+  */
+  				break;
+  				
+  			case RC_GREEN:
+  				nEditType = 1;
+  				nEditPos = 0;
+  //				pipeT9 = fopen(T9FILE,"r");
+  				break;
+  				
+  			case RC_YELLOW:
+  /*
+  				if( pipeT9 )
+  				{
+  					fclose (pipeT9 );
+  					pipeT9 = NULL;
+  				}
+  */	
+  				if( nEditType == 2 )
+  				{
+  					if( ++nEditDirectStyle > 3 )
+  					{
+  						nEditDirectStyle = 0;
+  					}
+  					char c = szInfo[nEditLine][nEditPos];
+  					if( (nEditDirectStyle == 0) && (c >= 'a') && (c <= 'z'))
+  					{
+  						szInfo[nEditLine][nEditPos] = c - ('a'-'A');
+  					}
+  					else if( (nEditDirectStyle == 2) && (c >= 'A') && (c <= 'Z'))
+  					{
+  						szInfo[nEditLine][nEditPos] = c + ('a'-'A');
+  					}
+  				}
+  				else
+  				{
+  					nEditType = 2;
+  					nEditLine = 2;
+  					nEditPos = 0;
+  				}
+  				break;
+  				
+  			case RC_BLUE:
+  				if(nEditType == 2)
+  				{
+  					int len;
+  							
+  					len = strlen( szInfo[nEditLine] );
+  				
+  					if( !len )
+  					{
+  						szInfo[nEditLine][0] = cChar;
+  						szInfo[nEditLine][1] = '\0';
+  					}
+  					else
+  					{
+  						if( len == MAXLINELEN )
+  						{
+  							break;
+  						}
+  						
+  						char linepart[MAXLINELEN];
+  						
+  						if( !nEditPos )
+  						{
+  							strcpy( linepart, szInfo[nEditLine]);
+  							sprintf( szInfo[nEditLine], "%c%s", cChar, linepart);
+  						}
+  						else if( nEditPos < len )
+  						{
+  							strcpy( linepart, &szInfo[nEditLine][nEditPos] );
+  							szInfo[nEditLine][nEditPos] = cChar;
+  							szInfo[nEditLine][nEditPos+1] = '\0';
+  							strcat( szInfo[nEditLine], linepart );
+  						}
+  					}				
+  				}
+  				break;
+  				
+  			case RC_PLUS:
+  				if((nEditType == 0) && (( TextFileValid ) || ( !nTextFileIdx )))
+  				{
+  					nTextFileIdx++;	
+  				}
+  				else if(nEditType == 2)
+  				{
+  					if( !nEditLine )
+  					{
+  						FILE* pipe;
+  						pipe = fopen(ADDRFILE,"r");
+  						if(pipe != NULL)
+  						{
+  							nAddrFileIdx++;
+  							int i=0;
+  							while(fgets(linebuffer, sizeof(linebuffer), pipe))
+  							{
+  								if( nAddrFileIdx==i )
+  								{
+  									strcpy( szInfo[nEditLine], linebuffer );
+  									if( szInfo[nEditLine][strlen(linebuffer)-1] == '\n' )
+  									{
+  										szInfo[nEditLine][strlen(linebuffer)-1] = '\0';
+  									}
+  									break;
+  								}
+  								i++;
+  							}
+  							if( i < nAddrFileIdx )
+  							{
+  								nAddrFileIdx = i;
+  							}
+  							fclose( pipe );
+  						}
+  						break;
+  					}
+  					
+  					char c;
+  					
+  					if(( c = szInfo[nEditLine][nEditPos] ))
+  					{
+  						if( c < 0x7D )
+  						{
+  							szInfo[nEditLine][nEditPos] = ++c;
+  						}
+  						else
+  						{
+  							szInfo[nEditLine][nEditPos] = '~';
+  						}
+  					}
+  					else
+  					{
+  						szInfo[nEditLine][nEditPos] = cChar;
+  						szInfo[nEditLine][nEditPos+1] = '\0';
+  					}
+  				}
+  				break;
+  				
+  			case RC_MINUS:
+  				if((nEditType == 0) && ( nTextFileIdx ))
+  				{
+  					nTextFileIdx--;
+  				}
+  				else if(nEditType == 2) 
+  				{
+  					if( !nEditLine )
+  					{
+  						FILE* pipe;
+  						pipe = fopen(ADDRFILE,"r");
+  						if(pipe != NULL)
+  						{
+  							if( nAddrFileIdx )
+  							{
+  								nAddrFileIdx--;
+  							}
+  							
+  							int i=0;
+  							while(fgets(linebuffer, sizeof(linebuffer), pipe))
+  							{
+  								if( nAddrFileIdx==i )
+  								{
+  									strcpy( szInfo[nEditLine], linebuffer );
+  									if( szInfo[nEditLine][strlen(linebuffer)-1] == '\n' )
+  									{
+  										szInfo[nEditLine][strlen(linebuffer)-1] = '\0';
+  									}
+  									break;
+  								}
+  								i++;
+  							}
+  							fclose( pipe );
+  						}
+  						break;
+  					}
+  
+  					char c;
+  				
+  					if(( c = szInfo[nEditLine][nEditPos] ))
+  					{
+  						if( c > 0x21 )
+  						{
+  							szInfo[nEditLine][nEditPos] = --c;
+  						}
+  						else
+  						{
+  							szInfo[nEditLine][nEditPos] = ' ';
+  						}
+  					}
+  					else
+  					{
+  						szInfo[nEditLine][nEditPos] = cChar;
+  						szInfo[nEditLine][nEditPos+1] = '\0';
+  					}
+  				}
+  				break;
+  				
+  			case RC_DOWN:
+  				if((nEditType == 2) && ( nEditLine < (MAXINFOLINES-1) ))
+  				{
+  					nEditLine ++;
+  					int len=strlen( szInfo[nEditLine] );
+  					if( len < (nEditPos + 1) )
+  					{
+  						if( len )
+  						{
+  							nEditPos = len - 1;
+  						}
+  						else
+  						{ 
+  							nEditPos = 0;
+  						}
+  					}
+  				}
+  				break;
+  					
+  			case RC_UP:
+  				if((nEditType == 2) && ( nEditLine ))
+  				{
+  					nEditLine --;
+  					int len=strlen( szInfo[nEditLine] );
+  					if( len < (nEditPos + 1) )
+  					{
+  						if( len )
+  						{
+  							nEditPos = len - 1;
+  						}
+  						else
+  						{ 
+  							nEditPos = 0;
+  						}
+  					}
+  				}
+  				break;
+  				
+  			case RC_LEFT:
+  				if((nEditType == 2) && ( nEditPos ))
+  				{
+  					nEditPos --;
+  				}
+  				break;
+  				
+  			case RC_RIGHT:
+  				if(nEditType == 2)
+  				{
+  					if( nEditPos < (MAXLINELEN-1) )
+  					{
+  						if( nEditPos < strlen(szInfo[nEditLine]))
+  						{
+  							nEditPos ++;
+  						}
+  						else
+  						{
+  							szInfo[nEditLine][nEditPos++]=' ';
+  							szInfo[nEditLine][nEditPos]='\0';
+  						}
+  					}
+  				}
+  				break;
+  				
+  			case RC_MUTE:
+  				if(nEditType == 2)
+  				{
+  					if( szInfo[nEditLine][nEditPos] )
+  					{
+  						char linepart[MAXLINELEN];
+  						int len;
+  						
+  						len = strlen( szInfo[nEditLine] );
+  						szInfo[nEditLine][nEditPos] = '\0';
+  						
+  						if( !nEditPos )
+  						{		
+  							strcpy(	linepart, &szInfo[nEditLine][1] );
+  							strcpy( szInfo[nEditLine], linepart );
+  						}
+  						else if( nEditPos < (len - 1) )
+  						{
+  							strcpy( linepart, &szInfo[nEditLine][ nEditPos + 1 ] );
+  							strcat( szInfo[nEditLine], linepart );							
+  						}
+  					}
+  				}
+  				break;
+  		}
 		}
 		
 		if( cChar == '\0' )
@@ -2895,7 +2849,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.29 $";
+	char cvs_revision[] = "$Revision: 1.30 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;

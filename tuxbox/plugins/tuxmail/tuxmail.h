@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.24  2005/06/06 21:28:03  robspr1
+ * using dBox Keyboard
+ *
  * Revision 1.23  2005/05/20 18:01:24  lazyt
  * - Preparation for Keyboard
  * - don't try add to Spamlist for empty Account
@@ -164,33 +167,92 @@
 
 #endif
 
-#define	RC_0		0x00
-#define	RC_1		0x01
-#define	RC_2		0x02
-#define	RC_3		0x03
-#define	RC_4		0x04
-#define	RC_5		0x05
-#define	RC_6		0x06
-#define	RC_7		0x07
-#define	RC_8		0x08
-#define	RC_9		0x09
-#define	RC_RIGHT	0x0A
-#define	RC_LEFT		0x0B
-#define	RC_UP		0x0C
-#define	RC_DOWN		0x0D
-#define	RC_OK		0x0E
-#define	RC_MUTE		0x0F
-#define	RC_STANDBY	0x10
-#define	RC_GREEN	0x11
-#define	RC_YELLOW	0x12
-#define	RC_RED		0x13
-#define	RC_BLUE		0x14
-#define	RC_PLUS		0x15
-#define	RC_MINUS	0x16
-#define	RC_HELP		0x17
-#define	RC_DBOX		0x18
-#define	RC_HOME		0x1F
+#define	RC_0			'0'
+#define	RC_1			'1'
+#define	RC_2			'2'
+#define	RC_3			'3'
+#define	RC_4			'4'
+#define	RC_5			'5'
+#define	RC_6			'6'
+#define	RC_7			'7'
+#define	RC_8			'8'
+#define	RC_9			'9'
 
+#define	RC_RIGHT	0x0191
+#define	RC_LEFT		0x0192
+#define	RC_UP			0x0193
+#define	RC_DOWN		0x0194
+#define	RC_PLUS		0x0195
+#define	RC_MINUS	0x0196
+
+#define	RC_OK				0x0D
+#define	RC_STANDBY	0x1C
+#define RC_ESC			RC_HOME
+
+#define	RC_HOME			0x01B1
+#define	RC_MUTE			0x01B2
+#define	RC_HELP			0x01B3
+#define	RC_DBOX			0x01B4
+
+#define	RC_GREEN	0x01A1
+#define	RC_YELLOW	0x01A2
+#define	RC_RED		0x01A3
+#define	RC_BLUE		0x01A4
+
+#define RC_PAUSE	RC_HELP
+#define RC_ALTGR	0x12
+#define RC_BS			0x08
+#define RC_POS1		RC_HOME
+#define RC_END		RC_MUTE
+#define RC_INS		0x10
+#define RC_ENTF		0x11
+#define RC_STRG		0x00
+#define RC_LSHIFT	0x0E
+#define RC_RSHIFT	0x0E
+#define RC_ALT		0x0F
+#define RC_CAPSLOCK	0x00
+#define RC_NUM		RC_DBOX
+#define RC_ROLLEN	0x00
+#define RC_F5			0x01C5
+#define RC_F6			0x01C6
+#define RC_F7			0x01C7
+#define RC_F8			0x01C8
+#define RC_F9			0x01C9
+#define RC_F10		0x01CA
+
+#define RC_F1		RC_RED
+#define RC_F2		RC_GREEN
+#define RC_F3		RC_YELLOW
+#define RC_F4		RC_BLUE
+#define RC_PAGEUP	RC_PLUS
+#define RC_PAGEDOWN	RC_MINUS
+
+int rctable[] = 
+{
+   0x00, RC_ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'ß', '´', RC_BS, 0x09,
+   'q',  'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'ü', '+', 0x0D, RC_STRG, 'a', 's',
+   'd',  'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä', '^', RC_LSHIFT, '#', 'y', 'x', 'c', 'v',
+   'b',  'n', 'm', ',', '.', '_', RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
+   RC_F6,RC_F7,RC_F8,RC_F9,RC_F10,RC_NUM,RC_ROLLEN,0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, RC_STANDBY, 0x00, 0x00, 0x00, 0x00, '<', RC_OK, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, RC_ALTGR, 0x00, RC_POS1, RC_UP, RC_PAGEUP, RC_LEFT, RC_RIGHT, RC_END, RC_DOWN,RC_PAGEDOWN,RC_INS,RC_ENTF,
+   0x00, RC_MUTE, RC_MINUS, RC_PLUS, RC_STANDBY, 0x00, 0x00, RC_PAUSE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+int rcshifttable[] = 
+{
+   0x00, RC_ESC, '!', '"', '§', '$', '%', '&', '/', '(', ')', '=', '?', '`', 0x08, 0x09,
+   'Q',  'W', 'E', 'R', 'T', 'Z', 'U', 'I', 'O', 'P', 'Ü', '*', 0x0D, RC_STRG, 'A', 'S',
+   'D',  'F', 'G', 'H', 'J', 'K', 'L', 'Ö', 'Ä', '°', RC_LSHIFT, 0x27, 'Y', 'X', 'C', 'V',
+   'B',  'N', 'M', ';', ':', '-', RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
+   RC_F6,RC_F7,RC_F8,RC_F9,RC_F10,RC_NUM,RC_ROLLEN,0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, RC_STANDBY, 0x00, 0x00, 0x00, 0x00, '>'
+};
+int rcaltgrtable[] = 
+{
+   0x00, RC_ESC, 0x00, '²', '³', 0x00, 0x00, 0x00, '{', '[', ']', '}', '\\', 0x00, 0x00, 0x00,
+   '@',  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, '~'
+};
+	
 // kb codes
 
 #define KBC_UP		0x01
@@ -210,12 +272,12 @@
  
 #define BORDERSIZE 2
 #define FONTHEIGHT_BIG 40
+#define FONTHEIGHT_NORMAL 32
 #define FONTHEIGHT_SMALL 24
 #define FONT_OFFSET_BIG 10
 #define FONT_OFFSET 5
 #define VIEWX  619
 #define VIEWY  504
-#define FRAMEROWS  15
 #define INFOBOXY   125
 #define KEYBOX_SPACE  5
 #define KEYBOX_HEIGHT 25
@@ -224,7 +286,7 @@
 #define KEYBOX_KEYS 12
 
 char *szKeyBoxInfo[KEYBOX_KEYS] = {
-  " !""#$%&'()*+-./[]\\1"   , "ABC2" , "DEF3" ,
+  " @!""#$%&'()*+-./[]\\1"   , "ABC2" , "DEF3" ,
   "GHI4" , "JKL5" , "MNO6" ,
   "PQRS7", "TUV8" , "WXYZ9",
   "0"    ,     "" ,  "" } ;
@@ -235,8 +297,20 @@ char *szKeyBoxKey[KEYBOX_KEYS] = {
   "7" , "8" , "9",
   "0" , "+" , "-" } ;
 
-char *szDirectStyle[3] = {
-"ABC", "Abc", "abc" };
+char *szKeyBBoxInfo[KEYBOX_KEYS] = {
+  "red"   , "OK"   , "clr ln" ,
+  "green" , "HOME" , "clr all" ,
+  "yellow", "pos1" , "plus",
+  "blue"  , "end"  ,  "minus" } ;
+
+char *szKeyBBoxKey[KEYBOX_KEYS] = {
+  "F1" , "F5" , "F9" ,
+  "F2" , "F6" , "F10" ,
+  "F3" , "F7" , "Pg+",
+  "F4" , "F8" , "Pg-" } ;
+
+char *szDirectStyle[4] = {
+"ABC", "Abc", "abc", "keyboard" };
 
 // functions
 
