@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.110 2005/06/01 11:17:33 metallica Exp $
+  $Id: movieplayer.cpp,v 1.111 2005/06/07 08:09:06 metallica Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -142,8 +142,8 @@ unsigned short ac3flags[10];
 unsigned short numpida=0;
 unsigned int currentapid = 0, currentac3 = 0, apidchanged=0;
 bool showaudioselectdialog = false;
-short lcdSetting=0;
-bool ldcUpdate =false;
+short lcdSetting=-1;
+bool lcdUpdateTsMode =false;
 
 
 //------------------------------------------------------------------------
@@ -312,6 +312,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 			}
 			else
 			{
+				CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
 				// TODO check if file is a TS. Not required right now as writing bookmarks is disabled for PES anyway
 				isTS = true;
 				isPES = false;
@@ -1540,8 +1541,11 @@ static void mp_checkEvent(MP_CTX *ctx)
 
 			//-- (live) stream should have 1 atrack only --
 			if(ctx->isStream)	break;
-			g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
-			ldcUpdate=true;
+			if(lcdSetting != -1)
+			{
+				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
+				lcdUpdateTsMode=true;
+			}
 			mp_analyze(ctx);
 			fprintf(stderr, "[mp] using pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
 					  ctx->pida, ctx->pidv, ctx->ac3);
@@ -2012,11 +2016,11 @@ void *mp_playFileThread (void *filename)
 			mp_startDMX(ctx);	// starts only if stopped !
 			//lcd
 			prozent=(ctx->pos*100)/ctx->fileSize;
-			if((last_prozent !=prozent && lcdSetting!=1) || ldcUpdate)
+			if((last_prozent !=prozent && lcdSetting!=1) || lcdUpdateTsMode)
 			{
 				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
 				last_prozent=prozent;
-				ldcUpdate=false;
+				lcdUpdateTsMode=false;
 				CLCD::getInstance()->showPercentOver(prozent);
 				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=1;
 			}
@@ -2865,7 +2869,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.110 $");
+	helpbox.addLine("Version: $Revision: 1.111 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2886,7 +2890,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.110 $");
+	helpbox.addLine("Version: $Revision: 1.111 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
