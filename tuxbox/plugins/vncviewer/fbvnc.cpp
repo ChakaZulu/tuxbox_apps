@@ -624,11 +624,9 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 
 		memset(&iev, 0, sizeof(struct input_event));
 #ifdef HAVE_DREAMBOX_HARDWARE
-dprintf("reading ms_fd\n");
 	if(ms_fd != -1|| ms_fd_usb != -1)
 	{
 		static unsigned short lastmousekey = 0xffff;
-		static int slowdown = 0;
 		if ( (ms_fd != -1 && FD_ISSET(ms_fd, &rfds)) || (ms_fd_usb != -1 && FD_ISSET(ms_fd_usb, &rfds)))
 		{
 		    unsigned char msbuf[3];
@@ -681,13 +679,10 @@ dprintf("reading ms_fd\n");
 				if (lastmousekey == iev.code)
 				{
 				    iev.value = 2;
-				    slowdown++;
-				    if (slowdown == 2) slowdown = 0;
-				    countevt = countevt- (slowdown== 0 ? 1 : 0);
+				    countevt = 0;
 				}
 				else
 				{
-				    slowdown = 0;
 				    iev.value = 0;
 				    lastmousekey = iev.code;
 				}
@@ -819,7 +814,7 @@ dprintf("reading ms_fd\n");
                   else if(countevt>15) step=40;
                   else if(countevt>10) step=20;
                   else if(countevt >5) step=10;
-                  else step=5;
+                  else step=2;
                }
                retval=FBVNC_EVENT_TS_MOVE;
                if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP)
