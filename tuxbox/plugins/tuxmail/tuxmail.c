@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.31  2005/06/07 19:17:51  robspr1
+ * -change ENTER for dBox Keyboard; -simple zoom for mail viewer
+ *
  * Revision 1.30  2005/06/06 21:27:48  robspr1
  * using dBox Keyboard
  *
@@ -811,7 +814,7 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 
 		if(!(glyphindex = FT_Get_Char_Index(face, currentchar)))
 		{
-			printf("TuxMail <FT_Get_Char_Index for Char \"%c\" failed: \"undefined character code\">\n", (int)currentchar);
+			printf("TuxMail <FT_Get_Char_Index for Char \"0x%x\" failed: \"undefined character code\">\n", (int)currentchar);
 
 			return 0;
 		}
@@ -1135,6 +1138,7 @@ void ShowMailFile(char* filename, char* szAction)
 	char szHeader[256];
 	int fSize = SMALL;
 	int fLines = 15;
+	int fChars = 83;
 	int fHeight = FONTHEIGHT_SMALL;
 	int fAssign = LEFT;
   int iRetfgets;
@@ -1152,7 +1156,7 @@ void ShowMailFile(char* filename, char* szAction)
 	int row = 0;
 	
 	// calculate number of pages
-	while( fgets( line, 83, pipe ))
+	while( fgets( line, fChars, pipe ))
 	{
 		if ( ++row > (fLines) )
 		{
@@ -1172,7 +1176,7 @@ void ShowMailFile(char* filename, char* szAction)
 	iPagePos[0] = ftell(pipe);
 	while(1)
 	{
-		iRetfgets=(int)fgets( line, 83, pipe );
+		iRetfgets=(int)fgets( line, fChars, pipe );
 		if( iRetfgets )
 		{
 			p = strchr(line,'\n');
@@ -1203,19 +1207,9 @@ void ShowMailFile(char* filename, char* szAction)
 					}
 					else
 					{
-						fseek(pipe, 0, SEEK_SET);
+//						fseek(pipe, 0, SEEK_SET);
 					}
 					break;
-				}
-				else if( rccode == RC_RIGHT )
-				{
-					fAssign = RIGHT;
-					fseek(pipe, iPagePos[iPage], SEEK_SET);
-				}
-				else if( rccode == RC_LEFT )
-				{
-					fAssign = LEFT;
-					fseek(pipe, iPagePos[iPage], SEEK_SET);
 				}
 				else if( rccode == RC_UP )
 				{
@@ -1232,27 +1226,32 @@ void ShowMailFile(char* filename, char* szAction)
 				}
 				else if( rccode == RC_YELLOW )
 				{
+					fseek(pipe, 0, SEEK_SET);
+					iPage=0;
 					switch( fSize )
 					{
 						case SMALL:
 							fSize = NORMAL;
 							fLines = 12;
+							fChars = 62;
 							fHeight = FONTHEIGHT_NORMAL;
-							fAssign = LEFT;
+							iMaxPages*=2;
 							break;
 						case NORMAL:
 							fSize = BIG;
 							fLines = 9;
+							fChars = 47;
 							fHeight = FONTHEIGHT_BIG;
-							fAssign = LEFT;
 							break;
 						case BIG:
 							fSize = SMALL;
 							fLines = 15;
+							fChars = 83;
 							fHeight = FONTHEIGHT_SMALL;
-							fAssign = LEFT;
+							iMaxPages/=2;
+							break;
 					}
-					fseek(pipe, iPagePos[iPage], SEEK_SET);
+					break;
 				}
 			}
 			row = 0;
@@ -1306,7 +1305,7 @@ void PaintSmtpMailHeader( int nEditDirectStyle )
 			if( nEditDirectStyle == 3 )
 			{
 				RenderString(szKeyBBoxKey[x+y*3],15 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3 + y*(KEYBOX_HEIGHT+KEYBOX_SPACE),25,LEFT, SMALL, WHITE);
-				RenderString(szKeyBBoxInfo[x+y*3],30 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3+ y*(KEYBOX_HEIGHT+KEYBOX_SPACE),60, RIGHT, SMALL, ORANGE);
+				RenderString((osd == 'G') ? szKeyBBoxInfoDe[x+y*3] : szKeyBBoxInfoEn[x+y*3],30 + x*(KEYBOX_WIDTH+KEYBOX_SPACE),VIEWY-INFOBOXY + KEYBOX_SPACE + FONTHEIGHT_SMALL - 3+ y*(KEYBOX_HEIGHT+KEYBOX_SPACE),60, RIGHT, SMALL, ORANGE);
 			}
 			else
 			{
@@ -1644,6 +1643,21 @@ void EditMailFile(char* filename, int account, int mailindex )
 					nEditPos--;
 				}
 				rccode = RC_MUTE;	
+			}
+			else if( rccode == RC_RET )
+			{
+				rccode = RC_DOWN;				
+			}
+			else if( rccode == RC_RET1 )
+			{
+				int i=MAXINFOLINES-1;
+				while( nEditLine < i )
+				{
+					strcpy(szInfo[i],szInfo[i-1]);
+					i--;
+				}
+				szInfo[nEditLine][0]='\0';
+				rccode = -1;				
 			}
 			else if( rccode == RC_ENTF )
 			{
@@ -2849,7 +2863,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.30 $";
+	char cvs_revision[] = "$Revision: 1.31 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;

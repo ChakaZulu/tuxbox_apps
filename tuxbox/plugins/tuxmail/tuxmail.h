@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.25  2005/06/07 19:18:07  robspr1
+ * -change ENTER for dBox Keyboard; -simple zoom for mail viewer
+ *
  * Revision 1.24  2005/06/06 21:28:03  robspr1
  * using dBox Keyboard
  *
@@ -219,6 +222,8 @@
 #define RC_F8			0x01C8
 #define RC_F9			0x01C9
 #define RC_F10		0x01CA
+#define RC_RET		0x0D
+#define RC_RET1		0x01CC
 
 #define RC_F1		RC_RED
 #define RC_F2		RC_GREEN
@@ -230,7 +235,7 @@
 int rctable[] = 
 {
    0x00, RC_ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'ß', '´', RC_BS, 0x09,
-   'q',  'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'ü', '+', 0x0D, RC_STRG, 'a', 's',
+   'q',  'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'ü', '+', RC_RET, RC_STRG, 'a', 's',
    'd',  'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä', '^', RC_LSHIFT, '#', 'y', 'x', 'c', 'v',
    'b',  'n', 'm', ',', '.', '_', RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
    RC_F6,RC_F7,RC_F8,RC_F9,RC_F10,RC_NUM,RC_ROLLEN,0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -241,7 +246,7 @@ int rctable[] =
 int rcshifttable[] = 
 {
    0x00, RC_ESC, '!', '"', '§', '$', '%', '&', '/', '(', ')', '=', '?', '`', 0x08, 0x09,
-   'Q',  'W', 'E', 'R', 'T', 'Z', 'U', 'I', 'O', 'P', 'Ü', '*', 0x0D, RC_STRG, 'A', 'S',
+   'Q',  'W', 'E', 'R', 'T', 'Z', 'U', 'I', 'O', 'P', 'Ü', '*', RC_RET1, RC_STRG, 'A', 'S',
    'D',  'F', 'G', 'H', 'J', 'K', 'L', 'Ö', 'Ä', '°', RC_LSHIFT, 0x27, 'Y', 'X', 'C', 'V',
    'B',  'N', 'M', ';', ':', '-', RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
    RC_F6,RC_F7,RC_F8,RC_F9,RC_F10,RC_NUM,RC_ROLLEN,0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -297,11 +302,17 @@ char *szKeyBoxKey[KEYBOX_KEYS] = {
   "7" , "8" , "9",
   "0" , "+" , "-" } ;
 
-char *szKeyBBoxInfo[KEYBOX_KEYS] = {
+char *szKeyBBoxInfoEn[KEYBOX_KEYS] = {
   "red"   , "OK"   , "clr ln" ,
   "green" , "HOME" , "clr all" ,
   "yellow", "pos1" , "plus",
   "blue"  , "end"  ,  "minus" } ;
+
+char *szKeyBBoxInfoDe[KEYBOX_KEYS] = {
+  "ROT"   , "OK"   , "entf." ,
+  "GRÜN" , "HOME" , "leeren" ,
+  "GELB", "Anf." , "plus",
+  "BLAU"  , "Ende"  ,  "minus" } ;
 
 char *szKeyBBoxKey[KEYBOX_KEYS] = {
   "F1" , "F5" , "F9" ,
