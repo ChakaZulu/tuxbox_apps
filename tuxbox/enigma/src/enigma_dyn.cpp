@@ -64,9 +64,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.3.0-Expert"
+#define WEBIFVERSION "3.3.1-Expert"
 #else
-#define WEBIFVERSION "3.3.0"
+#define WEBIFVERSION "3.3.1"
 #endif
 
 #define KEYBOARDTV 0
@@ -3233,6 +3233,8 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 	eString msg = opts["message"];
 	if (!msg)
+		msg = opt;
+	if (!msg)
 		msg = "Error: No message text available.";
 		
 	eZapMain::getInstance()->postMessage(eZapMessage(1, _("External Message"), httpUnescape(msg), 10), 0);
@@ -4659,9 +4661,6 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 	// vlc parameters
 	result.strReplace("#VLCPARMS#", getvideopls());
 	
-	// pmtpid
-	result.strReplace("#PMTPID#", (Decoder::current.pmtpid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.pmtpid));
-
 	// free recording space on disk
 #ifndef DISABLE_FILE
 	int fds = freeRecordSpace();
