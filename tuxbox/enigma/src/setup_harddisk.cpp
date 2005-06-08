@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.22 2005/06/08 09:58:46 Timekiller Exp $
+ * $Id: setup_harddisk.cpp,v 1.23 2005/06/08 17:11:08 Timekiller Exp $
  */
 
 #include <setup_harddisk.h>
@@ -189,9 +189,9 @@ eHarddiskSetup::eHarddiskSetup()
 	
 	move(ePoint(150, 136));
 	
-	for (int host=0; host<1; host++)
-		for (int bus=0; bus<1; bus++)
-			for (int target=0; target<1; target++)
+	for (int host=0; host<2; host++)
+		for (int bus=0; bus<2; bus++)
+			for (int target=0; target<2; target++)
 			{
 				int num=target+bus*2+host*4;
 				
