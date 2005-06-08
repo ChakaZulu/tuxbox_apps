@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.21 2004/11/26 02:05:17 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.22 2005/06/08 09:58:46 Timekiller Exp $
  */
 
 #include <setup_harddisk.h>
@@ -355,7 +355,7 @@ void eHarddiskMenu::s_format()
 		}
 		fprintf(f, "0,\n;\n;\n;\ny\n");
 		fclose(f);
-#if 0
+#if ENABLE_REISERFS
 		if ( !fs->getCurrent()->getKey() )  // reiserfs
 		{
 			::sync();
