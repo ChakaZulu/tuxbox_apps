@@ -227,7 +227,7 @@ class eMainloop
 	inline void doRecalcTimers();
 	inline void addSocketNotifier(eSocketNotifier *sn);
 	inline void removeSocketNotifier(eSocketNotifier *sn);
-	inline void addTimer(eTimer* e)	{		TimerList.push_back(e);		TimerList.sort();	}
+	inline void addTimer(eTimer* e)	{		TimerList.insert_in_order(e);	}
 	inline void removeTimer(eTimer* e)	{		TimerList.remove(e);	}
 public:
 	static ePtrList<eMainloop> existing_loops;

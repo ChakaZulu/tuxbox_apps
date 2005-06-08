@@ -3,6 +3,7 @@
 
 #include <list>
 #include <vector>
+#include <algorithm>
 #include <lib/base/eerror.h>
 
 template <typename T>
@@ -177,12 +178,12 @@ public:
 		return v;
 	}
 
-//	inline iterator insert_in_order( T* e )
-//	{
-//		// added a new item to the list... in order
-//		// returns a iterator to the new item
-//		return insert( std::lower_bound( std::list<T*>::begin(), std::list<T*>::end(), e ), e );
-//	}
+	inline iterator insert_in_order( T* e )
+	{
+		// added a new item to the list... in order
+		// returns a iterator to the new item
+		return insert( std::lower_bound( std::list<T*>::begin(), std::list<T*>::end(), e, less()), e );
+	}
 
 };
 
