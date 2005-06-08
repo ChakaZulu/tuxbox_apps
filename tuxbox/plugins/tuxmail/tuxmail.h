@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.26  2005/06/08 21:56:31  robspr1
+ * - minor fixes for mail writing; - using dreambox keyboard?
+ *
  * Revision 1.25  2005/06/07 19:18:07  robspr1
  * -change ENTER for dBox Keyboard; -simple zoom for mail viewer
  *
@@ -168,6 +171,35 @@
 #define	RC1_GREEN	0x5C55
 #define	RC1_HELP	0x5C82
 
+// kb codes
+
+#define KEY_0		0x5C00
+#define KEY_1		0x5C01
+#define KEY_2		0x5C02
+#define KEY_3		0x5C03
+#define KEY_4		0x5C04
+#define KEY_5		0x5C05
+#define KEY_6		0x5C06
+#define KEY_7		0x5C07
+#define KEY_8		0x5C08
+#define KEY_9		0x5C09
+#define KEY_POWER	0x5C0C
+#define KEY_UP		0x5C0E
+#define KEY_DOWN	0x5C0F
+#define KEY_VOLUMEUP	0x5C16
+#define KEY_VOLUMEDOWN	0x5C17
+#define KEY_HOME	0x5C20
+#define KEY_SETUP	0x5C27
+#define KEY_MUTE	0x5C28
+#define KEY_RED		0x5C2D
+#define KEY_RIGHT	0x5C2E
+#define KEY_LEFT	0x5C2F
+#define KEY_OK		0x5C30
+#define KEY_BLUE	0x5C3B
+#define KEY_YELLOW	0x5C52
+#define KEY_GREEN	0x5C55
+#define KEY_HELP	0x5C82
+
 #endif
 
 #define	RC_0			'0'
@@ -206,14 +238,13 @@
 #define RC_ALTGR	0x12
 #define RC_BS			0x08
 #define RC_POS1		RC_HOME
-#define RC_END		RC_MUTE
+#define RC_END		0x13
 #define RC_INS		0x10
 #define RC_ENTF		0x11
 #define RC_STRG		0x00
 #define RC_LSHIFT	0x0E
 #define RC_RSHIFT	0x0E
 #define RC_ALT		0x0F
-#define RC_CAPSLOCK	0x00
 #define RC_NUM		RC_DBOX
 #define RC_ROLLEN	0x00
 #define RC_F5			0x01C5
@@ -224,6 +255,8 @@
 #define RC_F10		0x01CA
 #define RC_RET		0x0D
 #define RC_RET1		0x01CC
+#define RC_CAPSLOCK	0x01CD
+#define RC_ON			0x01CE
 
 #define RC_F1		RC_RED
 #define RC_F2		RC_GREEN
@@ -237,7 +270,7 @@ int rctable[] =
    0x00, RC_ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'ß', '´', RC_BS, 0x09,
    'q',  'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p', 'ü', '+', RC_RET, RC_STRG, 'a', 's',
    'd',  'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä', '^', RC_LSHIFT, '#', 'y', 'x', 'c', 'v',
-   'b',  'n', 'm', ',', '.', '_', RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
+   'b',  'n', 'm', ',', '.', '-', RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
    RC_F6,RC_F7,RC_F8,RC_F9,RC_F10,RC_NUM,RC_ROLLEN,0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, RC_STANDBY, 0x00, 0x00, 0x00, 0x00, '<', RC_OK, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, RC_ALTGR, 0x00, RC_POS1, RC_UP, RC_PAGEUP, RC_LEFT, RC_RIGHT, RC_END, RC_DOWN,RC_PAGEDOWN,RC_INS,RC_ENTF,
@@ -248,14 +281,18 @@ int rcshifttable[] =
    0x00, RC_ESC, '!', '"', '§', '$', '%', '&', '/', '(', ')', '=', '?', '`', 0x08, 0x09,
    'Q',  'W', 'E', 'R', 'T', 'Z', 'U', 'I', 'O', 'P', 'Ü', '*', RC_RET1, RC_STRG, 'A', 'S',
    'D',  'F', 'G', 'H', 'J', 'K', 'L', 'Ö', 'Ä', '°', RC_LSHIFT, 0x27, 'Y', 'X', 'C', 'V',
-   'B',  'N', 'M', ';', ':', '-', RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
+   'B',  'N', 'M', ';', ':', '_', RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
    RC_F6,RC_F7,RC_F8,RC_F9,RC_F10,RC_NUM,RC_ROLLEN,0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, RC_STANDBY, 0x00, 0x00, 0x00, 0x00, '>'
 };
 int rcaltgrtable[] = 
 {
    0x00, RC_ESC, 0x00, '²', '³', 0x00, 0x00, 0x00, '{', '[', ']', '}', '\\', 0x00, 0x00, 0x00,
-   '@',  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, '~'
+   '@',  0x00, '€', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, '~', RC_RET1, RC_STRG, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, RC_LSHIFT, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00,  0x00, 'µ', 0x00, 0x00, 0x00, RC_RSHIFT, 0x00, RC_ALT, 0x20, RC_CAPSLOCK,RC_F1,RC_F2,RC_F3,RC_F4,RC_F5,
+   RC_F6,RC_F7,RC_F8,RC_F9,RC_F10,RC_NUM,RC_ROLLEN,0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, RC_STANDBY, 0x00, 0x00, 0x00, 0x00, '|'
 };
 	
 // kb codes

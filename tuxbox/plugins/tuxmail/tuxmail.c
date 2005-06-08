@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.32  2005/06/08 21:56:49  robspr1
+ * - minor fixes for mail writing; - using dreambox keyboard?
+ *
  * Revision 1.31  2005/06/07 19:17:51  robspr1
  * -change ENTER for dBox Keyboard; -simple zoom for mail viewer
  *
@@ -371,6 +374,10 @@ int GetRCCode()
 						if( ev.code > 0x7F )
 						{
 							rccode = 0;
+							if( ev.code == 0x110 )
+							{
+								rccode = RC_ON;
+							}
 						}
 						else
 						{
@@ -385,7 +392,7 @@ int GetRCCode()
 						}
 						else if( rc_last_code == RC_ALTGR )
 						{
-							if( ev.code <= 0x1B )
+							if( ev.code <= 0x56 )
 							{
 								rccode = rcaltgrtable[ev.code];
 							}
@@ -414,7 +421,137 @@ int GetRCCode()
 }
 
 #else
+int GetRCCode()
+{
+	static unsigned short LastKey = -1;
+	static char LastKBCode = 0x00;
 
+	if(sim_key)
+	{
+		sim_key = 0;
+
+		return rccode;
+	}
+	rccode = -1;
+	
+	int bytesavail = 0;
+	int bytesread = read(rc, &rccode, 2);
+	kbcode = 0;
+
+	// Tastaturabfrage
+	ioctl(kb, FIONREAD, &bytesavail);
+	if (bytesavail>0)
+	{
+		char tch[100];
+		char end=0;
+//			read(kb,&kbcode,1);
+		if (bytesavail > 99) bytesavail = 99;
+		read(kb,tch,bytesavail);
+		tch[bytesavail] = 0x00;
+		kbcode = tch[0];
+		LastKBCode = kbcode;
+		if (bytesavail == 1 && kbcode == 0x1b) { kbcode =LastKBCode = 0x00;rccode = RC_HOME; end=1; } // ESC-Taste
+		if (bytesavail == 1 && kbcode == '\n') { kbcode =LastKBCode = 0x00;rccode = RC_OK  ; end=1;} // Enter-Taste
+		if (bytesavail == 1 && kbcode == '+' ) { LastKey = RC_PLUS ; rccode = -1  ; return rccode;}
+		if (bytesavail == 1 && kbcode == '-' ) { LastKey = RC_MINUS; rccode = -1  ; return rccode;}
+		if (bytesavail >= 3 && tch[0] == 0x1b && tch[1] == 0x5b)
+		{
+			if (tch[2] == 0x41 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_UP        ; end=1;}// Cursortasten
+			if (tch[2] == 0x42 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_DOWN      ; end=1;}// Cursortasten
+			if (tch[2] == 0x43 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_RIGHT     ; end=1;}// Cursortasten
+			if (tch[2] == 0x44 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_LEFT      ; end=1;}// Cursortasten
+			if (tch[2] == 0x33 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_MINUS     ; end=1;}// entf-Taste
+			if (tch[2] == 0x32 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_PLUS      ; end=1;}// einf-Taste
+			if (tch[2] == 0x35 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_PLUS      ; end=1;}// PgUp-Taste
+			if (tch[2] == 0x36 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_MINUS     ; end=1;}// PgDn-Taste
+			if (tch[2] == 0x5b && tch[3] == 0x41)                   { kbcode = LastKBCode = 0x00; rccode = RC_RED       ; end=1;}// F1-Taste
+			if (tch[2] == 0x5b && tch[3] == 0x42)                   { kbcode = LastKBCode = 0x00; rccode = RC_GREEN     ; end=1;}// F2-Taste
+			if (tch[2] == 0x5b && tch[3] == 0x43)                   { kbcode = LastKBCode = 0x00; rccode = RC_YELLOW    ; end=1;}// F3-Taste
+			if (tch[2] == 0x5b && tch[3] == 0x44)                   { kbcode = LastKBCode = 0x00; rccode = RC_BLUE      ; end=1;}// F4-Taste
+			if (tch[2] == 0x5b && tch[3] == 0x45)                   { kbcode = LastKBCode = 0x00; rccode = RC_F5        ; end=1;}// F5-Taste
+			if (tch[2] == 0x31 && tch[3] == 0x37 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_F6        ; end=1;}// F6-Taste
+			if (tch[2] == 0x31 && tch[3] == 0x38 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_F7        ; end=1;}// F7-Taste
+			if (tch[2] == 0x31 && tch[3] == 0x39 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_F8        ; end=1;}// F8-Taste
+			if (tch[2] == 0x32 && tch[3] == 0x30 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_F9        ; end=1;}// F9-Taste
+			if (tch[2] == 0x32 && tch[3] == 0x31 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_F10       ; end=1;}// F10-Taste
+			if (tch[2] == 0x32 && tch[3] == 0x33 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_ON        ; end=1;}// F11-Taste
+		}
+		if (bytesread == 0)
+		{
+			if (kbcode == '0') { kbcode = 0x00;rccode = RC_0  ; end=1;}
+			if (kbcode == '1') { kbcode = 0x00;rccode = RC_1  ; end=1;}
+			if (kbcode == '2') { kbcode = 0x00;rccode = RC_2  ; end=1;}
+			if (kbcode == '3') { kbcode = 0x00;rccode = RC_3  ; end=1;}
+			if (kbcode == '4') { kbcode = 0x00;rccode = RC_4  ; end=1;}
+			if (kbcode == '5') { kbcode = 0x00;rccode = RC_5  ; end=1;}
+			if (kbcode == '6') { kbcode = 0x00;rccode = RC_6  ; end=1;}
+			if (kbcode == '7') { kbcode = 0x00;rccode = RC_7  ; end=1;}
+			if (kbcode == '8') { kbcode = 0x00;rccode = RC_8  ; end=1;}
+			if (kbcode == '9') { kbcode = 0x00;rccode = RC_9  ; end=1;}
+		}
+		if (end) { LastKey = rccode; return rccode; }
+	}
+	if (bytesread == 2)
+	{
+		if (rccode == LastKey && LastKBCode != 0x00 && LastKBCode == kbcode)
+		{
+				return rccode;
+		}
+		LastKBCode = 0x00;
+		if (rccode == LastKey)
+		{
+			rccode = -1;
+			return rccode;
+		}
+
+		LastKey = rccode;
+		if ((rccode & 0xFF00) == 0x5C00)
+		{
+			kbcode = 0;
+			switch(rccode)
+			{
+				case KEY_UP:		rccode = RC_UP;			break;
+				case KEY_DOWN:		rccode = RC_DOWN;		break;
+				case KEY_LEFT:		rccode = RC_LEFT;		break;
+				case KEY_RIGHT:		rccode = RC_RIGHT;		break;
+				case KEY_OK:		rccode = RC_OK;			break;
+				case KEY_0:			rccode = RC_0;			break;
+				case KEY_1:			rccode = RC_1;			break;
+				case KEY_2:			rccode = RC_2;			break;
+				case KEY_3:			rccode = RC_3;			break;
+				case KEY_4:			rccode = RC_4;			break;
+				case KEY_5:			rccode = RC_5;			break;
+				case KEY_6:			rccode = RC_6;			break;
+				case KEY_7:			rccode = RC_7;			break;
+				case KEY_8:			rccode = RC_8;			break;
+				case KEY_9:			rccode = RC_9;			break;
+				case KEY_RED:		rccode = RC_RED;		break;
+				case KEY_GREEN:		rccode = RC_GREEN;		break;
+				case KEY_YELLOW:	rccode = RC_YELLOW;		break;
+				case KEY_BLUE:		rccode = RC_BLUE;		break;
+				case KEY_VOLUMEUP:	rccode = RC_PLUS;		break;
+				case KEY_VOLUMEDOWN:rccode = RC_MINUS;		break;
+				case KEY_MUTE:		rccode = RC_MUTE;		break;
+				case KEY_HELP:		rccode = RC_HELP;		break;
+				case KEY_SETUP:		rccode = RC_DBOX;		break;
+				case KEY_HOME:		rccode = RC_HOME;		break;
+				case KEY_POWER:		rccode = RC_STANDBY;	break;
+			}
+			return rccode;
+		}
+		else
+		{
+			rccode &= 0x003F;
+		}
+		return rccode;
+	}
+
+		rccode = -1;
+		usleep(1000000/100);
+		return rccode;
+
+}
+/*
 int GetRCCode()
 {
 	static unsigned short LastKey = -1;
@@ -605,13 +742,14 @@ int GetRCCode()
 
 	return rccode;
 }
-
+*/
 #endif
+
 
 /******************************************************************************
  * GetKBCode
  ******************************************************************************/
-
+/*
 unsigned char GetKBCode()
 {
 	int available;
@@ -705,7 +843,7 @@ unsigned char GetKBCode()
 
 	return kbcode;
 }
-
+*/
 /******************************************************************************
  * MyFaceRequester
  ******************************************************************************/
@@ -1059,6 +1197,35 @@ void RenderCircle(int sx, int sy, char type)
 }
 
 /******************************************************************************
+ * MessageBox
+ ******************************************************************************/
+
+void MessageBox(char* header, char* question)
+{
+	RenderBox(155, 178, 464, 220, FILL, SKIN0);
+	RenderBox(155, 220, 464, 327, FILL, SKIN1);
+	RenderBox(155, 178, 464, 327, GRID, SKIN2);
+	RenderBox(155, 220, 464, 327, GRID, SKIN2);
+  
+	RenderString(header, 157, 213, 306, CENTER, BIG, ORANGE);
+	RenderString(question, 157, 265, 306, CENTER, BIG, WHITE);
+  
+  RenderBox(235, 286, 284, 310, FILL, SKIN2);
+  RenderString("OK", 237, 305, 46, CENTER, SMALL, WHITE);
+	RenderBox(335, 286, 384, 310, FILL, SKIN2);
+	RenderString("EXIT", 337, 305, 46, CENTER, SMALL, WHITE);
+  
+	memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+
+	while( GetRCCode() )
+	{
+		if(( rccode == RC_OK ) || ( rccode == RC_HOME ) || ( rccode == RC_RET ))
+		{
+			break;
+		}
+	}
+}
+/******************************************************************************
  * PaintMailHeader
  ******************************************************************************/
 
@@ -1328,7 +1495,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 	char szFrom[MAXLINELEN];
 	int nEditLine = 2;					// start to edit at body
 	int nEditPos = 0;						// start to edit at body
-	char nEditType = 0;					// type of edit: 0:letters, 1:T9, 2:direct, 3:keyboard
+	char nEditType = 0;					// type of edit: 0:letters, 1:T9, 2:direct
 	int nEditDirectStyle = 0;		// 0: ABC, 1: Abc, 2: abc, 3: keyboard
 	int  nTextFileIdx = 0;
 	int  nAddrFileIdx = 0;
@@ -1584,11 +1751,13 @@ void EditMailFile(char* filename, int account, int mailindex )
 		sprintf(szTmpOut,"Line:%d Pos:%d Type:%d T9:<%x>",nEditLine,nEditPos,nEditType,cLastKey);
 		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
 */
-/*		
+		
+/*
 		char szTmpOut[80];
-		sprintf(szTmpOut,"Key:%x    %c",rccode, rccode);
+		sprintf(szTmpOut,"Key:%x    %c   EV:%x - %x",rccode, rccode,ev.value, ev.code);
 		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
-*/		
+*/
+
 		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 		
 		int valid = 1;
@@ -1598,7 +1767,18 @@ void EditMailFile(char* filename, int account, int mailindex )
 			// don't show error-key, shift or alt
 			switch(rccode)
 			{
-				case 0xFFFF:
+				case RC_CAPSLOCK:
+				case RC_ON:
+					if( nEditDirectStyle != 3 )
+					{
+						nEditLine = 2;
+					}
+					nEditDirectStyle = 3;
+					nEditType = 2;
+					rccode = -1;
+					valid = 1;
+					break;
+//				case 0xFFFF:
 				case RC_LSHIFT:
 				case RC_ALT:
 				case RC_ALTGR:
@@ -1681,26 +1861,35 @@ void EditMailFile(char* filename, int account, int mailindex )
 				nEditPos = 0;
 				rccode = -1;				
 			}
-			else if( rccode == RC_F8 )
+			else if(( rccode == RC_F8 ) || ( rccode == RC_END ))
 			{
 				nEditPos = strlen(szInfo[nEditLine]);
 				rccode = -1;				
 			}
 			else if( rccode == RC_F9 )
 			{
+				int i;
+				for( i=nEditLine; i<MAXINFOLINES-1; i++)
+				{
+					strcpy(szInfo[i],szInfo[i+1]);
+				}
+				szInfo[MAXINFOLINES-1][0]='\0';
 				nEditPos = 0;
-				szInfo[nEditLine][nEditPos]='\0';
 				rccode = -1;
 			}
 			else if( rccode == RC_F10 )
 			{
-				int i;
-				for( i=2; i<MAXINFOLINES; i++ )
+ 				MessageBox((osd == 'G') ? "Löschen" : "clear",(osd == 'G') ? "Text löschen?" : "clear all?");
+				if(( rccode == RC_OK ) || ( rccode == RC_RET ))
 				{
-					szInfo[i][0] = '\0';
+					int i;
+					for( i=2; i<MAXINFOLINES; i++ )
+					{
+						szInfo[i][0] = '\0';
+					}
+					nEditPos = 0;
+					nEditLine = 2;
 				}
-				nEditPos = 0;
-				nEditLine = 2;
 				rccode = -1;
 			}
 		}
@@ -1816,37 +2005,21 @@ void EditMailFile(char* filename, int account, int mailindex )
   				break;
   				
   			case RC_OK:
-  				RenderBox(155, 178, 464, 220, FILL, SKIN0);
-  				RenderBox(155, 220, 464, 327, FILL, SKIN1);
-  				RenderBox(155, 178, 464, 327, GRID, SKIN2);
-  				RenderBox(155, 220, 464, 327, GRID, SKIN2);
-  
-  				RenderString((osd == 'G') ? "Mail senden?" : "send mail?", 157, 213, 306, CENTER, BIG, ORANGE);
-  				RenderString((osd == 'G') ? "Mail jetzt senden?" : "send mail now?", 157, 265, 306, CENTER, BIG, WHITE);
-  
-  		    RenderBox(235, 286, 284, 310, FILL, SKIN2);
-  		    RenderString("OK", 237, 305, 46, CENTER, SMALL, WHITE);
-  				RenderBox(335, 286, 384, 310, FILL, SKIN2);
-  				RenderString("EXIT", 337, 305, 46, CENTER, SMALL, WHITE);
-  
-  				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
-  				while( GetRCCode() )
-  				{
-  					if( rccode == RC_OK )
-  					{
-  						cChar = '\0';
-  						break;
-  					}
-  					if( rccode == RC_HOME )
-  					{
-  						break;
-  					}
-  				}
+  				MessageBox((osd == 'G') ? "Mail senden?" : "send mail?",(osd == 'G') ? "Mail jetzt senden?" : "send mail now?");
+					if(( rccode == RC_OK ) || ( rccode == RC_RET ))
+					{
+  					cChar = '\0';
+					}
   				break;
   
   			case RC_HOME:	
   			case RC_DBOX:
+	 				MessageBox((osd == 'G') ? "Beenden" : "end",(osd == 'G') ? "Jetzt beenden?" : "end now?");
+					if(( rccode == RC_OK ) || ( rccode == RC_RET ))
+					{
+						rccode = RC_HOME;
   					cChar = '\0';
+					}
   				break;
   
   			case RC_RED:
@@ -2863,7 +3036,7 @@ int CheckPIN(int Account)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.31 $";
+	char cvs_revision[] = "$Revision: 1.32 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
