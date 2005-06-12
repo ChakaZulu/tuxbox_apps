@@ -1089,7 +1089,7 @@ PrivateDataSpecifierDescriptor::PrivateDataSpecifierDescriptor(descr_gen_struct 
 		private_data_specifier = data[3];
 		private_data_specifier |= data[0] << 24;
 		private_data_specifier |= data[1] << 16;
-		private_data_specifier |= data[2] << 16;
+		private_data_specifier |= data[2] << 8;
 	}
 }
 
