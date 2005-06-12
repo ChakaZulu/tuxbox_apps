@@ -74,6 +74,10 @@ struct uniqueEPGKey
 #define tmpMap std::map<uniqueEPGKey, std::pair<time_t, int> >
 #define nvodMap std::map<uniqueEPGKey, std::list<NVODReferenceEntry> >
 
+#ifdef ENABLE_PRIVATE_EPG
+#define contentMap std::map<int, std::map<time_t, std::pair<time_t, __u16> > >
+#define contentMaps std::map<uniqueEPGKey, contentMap>
+#endif
 
 #if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 1) || __GNUC__ == 4 )  // check if gcc version >= 3.1
 	#define eventCache __gnu_cxx::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal>
@@ -148,7 +152,7 @@ class eSchedule: public eSection
 	friend class eEPGCache;
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
-	eSchedule()  // 0x50 .. 0x5F	
+	eSchedule()  // 0x50 .. 0x5F
 			:eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
 	{
 	}
@@ -170,11 +174,46 @@ class eNowNext: public eSection
 	friend class eEPGCache;
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
-	eNowNext()  // 0x4E, 0x4F	
+	eNowNext()  // 0x4E, 0x4F
 		:eSection(0x12, 0x4E, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFE)
 	{
 	}
 };
+
+#ifdef ENABLE_PRIVATE_EPG
+class ePrivateContent: public eSection
+{
+	friend class eEPGCache;
+	int sectionRead(__u8 *data);
+	std::set<__u8> seenSections;
+	ePrivateContent()
+	{}
+	void stop()
+	{
+		if ( pid )
+		{
+			abort();
+			pid = 0;
+		}
+	}
+	void start( int pid )
+	{
+		if ( pid != this->pid )
+			start_filter(pid,-1);
+	}
+	void restart()
+	{
+		if ( pid )
+			start_filter(pid);
+	}
+	void start_filter(int pid, int version=-1)
+	{
+		eDebug("[EPGC] start private content filter pid %04x, version %d", pid, version);
+		seenSections.clear();
+		setFilter(pid, 0xA0, -1, version, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFF);
+	}
+};
+#endif
 
 class eEPGCache: public eMainloop, private eThread, public Object
 {
@@ -183,6 +222,9 @@ public:
 	friend class eSchedule;
 	friend class eScheduleOther;
 	friend class eNowNext;
+#ifdef ENABLE_PRIVATE_EPG
+	friend class ePrivateContent;
+#endif
 	struct Message
 	{
 		enum
@@ -195,26 +237,32 @@ public:
 			updated,
 			isavail,
 			quit,
-			timeChanged
+			timeChanged,
+			content_pid,
+			save,
+			load
 		};
 		int type;
 		uniqueEPGKey service;
-		union { 
-			int err; 
-			time_t time; 
+		union {
+			int err;
+			int pid;
+			time_t time;
 			bool avail;
 		};
 		Message()
 			:type(0), time(0) {}
 		Message(int type)
 			:type(type) {}
+		Message(int type, int pid)
+			:type(type), pid(pid) {}
 		Message(int type, bool b)
 			:type(type), avail(b) {}
 		Message(int type, const eServiceReferenceDVB& service, int err=0)
 			:type(type), service(service), err(err) {}
 		Message(int type, time_t time)
 			:type(type), time(time) {}
-	};                   
+	};
 	eFixedMessagePump<Message> messages;
 private:
 	static pthread_mutex_t cache_lock;
@@ -233,6 +281,11 @@ private:
 	eSchedule scheduleReader;
 	eScheduleOther scheduleOtherReader;
 	eNowNext nownextReader;
+#ifdef ENABLE_PRIVATE_EPG
+	contentMaps content_time_tables;
+	ePrivateContent contentReader;
+	void setContentPid(int pid);
+#endif
 	eTimer CleanTimer;
 	eTimer zapTimer;
 	eTimer abortTimer;

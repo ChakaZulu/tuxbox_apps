@@ -131,6 +131,7 @@ public:
 	Signal2<void, EIT*, int> gotEIT;
 	Signal1<void, SDT*> gotSDT;
 	Signal1<void, PMT*> gotPMT;
+	Signal1<void, int> gotContentPid;
 
 	// use from external classes to get PMT/EIT/SDT ... for refcounting
 	PMT *getPMT();

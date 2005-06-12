@@ -828,11 +828,14 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 	videoStreams.clear();
 	subtitleStreams.clear();
 
+	int content_pid=-1;
+
 	ePtrList<PMTEntry>::iterator TTXIt=pmt->streams.end();
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
 		PMTEntry *pe=*i;
 		bool isAudio=false;
+		int tmp=0;
 
 		switch (pe->stream_type)
 		{
@@ -914,10 +917,38 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 				if (isAudio)
 					audioStreams.push_back(stream);
 			}
+			case 5: // private section
+			{
+				if ( content_pid != -1)
+					continue;
+				for (ePtrList<Descriptor>::iterator ii(pe->ES_info); ii != pe->ES_info.end(); ++ii)
+				{
+					switch( ii->Tag() )
+					{
+						case DESCR_PRIV_DATA_SPEC:
+							if ( ((PrivateDataSpecifierDescriptor*)*ii)->private_data_specifier == 190 )
+								tmp |= 1;
+							break;
+						case 0x90:
+						{
+							UnknownDescriptor *descr = (UnknownDescriptor*) *ii;
+							if ( descr->length() == 4 && !descr->data[0] && !descr->data[1] && descr->data[2] == 0xFF && descr->data[3] == 0xFF )
+								tmp |= 2;
+						}
+						default:
+							break;
+					}
+				}
+				if ( tmp == 3 )
+					content_pid = pe->elementary_PID;
+			}
 			default:
 				break;
 		}
 	}
+
+	if ( content_pid != -1 )
+		/*emit*/ dvb.gotContentPid(content_pid);
 
 	audio = priorityAudio(audio);
 
