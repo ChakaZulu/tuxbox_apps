@@ -989,8 +989,6 @@ void eSubServiceSelector::selected(SubService *ss)
 {
 	if (ss)
 		close(0);
-	else
-		close(-1);
 }
 
 void eSubServiceSelector::disableQuickZap()

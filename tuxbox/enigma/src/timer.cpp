@@ -187,13 +187,15 @@ eString getLeft( const eString& str, char c )
 	return found != eString::npos ? str.left(found):str;
 }
 
-static const eString& getEventDescrFromEPGCache( const eServiceReference &_ref, time_t time )
+static const eString& getEventDescrFromEPGCache( const eServiceReference &_ref, time_t time, int event_id = -1 )
 {
 	static eString descr;
 	descr="";
 	const eServiceReferenceDVB &ref = (eServiceReferenceDVB&)_ref;
 	// parse EPGCache to get event informations
-	EITEvent *tmp = eEPGCache::getInstance()->lookupEvent( ref, time );
+	EITEvent *tmp = event_id != -1 ? eEPGCache::getInstance()->lookupEvent( ref, event_id ) : 0;
+	if ( !tmp )
+		eEPGCache::getInstance()->lookupEvent( ref, time );
 	if (tmp)
 	{
 		for (ePtrList<Descriptor>::const_iterator d(tmp->descriptor); d != tmp->descriptor.end(); ++d)
@@ -1791,8 +1793,10 @@ bool eTimerManager::addEventToTimerList( eWidget *sel, const eServiceReference *
 		{
 			sel->hide();
 			subservicesel.show();
+			eWindow::globalCancel(eWindow::OFF);
 			if ( !subservicesel.exec() )
 				subref=subservicesel.getSelected();
+			eWindow::globalCancel(eWindow::ON);
 			subservicesel.hide();
 			sel->show();
 		}
@@ -2258,7 +2262,7 @@ void eTimerEditView::createWidgets()
 }
 
 eTimerEditView::eTimerEditView( ePlaylistEntry* e)
-	:curEntry(e)
+	:curEntry(e), event_id(-1)
 {
 	createWidgets();
 
@@ -2278,7 +2282,7 @@ eTimerEditView::eTimerEditView( ePlaylistEntry* e)
 }
 
 eTimerEditView::eTimerEditView( const EITEvent &e, int type, eServiceReference ref )
-	:curEntry(0)
+	:curEntry(0), event_id(e.event_id)
 {
 	createWidgets();
 	fillInData( e.start_time, e.duration, type, ref );
@@ -2403,7 +2407,10 @@ void eTimerEditView::applyPressed()
 	if ( getData( newEventBegin, newEventDuration) )  // all is okay... we add the event..
 	{
 		// parse EPGCache to get event informations
-		EITEvent *tmp = eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, newEventBegin+newEventDuration / 2 );
+		EITEvent *tmp = event_id && !multiple->isChecked() ? 
+			eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, event_id ) : 0;
+		if (!tmp)
+			eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, newEventBegin+newEventDuration / 2 );
 		if (tmp)
 		{
 			evt = *tmp;
@@ -2736,7 +2743,7 @@ void eTimerEditView::scanEPGPressed()
 				ttype |= ePlaylistEntry::Su;
 			newEventBegin = getNextEventStartTime( newEventBegin, newEventDuration, ttype );
 		}
-		const eString &descr = getEventDescrFromEPGCache( tmpService, newEventBegin+newEventDuration/2);
+		const eString &descr = getEventDescrFromEPGCache( tmpService, newEventBegin+newEventDuration/2, event_id );
 		if ( descr )
 		{
 			event_name->setText( descr );

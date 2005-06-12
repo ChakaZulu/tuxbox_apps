@@ -133,6 +133,7 @@ class eTimerEditView: public eWindow
 	tm beginTime, endTime;
 	eServiceReference tmpService;
 	ePlaylistEntry *curEntry;
+	int event_id;
 private:
 	void scanEPGPressed();
 	void multipleChanged( int );
