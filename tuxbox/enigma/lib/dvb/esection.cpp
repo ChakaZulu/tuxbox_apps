@@ -197,7 +197,7 @@ eSection::~eSection()
 
 int eSection::start( const char* dmxdev )
 {
-	if (timer && (version==-1) && !(flags&SECREAD_NOTIMEOUT))
+	if (timer && version==-1)
 		timer->start(
 			pid == 0x14 /* TOT/TDT */ ? 90000 :
 			pid == 0x10     /* NIT */ ? 12000 :
@@ -205,11 +205,17 @@ int eSection::start( const char* dmxdev )
 			pid == 0x11     /* SDT */ ?  5000 :
 			pid == 0x12     /* EIT */ ? 15000 :
 			tableid == 0x02 /* PMT */ ?  4000 : 10000, true);
-	return setFilter(pid, tableid, tableidext, version, dmxdev);
+	return setFilter(pid, tableid, tableidext, version, flags, tableidmask, dmxdev);
 }
 
-int eSection::setFilter(int pid, int tableid, int tableidext, int version, const char *dmxdev)
+int eSection::setFilter(int pid, int tableid, int tableidext, int version, int flags, int tableidmask, const char *dmxdev)
 {
+	this->pid = pid;
+	this->tableid = tableid,
+	this->tableidext = tableidext;
+	this->version = version;
+	this->flags = flags;
+	this->tableidmask = tableidmask;
 	closeFilter();
 	__u8 data[4], mask[4], mode[4];
 	memset(mode,0,4);
@@ -242,6 +248,12 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version, const
 	{
 		singleLock s(slock);
 		active.push_back(this);
+	}
+
+	if ( timer && (flags&SECREAD_NOTIMEOUT) )
+	{
+		delete timer;
+		timer=0;
 	}
 
 	if (notifier)
@@ -281,7 +293,7 @@ void eSection::data(int socket)
 			eDebug("eSection::data on locked section!");
 
 		int ret = reader.read(buf);
-		if ( ret != -2 && timer && section == -1)
+		if ( ret != -2 && timer && section == -1 )
 		{
 			section=0;
 			timer->start(10000, true);
@@ -332,7 +344,7 @@ void eSection::data(int socket)
 
 void eSection::timeout()
 {
-	eDebug("Section timeout");
+	eDebug("Section timeout PID %04x", pid);
 	closeFilter();
 	sectionFinish(-ETIMEDOUT);
 }
@@ -394,8 +406,12 @@ void eSection::setContext( eMainloop *context )
 {
 	this->context = context;
 	delete timer;
-	timer=new eTimer(context);
-	CONNECT(timer->timeout, eSection::timeout);
+	timer=0;
+	if ( !(flags&SECREAD_NOTIMEOUT) )
+	{
+		timer=new eTimer(context);
+		CONNECT(timer->timeout, eSection::timeout);
+	}
 	if ( notifier )
 		eWarning("setContext with running notifier !!!");
 }

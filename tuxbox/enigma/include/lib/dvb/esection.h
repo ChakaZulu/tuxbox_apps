@@ -45,13 +45,13 @@ class eSection: public Object
 	virtual void sectionFinish(int error);
 protected:
 	int pid, tableid, tableidext, tableidmask;
+	int setFilter(int pid, int tableid, int tableidext, int version, int flags, int tableidmask, const char *dmxdev=DEMUX0);
 private:
 	int maxsec, section, flags, prevSection;
 	void closeFilter();
 	eTimer *timer;
 	__u8 buf[4098];
 	int lockcount;
-	int setFilter(int pid, int tableid, int tableidext, int version, const char *dmxdev=DEMUX0);
 public:
 	void setContext( eMainloop *context );
 	void data(int socket);
