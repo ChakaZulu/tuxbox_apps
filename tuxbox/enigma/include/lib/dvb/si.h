@@ -54,9 +54,11 @@ public:
 class UnknownDescriptor: public Descriptor
 {
 public:
+  __u8 *data;
   UnknownDescriptor(descr_gen_t *descr);
-  ~UnknownDescriptor();                                     	
+  ~UnknownDescriptor();
   eString toString();
+  int length() { return len-2; }
 };
 
 class ServiceDescriptor: public Descriptor
@@ -105,12 +107,12 @@ public:
 class NVODReferenceEntry
 {
 public:
-	bool operator==( const NVODReferenceEntry &e )
-	{
-		return e.transport_stream_id == transport_stream_id
-				&& e.original_network_id == original_network_id
-				&& e.service_id == service_id;
-	}
+  bool operator==( const NVODReferenceEntry &e )
+  {
+    return e.transport_stream_id == transport_stream_id
+      && e.original_network_id == original_network_id
+      && e.service_id == service_id;
+  }
   __u16 transport_stream_id, original_network_id, service_id;
   NVODReferenceEntry(__u16 transport_stream_id, __u16 original_network_id, __u16 service_id);
   ~NVODReferenceEntry();
@@ -345,6 +347,14 @@ public:
 	eString toString();
 	char format_identifier[4];
 	eString additional_identification_info;
+};
+
+class PrivateDataSpecifierDescriptor: public Descriptor
+{
+public:
+	PrivateDataSpecifierDescriptor(descr_gen_struct *descr);
+	eString toString();
+	unsigned long private_data_specifier;
 };
 
 class SubtitleEntry

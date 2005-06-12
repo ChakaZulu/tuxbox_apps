@@ -169,19 +169,20 @@ Descriptor *Descriptor::create(descr_gen_t *descr, int tsidonid)
 		return new RegistrationDescriptor((descr_gen_struct*)descr);
 	case DESCR_TERR_DEL_SYS:
 		return new TerrestrialDeliverySystemDescriptor((descr_terrestrial_delivery_system_struct*)descr);
+	case DESCR_SUBTITLING:
+		return new SubtitlingDescriptor((descr_gen_struct*)descr);
+	case DESCR_PRIV_DATA_SPEC:
+		return new PrivateDataSpecifierDescriptor((descr_gen_struct*)descr);
 	case DESCR_STUFFING:
 	case DESCR_COUNTRY_AVAIL:
 	case DESCR_MOSAIC:
 	case DESCR_TELETEXT:
 	case DESCR_TELEPHONE:
 	case DESCR_LOCAL_TIME_OFF:
-	case DESCR_SUBTITLING:
-		return new SubtitlingDescriptor((descr_gen_struct*)descr);
 	case DESCR_ML_NW_NAME:
 	case DESCR_ML_BQ_NAME:
 	case DESCR_ML_SERVICE_NAME:
 	case DESCR_ML_COMPONENT:
-	case DESCR_PRIV_DATA_SPEC:
 	case DESCR_SERVICE_MOVE:
 	case DESCR_SHORT_SMOOTH_BUF:
 	case DESCR_FREQUENCY_LIST:
@@ -200,12 +201,22 @@ eString Descriptor::toXML()
 }
 
 UnknownDescriptor::UnknownDescriptor(descr_gen_t *descr)
-	:Descriptor(descr)
+	:Descriptor(descr), data(0)
 {
+	if ( len > 2 )
+	{
+		data = new __u8[len-2];
+		memcpy(data, (__u8*) (descr+1), len-2);
+	}
 }
 
 UnknownDescriptor::~UnknownDescriptor()
 {
+	if (len>2)
+	{
+		delete [] data;
+		data=0;
+	}
 }
 
 #ifdef SUPPORT_XML
@@ -1068,6 +1079,24 @@ eString SubtitlingDescriptor::toString()
 	return res;
 }
 #endif
+
+PrivateDataSpecifierDescriptor::PrivateDataSpecifierDescriptor(descr_gen_struct *descr)
+	:Descriptor(descr), private_data_specifier(0)
+{
+	if (len == 6)
+	{
+		__u8 *data = (__u8*) (descr+1);
+		private_data_specifier = data[3];
+		private_data_specifier |= data[0] << 24;
+		private_data_specifier |= data[1] << 16;
+		private_data_specifier |= data[2] << 16;
+	}
+}
+
+eString PrivateDataSpecifierDescriptor::toString()
+{
+	return eString().setNum(private_data_specifier);
+}
 
 PAT::PAT()
 	:eTable(PID_PAT, TID_PAT)
