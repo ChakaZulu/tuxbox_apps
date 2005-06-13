@@ -64,9 +64,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.3.1-Expert"
+#define WEBIFVERSION "3.3.2-Expert"
 #else
-#define WEBIFVERSION "3.3.1"
+#define WEBIFVERSION "3.3.2"
 #endif
 
 #define KEYBOARDTV 0
@@ -285,29 +285,6 @@ static bool playService(const eServiceReference &ref)
 }
 
 #ifndef DISABLE_FILE
-#if 0
-static eString pause(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eZapMain::getInstance()->pause();
-	return "+ok";
-}
-
-static eString play(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eZapMain::getInstance()->play();
-	return "+ok";
-}
-
-static eString stop(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eZapMain::getInstance()->stop();
-	return "+ok";
-}
-#endif
-
 static eString record(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -1438,6 +1415,7 @@ public:
 			if (short_description && addEPG)
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
+			tmp.strReplace("\n", " ");
 
 			if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF))
 				myList.push_back(myService(ref2string(e), tmp));
