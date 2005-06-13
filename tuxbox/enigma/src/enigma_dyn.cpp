@@ -3720,10 +3720,28 @@ static eString showRemoteControl(eString request, eString dirpath, eString opts,
 
 static eString getCurrentVpidApid(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	if (opt != "getpids")
-		return eString("+ok");
+	if (opt == "getpids")
+		return eString().sprintf("%d\n%d\n", Decoder::current.vpid, Decoder::current.apid);
+	else if (opt == "getallpids")
+	{
+		std::stringstream str;
+		str << std::setfill('0');
+		if ( Decoder::current.vpid != -1 )
+			str << std::setw(5) << Decoder::current.vpid << std::endl;
+		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+		if (!sapi || !sapi->service)
+			return "error\n";
+		std::list<eDVBServiceController::audioStream> &audioStreams = sapi->audioStreams;
+		for (std::list<eDVBServiceController::audioStream>::iterator it=audioStreams.begin(); it != audioStreams.end(); ++it)
+			str << std::setw(5) << it->pmtentry->elementary_PID << ' ' << it->text << std::endl;
+		if ( Decoder::current.tpid != -1 )
+			str << std::setw(5) << Decoder::current.tpid << " vtxt\n";
+		if ( Decoder::current.pmtpid != -1 )
+			str << std::setw(5) << Decoder::current.pmtpid << " pmt\n";
+		return str.str();
+	}
 	else
-		return eString().sprintf("%u\n%u\n", Decoder::current.vpid, Decoder::current.apid);
+		return "ok\n";
 }
 
 static eString neutrino_getonidsid(eString request, eString dirpath, eString opts, eHTTPConnection *content)
