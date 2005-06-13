@@ -1415,7 +1415,7 @@ public:
 			if (short_description && addEPG)
 				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 			tmp.strReplace("\"", "'");
-			tmp.strReplace("\n", " ");
+// done in si.cpp	tmp.strReplace("\n", "-");
 
 			if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF))
 				myList.push_back(myService(ref2string(e), tmp));
