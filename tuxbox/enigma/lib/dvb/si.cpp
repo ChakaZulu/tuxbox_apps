@@ -737,6 +737,7 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr, int tsidonid)
 
 	int table=getEncodingTable(language_code);
 
+	event_name.strReplace("\n", " - ");
 	event_name=convertDVBUTF8((unsigned char*)data+ptr, len, table, tsidonid);
 	// filter newlines in ARD ShortEventDescriptor event_name
 	event_name.strReplace("\xc2\x8a",": ");
