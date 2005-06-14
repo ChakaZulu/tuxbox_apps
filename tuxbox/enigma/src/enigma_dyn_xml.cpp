@@ -1,4 +1,3 @@
-#ifdef ENABLE_DYN_XML
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -171,7 +170,7 @@ static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPC
 	return result;
 }
 
-static eString getAudioChannelsXML(eString request, eString dirpath, eString opts, eHTTPConnection *content) //(eString eventID)
+static eString getAudioChannelsXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
 	content->local_header["Cache-Control"] = "no-cache";
@@ -278,56 +277,35 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 					}
 				}
 			}
+			
+			if (!genre)
+				genre = "n/a";
 
 			tm* t = localtime(&event.start_time);
 
+			result << "<event id=\"" << i << "\">";
+			eString tmp = filter_string(description);
+			tmp.strReplace("&", "&amp;");
+			result  << "<date>"
+				<< std::setw(2) << t->tm_mday << '.'
+				<< std::setw(2) << t->tm_mon+1 
+				<< "</date>"
+				<< "<time>"
+				<< std::setw(2) << t->tm_hour << ':'
+				<< std::setw(2) << t->tm_min 
+				<< "</time>"
+				<< "<duration>" << event.duration << "</duration>"
+				<< "<description>" << filter_string(tmp) << "</description>";
+				
 			if (type == "extended")
 			{
-				if (!genre)
-					genre = "n/a";
-
-
-				result << "<epg id=\"" << i << "\">"
-					<< "<date>"
-					<< std::setw(2) << t->tm_mday << '.'
-					<< std::setw(2) << t->tm_mon+1 << "</date><time>"
-					<< std::setw(2) << t->tm_hour << ':'
-					<< std::setw(2) << t->tm_min << ' '
-					<< "</time>\n";
-
-				eString tmp = filter_string(description);
-				tmp.strReplace("\'", "\\\'");
-				tmp.strReplace("\"", "\\\"");
-				tmp.strReplace("&", "&amp;");
-
-#ifndef DISABLE_FILE
-				result << "<ref>" << ref2string(ref) << "</ref>"
-					<< "<start>" << event.start_time << "</start>"
-					<< "<duration>" << event.duration << "</duration>";
-
-				result  << "<descr>" << tmp << "</descr>"
-					<< "<channel>" << filter_string(current->service_name)  << "</channel>";
-#endif
 				eString ext_tmp = filter_string(ext_description);
 				ext_tmp.strReplace("&", "&amp;");
 
-				result << "<event>" << filter_string(tmp) << "</event>"
-					<< "<genre>" << genre	<< "</genre>"
-					<< "<description>" << filter_string(ext_tmp) << "</description></epg>\n";
+				result  << "<genre>" << genre << "</genre>"
+					<< "<details>" << filter_string(ext_tmp) << "</details>";
 			}
-			else
-			{
-				eString ext_tmp2 = filter_string(description);
-			                ext_tmp2.strReplace("&", "&amp;");
-				
-					result << "<epg id=\"" << i << "\">"
-					<< eString().sprintf("<eventid>%x", event.event_id) << "</eventid><date>"
-					<< std::setw(2) << t->tm_mday << '.'
-					<< std::setw(2) << t->tm_mon+1 << "</date><time>"
-					<< std::setw(2) << t->tm_hour << ':'
-					<< std::setw(2) << t->tm_min << "</time>"
-					<< "<description>" << filter_string(ext_tmp2) << "</description></epg>\n";
-			}
+			result << "</event>";
 			i++;
 		}
 	}
@@ -338,7 +316,7 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 	return result.str();
 }
 
-static eString getepgdetailsXML(eString request, eString dirpath, eString opts, eHTTPConnection *content) //(eString eventID)
+static eString getepgdetailsXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
 	result << std::setfill('0');
@@ -603,4 +581,4 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/mplayer.mply", mplayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/getServices", getServices, lockWeb);
 }
-#endif
+
