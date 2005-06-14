@@ -203,7 +203,7 @@ static eString getAudioChannelsXML(eString request, eString dirpath, eString opt
 	return result.str();
 }
 
-static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
 	eString description, ext_description, genre;
@@ -213,18 +213,21 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 	eService* current;
 	eServiceReference ref;
 
-	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
-
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString type = opt["type"];
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content id=\"sapi\">No EPG available</content>";
 
-	//eString serviceRef = opt["ref"];
-	ref = sapi->service;
+	eString type = opt["type"];
+	
+	eString serviceRef = opt["ref"];
+	
+	if (serviceRef)
+		ref = string2ref(serviceRef);
+	else
+		ref = sapi->service;
 
 	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 
@@ -427,21 +430,6 @@ static eString mplayer(eString request, eString dirpath, eString opt, eHTTPConne
 	return "http://" + getIP() + ":31339/" + vpid  + "," + apid;
 }
 
-static eString vlc(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
-	eString apid = eString().sprintf("%04x", Decoder::current.apid);
-	eString pmt = eString().sprintf("%04x", Decoder::current.pmtpid);
-
-	content->local_header["Content-Type"]="video/mpegfile";
-	content->local_header["Cache-Control"] = "no-cache";
-	content->local_header["vpid"] = vpid;
-	content->local_header["apid"] = apid;
-	content->local_header["pmt"] = pmt;
-
-	return "http://" + getIP() + ":31339/0," + pmt + "," + vpid  + "," + apid;
-}
-
 class treeNode
 {
 public:
@@ -608,12 +596,11 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/xml", doStatusXML, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/epg", getcurepgXML, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/epg", getepgXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/epgdetails", getepgdetailsXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/imginfo", getimageinfoXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/audio", getAudioChannelsXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/mplayer.mply", mplayer, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/vlc.pls", vlc, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/getServices", getServices, lockWeb);
 }
 #endif
