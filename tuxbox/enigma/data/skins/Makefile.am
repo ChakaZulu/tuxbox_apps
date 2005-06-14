@@ -9,5 +9,7 @@ install_DATA = \
 	small.esml small.info \
 	small169.esml small169.info \
 	carbon.esml carbon.info \
-	blueqt.esml blueqt.info
+	blueqt.esml blueqt.info \
+	small_snr.esml small_snr.info \
+	stone_snr.esml stone_snr.info
 
