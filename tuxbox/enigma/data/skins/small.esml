@@ -7,6 +7,8 @@
 
 	<fonts>
 		<font file="pakenham.ttf" name="lcd" /> <!-- Found at dafont.com freeware -->
+		<font file="bluebold.ttf" name="Blue.Bold" /> <!-- Found at dafont.com freeware -->
+		<font file="bluehigh.ttf" name="Blue.Regular" /> <!-- Found at dafont.com freeware -->
 	</fonts>
 	<fontalias>
 		<map name="eServiceSelector.Entry.Description" font="Nimbus" size="19" />
@@ -53,54 +55,54 @@
 		<color name="red" color="#ff0303" />
 		<color name="blue" color="#0303ff" />
 		
-<color name="pal0" color="#1d003f80" />
-<color name="pal1" color="#01bdcae2" />
-<color name="pal2" color="#125d84b7" />
-<color name="pal3" color="#1d014081" />
-<color name="pal4" color="#164875ad" />
-<color name="pal5" color="#f6b5c3de" />
-<color name="pal6" color="#252c5f9d" />
-<color name="pal7" color="#174f79b0" />
-<color name="pal8" color="#0f89a4c9" />
-<color name="pal9" color="#1d064384" />
-<color name="pal10" color="#59154f90" />
-<color name="pal11" color="#17114c8d" />
-<color name="pal12" color="#2f195292" />
-<color name="pal13" color="#1d074586" />
-<color name="pal14" color="#b4bfcae2" />
-<color name="pal15" color="#0c7092c1" />
-<color name="pal16" color="#1d0b4788" />
-<color name="pal17" color="#1d3b6ba6" />
-<color name="pal18" color="#01c8d2e7" />
-<color name="pal19" color="#1a7c9ac0" />
-<color name="pal20" color="#01b7c7e0" />
-<color name="pal21" color="#2c1d5594" />
-<color name="pal22" color="#067f9dc8" />
-<color name="pal23" color="#0287a2cc" />
-<color name="pal24" color="#1d0e4a8b" />
-<color name="pal25" color="#12547eb3" />
-<color name="pal26" color="#213264a1" />
-<color name="pal27" color="#cbc3cde4" />
-<color name="pal28" color="#1d044283" />
-<color name="pal29" color="#1e5d83b2" />
-<color name="pal30" color="#05aebeda" />
-<color name="pal31" color="#29245a98" />
-<color name="pal32" color="#06a7b9d8" />
-<color name="pal33" color="#089eb3d3" />
-<color name="pal34" color="#146a8ebb" />
-<color name="pal35" color="#1c4673ab" />
-<color name="pal36" color="#0b95adcf" />
-<color name="pal37" color="#e3bfcae2" />
-<color name="pal38" color="#0196add2" />
-<color name="pal39" color="#01b4c3de" />
-<color name="pal40" color="#02bac6df" />
-<color name="pal41" color="#01b6c4df" />
-<color name="pal42" color="#01bdcbe2" />
-<color name="palx0" color="#ffff0000" />
-<color name="palx1" color="#ff3f3f54" />
-<color name="palx2" color="#feff0000" />
-<color name="palx3" color="#faff0000" />
-<color name="palx4" color="#fdff0000" />
+		<color name="pal0" color="#1d003f80" />
+		<color name="pal1" color="#01bdcae2" />
+		<color name="pal2" color="#125d84b7" />
+		<color name="pal3" color="#1d014081" />
+		<color name="pal4" color="#164875ad" />
+		<color name="pal5" color="#f6b5c3de" />
+		<color name="pal6" color="#252c5f9d" />
+		<color name="pal7" color="#174f79b0" />
+		<color name="pal8" color="#0f89a4c9" />
+		<color name="pal9" color="#1d064384" />
+		<color name="pal10" color="#59154f90" />
+		<color name="pal11" color="#17114c8d" />
+		<color name="pal12" color="#2f195292" />
+		<color name="pal13" color="#1d074586" />
+		<color name="pal14" color="#b4bfcae2" />
+		<color name="pal15" color="#0c7092c1" />
+		<color name="pal16" color="#1d0b4788" />
+		<color name="pal17" color="#1d3b6ba6" />
+		<color name="pal18" color="#01c8d2e7" />
+		<color name="pal19" color="#1a7c9ac0" />
+		<color name="pal20" color="#01b7c7e0" />
+		<color name="pal21" color="#2c1d5594" />
+		<color name="pal22" color="#067f9dc8" />
+		<color name="pal23" color="#0287a2cc" />
+		<color name="pal24" color="#1d0e4a8b" />
+		<color name="pal25" color="#12547eb3" />
+		<color name="pal26" color="#213264a1" />
+		<color name="pal27" color="#cbc3cde4" />
+		<color name="pal28" color="#1d044283" />
+		<color name="pal29" color="#1e5d83b2" />
+		<color name="pal30" color="#05aebeda" />
+		<color name="pal31" color="#29245a98" />
+		<color name="pal32" color="#06a7b9d8" />
+		<color name="pal33" color="#089eb3d3" />
+		<color name="pal34" color="#146a8ebb" />
+		<color name="pal35" color="#1c4673ab" />
+		<color name="pal36" color="#0b95adcf" />
+		<color name="pal37" color="#e3bfcae2" />
+		<color name="pal38" color="#0196add2" />
+		<color name="pal39" color="#01b4c3de" />
+		<color name="pal40" color="#02bac6df" />
+		<color name="pal41" color="#01b6c4df" />
+		<color name="pal42" color="#01bdcbe2" />
+		<color name="palx0" color="#ffff0000" />
+		<color name="palx1" color="#ff3f3f54" />
+		<color name="palx2" color="#feff0000" />
+		<color name="palx3" color="#faff0000" />
+		<color name="palx4" color="#fdff0000" />
 	</colors>
 
 	<colorscheme>
@@ -176,7 +178,7 @@
 		<img name="eListBox.arrow.right" src="lbarrow_right.png" />
 		<img name="eListBox.arrow.up" src="lbarrow_up.png" />
 		<img name="eListBox.arrow.down" src="lbarrow_down.png" />
-<!--
+		<!--
 		<img name="eWindow.top" src="t.png" />
 		<img name="eWindow.topLeft" src="tl.png" />
 		<img name="eWindow.topRight" src="tr.png" />
@@ -206,16 +208,16 @@
 	</images>
 
 	<imagealias>
-	<!--
+		<!--
 		<map name="eStatusBar.top" img="line-h" />
 		<map name="eStatusBar.left" img="line-v" />
 		<map name="eStatusBar.topLeft" img="corner" />
 		<map name="eStatusBar.bottom" img="line-h" />
 		<map name="eStatusBar.right" img="line-v" />
-		<map name="eStatusBar.bottomRight" img="corner" />		
+		<map name="eStatusBar.bottomRight" img="corner" />
 		<map name="eStatusBar.topRight" img="corner" />
-		<map name="eStatusBar.bottomLeft" img="corner" />		
--->
+		<map name="eStatusBar.bottomLeft" img="corner" />
+		-->
 		<map name="eComboBox.top" img="line-h" />
 		<map name="eComboBox.left" img="line-v" />
 		<map name="eComboBox.topLeft" img="corner" />
@@ -311,28 +313,33 @@
 
 			<eWidget position="0:0" size="720:2" backgroundColor="hell" />
 			<eWidget position="0:3" size="720:30" backgroundColor="dunkel" />
+			<!-- SNR Patch begin -->
+			<!-- <eWidget position="320:31" size="400:30" backgroundColor="dunkel" />
+			<eWidget position="320:56" size="400:2" backgroundColor="hell" />
+			<eWidget position="320:36" size="2:21" backgroundColor="hell" /> -->
+			<!-- SNR Patch end -->
 			<eWidget position="0:34" size="720:2" backgroundColor="hell" />
 			<eWidget position="0:398" size="720:3" backgroundColor="hell" />
 			<eWidget position="0:402" size="720:48" backgroundColor="mittel" />
 			<eWidget position="0:451" size="720:16" backgroundColor="dunkel" />
 			<eWidget position="0:468" size="720:3" backgroundColor="hell" />
 		
-			<!--texte    -->     
+			<!-- texte -->     
 			<eLabel position="70:3" size="80:26" font="Nimbus;22" name="ch_number" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 
 			<eLabel position="155:3" size="420:26" font="Nimbus;22" name="ch_name" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 
 			<eLabel position="593:3" size="55:26" font="Nimbus;22" name="time" align="right"  backgroundColor="dunkel" foregroundColor="dunkel+15" />
 			<!-- SNR Patch begin -->
-			<!-- <eLabel position="430:2" size="40:18" name="snr_" font="Nimbus;11" />
-			<eLabel position="430:13" size="40:18" name="agc_" font="Nimbus;11" />
-			<eLabel position="430:24" size="40:18" name="ber_" font="Nimbus;11" />
-			<eLabel position="470:2" size="40:18" name="snr_num" font="Nimbus;11" />
-			<eLabel position="470:13" size="40:18" name="agc_num" font="Nimbus;11" />
-			<eLabel position="470:24" size="40:18" name="ber_num" font="Nimbus;11" />
-			<eProgress position="510:3" size="75:7" name="snr" foregroundColor="mittel+4" border="1" />
-			<eProgress position="510:14" size="75:7" name="agc" foregroundColor="mittel+4" border="1" />
-			<eProgress position="510:25" size="75:7" name="ber" foregroundColor="mittel+4" border="1" /> -->
+			<!-- <eLabel text="SNR:" position="325:36" size="40:18" name="snr_" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel text="AGC:" position="405:36" size="40:18" name="agc_" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel text="BER:" position="485:36" size="40:18" name="ber_" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel position="362:36" size="40:18" name="snr_num" font="Blue.Regular;22" />
+			<eLabel position="442:36" size="40:18" name="agc_num" font="Blue.Regular;22" />
+			<eLabel position="522:36" size="40:18" name="ber_num" font="Blue.Regular;22" />
+			<eProgress position="580:37" size="93:6" name="snr" foregroundColor="dark" border="1" />
+			<eProgress position="580:42" size="93:6" name="agc" foregroundColor="dark" border="1" />
+			<eProgress position="580:49" size="93:6" name="ber" foregroundColor="dark" border="1" /> -->
 			<!-- SNR Patch end -->
 
 			<!-- <eProgress position="428:142" size="156:13" name="progress_bar" foregroundColor="content" border="0" /> -->
@@ -347,7 +354,7 @@
 			<eLabel position="622:451" size="25:15" pixmap="osd_dolby_off" name="osd_dolby_off"/>
 
 			<eLabel name="description" />
-		<!--	 -->
+			<!--	 -->
 			<eLabel position="70:451" size="8:16" pixmap="button_red" name="button_red_enabled" />
 			<eLabel position="132:451" size="8:16" pixmap="button_green" name="button_green_enabled" />
 			<eLabel position="214:451" size="8:16" pixmap="button_yellow" name="button_yellow_enabled" />
@@ -372,7 +379,7 @@
 			</eLabel>
 
 			<eWidget name="dvbInfoBar" position="70:402" size="720:48">
-				<!--Zeilen   -->
+				<!-- Zeilen -->
 				<eLabel position="0:0" size="55:23" font="Nimbus;19" name="e_now_time" backgroundColor="mittel" foregroundColor="mittel+15" />
 				<eLabel position="0:23" size="55:23" font="Nimbus;19" name="e_next_time" backgroundColor="mittel" foregroundColor="mittel+15" />
 
