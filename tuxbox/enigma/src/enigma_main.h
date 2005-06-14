@@ -20,6 +20,7 @@
 #include <lib/gui/eprogress.h>
 #include <src/audio_dynamic.h>
 #include <lib/dvb/subtitling.h>
+#include <math.h>
 
 class eProgress;
 
@@ -325,7 +326,7 @@ public:
 	enum { pathBouquets=1, pathProvider=2, pathRecordings=4, pathPlaylist=8, pathAll=16, pathRoot=32, pathSatellites=64 };
 	enum { listAll, listSatellites, listProvider, listBouquets };
 private:
-	eLabel 	*ChannelNumber, *ChannelName, *Clock,
+	eLabel 	*ChannelNumber, *ChannelName, *Clock, *lsnr_num, *lsync_num, *lber_num, *lsnr_, *lagc_, *lber_,
 		*EINow, *EINext, *EINowDuration, *EINextDuration,
 		*EINowTime, *EINextTime, *Description, *fileinfos,
 		*ButtonRedEn, *ButtonRedDis,
@@ -350,7 +351,7 @@ private:
 #else
 	eProgress *Progress;
 #endif
-	eProgress *VolumeBar;
+	eProgress *VolumeBar, *p_snr, *p_agc, *p_ber;
 	eMessageBox *pMsg, *pRotorMsg;
 
 	eLock messagelock;
@@ -364,6 +365,9 @@ private:
 	eTimer timeout, clocktimer, messagetimeout,
 					progresstimer, volumeTimer, recStatusBlink,
 					doubleklickTimer, unusedTimer;
+/* SNR,AGC,BER DISPLAY */
+	eTimer *snrTimer;
+/* SNR,AGC,BER DISPLAY */
 
 	Connection doubleklickTimerConnection;
 
@@ -449,7 +453,9 @@ private:
 	void hideVolumeSlider();
 	void toggleMute();
 	void showMainMenu();
-
+/* SNR,AGC,BER DISPLAY */
+	void showSNR();
+/* SNR,AGC,BER DISPLAY */
 	timeval standbyTime;
 	int standby_nomenu;
 

@@ -323,6 +323,17 @@
 			<eLabel position="155:3" size="420:26" font="Nimbus;22" name="ch_name" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 
 			<eLabel position="593:3" size="55:26" font="Nimbus;22" name="time" align="right"  backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<!-- SNR Patch begin -->
+			<!-- <eLabel position="430:2" size="40:18" name="snr_" font="Nimbus;11" />
+			<eLabel position="430:13" size="40:18" name="agc_" font="Nimbus;11" />
+			<eLabel position="430:24" size="40:18" name="ber_" font="Nimbus;11" />
+			<eLabel position="470:2" size="40:18" name="snr_num" font="Nimbus;11" />
+			<eLabel position="470:13" size="40:18" name="agc_num" font="Nimbus;11" />
+			<eLabel position="470:24" size="40:18" name="ber_num" font="Nimbus;11" />
+			<eProgress position="510:3" size="75:7" name="snr" foregroundColor="mittel+4" border="1" />
+			<eProgress position="510:14" size="75:7" name="agc" foregroundColor="mittel+4" border="1" />
+			<eProgress position="510:25" size="75:7" name="ber" foregroundColor="mittel+4" border="1" /> -->
+			<!-- SNR Patch end -->
 
 			<!-- <eProgress position="428:142" size="156:13" name="progress_bar" foregroundColor="content" border="0" /> -->
 

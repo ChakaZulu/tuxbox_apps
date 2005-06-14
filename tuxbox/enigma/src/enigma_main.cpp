@@ -1632,6 +1632,17 @@ eZapMain::eZapMain()
 #ifndef DISABLE_LCD
 	lcdmain.show();
 #endif
+// SNR Patch
+	ASSIGN(p_snr, eProgress, "snr");
+	ASSIGN(p_agc, eProgress, "agc");
+	ASSIGN(p_ber, eProgress, "ber");
+	ASSIGN(lsnr_num, eLabel, "snr_num");
+	ASSIGN(lsync_num, eLabel, "agc_num");
+	ASSIGN(lber_num, eLabel, "ber_num");
+	ASSIGN(lsnr_, eLabel, "snr_");
+	ASSIGN(lagc_, eLabel, "agc_");
+	ASSIGN(lber_, eLabel, "ber_");
+// SNR Patch
 
 	ASSIGN(ChannelNumber, eLabel, "ch_number");
 	ASSIGN(ChannelName, eLabel, "ch_name");
@@ -2848,6 +2859,23 @@ standby:
 		}
 	}
 }
+/* SNR,AGC,BER DISPLAY begin */
+void eZapMain::showSNR()
+{
+	int snr=eFrontend::getInstance()->SNR()*100/65536;
+	int agc=eFrontend::getInstance()->SignalStrength()*100/65536;
+	int ber=eFrontend::getInstance()->BER();
+	p_agc->setPerc((agc));
+	p_snr->setPerc((snr));
+	p_ber->setPerc((int)log2(ber));
+	lsnr_num->setText(eString().sprintf("%d%%",snr));
+	lsync_num->setText(eString().sprintf("%d%%",agc));
+	lber_num->setText(eString().sprintf("%d",ber)); 
+	lsnr_->setText("SNR:");
+	lagc_->setText("AGC:");
+	lber_->setText("BER:");
+}
+/* SNR,AGC,BER DISPLAY end */
 
 void eZapMain::showInfobar(bool startTimeout)
 {
@@ -2857,8 +2885,17 @@ void eZapMain::showInfobar(bool startTimeout)
 
 	if (startTimeout && doHideInfobar())
 		timeout.start(6000, 1);
-}
 
+/* SNR,AGC DISPLAY begin */
+/* SNR,AGC Display function call */
+	if(!snrTimer)
+	{
+		snrTimer=new eTimer(eApp);
+		snrTimer->start(1000,false); 
+		CONNECT(snrTimer->timeout,eZapMain::showSNR);
+	}
+/* SNR,AGC DISPLAY end */
+}
 void eZapMain::hideInfobar()
 {
 	if (doHideInfobar())
@@ -2866,6 +2903,13 @@ void eZapMain::hideInfobar()
 		timeout.stop();
 		hide();
 	}
+/* SNR,AGC DISPLAY begin */
+	if(snrTimer)
+	{
+		delete snrTimer;
+		snrTimer=0;
+	}
+/* SNR,AGC DISPLAY end */
 }
 
 #ifndef DISABLE_FILE
