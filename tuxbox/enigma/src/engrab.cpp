@@ -9,7 +9,7 @@
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/service.h>
 #include <lib/dvb/dvb.h>
-/*#include <lib/dvb/dvbservice.h>*/
+#include <lib/dvb/dvbservice.h>
 #include <lib/dvb/epgcache.h>
 //#include <lib/base/estring.h>
 //#define TMP_NgrabXML "/var/tmp/e-ngrab.xml"
@@ -73,7 +73,15 @@ eString ENgrab::startxml( const char* descr )
 	xmlstart+="    <epgid>123456</epgid>\n"; // und die epgid auch nicht
 	xmlstart+="    <videopid>"+eString().sprintf("%d", Decoder::current.vpid)+"</videopid>\n";
 	xmlstart+="    <audiopids selected=\""+eString().sprintf("%d", Decoder::current.apid)+"\">\n";
-	xmlstart+="       <audio pid=\""+eString().sprintf("%d", Decoder::current.apid)+"\" name=\"standard\"/>\n";
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi || !sapi->service)
+		xmlstart+="       <audio pid=\""+eString().sprintf("%d", Decoder::current.apid)+"\" name=\"standard\"/>\n";
+	else
+	{
+		std::list<eDVBServiceController::audioStream> &audioStreams = sapi->audioStreams;
+		for (std::list<eDVBServiceController::audioStream>::iterator it = audioStreams.begin(); it != audioStreams.end(); ++it)
+			xmlstart+="       <audio pid=\""+eString().sprintf("%d", it->pmtentry->elementary_PID)+"\" name=\"standard\"/>\n";
+	}
 	xmlstart+="    </audiopids>\n";
 	xmlstart+="  </record>\n";
 	xmlstart+=" </neutrino>\n";
