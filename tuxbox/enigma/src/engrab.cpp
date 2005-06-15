@@ -80,7 +80,7 @@ eString ENgrab::startxml( const char* descr )
 	{
 		std::list<eDVBServiceController::audioStream> &audioStreams = sapi->audioStreams;
 		for (std::list<eDVBServiceController::audioStream>::iterator it = audioStreams.begin(); it != audioStreams.end(); ++it)
-			xmlstart+="       <audio pid=\""+eString().sprintf("%d", it->pmtentry->elementary_PID)+"\" name=\"standard\"/>\n";
+			xmlstart+="       <audio pid=\""+eString().sprintf("%d", it->pmtentry->elementary_PID) + "\" name=\"" + it->text + "\"/>\n";
 	}
 	xmlstart+="    </audiopids>\n";
 	xmlstart+="  </record>\n";
