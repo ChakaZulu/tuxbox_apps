@@ -45,7 +45,7 @@ extern eString firmwareLevel(eString verid);
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 extern eString getIP(void);
 
-static eString getimageinfoXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getImageInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
 	content->local_header["Cache-Control"] = "no-cache";
@@ -57,18 +57,18 @@ static eString getimageinfoXML(eString request, eString dirpath, eString opts, e
 	eString myComment = getAttribute("/.version", "comment");
 	eString myImageURL = getAttribute("/.version", "url");
 
-	result << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>";
-	result << "<title>Installed Image Information</title>";
-	result << "<version>" << firmwareLevel(myVersion) << "</version>";
-	result << "<url>" << myImageURL << "</url>";
-	result << "<comment>" << myComment << "</comment>";
-	result << "<catalog>" << myCatalogURL << "</catalog>";
-	result << "</content>";
+	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		<< "<image>"
+		<< "<version>" << firmwareLevel(myVersion) << "</version>"
+		<< "<url>" << myImageURL << "</url>"
+		<< "<comment>" << myComment << "</comment>"
+		<< "<catalog>" << myCatalogURL << "</catalog>"
+		<< "</image>";
 
 	return result.str();
 }
 
-static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt;
 
@@ -79,10 +79,9 @@ static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPC
 	time_t atime;
 	time(&atime);
 	atime += eDVB::getInstance()->time_difference;
-	result = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
-		"<content>"
-		"<title>Enigma Status</title>"
-		"<currenttime>" + eString(ctime(&atime)) + "</currenttime>"
+	result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		"<status>"
+		"<current_time>" + eString(ctime(&atime)) + "</current_time>"
 		"<standby>";
 		if (eZapMain::getInstance()->isSleeping())
 			result += "ON";
@@ -102,7 +101,7 @@ static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPC
 	eString sRef;
 	if (eServiceInterface::getInstance()->service)
 		sRef = eServiceInterface::getInstance()->service.toString();
-	result += "<servicereference>" + sRef + "</servicereference>";
+	result += "<service_reference>" + sRef + "</service_reference>";
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
@@ -154,7 +153,7 @@ static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPC
 				vidform += "(20:9)"; break;
 		}
 	}
-	result += "<name>" + name + "</name>";
+	result += "<service_name>" + name + "</service_name>";
 	result += "<provider>" + provider + "</provider>";
 	result += "<vpid>" + vpid + "</vpid>";
 	result += "<apid>" + apid + "</apid>";
@@ -165,19 +164,20 @@ static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPC
 	result += "<sid>" + sid + "</sid>";
 	result += "<pmt>" + pmt + "</pmt>";
 	result += "<videoformat>" + vidform + "</videoformat>";
-	result += "</content>";
+	result += "</status>";
 	
 	return result;
 }
 
-static eString getAudioChannelsXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getAudioChannels(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
 	content->local_header["Cache-Control"] = "no-cache";
 
 	std::stringstream result;
 
-	result << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>";
+	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		<< "<audio_channels>";
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
@@ -185,24 +185,29 @@ static eString getAudioChannelsXML(eString request, eString dirpath, eString opt
 		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
 			;it != astreams.end(); ++it)
 		{
+			result  << "<channel>" 
+				<< "<pid>"
+				<< eString().sprintf("0x%04x", it->pmtentry->elementary_PID)
+				<< "</pid>"
+				<< "<selected>";
 			if (it->pmtentry->elementary_PID == Decoder::current.apid)
-				result << eString().sprintf("<audio pid=\"0x%04x\">", it->pmtentry->elementary_PID);
+				result << "1";
 			else
-				result << eString().sprintf("<audio pid=\"0x%04x\">", it->pmtentry->elementary_PID);
-
-			result << it->text;
-			result << "</audio>";
+				result << "0";
+			result  << "</selected>"
+				<< "<name>" << it->text << "</name>"
+				<< "</channel";
 		}
 	}
 	else
 		result << "<audio>none</audio>";
 
-	result << "</content>";
+	result << "</audio_channels>";
 	
 	return result.str();
 }
 
-static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
 	eString description, ext_description, genre;
@@ -245,7 +250,8 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 		int tsidonid = (rref.getTransportStreamID().get()<<16) | rref.getOriginalNetworkID().get();
 		result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			<< "<epg>"
-			<< "<service_reference>" << ref2string(ref) << "</service_reference>";
+			<< "<service_reference>" << ref2string(ref) << "</service_reference>"
+			<< "<service_name>" << filter_string(current->service_name) << "</service_name>";
 		
 		int i = 0;
 		for(It=evt->begin(); It!= evt->end(); ++It)
@@ -291,7 +297,7 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 			result  << "<date>"
 				<< std::setw(2) << t->tm_mday << '.'
 				<< std::setw(2) << t->tm_mon+1 << '.' 
-				<< std::setw(2) << t->tm_year 
+				<< std::setw(2) << t->tm_year + 1900
 				<< "</date>"
 				<< "<time>"
 				<< std::setw(2) << t->tm_hour << ':'
@@ -320,86 +326,7 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 	return result.str();
 }
 
-static eString getepgdetailsXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::stringstream result;
-	result << std::setfill('0');
-
-	eServiceReference ref;
-
-	eService *current = NULL;
-	eString ext_description;
-	std::stringstream record;
-	int eventid;
-	eString description = "No description available";
-
-
-	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
-
-	std::map<eString, eString> opt = getRequestOptions(opts, '=');
-	eString eventID = opt["id"];
-
-	sscanf(eventID.c_str(), "%x", &eventid);
-
-	// search for the event... to get the description...
-	result << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>";
-	//result << <ref>" << ref2string(ref) << "</ref><id>" << eventid << "</id>";
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (sapi)
-	{
-		eServiceReference ref = sapi->service;
-		//eServiceReference ref(string2ref(serviceRef));
-		current = eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)ref);
-
-		//result << "<current>" << current << "</current>";
-		eEPGCache::getInstance()->Lock();
-		if (current)
-		{
-			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid);
-			if (event)
-			{
-				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
-				{
-					if (d->Tag() == DESCR_SHORT_EVENT)
-					{
-						description = ((ShortEventDescriptor*)*d)->event_name;
-						eDebug("[ENIGMA_DYN] getEPGDetails: found description = %s", description.c_str());
-					}
-					if (d->Tag() == DESCR_EXTENDED_EVENT)
-					{
-						ext_description += ((ExtendedEventDescriptor*)*d)->text;
-						eDebug("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
-					}
-				}
-
-				if (!ext_description)
-					ext_description = "No detailed information available";
-
-					eString ext_tmp = filter_string(description);
-					ext_tmp.strReplace("&", "&amp;");
-					
-					result << "<path>" << ref2string(ref) << "</path>"
-					<< "<channel>" << filter_string(current->service_name) << "</channel>"
-					<< "<eventid>" << std::hex << event->event_id << std::dec << "</eventid>"
-					<< "<time>" << event->start_time << "</time>"
-					<< "<duration>" << event->duration << "</duration>"
-					<< "<descr>" << filter_string(ext_tmp) << "</descr>"
-					<< "<description>" << filter_string(ext_description) << "</description>";
-
-				delete event;
-			}
-		}
-	}
-
-	result << "</content>";
-	eEPGCache::getInstance()->Unlock();
-
-	return result.str();
-}
-
-static eString mplayer(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString mPlayer(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
 	eString apid = eString().sprintf("%04x", Decoder::current.apid);
@@ -441,9 +368,9 @@ eString getTag(int id)
 	eString tag;
 	switch(id)
 	{
-		case 2: tag = "satellite"; break;
-		case 3: tag = "provider"; break;
-		case 4: tag = "bouquet"; break;
+		case 2: tag = "satellites"; break;
+		case 3: tag = "providers"; break;
+		case 4: tag = "bouquets"; break;
 		default: tag = "unknown"; break;
 	}
 	return tag;
@@ -551,7 +478,7 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
 	content->local_header["Cache-Control"] = "no-cache";
 
-	eString result = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
+	eString result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
 	std::map<eString,eString> opts=getRequestOptions(opt, '&');
 
@@ -577,12 +504,11 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/xml", doStatusXML, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/epg", getepgXML, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/epgdetails", getepgdetailsXML, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/imginfo", getimageinfoXML, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/audio", getAudioChannelsXML, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/mplayer.mply", mplayer, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/getServices", getServices, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/status", getStatus, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/epg", getEPG, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/imageinfo", getImageInfo, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/audiochannels", getAudioChannels, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/mplayer.mply", mPlayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/getservices", getServices, lockWeb);
 }
 
