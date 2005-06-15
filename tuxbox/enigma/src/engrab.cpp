@@ -64,7 +64,7 @@ eString ENgrab::startxml( const char* descr )
 {
 	eString xmlstart;
 
-	xmlstart+="<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
+	xmlstart+="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	xmlstart+=" <neutrino commandversion=\"1\">\n";
 	xmlstart+="   <record command=\"record\">\n";
 	xmlstart+="    <channelname>"+getServiceName()+"</channelname>\n";//übernommen von trh
@@ -102,7 +102,7 @@ eString ENgrab::stopxml()
 {
 	eString xmlstop;
 
-	xmlstop+="<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
+	xmlstop+="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	xmlstop+=" <neutrino commandversion=\"2\">\n";
 	xmlstop+="   <record command=\"stop\">\n";
 	xmlstop+="    <channelname></channelname>\n";
