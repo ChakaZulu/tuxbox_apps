@@ -217,7 +217,7 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
-		return "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content id=\"sapi\">No EPG available</content>";
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><content id=\"sapi\">No EPG available</content>";
 
 	eString type = opt["type"];
 	
@@ -231,19 +231,21 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 
 	if (!current)
-		return "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content id=\"current\">No EPG available</content>";
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><content id=\"current\">No EPG available</content>";
 
 	eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
 	eEPGCache::getInstance()->Lock();
 	const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
 
 	if (!evt)
-		return "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content id=\"evt\">No EPG available</content>";
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><content id=\"evt\">No EPG available</content>";
 	else
 	{
 		timeMap::const_iterator It;
 		int tsidonid = (rref.getTransportStreamID().get()<<16) | rref.getOriginalNetworkID().get();
-		result << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>";
+		result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			<< "<epg>"
+			<< "<service_reference>" << ref2string(ref) << "</service_reference>";
 		
 		int i = 0;
 		for(It=evt->begin(); It!= evt->end(); ++It)
@@ -288,13 +290,14 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 			tmp.strReplace("&", "&amp;");
 			result  << "<date>"
 				<< std::setw(2) << t->tm_mday << '.'
-				<< std::setw(2) << t->tm_mon+1 
+				<< std::setw(2) << t->tm_mon+1 << '.' 
+				<< std::setw(2) << t->tm_year 
 				<< "</date>"
 				<< "<time>"
 				<< std::setw(2) << t->tm_hour << ':'
 				<< std::setw(2) << t->tm_min 
 				<< "</time>"
-				<< "<duration>" << event.duration << "</duration>"
+				<< "<duration>" << event.duration / 60 << "</duration>"
 				<< "<description>" << filter_string(tmp) << "</description>";
 				
 			if (type == "extended")
@@ -303,6 +306,7 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 				ext_tmp.strReplace("&", "&amp;");
 
 				result  << "<genre>" << genre << "</genre>"
+					<< "<start>" << event.start_time << "</start>"
 					<< "<details>" << filter_string(ext_tmp) << "</details>";
 			}
 			result << "</event>";
@@ -311,7 +315,7 @@ static eString getepgXML(eString request, eString dirpath, eString opts, eHTTPCo
 	}
 	eEPGCache::getInstance()->Unlock();
 
-	result << "</content>";
+	result << "</epg>";
 
 	return result.str();
 }
