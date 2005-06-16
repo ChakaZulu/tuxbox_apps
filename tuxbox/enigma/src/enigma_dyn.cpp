@@ -58,9 +58,7 @@
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
-#ifdef ENABLE_DYN_MOUNT
 #include <enigma_mount.h>
-#endif
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
@@ -4927,6 +4925,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_getchannellist, lockWeb);
 	
 	ezapWapInitializeDyn(dyn_resolver, lockWeb);
+	ezapXMLInitializeDyn(dyn_resolver, lockWeb);
 #ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
 #endif
@@ -4938,9 +4937,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #endif
 #ifdef ENABLE_DYN_ROTOR
 	ezapRotorInitializeDyn(dyn_resolver, lockWeb);
-#endif
-#ifdef ENABLE_DYN_XML
-	ezapXMLInitializeDyn(dyn_resolver, lockWeb);
 #endif
 }
 
