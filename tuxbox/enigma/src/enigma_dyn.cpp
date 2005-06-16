@@ -64,9 +64,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.4.1-Expert"
+#define WEBIFVERSION "3.4.2-Expert"
 #else
-#define WEBIFVERSION "3.4.1"
+#define WEBIFVERSION "3.4.2"
 #endif
 
 #define KEYBOARDTV 0
@@ -3699,7 +3699,10 @@ static eString showRemoteControl(eString request, eString dirpath, eString opts,
 		else
 		{
 			result = readFile(TEMPLATE_DIR + "remoteControl.tmp");
-			if (access("/tmp/osdshot.png", R_OK) == 0)
+			int osdshotenabled = 1;
+			eConfig::getInstance()->getKey("/enigma/osdshotenabled", osdshotenabled);
+			result.strReplace("#OSDSHOTENABLED#", eString().sprintf("%d", osdshotenabled));
+			if ((access("/tmp/osdshot.png", R_OK) == 0) && (osdshotenabled == 1))
 				result.strReplace("#OSDSHOTPNG#", "/root/tmp/osdshot.png");
 			else
 				result.strReplace("#OSDSHOTPNG#", "trans.gif");
@@ -4850,9 +4853,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/mv", moveFile, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/ln", createSymlink, lockWeb);
 #ifndef DISABLE_FILE
-//	dyn_resolver->addDyn("GET", "/cgi-bin/stop", stop, lockWeb);
-//	dyn_resolver->addDyn("GET", "/cgi-bin/pause", pause, lockWeb);
-//	dyn_resolver->addDyn("GET", "/cgi-bin/play", play, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/record", record, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/videocontrol", videocontrol, lockWeb);
 #endif
