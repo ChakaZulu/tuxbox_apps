@@ -3,6 +3,13 @@ TuxCom:
 History:
 ---------
 
+11.06.2006 Version 1.8
+ - direct jump into root-directory possible (select entry '/')
+ - more file information in rights-dialogue
+ - pressing OK at a file which is not executable opens viewer
+ - new created file/directory is automatically selected
+ - bugfix: sometimes \n was removed when editing a line
+
 12.01.2005 Version 1.7
  - some colors changed
  - bugfix: crash when entering text in last line in editor

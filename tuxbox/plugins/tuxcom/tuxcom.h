@@ -22,22 +22,13 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
-// setting Program-Version
-// 3 = for DBox
-// 2 = for Dreambox with new Freetype
-// 1 = for Dreambox with old Freetype
-#ifdef HAVE_DREAMBOX_HARDWARE
-	#define TUXCOM_DBOX_VERSION 1
-#else
-	#define TUXCOM_DBOX_VERSION 3
-#endif
-
 #include <config.h>
 #include <errno.h>
 #include <locale.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -62,7 +53,7 @@
 #include FT_CACHE_SMALL_BITMAPS_H
 
 
-#if TUXCOM_DBOX_VERSION >= 3
+#ifndef HAVE_DREAMBOX_HARDWARE
 #include <linux/input.h>
 #endif
 
@@ -86,12 +77,12 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.7\n"
-#define MSG_COPYRIGHT  "© dbluelle 2004"
+#define MSG_VERSION    "Tuxbox Commander Version 1.8\n"
+#define MSG_COPYRIGHT  "© dbluelle 2004-2005"
 //rc codes
 
 //rc codes
-#if TUXCOM_DBOX_VERSION < 3
+#ifdef HAVE_DREAMBOX_HARDWARE
 
 #define KEY_0		0x5C00
 #define KEY_1		0x5C01
@@ -119,49 +110,6 @@
 #define KEY_YELLOW	0x5C52
 #define KEY_GREEN	0x5C55
 #define KEY_HELP	0x5C82
-/*
-#define KEY_0 0x0000
-#define KEY_1 0x0001
-#define KEY_2 0x0002
-#define KEY_3 0x0003
-#define KEY_4 0x0004
-#define KEY_5 0x0005
-#define KEY_6 0x0006
-#define KEY_7 0x0007
-#define KEY_8 0x0008
-#define KEY_9 0x0009
-#define KEY_VOLUMEUP 0x000a // Wheel left
-#define KEY_VOLUMEDOWN 0x000b // Wheel right
-#define KEY_TV 0x000c // Document info
-#define KEY_BOUQUP 0x000d // Wheel up
-#define KEY_BOUQDOWN 0x000e // Wheel down
-#define KEY_POWER 0x000f
-#define KEY_SETUP 0x0020 // Escape
-#define KEY_UP 0x0021 // Mouse up
-#define KEY_DOWN 0x0022 // Mouse down
-#define KEY_LEFT 0x0023 // Mouse left
-#define KEY_RIGHT 0x0024 // Mouse right
-#define KEY_OK 0x0025 // Mouse leftclick
-#define KEY_AUDIO 0x0026 // Cursor down
-#define KEY_VIDEO 0x0027 // Space
-#define KEY_INFO 0x0028 // Cursor up
-//#define KEY_SHIFT_RED 0x0030
-//#define KEY_SHIFT_GREEN 0x0031
-//#define KEY_SHIFT_YELLOW 0x0032
-//#define KEY_SHIFT_BLUE 0x0033
-//#define KEY_RECORD 0x0035
-#define KEY_RED 0x0040 // z - go back
-#define KEY_GREEN 0x0041 // reload
-#define KEY_YELLOW 0x0042 // Kill all connections
-#define KEY_BLUE 0x0043 // Enter
-#define KEY_MUTE 0x0044 // Backspace
-#define KEY_TEXT 0x0045 // g - Goto url
-#define KEY_NEXT 0x0050 // Cursor right
-#define KEY_PREV 0x0051 // Cursor left
-#define KEY_HOME 0x0052 // Escape
-#define KEY_RADIO 0x0053 // d - Download Link
-#define KEY_HELP 0x0054 // s - Bookmark Manager
-*/
 #endif
 #define	RC_0		0x00
 #define	RC_1		0x01
@@ -206,9 +154,8 @@ FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache		cache;
 FTC_SBit		sbit;
-#if TUXCOM_DBOX_VERSION == 1
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 FTC_Image_Desc		desc;
-//FTC_ImageDesc		desc;
 #else
 FTC_ImageTypeRec	desc;
 #endif
@@ -248,7 +195,7 @@ struct fb_cmap colormap = {1, 14, rd, gn, bl, tr};
 int trans_map     [] = {BLUE1,BLUE_TRANSP,TRANSP};
 int trans_map_mark[] = {GRAY2,GRAY_TRANSP,GRAY_TRANSP};
 
-#if TUXCOM_DBOX_VERSION == 3
+#ifndef HAVE_DREAMBOX_HARDWARE
 struct input_event ev;
 #endif
 
@@ -338,6 +285,7 @@ int language, langselect, autosave;
 
 #define SELECT_NOCHANGE 0
 #define SELECT_UPDIR    1
+#define SELECT_ROOTDIR  2
 
 #define SHOW_NO_OUTPUT    0
 #define SHOW_OUTPUT       1
@@ -397,7 +345,11 @@ enum {INFO_COPY     ,
       INFO_PASS4    ,
       INFO_SEARCH1  ,
       INFO_SEARCH2  ,
-      INFO_SAVED    };
+      INFO_SAVED    ,
+      INFO_ACCESSED ,
+      INFO_MODIFIED ,
+      INFO_CREATED  ,
+      INFO_DATETIME };
 
 
 char *numberchars[] = {  "0#!$%&?*()@\\",
@@ -422,7 +374,11 @@ char *info[]   = { "(select 'hidden' to copy in background)"               ,"('v
 				   "password has been changed"                             ,"Passwort wurde geändert"                                       ,
 				   "searching..."							               ,"Suche läuft..."                                                ,
 				   "search result"									       ,"Suchergebnis"                                                  ,
-				   "settings saved"                                        ,"Einstellungen gespeichert"                                     };
+				   "settings saved"                                        ,"Einstellungen gespeichert"                                     ,
+				   "last access"                                           ,"letzter Zugriff"                                               ,
+				   "last modified"                                         ,"letze Änderung"                                                ,
+				   "created"                                               ,"Erstellung"                                                    ,
+				   "%m/%d/%Y %H:%M:%S"                                     ,"%d.%m.%Y %H:%M:%S"                                             };
 
 char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen ?"                                ,
                   "Cannot execute file '%s'"                   ,"Kann '%s' nicht ausführen"                       ,

@@ -3,6 +3,13 @@ TuxCom:
 Historie:
 ---------
 
+11.06.2006 Version 1.8
+ - direkter Sprung ins Rootverzeichnis möglich (Eintrag '/' selektieren)
+ - erweiterte Dateiinformationen im Rechte-Dialog (Taste 1)
+ - Druck auf OK bei Dateien, die nicht ausführbar sind, öffnet den Viewer
+ - Bei Neuanlegen einer Datei oder eines Verzeichnisses wird diese Datei danach automatisch selektiert.
+ - Bugfix: manchmal wurde beim Editieren einer Zeile das \n am Ende entfernt
+
 12.01.2005 Version 1.7
  - kosmetische Fehler bei Farbgebung behoben
  - Bugfix: Absturz bei Eingabe in letzter Zeile im Editor

@@ -30,15 +30,10 @@
 int GetRCCode(int mode)
 {
 	static int count = 0;
-#if TUXCOM_DBOX_VERSION < 3
+	//get code
+#ifdef HAVE_DREAMBOX_HARDWARE
 	static unsigned short LastKey = -1;
 	static char LastKBCode = 0x00;
-#else
-	struct input_event ev;
-	static __u16 rc_last_key = KEY_RESERVED;
-#endif
-	//get code
-#if TUXCOM_DBOX_VERSION < 3
 	rccode = -1;
 	int bytesavail = 0;
 	int bytesread = read(rc, &rccode, 2);
@@ -156,6 +151,8 @@ int GetRCCode(int mode)
 			kbcode = 0;
 			switch(rccode)
 #else
+	struct input_event ev;
+	static __u16 rc_last_key = KEY_RESERVED;
 	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
 	{
 		if(ev.value)
@@ -201,32 +198,11 @@ int GetRCCode(int mode)
 				case KEY_SETUP:		rccode = RC_DBOX;		break;
 				case KEY_HOME:		rccode = RC_HOME;		break;
 				case KEY_POWER:		rccode = RC_STANDBY;	break;
-/*
-#if TUXCOM_DBOX_VERSION < 3
-				case KEY_TV			:rccode = RC_TV			;break;
-				case KEY_BOUQUP		:rccode = RC_BOUQUP		;break;
-				case KEY_BOUQDOWN	:rccode = RC_BOUQDOWN	;break;
-				case KEY_AUDIO		:rccode = RC_AUDIO		;break;
-				case KEY_VIDEO		:rccode = RC_VIDEO		;break;
-				case KEY_INFO		:rccode = RC_INFO		;break;
-				case KEY_TEXT		:rccode = RC_TEXT		;break;
-				case KEY_NEXT		:rccode = RC_NEXT		;break;
-				case KEY_PREV		:rccode = RC_PREV		;break;
-				case KEY_RADIO		:rccode = RC_RADIO		;break;
-				case 0xff: return 0;
-#endif
-				default:
-				{
-					char tmsg[100];
-					sprintf(tmsg,"unknown Code:%x",rccode);
-					MessageBox(tmsg,"",NOBUTTON);
-				}
-*/
 			}
 			return 1;
 		}
 
-#if TUXCOM_DBOX_VERSION < 3
+#ifdef HAVE_DREAMBOX_HARDWARE
 		else
 		{
 			rccode &= 0x003F;
@@ -295,7 +271,7 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 		}
 
 
-#if TUXCOM_DBOX_VERSION < 2
+#if FREETYPE_MAJOR == 2 && FREETYPE_MINOR == 0
 		if((error = FTC_SBit_Cache_Lookup(cache, &desc, glyphindex, &sbit)))
 #else
 		FTC_Node anode;
@@ -509,10 +485,7 @@ void plugin_exec(PluginParam *par)
 		else if	(!strcmp(par->id, P_ID_OFF_Y))   sy = atoi(par->val);
 		else if	(!strcmp(par->id, P_ID_END_Y))   ey = atoi(par->val);
 	}
-#if TUXCOM_DBOX_VERSION < 3
-//	fclose (stdin);
-//	stdin = fopen("/dev/vc/0", "r");
-//	rc=open("/dev/rawir2", O_RDONLY);
+#ifdef HAVE_DREAMBOX_HARDWARE
 	kb=open("/dev/vc/0", O_RDONLY);
 #endif
 
@@ -592,11 +565,10 @@ void plugin_exec(PluginParam *par)
 
 	use_kerning = FT_HAS_KERNING(face);
 
-#if TUXCOM_DBOX_VERSION > 1
-	desc.flags = FT_LOAD_MONOCHROME;
-#else
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 	desc.image_type = ftc_image_mono;
-//	desc.type = ftc_image_mono;
+#else
+	desc.flags = FT_LOAD_MONOCHROME;
 #endif
 
 
@@ -685,7 +657,7 @@ void plugin_exec(PluginParam *par)
 	memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 	printf("TuxCom init successful\n");
 
-#if TUXCOM_DBOX_VERSION < 3
+#ifdef HAVE_DREAMBOX_HARDWARE
  	fcntl(rc, F_SETFL, O_NONBLOCK);
 #else
 	fcntl(rc, F_SETFL, fcntl(rc, F_GETFL) &~ O_NONBLOCK);
@@ -721,7 +693,7 @@ void plugin_exec(PluginParam *par)
 		}
 		firstentry = 0;
 
-#if TUXCOM_DBOX_VERSION < 3
+#ifdef HAVE_DREAMBOX_HARDWARE
 		if (kbcode != 0)
 		{
 			if (kbcode == 0x09) // tab
@@ -744,6 +716,11 @@ void plugin_exec(PluginParam *par)
 							ClearMarker(curframe);
 							FillDir(curframe,SELECT_UPDIR);
 						}
+						else if (strcmp(pfe->name,"/") == 0)
+						{
+							ClearMarker(curframe);
+							FillDir(curframe,SELECT_ROOTDIR);
+						}
 						else
 						{
 							if (finfo[curframe].zipfile[0] != 0x00)
@@ -756,7 +733,7 @@ void plugin_exec(PluginParam *par)
 								strncat(finfo[curframe].path,pfe->name,256);
 								strncat(finfo[curframe].path,"/",1);
 							}
-							finfo[curframe].selected =0;
+							finfo[curframe].selected =1;
 							finfo[curframe].first    =0;
 							ClearMarker(curframe);
 							FillDir(curframe,SELECT_NOCHANGE);
@@ -805,6 +782,13 @@ void plugin_exec(PluginParam *par)
 					{
 						ReadZip(check);
 						FillDir(curframe,SELECT_NOCHANGE);
+						SetSelected(curframe,"..");
+
+					}
+					else if (pfe && ((pfe->fentry.st_mode & S_IXUSR) == 0) && finfo[curframe].zipfile[0] == 0x00)
+					{
+						RenderMenuLine(ACTION_VIEW-1, YES);
+						DoViewFile();
 					}
 					else if (pfe && ((pfe->fentry.st_mode & S_IXUSR) == S_IXUSR) && finfo[curframe].zipfile[0] == 0x00)
 					{
@@ -1087,6 +1071,7 @@ void plugin_exec(PluginParam *par)
 									DoExecute(action, SHOW_NO_OUTPUT);
 									FillDir(1-curframe,SELECT_NOCHANGE);
 									FillDir(  curframe,SELECT_NOCHANGE);
+									SetSelected(curframe,szDir);
 								}
 							}
 							default:
@@ -1154,6 +1139,7 @@ void plugin_exec(PluginParam *par)
 									DoExecute(action, SHOW_NO_OUTPUT);
 									FillDir(1-curframe,SELECT_NOCHANGE);
 									FillDir(  curframe,SELECT_NOCHANGE);
+									SetSelected(curframe,szDir);
 								}
 							}
 							default:
@@ -1289,7 +1275,7 @@ void plugin_exec(PluginParam *par)
 	ClearZipEntries(RIGHTFRAME);
 	free(szCommand);
 	free(szZipCommand);
-#if TUXCOM_DBOX_VERSION < 3
+#ifdef HAVE_DREAMBOX_HARDWARE
 	if (kb != -1) close(kb);
 #endif
 	return;
@@ -1749,7 +1735,7 @@ int ShowProperties()
 {
 	struct fileentry *pfe = GetSelected(curframe);
 
-	int sel = NO, pos = -1, mode, i, le1, wi , he = 6 * BORDERSIZE + BUTTONHEIGHT + 4 * FONTHEIGHT_BIG;
+	int sel = NO, pos = -1, mode, i, le1, wi , he = 10 * BORDERSIZE + BUTTONHEIGHT + 7 * FONTHEIGHT_BIG;
 	int ri[3];
 	char action[FILENAME_MAX];
 
@@ -1758,7 +1744,7 @@ int ShowProperties()
 	ri[2] =  ((pfe->fentry.st_mode & S_IXUSR) == S_IXUSR ? 1 : 0);
 
 	le1 = GetStringLen(pfe->name, BIG);
-	wi = 300;
+	wi = 400;
 	if (le1 + 4*BORDERSIZE > wi  ) wi = le1 + 4*BORDERSIZE;
 	if (wi > viewx - 4* BORDERSIZE) wi = viewx - 4* BORDERSIZE;
 
@@ -1767,12 +1753,23 @@ int ShowProperties()
 	RenderBox((viewx-wi)/2 , (viewy-he) /2, viewx-(viewx-wi)/2, viewy-(viewy-he)/2, GRID, WHITE);
 	RenderString(pfe->name,(viewx-wi)/2+  2* BORDERSIZE , (viewy-he)/2 + 2*BORDERSIZE + FONTHEIGHT_BIG-FONT_OFFSET , wi, CENTER, BIG, WHITE);
 
+	RenderString(info[INFO_ACCESSED*NUM_LANG+language],(viewx-wi)/2+ 3* BORDERSIZE , (viewy-he)/2 + 6*BORDERSIZE + (2)*FONTHEIGHT_BIG-FONT_OFFSET , wi, LEFT, BIG, WHITE);
+	RenderString(info[INFO_MODIFIED*NUM_LANG+language],(viewx-wi)/2+ 3* BORDERSIZE , (viewy-he)/2 + 6*BORDERSIZE + (3)*FONTHEIGHT_BIG-FONT_OFFSET , wi, LEFT, BIG, WHITE);
+	RenderString(info[INFO_CREATED *NUM_LANG+language],(viewx-wi)/2+ 3* BORDERSIZE , (viewy-he)/2 + 6*BORDERSIZE + (4)*FONTHEIGHT_BIG-FONT_OFFSET , wi, LEFT, BIG, WHITE);
+	char tm[100];
+	strftime(tm,100,info[INFO_DATETIME *NUM_LANG+language],localtime(&pfe->fentry.st_atime));
+	RenderString(tm,viewx/2- 2* BORDERSIZE , (viewy-he)/2 + 6*BORDERSIZE + (2)*FONTHEIGHT_BIG-FONT_OFFSET , wi/2, RIGHT, BIG, WHITE);
+	strftime(tm,100,info[INFO_DATETIME *NUM_LANG+language],localtime(&pfe->fentry.st_mtime));
+	RenderString(tm,viewx/2- 2* BORDERSIZE , (viewy-he)/2 + 6*BORDERSIZE + (3)*FONTHEIGHT_BIG-FONT_OFFSET , wi/2, RIGHT, BIG, WHITE);
+	strftime(tm,100,info[INFO_DATETIME *NUM_LANG+language],localtime(&pfe->fentry.st_ctime));
+	RenderString(tm,viewx/2- 2* BORDERSIZE , (viewy-he)/2 + 6*BORDERSIZE + (4)*FONTHEIGHT_BIG-FONT_OFFSET , wi/2, RIGHT, BIG, WHITE);
+
 	for (i = 0; i < 3 ; i++)
 	{
-		RenderString(props[i*NUM_LANG+language],(viewx-wi)/2+ 3* BORDERSIZE , (viewy-he)/2 + 3*BORDERSIZE + (i+2)*FONTHEIGHT_BIG-FONT_OFFSET , wi, LEFT, BIG, WHITE);
-		RenderBox(viewx-(viewx-wi)/2 - 2* BORDERSIZE - FONTHEIGHT_BIG+2, (viewy-he)/2 + 3*BORDERSIZE + (i+1)*FONTHEIGHT_BIG+2, viewx-(viewx-wi)/2 - 2*BORDERSIZE-2, (viewy-he)/2 + 3*BORDERSIZE + (i+2)*FONTHEIGHT_BIG-2, FILL, (ri[i] == 0 ? RED : GREEN));
-		RenderBox(      (viewx-wi)/2 + 2* BORDERSIZE                 +1, (viewy-he)/2 + 3*BORDERSIZE + (i+1)*FONTHEIGHT_BIG+1, viewx-(viewx-wi)/2 - 2*BORDERSIZE-1, (viewy-he)/2 + 3*BORDERSIZE + (i+2)*FONTHEIGHT_BIG-1, GRID, (pos == i ? WHITE :trans_map[curvisibility]));
-		RenderBox(      (viewx-wi)/2 + 2* BORDERSIZE                 +2, (viewy-he)/2 + 3*BORDERSIZE + (i+1)*FONTHEIGHT_BIG+2, viewx-(viewx-wi)/2 - 2*BORDERSIZE-2, (viewy-he)/2 + 3*BORDERSIZE + (i+2)*FONTHEIGHT_BIG-2, GRID, (pos == i ? WHITE :trans_map[curvisibility]));
+		RenderString(props[i*NUM_LANG+language],(viewx-wi)/2+ 3* BORDERSIZE , (viewy-he)/2 + 6*BORDERSIZE + (i+5)*FONTHEIGHT_BIG-FONT_OFFSET , wi, LEFT, BIG, WHITE);
+		RenderBox(viewx-(viewx-wi)/2 - 2* BORDERSIZE - FONTHEIGHT_BIG+2, (viewy-he)/2 + 6*BORDERSIZE + (i+4)*FONTHEIGHT_BIG+2, viewx-(viewx-wi)/2 - 2*BORDERSIZE-2, (viewy-he)/2 + 6*BORDERSIZE + (i+5)*FONTHEIGHT_BIG-2, FILL, (ri[i] == 0 ? RED : GREEN));
+		RenderBox(      (viewx-wi)/2 + 2* BORDERSIZE                 +1, (viewy-he)/2 + 6*BORDERSIZE + (i+4)*FONTHEIGHT_BIG+1, viewx-(viewx-wi)/2 - 2*BORDERSIZE-1, (viewy-he)/2 + 6*BORDERSIZE + (i+5)*FONTHEIGHT_BIG-1, GRID, (pos == i ? WHITE :trans_map[curvisibility]));
+		RenderBox(      (viewx-wi)/2 + 2* BORDERSIZE                 +2, (viewy-he)/2 + 6*BORDERSIZE + (i+4)*FONTHEIGHT_BIG+2, viewx-(viewx-wi)/2 - 2*BORDERSIZE-2, (viewy-he)/2 + 6*BORDERSIZE + (i+5)*FONTHEIGHT_BIG-2, GRID, (pos == i ? WHITE :trans_map[curvisibility]));
 	}
 	RenderButtons(he,mode);
 	int drawsel = 0;
@@ -1860,9 +1857,9 @@ int ShowProperties()
 		{
 			for (i = 0; i < 3 ; i++)
 			{
-				RenderBox(viewx-(viewx-wi)/2 - 2* BORDERSIZE - FONTHEIGHT_BIG+2, (viewy-he)/2 + 3*BORDERSIZE + (i+1)*FONTHEIGHT_BIG+2, viewx-(viewx-wi)/2 - 2*BORDERSIZE-2, (viewy-he)/2 + 3*BORDERSIZE + (i+2)*FONTHEIGHT_BIG-2, FILL, (ri[i] == 0 ? RED : GREEN));
-				RenderBox(      (viewx-wi)/2 + 2* BORDERSIZE                 +2, (viewy-he)/2 + 3*BORDERSIZE + (i+1)*FONTHEIGHT_BIG+2, viewx-(viewx-wi)/2 - 2*BORDERSIZE-2, (viewy-he)/2 + 3*BORDERSIZE + (i+2)*FONTHEIGHT_BIG-2, GRID, (pos == i ? WHITE :trans_map[curvisibility]));
-				RenderBox(      (viewx-wi)/2 + 2* BORDERSIZE                 +1, (viewy-he)/2 + 3*BORDERSIZE + (i+1)*FONTHEIGHT_BIG+1, viewx-(viewx-wi)/2 - 2*BORDERSIZE-1, (viewy-he)/2 + 3*BORDERSIZE + (i+2)*FONTHEIGHT_BIG-1, GRID, (pos == i ? WHITE :trans_map[curvisibility]));
+				RenderBox(viewx-(viewx-wi)/2 - 2* BORDERSIZE - FONTHEIGHT_BIG+2, (viewy-he)/2 + 6*BORDERSIZE + (i+4)*FONTHEIGHT_BIG+2, viewx-(viewx-wi)/2 - 2*BORDERSIZE-2, (viewy-he)/2 + 6*BORDERSIZE + (i+5)*FONTHEIGHT_BIG-2, FILL, (ri[i] == 0 ? RED : GREEN));
+				RenderBox(      (viewx-wi)/2 + 2* BORDERSIZE                 +2, (viewy-he)/2 + 6*BORDERSIZE + (i+4)*FONTHEIGHT_BIG+2, viewx-(viewx-wi)/2 - 2*BORDERSIZE-2, (viewy-he)/2 + 6*BORDERSIZE + (i+5)*FONTHEIGHT_BIG-2, GRID, (pos == i ? WHITE :trans_map[curvisibility]));
+				RenderBox(      (viewx-wi)/2 + 2* BORDERSIZE                 +1, (viewy-he)/2 + 6*BORDERSIZE + (i+4)*FONTHEIGHT_BIG+1, viewx-(viewx-wi)/2 - 2*BORDERSIZE-1, (viewy-he)/2 + 6*BORDERSIZE + (i+5)*FONTHEIGHT_BIG-1, GRID, (pos == i ? WHITE :trans_map[curvisibility]));
 			}
 			RenderBox(viewx/2 - 2* BORDERSIZE -BUTTONWIDTH  , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT  , viewx/2 - 2* BORDERSIZE               ,viewy-(viewy-he)/2- 2* BORDERSIZE  , GRID, (sel == YES ? WHITE : RED  ));
 			RenderBox(viewx/2 - 2* BORDERSIZE -BUTTONWIDTH+1, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT+1, viewx/2 - 2* BORDERSIZE             -1,viewy-(viewy-he)/2- 2* BORDERSIZE-1, GRID, (sel == YES ? WHITE : RED  ));
@@ -2285,7 +2282,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 
 	do{
 		while (GetRCCode(RC_EDIT) == 0);
-#if TUXCOM_DBOX_VERSION < 3
+#ifdef HAVE_DREAMBOX_HARDWARE
 		if (kbcode != 0 && markmode == 0)
 		{
 			if (kbcode == 0x7f) // backspace
@@ -2573,6 +2570,8 @@ int flistcmp(struct fileentry * p1, struct fileentry * p2)
 	{
 		if (strcmp(p1->name,"..") == 0)
 			return -1;
+		if (strcmp(p1->name,"/") == 0)
+			return -1;
 		if (S_ISDIR(p2->fentry.st_mode) )
 			return strcmp(p1->name,p2->name) * cursort;
 		else
@@ -2581,6 +2580,8 @@ int flistcmp(struct fileentry * p1, struct fileentry * p2)
 	if (S_ISDIR(p2->fentry.st_mode) )
 	{
 		if (strcmp(p1->name,"..") == 0)
+			return -1;
+		if (strcmp(p1->name,"/") == 0)
 			return -1;
 		return 1;
 	}
@@ -2952,12 +2953,25 @@ void FillDir(int frame, int selmode)
 			}
 
 		}
+		else if ((selmode == SELECT_ROOTDIR) &&(frame == curframe))
+		{
+			pch = strchr(&(finfo[frame].path[1]),'/');
+			if (pch)
+			{
+				strcpy(selentry,(pch+1));
+				*(pch+1) = 0x00;
+			}
+			strcpy(finfo[frame].path, DEFAULT_PATH);
+
+		}
+#if DEBUG
 		printf("filling directory structure:<%s>\n", finfo[frame].path);
+#endif
 		DIR* dp = opendir(finfo[frame].path);
 
 		struct dirent *dentry;
 		char fullfile[FILENAME_MAX];
-		finfo[frame].count = (strcmp(finfo[frame].path,"/") == 0 ? 0 : 1);
+		finfo[frame].count = (strcmp(finfo[frame].path,"/") == 0 ? 0 : 2);
 		finfo[frame].size  = 0;
 		finfo[frame].writable = 0;
 		if (!dp)
@@ -2991,7 +3005,12 @@ void FillDir(int frame, int selmode)
 
 		if (strcmp(finfo[frame].path,"/") != 0)
 		{
-
+			// create "/" entry when not in root dir
+			pfe = getfileentry(frame, npos);
+			strcpy(pfe->name,"/");
+			memset(&pfe->fentry, 0, sizeof(struct stat));
+			pfe->fentry.st_mode = S_IFDIR;
+			npos++;
 			pfe = getfileentry(frame, npos);
 			// create ".." entry when not in root dir
 			strcpy(pfe->name,"..");
@@ -3392,11 +3411,13 @@ void InsertText(char* pStart, char* pEnd,char* szText, int sel, int* pcount)
 	int oldlen = (pEnd ? pEnd-pStart: strlen(pStart));
 	int newlen = strlen(szText);
 	int movlen = (pEnd ? (FILEBUFFER_SIZE-newlen <= strlen(pEnd) ? FILEBUFFER_SIZE-newlen-1 : strlen(pEnd)) : 0);
-	if (pEnd && (oldlen != newlen) && movlen > 0)
-		memmove((void*)(pStart+newlen),pEnd,movlen);
+	int step = (sel > 0 && (*(pStart-1) != '\n') ? 1 : 0)+ (szText[newlen-1] != '\n' ? 1 : 0);
+	if (pEnd && (oldlen != newlen+step) && movlen > 0)
+		memmove((void*)(pStart+newlen+step),pEnd,movlen);
 	if (sel > 0 && (*(pStart-1) != '\n')) {*pStart = '\n'; pStart++; (*pcount)++;}
 	strncpy(pStart,szText,newlen);
-	if (sel >= (*pcount)-1) *(pStart+newlen) = 0x00;
+	if (szText[newlen-1] != '\n') *(pStart+newlen+step-1)='\n';
+	if (sel >= (*pcount)-1) *(pStart+newlen+step) = 0x00;
 }
 void DoEditFile(char* szFile, char* szTitle,  int writable)
 {
@@ -4348,7 +4369,7 @@ void ReadFTPDir(int frame, char* seldir)
 
 	FTPcmd(frame, "TYPE A", NULL, buf);
 
-	if (strcmp(seldir,"..") != 0)
+	if (*seldir != 0x00 && strcmp(seldir,"..") != 0)
 	{
 		if (FTPcmd(frame, "CWD ", seldir, buf) != 250)
 		{
@@ -4552,15 +4573,11 @@ void SetPassword()
 FILE* OpenPipe(char* szAction)
 {
 	FILE *pipe;
-//#if TUXCOM_DBOX_VERSION == 3
 	char szCommand[4000];
 	system("rm -f /tmp/tuxcom.out");
 	sprintf(szCommand,"%s > /tmp/tuxcom.out",szAction);
 	system(szCommand);
 	pipe = fopen("/tmp/tuxcom.out","r");
-//#else
-//	pipe = popen(szAction,"r");
-//#endif
 	return pipe;
 }
 
