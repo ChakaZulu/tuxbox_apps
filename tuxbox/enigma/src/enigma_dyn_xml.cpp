@@ -339,168 +339,129 @@ static eString mPlayer(eString request, eString dirpath, eString opt, eHTTPConne
 	return "http://" + getIP() + ":31339/" + vpid  + "," + apid;
 }
 
-class treeNode
-{
-public:
-	eString serviceNode;
-	eString serviceName;
-	bool isDirectory;
-	eServiceReference serviceReference;
-	treeNode(bool isdir, eString sname, eString snode, eServiceReference ref)
-	{
-		serviceName = sname;
-		serviceNode = snode;
-		isDirectory = isdir;
-		serviceReference = ref;
-	};
-	~treeNode() {};
-	bool operator < (const treeNode &a) const {return serviceName < a.serviceName;}
-};
-
-eString genNode(int submode, std::list <treeNode>::iterator myIt)
-{
-	eString result = myIt->serviceNode + "\n";
-	return result;
-}
-
-eString getTag(int id)
+eString getTag(int mode, int submode)
 {
 	eString tag;
-	switch(id)
+	switch(mode)
 	{
-		case 2: tag = "satellites"; break;
-		case 3: tag = "providers"; break;
-		case 4: tag = "bouquets"; break;
-		default: tag = "unknown"; break;
+		case 3: 
+			tag = "movie"; 
+			break;
+		case 4: 
+			tag = "file"; 
+			break;
+		default: 
+			switch(submode)
+			{
+				case 2: tag = "satellite"; break;
+				case 3: tag = "provider"; break;
+				case 4: tag = "bouquet"; break;
+				default: tag = "unknown"; break;
+			}
 	}
 	return tag;
 }
 
-eString genNodeHeader(int submode, std::list <treeNode>::iterator myIt)
+struct getContent: public Object
 {
-	eString ext_tmp = filter_string(myIt->serviceName);
-	ext_tmp.strReplace("&", "&amp;");
-	eString result = "<" + getTag(submode) + "s name=\"" + filter_string(ext_tmp) + "\">\n";
-	return result;
-}
-
-eString genNodeFooter(int submode, std::list <treeNode>::iterator myIt)
-{
-	eString result = "</" + getTag(submode) + "s>\n";
-	return result;
-}
-
-struct listChannels: public Object
-{
-	std::list <treeNode> myList;
+	int mode;
+	int subm;
+	eString &result;
 	eServiceInterface *iface;
-	int submode;
-	eString& result;
-	bool sort;
-	bool addEPG;
-
-	listChannels(int submode, const eServiceReference &service, eString &result, bool sort, bool addEPG)
-		:myList(myList), iface(eServiceInterface::getInstance()), submode(submode), result(result), sort(sort), addEPG(addEPG)
+	bool listCont;
+	getContent(int mode, int subm, const eServiceReference &service, eString &result, bool listCont)
+		:mode(mode), subm(subm), result(result), iface(eServiceInterface::getInstance()), listCont(listCont)
 	{
-		std::list <treeNode>::iterator myIt;
 		Signal1<void, const eServiceReference&> cbSignal;
-		CONNECT(cbSignal, listChannels::addTreeNode);
+		CONNECT(cbSignal, getContent::addToString);
 		iface->enterDirectory(service, cbSignal);
 		iface->leaveDirectory(service);
-//		result += genNodes(submode, sort, myList);
-		if (sort)
-			myList.sort();
-		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
-		{
-			if (myIt->isDirectory)
-			{
-				result += genNodeHeader(submode, myIt);
-				listChannels(submode, myIt->serviceReference, result, sort, addEPG);
-				result += genNodeFooter(submode, myIt);
-			}
-			else
-				result += genNode(submode, myIt);
-		}
 	}
-
-	void addTreeNode(const eServiceReference& ref)
+	void addToString(const eServiceReference& ref)
 	{
-		eString serviceReference, serviceName, serviceDescription, serviceNode, orbitalPosition;
-
 		// sorry.. at moment we dont show any directory.. or locked service in webif
 		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
 			return;
 
 		eService *service = iface ? iface->addRef(ref) : 0;
-
-		serviceReference = ref.toString();
-		if (ref.descr) serviceName = filter_string(ref.descr);
-		else
+		if (!(ref.data[0] == -1 && ref.data[2] != (int)0xFFFFFFFF))
 		{
+		
+			if (ref.flags & eServiceReference::isDirectory)
+				result += "\n<" + getTag(mode, subm) + ">";
+			else
+				result += "\n<service>";
+			
+			result += "<reference>" + ref.toString() + "</reference>";
+
+			if (ref.descr)
+				result += "<name>" + filter_string(ref.descr) + "</name>";
+			else
 			if (service)
 			{
-				serviceName = filter_string(service->service_name);
+				result += "<name>" + filter_string(service->service_name) + "</name>";
+				if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
+					result += "<provider>" + filter_string(((eServiceDVB*)service)->service_provider) + "</provider>";
+			}
+
+			if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
+			{
+				const eServiceReferenceDVB& dvb_ref = (const eServiceReferenceDVB&)ref;
+				eTransponder *tp = eTransponderList::getInstance()->searchTS(
+					dvb_ref.getDVBNamespace(),
+					dvb_ref.getTransportStreamID(),
+					dvb_ref.getOriginalNetworkID());
+				if (tp && tp->satellite.isValid())
+					result += "<orbital_position>" + eString().setNum(tp->satellite.orbital_position) + "</orbital_position>";
+			}
+		
+			if (service)
 				iface->removeRef(ref);
+			
+			if (listCont && ref.flags & eServiceReference::isDirectory)
+			{
+				getContent(mode, subm, ref, result, false);
+				result += "\n</" + getTag(mode, subm) + ">";
 			}
 			else
-				serviceName = "unnamed service";
+				result += "</service>";
 		}
-
-		if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
-		{
-			const eServiceReferenceDVB& dvb_ref = (const eServiceReferenceDVB&)ref;
-			eTransponder *tp = eTransponderList::getInstance()->searchTS(
-				dvb_ref.getDVBNamespace(),
-				dvb_ref.getTransportStreamID(),
-				dvb_ref.getOriginalNetworkID());
-			if (tp && tp->satellite.isValid())
-				orbitalPosition = eString().setNum(tp->satellite.orbital_position);
-			else
-				orbitalPosition = "0";
-		}
-
-		eString epg;
-		if (addEPG && epg)
-			serviceDescription = serviceName + " - " + epg;
-		else
-			serviceDescription = serviceName;
-
-		serviceDescription.strReplace("'", "\\\'");
-		serviceDescription.strReplace("\"", "\\\"");
-		serviceDescription.strReplace("&", "&amp;");
-		serviceNode = "<service reference=\"" + serviceReference + "\" orbitalposition=\"" + orbitalPosition + "\">" + serviceDescription + "</service>";
-		myList.push_back(treeNode(ref.flags & eServiceReference::isDirectory, serviceName, serviceNode, ref));
 	}
 };
 
 static eString getServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
-
-	eString result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-
-	std::map<eString,eString> opts=getRequestOptions(opt, '&');
-
+	/* MODE: 0 = TV, 1 = Radio, 2 = Data, 3 = Movies, 4 = Root */
+	/* SUBMODE: 0 = n/a, 1 = All, 2 = Satellites, 2 = Providers, 4 = Bouquets */
+	
+	content->local_header["Content-Type"] = "text/plain; charset=utf-8";
+	std::map<eString,eString> opts = getRequestOptions(opt, '&');
+	
 	eString mode = "0";
 	if (opts["mode"])
 		mode = opts["mode"];
+	int mod = atoi(mode.c_str());
 
 	eString submode = "2";
 	if (opts["submode"])
 		submode = opts["submode"];
-
-	eString sref = zap[atoi(mode.c_str())][atoi(submode.c_str())];
+	int subm = atoi(submode.c_str());
+		
+	eString sref = zap[mod][subm];
 	eServiceReference ref(sref);
 
-	int subm = atoi(submode.c_str());
-
-	result += "<" + getTag(subm) + ">\n";
-	listChannels t(subm, ref, result, false, false);
-	result += "</" + getTag(subm) + ">\n";
-
+	eString result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	result += "<" + getTag(mod, subm) + "s>";
+	getContent t(mod, subm, ref, result, true);
+	result += "\n</" + getTag(mod, subm) + "s>";
+	result.strReplace("&", "&amp;");
+//	result.strReplace("<", "&lt;");
+//	result.strReplace(">", "&gt;");
+//	result.strReplace("\'", "&apos;");
+//	result.strReplace("\"", "&quot;");
 	return result;
 }
+
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
