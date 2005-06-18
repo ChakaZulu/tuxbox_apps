@@ -61,12 +61,7 @@ int eStreaminfo::eventHandler(const eWidgetEvent &event)
 }
 
 /* http://www.dvb.org/index.php?id=16 */
-static struct
-{
-	int value, mask;
-	const char *description;
-	int flag;
-} caids[]=
+struct caids_t  caids[]=
 	{{0x0100, 0xFF00, "Seca/Mediaguard (Canal Plus)", 0},
 	{0x0200, 0xFF00, "CCETT", 0}, 
 	{0x0300, 0xFF00, "MSG MediaServices GmbH", 0}, 
@@ -128,15 +123,11 @@ static struct
 	{0x4AD2, 0xFFFE, "Beijing Digital Video Technology Co., Ltd.", 0},
 	{0x0000, 0x0000, "other/unknown", 0}};
 
-static void clearCA()
-{
-	for (unsigned int i=0; i< sizeof(caids)/sizeof(*caids); ++i)
-		caids[i].flag=0;
-}
+ unsigned int caids_cnt = sizeof(caids)/sizeof(struct caids_t);
 
 eString eStreaminfo::getCAName(int casysid, int always)
 {
-	for (unsigned int i=0; i< sizeof(caids)/sizeof(*caids); ++i)
+	for (unsigned int i=0; i< caids_cnt; ++i)
 		if ((casysid & caids[i].mask) == caids[i].value)
 		{
 			if ((caids[i].flag) && !always)

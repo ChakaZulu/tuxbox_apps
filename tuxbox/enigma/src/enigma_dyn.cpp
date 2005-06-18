@@ -58,13 +58,14 @@
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
+#include <streaminfo.h>
 #include <enigma_mount.h>
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.5.0-Expert"
+#define WEBIFVERSION "3.6.0-Expert"
 #else
-#define WEBIFVERSION "3.5.0"
+#define WEBIFVERSION "3.6.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -94,6 +95,9 @@ eString zap[5][5] =
 
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 extern bool canPlayService( const eServiceReference & ref ); // implemented in timer.cpp
+
+extern struct caids_t caids[];
+extern unsigned int caids_cnt;
 
 eString firmwareLevel(eString verid)
 {
@@ -3152,46 +3156,230 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 		"<tr><td>SID:</td><td>" << sid << "</td></tr>"
 		"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
 		"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
-		"<tr><td>Namespace:<td>" << namespc << "</td></tr>"
+		"<tr><td>Namespace:<td>" << namespc << "</td></tr>" ;
+	result << "\n<tr><td valign=top>Supported coding systems:</td><td>";
+	clearCA();
+	// singleLock s(eDVBServiceController::availCALock);
+	std::set<int>& availCA = sapi->availableCASystems;
+	for (std::set<int>::iterator i(availCA.begin()); i != availCA.end(); ++i)
+	{
+		eString caname=eStreaminfo::getInstance()->getCAName(*i, 0);
+		if (caname)
+			result << caname << "<br>";
+	}
+	result << "</td></tr>\n<tr><td valign=top>Systems used in service:</td><td>";
+	int foundone = 0;
+	std::set<int>& calist = sapi->usedCASystems;
+	for (std::set<int>::iterator i(calist.begin()); i != calist.end(); ++i)
+	{
+		eString caname=eStreaminfo::getInstance()->getCAName(*i, 1);
+		eString codesys = eString().sprintf("%04xh:  ", *i) + caname;
+		result << codesys << "<br>";
+		foundone++;
+	}
+	if (!foundone)
+		result << "None";
+	result << "</td></tr>\n";
+
+	eTransponder *tp = sapi->transponder;
+	if (tp)
+	{
+		int systype = eSystemInfo::getInstance()->getFEType();
+		if ( systype == eSystemInfo::feSatellite )
+		{
+			result << "<tr><td>Satellite<td>";
+			int found = 0;
+			for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() );
+				found == 0 && it != eTransponderList::getInstance()->getLNBs().end(); it++)
+				for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() );
+					s != it->getSatelliteList().end(); s++)
+					if (s->getOrbitalPosition() == tp->satellite.orbital_position) {
+						result <<  s->getDescription().c_str();
+						found = 1;
+						break;
+					}
+			result << "</td></tr>";
+			result <<  eString().sprintf("<tr><td>Frequency<td>%d MHz</tr>"
+					"<tr><td>Symbol Rate<td>%d Ksymbols/s</tr>"
+					"<tr><td>Polarity<td>%s</tr>"
+					"<tr><td>Inversion<td>%s</tr>",
+					tp->satellite.frequency / 1000,
+					tp->satellite.symbol_rate / 1000,
+					tp->satellite.polarisation ? "Vertical" : "Horizontal",
+					tp->satellite.inversion ? "Yes" : "No");
+
+			result << "<tr><td>FEC<td>";
+			switch (tp->satellite.fec)
+			{
+				case 0: result << "Auto"; break;
+				case 1: result << "1/2"; break;
+				case 2: result << "2/3"; break;
+				case 3: result << "3/4"; break;
+				case 4: result << "5/6"; break;
+				case 5: result << "7/8"; break;
+				case 6: result << "8/9"; break;
+			}
+			result << "</tr>";
+
+			// Does this work for cable and terrestrial too???
+			eFrontend *fe = eFrontend::getInstance();
+			int status = fe->Status();
+			bool lock = status & FE_HAS_LOCK;
+			bool sync = status & FE_HAS_SYNC;
+			result <<  eString().sprintf("<tr><td>SNR<td>%d%%</tr>", fe->SNR() * 100/65535);
+			result <<  eString().sprintf("<tr><td>AGC<td>%d%%</tr>", fe->SignalStrength() * 100/65535);
+			result <<  eString().sprintf("<tr><td>BER<td>%u</tr>", fe->BER());
+			result << "<tr><td>Lock<td>" << (lock ? "Yes" : "No");
+			result << "<tr><td>Sync<td>" << (sync ? "Yes" : "No");
+		}
+		else if ( systype == eSystemInfo::feCable )
+		{
+			result <<  eString().sprintf("<tr><td>Frequency<td>%d MHz</tr>"
+						"<tr><td>Symbol Rate<td>%d Ksymbols/s</tr>"
+						"<tr><td>Inversion<td>%s</tr>",
+						tp->cable.frequency / 1000,
+						tp->cable.symbol_rate / 1000,
+						tp->cable.inversion ? "Yes" : "No");
+
+			result << "<tr><td>Modulation<td>";
+			switch (tp->cable.modulation)
+			{
+				case 0: result << "Auto"; break;
+				case 1: result << "16-QAM"; break;
+				case 2: result << "32-QAM"; break;
+				case 3: result << "64-QAM"; break;
+				case 4: result << "128-QAM"; break;
+				case 5: result << "256-QAM"; break;
+			}
+			result << "</tr>";
+
+			result << "<tr><td>FEC inner<td>";
+			switch (tp->cable.fec_inner)
+			{
+				case 0: result << "Auto"; break;
+				case 1: result << "1/2"; break;
+				case 2: result << "2/3"; break;
+				case 3: result << "3/4"; break;
+				case 4: result << "5/6"; break;
+				case 5: result << "7/8"; break;
+				case 6: result << "8/9"; break;
+			}
+			result << "</tr>";
+		}
+		else if ( systype == eSystemInfo::feTerrestrial)
+		{
+			result <<  eString().sprintf("<tr><td>Centre Frequency<td>%d MHz</tr>"
+						"<tr><td>Inversion<td>%d</tr>"
+						"<tr><td>Hierarchy Information<td>%d</tr>",
+						tp->terrestrial.centre_frequency / 1000,
+						tp->terrestrial.inversion,
+						tp->terrestrial.hierarchy_information);
+
+			result << "<tr><td>Bandwidth<td>";
+			switch (tp->terrestrial.bandwidth)
+			{
+				case 0: result << "8"; break;
+				case 1: result << "7"; break;
+				case 2: result << "6"; break;
+			}
+			result << " MHz</tr>";
+
+			result << "<tr><td>Constellation<td>";
+			switch (tp->terrestrial.constellation)
+			{
+				case 0: result << "Auto"; break;
+				case 1: result << "QPSK"; break;
+				case 2: result << "16-QAM"; break;
+				case 3: result << "64-QAM"; break;
+			}
+			result << "</tr>";
+
+			result << "<tr><td>Guard Interval<td>";
+			switch (tp->terrestrial.guard_interval)
+			{
+				case 0: result << "Auto"; break;
+				case 1: result << "1/32"; break;
+				case 2: result << "1/16"; break;
+				case 3: result << "1/8"; break;
+				case 4: result << "1/4"; break;
+			}
+			result << "</tr>";
+
+			result << "<tr><td>Transmission Mode<td>";
+			switch (tp->terrestrial.transmission_mode)
+			{
+				case 0: result << "Auto"; break;
+				case 1: result << "2k"; break;
+				case 2: result << "8k"; break;
+			}
+			result << "</tr>";
+
+			result << "<tr><td>codeRateLP<td>";
+			switch (tp->terrestrial.code_rate_lp)
+			{
+				case 0: result << "Auto"; break;
+				case 1: result << "1/2"; break;
+				case 2: result << "2/3"; break;
+				case 3: result << "3/4"; break;
+				case 4: result << "5/6"; break;
+				case 5: result << "7/8"; break;
+			}
+			result << "</tr>";
+
+			result << "<tr><td>codeRateHP<td>";
+			switch (tp->terrestrial.code_rate_hp)
+			{
+				case 0: result << "Auto"; break;
+				case 1: result << "1/2"; break;
+				case 2: result << "2/3"; break;
+				case 3: result << "3/4"; break;
+				case 4: result << "5/6"; break;
+				case 5: result << "7/8"; break;
+			}
+		result << "</tr>";
+		}
+	}
+
+	result <<
 		"</table>"
 		"</body>"
 		"</html>";
-
+    
 	return result.str();
-}
-
+}   
+    
 static eString getchannelinfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
+{   
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = getEITC(readFile(TEMPLATE_DIR + "eit.tmp"));
 	result.strReplace("#SERVICENAME#", getCurService());
-
+    
 	return result;
-}
-
+}   
+    
 eString genBar(int val)
-{
+{   
 	std::stringstream result;
 	for (int i = 10; i <= 100; i += 10)
-	{
+	{  
 		result << "<td width=\"15\" height=\"8\">";
 		if (i <= val)
 			result << "<img src=\"led_on.gif\" border=\"0\" width=\"15\" height=\"8\">";
 		else
 			result << "<img src=\"led_off.gif\" border=\"0\" width=\"15\" height=\"8\">";
 		result << "</td>";
-	}
+	}  
 	return result.str();
-}
-
+}   
+    
 static eString satFinder(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
+{   
 	if (opts != lastTransponder)
 		tuneTransponder(opts);
-
+    
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "satFinder.tmp");
-
+    
 	eFrontend *fe = eFrontend::getInstance();
 	int snr = fe->SNR();
 	int agc = fe->SignalStrength();

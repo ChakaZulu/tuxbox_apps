@@ -159,7 +159,7 @@ function admin(xy)
 
 function openSI()
 {
-	NewWindow("cgi-bin/streaminfo", "si", "320", "300", "no");
+	NewWindow("cgi-bin/streaminfo", "si", "450", "560", "no");
 }
 
 function openChannelInfo()

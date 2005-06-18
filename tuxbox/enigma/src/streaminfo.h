@@ -27,4 +27,13 @@ public:
 	eString getCAName(int casysid, int always);
 };
 
+struct caids_t
+{
+       int value, mask;
+       const char *description;
+       int flag;
+} ;
+
+#define clearCA() for (unsigned int i=0; i < caids_cnt; ++i) caids[i].flag=0
+
 #endif
