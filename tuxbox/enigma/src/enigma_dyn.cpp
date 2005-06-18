@@ -62,9 +62,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.4.3-Expert"
+#define WEBIFVERSION "3.5.0-Expert"
 #else
-#define WEBIFVERSION "3.4.3"
+#define WEBIFVERSION "3.5.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -1383,42 +1383,49 @@ public:
 		}
 #endif
 		eString short_description, event_start, event_duration;
-		eService *service = iface.addRef(e);
-		if (service)
+		
+		eEPGCache::getInstance()->Lock();
+		eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
+		const timeMap* evt = eEPGCache::getInstance()->getTimeMap(ref);
+		if (evt)
 		{
-			eEPGCache::getInstance()->Lock();
-			eServiceReferenceDVB &ref = (eServiceReferenceDVB&)e;
-			const timeMap* evt = eEPGCache::getInstance()->getTimeMap(ref);
-			if (evt)
+			int tsidonid = (ref.getTransportStreamID().get()<<16)|ref.getOriginalNetworkID().get();
+			timeMap::const_iterator It;
+			for (It = evt->begin(); (It != evt->end() && !short_description); ++It)
 			{
-				int tsidonid = (ref.getTransportStreamID().get()<<16)|ref.getOriginalNetworkID().get();
-				timeMap::const_iterator It;
-				for (It = evt->begin(); (It != evt->end() && !short_description); ++It)
+				EITEvent event(*It->second,tsidonid);
+				time_t now = time(0) + eDVB::getInstance()->time_difference;
+				if ((now >= event.start_time) && (now <= event.start_time + event.duration))
 				{
-					EITEvent event(*It->second,tsidonid);
-					time_t now = time(0) + eDVB::getInstance()->time_difference;
-					if ((now >= event.start_time) && (now <= event.start_time + event.duration))
-					{
-						LocalEventData led;
-						led.getLocalData(&event, &short_description);
-						tm t = *localtime(&event.start_time);
-						event_start = eString().sprintf("%02d:%02d", t.tm_hour, t.tm_min);
-						event_duration = eString().sprintf("%d", event.duration / 60);
-					}
+					LocalEventData led;
+					led.getLocalData(&event, &short_description);
+					tm t = *localtime(&event.start_time);
+					event_start = eString().sprintf("%02d:%02d", t.tm_hour, t.tm_min);
+					event_duration = eString().sprintf("%d", event.duration / 60);
 				}
 			}
-			eEPGCache::getInstance()->Unlock();
-
-			eString tmp = filter_string(service->service_name);
-			if (short_description && addEPG)
-				tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
-			tmp.strReplace("\"", "'");
-// done in si.cpp	tmp.strReplace("\n", "-");
-
-			if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF))
-				myList.push_back(myService(ref2string(e), tmp));
-			iface.removeRef(e);
 		}
+		eEPGCache::getInstance()->Unlock();
+		
+		eString tmp;
+		if (ref.descr)
+			tmp = ref.descr;
+		else
+		{
+			eService *service = iface.addRef(e);
+			if (service)
+			{
+				tmp = filter_string(service->service_name);
+				iface.removeRef(e);
+			}
+		}
+		
+		if (short_description && addEPG)
+			tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
+		tmp.strReplace("\"", "'");
+
+		if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF))
+			myList.push_back(myService(ref2string(e), tmp));
 	}
 };
 
