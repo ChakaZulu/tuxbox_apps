@@ -273,13 +273,6 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 
 	uniqueEPGKey service( HILO(eit->service_id), HILO(eit->original_network_id), HILO(eit->transport_stream_id) );
 
-#ifdef ENABLE_PRIVATE_EPG
-	static uniqueEPGKey sservice( 17, 133, 3 );
-	static uniqueEPGKey dservice( 18, 133, 4 );
-	if ( service == sservice || service == dservice )
-		return 0;
-#endif
-
 	eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 	int eit_event_size;
 	int duration;
@@ -628,7 +621,7 @@ void eEPGCache::cleanLoop()
 		for (eventCache::iterator DBIt = eventDB.begin(); DBIt != eventDB.end(); DBIt++)
 		{
 			bool updated=false;
-			for (timeMap::iterator It = DBIt->second.second.begin(); It != DBIt->second.second.end();)
+			for (timeMap::iterator It = DBIt->second.second.begin(); It != DBIt->second.second.end() && It->first < now;)
 			{
 				cur_event = (*It->second).get();
 				duration = fromBCD( cur_event->duration_1)*3600 + fromBCD(cur_event->duration_2)*60 + fromBCD(cur_event->duration_3);
@@ -647,9 +640,8 @@ void eEPGCache::cleanLoop()
 					// remove entry from timeMap
 //					eDebug("[EPGC] release heap mem");
 					delete It->second;
-					DBIt->second.second.erase(It);
+					DBIt->second.second.erase(It++);
 //					eDebug("[EPGC] delete old event (timeMap)");
-					It=DBIt->second.second.begin();  // start at begin
 
 					// add this (changed) service to temp map...
 					if ( temp.find(DBIt->first) == temp.end() )
@@ -658,10 +650,8 @@ void eEPGCache::cleanLoop()
 						updated=true;
 					}
 				}
-				else  // valid entry found
-							// we must not check any other event in this map
-							// beginTime is sort key...
-					break;
+				else
+					++It;
 			}
 
 #ifdef ENABLE_PRIVATE_EPG
