@@ -7,7 +7,8 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	pdaResponse.tmp flashMgr.tmp configSettings.tmp timerListEntry.tmp remoteControl.tmp epg_old.tmp \
 	pdaRemoteControl.tmp sat.tmp satFinder.tmp remoteControlDbox2.tmp data.tmp leftnavi.tmp channavi.tmp rotor.tmp \
 	root.tmp flashMgrReadMenu.tmp flashMgrWriteMenu.tmp mtd.tmp flashMgrProgressData.tmp flashMgrProgress.tmp \
-	pdaRemoteControlDbox2.tmp configSwapFileMenu.tmp movieSources.tmp streaminfo.tmp streaminfo_satellite.xsl
+	pdaRemoteControlDbox2.tmp configSwapFileMenu.tmp movieSources.tmp streaminfo.tmp streaminfo_satellite.xsl \
+	streaminfo_cable.xsl streaminfo_terrestrial.xsl
 
 install-data-local:
 	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/templates
