@@ -3456,7 +3456,9 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				channelList->numericZap( msg );
 			}
 			else
-			{
+			  {     // turn on LCD display by kicking it
+				if (msg == CRCInput::RC_home)
+					CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 				handleMsg(msg, data);
 			}
 
