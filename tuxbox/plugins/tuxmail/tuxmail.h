@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.27  2005/06/19 17:21:50  robspr1
+ * - dreambox tastatur now working
+ *
  * Revision 1.26  2005/06/08 21:56:31  robspr1
  * - minor fixes for mail writing; - using dreambox keyboard?
  *
@@ -345,6 +348,19 @@ char *szKeyBBoxInfoEn[KEYBOX_KEYS] = {
   "yellow", "pos1" , "plus",
   "blue"  , "end"  ,  "minus" } ;
 
+#if HAVE_DVB_API_VERSION == 1
+char *szKeyBBoxInfoDe[KEYBOX_KEYS] = {
+  "leeren"   , ""   , "" ,
+  "senden" , "" , "" ,
+  "entf.", "" , "plus",
+  "einf."  , ""  ,  "minus" } ;
+
+char *szKeyBBoxKey[KEYBOX_KEYS] = {
+  "F1" , "" , "" ,
+  "F2" , "" , "" ,
+  "M1" , "" , "P+",
+  "M2" , "" , "P-" } ;
+#else
 char *szKeyBBoxInfoDe[KEYBOX_KEYS] = {
   "ROT"   , "OK"   , "entf." ,
   "GRÜN" , "HOME" , "leeren" ,
@@ -356,6 +372,7 @@ char *szKeyBBoxKey[KEYBOX_KEYS] = {
   "F2" , "F6" , "F10" ,
   "F3" , "F7" , "Pg+",
   "F4" , "F8" , "Pg-" } ;
+#endif
 
 char *szDirectStyle[4] = {
 "ABC", "Abc", "abc", "keyboard" };
@@ -470,6 +487,8 @@ struct input_event ev;
 unsigned short rccode;
 unsigned char kbcode;
 int sim_key = 0;
+			char tch[100];
+
 
 char scroll_up[] =
 {
