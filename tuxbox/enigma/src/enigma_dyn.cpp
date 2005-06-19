@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.6.0-Expert"
+#define WEBIFVERSION "3.7.0-Expert"
 #else
-#define WEBIFVERSION "3.6.0"
+#define WEBIFVERSION "3.7.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -95,9 +95,6 @@ eString zap[5][5] =
 
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 extern bool canPlayService( const eServiceReference & ref ); // implemented in timer.cpp
-
-extern struct caids_t caids[];
-extern unsigned int caids_cnt;
 
 eString firmwareLevel(eString verid)
 {
@@ -3057,296 +3054,6 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 	tmp.strReplace("#BODY#", result.str());
 	return tmp;
 }
-
-static eString getstreaminfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::stringstream result;
-	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt, namespc;
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "not available";
-
-	eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
-	if (service)
-	{
-		name = filter_string(service->service_name);
-		provider = filter_string(service->service_provider);
-	}
-	vpid = eString().sprintf("%04xh (%dd)", Decoder::current.vpid, Decoder::current.vpid);
-	apid = eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid);
-	pcrpid = eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid);
-	tpid = eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid);
-	tsid = eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
-	onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
-	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
-	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
-	namespc = eString().sprintf("%04xh", sapi->service.getDVBNamespace().get());
-
-	FILE *bitstream = 0;
-
-	if (Decoder::current.vpid != -1)
-		bitstream = fopen("/proc/bus/bitstream", "rt");
-	if (bitstream)
-	{
-		char buffer[100];
-		int xres = 0, yres = 0, aspect = 0, framerate = 0;
-		while (fgets(buffer, 100, bitstream))
-		{
-			if (!strncmp(buffer, "H_SIZE:  ", 9))
-				xres=atoi(buffer+9);
-			if (!strncmp(buffer, "V_SIZE:  ", 9))
-				yres=atoi(buffer+9);
-			if (!strncmp(buffer, "A_RATIO: ", 9))
-				aspect=atoi(buffer+9);
-			if (!strncmp(buffer, "F_RATE: ", 8))
-				framerate=atoi(buffer+8);
-		}
-		fclose(bitstream);
-		vidform.sprintf("%dx%d ", xres, yres);
-		switch (aspect)
-		{
-			case 1:
-				vidform += "(square)"; break;
-			case 2:
-				vidform += "(4:3)"; break;
-			case 3:
-				vidform += "(16:9)"; break;
-			case 4:
-				vidform += "(20:9)"; break;
-		}
-		switch (framerate)
-		{
-			case 1:
-				vidform += ", 23.976 fps"; break;
-			case 2:
-				vidform += ", 24 fps"; break;
-			case 3:
-				vidform += ", 25 fps"; break;
-			case 4:
-				vidform += ", 29.97 fps"; break;
-			case 5:
-				vidform += ", 30 fps"; break;
-			case 6:
-				vidform += ", 50 fps"; break;
-			case 7:
-				vidform += ", 59.94 fps"; break;
-			case 8:
-				vidform += ", 80 fps"; break;
-		}
-	}
-
-	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
-		"<!-- " << sapi->service.toString() << "-->" << std::endl <<
-		"<table cellspacing=5 cellpadding=0 border=0>"
-		"<tr><td>Name:</td><td>" << name << "</td></tr>"
-		"<tr><td>Provider:</td><td>" << provider << "</td></tr>";
-		eString sRef;
-		if (eServiceInterface::getInstance()->service)
-			sRef = eServiceInterface::getInstance()->service.toString();
-	result << "<tr><td>Service reference:</td><td>" << sRef << "</td></tr>"
-		"<tr><td>VPID:</td><td>" << vpid << "</td></tr>"
-		"<tr><td>APID:</td><td>" << apid << "</td></tr>"
-		"<tr><td>PCRPID:</td><td>" << pcrpid << "</td></tr>"
-		"<tr><td>TPID:</td><td>" << tpid << "</td></tr>"
-		"<tr><td>TSID:</td><td>" << tsid << "</td></tr>"
-		"<tr><td>ONID:</td><td>" << onid << "</td></tr>"
-		"<tr><td>SID:</td><td>" << sid << "</td></tr>"
-		"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
-		"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
-		"<tr><td>Namespace:<td>" << namespc << "</td></tr>" ;
-	result << "\n<tr><td valign=top>Supported coding systems:</td><td>";
-	clearCA();
-	// singleLock s(eDVBServiceController::availCALock);
-	std::set<int>& availCA = sapi->availableCASystems;
-	for (std::set<int>::iterator i(availCA.begin()); i != availCA.end(); ++i)
-	{
-		eString caname=eStreaminfo::getInstance()->getCAName(*i, 0);
-		if (caname)
-			result << caname << "<br>";
-	}
-	result << "</td></tr>\n<tr><td valign=top>Systems used in service:</td><td>";
-	int foundone = 0;
-	std::set<int>& calist = sapi->usedCASystems;
-	for (std::set<int>::iterator i(calist.begin()); i != calist.end(); ++i)
-	{
-		eString caname=eStreaminfo::getInstance()->getCAName(*i, 1);
-		eString codesys = eString().sprintf("%04xh:  ", *i) + caname;
-		result << codesys << "<br>";
-		foundone++;
-	}
-	if (!foundone)
-		result << "None";
-	result << "</td></tr>\n";
-
-	eTransponder *tp = sapi->transponder;
-	if (tp)
-	{
-		int systype = eSystemInfo::getInstance()->getFEType();
-		if ( systype == eSystemInfo::feSatellite )
-		{
-			result << "<tr><td>Satellite<td>";
-			int found = 0;
-			for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() );
-				found == 0 && it != eTransponderList::getInstance()->getLNBs().end(); it++)
-				for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() );
-					s != it->getSatelliteList().end(); s++)
-					if (s->getOrbitalPosition() == tp->satellite.orbital_position) {
-						result <<  s->getDescription().c_str();
-						found = 1;
-						break;
-					}
-			result << "</td></tr>";
-			result <<  eString().sprintf("<tr><td>Frequency<td>%d MHz</tr>"
-					"<tr><td>Symbol Rate<td>%d Ksymbols/s</tr>"
-					"<tr><td>Polarity<td>%s</tr>"
-					"<tr><td>Inversion<td>%s</tr>",
-					tp->satellite.frequency / 1000,
-					tp->satellite.symbol_rate / 1000,
-					tp->satellite.polarisation ? "Vertical" : "Horizontal",
-					tp->satellite.inversion ? "Yes" : "No");
-
-			result << "<tr><td>FEC<td>";
-			switch (tp->satellite.fec)
-			{
-				case 0: result << "Auto"; break;
-				case 1: result << "1/2"; break;
-				case 2: result << "2/3"; break;
-				case 3: result << "3/4"; break;
-				case 4: result << "5/6"; break;
-				case 5: result << "7/8"; break;
-				case 6: result << "8/9"; break;
-			}
-			result << "</tr>";
-
-			// Does this work for cable and terrestrial too???
-			eFrontend *fe = eFrontend::getInstance();
-			int status = fe->Status();
-			bool lock = status & FE_HAS_LOCK;
-			bool sync = status & FE_HAS_SYNC;
-			result <<  eString().sprintf("<tr><td>SNR<td>%d%%</tr>", fe->SNR() * 100/65535);
-			result <<  eString().sprintf("<tr><td>AGC<td>%d%%</tr>", fe->SignalStrength() * 100/65535);
-			result <<  eString().sprintf("<tr><td>BER<td>%u</tr>", fe->BER());
-			result << "<tr><td>Lock<td>" << (lock ? "Yes" : "No");
-			result << "<tr><td>Sync<td>" << (sync ? "Yes" : "No");
-		}
-		else if ( systype == eSystemInfo::feCable )
-		{
-			result <<  eString().sprintf("<tr><td>Frequency<td>%d MHz</tr>"
-						"<tr><td>Symbol Rate<td>%d Ksymbols/s</tr>"
-						"<tr><td>Inversion<td>%s</tr>",
-						tp->cable.frequency / 1000,
-						tp->cable.symbol_rate / 1000,
-						tp->cable.inversion ? "Yes" : "No");
-
-			result << "<tr><td>Modulation<td>";
-			switch (tp->cable.modulation)
-			{
-				case 0: result << "Auto"; break;
-				case 1: result << "16-QAM"; break;
-				case 2: result << "32-QAM"; break;
-				case 3: result << "64-QAM"; break;
-				case 4: result << "128-QAM"; break;
-				case 5: result << "256-QAM"; break;
-			}
-			result << "</tr>";
-
-			result << "<tr><td>FEC inner<td>";
-			switch (tp->cable.fec_inner)
-			{
-				case 0: result << "Auto"; break;
-				case 1: result << "1/2"; break;
-				case 2: result << "2/3"; break;
-				case 3: result << "3/4"; break;
-				case 4: result << "5/6"; break;
-				case 5: result << "7/8"; break;
-				case 6: result << "8/9"; break;
-			}
-			result << "</tr>";
-		}
-		else if ( systype == eSystemInfo::feTerrestrial)
-		{
-			result <<  eString().sprintf("<tr><td>Centre Frequency<td>%d MHz</tr>"
-						"<tr><td>Inversion<td>%d</tr>"
-						"<tr><td>Hierarchy Information<td>%d</tr>",
-						tp->terrestrial.centre_frequency / 1000,
-						tp->terrestrial.inversion,
-						tp->terrestrial.hierarchy_information);
-
-			result << "<tr><td>Bandwidth<td>";
-			switch (tp->terrestrial.bandwidth)
-			{
-				case 0: result << "8"; break;
-				case 1: result << "7"; break;
-				case 2: result << "6"; break;
-			}
-			result << " MHz</tr>";
-
-			result << "<tr><td>Constellation<td>";
-			switch (tp->terrestrial.constellation)
-			{
-				case 0: result << "Auto"; break;
-				case 1: result << "QPSK"; break;
-				case 2: result << "16-QAM"; break;
-				case 3: result << "64-QAM"; break;
-			}
-			result << "</tr>";
-
-			result << "<tr><td>Guard Interval<td>";
-			switch (tp->terrestrial.guard_interval)
-			{
-				case 0: result << "Auto"; break;
-				case 1: result << "1/32"; break;
-				case 2: result << "1/16"; break;
-				case 3: result << "1/8"; break;
-				case 4: result << "1/4"; break;
-			}
-			result << "</tr>";
-
-			result << "<tr><td>Transmission Mode<td>";
-			switch (tp->terrestrial.transmission_mode)
-			{
-				case 0: result << "Auto"; break;
-				case 1: result << "2k"; break;
-				case 2: result << "8k"; break;
-			}
-			result << "</tr>";
-
-			result << "<tr><td>codeRateLP<td>";
-			switch (tp->terrestrial.code_rate_lp)
-			{
-				case 0: result << "Auto"; break;
-				case 1: result << "1/2"; break;
-				case 2: result << "2/3"; break;
-				case 3: result << "3/4"; break;
-				case 4: result << "5/6"; break;
-				case 5: result << "7/8"; break;
-			}
-			result << "</tr>";
-
-			result << "<tr><td>codeRateHP<td>";
-			switch (tp->terrestrial.code_rate_hp)
-			{
-				case 0: result << "Auto"; break;
-				case 1: result << "1/2"; break;
-				case 2: result << "2/3"; break;
-				case 3: result << "3/4"; break;
-				case 4: result << "5/6"; break;
-				case 5: result << "7/8"; break;
-			}
-		result << "</tr>";
-		}
-	}
-
-	result <<
-		"</table>"
-		"</body>"
-		"</html>";
-    
-	return result.str();
-}   
     
 static eString getchannelinfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {   
@@ -3899,7 +3606,7 @@ static eString showRemoteControl(eString request, eString dirpath, eString opts,
 			if ((access("/tmp/osdshot.png", R_OK) == 0) && (osdshotenabled == 1))
 				result.strReplace("#OSDSHOTPNG#", "/root/tmp/osdshot.png");
 			else
-				result.strReplace("#OSDSHOTPNG#", "trans.gif");
+				result.strReplace("#OSDSHOTPNG#", "trans.gif\" width=\"0\" height=\"0");
 		}
 	}
 	else
@@ -5090,7 +4797,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg, lockWeb);
 	dyn_resolver->addDyn("GET", "/getcurrentepg", getcurepg, lockWeb);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/channelinfo", getchannelinfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings, lockWeb);

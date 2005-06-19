@@ -30,6 +30,7 @@
 #include <lib/dvb/service.h>
 #include <lib/dvb/record.h>
 #include <lib/dvb/serviceplaylist.h>
+#include <lib/dvb/frontend.h>
 
 #include <lib/system/info.h>
 #include <lib/system/http_dyn.h>
@@ -37,6 +38,7 @@
 #include <enigma_dyn.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_xml.h>
+#include <streaminfo.h>
 
 using namespace std;
 
@@ -83,87 +85,21 @@ static eString getStatus(eString request, eString dirpath, eString opt, eHTTPCon
 		"<status>"
 		"<current_time>" + eString(ctime(&atime)) + "</current_time>"
 		"<standby>";
-		if (eZapMain::getInstance()->isSleeping())
-			result += "ON";
-		else
-			result += "OFF";
+	if (eZapMain::getInstance()->isSleeping())
+		result += "ON";
+	else
+		result += "OFF";
 	result += "</standby>";
 	result += "<recording>";
 #ifndef DISABLE_FILE
-		if (eZapMain::getInstance()->isRecording())
-			result += "ON";
-		else
+	if (eZapMain::getInstance()->isRecording())
+		result += "ON";
+	else
 #endif
-			result += "OFF";
+		result += "OFF";
 	result += "</recording>";
 	result += "<mode>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</mode>";
 
-	eString sRef;
-	if (eServiceInterface::getInstance()->service)
-		sRef = eServiceInterface::getInstance()->service.toString();
-	result += "<service_reference>" + sRef + "</service_reference>";
-
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-	if (sapi)
-	{
-		eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
-		if (service)
-		{
-			name = filter_string(service->service_name);
-			provider = filter_string(service->service_provider);
-		}
-	}
-	vpid = eString().sprintf("%04x", Decoder::current.vpid);
-	apid = eString().sprintf("%04x", Decoder::current.apid);
-	pcrpid = eString().sprintf("%04x", Decoder::current.pcrpid);
-	tpid = eString().sprintf("%04x", Decoder::current.tpid);
-	tsid = eString().sprintf("%04x", sapi->service.getTransportStreamID().get());
-	onid = eString().sprintf("%04x", sapi->service.getOriginalNetworkID().get());
-	sid = eString().sprintf("%04x", sapi->service.getServiceID().get());
-	pmt = eString().sprintf("%04x", Decoder::current.pmtpid);
-
-	FILE *bitstream = 0;
-
-	if (Decoder::current.vpid != -1)
-		bitstream = fopen("/proc/bus/bitstream", "rt");
-	if (bitstream)
-	{
-		char buffer[100];
-		int xres = 0, yres = 0, aspect = 0;
-		while (fgets(buffer, 100, bitstream))
-		{
-			if (!strncmp(buffer, "H_SIZE:  ", 9))
-				xres=atoi(buffer+9);
-			if (!strncmp(buffer, "V_SIZE:  ", 9))
-				yres=atoi(buffer+9);
-			if (!strncmp(buffer, "A_RATIO: ", 9))
-				aspect=atoi(buffer+9);
-		}
-		fclose(bitstream);
-		vidform.sprintf("%dx%d ", xres, yres);
-		switch (aspect)
-		{
-			case 1:
-				vidform += "(square)"; break;
-			case 2:
-				vidform += "(4:3)"; break;
-			case 3:
-				vidform += "(16:9)"; break;
-			case 4:
-				vidform += "(20:9)"; break;
-		}
-	}
-	result += "<service_name>" + name + "</service_name>";
-	result += "<provider>" + provider + "</provider>";
-	result += "<vpid>" + vpid + "</vpid>";
-	result += "<apid>" + apid + "</apid>";
-	result += "<pcrpid>" + pcrpid + "</pcrpid>";
-	result += "<tpid>" + tpid + "</tpid>";
-	result += "<tsid>" + tsid + "</tsid>";
-	result += "<onid>" + onid + "</onid>";
-	result += "<sid>" + sid + "</sid>";
-	result += "<pmt>" + pmt + "</pmt>";
-	result += "<videoformat>" + vidform + "</videoformat>";
 	result += "</status>";
 	
 	return result;
@@ -462,6 +398,302 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 	return result;
 }
 
+static eString getStreamInfoXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result;
+	
+	switch(eSystemInfo::getInstance()->getFEType())
+	{
+		case eSystemInfo::feSatellite:
+			result = readFile(TEMPLATE_DIR + "streaminfo_satellite.xsl");
+			break;
+		case eSystemInfo::feCable:
+			result = readFile(TEMPLATE_DIR + "streaminfo_cable.xsl");
+			break;
+		case eSystemInfo::feTerrestrial:
+			result = readFile(TEMPLATE_DIR + "streaminfo_terrestrial.xsl");
+			break;
+	}
+	
+	return result;
+}
+
+static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result = readFile(TEMPLATE_DIR + "streaminfo.tmp");
+
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return "not available";
+
+	eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+	if (service)
+	{
+		result.strReplace("#SERVICENAME#", filter_string(service->service_name));
+		result.strReplace("#PROVIDER#", filter_string(service->service_provider));
+	}
+	else
+	{
+		result.strReplace("#SERVICENAME#", "n/a");
+		result.strReplace("#PROVIDER#", "n/a");	
+	}
+	result.strReplace("#VPID#", eString().sprintf("%04xh (%dd)", Decoder::current.vpid, Decoder::current.vpid));
+	result.strReplace("#APID#", eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid));
+	result.strReplace("#PCRPID#", eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid));
+	result.strReplace("#TPID#", eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid));
+	result.strReplace("#TSID#", eString().sprintf("%04xh", sapi->service.getTransportStreamID().get()));
+	result.strReplace("#ONID#", eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get()));
+	result.strReplace("#SID#", eString().sprintf("%04xh", sapi->service.getServiceID().get()));
+	result.strReplace("#PMT#", eString().sprintf("%04xh", Decoder::current.pmtpid));
+	result.strReplace("#NAMESPACE#", eString().sprintf("%04xh", sapi->service.getDVBNamespace().get()));
+
+	FILE *bitstream = 0;
+
+	eString vidform;
+	if (Decoder::current.vpid != -1)
+		bitstream = fopen("/proc/bus/bitstream", "rt");
+	if (bitstream)
+	{
+		char buffer[100];
+		int xres = 0, yres = 0, aspect = 0, framerate = 0;
+		while (fgets(buffer, 100, bitstream))
+		{
+			if (!strncmp(buffer, "H_SIZE:  ", 9))
+				xres=atoi(buffer+9);
+			if (!strncmp(buffer, "V_SIZE:  ", 9))
+				yres=atoi(buffer+9);
+			if (!strncmp(buffer, "A_RATIO: ", 9))
+				aspect=atoi(buffer+9);
+			if (!strncmp(buffer, "F_RATE: ", 8))
+				framerate=atoi(buffer+8);
+		}
+		fclose(bitstream);
+		
+		vidform.sprintf("%dx%d ", xres, yres);
+		switch (aspect)
+		{
+			case 1:
+				vidform += "(square)"; break;
+			case 2:
+				vidform += "(4:3)"; break;
+			case 3:
+				vidform += "(16:9)"; break;
+			case 4:
+				vidform += "(20:9)"; break;
+		}
+		switch (framerate)
+		{
+			case 1:
+				vidform += ", 23.976 fps"; break;
+			case 2:
+				vidform += ", 24 fps"; break;
+			case 3:
+				vidform += ", 25 fps"; break;
+			case 4:
+				vidform += ", 29.97 fps"; break;
+			case 5:
+				vidform += ", 30 fps"; break;
+			case 6:
+				vidform += ", 50 fps"; break;
+			case 7:
+				vidform += ", 59.94 fps"; break;
+			case 8:
+				vidform += ", 80 fps"; break;
+		}
+	}
+
+	eString sRef;
+	if (eServiceInterface::getInstance()->service)
+		sRef = eServiceInterface::getInstance()->service.toString();
+	result.strReplace("#SERVICEREFERENCE#", sRef);
+	result.strReplace("#VIDEOFORMAT#", vidform);
+	
+	extern struct caids_t caids[];
+	extern unsigned int caids_cnt;
+
+	clearCA();
+	eString cryptSystems;
+	// singleLock s(eDVBServiceController::availCALock);
+	std::set<int>& availCA = sapi->availableCASystems;
+	for (std::set<int>::iterator i(availCA.begin()); i != availCA.end(); ++i)
+	{
+		eString caname = eStreaminfo::getInstance()->getCAName(*i, 0);
+		if (caname)
+		{
+			if (cryptSystems)
+				cryptSystems += ", ";
+			cryptSystems += caname;
+		}
+	}
+  	result.strReplace("#SUPPORTEDCRYPTSYSTEMS#", cryptSystems);
+	
+	int foundone = 0;
+	cryptSystems = "";
+	std::set<int>& calist = sapi->usedCASystems;
+	for (std::set<int>::iterator i(calist.begin()); i != calist.end(); ++i)
+	{
+		eString caname = eStreaminfo::getInstance()->getCAName(*i, 1);
+		eString codesys = eString().sprintf("%04xh:  ", *i) + caname;
+		if (cryptSystems)
+			cryptSystems += ", ";
+		cryptSystems += codesys;
+		foundone++;
+	}
+	if (!foundone)
+		cryptSystems = "None";
+	result.strReplace("#USEDCRYPTSYSTEMS#", cryptSystems);
+
+	int tpData = 0;
+	eTransponder *tp = sapi->transponder;
+	if (tp)
+	{
+		switch(eSystemInfo::getInstance()->getFEType())
+		{
+			case eSystemInfo::feSatellite:
+			{
+				for (std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin());
+					tpData == 0 && it != eTransponderList::getInstance()->getLNBs().end(); it++)
+					for (ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin());
+						s != it->getSatelliteList().end(); s++)
+						if (s->getOrbitalPosition() == tp->satellite.orbital_position) 
+						{
+							result.strReplace("#SATELLITE#", s->getDescription().c_str());
+							tpData = 1;
+							break;
+						}
+				if (tpData == 1)
+				{
+					result.strReplace("#FREQUENCY#", eString().sprintf("%d", tp->satellite.frequency / 1000));
+					result.strReplace("#SYMBOLRATE#", eString().sprintf("%d", tp->satellite.symbol_rate / 1000));
+					result.strReplace("#POLARISATION#", tp->satellite.polarisation ? "Vertical" : "Horizontal");
+					result.strReplace("#INVERSION#", tp->satellite.inversion ? "Yes" : "No");
+
+					switch (tp->satellite.fec)
+					{
+						case 0: result.strReplace("#FEC#", "Auto"); break;
+						case 1: result.strReplace("#FEC#", "1/2"); break;
+						case 2: result.strReplace("#FEC#", "2/3"); break;
+						case 3: result.strReplace("#FEC#", "3/4"); break;
+						case 4: result.strReplace("#FEC#", "5/6"); break;
+						case 5: result.strReplace("#FEC#", "7/8"); break;
+						case 6: result.strReplace("#FEC#", "8/9"); break;
+					}
+
+					eFrontend *fe = eFrontend::getInstance();
+					int status = fe->Status();
+					bool lock = status & FE_HAS_LOCK;
+					bool sync = status & FE_HAS_SYNC;
+					result.strReplace("#SNR#", eString().sprintf("%d%%", fe->SNR() * 100/65535));
+					result.strReplace("#AGC#", eString().sprintf("%d%%", fe->SignalStrength() * 100/65535));
+					result.strReplace("#BER#", eString().sprintf("%u", fe->BER()));
+					result.strReplace("#LOCK#", (lock ? "Yes" : "No"));
+					result.strReplace("#SYNC#", (sync ? "Yes" : "No"));
+				}
+			}
+			case eSystemInfo::feCable:
+			{
+				result.strReplace("#FREQUENCY#", eString().sprintf("%d", tp->cable.frequency / 1000));
+				result.strReplace("#SYMBOLRATE#", eString().sprintf("%d", tp->cable.symbol_rate / 1000));
+				result.strReplace("#INVERSION#", tp->cable.inversion ? "Yes" : "No");
+
+				switch (tp->cable.modulation)
+				{
+					case 0: result.strReplace("#MODULATION#", "Auto"); break;
+					case 1: result.strReplace("#MODULATION#", "16-QAM"); break;
+					case 2: result.strReplace("#MODULATION#", "32-QAM"); break;
+					case 3: result.strReplace("#MODULATION#", "64-QAM"); break;
+					case 4: result.strReplace("#MODULATION#", "128-QAM"); break;
+					case 5: result.strReplace("#MODULATION#", "256-QAM"); break;
+				}
+
+				switch (tp->cable.fec_inner)
+				{
+					case 0: result.strReplace("FEC#", "Auto"); break;
+					case 1: result.strReplace("FEC#", "1/2"); break;
+					case 2: result.strReplace("FEC#", "2/3"); break;
+					case 3: result.strReplace("FEC#", "3/4"); break;
+					case 4: result.strReplace("FEC#", "5/6"); break;
+					case 5: result.strReplace("FEC#", "7/8"); break;
+					case 6: result.strReplace("FEC#", "8/9"); break;
+				}
+			}
+			case eSystemInfo::feTerrestrial:
+			{
+				result.strReplace("#CENTERFREQUENCY#", eString().sprintf("%d",  tp->terrestrial.centre_frequency / 1000));
+				result.strReplace("#INVERSION#", eString().sprintf("%d",  tp->terrestrial.inversion));
+				result.strReplace("#HIERARCHYINFO#", eString().sprintf("%d",   tp->terrestrial.hierarchy_information));
+
+				switch (tp->terrestrial.bandwidth)
+				{
+					case 0: result.strReplace("#BANDWIDTH#", "8"); break;
+					case 1: result.strReplace("#BANDWIDTH#", "7"); break;
+					case 2: result.strReplace("#BANDWIDTH#", "6"); break;
+				}
+
+				switch (tp->terrestrial.constellation)
+				{
+					case 0: result.strReplace("#CONSTELLATION#", "Auto"); break;
+					case 1: result.strReplace("#CONSTELLATION#", "QPSK"); break;
+					case 2: result.strReplace("#CONSTELLATION#", "16-QAM"); break;
+					case 3: result.strReplace("#CONSTELLATION#", "64-QAM"); break;
+				}
+
+				switch (tp->terrestrial.guard_interval)
+				{
+					case 0: result.strReplace("#GUARDINTERVAL#", "Auto"); break;
+					case 1: result.strReplace("#GUARDINTERVAL#", "1/32"); break;
+					case 2: result.strReplace("#GUARDINTERVAL#", "1/16"); break;
+					case 3: result.strReplace("#GUARDINTERVAL#", "1/8"); break;
+					case 4: result.strReplace("#GUARDINTERVAL#", "1/4"); break;
+				}
+
+				switch (tp->terrestrial.transmission_mode)
+				{
+					case 0: result.strReplace("#TRANSMISSION#", "Auto"); break;
+					case 1: result.strReplace("#TRANSMISSION#", "2k"); break;
+					case 2: result.strReplace("#TRANSMISSION#", "8k"); break;
+				}
+
+				switch (tp->terrestrial.code_rate_lp)
+				{
+					case 0: result.strReplace("#CODERATELP#", "Auto"); break;
+					case 1: result.strReplace("#CODERATELP#", "1/2"); break;
+					case 2: result.strReplace("#CODERATELP#", "2/3"); break;
+					case 3: result.strReplace("#CODERATELP#", "3/4"); break;
+					case 4: result.strReplace("#CODERATELP#", "5/6"); break;
+					case 5: result.strReplace("#CODERATELP#", "7/8"); break;
+				}
+				
+				switch (tp->terrestrial.code_rate_hp)
+				{
+					case 0: result.strReplace("#CODERATEHP#", "Auto"); break;
+					case 1: result.strReplace("#CODERATEHP#", "1/2"); break;
+					case 2: result.strReplace("#CODERATEHP#", "2/3"); break;
+					case 3: result.strReplace("#CODERATEHP#", "3/4"); break;
+					case 4: result.strReplace("#CODERATEHP#", "5/6"); break;
+					case 5: result.strReplace("#CODERATEHP#", "7/8"); break;
+				}
+			}
+		}
+	}
+	
+	if (tpData == 0)
+	{
+		result.strReplace("#SATELLITE#", "n/a");
+		result.strReplace("#FREQUENCY#", "n/a");
+		result.strReplace("#SYMBOLRATE#", "n/a");
+		result.strReplace("#POLARISATION#", "n/a");
+		result.strReplace("#INVERSION#", "n/a");
+		result.strReplace("#FEC#", "n/a");
+		result.strReplace("#SNR#", "n/a");
+		result.strReplace("#AGC#", "n/a");
+		result.strReplace("#BER#", "n/a");
+		result.strReplace("#LOCK#", "n/a");
+		result.strReplace("#SYNC#", "n/a");
+	}
+		
+	return result;
+}
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
@@ -471,5 +703,7 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/audiochannels", getAudioChannels, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/mplayer.mply", mPlayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/getservices", getServices, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/streaminfo", getStreamInfo, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getStreamInfoXSL, lockWeb);
 }
 
