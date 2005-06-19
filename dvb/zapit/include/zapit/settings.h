@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.13 2003/06/13 21:13:44 digi_casi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.14 2005/06/19 14:28:22 barf Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -36,6 +36,8 @@
 #define CONFIGFILE      ZAPITCONFIGDIR "/zapit.conf"
 #define MOTORCONFIGFILE ZAPITCONFIGDIR "/motor.conf"
 #define SERVICES_XML    ZAPITCONFIGDIR "/services.xml"
+#define MYSERVICES_XML  ZAPITCONFIGDIR "/myservices.xml"
+#define ANTISERVICES_XML ZAPITCONFIGDIR "/antiservices.xml"
 #define SERVICES_TMP    "/tmp/services.tmp"
 #define BOUQUETS_XML    ZAPITCONFIGDIR "/bouquets.xml"
 #define BOUQUETS_TMP    "/tmp/bouquets.tmp"
