@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.21 2004/04/07 19:33:21 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.22 2005/06/19 14:31:55 barf Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -61,6 +61,6 @@ inline std::string convert_UTF8_To_UTF8_XML(const char * s)
 	return ZapitTools::UTF8_to_UTF8XML(s);
 }
 
-xmlDocPtr parseXmlFile(const char * filename);
+xmlDocPtr parseXmlFile(const char * filename, bool warning_by_nonexistence = true);
 
 #endif /* __xmlinterface_h__ */

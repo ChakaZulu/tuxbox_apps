@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.25 2004/04/07 19:33:21 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.26 2005/06/19 14:34:21 barf Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -77,7 +77,7 @@ std::string Unicode_Character_to_UTF8(const int character)
 }
 
 #ifdef USE_LIBXML
-xmlDocPtr parseXmlFile(const char * filename)
+xmlDocPtr parseXmlFile(const char * filename, bool warning_by_nonexistence /* = true */)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
@@ -103,7 +103,7 @@ xmlDocPtr parseXmlFile(const char * filename)
 	}
 }
 #else /* USE_LIBXML */
-xmlDocPtr parseXmlFile(const char * filename)
+xmlDocPtr parseXmlFile(const char * filename, bool warning_by_nonexistence /* = true */)
 {
 	char buffer[2048];
 	XMLTreeParser* tree_parser;
@@ -115,7 +115,8 @@ xmlDocPtr parseXmlFile(const char * filename)
 
 	if (xml_file == NULL)
 	{
-		perror(filename);
+	        if (warning_by_nonexistence)
+			perror(filename);
 		return NULL;
 	}
 
