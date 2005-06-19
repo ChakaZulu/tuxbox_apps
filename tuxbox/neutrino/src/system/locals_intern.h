@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.46 2005/05/23 21:55:28 mogway Exp $
+ * $Id: locals_intern.h,v 1.47 2005/06/19 19:13:28 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -781,6 +781,7 @@ const char * locale_real_names[] =
 	"settings.pos_bottom_right",
 	"settings.pos_top_left",
 	"settings.pos_top_right",
+	"shutdownerror.recoding",
 	"shutdowntimer.announce",
 	"sleeptimerbox.announce",
 	"sleeptimerbox.hint1",
@@ -935,6 +936,6 @@ const char * locale_real_names[] =
 	"zapit.scantype.radio",
 	"zapit.scantype.tv",
 	"zapit.scantype.tvradio",
- 	"zaptotimer.announce",
+	"zaptotimer.announce",
 };
 #endif

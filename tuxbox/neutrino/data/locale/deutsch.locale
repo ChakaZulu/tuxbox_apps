@@ -754,6 +754,7 @@ settings.pos_bottom_left unten links
 settings.pos_bottom_right unten rechts
 settings.pos_top_left oben links
 settings.pos_top_right oben rechts
+shutdownerror.recoding Aufnahme läuft. Shutdown nicht möglich.
 shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen?
 sleeptimerbox.announce Sleeptimer in 1 min
 sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)

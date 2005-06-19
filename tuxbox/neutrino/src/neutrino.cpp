@@ -3998,6 +3998,11 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 void CNeutrinoApp::ExitRun()
 {
+	if (recordingstatus) {
+    		DisplayErrorMessage(g_Locale->getText(LOCALE_SHUTDOWNERROR_RECODING));
+    		return;
+	}
+
 	CLCD::getInstance()->setMode(CLCD::MODE_SHUTDOWN);
 
 	dprintf(DEBUG_INFO, "exit\n");
