@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.93 2005/05/24 19:13:40 mogway Exp $
+ * $Id: getservices.cpp,v 1.94 2005/06/19 14:39:04 barf Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,11 +26,7 @@
 #include <zapit/getservices.h>
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
-
-// In a final version, the following two lines should be put somewhere else,
-// in an include file.
-#define MYSERVICES_XML ZAPITCONFIGDIR "/myservices.xml"
-#define ANTISERVICES_XML ZAPITCONFIGDIR "/antiservices.xml"
+#include <configfile.h>
 
 extern transponder_list_t transponders;
 extern tallchans allchans;
@@ -169,6 +165,10 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 }
 
 void NukeChannels(xmlNodePtr search) {
+  extern CConfigFile config;
+  int successful_nukes = 0;
+  int failed_nukes = 0;
+  bool trace_nukes = config.getBool("traceNukes", false);
   while (search) {
     xmlNodePtr transponder = search->xmlChildrenNode;
     while ((transponder = xmlGetNextOccurence(transponder, "transponder"))) {
@@ -177,14 +177,23 @@ void NukeChannels(xmlNodePtr search) {
       xmlNodePtr channel = transponder->xmlChildrenNode;
       while ((channel = xmlGetNextOccurence(channel, "channel"))) {
 	t_service_id service_id = xmlGetNumericAttribute(channel, "service_id", 16);
-	printf("[getservices]: Nuking %d \t%d \t%d \t(%s)\n", service_id, transport_stream_id, original_network_id, xmlGetAttribute(channel, "name"));
-	allchans.erase(CREATE_CHANNEL_ID);
+        int result = allchans.erase(CREATE_CHANNEL_ID);
+	if (result)
+	  successful_nukes++;
+	else
+	  failed_nukes++;
+	if (!result || trace_nukes)
+	  printf("[getservices]: Nuking '%s' (service_id=0x%x): %s", xmlGetAttribute(channel, "name"), service_id, result ? "succeded.\n" : "FAILED!\n");
 	channel = channel->xmlNextNode;
       }
       transponder = transponder->xmlNextNode;
     }
     search = search->xmlNextNode;
   }
+  printf("[getservices]: %d services successfully nuked\n", successful_nukes);
+  if (failed_nukes)
+    printf("[getservices]: %d nuke failed\n", failed_nukes);
+
 }
 
 void FindTransponder(xmlNodePtr search)
@@ -301,13 +310,13 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType)
 	FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
 	xmlFreeDoc(parser);
 
-        if ((parser = parseXmlFile(ANTISERVICES_XML))) {
+        if ((parser = parseXmlFile(ANTISERVICES_XML, false))) {
                 printf("[getservices] " ANTISERVICES_XML " found.\n");
                 NukeChannels(xmlDocGetRootElement(parser)->xmlChildrenNode);
                 xmlFreeDoc(parser);
         }
 
-	if ((parser = parseXmlFile(MYSERVICES_XML))) {
+	if ((parser = parseXmlFile(MYSERVICES_XML, false))) {
 		printf("[getservices] " MYSERVICES_XML "  found.\n");
 		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
 		xmlFreeDoc(parser);
