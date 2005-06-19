@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.371 2005/04/17 06:56:15 metallica Exp $
+ * $Id: zapit.cpp,v 1.372 2005/06/19 14:44:58 barf Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1790,7 +1790,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.371 2005/04/17 06:56:15 metallica Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.372 2005/06/19 14:44:58 barf Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1830,6 +1830,7 @@ int main(int argc, char **argv)
 			        "diseqcRepeats" ", "
 				"diseqcType" ", "
 				"motorRotationSpeed" ", "
+				"traceNukes" ", "
 				"lnb0_OffsetLow" ", ..., " "lnb63_OffsetLow" ", "
 				"lnb0_OffsetHigh" ", ..., " "lnb63_OffsetHigh" "."
 				"\n", argv[0]);
