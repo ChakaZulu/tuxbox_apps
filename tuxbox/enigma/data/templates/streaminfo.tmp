@@ -26,4 +26,11 @@
 <ber>#BER#</ber>
 <lock>#LOCK#</lock>
 <sync>#SYNC#</sync>
+<modulation>#MODULATION#</modulation>
+<bandwidth>#BANDWIDTH#</bandwidth>
+<constellation>#CONSTELLATION#</constellation>
+<guardinterval>#GUARDINTERVAL#</guardinterval>
+<transmission>#TRANSMISSION#</transmission>
+<coderatelp>#CODERATELP#</coderatelp>
+<coderatehp>#CODERATEHP#</coderatehp>
 </streaminfo>
