@@ -289,15 +289,26 @@ static eString record(eString request, eString dirpath, eString opts, eHTTPConne
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	if (command == "start")
+	if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR)
 	{
-		eZapMain::getInstance()->recordDVR(1,0);
-		return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording started...</body></html>";
+		if (command == "start")
+		{
+			eZapMain::getInstance()->recordDVR(1,0);
+			return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording started...</body></html>";
+		}
+		else
+		{
+			eZapMain::getInstance()->recordDVR(0,0);
+			return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording stopped.</body></html>";
+		}
 	}
 	else
+	if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab)
 	{
-		eZapMain::getInstance()->recordDVR(0,0);
-		return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording stopped.</body></html>";
+		if (command == "start")
+			eZapMain::getInstance()->startNGrabRecord();
+		else
+			eZapMain::getInstance()->stopNGrabRecord();
 	}
 }
 #endif
