@@ -326,7 +326,8 @@ public:
 	enum { pathBouquets=1, pathProvider=2, pathRecordings=4, pathPlaylist=8, pathAll=16, pathRoot=32, pathSatellites=64 };
 	enum { listAll, listSatellites, listProvider, listBouquets };
 private:
-	eLabel 	*ChannelNumber, *ChannelName, *Clock, *lsnr_num, *lsync_num, *lber_num, *lsnr_, *lagc_, *lber_,
+	eLabel 	*ChannelNumber, *ChannelName, *Clock,
+		*lsnr_num, *lsync_num, *lber_num, *lsnr_text, *lagc_text, *lber_text,
 		*EINow, *EINext, *EINowDuration, *EINextDuration,
 		*EINowTime, *EINextTime, *Description, *fileinfos,
 		*ButtonRedEn, *ButtonRedDis,

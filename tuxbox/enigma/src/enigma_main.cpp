@@ -1639,9 +1639,9 @@ eZapMain::eZapMain()
 	ASSIGN(lsnr_num, eLabel, "snr_num");
 	ASSIGN(lsync_num, eLabel, "agc_num");
 	ASSIGN(lber_num, eLabel, "ber_num");
-	ASSIGN(lsnr_, eLabel, "snr_");
-	ASSIGN(lagc_, eLabel, "agc_");
-	ASSIGN(lber_, eLabel, "ber_");
+	ASSIGN(lsnr_text, eLabel, "snr_text");
+	ASSIGN(lagc_text, eLabel, "agc_text");
+	ASSIGN(lber_text, eLabel, "ber_text");
 // SNR Patch
 
 	ASSIGN(ChannelNumber, eLabel, "ch_number");
@@ -2871,9 +2871,9 @@ void eZapMain::showSNR()
 	lsnr_num->setText(eString().sprintf("%d%%",snr));
 	lsync_num->setText(eString().sprintf("%d%%",agc));
 	lber_num->setText(eString().sprintf("%d",ber)); 
-	lsnr_->setText("SNR:");
-	lagc_->setText("AGC:");
-	lber_->setText("BER:");
+	lsnr_text->setText("SNR:");
+	lagc_text->setText("AGC:");
+	lber_text->setText("BER:");
 }
 /* SNR,AGC,BER DISPLAY end */
 

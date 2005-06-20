@@ -313,11 +313,11 @@
 
 			<eWidget position="0:0" size="720:2" backgroundColor="hell" />
 			<eWidget position="0:3" size="720:30" backgroundColor="dunkel" />
-			<!-- SNR Patch begin -->
+
 			<eWidget position="320:31" size="400:30" backgroundColor="dunkel" />
 			<eWidget position="320:56" size="400:2" backgroundColor="hell" />
 			<eWidget position="320:36" size="2:21" backgroundColor="hell" /> 
-			<!-- SNR Patch end -->
+
 			<eWidget position="0:34" size="720:2" backgroundColor="hell" />
 			<eWidget position="0:398" size="720:3" backgroundColor="hell" />
 			<eWidget position="0:402" size="720:48" backgroundColor="mittel" />
@@ -330,17 +330,16 @@
 			<eLabel position="155:3" size="420:26" font="Nimbus;22" name="ch_name" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 
 			<eLabel position="593:3" size="55:26" font="Nimbus;22" name="time" align="right"  backgroundColor="dunkel" foregroundColor="dunkel+15" />
-			<!-- SNR Patch begin -->
-			<eLabel text="SNR:" position="325:36" size="40:18" name="snr_" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
-			<eLabel text="AGC:" position="405:36" size="40:18" name="agc_" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
-			<eLabel text="BER:" position="485:36" size="40:18" name="ber_" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+
+			<eLabel text="SNR:" position="325:36" size="40:18" name="snr_text" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel text="AGC:" position="405:36" size="40:18" name="agc_text" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel text="BER:" position="485:36" size="40:18" name="ber_text" font="Blue.Regular;22" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 			<eLabel position="362:36" size="40:18" name="snr_num" font="Blue.Regular;22" />
 			<eLabel position="442:36" size="40:18" name="agc_num" font="Blue.Regular;22" />
 			<eLabel position="522:36" size="40:18" name="ber_num" font="Blue.Regular;22" />
-			<eProgress position="580:37" size="93:6" name="snr_progress" foregroundColor="dark" border="1" />
-			<eProgress position="580:42" size="93:6" name="agc_progress" foregroundColor="dark" border="1" />
-			<eProgress position="580:49" size="93:6" name="ber_progress" foregroundColor="dark" border="1" />
-			<!-- SNR Patch end -->
+			<eProgress position="580:37" size="93:6" name="snr_progress" foregroundColor="mittel" backgroundColor="dunkel" border="1" />
+			<eProgress position="580:42" size="93:6" name="agc_progress" foregroundColor="mittel" backgroundColor="dunkel" border="1" />
+			<eProgress position="580:49" size="93:6" name="ber_progress" foregroundColor="mittel" backgroundColor="dunkel" border="1" />
 
 			<!-- <eProgress position="428:142" size="156:13" name="progress_bar" foregroundColor="content" border="0" /> -->
 
