@@ -4627,7 +4627,11 @@ void eZapMain::removeServiceFromUserBouquet(eServiceSelector *sel )
 		return;
 
 	if (currentSelectedUserBouquet)
+	{
 		currentSelectedUserBouquet->getList().remove(service);
+		if ( currentSelectedUserBouquetRef == sel->getPath().top() )
+			sel->removeCurrent(true);
+	}
 }
 
 void eZapMain::showSubserviceMenu()
