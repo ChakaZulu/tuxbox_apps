@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.47 2005/06/19 19:13:28 barf Exp $
+ * $Id: locals_intern.h,v 1.48 2005/06/20 22:36:43 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -771,6 +771,10 @@ const char * locale_real_names[] =
 	"servicemenu.head",
 	"servicemenu.reload",
 	"servicemenu.reload_hint",
+	"servicemenu.restart",
+	"servicemenu.restart_failed",
+	"servicemenu.restart_hint",
+	"servicemenu.restart_refused_recording",
 	"servicemenu.scants",
 	"servicemenu.ucodecheck",
 	"servicemenu.update",

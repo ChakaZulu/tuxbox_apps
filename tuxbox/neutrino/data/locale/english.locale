@@ -744,6 +744,10 @@ servicemenu.getplugins_hint Reloading plugins,\nplease be patient.
 servicemenu.head Service
 servicemenu.reload Reload channel lists
 servicemenu.reload_hint Reloading channel lists,\nplease be patient.
+servicemenu.restart Restart Neutrino
+servicemenu.restart_failed Restarting Neutrino went wrong.
+servicemenu.restart_hint Restarting Neutrino...
+servicemenu.restart_refused_recording Recording runs. Restart not possible.
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
 servicemenu.update Software Update

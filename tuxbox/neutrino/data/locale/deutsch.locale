@@ -744,6 +744,10 @@ servicemenu.getplugins_hint Plugins werden neu geladen,\nbitte warten...
 servicemenu.head Service
 servicemenu.reload Kanallisten neu laden
 servicemenu.reload_hint Kanallisten werden neu geladen,\nbitte warten...
+servicemenu.restart Neutrino neu starten
+servicemenu.restart_failed Neustart von Neutrino schlug fehl.
+servicemenu.restart_hint Neutrino wird neu gestartet...
+servicemenu.restart_refused_recording Aufnahme läuft. Restart nicht möglich.
 servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
 servicemenu.update Software-Aktualisierung

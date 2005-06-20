@@ -145,6 +145,8 @@ CRemoteControl * g_RemoteControl;
 // but if you wanna do it so... ;)
 static bool parentallocked = false;
 
+static char **global_argv;
+
 static CTimingSettingsNotifier timingsettingsnotifier;
 static CFontSizeNotifier fontsizenotifier;
 
@@ -1208,6 +1210,11 @@ void CNeutrinoApp::channelsInit()
 
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
+	global_argv = new (char*)[argc+1];
+  	for (int i = 0; i < argc; i++)
+    		global_argv[i] = argv[i];
+  	global_argv[argc] = NULL;
+
 	softupdate = false;
 	fromflash = false;
 
@@ -1644,6 +1651,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
  	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS    , true, NULL, &scanSettings                           ));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD    , true, NULL, this                  , "reloadchannels"));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this                   , "reloadplugins"));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RESTART, true, NULL, this                   , "restart"));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker                            ));
 
 	//softupdate
@@ -4543,6 +4551,20 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 
 		hintBox->hide();
 		delete hintBox;
+	}
+	else if(actionKey=="restart")
+	{
+		if (recordingstatus)
+			DisplayErrorMessage(g_Locale->getText(LOCALE_SERVICEMENU_RESTART_REFUSED_RECORDING));
+		else {
+	 		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SERVICEMENU_RESTART_HINT));
+			hintBox->paint();
+			execvp(global_argv[0], global_argv); // no return if successful
+			DisplayErrorMessage(g_Locale->getText(LOCALE_SERVICEMENU_RESTART_FAILED));
+
+			hintBox->hide();
+			delete hintBox;
+		}
 	}
 	else if(strncmp(actionKey.c_str(), "fontsize.d", 10) == 0)
 	{
