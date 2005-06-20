@@ -337,9 +337,9 @@
 			<eLabel position="362:36" size="40:18" name="snr_num" font="Blue.Regular;22" />
 			<eLabel position="442:36" size="40:18" name="agc_num" font="Blue.Regular;22" />
 			<eLabel position="522:36" size="40:18" name="ber_num" font="Blue.Regular;22" />
-			<eProgress position="580:37" size="93:6" name="snr" foregroundColor="dark" border="1" />
-			<eProgress position="580:42" size="93:6" name="agc" foregroundColor="dark" border="1" />
-			<eProgress position="580:49" size="93:6" name="ber" foregroundColor="dark" border="1" />
+			<eProgress position="580:37" size="93:6" name="snr_progress" foregroundColor="dark" border="1" />
+			<eProgress position="580:42" size="93:6" name="agc_progress" foregroundColor="dark" border="1" />
+			<eProgress position="580:49" size="93:6" name="ber_progress" foregroundColor="dark" border="1" />
 			<!-- SNR Patch end -->
 
 			<!-- <eProgress position="428:142" size="156:13" name="progress_bar" foregroundColor="content" border="0" /> -->

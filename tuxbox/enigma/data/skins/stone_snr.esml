@@ -435,16 +435,17 @@
 			<eLabel position="69:30" size="427:26" font="Blue.Regular;32" name="ch_name" backgroundColor="dark" foregroundColor="white" vcenter="on" />
 
 			<eLabel position="575:10" size="66:30" font="Blue.Bold;34" name="time" align="center"  backgroundColor="content" foregroundColor="white" />
-
+			<!-- SNR Patch begin -->
 			<eLabel text="SNR:" position="195:2" size="40:18" name="snr_" font="Blue.Regular;22" />
 			<eLabel text="AGC:" position="275:2" size="40:18" name="agc_" font="Blue.Regular;22" />
 			<eLabel text="BER:" position="355:2" size="40:18" name="ber_" font="Blue.Regular;22" />
 			<eLabel position="232:2" size="40:18" name="snr_num" font="Blue.Regular;22" />
 			<eLabel position="312:2" size="40:18" name="agc_num" font="Blue.Regular;22" />
 			<eLabel position="392:2" size="40:18" name="ber_num" font="Blue.Regular;22" />
-			<eProgress position="442:1" size="93:7" name="snr" foregroundColor="dark" border="1" />
-			<eProgress position="442:8" size="93:7" name="agc" foregroundColor="dark" border="1" />
-			<eProgress position="442:15" size="93:7" name="ber" foregroundColor="dark" border="1" />
+			<eProgress position="442:1" size="93:7" name="snr_progress" foregroundColor="dark" border="1" />
+			<eProgress position="442:8" size="93:7" name="agc_progress" foregroundColor="dark" border="1" />
+			<eProgress position="442:15" size="93:7" name="ber_progress" foregroundColor="dark" border="1" />
+			<!-- SNR Patch begin -->
 
 			<eProgress position="304:60" size="121:8" name="progress_bar" foregroundColor="whiteHalf" border="0" />
 

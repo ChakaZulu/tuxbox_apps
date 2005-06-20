@@ -1633,9 +1633,9 @@ eZapMain::eZapMain()
 	lcdmain.show();
 #endif
 // SNR Patch
-	ASSIGN(p_snr, eProgress, "snr");
-	ASSIGN(p_agc, eProgress, "agc");
-	ASSIGN(p_ber, eProgress, "ber");
+	ASSIGN(p_snr, eProgress, "snr_progress");
+	ASSIGN(p_agc, eProgress, "agc_progress");
+	ASSIGN(p_ber, eProgress, "ber_progress");
 	ASSIGN(lsnr_num, eLabel, "snr_num");
 	ASSIGN(lsync_num, eLabel, "agc_num");
 	ASSIGN(lber_num, eLabel, "ber_num");
