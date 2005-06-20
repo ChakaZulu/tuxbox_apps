@@ -20,6 +20,11 @@
 		<tr><td>Namespace:</td><td><xsl:value-of select="streaminfo/namespace"/></td></tr>
 		<tr><td>Supported Crypto Systems:</td><td><xsl:value-of select="streaminfo/supported_crypt_systems"/></td></tr>
 		<tr><td>Used Crypto Systems:</td><td><xsl:value-of select="streaminfo/used_crypt_systems"/></td></tr>
+		<tr><td>Frequency:</td><td><xsl:value-of select="streaminfo/frequency"/> MHz</td></tr>
+		<tr><td>Symbol Rate:</td><td><xsl:value-of select="streaminfo/symbol_rate"/> KSymbols/s</td></tr>
+		<tr><td>Inversion:</td><td><xsl:value-of select="streaminfo/inversion"/></td></tr>
+		<tr><td>Modulation:</td><td><xsl:value-of select="streaminfo/modulation"/></td></tr>
+		<tr><td>FEC:</td><td><xsl:value-of select="streaminfo/fec"/></td></tr>
 	</table>
 </body>
 </html>

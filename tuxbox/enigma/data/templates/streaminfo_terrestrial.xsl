@@ -20,6 +20,15 @@
 		<tr><td>Namespace:</td><td><xsl:value-of select="streaminfo/namespace"/></td></tr>
 		<tr><td>Supported Crypto Systems:</td><td><xsl:value-of select="streaminfo/supported_crypt_systems"/></td></tr>
 		<tr><td>Used Crypto Systems:</td><td><xsl:value-of select="streaminfo/used_crypt_systems"/></td></tr>
+		<tr><td>Center Frequency:</td><td><xsl:value-of select="streaminfo/centerfrequency"/> MHz</td></tr>
+		<tr><td>Hierarchy Info:</td><td><xsl:value-of select="streaminfo/hierarchyinfo"/></td></tr>
+		<tr><td>Inversion:</td><td><xsl:value-of select="streaminfo/inversion"/></td></tr>
+		<tr><td>Bandwidth:</td><td><xsl:value-of select="streaminfo/bandwidth"/></td></tr>
+		<tr><td>Constellation:</td><td><xsl:value-of select="streaminfo/constellation"/></td></tr>
+		<tr><td>Guard Interval:</td><td><xsl:value-of select="streaminfo/guardinterval"/></td></tr>
+		<tr><td>Transmission Mode:</td><td><xsl:value-of select="streaminfo/transmission"/></td></tr>
+		<tr><td>Code Rate LP:</td><td><xsl:value-of select="streaminfo/coderatelp"/></td></tr>
+		<tr><td>Code Rate HP:</td><td><xsl:value-of select="streaminfo/coderatehp"/></td></tr>
 	</table>
 </body>
 </html>
