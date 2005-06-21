@@ -144,7 +144,7 @@ function openEPG(xy)
 {
 	if (xy == undefined)
 		xy = "";
-	NewWindow('getcurrentepg?type=extended&ref='+xy, 'EPG', screen.width, screen.height, 'yes');
+	NewWindow('xml/epg?type=extended&ref='+xy, 'EPG', screen.width, screen.height, 'yes');
 }
 
 function openMultiEPG(xy)

@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.7.0-Expert"
+#define WEBIFVERSION "3.8.0-Expert"
 #else
-#define WEBIFVERSION "3.7.0"
+#define WEBIFVERSION "3.8.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -2798,15 +2798,15 @@ public:
 								<< "\" colspan=" << colUnits << "\">";
 #ifndef DISABLE_FILE
 							result  << "<a href=\"javascript:record('"
-								<< "ref=" << ref2string(ref)
-								<< "&start=" << event.start_time
-								<< "&duration=" << event.duration;
+								<< ref2string(ref) << "','"
+								<< event.start_time << "','"
+								<< event.duration << "','";
 							eString tmp = filter_string(short_description);
 							tmp.strReplace("\'", "\\\'");
 							tmp.strReplace("\"", "\\\"");
 							tmp.strReplace("&", "~");
-							result  << "&descr=" << tmp
-								<< "&channel=" << filter_string(current->service_name)
+							result  << tmp << "','"
+								<< filter_string(current->service_name)
 								<< "')\"><img src=\"timer.gif\" border=0></a>"
 								<< "&nbsp;&nbsp;";
 #endif

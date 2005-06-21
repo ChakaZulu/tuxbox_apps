@@ -155,108 +155,102 @@ static eString getEPG(eString request, eString dirpath, eString opts, eHTTPConne
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/channelepg.xsl\"?>"
+		<< "<epg>";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><content id=\"sapi\">No EPG available</content>";
-
-	eString type = opt["type"];
-	
-	eString serviceRef = opt["ref"];
-	
-	if (serviceRef)
-		ref = string2ref(serviceRef);
-	else
-		ref = sapi->service;
-
-	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
-
-	if (!current)
-		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><content id=\"current\">No EPG available</content>";
-
-	eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
-	eEPGCache::getInstance()->Lock();
-	const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
-
-	if (!evt)
-		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><content id=\"evt\">No EPG available</content>";
-	else
+	if (sapi)
 	{
-		timeMap::const_iterator It;
-		int tsidonid = (rref.getTransportStreamID().get()<<16) | rref.getOriginalNetworkID().get();
-		result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			<< "<epg>"
-			<< "<service_reference>" << ref2string(ref) << "</service_reference>"
-			<< "<service_name>" << filter_string(current->service_name) << "</service_name>";
-		
-		int i = 0;
-		for(It=evt->begin(); It!= evt->end(); ++It)
+		eString type = opt["type"];
+		eString serviceRef = opt["ref"];
+		ref = (serviceRef) ? string2ref(serviceRef) : sapi->service;
+		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
+		if (current)
 		{
-			ext_description = "";
-			EITEvent event(*It->second,tsidonid);
-			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-			{
-				Descriptor *descriptor = *d;
-				if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-					ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
-				else
-				if (descriptor->Tag() == DESCR_SHORT_EVENT)
-					description = ((ShortEventDescriptor*)descriptor)->event_name;
-				else
-				if (descriptor->Tag() == DESCR_CONTENT)
-				{
-					genre = "";
-					genreCategory = 0;
-					ContentDescriptor *cod = (ContentDescriptor *)descriptor;
+			result	<< "<service_reference>" << ref2string(ref) << "</service_reference>"
+				<< "<service_name>" << filter_string(current->service_name) << "</service_name>";
+			eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
+			eEPGCache::getInstance()->Lock();
+			const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
 
-					for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
+			if (evt)
+			{
+				timeMap::const_iterator It;
+				int tsidonid = (rref.getTransportStreamID().get()<<16) | rref.getOriginalNetworkID().get();
+			
+				int i = 0;
+				for (It = evt->begin(); It != evt->end(); ++It)
+				{
+					ext_description = "";
+					EITEvent event(*It->second,tsidonid);
+					for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 					{
-						if (genreCategory == 0)
-							genreCategory = ce->content_nibble_level_1;
-						if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
+						Descriptor *descriptor = *d;
+						if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
+							ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
+						else
+						if (descriptor->Tag() == DESCR_SHORT_EVENT)
+							description = ((ShortEventDescriptor*)descriptor)->event_name;
+						else
+						if (descriptor->Tag() == DESCR_CONTENT)
 						{
-							if (!genre)
-								genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
+							genre = "";
+							genreCategory = 0;
+							ContentDescriptor *cod = (ContentDescriptor *)descriptor;
+
+							for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
+							{
+								if (genreCategory == 0)
+									genreCategory = ce->content_nibble_level_1;
+								if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
+								{
+									if (!genre)
+										genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
+								}
+							}
 						}
 					}
+			
+					if (!genre)
+						genre = "n/a";
+
+					tm* t = localtime(&event.start_time);
+
+					result << "<event id=\"" << i << "\">";
+					eString tmp = filter_string(description);
+					tmp.strReplace("&", "&amp;");
+					result  << "<date>"
+						<< std::setw(2) << t->tm_mday << '.'
+						<< std::setw(2) << t->tm_mon+1 << '.' 
+						<< std::setw(2) << t->tm_year + 1900
+						<< "</date>"
+						<< "<time>"
+						<< std::setw(2) << t->tm_hour << ':'
+						<< std::setw(2) << t->tm_min 
+						<< "</time>"
+						<< "<duration>" << event.duration<< "</duration>"
+						<< "<description>" << filter_string(tmp) << "</description>";
+					
+					if (type == "extended")
+					{
+						eString ext_tmp = filter_string(ext_description);
+						ext_tmp.strReplace("&", "&amp;");	
+
+						result  << "<genre>" << genre << "</genre>"
+							<< "<genrecategory>" << "genre" << eString().sprintf("%02d", genreCategory) << "</genrecategory>"
+							<< "<start>" << event.start_time << "</start>"
+							<< "<details>" << filter_string(ext_tmp) << "</details>";
+					}
+					
+					result << "</event>";
+					i++;
 				}
 			}
-			
-			if (!genre)
-				genre = "n/a";
-
-			tm* t = localtime(&event.start_time);
-
-			result << "<event id=\"" << i << "\">";
-			eString tmp = filter_string(description);
-			tmp.strReplace("&", "&amp;");
-			result  << "<date>"
-				<< std::setw(2) << t->tm_mday << '.'
-				<< std::setw(2) << t->tm_mon+1 << '.' 
-				<< std::setw(2) << t->tm_year + 1900
-				<< "</date>"
-				<< "<time>"
-				<< std::setw(2) << t->tm_hour << ':'
-				<< std::setw(2) << t->tm_min 
-				<< "</time>"
-				<< "<duration>" << event.duration / 60 << "</duration>"
-				<< "<description>" << filter_string(tmp) << "</description>";
-				
-			if (type == "extended")
-			{
-				eString ext_tmp = filter_string(ext_description);
-				ext_tmp.strReplace("&", "&amp;");
-
-				result  << "<genre>" << genre << "</genre>"
-					<< "<start>" << event.start_time << "</start>"
-					<< "<details>" << filter_string(ext_tmp) << "</details>";
-			}
-			result << "</event>";
-			i++;
+			eEPGCache::getInstance()->Unlock();
 		}
 	}
-	eEPGCache::getInstance()->Unlock();
-
 	result << "</epg>";
 
 	return result.str();
@@ -402,6 +396,7 @@ static eString getStreamInfoXSL(eString request, eString dirpath, eString opt, e
 {
 	eString result;
 	
+	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
 	switch(eSystemInfo::getInstance()->getFEType())
 	{
 		case eSystemInfo::feSatellite:
@@ -416,6 +411,12 @@ static eString getStreamInfoXSL(eString request, eString dirpath, eString opt, e
 	}
 	
 	return result;
+}
+
+static eString getChannelEPGXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
+	return readFile(TEMPLATE_DIR + "channelepg.xsl");
 }
 
 static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -705,5 +706,6 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/getservices", getServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo", getStreamInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getStreamInfoXSL, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/channelepg.xsl", getChannelEPGXSL, lockWeb);
 }
 
