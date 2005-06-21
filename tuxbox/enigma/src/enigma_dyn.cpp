@@ -3020,15 +3020,15 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 #ifndef DISABLE_FILE
 				result << "<td>"
 					<< "<a href=\"javascript:record('"
-					<< "ref=" << ref2string(ref)
-					<< "&start=" << event.start_time
-					<< "&duration=" << event.duration;
+					<< ref2string(ref) << "','"
+					<< event.start_time << "','"
+					<< event.duration << "','";
 				eString tmp = filter_string(description);
 				tmp.strReplace("\'", "\\\'");
 				tmp.strReplace("\"", "\\\"");
 				tmp.strReplace("&", "~");
-				result  << "&descr=" << tmp
-					<< "&channel=" << filter_string(current->service_name)
+				result  << tmp << "','"
+					<< filter_string(current->service_name)
 					<< "')\"><img src=\"timer.gif\" border=0></a>"
 					<< "</td>";
 #endif
