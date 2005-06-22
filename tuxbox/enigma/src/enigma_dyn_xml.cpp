@@ -158,19 +158,20 @@ static eString getEPG(eString request, eString dirpath, eString opts, eHTTPConne
 	
 	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/channelepg.xsl\"?>"
-		<< "<epg>";
+		<< "<service_epg>";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
-		eString type = opt["type"];
 		eString serviceRef = opt["ref"];
 		ref = (serviceRef) ? string2ref(serviceRef) : sapi->service;
 		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 		if (current)
 		{
-			result	<< "<service_reference>" << ref2string(ref) << "</service_reference>"
-				<< "<service_name>" << filter_string(current->service_name) << "</service_name>";
+			result	<< "<service>"
+				<< "<reference>" << ref2string(ref) << "</reference>"
+				<< "<name>" << filter_string(current->service_name) << "</name>"
+				<< "</service>";
 			eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
 			eEPGCache::getInstance()->Lock();
 			const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
@@ -231,27 +232,23 @@ static eString getEPG(eString request, eString dirpath, eString opts, eHTTPConne
 						<< std::setw(2) << t->tm_min 
 						<< "</time>"
 						<< "<duration>" << event.duration<< "</duration>"
-						<< "<description>" << filter_string(tmp) << "</description>";
+						<< "<description>" << tmp << "</description>";
 					
-					if (type == "extended")
-					{
-						eString ext_tmp = filter_string(ext_description);
-						ext_tmp.strReplace("&", "&amp;");	
+					eString ext_tmp = filter_string(ext_description);
+					ext_tmp.strReplace("&", "&amp;");	
 
-						result  << "<genre>" << genre << "</genre>"
-							<< "<genrecategory>" << "genre" << eString().sprintf("%02d", genreCategory) << "</genrecategory>"
-							<< "<start>" << event.start_time << "</start>"
-							<< "<details>" << filter_string(ext_tmp) << "</details>";
-					}
-					
-					result << "</event>";
+					result  << "<genre>" << genre << "</genre>"
+						<< "<genrecategory>" << "genre" << eString().sprintf("%02d", genreCategory) << "</genrecategory>"
+						<< "<start>" << event.start_time << "</start>"
+						<< "<details>" << ext_tmp << "</details>"
+						<< "</event>";
 					i++;
 				}
 			}
 			eEPGCache::getInstance()->Unlock();
 		}
 	}
-	result << "</epg>";
+	result << "</service_epg>";
 
 	return result.str();
 }

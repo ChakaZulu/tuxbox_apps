@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.8.0-Expert"
+#define WEBIFVERSION "3.8.1-Expert"
 #else
-#define WEBIFVERSION "3.8.0"
+#define WEBIFVERSION "3.8.1"
 #endif
 
 #define KEYBOARDTV 0

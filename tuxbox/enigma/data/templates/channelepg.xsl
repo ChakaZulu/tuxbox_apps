@@ -12,17 +12,17 @@
 		<table id="epg" width="100%" border="0" cellspacing="0" cellpadding="5">
 			<thead>
 				<tr>
-					<th colspan="3"><xsl:value-of select="/epg/service_name"/></th>
+					<th colspan="3"><xsl:value-of select="/service_epg/service/name"/></th>
 				</tr>
 			</thead>
 			<tbody>
-				<xsl:for-each select="epg/event">
+				<xsl:for-each select="service_epg/event">
 					<tr valign="middle">
 						<td>
 							<span class="time"><xsl:value-of select="date"/> - <xsl:value-of select="time"/></span>
 						</td>
 						<td>
-							<a href="javascript:record('{service_reference},{start},{duration},{description},{/epg/service_name}')">
+							<a href="javascript:record('{/service_epg/service/reference},{start},{duration},{description},{/service_epg/service/name}')">
 								<img src="/timer.gif" border="0"/>
 							</a>
 						</td>
