@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.8.1-Expert"
+#define WEBIFVERSION "3.9.0-Expert"
 #else
-#define WEBIFVERSION "3.8.1"
+#define WEBIFVERSION "3.9.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -1786,20 +1786,6 @@ static eString recoverRecordings(eString request, eString dirpath, eString opt, 
 }
 #endif
 
-class myTimerEntry
-{
-public:
-	int start;
-	eString timerData;
-	myTimerEntry(int pStart, eString pTimerData)
-	{
-		start = pStart;
-		timerData = pTimerData;
-	};
-	~myTimerEntry() {};
-	bool operator < (const myTimerEntry &a) const {return start < a.start;}
-};
-
 struct countTimer
 {
 	int &count;
@@ -2640,6 +2626,19 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 	content->local_header["Cache-Control"] = "no-cache";
 
 	return getvideopls();
+}
+
+static eString mPlayer(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
+	eString apid = eString().sprintf("%04x", Decoder::current.apid);
+
+	content->local_header["Content-Type"]="video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache";
+	content->local_header["vpid"] = vpid;
+	content->local_header["apid"] = apid;
+
+	return "http://" + getIP() + ":31339/" + vpid  + "," + apid;
 }
 
 static eString setStreamingServiceRef(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -4798,8 +4797,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/satFinder", satFinder, lockWeb);
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/video.pls", videopls, lockWeb);
+	dyn_resolver->addDyn("GET", "/mplayer.mply", mPlayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
-//	dyn_resolver->addDyn("GET", "/header", header, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
 	dyn_resolver->addDyn("GET", "/videodata", videodata, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);

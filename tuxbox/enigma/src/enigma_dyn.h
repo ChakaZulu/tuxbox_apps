@@ -17,4 +17,18 @@ class eHTTPDynPathResolver;
 
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver);
 
+class myTimerEntry
+{
+public:
+	int start;
+	eString timerData;
+	myTimerEntry(int pStart, eString pTimerData)
+	{
+		start = pStart;
+		timerData = pTimerData;
+	};
+	~myTimerEntry() {};
+	bool operator < (const myTimerEntry &a) const {return start < a.start;}
+};
+
 #endif /* __enigma_dyn_h */

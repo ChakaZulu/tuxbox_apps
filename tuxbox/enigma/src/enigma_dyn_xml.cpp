@@ -143,7 +143,7 @@ static eString getAudioChannels(eString request, eString dirpath, eString opts, 
 	return result.str();
 }
 
-static eString getEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getServiceEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
 	eString description, ext_description, genre;
@@ -179,13 +179,13 @@ static eString getEPG(eString request, eString dirpath, eString opts, eHTTPConne
 			if (evt)
 			{
 				timeMap::const_iterator It;
-				int tsidonid = (rref.getTransportStreamID().get()<<16) | rref.getOriginalNetworkID().get();
+				int tsidonid = (rref.getTransportStreamID().get() << 16) | rref.getOriginalNetworkID().get();
 			
 				int i = 0;
 				for (It = evt->begin(); It != evt->end(); ++It)
 				{
 					ext_description = "";
-					EITEvent event(*It->second,tsidonid);
+					EITEvent event(*It->second, tsidonid);
 					for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 					{
 						Descriptor *descriptor = *d;
@@ -251,19 +251,6 @@ static eString getEPG(eString request, eString dirpath, eString opts, eHTTPConne
 	result << "</service_epg>";
 
 	return result.str();
-}
-
-static eString mPlayer(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
-	eString apid = eString().sprintf("%04x", Decoder::current.apid);
-
-	content->local_header["Content-Type"]="video/mpegfile";
-	content->local_header["Cache-Control"] = "no-cache";
-	content->local_header["vpid"] = vpid;
-	content->local_header["apid"] = apid;
-
-	return "http://" + getIP() + ":31339/" + vpid  + "," + apid;
 }
 
 eString getTag(int mode, int submode)
@@ -361,7 +348,7 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 	/* MODE: 0 = TV, 1 = Radio, 2 = Data, 3 = Movies, 4 = Root */
 	/* SUBMODE: 0 = n/a, 1 = All, 2 = Satellites, 2 = Providers, 4 = Bouquets */
 	
-	content->local_header["Content-Type"] = "text/plain; charset=utf-8";
+	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
 	std::map<eString,eString> opts = getRequestOptions(opt, '&');
 	
 	eString mode = "0";
@@ -414,6 +401,12 @@ static eString getChannelEPGXSL(eString request, eString dirpath, eString opt, e
 {
 	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
 	return readFile(TEMPLATE_DIR + "channelepg.xsl");
+}
+
+static eString getTimersXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
+	return readFile(TEMPLATE_DIR + "timers.xsl");
 }
 
 static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -693,16 +686,127 @@ static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTT
 	return result;
 }
 
+struct getTimer
+{
+	std::list<myTimerEntry> &myList;
+
+	getTimer(std::list<myTimerEntry> &myList)
+		:myList(myList)
+	{
+	}
+
+	void operator()(ePlaylistEntry* se)
+	{
+		eString tmp = readFile(TEMPLATE_DIR + "XMLTimer.tmp");
+		
+		if (se->type & ePlaylistEntry::isRepeating)
+			tmp.strReplace("#TYPE#", "REPEATING");
+		else
+			tmp.strReplace("#TYPE#", "SINGLE");
+		
+		tm startTime = *localtime(&se->time_begin);
+		
+		tmp.strReplace("#DATE#", eString().sprintf("%02d.%02d.%04d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_year + 1900));
+		tmp.strReplace("#TIME#", eString().sprintf("%02d:%02d", startTime.tm_hour, startTime.tm_min));
+		tmp.strReplace("#START#", eString().sprintf("%d", se->time_begin));
+		tmp.strReplace("#DURATION#", eString().sprintf("%d", se->duration));
+
+		eString description = htmlChars(se->service.descr);
+		eString channel = getLeft(description, '/');
+		if (!channel)
+		{
+			eService *service = eDVB::getInstance()->settings->getTransponders()->searchService(se->service);
+			if (service)
+				channel = filter_string(service->service_name);
+		}
+		if (!channel)
+			channel = "No channel available";
+
+		description = getRight(description, '/');
+		if (!description)
+			description = "No description available";
+
+		if (se->type & ePlaylistEntry::stateFinished)
+			tmp.strReplace("#STATUS#", "FINISHED");
+		else
+		if (se->type & ePlaylistEntry::stateError)
+			tmp.strReplace("#STATUS#", "ERROR");
+		else
+			tmp.strReplace("#STATUS#", "ACTIVE");
+
+		eString days;
+		if (se->type & ePlaylistEntry::isRepeating)
+		{
+			if (se->type & ePlaylistEntry::Su)
+				days += "Su ";
+			if (se->type & ePlaylistEntry::Mo)
+				days += "Mo ";
+			if (se->type & ePlaylistEntry::Tue)
+				days += "Tue ";
+			if (se->type & ePlaylistEntry::Wed)
+				days += "Wed ";
+			if (se->type & ePlaylistEntry::Thu)
+				days += "Thu ";
+			if (se->type & ePlaylistEntry::Fr)
+				days += "Fr ";
+			if (se->type & ePlaylistEntry::Sa)
+				days += "Sa";
+		}
+		
+		tmp.strReplace("#DAYS#", days);
+		
+		tmp.strReplace("#NAME#", channel);
+		tmp.strReplace("#DESCRIPTION#", description);
+		tmp.strReplace("#REFERENCE#", ref2string(se->service));
+		
+		if (se->type & ePlaylistEntry::SwitchTimerEntry)
+			tmp.strReplace("#ACTION#", "ZAP");
+		else
+		if (se->type & ePlaylistEntry::recDVR)
+			tmp.strReplace("#ACTION#", "DVR");
+		else
+		if (se->type & ePlaylistEntry::recNgrab)
+			tmp.strReplace("#ACTION#", "NGRAB");
+		else
+			tmp.strReplace("#ACTION#", "NONE");
+
+		myList.push_back(myTimerEntry(se->time_begin, tmp));
+	}
+};
+
+static eString getTimers(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	std::stringstream result;
+	std::list<myTimerEntry> myList;
+	std::list<myTimerEntry>::iterator myIt;
+	
+	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
+	
+	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/timers.xsl\"?>"
+		<< "<timers>";
+
+	eTimerManager::getInstance()->forEachEntry(getTimer(myList));
+	myList.sort();
+	for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+		result << myIt->timerData;
+		
+	result << "</timers>";
+
+	return result.str();
+}
+
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/xml/status", getStatus, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/epg", getEPG, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/service_epg", getServiceEPG, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/imageinfo", getImageInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/audiochannels", getAudioChannels, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/mplayer.mply", mPlayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/getservices", getServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo", getStreamInfo, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/timers", getTimers, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getStreamInfoXSL, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/channelepg.xsl", getChannelEPGXSL, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/timers.xsl", getTimersXSL, lockWeb);
 }
 
