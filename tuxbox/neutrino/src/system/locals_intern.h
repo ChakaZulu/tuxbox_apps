@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.48 2005/06/20 22:36:43 barf Exp $
+ * $Id: locals_intern.h,v 1.49 2005/06/23 18:52:25 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -785,7 +785,7 @@ const char * locale_real_names[] =
 	"settings.pos_bottom_right",
 	"settings.pos_top_left",
 	"settings.pos_top_right",
-	"shutdownerror.recoding",
+	"shutdown.recoding_query",
 	"shutdowntimer.announce",
 	"sleeptimerbox.announce",
 	"sleeptimerbox.hint1",

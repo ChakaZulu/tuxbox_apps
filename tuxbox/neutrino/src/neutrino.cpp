@@ -4006,33 +4006,34 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 void CNeutrinoApp::ExitRun()
 {
-	if (recordingstatus) {
-    		DisplayErrorMessage(g_Locale->getText(LOCALE_SHUTDOWNERROR_RECODING));
-    		return;
+	  //DisplayErrorMessage(g_Locale->getText(LOCALE_SHUTDOWNERROR_RECODING));
+	if (!recordingstatus || 
+	    ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_SHUTDOWN_RECODING_QUERY, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 30, true) == CMessageBox::mbrYes)
+	{
+	
+		CLCD::getInstance()->setMode(CLCD::MODE_SHUTDOWN);
+
+		dprintf(DEBUG_INFO, "exit\n");
+		for(int x=0;x<256;x++)
+			frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
+		frameBuffer->paletteSet();
+
+		frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
+		frameBuffer->loadPal("shutdown.pal");
+
+		networkConfig.automatic_start = (network_automatic_start == 1);
+		networkConfig.commitConfig();
+		saveSetup();
+		g_Controld->shutdown();
+
+		if (g_RCInput != NULL)
+			delete g_RCInput;
+
+		if (frameBuffer != NULL)
+			delete frameBuffer;
+
+		exit(0);
 	}
-
-	CLCD::getInstance()->setMode(CLCD::MODE_SHUTDOWN);
-
-	dprintf(DEBUG_INFO, "exit\n");
-	for(int x=0;x<256;x++)
-		frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
-	frameBuffer->paletteSet();
-
-	frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
-	frameBuffer->loadPal("shutdown.pal");
-
-	networkConfig.automatic_start = (network_automatic_start == 1);
-	networkConfig.commitConfig();
-	saveSetup();
-	g_Controld->shutdown();
-
-	if (g_RCInput != NULL)
-		delete g_RCInput;
-
-	if (frameBuffer != NULL)
-		delete frameBuffer;
-
-	exit(0);
 }
 
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )

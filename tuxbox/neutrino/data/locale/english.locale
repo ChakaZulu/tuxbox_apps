@@ -758,7 +758,7 @@ settings.pos_bottom_left bottom left
 settings.pos_bottom_right bottom right
 settings.pos_top_left oben top left
 settings.pos_top_right oben top right
-shutdownerror.recoding Recording is running. Shutdown not possible.
+shutdown.recoding_query dBox is recording. Really shutdown?
 shutdowntimer.announce Box will shutdown in 1 min.\nCancel Shutdown ?
 sleeptimerbox.announce Sleeptimer in 1 min
 sleeptimerbox.hint1 Shutdown time in min. (000=off)
