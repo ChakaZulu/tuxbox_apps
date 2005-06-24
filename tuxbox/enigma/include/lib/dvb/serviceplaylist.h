@@ -84,6 +84,10 @@ struct ePlaylistEntry
 		else
 			return e.service == service && e.time_begin == time_begin;
 	}
+	bool operator < (const ePlaylistEntry &e) const
+	{
+		return ( service.descr.compare( e.service.descr ) < 0 ) ;
+	}
 };
 
 class ePlaylist: public eService

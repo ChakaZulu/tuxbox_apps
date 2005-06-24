@@ -1742,37 +1742,123 @@ static eString aboutDreambox(void)
 }
 
 #ifndef	DISABLE_FILE
+// Extract the description from the filename.
+eString getDesc( const eString& str )
+{
+	unsigned int leftbound, rightbound ;
+	eString tbtrimmed ;
+	
+	leftbound = str.find( '-' ) ;
+	rightbound = str.find( '-', leftbound + 1 ) ;
+	if ( ( rightbound == eString::npos ) || ( rightbound - leftbound < 1 ) )
+	{
+		tbtrimmed = str ;
+	} else {
+		tbtrimmed = str.substr( leftbound + 1, rightbound - leftbound - 1 ) ;
+	}
+	
+	leftbound = tbtrimmed.find_first_not_of( ' ' ) ;
+	rightbound = tbtrimmed.find_last_not_of( ' ' ) ;
+
+	// If the extracted description is empty use the value of str as the description.
+	if ( rightbound - leftbound < 1 ) {
+		tbtrimmed = str ;
+		leftbound = tbtrimmed.find_first_not_of( ' ' ) ;
+		rightbound = tbtrimmed.find_last_not_of( ' ' ) ;
+	}
+	return tbtrimmed.substr( leftbound, rightbound - leftbound + 1 ) ;
+}
+
+// Recover index with recordings on harddisk in /hdd/movie.
 bool rec_movies()
 {
+	eString filen ;
+	int i ;
 	bool result = false;
-	FILE *rec = fopen("/hdd/movie/recordings.epl", "w");
-	if (rec)
-	{
-		fprintf(rec, "#NAME Aufgenommene Filme\n");
 
-		struct dirent **namelist;
-		int n = scandir("/hdd/movie", &namelist, 0, alphasort);
-		if (n > 0)
+	eZapMain::getInstance()->loadRecordings();
+	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
+	std::list<ePlaylistEntry>& rec_list = recordings->getList() ;
+	struct dirent **namelist;
+	int n = scandir("/hdd/movie", &namelist, 0, alphasort);
+
+	if ( n > 0 )
+	{
+		// There will be 2 passes through recordings list:
+		// 1) Delete entries from list that are not on disk.
+		// 2) Add entries to list that do not exist yet.
+	
+		// Pass 1
+		std::list<ePlaylistEntry>::iterator it(rec_list.begin()) ;
+		std::list<ePlaylistEntry>::iterator it_next ;
+		while ( it != rec_list.end() ) 
 		{
-			for (int i = 0; i < n; i++)
+			bool valid_file = false ;
+			// For every file in /hdd/movie
+			for (i = 0; i < n; i++)
 			{
-				eString filen = namelist[i]->d_name;
-				if ((filen.find(".ts") != eString::npos) && (filen.find(".ts.") == eString::npos))
+				filen = namelist[i]->d_name;
+				// For every valid file
+				if (( filen.length() >= 3 ) &&
+				( filen.substr(filen.length()-3, 3).compare(".ts") == 0 ) &&
+					(it->service.path.length() >= 11) &&
+					!it->service.path.substr(11,it->service.path.length()-11).compare( filen ) )
 				{
-					fprintf(rec, "#SERVICE: 1:0:1:0:0:0:000000:0:0:0:/hdd/movie/%s\n", filen.c_str());
-					fprintf(rec, "#DESCRIPTION: %s\n", getLeft(filen, '.').c_str());
-					fprintf(rec, "#TYPE 16385\n");
-					fprintf(rec, "/hdd/movie/%s\n", filen.c_str());
+					valid_file = true ;
+					break ;
 				}
-				free(namelist[i]);
 			}
-			free(namelist);
-			result = true;
+
+			(it_next = it)++ ;
+			if ( !valid_file )
+				rec_list.erase(it) ;
+			else
+			{
+				// Trim descr
+				if ( it->service.descr.find_last_not_of( ' ' ) != eString::npos ) 
+					it->service.descr = it->service.descr.substr( 0, it->service.descr.find_last_not_of( ' ' ) + 1 ) ;
+			}
+			it = it_next ;
 		}
-		fclose(rec);
-		eZapMain::getInstance()->loadRecordings();
+		
+		// Pass 2
+		for (i = 0; i < n; i++)
+		{
+			filen = namelist[i]->d_name;
+			// For every .ts file
+			if ( ( filen.length() >= 3 ) &&
+				( filen.substr(filen.length()-3, 3).compare(".ts") == 0 ) )
+			{
+				// Check if file is in the list.
+				bool file_in_list = false ;
+				for (std::list<ePlaylistEntry>::iterator it(rec_list.begin()); it != rec_list.end(); ++it)
+				{
+					if ( (it->service.path.length() >= 11) &&
+						!it->service.path.substr(11,it->service.path.length()-11).compare( filen ) )
+					{
+						file_in_list = true ;
+						break ;
+					}
+				}
+				if ( !file_in_list )	// Add file to list.
+				{
+					eServicePath path( "1:0:1:0:0:0:000000:0:0:0:/hdd/movie/" + filen ) ;
+					rec_list.push_back( path ) ;
+					rec_list.back().type = 16385 ;
+					rec_list.back().service.descr = getDesc( filen ) ;
+					rec_list.back().service.path = "/hdd/movie/" + filen ;
+				}
+			}
+			free( namelist[i] ) ;
+		}
+		rec_list.sort() ;
+		result = true ;
 	}
-	return result;
+	
+	recordings->save();
+	free( namelist ) ;
+
+	return result ;
 }
 
 static eString recoverRecordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
