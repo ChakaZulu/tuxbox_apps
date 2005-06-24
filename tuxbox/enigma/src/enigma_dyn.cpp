@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "3.9.0-Expert"
+#define WEBIFVERSION "4.0.0-Expert"
 #else
-#define WEBIFVERSION "3.9.0"
+#define WEBIFVERSION "4.0.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -760,7 +760,7 @@ eString getCurService(void)
 	{
 		eService *current = eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 		if (current)
-			result = current->service_name.c_str();
+			result = current->service_name;
 	}
 	return filter_string(result);
 }

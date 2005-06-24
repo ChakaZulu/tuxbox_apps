@@ -5,9 +5,9 @@
 <body>
 	<h2>Stream Information</h2>
 	<table border="0">
-		<tr><td>Service Name:</td><td><xsl:value-of select="streaminfo/service_name"/></td></tr>
+		<tr><td>Service Name:</td><td><xsl:value-of select="streaminfo/service/name"/></td></tr>
 		<tr><td>Service Provider:</td><td><xsl:value-of select="streaminfo/provider"/></td></tr>
-		<tr><td>Service Reference:</td><td><xsl:value-of select="streaminfo/service_reference"/></td></tr>
+		<tr><td>Service Reference:</td><td><xsl:value-of select="streaminfo/service/reference"/></td></tr>
 		<tr><td>VPID:</td><td><xsl:value-of select="streaminfo/vpid"/></td></tr>
 		<tr><td>APID:</td><td><xsl:value-of select="streaminfo/apid"/></td></tr>
 		<tr><td>PCRPID:</td><td><xsl:value-of select="streaminfo/pcrpid"/></td></tr>

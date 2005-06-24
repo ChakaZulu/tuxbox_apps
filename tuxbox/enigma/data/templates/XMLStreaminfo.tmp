@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet type="text/xsl" href="/xml/streaminfo.xsl"?>
 <streaminfo>
-<service_name>#SERVICENAME#</service_name>
-<service_reference>#SERVICEREFERENCE#</service_reference>
+<frontend>#FRONTEND#</frontend>
+<service>
+	<name>#SERVICENAME#</name>
+	<reference>#SERVICEREFERENCE#</reference>
+</service>
 <provider>#PROVIDER#</provider>
 <vpid>#VPID#</vpid>
 <apid>#APID#</apid>

@@ -70,7 +70,7 @@ static eString getImageInfo(eString request, eString dirpath, eString opts, eHTT
 	return result.str();
 }
 
-static eString getStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getBoxStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt;
 
@@ -105,42 +105,189 @@ static eString getStatus(eString request, eString dirpath, eString opt, eHTTPCon
 	return result;
 }
 
-static eString getAudioChannels(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+extern eString getCurrentSubChannel(eString);
+
+static eString getCurrentServiceData(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+	eString now_start, now_date, now_time, now_duration, now_text, now_longtext,
+		next_start, next_date, next_time, next_duration, next_text, next_longtext;
+	
+	eString result = readFile(TEMPLATE_DIR + "currentServiceData.tmp");
+	
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
+	
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		eService *current = eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		if (current)
+		{
+			eString curService = current->service_name;
+			eString curSubService = getCurrentSubChannel(ref2string(sapi->service));
+			if (curSubService)
+			{
+				if (curService)
+					curService += ": " + curSubService;
+				else
+					curService = curSubService;
+			}
+			result.strReplace("#NAME#", curService);
+			result.strReplace("#REFERENCE#", ref2string(sapi->service));
+		}
+		else
+		{
+			result.strReplace("#NAME#", "");
+			result.strReplace("#REFERENCE#", "");
+		}
+	}
 
-	std::stringstream result;
+	EIT *eit = eDVB::getInstance()->getEIT();
+	if (eit)
+	{
+		int p = 0;
 
-	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-		<< "<audio_channels>";
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
+		{
+			if (*event)
+			{
+				if (p == 0)
+				{
+					if (event->start_time)
+					{
+						now_start = eString().sprintf("%d", (int)event->start_time);
+						now_time.sprintf("%s", ctime(&event->start_time));
+						eDebug("[ENIGMA_DYN_XML] now_time = %s", now_time.c_str());
+						now_date = now_time.mid(5, 5);
+						now_time = now_time.mid(11, 5);
+					}
+
+					now_duration.sprintf("%d", (int)(event->duration));
+				}
+				if (p == 1)
+				{
+					if (event->start_time)
+					{
+						next_start = eString().sprintf("%d", (int)event->start_time);
+ 						next_time.sprintf("%s", ctime(&event->start_time));
+						eDebug("[ENIGMA_DYN_XML] next_time = %s", next_time.c_str());
+						next_date = next_time.mid(5, 5);
+						next_time = next_time.mid(11, 5);
+						next_duration.sprintf("%d", (int)(event->duration));
+					}
+				}
+				LocalEventData led;
+				switch(p)
+				{
+				case 0:
+					led.getLocalData(event, &now_text, 0, &now_longtext);
+					break;
+				case 1:
+					led.getLocalData(event, &next_text, 0, &next_longtext);
+					break;
+				}
+				p++;
+		 	}
+		}
+		eit->unlock();
+	}
+
+	result.strReplace("#NOWSTART#", now_start);
+	result.strReplace("#NOWT#", now_time);
+	result.strReplace("#NOWDATE#", now_date);
+	result.strReplace("#NOWD#", now_duration);
+	result.strReplace("#NOWST#", filter_string(now_text.strReplace("\"", "'")));
+	result.strReplace("#NOWLT#", filter_string(now_longtext.strReplace("\"", "'")));
+	result.strReplace("#NEXTSTART#", next_start);
+	result.strReplace("#NEXTT#", next_time);
+	result.strReplace("#NEXTDATE#", next_date);
+	result.strReplace("#NEXTD#", next_duration);
+	result.strReplace("#NEXTST#", filter_string(next_text.strReplace("\"", "'")));
+	result.strReplace("#NEXTLT#", filter_string(next_longtext.strReplace("\"", "'")));
+	
+	std::stringstream tmp;
+	tmp << "<audiochannels>";
 	if (sapi)
 	{
 		std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
 		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
 			;it != astreams.end(); ++it)
 		{
-			result  << "<channel>" 
+			tmp	<< "<channel>" 
 				<< "<pid>"
 				<< eString().sprintf("0x%04x", it->pmtentry->elementary_PID)
 				<< "</pid>"
 				<< "<selected>";
 			if (it->pmtentry->elementary_PID == Decoder::current.apid)
-				result << "1";
+				tmp << "1";
 			else
-				result << "0";
-			result  << "</selected>"
-				<< "<name>" << it->text << "</name>"
-				<< "</channel";
+				tmp << "0";
+			result += "</selected><name>" + it->text + "</name>";
+			result += "</channel";
 		}
 	}
-	else
-		result << "<audio>none</audio>";
-
-	result << "</audio_channels>";
+	tmp << "</audio_channels>";
+	result.strReplace("#AUDIOCHANNELS#", tmp.str());
 	
-	return result.str();
+	switch (eAVSwitch::getInstance()->getAudioChannel())
+	{
+		case 0: result.strReplace("#AUDIOTRACK#", "LEFT"); break;
+		case 1: result.strReplace("#AUDIOTRACK#", "STEREO"); break;
+		case 2: result.strReplace("#AUDIOTRACK#", "RIGHT"); break;
+		default: result.strReplace("#AUDIOTRACK#", ""); break;
+	}
+	
+	tmp.clear();
+	tmp << "<video_channels>";
+	eString curServiceRef = ref2string(eServiceInterface::getInstance()->service);
+	if (curServiceRef)
+	{
+		eString s1 = curServiceRef; int pos; eString nspace;
+		for (int i = 0; i < 7 && s1.find(":") != eString::npos; i++)
+		{
+			pos = s1.find(":");
+			nspace = s1.substr(0, pos);
+			s1 = s1.substr(pos + 1);
+		}
+		EIT *eit = eDVB::getInstance()->getEIT();
+		if (eit)
+		{
+			int p = 0;
+			for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
+			{
+				EITEvent *event = *i;
+				if ((event->running_status >= 2) || ((!p) && (!event->running_status)))
+				{
+					for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
+					{
+						if (d->Tag() == DESCR_LINKAGE)
+						{
+							LinkageDescriptor *ld = (LinkageDescriptor *)*d;
+							if (ld->linkage_type == 0xB0) //subchannel
+							{
+								eString subService((char *)ld->private_data, ld->priv_len);
+								eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
+									+ eString(nspace) + ":0:0:0:";
+								tmp << "<service>";
+								tmp << "<reference>" << subServiceRef << "</reference>";
+								tmp << "<name>" << subService << "</name>";
+								if (subServiceRef == curServiceRef)
+									tmp << "<selected>1</selected>";
+								else
+									tmp << "<selected>0</selected>";
+								tmp << "</service>";
+							}
+						}
+					}
+				}
+				++p;
+			}
+			eit->unlock();
+		}
+	}
+	tmp << "</video_channels>";
+	result += tmp.str();
+	
+	return result;
 }
 
 static eString getServiceEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -157,7 +304,7 @@ static eString getServiceEPG(eString request, eString dirpath, eString opts, eHT
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
 	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/channelepg.xsl\"?>"
+		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/serviceepg.xsl\"?>"
 		<< "<service_epg>";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
@@ -397,10 +544,10 @@ static eString getStreamInfoXSL(eString request, eString dirpath, eString opt, e
 	return result;
 }
 
-static eString getChannelEPGXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getServiceEPGXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
-	return readFile(TEMPLATE_DIR + "channelepg.xsl");
+	return readFile(TEMPLATE_DIR + "serviceepg.xsl");
 }
 
 static eString getTimersXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -411,7 +558,7 @@ static eString getTimersXSL(eString request, eString dirpath, eString opt, eHTTP
 
 static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result = readFile(TEMPLATE_DIR + "streaminfo.tmp");
+	eString result = readFile(TEMPLATE_DIR + "XMLstreaminfo.tmp");
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
@@ -542,6 +689,7 @@ static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTT
 		{
 			case eSystemInfo::feSatellite:
 			{
+				result.strReplace("#FRONTEND#", "DVB-S");
 				for (std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin());
 					tpData == 0 && it != eTransponderList::getInstance()->getLNBs().end(); it++)
 					for (ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin());
@@ -580,9 +728,11 @@ static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTT
 					result.strReplace("#LOCK#", (lock ? "Yes" : "No"));
 					result.strReplace("#SYNC#", (sync ? "Yes" : "No"));
 				}
+				break;
 			}
 			case eSystemInfo::feCable:
 			{
+				result.strReplace("#FRONTEND#", "DVB-C");
 				result.strReplace("#FREQUENCY#", eString().sprintf("%d", tp->cable.frequency / 1000));
 				result.strReplace("#SYMBOLRATE#", eString().sprintf("%d", tp->cable.symbol_rate / 1000));
 				result.strReplace("#INVERSION#", tp->cable.inversion ? "Yes" : "No");
@@ -607,9 +757,11 @@ static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTT
 					case 5: result.strReplace("FEC#", "7/8"); break;
 					case 6: result.strReplace("FEC#", "8/9"); break;
 				}
+				break;
 			}
 			case eSystemInfo::feTerrestrial:
 			{
+				result.strReplace("#FRONTEND#", "DVB-T");
 				result.strReplace("#CENTERFREQUENCY#", eString().sprintf("%d",  tp->terrestrial.centre_frequency / 1000));
 				result.strReplace("#INVERSION#", eString().sprintf("%d",  tp->terrestrial.inversion));
 				result.strReplace("#HIERARCHYINFO#", eString().sprintf("%d",   tp->terrestrial.hierarchy_information));
@@ -664,7 +816,11 @@ static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTT
 					case 4: result.strReplace("#CODERATEHP#", "5/6"); break;
 					case 5: result.strReplace("#CODERATEHP#", "7/8"); break;
 				}
+				
+				break;
 			}
+			default:
+				result.strReplace("#FRONTEND#", "NONE");
 		}
 	}
 	
@@ -783,7 +939,7 @@ static eString getTimers(eString request, eString dirpath, eString opt, eHTTPCon
 	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
 	
 	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/timers.xsl\"?>"
+//		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/timers.xsl\"?>"
 		<< "<timers>";
 
 	eTimerManager::getInstance()->forEachEntry(getTimer(myList));
@@ -798,15 +954,15 @@ static eString getTimers(eString request, eString dirpath, eString opt, eHTTPCon
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/xml/status", getStatus, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/service_epg", getServiceEPG, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/boxstatus", getBoxStatus, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/serviceepg", getServiceEPG, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/imageinfo", getImageInfo, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/audiochannels", getAudioChannels, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/getservices", getServices, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/currentservicedata", getCurrentServiceData, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/services", getServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo", getStreamInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/timers", getTimers, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getStreamInfoXSL, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/channelepg.xsl", getChannelEPGXSL, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/serviceepg.xsl", getServiceEPGXSL, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/timers.xsl", getTimersXSL, lockWeb);
 }
 
