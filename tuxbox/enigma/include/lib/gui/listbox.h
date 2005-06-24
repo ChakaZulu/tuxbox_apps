@@ -30,7 +30,7 @@ class eListBoxBase: public eDecoWidget
 	int movemode, MaxEntries, flags, item_height, columns, in_atomic, atomic_redraw, atomic_old, atomic_new;
 	bool atomic_selchanged;
 	bool atomic_selected;
-	int entries;
+	unsigned int entries;
 	int currentPos;
 protected:
 	ePtrList<eListBoxEntry>::iterator top, bottom, current;

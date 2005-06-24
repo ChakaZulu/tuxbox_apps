@@ -114,7 +114,7 @@ void eListBoxBase::recalcMaxEntries()
 eRect eListBoxBase::getEntryRect(int pos)
 {
 	bool sbar =
-		( entries > MaxEntries*columns && MaxEntries*columns > 1 );
+		( entries > (unsigned int)(MaxEntries*columns && MaxEntries*columns) > 1 );
 
 	int lme=MaxEntries;
 			// in case we show partial last lines (which only works in single-column),
@@ -475,10 +475,10 @@ void eListBoxBase::redrawWidget(gPainter *target, const eRect &where)
 				break;
 	}
 
-	if ( entries > MaxEntries*columns && MaxEntries*columns > 1 )
+	if ( entries > (unsigned int)(MaxEntries*columns && MaxEntries*columns) > 1 )
 	{
 		int pages = entries / (MaxEntries*columns);
-		if ( pages*MaxEntries*columns < entries )
+		if ( (unsigned int)(pages*MaxEntries*columns) < entries )
 			pages++;
 		int start=(currentPos/(MaxEntries*columns)*MaxEntries*columns*100)/(pages*MaxEntries*columns);
 		int vis=MaxEntries*columns*100/(pages*MaxEntries*columns);
