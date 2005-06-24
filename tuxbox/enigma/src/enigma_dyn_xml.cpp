@@ -558,7 +558,7 @@ static eString getTimersXSL(eString request, eString dirpath, eString opt, eHTTP
 
 static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result = readFile(TEMPLATE_DIR + "XMLstreaminfo.tmp");
+	eString result = readFile(TEMPLATE_DIR + "XMLStreaminfo.tmp");
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
