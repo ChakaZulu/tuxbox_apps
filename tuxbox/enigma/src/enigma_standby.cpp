@@ -132,19 +132,17 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		eZapLCD *pLCD=eZapLCD::getInstance();
 		pLCD->lcdStandby->hide();
 		pLCD->lcdMain->show();
+		eDBoxLCD::getInstance()->switchLCD(1);
 #endif
+		eAVSwitch::getInstance()->setInput(0);
+		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage
 		if (handler->getFlags() & eServiceHandler::flagIsSeekable)
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 2));
 		else if ( rezap && canPlayService(ref) )
 			eServiceInterface::getInstance()->play(ref);
 		else if ( rezap && eDVB::getInstance()->recorder )
 			eServiceInterface::getInstance()->play(eDVB::getInstance()->recorder->recRef);
-		eAVSwitch::getInstance()->setInput(0);
-		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage
 		eStreamWatchdog::getInstance()->reloadSettings();
-#ifndef DISABLE_LCD
-		eDBoxLCD::getInstance()->switchLCD(1);
-#endif
 		if( !eSystemInfo::getInstance()->hasLCD() ) //  out of standby
 		{
 			int stdby=0;
