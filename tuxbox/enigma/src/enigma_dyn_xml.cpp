@@ -112,7 +112,7 @@ static eString getCurrentServiceData(eString request, eString dirpath, eString o
 	eString now_start, now_date, now_time, now_duration, now_text, now_longtext,
 		next_start, next_date, next_time, next_duration, next_text, next_longtext;
 	
-	eString result = readFile(TEMPLATE_DIR + "currentServiceData.tmp");
+	eString result = readFile(TEMPLATE_DIR + "XMLCurrentServiceData.tmp");
 	
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
 	
@@ -155,10 +155,9 @@ static eString getCurrentServiceData(eString request, eString dirpath, eString o
 					if (event->start_time)
 					{
 						now_start = eString().sprintf("%d", (int)event->start_time);
-						now_time.sprintf("%s", ctime(&event->start_time));
-						eDebug("[ENIGMA_DYN_XML] now_time = %s", now_time.c_str());
-						now_date = now_time.mid(5, 5);
-						now_time = now_time.mid(11, 5);
+						tm* t = localtime(&event->start_time);
+						now_time.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
+						now_date.sprintf("%02d.%02d.%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900);
 					}
 
 					now_duration.sprintf("%d", (int)(event->duration));
@@ -168,10 +167,9 @@ static eString getCurrentServiceData(eString request, eString dirpath, eString o
 					if (event->start_time)
 					{
 						next_start = eString().sprintf("%d", (int)event->start_time);
- 						next_time.sprintf("%s", ctime(&event->start_time));
-						eDebug("[ENIGMA_DYN_XML] next_time = %s", next_time.c_str());
-						next_date = next_time.mid(5, 5);
-						next_time = next_time.mid(11, 5);
+						tm* t = localtime(&event->start_time);
+						next_time.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
+						next_date.sprintf("%02d.%02d.%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900);
 						next_duration.sprintf("%d", (int)(event->duration));
 					}
 				}
@@ -205,7 +203,6 @@ static eString getCurrentServiceData(eString request, eString dirpath, eString o
 	result.strReplace("#NEXTLT#", filter_string(next_longtext.strReplace("\"", "'")));
 	
 	std::stringstream tmp;
-	tmp << "<audiochannels>";
 	if (sapi)
 	{
 		std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
@@ -221,11 +218,10 @@ static eString getCurrentServiceData(eString request, eString dirpath, eString o
 				tmp << "1";
 			else
 				tmp << "0";
-			result += "</selected><name>" + it->text + "</name>";
-			result += "</channel";
+			tmp 	<< "</selected><name>" << it->text << "</name>";
+			tmp 	<< "</channel>";
 		}
 	}
-	tmp << "</audio_channels>";
 	result.strReplace("#AUDIOCHANNELS#", tmp.str());
 	
 	switch (eAVSwitch::getInstance()->getAudioChannel())
@@ -237,7 +233,7 @@ static eString getCurrentServiceData(eString request, eString dirpath, eString o
 	}
 	
 	tmp.clear();
-	tmp << "<video_channels>";
+	tmp.str("");
 	eString curServiceRef = ref2string(eServiceInterface::getInstance()->service);
 	if (curServiceRef)
 	{
@@ -284,8 +280,7 @@ static eString getCurrentServiceData(eString request, eString dirpath, eString o
 			eit->unlock();
 		}
 	}
-	tmp << "</video_channels>";
-	result += tmp.str();
+	result.strReplace("#VIDEOCHANNELS#", tmp.str());
 	
 	return result;
 }
