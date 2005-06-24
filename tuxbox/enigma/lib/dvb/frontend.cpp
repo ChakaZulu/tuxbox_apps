@@ -342,7 +342,7 @@ int eFrontend::Status()
 #else
 	fe_status_t status;
 #endif
-	if ( ioctl(fd, FE_READ_STATUS, &status) < 0 )
+	if ( ioctl(fd, FE_READ_STATUS, &status) < 0 && errno != ERANGE )
 		eDebug("FE_READ_STATUS failed (%m)");
 	return status;
 }
@@ -350,7 +350,7 @@ int eFrontend::Status()
 uint32_t eFrontend::BER()
 {
 	uint32_t ber=0;
-	if (ioctl(fd, FE_READ_BER, &ber) < 0)
+	if (ioctl(fd, FE_READ_BER, &ber) < 0 && errno != ERANGE)
 		eDebug("FE_READ_BER failed (%m)");
 	return ber;
 }
@@ -358,7 +358,7 @@ uint32_t eFrontend::BER()
 int eFrontend::SignalStrength()
 {
 	uint16_t strength=0;
-	if (ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength) < 0)
+	if (ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength) < 0 && errno != ERANGE)
 		eDebug("FE_READ_SIGNAL_STRENGTH failed (%m)");
 #if 0
 	if ((strength<0) || (strength>65535))
@@ -373,7 +373,7 @@ int eFrontend::SignalStrength()
 int eFrontend::SNR()
 {
 	uint16_t snr=0;
-	if (ioctl(fd, FE_READ_SNR, &snr) < 0)
+	if (ioctl(fd, FE_READ_SNR, &snr) < 0 && errno != ERANGE)
 		eDebug("FE_READ_SNR failed (%m)");
 	#if 0
 	if ((snr<0) || (snr>65535))
@@ -388,7 +388,7 @@ int eFrontend::SNR()
 uint32_t eFrontend::UncorrectedBlocks()
 {
 	uint32_t ublocks=0;
-	if (ioctl(fd, FE_READ_UNCORRECTED_BLOCKS, &ublocks) < 0)
+	if (ioctl(fd, FE_READ_UNCORRECTED_BLOCKS, &ublocks) < 0 && errno != ERANGE)
 		eDebug("FE_READ_UNCORRECTED_BLOCKS failed (%m)");
 	return ublocks;
 }
