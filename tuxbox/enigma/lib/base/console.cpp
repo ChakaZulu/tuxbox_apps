@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.13 2005/06/24 22:30:50 ghostrider Exp $
+ * $Id: console.cpp,v 1.14 2005/06/25 11:01:24 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -181,7 +181,7 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 		strcpy( argv[cnt], cmds.c_str() );
 	}
 	else
-		cnt=0;
+		cnt=1;
 
   // get one read ,one write and the err pipe to the prog..
 
@@ -191,7 +191,7 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
   
 	pid = bidirpipe(fd, argv[0], argv);
 
-	while ( cnt > 0 )  // release heap memory
+	while ( cnt >= 0 )  // release heap memory
 		delete [] argv[cnt--];
 	delete [] argv;
 	
