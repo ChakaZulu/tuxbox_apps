@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: tuxbox-tuxtxt
+Description: tuxtxt
+Version: @VERSION@
+Libs: -L${libdir} -ltuxtxt
+Cflags: -I${includedir} -I@DRIVER@/include
