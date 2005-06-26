@@ -17,9 +17,9 @@ tuxtxt_la_LIBADD = \
 tuxtxt_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install -d $(CONFIGDIR)
-	install -d $(CONFIGDIR)/tuxtxt
-	$(LIBTOOL) install tuxtxt.la $(PLUGINDIR)
-	install -m 0644 $(srcdir)/tuxtxt.cfg $(PLUGINDIR)
-	install -m 0644 $(srcdir)/tuxtxt.conf $(CONFIGDIR)/tuxtxt
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)/tuxtxt
+	$(LIBTOOL) install tuxtxt.la $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/tuxtxt.cfg $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 $(srcdir)/tuxtxt.conf $(DESTDIR)$(CONFIGDIR)/tuxtxt
