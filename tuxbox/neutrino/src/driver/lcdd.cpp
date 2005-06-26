@@ -92,8 +92,12 @@ void* CLCD::TimeThread(void *)
 	while(1)
 	{
 		sleep(1);
-		CLCD::getInstance()->showTime();
-		CLCD::getInstance()->count_down();
+		struct stat buf;
+		if (stat("/tmp/lcd.locked", &buf) == -1) {
+			CLCD::getInstance()->showTime();
+			CLCD::getInstance()->count_down();
+		} else
+			CLCD::getInstance()->wake_up();
 	}
 	return NULL;
 }
