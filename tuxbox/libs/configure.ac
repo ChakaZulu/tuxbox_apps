@@ -21,5 +21,7 @@ liblcddisplay/Makefile
 liblcddisplay/tuxbox-lcddisplay.pc
 liblircdclient/Makefile
 liblircdclient/tuxbox-lircdclient.pc
+libtuxtxt/Makefile
+libtuxtxt/tuxbox-tuxtxt.pc
 ])
 
