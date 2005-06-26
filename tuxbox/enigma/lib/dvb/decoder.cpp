@@ -51,6 +51,12 @@ typedef unsigned char __u8;
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/base/eerror.h>
+// from libtuxtxt
+#if !TUXTXT_CFG_STANDALONE
+extern "C" void tuxtxt_start(int tpid);
+extern "C" int  tuxtxt_stop();
+extern "C" void tuxtxt_close();
+#endif
 
 decoderParameters Decoder::current;
 decoderParameters Decoder::parms;
@@ -135,6 +141,9 @@ int Decoder::Initialize()
 void Decoder::Close()
 {
 	Flush();
+#if !TUXTXT_CFG_STANDALONE
+	tuxtxt_close();
+#endif
 	eDebug("fd video = %d, audio = %d, demux_video = %d, demux_audio = %d, demux_pcr = %d, demux_vtxt = %d, mpeg = %d",
 					fd.video, fd.audio, fd.demux_video, fd.demux_audio, fd.demux_pcr, fd.demux_vtxt, fd.mpeg);
 }
@@ -239,6 +248,7 @@ void Decoder::SetStreamType(int type)
 		eDebug("AUDIO_SET_STREAMTYPE failed (%m)");
 }
 
+int priorityApid(int);
 int Decoder::Set()
 {
 	if (locked)
@@ -319,6 +329,9 @@ int Decoder::Set()
 		}
 		if ( current.tpid != -1 ) // we stop dmx vtxt
 		{
+#if !TUXTXT_CFG_STANDALONE
+		    tuxtxt_stop();
+#endif
 			eDebugNoNewLine("DEMUX_STOP - vtxt - ");
 			if (::ioctl(fd.demux_vtxt, DMX_STOP)<0)
 				eDebug("failed (%m)");
@@ -327,6 +340,9 @@ int Decoder::Set()
 		}
 		if ( parms.tpid != -1 )
 		{
+#if !TUXTXT_CFG_STANDALONE
+		    tuxtxt_start(parms.tpid);
+#endif
 			pes_filter.pid=parms.tpid;
 			pes_filter.input=DMX_IN_FRONTEND;
 			pes_filter.output=DMX_OUT_DECODER;
@@ -687,9 +703,9 @@ void Decoder::stopTrickmode()
 void Decoder::addCADescriptor(__u8 *descriptor)
 {
 #if 0
-	// this code is broken.. do not use this.. 
+	// this code is broken.. do not use this..
 	// on PMT updates parms.descriptor_length are not set to 0 ..
-	// so after many pmt updates parms.descriptor_length is longer than 2048.. 
+	// so after many pmt updates parms.descriptor_length is longer than 2048..
 	// and then .. *booom*
 	memcpy(parms.descriptors+parms.descriptor_length, descriptor, descriptor[1]+2);
 	parms.descriptor_length+=descriptor[1]+2;
@@ -771,7 +787,7 @@ int Decoder::displayIFrameFromFile(const char *filename)
 #define VIDEO_SET_FASTZAP	_IOW('o', 4, int)
 
 #ifndef DMX_GET_STC
-struct dmx_stc 
+struct dmx_stc
 {
 	unsigned int num;	/* input : which STC? O..N */
 	unsigned int base;	/* output: divisor for stc to get 90 kHz clock */
@@ -829,7 +845,7 @@ int Decoder::getSTC(unsigned long long &dst)
 {
 	struct dmx_stc stc;
 	stc.num = 0;
-	
+
 	int f = fd.demux_video;
 	if (f < 0)
 		f = fd.demux_audio;
