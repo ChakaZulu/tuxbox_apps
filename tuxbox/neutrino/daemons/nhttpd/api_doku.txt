@@ -6,27 +6,28 @@ Der Neutrino HTTP-Server laeuft auf Port 80.
 Die Steuerfunktionen fuer externe Programme sind unter dem Context /control/ oder /cgi-bin/ zu finden. 
 Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 
-1. Die Kanalliste			http://dbox/control/channellist
-2. EPG-Abfrage				http://dbox/control/epg
-3. Die DBox herunterfahren		http://dbox/control/shutdown
-4. Standby Mode				http://dbox/control/standby
-5. Lautstaerke-Steuerung                http://dbox/control/volume
-6. Programm umschalten / Playback	http://dbox/control/zapto
-7. Radio/TV, Record Mode		http://dbox/control/setmode
-8. Radio/TV Mode Abfrage		http://dbox/control/getmode
-9. Datum von der Box abfragen		http://dbox/control/getdate
-10. Uhrzeit von der Box abfragen	http://dbox/control/gettime
-11. Allgemeine Informationen 		http://dbox/control/info
-12. Aktuellen Kanal abfragen		http://dbox/control/getonidsid
-13. services.xml lesen			http://dbox/control/getservicesxml
-14. bouquets.xml auslesen		http://dbox/control/getbouquetsxml
-15. Bouquetlist abfragen		http://dbox/control/getbouquets
-16. Bouquet abfragen			http://dbox/control/getbouquet
-17. Fenster in neutrino			http://dbox/control/message
-18. Timerd Interface			http://dbox/control/timer
-19. Shellscript ausführen               http://dbox/cgi-bin/exec
-20. System-/Treiberfunktionen           http://dbox/control/system
-21. Fernbedienung                       http://dbox/control/rc
+1. Die Kanalliste           		http://dbox/control/channellist
+2. EPG-Abfrage              		http://dbox/control/epg
+3. Die DBox herunterfahren      	http://dbox/control/shutdown
+4. Standby Mode             		http://dbox/control/standby
+5. Lautstaerke-Steuerung            http://dbox/control/volume
+6. Programm umschalten / Playback   http://dbox/control/zapto
+7. Radio/TV, Record Mode        	http://dbox/control/setmode
+8. Radio/TV Mode Abfrage        	http://dbox/control/getmode
+9. Datum von der Box abfragen       http://dbox/control/getdate
+10. Uhrzeit von der Box abfragen    http://dbox/control/gettime
+11. Allgemeine Informationen        http://dbox/control/info
+12. Aktuellen Kanal abfragen        http://dbox/control/getonidsid
+13. services.xml lesen          	http://dbox/control/getservicesxml
+14. bouquets.xml auslesen       	http://dbox/control/getbouquetsxml
+15. Bouquetlist abfragen        	http://dbox/control/getbouquets
+16. Bouquet abfragen            	http://dbox/control/getbouquet
+17. Fenster in neutrino         	http://dbox/control/message
+18. Timerd Interface            	http://dbox/control/timer
+19. LCD-Interace					http://dbox/control/lcd
+20. Shellscript ausführen           http://dbox/cgi-bin/exec
+21. System-/Treiberfunktionen       http://dbox/control/system
+22. Fernbedienung                   http://dbox/control/rc
 **********************************************************************************************
 1. Die Kanalliste
 **********************************************************************************************
@@ -965,7 +966,92 @@ Beispiel:
 ok
 
 **********************************************************************************************
-19. Shellscript ausführen
+19. LCD Interface
+**********************************************************************************************
+Handler: http://dbox/control/lcd
+
+Parameter: lock, clear, png, raw, line, rect, xpos, ypos, size, font, color, text, update
+Rückgabe: ok /error
+
+Ansteuerung des LCD-Interfaces über das Web-Interface
+
+Folgende Parameter werden dabei unterstützt:
+
+  lock=n    : n=1 -> das Display wird bis auf Widerruf für Neutrino gesperrt
+              n=0 -> das Display wird wieder für Neutrino freigegeben
+           
+  clear=n   : n=1 -> das Display wird gelöscht (sollte ganz vorn stehen)
+              n=0 -> das Display wird vor der neuen Ausgabe nicht gelöscht (kann entfallen)
+              
+  png=Dateiname : eine lokal auf der Box liegende PNG-Datei wird in's Display geladen
+                  (z.B. /share/tuxbox/lcdd/icons/setup.png als Hintergrund)
+                              
+  raw=x,y,xs,ys,d1,..,dn : überträgt die Daten d1 bis dn an die Position (x,y) im Display mit
+                           xs Spalten und ys Zeilen. Die Daten werden dezimal übertragen. Je-
+                           der Wert repräsentiert dabei 8 Punkte innerhalb einer Zeile. Das
+                           höchstwertige Bit entspricht dem Pixel ganz links. Sollen in einer 
+                           Zeile 9 Pixel geschrieben werden, sind dafür zwei Datenwerte nötig, 
+                           auch wenn die restlichen 7 Bit des zweiten Wertes nicht verwendet 
+                           werden. Die Werte werden zeilenweise hintereinandergeschrieben.
+                           Für ein Rechteck von 8 Zeilen zu 9 Pixeln sind also 16 Werte erfor-
+                           derlich, beginnend mit dem Wert für die 8 Pixel ganz links oben, ge-
+                           folgt von dem Wert für das letzte Pixel der obersten Zeile (mit einem
+                           Wert von 128 wenn es gesetzt werden soll), dann der Wert für die ers-
+                           ten 8 Pixel der zweiten Zeile usw.
+                              
+  line=x1,y1,x2,y2,col : zeichnet eine Linie von (x1,y1) nach (x2,y2) mit der Farbe col
+                         col=0 -> aus, col=1 -> leuchtend, col=2 -> invertierend
+                         
+  rect=x1,y1,x2,y2,col1,col2: zeichnet ein Rechteck mit der linken oberen Ecke (x1,y1) und der
+                              rechten unteren Ecke (x2,y2), der Rahmenfarbe col1 welches mit
+                              der Farbe col2 ausgefüllt wird (Farben siehe "line")
+                              
+  update=1  : an dieser Stelle wird das Display upgedatet. Somit kann man zunächst einige Aus-
+              gaben machen und dann erst alles zusammen updaten. Somit wird ein Flackern des
+              Displays verhindert. Sequenzen ohne diesen Parameter haben auf die Anzeige also
+              zunächst erst mal keine Auswirkung.
+
+Die folgenden Parameter betreffen nur die Textausgabe
+
+  text=     : Auszugebender Text in UTF-8 Format (Leerzeichen = %20, Zeilenumbruch = %0A usw.)
+  
+  xpos=nn   : Position des ersten Zeichens horizontal (default 10)
+  
+  ypos=nn   : Position der linken oberen Ecke des ersten Zeichens (default 10)
+  
+  size=nn   : Größe des Textes (default 12)
+  
+  color=n   : Textfarbe (default 1, siehe "line")
+  
+  font=n    : zu verwendender Font (default 0)
+              n=0 -> micron.ttf, n=1 -> micron_bold.ttf, n=2 -> pakenham.ttf
+              
+Hinweise:             
+----------------------------------
+Innerhalb eines Aufrufes können mehrere Kommandos gleichzeitig angegeben werden. Allerdings müs-
+sen sie von unterschiedlichem Typ sein. Bei z.B. zwei rect-Parametern innerhalb eines Aufrufes
+wird der zweite Parameter ignoriert. Abgearbeitet werden die Kommandos in der Reihenfolge:
+lock, clear, png, raw, line, rect, xpos, ypos, size, color, font, text, update.
+Der Parameter lock ist erforderlich, da ohne Sperrung das Displays für Neutrino die über den 
+nhttpd gemachten Ausgaben auf dem Display spätestens nach einer Sekunde durch das zyklische 
+Update von Neutrino wieder überschrieben werden würden. Daher ist bei der ersten Ausgabe lock=1 
+zu setzen. Wird das Display nicht mehr benötigt, muß lock=0 gesetzt werden, damit Neutrino wieder 
+Zugriff auf das LCD erhält.
+
+Beispiel:             
+----------------------------------
+
+  wget -O /tmp/nhttpd.res 'http://localhost/control/lcd?lock=1&clear=1&rect=10,10,110,50,1,0&xpos=20&ypos=27&size=22&font=2&text=%20Hallo%20Welt%0A%C3%9Cbungstext&update=1'
+  wget -O /tmp/nhttpd.res 'http://localhost/control/lcd?rect=10,10,110,50,1,2&update=1'  
+  
+um das Display wieder freizugeben, sollte zum Schluß
+  
+  wget -O /tmp/nhttpd.res 'http://localhost/control/lcd?lock=0'
+
+ausgeführt werden.
+
+**********************************************************************************************
+20. Shellscript ausführen
 **********************************************************************************************
 
 Handler: http://dbox/cgi-bin/exec
@@ -983,7 +1069,7 @@ http://dbox/cgi-bin/exec?buli
 
 
 **********************************************************************************************
-20. System-/Treiberfunktionen
+21. System-/Treiberfunktionen
 **********************************************************************************************
 
 Handler: http://dbox/control/system

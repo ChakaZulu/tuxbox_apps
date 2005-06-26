@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.55 2005/06/01 10:25:16 metallica Exp $
+	$Id: controlapi.cpp,v 1.56 2005/06/26 18:01:27 barf Exp $
 
 	License: GPL
 
@@ -41,6 +41,7 @@
 
 // nhttpd
 #include "controlapi.h"
+#include "lcdapi.h"
 #include "debug.h"
 
 std::map<std::string, std::string> iso639;
@@ -84,7 +85,7 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		"timer","setmode","standby","getdate","gettime","settings","getservicesxml",
 		"getbouquetsxml","getonidsid","message","info","shutdown","volume",
 		"channellist","getbouquet","getbouquets","epg","version","zapto", "startplugin",
-		"getmode","exec","system","rc",NULL
+		"getmode","exec","system","rc","lcd",NULL
 	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
@@ -171,6 +172,8 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 	        return SystemCGI(request);
 	case 23: 
 	        return RCCGI(request);
+	case 24: 
+	        return LCDAction(request);
 	default:
 		request->SendError();
 		return false;
@@ -995,6 +998,185 @@ bool CControlAPI::StartPluginCGI(CWebserverRequest *request)
 	
 }
 
+
+
+//-------------------------------------------------------------------------
+
+bool CControlAPI::LCDAction(CWebserverRequest *request)
+{
+	int tval;
+	int error=0;
+	int xpos=10, ypos=10, size=12, color=1, font=0; 
+	int x1,y1,x2,y2,coll,colf;
+	
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden
+
+	if (request->ParameterList.empty())
+	{	//paramlos
+		request->SendError();
+		return false;
+	}
+	
+	if (request->ParameterList["lock"] != "")
+	{
+		if(sscanf( request->ParameterList["lock"].c_str(), "%d", &tval))
+		{
+			Parent->LcdAPI->LockDisplay(tval);
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["clear"] != "")
+	{
+		if(sscanf( request->ParameterList["clear"].c_str(), "%d", &tval))
+		{
+			if(tval)
+			{
+				Parent->LcdAPI->Clear();
+			}
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["png"] != "")
+	{
+		if(! Parent->LcdAPI->ShowPng((char*)request->ParameterList["png"].c_str()))
+		{
+			error=1;
+		}
+	}	
+	if (request->ParameterList["raw"] != "")
+	{
+		char *sptr=strdup((char*)request->ParameterList["raw"].c_str()),*pptr;
+		int loop=4;
+		
+		pptr=sptr;
+		error=1;
+		if(sscanf(pptr, "%d,%d,%d,%d",&x1,&y1,&x2,&y2)==4)
+		{
+			while(loop-- && ((pptr=strchr(pptr,','))!=NULL))
+			{
+				++pptr;
+			}
+			if(pptr)
+			{
+				Parent->LcdAPI->ShowRaw(x1,y1,x2,y2,pptr);
+				error=0;
+			}
+		}
+		if(sptr)
+		{
+			free(sptr);
+		}
+	}
+	if (request->ParameterList["line"] != "")
+	{
+		if(sscanf( request->ParameterList["line"].c_str(), "%d,%d,%d,%d,%d",&x1,&y1,&x2,&y2,&coll)==5)
+		{
+			Parent->LcdAPI->DrawLine(x1,y1,x2,y2,coll);
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["rect"] != "")
+	{
+		if(sscanf( request->ParameterList["rect"].c_str(), "%d,%d,%d,%d,%d,%d",&x1,&y1,&x2,&y2,&coll,&colf)==6)
+		{
+			Parent->LcdAPI->DrawRect(x1,y1,x2,y2,coll,colf);
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["xpos"] != "")
+	{
+		if(sscanf( request->ParameterList["xpos"].c_str(), "%d", &tval))
+		{
+			xpos=tval;
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["ypos"] != "")
+	{
+		if(sscanf( request->ParameterList["ypos"].c_str(), "%d", &tval))
+		{
+			ypos=tval;
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["size"] != "")
+	{
+		if(sscanf( request->ParameterList["size"].c_str(), "%d", &tval))
+		{
+			size=tval;
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["color"] != "")
+	{
+		if(sscanf( request->ParameterList["color"].c_str(), "%d", &tval))
+		{
+			color=tval;
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["font"] != "")
+	{
+		if(sscanf( request->ParameterList["font"].c_str(), "%d", &tval) && tval>=0 && tval<3)
+		{
+			font=tval;
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if (request->ParameterList["text"] != "")
+	{
+		Parent->LcdAPI->DrawText(xpos, ypos, size, color, font, (char*)request->ParameterList["text"].c_str());
+	}	
+	if (request->ParameterList["update"] != "")
+	{
+		if(sscanf( request->ParameterList["update"].c_str(), "%d", &tval))
+		{
+			if(tval)
+			{
+				Parent->LcdAPI->Update();
+			}
+		}
+		else
+		{
+			error=1;
+		}
+	}
+	if(error)
+	{
+		request->SendError();
+		return false;
+	}
+		
+	request->SendOk();
+	return true;
+}
 
 
 //-------------------------------------------------------------------------

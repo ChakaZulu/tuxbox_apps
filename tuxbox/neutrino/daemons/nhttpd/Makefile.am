@@ -3,6 +3,7 @@ SUBDIRS = data data-alt2
 INCLUDES = \
 	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/src \
+	@FREETYPE_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
 	@CONNECTION_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@
@@ -11,12 +12,14 @@ bin_PROGRAMS = nhttpd
 
 nhttpd_SOURCES = \
 	controlapi.cpp bouqueteditapi.cpp debug.cpp helper.cpp \
-	nhttpd.cpp request.cpp webapi.cpp webdbox.cpp webserver.cpp
+	nhttpd.cpp request.cpp webapi.cpp webdbox.cpp webserver.cpp lcdapi.cpp
 
 nhttpd_LDADD = \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
+	@LCDDISPLAY_LIBS@ \
+	@FREETYPE_LIBS@ \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
 	@ZAPIT_LIBS@ \
