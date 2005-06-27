@@ -1226,7 +1226,7 @@ void eEPGCache::save()
 	}
 
 	// prevent writes to builtin flash
-	if ( tmp < 1024*1024*1024*50 ) // storage size < 50MB
+	if ( tmp < 1024*1024*50 ) // storage size < 50MB
 		return;
 
 	// check for enough free space on storage
