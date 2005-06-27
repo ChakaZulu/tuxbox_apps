@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.1.0-Expert"
+#define WEBIFVERSION "4.1.1-Expert"
 #else
-#define WEBIFVERSION "4.1.0"
+#define WEBIFVERSION "4.1.1"
 #endif
 
 #define KEYBOARDTV 0
@@ -478,10 +478,15 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 			currentChannel = atoi(curChannel.c_str());
 			currentBouquet = 0;
 		}
-		if (sref && eServiceInterface::getInstance()->service == sref)
-			eZapMain::getInstance()->play();
+		if (sref)
+		{
+			if (eServiceInterface::getInstance()->service == sref)
+				eZapMain::getInstance()->play();
+			else
+				playService(sref);
+		}
 		else
-			playService(sref);
+			eZapMain::getInstance()->play();
 	}
 
 	return closeWindow(content, "", 500);
