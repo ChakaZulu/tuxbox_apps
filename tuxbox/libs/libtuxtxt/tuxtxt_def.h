@@ -2,6 +2,7 @@
  * definitions for plugin and lib                                             *
  ******************************************************************************/
 
+#include <config.h>
 
 #if HAVE_DVB_API_VERSION < 3
  #define dmx_pes_filter_params dmxPesFilterParams
