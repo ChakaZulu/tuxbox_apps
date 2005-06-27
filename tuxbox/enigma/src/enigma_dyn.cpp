@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.0.2-Expert"
+#define WEBIFVERSION "4.1.0-Expert"
 #else
-#define WEBIFVERSION "4.0.2"
+#define WEBIFVERSION "4.1.0"
 #endif
 
 #define KEYBOARDTV 0
@@ -460,6 +460,8 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	else
 	if (command == "stop")
 	{
+		if (eZapMain::getInstance()->isRecording())
+			eZapMain::getInstance()->recordDVR(0,0);
 		eZapMain::getInstance()->stop();
 	}
 	else
@@ -472,8 +474,11 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	{
 		eString curChannel = opt["curChannel"];
 		if (curChannel)
+		{
 			currentChannel = atoi(curChannel.c_str());
-		if (eServiceInterface::getInstance()->service == sref)
+			currentBouquet = 0;
+		}
+		if (sref && eServiceInterface::getInstance()->service == sref)
 			eZapMain::getInstance()->play();
 		else
 			playService(sref);
@@ -3440,6 +3445,11 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 			result.strReplace("#TOPBALK#", "topbalk4.png");
 		result.strReplace("#EMPTYCELL#", "&nbsp;");
 		result.strReplace("#TOPNAVI#", getTopNavi(true));
+#ifndef DISABLE_FILE
+		result.strReplace("#DVRCONTROLS#", readFile(TEMPLATE_DIR + "dvrcontrols.tmp"));
+#else
+		result.strReplace("#DVRCONTROLS#", "");
+#endif
 	}
 	else
 	{
@@ -4608,14 +4618,6 @@ static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPCon
 	return result;
 }
 
-static eString channavi(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = readFile(TEMPLATE_DIR + "channavi.tmp");
-	result.strReplace("#CHANNAVI#", getChannelNavi());
-	return result;
-}
-
 #ifndef DISABLE_FILE
 extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 #endif
@@ -4701,19 +4703,13 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 #endif
 	// vlc streaming
 	result.strReplace("#SERVICEREFERENCE#", (eServiceInterface::getInstance()->service) ? eServiceInterface::getInstance()->service.toString() : "");
-
-	return result;
-}
-
-static eString videodata(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"] = "text/html; charset=utf-8";
-	eString result = readFile(TEMPLATE_DIR + "videodata.tmp");
-
+	
+	// dvr info
 	int videopos = 0;
-	int min = 0, sec = 0;
+	int min = 0, sec2 = 0;
 	int total = 0, current = 0;
 
+#ifndef DISABLE_FILE
 	if (eServiceHandler *handler = eServiceInterface::getInstance()->getService())
 	{
 		total = handler->getPosition(eServiceHandler::posQueryLength);
@@ -4723,13 +4719,14 @@ static eString videodata(eString request, eString dirpath, eString opt, eHTTPCon
 	if ((total > 0) && (current != -1))
 	{
 		min = total - current;
-		sec = min % 60;
+		sec2 = min % 60;
 		min /= 60;
 		videopos = (current * 20) / total;
 	}
+#endif
 
 	result.strReplace("#VIDEOPOSITION#", eString().sprintf("%d", videopos));
-	result.strReplace("#VIDEOTIME#", eString().sprintf("%d:%02d", min, sec));
+	result.strReplace("#VIDEOTIME#", eString().sprintf("%d:%02d", min, sec2));
 
 	return result;
 }
@@ -4886,10 +4883,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/mplayer.mply", mPlayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
-	dyn_resolver->addDyn("GET", "/videodata", videodata, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
 	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
-	dyn_resolver->addDyn("GET", "/channavi", channavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg, lockWeb);
 	dyn_resolver->addDyn("GET", "/getcurrentepg", getcurepg, lockWeb);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG, lockWeb);

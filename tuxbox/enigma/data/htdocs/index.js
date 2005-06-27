@@ -36,7 +36,6 @@ function switchChannel(xy, bouquet, channel)
 			document.location = "?path="+xy+"&mode=zap&zapmode=4&zapsubmode=1";
 
 		setTimeout("parent.data.location.reload()", 500);
-		setTimeout("parent.channavi.location.reload()", 2000);
 		vlcStop();
 		setTimeout("vlcStart()", 1000);
 	}

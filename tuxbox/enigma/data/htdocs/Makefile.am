@@ -4,13 +4,13 @@ EXTRA_DIST = \
 	index.js epg.js trash.gif dm7000.jpg blinking_red.gif \
 	format_on.png format_off.png dolby_on.png dolby_off.png \
 	crypt_on.png crypt_off.png mountMgr.js rc_small.jpg rc_big.jpg \
-	bg.png rc_dbox2.jpg dhtml.js data.js rc_dbox2_small.jpg \
+	bg.png rc_dbox2.jpg dhtml.js rc_dbox2_small.jpg \
 	mepg_grad.png edit.gif timer.js window.js topbalk2.png topbalk3.png \
 	topbalk4.png zap.js zapdata.js up.gif down.gif topbalk_small.png \
 	webif_small.css topbalk2_small.png topbalk3_small.png \
-	topbalk4_small.png videobar1.jpg videobar2.jpg videobar3.jpg \
+	topbalk4_small.png \
 	locked.png unlocked.png 1rightarrow.png 1leftarrow.png player_stop.png \
-	player_fwd.png player_rew.png filesave.png today.png vlc.png
+	player_fwd.png player_rew.png filesave.png today.png vlc.png dvr.png
 
 install-data-local:
 	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/htdocs

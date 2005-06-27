@@ -1,6 +1,17 @@
 <html>
 <head>
-<script type="text/javascript" src="data.js"></script>
+<script type="text/javascript">
+function update()
+{
+	parent.headerUpdateEPGData(serviceName, nowT, nowD, nowSt, nextT, nextD, nextSt);
+	parent.headerUpdateStatusBar(vpid, apid, ip, lock, upTime);
+	parent.headerUpdateVolumeBar(volume, mute);
+	parent.headerUpdateChannelStatusBar(dolby, crypt, format);
+	parent.headerUpdateRecording(recording);
+	if (parent.updateVideoBar)
+		parent.updateVideoBar(videoPosition, videoTime, diskGB, diskH);
+}
+</script>
 </head>
 <body onLoad="update()">
 <script>
@@ -35,8 +46,9 @@
 	var recording = #RECORDING#;
 	<!-- vlc streaming -->
 	var vlcparms = "#VLCPARMS#";
-	var pmtpid = "#PMTPID#";
 	var serviceReference = "#SERVICEREFERENCE#";
+	var videoTime = "#VIDEOTIME#";
+	var videoPosition = #VIDEOPOSITION#;
 </script>
 </body>
 </html>

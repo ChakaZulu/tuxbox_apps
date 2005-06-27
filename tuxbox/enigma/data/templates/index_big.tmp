@@ -2,9 +2,9 @@
 	<head>
 		<title>Enigma Web Interface - #BOX#</title>
 		<link rel="stylesheet" type="text/css" href="webif.css">
-		<script language="javascript" type="text/javascript" src="dhtml.js"></script>
-		<script language="javascript" type="text/javascript" src="index.js"></script> 
-
+		<script language="javascript" type="text/javascript" src="/window.js"></script>
+		<script language="javascript" type="text/javascript" src="/dhtml.js"></script>
+		<script language="javascript" type="text/javascript" src="/index.js"></script>
 		<script>
 			function headerUpdateVolumeBar(volume, mute)
 			{
@@ -45,10 +45,8 @@
 				else
 					getElem("id", "imgFormat", null).src = "format_off.png";
 			}
-			function headerUpdateStatusBar(diskGB, diskH, vpid, apid, ip, lock, upTime)
+			function headerUpdateStatusBar(vpid, apid, ip, lock, upTime)
 			{
-				getElem("id", "diskgb", null).firstChild.nodeValue = diskGB;
-				getElem("id", "diskh", null).firstChild.nodeValue = diskH;
 				getElem("id", "vpid", null).firstChild.nodeValue = vpid;
 				getElem("id", "apid", null).firstChild.nodeValue = apid;
 				getElem("id", "ip", null).firstChild.nodeValue = ip;
@@ -86,6 +84,25 @@
 					refresh = data.updateCycleTime;
 				setTimeout("init()", refresh);
 			}
+			function updateVideoBar(videoPosition, videoTime, diskGB, diskH)
+			{
+				for (var i = 1; i <= 20; i += 1)
+				{
+					if (i <= videoPosition)
+						getElem("id", "vid" + i, null).src = "led_on.gif";
+					else
+						getElem("id", "vid" + i, null).src = "led_off.gif";
+				}
+				getElem("id", "videoTime", null).firstChild.nodeValue = videoTime;
+				getElem("id", "diskgb", null).firstChild.nodeValue = diskGB;
+				getElem("id", "diskh", null).firstChild.nodeValue = diskH;
+			}
+			function vlc2()
+			{
+				setTimeout("data.location.reload()", 500);
+				vlcStop();
+				setTimeout("vlcStart()", 1000);
+			}	
 		</script>
 	</head>
 	<body id="index_big" style="margin: 0px; border: 0px; padding: 0px" background="bg.png" onLoad="init()">
@@ -171,12 +188,6 @@
 								<tr>
 									<td id="lock">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
-									<td>disk space:&nbsp;</td>
-									<td id="diskgb">&nbsp;</td>
-									<td>&nbsp;</td>
-									<td id="diskh">&nbsp;</td>
-									<td>&nbsp;</td>
-									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td id="uptime">&nbsp;</td>
 									<td>&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
@@ -202,8 +213,21 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2"><iframe name="channavi" width="100%" height="24px" src="channavi" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe></td>
+			<td colspan="2">
+				<!-- channavi start -->
+				<table id="channavi" border="0" height="22px" width="780" cellspacing="0" cellpadding="0">
+				<tbody align="left">
+				<tr>
+					<td width="120">&nbsp;</td>
+					<td align="left">
+						<input name="Audio" type="button" style="width: 100px; height:22px; background-color: #FFCC33;" value="Audio" onclick=javascript:selectAudio()><input name="Video" type="button" style="width: 100px;height:22px; background-color: #FFCC33;" value="Video" onclick="javascript:selectSubChannel()"><input name="EPG" type="button" style="width: 100px;height:22px;background-color: #1FCB12;" value="EPG" onclick="javascript:openEPG()"><input name="Info" type="button" style="width: 100px;height:22px;background-color: #95077C;" value="Info" onclick="javascript:openChannelInfo()"><input name="Stream Info" type="button" style="width: 100px;height:22px;background-color: #F1EF1D;" value="Stream Info" onclick=javascript:openSI()></td>
+				</tr>
+				</tbody>
+				</table>
+				<!-- channavi end -->
+			</td>
 		</tr>
+		#DVRCONTROLS#
 		<tr>
 			<td colspan="2">
 				<!-- topnavi start -->
@@ -231,6 +255,9 @@
 		<tr height="100%">
 			<td><iframe name="leftnavi" width="110px" height="100%" src="leftnavi" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe></td>
 			<td><iframe name="body" width="670px" height="100%" src="body" scrolling="auto" frameborder="0" marginwidth="0" marginheight="0" style="background-color: #F4F4F4F4"></iframe></td>
+		</tr>
+		<tr>
+			<td><iframe name="vlccmd" src="" width="100%", height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>
 		</tr>
 		<tr>
 			<td colspan="2"><iframe name="data" src="blank" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>

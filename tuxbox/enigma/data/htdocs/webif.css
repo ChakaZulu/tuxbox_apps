@@ -45,6 +45,7 @@ a:hover {
 	padding: 10px;
 }
 
+#dvrctrl TD, 
 #statcell TD {
 	font-size: 9pt;
 }
@@ -72,8 +73,8 @@ a:hover {
 	border-right: 0px solid #98A4B6;
 }
 
+#dvrctrl, 
 #channavi {
-	padding-left: 120px;
 	background-color: #D9E0E7;
 	border-bottom: 0px solid #98A4B6;
 	border-top: 1px solid #98A4B6;

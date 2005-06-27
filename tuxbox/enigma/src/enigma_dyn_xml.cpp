@@ -539,6 +539,7 @@ static eString getStreamInfoXSL(eString request, eString dirpath, eString opt, e
 	return result;
 }
 
+#if 0
 static eString getServiceEPGXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
@@ -550,6 +551,7 @@ static eString getTimersXSL(eString request, eString dirpath, eString opt, eHTTP
 	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
 	return readFile(TEMPLATE_DIR + "timers.xsl");
 }
+#endif
 
 static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -957,7 +959,7 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/streaminfo", getStreamInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/timers", getTimers, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getStreamInfoXSL, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/serviceepg.xsl", getServiceEPGXSL, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/timers.xsl", getTimersXSL, lockWeb);
+//	dyn_resolver->addDyn("GET", "/xml/serviceepg.xsl", getServiceEPGXSL, lockWeb);
+//	dyn_resolver->addDyn("GET", "/xml/timers.xsl", getTimersXSL, lockWeb);
 }
 

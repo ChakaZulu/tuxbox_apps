@@ -5,10 +5,11 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	wapEPGDetails.tmp wapTimerList.tmp queryEditTimer.tmp queryDeleteTimer.tmp deleteTimerComplete.tmp \
 	mountPoint.tmp mountPoints.tmp mountPointWindow.tmp subChannelSelection.tmp mepg_small.tmp \
 	pdaResponse.tmp flashMgr.tmp configSettings.tmp timerListEntry.tmp remoteControl.tmp epg_old.tmp \
-	pdaRemoteControl.tmp sat.tmp satFinder.tmp remoteControlDbox2.tmp data.tmp leftnavi.tmp channavi.tmp rotor.tmp \
+	pdaRemoteControl.tmp sat.tmp satFinder.tmp remoteControlDbox2.tmp data.tmp leftnavi.tmp rotor.tmp \
 	root.tmp flashMgrReadMenu.tmp flashMgrWriteMenu.tmp mtd.tmp flashMgrProgressData.tmp flashMgrProgress.tmp \
 	pdaRemoteControlDbox2.tmp configSwapFileMenu.tmp movieSources.tmp XMLStreaminfo.tmp streaminfo_satellite.xsl \
-	streaminfo_cable.xsl streaminfo_terrestrial.xsl serviceepg.xsl XMLTimer.tmp XMLCurrentServiceData.tmp
+	streaminfo_cable.xsl streaminfo_terrestrial.xsl serviceepg.xsl XMLTimer.tmp XMLCurrentServiceData.tmp \
+	dvrcontrols.tmp
 
 install-data-local:
 	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/templates
