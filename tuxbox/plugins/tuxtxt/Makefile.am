@@ -10,8 +10,8 @@ noinst_LTLIBRARIES = tuxtxt.la
 tuxtxt_la_SOURCES = tuxtxt.c
 
 tuxtxt_la_LIBADD = \
-	 @FREETYPE_LIBS@ \
-	-ltuxtxt 
+	@FREETYPE_LIBS@
+#@TUXTXT_LIBS@ 
 
 
 tuxtxt_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version

@@ -65,8 +65,6 @@
 #else
 extern void tuxtxt_start(int tpid);  // Start caching
 extern int  tuxtxt_stop(); // Stop caching
-#endif
-
 /* variables and functions from libtuxtxt */
 extern short flofpages[0x900][FLOFSIZE];
 extern unsigned char adip[0x900][13];
@@ -93,7 +91,7 @@ extern int is_dec(int i);
 extern int next_hex(int i);
 extern void decode_btt();
 extern void decode_adip(); /* additional information table */
-
+#endif
 
 
 #define TUXTXTCONF CONFIGDIR "/tuxtxt/tuxtxt2.conf"
