@@ -1,8 +1,5 @@
 AUTOMAKE_OPTIONS = gnu
 
 SUBDIRS = \
-	etherwake fbshot
+	etherwake fbshot mtd
 
-if !NEW_MTD
-SUBDIRS += mtd
-endif

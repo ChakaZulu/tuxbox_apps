@@ -4,7 +4,7 @@
  * Written by Abraham vd Merwe <abraham@2d3d.co.za>
  * All rights reserved.
  *
- * $Id: fcp.c,v 1.1 2003/10/16 19:48:08 obi Exp $
+ * $Id: fcp.c,v 1.2 2005/06/27 21:28:09 mogway Exp $
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <linux/mtd/mtd.h>
+#include <mtd/mtd-user.h>
 #include <getopt.h>
 
 typedef int bool;

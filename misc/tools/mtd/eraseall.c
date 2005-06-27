@@ -16,7 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA  
 
-   $Id: eraseall.c,v 1.2 2003/10/16 20:18:48 obi Exp $
+   $Id: eraseall.c,v 1.3 2005/06/27 21:28:09 mogway Exp $
 */
 #include <sys/types.h>
 #include <stdio.h>
@@ -36,9 +36,9 @@
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 #include "crc32.h"
-
-#include <linux/mtd/mtd.h>
-#include "linux/jffs2.h"
+#include <mtd/mtd-user.h>
+#include <mtd/jffs2-user.h>
+int target_endian;
 
 #ifndef cpu_to_je16
 #define cpu_to_je16(x) (x)
