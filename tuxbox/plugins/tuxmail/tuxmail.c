@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.34  2005/06/27 19:49:54  robspr1
+ * - reload database after read/write
+ *
  * Revision 1.33  2005/06/19 17:21:36  robspr1
  * - dreambox tastatur now working
  *
@@ -451,23 +454,28 @@ int GetRCCode()
 		kbcode = 0;
 
 		// keyboard
-		if(kb != -1)
+		if( kb != -1 )
 		{
 			ioctl(kb, FIONREAD, &bytesavail);
 		}	
-		if (bytesavail>0)
+		if( bytesavail>0 )
 		{
 //			char tch[100];
 			char end=0;
 
-			if (bytesavail > 99) bytesavail = 99;
+			if( bytesavail > 99 ) 
+			{
+				bytesavail = 99;
+			}
 			read(kb,tch,bytesavail);
 			tch[bytesavail] = 0x00;
 			kbcode = tch[0];
 			LastKBCode = kbcode;
+			// one code keys
 			if (bytesavail == 1 && kbcode == 0x1b) { rccode = RC_ESC; LastKey = rccode; return rccode;} // ESC-Taste
 			if (bytesavail == 1 && kbcode == 0x7F) { rccode = RC_BS; LastKey = rccode; return rccode;} 	// BS-Taste
 			if (bytesavail == 1 && kbcode == '\n') { rccode = RC_RET; LastKey = rccode; return rccode;} // Enter-Taste
+			// keys with at least 3 codes
 			if (bytesavail >= 3 && tch[0] == 0x1b && tch[1] == 0x5b)
 			{
 				if (tch[2] == 0x41 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_UP        ; end=1;}// Cursortasten
@@ -491,7 +499,7 @@ int GetRCCode()
 				if (tch[2] == 0x32 && tch[3] == 0x33 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_F9        ; end=1;}// M1-Taste
 			}
 			// if we didn't read a key from remote-control
-			if (bytesread == 0)
+			if( bytesread == 0 )
 			{
 				if (kbcode == '0') { kbcode = 0x00;rccode = RC_0  ; end=1;}
 				if (kbcode == '1') { kbcode = 0x00;rccode = RC_1  ; end=1;}
@@ -504,31 +512,31 @@ int GetRCCode()
 				if (kbcode == '8') { kbcode = 0x00;rccode = RC_8  ; end=1;}
 				if (kbcode == '9') { kbcode = 0x00;rccode = RC_9  ; end=1;}
 			}
-			if (end) 
+			if( end ) 
 			{ 
 				LastKey = rccode; return rccode; 
 			}
-			if (bytesavail == 1)
+			if( bytesavail == 1 )
 			{
 				rccode = kbcode ; return rccode; 
 			}
 		}
 		// if a key on the remote-control has been pressed
-		if (bytesread == 2)
+		if( bytesread == 2 )
 		{
-			if (rccode == LastKey && LastKBCode != 0x00 && LastKBCode == kbcode)
+			if( rccode == LastKey && LastKBCode != 0x00 && LastKBCode == kbcode )
 			{
 				return rccode;
 			}
 			LastKBCode = 0x00;
-			if (rccode == LastKey)
+			if( rccode == LastKey )
 			{
 				rccode = -1;
 				return rccode;
 			}
 
 			LastKey = rccode;
-			if ((rccode & 0xFF00) == 0x5C00)
+			if((rccode & 0xFF00) == 0x5C00)
 			{
 				kbcode = 0;
 				switch(rccode)
@@ -1858,13 +1866,16 @@ void EditMailFile(char* filename, int account, int mailindex )
 			}
 			else if( rccode == RC_RET1 )
 			{
-				int i=MAXINFOLINES-1;
-				while( nEditLine < i )
+				if( nEditLine > 1)
 				{
-					strcpy(szInfo[i],szInfo[i-1]);
-					i--;
+					int i=MAXINFOLINES-1;
+					while( nEditLine < i )
+					{
+						strcpy(szInfo[i],szInfo[i-1]);
+						i--;
+					}
+					szInfo[nEditLine][0]='\0';
 				}
-				szInfo[nEditLine][0]='\0';
 				rccode = -1;				
 			}
 			else if( rccode == RC_ENTF )
@@ -1896,13 +1907,21 @@ void EditMailFile(char* filename, int account, int mailindex )
 			}
 			else if( rccode == RC_F9 )
 			{
-				int i;
-				for( i=nEditLine; i<MAXINFOLINES-1; i++)
+				if( nEditLine > 1)
 				{
-					strcpy(szInfo[i],szInfo[i+1]);
+					int i;
+					for( i=nEditLine; i<MAXINFOLINES-1; i++)
+					{
+						strcpy(szInfo[i],szInfo[i+1]);
+					}
+					szInfo[MAXINFOLINES-1][0]='\0';
+					nEditPos = 0;
 				}
-				szInfo[MAXINFOLINES-1][0]='\0';
-				nEditPos = 0;
+				else
+				{
+					szInfo[nEditLine][0] = '\0';
+					nEditPos = 0;
+				}
 				rccode = -1;
 			}
 			else if( rccode == RC_F10 )
@@ -3059,12 +3078,42 @@ int CheckPIN(int Account)
 }
 
 /******************************************************************************
+ * SaveAndReloadDB(int iSave)
+ ******************************************************************************/
+
+void SaveAndReloadDB(int iSave)
+{
+	int loop;
+	
+	if( iSave )
+	{
+		for(loop = 0; loop < 10; loop++)
+		{
+			UpdateDB(loop);
+		}
+	}
+	
+	// fill database
+	memset(maildb, 0, sizeof(maildb));
+
+	for(loop = 0; loop < 10; loop++)
+	{
+		FillDB(loop);
+	}
+
+	// read config
+
+	ReadConf();
+
+}
+
+/******************************************************************************
  * plugin_exec
  ******************************************************************************/
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.33 $";
+	char cvs_revision[] = "$Revision: 1.34 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -3477,6 +3526,7 @@ void plugin_exec(PluginParam *par)
 								}
 							}
 						}
+						SaveAndReloadDB(1);
 					}
 
 					break;
@@ -3491,6 +3541,7 @@ void plugin_exec(PluginParam *par)
 						{
 							ControlDaemon(SEND_MAIL, account, mailindex);
 						}
+						SaveAndReloadDB(0);
 					}
 
 					break;
@@ -3536,6 +3587,7 @@ void plugin_exec(PluginParam *par)
 										ShowMailFile(mailfile, szInfo);
 										free(stored_uids);
 										fclose(fd_mailidx);
+										SaveAndReloadDB(0);
 										break;
 									}
 								}
@@ -3555,6 +3607,7 @@ void plugin_exec(PluginParam *par)
 							sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
 							ShowMailFile(POP3FILE, szInfo);
 						}
+						SaveAndReloadDB(0);
 					}
 
 					break;
