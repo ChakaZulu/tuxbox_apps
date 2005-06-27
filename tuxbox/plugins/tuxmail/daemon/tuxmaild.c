@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.28  2005/06/27 19:50:48  robspr1
+ * - reset read-flag
+ *
  * Revision 1.27  2005/05/26 09:37:35  robspr1
  * - add param for SMTP AUTH  - support just playing audio (call tuxmaild -play wavfile)
  *
@@ -298,6 +301,22 @@ int ReadConf()
 					sscanf(ptr + 6, "%d", &account_db[index-'0'].auth);
 				}
 			}
+			else if((ptr = strstr(line_buffer, "SUSER")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", account_db[index-'0'].suser);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "SPASS")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", account_db[index-'0'].spass);
+				}
+			}
 		}
 
 	// check for update
@@ -395,6 +414,8 @@ int ReadConf()
 				fprintf(fd_conf, "FROM%d=%s\n", loop, account_db[loop].from);
 				fprintf(fd_conf, "CODE%d=%s\n", loop, account_db[loop].code);
 				fprintf(fd_conf, "AUTH%d=%d\n", loop, account_db[loop].auth);
+				fprintf(fd_conf, "SUSER%d=%s\n", loop, account_db[loop].suser);
+				fprintf(fd_conf, "SPASS%d=%s\n", loop, account_db[loop].spass);
 
 				if(!account_db[loop + 1].name[0])
 				{
@@ -1534,6 +1555,12 @@ int SendPOPCommand(int command, char *param)
 
 				break;
 
+			case RSET:
+
+				sprintf(send_buffer, "RSET \r\n");
+
+				break;
+
 			case QUIT:
 				sprintf(send_buffer, "QUIT\r\n");
 		}
@@ -2122,14 +2149,23 @@ int SendMail(int account)
 			}
 		}
 
-		if(account_db[account].auth == 1)
+		if(account_db[account].auth == 1 || account_db[account].auth == 2)
 		{
 	// send auth
 
 			memset(decodedstring, 0, sizeof(decodedstring));
-			memcpy(decodedstring + 1, account_db[account].user, strlen(account_db[account].user));
-			memcpy(decodedstring + 1 + strlen(account_db[account].user) + 1, account_db[account].pass, strlen(account_db[account].pass));
-			EncodeBase64(decodedstring, strlen(account_db[account].user) + strlen(account_db[account].pass) + 2);
+			if(account_db[account].auth == 1)
+			{
+				memcpy(decodedstring + 1, account_db[account].user, strlen(account_db[account].user));
+				memcpy(decodedstring + 1 + strlen(account_db[account].user) + 1, account_db[account].pass, strlen(account_db[account].pass));
+				EncodeBase64(decodedstring, strlen(account_db[account].user) + strlen(account_db[account].pass) + 2);
+			}
+			if(account_db[account].auth == 2)
+			{
+				memcpy(decodedstring + 1, account_db[account].suser, strlen(account_db[account].suser));
+				memcpy(decodedstring + 1 + strlen(account_db[account].suser) + 1, account_db[account].spass, strlen(account_db[account].spass));
+				EncodeBase64(decodedstring, strlen(account_db[account].suser) + strlen(account_db[account].spass) + 2);
+			}
 
 			if(!SendSMTPCommand(AUTH, encodedstring))
 			{
@@ -2478,6 +2514,12 @@ int CheckAccount(int account)
 			return 0;
 		}
 
+		if(!SendPOPCommand(RSET, ""))
+		{
+			SendPOPCommand(QUIT, "");	
+			return 0;
+		}
+
 		account_db[account].mail_all = messages;
 		account_db[account].mail_new = 0;
 		deleted_messages = 0;
@@ -2706,6 +2748,15 @@ int CheckAccount(int account)
 						{
 //							printf("not found\n");
 						}
+					}
+				}
+				
+				if( !deleted_messages )
+				{
+					if(!SendPOPCommand(RSET, ""))
+					{
+						SendPOPCommand(QUIT, "");	
+						return 0;
 					}
 				}
 				
@@ -3196,7 +3247,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.27 $";
+	char cvs_revision[] = "$Revision: 1.28 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;

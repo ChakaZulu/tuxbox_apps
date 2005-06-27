@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.22  2005/06/27 19:50:59  robspr1
+ * - reset read-flag
+ *
  * Revision 1.21  2005/05/26 09:37:46  robspr1
  * - add param for SMTP AUTH  - support just playing audio (call tuxmaild -play wavfile)
  *
@@ -202,7 +205,7 @@ int SendMail(int account);
 enum
 {
 	INIT, QUIT,
-	USER, PASS, STAT, UIDL, TOP, DELE, RETR,
+	USER, PASS, STAT, UIDL, TOP, DELE, RETR, RSET,
 	EHLO, AUTH, MAIL, RCPT, DATA1, DATA2, DATA3
 };
 
@@ -218,6 +221,8 @@ struct
 	char from[64];
 	char code[8];
 	int  auth;
+	char suser[64];
+	char spass[64];
 	int  mail_all;
 	int  mail_new;
 
