@@ -1383,7 +1383,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.85 $";
+	char cvs_revision[] = "$Revision: 1.86 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -1962,6 +1962,7 @@ void CleanUp()
 
 #if TUXTXT_CFG_STANDALONE
 	stop_thread();
+	clear_cache();
 	if (dmx != -1)
     	    close(dmx);
 	dmx = -1;
