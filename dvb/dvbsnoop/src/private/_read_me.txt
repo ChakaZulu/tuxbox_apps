@@ -9,3 +9,8 @@ If you know section or descriptor strcutures of "private"
 protocols or provider defined structures, please let the
 author know.
 
+
+Please check for legal issues, when using provider specific
+data structures in your own software!
+
+

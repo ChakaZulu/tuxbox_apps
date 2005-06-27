@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.41 2005/01/17 19:41:22 rasc Exp $
+$Id: cmdline.c,v 1.42 2005/06/27 20:28:17 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.41 2005/01/17 19:41:22 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.42  2005/06/27 20:28:17  rasc
+first version for a man page
+
 Revision 1.41  2005/01/17 19:41:22  rasc
 Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 
@@ -215,6 +218,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->crc = 0;
   opt->spider_pid = 0;
   opt->ts_subdecode = 0;
+  opt->rd_all_sections = 0;	// read all section no. for a pid 
   opt->ts_raw_mode = 0;
   opt->rd_packet_count = 0;
   opt->dec_packet_count = 0;
@@ -262,6 +266,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-help")) opt->help = 1;
      else if (!strcmp (argv[i],"-privateprovider")) opt->privateProviderStr = argv[++i];
      else if (!strcmp (argv[i],"-tssubdecode")) opt->ts_subdecode = 1;
+     else if (!strcmp (argv[i],"-allsections")) opt->rd_all_sections = 1;
      else if (!strcmp (argv[i],"-tsraw")) {
 	 opt->ts_raw_mode = 1;
 	 opt->pid = DUMMY_PID;			// dummy to avoid usage output
@@ -394,6 +399,8 @@ static void usage (void)
     printf("   -n count:     receive/read max. <count> packets (0=no limit) [-n 0]\n");
 //    printf("   -N count:     decode max. <count> packets (0=no limit) [-N 0]\n");
     printf("   -spiderpid:   snoop referenced section pids (sets -n 1) \n");
+// $$$ TODO
+//    printf("   -allsections: read all sections in sequence on pid (limited by -n ..) \n");
     printf("   -tssubdecode: sub-decode sections or pes from ts stream decoding\n");
     printf("   -tsraw:       read raw/full TS in TS snoop mode\n");
     printf("   -b:           binary output of packets (disables other output)\n");

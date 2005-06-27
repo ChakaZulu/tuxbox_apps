@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.26 2005/06/06 17:37:03 rasc Exp $
+$Id: dmx_sect.c,v 1.27 2005/06/27 20:28:16 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.26 2005/06/06 17:37:03 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.27  2005/06/27 20:28:16  rasc
+first version for a man page
+
 Revision 1.26  2005/06/06 17:37:03  rasc
 minor error msg change
 
@@ -194,7 +197,6 @@ static int  doReadSECT_2 (OPTION *opt)
   int     openMode;
   int     dmxMode;
   long    dmx_buffer_size = SECT_BUF_SIZE;
-  int     idx=0;
 
 
 
@@ -238,22 +240,29 @@ static int  doReadSECT_2 (OPTION *opt)
     memset (&flt, 0, sizeof (struct dmx_sct_filter_params));
 
     flt.pid = opt->pid;
-    if ( opt->filter > 0xFFFFFF )  // we have 4 byte filter
-	flt.filter.filter[idx++] = (opt->filter >> 24)&0xFF;
-    if ( opt->filter > 0xFFFF )
-	flt.filter.filter[idx++] = (opt->filter >> 16)&0xFF;
-    if ( opt->filter > 0xFF )
-	flt.filter.filter[idx++] = (opt->filter >> 8)&0xFF;
-    flt.filter.filter[idx++] = opt->filter&0xFF;
 
-    idx=0;
-    if ( opt->mask > 0xFFFFFF )  // we have 4 byte filter
+
+    // $$$ TODO to be redesigned!
+    { int idx;
+      idx=0;
+      if ( opt->filter > 0xFFFFFF )  // we have 4 byte filter
+	flt.filter.filter[idx++] = (opt->filter >> 24)&0xFF;
+      if ( opt->filter > 0xFFFF )
+	flt.filter.filter[idx++] = (opt->filter >> 16)&0xFF;
+      if ( opt->filter > 0xFF )
+	flt.filter.filter[idx++] = (opt->filter >> 8)&0xFF;
+      flt.filter.filter[idx++] = opt->filter&0xFF;
+
+      idx=0;
+      if ( opt->mask > 0xFFFFFF )  // we have 4 byte filter
 	flt.filter.mask[idx++] = (opt->mask >> 24)&0xFF;
-    if ( opt->mask > 0xFFFF )
+      if ( opt->mask > 0xFFFF )
 	flt.filter.mask[idx++] = (opt->mask >> 16)&0xFF;
-    if ( opt->mask > 0xFF )
+      if ( opt->mask > 0xFF )
 	flt.filter.mask[idx++] = (opt->mask >> 8)&0xFF;
-    flt.filter.mask[idx++] = opt->mask&0xFF;
+      flt.filter.mask[idx++] = opt->mask&0xFF;
+    }
+
 
     flt.timeout = opt->timeout_ms;
     flt.flags = DMX_IMMEDIATE_START;
@@ -394,6 +403,7 @@ static long  sect_read (int fd, u_char *buf, long buflen)
 
 
 /*
+ // $$$ TODO
   Annotation:
     We could also do a soft-CRC32 check here.
     But to do this properly, we have to do this "read" byte shifted, because
@@ -403,3 +413,25 @@ static long  sect_read (int fd, u_char *buf, long buflen)
  */
 
 
+
+
+/*
+ // $$$ TODO
+*   u_int      table_id;
++   u_int      section_syntax_indicator;		
+    u_int      reserved_1;
+    u_int      reserved_2;
+    u_int      section_length;
+    u_int      service_id;
+    u_int      reserved_3;
+*   u_int      version_number;
+    u_int      current_next_indicator;
+*   u_int      section_number;
+*   u_int      last_section_number;
+
+
+    -- get table_id + version      tid_ver[32] (id, version, last_sec_no,completed)
+     --> check section_syntax
+     --> get last_section_nr & sect_number
+
+ */
