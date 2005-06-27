@@ -51,7 +51,11 @@ typedef unsigned char __u8;
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/base/eerror.h>
-// from libtuxtxt
+
+
+// at this place we do not 'see' the #define from tuxtxt.h.. create a own define
+#define TUXTXT_CFG_STANDALONE 1
+
 #if !TUXTXT_CFG_STANDALONE
 extern "C" void tuxtxt_start(int tpid);
 extern "C" int  tuxtxt_stop();
