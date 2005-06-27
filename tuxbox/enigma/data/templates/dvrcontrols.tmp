@@ -4,31 +4,31 @@
 				dvr = 1;
 				function video(key)
 				{
-					if (body.zapMode)
+					if (key == "record")
 					{
-						if (body.zapMode == 3)
+						NewWindow("cgi-bin/record?command=start", "record", "200", "100", "no", "5000");
+					}
+					else
+					{
+						if (body.zapMode)
 						{
-							var selChannel = body.document.channelselector.channel.selectedIndex;
-							var channel = "";
-							if (selChannel >= 0)
+							if (body.zapMode == 3)
 							{
-								if (key == "record")
-								{
-									NewWindow("cgi-bin/record?command=start", "record", "200", "100", "no", "5000");
-								}
-								else
+								var selChannel = body.document.channelselector.channel.selectedIndex;
+								var channel = "";
+								if (selChannel >= 0)
 								{
 									currentChannel = selChannel;
 									channel = body.document.channelselector.channel.options[selChannel].value;
 									document.location = "/cgi-bin/videocontrol?command=" + key + "&sref=" + channel + "&curChannel=" + currentChannel;
 								}
 							}
+							else
+								document.location = "/cgi-bin/videocontrol?command=" + key;
 						}
 						else
 							document.location = "/cgi-bin/videocontrol?command=" + key;
 					}
-					else
-						document.location = "/cgi-bin/videocontrol?command=" + key;
 				}
 				function setVideo(videoPosition)
 				{
