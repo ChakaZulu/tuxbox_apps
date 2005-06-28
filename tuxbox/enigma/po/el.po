@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-04-25 20:09+0200\n"
-"PO-Revision-Date: Mon Apr 25 19:53:30 CEST 2005\n"
+"POT-Creation-Date: 2005-06-28 14:18+0200\n"
+"PO-Revision-Date: Tue Jun 28 14:21:03 CEST 2005\n"
 "Last-Translator: unknown\n"
 "Language-Team: Greek / George Zotos <zotos@zotos.biz>\n"
 "MIME-Version: 1.0\n"
@@ -20,15 +20,15 @@ msgstr ""
 msgid "FF "
 msgstr "ΓΜ"
 
-#: default.esml:879
+#: default.esml:877
 msgid "&#53;"
 msgstr ""
 
-#: default.esml:385
+#: default.esml:383
 msgid "here you can change your sat/lnb mapping"
 msgstr "Εδώ μπορείτε να αλλάξετε την σχέση δορυφόρυ/LNB"
 
-#: default.esml:420 src/enigma_scan.cpp:49
+#: default.esml:418 src/enigma_scan.cpp:49
 msgid "Satfind"
 msgstr "Σήμα"
 
@@ -36,224 +36,224 @@ msgstr "Σήμα"
 msgid "Pause "
 msgstr "Παύση"
 
-#: default.esml:447
+#: default.esml:445
 msgid "motor power input difference between running and not running"
 msgstr "Διαφορά κατανάλωσης μοτέρ κατά την κίνηση και σταματημένο"
 
-#: default.esml:411
+#: default.esml:409
 msgid "send the complete DiSEqC sequence twice"
 msgstr "Διπλή αποστολή ολόκληρης της εντολής DiSEqC"
 
-#: default.esml:435 default.esml:483 default.esml:587 src/rotorconfig.cpp:588
+#: default.esml:433 default.esml:481 default.esml:585 src/rotorconfig.cpp:588
 msgid "Satellite:"
 msgstr "Δορυφόρος:"
 
-#: default.esml:412
+#: default.esml:410
 msgid "send no DiSEqC when only Hi/Lo or H/V changes"
 msgstr "Χωρίς DiSEqC όταν αλλάζει μόνο το Hi/Lo ή το H/V"
 
-#: default.esml:654
+#: default.esml:652
 msgid "SNR"
 msgstr "SNR"
 
-#: default.esml:410
+#: default.esml:408
 msgid "Uncommitted Switch:"
 msgstr "Διακόπτης Uncommitted:"
 
-#: default.esml:593 default.esml:611 default.esml:630
+#: default.esml:591 default.esml:609 default.esml:628
 msgid "enable/disable inversion here (ok)"
 msgstr "Αντιστροφής ή όχι φάσματος (OK)"
 
-#: default.esml:414
+#: default.esml:412
 msgid "prev. page"
 msgstr "Προηγούμενο"
 
-#: default.esml:387
+#: default.esml:385
 msgid "LOF/L:"
 msgstr "LOF/L:"
 
-#: default.esml:756 src/timer.cpp:2641
+#: default.esml:754 src/timer.cpp:2648
 msgid "Wednesday"
 msgstr "Τετάρτη"
 
-#: default.esml:849
+#: default.esml:847
 msgid "Partition Check"
 msgstr "Έλενχος κατάτμησης"
 
-#: default.esml:797 default.esml:821
+#: default.esml:795 default.esml:819
 msgid "enter recording end time (0..9, left, right, ok)"
 msgstr "Επιλογή τέλους χρόνου εγγραφής (0..9, <, >)"
 
-#: default.esml:761 default.esml:765
+#: default.esml:759 default.esml:763
 msgid "select year (ok)"
 msgstr "Επιλογή χρονιάς (ok)"
 
-#: default.esml:392
+#: default.esml:390
 msgid "increased voltage"
 msgstr "Αυξημένη τάση"
 
-#: default.esml:423 default.esml:657
+#: default.esml:421 default.esml:655
 msgid "LOCK"
 msgstr "OK"
 
-#: default.esml:642
+#: default.esml:640
 msgid "choose the code rate HP (left, right)"
 msgstr "Επιλογή του FEC (<, >)"
 
-#: default.esml:393
+#: default.esml:391
 msgid "turn 12V output on (for 12V relais) (ok)"
 msgstr ""
 
-#: default.esml:515
+#: default.esml:513
 msgid "enable/disable use BAT for scan (if exists)"
 msgstr "Χρήση του BAT κατά την ανίχνευση (αν υπάρχει)"
 
-#: default.esml:577
+#: default.esml:575
 msgid "Skin Selector"
 msgstr "Επιλογή επιφάνειας μενού"
 
-#: default.esml:557
+#: default.esml:555
 msgid "transponder scanned:"
 msgstr "Ανίχνευση αναμεταδότη:"
 
-#: default.esml:749
+#: default.esml:747
 msgid "press ok to change event name manually"
 msgstr "Πατήστε OK για να δώσετε όνομα στο γεγονός"
 
-#: default.esml:820
+#: default.esml:818
 msgid "recording end time:"
 msgstr "Ρύθμιση τέλους χρόνου εγγαφής:"
 
-#: default.esml:446
+#: default.esml:444
 msgid "Use motor input power for running detection.. else use timeout"
 msgstr "Χρήση ισχύος εισόδου ρότορα για έλεγχο κίνησης ή χρονοκαθυστέρηση"
 
-#: default.esml:529
+#: default.esml:527
 msgid "no circ polariz."
 msgstr "Μη κυκλικ. πόλωση"
 
-#: default.esml:467 default.esml:488
+#: default.esml:465 default.esml:486
 msgid "Direction:"
 msgstr "Κατεύθυνση"
 
-#: default.esml:592 default.esml:610
+#: default.esml:590 default.esml:608
 msgid "MHz"
 msgstr "MHz"
 
-#: default.esml:556
+#: default.esml:554
 msgid "services scanned     :"
 msgstr "Ανιχνεύτηκαν υπηρεσίες :"
 
-#: default.esml:580 src/parentallock.cpp:101 src/setup_lcd.cpp:112
-#: src/setup_keyboard.cpp:55 src/setup_osd.cpp:263 src/setup_rc.cpp:121
+#: default.esml:578 src/parentallock.cpp:101 src/setup_lcd.cpp:112
+#: src/setup_keyboard.cpp:55 src/setup_osd.cpp:264 src/setup_rc.cpp:121
 #: src/setup_timezone.cpp:47 src/setupengrab.cpp:102 src/setupnetwork.cpp:643
 #: src/setupvideo.cpp:174 src/setupvideo.cpp:412 src/tpeditwindow.cpp:112
 #: src/tpeditwindow.cpp:154
 msgid "save changes and return"
 msgstr "Επιστροφή με αποθήκευση αλλαγών"
 
-#: default.esml:539
+#: default.esml:537
 msgid "aborts the transponder scan"
 msgstr "Εκίνηση ανίνχευσης."
 
-#: default.esml:471 default.esml:740 default.esml:900 default.esml:937
+#: default.esml:469 default.esml:738 default.esml:898 default.esml:935
 msgid "remove"
 msgstr "διαγραφή"
 
-#: default.esml:445 default.esml:480
+#: default.esml:443 default.esml:478
 msgid "Motor Config"
 msgstr "Ρύθμιση ρότορα"
 
-#: default.esml:471
+#: default.esml:469
 msgid "remove selected entry"
 msgstr "Διαγραφή επιλεγμένου γεγονότος"
 
-#: default.esml:895
+#: default.esml:893
 msgid "abc &lt;-&gt; ABC"
 msgstr ""
 
-#: default.esml:889
+#: default.esml:887
 msgid "&lt;"
 msgstr ""
 
-#: default.esml:403
+#: default.esml:401
 msgid "select DiSEqC mode (ok)"
 msgstr "Επιλογή τύπου DiSEqC (ok)"
 
-#: default.esml:413
+#: default.esml:411
 msgid "Swap Commands"
 msgstr "Ανταλλαγή:"
 
-#: default.esml:391
+#: default.esml:389
 msgid "enter LNB threshold frequency (0..9, ok)"
 msgstr "δώστε την συχνότητα αλλαγής μπάντας του LNB (0..9, OK)"
 
-#: default.esml:496
+#: default.esml:494
 msgid "close motor setup"
 msgstr "Επιστροφή στο προηγούμενο μενού"
 
-#: default.esml:462
+#: default.esml:460
 msgid "insert rotor memory cell for this orbital position"
 msgstr "Επιλέξτε ποιά τροχιακή θέση να αποθηκευτεί στον ρότορα"
 
-#: default.esml:528 default.esml:547
+#: default.esml:526 default.esml:545
 msgid "add only unscrambled services"
 msgstr "Κρύψημο κλειδωμένων υπηρεσιών"
 
-#: default.esml:539 default.esml:864
+#: default.esml:537 default.esml:862
 msgid "abort"
 msgstr "Ακύρωση"
 
-#: default.esml:843
+#: default.esml:841
 msgid "select filsystem to format"
 msgstr "Επιλέξτε τύπο φορμαρίσματος"
 
-#: default.esml:852
+#: default.esml:850
 msgid "close window"
 msgstr "Επιστροφή στο προηγούμενο μενού."
 
-#: default.esml:431 default.esml:656
+#: default.esml:429 default.esml:654
 msgid "BER"
 msgstr "BER"
 
-#: default.esml:490
+#: default.esml:488
 msgid "Recalc Params:"
 msgstr "Αναθεώρηση παραμέτρων"
 
-#: default.esml:591 default.esml:609 default.esml:628
+#: default.esml:589 default.esml:607 default.esml:626
 msgid "enter transponder frequeny (0..9, left, right)"
 msgstr "Συχνότητα αναμεταδότη (0..9, <, >)"
 
-#: default.esml:470 default.esml:741 default.esml:935
+#: default.esml:468 default.esml:739 default.esml:933
 msgid "add"
 msgstr "προσθήκη"
 
-#: default.esml:518
+#: default.esml:516
 msgid "start the transponder scan"
 msgstr "Εκίνηση ανίχνευσης"
 
-#: default.esml:518 default.esml:530 default.esml:549 default.esml:572
+#: default.esml:516 default.esml:528 default.esml:547 default.esml:570
 msgid "start scan"
 msgstr "Έναρξη"
 
-#: default.esml:841
+#: default.esml:839
 msgid "check"
 msgstr "Έλεγχος"
 
-#: default.esml:670 default.esml:677 default.esml:684 default.esml:692
-#: default.esml:703 default.esml:714
+#: default.esml:668 default.esml:675 default.esml:682 default.esml:690
+#: default.esml:701 default.esml:712
 msgid "Services"
 msgstr "υπηρεσίες"
 
-#: default.esml:881
+#: default.esml:879
 msgid "&#54;"
 msgstr ""
 
-#: default.esml:875
+#: default.esml:873
 msgid "&#51;"
 msgstr ""
 
-#: default.esml:639
+#: default.esml:637
 msgid "Coderate LP:"
 msgstr ""
 
@@ -261,131 +261,131 @@ msgstr ""
 msgid "subservices"
 msgstr "Υπο-υπηρεσίες"
 
-#: default.esml:636
+#: default.esml:634
 msgid "choose the bandwidth (left, right)"
 msgstr "Επιλογή του FEC (<, >)"
 
-#: default.esml:893
+#: default.esml:891
 msgid "&gt;"
 msgstr ""
 
-#: default.esml:762 default.esml:766
+#: default.esml:760 default.esml:764
 msgid "select month (ok)"
 msgstr "Επιλογή μήνα (ok)"
 
-#: default.esml:456
+#: default.esml:454
 msgid "enter your latitude (0..9, +, -, ok)"
 msgstr "Γεωγραφικό πλάτος (0..9, +, -, ΟΚ)"
 
-#: default.esml:404
+#: default.esml:402
 msgid "DiSEqC Mode:"
 msgstr "Τύπος DiSEqC:"
 
-#: default.esml:377
+#: default.esml:375
 msgid "LNB Configuration"
 msgstr "Ρύθμιση LNB"
 
-#: default.esml:536 default.esml:555 src/scan.cpp:654
+#: default.esml:534 default.esml:553 src/scan.cpp:654
 msgid "scanning..."
 msgstr "Ανίχνευση"
 
-#: default.esml:493
+#: default.esml:491
 msgid "calc param 3 (see your motor manual or let it 00)"
 msgstr "παράμετρος 3 (δήτε τις οδηγίες του ρότορα ή αφήστετο 00)"
 
-#: default.esml:655
+#: default.esml:653
 msgid "AGC"
 msgstr "AGC"
 
-#: default.esml:409
+#: default.esml:407
 msgid "select uncommitted input"
 msgstr "Επιλογή LNB στην 'Uncommitted' είσοδο."
 
-#: default.esml:446
+#: default.esml:444
 msgid "Use Motor Input Power"
 msgstr "Χρήση ισχύος ρότορα:"
 
-#: default.esml:450
+#: default.esml:448
 msgid "when the motor support this, then use"
 msgstr "Χρήση αυτού αν ο ρότορας το υποστηρίζει"
 
-#: default.esml:750
+#: default.esml:748
 msgid "Starttime"
 msgstr "Ώρα έναρξης:"
 
-#: default.esml:629
+#: default.esml:627
 msgid "KHz"
 msgstr "KHz"
 
-#: default.esml:355
+#: default.esml:353
 msgid "HTTP Download"
 msgstr "HTTP Download"
 
-#: default.esml:414
+#: default.esml:412
 msgid "goto prev page (LNB)"
 msgstr "Πρός την προηγούμενη σελίδα (LNB)."
 
-#: default.esml:450
+#: default.esml:448
 msgid "Use gotoXX Function"
 msgstr "Χρήση λειτουργείας gotoXX"
 
-#: default.esml:897
+#: default.esml:895
 msgid "vol+"
 msgstr ""
 
-#: default.esml:635
+#: default.esml:633
 msgid "Bandwidth:"
 msgstr ""
 
-#: default.esml:752
+#: default.esml:750
 msgid "for a multiple event enable this"
 msgstr "Για πολλαπλό γεγονός ενεργοποιήστε το"
 
-#: default.esml:739
+#: default.esml:737
 msgid "press ok to select another event"
 msgstr "Πατήστε OK για να επιλέξετε διαφορετικό γεγονός"
 
-#: default.esml:799 default.esml:811 default.esml:823
+#: default.esml:797 default.esml:809 default.esml:821
 msgid "shutdown  "
 msgstr "Τέλος λειτουργίας τώρα"
 
-#: default.esml:438 default.esml:486
+#: default.esml:436 default.esml:484
 msgid "Transponder:"
 msgstr "Αναμεταδότης:"
 
-#: default.esml:365
+#: default.esml:363
 msgid "22Khz"
 msgstr "22Khz"
 
-#: default.esml:822
+#: default.esml:820
 msgid "o'clock"
 msgstr "η ώρα"
 
-#: default.esml:389
+#: default.esml:387
 msgid "LOF/H:"
 msgstr "LOF/H"
 
-#: default.esml:873
+#: default.esml:871
 msgid "&#50;"
 msgstr ""
 
-#: default.esml:778 src/enigma_info.cpp:43
+#: default.esml:776 src/enigma_info.cpp:43
 msgid "About..."
 msgstr "Περί..."
 
-#: default.esml:741
+#: default.esml:739
 msgid "add new Timer (ok)"
 msgstr "Προσθήκη στον χρονοδιακόπτη (ok)"
 
-#: default.esml:770
+#: default.esml:768
 msgid "to change service press ok"
 msgstr "Για να αλλαχτή η υπηρεσία πατήστε ΟΚ"
 
-#: default.esml:883
+#: default.esml:881
 msgid "&#55;"
 msgstr ""
 
-#: default.esml:772
+#: default.esml:770
 msgid "scan EPG"
 msgstr "Έρευνα στο EPG"
 
@@ -393,164 +393,165 @@ msgstr "Έρευνα στο EPG"
 msgid "audio track"
 msgstr "Επιλογή ήχου"
 
-#: default.esml:760
+#: default.esml:758
 msgid "Su"
 msgstr "Κυρ"
 
-#: default.esml:370
+#: default.esml:368
 msgid "new"
 msgstr "Νέος"
 
-#: default.esml:808
+#: default.esml:806
 msgid "duration:"
 msgstr "Διάρκεια:"
 
-#: default.esml:412
+#: default.esml:410
 msgid "Fast DiSEqC"
 msgstr "Γρήγορο DiSEqC"
 
-#: default.esml:756 src/epgwindow.cpp:113 src/timer.cpp:220
+#: default.esml:754 src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Wed"
 msgstr "Τετ"
 
-#: default.esml:452
+#: default.esml:450
 msgid "Longitude:"
 msgstr "Γεωγραφικό μήκος:"
 
-#: default.esml:454 default.esml:457 default.esml:468
+#: default.esml:452 default.esml:455 default.esml:466
 msgid "choose direction"
 msgstr "Επιλογή κατεύθυνσης"
 
-#: default.esml:834
+#: default.esml:832
 msgid "capacity:"
 msgstr "Μέγεθος:"
 
-#: default.esml:640
+#: default.esml:638
 msgid "choose the code rate LP (left, right)"
 msgstr "Επιλογή του FEC (<, >)"
 
-#: default.esml:491
+#: default.esml:489
 msgid "calc param 1 (see your motor manual or let it 00)"
 msgstr "παράμετρος 1 (δείτε τις οδηγίες του ρότορα ή αφήστετο 00)"
 
-#: default.esml:496
+#: default.esml:494
 msgid "prev page"
 msgstr "Προηγούμενο"
 
-#: default.esml:757 src/epgwindow.cpp:113 src/timer.cpp:220
+#: default.esml:755 src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Thu"
 msgstr "Πεμ"
 
-#: default.esml:637
+#: default.esml:635
 msgid "Transm. Mode:"
 msgstr "Αναμεταδότης:"
 
-#: default.esml:393
+#: default.esml:391
 msgid "12V output on"
 msgstr ""
 
-#: default.esml:811
+#: default.esml:809
 msgid "shutdown the box to deepstandby (ok)"
 msgstr "Κλείσημο δέκτη σε βαθύ ύπνο (οκ)"
 
-#: default.esml:768
+#: default.esml:766
 msgid "edit the end time (0..9, left, right)"
 msgstr "Επιλογή τέλους χρόνου (0..9, <, >)"
 
-#: default.esml:755 src/timer.cpp:2641
+#: default.esml:753 src/timer.cpp:2648
 msgid "Tuesday"
 msgstr "Τρίτη"
 
-#: default.esml:796
+#: default.esml:794
 msgid "recording duration:"
 msgstr "ρύθμιση διάρκειας εγγραφής:"
 
-#: default.esml:742
+#: default.esml:740
 msgid "delete expired timer (ok)"
 msgstr "Διαγραφή του επιλεγμένου χρονοδιακόπτη (ok)"
 
-#: default.esml:439 default.esml:487
+#: default.esml:437 default.esml:485
 msgid "choose the Transponder you wish to find"
 msgstr "Διαλέξτε τον αναμεταδότη που θέλετε να ανιχνεύσετε"
 
-#: default.esml:935
+#: default.esml:933
 msgid "add new Transponder to selected sat (ok)"
 msgstr "Προσθήκη νέου αναμεταδότη στον επιλεγμένο δορυφόρο (ΟΚ)"
 
-#: default.esml:757 src/timer.cpp:2642
+#: default.esml:755 src/timer.cpp:2649
 msgid "Thursday"
 msgstr "Πέμπτη"
 
-#: default.esml:813
+#: default.esml:811
 msgid "set sleeptimer and close window (ok)"
 msgstr "Θέσε τον χρονοδιακόπτη ύπνου και κλείσε το παράθυρο (ΟΚ)"
 
-#: default.esml:370
+#: default.esml:368
 msgid "add a new Satellite"
 msgstr "Προσθήκη νέου δορυφόρου"
 
-#: default.esml:498
+#: default.esml:496
 msgid "open transponder scan"
 msgstr "Ανίχνευση αναμεταδότη"
 
-#: default.esml:798 default.esml:810
+#: default.esml:796 default.esml:808
 msgid "min"
 msgstr "λεπ"
 
-#: default.esml:448
+#: default.esml:446
 msgid "mA"
 msgstr "mA"
 
-#: default.esml:474
+#: default.esml:472
 msgid "goto advanced motor setup"
 msgstr "Προχορημένες επιλογές για ρότορα"
 
-#: default.esml:753 src/timer.cpp:2641
+#: default.esml:751 src/timer.cpp:2648
 msgid "Monday"
 msgstr "Δευτέρα"
 
-#: default.esml:840
+#: default.esml:838
 msgid "format"
 msgstr "φορμάρισμα"
 
-#: default.esml:530 default.esml:549
+#: default.esml:528 default.esml:547
 msgid "starts the transponder scan"
 msgstr "Εκίνηση ανίνχευσης."
 
-#: default.esml:934
+#: default.esml:932
 msgid "sat"
 msgstr "Ρύθμιση"
 
-#: default.esml:366
+#: default.esml:364
 msgid "Voltage"
 msgstr "Τάση"
 
-#: default.esml:638
+#: default.esml:636
 msgid "choose the transmission mode (left, right)"
 msgstr "Επιλογή του FEC (<, >)"
 
-#: default.esml:663
+#: default.esml:661
 msgid "Help"
 msgstr "Βοήθεια"
 
-#: default.esml:898
+#: default.esml:896
 msgid "insert"
 msgstr "Ρύθμιση"
 
-#: default.esml:772
+#: default.esml:770
 msgid "search event name for this beg-/end time in epg"
 msgstr "Έυρεση ονόματος γεγονότος από το EPG, αν υπάρχει"
 
-#: default.esml:369 default.esml:394 default.esml:415 default.esml:473
-#: default.esml:580 src/parentallock.cpp:96 src/setup_lcd.cpp:107
-#: src/setup_keyboard.cpp:50 src/setup_osd.cpp:258 src/setup_rc.cpp:116
-#: src/setup_rfmod.cpp:139 src/setup_timezone.cpp:42 src/setupengrab.cpp:97
-#: src/setupnetwork.cpp:638 src/setupnetwork.cpp:1110 src/setupvideo.cpp:169
-#: src/setupvideo.cpp:407 src/tpeditwindow.cpp:106 src/tpeditwindow.cpp:151
+#: default.esml:367 default.esml:392 default.esml:413 default.esml:471
+#: default.esml:578 src/parentallock.cpp:96 src/scan.cpp:1709
+#: src/setup_lcd.cpp:107 src/setup_keyboard.cpp:50 src/setup_osd.cpp:259
+#: src/setup_rc.cpp:116 src/setup_rfmod.cpp:139 src/setup_timezone.cpp:42
+#: src/setupengrab.cpp:97 src/setupnetwork.cpp:638 src/setupnetwork.cpp:1110
+#: src/setupvideo.cpp:169 src/setupvideo.cpp:407 src/tpeditwindow.cpp:106
+#: src/tpeditwindow.cpp:151
 msgid "save"
 msgstr "Αποθήκευση"
 
-#: default.esml:755 src/epgwindow.cpp:113 src/timer.cpp:220
+#: default.esml:753 src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Tue"
 msgstr "Τρι"
 
@@ -558,88 +559,88 @@ msgstr "Τρι"
 msgid "Play "
 msgstr "Αναπαραγωγή"
 
-#: default.esml:436 default.esml:484
+#: default.esml:434 default.esml:482
 msgid "choose the Satellite you wish to find"
 msgstr "Διαλέξτε τον δορυφόρο που θέλετε βρήτε"
 
-#: default.esml:459
+#: default.esml:457
 msgid "choose entry to edit or remove"
 msgstr "Επιλέξτε καταχώρηση για να αλλάξετε ή διαγράψετε"
 
-#: default.esml:781
+#: default.esml:779
 msgid "processor: "
 msgstr "Επεξεργαστής:"
 
-#: default.esml:751
+#: default.esml:749
 msgid "Endtime"
 msgstr "Ώρα αποπεράτωσης"
 
-#: default.esml:877
+#: default.esml:875
 msgid "&#52;"
 msgstr ""
 
-#: default.esml:470
+#: default.esml:468
 msgid "add to table/existing will be overwritten"
 msgstr "προσθήκη στον πίνακα -το υπάρχον διαγράφεται"
 
-#: default.esml:782
+#: default.esml:780
 msgid "frontend: "
 msgstr "Δέκτης:"
 
-#: default.esml:887
+#: default.esml:885
 msgid "&#57;"
 msgstr ""
 
-#: default.esml:348 default.esml:426
+#: default.esml:346 default.esml:424
 msgid "AGC:"
 msgstr "AGC"
 
-#: default.esml:519
+#: default.esml:517
 #, fuzzy
 msgid "enter manual pids"
 msgstr "Χειροκίνητη αναβάθμιση λογισμικού"
 
-#: default.esml:402
+#: default.esml:400
 msgid "Toneburst:"
 msgstr "Ριπή τόνων:"
 
-#: default.esml:800 default.esml:812 default.esml:824
+#: default.esml:798 default.esml:810 default.esml:822
 msgid "standby  "
 msgstr "Αναμονή:"
 
-#: default.esml:597 default.esml:615
+#: default.esml:595 default.esml:613
 msgid "FEC:"
 msgstr "FEC:"
 
-#: default.esml:428 default.esml:658
+#: default.esml:426 default.esml:656
 msgid "SYNC"
 msgstr "SYNC"
 
-#: default.esml:455
+#: default.esml:453
 msgid "Latitude:"
 msgstr "Γεωγραφικό πλάτος:"
 
-#: default.esml:578
+#: default.esml:576
 msgid "Skins:"
 msgstr "Τύπος:"
 
-#: default.esml:788
+#: default.esml:786
 msgid "ok"
 msgstr "Κλείδωμα"
 
-#: default.esml:596
+#: default.esml:594
 msgid "choose polarity (left, right)"
 msgstr "Επιλέξτε πολικότητα (<, >)"
 
-#: default.esml:593 default.esml:611 default.esml:630
+#: default.esml:591 default.esml:609 default.esml:628
 msgid "Inv:"
 msgstr "Inv:"
 
-#: default.esml:764
+#: default.esml:762
 msgid "edit the start time (0..9, left, right)"
 msgstr "Επιλογή χρόνου έναρξης (0..9, <, >)"
 
-#: default.esml:386
+#: default.esml:384
 msgid "enter LNB lowband offset frequency (0..9, ok)"
 msgstr "Συχνότητα LNB, χαμηλή μπάντα (0..9, OK)"
 
@@ -647,79 +648,79 @@ msgstr "Συχνότητα LNB, χαμηλή μπάντα (0..9, OK)"
 msgid "Record "
 msgstr "Εγγραφή σε Video"
 
-#: default.esml:614 default.esml:632
+#: default.esml:612 default.esml:630
 msgid "choose modulation (left, right)"
 msgstr "Επιλέξτε πολικότητα (<, >)"
 
-#: default.esml:758 src/timer.cpp:2642
+#: default.esml:756 src/timer.cpp:2649
 msgid "Friday"
 msgstr "Παρασκευή"
 
-#: default.esml:871
+#: default.esml:869
 msgid "&#49;"
 msgstr ""
 
-#: default.esml:754
+#: default.esml:752
 msgid "select what todo after event"
 msgstr "Πατήστε OK για να επιλέξετε διαφορετικό γεγονός"
 
-#: default.esml:464 src/tpeditwindow.cpp:71
+#: default.esml:462 src/tpeditwindow.cpp:71
 msgid "Orbital Position:"
 msgstr "Τροχιακή θέση:"
 
-#: default.esml:408
+#: default.esml:406
 msgid "DiSEqC Repeats:"
 msgstr "Επαναλήψεις DiSEqC:"
 
-#: default.esml:388
+#: default.esml:386
 msgid "enter LNB highband offset frequency (0..9, ok)"
 msgstr "Συχνότητα LNB υψηλής μπάντας (0..9, OK)"
 
-#: default.esml:799 default.esml:823
+#: default.esml:797 default.esml:821
 msgid "shutdown the box after recording (ok)"
 msgstr "Κλείσημο του δέκτη μετά το τέλος εγγραφής"
 
-#: default.esml:923
+#: default.esml:921
 msgid "Please choose your DiSEqC-Configuration:"
 msgstr "Παρακαλώ επιλέξτε τον τύπο DiSEqC που έχετε:"
 
-#: default.esml:795 default.esml:819
+#: default.esml:793 default.esml:817
 msgid "Stop Record"
 msgstr "Σταμάτημα εγγραφής"
 
-#: default.esml:742
+#: default.esml:740
 msgid "cleanup"
 msgstr ""
 
-#: default.esml:481
+#: default.esml:479
 msgid "Mode:"
 msgstr "Τύπος:"
 
-#: default.esml:602 default.esml:620
+#: default.esml:600 default.esml:618
 msgid "KSymb/s"
 msgstr "KSymb/s"
 
-#: default.esml:560
+#: default.esml:558
 msgid "Progress:"
 msgstr "Πρόοδος:"
 
-#: default.esml:345 default.esml:421
+#: default.esml:343 default.esml:419
 msgid "SNR:"
 msgstr "SNR"
 
-#: default.esml:361 src/enigma_scan.cpp:48
+#: default.esml:359 src/enigma_scan.cpp:48
 msgid "Satellite Configuration"
 msgstr "Σύνθεση δορυφόρου"
 
-#: default.esml:771
+#: default.esml:769
 msgid "save data and close window"
 msgstr "Επιστροφή με αποθήκευση αλλαγών"
 
-#: default.esml:390
+#: default.esml:388
 msgid "Threshold:"
 msgstr "Κατώφλι:"
 
-#: default.esml:415
+#: default.esml:413
 msgid "save changes"
 msgstr "Επιστροφή με αποθήκευση αλλαγών"
 
@@ -727,177 +728,177 @@ msgstr "Επιστροφή με αποθήκευση αλλαγών"
 msgid "plugins"
 msgstr "Πρόσθετα (Plugins)"
 
-#: default.esml:936
+#: default.esml:934
 msgid "edit selected transponder (ok)"
 msgstr "Σύνταξη επιλεγμένου αναμεταδότη (οκ)"
 
-#: default.esml:497
+#: default.esml:495
 msgid "save in motor"
 msgstr "Αποθήκευση στον ρότορα"
 
-#: default.esml:595
+#: default.esml:593
 msgid "Polarity:"
 msgstr "Πολικότητα:"
 
-#: default.esml:841
+#: default.esml:839
 msgid "do a filesystem check"
 msgstr "Έλεγχος του δίσκου"
 
-#: default.esml:840
+#: default.esml:838
 msgid "initialize the disk for use with the dreambox"
 msgstr "Φορμάρισμα του δίσκου για να δουλέψει με το dreambox."
 
-#: default.esml:364
+#: default.esml:362
 msgid "LNB"
 msgstr "LNB"
 
-#: default.esml:753
+#: default.esml:751
 msgid "Mo"
 msgstr "Δευ"
 
-#: default.esml:405
+#: default.esml:403
 msgid "select DiSEqC parameter (ok)"
 msgstr "Επιλέξτε παράμετρο DiSEqC (ok)"
 
-#: default.esml:852
+#: default.esml:850
 msgid "close"
 msgstr "κλείσιμο"
 
-#: default.esml:590 default.esml:608 default.esml:627
+#: default.esml:588 default.esml:606 default.esml:625
 msgid "Frequency:"
 msgstr "Συχνότητα:"
 
-#: default.esml:937
+#: default.esml:935
 msgid "remove selected satellite"
 msgstr "Διαγραφή επιλεγμένου δορυφόρου"
 
-#: default.esml:601 default.esml:619
+#: default.esml:599 default.esml:617
 msgid "enter symbol rate (0..9, left, right)"
 msgstr "Symbolrate (0..9, <, >)"
 
-#: default.esml:907
+#: default.esml:905
 msgid "press ok to enter the name"
 msgstr "Πατήστε OK για να δώσετε όνομα"
 
-#: default.esml:641
+#: default.esml:639
 msgid "Coderate HP:"
 msgstr ""
 
-#: default.esml:740
+#: default.esml:738
 msgid "delete the current selected timer (ok)"
 msgstr "Διαγραφή του επιλεγμένου χρονοδιακόπτη (ok)"
 
-#: default.esml:401
+#: default.esml:399
 msgid "select MiniDiSEqC parameter (ok)"
 msgstr "Επιλογή παραμέτρου MiniDiSEqC (ok)"
 
-#: default.esml:785
+#: default.esml:783
 msgid "Software Version:"
 msgstr "Έκδοση λογισμικού:"
 
-#: default.esml:453
+#: default.esml:451
 msgid "enter your longitude (0..9, +, -, ok)"
 msgstr "Γεωγραφικό μήκος (0..9, +, -, ΟΚ)"
 
-#: default.esml:896
+#: default.esml:894
 msgid "abc2 &lt;-&gt; 2abc"
 msgstr ""
 
-#: default.esml:371
+#: default.esml:369
 msgid "remove the selected Satellite"
 msgstr "Διαγραφή επιλεγμένου δορυφόρου"
 
-#: default.esml:812
+#: default.esml:810
 msgid "goto standby (ok)"
 msgstr "κατάσταση αναμονής λειτουργίας (οκ)"
 
-#: default.esml:588
+#: default.esml:586
 msgid "choose wished satellite (ok)"
 msgstr "Επιλέξτε επιθυμητό δορυφόρο (ΟΚ, <,>)"
 
-#: default.esml:842
+#: default.esml:840
 msgid "show extended configuration"
 msgstr "Εμφάνιση περισσοτέρων παραμέτρων"
 
-#: default.esml:482
+#: default.esml:480
 msgid "choose what you want to do"
 msgstr "Επιλέξτε τι θέλετε να κάνετε"
 
-#: default.esml:760 src/timer.cpp:2641
+#: default.esml:758 src/timer.cpp:2648
 msgid "Sunday"
 msgstr "Κυριακή"
 
-#: default.esml:461
+#: default.esml:459
 msgid "Number in motor:"
 msgstr "Αριθμός στον ρότορα"
 
-#: default.esml:832
+#: default.esml:830
 msgid "model:"
 msgstr "Μοντέλο:"
 
-#: default.esml:371
+#: default.esml:369
 msgid "erase"
 msgstr "Διαγραφή"
 
-#: default.esml:363
+#: default.esml:361
 msgid "Sat/Position"
 msgstr "Δορυφόρος"
 
-#: default.esml:384
+#: default.esml:382
 msgid "Sat/LNB mapping:"
 msgstr "Σχέση Δορυφ/LNB:"
 
-#: default.esml:394
+#: default.esml:392
 msgid "save changes and use current selected LNB for the chosen satellite"
 msgstr "Αποθήκευση αλλαγών και χρήση του επιλεγμένου LNB."
 
-#: default.esml:473
+#: default.esml:471
 msgid ""
 "save changes and use the selected LNB (in first page) for the choosen "
 "satellite"
 msgstr "Αποθήκευση και χρήση του LNB για τον επιλεγμένο δορυφόρο."
 
-#: default.esml:406
+#: default.esml:404
 msgid "DiSEqC Parameter:"
 msgstr "Παράμετρος DiSEqC:"
 
-#: default.esml:392
+#: default.esml:390
 msgid "0,5V higher LNB Voltage (for long cables) (ok)"
 msgstr "0,5V υψηλότερη τάση (για μακριά καλώδια)"
 
-#: default.esml:613
+#: default.esml:611
 msgid "Modulation:"
 msgstr "Διάρκεια:"
 
-#: default.esml:514
+#: default.esml:512
 msgid "enable/disable check ONIT on any transponder"
 msgstr "Έλεγχος ή όχι ONIT για κάθε αναμεταδότη"
 
-#: default.esml:783
+#: default.esml:781
 msgid "harddisk: "
 msgstr "Σκληρός δίσκος:"
 
-#: default.esml:787
+#: default.esml:785
 msgid "FP Version:"
 msgstr "Αντιστροφή:"
 
-#: default.esml:838
+#: default.esml:836
 msgid "status:"
 msgstr "Είδος:"
 
-#: default.esml:515
+#: default.esml:513
 msgid "use BAT"
 msgstr "Χρήση BAT"
 
-#: default.esml:807
+#: default.esml:805
 msgid "Set Sleeptimer"
 msgstr "Χρονοδιακόπτης ύπνου"
 
-#: default.esml:571
+#: default.esml:569
 msgid "press ok to change"
 msgstr "Πατήστε OK για να αλλάξετε κατεύθυνση"
 
-#: default.esml:931
+#: default.esml:929
 msgid "Transponders"
 msgstr "Αναμεταδότες"
 
@@ -905,75 +906,75 @@ msgstr "Αναμεταδότες"
 msgid "FR "
 msgstr "ΓΜ"
 
-#: default.esml:801 default.esml:825
+#: default.esml:799 default.esml:823
 msgid "set recording end time and close window (ok)"
 msgstr "Θέσε την ώρα τέλους εγραφής και κλείσε το παράθυρο"
 
-#: default.esml:369
+#: default.esml:367
 msgid "close Satellite Configuration"
 msgstr "Κλείσημο ρυθμίσεων δορυφόρων"
 
-#: default.esml:732 default.esml:738 stone.esml:462 silver.esml:469
+#: default.esml:730 default.esml:736 stone.esml:462 silver.esml:469
 msgid "EPG"
 msgstr "EPG"
 
-#: default.esml:936
+#: default.esml:934
 msgid "edit"
 msgstr "σύνταξη"
 
-#: default.esml:759
+#: default.esml:757
 msgid "Sa"
 msgstr "Σαβ"
 
-#: default.esml:836
+#: default.esml:834
 msgid "connected:"
 msgstr "Σύνδεση:"
 
-#: default.esml:395 default.esml:474
+#: default.esml:393 default.esml:472
 msgid "next page"
 msgstr "Επόμενο"
 
-#: default.esml:600 default.esml:618
+#: default.esml:598 default.esml:616
 msgid "Symbol Rate:"
 msgstr "Symbolrate:"
 
-#: default.esml:801 default.esml:813 default.esml:825
+#: default.esml:799 default.esml:811 default.esml:823
 msgid "set"
 msgstr "Ρύθμιση"
 
-#: default.esml:489
+#: default.esml:487
 msgid "press left or right to move motor"
 msgstr "Πατήστε το < ή το > για να κινήσετε το ρότορα"
 
-#: default.esml:492
+#: default.esml:490
 msgid "calc param 2 (see your motor manual or let it 00)"
 msgstr "παράμετρος 2 (δείτε τις οδηγίες του ρότορα ή αφήστετο 00)"
 
-#: default.esml:769
+#: default.esml:767
 msgid "select the timer type (ok)"
 msgstr "Επιλογή τύπου χρονοδιακόπτη (οk)"
 
-#: default.esml:525 default.esml:545
+#: default.esml:523 default.esml:543
 msgid "choose satellite/cable provider (ok)"
 msgstr "Επιλέξτε δορυφόρο που θα γίνει η ανίχνευση (<, >, OK)"
 
-#: default.esml:514
+#: default.esml:512
 msgid "use ONIT"
 msgstr "Χρήση ONIT"
 
-#: default.esml:498
+#: default.esml:496
 msgid "search"
 msgstr "Ανίχνευση"
 
-#: default.esml:494
+#: default.esml:492
 msgid "Counter(Movement)"
 msgstr "Μετρητής (Κίνηση)"
 
-#: default.esml:517
+#: default.esml:515
 msgid "enable/disable initiate network search"
 msgstr "Ενεργοποίηση ή όχι ανίχνευσης δικτύου"
 
-#: default.esml:633
+#: default.esml:631
 msgid "Guard:"
 msgstr ""
 
@@ -981,132 +982,132 @@ msgstr ""
 msgid "Stop "
 msgstr "Σταμάτημα"
 
-#: default.esml:362
+#: default.esml:360
 msgid "select your configuration here"
 msgstr "Επιλογή τοπικής χρονικής ζώνης (οk)"
 
-#: default.esml:885
+#: default.esml:883
 msgid "&#56;"
 msgstr ""
 
-#: default.esml:407
+#: default.esml:405
 msgid "select DiSEqC repeats (ok)"
 msgstr "Επαναλήψεις εντολών DiSEqC (ok)"
 
-#: default.esml:598 default.esml:616 default.esml:634
+#: default.esml:596 default.esml:614 default.esml:632
 msgid "choose the FEC (left, right)"
 msgstr "Επιλογή του FEC (<, >)"
 
-#: default.esml:914 src/system_settings.cpp:60
+#: default.esml:912 src/system_settings.cpp:60
 msgid "OSD Language"
 msgstr "Γλώσσα μενού"
 
-#: default.esml:858
+#: default.esml:856
 msgid "Software upgrade..."
 msgstr "Αναβάθμιση λογισμικού.."
 
-#: default.esml:922
+#: default.esml:920
 msgid "DiSEqC..."
 msgstr "Αλλαγή τύπου DiSEqC"
 
-#: default.esml:579
+#: default.esml:577
 msgid "select skin and press ok or choose save"
 msgstr "Επιλέξτε επιφάνεια και πατήστε ΟΚ"
 
-#: default.esml:763 default.esml:767
+#: default.esml:761 default.esml:765
 msgid "select day (ok)"
 msgstr "Επιλογή ημέρας (ok)"
 
-#: default.esml:529
+#: default.esml:527
 msgid "change circular to linear polarization"
 msgstr "Αλλαγή από κυκλική σε γραμμική πόλωση"
 
-#: default.esml:395
+#: default.esml:393
 msgid "goto next page (DiSEqC)"
 msgstr "Προς επόμενη σελίδα (DiSEqC)"
 
-#: default.esml:934
+#: default.esml:932
 msgid "select sat(up/down), ok(edit), green(add new), red(delete)"
 msgstr "Επιλογή(πάνω,κάτω),οκ(αλλαγή),πράσινο(νέος),κόκκ.(διαγραφή)"
 
-#: default.esml:748
+#: default.esml:746
 msgid "Timer Edit"
 msgstr "Ρύθμιση χρονοδιακόπτη"
 
-#: default.esml:771
+#: default.esml:769
 msgid "apply"
 msgstr "Εφαρμογή"
 
-#: default.esml:891
+#: default.esml:889
 msgid "&#48;"
 msgstr ""
 
-#: default.esml:758
+#: default.esml:756
 msgid "Fr"
 msgstr "Παρ"
 
-#: default.esml:519
+#: default.esml:517
 #, fuzzy
 msgid "enter pids"
 msgstr "Χειμερινά σπορ"
 
-#: default.esml:752
+#: default.esml:750
 msgid "Repeated timer"
 msgstr "Επαναλυπτικό γεγονός"
 
-#: default.esml:485
+#: default.esml:483
 msgid "enter stored satellite pos"
 msgstr "Δώστε θέση αποθηκευμένου δορυφόρου"
 
-#: default.esml:411
+#: default.esml:409
 msgid "Sequence repeat"
 msgstr "Επανάληψη:"
 
-#: default.esml:850
+#: default.esml:848
 msgid "status output:"
 msgstr "Κατάσταση:"
 
-#: default.esml:831
+#: default.esml:829
 msgid "Harddisk"
 msgstr "Σκληρός Δίσκος..."
 
-#: default.esml:495
+#: default.esml:493
 msgid "bla"
 msgstr ""
 
-#: default.esml:800 default.esml:824
+#: default.esml:798 default.esml:822
 msgid "goto standby after recording (ok)"
 msgstr "Σε αναμονή μετά την εγγραφή"
 
-#: default.esml:516 default.esml:528 default.esml:547
+#: default.esml:514 default.esml:526 default.esml:545
 msgid "only Free"
 msgstr "Μόνο ελεύθερα"
 
-#: default.esml:631
+#: default.esml:629
 msgid "Constellation:"
 msgstr "Αντίθεση:"
 
-#: default.esml:759 src/timer.cpp:2642
+#: default.esml:757 src/timer.cpp:2649
 msgid "Saturday"
 msgstr "Σάββατο"
 
-#: default.esml:809
+#: default.esml:807
 msgid "(0..9, left, right, ok)"
 msgstr "(0..9, <, >, οκ)"
 
-#: default.esml:413
+#: default.esml:411
 msgid "swaps committed and uncommitted DiSEqC Commands"
 msgstr "Μη αποστολή εντολής committed DiSEqC"
 
-#: default.esml:899
+#: default.esml:897
 msgid "vol-"
 msgstr ""
 
-#: default.esml:517
+#: default.esml:515
 msgid "network search"
 msgstr "Έρευνα δικτύου"
 
-#: default.esml:516
+#: default.esml:514
 msgid "add only not scrambled services"
 msgstr "Κρύψημο κλειδωμένων υπηρεσιών"
 
@@ -1152,8 +1153,8 @@ msgid "QPSK"
 msgstr ""
 
 #: lib/dvb/service.cpp:202 lib/dvb/service.cpp:230 src/enigma_bouquet.cpp:212
-#: src/enigma_main.cpp:4245 src/enigma_main.cpp:4257 src/parentallock.cpp:123
-#: src/parentallock.cpp:155 src/timer.cpp:2358
+#: src/enigma_main.cpp:4297 src/enigma_main.cpp:4309 src/parentallock.cpp:123
+#: src/parentallock.cpp:155 src/timer.cpp:2362
 msgid "parental"
 msgstr "γωνικό"
 
@@ -1193,13 +1194,17 @@ msgstr "Δορυφόροι (Radio)"
 msgid "Satellites (Data)"
 msgstr "Δορυφόροι (Data)"
 
-#: lib/dvb/servicedvb.cpp:1137
+#: lib/dvb/servicedvb.cpp:1141
 msgid " - provider"
 msgstr " - παροχέας"
 
-#: lib/dvb/servicedvb.cpp:1145
+#: lib/dvb/servicedvb.cpp:1149
 msgid " - services"
 msgstr " - υπηρεσίες"
+
+#: lib/dvb/servicedvb.cpp:1157
+msgid " - new found"
+msgstr ""
 
 #: lib/dvb/servicemp3.cpp:186
 msgid "Connecting..."
@@ -1239,8 +1244,8 @@ msgstr "Αρχεία"
 msgid "TV/Radio"
 msgstr "TV/Radio"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7392
-#: src/sselect.cpp:384 src/sselect.cpp:391
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7466
+#: src/sselect.cpp:393 src/sselect.cpp:400
 msgid "Bouquets"
 msgstr "Μπουκέτα"
 
@@ -1260,7 +1265,7 @@ msgstr "Ναι"
 msgid "No"
 msgstr "'Οχι"
 
-#: lib/gui/listbox.cpp:806
+#: lib/gui/listbox.cpp:831
 msgid "no description available"
 msgstr "Δεν υπάρχει περιγραφή"
 
@@ -1626,7 +1631,7 @@ msgid "Filename: "
 msgstr "Όνομα αρχείου: "
 
 #: src/engrab.cpp:37 src/enigma_event.cpp:298 src/enigma_event.cpp:307
-#: src/timer.cpp:2295
+#: src/timer.cpp:2299
 msgid "no description is available"
 msgstr "Δεν υπάρχει περιγραφή"
 
@@ -1750,6 +1755,11 @@ msgstr "Κοινή διεπαφή (CI) - mmi"
 msgid "waiting for CI answer..."
 msgstr "Αναμονή για το μόντουλ..."
 
+#: src/enigma_dyn.cpp:3225
+#, fuzzy
+msgid "External Message"
+msgstr "Μήνυμα"
+
 #: src/enigma_epg.cpp:82
 msgid "press 1 ... 6 to select count of visible hours"
 msgstr ""
@@ -1767,7 +1777,7 @@ msgstr "Κλείνει την ένδειξη γεγονότων"
 msgid "Original duration: %d min"
 msgstr ""
 
-#: src/enigma_event.cpp:288 src/streaminfo.cpp:582 src/streaminfo.cpp:636
+#: src/enigma_event.cpp:288 src/streaminfo.cpp:573 src/streaminfo.cpp:627
 msgid "no information is available"
 msgstr "Δεν υπάρχουν πληροφορίες"
 
@@ -1775,7 +1785,7 @@ msgstr "Δεν υπάρχουν πληροφορίες"
 msgid "Infos"
 msgstr "Πληροφορίες"
 
-#: src/enigma_info.cpp:42 src/streaminfo.cpp:551
+#: src/enigma_info.cpp:42 src/streaminfo.cpp:542
 msgid "Streaminfo"
 msgstr "Λεπτομέρειες"
 
@@ -1799,13 +1809,13 @@ msgstr "Tuner: Καλώδιακό"
 msgid "Frontend: Terrestrial"
 msgstr "Tuner: Επίγειο"
 
-#: src/enigma_info.cpp:205 src/streaminfo.cpp:280 src/streaminfo.cpp:291
-#: src/streaminfo.cpp:303 src/streaminfo.cpp:315 src/streaminfo.cpp:327
-#: src/streaminfo.cpp:479 src/streaminfo.cpp:518
+#: src/enigma_info.cpp:205 src/streaminfo.cpp:271 src/streaminfo.cpp:282
+#: src/streaminfo.cpp:294 src/streaminfo.cpp:306 src/streaminfo.cpp:318
+#: src/streaminfo.cpp:470 src/streaminfo.cpp:509
 msgid "none"
 msgstr "Χωρίς"
 
-#: src/enigma_info.cpp:211 src/timer.cpp:2706 src/upgrade.cpp:276
+#: src/enigma_info.cpp:211 src/timer.cpp:2713 src/upgrade.cpp:274
 msgid "unknown"
 msgstr "Αγνωστο"
 
@@ -1941,7 +1951,7 @@ msgstr "Παύση αναπαραγωγής"
 msgid "resume playback"
 msgstr "Συνέχιση αναπαραγωγής"
 
-#: src/enigma_main.cpp:120 src/enigma_main.cpp:133 src/enigma_main.cpp:3024
+#: src/enigma_main.cpp:120 src/enigma_main.cpp:133 src/enigma_main.cpp:3066
 msgid "record"
 msgstr "Εγγραφή"
 
@@ -1985,15 +1995,15 @@ msgstr "Προβολή λίστας εγγεγραμένων ταινιών"
 msgid "open the serviceselector and shows the playlist"
 msgstr "Προβολή λίστας παιξήματος (playlist)"
 
-#: src/enigma_main.cpp:148 src/sselect.cpp:130
+#: src/enigma_main.cpp:148 src/sselect.cpp:131
 msgid "switch to TV mode"
 msgstr "Λειτουργία TV"
 
-#: src/enigma_main.cpp:149 src/sselect.cpp:131
+#: src/enigma_main.cpp:149 src/sselect.cpp:132
 msgid "switch to Radio mode"
 msgstr "Λειτουργία Radio"
 
-#: src/enigma_main.cpp:150 src/sselect.cpp:132
+#: src/enigma_main.cpp:150 src/sselect.cpp:133
 msgid "switch to File mode"
 msgstr "Λειτουργία με αρχεία"
 
@@ -2065,7 +2075,7 @@ msgstr ""
 msgid "multiple Services"
 msgstr "πολλαπλές υπηρεσίες"
 
-#: src/enigma_main.cpp:932 src/enigma_main.cpp:983 src/enigma_main.cpp:999
+#: src/enigma_main.cpp:932 src/enigma_main.cpp:983 src/enigma_main.cpp:997
 msgid "enable quickzap"
 msgstr "Ενεργοποίηση γρήγορου ζάπινγκ (quickzap)"
 
@@ -2077,119 +2087,119 @@ msgstr "Προσθήκη στα μπουκέτα"
 msgid "disable quickzap"
 msgstr "Απενεργοποίηση γρήγορου ζάπινγκ (quickzap)"
 
-#: src/enigma_main.cpp:1079
+#: src/enigma_main.cpp:1077
 msgid "Channel"
 msgstr "Κανάλι"
 
-#: src/enigma_main.cpp:1084
+#: src/enigma_main.cpp:1082
 msgid "Channel:"
 msgstr "Κανάλι:"
 
-#: src/enigma_main.cpp:1159
+#: src/enigma_main.cpp:1157
 #, c-format
 msgid "Please wait while the motor is turning to %d.%d°%c ...."
 msgstr "Παρακαλώ περιμένετε, ο ρότορας μετακινήται στο %d.%d%c ...."
 
-#: src/enigma_main.cpp:1159
+#: src/enigma_main.cpp:1157
 msgid "Message"
 msgstr "Μήνυμα"
 
-#: src/enigma_main.cpp:1253
+#: src/enigma_main.cpp:1251
 msgid "recorded movies"
 msgstr "Αποθηκευμένες ταινίες"
 
-#: src/enigma_main.cpp:1374
+#: src/enigma_main.cpp:1372
 msgid "Bouquets (TV)"
 msgstr "Μπουκέτα (TV)"
 
-#: src/enigma_main.cpp:1385
+#: src/enigma_main.cpp:1383
 msgid "Bouquets (File)"
 msgstr "Μπουκέτα (Αρχεία)"
 
-#: src/enigma_main.cpp:1397
+#: src/enigma_main.cpp:1395
 msgid "Bouquets (Radio)"
 msgstr "Μπουκέτα (Radio)"
 
-#: src/enigma_main.cpp:1446
+#: src/enigma_main.cpp:1444
 msgid "Favourites (TV)"
 msgstr "Αγαπημένα (TV)"
 
-#: src/enigma_main.cpp:1452
+#: src/enigma_main.cpp:1450
 msgid "Favourites (Radio)"
 msgstr "Αγαπημένα (Radio)"
 
-#: src/enigma_main.cpp:1458
+#: src/enigma_main.cpp:1456
 msgid "Favourites (File)"
 msgstr "Αγαπημένα (Αρχεία)"
 
-#: src/enigma_main.cpp:1857
+#: src/enigma_main.cpp:1866
 msgid "please wait while initializing Common Interface ..."
 msgstr "Παρακαλώ περιμένετε μέχρι να απαντήσει το CI ..."
 
-#: src/enigma_main.cpp:2154
+#: src/enigma_main.cpp:2163
 msgid "no EPG available"
 msgstr "Δεν υπάρχει EPG"
 
-#: src/enigma_main.cpp:2808
+#: src/enigma_main.cpp:2817
 msgid "ShutdownTimer"
 msgstr "Χρονοδιακόπτης τέλους λειτουργίας"
 
-#: src/enigma_main.cpp:2808
+#: src/enigma_main.cpp:2817
 msgid "SleepTimer"
 msgstr "Χρονοδιακόπτης ύπνου"
 
-#: src/enigma_main.cpp:3024
+#: src/enigma_main.cpp:3066
 msgid "Sorry, you cannot record this service."
 msgstr "Αυτή η υπηρεσία δεν μπορεί να εγγραφεί."
 
-#: src/enigma_main.cpp:3229
+#: src/enigma_main.cpp:3271
 msgid "Show recorded movies?"
 msgstr "Αποθηκευμένες ταινίες"
 
-#: src/enigma_main.cpp:3229
+#: src/enigma_main.cpp:3271
 msgid "recording finished"
 msgstr "Τέλος εγγραφής"
 
-#: src/enigma_main.cpp:3571
+#: src/enigma_main.cpp:3623
 msgid "Shutdown your Receiver now?"
 msgstr "Τέλος λειτουργίας"
 
-#: src/enigma_main.cpp:3571 src/enigma_main.cpp:3591
+#: src/enigma_main.cpp:3623 src/enigma_main.cpp:3643
 msgid "Timer Message"
 msgstr "Μήνυμα"
 
-#: src/enigma_main.cpp:3591
+#: src/enigma_main.cpp:3643
 msgid "Go to Standby now?"
 msgstr "κατάσταση αναμονής λειτουργίας (οκ)"
 
-#: src/enigma_main.cpp:3648 src/enigma_main.cpp:3710
+#: src/enigma_main.cpp:3700 src/enigma_main.cpp:3762
 msgid "Enter new name:"
 msgstr "Δώστε νέο όνομα:"
 
-#: src/enigma_main.cpp:3649 src/enigma_main.cpp:3711
+#: src/enigma_main.cpp:3701 src/enigma_main.cpp:3763
 msgid "Rename entry"
 msgstr "Αλλαγή ονόματος"
 
-#: src/enigma_main.cpp:3773
+#: src/enigma_main.cpp:3825
 msgid "Sorry, you cannot delete this service."
 msgstr "Αυτή η υπηρεσία δεν μπορεί να διαγραφεί."
 
-#: src/enigma_main.cpp:3773
+#: src/enigma_main.cpp:3825
 msgid "delete service"
 msgstr "Διαγραφή υπηρεσίας"
 
-#: src/enigma_main.cpp:3800 src/enigma_main.cpp:3886
+#: src/enigma_main.cpp:3852 src/enigma_main.cpp:3938
 #, c-format
 msgid ""
 "You are trying to delete '%s'.\n"
 "Really do this?"
 msgstr ""
 
-#: src/enigma_main.cpp:3801
+#: src/enigma_main.cpp:3853
 msgid "Delete recorded stream"
 msgstr "Διαγραφή γραμμένου σήματος"
 
-#: src/enigma_main.cpp:3832
+#: src/enigma_main.cpp:3884
 msgid ""
 "This is a complete Bouquet!\n"
 "Really delete?"
@@ -2197,63 +2207,63 @@ msgstr ""
 "Αυτό είναι ολόκληρο μπουκέτο!\n"
 "Σίγουρα θέλετε να διαγραφεί;"
 
-#: src/enigma_main.cpp:3833
+#: src/enigma_main.cpp:3885
 msgid "Delete bouquet"
 msgstr "Διαγραφή μπουκέτου"
 
-#: src/enigma_main.cpp:3887
+#: src/enigma_main.cpp:3939
 msgid "Delete File"
 msgstr "Διαγραφή αρχείου"
 
-#: src/enigma_main.cpp:3945
+#: src/enigma_main.cpp:3997
 msgid "Enter new Filename:"
 msgstr "Δώστε νέο όνομα:"
 
-#: src/enigma_main.cpp:3946
+#: src/enigma_main.cpp:3998
 msgid "Rename File"
 msgstr "Μετονομασία αρχείου"
 
-#: src/enigma_main.cpp:4010
+#: src/enigma_main.cpp:4062
 msgid "Enter new name for the bouquet:"
 msgstr "Δώστε νέο όνομα για το μπουκέτο:"
 
-#: src/enigma_main.cpp:4011
+#: src/enigma_main.cpp:4063
 msgid "Rename bouquet"
 msgstr "Μετονομασία μπουκέτου"
 
-#: src/enigma_main.cpp:4036
+#: src/enigma_main.cpp:4088
 msgid "Enter name for the new bouquet:"
 msgstr "Δώστε όνομα του νέου μπουκέτου:"
 
-#: src/enigma_main.cpp:4037
+#: src/enigma_main.cpp:4089
 msgid "Add new bouquet"
 msgstr "Προσθήκη νέου μπουκέτου"
 
-#: src/enigma_main.cpp:4092
+#: src/enigma_main.cpp:4144
 msgid "unnamed"
 msgstr "Χωρίς όνομα"
 
-#: src/enigma_main.cpp:4093
+#: src/enigma_main.cpp:4145
 msgid "Enter marker name:"
 msgstr "Δώστε όνομα στο σημάδι:"
 
-#: src/enigma_main.cpp:4094
+#: src/enigma_main.cpp:4146
 msgid "create marker"
 msgstr "Δημιουργεία σημαδιού"
 
-#: src/enigma_main.cpp:4135
+#: src/enigma_main.cpp:4187
 msgid "unnamed bouquet"
 msgstr "Μπουκέτο χωρίς όνομα"
 
-#: src/enigma_main.cpp:4459 src/enigma_main.cpp:4460
+#: src/enigma_main.cpp:4518 src/enigma_main.cpp:4519
 msgid "This directory doesn't contain anything playable!"
 msgstr "Αυτός ο κατάλογος δεν περιέχει κάτι που μπορεί να αναπαραχθεί!"
 
-#: src/enigma_main.cpp:4460
+#: src/enigma_main.cpp:4519
 msgid "Play"
 msgstr "Αναπαραγωγή"
 
-#: src/enigma_main.cpp:4946
+#: src/enigma_main.cpp:5012
 msgid ""
 "A timer based recording is currently in progress!\n"
 "This stops the timer, and recording!"
@@ -2261,7 +2271,7 @@ msgstr ""
 "Ο χρονοδιακόπτης έχει ενεργοποιήσει ψηφιακή εγγραφή.<nΑυτή η επιλογή θα "
 "σταματίσει τον χρονοδιακόπτη και την εγγραφή"
 
-#: src/enigma_main.cpp:4956
+#: src/enigma_main.cpp:5022
 msgid ""
 "A recording is currently in progress!\n"
 "This stops the recording!"
@@ -2269,7 +2279,7 @@ msgstr ""
 "Γίνεται ψηφιακή εγγραφή αυτή τη στιγμή!\n"
 "Αυτή η επιλογή θα σταματίσει την ψηφιακή εγγραφή!"
 
-#: src/enigma_main.cpp:4968
+#: src/enigma_main.cpp:5034
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2277,322 +2287,331 @@ msgstr ""
 "Ο χρονοδιακόπτης είναι ενεργός!\n"
 "Αυτή η επιλογή θα σταματίσει τον χρονοδιακόπτη!"
 
-#: src/enigma_main.cpp:4976
+#: src/enigma_main.cpp:5042
 msgid "Really do this?"
 msgstr "Σίγουρα να γίνει αυτό;"
 
-#: src/enigma_main.cpp:5070
+#: src/enigma_main.cpp:5136
 msgid "please wait until the timer has started the recording (max 10 seconds)"
 msgstr ""
 
-#: src/enigma_main.cpp:5071
+#: src/enigma_main.cpp:5137
 msgid "information"
 msgstr "Πληροφορίες"
 
-#: src/enigma_main.cpp:5723
+#: src/enigma_main.cpp:5789
 msgid "Record failed due to inaccessable storage."
 msgstr ""
 
-#: src/enigma_main.cpp:5725
+#: src/enigma_main.cpp:5791
 msgid ""
 "Record stopped due to full harddisk. Delete some recordings and try again."
 msgstr ""
 
-#: src/enigma_main.cpp:5727
+#: src/enigma_main.cpp:5793
 msgid ""
 "Record failed due to an write error during recording. Check for filesystem "
 "corruption."
 msgstr ""
 
-#: src/enigma_main.cpp:5729
+#: src/enigma_main.cpp:5795
 msgid "record failed"
 msgstr "Τέλος εγγραφής"
 
-#: src/enigma_main.cpp:5965 src/enigma_main.cpp:5966
+#: src/enigma_main.cpp:6034 src/enigma_main.cpp:6035
 msgid "One moment please..."
 msgstr "Παρακαλώ περιμένετε..."
 
-#: src/enigma_main.cpp:5966 src/enigma_main.cpp:5970 src/enigma_main.cpp:5978
-#: src/enigma_main.cpp:5985 src/enigma_main.cpp:5991 src/enigma_main.cpp:5996
-#: src/enigma_main.cpp:6001 src/timer.cpp:2239
+#: src/enigma_main.cpp:6035 src/enigma_main.cpp:6039 src/enigma_main.cpp:6047
+#: src/enigma_main.cpp:6054 src/enigma_main.cpp:6060 src/enigma_main.cpp:6065
+#: src/enigma_main.cpp:6070 src/timer.cpp:2243
 msgid "switch"
 msgstr "Μήνυμα"
 
-#: src/enigma_main.cpp:5969 src/enigma_main.cpp:5970
+#: src/enigma_main.cpp:6038 src/enigma_main.cpp:6039
 msgid "Service could not be found !"
 msgstr "Η υπήρεσία δεν βρέθηκε."
 
-#: src/enigma_main.cpp:5977 src/enigma_main.cpp:5978
+#: src/enigma_main.cpp:6046 src/enigma_main.cpp:6047
 msgid "This service could not be descrambled"
 msgstr "Αυτή η υπηρεσία δεν μπορεί να αποκωδικοποιηθεί"
 
-#: src/enigma_main.cpp:5984 src/enigma_main.cpp:5985
+#: src/enigma_main.cpp:6053 src/enigma_main.cpp:6054
 msgid "This service doesn't currently send a signal"
 msgstr "Αυτή η υπηρεσία δεν στέλνει (τώρα) σήμα."
 
-#: src/enigma_main.cpp:5989 src/enigma_main.cpp:5991
+#: src/enigma_main.cpp:6058 src/enigma_main.cpp:6060
 msgid "This content could not be displayed"
 msgstr "Τα περιεχόμενα αυτά δεν μπορούν να αποδωθούν"
 
-#: src/enigma_main.cpp:5994 src/enigma_main.cpp:5996
+#: src/enigma_main.cpp:6063 src/enigma_main.cpp:6065
 msgid "NVOD Service - please select a starttime"
 msgstr "Υπηρεσία NVOD - Παρακαλώ επιλέξτε ώρα έναρξης!"
 
-#: src/enigma_main.cpp:5999 src/enigma_main.cpp:6001
+#: src/enigma_main.cpp:6068 src/enigma_main.cpp:6070
 msgid "Unknown error!!"
 msgstr "Σου είπε κανείς να παίζεις με τα πλήκτρα;"
 
-#: src/enigma_main.cpp:6499 src/sselect.cpp:390
+#: src/enigma_main.cpp:6568 src/sselect.cpp:399
 msgid "Playlist"
 msgstr "Λίστα αναπαραγωγής"
 
-#: src/enigma_main.cpp:6501
+#: src/enigma_main.cpp:6570
 msgid "History"
 msgstr "Ιστορία"
 
-#: src/enigma_main.cpp:6937
+#: src/enigma_main.cpp:7006
 msgid "Service Menu"
 msgstr "Μενού υπηρεσιών"
 
-#: src/enigma_main.cpp:6949 src/sselect.cpp:128
+#: src/enigma_main.cpp:7018 src/sselect.cpp:129
 msgid "add service to playlist"
 msgstr "Προσθήκη υπηρεσίας στην Playlist"
 
-#: src/enigma_main.cpp:6949
+#: src/enigma_main.cpp:7018
 msgid "add selected service to the playlist"
 msgstr "Προσθήκη υπηρεσίας στην Playlist"
 
-#: src/enigma_main.cpp:6958
+#: src/enigma_main.cpp:7029
+msgid "remove 'new found flag'"
+msgstr ""
+
+#: src/enigma_main.cpp:7029
+#, fuzzy
+msgid "select to remove the 'new found flag'"
+msgstr "Δημιουργία νέου μπουκέτου"
+
+#: src/enigma_main.cpp:7032
 msgid "create new bouquet"
 msgstr "Δημιουργία νέου μπουκέτου"
 
-#: src/enigma_main.cpp:6958
+#: src/enigma_main.cpp:7032
 msgid "select to create a new bouquet"
 msgstr "Δημιουργία νέου μπουκέτου"
 
-#: src/enigma_main.cpp:6970
+#: src/enigma_main.cpp:7044
 msgid "duplicate bouquet"
 msgstr "Διπλότυπο μπουκέτο"
 
-#: src/enigma_main.cpp:6970
+#: src/enigma_main.cpp:7044
 msgid "duplicate the complete bouquet with all content"
 msgstr ""
 
-#: src/enigma_main.cpp:6976 src/enigma_main.cpp:7029 src/enigma_main.cpp:7034
-#: src/enigma_main.cpp:7049
+#: src/enigma_main.cpp:7050 src/enigma_main.cpp:7103 src/enigma_main.cpp:7108
+#: src/enigma_main.cpp:7123
 msgid "add to specific bouquet"
 msgstr "Προσθήκη σε κάποιο μπουκέτο"
 
-#: src/enigma_main.cpp:6976
+#: src/enigma_main.cpp:7050
 msgid "add the selected service to another bouquet"
 msgstr "Προσθήκη πολλαπλών υπηρεσιών σε συγκεκριμένο μπουκέτο"
 
-#: src/enigma_main.cpp:6978
+#: src/enigma_main.cpp:7052
 msgid "add marker"
 msgstr "Προσθήκη σημαδιού"
 
-#: src/enigma_main.cpp:6978
+#: src/enigma_main.cpp:7052
 msgid "create a new marker in the current bouquet"
 msgstr "Δημιουργία νέου δείκτη (marker)"
 
-#: src/enigma_main.cpp:6987 src/enigma_main.cpp:7001 src/enigma_main.cpp:7036
-#: src/sselect.cpp:369
+#: src/enigma_main.cpp:7061 src/enigma_main.cpp:7075 src/enigma_main.cpp:7110
+#: src/sselect.cpp:378
 msgid "rename"
 msgstr "Μετονομασία"
 
-#: src/enigma_main.cpp:6987
+#: src/enigma_main.cpp:7061
 msgid "rename the current selected bouquet"
 msgstr "Διαγραφή του επιλεγμένου χρονοδιακόπτη (ok)"
 
-#: src/enigma_main.cpp:7001 src/enigma_main.cpp:7036
+#: src/enigma_main.cpp:7075 src/enigma_main.cpp:7110
 msgid "rename the current selected service/movie"
 msgstr "Διαγραφή του επιλεγμένου χρονοδιακόπτη (ok)"
 
-#: src/enigma_main.cpp:7005 src/enigma_main.cpp:7037 src/sselect.cpp:367
+#: src/enigma_main.cpp:7079 src/enigma_main.cpp:7111 src/sselect.cpp:376
 msgid "delete"
 msgstr "*Διαγραφή*"
 
-#: src/enigma_main.cpp:7005 src/enigma_main.cpp:7037
+#: src/enigma_main.cpp:7079 src/enigma_main.cpp:7111
 msgid "delete the current selected service/movie"
 msgstr "Διαγραφή του επιλεγμένου χρονοδιακόπτη (ok)"
 
-#: src/enigma_main.cpp:7012
+#: src/enigma_main.cpp:7086
 msgid "disable move mode"
 msgstr "απενεργοποίηση μετακίνησης"
 
-#: src/enigma_main.cpp:7012
+#: src/enigma_main.cpp:7086
 msgid "switch move mode off"
 msgstr "Λειτουργία με αρχεία"
 
-#: src/enigma_main.cpp:7014
+#: src/enigma_main.cpp:7088
 msgid "enable move mode"
 msgstr "ενεργοποίηση μετακίνησης"
 
-#: src/enigma_main.cpp:7014
+#: src/enigma_main.cpp:7088
 msgid "activate mode to simply change the entry order"
 msgstr ""
 
-#: src/enigma_main.cpp:7023
+#: src/enigma_main.cpp:7097
 msgid "copy to bouquet list"
 msgstr "Αντιγραφή στη λίστα μπουκέτων"
 
-#: src/enigma_main.cpp:7023
+#: src/enigma_main.cpp:7097
 msgid "copy the selected provider to the bouquet list"
 msgstr "Άνοιγμα λίστας υπηρεσιών και προβολή μπουκέτων"
 
-#: src/enigma_main.cpp:7029 src/enigma_main.cpp:7034
+#: src/enigma_main.cpp:7103 src/enigma_main.cpp:7108
 msgid "add the selected service to a selectable bouquet"
 msgstr "Προσθήκη πολλαπλών υπηρεσιών σε συγκεκριμένο μπουκέτο"
 
-#: src/enigma_main.cpp:7049
+#: src/enigma_main.cpp:7123
 msgid "add the selected file to a selectable bouquet"
 msgstr "Προσθήκη πολλαπλών υπηρεσιών σε συγκεκριμένο μπουκέτο"
 
-#: src/enigma_main.cpp:7051
+#: src/enigma_main.cpp:7125
 msgid "delete file"
 msgstr "Διαγραφή αρχείου"
 
-#: src/enigma_main.cpp:7051
+#: src/enigma_main.cpp:7125
 msgid "delete the selected file (and all corresponding ts files"
 msgstr ""
 
-#: src/enigma_main.cpp:7052
+#: src/enigma_main.cpp:7126
 msgid "rename file"
 msgstr "Μετονομασία αρχείου"
 
-#: src/enigma_main.cpp:7052
+#: src/enigma_main.cpp:7126
 msgid "rename the selected file (and all corresponding ts files"
 msgstr ""
 
-#: src/enigma_main.cpp:7066
+#: src/enigma_main.cpp:7140
 msgid "disable edit mode"
 msgstr "απενεργοποίηση επεμβάσεων"
 
-#: src/enigma_main.cpp:7066
+#: src/enigma_main.cpp:7140
 msgid "disable the edit mode"
 msgstr "απενεργοποίηση επεμβάσεων"
 
-#: src/enigma_main.cpp:7068
+#: src/enigma_main.cpp:7142
 msgid "enable edit mode"
 msgstr "ενεργοποίηση επεμβάσεων"
 
-#: src/enigma_main.cpp:7068
+#: src/enigma_main.cpp:7142
 msgid "activate mode to simply add many services to a selectable bouquet"
 msgstr "Προσθήκη υπηρεσίας σε κάποιο μπουκέτο"
 
-#: src/enigma_main.cpp:7078
+#: src/enigma_main.cpp:7152
 msgid "unlock"
 msgstr "Ξεκλείδωμα"
 
-#: src/enigma_main.cpp:7078
+#: src/enigma_main.cpp:7152
 msgid "do parental-unlock the selected service or file"
 msgstr ""
 
-#: src/enigma_main.cpp:7080
+#: src/enigma_main.cpp:7154
 msgid "lock"
 msgstr "Κλείδωμα"
 
-#: src/enigma_main.cpp:7080
+#: src/enigma_main.cpp:7154
 msgid "do parentallock the selected service or file"
 msgstr ""
 
-#: src/enigma_main.cpp:7084
+#: src/enigma_main.cpp:7158
 msgid "disable parental lock"
 msgstr "Απενεργοποίηση γωνικού κλειδώματος"
 
-#: src/enigma_main.cpp:7084
+#: src/enigma_main.cpp:7158
 msgid "temporary disable the parental locking"
 msgstr "Απενεργοποίηση γωνικού κλειδώματος"
 
-#: src/enigma_main.cpp:7086
+#: src/enigma_main.cpp:7160
 msgid "enable parental lock"
 msgstr "Ενεργοποίηση γωνικού κλειδώματος"
 
-#: src/enigma_main.cpp:7086
+#: src/enigma_main.cpp:7160
 msgid "re-enable the parental locking"
 msgstr "Ενεργοποίηση γωνικού κλειδώματος"
 
-#: src/enigma_main.cpp:7104
+#: src/enigma_main.cpp:7178
 msgid "Shutdown/Standby Menu"
 msgstr "Μενού Αναμονής/Επανεκίνησης"
 
-#: src/enigma_main.cpp:7115 src/enigma_main.cpp:7118
+#: src/enigma_main.cpp:7189 src/enigma_main.cpp:7192
 msgid "reboot now"
 msgstr "Επανεκίνηση τώρα"
 
-#: src/enigma_main.cpp:7115 src/enigma_main.cpp:7123
+#: src/enigma_main.cpp:7189 src/enigma_main.cpp:7197
 msgid "restart your dreambox"
 msgstr "Επανεκίνηση του dreambox"
 
-#: src/enigma_main.cpp:7118
+#: src/enigma_main.cpp:7192
 msgid "restart your receiver"
 msgstr "Επανεκίνηση του δέκτη"
 
-#: src/enigma_main.cpp:7122 src/enigma_main.cpp:7126
+#: src/enigma_main.cpp:7196 src/enigma_main.cpp:7200
 msgid "shutdown now"
 msgstr "Τέλος λειτουργίας τώρα"
 
-#: src/enigma_main.cpp:7122
+#: src/enigma_main.cpp:7196
 msgid "shutdown your dreambox"
 msgstr "Τέλος λειτουργίας"
 
-#: src/enigma_main.cpp:7123 src/enigma_main.cpp:7127
+#: src/enigma_main.cpp:7197 src/enigma_main.cpp:7201
 msgid "restart"
 msgstr "Επανεκίνηση"
 
-#: src/enigma_main.cpp:7126
+#: src/enigma_main.cpp:7200
 msgid "shutdown your dbox-2"
 msgstr "Τέλος λειτουργίας"
 
-#: src/enigma_main.cpp:7127
+#: src/enigma_main.cpp:7201
 msgid "restart your dbox-2"
 msgstr "Επανεκίνηση του dbox-2"
 
-#: src/enigma_main.cpp:7131
+#: src/enigma_main.cpp:7205
 msgid "goto standby"
 msgstr "κατάσταση αναμονής λειτουργίας"
 
-#: src/enigma_main.cpp:7131
+#: src/enigma_main.cpp:7205
 msgid "goto standby mode"
 msgstr "κατάσταση αναμονής λειτουργίας"
 
-#: src/enigma_main.cpp:7132
+#: src/enigma_main.cpp:7206
 msgid "set sleeptimer"
 msgstr "Χρονοδιακόπτης ύπνου"
 
-#: src/enigma_main.cpp:7132
+#: src/enigma_main.cpp:7206
 msgid "set a sleep timer"
 msgstr "Χρονοδιακόπτης ύπνου"
 
-#: src/enigma_main.cpp:7252
+#: src/enigma_main.cpp:7326
 msgid "Record Menu"
 msgstr "Μενού εγγραφών"
 
-#: src/enigma_main.cpp:7258
+#: src/enigma_main.cpp:7332
 msgid "stop record now"
 msgstr "Σταμάτημα εγγραφής"
 
-#: src/enigma_main.cpp:7258
+#: src/enigma_main.cpp:7332
 msgid "immediate stop the recording"
 msgstr ""
 
-#: src/enigma_main.cpp:7260
+#: src/enigma_main.cpp:7334
 msgid "set record duration"
 msgstr "ρύθμιση διάρκειας εγγραφής"
 
-#: src/enigma_main.cpp:7260
+#: src/enigma_main.cpp:7334
 msgid "set the recording time (in minutes)"
 msgstr "Αύξηση του χρόνου έναρξης σε βήματα του 1 λεπτού"
 
-#: src/enigma_main.cpp:7261
+#: src/enigma_main.cpp:7335
 msgid "set record stop time"
 msgstr "ρύθμιση ώρα τέλους εγγραφής"
 
-#: src/enigma_main.cpp:7261
+#: src/enigma_main.cpp:7335
 msgid "set the recording end time"
 msgstr "Ρύθμιση τέλους χρόνου εγγαφής"
 
-#: src/enigma_main.cpp:7356
+#: src/enigma_main.cpp:7430
 msgid "press ok to start edit mode"
 msgstr "Πατήστε OK για να κάνετε επεμβάσεις"
 
@@ -2622,11 +2641,11 @@ msgstr "Αρχεία"
 
 #: src/enigma_mainmenu.cpp:66 src/enigma_mainmenu.cpp:85
 #: src/enigma_mainmenu.cpp:198 src/enigma_mainmenu.cpp:208
-#: src/rotorconfig.cpp:908 src/timer.cpp:2685
+#: src/rotorconfig.cpp:908 src/timer.cpp:2692
 msgid "Information"
 msgstr "Πληροφορίες"
 
-#: src/enigma_mainmenu.cpp:69 src/enigma_mainmenu.cpp:200 src/timer.cpp:2143
+#: src/enigma_mainmenu.cpp:69 src/enigma_mainmenu.cpp:200 src/timer.cpp:2147
 msgid "Shutdown"
 msgstr "Τέλος λειτουργίας"
 
@@ -2674,8 +2693,8 @@ msgstr "Επιλέξτε πρόσθετο και πατήστε OK"
 msgid "Couldn't read plugin directory %s"
 msgstr "Δεν ειναι δυνατή η ανάγνωση του καταλόγου με τα πρόσθετα %s"
 
-#: src/enigma_plugins.cpp:156 src/scan.cpp:1831 src/scan.cpp:1886
-#: src/scan.cpp:1993
+#: src/enigma_plugins.cpp:156 src/scan.cpp:1856 src/scan.cpp:1911
+#: src/scan.cpp:2018
 msgid "Error"
 msgstr "Λάθος"
 
@@ -2841,19 +2860,19 @@ msgstr "Διαγραφή εγγραφής από την λίστα του χρο
 msgid "show extended event information"
 msgstr "Εμφάνιση περισσοτέρων παραμέτρων"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:220
+#: src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Sun"
 msgstr "Κυρ"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:220
+#: src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Mon"
 msgstr "Δευ"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:220
+#: src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Fri"
 msgstr "Παρ"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:220
+#: src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Sat"
 msgstr "Σαβ"
 
@@ -3643,43 +3662,43 @@ msgstr " %d λεπτά και %02d δευτερόλεπτα"
 msgid "%02i seconds left"
 msgstr "%02i δευτερόλεπτα απομένουν"
 
-#: src/scan.cpp:785
+#: src/scan.cpp:783
 msgid "Vertical"
 msgstr "Κάθετα"
 
-#: src/scan.cpp:851
+#: src/scan.cpp:849
 msgid "[only free]"
 msgstr "Μόνο ελεύθερα"
 
-#: src/scan.cpp:852
+#: src/scan.cpp:850
 msgid "[all]"
 msgstr "[όλα]"
 
-#: src/scan.cpp:852
+#: src/scan.cpp:850
 msgid "[nothing]"
 msgstr "[κανένα]"
 
-#: src/scan.cpp:946
+#: src/scan.cpp:944
 msgid "Transponder Scan"
 msgstr "Ανίχνευση καναλιών"
 
-#: src/scan.cpp:1238
+#: src/scan.cpp:1237
 msgid "Waiting for tuner lock... please wait"
 msgstr "Ανίχνευση σε εξέλιξη... παρακαλώ περιμένετε"
 
-#: src/scan.cpp:1286 src/scan.cpp:1341
+#: src/scan.cpp:1290 src/scan.cpp:1357
 msgid "Scan is in progress... please wait"
 msgstr "Ανίχνευση σε εξέλιξη... παρακαλώ περιμένετε"
 
-#: src/scan.cpp:1308 src/scan.cpp:1346
-#, c-format
+#: src/scan.cpp:1320 src/scan.cpp:1371
+#, fuzzy, c-format
 msgid ""
 "The transponder scan has finished and found \n"
 "   %i new Transponders,\n"
 "   %i new TV Services,\n"
 "   %i new Radio Services and\n"
 "   %i new Data Services.\n"
-"%i Transponders within %i Services scanned."
+"%i Transponders with %i Services scanned."
 msgstr ""
 "Η ανίχνευση τελείωσε.  Βρέθηκαν:\n"
 "%i νέοι αναμεταδότες,\n"
@@ -3689,15 +3708,15 @@ msgstr ""
 "Ερευνήθηκαν %i αναμεταδότες \n"
 "%i υπηρεσιών."
 
-#: src/scan.cpp:1358
+#: src/scan.cpp:1383
 msgid "Done."
 msgstr "Τέλος."
 
-#: src/scan.cpp:1366
+#: src/scan.cpp:1391
 msgid "Scan is in finished, press ok to close window"
 msgstr "Η ανίχνευση τελείωσε. Πατήστε OK."
 
-#: src/scan.cpp:1374
+#: src/scan.cpp:1399
 #, c-format
 msgid ""
 "Do you want\n"
@@ -3707,171 +3726,180 @@ msgstr ""
 "Θέλετε να ερευνήσετε\n"
 "και άλλο %s?"
 
-#: src/scan.cpp:1374
+#: src/scan.cpp:1399
 #, c-format
 msgid "Transponder"
 msgstr "Αναμεταδότη"
 
-#: src/scan.cpp:1374
+#: src/scan.cpp:1399
 #, c-format
 msgid "Satellite"
 msgstr "Δορυφόρο"
 
-#: src/scan.cpp:1375
+#: src/scan.cpp:1400
 msgid "Scan finished"
 msgstr "Τέλος ανίχνευσης"
 
-#: src/scan.cpp:1476
+#: src/scan.cpp:1501
 msgid "Manual PIDs"
 msgstr ""
 
-#: src/scan.cpp:1498
+#: src/scan.cpp:1523
 #, fuzzy
 msgid "to enter service name press OK"
 msgstr "Για να αλλαχτή η υπηρεσία πατήστε ΟΚ"
 
-#: src/scan.cpp:1499
+#: src/scan.cpp:1524
 #, fuzzy
 msgid "enter service name"
 msgstr "Διαγραφή υπηρεσίας"
 
-#: src/scan.cpp:1514
+#: src/scan.cpp:1539
 msgid "to enter provider name press OK"
 msgstr ""
 
-#: src/scan.cpp:1515
+#: src/scan.cpp:1540
 #, fuzzy
 msgid "enter provider name"
 msgstr "Δώστε όνομα στο σημάδι:"
 
-#: src/scan.cpp:1530
+#: src/scan.cpp:1555
 #, fuzzy
 msgid "to enter video pid press OK"
 msgstr "Για να αλλαχτή η υπηρεσία πατήστε ΟΚ"
 
-#: src/scan.cpp:1531
+#: src/scan.cpp:1556
 msgid "enter video pid"
 msgstr ""
 
-#: src/scan.cpp:1544
+#: src/scan.cpp:1569
 msgid "to enter pcr pid press OK"
 msgstr ""
 
-#: src/scan.cpp:1545
+#: src/scan.cpp:1570
 msgid "enter pcr pid (in most case the same pid as the video pid)"
 msgstr ""
 
-#: src/scan.cpp:1560
+#: src/scan.cpp:1585
 msgid "to enter audio pid press OK"
 msgstr ""
 
-#: src/scan.cpp:1561
+#: src/scan.cpp:1586
 msgid "enter audio pid"
 msgstr ""
 
-#: src/scan.cpp:1567
+#: src/scan.cpp:1592
 msgid "is AC3 Pid"
 msgstr ""
 
-#: src/scan.cpp:1568
+#: src/scan.cpp:1593
 msgid "set this check when the entered audio pid is a ac3 audio pid"
 msgstr ""
 
-#: src/scan.cpp:1583
+#: src/scan.cpp:1608
 msgid "to enter (video) text pid press OK"
 msgstr ""
 
-#: src/scan.cpp:1584
+#: src/scan.cpp:1609
 msgid "enter (video) text pid"
 msgstr ""
 
-#: src/scan.cpp:1597
+#: src/scan.cpp:1622
 #, fuzzy
 msgid "to enter service id press OK"
 msgstr "Για να αλλαχτή η υπηρεσία πατήστε ΟΚ"
 
-#: src/scan.cpp:1598
+#: src/scan.cpp:1623
 #, fuzzy
 msgid "enter service id"
 msgstr "Διαγραφή υπηρεσίας"
 
-#: src/scan.cpp:1613
+#: src/scan.cpp:1638
 msgid "to enter tsid (transport stream id) press OK"
 msgstr ""
 
-#: src/scan.cpp:1614
+#: src/scan.cpp:1639
 msgid "enter tsid (transport stream id)"
 msgstr ""
 
-#: src/scan.cpp:1627
+#: src/scan.cpp:1652
 msgid "to enter onid (original network id) press OK"
 msgstr ""
 
-#: src/scan.cpp:1628
+#: src/scan.cpp:1653
 msgid "enter onid (original network id)"
 msgstr ""
 
-#: src/scan.cpp:1636
+#: src/scan.cpp:1661
 msgid "no DVB"
 msgstr ""
 
-#: src/scan.cpp:1637
+#: src/scan.cpp:1662
 msgid "don't read PAT/PMT/SDT for this service (only use cached pids)"
 msgstr ""
 
-#: src/scan.cpp:1643
+#: src/scan.cpp:1668
 #, fuzzy
 msgid "use sdt"
 msgstr "Παύση"
 
-#: src/scan.cpp:1644
+#: src/scan.cpp:1669
 msgid ""
 "update name/provider/service type with content of the sdt (and auto remove "
 "service)"
 msgstr ""
 
-#: src/scan.cpp:1650
+#: src/scan.cpp:1675
 msgid "hold name"
 msgstr ""
 
-#: src/scan.cpp:1651
+#: src/scan.cpp:1676
 msgid "don't update the service name with content of the sdt"
 msgstr ""
 
-#: src/scan.cpp:1665
+#: src/scan.cpp:1689
+#, fuzzy
+msgid "read NIT"
+msgstr "Χρήση ONIT"
+
+#: src/scan.cpp:1690
 msgid "read tsid and onid from the nit (this can take up to 10 seconds)"
 msgstr ""
 
-#: src/scan.cpp:1675
+#: src/scan.cpp:1699
+msgid "test values"
+msgstr ""
+
+#: src/scan.cpp:1700
 msgid "test entered values"
 msgstr ""
 
-#: src/scan.cpp:1685
+#: src/scan.cpp:1710
 msgid ""
 "save data and close window (the new channel could be found in the all "
 "services list)"
 msgstr ""
 
-#: src/scan.cpp:1830
+#: src/scan.cpp:1855
 msgid ""
 "Reading NIT failed... this transponder have no NIT..\n"
 "so you can use random values for tsid and onid or set both to 0"
 msgstr ""
 
-#: src/scan.cpp:1885
+#: src/scan.cpp:1910
 msgid ""
 "No NIT Entry for current transponder values found...\n"
 "so you can use random values for tsid and onid or set both to 0"
 msgstr ""
 
-#: src/scan.cpp:1992
+#: src/scan.cpp:2017
 msgid ""
 "A transponder with the same tsid / onid but other frequency/pol/... already "
 "exist.. create a new transponder with the same data is no possible.. please "
 "do change tsid and/or onid"
 msgstr ""
 
-#: src/scan.cpp:2041
+#: src/scan.cpp:2066
 #, c-format
 msgid ""
 "A service named '%s' with this sid/onid/tsid/namespace is already exist\n"
@@ -3879,16 +3907,16 @@ msgid ""
 "Should i use this service name and provider name?"
 msgstr ""
 
-#: src/scan.cpp:2043
+#: src/scan.cpp:2068
 #, fuzzy
 msgid "Service already exist"
 msgstr "Ταξινόμιση υπηρεσιών"
 
-#: src/scan.cpp:2135
+#: src/scan.cpp:2160
 msgid "show/enter values as hexadecimal"
 msgstr ""
 
-#: src/scan.cpp:2141
+#: src/scan.cpp:2166
 msgid "show/enter values as decimal"
 msgstr ""
 
@@ -4119,11 +4147,11 @@ msgstr "Δεν υποστηρίζεται σε αυτό το σύστημα αρ
 msgid "LC-Display Setup"
 msgstr "Ρύθμιση LCD"
 
-#: src/setup_lcd.cpp:63 src/setup_osd.cpp:204
+#: src/setup_lcd.cpp:63 src/setup_osd.cpp:205
 msgid "Brightness:"
 msgstr "Φωτηνότ:"
 
-#: src/setup_lcd.cpp:68 src/setup_osd.cpp:217
+#: src/setup_lcd.cpp:68 src/setup_osd.cpp:218
 msgid "Contrast:"
 msgstr "Αντίθεση:"
 
@@ -4163,23 +4191,23 @@ msgstr "Ρυθμίσεις πληκτρολογίου"
 msgid "select your keyboard mapping (ok)"
 msgstr "Επιλογή τοπικής χρονικής ζώνης (οk)"
 
-#: src/setup_osd.cpp:40
+#: src/setup_osd.cpp:41
 msgid "PluginOffsetActions"
 msgstr "Ρυθμίσεις για τα πρόσθετα (plugins)"
 
-#: src/setup_osd.cpp:41
+#: src/setup_osd.cpp:42
 msgid "enable set the leftTop Point of the rectangle"
 msgstr "Επιλογή ρύθμισης επάνω αριστερού μέρους του τετραγώνου"
 
-#: src/setup_osd.cpp:42
+#: src/setup_osd.cpp:43
 msgid "enable set the rightBottom Point of the rectangle"
 msgstr "Επιλογή ρύθμισης κάτω δεξιού μέρους του τετραγώνου"
 
-#: src/setup_osd.cpp:43
+#: src/setup_osd.cpp:44
 msgid "saves the current positions"
 msgstr "Αποθήκευση τών θέσεων"
 
-#: src/setup_osd.cpp:166
+#: src/setup_osd.cpp:167
 msgid ""
 "here you can center the tuxtxt rectangle...\n"
 "press red to select the left top edge\n"
@@ -4187,51 +4215,51 @@ msgid ""
 "use the cursor keys to move the selected edges"
 msgstr ""
 
-#: src/setup_osd.cpp:182 src/system_settings.cpp:59
+#: src/setup_osd.cpp:183 src/system_settings.cpp:59
 msgid "OSD Settings"
 msgstr "Ρυθμίσεις OSD"
 
-#: src/setup_osd.cpp:190
+#: src/setup_osd.cpp:191
 msgid "Alpha:"
 msgstr "Άλφα:"
 
-#: src/setup_osd.cpp:198
+#: src/setup_osd.cpp:199
 msgid "change the transparency correction"
 msgstr "Αλλαγή διαφάνειας μενού"
 
-#: src/setup_osd.cpp:211
+#: src/setup_osd.cpp:212
 msgid "change the brightness correction"
 msgstr "Αλλαγή φωτηνότητας μενού"
 
-#: src/setup_osd.cpp:224
+#: src/setup_osd.cpp:225
 msgid "change the contrast"
 msgstr "Αλλαγή αντίθεσης μενού"
 
-#: src/setup_osd.cpp:229
+#: src/setup_osd.cpp:230
 msgid "Show Mainmenu like Listbox"
 msgstr ""
 
-#: src/setup_osd.cpp:230
+#: src/setup_osd.cpp:231
 msgid "show the Mainmenu in normal listbox style"
 msgstr ""
 
-#: src/setup_osd.cpp:238
+#: src/setup_osd.cpp:239
 msgid "Change skin"
 msgstr "Αλλαγή επιφάνειας μενού"
 
-#: src/setup_osd.cpp:244
+#: src/setup_osd.cpp:245
 msgid "press ok to open skin selector"
 msgstr "Επιλογή στιλ επιφάνειας μενού"
 
-#: src/setup_osd.cpp:248
+#: src/setup_osd.cpp:249
 msgid "TuxText position"
 msgstr "Θέση TuxText"
 
-#: src/setup_osd.cpp:249
+#: src/setup_osd.cpp:250
 msgid "here you can center the Tuxtxt (builtin videotext)"
 msgstr "Εδώ μπορείτε να κεντράρετε το ενσωματωμένο τελετέξτ (TuxTxt)"
 
-#: src/setup_osd.cpp:331
+#: src/setup_osd.cpp:332
 msgid ""
 "You have to restart enigma to apply the new skin\n"
 "Restart now?"
@@ -4239,7 +4267,7 @@ msgstr ""
 "Πρέπει να κάνετε επανεκίνηση για να αλλάξει η επιφάνεια.\n"
 "Να γίνει τώρα;"
 
-#: src/setup_osd.cpp:331
+#: src/setup_osd.cpp:332
 msgid "Skin changed"
 msgstr "Η επιφάνεια άλλαξε"
 
@@ -4729,227 +4757,227 @@ msgstr ""
 msgid "Manual update"
 msgstr "Χειροκίνητη αναβάθμιση"
 
-#: src/sselect.cpp:51
+#: src/sselect.cpp:52
 msgid "EPG Style Selector"
 msgstr "Επιλογή στιλ EPG"
 
-#: src/sselect.cpp:52
+#: src/sselect.cpp:53
 msgid "open the EPG with selected style"
 msgstr "Άνοιγμα του EPG με το επιλεγμένο στιλ"
 
-#: src/sselect.cpp:59
+#: src/sselect.cpp:60
 msgid "EPG Style"
 msgstr "Στιλ EPG"
 
-#: src/sselect.cpp:70
+#: src/sselect.cpp:71
 msgid "Channel EPG"
 msgstr "EPG Καναλιού"
 
-#: src/sselect.cpp:70
+#: src/sselect.cpp:71
 msgid "open EPG for selected Channel"
 msgstr "EPG για το επιλεγμένο κανάλι"
 
-#: src/sselect.cpp:71
+#: src/sselect.cpp:72
 msgid "Multi EPG"
 msgstr "Πολλαπλό EPG"
 
-#: src/sselect.cpp:71
+#: src/sselect.cpp:72
 msgid "open EPG for next five channels"
 msgstr "EPG για τα επόμενα πέντε κανάλια"
 
-#: src/sselect.cpp:77
+#: src/sselect.cpp:78
 msgid "External EPG"
 msgstr "εσωτερική"
 
-#: src/sselect.cpp:77
+#: src/sselect.cpp:78
 msgid "open external plugin EPG"
 msgstr ""
 
-#: src/sselect.cpp:122
+#: src/sselect.cpp:123
 msgid "service selector"
 msgstr "Επιλογή υπηρεσίας"
 
-#: src/sselect.cpp:123
+#: src/sselect.cpp:124
 msgid "switch to next bouquet"
 msgstr "Επιλογή του επόμενου πακέτου"
 
-#: src/sselect.cpp:124
+#: src/sselect.cpp:125
 msgid "switch to previous bouquet"
 msgstr "Επιλογή του προηγούμενου πακέτου"
 
-#: src/sselect.cpp:125
+#: src/sselect.cpp:126
 msgid "go up a directory"
 msgstr "Προς τον προηγούμενο κατάλογο"
 
-#: src/sselect.cpp:126
+#: src/sselect.cpp:127
 msgid "shows the EPG selector for the highlighted channel"
 msgstr "Δείχνει το EPG για το επιλεγμένο κανάλι"
 
-#: src/sselect.cpp:127
+#: src/sselect.cpp:128
 msgid "show service selector menu"
 msgstr "Δείχνει το μενού επιλογής υπηρεσίας"
 
-#: src/sselect.cpp:129
+#: src/sselect.cpp:130
 msgid "add service to a specific bouquet"
 msgstr "Προσθήκη υπηρεσίας σε κάποιο μπουκέτο"
 
-#: src/sselect.cpp:133
+#: src/sselect.cpp:134
 msgid "toggle between classic and multi column style"
 msgstr "Αλλαγή στίλ, μεταξύ κλασσικού και πολλαπλών στειλών"
 
-#: src/sselect.cpp:134
+#: src/sselect.cpp:135
 msgid "toggle focus between service and bouquet list (in combi column style)"
 msgstr "Εναλλαγή μεταξύ λίστας υπηρεσιών και λίστας μπουκέτων"
 
-#: src/sselect.cpp:135
+#: src/sselect.cpp:136
 msgid "go to the prev Marker if exist.. else goto first service"
 msgstr "Επιλογή προηγούμενου δείκτη άν υπάρχει ή στην πρώτη υπηρεσία"
 
-#: src/sselect.cpp:136
+#: src/sselect.cpp:137
 msgid "go to the next Marker if exist.. else goto last service"
 msgstr "Επιλογή επόμενου δείκτη άν υπάρχει ή στην τελευταία υπηρεσία"
 
-#: src/sselect.cpp:138
+#: src/sselect.cpp:139
 msgid "show all services"
 msgstr "Εμφάνιση όλων των υπηρεσιών"
 
-#: src/sselect.cpp:139
+#: src/sselect.cpp:140
 msgid "show satellite list"
 msgstr "Εμφάνιση λίστας δορυφόρων"
 
-#: src/sselect.cpp:140
+#: src/sselect.cpp:141
 msgid "show provider list"
 msgstr "Εμφάνιση λίστας παροχέων"
 
-#: src/sselect.cpp:141
+#: src/sselect.cpp:142
 msgid "show bouquet list"
 msgstr "Εμφάνιση λίστας μπουκέτων"
 
-#: src/sselect.cpp:143
+#: src/sselect.cpp:144
 msgid "delete selected entry"
 msgstr "Διαγραφή επιλεγμένης καταχώρησης"
 
-#: src/sselect.cpp:144
+#: src/sselect.cpp:145
 msgid "mark selected entry for move"
 msgstr "Επιλογή καταχώρησης για μετακίνηση"
 
-#: src/sselect.cpp:145
+#: src/sselect.cpp:146
 msgid "rename selected entry"
 msgstr "Μετονομασία επιλεγμένης καταχώρησης"
 
-#: src/sselect.cpp:146
+#: src/sselect.cpp:147
 msgid "create new marker entry"
 msgstr "Δημιουργία νέου δείκτη (marker)"
 
-#: src/sselect.cpp:287
+#: src/sselect.cpp:296
 msgid "[GO UP]"
 msgstr "[ΕΠΙΣΤΡΟΦΗ]"
 
-#: src/sselect.cpp:289
+#: src/sselect.cpp:298
 msgid "(removed service)"
 msgstr "(διαγεγραμμένη υπηρεσία)"
 
-#: src/sselect.cpp:368
+#: src/sselect.cpp:377
 msgid "mark"
 msgstr "Μαρκάρισμα"
 
-#: src/sselect.cpp:370
+#: src/sselect.cpp:379
 msgid "marker"
 msgstr "Δείκτης"
 
-#: src/sselect.cpp:378
+#: src/sselect.cpp:387
 msgid "All Services"
 msgstr "Όλες οι υπηρεσίες"
 
-#: src/sselect.cpp:380
+#: src/sselect.cpp:389
 msgid "Satellites"
 msgstr "Δορυφόροι"
 
-#: src/sselect.cpp:383
+#: src/sselect.cpp:392
 msgid "Providers"
 msgstr "Παροχείς"
 
-#: src/sselect.cpp:388
+#: src/sselect.cpp:397
 msgid "Root"
 msgstr "Root"
 
-#: src/sselect.cpp:389
+#: src/sselect.cpp:398
 msgid "Movies"
 msgstr "Ταινίες"
 
-#: src/sselect.cpp:847
+#: src/sselect.cpp:856
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr "Επιλέξτε Όχι ή πατήστε Άκυρο' για να κλειδώσετε ή όχι όλο τον κατάλογο"
 
-#: src/sselect.cpp:847
+#: src/sselect.cpp:856
 msgid "Enter Directory"
 msgstr "Δώστε υποκατάλογο"
 
-#: src/streaminfo.cpp:174
+#: src/streaminfo.cpp:165
 msgid "album"
 msgstr "Άλμπουμ"
 
-#: src/streaminfo.cpp:176
+#: src/streaminfo.cpp:167
 msgid "title"
 msgstr "Τίτλος"
 
-#: src/streaminfo.cpp:178
+#: src/streaminfo.cpp:169
 msgid "artist"
 msgstr "Καλλιτέχνης"
 
-#: src/streaminfo.cpp:180
+#: src/streaminfo.cpp:171
 msgid "genre"
 msgstr "Είδος"
 
-#: src/streaminfo.cpp:182
+#: src/streaminfo.cpp:173
 msgid "year"
 msgstr "Χρονιά"
 
-#: src/streaminfo.cpp:184
+#: src/streaminfo.cpp:175
 msgid "composer"
 msgstr "Συνθέτης"
 
-#: src/streaminfo.cpp:186
+#: src/streaminfo.cpp:177
 msgid "track"
 msgstr "Κομμάτι"
 
-#: src/streaminfo.cpp:188
+#: src/streaminfo.cpp:179
 msgid "length"
 msgstr "Διάρκεια"
 
-#: src/streaminfo.cpp:395
+#: src/streaminfo.cpp:386
 msgid "Video format:"
 msgstr "Εικόνα:"
 
-#: src/streaminfo.cpp:474
+#: src/streaminfo.cpp:465
 msgid "supported coding systems:"
 msgstr "Σύστηματα κωδικοποίησης DREAMBOX:"
 
-#: src/streaminfo.cpp:514
+#: src/streaminfo.cpp:505
 msgid "Systems used in service:"
 msgstr "Σύστηματα κωδικοποίησης καναλιού:"
 
-#: src/streaminfo.cpp:551
+#: src/streaminfo.cpp:542
 msgid "Record mode - read manual"
 msgstr "Έιδος εγγραφής - δήτε τις οδηγίες"
 
-#: src/streaminfo.cpp:657
+#: src/streaminfo.cpp:648
 msgid "Service information (right)"
 msgstr "Πληροφορίες υπηρεσίας (>)"
 
-#: src/streaminfo.cpp:658
+#: src/streaminfo.cpp:649
 msgid "Scrambled system information (left, right)"
 msgstr "Πληροφορίες κωδικοποίησης (<, >)"
 
-#: src/streaminfo.cpp:659
+#: src/streaminfo.cpp:650
 msgid "Transponder information (left)"
 msgstr "Πληροφορίες αναμεταδότη (<)"
 
-#: src/timer.cpp:282
+#: src/timer.cpp:284
 msgid "Timerlist"
 msgstr "Λίστα χρονοδιακόπτη"
 
-#: src/timer.cpp:1542
+#: src/timer.cpp:1544
 msgid ""
 "You would delete the running event..\n"
 "this stops the timer mode (recording)!"
@@ -4957,15 +4985,15 @@ msgstr ""
 "Θέλετε να διαγράψετε το ενεργό γεγονός..\n"
 "Αυτό θα σταματήση την εγγραφή"
 
-#: src/timer.cpp:1543
+#: src/timer.cpp:1545
 msgid "Delete the event from the timer list"
 msgstr "Διαγραφή από τον χρονοδιακόπτη"
 
-#: src/timer.cpp:1544
+#: src/timer.cpp:1546
 msgid "Really delete this event?"
 msgstr "Σίγουρα θέλετε να διαγράψετε αυτό το γεγονός;"
 
-#: src/timer.cpp:1548
+#: src/timer.cpp:1550
 msgid ""
 "You would update the running event.. \n"
 "this stops the timer mode (recording)!"
@@ -4973,31 +5001,31 @@ msgstr ""
 "Θέλετε να ανανεώσετε το ενεργό γεγονός..\n"
 "Αυτό θα σταματήση την εγγραφή"
 
-#: src/timer.cpp:1549
+#: src/timer.cpp:1551
 msgid "Update event in timer list"
 msgstr "Ενημέρωση γεγονότος στον χρονοδιακόπτη"
 
-#: src/timer.cpp:1550 src/timer.cpp:2460
+#: src/timer.cpp:1552 src/timer.cpp:2467
 msgid "Really update this event?"
 msgstr "Σίγουρα θέλετε να ενημερώσετε το γεγονός αυτό;"
 
-#: src/timer.cpp:1700
+#: src/timer.cpp:1702
 msgid "This event is already in the timerlist."
 msgstr "Αυτό το γεγονός είναι ήδη στην λίστα του χρονοδικόπτη."
 
-#: src/timer.cpp:1701 src/timer.cpp:1752
+#: src/timer.cpp:1703 src/timer.cpp:1754
 msgid "Add event to timerlist"
 msgstr "Προσθήκη γεγονότος στον χρονοδιακόπτη"
 
-#: src/timer.cpp:1741
+#: src/timer.cpp:1743
 msgid "The Endtime overlaps with another event in the timerlist"
 msgstr "Αυτό το γεγονός υπερκαλύπτει κατί ήδη στην λίστα του χρονοδικόπτη."
 
-#: src/timer.cpp:1741
+#: src/timer.cpp:1743
 msgid "Set Stop Time"
 msgstr "Ρύθμιση χρόνου λήξης"
 
-#: src/timer.cpp:1750
+#: src/timer.cpp:1752
 msgid ""
 "This event cannot added to the timerlist.\n"
 "The event overlaps with another event in the timerlist\n"
@@ -5007,145 +5035,145 @@ msgstr ""
 "Υπερκαλύπτει κάποιο άλλο γεγονός.\n"
 "Παρακαλώ ελένξτε την λίστα του χρονοδιακόπτη."
 
-#: src/timer.cpp:1829
+#: src/timer.cpp:1833
 msgid "timerView"
 msgstr "Χρονοδιακόπτης"
 
-#: src/timer.cpp:1830
+#: src/timer.cpp:1834
 msgid "add new event to Timerlist"
 msgstr "Προσθήκη νέου γεγονότος στο χρονοδιακόπτη"
 
-#: src/timer.cpp:1831
+#: src/timer.cpp:1835
 msgid "remove this entry from timer list"
 msgstr "Διαγραφή εγγραφής από την λίστα του χρονοδιακόπτη"
 
-#: src/timer.cpp:2030
+#: src/timer.cpp:2034
 msgid "Timer list"
 msgstr "Χρονοδιακόπτης"
 
-#: src/timer.cpp:2108
+#: src/timer.cpp:2112
 msgid "Timer Edit View"
 msgstr "Σύνταξη χρονοδιακόπτη"
 
-#: src/timer.cpp:2109
+#: src/timer.cpp:2113
 msgid "increase the event begin time in 1 minute steps"
 msgstr "Αύξηση του χρόνου έναρξης σε βήματα του 1 λεπτού"
 
-#: src/timer.cpp:2110
+#: src/timer.cpp:2114
 msgid "decrease the event begin time in 1 minute steps"
 msgstr "Μείωση του χρόνου έναρξης σε βήματα του 1 λεπτού"
 
-#: src/timer.cpp:2111
+#: src/timer.cpp:2115
 msgid "increase the event end time in 1 minute steps"
 msgstr "Αύξηση του χρόνου τέλους σε βήματα του 1 λεπτού"
 
-#: src/timer.cpp:2112
+#: src/timer.cpp:2116
 msgid "decrease the event end time in 1 minute steps"
 msgstr "Μείωση του χρόνου τέλους σε βήματα του 1 λεπτού"
 
-#: src/timer.cpp:2121
+#: src/timer.cpp:2125
 msgid "January"
 msgstr "Ιανουάριος"
 
-#: src/timer.cpp:2121
+#: src/timer.cpp:2125
 msgid "February"
 msgstr "Φεβρουάριος"
 
-#: src/timer.cpp:2121
+#: src/timer.cpp:2125
 msgid "March"
 msgstr "Μάρτιος"
 
-#: src/timer.cpp:2122
+#: src/timer.cpp:2126
 msgid "April"
 msgstr "Απρίλιος"
 
-#: src/timer.cpp:2122
+#: src/timer.cpp:2126
 msgid "May"
 msgstr "Μάιος"
 
-#: src/timer.cpp:2122
+#: src/timer.cpp:2126
 msgid "June"
 msgstr "Ιούνιος"
 
-#: src/timer.cpp:2122
+#: src/timer.cpp:2126
 msgid "July"
 msgstr "Ιούλιος"
 
-#: src/timer.cpp:2123
+#: src/timer.cpp:2127
 msgid "August"
 msgstr "Αυγουστος"
 
-#: src/timer.cpp:2123
+#: src/timer.cpp:2127
 msgid "September"
 msgstr "Σεπτέμβριος"
 
-#: src/timer.cpp:2123
+#: src/timer.cpp:2127
 msgid "October"
 msgstr "Οκτώβριος"
 
-#: src/timer.cpp:2124
+#: src/timer.cpp:2128
 msgid "November"
 msgstr "Νοέμβριος"
 
-#: src/timer.cpp:2124
+#: src/timer.cpp:2128
 msgid "December"
 msgstr "Δεκέμβριος"
 
-#: src/timer.cpp:2140
+#: src/timer.cpp:2144
 msgid "Nothing"
 msgstr "[κανένα]"
 
-#: src/timer.cpp:2140
+#: src/timer.cpp:2144
 msgid "do nothing"
 msgstr "[κανένα]"
 
-#: src/timer.cpp:2141
+#: src/timer.cpp:2145
 msgid "Standby"
 msgstr "Αναμονή:"
 
-#: src/timer.cpp:2141
+#: src/timer.cpp:2145
 msgid "put box into standby"
 msgstr "κατάσταση αναμονής λειτουργίας"
 
-#: src/timer.cpp:2143
+#: src/timer.cpp:2147
 msgid "put box into deep standby"
 msgstr "Κλείσημο δέκτη σε βαθύ ύπνο"
 
-#: src/timer.cpp:2242
+#: src/timer.cpp:2246
 msgid "record DVR"
 msgstr "Ψηφιακή εγγραφή"
 
-#: src/timer.cpp:2246
+#: src/timer.cpp:2250
 msgid "Ngrab"
 msgstr "Ngrab"
 
-#: src/timer.cpp:2252
+#: src/timer.cpp:2256
 msgid "Record VCR"
 msgstr "Εγγραφή σε Video"
 
-#: src/timer.cpp:2322
+#: src/timer.cpp:2326
 msgid "unknown service"
 msgstr "Αγνωστη υπηρεσία"
 
-#: src/timer.cpp:2458
+#: src/timer.cpp:2465
 msgid ""
 "The new endtime is before now time!\n"
 "This stops the running timer(recording)\n"
 msgstr ""
 
-#: src/timer.cpp:2464 src/timer.cpp:2479 src/timer.cpp:2492 src/timer.cpp:2513
+#: src/timer.cpp:2471 src/timer.cpp:2486 src/timer.cpp:2499 src/timer.cpp:2520
 msgid "Update event in timerlist"
 msgstr "Ενημέρωση γεγονότος στον χρονοδιακόπτη"
 
-#: src/timer.cpp:2478
+#: src/timer.cpp:2485
 msgid "New endtime are now adjusted"
 msgstr ""
 
-#: src/timer.cpp:2491
+#: src/timer.cpp:2498
 msgid "The event has already finished... you can not change endtime!"
 msgstr "Αυτό το γεγονός είναι ήδη στην λίστα του χρονοδικόπτη."
 
-#: src/timer.cpp:2513
+#: src/timer.cpp:2520
 msgid ""
 "Invalid begin or end time.!\n"
 "Please check time and date"
@@ -5153,7 +5181,7 @@ msgstr ""
 "Λάθος χρόνος έναρξης ή λήξης!\n"
 "Παρακάλώ έλέξτε την ώρα και την ημερομηνία"
 
-#: src/timer.cpp:2685
+#: src/timer.cpp:2692
 msgid ""
 "Sorry, you can not add a time shifted service manually to the timer.\n"
 "Please close the Timer and use the EPG of the service you wish to add!"
@@ -5162,7 +5190,7 @@ msgstr ""
 "Κλέιστε τον χρονοδιακόπτη και χρησημοποιήστε το EPG για την υπηρεσία που "
 "θέλετε να προσθέσετε"
 
-#: src/timer.cpp:2746
+#: src/timer.cpp:2753
 msgid "no description found"
 msgstr "Δεν βρέθηκε περιγραφή"
 
@@ -5247,96 +5275,96 @@ msgstr "Σίγουρα να διαγραφεί ο επιλεγμένος δορ�
 msgid "Delete %s"
 msgstr "Διαγραφή %s"
 
-#: src/upgrade.cpp:149
+#: src/upgrade.cpp:147
 msgid "Please select the software version to upgrade to:"
 msgstr "Παρακαλώ επιλέξτε έκδοση αναβάθμισης:"
 
-#: src/upgrade.cpp:186
+#: src/upgrade.cpp:184
 msgid "manual upload"
 msgstr "Χειροκείνητο φόρτωμα"
 
-#: src/upgrade.cpp:204
+#: src/upgrade.cpp:202
 msgid "downloading catalog..."
 msgstr "κατέβασμα καταλόγου..."
 
-#: src/upgrade.cpp:224
+#: src/upgrade.cpp:222
 msgid "downloading changelog..."
 msgstr "κατέβασμα καταλόγου αλλαγών (changelog)..."
 
-#: src/upgrade.cpp:249
+#: src/upgrade.cpp:247
 msgid "downloading image..."
 msgstr "κατέβασμα αρχείου λογισμικού..."
 
-#: src/upgrade.cpp:307
+#: src/upgrade.cpp:305
 msgid "Please select version to upgrade or LAME! to abort"
 msgstr "Παρακαλώ επιλέξτε έκδοση ή LAME για ακύρωση:"
 
-#: src/upgrade.cpp:428 src/upgrade.cpp:510 src/upgrade.cpp:524
+#: src/upgrade.cpp:426 src/upgrade.cpp:508 src/upgrade.cpp:522
 msgid "Error!"
 msgstr "Λάθος!"
 
-#: src/upgrade.cpp:484
+#: src/upgrade.cpp:482
 msgid "Download aborted."
 msgstr "Ακύρωση διαβάσματος αρχείου."
 
-#: src/upgrade.cpp:503
+#: src/upgrade.cpp:501
 msgid "checking consistency of file..."
 msgstr "Έλεγχος του αρχείου..."
 
-#: src/upgrade.cpp:507 src/upgrade.cpp:509
+#: src/upgrade.cpp:505 src/upgrade.cpp:507
 msgid "write error while downloading..."
 msgstr "Σφάλμα εγγραφής κατά το κατέβασμα..."
 
-#: src/upgrade.cpp:521 src/upgrade.cpp:523
+#: src/upgrade.cpp:519 src/upgrade.cpp:521
 msgid "Data error. The checksum didn't match."
 msgstr "Σφάλμα δεδομένων. Η σούμα δεν ταιριάζει."
 
-#: src/upgrade.cpp:533
+#: src/upgrade.cpp:531
 msgid "Checksum OK. Ready to upgrade."
 msgstr "Η σούμα ταιριάζει. Έτοιμο για αναβάθμιση."
 
-#: src/upgrade.cpp:535
+#: src/upgrade.cpp:533
 msgid "Are you sure you want to upgrade to this new version?"
 msgstr "Σίγουρα θέλετε να γίνει η αναβάθμιση στην νέα έκδοση;"
 
-#: src/upgrade.cpp:536
+#: src/upgrade.cpp:534
 msgid "Ready to upgrade"
 msgstr "Έτοιμο για αναβάθμιση"
 
-#: src/upgrade.cpp:572
+#: src/upgrade.cpp:570
 msgid "Can't read flashimage.img!"
 msgstr "Η ανάγνωση του flashimage.img δεν είναι δυνατή!"
 
-#: src/upgrade.cpp:572 src/upgrade.cpp:585 src/upgrade.cpp:708
-#: src/upgrade.cpp:719
+#: src/upgrade.cpp:570 src/upgrade.cpp:583 src/upgrade.cpp:706
+#: src/upgrade.cpp:717
 msgid "Flash"
 msgstr "Εγγραφή στη μνήμη flash"
 
-#: src/upgrade.cpp:585
+#: src/upgrade.cpp:583
 msgid "flashimage.img has filesize of 0byte!"
 msgstr "Το αρχείο flashimage.img έχει μέγεθος 0 bytes!"
 
-#: src/upgrade.cpp:615 src/upgrade.cpp:693
+#: src/upgrade.cpp:613 src/upgrade.cpp:691
 msgid "Please wait... do NOT switch off the receiver!"
 msgstr "Παρακαλώ περιμένετε...ΜΗΝ κλείσετε το μηχάνημα!"
 
-#: src/upgrade.cpp:616 src/upgrade.cpp:694
+#: src/upgrade.cpp:614 src/upgrade.cpp:692
 msgid "upgrade in progress"
 msgstr "Αναβάθμιση σε εξέλιξη"
 
-#: src/upgrade.cpp:619 src/upgrade.cpp:705
+#: src/upgrade.cpp:617 src/upgrade.cpp:703
 msgid "Erasing Flash..."
 msgstr "Διαγραφή μνήμης flash..."
 
-#: src/upgrade.cpp:644 src/upgrade.cpp:734
+#: src/upgrade.cpp:642 src/upgrade.cpp:732
 msgid "Writing Software to Flash..."
 msgstr "Εγραφή λογισμικού στη μνήμη Flash..."
 
-#: src/upgrade.cpp:708
+#: src/upgrade.cpp:706
 msgid "Erase error!"
 msgstr "Σφάλμα κατά τη διαγραφή!"
 
-#: src/upgrade.cpp:719
+#: src/upgrade.cpp:717
 msgid "Can't open mtd!"
 msgstr "Δεν μπορώ να ανοίξω το mtd!"
 
