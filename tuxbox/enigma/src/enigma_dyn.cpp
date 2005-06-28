@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.1.1-Expert"
+#define WEBIFVERSION "4.1.2-Expert"
 #else
-#define WEBIFVERSION "4.1.1"
+#define WEBIFVERSION "4.1.2"
 #endif
 
 #define KEYBOARDTV 0
@@ -487,6 +487,11 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 		}
 		else
 			eZapMain::getInstance()->play();
+	}
+	else
+	if (command == "record")
+	{
+		eZapMain::getInstance()->recordDVR(1,0);
 	}
 
 	return closeWindow(content, "", 500);
