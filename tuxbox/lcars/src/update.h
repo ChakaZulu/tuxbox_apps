@@ -17,7 +17,7 @@
 #include <zlib.h>
 #include <string>
 #include <sstream>
-#include <linux/mtd/mtd.h>
+#include <mtd/mtd-user.h>
 #include <curl/curl.h>
 #include "rc.h"
 #include "osd.h"
