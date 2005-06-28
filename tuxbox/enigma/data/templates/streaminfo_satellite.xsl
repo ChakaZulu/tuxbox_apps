@@ -23,6 +23,7 @@
 		<tr><td>Satellite:</td><td><xsl:value-of select="streaminfo/satellite"/></td></tr>
 		<tr><td>Frequency:</td><td><xsl:value-of select="streaminfo/frequency"/> MHz</td></tr>
 		<tr><td>Symbol Rate:</td><td><xsl:value-of select="streaminfo/symbol_rate"/> KSymbols/s</td></tr>
+		<tr><td>Polarisation:</td><td><xsl:value-of select="streaminfo/polarisation"/></td></tr>
 		<tr><td>Inversion:</td><td><xsl:value-of select="streaminfo/inversion"/></td></tr>
 		<tr><td>FEC:</td><td><xsl:value-of select="streaminfo/fec"/></td></tr>
 		<tr><td>SNR:</td><td><xsl:value-of select="streaminfo/snr"/></td></tr>

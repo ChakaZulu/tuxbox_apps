@@ -21,7 +21,8 @@
 <used_crypt_systems>#USEDCRYPTSYSTEMS#</used_crypt_systems>
 <satellite>#SATELLITE#</satellite>
 <frequency>#FREQUENCY#</frequency>
-<symbol_rate>#SYMBOLRATE#</symbol_rate>
+<symbol_rate>#POLARISATION#</polarisation>
+<polarisation>#INVERSION#</inversion>
 <inversion>#INVERSION#</inversion>
 <fec>#FEC#</fec>
 <snr>#SNR#</snr>
