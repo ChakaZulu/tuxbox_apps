@@ -26,7 +26,6 @@
 				{
 					updateVideoBar2(videoPosition);
 					document.location = "/setVideo?position=" + videoPosition;
-					data.location.reload();
 				}
 			</script>
 			<td colspan="2">
