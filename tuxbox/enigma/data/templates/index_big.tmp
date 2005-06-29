@@ -86,6 +86,13 @@
 			}
 			function updateVideoBar(videoPosition, videoTime, diskGB, diskH)
 			{
+				updateVideoBar2(videoPosition);
+				getElem("id", "videoTime", null).firstChild.nodeValue = videoTime;
+				getElem("id", "diskgb", null).firstChild.nodeValue = diskGB;
+				getElem("id", "diskh", null).firstChild.nodeValue = diskH;
+			}
+			function updateVideoBar2(videoPosition)
+			{
 				for (var i = 1; i <= 20; i += 1)
 				{
 					if (i <= videoPosition)
@@ -93,9 +100,6 @@
 					else
 						getElem("id", "vid" + i, null).src = "led_off.gif";
 				}
-				getElem("id", "videoTime", null).firstChild.nodeValue = videoTime;
-				getElem("id", "diskgb", null).firstChild.nodeValue = diskGB;
-				getElem("id", "diskh", null).firstChild.nodeValue = diskH;
 			}
 			function vlc2()
 			{

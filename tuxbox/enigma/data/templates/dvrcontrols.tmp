@@ -25,6 +25,7 @@
 				}
 				function setVideo(videoPosition)
 				{
+					updateVideoBar2(videoPosition);
 					document.location = "/setVideo?position=" + videoPosition;
 					data.location.reload();
 				}
