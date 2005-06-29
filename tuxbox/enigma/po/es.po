@@ -313,7 +313,7 @@ msgstr "Si está soportado por el motor, utilizelo"
 
 #: default.esml:747
 msgid "Starttime"
-msgstr "Hora início"
+msgstr "Inicio"
 
 #: default.esml:626
 msgid "KHz"
@@ -575,7 +575,7 @@ msgstr "Processador:"
 
 #: default.esml:748
 msgid "Endtime"
-msgstr "Hora parada"
+msgstr "Parada"
 
 #: default.esml:874
 msgid "&#52;"
