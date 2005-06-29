@@ -1,7 +1,6 @@
 		<tr>
 			<!-- dvr controls start -->
 			<script>
-				dvr = 1;
 				function video(key)
 				{
 					if (body.zapMode)
@@ -46,7 +45,7 @@
 							<table id="videocontrol" border="0" cellspacing="0" cellpadding="0">
 							<tr>
 								<td id="videoTime" align="center" valign="center" width="120">&nbsp;</td>
-								<td><img src="dvr.png" border="0" usemap="#ctrl"></td>
+								<td><img src="dvr.png" height="24" border="0" usemap="#ctrl"></td>
 								<td width="10">&nbsp;</td>
 								<td>
 									<table border="0" cellspacing="0" cellpadding="0">
