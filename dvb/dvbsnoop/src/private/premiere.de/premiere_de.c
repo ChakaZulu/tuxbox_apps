@@ -1,5 +1,5 @@
 /*
-$Id: premiere_de.c,v 1.1 2004/11/03 21:01:02 rasc Exp $
+$Id: premiere_de.c,v 1.2 2005/06/29 17:30:38 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: premiere_de.c,v 1.1 2004/11/03 21:01:02 rasc Exp $
 
 
 $Log: premiere_de.c,v $
+Revision 1.2  2005/06/29 17:30:38  rasc
+some legal notes...
+
 Revision 1.1  2004/11/03 21:01:02  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"
@@ -39,6 +42,14 @@ Revision 1.1  2004/11/03 21:01:02  rasc
 
 
 
+/*
+ 
+ Please check for legal issues, when using provider specific
+ data structures in your own software!
+ Using  these data structures may require a certification or
+ licensing process by the provider.
+
+ */
 
 static PRIV_DESCR_ID_FUNC pdescriptors[] = {
 	{ 0xF0, DVB_SI,   descriptor_PRIVATE_PremiereDE_ContentOrder },

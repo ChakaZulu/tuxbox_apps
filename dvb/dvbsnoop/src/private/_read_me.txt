@@ -12,5 +12,7 @@ author know.
 
 Please check for legal issues, when using provider specific
 data structures in your own software!
+Using  these data structures may require a certification or
+licensing process by the provider.
 
 
