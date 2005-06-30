@@ -1,9 +1,10 @@
 /*      
         nhttpd  -  DBoxII-Project
 
+        Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
         Copyright (C) 2005 SnowHead
 
-        $Id: lcdapi.h,v 1.2 2005/06/30 17:09:39 barf Exp $
+        $Id: lcdapi.h,v 1.3 2005/06/30 17:31:24 mogway Exp $
 
         License: GPL
 
