@@ -72,7 +72,7 @@
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
 
-// Only Squashfs v2.0 is supported in U-Boot Bootloader
+// Only Squashfs v2.1 is supported in U-Boot Bootloader
 #ifdef SQUASHFS
 #define LIST_OF_UPDATES_LOCAL_FILENAME "squashfs.list"
 #define UPDATE_LOCAL_FILENAME          "update.squashfs"
