@@ -789,7 +789,7 @@ void CChannelList::setSelected( int nChannelNr)
 
 void CChannelList::paintDetails(int index)
 {
-	if (chanlist[index]->currentEvent.description.empty())
+  	if (index >= chanlist.size() || chanlist[index]->currentEvent.description.empty())
 	{
 		frameBuffer->paintBackgroundBoxRel(x, y+ height, width, info_height);
 	}
@@ -878,7 +878,7 @@ void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
 	frameBuffer->paintBackgroundBoxRel(xpos,y, ConnectLineBox_Width, height+info_height);
 
 	// paint Line if detail info (and not valid list pos)
-	if (pos >= 0 &&  chanlist[ch_index]->currentEvent.description != "")
+	if (pos >= 0 &&  ch_index < chanlist.size() && chanlist[ch_index]->currentEvent.description != "")
 	{
 		// 1. col thick line
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
