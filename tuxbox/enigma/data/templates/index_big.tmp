@@ -45,13 +45,16 @@
 				else
 					getElem("id", "imgFormat", null).src = "format_off.png";
 			}
-			function headerUpdateStatusBar(vpid, apid, ip, lock, upTime)
+			function headerUpdateStatusBar(vpid, apid, ip, lock, upTime, agc, snr, ber)
 			{
 				getElem("id", "vpid", null).firstChild.nodeValue = vpid;
 				getElem("id", "apid", null).firstChild.nodeValue = apid;
 				getElem("id", "ip", null).firstChild.nodeValue = ip;
 				getElem("id", "lock", null).firstChild.nodeValue = lock;
 				getElem("id", "uptime", null).firstChild.nodeValue = upTime;
+				getElem("id", "agc", null).firstChild.nodeValue = "AGC: " + agc + "%";
+				getElem("id", "snr", null).firstChild.nodeValue = "SNR: " + snr + "%";
+				getElem("id", "ber", null).firstChild.nodeValue = "BER: " + ber;
 			}
 			function headerUpdateEPGData(serviceName, nowT, nowD, nowSt, nextT, nextD, nextSt)
 			{
@@ -190,6 +193,12 @@
 								</table>
 								<table id="statcell" border="0" cellpadding="0" cellspacing="0" height="20px">
 								<tr>
+									<td id="agc">&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td id="snr">&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td id="ber">&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td id="lock">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td id="uptime">&nbsp;</td>

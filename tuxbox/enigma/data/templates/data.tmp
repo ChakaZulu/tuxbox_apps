@@ -4,7 +4,7 @@
 function update()
 {
 	parent.headerUpdateEPGData(serviceName, nowT, nowD, nowSt, nextT, nextD, nextSt);
-	parent.headerUpdateStatusBar(vpid, apid, ip, lock, upTime);
+	parent.headerUpdateStatusBar(vpid, apid, ip, lock, upTime, agc, snr, ber);
 	parent.headerUpdateVolumeBar(volume, mute);
 	parent.headerUpdateChannelStatusBar(dolby, crypt, format);
 	parent.headerUpdateRecording(recording);
@@ -49,6 +49,9 @@ function update()
 	var serviceReference = "#SERVICEREFERENCE#";
 	var videoTime = "#VIDEOTIME#";
 	var videoPosition = #VIDEOPOSITION#;
+	var agc = #AGC#;
+	var snr = #SNR#;
+	var ber = #BER#;
 </script>
 </body>
 </html>

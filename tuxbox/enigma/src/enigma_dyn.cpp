@@ -63,9 +63,9 @@
 
 using namespace std;
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.1.3-Expert"
+#define WEBIFVERSION "4.1.4.Expert"
 #else
-#define WEBIFVERSION "4.1.3"
+#define WEBIFVERSION "4.1.4"
 #endif
 
 #define KEYBOARDTV 0
@@ -4737,6 +4737,12 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 
 	result.strReplace("#VIDEOPOSITION#", eString().sprintf("%d", videopos));
 	result.strReplace("#VIDEOTIME#", eString().sprintf("%d:%02d", min, sec2));
+	
+	// stream info
+	eFrontend *fe = eFrontend::getInstance();
+	result.strReplace("#SNR#", eString().sprintf("%d", fe->SNR() * 100 / 65535));
+	result.strReplace("#AGC#", eString().sprintf("%d", fe->SignalStrength() * 100 / 65535));
+	result.strReplace("#BER#", eString().sprintf("%u", fe->BER()));
 
 	return result;
 }
