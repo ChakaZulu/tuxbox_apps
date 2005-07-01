@@ -18,7 +18,7 @@ enigma_SOURCES = \
 	audio_dynamic.cpp setup_keyboard.cpp wizard_fpupdate.cpp enigma_mount.cpp \
 	enigma_dyn_mount.cpp enigma_dyn_utils.cpp enigma_dyn_wap.cpp enigma_dyn_conf.cpp \
 	enigma_dyn_flash.cpp enigma_dyn_xml.cpp enigma_streamer.cpp \
-	enigma_processutils.cpp enigma_picmanager.cpp
+	enigma_processutils.cpp enigma_picmanager.cpp enigma_dyn_misc.cpp
 
 enigma_LDADD_WHOLE = \
 	$(top_builddir)/lib/driver/libenigma_driver.a \
