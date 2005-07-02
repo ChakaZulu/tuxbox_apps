@@ -298,9 +298,9 @@ static eString getServiceEPG(eString request, eString dirpath, eString opts, eHT
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
-	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/serviceepg.xsl\"?>"
-		<< "<service_epg>";
+	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/serviceepg.xsl\"?>\n"
+		<< "<service_epg>\n";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
@@ -310,10 +310,10 @@ static eString getServiceEPG(eString request, eString dirpath, eString opts, eHT
 		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 		if (current)
 		{
-			result	<< "<service>"
-				<< "<reference>" << ref2string(ref) << "</reference>"
-				<< "<name>" << filter_string(current->service_name) << "</name>"
-				<< "</service>";
+			result	<< "<service>\n"
+				<< "<reference>" << ref2string(ref) << "</reference>\n"
+				<< "<name>" << filter_string(current->service_name) << "</name>\n"
+				<< "</service>\n";
 			eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
 			eEPGCache::getInstance()->Lock();
 			const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
@@ -361,29 +361,29 @@ static eString getServiceEPG(eString request, eString dirpath, eString opts, eHT
 
 					tm* t = localtime(&event.start_time);
 
-					result << "<event id=\"" << i << "\">";
+					result << "<event id=\"" << i << "\">\n";
 					eString tmp = filter_string(description);
 					tmp.strReplace("&", "&amp;");
 					result  << "<date>"
 						<< std::setw(2) << t->tm_mday << '.'
 						<< std::setw(2) << t->tm_mon+1 << '.' 
 						<< std::setw(2) << t->tm_year + 1900
-						<< "</date>"
+						<< "</date>\n"
 						<< "<time>"
 						<< std::setw(2) << t->tm_hour << ':'
 						<< std::setw(2) << t->tm_min 
-						<< "</time>"
-						<< "<duration>" << event.duration<< "</duration>"
-						<< "<description>" << tmp << "</description>";
+						<< "</time>\n"
+						<< "<duration>" << event.duration<< "</duration>\n"
+						<< "<description>" << tmp << "</description>\n";
 					
 					eString ext_tmp = filter_string(ext_description);
 					ext_tmp.strReplace("&", "&amp;");	
 
-					result  << "<genre>" << genre << "</genre>"
-						<< "<genrecategory>" << "genre" << eString().sprintf("%02d", genreCategory) << "</genrecategory>"
-						<< "<start>" << event.start_time << "</start>"
-						<< "<details>" << ext_tmp << "</details>"
-						<< "</event>";
+					result  << "<genre>" << genre << "</genre>\n"
+						<< "<genrecategory>" << "genre" << eString().sprintf("%02d", genreCategory) << "</genrecategory>\n"
+						<< "<start>" << event.start_time << "</start>\n"
+						<< "<details>" << ext_tmp << "</details>\n"
+						<< "</event>\n";
 					i++;
 				}
 			}
@@ -538,20 +538,6 @@ static eString getStreamInfoXSL(eString request, eString dirpath, eString opt, e
 	
 	return result;
 }
-
-#if 0
-static eString getServiceEPGXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
-	return readFile(TEMPLATE_DIR + "serviceepg.xsl");
-}
-
-static eString getTimersXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
-	return readFile(TEMPLATE_DIR + "timers.xsl");
-}
-#endif
 
 static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -959,7 +945,5 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/streaminfo", getStreamInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/timers", getTimers, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getStreamInfoXSL, lockWeb);
-//	dyn_resolver->addDyn("GET", "/xml/serviceepg.xsl", getServiceEPGXSL, lockWeb);
-//	dyn_resolver->addDyn("GET", "/xml/timers.xsl", getTimersXSL, lockWeb);
 }
 

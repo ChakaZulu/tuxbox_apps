@@ -702,6 +702,28 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 	return plugins.execPluginByName((path + opts["name"]).c_str());
 }
 
+static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString result;
+	eString volume = opt["volume"];
+	if (volume)
+	{
+		int vol = atoi(volume.c_str());
+		eAVSwitch::getInstance()->changeVolume(1, vol);
+		result += "Volume set.<br>\n";
+	}
+	eString mute = opt["mute"];
+	if (mute)
+	{
+		eAVSwitch::getInstance()->toggleMute();
+		result += "mute set<br>\n";
+	}
+	result += eString().sprintf("volume: %d<br>\nmute: %d<br>\n", eAVSwitch::getInstance()->getVolume(), eAVSwitch::getInstance()->getMute());
+	return result;
+}
+
 void ezapMiscInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory, lockWeb);
@@ -730,6 +752,7 @@ void ezapMiscInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadTimerList", load_timerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", startPlugin, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio, lockWeb);
 // functions needed by dreamtv
 	dyn_resolver->addDyn("GET", "/cgi-bin/audioChannels", audioChannels, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/videoChannels", videoChannels, lockWeb);

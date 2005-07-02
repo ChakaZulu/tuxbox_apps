@@ -168,36 +168,6 @@ bool playService(const eServiceReference &ref)
 	return true;
 }
 
-#ifndef DISABLE_FILE
-static eString record(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString command = opt["command"];
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR)
-	{
-		if (command == "start")
-		{
-			eZapMain::getInstance()->recordDVR(1,0);
-			return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording started...</body></html>";
-		}
-		else
-		{
-			eZapMain::getInstance()->recordDVR(0,0);
-			return "<html>" CHARSETMETA "<head><title>Record</title></head><body>Recording stopped.</body></html>";
-		}
-	}
-	else
-	if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab)
-	{
-		if (command == "start")
-			eZapMain::getInstance()->startNGrabRecord();
-		else
-			eZapMain::getInstance()->stopNGrabRecord();
-	}
-}
-#endif
-
 void tuneTransponder(eString transponder)
 {
 	unsigned int frequency, symbol_rate;
@@ -308,8 +278,15 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	if (command == "stop")
 	{
 		if (eZapMain::getInstance()->isRecording())
-			eZapMain::getInstance()->recordDVR(0,0);
-		eZapMain::getInstance()->stop();
+		{
+			if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR)
+				eZapMain::getInstance()->recordDVR(0,0);
+			else
+			if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab)
+				eZapMain::getInstance()->stopNGrabRecord();
+		}
+		else
+			eZapMain::getInstance()->stop();
 	}
 	else
 	if (command == "pause")
@@ -338,34 +315,16 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	else
 	if (command == "record")
 	{
-		eZapMain::getInstance()->recordDVR(1,0);
+		if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR)
+			eZapMain::getInstance()->recordDVR(1,0);
+		else
+		if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab)
+			eZapMain::getInstance()->startNGrabRecord();
 	}
 
 	return closeWindow(content, "", 500);
 }
 #endif
-
-static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString result;
-	eString volume = opt["volume"];
-	if (volume)
-	{
-		int vol = atoi(volume.c_str());
-		eAVSwitch::getInstance()->changeVolume(1, vol);
-		result += "Volume set.<br>\n";
-	}
-	eString mute = opt["mute"];
-	if (mute)
-	{
-		eAVSwitch::getInstance()->toggleMute();
-		result += "mute set<br>\n";
-	}
-	result += eString().sprintf("volume: %d<br>\nmute: %d<br>\n", eAVSwitch::getInstance()->getVolume(), eAVSwitch::getInstance()->getMute());
-	return result;
-}
 
 static eString setAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -585,7 +544,7 @@ static eString getChannelNavi(void)
 			if (eZapMain::getInstance()->isRecording())
 				result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
 			else
-				result += button(100, "Record", RED, "javascript:DVRrecord('start')");
+				result += button(100, "Record", RED, "javascript:DVRrecord('record')");
 #endif
 		}
 	}
@@ -657,16 +616,16 @@ static eString getLeftNavi(eString mode, bool javascript)
 	{
 		if (eSystemInfo::getInstance()->canShutdown())
 		{
-			result += button(110, "Shutdown", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=shutdown\')");
+			result += button(110, "Shutdown", LEFTNAVICOLOR, "javascript:admin(\'shutdown\')");
 			result += "<br>";
 		}
-		result += button(110, "Restart", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=restart\')");
+		result += button(110, "Restart", LEFTNAVICOLOR, "javascript:admin(\'restart\')");
 		result += "<br>";
-		result += button(110, "Reboot", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=reboot\')");
+		result += button(110, "Reboot", LEFTNAVICOLOR, "javascript:admin(\'reboot\')");
 		result += "<br>";
-		result += button(110, "Standby", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=standby\')");
+		result += button(110, "Standby", LEFTNAVICOLOR, "javascript:admin(\'standby\')");
 		result += "<br>";
-		result += button(110, "Wakeup", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=wakeup\')");
+		result += button(110, "Wakeup", LEFTNAVICOLOR, "javascript:admin(\'wakeup\')");
 		result += "<br>";
 		result += button(110, "OSDshot", LEFTNAVICOLOR, pre + "?mode=controlFBShot" + post);
 #ifndef DISABLE_LCD
@@ -4212,7 +4171,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/pda", pda_root, lockWeb);
 
 #ifndef DISABLE_FILE
-	dyn_resolver->addDyn("GET", "/cgi-bin/record", record, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/videocontrol", videocontrol, lockWeb);
 #endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume, lockWeb);
@@ -4229,7 +4187,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectSubChannel", selectSubChannel, lockWeb);
