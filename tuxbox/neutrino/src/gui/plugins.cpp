@@ -65,7 +65,6 @@ extern CPlugins       * g_PluginList;    /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 #define PLUGINDIR_VAR "/var/tuxbox/plugins"
-#define PLUGINDIR_MNT "/mnt/plugins"
 
 bool CPlugins::plugin_exists(const std::string & filename)
 {
@@ -147,7 +146,6 @@ void CPlugins::loadPlugins()
 	number_of_plugins = 0;
 	plugin_list.clear();
 
-	scanDir(PLUGINDIR_MNT);
 	scanDir(PLUGINDIR_VAR);
 	scanDir(PLUGINDIR);
 	sort(plugin_list.begin(), plugin_list.end());

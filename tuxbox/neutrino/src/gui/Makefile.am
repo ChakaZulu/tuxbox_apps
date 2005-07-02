@@ -9,7 +9,7 @@ INCLUDES = \
 	@NET_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
 	@MPEGTOOLS_CFLAGS@ \
-	-I$(top_srcdir)/lib 
+	-I$(top_srcdir)/lib
 
 noinst_LIBRARIES = libtimerlist.a libneutrino_gui.a libneutrino_gui2.a
 
@@ -24,7 +24,7 @@ libneutrino_gui_a_SOURCES = \
 #	ch_mosaic.cpp
 
 libneutrino_gui2_a_SOURCES = \
-	alphasetup.cpp motorcontrol.cpp 
+	alphasetup.cpp motorcontrol.cpp
 
 libtimerlist_a_SOURCES = \
 	timerlist.cpp

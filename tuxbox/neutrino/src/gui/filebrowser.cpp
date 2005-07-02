@@ -583,15 +583,8 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 	n = my_scandir(dirname.c_str(), &namelist, 0, my_alphasort);
 	if (n < 0)
 	{
-		perror(("Filebrowser scandir [1st try]: "+dirname).c_str());
-		sleep(1);
-
-		n = my_scandir(dirname.c_str(), &namelist, 0, my_alphasort);
-		if (n < 0)
-		{
-			perror(("Filebrowser scandir [2nd try]: "+dirname).c_str());
-			return false;
-		}
+		perror(("Filebrowser scandir: "+dirname).c_str());
+		return false;
 	}
 	for(int i = 0; i < n;i++)
 	{
