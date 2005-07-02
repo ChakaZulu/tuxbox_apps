@@ -51,13 +51,13 @@
 
 #include <zapit/client/zapittools.h>
 
-/* for alexW images with old drivers: 
+/* for alexW images with old drivers:
  * #define USE_VBI_INTERFACE 1
  */
 
 #ifdef USE_VBI_INTERFACE
  #define AVIA_VBI_START_VTXT	1
- #define AVIA_VBI_STOP_VTXT	2 
+ #define AVIA_VBI_STOP_VTXT	2
 #endif
 
 #include <daemonc/remotecontrol.h>
@@ -126,7 +126,7 @@ void CPlugins::scanDir(const char *dir)
 			}
 			// We do not check if new_plugin.pluginfile exists since .cfg in
 			// PLUGINDIR_VAR can overwrite settings in read only dir
-			// PLUGINDIR. This needs PLUGINDIR_VAR to be scanned at 
+			// PLUGINDIR. This needs PLUGINDIR_VAR to be scanned at
 			// first -> .cfg in PLUGINDIR will be skipped since plugin
 			// already exists in the list.
 			// This behavior is used to make sure plugins can be disabled
@@ -278,7 +278,7 @@ void CPlugins::startPlugin(const char * const name)
 	int pluginnr = find_plugin(name);
 	if (pluginnr > -1)
 		startPlugin(pluginnr,0);
-	else 
+	else
 		printf("[CPlugins] could not find %s\n", name);
 
 }
@@ -300,12 +300,12 @@ void CPlugins::startScriptPlugin(int number)
 		char output[1024];
 		while (fgets(output,1024,f))
 		{
-			scriptOutput += output; 
+			scriptOutput += output;
 		}
 		pclose(f);
-	} 
-	else 
-	{	
+	}
+	else
+	{
 		printf("[CPlugins] can't execute %s\n",script);
 	}
 }
@@ -458,11 +458,11 @@ void CPlugins::startPlugin(int number,int param)
 		g_RCInput->clearRCMsg();
 
 		if (plugin_list[number].lcd)
-		{       
+		{
 			if(lcd_fd != -1)
 				close(lcd_fd);
 			CLCD::getInstance()->resume();
-		}       
+		}
 
 		if (plugin_list[number].fb)
 		{
