@@ -146,7 +146,7 @@ bool CFlashUpdate::selectHttpImage(void)
 	httpTool.setStatusViewer(this);
 	showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_GETINFOFILE)); // UTF-8
 
-	CMenuWidget SelectionWidget(LOCALE_FLASHUPDATE_SELECTIMAGE, "softupdate.raw");
+	CMenuWidget SelectionWidget(LOCALE_FLASHUPDATE_SELECTIMAGE, "softupdate.raw", 400);
 	SelectionWidget.addItem(GenericMenuSeparator);
 	SelectionWidget.addItem(GenericMenuBack);
 
@@ -172,7 +172,7 @@ bool CFlashUpdate::selectHttpImage(void)
 		updates_lists.push_back(url.substr(startpos, endpos - startpos));
 
 		SelectionWidget.addItem(new CNonLocalizedMenuSeparator(updates_lists.rbegin()->c_str(), LOCALE_FLASHUPDATE_SELECTIMAGE));
-		
+
 		if (httpTool.downloadFile(url, gTmpPath LIST_OF_UPDATES_LOCAL_FILENAME, 20))
 		{
 			std::ifstream in(gTmpPath LIST_OF_UPDATES_LOCAL_FILENAME);
@@ -190,7 +190,7 @@ bool CFlashUpdate::selectHttpImage(void)
 				description += versionInfo.getDate();
 				description += ' ';
 				description += versionInfo.getTime();
-				
+
 				descriptions.push_back(description); /* workaround since CMenuForwarder does not store the Option String itself */
 
 				SelectionWidget.addItem(new CMenuForwarderNonLocalized(names[i].c_str(), true, descriptions[i].c_str(), new CUpdateMenuTarget(i, &selected)));
@@ -206,7 +206,7 @@ bool CFlashUpdate::selectHttpImage(void)
 		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_GETINFOFILEERROR)); // UTF-8
 		return false;
 	}
-		
+
 	SelectionWidget.exec(NULL, "");
 
 	if (selected == -1)
@@ -249,7 +249,7 @@ bool CFlashUpdate::checkVersion4Update()
 		showLocalStatus(100);
 		showGlobalStatus(20);
 		hide();
-		
+
 		versionInfo = new CFlashVersionInfo(newVersion);
 
 		msg_body = LOCALE_FLASHUPDATE_MSGBOX;
@@ -299,12 +299,12 @@ bool CFlashUpdate::checkVersion4Update()
 			}
 		}
 		UpdatesBrowser.hide();
-		
+
 		if (CFileSelected == NULL)
 		{
 			if (!(UpdatesBrowser.exec(gTmpPath)))
 				return false;
-		
+
 			CFileSelected = UpdatesBrowser.getSelectedFile();
 
 			if (CFileSelected == NULL)
@@ -326,7 +326,7 @@ bool CFlashUpdate::checkVersion4Update()
 			return false;
 		}
 		hide();
-		
+
 #ifdef SQUASHFS
 #warning no squash filesystem version check in non-internet update mode
 		strcpy(msg, g_Locale->getText(LOCALE_FLASHUPDATE_SQUASHFS_NOVERSION));
