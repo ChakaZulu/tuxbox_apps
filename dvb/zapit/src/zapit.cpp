@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.372 2005/06/19 14:44:58 barf Exp $
+ * $Id: zapit.cpp,v 1.373 2005/07/02 13:44:33 barf Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -21,6 +21,17 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+
+/*
+ Options:
+ -d	Debugmode: Don't fork, additionally generate debugging messages
+
+ -q     Be quiet.
+
+ Signal handling:
+  SIGTERM, SIGHUP: Terminates zapit (gracefully)
+  SIGUSR1:         Toggles debug mode
+*/
 
 /* system headers */
 #include <csignal>
@@ -1790,7 +1801,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.372 2005/06/19 14:44:58 barf Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.373 2005/07/02 13:44:33 barf Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1831,6 +1842,7 @@ int main(int argc, char **argv)
 				"diseqcType" ", "
 				"motorRotationSpeed" ", "
 				"traceNukes" ", "
+				"ChannelNamesFromBouquet" ", "
 				"lnb0_OffsetLow" ", ..., " "lnb63_OffsetLow" ", "
 				"lnb0_OffsetHigh" ", ..., " "lnb63_OffsetHigh" "."
 				"\n", argv[0]);

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.104 2005/02/01 18:16:06 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.105 2005/07/02 13:44:33 barf Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -349,6 +349,9 @@ void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode, 
 
 void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 {
+	extern CConfigFile config;
+	bool channel_names_from_bouquet = config.getBool("ChannelNamesFromBouquet", false);
+
 	xmlNodePtr search=root->xmlChildrenNode;
 	xmlNodePtr channel_node;
 	
@@ -380,8 +383,11 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 				CZapitChannel* chan = findChannelByChannelID(CREATE_CHANNEL_ID);
 
-				if (chan != NULL)
+				if (chan != NULL) {
+					if (channel_names_from_bouquet)
+						chan->setName(xmlGetAttribute(channel_node, "name"));
 					newBouquet->addService(chan);
+				}
 
 				channel_node = channel_node->xmlNextNode;
 			}
