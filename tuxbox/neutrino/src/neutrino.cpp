@@ -1503,9 +1503,9 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
 
-	CMenuOptionChooser* ojScantype = new CMenuOptionChooser(LOCALE_ZAPIT_SCANTYPE, (int *)&scanSettings.scanType, SCANTS_ZAPIT_SCANTYPE, SCANTS_ZAPIT_SCANTYPE_COUNT, true);
+	CMenuOptionChooser* ojScantype = new CMenuOptionChooser(LOCALE_ZAPIT_SCANTYPE, (int *)&scanSettings.scanType, SCANTS_ZAPIT_SCANTYPE, SCANTS_ZAPIT_SCANTYPE_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN);
 
-	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, SCANTS_BOUQUET_OPTIONS, SCANTS_BOUQUET_OPTION_COUNT, true);
+	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, SCANTS_BOUQUET_OPTIONS, SCANTS_BOUQUET_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
 
 	settings.addItem(GenericMenuSeparator);
 	settings.addItem(GenericMenuBack);
@@ -1583,8 +1583,8 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser(LOCALE_SATSETUP_DISEQC, (int *)&scanSettings.diseqcMode, SATSETUP_DISEQC_OPTIONS, SATSETUP_DISEQC_OPTION_COUNT, true, new CSatDiseqcNotifier(ojSat, ojExtSatSettings, ojExtMotorSettings, ojDiseqcRepeats));
 
 		settings.addItem( ojScantype );
-		settings.addItem( ojDiseqc );
 		settings.addItem( ojBouquets );
+		settings.addItem( ojDiseqc );
 		settings.addItem( ojSat );
 		settings.addItem( ojDiseqcRepeats );
 
@@ -1631,7 +1631,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	settings.addItem(pol);
 	settings.addItem(GenericMenuSeparatorLine);
 
-	settings.addItem(new CMenuForwarder(LOCALE_SCANTS_STARTNOW, true, NULL, new CScanTs()));
+	settings.addItem(new CMenuForwarder(LOCALE_SCANTS_STARTNOW, true, NULL, new CScanTs(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 }
 
 #define FLASHUPDATE_UPDATEMODE_OPTION_COUNT 2
