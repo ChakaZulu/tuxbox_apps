@@ -2759,6 +2759,10 @@ void eZapMain::toggleTimerMode(int newstate)
 void eZapMain::standbyPress(int n)
 {
 	standby_nomenu = n;
+	int fastshutdown = 0;
+	eConfig::getInstance()->getKey("/extras/fastshutdown", fastshutdown);
+	if (fastshutdown == 1)
+		eZap::getInstance()->quit();
 	gettimeofday(&standbyTime,0);
 	standbyTime+=1000;
 }
