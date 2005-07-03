@@ -45,4 +45,5 @@ dvbsnoop_LDADD = \
 	$(top_builddir)/src/strings/libstrings.a \
 	$(top_builddir)/src/misc/libmisc.a 
 
+man_MANS = dvbsnoop.1
 
