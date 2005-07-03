@@ -90,7 +90,7 @@ eString zap[5][5] =
 };
 
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
-extern bool canPlayService( const eServiceReference & ref ); // implemented in timer.cpp
+extern bool canPlayService(const eServiceReference & ref); // implemented in timer.cpp
 
 eString firmwareLevel(eString verid)
 {
@@ -632,7 +632,7 @@ static eString getLeftNavi(eString mode, bool javascript)
 		result += "<br>";
 		result += button(110, "LCDshot", LEFTNAVICOLOR, pre + "?mode=controlLCDShot" + post);
 #endif
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 		{
 			result += "<br>";
 			result += button(110, "Screenshot", LEFTNAVICOLOR, pre + "?mode=controlScreenShot" + post);
@@ -649,7 +649,7 @@ static eString getLeftNavi(eString mode, bool javascript)
 		result += button(110, "Logging", LEFTNAVICOLOR, "javascript:logging()");
 		result += "<br>";
 		result += button(110, "Satfinder", LEFTNAVICOLOR, pre + "?mode=controlSatFinder" + post);
-		switch ( eSystemInfo::getInstance()->getHwType() )
+		switch (eSystemInfo::getInstance()->getHwType())
 		{
 			case eSystemInfo::dbox2Nokia:
 			case eSystemInfo::dbox2Sagem:
@@ -657,7 +657,7 @@ static eString getLeftNavi(eString mode, bool javascript)
 				result += "<br>";
 				result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dbox2')");
 			default:
-				if ( eSystemInfo::getInstance()->hasKeyboard() )
+				if (eSystemInfo::getInstance()->hasKeyboard())
 				    result += "<br>"+button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dreambox')");
 				break;
 		}
@@ -1443,7 +1443,6 @@ static eString getUSBInfo(void)
 			"<td>USB Stick:</td>"
 			"<td>" << usbStick << "</td>"
 			"</tr>";
-		unlink("/tmp/usbstick.tmp");
 	}
 	return result.str();
 }
@@ -1472,7 +1471,7 @@ static eString aboutDreambox(void)
 	result	<< "<tr><td>Linux Kernel:</td><td>" << readFile("/proc/version") << "</td></tr>"
 		<< "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>";
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
-			eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
+			eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 			result << "<tr><td>FP Firmware:</td><td>" << eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion()) << "</td></tr>";
 		result << "<tr><td>Web Interface:</td><td>" << WEBIFVERSION << "</td></tr>"
 		<< "</table>";
@@ -1482,82 +1481,81 @@ static eString aboutDreambox(void)
 
 #ifndef	DISABLE_FILE
 // Extract the description from the filename.
-eString getDesc( const eString& str )
+eString getDesc(const eString& str)
 {
-	unsigned int leftbound, rightbound ;
-	eString tbtrimmed ;
+	unsigned int leftbound, rightbound;
+	eString tbtrimmed;
 	
-	leftbound = str.find( '-' ) ;
-	rightbound = str.find( '-', leftbound + 1 ) ;
-	if ( ( rightbound == eString::npos ) || ( rightbound - leftbound < 1 ) )
-	{
-		tbtrimmed = str ;
-	} else {
-		tbtrimmed = str.substr( leftbound + 1, rightbound - leftbound - 1 ) ;
-	}
+	leftbound = str.find('-');
+	rightbound = str.find('-', leftbound + 1);
+	if ((rightbound == eString::npos) || (rightbound - leftbound < 1))
+		tbtrimmed = str;
+	else
+		tbtrimmed = str.substr(leftbound + 1, rightbound - leftbound - 1);
 	
-	leftbound = tbtrimmed.find_first_not_of( ' ' ) ;
-	rightbound = tbtrimmed.find_last_not_of( ' ' ) ;
+	leftbound = tbtrimmed.find_first_not_of(' ');
+	rightbound = tbtrimmed.find_last_not_of(' ');
 
 	// If the extracted description is empty use the value of str as the description.
-	if ( rightbound - leftbound < 1 ) {
-		tbtrimmed = str ;
-		leftbound = tbtrimmed.find_first_not_of( ' ' ) ;
-		rightbound = tbtrimmed.find_last_not_of( ' ' ) ;
+	if (rightbound - leftbound < 1) 
+	{
+		tbtrimmed = str;
+		leftbound = tbtrimmed.find_first_not_of(' ');
+		rightbound = tbtrimmed.find_last_not_of(' ');
 	}
-	return tbtrimmed.substr( leftbound, rightbound - leftbound + 1 ) ;
+	return tbtrimmed.substr(leftbound, rightbound - leftbound + 1);
 }
 
 // Recover index with recordings on harddisk in /hdd/movie.
 bool rec_movies()
 {
-	eString filen ;
-	int i ;
+	eString filen;
+	int i;
 	bool result = false;
 
 	eZapMain::getInstance()->loadRecordings();
 	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
-	std::list<ePlaylistEntry>& rec_list = recordings->getList() ;
+	std::list<ePlaylistEntry>& rec_list = recordings->getList();
 	struct dirent **namelist;
 	int n = scandir("/hdd/movie", &namelist, 0, alphasort);
 
-	if ( n > 0 )
+	if (n > 0)
 	{
 		// There will be 2 passes through recordings list:
 		// 1) Delete entries from list that are not on disk.
 		// 2) Add entries to list that do not exist yet.
 	
 		// Pass 1
-		std::list<ePlaylistEntry>::iterator it(rec_list.begin()) ;
-		std::list<ePlaylistEntry>::iterator it_next ;
-		while ( it != rec_list.end() ) 
+		std::list<ePlaylistEntry>::iterator it(rec_list.begin());
+		std::list<ePlaylistEntry>::iterator it_next;
+		while (it != rec_list.end()) 
 		{
-			bool valid_file = false ;
+			bool valid_file = false;
 			// For every file in /hdd/movie
 			for (i = 0; i < n; i++)
 			{
 				filen = namelist[i]->d_name;
 				// For every valid file
-				if (( filen.length() >= 3 ) &&
-				( filen.substr(filen.length()-3, 3).compare(".ts") == 0 ) &&
+				if ((filen.length() >= 3) &&
+				(filen.substr(filen.length()-3, 3).compare(".ts") == 0) &&
 					(it->service.path.length() >= 11) &&
-					!it->service.path.substr(11,it->service.path.length()-11).compare( filen ) )
+					!it->service.path.substr(11,it->service.path.length()-11).compare(filen))
 				{
-					valid_file = true ;
-					break ;
+					valid_file = true;
+					break;
 				}
 			}
 
-			(it_next = it)++ ;
-			if ( !valid_file )
-				rec_list.erase(it) ;
+			(it_next = it)++;
+			if (!valid_file)
+				rec_list.erase(it);
 			else
 			{
 				// Trim descr
-				if ( it->service.descr.find_last_not_of( ' ' ) != eString::npos ) 
-					it->service.descr = it->service.descr.substr( 0, it->service.descr.find_last_not_of( ' ' ) + 1 ) ;
+				if (it->service.descr.find_last_not_of(' ') != eString::npos) 
+					it->service.descr = it->service.descr.substr(0, it->service.descr.find_last_not_of(' ') + 1);
 			}
-			it = it_next ;
+			it = it_next;
 		}
 		
 		// Pass 2
@@ -1565,39 +1563,39 @@ bool rec_movies()
 		{
 			filen = namelist[i]->d_name;
 			// For every .ts file
-			if ( ( filen.length() >= 3 ) &&
-				( filen.substr(filen.length()-3, 3).compare(".ts") == 0 ) )
+			if ((filen.length() >= 3) &&
+				(filen.substr(filen.length()-3, 3).compare(".ts") == 0))
 			{
 				// Check if file is in the list.
-				bool file_in_list = false ;
+				bool file_in_list = false;
 				for (std::list<ePlaylistEntry>::iterator it(rec_list.begin()); it != rec_list.end(); ++it)
 				{
-					if ( (it->service.path.length() >= 11) &&
-						!it->service.path.substr(11,it->service.path.length()-11).compare( filen ) )
+					if ((it->service.path.length() >= 11) &&
+						!it->service.path.substr(11,it->service.path.length()-11).compare(filen))
 					{
-						file_in_list = true ;
-						break ;
+						file_in_list = true;
+						break;
 					}
 				}
-				if ( !file_in_list )	// Add file to list.
+				if (!file_in_list)	// Add file to list.
 				{
-					eServicePath path( "1:0:1:0:0:0:000000:0:0:0:/hdd/movie/" + filen ) ;
-					rec_list.push_back( path ) ;
-					rec_list.back().type = 16385 ;
-					rec_list.back().service.descr = getDesc( filen ) ;
-					rec_list.back().service.path = "/hdd/movie/" + filen ;
+					eServicePath path("1:0:1:0:0:0:000000:0:0:0:/hdd/movie/" + filen);
+					rec_list.push_back(path);
+					rec_list.back().type = 16385;
+					rec_list.back().service.descr = getDesc(filen);
+					rec_list.back().service.path = "/hdd/movie/" + filen;
 				}
 			}
-			free( namelist[i] ) ;
+			free(namelist[i]);
 		}
-		rec_list.sort() ;
-		result = true ;
+		rec_list.sort();
+		result = true;
 	}
 	
 	recordings->save();
-	free( namelist ) ;
+	free(namelist);
 
-	return result ;
+	return result;
 }
 
 static eString recoverRecordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1955,7 +1953,7 @@ struct blasel
 
 int genScreenShot(int index)
 {
-	unsigned char frame[720*576*3+16]; // max. size
+	unsigned char frame[720 * 576 * 3 + 16]; // max. size
 
 	int fd = open("/dev/video", O_RDONLY);
 	if (fd < 0)
@@ -1974,7 +1972,7 @@ int genScreenShot(int index)
 	
 	int genhdr = 1;
 	
-	int r = read(fd, frame, 720*576*3+16);
+	int r = read(fd, frame, 720 * 576 * 3 + 16);
 	if (r < 16)
 	{
 		fprintf(stderr, "read failed\n");
@@ -1994,7 +1992,7 @@ int genScreenShot(int index)
 	
 	int ssid;
 	char *d = "unknown";
-	for (ssid=0; ssid<(int)(sizeof(subsamplings)/sizeof(*subsamplings)); ++ssid)
+	for (ssid = 0; ssid < (int)(sizeof(subsamplings)/sizeof(*subsamplings)); ++ssid)
 		if ((subsamplings[ssid].hor == sub[0]) && (subsamplings[ssid].vert == sub[1]))
 		{
 			d = subsamplings[ssid].name;
@@ -2006,14 +2004,14 @@ int genScreenShot(int index)
 	if (genhdr)
 	{
 		eDebug("generating bitmap.");
-		unsigned char hdr[14+40];
+		unsigned char hdr[14 + 40];
 		int i = 0;
 #define PUT32(x) hdr[i++] = ((x)&0xFF); hdr[i++] = (((x)>>8)&0xFF); hdr[i++] = (((x)>>16)&0xFF); hdr[i++] = (((x)>>24)&0xFF);
 #define PUT16(x) hdr[i++] = ((x)&0xFF); hdr[i++] = (((x)>>8)&0xFF);
 #define PUT8(x) hdr[i++] = ((x)&0xFF);
 		PUT8('B'); PUT8('M');
-		PUT32( (((luma_x*luma_y)*3 + 3)&~3) + 14 + 40);
-		PUT16(0); PUT16(0); PUT32(14+40);
+		PUT32((((luma_x * luma_y) * 3 + 3) &~ 3) + 14 + 40);
+		PUT16(0); PUT16(0); PUT32(14 + 40);
 		PUT32(40); PUT32(luma_x); PUT32(luma_y);
 		PUT16(1);
 		PUT16(24);
@@ -2026,10 +2024,10 @@ int genScreenShot(int index)
 	
 	int x, y;
 	
-	for (y=luma_y-1; y>=0; --y)
+	for (y=luma_y - 1; y >= 0; --y)
 	{
 		unsigned char line[luma_x * 3];
-		for (x=0; x<luma_x; ++x)
+		for (x = 0; x < luma_x; ++x)
 		{
 			int l = luma[y * luma_x + x];
 			int c = 0x8080;
@@ -2040,45 +2038,45 @@ int genScreenShot(int index)
 				break;
 			case 1: // 4:2:2
 				if (!(x & 1))
-					c = chroma[y * chroma_x + (x>>1)];
+					c = chroma[y * chroma_x + (x >> 1)];
 				else
-					c = avg2(chroma[y * chroma_x + (x>>1)], chroma[y * chroma_x + (x>>1) + 1]);
+					c = avg2(chroma[y * chroma_x + (x >> 1)], chroma[y * chroma_x + (x >> 1) + 1]);
 				break;
 			case 2: // 4:2:0
 				if (!((x|y) & 1))
-					c = chroma[(y>>1) * chroma_x + (x>>1)];
+					c = chroma[(y >> 1) * chroma_x + (x >> 1)];
 				else if (!(y & 1))
-					c = avg2(chroma[(y>>1) * chroma_x + (x>>1)], chroma[(y>>1) * chroma_x + (x>>1) + 1]);
+					c = avg2(chroma[(y >> 1) * chroma_x + (x >> 1)], chroma[(y >> 1) * chroma_x + (x >> 1) + 1]);
 				else if (!(x & 1))
-					c = avg2(chroma[(y>>1) * chroma_x + (x>>1)], chroma[((y>>1)+1) * chroma_x + (x>>1)]);
+					c = avg2(chroma[(y >> 1) * chroma_x + (x >> 1)], chroma[((y >> 1) + 1) * chroma_x + (x >> 1)]);
 				else
 					c = avg2(
-						avg2(chroma[(y>>1) * chroma_x + (x>>1)], chroma[(y>>1) * chroma_x + (x>>1) + 1]),
-						avg2(chroma[((y>>1)+1) * chroma_x + (x>>1)], chroma[((y>>1)+1) * chroma_x + (x>>1) + 1]));
+						avg2(chroma[(y >> 1) * chroma_x + (x >> 1)], chroma[(y >> 1) * chroma_x + (x >> 1) + 1]),
+						avg2(chroma[((y >> 1) + 1) * chroma_x + (x >> 1)], chroma[((y >> 1) + 1) * chroma_x + (x >> 1) + 1]));
 				break;
 			case 3:	// 4:2:0-half
-				if (!(((x>>1)|y) & 1))
-					c = chroma[(y>>1) * chroma_x + (x>>2)];
+				if (!(((x >> 1)|y) & 1))
+					c = chroma[(y >> 1) * chroma_x + (x >> 2)];
 				else if (!(y & 1))
-					c = avg2(chroma[(y>>1) * chroma_x + (x>>2)], chroma[(y>>1) * chroma_x + (x>>2) + 1]);
+					c = avg2(chroma[(y >> 1) * chroma_x + (x >> 2)], chroma[(y >> 1) * chroma_x + (x >> 2) + 1]);
 				else if (!(x & 2))
-					c = avg2(chroma[(y>>1) * chroma_x + (x>>2)], chroma[((y>>1)+1) * chroma_x + (x>>2)]);
+					c = avg2(chroma[(y >> 1) * chroma_x + (x >> 2)], chroma[((y >> 1) + 1) * chroma_x + (x >> 2)]);
 				else
 					c = avg2(
-						avg2(chroma[(y>>1) * chroma_x + (x>>2)], chroma[(y>>1) * chroma_x + (x>>2) + 1]),
-						avg2(chroma[((y>>1)+1) * chroma_x + (x>>2)], chroma[((y>>1)+1) * chroma_x + (x>>2) + 1]));
+						avg2(chroma[(y >> 1) * chroma_x + (x >> 2)], chroma[(y >> 1) * chroma_x + (x >> 2) + 1]),
+						avg2(chroma[((y >> 1) + 1) * chroma_x + (x >> 2)], chroma[((y >> 1) + 1) * chroma_x + (x >> 2) + 1]));
 				break;
 			case 4:	// 4:1:1
-				if (!((x>>1) & 1))
-					c = chroma[y * chroma_x + (x>>2)];
+				if (!((x >> 1) & 1))
+					c = chroma[y * chroma_x + (x >> 2)];
 				else
-					c = avg2(chroma[y * chroma_x + (x>>2)], chroma[y * chroma_x + (x>>2) + 1]);
+					c = avg2(chroma[y * chroma_x + (x >> 2)], chroma[y * chroma_x + (x >> 2) + 1]);
 				break;
 			case 5:
-				if (!((x>>1) & 1))
-					c = chroma[(y>>2) * chroma_x + (x>>2)];
+				if (!((x >> 1) & 1))
+					c = chroma[(y >> 2) * chroma_x + (x >> 2)];
 				else
-					c = avg2(chroma[(y>>2) * chroma_x + (x>>2)], chroma[(y>>2) * chroma_x + (x>>2) + 1]);
+					c = avg2(chroma[(y >> 2) * chroma_x + (x >> 2)], chroma[(y >> 2) * chroma_x + (x >> 2) + 1]);
 				break;
 			}
 			
@@ -2093,11 +2091,11 @@ int genScreenShot(int index)
 			g = -25690 * cb - 53294 * cr + l * 76310;
 			b = 132278 * cb + l * 76310;
 			
-			line[x * 3 + 2] = CLAMP(r>>16);
-			line[x * 3 + 1] = CLAMP(g>>16);
-			line[x * 3 + 0] = CLAMP(b>>16);
+			line[x * 3 + 2] = CLAMP(r >> 16);
+			line[x * 3 + 1] = CLAMP(g >> 16);
+			line[x * 3 + 0] = CLAMP(b >> 16);
 		}
-		fwrite(line, 1, luma_x*3, fd2);
+		fwrite(line, 1, luma_x * 3, fd2);
 	}
 	fclose(fd2);
 	return 0;
