@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.94 2005/06/19 14:39:04 barf Exp $
+ * $Id: getservices.cpp,v 1.95 2005/07/03 11:24:49 barf Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -36,7 +36,7 @@ std::map<std::string, t_satellite_position> satellitePositions; //satellite posi
 std::map<t_satellite_position, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
 std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 
-void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_position satellitePosition)
+void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_position satellitePosition, bool remove_as_default)
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
@@ -107,7 +107,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 		);
 
 		/* read channels that belong to the current transponder */
-		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC, satellitePosition, feparams.frequency);
+		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC, satellitePosition, feparams.frequency, remove_as_default);
 
 		/* hop to next transponder */
 		node = node->xmlNextNode;
@@ -116,8 +116,11 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 	return;
 }
 
-void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, t_satellite_position satellitePosition, const uint32_t frequency)
+void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, t_satellite_position satellitePosition, const uint32_t frequency, bool remove_as_default)
 {
+	extern CConfigFile config;
+	bool trace_nukes = config.getBool("traceNukes", false);
+
 	t_service_id service_id;
 	std::string  name;
 	uint8_t      service_type;
@@ -129,74 +132,53 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 		name = xmlGetAttribute(node, "name");
 		service_type = xmlGetNumericAttribute(node, "service_type", 16);
 
-		switch (service_type) {
-		case ST_DIGITAL_TELEVISION_SERVICE:
-		case ST_NVOD_REFERENCE_SERVICE:
-		case ST_NVOD_TIME_SHIFTED_SERVICE:
-		case ST_DIGITAL_RADIO_SOUND_SERVICE:
-			allchans.insert
-			(
-				std::pair <t_channel_id, CZapitChannel>
-				(
-					CREATE_CHANNEL_ID,
-					CZapitChannel
-					(
-						name,
-						service_id,
-						transport_stream_id,
-						original_network_id,
-						service_type,
-						DiSEqC, 
-						satellitePosition,
-						zfrequency
-					)
-				)
-			);
- 			break;
-
-		default:
-			break;
+		char *ptr = xmlGetAttribute(node, "action");
+		bool remove = ptr ? (!strcmp(ptr, "remove") || !strcmp(ptr, "replace")) : remove_as_default;
+		bool add    = ptr ? (!strcmp(ptr, "add")    || !strcmp(ptr, "replace")) : !remove_as_default;
+		if (remove) {
+		  int result = allchans.erase(CREATE_CHANNEL_ID);
+		  if (!result || trace_nukes)
+		    printf("[getservices]: %s '%s' (service_id=0x%x): %s", add ? "replacing" : "removing", 
+			   xmlGetAttribute(node, "name"), service_id, result ? "succeded.\n" : "FAILED!\n");
 		}
 
+		if (add) {
+			switch (service_type) {
+			case ST_DIGITAL_TELEVISION_SERVICE:
+			case ST_NVOD_REFERENCE_SERVICE:
+			case ST_NVOD_TIME_SHIFTED_SERVICE:
+			case ST_DIGITAL_RADIO_SOUND_SERVICE:
+				allchans.insert
+				  (
+					std::pair <t_channel_id, CZapitChannel>
+					(
+						CREATE_CHANNEL_ID,
+						CZapitChannel
+						(
+							name,
+							service_id,
+							transport_stream_id,
+							original_network_id,
+							service_type,
+							DiSEqC, 
+							satellitePosition,
+							zfrequency
+						)
+					)
+				);
+ 				break;
+
+			default:
+				break;
+			}
+		}
 		node = node->xmlNextNode;
 	}
 
 	return;
 }
 
-void NukeChannels(xmlNodePtr search) {
-  extern CConfigFile config;
-  int successful_nukes = 0;
-  int failed_nukes = 0;
-  bool trace_nukes = config.getBool("traceNukes", false);
-  while (search) {
-    xmlNodePtr transponder = search->xmlChildrenNode;
-    while ((transponder = xmlGetNextOccurence(transponder, "transponder"))) {
-      t_transport_stream_id transport_stream_id = xmlGetNumericAttribute(transponder, "id", 16);
-      t_original_network_id original_network_id = xmlGetNumericAttribute(transponder, "onid", 16);
-      xmlNodePtr channel = transponder->xmlChildrenNode;
-      while ((channel = xmlGetNextOccurence(channel, "channel"))) {
-	t_service_id service_id = xmlGetNumericAttribute(channel, "service_id", 16);
-        int result = allchans.erase(CREATE_CHANNEL_ID);
-	if (result)
-	  successful_nukes++;
-	else
-	  failed_nukes++;
-	if (!result || trace_nukes)
-	  printf("[getservices]: Nuking '%s' (service_id=0x%x): %s", xmlGetAttribute(channel, "name"), service_id, result ? "succeded.\n" : "FAILED!\n");
-	channel = channel->xmlNextNode;
-      }
-      transponder = transponder->xmlNextNode;
-    }
-    search = search->xmlNextNode;
-  }
-  printf("[getservices]: %d services successfully nuked\n", successful_nukes);
-  if (failed_nukes)
-    printf("[getservices]: %d nuke failed\n", failed_nukes);
-
-}
-
-void FindTransponder(xmlNodePtr search)
+void FindTransponder(xmlNodePtr search, bool remove_as_default)
 {
 	uint8_t DiSEqC;
 	t_satellite_position satellitePosition = SATELLITE_POSITION_OF_NON_SATELLITE_SOURCE;
@@ -225,7 +207,7 @@ void FindTransponder(xmlNodePtr search)
 		}
 
 		INFO("going to parse dvb-%c provider %s", xmlGetName(search)[0], xmlGetAttribute(search, "name"));
-		ParseTransponders(search->xmlChildrenNode, DiSEqC, satellitePosition);
+		ParseTransponders(search->xmlChildrenNode, DiSEqC, satellitePosition, remove_as_default);
 		search = search->xmlNextNode;
 	}
 }
@@ -307,18 +289,19 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType)
 	if (parser == NULL)
 		return -1;
 
-	FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
+	FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
 	xmlFreeDoc(parser);
 
         if ((parser = parseXmlFile(ANTISERVICES_XML, false))) {
                 printf("[getservices] " ANTISERVICES_XML " found.\n");
-                NukeChannels(xmlDocGetRootElement(parser)->xmlChildrenNode);
+                printf("[getservices] WARNING: antiservices.xml is depreciated; please use myservices.xml and 'action=\"remove\"' instead.\n");
+                FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, true);
                 xmlFreeDoc(parser);
         }
 
 	if ((parser = parseXmlFile(MYSERVICES_XML, false))) {
 		printf("[getservices] " MYSERVICES_XML "  found.\n");
-		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
+		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
 		xmlFreeDoc(parser);
 	}
 
