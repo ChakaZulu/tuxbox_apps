@@ -1647,13 +1647,13 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(GenericMenuSeparator);
 	service.addItem(GenericMenuBack);
 	service.addItem(GenericMenuSeparatorLine);
-	service.addItem(new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME    , true, NULL, new CBEBouquetWidget()                  ));
- 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS    , true, NULL, &scanSettings                           ));
+	service.addItem(new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME    , true, NULL, new CBEBouquetWidget(), NULL            , CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+ 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS    , true, NULL, &scanSettings         , NULL            , CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
  	service.addItem(GenericMenuSeparatorLine);
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD    , true, NULL, this                  , "reloadchannels"));
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this                   , "reloadplugins"));
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RESTART   , true, NULL, this                   , "restart"));
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker                            ));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD    , true, NULL, this                  , "reloadchannels", CRCInput::RC_1));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this                  , "reloadplugins" , CRCInput::RC_2));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RESTART   , true, NULL, this                  , "restart"       , CRCInput::RC_3));
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker          , NULL            , CRCInput::RC_4));
 
 	//softupdate
 	if(softupdate)
@@ -1721,7 +1721,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CHECKUPDATE, true, NULL, new CFlashUpdate()));
 
 		service.addItem(GenericMenuSeparatorLine);
-		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UPDATE, true, NULL, updateSettings));
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UPDATE, true, NULL, updateSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	}
 }
 
