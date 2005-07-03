@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.35  2005/07/03 18:39:17  robspr1
+ * bugbix PIN code after database reload
+ *
  * Revision 1.34  2005/06/27 19:49:54  robspr1
  * - reload database after read/write
  *
@@ -391,14 +394,14 @@ int GetRCCode()
 						}
 						if( rc_last_code == RC_LSHIFT )
 						{
-							if( ev.code <= 0x56 )
+							if( ev.code <= 0x56 )  //(sizeof(rcshifttable)/sizeof(int)-1)
 							{
 								rccode = rcshifttable[ev.code];
 							}
 						}
 						else if( rc_last_code == RC_ALTGR )
 						{
-							if( ev.code <= 0x56 )
+							if( ev.code <= 0x56 )  //(sizeof(rcaltgrtable)/sizeof(int)-1)
 							{
 								rccode = rcaltgrtable[ev.code];
 							}
@@ -3093,17 +3096,36 @@ void SaveAndReloadDB(int iSave)
 		}
 	}
 	
+	int pincount[10];
+	char code[10];
+	
+	// save already done pin info
+	
+	for( loop = 0; loop < 10; loop++)
+	{
+		pincount[loop]=maildb[loop].pincount;
+		code[loop]=maildb[loop].code[0];
+	}
+	
 	// fill database
 	memset(maildb, 0, sizeof(maildb));
 
 	for(loop = 0; loop < 10; loop++)
-	{
+	{	
 		FillDB(loop);
 	}
 
 	// read config
 
 	ReadConf();
+
+	// restore pin info
+	
+	for(loop = 0; loop < 10; loop++)
+	{	
+		maildb[loop].pincount=pincount[loop];
+		maildb[loop].code[0]=code[loop];
+	}
 
 }
 
@@ -3113,7 +3135,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.34 $";
+	char cvs_revision[] = "$Revision: 1.35 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
