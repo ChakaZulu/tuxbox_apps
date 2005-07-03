@@ -5450,7 +5450,7 @@ msgstr "Dies ist die derzeit installierte Version."
 
 #: src/upgrade.cpp:824
 msgid "This is an older release."
-msgstr "Dies ist eine älterer Version."
+msgstr "Dies ist eine ältere Version."
 
 #: src/upgrade.cpp:827
 msgid "No changelog data available."
