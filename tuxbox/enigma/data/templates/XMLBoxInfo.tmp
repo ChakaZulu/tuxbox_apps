@@ -1,0 +1,12 @@
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<boxinfo>
+	<image>
+		<version>#VERSION#</version>
+		<url>#URL#</url>
+		<comment>#COMMENT#</comment>
+		<catalog>#CATALOG#</catalog>
+	</image>
+	<usbstick>#USBSTICK#</usbstick>
+	<disk>#DISK#</disk>
+</boxinfo>
+

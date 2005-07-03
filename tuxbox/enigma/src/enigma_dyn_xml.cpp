@@ -46,61 +46,47 @@ extern eString zap[5][5];
 extern eString firmwareLevel(eString verid);
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 extern eString getIP(void);
+extern eString getUSBInfo(void);
+extern eString getDiskInfo(void);
+extern eString getIP(void);
 
-static eString getImageInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getBoxInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
 
-	std::stringstream result;
+	eString result = readFile(TEMPLATE_DIR + "XMLBoxInfo.tmp");
 
-	eString myVersion = getAttribute("/.version", "version");
-	eString myCatalogURL = getAttribute("/.version", "catalog");
-	eString myComment = getAttribute("/.version", "comment");
-	eString myImageURL = getAttribute("/.version", "url");
+	result.strReplace("#VERSION#", getAttribute("/.version", "version"));
+	result.strReplace("#CATALOG#", getAttribute("/.version", "catalog"));
+	result.strReplace("#COMMENT#", getAttribute("/.version", "comment"));
+	result.strReplace("#URL#", getAttribute("/.version", "url"));
+	result.strReplace("#USBSTICK#", getUSBInfo());
+	result.strReplace("#DISK#", getDiskInfo());
 
-	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-		<< "<image>"
-		<< "<version>" << firmwareLevel(myVersion) << "</version>"
-		<< "<url>" << myImageURL << "</url>"
-		<< "<comment>" << myComment << "</comment>"
-		<< "<catalog>" << myCatalogURL << "</catalog>"
-		<< "</image>";
-
-	return result.str();
+	return result;
 }
 
 static eString getBoxStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt;
-
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
 
-	eString result;
+	eString result = readFile(TEMPLATE_DIR + "XMLBoxStatus.tmp");
 	time_t atime;
 	time(&atime);
 	atime += eDVB::getInstance()->time_difference;
-	result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-		"<status>"
-		"<current_time>" + eString(ctime(&atime)) + "</current_time>"
-		"<standby>";
+	result.strReplace("#TIME#", eString(ctime(&atime)));
 	if (eZapMain::getInstance()->isSleeping())
-		result += "ON";
+		result.strReplace("#STANBY#", "ON");
 	else
-		result += "OFF";
-	result += "</standby>";
-	result += "<recording>";
+		result.strReplace("#STANDBY#", "OFF");
 #ifndef DISABLE_FILE
 	if (eZapMain::getInstance()->isRecording())
-		result += "ON";
+		result.strReplace("#RECORDING#", "ON");
 	else
 #endif
-		result += "OFF";
-	result += "</recording>";
-	result += "<mode>" + eString().sprintf("%d", eZapMain::getInstance()->getMode()) + "</mode>";
-
-	result += "</status>";
+		result.strReplace("#RECORDING#", "OFF");
+	result.strReplace("#MODE#", eString().sprintf("%d", eZapMain::getInstance()->getMode()));
+	result.strReplace("#IP#", getIP());
 	
 	return result;
 }
@@ -938,8 +924,8 @@ static eString getTimers(eString request, eString dirpath, eString opt, eHTTPCon
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/xml/boxstatus", getBoxStatus, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/boxinfo", getBoxInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/serviceepg", getServiceEPG, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/imageinfo", getImageInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/currentservicedata", getCurrentServiceData, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/services", getServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo", getStreamInfo, lockWeb);

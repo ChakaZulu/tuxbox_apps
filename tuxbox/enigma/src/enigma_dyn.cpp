@@ -1368,9 +1368,8 @@ static eString getZap(eString mode, eString path)
 }
 
 #ifndef DISABLE_FILE
-static eString getDiskInfo(void)
+eString getDiskInfo(void)
 {
-	std::stringstream result;
 	eString sharddisks = "none";
 	if (eSystemInfo::getInstance()->hasHDD())
 	{
@@ -1412,17 +1411,12 @@ static eString getDiskInfo(void)
 				sharddisks += ")";
 			}
 		}
-		result  << "<tr>"
-			"<td>Harddisk:</td>"
-			"<td>" << sharddisks << "</td>"
-			"</tr>";
 	}
-	return result.str();
+	return sharddisks;
 }
 
-static eString getUSBInfo(void)
+eString getUSBInfo(void)
 {
-	std::stringstream result;
 	eString usbStick = "none";
 	eString line;
 	ifstream infile("/proc/scsi/usb-storage/0");
@@ -1439,12 +1433,8 @@ static eString getUSBInfo(void)
 				usbStick += "Product =" + getRight(line, ':');
 			}
 		}
-		result 	<< "<tr>"
-			"<td>USB Stick:</td>"
-			"<td>" << usbStick << "</td>"
-			"</tr>";
 	}
-	return result.str();
+	return usbStick;
 }
 #endif
 
@@ -1465,8 +1455,14 @@ static eString aboutDreambox(void)
 		<< "<tr><td>Processor:</td><td>" << eSystemInfo::getInstance()->getCPUInfo() << "</td></tr>";
 
 #ifndef DISABLE_FILE
-	result << getDiskInfo();
-	result << getUSBInfo();
+	result << "<tr>"
+		"<td>Harddisk:</td>"
+		"<td>" << getDiskInfo() << "</td>"
+		"</tr>"
+		"<tr>"
+		"<td>USB Stick:</td>"
+		"<td>" << getUSBInfo() << "</td>"
+		"</tr>";
 #endif
 	result	<< "<tr><td>Linux Kernel:</td><td>" << readFile("/proc/version") << "</td></tr>"
 		<< "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>";
