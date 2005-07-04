@@ -1383,7 +1383,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.86 $";
+	char cvs_revision[] = "$Revision: 1.87 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -1470,7 +1470,7 @@ void plugin_exec(PluginParam *par)
 #ifndef HAVE_DREAMBOX_HARDWARE
 					int vendor = tuxbox_get_vendor() - 1;
 #else
-					int vendor = 0; /* values unknown, rely on requested values */
+					int vendor = 3; /* values unknown, rely on requested values */
 #endif
 
 					if (vendor < 3) /* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
