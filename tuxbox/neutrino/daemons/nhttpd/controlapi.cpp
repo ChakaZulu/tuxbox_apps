@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.57 2005/07/04 17:05:29 mogway Exp $
+	$Id: controlapi.cpp,v 1.58 2005/07/04 18:37:34 chakazulu Exp $
 
 	License: GPL
 
@@ -297,7 +297,8 @@ bool CControlAPI::GetModeCGI(CWebserverRequest *request)
 	return true;
 }
 
-static const std::string pluginDirs[3] = {
+static const unsigned int PLUGIN_DIR_COUNT = 3;
+static const std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT] = {
 	PLUGINDIR,
 	"/var/tuxbox/plugins",
 	"/mnt/plugins",
@@ -315,8 +316,8 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 		if (i != std::string::npos)
 			script = script.substr(i+1);
 		script += ".sh";
-		for (unsigned int i=0;i<2;i++) {
-			DIR *scriptdir = opendir(pluginDirs[i].c_str());
+		for (unsigned int i=0;i<PLUGIN_DIR_COUNT;i++) {
+			DIR *scriptdir = opendir(PLUGIN_DIRS[i].c_str());
 			if (scriptdir != NULL)
 			{
 				struct dirent *scriptfile = NULL;
@@ -328,7 +329,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 				if (scriptfile != NULL)
 				{
 					// script was found
-					std::string abscmd(pluginDirs[i].c_str());
+					std::string abscmd(PLUGIN_DIRS[i].c_str());
 					abscmd += "/";
 					abscmd += script;
 					printf("[CControlAPI] executing %s\n",abscmd.c_str());
@@ -353,14 +354,14 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 			}
 			else
 			{
-				printf("[CControlAPI] could not open: %s\n",pluginDirs[i].c_str());
+				printf("[CControlAPI] could not open: %s\n",PLUGIN_DIRS[i].c_str());
 			}
 		}
 		if (!res)
 		{
 			printf("[CControlAPI] script %s not found in\n",script.c_str());
-			for (unsigned int i=0;i<2;i++) {
-				printf("%s\n",pluginDirs[i].c_str());
+			for (unsigned int i=0;i<PLUGIN_DIR_COUNT;i++) {
+				printf("%s\n",PLUGIN_DIRS[i].c_str());
 			}
 		}
 	}
