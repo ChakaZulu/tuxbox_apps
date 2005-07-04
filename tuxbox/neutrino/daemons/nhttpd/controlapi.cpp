@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.56 2005/06/26 18:01:27 barf Exp $
+	$Id: controlapi.cpp,v 1.57 2005/07/04 17:05:29 mogway Exp $
 
 	License: GPL
 
@@ -121,7 +121,7 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		else
 			request->SendPlainHeader("text/xml");
 		return true;
-	}	
+	}
 
 	switch (operation) {
 	case 0:
@@ -166,13 +166,13 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		return StartPluginCGI(request);
 	case 20:
 		return GetModeCGI(request);
-	case 21: 
+	case 21:
 	        return ExecCGI(request);
-	case 22: 
+	case 22:
 	        return SystemCGI(request);
-	case 23: 
+	case 23:
 	        return RCCGI(request);
-	case 24: 
+	case 24:
 	        return LCDAction(request);
 	default:
 		request->SendError();
@@ -185,7 +185,7 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 bool CControlAPI::TimerCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");
-	
+
 	if (Parent->Timerd->isTimerdAvailable())
 	{
 		if (!(request->ParameterList.empty()))
@@ -227,7 +227,7 @@ bool CControlAPI::SetModeCGI(CWebserverRequest *request)
 
 	// Standard httpd header senden
 	request->SendPlainHeader("text/plain");
-	
+
 	if (!(request->ParameterList.empty()))
 	{
 		if (request->ParameterList["1"] == "status")
@@ -238,7 +238,7 @@ bool CControlAPI::SetModeCGI(CWebserverRequest *request)
 				request->SocketWriteLn("off");
 			return true;
 		}
-		
+
 		if (request->ParameterList["1"] == "radio")	// in radio mode schalten
 		{
 			mode = NeutrinoMessages::mode_radio;
@@ -286,7 +286,7 @@ bool CControlAPI::GetModeCGI(CWebserverRequest *request)
 
 	// Standard httpd header senden
 	request->SendPlainHeader("text/plain");
-	
+
 	mode = Parent->Zapit->getMode();
 	if ( mode == CZapitClient::MODE_TV)
 		request->SocketWriteLn("tv");
@@ -297,9 +297,10 @@ bool CControlAPI::GetModeCGI(CWebserverRequest *request)
 	return true;
 }
 
-static const std::string pluginDirs[2] = {
+static const std::string pluginDirs[3] = {
 	PLUGINDIR,
 	"/var/tuxbox/plugins",
+	"/mnt/plugins",
 };
 
 bool CControlAPI::ExecCGI(CWebserverRequest *request)
@@ -307,7 +308,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 	bool res = false;
 	std::string script;
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	if (request->ParameterList.size() > 0) 
+	if (request->ParameterList.size() > 0)
 	{
 		script = request->ParameterList["1"];
 		std::string::size_type i = script.find_last_of("/");
@@ -342,15 +343,15 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 						pclose(f);
 						res = true;
 						break;
-					} 
-					else 
-					{	
+					}
+					else
+					{
 						printf("[CControlAPI] can't open %s\n",abscmd.c_str());
 					}
-				} 
+				}
 				closedir(scriptdir);
 			}
-			else 
+			else
 			{
 				printf("[CControlAPI] could not open: %s\n",pluginDirs[i].c_str());
 			}
@@ -369,7 +370,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 	}
 	if (!res)
 	{
-		request->Send404Error();		
+		request->Send404Error();
 	}
 	return res;
 }
@@ -379,7 +380,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 bool CControlAPI::SystemCGI(CWebserverRequest *request)
 {
 	std::string pluginname;
-	request->SendPlainHeader("text/plain");          // Standard httpd header senden	
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size() == 1)
 	{
 
@@ -418,7 +419,7 @@ bool CControlAPI::SystemCGI(CWebserverRequest *request)
 			return true;
 		}
 	}
-	
+
 	request->SendError();
 	return false;
 
@@ -492,7 +493,7 @@ bool CControlAPI::GetTimeCGI(CWebserverRequest *request)
 	time_t now = time(NULL);
 
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	
+
 	if (request->ParameterList.empty())
 	{
 		//paramlos
@@ -565,7 +566,7 @@ bool CControlAPI::MessageCGI(CWebserverRequest *request)
 		request->SendError();
 		return false;
 	}
-	
+
 	if (!(request->ParameterList["popup"].empty()))
 	{
 		message = request->ParameterList["popup"];
@@ -576,7 +577,7 @@ bool CControlAPI::MessageCGI(CWebserverRequest *request)
 		message = request->ParameterList["nmsg"];
 		event = NeutrinoMessages::EVT_EXTMSG;
 	}
-	
+
 	if (event != 0)
 	{
 		request->URLDecode(message);
@@ -637,7 +638,7 @@ bool CControlAPI::InfoCGI(CWebserverRequest *request)
 bool CControlAPI::ShutdownCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	
+
 	if (request->ParameterList.empty())
 	{
 		//paramlos
@@ -657,7 +658,7 @@ bool CControlAPI::ShutdownCGI(CWebserverRequest *request)
 bool CControlAPI::VolumeCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	
+
 	if (request->ParameterList.empty())
 	{	//paramlos - aktuelle volume anzeigen
 		request->printf("%d", Parent->Controld->getVolume());			// volume ausgeben
@@ -717,7 +718,7 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 	if (!(request->ParameterList.empty()))
 	{
 		int mode = CZapitClient::MODE_CURRENT;
-		
+
 		if (!(request->ParameterList["mode"].empty()))
 		{
 			if (request->ParameterList["mode"].compare("TV") == 0)
@@ -725,7 +726,7 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 			if (request->ParameterList["mode"].compare("RADIO") == 0)
 				mode = CZapitClient::MODE_RADIO;
 		}
-		
+
 		bouquet = Parent->GetBouquet(atoi(request->ParameterList["bouquet"].c_str()), mode);
 		CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
 
@@ -763,7 +764,7 @@ bool CControlAPI::GetBouquetsCGI(CWebserverRequest *request)
 bool CControlAPI::EpgCGI(CWebserverRequest *request)
 {
 	CChannelEvent *event;
-	
+
 	Parent->GetChannelEvents();
 
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
@@ -771,7 +772,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 	if (request->ParameterList.empty())
 	{
 		CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
-		
+
 		CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
 
 		for(; channel != channellist->end();channel++)
@@ -819,7 +820,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 			unsigned long long epgid;
 			sscanf( request->ParameterList["eventid"].c_str(), "%llu", &epgid);
 			CShortEPGData epg;
-			
+
 			if (Parent->Sectionsd->getEPGidShort(epgid,&epg))
 			{
 				request->SocketWriteLn(epg.title);
@@ -859,7 +860,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 			for (eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++)
 			{
 			CShortEPGData epg;
-			
+
 				if (Parent->Sectionsd->getEPGidShort(eventIterator->eventID,&epg))
 				{
 					request->printf("%llu %ld %d\n", eventIterator->eventID, eventIterator->startTime, eventIterator->duration);
@@ -869,7 +870,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 				}
 			}
 			return true;
-		
+
 		}
 		else
 		{
@@ -884,7 +885,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 			return true;
 		}
 	}
-	
+
 	request->SendError();
 	return false;
 }
@@ -939,7 +940,7 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 		}
 		else if (request->ParameterList["1"] == "statusplayback")
 		{
-			request->SocketWrite((char *) (Parent->Zapit->isPlayBackActive() ? "1" : "0")); 
+			request->SocketWrite((char *) (Parent->Zapit->isPlayBackActive() ? "1" : "0"));
 			return true;
 		}
 		else if (request->ParameterList["1"] == "stopsectionsd")
@@ -954,7 +955,7 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 		}
 		else if (request->ParameterList["1"] == "statussectionsd")
 		{
-			request->SocketWrite((char *) (Parent->Sectionsd->getIsScanningActive() ? "1" : "0")); 
+			request->SocketWrite((char *) (Parent->Sectionsd->getIsScanningActive() ? "1" : "0"));
 			return true;
 		}
 		else
@@ -963,10 +964,10 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 
 			request->SendOk();
 		}
-		
+
 		return true;
 	}
-	
+
 	request->SendError();
 	return false;
 }
@@ -982,20 +983,20 @@ bool CControlAPI::StartPluginCGI(CWebserverRequest *request)
 		{
 			pluginname = request->ParameterList["name"];
 			request->URLDecode(pluginname);
-			Parent->EventServer->sendEvent(NeutrinoMessages::EVT_START_PLUGIN, 
-				CEventServer::INITID_HTTPD, 
-				(void *) pluginname.c_str(), 
+			Parent->EventServer->sendEvent(NeutrinoMessages::EVT_START_PLUGIN,
+				CEventServer::INITID_HTTPD,
+				(void *) pluginname.c_str(),
 				pluginname.length() + 1);
 
 			request->SendOk();
 			return true;
 		}
 	}
-	
+
 	request->SendError();
 	return false;
 
-	
+
 }
 
 
@@ -1006,9 +1007,9 @@ bool CControlAPI::LCDAction(CWebserverRequest *request)
 {
 	int tval;
 	int error=0;
-	int xpos=10, ypos=10, size=12, color=1, font=0; 
+	int xpos=10, ypos=10, size=12, color=1, font=0;
 	int x1,y1,x2,y2,coll,colf;
-	
+
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 
 	if (request->ParameterList.empty())
@@ -1016,7 +1017,7 @@ bool CControlAPI::LCDAction(CWebserverRequest *request)
 		request->SendError();
 		return false;
 	}
-	
+
 	if (request->ParameterList["lock"] != "")
 	{
 		if(sscanf( request->ParameterList["lock"].c_str(), "%d", &tval))
@@ -1048,12 +1049,12 @@ bool CControlAPI::LCDAction(CWebserverRequest *request)
 		{
 			error=1;
 		}
-	}	
+	}
 	if (request->ParameterList["raw"] != "")
 	{
 		char *sptr=strdup((char*)request->ParameterList["raw"].c_str()),*pptr;
 		int loop=4;
-		
+
 		pptr=sptr;
 		error=1;
 		if(sscanf(pptr, "%d,%d,%d,%d",&x1,&y1,&x2,&y2)==4)
@@ -1153,7 +1154,7 @@ bool CControlAPI::LCDAction(CWebserverRequest *request)
 	if (request->ParameterList["text"] != "")
 	{
 		Parent->LcdAPI->DrawText(xpos, ypos, size, color, font, (char*)request->ParameterList["text"].c_str());
-	}	
+	}
 	if (request->ParameterList["update"] != "")
 	{
 		if(sscanf( request->ParameterList["update"].c_str(), "%d", &tval))
@@ -1173,7 +1174,7 @@ bool CControlAPI::LCDAction(CWebserverRequest *request)
 		request->SendError();
 		return false;
 	}
-		
+
 	request->SendOk();
 	return true;
 }
@@ -1200,7 +1201,7 @@ void CControlAPI::SendChannelList(CWebserverRequest *request)
 {
 	CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
 	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
-	
+
 	for(; channel != channellist->end();channel++)
 		request->printf(PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 				" %s\n",
@@ -1217,7 +1218,7 @@ void CControlAPI::SendStreamInfo(CWebserverRequest* request)
 	Parent->GetStreamInfo(bitInfo);
 	request->printf("%d\n%d\n", bitInfo[0], bitInfo[1] );	//Resolution x y
 	request->printf("%d\n", bitInfo[4]*50);					//Bitrate bit/sec
-	
+
 	switch (bitInfo[2]) //format
 	{
 		case 2: request->SocketWrite("4:3\n"); break;
@@ -1269,7 +1270,7 @@ void CControlAPI::SendAllCurrentVAPid(CWebserverRequest* request)
 	Parent->Zapit->getPIDS(pids);
 
 	request->printf("%05u\n", pids.PIDs.vpid);
-	
+
 	t_channel_id current_channel = Parent->Zapit->getCurrentServiceID();
 	CSectionsdClient::responseGetCurrentNextInfoChannelID currentNextInfo;
 	Parent->Sectionsd->getCurrentNextServiceKey(current_channel, currentNextInfo);
@@ -1330,7 +1331,7 @@ void CControlAPI::SendSettings(CWebserverRequest* request)
 	request->SocketWriteLn(
 		"Boxtype " +
 		Parent->Dbox_Hersteller[Parent->Controld->getBoxType()] +
-		"\n" 
+		"\n"
 		"videooutput " +
 		Parent->videooutput_names[(unsigned char)Parent->Controld->getVideoOutput()] +
 		"\n"
@@ -1349,12 +1350,12 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 	Parent->Timerd->getTimerList(timerlist);
 
 	CTimerd::TimerList::iterator timer = timerlist.begin();
-	
+
 	for(; timer != timerlist.end();timer++)
 	{
 		// Add Data
 		char zAddData[22+1] = { 0 };
-		
+
 		switch(timer->eventType) {
 		case CTimerd::TIMER_NEXTPROGRAM:
 		case CTimerd::TIMER_ZAPTO:
@@ -1365,7 +1366,7 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 			if (zAddData[0] == 0)
 				strcpy(zAddData, Parent->Zapit->isChannelTVChannel(timer->channel_id) ? "Unbekannter TV-Kanal" : "Unbekannter Radiokanal");
 			break;
-			
+
 		case CTimerd::TIMER_STANDBY:
 			sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
 			break;
