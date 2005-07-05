@@ -4191,6 +4191,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/satFinder", satFinder, lockWeb);
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/video.pls", videopls, lockWeb);
+	dyn_resolver->addDyn("GET", "/video.m3u", videopls, lockWeb);
 	dyn_resolver->addDyn("GET", "/mplayer.mply", mPlayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
