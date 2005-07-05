@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.29  2005/07/05 19:59:22  robspr1
+ * - add execution of special mail
+ *
  * Revision 1.28  2005/06/27 19:50:48  robspr1
  * - reset read-flag
  *
@@ -145,7 +148,8 @@ int ReadConf()
 			fprintf(fd_conf, "SKIN=1\n\n");
 			fprintf(fd_conf, "ADMIN=Y\n\n");
 			fprintf(fd_conf, "MAILCACHE=0\n");
-			fprintf(fd_conf, "MAILDIR=\\tmp\\\n\n");		
+			fprintf(fd_conf, "MAILDIR=\\tmp\\\n");		
+			fprintf(fd_conf, "SECURITY=\n\n");		
 			fprintf(fd_conf, "WEBPORT=80\n");
 			fprintf(fd_conf, "WEBUSER=\n");
 			fprintf(fd_conf, "WEBPASS=\n\n");
@@ -224,6 +228,10 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "MAILDIR=")))
 			{
 				sscanf(ptr + 8, "%s", &maildir[0]);
+			}
+			else if((ptr = strstr(line_buffer, "SECURITY=")))
+			{
+				sscanf(ptr + 9, "%s", &security[0]);
 			}
 			else if((ptr = strstr(line_buffer, "WEBPORT=")))
 			{
@@ -399,7 +407,8 @@ int ReadConf()
 			fprintf(fd_conf, "SKIN=%d\n\n", skin);
 			fprintf(fd_conf, "ADMIN=%c\n\n", admin);
 			fprintf(fd_conf, "MAILCACHE=%d\n", mailcache);
-			fprintf(fd_conf, "MAILDIR=%s\n\n", maildir);
+			fprintf(fd_conf, "MAILDIR=%s\n", maildir);
+			fprintf(fd_conf, "SECURITY=%s\n\n", security);
 			fprintf(fd_conf, "WEBPORT=%d\n", webport);
 			fprintf(fd_conf, "WEBUSER=%s\n", webuser);
 			fprintf(fd_conf, "WEBPASS=%s\n", webpass);
@@ -535,6 +544,11 @@ int ReadConf()
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "store max. %d mails in %s\n", mailcache,maildir) : printf("TuxMailD <store max. %d mails in %s>\n", mailcache, maildir);
 		}
 		
+		if(security[0])
+		{
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "security for executing commands defined\n") : printf("TuxMailD <security for executing commands defined>\n");
+		}
+
 		if(accounts)
 		{
 			if(logging == 'N')
@@ -2363,6 +2377,88 @@ int SaveMail(int account, char* mailuid)
 }
 
 /******************************************************************************
+ * int ExecuteMail(char* mailfile) (0=not executed, 1=exectuted)
+ ******************************************************************************/
+
+int ExecuteMail(char* mailfile)
+{
+	// only execute if a securitystring is defined
+	if( strlen(security)==0 ) 
+	{
+		return 0;
+	}
+	
+	char exit = -1;
+	FILE* fd_mail;
+	fd_mail = fopen(mailfile, "r");
+
+	char linebuffer[256];
+	char executeline[1024];
+	
+	// read first line of mail to check if we should execute it
+	if( fgets(linebuffer,sizeof(linebuffer),fd_mail) )
+	{
+		while(( linebuffer[strlen(linebuffer)-1] == '\n' ) || ( linebuffer[strlen(linebuffer)-1] == '\r') )
+		{
+			linebuffer[strlen(linebuffer)-1] = '\0';
+			if( linebuffer[0] == '\0' )
+			{
+				break;
+			}
+		}
+		if( strcmp(linebuffer,security) )
+		{
+			exit = 0;
+		}
+	}
+	else
+	{
+		exit = 0;
+	}
+
+	if( exit )
+	{	
+		executeline[0] = '\0';
+		
+		while(fgets(linebuffer,sizeof(linebuffer),fd_mail))
+		{
+			while(( linebuffer[strlen(linebuffer)-1] == '\n' ) || ( linebuffer[strlen(linebuffer)-1] == '\r') )
+			{
+				linebuffer[strlen(linebuffer)-1] = '\0';
+				if( linebuffer[0] == '\0' )
+				{
+					break;
+				}
+			}
+			if( strcmp(&linebuffer[1],".") )
+			{
+				strcat(executeline,&linebuffer[1]);
+				if( executeline[strlen(executeline)-1] == '&' )
+				{
+					executeline[strlen(executeline)-1] = '\0';	
+				}
+				else
+				{
+					if( executeline[0] )
+					{
+						printf("tuxmaild execute: '%s'\n",executeline);
+						system(executeline);
+						executeline[0] = '\0';
+					}
+				}
+			}
+			else
+			{	
+				exit = 1;
+				break;
+			}
+		}
+	}					
+	fclose(fd_mail);
+	return exit;
+}
+
+/******************************************************************************
  * AddNewMailFile (0=fail, 1=done)
  ******************************************************************************/
 
@@ -2435,12 +2531,14 @@ int AddNewMailFile(int account, char *mailnumber)
 			if(!SendPOPCommand(RETR, mailnumber))
 			{
 				idx1 = 0;
+				fclose(fd_mail);
 			}
 			else
 			{
 //				printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
+				fclose(fd_mail);
+				ExecuteMail(mailfile);
 			}
-			fclose(fd_mail);
 		}
 
 		if( idx1 )
@@ -3247,7 +3345,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.28 $";
+	char cvs_revision[] = "$Revision: 1.29 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;

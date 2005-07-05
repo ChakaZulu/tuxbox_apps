@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.23  2005/07/05 19:59:35  robspr1
+ * - add execution of special mail
+ *
  * Revision 1.22  2005/06/27 19:50:59  robspr1
  * - reset read-flag
  *
@@ -282,6 +285,7 @@ char header[1024];
 int headersize;
 char timeinfo[22];
 char maildir[256];
+char security[80];
 int mailcache = 0;
 time_t tt;
 
