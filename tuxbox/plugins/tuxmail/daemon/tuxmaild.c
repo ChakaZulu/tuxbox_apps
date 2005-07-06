@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.30  2005/07/06 19:55:56  robspr1
+ * - add cmd-line interface for sending mails
+ *
  * Revision 1.29  2005/07/05 19:59:22  robspr1
  * - add execution of special mail
  *
@@ -290,7 +293,8 @@ int ReadConf()
 				char index = *(ptr+4);
 				if((index >= '0') && (index <= '9'))
 				{
-					strncpy(account_db[index-'0'].from,ptr+6,63);
+//					strncpy(account_db[index-'0'].from,ptr+6,63);
+					sscanf(ptr + 6, "%s", account_db[index-'0'].from);
 				}
 			}
 			else if((ptr = strstr(line_buffer, "CODE")) && (*(ptr+5) == '='))
@@ -3345,7 +3349,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.29 $";
+	char cvs_revision[] = "$Revision: 1.30 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -3370,13 +3374,86 @@ int main(int argc, char **argv)
 				{
 					param++;
 					PlaySound(argv[param]);
-					exit(0);
+					return 0;
+				}
+				else if(!strcmp(argv[param], "-send"))
+				{
+					slog = 1;
+
+					if(!ReadConf())
+					{
+						return -1;
+					}
+					param++;
+					int account = atoi(argv[param]);
+					param++;
+					FILE* pipeout;
+					pipeout = fopen(SMTPFILE,"w");
+					if(pipeout == NULL)
+					{
+						return -1;
+					}
+					FILE* pipein;
+					pipein = fopen(argv[param+1],"r");
+					if(pipeout == NULL)
+					{
+						fclose(pipeout);
+						return -1;
+					}
+	
+					// check from:
+					char *ptr1, *ptr2;
+					char szFrom[80];
+					char szSmtp[80];
+					strcpy(szSmtp,account_db[account].smtp);
+					strcpy(szFrom,account_db[account].from);
+
+					if( (ptr1=strchr(account_db[account].from,'<')) )
+					{
+						if( (ptr2=strchr(ptr1,'>')) )
+						{
+							*ptr2 = '\0';
+							strcpy(szFrom,ptr1);	
+						}
+					}		
+					// check to: (and ptr1 to result)
+					if( (ptr1=strchr(argv[param],'<')) )
+					{
+						if( (ptr2=strchr(ptr1++,'>')) )
+						{
+							*ptr2 = '\0';
+						}
+					}		
+					else
+					{
+						ptr1 = argv[param];
+					}
+					fprintf(pipeout,"%s\n",szSmtp);
+					fputs("tuxmaild\n",pipeout);
+					fprintf(pipeout,"<%s>\n",szFrom);
+					fprintf(pipeout,"<%s>\n",ptr1);
+					fprintf(pipeout,"From: %s\n",szFrom);
+					fprintf(pipeout,"To: %s\n",argv[param]);
+					
+					char linebuffer[250];
+					if( fgets(linebuffer, sizeof(linebuffer), pipein))
+					{
+						fprintf(pipeout,"Subject: %s\n\n",linebuffer);
+					}
+					while(fgets(linebuffer, sizeof(linebuffer), pipein))
+					{
+						fputs(linebuffer,pipeout);
+					}	
+					fclose(pipein);
+					fclose(pipeout);
+					SendMail(account);
+					return 0;
 				}
 			}
 		}
 
 	// create daemon
-
+		
 		sscanf(cvs_revision, "%*s %s", versioninfo);
 
 		time(&tt);
