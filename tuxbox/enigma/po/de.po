@@ -1,20 +1,23 @@
+# translation of de.po to 
 # created by Enigma Language Editor 0.2
 # 			 (c) 10/2002 ole <olest@gmx.net>
 # *************************************
 # *	 use/modify on your own risk!		*
 # *************************************
+# Michael Setzer <michael.setzer@layline.de>, 2005.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: tuxbox-enigma 0.1\n"
+"Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-05-22 13:18+0200\n"
-"PO-Revision-Date: Mon Apr 25 19:53:28 CEST 2005\n"
-"Last-Translator: unknown\n"
-"Language-Team: German / Felix Domke <tmbinc@gmx.net>\n"
+"PO-Revision-Date: 2005-07-06 15:13+0200\n"
+"Last-Translator: Michael Setzer <michael.setzer@layline.de>\n"
+"Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.9.1\n"
 
 #: chk_blue2.esml:316
 msgid "FF "
@@ -38,7 +41,7 @@ msgstr ""
 
 #: default.esml:444
 msgid "motor power input difference between running and not running"
-msgstr "Unterschied der Stromaunahme zwischen bewegendem und stehendem Motor"
+msgstr "Unterschied der Stromaufnahme zwischen bewegendem und stehendem Motor"
 
 #: default.esml:408
 msgid "send the complete DiSEqC sequence twice"
@@ -126,8 +129,7 @@ msgstr "Aufnahme Endzeit:"
 
 #: default.esml:443
 msgid "Use motor input power for running detection.. else use timeout"
-msgstr ""
-"Benutze Motor-Stromaufnahme zur Bewegungserkennung oder benutze 'timeout'"
+msgstr "Benutze Motor-Stromaufnahme zur Bewegungserkennung oder benutze 'timeout'"
 
 #: default.esml:526
 msgid "no circ polariz."
@@ -976,7 +978,7 @@ msgstr "Zähler(Bewegung)"
 
 #: default.esml:514
 msgid "enable/disable initiate network search"
-msgstr "Netzwerksuche ein/ausschalten"
+msgstr "Netzwerksuche ein-/ausschalten"
 
 #: default.esml:630
 msgid "Guard:"
@@ -1102,8 +1104,7 @@ msgstr "(0..9, links, rechts, OK)"
 
 #: default.esml:410
 msgid "swaps committed and uncommitted DiSEqC Commands"
-msgstr ""
-"Vertausche 'committed' und 'uncommitted' Kommandos beim Senden(Reihenfolge)"
+msgstr "Vertausche 'committed' und 'uncommitted' Kommandos beim Senden(Reihenfolge)"
 
 #: default.esml:896
 msgid "vol-"
@@ -1218,7 +1219,7 @@ msgstr "Verbinde..."
 
 #: lib/dvb/servicemp3.cpp:397
 msgid "buffering..."
-msgstr "puffern..."
+msgstr "Puffern..."
 
 #: lib/dvb/servicemp3.cpp:553
 msgid "playing..."
@@ -1277,7 +1278,7 @@ msgstr "Keine Beschreibung verfügbar"
 
 #: lib/gui/textinput.cpp:19
 msgid "enable/disable capslock"
-msgstr "Großbuchstaben an/ausschalten"
+msgstr "Großbuchstaben ein-/ausschalten"
 
 #: lib/gui/textinput.cpp:20
 msgid "put numbers before/after characters"
@@ -1333,7 +1334,7 @@ msgstr "Romantik"
 
 #: src/channelinfo.cpp:74
 msgid "Serious"
-msgstr "Serien"
+msgstr "Drama"
 
 #: src/channelinfo.cpp:74
 msgid "Adult"
@@ -1663,7 +1664,7 @@ msgstr "Bouquet Typ"
 
 #: src/enigma_bouquet.cpp:21
 msgid "TV"
-msgstr ""
+msgstr "TV"
 
 #: src/enigma_bouquet.cpp:22
 msgid "Radio"
@@ -1707,7 +1708,7 @@ msgstr "Services sperren/entsperren"
 
 #: src/enigma_bouquet.cpp:48
 msgid "lock,unlock services (parental locking)"
-msgstr "Services sperren,entsperren (Jugendschutz)"
+msgstr "Services sperren/entsperren (Jugendschutz)"
 
 #: src/enigma_ci.cpp:29
 msgid "Common Interface Modules"
@@ -1751,7 +1752,7 @@ msgstr "Anhaken, wenn das CI mehrere Sender gleichzeitig entschlüsseln kann"
 
 #: src/enigma_ci.cpp:166 src/enigma_ci.cpp:172
 msgid "resetting....please wait"
-msgstr "Resette... bitte warten"
+msgstr "Resette... Bitte warten"
 
 #: src/enigma_ci.cpp:218
 msgid "Common Interface Module - mmi"
@@ -1942,7 +1943,7 @@ msgstr "Laustärke (leiser)"
 
 #: src/enigma_main.cpp:115 src/enigma_main.cpp:172
 msgid "toggle mute flag"
-msgstr "Stumm an/aus"
+msgstr "Stumm ein/aus"
 
 #: src/enigma_main.cpp:117 src/enigma_main.cpp:130
 msgid "stop playback"
@@ -2054,15 +2055,15 @@ msgstr "Tonwahl"
 
 #: src/enigma_main.cpp:660 src/enigma_main.cpp:842
 msgid "   Left Mono  >"
-msgstr "Links Mono >"
+msgstr "Links Mono  >"
 
 #: src/enigma_main.cpp:661 src/enigma_main.cpp:843
 msgid "<  Stereo  >"
-msgstr ""
+msgstr "<  Stereo  >"
 
 #: src/enigma_main.cpp:662 src/enigma_main.cpp:844
 msgid "<  Right Mono  "
-msgstr "< Rechts Mono"
+msgstr "<  Rechts Mono"
 
 #: src/enigma_main.cpp:690
 msgid "Audiotrack(AC3)"
@@ -2103,7 +2104,7 @@ msgstr "Sender:"
 #: src/enigma_main.cpp:1159
 #, c-format
 msgid "Please wait while the motor is turning to %d.%d°%c ...."
-msgstr "Bitte warten... der Motor dreht nach %d.%d°%c..."
+msgstr "Bitte warten... Der Motor dreht nach %d.%d°%c..."
 
 #: src/enigma_main.cpp:1159
 msgid "Message"
@@ -2300,8 +2301,7 @@ msgstr "Sind Sie sicher?"
 
 #: src/enigma_main.cpp:5084
 msgid "please wait until the timer has started the recording (max 10 seconds)"
-msgstr ""
-"Bitte warten bis der Timer die Aufnahme gestartet hat (max. 10 Sekunden)"
+msgstr "Bitte warten bis der Timer die Aufnahme gestartet hat (max. 10 Sekunden)"
 
 #: src/enigma_main.cpp:5085
 msgid "information"
@@ -2314,8 +2314,7 @@ msgstr ""
 "konnte."
 
 #: src/enigma_main.cpp:5739
-msgid ""
-"Record stopped due to full harddisk. Delete some recordings and try again."
+msgid "Record stopped due to full harddisk. Delete some recordings and try again."
 msgstr ""
 "Aufnahme gestoppt, weil kein Speicherplatz mehr vorhanden ist. Nach "
 "freimachen von Speicherplatz (löschen von Aufnahmen) nochmal versuchen."
@@ -3082,8 +3081,7 @@ msgstr "Neu berechnen"
 
 #: src/rotorconfig.cpp:457
 msgid "recalculate stored positions rel. to current pos"
-msgstr ""
-"Gespeicherte Positionen in Relation zur derzeitigen Position neu berechnen"
+msgstr "Gespeicherte Positionen in Relation zur derzeitigen Position neu berechnen"
 
 #: src/rotorconfig.cpp:458
 msgid "set east limit"
@@ -3647,8 +3645,7 @@ msgstr ""
 "gewünschte Ziel manuell auswählen und OK drücken"
 
 #: src/scan.cpp:443
-msgid ""
-"A valid transponder has been found. Verify that the right network is selected"
+msgid "A valid transponder has been found. Verify that the right network is selected"
 msgstr ""
 "Ein gültiger Transponder wurde gefunden. Bestätigen, dass das richtige "
 "Netzwerk gewählt ist."
@@ -3854,8 +3851,7 @@ msgstr "kein DVB"
 
 #: src/scan.cpp:1662
 msgid "don't read PAT/PMT/SDT for this service (only use cached pids)"
-msgstr ""
-"keine DVB Tabellen (PAT/PMT/SDT) beim umschalten auf diesen Sender auswerten"
+msgstr "keine DVB Tabellen (PAT/PMT/SDT) beim umschalten auf diesen Sender auswerten"
 
 #: src/scan.cpp:1668
 msgid "use sdt"
@@ -4074,8 +4070,7 @@ msgstr "Bouquet automatisch wechseln"
 
 #: src/setup_extra.cpp:90
 msgid "change into next bouquet when end of current bouquet is reached"
-msgstr ""
-"Ins nächste Bouquet wechseln, wenn das Ende des aktuellen erreicht ist."
+msgstr "Ins nächste Bouquet wechseln, wenn das Ende des aktuellen erreicht ist."
 
 #: src/setup_extra.cpp:181
 msgid ""
@@ -4180,8 +4175,7 @@ msgstr ""
 "gefunden werden"
 
 #: src/setup_harddisk.cpp:585
-msgid ""
-"sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
+msgid "sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
 msgstr ""
 "Programm 'reiserfsck' zum Überprüfen des reiser Dateisystems konnte nicht "
 "gefunden werden."
@@ -5232,8 +5226,7 @@ msgstr "Die neue Endzeit ist nun eingestellt"
 
 #: src/timer.cpp:2491
 msgid "The event has already finished... you can not change endtime!"
-msgstr ""
-"Dieser Eintrag ist bereits beendet... Endzeit kann nicht geändern werden!"
+msgstr "Dieser Eintrag ist bereits beendet... Endzeit kann nicht geändern werden!"
 
 #: src/timer.cpp:2513
 msgid ""
@@ -5360,8 +5353,7 @@ msgstr "Übertrage Image..."
 
 #: src/upgrade.cpp:307
 msgid "Please select version to upgrade or LAME! to abort"
-msgstr ""
-"Bitte gewünschte Version zur Aktualisierung wählen oder mit LAME! abbrechen"
+msgstr "Bitte gewünschte Version zur Aktualisierung wählen oder mit LAME! abbrechen"
 
 #: src/upgrade.cpp:428 src/upgrade.cpp:510 src/upgrade.cpp:524
 msgid "Error!"
@@ -5593,3 +5585,4 @@ msgstr ""
 #: src/time_settings.cpp:72
 msgid "time correction change error"
 msgstr "Fehler beim Ändern der Zeitkorrektur"
+
