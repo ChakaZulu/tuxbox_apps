@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0052)http://vthr.videolan.org/~dionoea/april/activex.html -->
+<HTML>
+<HEAD>
+<TITLE>WEBXTV</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=windows-1252">
+<META content="MSHTML 6.00.2900.2668" name=GENERATOR>
+<SCRIPT language=JScript>
+var ip = "192.168.1.5";
+var status = "stopped";
+var service = "";
+function init2(share, numCASys, caSysName, caSysStatus) 
+{
+	if (document.service != data.vlcparms)
+	{
+		status = "play";
+		document.service = data.vlcparms;
+		play();
+	}
+}
+function headerUpdateEPGData(serviceName, nowT, nowD, nowSt, nextT, nextD, nextSt)
+{
+}
+function headerUpdateStatusBar(vpid, apid, ip, lock, upTime, agc, snr, ber) 
+{
+}
+function headerUpdateVolumeBar(volume, mute)
+{
+}
+function headerUpdateChannelStatusBar(dolby, crypt, format) 
+{
+}
+function headerUpdateRecording(recording) 
+{
+}
+function init()
+{
+	update();
+}
+function update()
+{
+	data.location = "/data";
+	setTimeout("update()", 5000);
+}
+function go(targetURL)
+{
+	var options = new Array(":input-repeat");
+	document.vlc.stop();
+	document.vlc.addTarget(targetURL, options, 4+8, -666);
+}
+function play()
+{
+	if (data.vlcparms)
+		go(data.vlcparms);
+	else
+		setTimeout("play()", 500);
+}
+</SCRIPT>
+</HEAD>
+<BODY onLoad="init()">
+<TABLE>
+  <TBODY>
+  <TR>
+    <TD>
+      <OBJECT id=vlc height="476" width="634" classid=clsid:E23FE9C6-778E-49D4-B537-38FCDE4887D8 events="True">
+      	<PARAM NAME="Src" VALUE="">
+      	<PARAM NAME="ShowDisplay" VALUE="True">
+      	<PARAM NAME="Loop" VALUE="False">
+      	<PARAM NAME="AutoPlay" VALUE="False">
+      </OBJECT>
+    </TD>
+  </TR>
+  <tr>
+		<td><iframe name="data" src="blank" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>
+	</tr>
+	</TBODY>
+</TABLE>
+</BODY>
+</HTML>

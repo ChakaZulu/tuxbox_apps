@@ -3957,6 +3957,16 @@ static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPCon
 	return result;
 }
 
+static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString result = readFile(TEMPLATE_DIR + "webxtv.tmp");
+
+	return result;
+}
+
 #ifndef DISABLE_FILE
 extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 #endif
@@ -4196,6 +4206,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
 	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
+	dyn_resolver->addDyn("GET", "/webxtv", webxtv, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg, lockWeb);
 	dyn_resolver->addDyn("GET", "/getcurrentepg", getcurepg, lockWeb);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG, lockWeb);
