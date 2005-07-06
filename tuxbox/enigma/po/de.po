@@ -1,4 +1,5 @@
 # translation of de.po to 
+# translation of de.po to
 # created by Enigma Language Editor 0.2
 # 			 (c) 10/2002 ole <olest@gmx.net>
 # *************************************
@@ -11,13 +12,13 @@ msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-05-22 13:18+0200\n"
-"PO-Revision-Date: 2005-07-06 15:13+0200\n"
-"Last-Translator: Michael Setzer <michael.setzer@layline.de>\n"
-"Language-Team:  <de@li.org>\n"
+"PO-Revision-Date: 2005-07-06 15:44+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.9.1\n"
+"Last-Translator: Michael Setzer <michael.setzer@layline.de>\n"
+"Language-Team:  <de@li.org>\n"
 
 #: chk_blue2.esml:316
 msgid "FF "
@@ -2739,7 +2740,7 @@ msgstr "Satellitenfinder öffnen"
 
 #: src/enigma_scan.cpp:50
 msgid "Motor Setup"
-msgstr "Motor"
+msgstr "Motorkonfiguration"
 
 #: src/enigma_scan.cpp:50
 msgid "open Motor Setup"
@@ -5394,7 +5395,7 @@ msgstr "Kann flashimage.img nicht lesen!"
 #: src/upgrade.cpp:572 src/upgrade.cpp:585 src/upgrade.cpp:708
 #: src/upgrade.cpp:719
 msgid "Flash"
-msgstr ""
+msgstr "Flash"
 
 #: src/upgrade.cpp:585
 msgid "flashimage.img has filesize of 0byte!"
@@ -5402,7 +5403,7 @@ msgstr "flashimage.img ist 0 Byte groß!"
 
 #: src/upgrade.cpp:615 src/upgrade.cpp:693
 msgid "Please wait... do NOT switch off the receiver!"
-msgstr "Bitte warten... das Gerät NICHT ausschalten!"
+msgstr "Bitte warten... Das Gerät NICHT ausschalten!"
 
 #: src/upgrade.cpp:616 src/upgrade.cpp:694
 msgid "upgrade in progress"
