@@ -2,14 +2,14 @@
 <!-- saved from url=(0052)http://vthr.videolan.org/~dionoea/april/activex.html -->
 <HTML>
 <HEAD>
-<TITLE>WEBXTV</TITLE>
+<TITLE>WEB-X-TV</TITLE>
 <META http-equiv=Content-Type content="text/html; charset=windows-1252">
-<META content="MSHTML 6.00.2900.2668" name=GENERATOR>
-<SCRIPT language=JScript>
+<META content="MSHTML 6.00.2900.2668" name="GENERATOR">
+<SCRIPT language="JScript">
 var ip = "192.168.1.5";
 var status = "stopped";
 var service = "";
-function init2(share, numCASys, caSysName, caSysStatus) 
+function headerUpdateEPGData(serviceName, nowT, nowD, nowSt, nextT, nextD, nextSt)
 {
 	if (document.service != data.vlcparms)
 	{
@@ -17,9 +17,6 @@ function init2(share, numCASys, caSysName, caSysStatus)
 		document.service = data.vlcparms;
 		play();
 	}
-}
-function headerUpdateEPGData(serviceName, nowT, nowD, nowSt, nextT, nextD, nextSt)
-{
 }
 function headerUpdateStatusBar(vpid, apid, ip, lock, upTime, agc, snr, ber) 
 {
