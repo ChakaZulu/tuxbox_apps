@@ -3963,6 +3963,7 @@ static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConne
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "webxtv.tmp");
+	result.strReplace("#ZAPDATA#", getZapContent2(ZAPMODETV, zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false));
 
 	return result;
 }

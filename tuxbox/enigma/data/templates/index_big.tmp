@@ -109,7 +109,11 @@
 				setTimeout("data.location.reload()", 500);
 				vlcStop();
 				setTimeout("vlcStart()", 1000);
-			}	
+			}
+			function webxtv()
+			{
+				NewWindow("/webxtv", "tv", "780", "720", "no", "0");
+			}
 		</script>
 	</head>
 	<body id="index_big" style="margin: 0px; border: 0px; padding: 0px" background="bg.png" onLoad="init()">
@@ -231,7 +235,14 @@
 				<table id="channavi" border="0" height="22px" width="780" cellspacing="0" cellpadding="0">
 				<tbody align="left">
 				<tr>
-					<td width="120">&nbsp;</td>
+					<td width="120" align="center">
+						<script>
+						if (MS)
+							document.writeln('<a href="javascript:webxtv()">WEB-X-TV</a>');
+						else
+							document.writeln('&nbsp;');
+						</script>
+					</td>
 					<td align="left">
 						<input name="Audio" type="button" style="width: 100px; height:22px; background-color: #FFCC33;" value="Audio" onclick=javascript:selectAudio()><input name="Video" type="button" style="width: 100px;height:22px; background-color: #FFCC33;" value="Video" onclick="javascript:selectSubChannel()"><input name="EPG" type="button" style="width: 100px;height:22px;background-color: #1FCB12;" value="EPG" onclick="javascript:openEPG()"><input name="Info" type="button" style="width: 100px;height:22px;background-color: #95077C;" value="Info" onclick="javascript:openChannelInfo()"><input name="Stream Info" type="button" style="width: 100px;height:22px;background-color: #F1EF1D;" value="Stream Info" onclick=javascript:openSI()></td>
 				</tr>
@@ -259,7 +270,7 @@
 			<td colspan="2">
 				<table id="titletable" width="100%" height="26px" border="0" cellspacing="0" cellpadding="0" background="mepg_grad.png">
 				<tr>
-					<td width="120px" background="mepg_grad.png">&nbsp;</td>
+					<td width="120px" align="center" background="mepg_grad.png">&nbsp;</td>
 					<td id="title" align="left" valign="middle" background="mepg_grad.png">&nbsp;</td>
 				</tr>
 				</table>
