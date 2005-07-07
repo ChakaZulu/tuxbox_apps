@@ -374,8 +374,13 @@ static void getIP( char *dev, __u32 &ip, __u32 &mask)
 	close(fd);
 }
 
-eZapNetworkSetup::eZapNetworkSetup():
-	eWindow(0)
+eZapNetworkSetup::eZapNetworkSetup()
+	:eWindow(0)
+{
+	init_eZapNetworkSetup();
+}
+
+void eZapNetworkSetup::init_eZapNetworkSetup()
 {
 	setText(_("Communication setup"));
 	cmove(ePoint(130, 110));
@@ -938,6 +943,11 @@ static void errorMessage(const eString message, int type=0)
 
 eNFSSetup::eNFSSetup()
 	:eWindow(0), timeout(eApp), mountContainer(0)
+{
+	init_eNFSSetup();
+}
+
+void eNFSSetup::init_eNFSSetup()
 {
 	bool have_cifs=false;
 	bool have_smbfs=false;

@@ -34,7 +34,13 @@ void eZapRCSetup::update()
 	eRCInput::getInstance()->config.set(rdelay, rrate);
 }
 
-eZapRCSetup::eZapRCSetup(): eWindow(0)
+eZapRCSetup::eZapRCSetup()
+	:eWindow(0)
+{
+	init_eZapRCSetup();
+}
+
+void eZapRCSetup::init_eZapRCSetup()
 {
 	setText(_("Remotecontrol Setup"));
 	cmove(ePoint(140, 136));

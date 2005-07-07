@@ -33,6 +33,7 @@ class eZapRCSetup: public eWindow
 	void update();
 	void setStyle();
 	void nextField(int *);
+	void init_eZapRCSetup();
 public:
 	eZapRCSetup();
 	~eZapRCSetup();

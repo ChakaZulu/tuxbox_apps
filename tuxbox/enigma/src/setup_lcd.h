@@ -30,6 +30,7 @@ class eZapLCDSetup: public eWindow
 	void standbyChanged( int );
 	void invertedChanged( int );
 	void update(int brightness, int contrast);
+	void init_eZapLCDSetup();
 public:
 	eZapLCDSetup();
 	~eZapLCDSetup();

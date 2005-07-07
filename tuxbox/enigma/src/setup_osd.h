@@ -24,6 +24,7 @@ private:
 	void gammaChanged( int );
 	void pluginPositionPressed();
 	void okPressed();
+	void init_eZapOsdSetup();
 public:
 	eZapOsdSetup();
 	~eZapOsdSetup();

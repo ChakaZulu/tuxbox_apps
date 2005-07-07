@@ -28,7 +28,7 @@ private:
 	void okPressed();
 	void showTestpicture();
 	int eventHandler( const eWidgetEvent &e );
-
+	void init_eZapVideoSetup();
 public:
 	eZapVideoSetup();
 	~eZapVideoSetup();

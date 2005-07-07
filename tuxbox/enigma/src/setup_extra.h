@@ -19,6 +19,7 @@ class eExpertSetup: public eSetupWindow
 	void colorbuttonsChanged(bool);
 	void reinitializeHTTPServer(bool);
 	void fastZappingChanged(bool b);
+	void init_eExpertSetup();
 public:
 	eExpertSetup();
 };

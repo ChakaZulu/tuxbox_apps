@@ -17,6 +17,11 @@
 eZapRFmodSetup::eZapRFmodSetup()
 	:eWindow(0)
 {
+	init_eZapRFmodSetup();
+}
+
+void eZapRFmodSetup::init_eZapRFmodSetup()
+{
 //	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	setText(_("UHF-Modulator Setup"));

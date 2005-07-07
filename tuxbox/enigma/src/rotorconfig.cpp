@@ -14,9 +14,13 @@
 #include <lib/dvb/edvb.h>
 #include <lib/system/info.h>
 
-
 RotorConfig::RotorConfig(eLNB *lnb )
 	:lnb(lnb)
+{
+	init_RotorConfig(lnb);
+}
+
+void RotorConfig::init_RotorConfig(eLNB *lnb )
 {
 #ifndef DISABLE_LCD
 	LCDTitle=parent->LCDTitle;
@@ -388,6 +392,11 @@ eAutoInitP0<rotorMenuActions> i_rotorMenuActions(eAutoInitNumbers::actions, "rot
 
 eRotorManual::eRotorManual(eLNB *lnb)
 	:lnb(lnb), retuneTimer(new eTimer(eApp)), transponder(0), changed(0)
+{
+	init_eRotorManual(lnb);
+}
+
+void eRotorManual::init_eRotorManual(eLNB *lnb)
 {
 	lMode = new eLabel(this);
 	lMode->setName("lMode");

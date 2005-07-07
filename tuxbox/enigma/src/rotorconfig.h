@@ -33,6 +33,7 @@ class RotorConfig: public eWindow
 	void gotoXXChanged( int );
 	void useRotorInPowerChanged( int );
 	void setLNBData( eLNB *lnb );
+	void init_RotorConfig( eLNB *lnb );
 public:
 	RotorConfig( eLNB *lnb );
 };
@@ -58,6 +59,7 @@ class eRotorManual: public eWindow
 	void tpChanged(eListBoxEntryText *tp);
 	void modeChanged( eListBoxEntryText *e);
 	void nextfield(int*);
+	void init_eRotorManual(eLNB *lnb);
 public:
 	int changed;
 	eRotorManual(eLNB *lnb);

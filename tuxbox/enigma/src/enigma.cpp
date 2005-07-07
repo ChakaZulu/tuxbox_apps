@@ -108,6 +108,11 @@ eZap::eZap(int argc, char **argv)
 	,httpd(0), serialhttpd(0), dyn_resolver(0), fileresolver(0)
 	,xmlrpcresolver(0), logresolver(0), serviceSelector(0), tts_fd(-1)
 {
+	init_eZap(argc, argv);
+}
+
+void eZap::init_eZap(int argc, char **argv)
+{
 	int bootcount;
 
 #ifndef DISABLE_LCD

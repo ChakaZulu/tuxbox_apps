@@ -1529,6 +1529,11 @@ eZapMain::eZapMain()
 	,state(0)
 	,wasSleeping(0)
 {
+	init_main();
+}
+
+void eZapMain::init_main()
+{
 	if (!instance)
 		instance=this;
 
@@ -1879,6 +1884,11 @@ void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 #endif
 
 eZapMain::~eZapMain()
+{
+	exit_main();
+}
+
+void eZapMain::exit_main()
 {
 #ifndef DISABLE_FILE
 	if ( state & stateRecording )
@@ -7008,6 +7018,11 @@ void eZapMain::wakeUp()
 
 eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *lcdTitle, eWidget *lcdElement)
 : eListBoxWindow<eListBoxEntryText>(_("Service Menu"), 12, 400, true), ref(ref)
+{
+	init_eServiceContextMenu(ref, path, lcdTitle, lcdElement);
+}
+
+void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *lcdTitle, eWidget *lcdElement)
 {
 #ifndef DISABLE_LCD
 	setLCD(lcdTitle,lcdElement);

@@ -19,6 +19,11 @@
 enigmaCI::enigmaCI()
 	:ci_messages(eApp,1), ci2_messages(eApp,1)
 {
+	init_enigmaCI();
+}
+
+void enigmaCI::init_enigmaCI()
+{
 	CONNECT(ci_messages.recv_msg, enigmaCI::updateCIinfo );
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 

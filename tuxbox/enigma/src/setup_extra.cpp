@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.24 2005/02/09 12:35:54 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.25 2005/07/07 15:23:03 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -31,6 +31,11 @@
 
 eExpertSetup::eExpertSetup()
 	:eSetupWindow(_("Expert Setup"), 10, 400)
+{
+	init_eExpertSetup();
+}
+
+void eExpertSetup::init_eExpertSetup()
 {
 	cmove(ePoint(170, 115));
 

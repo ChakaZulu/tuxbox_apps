@@ -428,6 +428,8 @@ private:
 	void handleNVODService(SDTEntry *sdtentry);
 
 	// actions
+	void init_main();
+	void exit_main();
 public:
 	void showServiceSelector(int dir, int newTarget=0 );
 #ifndef DISABLE_FILE
@@ -655,6 +657,7 @@ class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
 {
 	eServiceReference ref;
 	void entrySelected(eListBoxEntryText *s);
+	void init_eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *LCDTitle=0, eWidget *LCDElement=0);
 public:
 	int getCount() { return list.getCount(); }
 	eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *LCDTitle=0, eWidget *LCDElement=0);

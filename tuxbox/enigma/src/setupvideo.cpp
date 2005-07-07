@@ -19,7 +19,13 @@
 
 #include <src/enigma_lcd.h>
                                                
-eZapVideoSetup::eZapVideoSetup(): eWindow(0)
+eZapVideoSetup::eZapVideoSetup()
+	:eWindow(0)
+{
+	init_eZapVideoSetup();
+}
+
+void eZapVideoSetup::init_eZapVideoSetup()
 {
 /*	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "setup.video"))

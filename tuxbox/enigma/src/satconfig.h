@@ -69,6 +69,7 @@ class eSatelliteConfigurationManager: public eWindow
 	
 		// according to "complexity" (works only for complexity <= 2, of course)
 	void setSimpleDiseqc(eSatellite *s, int diseqcnr);
+	void init_eSatelliteConfigurationManager();
 public:
 	void extSetComplexity(int complexity);
 	eSatelliteConfigurationManager();
@@ -130,6 +131,7 @@ class eDiSEqCPage : public eWidget
 	void lnbChanged( eListBoxEntryText* );
 	void DiSEqCModeChanged( eListBoxEntryText* );
 	void numSelected(int*);
+	void init_eDiSEqCPage( eWidget *parent, eSatellite *sat );
 public:
 	eDiSEqCPage( eWidget *parent, eSatellite *sat );
 };

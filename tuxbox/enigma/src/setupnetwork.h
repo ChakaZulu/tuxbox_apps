@@ -43,6 +43,7 @@ class eNFSSetup: public eWindow
 	void mountPressed();
 	void umountPressed();
 	void mountTimeout();
+	void init_eNFSSetup();
 public:
 	eNFSSetup();
 	~eNFSSetup();
@@ -85,6 +86,7 @@ private:
 #ifndef DISABLE_NFS
 	void nfsPressed();
 #endif
+	void init_eZapNetworkSetup();
 public:
 	eZapNetworkSetup();
 	~eZapNetworkSetup();

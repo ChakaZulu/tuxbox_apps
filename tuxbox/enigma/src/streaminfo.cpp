@@ -222,12 +222,19 @@ void siTags::willShow()
 class siPID: public eWidget
 {
 	eLabel *service_name[2], *service_provider[2], *apid[2], *vpid[2], *pcrpid[2], *pmtpid[2], *tpid[2], *vform[2], *tsid[2], *onid[2], *sid[2];
+	void init_siPID(decoderParameters parms, const eService *service, eWidget *parent);
 public:
 	siPID(decoderParameters parms, const eService *service, eWidget *parent);
 	void redrawWidget();
 };
 
-siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent): eWidget(parent)
+siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
+	:eWidget(parent)
+{
+	init_siPID(parms, cservice, parent);
+}
+
+void siPID::init_siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)

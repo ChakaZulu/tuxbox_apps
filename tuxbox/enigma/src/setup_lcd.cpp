@@ -44,7 +44,13 @@ void eZapLCDSetup::update(int brightness, int contrast)
 	eDBoxLCD::getInstance()->setLCDParameter(brightness, contrast);
 }
 
-eZapLCDSetup::eZapLCDSetup(): eWindow(0)
+eZapLCDSetup::eZapLCDSetup()
+	:eWindow(0)
+{
+	init_eZapLCDSetup();
+}
+
+void eZapLCDSetup::init_eZapLCDSetup()
 {
 	setText(_("LC-Display Setup"));
 	move(ePoint(150, 126));

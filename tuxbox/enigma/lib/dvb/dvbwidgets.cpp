@@ -11,6 +11,11 @@
 eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	:eWidget(parent), type(type), edit(edit)
 {
+	init_eTransponderWidget(parent, edit, type);
+}
+
+void eTransponderWidget::init_eTransponderWidget(eWidget *parent, int edit, int type)
+{
 #ifndef DISABLE_LCD
 	LCDTitle=parent->LCDTitle;
 	LCDElement=parent->LCDElement;

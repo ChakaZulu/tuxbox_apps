@@ -180,6 +180,11 @@ PluginOffsetScreen::PluginOffsetScreen()
 eZapOsdSetup::eZapOsdSetup()
 	:eWindow(0)
 {
+	init_eZapOsdSetup();
+}
+
+void eZapOsdSetup::init_eZapOsdSetup()
+{
 	setText(_("OSD Settings"));
 	cmove(ePoint(140, 125));
 	cresize(eSize(460, 350));

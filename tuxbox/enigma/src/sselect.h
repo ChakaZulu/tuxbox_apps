@@ -101,6 +101,7 @@ private:
 	void ResetBrowseChar();
 	void gotoChar(char c);
 	void updateCi();
+	void init_eServiceSelector();
 public:
 	void EPGUpdated();
 	int eventHandler(const eWidgetEvent &event);

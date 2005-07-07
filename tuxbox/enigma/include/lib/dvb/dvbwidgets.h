@@ -28,6 +28,7 @@ class eTransponderWidget: public eWidget
 	void nextField0(int *);
 	void updated1(eListBoxEntryText *);
 	void updated2(int);
+	void init_eTransponderWidget(eWidget *parent, int edit, int type);
 public:
 	enum type
 	{

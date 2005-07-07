@@ -16,6 +16,11 @@
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	:refresh(0)
 {
+	init_eSatelliteConfigurationManager();
+}
+
+void eSatelliteConfigurationManager::init_eSatelliteConfigurationManager()
+{
 	lSatPos = new eLabel(this);
 	lSatPos->setName("lSatPos");
 
@@ -1125,6 +1130,11 @@ void eLNBPage::numSelected(int*)
 
 eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
 	:eWidget(parent), sat(sat)
+{
+	init_eDiSEqCPage(parent, sat);
+}
+
+void eDiSEqCPage::init_eDiSEqCPage( eWidget *parent, eSatellite *sat)
 {
 #ifndef DISABLE_LCD
 	LCDTitle=parent->LCDTitle;

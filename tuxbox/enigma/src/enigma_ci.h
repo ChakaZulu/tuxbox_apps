@@ -36,6 +36,7 @@ private:
 	void gotCI2infoText(const char*);
 	void updateCIinfo(const char* const&);
 	void updateCI2info(const char* const&);
+	void init_enigmaCI();
 public:
 	enigmaCI();
 	~enigmaCI();

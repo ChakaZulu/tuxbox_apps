@@ -201,6 +201,7 @@ class ManualPIDWindow: public eWindow
 	void setPIDs();
 	void store();
 	void hexdec();
+	void init_ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &ref = eServiceReferenceDVB());
 public:
 	ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &ref = eServiceReferenceDVB() );
 	~ManualPIDWindow();

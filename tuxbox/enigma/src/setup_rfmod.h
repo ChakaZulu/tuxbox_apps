@@ -30,6 +30,7 @@ class eZapRFmodSetup: public eWindow
 
 	int chan,soundenable,ssc,finetune,standby;
 
+	void init_eZapRFmodSetup();
 public:
 	eZapRFmodSetup();
 };

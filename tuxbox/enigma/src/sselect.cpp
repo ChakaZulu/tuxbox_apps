@@ -1682,6 +1682,11 @@ eServiceSelector::eServiceSelector()
 	,BrowseChar(0), BrowseTimer(eApp), ciDelay(eApp), movemode(0)
 	,editMode(0), plockmode(0)
 {
+	init_eServiceSelector();
+}
+
+void eServiceSelector::init_eServiceSelector()
+{
 	ci = new eChannelInfo(this);
 	ci->setName("channelinfo");
 

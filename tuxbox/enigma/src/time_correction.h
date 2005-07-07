@@ -20,6 +20,7 @@ class eTimeCorrectionEditWindow: public eWindow
 	void monthChanged( eListBoxEntryText* );
 	void yearChanged( eListBoxEntryText* );
 	void fieldSelected(int *){focusNext(eWidget::focusDirNext);}
+	void init_eTimeCorrectionEditWindow( tsref tp );
 public:
 	eTimeCorrectionEditWindow( tsref tp );
 };

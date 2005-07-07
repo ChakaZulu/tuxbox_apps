@@ -46,6 +46,7 @@ class eZap: public eApplication, public Object
 	std::list<void*> plugins;
 
 	eZapMain *main;
+	void init_eZap(int argc, char **argv);
 public:
 	enum
 	{

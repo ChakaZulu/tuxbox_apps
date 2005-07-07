@@ -5,6 +5,11 @@
 eTimeCorrectionEditWindow::eTimeCorrectionEditWindow( tsref tp )
 	:updateTimer(eApp), transponder(tp)
 {
+	init_eTimeCorrectionEditWindow(tp);
+}
+
+void eTimeCorrectionEditWindow::init_eTimeCorrectionEditWindow( tsref tp )
+{
 	setText(_("Time Correction"));
 	move( ePoint(100,100) );
 	cresize( eSize(440,290 ) );

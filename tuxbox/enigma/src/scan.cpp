@@ -1496,6 +1496,11 @@ ManualPIDWindow::ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &r
 	:eWindow(0), hex(false), transponder(*eDVB::getInstance()->settings->getTransponders())
 	,service(ref), pat(0), nit(0)
 {
+	init_ManualPIDWindow(tp,ref);
+}
+
+void ManualPIDWindow::init_ManualPIDWindow(eTransponder *tp, const eServiceReferenceDVB &ref )
+{
 	if ( tp )
 		transponder = *tp;
 	setText(_("Manual PIDs"));
