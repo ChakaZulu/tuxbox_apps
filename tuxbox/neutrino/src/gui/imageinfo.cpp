@@ -139,7 +139,7 @@ void CImageInfo::paint()
 	ypos += (iheight >>1);
 
 	// paint PIG
-	paint_pig( width-240,  y+10 , 240, 190);
+	paint_pig( width-170, y, 215, 170);
 
 	CConfigFile config('\t');
 	config.loadConfig("/.version");
@@ -165,15 +165,15 @@ void CImageInfo::paint()
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_VERSION));
 	paintLine(xpos+120, font_info, releaseCycle);
 
-	ypos += iheight+10;
+	ypos += iheight;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_CREATOR));
 	paintLine(xpos+120, font_info, creator);
 
-	ypos += iheight;
+	ypos += iheight+15;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_HOMEPAGE));
 	paintLine(xpos+120, font_info, homepage);
 
-	ypos += iheight+10;
+	ypos += iheight;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_DOKUMENTATION));
 	paintLine(xpos+120, font_info, "http://wiki.tuxbox.org");
 
