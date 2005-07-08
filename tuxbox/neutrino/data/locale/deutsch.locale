@@ -374,6 +374,15 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menu Titel
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
+imageinfo.creator Ersteller:
+imageinfo.date Datum:
+imageinfo.dokumentation Anleitung:
+imageinfo.forum Forum:
+imageinfo.head Image Informationen
+imageinfo.homepage Homepage:
+imageinfo.image Image:
+imageinfo.license Lizenz:
+imageinfo.version Version:
 infoviewer.epgnotload Informationen noch nicht geladen...
 infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.eventlist EPG/Vorschau
@@ -742,6 +751,7 @@ screensetup.upperleft rot = Bildrand oben, links
 servicemenu.getplugins Plugins neu laden
 servicemenu.getplugins_hint Plugins werden neu geladen,\nbitte warten...
 servicemenu.head Service
+servicemenu.imageinfo Image Informationen
 servicemenu.reload Kanallisten neu laden
 servicemenu.reload_hint Kanallisten werden neu geladen,\nbitte warten...
 servicemenu.restart Neutrino neu starten

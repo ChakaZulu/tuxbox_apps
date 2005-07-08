@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.49 2005/06/23 18:52:25 barf Exp $
+ * $Id: locals_intern.h,v 1.50 2005/07/08 21:17:14 mogway Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -401,6 +401,15 @@ const char * locale_real_names[] =
 	"fontsize.menu_title",
 	"gtxalpha.alpha1",
 	"gtxalpha.alpha2",
+	"imageinfo.creator",
+	"imageinfo.date",
+	"imageinfo.dokumentation",
+	"imageinfo.forum",
+	"imageinfo.head",
+	"imageinfo.homepage",
+	"imageinfo.image",
+	"imageinfo.license",
+	"imageinfo.version",
 	"infoviewer.epgnotload",
 	"infoviewer.epgwait",
 	"infoviewer.eventlist",
@@ -769,6 +778,7 @@ const char * locale_real_names[] =
 	"servicemenu.getplugins",
 	"servicemenu.getplugins_hint",
 	"servicemenu.head",
+	"servicemenu.imageinfo",
 	"servicemenu.reload",
 	"servicemenu.reload_hint",
 	"servicemenu.restart",

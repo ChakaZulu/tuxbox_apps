@@ -102,6 +102,7 @@
 #include "gui/timerlist.h"
 #include "gui/alphasetup.h"
 #include "gui/audioplayer.h"
+#include "gui/imageinfo.h"
 
 #if HAVE_DVB_API_VERSION >= 3
 #include "gui/movieplayer.h"
@@ -1654,6 +1655,8 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this                  , "reloadplugins" , CRCInput::RC_2));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RESTART   , true, NULL, this                  , "restart"       , CRCInput::RC_3));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker          , NULL            , CRCInput::RC_4));
+	service.addItem(GenericMenuSeparatorLine);
+	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_IMAGEINFO,  true, NULL, new CImageInfo()     , NULL, CRCInput::RC_yellow  , NEUTRINO_ICON_BUTTON_YELLOW  ), false);
 
 	//softupdate
 	if(softupdate)
@@ -1720,7 +1723,6 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem(GenericMenuSeparatorLine);
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CHECKUPDATE, true, NULL, new CFlashUpdate()));
 
-		service.addItem(GenericMenuSeparatorLine);
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UPDATE, true, NULL, updateSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	}
 }
@@ -4542,7 +4544,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 
 		g_Zapit->reinitChannels();
 
-		int result = system(mode == mode_radio 
+		int result = system(mode == mode_radio
 				    ? "wget http://127.0.0.1/control/setmode?radio > /dev/null 2>&1"
 				    : "wget http://127.0.0.1/control/setmode?tv > /dev/null 2>&1");
 		if (result)
