@@ -1,7 +1,7 @@
 <tr valign="middle">
 	<td><span class="time">#DATE# #TIME#</span></td>
 	<td>
-		<a href="javascript:record('#REFERENCE#','#START#','#DURATION#','#DESCRIPTION#','#SERVICENAME#')">
+		<a href="javascript:record('#REFERENCE#','#START#','#DURATION#','#DESCRIPTION#','#NAME#')">
 			<img src="timer.gif" border="0">
 		</a>
 	</td>

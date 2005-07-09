@@ -56,6 +56,7 @@
 #include <enigma_dyn_rotor.h>
 #include <enigma_dyn_xml.h>
 #include <enigma_dyn_misc.h>
+#include <enigma_dyn_epg.h>
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
@@ -1307,8 +1308,6 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 	return result;
 }
 
-eString getEITC(eString);
-
 static eString getZap(eString mode, eString path)
 {
 	eString result, tmp;
@@ -2328,86 +2327,6 @@ static eString getContent(eString mode, eString path, eString opts)
 	return result;
 }
 
-eString getEITC(eString result)
-{
-	eString now_time, now_duration, now_text, now_longtext,
-		next_time, next_duration, next_text, next_longtext;
-
-	EIT *eit = eDVB::getInstance()->getEIT();
-	if (eit)
-	{
-		int p = 0;
-
-		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
-		{
-			if (*event)
-			{
-				if (p == 0)
-				{
-					if (event->start_time)
-					{
-						now_time.sprintf("%s", ctime(&event->start_time));
-						now_time = now_time.mid(11, 5);
-					}
-
-					now_duration.sprintf("%d", (int)(event->duration / 60));
-				}
-				if (p == 1)
-				{
-					if (event->start_time)
-					{
- 						next_time.sprintf("%s", ctime(&event->start_time));
-						next_time = next_time.mid(11, 5);
-						next_duration.sprintf("%d", (int)(event->duration / 60));
-					}
-				}
-				LocalEventData led;
-				switch(p)
-				{
-				case 0:
-					led.getLocalData(event, &now_text, 0, &now_longtext);
-					break;
-				case 1:
-					led.getLocalData(event, &next_text, 0, &next_longtext);
-					break;
-				}
-				p++;
-		 	}
-		}
-		eit->unlock();
-	}
-
-	result.strReplace("#NOWT#", now_time);
-	if (now_duration)
-		now_duration = "(" + now_duration + ")";
-	result.strReplace("#NOWD#", now_duration);
-	result.strReplace("#NOWST#", filter_string(now_text.strReplace("\"", "'")));
-	result.strReplace("#NOWLT#", filter_string(now_longtext.strReplace("\"", "'")));
-	result.strReplace("#NEXTT#", next_time);
-	if (next_duration)
-		next_duration = "(" + next_duration + ")";
-	result.strReplace("#NEXTD#", next_duration);
-	result.strReplace("#NEXTST#", filter_string(next_text.strReplace("\"", "'")));
-	result.strReplace("#NEXTLT#", filter_string(next_longtext.strReplace("\"", "'")));
-
-	eString curService = getCurService();
-	eString curServiceRef;
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-	if (sapi)
-		curServiceRef = ref2string(sapi->service);
-	eString curSubService = getCurrentSubChannel(curServiceRef);
-	if (curSubService)
-	{
-		if (curService)
-			curService += ": " + curSubService;
-		else
-			curService = curSubService;
-	}
-	result.strReplace("#SERVICENAME#", curService);
-
-	return result;
-}
-
 static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="audio/mpegfile";
@@ -2468,302 +2387,6 @@ static eString setStreamingServiceRef(eString request, eString dirpath, eString 
 	return closeWindow(content, "", 10);
 }
 
-#define CHANNELWIDTH 200
-
-class eMEPG: public Object
-{
-	int d_min;
-	eString multiEPG;
-	int hours;
-	time_t start;
-	time_t end;
-	int tableWidth;
-	int channelWidth;
-public:
-	int getTableWidth(void)
-	{
-		return tableWidth;
-	}
-
-	time_t adjust2FifteenMinutes(time_t seconds)
-	{
-		int minutes = seconds / 60;
-		int quarterHours = minutes / 15;
-		if (minutes % 15 > 7)
-			quarterHours++;
-		return quarterHours * 15 * 60;
-	}
-
-	void getcurepg(const eServiceReference &ref)
-	{
-		// sorry.. at moment we dont show any directory.. or locked service in webif
-		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
-			return;
-
-		time_t now = time(0) + eDVB::getInstance()->time_difference;
-
-		std::stringstream result;
-		result << std::setfill('0');
-		eService* current;
-
-		eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-		if (sapi)
-		{
-			current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
-			if (current)
-			{
-				eEPGCache::getInstance()->Lock();
-				eServiceReferenceDVB &dref = (eServiceReferenceDVB&)ref;
-				const timeMap* evt = eEPGCache::getInstance()->getTimeMap(dref);
-				if (evt)
-				{
-					int tsidonid = (dref.getTransportStreamID().get()<<16)|dref.getOriginalNetworkID().get();
-					int tablePos = 0;
-					time_t tableTime = start;
-					result  << "<tr>"
-						<< "<td id=\"channel\" width=" << eString().sprintf("%d", channelWidth) << ">"
-						<< "<span class=\"channel\">"
-						<< filter_string(current->service_name)
-						<< "</span>"
-						<< "</td>";
-					tablePos += CHANNELWIDTH;
-
-					timeMap::const_iterator It;
-
-					for (It = evt->begin(); It != evt->end(); ++It)
-					{
-						eString ext_description;
-						eString short_description;
-						eString genre;
-						int genreCategory = 0; //none
-						EITEvent event(*It->second, tsidonid);
-						LocalEventData led;
-						led.getLocalData(&event, &short_description, 0, &ext_description);
-						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-						{
-							Descriptor *descriptor = *d;
-							if (descriptor->Tag() == DESCR_CONTENT)
-							{
-								genre = "";
-								genreCategory = 0;
-								ContentDescriptor *cod = (ContentDescriptor *)descriptor;
-
-								for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
-								{
-									if (genreCategory == 0)
-										genreCategory = ce->content_nibble_level_1;
-									if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
-									{
-										if (!genre)
-											genre = gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
-									}
-								}
-							}
-						}
-
-						if (!genre)
-							genre = "n/a";
-
-						time_t eventStart = adjust2FifteenMinutes(event.start_time);
-						time_t eventEnd = eventStart + adjust2FifteenMinutes(event.duration);
-
-						int eventDuration = 0;
-						int colUnits = 0;
-						if ((eventStart > end) || (eventEnd < tableTime))
-						{
-							eventDuration = 0;
-						}
-						else
-						if ((eventStart < tableTime) && (eventEnd > tableTime))
-						{
-							eventDuration = eventEnd - tableTime;
-						}
-						else
-						if (eventStart == tableTime)
-						{
-							eventDuration = adjust2FifteenMinutes(event.duration);
-						}
-						else
-						if ((eventStart > tableTime) && (eventStart < end))
-						{
-							eventDuration = eventStart - tableTime;
-							colUnits = eventDuration / 60 / 15;
-							if (colUnits == 1)
-							{
-								eventStart = tableTime;
-								eventDuration += adjust2FifteenMinutes(event.duration);
-							}
-							else
-							{
-								result << "<td colspan=" << colUnits << ">&nbsp;</td>";
-								tableTime = eventStart;
-								tablePos += colUnits * 15 * d_min;
-								eventDuration = adjust2FifteenMinutes(event.duration);
-							}
-						}
-
-						if ((eventDuration > 0) && (eventDuration < 15 * 60))
-							eventDuration = 15 * 60;
-
-						if (tableTime + eventDuration > end)
-							eventDuration = end - tableTime;
-
-						colUnits = eventDuration / 60 / 15;
-						if (colUnits > 0)
-						{
-							result  << "<td class=\"genre"
-								<< eString().sprintf("%02d", genreCategory)
-								<< "\" colspan=" << colUnits << "\">";
-#ifndef DISABLE_FILE
-							result  << "<a href=\"javascript:record('"
-								<< ref2string(ref) << "','"
-								<< event.start_time << "','"
-								<< event.duration << "','";
-							eString tmp = filter_string(short_description);
-							tmp.strReplace("\'", "\\\'");
-							tmp.strReplace("\"", "\\\"");
-							tmp.strReplace("&", "~");
-							result  << tmp << "','"
-								<< filter_string(current->service_name)
-								<< "')\"><img src=\"timer.gif\" border=0></a>"
-								<< "&nbsp;&nbsp;";
-#endif
-							tm* t = localtime(&event.start_time);
-							result  << std::setfill('0')
-								<< "<span class=\"time\">"
-								<< std::setw(2) << t->tm_mday << '.'
-								<< std::setw(2) << t->tm_mon+1 << ". - "
-								<< std::setw(2) << t->tm_hour << ':'
-								<< std::setw(2) << t->tm_min << ' '
-								<< "</span>"
-								<< "<span class=\"duration\">"
-								<< " (" << event.duration / 60 << " min)"
-								<< "</span>"
-								<< "<br>";
-							if ((eventStart <= now) && (eventEnd >= now))
-								result << "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\", \"0\", \"-1\")\'>";
-							result  << "<span class=\"event\">"
-								<< "<b>" << short_description << "</b>"
-								<< "</span>";
-							if ((eventStart <= now) && (eventEnd >= now))
-								result << "</a>";
-
-							result	<< "<br>"
-								<< "Genre: " << genre
-								<< "<br>";
-
-							if ((eventDuration >= 15 * 60) && (pdaScreen == 0))
-							{
-								result  << "<span class=\"description\">"
-									<< filter_string(ext_description)
-									<< "</span>";
-							}
-
-							result  << "</td>\n";
-							tablePos += colUnits * 15 * d_min;
-							tableTime += eventDuration;
-						}
-					}
-					if (tablePos < tableWidth)
-						result << "<td colspan=" << (tableWidth - tablePos) / d_min / 15 << ">&nbsp;</td>";
-
-					result << "</tr>\n";
-				}
-				eEPGCache::getInstance()->Unlock();
-
-				multiEPG += result.str();
-			}
-		}
-	}
-
-	eMEPG(int hours, time_t start, const eServiceReference & bouquetRef, int channelWidth)
-		:d_min((pdaScreen == 0) ? 5 : 3)  // distance on time scale for 1 minute
-		,hours(hours)   // horizontally visible hours
-		,start(start)
-		,end(start + hours * 3600)
-		,tableWidth((end - start) / 60 * d_min + channelWidth)
-		,channelWidth((pdaScreen == 0) ? CHANNELWIDTH : CHANNELWIDTH / 2)
-	{
-		Signal1<void, const eServiceReference&> cbSignal;
-		CONNECT(cbSignal, eMEPG::getcurepg);
-		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
-		eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
-	}
-
-	eString getMultiEPG()
-	{
-		return multiEPG;
-	}
-
-	eString getTimeScale(int channelWidth)
-	{
-		std::stringstream result;
-
-		result << "<tr>"
-			<< "<th width=" << eString().sprintf("%d", channelWidth) << ">"
-			<< "CHANNEL"
-			<< "<br>"
-			<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", channelWidth) << "\">"
-			<< "</th>";
-
-		for (time_t i = start; i < end; i += 15 * 60)
-		{
-			tm* t = localtime(&i);
-			result << "<th width=" << d_min * 15 << ">"
-				<< std::setfill('0')
-				<< std::setw(2) << t->tm_mday << '.'
-				<< std::setw(2) << t->tm_mon+1 << "."
-				<< "<br>"
-				<< std::setw(2) << t->tm_hour << ':'
-				<< std::setw(2) << t->tm_min << ' '
-				<< "<br>"
-				<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", 15 * d_min) << "\">"
-				<< "</th>";
-		}
-		result << "</tr>";
-
-		return result.str();
-	}
-};
-
-static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString>opt = getRequestOptions(opts, '&');
-	eString refs = opt["ref"];
-	eServiceReference bouquetRef = string2ref(refs);
-	int channelWidth = (pdaScreen == 0) ? CHANNELWIDTH : CHANNELWIDTH / 2;
-
-	time_t start = time(0) + eDVB::getInstance()->time_difference;
-	start -= ((start % 900) + (60 * 60)); // align to 15 mins & start 1 hour before now
-	int hours = 24;
-	eConfig::getInstance()->getKey("/elitedvb/multiepg/hours", hours); // horizontally visible hours
-
-	eMEPG mepg(hours, start, bouquetRef, channelWidth);
-
-	eString result = (pdaScreen == 0) ? readFile(TEMPLATE_DIR + "mepg.tmp") : readFile(TEMPLATE_DIR + "mepg_small.tmp");
-	result.strReplace("#TIMESCALE#", mepg.getTimeScale(channelWidth));
-	result.strReplace("#BODY#", mepg.getMultiEPG());
-	return result;
-}
-
-extern eString getServiceEPG(eString, eString);
-
-static eString getHTMLServiceEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	return getServiceEPG("HTML", opts);
-}
-
-static eString getchannelinfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{   
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = getEITC(readFile(TEMPLATE_DIR + "eit.tmp"));
-	result.strReplace("#SERVICENAME#", getCurService());
-    
-	return result;
-}   
-    
 eString genBar(int val)
 {   
 	std::stringstream result;
@@ -4035,10 +3658,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
 	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/webxtv", webxtv, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getHTMLServiceEPG, lockWeb);
-	dyn_resolver->addDyn("GET", "/getcurrentepg", getHTMLServiceEPG, lockWeb);
-	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/channelinfo", getchannelinfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServiceRef", setStreamingServiceRef, lockWeb);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/recoverRecordings", recoverRecordings, lockWeb);
@@ -4049,6 +3668,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	
 	ezapWapInitializeDyn(dyn_resolver, lockWeb);
 	ezapXMLInitializeDyn(dyn_resolver, lockWeb);
+	ezapEPGInitializeDyn(dyn_resolver, lockWeb);
 	ezapMiscInitializeDyn(dyn_resolver, lockWeb);
 #ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);

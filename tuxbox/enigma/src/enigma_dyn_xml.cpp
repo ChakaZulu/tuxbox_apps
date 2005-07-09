@@ -38,6 +38,7 @@
 #include <enigma_dyn.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_xml.h>
+#include <enigma_dyn_epg.h>
 #include <streaminfo.h>
 
 using namespace std;
@@ -269,111 +270,6 @@ static eString getXMLCurrentServiceData(eString request, eString dirpath, eStrin
 	result.strReplace("#VIDEOCHANNELS#", tmp.str());
 	
 	return result;
-}
-
-eString getServiceEPG(eString format, eString opts)
-{
-	eString result, result1, events;
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	
-	if (format == "XML")
-		result1 = readFile(TEMPLATE_DIR + "XMLServiceEPG.tmp");
-	else
-		result1 = readFile(TEMPLATE_DIR + "HTMLServiceEPG.tmp");
-		
-	eString description, ext_description, genre;
-	int genreCategory = 0;
-
-	eService* current;
-	eServiceReference ref;
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (sapi)
-	{
-		eString serviceRef = opt["ref"];
-		ref = (serviceRef) ? string2ref(serviceRef) : sapi->service;
-		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
-		if (current)
-		{
-			result1.strReplace("#REFERENCE#", ref2string(ref));
-			result1.strReplace("#NAME#", filter_string(current->service_name));
-			
-			eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
-			eEPGCache::getInstance()->Lock();
-			const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
-
-			if (evt)
-			{
-				timeMap::const_iterator It;
-				int tsidonid = (rref.getTransportStreamID().get() << 16) | rref.getOriginalNetworkID().get();
-			
-				int i = 0;
-				for (It = evt->begin(); It != evt->end(); ++It)
-				{
-					ext_description = "";
-					EITEvent event(*It->second, tsidonid);
-					for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-					{
-						Descriptor *descriptor = *d;
-						if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-							ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
-						else
-						if (descriptor->Tag() == DESCR_SHORT_EVENT)
-							description = ((ShortEventDescriptor*)descriptor)->event_name;
-						else
-						if (descriptor->Tag() == DESCR_CONTENT)
-						{
-							genre = "";
-							genreCategory = 0;
-							ContentDescriptor *cod = (ContentDescriptor *)descriptor;
-
-							for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
-							{
-								if (genreCategory == 0)
-									genreCategory = ce->content_nibble_level_1;
-								if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
-								{
-									if (!genre)
-										genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
-								}
-							}
-						}
-					}
-			
-					if (!genre)
-						genre = "n/a";
-
-					tm* t = localtime(&event.start_time);
-					
-					if (format == "XML")
-						result = readFile(TEMPLATE_DIR + "XMLEPGEntry.tmp");
-					else
-						result = readFile(TEMPLATE_DIR + "HTMLEPGEntry.tmp");
-				
-					result.strReplace("#NO#", eString().sprintf("%d", i));
-					result.strReplace("#DATE#", eString().sprintf("%02d.%02d.%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900));
-					result.strReplace("#TIME#", eString().sprintf("%02d:%02d", t->tm_hour, t->tm_min));
-					result.strReplace("#DURATION#", eString().sprintf("%d", event.duration));
-					eString tmp = filter_string(description);
-					tmp.strReplace("&", "&amp;");
-					result.strReplace("#DESCRIPTION#", tmp); 
-					tmp = filter_string(ext_description);
-					tmp.strReplace("&", "&amp;");	
-					result.strReplace("#DETAILS#", tmp);
-					result.strReplace("#GENRE#", genre);
-					result.strReplace("#GENRECATEGORY#", eString().sprintf("%02d", genreCategory));
-					result.strReplace("#START#", eString().sprintf("%d", event.start_time));
-					
-					events += result;
-					i++;
-				}
-			}
-			eEPGCache::getInstance()->Unlock();
-		}
-	}
-	result1.strReplace("#BODY#", events);
-
-	return result1;
 }
 
 static eString getXMLServiceEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)

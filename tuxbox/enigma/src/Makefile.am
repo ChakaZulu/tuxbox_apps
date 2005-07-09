@@ -14,7 +14,7 @@ enigma_SOURCES = \
 	engrab.cpp setupengrab.cpp helpwindow.cpp tpeditwindow.cpp enigma_web.cpp enigma_epg.cpp \
 	wizard_timezone.cpp elirc.cpp hotplug.cpp enigma_bouquet.cpp setup_window.cpp \
 	system_settings.cpp time_settings.cpp software_update.cpp enigma_standby.cpp \
-	enigma_mmisocket.cpp enigma_mmi.cpp flashtool.cpp time_correction.cpp \
+	enigma_mmisocket.cpp enigma_mmi.cpp flashtool.cpp time_correction.cpp enigma_dyn_epg.cpp \
 	audio_dynamic.cpp setup_keyboard.cpp wizard_fpupdate.cpp enigma_mount.cpp \
 	enigma_dyn_mount.cpp enigma_dyn_utils.cpp enigma_dyn_wap.cpp enigma_dyn_conf.cpp \
 	enigma_dyn_flash.cpp enigma_dyn_xml.cpp enigma_streamer.cpp \
