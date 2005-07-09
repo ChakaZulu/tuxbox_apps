@@ -143,7 +143,7 @@ function openEPG(ref)
 {
 	if (ref == undefined)
 		ref = "";
-	NewWindow('/getcurrentepg?type=extended&ref=' + ref, 'EPG', screen.width, screen.height, 'yes');
+	NewWindow('/getcurrentepg?type=extended&ref=' + ref, 'EPG', '780', screen.height, 'yes');
 }
 
 function openMultiEPG(ref)
@@ -158,12 +158,12 @@ function admin(command)
 
 function openSI()
 {
-	NewWindow("/xml/streaminfo", "si", "500", "700", "yes");
+	NewWindow("/xml/streaminfo", "si", "780", "700", "yes");
 }
 
 function openChannelInfo()
 {
-	NewWindow("/cgi-bin/channelinfo", "ci", "820", "600", "yes");
+	NewWindow("/cgi-bin/channelinfo", "ci", "780", "600", "yes");
 }
 
 function DVRrecord(command)
@@ -184,7 +184,7 @@ function selectAudio()
 
 function selectSubChannel()
 {
-	NewWindow("/cgi-bin/selectSubChannel", "subchannel", "200", "100", "no");
+	NewWindow("/cgi-bin/selectSubChannel", "subchannel", "250", "130", "no");
 }
 
 function configSwapFile()

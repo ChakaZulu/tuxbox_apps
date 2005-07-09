@@ -1,6 +1,6 @@
 EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tmp timerList.tmp \
-	timerListBody.tmp epg.tmp mepg.tmp videodata.tmp audioSelection.tmp editTimerEvent.tmp sendMessage.tmp \
-	configSwapFile.tmp msgWindow.tmp zap.tmp movies.tmp index2.tmp epgDetails.tmp rotorSat.tmp \
+	timerListBody.tmp mepg.tmp videodata.tmp audioSelection.tmp editTimerEvent.tmp sendMessage.tmp \
+	configSwapFile.tmp msgWindow.tmp zap.tmp movies.tmp index2.tmp rotorSat.tmp \
 	index_small.tmp index_big.tmp eit_small.tmp addTimerEvent.tmp wap.tmp wapepg.tmp wapzap.tmp \
 	wapEPGDetails.tmp wapTimerList.tmp queryEditTimer.tmp queryDeleteTimer.tmp deleteTimerComplete.tmp \
 	mountPoint.tmp mountPoints.tmp mountPointWindow.tmp subChannelSelection.tmp mepg_small.tmp \
@@ -9,7 +9,8 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	root.tmp flashMgrReadMenu.tmp flashMgrWriteMenu.tmp mtd.tmp flashMgrProgressData.tmp flashMgrProgress.tmp \
 	pdaRemoteControlDbox2.tmp configSwapFileMenu.tmp movieSources.tmp XMLStreaminfo.tmp streaminfo_satellite.xsl \
 	streaminfo_cable.xsl streaminfo_terrestrial.xsl serviceepg.xsl XMLTimer.tmp XMLCurrentServiceData.tmp \
-	dvrcontrols.tmp XMLBoxStatus.tmp XMLBoxInfo.tmp webxtv.tmp
+	dvrcontrols.tmp XMLBoxStatus.tmp XMLBoxInfo.tmp webxtv.tmp \
+	XMLServiceEPG.tmp XMLEPGEntry.tmp HTMLServiceEPG.tmp HTMLEPGEntry.tmp
 
 install-data-local:
 	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/templates

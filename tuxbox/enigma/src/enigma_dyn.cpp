@@ -2747,143 +2747,14 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	return result;
 }
 
-static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+extern eString getServiceEPG(eString, eString);
+
+static eString getHTMLServiceEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::stringstream result;
-	eString description, ext_description, genre;
-	int genreCategory = 0;
-	result << std::setfill('0');
-
-	eService* current;
-	eServiceReference ref;
-
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString type = opt["type"];
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "No EPG available";
-
-	eString serviceRef = opt["ref"];
-	if (serviceRef)
-		ref = string2ref(serviceRef);
-	else
-		ref = sapi->service;
-
-	eDebug("[ENIGMA_DYN] getcurepg: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
-
-	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
-
-	if (!current)
-		return "No EPG available";
-
-	eEPGCache::getInstance()->Lock();
-	eServiceReferenceDVB &dref =
-		(eServiceReferenceDVB&)ref;
-	int tsidonid = dref.getTransportStreamID().get()<<16|dref.getOriginalNetworkID().get();
-	const timeMap* evt = eEPGCache::getInstance()->getTimeMap(dref);
-
-	if (!evt)
-		return "No EPG available";
-	else
-	{
-		timeMap::const_iterator It;
-
-		for(It=evt->begin(); It!= evt->end(); ++It)
-		{
-			ext_description = "";
-			EITEvent event(*It->second, tsidonid);
-			LocalEventData led;
-			led.getLocalData(&event, &description, 0, &ext_description);
-
-			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-			{
-				Descriptor *descriptor = *d;
-				if (descriptor->Tag() == DESCR_CONTENT)
-				{
-					genre = "";
-					genreCategory = 0;
-					ContentDescriptor *cod = (ContentDescriptor *)descriptor;
-
-					for (ePtrList<descr_content_entry_struct>::iterator ce(cod->contentList.begin()); ce != cod->contentList.end(); ++ce)
-					{
-						if (genreCategory == 0)
-							genreCategory = ce->content_nibble_level_1;
-						if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
-						{
-							if (!genre)
-								genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
-						}
-					}
-				}
-			}
-
-			tm* t = localtime(&event.start_time);
-
-			if (type == "extended")
-			{
-				if (!genre)
-					genre = "n/a";
-
-				result << "<tr valign=\"middle\">"
-					<< "<td>"
-					<< "<span class=\"time\">"
-					<< std::setw(2) << t->tm_mday << '.'
-					<< std::setw(2) << t->tm_mon+1 << ". - "
-					<< std::setw(2) << t->tm_hour << ':'
-					<< std::setw(2) << t->tm_min << ' '
-					<< "</span>"
-					<< "</td>";
-#ifndef DISABLE_FILE
-				result << "<td>"
-					<< "<a href=\"javascript:record('"
-					<< ref2string(ref) << "','"
-					<< event.start_time << "','"
-					<< event.duration << "','";
-				eString tmp = filter_string(description);
-				tmp.strReplace("\'", "\\\'");
-				tmp.strReplace("\"", "\\\"");
-				tmp.strReplace("&", "~");
-				result  << tmp << "','"
-					<< filter_string(current->service_name)
-					<< "')\"><img src=\"timer.gif\" border=0></a>"
-					<< "</td>";
-#endif
-				result  << "<td class=\"genre" << eString().sprintf("%02d", genreCategory) << "\">"
-					<< "<span class=\"event\">"
-					<< filter_string(description)
-					<< "</span>"
-					<< "<br>"
-					<< "Genre: " << genre
-					<< "<br>"
-					<< "<span class=\"description\">"
-					<< filter_string(ext_description)
-					<< "</span>"
-					<< "</td>"
-					<< "</tr>\n";
-			}
-			else
-			{
-				result  << eString().sprintf("<!-- ID: %04x -->", event.event_id)
-					<< eString().sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min)
-					<< description
-					<< "</span><br>\n";
-			}
-		}
-	}
-	eEPGCache::getInstance()->Unlock();
-
-	eString tmp;
-	if (type == "extended")
-		tmp = readFile(TEMPLATE_DIR + "epg.tmp");
-	else
-		tmp = readFile(TEMPLATE_DIR + "epg_old.tmp");
-	tmp.strReplace("#CHANNEL#", filter_string(current->service_name));
-	tmp.strReplace("#BODY#", result.str());
-	return tmp;
+	return getServiceEPG("HTML", opts);
 }
-    
+
 static eString getchannelinfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {   
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -3900,49 +3771,6 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 	return result;
 }
 
-static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	eString result;
-	eService *current = NULL;
-	eString ext_description;
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString serviceRef = opt["ref"];
-	eString eventID = opt["ID"];
-	int eventid;
-	eString description = "No description available";
-
-	sscanf(eventID.c_str(), "%x", &eventid);
-	eDebug("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %04x", serviceRef.c_str(), eventid);
-
-	// search for the event... to get the description...
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (sapi)
-	{
-		eServiceReference ref(string2ref(serviceRef));
-		current = eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)ref);
-		if (current)
-		{
-			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid);
-			if (event)
-			{
-				LocalEventData led;
-				led.getLocalData(event, &description, &ext_description);
-				delete event;
-			}
-		}
-	}
-	if (!ext_description)
-		ext_description = "No detailed description available";
-
-	result = readFile(TEMPLATE_DIR + "epgDetails.tmp");
-	result.strReplace("#EVENT#", filter_string(description));
-	result.strReplace("#BODY#", filter_string(ext_description));
-
-	return result;
-}
-
 static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -4188,7 +4016,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/changeTimerEvent", changeTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, lockWeb);
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, lockWeb);
-	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails, lockWeb);
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin, lockWeb);
@@ -4208,8 +4035,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
 	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/webxtv", webxtv, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg, lockWeb);
-	dyn_resolver->addDyn("GET", "/getcurrentepg", getcurepg, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getHTMLServiceEPG, lockWeb);
+	dyn_resolver->addDyn("GET", "/getcurrentepg", getHTMLServiceEPG, lockWeb);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/channelinfo", getchannelinfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServiceRef", setStreamingServiceRef, lockWeb);

@@ -50,7 +50,7 @@ extern eString getUSBInfo(void);
 extern eString getDiskInfo(void);
 extern eString getIP(void);
 
-static eString getBoxInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getXMLBoxInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
 
@@ -66,7 +66,7 @@ static eString getBoxInfo(eString request, eString dirpath, eString opts, eHTTPC
 	return result;
 }
 
-static eString getBoxStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getXMLBoxStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
 
@@ -76,7 +76,7 @@ static eString getBoxStatus(eString request, eString dirpath, eString opt, eHTTP
 	atime += eDVB::getInstance()->time_difference;
 	result.strReplace("#TIME#", eString(ctime(&atime)));
 	if (eZapMain::getInstance()->isSleeping())
-		result.strReplace("#STANBY#", "ON");
+		result.strReplace("#STANDBY#", "ON");
 	else
 		result.strReplace("#STANDBY#", "OFF");
 #ifndef DISABLE_FILE
@@ -93,7 +93,7 @@ static eString getBoxStatus(eString request, eString dirpath, eString opt, eHTTP
 
 extern eString getCurrentSubChannel(eString);
 
-static eString getCurrentServiceData(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getXMLCurrentServiceData(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString now_start, now_date, now_time, now_duration, now_text, now_longtext,
 		next_start, next_date, next_time, next_duration, next_text, next_longtext;
@@ -271,22 +271,21 @@ static eString getCurrentServiceData(eString request, eString dirpath, eString o
 	return result;
 }
 
-static eString getServiceEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+eString getServiceEPG(eString format, eString opts)
 {
-	std::stringstream result;
+	eString result, result1, events;
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	if (format == "XML")
+		result1 = readFile(TEMPLATE_DIR + "XMLServiceEPG.tmp");
+	else
+		result1 = readFile(TEMPLATE_DIR + "HTMLServiceEPG.tmp");
+		
 	eString description, ext_description, genre;
 	int genreCategory = 0;
-	result << std::setfill('0');
 
 	eService* current;
 	eServiceReference ref;
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	
-	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/serviceepg.xsl\"?>\n"
-		<< "<service_epg>\n";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
@@ -296,10 +295,9 @@ static eString getServiceEPG(eString request, eString dirpath, eString opts, eHT
 		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 		if (current)
 		{
-			result	<< "<service>\n"
-				<< "<reference>" << ref2string(ref) << "</reference>\n"
-				<< "<name>" << filter_string(current->service_name) << "</name>\n"
-				<< "</service>\n";
+			result1.strReplace("#REFERENCE#", ref2string(ref));
+			result1.strReplace("#NAME#", filter_string(current->service_name));
+			
 			eServiceReferenceDVB &rref = (eServiceReferenceDVB&)ref;
 			eEPGCache::getInstance()->Lock();
 			const timeMap* evt = eEPGCache::getInstance()->getTimeMap(rref);
@@ -346,39 +344,42 @@ static eString getServiceEPG(eString request, eString dirpath, eString opts, eHT
 						genre = "n/a";
 
 					tm* t = localtime(&event.start_time);
-
-					result << "<event id=\"" << i << "\">\n";
+					
+					if (format == "XML")
+						result = readFile(TEMPLATE_DIR + "XMLEPGEntry.tmp");
+					else
+						result = readFile(TEMPLATE_DIR + "HTMLEPGEntry.tmp");
+				
+					result.strReplace("#NO#", eString().sprintf("%d", i));
+					result.strReplace("#DATE#", eString().sprintf("%02d.%02d.%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900));
+					result.strReplace("#TIME#", eString().sprintf("%02d:%02d", t->tm_hour, t->tm_min));
+					result.strReplace("#DURATION#", eString().sprintf("%d", event.duration));
 					eString tmp = filter_string(description);
 					tmp.strReplace("&", "&amp;");
-					result  << "<date>"
-						<< std::setw(2) << t->tm_mday << '.'
-						<< std::setw(2) << t->tm_mon+1 << '.' 
-						<< std::setw(2) << t->tm_year + 1900
-						<< "</date>\n"
-						<< "<time>"
-						<< std::setw(2) << t->tm_hour << ':'
-						<< std::setw(2) << t->tm_min 
-						<< "</time>\n"
-						<< "<duration>" << event.duration<< "</duration>\n"
-						<< "<description>" << tmp << "</description>\n";
+					result.strReplace("#DESCRIPTION#", tmp); 
+					tmp = filter_string(ext_description);
+					tmp.strReplace("&", "&amp;");	
+					result.strReplace("#DETAILS#", tmp);
+					result.strReplace("#GENRE#", genre);
+					result.strReplace("#GENRECATEGORY#", eString().sprintf("%02d", genreCategory));
+					result.strReplace("#START#", eString().sprintf("%d", event.start_time));
 					
-					eString ext_tmp = filter_string(ext_description);
-					ext_tmp.strReplace("&", "&amp;");	
-
-					result  << "<genre>" << genre << "</genre>\n"
-						<< "<genrecategory>" << "genre" << eString().sprintf("%02d", genreCategory) << "</genrecategory>\n"
-						<< "<start>" << event.start_time << "</start>\n"
-						<< "<details>" << ext_tmp << "</details>\n"
-						<< "</event>\n";
+					events += result;
 					i++;
 				}
 			}
 			eEPGCache::getInstance()->Unlock();
 		}
 	}
-	result << "</service_epg>";
+	result1.strReplace("#BODY#", events);
 
-	return result.str();
+	return result1;
+}
+
+static eString getXMLServiceEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	return getServiceEPG("XML", opts);
 }
 
 eString getTag(int mode, int submode)
@@ -471,7 +472,7 @@ struct getContent: public Object
 	}
 };
 
-static eString getServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getXMLServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	/* MODE: 0 = TV, 1 = Radio, 2 = Data, 3 = Movies, 4 = Root */
 	/* SUBMODE: 0 = n/a, 1 = All, 2 = Satellites, 2 = Providers, 4 = Bouquets */
@@ -504,7 +505,7 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 	return result;
 }
 
-static eString getStreamInfoXSL(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getXSLStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result;
 	
@@ -525,7 +526,7 @@ static eString getStreamInfoXSL(eString request, eString dirpath, eString opt, e
 	return result;
 }
 
-static eString getStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result = readFile(TEMPLATE_DIR + "XMLStreaminfo.tmp");
 
@@ -899,7 +900,7 @@ struct getTimer
 	}
 };
 
-static eString getTimers(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString getXMLTimers(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::stringstream result;
 	std::list<myTimerEntry> myList;
@@ -923,13 +924,13 @@ static eString getTimers(eString request, eString dirpath, eString opt, eHTTPCon
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/xml/boxstatus", getBoxStatus, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/boxinfo", getBoxInfo, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/serviceepg", getServiceEPG, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/currentservicedata", getCurrentServiceData, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/services", getServices, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/streaminfo", getStreamInfo, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/timers", getTimers, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getStreamInfoXSL, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/boxstatus", getXMLBoxStatus, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/boxinfo", getXMLBoxInfo, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/serviceepg", getXMLServiceEPG, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/currentservicedata", getXMLCurrentServiceData, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/services", getXMLServices, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/streaminfo", getXMLStreamInfo, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/timers", getXMLTimers, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getXSLStreamInfo, lockWeb);
 }
 
