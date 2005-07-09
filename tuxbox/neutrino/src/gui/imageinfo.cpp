@@ -43,12 +43,12 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 CImageInfo::CImageInfo()
 {
-	pig = new CPIG (0);
 	frameBuffer = CFrameBuffer::getInstance();
 
-	font_head   = SNeutrinoSettings::FONT_TYPE_MENU_TITLE;
-	font_info   = SNeutrinoSettings::FONT_TYPE_MENU;
-	font_small  = SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL;
+	font_head   = 18; // SNeutrinoSettings::FONT_TYPE_MENU_TITLE;
+	font_small  = 20; // SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL;
+	font_info   = 0;  // SNeutrinoSettings::FONT_TYPE_MENU;
+
 
 	hheight     = g_Font[font_head]->getHeight();
 	iheight     = g_Font[font_info]->getHeight();
@@ -77,6 +77,10 @@ int CImageInfo::exec(CMenuTarget* parent, const std::string &)
 	}
 
 	paint();
+
+	pig = new CPIG (0);
+ 	paint_pig( width-170, y, 215, 170);
+
 	neutrino_msg_t msg;
 
 	while (1)
@@ -96,6 +100,7 @@ int CImageInfo::exec(CMenuTarget* parent, const std::string &)
 		}
 	}
 
+	delete pig;
 	hide();
 
 	return menu_return::RETURN_REPAINT;
@@ -123,7 +128,6 @@ void CImageInfo::paintLine(int xpos, int font, const char* text)
 void CImageInfo::paint()
 {
 	const char * head_string;
-	char buf[100];
 	char imagedate[18] = "";
  	int  xpos = x+10;
 
@@ -138,8 +142,6 @@ void CImageInfo::paint()
 	ypos += hheight;
 	ypos += (iheight >>1);
 
-	// paint PIG
-	paint_pig( width-170, y, 215, 170);
 
 	CConfigFile config('\t');
 	config.loadConfig("/.version");
@@ -155,63 +157,63 @@ void CImageInfo::paint()
 
 	ypos += iheight;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_IMAGE));
-	paintLine(xpos+120, font_info, imagename);
+	paintLine(xpos+125, font_info, imagename);
 
 	ypos += iheight;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_DATE));
-	paintLine(xpos+120, font_info, imagedate);
+	paintLine(xpos+125, font_info, imagedate);
 
 	ypos += iheight;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_VERSION));
-	paintLine(xpos+120, font_info, releaseCycle);
+	paintLine(xpos+125, font_info, releaseCycle);
 
 	ypos += iheight;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_CREATOR));
-	paintLine(xpos+120, font_info, creator);
+	paintLine(xpos+125, font_info, creator);
 
 	ypos += iheight+15;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_HOMEPAGE));
-	paintLine(xpos+120, font_info, homepage);
+	paintLine(xpos+125, font_info, homepage);
 
 	ypos += iheight;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_DOKUMENTATION));
-	paintLine(xpos+120, font_info, "http://wiki.tuxbox.org");
+	paintLine(xpos+125, font_info, "http://wiki.tuxbox.org");
 
 	ypos += iheight;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_FORUM));
-	paintLine(xpos+120, font_info, "http://forum.tuxbox.org");
+	paintLine(xpos+125, font_info, "http://forum.tuxbox.org");
 
 	ypos += iheight+15;
-    paintLine(xpos, font_info,g_Locale->getText(LOCALE_IMAGEINFO_LICENSE));
-	paintLine(xpos+120, font_small, "This program is free software; you can redistribute it and/or modify");
+	paintLine(xpos, font_info,g_Locale->getText(LOCALE_IMAGEINFO_LICENSE));
+	paintLine(xpos+125, font_small, "This program is free software; you can redistribute it and/or modify");
 
 	ypos+= sheight;
-	paintLine(xpos+120, font_small, "it under the terms of the GNU General Public License as published by");
+	paintLine(xpos+125, font_small, "it under the terms of the GNU General Public License as published by");
 
 	ypos+= sheight;
-	paintLine(xpos+120, font_small, "the Free Software Foundation; either version 2 of the License, or");
+	paintLine(xpos+125, font_small, "the Free Software Foundation; either version 2 of the License, or");
 
 	ypos+= sheight;
-	paintLine(xpos+120, font_small, "(at your option) any later version.");
+	paintLine(xpos+125, font_small, "(at your option) any later version.");
 
 	ypos+= sheight+10;
-	paintLine(xpos+120, font_small, "This program is distributed in the hope that it will be useful,");
+	paintLine(xpos+125, font_small, "This program is distributed in the hope that it will be useful,");
 
 	ypos+= sheight;
-	paintLine(xpos+120, font_small, "but WITHOUT ANY WARRANTY; without even the implied warranty of");
+	paintLine(xpos+125, font_small, "but WITHOUT ANY WARRANTY; without even the implied warranty of");
 
 	ypos+= sheight;
-	paintLine(xpos+120, font_small, "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.");
+	paintLine(xpos+125, font_small, "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.");
 
 	ypos+= sheight;
-	paintLine(xpos+120, font_small, "See the GNU General Public License for more details.");
+	paintLine(xpos+125, font_small, "See the GNU General Public License for more details.");
 
 	ypos+= sheight+10;
-	paintLine(xpos+120, font_small, "You should have received a copy of the GNU General Public License");
+	paintLine(xpos+125, font_small, "You should have received a copy of the GNU General Public License");
 
 	ypos+= sheight;
-	paintLine(xpos+120, font_small, "along with this program; if not, write to the Free Software");
+	paintLine(xpos+125, font_small, "along with this program; if not, write to the Free Software");
 
 	ypos+= sheight;
-	paintLine(xpos+120, font_small, "Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.");
+	paintLine(xpos+125, font_small, "Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.");
 }
