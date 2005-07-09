@@ -1,0 +1,17 @@
+<timer>
+	<type>#TYPE#</type>
+	<days>#DAYS#</days>
+	<action>#ACTION#</action>
+	<status>#STATUS#</status>
+	<service>
+		<reference>#REFERENCE#</reference>
+		<name>#CHANNEL#</name>
+	</service>
+	<event>
+		<date>#DATE#</date>
+		<time>#TIME#</time>
+		<start>#START#</start>
+		<duration>#DURATION#</duration>
+		<description>#DESCRIPTION#</description>
+	</event>
+</timer>
