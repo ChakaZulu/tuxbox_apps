@@ -123,19 +123,31 @@ struct getEntryString
 {
 	std::list<myTimerEntry> &myList;
 	bool repeating;
+	eString format;
 
-	getEntryString(std::list<myTimerEntry> &myList, bool repeating)
-		:myList(myList), repeating(repeating)
+	getEntryString(std::list<myTimerEntry> &myList, bool repeating, eString format)
+		:myList(myList), repeating(repeating), format(format)
 	{
 	}
 
 	void operator()(ePlaylistEntry* se)
 	{
-		eString tmp = readFile(TEMPLATE_DIR + "timerListEntry.tmp");
+		eString tmp = readFile(TEMPLATE_DIR + format + "TimerEntry.tmp");
+			
 		if (!repeating && se->type & ePlaylistEntry::isRepeating)
 			return;
 		if (repeating && !(se->type & ePlaylistEntry::isRepeating))
 			return;
+			
+		tmp.strReplace("#REFERENCE#", ref2string(se->service));
+		
+		if (se->type & ePlaylistEntry::isRepeating)
+			tmp.strReplace("#TYPE#", "REPEATING");
+		else
+			tmp.strReplace("#TYPE#", "SINGLE");
+		
+		tmp.strReplace("#TIMERTYPE#", eString().sprintf("%d", se->type));
+			
 		tm startTime = *localtime(&se->time_begin);
 		time_t time_end = se->time_begin + se->duration;
 		tm endTime = *localtime(&time_end);
@@ -155,9 +167,6 @@ struct getEntryString
 		if (!description)
 			description = "No description available";
 
-		tmp.strReplace("#DELETEPARMS#", "ref=" + ref2string(se->service) + "&start=" + eString().sprintf("%d", se->time_begin) + "&type=" + eString().sprintf("%d", se->type) + "&force=no");
-		tmp.strReplace("#EDITPARMS#", "ref=" + ref2string(se->service) + "&start=" + eString().sprintf("%d", se->time_begin) + "&duration=" + eString().sprintf("%d", se->duration) + "&channel=" + channel + "&descr=" + description + "&type=" + eString().sprintf("%d", se->type));
-
 		if (se->type & ePlaylistEntry::stateFinished)
 			tmp.strReplace("#STATEPIC#", "on.gif");
 		else
@@ -165,6 +174,14 @@ struct getEntryString
 			tmp.strReplace("#STATEPIC#", "off.gif");
 		else
 			tmp.strReplace("#STATEPIC#", "trans.gif");
+		
+		if (se->type & ePlaylistEntry::stateFinished)
+			tmp.strReplace("#STATUS#", "FINISHED");
+		else
+		if (se->type & ePlaylistEntry::stateError)
+			tmp.strReplace("#STATUS#", "ERROR");
+		else
+			tmp.strReplace("#STATUS#", "ACTIVE");
 
 		if (se->type & ePlaylistEntry::isRepeating)
 		{
@@ -190,10 +207,18 @@ struct getEntryString
 		}
 		else
 		{
-			tmp.strReplace("#DAYS#", "&nbsp;");
-			tmp.strReplace("#START#", eString().sprintf("%02d.%02d. - %02d:%02d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_hour, startTime.tm_min));
-			tmp.strReplace("#END#", eString().sprintf("%02d.%02d. - %02d:%02d", endTime.tm_mday, endTime.tm_mon + 1, endTime.tm_hour, endTime.tm_min));
+			if (format == "HTML")
+				tmp.strReplace("#DAYS#", "&nbsp;");
+			else
+				tmp.strReplace("#DAYS#", "");
+			tmp.strReplace("#STARTTIME#", eString().sprintf("%02d.%02d. - %02d:%02d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_hour, startTime.tm_min));
+			tmp.strReplace("#ENDTIME#", eString().sprintf("%02d.%02d. - %02d:%02d", endTime.tm_mday, endTime.tm_mon + 1, endTime.tm_hour, endTime.tm_min));
 		}
+		
+		tmp.strReplace("#START#", eString().sprintf("%d", se->time_begin));
+		tmp.strReplace("#DURATION#", eString().sprintf("%d", se->duration));
+		tmp.strReplace("#DATE#", eString().sprintf("%02d.%02d.%04d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_year + 1900));
+		tmp.strReplace("#TIME#", eString().sprintf("%02d:%02d", startTime.tm_hour, startTime.tm_min));
 		tmp.strReplace("#CHANNEL#", channel);
 		tmp.strReplace("#DESCRIPTION#", description);
 		if (se->type & ePlaylistEntry::SwitchTimerEntry)
@@ -205,15 +230,16 @@ struct getEntryString
 		if (se->type & ePlaylistEntry::recNgrab)
 			tmp.strReplace("#ACTION#", "NGRAB");
 		else
-			tmp.strReplace("#ACTION#", "&rbl.");
+			tmp.strReplace("#ACTION#", "&nbsp;");
 
 		myList.push_back(myTimerEntry(se->time_begin, tmp));
 	}
 };
 
-eString getControlTimerList()
+eString getTimerList(eString format)
 {
-	eString result = readFile(TEMPLATE_DIR + "timerListBody.tmp");
+	eString result = readFile(TEMPLATE_DIR + format + "TimerListBody.tmp");
+		
 	std::list<myTimerEntry> myList;
 	std::list<myTimerEntry>::iterator myIt;
 
@@ -224,14 +250,19 @@ eString getControlTimerList()
 	eString tmp;
 	if (count)
 	{
-		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 0));
+		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 0, format));
 		myList.sort();
 		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
 			tmp += myIt->timerData;
 		result.strReplace("#TIMER_REGULAR#", tmp);
 	}
 	else
-		result.strReplace("#TIMER_REGULAR#", "<tr><td colspan=\"8\">None</td></tr>");
+	{
+		if (format == "HTML")
+			result.strReplace("#TIMER_REGULAR#", "<tr><td colspan=\"8\">None</td></tr>");
+		else
+			result.strReplace("#TIMER_REGULAR#", "");
+	}
 
 	tmp ="";
 	myList.clear();
@@ -241,19 +272,19 @@ eString getControlTimerList()
 	eTimerManager::getInstance()->forEachEntry(countTimer(count, true));
 	if (count)
 	{
-		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 1));
+		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 1, format));
 		myList.sort();
 		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
 			tmp += myIt->timerData;
 		result.strReplace("#TIMER_REPEATED#", tmp);
 	}
 	else
-		result.strReplace("#TIMER_REPEATED#", "<tr><td colspan=\"8\">None</td></tr>");
-
-	// buttons
-	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()", "#FFFFFF"));
-	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()", "#FFFFFF"));
-	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()", "#FFFFFF"));
+	{
+		if (format == "HTML")
+			result.strReplace("#TIMER_REPEATED#", "<tr><td colspan=\"8\">None</td></tr>");
+		else
+			result.strReplace("#TIMER_REPEATED#", "");
+	}
 
 	return result;
 }

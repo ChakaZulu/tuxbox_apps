@@ -39,6 +39,7 @@
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_xml.h>
 #include <enigma_dyn_epg.h>
+#include <enigma_dyn_timer.h>
 #include <streaminfo.h>
 
 using namespace std;
@@ -708,114 +709,11 @@ static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, e
 	return result;
 }
 
-struct getTimer
-{
-	std::list<myTimerEntry> &myList;
-
-	getTimer(std::list<myTimerEntry> &myList)
-		:myList(myList)
-	{
-	}
-
-	void operator()(ePlaylistEntry* se)
-	{
-		eString tmp = readFile(TEMPLATE_DIR + "XMLTimer.tmp");
-		
-		if (se->type & ePlaylistEntry::isRepeating)
-			tmp.strReplace("#TYPE#", "REPEATING");
-		else
-			tmp.strReplace("#TYPE#", "SINGLE");
-		
-		tm startTime = *localtime(&se->time_begin);
-		
-		tmp.strReplace("#DATE#", eString().sprintf("%02d.%02d.%04d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_year + 1900));
-		tmp.strReplace("#TIME#", eString().sprintf("%02d:%02d", startTime.tm_hour, startTime.tm_min));
-		tmp.strReplace("#START#", eString().sprintf("%d", se->time_begin));
-		tmp.strReplace("#DURATION#", eString().sprintf("%d", se->duration));
-
-		eString description = htmlChars(se->service.descr);
-		eString channel = getLeft(description, '/');
-		if (!channel)
-		{
-			eService *service = eDVB::getInstance()->settings->getTransponders()->searchService(se->service);
-			if (service)
-				channel = filter_string(service->service_name);
-		}
-		if (!channel)
-			channel = "No channel available";
-
-		description = getRight(description, '/');
-		if (!description)
-			description = "No description available";
-
-		if (se->type & ePlaylistEntry::stateFinished)
-			tmp.strReplace("#STATUS#", "FINISHED");
-		else
-		if (se->type & ePlaylistEntry::stateError)
-			tmp.strReplace("#STATUS#", "ERROR");
-		else
-			tmp.strReplace("#STATUS#", "ACTIVE");
-
-		eString days;
-		if (se->type & ePlaylistEntry::isRepeating)
-		{
-			if (se->type & ePlaylistEntry::Su)
-				days += "Su ";
-			if (se->type & ePlaylistEntry::Mo)
-				days += "Mo ";
-			if (se->type & ePlaylistEntry::Tue)
-				days += "Tue ";
-			if (se->type & ePlaylistEntry::Wed)
-				days += "Wed ";
-			if (se->type & ePlaylistEntry::Thu)
-				days += "Thu ";
-			if (se->type & ePlaylistEntry::Fr)
-				days += "Fr ";
-			if (se->type & ePlaylistEntry::Sa)
-				days += "Sa";
-		}
-		
-		tmp.strReplace("#DAYS#", days);
-		
-		tmp.strReplace("#NAME#", channel);
-		tmp.strReplace("#DESCRIPTION#", description);
-		tmp.strReplace("#REFERENCE#", ref2string(se->service));
-		
-		if (se->type & ePlaylistEntry::SwitchTimerEntry)
-			tmp.strReplace("#ACTION#", "ZAP");
-		else
-		if (se->type & ePlaylistEntry::recDVR)
-			tmp.strReplace("#ACTION#", "DVR");
-		else
-		if (se->type & ePlaylistEntry::recNgrab)
-			tmp.strReplace("#ACTION#", "NGRAB");
-		else
-			tmp.strReplace("#ACTION#", "NONE");
-
-		myList.push_back(myTimerEntry(se->time_begin, tmp));
-	}
-};
-
 static eString getXMLTimers(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	std::stringstream result;
-	std::list<myTimerEntry> myList;
-	std::list<myTimerEntry>::iterator myIt;
-	
-	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
-	
-	result  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-//		<< "<?xml-stylesheet type=\"text/xsl\" href=\"/xml/timers.xsl\"?>"
-		<< "<timers>";
-
-	eTimerManager::getInstance()->forEachEntry(getTimer(myList));
-	myList.sort();
-	for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
-		result << myIt->timerData;
-		
-	result << "</timers>";
-
-	return result.str();
+	eString result = readFile(TEMPLATE_DIR + "XMLTimerList.tmp");
+	result.strReplace("#BODY#", getTimerList("XML"));
+	return result;
 }
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)

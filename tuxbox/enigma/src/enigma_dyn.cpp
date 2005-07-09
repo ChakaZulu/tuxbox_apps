@@ -2111,7 +2111,7 @@ static eString getContent(eString mode, eString path, eString opts)
 	if (mode == "controlTimerList")
 	{
 		result = getTitle("CONTROL: Timer");
-		result += getControlTimerList();
+		result += getTimerList("HTML");
 	}
 	else
 	if (mode == "updates")

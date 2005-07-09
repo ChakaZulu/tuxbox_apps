@@ -1,0 +1,34 @@
+<tr>
+	<td rowspan="2" align="center">
+		<a href="javascript:deleteTimerEvent('ref=#REFERENCE#&start=#START#&type=#TIMERTYPE#&force=no')">
+			<img src="trash.gif" border="0" height="20">
+		</a>
+	</td>
+	<td rowspan="2" align="center">
+		<a href="javascript:editTimerEvent('ref=#REFERENCE#&start=#START#&duration=#DURATION#&channel=#CHANNEL#&descr=#DESCRIPTION#&type=#TIMERTYPE#')">
+			<img src="edit.gif" border="0" height="20">
+		</a>
+	</td>
+	<td rowspan="2" align="center">
+		<img src="#STATEPIC#">
+	</td>
+	<td rowspan="2" align="center">
+		#ACTION#
+	</td>
+	<td>
+		#STARTTIME#
+	</td>
+	<td>
+		#ENDTIME#
+	</td>
+	<td>
+		#DAYS#
+	</td>
+	<td>
+		<b>#CHANNEL#</b>
+	</td>
+</tr>
+<tr>
+	<td colspan="4"><b>#DESCRIPTION#</b></td>
+</tr>
+

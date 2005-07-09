@@ -63,10 +63,7 @@ eString getServiceEPG(eString format, eString opts)
 	eString result, result1, events;
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
-	if (format == "XML")
-		result1 = readFile(TEMPLATE_DIR + "XMLServiceEPG.tmp");
-	else
-		result1 = readFile(TEMPLATE_DIR + "HTMLServiceEPG.tmp");
+	result1 = readFile(TEMPLATE_DIR + format + "ServiceEPG.tmp");
 		
 	eString description, ext_description, genre;
 	int genreCategory = 0;
