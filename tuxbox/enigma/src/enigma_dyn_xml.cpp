@@ -48,6 +48,7 @@ extern eString zap[5][5];
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 extern eString getIP(void);
 extern eString getBoxInfo(eString);
+extern eString getBoxStatus(eString);
 
 static eString getXMLBoxInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -58,29 +59,11 @@ static eString getXMLBoxInfo(eString request, eString dirpath, eString opts, eHT
 static eString getXMLBoxStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-
-	eString result = readFile(TEMPLATE_DIR + "XMLBoxStatus.tmp");
-	time_t atime;
-	time(&atime);
-	atime += eDVB::getInstance()->time_difference;
-	result.strReplace("#TIME#", eString(ctime(&atime)));
-	if (eZapMain::getInstance()->isSleeping())
-		result.strReplace("#STANDBY#", "ON");
-	else
-		result.strReplace("#STANDBY#", "OFF");
-#ifndef DISABLE_FILE
-	if (eZapMain::getInstance()->isRecording())
-		result.strReplace("#RECORDING#", "ON");
-	else
-#endif
-		result.strReplace("#RECORDING#", "OFF");
-	result.strReplace("#MODE#", eString().sprintf("%d", eZapMain::getInstance()->getMode()));
-	result.strReplace("#IP#", getIP());
-	
-	return result;
+	return getBoxStatus("XML");
 }
 
 extern eString getCurrentSubChannel(eString);
+extern eString getEITC(eString);
 
 static eString getXMLCurrentServiceData(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -115,67 +98,8 @@ static eString getXMLCurrentServiceData(eString request, eString dirpath, eStrin
 			result.strReplace("#REFERENCE#", "");
 		}
 	}
-
-	EIT *eit = eDVB::getInstance()->getEIT();
-	if (eit)
-	{
-		int p = 0;
-
-		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
-		{
-			if (*event)
-			{
-				if (p == 0)
-				{
-					if (event->start_time)
-					{
-						now_start = eString().sprintf("%d", (int)event->start_time);
-						tm* t = localtime(&event->start_time);
-						now_time.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
-						now_date.sprintf("%02d.%02d.%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900);
-					}
-
-					now_duration.sprintf("%d", (int)(event->duration));
-				}
-				if (p == 1)
-				{
-					if (event->start_time)
-					{
-						next_start = eString().sprintf("%d", (int)event->start_time);
-						tm* t = localtime(&event->start_time);
-						next_time.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
-						next_date.sprintf("%02d.%02d.%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900);
-						next_duration.sprintf("%d", (int)(event->duration));
-					}
-				}
-				LocalEventData led;
-				switch(p)
-				{
-				case 0:
-					led.getLocalData(event, &now_text, 0, &now_longtext);
-					break;
-				case 1:
-					led.getLocalData(event, &next_text, 0, &next_longtext);
-					break;
-				}
-				p++;
-		 	}
-		}
-		eit->unlock();
-	}
-
-	result.strReplace("#NOWSTART#", now_start);
-	result.strReplace("#NOWT#", now_time);
-	result.strReplace("#NOWDATE#", now_date);
-	result.strReplace("#NOWD#", now_duration);
-	result.strReplace("#NOWST#", filter_string(now_text.strReplace("\"", "'")));
-	result.strReplace("#NOWLT#", filter_string(now_longtext.strReplace("\"", "'")));
-	result.strReplace("#NEXTSTART#", next_start);
-	result.strReplace("#NEXTT#", next_time);
-	result.strReplace("#NEXTDATE#", next_date);
-	result.strReplace("#NEXTD#", next_duration);
-	result.strReplace("#NEXTST#", filter_string(next_text.strReplace("\"", "'")));
-	result.strReplace("#NEXTLT#", filter_string(next_longtext.strReplace("\"", "'")));
+	
+	result = getEITC(result);
 	
 	std::stringstream tmp;
 	if (sapi)

@@ -164,14 +164,13 @@ eString getServiceEPG(eString format, eString opts)
 
 eString getEITC(eString result)
 {
-	eString now_time, now_duration, now_text, now_longtext,
-		next_time, next_duration, next_text, next_longtext;
+	eString now_start, now_date, now_time, now_duration, now_text, now_longtext,
+		next_start, next_date, next_time, next_duration, next_text, next_longtext;
 
 	EIT *eit = eDVB::getInstance()->getEIT();
 	if (eit)
 	{
 		int p = 0;
-
 		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
 		{
 			if (*event)
@@ -180,30 +179,33 @@ eString getEITC(eString result)
 				{
 					if (event->start_time)
 					{
-						now_time.sprintf("%s", ctime(&event->start_time));
-						now_time = now_time.mid(11, 5);
+						now_start = eString().sprintf("%d", (int)event->start_time);
+						tm* t = localtime(&event->start_time);
+						now_time.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
+						now_date.sprintf("%02d.%02d.%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900);
+						now_duration.sprintf("%d", (int)(event->duration / 60));
 					}
-
-					now_duration.sprintf("%d", (int)(event->duration / 60));
 				}
 				if (p == 1)
 				{
 					if (event->start_time)
 					{
- 						next_time.sprintf("%s", ctime(&event->start_time));
-						next_time = next_time.mid(11, 5);
+						next_start = eString().sprintf("%d", (int)event->start_time);
+						tm* t = localtime(&event->start_time);
+						next_time.sprintf("%02d:%02d", t->tm_hour, t->tm_min);
+						next_date.sprintf("%02d.%02d.%04d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900);
 						next_duration.sprintf("%d", (int)(event->duration / 60));
 					}
 				}
 				LocalEventData led;
-				switch(p)
+				switch (p)
 				{
-				case 0:
-					led.getLocalData(event, &now_text, 0, &now_longtext);
-					break;
-				case 1:
-					led.getLocalData(event, &next_text, 0, &next_longtext);
-					break;
+					case 0:
+						led.getLocalData(event, &now_text, 0, &now_longtext);
+						break;
+					case 1:
+						led.getLocalData(event, &next_text, 0, &next_longtext);
+						break;
 				}
 				p++;
 		 	}
@@ -211,13 +213,19 @@ eString getEITC(eString result)
 		eit->unlock();
 	}
 
+	result.strReplace("#NOWSTART#", now_start);
 	result.strReplace("#NOWT#", now_time);
+	result.strReplace("#NOWDATE#", now_date);
+	result.strReplace("#NOWDURATION#", now_duration);
 	if (now_duration)
 		now_duration = "(" + now_duration + ")";
 	result.strReplace("#NOWD#", now_duration);
 	result.strReplace("#NOWST#", filter_string(now_text.strReplace("\"", "'")));
 	result.strReplace("#NOWLT#", filter_string(now_longtext.strReplace("\"", "'")));
+	result.strReplace("#NEXTSTART#", next_start);
 	result.strReplace("#NEXTT#", next_time);
+	result.strReplace("#NEXTDATE#", next_date);
+	result.strReplace("#NEXTDURATION#", next_duration);
 	if (next_duration)
 		next_duration = "(" + next_duration + ")";
 	result.strReplace("#NEXTD#", next_duration);

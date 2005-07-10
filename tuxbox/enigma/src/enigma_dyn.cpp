@@ -2585,10 +2585,16 @@ static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConne
 extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 #endif
 
-static eString data(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+eString getBoxStatus(eString format)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = readFile(TEMPLATE_DIR + "data.tmp");
+	eString result = readFile(TEMPLATE_DIR + format + "Data.tmp");
+	
+	// mode
+	result.strReplace("#MODE#", eString().sprintf("%d", eZapMain::getInstance()->getMode()));
+	
+	// time
+	time_t atime;
+	result.strReplace("#TIME#", eString(ctime(&atime)));
 
 	// epg data
 	result = getEITC(result);
@@ -2698,6 +2704,13 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 	result.strReplace("#BER#", eString().sprintf("%u", fe->BER()));
 
 	return result;
+}
+
+
+static eString data(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	return getBoxStatus("HTML");
 }
 
 static eString body(eString request, eString dirpath, eString opts, eHTTPConnection *content)
