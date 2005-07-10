@@ -47,13 +47,13 @@ using namespace std;
 extern eString zap[5][5];
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 extern eString getIP(void);
-extern eString getBoxInfo(eString);
+extern eString getBoxInfo(eString, eString);
 extern eString getBoxStatus(eString);
 
 static eString getXMLBoxInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	return getBoxInfo("XML");
+	return getBoxInfo("BoxInfo", "XML");
 }
 
 static eString getXMLBoxStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)

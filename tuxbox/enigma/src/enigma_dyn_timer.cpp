@@ -285,6 +285,11 @@ eString getTimerList(eString format)
 		else
 			result.strReplace("#TIMER_REPEATED#", "");
 	}
+	
+	// buttons
+	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()", "#FFFFFF"));
+	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()", "#FFFFFF"));
+	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()", "#FFFFFF"));
 
 	return result;
 }

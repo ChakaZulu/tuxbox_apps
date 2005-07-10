@@ -9,6 +9,7 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	root.tmp flashMgrReadMenu.tmp flashMgrWriteMenu.tmp mtd.tmp flashMgrProgressData.tmp flashMgrProgress.tmp \
 	pdaRemoteControlDbox2.tmp configSwapFileMenu.tmp movieSources.tmp \
 	XMLStreaminfo.tmp streaminfo_satellite.xsl streaminfo_cable.xsl streaminfo_terrestrial.xsl serviceepg.xsl \
+	HTMLImageInfo.tmp \
 	XMLCurrentServiceData.tmp \
 	dvrcontrols.tmp webxtv.tmp \
 	XMLBoxInfo.tmp  HTMLBoxInfo.tmp \

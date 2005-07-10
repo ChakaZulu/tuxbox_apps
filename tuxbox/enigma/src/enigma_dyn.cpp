@@ -829,26 +829,14 @@ static eString getMute()
 	return result.str();
 }
 
+eString getBoxInfo(eString, eString);
 static eString getUpdates()
 {
-	std::stringstream result;
-
-	eString myVersion = getAttribute("/.version", "version");
-	eString myCatalogURL = getAttribute("/.version", "catalog");
-	eString myComment = getAttribute("/.version", "comment");
-	eString myImageURL = getAttribute("/.version", "url");
-
-	result << "<h2>Installed Image Information</h2>";
-	result << "<table width=100% border=1 cellpadding=0 cellspacing=0>";
-	result << "<tr><td>Version</td><td>" << firmwareLevel(myVersion) << "</td></tr>";
-	result << "<tr><td>URL</td><td>" << myImageURL << "</td></tr>";
-	result << "<tr><td>Comment</td><td>" << myComment << "</td></tr>";
-	result << "<tr><td>Catalog</td><td>" << myCatalogURL << "</td></tr>";
-	result << "</table>";
-	result << "<br>";
-	result << "For information about available updates select one of the categories on the left.";
-
-	return result.str();
+	eString result;
+	result += getBoxInfo("ImageInfo", "HTML");
+	result += "<br>";
+	result += "For information about available updates select one of the categories on the left.";
+	return result;
 }
 
 static eString getUpdatesInternet()
@@ -857,15 +845,19 @@ static eString getUpdatesInternet()
 	eString imageName = "&nbsp;", imageVersion = "&nbsp;", imageURL = "&nbsp;", imageCreator = "&nbsp;", imageMD5 = "&nbsp;";
 	eString myCatalogURL = getAttribute("/.version", "catalog");
 
-	result << "<h2>Available Images</h2>";
-
 	if (myCatalogURL.length())
 	{
 		system(eString("wget -q -O /tmp/catalog.xml " + myCatalogURL).c_str());
 		ifstream catalogFile("/tmp/catalog.xml");
 		if (catalogFile)
 		{
-			result << "<table width=100% border=1 cellpadding=0 cellspacing=0>";
+			result  << "<table id=\"epg\" width=\"100%\" border=\"1\" cellpadding=\"5\" cellspacing=\"0\">"
+				<< "<thead>"
+				<< "<tr>"
+				<< "<th colspan=\"2\">Available Images</th>"
+				<< "</tr>"
+				<< "</thead>"
+				<< "<tbody>";
 			eString line;
 			while (getline(catalogFile, line, '\n'))
 			{
@@ -897,7 +889,8 @@ static eString getUpdatesInternet()
 					imageName = getLeft(imageName, '"');
 				}
 			}
-			result << "</table>";
+			result 	<< "</tbody>"
+				<< "</table>";
 		}
 		else
 			result << "No image information available.";
@@ -1407,9 +1400,9 @@ eString getUSBInfo(void)
 }
 #endif
 
-eString getBoxInfo(eString format)
+eString getBoxInfo(eString skelleton, eString format)
 {
-	eString result = readFile(TEMPLATE_DIR + format + "BoxInfo.tmp");
+	eString result = readFile(TEMPLATE_DIR + format + skelleton + ".tmp");
 
 	result.strReplace("#VERSION#", getAttribute("/.version", "version"));
 	result.strReplace("#CATALOG#", getAttribute("/.version", "catalog"));
@@ -2041,7 +2034,7 @@ static eString getContent(eString mode, eString path, eString opts)
 			result += "<img src=\"dm7000.jpg\" width=\"630\" border=\"0\"><br><br>";
 		else
 			result += "<img src=\"dm7000.jpg\" width=\"160\" border=\"0\"><br><br>";
-		result += getBoxInfo("HTML");
+		result += getBoxInfo("BoxInfo", "HTML");
 	}
 	else
 	if (mode == "helpDMMSites")
