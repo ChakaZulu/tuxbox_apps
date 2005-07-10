@@ -45,27 +45,14 @@
 using namespace std;
 
 extern eString zap[5][5];
-extern eString firmwareLevel(eString verid);
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 extern eString getIP(void);
-extern eString getUSBInfo(void);
-extern eString getDiskInfo(void);
-extern eString getIP(void);
+extern eString getBoxInfo(eString);
 
 static eString getXMLBoxInfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-
-	eString result = readFile(TEMPLATE_DIR + "XMLBoxInfo.tmp");
-
-	result.strReplace("#VERSION#", getAttribute("/.version", "version"));
-	result.strReplace("#CATALOG#", getAttribute("/.version", "catalog"));
-	result.strReplace("#COMMENT#", getAttribute("/.version", "comment"));
-	result.strReplace("#URL#", getAttribute("/.version", "url"));
-	result.strReplace("#USBSTICK#", getUSBInfo());
-	result.strReplace("#DISK#", getDiskInfo());
-
-	return result;
+	return getBoxInfo("XML");
 }
 
 static eString getXMLBoxStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)

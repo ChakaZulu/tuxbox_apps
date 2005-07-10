@@ -6,7 +6,15 @@
 		<comment>#COMMENT#</comment>
 		<catalog>#CATALOG#</catalog>
 	</image>
+	<firmware>#FIRMWARE#</firmware>
+	<fpfirmware>#FP#</fpfirmware>
+	<webinterface>#WEBIFVERSION#</webinterface>
+	<model>#MODEL#</model>
+	<manufacturer>#MANUFACTURER#</manufacturer>
+	<processor>#PROCESSOR#</processor>
 	<usbstick>#USBSTICK#</usbstick>
 	<disk>#DISK#</disk>
 </boxinfo>
+
+
 

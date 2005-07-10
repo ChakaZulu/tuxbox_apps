@@ -101,7 +101,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 			result << "background-color: " << buttonColor << "; ";
 		if (color)
 			result << "color: " << color << "; ";
-		result << "\" value=\"" << buttonText << "\" onclick=" << ref1 << buttonRef << ref2 << ">";
+		result << "\" value=\"" << buttonText << "\" onclick=\"" << ref1 << buttonRef << ref2 << "\">";
 	}
 	else
 		result << "<a href=\"" << buttonRef << "\"><span class=\"button\">" << buttonText << "</span></a>&nbsp;";

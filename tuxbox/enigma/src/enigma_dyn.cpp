@@ -1407,41 +1407,35 @@ eString getUSBInfo(void)
 }
 #endif
 
-static eString aboutDreambox(void)
+eString getBoxInfo(eString format)
 {
-	std::stringstream result;
-	result << "<table border=0 cellspacing=0 cellpadding=0>";
+	eString result = readFile(TEMPLATE_DIR + format + "BoxInfo.tmp");
 
-	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
-		if (pdaScreen == 0)
-			result << "<img src=\"dm7000.jpg\" width=\"630\" border=\"0\"><br><br>";
-		else
-			result << "<img src=\"dm7000.jpg\" width=\"160\" border=\"0\"><br><br>";
+	result.strReplace("#VERSION#", getAttribute("/.version", "version"));
+	result.strReplace("#CATALOG#", getAttribute("/.version", "catalog"));
+	result.strReplace("#COMMENT#", getAttribute("/.version", "comment"));
+	result.strReplace("#URL#", getAttribute("/.version", "url"));
 
-	result  << "<tr><td>Model:</td><td>" << eSystemInfo::getInstance()->getModel() << "</td></tr>"
-		<< "<tr><td>Manufacturer:</td><td>" << eSystemInfo::getInstance()->getManufacturer() << "</td></tr>"
-		<< "<tr><td>Processor:</td><td>" << eSystemInfo::getInstance()->getCPUInfo() << "</td></tr>";
-
+	result.strReplace("#MODEL#", eSystemInfo::getInstance()->getModel());
+	result.strReplace("#MANUFACTURER#", eSystemInfo::getInstance()->getManufacturer());
+	result.strReplace("#PROCESSOR#", eSystemInfo::getInstance()->getCPUInfo());
 #ifndef DISABLE_FILE
-	result << "<tr>"
-		"<td>Harddisk:</td>"
-		"<td>" << getDiskInfo() << "</td>"
-		"</tr>"
-		"<tr>"
-		"<td>USB Stick:</td>"
-		"<td>" << getUSBInfo() << "</td>"
-		"</tr>";
+	result.strReplace("#DISK#", getDiskInfo());
+	result.strReplace("#USBSTICK#", getUSBInfo());
+#else
+	result.strReplace("#DISK#", "none");
+	result.strReplace("#USBSTICK#", "none");
 #endif
-	result	<< "<tr><td>Linux Kernel:</td><td>" << readFile("/proc/version") << "</td></tr>"
-		<< "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>";
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
-			eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
-			result << "<tr><td>FP Firmware:</td><td>" << eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion()) << "</td></tr>";
-		result << "<tr><td>Web Interface:</td><td>" << WEBIFVERSION << "</td></tr>"
-		<< "</table>";
+	result.strReplace("#LINUXKERNEL#", readFile("/proc/version"));
+	result.strReplace("#FIRMWARE#", firmwareLevel(getAttribute("/.version", "version")));
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
+		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+		result.strReplace("#FP#", eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion()));
+	else
+		result.strReplace("#FP#", "n/a");
+	result.strReplace("#WEBIFVERSION#", WEBIFVERSION);
 
-	return result.str();
+	return result;
 }
 
 #ifndef	DISABLE_FILE
@@ -2041,7 +2035,13 @@ static eString getContent(eString mode, eString path, eString opts)
 	if (mode == "help")
 	{
 		result = getTitle("HELP");
-		result += aboutDreambox();
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+		if (pdaScreen == 0)
+			result += "<img src=\"dm7000.jpg\" width=\"630\" border=\"0\"><br><br>";
+		else
+			result += "<img src=\"dm7000.jpg\" width=\"160\" border=\"0\"><br><br>";
+		result += getBoxInfo("HTML");
 	}
 	else
 	if (mode == "helpDMMSites")

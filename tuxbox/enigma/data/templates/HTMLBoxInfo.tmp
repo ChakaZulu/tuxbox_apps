@@ -1,0 +1,20 @@
+<table id="epg" width="100%" border="0" cellspacing="0" cellpadding="5">
+	<thead>
+		<tr>
+			<th colspan="2">About Box</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>Model</td><td>#MODEL#</td></tr>
+		<tr><td>Manufacturer</td><td>#MANUFACTURER#</td></tr>
+		<tr><td>Processor</td><td>#PROCESSOR#</td></tr>
+		<tr><td>Harddisk</td><td>#DISK#</td></tr>
+		<tr><td>USB Stick</td><td>#USBSTICK#</td></tr>
+		<tr><td>Linux Kernel</td><td>#LINUXKERNEL#</td></tr>
+		<tr><td>Firmware</td><td>#FIRMWARE#</td></tr>
+		<tr><td>FP Firmware</td><td>#FP#</td></tr>
+		<tr><td>Web Interface</td><td>#WEBIFVERSION#</td></tr>
+	</tbody>
+</table>
+
+
