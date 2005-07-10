@@ -3546,6 +3546,8 @@ void eZapMain::repeatSkip(int dir)
 						break;
 				}
 			}
+			else if (Decoder::current.vpid==-1) //Radiorecording
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*24));
 			else
 				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*376)); // ca in TS
 
@@ -5129,8 +5131,13 @@ void eZapMain::blinkRecord()
 				{
 					int min = fds/33;
 
+					if (Decoder::current.vpid==-1) //Radiorecording 
+						min = fds/2;//One minute mp2-audio equals roughly 2MB
+
 					if (min<60)
 						DVRSpaceLeft->setText(eString().sprintf("~%d min\nfree", min ));
+					else if (min>5999)
+						DVRSpaceLeft->setText(eString().sprintf("~%d h\nfree", min/60 ));//Radiorecording
 					else
 						DVRSpaceLeft->setText(eString().sprintf("~%dh%02dmin\nfree", min/60, min%60 ));
 				}

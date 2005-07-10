@@ -376,7 +376,12 @@ int eDVRPlayerThread::getPosition(int real)
 
 	ret = ((position-bufferFullness)/1880) + slice * (slicesize/1880);
 	if (!real)
-		ret /= 250;
+	{
+		if (Decoder::current.vpid==-1) //Radiorecording
+			ret /= 15;
+		else
+			ret /= 250;
+	}
 	return ret;
 }
 
@@ -384,7 +389,10 @@ int eDVRPlayerThread::getLength(int real)
 {
 	if (real)
 		return filelength;
-	return filelength/250;
+	if (Decoder::current.vpid==-1)
+		return filelength/15; //Radiorecording
+	else
+		return filelength/250;
 }
 
 void eDVRPlayerThread::seekTo(off64_t offset)
