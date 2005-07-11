@@ -46,6 +46,7 @@ void print_databytes_line  (int v, const char *str, u_char *b, u_int len);
 void print_private_data (int verbose, u_char *b, u_int len);
 
 long str2i (char *s);
+int  str2barray  (char *s, u_char *barray, int max_len);
 
 char *str_cell_latitude (long latitude);
 char *str_cell_longitude (long longitude);

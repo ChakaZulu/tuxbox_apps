@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.28 2005/01/17 19:41:21 rasc Exp $
+$Id: dvbsnoop.c,v 1.29 2005/07/11 23:06:47 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,10 @@ $Id: dvbsnoop.c,v 1.28 2005/01/17 19:41:21 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.29  2005/07/11 23:06:47  rasc
+Multibyte section filter redesign:  -f 0x4F.22.33.44.55.66 -m 0x.FF.FF.FF etc.
+Manpage update
+
 Revision 1.28  2005/01/17 19:41:21  rasc
 Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 
@@ -164,9 +168,21 @@ int main(int argc, char **argv)
 	if (opt.pid != DUMMY_PID) {
 		out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
 	}
-	if (opt.packet_mode == SECT) {		// filter are only for sections
-		out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
-		out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);
+	if ((opt.packet_mode == SECT) && (opt.filterLen > 0)) {		// filter are only for sections
+
+		int i;
+		out (9, "   Filter: 0x");
+		for (i=0; i < opt.filterLen; i++) {
+			out (9,"%02x ",opt.filter[i]);
+		}
+		out_NL (9);
+		out (9, "   Mask  : 0x");
+		for (i=0; i < opt.filterLen; i++) {
+			out (9,"%02x ",opt.mask[i]);
+		}
+		out_NL (9);
+		out_nl (9, "   Max. Filtersize: %d",DMX_FILTER_SIZE);
+
 	}
 	out_nl (9, "   DEMUX : %s",opt.devDemux);
 	out_nl (9, "   DVR   : %s",opt.devDvr);

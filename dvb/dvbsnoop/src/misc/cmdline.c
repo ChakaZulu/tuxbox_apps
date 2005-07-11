@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.42 2005/06/27 20:28:17 rasc Exp $
+$Id: cmdline.c,v 1.43 2005/07/11 23:06:47 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: cmdline.c,v 1.42 2005/06/27 20:28:17 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.43  2005/07/11 23:06:47  rasc
+Multibyte section filter redesign:  -f 0x4F.22.33.44.55.66 -m 0x.FF.FF.FF etc.
+Manpage update
+
 Revision 1.42  2005/06/27 20:28:17  rasc
 first version for a man page
 
@@ -211,8 +215,6 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->devFE = FRONTEND_DEVICE;
   opt->rd_buffer_size = 0L;	// use default read buffersize
   opt->pid = INVALID_PID;
-  opt->filter = 0;
-  opt->mask = 0;
   opt->timeout_ms = 0;		// no timeout (0) or default timeout in ms (SECTIONS)
   opt->max_dmx_filter = 0;	// use module default  (pidscan)
   opt->crc = 0;
@@ -229,6 +231,11 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->help = 0;
   opt->privateProviderStr = (char *)NULL;  // decoding known private tables/descriptors, ProviderStr
 
+  opt->filterLen = 0;
+  memset(opt->filter, 0, DMX_FILTER_SIZE);
+  memset(opt->mask,   0, DMX_FILTER_SIZE);
+
+
 
 
   /*
@@ -242,8 +249,6 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-dvr")) opt->devDvr = argv[++i];
      else if (!strcmp (argv[i],"-frontend")) opt->devFE = argv[++i];
      else if (!strcmp (argv[i],"-maxdmx")) opt->max_dmx_filter = str2i(argv[++i]);
-     else if (!strcmp (argv[i],"-f")) opt->filter = str2i(argv[++i]);
-     else if (!strcmp (argv[i],"-m")) opt->mask = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-crc")) opt->crc = 1;
      else if (!strcmp (argv[i],"-nocrc")) opt->crc = 0;
      else if (!strcmp (argv[i],"-sync")) opt->packet_header_sync = 1;
@@ -267,7 +272,12 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-privateprovider")) opt->privateProviderStr = argv[++i];
      else if (!strcmp (argv[i],"-tssubdecode")) opt->ts_subdecode = 1;
      else if (!strcmp (argv[i],"-allsections")) opt->rd_all_sections = 1;
-     else if (!strcmp (argv[i],"-tsraw")) {
+     else if (!strcmp (argv[i],"-f")) {
+	 opt->filterLen = str2barray(argv[++i], opt->filter, DMX_FILTER_SIZE);
+     } else if (!strcmp (argv[i],"-m")) {
+	 int x = str2barray(argv[++i], opt->mask, DMX_FILTER_SIZE);
+	 if (x<0) opt->filterLen = -1;
+     } else if (!strcmp (argv[i],"-tsraw")) {
 	 opt->ts_raw_mode = 1;
 	 opt->pid = DUMMY_PID;			// dummy to avoid usage output
      } else if (!strcmp (argv[i],"-spiderpid")) {
@@ -319,6 +329,10 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   if (opt->printdecode < 0) opt->printdecode = 7;
 
 
+  if (opt->filterLen < 0) {
+    printf("Illegal filter/mask value: use e.g. 0x4F or 0x12.5F.2A. etc...\n");
+    return(0); 
+  }
 
 
   /*
@@ -391,7 +405,9 @@ static void usage (void)
     printf("   -buffersize kb: read buffersize in KBytes  [-buffersize 0]\n");
     printf("                 (0 = use default read buffer size)\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
+    printf("                 multibyte filter syntax: 0x1A.34.56.7F.01\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
+    printf("                 multibyte mask syntax: 0x1A.00.F6.55\n");
     printf("   -crc:         CRC check when reading 'sec' [-nocrc]\n");
     printf("   -nocrc:       no CRC check when reading 'sec' [-nocrc]\n");
     printf("   -sync:        simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");

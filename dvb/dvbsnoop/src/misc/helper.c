@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.36 2004/11/04 19:21:11 rasc Exp $
+$Id: helper.c,v 1.37 2005/07/11 23:06:47 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: helper.c,v 1.36 2004/11/04 19:21:11 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.37  2005/07/11 23:06:47  rasc
+Multibyte section filter redesign:  -f 0x4F.22.33.44.55.66 -m 0x.FF.FF.FF etc.
+Manpage update
+
 Revision 1.36  2004/11/04 19:21:11  rasc
 Fixes and changes on "premiere.de" private sections
 Cleaning up "premiere.de" private descriptors (should be final now)
@@ -730,16 +734,56 @@ long  str2i  (char *s)
 {
  long v;
  
- if (!s) {
-	 fprintf (stderr,"str2i: NULL ptr (abort)\n");
-	 exit(-1);
- }
+ if (!s) s = "";
 
  v = strtol (s, NULL, 0);
  return v;
 
 }
 
+
+
+
+
+/*
+   -- str2barray
+   -- string to integer (byte array)
+   --   x, 0x ist Hex, ansonsten Dezimal oder octal
+   --- Input:  1 byte:    0xF0
+   ---         multibyte: 0xFE.12.43.4F.6F (etc) (hex)
+                          123.255.24 (dec)
+   -- return:  <0 = error, 0 = no filter, >0 = count filter bytes
+*/
+
+int  str2barray  (char *s, u_char *barray, int max_len)
+{
+ int  i = 0;
+ long v;
+ int  base = 10;
+ char *endptr = NULL;
+
+
+ if (!s) s = "";
+
+ // -- get base
+ if (*s == '0') {
+	base = 8;  // octal
+ 	if (*s && *(s+1) == 'x') base = 16; // hex
+ }
+
+ while (1)  {
+	 if ( i >= max_len) break;
+
+	 v = strtol (s, &endptr, base);
+	 if ( v < 0 || v > 0xFF) return -1;
+	 if (s == endptr) return -1; // illegal char...
+	 barray[i++] = v;
+	 if (! *endptr) break;   // end of string
+	 s = endptr + 1;
+ }
+
+ return i;
+}
 
 
 

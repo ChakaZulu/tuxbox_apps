@@ -1,7 +1,8 @@
 
+ - New:  Multibyte section filtering redesign e.g. -f 0x4e.2f.1c.3f.50 -m 0xFF.FF.FF (basic code by Stéphane Esté-Gracias)
  - New:  Man page...
  - Changed: Minor changes...
- - New:    Multibyte section filtering e.g. -f 0x4e2f1c -m 0xFFFFFF (tnx to ghostrider, tuxbox-team)
+ - New:    Multibyte section filtering e.g. -f 0x4e2f1c -m 0xFFFFFF (ghostrider, tuxbox-team)
  - Bugfix: dvr device open set to read only 
  - Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 

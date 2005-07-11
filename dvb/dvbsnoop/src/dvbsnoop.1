@@ -123,10 +123,14 @@ section read timeout in ms. Default is 0 (no timeout).
 
 .IP \-f <filter>
 Filter value for filtering section data e.g. table id's.
-Value may be decimal (49), octal (037) or hexadecimal (0x4F)
+Value may be decimal (49), octal (037) or hexadecimal (0x4F).
+You may use multibyte filters like: 0x4E.01.20.FF
+Check the filtervalues  using \-pd 9.
 .IP \-m <mask>
 Mask value to use for filters.
-Value may be decimal (49), octal (037) or hexadecimal (0x4F)
+Value may be decimal (49), octal (037) or hexadecimal (0x4F).
+You may use multibyte filters like: 0x4E.01.20.FF
+Check the filtervalues  using \-pd 9.
 
 .IP \-crc
 Do CRC checking, when reading section data. 
@@ -232,18 +236,38 @@ Simple filter for some PID values, some examples:
    
 Other simple filter examples:
    dvbsnoop \-s sec \-f 0x4E \-m 0xFF  0x12
+   dvbsnoop \-s sec \-f 0x4E.34.00 \-m 0xFF.FF.0F  0x12
+   dvbsnoop \-s sec \-f 16.00 \-m 255.255  0x12
    dvbsnoop \-s sec \-nph \-n 5 0x10 | grep \-i "frequency"
 
 ... for more examples and example output of dvbsnoop, please visit http://dvbsnoop.sourceforge.net.
 
-.SH "BUGS"
+.SH NOTES 
+dvbsnoop tries to decode all of the data it receives, e.g. if you try
+to decode a video or audio stream in section mode, dvbsnoop may assume
+a section table and will decode the data wrong. In this case the decoding
+will be garbage. Using the '-crc' option should prevent this
+(if supported at the hardware/driver level). Also, the '-sync' option
+is very helpful when using '-s pes' or '-s ts'. The '-sync' option tries
+to find TS or PES packet start sync bytes before decoding. 
+.br
+.br
+dvbsnoop does not do DVB stream validation.
+dvbsnoop assumes correct DVB streams. Corrupted streams or streams with
+wrong semantics (e.g. incorrect length information) will result in
+wrong decoding output. For this reason, the use of '-crc' and '-sync'
+options is strongly recommended. 
+.br
 Depending on the firmware of your dvb card, dvbsnoop may not be able to sniff on pids,
 which are occupied by other processes. This is no bug, this is a driver/firmware issue.
 
+.SH "BUGS"
 Please check http://dvbsnoop.sourceforge.net for bug reports.
 
 .SH "Acknowledgments"
 DVBSNOOP was written by Rainer Scherg (rasc).
+Copyright (c) 2001-2005  Rainer Scherg
+
 Additional patches and bugfixes/\-reports were provided by members of the tuxbox project \- bringing digital TV to linux based set top boxes (e.g. "dbox2" digital tv receiver) and also by users of dvbsnoop (see the ChangeLog file for credits).
 
 For more information about DVBSNOOP please visit 'http://dvbsnoop.sourceforge.net'.

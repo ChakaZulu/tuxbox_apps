@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.27 2005/06/27 20:28:16 rasc Exp $
+$Id: dmx_sect.c,v 1.28 2005/07/11 23:06:47 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dmx_sect.c,v 1.27 2005/06/27 20:28:16 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.28  2005/07/11 23:06:47  rasc
+Multibyte section filter redesign:  -f 0x4F.22.33.44.55.66 -m 0x.FF.FF.FF etc.
+Manpage update
+
 Revision 1.27  2005/06/27 20:28:16  rasc
 first version for a man page
 
@@ -241,28 +245,10 @@ static int  doReadSECT_2 (OPTION *opt)
 
     flt.pid = opt->pid;
 
-
-    // $$$ TODO to be redesigned!
-    { int idx;
-      idx=0;
-      if ( opt->filter > 0xFFFFFF )  // we have 4 byte filter
-	flt.filter.filter[idx++] = (opt->filter >> 24)&0xFF;
-      if ( opt->filter > 0xFFFF )
-	flt.filter.filter[idx++] = (opt->filter >> 16)&0xFF;
-      if ( opt->filter > 0xFF )
-	flt.filter.filter[idx++] = (opt->filter >> 8)&0xFF;
-      flt.filter.filter[idx++] = opt->filter&0xFF;
-
-      idx=0;
-      if ( opt->mask > 0xFFFFFF )  // we have 4 byte filter
-	flt.filter.mask[idx++] = (opt->mask >> 24)&0xFF;
-      if ( opt->mask > 0xFFFF )
-	flt.filter.mask[idx++] = (opt->mask >> 16)&0xFF;
-      if ( opt->mask > 0xFF )
-	flt.filter.mask[idx++] = (opt->mask >> 8)&0xFF;
-      flt.filter.mask[idx++] = opt->mask&0xFF;
-    }
-
+    
+    memcpy(flt.filter.filter, opt->filter, DMX_FILTER_SIZE);
+    memcpy(flt.filter.mask, opt->mask, DMX_FILTER_SIZE);
+    
 
     flt.timeout = opt->timeout_ms;
     flt.flags = DMX_IMMEDIATE_START;
