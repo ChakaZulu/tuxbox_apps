@@ -64,7 +64,7 @@ void tuxtxt_start(int tpid)
 			vtxtpid = tpid;
 			start_thread();
 		}
-		else if (!thread_starting)
+		else if (!thread_starting && !receiving)
 		{
 			start_thread();
 		}
