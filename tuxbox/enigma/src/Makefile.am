@@ -43,6 +43,7 @@ enigma_LDADD = \
 	@TUXBOX_LIBS@ \
 	@CONFIGFILE_LIBS@ \
 	@NET_LIBS@ \
+	@TUXTXT_LIBS@ \
 	-ldl -lpthread -lcrypt -lresolv -ljpeg -lungif
 
 enigma$(EXEEXT): $(enigma_OBJECTS) $(enigma_DEPENDENCIES) $(enigma_LDADD_WHOLE)

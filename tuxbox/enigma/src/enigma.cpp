@@ -438,9 +438,6 @@ int main(int argc, char **argv)
 	bind_textdomain_codeset("tuxbox-enigma", "UTF8");
 	textdomain ("tuxbox-enigma");
 
-	Decoder::Initialize();	
-	Decoder::displayIFrameFromFile("/iframe");
-	
 //	mtrace();
 //	mcheck(0);
 
@@ -451,6 +448,8 @@ int main(int argc, char **argv)
 
 	{
 		eZap ezap(argc, argv);
+		Decoder::Initialize();
+		Decoder::displayIFrameFromFile("/iframe");
 		if ( !ezap.isAppQuitNowSet() )
 			res=ezap.exec();
 		else

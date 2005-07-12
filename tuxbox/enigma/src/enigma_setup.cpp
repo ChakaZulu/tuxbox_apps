@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.40 2003/09/14 15:18:16 ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.41 2005/07/12 22:38:34 ghostrider Exp $
  */
 
 #include <enigma_setup.h>
@@ -115,6 +115,7 @@ void eZapSetup::expert_setup()
 	setup.show();
 	setup.exec();
 	setup.hide();
+	eConfig::getInstance()->flush();
 	show();
 }
 

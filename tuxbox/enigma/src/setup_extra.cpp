@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.25 2005/07/07 15:23:03 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.26 2005/07/12 22:38:34 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -28,6 +28,13 @@
 #include <lib/dvb/decoder.h>
 #include <lib/gui/emessage.h>
 #include <lib/system/info.h>
+
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" int  tuxtxt_stop();
+extern "C" void tuxtxt_close();
+extern "C" int  tuxtxt_init();
+extern "C" void tuxtxt_start(int tpid);
+#endif
 
 eExpertSetup::eExpertSetup()
 	:eSetupWindow(_("Expert Setup"), 10, 400)
@@ -93,8 +100,29 @@ void eExpertSetup::init_eExpertSetup()
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Use http authentification"), "/ezap/webif/lockWebIf", _("enables the http (user/password) authentification")))->selected, eExpertSetup::reinitializeHTTPServer );
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Don't open serial port"), "/ezap/extra/disableSerialOutput", _("don't write debug messages to /dev/tts/0")))->selected, eExpertSetup::reinitializeHTTPServer );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Auto bouquet change"), "/elitedvb/extra/autobouquetchange", _("change into next bouquet when end of current bouquet is reached"));
+#ifndef TUXTXT_CFG_STANDALONE
+	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable teletext caching"), "/ezap/extra/teletext_caching", _("don't cache teletext pages in background")))->selected, eExpertSetup::tuxtxtCachingChanged );
+#endif
 	setHelpID(92);
 }
+
+#ifndef TUXTXT_CFG_STANDALONE
+void eExpertSetup::tuxtxtCachingChanged(bool b)
+{
+	if ( b )
+	{
+		if (Decoder::current.tpid != -1)
+			tuxtxt_stop();
+		tuxtxt_close();
+	}
+	else
+	{
+		tuxtxt_init();
+		if (Decoder::current.tpid != -1)
+			tuxtxt_start(Decoder::current.tpid);
+	}
+}
+#endif
 
 #ifndef DISABLE_FILE
 void eExpertSetup::selChanged(eListBoxEntryMenu* e)

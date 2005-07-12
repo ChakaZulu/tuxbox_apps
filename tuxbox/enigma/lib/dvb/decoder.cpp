@@ -48,15 +48,13 @@
 
 typedef unsigned char __u8;
 
+#include <lib/system/econfig.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/base/eerror.h>
 
-
-// at this place we do not 'see' the #define from tuxtxt.h.. create a own define
-#define TUXTXT_CFG_STANDALONE 1
-
-#if !TUXTXT_CFG_STANDALONE
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" int  tuxtxt_init();
 extern "C" void tuxtxt_start(int tpid);
 extern "C" int  tuxtxt_stop();
 extern "C" void tuxtxt_close();
@@ -139,14 +137,23 @@ int Decoder::Initialize()
 	parms.restart_camd=0;
 	current=parms;
 	fd.video = fd.audio = fd.demux_video = fd.demux_audio = fd.demux_pcr = fd.demux_vtxt = fd.mpeg = -1;
+#ifndef TUXTXT_CFG_STANDALONE
+	int disable_background_caching=0;
+	eConfig::getInstance()->getKey("/ezap/extra/teletext_caching", disable_background_caching);
+	if ( !disable_background_caching )
+		tuxtxt_init();
+#endif
 	return 0;
 }
 
 void Decoder::Close()
 {
 	Flush();
-#if !TUXTXT_CFG_STANDALONE
-	tuxtxt_close();
+#ifndef TUXTXT_CFG_STANDALONE
+	int disable_background_caching=0;
+	eConfig::getInstance()->getKey("/ezap/extra/teletext_caching", disable_background_caching);
+	if ( !disable_background_caching )
+		tuxtxt_close();
 #endif
 	eDebug("fd video = %d, audio = %d, demux_video = %d, demux_audio = %d, demux_pcr = %d, demux_vtxt = %d, mpeg = %d",
 					fd.video, fd.audio, fd.demux_video, fd.demux_audio, fd.demux_pcr, fd.demux_vtxt, fd.mpeg);
@@ -279,97 +286,17 @@ int Decoder::Set()
 	if (!changed)
 		return 0;
 
+#ifndef TUXTXT_CFG_STANDALONE
+	int disable_background_caching=0;
+	eConfig::getInstance()->getKey("/ezap/extra/teletext_caching", disable_background_caching);
+#endif
+
 	dmxPesFilterParams pes_filter;
 
 	if (changed & 0xC7 || parms.restart_camd)
 	{
 		SetECM(parms.vpid, parms.apid, parms.pmtpid, parms.descriptor_length, parms.descriptors);
 		parms.restart_camd=0;
-	}
-
-	if (changed & 4)
-	{
-#ifdef OLD_VBI // for old drivers in alexW Image...
-		// vtxt reinsertion (ost api)
-		if ( fd.demux_vtxt == -1 )
-		{
-			fd.demux_vtxt=open("/dev/dbox/vbi0", O_RDWR);
-			if (fd.demux_vtxt<0)
-				eDebug("fd.demux_vtxt couldn't be opened");
-/*			else
-				eDebug("fd.demux_vtxt opened");*/
-		}
-		if ( current.tpid != -1 ) // we stop old vbi vtxt insertion
-		{
-			eDebugNoNewLine("VBI_DEV_STOP - vtxt - ");
-			if (::ioctl(fd.demux_vtxt, AVIA_VBI_STOP_VTXT )<0)
-				eDebug("failed (%m)");
-			else
-				eDebug("ok");
-		}
-		if ( parms.tpid != -1 )  // we start old vbi vtxt insertion
-		{
-			eDebugNoNewLine("VBI_DEV_START - vtxt - ");
-			if (::ioctl(fd.demux_vtxt, AVIA_VBI_START_VTXT, parms.tpid)<0)
-				eDebug("failed (%m)");
-			else
-				eDebug("ok");
-		}
-		else  // we have no tpid ... close device
-		{
-			close(fd.demux_vtxt);
-			fd.demux_vtxt = -1;
-//			eDebug("fd.demux_vtxt closed");
-		}
-#else
-    // vtxt reinsertion (ost api)
-    if ( fd.demux_vtxt == -1 )
-		{
-			fd.demux_vtxt=open(DEMUX_DEV, O_RDWR);
-			if (fd.demux_vtxt<0)
-				eDebug("fd.demux_vtxt couldn't be opened");
-/*			else
-				eDebug("fd.demux_vtxt opened");*/
-		}
-		if ( current.tpid != -1 ) // we stop dmx vtxt
-		{
-#if !TUXTXT_CFG_STANDALONE
-		    tuxtxt_stop();
-#endif
-			eDebugNoNewLine("DEMUX_STOP - vtxt - ");
-			if (::ioctl(fd.demux_vtxt, DMX_STOP)<0)
-				eDebug("failed (%m)");
-			else
-				eDebug("ok");
-		}
-		if ( parms.tpid != -1 )
-		{
-#if !TUXTXT_CFG_STANDALONE
-		    tuxtxt_start(parms.tpid);
-#endif
-			pes_filter.pid=parms.tpid;
-			pes_filter.input=DMX_IN_FRONTEND;
-			pes_filter.output=DMX_OUT_DECODER;
-			pes_filter.pesType=DMX_PES_TELETEXT;
-			pes_filter.flags=DMX_IMMEDIATE_START;
-			eDebugNoNewLine("DMX_SET_PES_FILTER(0x%02x) - vtxt - ", parms.tpid);
-			if (::ioctl(fd.demux_vtxt, DMX_SET_PES_FILTER, &pes_filter)<0)
-				eDebug("failed (%m)");
-			else
-				eDebug("ok");
-			eDebugNoNewLine("DEMUX_START - vtxt - ");
-			if (::ioctl(fd.demux_vtxt, DMX_START)<0)
-				eDebug("failed (%m)");
-			else
-				eDebug("ok");
-		}
-		else  // we have no tpid
-		{
-			close(fd.demux_vtxt);
-			fd.demux_vtxt = -1;
-//			eDebug("fd.demux_vtxt closed");
-		}
-#endif
 	}
 
 	if ( changed & 11 )
@@ -669,6 +596,93 @@ int Decoder::Set()
 			else
 				eDebug("ok");
 		}
+	}
+
+	if (changed & 4)
+	{
+#ifdef OLD_VBI // for old drivers in alexW Image...
+		// vtxt reinsertion (ost api)
+		if ( fd.demux_vtxt == -1 )
+		{
+			fd.demux_vtxt=open("/dev/dbox/vbi0", O_RDWR);
+			if (fd.demux_vtxt<0)
+				eDebug("fd.demux_vtxt couldn't be opened");
+/*			else
+				eDebug("fd.demux_vtxt opened");*/
+		}
+		if ( current.tpid != -1 ) // we stop old vbi vtxt insertion
+		{
+			eDebugNoNewLine("VBI_DEV_STOP - vtxt - ");
+			if (::ioctl(fd.demux_vtxt, AVIA_VBI_STOP_VTXT )<0)
+				eDebug("failed (%m)");
+			else
+				eDebug("ok");
+		}
+		if ( parms.tpid != -1 )  // we start old vbi vtxt insertion
+		{
+			eDebugNoNewLine("VBI_DEV_START - vtxt - ");
+			if (::ioctl(fd.demux_vtxt, AVIA_VBI_START_VTXT, parms.tpid)<0)
+				eDebug("failed (%m)");
+			else
+				eDebug("ok");
+		}
+		else  // we have no tpid ... close device
+		{
+			close(fd.demux_vtxt);
+			fd.demux_vtxt = -1;
+//			eDebug("fd.demux_vtxt closed");
+		}
+#else
+		// vtxt reinsertion (ost api)
+		if ( fd.demux_vtxt == -1 )
+		{
+			fd.demux_vtxt=open(DEMUX_DEV, O_RDWR);
+			if (fd.demux_vtxt<0)
+				eDebug("fd.demux_vtxt couldn't be opened");
+/*			else
+				eDebug("fd.demux_vtxt opened");*/
+		}
+		if ( current.tpid != -1 ) // we stop dmx vtxt
+		{
+#ifndef TUXTXT_CFG_STANDALONE
+			if ( !disable_background_caching )
+				tuxtxt_stop();
+#endif
+			eDebugNoNewLine("DEMUX_STOP - vtxt - ");
+			if (::ioctl(fd.demux_vtxt, DMX_STOP)<0)
+				eDebug("failed (%m)");
+			else
+				eDebug("ok");
+		}
+		if ( parms.tpid != -1 )
+		{
+#ifndef TUXTXT_CFG_STANDALONE
+			if ( !disable_background_caching )
+				tuxtxt_start(parms.tpid);
+#endif
+			pes_filter.pid=parms.tpid;
+			pes_filter.input=DMX_IN_FRONTEND;
+			pes_filter.output=DMX_OUT_DECODER;
+			pes_filter.pesType=DMX_PES_TELETEXT;
+			pes_filter.flags=DMX_IMMEDIATE_START;
+			eDebugNoNewLine("DMX_SET_PES_FILTER(0x%02x) - vtxt - ", parms.tpid);
+			if (::ioctl(fd.demux_vtxt, DMX_SET_PES_FILTER, &pes_filter)<0)
+				eDebug("failed (%m)");
+			else
+				eDebug("ok");
+			eDebugNoNewLine("DEMUX_START - vtxt - ");
+			if (::ioctl(fd.demux_vtxt, DMX_START)<0)
+				eDebug("failed (%m)");
+			else
+				eDebug("ok");
+		}
+		else  // we have no tpid
+		{
+			close(fd.demux_vtxt);
+			fd.demux_vtxt = -1;
+//			eDebug("fd.demux_vtxt closed");
+		}
+#endif
 	}
 
 	current=parms;
