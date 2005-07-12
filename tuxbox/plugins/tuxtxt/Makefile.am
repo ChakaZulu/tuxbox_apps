@@ -8,7 +8,7 @@ AM_CPPFLAGS = \
 
 tuxtxt_la_LIBADD = \
 	@FREETYPE_LIBS@ \
-#	@TUXTXT_LIBS@
+	@TUXTXT_LIBS@
 else
 AM_CPPFLAGS = \
 	@TUXBOX_CFLAGS@ \
@@ -19,7 +19,7 @@ AM_CPPFLAGS = \
 tuxtxt_la_LIBADD = \
 	@TUXBOX_LIBS@  \
 	@FREETYPE_LIBS@
-#	@TUXTXT_LIBS@ 
+	@TUXTXT_LIBS@ 
 endif
 
 noinst_LTLIBRARIES = tuxtxt.la

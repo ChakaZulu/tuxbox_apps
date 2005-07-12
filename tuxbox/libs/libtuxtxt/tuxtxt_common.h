@@ -7,32 +7,9 @@
 #include <ctype.h>
 #include <unistd.h>
 
+tuxtxt_cache_struct tuxtxt_cache;
 
-
-/* some data */
- short flofpages[0x900][FLOFSIZE];
-unsigned char adip[0x900][13];
-unsigned char subpagetable[0x900];
-int dmx = -1;
-int vtxtpid;
-int cached_pages, page, subpage, pageupdate,page_receiving, current_page[9], current_subpage[9];
-int receiving, thread_starting, zap_subpage_manual;
-char bttok;
-int adippg[10];
-int maxadippg;
-unsigned char basictop[0x900];
-int initialized = 0;
-
-unsigned char  timestring[8];
-/* cachetable for packets 29 (one for each magazine) */
-tstExtData *astP29[9];
-/* cachetable */
-tstCachedPage *astCachetable[0x900][0x80];
-
-pthread_t thread_id;
-void *thread_result;
-
-void next_dec(int *i) /* skip to next decimal */
+void tuxtxt_next_dec(int *i) /* skip to next decimal */
 {
 	(*i)++;
 
@@ -46,7 +23,7 @@ void next_dec(int *i) /* skip to next decimal */
 		*i = 0x100;
 }
 
-void prev_dec(int *i)           /* counting down */
+void tuxtxt_prev_dec(int *i)           /* counting down */
 {
 	(*i)--;
 
@@ -60,12 +37,12 @@ void prev_dec(int *i)           /* counting down */
 		*i = 0x899;
 }
 
-int is_dec(int i)
+int tuxtxt_is_dec(int i)
 {
 	return ((i & 0x00F) <= 9) && ((i & 0x0F0) <= 0x90);
 }
 
-int next_hex(int i) /* return next existing non-decimal page number */
+int tuxtxt_next_hex(int i) /* return next existing non-decimal page number */
 {
 	int startpage = i;
 	if (startpage < 0x100)
@@ -78,7 +55,7 @@ int next_hex(int i) /* return next existing non-decimal page number */
 			i = 0x100;
 		if (i == startpage)
 			break;
-	}  while ((subpagetable[i] == 0xFF) || is_dec(i));
+	}  while ((tuxtxt_cache.subpagetable[i] == 0xFF) || tuxtxt_is_dec(i));
 	return i;
 }
 /*
@@ -86,15 +63,15 @@ int next_hex(int i) /* return next existing non-decimal page number */
  * Info entnommen aus videotext-0.6.19991029,
  * Copyright (c) 1994-96 Martin Buck  <martin-2.buck@student.uni-ulm.de>
  */
-void decode_btt()
+void tuxtxt_decode_btt()
 {
 	/* basic top table */
 	int i, current, b1, b2, b3, b4;
 	unsigned char *btt;
 
-	if (subpagetable[0x1f0] == 0xff || 0 == astCachetable[0x1f0][subpagetable[0x1f0]]) /* not yet received */
+	if (tuxtxt_cache.subpagetable[0x1f0] == 0xff || 0 == tuxtxt_cache.astCachetable[0x1f0][tuxtxt_cache.subpagetable[0x1f0]]) /* not yet received */
 		return;
-	btt = astCachetable[0x1f0][subpagetable[0x1f0]]->data;
+	btt = tuxtxt_cache.astCachetable[0x1f0][tuxtxt_cache.subpagetable[0x1f0]]->data;
 	if (btt[799] == ' ') /* not completely received or error */
 		return;
 
@@ -113,11 +90,11 @@ void decode_btt()
 				return;
 			}
 		}
-		basictop[current] = b1;
-		next_dec(&current);
+		tuxtxt_cache.basictop[current] = b1;
+		tuxtxt_next_dec(&current);
 	}
 	/* page linking table */
-	maxadippg = -1; /* rebuild table of adip pages */
+	tuxtxt_cache.maxadippg = -1; /* rebuild table of adip pages */
 	for (i = 0; i < 10; i++)
 	{
 		b1 = dehamming[btt[800 + 8*i +0]];
@@ -143,26 +120,26 @@ void decode_btt()
 		}
 
 		b1 = b1<<8 | b2<<4 | b3; /* page number */
-		adippg[++maxadippg] = b1;
+		tuxtxt_cache.adippg[++tuxtxt_cache.maxadippg] = b1;
 	}
 #if DEBUG
 	printf("TuxTxt <BTT decoded>\n");
 #endif
-	bttok = 1;
+	tuxtxt_cache.bttok = 1;
 }
 
-void decode_adip() /* additional information table */
+void tuxtxt_decode_adip() /* additional information table */
 {
 	int i, p, j, b1, b2, b3, charfound;
 	unsigned char *padip;
 
-	for (i = 0; i <= maxadippg; i++)
+	for (i = 0; i <= tuxtxt_cache.maxadippg; i++)
 	{
-		p = adippg[i];
-		if (!p || subpagetable[p] == 0xff || 0 == astCachetable[p][subpagetable[p]]) /* not cached (avoid segfault) */
+		p = tuxtxt_cache.adippg[i];
+		if (!p || tuxtxt_cache.subpagetable[p] == 0xff || 0 == tuxtxt_cache.astCachetable[p][tuxtxt_cache.subpagetable[p]]) /* not cached (avoid segfault) */
 			continue;
 
-		padip = astCachetable[p][subpagetable[p]]->data;
+		padip = tuxtxt_cache.astCachetable[p][tuxtxt_cache.subpagetable[p]]->data;
 		for (j = 0; j < 44; j++)
 		{
 			b1 = dehamming[padip[20*j+0]];
@@ -201,27 +178,27 @@ void decode_adip() /* additional information table */
 					b3 = ' ';
 
 				if (b3 == ' ' && !charfound)
-					adip[b1][b2] = '\0';
+					tuxtxt_cache.adip[b1][b2] = '\0';
 				else
 				{
-					adip[b1][b2] = b3;
+					tuxtxt_cache.adip[b1][b2] = b3;
 					charfound = 1;
 				}
 			}
 		} /* next link j */
-		adippg[i] = 0; /* completely decoded: clear entry */
+		tuxtxt_cache.adippg[i] = 0; /* completely decoded: clear entry */
 #if DEBUG
 		printf("TuxTxt <ADIP %03x decoded>\n", p);
 #endif
 	} /* next adip page i */
 
-	while (!adippg[maxadippg] && (maxadippg >= 0)) /* and shrink table */
-		maxadippg--;
+	while (!tuxtxt_cache.adippg[tuxtxt_cache.maxadippg] && (tuxtxt_cache.maxadippg >= 0)) /* and shrink table */
+		tuxtxt_cache.maxadippg--;
 }
 /******************************************************************************
  * GetSubPage                                                                 *
  ******************************************************************************/
-int GetSubPage(int page, int subpage, int offset)
+int tuxtxt_GetSubPage(int page, int subpage, int offset)
 {
 	int loop;
 
@@ -235,7 +212,7 @@ int GetSubPage(int page, int subpage, int offset)
 		if (loop == subpage)
 			break;
 
-		if (astCachetable[page][loop])
+		if (tuxtxt_cache.astCachetable[page][loop])
 		{
 #if DEBUG
 			printf("TuxTxt <NextSubPage: %.3X-%.2X>\n", page, subpage);
@@ -254,30 +231,30 @@ int GetSubPage(int page, int subpage, int offset)
  * clear_cache                                                                *
  ******************************************************************************/
 
-void clear_cache()
+void tuxtxt_clear_cache()
 {
 	int clear_page, clear_subpage, d26;
-	maxadippg  = -1;
-	bttok      = 0;
-	cached_pages  = 0;
-	page_receiving = -1;
-	memset(&subpagetable, 0xFF, sizeof(subpagetable));
-	memset(&basictop, 0, sizeof(basictop));
-	memset(&adip, 0, sizeof(adip));
-	memset(&flofpages, 0 , sizeof(flofpages));
-	memset(&timestring, 0x20, 8);
+	tuxtxt_cache.maxadippg  = -1;
+	tuxtxt_cache.bttok      = 0;
+	tuxtxt_cache.cached_pages  = 0;
+	tuxtxt_cache.page_receiving = -1;
+	memset(&tuxtxt_cache.subpagetable, 0xFF, sizeof(tuxtxt_cache.subpagetable));
+	memset(&tuxtxt_cache.basictop, 0, sizeof(tuxtxt_cache.basictop));
+	memset(&tuxtxt_cache.adip, 0, sizeof(tuxtxt_cache.adip));
+	memset(&tuxtxt_cache.flofpages, 0 , sizeof(tuxtxt_cache.flofpages));
+	memset(&tuxtxt_cache.timestring, 0x20, 8);
  	unsigned char magazine;
 	for (magazine = 1; magazine < 9; magazine++)
 	{
-		current_page  [magazine] = -1;
-		current_subpage [magazine] = -1;
+		tuxtxt_cache.current_page  [magazine] = -1;
+		tuxtxt_cache.current_subpage [magazine] = -1;
 	}
 
 	for (clear_page = 0; clear_page < 0x900; clear_page++)
 		for (clear_subpage = 0; clear_subpage < 0x80; clear_subpage++)
-			if (astCachetable[clear_page][clear_subpage])
+			if (tuxtxt_cache.astCachetable[clear_page][clear_subpage])
 			{
-				tstPageinfo *p = &(astCachetable[clear_page][clear_subpage]->pageinfo);
+				tstPageinfo *p = &(tuxtxt_cache.astCachetable[clear_page][clear_subpage]->pageinfo);
 				if (p->p24)
 					free(p->p24);
 				if (p->ext)
@@ -289,26 +266,26 @@ void clear_cache()
 							free(p->ext->p26[d26]);
 					free(p->ext);
 				}
-				free(astCachetable[clear_page][clear_subpage]);
-				astCachetable[clear_page][clear_subpage] = 0;
+				free(tuxtxt_cache.astCachetable[clear_page][clear_subpage]);
+				tuxtxt_cache.astCachetable[clear_page][clear_subpage] = 0;
 			}
 	for (clear_page = 0; clear_page < 9; clear_page++)
 	{
-		if (astP29[clear_page])
+		if (tuxtxt_cache.astP29[clear_page])
 		{
-		    if (astP29[clear_page]->p27)
-			free(astP29[clear_page]->p27);
+		    if (tuxtxt_cache.astP29[clear_page]->p27)
+			free(tuxtxt_cache.astP29[clear_page]->p27);
 		    for (d26=0; d26 < 16; d26++)
-			if (astP29[clear_page]->p26[d26])
-			    free(astP29[clear_page]->p26[d26]);
-		    free(astP29[clear_page]);
-		    astP29[clear_page] = 0;
+			if (tuxtxt_cache.astP29[clear_page]->p26[d26])
+			    free(tuxtxt_cache.astP29[clear_page]->p26[d26]);
+		    free(tuxtxt_cache.astP29[clear_page]);
+		    tuxtxt_cache.astP29[clear_page] = 0;
 		}
-		current_page  [clear_page] = -1;
-		current_subpage [clear_page] = -1;
+		tuxtxt_cache.current_page  [clear_page] = -1;
+		tuxtxt_cache.current_subpage [clear_page] = -1;
 	}
-	memset(&astCachetable, 0, sizeof(astCachetable));
-	memset(&astP29, 0, sizeof(astP29));
+	memset(&tuxtxt_cache.astCachetable, 0, sizeof(tuxtxt_cache.astCachetable));
+	memset(&tuxtxt_cache.astP29, 0, sizeof(tuxtxt_cache.astP29));
 #if DEBUG
 	printf("TuxTxt cache cleared\n");
 #endif
@@ -317,17 +294,17 @@ void clear_cache()
  * init_demuxer                                                               *
  ******************************************************************************/
 
-int init_demuxer()
+int tuxtxt_init_demuxer()
 {
 	/* open demuxer */
-	if ((dmx = open(DMX, O_RDWR)) == -1)
+	if ((tuxtxt_cache.dmx = open(DMX, O_RDWR)) == -1)
 	{
 		perror("TuxTxt <open DMX>");
 		return 0;
 	}
 
 
-	if (ioctl(dmx, DMX_SET_BUFFER_SIZE, 64*1024) < 0)
+	if (ioctl(tuxtxt_cache.dmx, DMX_SET_BUFFER_SIZE, 64*1024) < 0)
 	{
 		perror("TuxTxt <DMX_SET_BUFFERSIZE>");
 		return 0;
@@ -336,13 +313,14 @@ int init_demuxer()
 	printf("TuxTxt: initialized\n");
 #endif
 	/* init successfull */
+	
 	return 1;
 }
 /******************************************************************************
  * CacheThread support functions                                              *
  ******************************************************************************/
 
-void decode_p2829(unsigned char *vtxt_row, tstExtData **ptExtData)
+void tuxtxt_decode_p2829(unsigned char *vtxt_row, tstExtData **ptExtData)
 {
 	int bitsleft, colorindex;
 	unsigned char *p;
@@ -401,21 +379,21 @@ void decode_p2829(unsigned char *vtxt_row, tstExtData **ptExtData)
 	(*ptExtData)->ColorTableRemapping = t2 & 0x07;
 }
 
-void erase_page(int magazine)
+void tuxtxt_erase_page(int magazine)
 {
-	memset(&(astCachetable[current_page[magazine]][current_subpage[magazine]]->pageinfo), 0, sizeof(tstPageinfo));	/* struct pageinfo */
-	memset(astCachetable[current_page[magazine]][current_subpage[magazine]]->p0, ' ', 24);
-	memset(astCachetable[current_page[magazine]][current_subpage[magazine]]->data, ' ', 23*40);
+	memset(&(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->pageinfo), 0, sizeof(tstPageinfo));	/* struct pageinfo */
+	memset(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->p0, ' ', 24);
+	memset(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->data, ' ', 23*40);
 }
 
-void allocate_cache(int magazine)
+void tuxtxt_allocate_cache(int magazine)
 {
 	/* check cachetable and allocate memory if needed */
-	if (astCachetable[current_page[magazine]][current_subpage[magazine]] == 0)
+	if (tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]] == 0)
 	{
-		astCachetable[current_page[magazine]][current_subpage[magazine]] = malloc(sizeof(tstCachedPage));
-		erase_page(magazine);
-		cached_pages++;
+		tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]] = malloc(sizeof(tstCachedPage));
+		tuxtxt_erase_page(magazine);
+		tuxtxt_cache.cached_pages++;
 	}
 }
 
@@ -423,7 +401,7 @@ void allocate_cache(int magazine)
  * CacheThread                                                                *
  ******************************************************************************/
 
-void *CacheThread(void *arg)
+void *tuxtxt_CacheThread(void *arg)
 {
 	const unsigned char rev_lut[32] = {
 		0x00,0x08,0x04,0x0c, /*  upper nibble */
@@ -442,18 +420,18 @@ void *CacheThread(void *arg)
 	unsigned char magazine;
 	tstPageinfo *pageinfo_thread;
 
-	printf("TuxTxt running thread...(%03x)\n",vtxtpid);
-	receiving = 1;
+	printf("TuxTxt running thread...(%03x)\n",tuxtxt_cache.vtxtpid);
+	tuxtxt_cache.receiving = 1;
 	while (1)
 	{
 		/* check stopsignal */
 		pthread_testcancel();
 
-		if (!receiving) continue;
+		if (!tuxtxt_cache.receiving) continue;
 
 		/* read packet */
 		ssize_t readcnt;
-		readcnt = read(dmx, &pes_packet, sizeof(pes_packet));
+		readcnt = read(tuxtxt_cache.dmx, &pes_packet, sizeof(pes_packet));
 
 		if (readcnt != sizeof(pes_packet))
 		{
@@ -508,18 +486,18 @@ void *CacheThread(void *arg)
 
 					if (b2 == 0xFF || b3 == 0xFF)
 					{
-						current_page[magazine] = page_receiving = -1;
+						tuxtxt_cache.current_page[magazine] = tuxtxt_cache.page_receiving = -1;
 #if DEBUG
 						printf("TuxTxt <Biterror in Page>\n");
 #endif
 						continue;
 					}
 
-					current_page[magazine] = page_receiving = magazine<<8 | b2<<4 | b3;
+					tuxtxt_cache.current_page[magazine] = tuxtxt_cache.page_receiving = magazine<<8 | b2<<4 | b3;
 
 					if (b2 == 0x0f && b3 == 0x0f)
 					{
-						current_subpage[magazine] = -1; /* ?ff: ignore data transmissions */
+						tuxtxt_cache.current_subpage[magazine] = -1; /* ?ff: ignore data transmissions */
 						continue;
 					}
 
@@ -534,43 +512,43 @@ void *CacheThread(void *arg)
 #if DEBUG
 						printf("TuxTxt <Biterror in SubPage>\n");
 #endif
-						current_subpage[magazine] = -1;
+						tuxtxt_cache.current_subpage[magazine] = -1;
 						continue;
 					}
 
 					b1 &= 3;
 					b3 &= 7;
 
-					if (is_dec(page_receiving)) /* ignore other subpage bits for hex pages */
+					if (tuxtxt_is_dec(tuxtxt_cache.page_receiving)) /* ignore other subpage bits for hex pages */
 					{
 #if 0	/* ? */
 						if (b1 != 0 || b2 != 0)
 						{
 #if DEBUG
-							printf("TuxTxt <invalid subpage data p%03x %02x %02x %02x %02x>\n", page_receiving, b1, b2, b3, b4);
+							printf("TuxTxt <invalid subpage data p%03x %02x %02x %02x %02x>\n", tuxtxt_cache.page_receiving, b1, b2, b3, b4);
 #endif
-							current_subpage[magazine] = -1;
+							tuxtxt_cache.current_subpage[magazine] = -1;
 							continue;
 						}
 						else
 #endif
-							current_subpage[magazine] = b3<<4 | b4;
+							tuxtxt_cache.current_subpage[magazine] = b3<<4 | b4;
 					}
 					else
-						current_subpage[magazine] = b4; /* max 16 subpages for hex pages */
+						tuxtxt_cache.current_subpage[magazine] = b4; /* max 16 subpages for hex pages */
 
 					/* store current subpage for this page */
-					subpagetable[current_page[magazine]] = current_subpage[magazine];
+					tuxtxt_cache.subpagetable[tuxtxt_cache.current_page[magazine]] = tuxtxt_cache.current_subpage[magazine];
 
-					allocate_cache(magazine);
-					pageinfo_thread = &(astCachetable[current_page[magazine]][current_subpage[magazine]]->pageinfo);
+					tuxtxt_allocate_cache(magazine);
+					pageinfo_thread = &(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->pageinfo);
 
-					if ((page_receiving & 0xff) == 0xfe) /* ?fe: magazine organization table (MOT) */
+					if ((tuxtxt_cache.page_receiving & 0xff) == 0xfe) /* ?fe: magazine organization table (MOT) */
 						pageinfo_thread->function = FUNC_MOT;
 
 					/* check controlbits */
 					if (dehamming[vtxt_row[5]] & 8)   /* C4 -> erase page */
-						memset(astCachetable[current_page[magazine]][current_subpage[magazine]]->data, ' ', 23*40);
+						memset(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->data, ' ', 23*40);
 
 					pageinfo_thread->boxed = !!(dehamming[vtxt_row[7]] & 0x0c);
 
@@ -589,34 +567,34 @@ void *CacheThread(void *arg)
 					}
 
 					/* check parity, copy line 0 to cache (start and end 8 bytes are not needed and used otherwise) */
-					unsigned char *p = astCachetable[current_page[magazine]][current_subpage[magazine]]->p0;
+					unsigned char *p = tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->p0;
 					for (byte = 10; byte < 42-8; byte++)
 						*p++ = deparity[vtxt_row[byte]];
 
-					if (!is_dec(page_receiving))
+					if (!tuxtxt_is_dec(tuxtxt_cache.page_receiving))
 						continue; /* valid hex page number: just copy headline, ignore timestring */
 
 					/* copy timestring */
-					p = timestring;
+					p = tuxtxt_cache.timestring;
 					for (; byte < 42; byte++)
 						*p++ = deparity[vtxt_row[byte]];
 
 				} /* (packet_number == 0) */
 				else if (packet_number == 29 && dehamming[vtxt_row[2]] == 0) /* packet 29/0 replaces 28/0 for a whole magazine */
 				{
-					decode_p2829(vtxt_row, &(astP29[magazine]));
+					tuxtxt_decode_p2829(vtxt_row, &(tuxtxt_cache.astP29[magazine]));
 				}
-				else if (current_page[magazine] != -1 && current_subpage[magazine] != -1)
+				else if (tuxtxt_cache.current_page[magazine] != -1 && tuxtxt_cache.current_subpage[magazine] != -1)
 					/* packet>0, 0 has been correctly received, buffer allocated */
 				{
-					pageinfo_thread = &(astCachetable[current_page[magazine]][current_subpage[magazine]]->pageinfo);
+					pageinfo_thread = &(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->pageinfo);
 					/* pointer to current info struct */
 
 					if (packet_number <= 25)
 					{
 						unsigned char *p;
 						if (packet_number < 24)
-							p = astCachetable[current_page[magazine]][current_subpage[magazine]]->data + 40*(packet_number-1);
+							p = tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->data + 40*(packet_number-1);
 						else
 						{
 							if (!(pageinfo_thread->p24))
@@ -624,10 +602,10 @@ void *CacheThread(void *arg)
 							p = pageinfo_thread->p24 + (packet_number - 24) * 40;
 						}
 
-						if (is_dec(current_page[magazine]))
+						if (tuxtxt_is_dec(tuxtxt_cache.current_page[magazine]))
 							for (byte = 2; byte < 42; byte++)
 								*p++ = deparity[vtxt_row[byte]]; /* check/remove parity bit */
-						else if ((current_page[magazine] & 0xff) == 0xfe)
+						else if ((tuxtxt_cache.current_page[magazine] & 0xff) == 0xfe)
 							for (byte = 2; byte < 42; byte++)
 								*p++ = dehamming[vtxt_row[byte]]; /* decode hamming 8/4 */
 						else /* other hex page: no parity check, just copy */
@@ -663,7 +641,7 @@ void *CacheThread(void *arg)
 										if (b4 == 0)
 											b4 = 8;
 										if (b2 <= 9 && b3 <= 9)
-											flofpages[current_page[magazine] ][byte] = b4<<8 | b2<<4 | b3;
+											tuxtxt_cache.flofpages[tuxtxt_cache.current_page[magazine] ][byte] = b4<<8 | b2<<4 | b3;
 									}
 								}
 
@@ -675,7 +653,7 @@ void *CacheThread(void *arg)
 									do
 									{
 										for (;
-											  l >= 2 && 0 == flofpages[current_page[magazine]][l];
+											  l >= 2 && 0 == tuxtxt_cache.flofpages[tuxtxt_cache.current_page[magazine]][l];
 											  l--)
 											; /* find used linkindex */
 										for (;
@@ -689,17 +667,17 @@ void *CacheThread(void *arg)
 											a1 = a; /* first non-space */
 										if (a >= 0 && l >= 2)
 										{
-											strncpy(adip[flofpages[current_page[magazine]][l]],
+											strncpy(tuxtxt_cache.adip[tuxtxt_cache.flofpages[tuxtxt_cache.current_page[magazine]][l]],
 													  &p[a1],
 													  12);
 											if (e-a1 < 11)
-												adip[flofpages[current_page[magazine]][l]][e-a1+1] = '\0';
+												tuxtxt_cache.adip[tuxtxt_cache.flofpages[tuxtxt_cache.current_page[magazine]][l]][e-a1+1] = '\0';
 #if 0 //DEBUG
 											printf(" %03x/%02x %d %d %d %d %03x %s\n",
-													 current_page[magazine], current_subpage[magazine],
+													 tuxtxt_cache.current_page[magazine], tuxtxt_cache.current_subpage[magazine],
 													 l, a, a1, e,
-													 flofpages[current_page[magazine]][l],
-													 adip[flofpages[current_page[magazine]][l]]
+													 tuxtxt_cache.flofpages[tuxtxt_cache.current_page[magazine]][l],
+													 tuxtxt_cache.adip[tuxtxt_cache.flofpages[tuxtxt_cache.current_page[magazine]][l]]
 													 );
 #endif
 										}
@@ -744,9 +722,9 @@ void *CacheThread(void *arg)
 								p->subpage = d2 >> 2;
 								if ((p->page & 0xff) == 0xff)
 									p->page = 0;
-								else if (astCachetable[p->page][0])	/* link valid && linked page cached */
+								else if (tuxtxt_cache.astCachetable[p->page][0])	/* link valid && linked page cached */
 								{
-									tstPageinfo *pageinfo_link = &(astCachetable[p->page][0]->pageinfo);
+									tstPageinfo *pageinfo_link = &(tuxtxt_cache.astCachetable[p->page][0]->pageinfo);
 									if (p->local)
 										pageinfo_link->function = p->drcs ? FUNC_DRCS : FUNC_POP;
 									else
@@ -777,7 +755,7 @@ void *CacheThread(void *arg)
 						int i, t, m;
 
 						printf("P%03x/%02x %02d/%x",
-								 current_page[magazine], current_subpage[magazine],
+								 tuxtxt_cache.current_page[magazine], tuxtxt_cache.current_subpage[magazine],
 								 packet_number, dehamming[vtxt_row[2]]);
 						for (i=7-4; i <= 45-4; i+=3) /* dump all triplets */
 						{
@@ -816,7 +794,7 @@ void *CacheThread(void *arg)
 						{
 						case 0: /* basic level 1 page */
 						{
-							decode_p2829(vtxt_row, &(pageinfo_thread->ext));
+							tuxtxt_decode_p2829(vtxt_row, &(pageinfo_thread->ext));
 							break;
 						}
 						case 1: /* G0/G1 designation for older decoders, level 3.5: DCLUT4/16, colors for multicolored bitmaps */
@@ -847,7 +825,7 @@ void *CacheThread(void *arg)
 						int i;
 
 						printf("p%03x/%02x %02d/%x ",
-								 current_page[magazine], current_subpage[magazine],
+								 tuxtxt_cache.current_page[magazine], tuxtxt_cache.current_subpage[magazine],
 								 packet_number, dehamming[vtxt_row[2]]);
 						for (i=26-4; i <= 45-4; i++) /* station ID */
 							putchar(deparity[vtxt_row[i]]);
@@ -856,11 +834,11 @@ void *CacheThread(void *arg)
 					}
 				}
 				/* set update flag */
-				if (current_page[magazine] == page && current_subpage[magazine] != -1)
+				if (tuxtxt_cache.current_page[magazine] == tuxtxt_cache.page && tuxtxt_cache.current_subpage[magazine] != -1)
 				{
-					pageupdate = 1;
-					if (!zap_subpage_manual)
-						subpage = current_subpage[magazine];
+					tuxtxt_cache.pageupdate = 1;
+					if (!tuxtxt_cache.zap_subpage_manual)
+						tuxtxt_cache.subpage = tuxtxt_cache.current_subpage[magazine];
 				}
 			}
 		}
@@ -870,66 +848,71 @@ void *CacheThread(void *arg)
 /******************************************************************************
  * start_thread                                                               *
  ******************************************************************************/
-int start_thread()
+int tuxtxt_start_thread()
 {
-	thread_starting = 1;
+	tuxtxt_cache.thread_starting = 1;
 	struct dmx_pes_filter_params dmx_flt;
 
 	/* set filter & start demuxer */
-	dmx_flt.pid      = vtxtpid;
+	dmx_flt.pid      = tuxtxt_cache.vtxtpid;
 	dmx_flt.input    = DMX_IN_FRONTEND;
 	dmx_flt.output   = DMX_OUT_TAP;
 	dmx_flt.pes_type = DMX_PES_OTHER;
 	dmx_flt.flags    = DMX_IMMEDIATE_START;
 
-	if (dmx == -1) init_demuxer();
+	if (tuxtxt_cache.dmx == -1) tuxtxt_init_demuxer();
 
-	if (ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
+	if (ioctl(tuxtxt_cache.dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
 	{
 		perror("TuxTxt <DMX_SET_PES_FILTER>");
-		thread_starting = 0;
+		tuxtxt_cache.thread_starting = 0;
 		return 0;
 	}
 
 	/* create decode-thread */
-	if (pthread_create(&thread_id, NULL, CacheThread, NULL) != 0)
+	if (pthread_create(&tuxtxt_cache.thread_id, NULL, tuxtxt_CacheThread, NULL) != 0)
 	{
 		perror("TuxTxt <pthread_create>");
-		thread_starting = 0;
+		tuxtxt_cache.thread_starting = 0;
 		return 0;
 	}
 #if 1//DEBUG
-	printf("TuxTxt service started %x\n", vtxtpid);
+	printf("TuxTxt service started %x\n", tuxtxt_cache.vtxtpid);
 #endif
-	receiving = 1;
-	thread_starting = 0;
+	tuxtxt_cache.receiving = 1;
+	tuxtxt_cache.thread_starting = 0;
 	return 1;
 }
 /******************************************************************************
  * stop_thread                                                                *
  ******************************************************************************/
 
-int stop_thread()
+int tuxtxt_stop_thread()
 {
 
 	/* stop decode-thread */
-	if (pthread_cancel(thread_id) != 0)
+	if (tuxtxt_cache.thread_id != 0)
 	{
-		perror("TuxTxt <pthread_cancel>");
-		return 0;
-	}
+		if (pthread_cancel(tuxtxt_cache.thread_id) != 0)
+		{
+			perror("TuxTxt <pthread_cancel>");
+			return 0;
+		}
 
-	if (pthread_join(thread_id, &thread_result) != 0)
-	{
-		perror("TuxTxt <pthread_join>");
-		return 0;
+		if (pthread_join(tuxtxt_cache.thread_id, &tuxtxt_cache.thread_result) != 0)
+		{
+			perror("TuxTxt <pthread_join>");
+			return 0;
+		}
 	}
-	ioctl(dmx, DMX_STOP);
-	if (dmx != -1)
-    	    close(dmx);
-	dmx = -1;
+	if (tuxtxt_cache.dmx != -1)
+	{
+		ioctl(tuxtxt_cache.dmx, DMX_STOP);
+        close(tuxtxt_cache.dmx);
+  	}
+	tuxtxt_cache.dmx = -1;
 #if 1//DEBUG
-	printf("TuxTxt stopped service %x\n", vtxtpid);
+	printf("TuxTxt stopped service %x\n", tuxtxt_cache.vtxtpid);
 #endif
 	return 1;
 }

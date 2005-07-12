@@ -26,17 +26,26 @@
  * Initialize                                                                 *
  ******************************************************************************/
 
-int Initialize()
-{
-	/* init data */
-	memset(&astCachetable, 0, sizeof(astCachetable));
-	memset(&astP29, 0, sizeof(astP29));
+static int initialized=0;
 
-	clear_cache();
-	receiving = 0;
-	thread_starting = 0;
-	vtxtpid = -1;
-	return init_demuxer();
+int tuxtxt_init()
+{
+	if ( initialized )
+		return 0;
+	
+	initialized=1;
+
+	/* init data */
+	memset(&tuxtxt_cache.astCachetable, 0, sizeof(tuxtxt_cache.astCachetable));
+	memset(&tuxtxt_cache.astP29, 0, sizeof(tuxtxt_cache.astP29));
+
+	tuxtxt_clear_cache();
+	tuxtxt_cache.receiving = 0;
+	tuxtxt_cache.thread_starting = 0;
+	tuxtxt_cache.vtxtpid = -1;
+	tuxtxt_cache.thread_id = 0;
+	tuxtxt_cache.dmx = -1;
+	return tuxtxt_init_demuxer();
 }
 
 /******************************************************************************
@@ -45,42 +54,38 @@ int Initialize()
 
 int tuxtxt_stop()
 {
-	if (!receiving) return 1;
-	receiving = 0;
+	if (!tuxtxt_cache.receiving) return 1;
+	tuxtxt_cache.receiving = 0;
 
-	return stop_thread();
+	return tuxtxt_stop_thread();
 }
 void tuxtxt_start(int tpid)
 {
-	if (!initialized) initialized = Initialize();
-
-	if (initialized)
+	if (tuxtxt_cache.vtxtpid != tpid)
 	{
-		if (vtxtpid != tpid)
-		{
-			tuxtxt_stop();
-			clear_cache();
-			page = 0x100;
-			vtxtpid = tpid;
-			start_thread();
-		}
-		else if (!thread_starting && !receiving)
-		{
-			start_thread();
-		}
+		tuxtxt_stop();
+		tuxtxt_clear_cache();
+		tuxtxt_cache.page = 0x100;
+		tuxtxt_cache.vtxtpid = tpid;
+		tuxtxt_start_thread();
 	}
-
+	else if (!tuxtxt_cache.thread_starting && !tuxtxt_cache.receiving)
+	{
+		tuxtxt_start_thread();
+	}
 }
+
 void tuxtxt_close()
 {
+	initialized=0;
 #if DEBUG
 	printf ("cleaning up\n");
 #endif
 	tuxtxt_stop();
-	if (dmx != -1)
-    	    close(dmx);
-	dmx = -1;
-	clear_cache();
+	if (tuxtxt_cache.dmx != -1)
+    	    close(tuxtxt_cache.dmx);
+	tuxtxt_cache.dmx = -1;
+	tuxtxt_clear_cache();
 }
 
 /* Local Variables: */

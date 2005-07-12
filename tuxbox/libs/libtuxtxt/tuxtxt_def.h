@@ -89,6 +89,30 @@ typedef struct
 	unsigned char data[23*40];	/* packet 1-23 */
 } tstCachedPage;
 
+/* main data structure */
+typedef struct
+{
+	short flofpages[0x900][FLOFSIZE];
+	unsigned char adip[0x900][13];
+	unsigned char subpagetable[0x900];
+	int dmx;
+	int vtxtpid;
+	int cached_pages, page, subpage, pageupdate,page_receiving, current_page[9], current_subpage[9];
+	int receiving, thread_starting, zap_subpage_manual;
+	char bttok;
+	int adippg[10];
+	int maxadippg;
+	unsigned char basictop[0x900];
+
+	unsigned char  timestring[8];
+	/* cachetable for packets 29 (one for each magazine) */
+	tstExtData *astP29[9];
+	/* cachetable */
+	tstCachedPage *astCachetable[0x900][0x80];
+
+	pthread_t thread_id;
+	void *thread_result;
+} tuxtxt_cache_struct;
 
 /* hamming table */
 const unsigned char dehamming[] =

@@ -8,7 +8,7 @@
  *                                                                            *
  ******************************************************************************/
 
-#define TUXTXT_CFG_STANDALONE 1 // 1:plugin only 0:use library
+#define TUXTXT_CFG_STANDALONE 0  // 1:plugin only 0:use library
 
 #include <config.h>
 
@@ -63,34 +63,18 @@
 #if TUXTXT_CFG_STANDALONE
 #include "tuxtxt_common.h"
 #else
+/* variables and functions from libtuxtxt */
+extern tuxtxt_cache_struct tuxtxt_cache;
+extern int tuxtxt_init();
+extern void tuxtxt_close();
 extern void tuxtxt_start(int tpid);  // Start caching
 extern int  tuxtxt_stop(); // Stop caching
-/* variables and functions from libtuxtxt */
-extern short flofpages[0x900][FLOFSIZE];
-extern unsigned char adip[0x900][13];
-extern unsigned char subpagetable[0x900];
-extern int dmx;
-extern int vtxtpid;
-extern int cached_pages, page, subpage, pageupdate,page_receiving, current_page[9], current_subpage[9];
-extern int receiving, zap_subpage_manual;
-extern char bttok;
-extern int adippg[10];
-extern int maxadippg;
-extern unsigned char basictop[0x900];
-extern int initialized;
-
-extern unsigned char  timestring[8];
-/* cachetable for packets 29 (one for each magazine) */
-extern tstExtData *astP29[9];
-/* cachetable */
-extern tstCachedPage *astCachetable[0x900][0x80];
-
-extern void next_dec(int *i); /* skip to next decimal */
-extern void prev_dec(int *i); /* counting down */
-extern int is_dec(int i);
-extern int next_hex(int i);
-extern void decode_btt();
-extern void decode_adip(); /* additional information table */
+extern void tuxtxt_next_dec(int *i); /* skip to next decimal */
+extern void tuxtxt_prev_dec(int *i); /* counting down */
+extern int tuxtxt_is_dec(int i);
+extern int tuxtxt_next_hex(int i);
+extern void tuxtxt_decode_btt();
+extern void tuxtxt_decode_adip(); /* additional information table */
 #endif
 
 
@@ -252,7 +236,7 @@ const unsigned char *ObjectType[] =
 
 /* messages */
 #define ShowInfoBar     0
-#define PageNotFound    1
+//#define PageNotFound    1
 #define ShowServiceName 2
 #define NoServicesFound 3
 
@@ -383,9 +367,6 @@ int hotlist[10];
 int maxhotlist;
 
 int pig, avs, saa, rc, fb, lcd;
-#if !TUXTXT_CFG_STANDALONE
-int dmx;
-#endif
 int sx, ex, sy, ey;
 int PosX, PosY, StartX, StartY;
 int lastpage;
@@ -451,7 +432,7 @@ unsigned char avstable_dvb[3][7] =
 };
 
 /* language dependent texts */
-#define MAXMENULANGUAGE 4 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch */
+#define MAXMENULANGUAGE 5 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch */
 
 #define Menu_StartX (StartX + fontwidth*9/2)
 #define Menu_StartY (StartY + fontheight)
@@ -481,11 +462,11 @@ enum
 
 const char hotlistpagecolumn[] =	/* last(!) column of page to show in each language */
 {
-	22, 26, 28, 27, 28
+	22, 26, 28, 27, 28, 27
 };
 const char hotlisttextcolumn[] =
 {
-	24, 14, 14, 15, 14
+	24, 14, 14, 15, 14, 15
 };
 const char hotlisttext[][2*5] =
 {
@@ -494,6 +475,7 @@ const char hotlisttext[][2*5] =
 	{ "ajoutenlev" },
 	{ "toev.verw." },
 	{ "pqoshavaiq" },
+	{ "agg. elim." },
 };
 
 const char configonoff[][2*3] =
@@ -502,150 +484,205 @@ const char configonoff[][2*3] =
 	{ "offon " },
 	{ "desact" },
 	{ "uitaan" },
-	{ "emeape" }
+	{ "emeape" },
+	{ "offon " }
 };
-
-const char configmenu[][2*Menu_Height*Menu_Width] =
+const char menuatr[Menu_Height*Menu_Width] =
+{
+	"0000000000000000000000000000002"
+	"0111111111111111111111111111102"
+	"0000000000000000000000000000002"
+	"3333333333333333333333333333332"
+	"3144444444444444444444444444432"
+	"3556655555555555555555555555532"
+	"3555555555555555555555555555532"
+	"3333333333333333333333333333332"
+	"3144444444444444444444444444432"
+	"3555555555555555555555555555532"
+	"3333333333333333333333333333332"
+	"3444444444444444444444444444432"
+	"3155555555555555555555555555532"
+	"3155555555555555555555555555532"
+	"3333333333333333333333333333332"
+	"3144444444444444444444444444432"
+	"3555555555555555555555555555532"
+	"3333333333333333333333333333332"
+	"3144444444444444444444444444432"
+	"3555555555555555555555555555532"
+	"3555555555555555555555555555532"
+	"3555555555555555555555555555532"
+	"3333333333333333333333333333332"
+	"2222222222222222222222222222222"
+};
+const char configmenu[][Menu_Height*Menu_Width] =
 {
 	{
 /*     0000000000111111111122222222223 */
 /*     0123456789012345678901234567890 */
-		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט0000000000000000000000000000002"
-		"ד     Konfigurationsmenue    הי0111111111111111111111111111102"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי0000000000000000000000000000002"
-		"ד                            הי3333333333333333333333333333332"
-		"ד1 Favoriten: Seite 111 dazu הי3144444444444444444444444444432"
-		"דםמסע                        הי3556655555555555555555555555532"
-		"ד+-?                         הי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד2     Teletext-Auswahl      הי3144444444444444444444444444432"
-		"דם          suchen          מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד      Bildschirmformat      הי3444444444444444444444444444432"
-		"ד3  Standard-Modus 16:9      הי3155555555555555555555555555532"
-		"ד4  TextBild-Modus 16:9      הי3155555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד5        Helligkeit         הי3144444444444444444444444444432"
-		"דם                          מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד6  nationaler Zeichensatz   הי3144444444444444444444444444432"
-		"דautomatische Erkennung      הי3555555555555555555555555555532"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי3555555555555555555555555555532"
-		"דם Sprache/Language deutsch מהי3555555555555555555555555555532"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי3333333333333333333333333333332"
-		"כלללללללללללללללללללללללללללללך2222222222222222222222222222222"
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד     Konfigurationsmenue    הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד                            הי"
+		"ד1 Favoriten: Seite 111 dazu הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2     Teletext-Auswahl      הי"
+		"דם          suchen          מהי"
+		"ד                            הי"
+		"ד      Bildschirmformat      הי"
+		"ד3  Standard-Modus 16:9      הי"
+		"ד4  TextBild-Modus 16:9      הי"
+		"ד                            הי"
+		"ד5        Helligkeit         הי"
+		"דם                          מהי"
+		"ד                            הי"
+		"ד6  nationaler Zeichensatz   הי"
+		"דautomatische Erkennung      הי"
+		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם Sprache/Language deutsch מהי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
 /*     0123456789012345678901234567890 */
 	{
-		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט0000000000000000000000000000002"
-		"ד     Configuration menu     הי0111111111111111111111111111102"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי0000000000000000000000000000002"
-		"ד                            הי3333333333333333333333333333332"
-		"ד1 Favorites:  add page 111  הי3144444444444444444444444444432"
-		"דםמסע                        הי3556655555555555555555555555532"
-		"ד+-?                         הי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד2     Teletext selection    הי3144444444444444444444444444432"
-		"דם          search          מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד        Screen format       הי3444444444444444444444444444432"
-		"ד3 Standard mode 16:9        הי3155555555555555555555555555532"
-		"ד4 Text/TV mode  16:9        הי3155555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד5        Brightness         הי3144444444444444444444444444432"
-		"דם                          מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד6   national characterset   הי3144444444444444444444444444432"
-		"ד automatic recognition      הי3555555555555555555555555555532"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי3555555555555555555555555555532"
-		"דם Sprache/language english מהי3555555555555555555555555555532"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי3333333333333333333333333333332"
-		"כלללללללללללללללללללללללללללללך2222222222222222222222222222222"
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד     Configuration menu     הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד                            הי"
+		"ד1 Favorites:  add page 111  הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2     Teletext selection    הי"
+		"דם          search          מהי"
+		"ד                            הי"
+		"ד        Screen format       הי"
+		"ד3 Standard mode 16:9        הי"
+		"ד4 Text/TV mode  16:9        הי"
+		"ד                            הי"
+		"ד5        Brightness         הי"
+		"דם                          מהי"
+		"ד                            הי"
+		"ד6   national characterset   הי"
+		"ד automatic recognition      הי"
+		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם Sprache/language english מהי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
 /*     0123456789012345678901234567890 */
 	{
-		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט0000000000000000000000000000002"
-		"ד    Menu de configuration   הי0111111111111111111111111111102"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי0000000000000000000000000000002"
-		"ד                            הי3333333333333333333333333333332"
-		"ד1 Favorites: ajout. page 111הי3144444444444444444444444444432"
-		"דםמסע                        הי3556655555555555555555555555532"
-		"ד+-?                         הי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד2  Selection de teletext    הי3144444444444444444444444444432"
-		"דם        recherche         מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד      Format de l'#cran     הי3444444444444444444444444444432"
-		"ד3 Mode standard 16:9        הי3155555555555555555555555555532"
-		"ד4 Texte/TV      16:9        הי3155555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד5          Clarte           הי3144444444444444444444444444432"
-		"דם                          מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד6     police nationale      הי3144444444444444444444444444432"
-		"דreconn. automatique         הי3555555555555555555555555555532"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי3555555555555555555555555555532"
-		"דם Sprache/language francaisמהי3555555555555555555555555555532"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי3333333333333333333333333333332"
-		"כלללללללללללללללללללללללללללללך2222222222222222222222222222222"
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד    Menu de configuration   הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד                            הי"
+		"ד1 Favorites: ajout. page 111הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2  Selection de teletext    הי"
+		"דם        recherche         מהי"
+		"ד                            הי"
+		"ד      Format de l'#cran     הי"
+		"ד3 Mode standard 16:9        הי"
+		"ד4 Texte/TV      16:9        הי"
+		"ד                            הי"
+		"ד5          Clarte           הי"
+		"דם                          מהי"
+		"ד                            הי"
+		"ד6     police nationale      הי"
+		"דreconn. automatique         הי"
+		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם Sprache/language francaisמהי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
 /*     0123456789012345678901234567890 */
 	{
-		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט0000000000000000000000000000002"
-		"ד      Configuratiemenu      הי0111111111111111111111111111102"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי0000000000000000000000000000002"
-		"ד                            הי3333333333333333333333333333332"
-		"ד1 Favorieten: toev. pag 111 הי3144444444444444444444444444432"
-		"דםמסע                        הי3556655555555555555555555555532"
-		"ד+-?                         הי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד2     Teletekst-selectie    הי3144444444444444444444444444432"
-		"דם          zoeken          מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד     Beeldschermformaat     הי3444444444444444444444444444432"
-		"ד3   Standaardmode 16:9      הי3155555555555555555555555555532"
-		"ד4   Tekst/TV mode 16:9      הי3155555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד5        Helderheid         הי3144444444444444444444444444432"
-		"דם                          מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד6    nationale tekenset     הי3144444444444444444444444444432"
-		"דautomatische herkenning     הי3555555555555555555555555555532"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי3555555555555555555555555555532"
-		"דם Sprache/Language nederl. מהי3555555555555555555555555555532"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי3333333333333333333333333333332"
-		"כלללללללללללללללללללללללללללללך2222222222222222222222222222222"
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד      Configuratiemenu      הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד                            הי"
+		"ד1 Favorieten: toev. pag 111 הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2     Teletekst-selectie    הי"
+		"דם          zoeken          מהי"
+		"ד                            הי"
+		"ד     Beeldschermformaat     הי"
+		"ד3   Standaardmode 16:9      הי"
+		"ד4   Tekst/TV mode 16:9      הי"
+		"ד                            הי"
+		"ד5        Helderheid         הי"
+		"דם                          מהי"
+		"ד                            הי"
+		"ד6    nationale tekenset     הי"
+		"דautomatische herkenning     הי"
+		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם Sprache/Language nederl. מהי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
 /*     0123456789012345678901234567890 */
 	{
-		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט0000000000000000000000000000002"
-		"ד      Lemou quhliseym       הי0111111111111111111111111111102"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי0000000000000000000000000000002"
-		"ד                            הי3333333333333333333333333333332"
-		"ד1 Vaboqi:    pqosh. sek. 111הי3144444444444444444444444444432"
-		"דםמסע                        הי3556655555555555555555555555532"
-		"ד+-?                         הי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד2     Epikocg Teketent      הי3144444444444444444444444444432"
-		"דם        amafgtgsg         מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד       Loqvg ohomgr         הי3444444444444444444444444444432"
-		"ד3 Tqopor pqotupor   16:9    הי3155555555555555555555555555532"
-		"ד4 Tqopor eij. jeil. 16:9    הי3155555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד5      Vyteimotgta          הי3144444444444444444444444444432"
-		"דם                          מהי3555555555555555555555555555532"
-		"ד                            הי3333333333333333333333333333332"
-		"ד6    Ehmijg tuposeiqa       הי3144444444444444444444444444432"
-		"דautolatg amacmyqisg         הי3555555555555555555555555555532"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי3555555555555555555555555555532"
-		"דם Ckyssa/Language ekkgmija מהי3555555555555555555555555555532"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי3333333333333333333333333333332"
-		"כלללללללללללללללללללללללללללללך2222222222222222222222222222222"
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד      Lemou quhliseym       הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד                            הי"
+		"ד1 Vaboqi:    pqosh. sek. 111הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2     Epikocg Teketent      הי"
+		"דם        amafgtgsg         מהי"
+		"ד                            הי"
+		"ד       Loqvg ohomgr         הי"
+		"ד3 Tqopor pqotupor   16:9    הי"
+		"ד4 Tqopor eij. jeil. 16:9    הי"
+		"ד                            הי"
+		"ד5      Vyteimotgta          הי"
+		"דם                          מהי"
+		"ד                            הי"
+		"ד6    Ehmijg tuposeiqa       הי"
+		"דautolatg amacmyqisg         הי"
+		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם Ckyssa/Language ekkgmija מהי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"כלללללללללללללללללללללללללללללך"
+	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד   Menu di configurazione   הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד                            הי"
+		"ד1  Preferiti:  agg. pag.111 הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2   Selezione televideo     הי"
+		"דם         ricerca          מהי"
+		"ד                            הי"
+		"ד      Formato schermo       הי"
+		"ד3  Modo standard 16:9       הי"
+		"ד4  Text/Mod.TV 16:9         הי"
+		"ד                            הי"
+		"ד5        Luminositא         הי"
+		"דם                          מהי"
+		"ד                            הי"
+		"ד6   nazionalita'caratteri   הי"
+		"ד riconoscimento automatico  הי"
+		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם Lingua/Language Italiana מהי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"כלללללללללללללללללללללללללללללך"
 	}
 };
 
@@ -660,6 +697,8 @@ const char catchmenutext[][80] =
 	{ "        םןנמ kiezen   סע tonen          "
 	  "0000000011110000000000110000000000000000" },
 	{ "        םןנמ epikocg  סע pqobokg        "
+	  "0000000011110000000000110000000000000000" },
+	{ "        םןנמseleziona סע mostra         "
 	  "0000000011110000000000110000000000000000" }
 };
 
@@ -669,7 +708,8 @@ const char message_3[][38] =
 	{ "ד  searching for teletext Services  הי" },
 	{ "ד  recherche des services teletext  הי" },
 	{ "ד zoeken naar teletekst aanbieders  הי" },
-	{ "ד     amafgtgsg voqeym Teketent     הי" }
+	{ "ד     amafgtgsg voqeym Teketent     הי" },
+	{ "ד     attesa opzioni televideo      הי" }
 };
 const char message_3_blank[] = "ד                                   הי";
 const char message_7[][38] =
@@ -678,7 +718,8 @@ const char message_7[][38] =
 	{ "ד   no teletext on the transponder  הי" },
 	{ "ד pas de teletext sur le transponderהי" },
 	{ "ד geen teletekst op de transponder  הי" },
-	{ "ד jalela Teketent ston amaletadotg  הי" }
+	{ "ד jalela Teketent ston amaletadotg  הי" },
+	{ "ד nessun televideo sul trasponder   הי" }
 };
 const char message_8[][38] =
 {
@@ -688,12 +729,14 @@ const char message_8[][38] =
 	{ "ד waiting for reception of page 100 הי" },
 	{ "ד attentre la rיception de page 100 הי" },
 	{ "דwachten op ontvangst van pagina 100הי" },
-	{ "ד     amalemy kgxg sekidar 100      הי" }
+	{ "ד     amalemy kgxg sekidar 100      הי" },
+	{ "ד   attesa ricezione pagina 100     הי" }
 };
 const char message8pagecolumn[] = /* last(!) column of page to show in each language */
 {
-	33, 34, 34, 35, 34
+	33, 34, 34, 35, 29, 30
 };
+#if 0
 const char message_9[][38] =
 {
 /*    0000000000111111111122222222223 */
@@ -702,10 +745,11 @@ const char message_9[][38] =
 	{ "ד      Page 100 does not exist!     הי" },
 	{ "ד      Page 100 n'existe pas!       הי" },
 	{ "ד    Pagina 100 bestaat niet!       הי" },
-	{ "ד    G sekida 100 dem upaqwei!      הי" }
+	{ "ד    G sekida 100 dem upaqwei!      הי" },
+	{ "ד      Pagina 100 non esiste!       הי" }
 };
 #define MESSAGE9PAGECOLUMN 14
-
+#endif
 
 enum /* options for charset */
 {
