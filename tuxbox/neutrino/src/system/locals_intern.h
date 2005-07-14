@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.50 2005/07/08 21:17:14 mogway Exp $
+ * $Id: locals_intern.h,v 1.51 2005/07/14 21:58:02 mogway Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -392,6 +392,8 @@ const char * locale_real_names[] =
 	"fontsize.gamelist_itemlarge",
 	"fontsize.gamelist_itemsmall",
 	"fontsize.hint",
+	"fontsize.imageinfo_info",
+	"fontsize.imageinfo_small",
 	"fontsize.infobar_channame",
 	"fontsize.infobar_info",
 	"fontsize.infobar_number",

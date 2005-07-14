@@ -236,7 +236,7 @@ struct SNeutrinoSettings
 
 
 	// Font sizes
-#define FONT_TYPE_COUNT 22
+#define FONT_TYPE_COUNT 24
 	enum FONT_TYPES {
 		FONT_TYPE_MENU                =  0,
 		FONT_TYPE_MENU_TITLE          =  1,
@@ -259,7 +259,9 @@ struct SNeutrinoSettings
 		FONT_TYPE_INFOBAR_CHANNAME    = 18,
 		FONT_TYPE_INFOBAR_INFO        = 19,
 		FONT_TYPE_INFOBAR_SMALL       = 20,
-		FONT_TYPE_FILEBROWSER_ITEM    = 21
+		FONT_TYPE_FILEBROWSER_ITEM    = 21,
+		FONT_TYPE_IMAGEINFO_INFO      = 22,
+		FONT_TYPE_IMAGEINFO_SMALL     = 23
 	};
 
 	// lcdd

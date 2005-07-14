@@ -45,10 +45,9 @@ CImageInfo::CImageInfo()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 
-	font_head   = 18; // SNeutrinoSettings::FONT_TYPE_MENU_TITLE;
-	font_small  = 20; // SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL;
-	font_info   = 0;  // SNeutrinoSettings::FONT_TYPE_MENU;
-
+	font_head   = SNeutrinoSettings::FONT_TYPE_MENU_TITLE;
+	font_small  = SNeutrinoSettings::FONT_TYPE_IMAGEINFO_SMALL;
+	font_info   = SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO;
 
 	hheight     = g_Font[font_head]->getHeight();
 	iheight     = g_Font[font_info]->getHeight();
@@ -128,6 +127,7 @@ void CImageInfo::paintLine(int xpos, int font, const char* text)
 void CImageInfo::paint()
 {
 	const char * head_string;
+	const char * releaseCycle;
 	char imagedate[18] = "";
  	int  xpos = x+10;
 
@@ -152,7 +152,8 @@ void CImageInfo::paint()
 	const char * version   = config.getString("version",   "????????????????").c_str();
 
 	static CFlashVersionInfo versionInfo(version);
-	const char * releaseCycle = versionInfo.getReleaseCycle();
+
+	sprintf((char*) releaseCycle, "%s (%s)", versionInfo.getReleaseCycle() ,versionInfo.getType());
 	sprintf((char*) imagedate, "%s  %s", versionInfo.getDate(), versionInfo.getTime());
 
 	ypos += iheight;
@@ -171,7 +172,7 @@ void CImageInfo::paint()
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_CREATOR));
 	paintLine(xpos+125, font_info, creator);
 
-	ypos += iheight+15;
+	ypos += iheight+10;
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_HOMEPAGE));
 	paintLine(xpos+125, font_info, homepage);
 
@@ -183,7 +184,7 @@ void CImageInfo::paint()
 	paintLine(xpos    , font_info, g_Locale->getText(LOCALE_IMAGEINFO_FORUM));
 	paintLine(xpos+125, font_info, "http://forum.tuxbox.org");
 
-	ypos += iheight+15;
+	ypos += iheight+10;
 	paintLine(xpos, font_info,g_Locale->getText(LOCALE_IMAGEINFO_LICENSE));
 	paintLine(xpos+125, font_small, "This program is free software; you can redistribute it and/or modify");
 
