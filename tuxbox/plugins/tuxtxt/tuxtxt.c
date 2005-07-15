@@ -1039,7 +1039,7 @@ void eval_l25()
 	} /* function == FUNC_MOT  */
 
 //	else if (pageinfo->function == FUNC_GPOP || pageinfo->function == FUNC_POP) /* object definitions */
-	else if (!is_dec(tuxtxt_cache.page) && pageinfo->function != FUNC_GDRCS && pageinfo->function != FUNC_DRCS) /* in case the function is not assigned properly */
+	else if (!tuxtxt_is_dec(tuxtxt_cache.page) && pageinfo->function != FUNC_GDRCS && pageinfo->function != FUNC_DRCS) /* in case the function is not assigned properly */
 	{
 		unsigned char APx0, APy0, APx, APy;
 		int packet;
@@ -1383,7 +1383,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.88 $";
+	char cvs_revision[] = "$Revision: 1.89 $";
 	
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
