@@ -724,6 +724,15 @@ static eString audio(eString request, eString dirpath, eString opts, eHTTPConnec
 	return result;
 }
 
+static eString getCurrentServiceRef(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if (eServiceInterface::getInstance()->service)
+		return eServiceInterface::getInstance()->service.toString();
+	else
+		return "E:no service running";
+}
+
+
 void ezapMiscInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory, lockWeb);
@@ -761,5 +770,6 @@ void ezapMiscInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/control/zapto", getCurrentVpidApid, false); // this dont really zap.. only used to return currently used pids;
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_getchannellist, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
 }
 

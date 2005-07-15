@@ -2266,14 +2266,6 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	return closeWindow(content, "Please wait...", 3000);
 }
 
-static eString getCurrentServiceRef(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	if (eServiceInterface::getInstance()->service)
-		return eServiceInterface::getInstance()->service.toString();
-	else
-		return "E:no service running";
-}
-
 eString getPDAContent(eString mode, eString path, eString opts)
 {
 	eString result;
@@ -2769,11 +2761,6 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 			result.strReplace("#CONTENT#", tmp);
 		else
 			result = "";
-
-		if (mode == "controlSatFinder")
-			result.strReplace("#ONLOAD#", "onLoad=init()");
-		else
-			result.strReplace("#ONLOAD#", "");
 	}
 
 	if (!result)
@@ -2824,7 +2811,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/deleteMovie", deleteMovie, lockWeb);
 #endif
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
 	
 	ezapWapInitializeDyn(dyn_resolver, lockWeb);
 	ezapXMLInitializeDyn(dyn_resolver, lockWeb);

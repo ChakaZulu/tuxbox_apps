@@ -24,3 +24,4 @@
 		</td>
 	</tr>
 </table>
+<script>init();</script>
