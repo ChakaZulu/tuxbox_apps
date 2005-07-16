@@ -197,9 +197,9 @@
 								</table>
 								<table id="statcell" border="0" cellpadding="0" cellspacing="0" height="20px">
 								<tr>
-									<td id="agc">&nbsp;</td>
-									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td id="snr">&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td id="agc">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td id="ber">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
