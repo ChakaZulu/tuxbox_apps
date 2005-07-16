@@ -26,7 +26,6 @@ function deleteTimerEvent(xy)
 	if (window.confirm('Do you really want to delete this timer event?'))
 	{
 		NewWindow('deleteTimerEvent?'+xy, 'deleteTimer', '300', '150', 'no');
-		setTimeout("document.location.reload()", 1000);
 	}
 }
 

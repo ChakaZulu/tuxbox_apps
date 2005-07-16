@@ -9,7 +9,7 @@
 			}
 		</script>
 	</head>
-	<body onLoad="init()">
+	<body onLoad="init()" onUnload="parent.window.opener.location.reload(true)">
 		Timer event deleted successfully.
 	</body>
 </html>
