@@ -88,7 +88,7 @@ void eAVSwitch::init()
 		volume=10;
 
 	setInput(0);
-	setActive(1);		// in setActive is volume or mute set to current state
+	setActive(1);
 	changeVolume(0,0);
 }
 

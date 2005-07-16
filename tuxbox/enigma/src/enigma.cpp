@@ -143,7 +143,10 @@ void eZap::init_eZap(int argc, char **argv)
 		}
 		fclose(pluginlist);
 	}
-	
+
+	init->setRunlevel(eAutoInitNumbers::configuration);
+	Decoder::Initialize();
+
 	init->setRunlevel(eAutoInitNumbers::osd);
 
 	CONNECT(eRCInput::getInstance()->keyEvent, eZap::keyEvent);
@@ -448,8 +451,6 @@ int main(int argc, char **argv)
 
 	{
 		eZap ezap(argc, argv);
-		Decoder::Initialize();
-		Decoder::displayIFrameFromFile("/iframe");
 		if ( !ezap.isAppQuitNowSet() )
 			res=ezap.exec();
 		else
