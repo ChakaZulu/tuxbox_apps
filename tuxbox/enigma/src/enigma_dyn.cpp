@@ -554,12 +554,12 @@ static eString getChannelNavi(void)
 	return result;
 }
 
-static eString getLeftNavi(eString mode, bool javascript)
+static eString getLeftNavi(eString mode)
 {
 	eString result;
 	eString pre, post;
 
-	if (javascript)
+	if (pdaScreen == 0)
 	{
 		pre = "javascript:leftnavi('";
 		post = "')";
@@ -569,7 +569,6 @@ static eString getLeftNavi(eString mode, bool javascript)
 	{
 		if (pdaScreen == 0)
 		{
-			result += "<span class=\"zapnavi\">";
 			result += button(110, "TV", RED, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
 			result += "<br>";
 			result += button(110, "Radio", GREEN, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
@@ -580,7 +579,6 @@ static eString getLeftNavi(eString mode, bool javascript)
 			result += button(110, "Movies", OCKER, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
 			result += "<br>";
 			result += button(110, "Root", PINK, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
-			result += "</span>";
 #endif
 			result += "<br><br>";
 			if (zap[zapMode][ZAPSUBMODESATELLITES])
@@ -658,6 +656,7 @@ static eString getLeftNavi(eString mode, bool javascript)
 			case eSystemInfo::dbox2Philips:
 				result += "<br>";
 				result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dbox2')");
+				break;
 			default:
 				if (eSystemInfo::getInstance()->hasKeyboard())
 				    result += "<br>"+button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dreambox')");
@@ -711,12 +710,12 @@ static eString getLeftNavi(eString mode, bool javascript)
 	return result;
 }
 
-static eString getTopNavi(bool javascript)
+static eString getTopNavi()
 {
 	eString result;
 	eString pre, post;
 
-	if (javascript)
+	if (pdaScreen == 0)
 	{
 		pre = "javascript:topnavi('";
 		post = "')";
@@ -1014,7 +1013,7 @@ class eWebNavigatorListDirectory: public Object
 public:
 	eWebNavigatorListDirectory(eString &result, eString path, eServiceInterface &iface): result(result), path(path), iface(iface)
 	{
-		eDebug("path: %s", path.c_str());
+//		eDebug("path: %s", path.c_str());
 		num = 0;
 	}
 	void addEntry(const eServiceReference &e)
@@ -1083,7 +1082,7 @@ class eWebNavigatorListDirectory2: public Object
 public:
 	eWebNavigatorListDirectory2(std::list <myService> &myList, eString path, eServiceInterface &iface, bool addEPG): myList(myList), path(path), iface(iface), addEPG(addEPG)
 	{
-		eDebug("[eWebNavigatorListDirectory2:] path: %s", path.c_str());
+//		eDebug("[eWebNavigatorListDirectory2:] path: %s", path.c_str());
 	}
 	void addEntry(const eServiceReference &e)
 	{
@@ -1140,12 +1139,12 @@ public:
 		tmp.strReplace("\"", "'");
 		tmp.strReplace("\n", "-");
 
-		if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF))
+		if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF) && tmp)
 			myList.push_back(myService(ref2string(e), tmp));
 	}
 };
 
-static eString getZapContent(eString mode, eString path)
+static eString getZapContent(eString path)
 {
 	eString result;
 
@@ -1165,15 +1164,15 @@ static eString getZapContent(eString mode, eString path)
 		result += "<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
 		iface->enterDirectory(current_service, signal);
 		result += "</table>\n";
-		eDebug("entered");
+//		eDebug("entered");
 		iface->leaveDirectory(current_service);
-		eDebug("exited");
+//		eDebug("exited");
 	}
 
 	return result;
 }
 
-eString getZapContent2(eString mode, eString path, int depth, bool addEPG, bool sortList)
+eString getZapContent2(eString path, int depth, bool addEPG, bool sortList)
 {
 	std::list <myService> myList, myList2;
 	std::list <myService>::iterator myIt;
@@ -1191,14 +1190,14 @@ eString getZapContent2(eString mode, eString path, int depth, bool addEPG, bool 
 	else
 	{
 		// first pass thru is to get all user bouquets
-		myList.sort();
+		myList.clear();
 		eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG);
 		Signal1<void, const eServiceReference&> signal;
 		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 		iface->enterDirectory(current_service, signal);
-		eDebug("entered");
+//		eDebug("entered");
 		iface->leaveDirectory(current_service);
-		eDebug("exited");
+//		eDebug("exited");
 
 		sortServices(sortList, myList, result1, result2);
 
@@ -1229,9 +1228,9 @@ eString getZapContent2(eString mode, eString path, int depth, bool addEPG, bool 
 					channelrefs += "] = new Array(";
 
 					iface->enterDirectory(current_service, signal);
-					eDebug("entered");
+//					eDebug("entered");
 					iface->leaveDirectory(current_service);
-					eDebug("exited");
+//					eDebug("exited");
 
 					sortServices(sortList, myList2, result1, result2);
 
@@ -1271,7 +1270,7 @@ eString getZapContent2(eString mode, eString path, int depth, bool addEPG, bool 
 	return result;
 }
 
-static eString getZap(eString mode, eString path)
+static eString getZap(eString path)
 {
 	eString result, tmp;
 	int selsize = 0;
@@ -1282,7 +1281,7 @@ static eString getZap(eString mode, eString path)
 		if (zapMode == ZAPMODERECORDINGS) // recordings
 		{
 			result = readFile(TEMPLATE_DIR + "movies.tmp");
-			result.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false, false));
+			result.strReplace("#ZAPDATA#", getZapContent2(path, 1, false, false));
 			selsize = (screenWidth > 1024) ? 25 : 10;
 #ifdef ENABLE_DYN_MOUNT
 			tmp = readFile(TEMPLATE_DIR + "movieSources.tmp");
@@ -1297,7 +1296,7 @@ static eString getZap(eString mode, eString path)
 		if (zapMode == ZAPMODEROOT) // root
 		{
 			result = readFile(TEMPLATE_DIR + "root.tmp");
-			eString tmp = getZapContent2(mode, path, 1, false, false);
+			eString tmp = getZapContent2(path, 1, false, false);
 			if (tmp)
 			{
 				result.strReplace("#ZAPDATA#", tmp);
@@ -1311,7 +1310,7 @@ static eString getZap(eString mode, eString path)
 			result = readFile(TEMPLATE_DIR + "zap.tmp");
 			selsize = (screenWidth > 1024) ? 30 : 15;
 			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS);
-			result.strReplace("#ZAPDATA#", getZapContent2(mode, path, 2, true, sortList));
+			result.strReplace("#ZAPDATA#", getZapContent2(path, 2, true, sortList));
 		}
 		result.strReplace("#SELSIZE#", eString().sprintf("%d", selsize));
 	}
@@ -1319,7 +1318,7 @@ static eString getZap(eString mode, eString path)
 	{
 		result = getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"));
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
-		eString tmp = getZapContent(mode, path);
+		eString tmp = getZapContent(path);
 		if (tmp)
 			result += tmp;
 		else
@@ -1432,32 +1431,6 @@ eString getBoxInfo(eString skelleton, eString format)
 }
 
 #ifndef	DISABLE_FILE
-// Extract the description from the filename.
-eString getDesc(const eString& str)
-{
-	unsigned int leftbound, rightbound;
-	eString tbtrimmed;
-	
-	leftbound = str.find('-');
-	rightbound = str.find('-', leftbound + 1);
-	if ((rightbound == eString::npos) || (rightbound - leftbound < 1))
-		tbtrimmed = str;
-	else
-		tbtrimmed = str.substr(leftbound + 1, rightbound - leftbound - 1);
-	
-	leftbound = tbtrimmed.find_first_not_of(' ');
-	rightbound = tbtrimmed.find_last_not_of(' ');
-
-	// If the extracted description is empty use the value of str as the description.
-	if (rightbound - leftbound < 1) 
-	{
-		tbtrimmed = str;
-		leftbound = tbtrimmed.find_first_not_of(' ');
-		rightbound = tbtrimmed.find_last_not_of(' ');
-	}
-	return tbtrimmed.substr(leftbound, rightbound - leftbound + 1);
-}
-
 // Recover index with recordings on harddisk in /hdd/movie.
 bool rec_movies()
 {
@@ -1534,7 +1507,7 @@ bool rec_movies()
 					eServicePath path("1:0:1:0:0:0:000000:0:0:0:/hdd/movie/" + filen);
 					rec_list.push_back(path);
 					rec_list.back().type = 16385;
-					rec_list.back().service.descr = getDesc(filen);
+					rec_list.back().service.descr = filen.substr(0, filen.find(".ts"));
 					rec_list.back().service.path = "/hdd/movie/" + filen;
 				}
 			}
@@ -1970,7 +1943,7 @@ static eString getContent(eString mode, eString path, eString opts)
 		}
 
 		result = getTitle(tmp);
-		tmp = getZap(mode, path);
+		tmp = getZap(path);
 		if (tmp)
 			result += tmp;
 		else
@@ -2266,10 +2239,13 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	return closeWindow(content, "Please wait...", 3000);
 }
 
-eString getPDAContent(eString mode, eString path, eString opts)
+eString getPDAContent(eString opts)
 {
 	eString result;
-
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString mode = opt["mode"];
+	eString path = opt["path"];
+	
 	if (!path)
 		path = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
 	if (!mode)
@@ -2282,9 +2258,9 @@ eString getPDAContent(eString mode, eString path, eString opts)
 	result.strReplace("#CONTENT#", tmp);
 	result.strReplace("#VOLBAR#", getVolBar());
 	result.strReplace("#MUTE#", getMute());
-	result.strReplace("#TOPNAVI#", getTopNavi(false));
+	result.strReplace("#TOPNAVI#", getTopNavi());
 	result.strReplace("#CHANNAVI#", getChannelNavi());
-	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, false));
+	result.strReplace("#LEFTNAVI#", getLeftNavi(mode));
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
 		|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
 		result.strReplace("#TOPBALK#", "topbalk_small.png");
@@ -2314,9 +2290,7 @@ static eString pda_root(eString request, eString dirpath, eString opts, eHTTPCon
 	content->local_header["Content-Type"] = "text/html; charset=utf-8";
 	content->local_header["Cache-Control"] = "no-cache";
 
-	eString mode = opt["mode"];
-	eString path = opt["path"];
-	result = getPDAContent(mode, path, opts);
+	result = getPDAContent(opts);
 
 	return result;
 }
@@ -2364,7 +2338,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 //		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
 			result.strReplace("#TOPBALK#", "topbalk4.png");
 		result.strReplace("#EMPTYCELL#", "&nbsp;");
-		result.strReplace("#TOPNAVI#", getTopNavi(true));
+		result.strReplace("#TOPNAVI#", getTopNavi());
 #ifndef DISABLE_FILE
 		result.strReplace("#DVRCONTROLS#", readFile(TEMPLATE_DIR + "dvrcontrols.tmp"));
 #else
@@ -2373,10 +2347,8 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	}
 	else
 	{
-		eString mode = opt["mode"];
-		eString path = opt["path"];
-		result = getPDAContent(mode, path, opts);
 		content->local_header["Cache-Control"] = "no-cache";
+		result = getPDAContent(opts);
 	}
 
 	return result;
@@ -2551,7 +2523,7 @@ static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPCon
 	eString result = readFile(TEMPLATE_DIR + "leftnavi.tmp");
 
 	result.strReplace("#MODE#", mode);
-	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, true));
+	result.strReplace("#LEFTNAVI#", getLeftNavi(mode));
 	return result;
 }
 
@@ -2561,7 +2533,7 @@ static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConne
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "webxtv.tmp");
-	result.strReplace("#ZAPDATA#", getZapContent2(ZAPMODETV, zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false));
+	result.strReplace("#ZAPDATA#", getZapContent2(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false));
 
 	return result;
 }
