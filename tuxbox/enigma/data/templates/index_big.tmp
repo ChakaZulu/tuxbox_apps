@@ -244,7 +244,7 @@
 						</script>
 					</td>
 					<td align="left">
-						<input name="Audio" type="button" style="width: 100px; height:22px; background-color: #FFCC33;" value="Audio" onclick=javascript:selectAudio()><input name="Video" type="button" style="width: 100px;height:22px; background-color: #FFCC33;" value="Video" onclick="javascript:selectSubChannel()"><input name="EPG" type="button" style="width: 100px;height:22px;background-color: #1FCB12;" value="EPG" onclick="javascript:openEPG()"><input name="Info" type="button" style="width: 100px;height:22px;background-color: #95077C;" value="Info" onclick="javascript:openChannelInfo()"><input name="Stream Info" type="button" style="width: 100px;height:22px;background-color: #F1EF1D;" value="Stream Info" onclick=javascript:openSI()></td>
+						<input name="Audio" type="button" style="width: 100px; height:22px; background-color: #FFCC33;" value="Audio" onclick=javascript:selectAudio()><input name="Video" type="button" style="width: 100px;height:22px; background-color: #FFCC33;" value="Video" onclick="javascript:selectSubChannel()"><input name="EPG" type="button" style="width: 100px;height:22px;background-color: #1FCB12;" value="EPG" onclick="javascript:openEPG('')"><input name="Info" type="button" style="width: 100px;height:22px;background-color: #95077C;" value="Info" onclick="javascript:openChannelInfo()"><input name="Stream Info" type="button" style="width: 100px;height:22px;background-color: #F1EF1D;" value="Stream Info" onclick=javascript:openSI()></td>
 				</tr>
 				</tbody>
 				</table>
