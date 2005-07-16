@@ -254,3 +254,35 @@ eString closeWindow(eHTTPConnection *content, eString msg, int wait)
 	}
 	return result;
 }
+
+eString getIP()
+{
+	int sd;
+	struct ifreq ifr;
+	sd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sd < 0)
+		return "?.?.?.?-socket-error";
+	memset(&ifr, 0, sizeof(ifr));
+	ifr.ifr_addr.sa_family = AF_INET; // fixes problems with some linux vers.
+	strncpy(ifr.ifr_name, "eth0", sizeof(ifr.ifr_name));
+	if (ioctl(sd, SIOCGIFADDR, &ifr) < 0)
+		return "?.?.?.?-ioctl-error";
+	close(sd);
+
+	return eString().sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+}
+
+off64_t getMovieSize(eString filename)
+{
+	off64_t size = 0;
+	int slice = 0;
+	struct stat64 s;
+	while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+	{
+		size += s.st_size;
+		++slice;
+	}
+	eDebug("[GETMOVIESIZE] %s: %lld", filename.c_str(), size);
+	return size;
+}
+

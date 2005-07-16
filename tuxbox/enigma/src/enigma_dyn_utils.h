@@ -43,6 +43,8 @@ eServiceReference string2ref(const eString &service);
 eString closeWindow(eHTTPConnection *content, eString msg, int wait);
 eString htmlChars(eString);
 eString unHtmlChars(eString);
+eString getIP(void);
+off64_t getMovieSize(eString);
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp

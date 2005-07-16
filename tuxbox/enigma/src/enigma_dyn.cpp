@@ -536,7 +536,7 @@ static eString getChannelNavi(void)
 
 		if (getCurService() || getCurrentSubChannel(ref2string(sapi->service)))
 		{
-			result += button(100, "EPG", GREEN, "javascript:openEPG()");
+			result += button(100, "EPG", GREEN, "javascript:openEPG('')");
 			if (pdaScreen == 0)
 			{
 				result += button(100, "Info", PINK, "javascript:openChannelInfo()");
@@ -775,23 +775,6 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 	}
 
 	return closeWindow(content, "", 500);
-}
-
-eString getIP()
-{
-	int sd;
-	struct ifreq ifr;
-	sd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sd < 0)
-		return "?.?.?.?-socket-error";
-	memset(&ifr, 0, sizeof(ifr));
-	ifr.ifr_addr.sa_family = AF_INET; // fixes problems with some linux vers.
-	strncpy(ifr.ifr_name, "eth0", sizeof(ifr.ifr_name));
-	if (ioctl(sd, SIOCGIFADDR, &ifr) < 0)
-		return "?.?.?.?-ioctl-error";
-	close(sd);
-
-	return eString().sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
 }
 
 static eString getVolBar()
@@ -1138,6 +1121,12 @@ public:
 			tmp = tmp + " - " + event_start + " (" + event_duration + ") " + filter_string(short_description);
 		tmp.strReplace("\"", "'");
 		tmp.strReplace("\n", "-");
+		
+		if (zapMode == ZAPMODERECORDINGS)
+		{
+			eString r = httpUnescape(ref2string(e));
+			tmp = "[" + eString().sprintf("%lld", getMovieSize(r.right(r.length() - r.find("/hdd/movie"))) / 1024 / 1024) + " MB] " + tmp;
+		}
 
 		if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF) && tmp)
 			myList.push_back(myService(ref2string(e), tmp));
@@ -1286,10 +1275,8 @@ static eString getZap(eString path)
 #ifdef ENABLE_DYN_MOUNT
 			tmp = readFile(TEMPLATE_DIR + "movieSources.tmp");
 			tmp.strReplace("#OPTIONS#", eMountMgr::getInstance()->listMovieSources());
-			result.strReplace("#MOVIESOURCES#", tmp);
-#else
-			result.strReplace("#MOVIESOURCES#", "");
 #endif
+			result.strReplace("#MOVIESOURCES#", tmp);
 		}
 		else
 #endif
@@ -1308,21 +1295,16 @@ static eString getZap(eString path)
 		else
 		{
 			result = readFile(TEMPLATE_DIR + "zap.tmp");
-			selsize = (screenWidth > 1024) ? 30 : 15;
 			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS);
 			result.strReplace("#ZAPDATA#", getZapContent2(path, 2, true, sortList));
+			selsize = (screenWidth > 1024) ? 30 : 15;
 		}
 		result.strReplace("#SELSIZE#", eString().sprintf("%d", selsize));
 	}
 	else
 	{
-		result = getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"));
-		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
 		eString tmp = getZapContent(path);
-		if (tmp)
-			result += tmp;
-		else
-			result = "";
+		result = (tmp) ? getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp")) + tmp : "";
 	}
 
 	return result;
@@ -1527,9 +1509,9 @@ static eString recoverRecordings(eString request, eString dirpath, eString opt, 
 {
 	eString result;
 	if (rec_movies())
-		result = "<html><head><title>Info</title></head><body>Movies recovered successfully.</body></html>";
+		result = "<html><head><title>Info</title></head><body onUnload=\"parent.window.opener.location.reload(true)\">Movies recovered successfully.</body></html>";
 	else
-		result = "<html><head><title>Info</title></head><body>Movies could not be recovered.</body></html>";
+		result = "<html><head><title>Info</title></head><body onUnload=\"parent.window.opener.location.reload(true)\">Movies could not be recovered.</body></html>";
 	return result;
 }
 #endif
@@ -2522,7 +2504,6 @@ static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPCon
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "leftnavi.tmp");
 
-	result.strReplace("#MODE#", mode);
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode));
 	return result;
 }

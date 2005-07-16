@@ -2,9 +2,9 @@
 #define __enigma_dyn_h
 
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.3.3-Expert"
+#define WEBIFVERSION "4.3.4-Expert"
 #else
-#define WEBIFVERSION "4.3.3"
+#define WEBIFVERSION "4.3.4"
 #endif
 
 #define ZAPMODETV 0

@@ -54,43 +54,27 @@ function remoteControl(box)
 		NewWindow("/showRemoteControl", "RC", "1024", "640", "no");
 }
 
-function tuneTransponder(transponder)
-{
-	if (transponder == "none")
-	{
-		var currentTransponder = document.channelselector.channel.selectedIndex;
-		if (currentTransponder >= 0)
-		{
-			transponder = document.channelselector.channel.options[currentTransponder].value;
-			satFinder(transponder);
-		}
-	}
-	else
-		satFinder(transponder);
-}
-
 function satFinder(transponder)
 {
 	NewWindow("/satFinder?" + transponder, "satfind", "170", "150", "no");
 }
 
-function deleteMovie(xy)
+function deleteMovie(channel)
 {
 	if (window.confirm('Do you really want to delete this movie?'))
 	{
 		if (window.screen.width < 800)
 		{
-			document.location = "/cgi-bin/deleteMovie?ref="+xy;
+			document.location = "/cgi-bin/deleteMovie?ref=" + channel;
 		}
 		else
 		{
 			var selChannel = document.channelselector.channel.selectedIndex;
-			var channel = "";
 			if (selChannel >= 0)
 			{
 				currentChannel = selChannel;
 				channel = document.channelselector.channel.options[selChannel].value;
-				document.location = "/cgi-bin/deleteMovie?ref="+channel;
+				document.location = "/cgi-bin/deleteMovie?ref=" + channel;
 				setTimeout("document.location.reload()", 3000);
 			}
 			else
@@ -129,20 +113,12 @@ function recoverMovies()
 {
 	if (window.confirm('Do you really want to rebuild the movie playlist?'))
 	{
-		if (window.screen.width < 800)
-			document.location = "/cgi-bin/recoverRecordings";
-		else
-		{
-			NewWindow("/cgi-bin/recoverRecordings", "recoverRecordings", "200", "100", "no", "5000");
-			window.setTimeout("document.location.reload()", 3000);
-		}		
+		NewWindow("/cgi-bin/recoverRecordings", "recoverRecordings", "200", "100", "no", "5000");
 	}
 }
 
 function openEPG(ref)
 {
-	if (ref == undefined)
-		ref = "";
 	NewWindow('/getcurrentepg?type=extended&ref=' + ref, 'EPG', '780', screen.height, 'yes');
 }
 
