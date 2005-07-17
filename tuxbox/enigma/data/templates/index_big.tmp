@@ -112,7 +112,7 @@
 			}
 			function webxtv()
 			{
-				NewWindow("/webxtv", "tv", "780", "720", "no", "0");
+				NewWindow("/webxtv", "tv", "780", "700", "no", "0");
 			}
 		</script>
 	</head>

@@ -58,13 +58,13 @@ function play()
 }
 </SCRIPT>
 </HEAD>
-<BODY onLoad="initTV()" background="bg.png">
+<BODY onLoad="initTV()" style="margin: 0px; padding: 0px">
 <TABLE border="0" width="760" align="center" cellspacing="0" cellpadding="0">
 	<TBODY valign="top">
 	<tr>
 		<td>
 				<!-- begin header -->
-				<table id="headercell" width="760px" height="60px" border="1" cellpadding="5" cellspacing="0">
+				<table id="headercell" width="780px" height="60px" border="1" cellpadding="5" cellspacing="0">
 						<tr style="height: 20">
 							<td colspan="3" id="servicename" class="servicename" align="left" background="mepg_grad.png">&nbsp;</td>
 						</tr>
@@ -84,7 +84,7 @@ function play()
 	</tr>
 	<TR>
 		<TD>
-			<OBJECT id="vlc" height="570" width="760" classid=clsid:E23FE9C6-778E-49D4-B537-38FCDE4887D8 events="True">
+			<OBJECT id="vlc" height="585" width="780" classid=clsid:E23FE9C6-778E-49D4-B537-38FCDE4887D8 events="True">
 				<PARAM NAME="Src" VALUE="">
 				<PARAM NAME="ShowDisplay" VALUE="True">
 				<PARAM NAME="Loop" VALUE="False">
@@ -101,10 +101,10 @@ function play()
 				<table border="0" cellpadding="0" cellspacing="0">
 				<tr>
 					<td>
-						<select style="width: 250px; font-weight: bold; background-color: #F4F4F4" onChange=bouquetChange() name="bouquet" size="1"></select>
+						<select style="width: 260px; font-weight: bold; background-color: #F4F4F4" onChange=bouquetChange() name="bouquet" size="1"></select>
 					</td>
 					<td>
-						<select style="width: 510px; font-weight: bold; background-color: #F4F4F4" onChange=channelChange() name="channel" size="1"></select>
+						<select style="width: 520px; font-weight: bold; background-color: #F4F4F4" onChange=channelChange() name="channel" size="1"></select>
 					</td>
 				</tr>
 				</table>

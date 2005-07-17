@@ -956,7 +956,7 @@ public:
 		
 		if (zapMode == ZAPMODERECORDINGS)
 		{
-			eString r = httpUnescape(ref2string(e));
+			eString r = e.toString();
 			tmp = "[" + eString().sprintf("%05lld", getMovieSize(r.right(r.length() - r.find("/hdd/movie"))) / 1024 / 1024) + " MB] " + tmp;
 		}
 
@@ -965,7 +965,7 @@ public:
 	}
 };
 
-eString getZapContent2(eString path, int depth, bool addEPG, bool sortList)
+eString getZapContent(eString path, int depth, bool addEPG, bool sortList)
 {
 	std::list <myService> myList, myList2;
 	std::list <myService>::iterator myIt;
@@ -1080,7 +1080,7 @@ static eString getZap(eString path)
 		if (zapMode == ZAPMODERECORDINGS) // recordings
 		{
 			result = readFile(TEMPLATE_DIR + "movies.tmp");
-			result.strReplace("#ZAPDATA#", getZapContent2(path, 1, false, false));
+			result.strReplace("#ZAPDATA#", getZapContent(path, 1, false, false));
 			selsize = (screenWidth > 1024) ? 25 : 10;
 #ifdef ENABLE_DYN_MOUNT
 			tmp = readFile(TEMPLATE_DIR + "movieSources.tmp");
@@ -1093,7 +1093,7 @@ static eString getZap(eString path)
 		if (zapMode == ZAPMODEROOT) // root
 		{
 			result = readFile(TEMPLATE_DIR + "root.tmp");
-			eString tmp = getZapContent2(path, 1, false, false);
+			eString tmp = getZapContent(path, 1, false, false);
 			if (tmp)
 			{
 				result.strReplace("#ZAPDATA#", tmp);
@@ -1106,7 +1106,7 @@ static eString getZap(eString path)
 		{
 			result = readFile(TEMPLATE_DIR + "zap.tmp");
 			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS);
-			result.strReplace("#ZAPDATA#", getZapContent2(path, 2, true, sortList));
+			result.strReplace("#ZAPDATA#", getZapContent(path, 2, true, sortList));
 			selsize = (screenWidth > 1024) ? 30 : 15;
 		}
 		result.strReplace("#SELSIZE#", eString().sprintf("%d", selsize));
@@ -2215,7 +2215,7 @@ static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConne
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "webxtv.tmp");
-	result.strReplace("#ZAPDATA#", getZapContent2(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false));
+	result.strReplace("#ZAPDATA#", getZapContent(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false));
 
 	return result;
 }
