@@ -636,8 +636,10 @@ eString getLeftNavi(eString mode)
 		result += "<br>";
 		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
 		result += "<br>";
+#ifdef DEBUG
 		result += button(110, "Logging", LEFTNAVICOLOR, "javascript:logging()");
 		result += "<br>";
+#endif
 		result += button(110, "Satfinder", LEFTNAVICOLOR, pre + "?mode=controlSatFinder" + post);
 		switch (eSystemInfo::getInstance()->getHwType())
 		{
