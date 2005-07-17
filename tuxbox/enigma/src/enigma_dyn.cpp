@@ -641,8 +641,6 @@ static eString getLeftNavi(eString mode)
 		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
 #ifndef DISABLE_FILE
 		result += "<br>";
-		result += button(110, "Timer", LEFTNAVICOLOR, pre + "?mode=controlTimerList" + post);
-		result += "<br>";
 		result += button(110, "Recover Movies", LEFTNAVICOLOR, "javascript:recoverMovies()");
 #endif
 		result += "<br>";
@@ -689,11 +687,6 @@ static eString getLeftNavi(eString mode)
 #endif
 	}
 	else
-	if (mode.find("updates") == 0)
-	{
-		result += button(110, "Internet", LEFTNAVICOLOR, pre + "?mode=updatesInternet" + post);
-	}
-	else
 	if (mode.find("help") == 0)
 	{
 		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
@@ -704,6 +697,12 @@ static eString getLeftNavi(eString mode)
 			result += "<br>";
 		}
 		result += button(110, "Boards", LEFTNAVICOLOR, pre + "?mode=helpForums" + post);
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		{
+			result += "<br>";
+			result += button(110, "Images", LEFTNAVICOLOR, pre + "?mode=helpUpdatesInternet" + post);
+			result += "<br>";
+		}
 	}
 
 	result += "&nbsp;";
@@ -722,13 +721,13 @@ static eString getTopNavi()
 	}
 
 	result += button(100, "ZAP", TOPNAVICOLOR, pre + "?mode=zap" + post);
+	result += button(100, "TIMERS", TOPNAVICOLOR, pre + "?mode=timers" + post);
 	result += button(100, "CONTROL", TOPNAVICOLOR, pre + "?mode=control" + post);
 	if (pdaScreen == 0)
 	{
 #if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
 		result += button(100, "CONFIG", TOPNAVICOLOR, pre + "?mode=config" + post);
 #endif
-		result += button(100, "UPDATES", TOPNAVICOLOR, pre + "?mode=updates" + post);
 	}
 	result += button(100, "HELP", TOPNAVICOLOR, pre + "?mode=help" + post);
 
@@ -812,16 +811,12 @@ static eString getMute()
 }
 
 eString getBoxInfo(eString, eString);
-static eString getUpdates()
+static eString getTimers()
 {
-	eString result;
-	result += getBoxInfo("ImageInfo", "HTML");
-	result += "<br>";
-	result += "For information about available updates select one of the categories on the left.";
-	return result;
+	return getTimerList("HTML");
 }
 
-static eString getUpdatesInternet()
+static eString getHelpUpdatesInternet()
 {
 	std::stringstream result;
 	eString imageName = "&nbsp;", imageVersion = "&nbsp;", imageURL = "&nbsp;", imageCreator = "&nbsp;", imageMD5 = "&nbsp;";
@@ -1125,7 +1120,7 @@ public:
 		if (zapMode == ZAPMODERECORDINGS)
 		{
 			eString r = httpUnescape(ref2string(e));
-			tmp = "[" + eString().sprintf("%lld", getMovieSize(r.right(r.length() - r.find("/hdd/movie"))) / 1024 / 1024) + " MB] " + tmp;
+			tmp = "[" + eString().sprintf("%05lld", getMovieSize(r.right(r.length() - r.find("/hdd/movie"))) / 1024 / 1024) + " MB] " + tmp;
 		}
 
 		if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF) && tmp)
@@ -2056,22 +2051,16 @@ static eString getContent(eString mode, eString path, eString opts)
 		result += getControlSatFinder(opts);
 	}
 	else
-	if (mode == "controlTimerList")
+	if (mode == "timers")
 	{
-		result = getTitle("CONTROL: Timer");
-		result += getTimerList("HTML");
+		result = getTitle("TIMERS");
+		result += getTimers();
 	}
 	else
-	if (mode == "updates")
+	if (mode == "helpUpdatesInternet")
 	{
-		result = getTitle("UPDATES");
-		result += getUpdates();
-	}
-	else
-	if (mode == "updatesInternet")
-	{
-		result = getTitle("UPDATES: Internet");
-		result += getUpdatesInternet();
+		result = getTitle("HELP: Images");
+		result += getHelpUpdatesInternet();
 	}
 	else
 	{
