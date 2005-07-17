@@ -202,8 +202,8 @@ struct getEntryString
 				days += "Sa";
 
 			tmp.strReplace("#DAYS#", days);
-			tmp.strReplace("#START#", eString().sprintf("XX.XX. - %02d:%02d", startTime.tm_hour, startTime.tm_min));
-			tmp.strReplace("#END#", eString().sprintf("XX.XX. - %02d:%02d", endTime.tm_hour, endTime.tm_min));
+			tmp.strReplace("#STARTTIME#", eString().sprintf("XX.XX. - %02d:%02d", startTime.tm_hour, startTime.tm_min));
+			tmp.strReplace("#ENDTIME#", eString().sprintf("XX.XX. - %02d:%02d", endTime.tm_hour, endTime.tm_min));
 		}
 		else
 		{
@@ -524,24 +524,18 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
 	start.tm_isdst = -1;
-	if (!(oldType & ePlaylistEntry::isRepeating))
-	{
-		start.tm_mday = atoi(sday.c_str());
-		start.tm_mon = atoi(smonth.c_str()) - 1;
-		start.tm_year = atoi(syear.c_str()) - 1900;
-	}
+	start.tm_mday = atoi(sday.c_str());
+	start.tm_mon = atoi(smonth.c_str()) - 1;
+	start.tm_year = atoi(syear.c_str()) - 1900;
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
 
 	tm end = *localtime(&now);
 	end.tm_isdst = -1;
-	if (!(oldType & ePlaylistEntry::isRepeating))
-	{
-		end.tm_mday = atoi(eday.c_str());
-		end.tm_mon = atoi(emonth.c_str()) - 1;
-		end.tm_year = atoi(eyear.c_str()) - 1900;
-	}
+	end.tm_mday = atoi(eday.c_str());
+	end.tm_mon = atoi(emonth.c_str()) - 1;
+	end.tm_year = atoi(eyear.c_str()) - 1900;
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
@@ -708,25 +702,18 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	{
 		tm start = *localtime(&now);
 		start.tm_isdst = -1;
-
-		if (timer == "regular")
-		{
-			start.tm_mday = atoi(sday.c_str());
-			start.tm_mon = atoi(smonth.c_str()) - 1;
-			start.tm_year = atoi(syear.c_str()) - 1900;
-		}
+		start.tm_mday = atoi(sday.c_str());
+		start.tm_mon = atoi(smonth.c_str()) - 1;
+		start.tm_year = atoi(syear.c_str()) - 1900;
 		start.tm_hour = atoi(shour.c_str());
 		start.tm_min = atoi(smin.c_str());
 		start.tm_sec = 0;
 
 		tm end = *localtime(&now);
 		end.tm_isdst = -1;
-		if (timer == "regular")
-		{
-			end.tm_mday = atoi(eday.c_str());
-			end.tm_mon = atoi(emonth.c_str()) - 1;
-			end.tm_year = atoi(eyear.c_str()) - 1900;
-		}
+		end.tm_mday = atoi(eday.c_str());
+		end.tm_mon = atoi(emonth.c_str()) - 1;
+		end.tm_year = atoi(eyear.c_str()) - 1900;
 		end.tm_hour = atoi(ehour.c_str());
 		end.tm_min = atoi(emin.c_str());
 		end.tm_sec = 0;
