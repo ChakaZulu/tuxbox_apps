@@ -58,6 +58,7 @@
 #include <enigma_dyn_misc.h>
 #include <enigma_dyn_epg.h>
 #include <enigma_dyn_timer.h>
+#include <enigma_dyn_pda.h>
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
@@ -523,38 +524,33 @@ eString getCurService(void)
 	return filter_string(result);
 }
 
-static eString getChannelNavi(void)
+
+eString getTopNavi()
 {
 	eString result;
+	eString pre, post;
 
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-
-	if (sapi && sapi->service)
+	if (pdaScreen == 0)
 	{
-		result = button(100, "Audio", OCKER, "javascript:selectAudio()");
-		result += button(100, "Video", OCKER, "javascript:selectSubChannel()");
-
-		if (getCurService() || getCurrentSubChannel(ref2string(sapi->service)))
-		{
-			result += button(100, "EPG", GREEN, "javascript:openEPG('')");
-			if (pdaScreen == 0)
-			{
-				result += button(100, "Info", PINK, "javascript:openChannelInfo()");
-				result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
-			}
-#ifndef DISABLE_FILE
-			if (eZapMain::getInstance()->isRecording())
-				result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
-			else
-				result += button(100, "Record", RED, "javascript:DVRrecord('record')");
-#endif
-		}
+		pre = "javascript:topnavi('";
+		post = "')";
 	}
+
+	result += button(100, "ZAP", TOPNAVICOLOR, pre + "?mode=zap" + post);
+	result += button(100, "TIMERS", TOPNAVICOLOR, pre + "?mode=timers" + post);
+	result += button(100, "CONTROL", TOPNAVICOLOR, pre + "?mode=control" + post);
+	if (pdaScreen == 0)
+	{
+#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
+		result += button(100, "CONFIG", TOPNAVICOLOR, pre + "?mode=config" + post);
+#endif
+	}
+	result += button(100, "HELP", TOPNAVICOLOR, pre + "?mode=help" + post);
 
 	return result;
 }
 
-static eString getLeftNavi(eString mode)
+eString getLeftNavi(eString mode)
 {
 	eString result;
 	eString pre, post;
@@ -639,10 +635,6 @@ static eString getLeftNavi(eString mode)
 		}
 		result += "<br>";
 		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
-#ifndef DISABLE_FILE
-		result += "<br>";
-		result += button(110, "Recover Movies", LEFTNAVICOLOR, "javascript:recoverMovies()");
-#endif
 		result += "<br>";
 		result += button(110, "Logging", LEFTNAVICOLOR, "javascript:logging()");
 		result += "<br>";
@@ -699,38 +691,12 @@ static eString getLeftNavi(eString mode)
 		result += button(110, "Boards", LEFTNAVICOLOR, pre + "?mode=helpForums" + post);
 		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 		{
-			result += "<br>";
+			result += "<br><br>";
 			result += button(110, "Images", LEFTNAVICOLOR, pre + "?mode=helpUpdatesInternet" + post);
-			result += "<br>";
 		}
 	}
 
 	result += "&nbsp;";
-	return result;
-}
-
-static eString getTopNavi()
-{
-	eString result;
-	eString pre, post;
-
-	if (pdaScreen == 0)
-	{
-		pre = "javascript:topnavi('";
-		post = "')";
-	}
-
-	result += button(100, "ZAP", TOPNAVICOLOR, pre + "?mode=zap" + post);
-	result += button(100, "TIMERS", TOPNAVICOLOR, pre + "?mode=timers" + post);
-	result += button(100, "CONTROL", TOPNAVICOLOR, pre + "?mode=control" + post);
-	if (pdaScreen == 0)
-	{
-#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
-		result += button(100, "CONFIG", TOPNAVICOLOR, pre + "?mode=config" + post);
-#endif
-	}
-	result += button(100, "HELP", TOPNAVICOLOR, pre + "?mode=help" + post);
-
 	return result;
 }
 
@@ -774,40 +740,6 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 	}
 
 	return closeWindow(content, "", 500);
-}
-
-static eString getVolBar()
-{
-	std::stringstream result;
-	int volume = (eAVSwitch::getInstance()->getMute()) ? 0 : 63 - eAVSwitch::getInstance()->getVolume();
-
-	for (int i = 9; i <= 63; i += 6)
-	{
-		result << "<td width=\"15\" height=\"8\">"
-			"<a href=\"javascript:setVol(" << i << ")\">";
-		if (i <= volume)
-			result << "<img src=\"led_on.gif\" border=\"0\" width=\"15\" height=\"8\">";
-		else
-			result << "<img src=\"led_off.gif\" border=\"0\" width=\"15\" height=\"8\">";
-		result << "</a>"
-			"</td>";
-	}
-
-	return result.str();
-}
-
-static eString getMute()
-{
-	std::stringstream result;
-
-	result << "<a href=\"javascript:toggleMute(" << eAVSwitch::getInstance()->getMute() << ")\">";
-	if (eAVSwitch::getInstance()->getMute())
-		result << "<img src=\"speak_off.gif\" border=0>";
-	else
-		result << "<img src=\"speak_on.gif\" border=0>";
-	result << "</a>";
-
-	return result.str();
 }
 
 eString getBoxInfo(eString, eString);
@@ -924,32 +856,6 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 }
 #endif
 
-struct countDVBServices: public Object
-{
-	int &count;
-	countDVBServices(const eServiceReference &bouquetRef, int &count)
-		:count(count)
-	{
-		Signal1<void, const eServiceReference&> cbSignal;
-		CONNECT(cbSignal, countDVBServices::countFunction);
-		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
-		eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
-	}
-	void countFunction(const eServiceReference& ref)
-	{
-		if (ref.path
-			|| ref.flags & eServiceReference::isDirectory
-			|| ref.type != eServiceReference::idDVB)
-			return;
-
-		// sorry.. at moment we dont show any directory.. or locked service in webif
-		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
-			return;
-
-		++count;
-	}
-};
-
 class myService
 {
 public:
@@ -964,13 +870,10 @@ public:
 	bool operator < (const myService &a) const {return serviceName < a.serviceName;}
 };
 
-void sortServices(bool sortList, std::list <myService> &myList, eString &serviceRefList, eString &serviceList)
+void genHTMLServicesList(std::list <myService> &myList, eString &serviceRefList, eString &serviceList)
 {
 	std::list <myService>::iterator myIt;
 	eString serviceRef, serviceName;
-
-	if (sortList)
-		myList.sort();
 
 	serviceRefList = "";
 	serviceList = "";
@@ -980,76 +883,10 @@ void sortServices(bool sortList, std::list <myService> &myList, eString &service
 		serviceRefList += "\"" + myIt->serviceRef + "\", ";
 		serviceList += "\"" + myIt->serviceName + "\", ";
 	}
+	
+	serviceRefList = serviceRefList.left(serviceRefList.length() - 2);
+	serviceList = serviceList.left(serviceList.length() - 2);
 }
-
-class eWebNavigatorListDirectory: public Object
-{
-	eString &result;
-	eString path;
-	eServiceInterface &iface;
-	int num;
-public:
-	eWebNavigatorListDirectory(eString &result, eString path, eServiceInterface &iface): result(result), path(path), iface(iface)
-	{
-//		eDebug("path: %s", path.c_str());
-		num = 0;
-	}
-	void addEntry(const eServiceReference &e)
-	{
-		// sorry.. at moment we dont show any directory.. or locked service in webif
-		if (e.isLocked() && eConfig::getInstance()->pLockActive())
-			return;
-#ifndef DISABLE_FILE
-		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
-		{
-			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
-				 return;
-		}
-#endif
-		result += "<tr bgcolor=\"";
-		result += (num & 1) ? LIGHTGREY : DARKGREY;
-		result += "\"><td width=30 align=center>";
-
-		eString serviceRef = ref2string(e);
-		if (!(e.flags & eServiceReference::isDirectory))
-		{
-			if (!e.path)
-				result += button(50, "EPG", GREEN, "javascript:openEPG('" + serviceRef + "')");
-			else
-			if (serviceRef.find("%2fhdd%2fmovie%2f") != eString::npos)
-			{
-				result += "<a href=\"javascript:deleteMovie('";
-				result += serviceRef;
-				result += "')\"><img src=\"trash.gif\" height=12 border=0></a>";
-			}
-			else
-				result += "&#160;";
-		}
-		else
-		{
-			int count = 0;
-			countDVBServices bla(e, count);
-			if (count)
-				result += button(50, "EPG", GREEN, "javascript:openMultiEPG('" + serviceRef + "')");
-			else
-				result += "&#160;";
-		}
-		result += eString("</td><td><a href=\"/")+ "?mode=zap&path=" + serviceRef + "\">";
-
-		eService *service = iface.addRef(e);
-		if (!service)
-			result += "N/A";
-		else
-		{
-			result += filter_string(service->service_name);
-			iface.removeRef(e);
-		}
-
-		result += "</a>";
-		result += "</td></tr>\n";
-		num++;
-	}
-};
 
 class eWebNavigatorListDirectory2: public Object
 {
@@ -1128,34 +965,6 @@ public:
 	}
 };
 
-static eString getZapContent(eString path)
-{
-	eString result;
-
-	eServiceReference current_service = string2ref(path);
-	eServiceInterface *iface = eServiceInterface::getInstance();
-
-	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
-	{
-		playService(current_service);
-		result = "";
-	}
-	else
-	{
-		eWebNavigatorListDirectory navlist(result, path, *iface);
-		Signal1<void, const eServiceReference&> signal;
-		signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
-		result += "<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
-		iface->enterDirectory(current_service, signal);
-		result += "</table>\n";
-//		eDebug("entered");
-		iface->leaveDirectory(current_service);
-//		eDebug("exited");
-	}
-
-	return result;
-}
-
 eString getZapContent2(eString path, int depth, bool addEPG, bool sortList)
 {
 	std::list <myService> myList, myList2;
@@ -1183,10 +992,13 @@ eString getZapContent2(eString path, int depth, bool addEPG, bool sortList)
 		iface->leaveDirectory(current_service);
 //		eDebug("exited");
 
-		sortServices(sortList, myList, result1, result2);
-
-		bouquetrefs = result1.left(result1.length() - 2);
-		bouquets = result2.left(result2.length() - 2);
+		if (sortList)
+			myList.sort();
+			
+		genHTMLServicesList(myList, result1, result2);
+		bouquetrefs = result1;
+		bouquets = result2;
+		
 		if (depth > 1)
 		{
 			// go thru all bouquets to get the channels
@@ -1204,23 +1016,26 @@ eString getZapContent2(eString path, int depth, bool addEPG, bool sortList)
 					Signal1<void, const eServiceReference&> signal;
 					signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 
+					iface->enterDirectory(current_service, signal);
+//					eDebug("entered");
+					iface->leaveDirectory(current_service);
+//					eDebug("exited");
+	
+					if (sortList)
+						myList2.sort();
+						
+					genHTMLServicesList(myList2, result1, result2);
+
 					channels += "channels[";
 					channels += eString().sprintf("%d", i);
 					channels += "] = new Array(";
 					channelrefs += "channelRefs[";
 					channelrefs += eString().sprintf("%d", i);
 					channelrefs += "] = new Array(";
-
-					iface->enterDirectory(current_service, signal);
-//					eDebug("entered");
-					iface->leaveDirectory(current_service);
-//					eDebug("exited");
-
-					sortServices(sortList, myList2, result1, result2);
-
-					channels += result2.left(result2.length() - 2);
+					
+					channels += result2;
 					channels += ");";
-					channelrefs += result1.left(result1.length() - 2);
+					channelrefs += result1;
 					channelrefs += ");";
 					
 					channels += "\n";
@@ -1298,7 +1113,7 @@ static eString getZap(eString path)
 	}
 	else
 	{
-		eString tmp = getZapContent(path);
+		eString tmp = getPDAZapContent(path);
 		result = (tmp) ? getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp")) + tmp : "";
 	}
 
@@ -1510,53 +1325,6 @@ static eString recoverRecordings(eString request, eString dirpath, eString opt, 
 	return result;
 }
 #endif
-
-eString getSatellites(void)
-{
-	eString result;
-	int num = 0;
-
-	for (std::list<eLNB>::iterator it2(eTransponderList::getInstance()->getLNBs().begin()); it2 != eTransponderList::getInstance()->getLNBs().end(); it2++)
-	{
-		// go thru all satellites...
-		for (ePtrList<eSatellite>::iterator s (it2->getSatelliteList().begin()); s != it2->getSatelliteList().end(); s++)
-		{
-			result += "<tr bgcolor=\"";
-			result += (num & 1) ? LIGHTGREY : DARKGREY;
-			result += "\">";
-			result += "<td><a href=\'?mode=controlSatFinder&display=transponders&sat=" + eString().sprintf("%d", s->getOrbitalPosition()) + "\'>" + s->getDescription() + "</a></td>";
-			result += "</tr>\n";
-			num++;
-		}
-	}
-	return result;
-}
-
-eString getTransponders(int orbital_position)
-{
-	eString result;
-	int num = 0;
-
-	result += "<h2>Satellite Orbital Position: " + eString().sprintf("%d", orbital_position) + "</h2>\n";
-	// go thru all transponders...
-	for (std::list<tpPacket>::iterator it3(eTransponderList::getInstance()->getNetworks().begin()); it3 != eTransponderList::getInstance()->getNetworks().end(); it3++)
-	{
-		if (it3->orbital_position == orbital_position)
-		{
-			for (std::list<eTransponder>::iterator it(it3->possibleTransponders.begin()); it != it3->possibleTransponders.end(); it++)
-			{
-				eString transponder = eString().sprintf("%d / %d / %c", it->satellite.frequency / 1000, it->satellite.symbol_rate / 1000, it->satellite.polarisation ? 'V' : 'H');
-				result += "<tr bgcolor=\"";
-				result += (num & 1) ? LIGHTGREY : DARKGREY;
-				result += "\">";
-				result += "<td><a href=\'javascript:tuneTransponder(\"" + it->satellite.toString() + "\")\'>" + transponder + "</a></td>";
-				result += "</tr>\n";
-				num++;
-			}
-		}
-	}
-	return result;
-}
 
 eString getSatellitesAndTransponders(void)
 {
@@ -1903,7 +1671,7 @@ static eString getControlScreenShot(void)
 	return result;
 }
 
-static eString getContent(eString mode, eString path, eString opts)
+eString getContent(eString mode, eString path, eString opts)
 {
 	eString result, tmp;
 	lastTransponder = "";
@@ -2208,62 +1976,6 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	}
 	
 	return closeWindow(content, "Please wait...", 3000);
-}
-
-eString getPDAContent(eString opts)
-{
-	eString result;
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString mode = opt["mode"];
-	eString path = opt["path"];
-	
-	if (!path)
-		path = eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTV).toString();
-	if (!mode)
-		mode = "zap";
-
-	result = readFile(TEMPLATE_DIR + "index_small.tmp");
-	eString tmp = getContent(mode, path, opts);
-	if (!tmp)
-		result = "";
-	result.strReplace("#CONTENT#", tmp);
-	result.strReplace("#VOLBAR#", getVolBar());
-	result.strReplace("#MUTE#", getMute());
-	result.strReplace("#TOPNAVI#", getTopNavi());
-	result.strReplace("#CHANNAVI#", getChannelNavi());
-	result.strReplace("#LEFTNAVI#", getLeftNavi(mode));
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
-		|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
-		result.strReplace("#TOPBALK#", "topbalk_small.png");
-	else
-	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
-		result.strReplace("#TOPBALK#", "topbalk2_small.png");
-	else
-	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem)
-		result.strReplace("#TOPBALK#", "topbalk3_small.png");
-	else
-//	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
-		result.strReplace("#TOPBALK#", "topbalk4_small.png");
-	if (!result)
-		result = "<html><body>Please wait...<script language=\"javascript\">window.close();</script></body></html>";
-	return result;
-}
-
-static eString pda_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	eString result;
-
-	pdaScreen = 1;
-	screenWidth = 240;
-	eConfig::getInstance()->setKey("/ezap/webif/pdaScreen", pdaScreen);
-
-	std::map<eString,eString> opt = getRequestOptions(opts, '&');
-	content->local_header["Content-Type"] = "text/html; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
-
-	result = getPDAContent(opts);
-
-	return result;
 }
 
 static eString web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -2721,8 +2433,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	bool lockWeb = (lockWebIf == 1) ? true : false;
 
 	dyn_resolver->addDyn("GET", "/", web_root, lockWeb);
-	dyn_resolver->addDyn("GET", "/pda", pda_root, lockWeb);
-
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/videocontrol", videocontrol, lockWeb);
 #endif
@@ -2759,6 +2469,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapEPGInitializeDyn(dyn_resolver, lockWeb);
 	ezapMiscInitializeDyn(dyn_resolver, lockWeb);
 	ezapTimerInitializeDyn(dyn_resolver, lockWeb);
+	ezapPDAInitializeDyn(dyn_resolver, lockWeb);
 #ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
 #endif
