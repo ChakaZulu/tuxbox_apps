@@ -4,7 +4,9 @@ function channelChange()
 	if (currentChannel >= 0)
 	{
 		var channel = document.channelselector.channel.options[currentChannel].value;
+		vlcStop();
 		switchChannel(channel, currentBouquet, currentChannel);
+		setTimeout("vlcStart()", 1000);
 	}
 }
 function zapChannelForward()
@@ -93,4 +95,46 @@ function loadBouquets(bouquet)
 		document.channelselector.bouquet.options[i] = newOption;
 	}
 	document.channelselector.bouquet.selectedIndex = bouquet;
+}
+
+function vlc()
+{
+ 	document.location = "/video.pls";
+ 	setTimeout("setStreamingServiceRef()", 200);	
+}
+
+function vlcStop()
+{
+	vlccmd.location = "http://127.0.0.1:8000/?control=stop";
+	vlccmd.location = "http://127.0.0.1:8080/?control=empty";
+}
+function vlcStart()
+{
+	if (parent.data.vlcparms)
+	{
+		if (parent.data.vlcparms.indexOf("ffffffff") == -1)
+		{
+			vlccmd.location.href = "http://127.0.0.1:8080/?control=add&mrl=" + parent.data.vlcparms;
+			setTimeout("vlcStartItem()", 200);
+		}
+		else
+		{
+			parent.data.location.reload();
+			setTimeout("vlcStart()", 500);
+		}
+	}
+	else
+		setTimeout("vlcStart()", 200);
+}
+function vlcStartItem()
+{
+	vlccmd.location.href = "http://127.0.0.1:8080/?control=play&item=0";
+	setTimeout("setStreamingServiceRef()", 200);
+}
+function setStreamingServiceRef()
+{
+	if (parent.data.serviceReference)
+		document.location = "/cgi-bin/setStreamingServiceRef?sref=" + parent.data.serviceReference;
+	else
+		setTimeout("setStreamingServiceRef()", 200);
 }

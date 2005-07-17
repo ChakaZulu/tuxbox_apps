@@ -1,3 +1,13 @@
+<script>
+function configSwapFile()
+{
+	var activate = "off";
+	if (swapfileconfig.swap.checked)
+		activate = "on";
+	document.location = "/cgi-bin/setConfigSwapFile?swap=" + activate + "&swapfile=" + swapfileconfig.swapfile.value;
+	setTimeout("document.location.reload()", 500);
+}
+</script>
 <form name="swapfileconfig">
 	<table border="0" cellspacing="5" cellpadding="0">
 		<tr>
