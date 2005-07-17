@@ -104,12 +104,6 @@
 						getElem("id", "vid" + i, null).src = "led_off.gif";
 				}
 			}
-			function vlc2()
-			{
-				setTimeout("data.location.reload()", 500);
-				vlcStop();
-				setTimeout("vlcStart()", 1000);
-			}
 			function webxtv()
 			{
 				NewWindow("/webxtv", "tv", "780", "700", "no", "0");

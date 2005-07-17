@@ -2,23 +2,16 @@
 	<head>
 		<title>SubChannel Selection</title>
 		<link rel="stylesheet" type="text/css" href="webif.css">
-		<script>
-			function subChannelChange()
-			{
-				var i = document.subchannelselector.subchannel.selectedIndex;
-				var subChannel = document.subchannelselector.subchannel.options[i].value;
-				document.location = "/cgi-bin/zapTo?path="+subChannel;
-				setTimeout("window.close()", 1000);
-			}
-		</script>
 	</head>
-	<body onUnload="parent.window.opener.vlc2()">
+	<body>
 		Please select subchannel:
 		<br>
-		<form name="subchannelselector">
-			<select name="subchannel" size="1" onChange=subChannelChange()>
+		<form name="subchannelselector" action="/cgi-bin/zapTo">
+			<select name="path" size="1">
 				#SUBCHANS#
 			</select>
+			<br><br>
+			<input type="submit" value="Apply" style="width: 100px; color:#000000">
 		</form>
 	</body>
 </html>
