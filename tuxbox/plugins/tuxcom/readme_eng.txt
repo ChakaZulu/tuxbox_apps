@@ -3,6 +3,9 @@ TuxCom:
 History:
 ---------
 
+15.07.2006 Version 1.8a
+ - added italian language support (thanks to fbrassin)
+
 11.06.2006 Version 1.8
  - direct jump into root-directory possible (select entry '/')
  - more file information in rights-dialogue

@@ -2,6 +2,8 @@ TuxCom:
 
 Historie:
 ---------
+15.07.2006 Version 1.8a
+ - Italienische Übersetzung eingebaut (Dank an fbrassin)
 
 11.06.2006 Version 1.8
  - direkter Sprung ins Rootverzeichnis möglich (Eintrag '/' selektieren)
