@@ -277,8 +277,13 @@ static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnec
 
 static eString version(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+        eString versionFile = "/.version";
+
+        if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+                versionFile = "/etc/image-version";
+
 	content->local_header["Content-Type"]="text/plain";
-	return firmwareLevel(getAttribute("/.version", "version"));
+	return firmwareLevel(getAttribute(versionFile, "version"));
 }
 
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)

@@ -752,11 +752,16 @@ static eString getTimers()
 
 static eString getHelpUpdatesInternet()
 {
+        eString versionFile = "/.version";
+
+        if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+                versionFile = "/etc/image-version";
+
 	std::stringstream result;
 	eString imageName = "&nbsp;", imageVersion = "&nbsp;", imageURL = "&nbsp;", imageCreator = "&nbsp;", imageMD5 = "&nbsp;";
-	eString myCatalogURL = getAttribute("/.version", "catalog");
+	eString myCatalogURL = getAttribute(versionFile, "catalog");
 
-	if (myCatalogURL.length())
+	if (!(eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020) && myCatalogURL.length())
 	{
 		system(eString("wget -q -O /tmp/catalog.xml " + myCatalogURL).c_str());
 		ifstream catalogFile("/tmp/catalog.xml");
@@ -1195,12 +1200,17 @@ eString getUSBInfo(void)
 
 eString getBoxInfo(eString skelleton, eString format)
 {
+        eString versionFile = "/.version";
+
+        if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+                versionFile = "/etc/image-version";
+
 	eString result = readFile(TEMPLATE_DIR + format + skelleton + ".tmp");
 
-	result.strReplace("#VERSION#", getAttribute("/.version", "version"));
-	result.strReplace("#CATALOG#", getAttribute("/.version", "catalog"));
-	result.strReplace("#COMMENT#", getAttribute("/.version", "comment"));
-	result.strReplace("#URL#", getAttribute("/.version", "url"));
+	result.strReplace("#VERSION#", getAttribute(versionFile, "version"));
+	result.strReplace("#CATALOG#", getAttribute(versionFile, "catalog"));
+	result.strReplace("#COMMENT#", getAttribute(versionFile, "comment"));
+	result.strReplace("#URL#", getAttribute(versionFile, "url"));
 
 	result.strReplace("#MODEL#", eSystemInfo::getInstance()->getModel());
 	result.strReplace("#MANUFACTURER#", eSystemInfo::getInstance()->getManufacturer());
@@ -1213,7 +1223,7 @@ eString getBoxInfo(eString skelleton, eString format)
 	result.strReplace("#USBSTICK#", "none");
 #endif
 	result.strReplace("#LINUXKERNEL#", readFile("/proc/version"));
-	result.strReplace("#FIRMWARE#", firmwareLevel(getAttribute("/.version", "version")));
+	result.strReplace("#FIRMWARE#", firmwareLevel(getAttribute(versionFile, "version")));
 	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
 		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		result.strReplace("#FP#", eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion()));
