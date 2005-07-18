@@ -738,6 +738,99 @@ static eString getCurrentServiceRef(eString request, eString dirpath, eString op
 }
 
 
+static eString getstreaminfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::stringstream result;
+	eString name,
+		provider,
+		vpid,
+		apid,
+		pcrpid,
+		tpid,
+		vidform("n/a"),
+		tsid,
+		onid,
+		sid,
+		pmt;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return "not available";
+
+	eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+	if (service)
+	{
+		name = filter_string(service->service_name);
+		provider = filter_string(service->service_provider);
+	}
+	vpid = eString().sprintf("%04xh (%dd)", Decoder::current.vpid, Decoder::current.vpid);
+	apid = eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid);
+	pcrpid = eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid);
+	tpid = eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid);
+	tsid = eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
+	onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
+	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
+	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
+
+	FILE *bitstream = 0;
+
+	if (Decoder::current.vpid != -1)
+		bitstream = fopen("/proc/bus/bitstream", "rt");
+	if (bitstream)
+	{
+		char buffer[100];
+		int xres = 0, yres = 0, aspect = 0;
+		while (fgets(buffer, 100, bitstream))
+		{
+			if (!strncmp(buffer, "H_SIZE:  ", 9))
+				xres=atoi(buffer+9);
+			if (!strncmp(buffer, "V_SIZE:  ", 9))
+				yres=atoi(buffer+9);
+			if (!strncmp(buffer, "A_RATIO: ", 9))
+				aspect=atoi(buffer+9);
+		}
+		fclose(bitstream);
+		vidform.sprintf("%dx%d ", xres, yres);
+		switch (aspect)
+		{
+			case 1:
+				vidform += "(square)"; break;
+			case 2:
+				vidform += "(4:3)"; break;
+			case 3:
+				vidform += "(16:9)"; break;
+			case 4:
+				vidform += "(20:9)"; break;
+		}
+	}
+
+	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
+		"<!-- " << sapi->service.toString() << "-->" << std::endl <<
+		"<table cellspacing=5 cellpadding=0 border=0>"
+		"<tr><td>Name:</td><td>" << name << "</td></tr>"
+		"<tr><td>Provider:</td><td>" << provider << "</td></tr>";
+	eString sRef;
+	if (eServiceInterface::getInstance()->service)
+		sRef = eServiceInterface::getInstance()->service.toString();
+	result << "<tr><td>Service reference:</td><td>" << sRef << "</td></tr>"
+		"<tr><td>VPID:</td><td>" << vpid << "</td></tr>"
+		"<tr><td>APID:</td><td>" << apid << "</td></tr>"
+		"<tr><td>PCRPID:</td><td>" << pcrpid << "</td></tr>"
+		"<tr><td>TPID:</td><td>" << tpid << "</td></tr>"
+		"<tr><td>TSID:</td><td>" << tsid << "</td></tr>"
+		"<tr><td>ONID:</td><td>" << onid << "</td></tr>"
+		"<tr><td>SID:</td><td>" << sid << "</td></tr>"
+		"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
+		"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
+		"</table>"
+		"</body>"
+		"</html>";
+
+	return result.str();
+}
+
 void ezapMiscInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory, lockWeb);
@@ -776,5 +869,7 @@ void ezapMiscInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/control/getonidsid", neutrino_getonidsid, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_getchannellist, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
+// function needed by bitcntrl
+	dyn_resolver->addDyn("GET", "/cgi-bin/getstreaminfo", getstreaminfo, lockWeb);
 }
 
