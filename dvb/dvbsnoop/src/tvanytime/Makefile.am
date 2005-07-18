@@ -3,9 +3,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 noinst_LIBRARIES = libtvanytime.a
 
 noinst_HEADERS = \
-		rnt.h
+		rnt.h \
+		cs.h 
 
 libtvanytime_a_SOURCES = \
-		rnt.c
+		rnt.c \
+		cs.c 
 
 

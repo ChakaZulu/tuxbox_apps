@@ -1,5 +1,5 @@
 /*
-$Id: rnt.h,v 1.3 2005/07/18 21:11:41 rasc Exp $
+$Id: cs.h,v 1.1 2005/07/18 21:13:05 rasc Exp $
 
  DVBSNOOP
 
@@ -13,11 +13,11 @@ $Id: rnt.h,v 1.3 2005/07/18 21:11:41 rasc Exp $
 */
 
 
-#ifndef __RNT_H
-#define __RNT_H 
+#ifndef __CS_H
+#define __CS_H 
 
 
-void section_TVA_RNT (u_char *b, int len);
+void section_TVA_CS (u_char *b, int len);
 
 
 #endif

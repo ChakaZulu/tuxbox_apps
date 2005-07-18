@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.30 2004/11/03 21:01:03 rasc Exp $
+$Id: sectables.c,v 1.31 2005/07/18 21:11:40 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: sectables.c,v 1.30 2004/11/03 21:01:03 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.31  2005/07/18 21:11:40  rasc
+TVA Content Section
+
 Revision 1.30  2004/11/03 21:01:03  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"
@@ -150,13 +153,16 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "eit.h"
 #include "mdt.h"
 #include "emm_ecm.h"
+
 #include "datacarousel/ait.h"
 #include "datacarousel/dsmcc.h"
 #include "datacarousel/datagram.h"
 #include "datacarousel/ints.h"
 #include "datacarousel/unts.h"
 #include "datacarousel/mpe_fec.h"
+
 #include "tvanytime/rnt.h"
+#include "tvanytime/cs.h"
 
 #include "private/userdefs.h"
 
@@ -275,13 +281,13 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x73, 0x73,  section_TOT },
      {  0x74, 0x74,  section_MHP_AIT },
 
+     {  0x75, 0x75,  section_TVA_CS },		// TS 102 323
 // $$$ TODO
-// 0x75 container section (TS 102 323 [36])
 // 0x76 related content section (TS 102 323 [36])
 // 0x77 content identifier section (TS 102 323 [36])  (CIT)
 
      {  0x78, 0x78,  section_MPE_FEC },		// EN 301 192 v1.4.1
-     {  0x79, 0x79,  section_RNT },		// TS 102 323
+     {  0x79, 0x79,  section_TVA_RNT },		// TS 102 323
 
      /* res. */
      {  0x7E, 0x7E,  section_DIT },

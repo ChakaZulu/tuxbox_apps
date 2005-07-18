@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.63 2005/01/17 19:41:24 rasc Exp $
+$Id: dvb_str.c,v 1.64 2005/07/18 21:11:40 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.63 2005/01/17 19:41:24 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.64  2005/07/18 21:11:40  rasc
+TVA Content Section
+
 Revision 1.63  2005/01/17 19:41:24  rasc
 Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 
@@ -345,12 +348,12 @@ char *dvbstrTableID (u_int id)
      {  0x71, 0x71,  "Running Status Table (RST)" },
      {  0x72, 0x72,  "Stuffing Table (ST)" },
      {  0x73, 0x73,  "Time Offset Table (TOT)" },
-     {  0x74, 0x74,  "MHP- Application Information Table (AIT)" }, /* MHP */
-     {  0x75, 0x75,  "Container Table (CT)" }, 			/* TS 102 323 */
-     {  0x76, 0x76,  "Related Content Table (RCT)" }, 		/* TS 102 323 */
-     {  0x77, 0x77,  "Content Identifier Table (CIT)" }, 	/* TS 102 323 */
-     {  0x78, 0x78,  "MPE-FEC Table (MFT)" }, 			/* EN 301 192 v1.4.1*/
-     {  0x79, 0x79,  "Resolution Notification Table (RNT)" },	/* TS 102 323 */
+     {  0x74, 0x74,  "MHP- Application Information Table (AIT)" }, 	/* MHP */
+     {  0x75, 0x75,  "TVA- Container Table (CT)" }, 			/* TS 102 323 */
+     {  0x76, 0x76,  "TVA- Related Content Table (RCT)" }, 		/* TS 102 323 */
+     {  0x77, 0x77,  "TVA- Content Identifier Table (CIT)" },	 	/* TS 102 323 */
+     {  0x78, 0x78,  "MPE-FEC Table (MFT)" }, 				/* EN 301 192 v1.4.1*/
+     {  0x79, 0x79,  "TVA- Resolution Notification Table (RNT)" },	/* TS 102 323 */
      {  0x80, 0x7D,  "reserved" },
      {  0x7E, 0x7E,  "Discontinuity Information Table (DIT)" },
      {  0x7F, 0x7F,  "Selection Information Table (SIT)" },
