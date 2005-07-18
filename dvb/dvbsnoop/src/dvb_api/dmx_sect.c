@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.28 2005/07/11 23:06:47 rasc Exp $
+$Id: dmx_sect.c,v 1.29 2005/07/18 18:38:57 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.28 2005/07/11 23:06:47 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.29  2005/07/18 18:38:57  rasc
+minor changes on section filter, manpage
+
 Revision 1.28  2005/07/11 23:06:47  rasc
 Multibyte section filter redesign:  -f 0x4F.22.33.44.55.66 -m 0x.FF.FF.FF etc.
 Manpage update
@@ -245,9 +248,19 @@ static int  doReadSECT_2 (OPTION *opt)
 
     flt.pid = opt->pid;
 
-    
-    memcpy(flt.filter.filter, opt->filter, DMX_FILTER_SIZE);
-    memcpy(flt.filter.mask, opt->mask, DMX_FILTER_SIZE);
+
+    // -- set filter (info from the dvb api v3:)
+    // --  The filter comprises 16 bytes(?) covering byte 0 and byte 3..17 in
+    // --  a section,thus excluding bytes 1 and 2 (len field of a sect).
+
+    { int i;
+      for (i=0; i < opt->filterLen && i < DMX_FILTER_SIZE; i++) {
+	    flt.filter.filter[i] = opt->filter[i];
+	    flt.filter.mask[i]   = opt->mask[i];
+      }
+     //    memcpy(&flt.filter.filter, opt->filter, DMX_FILTER_SIZE);
+     //    memcpy(&flt.filter.mask, opt->mask, DMX_FILTER_SIZE);
+    }
     
 
     flt.timeout = opt->timeout_ms;

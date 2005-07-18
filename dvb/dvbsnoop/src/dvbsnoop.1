@@ -125,12 +125,16 @@ section read timeout in ms. Default is 0 (no timeout).
 Filter value for filtering section data e.g. table id's.
 Value may be decimal (49), octal (037) or hexadecimal (0x4F).
 You may use multibyte filters like: 0x4E.01.20.FF
-Check the filtervalues  using \-pd 9.
+The filter comprises e.g. 16 bytes covering byte 0 and byte 3..17 in a section,
+thus excluding bytes 1 and 2 (the length field of a section).
+To check the filtervalues use \-pd 9.
 .IP \-m <mask>
 Mask value to use for filters.
 Value may be decimal (49), octal (037) or hexadecimal (0x4F).
-You may use multibyte filters like: 0x4E.01.20.FF
-Check the filtervalues  using \-pd 9.
+You may use multibyte filters like: 0xFF.F0.FE.FF
+The filter comprises e.g. 16 bytes covering byte 0 and byte 3..17 in a section,
+thus excluding bytes 1 and 2 (the length field of a section).
+To check the filtervalues use \-pd 9.
 
 .IP \-crc
 Do CRC checking, when reading section data. 
