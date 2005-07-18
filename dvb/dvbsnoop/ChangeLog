@@ -1,6 +1,7 @@
 
- - New:  Multibyte section filtering redesign e.g. -f 0x4e.2f.1c.3f.50 -m 0xFF.FF.FF (basic code by Stéphane Esté-Gracias)
- - New:  Man page...
+ - New:  Multibyte section filtering redesign e.g. -f 0x4e.2f.1c.3f.50 -m
+   0xFF.FF.FF (basic code idea by Stéphane Esté-Gracias)
+ - New:  Man page (first version)
  - Changed: Minor changes...
  - New:    Multibyte section filtering e.g. -f 0x4e2f1c -m 0xFFFFFF (ghostrider, tuxbox-team)
  - Bugfix: dvr device open set to read only 
