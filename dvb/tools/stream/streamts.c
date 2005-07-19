@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.14 2005/02/04 17:27:56 ghostrider Exp $
+ * $Id: streamts.c,v 1.15 2005/07/19 20:09:46 digi_casi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -27,13 +27,15 @@
  * usage:
  * 	http://dbox:<port>/apid,vpid (for ps or avpes)
  * 	http://dbox:<port>/pid1,pid2,.... (for ts)
+ *	http://dbox:<port>/filename (for ts file)
  *
  * 	each pid must be a hexadecimal number
  *
  * command line parameters:
- *      -pes   send a packetized elementary stream (2 pids)
- *      -ps    send a program stream (2 pids)
- *      -ts    send a transport stream (MAXPIDS pids, see below)
+ *      -pes    send a packetized elementary stream (2 pids)
+ *      -ps     send a program stream (2 pids)
+ *      -ts     send a transport stream (MAXPIDS pids, see below)
+ *	-tsfile send a transport stream read from a .ts file
  */
 
 
@@ -108,7 +110,7 @@ sync_byte_offset (const unsigned char * buf, const unsigned int len) {
 	return -1;
 }
 
-
+#ifdef TRANSFORM
 static ssize_t
 safe_read (const int fd, void * buf, const size_t count) {
 
@@ -123,7 +125,7 @@ safe_read (const int fd, void * buf, const size_t count) {
 
 	return re;
 }
-
+#endif
 
 void
 packet_stdout (unsigned char * buf, int count, void * p) {
@@ -366,6 +368,9 @@ main (int argc, char ** argv) {
 	if (!strncmp(argv[1], "-ts", 3))
 		mode = 2;
 	else
+	if (!strncmp(argv[1], "-tsfile", 7))
+		mode = 3;
+	else
 		return EXIT_FAILURE;
 
 	buf = (unsigned char *) malloc(IN_SIZE);
@@ -375,7 +380,6 @@ main (int argc, char ** argv) {
 		return EXIT_FAILURE;
 	}
 
-	/* yeah, evil, no need to patch mpegtools */
 	fclose(stderr);
 
 	bp = buf;
@@ -398,23 +402,37 @@ main (int argc, char ** argv) {
 		bp += 5;
 	}
 
-	if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0) {
-		free(buf);
-		return EXIT_FAILURE;
+	if (mode != 3)
+	{
+		if ((dvrfd = open(DVRDEV, O_RDONLY)) < 0) {
+			free(buf);
+			return EXIT_FAILURE;
+		}
+
+		/* parse stdin / url path, start dmx filters */
+		do {
+			sscanf(bp, "%x", &pid);
+
+			pids[demuxfd_count] = pid;
+
+			if ((demuxfd[demuxfd_count] = setPesFilter(pid)) < 0)
+				break;
+
+			demuxfd_count++;
+		}
+		while ((bp = strchr(bp, ',')) && (bp++) && (demuxfd_count < MAXPIDS));
 	}
-
-	/* parse stdin / url path, start dmx filters */
-	do {
-		sscanf(bp, "%x", &pid);
-
-		pids[demuxfd_count] = pid;
-
-		if ((demuxfd[demuxfd_count] = setPesFilter(pid)) < 0)
-			break;
-
-		demuxfd_count++;
+	else
+	{
+		char tsfile[64];
+		/* read ts filename */
+		sscanf(bp, "%s", tsfile);
+		/* open ts file */
+		if ((dvrfd = open(tsfile, O_RDONLY)) < 0) {
+			free(buf);
+			return EXIT_FAILURE;
+		}
 	}
-	while ((bp = strchr(bp, ',')) && (bp++) && (demuxfd_count < MAXPIDS));
 
 #ifdef TRANSFORM
 	/* convert transport stream and write to stdout */
@@ -424,7 +442,7 @@ main (int argc, char ** argv) {
 	/* write raw transport stream to stdout */
 	else 
 #endif	
-	if (mode == 2) {
+	if (mode == 2 || mode == 3) {
 
 		int offset;
 
@@ -457,8 +475,11 @@ main (int argc, char ** argv) {
 		}
 	}
 
-	while (demuxfd_count > 0)
-		unsetPesFilter(demuxfd[--demuxfd_count]);
+	if (mode != 3)
+	{
+		while (demuxfd_count > 0)
+			unsetPesFilter(demuxfd[--demuxfd_count]);
+	}
 
 	close(dvrfd);
 
