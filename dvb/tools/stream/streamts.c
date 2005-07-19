@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.15 2005/07/19 20:09:46 digi_casi Exp $
+ * $Id: streamts.c,v 1.16 2005/07/19 21:17:01 digi_casi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -97,6 +97,9 @@ unsigned char demuxfd_count = 0;
 unsigned char exit_flag = 0;
 unsigned int writebuf_size = 0;
 unsigned char writebuf[PACKET_SIZE];
+
+char tsfile[64];
+int fileslice = 0;
 
 static int
 sync_byte_offset (const unsigned char * buf, const unsigned int len) {
@@ -424,7 +427,6 @@ main (int argc, char ** argv) {
 	}
 	else
 	{
-		char tsfile[64];
 		/* read ts filename */
 		sscanf(bp, "%s", tsfile);
 		/* open ts file */
@@ -463,11 +465,36 @@ main (int argc, char ** argv) {
 					pos += r;
 					todo -= r;
 				}
+				else
+				{
+					if (mode == 3)
+					{
+						if (r == -1)
+						{
+							free(buf);
+							return EXIT_FAILURE;
+						}
+						else
+						{
+							close(dvrfd);
+							char temp[5];
+							char filename[64];
+							strcpy(filename, tsfile);
+							fileslice++;
+							sprintf(temp, ".%03d", fileslice);
+							strcat(filename, temp);
+							if ((dvrfd = open(filename, O_RDONLY)) < 0) {
+								free(buf);
+								return EXIT_SUCCESS;
+							}
+						}
+					}
+				}
 			}
 
 			/* make sure to start with a ts header */
 			offset = sync_byte_offset(buf, TS_SIZE);
-
+			
 			if (offset == -1)
 				continue;
 
