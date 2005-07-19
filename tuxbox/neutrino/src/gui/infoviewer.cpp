@@ -69,6 +69,11 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 #define LCD_UPDATE_TIME_TV_MODE (60 * 1000 * 1000)
 
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" void tuxtxt_start(int tpid);
+extern "C" int  tuxtxt_stop();
+#endif
+
 int time_left_width;
 int time_dot_width;
 int time_width;
@@ -560,7 +565,21 @@ void CInfoViewer::showIcon_16_9() const
 
 void CInfoViewer::showIcon_VTXT() const
 {
-	frameBuffer->paintIcon((g_RemoteControl->current_PIDs.PIDs.vtxtpid != 0) ? "vtxt.raw" : "vtxt_gray.raw", BoxEndX - (ICON_SMALL_WIDTH + 2), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
+	int vtpid=g_RemoteControl->current_PIDs.PIDs.vtxtpid;
+	frameBuffer->paintIcon((vtpid != 0) ? "vtxt.raw" : "vtxt_gray.raw", BoxEndX - (ICON_SMALL_WIDTH + 2), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
+#ifndef TUXTXT_CFG_STANDALONE
+		if(g_settings.tuxtxt_cache)
+	{
+		static int last_vtpid=0;
+		if(vtpid !=last_vtpid)
+		{
+			tuxtxt_stop();
+			if(vtpid)
+				tuxtxt_start(vtpid);
+			last_vtpid=vtpid;
+		}
+	}
+#endif
 }
 
 void CInfoViewer::showFailure()

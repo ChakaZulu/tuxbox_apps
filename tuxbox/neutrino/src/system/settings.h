@@ -53,6 +53,9 @@ struct SNeutrinoSettings
 	int infobar_sat_display;
 	int infobar_subchan_disp_pos;
 	int misc_spts;
+#ifndef TUXTXT_CFG_STANDALONE
+	int tuxtxt_cache;
+#endif
 
 	//audio
 	int audio_AnalogMode;

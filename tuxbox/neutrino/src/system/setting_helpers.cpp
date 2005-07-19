@@ -57,6 +57,13 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 extern "C" int pinghost( const char *hostname );
 
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" int  tuxtxt_stop();
+extern "C" void tuxtxt_close();
+extern "C" int  tuxtxt_init();
+extern "C" void tuxtxt_start(int tpid);
+#endif
+
 bool CSatDiseqcNotifier::changeNotify(const neutrino_locale_t, void * Data)
 {
 	if (*((int*) Data) == NO_DISEQC)
@@ -238,6 +245,29 @@ bool CSPTSNotifier::changeNotify(const neutrino_locale_t, void *)
 
 	return true;
 }
+
+#ifndef TUXTXT_CFG_STANDALONE
+bool CTuxtxtCacheNotifier::changeNotify(const neutrino_locale_t, void *)
+{
+	int vtpid=g_RemoteControl->current_PIDs.PIDs.vtxtpid;
+
+	if (g_settings.tuxtxt_cache)
+	{
+		tuxtxt_init();
+		if (vtpid)
+			tuxtxt_start(vtpid);
+
+	}
+	else
+	{
+		tuxtxt_stop();
+		tuxtxt_close();
+
+	}
+
+	return true;
+}
+#endif
 
 bool CTouchFileNotifier::changeNotify(const neutrino_locale_t, void * data)
 {

@@ -110,6 +110,14 @@ class CLcdNotifier : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void *);
 };
 
+#ifndef TUXTXT_CFG_STANDALONE
+class CTuxtxtCacheNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const neutrino_locale_t, void *);
+};
+#endif
+
 class CPauseSectionsdNotifier : public CChangeObserver
 {
 	public:

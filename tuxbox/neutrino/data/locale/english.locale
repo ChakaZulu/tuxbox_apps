@@ -518,6 +518,7 @@ miscsettings.shutdown_real Enable standby
 miscsettings.shutdown_real_rcdelay Delayed shutdown
 miscsettings.sptsmode use spts mode
 miscsettings.startbhdriver load BH-Mode drivers
+miscsettings.tuxtxt_cache videotext cache
 motorcontrol.head Motor-Setup
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmarkname

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.51 2005/07/14 21:58:02 mogway Exp $
+ * $Id: locals_intern.h,v 1.52 2005/07/19 10:46:20 metallica Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -547,6 +547,7 @@ const char * locale_real_names[] =
 	"miscsettings.shutdown_real_rcdelay",
 	"miscsettings.sptsmode",
 	"miscsettings.startbhdriver",
+	"miscsettings.tuxtxt_cache",
 	"motorcontrol.head",
 	"movieplayer.bookmark",
 	"movieplayer.bookmarkname",

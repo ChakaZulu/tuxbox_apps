@@ -518,6 +518,7 @@ miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.sptsmode SPTS-Mode Treiber laden
 miscsettings.startbhdriver BH-Mode Treiber laden
+miscsettings.tuxtxt_cache videotext zwischenspeichern
 motorcontrol.head Motor-Setup
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmark Name

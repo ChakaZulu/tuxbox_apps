@@ -133,8 +133,9 @@
 
 #endif
 
-
-
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" int  tuxtxt_init();
+#endif
 
 
 CBouquetList   * bouquetList;
@@ -557,6 +558,9 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_sat_display      = configfile.getBool("infobar_sat_display"       , true );
 	g_settings.infobar_subchan_disp_pos = configfile.getInt32("infobar_subchan_disp_pos" , 0 );
 	g_settings.misc_spts                = configfile.getBool("misc_spts"                 , false );
+#ifndef TUXTXT_CFG_STANDALONE
+	g_settings.tuxtxt_cache                = configfile.getBool("tuxtxt_cache"                 , false );
+#endif
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -891,6 +895,9 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool("infobar_sat_display"       , g_settings.infobar_sat_display);
 	configfile.setInt32("infobar_subchan_disp_pos" , g_settings.infobar_subchan_disp_pos);
 	configfile.setBool("misc_spts"                 , g_settings.misc_spts);
+#ifndef TUXTXT_CFG_STANDALONE
+	configfile.setBool("tuxtxt_cache"                 , g_settings.tuxtxt_cache);
+#endif
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -1856,6 +1863,11 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_SUBCHAN_DISP_POS, &g_settings.infobar_subchan_disp_pos, INFOBAR_SUBCHAN_DISP_POS_OPTIONS, INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT, true));
+
+#ifndef TUXTXT_CFG_STANDALONE
+	CTuxtxtCacheNotifier *tuxtxtcacheNotifier = new CTuxtxtCacheNotifier;
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_TUXTXT_CACHE, &g_settings.tuxtxt_cache, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, tuxtxtcacheNotifier));
+#endif
 
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
 
@@ -3024,6 +3036,13 @@ void CNeutrinoApp::InitZapper()
 	g_EpgData->start();
 
 	firstChannel();
+
+#ifndef TUXTXT_CFG_STANDALONE
+	if(g_settings.tuxtxt_cache)
+	{
+		tuxtxt_init();
+	}
+#endif
 
 	// set initial PES/SPTS mode
 	if (g_settings.misc_spts != g_Zapit->PlaybackState())

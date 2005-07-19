@@ -9,7 +9,8 @@ INCLUDES = \
 	@LCDDISPLAY_CFLAGS@ \
 	@CONFIGFILE_CFLAGS@ \
 	@NET_CFLAGS@ \
-	@ZAPIT_CFLAGS@
+	@ZAPIT_CFLAGS@ \
+	@TUXTXT_CFLAGS@
 
 bin_PROGRAMS = neutrino
 
@@ -47,6 +48,7 @@ neutrino_LDADD = \
 	@ID3TAG_LIBS@ \
 	@MPEGTOOLS_LIBS@ \
 	@VORBISIDEC_LIBS@ \
+	@TUXTXT_LIBS@ \
 	-ljpeg \
 	-lpthread
 

@@ -29,6 +29,7 @@ TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
+TUXBOX_APPS_LIB_PKGCONFIG(TUXTXT,tuxbox-tuxtxt)
 
 AC_ARG_ENABLE(16-bit-mode,
          [  --enable-16-bit-mode                enable 16 bit graphics mode],
