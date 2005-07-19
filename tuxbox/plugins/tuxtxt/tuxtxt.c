@@ -146,9 +146,6 @@ int toptext_getnext(int startpage, int up, int findgroup)
 
 		if (!tuxtxt_cache.bttok || tuxtxt_cache.basictop[current]) /* only if existent */
 		{
-			if (!tuxtxt_cache.bttok && tuxtxt_cache.adip[current]) /* for FLOF return first linked page */
-				return current;
-
 			if (findgroup)
 			{
 				if (tuxtxt_cache.basictop[current] >= 6 && tuxtxt_cache.basictop[current] <= 7)
@@ -1383,7 +1380,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.89 $";
+	char cvs_revision[] = "$Revision: 1.90 $";
 	
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
