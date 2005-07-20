@@ -63,6 +63,7 @@ vncviewer/Makefile
 vncviewer/rfb/Makefile
 enigma/Makefile
 enigma/demo/Makefile
+enigma/dreamdata/Makefile
 enigma/ngrabstart/Makefile
 enigma/ngrabstop/Makefile
 enigma/dslconnect/Makefile
