@@ -4,6 +4,7 @@
 #include <vector>
 #include <list>
 #include <ext/hash_map>
+#include <ext/hash_set>
 
 // check if gcc version >= 3.4
 #if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || __GNUC__ == 4 )
@@ -79,26 +80,39 @@ struct uniqueEPGKey
 #define contentMaps std::map<uniqueEPGKey, contentMap>
 #endif
 
-#if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 1) || __GNUC__ == 4 )  // check if gcc version >= 3.1
-	#define eventCache __gnu_cxx::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal>
-	#define updateMap __gnu_cxx::hash_map<uniqueEPGKey, time_t, __gnu_cxx::hash<uniqueEPGKey>, uniqueEPGKey::equal >
-	namespace __gnu_cxx
-#else // for older gcc use following
-	#define eventCache std::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, std::hash<uniqueEPGKey>, uniqueEPGKey::equal >
-	#define updateMap std::hash_map<uniqueEPGKey, time_t, std::hash<uniqueEPGKey>, uniqueEPGKey::equal >
-	namespace std
-#endif
+struct hash_32
 {
-template<> struct hash<uniqueEPGKey>
+	inline size_t operator()( const __u32 &x) const
+	{
+		return (x >> 8)&0xFFFF;
+	}
+};
+
+struct equal_32
+{
+	inline size_t operator()(const __u32 &x, const __u32 &y) const
+	{
+		return x == y;
+	}
+};
+
+struct hash_uniqueEPGKey
 {
 	inline size_t operator()( const uniqueEPGKey &x) const
 	{
-		int v=(x.onid^x.sid);
-		v^=v>>8;
-		return v&0xFF;
+		return (x.onid << 16) | x.tsid;
 	}
 };
-}
+
+#if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 1) || __GNUC__ == 4 )  // check if gcc version >= 3.1
+	#define eventCache __gnu_cxx::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, hash_uniqueEPGKey, uniqueEPGKey::equal>
+	#define updateMap __gnu_cxx::hash_map<uniqueEPGKey, time_t, hash_uniqueEPGKey, uniqueEPGKey::equal >
+	#define tidMap __gnu_cxx::hash_set<__u32, hash_32, equal_32>
+#else // for older gcc use following
+	#define eventCache std::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, hash_uniqueEPGKey, uniqueEPGKey::equal >
+	#define updateMap std::hash_map<uniqueEPGKey, time_t, hash_uniqueEPGKey, uniqueEPGKey::equal >
+	#define tidMap std::hash_map<__u32, hash_32, equal_32>
+#endif
 
 class eventData
 {
@@ -278,6 +292,7 @@ private:
 	updateMap serviceLastUpdated;
 	tmpMap temp;
 	nvodMap NVOD;
+	tidMap seenSections, calcedSections;
 	eSchedule scheduleReader;
 	eScheduleOther scheduleOtherReader;
 	eNowNext nownextReader;

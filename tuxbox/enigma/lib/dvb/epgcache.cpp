@@ -255,256 +255,288 @@ int ePrivateContent::sectionRead(__u8 *data)
 
 int eEPGCache::sectionRead(__u8 *data, int source)
 {
-	if ( !data || state == 2 )
+	if ( !data )
 		return -ECANCELED;
 
 	eit_t *eit = (eit_t*) data;
 
-	int len=HILO(eit->section_length)-1;//+3-4;
-	int ptr=EIT_SIZE;
-	if ( ptr >= len )
-		return 0;
+	bool seen=false;
 
-	//
-	// This fixed the EPG on the Multichoice irdeto systems
-	// the EIT packet is non-compliant.. their EIT packet stinks
-	if ( data[ptr-1] < 0x40 )
-		--ptr;
+	__u32 sectionNo = data[0] << 24;
+	sectionNo |= data[3] << 16;
+	sectionNo |= data[4] << 8;
+	sectionNo |= eit->section_number;
 
-	uniqueEPGKey service( HILO(eit->service_id), HILO(eit->original_network_id), HILO(eit->transport_stream_id) );
+	tidMap::iterator it =
+		seenSections.find(sectionNo);
 
-	eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
-	int eit_event_size;
-	int duration;
-
-	time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5);
-	time_t now = time(0)+eDVB::getInstance()->time_difference;
-
-	if ( TM != 3599 && TM > -1)
+	static int cnt=0;
+	if ( it != seenSections.end() )
+		seen=true;
+	else
 	{
-		switch(source)
+		seenSections.insert(sectionNo);
+		__u32 tmpval = sectionNo & 0xFFFFFF00;
+		__u8 incr = source == NOWNEXT ? 1 : 8;
+		for ( int i = 0; i <= eit->last_section_number; i+=incr )
 		{
-		case NOWNEXT:
-			haveData |= 2;
-			break;
-		case SCHEDULE:
-			haveData |= 1;
-			break;
-		case SCHEDULE_OTHER:
-			haveData |= 4;
-			break;
+			if ( i == eit->section_number )
+			{
+				for (int x=i; x <= eit->segment_last_section_number; ++x)
+					calcedSections.insert(tmpval|(x&0xFF));
+			}
+			else
+				calcedSections.insert(tmpval|(i&0xFF));
 		}
 	}
 
-	Lock();
-	// hier wird immer eine eventMap zurück gegeben.. entweder eine vorhandene..
-	// oder eine durch [] erzeugte
-	std::pair<eventMap,timeMap> &servicemap = eventDB[service];
-	eventMap::iterator prevEventIt = servicemap.first.end();
-	timeMap::iterator prevTimeIt = servicemap.second.end();
-
-	while (ptr<len)
+	int len=HILO(eit->section_length)-1;//+3-4;
+	int ptr=EIT_SIZE;
+	if ( ptr < len && !seen )
 	{
-		eit_event_size = HILO(eit_event->descriptors_loop_length)+EIT_LOOP_SIZE;
+		// This fixed the EPG on the Multichoice irdeto systems
+		// the EIT packet is non-compliant.. their EIT packet stinks
+		if ( data[ptr-1] < 0x40 )
+			--ptr;
 
-		duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
-		TM = parseDVBtime(
-			eit_event->start_time_1,
-			eit_event->start_time_2,
-			eit_event->start_time_3,
-			eit_event->start_time_4,
-			eit_event->start_time_5);
+		uniqueEPGKey service( HILO(eit->service_id), HILO(eit->original_network_id), HILO(eit->transport_stream_id) );
 
-#ifndef NVOD
-		if ( TM == 3599 )
-			goto next;
-#endif
+		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
+		int eit_event_size;
+		int duration;
 
-		if ( TM != 3599 && (TM+duration < now || TM > now+14*24*60*60) )
-			goto next;
+		time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5);
+		time_t now = time(0)+eDVB::getInstance()->time_difference;
 
-		if ( now <= (TM+duration) || TM == 3599 /*NVOD Service*/ )  // old events should not be cached
+		if ( TM != 3599 && TM > -1)
 		{
-#ifdef NVOD
-			// look in 1st descriptor tag.. i hope all time shifted events have the
-			// time shifted event descriptor at the begin of the descriptors..
-			if ( ((unsigned char*)eit_event)[12] == 0x4F ) // TIME_SHIFTED_EVENT_DESCR
+			switch(source)
 			{
-				// get Service ID of NVOD Service ( parent )
-				int sid = ((unsigned char*)eit_event)[14] << 8 | ((unsigned char*)eit_event)[15];
-				uniqueEPGKey parent( sid, HILO(eit->original_network_id), HILO(eit->transport_stream_id) );
-				// check that this nvod reference currently is not in the NVOD List
-				std::list<NVODReferenceEntry>::iterator it( NVOD[parent].begin() );
-				for ( ; it != NVOD[parent].end(); it++ )
-					if ( it->service_id == HILO(eit->service_id) && it->original_network_id == HILO( eit->original_network_id ) )
-						break;
-				if ( it == NVOD[parent].end() )  // not in list ?
-					NVOD[parent].push_back( NVODReferenceEntry( HILO(eit->transport_stream_id), HILO(eit->original_network_id), HILO(eit->service_id) ) );
+			case NOWNEXT:
+				haveData |= 2;
+				break;
+			case SCHEDULE:
+				haveData |= 1;
+				break;
+			case SCHEDULE_OTHER:
+				haveData |= 4;
+				break;
 			}
+		}
+	
+		Lock();
+		// hier wird immer eine eventMap zurück gegeben.. entweder eine vorhandene..
+		// oder eine durch [] erzeugte
+		std::pair<eventMap,timeMap> &servicemap = eventDB[service];
+		eventMap::iterator prevEventIt = servicemap.first.end();
+		timeMap::iterator prevTimeIt = servicemap.second.end();
+	
+		while (ptr<len)
+		{
+			eit_event_size = HILO(eit_event->descriptors_loop_length)+EIT_LOOP_SIZE;
+	
+			duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
+			TM = parseDVBtime(
+				eit_event->start_time_1,
+				eit_event->start_time_2,
+				eit_event->start_time_3,
+				eit_event->start_time_4,
+				eit_event->start_time_5);
+	
+#ifndef NVOD
+			if ( TM == 3599 )
+				goto next;
 #endif
-			__u16 event_id = HILO(eit_event->event_id);
-//			eDebug("event_id is %d sid is %04x", event_id, service.sid);
+	
+			if ( TM != 3599 && (TM+duration < now || TM > now+14*24*60*60) )
+				goto next;
 
-			eventData *evt = 0;
-			int ev_erase_count = 0;
-			int tm_erase_count = 0;
+			if ( now <= (TM+duration) || TM == 3599 /*NVOD Service*/ )  // old events should not be cached
+			{
+#ifdef NVOD
+				// look in 1st descriptor tag.. i hope all time shifted events have the
+				// time shifted event descriptor at the begin of the descriptors..
+				if ( ((unsigned char*)eit_event)[12] == 0x4F ) // TIME_SHIFTED_EVENT_DESCR
+				{
+					// get Service ID of NVOD Service ( parent )
+					int sid = ((unsigned char*)eit_event)[14] << 8 | ((unsigned char*)eit_event)[15];
+					uniqueEPGKey parent( sid, HILO(eit->original_network_id), HILO(eit->transport_stream_id) );
+					// check that this nvod reference currently is not in the NVOD List
+					std::list<NVODReferenceEntry>::iterator it( NVOD[parent].begin() );
+					for ( ; it != NVOD[parent].end(); it++ )
+						if ( it->service_id == HILO(eit->service_id) && it->original_network_id == HILO( eit->original_network_id ) )
+							break;
+					if ( it == NVOD[parent].end() )  // not in list ?
+						NVOD[parent].push_back( NVODReferenceEntry( HILO(eit->transport_stream_id), HILO(eit->original_network_id), HILO(eit->service_id) ) );
+				}
+#endif
+				__u16 event_id = HILO(eit_event->event_id);
+//				eDebug("event_id is %d sid is %04x", event_id, service.sid);
+
+				eventData *evt = 0;
+				int ev_erase_count = 0;
+				int tm_erase_count = 0;
 
 // search in eventmap
-			eventMap::iterator ev_it =
-				servicemap.first.find(event_id);
+				eventMap::iterator ev_it =
+					servicemap.first.find(event_id);
 
-			// entry with this event_id is already exist ?
-			if ( ev_it != servicemap.first.end() )
-			{
-				if ( source > ev_it->second->type )  // update needed ?
-					goto next; // when not.. the skip this entry
-// search this event in timemap
-				timeMap::iterator tm_it_tmp =
-					servicemap.second.find(ev_it->second->getStartTime());
-
-				if ( tm_it_tmp != servicemap.second.end() )
+				// entry with this event_id is already exist ?
+				if ( ev_it != servicemap.first.end() )
 				{
-					if ( tm_it_tmp->first == TM ) // correct eventData
+					if ( source > ev_it->second->type )  // update needed ?
+						goto next; // when not.. the skip this entry
+// search this event in timemap
+					timeMap::iterator tm_it_tmp =
+						servicemap.second.find(ev_it->second->getStartTime());
+
+					if ( tm_it_tmp != servicemap.second.end() )
 					{
-						// exempt memory
-						delete ev_it->second;
-						evt = new eventData(eit_event, eit_event_size, source);
-						ev_it->second=evt;
-						tm_it_tmp->second=evt;
-						goto next;
-					}
-					else
-					{
-						tm_erase_count++;
-						// delete the found record from timemap
-						servicemap.second.erase(tm_it_tmp);
-						prevTimeIt=servicemap.second.end();
+						if ( tm_it_tmp->first == TM ) // correct eventData
+						{
+							// exempt memory
+							delete ev_it->second;
+							evt = new eventData(eit_event, eit_event_size, source);
+							ev_it->second=evt;
+							tm_it_tmp->second=evt;
+							goto next;
+						}
+						else
+						{
+							tm_erase_count++;
+							// delete the found record from timemap
+							servicemap.second.erase(tm_it_tmp);
+							prevTimeIt=servicemap.second.end();
+						}
 					}
 				}
-			}
 
 // search in timemap, for check of a case if new time has coincided with time of other event
 // or event was is not found in eventmap
-			timeMap::iterator tm_it =
-				servicemap.second.find(TM);
+				timeMap::iterator tm_it =
+					servicemap.second.find(TM);
 
-			if ( tm_it != servicemap.second.end() )
-			{
+				if ( tm_it != servicemap.second.end() )
+				{
 
 // i think, if event is not found on eventmap, but found on timemap updating nevertheless demands
 #if 0
-				if ( source > tm_it->second->type && tm_erase_count == 0 ) // update needed ?
-					goto next; // when not.. the skip this entry
+					if ( source > tm_it->second->type && tm_erase_count == 0 ) // update needed ?
+						goto next; // when not.. the skip this entry
 #endif
 
 // search this time in eventmap
-				eventMap::iterator ev_it_tmp =
-					servicemap.first.find(tm_it->second->getEventID());
-
-				if ( ev_it_tmp != servicemap.first.end() )
-				{
-					ev_erase_count++;
-					// delete the found record from eventmap
-					servicemap.first.erase(ev_it_tmp);
-					prevEventIt=servicemap.first.end();
+					eventMap::iterator ev_it_tmp =
+						servicemap.first.find(tm_it->second->getEventID());
+	
+					if ( ev_it_tmp != servicemap.first.end() )
+					{
+						ev_erase_count++;
+						// delete the found record from eventmap
+						servicemap.first.erase(ev_it_tmp);
+						prevEventIt=servicemap.first.end();
+					}
 				}
-			}
 
-			evt = new eventData(eit_event, eit_event_size, source);
+				evt = new eventData(eit_event, eit_event_size, source);
 #if EPG_DEBUG
-			bool consistencyCheck=true;
+				bool consistencyCheck=true;
 #endif
-			if (ev_erase_count > 0 && tm_erase_count > 0) // 2 different pairs have been removed
-			{
-				// exempt memory
-				delete ev_it->second;
-				delete tm_it->second;
-				ev_it->second=evt;
-				tm_it->second=evt;
-			}
-			else if (ev_erase_count == 0 && tm_erase_count > 0)
-			{
-				// exempt memory
-				delete ev_it->second;
-				tm_it=prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
-				ev_it->second=evt;
-			}
-			else if (ev_erase_count > 0 && tm_erase_count == 0)
-			{
-				// exempt memory
-				delete tm_it->second;
-				ev_it=prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
-				tm_it->second=evt;
-			}
-			else // added new eventData
-			{
+				if (ev_erase_count > 0 && tm_erase_count > 0) // 2 different pairs have been removed
+				{
+					// exempt memory
+					delete ev_it->second;
+					delete tm_it->second;
+					ev_it->second=evt;
+					tm_it->second=evt;
+				}
+				else if (ev_erase_count == 0 && tm_erase_count > 0)
+				{
+					// exempt memory
+					delete ev_it->second;
+					tm_it=prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
+					ev_it->second=evt;
+				}
+				else if (ev_erase_count > 0 && tm_erase_count == 0)
+				{
+					// exempt memory
+					delete tm_it->second;
+					ev_it=prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
+					tm_it->second=evt;
+				}
+				else // added new eventData
+				{
 #if EPG_DEBUG
-				consistencyCheck=false;
+					consistencyCheck=false;
 #endif
-				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
-				prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
-			}
+					prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
+					prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
+				}
 #if EPG_DEBUG
-			if ( consistencyCheck )
-			{
-				if ( tm_it->second != evt || ev_it->second != evt )
-					eFatal("tm_it->second != ev_it->second");
-				else if ( tm_it->second->getStartTime() != tm_it->first )
-					eFatal("event start_time(%d) non equal timemap key(%d)",
-						tm_it->second->getStartTime(), tm_it->first );
-				else if ( tm_it->first != TM )
-					eFatal("timemap key(%d) non equal TM(%d)",
-						tm_it->first, TM);
-				else if ( ev_it->second->getEventID() != ev_it->first )
-					eFatal("event_id (%d) non equal event_map key(%d)",
-						ev_it->second->getEventID(), ev_it->first);
-				else if ( ev_it->first != event_id )
-					eFatal("eventmap key(%d) non equal event_id(%d)",
-						ev_it->first, event_id );
-			}
+				if ( consistencyCheck )
+				{
+					if ( tm_it->second != evt || ev_it->second != evt )
+						eFatal("tm_it->second != ev_it->second");
+					else if ( tm_it->second->getStartTime() != tm_it->first )
+						eFatal("event start_time(%d) non equal timemap key(%d)",
+							tm_it->second->getStartTime(), tm_it->first );
+					else if ( tm_it->first != TM )
+						eFatal("timemap key(%d) non equal TM(%d)",
+							tm_it->first, TM);
+					else if ( ev_it->second->getEventID() != ev_it->first )
+						eFatal("event_id (%d) non equal event_map key(%d)",
+							ev_it->second->getEventID(), ev_it->first);
+					else if ( ev_it->first != event_id )
+						eFatal("eventmap key(%d) non equal event_id(%d)",
+							ev_it->first, event_id );
+				}
 #endif
-		}
+			}
 next:
 #if EPG_DEBUG
-		if ( servicemap.first.size() != servicemap.second.size() )
-		{
-			FILE *f = fopen("/hdd/event_map.txt", "w+");
-			int i=0;
-			for (eventMap::iterator it(servicemap.first.begin())
-				; it != servicemap.first.end(); ++it )
+			if ( servicemap.first.size() != servicemap.second.size() )
+			{
+				FILE *f = fopen("/hdd/event_map.txt", "w+");
+				int i=0;
+				for (eventMap::iterator it(servicemap.first.begin())
+					; it != servicemap.first.end(); ++it )
+					fprintf(f, "%d(key %d) -> time %d, event_id %d, data %p\n",
+						i++, (int)it->first, (int)it->second->getStartTime(), (int)it->second->getEventID(), it->second );
+				fclose(f);
+				f = fopen("/hdd/time_map.txt", "w+");
+				i=0;
+				for (timeMap::iterator it(servicemap.second.begin())
+					; it != servicemap.second.end(); ++it )
 				fprintf(f, "%d(key %d) -> time %d, event_id %d, data %p\n",
 					i++, (int)it->first, (int)it->second->getStartTime(), (int)it->second->getEventID(), it->second );
-			fclose(f);
-			f = fopen("/hdd/time_map.txt", "w+");
-			i=0;
-			for (timeMap::iterator it(servicemap.second.begin())
-				; it != servicemap.second.end(); ++it )
-			fprintf(f, "%d(key %d) -> time %d, event_id %d, data %p\n",
-				i++, (int)it->first, (int)it->second->getStartTime(), (int)it->second->getEventID(), it->second );
-			fclose(f);
-
-			eFatal("(1)map sizes not equal :( sid %04x tsid %04x onid %04x size %d size2 %d",
-				service.sid, service.tsid, service.onid,
-				servicemap.first.size(), servicemap.second.size() );
-		}
+				fclose(f);
+	
+				eFatal("(1)map sizes not equal :( sid %04x tsid %04x onid %04x size %d size2 %d",
+					service.sid, service.tsid, service.onid,
+					servicemap.first.size(), servicemap.second.size() );
+			}
 #endif
-		ptr += eit_event_size;
-		eit_event=(eit_event_struct*)(((__u8*)eit_event)+eit_event_size);
-	}
-
-	tmpMap::iterator it = temp.find( service );
-	if ( it != temp.end() )
-	{
-		if ( source > it->second.second )
-		{
-			it->second.first=now;
-			it->second.second=source;
+			ptr += eit_event_size;
+			eit_event=(eit_event_struct*)(((__u8*)eit_event)+eit_event_size);
 		}
-	}
-	else
-		temp[service] = std::pair< time_t, int> (now, source);
 
-	Unlock();
+		tmpMap::iterator it = temp.find( service );
+		if ( it != temp.end() )
+		{
+			if ( source > it->second.second )
+			{
+				it->second.first=now;
+				it->second.second=source;
+			}
+		}
+		else
+			temp[service] = std::pair< time_t, int> (now, source);
+
+		Unlock();
+	}
+
+	if ( state == 1 && calcedSections == seenSections || state > 1 )
+		return -ECANCELED;
 
 	return 0;
 }
@@ -513,7 +545,9 @@ bool eEPGCache::finishEPG()
 {
 	if (!isRunning)  // epg ready
 	{
-		eDebug("[EPGC] stop caching events");
+		eDebug("[EPGC] stop caching events %d(%d)", seenSections.size(), time(0)+eDVB::getInstance()->time_difference );
+		seenSections.clear();
+		calcedSections.clear();
 		zapTimer.start(UPDATE_INTERVAL, 1);
 		eDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
 
@@ -604,7 +638,7 @@ void eEPGCache::flushEPG(const uniqueEPGKey & s)
 void eEPGCache::cleanLoop()
 {
 	singleLock s(cache_lock);
-	if ( isRunning || temp.size() )
+	if ( isRunning || (temp.size() && haveData) )
 	{
 		CleanTimer.start(5000,true);
 		eDebug("[EPGC] schedule cleanloop");
@@ -922,8 +956,10 @@ void eEPGCache::startEPG()
 		}
 		Lock();
 		temp.clear();
+		seenSections.clear();
+		calcedSections.clear();
 		Unlock();
-		eDebug("[EPGC] start caching events");
+		eDebug("[EPGC] start caching events(%d)", time(0)+eDVB::getInstance()->time_difference);
 		state=0;
 		haveData=0;
 		scheduleReader.start();
@@ -932,7 +968,7 @@ void eEPGCache::startEPG()
 		isRunning |= 2;
 		scheduleOtherReader.start();
 		isRunning |= 4;
-		abortTimer.start(5000,true);
+		abortTimer.start(7000,true);
 	}
 	else
 	{
@@ -963,7 +999,10 @@ void eEPGCache::abortNonAvail()
 			isRunning &= ~4;
 			scheduleOtherReader.abort();
 		}
-		abortTimer.start(20000, true);
+		if ( isRunning )
+			abortTimer.start(50000, true);
+		else
+			++state;
 	}
 	++state;
 }
