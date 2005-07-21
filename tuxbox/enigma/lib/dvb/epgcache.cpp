@@ -270,7 +270,6 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 	tidMap::iterator it =
 		seenSections.find(sectionNo);
 
-	static int cnt=0;
 	if ( it != seenSections.end() )
 		seen=true;
 	else
