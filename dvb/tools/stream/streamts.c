@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.16 2005/07/19 21:17:01 digi_casi Exp $
+ * $Id: streamts.c,v 1.17 2005/07/21 18:57:04 digi_casi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -48,6 +48,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <config.h>
+#include <ctype.h>
 
 #if HAVE_DVB_API_VERSION < 3
     #include <ost/dmx.h>
@@ -97,9 +98,6 @@ unsigned char demuxfd_count = 0;
 unsigned char exit_flag = 0;
 unsigned int writebuf_size = 0;
 unsigned char writebuf[PACKET_SIZE];
-
-char tsfile[64];
-int fileslice = 0;
 
 static int
 sync_byte_offset (const unsigned char * buf, const unsigned int len) {
@@ -358,7 +356,10 @@ main (int argc, char ** argv) {
 	int pids[MAXPIDS];
 	unsigned char *bp;
 	unsigned char mode;
-
+	unsigned char tsfile[IN_SIZE];
+	int fileslice = 0;
+	int i = 0;
+	
 	if (argc != 2)
 		return EXIT_FAILURE;
 #ifdef TRANSFORM
@@ -368,11 +369,11 @@ main (int argc, char ** argv) {
 		mode = 1;
 	else 
 #endif	
-	if (!strncmp(argv[1], "-ts", 3))
-		mode = 2;
-	else
 	if (!strncmp(argv[1], "-tsfile", 7))
 		mode = 3;
+	else
+	if (!strncmp(argv[1], "-ts", 3))
+		mode = 2;
 	else
 		return EXIT_FAILURE;
 
@@ -427,8 +428,16 @@ main (int argc, char ** argv) {
 	}
 	else
 	{
-		/* read ts filename */
-		sscanf(bp, "%s", tsfile);
+		/* ts filename */
+		strcpy(tsfile, bp);
+		for (i = 0; i < strlen(bp) - 3; i++) 
+		{
+			if ((tsfile[i] == '.') && (tsfile[i + 1] == 't') && (tsfile[i + 2] == 's'))
+			{
+				tsfile[i + 3] = '\0';
+				break;
+			}
+		}
 		/* open ts file */
 		if ((dvrfd = open(tsfile, O_RDONLY)) < 0) {
 			free(buf);
@@ -445,7 +454,6 @@ main (int argc, char ** argv) {
 	else 
 #endif	
 	if (mode == 2 || mode == 3) {
-
 		int offset;
 
 		ssize_t pos;
@@ -453,14 +461,11 @@ main (int argc, char ** argv) {
 		ssize_t todo;
 
 		while (!exit_flag) {
-
 			pos = 0;
 			todo = IN_SIZE;
 
 			while ((!exit_flag) && (todo)) {
-
 				r = read(dvrfd, buf + pos, todo);
-
 				if (r > 0) {
 					pos += r;
 					todo -= r;
@@ -478,10 +483,9 @@ main (int argc, char ** argv) {
 						{
 							close(dvrfd);
 							char temp[5];
-							char filename[64];
+							char filename[IN_SIZE];
 							strcpy(filename, tsfile);
-							fileslice++;
-							sprintf(temp, ".%03d", fileslice);
+							sprintf(temp, ".%03d", ++fileslice);
 							strcat(filename, temp);
 							if ((dvrfd = open(filename, O_RDONLY)) < 0) {
 								free(buf);
@@ -509,9 +513,8 @@ main (int argc, char ** argv) {
 	}
 
 	close(dvrfd);
-
 	free(buf);
-
+	
 	return EXIT_SUCCESS;
 }
 
