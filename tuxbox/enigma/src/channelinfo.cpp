@@ -236,7 +236,7 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 		e = eEPGCache::getInstance()->lookupEvent(service);
 		if (e)  // data is in cache...
 		{
-	  	ParseEITInfo(e);
+			ParseEITInfo(e);
 			delete e;
 		}
 		else  // we parse the eit...
@@ -249,7 +249,7 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 
 			int type = ((service.getTransportStreamID()==ref.getTransportStreamID())
 				&&	(service.getOriginalNetworkID()==ref.getOriginalNetworkID())) ? EIT::tsActual:EIT::tsOther;
-	
+
 			eit = new EIT( EIT::typeNowNext, service.getServiceID().get(), type );
 			CONNECT( eit->tableReady, eChannelInfo::EITready );
 			eit->start();

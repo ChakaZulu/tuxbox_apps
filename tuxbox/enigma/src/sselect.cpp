@@ -958,7 +958,8 @@ void eServiceSelector::serviceSelChanged(eListBoxEntryService *entry)
 
 void eServiceSelector::updateCi()
 {
-	ci->update((const eServiceReferenceDVB&)selected);
+	if ( isVisible() )
+		ci->update((const eServiceReferenceDVB&)selected);
 }
 
 void eServiceSelector::forEachServiceRef( Signal1<void,const eServiceReference&> callback, bool fromBeg )
