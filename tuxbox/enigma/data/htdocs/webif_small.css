@@ -1,11 +1,11 @@
-.white { color:#000000; font-size: 8pt; font-family: Verdana; }
-.epgzeit { color:#000000; font-size:12pt; font-family: tahoma, arial; }
-.epgdur { color:#000000; font-size:10pt; font-family: tahoma, arial; }
-.epgname { color:#000000; font-size:12pt; font-family: tahoma, arial; }
-.epgdesc { color:#000000; font-size:10pt; font-family: tahoma, arial; }
-.epg { color:#000000; font-size:10pt; font-family:tahoma,arial; }
+.white { color:#000000; font-size: 8pt; font-family: Verdana, Arial, Helvetica, sans-serif; }
+.epgzeit { color:#000000; font-size:12pt; font-family: Verdana, Arial, Helvetica, sans-serif; }
+.epgdur { color:#000000; font-size:10pt; font-family: Verdana, Arial, Helvetica, sans-serif; }
+.epgname { color:#000000; font-size:12pt; font-family: Verdana, Arial, Helvetica, sans-serif; }
+.epgdesc { color:#000000; font-size:10pt; font-family: Verdana, Arial, Helvetica, sans-serif; }
+.epg { color:#000000; font-size:10pt; font-family: Verdana, Arial, Helvetica, sans-serif; }
 body {
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 8px;
 }
 
@@ -13,9 +13,11 @@ body {
 	background-image: url(bg.png);
 	background-color: #ffffff;
 	font-size: 8px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 h1 {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 10px;
 	font-weight: bold;
 	margin-top: 1px;
@@ -23,6 +25,7 @@ h1 {
 }
 
 h2 {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 8px;
 	font-weight: bold;
 	margin-top: 1px;
@@ -30,15 +33,18 @@ h2 {
 }
 
 td {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 8px;
 }
 
 th {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 8px;
 	font-weight: bold;
 }
 
 input {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 8px;
 	font-weight: bold;
 	color: #ffffff;
@@ -60,6 +66,7 @@ a:hover {
 	padding-right: 5px;
 	padding-bottom: 5px;
 	font-size: 8px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 #leftnavi {
@@ -90,11 +97,13 @@ a:hover {
 }
 
 #mepg .channel { 
+    font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 6px;
 	font-weight: bold; 
 }
 
 #mepg .description {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 6px;
 }	
 
