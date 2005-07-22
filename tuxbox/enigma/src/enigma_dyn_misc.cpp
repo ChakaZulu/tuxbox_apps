@@ -870,6 +870,6 @@ void ezapMiscInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/control/channellist", neutrino_getchannellist, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
 // function needed by bitcntrl
-	dyn_resolver->addDyn("GET", "/cgi-bin/getstreaminfo", getstreaminfo, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo, lockWeb);
 }
 
