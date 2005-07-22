@@ -261,7 +261,8 @@ int eTransponderEditWindow::eventHandler( const eWidgetEvent & event )
 					mb.exec();
 					mb.hide();
 				}
-				eTransponderList::getInstance()->reloadNetworks();
+				else
+					eTransponderList::getInstance()->invalidateNetworks();
 			}
 			return 0;
 		case eWidgetEvent::evtAction:

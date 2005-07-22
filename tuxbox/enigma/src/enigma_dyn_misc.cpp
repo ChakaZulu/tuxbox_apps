@@ -321,6 +321,21 @@ static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConn
 	return eString("+ok");
 }
 
+static eString reload_networks(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	if (!eDVB::getInstance())
+		return "-no dvb\n";
+	if (eTransponderList::getInstance())
+	{
+		eTransponderList::getInstance()->invalidateNetworks();
+		if (!eTransponderList::getInstance()->reloadNetworks())
+			return "+ok";
+		else
+			return "-reload networks failed\n";
+	}
+	return "-reload networks failes... no transponderlist\n";
+}
+
 static eString reload_settings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if (!eDVB::getInstance())
@@ -846,6 +861,7 @@ void ezapMiscInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage, lockWeb);
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/reloadNetworks", reload_networks, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadEncodingTable", reload_encoding_table, lockWeb);
 #ifndef DISABLE_FILE

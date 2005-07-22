@@ -348,21 +348,13 @@ existNetworks::existNetworks()
 
 std::list<tpPacket>& existNetworks::getNetworks()
 {
-	if (!networksLoaded)
-	{
-		reloadNetworks();
-		networksLoaded=true;
-	}
+	reloadNetworks();
 	return networks;
 }
 
 std::map<int,tpPacket>& existNetworks::getNetworkNameMap()
 {
-	if (!networksLoaded)
-	{
-		reloadNetworks();
-		networksLoaded=true;
-	}
+	reloadNetworks();
 	return names;
 }
 
@@ -430,6 +422,9 @@ int existNetworks::saveNetworks()
 
 int existNetworks::reloadNetworks()
 {
+	if ( networksLoaded )
+		return 0;
+
 	names.clear();
 	networks.clear();
 	XMLTreeParser parser("ISO-8859-1");
@@ -479,10 +474,11 @@ int existNetworks::reloadNetworks()
 			return -1;
 	}
 
+	char buf[2048];
 	do
 	{
-		char buf[2048];
 		unsigned int len=fread(buf, 1, sizeof(buf), in);
+
 		done=len<sizeof(buf);
 		if (!parser.Parse(buf, len, done))
 		{
@@ -524,6 +520,7 @@ int existNetworks::reloadNetworks()
 			eFatal("unknown packet %s", node->GetType());
 
 	networks.sort();
+	networksLoaded=true;
 	return 0;
 }
 
