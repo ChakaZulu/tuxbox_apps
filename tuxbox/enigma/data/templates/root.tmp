@@ -3,7 +3,6 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
-		<script language="javascript" type="text/javascript" src="timer.js"></script>
 		<script language="javascript" type="text/javascript" src="zap.js"></script>
 		<script language="javascript" type="text/javascript">#ZAPDATA#</script>
 	</head>
@@ -30,5 +29,6 @@
 			</td>
 		</tr>
 	</table>
+	<iframe name="vlccmd" src="" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe>
 	</body>
 </html>
