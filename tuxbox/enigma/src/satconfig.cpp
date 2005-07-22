@@ -596,10 +596,12 @@ void eSatelliteConfigurationManager::repositionWidgets()
 
 void eSatelliteConfigurationManager::createControlElements()
 {
-	ePtrList<eSatellite> sats;
-	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
-		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			sats.push_back(*s);
+	if ( !sats )
+	{
+		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+			for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
+				sats.push_back(*s);
+	}
 	for (ePtrList<eSatellite>::iterator it(sats.begin()); it != sats.end(); ++it )
 		createSatWidgets(*it);
 }
@@ -730,12 +732,6 @@ eComboBox* eSatelliteConfigurationManager::createSatWidgets( eSatellite *s )
 	newSat->loadDeco();
 	newSat->resize(eSize(250, 30));
 	newSat->setHelpText( _("press ok to select another satellite"));
-
-/*	if (complexity == 3)
-		new eListBoxEntryText( *c, _("*delete*"), (void*) 0 );   // this is to delete an satellite*/
-/*	for (std::list<tpPacket>::const_iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
-		if ( i->possibleTransponders.size() )
-			new eListBoxEntryText( *newSat, i->name, (void*) i->orbital_position );*/
 
 	int err;
 	if ( (err = newSat->setCurrent( (void*) s->getOrbitalPosition() ) ) )

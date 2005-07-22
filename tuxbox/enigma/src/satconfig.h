@@ -34,6 +34,7 @@ class eSatelliteConfigurationManager: public eWindow
 	std::list<SatelliteEntry*> deleteEntryList;
 	std::list<int> pageEnds;
 	std::list<int>::iterator curScrollPos;
+	ePtrList<eSatellite> sats;
 
 	int complexity;
  	int eventHandler(const eWidgetEvent &event);
