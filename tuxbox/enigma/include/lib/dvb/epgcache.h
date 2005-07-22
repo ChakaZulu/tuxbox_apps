@@ -6,11 +6,6 @@
 #include <ext/hash_map>
 #include <ext/hash_set>
 
-// check if gcc version >= 3.4
-#if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || __GNUC__ == 4 )
-#else
-#include <ext/stl_hash_fun.h>
-#endif
 #include <errno.h>
 
 #include "si.h"
