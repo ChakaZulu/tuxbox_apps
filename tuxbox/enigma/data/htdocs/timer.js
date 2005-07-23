@@ -36,28 +36,22 @@ function addTimerEvent()
 	var timer = document.channelselector.type.options[currentTimer].value;
 	var currentChannel = document.channelselector.channel.selectedIndex;
 	var channel = document.channelselector.channel.options[currentChannel].value;
-	if (timer == "regular")
-	{
-		var currentSday = document.channelselector.sday.selectedIndex;
-		var sday = document.channelselector.sday.options[currentSday].text;
-		var currentSmonth = document.channelselector.smonth.selectedIndex;
-		var smonth = document.channelselector.smonth.options[currentSmonth].text;
-		var currentSyear = document.channelselector.syear.selectedIndex;
-		var syear = document.channelselector.syear.options[currentSyear].text;
-	}
+	var currentSday = document.channelselector.sday.selectedIndex;
+	var sday = document.channelselector.sday.options[currentSday].text;
+	var currentSmonth = document.channelselector.smonth.selectedIndex;
+	var smonth = document.channelselector.smonth.options[currentSmonth].text;
+	var currentSyear = document.channelselector.syear.selectedIndex;
+	var syear = document.channelselector.syear.options[currentSyear].text;
 	var currentShour = document.channelselector.shour.selectedIndex;
 	var shour = document.channelselector.shour.options[currentShour].text;
 	var currentSmin = document.channelselector.smin.selectedIndex;
 	var smin = document.channelselector.smin.options[currentSmin].text;
-	if (timer == "regular")
-	{
-		var currentEday = document.channelselector.eday.selectedIndex;
-		var eday = document.channelselector.eday.options[currentEday].text;
-		var currentEmonth = document.channelselector.emonth.selectedIndex;
-		var emonth = document.channelselector.emonth.options[currentEmonth].text;
-		var currentEyear = document.channelselector.eyear.selectedIndex;
-		var eyear = document.channelselector.eyear.options[currentEyear].text;
-	}
+	var currentEday = document.channelselector.eday.selectedIndex;
+	var eday = document.channelselector.eday.options[currentEday].text;
+	var currentEmonth = document.channelselector.emonth.selectedIndex;
+	var emonth = document.channelselector.emonth.options[currentEmonth].text;
+	var currentEyear = document.channelselector.eyear.selectedIndex;
+	var eyear = document.channelselector.eyear.options[currentEyear].text;
 	var currentEhour = document.channelselector.ehour.selectedIndex;
 	var ehour = document.channelselector.ehour.options[currentEhour].text;
 	var currentEmin = document.channelselector.emin.selectedIndex;
@@ -92,7 +86,7 @@ function addTimerEvent()
 		if (document.channelselector.su.checked)
 			su = "on";
 
-		url = 'addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
+		url = 'addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&smonth=' + smonth + '&syear=' + syear + '&ehour=' + ehour + '&emin=' + emin + '&emonth=' + emonth + '&eyear=' + eyear + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
 	}
 	else
 		url = 'addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&syear=' + syear + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&eyear=' + eyear + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
