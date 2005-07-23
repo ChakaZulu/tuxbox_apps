@@ -104,9 +104,15 @@
 						getElem("id", "vid" + i, null).src = "led_off.gif";
 				}
 			}
+			function vlc2()
+			{
+				setTimeout("data.location.reload()", 500);
+				vlcStop();
+				setTimeout("vlcStart()", 1000);
+			}
 			function webxtv()
 			{
-				NewWindow("/webxtv", "tv", "780", "700", "no", "0");
+				NewWindow("/webxtv", "tv", "780", "720", "no", "0");
 			}
 		</script>
 	</head>
@@ -191,9 +197,9 @@
 								</table>
 								<table id="statcell" border="0" cellpadding="0" cellspacing="0" height="20px">
 								<tr>
-									<td id="snr">&nbsp;</td>
-									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td id="agc">&nbsp;</td>
+									<td>&nbsp;<img src="squ.png">&nbsp;</td>
+									<td id="snr">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td id="ber">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
@@ -238,7 +244,7 @@
 						</script>
 					</td>
 					<td align="left">
-						<input name="Audio" type="button" style="width: 100px; height:22px; background-color: #FFCC33;" value="Audio" onclick=javascript:selectAudio()><input name="Video" type="button" style="width: 100px;height:22px; background-color: #FFCC33;" value="Video" onclick="javascript:selectSubChannel()"><input name="EPG" type="button" style="width: 100px;height:22px;background-color: #1FCB12;" value="EPG" onclick="javascript:openEPG('')"><input name="Info" type="button" style="width: 100px;height:22px;background-color: #95077C;" value="Info" onclick="javascript:openChannelInfo()"><input name="Stream Info" type="button" style="width: 100px;height:22px;background-color: #F1EF1D;" value="Stream Info" onclick=javascript:openSI()></td>
+						<input name="Audio" type="button" style="width: 100px; height:22px; background-color: #fcbd00; background-image: url(/yellow.png); background-repeat: repeat-x; border-bottom: 1px solid #888888; border-top: 1px solid #f5f5f5; border-left: 1px solid #f5f5f5; border-right: 1px solid #888888; " value="Audio" onclick=javascript:selectAudio()><input name="Video" type="button" style="width: 100px;height:22px; background-color: #fcbd00; border-bottom: 1px solid #888888; border-top: 1px solid #f5f5f5; border-left: 1px solid #f5f5f5; border-right: 1px solid #888888;background-image: url(/yellow.png); background-repeat: repeat-x;" value="Video" onclick="javascript:selectSubChannel()"><input name="EPG" type="button" style="width: 100px;height:22px;background-color: #1FCB12; border-bottom: 1px solid #888888; border-top: 1px solid #f5f5f5; border-left: 1px solid #f5f5f5; border-right: 1px solid #888888; background-image: url(/green.png); background-repeat: repeat-x;" value="EPG" onclick="javascript:openEPG()"><input name="Info" type="button" style="width: 100px;height:22px;background-color: #d43434; border-bottom: 1px solid #888888; border-top: 1px solid #f5f5f5; border-left: 1px solid #f5f5f5; border-right: 1px solid #888888; background-image: url(/red.png); background-repeat: repeat-x;" value="Info" onclick="javascript:openChannelInfo()"><input name="Stream Info" type="button" style="width: 100px;height:22px;background-color: #12259e; border-bottom: 1px solid #888888; border-top: 1px solid #f5f5f5; border-left: 1px solid #f5f5f5; border-right: 1px solid #888888; background-image: url(/blue.png); background-repeat: repeat-x;" value="Stream Info" onclick=javascript:openSI()></td>
 				</tr>
 				</tbody>
 				</table>
@@ -275,7 +281,7 @@
 			<td><iframe name="body" width="670px" height="100%" src="body" scrolling="auto" frameborder="0" marginwidth="0" marginheight="0" style="background-color: #F4F4F4F4"></iframe></td>
 		</tr>
 		<tr>
-			<td><iframe name="vlccmd" src="" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>
+			<td><iframe name="vlccmd" src="" width="100%", height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>
 		</tr>
 		<tr>
 			<td colspan="2"><iframe name="data" src="blank" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe></td>

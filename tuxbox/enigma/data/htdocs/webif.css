@@ -36,7 +36,11 @@ input {
 	font-size: 8pt;
 	color:#ffffff;
 	background-color:#f4f4f4;
-
+	border-bottom: 1px solid #888888;
+	border-top: 1px solid #f5f5f5;
+	border-left: 1px solid #f5f5f5;
+	border-right: 1px solid #888888;
+	
 }
 
 a {
@@ -53,7 +57,6 @@ a:hover {
     background-color: #f4f4f4;
     font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 9pt;
-	
 	
 }
 
@@ -76,11 +79,13 @@ a:hover {
 	font-size: 8pt;
 	font-weight: bold;
 	border-bottom: 1px solid #98A4B6;
+	
 }
 
 #leftnavi {
 	background-color: #D9E0E7;
-	border-right: 1px solid #98A4B6;
+
+	
 }
 
 #topnavi {
