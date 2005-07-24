@@ -1,6 +1,7 @@
 #ifndef __lib_movie_player_h
 #define __lib_movie_player_h
 
+#include <lib/base/estring.h>
 #include <lib/base/thread.h>
 #include <lib/base/message.h>
 
@@ -18,6 +19,7 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 			:type(type)
 		{}
 	};
+	eString buffer;
 	eFixedMessagePump<Message> messages;
 	static eMoviePlayer *instance;
 	void gotMessage(const Message &message);
@@ -27,6 +29,7 @@ public:
 	~eMoviePlayer();
 	void start();
 	void stop();
+	void playStream();
 	static eMoviePlayer *getInstance() { return instance; }
 };
 
