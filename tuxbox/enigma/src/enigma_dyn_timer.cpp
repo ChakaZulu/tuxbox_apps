@@ -63,6 +63,21 @@ extern int pdaScreen;
 extern eString zap[5][5];
 extern eString getZapContent(eString path, int depth, bool addEPG, bool sortList);
 
+static eString getAfterEvent(int type)
+{
+	eString result;
+	if (type & ePlaylistEntry::doGoSleep)
+		result = "Standby";
+	else
+	if (eSystemInfo::getInstance()->canShutdown())
+	{
+		if (type & ePlaylistEntry::doShutdown)
+			result = "Shutdown";
+	}
+	else
+		result = "None";
+	return result;
+}
 
 class eWebNavigatorSearchService: public Object
 {
@@ -147,6 +162,7 @@ struct getEntryString
 			tmp.strReplace("#TYPE#", "SINGLE");
 		
 		tmp.strReplace("#TIMERTYPE#", eString().sprintf("%d", se->type));
+		tmp.strReplace("#AFTEREVENT#", getAfterEvent(se->type));
 			
 		tm startTime = *localtime(&se->time_begin);
 		time_t time_end = se->time_begin + se->duration;
