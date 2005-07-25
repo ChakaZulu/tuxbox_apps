@@ -96,7 +96,6 @@ function loadBouquets(bouquet)
 	}
 	document.channelselector.bouquet.selectedIndex = bouquet;
 }
-
 function vlcStop()
 {
 	vlccmd.location = "http://127.0.0.1:8000/?control=stop";
@@ -125,7 +124,7 @@ function vlcStartItem()
 	vlccmd.location.href = "http://127.0.0.1:8080/?control=play&item=0";
 	setTimeout("setStreamingServiceRef()", 200);
 }
-unction setStreamingServiceRef()
+function setStreamingServiceRef()
 {
 	if (parent.data.serviceReference)
 		document.location = "/cgi-bin/setStreamingServiceRef?sref=" + parent.data.serviceReference;
