@@ -3607,7 +3607,7 @@ msgstr "Búsqueda manual..."
 
 #: src/scan.cpp:210
 msgid "Waiting for tuner lock on:"
-msgstr "Esperando capación señal en:"
+msgstr "Esperando captación señal en:"
 
 #: src/scan.cpp:345
 msgid ""
@@ -3662,12 +3662,12 @@ msgstr "Búsqueda en progreso"
 #: src/scan.cpp:708
 #, c-format
 msgid "%02i minutes and %02i seconds left"
-msgstr "Quedan %d minutos y %02d segundos"
+msgstr "Faltan %d minutos y %02d segundos"
 
 #: src/scan.cpp:710
 #, c-format
 msgid "%02i seconds left"
-msgstr "Quedan %02i segundos"
+msgstr "Faltan %02i segundos"
 
 #: src/scan.cpp:783
 msgid "Vertical"
