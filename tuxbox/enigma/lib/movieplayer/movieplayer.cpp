@@ -21,7 +21,7 @@ static eIOBuffer *tsBuffer;
 static pthread_mutex_t mutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 extern int tcpOpen(eString, int);
-extern void find_avpids(int fd, uint16_t *vpid, uint16_t *apid);
+extern void find_avpids(int fd, unsigned short *vpid, unsigned short *apid);
 extern int is_audio_ac3(int);
 extern int tcpRequest(int fd, char *ioBuf, int maxLen);
 
@@ -112,7 +112,7 @@ int waitUntilVLCStartsTalking()
 		char line[256];
 		memset(line, '\0', sizeof(line));
 		char *bp = line;
-		while (bp - line < sizeof(line))
+		while ((unsigned int)(bp - line) < sizeof(line))
 		{
 			recv(skt, bp, 1, 0);
 			if (strstr(line, "\r\n\r\n") == 0)
@@ -186,7 +186,7 @@ void eMoviePlayer::playStream()
 	int skt;
 	char tempBuffer[BLOCKSIZE];
 
-	if (skt = waitUntilVLCStartsTalking())
+	if ((skt = waitUntilVLCStartsTalking()))
 	{
 		eDebug("[MOVIEPLAYER] VLC is sending now... now looking for AV pids");
 
@@ -232,22 +232,26 @@ extern bool playService(const eServiceReference &ref);
 
 void eMoviePlayer::gotMessage(const Message &msg )
 {
+	eDVBServiceController *sapi;
 	eDebug("[MOVIEPLAYER] received message : %d", msg.type);
 	switch (msg.type)
 	{
 		case Message::start:
-			eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-			if (sapi)
+		{
+			if (sapi = eDVB::getInstance()->getServiceAPI())
 				suspendedServiceReference = sapi->service;
 			eServiceInterface::getInstance()->stop();
 			playStream();
 			playService(suspendedServiceReference);
 			break;
+		}
 		case Message::stop:
+		{
 			pthread_cancel(dvr);
 			playService(suspendedServiceReference);
 			quit(0);
 			break;
+		}
 		default:
 			eDebug("[MOVIEPLAYER] received unknown message");
 	}
