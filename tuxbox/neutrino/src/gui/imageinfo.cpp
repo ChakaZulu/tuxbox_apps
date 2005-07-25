@@ -127,8 +127,8 @@ void CImageInfo::paintLine(int xpos, int font, const char* text)
 void CImageInfo::paint()
 {
 	const char * head_string;
-	const char * releaseCycle;
-	char imagedate[18] = "";
+	char releaseCycle[10] = "";
+	char imagedate[18]    = "";
  	int  xpos = x+10;
 
 	ypos = y+5;
