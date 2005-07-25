@@ -61,9 +61,3 @@ function update()
 </script>
 </body>
 </html>
- agc = #AGC#;
-	var snr = #SNR#;
-	var ber = #BER#;
-</script>
-</body>
-</html>
