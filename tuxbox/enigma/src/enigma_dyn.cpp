@@ -2258,6 +2258,7 @@ eString getBoxStatus(eString format)
 	
 	// time
 	time_t atime;
+	time(&atime);
 	result.strReplace("#TIME#", eString(ctime(&atime)));
 
 	// epg data
