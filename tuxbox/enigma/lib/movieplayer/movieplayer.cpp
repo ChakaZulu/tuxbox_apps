@@ -171,7 +171,7 @@ int foundAVPids(int skt, unsigned short * apid, unsigned short * vpid, unsigned 
 	
 	eDebug("[MOVIEPLAYER] found apid: 0x%04X, vpid: 0x%04X, ac3: %d", *apid, *vpid, *ac3);
 	
-	return (int)(*apid > 0 && *vpid > 0)
+	return (int)(*apid > 0 && *vpid > 0);
 }
 
 void eMoviePlayer::playStream()
