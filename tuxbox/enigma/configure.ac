@@ -104,6 +104,7 @@ lib/gui/Makefile
 lib/socket/Makefile
 lib/system/Makefile
 lib/picviewer/Makefile
+lib/movieplayer/Makefile
 po/Makefile
 src/Makefile
 enigma.pc

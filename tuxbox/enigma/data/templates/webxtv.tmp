@@ -89,9 +89,6 @@ function play()
 				<PARAM NAME="ShowDisplay" VALUE="True">
 				<PARAM NAME="Loop" VALUE="False">
 				<PARAM NAME="AutoPlay" VALUE="False">
-			<br><br>
-			<b>VLC ActiveX Plugin is not installed!</b>
-			<br><br><br>
 			</OBJECT>
 		</TD>
 	</TR>

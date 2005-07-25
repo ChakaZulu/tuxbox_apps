@@ -102,11 +102,6 @@ function selectSubChannel()
 {
 	NewWindow("/cgi-bin/selectSubChannel", "subchannel", "250", "130", "no");
 }
-function vlc()
-{
- 	document.location = "/video.pls";
- 	setTimeout("setStreamingServiceRef()", 200);	
-}
 function setStreamingServiceRef()
 {
 	if (parent.data.serviceReference)
@@ -114,4 +109,8 @@ function setStreamingServiceRef()
 	else
 		setTimeout("setStreamingServiceRef()", 200);
 }
-
+function vlc()
+{
+	document.location = "/video.pls";
+	setTimeout("setStreamingServiceRef()", 200);	
+}

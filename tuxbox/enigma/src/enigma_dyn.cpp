@@ -59,6 +59,7 @@
 #include <enigma_dyn_epg.h>
 #include <enigma_dyn_timer.h>
 #include <enigma_dyn_pda.h>
+#include <enigma_dyn_movieplayer.h>
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
@@ -109,8 +110,7 @@ eString firmwareLevel(eString verid)
 		eString ver = verid.mid(1, 3);
 		eString date = verid.mid(4, 8);
 //		eString time = verid.mid(12, 4);
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
-			|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 			result = eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
 		else
 			result = eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
@@ -1890,6 +1890,22 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 	return getvideopls();
 }
 
+
+static eString moviepls(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+
+	eString movieRef = httpUnescape(opt["ref"]);
+	eString movieFile = movieRef.right(movieRef.length() - movieRef.find("/hdd/movie"));
+	
+	eProcessUtils::killProcess("streamts");
+	
+	content->local_header["Content-Type"]="video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache";
+
+	return "http://" + getIP() + ":31342" + movieFile;
+}
+
 static eString mPlayer(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
@@ -2016,8 +2032,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	if (pdaScreen == 0)
 	{
 		result = readFile(TEMPLATE_DIR + "index_big.tmp");
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
-			|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 			result.strReplace("#BOX#", "Dreambox");
 		else
 			result.strReplace("#BOX#", "dBox");
@@ -2224,11 +2239,9 @@ static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPCon
 static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = readFile(TEMPLATE_DIR + "webxtv.tmp");
+	eString result = readFile(TEMPLATE_DIR + "webxtv" + opt["browser"] + ".tmp");
 	result.strReplace("#ZAPDATA#", getZapContent(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false));
-
 	return result;
 }
 
@@ -2464,6 +2477,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/video.pls", videopls, lockWeb);
 	dyn_resolver->addDyn("GET", "/video.m3u", videopls, lockWeb);
+	dyn_resolver->addDyn("GET", "/movie.pls", moviepls, lockWeb);
+	dyn_resolver->addDyn("GET", "/movie.m3u", moviepls, lockWeb);
 	dyn_resolver->addDyn("GET", "/mplayer.mply", mPlayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
@@ -2482,6 +2497,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapMiscInitializeDyn(dyn_resolver, lockWeb);
 	ezapTimerInitializeDyn(dyn_resolver, lockWeb);
 	ezapPDAInitializeDyn(dyn_resolver, lockWeb);
+	ezapMoviePlayerInitializeDyn(dyn_resolver, lockWeb);
 #ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
 #endif

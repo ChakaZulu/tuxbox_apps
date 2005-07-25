@@ -1,9 +1,9 @@
 INCLUDES = \
 	-I$(top_srcdir)/include
 
-noinst_LIBRARIES = libenigma_picviewer.a
+noinst_LIBRARIES = libenigma_movieplayer.a
 
-libenigma_picviewer_a_SOURCES = \
-	movieplayer.cpp
+libenigma_movieplayer_a_SOURCES = \
+	movieplayer.cpp utils.cpp
 
 

@@ -63,6 +63,20 @@ extern int pdaScreen;
 extern eString zap[5][5];
 extern eString getZapContent(eString path, int depth, bool addEPG, bool sortList);
 
+class myTimerEntry
+{
+public:
+	int start;
+	eString timerData;
+	myTimerEntry(int pStart, eString pTimerData)
+	{
+		start = pStart;
+		timerData = pTimerData;
+	};
+	~myTimerEntry() {};
+	bool operator < (const myTimerEntry &a) const {return start < a.start;}
+};
+
 static eString getAfterEvent(int type)
 {
 	eString result;

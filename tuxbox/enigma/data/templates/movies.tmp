@@ -3,7 +3,6 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
-		<script language="javascript" type="text/javascript" src="timer.js"></script>
 		<script language="javascript" type="text/javascript" src="dhtml.js"></script>
 		<script language="javascript" type="text/javascript" src="zap.js"></script>
 		<script language="javascript" type="text/javascript">#ZAPDATA#</script>
@@ -65,6 +64,10 @@
 					NewWindow("/cgi-bin/recoverRecordings", "recoverRecordings", "200", "100", "no", "7000");
 				}
 			}
+			function streamMovie()
+			{
+				document.location = "/movie.pls";
+			}
 		</script>
 	</head>
 	<body onLoad="init()" style="padding: 10px; background-color: #F4F4F4" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" id="contentcell">
@@ -83,15 +86,20 @@
 		</form>
 		<table border="0" cellpadding="0" cellspacing="0">
 			<tr>
-				<td style="width: 250px">
+				<td>
 					<input name="delete" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="Delete" onClick="javascript:deleteMovie()">
 					&nbsp;
 					<input name="download" type="button" style="width: 100px; height: 22px; background-color: #1FCB12; color: #FFFFFF;" value="Download" onClick="javascript:downloadMovie()">
+					&nbsp;
+					<input name="stream" type="button" style="width: 100px; height: 22px; background-color: #FFCC33; color: #FFFFFF;" value="VLC" onClick="javascript:streamMovie()">
 				</td>
-				<td style="width: 370px" align="center">
-					<a href="javascript:zapChannelBackward()"><img src="up.gif" border="0"></a>
-					&nbsp;&nbsp;
-					<a href="javascript:zapChannelForward()"><img src="down.gif" border="0"></a>
+			</tr>
+		</table>
+		<br>
+		<input name="recover" type="button" style="width: 100px; height: 22px; background-color: #12259E; color: #FFFFFF;" value="Recover" onClick="javascript:recoverMovies()">
+	</body>
+</html>
+ #FFFFFF;" value="VLC" onClick="javascript:streamMovie()">
 				</td>
 			</tr>
 		</table>

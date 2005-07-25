@@ -2,9 +2,9 @@
 #define __enigma_dyn_h
 
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.4.4-Expert"
+#define WEBIFVERSION "4.5.0-Expert"
 #else
-#define WEBIFVERSION "4.4.4"
+#define WEBIFVERSION "4.5.0"
 #endif
 
 #define ZAPMODETV 0
@@ -22,19 +22,5 @@
 class eHTTPDynPathResolver;
 
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver);
-
-class myTimerEntry
-{
-public:
-	int start;
-	eString timerData;
-	myTimerEntry(int pStart, eString pTimerData)
-	{
-		start = pStart;
-		timerData = pTimerData;
-	};
-	~myTimerEntry() {};
-	bool operator < (const myTimerEntry &a) const {return start < a.start;}
-};
 
 #endif /* __enigma_dyn_h */

@@ -1,2 +1,2 @@
-SUBDIRS = base codecs driver dvb gdi gui socket system picviewer
+SUBDIRS = base codecs driver dvb gdi gui socket system picviewer movieplayer
 
