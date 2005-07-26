@@ -6,7 +6,8 @@
 			function key(code)
 			{
 				document.location="/cgi-bin/rc?" + code;
-				window.setTimeout("osdShot()", 250);
+				if (#OSDSHOTENABLED#)
+					window.setTimeout("osdShot()", 250);
 			}
 			function osdShot()
 			{
