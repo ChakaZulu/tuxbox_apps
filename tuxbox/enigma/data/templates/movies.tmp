@@ -66,7 +66,15 @@
 			}
 			function streamMovie()
 			{
-				document.location = "/movie.pls";
+				var selChannel = document.channelselector.channel.selectedIndex;
+				if (selChannel >= 0)
+				{
+					currentChannel = selChannel;
+					channel = document.channelselector.channel.options[selChannel].value;
+					document.location = "/movie.pls?ref=" + channel;
+				}
+				else
+					alert("Please select a movie first!");
 			}
 		</script>
 	</head>
@@ -95,15 +103,5 @@
 				</td>
 			</tr>
 		</table>
-		<br>
-		<input name="recover" type="button" style="width: 100px; height: 22px; background-color: #12259E; color: #FFFFFF;" value="Recover" onClick="javascript:recoverMovies()">
-	</body>
-</html>
- #FFFFFF;" value="VLC" onClick="javascript:streamMovie()">
-				</td>
-			</tr>
-		</table>
-		<br>
-		<input name="recover" type="button" style="width: 100px; height: 22px; background-color: #12259E; color: #FFFFFF;" value="Recover" onClick="javascript:recoverMovies()">
 	</body>
 </html>
