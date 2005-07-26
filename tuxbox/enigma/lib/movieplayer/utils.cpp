@@ -11,6 +11,9 @@
 #include <lib/base/estring.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
 
 #define PROG_STREAM_MAP  0xBC
 #ifndef PRIVATE_STREAM1
@@ -85,6 +88,32 @@ int tcpOpen(eString serverIP, int serverPort)
 
 	return fd;
 }
+
+size_t CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
+{
+	std::string *pStr = (std::string *)data;
+	*pStr += (char *)ptr;
+	return size *nmemb;
+}
+
+CURLcode sendGetRequest (const eString& url, eString& response, bool useAuthorization) 
+{
+	CURL *curl;
+	CURLcode httpres;
+
+	curl = curl_easy_init ();
+	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
+	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+	curl_easy_setopt (curl, CURLOPT_FILE, (void *)&response);
+	if (useAuthorization)
+		curl_easy_setopt (curl, CURLOPT_USERPWD, "admin:admin");	/* !!! make me customizable */
+	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
+	httpres = curl_easy_perform (curl);
+	eDebug("[MOVIEPLAYER] HTTP result: %d", httpres);
+	curl_easy_cleanup (curl);
+	return httpres;
+}
+
 
 void find_avpids(int fd, uint16_t *vpid, uint16_t *apid)
 {

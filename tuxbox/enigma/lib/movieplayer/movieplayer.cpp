@@ -12,6 +12,10 @@
 #include <lib/base/buffer.h>
 #include <lib/system/econfig.h>
 #include <lib/dvb/decoder.h>
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
+#include <src/enigma_dyn_utils.h>
 
 #define BLOCKSIZE 65424
 #define PVRDEV "/dev/pvr"
@@ -20,10 +24,11 @@
 static eIOBuffer *tsBuffer;
 static pthread_mutex_t mutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
-extern int tcpOpen(eString, int);
 extern void find_avpids(int fd, unsigned short *vpid, unsigned short *apid);
 extern int is_audio_ac3(int);
+extern int tcpOpen(eString, int);
 extern int tcpRequest(int fd, char *ioBuf, int maxLen);
+extern CURLcode sendGetRequest (const eString& url, eString& response, bool useAuthorization);
 
 pthread_t dvr;
 void *dvrThread(void *);
@@ -37,13 +42,23 @@ eMoviePlayer::eMoviePlayer():messages(this, 1)
 	tsBuffer = new eIOBuffer(BLOCKSIZE);
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
 	eDebug("[MOVIEPLAYER] starting...");
+	serverPort = 0;
+	eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
+	char *serverip;
+	if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
+		serverip = strdup("");
+	serverIP = eString(serverip);
+	free(serverip);
+	eDebug("[MOVIEPLAYER] Server IP: %s", serverIP.c_str());
+	eDebug("[MOVIEPLAYER] Server Port: %d", serverPort);
+	
 	run();
 }
 
 eMoviePlayer::~eMoviePlayer()
 {
 	eDebug("[MOVIEPLAYER] stopping...");
-	messages.send(Message::stop);
+	messages.send(Message(Message::stop, ""));
 	if (tsBuffer)
 		delete tsBuffer;
 	if ( thread_running() )
@@ -59,34 +74,24 @@ void eMoviePlayer::thread()
 	exec();
 }
 
-void eMoviePlayer::start()
+void eMoviePlayer::start(eString mrl)
 {
 	eDebug("[MOVIEPLAYER] issuing start...");
-	messages.send(Message(Message::start));
+	messages.send(Message(Message::start, mrl));
 }
 
 void eMoviePlayer::stop()
 {
 	eDebug("[MOVIEPLAYER] issueing stop...");
-	messages.send(Message(Message::stop));
+	messages.send(Message(Message::stop, ""));
 }
 
-int waitUntilVLCStartsTalking()
+int eMoviePlayer::waitUntilVLCStartsTalking()
 {
 	int skt;
 
 	eDebug("[MOVIEPLAYER] wait for VLC talking to us...");
 	// Open HTTP connection to VLC
-	int serverPort = 0;
-	eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
-	char *serverip;
-	if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
-		serverip = strdup("");
-	eString serverIP = eString(serverip);
-	free(serverip);
-	
-	eDebug("[MOVIEPLAYER] Server IP: %s", serverIP.c_str());
-	eDebug("[MOVIEPLAYER] Server Port: %d", serverPort);
 
 	while (true)
 	{
@@ -228,6 +233,116 @@ void eMoviePlayer::playStream()
 	quit(0);
 }
 
+eString eMoviePlayer::sout(eString mrl)
+{
+	eString soutURL = "?sout=#";
+	
+	int settingResolution = 0;
+	eConfig::getInstance()->getKey("/movieplayer/resolution", settingResolution);
+	int settingAudioRate = 0;
+	eConfig::getInstance()->getKey("/movieplayer/audiorate", settingAudioRate);
+	int settingVideoRate = 0;
+	eConfig::getInstance()->getKey("/movieplayer/videorate", settingVideoRate);
+	int settingTranscodeVideoCodec = 0;
+	eConfig::getInstance()->getKey("/movieplayer/transcodevideocodec", settingTranscodeVideoCodec);
+	int settingForceTranscodeVideo = 0;
+	eConfig::getInstance()->getKey("/movieplayer/forcetranscodevideo", settingForceTranscodeVideo);
+	int settingForceTranscodeAudio = 0;
+	eConfig::getInstance()->getKey("/movieplayer/forcetranscodeaudio", settingForceTranscodeAudio);
+	int settingForceAviRawAudio = 0;
+	eConfig::getInstance()->getKey("/movieplayer/forceavirawaudio", settingForceAviRawAudio);
+	
+	eDebug("[MOVIEPLAYER] determine ?sout for mrl: %s", mrl.c_str());
+	
+	// determine whether VLC has to transcode or not
+	if ((mrl.left(4) == "vcd:") ||
+	    (mrl.right(3) == "mpg") ||
+	    (mrl.right(4) == "mpeg") ||
+	    (mrl.right(3) == "m2p"))
+	{
+		if (settingForceTranscodeVideo)
+			transcodeVideo = settingTranscodeVideoCodec;
+		else
+			transcodeVideo = 0;
+		transcodeAudio = settingForceTranscodeAudio;
+	}
+	else
+	{
+		transcodeVideo = settingTranscodeVideoCodec;
+		if ((mrl.left(3) == "dvd" && settingForceTranscodeAudio) ||
+		    (mrl.right(3) == "vob" && settingForceTranscodeAudio) ||
+		    (mrl.right(3) == "ac3" && settingForceTranscodeAudio) ||
+		    settingForceAviRawAudio)
+			transcodeAudio = 0;
+		else
+			transcodeAudio = 1;
+	}
+	
+	eDebug("[MOVIEPLAYER] transcoding audio: %d, video: %d", transcodeAudio, transcodeVideo);
+
+	// add sout (URL encoded)
+	// example (with transcode to mpeg1):
+	//  ?sout=#transcode{vcodec=mpgv,vb=2000,acodec=mpga,ab=192,channels=2}:duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
+	// example (without transcode to mpeg1): 
+	// ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
+
+	eString res_horiz;
+	eString res_vert;
+	switch (settingResolution)
+	{
+		case 1:
+			res_horiz = "352";
+			res_vert = "576";
+			break;
+		case 2:
+			res_horiz = "480";
+			res_vert = "576";
+			break;
+		case 3:
+			res_horiz = "704";
+			res_vert = "576";
+			break;
+		default:
+			res_horiz = "352";
+			res_vert = "288";
+	}
+	
+	if (transcodeVideo || transcodeAudio)
+	{
+		soutURL += "transcode{";
+		if (transcodeVideo)
+		{
+			soutURL += "vcodec=" + (transcodeVideo == 1) ? "mpgv" : "mp2v";
+			soutURL += ",vb=" + eString().sprintf("%d", settingVideoRate);
+			soutURL += ",width=" + res_horiz;
+			soutURL += ",height=" + res_vert;
+		}
+		if (transcodeAudio)
+		{
+			if (transcodeVideo)
+				soutURL += ",";
+			soutURL += "acodec=mpga,ab=" + eString().sprintf("%d", settingAudioRate) + ",channels=2";
+		}
+		soutURL += "}:";
+	}
+	
+	soutURL += "duplicate{dst=std{access=http,mux=ts,url=:" + eString().sprintf("%d", serverPort) + "/dboxstream}}";
+
+	return soutURL;
+}
+
+int eMoviePlayer::sendRequest2VLC(eString command)
+{
+	CURLcode httpres;
+	eString baseURL = "http://" + serverIP + ':' + eString().sprintf("%d", serverPort) + '/';
+
+	eString response;
+	httpres = sendGetRequest(baseURL + command, response, false);
+	eDebug("[MOVIEPLAYER] HTTP result for vlc command %s: %d - %s", command.c_str(), httpres, response.c_str());
+	
+	return httpres;
+}
+
 extern bool playService(const eServiceReference &ref);
 
 void eMoviePlayer::gotMessage(const Message &msg )
@@ -238,17 +353,35 @@ void eMoviePlayer::gotMessage(const Message &msg )
 	{
 		case Message::start:
 		{
+			// save current dvb service for later
 			if (sapi = eDVB::getInstance()->getServiceAPI())
 				suspendedServiceReference = sapi->service;
+			// stop dvb service
 			eServiceInterface::getInstance()->stop();
+			// clear VLC playlist
+			sendRequest2VLC("?control=empty");
+			// add mrl to VLC playlist
+			sendRequest2VLC("?control=add&mrl=" + msg.mrl);
+			// set VLC sout...
+			sendRequest2VLC(httpEscape(sout(msg.mrl)));
+			// start VLC playback of item 0 in playlist
+			sendRequest2VLC("?control=play&item=0");
+			// receive and play ts stream
 			playStream();
+			// restore suspended dvb service
 			playService(suspendedServiceReference);
+			// shutdown vlc
+			sendRequest2VLC("?control=shutdown");
 			break;
 		}
 		case Message::stop:
 		{
+			// cancel dvr thread
 			pthread_cancel(dvr);
+			// restore suspended dvb service
 			playService(suspendedServiceReference);
+			// shutdown vlc
+			sendRequest2VLC("?control=shutdown");
 			quit(0);
 			break;
 		}

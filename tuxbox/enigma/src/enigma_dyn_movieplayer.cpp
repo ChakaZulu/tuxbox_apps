@@ -51,7 +51,7 @@ eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnect
 	eString command = opt["command"];
 	if (command == "start")
 	{
-		moviePlayer->start();
+		moviePlayer->start(opt["mrl"]);
 	}
 	else
 	{
@@ -64,5 +64,5 @@ eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnect
 
 void ezapMoviePlayerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer", movieplayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.pls", movieplayer, lockWeb);
 }
