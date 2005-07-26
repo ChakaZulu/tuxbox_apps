@@ -73,7 +73,7 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 	}
    
 	CTimerdClient * timerdclient = new CTimerdClient;
-
+	bool setflag=false;
 	shutdown_min = timerdclient->getSleepTimerRemaining();  // remaining shutdown time?
 //	if(shutdown_min == 0)		// no timer set
 //		shutdown_min = 10;		// set to 10 min default
@@ -85,6 +85,7 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 		if(shutdown_min == 0 && current_epg_zeit_dauer_rest > 0 && current_epg_zeit_dauer_rest < 1000)
 		{
 			shutdown_min=current_epg_zeit_dauer_rest;
+			setflag=true;
 		}
 	}
 	sprintf(value,"%03d",shutdown_min);
@@ -94,8 +95,9 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 
 	delete inbox;
 
-	if(shutdown_min!=atoi(value))
+	if(shutdown_min!=atoi(value) || setflag )
 	{
+		setflag=false;
 		shutdown_min = atoi (value);
 		printf("sleeptimer min: %d\n",shutdown_min);
 		if (shutdown_min == 0)			// if set to zero remove existing sleeptimer
