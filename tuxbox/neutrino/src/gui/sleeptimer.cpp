@@ -48,6 +48,10 @@
 
 #include <stdlib.h>
 
+#include <daemonc/remotecontrol.h>
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
+#include <gui/infoviewer.h>
+extern CInfoViewer*	g_InfoViewer; /*infoviewer.cpp*/
 
 //
 // -- Input Widget for setting shutdown time
@@ -59,7 +63,7 @@
 int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 {
 	int    res = menu_return::RETURN_EXIT_ALL;
-	int    shutdown_min;
+	int    shutdown_min=0;
 	char   value[16];
 	CStringInput  *inbox;
 
@@ -73,7 +77,16 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 	shutdown_min = timerdclient->getSleepTimerRemaining();  // remaining shutdown time?
 //	if(shutdown_min == 0)		// no timer set
 //		shutdown_min = 10;		// set to 10 min default
-
+	CSectionsdClient::CurrentNextInfo info_CurrentNext=g_InfoViewer->getEPG(g_RemoteControl->current_channel_id);
+	if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
+	{
+		time_t jetzt=time(NULL);
+		int current_epg_zeit_dauer_rest = (info_CurrentNext.current_zeit.dauer+150 - (jetzt - info_CurrentNext.current_zeit.startzeit ))/60 ;
+		if(shutdown_min == 0 && current_epg_zeit_dauer_rest > 0 && current_epg_zeit_dauer_rest < 1000)
+		{
+			shutdown_min=current_epg_zeit_dauer_rest;
+		}
+	}
 	sprintf(value,"%03d",shutdown_min);
 	inbox = new CStringInput(LOCALE_SLEEPTIMERBOX_TITLE, value, 3, LOCALE_SLEEPTIMERBOX_HINT1, LOCALE_SLEEPTIMERBOX_HINT2, "0123456789 ");
 	inbox->exec (NULL, "");
