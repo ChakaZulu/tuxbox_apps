@@ -73,10 +73,10 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 	}
    
 	CTimerdClient * timerdclient = new CTimerdClient;
-	bool setflag=false;
 	shutdown_min = timerdclient->getSleepTimerRemaining();  // remaining shutdown time?
 //	if(shutdown_min == 0)		// no timer set
 //		shutdown_min = 10;		// set to 10 min default
+	sprintf(value,"%03d",shutdown_min);
 	CSectionsdClient::CurrentNextInfo info_CurrentNext=g_InfoViewer->getEPG(g_RemoteControl->current_channel_id);
 	if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 	{
@@ -84,20 +84,17 @@ int CSleepTimerWidget::exec(CMenuTarget* parent, const std::string &)
 		int current_epg_zeit_dauer_rest = (info_CurrentNext.current_zeit.dauer+150 - (jetzt - info_CurrentNext.current_zeit.startzeit ))/60 ;
 		if(shutdown_min == 0 && current_epg_zeit_dauer_rest > 0 && current_epg_zeit_dauer_rest < 1000)
 		{
-			shutdown_min=current_epg_zeit_dauer_rest;
-			setflag=true;
+			sprintf(value,"%03d",current_epg_zeit_dauer_rest);
 		}
 	}
-	sprintf(value,"%03d",shutdown_min);
 	inbox = new CStringInput(LOCALE_SLEEPTIMERBOX_TITLE, value, 3, LOCALE_SLEEPTIMERBOX_HINT1, LOCALE_SLEEPTIMERBOX_HINT2, "0123456789 ");
 	inbox->exec (NULL, "");
 	inbox->hide ();
 
 	delete inbox;
 
-	if(shutdown_min!=atoi(value) || setflag )
+	if(shutdown_min!=atoi(value))
 	{
-		setflag=false;
 		shutdown_min = atoi (value);
 		printf("sleeptimer min: %d\n",shutdown_min);
 		if (shutdown_min == 0)			// if set to zero remove existing sleeptimer
