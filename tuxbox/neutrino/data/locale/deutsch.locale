@@ -33,7 +33,7 @@ EPGPlus.page_up Seite vor
 EPGPlus.prev_bouquet Bouquet zurück
 EPGPlus.record Aufnahme
 EPGPlus.refresh_epg Aktualisieren
-EPGPlus.remind Vormerken
+EPGPlus.remind Umschalten
 EPGPlus.reset_settings Einstellungen zurücksetzen
 EPGPlus.save_settings Einstellungen speichern
 EPGPlus.scroll_mode Scroll Mode
@@ -51,12 +51,12 @@ GENRE.ARTS.0 Kunst / Kultur
 GENRE.ARTS.1 Darstellende Künste
 GENRE.ARTS.10 Kunst-/Kultur-Magazin
 GENRE.ARTS.11 Mode
-GENRE.ARTS.2 fine arts
+GENRE.ARTS.2 bildende Kunst
 GENRE.ARTS.3 Religion
 GENRE.ARTS.4 Volkskunst
 GENRE.ARTS.5 Literatur
 GENRE.ARTS.6 Film/Kino
-GENRE.ARTS.7 experimental film/video
+GENRE.ARTS.7 Experimentalfilm
 GENRE.ARTS.8 Rundfunk/Presse
 GENRE.ARTS.9 Neue Medien
 GENRE.CHILDRENs_PROGRAMMES.0 Kinder / Jugendprogramm
@@ -84,7 +84,7 @@ GENRE.MOVIE.7 serious/classical/religious/historical movie/drama
 GENRE.MOVIE.8 adult movie/Drama
 GENRE.MUSIC_DANCE.0 Musik/Ballet/Tanz
 GENRE.MUSIC_DANCE.1 Rock/Pop
-GENRE.MUSIC_DANCE.2 serious music/Klassik
+GENRE.MUSIC_DANCE.2 Ernste Musik/Klassik
 GENRE.MUSIC_DANCE.3 Volksmusik
 GENRE.MUSIC_DANCE.4 Jazz
 GENRE.MUSIC_DANCE.5 Musical/Oper
@@ -772,8 +772,8 @@ settings.pos_bottom_right unten rechts
 settings.pos_top_left oben links
 settings.pos_top_right oben rechts
 shutdown.recoding_query Aufnahme läuft. Trotzdem runterfahren?
-shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen?
-sleeptimerbox.announce Sleeptimer in 1 min
+shutdowntimer.announce Die Box wird in 1 Min. runtergefahren.\nShutdown abbrechen?
+sleeptimerbox.announce Sleeptimer in 1 Min.
 sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)
 sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
 sleeptimerbox.title Sleeptimer
