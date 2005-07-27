@@ -614,7 +614,6 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 }
 
 //------------------------------------------------------------------------
-#include  <iostream>
 
 bool CFileBrowser::exec(const char * const dirname)
 {
