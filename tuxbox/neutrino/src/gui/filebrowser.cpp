@@ -614,6 +614,7 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 }
 
 //------------------------------------------------------------------------
+#include  <iostream>
 
 bool CFileBrowser::exec(const char * const dirname)
 {
@@ -763,21 +764,29 @@ bool CFileBrowser::exec(const char * const dirname)
 		}
 		else if ( msg == CRCInput::RC_spkr )
 		{
-			std::string msg = g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1);
-			msg += ' ';
-			if (filelist[selected].getFileName().length() > 10)
+			if(".." !=(filelist[selected].getFileName().substr(0,2))) // das darf man nicht löschen
 			{
-				msg += filelist[selected].getFileName().substr(0,10);
-				msg += "...";
-			}
-			else
-				msg += filelist[selected].getFileName();
-			msg += ' ';
-			msg += g_Locale->getText(LOCALE_FILEBROWSER_DODELETE2);
-			if (ShowMsgUTF(LOCALE_FILEBROWSER_DELETE, msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
-			{
-				recursiveDelete(filelist[selected].Name.c_str());
-				ChangeDir(Path);
+				std::string msg = g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1);
+				msg += ' ';
+				if (filelist[selected].getFileName().length() > 10)
+				{
+					msg += filelist[selected].getFileName().substr(0,10);
+					msg += "...";
+				}
+				else
+					msg += filelist[selected].getFileName();
+				msg += ' ';
+				msg += g_Locale->getText(LOCALE_FILEBROWSER_DODELETE2);
+				if (ShowMsgUTF(LOCALE_FILEBROWSER_DELETE, msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
+				{
+					recursiveDelete(filelist[selected].Name.c_str());
+					if(".ts" ==(filelist[selected].getFileName().substr(filelist[selected].getFileName().length()-3,filelist[selected].getFileName().length())))//if bla.ts
+					{
+						recursiveDelete((filelist[selected].Name.substr(0,filelist[selected].Name.length()-7)+".xml").c_str());//remove bla.xml von bla.ts
+					}
+					ChangeDir(Path);
+
+				}
 			}
 		}
 		else if (msg == CRCInput::RC_ok)
