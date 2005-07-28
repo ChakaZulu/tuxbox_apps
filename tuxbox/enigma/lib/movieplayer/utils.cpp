@@ -15,52 +15,26 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
-#define PROG_STREAM_MAP  0xBC
-#ifndef PRIVATE_STREAM1
 #define PRIVATE_STREAM1  0xBD
-#endif
-#define PADDING_STREAM   0xBE
-#ifndef PRIVATE_STREAM2
 #define PRIVATE_STREAM2  0xBF
-#endif
+
 #define AUDIO_STREAM_S   0xC0
 #define AUDIO_STREAM_E   0xDF
+
 #define VIDEO_STREAM_S   0xE0
 #define VIDEO_STREAM_E   0xEF
-#define ECM_STREAM       0xF0
-#define EMM_STREAM       0xF1
-#define DSM_CC_STREAM    0xF2
-#define ISO13522_STREAM  0xF3
-#define PROG_STREAM_DIR  0xFF
 
-#define TS_SIZE        188
-#define TRANS_ERROR    0x80
-#define PAY_START      0x40
-#define TRANS_PRIO     0x20
-#define PID_MASK_HI    0x1F
+#define TS_SIZE          188
+#define IN_SIZE          TS_SIZE*10
 
-#define IN_SIZE TS_SIZE*10
-#define IPACKS 2048
-
-
-uint16_t get_pid(uint8_t *pid)
-{
-	uint16_t pp = 0;
-
-	pp = (pid[0] & PID_MASK_HI)<<8;
-	pp |= pid[1];
-
-	return pp;
-}
-
-int tcpRequest(int fd, char *ioBuf, int maxLen)
+int tcpRequest(int fd, char *ioBuffer, int maxLength)
 {
 	int r;
 
-	write(fd, ioBuf, strlen(ioBuf));
-	r = read(fd, ioBuf, maxLen);
+	write(fd, ioBuffer, strlen(ioBuffer));
+	r = read(fd, ioBuffer, maxLength);
 	if (r >= 0) 
-		ioBuf[r] = '\0';
+		ioBuffer[r] = '\0';
 
 	return r;
 }
@@ -106,93 +80,70 @@ CURLcode sendGetRequest (const eString& url, eString& response, bool useAuthoriz
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
 	curl_easy_setopt (curl, CURLOPT_FILE, (void *)&response);
 	if (useAuthorization)
-		curl_easy_setopt (curl, CURLOPT_USERPWD, "admin:admin");	/* !!! make me customizable */
+		curl_easy_setopt (curl, CURLOPT_USERPWD, "admin:admin");
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
 	httpres = curl_easy_perform (curl);
-	eDebug("[MOVIEPLAYER] HTTP result: %d", httpres);
+	eDebug("[MOVIEPLAYER] HTTP result: %d - %s", httpres, response.c_str());
 	curl_easy_cleanup (curl);
 	return httpres;
 }
 
-
-void find_avpids(int fd, uint16_t *vpid, uint16_t *apid)
+#define PID_MASK_HI 0x1F
+uint16_t get_pid(uint8_t *pid)
 {
-	uint8_t buf[IN_SIZE];
-	int count;
-	int i;
-	int off = 0;
-	
-	*apid = 0; *vpid = 0;
-        while (*apid == 0 || *vpid == 0)
-	{
-		count = read(fd, buf, IN_SIZE);
-		if (count <= 0) 
-			return;
-		for (i = 0; i < count-7; i++)
-		{
-			if (buf[i] == 0x47)
-			{
-				if (buf[i + 1] & 0x40)
-				{
-					off = 0;
-					if (buf[3 + i] & 0x20)//adapt field?
-						off = buf[4 + i] + 1;
-					switch(buf[i + 7 + off])
-					{
-						case VIDEO_STREAM_S ... VIDEO_STREAM_E:
-							*vpid = get_pid(buf + i + 1);
-							break;
-						case PRIVATE_STREAM1:
-						case AUDIO_STREAM_S ... AUDIO_STREAM_E:
-							*apid = get_pid(buf + i + 1);
-							break;
-					}
-				}
-				i += 187;
-			}
-			if (*apid != 0 && *vpid != 0) 
-				break;
-		}
-	}
+	uint16_t pp = 0;
+
+	pp = (pid[0] & PID_MASK_HI)<<8;
+	pp |= pid[1];
+
+	return pp;
 }
 
-int is_audio_ac3(int fd)
+void find_avpids(int fd, int *vpid, int *apid, int *ac3)
 {
-	uint8_t buf[IN_SIZE];
+	unsigned char buffer[IN_SIZE];
 	int count;
 	int i;
-	int off = 0;
-	int is_ac3 = -1;
-
-	while (is_ac3 == -1)
+	int offset = 0;
+	
+	*apid = -1; *vpid = -1; *ac3 = -1;
+        while (*apid == -1 || *vpid == -1)
 	{
-		count = read(fd, buf, IN_SIZE);
-		if (count <= 0)
-			break;
-		for (i = 0; i < count - 7; i++)
+		count = read(fd, buffer, IN_SIZE);
+		if (count <= 0) 
+			return;
+		for (i = 0; i < (count - 7) && (*apid == -1 || *vpid == -1); i++)
 		{
-			if (buf[i] == 0x47)
+			if (buffer[i] == 0x47)
 			{
-				if (buf[i + 1] & 0x40)
+				if (buffer[i + 1] & 0x40)
 				{
-					off = 0;
-					if ( buf[3 + i] & 0x20)//adapt field?
-						off = buf[4 + i] + 1;
-					switch (buf[i + 7 + off])
+					offset = 0;
+					if (buffer[3 + i] & 0x20) //adapt field?
+						offset = buffer[4 + i] + 1;
+					switch (buffer[i + 7 + offset])
 					{
-						case PRIVATE_STREAM1:
-							is_ac3 = 1;
+						case VIDEO_STREAM_S ... VIDEO_STREAM_E:
+						{
+							*vpid = get_pid(buffer + i + 1);
 							break;
+						}
 						case AUDIO_STREAM_S ... AUDIO_STREAM_E:
-							is_ac3 = 0;
+						{
+							*apid = get_pid(buffer + i + 1);
+							*ac3 = 0;
 							break;
+						}
+						case PRIVATE_STREAM1:
+						{
+							*apid = get_pid(buffer + i + 1);
+							*ac3 = 1;
+							break;
+						}
 					}
 				}
 				i += 187;
 			}
-			if (is_ac3 >= 0) 
-				break;
 		}
 	}
-	return is_ac3;
 }

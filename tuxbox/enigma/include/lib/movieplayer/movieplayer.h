@@ -31,15 +31,17 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	int transcodeVideo;
 	void gotMessage(const Message &message);
 	void thread();
-	int waitUntilVLCStartsTalking();
+	int VLCStartsTalking();
 	eString sout(eString mrl);
 	int sendRequest2VLC(eString command);
-	void playStream();
+	void playStream(eString mrl);
 public:
 	eMoviePlayer();
 	~eMoviePlayer();
 	void start(eString mrl);
 	void stop();
+	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& forcetranscodevideo, int& audiodatarate, int& forcetranscodeaudio, int& forceaviac3);
+	void writeStreamingServerSettings(eString ip, int port, eString dvddrive, int videodatarate, int resolution, int mpegcodec, int forcetranscodevideo, int audiodatarate, int forcetranscodeaudio, int forceaviac3);
 	static eMoviePlayer *getInstance() {return (instance) ? instance : instance = new eMoviePlayer();}
 };
 

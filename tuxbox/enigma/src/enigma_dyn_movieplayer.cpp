@@ -42,11 +42,65 @@
 
 using namespace std;
 
+eString streamingServerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString ip;
+	int port;
+	eString dvddrive;
+	int videodatarate, resolution, mpegcodec, forcetranscodevideo, audiodatarate, forcetranscodeaudio, forceaviac3;
+	eString result;
+	
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	eMoviePlayer::getInstance()->readStreamingServerSettings(ip, port, dvddrive, videodatarate, resolution, mpegcodec, forcetranscodevideo, audiodatarate, forcetranscodeaudio, forceaviac3);
+	
+	result = readFile(TEMPLATE_DIR + "streamingServerSettings.tmp");
+	result.strReplace("#IP#", ip);
+	result.strReplace("#PORT#", eString().sprintf("%d", port));
+	result.strReplace("#DVDDRIVE#", dvddrive);
+	result.strReplace("#VIDEODATARATE#", eString().sprintf("%d", videodatarate));
+	result.strReplace("#RES0#", (resolution == 0) ? "selected" : "");
+	result.strReplace("#RES1#", (resolution == 1) ? "selected" : "");
+	result.strReplace("#RES2#", (resolution == 2) ? "selected" : "");
+	result.strReplace("#RES3#", (resolution == 3) ? "selected" : "");
+	result.strReplace("#CODEC1#", (mpegcodec == 1) ? "selected" : "");
+	result.strReplace("#CODEC2#", (mpegcodec == 2) ? "selected" : "");
+	result.strReplace("#FORCETRANSCODEVIDEO#", (forcetranscodevideo == 1) ? "checked" : "");
+	result.strReplace("#AUDIODATARATE#", eString().sprintf("%d", audiodatarate));
+	result.strReplace("#FORCETRANSCODEAUDIO#", (forcetranscodeaudio == 1) ? "checked" : "");
+	result.strReplace("#FORCEAVIAC3#", (forceaviac3 == 1) ? "checked" : "");
+			
+	return result;
+}
+
+eString setStreamingServerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString ip = opt["ip"];
+	int port = atoi(opt["port"].c_str());
+	eString dvddrive = opt["dvddrive"];
+	int videodatarate = atoi(opt["videodatarate"].c_str());
+	int resolution = atoi(opt["resolution"].c_str());
+	int mpegcodec = atoi(opt["mpegcodec"].c_str());
+	int forcetranscodevideo = (opt["forcetranscodevideo"] == "on") ? 1 : 0;
+	int audiodatarate = atoi(opt["audiodatarate"].c_str());
+	int forcetranscodeaudio = (opt["forcetranscodeaudio"] == "on") ? 1 : 0;
+	int forceaviac3 = (opt["forceaviac3"] == "on") ? 1 : 0;
+	
+	eMoviePlayer::getInstance()->writeStreamingServerSettings(ip, port, dvddrive, videodatarate, resolution, mpegcodec, forcetranscodevideo, audiodatarate, forcetranscodeaudio, forceaviac3);
+	
+	return closeWindow(content, "", 500);
+}
+
 eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eMoviePlayer *moviePlayer = new eMoviePlayer();
-		
+	eMoviePlayer *moviePlayer = eMoviePlayer::getInstance();
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	content->local_header["Content-Type"] = "video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache";
 	
 	eString command = opt["command"];
 	if (command == "start")
@@ -59,10 +113,13 @@ eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnect
 		delete moviePlayer;
 	}
 	
-	return "done";
+	return ""; // empty playlist entry
 }
 
 void ezapMoviePlayerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.pls", movieplayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.m3u", movieplayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/streamingServerSettings", streamingServerSettings, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServerSettings", setStreamingServerSettings, lockWeb);
 }
