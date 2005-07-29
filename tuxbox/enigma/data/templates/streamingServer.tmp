@@ -1,6 +1,7 @@
 <html>
 <head>
-	<script language="JavaScript">
+	<script language="javascript" type="text/javascript" src="window.js"></script>
+	<script language="javascript">
 	function playFile()
 	{
 		document.location =  "/cgi-bin/movieplayer.pls?mrl=" + document.form1.mrl.value;
@@ -12,6 +13,10 @@
 	function playVCD()
 	{
 		document.location = "/cgi-bin/movieplayer.pls?mrl=vcd:" + document.form1.drive.value + ":@1:1";
+	}
+	function settings()
+	{
+		NewWindow('/cgi-bin/streamingServerSettings.tmp', 'streamingserver', '780', '500', 'yes');
 	}
 	</script>
 </head>
@@ -28,6 +33,8 @@
 		<input type="button" style="width: 100; height: 22" onClick="playVCD()" value="(S)VCD">
 		&nbsp;Drive:&nbsp;
 		<input type="text" name="drive" value="#DRIVE#" size="1" readonly>
+		<br><br><br>
+		<input type="button" style="width: 100; height: 22" onClick="settings()" value="Settings">
 	</form>
 </body>
 </html> 

@@ -41,7 +41,7 @@ eMoviePlayer::eMoviePlayer():messages(this, 1)
 	tsBuffer = new eIOBuffer(BLOCKSIZE);
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
 	eDebug("[MOVIEPLAYER] starting...");
-	serverPort = 0;
+	serverPort = 8080;
 	eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
 	char *serverip;
 	if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
@@ -73,18 +73,19 @@ void eMoviePlayer::thread()
 	exec();
 }
 
-void eMoviePlayer::readStreamingServerSettings(eString& serverIP, int& serverPort, eString& DVDDrive, int& settingVideoRate, int& settingResolution, int& settingTranscodeVideoCodec, int& settingForceTranscodeVideo, int& settingAudioRate, int& settingForceTranscodeAudio, int& settingForceAviRawAudio)
+void eMoviePlayer::readStreamingServerSettings(eString& serverIP, int& serverPort, eString& 
+DVDDrive, int& settingVideoRate, int& settingResolution, int& settingTranscodeVideoCodec, int& settingForceTranscodeVideo, int& settingAudioRate, int& settingForceTranscodeAudio, int& settingForceAviRawAudio)
 {
 	char *serverip;
 	if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
 		serverip = strdup("");
 	serverIP = eString(serverip);
 	free(serverip);
-	serverPort = 0;
+	serverPort = 8080;
 	eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
 	char *dvddrive;
 	if (eConfig::getInstance()->getKey("/movieplayer/dvddrive", dvddrive))
-		dvddrive = strdup("");
+		dvddrive = strdup("D");
 	DVDDrive = eString(dvddrive);
 	free(dvddrive);
 	settingResolution = 0;
@@ -119,7 +120,7 @@ void eMoviePlayer::writeStreamingServerSettings(eString serverIP, int serverPort
 
 void eMoviePlayer::start(eString mrl)
 {
-	eDebug("[MOVIEPLAYER] issuing start...");
+	eDebug("[MOVIEPLAYER] issueing start...");
 	messages.send(Message(Message::start, mrl));
 }
 
@@ -285,6 +286,7 @@ eString eMoviePlayer::sout(eString mrl)
 {
 	eString soutURL = "?sout=#";
 	eString serverIP, DVDDrive;
+	int transcodeAudio = 0, transcodeVideo = 0;
 	int serverPort;
 	int settingVideoRate, settingResolution, settingTranscodeVideoCodec, settingForceTranscodeVideo, settingAudioRate, settingForceTranscodeAudio, settingForceAviRawAudio;
 	

@@ -27,8 +27,6 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	static eMoviePlayer *instance;
 	int serverPort;
 	eString serverIP;
-	int transcodeAudio;
-	int transcodeVideo;
 	void gotMessage(const Message &message);
 	void thread();
 	int VLCStartsTalking();

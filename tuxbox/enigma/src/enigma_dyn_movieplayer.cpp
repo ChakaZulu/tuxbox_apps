@@ -94,6 +94,21 @@ eString setStreamingServerSettings(eString request, eString dirpath, eString opt
 	return closeWindow(content, "", 500);
 }
 
+eString streamingServer(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	eString result = readFile(TEMPLATE_DIR + "streamingServer.tmp");
+	
+	char *drive;
+	if (eConfig::getInstance()->getKey("/movieplayer/dvddrive", drive))
+		drive = strdup("D");
+	result.strReplace("#DRIVE#", eString(drive));
+	free(drive);
+		
+	return result;
+}
+
 eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eMoviePlayer *moviePlayer = eMoviePlayer::getInstance();
@@ -120,6 +135,7 @@ void ezapMoviePlayerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockW
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.pls", movieplayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.m3u", movieplayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/streamingServer", streamingServer, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streamingServerSettings", streamingServerSettings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServerSettings", setStreamingServerSettings, lockWeb);
 }
