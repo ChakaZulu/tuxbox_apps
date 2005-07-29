@@ -4,7 +4,7 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	index_small.tmp index_big.tmp eit_small.tmp addTimerEvent.tmp wap.tmp wapepg.tmp wapzap.tmp \
 	wapEPGDetails.tmp wapTimerList.tmp queryEditTimer.tmp queryDeleteTimer.tmp deleteTimerComplete.tmp \
 	mountPoint.tmp mountPoints.tmp mountPointWindow.tmp subChannelSelection.tmp mepg_small.tmp \
-	pdaResponse.tmp flashMgr.tmp configSettings.tmp remoteControl.tmp \
+	pdaResponse.tmp flashMgr.tmp configSettings.tmp remoteControl.tmp streamingServer.tmp \
 	pdaRemoteControl.tmp sat.tmp satFinder.tmp remoteControlDbox2.tmp leftnavi.tmp rotor.tmp \
 	root.tmp flashMgrReadMenu.tmp flashMgrWriteMenu.tmp mtd.tmp flashMgrProgressData.tmp flashMgrProgress.tmp \
 	pdaRemoteControlDbox2.tmp configSwapFileMenu.tmp movieSources.tmp \
