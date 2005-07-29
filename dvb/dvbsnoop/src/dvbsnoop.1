@@ -27,8 +27,9 @@ Some options are specific for the selected modes. You may try different combinat
 A short FAQ for common questions and example decoding output can be found at http://dvbsnoop.sourceforge.net.
 
 .SH "Basic Decoding Selection Command Line Options"
-.IP \-s \[ts|pes|sec|pidscan|bandwidth|signal|feinfo\]
-Basic snoop mode selection.
+.TP
+.B \-s [ts|pes|sec|pidscan|bandwidth|signal|feinfo]
+ Basic snoop mode selection.
    ts       \= transport stream mode
    pes      \= packetized elementary stream mode,
                e.g. teletext, audio, video, data
@@ -41,7 +42,6 @@ Basic snoop mode selection.
    signal   \= display tuner signal reception info.
    feinfo   \= display tuner data (frontend info).
    
-
 The modes 'sec' and "pes" require the selection of a PID.
 The mode 'ts' requires either a PID specified or the option \-tsraw.
 
@@ -49,67 +49,84 @@ A PID can be specified using octal, decimal or hexadecimal values.
    Examples:  octal: 021, decimal: 17, hexadecimal: 0x11
 
 .SH "General Command Line Options"
-.IP \-help
+.TP 
+.B \-help
 Print help text with command line options.
-.IP \-hideproginfo
+.TP 
+.B \-hideproginfo
 Do not print dvbsnoop header (version, etc.).
 
 
 .SH "General Decoding Output Command Line Options"
-.IP \-pd <\mode>
+.TP
+.B \-pd \<mode\>
 Specify print decoding verbose mode. Specify 0 for no output.
 9 will be very verbose. Default is 6.
-.IP \-npd
+.TP
+.B \-npd
 Same as \-pd 0.
 
-.IP \-ph <mode>
+.TP
+.B \-ph \<mode\>
 Specify print hex putput verbose mode:
    0\=no hexdump output, 1\=hex output, 2\=hex line,
    3\=ascii line, 4\=alternate hex output. (default is 4) 
-.IP \-hexdumpbuffer
-.IP \-nohexdumpbuffer
+.TP
+.B \-hexdumpbuffer
+.TP
+.B \-nohexdumpbuffer
 Switch on/off hexdump of stream input buffer. 
 May be used to enhance \-ph option. (e.g. \-ph 4 \-nohexdumpbuffer)
-.IP \-nph
+.TP
+.B \-nph
 Obsolete, same as \-nohexdumpbuffer.
 
-.IP \-t<mode>
+.TP
+.B \-t\<mode\>
 Timestamp output mode:
    \-tf \= full timestamp
    \-td \= delta timestamp mode,
    \-tn \= no time stamp.
 
-.IP \-b
+.TP
+.B \-b
 Binary output of packets (disables other output).
 Use this option to store raw data in file or chain data to another program.
    E.g.:  dvbsnoop \-s ts 0x00 \-b > file
-          dvbsnoop \-s pes 0x3FF \-b \| ./myprogram \-option 
+          dvbsnoop \-s pes 0x3FF \-b 
+| ./myprogram 
+
 There might be a file limit on your system (mostly 2 GB) when writing files using '>'.
 
 
 .SH "Device Selection Command Line Options"
 Dvbsnoop uses default devices, defined by the DVB API.
 On some platforms or if using multiple dvb cards, you may want to override default settings, e.g. to select a different tuner. 
+.TP
+.B \-demux \<device\>
+Specify \<device\> for demux.
+If not specified, dvbsnoop uses the device specified by the linux  dvb\-api.
+.TP
+.B \-dvr \<device\>
+Specify \<device\> for dvr.
+If not specified, dvbsnoop uses the device specified by the linux  dvb\-api.
+.TP
+.B \-frontend \<device\>
+Specify \<device\> for frontend.
+If not specified, dvbsnoop uses the device specified by the linux  dvb\-api.
 
-.IP \-demux <device>
-Specify <device> for demux.
-If not specified, dvbsnoop uses the device specified by the linux  dvb\-api.
-.IP \-dvr <device>
-Specify <device> for dvr.
-If not specified, dvbsnoop uses the device specified by the linux  dvb\-api.
-.IP \-frontend <device>
-Specify <device> for frontend.
-If not specified, dvbsnoop uses the device specified by the linux  dvb\-api.
-
-.IP \-buffersize <kb>
+.TP
+.B \-buffersize \<kb\>
 Set demux read buffersize in KBytes.
 Default is 0 (use internal default value).
 
-.IP \-n <value>
-Stop after reading <value> packets. Use this to limit the read process.
+.TP
+.B \-n \<value\>
+Stop after reading \<value\> packets. Use this to limit the read process.
 Default is 0 (no limit).
 
-.IP \-if \<file\>
+.TP
+.B \-if \<file\>
 Read binary stream data from file instead of the demux device.
 Depending on the decoding mode this might be transport stream, packetized elemtary stream or sections.
 Ensure packet sync by using \-sync option.
@@ -117,18 +134,19 @@ Ensure packet sync by using \-sync option.
 
 .SH "SECTION Mode Specific Command Line Options"
 The following command line options are special to the 'SECTION' decoding mode:
-
-.IP \-timeout <ms>
+.TP
+.B \-timeout \<ms\>
 section read timeout in ms. Default is 0 (no timeout).
-
-.IP \-f <filter>
+.TP
+.B \-f \<filter\>
 Filter value for filtering section data e.g. table id's.
 Value may be decimal (49), octal (037) or hexadecimal (0x4F).
 You may use multibyte filters like: 0x4E.01.20.FF
 The filter comprises e.g. 16 bytes covering byte 0 and byte 3..17 in a section,
 thus excluding bytes 1 and 2 (the length field of a section).
 To check the filtervalues use \-pd 9.
-.IP \-m <mask>
+.TP
+.B \-m \<mask\>
 Mask value to use for filters.
 Value may be decimal (49), octal (037) or hexadecimal (0x4F).
 You may use multibyte filters like: 0xFF.F0.FE.FF
@@ -136,55 +154,63 @@ The filter comprises e.g. 16 bytes covering byte 0 and byte 3..17 in a section,
 thus excluding bytes 1 and 2 (the length field of a section).
 To check the filtervalues use \-pd 9.
 
-.IP \-crc
+.TP
+.B \-crc
 Do CRC checking, when reading section data. 
 Default is off. This is only supported, if your DVB hardware/firmware supports CRC checking.
-.IP \-nocrc
+.TP
+.B \-nocrc
 Don't do CRC checking, when reading section data. 
 Some private sections do have proper CRC's! So default is to have CRC checking switched off.
 
-.IP \-spiderpid
+.TP
+.B \-spiderpid
 Snoop referenced section PIDs.
 This option recursivly reads all PIDs referenced by a section. This option also sets number of packets to be read to 1 (sets \-n 1).
-
-.IP \-privateprovider <id>
-Set provider <id> string for decoding special private tables and descriptors. Use \-help to display provider currently supported. If omitted, private data will be displayed according DVB standards description.
+.TP
+.B \-privateprovider \<id\>
+Set provider \<id\> string for decoding special private tables and descriptors. Use \-help to display provider currently supported. If omitted, private data will be displayed according DVB standards description.
 
 .SH "Transport Stream Mode Specific Command Line Options"
 The following command line options are special to the 'Transport Stream'  decoding mode:
-
-.IP \-sync
+.TP
+.B \-sync
 Do simple packet header sync when reading transport streams.
 This option enforces sync byte aligning (default) ans is normally
 done by receiption hardware/firmware.
-.IP \-nosync
+.TP
+.B \-nosync
 Switch off packet header sync when reading transport streams.
 Switching of packet sync may result in odd decoding results or
 even dvbsnoop crashes. This may not work on some hardware.
 
-.IP \-tssubdecode
+.TP
+.B \-tssubdecode
 Sub\-decode SECTION data or PES data from transport stream decoding. This reads transport stream packets and tries to decode its content.
 
-.IP \-tsraw
+.TP
+.B \-tsraw
 Read full transport stream (all pids).
 Your hardware/firmware has to support this mode.
 
 .SH "PES Mode Specific Command Line Options"
 The following command line options are special to the 'PES' (packetized elementary stream) decoding mode:
-
-.IP \-sync
+.TP
+.B \-sync
 Do simple packet header sync when reading PES data.
 This option enforces sync byte aligning (default) ans is normally
 done by receiption hardware/firmware.
-.IP \-nosync
+.TP
+.B \-nosync
 Switch off packet header sync when reading PES data.
 Switching of packet sync may result in odd decoding results or
 even dvbsnoop crashes. This may not work on some hardware.
 
 .SH "PID Scan Mode Specific Command Line Options"
-The following command line options are special to the 'PID Scan' discovery mode:
 
-.IP \-maxdmx <n>
+The following command line options are special to the 'PID Scan' discovery mode:
+.TP
+.B \-maxdmx \<n\>
 Set maximum use of DMX filters.
 Default is 0 (use all possible filters).
 
@@ -270,6 +296,7 @@ Please check http://dvbsnoop.sourceforge.net for bug reports.
 
 .SH "Acknowledgments"
 DVBSNOOP was written by Rainer Scherg (rasc).
+.br
 Copyright (c) 2001-2005  Rainer Scherg
 
 Additional patches and bugfixes/\-reports were provided by members of the tuxbox project \- bringing digital TV to linux based set top boxes (e.g. "dbox2" digital tv receiver) and also by users of dvbsnoop (see the ChangeLog file for credits).
