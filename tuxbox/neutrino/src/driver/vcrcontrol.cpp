@@ -64,6 +64,12 @@
 
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" int  tuxtxt_init();
+extern "C" void tuxtxt_start(int tpid);
+extern "C" int  tuxtxt_stop();
+extern "C" void tuxtxt_close();
+#endif
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -224,6 +230,15 @@ void CVCRControl::CFileAndServerDevice::RestoreNeutrino(void)
 		//Wenn vorher und jetzt standby, dann die zapit wieder auf sb schalten
 		g_Zapit->setStandby(true);
 	}*/
+#ifndef TUXTXT_CFG_STANDALONE
+	if(g_settings.tuxtxt_cache)
+	{
+		int vtpid=g_RemoteControl->current_PIDs.PIDs.vtxtpid;
+		tuxtxt_init();
+		if(vtpid)
+			tuxtxt_start(vtpid);
+	}
+#endif
 }
 
 void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id channel_id, const int mode)
@@ -254,7 +269,13 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 			g_Zapit->muteAudio(true);
 		}
 	}
-
+#ifndef TUXTXT_CFG_STANDALONE
+	if(g_settings.tuxtxt_cache)
+	{
+		tuxtxt_stop();
+		tuxtxt_close();
+	}
+#endif
 	if(StopPlayBack && g_Zapit->isPlayBackActive())	// wenn playback gestoppt werden soll und noch läuft
 		g_Zapit->stopPlayBack();					// dann playback stoppen
 

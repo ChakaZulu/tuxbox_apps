@@ -61,7 +61,9 @@
 extern CBouquetList * bouquetList;       /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 int info_height = 0;
-
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" int  tuxtxt_stop();
+#endif
 
 CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const t_satellite_position _satellitePosition, const t_channel_id ids)
 {
@@ -542,6 +544,12 @@ void CChannelList::zapTo(int pos, bool forceStoreToLastChannels)
 
 	if ( pos!=(int)tuned )
 	{
+#ifndef TUXTXT_CFG_STANDALONE
+		if(g_settings.tuxtxt_cache)
+		{
+			tuxtxt_stop();
+		}
+#endif
 		tuned = pos;
 		g_RemoteControl->zapTo_ChannelID(chan->channel_id, chan->name, !chan->bAlwaysLocked); // UTF-8
 	}
