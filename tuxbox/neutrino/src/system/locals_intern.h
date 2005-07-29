@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.52 2005/07/19 10:46:20 metallica Exp $
+ * $Id: locals_intern.h,v 1.53 2005/07/29 18:47:41 rasc Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -278,6 +278,12 @@ const char * locale_real_names[] =
 	"date.Thu",
 	"date.Tue",
 	"date.Wed",
+	"epgextended.actors",
+	"epgextended.director",
+	"epgextended.guests",
+	"epgextended.original_title",
+	"epgextended.presenter",
+	"epgextended.year_of_production",
 	"epglist.head",
 	"epglist.noevents",
 	"epgviewer.More_Screenings",

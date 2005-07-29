@@ -47,6 +47,62 @@
 #include <driver/encoding.h>
 #include <driver/screen_max.h>
 
+int findItem(std::string strItem, std::vector<std::string> & vecItems) {
+	for (std::vector<std::string>::size_type nCnt = 0; nCnt < vecItems.size(); nCnt++) {
+		std::string strThisItem = vecItems[nCnt];
+		if (strItem == strThisItem) {
+			return nCnt;
+		}
+	}
+	return -1;
+}
+
+// 21.07.2005 - rainerk
+// Merge multiple extended event strings into one description and localize the label
+// Examples:
+//   Actor1-ActorX      -> Darsteller 1, 2, 3
+//   Year of production -> Produktionsjahr
+//   Director           -> Regisseur
+//   Guests             -> Gäste
+void reformatExtendedEvents(std::string strItem, std::string strLabel, bool bUseRange, CEPGData & epgdata) {
+	std::vector<std::string> & vecDescriptions = epgdata.itemDescriptions;
+	std::vector<std::string> & vecItems = epgdata.items;
+	// Merge multiple events into 1 (Actor1-)
+	if (bUseRange) {
+		bool bHasItems = false;
+		char index[3];
+		// Maximum of 10 items should suffice
+		for (int nItem = 1; nItem < 11; nItem++) {
+			sprintf(index, "%d", nItem);
+			// Look for matching items
+			int nPos = findItem(std::string(strItem) + std::string(index), vecDescriptions);
+			if (-1 != nPos) {
+				std::string item = std::string(vecItems[nPos]);
+				vecDescriptions.erase(vecDescriptions.begin() + nPos);
+				vecItems.erase(vecItems.begin() + nPos);
+				if (false == bHasItems) {
+					// First item added, so create new label item
+					vecDescriptions.push_back(strLabel);
+					vecItems.push_back(item + ", ");
+					bHasItems = true;
+				} else {
+					vecItems.back().append(item).append(", ");
+				}
+			}
+		}
+		// Remove superfluous ", "
+		if (bHasItems) {
+			vecItems.back().resize(vecItems.back().length() - 2);
+		}
+	} else {	// Single string event (e.g. Director)
+		// Look for matching items
+		int nPos = findItem(strItem, vecDescriptions);
+		if (-1 != nPos) {
+			vecDescriptions[nPos] = strLabel;
+		}
+	}
+}
+
 CEpgData::CEpgData()
 {
 	bigFonts = false;
@@ -314,6 +370,17 @@ const neutrino_locale_t * genre_sub_classes_list[10] =
 	genre_travel_hobbies
 };
 
+bool CEpgData::hasFollowScreenings(const t_channel_id channel_id, const std::string & title) {
+	time_t curtime = time(NULL);
+	
+	for (CChannelEventList::iterator e = evtlist.begin(); e != evtlist.end(); ++e )
+	{
+		if (e->startTime > curtime && e->eventID && e->description == title)
+			return true;
+	}
+	return false;	
+}
+
 const char * GetGenre(const unsigned char contentClassification) // UTF-8
 {
 	neutrino_locale_t res;
@@ -393,8 +460,33 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 		frameBuffer->paintBackgroundBox (sx, sy- oldtoph- 1, sx+ ox, sy- toph);
 	}
 
-	if (!epgData.info1.empty())
-		processTextToArray(Latin1_to_UTF8(epgData.info1));
+	// 21.07.2005 - rainerk
+	// Only show info1 if it's not included in info2!
+	std::string strEpisode = "";	// Episode title in case info1 gets stripped
+	if (!epgData.info1.empty()) {
+		bool bHide = false;
+		if (false == epgData.info2.empty()) {
+			// Look for the first . in info1, usually this is the title of an episode.
+			std::string::size_type nPosDot = epgData.info1.find('.');
+			if (std::string::npos != nPosDot) {
+				nPosDot += 2; // Skip dot and first blank
+				if (nPosDot < epgData.info2.length()) {	// Make sure we don't overrun the buffer
+					// Check if the stuff after the dot equals the beginning of info2
+					if (0 == epgData.info2.find(epgData.info1.substr(nPosDot, epgData.info1.length() - nPosDot))) {
+						strEpisode = epgData.info1.substr(0, nPosDot) + "\n";
+						bHide = true;
+					}
+				}
+			}
+			// Compare strings normally if not positively found to be equal before			
+			if (false == bHide && false == (std::string::npos == epgData.info2.find(epgData.info1))) {
+				bHide = true;
+			}
+		}
+		if (false == bHide) {
+			processTextToArray(Latin1_to_UTF8(epgData.info1));
+		}
+	}
 
 	info1_lines = epgText.size();
 
@@ -402,7 +494,20 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	if ((epgData.info2.empty()) && (info1_lines == 0))
 		processTextToArray(g_Locale->getText(LOCALE_EPGVIEWER_NODETAILED)); // UTF-8
 	else
-		processTextToArray(Latin1_to_UTF8(epgData.info2));
+		processTextToArray(Latin1_to_UTF8(strEpisode + epgData.info2));
+
+	// 21.07.2005 - rainerk
+	// Show extended information
+	if(0 != epgData.itemDescriptions.size()) {
+		char line[256];
+		std::vector<std::string>::iterator description;
+		std::vector<std::string>::iterator item;
+		processTextToArray(""); // Add a blank line
+		for (description = epgData.itemDescriptions.begin(), item = epgData.items.begin(); description != epgData.itemDescriptions.end(); ++description, ++item) {
+			sprintf(line, "%s: %s", (*(description)).c_str(), (*(item)).c_str());
+			processTextToArray(line);
+		}
+	}
 
 	if (epgData.fsk > 0)
 	{
@@ -418,9 +523,11 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 	// -- display more screenings on the same channel
 	// -- 2002-05-03 rasc
-	processTextToArray("\n"); // UTF-8
-	processTextToArray(std::string(g_Locale->getText(LOCALE_EPGVIEWER_MORE_SCREENINGS)) + ':'); // UTF-8
-	FollowScreenings(channel_id, epgData.title);
+	if (hasFollowScreenings(channel_id, epgData.title)) {
+		processTextToArray(""); // UTF-8
+		processTextToArray(std::string(g_Locale->getText(LOCALE_EPGVIEWER_MORE_SCREENINGS)) + ':'); // UTF-8
+		FollowScreenings(channel_id, epgData.title);
+	}
 
 
 	//show the epg
@@ -670,6 +777,16 @@ void CEpgData::GetEPGData(const t_channel_id channel_id, unsigned long long id, 
 
 	if ( res )
 	{
+		// If we have items, merge and localize them (e.g. actor1, actor2, ... -> Actors)
+		if (false == epgData.itemDescriptions.empty()) {
+			reformatExtendedEvents("Year of production", g_Locale->getText(LOCALE_EPGEXTENDED_YEAR_OF_PRODUCTION), false, epgData);
+			reformatExtendedEvents("Original title", g_Locale->getText(LOCALE_EPGEXTENDED_ORIGINAL_TITLE), false, epgData);
+			reformatExtendedEvents("Director", g_Locale->getText(LOCALE_EPGEXTENDED_DIRECTOR), false, epgData);
+			reformatExtendedEvents("Actor", g_Locale->getText(LOCALE_EPGEXTENDED_ACTORS), true, epgData);
+			reformatExtendedEvents("Guests", g_Locale->getText(LOCALE_EPGEXTENDED_GUESTS), false, epgData);
+			reformatExtendedEvents("Presenter", g_Locale->getText(LOCALE_EPGEXTENDED_PRESENTER), false, epgData);
+		}
+		
 		struct tm *pStartZeit = localtime(&(epgData.epg_times).startzeit);
 		char temp[11];
 		strftime( temp, sizeof(temp), "%d.%m.%Y", pStartZeit);

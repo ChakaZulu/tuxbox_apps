@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.38 2005/02/21 15:11:24 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.39 2005/07/29 18:47:18 rasc Exp $
 
   License: GPL
 
@@ -425,6 +425,38 @@ CChannelEventList CSectionsdClient::getEventsServiceKey(const t_channel_id chann
 	return eList;
 }
 
+// 21.07.2005 - rainerk
+// Convert line-terminated extended events to vector of strings
+char * CSectionsdClient::parseExtendedEvents(char * dp, CEPGData * epgdata) {
+	char * pItemDescriptions = dp, * pItemDescriptionStart;
+	dp+=strlen(dp)+1;
+	char * pItems = dp, * pItemStart;
+	dp+=strlen(dp)+1;
+	// Clear vector since epgdata seems to be reused
+	epgdata->itemDescriptions.clear();
+	while (*pItemDescriptions) {
+		pItemDescriptionStart = pItemDescriptions;
+		while ('\n' != *pItemDescriptions) {
+			pItemDescriptions++;
+		}
+		*pItemDescriptions = 0;
+		epgdata->itemDescriptions.push_back(pItemDescriptionStart);
+		pItemDescriptions++;
+	}
+	// Clear vector since epgdata seems to be reused
+	epgdata->items.clear();
+	while (*pItems) {
+		pItemStart = pItems;
+		while ('\n' != *pItems) {
+			pItems++;
+		}
+		*pItems = 0;
+		epgdata->items.push_back(pItemStart);
+		pItems++;
+	}
+	return dp;
+}
+
 bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEPGData * epgdata)
 {
 	epgdata->title = "";
@@ -451,6 +483,9 @@ bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEP
 			dp+=strlen(dp)+1;
 			epgdata->info2 = dp;
 			dp+=strlen(dp)+1;
+			// 21.07.2005 - rainerk
+			// Convert line-terminated extended events to vector of strings
+			dp = parseExtendedEvents(dp, epgdata);
 			epgdata->contentClassification = dp;
 			dp+=strlen(dp)+1;
 			epgdata->userClassification = dp;
@@ -502,6 +537,9 @@ bool CSectionsdClient::getEPGid(const event_id_t eventid, const time_t starttime
 			dp+=strlen(dp)+1;
 			epgdata->info2 = dp;
 			dp+=strlen(dp)+1;
+			// 21.07.2005 - rainerk
+			// Convert line-terminated extended events to vector of strings
+			dp = parseExtendedEvents(dp, epgdata);
 			epgdata->contentClassification = dp;
 			dp+=strlen(dp)+1;
 			epgdata->userClassification = dp;

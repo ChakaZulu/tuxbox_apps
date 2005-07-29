@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.30 2005/02/21 15:11:24 thegoodguy Exp $
+  $Id: sectionsdclient.h,v 1.31 2005/07/29 18:47:18 rasc Exp $
 
   License: GPL
 
@@ -68,6 +68,7 @@ class CSectionsdClient : private CBasicClient
 
 	int readResponse(char* data = NULL, int size = 0);
 	bool send(const unsigned char command, const char* data = NULL, const unsigned int size = 0);
+	char * parseExtendedEvents(char * dp, CEPGData * epgdata);
 
  public:
 	enum events
@@ -190,6 +191,9 @@ class CEPGData
 	std::string                     title;
 	std::string                     info1;
 	std::string                     info2;
+	// 21.07.2005 - extended event data
+	std::vector<std::string>		itemDescriptions;
+	std::vector<std::string>		items;
 	char                            fsk;
 	std::string                     contentClassification;
 	std::string                     userClassification;

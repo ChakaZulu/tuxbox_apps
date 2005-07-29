@@ -251,6 +251,12 @@ date.Sun  Sun
 date.Thu  Thu
 date.Tue  Tue
 date.Wed  Wed
+epgextended.actors Actors
+epgextended.director Director
+epgextended.guests Guests
+epgextended.original_title Original Title
+epgextended.presenter Presenter
+epgextended.year_of_production Year of Production
 epglist.head Event-list - %s
 epglist.noevents EPG is not available...
 epgviewer.More_Screenings More Screenings on this Channel

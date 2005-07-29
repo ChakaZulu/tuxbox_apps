@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.36 2005/02/09 19:27:34 metallica Exp $
+// $Id: SIsections.cpp,v 1.37 2005/07/29 18:46:55 rasc Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -135,19 +135,32 @@ void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
   unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
   while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
     if(*items) {
-      if(*(items+1) < 0x06) // other code table
-        e.itemDescription=std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1));
-      else
-        e.itemDescription=std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items));
-//      printf("Item Description: %s\n", e.itemDescription.c_str());
+      if(*(items+1) < 0x06) { // other code table
+		  // 21.07.2005 - collect all extended events in one
+		  // string, delimit multiple entries with a newline
+		  e.itemDescription.append(std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1)));
+		  e.itemDescription.append("\n");
+	  }
+      else {
+		  // 21.07.2005 - collect all extended events in one
+		  // string, delimit multiple entries with a newline
+		  e.itemDescription.append(std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items)));
+		  e.itemDescription.append("\n");
+	  }
     }
     items+=1+*items;
     if(*items) {
-      e.item=std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items));
-//      printf("Item: %s\n", e.item.c_str());
+		// 21.07.2005 - collect all extended events in one
+		// string, delimit multiple entries with a newline
+        e.item.append(std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items)));
+        e.item.append("\n");
     }
     items+=1+*items;
   }
+//  if (0 != e.itemDescription.length()) {
+//	printf("Item Description: %s\n", e.itemDescription.c_str());
+//	printf("Item: %s\n", e.item.c_str());
+//  }
   if(*items) {
     if(*(items+1) < 0x06) // other code table
       e.extendedText+=std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1));
