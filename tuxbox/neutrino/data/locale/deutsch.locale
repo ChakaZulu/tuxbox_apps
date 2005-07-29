@@ -251,6 +251,12 @@ date.Sun  So
 date.Thu  Do
 date.Tue  Di
 date.Wed  Mi
+epgextended.actors Darsteller
+epgextended.director Regisseur
+epgextended.guests Gäste
+epgextended.original_title Originaltitel
+epgextended.presenter Moderator
+epgextended.year_of_production Produktionsjahr
 epglist.head Vorschau - %s
 epglist.noevents Keine EPG-Information verfügbar.
 epgviewer.More_Screenings Weitere Termine auf diesem Kanal
