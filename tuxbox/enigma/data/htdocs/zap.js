@@ -98,7 +98,7 @@ function loadBouquets(bouquet)
 }
 function vlcStop()
 {
-	vlccmd.location = "http://127.0.0.1:8000/?control=stop";
+	vlccmd.location = "http://127.0.0.1:8080/?control=stop";
 	vlccmd.location = "http://127.0.0.1:8080/?control=empty";
 }
 function vlcStart()
