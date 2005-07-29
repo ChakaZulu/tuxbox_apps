@@ -21,6 +21,7 @@
 #define RED "#CB0303"
 #define GREEN "#1FCB12"
 #define YELLOW "#F1EF1D"
+#define GREY "bla"
 #define LIGHTGREY "#F4F4EC"
 #define DARKGREY "#D9E0E7"
 #define LEFTNAVICOLOR ""

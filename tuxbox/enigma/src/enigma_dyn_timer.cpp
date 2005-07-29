@@ -317,9 +317,9 @@ eString getTimerList(eString format)
 	}
 	
 	// buttons
-	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()", "#FFFFFF"));
-	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()", "#FFFFFF"));
-	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()", "#FFFFFF"));
+	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BACKGREY, "javascript:cleanupTimerList()", "#000000"));
+	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", BACKGREY, "javascript:clearTimerList()", "#000000"));
+	result.strReplace("#BUTTONADD#", button(100, "Add", BACKGREY, "javascript:showAddTimerEventWindow()", "#000000"));
 
 	return result;
 }

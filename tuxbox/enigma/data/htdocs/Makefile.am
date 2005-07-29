@@ -8,7 +8,7 @@ EXTRA_DIST = \
 	mepg_grad.png edit.gif timer.js window.js topbalk2.png topbalk3.png \
 	topbalk4.png zap.js zapdata.js up.gif down.gif topbalk_small.png \
 	webif_small.css topbalk2_small.png topbalk3_small.png \
-	topbalk4_small.png \
+	topbalk4_small.png blue.png green.png red.png grey.png \
 	locked.png unlocked.png 1rightarrow.png 1leftarrow.png player_stop.png \
 	player_fwd.png player_rew.png dvr.gif
 

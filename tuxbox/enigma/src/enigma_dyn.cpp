@@ -565,16 +565,16 @@ eString getLeftNavi(eString mode)
 	{
 		if (pdaScreen == 0)
 		{
-			result += button(110, "TV", RED, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
+			result += button(110, "TV", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#000000");
 			result += "<br>";
-			result += button(110, "Radio", GREEN, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
+			result += button(110, "Radio", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#000000");
 			result += "<br>";
-			result += button(110, "Data", BLUE, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEDATA) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post, "#FFFFFF");
+			result += button(110, "Data", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEDATA) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post, "#000000");
 			result += "<br>";
 #ifndef DISABLE_FILE
-			result += button(110, "Movies", OCKER, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
+			result += button(110, "Movies", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
 			result += "<br>";
-			result += button(110, "Root", PINK, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
+			result += button(110, "Root", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
 #endif
 			result += "<br><br>";
 			if (zap[zapMode][ZAPSUBMODESATELLITES])
