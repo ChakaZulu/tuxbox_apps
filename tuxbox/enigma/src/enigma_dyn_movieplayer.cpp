@@ -117,18 +117,20 @@ eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnect
 	content->local_header["Content-Type"] = "video/mpegfile";
 	content->local_header["Cache-Control"] = "no-cache";
 	
+	sleep(1);
+	
 	eString command = opt["command"];
+	eString mrl = opt["mrl"];
 	if (command == "start")
 	{
-		moviePlayer->start(opt["mrl"]);
+		moviePlayer->start(mrl.c_str());
 	}
 	else
 	{
-		moviePlayer->stop();
 		delete moviePlayer;
 	}
 	
-	return ""; // empty playlist entry
+	return "dummy";
 }
 
 void ezapMoviePlayerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
