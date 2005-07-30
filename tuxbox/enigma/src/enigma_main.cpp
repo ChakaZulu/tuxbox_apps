@@ -1647,6 +1647,9 @@ void eZapMain::init_main()
 	ASSIGN(lsnr_text, eLabel, "snr_text");
 	ASSIGN(lagc_text, eLabel, "agc_text");
 	ASSIGN(lber_text, eLabel, "ber_text");
+	lsnr_text->setText("SNR:");
+	lagc_text->setText("AGC:");
+	lber_text->setText("BER:");
 // SNR Patch
 
 	ASSIGN(ChannelNumber, eLabel, "ch_number");
@@ -2876,18 +2879,17 @@ standby:
 /* SNR,AGC,BER DISPLAY begin */
 void eZapMain::showSNR()
 {
-	int snr=eFrontend::getInstance()->SNR()*100/65536;
-	int agc=eFrontend::getInstance()->SignalStrength()*100/65536;
-	int ber=eFrontend::getInstance()->BER();
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	bool dvb = sapi && sapi->transponder;
+	int snr=dvb?eFrontend::getInstance()->SNR()*100/65536:0;
+	int agc=dvb?eFrontend::getInstance()->SignalStrength()*100/65536:0;
+	int ber=dvb?eFrontend::getInstance()->BER():0;
 	p_agc->setPerc((agc));
 	p_snr->setPerc((snr));
 	p_ber->setPerc((int)log2(ber));
 	lsnr_num->setText(eString().sprintf("%d%%",snr));
 	lsync_num->setText(eString().sprintf("%d%%",agc));
 	lber_num->setText(eString().sprintf("%d",ber)); 
-	lsnr_text->setText("SNR:");
-	lagc_text->setText("AGC:");
-	lber_text->setText("BER:");
 }
 /* SNR,AGC,BER DISPLAY end */
 
