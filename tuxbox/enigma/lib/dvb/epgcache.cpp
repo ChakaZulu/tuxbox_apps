@@ -255,12 +255,13 @@ int ePrivateContent::sectionRead(__u8 *data)
 
 int eEPGCache::sectionRead(__u8 *data, int source)
 {
-	if ( !data )
+	if ( !data || state > 1 )
 		return -ECANCELED;
 
 	eit_t *eit = (eit_t*) data;
-
 	bool seen=false;
+	tidMap &seenSections = this->seenSections[source];
+	tidMap &calcedSections = this->calcedSections[source];
 
 	__u32 sectionNo = data[0] << 24;
 	sectionNo |= data[3] << 16;
@@ -534,7 +535,7 @@ next:
 		Unlock();
 	}
 
-	if ( state == 1 && calcedSections == seenSections || state > 1 )
+	if ( state == 1 && seenSections == calcedSections  )
 		return -ECANCELED;
 
 	return 0;
@@ -544,9 +545,12 @@ bool eEPGCache::finishEPG()
 {
 	if (!isRunning)  // epg ready
 	{
-		eDebug("[EPGC] stop caching events %d(%d)", seenSections.size(), time(0)+eDVB::getInstance()->time_difference );
-		seenSections.clear();
-		calcedSections.clear();
+		eDebug("[EPGC] stop caching events(%d)", time(0)+eDVB::getInstance()->time_difference );
+		for (int i=0; i < 3; ++i)
+		{
+			seenSections[i].clear();
+			calcedSections[i].clear();
+		}
 		zapTimer.start(UPDATE_INTERVAL, 1);
 		eDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
 
@@ -955,8 +959,11 @@ void eEPGCache::startEPG()
 		}
 		Lock();
 		temp.clear();
-		seenSections.clear();
-		calcedSections.clear();
+		for (int i=0; i < 3; ++i)
+		{
+			seenSections[i].clear();
+			calcedSections[i].clear();
+		}
 		Unlock();
 		eDebug("[EPGC] start caching events(%d)", time(0)+eDVB::getInstance()->time_difference);
 		state=0;
@@ -1001,8 +1008,13 @@ void eEPGCache::abortNonAvail()
 		if ( isRunning )
 			abortTimer.start(50000, true);
 		else
+		{
+			eDebug("[EPGC] no data .. abort");
 			++state;
+		}
 	}
+	else
+		eDebug("[EPGC] timeout");
 	++state;
 }
 

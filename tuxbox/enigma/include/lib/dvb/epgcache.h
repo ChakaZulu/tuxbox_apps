@@ -287,7 +287,7 @@ private:
 	updateMap serviceLastUpdated;
 	tmpMap temp;
 	nvodMap NVOD;
-	tidMap seenSections, calcedSections;
+	tidMap seenSections[3], calcedSections[3];
 	eSchedule scheduleReader;
 	eScheduleOther scheduleOtherReader;
 	eNowNext nownextReader;
@@ -386,6 +386,7 @@ inline void eSchedule::sectionFinish(int err)
 	eEPGCache *e = eEPGCache::getInstance();
 	if ( (e->isRunning & 1) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
+		eDebug("[EPGC] stop schedule");
 		e->isRunning &= ~1;
 		if (e->haveData)
 			e->finishEPG();
@@ -397,6 +398,7 @@ inline void eScheduleOther::sectionFinish(int err)
 	eEPGCache *e = eEPGCache::getInstance();
 	if ( (e->isRunning & 4) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
+		eDebug("[EPGC] stop schedule other");
 		e->isRunning &= ~4;
 		if (e->haveData)
 			e->finishEPG();
@@ -408,6 +410,7 @@ inline void eNowNext::sectionFinish(int err)
 	eEPGCache *e = eEPGCache::getInstance();
 	if ( (e->isRunning & 2) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
+		eDebug("[EPGC] stop nownext");
 		e->isRunning &= ~2;
 		if (e->haveData)
 			e->finishEPG();
