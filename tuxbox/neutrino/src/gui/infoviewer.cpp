@@ -568,7 +568,7 @@ void CInfoViewer::showIcon_VTXT() const
 	int vtpid=g_RemoteControl->current_PIDs.PIDs.vtxtpid;
 	frameBuffer->paintIcon((vtpid != 0) ? "vtxt.raw" : "vtxt_gray.raw", BoxEndX - (ICON_SMALL_WIDTH + 2), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
 #ifndef TUXTXT_CFG_STANDALONE
-		if(g_settings.tuxtxt_cache)
+	if(g_settings.tuxtxt_cache && !CNeutrinoApp::getInstance ()->recordingstatus)
 	{
 		static int last_vtpid=0;
 		if(vtpid !=last_vtpid)

@@ -545,7 +545,7 @@ void CChannelList::zapTo(int pos, bool forceStoreToLastChannels)
 	if ( pos!=(int)tuned )
 	{
 #ifndef TUXTXT_CFG_STANDALONE
-		if(g_settings.tuxtxt_cache)
+		if(g_settings.tuxtxt_cache && !CNeutrinoApp::getInstance ()->recordingstatus)
 		{
 			tuxtxt_stop();
 		}
