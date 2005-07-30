@@ -1,5 +1,5 @@
-#ifndef __lib_movie_player_h
-#define __lib_movie_player_h
+#ifndef __lib_movieplayer_h
+#define __lib_movieplayer_h
 
 #include <lib/base/estring.h>
 #include <lib/base/thread.h>
@@ -13,34 +13,33 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	struct Message
 	{
 		int type;
-		eString mrl;
+		const char *filename;
 		enum
 		{
 			start,
-			stop
+			quit
 		};
-		Message(int type = 0, eString mrl = ""): type(type), mrl(mrl)
+		Message(int type = 0, const char *filename = 0)
+			:type(type), filename(filename)
 		{}
 	};
-	eServiceReference suspendedServiceReference;
 	eFixedMessagePump<Message> messages;
 	static eMoviePlayer *instance;
 	int serverPort;
 	eString serverIP;
+	eServiceReference suspendedServiceReference;
 	void gotMessage(const Message &message);
 	void thread();
-	int VLCStartsTalking();
+	int sendRequest2VLC(eString command, bool authenticate);
 	eString sout(eString mrl);
-	int sendRequest2VLC(eString command);
 	void playStream(eString mrl);
 public:
 	eMoviePlayer();
 	~eMoviePlayer();
-	void start(eString mrl);
-	void stop();
+	void start(const char * filename);
 	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& forcetranscodevideo, int& audiodatarate, int& forcetranscodeaudio, int& forceaviac3);
 	void writeStreamingServerSettings(eString ip, int port, eString dvddrive, int videodatarate, int resolution, int mpegcodec, int forcetranscodevideo, int audiodatarate, int forcetranscodeaudio, int forceaviac3);
-	static eMoviePlayer *getInstance() {return (instance) ? instance : instance = new eMoviePlayer();}
+	static eMoviePlayer *getInstance() { return (instance) ? instance : new eMoviePlayer(); }
 };
 
 #endif

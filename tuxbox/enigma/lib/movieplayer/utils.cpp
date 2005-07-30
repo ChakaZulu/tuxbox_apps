@@ -27,18 +27,6 @@
 #define TS_SIZE          188
 #define IN_SIZE          TS_SIZE*10
 
-int tcpRequest(int fd, char *ioBuffer, int maxLength)
-{
-	int r;
-
-	write(fd, ioBuffer, strlen(ioBuffer));
-	r = read(fd, ioBuffer, maxLength);
-	if (r >= 0) 
-		ioBuffer[r] = '\0';
-
-	return r;
-}
-
 int tcpOpen(eString serverIP, int serverPort)
 {
 	struct sockaddr_in ads;
@@ -83,7 +71,7 @@ CURLcode sendGetRequest (const eString& url, eString& response, bool useAuthoriz
 		curl_easy_setopt (curl, CURLOPT_USERPWD, "admin:admin");
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
 	httpres = curl_easy_perform (curl);
-	eDebug("[MOVIEPLAYER] HTTP result: %d - %s", httpres, response.c_str());
+	eDebug("[MOVIEPLAYER] HTTP result: %d", httpres);
 	curl_easy_cleanup (curl);
 	return httpres;
 }
