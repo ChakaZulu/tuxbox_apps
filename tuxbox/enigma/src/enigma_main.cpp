@@ -2879,11 +2879,9 @@ standby:
 /* SNR,AGC,BER DISPLAY begin */
 void eZapMain::showSNR()
 {
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-	bool dvb = sapi && sapi->transponder;
-	int snr=dvb?eFrontend::getInstance()->SNR()*100/65536:0;
-	int agc=dvb?eFrontend::getInstance()->SignalStrength()*100/65536:0;
-	int ber=dvb?eFrontend::getInstance()->BER():0;
+	int snr=eFrontend::getInstance()->SNR()*100/65536;
+	int agc=eFrontend::getInstance()->SignalStrength()*100/65536;
+	int ber=eFrontend::getInstance()->BER();
 	p_agc->setPerc((agc));
 	p_snr->setPerc((snr));
 	p_ber->setPerc((int)log2(ber));

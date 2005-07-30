@@ -337,6 +337,8 @@ eFrontend::~eFrontend()
 
 int eFrontend::Status()
 {
+	if (!transponder)
+		return 0;
 #if HAVE_DVB_API_VERSION < 3
 	FrontendStatus status=0;
 #else
@@ -349,6 +351,8 @@ int eFrontend::Status()
  
 uint32_t eFrontend::BER()
 {
+	if (!transponder)
+		return 0;
 	uint32_t ber=0;
 	if (ioctl(fd, FE_READ_BER, &ber) < 0 && errno != ERANGE)
 		eDebug("FE_READ_BER failed (%m)");
@@ -357,6 +361,8 @@ uint32_t eFrontend::BER()
 
 int eFrontend::SignalStrength()
 {
+	if (!transponder)
+		return 0;
 	uint16_t strength=0;
 	if (ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength) < 0 && errno != ERANGE)
 		eDebug("FE_READ_SIGNAL_STRENGTH failed (%m)");
@@ -372,6 +378,8 @@ int eFrontend::SignalStrength()
 
 int eFrontend::SNR()
 {
+	if (!transponder)
+		return 0;
 	uint16_t snr=0;
 	if (ioctl(fd, FE_READ_SNR, &snr) < 0 && errno != ERANGE)
 		eDebug("FE_READ_SNR failed (%m)");
@@ -387,6 +395,8 @@ int eFrontend::SNR()
 
 uint32_t eFrontend::UncorrectedBlocks()
 {
+	if (!transponder)
+		return 0;
 	uint32_t ublocks=0;
 	if (ioctl(fd, FE_READ_UNCORRECTED_BLOCKS, &ublocks) < 0 && errno != ERANGE)
 		eDebug("FE_READ_UNCORRECTED_BLOCKS failed (%m)");
