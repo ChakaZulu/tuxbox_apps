@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.43 2005/07/11 23:06:47 rasc Exp $
+$Id: cmdline.c,v 1.44 2005/07/31 21:47:59 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.43 2005/07/11 23:06:47 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.44  2005/07/31 21:47:59  rasc
+soft CRC for sections...
+
 Revision 1.43  2005/07/11 23:06:47  rasc
 Multibyte section filter redesign:  -f 0x4F.22.33.44.55.66 -m 0x.FF.FF.FF etc.
 Manpage update
@@ -184,7 +187,8 @@ dvbsnoop v0.7  -- Commit to CVS
 static void title (void);
 static void usage (void);
 
-
+// -- GetOptionPtr
+static OPTION *opt_ptr = NULL;
 
 
 
@@ -218,6 +222,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->timeout_ms = 0;		// no timeout (0) or default timeout in ms (SECTIONS)
   opt->max_dmx_filter = 0;	// use module default  (pidscan)
   opt->crc = 0;
+  opt->soft_crc = 0;
   opt->spider_pid = 0;
   opt->ts_subdecode = 0;
   opt->rd_all_sections = 0;	// read all section no. for a pid 
@@ -236,6 +241,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   memset(opt->mask,   0, DMX_FILTER_SIZE);
 
 
+  // -- store for getOption 
+  opt_ptr = opt;
 
 
   /*
@@ -251,6 +258,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-maxdmx")) opt->max_dmx_filter = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-crc")) opt->crc = 1;
      else if (!strcmp (argv[i],"-nocrc")) opt->crc = 0;
+     else if (!strcmp (argv[i],"-softcrc")) opt->soft_crc = 1;
+     else if (!strcmp (argv[i],"-nosoftcrc")) opt->soft_crc = 0;
      else if (!strcmp (argv[i],"-sync")) opt->packet_header_sync = 1;
      else if (!strcmp (argv[i],"-nosync")) opt->packet_header_sync = 0;
      else if (!strcmp (argv[i],"-n")) opt->rd_packet_count = str2i(argv[++i]);
@@ -368,6 +377,15 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
 
 
+//
+// -- Get pointer to cmdline Option structure
+//
+OPTION *getOptionPtr (void)
+{
+   return opt_ptr;
+}
+
+
 
 
 
@@ -410,6 +428,8 @@ static void usage (void)
     printf("                 multibyte mask syntax: 0x1A.00.F6.55\n");
     printf("   -crc:         CRC check when reading 'sec' [-nocrc]\n");
     printf("   -nocrc:       no CRC check when reading 'sec' [-nocrc]\n");
+    printf("   -softcrc:     internal soft CRC check when reading 'sec' [-nosoftcrc]\n");
+    printf("   -nosoftcrc:   no internal soft CRC check when reading 'sec' [-nosoftcrc]\n");
     printf("   -sync:        simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -nosync:      no header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -n count:     receive/read max. <count> packets (0=no limit) [-n 0]\n");

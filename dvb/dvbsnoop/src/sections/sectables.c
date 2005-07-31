@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.31 2005/07/18 21:11:40 rasc Exp $
+$Id: sectables.c,v 1.32 2005/07/31 21:48:03 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: sectables.c,v 1.31 2005/07/18 21:11:40 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.32  2005/07/31 21:48:03  rasc
+soft CRC for sections...
+
 Revision 1.31  2005/07/18 21:11:40  rasc
 TVA Content Section
 
@@ -171,6 +174,8 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "strings/dvb_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
+#include "misc/cmdline.h"
+#include "misc/crc32.h"
 
 
 
@@ -189,7 +194,8 @@ void  guess_table (u_char *buf, int len, u_int pid);
 void decodeSections_buf (u_char *buf, int len, u_int pid)
 
 {
-  int table_id;
+  OPTION *opt;
+  int    softcrc_fail;
 
 
   // nothing to output ?  
@@ -206,24 +212,43 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 	out_NL (2);
   }
 
-  table_id = buf[0];
 
+  //
+  // -- do a soft crc check
+  // -- if soft crc fails, ignore packet
+  //
+  opt = getOptionPtr();
+  softcrc_fail = 0;
 
-  switch (pid) {
-
-	case  0x01D:		/* Measurement */
-		section_TESTDATA  (buf, len);
-		break; 
-
-        default:			// multiple PIDs possible
-                guess_table (buf, len, pid);
-		break;
-
-
+  if (opt->soft_crc) {
+    u_long crc = crc32 (buf,len);
+    if (crc) {
+	softcrc_fail = 1;
+    }
   }
 
-  fflush (stdout);
 
+  if (! softcrc_fail) {
+
+	switch (pid) {
+
+		case  0x01D:	/* Measurement */
+			section_TESTDATA  (buf, len);
+			break; 
+
+        	default:	// multiple PIDs possible
+                	guess_table (buf, len, pid);
+			break;
+
+	}
+
+  } else {
+	printhex_buf (5,buf,len);
+	out_nl (2, "Packet soft CRC failed, skipping packet..."); 
+  }
+
+
+  fflush (stdout);
 
 }
 
