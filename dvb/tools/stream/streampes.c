@@ -1,7 +1,7 @@
 /*
- * $Id: streampes.c,v 1.9 2005/02/04 17:27:56 ghostrider Exp $
+ * $Id: streampes.c,v 1.10 2005/07/31 23:32:44 tmbinc Exp $
  *
- * Copyright (C) 2001 by tmbinc
+ * Copyright (C) 2001,2005 by tmbinc
  * Copyright (C) 2001 by kwon
  * Copyright (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -57,6 +57,111 @@
 #define BSIZE					 1024*16
 void send_udp(int fd, int port);
 
+	/* convert_to_es
+	
+	   this is a state-machine, designed to run in-place,
+	   able to work across PES buffers in all circumstances.
+	   
+	   only change this to another implementation if you 
+	   have good reasons ;)
+	   
+	   it skips the PES header.
+	*/
+
+int state, pes_length, pes_hdr_length;
+int es_mode;
+
+int convert_to_es(unsigned char *buffer, int len)
+{
+	unsigned char *dst = buffer;
+	int new_len = 0;
+	while (len)
+	{
+		unsigned char v = *buffer++; len--;
+		switch (state)
+		{
+		case 0:
+			if (v)
+				continue;
+			++state;
+			break;
+		case 1:
+			if (v)
+			{
+				state = 0;
+				continue;
+			}
+			++state;
+			break;
+		case 2:
+			if (v == 0)
+			{
+				state = 1;
+				continue;
+			}
+			if (v != 1)
+			{
+				state = 0;
+				continue;
+			}
+			++state;
+			break;
+		case 3:
+			++state;
+			break;
+		case 4:
+			pes_length  = v << 8;
+			++state;
+			break;
+		case 5:
+			pes_length |= v;
+			++state;
+			break;
+		case 6:
+		case 7:
+			++state;
+			--pes_length;
+			break;
+		case 8:
+			pes_hdr_length = v;
+			++state;
+			--pes_length;
+			break;
+		case 9:
+			if (!pes_hdr_length--)
+				++state;
+			else
+			{
+				--pes_length;
+				break;
+			}
+				/* fall-trough */
+		case 10:
+		{
+			int max_len;
+			--buffer; ++len;
+			
+			/* pes_length DATA is left. */
+			max_len = pes_length;
+			if (max_len > len)
+				max_len = len;
+			if (buffer != dst)
+				memcpy(dst, buffer, max_len);
+			len -= max_len;
+			buffer += max_len;
+			dst += max_len;
+			new_len += max_len;
+			pes_length -= max_len;
+			if (!pes_length)
+				state = 0;
+			break;
+		}
+		}
+	}
+	return new_len;
+}
+
+
 int main(int argc, char **argv)
 {
 	int fd,port,ppid;
@@ -64,6 +169,9 @@ int main(int argc, char **argv)
 	struct dmx_pes_filter_params flt; 
 	char buffer[BSIZE], *bp;
 	unsigned char c;
+	
+		/* use pes->es when called as streames. */
+	es_mode = strstr(argv[0], "streames") ? 1 : 0;
 	
 	bp = buffer;
 
@@ -103,7 +211,6 @@ int main(int argc, char **argv)
 		sscanf(bp, "%d", &port);
 	}
 	
-
 	flt.pid = pid;
 	flt.input = DMX_IN_FRONTEND;
 	flt.output = DMX_OUT_TAP;
@@ -119,7 +226,7 @@ int main(int argc, char **argv)
 		ppid = fork();
 		if (ppid == 0) {
 			send_udp (fd, port);
-		} 
+		}
 		else if (ppid > 0) {
 			while (read(STDIN_FILENO,buffer,1) >= 0);
 		 	kill (ppid,SIGINT);
@@ -141,6 +248,10 @@ int main(int argc, char **argv)
 
 				if ((r=read(fd, buffer+pr, tr)) <= 0)
 					continue;
+
+				if (es_mode)
+					r = convert_to_es(buffer + pr, r);
+
 				pr+=r;
 				tr-=r;
 				if (tr) {
@@ -200,13 +311,17 @@ send_udp (int fd, int port) {
 				perror ("streampes: read error muxer");
 				continue;
 			}
+			
+			if (es_mode)
+				r = convert_to_es(buffer + pr, r);
+			
 			pr+=r;
 			tr-=r;
 			if (tr) {
 				usleep(10000); //wait for 10 ms = max. 10 kb 
 			}
 		}
-		*((int *)(&(buffer[1440])))=pnr++;	
+		*((int *)(&(buffer[1440])))=pnr++;
 		sendto(sockfd, buffer, 1444, 0, (struct sockaddr *) &serv_addr, addr_len);
 	}
 }
