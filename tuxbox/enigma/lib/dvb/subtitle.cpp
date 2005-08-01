@@ -210,7 +210,7 @@ int subtitle_process_pixel_data(struct subtitle_ctx *sub, struct subtitle_page *
 				} else
 					break;
 			}
-			col = col >>= 4; // 8 -> 4 bit reduction
+			col >>= 4; // 8 -> 4 bit reduction
 			while (len && ((*linep) < 720))
 			{
 				line[(*linep)++] = col | 0xF0;
@@ -385,7 +385,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 	{
 		int region_id = *segment++; processed_length++;
 		int region_version_number = *segment >> 4;
-		int region_fill_flag = !!(*segment & 0x40);
+		int region_fill_flag = (*segment >> 3) & 1;
 		segment++; processed_length++;
 		
 			// if we didn't yet received the pcs for this page, drop the region
@@ -446,7 +446,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		
 		region_level_of_compatibility = (*segment >> 5) & 7;
 		region_depth = (*segment++ >> 2) & 7;
-		processed_length ++;
+		processed_length++;
 		
 		int CLUT_id;
 		CLUT_id = *segment++; processed_length++;
@@ -587,7 +587,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			{
 				v_Y   = *segment & 0xFC;
 				v_Cr  = (*segment++ & 3) << 6;
-				v_Cr |= (*segment & 0xC0) >> 4;
+				v_Cr |= (*segment & 0xC0) >> 2;
 				v_Cb  = (*segment & 0x3C) << 2;
 				v_T   = (*segment++ & 3) << 6;
 				processed_length += 2;
@@ -611,7 +611,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		
 		object_version_number = *segment >> 4;
 		object_coding_method  = (*segment >> 2) & 3;
-		non_modifying_color_flag = !!(*segment++ & 2);
+		non_modifying_color_flag = (*segment++ >> 1) & 1;
 		processed_length++;
 		
 		//eDebug("object id %04x, version %d, object_coding_method %d (page_id %d)", object_id, object_version_number, object_coding_method, page_id);

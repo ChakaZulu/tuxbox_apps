@@ -319,9 +319,16 @@ static void subtitle_set_palette(struct subtitle_clut *pal)
 				y -= 16;
 				cr -= 128;
 				cb -= 128;
+#if 1
+//				 let's try a bit different conversion method
+				palette[i].r = (((298 * y            + 460 * cr) / 256) <? 255) >? 0;
+				palette[i].g = (((298 * y -  55 * cb - 137 * cr) / 256) <? 255) >? 0;
+				palette[i].b = (((298 * y + 543 * cb           ) / 256) <? 255) >? 0;
+#else
 				palette[i].r = ((1164 * y + 1596 * cr) + 500) / 1000;
 				palette[i].g = ((1164 * y - 813 * cr - 392 * cb) + 500) / 1000;
 				palette[i].b = ((1164 * y + 2017 * cb) + 500) / 1000;
+#endif
 				palette[i].a = (pal->entries[i].T) & 0xFF;
 			} else
 			{
