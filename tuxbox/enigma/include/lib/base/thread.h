@@ -19,8 +19,7 @@ public:
 	virtual void thread()=0;
 	virtual void thread_finished() { }
 
-	void kill(bool hard=false);
-
+	void kill(bool sendcancel=false);
 };
 
 #endif

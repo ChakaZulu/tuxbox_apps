@@ -39,6 +39,7 @@ gRC::~gRC()
 	pthread_join(the_thread, 0);
 	eDebug("gRC thread has finished");
 	pthread_mutex_destroy(&mutex);
+	pthread_cond_destroy(&cond);
 }
 
 void *gRC::thread()
