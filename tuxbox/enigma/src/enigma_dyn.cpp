@@ -1854,7 +1854,7 @@ eString getContent(eString mode, eString path, eString opts)
 static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="audio/mpegfile";
-	return "http://" + getIP() + ":31338/" + eString().sprintf("%02x\n", Decoder::current.apid);
+	return "http://" + getIP() + ":31343/" + eString().sprintf("%02x\n", Decoder::current.apid);
 }
 
 static eString getvideopls()
