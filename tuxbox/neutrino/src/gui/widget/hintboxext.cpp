@@ -254,7 +254,7 @@ void CHintBoxExt::refresh(void)
 		{
 // 			(*d)->print();
 // 			printf("\n");
-			(*d)->draw(m_window,xPos,yPos,m_width);
+			(*d)->draw(m_window,xPos,yPos,m_width-20);
 			xPos += (*d)->getWidth() + 20;
 			if ((*d)->getHeight() > maxHeight)
 				maxHeight = (*d)->getHeight();
