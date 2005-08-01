@@ -35,6 +35,12 @@
 					<td colspan="2"><b>Video Stream</b></td>
 				</tr>
 				<tr>
+					<td>Transcode Video:</td>
+					<td>
+						<input type="checkbox" name="forcetranscodevideo" value="on" #FORCETRANSCODEVIDEO#>
+					</td>
+				</tr>
+				<tr>
 					<td>Datarate:</td>
 					<td>
 						<input name="videodatarate" type="text" size="5" maxlength="5" value="#VIDEODATARATE#" style="color: #000000">
@@ -61,16 +67,16 @@
 					</td>
 				</tr>
 				<tr>
-					<td>Transcode VCD/MPG:</td>
-					<td>
-						<input type="checkbox" name="forcetranscodevideo" value="on" #FORCETRANSCODEVIDEO#>
-					</td>
-				</tr>
-				<tr>
 					<td colspan="2">&nbsp;</td>
 				</tr>
 				<tr>
 					<td colspan="2"><b>Audio Stream</b></td>
+				</tr>
+				<tr>
+					<td>Transcode Audio:</td>
+					<td>
+						<input type="checkbox" name="forcetranscodeaudio" value="on" #FORCETRANSCODEAUDIO#>
+					</td>
 				</tr>
 				<tr>
 					<td>Audio Datarate:</td>
@@ -78,18 +84,12 @@
 						<input name="audiodatarate" type="text" size="5" maxlength="5" value="#AUDIODATARATE#" style="color: #000000">
 					</td>
 				</tr>
-				<tr>
-					<td>Transcode DVD/VCD/MPG:</td>
-					<td>
-						<input type="checkbox" name="forcetranscodeaudio" value="on" #FORCETRANSCODEAUDIO#>
-					</td>
-				</tr>
-				<tr>
+				<!--tr>
 					<td>Force AC3 for AVI:</td>
 					<td>
 						<input type="checkbox" name="forceaviac3" value="on" #FORCEAVIAC3#>
 					</td>
-				</tr>
+				</tr-->
 				<tr>
 					<td colspan="2">&nbsp;</td>
 				</tr>
