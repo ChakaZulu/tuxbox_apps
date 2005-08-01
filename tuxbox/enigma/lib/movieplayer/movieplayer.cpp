@@ -16,7 +16,7 @@
 #include <lib/dvb/decoder.h>
 #include <lib/movieplayer/movieplayer.h>
 
-#define BLOCKSIZE 65424
+#define BLOCKSIZE 4*65424
 #define PVRDEV "/dev/pvr"
 #define INITIALBUFFERING BLOCKSIZE*5
 
@@ -25,20 +25,26 @@ static pthread_mutex_t mutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 extern void find_avpids(int fd, int *vpid, int *apid, int *ac3);
 extern int tcpOpen(eString, int);
+extern eString httpEscape(eString);
 extern CURLcode sendGetRequest (const eString& url, eString& response, bool useAuthorization);
+extern bool playService(const eServiceReference &ref);
 
 pthread_t dvr;
 void *dvrThread(void *);
 pthread_t receiver;
 void *receiverThread(void *);
 
+int skt = -1;
+int play = -1;
+
 eMoviePlayer *eMoviePlayer::instance;
 
-eMoviePlayer::eMoviePlayer()
-	:messages(this,1)
+eMoviePlayer::eMoviePlayer(): messages(this,1)
 {
-	if (!instance)
-		instance = this;
+	if (instance)
+		delete instance;
+	instance = this;
+		
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
 	eDebug("[MOVIEPLAYER] starting...");
 	serverPort = 8080;
@@ -56,16 +62,18 @@ eMoviePlayer::eMoviePlayer()
 
 eMoviePlayer::~eMoviePlayer()
 {
-	messages.send(Message::quit);
+	play = -1; skt = -1; // terminate receiver and dvr thread if they are still running
 	if (thread_running())
 		kill();
+	if (tsBuffer)
+		delete tsBuffer;
 	if (instance == this)
 		instance = 0;
 }
 
 void eMoviePlayer::thread()
 {
-	nice(0);
+	nice(5);
 	exec();
 }
 
@@ -91,6 +99,7 @@ bool AVPids(int skt, int *apid, int *vpid, int *ac3)
 {
 	int len = 0;
 	int totallen = 0;
+	int error = 0;
 	char tempBuffer[BLOCKSIZE];
 	int fd = open ("/tmp/tmpts", O_CREAT | O_WRONLY);
 	
@@ -100,7 +109,7 @@ bool AVPids(int skt, int *apid, int *vpid, int *ac3)
 	do
 	{
 		len = recv(skt, tempBuffer, BLOCKSIZE, 0);
-		if (len >= 0)
+		if (len > 0)
 		{
 			eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, totallen);
 //			pthread_mutex_lock(&mutex);
@@ -109,130 +118,143 @@ bool AVPids(int skt, int *apid, int *vpid, int *ac3)
 //			pthread_mutex_unlock(&mutex);
 			totallen += len;
 		}
+		else 
+			error++;
 	}
-	while (totallen < INITIALBUFFERING);
+	while (totallen < INITIALBUFFERING && error < 1000);
 	
-	eDebug("[MOVIEPLAYER] searching for vpid and apid");
-	close (fd);
-	fd = open ("/tmp/tmpts", O_RDONLY);
-	find_avpids(fd, vpid, apid, ac3);
-	close(fd);
-	remove("/tmp/tmpts");
+	if (error == 0)
+	{
+		eDebug("[MOVIEPLAYER] searching for vpid and apid");
+		close (fd);
+		fd = open ("/tmp/tmpts", O_RDONLY);
+		find_avpids(fd, vpid, apid, ac3);
+		close(fd);
+		remove("/tmp/tmpts");
 	
-	eDebug("[MOVIEPLAYER] found apid: 0x%04X, vpid: 0x%04X, ac3: %d", *apid, *vpid, *ac3);
+		eDebug("[MOVIEPLAYER] found apid: 0x%04X, vpid: 0x%04X, ac3: %d", *apid, *vpid, *ac3);
+	}
 	
 	return (*apid != -1 && *vpid != -1);
 }
 
-void eMoviePlayer::playStream(eString mrl)
+int eMoviePlayer::playStream(eString mrl)
 {
-	int apid = 0, vpid = 0, ac3 = 0;
-	int skt = -1;
-	int play = 0;
-	int retry = 1;
+	int apid = -1, vpid = -1, ac3 = -1;
 	
 	// receive video stream from VLC on PC
 	eDebug("[MOVIEPLAYER] start playing stream...");
-	sleep(1);
-	while (retry)
-	{
-		eDebug("[MOVIEPLAYER] connecting: retry = %d", retry);
-		
-		skt = tcpOpen(serverIP, serverPort);
-		if (skt == -1)
-		{
-			eDebug("[MOVIEPLAYER] couldn't connect socket... retrying...");
-			retry--;
-			continue;
-		}
 	
-		eDebug("[MOVIEPLAYER] socket connected: skt = %d", skt);
-		fcntl(skt, O_NONBLOCK);
-	
-		const char * msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
-		if (send(skt, msg, strlen (msg), 0) == -1)
-		{
-			eDebug("[MOVIEPLAYER] sending GET failed, retry = %d", retry);
-			close(skt);
-			retry--;
-			continue;
-		}
-
-		eDebug("[MOVIEPLAYER] GET request sent.");
-
-		// Skip HTTP Header
-		char line[256];
-		memset(line, '\0', sizeof(line));
-		char *bp = line;
-		while ((unsigned int)(bp - line) < sizeof(line))
-		{
-//			eDebug("[MOVIEPLAYER] reading: %s", line);
-			recv(skt, bp, 1, 0);
-			if (strstr(line, "\r\n\r\n") != 0)
-			{
-				if (strstr(line, "HTTP/1.0 404") != 0)
-				{
-					eDebug("[MOVIEPLAYER] VLC header not received...");
-					retry--;
-					close(skt);
-					break;
-				}
-				else
-				{
-					eDebug("[MOVIEPLAYER] VLC header received.");
-					retry = 0;
-					play = 1;
-					break;
-				}
-			}
-			bp++;
-		}
-	}
-
-	if (play == 1)
+	skt = tcpOpen(serverIP, serverPort);
+	if (skt == -1)
 	{
-		eDebug("[MOVIEPLAYER] VLC is sending now... now looking for AV pids");
-		if (AVPids(skt, &apid, &vpid, &ac3))
-		{
-			// set pids
-			Decoder::parms.vpid = vpid;
-			Decoder::parms.apid = apid;
-			Decoder::parms.audio_type = DECODE_AUDIO_MPEG;
-			if (ac3)
-			{
-				if (mrl.right(3) == "vob" || mrl.left(3) == "dvd")
-					Decoder::parms.audio_type = DECODE_AUDIO_AC3_VOB;
-				else
-					Decoder::parms.audio_type = DECODE_AUDIO_AC3;
-			}
-		
-			Decoder::Set();
-			
-			// create receiver thread
-			pthread_create(&receiver, 0, receiverThread, (void *)&skt);
-			// create dvr thread
-			pthread_create(&dvr, 0, dvrThread, (void *)&play);
-			while(1)
-			{
-				sleep(10);
-			}
-
-		}
-		else
-		{
-			eDebug("[MOVIEPLAYER] could not find AV pids.");
-		}
+		eDebug("[MOVIEPLAYER] couldn't connect socket");
+		return -1;
 	}
-	if (skt != -1)
+	
+	eDebug("[MOVIEPLAYER] socket connected: skt = %d", skt);
+	fcntl(skt, O_NONBLOCK);
+	
+	const char * msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
+	if (send(skt, msg, strlen (msg), 0) == -1)
+	{
+		eDebug("[MOVIEPLAYER] sending GET failed.");
 		close(skt);
-}
+		return -2;
+	}
+		
+	eDebug("[MOVIEPLAYER] GET request sent.");
+		
+	// Skip HTTP Header
+	char line[256];
+	memset(line, '\0', sizeof(line));
+	char *bp = line;
+	while ((unsigned int)(bp - line) < sizeof(line))
+	{
+//		eDebug("[MOVIEPLAYER] reading: %s", line);
+		recv(skt, bp, 1, 0);
+		if (strstr(line, "\r\n\r\n") != 0)
+		{
+			if (strstr(line, "HTTP/1.0 404") != 0)
+			{
+				eDebug("[MOVIEPLAYER] VLC header not received...");
+				close(skt);
+				return -3;
+			}
+			else
+			{
+				eDebug("[MOVIEPLAYER] VLC header received.");
+				break;
+			}
+		}
+		bp++;
+	}
 
-extern bool playService(const eServiceReference &ref);
+	if (!(AVPids(skt, &apid, &vpid, &ac3)))
+	{
+		eDebug("[MOVIEPLAYER] could not find AV pids.");
+		close(skt);
+		return -4;
+	}
+	
+	eDebug("[MOVIEPLAYER] AV pids found.");
+	
+	// save current dvb service for later
+	eDVBServiceController *sapi;
+	if (sapi = eDVB::getInstance()->getServiceAPI())
+		suspendedServiceReference = sapi->service;
+	// stop dvb service
+	eServiceInterface::getInstance()->stop();
+	
+	// set pids
+	Decoder::parms.vpid = vpid;
+	Decoder::parms.apid = apid;
+	Decoder::parms.audio_type = DECODE_AUDIO_MPEG;
+	if (ac3)
+	{
+		if (mrl.right(3) == "vob" || mrl.left(3) == "dvd")
+			Decoder::parms.audio_type = DECODE_AUDIO_AC3_VOB;
+		else
+			Decoder::parms.audio_type = DECODE_AUDIO_AC3;
+	}
+	
+	Decoder::Set();
+			
+	// create receiver thread
+	pthread_create(&receiver, 0, receiverThread, (void *)&skt);
+	// create dvr thread
+	play = 1;
+	pthread_create(&dvr, 0, dvrThread, (void *)&play);
+			
+	while (skt != -1)
+	{
+		sleep(1);
+	}
+	play = 0; // terminate dvr thread
+	while (play != -1) 
+	{
+		// wait for dvr thread to terminate
+		sleep(1);
+	}
+	
+	usleep(100000); // wait for threads to terminate...
+	
+	// cancel dvr thread
+	if (dvr)
+		pthread_cancel(dvr);
+	// cancel receiver thread
+	if (receiver)
+		pthread_cancel(receiver);
+		
+	// restore suspended dvb service
+	playService(suspendedServiceReference);
+	
+	return 0;
+}
 
 void eMoviePlayer::gotMessage(const Message &msg )
 {
 	eString mrl;
-	eDVBServiceController *sapi;
 	switch (msg.type)
 	{
 		case Message::start:
@@ -243,41 +265,28 @@ void eMoviePlayer::gotMessage(const Message &msg )
 				eDebug("[MOVIEPLAYER] mrl = %s", mrl.c_str());
 				free((char*)msg.filename);
 				
-				// save current dvb service for later
-				if (sapi = eDVB::getInstance()->getServiceAPI())
-					suspendedServiceReference = sapi->service;
-				// stop dvb service
-				eServiceInterface::getInstance()->stop();
-				
-				// vlc: empty playlist
-				sendRequest2VLC("?control=empty", false);
-				// vlc: add mrl to playlist
-				sendRequest2VLC("?control=add&mrl=" + mrl, false);
-				// vlc: set sout...
-				sendRequest2VLC("?sout=" + sout(mrl), false);
-				// vlc: start playback of first item in playlist
-				sendRequest2VLC("?control=play&item=0", false);
-				// receive and play ts stream
-				playStream(mrl);
-				// cancel dvr thread
-				pthread_cancel(dvr);
-				// restore suspended dvb service
-				playService(suspendedServiceReference);
+				int retry = 10;
+				do
+				{
+					// vlc: empty playlist
+					if (sendRequest2VLC("?control=empty", false) > 0)
+					{
+						eDebug("[MOVIEPLAYER] couldn't communicate with vlc, streaming server ip address may be wrong in settings.");
+						retry = 0;
+						break;
+					}
+					// vlc: add mrl to playlist
+					sendRequest2VLC("?control=add&mrl=" + httpEscape(mrl), false);
+					// vlc: set sout...
+					sendRequest2VLC("?sout=" + httpEscape(sout(mrl)), false);
+					// vlc: start playback of first item in playlist
+					sendRequest2VLC("?control=play&item=0", false);
+					// receive and play ts stream
+				} while (playStream(mrl) < 0 && retry-- > 0);
+
 				// shutdown vlc
 				sendRequest2VLC("admin/?control=shutdown", true);
-				instance = 0;
-				quit(0);
 			}
-			break;
-		}
-		case Message::quit:
-		{
-			// cancel dvr thread
-			pthread_cancel(dvr);
-			// restore suspended dvb service
-			playService(suspendedServiceReference);
-			// shutdown vlc
-			sendRequest2VLC("admin/?control=shutdown", true);
 			quit(0);
 			break;
 		}
@@ -298,29 +307,9 @@ eString eMoviePlayer::sout(eString mrl)
 	
 	eDebug("[MOVIEPLAYER] determine ?sout for mrl: %s", mrl.c_str());
 	
-	// determine whether VLC has to transcode or not
-	if ((mrl.left(4) == "vcd:") ||
-	    (mrl.right(3) == "mpg") ||
-	    (mrl.right(4) == "mpeg") ||
-	    (mrl.right(3) == "m2p"))
-	{
-		if (settingForceTranscodeVideo)
-			transcodeVideo = settingTranscodeVideoCodec;
-		else
-			transcodeVideo = 0;
-		transcodeAudio = settingForceTranscodeAudio;
-	}
-	else
-	{
+	if (settingForceTranscodeVideo)
 		transcodeVideo = settingTranscodeVideoCodec;
-		if ((mrl.left(3) == "dvd" && settingForceTranscodeAudio) ||
-		    (mrl.right(3) == "vob" && settingForceTranscodeAudio) ||
-		    (mrl.right(3) == "ac3" && settingForceTranscodeAudio) ||
-		    settingForceAviRawAudio)
-			transcodeAudio = 0;
-		else
-			transcodeAudio = 1;
-	}
+	transcodeAudio = settingForceTranscodeAudio;
 	
 	eDebug("[MOVIEPLAYER] transcoding audio: %d, video: %d", transcodeAudio, transcodeVideo);
 
@@ -330,7 +319,6 @@ eString eMoviePlayer::sout(eString mrl)
 	// example (without transcode to mpeg1): 
 	// ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
 
-	transcodeVideo = 0; transcodeAudio = 0;
 	eString res_horiz;
 	eString res_vert;
 	switch (settingResolution)
@@ -374,10 +362,6 @@ eString eMoviePlayer::sout(eString mrl)
 	
 	soutURL += "duplicate{dst=std{access=http,mux=ts,url=:" + eString().sprintf("%d", serverPort) + "/dboxstream}}";
 	eDebug("[MOVIEPLAYER] sout = %s", soutURL.c_str());
-	char *tmp = curl_escape(soutURL.c_str(), 0);
-	soutURL = eString(tmp);
-	curl_free(tmp);
-	eDebug("[MOVIEPLAYER] sout = %s", soutURL.c_str());
 	return soutURL;
 }
 
@@ -396,13 +380,13 @@ DVDDrive, int& settingVideoRate, int& settingResolution, int& settingTranscodeVi
 		dvddrive = strdup("D");
 	DVDDrive = eString(dvddrive);
 	free(dvddrive);
-	settingResolution = 0;
+	settingResolution = 3;
 	eConfig::getInstance()->getKey("/movieplayer/resolution", settingResolution);
-	settingAudioRate = 0;
+	settingAudioRate = 192;
 	eConfig::getInstance()->getKey("/movieplayer/audiorate", settingAudioRate);
-	settingVideoRate = 0;
+	settingVideoRate = 2048;
 	eConfig::getInstance()->getKey("/movieplayer/videorate", settingVideoRate);
-	settingTranscodeVideoCodec = 0;
+	settingTranscodeVideoCodec = 2;
 	eConfig::getInstance()->getKey("/movieplayer/transcodevideocodec", settingTranscodeVideoCodec);
 	settingForceTranscodeVideo = 0;
 	eConfig::getInstance()->getKey("/movieplayer/forcetranscodevideo", settingForceTranscodeVideo);
@@ -432,46 +416,56 @@ void *dvrThread(void *ctrl)
 	int rd = 0;
 	eDebug("[MOVIEPLAYER] dvrThread starting...");
 	int pvrfd = 0;
+	timeval t1, t2;
 	pvrfd = open(PVRDEV, O_RDWR);
 	eDebug("[MOVIEPLAYER] pvr device opened: %d", pvrfd);
+	nice(-50);
 //	while (*((int *)ctrl) == 1)
-	while (1)
+	while (*((int *)ctrl) > 0)
 	{
 		if (tsBuffer->size() > 0)
 		{
 			pthread_mutex_lock(&mutex);
 			rd = tsBuffer->read(tempBuffer, BLOCKSIZE);
-			eDebug("[MOVIEPLAYER] writing %d bytes to dvr...", rd);
 			pthread_mutex_unlock(&mutex);
+			gettimeofday(&t1, 0);
 			write(pvrfd, tempBuffer, rd);
+			gettimeofday(&t2, 0);
+			eDebug("%d:%d\n%d:%d [MOVIEPLAYER]     >>> writing %d bytes to dvr...", t1.tv_sec, t1.tv_usec, t2.tv_sec, t2.tv_usec, rd);
 		}
 		else 
 			usleep(100);
 	}
 	close(pvrfd);
+	*((int *)ctrl) = -1;
 	eDebug("[MOVIEPLAYER] dvrThread stopping...");
 	pthread_exit(NULL);
 }
 
 void *receiverThread(void *skt)
 {
+	timeval t1, t2;
 	char tempBuffer[BLOCKSIZE];
 	int len = 0;
 	eDebug("[MOVIEPLAYER] receiverThread starting: skt = %d", *((int *)skt));
+	nice(-50);
 	// fill buffer
 	do
 	{
+		gettimeofday(&t1, 0);
 		len = recv(*((int *)skt), tempBuffer, BLOCKSIZE, 0);
+		gettimeofday(&t2, 0);
+		eDebug("%d:%d\n%d:%d [MOVIEPLAYER] <<< writing %d bytes to buffer...", t1.tv_sec, t1.tv_usec, t2.tv_sec, t2.tv_usec, len);
 		if (len >= 0)
 		{
 			pthread_mutex_lock(&mutex);
-			eDebug("[MOVIEPLAYER] <<< writing %d bytes to buffer...", len);
 			tsBuffer->write(tempBuffer, len);
 			pthread_mutex_unlock(&mutex);
 		}
 	}
 	while (len > 0);
 	close(*((int *)skt));
+	*((int *)skt) = -1;
 	eDebug("[MOVIEPLAYER] receiverThread stopping...");
 	pthread_exit(NULL);
 }

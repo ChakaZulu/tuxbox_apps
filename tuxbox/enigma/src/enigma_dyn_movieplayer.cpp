@@ -111,24 +111,18 @@ eString streamingServer(eString request, eString dirpath, eString opts, eHTTPCon
 
 eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eMoviePlayer *moviePlayer = eMoviePlayer::getInstance();
+	eMoviePlayer *moviePlayer = new eMoviePlayer();
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
 	content->local_header["Content-Type"] = "video/mpegfile";
 	content->local_header["Cache-Control"] = "no-cache";
 	
-	sleep(1);
-	
 	eString command = opt["command"];
-	eString mrl = opt["mrl"];
+	eString mrl = httpUnescape(opt["mrl"]);
 	if (command == "start")
-	{
 		moviePlayer->start(mrl.c_str());
-	}
 	else
-	{
 		delete moviePlayer;
-	}
 	
 	return "dummy";
 }

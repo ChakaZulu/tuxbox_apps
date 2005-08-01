@@ -27,6 +27,15 @@
 #define TS_SIZE          188
 #define IN_SIZE          TS_SIZE*10
 
+eString httpEscape(eString url)
+{
+	char *tmp = curl_escape(url.c_str(), 0);
+	url = eString(tmp);
+	curl_free(tmp);
+	eDebug("[MOVIEPLAYER] httpEscape: url = %s", url.c_str());
+	return url;
+}
+
 int tcpOpen(eString serverIP, int serverPort)
 {
 	struct sockaddr_in ads;

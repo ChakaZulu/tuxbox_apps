@@ -16,8 +16,7 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 		const char *filename;
 		enum
 		{
-			start,
-			quit
+			start
 		};
 		Message(int type = 0, const char *filename = 0)
 			:type(type), filename(filename)
@@ -32,14 +31,14 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	void thread();
 	int sendRequest2VLC(eString command, bool authenticate);
 	eString sout(eString mrl);
-	void playStream(eString mrl);
+	int playStream(eString mrl);
 public:
 	eMoviePlayer();
 	~eMoviePlayer();
 	void start(const char * filename);
 	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& forcetranscodevideo, int& audiodatarate, int& forcetranscodeaudio, int& forceaviac3);
 	void writeStreamingServerSettings(eString ip, int port, eString dvddrive, int videodatarate, int resolution, int mpegcodec, int forcetranscodevideo, int audiodatarate, int forcetranscodeaudio, int forceaviac3);
-	static eMoviePlayer *getInstance() { return (instance) ? instance : new eMoviePlayer(); }
+	static eMoviePlayer *getInstance() { return instance; }
 };
 
 #endif
