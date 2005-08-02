@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.20 2004/10/12 20:37:48 rasc Exp $
+$Id: tslayer.c,v 1.21 2005/08/02 22:57:47 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.20 2004/10/12 20:37:48 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.21  2005/08/02 22:57:47  rasc
+Option -N, rewrite offline filters (TS & Section)
+
 Revision 1.20  2004/10/12 20:37:48  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -144,7 +147,7 @@ void decodeTS_buf (u_char *b, int len, u_int opt_pid)
 
 
 
- out_SB_NL (3,"Sync-Byte: ",t.sync_byte);
+ out_SB_NL (3,"Sync-Byte 0x47: ",t.sync_byte);
  out_SB    (3,"Transport_error_indicator: ",t.transport_error_indicator);
     if (t.transport_error_indicator) out_nl (3,"  [= Packet has uncorrectable errors!]");
     else out_NL (3);

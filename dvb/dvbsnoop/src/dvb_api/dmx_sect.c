@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.29 2005/07/18 18:38:57 rasc Exp $
+$Id: dmx_sect.c,v 1.30 2005/08/02 22:57:46 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.29 2005/07/18 18:38:57 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.30  2005/08/02 22:57:46  rasc
+Option -N, rewrite offline filters (TS & Section)
+
 Revision 1.29  2005/07/18 18:38:57  rasc
 minor changes on section filter, manpage
 
@@ -200,6 +203,7 @@ static int  doReadSECT_2 (OPTION *opt)
   int     fd;
   u_char  buf[READ_BUF_SIZE]; 		/* data buffer */
   long    count;
+  long    filtered_count;
   char    *f;
   int     openMode;
   int     dmxMode;
@@ -261,6 +265,7 @@ static int  doReadSECT_2 (OPTION *opt)
      //    memcpy(&flt.filter.filter, opt->filter, DMX_FILTER_SIZE);
      //    memcpy(&flt.filter.mask, opt->mask, DMX_FILTER_SIZE);
     }
+
     
 
     flt.timeout = opt->timeout_ms;
@@ -283,8 +288,10 @@ static int  doReadSECT_2 (OPTION *opt)
 */
 
   count = 0;
+  filtered_count = 0;
   while (1) {
     long   n;
+    int    filter_match = 1;
 
 
     n = sect_read(fd,buf,sizeof(buf));
@@ -309,32 +316,60 @@ static int  doReadSECT_2 (OPTION *opt)
 
     count ++;
 
-    if (opt->binary_out) {
-
-       // direct write to FD 1 ( == stdout)
-       write (1, buf,n);
-
-    } else {
-
-       indent (0);
-       print_packet_header (opt, "SECT", opt->pid, count, n, 0);
-
-// $$$ TODO: check pid in -if  (warnung: dmx read may use mask!)
-// $$$ TODO: mask may also be used with -if
-
-       if (opt->buffer_hexdump) {
-           printhex_buf (0,buf, n);
-           out_NL(0);
-       }
 
 
-       // decode protocol
-       if (opt->printdecode) {
-          decodeSections_buf (buf,n ,opt->pid);
-          out_nl (3,"==========================================================");
-          out_NL (3);
-       }
-    } // bin_out
+    // -- FILE filter mode when reading from file (soft section filter)
+    // --  The filter comprises 16 bytes(?) covering byte 0 and byte 3..17
+   
+    if (! dmxMode) {					// file read mode
+      int i;
+      for (i=0; i < opt->filterLen; i++) {
+	    int j;
+	    j =  (i) ? i+2 : 0;			// Byte 0, 3..17
+
+	    if ( (buf[j] & opt->mask[i]) != (opt->filter[i] & opt->mask[i]) ) {
+    		filter_match = 0;   // fail!
+		break;
+	    }
+      }
+    }
+
+
+
+    // -- packet output ? (binary or decoded)
+    // -- This happens, when filter are matching (hard or soft filter)
+ 
+    if (filter_match) { 
+
+	filtered_count++;
+
+	if (opt->binary_out) {
+
+	       // direct write to FD 1 ( == stdout)
+	       write (1, buf,n);
+
+	} else {
+
+	       indent (0);
+	       print_packet_header (opt, "SECT", opt->pid, count, n, 0);
+
+
+	       if (opt->buffer_hexdump) {
+	           printhex_buf (0,buf, n);
+	           out_NL(0);
+	       }
+
+
+	       // decode protocol
+	       if (opt->printdecode) {
+	          decodeSections_buf (buf,n ,opt->pid);
+	          out_nl (3,"==========================================================");
+	          out_NL (3);
+	       }
+
+	} // bin_out
+
+    }  // filter_match: packet out
 
 
 
@@ -345,6 +380,9 @@ static int  doReadSECT_2 (OPTION *opt)
     // count packets ?
     if (opt->rd_packet_count > 0) {
        if (count >= opt->rd_packet_count) break;
+    }
+    if (opt->dec_packet_count > 0) {
+       if (filtered_count >= opt->dec_packet_count) break;
     }
 
 
@@ -401,16 +439,6 @@ static long  sect_read (int fd, u_char *buf, long buflen)
 
 
 
-/*
- // $$$ TODO
-  Annotation:
-    We could also do a soft-CRC32 check here.
-    But to do this properly, we have to do this "read" byte shifted, because
-    we do not know, when a payload_unit_start is indicated in TS.
-    Also this would be necessary, when reading from playback stream files.
-    so: currently we only offer hardware supported crc check...
- */
-
 
 
 
@@ -434,3 +462,4 @@ static long  sect_read (int fd, u_char *buf, long buflen)
      --> get last_section_nr & sect_number
 
  */
+

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.30 2004/12/07 21:01:40 rasc Exp $
+$Id: dmx_pes.c,v 1.31 2005/08/02 22:57:46 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dmx_pes.c,v 1.30 2004/12/07 21:01:40 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.31  2005/08/02 22:57:46  rasc
+Option -N, rewrite offline filters (TS & Section)
+
 Revision 1.30  2004/12/07 21:01:40  rasc
 Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
 
@@ -300,6 +303,9 @@ int  doReadPES (OPTION *opt)
     // count packets ?
     if (opt->rd_packet_count > 0) {
        if (count >= opt->rd_packet_count) break;
+    }
+    if (opt->dec_packet_count > 0) {
+       if (count >= opt->dec_packet_count) break;
     }
 
 

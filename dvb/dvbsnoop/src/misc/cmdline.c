@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.44 2005/07/31 21:47:59 rasc Exp $
+$Id: cmdline.c,v 1.45 2005/08/02 22:57:46 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.44 2005/07/31 21:47:59 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.45  2005/08/02 22:57:46  rasc
+Option -N, rewrite offline filters (TS & Section)
+
 Revision 1.44  2005/07/31 21:47:59  rasc
 soft CRC for sections...
 
@@ -433,7 +436,8 @@ static void usage (void)
     printf("   -sync:        simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -nosync:      no header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -n count:     receive/read max. <count> packets (0=no limit) [-n 0]\n");
-//    printf("   -N count:     decode max. <count> packets (0=no limit) [-N 0]\n");
+    printf("   -N count:     decode max. <count> packets (0=no limit) [-N 0]\n");
+    printf("                 this will limit -n, e.g. when using soft filters.\n");
     printf("   -spiderpid:   snoop referenced section pids (sets -n 1) \n");
 // $$$ TODO
 //    printf("   -allsections: read all sections in sequence on pid (limited by -n ..) \n");

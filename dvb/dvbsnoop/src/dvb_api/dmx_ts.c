@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.31 2005/01/23 21:52:01 rasc Exp $
+$Id: dmx_ts.c,v 1.32 2005/08/02 22:57:46 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.31 2005/01/23 21:52:01 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.32  2005/08/02 22:57:46  rasc
+Option -N, rewrite offline filters (TS & Section)
+
 Revision 1.31  2005/01/23 21:52:01  rasc
 DVR device needs to be open in RD only mode...
 
@@ -167,6 +170,7 @@ int  doReadTS (OPTION *opt)
   u_char  buf[READ_BUF_SIZE]; 	/* data buffer */
   u_char  *b;			/* ptr for packet start */
   long    count;
+  long    filtered_count;
   char    *f;
   int     openMode;
   int     fileMode;
@@ -257,9 +261,14 @@ int  doReadTS (OPTION *opt)
 */
 
   count = 0;
+  filtered_count = 0;
   while (1) {
     long   n;
-    long   skipped_bytes = 0;
+    long   skipped_bytes    = 0;
+    int    pid_filter_match = 1;
+    int    is_ts_packet     = 1;
+    int    packet_pid       = -1;
+
 
 
     if (opt->packet_header_sync) {
@@ -288,72 +297,103 @@ int  doReadTS (OPTION *opt)
     }
 
 
+
     count ++;
 
-    if (opt->binary_out) {
-
-       // direct write to FD 1 ( == stdout)
-       write (1, b, n);
-
-    } else {
-
-       int   is_ts_packet = 1;
-       int   filter_match = 1;
 
 
 
-       // -- subdecode prev. collected TS data
-       if (opt->printdecode && opt->ts_subdecode) {
-	       ts2SecPes_subdecode (b, n, opt->pid);
-       }
+    // -- SyncByte for TS packet and correct len?
+ 
+    if (b[0] != TS_SYNC_BYTE || n != TS_PACKET_LEN) {
+	is_ts_packet = 0; 
+    }
 
 
-       // -- new packet, output header
-       indent (0);
-       print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
+    // -- PID soft filter mode
+    // -- We alway do this check (even if we are reading directly
+    // -- from dvb device and PID has already been filtered by demux)
+   
+    if (is_ts_packet) {
+	packet_pid = getBits (b, 0,11, 13);
+
+	if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && (opt->pid != packet_pid)) {
+		pid_filter_match = 0;
+	}
+    }
 
 
-	// -- SyncByte for TS packet and correct len?
-	if (b[0] != 0x47) {
-	   out_nl (3,"!!! SyncByte is wrong (= no TS)!!!\n");
-	   is_ts_packet = 0; 
- 	}
-	if (n != 188) {
-	   out_nl (3,"Fixed packet length is wrong (not 188)!!!\n");
-	   is_ts_packet = 0; 
- 	}
+    // -- PID soft filter mode when reading from file 
+    // -- (e.g. if multi-pid-ts-file)
 
-
-	// -- filter pid?  (e.g. if multi-pid-ts-file)
-	if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && is_ts_packet) {
-	   int packet_pid = getBits (b, 0,11, 13);
-	   if (opt->pid != packet_pid) {
- 		out_SW_NL(6,"skipped packet, assigned PID: ",packet_pid);
-		filter_match = 0;
-	   }
- 	}
+//    if (fileMode && is_ts_packet) {				// file read mode
+//	if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && (opt->pid != packet_pid)) {
+//		filter_match = 0;
+//	}
+//    }
 
 
 
-       // hex output (also on wrong packets)
-       if (opt->buffer_hexdump && filter_match) {
-           printhex_buf (0, b, n);
-           out_NL(0);
-       }
 
 
-       // decode protocol (if ts packet)
-       if (opt->printdecode && is_ts_packet && filter_match) {
-          decodeTS_buf (b, n ,opt->pid);
-          out_nl (3,"==========================================================");
-          out_NL (3);
-          if (opt->ts_subdecode) {
-             // -- check if stored packet(s) length is sufficient for output
-	     ts2SecPes_checkAndDo_PacketSubdecode_Output();
-          }
+    // -- packet output ? (binary or decoded)
+    // -- This happens, when filter are matching (hard or soft filter)
 
-       }
-    } // bin_out
+
+    if (pid_filter_match) { 
+
+	filtered_count++;
+
+
+	if (opt->binary_out) {
+
+	       // direct write to FD 1 ( == stdout)
+	       write (1, b, n);
+
+    	} else {
+
+
+
+
+	       // -- subdecode prev. collected TS data
+	       if (opt->printdecode && opt->ts_subdecode) {
+		       ts2SecPes_subdecode (b, n, opt->pid);
+	       }
+
+
+	       // -- new packet, output header
+	       indent (0);
+	       print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
+
+
+		// -- SyncByte for TS packet and correct len?
+		if (! is_ts_packet) {
+		   out_nl (3,"!!! Wrong SyncByte or packet length mismatch (= no TS)!!!");
+	 	}
+
+
+
+	       // hex output (also on wrong packets)
+	       if (opt->buffer_hexdump && pid_filter_match) {
+	           printhex_buf (0, b, n);
+	           out_NL(0);
+	       }
+
+
+	       // decode protocol (if ts packet)
+	       if (opt->printdecode && is_ts_packet && pid_filter_match) {
+	          decodeTS_buf (b, n ,opt->pid);
+	          out_nl (3,"==========================================================");
+	          out_NL (3);
+	          if (opt->ts_subdecode) {
+	             // -- check if stored packet(s) length is sufficient for output
+		     ts2SecPes_checkAndDo_PacketSubdecode_Output();
+	          }
+
+	       }
+	} // bin_out
+
+    } // pid_filter_match: packet out
 
 
 
@@ -364,6 +404,9 @@ int  doReadTS (OPTION *opt)
     // count packets ?
     if (opt->rd_packet_count > 0) {
        if (count >= opt->rd_packet_count) break;
+    }
+    if (opt->dec_packet_count > 0) {
+       if (filtered_count >= opt->dec_packet_count) break;
     }
 
 
