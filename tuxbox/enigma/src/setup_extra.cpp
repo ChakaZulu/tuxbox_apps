@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.26 2005/07/12 22:38:34 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.27 2005/08/02 21:10:47 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -100,6 +100,7 @@ void eExpertSetup::init_eExpertSetup()
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Use http authentification"), "/ezap/webif/lockWebIf", _("enables the http (user/password) authentification")))->selected, eExpertSetup::reinitializeHTTPServer );
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Don't open serial port"), "/ezap/extra/disableSerialOutput", _("don't write debug messages to /dev/tts/0")))->selected, eExpertSetup::reinitializeHTTPServer );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Auto bouquet change"), "/elitedvb/extra/autobouquetchange", _("change into next bouquet when end of current bouquet is reached"));
+	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable Samba"), "/elitedvb/network/samba", _("dont start samba daemons on tartup"));
 #ifndef TUXTXT_CFG_STANDALONE
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable teletext caching"), "/ezap/extra/teletext_caching", _("don't cache teletext pages in background")))->selected, eExpertSetup::tuxtxtCachingChanged );
 #endif
