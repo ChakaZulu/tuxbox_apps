@@ -1,3 +1,6 @@
+
+ - Changed: Soft filters for TS and Section rewritten
+ - New: Option -N (decode n packets)
  - New: Soft CRC for sections (-softcrc / -nosoftcrc)
  - New: TV-Anytime (TS 102 323)  Content Section
  - Changed:  Multibyte section filtering redesign e.g. -f 0x4e.2f.1c.3f.50 -m
