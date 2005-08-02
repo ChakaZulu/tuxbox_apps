@@ -153,7 +153,6 @@ int eMoviePlayer::playStream(eString mrl)
 	}
 	
 	eDebug("[MOVIEPLAYER] socket connected: skt = %d", skt);
-	fcntl(skt, O_NONBLOCK);
 	
 	const char * msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
 	if (send(skt, msg, strlen (msg), 0) == -1)
@@ -166,6 +165,7 @@ int eMoviePlayer::playStream(eString mrl)
 	eDebug("[MOVIEPLAYER] GET request sent.");
 		
 	// Skip HTTP Header
+	bool header = false;
 	char line[256];
 	memset(line, '\0', sizeof(line));
 	char *bp = line;
@@ -184,17 +184,27 @@ int eMoviePlayer::playStream(eString mrl)
 			else
 			{
 				eDebug("[MOVIEPLAYER] VLC header received.");
+				header = true;
 				break;
 			}
 		}
 		bp++;
 	}
+	
+	if (!header)
+	{
+		eDebug("[MOVIEPLAYER] something received... but not a header.");
+		close(skt);
+		return -4;
+	}
+	
+	fcntl(skt, O_NONBLOCK);
 
 	if (!(AVPids(skt, &apid, &vpid, &ac3)))
 	{
 		eDebug("[MOVIEPLAYER] could not find AV pids.");
 		close(skt);
-		return -4;
+		return -5;
 	}
 	
 	eDebug("[MOVIEPLAYER] AV pids found.");
@@ -246,6 +256,8 @@ int eMoviePlayer::playStream(eString mrl)
 	if (receiver)
 		pthread_cancel(receiver);
 		
+	Decoder::Flush();
+	
 	// restore suspended dvb service
 	playService(suspendedServiceReference);
 	
@@ -281,6 +293,7 @@ void eMoviePlayer::gotMessage(const Message &msg )
 					sendRequest2VLC("?sout=" + httpEscape(sout(mrl)), false);
 					// vlc: start playback of first item in playlist
 					sendRequest2VLC("?control=play&item=0", false);
+					usleep(100000); // wait a little bit for vlc to start sending the stream
 					// receive and play ts stream
 				} while (playStream(mrl) < 0 && retry-- > 0);
 
