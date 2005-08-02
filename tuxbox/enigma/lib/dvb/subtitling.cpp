@@ -314,16 +314,16 @@ static void subtitle_set_palette(struct subtitle_clut *pal)
 		{
 			int y = pal->entries[i].Y, cr = pal->entries[i].Cr, cb = pal->entries[i].Cb;
 		
-			if (y >= 16)
+			if (y > 0)
 			{
 				y -= 16;
 				cr -= 128;
 				cb -= 128;
 #if 1
-//				 let's try a bit different conversion method
-				palette[i].r = (((298 * y            + 460 * cr) / 256) <? 255) >? 0;
-				palette[i].g = (((298 * y -  55 * cb - 137 * cr) / 256) <? 255) >? 0;
-				palette[i].b = (((298 * y + 543 * cb           ) / 256) <? 255) >? 0;
+//				let's try a bit different conversion method
+				palette[i].r = MAX(MIN(((298 * y            + 460 * cr) / 256), 255), 0);
+				palette[i].g = MAX(MIN(((298 * y -  55 * cb - 137 * cr) / 256), 255), 0);
+				palette[i].b = MAX(MIN(((298 * y + 543 * cb           ) / 256), 255), 0);
 #else
 				palette[i].r = ((1164 * y + 1596 * cr) + 500) / 1000;
 				palette[i].g = ((1164 * y - 813 * cr - 392 * cb) + 500) / 1000;

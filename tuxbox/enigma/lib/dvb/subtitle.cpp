@@ -558,7 +558,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		if ((sub->current_clut_page_id == page_id) && (sub->current_clut_id == CLUT_id))
 			sub->current_clut_id = -1;
 			
-		clut->size = 16;
+		clut->size = 0;
 			
 		//eDebug("new clut");
 		while (processed_length < segment_length)
@@ -597,6 +597,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			clut->entries[CLUT_entry_id].Cr = v_Cr; 
 			clut->entries[CLUT_entry_id].Cb = v_Cb; 
 			clut->entries[CLUT_entry_id].T = v_T; 
+			clut->size++;
 			//eDebug("  %04x %02x %02x %02x %02x", CLUT_entry_id, v_Y, v_Cb, v_Cr, v_T);
 		}
 		break;
@@ -963,7 +964,6 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 		//eDebug("have %d, want %d", clut->clut_id, main_clut_id);
 		if (clut->clut_id == main_clut_id)
 			break;
-		break;
 		clut = clut->next;
 	}
 	if (clut)
