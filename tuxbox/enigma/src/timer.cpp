@@ -195,7 +195,7 @@ static const eString& getEventDescrFromEPGCache( const eServiceReference &_ref, 
 	// parse EPGCache to get event informations
 	EITEvent *tmp = event_id != -1 ? eEPGCache::getInstance()->lookupEvent( ref, event_id ) : 0;
 	if ( !tmp )
-		eEPGCache::getInstance()->lookupEvent( ref, time );
+		tmp = eEPGCache::getInstance()->lookupEvent( ref, time );
 	if (tmp)
 	{
 		for (ePtrList<Descriptor>::const_iterator d(tmp->descriptor); d != tmp->descriptor.end(); ++d)
@@ -2410,7 +2410,7 @@ void eTimerEditView::applyPressed()
 		EITEvent *tmp = event_id && !multiple->isChecked() ? 
 			eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, event_id ) : 0;
 		if (!tmp)
-			eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, newEventBegin+newEventDuration / 2 );
+			tmp = eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, newEventBegin+newEventDuration / 2 );
 		if (tmp)
 		{
 			evt = *tmp;
