@@ -36,12 +36,14 @@ void eRCDeviceDreambox2::handleCode(int rccode)
 	int old=ccode;
 	ccode=rccode;
 	if ((old!=-1) && ( ((old&0x7FFF)!=(rccode&0x7FFF)) || !(rccode&0x8000)) )
-		/*emit*/ input->keyPressed(eRCKey(this, (old&0x7FFF), eRCKey::flagBreak));
-	if ((old^rccode)&0x7FFF)
 	{
-		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
-		input->keyPressed(eRCKey(this, rccode&0x7FFF, 0));
+		repeattimer.stop();
+		/*emit*/ input->keyPressed(eRCKey(this, (old&0x7FFF), eRCKey::flagBreak));
 	}
+	if ((old^rccode)&0x7FFF)
+		input->keyPressed(eRCKey(this, rccode&0x7FFF, 0));
+	else if (rccode&0x8000 && !repeattimer.isActive())
+		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
 }
 
 void eRCDeviceDreambox2::timeOut()
