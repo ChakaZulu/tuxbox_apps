@@ -2407,10 +2407,13 @@ void eTimerEditView::applyPressed()
 	if ( getData( newEventBegin, newEventDuration) )  // all is okay... we add the event..
 	{
 		// parse EPGCache to get event informations
-		EITEvent *tmp = event_id && !multiple->isChecked() ? 
-			eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, event_id ) : 0;
-		if (!tmp)
-			tmp = eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, newEventBegin+newEventDuration / 2 );
+		EITEvent *tmp = 0;
+		if (!multiple->isChecked() && event_id)
+		{
+			tmp = eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, event_id );
+			if (!tmp)
+				tmp = eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)tmpService, newEventBegin+newEventDuration / 2 );
+		}
 		if (tmp)
 		{
 			evt = *tmp;
