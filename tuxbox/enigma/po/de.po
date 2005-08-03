@@ -3980,112 +3980,120 @@ msgstr "Software Aktualisierung"
 msgid "open software update"
 msgstr "Software Auktualisierung öffnen"
 
-#: src/setup_extra.cpp:67
+#: src/setup_extra.cpp:70
 msgid "Remote Control"
 msgstr "Fernbedienung"
 
-#: src/setup_extra.cpp:67
+#: src/setup_extra.cpp:70
 msgid "open remote control setup"
 msgstr "Fernbedienungseinstellungen anzeigen"
 
-#: src/setup_extra.cpp:69 src/setup_extra.cpp:218
+#: src/setup_extra.cpp:72 src/setup_extra.cpp:218
 msgid "Factory reset"
 msgstr "Standardeinstellungen"
 
-#: src/setup_extra.cpp:69
+#: src/setup_extra.cpp:72
 msgid "all settings will set to factory defaults"
 msgstr "Alle Einstellungen werden in den Auslieferungszustand zurückgesetzt"
 
-#: src/setup_extra.cpp:75
+#: src/setup_extra.cpp:78
 msgid "record split size (left, right)"
 msgstr "Splitgrösse für Aufnahmen (links,rechts)"
 
-#: src/setup_extra.cpp:92
+#: src/setup_extra.cpp:95
 msgid "Serviceselector help buttons"
 msgstr "Hilfebuttons in der Serviceliste"
 
-#: src/setup_extra.cpp:92
+#: src/setup_extra.cpp:95
 msgid "show colored help buttons in service selector"
 msgstr "Farbige Hilfebuttons in der Serviceliste zeigen"
 
-#: src/setup_extra.cpp:93
+#: src/setup_extra.cpp:96
 msgid "Show Sat position"
 msgstr "Sat Position anzeigen"
 
-#: src/setup_extra.cpp:93
+#: src/setup_extra.cpp:96
 msgid "show sat position in the infobar"
 msgstr "Sat Position in der Infoleiste anzeigen"
 
-#: src/setup_extra.cpp:95
+#: src/setup_extra.cpp:98
 msgid "Enable fast zapping"
 msgstr "Schnelles Umschalten"
 
-#: src/setup_extra.cpp:95
+#: src/setup_extra.cpp:98
 msgid "enables faster zapping.. but with visible sync"
 msgstr "Schaltet 'Schnelles Umschalten' an (mit sichtbarem Sync)"
 
-#: src/setup_extra.cpp:96
+#: src/setup_extra.cpp:99
 msgid "Skip confirmations"
 msgstr "Keine Bestätigungsmeldungen"
 
-#: src/setup_extra.cpp:96
+#: src/setup_extra.cpp:99
 msgid "enable/disable confirmations"
 msgstr "Bestätigungen an-/ausschalten"
 
-#: src/setup_extra.cpp:97
+#: src/setup_extra.cpp:100
 msgid "Hide error windows"
 msgstr "Keine Fehlermeldungen"
 
-#: src/setup_extra.cpp:97
+#: src/setup_extra.cpp:100
 msgid "don't show zap error messages"
 msgstr "Keine Umschalt-Fehlermeldungen anzeigen"
 
-#: src/setup_extra.cpp:98
+#: src/setup_extra.cpp:101
 msgid "Auto show Infobar"
 msgstr "Infoleiste automatisch anzeigen"
 
-#: src/setup_extra.cpp:98
+#: src/setup_extra.cpp:101
 msgid "always show infobar when new event info is avail"
 msgstr "Infoleiste anzeigen wenn eine neue Sendung beginnt"
 
-#: src/setup_extra.cpp:99
+#: src/setup_extra.cpp:102
 msgid "Show remaining Time"
 msgstr "Restzeit anzeigen"
 
-#: src/setup_extra.cpp:99
+#: src/setup_extra.cpp:102
 msgid "show event remaining time in the infobar"
 msgstr "Restzeit der laufenden Sendung in Infoleiste anzeigen"
 
-#: src/setup_extra.cpp:100
+#: src/setup_extra.cpp:103
 msgid "Use http authentification"
 msgstr "Http-Authentifizierung benutzen"
 
-#: src/setup_extra.cpp:100
+#: src/setup_extra.cpp:103
 msgid "enables the http (user/password) authentification"
 msgstr "Schaltet die http-Authentifizierung (Benutzer/Passwort) ein"
 
-#: src/setup_extra.cpp:101
+#: src/setup_extra.cpp:104
 msgid "Don't open serial port"
 msgstr "Serielle Schnittstelle nicht öffnen"
 
-#: src/setup_extra.cpp:101
+#: src/setup_extra.cpp:104
 msgid "don't write debug messages to /dev/tts/0"
 msgstr "Keine Debug-Messages auf /dev/tts/0 ausgeben"
 
-#: src/setup_extra.cpp:102
+#: src/setup_extra.cpp:105
 msgid "Auto bouquet change"
 msgstr "Bouquet automatisch wechseln"
 
-#: src/setup_extra.cpp:102
+#: src/setup_extra.cpp:105
 msgid "change into next bouquet when end of current bouquet is reached"
 msgstr ""
 "Ins nächste Bouquet wechseln, wenn das Ende des aktuellen erreicht ist."
 
-#: src/setup_extra.cpp:104
+#: src/setup_extra.cpp:109
+msgid "Enable file sharing"
+msgstr "Dateifreigaben aktivieren"
+
+#: src/setup_extra.cpp:109
+msgid "start file sharing(samba) on startup"
+msgstr "starte Samba beim Systemstart"
+
+#: src/setup_extra.cpp:112
 msgid "Disable teletext caching"
 msgstr "Videotext 'caching' abschalten"
 
-#: src/setup_extra.cpp:104
+#: src/setup_extra.cpp:112
 msgid "don't cache teletext pages in background"
 msgstr "Im Hintergrund keine Videotext Seiten sammeln"
 
