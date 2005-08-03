@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.28 2005/08/02 22:36:56 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.29 2005/08/03 20:05:49 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -63,6 +63,9 @@ void eExpertSetup::init_eExpertSetup()
 		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM7020 )  // no update for 7020 yet
 			CONNECT((new eListBoxEntryMenu(&list, _("Software Update"), eString().sprintf("(%d) %s", ++entry, _("open software update")) ))->selected, eExpertSetup::software_update);
 	}
+	int startSamba=1;
+	if ( eConfig::getInstance()->getKey("/elitedvb/network/samba", startSamba) )
+		eConfig::getInstance()->setKey("/elitedvb/network/samba", startSamba);
 #endif
 	CONNECT((new eListBoxEntryMenu(&list, _("Remote Control"), eString().sprintf("(%d) %s", ++entry, _("open remote control setup")) ))->selected, eExpertSetup::rc_setup);
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
@@ -100,9 +103,11 @@ void eExpertSetup::init_eExpertSetup()
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Use http authentification"), "/ezap/webif/lockWebIf", _("enables the http (user/password) authentification")))->selected, eExpertSetup::reinitializeHTTPServer );
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Don't open serial port"), "/ezap/extra/disableSerialOutput", _("don't write debug messages to /dev/tts/0")))->selected, eExpertSetup::reinitializeHTTPServer );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Auto bouquet change"), "/elitedvb/extra/autobouquetchange", _("change into next bouquet when end of current bouquet is reached"));
+#ifndef DISABLE_NETWORK
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
 	    eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
-		new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable file sharing"), "/elitedvb/network/samba", _("don't start file sharing(samba) on startup"));
+		new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Enable file sharing"), "/elitedvb/network/samba", _("start file sharing(samba) on startup"));
+#endif
 #ifndef TUXTXT_CFG_STANDALONE
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable teletext caching"), "/ezap/extra/teletext_caching", _("don't cache teletext pages in background")))->selected, eExpertSetup::tuxtxtCachingChanged );
 #endif
