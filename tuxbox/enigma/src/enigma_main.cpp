@@ -5484,12 +5484,16 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 			{
 				if ( mode != modeRadio )
+				{
+					eServiceReference oldref = eServiceInterface::getInstance()->service;
 					setMode(modeRadio,
 #ifndef DISABLE_FILE
 					eDVB::getInstance()->recorder ? 0 :
 #endif
 					1);
-				showServiceSelector(-1);
+					if ( oldref == eServiceInterface::getInstance()->service)
+						showServiceSelector(-1);
+				}
 			}
 		}
 		else if (event.action == &i_enigmaMainActions->modeTV)
@@ -5501,12 +5505,16 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 			{
 				if ( mode != modeTV )
+				{
+					eServiceReference oldref = eServiceInterface::getInstance()->service;
 					setMode(modeTV,
 #ifndef DISABLE_FILE
 					eDVB::getInstance()->recorder ? 0 :
 #endif
 					1);
-				showServiceSelector(-1);
+					if ( oldref == eServiceInterface::getInstance()->service)
+						showServiceSelector(-1);
+				}
 			}
 		}
 		else if (event.action == &i_enigmaMainActions->modeFile)
@@ -5518,8 +5526,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 			{
 				if ( mode != modeFile )
+				{
+					eServiceReference oldref = eServiceInterface::getInstance()->service;
 					setMode(modeFile, 2);
-				showServiceSelector(-1);
+					if ( oldref == eServiceInterface::getInstance()->service)
+						showServiceSelector(-1);
+				}
 			}
 		}
 #ifndef DISABLE_FILE
