@@ -381,30 +381,37 @@ void eZapEPG::selService(int dir)
 	isok = l != current_service->entries.end();
 	if (dir == +1)
 	{
-		++current_service;
-		if (current_service == serviceentries.end())
+		do
 		{
-			focusColumn=0;
-			close(2);
-			return;
+			++current_service;
+			if (current_service == serviceentries.end())
+			{
+				focusColumn=0;
+				close(2);
+				return;
+			}
+			else
+				++focusColumn;
 		}
-		else
-			++focusColumn;
+		while(current_service->entries.empty());
 	} else if (dir == -1)
 	{
-		if (current_service != serviceentries.begin())
+		do
 		{
-			--focusColumn;
-			--current_service;
+			if (current_service != serviceentries.begin())
+			{
+				--focusColumn;
+				--current_service;
+			}
+			else
+			{
+				close(1);
+				focusColumn=numservices-1;
+				return;
+			}
 		}
-		else
-		{
-			close(1);
-			focusColumn=numservices-1;
-			return;
-		}
+		while(current_service->entries.empty());
 	}
-
 	time_t last_time=0;
 
 	if (isok)
@@ -438,7 +445,7 @@ void eZapEPG::selService(int dir)
 
 void eZapEPG::selEntry(int dir)
 {
-	if (current_service == serviceentries.end())
+	if (current_service == serviceentries.end() || current_service->entries.empty())
 	{
 		if ( dir == -1 && offs >= hours*3600 )
 		{
@@ -447,11 +454,6 @@ void eZapEPG::selEntry(int dir)
 		}
 /*		else
 			eDebug("invalid service");*/
-		return;
-	}
-	if (current_service->entries.begin() == current_service->entries.end())
-	{
-//		eDebug("empty service");
 		return;
 	}
 	ePtrList<entry>::iterator l = current_service->current_entry;
@@ -569,19 +571,22 @@ void eZapEPG::buildPage(int direction)
 	}
 
 	int p=0;
+	std::set<int> nonEmptyServices;
+
 	do
 	{
 		if ( curE == services.end() )
 			break;
-		const eit_event_struct *e = (const eit_event_struct*) eEPGCache::getInstance()->lookupEvent( *curE, (time_t)(start+tmp), true );
-		if ( e )
+
+//		const eit_event_struct *e = (const eit_event_struct*) eEPGCache::getInstance()->lookupEvent( *curE, (time_t)(start+tmp), true );
+//		if ( e )
 		{
 			serviceentries.push_back(serviceentry());
 			serviceentry &service = serviceentries.back();
 			service.header = new eLabel(eventWidget);
 			service.header->move(ePoint(0, p * serviceheight + 35));
 			service.header->resize(eSize(90, serviceheight));
-			service.pos = eRect(100, p++ * serviceheight + 35, width - 100, serviceheight );
+			service.pos = eRect(100, p * serviceheight + 35, width - 100, serviceheight );
 
 			eString stext;
 			if ( curE->descr )   // have changed service name?
@@ -604,12 +609,19 @@ void eZapEPG::buildPage(int direction)
 
 			buildService(service);
 
-			// set focus line
-			if ( direction == 3 )  // up pressed
-			// set focus to last line
-				service.current_entry = --service.entries.end();
-			else  // set focus to first line
-				service.current_entry = service.entries.begin();
+			if ( service.entries.empty() )
+				service.current_entry = service.entries.end();
+			else
+			{
+				// set focus line
+				if ( direction == 3 )  // up pressed
+				// set focus to last line
+					service.current_entry = --service.entries.end();
+				else  // set focus to first line
+					service.current_entry = service.entries.begin();
+				nonEmptyServices.insert(p);
+			}
+			++p;
 		}
 		if ( ++curE == services.end() )  // need wrap ?
 			curE = services.begin();
@@ -624,10 +636,20 @@ void eZapEPG::buildPage(int direction)
 
 	eventWidget->show();
 
-	if ( !serviceentries.size() )
+	if ( serviceentries.empty() )
+	{
+		drawTimeLines();
 		return;
+	}
 
- // set column focus
+	std::set<int>::iterator it =
+		nonEmptyServices.lower_bound(focusColumn);
+	if ( it != nonEmptyServices.end() )
+		focusColumn = *it;
+	else
+		focusColumn = 0;
+
+	// set column focus
 	current_service = serviceentries.begin();
 	for (unsigned int i=0; i < focusColumn; i++ )
 	{
@@ -635,8 +657,12 @@ void eZapEPG::buildPage(int direction)
 			break;
 		current_service++;
 	}
+
 	if (current_service->current_entry != current_service->entries.end())
 		current_service->current_entry->gotFocus();
+
+	if (nonEmptyServices.empty())
+		drawTimeLines();
 }
 
 void eZapEPG::drawTimeLines()
