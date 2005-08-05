@@ -94,19 +94,21 @@ eString setStreamingServerSettings(eString request, eString dirpath, eString opt
 	return closeWindow(content, "", 500);
 }
 
-eString streamingServer(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+eString getStreamingServer()
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	
 	eString result = readFile(TEMPLATE_DIR + "streamingServer.tmp");
-	
 	char *drive;
 	if (eConfig::getInstance()->getKey("/movieplayer/dvddrive", drive))
 		drive = strdup("D");
 	result.strReplace("#DRIVE#", eString(drive));
 	free(drive);
-		
 	return result;
+}
+
+eString streamingServer(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	return getStreamingServer();
 }
 
 eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnection *content)

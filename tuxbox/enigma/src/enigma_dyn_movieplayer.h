@@ -3,6 +3,7 @@
 
 class eHTTPDynPathResolver;
 void ezapMoviePlayerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb);
+eString getStreamingServer();
 
 #endif
 
