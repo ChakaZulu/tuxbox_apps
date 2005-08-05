@@ -50,6 +50,8 @@ void eEPGCache::timeUpdated()
 	{
 		eDebug("[EPGC] time updated.. start EPG Mainloop");
 		run();
+		if ( cached_service )
+			enterService(cached_service, cached_err);
 	}
 	else
 		messages.send(Message(Message::timeChanged));
@@ -1033,13 +1035,22 @@ void eEPGCache::enterService(const eServiceReferenceDVB& ref, int err)
 				break;
 		}
 
-	messages.send(Message(Message::enterService, ref, err));
+	if ( thread_running() )
 	// -> gotMessage -> changedService
+		messages.send(Message(Message::enterService, ref, err));
+	else
+	{
+		cached_service = ref;
+		cached_err = err;
+	}
 }
 
 void eEPGCache::leaveService(const eServiceReferenceDVB& ref)
 {
-	messages.send(Message(Message::leaveService, ref));
+	if ( thread_running() )
+		messages.send(Message(Message::leaveService, ref));
+	else
+		cached_service=eServiceReferenceDVB();
 	// -> gotMessage -> abortEPG
 }
 

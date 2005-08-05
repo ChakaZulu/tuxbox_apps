@@ -274,6 +274,11 @@ public:
 	};
 	eFixedMessagePump<Message> messages;
 private:
+	// needed for caching current service until the thread has started
+	// (valid transponder time received)
+	eServiceReferenceDVB cached_service;
+	int cached_err;
+
 	static pthread_mutex_t cache_lock;
 	uniqueEPGKey current_service;
 	int paused;
