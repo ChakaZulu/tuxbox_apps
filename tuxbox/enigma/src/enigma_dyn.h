@@ -2,9 +2,9 @@
 #define __enigma_dyn_h
 
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.6.0-Expert"
+#define WEBIFVERSION "4.6.1-Expert"
 #else
-#define WEBIFVERSION "4.6.0"
+#define WEBIFVERSION "4.6.1"
 #endif
 
 #define ZAPMODETV 0
@@ -12,6 +12,7 @@
 #define ZAPMODEDATA 2
 #define ZAPMODERECORDINGS 3
 #define ZAPMODEROOT 4
+#define ZAPMODESTREAMING 5
 
 #define ZAPSUBMODENAME 0
 #define ZAPSUBMODECATEGORY 1
