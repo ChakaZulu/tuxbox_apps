@@ -431,8 +431,9 @@ static CodeRate etsiToDvbApiFEC(int fec)
 	case 5:
 		return FEC_7_8;
 	default:
-		return FEC_AUTO;
+		break;
 	}
+	return FEC_AUTO;
 }
 
 static Modulation etsiToDvbApiModulation(int mod)
@@ -465,6 +466,8 @@ static Modulation etsiToDvbApiConstellation(int mod)
 			return QAM_16;
 		case 2:
 			return QAM_64;
+		default:
+			break;
 	}
 	return (Modulation)QAM_AUTO;
 }
@@ -483,6 +486,8 @@ static CodeRate etsiToDvbApiCodeRate(int rate)
 			return FEC_5_6;
 		case 4:
 			return FEC_7_8;
+		default:
+			break;
 	}
 	return (CodeRate)FEC_AUTO;
 }
@@ -497,6 +502,8 @@ static BandWidth etsiToDvbApiBandwidth(int bwidth)
 			return BANDWIDTH_7_MHZ;
 		case 2:
 			return BANDWIDTH_6_MHZ;
+		default:
+			break;
 	}
 	return (BandWidth)BANDWIDTH_AUTO;
 }
@@ -513,6 +520,8 @@ static GuardInterval etsiToDvbApiGuardInterval( int interval )
 			return GUARD_INTERVAL_1_8;
 		case 3:
 			return GUARD_INTERVAL_1_4;
+		default:
+			break;
 	}
 	return (GuardInterval)GUARD_INTERVAL_AUTO;
 }
@@ -525,6 +534,8 @@ static TransmitMode etsiToDvbApiTransmitMode( int mode )
 			return TRANSMISSION_MODE_2K;
 		case 1:
 			return TRANSMISSION_MODE_8K;
+		default:
+			break;
 	}
 	return (TransmitMode)TRANSMISSION_MODE_AUTO;
 }
@@ -541,6 +552,8 @@ static Hierarchy etsiToDvbApiHierarchyInformation( int hierarchy )
 			return HIERARCHY_2;
 		case 3:
 			return HIERARCHY_4;
+		default:
+			break;
 	}
 	return (Hierarchy)HIERARCHY_AUTO;
 }
@@ -559,8 +572,9 @@ static int dvbApiToEtsiCodeRate(CodeRate cr)
 	case FEC_7_8:
 		return 4;
 	default:
-		return -1;
+		break;
 	}
+	return -1;
 }
 
 static int dvbApiToEtsiConstellation(Modulation mod)
@@ -589,6 +603,8 @@ static int dvbApiToEtsiBandWidth(BandWidth bw)
 			return 1;
 		case BANDWIDTH_6_MHZ:
 			return 2;
+		default:
+			break;
 	}
 	return 3;
 }
@@ -605,6 +621,8 @@ static int dvbApiToEtsiGuardInterval( GuardInterval interval )
 			return 2;
 		case GUARD_INTERVAL_1_4:
 			return 3;
+		default:
+			break;
 	}
 	return 4;
 }
@@ -617,6 +635,8 @@ static int dvbApiToEtsiTransmitMode( TransmitMode mode )
 			return 0;
 		case TRANSMISSION_MODE_8K:
 			return 1;
+		default:
+			break;
 	}
 	return 2;
 }
@@ -633,6 +653,8 @@ static int dvbApiToEtsiHierarchyInformation( Hierarchy hierarchy )
 			return 2;
 		case HIERARCHY_4:
 			return 3;
+		default:
+			break;
 	}
 	return 4;
 }
@@ -2169,6 +2191,7 @@ int eFrontend::savePower()
 
 void eFrontend::setTerrestrialAntennaVoltage(bool state)
 {
+#if HAVE_DVB_API_VERSION < 3
 	int secfd=::open(SEC_DEV, O_RDWR);
 	if (secfd<0)
 	{
@@ -2178,4 +2201,5 @@ void eFrontend::setTerrestrialAntennaVoltage(bool state)
 	if ( ::ioctl(secfd, SEC_SET_VOLTAGE, state ? SEC_VOLTAGE_OFF : SEC_VOLTAGE_13) < 0 )
 		eDebug("SEC_SET_VOLTAGE (-T) failed (%m)");
 	::close(secfd);
+#endif
 }
