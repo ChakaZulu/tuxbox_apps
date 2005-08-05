@@ -45,7 +45,6 @@ function update2()
 }
 function go(targetURL)
 {
-	document.vlc.stop();
 	document.vlc.clear_playlist();
 	document.vlc.add_item(targetURL);
 	document.vlc.play();
