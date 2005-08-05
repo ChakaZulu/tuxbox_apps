@@ -20,7 +20,7 @@
 		<tr><td>Namespace:</td><td><xsl:value-of select="streaminfo/namespace"/></td></tr>
 		<tr><td>Supported Crypto Systems:</td><td><xsl:value-of select="streaminfo/supported_crypt_systems"/></td></tr>
 		<tr><td>Used Crypto Systems:</td><td><xsl:value-of select="streaminfo/used_crypt_systems"/></td></tr>
-		<tr><td>Center Frequency:</td><td><xsl:value-of select="streaminfo/centerfrequency"/> MHz</td></tr>
+		<tr><td>Center Frequency:</td><td><xsl:value-of select="streaminfo/frequency"/> KHz</td></tr>
 		<tr><td>Hierarchy Info:</td><td><xsl:value-of select="streaminfo/hierarchyinfo"/></td></tr>
 		<tr><td>Inversion:</td><td><xsl:value-of select="streaminfo/inversion"/></td></tr>
 		<tr><td>Bandwidth:</td><td><xsl:value-of select="streaminfo/bandwidth"/></td></tr>

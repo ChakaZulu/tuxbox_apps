@@ -75,7 +75,15 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 			return;
 		}
 	} else
+	{
 		secfd=-1;
+		if (type == eSystemInfo::feTerrestrial)
+		{
+			int antenna_5v_disabled=0;
+			eConfig::getInstance()->getKey("/elitedvb/DVB/config/disable_5V", antenna_5v_disabled);
+			setTerrestrialAntennaVoltage(antenna_5v_disabled);
+		}
+	}
 #else
 	curContTone = curVoltage = -1;
 #endif
@@ -403,7 +411,7 @@ uint32_t eFrontend::UncorrectedBlocks()
 	return ublocks;
 }
 
-static CodeRate getFEC(int fec)		// etsi -> api
+static CodeRate etsiToDvbApiFEC(int fec)
 {
 	switch (fec)
 	{
@@ -427,7 +435,7 @@ static CodeRate getFEC(int fec)		// etsi -> api
 	}
 }
 
-static Modulation getModulation(int mod)
+static Modulation etsiToDvbApiModulation(int mod)
 {
 	switch (mod)
 	{
@@ -447,13 +455,13 @@ static Modulation getModulation(int mod)
 }
 
 // conversions etsi -> API for DVB-T
-static Modulation getConstellation(int mod)
+static Modulation etsiToDvbApiConstellation(int mod)
 {
 	switch (mod)
 	{
 		case 0:
 			return QPSK;
-		case 1: 
+		case 1:
 			return QAM_16;
 		case 2:
 			return QAM_64;
@@ -461,7 +469,7 @@ static Modulation getConstellation(int mod)
 	return (Modulation)QAM_AUTO;
 }
 
-static CodeRate getCodeRate(int rate)
+static CodeRate etsiToDvbApiCodeRate(int rate)
 {
 	switch(rate)
 	{
@@ -479,13 +487,13 @@ static CodeRate getCodeRate(int rate)
 	return (CodeRate)FEC_AUTO;
 }
 
-static BandWidth getBandWidth(int bwidth)
+static BandWidth etsiToDvbApiBandwidth(int bwidth)
 {
 	switch(bwidth)
 	{
-		case 0: 
+		case 0:
 			return BANDWIDTH_8_MHZ;
-		case 1: 
+		case 1:
 			return BANDWIDTH_7_MHZ;
 		case 2:
 			return BANDWIDTH_6_MHZ;
@@ -493,7 +501,7 @@ static BandWidth getBandWidth(int bwidth)
 	return (BandWidth)BANDWIDTH_AUTO;
 }
 
-GuardInterval getGuardInterval( int interval )
+static GuardInterval etsiToDvbApiGuardInterval( int interval )
 {
 	switch(interval)
 	{
@@ -509,9 +517,9 @@ GuardInterval getGuardInterval( int interval )
 	return (GuardInterval)GUARD_INTERVAL_AUTO;
 }
 
-TransmitMode getTransmitMode( int mode )
+static TransmitMode etsiToDvbApiTransmitMode( int mode )
 {
-	switch(mode)  // !! IS THIS CORRECT ?? 
+	switch(mode)
 	{
 		case 0:
 			return TRANSMISSION_MODE_2K;
@@ -521,7 +529,7 @@ TransmitMode getTransmitMode( int mode )
 	return (TransmitMode)TRANSMISSION_MODE_AUTO;
 }
 
-Hierarchy getHierarchyInformation( int hierarchy )
+static Hierarchy etsiToDvbApiHierarchyInformation( int hierarchy )
 {
 	switch(hierarchy)
 	{
@@ -537,7 +545,7 @@ Hierarchy getHierarchyInformation( int hierarchy )
 	return (Hierarchy)HIERARCHY_AUTO;
 }
 
-int dvbtApiToEtsiCodeRate(CodeRate cr)
+static int dvbApiToEtsiCodeRate(CodeRate cr)
 {
 	switch (cr) {
 	case FEC_1_2:
@@ -554,6 +562,81 @@ int dvbtApiToEtsiCodeRate(CodeRate cr)
 		return -1;
 	}
 }
+
+static int dvbApiToEtsiConstellation(Modulation mod)
+{
+	switch(mod)
+	{
+		case QPSK:
+			return 0;
+		case QAM_16:
+			return 1;
+		case QAM_64:
+			return 2;
+		default:
+			break;
+	}
+	return 3;
+}
+
+static int dvbApiToEtsiBandWidth(BandWidth bw)
+{
+	switch(bw)
+	{
+		case BANDWIDTH_8_MHZ:
+			return 0;
+		case BANDWIDTH_7_MHZ:
+			return 1;
+		case BANDWIDTH_6_MHZ:
+			return 2;
+	}
+	return 3;
+}
+
+static int dvbApiToEtsiGuardInterval( GuardInterval interval )
+{
+	switch(interval)
+	{
+		case GUARD_INTERVAL_1_32:
+			return 0;
+		case GUARD_INTERVAL_1_16:
+			return 1;
+		case GUARD_INTERVAL_1_8:
+			return 2;
+		case GUARD_INTERVAL_1_4:
+			return 3;
+	}
+	return 4;
+}
+
+static int dvbApiToEtsiTransmitMode( TransmitMode mode )
+{
+	switch(mode)
+	{
+		case TRANSMISSION_MODE_2K:
+			return 0;
+		case TRANSMISSION_MODE_8K:
+			return 1;
+	}
+	return 2;
+}
+
+static int dvbApiToEtsiHierarchyInformation( Hierarchy hierarchy )
+{
+	switch(hierarchy)
+	{
+		case HIERARCHY_NONE:
+			return 0;
+		case HIERARCHY_1:
+			return 1;
+		case HIERARCHY_2:
+			return 2;
+		case HIERARCHY_4:
+			return 3;
+	}
+	return 4;
+}
+
 
 int gotoXTable[10] = { 0x00, 0x02, 0x03, 0x05, 0x06, 0x08, 0x0A, 0x0B, 0x0D, 0x0E };
 
@@ -1431,13 +1514,14 @@ void eFrontend::updateTransponder()
 	}
 	else if ((type==eSystemInfo::feTerrestrial) && (transponder->terrestrial.valid)) {
 #if HAVE_DVB_API_VERSION < 3
-		eDebug("[FE] update transponder data");
-		transponder->terrestrial.code_rate_hp = dvbtApiToEtsiCodeRate(front.u.ofdm.HP_CodeRate);
-		transponder->terrestrial.code_rate_lp = dvbtApiToEtsiCodeRate(front.u.ofdm.LP_CodeRate);
-		transponder->terrestrial.constellation = front.u.ofdm.Constellation;
-		transponder->terrestrial.transmission_mode = front.u.ofdm.TransmissionMode;
-		transponder->terrestrial.guard_interval = front.u.ofdm.guardInterval;
-		transponder->terrestrial.hierarchy_information = front.u.ofdm.HierarchyInformation;
+		transponder->terrestrial.centre_frequency = front.Frequency;
+		transponder->terrestrial.bandwidth = dvbApiToEtsiBandWidth(front.u.ofdm.bandWidth);
+		transponder->terrestrial.code_rate_hp = dvbApiToEtsiCodeRate(front.u.ofdm.HP_CodeRate);
+		transponder->terrestrial.code_rate_lp = dvbApiToEtsiCodeRate(front.u.ofdm.LP_CodeRate);
+		transponder->terrestrial.constellation = dvbApiToEtsiConstellation(front.u.ofdm.Constellation);
+		transponder->terrestrial.transmission_mode = dvbApiToEtsiTransmitMode(front.u.ofdm.TransmissionMode);
+		transponder->terrestrial.guard_interval = dvbApiToEtsiGuardInterval(front.u.ofdm.guardInterval);
+		transponder->terrestrial.hierarchy_information = dvbApiToEtsiHierarchyInformation(front.u.ofdm.HierarchyInformation);
 #else
 		// FIXME
 #endif
@@ -1964,12 +2048,12 @@ send:
 #if HAVE_DVB_API_VERSION < 3
 	front.Inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
-	front.u.qpsk.FEC_inner=getFEC(FEC_inner);
+	front.u.qpsk.FEC_inner=etsiToDvbApiFEC(FEC_inner);
 	front.u.qpsk.SymbolRate=SymbolRate;
 #else
 	front.inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
-	front.u.qpsk.fec_inner=getFEC(FEC_inner);
+	front.u.qpsk.fec_inner=etsiToDvbApiFEC(FEC_inner);
 	front.u.qpsk.symbol_rate=SymbolRate;
 #endif
 
@@ -1993,15 +2077,15 @@ int eFrontend::tune_qam(eTransponder *trans,
 	front.Inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
 	front.Frequency=Frequency;
-	front.u.qam.QAM=getModulation(QAM);
-	front.u.qam.FEC_inner=getFEC(FEC_inner);
+	front.u.qam.QAM=etsiToDvbApiModulation(QAM);
+	front.u.qam.FEC_inner=etsiToDvbApiFEC(FEC_inner);
 	front.u.qam.SymbolRate=SymbolRate;
 #else
 	front.inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
 	front.frequency = Frequency*1000; // dbox2 v3 drivers need frequency as Hz
-	front.u.qam.modulation=getModulation(QAM);
-	front.u.qam.fec_inner=getFEC(FEC_inner);
+	front.u.qam.modulation=etsiToDvbApiModulation(QAM);
+	front.u.qam.fec_inner=etsiToDvbApiFEC(FEC_inner);
 	front.u.qam.symbol_rate=SymbolRate;
 #endif
 	return setFrontend();
@@ -2022,27 +2106,27 @@ int eFrontend::tune_ofdm(eTransponder *trans,
 	tune_all(trans);
 
 #if HAVE_DVB_API_VERSION < 3
-	front.Inversion=(inversion == 2 ? INVERSION_AUTO : 
+	front.Inversion=(inversion == 2 ? INVERSION_AUTO :
 		(inversion?INVERSION_ON:INVERSION_OFF) );
 	front.Frequency = centre_frequency;
-	front.u.ofdm.bandWidth=getBandWidth(bandwidth);
-	front.u.ofdm.HP_CodeRate=getCodeRate(code_rate_lp);
-	front.u.ofdm.LP_CodeRate=getCodeRate(code_rate_hp);
-	front.u.ofdm.Constellation=getConstellation(constellation);
-	front.u.ofdm.TransmissionMode=getTransmitMode(transmission_mode);
-	front.u.ofdm.guardInterval=getGuardInterval(guard_interval);
-	front.u.ofdm.HierarchyInformation=getHierarchyInformation(hierarchy_information);
+	front.u.ofdm.bandWidth=etsiToDvbApiBandwidth(bandwidth);
+	front.u.ofdm.HP_CodeRate=etsiToDvbApiCodeRate(code_rate_hp);
+	front.u.ofdm.LP_CodeRate=etsiToDvbApiCodeRate(code_rate_lp);
+	front.u.ofdm.Constellation=etsiToDvbApiConstellation(constellation);
+	front.u.ofdm.TransmissionMode=etsiToDvbApiTransmitMode(transmission_mode);
+	front.u.ofdm.guardInterval=etsiToDvbApiGuardInterval(guard_interval);
+	front.u.ofdm.HierarchyInformation=etsiToDvbApiHierarchyInformation(hierarchy_information);
 #else
 	front.inversion=(inversion == 2 ? INVERSION_AUTO :
 		(inversion?INVERSION_ON:INVERSION_OFF) );
 	front.frequency = centre_frequency;
-	front.u.ofdm.bandwidth=getBandWidth(bandwidth);
-	front.u.ofdm.code_rate_HP=getCodeRate(code_rate_lp);
-	front.u.ofdm.code_rate_LP=getCodeRate(code_rate_hp);
-	front.u.ofdm.constellation=getConstellation(constellation);
-	front.u.ofdm.transmission_mode=getTransmitMode(transmission_mode);
-	front.u.ofdm.guard_interval=getGuardInterval(guard_interval);
-	front.u.ofdm.hierarchy_information=getHierarchyInformation(hierarchy_information);
+	front.u.ofdm.bandwidth=etsiToDvbApiBandwidth(bandwidth);
+	front.u.ofdm.code_rate_HP=etsiToDvbApiCodeRate(code_rate_hp);
+	front.u.ofdm.code_rate_LP=etsiToDvbApiCodeRate(code_rate_lp);
+	front.u.ofdm.constellation=etsiToDvbApiConstellation(constellation);
+	front.u.ofdm.transmission_mode=etsiToDvbApiTransmitMode(transmission_mode);
+	front.u.ofdm.guard_interval=etsiToDvbApiGuardInterval(guard_interval);
+	front.u.ofdm.hierarchy_information=etsiToDvbApiHierarchyInformation(hierarchy_information);
 #endif
 	return setFrontend();
 }
@@ -2081,4 +2165,17 @@ int eFrontend::savePower()
 	transponder=0;
 	needreset = 2;
 	return 0;
+}
+
+void eFrontend::setTerrestrialAntennaVoltage(bool state)
+{
+	int secfd=::open(SEC_DEV, O_RDWR);
+	if (secfd<0)
+	{
+		eDebug("open secfd failed(%m)");
+		return;
+	}
+	if ( ::ioctl(secfd, SEC_SET_VOLTAGE, state ? SEC_VOLTAGE_OFF : SEC_VOLTAGE_13) < 0 )
+		eDebug("SEC_SET_VOLTAGE (-T) failed (%m)");
+	::close(secfd);
 }

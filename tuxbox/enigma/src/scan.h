@@ -35,6 +35,7 @@ class tsSelectType: public eWidget
 	eListBox<eListBoxEntryText> *list;
 	void selected(eListBoxEntryText *entry);
 	int eventHandler( const eWidgetEvent &e );
+	eListBoxEntryCheck *check;
 public:
 	tsSelectType(eWidget *parent);
 };

@@ -24,7 +24,7 @@
 #include <lib/system/info.h>
 
 tsSelectType::tsSelectType(eWidget *parent)
-	:eWidget(parent)
+	:eWidget(parent), check(NULL)
 {
 	list=new eListBox<eListBoxEntryText>(this);
 	list->setName("menu");
@@ -33,6 +33,13 @@ tsSelectType::tsSelectType(eWidget *parent)
 		eFatal("skin load of \"tsSelectType\" failed");
 
 	list->setFlags(eListBox<eListBoxEntryText>::flagShowEntryHelp);
+
+	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
+	{
+		check=new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)list, _("Disable 5V"), "/elitedvb/DVB/config/disable_5V", _("disable 5V for passive terrerstrial antennas"));
+		check->selected.connect( slot(*eFrontend::getInstance(), &eFrontend::setTerrestrialAntennaVoltage) );
+		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	}
 	new eListBoxEntryText(list, _("Automatic Transponder Scan"), (void*)2, 0, _("open automatic transponder scan") );
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 		new eListBoxEntryText(list, _("Automatic Multisat Scan"), (void*)3, 0, _("open automatic multisat transponder scan") );
@@ -42,6 +49,8 @@ tsSelectType::tsSelectType(eWidget *parent)
 
 void tsSelectType::selected(eListBoxEntryText *entry)
 {
+	if ( entry == check )
+		return;
 	if (entry && entry->getKey())
 		close((int)entry->getKey());
 	else

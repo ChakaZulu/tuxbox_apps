@@ -429,7 +429,7 @@
 			<eLabel name="ber_num" position="210:180" size="150:50" font="eSatfind" vcenter="on" />
 			<eProgress name="ber" position="10:230" size="e-10:40" />
 
-			<eLabel text="Satellite:" position="10:285" size="160:35" vcenter="on" />
+			<eLabel name="lSat" text="Satellite:" position="10:285" size="160:35" vcenter="on" />
 			<eComboBox name="sat" position="180:285" size="e-10:35" helptext="choose the Satellite you wish to find" loadDeco="" />
 
 			<eLabel text="Transponder:" position="10:330" size="160:35" vcenter="on" />

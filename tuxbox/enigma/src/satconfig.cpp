@@ -496,7 +496,7 @@ eSatellite *eSatelliteConfigurationManager::getSat4LnbButton( const eButton *b )
 	return it != entryMap.end()?it->first:0;
 }
 
-#define DESC_POS_X 350
+#define DESC_POS_X 330
 #define SAT_POS_X  0
 #define LNB_POS_X  260
 #define HILO_POS_X  330
@@ -564,7 +564,7 @@ void eSatelliteConfigurationManager::repositionWidgets()
 		entry.fixed->hide();
 		entry.description->hide();
 
-		entry.sat->move( ePoint((tmp>2?SAT_POS_X:75), y) );
+		entry.sat->move( ePoint((tmp>2?SAT_POS_X:55), y) );
 		entry.fixed->move( ePoint(0, y) );
 		entry.description->move( ePoint(DESC_POS_X, y) );
 		entry.lnb->move( ePoint(LNB_POS_X, y) );

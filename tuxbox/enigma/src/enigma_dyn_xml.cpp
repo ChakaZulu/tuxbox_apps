@@ -483,7 +483,13 @@ static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, e
 					result.strReplace("#FREQUENCY#", eString().sprintf("%d", tp->satellite.frequency / 1000));
 					result.strReplace("#SYMBOLRATE#", eString().sprintf("%d", tp->satellite.symbol_rate / 1000));
 					result.strReplace("#POLARISATION#", tp->satellite.polarisation ? "Vertical" : "Horizontal");
-					result.strReplace("#INVERSION#", tp->satellite.inversion ? "Yes" : "No");
+
+					switch(tp->satellite.inversion)
+					{
+						case 0: result.strReplace("#INVERSION#", "No"); break;
+						case 1: result.strReplace("#INVERSION#", "Yes"); break;
+						default: result.strReplace("#INVERSION#", "Auto"); break;
+					}
 
 					switch (tp->satellite.fec)
 					{
@@ -513,7 +519,13 @@ static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, e
 				result.strReplace("#FRONTEND#", "DVB-C");
 				result.strReplace("#FREQUENCY#", eString().sprintf("%d", tp->cable.frequency / 1000));
 				result.strReplace("#SYMBOLRATE#", eString().sprintf("%d", tp->cable.symbol_rate / 1000));
-				result.strReplace("#INVERSION#", tp->cable.inversion ? "Yes" : "No");
+
+				switch(tp->cable.inversion)
+				{
+					case 0: result.strReplace("#INVERSION#", "No"); break;
+					case 1: result.strReplace("#INVERSION#", "Yes"); break;
+					default: result.strReplace("#INVERSION#", "Auto"); break;
+				}
 
 				switch (tp->cable.modulation)
 				{
@@ -527,72 +539,87 @@ static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, e
 
 				switch (tp->cable.fec_inner)
 				{
-					case 0: result.strReplace("FEC#", "Auto"); break;
-					case 1: result.strReplace("FEC#", "1/2"); break;
-					case 2: result.strReplace("FEC#", "2/3"); break;
-					case 3: result.strReplace("FEC#", "3/4"); break;
-					case 4: result.strReplace("FEC#", "5/6"); break;
-					case 5: result.strReplace("FEC#", "7/8"); break;
-					case 6: result.strReplace("FEC#", "8/9"); break;
+					case 0: result.strReplace("#FEC#", "Auto"); break;
+					case 1: result.strReplace("#FEC#", "1/2"); break;
+					case 2: result.strReplace("#FEC#", "2/3"); break;
+					case 3: result.strReplace("#FEC#", "3/4"); break;
+					case 4: result.strReplace("#FEC#", "5/6"); break;
+					case 5: result.strReplace("#FEC#", "7/8"); break;
+					case 6: result.strReplace("#FEC#", "8/9"); break;
 				}
 				break;
 			}
 			case eSystemInfo::feTerrestrial:
 			{
 				result.strReplace("#FRONTEND#", "DVB-T");
-				result.strReplace("#CENTERFREQUENCY#", eString().sprintf("%d",  tp->terrestrial.centre_frequency / 1000));
-				result.strReplace("#INVERSION#", eString().sprintf("%d",  tp->terrestrial.inversion));
-				result.strReplace("#HIERARCHYINFO#", eString().sprintf("%d",   tp->terrestrial.hierarchy_information));
+				result.strReplace("#FREQUENCY#", eString().sprintf("%d",  tp->terrestrial.centre_frequency / 1000));
+				
+				switch(tp->terrestrial.inversion)
+				{
+					case 0: result.strReplace("#INVERSION#", "No"); break;
+					case 1: result.strReplace("#INVERSION#", "Yes"); break;
+					default: result.strReplace("#INVERSION#", "Auto"); break;
+				}
+
+				switch (tp->terrestrial.hierarchy_information)
+				{
+					case 0: result.strReplace("#HIERARCHYINFO#", "None"); break;
+					case 1: result.strReplace("#HIERARCHYINFO#", "1"); break;
+					case 2: result.strReplace("#HIERARCHYINFO#", "2"); break;
+					case 3: result.strReplace("#HIERARCHYINFO#", "4"); break;
+					default: result.strReplace("#HIERARCHYINFO#", "Auto"); break;
+				}
 
 				switch (tp->terrestrial.bandwidth)
 				{
-					case 0: result.strReplace("#BANDWIDTH#", "8"); break;
-					case 1: result.strReplace("#BANDWIDTH#", "7"); break;
-					case 2: result.strReplace("#BANDWIDTH#", "6"); break;
+					case 0: result.strReplace("#BANDWIDTH#", "8 Mhz"); break;
+					case 1: result.strReplace("#BANDWIDTH#", "7 Mhz"); break;
+					case 2: result.strReplace("#BANDWIDTH#", "6 Mhz"); break;
+					default:result.strReplace("#BANDWIDTH#", "Auto"); break;
 				}
 
 				switch (tp->terrestrial.constellation)
 				{
-					case 0: result.strReplace("#CONSTELLATION#", "Auto"); break;
-					case 1: result.strReplace("#CONSTELLATION#", "QPSK"); break;
-					case 2: result.strReplace("#CONSTELLATION#", "16-QAM"); break;
-					case 3: result.strReplace("#CONSTELLATION#", "64-QAM"); break;
+					case 0: result.strReplace("#CONSTELLATION#", "QPSK"); break;
+					case 1: result.strReplace("#CONSTELLATION#", "16-QAM"); break;
+					case 2: result.strReplace("#CONSTELLATION#", "64-QAM"); break;
+					default: result.strReplace("#CONSTELLATION#", "Auto"); break;
 				}
 
 				switch (tp->terrestrial.guard_interval)
 				{
-					case 0: result.strReplace("#GUARDINTERVAL#", "Auto"); break;
-					case 1: result.strReplace("#GUARDINTERVAL#", "1/32"); break;
-					case 2: result.strReplace("#GUARDINTERVAL#", "1/16"); break;
-					case 3: result.strReplace("#GUARDINTERVAL#", "1/8"); break;
-					case 4: result.strReplace("#GUARDINTERVAL#", "1/4"); break;
+					case 0: result.strReplace("#GUARDINTERVAL#", "1/32"); break;
+					case 1: result.strReplace("#GUARDINTERVAL#", "1/16"); break;
+					case 2: result.strReplace("#GUARDINTERVAL#", "1/8"); break;
+					case 3: result.strReplace("#GUARDINTERVAL#", "1/4"); break;
+					default: result.strReplace("#GUARDINTERVAL#", "Auto"); break;
 				}
 
 				switch (tp->terrestrial.transmission_mode)
 				{
-					case 0: result.strReplace("#TRANSMISSION#", "Auto"); break;
-					case 1: result.strReplace("#TRANSMISSION#", "2k"); break;
-					case 2: result.strReplace("#TRANSMISSION#", "8k"); break;
+					case 0: result.strReplace("#TRANSMISSION#", "2k"); break;
+					case 1: result.strReplace("#TRANSMISSION#", "8k"); break;
+					default: result.strReplace("#TRANSMISSION#", "Auto"); break;
 				}
 
 				switch (tp->terrestrial.code_rate_lp)
 				{
-					case 0: result.strReplace("#CODERATELP#", "Auto"); break;
-					case 1: result.strReplace("#CODERATELP#", "1/2"); break;
-					case 2: result.strReplace("#CODERATELP#", "2/3"); break;
-					case 3: result.strReplace("#CODERATELP#", "3/4"); break;
-					case 4: result.strReplace("#CODERATELP#", "5/6"); break;
-					case 5: result.strReplace("#CODERATELP#", "7/8"); break;
+					case 0: result.strReplace("#CODERATELP#", "1/2"); break;
+					case 1: result.strReplace("#CODERATELP#", "2/3"); break;
+					case 2: result.strReplace("#CODERATELP#", "3/4"); break;
+					case 3: result.strReplace("#CODERATELP#", "5/6"); break;
+					case 4: result.strReplace("#CODERATELP#", "7/8"); break;
+					default: result.strReplace("#CODERATELP#", "Auto"); break;
 				}
 				
 				switch (tp->terrestrial.code_rate_hp)
 				{
-					case 0: result.strReplace("#CODERATEHP#", "Auto"); break;
-					case 1: result.strReplace("#CODERATEHP#", "1/2"); break;
-					case 2: result.strReplace("#CODERATEHP#", "2/3"); break;
-					case 3: result.strReplace("#CODERATEHP#", "3/4"); break;
-					case 4: result.strReplace("#CODERATEHP#", "5/6"); break;
-					case 5: result.strReplace("#CODERATEHP#", "7/8"); break;
+					case 0: result.strReplace("#CODERATEHP#", "1/2"); break;
+					case 1: result.strReplace("#CODERATEHP#", "2/3"); break;
+					case 2: result.strReplace("#CODERATEHP#", "3/4"); break;
+					case 3: result.strReplace("#CODERATEHP#", "5/6"); break;
+					case 4: result.strReplace("#CODERATEHP#", "7/8"); break;
+					default: result.strReplace("#CODERATEHP#", "Auto"); break;
 				}
 				
 				break;

@@ -10,6 +10,7 @@
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvb.h>
+#include <lib/system/info.h>
 #include <math.h>
 
 eSatfind::eSatfind(eFrontend *fe)
@@ -48,6 +49,9 @@ eSatfind::eSatfind(eFrontend *fe)
 
 	CONNECT(updateTimer.timeout, eSatfind::update);
 
+	eLabel *l = new eLabel(this);
+	l->setName("lSat");
+
 	if (eSkin::getActive()->build(this, "eSatfind"))
 		return;
 
@@ -58,12 +62,25 @@ eSatfind::eSatfind(eFrontend *fe)
 
 	eListBoxEntryText *sel=0;
 
+	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
+	{
+		setText(_("Signalfind"));
+		l->setText(_("Region:"));
+	}
+
+	std::map<int,eSatellite*> sats;
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			if ( current && s->getOrbitalPosition() == current->satellite.orbital_position )
-				sel = new eListBoxEntryText(*sat, s->getDescription().c_str(), (void*) *s);
+			sats[s->getOrbitalPosition()]=s;
+
+	for ( std::list<tpPacket>::const_iterator i(eTransponderList::getInstance()->getNetworks().begin()); i != eTransponderList::getInstance()->getNetworks().end(); ++i)
+		if ( ( sats.find(i->orbital_position) != sats.end()) || (eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite) )
+		{
+			if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite && current && i->orbital_position == current->satellite.orbital_position )
+				sel = new eListBoxEntryText(*sat, i->name, (void*)&*i);
 			else
-				new eListBoxEntryText(*sat, s->getDescription().c_str(), (void*) *s);
+				new eListBoxEntryText(*sat, i->name, (void*)&*i);
+		}
 
 	if ( sat->getCount() )
 	{
@@ -86,7 +103,7 @@ void eSatfind::RotorRunning(int)
 	updateTimer.stop();
 }
 
-void eSatfind::satChanged( eListBoxEntryText *sat)
+void eSatfind::satChanged(eListBoxEntryText *sat)
 {
 	transponder->clear();
 	if (sat && sat->getKey())
@@ -99,18 +116,28 @@ void eSatfind::satChanged( eListBoxEntryText *sat)
 
 		eListBoxEntryText *sel=0;
 
-		eSatellite *Sat = (eSatellite*) (sat->getKey());
+		tpPacket *i = (tpPacket*) (sat->getKey());
 
-		for ( std::list<tpPacket>::const_iterator i( eTransponderList::getInstance()->getNetworks().begin() ); i != eTransponderList::getInstance()->getNetworks().end(); i++ )
+		switch(eSystemInfo::getInstance()->getFEType())
 		{
-			if ( i->orbital_position == Sat->getOrbitalPosition() )
-			{
+			case eSystemInfo::feSatellite:
 				for (std::list<eTransponder>::const_iterator it( i->possibleTransponders.begin() ); it != i->possibleTransponders.end(); it++)
+				{
 					if ( tp && *tp == *it )
 						sel = new eListBoxEntryText( *transponder, eString().sprintf("%d / %d / %c", it->satellite.frequency/1000, it->satellite.symbol_rate/1000, it->satellite.polarisation?'V':'H' ), (void*)&(*it) );
 					else
 						new eListBoxEntryText( *transponder, eString().sprintf("%d / %d / %c", it->satellite.frequency/1000, it->satellite.symbol_rate/1000, it->satellite.polarisation?'V':'H' ), (void*)&(*it) );
-			}
+				}
+				break;
+			case eSystemInfo::feTerrestrial:
+				for (std::list<eTransponder>::const_iterator it( i->possibleTransponders.begin() ); it != i->possibleTransponders.end(); it++)
+				{
+					if ( tp && *tp == *it )
+						sel = new eListBoxEntryText( *transponder, eString().sprintf("%d kHz", it->terrestrial.centre_frequency/1000), (void*)&(*it) );
+					else
+						new eListBoxEntryText( *transponder, eString().sprintf("%d kHz", it->terrestrial.centre_frequency/1000), (void*)&(*it) );
+				}
+				break;
 		}
 
 		if (transponder->getCount())

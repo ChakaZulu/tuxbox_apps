@@ -213,6 +213,8 @@ public:
 
 		// switches off as much as possible.
 	int savePower();
+
+	void setTerrestrialAntennaVoltage(bool state);
 };
 
 
