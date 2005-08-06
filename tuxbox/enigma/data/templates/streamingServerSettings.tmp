@@ -84,12 +84,6 @@
 						<input name="audiodatarate" type="text" size="5" maxlength="5" value="#AUDIODATARATE#" style="color: #000000">
 					</td>
 				</tr>
-				<!--tr>
-					<td>Force AC3 for AVI:</td>
-					<td>
-						<input type="checkbox" name="forceaviac3" value="on" #FORCEAVIAC3#>
-					</td>
-				</tr-->
 				<tr>
 					<td colspan="2">&nbsp;</td>
 				</tr>
