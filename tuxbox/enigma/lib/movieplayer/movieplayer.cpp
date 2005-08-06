@@ -23,7 +23,7 @@
 eIOBuffer tsBuffer(BLOCKSIZE);
 static pthread_mutex_t mutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
-extern void find_avpids(int fd, int *vpid, int *apid, int *ac3);
+extern void find_avpids(eIOBuffer *tsBuffer, int *vpid, int *apid, int *ac3);
 extern int tcpOpen(eString, int);
 extern eString httpEscape(eString);
 extern CURLcode sendGetRequest (const eString& url, eString& response, bool useAuthorization);
@@ -86,10 +86,8 @@ int eMoviePlayer::sendRequest2VLC(eString command, bool authenticate)
 bool AVPids(int skt, int *apid, int *vpid, int *ac3)
 {
 	int len = 0;
-	int totallen = 0;
 	int error = 0;
 	char tempBuffer[BLOCKSIZE];
-	int fd = open ("/tmp/tmpts", O_CREAT | O_WRONLY);
 	
 	eDebug("[MOVIEPLAYER] buffering data...");
 	
@@ -99,27 +97,17 @@ bool AVPids(int skt, int *apid, int *vpid, int *ac3)
 		len = recv(skt, tempBuffer, BLOCKSIZE, 0);
 		if (len > 0)
 		{
-			eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, totallen);
-//			pthread_mutex_lock(&mutex);
+//			eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, tsBuffer.size());
 			tsBuffer.write(tempBuffer, len);
-			write(fd, tempBuffer, len);
-//			pthread_mutex_unlock(&mutex);
-			totallen += len;
 		}
 		else 
 			error++;
 	}
-	while (totallen < INITIALBUFFERING && error < 100);
+	while (tsBuffer.size() < INITIALBUFFERING && error < 100);
 	
 	if (error == 0)
 	{
-		eDebug("[MOVIEPLAYER] searching for vpid and apid");
-		close (fd);
-		fd = open ("/tmp/tmpts", O_RDONLY);
-		find_avpids(fd, vpid, apid, ac3);
-		close(fd);
-		remove("/tmp/tmpts");
-	
+		find_avpids(&tsBuffer, vpid, apid, ac3);
 		eDebug("[MOVIEPLAYER] found apid: 0x%04X, vpid: 0x%04X, ac3: %d", *apid, *vpid, *ac3);
 	}
 	
@@ -157,7 +145,7 @@ int eMoviePlayer::playStream(eString mrl)
 	char line[256];
 	memset(line, '\0', sizeof(line));
 	char *bp = line;
-	while ((unsigned int)(bp - line) < sizeof(line))
+	while ((unsigned int)(bp - line) < sizeof(line) - 1)
 	{
 //		eDebug("[MOVIEPLAYER] reading: %s", line);
 		recv(skt, bp, 1, 0);
@@ -269,7 +257,6 @@ void eMoviePlayer::gotMessage(const Message &msg )
 					if (sendRequest2VLC("?control=empty", false) > 0)
 					{
 						eDebug("[MOVIEPLAYER] couldn't communicate with vlc, streaming server ip address may be wrong in settings.");
-						retry = 0;
 						break;
 					}
 					// vlc: add mrl to playlist
@@ -281,7 +268,7 @@ void eMoviePlayer::gotMessage(const Message &msg )
 					// vlc: start playback of first item in playlist
 					if (sendRequest2VLC("?control=play&item=0", false))
 						break;
-					usleep(100000); // wait a little bit for vlc to start sending the stream
+//					usleep(100000); // wait a little bit for vlc to start sending the stream
 					// receive and play ts stream
 				} while (playStream(mrl) < 0 && retry-- > 0);
 

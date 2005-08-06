@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <netinet/in.h>
 #include <lib/base/estring.h>
+#include <lib/base/buffer.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <curl/curl.h>
@@ -25,7 +26,7 @@
 #define VIDEO_STREAM_E   0xEF
 
 #define TS_SIZE          188
-#define IN_SIZE          TS_SIZE*10
+#define IN_SIZE		 65424
 
 eString httpEscape(eString url)
 {
@@ -96,19 +97,22 @@ uint16_t get_pid(uint8_t *pid)
 	return pp;
 }
 
-void find_avpids(int fd, int *vpid, int *apid, int *ac3)
+void find_avpids(eIOBuffer *tsBuffer, int *vpid, int *apid, int *ac3)
 {
 	unsigned char buffer[IN_SIZE];
 	int count;
 	int i;
 	int offset = 0;
+	int bufferSize = tsBuffer->size();
 	
 	*apid = -1; *vpid = -1; *ac3 = -1;
-        while (*apid == -1 || *vpid == -1)
+        while (bufferSize > 0)
 	{
-		count = read(fd, buffer, IN_SIZE);
-		if (count <= 0) 
-			return;
+		int toRead = (bufferSize < IN_SIZE) ? bufferSize : IN_SIZE;
+		count = tsBuffer->read(buffer, toRead);
+		bufferSize -= count;
+		tsBuffer->write(buffer, count);
+//		eDebug("[MOVIEPLAYER] find_avpids: bufferSize = %d, toRead = %d, count = %d, tsBuffer.size() = %d", bufferSize, toRead, count, tsBuffer->size());
 		for (i = 0; i < (count - 7) && (*apid == -1 || *vpid == -1); i++)
 		{
 			if (buffer[i] == 0x47)
