@@ -412,11 +412,9 @@ void *dvrThread(void *ctrl)
 	int rd = 0;
 	eDebug("[MOVIEPLAYER] dvrThread starting...");
 	int pvrfd = 0;
-	timeval t1, t2;
 	pvrfd = open(PVRDEV, O_RDWR);
 	eDebug("[MOVIEPLAYER] pvr device opened: %d", pvrfd);
-//	nice(-50);
-//	while (*((int *)ctrl) == 1)
+	nice(-50);
 	while (*((int *)ctrl) > 0)
 	{
 		if (tsBuffer->size() > 0)
@@ -424,10 +422,8 @@ void *dvrThread(void *ctrl)
 			pthread_mutex_lock(&mutex);
 			rd = tsBuffer->read(tempBuffer, BLOCKSIZE);
 			pthread_mutex_unlock(&mutex);
-			gettimeofday(&t1, 0);
 			write(pvrfd, tempBuffer, rd);
-			gettimeofday(&t2, 0);
-			eDebug("%d:%d\n%d:%d [MOVIEPLAYER]     >>> writing %d bytes to dvr...", t1.tv_sec, t1.tv_usec, t2.tv_sec, t2.tv_usec, rd);
+			eDebug("%d [MOVIEPLAYER]     >>> writing %d bytes to dvr...", tsBuffer->size(), rd);
 		}
 		else 
 			usleep(100);
@@ -440,18 +436,15 @@ void *dvrThread(void *ctrl)
 
 void *receiverThread(void *skt)
 {
-	timeval t1, t2;
 	char tempBuffer[BLOCKSIZE];
 	int len = 0;
 	eDebug("[MOVIEPLAYER] receiverThread starting: skt = %d", *((int *)skt));
-//	nice(-50);
+	nice(-50);
 	// fill buffer
 	do
 	{
-		gettimeofday(&t1, 0);
 		len = recv(*((int *)skt), tempBuffer, BLOCKSIZE, 0);
-		gettimeofday(&t2, 0);
-		eDebug("%d:%d\n%d:%d [MOVIEPLAYER] <<< writing %d bytes to buffer...", t1.tv_sec, t1.tv_usec, t2.tv_sec, t2.tv_usec, len);
+		eDebug("%d [MOVIEPLAYER] <<< writing %d bytes to buffer...", tsBuffer->size(), len);
 		if (len >= 0)
 		{
 			pthread_mutex_lock(&mutex);
