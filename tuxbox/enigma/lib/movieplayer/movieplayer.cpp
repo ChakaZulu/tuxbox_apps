@@ -18,9 +18,9 @@
 
 #define BLOCKSIZE 4*65424
 #define PVRDEV "/dev/pvr"
-#define INITIALBUFFERING BLOCKSIZE*5
+#define INITIALBUFFERING BLOCKSIZE*6
 
-static eIOBuffer *tsBuffer;
+eIOBuffer tsBuffer(BLOCKSIZE);
 static pthread_mutex_t mutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 extern void find_avpids(int fd, int *vpid, int *apid, int *ac3);
@@ -41,32 +41,20 @@ eMoviePlayer *eMoviePlayer::instance;
 
 eMoviePlayer::eMoviePlayer(): messages(this,1)
 {
-	if (instance)
-		delete instance;
-	instance = this;
+	if (!instance)
+		instance = this;
 		
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
 	eDebug("[MOVIEPLAYER] starting...");
-	serverPort = 8080;
-	eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
-	char *serverip;
-	if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
-		serverip = strdup("");
-	serverIP = eString(serverip);
-	free(serverip);
-	eDebug("[MOVIEPLAYER] Server IP: %s", serverIP.c_str());
-	eDebug("[MOVIEPLAYER] Server Port: %d", serverPort);
-	tsBuffer = new eIOBuffer(BLOCKSIZE);
 	run();
 }
 
 eMoviePlayer::~eMoviePlayer()
 {
 	play = -1; skt = -1; // terminate receiver and dvr thread if they are still running
-	if (thread_running())
+	messages.send(Message::quit);
+	if ( thread_running() )
 		kill();
-	if (tsBuffer)
-		delete tsBuffer;
 	if (instance == this)
 		instance = 0;
 }
@@ -113,7 +101,7 @@ bool AVPids(int skt, int *apid, int *vpid, int *ac3)
 		{
 			eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, totallen);
 //			pthread_mutex_lock(&mutex);
-			tsBuffer->write(tempBuffer, len);
+			tsBuffer.write(tempBuffer, len);
 			write(fd, tempBuffer, len);
 //			pthread_mutex_unlock(&mutex);
 			totallen += len;
@@ -199,6 +187,8 @@ int eMoviePlayer::playStream(eString mrl)
 	}
 	
 	fcntl(skt, O_NONBLOCK);
+	
+	tsBuffer.clear();
 
 	if (!(AVPids(skt, &apid, &vpid, &ac3)))
 	{
@@ -238,9 +228,11 @@ int eMoviePlayer::playStream(eString mrl)
 	pthread_join(receiver, 0);
 	play = 0; // request termination of dvr thread
 	pthread_join(dvr, 0);
-		
+
 	Decoder::Flush();
 	
+	tsBuffer.clear();
+
 	// restore suspended dvb service
 	playService(suspendedServiceReference);
 	
@@ -260,6 +252,16 @@ void eMoviePlayer::gotMessage(const Message &msg )
 				eDebug("[MOVIEPLAYER] mrl = %s", mrl.c_str());
 				free((char*)msg.filename);
 				
+				serverPort = 8080;
+				eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
+				char *serverip;
+				if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
+					serverip = strdup("");
+				serverIP = eString(serverip);
+				free(serverip);
+				eDebug("[MOVIEPLAYER] Server IP: %s", serverIP.c_str());
+				eDebug("[MOVIEPLAYER] Server Port: %d", serverPort);
+				
 				int retry = 10;
 				do
 				{
@@ -271,11 +273,14 @@ void eMoviePlayer::gotMessage(const Message &msg )
 						break;
 					}
 					// vlc: add mrl to playlist
-					sendRequest2VLC("?control=add&mrl=" + httpEscape(mrl), false);
+					if (sendRequest2VLC("?control=add&mrl=" + httpEscape(mrl), false))
+						break;
 					// vlc: set sout...
-					sendRequest2VLC("?sout=" + httpEscape(sout(mrl)), false);
+					if (sendRequest2VLC("?sout=" + httpEscape(sout(mrl)), false))
+						break;
 					// vlc: start playback of first item in playlist
-					sendRequest2VLC("?control=play&item=0", false);
+					if (sendRequest2VLC("?control=play&item=0", false))
+						break;
 					usleep(100000); // wait a little bit for vlc to start sending the stream
 					// receive and play ts stream
 				} while (playStream(mrl) < 0 && retry-- > 0);
@@ -283,6 +288,10 @@ void eMoviePlayer::gotMessage(const Message &msg )
 				// shutdown vlc
 				sendRequest2VLC("admin/?control=shutdown", true);
 			}
+			break;
+		}
+		case Message::quit:
+		{
 			quit(0);
 			break;
 		}
@@ -297,9 +306,9 @@ eString eMoviePlayer::sout(eString mrl)
 	eString serverIP, DVDDrive;
 	int transcodeAudio = 0, transcodeVideo = 0;
 	int serverPort;
-	int settingVideoRate, settingResolution, settingTranscodeVideoCodec, settingForceTranscodeVideo, settingAudioRate, settingForceTranscodeAudio, settingForceAviRawAudio;
+	int settingVideoRate, settingResolution, settingTranscodeVideoCodec, settingForceTranscodeVideo, settingAudioRate, settingForceTranscodeAudio;
 	
-	readStreamingServerSettings(serverIP, serverPort, DVDDrive, settingVideoRate, settingResolution, settingTranscodeVideoCodec, settingForceTranscodeVideo, settingAudioRate, settingForceTranscodeAudio, settingForceAviRawAudio);
+	readStreamingServerSettings(serverIP, serverPort, DVDDrive, settingVideoRate, settingResolution, settingTranscodeVideoCodec, settingForceTranscodeVideo, settingAudioRate, settingForceTranscodeAudio);
 	
 	eDebug("[MOVIEPLAYER] determine ?sout for mrl: %s", mrl.c_str());
 	
@@ -362,7 +371,7 @@ eString eMoviePlayer::sout(eString mrl)
 }
 
 void eMoviePlayer::readStreamingServerSettings(eString& serverIP, int& serverPort, eString& 
-DVDDrive, int& settingVideoRate, int& settingResolution, int& settingTranscodeVideoCodec, int& settingForceTranscodeVideo, int& settingAudioRate, int& settingForceTranscodeAudio, int& settingForceAviRawAudio)
+DVDDrive, int& settingVideoRate, int& settingResolution, int& settingTranscodeVideoCodec, int& settingForceTranscodeVideo, int& settingAudioRate, int& settingForceTranscodeAudio)
 {
 	char *serverip;
 	if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
@@ -388,11 +397,9 @@ DVDDrive, int& settingVideoRate, int& settingResolution, int& settingTranscodeVi
 	eConfig::getInstance()->getKey("/movieplayer/forcetranscodevideo", settingForceTranscodeVideo);
 	settingForceTranscodeAudio = 0;
 	eConfig::getInstance()->getKey("/movieplayer/forcetranscodeaudio", settingForceTranscodeAudio);
-	settingForceAviRawAudio = 0;
-	eConfig::getInstance()->getKey("/movieplayer/forceavirawaudio", settingForceAviRawAudio);
 }
 
-void eMoviePlayer::writeStreamingServerSettings(eString serverIP, int serverPort, eString DVDDrive, int settingVideoRate, int settingResolution, int settingTranscodeVideoCodec, int settingForceTranscodeVideo, int settingAudioRate, int settingForceTranscodeAudio, int settingForceAviRawAudio)
+void eMoviePlayer::writeStreamingServerSettings(eString serverIP, int serverPort, eString DVDDrive, int settingVideoRate, int settingResolution, int settingTranscodeVideoCodec, int settingForceTranscodeVideo, int settingAudioRate, int settingForceTranscodeAudio)
 {
 	eConfig::getInstance()->setKey("/movieplayer/serverip", serverIP.c_str());
 	eConfig::getInstance()->setKey("/movieplayer/serverport", serverPort);
@@ -403,7 +410,6 @@ void eMoviePlayer::writeStreamingServerSettings(eString serverIP, int serverPort
 	eConfig::getInstance()->setKey("/movieplayer/transcodevideocodec", settingTranscodeVideoCodec);
 	eConfig::getInstance()->setKey("/movieplayer/forcetranscodevideo", settingForceTranscodeVideo);
 	eConfig::getInstance()->setKey("/movieplayer/forcetranscodeaudio", settingForceTranscodeAudio);
-	eConfig::getInstance()->setKey("/movieplayer/forceavirawaudio", settingForceAviRawAudio);
 }
 
 void *dvrThread(void *ctrl)
@@ -414,16 +420,16 @@ void *dvrThread(void *ctrl)
 	int pvrfd = 0;
 	pvrfd = open(PVRDEV, O_RDWR);
 	eDebug("[MOVIEPLAYER] pvr device opened: %d", pvrfd);
-	nice(-50);
+	nice(-15);
 	while (*((int *)ctrl) > 0)
 	{
-		if (tsBuffer->size() > 0)
+		if (tsBuffer.size() > 0)
 		{
 			pthread_mutex_lock(&mutex);
-			rd = tsBuffer->read(tempBuffer, BLOCKSIZE);
+			rd = tsBuffer.read(tempBuffer, BLOCKSIZE);
 			pthread_mutex_unlock(&mutex);
 			write(pvrfd, tempBuffer, rd);
-			eDebug("%d [MOVIEPLAYER]     >>> writing %d bytes to dvr...", tsBuffer->size(), rd);
+//			eDebug("%d [MOVIEPLAYER]     >>> writing %d bytes to dvr...", tsBuffer.size(), rd);
 		}
 		else 
 			usleep(100);
@@ -439,18 +445,23 @@ void *receiverThread(void *skt)
 	char tempBuffer[BLOCKSIZE];
 	int len = 0;
 	eDebug("[MOVIEPLAYER] receiverThread starting: skt = %d", *((int *)skt));
-	nice(-50);
+	nice(-15);
 	// fill buffer
 	do
 	{
-		len = recv(*((int *)skt), tempBuffer, BLOCKSIZE, 0);
-		eDebug("%d [MOVIEPLAYER] <<< writing %d bytes to buffer...", tsBuffer->size(), len);
-		if (len >= 0)
+		if (tsBuffer.size() < BLOCKSIZE * 6)
 		{
-			pthread_mutex_lock(&mutex);
-			tsBuffer->write(tempBuffer, len);
-			pthread_mutex_unlock(&mutex);
+			len = recv(*((int *)skt), tempBuffer, BLOCKSIZE, 0);
+//			eDebug("%d [MOVIEPLAYER] <<< writing %d bytes to buffer...", tsBuffer.size(), len);
+			if (len >= 0)
+			{
+				pthread_mutex_lock(&mutex);
+				tsBuffer.write(tempBuffer, len);
+				pthread_mutex_unlock(&mutex);
+			}
 		}
+		else
+			len = 1; // to prevent loop from ending
 	}
 	while (len > 0);
 	close(*((int *)skt));
