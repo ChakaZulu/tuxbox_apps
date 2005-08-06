@@ -2,9 +2,17 @@
 	<head>
 		<title>Streaming Server Settings</title>
 		<link rel="stylesheet" type="text/css" href="webif.css">
+		<script>
+			function submitSettings()
+			{
+				var parms = "ip=" + document.f1.ip.value + "&port=" + document.f1.port.value + "&dvddrive=" + document.f1.dvddrive.value + "&forcetranscodevideo=" + document.f1.forcetranscodevideo.value + "&videodatarate=" + document.f1.videodatarate.value + "&resolution=" + document.f1.resolution.value + "&mpegcodec=" + document.f1.mpegcodec.value + "&forcetranscodeaudio=" + document.f1.forcetranscodeaudio.value + "&audiodatarate=" + document.f1.audiodatarate.value;
+				document.location = "/cgi-bin/setStreamingServerSettings?" + parms;
+				setTimeout("window.close()", 500);
+			}
+		</script>
 	</head>
 	<body id="streamingserver">
-		<form action="/cgi-bin/setStreamingServerSettings">
+		<form name="f1" action="/cgi-bin/setStreamingServerSettings">
 			<table border="0" cellpadding="0" cellspacing="10">
 			<tbody>
 				<tr>
@@ -89,7 +97,7 @@
 				</tr>
 				<tr>
 					<td colspan="2">
-						<input type="submit" value="Change" size="100px" style="color:#000000">
+						<input type="button" name="Change" onClick="javascript:submitSettings()" value="Change" style="width: 100px; color: #000000;">
 					</td>
 				</tr>
 			</tbody>
