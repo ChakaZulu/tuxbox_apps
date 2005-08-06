@@ -121,7 +121,7 @@ bool AVPids(int skt, int *apid, int *vpid, int *ac3)
 		else 
 			error++;
 	}
-	while (totallen < INITIALBUFFERING && error < 1000);
+	while (totallen < INITIALBUFFERING && error < 100);
 	
 	if (error == 0)
 	{
@@ -193,7 +193,7 @@ int eMoviePlayer::playStream(eString mrl)
 	
 	if (!header)
 	{
-		eDebug("[MOVIEPLAYER] something received... but not a header.");
+		eDebug("[MOVIEPLAYER] something received... but not a header\n%s", line);
 		close(skt);
 		return -4;
 	}
@@ -235,26 +235,9 @@ int eMoviePlayer::playStream(eString mrl)
 	// create dvr thread
 	play = 1;
 	pthread_create(&dvr, 0, dvrThread, (void *)&play);
-			
-	while (skt != -1)
-	{
-		sleep(1);
-	}
-	play = 0; // terminate dvr thread
-	while (play != -1) 
-	{
-		// wait for dvr thread to terminate
-		sleep(1);
-	}
-	
-	usleep(100000); // wait for threads to terminate...
-	
-	// cancel dvr thread
-	if (dvr)
-		pthread_cancel(dvr);
-	// cancel receiver thread
-	if (receiver)
-		pthread_cancel(receiver);
+	pthread_join(receiver, 0);
+	play = 0; // request termination of dvr thread
+	pthread_join(dvr, 0);
 		
 	Decoder::Flush();
 	
@@ -432,7 +415,7 @@ void *dvrThread(void *ctrl)
 	timeval t1, t2;
 	pvrfd = open(PVRDEV, O_RDWR);
 	eDebug("[MOVIEPLAYER] pvr device opened: %d", pvrfd);
-	nice(-50);
+//	nice(-50);
 //	while (*((int *)ctrl) == 1)
 	while (*((int *)ctrl) > 0)
 	{
@@ -461,7 +444,7 @@ void *receiverThread(void *skt)
 	char tempBuffer[BLOCKSIZE];
 	int len = 0;
 	eDebug("[MOVIEPLAYER] receiverThread starting: skt = %d", *((int *)skt));
-	nice(-50);
+//	nice(-50);
 	// fill buffer
 	do
 	{
