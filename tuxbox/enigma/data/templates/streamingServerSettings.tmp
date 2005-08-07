@@ -5,7 +5,13 @@
 		<script>
 			function submitSettings()
 			{
-				var parms = "ip=" + document.f1.ip.value + "&port=" + document.f1.port.value + "&dvddrive=" + document.f1.dvddrive.value + "&forcetranscodevideo=" + document.f1.forcetranscodevideo.value + "&videodatarate=" + document.f1.videodatarate.value + "&resolution=" + document.f1.resolution.value + "&mpegcodec=" + document.f1.mpegcodec.value + "&forcetranscodeaudio=" + document.f1.forcetranscodeaudio.value + "&audiodatarate=" + document.f1.audiodatarate.value;
+				var transcodeAudio = "off";
+				if (document.f1.forcetranscodeaudio.checked)
+					transcodeAudio = "on";
+				var transcodeVideo = "off";
+				if (document.f1.forcetranscodevideo.checked)
+					transcodeVideo = "on";
+				var parms = "ip=" + document.f1.ip.value + "&port=" + document.f1.port.value + "&dvddrive=" + document.f1.dvddrive.value + "&forcetranscodevideo=" + transcodeVideo + "&videodatarate=" + document.f1.videodatarate.value + "&resolution=" + document.f1.resolution.value + "&mpegcodec=" + document.f1.mpegcodec.value + "&forcetranscodeaudio=" + transcodeAudio + "&audiodatarate=" + document.f1.audiodatarate.value;
 				document.location = "/cgi-bin/setStreamingServerSettings?" + parms;
 				setTimeout("window.close()", 500);
 			}
