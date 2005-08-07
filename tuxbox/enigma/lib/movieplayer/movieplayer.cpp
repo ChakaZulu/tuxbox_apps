@@ -1,3 +1,4 @@
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,11 +15,15 @@
 #include <lib/movieplayer/movieplayer.h>
 #include <src/enigma_dyn_utils.h>
 
-#define BLOCKSIZE 4*65424
+#define BLOCKSIZE 65424
+#if HAVE_DVB_API_VERSION < 3
 #define PVRDEV "/dev/pvr"
-#define INITIALBUFFERING BLOCKSIZE*8
+#else
+#define PVRDEV "/dev/dvb/adapter0/dvr0"
+#endif
+#define INITIALBUFFERING BLOCKSIZE*32
 
-eIOBuffer tsBuffer(BLOCKSIZE);
+eIOBuffer tsBuffer(BLOCKSIZE*4);
 static pthread_mutex_t mutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 extern void find_avpids(eIOBuffer *tsBuffer, int *vpid, int *apid, int *ac3);
@@ -42,7 +47,7 @@ eMoviePlayer::eMoviePlayer(): messages(this,1)
 		instance = this;
 		
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
-	eDebug("[MOVIEPLAYER] Version 1.0 starting...");
+	eDebug("[MOVIEPLAYER] Version 1.1 starting...");
 	run();
 }
 
@@ -166,6 +171,8 @@ int eMoviePlayer::playStream(eString mrl)
 			retry = 0;
 	}
 
+	tsBuffer.clear();
+	
 	if (!(AVPids(fd, &apid, &vpid, &ac3)))
 	{
 		eDebug("[MOVIEPLAYER] could not find AV pids.");
@@ -207,6 +214,8 @@ int eMoviePlayer::playStream(eString mrl)
 	pthread_join(dvr, 0);
 
 	Decoder::Flush();
+	
+	tsBuffer.clear();
 
 	// restore suspended dvb service
 	playService(suspendedServiceReference);
@@ -223,8 +232,6 @@ void eMoviePlayer::gotMessage(const Message &msg )
 		{
 			if (msg.filename)
 			{
-				tsBuffer.clear();
-				
 				mrl = eString(msg.filename);
 				eDebug("[MOVIEPLAYER] mrl = %s", mrl.c_str());
 				free((char*)msg.filename);
@@ -268,7 +275,6 @@ void eMoviePlayer::gotMessage(const Message &msg )
 
 				// shutdown vlc
 //				sendRequest2VLC("admin/?control=shutdown", true);
-				tsBuffer.clear();
 			}		
 			break;
 		}
@@ -400,40 +406,46 @@ void *dvrThread(void *ctrl)
 	int rd = 0;
 	eDebug("[MOVIEPLAYER] dvrThread starting...");
 	int pvrfd = 0;
+	int bufferSize = 0;
 	pvrfd = open(PVRDEV, O_RDWR);
 	eDebug("[MOVIEPLAYER] pvr device opened: %d", pvrfd);
-	nice(-5);
-	while (*((int *)ctrl) > 0)
+	nice(-1);
+	while (play > 0)
 	{
-		if (tsBuffer.size() > 0)
+		pthread_mutex_lock(&mutex);
+		rd = tsBuffer.read(tempBuffer, BLOCKSIZE);
+		bufferSize = tsBuffer.size();
+		pthread_mutex_unlock(&mutex);
+		if (rd > 0)
 		{
-			pthread_mutex_lock(&mutex);
-			rd = tsBuffer.read(tempBuffer, BLOCKSIZE);
-			pthread_mutex_unlock(&mutex);
 			write(pvrfd, tempBuffer, rd);
-			eDebug("%d [MOVIEPLAYER]     >>> writing %d bytes to dvr...", tsBuffer.size(), rd);
+			eDebug("%d [MOVIEPLAYER]     >>> writing %d bytes to dvr...", bufferSize, rd);
 		}
 	}
 	close(pvrfd);
-	*((int *)ctrl) = -1;
+	play = -1;
 	eDebug("[MOVIEPLAYER] dvrThread stopping...");
 	pthread_exit(NULL);
 }
 
-void *receiverThread(void *skt)
+void *receiverThread(void *ctrl)
 {
 	char tempBuffer[BLOCKSIZE];
 	int len = 0;
-	eDebug("[MOVIEPLAYER] receiverThread starting: skt = %d", *((int *)skt));
-	nice(-5);
+	int bufferSize = 0;
+	eDebug("[MOVIEPLAYER] receiverThread starting: skt = %d", skt);
+	nice(-1);
 	// fill buffer
 	do
 	{
-		if (tsBuffer.size() < INITIALBUFFERING)
+		pthread_mutex_lock(&mutex);
+		bufferSize = tsBuffer.size();
+		pthread_mutex_unlock(&mutex);
+		if (bufferSize < INITIALBUFFERING)
 		{
-			len = recv(*((int *)skt), tempBuffer, BLOCKSIZE, 0);
-//			eDebug("%d [MOVIEPLAYER] <<< writing %d bytes to buffer...", tsBuffer.size(), len);
-			if (len >= 0)
+			len = recv(skt, tempBuffer, BLOCKSIZE, 0);
+//			eDebug("%d [MOVIEPLAYER] <<< writing %d bytes to buffer...", bufferSize, len);
+			if (len > 0)
 			{
 				pthread_mutex_lock(&mutex);
 				tsBuffer.write(tempBuffer, len);
@@ -444,8 +456,8 @@ void *receiverThread(void *skt)
 			len = 1; // to prevent loop from ending
 	}
 	while (len > 0);
-	close(*((int *)skt));
-	*((int *)skt) = -1;
+	close(skt);
+	skt = -1;
 	eDebug("[MOVIEPLAYER] receiverThread stopping...");
 	pthread_exit(NULL);
 }
