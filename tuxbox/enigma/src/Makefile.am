@@ -35,7 +35,6 @@ enigma_LDADD_WHOLE = \
 	$(top_builddir)/lib/movieplayer/libenigma_movieplayer.a
 
 enigma_LDADD = \
-	@CURL_LIBS@ \
 	@FREETYPE_LIBS@ \
 	@ID3TAG_LIBS@ \
 	@MAD_LIBS@ \

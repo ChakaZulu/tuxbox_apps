@@ -12,9 +12,6 @@
 #include <lib/base/buffer.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
 
 #define PRIVATE_STREAM1  0xBD
 #define PRIVATE_STREAM2  0xBF
@@ -27,15 +24,6 @@
 
 #define TS_SIZE          188
 #define IN_SIZE		 65424
-
-eString httpEscape(eString url)
-{
-	char *tmp = curl_escape(url.c_str(), 0);
-	url = eString(tmp);
-	curl_free(tmp);
-	eDebug("[MOVIEPLAYER] httpEscape: url = %s", url.c_str());
-	return url;
-}
 
 int tcpOpen(eString serverIP, int serverPort)
 {
@@ -61,29 +49,27 @@ int tcpOpen(eString serverIP, int serverPort)
 	return fd;
 }
 
-size_t CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
+int tcpRequest(int fd, char *ioBuffer, int maxLength)
 {
-	std::string *pStr = (std::string *)data;
-	*pStr += (char *)ptr;
-	return size *nmemb;
-}
+	int rd;
+	int rc;
 
-CURLcode sendGetRequest (const eString& url, eString& response, bool useAuthorization) 
-{
-	CURL *curl;
-	CURLcode httpres;
-
-	curl = curl_easy_init ();
-	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
-	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
-	curl_easy_setopt (curl, CURLOPT_FILE, (void *)&response);
-	if (useAuthorization)
-		curl_easy_setopt (curl, CURLOPT_USERPWD, "admin:admin");
-	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
-	httpres = curl_easy_perform (curl);
-	eDebug("[MOVIEPLAYER] HTTP result: %d", httpres);
-	curl_easy_cleanup (curl);
-	return httpres;
+	write(fd, ioBuffer, strlen(ioBuffer));
+	rd = read(fd, ioBuffer, maxLength);
+	if (rd >= 0)
+	{
+		ioBuffer[rd] = '\0';
+		rc = 0;
+	}
+	else
+	{
+		ioBuffer[0] = '\0';
+		rc = -1;
+	}
+		
+	eDebug("[MOVIEPLAYER] tcpRequest: rd = %d, rc = %d, response = %s", rd, rc, ioBuffer);
+		
+	return rc;
 }
 
 #define PID_MASK_HI 0x1F
@@ -91,7 +77,7 @@ uint16_t get_pid(uint8_t *pid)
 {
 	uint16_t pp = 0;
 
-	pp = (pid[0] & PID_MASK_HI)<<8;
+	pp = (pid[0] & PID_MASK_HI) << 8;
 	pp |= pid[1];
 
 	return pp;
