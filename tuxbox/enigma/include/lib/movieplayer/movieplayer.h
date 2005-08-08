@@ -17,7 +17,6 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 		enum
 		{
 			start,
-			stop,
 			quit
 		};
 		Message(int type = 0, const char *filename = 0)

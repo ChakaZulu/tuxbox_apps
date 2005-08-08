@@ -76,7 +76,7 @@ void eMoviePlayer::start(const char *filename)
 
 void eMoviePlayer::stop()
 {
-	messages.send(Message(Message::stop, 0));
+	play = -1;
 }
 
 int eMoviePlayer::sendRequest2VLC(eString command, bool authenticate)
@@ -238,8 +238,6 @@ void eMoviePlayer::gotMessage(const Message &msg )
 		{
 			if (msg.filename)
 			{
-				play = -1; // terminate threads if they still should be running
-				
 				mrl = eString(msg.filename);
 				eDebug("[MOVIEPLAYER] mrl = %s", mrl.c_str());
 				free((char*)msg.filename);
@@ -285,11 +283,6 @@ void eMoviePlayer::gotMessage(const Message &msg )
 				// shutdown vlc
 //				sendRequest2VLC("admin/?control=shutdown", true);
 			}		
-			break;
-		}
-		case Message::stop:
-		{
-			play = -1; // terminate threads
 			break;
 		}
 		case Message::quit:
