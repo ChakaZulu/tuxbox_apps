@@ -574,37 +574,37 @@ movieplayer.vlchelp9 skip approx. 5 minutes
 movieplayer.wrongvlcversion This feature is not support by your current version of VLC
 networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
-networkmenu.gateway default gateway
+networkmenu.gateway Default Gateway
 networkmenu.head Network Settings
 networkmenu.ipaddress IP address
 networkmenu.mount NFS/CIFS/FTPFS
-networkmenu.nameserver name server
-networkmenu.netmask netmask
-networkmenu.setupnow setup network now
-networkmenu.setuponstartup setup network on startup
-networkmenu.show show active network settings
-networkmenu.test test network now
-nfs.alreadymounted directory already mounted
-nfs.automount mount on startup
-nfs.dir directory/share
+networkmenu.nameserver DNS Server
+networkmenu.netmask Subnet Mask
+networkmenu.setupnow Start/Restart network now
+networkmenu.setuponstartup Start network on Boot
+networkmenu.show Show active network settings
+networkmenu.test Test network now
+nfs.alreadymounted Directory already mounted
+nfs.automount Mount on Startup
+nfs.dir Directory/Share
 nfs.ip Server IP
-nfs.localdir local dir
-nfs.mount Mount Network volume
-nfs.mount_options mount options
-nfs.mounterror mount error
-nfs.mounterror_notsup filesystem type not supported
-nfs.mountnow mount now
-nfs.mountok mount successful
-nfs.mounttimeout mount error: timeout
-nfs.password password
-nfs.remount remount directories
-nfs.type type
+nfs.localdir Local Directory
+nfs.mount Mount Network Volume
+nfs.mount_options Mount Options
+nfs.mounterror Mount Error
+nfs.mounterror_notsup Filesystem type not supported
+nfs.mountnow Mount now
+nfs.mountok Mount successful
+nfs.mounttimeout Mount error: timeout
+nfs.password Password
+nfs.remount Remount directories
+nfs.type Type
 nfs.type_cifs CIFS
 nfs.type_lufs FTPFS
 nfs.type_nfs NFS
 nfs.umount Umount Network volume
-nfs.umounterror error umounting volume
-nfs.username username
+nfs.umounterror Error umounting volume
+nfs.username Username
 nfsmenu.head NFS/CIFS/FTPFS settings
 nvod.percentage (%d%% over)
 nvod.starting (starting in %d min)
@@ -775,9 +775,9 @@ settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Op
 settings.noconffile No neutrino-settings found.\nUsing defaults.
 settings.pos_bottom_left bottom left
 settings.pos_bottom_right bottom right
-settings.pos_top_left oben top left
-settings.pos_top_right oben top right
-shutdown.recoding_query dBox is recording. Really shutdown?
+settings.pos_top_left top left
+settings.pos_top_right top right
+shutdown.recoding_query dBox is currently recording. Really shutdown?
 shutdowntimer.announce Box will shutdown in 1 min.\nCancel Shutdown ?
 sleeptimerbox.announce Sleeptimer in 1 min
 sleeptimerbox.hint1 Shutdown time in min. (000=off)
