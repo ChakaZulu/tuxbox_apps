@@ -17,6 +17,7 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 		enum
 		{
 			start,
+			stop,
 			quit
 		};
 		Message(int type = 0, const char *filename = 0)
@@ -37,6 +38,7 @@ public:
 	eMoviePlayer();
 	~eMoviePlayer();
 	void start(const char * filename);
+	void stop();
 	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& forcetranscodevideo, int& audiodatarate, int& forcetranscodeaudio);
 	void writeStreamingServerSettings(eString ip, int port, eString dvddrive, int videodatarate, int resolution, int mpegcodec, int forcetranscodevideo, int audiodatarate, int forcetranscodeaudio);
 	static eMoviePlayer *getInstance() { return instance; }

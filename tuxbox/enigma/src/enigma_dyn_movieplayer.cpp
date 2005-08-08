@@ -111,23 +111,40 @@ eString streamingServer(eString request, eString dirpath, eString opts, eHTTPCon
 	return getStreamingServer();
 }
 
-eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+eString movieplayerpls(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
 	content->local_header["Content-Type"] = "video/mpegfile";
 	content->local_header["Cache-Control"] = "no-cache";
 	
+//	eString command = opt["command"];
 	eString mrl = httpUnescape(opt["mrl"]);
-	moviePlayer.start(mrl.c_str());
+//	if (command == "start")
+		moviePlayer.start(mrl.c_str());
 	
 	return "dummy";
 }
 
+
+eString movieplayer(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	content->local_header["Content-Type"] = "text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache";
+	
+//	eString command = opt["command"];
+	moviePlayer.stop();
+	
+	return closeWindow(content, "", 500);
+}
+
 void ezapMoviePlayerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.pls", movieplayer, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.m3u", movieplayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer", movieplayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.pls", movieplayerpls, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.m3u", movieplayerpls, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streamingServer", streamingServer, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streamingServerSettings", streamingServerSettings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServerSettings", setStreamingServerSettings, lockWeb);
