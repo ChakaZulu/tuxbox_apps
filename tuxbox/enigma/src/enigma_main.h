@@ -447,6 +447,7 @@ public:
 	int dvrActive(void) {return dvrfunctions;}
 #endif
 	int isSleeping() {return state & stateSleeping;}
+	void hideInfobar();
 private:
 	void nextService(int add=0);
 	void prevService();
@@ -477,7 +478,6 @@ private:
 	void showEPG();
 	void showEPG_Streaminfo();
 	void showInfobar(bool startTimeout=false);
-	void hideInfobar();
 	void showHelp( ePtrList<eAction>*, int );
 
 #ifndef DISABLE_FILE

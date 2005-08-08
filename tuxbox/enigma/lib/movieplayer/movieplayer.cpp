@@ -13,6 +13,7 @@
 #include <lib/system/econfig.h>
 #include <lib/dvb/decoder.h>
 #include <lib/movieplayer/movieplayer.h>
+#include <src/enigma_main.h>
 #include <src/enigma_dyn_utils.h>
 
 #if HAVE_DVB_API_VERSION < 3
@@ -107,7 +108,7 @@ int eMoviePlayer::sendRequest2VLC(eString command, bool authenticate)
 	return rc;
 }
 
-int bufferingStream(int fd, int bufferSize)
+int bufferStream(int fd, int bufferSize)
 {
 	int len = 0;
 	char tempBuffer[BLOCKSIZE];
@@ -171,7 +172,7 @@ int eMoviePlayer::playStream(eString mrl)
 
 	tsBuffer.clear();
 	
-	if (bufferingStream(fd, INITIALBUFFER) == 0)
+	if (bufferStream(fd, INITIALBUFFER) == 0)
 	{
 		eDebug("[MOVIEPLAYER] buffer is empty.");
 		close(fd);
@@ -207,6 +208,7 @@ int eMoviePlayer::playStream(eString mrl)
 			Decoder::parms.audio_type = DECODE_AUDIO_AC3;
 	}
 	
+	eZapMain::getInstance()->hideInfobar();
 	Decoder::Set();
 	
 	play = 1;
@@ -272,7 +274,6 @@ void eMoviePlayer::gotMessage(const Message &msg )
 					// vlc: start playback of first item in playlist
 					if (sendRequest2VLC("?control=play&item=0", false) < 0)
 						continue;
-//					usleep(100000); // wait a little bit for vlc to start sending the stream
 					// receive and play ts stream
 					if (playStream(mrl) < 0)
 						continue;
