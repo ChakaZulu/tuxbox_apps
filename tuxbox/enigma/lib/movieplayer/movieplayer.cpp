@@ -200,7 +200,10 @@ int eMoviePlayer::playStream(eString mrl)
 	Decoder::parms.vpid = vpid;
 	Decoder::parms.apid = apid;
 	Decoder::parms.audio_type = DECODE_AUDIO_MPEG;
-	if (ac3)
+	
+	int ac3default = 0;
+	eConfig::getInstance()->getKey("/elitedvb/audio/ac3default", ac3default);
+	if (ac3 && ac3default)
 	{
 		if (mrl.right(3) == "vob" || mrl.left(3) == "dvd")
 			Decoder::parms.audio_type = DECODE_AUDIO_AC3_VOB;
@@ -450,7 +453,7 @@ void *receiverThread(void *ctrl)
 		else
 			len = 1; // to prevent loop from ending
 	}
-	while (len > 0 && play == 1);
+	while (tsBufferSize > 0 && play == 1);
 	close(fd);
 	eDebug("[MOVIEPLAYER] receiverThread stopping...");
 	pthread_exit(NULL);
