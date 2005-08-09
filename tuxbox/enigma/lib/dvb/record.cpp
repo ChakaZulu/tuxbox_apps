@@ -532,7 +532,7 @@ void eDVBRecorder::writeSection(void *data, int pid, unsigned int &cc)
 	if ( !data )
 		return;
 
-	__u8 secbuf[4096];
+	__u8 secbuf[4300];  // with ts overhead...
 
 	int len = section2ts(secbuf, (__u8*)data, pid, cc);
 
