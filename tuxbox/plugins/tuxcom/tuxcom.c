@@ -23,6 +23,7 @@
 */
 
 #include "tuxcom.h"
+#ifdef ORG_RC
 /******************************************************************************
  * GetRCCode  (Code from TuxTxt)
  ******************************************************************************/
@@ -221,7 +222,268 @@ int GetRCCode(int mode)
 		usleep(1000000/100);
 		return 0;
 }
+#else
+/******************************************************************************
+ * GetRCCode  (Code from Tuxmail)
+ ******************************************************************************/
+ 
+#if HAVE_DVB_API_VERSION == 3
 
+int GetRCCode(int mode)
+{
+	static int count = 0;
+	//get code
+	struct input_event ev;
+	static __u16 rc_last_key = KEY_RESERVED;
+	static __u16 rc_last_code = KEY_RESERVED;
+	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
+	{
+		if(ev.value)
+		{
+			if(ev.code == rc_last_key)
+			{
+				if (count < REPEAT_TIMER)
+				{
+					count++;
+					rccode = -1;
+					return 1;
+				}
+			}
+			else
+				count = 0;
+			rc_last_key = ev.code;
+			switch(ev.code)
+			{
+				case KEY_UP:		rccode = RC_UP;			break;
+				case KEY_DOWN:		rccode = RC_DOWN;		break;
+				case KEY_LEFT:		rccode = RC_LEFT;		break;
+				case KEY_RIGHT:		rccode = RC_RIGHT;		break;
+				case KEY_OK:		rccode = RC_OK;			break;
+				case KEY_RED:		rccode = RC_RED;		break;
+				case KEY_GREEN:		rccode = RC_GREEN;		break;
+				case KEY_YELLOW:	rccode = RC_YELLOW;		break;
+				case KEY_BLUE:		rccode = RC_BLUE;		break;
+				case KEY_HELP:		rccode = RC_HELP;		break;
+				case KEY_SETUP:		rccode = RC_DBOX;		break;
+				case KEY_HOME:		rccode = RC_HOME;		break;
+				case KEY_POWER:		rccode = RC_STANDBY;	break;
+				default:
+					if( ev.code > 0x7F )
+					{
+						rccode = 0;
+						if( ev.code == 0x110 )
+						{
+							rccode = RC_ON;
+						}
+					}
+					else
+					{
+						rccode = rctable[ev.code & 0x7F];
+					}
+					if( rc_last_code == RC_LSHIFT )
+					{
+						if( ev.code <= 0x56 )  //(sizeof(rcshifttable)/sizeof(int)-1)
+						{
+							rccode = rcshifttable[ev.code];
+						}
+					}
+					else if( rc_last_code == RC_ALTGR )
+					{
+						if( ev.code <= 0x56 )  //(sizeof(rcaltgrtable)/sizeof(int)-1)
+						{
+							rccode = rcaltgrtable[ev.code];
+						}
+					}
+					if( !rccode )
+					{
+						rccode = -1;
+					}
+					
+			}
+			rc_last_code = rccode;
+			return 1;
+		}
+		else
+		{
+			rccode = -1;
+			rc_last_key = KEY_RESERVED;
+			rc_last_code = KEY_RESERVED;
+		}
+	}
+
+		rccode = -1;
+		usleep(1000000/100);
+		return 0;
+}
+
+#else
+
+int GetRCCode(int mode)
+{
+	static int count = 0;
+	//get code
+	static unsigned short LastKey = -1;
+	static char LastKBCode = 0x00;
+	rccode = -1;
+	int bytesavail = 0;
+	int bytesread = read(rc, &rccode, 2);
+	unsigned short tmprc;
+	kbcode = 0;
+
+	if (bytesread == 2)
+	{
+		if (read(rc, &tmprc, 2) == 2)
+		{
+			if (rccode == tmprc && count >= 0)
+				count++;
+		}
+	}
+
+
+	// Tastaturabfrage
+	ioctl(kb, FIONREAD, &bytesavail);
+	if (bytesavail>0)
+	{
+		char tch[100];
+//			read(kb,&kbcode,1);
+		if (bytesavail > 99) bytesavail = 99;
+		read(kb,tch,bytesavail);
+		tch[bytesavail] = 0x00;
+		kbcode = tch[0];
+		LastKBCode = kbcode;
+		if (bytesavail == 1 && kbcode == 0x1b) { kbcode =LastKBCode = 0x00;rccode = RC_HOME; LastKey = rccode; count = -1; return 1;} // ESC-Taste
+		if (bytesavail == 1 && kbcode == '\n') { kbcode =LastKBCode = 0x00;rccode = RC_OK  ; LastKey = rccode; count = -1; return 1;} // Enter-Taste
+		if (bytesavail == 1 && kbcode == '+' ) { LastKey = RC_PLUS ; rccode = -1  ; count = -1; return 1;}
+		if (bytesavail == 1 && kbcode == '-' ) { LastKey = RC_MINUS; rccode = -1  ; count = -1; return 1;}
+		if (bytesavail >= 3 && tch[0] == 0x1b && tch[1] == 0x5b)
+		{
+			if (tch[2] == 0x41 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_UP        ; LastKey = rccode; count = -1; return 1; }// Cursortasten
+			if (tch[2] == 0x42 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_DOWN      ; LastKey = rccode; count = -1; return 1; }// Cursortasten
+			if (tch[2] == 0x43 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_RIGHT     ; LastKey = rccode; count = -1; return 1; }// Cursortasten
+			if (tch[2] == 0x44 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_LEFT      ; LastKey = rccode; count = -1; return 1; }// Cursortasten
+			if (tch[2] == 0x33 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_MINUS     ; LastKey = rccode; count = -1; return 1; }// entf-Taste
+			if (tch[2] == 0x32 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_PLUS      ; LastKey = rccode; count = -1; return 1; }// einf-Taste
+			if (tch[2] == 0x35 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_PLUS      ; LastKey = rccode; count = -1; return 1; }// PgUp-Taste
+			if (tch[2] == 0x36 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_MINUS     ; LastKey = rccode; count = -1; return 1; }// PgDn-Taste
+			if (tch[2] == 0x5b && tch[3] == 0x45)                   { kbcode = LastKBCode = 0x00; rccode = RC_RED       ; LastKey = rccode; count = -1; return 1; }// F5-Taste
+			if (tch[2] == 0x31 && tch[3] == 0x37 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_GREEN     ; LastKey = rccode; count = -1; return 1; }// F6-Taste
+			if (tch[2] == 0x31 && tch[3] == 0x38 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_YELLOW    ; LastKey = rccode; count = -1; return 1; }// F7-Taste
+			if (tch[2] == 0x31 && tch[3] == 0x39 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_BLUE      ; LastKey = rccode; count = -1; return 1; }// F8-Taste
+			if (tch[2] == 0x32 && tch[3] == 0x30 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_DBOX      ; LastKey = rccode; count = -1; return 1; }// F9-Taste
+			if (tch[2] == 0x32 && tch[3] == 0x31 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_HELP      ; LastKey = rccode; count = -1; return 1; }// F10-Taste
+			if (tch[2] == 0x32 && tch[3] == 0x33 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_MUTE      ; LastKey = rccode; count = -1; return 1; }// F11-Taste
+		}
+		if (mode == RC_EDIT)
+		{
+/*
+			char tmsg[100];
+			int i;
+			sprintf(tmsg,"KeyboardCode:avail:%d, char:%c, rccode:%x ",bytesavail,(kbcode == 0x00 ? '*' : kbcode ),rccode);
+			for (i = 0; i < bytesavail; i++) sprintf(tmsg,"%s%x",tmsg,tch[i]);
+			MessageBox(tmsg,"",NOBUTTON);
+*/
+			LastKey = rccode;
+			count = -1;
+			switch (rccode)
+			{
+				case KEY_0:
+				case KEY_1:
+				case KEY_2:
+				case KEY_3:
+				case KEY_4:
+				case KEY_5:
+				case KEY_6:
+				case KEY_7:
+				case KEY_8:
+				case KEY_9:
+					// SMS-Style verhindern
+					rccode = -1;
+					break;
+			}
+			return 1;
+		}
+		else if (bytesread == 0)
+		{
+			if (kbcode == '0') { kbcode = 0x00;rccode = RC_0  ; LastKey = rccode; return 1;}
+			if (kbcode == '1') { kbcode = 0x00;rccode = RC_1  ; LastKey = rccode; return 1;}
+			if (kbcode == '2') { kbcode = 0x00;rccode = RC_2  ; LastKey = rccode; return 1;}
+			if (kbcode == '3') { kbcode = 0x00;rccode = RC_3  ; LastKey = rccode; return 1;}
+			if (kbcode == '4') { kbcode = 0x00;rccode = RC_4  ; LastKey = rccode; return 1;}
+			if (kbcode == '5') { kbcode = 0x00;rccode = RC_5  ; LastKey = rccode; return 1;}
+			if (kbcode == '6') { kbcode = 0x00;rccode = RC_6  ; LastKey = rccode; return 1;}
+			if (kbcode == '7') { kbcode = 0x00;rccode = RC_7  ; LastKey = rccode; return 1;}
+			if (kbcode == '8') { kbcode = 0x00;rccode = RC_8  ; LastKey = rccode; return 1;}
+			if (kbcode == '9') { kbcode = 0x00;rccode = RC_9  ; LastKey = rccode; return 1;}
+		}
+	}
+	if (bytesread == 2)
+	{
+		if (rccode == LastKey && LastKBCode != 0x00 && LastKBCode == kbcode)
+		{
+				return 1;
+		}
+		LastKBCode = 0x00;
+		if (rccode == LastKey)
+		{
+			if (count < REPEAT_TIMER)
+			{
+				if (count >= 0)
+					count++;
+				rccode = -1;
+				return 1;
+			}
+		}
+		else
+			count = 0;
+		LastKey = rccode;
+		if ((rccode & 0xFF00) == 0x5C00)
+		{
+			kbcode = 0;
+			switch(rccode)
+			{
+				case KEY_UP:		rccode = RC_UP;			break;
+				case KEY_DOWN:		rccode = RC_DOWN;		break;
+				case KEY_LEFT:		rccode = RC_LEFT;		break;
+				case KEY_RIGHT:		rccode = RC_RIGHT;		break;
+				case KEY_OK:		rccode = RC_OK;			break;
+				case KEY_0:			rccode = RC_0;			break;
+				case KEY_1:			rccode = RC_1;			break;
+				case KEY_2:			rccode = RC_2;			break;
+				case KEY_3:			rccode = RC_3;			break;
+				case KEY_4:			rccode = RC_4;			break;
+				case KEY_5:			rccode = RC_5;			break;
+				case KEY_6:			rccode = RC_6;			break;
+				case KEY_7:			rccode = RC_7;			break;
+				case KEY_8:			rccode = RC_8;			break;
+				case KEY_9:			rccode = RC_9;			break;
+				case KEY_RED:		rccode = RC_RED;		break;
+				case KEY_GREEN:		rccode = RC_GREEN;		break;
+				case KEY_YELLOW:	rccode = RC_YELLOW;		break;
+				case KEY_BLUE:		rccode = RC_BLUE;		break;
+				case KEY_VOLUMEUP:	rccode = RC_PLUS;		break;
+				case KEY_VOLUMEDOWN:rccode = RC_MINUS;		break;
+				case KEY_MUTE:		rccode = RC_MUTE;		break;
+				case KEY_HELP:		rccode = RC_HELP;		break;
+				case KEY_SETUP:		rccode = RC_DBOX;		break;
+				case KEY_HOME:		rccode = RC_HOME;		break;
+				case KEY_POWER:		rccode = RC_STANDBY;	break;
+			}
+			return 1;
+		}
+		else
+		{
+			rccode &= 0x003F;
+		}
+		return 0;
+	}
+
+		rccode = -1;
+		usleep(1000000/100);
+		return 0;
+}
+#endif
+
+#endif
 /******************************************************************************
  * MyFaceRequester
  ******************************************************************************/
@@ -2291,7 +2553,12 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 
 	do{
 		while (GetRCCode(RC_EDIT) == 0);
-#ifdef HAVE_DREAMBOX_HARDWARE
+#ifndef HAVE_DREAMBOX_HARDWARE
+		if ((rccode >=0x20) && (rccode < 0x0100))
+		  kbcode=rccode;
+		 else
+		   kbcode = 0;
+#endif
 		if (kbcode != 0 && markmode == 0)
 		{
 			if (kbcode == 0x7f) // backspace
@@ -2323,7 +2590,6 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 			prev_key = -1;
 			rccode = -1;
 		}
-#endif
 		switch(rccode)
 		{
 				case RC_OK:
