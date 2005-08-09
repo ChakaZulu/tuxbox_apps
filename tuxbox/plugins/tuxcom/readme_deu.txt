@@ -2,10 +2,13 @@ TuxCom:
 
 Historie:
 ---------
-15.07.2006 Version 1.8a
+10.08.2005 Version 1.9
+ - Unterstützung für Dbox2-Tastaturen
+
+15.07.2005 Version 1.8a
  - Italienische Übersetzung eingebaut (Dank an fbrassin)
 
-11.06.2006 Version 1.8
+11.06.2005 Version 1.8
  - direkter Sprung ins Rootverzeichnis möglich (Eintrag '/' selektieren)
  - erweiterte Dateiinformationen im Rechte-Dialog (Taste 1)
  - Druck auf OK bei Dateien, die nicht ausführbar sind, öffnet den Viewer
@@ -264,16 +267,33 @@ Es wird eine FTP-Verbindung zur angegebenen Adresse aufgebaut.
 
 Tastaturbelegung für USB-Tastaturen:
 ------------------------------------
-lame		Esc
+lame			Esc
 volume+/-	PgUp/PgDn
-OK		Enter
-rot		F5
-grün		F6
-gelb		F7
-blau		F8
-dream		F9
-info		F10
-mute		F11
+OK				Enter
+rot				F5
+grün			F6
+gelb			F7
+blau			F8
+dream			F9
+info			F10
+mute			F11
+
+Tastaturbelegung für Dbox2-Tastaturen:
+--------------------------------------
+home			Esc
+volume+/-	PgUp/PgDn
+OK				Enter
+rot				F1
+grün			F2
+gelb			F3
+blau			F4
+dbox			F5
+?				F6
+mute			F7
+
+Um eine Ziffer mit der Dbox2-Tastatur direkt einzugeben, 
+ist die entsprechende Zifferntaste in Verbindung mit der Alt-Taste zu drücken. 
+Die Sonderzeichen bei den Zifferntasten (²³{[]}\) erhält man über Ziffer und ALTGR-Taste.
 
 Nutzung des Passwortschutzes:
 -----------------------------
