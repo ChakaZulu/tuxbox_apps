@@ -3,10 +3,13 @@ TuxCom:
 History:
 ---------
 
-15.07.2006 Version 1.8a
+10.08.2005 Version 1.9
+ - support of dbox2-keyboards integrated
+
+15.07.2005 Version 1.8a
  - added italian language support (thanks to fbrassin)
 
-11.06.2006 Version 1.8
+11.06.2005 Version 1.8
  - direct jump into root-directory possible (select entry '/')
  - more file information in rights-dialogue
  - pressing OK at a file which is not executable opens viewer
@@ -264,16 +267,35 @@ you are connected to the specified adress.
 
 buttons for usb-keyboard:
 -------------------------
-lame		Esc
+lame			Esc
 volume+/-	PgUp/PgDn
-OK		Enter
-red		F5
-green		F6
-yellow		F7
-blue		F8
-dream		F9
-info		F10
-mute		F11
+OK				Enter
+red				F5
+green			F6
+yellow			F7
+blue			F8
+dream			F9
+info			F10
+mute			F11
+
+
+buttons for dbox2-keyboard:
+---------------------------
+home			Esc
+volume+/-	PgUp/PgDn
+OK				Enter
+red				F1
+green			F2
+yellow			F3
+blue			F4
+dbox			F5
+?				F6
+mute			F7
+
+If you want to put in a number with the dbox2-keyboard directly,
+you have to press the number-key together with the ALT-key.
+You get the special characters at the number-keys (²³{[]}\), if you press ALTGR and the number-key.
+
 
 use of password protection:
 ---------------------------
