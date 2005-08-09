@@ -77,12 +77,13 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.8a\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.9\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004-2005"
 //rc codes
 
-#ifdef ORG_RC
 //rc codes
+#ifdef HAVE_DREAMBOX_HARDWARE
+
 #if TUXCOM_DBOX_VERSION < 3
 
 #define KEY_0		0x5C00
@@ -142,65 +143,6 @@
 #else
 // rc codes
 
-#if HAVE_DVB_API_VERSION == 1
-
-#define	RC1_0		0x5C00
-#define	RC1_1		0x5C01
-#define	RC1_2		0x5C02
-#define	RC1_3		0x5C03
-#define	RC1_4		0x5C04
-#define	RC1_5		0x5C05
-#define	RC1_6		0x5C06
-#define	RC1_7		0x5C07
-#define	RC1_8		0x5C08
-#define	RC1_9		0x5C09
-#define	RC1_STANDBY	0x5C0C
-#define	RC1_UP		0x5C0E
-#define	RC1_DOWN	0x5C0F
-#define	RC1_PLUS	0x5C16
-#define	RC1_MINUS	0x5C17
-#define	RC1_HOME	0x5C20
-#define	RC1_DBOX	0x5C27
-#define	RC1_MUTE	0x5C28
-#define	RC1_RED		0x5C2D
-#define	RC1_RIGHT	0x5C2E
-#define	RC1_LEFT	0x5C2F
-#define	RC1_OK		0x5C30
-#define	RC1_BLUE	0x5C3B
-#define	RC1_YELLOW	0x5C52
-#define	RC1_GREEN	0x5C55
-#define	RC1_HELP	0x5C82
-
-// kb codes
-
-#define KEY_0		0x5C00
-#define KEY_1		0x5C01
-#define KEY_2		0x5C02
-#define KEY_3		0x5C03
-#define KEY_4		0x5C04
-#define KEY_5		0x5C05
-#define KEY_6		0x5C06
-#define KEY_7		0x5C07
-#define KEY_8		0x5C08
-#define KEY_9		0x5C09
-#define KEY_POWER	0x5C0C
-#define KEY_UP		0x5C0E
-#define KEY_DOWN	0x5C0F
-#define KEY_VOLUMEUP	0x5C16
-#define KEY_VOLUMEDOWN	0x5C17
-#define KEY_HOME	0x5C20
-#define KEY_SETUP	0x5C27
-#define KEY_MUTE	0x5C28
-#define KEY_RED		0x5C2D
-#define KEY_RIGHT	0x5C2E
-#define KEY_LEFT	0x5C2F
-#define KEY_OK		0x5C30
-#define KEY_BLUE	0x5C3B
-#define KEY_YELLOW	0x5C52
-#define KEY_GREEN	0x5C55
-#define KEY_HELP	0x5C82
-
-#endif
 
 #define	RC_0			'0'
 #define	RC_1			'1'
@@ -247,9 +189,9 @@
 #define RC_ALT		0x0F
 #define RC_NUM		RC_DBOX
 #define RC_ROLLEN	0x00
-#define RC_F5			0x01C5
-#define RC_F6			0x01C6
-#define RC_F7			0x01C7
+#define RC_F5			RC_DBOX
+#define RC_F6			RC_HELP
+#define RC_F7			RC_MUTE
 #define RC_F8			0x01C8
 #define RC_F9			0x01C9
 #define RC_F10		0x01CA

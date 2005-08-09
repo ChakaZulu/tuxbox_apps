@@ -294,9 +294,16 @@ int GetRCCode(int mode)
 							rccode = rcaltgrtable[ev.code];
 						}
 					}
-					if( !rccode )
+					else if( rc_last_code == RC_ALT )
 					{
-						rccode = -1;
+						if((ev.code >=2) && ( ev.code <= 11 )) 
+						{
+							rccode = (ev.code-1) | 0x0200;
+						}
+					}
+//					if( !rccode )
+					{
+//						rccode = -1;
 					}
 					
 			}
@@ -2555,9 +2562,43 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 		while (GetRCCode(RC_EDIT) == 0);
 #ifndef HAVE_DREAMBOX_HARDWARE
 		if ((rccode >=0x20) && (rccode < 0x0100))
+		{
 		  kbcode=rccode;
-		 else
-		   kbcode = 0;
+		  if ((kbcode>=RC_0) && (kbcode<=RC_9))
+		  {
+		  	rccode-=RC_0;
+		  	kbcode=0;
+					if (markmode == 0)
+					{
+						if (prev_key != -1 && rccode != prev_key) // jump to next char when other number pressed
+						{
+							pos++;
+							if (pos >= strlen(szdst))
+							{
+								if (pos > maxchars) pos = maxchars;
+								else
+									strcat(szdst," ");
+							}
+						}
+						prev_key = rccode;
+						pch = strchr(numberchars[rccode],tolower(szdst[pos]));
+						if (pch == NULL) szdst[pos] = (textuppercase == 0 ? numberchars[rccode][0] : toupper(numberchars[rccode][0]));
+						else
+						{
+							if (pch == &(numberchars[rccode][strlen(numberchars[rccode])-1])) szdst[pos] = (textuppercase == 0 ? numberchars[rccode][0]: toupper(numberchars[rccode][0]));
+							else szdst[pos] = (textuppercase == 0 ? *((char*)pch+1) : toupper(*((char*)pch+1)));
+						}
+					}
+		  }
+		}
+		else if ((rccode >= 0x0201) && (rccode <= 0x020A))
+		{
+		  kbcode = (rccode & 0x00FF) ;
+		  if (kbcode == 10) kbcode = 0;
+		  kbcode += RC_0;
+		}
+		else
+		  kbcode = 0;
 #endif
 		if (kbcode != 0 && markmode == 0)
 		{
