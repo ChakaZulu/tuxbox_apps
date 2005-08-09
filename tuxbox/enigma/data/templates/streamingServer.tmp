@@ -10,12 +10,12 @@
 	function playDVD()
 	{
 		stopStreaming();
-		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=dvdsimple:" + document.form1.drive1.value + ":@1:1-";
+		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=dvdsimple:" + document.form1.drive1.value + ":";
 	}
 	function playVCD()
 	{
 		stopStreaming();
-		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=vcd:" + document.form1.drive2.value + ":@1:1-";
+		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=vcd:" + document.form1.drive2.value + ":";
 	}
 	function settings()
 	{
