@@ -61,7 +61,7 @@ extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDV
 extern bool canPlayService(const eServiceReference & ref); // implemented in timer.cpp
 extern int pdaScreen;
 extern eString zap[5][5];
-extern eString getZapContent(eString path, int depth, bool addEPG, bool sortList);
+extern eString getZapContent(eString path, int depth, bool addEPG, bool sortList, bool forceAll);
 
 class myTimerEntry
 {
@@ -949,7 +949,7 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
 
-	result.strReplace("#ZAPDATA#", getZapContent(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, false, false));
+	result.strReplace("#ZAPDATA#", getZapContent(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, false, false, true));
 	if (pdaScreen == 1)
 		result = "<html><head><title>Info</title></head><body>This function is not available for PDAs.</body></html>";
 
