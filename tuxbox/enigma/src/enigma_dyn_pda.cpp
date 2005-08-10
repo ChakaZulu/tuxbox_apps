@@ -68,22 +68,22 @@ static eString getChannelNavi(void)
 
 	if (sapi && sapi->service)
 	{
-		result = button(100, "Audio", OCKER, "javascript:selectAudio()");
-		result += button(100, "Video", OCKER, "javascript:selectSubChannel()");
+		result = button(100, "Audio", NOCOLOR, "javascript:selectAudio()");
+		result += button(100, "Video", NOCOLOR, "javascript:selectSubChannel()");
 
 		if (getCurService() || getCurrentSubChannel(ref2string(sapi->service)))
 		{
-			result += button(100, "EPG", GREEN, "javascript:openEPG('')");
+			result += button(100, "EPG", NOCOLOR, "javascript:openEPG('')");
 			if (pdaScreen == 0)
 			{
-				result += button(100, "Info", PINK, "javascript:openChannelInfo()");
-				result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
+				result += button(100, "Info", NOCOLOR, "javascript:openChannelInfo()");
+				result += button(100, "Stream Info", NOCOLOR, "javascript:openSI()");
 			}
 #ifndef DISABLE_FILE
 			if (eZapMain::getInstance()->isRecording())
-				result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
+				result += button(100, "Stop", NOCOLOR, "javascript:DVRrecord('stop')");
 			else
-				result += button(100, "Record", RED, "javascript:DVRrecord('record')");
+				result += button(100, "Record", NOCOLOR, "javascript:DVRrecord('record')");
 #endif
 		}
 	}
