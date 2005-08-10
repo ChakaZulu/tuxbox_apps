@@ -23,7 +23,7 @@
 #endif
 
 #define BLOCKSIZE 65424
-#define INITIALBUFFER BLOCKSIZE*32
+#define INITIALBUFFER BLOCKSIZE*40
 
 eIOBuffer tsBuffer(BLOCKSIZE*4);
 static pthread_mutex_t mutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
@@ -50,7 +50,7 @@ eMoviePlayer::eMoviePlayer(): messages(this,1)
 		instance = this;
 		
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
-	eDebug("[MOVIEPLAYER] Version 1.2 starting...");
+	eDebug("[MOVIEPLAYER] Version 1.3 starting...");
 	run();
 }
 
@@ -72,12 +72,13 @@ void eMoviePlayer::thread()
 
 void eMoviePlayer::start(const char *filename)
 {
+	play = -1; // terminate threads
 	messages.send(Message(Message::start, filename ? strdup(filename) : 0));
 }
 
 void eMoviePlayer::stop()
 {
-	play = -1;
+	play = -1; // terminate threads
 }
 
 int eMoviePlayer::sendRequest2VLC(eString command, bool authenticate)
@@ -450,8 +451,6 @@ void *receiverThread(void *ctrl)
 				pthread_mutex_unlock(&mutex);
 			}
 		}
-		else
-			len = 1; // to prevent loop from ending
 	}
 	while (tsBufferSize > 0 && play == 1);
 	close(fd);
