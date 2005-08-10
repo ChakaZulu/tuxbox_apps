@@ -1133,6 +1133,16 @@ static eString getZap(eString path)
 			int columns = (zapSubMode == ZAPSUBMODEALLSERVICES) ? 1 : 2;
 			result.strReplace("#ZAPDATA#", getZapContent(path, columns, true, sortList, false));
 			selsize = (screenWidth > 1024) ? 30 : 15;
+			if (columns == 1)
+			{
+				result.strReplace("#WIDTH1#", "0");
+				result.strReplace("#WIDTH2#", "630");
+			}
+			else
+			{
+				result.strReplace("#WIDTH1#", "200");
+				result.strReplace("#WIDTH2#", "430");
+			}
 		}
 		result.strReplace("#SELSIZE#", eString().sprintf("%d", selsize));
 	}

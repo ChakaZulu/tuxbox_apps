@@ -3,7 +3,6 @@
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
-		<script language="javascript" type="text/javascript" src="timer.js"></script>
 		<script language="javascript" type="text/javascript" src="zap.js"></script>
 		<script language="javascript" type="text/javascript">#ZAPDATA#</script>
 	</head>
@@ -12,10 +11,10 @@
 			<table border=0 cellpadding=0 cellspacing=0>
 				<tr>
 					<td>
-						<select style="width: 200px; font-weight: bold; background-color: #F4F4F4" onChange=bouquetChange() name="bouquet" size=#SELSIZE#></select>
+						<select style="width: #WIDTH1#px; font-weight: bold; background-color: #F4F4F4" onChange=bouquetChange() name="bouquet" size=#SELSIZE#></select>
 					</td>
 					<td>
-						<select style="width: 430px; font-weight: bold; background-color: #F4F4F4" onChange=channelChange() name="channel" size=#SELSIZE#></select>
+						<select style="width: #WIDTH2#px; font-weight: bold; background-color: #F4F4F4" onChange=channelChange() name="channel" size=#SELSIZE#></select>
 					</td>
 				</tr>
 			</table>
@@ -23,7 +22,7 @@
 		<table border=0 cellpadding=0 cellspacing=0>
 			<tr>
 				<td style="width: 200px">
-					<input name="mepg" type="button" style="width: 100px; height: 22px; color: #000000;" value="EPG-Overview" onClick=javascript:mepg()>
+					<input name="mepg" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="EPG-Overview" onClick=javascript:mepg()>
 					<!--input name="epg" type="button" style="width: 100px; height: 22px; background-color: #12259E" value="EPG" onClick=javascript:epg()-->
 				</td>
 				<td style="width: 430px" align=center>
