@@ -585,7 +585,7 @@ eString getLeftNavi(eString mode)
 				result += button(110, "All Services", RED, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEALLSERVICES) + post);
 				result += "<br>";
 			}
-			if (zap[zapMode][ZAPSUBMODESATELLITES])
+			if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite && zap[zapMode][ZAPSUBMODESATELLITES])
 			{
 				result += button(110, "Satellites", GREEN, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post);
 				result += "<br>";
