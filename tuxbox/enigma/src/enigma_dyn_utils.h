@@ -9,6 +9,7 @@
 #include <lib/dvb/service.h>
 #include <lib/dvb/serviceplaylist.h>
 #include <lib/system/http_dyn.h>
+#include <src/enigma_dyn_colors.h>
 
 #define TEMPLATE_DIR TUXBOXDATADIR+eString("/enigma/templates/")
 #define HTDOCS_DIR TUXBOXDATADIR+eString("/enigma/htdocs/")
@@ -16,30 +17,6 @@
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 #define WINDOWCLOSE "<html><head><META http-equiv=Content-Type content=\"text/html; charset=UTF-8\"></head><body><script  language=\"javascript\">close();</script></body></html>"
 #define WINDOWBACK "<html><head><META http-equiv=Content-Type content=\"text/html; charset=UTF-8\"></head><body><script  language=\"javascript\">back();</script></body></html>"
-
-#if 0
-#define BLUE "#12259E"
-#define RED "#CB0303"
-#define GREEN "#1FCB12"
-#define YELLOW "#F1EF1D"
-#define LIGHTGREY "#F4F4EC"
-#define DARKGREY "#D9E0E7"
-#define LEFTNAVICOLOR ""
-#define TOPNAVICOLOR ""
-#define OCKER "#FFCC33"
-#define PINK "#95077C"
-#define NOCOLOR ""
-#else
-#define BLUE "blue.png"
-#define RED "red.png"
-#define GREEN "green.png"
-#define YELLOW "yellow.png"
-#define LIGHTGREY "#F4F4EC"
-#define DARKGREY "#D9E0E7"
-#define LEFTNAVICOLOR "grey.png"
-#define TOPNAVICOLOR "grey.png"
-#define NOCOLOR ""
-#endif
 
 eString getAttribute(eString filename, eString attribute);
 eString readFile(eString filename);
