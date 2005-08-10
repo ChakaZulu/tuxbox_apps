@@ -2,9 +2,9 @@
 #define __enigma_dyn_h
 
 #if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.6.2-Expert"
+#define WEBIFVERSION "4.6.3-Expert"
 #else
-#define WEBIFVERSION "4.6.2"
+#define WEBIFVERSION "4.6.3"
 #endif
 
 #define ZAPMODETV 0
@@ -19,6 +19,7 @@
 #define ZAPSUBMODESATELLITES 2
 #define ZAPSUBMODEPROVIDERS 3
 #define ZAPSUBMODEBOUQUETS 4
+#define ZAPSUBMODEALLSERVICES 5
 
 class eHTTPDynPathResolver;
 

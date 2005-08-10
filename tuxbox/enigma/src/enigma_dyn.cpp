@@ -577,6 +577,8 @@ eString getLeftNavi(eString mode)
 			result += "<br>";
 			result += button(110, "Root", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
 #endif
+			result += "<br>";
+			result += button(110, "Stream", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODESTREAMING) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
 			result += "<br><br>";
 			if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite &&
 				zap[zapMode][ZAPSUBMODESATELLITES])
@@ -903,8 +905,9 @@ class eWebNavigatorListDirectory2: public Object
 	eString path;
 	eServiceInterface &iface;
 	bool addEPG;
+	bool forceAll;
 public:
-	eWebNavigatorListDirectory2(std::list <myService> &myList, eString path, eServiceInterface &iface, bool addEPG): myList(myList), path(path), iface(iface), addEPG(addEPG)
+	eWebNavigatorListDirectory2(std::list <myService> &myList, eString path, eServiceInterface &iface, bool addEPG, bool forceAll): myList(myList), path(path), iface(iface), addEPG(addEPG), forceAll(forceAll)
 	{
 //		eDebug("[eWebNavigatorListDirectory2:] path: %s", path.c_str());
 	}
@@ -914,10 +917,13 @@ public:
 		if (e.isLocked() && eConfig::getInstance()->pLockActive())
 			return;
 #ifndef DISABLE_FILE
-		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
+		if (!forceAll)
 		{
-			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
-				return;
+			if (eDVB::getInstance()->recorder && !e.path && !e.flags)
+			{
+				if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
+					return;
+			}
 		}
 #endif
 		eString short_description, event_start, event_duration;
@@ -974,7 +980,7 @@ public:
 	}
 };
 
-eString getZapContent(eString path, int depth, bool addEPG, bool sortList)
+eString getZapContent(eString path, int depth, bool addEPG, bool sortList, bool forceAll)
 {
 	std::list <myService> myList, myList2;
 	std::list <myService>::iterator myIt;
@@ -993,7 +999,7 @@ eString getZapContent(eString path, int depth, bool addEPG, bool sortList)
 	{
 		// first pass thru is to get all user bouquets
 		myList.clear();
-		eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG);
+		eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG, forceAll);
 		Signal1<void, const eServiceReference&> signal;
 		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 		iface->enterDirectory(current_service, signal);
@@ -1021,7 +1027,7 @@ eString getZapContent(eString path, int depth, bool addEPG, bool sortList)
 					eServiceReference current_service = string2ref(path);
 
 					myList2.clear();
-					eWebNavigatorListDirectory2 navlist(myList2, path, *iface, addEPG);
+					eWebNavigatorListDirectory2 navlist(myList2, path, *iface, addEPG, forceAll);
 					Signal1<void, const eServiceReference&> signal;
 					signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 
@@ -1089,7 +1095,7 @@ static eString getZap(eString path)
 		if (zapMode == ZAPMODERECORDINGS) // recordings
 		{
 			result = readFile(TEMPLATE_DIR + "movies.tmp");
-			result.strReplace("#ZAPDATA#", getZapContent(path, 1, false, false));
+			result.strReplace("#ZAPDATA#", getZapContent(path, 1, false, false, false));
 			selsize = (screenWidth > 1024) ? 25 : 10;
 #ifdef ENABLE_DYN_MOUNT
 			tmp = readFile(TEMPLATE_DIR + "movieSources.tmp");
@@ -1102,7 +1108,7 @@ static eString getZap(eString path)
 		if (zapMode == ZAPMODEROOT) // root
 		{
 			result = readFile(TEMPLATE_DIR + "root.tmp");
-			eString tmp = getZapContent(path, 1, false, false);
+			eString tmp = getZapContent(path, 1, false, false, false);
 			if (tmp)
 			{
 				result.strReplace("#ZAPDATA#", tmp);
@@ -1112,10 +1118,16 @@ static eString getZap(eString path)
 				result = "";
 		}
 		else
+		if (zapMode == ZAPMODESTREAMING)
+		{
+			result = getStreamingServer();
+		}
+		else
 		{
 			result = readFile(TEMPLATE_DIR + "zap.tmp");
 			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS);
-			result.strReplace("#ZAPDATA#", getZapContent(path, 2, true, sortList));
+			int columns = (zapSubMode == ZAPSUBMODEALLSERVICES) ? 1 : 2;
+			result.strReplace("#ZAPDATA#", getZapContent(path, columns, true, sortList, false));
 			selsize = (screenWidth > 1024) ? 30 : 15;
 		}
 		result.strReplace("#SELSIZE#", eString().sprintf("%d", selsize));
@@ -2243,7 +2255,7 @@ static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConne
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "webxtv" + opt["browser"] + ".tmp");
-	result.strReplace("#ZAPDATA#", getZapContent(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false));
+	result.strReplace("#ZAPDATA#", getZapContent(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false, false));
 	return result;
 }
 
