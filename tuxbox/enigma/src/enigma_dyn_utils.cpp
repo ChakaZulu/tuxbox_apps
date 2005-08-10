@@ -97,9 +97,10 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 		result << "<input name=\"" << buttonText << "\""
 			" type=\"button\" style=\"width: " << width << "px;"
 			"height: " << height << "px;";
-		if (buttonColor == GREY)
-			result << "background-image: url(/grey.png); background-repeat: repeat-x; ";
-		else if (buttonColor)
+		if (buttonColor.find("#" == eString::npos)
+			result << "background-image: url(/" << buttonColor << "); background-repeat: repeat-x; ";
+		else
+		if (buttonColor)
 			result << "background-color: " << buttonColor << "; ";
 		if (color)
 			result << "color: " << color << "; ";

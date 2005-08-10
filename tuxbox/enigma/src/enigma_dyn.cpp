@@ -566,34 +566,38 @@ eString getLeftNavi(eString mode)
 	{
 		if (pdaScreen == 0)
 		{
-			result += button(110, "TV", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#000000");
+			result += button(110, "TV", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
 			result += "<br>";
-			result += button(110, "Radio", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#000000");
+			result += button(110, "Radio", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
 			result += "<br>";
-			result += button(110, "Data", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEDATA) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post, "#000000");
+			result += button(110, "Data", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEDATA) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post, "#FFFFFF");
 			result += "<br>";
 #ifndef DISABLE_FILE
-			result += button(110, "Movies", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
+			result += button(110, "Movies", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
 			result += "<br>";
-			result += button(110, "Root", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
+			result += button(110, "Root", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
 #endif
 			result += "<br>";
-			result += button(110, "Stream", GREY, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODESTREAMING) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
+			result += button(110, "Stream", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODESTREAMING) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
 			result += "<br><br>";
-			if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite &&
-				zap[zapMode][ZAPSUBMODESATELLITES])
+			if (zap[zapMode][ZAPSUBMODEALLSERVICES])
 			{
-				result += button(110, "Satellites", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post);
+				result += button(110, "All Services", RED, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEALLSERVICES) + post);
+				result += "<br>";
+			}
+			if (zap[zapMode][ZAPSUBMODESATELLITES])
+			{
+				result += button(110, "Satellites", GREEN, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post);
 				result += "<br>";
 			}
 			if (zap[zapMode][ZAPSUBMODEPROVIDERS])
 			{
-				result += button(110, "Providers", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEPROVIDERS) + post);
+				result += button(110, "Providers", YELLOW, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEPROVIDERS) + post);
 				result += "<br>";
 			}
 			if (zap[zapMode][ZAPSUBMODEBOUQUETS])
 			{
-				result += button(110, "Bouquets", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post);
+				result += button(110, "Bouquets", BLUE, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post);
 			}
 		}
 		else
@@ -1709,7 +1713,7 @@ eString getContent(eString mode, eString path, eString opts)
 		{
 			if (zapMode >= 0 && zapMode <= 5)
 				tmp += ": " + zap[zapMode][ZAPSUBMODENAME];
-			if (zapSubMode >= 2 && zapSubMode <= 4)
+			if (zapSubMode >= 2 && zapSubMode <= 5)
 				tmp += " - " + zapSubModes[zapSubMode];
 		}
 
@@ -2427,7 +2431,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 		if (curChannel)
 			currentChannel = atoi(curChannel.c_str());
 
-		if ((zapMode >= 0) && (zapMode <= 5) && (zapSubMode >= 0) && (zapSubMode <= 4))
+		if ((zapMode >= 0) && (zapMode <= 5) && (zapSubMode >= 0) && (zapSubMode <= 5))
 		{
 			if (!path)
 				path = zap[zapMode][zapSubMode];
