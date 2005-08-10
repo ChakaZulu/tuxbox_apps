@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.64 2005/07/18 21:11:40 rasc Exp $
+$Id: dvb_str.c,v 1.65 2005/08/10 21:28:19 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.64 2005/07/18 21:11:40 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.65  2005/08/10 21:28:19  rasc
+New: Program Stream handling  (-s ps)
+
 Revision 1.64  2005/07/18 21:11:40  rasc
 TVA Content Section
 
@@ -2155,9 +2158,9 @@ char *dvbstrPESstream_ID (u_int i)
      // $$$ TODO streamID 00-B8 (ISO 13818-2)
      {  0x00, 0xB8,  "!!!unknown or PES stream not in sync... (!!!)" },
      // special PS_stream_IDs (these are not PES stream IDs)
-     {  0xB9, 0xB9,  "MPEG_program_stream_end" },
-     {  0xBA, 0xBA,  "MPEG_pack_start" },
-     {  0xBB, 0xBB,  "MPEG_system_header_start" },
+     {  0xB9, 0xB9,  "MPEG_program_stream_end (PS)" },
+     {  0xBA, 0xBA,  "MPEG_pack_start (PS)" },
+     {  0xBB, 0xBB,  "MPEG_system_header_start (PS)" },
      // PES_stream_IDs
      {  0xBC, 0xBC,  "program_stream_map" },
      {  0xBD, 0xBD,  "private_stream_1" },

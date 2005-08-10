@@ -214,7 +214,7 @@ This option recursivly reads all PIDs referenced by a section. This option also 
 .TP
 .B \-privateprovider \<id\>
 .br
-Set provider \<id\> string for decoding special private tables and descriptors. Use \-help to display provider currently supported. If omitted, private data will be displayed according DVB standards description.
+Set provider \<id\> string for decoding of special private tables and descriptors. Use \-help to display provider currently supported. If omitted, private data will be displayed as hexdump depending on \-ph option. (If you have information on private data structures, currently not supported by dvbsnoop, please let us know!)
 
 
 .SH "Transport Stream (TS) Mode Specific Command Line Options"
@@ -304,6 +304,9 @@ Display PAT transport stream (ts) and do subdecoding of sections and descriptors
 Read PES (e.g. Videotext, Video, Audio) stream:
    dvbsnoop \-s pes 0x28F
    dvbsnoop \-s pes 0x28F -sync -b > pes.bin.file
+
+Read PS from file and do not show hex dump:
+   dvbsnoop -if hdtv_ps_file.mpg -s ps -ph 0 -nohexdumpbuffer -n 30
 
 Show current signal strength:
    dvbsnoop \-s signal \-pd 9 \-n 100

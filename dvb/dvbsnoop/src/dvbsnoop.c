@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.29 2005/07/11 23:06:47 rasc Exp $
+$Id: dvbsnoop.c,v 1.30 2005/08/10 21:28:17 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.29 2005/07/11 23:06:47 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.30  2005/08/10 21:28:17  rasc
+New: Program Stream handling  (-s ps)
+
 Revision 1.29  2005/07/11 23:06:47  rasc
 Multibyte section filter redesign:  -f 0x4F.22.33.44.55.66 -m 0x.FF.FF.FF etc.
 Manpage update
@@ -200,6 +203,7 @@ int main(int argc, char **argv)
 			err = doReadSECT (&opt);
 			break;
 
+		case PS:
 		case PES:
 			err = doReadPES (&opt);
 			break;

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.31 2005/08/02 22:57:46 rasc Exp $
+$Id: dmx_pes.c,v 1.32 2005/08/10 21:28:17 rasc Exp $
 
 
  DVBSNOOP
@@ -7,18 +7,22 @@ $Id: dmx_pes.c,v 1.31 2005/08/02 22:57:46 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
- -- PE Streams
+ -- Streams: PES  & PS
+
  --  For more information please see:
- --  ISO 13818 (-1) and ETSI 300 468
+ --  ISO 13818-1 and ETSI 300 468
 
 
 
 
 
 $Log: dmx_pes.c,v $
+Revision 1.32  2005/08/10 21:28:17  rasc
+New: Program Stream handling  (-s ps)
+
 Revision 1.31  2005/08/02 22:57:46  rasc
 Option -N, rewrite offline filters (TS & Section)
 
@@ -152,11 +156,13 @@ dvbsnoop v0.7  -- Commit to CVS
 
 static long pes_UnsyncRead (int fd, u_char *buf, u_long len);
 static long pes_SyncRead   (int fd, u_char *buf, u_long len, u_long *skipped_bytes);
+static long ps_chainread_packheader (int fd, u_char *buf);
 
 
 
 
 
+// int  doReadPS (OPTION *opt)
 int  doReadPES (OPTION *opt)
 
 {
@@ -275,9 +281,10 @@ int  doReadPES (OPTION *opt)
        write (1, b, n);
 
     } else {
+       char *strx = (opt->packet_mode == PES) ? "PES" : "PS";
 
        indent (0);
-       print_packet_header (opt, "PES", opt->pid, count, n, skipped_bytes);
+       print_packet_header (opt, strx, opt->pid, count, n, skipped_bytes);
 
 
        if (opt->buffer_hexdump) {
@@ -341,7 +348,8 @@ static long pes_UnsyncRead (int fd, u_char *buf, u_long len)
 
     /*
      -- read first 6 bytes to get length of Packet
-     -- read rest ...
+     -- read following data ...
+     -- $$$ TODO: will not work for PS!
     */
 
     n = read(fd,buf,6);
@@ -387,6 +395,9 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
     // ==>   Check the stream_id with "dvb_str.c", if you do changes!
  
 
+    buf[0] = 0x00;   // pre write packet_start_code_prefix to buffer
+    buf[1] = 0x00;
+    buf[2] = 0x01;
     *skipped_bytes = 0;
     sync = 0xFFFFFFFF;
     while (1) {
@@ -396,17 +407,24 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
 	if (n1 <= 0) return n1;			// error or strange, abort
 
 	// -- byte shift for packet_start_code_prefix
-	// -- sync found? 0x000001 + valid PESstream_ID
+	// -- sync found? 0x000001 + valid PESstream_ID or PS_stream_ID
 	// -- $$$ check this if streamID defs will be enhanced by ISO!!!
 
 	c = buf[3];
 	sync = (sync << 8) | c;
 	if ( (sync & 0xFFFFFF00) == 0x00000100 ) {
-		if (c >= 0xBC)  break;	
-		// $$$ TODO
-		// if (c == 0xBB)  ; // system_header_start
-		// if (c == 0xBA)  ; // pack_header_start
-		// if (c == 0xB9)  ; // MPEG_program_end
+		// Program Stream ID check (PS)
+		if (c == 0xB9) {		// MPEG_program_end
+    		   *skipped_bytes -= 3;
+		   return 4;
+		}
+		if (c == 0xBA)  {		// pack_header_start
+		   n1 = ps_chainread_packheader (fd, buf+4);
+    		   *skipped_bytes -= 3;
+		   return (n1 > 0) ? n1+4 : n1;
+		}
+		if (c == 0xBB)  break; 		// system_header_start  (same as PES packet)
+		if (c >= 0xBC)  break;		// PES packet	
 	}
 
 	(*skipped_bytes)++;			// sync skip counter
@@ -416,9 +434,9 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
     // -- Sync found!
 
     *skipped_bytes -= 3;
-    buf[0] = 0x00;   // write packet_start_code_prefix to buffer
-    buf[1] = 0x00;
-    buf[2] = 0x01;
+    // buf[0] = 0x00;   // write packet_start_code_prefix to buffer
+    // buf[1] = 0x00;
+    // buf[2] = 0x01;
     // buf[3] = streamID == recent read
 
 
@@ -440,6 +458,36 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
 
     return n1;
 }
+
+
+
+
+//
+// -- chain read PS pack_header
+// -- packet_start_code + id already in buffer (4 bytes)
+// -- DOES NOT READ system_header, when following pack_header!!!
+// -- return: <=0: err  >0: len
+//
+static long ps_chainread_packheader (int fd, u_char *buf)
+
+{
+   int  n1, n2;
+   int  len;
+
+
+   n1 = read(fd, buf, 10);
+   if (n1 <= 0) return n1;
+   if (n1 != 10) return -1;
+
+   // -- get pack_stuffing_length
+   len = getBits (buf+9, 0, 5, 3);
+
+   n2 = read(fd, buf+10, len);
+   if (n2 < 0) return n2;
+
+   return n1+n2;
+}
+
 
 
 

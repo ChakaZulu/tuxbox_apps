@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.45 2005/08/02 22:57:46 rasc Exp $
+$Id: cmdline.c,v 1.46 2005/08/10 21:28:18 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.45 2005/08/02 22:57:46 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.46  2005/08/10 21:28:18  rasc
+New: Program Stream handling  (-s ps)
+
 Revision 1.45  2005/08/02 22:57:46  rasc
 Option -N, rewrite offline filters (TS & Section)
 
@@ -279,7 +282,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
      else if (!strcmp (argv[i],"-hexdumpbuffer")) opt->buffer_hexdump = 1;
      else if (!strcmp (argv[i],"-nohexdumpbuffer")) opt->buffer_hexdump = 0;
-     else if (!strcmp (argv[i],"-nph")) opt->buffer_hexdump = 0; // old option  use -ph and -nhdb/-hdb
+     else if (!strcmp (argv[i],"-nph")) opt->buffer_hexdump = 0;  // old option  use -ph and -nhdb/-hdb
      else if (!strcmp (argv[i],"-help")) opt->help = 1;
      else if (!strcmp (argv[i],"-privateprovider")) opt->privateProviderStr = argv[++i];
      else if (!strcmp (argv[i],"-tssubdecode")) opt->ts_subdecode = 1;
@@ -311,6 +314,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
          if (!strcmp (s,"sec")) opt->packet_mode = SECT;
          else if (!strcmp (s,"ts")) opt->packet_mode = TS;
          else if (!strcmp (s,"pes")) opt->packet_mode = PES;
+         else if (!strcmp (s,"ps")) opt->packet_mode = PS;	// ProgramStream
          else if (!strcmp (s,"bandwidth")) opt->packet_mode = PIDBANDWIDTH;
          else if (!strcmp (s,"pidscan")) {
 		 	opt->packet_mode = PIDSCAN;
@@ -414,7 +418,7 @@ static void usage (void)
     printf("   -dvr device:   dvr device [%s]\n",DVR_DEVICE);
     printf("   -frontend device: frontend   device [%s]\n",FRONTEND_DEVICE);
     printf("   -s type:    snoop type or mode <type>  [-s sec]\n");
-    printf("                   stream type: sec, pes or ts\n");
+    printf("                   stream type: sec, pes, ps or ts\n");
     printf("                   or special scan type:\n");
     printf("                         pidscan = transponder pid scan,\n");
     printf("                         bandwidth = data rate statistics for pid\n");
@@ -451,9 +455,9 @@ static void usage (void)
     printf("                  <file>=\"-\" = /dev/stdin \n");
     printf("   -ph mode:     data hex dump mode, modes: [-ph 4]\n");
     printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
-    printf("   -nph:         don't print hex dump of buffer [= -nohexdumpbuffer -ph 0]\n");
     printf("   -hexdumpbuffer:   print hex dump of read buffer [-hexdumpbuffer]\n");
     printf("   -nohexdumpbuffer: don't print hex dump of read buffer [-hexdumpbuffer]\n");
+    printf("   -nph:         don't print hex dump of buffer [= -nohexdumpbuffer]\n");
     printf("   -pd verbose:  print stream decode (verbose level 0..9) [-pd 7]\n");
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
     printf("   -t[n|d|f]:    print timestamp (no, delta, full) [-tf] \n");
