@@ -4,18 +4,21 @@
 	<script language="javascript">
 	function playFile()
 	{
-		stopStreaming();
 		document.location =  "/cgi-bin/movieplayer.pls?command=start&mrl=" + document.form1.mrl.value;
 	}
 	function playDVD()
 	{
-		stopStreaming();
-		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=dvdsimple:" + document.form1.drive1.value + ":";
+		var parms = ":";
+		if (document.form1.title1.value > 0)
+			parms = ":@" + document.form1.title1.value + ":" + document.form1.chapter1.value + "-";
+		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=dvdsimple:" + document.form1.drive1.value + parms;
 	}
 	function playVCD()
 	{
-		stopStreaming();
-		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=vcd:" + document.form1.drive2.value + ":";
+		var parms = ":";
+		if (document.form1.title2.value > 0)
+			parms = ":@" + document.form1.title2.value + ":" + document.form1.chapter2.value + "-";
+		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=vcd:" + document.form1.drive2.value + parms;
 	}
 	function settings()
 	{
@@ -25,9 +28,14 @@
 	{
 		document.location =  "/cgi-bin/movieplayer?command=stop";
 	}
+	function init()
+	{
+		if (parent.leftnavi)
+			parent.leftnavi.location.reload();
+	}
 	</script>
 </head>
-<body style="padding: 10px; background-color: #F4F4F4;" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" id="contentcell">
+<body style="padding: 10px; background-color: #F4F4F4;" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" id="contentcell" onLoad="init()">
 	<form name="form1">
 		<input type="button" style="width: 100; height: 22" onClick="playFile()" value="File">
 		&nbsp;
@@ -35,16 +43,131 @@
 		<br><br>
 		<input type="button" style="width: 100; height: 22" onClick="playDVD()" value="DVD">
 		&nbsp;Drive:&nbsp;
-		<input type="text" name="drive1" value="#DRIVE#" size="1" readonly>
+		<input type="text" name="drive1" value="#DRIVE#" readonly>
+		&nbsp;Title:&nbsp;
+		<select name="title1" size="1">
+			<option value="0">None</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+			<option value="16">16</option>
+			<option value="17">17</option>
+			<option value="18">18</option>
+			<option value="19">19</option>
+			<option value="20">20</option>
+			<option value="21">21</option>
+			<option value="22">22</option>
+			<option value="23">23</option>
+			<option value="24">24</option>
+			<option value="25">25</option>
+		</select>
+		&nbsp;Chapter:&nbsp;
+		<select name="chapter1" size="1">
+			<option value="0">None</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+			<option value="16">16</option>
+			<option value="17">17</option>
+			<option value="18">18</option>
+			<option value="19">19</option>
+			<option value="20">20</option>
+			<option value="21">21</option>
+			<option value="22">22</option>
+			<option value="23">23</option>
+			<option value="24">24</option>
+			<option value="25">25</option>
+		</select>
 		<br><br>
 		<input type="button" style="width: 100; height: 22" onClick="playVCD()" value="(S)VCD">
 		&nbsp;Drive:&nbsp;
-		<input type="text" name="drive2" value="#DRIVE#" size="1" readonly>
+		<input type="text" name="drive2" value="#DRIVE#" readonly>
+		&nbsp;Title:&nbsp;
+		<select name="title2" size="1">
+			<option value="0">None</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+			<option value="16">16</option>
+			<option value="17">17</option>
+			<option value="18">18</option>
+			<option value="19">19</option>
+			<option value="20">20</option>
+			<option value="21">21</option>
+			<option value="22">22</option>
+			<option value="23">23</option>
+			<option value="24">24</option>
+			<option value="25">25</option>
+		</select>
+		&nbsp;Chapter:&nbsp;
+		<select name="chapter2" size="1">
+			<option value="0">None</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+			<option value="16">16</option>
+			<option value="17">17</option>
+			<option value="18">18</option>
+			<option value="19">19</option>
+			<option value="20">20</option>
+			<option value="21">21</option>
+			<option value="22">22</option>
+			<option value="23">23</option>
+			<option value="24">24</option>
+			<option value="25">25</option>
+		</select>
 		<br><br><br>
 		<input type="button" style="width: 100; height: 22" onClick="settings()" value="Settings">
 		<br><br>
 		<input name="stop" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="Stop" onClick="stopStreaming()">
 	</form>
-	<iframe name="vlccmd" src="" width="100%" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe>
 </body>
 </html> 

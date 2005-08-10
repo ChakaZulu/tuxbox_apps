@@ -39,7 +39,7 @@
 				<tr>
 					<td>DVD Drive Letter:</td>
 					<td>
-						<input name="dvddrive" type="text" size="1" maxlength="1" value="#DVDDRIVE#" style="color: #000000">
+						<input name="dvddrive" type="text" value="#DVDDRIVE#" style="color: #000000">
 					</td>
 				</tr>
 				<tr>
