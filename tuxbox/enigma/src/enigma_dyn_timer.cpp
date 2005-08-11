@@ -124,30 +124,6 @@ public:
 	}
 };
 
-struct countTimer
-{
-	int &count;
-	bool repeating;
-	countTimer(int &count,bool repeating)
-		:count(count), repeating(repeating)
-	{
-	}
-
-	void operator()(ePlaylistEntry *se)
-	{
-		if (se->type&ePlaylistEntry::isRepeating)
-		{
-			if (repeating)
-				++count;
-		}
-		else
-		{
-			if (!repeating)
-				++count;
-		}
-	}
-};
-
 struct getEntryString
 {
 	std::list<myTimerEntry> &myList;
@@ -272,15 +248,12 @@ eString getTimerList(eString format)
 		
 	std::list<myTimerEntry> myList;
 	std::list<myTimerEntry>::iterator myIt;
-
-	// regular timers
-	int count = 0;
-	eTimerManager::getInstance()->forEachEntry(countTimer(count, false));
-
 	eString tmp;
-	if (count)
+	
+	// regular timers
+	eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 0, format));
+	if (myList.size() > 0)
 	{
-		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 0, format));
 		myList.sort();
 		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
 			tmp += myIt->timerData;
@@ -294,15 +267,13 @@ eString getTimerList(eString format)
 			result.strReplace("#TIMER_REGULAR#", "");
 	}
 
-	tmp ="";
+	tmp = "";
 	myList.clear();
 
 	// repeating timers
-	count = 0;
-	eTimerManager::getInstance()->forEachEntry(countTimer(count, true));
-	if (count)
+	eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 1, format));
+	if (myList.size() > 0)
 	{
-		eTimerManager::getInstance()->forEachEntry(getEntryString(myList, 1, format));
 		myList.sort();
 		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
 			tmp += myIt->timerData;
@@ -340,7 +311,7 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 	return closeWindow(content, "", 500);
 }
 
-static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result, result1;
 
@@ -959,7 +930,7 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 void ezapTimerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, lockWeb);
-	dyn_resolver->addDyn("GET", "/TVBrowserTimerEvent", TVBrowserTimerEvent, lockWeb);
+	dyn_resolver->addDyn("GET", "/TVBrowserTimerEvent", addTVBrowserTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/deleteTimerEvent", deleteTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/showEditTimerEventWindow", showEditTimerEventWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/showAddTimerEventWindow", showAddTimerEventWindow, lockWeb);
