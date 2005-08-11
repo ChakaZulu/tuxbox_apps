@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.46 2005/08/10 21:28:18 rasc Exp $
+$Id: cmdline.c,v 1.47 2005/08/11 21:02:16 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.46 2005/08/10 21:28:18 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.47  2005/08/11 21:02:16  rasc
+minor changes, man page
+
 Revision 1.46  2005/08/10 21:28:18  rasc
 New: Program Stream handling  (-s ps)
 
@@ -425,7 +428,7 @@ static void usage (void)
     printf("                         signal = signal rate statistics \n");
     printf("                         feinfo = frontend information\n");
     printf("                 stream type or pidscan\n");
-    printf("   -timeout ms:  section read timeout in ms [-TIMEOUT 0]\n");
+    printf("   -timeout ms:  section/signal read timeout in <ms> msec. [-timeout 0]\n");
     printf("   -maxdmx n:    max demux filters <n> to use in pidscan mode (0=max) [-maxdmx 0]\n");
     printf("   -buffersize kb: read buffersize in KBytes  [-buffersize 0]\n");
     printf("                 (0 = use default read buffer size)\n");

@@ -2,13 +2,13 @@
 .SH "Name"
 dvbsnoop \- DVB and MPEG stream analyzer
 .SH "SYNOPSIS"
-.B dvbsnoop [options] pid
+.B dvbsnoop [\-s mode] [options] pid
 
-.B dvbsnoop [options] \-if filename [pid]
+.B dvbsnoop [\-s mode] [options] \-if filename [pid]
 
-.B dvbsnoop [options] \-b [pid]   > binary.file
+.B dvbsnoop [\-s mode] [options] \-b [pid]   > binary.file
 
-.B dvbsnoop [options] 
+.B dvbsnoop [\-s mode] [options] 
 
 
 .SH "Description"
@@ -18,7 +18,7 @@ DVBSNOOP also has some additional functionallity to analyze receiver (set top bo
 
 
 .SH "Usage "
-Dvbsnoop provides an online and offline mode.
+Dvbsnoop provides an online and offline input and different snoop/decoding modes (see below).
 
 Using dvbsnoop 'online' requires dvb\-api compliant devices (http://www.linuxtv.org) to grab live stream information from e.g. satellite or cable tv or data streams. You will also need DVB compliant hardware (e.g. DVB\-S pci card or a linux based setop box like dbox2 or Dreambox) to receive DVB data streams. To tune into a transponder or frequency, please use a program like 'szap', 'dvbtune' or a DVB-GUI like 'Enigma' or 'Neutrino'.
 
@@ -29,16 +29,15 @@ Some options are specific for the selected modes. You may try different combinat
 A short FAQ for common questions and example decoding output can be found at http://dvbsnoop.sourceforge.net.
 
 
-.SH "Basic Decoding Selection Command Line Options"
+.SH "Basic Decoding Selection Mode Command Line Options"
 .TP
 .B \-s [ts|pes|sec|pidscan|bandwidth|signal|feinfo]
 .br
  Basic snoop mode selection.
+   sec      \= SI mode (SECTIONS)
    ts       \= transport stream mode
    pes      \= packetized elementary stream mode,
                e.g. teletext, audio, video, data
-   sec      \= SI mode (SECTIONS),
-               e.g. EPG (default mode)
    pidscan  \= scan and display PIDs on tuned
                transponder/frequency.
    bandwith \= bandwidth messurement mode
@@ -51,6 +50,8 @@ The mode 'ts' requires either a PID specified or the option \-tsraw.
 
 A PID can be specified using octal, decimal or hexadecimal values.
 Examples:  octal: 021, decimal: 17, hexadecimal: 0x11
+
+If \-s option is omitted, default mode is "\-s sec" (Section mode).
 
 
 .SH "General Command Line Options"
@@ -284,10 +285,15 @@ There are no special command line options for the 'Bandwidth' display mode.
 
 .SH "Signal Mode Specific Command Line Options"
 There are no special command line options for the 'Signal Strength'  display mode.
+.TP
+.B \-timeout \<ms\>
+.br
+section read timeout in ms. Default is 0 (no timeout).
 
 
 .SH "Frontend Info Mode Specific Command Line Options"
 There are no special command line options for the 'Frontend Info' display  mode.
+.TP
 
 
 .SH "Examples:"
@@ -309,7 +315,8 @@ Read PS from file and do not show hex dump:
    dvbsnoop -if hdtv_ps_file.mpg -s ps -ph 0 -nohexdumpbuffer -n 30
 
 Show current signal strength:
-   dvbsnoop \-s signal \-pd 9 \-n 100
+   dvbsnoop \-s signal
+   dvbsnoop \-s signal \-pd 9 \-n 100 -timeout 100
 
 Show bandwidth usage of a PID  0x1FF:
    dvbsnoop \-s bandwidth \-n 1000 \-pd 2 0x1FF
@@ -321,7 +328,7 @@ Do PID scan of a tuned transponder (different display levels):
    dvbsnoop \-s pidscan \-pd 9 \-maxdmx 12 
 
 Show frontend info:
-   dvbsnoop \-s feinfo
+   dvbsnoop \-s feinfo \-pd 9
 
 Try to scan all sections, read 2 packets per PID:
    dvbsnoop \-nohexdumpbuffer \-spiderpid \-n 2  0x0000
@@ -337,6 +344,7 @@ Read transport stream (ts) from file and decode:
 Simple filter for some PID values, some examples:
    dvbsnoop \-n 5 \-nph 0x00 | grep \-i "PID: "
    dvbsnoop \-spiderpid \-nph \-n 10  0x00 | grep \-i "PID: " | sort | uniq
+   dvbsnoop \-s signal \-pd 9 | ./perl-statistics-prog.pl
    
 Other simple filter examples:
    dvbsnoop \-s sec \-f 0x4E \-m 0xFF  0x12
