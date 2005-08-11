@@ -1,5 +1,5 @@
 /*
-$Id: fe_info.c,v 1.5 2004/03/27 22:34:03 rasc Exp $
+$Id: fe_info.c,v 1.6 2005/08/11 21:53:49 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_info.c,v 1.5 2004/03/27 22:34:03 rasc Exp $
 
 
 $Log: fe_info.c,v $
+Revision 1.6  2005/08/11 21:53:49  rasc
+minor changes, man page
+
 Revision 1.5  2004/03/27 22:34:03  rasc
 - frontend info  current parameters
 
@@ -101,6 +104,8 @@ int  do_FE_Info (OPTION *opt)
    out_nl (2,"---------------------------------------------------------");
    out_NL (2);
 
+   out_nl (2,"Device: %s",opt->devFE);
+   out_NL (2);
 
   print_FE_BasicCapabilities (3, fd_fe);
   print_FE_CurrentParameters (2, fd_fe);
