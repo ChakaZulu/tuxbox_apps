@@ -1525,7 +1525,6 @@ void eFrontend::updateTransponder()
 				else
 					transponder->satellite.frequency = freq+lof;
 			}
-			eDebug("freq from tuner is %d", transponder->satellite.frequency);
 		}
 /*		transponder->satellite.fec = front.u.qpsk.FEC_inner; */
 		transponder->satellite.inversion = inv;
