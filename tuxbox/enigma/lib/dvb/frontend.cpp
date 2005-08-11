@@ -1517,11 +1517,15 @@ void eFrontend::updateTransponder()
 			eLNB *lnb = sat->getLNB();
 			if (lnb)
 			{
-				transponder->satellite.frequency =
-					transponder->satellite.frequency > lnb->getLOFThreshold() ?
-						freq + lnb->getLOFHi() :
-						freq + lnb->getLOFLo();
+				int lof = transponder->satellite.frequency > lnb->getLOFThreshold() ?
+					lnb->getLOFHi() : lnb->getLOFLo();
+				int tuned_freq = transponder->satellite.frequency - lof;
+				if ( tuned_freq < 0 ) // c-band
+					transponder->satellite.frequency = abs(freq-lof);
+				else
+					transponder->satellite.frequency = freq+lof;
 			}
+			eDebug("freq from tuner is %d", transponder->satellite.frequency);
 		}
 /*		transponder->satellite.fec = front.u.qpsk.FEC_inner; */
 		transponder->satellite.inversion = inv;
