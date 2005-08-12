@@ -1,4 +1,5 @@
 
+ - New: option -adapter and -devnr as device shortcuts
  - New: option '-s ps'
  - New: Program Stream (PS) pack_header, system_header, ...
  - Changed: Soft filters for TS and Section rewritten

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.47 2005/08/11 21:02:16 rasc Exp $
+$Id: cmdline.c,v 1.48 2005/08/12 23:02:35 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: cmdline.c,v 1.47 2005/08/11 21:02:16 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.48  2005/08/12 23:02:35  rasc
+New shortcut options: -adapter and -devnr to select dvb cards/adapters or device numbers on a card.
+This is a shortcut for -demux -dvr and -frontend...
+
 Revision 1.47  2005/08/11 21:02:16  rasc
 minor changes, man page
 
@@ -196,8 +200,18 @@ dvbsnoop v0.7  -- Commit to CVS
 static void title (void);
 static void usage (void);
 
+static char *set_DVB_device (char *str, const char *path_mask, int adapter, int devnr);
+
 // -- GetOptionPtr
 static OPTION *opt_ptr = NULL;
+
+// -- mem for dvb devices
+static char  strDEV_DEMUX[DVB_MAX_DEV_PATH_LEN];
+static char  strDEV_DVR[DVB_MAX_DEV_PATH_LEN];
+static char  strDEV_FRONTEND[DVB_MAX_DEV_PATH_LEN];
+
+
+
 
 
 
@@ -223,9 +237,11 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->binary_out = 0;
   opt->outPidFile = (char *) NULL;
   opt->inpPidFile = (char *) NULL;
-  opt->devDemux = DEMUX_DEVICE;
-  opt->devDvr = DVR_DEVICE;
-  opt->devFE = FRONTEND_DEVICE;
+  opt->devDemux = (char *) NULL;
+  opt->devDvr = (char *) NULL;
+  opt->devFE = (char *) NULL;
+  opt->dvbAdapterNr = DVB_STD_ADAPTER_NR;	// default
+  opt->dvbDeviceNr  = DVB_STD_DEVICE_NR;	// default
   opt->rd_buffer_size = 0L;	// use default read buffersize
   opt->pid = INVALID_PID;
   opt->timeout_ms = 0;		// no timeout (0) or default timeout in ms (SECTIONS)
@@ -261,9 +277,11 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   i = 0;
   while (++i < argc) {
 
-     if (!strcmp (argv[i],"-demux")) opt->devDemux = argv[++i];
+     if      (!strcmp (argv[i],"-demux")) opt->devDemux = argv[++i];
      else if (!strcmp (argv[i],"-dvr")) opt->devDvr = argv[++i];
      else if (!strcmp (argv[i],"-frontend")) opt->devFE = argv[++i];
+     else if (!strcmp (argv[i],"-adapter")) opt->dvbAdapterNr = str2i(argv[++i]);
+     else if (!strcmp (argv[i],"-devnr")) opt->dvbDeviceNr  = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-maxdmx")) opt->max_dmx_filter = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-crc")) opt->crc = 1;
      else if (!strcmp (argv[i],"-nocrc")) opt->crc = 0;
@@ -349,14 +367,27 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
 
   if (opt->filterLen < 0) {
-    printf("Illegal filter/mask value: use e.g. 0x4F or 0x12.5F.2A. etc...\n");
+    printf("Error: Illegal filter/mask value: use e.g. 0x4F or 0x12.5F.2A. etc...\n");
     return(0); 
   }
 
 
-  /*
-   -- help ?  (and return abort)
-  */
+
+
+  //
+  // -- set default DVB devices 
+  // -- (e.g. printed by help)
+  //
+
+  set_DVB_device (strDEV_DEMUX,    DEMUX_DEVICE_MASK,    DVB_STD_ADAPTER_NR, DVB_STD_DEVICE_NR);
+  set_DVB_device (strDEV_DVR,      DVR_DEVICE_MASK,      DVB_STD_ADAPTER_NR, DVB_STD_DEVICE_NR);
+  set_DVB_device (strDEV_FRONTEND, FRONTEND_DEVICE_MASK, DVB_STD_ADAPTER_NR, DVB_STD_DEVICE_NR);
+
+
+ 
+  //
+  //  -- help ?  (and return abort)
+  //
 
   if (opt->help) {
     usage ();
@@ -366,14 +397,45 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   } 
 
 
-  /*
-    -- set private scope id strings (if specified)
-   */
+  //
+  // -- set private scope id strings (if specified)
+  //
+
   if (opt->privateProviderStr) {
      set_PRIVATE_ProviderStr (opt->privateProviderStr);
   }
 
 
+
+  //
+  // -- set DVB devices  demux, dvr and frontend
+  // -- if not set by cmdline, set by 1.) default, 2.) adapterNr & deviceNr
+  //
+
+  if (   opt->dvbAdapterNr < 0 || opt->dvbAdapterNr > 9
+      || opt->dvbDeviceNr  < 0 || opt->dvbDeviceNr  > 9)  {
+    printf("Error: Illegal DVB adapter/card number or illegal DVB device number. \n");
+    return(0); 
+  }
+
+  if (!opt->devDemux) {
+  	opt->devDemux = set_DVB_device (strDEV_DEMUX, DEMUX_DEVICE_MASK,
+  					opt->dvbAdapterNr, opt->dvbDeviceNr);
+  }
+  if (!opt->devDvr) {
+  	opt->devDvr   = set_DVB_device (strDEV_DVR, DVR_DEVICE_MASK,
+  					opt->dvbAdapterNr, opt->dvbDeviceNr);
+  }
+  if (!opt->devFE) {
+  	opt->devFE    = set_DVB_device (strDEV_FRONTEND, FRONTEND_DEVICE_MASK,
+  					opt->dvbAdapterNr, opt->dvbDeviceNr);
+  }
+
+
+
+  //
+  // -- PID check
+  //
 
   if ((argc==1) || ((opt->pid > MAX_PID) && (opt->pid != DUMMY_PID)) ) {
     title ();
@@ -384,6 +446,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
  return 1;
 }
+
+
 
 
 
@@ -417,9 +481,6 @@ static void usage (void)
 
     printf("Usage:   dvbsnoop [opts] pid \n");
     printf("Options:  \n");
-    printf("   -demux device: demux device [%s]\n",DEMUX_DEVICE);
-    printf("   -dvr device:   dvr device [%s]\n",DVR_DEVICE);
-    printf("   -frontend device: frontend   device [%s]\n",FRONTEND_DEVICE);
     printf("   -s type:    snoop type or mode <type>  [-s sec]\n");
     printf("                   stream type: sec, pes, ps or ts\n");
     printf("                   or special scan type:\n");
@@ -428,6 +489,16 @@ static void usage (void)
     printf("                         signal = signal rate statistics \n");
     printf("                         feinfo = frontend information\n");
     printf("                 stream type or pidscan\n");
+    printf("   -demux device: demux device [%s]\n",strDEV_DEMUX);
+    printf("   -dvr device:   dvr device [%s]\n",strDEV_DVR);
+    printf("   -frontend device: frontend   device [%s]\n",strDEV_FRONTEND);
+    printf("   -adapter n:    select dvb adapter/card no. <n> using default path\n");
+    printf("   -devnr n:      select device no. <n> using default dvb adapter/card\n");
+// $$$ TODO  -of cmd option
+//  printf("   -of file:     output file, writes binary <file> (implies -b)\n");
+//  printf("                  <file>=\"-\" = /dev/stdout \n");
+    printf("   -if file:     input file, reads from binary <file> instead of demux device \n");
+    printf("                  <file>=\"-\" = /dev/stdin \n");
     printf("   -timeout ms:  section/signal read timeout in <ms> msec. [-timeout 0]\n");
     printf("   -maxdmx n:    max demux filters <n> to use in pidscan mode (0=max) [-maxdmx 0]\n");
     printf("   -buffersize kb: read buffersize in KBytes  [-buffersize 0]\n");
@@ -451,11 +522,6 @@ static void usage (void)
     printf("   -tssubdecode: sub-decode sections or pes from ts stream decoding\n");
     printf("   -tsraw:       read raw/full TS in TS snoop mode\n");
     printf("   -b:           binary output of packets (disables other output)\n");
-// $$$ TODO  -of cmd option
-//  printf("   -of file:     output file, writes binary <file> (implies -b)\n");
-//  printf("                  <file>=\"-\" = /dev/stdout \n");
-    printf("   -if file:     input file, reads from binary <file> instead of demux device \n");
-    printf("                  <file>=\"-\" = /dev/stdin \n");
     printf("   -ph mode:     data hex dump mode, modes: [-ph 4]\n");
     printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
     printf("   -hexdumpbuffer:   print hex dump of read buffer [-hexdumpbuffer]\n");
@@ -472,6 +538,17 @@ static void usage (void)
 
  return;
 }
+
+
+
+
+static char *set_DVB_device (char *str, const char *path_mask, int adapter, int devnr)
+{
+  sprintf (str, path_mask, adapter, devnr);
+  return str;
+}
+
+
 
 
 

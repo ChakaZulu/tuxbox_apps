@@ -1,5 +1,6 @@
 .TH "dvbsnoop" "1" "" "Rainer Scherg (rasc)" "DVB Analyzer, MPEG Analyzer"
 .SH "Name"
+.br
 dvbsnoop \- DVB and MPEG stream analyzer
 .SH "SYNOPSIS"
 .B dvbsnoop [\-s mode] [options] pid
@@ -12,12 +13,14 @@ dvbsnoop \- DVB and MPEG stream analyzer
 
 
 .SH "Description"
+.br
 DVBSNOOP is a text based DVB and MPEG stream analyzer for viewing/debugging stream information, e.g. send via digital TV. You may also use dvbsnoop to analyze mpeg compliant streams stored on DVD or other media.  Dvbsnoop analyzes and displays MPEG, DVB, DSM\-CC, MHP, etc. data and structures in human readable form. Possible stream types are TS (tranport streams), PES (packetized elementary streams) or SECTIONS (service information streams).
 
 DVBSNOOP also has some additional functionallity to analyze receiver (set top box, dvb card) data, bandwidth of a transport stream, pid scan, etc.
 
 
 .SH "Usage "
+.br
 Dvbsnoop provides an online and offline input and different snoop/decoding modes (see below).
 
 Using dvbsnoop 'online' requires dvb\-api compliant devices (http://www.linuxtv.org) to grab live stream information from e.g. satellite or cable tv or data streams. You will also need DVB compliant hardware (e.g. DVB\-S pci card or a linux based setop box like dbox2 or Dreambox) to receive DVB data streams. To tune into a transponder or frequency, please use a program like 'szap', 'dvbtune' or a DVB-GUI like 'Enigma' or 'Neutrino'.
@@ -30,6 +33,7 @@ A short FAQ for common questions and example decoding output can be found at htt
 
 
 .SH "Basic Decoding Selection Mode Command Line Options"
+.br
 .TP
 .B \-s [ts|pes|sec|pidscan|bandwidth|signal|feinfo]
 .br
@@ -55,6 +59,7 @@ If \-s option is omitted, default mode is "\-s sec" (Section mode).
 
 
 .SH "General Command Line Options"
+.br
 .TP 
 .B \-help
 .br
@@ -65,6 +70,7 @@ Do not print dvbsnoop header (version, etc.).
 
 
 .SH "General Decoding Output Command Line Options"
+.br
 .TP
 .B \-pd \<mode\>
 .br
@@ -114,6 +120,7 @@ There might be a file limit on your system (mostly 2 GB) when writing files usin
 
 
 .SH "Device Selection Command Line Options"
+.br
 Dvbsnoop uses default devices, defined by the DVB API.
 On some platforms or if using multiple dvb cards, you may want to override default settings, e.g. to select a different tuner. 
 .TP
@@ -131,6 +138,16 @@ If not specified, dvbsnoop uses the device specified by the linux  dvb\-api.
 .br
 Specify \<device\> for frontend.
 If not specified, dvbsnoop uses the device specified by the linux  dvb\-api.
+.TP
+.B \-adapter \<n\>
+.br
+Specify DVB adapter/card by number <n> (0-9) using default path pattern 
+(e.g. /dev/dvb/adapter1/...). If not specified, dvbsnoop uses the default adapter/card - usually 0.
+.TP
+.B \-devnr \<n\>
+.br
+Specify DVB device number <n> (0-9) on a DVB adapter/card using default path pattern
+(e.g. /dev/dvb/adapt.../demux1). If not specified, dvbsnoop uses the default device number - usually 0.
 
 .TP
 .B \-buffersize \<kb\>
@@ -154,6 +171,7 @@ Ensure packet sync by using \-sync option.
 
 
 .SH "SECTION Mode (SEC) Specific Command Line Options"
+.br
 The following command line options are special to the 'SECTION' decoding mode:
 .TP
 .B \-timeout \<ms\>
@@ -219,6 +237,7 @@ Set provider \<id\> string for decoding of special private tables and descriptor
 
 
 .SH "Transport Stream (TS) Mode Specific Command Line Options"
+.br
 The following command line options are special to the 'Transport Stream'  decoding mode:
 .TP
 .B \-sync
@@ -254,6 +273,7 @@ Default is 0 (no limit).
 
 
 .SH "PES Mode (PES) Specific Command Line Options"
+.br
 The following command line options are special to the 'PES' (packetized elementary stream) decoding mode:
 .TP
 .B \-sync
@@ -270,7 +290,7 @@ even dvbsnoop crashes. This may not work on some hardware.
 
 
 .SH "PID Scan Mode Specific Command Line Options"
-
+.br
 The following command line options are special to the 'PID Scan' discovery mode:
 .TP
 .B \-maxdmx \<n\>
@@ -280,10 +300,12 @@ Default is 0 (use all possible filters).
 
 
 .SH "Bandwidth Mode Specific Command Line Options"
+.br
 There are no special command line options for the 'Bandwidth' display mode.
 
 
 .SH "Signal Mode Specific Command Line Options"
+.br
 There are no special command line options for the 'Signal Strength'  display mode.
 .TP
 .B \-timeout \<ms\>
@@ -292,11 +314,13 @@ Poll timing in msec.
 
 
 .SH "Frontend Info Mode Specific Command Line Options"
+.br
 There are no special command line options for the 'Frontend Info' display  mode.
 .TP
 
 
 .SH "Examples:"
+.br
 Display EPG, 10 sections:
    dvbsnoop \-s sec \-nph  \-n 10  0x12
    dvbsnoop \-s sec \-ph 3 \-n 10 -crc  0x12
@@ -352,10 +376,16 @@ Other simple filter examples:
    dvbsnoop \-s sec \-f 16.00 \-m 255.255  0x12
    dvbsnoop \-s sec \-nph \-n 5 0x10 | grep \-i "frequency"
 
+Selecting devices:
+   dvbsnoop \-s feinfo -pd 9 -frontend /dev/dvb/adapter0/frontend1
+   dvbsnoop \-s feinfo -pd 9 -adapter 0 -devnr 1
+   dvbsnoop \-s feinfo -pd 9 -adapter 2
+
 ... for more examples and example output of dvbsnoop, please visit http://dvbsnoop.sourceforge.net.
 
 
 .SH NOTES 
+.br
 dvbsnoop tries to decode all of the data it receives, e.g. if you try
 to decode a video or audio stream in section mode, dvbsnoop may assume
 a section table and will decode the data wrong. In this case the decoding
