@@ -211,10 +211,15 @@ int eMoviePlayer::playStream(eString mrl)
 		else
 			Decoder::parms.audio_type = DECODE_AUDIO_AC3;
 	}
-	
+
 	eZapMain::getInstance()->hideInfobar();
+	usleep(100000);
 	Decoder::Set();
-	
+
+#ifndef DISABLE_LCD
+	eZapLCD::getInstance()->lcdMain->ServiceName->setText(mrl);
+#endif
+
 	play = 1;
 			
 	// create receiver thread
