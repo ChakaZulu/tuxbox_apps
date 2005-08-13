@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.31  2005/08/13 18:47:37  robspr1
+ * - correct RSET command, change USR1 / USR2 meaning
+ *
  * Revision 1.30  2005/07/06 19:55:56  robspr1
  * - add cmd-line interface for sending mails
  *
@@ -690,7 +693,14 @@ void *InterfaceThread(void *arg)
 
 					recv(fd_conn, &online, 1, 0);
 
-					kill(pid, SIGUSR2);
+					if( online )
+					{
+						kill(pid, SIGUSR1);
+					}
+					else
+					{
+						kill(pid, SIGUSR2);
+					}
 
 					break;
 
@@ -1575,7 +1585,7 @@ int SendPOPCommand(int command, char *param)
 
 			case RSET:
 
-				sprintf(send_buffer, "RSET \r\n");
+				sprintf(send_buffer, "RSET\r\n");
 
 				break;
 
@@ -3328,17 +3338,30 @@ void SigHandler(int signal)
 
 		case SIGUSR1:
 
-			online ^= 1;
-
-		case SIGUSR2:
+			online = 1;
 
 			if(slog)
 			{
-				syslog(LOG_DAEMON | LOG_INFO, online ? "wakeup" : "sleep");
+				syslog(LOG_DAEMON | LOG_INFO, "wakeup");
 			}
 			else
 			{
-				printf(online ? "TuxMailD <wakeup>\n" : "TuxMailD <sleep>\n");
+				printf("TuxMailD <wakeup>\n");
+			}
+			
+			break;
+			
+		case SIGUSR2:
+
+			online = 0;
+			
+			if(slog)
+			{
+				syslog(LOG_DAEMON | LOG_INFO, "sleep");
+			}
+			else
+			{
+				printf("TuxMailD <sleep>\n");
 			}
 	}
 }
@@ -3349,7 +3372,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.30 $";
+	char cvs_revision[] = "$Revision: 1.31 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
