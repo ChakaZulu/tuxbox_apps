@@ -47,6 +47,7 @@
 #include <lib/system/info.h>
 #include <lib/system/dmfp.h>
 #include <lib/system/file_eraser.h>
+#include <lib/movieplayer/movieplayer.h>
 #include <enigma_dyn.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_mount.h>
@@ -2395,6 +2396,9 @@ eString getBoxStatus(eString format)
 	result.strReplace("#SNR#", eString().sprintf("%d", fe->SNR() * 100 / 65535));
 	result.strReplace("#AGC#", eString().sprintf("%d", fe->SignalStrength() * 100 / 65535));
 	result.strReplace("#BER#", eString().sprintf("%u", fe->BER()));
+	
+	// streaming client status
+	result.strReplace("#STREAMINGCLIENTSTATUS#", eString().sprintf("%d", eMoviePlayer::getInstance()->getStatus()));
 
 	return result;
 }

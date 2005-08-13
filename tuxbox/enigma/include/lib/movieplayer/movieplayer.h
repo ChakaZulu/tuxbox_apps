@@ -27,19 +27,20 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	static eMoviePlayer *instance;
 	int serverPort;
 	eString serverIP;
+	int status;
 	eServiceReference suspendedServiceReference;
 	void gotMessage(const Message &message);
 	void thread();
-	int sendRequest2VLC(eString command, bool authenticate);
+	int sendRequest2VLC(eString command);
 	eString sout(eString mrl);
 	int playStream(eString mrl);
 public:
 	eMoviePlayer();
 	~eMoviePlayer();
-	void start(const char * filename);
-	void stop();
-	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& forcetranscodevideo, int& audiodatarate, int& forcetranscodeaudio);
-	void writeStreamingServerSettings(eString ip, int port, eString dvddrive, int videodatarate, int resolution, int mpegcodec, int forcetranscodevideo, int audiodatarate, int forcetranscodeaudio);
+	void control(const char *command, const char *filename);
+	int getStatus() { return status; }
+	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& transcodevideo, int& audiodatarate, int& transcodeaudio);
+	void writeStreamingServerSettings(eString ip, int port, eString dvddrive, int videodatarate, int resolution, int mpegcodec, int transcodevideo, int audiodatarate, int transcodeaudio);
 	static eMoviePlayer *getInstance() { return instance; }
 };
 
