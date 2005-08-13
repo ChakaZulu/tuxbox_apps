@@ -14,7 +14,7 @@ dvbsnoop \- DVB and MPEG stream analyzer
 
 .SH "Description"
 .br
-DVBSNOOP is a text based DVB and MPEG stream analyzer for viewing/debugging stream information, e.g. send via digital TV. You may also use dvbsnoop to analyze mpeg compliant streams stored on DVD or other media.  Dvbsnoop analyzes and displays MPEG, DVB, DSM\-CC, MHP, etc. data and structures in human readable form. Possible stream types are TS (tranport streams), PES (packetized elementary streams) or SECTIONS (service information streams).
+DVBSNOOP is a text based DVB and MPEG stream analyzer for viewing/debugging stream information, e.g. send via digital TV. You may also use dvbsnoop to analyze mpeg compliant streams stored on DVD or other media.  Dvbsnoop analyzes and displays MPEG, DVB, DSM\-CC, MHP, etc. data and structures in human readable form. Possible stream types are TS (tranport streams), PS (program streams), PES (packetized elementary streams) or SECTIONS (service information streams).
 
 DVBSNOOP also has some additional functionallity to analyze receiver (set top box, dvb card) data, bandwidth of a transport stream, pid scan, etc.
 
@@ -29,17 +29,20 @@ The 'offline' mode enables you to analyze binary stream files (e.g. transport st
 
 Some options are specific for the selected modes. You may try different combinations of command line options to get best results.
 
-A short FAQ for common questions and example decoding output can be found at http://dvbsnoop.sourceforge.net.
+A short FAQ for common questions and example decoding output can be found at
+.I http://dvbsnoop.sourceforge.net.
+.br
 
 
 .SH "Basic Decoding Selection Mode Command Line Options"
 .br
 .TP
-.B \-s [ts|pes|sec|pidscan|bandwidth|signal|feinfo]
+.B \-s [ts|ps|pes|sec|pidscan|bandwidth|signal|feinfo]
 .br
  Basic snoop mode selection.
    sec      \= SI mode (SECTIONS)
    ts       \= transport stream mode
+   ps       \= program stream mode (same as PES mode)
    pes      \= packetized elementary stream mode,
                e.g. teletext, audio, video, data
    pidscan  \= scan and display PIDs on tuned
@@ -49,7 +52,7 @@ A short FAQ for common questions and example decoding output can be found at htt
    signal   \= display tuner signal reception info.
    feinfo   \= display tuner data (frontend info).
    
-The modes 'sec' and "pes" require the selection of a PID.
+The modes 'sec', "ps" or "pes" require the selection of a PID.
 The mode 'ts' requires either a PID specified or the option \-tsraw.
 
 A PID can be specified using octal, decimal or hexadecimal values.
@@ -174,9 +177,13 @@ Ensure packet sync by using \-sync option.
 .br
 The following command line options are special to the 'SECTION' decoding mode:
 .TP
+.B \-s sec
+.br
+Section mode.
+.TP
 .B \-timeout \<ms\>
 .br
-section read timeout in ms. Default is 0 (no timeout).
+Section read timeout in ms. Default is 0 (no timeout).
 .TP
 .B \-f \<filter\>
 .br
@@ -240,6 +247,10 @@ Set provider \<id\> string for decoding of special private tables and descriptor
 .br
 The following command line options are special to the 'Transport Stream'  decoding mode:
 .TP
+.B \-s ts
+.br
+Transport Stream mode.
+.TP
 .B \-sync
 .br
 Do simple packet header sync when reading transport streams.
@@ -272,13 +283,20 @@ limits the decoding process. Using dvb hardware filters \-n would be the same as
 Default is 0 (no limit).
 
 
-.SH "PES Mode (PES) Specific Command Line Options"
+.SH "PES or PS Mode Specific Command Line Options"
 .br
-The following command line options are special to the 'PES' (packetized elementary stream) decoding mode:
+The following command line options are special to the 'PES' (packetized elementary stream) or 'PS' (program stream) decoding mode:
+.TP
+.B \-s ps
+Program Stream mode.
+.TP
+.B \-s pes
+.br
+Packetized Elementary Stream mode.
 .TP
 .B \-sync
 .br
-Do simple packet header sync when reading PES data.
+Do simple packet header sync when reading PES or PS data.
 This option enforces sync byte aligning (default) ans is normally
 done by receiption hardware/firmware.
 .TP
@@ -293,6 +311,10 @@ even dvbsnoop crashes. This may not work on some hardware.
 .br
 The following command line options are special to the 'PID Scan' discovery mode:
 .TP
+.B \-s pidscan
+.br
+Scan PIDs on transponder/frequency.
+.TP
 .B \-maxdmx \<n\>
 .br
 Set maximum use of DMX filters.
@@ -302,11 +324,20 @@ Default is 0 (use all possible filters).
 .SH "Bandwidth Mode Specific Command Line Options"
 .br
 There are no special command line options for the 'Bandwidth' display mode.
+.TP
+.B \-s bandwidth
+.br
+Determine bandwidth for a dvb stream. This will be done by calculating received
+ts packets in a timeslot.
 
 
 .SH "Signal Mode Specific Command Line Options"
 .br
 There are no special command line options for the 'Signal Strength'  display mode.
+.TP
+.B \-s signal
+.br
+Poll frontend signal status.
 .TP
 .B \-timeout \<ms\>
 .br
@@ -317,11 +348,17 @@ Poll timing in msec.
 .br
 There are no special command line options for the 'Frontend Info' display  mode.
 .TP
+.B \-s feinfo
+.br
+Display frontend information.
 .br
 
 
 .SH "Examples"
 .br
+Examples how to use dvbsnoop:
+.br
+
 Display EPG, 10 sections:
    dvbsnoop \-s sec \-nph  \-n 10  0x12
    dvbsnoop \-s sec \-ph 3 \-n 10 -crc  0x12
