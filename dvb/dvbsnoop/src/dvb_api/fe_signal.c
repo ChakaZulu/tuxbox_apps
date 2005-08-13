@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.12 2004/10/12 20:37:47 rasc Exp $
+$Id: fe_signal.c,v 1.13 2005/08/13 00:06:56 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: fe_signal.c,v 1.12 2004/10/12 20:37:47 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- Signal Statistics  Current Frequency/Transponder
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.12 2004/10/12 20:37:47 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.13  2005/08/13 00:06:56  rasc
+no message
+
 Revision 1.12  2004/10/12 20:37:47  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -99,7 +102,7 @@ int  do_SignalStrength (OPTION *opt)
 
 
   if (opt->inpPidFile) {
-	fprintf (stderr,"Error: FileMode not possible...\n");
+	fprintf (stderr,"Error: FileMode not supported...\n");
 	return -1;
   } 
 
