@@ -1,20 +1,23 @@
+# translation of es.po to 
 # created by Enigma Language Editor 0.2
 # 			 (c) 10/2002 ole <olest@gmx.net>
 # *************************************
 # *	 use/modify on your own risk!		*
 # *************************************
+# , 2005.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: tuxbox-enigma 0.1\n"
+"Project-Id-Version: es\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-07-14 07:54+0100\n"
-"PO-Revision-Date: Thu Mar 25 16:08:04 CET 2004\n"
-"Last-Translator: unknown\n"
-"Language-Team: Spanish / J.M. Degen <info@comant.tv>\n"
+"POT-Creation-Date: 2005-08-11 13:06+0100\n"
+"PO-Revision-Date: 2005-08-13 07:34+0100\n"
+"Last-Translator: \n"
+"Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.9.1\n"
 
 #: chk_blue2.esml:316
 msgid "FF "
@@ -72,7 +75,7 @@ msgstr "Pagina previa"
 msgid "LOF/L:"
 msgstr "LOF/L:"
 
-#: default.esml:753 src/timer.cpp:2648
+#: default.esml:753 src/timer.cpp:2651
 msgid "Wednesday"
 msgstr "Miercoles"
 
@@ -287,7 +290,7 @@ msgstr "Modo DiSEqC:"
 msgid "LNB Configuration"
 msgstr "Configuración LNB"
 
-#: default.esml:533 default.esml:552 src/scan.cpp:654
+#: default.esml:533 default.esml:552 src/scan.cpp:663
 msgid "scanning..."
 msgstr "Buscando..."
 
@@ -459,7 +462,7 @@ msgstr "Apagar receptor (ok)"
 msgid "edit the end time (0..9, left, right)"
 msgstr "Modificar hora de parada (0..9, izquierda, derecha)"
 
-#: default.esml:752 src/timer.cpp:2648
+#: default.esml:752 src/timer.cpp:2651
 msgid "Tuesday"
 msgstr "Martes"
 
@@ -479,7 +482,7 @@ msgstr "Elige transpondedor buscado"
 msgid "add new Transponder to selected sat (ok)"
 msgstr "Añadir transpondedor al satélite elegido (ok)"
 
-#: default.esml:754 src/timer.cpp:2649
+#: default.esml:754 src/timer.cpp:2652
 msgid "Thursday"
 msgstr "Jueves"
 
@@ -507,7 +510,7 @@ msgstr "mA"
 msgid "goto advanced motor setup"
 msgstr "Abrir ajustes motor avancados"
 
-#: default.esml:750 src/timer.cpp:2648
+#: default.esml:750 src/timer.cpp:2651
 msgid "Monday"
 msgstr "Lunes"
 
@@ -544,7 +547,7 @@ msgid "search event name for this beg-/end time in epg"
 msgstr "Buscar el nombre del evento en la epg"
 
 #: default.esml:366 default.esml:391 default.esml:412 default.esml:470
-#: default.esml:577 src/parentallock.cpp:96 src/scan.cpp:1714
+#: default.esml:577 src/parentallock.cpp:96 src/scan.cpp:1723
 #: src/setup_lcd.cpp:113 src/setup_keyboard.cpp:50 src/setup_osd.cpp:264
 #: src/setup_rc.cpp:122 src/setup_rfmod.cpp:144 src/setup_timezone.cpp:42
 #: src/setupengrab.cpp:97 src/setupnetwork.cpp:643 src/setupnetwork.cpp:1120
@@ -653,7 +656,7 @@ msgstr "Grabar"
 msgid "choose modulation (left, right)"
 msgstr "Elige mudulación (izquierda, derecha)"
 
-#: default.esml:755 src/timer.cpp:2649
+#: default.esml:755 src/timer.cpp:2652
 msgid "Friday"
 msgstr "Viernes"
 
@@ -825,7 +828,7 @@ msgstr "Mostrar parámetros adicionales"
 msgid "choose what you want to do"
 msgstr "Elige acción"
 
-#: default.esml:757 src/timer.cpp:2648
+#: default.esml:757 src/timer.cpp:2651
 msgid "Sunday"
 msgstr "Domingo"
 
@@ -1089,7 +1092,7 @@ msgstr "Sólo libres"
 msgid "Constellation:"
 msgstr "Constelación:"
 
-#: default.esml:756 src/timer.cpp:2649
+#: default.esml:756 src/timer.cpp:2652
 msgid "Saturday"
 msgstr "Sábado"
 
@@ -1246,7 +1249,7 @@ msgstr "Modo fichero"
 msgid "TV/Radio"
 msgstr "TV/Radio"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7492
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7497
 #: src/sselect.cpp:393 src/sselect.cpp:400
 msgid "Bouquets"
 msgstr "Bouquetes"
@@ -1637,7 +1640,7 @@ msgstr "Nombre de fichero:"
 msgid "no description is available"
 msgstr "Descripción no disponible"
 
-#: src/enigma.cpp:271
+#: src/enigma.cpp:274
 msgid ""
 "Welcome to enigma.\n"
 "\n"
@@ -1649,7 +1652,7 @@ msgstr ""
 "Hay que hacer una búsqueda de canales.\n"
 "(Menu principal > Ajustes > Canales > Búsqueda de canales)"
 
-#: src/enigma.cpp:273
+#: src/enigma.cpp:276
 msgid "First start of enigma"
 msgstr "Primer lancamiento de enigma"
 
@@ -1757,7 +1760,7 @@ msgstr "Módulo Interfaz commún - mmi"
 msgid "waiting for CI answer..."
 msgstr "Esperando respuesta del CI"
 
-#: src/enigma_dyn.cpp:2242
+#: src/enigma_dyn.cpp:2010
 msgid "External Message"
 msgstr "Mensaje externo"
 
@@ -1816,7 +1819,7 @@ msgstr "Frontend: terrestre"
 msgid "none"
 msgstr "ninguno"
 
-#: src/enigma_info.cpp:211 src/timer.cpp:2713 src/upgrade.cpp:274
+#: src/enigma_info.cpp:211 src/timer.cpp:2716 src/upgrade.cpp:274
 msgid "unknown"
 msgstr "desconocido"
 
@@ -2133,19 +2136,19 @@ msgstr "Favoritos (Radio)"
 msgid "Favourites (File)"
 msgstr "Favoritos (Fichero)"
 
-#: src/enigma_main.cpp:1871
+#: src/enigma_main.cpp:1874
 msgid "please wait while initializing Common Interface ..."
 msgstr "Espere mientras el Interface Commún se inicializa ..."
 
-#: src/enigma_main.cpp:2173
+#: src/enigma_main.cpp:2176
 msgid "no EPG available"
 msgstr "EPG no disponible"
 
-#: src/enigma_main.cpp:2831
+#: src/enigma_main.cpp:2834
 msgid "ShutdownTimer"
 msgstr "Temporizador Apagar"
 
-#: src/enigma_main.cpp:2831
+#: src/enigma_main.cpp:2834
 msgid "SleepTimer"
 msgstr "Sleep Timer"
 
@@ -2266,7 +2269,7 @@ msgstr "Este directorio no contiene nada reconocido!"
 msgid "Play"
 msgstr "Reproducir"
 
-#: src/enigma_main.cpp:5028
+#: src/enigma_main.cpp:5025
 msgid ""
 "A timer based recording is currently in progress!\n"
 "This stops the timer, and recording!"
@@ -2274,7 +2277,7 @@ msgstr ""
 "Está en curso una grabación pogramada!\n"
 "Eso va a terminar el temporizador y la grabación!"
 
-#: src/enigma_main.cpp:5038
+#: src/enigma_main.cpp:5035
 msgid ""
 "A recording is currently in progress!\n"
 "This stops the recording!"
@@ -2282,7 +2285,7 @@ msgstr ""
 "Está en curso una grabación!\n"
 "Eso la va a terminar!"
 
-#: src/enigma_main.cpp:5050
+#: src/enigma_main.cpp:5047
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2290,333 +2293,331 @@ msgstr ""
 "Está en curso un evento programado!\n"
 "Eso lo va a terminar!"
 
-#: src/enigma_main.cpp:5058
+#: src/enigma_main.cpp:5055
 msgid "Really do this?"
 msgstr "Seguro?"
 
-#: src/enigma_main.cpp:5157
+#: src/enigma_main.cpp:5154
 msgid "please wait until the timer has started the recording (max 10 seconds)"
 msgstr "Espere el comienzo de la grabación temporizador (10 segundos max.)"
 
-#: src/enigma_main.cpp:5158
+#: src/enigma_main.cpp:5155
 msgid "information"
 msgstr "Información"
 
-#: src/enigma_main.cpp:5810
+#: src/enigma_main.cpp:5815
 msgid "Record failed due to inaccessable storage."
 msgstr "Grabación errónea debido a un directorio inaccesible."
 
-#: src/enigma_main.cpp:5812
-msgid ""
-"Record stopped due to full harddisk. Delete some recordings and try again."
+#: src/enigma_main.cpp:5817
+msgid "Record stopped due to full harddisk. Delete some recordings and try again."
 msgstr ""
 "Grabación terminada, disco duro lleno. Borre algunos grabaciones e intente "
 "otra vez."
 
-#: src/enigma_main.cpp:5814
+#: src/enigma_main.cpp:5819
 msgid ""
 "Record failed due to an write error during recording. Check for filesystem "
 "corruption."
-msgstr ""
-"Grabación errónea debido a un error de escritura. Compruebe el disco duro."
+msgstr "Grabación errónea debido a un error de escritura. Compruebe el disco duro."
 
-#: src/enigma_main.cpp:5816
+#: src/enigma_main.cpp:5821
 msgid "record failed"
 msgstr "Grabación errónea"
 
-#: src/enigma_main.cpp:6055 src/enigma_main.cpp:6056
+#: src/enigma_main.cpp:6060 src/enigma_main.cpp:6061
 msgid "One moment please..."
 msgstr "Un momento, por favor..."
 
-#: src/enigma_main.cpp:6056 src/enigma_main.cpp:6060 src/enigma_main.cpp:6068
-#: src/enigma_main.cpp:6075 src/enigma_main.cpp:6081 src/enigma_main.cpp:6086
-#: src/enigma_main.cpp:6091 src/timer.cpp:2243
+#: src/enigma_main.cpp:6061 src/enigma_main.cpp:6065 src/enigma_main.cpp:6073
+#: src/enigma_main.cpp:6080 src/enigma_main.cpp:6086 src/enigma_main.cpp:6091
+#: src/enigma_main.cpp:6096 src/timer.cpp:2243
 msgid "switch"
 msgstr "Cambiar canal"
 
-#: src/enigma_main.cpp:6059 src/enigma_main.cpp:6060
+#: src/enigma_main.cpp:6064 src/enigma_main.cpp:6065
 msgid "Service could not be found !"
 msgstr "El servicio no está disponible."
 
-#: src/enigma_main.cpp:6067 src/enigma_main.cpp:6068
+#: src/enigma_main.cpp:6072 src/enigma_main.cpp:6073
 msgid "This service could not be descrambled"
 msgstr "Este servicio no se puede descodificar"
 
-#: src/enigma_main.cpp:6074 src/enigma_main.cpp:6075
+#: src/enigma_main.cpp:6079 src/enigma_main.cpp:6080
 msgid "This service doesn't currently send a signal"
 msgstr "Actualmente, este servicio no está transmitiendo."
 
-#: src/enigma_main.cpp:6079 src/enigma_main.cpp:6081
+#: src/enigma_main.cpp:6084 src/enigma_main.cpp:6086
 msgid "This content could not be displayed"
 msgstr "No se puede mostrar este contenido"
 
-#: src/enigma_main.cpp:6084 src/enigma_main.cpp:6086
+#: src/enigma_main.cpp:6089 src/enigma_main.cpp:6091
 msgid "NVOD Service - please select a starttime"
 msgstr "Servicio NVOD - elige hora de inicio deseada"
 
-#: src/enigma_main.cpp:6089 src/enigma_main.cpp:6091
+#: src/enigma_main.cpp:6094 src/enigma_main.cpp:6096
 msgid "Unknown error!!"
 msgstr "Error desconocido!!"
 
-#: src/enigma_main.cpp:6589 src/sselect.cpp:399
+#: src/enigma_main.cpp:6594 src/sselect.cpp:399
 msgid "Playlist"
 msgstr "Lista de reproducción"
 
-#: src/enigma_main.cpp:6591
+#: src/enigma_main.cpp:6596
 msgid "History"
 msgstr "Historial"
 
-#: src/enigma_main.cpp:7027
+#: src/enigma_main.cpp:7032
 msgid "Service Menu"
 msgstr "Menú servicios"
 
-#: src/enigma_main.cpp:7044 src/sselect.cpp:129
+#: src/enigma_main.cpp:7049 src/sselect.cpp:129
 msgid "add service to playlist"
 msgstr "Añadir a la lista de reproducción"
 
-#: src/enigma_main.cpp:7044
+#: src/enigma_main.cpp:7049
 msgid "add selected service to the playlist"
 msgstr "Añadir servicio elegido a la lista de reproducción"
 
-#: src/enigma_main.cpp:7055
+#: src/enigma_main.cpp:7060
 msgid "remove 'new found flag'"
 msgstr "Anular marca 'servicio nuevo'"
 
-#: src/enigma_main.cpp:7055
+#: src/enigma_main.cpp:7060
 msgid "select to remove the 'new found flag'"
 msgstr "Para anular la marca 'servicio nuevo'"
 
-#: src/enigma_main.cpp:7058
+#: src/enigma_main.cpp:7063
 msgid "create new bouquet"
 msgstr "Crear bouquete nuevo"
 
-#: src/enigma_main.cpp:7058
+#: src/enigma_main.cpp:7063
 msgid "select to create a new bouquet"
 msgstr "Para crear un bouquete nuevo"
 
-#: src/enigma_main.cpp:7070
+#: src/enigma_main.cpp:7075
 msgid "duplicate bouquet"
 msgstr "Duplicar bouquete"
 
-#: src/enigma_main.cpp:7070
+#: src/enigma_main.cpp:7075
 msgid "duplicate the complete bouquet with all content"
 msgstr "Duplicar bouquete entero con todo su contenido"
 
-#: src/enigma_main.cpp:7076 src/enigma_main.cpp:7129 src/enigma_main.cpp:7134
-#: src/enigma_main.cpp:7149
+#: src/enigma_main.cpp:7081 src/enigma_main.cpp:7134 src/enigma_main.cpp:7139
+#: src/enigma_main.cpp:7154
 msgid "add to specific bouquet"
 msgstr "Añadir a bouquete determinado"
 
-#: src/enigma_main.cpp:7076
+#: src/enigma_main.cpp:7081
 msgid "add the selected service to another bouquet"
 msgstr "Añadir canal elegido a un bouquete determinado"
 
-#: src/enigma_main.cpp:7078
+#: src/enigma_main.cpp:7083
 msgid "add marker"
 msgstr "Añadir línea separación"
 
-#: src/enigma_main.cpp:7078
+#: src/enigma_main.cpp:7083
 msgid "create a new marker in the current bouquet"
 msgstr "Introducir una separación nueva en el bouquete actual"
 
-#: src/enigma_main.cpp:7087 src/enigma_main.cpp:7101 src/enigma_main.cpp:7136
+#: src/enigma_main.cpp:7092 src/enigma_main.cpp:7106 src/enigma_main.cpp:7141
 #: src/sselect.cpp:378
 msgid "rename"
 msgstr "Renombrar"
 
-#: src/enigma_main.cpp:7087
+#: src/enigma_main.cpp:7092
 msgid "rename the current selected bouquet"
 msgstr "Renombrar bouquete elegido"
 
-#: src/enigma_main.cpp:7101 src/enigma_main.cpp:7136
+#: src/enigma_main.cpp:7106 src/enigma_main.cpp:7141
 msgid "rename the current selected service/movie"
 msgstr "Renombrar servicio elegido"
 
-#: src/enigma_main.cpp:7105 src/enigma_main.cpp:7137 src/sselect.cpp:376
+#: src/enigma_main.cpp:7110 src/enigma_main.cpp:7142 src/sselect.cpp:376
 msgid "delete"
 msgstr "Borrar"
 
-#: src/enigma_main.cpp:7105 src/enigma_main.cpp:7137
+#: src/enigma_main.cpp:7110 src/enigma_main.cpp:7142
 msgid "delete the current selected service/movie"
 msgstr "Borrar servicio/fichero elegido"
 
-#: src/enigma_main.cpp:7112
+#: src/enigma_main.cpp:7117
 msgid "disable move mode"
 msgstr "Desactivar modo mover"
 
-#: src/enigma_main.cpp:7112
+#: src/enigma_main.cpp:7117
 msgid "switch move mode off"
 msgstr "Terminar el modo mover"
 
-#: src/enigma_main.cpp:7114
+#: src/enigma_main.cpp:7119
 msgid "enable move mode"
 msgstr "Activar modo mover"
 
-#: src/enigma_main.cpp:7114
+#: src/enigma_main.cpp:7119
 msgid "activate mode to simply change the entry order"
 msgstr "Activar este modo para odernar la lista "
 
-#: src/enigma_main.cpp:7123
+#: src/enigma_main.cpp:7128
 msgid "copy to bouquet list"
 msgstr "Copiar a la lista de bouquetes"
 
-#: src/enigma_main.cpp:7123
+#: src/enigma_main.cpp:7128
 msgid "copy the selected provider to the bouquet list"
 msgstr "Copiar proveedor elegido a la lista de bouquetes"
 
-#: src/enigma_main.cpp:7129 src/enigma_main.cpp:7134
+#: src/enigma_main.cpp:7134 src/enigma_main.cpp:7139
 msgid "add the selected service to a selectable bouquet"
 msgstr "Añadir canal elegido a un bouquete determinado"
 
-#: src/enigma_main.cpp:7149
+#: src/enigma_main.cpp:7154
 msgid "add the selected file to a selectable bouquet"
 msgstr "Añadir fichero elegido a un bouquete determinado"
 
-#: src/enigma_main.cpp:7151
+#: src/enigma_main.cpp:7156
 msgid "delete file"
 msgstr "Borrar fichero"
 
-#: src/enigma_main.cpp:7151
+#: src/enigma_main.cpp:7156
 msgid "delete the selected file (and all corresponding ts files"
 msgstr "Borrar fichero elegido (con todos ficheros ts correspondientes)"
 
-#: src/enigma_main.cpp:7152
+#: src/enigma_main.cpp:7157
 msgid "rename file"
 msgstr "Renombrar fichero"
 
-#: src/enigma_main.cpp:7152
+#: src/enigma_main.cpp:7157
 msgid "rename the selected file (and all corresponding ts files"
 msgstr "Renombrar fichero elegido (con todos sus ficheros ts)"
 
-#: src/enigma_main.cpp:7166
+#: src/enigma_main.cpp:7171
 msgid "disable edit mode"
 msgstr "Desactivar modo edición"
 
-#: src/enigma_main.cpp:7166
+#: src/enigma_main.cpp:7171
 msgid "disable the edit mode"
 msgstr "Desactivar el modo de edición"
 
-#: src/enigma_main.cpp:7168
+#: src/enigma_main.cpp:7173
 msgid "enable edit mode"
 msgstr "Activar modo edición"
 
-#: src/enigma_main.cpp:7168
+#: src/enigma_main.cpp:7173
 msgid "activate mode to simply add many services to a selectable bouquet"
 msgstr "Añadir multipes servicios facilmente a un bouquete específico"
 
-#: src/enigma_main.cpp:7178
+#: src/enigma_main.cpp:7183
 msgid "unlock"
 msgstr "Desbloquear"
 
-#: src/enigma_main.cpp:7178
+#: src/enigma_main.cpp:7183
 msgid "do parental-unlock the selected service or file"
 msgstr "desbloquear servicio/fichero elegido"
 
-#: src/enigma_main.cpp:7180
+#: src/enigma_main.cpp:7185
 msgid "lock"
 msgstr "Bloquear"
 
-#: src/enigma_main.cpp:7180
+#: src/enigma_main.cpp:7185
 msgid "do parentallock the selected service or file"
 msgstr "bloquear servicio/fichero elegido"
 
-#: src/enigma_main.cpp:7184
+#: src/enigma_main.cpp:7189
 msgid "disable parental lock"
 msgstr "Desactivar bloqueo paterno"
 
-#: src/enigma_main.cpp:7184
+#: src/enigma_main.cpp:7189
 msgid "temporary disable the parental locking"
 msgstr "Desactivar bloqueo paterno temporaneamente"
 
-#: src/enigma_main.cpp:7186
+#: src/enigma_main.cpp:7191
 msgid "enable parental lock"
 msgstr "Activar bloqueo paterno"
 
-#: src/enigma_main.cpp:7186
+#: src/enigma_main.cpp:7191
 msgid "re-enable the parental locking"
 msgstr "Reactivar bloqueo paterno "
 
-#: src/enigma_main.cpp:7204
+#: src/enigma_main.cpp:7209
 msgid "Shutdown/Standby Menu"
 msgstr "Menú apagar/Standby"
 
-#: src/enigma_main.cpp:7215 src/enigma_main.cpp:7218
+#: src/enigma_main.cpp:7220 src/enigma_main.cpp:7223
 msgid "reboot now"
 msgstr "Reencender"
 
-#: src/enigma_main.cpp:7215 src/enigma_main.cpp:7223
+#: src/enigma_main.cpp:7220 src/enigma_main.cpp:7228
 msgid "restart your dreambox"
 msgstr "Reiniciar su receptor"
 
-#: src/enigma_main.cpp:7218
+#: src/enigma_main.cpp:7223
 msgid "restart your receiver"
 msgstr "Reinicie su receptor"
 
-#: src/enigma_main.cpp:7222 src/enigma_main.cpp:7226
+#: src/enigma_main.cpp:7227 src/enigma_main.cpp:7231
 msgid "shutdown now"
 msgstr "Apagar ahora"
 
-#: src/enigma_main.cpp:7222
+#: src/enigma_main.cpp:7227
 msgid "shutdown your dreambox"
 msgstr "Apagar su receptor"
 
-#: src/enigma_main.cpp:7223 src/enigma_main.cpp:7227
+#: src/enigma_main.cpp:7228 src/enigma_main.cpp:7232
 msgid "restart"
 msgstr "Reiniciar"
 
-#: src/enigma_main.cpp:7226
+#: src/enigma_main.cpp:7231
 msgid "shutdown your dbox-2"
 msgstr "Apagar su receptor"
 
-#: src/enigma_main.cpp:7227
+#: src/enigma_main.cpp:7232
 msgid "restart your dbox-2"
 msgstr "Reiniciar su receptor"
 
-#: src/enigma_main.cpp:7231
+#: src/enigma_main.cpp:7236
 msgid "goto standby"
 msgstr "Ir al modo espera"
 
-#: src/enigma_main.cpp:7231
+#: src/enigma_main.cpp:7236
 msgid "goto standby mode"
 msgstr "Ir al modo espera"
 
-#: src/enigma_main.cpp:7232
+#: src/enigma_main.cpp:7237
 msgid "set sleeptimer"
 msgstr "Activar Sleep Timer"
 
-#: src/enigma_main.cpp:7232
+#: src/enigma_main.cpp:7237
 msgid "set a sleep timer"
 msgstr "Activar Sleep Timer"
 
-#: src/enigma_main.cpp:7352
+#: src/enigma_main.cpp:7357
 msgid "Record Menu"
 msgstr "Menú grabaciones"
 
-#: src/enigma_main.cpp:7358
+#: src/enigma_main.cpp:7363
 msgid "stop record now"
 msgstr "Terminar grabación ya!"
 
-#: src/enigma_main.cpp:7358
+#: src/enigma_main.cpp:7363
 msgid "immediate stop the recording"
 msgstr "Terminar grabación ahora"
 
-#: src/enigma_main.cpp:7360
+#: src/enigma_main.cpp:7365
 msgid "set record duration"
 msgstr "Duración de la grabación"
 
-#: src/enigma_main.cpp:7360
+#: src/enigma_main.cpp:7365
 msgid "set the recording time (in minutes)"
 msgstr "Ajustar duración de la grabación (en minutos)"
 
-#: src/enigma_main.cpp:7361
+#: src/enigma_main.cpp:7366
 msgid "set record stop time"
 msgstr "Hora de parada"
 
-#: src/enigma_main.cpp:7361
+#: src/enigma_main.cpp:7366
 msgid "set the recording end time"
 msgstr "Poner la hora de parada"
 
-#: src/enigma_main.cpp:7456
+#: src/enigma_main.cpp:7461
 msgid "press ok to start edit mode"
 msgstr "Pulse OK para activar modo edición"
 
@@ -2646,7 +2647,7 @@ msgstr "Modo fichero"
 
 #: src/enigma_mainmenu.cpp:66 src/enigma_mainmenu.cpp:85
 #: src/enigma_mainmenu.cpp:198 src/enigma_mainmenu.cpp:208
-#: src/rotorconfig.cpp:917 src/timer.cpp:2692
+#: src/rotorconfig.cpp:917 src/timer.cpp:2695
 msgid "Information"
 msgstr "Información"
 
@@ -2698,8 +2699,8 @@ msgstr "Elige plugin y pulse OK"
 msgid "Couldn't read plugin directory %s"
 msgstr "No se puede acceder al directorio plugin %s"
 
-#: src/enigma_plugins.cpp:156 src/scan.cpp:1861 src/scan.cpp:1916
-#: src/scan.cpp:2023
+#: src/enigma_plugins.cpp:156 src/scan.cpp:1870 src/scan.cpp:1925
+#: src/scan.cpp:2032
 msgid "Error"
 msgstr "Error"
 
@@ -2744,42 +2745,57 @@ msgstr "Editar transpondedor"
 msgid "for automatic scan"
 msgstr "Editar lista de transpondedores para la búsqueda automática"
 
-#: src/enigma_scan.cpp:54 src/scan.cpp:36
+#: src/enigma_scan.cpp:55 src/satfind.cpp:67
+msgid "Signalfind"
+msgstr "Señal"
+
+#: src/enigma_scan.cpp:55
+msgid "open the signalfinder"
+msgstr "Mostrar buscador señal"
+
+#: src/enigma_scan.cpp:56 src/scan.cpp:39
+msgid "Disable 5V"
+msgstr "Desactivar 5V"
+
+#: src/enigma_scan.cpp:56 src/scan.cpp:39
+msgid "disable 5V for passive terrerstrial antennas"
+msgstr "Desactivar 5V para antenas terrestres pasivas"
+
+#: src/enigma_scan.cpp:60 src/scan.cpp:43
 msgid "Automatic Transponder Scan"
 msgstr "Búsqueda automática de canales"
 
-#: src/enigma_scan.cpp:54 src/scan.cpp:36
+#: src/enigma_scan.cpp:60 src/scan.cpp:43
 msgid "open automatic transponder scan"
 msgstr "Abrir búsqueda automática de canales"
 
-#: src/enigma_scan.cpp:56 src/scan.cpp:38
+#: src/enigma_scan.cpp:62 src/scan.cpp:45
 msgid "Automatic Multisat Scan"
 msgstr "Búsqueda automática de satélites"
 
-#: src/enigma_scan.cpp:56 src/scan.cpp:38
+#: src/enigma_scan.cpp:62 src/scan.cpp:45
 msgid "open automatic multisat transponder scan"
 msgstr "Abrir búsqueda automática de varios satélites"
 
-#: src/enigma_scan.cpp:58
+#: src/enigma_scan.cpp:64
 msgid "Manual Transponder Scan"
 msgstr "Búsqueda manual de canales"
 
-#: src/enigma_scan.cpp:58 src/scan.cpp:39
+#: src/enigma_scan.cpp:64 src/scan.cpp:46
 msgid "open manual transponder scan"
 msgstr "Abrir búsqueda manual de canales"
 
-#: src/enigma_scan.cpp:135
+#: src/enigma_scan.cpp:141
 msgid ""
 "DiSEqC 1.2 is enabled on more than one LNB, please select the LNB the motor "
 "is connected to"
-msgstr ""
-"Como hay varios LNB con DiSEqC 1.2, elige el LNB que está connectado al motor"
+msgstr "Como hay varios LNB con DiSEqC 1.2, elige el LNB que está connectado al motor"
 
-#: src/enigma_scan.cpp:135 src/setupnetwork.cpp:938
+#: src/enigma_scan.cpp:141 src/setupnetwork.cpp:938
 msgid "Info"
 msgstr "Info"
 
-#: src/enigma_scan.cpp:149
+#: src/enigma_scan.cpp:155
 msgid ""
 "Found no LNB with DiSEqC 1.2 enabled,\n"
 "please goto Satellite Config first, and enable DiSEqC 1.2"
@@ -2787,15 +2803,15 @@ msgstr ""
 "Ningun LNB tiene DiSEqC 1.2,\n"
 "hay que activarlo primero en la configuración satélite"
 
-#: src/enigma_scan.cpp:149 src/rotorconfig.cpp:692 src/rotorconfig.cpp:893
+#: src/enigma_scan.cpp:155 src/rotorconfig.cpp:692 src/rotorconfig.cpp:893
 msgid "Warning"
 msgstr "Aviso"
 
-#: src/enigma_scan.cpp:191
+#: src/enigma_scan.cpp:197
 msgid "Select LNB"
 msgstr "Elige LNB"
 
-#: src/enigma_scan.cpp:198
+#: src/enigma_scan.cpp:204
 #, c-format
 msgid "use LNB %d for Motor"
 msgstr "Utilizar LNB %d para el motor"
@@ -3281,335 +3297,339 @@ msgstr "Cambiar modo DiSEqC..."
 msgid "direct connection"
 msgstr "Conexión directa"
 
-#: src/satconfig.cpp:732
+#: src/satconfig.cpp:734
 msgid "press ok to select another satellite"
 msgstr "Pulse OK para elegir otro satélite"
 
-#: src/satconfig.cpp:753
+#: src/satconfig.cpp:749
 msgid "press ok to goto LNB config"
 msgstr "Pulse OK para configurar los LNB"
 
-#: src/satconfig.cpp:771
+#: src/satconfig.cpp:767
 msgid "press ok to select another 22kHz mode"
 msgstr "Pulse OK para activar otro modo 22kHz"
 
-#: src/satconfig.cpp:772
+#: src/satconfig.cpp:768
 msgid "22kHz signal is automatically switched"
 msgstr "Conmutación automatica 22kHz"
 
-#: src/satconfig.cpp:773
+#: src/satconfig.cpp:769
 msgid "22kHz is always enabled (high band)"
 msgstr "22kHz siempre activado (banda alta)"
 
-#: src/satconfig.cpp:774
+#: src/satconfig.cpp:770
 msgid "22kHz is always disabled (low band)"
 msgstr "22kHz siempre desactivado (banda baja)"
 
-#: src/satconfig.cpp:784
+#: src/satconfig.cpp:780
 msgid "press ok to select another LNB Voltage mode"
 msgstr "Pulse OK para activar otro modo tensión LNB"
 
-#: src/satconfig.cpp:785
+#: src/satconfig.cpp:781
 msgid "Voltage is automatically changed"
 msgstr "Conmutación automatica de la tensión "
 
-#: src/satconfig.cpp:786
+#: src/satconfig.cpp:782
 msgid "Voltage is always 14V (vertical)"
 msgstr "Tensión LNB siempre 14V (vertical)"
 
-#: src/satconfig.cpp:787
+#: src/satconfig.cpp:783
 msgid "Voltage is always 18V (horizontal)"
 msgstr "Tensión LNB siempre 18V (horizontal)"
 
-#: src/satconfig.cpp:788
+#: src/satconfig.cpp:784
 msgid "Voltage is always off"
 msgstr "Tensión LNB siempre apagada"
 
-#: src/satconfig.cpp:1147 src/satconfig.cpp:1193 src/satconfig.cpp:1203
+#: src/satconfig.cpp:1143 src/satconfig.cpp:1189 src/satconfig.cpp:1199
 msgid "None"
 msgstr "Ninguno"
 
-#: src/satconfig.cpp:1147
+#: src/satconfig.cpp:1143
 msgid "sends no tone burst"
 msgstr "No enviar tone burst"
 
-#: src/satconfig.cpp:1148
+#: src/satconfig.cpp:1144
 msgid "sends modulated tone burst"
 msgstr "Enviar tone burst modulado"
 
-#: src/satconfig.cpp:1149
+#: src/satconfig.cpp:1145
 msgid "sends unmodulated tone burst"
 msgstr "Enviar tone burst no modulado"
 
-#: src/satconfig.cpp:1156
+#: src/satconfig.cpp:1152
 msgid "Disable DiSEqC"
 msgstr "Desactivar DiSEqC"
 
-#: src/satconfig.cpp:1157
+#: src/satconfig.cpp:1153
 msgid "Use DiSEqC Version 1.0"
 msgstr "Utilizar DiSEqC versión 1.0"
 
-#: src/satconfig.cpp:1158
+#: src/satconfig.cpp:1154
 msgid "Use DiSEqC Version 1.1"
 msgstr "Utilizar DiSEqC versión 1.1"
 
-#: src/satconfig.cpp:1159
+#: src/satconfig.cpp:1155
 msgid "Use DiSEqC Version 1.2"
 msgstr "Utilizar DiSEqC versión 1.2"
 
-#: src/satconfig.cpp:1167
+#: src/satconfig.cpp:1163
 msgid "sends DiSEqC cmd A/A"
 msgstr "Enviar DiSEqC cmd A/A"
 
-#: src/satconfig.cpp:1168
+#: src/satconfig.cpp:1164
 msgid "sends DiSEqC cmd A/B"
 msgstr "Enviar DiSEqC cmd A/B"
 
-#: src/satconfig.cpp:1169
+#: src/satconfig.cpp:1165
 msgid "sends DiSEqC cmd B/A"
 msgstr "Enviar DiSEqC cmd B/A"
 
-#: src/satconfig.cpp:1170
+#: src/satconfig.cpp:1166
 msgid "sends DiSEqC cmd B/B"
 msgstr "Enviar DiSEqC cmd B/B"
 
-#: src/satconfig.cpp:1171
+#: src/satconfig.cpp:1167
 msgid "sends no committed DiSEqC cmd"
 msgstr "Enviar ningun commited DiSEqC cmd"
 
-#: src/satconfig.cpp:1172
+#: src/satconfig.cpp:1168
 msgid "sends switch cmd 1"
 msgstr "Enviar switch cmd 1"
 
-#: src/satconfig.cpp:1173
+#: src/satconfig.cpp:1169
 msgid "sends switch cmd 2"
 msgstr "Enviar switch cmd 2"
 
-#: src/satconfig.cpp:1174
+#: src/satconfig.cpp:1170
 msgid "sends switch cmd 3"
 msgstr "Enviar switch cmd 3"
 
-#: src/satconfig.cpp:1175
+#: src/satconfig.cpp:1171
 msgid "sends switch cmd 4"
 msgstr "Enviar switch cmd 4"
 
-#: src/satconfig.cpp:1176
+#: src/satconfig.cpp:1172
 msgid "sends switch cmd 5"
 msgstr "Enviar switch cmd 5"
 
-#: src/satconfig.cpp:1177
+#: src/satconfig.cpp:1173
 msgid "sends switch cmd 6"
 msgstr "Enviar switch cmd 6"
 
-#: src/satconfig.cpp:1178
+#: src/satconfig.cpp:1174
 msgid "sends switch cmd 7"
 msgstr "Enviar switch cmd 7"
 
-#: src/satconfig.cpp:1179
+#: src/satconfig.cpp:1175
 msgid "sends switch cmd 8"
 msgstr "Enviar switch cmd 8"
 
-#: src/satconfig.cpp:1180
+#: src/satconfig.cpp:1176
 msgid "sends switch cmd 9"
 msgstr "Enviar switch cmd 9"
 
-#: src/satconfig.cpp:1181
+#: src/satconfig.cpp:1177
 msgid "sends switch cmd 10"
 msgstr "Enviar switch cmd 10"
 
-#: src/satconfig.cpp:1182
+#: src/satconfig.cpp:1178
 msgid "sends switch cmd 11"
 msgstr "Enviar switch cmd 11"
 
-#: src/satconfig.cpp:1183
+#: src/satconfig.cpp:1179
 msgid "sends switch cmd 12"
 msgstr "Enviar switch cmd 12"
 
-#: src/satconfig.cpp:1184
+#: src/satconfig.cpp:1180
 msgid "sends switch cmd 13"
 msgstr "Enviar switch cmd 13"
 
-#: src/satconfig.cpp:1185
+#: src/satconfig.cpp:1181
 msgid "sends switch cmd 14"
 msgstr "Enviar switch cmd 14"
 
-#: src/satconfig.cpp:1186
+#: src/satconfig.cpp:1182
 msgid "sends switch cmd 15"
 msgstr "Enviar switch cmd 15"
 
-#: src/satconfig.cpp:1187
+#: src/satconfig.cpp:1183
 msgid "sends switch cmd 16"
 msgstr "Enviar switch cmd 16"
 
-#: src/satconfig.cpp:1193
+#: src/satconfig.cpp:1189
 msgid "sends no DiSEqC repeats"
 msgstr "No enviar repeticiones DiSEqC"
 
-#: src/satconfig.cpp:1194
+#: src/satconfig.cpp:1190
 msgid "One"
 msgstr "Una"
 
-#: src/satconfig.cpp:1194
+#: src/satconfig.cpp:1190
 msgid "sends one repeat"
 msgstr "Enviar una repetición"
 
-#: src/satconfig.cpp:1195
+#: src/satconfig.cpp:1191
 msgid "Two"
 msgstr "Dos"
 
-#: src/satconfig.cpp:1195
+#: src/satconfig.cpp:1191
 msgid "sends two repeats"
 msgstr "Enviar dos repeticiones"
 
-#: src/satconfig.cpp:1196
+#: src/satconfig.cpp:1192
 msgid "Three"
 msgstr "Tres"
 
-#: src/satconfig.cpp:1196
+#: src/satconfig.cpp:1192
 msgid "sends three repeats"
 msgstr "Envia tres repeticiones"
 
-#: src/satconfig.cpp:1203
+#: src/satconfig.cpp:1199
 msgid "sends no uncommitted switch command"
 msgstr "Enviar ningun uncommitted switch command"
 
-#: src/satconfig.cpp:1204
+#: src/satconfig.cpp:1200
 msgid "Input 1"
 msgstr "Input 1"
 
-#: src/satconfig.cpp:1204
+#: src/satconfig.cpp:1200
 msgid "select uncommitted switch Input 1"
 msgstr "Activar Uncommitted Switch Input 1"
 
-#: src/satconfig.cpp:1205
+#: src/satconfig.cpp:1201
 msgid "Input 2"
 msgstr "Input 2"
 
-#: src/satconfig.cpp:1205
+#: src/satconfig.cpp:1201
 msgid "select uncommitted switch Input 2"
 msgstr "Activar Uncommitted Switch Input 2"
 
-#: src/satconfig.cpp:1206
+#: src/satconfig.cpp:1202
 msgid "Input 3"
 msgstr "Input 3"
 
-#: src/satconfig.cpp:1206
+#: src/satconfig.cpp:1202
 msgid "select uncommitted switch Input 3"
 msgstr "Activar Uncommitted Switch Input 3"
 
-#: src/satconfig.cpp:1207
+#: src/satconfig.cpp:1203
 msgid "Input 4"
 msgstr "Input 4"
 
-#: src/satconfig.cpp:1207
+#: src/satconfig.cpp:1203
 msgid "select uncommitted switch Input 4"
 msgstr "Activar Uncommitted Switch Input 4"
 
-#: src/satconfig.cpp:1208
+#: src/satconfig.cpp:1204
 msgid "Input 5"
 msgstr "Input 5"
 
-#: src/satconfig.cpp:1208
+#: src/satconfig.cpp:1204
 msgid "select uncommitted switch Input 5"
 msgstr "Activar Uncommitted Switch Input 5"
 
-#: src/satconfig.cpp:1209
+#: src/satconfig.cpp:1205
 msgid "Input 6"
 msgstr "Input 6"
 
-#: src/satconfig.cpp:1209
+#: src/satconfig.cpp:1205
 msgid "select uncommitted switch Input 6"
 msgstr "Activar Uncommitted Switch Input 6"
 
-#: src/satconfig.cpp:1210
+#: src/satconfig.cpp:1206
 msgid "Input 7"
 msgstr "Input 7"
 
-#: src/satconfig.cpp:1210
+#: src/satconfig.cpp:1206
 msgid "select uncommitted switch Input 7"
 msgstr "Activar Uncommitted Switch Input 7"
 
-#: src/satconfig.cpp:1211
+#: src/satconfig.cpp:1207
 msgid "Input 8"
 msgstr "Input 8"
 
-#: src/satconfig.cpp:1211
+#: src/satconfig.cpp:1207
 msgid "select uncommitted switch Input 8"
 msgstr "Activar Uncommitted Switch Input 8"
 
-#: src/satconfig.cpp:1212
+#: src/satconfig.cpp:1208
 msgid "Input 9"
 msgstr "Input 9"
 
-#: src/satconfig.cpp:1212
+#: src/satconfig.cpp:1208
 msgid "select uncommitted switch Input 9"
 msgstr "Activar Uncommitted Switch Input 9"
 
-#: src/satconfig.cpp:1213
+#: src/satconfig.cpp:1209
 msgid "Input 10"
 msgstr "Input 10"
 
-#: src/satconfig.cpp:1213
+#: src/satconfig.cpp:1209
 msgid "select uncommitted switch Input 10"
 msgstr "Activar Uncommitted Switch Input 10"
 
-#: src/satconfig.cpp:1214
+#: src/satconfig.cpp:1210
 msgid "Input 11"
 msgstr "Input 11"
 
-#: src/satconfig.cpp:1214
+#: src/satconfig.cpp:1210
 msgid "select uncommitted switch Input 11"
 msgstr "Activar Uncommitted Switch Input 11"
 
-#: src/satconfig.cpp:1215
+#: src/satconfig.cpp:1211
 msgid "Input 12"
 msgstr "Input 12"
 
-#: src/satconfig.cpp:1215
+#: src/satconfig.cpp:1211
 msgid "select uncommitted switch Input 12"
 msgstr "Activar Uncommitted Switch Input 12"
 
-#: src/satconfig.cpp:1216
+#: src/satconfig.cpp:1212
 msgid "Input 13"
 msgstr "Input 13"
 
-#: src/satconfig.cpp:1216
+#: src/satconfig.cpp:1212
 msgid "select uncommitted switch Input 13"
 msgstr "Activar Uncommitted Switch Input 13"
 
-#: src/satconfig.cpp:1217
+#: src/satconfig.cpp:1213
 msgid "Input 14"
 msgstr "Input 14"
 
-#: src/satconfig.cpp:1217
+#: src/satconfig.cpp:1213
 msgid "select uncommitted switch Input 14"
 msgstr "Activar Uncommitted Switch Input 14"
 
-#: src/satconfig.cpp:1218
+#: src/satconfig.cpp:1214
 msgid "Input 15"
 msgstr "Input 15"
 
-#: src/satconfig.cpp:1218
+#: src/satconfig.cpp:1214
 msgid "select uncommitted switch Input 15"
 msgstr "Activar Uncommitted Switch Input 15"
 
-#: src/satconfig.cpp:1219
+#: src/satconfig.cpp:1215
 msgid "Input 16"
 msgstr "Input 16"
 
-#: src/satconfig.cpp:1219
+#: src/satconfig.cpp:1215
 msgid "select uncommitted switch Input 16"
 msgstr "Activar Uncommitted Switch Input 16"
 
-#: src/scan.cpp:39
+#: src/satfind.cpp:68
+msgid "Region:"
+msgstr "Región:"
+
+#: src/scan.cpp:46
 msgid "manual scan.."
 msgstr "Búsqueda manual..."
 
-#: src/scan.cpp:210
+#: src/scan.cpp:219
 msgid "Waiting for tuner lock on:"
 msgstr "Esperando captación señal en:"
 
-#: src/scan.cpp:345
+#: src/scan.cpp:354
 msgid ""
 "To begin searching for a valid satellite press OK, or choose your desired "
 "satellite manually and press OK"
@@ -3617,7 +3637,7 @@ msgstr ""
 "Para lanzar la búsqueda de un satélite válido pulse OK o elige el satélite "
 "manualmente."
 
-#: src/scan.cpp:348
+#: src/scan.cpp:357
 msgid ""
 "To begin searching for a valid cable provider press OK, or choose your "
 "desired cable provider manually and press OK"
@@ -3625,7 +3645,7 @@ msgstr ""
 "Para lanzar la búsqueda de un operador cable válido pulse OK o elige el "
 "operador manualmente."
 
-#: src/scan.cpp:351
+#: src/scan.cpp:360
 msgid ""
 "To begin searching for a valid transponder press OK, or choose your desired "
 "location manually and press OK"
@@ -3633,12 +3653,11 @@ msgstr ""
 "Para lanzar la búsqueda de un transpondedor válido pulse OK o elige la "
 "posición manualmente y pulse OK."
 
-#: src/scan.cpp:443
-msgid ""
-"A valid transponder has been found. Verify that the right network is selected"
+#: src/scan.cpp:452
+msgid "A valid transponder has been found. Verify that the right network is selected"
 msgstr "Transpondedor válido encontrado. Verifique si la red está correcta"
 
-#: src/scan.cpp:525
+#: src/scan.cpp:534
 msgid ""
 "All known transponders have been tried, but no lock was possible. Verify "
 "antenna-/cable-setup or try manual search if its some obscure satellite/"
@@ -3647,7 +3666,7 @@ msgstr ""
 "Ningun transpondedor conocido fue encontrado. Verifique los parámetros de la "
 "antena/cable o intente una búsqueda manual."
 
-#: src/scan.cpp:533
+#: src/scan.cpp:542
 msgid ""
 "All known transponders have been tried, but no lock was possible. Verify "
 "antenna-/cable-setup or try another satellite/network."
@@ -3655,49 +3674,49 @@ msgstr ""
 "Ningun transpondedor conocido fue encontrado. Verifique los parámetros de la "
 "antena/cable o intente otro satélite/operador."
 
-#: src/scan.cpp:542
+#: src/scan.cpp:551
 msgid "Search in progress "
 msgstr "Búsqueda en progreso"
 
-#: src/scan.cpp:708
+#: src/scan.cpp:717
 #, c-format
 msgid "%02i minutes and %02i seconds left"
 msgstr "Faltan %d minutos y %02d segundos"
 
-#: src/scan.cpp:710
+#: src/scan.cpp:719
 #, c-format
 msgid "%02i seconds left"
 msgstr "Faltan %02i segundos"
 
-#: src/scan.cpp:783
+#: src/scan.cpp:792
 msgid "Vertical"
 msgstr "vertical"
 
-#: src/scan.cpp:849
+#: src/scan.cpp:858
 msgid "[only free]"
 msgstr "[sólo libre]"
 
-#: src/scan.cpp:850
+#: src/scan.cpp:859
 msgid "[all]"
 msgstr "[todo]"
 
-#: src/scan.cpp:850
+#: src/scan.cpp:859
 msgid "[nothing]"
 msgstr "[saltar]"
 
-#: src/scan.cpp:944
+#: src/scan.cpp:953
 msgid "Transponder Scan"
 msgstr "Búsqueda de canales"
 
-#: src/scan.cpp:1237
+#: src/scan.cpp:1246
 msgid "Waiting for tuner lock... please wait"
 msgstr "Esperando capación señal... espere"
 
-#: src/scan.cpp:1290 src/scan.cpp:1357
+#: src/scan.cpp:1299 src/scan.cpp:1366
 msgid "Scan is in progress... please wait"
 msgstr "Búsqueda en progreso... espere"
 
-#: src/scan.cpp:1320 src/scan.cpp:1371
+#: src/scan.cpp:1329 src/scan.cpp:1380
 #, c-format
 msgid ""
 "The transponder scan has finished and found \n"
@@ -3714,15 +3733,15 @@ msgstr ""
 "   %i Servicios de datos.\n"
 "%i Transpondedores (%i servicios) fueron escaneados."
 
-#: src/scan.cpp:1383
+#: src/scan.cpp:1392
 msgid "Done."
 msgstr "Terminada."
 
-#: src/scan.cpp:1391
+#: src/scan.cpp:1400
 msgid "Scan is in finished, press ok to close window"
 msgstr "Búsqueda terminada, pulse ok para cerrar ventana"
 
-#: src/scan.cpp:1399
+#: src/scan.cpp:1408
 #, c-format
 msgid ""
 "Do you want\n"
@@ -3732,117 +3751,117 @@ msgstr ""
 "Escanear otro\n"
 "%s?"
 
-#: src/scan.cpp:1399
+#: src/scan.cpp:1408
 #, c-format
 msgid "Transponder"
 msgstr "Transpondedor"
 
-#: src/scan.cpp:1399
+#: src/scan.cpp:1408
 #, c-format
 msgid "Satellite"
 msgstr "Satélite"
 
-#: src/scan.cpp:1400
+#: src/scan.cpp:1409
 msgid "Scan finished"
 msgstr "Búsqueda terminada"
 
-#: src/scan.cpp:1506
+#: src/scan.cpp:1515
 msgid "Manual PIDs"
 msgstr "Editar PIDs manualmente"
 
-#: src/scan.cpp:1528
+#: src/scan.cpp:1537
 msgid "to enter service name press OK"
 msgstr "Pulse OK para nombrar el servicio"
 
-#: src/scan.cpp:1529
+#: src/scan.cpp:1538
 msgid "enter service name"
 msgstr "Nombre del servicio"
 
-#: src/scan.cpp:1544
+#: src/scan.cpp:1553
 msgid "to enter provider name press OK"
 msgstr "Pulse OK para nombrar el proveedor"
 
-#: src/scan.cpp:1545
+#: src/scan.cpp:1554
 msgid "enter provider name"
 msgstr "Nombre del proveedor"
 
-#: src/scan.cpp:1560
+#: src/scan.cpp:1569
 msgid "to enter video pid press OK"
 msgstr "Pulse OK para editar el PID vídeo"
 
-#: src/scan.cpp:1561
+#: src/scan.cpp:1570
 msgid "enter video pid"
 msgstr "PID vídeo"
 
-#: src/scan.cpp:1574
+#: src/scan.cpp:1583
 msgid "to enter pcr pid press OK"
 msgstr "Pulse OK para editar el PID PCR"
 
-#: src/scan.cpp:1575
+#: src/scan.cpp:1584
 msgid "enter pcr pid (in most case the same pid as the video pid)"
 msgstr "PID pcr (casi siempre igual al pid vídeo)"
 
-#: src/scan.cpp:1590
+#: src/scan.cpp:1599
 msgid "to enter audio pid press OK"
 msgstr "Pulse OK para editar el PID audio"
 
-#: src/scan.cpp:1591
+#: src/scan.cpp:1600
 msgid "enter audio pid"
 msgstr "PID audio"
 
-#: src/scan.cpp:1597
+#: src/scan.cpp:1606
 msgid "is AC3 Pid"
 msgstr "PID AC3"
 
-#: src/scan.cpp:1598
+#: src/scan.cpp:1607
 msgid "set this check when the entered audio pid is a ac3 audio pid"
 msgstr "Activar si es un PID audio AC3"
 
-#: src/scan.cpp:1613
+#: src/scan.cpp:1622
 msgid "to enter (video) text pid press OK"
 msgstr "Pulse OK para editar el PID teletexto"
 
-#: src/scan.cpp:1614
+#: src/scan.cpp:1623
 msgid "enter (video) text pid"
 msgstr "PID teletexto"
 
-#: src/scan.cpp:1627
+#: src/scan.cpp:1636
 msgid "to enter service id press OK"
 msgstr "Pulse OK para editar el Service ID"
 
-#: src/scan.cpp:1628
+#: src/scan.cpp:1637
 msgid "enter service id"
 msgstr "Service ID"
 
-#: src/scan.cpp:1643
+#: src/scan.cpp:1652
 msgid "to enter tsid (transport stream id) press OK"
 msgstr "Pulse OK para editar el TSID (Transport stream ID)"
 
-#: src/scan.cpp:1644
+#: src/scan.cpp:1653
 msgid "enter tsid (transport stream id)"
 msgstr "TSID (transport stream id)"
 
-#: src/scan.cpp:1657
+#: src/scan.cpp:1666
 msgid "to enter onid (original network id) press OK"
 msgstr "Pulse OK para editar el ONID (Original network ID)"
 
-#: src/scan.cpp:1658
+#: src/scan.cpp:1667
 msgid "enter onid (original network id)"
 msgstr "ONID (original network id)"
 
-#: src/scan.cpp:1666
+#: src/scan.cpp:1675
 msgid "no DVB"
 msgstr "Sin DVB"
 
-#: src/scan.cpp:1667
+#: src/scan.cpp:1676
 msgid "don't read PAT/PMT/SDT for this service (only use cached pids)"
 msgstr "No leer PAT/PMT/SDT para este servicio (usar PIDs cacheados)"
 
-#: src/scan.cpp:1673
+#: src/scan.cpp:1682
 msgid "use sdt"
 msgstr "Usar SDT"
 
-#: src/scan.cpp:1674
+#: src/scan.cpp:1683
 msgid ""
 "update name/provider/service type with content of the sdt (and auto remove "
 "service)"
@@ -3850,31 +3869,31 @@ msgstr ""
 "Actualizar nombre/proveedor/tipo con contenido de la SDT (y borrar servicio "
 "automaticamente)"
 
-#: src/scan.cpp:1680
+#: src/scan.cpp:1689
 msgid "hold name"
 msgstr "Nombre fijo"
 
-#: src/scan.cpp:1681
+#: src/scan.cpp:1690
 msgid "don't update the service name with content of the sdt"
 msgstr "Prohibir que la SDT actualiza el nombre del servicio"
 
-#: src/scan.cpp:1694
+#: src/scan.cpp:1703
 msgid "read NIT"
 msgstr "Escanear NIT"
 
-#: src/scan.cpp:1695
+#: src/scan.cpp:1704
 msgid "read tsid and onid from the nit (this can take up to 10 seconds)"
 msgstr "Leer TSID y ONID de la NIT (espere hasta 10 segundos)"
 
-#: src/scan.cpp:1704
+#: src/scan.cpp:1713
 msgid "test values"
 msgstr "Comprobar"
 
-#: src/scan.cpp:1705
+#: src/scan.cpp:1714
 msgid "test entered values"
 msgstr "Sintonizar servicio usando estos valores"
 
-#: src/scan.cpp:1715
+#: src/scan.cpp:1724
 msgid ""
 "save data and close window (the new channel could be found in the all "
 "services list)"
@@ -3882,7 +3901,7 @@ msgstr ""
 "Guardar datos y cerrar (el canal nuevo se encuentra en la lista todos los "
 "servicios)"
 
-#: src/scan.cpp:1860
+#: src/scan.cpp:1869
 msgid ""
 "Reading NIT failed... this transponder have no NIT..\n"
 "so you can use random values for tsid and onid or set both to 0"
@@ -3890,7 +3909,7 @@ msgstr ""
 "Error al leer la NIT... Como no hay NIT en este transponder,\n"
 "se pueden usar valores < 8191 para TSID y ONID"
 
-#: src/scan.cpp:1915
+#: src/scan.cpp:1924
 msgid ""
 "No NIT Entry for current transponder values found...\n"
 "so you can use random values for tsid and onid or set both to 0"
@@ -3898,7 +3917,7 @@ msgstr ""
 "No ha NIT en el transponder actual...\n"
 "Se pueden usar valores < 8191 para TSID y ONID"
 
-#: src/scan.cpp:2022
+#: src/scan.cpp:2031
 msgid ""
 "A transponder with the same tsid / onid but other frequency/pol/... already "
 "exist.. create a new transponder with the same data is no possible.. please "
@@ -3907,7 +3926,7 @@ msgstr ""
 "Como ya hay un transpondedor con el mismo TSID/ONID en otra frecuencia/"
 "pol/..., no se puede añadir este transpondedor. Revise el TSID y/o ONID"
 
-#: src/scan.cpp:2071
+#: src/scan.cpp:2080
 #, c-format
 msgid ""
 "A service named '%s' with this sid/onid/tsid/namespace is already exist\n"
@@ -3918,15 +3937,15 @@ msgstr ""
 "proveedor '%s'.\n"
 "Usar el nombre del servicio y proveedor?"
 
-#: src/scan.cpp:2073
+#: src/scan.cpp:2082
 msgid "Service already exist"
 msgstr "Servicio ya existe"
 
-#: src/scan.cpp:2165
+#: src/scan.cpp:2174
 msgid "show/enter values as hexadecimal"
 msgstr "Usar numeración hexadecimal"
 
-#: src/scan.cpp:2171
+#: src/scan.cpp:2180
 msgid "show/enter values as decimal"
 msgstr "Usar numeración decimal"
 
@@ -3954,117 +3973,125 @@ msgstr "Actualización firmware"
 msgid "open software update"
 msgstr "Abrir actualización firmware"
 
-#: src/setup_extra.cpp:67
+#: src/setup_extra.cpp:70
 msgid "Remote Control"
 msgstr "Mando a distancia"
 
-#: src/setup_extra.cpp:67
+#: src/setup_extra.cpp:70
 msgid "open remote control setup"
 msgstr "Abrir configuración de la mando a distancia"
 
-#: src/setup_extra.cpp:69 src/setup_extra.cpp:218
+#: src/setup_extra.cpp:72 src/setup_extra.cpp:226
 msgid "Factory reset"
 msgstr "Valores fábrica"
 
-#: src/setup_extra.cpp:69
+#: src/setup_extra.cpp:72
 msgid "all settings will set to factory defaults"
 msgstr "Borrar ajustes personales y reiniciar receptor"
 
-#: src/setup_extra.cpp:75
+#: src/setup_extra.cpp:78
 msgid "record split size (left, right)"
 msgstr "Tamaño máximo de cada fichero grabado (izquierda, derecha)"
 
-#: src/setup_extra.cpp:92
+#: src/setup_extra.cpp:95
 msgid "Serviceselector help buttons"
 msgstr "Teclas de ayuda"
 
-#: src/setup_extra.cpp:92
+#: src/setup_extra.cpp:95
 msgid "show colored help buttons in service selector"
 msgstr "Activar teclas de apoyo en la lista de canales"
 
-#: src/setup_extra.cpp:93
+#: src/setup_extra.cpp:96
 msgid "Show Sat position"
 msgstr "Mostrar posición satélite"
 
-#: src/setup_extra.cpp:93
+#: src/setup_extra.cpp:96
 msgid "show sat position in the infobar"
 msgstr "Mostrar la posición del satélite en la Infobar"
 
-#: src/setup_extra.cpp:95
+#: src/setup_extra.cpp:98
 msgid "Enable fast zapping"
 msgstr "Cambio canal rapido"
 
-#: src/setup_extra.cpp:95
+#: src/setup_extra.cpp:98
 msgid "enables faster zapping.. but with visible sync"
 msgstr "Cambiar el canal mas rapido.. sincronización visible"
 
-#: src/setup_extra.cpp:96
+#: src/setup_extra.cpp:99
 msgid "Skip confirmations"
 msgstr "Saltar confirmaciones"
 
-#: src/setup_extra.cpp:96
+#: src/setup_extra.cpp:99
 msgid "enable/disable confirmations"
 msgstr "Activar/desactivar confirmaciones"
 
-#: src/setup_extra.cpp:97
+#: src/setup_extra.cpp:100
 msgid "Hide error windows"
 msgstr "Ocultar errores"
 
-#: src/setup_extra.cpp:97
+#: src/setup_extra.cpp:100
 msgid "don't show zap error messages"
 msgstr "Ocultar errores al cambiar el canal"
 
-#: src/setup_extra.cpp:98
+#: src/setup_extra.cpp:101
 msgid "Auto show Infobar"
 msgstr "Infobar automático"
 
-#: src/setup_extra.cpp:98
+#: src/setup_extra.cpp:101
 msgid "always show infobar when new event info is avail"
 msgstr "Mostrar actualizaciones del EPG en la Infobar"
 
-#: src/setup_extra.cpp:99
+#: src/setup_extra.cpp:102
 msgid "Show remaining Time"
 msgstr "Mostrar tiempo restante"
 
-#: src/setup_extra.cpp:99
+#: src/setup_extra.cpp:102
 msgid "show event remaining time in the infobar"
 msgstr "Mostrar tiempo del evento restante en la Infobar"
 
-#: src/setup_extra.cpp:100
+#: src/setup_extra.cpp:103
 msgid "Use http authentification"
 msgstr "Utilizar autenticación http"
 
-#: src/setup_extra.cpp:100
+#: src/setup_extra.cpp:103
 msgid "enables the http (user/password) authentification"
 msgstr "Activar autenticación (usuario/contraseña) http"
 
-#: src/setup_extra.cpp:101
+#: src/setup_extra.cpp:104
 msgid "Don't open serial port"
 msgstr "Cerrar puerto serie"
 
-#: src/setup_extra.cpp:101
+#: src/setup_extra.cpp:104
 msgid "don't write debug messages to /dev/tts/0"
 msgstr "No enviar mensajes debug a /dev/tts/0"
 
-#: src/setup_extra.cpp:102
+#: src/setup_extra.cpp:105
 msgid "Auto bouquet change"
 msgstr "Cambio automático bouquete"
 
-#: src/setup_extra.cpp:102
+#: src/setup_extra.cpp:105
 msgid "change into next bouquet when end of current bouquet is reached"
 msgstr ""
 "Ir al bouquete siguiente cuando ha llegado al último canal del bouquete "
 "actual"
 
-#: src/setup_extra.cpp:104
+#: src/setup_extra.cpp:109
+msgid "Enable file sharing"
+msgstr "Compartir ficheros"
+
+#: src/setup_extra.cpp:109
+msgid "start file sharing(samba) on startup"
+msgstr "Compartir ficheros (samba) al iniciar"
+
+#: src/setup_extra.cpp:112
 msgid "Disable teletext caching"
 msgstr "Desactivar caché teletexto"
 
-#: src/setup_extra.cpp:104
+#: src/setup_extra.cpp:112
 msgid "don't cache teletext pages in background"
 msgstr "No usar memoria caché para teletexto"
 
-#: src/setup_extra.cpp:214
+#: src/setup_extra.cpp:222
 msgid ""
 "When you do a factory reset, you will lost ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4078,7 +4105,7 @@ msgstr ""
 "\n"
 "Seguro de activar valores fábrica?"
 
-#: src/setup_extra.cpp:236
+#: src/setup_extra.cpp:244
 msgid "Factory reset..."
 msgstr "Valores fábrica..."
 
@@ -4160,8 +4187,7 @@ msgid "sorry, couldn't find fsck.ext2 utility to check the ext2 filesystem."
 msgstr "No he encontrado fsck.ext2 para comprobar el disco duro."
 
 #: src/setup_harddisk.cpp:585
-msgid ""
-"sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
+msgid "sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
 msgstr "No he encontrado reiserfsck para comprobar el disco duro."
 
 #: src/setup_harddisk.cpp:604
@@ -5034,7 +5060,7 @@ msgstr ""
 msgid "Update event in timer list"
 msgstr "Actualizar evento en lista temporizadores"
 
-#: src/timer.cpp:1552 src/timer.cpp:2467
+#: src/timer.cpp:1552 src/timer.cpp:2470
 msgid "Really update this event?"
 msgstr "Seguro de actualizar este evento?"
 
@@ -5184,7 +5210,7 @@ msgstr "Grabar vídeo"
 msgid "unknown service"
 msgstr "Servicio desconocido"
 
-#: src/timer.cpp:2465
+#: src/timer.cpp:2468
 msgid ""
 "The new endtime is before now time!\n"
 "This stops the running timer(recording)\n"
@@ -5192,19 +5218,19 @@ msgstr ""
 "La hora de parada ya pasó!\n"
 "Eso termina el temporizador actual(grabacion)\n"
 
-#: src/timer.cpp:2471 src/timer.cpp:2486 src/timer.cpp:2499 src/timer.cpp:2520
+#: src/timer.cpp:2474 src/timer.cpp:2489 src/timer.cpp:2502 src/timer.cpp:2523
 msgid "Update event in timerlist"
 msgstr "Actualizar evento en la lista temporizadores"
 
-#: src/timer.cpp:2485
+#: src/timer.cpp:2488
 msgid "New endtime are now adjusted"
 msgstr "Hora de parada ajustada"
 
-#: src/timer.cpp:2498
+#: src/timer.cpp:2501
 msgid "The event has already finished... you can not change endtime!"
 msgstr "Este evento ya terminó... no se puede editar la hora de parada!"
 
-#: src/timer.cpp:2520
+#: src/timer.cpp:2523
 msgid ""
 "Invalid begin or end time.!\n"
 "Please check time and date"
@@ -5212,7 +5238,7 @@ msgstr ""
 "Hora de inicio/parada invalida!\n"
 "Revise hora y fecha"
 
-#: src/timer.cpp:2692
+#: src/timer.cpp:2695
 msgid ""
 "Sorry, you can not add a time shifted service manually to the timer.\n"
 "Please close the Timer and use the EPG of the service you wish to add!"
@@ -5220,7 +5246,7 @@ msgstr ""
 "No se puede añadir este servicio manualmente a los temporizadores.\n"
 "Elige un temporizador y utilizer el EPG del sevicio para añadirlo!"
 
-#: src/timer.cpp:2753
+#: src/timer.cpp:2756
 msgid "no description found"
 msgstr "Descripción no disponible"
 
@@ -5292,15 +5318,15 @@ msgstr "Error escritura del fichero transpondedores"
 msgid "Write Error"
 msgstr "Error escritura"
 
-#: src/tpeditwindow.cpp:439
+#: src/tpeditwindow.cpp:440
 msgid "new Satellite"
 msgstr "Satélite nuevo"
 
-#: src/tpeditwindow.cpp:468
+#: src/tpeditwindow.cpp:469
 msgid "Really delete the selected satellite?"
 msgstr "Seguro de borrar el satélite elegido"
 
-#: src/tpeditwindow.cpp:469
+#: src/tpeditwindow.cpp:470
 #, c-format
 msgid "Delete %s"
 msgstr "Borrar %s"
@@ -5327,8 +5353,7 @@ msgstr "Descargando imagen..."
 
 #: src/upgrade.cpp:305
 msgid "Please select version to upgrade or LAME! to abort"
-msgstr ""
-"Elige versión del software para la actualización o pulse LAME! para cancelar."
+msgstr "Elige versión del software para la actualización o pulse LAME! para cancelar."
 
 #: src/upgrade.cpp:426 src/upgrade.cpp:508 src/upgrade.cpp:522
 msgid "Error!"
@@ -5559,133 +5584,3 @@ msgstr "Antes de acceder la correción hay que sintonizar a un transpondedor"
 msgid "time correction change error"
 msgstr "Ajustar hora local incorrecta"
 
-#~ msgid "Network:"
-#~ msgstr "Red:"
-
-#~ msgid "enter frequency (0..9, left, right)"
-#~ msgstr "Frecuencia (0..9, izquierda, derecha)"
-
-#~ msgid "enable/disable inversion (ok)"
-#~ msgstr "Activar/desactivar inversión (OK)"
-
-#~ msgid "Inversion:"
-#~ msgstr "Inversión:"
-
-#~ msgid "Symbolrate:"
-#~ msgstr "Symbolrate:"
-
-#~ msgid "No channel available"
-#~ msgstr "Canal no disponible"
-
-#~ msgid "No description available"
-#~ msgstr "Descripción no disponible"
-
-#~ msgid "No timer events available"
-#~ msgstr "Ningun temporizador disponible"
-
-#~ msgid "No regular timer events available"
-#~ msgstr "Ningun temporizador regular disponible"
-
-#~ msgid "No repeating timer events available"
-#~ msgstr "Ningun temporizador repetitivo disponible"
-
-#~ msgid ""
-#~ "Timer event could not be added because time of the event overlaps with an "
-#~ "already existing event."
-#~ msgstr ""
-#~ "No se puede añadir el temporizador como hay un conficto con otra "
-#~ "grabación programada."
-
-#~ msgid "Timer event was created successfully."
-#~ msgstr "Temporizador grabado con éxito."
-
-#~ msgid "After Event:"
-#~ msgstr "Después:"
-
-#~ msgid "No detailed description available"
-#~ msgstr "Descripción detallada no disponible"
-
-#~ msgid "Show BN version"
-#~ msgstr "Mostrar versión BN..."
-
-#~ msgid "show the Current Version of the Betanova FW"
-#~ msgstr "Mostrar versión actual del FW Betanova"
-
-#~ msgid ""
-#~ "here you can center the tuxtxt rectangle...\n"
-#~ "for more infos press help"
-#~ msgstr ""
-#~ "Aqui se puede ajustar la posición de tuxtxt en la pantalla...\n"
-#~ "Más detalles con help"
-
-#~ msgid "Skip known Networks"
-#~ msgstr "Saltar redes conocidos"
-
-#~ msgid ""
-#~ "dont scan NITs from known Networks\n"
-#~ "faster scan"
-#~ msgstr ""
-#~ "No escanear NITs de redes conocidos\n"
-#~ "búsqueda más rápida"
-
-#~ msgid "motor drive speed, in degrees per second"
-#~ msgstr "Velocidad del motor en gradios pro segundo"
-
-#~ msgid "/sec"
-#~ msgstr "/sec"
-
-#~ msgid "Upgrade FP"
-#~ msgstr "Actualizar FP"
-
-#~ msgid "press left or right to change"
-#~ msgstr "Pulse derecha/izquierda para cambiar"
-
-#~ msgid "Transponder Time:"
-#~ msgstr "Hora transpondedor:"
-
-#~ msgid "Transponder Date:"
-#~ msgstr "Fecha transpondedor:"
-
-#~ msgid "New Time:"
-#~ msgstr "Hora nueva:"
-
-#~ msgid "enter correct time here"
-#~ msgstr "Ajustar valor a la hora local correcta"
-
-#~ msgid "New Date:"
-#~ msgstr "Fecha nueva:"
-
-#~ msgid "press ok to select another day"
-#~ msgstr "Pulse OK para cambiar el día"
-
-#~ msgid "press ok to select another month"
-#~ msgstr "Pulse OK para cambiar el mes"
-
-#~ msgid "press ok to select another year"
-#~ msgstr "Pulse OK para cambiar el año"
-
-#~ msgid "set new time and close window"
-#~ msgstr "Guardar hora y cerrar ventana"
-
-#~ msgid "use automatically daylight saving time"
-#~ msgstr "Ajustar automaticamente hora verano"
-
-#~ msgid "Automatically adjust clock for daylight saving changes"
-#~ msgstr "Cambio automatico hora vervano/hora invierno"
-
-#~ msgid "Configure Network"
-#~ msgstr "Configurar red"
-
-#~ msgid "Processor: STB04500, 252MHz"
-#~ msgstr "Processador: STB04500, 252MHz"
-
-#~ msgid "Processor: STBx25xx, 252MHz"
-#~ msgstr "Processador: STBx25xx, 252MHz"
-
-#~ msgid "Processor: XPC823, 66MHz"
-#~ msgstr "Processador: XPC823, 66MHz"
-
-#~ msgid ""
-#~ "This is a recorded stream!\n"
-#~ "Really delete?"
-#~ msgstr "Seguro de borrar la grabación?"
