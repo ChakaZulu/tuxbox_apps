@@ -98,8 +98,11 @@ function loadBouquets(bouquet)
 }
 function vlcStop()
 {
-	vlccmd.location = "http://127.0.0.1:8080/?control=stop";
-	vlccmd.location = "http://127.0.0.1:8080/?control=empty";
+	vlccmd.location = "http://127.0.0.1:8080/?control=pause";
+}
+function vlcPause()
+{
+	vlccmd.location = "http://127.0.0.1:8080/?control=pause";
 }
 function vlcStart()
 {
@@ -121,7 +124,8 @@ function vlcStart()
 }
 function vlcStartItem()
 {
-	vlccmd.location.href = "http://127.0.0.1:8080/?control=pause";
+	vlccmd.location.href = "http://127.0.0.1:8080/?control=next";
+	setTimeout("vlcPause()", 100);
 	setTimeout("setStreamingServiceRef()", 200);
 }
 function setStreamingServiceRef()
