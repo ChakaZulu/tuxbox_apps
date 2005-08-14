@@ -216,7 +216,7 @@
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td>vpid:&nbsp;<a id="vpid" href="javascript:vlc()">&nbsp;</a></td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
-									<td>apid:&nbsp;<a id="apid" href="audio.m3u">&nbsp;</a></td>
+									<td>apid:&nbsp;<a id="apid" href="audio.pls">&nbsp;</a></td>
 								</tr>
 								</table>
 								<table style="table-layout: fixed" width="620px" height="5px" border="0" cellspacing="0" cellpadding="0">

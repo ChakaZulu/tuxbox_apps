@@ -1880,13 +1880,32 @@ eString getContent(eString mode, eString path, eString opts)
 	return result;
 }
 
-static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString audiopls(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="audio/mpegfile";
-	return "http://" + getIP() + ":31343/" + eString().sprintf("%02x\n", Decoder::current.apid);
+	
+	eString serviceName = "Enigma Audio Stream";
+	eService* current;
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		current = eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		if (current)
+			serviceName = filter_string(current->service_name);
+	}
+	
+	eString result = "[playlist]\n";
+	result += "File1=";
+	result += "http://" + getIP() + ":31343/" + eString().sprintf("%02x\n", Decoder::current.apid);
+	result += "Title1=" + serviceName + "\n";
+	result += "Length1=-1\n";
+	result += "NumberOfEntries=1\n";
+	result += "Version=2";
+	
+	return result;
 }
 
-static eString getvideopls()
+static eString getvideom3u()
 {
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
 	eString apid = eString().sprintf("%04x", Decoder::current.apid);
@@ -1909,18 +1928,18 @@ static eString getvideopls()
 }
 
 
-static eString videopls(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString videom3u(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eProcessUtils::killProcess("streamts");
 	
 	content->local_header["Content-Type"]="video/mpegfile";
 	content->local_header["Cache-Control"] = "no-cache";
 
-	return getvideopls();
+	return getvideom3u();
 }
 
 
-static eString moviepls(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString moviem3u(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 
@@ -2320,7 +2339,7 @@ eString getBoxStatus(eString format)
 	result.strReplace("#APID#", (Decoder::current.apid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.apid));
 	
 	// vlc parameters
-	result.strReplace("#VLCPARMS#", getvideopls());
+	result.strReplace("#VLCPARMS#", getvideom3u());
 	
 	// free recording space on disk
 #ifndef DISABLE_FILE
@@ -2507,11 +2526,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/rc", remoteControl, lockWeb);
 	dyn_resolver->addDyn("GET", "/showRemoteControl", showRemoteControl, lockWeb);
 	dyn_resolver->addDyn("GET", "/satFinder", satFinder, lockWeb);
-	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
-	dyn_resolver->addDyn("GET", "/video.pls", videopls, lockWeb);
-	dyn_resolver->addDyn("GET", "/video.m3u", videopls, lockWeb);
-	dyn_resolver->addDyn("GET", "/movie.pls", moviepls, lockWeb);
-	dyn_resolver->addDyn("GET", "/movie.m3u", moviepls, lockWeb);
+	dyn_resolver->addDyn("GET", "/audio.pls", audiopls, lockWeb);
+	dyn_resolver->addDyn("GET", "/video.m3u", videom3u, lockWeb);
+	dyn_resolver->addDyn("GET", "/movie.m3u", moviem3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/mplayer.mply", mPlayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);

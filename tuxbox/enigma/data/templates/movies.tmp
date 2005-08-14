@@ -71,7 +71,7 @@
 				{
 					currentChannel = selChannel;
 					channel = document.channelselector.channel.options[selChannel].value;
-					document.location = "/movie.pls?ref=" + channel;
+					document.location = "/movie.m3u?ref=" + channel;
 				}
 				else
 					alert("Please select a movie first!");

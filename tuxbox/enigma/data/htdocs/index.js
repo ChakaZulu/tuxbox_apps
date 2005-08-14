@@ -111,6 +111,6 @@ function setStreamingServiceRef()
 }
 function vlc()
 {
-	document.location = "/video.pls";
+	document.location = "/video.m3u";
 	setTimeout("setStreamingServiceRef()", 200);	
 }
