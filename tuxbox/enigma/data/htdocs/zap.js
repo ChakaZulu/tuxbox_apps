@@ -121,7 +121,7 @@ function vlcStart()
 }
 function vlcStartItem()
 {
-	vlccmd.location.href = "http://127.0.0.1:8080/?control=play&item=0";
+	vlccmd.location.href = "http://127.0.0.1:8080/?control=pause";
 	setTimeout("setStreamingServiceRef()", 200);
 }
 function setStreamingServiceRef()
