@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.113 2005/08/10 05:53:33 metallica Exp $
+  $Id: movieplayer.cpp,v 1.114 2005/08/14 07:17:38 digi_casi Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -492,7 +492,7 @@ bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
 
 	// play MRL
 	std::string playurl = baseurl;
-	playurl += "?control=play&item=0";
+	playurl += "?control=pause";
 	httpres = sendGetRequest(playurl, response, false);
 
 	return true; // TODO error checking
@@ -2869,7 +2869,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.113 $");
+	helpbox.addLine("Version: $Revision: 1.114 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2890,7 +2890,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.113 $");
+	helpbox.addLine("Version: $Revision: 1.114 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
