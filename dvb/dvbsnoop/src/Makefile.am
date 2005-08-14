@@ -4,6 +4,8 @@ bin_PROGRAMS = dvbsnoop
 INCLUDES = \
 	-I$(top_srcdir)
 
+EXTRA_DIST = \
+	$(man_MANS)
 
 
 SUBDIRS = \
