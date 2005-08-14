@@ -40,7 +40,7 @@
 					if (key == "record")
 						alert("Recording is not supported while streaming.");
 					else
-						document.location = "/cgi-bin/movieplayer.pls?command=" + key;
+						document.location = "/cgi-bin/movieplayer.m3u?command=" + key;
 				}
 			</script>
 			<td colspan="2">
