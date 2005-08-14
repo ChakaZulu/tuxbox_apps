@@ -111,13 +111,14 @@ eString streamingServer(eString request, eString dirpath, eString opts, eHTTPCon
 	return getStreamingServer();
 }
 
-eString movieplayerpls(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+eString movieplayerm3u(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
 	eString mrl = httpUnescape(opt["mrl"]);
 	eString result;
 	
+	eDebug("[MOVIEPLAYERPLS] command = %s, mrl = %s", command.c_str(), mrl.c_str());
 	moviePlayer.control(command.c_str(), mrl.c_str());
 	
 	if (command == "start")
@@ -138,8 +139,7 @@ eString movieplayerpls(eString request, eString dirpath, eString opts, eHTTPConn
 
 void ezapMoviePlayerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.pls", movieplayerpls, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.m3u", movieplayerpls, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/movieplayer.m3u", movieplayerm3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streamingServer", streamingServer, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streamingServerSettings", streamingServerSettings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServerSettings", setStreamingServerSettings, lockWeb);

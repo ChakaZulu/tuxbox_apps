@@ -4,21 +4,21 @@
 	<script language="javascript">
 	function playFile()
 	{
-		document.location =  "/cgi-bin/movieplayer.pls?command=start&mrl=" + document.form1.mrl.value;
+		document.location =  "/cgi-bin/movieplayer.m3u?command=start&mrl=" + document.form1.mrl.value;
 	}
 	function playDVD()
 	{
 		var parms = ":";
 		if (document.form1.title1.value > 0)
 			parms = ":@" + document.form1.title1.value + ":" + document.form1.chapter1.value + "-";
-		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=dvdsimple:" + document.form1.drive1.value + parms;
+		document.location = "/cgi-bin/movieplayer.m3u?command=start&mrl=dvdsimple:" + document.form1.drive1.value + parms;
 	}
 	function playVCD()
 	{
 		var parms = ":";
 		if (document.form1.title2.value > 0)
 			parms = ":@" + document.form1.title2.value + ":" + document.form1.chapter2.value + "-";
-		document.location = "/cgi-bin/movieplayer.pls?command=start&mrl=vcd:" + document.form1.drive2.value + parms;
+		document.location = "/cgi-bin/movieplayer.m3u?command=start&mrl=vcd:" + document.form1.drive2.value + parms;
 	}
 	function settings()
 	{
@@ -26,7 +26,7 @@
 	}
 	function terminateStreaming()
 	{
-		document.location =  "/cgi-bin/movieplayer.pls?command=terminate";
+		document.location =  "/cgi-bin/movieplayer.m3u?command=terminate";
 	}
 	function init()
 	{
