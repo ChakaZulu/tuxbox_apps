@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.19 2005/01/12 20:40:22 chakazulu Exp $
+ * $Id: stream2file.cpp,v 1.20 2005/08/15 14:49:34 metallica Exp $
  * 
  * streaming to file/disc
  * 
@@ -67,6 +67,7 @@
 
 extern "C" {
 #include <driver/ringbuffer.h>
+#include <driver/genpsi.h>
 }           	
 
 /* conversion buffer sizes */
@@ -160,7 +161,6 @@ void * FileThread(void * v_arg)
 	unsigned long long remfile=0;
 	int fd2 = -1;
 	ringbuffer_t * ringbuf = ((struct filenames_t *)v_arg)->ringbuffer;
-
 	while (1)
 	{
 		ringbuffer_get_read_vector(ringbuf, &(vec[0]));
@@ -180,6 +180,10 @@ void * FileThread(void * v_arg)
 					perror("[stream2file]: error opening outfile");
 					exit_flag = STREAM2FILE_STATUS_WRITE_OPEN_FAILURE;
 					pthread_exit(NULL);
+				}
+				if( strstr(filename, ".ts") != NULL )
+				{
+					genpsi(fd2);
 				}
 				remfile = splitsize;
 			}
@@ -434,7 +438,6 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	}
 
 	INC_BUSY_COUNT;
-
 	strcpy(myfilename, filename);
 
 	// write stream information (should wakeup the disk from standby, too)
@@ -473,7 +476,6 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			DEC_BUSY_COUNT;
 			return STREAM2FILE_INVALID_PID;
 		}
-		
 		if ((demuxfd[i] = setPesFilter(pids[i], write_ts ? DMX_OUT_TS_TAP : DMX_OUT_TAP)) < 0)
 		{
 			for (unsigned int j = 0; j < i; j++)

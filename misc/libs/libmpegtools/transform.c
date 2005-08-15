@@ -135,8 +135,7 @@ static const uint32_t crc_table[256] = {
   0xbcb4666d, 0xb8757bda, 0xb5365d03, 0xb1f740b4
 };
 
-static uint32_t
-calc_crc32 (const uint8_t *sec, uint8_t len)
+static uint32_t calc_crc32 (const uint8_t *sec, uint8_t len)
 {
   int i;
   uint32_t crc = 0xffffffff;
@@ -145,6 +144,24 @@ calc_crc32 (const uint8_t *sec, uint8_t len)
     crc = (crc << 8) ^ crc_table[((crc >> 24) ^ *sec++) & 0xff];
 
   return crc;
+}
+uint32_t calc_crc32psi(uint8_t *dst, const uint8_t *src, uint32_t len)
+{  
+	uint32_t i;
+	uint32_t crc = 0xffffffff;
+    
+	for (i=0; i<len; i++)
+		crc = (crc << 8) ^ crc_table[((crc >> 24) ^ *src++) & 0xff];
+    
+	if (dst)
+	{
+		dst[0] = (crc >> 24) & 0xff;
+		dst[1] = (crc >> 16) & 0xff;
+		dst[2] = (crc >> 8) & 0xff;
+		dst[3] = (crc) & 0xff;
+	}
+    
+	return crc;
 }
 
 

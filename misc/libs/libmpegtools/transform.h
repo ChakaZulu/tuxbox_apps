@@ -179,6 +179,7 @@ extern "C" {
 				   uint8_t subid);
 	void find_avpids(int fd, uint16_t *vpid, uint16_t *apid);
 	void find_all_avpids(int fd, uint16_t *vpid, uint16_t *apids, unsigned short *ac3flags, uint16_t *numpida);
+	uint32_t calc_crc32psi(uint8_t *dst, const uint8_t *src, uint32_t len);
 	int  is_audio_ac3(int fd);
 
 

@@ -70,6 +70,9 @@ extern "C" void tuxtxt_start(int tpid);
 extern "C" int  tuxtxt_stop();
 extern "C" void tuxtxt_close();
 #endif
+extern "C" {
+#include <driver/genpsi.h>
+}
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -504,6 +507,8 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	{
 		pids[0] = si.vpid;
 		numpids = 1;
+		if(sptsmode)
+			transfer_pids(si.vpid,0x00,0);
 	}
 	else
 	{
@@ -518,6 +523,9 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	    	for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
 		{
 			pids[numpids++] = allpids.APIDs[i].pid;
+			if(sptsmode)
+				transfer_pids(allpids.APIDs[i].pid,0x01,( strstr(g_RemoteControl->current_PIDs.APIDs[i].desc, "(AC3)") == NULL ) ? 0:1);
+
 		}
 	}
 	else
@@ -525,6 +533,9 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		if (apids.empty())
 		{
 			pids[numpids++] = si.apid;
+			if(sptsmode)
+				transfer_pids(si.apid,0x01,0);
+
 		}
 		else
 		{
