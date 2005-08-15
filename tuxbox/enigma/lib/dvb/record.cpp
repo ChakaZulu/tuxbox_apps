@@ -22,8 +22,13 @@
 #define DEMUX1_DEV "/dev/dvb/card0/demux1"
 #else
 #include <linux/dvb/dmx.h>
-#define DVR_DEV "/dev/dvb/adapter0/dvr1"
-#define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
+	#if HAVE_DBOX2_DRIVER
+		#define DVR_DEV "/dev/dvb/adapter0/dvr0"
+		#define DEMUX1_DEV "/dev/dvb/adapter0/demux0"
+	#else
+		#define DVR_DEV "/dev/dvb/adapter0/dvr1"
+		#define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
+	#endif
 #endif
 
 static pthread_mutex_t PMTLock =
