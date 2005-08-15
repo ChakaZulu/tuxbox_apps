@@ -453,15 +453,26 @@ void CInfoViewer::showSubchan()
 	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
-	std::string subChannelName;
+	std::string subChannelName; 	// holds the name of the subchannel/audio channel
+	int subchannel;			// holds the channel index
 
-	if ( g_RemoteControl->selected_subchannel >= 0)
-		subChannelName = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].subservice_name;
+	if (!(g_RemoteControl->subChannels.empty())) {
+		// get info for nvod/subchannel
+		subchannel = g_RemoteControl->selected_subchannel;
+		if ( g_RemoteControl->selected_subchannel >= 0)
+			subChannelName = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].subservice_name;
+	}
+	else if (g_RemoteControl->current_PIDs.APIDs.size()>1 && g_settings.audiochannel_up_down_enable)
+	{
+		// get info for audio channel
+		subchannel = g_RemoteControl->current_PIDs.PIDs.selected_apid;
+		subChannelName = g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].desc;
+	}
 
 	if (!(subChannelName.empty()))
 	{
 		char text[100];
-		sprintf( text, "%d - %s", g_RemoteControl->selected_subchannel, subChannelName.c_str() );
+		sprintf( text, "%d - %s", subchannel, subChannelName.c_str() );
 
 		int dx = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(text) + 20;
 		int dy = 25;

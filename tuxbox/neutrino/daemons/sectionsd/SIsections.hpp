@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.16 2004/02/13 14:40:00 thegoodguy Exp $
+//    $Id: SIsections.hpp,v 1.17 2005/08/15 12:09:16 metallica Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -198,6 +198,47 @@ struct SI_section_header {
 #endif
 	unsigned section_number			: 8;
 	unsigned last_section_number		: 8;
+} __attribute__ ((packed)) ; // 8 bytes
+
+struct SI_section_PPT_header { // Premiere Private Table
+	unsigned table_id			: 8;
+#if __BYTE_ORDER == __BIG_ENDIAN
+	unsigned section_syntax_indicator	: 1;
+	unsigned reserved_future_use		: 1;
+	unsigned reserved1			: 2;
+	unsigned section_length_hi		: 4;
+#else
+	unsigned section_length_hi		: 4;
+	unsigned reserved1			: 2;
+	unsigned reserved_future_use		: 1;
+	unsigned section_syntax_indicator	: 1;
+#endif
+	unsigned section_length_lo		: 8;
+	unsigned table_id_extension_hi		: 8;
+	unsigned table_id_extension_lo		: 8;
+#if __BYTE_ORDER == __BIG_ENDIAN
+	unsigned reserved2			: 2;
+	unsigned version_number			: 5;
+	unsigned current_next_indicator		: 1;
+#else
+	unsigned current_next_indicator		: 1;
+	unsigned version_number			: 5;
+	unsigned reserved2			: 2;
+#endif
+	unsigned section_number			: 8;
+	unsigned last_section_number		: 8;
+	
+	unsigned content_id_32_25		: 8;
+	unsigned content_id_24_17		: 8;
+	unsigned content_id_16_9		: 8;
+	unsigned content_id_8_0			: 8;
+	unsigned duration_hi			: 8;
+	unsigned duration_mid			: 8;
+	unsigned duration_lo			: 8;
+	unsigned reserved3			: 4;
+	unsigned descriptor_section_length_hi	: 4;
+	unsigned descriptor_section_length_lo	: 8;
+	
 } __attribute__ ((packed)) ; // 8 bytes
 
 class SIsection
@@ -486,10 +527,105 @@ protected:
 	void parseLinkageDescriptor(const char *buf, SIevent &e, unsigned maxlen);
 };
 
+class SIsectionPPT : public SIsection
+{
+public:
+	SIsectionPPT(const SIsection &s) : SIsection(s) {
+		parsed = 0;
+		parse();
+	}
+
+	// Std-Copy
+	SIsectionPPT(const SIsectionPPT &s) : SIsection(s) {
+		evts = s.evts;
+		parsed = s.parsed;
+	}
+
+	long content_id(void) const {
+		return buffer ? ((((struct SI_section_PPT_header *)buffer)->content_id_32_25<< 24) |
+				(((struct SI_section_PPT_header *)buffer)->content_id_24_17<< 16) |
+				(((struct SI_section_PPT_header *)buffer)->content_id_16_9<< 8) |
+				((struct SI_section_PPT_header *)buffer)->content_id_8_0): 0;
+	}
+
+	long duration(void) const {
+
+		if (!buffer) return(0);
+		
+		if (!((((struct SI_section_PPT_header *)buffer)->duration_hi == 0xff) && 
+		      (((struct SI_section_PPT_header *)buffer)->duration_mid == 0xff) && 
+		      (((struct SI_section_PPT_header *)buffer)->duration_lo == 0xff)))
+			return  ((((struct SI_section_PPT_header *)buffer)->duration_hi)>>4)*10*3600L + ((((struct SI_section_PPT_header *)buffer)->duration_hi)&0x0f)*3600L +
+				((((struct SI_section_PPT_header *)buffer)->duration_mid)>>4)*10*60L + ((((struct SI_section_PPT_header *)buffer)->duration_mid)&0x0f)*60L +
+				((((struct SI_section_PPT_header *)buffer)->duration_lo)>>4)*10 + ((((struct SI_section_PPT_header *)buffer)->duration_lo)&0x0f);
+	}
+
+	short int descriptor_section_length(void) const {
+		return buffer ? ((((struct SI_section_PPT_header *)buffer)->descriptor_section_length_hi << 8) |
+				((struct SI_section_PPT_header *)buffer)->descriptor_section_length_lo) : 0;
+	}
+
+	struct SI_section_PPT_header const *header(void) const {
+		return (struct SI_section_PPT_header *)buffer;
+	}
+
+	static void dump(const struct SI_section_PPT_header *header) {
+		if (!header)
+			return;
+		SIsection::dump1((const struct SI_section_header *)header);
+		printf("table_id_extension: 0x%02x%02x\n", header->table_id_extension_hi, header->table_id_extension_lo);
+		SIsection::dump1((const struct SI_section_header *)header);
+		printf("content id 0x%02x%02x%02x%02x\n", header->content_id_32_25, header->content_id_24_17, header->content_id_16_9, header->content_id_8_0);
+		printf("duration 0x%02x%02x%02x\n", header->duration_hi, header->duration_mid, header->duration_lo);
+		printf("reserved3 0x%02x\n", header->reserved3);
+		printf("descriptor section length 0x%02x%02x\n", header->descriptor_section_length_hi, header->descriptor_section_length_lo);
+	}
+
+	static void dump(const SIsectionPPT &s) {
+		dump((struct SI_section_PPT_header *)s.buffer);
+		for_each(s.evts.begin(), s.evts.end(), printSIevent());
+	}
+
+	void dump(void) const {
+		dump((struct SI_section_PPT_header *)buffer);
+		for_each(evts.begin(), evts.end(), printSIevent());
+	}
+
+	const SIevents &events(void) const {
+		//if(!parsed)
+		//	parse(); -> nicht const
+		return evts;
+	}
+
+protected:
+	SIevents evts;
+	int parsed;
+	void parse(void);
+	void parseDescriptors(const char *desc, unsigned len, SIevent &e);
+	void parseShortEventDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+	void parseExtendedEventDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+	void parseContentDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+	void parseComponentDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+	void parseParentalRatingDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+	void parseLinkageDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+	
+	void parsePrivateContentOrderDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+	void parsePrivateParentalInformationDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+	void parsePrivateContentTransmissionDescriptor(const char *buf, SIevent &e, unsigned maxlen);
+
+};
+
+
 // Fuer for_each
 struct printSIsectionEIT : public std::unary_function<SIsectionEIT, void>
 {
 	void operator() (const SIsectionEIT &s) { s.dump();}
+};
+
+// Fuer for_each
+struct printSIsectionPPT : public std::unary_function<SIsectionPPT, void>
+{
+	void operator() (const SIsectionPPT &s) { s.dump();}
 };
 
 /*
@@ -507,6 +643,22 @@ public:
 	int readSections(void) {
 		SIsections sections;
 		int rc=sections.readSections(0x12, 0x4e, 0xff);
+
+		for (SIsections::iterator k=sections.begin(); k!=sections.end(); k++)
+			insert(*k);
+
+		return rc;
+	}
+};
+
+// Menge aller present/following PPTs (actual TS)
+class SIsectionsPPT : public std::set <SIsectionPPT, std::less<SIsectionPPT> >
+{
+public:
+	int readSections(int pid) {
+//	int readSections(void) {
+		SIsections sections;
+		int rc=sections.readSections(pid, 0xa1, 0xfe);
 
 		for (SIsections::iterator k=sections.begin(); k!=sections.end(); k++)
 			insert(*k);

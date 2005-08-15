@@ -63,6 +63,10 @@ bool sortByDescription (const CChannelEvent& a, const CChannelEvent& b)
 	else
 		return a.description < b.description ;
 }
+static bool sortByDateTime (const CChannelEvent& a, const CChannelEvent& b)
+{
+	return a.startTime < b.startTime;
+}
 
 EventList::EventList()
 {
@@ -106,17 +110,76 @@ EventList::~EventList()
 
 void EventList::readEvents(const t_channel_id channel_id)
 {
-	current_event = (unsigned int)-1;
 	evtlist = g_Sectionsd->getEventsServiceKey(channel_id);
 	time_t azeit=time(NULL);
+	CChannelEventList::iterator e;
+	
+	if ( evtlist.size() != 0 ) {
 
-	for ( CChannelEventList::iterator e= evtlist.begin(); e != evtlist.end(); ++e )
-	{
-    	if ( e->startTime > azeit )
-    		break;
-    	current_event++;
+		CEPGData epgData;
+		// todo: what if there are more than one events in the Portal
+		if (g_Sectionsd->getActualEPGServiceKey(channel_id, &epgData ))
+		{
+//			epgData.eventID;
+//			epgData.epg_times.startzeit;
+			CSectionsdClient::LinkageDescriptorList	linkedServices;
+			if ( g_Sectionsd->getLinkageDescriptorsUniqueKey( epgData.eventID, linkedServices ) )
+			{
+				if ( linkedServices.size()> 1 )
+				{
+					CChannelEventList evtlist2; // stores the temporary eventlist of the subchannel channelid
+					t_channel_id channel_id2;
+#if 0				
+					for (e=evtlist.begin(); e!=evtlist.end(); ++e )
+					{
+						if ( e->startTime > azeit ) {
+							break;
+						}
+					}
+					// next line is to have a valid e
+					if (evtlist.end() == e) --e;
+#endif				
+					for (unsigned int i=0; i<linkedServices.size(); i++)
+					{
+						channel_id2 = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(
+								linkedServices[i].serviceId,
+								linkedServices[i].originalNetworkId,
+								linkedServices[i].transportStreamId);
+							
+						// do not add parent events
+						if (channel_id != channel_id2) {
+							evtlist2 = g_Sectionsd->getEventsServiceKey(channel_id2);
+
+							for (unsigned int loop=0 ; loop<evtlist2.size(); loop++ )
+							{
+								// check if event is in the range of the portal parent event
+#if 0								
+								if ( (evtlist2[loop].startTime >= azeit) /*&& 
+								     (evtlist2[loop].startTime < e->startTime + (int)e->duration)*/ )
+#endif								
+								{
+									evtlist.push_back(evtlist2[loop]);
+								}
+							}
+							evtlist2.clear();
+						}
+					}
+				}
+			}
+		}
+		// Houdini added for Private Premiere EPG, start sorted by start date/time
+		sort(evtlist.begin(),evtlist.end(),sortByDateTime);
 	}
-
+	
+	current_event = (unsigned int)-1;
+	for ( e=evtlist.begin(); e!=evtlist.end(); ++e )
+	{
+		if ( e->startTime > azeit ) {
+			break;
+		}
+		current_event++;
+	}
+	
 	if ( evtlist.size() == 0 )
 	{
 		CChannelEvent evt;
@@ -183,14 +246,20 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			unsigned long long selected_id = evtlist[selected].eventID;
 			if(sort_mode==0)
 			{
-				sort_mode=1;
+				sort_mode++;
 				sort(evtlist.begin(),evtlist.end(),sortByDescription);
+			}
+			else if(sort_mode==1)
+			{
+				sort_mode++;
+				sort(evtlist.begin(),evtlist.end(),sortById);
 			}
 			else
 			{
 				sort_mode=0;
-				sort(evtlist.begin(),evtlist.end(),sortById);
+				sort(evtlist.begin(),evtlist.end(),sortByDateTime);
 			}
+			
 			// find selected
 			for ( selected=0 ; selected < evtlist.size(); selected++ )
 			{
@@ -198,7 +267,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 					break;
 			}
 			oldselected=selected;
-			if(selected <=listmaxshow)
+			if(selected<=listmaxshow)
 				liststart=0;
 			else
 				liststart=(selected/listmaxshow)*listmaxshow;
@@ -247,7 +316,8 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 					if (recDir != NULL)
 					{
 						
-						if (timerdclient.addRecordTimerEvent(channel_id,
+//						if (timerdclient.addRecordTimerEvent(channel_id,
+						if (timerdclient.addRecordTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID),
 										     evtlist[selected].startTime,
 										     evtlist[selected].startTime + evtlist[selected].duration,
 										     evtlist[selected].eventID, evtlist[selected].startTime,
@@ -257,11 +327,12 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 							if(askUserOnTimerConflict(evtlist[selected].startTime - (ANNOUNCETIME + 120),
 										  evtlist[selected].startTime + evtlist[selected].duration))
 							{
-								timerdclient.addRecordTimerEvent(channel_id,
-												 evtlist[selected].startTime,
-												 evtlist[selected].startTime + evtlist[selected].duration,
-												 evtlist[selected].eventID, evtlist[selected].startTime,
-												 evtlist[selected].startTime - (ANNOUNCETIME + 120),
+//								timerdclient.addRecordTimerEvent(channel_id,
+								timerdclient.addRecordTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID),
+									 evtlist[selected].startTime,
+									 evtlist[selected].startTime + evtlist[selected].duration,
+									 evtlist[selected].eventID, evtlist[selected].startTime,
+									 evtlist[selected].startTime - (ANNOUNCETIME + 120),
 												 "", true, recDir,true);
 								ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 							}
@@ -277,11 +348,12 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			}					
 		}
 		else if ( msg == (neutrino_msg_t) g_settings.key_channelList_addremind )
-	   {
+		{
 			CTimerdClient timerdclient;
 			if(timerdclient.isTimerdAvailable())
 			{
-				timerdclient.addZaptoTimerEvent(channel_id, 
+//				timerdclient.addZaptoTimerEvent(channel_id, 
+				timerdclient.addZaptoTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID), 
 								evtlist[selected].startTime,
 								evtlist[selected].startTime - ANNOUNCETIME, 0,
 								evtlist[selected].eventID, evtlist[selected].startTime,
@@ -346,7 +418,8 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			{
 				hide();
 
-				res = g_EpgData->show(channel_id, evtlist[selected].eventID, &evtlist[selected].startTime);
+//				res = g_EpgData->show(channel_id, evtlist[selected].eventID, &evtlist[selected].startTime);
+				res = g_EpgData->show(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID), evtlist[selected].eventID, &evtlist[selected].startTime);
 				if ( res == menu_return::RETURN_EXIT_ALL )
 				{
 					loop = false;
@@ -581,7 +654,8 @@ int CEventListHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 	e = new EventList;
 
 	channelList = CNeutrinoApp::getInstance()->channelList;
-	e->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName()); // UTF-8
+//	e->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName()); // UTF-8
+	e->exec(g_Zapit->getCurrentServiceID(), channelList->getActiveChannelName()); // UTF-8
 	delete e;
 
 	return res;

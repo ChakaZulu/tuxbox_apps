@@ -717,6 +717,7 @@ int CNeutrinoApp::loadSetup()
 
 	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
 	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
+	g_settings.audiochannel_up_down_enable = configfile.getBool("audiochannel_up_down_enable", false);
 
 	//screen configuration
 	g_settings.screen_StartX = configfile.getInt32( "screen_StartX", 37 );
@@ -1053,6 +1054,7 @@ void CNeutrinoApp::saveSetup()
 
 	configfile.setString( "repeat_blocker", g_settings.repeat_blocker );
 	configfile.setString( "repeat_genericblocker", g_settings.repeat_genericblocker );
+	configfile.setBool  ( "audiochannel_up_down_enable", g_settings.audiochannel_up_down_enable );
 
 	//screen configuration
 	configfile.setInt32( "screen_StartX", g_settings.screen_StartX );
@@ -3376,7 +3378,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				// show EPG
 
-				g_EpgData->show( channelList->getActiveChannel_ChannelID() );
+//				g_EpgData->show( channelList->getActiveChannel_ChannelID() );
+				g_EpgData->show( g_Zapit->getCurrentServiceID() );
 
 			}
 			else if( msg == (neutrino_msg_t) g_settings.key_tvradio_mode )

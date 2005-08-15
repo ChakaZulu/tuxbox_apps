@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.185 2005/07/29 18:46:55 rasc Exp $
+//  $Id: sectionsd.cpp,v 1.186 2005/08/15 12:09:15 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -124,6 +124,22 @@ static pthread_mutex_t eventsLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)
 static pthread_mutex_t servicesLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
 static pthread_mutex_t messagingLock = PTHREAD_MUTEX_INITIALIZER;
 
+// k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
+// falsch ist es zumindest nicht
+/*
+static DMX dmxEIT(0x12, 0x4f, (0xff- 0x01), 0x50, (0xff- 0x0f), 256);
+static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
+*/
+static DMX dmxEIT(0x12, 256);
+static DMX dmxSDT(0x11, 256);
+
+// Houdini: added for Premiere Private EPG section for Sport/Direkt Portal
+const int PREMIERE_PRIVATE_PID1 = 0xb11;
+const int PREMIERE_PRIVATE_PID2 = 0xb12;
+static DMX* dmxPPT1 = NULL;
+static DMX* dmxPPT2 = NULL;
+
+
 inline void lockServices(void)
 {
 	pthread_mutex_lock(&servicesLock);
@@ -154,6 +170,19 @@ inline void unlockEvents(void)
 	pthread_mutex_unlock(&eventsLock);
 }
 
+inline int EITThreadsPause(void)
+{
+	return(	dmxEIT.pause() || 
+		dmxPPT1 && dmxPPT1->pause() || 
+		dmxPPT2 && dmxPPT2->pause());
+}
+
+inline int EITThreadsUnPause(void)
+{
+	return(	dmxEIT.unpause() || 
+		dmxPPT1 && dmxPPT1->unpause() || 
+		dmxPPT2 && dmxPPT2->unpause());
+}
 
 static long long last_profile_call;
 
@@ -481,15 +510,6 @@ inline bool writeNbytes(int fd, const char *buf,  const size_t numberOfBytes, co
 }
 
 
-// k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
-// falsch ist es zumindest nicht
-/*
-static DMX dmxEIT(0x12, 0x4f, (0xff- 0x01), 0x50, (0xff- 0x0f), 256);
-static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
-*/
-static DMX dmxEIT(0x12, 256);
-static DMX dmxSDT(0x11, 256);
-
 //------------------------------------------------------------
 // misc. functions
 //------------------------------------------------------------
@@ -746,12 +766,16 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 	{
 		dmxEIT.request_pause();
 		dmxSDT.request_pause();
+		if (dmxPPT1) (dmxPPT1->request_pause());
+		if (dmxPPT2) (dmxPPT2->request_pause());
 		scanning = 0;
 	}
 	else if (!pause && !scanning)
 	{
 		dmxSDT.request_unpause();
 		dmxEIT.request_unpause();
+		if (dmxPPT1) (dmxPPT1->request_unpause());
+		if (dmxPPT2) (dmxPPT2->request_unpause());
 		scanning = 1;
 	}
 
@@ -791,9 +815,9 @@ static void commandPauseSorting(int connfd, char *data, const unsigned dataLengt
 	dprintf("Request of %s sorting events.\n", pause ? "stop" : "continue" );
 
 	if (pause)
-		dmxEIT.pause();
+		EITThreadsPause();
 	else
-		dmxEIT.unpause();
+		EITThreadsUnPause();
 
 	struct sectionsd::msgResponseHeader msgResponse;
 
@@ -913,7 +937,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 	{
 		// service Found
 
-		if ( dmxEIT.pause() )
+		if (EITThreadsPause())
 		{
 			delete[] evtList;
 			return ;
@@ -977,7 +1001,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 		unlockEvents();
 
-		if (dmxEIT.unpause())
+		if (EITThreadsUnPause())
 		{
 			delete[] evtList;
 			return ;
@@ -1064,7 +1088,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.185 2005/07/29 18:46:55 rasc Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.186 2005/08/15 12:09:15 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1106,7 +1130,7 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 	data[dataLength - 1] = 0; // to be sure it has an trailing 0
 	dprintf("Request of current/next information for '%s'\n", data);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockServices();
@@ -1147,7 +1171,8 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 				fprintf(stderr, "low on memory!\n");
 				unlockEvents();
 				dmxEIT.unpause();
-				return ;
+				EITThreadsUnPause();
+//				return ;
 			}
 
 			struct tm *pStartZeit = localtime(&zeitEvt1.startzeit);
@@ -1176,8 +1201,8 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 	}
 
 	unlockEvents();
-	dmxEIT.unpause(); // -> unlock
-
+	EITThreadsUnPause(); // -> unlock
+	
 	// response
 
 	struct sectionsd::msgResponseHeader pmResponse;
@@ -1213,7 +1238,7 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 
 	dprintf("Request of ComponentTags for 0x%llx\n", uniqueKey);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockEvents();
@@ -1244,7 +1269,7 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		dmxEIT.unpause();
+		EITThreadsUnPause();
 		return ;
 	}
 
@@ -1275,7 +1300,7 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 	}
 
 	unlockEvents();
-	dmxEIT.unpause(); // -> unlock
+	EITThreadsUnPause(); // -> unlock
 
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = nResultDataSize;
@@ -1305,7 +1330,7 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 
 	dprintf("Request of LinkageDescriptors for 0x%llx\n", uniqueKey);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockEvents();
@@ -1343,7 +1368,7 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		dmxEIT.unpause();
+		EITThreadsUnPause();
 		return ;
 	}
 
@@ -1371,7 +1396,7 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 	}
 
 	unlockEvents();
-	dmxEIT.unpause(); // -> unlock
+	EITThreadsUnPause(); // -> unlock
 
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = nResultDataSize;
@@ -1489,6 +1514,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		// nur wenn lange genug her, oder wenn anderer Service :)
 		dmxEIT.change( 0 );
 		dmxSDT.change( 0 );
+		if (dmxPPT1) dmxPPT1->change( 0 );
+		if (dmxPPT2) dmxPPT2->change( 0 );
 	}
 	else
 		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
@@ -1518,7 +1545,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 
 	dprintf("[sectionsd] Request of current/next information for " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockServices();
@@ -1622,7 +1649,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		dmxEIT.unpause();
+		EITThreadsUnPause();
 		return ;
 	}
 
@@ -1651,7 +1678,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	p++;
 
 	unlockEvents();
-	dmxEIT.unpause(); // -> unlock
+	EITThreadsUnPause(); // -> unlock
 
 	// response
 
@@ -1712,7 +1739,7 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		dmxEIT.unpause(); // -> unlock
+		EITThreadsUnPause(); // -> unlock
 		return ;
 	}
 
@@ -1758,7 +1785,7 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 
 	unlockEvents();
 
-	dmxEIT.unpause(); // -> unlock
+	EITThreadsUnPause(); // -> unlock
 
 	bool rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
@@ -1781,7 +1808,7 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 
 	dprintf("Request of next epg for 0x%llx %s", *uniqueEventKey, ctime(starttime));
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockEvents();
@@ -1798,7 +1825,7 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 	else
 	{
 		unlockEvents();
-		dmxEIT.unpause(); // -> unlock
+		EITThreadsUnPause(); // -> unlock
 		dprintf("next epg not found!\n");
 
 		struct sectionsd::msgResponseHeader responseHeader;
@@ -1818,7 +1845,7 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 
 	dprintf("Request of actual EPG for " PRINTF_CHANNEL_ID_TYPE "\n", * uniqueServiceKey);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockEvents();
@@ -1835,7 +1862,7 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 	else
 	{
 		unlockEvents();
-		dmxEIT.unpause(); // -> unlock
+		EITThreadsUnPause(); // -> unlock
 		dprintf("EPG not found!\n");
 
 		struct sectionsd::msgResponseHeader responseHeader;
@@ -1857,7 +1884,7 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 
 	dprintf("Request of Prev/Next EPG for 0x%llx %s", *uniqueEventKey, ctime(starttime));
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockEvents();
@@ -1888,7 +1915,7 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		dmxEIT.unpause(); // -> unlock
+		EITThreadsUnPause(); // -> unlock
 		return ;
 	}
 
@@ -1899,7 +1926,7 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 	        next_zeit.startzeit
 	       );
 	unlockEvents();
-	dmxEIT.unpause(); // -> unlock
+	EITThreadsUnPause(); // -> unlock
 
 	bool rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
@@ -1923,7 +1950,7 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 	data[dataLength - 1] = 0; // to be sure it has an trailing 0
 	dprintf("Request of actual EPG for '%s'\n", data);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockServices();
@@ -1954,7 +1981,7 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 		{
 			fprintf(stderr, "low on memory!\n");
 			unlockEvents();
-			dmxEIT.unpause();
+			EITThreadsUnPause();
 			return ;
 		}
 
@@ -1982,7 +2009,7 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 
 	unlockEvents();
 
-	dmxEIT.unpause(); // -> unlock
+	EITThreadsUnPause(); // -> unlock
 
 	// response
 
@@ -2015,7 +2042,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 
 	*evtList = 0;
 
-	if (dmxEIT.pause())
+	if (EITThreadsPause()) // -> lock
 	{
 		delete[] evtList;
 		return ;
@@ -2024,7 +2051,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	if (dmxSDT.pause())
 	{
 		delete[] evtList;
-		dmxEIT.unpause();
+		EITThreadsUnPause();
 		return ;
 	}
 
@@ -2128,7 +2155,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	unlockServices();
 
 	dmxSDT.unpause();
-	dmxEIT.unpause();
+	EITThreadsUnPause();
 
 	struct sectionsd::msgResponseHeader msgResponse;
 	msgResponse.dataLength = liste - evtList;
@@ -2166,7 +2193,7 @@ static void sendShort(int connfd, const SIevent& e, const SItime& t)
 	{
 		fprintf(stderr, "low on memory!\n");
 		unlockEvents();
-		dmxEIT.unpause(); // -> unlock
+		EITThreadsUnPause(); // -> unlock
 		return ;
 	}
 
@@ -2178,7 +2205,7 @@ static void sendShort(int connfd, const SIevent& e, const SItime& t)
 	        t.dauer
 	       );
 	unlockEvents();
-	dmxEIT.unpause(); // -> unlock
+	EITThreadsUnPause(); // -> unlock
 
 	bool rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
@@ -2201,7 +2228,7 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 
 	dprintf("Request of next short for 0x%llx %s", *uniqueEventKey, ctime(starttime));
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockEvents();
@@ -2218,7 +2245,7 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 	else
 	{
 		unlockEvents();
-		dmxEIT.unpause(); // -> unlock
+		EITThreadsUnPause(); // -> unlock
 		dprintf("next short not found!\n");
 
 		struct sectionsd::msgResponseHeader responseHeader;
@@ -2262,7 +2289,7 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 
 	dprintf("Request of actual EPG for 0x%llx 0x%lx\n", *epgID, *startzeit);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockEvents();
@@ -2281,7 +2308,7 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 		{
 			dputs("EPG not found!");
 			unlockEvents();
-			dmxEIT.unpause(); // -> unlock
+			EITThreadsUnPause(); // -> unlock
 		}
 		else
 		{
@@ -2294,7 +2321,7 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 	{
 		dputs("EPG not found!");
 		unlockEvents();
-		dmxEIT.unpause(); // -> unlock
+		EITThreadsUnPause(); // -> unlock
 		// response
 
 		struct sectionsd::msgResponseHeader pmResponse;
@@ -2313,7 +2340,7 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 
 	dprintf("Request of actual EPG for 0x%llx\n", *epgID);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return;
 
 	lockEvents();
@@ -2329,7 +2356,7 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 	{
 		dputs("EPG not found!");
 		unlockEvents();
-		dmxEIT.unpause(); // -> unlock
+		EITThreadsUnPause(); // -> unlock
 		// response
 
 		struct sectionsd::msgResponseHeader pmResponse;
@@ -2348,7 +2375,7 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 
 	dprintf("Request of NVOD times for " PRINTF_CHANNEL_ID_TYPE "\n", uniqueServiceKey);
 
-	if (dmxEIT.pause()) // -> lock
+	if (EITThreadsPause()) // -> lock
 		return ;
 
 	lockServices();
@@ -2377,7 +2404,7 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 				fprintf(stderr, "low on memory!\n");
 				unlockEvents();
 				unlockServices();
-				dmxEIT.unpause(); // -> unlock
+				EITThreadsUnPause(); // -> unlock
 				return ;
 			}
 
@@ -2437,7 +2464,7 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 
 	unlockServices();
 
-	dmxEIT.unpause(); // -> unlock
+	EITThreadsUnPause(); // -> unlock
 }
 
 
@@ -3412,6 +3439,239 @@ static void *eitThread(void *)
 	pthread_exit(NULL);
 }
 
+
+//---------------------------------------------------------------------
+// Premiere Private EPG Thread
+// reads EPG-datas
+//---------------------------------------------------------------------
+
+static void *pptThread(void *p_pptpid)
+{
+	struct SI_section_header header;
+	char *buf;
+	unsigned timeoutInMSeconds = 500;
+	bool sendToSleepNow = false;
+	DMX* dmxPPT;
+	unsigned short start_section = 0;
+	int pptpid=*(int*)p_pptpid;
+	
+	if (pptpid == PREMIERE_PRIVATE_PID1 ) 	dmxPPT = dmxPPT1; 
+	else					dmxPPT = dmxPPT2; 
+	dmxPPT->addfilter( 0xa0, (0xff - 0x01) );
+
+	try
+	{
+		dprintf("[%sThread 0x%x] pid %d start\n", "ppt", pptpid, getpid());
+		int timeoutsDMX = 0;
+		time_t lastRestarted = time(NULL);
+		time_t lastData = time(NULL);
+		dmxPPT->start(); // -> unlock
+
+		for (;;)
+		{
+
+			time_t zeit = time(NULL);
+
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
+			{
+				if ( (zeit > lastRestarted + 3) || (dmxPPT->real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
+				{
+					dmxPPT->stop(); // -> lock
+					dmxPPT->start(); // -> unlock
+					dprintf("[pptThread] dmxPPT restarted, cache NOT decreased (dt=%ld)\n", (int)zeit - lastRestarted);
+				}
+				else
+				{
+
+					// sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
+					dmxPPT->stop(); // -> lock
+					/*                    lockEvents();
+					                    if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000)
+					                    {
+					                        // kleiner als 1 Tag machen wir den Cache nicht,
+					                        // da die timeouts ja auch von einem Sender ohne EPG kommen koennen
+					                        // Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
+					                        // Man koennte auch ab 3000 Events nur noch jedes 3 Event o.ae. einsortieren
+					                        dmxSDT.real_pause();
+					                        lockServices();
+					                        unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
+					                        secondsToCache-=5*60L*60L; // 5h weniger
+					                        dprintf("[eitThread] decreasing cache 5h (now %ldh)\n", secondsToCache/(60*60L));
+					                        removeNewEvents();
+					                        removeOldEvents(oldEventsAre);
+					                        if(anzEventsAlt>mySIeventsOrderUniqueKey.size())
+					                            dprintf("[eitThread] Removed %u Events (%u -> %u)\n", anzEventsAlt-mySIeventsOrderUniqueKey.size(), anzEventsAlt, mySIeventsOrderUniqueKey.size());
+					                        unlockServices();
+					                        dmxSDT.real_unpause();
+					                    }
+					                    unlockEvents();
+					*/
+					dmxPPT->start(); // -> unlock
+//					dputs("[pptThread] dmxPPT restarted");
+
+				}
+
+				lastRestarted = zeit;
+				timeoutsDMX = 0;
+				lastData = zeit;
+			}
+
+			if (timeset)
+			{
+				// Nur wenn ne richtige Uhrzeit da ist
+				if ( (sendToSleepNow) )
+				{
+					sendToSleepNow = false;
+
+					struct timespec abs_wait;
+
+					struct timeval now;
+
+					gettimeofday(&now, NULL);
+					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+					abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
+
+					dmxPPT->real_pause();
+					pthread_mutex_lock( &dmxPPT->start_stop_mutex );
+					dprintf("[pptThread %x] going to sleep...\n", pptpid);
+
+					int rs = pthread_cond_timedwait( &dmxPPT->change_cond, &dmxPPT->start_stop_mutex, &abs_wait );
+
+					if (rs == ETIMEDOUT)
+					{
+						dprintf("dmxPPT %x: waking up again - looking for new events :)\n", pptpid);
+						pthread_mutex_unlock( &dmxPPT->start_stop_mutex );
+						dmxPPT->change( 0 ); // -> restart
+#ifdef PAUSE_EQUALS_STOP
+						dmxPPT->real_unpause();
+#endif
+					}
+					else if (rs == 0)
+					{
+						dprintf("dmxPPT %x: waking up again - requested from .change()\n", pptpid);
+						pthread_mutex_unlock( &dmxPPT->start_stop_mutex );
+#ifdef PAUSE_EQUALS_STOP
+						dmxPPT->real_unpause();
+#endif
+					}
+					else
+					{
+						dprintf("dmxPPT %x:  waking up again - unknown reason?!\n", pptpid);
+						pthread_mutex_unlock( &dmxPPT->start_stop_mutex );
+						dmxPPT->real_unpause();
+					}
+					// after sleeping get actual time
+					zeit = time(NULL);
+					start_section = 0; // fetch new? events
+					lastData = zeit; // restart timer
+				}
+			}
+
+			buf = dmxPPT->getSection(timeoutInMSeconds, timeoutsDMX);
+
+			if (buf == NULL) {
+				if (zeit > lastData + 5) 
+				{
+					sendToSleepNow = true; // if there are no data for 5 seconds -> sleep
+					dprintf("dmxPPT %x: no data for 5 seconds\n", pptpid);
+				}
+				continue;
+			}
+			lastData = zeit;
+			
+			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
+							((SI_section_header*)buf)->section_length_lo;
+			
+			// copy the header
+			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
+
+			if ((header.current_next_indicator) && (!dmxPPT->pauseCounter ))
+			{
+				// Wir wollen nur aktuelle sections
+				SIsectionPPT ppt(SIsection(section_length + 3, buf));
+
+				if (ppt.header())
+				{
+					// == 0 -> kein event
+//					dprintf("[pptThread] adding %d events [table 0x%x] (begin)\n", ppt.events().size(), header.table_id);
+//					dprintf("got %d: ", header.section_number);
+					if (start_section == 0) start_section = header.section_number;
+					else if (start_section == header.section_number) 
+					{
+						sendToSleepNow = true; // no more scanning
+						dprintf("[pptThread %x] got all sections\n", pptpid);
+					}
+
+					zeit = time(NULL);
+					// Nicht alle Events speichern
+					for (SIevents::iterator e = ppt.events().begin(); e != ppt.events().end(); e++)
+					{
+						if (!(e->times.empty()))
+						{
+							for (SItimes::iterator t = e->times.begin(); t != e->times.end(); t++) {
+//								if ( ( e->times.begin()->startzeit < zeit + secondsToCache ) &&
+//								        ( ( e->times.begin()->startzeit + (long)e->times.begin()->dauer ) > zeit - oldEventsAre ) )
+								// add the event if at least one starttime matches
+								if ( ( t->startzeit < zeit + secondsToCache ) &&
+								        ( ( t->startzeit + (long)t->dauer ) > zeit - oldEventsAre ) )
+								{
+//									dprintf("chId: " PRINTF_CHANNEL_ID_TYPE " Dauer: %ld, Startzeit: %s", e->get_channel_id(),  (long)e->times.begin()->dauer, ctime(&e->times.begin()->startzeit));
+									lockEvents();
+									addEvent(*e);
+									unlockEvents();
+									break; // only add the event once
+								}
+#if 0									
+// why is the following not compiling, fuXX STL								
+								else {
+									// remove unusable times in event
+									SItimes::iterator kt = t;
+									t--; // the iterator t points to the last element
+									e->times.erase(kt);
+								}
+#endif							
+							}
+						}
+						else
+						{
+							// pruefen ob nvod event
+							lockServices();
+							MySIservicesNVODorderUniqueKey::iterator si = mySIservicesNVODorderUniqueKey.find(e->get_channel_id());
+
+							if (si != mySIservicesNVODorderUniqueKey.end())
+							{
+								// Ist ein nvod-event
+								lockEvents();
+
+								for (SInvodReferences::iterator i = si->second->nvods.begin(); i != si->second->nvods.end(); i++)
+									mySIeventUniqueKeysMetaOrderServiceUniqueKey.insert(std::make_pair(i->uniqueKey(), e->uniqueKey()));
+
+								addNVODevent(*e);
+								unlockEvents();
+							}
+							unlockServices();
+						}
+					} // for
+					//dprintf("[eitThread] added %d events (end)\n",  eit.events().size());
+				} // if
+			} // if
+		} // for
+	} // try
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "[pptThread] Caught std-exception %s!\n", e.what());
+	}
+	catch (...)
+	{
+		fprintf(stderr, "[pptThread] Caught exception!\n");
+	}
+
+	dputs("[pptThread] end");
+
+	pthread_exit(NULL);
+}
+
+
 //---------------------------------------------------------------------
 //			housekeeping-thread
 // does cleaning on fetched datas
@@ -3434,8 +3694,8 @@ static void *houseKeepingThread(void *)
 
 			dprintf("housekeeping.\n");
 
-			dmxEIT.pause();
-
+			EITThreadsPause();
+			
 			dmxSDT.pause();
 
 			struct mallinfo speicherinfo1;
@@ -3485,7 +3745,7 @@ static void *houseKeepingThread(void *)
 			}
 
 			dmxSDT.unpause();
-			dmxEIT.unpause();
+			EITThreadsUnPause();
 
 		} // for endlos
 	} // try
@@ -3524,10 +3784,10 @@ static void signalHandler(int signum)
 
 int main(int argc, char **argv)
 {
-	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
+	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT1, threadPPT2;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.185 2005/07/29 18:46:55 rasc Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.186 2005/08/15 12:09:15 metallica Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
@@ -3609,6 +3869,26 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 
+		// premiere private epg -Thread1 starten
+		int ppt_pid1 = PREMIERE_PRIVATE_PID1;
+		dmxPPT1 = new DMX(ppt_pid1, 256);
+		rc = pthread_create(&threadPPT1, 0, pptThread, (void*)&ppt_pid1);
+
+		if (rc) {
+			fprintf(stderr, "[sectionsd] failed to create ppt-thread1 (rc=%d)\n", rc);
+			return EXIT_FAILURE;
+		}
+
+		// premiere private epg -Thread2 starten
+		int ppt_pid2 = PREMIERE_PRIVATE_PID2;
+		dmxPPT2 = new DMX(ppt_pid2, 256);
+		rc = pthread_create(&threadPPT2, 0, pptThread, (void*)&ppt_pid2);
+
+		if (rc) {
+			fprintf(stderr, "[sectionsd] failed to create ppt-thread2 (rc=%d)\n", rc);
+			return EXIT_FAILURE;
+		}
+
 		// housekeeping-Thread starten
 		rc = pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
 
@@ -3632,6 +3912,9 @@ int main(int argc, char **argv)
 		fprintf(stderr, "[sectionsd] Caught exception in main-thread!\n");
 	}
 
+	delete dmxPPT1;
+	delete dmxPPT2;
+	
 	puts("[sectionsd] ended");
 
 	return EXIT_SUCCESS;

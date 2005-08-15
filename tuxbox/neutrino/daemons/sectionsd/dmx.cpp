@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.24 2004/04/29 09:11:13 metallica Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.25 2005/08/15 12:09:15 metallica Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -50,7 +50,7 @@ extern void showProfiling(std::string text);
 extern bool timeset;
 
 
-DMX::DMX(const unsigned char p, const unsigned short bufferSizeInKB)
+DMX::DMX(const unsigned short p, const unsigned short bufferSizeInKB)
 {
 	fd = -1;
 	lastChanged = 0;

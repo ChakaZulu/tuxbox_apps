@@ -495,18 +495,48 @@ const std::string & CRemoteControl::setSubChannel(const int numSub, const bool f
 	selected_subchannel = numSub;
 	current_sub_channel_id = subChannels[numSub].getChannelID();
 	g_Zapit->zapTo_subServiceID_NOWAIT( current_sub_channel_id );
+	// Houdini: to restart reading the private EPG when switching to a new option
+	g_Sectionsd->setServiceChanged( current_sub_channel_id , true );
 
 	return subChannels[numSub].subservice_name;
 }
 
 const std::string & CRemoteControl::subChannelUp(void)
 {
-	return setSubChannel((subChannels.size() == 0) ? -1 : (int)((selected_subchannel + 1) % subChannels.size()));
+//	return setSubChannel((subChannels.size() == 0) ? -1 : (int)((selected_subchannel + 1) % subChannels.size()));
+	// if there are any NVOD/subchannels switch these else switch audio channel (if any)
+	if (subChannels.size() > 0 || !g_settings.audiochannel_up_down_enable)
+	{
+		return setSubChannel((subChannels.size() == 0) ? -1 : (int)((selected_subchannel + 1) % subChannels.size()));
+	}
+	else
+	{
+		if (current_PIDs.APIDs.size() > 0)
+		{
+			setAPID((current_PIDs.PIDs.selected_apid + 1) % current_PIDs.APIDs.size());
+		}
+		return (empty_string);
+	}
 }
 
 const std::string & CRemoteControl::subChannelDown(void)
 {
-	return setSubChannel((selected_subchannel <= 0) ? (subChannels.size() - 1) : (selected_subchannel - 1));
+	// if there are any NVOD/subchannels switch these else switch audio channel (if any)
+	if (subChannels.size() > 0 || !g_settings.audiochannel_up_down_enable)
+	{
+		return setSubChannel((selected_subchannel <= 0) ? (subChannels.size() - 1) : (selected_subchannel - 1));
+	}
+	else
+	{
+		if (current_PIDs.APIDs.size() > 0)
+		{
+			if (current_PIDs.PIDs.selected_apid <= 0)
+				setAPID(current_PIDs.APIDs.size() - 1);
+			else
+				setAPID((current_PIDs.PIDs.selected_apid - 1));
+		}
+		return (empty_string);
+	}
 }
 
 void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::string & channame, const bool start_video) // UTF-8

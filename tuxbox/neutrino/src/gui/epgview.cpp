@@ -399,6 +399,10 @@ const char * GetGenre(const unsigned char contentClassification) // UTF-8
 	return g_Locale->getText(res);
 }
 
+static bool sortByDateTime (const CChannelEvent& a, const CChannelEvent& b)
+{
+	return a.startTime< b.startTime;
+}
 
 int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_t* a_startzeit, bool doLoop )
 {
@@ -423,6 +427,8 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	if (doLoop)
 	{
 		evtlist = g_Sectionsd->getEventsServiceKey(channel_id);
+		// Houdini added for Private Premiere EPG start sorted by start date/time
+		sort(evtlist.begin(),evtlist.end(),sortByDateTime);
 		frameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
 	}
 
