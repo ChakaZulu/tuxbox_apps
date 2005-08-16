@@ -17,6 +17,11 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 		enum
 		{
 			start,
+			stop,
+			play,
+			pause,
+			forward,
+			rewind,
 			quit
 		};
 		Message(int type = 0, const char *filename = 0)
@@ -31,12 +36,13 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	eServiceReference suspendedServiceReference;
 	void gotMessage(const Message &message);
 	void thread();
-	int sendRequest2VLC(eString command);
 	eString sout(eString mrl);
+	int requestStream();
 	int playStream(eString mrl);
 public:
 	eMoviePlayer();
 	~eMoviePlayer();
+	int sendRequest2VLC(eString command);
 	void control(const char *command, const char *filename);
 	int getStatus() { return status; }
 	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& transcodevideo, int& audiodatarate, int& transcodeaudio);

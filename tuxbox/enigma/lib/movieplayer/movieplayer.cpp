@@ -23,7 +23,7 @@
 #else
 #define PVRDEV "/dev/dvb/adapter0/dvr0"
 #define BLOCKSIZE 65424
-#define INITIALBUFFER BLOCKSIZE*40
+#define INITIALBUFFER BLOCKSIZE*48
 #endif
 
 eIOBuffer tsBuffer(BLOCKSIZE*4);
@@ -34,16 +34,53 @@ extern int tcpOpen(eString, int);
 extern int tcpRequest(int, char *, int);
 extern bool playService(const eServiceReference &ref);
 
-pthread_t dvr;
-void *dvrThread(void *);
-pthread_t receiver;
+pthread_t pvr = 0;
+void *pvrThread(void *);
+pthread_t receiver = 0;
 void *receiverThread(void *);
 
 static int fd = -1;
-static int play = -1;
-static int tsBufferSize = 0;
+static int pvrfd = -1;
 
 eMoviePlayer *eMoviePlayer::instance;
+
+void createThreads()
+{
+	// create receiver thread
+	if (!receiver)
+	{
+		pthread_create(&receiver, 0, receiverThread, (void *)&fd);
+		eDebug("[MOVIEPLAYER] createThreads: receiver thread created.");
+	}
+	// create pvr thread
+	if (!pvr)
+	{
+		pvrfd = open(PVRDEV, O_RDWR);
+		pthread_create(&pvr, 0, pvrThread, (void *)&pvrfd);
+		eDebug("[MOVIEPLAYER] createThreads: pvr thread created.");
+	}
+}
+
+void killThreads()
+{
+	if (receiver)
+	{
+		pthread_cancel(receiver);
+		eDebug("[MOVIEPLAYER] killThreads: waiting for receiver thread to join.");
+		pthread_join(receiver, 0);
+		receiver = 0;
+		eDebug("[MOVIEPLAYER] killThreads: receiver thread cancelled.");
+	}
+	
+	if (pvr)
+	{	
+		pthread_cancel(pvr);
+		eDebug("[MOVIEPLAYER] killThreads: waiting for pvr thread to join.");
+		pthread_join(pvr, 0);
+		pvr = 0;
+		eDebug("[MOVIEPLAYER] killThreads: pvr thread cancelled.");
+	}
+}
 
 eMoviePlayer::eMoviePlayer(): messages(this,1)
 {
@@ -51,67 +88,61 @@ eMoviePlayer::eMoviePlayer(): messages(this,1)
 		instance = this;
 		
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
-	eDebug("[MOVIEPLAYER] Version 1.4 starting...");
+	eDebug("[MOVIEPLAYER] Version 1.5 starting...");
 	run();
 }
 
 eMoviePlayer::~eMoviePlayer()
 {
-	play = -1; // terminate receiver and dvr thread if they are still running
+	killThreads();
 	messages.send(Message::quit);
-	if ( thread_running() )
+	if (thread_running())
 		kill();
 	if (instance == this)
 		instance = 0;
+	status = 0;
 }
 
 void eMoviePlayer::thread()
 {
-	nice(5);
+	nice(1);
 	exec();
 }
 
 void eMoviePlayer::control(const char *command, const char *filename)
 {
+	if (thread_running())
+		eDebug("[MOVIEPLAYER] main thread is running.");
+	else
+		eDebug("[MOVIEPLAYER] main thread is NOT running.");
+		
 	eString cmd = eString(command);
 	
 	eDebug("[MOVIEPLAYER] control: command = %s", command);
 	if (cmd == "start")
-	{
-		play = -1; // terminate threads
 		messages.send(Message(Message::start, filename ? strdup(filename) : 0));
-	}
 	else
-	if (cmd == "terminate")
-	{
-		play = -1; // terminate threads
-	}
+	if (cmd == "stop" || cmd == "terminate")
+		messages.send(Message(Message::stop, 0));
+	else
 	if (cmd == "play")
-	{
-	}
-	else
-	if (cmd == "stop")
-	{
-	}
+		messages.send(Message(Message::play, 0));
 	else 
 	if (cmd == "pause")
-	{
-	}
+		messages.send(Message(Message::pause, 0));
 	else
 	if (cmd == "rewind")
-	{
-	}
+		messages.send(Message(Message::rewind, 0));
 	else
 	if (cmd == "forward")
-	{
-	}
+		messages.send(Message(Message::forward, 0));
 }
 
 int eMoviePlayer::sendRequest2VLC(eString command)
 {
 	char ioBuffer[512];
 	int rc = -1;
-	int fd = tcpOpen(serverIP, serverPort);
+	int fd = tcpOpen(serverIP, 8080);
 	if (fd > 0)
 	{
 		eString url = "GET /" + command + " HTTP/1.0\r\n\r\n";
@@ -122,16 +153,19 @@ int eMoviePlayer::sendRequest2VLC(eString command)
 		{
 			if (strstr(ioBuffer, "HTTP/1.0 200 OK") == 0)
 			{
-				eDebug("[MOVIEPLAYER] 200 OK not received...");
-				rc = -1;
+				eDebug("[MOVIEPLAYER] 200 OK NOT received...");
+				rc = -2;
+			}
+			else 
+			{
+				eDebug("[MOVIEPLAYER] 200 OK...");
 			}
 		}
 		else 
-			rc = -2;
+			rc = -3;
 		close(fd);
 	}
-	else
-		rc = -3;
+	
 	return rc;
 }
 
@@ -144,33 +178,34 @@ int bufferStream(int fd, int bufferSize)
 	eDebug("[MOVIEPLAYER] buffering stream...");
 	
 	// fill buffer and temp file
-	do
+	while (tsBuffer.size() < bufferSize && errors < 100)
 	{
 		len = recv(fd, tempBuffer, BLOCKSIZE, 0);
 		if (len > 0)
 		{
-//			eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, tsBuffer.size());
+			eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, tsBuffer.size());
 			tsBuffer.write(tempBuffer, len);
+			errors = 0;
 		}
 		else
+		{
 			errors++;
+			usleep(10000);
+		}
 	}
-	while (tsBuffer.size() < bufferSize && errors < 100);
 	
-	tsBufferSize = tsBuffer.size();
-	return tsBufferSize;
+	return tsBuffer.size();
 }
 
-int eMoviePlayer::playStream(eString mrl)
+int eMoviePlayer::requestStream()
 {
-	int apid = -1, vpid = -1, ac3 = -1;
 	char ioBuffer[512];
 	
-	// receive video stream from VLC on PC
-	eDebug("[MOVIEPLAYER] start playing stream...");
+	eDebug("[MOVIEPLAYER] requesting VLC stream...");
 	
-	int retry = 10;
-	while (--retry > 0)
+	int rc = -1;
+	int retry = 2;
+	while (--retry > 0 && rc != 0)
 	{
 		eDebug("[MOVIEPLAYER] retry: %d", retry);
 		fd = tcpOpen(serverIP, serverPort);
@@ -194,7 +229,27 @@ int eMoviePlayer::playStream(eString mrl)
 			continue;
 		}
 		else
-			retry = 0;
+		{
+			eDebug("[MOVIEPLAYER] 200 OK...");
+			rc = 0;
+		}
+	}
+	return rc;
+}
+
+
+int eMoviePlayer::playStream(eString mrl)
+{
+	int apid = -1, vpid = -1, ac3 = -1;
+	
+	// receive video stream from VLC on PC
+	eDebug("[MOVIEPLAYER] start playing stream...");
+	
+	if (requestStream() < 0)
+	{
+		eDebug("[MOVIEPLAYER] requesting stream failed...");
+		close(fd);
+		return -1;
 	}
 
 	tsBuffer.clear();
@@ -213,8 +268,6 @@ int eMoviePlayer::playStream(eString mrl)
 		close(fd);
 		return -5;
 	}
-	
-	eDebug("[MOVIEPLAYER] found apid: 0x%04X, vpid: 0x%04X, ac3: %d", apid, vpid, ac3);
 	
 	// save current dvb service for later
 	eDVBServiceController *sapi;
@@ -246,22 +299,7 @@ int eMoviePlayer::playStream(eString mrl)
 	eZapLCD::getInstance()->lcdMain->ServiceName->setText(mrl);
 #endif
 
-	play = 1;
-			
-	// create receiver thread
-	pthread_create(&receiver, 0, receiverThread, (void *)&play);
-	// create dvr thread
-	pthread_create(&dvr, 0, dvrThread, (void *)&play);
-	pthread_join(receiver, 0);
-	play = -1; // request termination of dvr thread
-	pthread_join(dvr, 0);
-
-	Decoder::Flush();
-	
-	tsBuffer.clear();
-
-	// restore suspended dvb service
-	playService(suspendedServiceReference);
+	createThreads();
 	
 	return 0;
 }
@@ -269,17 +307,20 @@ int eMoviePlayer::playStream(eString mrl)
 void eMoviePlayer::gotMessage(const Message &msg )
 {
 	eString mrl;
+	eDebug("[MOVIEPLAYER] message %d coming in...", msg.type);
 	switch (msg.type)
 	{
 		case Message::start:
 		{
+			status = 1;
+			killThreads();
 			if (msg.filename)
 			{
 				mrl = eString(msg.filename);
 				eDebug("[MOVIEPLAYER] mrl = %s", mrl.c_str());
 				free((char*)msg.filename);
 				
-				serverPort = 8080;
+				serverPort = 9090;
 				eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
 				char *serverip;
 				if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
@@ -289,7 +330,7 @@ void eMoviePlayer::gotMessage(const Message &msg )
 				eDebug("[MOVIEPLAYER] Server IP: %s", serverIP.c_str());
 				eDebug("[MOVIEPLAYER] Server Port: %d", serverPort);
 				
-				int retry = 20;
+				int retry = 5;
 				while (--retry > 0)
 				{
 					eDebug("[MOVIEPLAYER] trying to get vlc going... retry = %d", retry);
@@ -318,6 +359,23 @@ void eMoviePlayer::gotMessage(const Message &msg )
 			}
 			break;
 		}
+		case Message::pause:
+			break;
+		case Message::play:
+			break;
+		case Message::forward:
+			break;
+		case Message::stop:
+		{
+			sendRequest2VLC("?control=stop");
+			killThreads();
+			Decoder::Flush();
+			tsBuffer.clear();
+			// restore suspended dvb service
+			playService(suspendedServiceReference);
+			status = 0;
+			break;
+		}
 		case Message::quit:
 		{
 			quit(0);
@@ -326,6 +384,7 @@ void eMoviePlayer::gotMessage(const Message &msg )
 		default:
 			eDebug("unhandled thread message");
 	}
+	eDebug("[MOVIEPLAYER] message %d handled.", msg.type);
 }
 
 eString eMoviePlayer::sout(eString mrl)
@@ -400,7 +459,7 @@ DVDDrive, int& settingVideoRate, int& settingResolution, int& settingTranscodeVi
 		serverip = strdup("");
 	serverIP = eString(serverip);
 	free(serverip);
-	serverPort = 8080;
+	serverPort = 9090;
 	eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
 	char *dvddrive;
 	if (eConfig::getInstance()->getKey("/movieplayer/dvddrive", dvddrive))
@@ -434,43 +493,70 @@ void eMoviePlayer::writeStreamingServerSettings(eString serverIP, int serverPort
 	eConfig::getInstance()->setKey("/movieplayer/transcodeaudio", settingTranscodeAudio);
 }
 
-void *dvrThread(void *ctrl)
+void pvrThreadCleanup(void *pvrfd)
+{
+	close(*(int *)pvrfd);
+	eDebug("[MOVIEPLAYER] pvrThreadCleanup done.");
+}
+
+void *pvrThread(void *pvrfd)
 {
 	char tempBuffer[BLOCKSIZE];
 	int rd = 0;
-	int pvrfd = 0;
-	pvrfd = open(PVRDEV, O_RDWR);
-	eDebug("[MOVIEPLAYER] dvrThread starting: pvrfd = %d", pvrfd);
+	int tsBufferSize = 0;
+	eDebug("[MOVIEPLAYER] pvrThread starting: pvrfd = %d", *(int *)pvrfd);
+	pthread_cleanup_push(pvrThreadCleanup, (void *)pvrfd);
 	nice(-1);
-	while (play > 0)
+	while (true)
 	{
+		pthread_testcancel();
 		pthread_mutex_lock(&mutex);
 		rd = tsBuffer.read(tempBuffer, BLOCKSIZE);
 		tsBufferSize = tsBuffer.size();
 		pthread_mutex_unlock(&mutex);
 		if (rd > 0)
 		{
-			write(pvrfd, tempBuffer, rd);
-			eDebug("[MOVIEPLAYER] %d >>> writing %d bytes to dvr...", tsBufferSize, rd);
+			write(*(int *)pvrfd, tempBuffer, rd);
+			eDebug("[MOVIEPLAYER] %d >>> writing %d bytes to pvr...", tsBufferSize, rd);
 		}
 	}
-	close(pvrfd);
-	eDebug("[MOVIEPLAYER] dvrThread stopping...");
-	pthread_exit(NULL);
+	pthread_cleanup_pop(1);
 }
 
-void *receiverThread(void *ctrl)
+void receiverThreadCleanup(void *fd)
+{
+	close(*(int *)fd);
+	eDebug("[MOVIEPLAYER] receiverThreadCleanup done.");
+}
+
+void *receiverThread(void *fd)
 {
 	char tempBuffer[BLOCKSIZE];
 	int len = 0;
-	eDebug("[MOVIEPLAYER] receiverThread starting: fd = %d", fd);
+//	bool paused = false;
+	int tsBufferSize = 0;
+//	eMoviePlayer *movieplayer = eMoviePlayer::getInstance();
+	eDebug("[MOVIEPLAYER] receiverThread starting: fd = %d", *(int *)fd);
+	pthread_cleanup_push(receiverThreadCleanup, (void *)fd);
 	nice(-1);
 	// fill buffer
-	do
+	while (true)
 	{
+		pthread_testcancel();
+		pthread_mutex_lock(&mutex);
+		tsBufferSize = tsBuffer.size();
+		pthread_mutex_unlock(&mutex);
 		if (tsBufferSize < INITIALBUFFER)
 		{
-			len = recv(fd, tempBuffer, BLOCKSIZE, 0);
+#if 0
+			if (paused)
+			{
+				eDebug("[MOVIEPLAYER] receiverThread: resume vlc...");
+				if (movieplayer->sendRequest2VLC("?control=pause") == 0)
+					paused = false;
+			}
+#endif				
+			len = recv(*(int *)fd, tempBuffer, BLOCKSIZE, 0);
 //			eDebug("[MOVIEPLAYER] %d <<< writing %d bytes to buffer...", tsBufferSize, len);
 			if (len > 0)
 			{
@@ -479,10 +565,20 @@ void *receiverThread(void *ctrl)
 				pthread_mutex_unlock(&mutex);
 			}
 		}
+#if 0
+		else
+		{
+			if (!paused)
+			{
+				eDebug("[MOVIEPLAYER] receiverThread: pause vlc...");
+				if (movieplayer->sendRequest2VLC("?control=pause") == 0)
+					paused = true;
+			}
+		}
+#endif
 	}
-	while (tsBufferSize > 0 && play == 1);
-	close(fd);
-	eDebug("[MOVIEPLAYER] receiverThread stopping...");
-	pthread_exit(NULL);
+	pthread_cleanup_pop(1);
 }
+
+
 

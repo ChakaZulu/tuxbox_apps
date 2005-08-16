@@ -29,7 +29,8 @@ int tcpOpen(eString serverIP, int serverPort)
 {
 	struct sockaddr_in ads;
 	socklen_t adsLen;
-	int fd;
+	int fd = -1;
+	int rc = -1;
 
 	bzero((char *)&ads, sizeof(ads));
 	ads.sin_family = AF_INET;
@@ -39,11 +40,27 @@ int tcpOpen(eString serverIP, int serverPort)
 
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) != -1)
 	{
-		if (connect(fd, (struct sockaddr *)&ads, adsLen) == -1)
+		if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
+			eDebug("[MOVIEPLAYER] tcpOpen: fcntl failed.");
+		int retry = 100;
+		while (retry > 0)
+		{
+			rc = connect(fd, (struct sockaddr *)&ads, adsLen);
+			if (rc < 0)
+			{
+				usleep(10000);
+				retry--;
+			}
+			else
+				retry = 0;
+		}
+		if (rc < 0)
 		{
 			close(fd);
 			fd = -1;
 		}
+		else
+			eDebug("[MOVIEPLAYER] tcpOpen: socket fd = %d", fd);
 	}
 
 	return fd;
@@ -51,24 +68,41 @@ int tcpOpen(eString serverIP, int serverPort)
 
 int tcpRequest(int fd, char *ioBuffer, int maxLength)
 {
-	int rd;
-	int rc;
+	int rc = -1;
+	char *p = ioBuffer;
+	char temp[512];
 
-	write(fd, ioBuffer, strlen(ioBuffer));
-	rd = read(fd, ioBuffer, maxLength);
-	if (rd >= 0)
+	int wr = write(fd, ioBuffer, strlen(ioBuffer));
+	eDebug("[MOVIEPLAYER] tcpRequest: fd = %d, wr = %d", fd, wr);
+	int retry = 100;
+	int rd = -1;
+	while (retry > 0)
 	{
-		ioBuffer[rd] = '\0';
-		rc = 0;
+		rd = read(fd, temp, sizeof(temp) - 1);
+		if (rd <= 0)
+		{
+			retry--;
+			usleep(10000);
+		}
+		else
+		{
+			int l = maxLength - (p - ioBuffer);
+			strncpy(p, temp, l);
+			if (l < rd)
+			{
+				p += l;
+				retry = 0;
+			}
+			else
+			{
+				p += rd;
+				retry = 100;
+			}
+			rc = 0;
+		}
 	}
-	else
-	{
-		ioBuffer[0] = '\0';
-		rc = -1;
-	}
-		
-	eDebug("[MOVIEPLAYER] tcpRequest: rd = %d, rc = %d, response = %s", rd, rc, ioBuffer);
-		
+	*p = '\0';
+	eDebug("[MOVIEPLAYER] tcpRequest: rd = %d, rc = %d, response = %s", p - ioBuffer, rc, ioBuffer);
 	return rc;
 }
 
@@ -133,4 +167,5 @@ void find_avpids(eIOBuffer *tsBuffer, int *vpid, int *apid, int *ac3)
 			}
 		}
 	}
+	eDebug("[MOVIEPLAYER] found apid: 0x%04X, vpid: 0x%04X, ac3: %d", *apid, *vpid, *ac3);
 }
