@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.186 2005/08/15 12:09:15 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.187 2005/08/16 21:59:56 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -134,10 +134,7 @@ static DMX dmxEIT(0x12, 256);
 static DMX dmxSDT(0x11, 256);
 
 // Houdini: added for Premiere Private EPG section for Sport/Direkt Portal
-const int PREMIERE_PRIVATE_PID1 = 0xb11;
-const int PREMIERE_PRIVATE_PID2 = 0xb12;
-static DMX* dmxPPT1 = NULL;
-static DMX* dmxPPT2 = NULL;
+static DMX dmxPPT(0xb11, 256);
 
 
 inline void lockServices(void)
@@ -173,15 +170,13 @@ inline void unlockEvents(void)
 inline int EITThreadsPause(void)
 {
 	return(	dmxEIT.pause() || 
-		dmxPPT1 && dmxPPT1->pause() || 
-		dmxPPT2 && dmxPPT2->pause());
+		dmxPPT.pause());
 }
 
 inline int EITThreadsUnPause(void)
 {
 	return(	dmxEIT.unpause() || 
-		dmxPPT1 && dmxPPT1->unpause() || 
-		dmxPPT2 && dmxPPT2->unpause());
+		dmxPPT.unpause());
 }
 
 static long long last_profile_call;
@@ -766,16 +761,14 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 	{
 		dmxEIT.request_pause();
 		dmxSDT.request_pause();
-		if (dmxPPT1) (dmxPPT1->request_pause());
-		if (dmxPPT2) (dmxPPT2->request_pause());
+		dmxPPT.request_pause();
 		scanning = 0;
 	}
 	else if (!pause && !scanning)
 	{
 		dmxSDT.request_unpause();
 		dmxEIT.request_unpause();
-		if (dmxPPT1) (dmxPPT1->request_unpause());
-		if (dmxPPT2) (dmxPPT2->request_unpause());
+		dmxPPT.request_unpause();
 		scanning = 1;
 	}
 
@@ -1088,7 +1081,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.186 2005/08/15 12:09:15 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.187 2005/08/16 21:59:56 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1428,6 +1421,11 @@ static time_t	messaging_last_requested = time(NULL);
 static bool	messaging_neutrino_sets_time = false;
 static bool 	messaging_WaitForServiceDesc = false;
 
+#include <zapit/client/zapitclient.h>
+CZapitClient	zapit;
+CZapitClient::responseGetPIDs current_PIDs;
+unsigned int privatePid=0;
+
 static void commandserviceChanged(int connfd, char *data, const unsigned dataLength)
 {
 
@@ -1514,8 +1512,14 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		// nur wenn lange genug her, oder wenn anderer Service :)
 		dmxEIT.change( 0 );
 		dmxSDT.change( 0 );
-		if (dmxPPT1) dmxPPT1->change( 0 );
-		if (dmxPPT2) dmxPPT2->change( 0 );
+		
+		zapit.getPIDS(current_PIDs);
+		if (privatePid != current_PIDs.PIDs.privatepid)
+		{
+			privatePid = current_PIDs.PIDs.privatepid;
+			dprintf("New PrivatePid %x\n", privatePid );
+		}
+		dmxPPT.change( 0 );
 	}
 	else
 		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
@@ -3445,27 +3449,25 @@ static void *eitThread(void *)
 // reads EPG-datas
 //---------------------------------------------------------------------
 
-static void *pptThread(void *p_pptpid)
+static void *pptThread(void *)
 {
 	struct SI_section_header header;
 	char *buf;
 	unsigned timeoutInMSeconds = 500;
 	bool sendToSleepNow = false;
-	DMX* dmxPPT;
 	unsigned short start_section = 0;
-	int pptpid=*(int*)p_pptpid;
-	
-	if (pptpid == PREMIERE_PRIVATE_PID1 ) 	dmxPPT = dmxPPT1; 
-	else					dmxPPT = dmxPPT2; 
-	dmxPPT->addfilter( 0xa0, (0xff - 0x01) );
+	unsigned short pptpid=0;
 
+//	dmxPPT.addfilter( 0xa0, (0xff - 0x01) );
+	dmxPPT.addfilter( 0xa0, (0xff));
 	try
 	{
-		dprintf("[%sThread 0x%x] pid %d start\n", "ppt", pptpid, getpid());
+		dprintf("[%sThread] pid %d start\n", "ppt", getpid());
 		int timeoutsDMX = 0;
 		time_t lastRestarted = time(NULL);
 		time_t lastData = time(NULL);
-		dmxPPT->start(); // -> unlock
+		
+		dmxPPT.start(); // -> unlock
 
 		for (;;)
 		{
@@ -3474,17 +3476,17 @@ static void *pptThread(void *p_pptpid)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
-				if ( (zeit > lastRestarted + 3) || (dmxPPT->real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
+				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
 				{
-					dmxPPT->stop(); // -> lock
-					dmxPPT->start(); // -> unlock
+					dmxPPT.stop(); // -> lock
+					dmxPPT.start(); // -> unlock
 					dprintf("[pptThread] dmxPPT restarted, cache NOT decreased (dt=%ld)\n", (int)zeit - lastRestarted);
 				}
 				else
 				{
 
 					// sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
-					dmxPPT->stop(); // -> lock
+					dmxPPT.stop(); // -> lock
 					/*                    lockEvents();
 					                    if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000)
 					                    {
@@ -3506,7 +3508,7 @@ static void *pptThread(void *p_pptpid)
 					                    }
 					                    unlockEvents();
 					*/
-					dmxPPT->start(); // -> unlock
+					dmxPPT.start(); // -> unlock
 //					dputs("[pptThread] dmxPPT restarted");
 
 				}
@@ -3531,49 +3533,63 @@ static void *pptThread(void *p_pptpid)
 					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
 					abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
 
-					dmxPPT->real_pause();
-					pthread_mutex_lock( &dmxPPT->start_stop_mutex );
-					dprintf("[pptThread %x] going to sleep...\n", pptpid);
+					dmxPPT.real_pause();
+					pthread_mutex_lock( &dmxPPT.start_stop_mutex );
+					dprintf("[pptThread] going to sleep...\n");
 
-					int rs = pthread_cond_timedwait( &dmxPPT->change_cond, &dmxPPT->start_stop_mutex, &abs_wait );
+					int rs = pthread_cond_timedwait( &dmxPPT.change_cond, &dmxPPT.start_stop_mutex, &abs_wait );
 
 					if (rs == ETIMEDOUT)
 					{
-						dprintf("dmxPPT %x: waking up again - looking for new events :)\n", pptpid);
-						pthread_mutex_unlock( &dmxPPT->start_stop_mutex );
-						dmxPPT->change( 0 ); // -> restart
+						dprintf("dmxPPT: waking up again - looking for new events :)\n");
+						pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
+						dmxPPT.change( 0 ); // -> restart
 #ifdef PAUSE_EQUALS_STOP
-						dmxPPT->real_unpause();
+						dmxPPT.real_unpause();
 #endif
 					}
 					else if (rs == 0)
 					{
-						dprintf("dmxPPT %x: waking up again - requested from .change()\n", pptpid);
-						pthread_mutex_unlock( &dmxPPT->start_stop_mutex );
+						dprintf("dmxPPT: waking up again - requested from .change()\n");
+						pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
 #ifdef PAUSE_EQUALS_STOP
-						dmxPPT->real_unpause();
+						dmxPPT.real_unpause();
 #endif
 					}
 					else
 					{
-						dprintf("dmxPPT %x:  waking up again - unknown reason?!\n", pptpid);
-						pthread_mutex_unlock( &dmxPPT->start_stop_mutex );
-						dmxPPT->real_unpause();
+						dprintf("dmxPPT: waking up again - unknown reason?!\n");
+						pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
+						dmxPPT.real_unpause();
 					}
 					// after sleeping get actual time
 					zeit = time(NULL);
 					start_section = 0; // fetch new? events
 					lastData = zeit; // restart timer
+					
 				}
 			}
 
-			buf = dmxPPT->getSection(timeoutInMSeconds, timeoutsDMX);
+			if (pptpid != privatePid)
+			{
+				if (0 == privatePid)
+				{
+					sendToSleepNow = true; // if there is no valid pid -> sleep
+					dprintf("dmxPPT: no valid pid\n");
+					continue;
+				}
+				pptpid = privatePid;
+				dprintf("Setting PrivatePid %x\n", pptpid);
+				dmxPPT.setPid(pptpid);
+			}
+
+			buf = dmxPPT.getSection(timeoutInMSeconds, timeoutsDMX);
 
 			if (buf == NULL) {
 				if (zeit > lastData + 5) 
 				{
 					sendToSleepNow = true; // if there are no data for 5 seconds -> sleep
-					dprintf("dmxPPT %x: no data for 5 seconds\n", pptpid);
+					dprintf("dmxPPT: no data for 5 seconds\n");
 				}
 				continue;
 			}
@@ -3585,7 +3601,7 @@ static void *pptThread(void *p_pptpid)
 			// copy the header
 			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
-			if ((header.current_next_indicator) && (!dmxPPT->pauseCounter ))
+			if ((header.current_next_indicator) && (!dmxPPT.pauseCounter ))
 			{
 				// Wir wollen nur aktuelle sections
 				SIsectionPPT ppt(SIsection(section_length + 3, buf));
@@ -3599,7 +3615,7 @@ static void *pptThread(void *p_pptpid)
 					else if (start_section == header.section_number) 
 					{
 						sendToSleepNow = true; // no more scanning
-						dprintf("[pptThread %x] got all sections\n", pptpid);
+						dprintf("[pptThread] got all sections\n");
 					}
 
 					zeit = time(NULL);
@@ -3784,10 +3800,10 @@ static void signalHandler(int signum)
 
 int main(int argc, char **argv)
 {
-	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT1, threadPPT2;
+	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.186 2005/08/15 12:09:15 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.187 2005/08/16 21:59:56 metallica Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
@@ -3869,23 +3885,11 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 
-		// premiere private epg -Thread1 starten
-		int ppt_pid1 = PREMIERE_PRIVATE_PID1;
-		dmxPPT1 = new DMX(ppt_pid1, 256);
-		rc = pthread_create(&threadPPT1, 0, pptThread, (void*)&ppt_pid1);
+		// premiere private epg -Thread starten
+		rc = pthread_create(&threadPPT, 0, pptThread, 0);
 
 		if (rc) {
-			fprintf(stderr, "[sectionsd] failed to create ppt-thread1 (rc=%d)\n", rc);
-			return EXIT_FAILURE;
-		}
-
-		// premiere private epg -Thread2 starten
-		int ppt_pid2 = PREMIERE_PRIVATE_PID2;
-		dmxPPT2 = new DMX(ppt_pid2, 256);
-		rc = pthread_create(&threadPPT2, 0, pptThread, (void*)&ppt_pid2);
-
-		if (rc) {
-			fprintf(stderr, "[sectionsd] failed to create ppt-thread2 (rc=%d)\n", rc);
+			fprintf(stderr, "[sectionsd] failed to create ppt-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
 
@@ -3912,9 +3916,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "[sectionsd] Caught exception in main-thread!\n");
 	}
 
-	delete dmxPPT1;
-	delete dmxPPT2;
-	
 	puts("[sectionsd] ended");
 
 	return EXIT_SUCCESS;

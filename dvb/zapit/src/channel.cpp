@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.18 2005/04/17 06:56:15 metallica Exp $
+ * $Id: channel.cpp,v 1.19 2005/08/16 21:59:54 metallica Exp $
  *
  * (C) 2002 by Steffen Hehn <mcclean@berlios.de>
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
@@ -99,6 +99,7 @@ void CZapitChannel::resetPids(void)
 	pmtPid = 0;
 	teletextPid = 0;
 	videoPid = 0;
+	privatePid = 0;
 
 	pidsFlag = false;
 }

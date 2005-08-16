@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.5 2005/08/15 12:09:15 metallica Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.6 2005/08/16 21:59:56 metallica Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -82,7 +82,7 @@ class DMX
 
 	char * getSection(const unsigned timeoutInMSeconds, int &timeouts);
 	// section with size < 3 + 5 are skipped !
+	int setPid(const unsigned short new_pid);
 };
 
 #endif /* __sectionsd__dmx_h__ */
-

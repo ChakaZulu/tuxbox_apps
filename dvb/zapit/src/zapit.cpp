@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.373 2005/07/02 13:44:33 barf Exp $
+ * $Id: zapit.cpp,v 1.374 2005/08/16 21:59:54 metallica Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1133,6 +1133,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			responseGetOtherPIDs.pcrpid = channel->getPcrPid();
 			responseGetOtherPIDs.pmtpid = channel->getPmtPid();
 			responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
+			responseGetOtherPIDs.privatepid = channel->getPrivatePid();
 			CBasicServer::send_data(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs));
 			sendAPIDs(connfd);
 		}
@@ -1801,7 +1802,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.373 2005/07/02 13:44:33 barf Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.374 2005/08/16 21:59:54 metallica Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

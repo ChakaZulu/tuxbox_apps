@@ -178,7 +178,8 @@ class CZapitClient:public CBasicClient
 		uint		vtxtpid;
 		uint		pcrpid;
 		uint		selected_apid;
-		uint            pmtpid;
+		uint		pmtpid;
+		uint		privatepid;
 	};
 
 	class CCurrentServiceInfo

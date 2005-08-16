@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.42 2005/03/14 19:58:48 mws Exp $
+ * $Id: pmt.cpp,v 1.43 2005/08/16 21:59:55 metallica Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -205,8 +205,35 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 		descramble = true;
 		break;
 
-	case 0x05:
+	case 0x05:// private section
+	{
+		int tmp=0;	
+		// Houdini: shameless stolen from enigma dvbservices.cpp
+		for (pos = 5; pos < ES_info_length + 5; pos += descriptor_length + 2) {
+			descriptor_tag = buffer[pos];
+			descriptor_length = buffer[pos + 1];
+			
+			switch (descriptor_tag) {
+				case 0x5F: //DESCR_PRIV_DATA_SPEC:
+					if ( ((buffer[pos + 2]<<24) | (buffer[pos + 3]<<16) | (buffer[pos + 4]<<8) | (buffer[pos + 5])) == 190 )
+						tmp |= 1;
+					break;
+				case 0x90:
+				{
+					if ( descriptor_length == 4 && !buffer[pos + 2] && !buffer[pos + 3] && buffer[pos + 4] == 0xFF && buffer[pos + 5] == 0xFF )
+						tmp |= 2;
+				}
+				//break;??
+				default:
+					break;
+			}
+		}
+		if ( tmp == 3 ) {
+			channel->setPrivatePid(esInfo->elementary_PID);
+			DBG("channel->setPrivatePid(%x)\n", esInfo->elementary_PID);
+		}
 		break;
+	}
 
 	case 0x06:
 		if ((isAc3) || (isDts))

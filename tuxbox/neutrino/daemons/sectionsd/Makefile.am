@@ -15,5 +15,6 @@ sdt_SOURCES = sdt.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp
 sectionsd_LDADD = \
 	@CONNECTION_LIBS@ \
 	@EVENTSERVER_LIBS@ \
+	@ZAPIT_LIBS@ \
 	-lpthread
 
