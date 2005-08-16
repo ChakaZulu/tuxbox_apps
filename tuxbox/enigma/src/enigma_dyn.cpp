@@ -1130,7 +1130,7 @@ static eString getZap(eString path)
 		else
 		{
 			result = readFile(TEMPLATE_DIR + "zap.tmp");
-			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS);
+			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS || zapSubMode == ZAPSUBMODEALLSERVICES);
 			int columns = (zapSubMode == ZAPSUBMODEALLSERVICES) ? 1 : 2;
 			result.strReplace("#ZAPDATA#", getZapContent(path, columns, true, sortList, false));
 			selsize = (screenWidth > 1024) ? 30 : 15;
