@@ -167,7 +167,7 @@
 		<br><br><br>
 		<input type="button" style="width: 100; height: 22" onClick="settings()" value="Settings">
 		<br><br>
-		<input name="stop" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="Terminate" onClick="terminateStreaming()">
+		#TERMINATEBUTTON#
 	</form>
 </body>
 </html> 

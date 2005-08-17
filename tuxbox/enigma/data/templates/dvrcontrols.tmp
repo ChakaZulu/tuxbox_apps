@@ -1,46 +1,31 @@
 		<tr>
 			<!-- dvr controls start -->
 			<script>
-				var streamingClientStatus = 0;
 				function video(key)
 				{
-					if (streamingClientStatus == 0)
+					if (body.zapMode)
 					{
-						if (body.zapMode)
+						if (body.zapMode == 3)
 						{
-							if (body.zapMode == 3)
+							var selChannel = body.document.channelselector.channel.selectedIndex;
+							var channel = "";
+							if (selChannel >= 0)
 							{
-								var selChannel = body.document.channelselector.channel.selectedIndex;
-								var channel = "";
-								if (selChannel >= 0)
-								{
-									currentChannel = selChannel;
-									channel = body.document.channelselector.channel.options[selChannel].value;
-									document.location = "/cgi-bin/videocontrol?command=" + key + "&sref=" + channel + "&curChannel=" + currentChannel;
-								}
+								currentChannel = selChannel;
+								channel = body.document.channelselector.channel.options[selChannel].value;
+								document.location = "/cgi-bin/videocontrol?command=" + key + "&sref=" + channel + "&curChannel=" + currentChannel;
 							}
-							else
-								document.location = "/cgi-bin/videocontrol?command=" + key;
 						}
 						else
 							document.location = "/cgi-bin/videocontrol?command=" + key;
 					}
 					else
-					{
-						streamingClient(key);
-					}
+						document.location = "/cgi-bin/videocontrol?command=" + key;
 				}
 				function setVideo(videoPosition)
 				{
 					updateVideoBar2(videoPosition);
 					document.location = "/setVideo?position=" + videoPosition;
-				}
-				function streamingClient(key)
-				{
-					if (key == "record")
-						alert("Recording is not supported while streaming.");
-					else
-						document.location = "/cgi-bin/movieplayer.m3u?command=" + key;
 				}
 			</script>
 			<td colspan="2">

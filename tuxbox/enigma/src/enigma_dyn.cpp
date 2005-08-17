@@ -270,61 +270,68 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString sReference = opt["sref"];
 	eServiceReference sref = string2ref(sReference);
 	eString command = opt["command"];
-	if (command == "rewind")
+	if (eMoviePlayer::getInstance()->getStatus())
 	{
-		eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
+		eMoviePlayer::getInstance()->control(command.c_str(), "");
 	}
 	else
-	if (command == "forward")
 	{
-		eZapMain::getInstance()->startSkip(eZapMain::skipForward);
-	}
-	else
-	if (command == "stop")
-	{
-		if (eZapMain::getInstance()->isRecording())
+		if (command == "rewind")
+		{
+			eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
+		}
+		else
+		if (command == "forward")
+		{
+			eZapMain::getInstance()->startSkip(eZapMain::skipForward);
+		}
+		else
+		if (command == "stop")
+		{
+			if (eZapMain::getInstance()->isRecording())
+			{
+				if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR)
+					eZapMain::getInstance()->recordDVR(0,0);
+				else
+				if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab)
+					eZapMain::getInstance()->stopNGrabRecord();
+			}
+			else
+				eZapMain::getInstance()->stop();
+		}
+		else
+		if (command == "pause")
+		{
+			eZapMain::getInstance()->pause();
+		}
+		else
+		if (command == "play")
+		{
+			eString curChannel = opt["curChannel"];
+			if (curChannel)
+			{
+				currentChannel = atoi(curChannel.c_str());
+				currentBouquet = 0;
+			}
+			if (sref)
+			{
+				if (eServiceInterface::getInstance()->service == sref)
+					eZapMain::getInstance()->play();
+				else
+					playService(sref);
+			}
+			else
+				eZapMain::getInstance()->play();
+		}
+		else
+		if (command == "record")
 		{
 			if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR)
-				eZapMain::getInstance()->recordDVR(0,0);
+				eZapMain::getInstance()->recordDVR(1,0);
 			else
 			if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab)
-				eZapMain::getInstance()->stopNGrabRecord();
+				eZapMain::getInstance()->startNGrabRecord();
 		}
-		else
-			eZapMain::getInstance()->stop();
-	}
-	else
-	if (command == "pause")
-	{
-		eZapMain::getInstance()->pause();
-	}
-	else
-	if (command == "play")
-	{
-		eString curChannel = opt["curChannel"];
-		if (curChannel)
-		{
-			currentChannel = atoi(curChannel.c_str());
-			currentBouquet = 0;
-		}
-		if (sref)
-		{
-			if (eServiceInterface::getInstance()->service == sref)
-				eZapMain::getInstance()->play();
-			else
-				playService(sref);
-		}
-		else
-			eZapMain::getInstance()->play();
-	}
-	else
-	if (command == "record")
-	{
-		if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR)
-			eZapMain::getInstance()->recordDVR(1,0);
-		else
-		if (eSystemInfo::getInstance()->getDefaultTimerType() == ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab)
-			eZapMain::getInstance()->startNGrabRecord();
 	}
 
 	return closeWindow(content, "", 500);
@@ -526,6 +533,16 @@ eString getCurService(void)
 	return filter_string(result);
 }
 
+eString getChanNavi()
+{
+	eString result;
+	result += button(100, "Audio", YELLOW, "javascript:selectAudio()", "#FFFFFF");
+	result += button(100, "Video", GREEN, "javascript:selectSubChannel()", "#FFFFFF");
+	result += button(100, "EPG", RED, "javascript:openEPG(\'\')", "#FFFFFF");
+	result += button(100, "Info", BLUE, "javascript:openChannelInfo()", "#FFFFFF");
+	result += button(100, "VLC", TOPNAVICOLOR, "javascript:vlc()", "#000000");
+	return result;
+}
 
 eString getTopNavi()
 {
@@ -1107,6 +1124,14 @@ static eString getZap(eString path)
 			tmp.strReplace("#OPTIONS#", eMountMgr::getInstance()->listMovieSources());
 #endif
 			result.strReplace("#MOVIESOURCES#", tmp);
+			tmp = button(100, "Delete", RED, "javascript:deleteMovie()", "#FFFFFF");
+			result.strReplace("#DELETEBUTTON#", tmp);
+			tmp = button(100, "Download", GREEN, "javascript:downloadMovie()", "#FFFFFF");
+			result.strReplace("#DOWNLOADBUTTON#", tmp);
+			tmp = button(100, "VLC", YELLOW, "javascript:streamMovie()", "#FFFFFF");
+			result.strReplace("#STREAMBUTTON#", tmp);
+			tmp = button(100, "Recover", BLUE, "javascript:recoverMovies()", "#FFFFFF");
+			result.strReplace("#RECOVERBUTTON#", tmp);
 		}
 		else
 #endif
@@ -1144,6 +1169,8 @@ static eString getZap(eString path)
 				result.strReplace("#WIDTH1#", "200");
 				result.strReplace("#WIDTH2#", "430");
 			}
+			tmp = button(100, "EPG-Overview", RED, "javascript:mepg()", "#FFFFFF");
+			result.strReplace("#MEPGBUTTON#", tmp);
 		}
 		result.strReplace("#SELSIZE#", eString().sprintf("%d", selsize));
 	}
@@ -2096,6 +2123,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 //		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
 			result.strReplace("#TOPBALK#", "topbalk4.png");
 		result.strReplace("#EMPTYCELL#", "&nbsp;");
+		result.strReplace("#CHANNAVI#", getChanNavi());
 		result.strReplace("#TOPNAVI#", getTopNavi());
 #ifndef DISABLE_FILE
 		result.strReplace("#DVRCONTROLS#", readFile(TEMPLATE_DIR + "dvrcontrols.tmp"));

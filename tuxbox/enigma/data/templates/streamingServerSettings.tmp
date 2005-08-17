@@ -17,7 +17,7 @@
 			}
 		</script>
 	</head>
-	<body id="streamingserver">
+	<body id="streamingserver" onUnload="parent.window.opener.location.reload(true)">
 		<form name="f1" action="/cgi-bin/setStreamingServerSettings">
 			<table border="0" cellpadding="0" cellspacing="10">
 			<tbody>

@@ -95,15 +95,11 @@
 		<table border="0" cellpadding="0" cellspacing="0">
 			<tr>
 				<td>
-					<input name="delete" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #000000;" value="Delete" onClick="javascript:deleteMovie()">
-					&nbsp;
-					<input name="download" type="button" style="width: 100px; height: 22px; background-color: #1FCB12; color: #000000;" value="Download" onClick="javascript:downloadMovie()">
-					&nbsp;
-					<input name="stream" type="button" style="width: 100px; height: 22px; background-color: #FFCC33; color: #000000;" value="VLC" onClick="javascript:streamMovie()">
+					#DELETEBUTTON##DOWNLOADBUTTON##STREAMBUTTON#
 				</td>
 			</tr>
 		</table>
 		<br>
-		<input name="recover" type="button" style="width: 100px; height: 22px; background-color: #12259E; color: #000000;" value="Recover" onClick="javascript:recoverMovies()">
+		#RECOVERBUTTON#
 	</body>
 </html>

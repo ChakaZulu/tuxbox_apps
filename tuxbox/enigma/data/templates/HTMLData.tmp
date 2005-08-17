@@ -3,8 +3,6 @@
 <script type="text/javascript">
 function update()
 {
-	if (parent.streamingClientStatus)
-		parent.streamingClientStatus = streamingClientStatus;
 	if (parent.headerUpdateEPGData)
 		parent.headerUpdateEPGData(serviceName, nowT, nowD, nowSt, nextT, nextD, nextSt);
 	if (parent.headerUpdateStatusBar)
