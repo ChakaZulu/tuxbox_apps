@@ -102,6 +102,8 @@ eString getStreamingServer()
 		drive = strdup("D");
 	result.strReplace("#DRIVE#", eString(drive));
 	free(drive);
+	eString tmp = button(100, "Terminate", RED, "javascript:terminateStreaming()", "#FFFFFF");
+	result.strReplace("#TERMINATEBUTTON#", tmp);
 	return result;
 }
 
@@ -125,7 +127,9 @@ eString movieplayerm3u(eString request, eString dirpath, eString opts, eHTTPConn
 	{
 		content->local_header["Content-Type"] = "video/mpegfile";
 		content->local_header["Cache-Control"] = "no-cache";
-		result = "dummy";
+		result = "#EXTM3U\n";
+		result += "#EXTVLCOPT:sout=" + moviePlayer.sout(mrl) + "\n";
+		result += mrl;
 	}
 	else
 	{

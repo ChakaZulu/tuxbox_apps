@@ -36,7 +36,6 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	eServiceReference suspendedServiceReference;
 	void gotMessage(const Message &message);
 	void thread();
-	eString sout(eString mrl);
 	int requestStream();
 	int playStream(eString mrl);
 public:
@@ -44,7 +43,9 @@ public:
 	~eMoviePlayer();
 	int sendRequest2VLC(eString command);
 	void control(const char *command, const char *filename);
+	void leaveStreamingClient();
 	int getStatus() { return status; }
+	eString sout(eString mrl);
 	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& transcodevideo, int& audiodatarate, int& transcodeaudio);
 	void writeStreamingServerSettings(eString ip, int port, eString dvddrive, int videodatarate, int resolution, int mpegcodec, int transcodevideo, int audiodatarate, int transcodeaudio);
 	static eMoviePlayer *getInstance() { return instance; }
