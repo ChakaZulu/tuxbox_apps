@@ -223,7 +223,7 @@ int eMoviePlayer::requestStream()
 	eDebug("[MOVIEPLAYER] requesting VLC stream...");
 	
 	int rc = -1;
-	int retry = 2;
+	int retry = 10;
 	while (--retry > 0 && rc != 0)
 	{
 		eDebug("[MOVIEPLAYER] retry: %d", retry);
