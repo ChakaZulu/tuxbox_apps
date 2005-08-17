@@ -540,6 +540,7 @@ eString getChanNavi()
 	result += button(100, "Video", GREEN, "javascript:selectSubChannel()", "#FFFFFF");
 	result += button(100, "EPG", RED, "javascript:openEPG(\'\')", "#FFFFFF");
 	result += button(100, "Info", BLUE, "javascript:openChannelInfo()", "#FFFFFF");
+	result += button(100, "Stream Info", TOPNAVICOLOR, "javascript:openSI()", "#000000");
 	result += button(100, "VLC", TOPNAVICOLOR, "javascript:vlc()", "#000000");
 	return result;
 }
