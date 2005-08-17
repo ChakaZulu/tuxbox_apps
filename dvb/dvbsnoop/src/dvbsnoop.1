@@ -366,6 +366,9 @@ Display EPG, 10 sections:
 Display sections tree (1 packet each) using private provider data:
    dvbsnoop \-s sec \-spiderpid \-privateprovider premiere.de  0x00
 
+Display sections tree (1 packet each) skipping "empty" pids:
+   dvbsnoop \-s sec \-spiderpid \-timeout 15000  0x00
+
 Display PAT transport stream (ts) and do subdecoding of sections and descriptors:
    dvbsnoop \-s ts \-pd 4 \-tssubdecode \-nph  0x00
 
