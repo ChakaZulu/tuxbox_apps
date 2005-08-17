@@ -1,12 +1,12 @@
 /*
-$Id: dmx_tspidscan.c,v 1.18 2004/10/12 20:37:47 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.19 2005/08/17 21:18:18 rasc Exp $
 
 
  DVBSNOOP
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Brute force scan all pids on a transponder
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.18 2004/10/12 20:37:47 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.19  2005/08/17 21:18:18  rasc
+improvements on pidscan
+
 Revision 1.18  2004/10/12 20:37:47  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -130,7 +133,10 @@ pidscan on transponder
 
 
 
-enum TS_TYPE { TS_NOPID, TS_SECTION, TS_PES, TS_UNKNOWN };
+enum TS_TYPE {		// TS Content
+		TS_NOPID, TS_SECTION, TS_PES, TS_ERROR,
+		TS_SCRAMBLED, TS_STUFFING, TS_UNKNOWN
+};
 
 typedef struct _TS_PID {
 	int	count;
@@ -141,7 +147,7 @@ typedef struct _TS_PID {
 
 static TS_PID *pidArray;
 static int    analyze_ts_pid (u_char *buf, int len);
-static TS_PID *ts_payload_check (u_char *b, TS_PID *tspid);
+static TS_PID *ts_payload_check (u_char *b, int pid, TS_PID *tspid);
 
 
 
@@ -341,11 +347,21 @@ int ts_pidscan (OPTION *opt)
 					out (3,"[PES: %s]",dvbstrPESstream_ID(p->id) );
 					break;
 
-				case TS_UNKNOWN:
-					out (3,"[unknown]");
+				case TS_STUFFING:
+					out (3,"[stuffing]");
 					break;
 
+				case TS_ERROR:
+					out (3,"[packet error]");
+					break;
+
+				case TS_SCRAMBLED:
+					out (3,"[scrambled]");
+					break;
+
+				case TS_UNKNOWN:
 				default:
+					out (3,"[unknown]");
 					break;
 			}
 			out_NL (1);
@@ -391,7 +407,7 @@ static int analyze_ts_pid (u_char *buf, int len)
 			(pidArray+pid)->count++;
 			if ((pidArray+pid)->type == TS_NOPID) {
 				found = 1;
-				ts_payload_check (buf+i, (pidArray+pid));
+				ts_payload_check (buf+i, pid, (pidArray+pid));
 			}
 
 		} // if syncbyte
@@ -406,7 +422,7 @@ static int analyze_ts_pid (u_char *buf, int len)
 
 
 
-static TS_PID *ts_payload_check (u_char *b, TS_PID *tspid)
+static TS_PID *ts_payload_check (u_char *b, int pid, TS_PID *tspid)
 {
 
 	int payload_start 	= getBits (b, 0, 9, 1);
@@ -416,6 +432,7 @@ static TS_PID *ts_payload_check (u_char *b, TS_PID *tspid)
 	  	int err_bit 		= getBits (b, 0, 8, 1);
 		int scrambled		= getBits (b, 0,24, 2);
 
+		tspid->type = TS_UNKNOWN;
 	  	if (err_bit == 0 && scrambled == 0) {
 	  		int adaptation_field_ctrl	= getBits (b, 0,26, 2);
 
@@ -435,9 +452,17 @@ static TS_PID *ts_payload_check (u_char *b, TS_PID *tspid)
 				}
 				return tspid;
 			}
+		} else if (err_bit) {
+			tspid->type = TS_ERROR;
+		} else if (scrambled) {
+			tspid->type = TS_SCRAMBLED;
 		}
-		tspid->type = TS_UNKNOWN;
+
 		return tspid;
+	}
+
+	if (pid == 0x1FFF) {
+		tspid->type = TS_STUFFING;
 	}
 
 
@@ -445,4 +470,11 @@ static TS_PID *ts_payload_check (u_char *b, TS_PID *tspid)
 }
 
 
+// $$$ TODO:   optional: Pidscan by -tsraw
+// read full transponder stream and do pid analyzing
+// currently I do not know if there is any reel improvment by this,
+// because budget card have a huge amount of filters.
 
+
+// $$$ TODO: problems on twinhan budget card (driver issue/suse9.2?)
+// to be checked

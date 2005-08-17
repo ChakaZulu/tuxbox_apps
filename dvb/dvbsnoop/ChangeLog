@@ -1,4 +1,6 @@
+ - Changed: -s pidscan improved
 
+1.4.0
  - New: option -adapter and -devnr as device shortcuts
  - New: option '-s ps'
  - New: Program Stream (PS) pack_header, system_header, ...
