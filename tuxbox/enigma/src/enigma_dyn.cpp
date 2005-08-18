@@ -1153,7 +1153,7 @@ static eString getZap(eString path)
 				result = "";
 		}
 		else
-#ifdef ENABLE_DYN_STREAMING
+#ifdef ENABLE_DYN_STREAM
 		if (zapMode == ZAPMODESTREAMING)
 		{
 			result = getStreamingServer();
