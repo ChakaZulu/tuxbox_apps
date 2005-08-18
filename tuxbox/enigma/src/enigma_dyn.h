@@ -1,10 +1,10 @@
 #ifndef __enigma_dyn_h
 #define __enigma_dyn_h
 
-#if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR
-#define WEBIFVERSION "4.7.2-Expert"
+#if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR && ENABLE_DYN_STREAM
+#define WEBIFVERSION "4.8.0-Expert"
 #else
-#define WEBIFVERSION "4.7.2"
+#define WEBIFVERSION "4.8.0"
 #endif
 
 #define ZAPMODETV 0

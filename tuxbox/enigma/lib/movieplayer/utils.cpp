@@ -1,3 +1,5 @@
+#ifdef ENABLE_DYN_STREAM
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -169,3 +171,4 @@ void find_avpids(eIOBuffer *tsBuffer, int *vpid, int *apid, int *ac3)
 	}
 	eDebug("[MOVIEPLAYER] found apid: 0x%04X, vpid: 0x%04X, ac3: %d", *apid, *vpid, *ac3);
 }
+#endif

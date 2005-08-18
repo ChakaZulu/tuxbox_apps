@@ -270,11 +270,13 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString sReference = opt["sref"];
 	eServiceReference sref = string2ref(sReference);
 	eString command = opt["command"];
+#ifdef ENABLE_DYN_STREAM
 	if (eMoviePlayer::getInstance()->getStatus())
 	{
 		eMoviePlayer::getInstance()->control(command.c_str(), "");
 	}
 	else
+#endif
 	{
 		if (command == "rewind")
 		{
@@ -596,8 +598,10 @@ eString getLeftNavi(eString mode)
 			result += "<br>";
 			result += button(110, "Root", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
 #endif
+#ifdef ENABLE_DYN_STREAM
 			result += "<br>";
 			result += button(110, "Stream", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODESTREAMING) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
+#endif
 			result += "<br><br>";
 			if (zap[zapMode][ZAPSUBMODEALLSERVICES])
 			{
@@ -2445,8 +2449,12 @@ eString getBoxStatus(eString format)
 	result.strReplace("#AGC#", eString().sprintf("%d", fe->SignalStrength() * 100 / 65535));
 	result.strReplace("#BER#", eString().sprintf("%u", fe->BER()));
 	
+#ifdef ENABLE_DYN_STREAM
 	// streaming client status
 	result.strReplace("#STREAMINGCLIENTSTATUS#", eString().sprintf("%d", eMoviePlayer::getInstance()->getStatus()));
+#else
+	result.strReplace("#STREAMINGCLIENTSTATUS#", "0");
+#endif
 
 	return result;
 }
@@ -2576,7 +2584,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapMiscInitializeDyn(dyn_resolver, lockWeb);
 	ezapTimerInitializeDyn(dyn_resolver, lockWeb);
 	ezapPDAInitializeDyn(dyn_resolver, lockWeb);
+#ifdef ENABLE_DYN_STREAM
 	ezapMoviePlayerInitializeDyn(dyn_resolver, lockWeb);
+#endif
 #ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
 #endif

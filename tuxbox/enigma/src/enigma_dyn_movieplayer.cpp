@@ -1,3 +1,5 @@
+#ifdef ENABLE_DYN_STREAM
+
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -148,3 +150,5 @@ void ezapMoviePlayerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockW
 	dyn_resolver->addDyn("GET", "/cgi-bin/streamingServerSettings", streamingServerSettings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServerSettings", setStreamingServerSettings, lockWeb);
 }
+#endif
+

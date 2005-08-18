@@ -1,3 +1,5 @@
+#ifdef ENABLE_DYN_STREAM
+
 #include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -292,6 +294,8 @@ int eMoviePlayer::playStream(eString mrl)
 		return -5;
 	}
 	
+	status = 1;
+	
 	// save current dvb service for later
 	eDVBServiceController *sapi;
 	if (sapi = eDVB::getInstance()->getServiceAPI())
@@ -335,7 +339,6 @@ void eMoviePlayer::gotMessage(const Message &msg )
 	{
 		case Message::start:
 		{
-			status = 1;
 			killThreads();
 			if (msg.filename)
 			{
@@ -568,6 +571,4 @@ void *receiverThread(void *fd)
 	pthread_exit(NULL);
 	pthread_cleanup_pop(1);
 }
-
-
-
+#endif
