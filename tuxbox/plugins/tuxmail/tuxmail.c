@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.36  2005/08/18 23:20:54  robspr1
+ * - add config GUI (DBOX key)
+ *
  * Revision 1.35  2005/07/03 18:39:17  robspr1
  * bugbix PIN code after database reload
  *
@@ -146,7 +149,39 @@ void ReadConf()
 
 		while(fgets(line_buffer, sizeof(line_buffer), fd_conf))
 		{
-			if((ptr = strstr(line_buffer, "ADMIN=")))
+			if((ptr = strstr(line_buffer, "STARTDELAY=")))
+			{
+				sscanf(ptr + 11, "%d", &startdelay);
+			}
+			else if((ptr = strstr(line_buffer, "INTERVALL=")))
+			{
+				sscanf(ptr + 10, "%d", &intervall);
+			}
+			else if((ptr = strstr(line_buffer, "LOGGING=")))
+			{
+				sscanf(ptr + 8, "%c", &logging);
+			}
+			else if((ptr = strstr(line_buffer, "LOGMODE=")))
+			{
+				sscanf(ptr + 8, "%c", &logmode);
+			}
+			else if((ptr = strstr(line_buffer, "SAVEDB=")))
+			{
+				sscanf(ptr + 7, "%c", &savedb);
+			}
+			else if((ptr = strstr(line_buffer, "AUDIO=")))
+			{
+				sscanf(ptr + 6, "%c", &audio);
+			}
+			else if((ptr = strstr(line_buffer, "VIDEO=")))
+			{
+				sscanf(ptr + 6, "%d", &video);
+			}
+			else if((ptr = strstr(line_buffer, "LCD=")))
+			{
+				sscanf(ptr + 4, "%c", &lcdc);
+			}
+			else if((ptr = strstr(line_buffer, "ADMIN=")))
 			{
 				sscanf(ptr + 6, "%c", &admin);
 			}
@@ -165,6 +200,30 @@ void ReadConf()
 			else if((ptr = strstr(line_buffer, "SKIN=")))
 			{
 				sscanf(ptr + 5, "%d", &skin);
+			}
+			else if((ptr = strstr(line_buffer, "SECURITY=")))
+			{
+				sscanf(ptr + 9, "%s", &security[0]);
+			}
+			else if((ptr = strstr(line_buffer, "WEBPORT=")))
+			{
+				sscanf(ptr + 8, "%d", &webport);
+			}
+			else if((ptr = strstr(line_buffer, "WEBUSER=")))
+			{
+				sscanf(ptr + 8, "%s", &webuser[0]);
+			}
+			else if((ptr = strstr(line_buffer, "WEBPASS=")))
+			{
+				sscanf(ptr + 8, "%s", &webpass[0]);
+			}
+			else if((ptr = strstr(line_buffer, "NAME")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", maildb[index-'0'].namebox);
+				}
 			}
 			else if((ptr = strstr(line_buffer, "SMTP")) && (*(ptr+5) == '='))
 			{
@@ -189,6 +248,54 @@ void ReadConf()
 				if((index >= '0') && (index <= '9'))
 				{
 					sscanf(ptr + 6, "%4s", maildb[index-'0'].code);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "POP3")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", maildb[index-'0'].pop3);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "USER")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", maildb[index-'0'].user);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "PASS")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", maildb[index-'0'].pass);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "AUTH")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%d", &maildb[index-'0'].auth);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "SUSER")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", maildb[index-'0'].suser);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "SPASS")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", maildb[index-'0'].spass);
 				}
 			}
 		}
@@ -217,6 +324,62 @@ void ReadConf()
 
 			skin = 1;
 		}
+}
+
+/******************************************************************************
+ * WriteConf
+ ******************************************************************************/
+
+int WriteConf()
+{
+	FILE *fd_conf;
+	int loop;
+
+	// open config
+
+	if(!(fd_conf = fopen(CFGPATH CFGFILE , "w")))
+	{
+		return 0;
+	}
+
+	fprintf(fd_conf, "STARTDELAY=%d\n", startdelay);
+	fprintf(fd_conf, "INTERVALL=%d\n\n", intervall);
+	fprintf(fd_conf, "LOGGING=%c\n", logging);
+	fprintf(fd_conf, "LOGMODE=%c\n\n", logmode);
+	fprintf(fd_conf, "SAVEDB=%c\n\n", savedb);
+	fprintf(fd_conf, "AUDIO=%c\n", audio);
+	fprintf(fd_conf, "VIDEO=%d\n\n", video);
+	fprintf(fd_conf, "LCD=%c\n", lcdc);
+	fprintf(fd_conf, "OSD=%c\n\n", osd);
+	fprintf(fd_conf, "SKIN=%d\n\n", skin);
+	fprintf(fd_conf, "ADMIN=%c\n\n", admin);
+	fprintf(fd_conf, "MAILCACHE=%d\n", mailcache);
+	fprintf(fd_conf, "MAILDIR=%s\n", maildir);
+	fprintf(fd_conf, "SECURITY=%s\n\n", security);
+	fprintf(fd_conf, "WEBPORT=%d\n", webport);
+	fprintf(fd_conf, "WEBUSER=%s\n", webuser);
+	fprintf(fd_conf, "WEBPASS=%s\n", webpass);
+
+	for(loop = 0; loop < 10; loop++)
+	{
+		fprintf(fd_conf, "\nNAME%d=%s\n", loop, maildb[loop].namebox);
+		fprintf(fd_conf, "POP3%d=%s\n", loop, maildb[loop].pop3);
+		fprintf(fd_conf, "USER%d=%s\n", loop, maildb[loop].user);
+		fprintf(fd_conf, "PASS%d=%s\n", loop, maildb[loop].pass);
+		fprintf(fd_conf, "SMTP%d=%s\n", loop, maildb[loop].smtp);
+		fprintf(fd_conf, "FROM%d=%s\n", loop, maildb[loop].from);
+		fprintf(fd_conf, "CODE%d=%s\n", loop, maildb[loop].code);
+		fprintf(fd_conf, "AUTH%d=%d\n", loop, maildb[loop].auth);
+		fprintf(fd_conf, "SUSER%d=%s\n", loop, maildb[loop].suser);
+		fprintf(fd_conf, "SPASS%d=%s\n", loop, maildb[loop].spass);
+		if(!maildb[loop + 1].user[0])
+		{
+			break;
+		}
+	}
+
+	fclose(fd_conf);
+	return 1;
 }
 
 /******************************************************************************
@@ -1482,9 +1645,11 @@ void ShowMailFile(char* filename, char* szAction)
 
 /******************************************************************************
  * PaintSmtpMailHeader
+ * nEditDirectStyle: 0: ABC, 1: Abc, 2: abc, 3: keyboard
+ * nConfigPage:      -1: no Configpage, 0-9: mailboxes, >=10: main-settings
  ******************************************************************************/
 
-void PaintSmtpMailHeader( int nEditDirectStyle )
+void PaintSmtpMailHeader( int nEditDirectStyle , int nConfigPage)
 {
 	RenderBox(0, 0, VIEWX, 3*FONTHEIGHT_SMALL+2*BORDERSIZE+2, FILL, SKIN0);
 	RenderBox(0, 3*FONTHEIGHT_SMALL+2*BORDERSIZE, VIEWX,VIEWY-INFOBOXY, FILL, SKIN1);
@@ -1494,10 +1659,180 @@ void PaintSmtpMailHeader( int nEditDirectStyle )
 	RenderBox(0, VIEWY-INFOBOXY, VIEWX,VIEWY, GRID, SKIN2);	
 	RenderBox(300, VIEWY-INFOBOXY, VIEWX,VIEWY, GRID, SKIN2);	
 
-	RenderString((osd == 'G') ? "Absender:" : "From:", 2*BORDERSIZE, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
-	RenderString((osd == 'G') ? "Empfänger:" : "To:", 2*BORDERSIZE, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
-	RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+	if( nConfigPage == -1 )
+	{
+		RenderString((osd == 'G') ? "Absender:" : "From:", 2*BORDERSIZE, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString((osd == 'G') ? "Empfänger:" : "To:", 2*BORDERSIZE, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+		RenderString((osd == 'G') ? "Betreff:" : "Subject:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+	}
+	else
+	{
+		char linebuffer[80];
 
+		RenderString((osd == 'G') ? "Konfiguration für TuxMail" : "Config for tuxmail", 2*BORDERSIZE, BORDERSIZE+FONTHEIGHT_BIG-2  , VIEWX-4*BORDERSIZE, CENTER, BIG, RED);
+		sprintf(linebuffer,"%d / 12",nConfigPage+1);
+		RenderString(linebuffer, 2*BORDERSIZE+550, BORDERSIZE+3*FONTHEIGHT_SMALL-2 , VIEWX-4*BORDERSIZE-500, LEFT, SMALL, WHITE);
+
+		if( nConfigPage < 10 )
+		{			
+			RenderString((osd == 'G') ? "POP3 / SMPT Einstellungen für die Mailbox:" : "POP3 / SMTP setting for mailbox:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-6  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, ORANGE);
+			sprintf(linebuffer,"%d",nConfigPage);
+			RenderString(linebuffer, 2*BORDERSIZE+380, BORDERSIZE+3*FONTHEIGHT_SMALL-6  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, WHITE);			
+				
+			int i;
+			for( i=2; i<12; i++)
+			{
+				switch( i )
+				{
+					case 2: 
+						strcpy(linebuffer, "NAME:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].namebox);
+						if( maildb[nConfigPage].user[0]=='\0' )
+						{
+							szInfo[i][0]='\0';
+						}
+						break; 
+					case 3: 
+						strcpy(linebuffer, "POP3:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].pop3);
+						break; 
+					case 4: 
+						strcpy(linebuffer, "USER:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].user);
+						break; 
+					case 5: 
+						strcpy(linebuffer, "PASS:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].pass);
+						break; 
+					case 6: 
+						strcpy(linebuffer, "SMTP:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].smtp);
+						break; 
+					case 7: 
+						strcpy(linebuffer, "FROM:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].from);
+						break; 
+					case 8: 
+						strcpy(linebuffer, "CODE:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].code);
+						break; 
+					case 9: 
+						strcpy(linebuffer, "AUTH:"); 
+						sprintf(szInfo[i],"%d",maildb[nConfigPage].auth);
+						break; 
+					case 10: 
+						strcpy(linebuffer, "SUSER:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].suser);
+						break; 
+					case 11: 
+						strcpy(linebuffer, "SPASS:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].spass);
+						break; 
+				}
+				RenderString( linebuffer, 2*BORDERSIZE, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+			}
+
+		}
+		else
+		{
+			RenderString((osd == 'G') ? "Grundeinstellungen:" : "main setting:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-6  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, ORANGE);
+			
+			if( nConfigPage == 10 )
+			{
+				int i;
+				for( i=2; i<12; i++)
+				{
+					switch( i )
+					{
+						case 2: 
+							strcpy(linebuffer, "STARTDELAY:"); 
+							sprintf(szInfo[i],"%d",startdelay);
+							break; 
+						case 3: 
+							strcpy(linebuffer, "INTERVALL:"); 
+							sprintf(szInfo[i],"%d",intervall);
+							break; 
+						case 4: 
+							strcpy(linebuffer, "LOGGING:"); 
+							sprintf(szInfo[i],"%c",logging);
+							break; 
+						case 5: 
+							strcpy(linebuffer, "LOGMODE:"); 
+							sprintf(szInfo[i],"%c",logmode);
+							break; 
+						case 6: 
+							strcpy(linebuffer, "SAVEDB:"); 
+							sprintf(szInfo[i],"%c",savedb);
+							break; 
+						case 7: 
+							strcpy(linebuffer, "AUDIO:"); 
+							sprintf(szInfo[i],"%c",audio);
+							break; 
+						case 8: 
+							strcpy(linebuffer, "VIDEO:"); 
+							sprintf(szInfo[i],"%d",video);
+							break; 
+						case 9: 
+							strcpy(linebuffer, "LCD:"); 
+							sprintf(szInfo[i],"%c",lcdc);
+							break; 
+						case 10: 
+							strcpy(linebuffer, "OSD:"); 
+							sprintf(szInfo[i],"%c",osd);
+							break; 
+						case 11: 
+							strcpy(linebuffer, "SKIN:"); 
+							sprintf(szInfo[i],"%d",skin);
+							break; 
+					}
+					RenderString( linebuffer, 2*BORDERSIZE, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+				}
+			}
+			else
+			{
+				int i;
+				for( i=2; i<12; i++)
+				{
+					switch( i )
+					{
+						case 2: 
+							strcpy(linebuffer, "ADMIN:"); 
+							sprintf(szInfo[i],"%c",admin);
+							break; 
+						case 3: 
+							strcpy(linebuffer, "MAILCACHE:"); 
+							sprintf(szInfo[i],"%d",mailcache);
+							break; 
+						case 4: 
+							strcpy(linebuffer, "MAILDIR:"); 
+							strcpy(szInfo[i],maildir);
+							break; 
+						case 5: 
+							strcpy(linebuffer, "SECURITY:"); 
+							strcpy(szInfo[i],security);
+							break; 
+						case 6: 
+							strcpy(linebuffer, "WEBPORT:"); 
+							sprintf(szInfo[i],"%d",webport);
+							break; 
+						case 7: 
+							strcpy(linebuffer, "WEBUSER:"); 
+							strcpy(szInfo[i],webuser);
+							break; 
+						case 8: 
+							strcpy(linebuffer, "WEBPASS:"); 
+							strcpy(szInfo[i],webpass);
+							break; 
+						default:
+							linebuffer[0]='\0';
+							szInfo[i][0]='\0';
+					}
+					RenderString( linebuffer, 2*BORDERSIZE, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
+				}
+			}
+		}
+	}
+	
 	int x, y;
 	for( x = 0; x < 3; x++ )
 	{
@@ -1522,66 +1857,207 @@ void PaintSmtpMailHeader( int nEditDirectStyle )
 }
 
 /******************************************************************************
+ * SaveConfigMailBox
+ ******************************************************************************/
+
+void SaveConfigMailBox(int nConfigPage)
+{
+	if( nConfigPage < 10 )
+	{				
+		int i;
+		for( i=2; i<12; i++)
+		{
+			switch( i )
+			{
+				case 2: 
+					strcpy(maildb[nConfigPage].namebox,szInfo[i]);
+					break; 
+				case 3: 
+					strcpy(maildb[nConfigPage].pop3,szInfo[i]);
+					break; 
+				case 4: 
+					strcpy(maildb[nConfigPage].user,szInfo[i]);
+					break; 
+				case 5: 
+					strcpy(maildb[nConfigPage].pass,szInfo[i]);
+					break; 
+				case 6: 
+					strcpy(maildb[nConfigPage].smtp,szInfo[i]);
+					break; 
+				case 7: 
+					strcpy(maildb[nConfigPage].from,szInfo[i]);
+					break; 
+				case 8: 
+					strcpy(maildb[nConfigPage].code,szInfo[i]);
+					break; 
+				case 9: 
+					maildb[nConfigPage].auth=szInfo[i][0]-'0';
+					break; 
+				case 10: 
+					strcpy(maildb[nConfigPage].suser,szInfo[i]);
+					break; 
+				case 11: 
+					strcpy(maildb[nConfigPage].spass,szInfo[i]);
+					break; 
+			}
+		}
+	}
+	else if( nConfigPage == 10 )
+	{
+		int i;
+		for( i=2; i<12; i++)
+		{
+			switch( i )
+			{
+				case 2: 
+					startdelay=atoi(szInfo[i]);
+					break; 
+				case 3: 
+					intervall=atoi(szInfo[i]);
+					break; 
+				case 4: 
+					logging=szInfo[i][0];
+					break; 
+				case 5: 
+					logmode=szInfo[i][0];
+					break; 
+				case 6: 
+					savedb=szInfo[i][0];
+					break; 
+				case 7: 
+					audio=szInfo[i][0];
+					break; 
+				case 8: 
+					video=atoi(szInfo[i]);
+					break; 
+				case 9: 
+					lcdc=szInfo[i][0];
+					break; 
+				case 10: 
+					osd=szInfo[i][0];
+					break; 
+				case 11: 
+					skin=szInfo[i][0]-'0';
+					break; 
+			}
+		}
+	}
+	else
+	{
+		int i;
+		for( i=2; i<9; i++)
+		{
+			switch( i )
+			{
+				case 2: 
+					admin=szInfo[i][0];
+					break; 
+				case 3: 
+					mailcache=atoi(szInfo[i]);
+					break; 
+				case 4: 
+					strcpy(maildir,szInfo[i]);
+					break; 
+				case 5: 
+					strcpy(security,szInfo[i]);
+					break; 
+				case 6: 
+					webport=atoi(szInfo[i]);
+					break; 
+				case 7: 
+					strcpy(webuser,szInfo[i]);
+					break; 
+				case 8: 
+					strcpy(webpass,szInfo[i]);
+					break; 
+			}
+		}
+	}
+	
+}
+/******************************************************************************
  * EditMailFile
+ * account: 0-9: mailbox-account, -1: config
  ******************************************************************************/
 
 void EditMailFile(char* filename, int account, int mailindex )
 {
-	#define MAXINFOLINES 14
-	#define MAXLINELEN	 80
 	char szSmtp[MAXLINELEN];
 	char szFrom[MAXLINELEN];
-	int nEditLine = 2;					// start to edit at body
-	int nEditPos = 0;						// start to edit at body
-	char nEditType = 0;					// type of edit: 0:letters, 1:T9, 2:direct
+	int nEditLine = 2;				// start to edit at body
+	int nEditPos = 0;				// start to edit at body
+	char nEditType = 0;				// type of edit: 0:letters, 1:T9, 2:direct
 	int nEditDirectStyle = 0;		// 0: ABC, 1: Abc, 2: abc, 3: keyboard
+	int nConfigPage = -1;			// -1: no Configpage, 0-9: mailboxes, >=10: main-settings
 	int  nTextFileIdx = 0;
 	int  nAddrFileIdx = 0;
 	char szTextFile[MAXLINELEN];
 	char TextFileValid = 0;
 	char linebuffer[MAXLINELEN];
-	char szInfo[MAXINFOLINES][MAXLINELEN];
 //	FILE* pipeT9 = NULL;
 //	char szT9Code[11];
 	char cChar;
 	unsigned short cLastKey=RC_UP;
 	
-	FILE* pipe;
-	pipe = fopen(filename,"w");
-
-	if(pipe == NULL)
+	FILE* pipe = NULL;
+	
+	if( account!= -1 )				// not editing the config
 	{
-		return;
-	}
+		pipe = fopen(filename,"w");
 
-	// prepare main strings
-	strcpy(szSmtp,maildb[account].smtp);
-	strcpy(szFrom,maildb[account].from);
-	strncpy(szInfo[0],maildb[account].mailinfo[mailindex].from,MAXLINELEN-1);
-	szInfo[0][MAXLINELEN-1]='\0';
-	strcpy(szInfo[1],"Re: ");
-	strncpy(&szInfo[1][4],maildb[account].mailinfo[mailindex].subj,MAXLINELEN-5);
-	szInfo[1][MAXLINELEN-1]='\0';
+		if(pipe == NULL)
+		{
+			return;
+		}
+	
+		// prepare main strings
+		strcpy(szSmtp,maildb[account].smtp);
+		strcpy(szFrom,maildb[account].from);
+		strncpy(szInfo[0],maildb[account].mailinfo[mailindex].from,MAXLINELEN-1);
+		szInfo[0][MAXLINELEN-1]='\0';
+		strcpy(szInfo[1],"Re: ");
+		strncpy(&szInfo[1][4],maildb[account].mailinfo[mailindex].subj,MAXLINELEN-5);
+		szInfo[1][MAXLINELEN-1]='\0';
+
+	}
+	else
+	{
+		nConfigPage = 0;
+		nEditType = 2;
+		int i;
+		for( i=0; i<MAXINFOLINES; i++)
+		{
+			szInfo[i][0]='\0';
+		}
+	}
 	
 	while(1)
 	{
-		PaintSmtpMailHeader(nEditDirectStyle);
-
-		RenderString( szFrom, 2*BORDERSIZE+100, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
-		
-
-		if( nEditType < 2 )
-		{
-			RenderString( szInfo[0], 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
-			RenderString( szInfo[1], 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
-		}
+		PaintSmtpMailHeader(nEditDirectStyle,nConfigPage);
 
 		int y = nEditType * 30;
 		RenderCircle( 310, VIEWY-INFOBOXY+10, 'D');
-		RenderString((osd == 'G') ? "Texte" : "Letters", 325, VIEWY-INFOBOXY+30  , 100, CENTER, (nEditType == 0) ? NORMAL : SMALL, (nEditType == 0) ? ORANGE : WHITE);
-		RenderCircle( 310, VIEWY-INFOBOXY+40, 'N');
-		RenderString((osd == 'G') ? "T9" : "T9", 325, VIEWY-INFOBOXY+60  , 100, CENTER,  (nEditType == 1) ? NORMAL : SMALL, (nEditType == 1) ? ORANGE : WHITE);
+		RenderCircle( 310, VIEWY-INFOBOXY+40, 'N');	
 		RenderCircle( 310, VIEWY-INFOBOXY+70, 'O');
+
+		if( nConfigPage == -1)
+		{
+			RenderString( szFrom, 2*BORDERSIZE+100, BORDERSIZE+FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
+			
+			if( nEditType < 2 )
+			{
+				RenderString( szInfo[0], 2*BORDERSIZE+100, BORDERSIZE+2*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
+				RenderString( szInfo[1], 2*BORDERSIZE+100, BORDERSIZE+3*FONTHEIGHT_SMALL-2  , VIEWX-4*BORDERSIZE-100, LEFT, SMALL, WHITE);
+			}
+			RenderString((osd == 'G') ? "Texte" : "Letters", 325, VIEWY-INFOBOXY+30  , 100, CENTER, (nEditType == 0) ? NORMAL : SMALL, (nEditType == 0) ? ORANGE : WHITE);
+			RenderString((osd == 'G') ? "T9" : "T9", 325, VIEWY-INFOBOXY+60  , 100, CENTER,  (nEditType == 1) ? NORMAL : SMALL, (nEditType == 1) ? ORANGE : WHITE);
+		}
+		else
+		{
+			RenderString((osd == 'G') ? "vor" : "next", 325, VIEWY-INFOBOXY+30  , 100, CENTER, SMALL,  WHITE);
+			RenderString((osd == 'G') ? "zurück" : "back", 325, VIEWY-INFOBOXY+60  , 100, CENTER,  SMALL, WHITE);
+		}
+		
 		RenderString(szDirectStyle[nEditDirectStyle], 325, VIEWY-INFOBOXY+90  , 100,  CENTER, (nEditType == 2) ? NORMAL : SMALL, (nEditType == 2) ? ORANGE : WHITE);
 		RenderBox(330, VIEWY-INFOBOXY+y+5  , 430, VIEWY-INFOBOXY+35+y, GRID, SKIN2);
 	
@@ -1731,6 +2207,11 @@ void EditMailFile(char* filename, int account, int mailindex )
 					xoff = 0;
 				}
 				
+				if( nConfigPage != -1 )
+				{
+					xoff = 100;
+				}
+								
 				if( nEditLine ==  i )
 				{
 					if( szInfo[i][0] == '\0' )
@@ -1908,7 +2389,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 				nEditPos = strlen(szInfo[nEditLine]);
 				rccode = -1;				
 			}
-			else if( rccode == RC_F9 )
+			else if(( rccode == RC_F9 ) && ( nConfigPage == -1))
 			{
 				if( nEditLine > 1)
 				{
@@ -1927,7 +2408,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 				}
 				rccode = -1;
 			}
-			else if( rccode == RC_F10 )
+			else if(( rccode == RC_F10 ) && ( nConfigPage == -1))
 			{
  				MessageBox((osd == 'G') ? "Löschen" : "clear",(osd == 'G') ? "Text löschen?" : "clear all?");
 				if(( rccode == RC_OK ) || ( rccode == RC_RET ))
@@ -2055,39 +2536,74 @@ void EditMailFile(char* filename, int account, int mailindex )
   				break;
   				
   			case RC_OK:
-  				MessageBox((osd == 'G') ? "Mail senden?" : "send mail?",(osd == 'G') ? "Mail jetzt senden?" : "send mail now?");
-					if(( rccode == RC_OK ) || ( rccode == RC_RET ))
-					{
+  				if( nConfigPage == -1)
+  				{	
+  					MessageBox((osd == 'G') ? "Mail senden?" : "send mail?",(osd == 'G') ? "Mail jetzt senden?" : "send mail now?");
+  				}
+  				else
+  				{
+  					MessageBox((osd == 'G') ? "Konfiguration" : "config",(osd == 'G') ? "jetzt sichern?" : "save now?");
+  				}
+				if(( rccode == RC_OK ) || ( rccode == RC_RET ))
+				{
   					cChar = '\0';
-					}
+				}
   				break;
   
   			case RC_HOME:	
   			case RC_DBOX:
-	 				MessageBox((osd == 'G') ? "Beenden" : "end",(osd == 'G') ? "Jetzt beenden?" : "end now?");
-					if(( rccode == RC_OK ) || ( rccode == RC_RET ))
-					{
-						rccode = RC_HOME;
+	 			MessageBox((osd == 'G') ? "Beenden" : "end",(osd == 'G') ? "Jetzt beenden?" : "end now?");
+				if(( rccode == RC_OK ) || ( rccode == RC_RET ))
+				{
+					rccode = RC_HOME;
   					cChar = '\0';
-					}
+				}
   				break;
   
   			case RC_RED:
-  				nEditType = 0;
-  				nEditPos = 0;
-  /*
-  				if( pipeT9 )
+  				if( nConfigPage == -1)
   				{
-  					fclose (pipeT9 );
-  					pipeT9 = NULL;
-  				}
+  					nEditType = 0;
+  					nEditPos = 0;
+  /*
+	  				if( pipeT9 )
+  					{
+  						fclose (pipeT9 );
+  						pipeT9 = NULL;
+  					}
   */
+  				}
+  				else
+  				{
+  					if(( nConfigPage >= 0 ) && ( nConfigPage<10))
+  					{
+  						SaveConfigMailBox(nConfigPage);
+  					}
+  					if( nConfigPage<11 )
+  					{
+  						nConfigPage++;
+  					}
+  				}
   				break;
   				
   			case RC_GREEN:
-  				nEditType = 1;
-  				nEditPos = 0;
-  //				pipeT9 = fopen(T9FILE,"r");
+  				if( nConfigPage == -1)
+  				{
+	  				nEditType = 1;
+  					nEditPos = 0;
+  //					pipeT9 = fopen(T9FILE,"r");
+  				}
+  				else
+  				{
+  					if(( nConfigPage >= 0 ) && ( nConfigPage<10))
+  					{
+  						SaveConfigMailBox(nConfigPage);
+  					}
+  					if( nConfigPage )
+  					{
+  						nConfigPage--;
+  					}
+  				}
   				break;
   				
   			case RC_YELLOW:
@@ -2278,7 +2794,10 @@ void EditMailFile(char* filename, int account, int mailindex )
   			case RC_DOWN:
   				if((nEditType == 2) && ( nEditLine < (MAXINFOLINES-1) ))
   				{
-  					nEditLine ++;
+					if(( nConfigPage == -1) || (nEditLine<12))
+					{
+						nEditLine ++;
+					}
   					int len=strlen( szInfo[nEditLine] );
   					if( len < (nEditPos + 1) )
   					{
@@ -2297,7 +2816,11 @@ void EditMailFile(char* filename, int account, int mailindex )
   			case RC_UP:
   				if((nEditType == 2) && ( nEditLine ))
   				{
-  					nEditLine --;
+					if(( nConfigPage == -1) || (nEditLine>2))
+					{
+						nEditLine --;
+					}
+					
   					int len=strlen( szInfo[nEditLine] );
   					if( len < (nEditPos + 1) )
   					{
@@ -2362,63 +2885,79 @@ void EditMailFile(char* filename, int account, int mailindex )
   					}
   				}
   				break;
-  		}
+	  		}
 		}
 		
 		if( cChar == '\0' )
 		{
 			break;
 		}
-				
+
+		if(( nConfigPage >= 0 ) && ( nConfigPage<10 ) && ( rccode != RC_RED ) && ( rccode != RC_GREEN ))
+		{
+			SaveConfigMailBox(nConfigPage);
+			if(( maildb[nConfigPage].namebox[0] ) && (maildb[nConfigPage].user[0] == '\0'))
+			{
+				maildb[nConfigPage].user[0] = ' ';
+			}
+		}
 	}
 	
 	if( rccode == RC_OK)
 	{
-		// check from:
-		char *ptr1, *ptr2;
-		if( (ptr1=strchr(maildb[account].from,'<')) )
+		if( account!= -1 )				// not editing the config
 		{
-			if( (ptr2=strchr(ptr1,'>')) )
+			// check from:
+			char *ptr1, *ptr2;
+			if( (ptr1=strchr(maildb[account].from,'<')) )
 			{
-				*ptr2 = '\0';
-				strcpy(szFrom,ptr1);	
-			}
-		}		
-		// check to: (and ptr1 to result)
-		if( (ptr1=strchr(szInfo[0],'<')) )
-		{
-			if( (ptr2=strchr(ptr1++,'>')) )
+				if( (ptr2=strchr(ptr1,'>')) )
+				{
+					*ptr2 = '\0';
+					strcpy(szFrom,ptr1);	
+				}
+			}		
+			// check to: (and ptr1 to result)
+			if( (ptr1=strchr(szInfo[0],'<')) )
 			{
-				*ptr2 = '\0';
+				if( (ptr2=strchr(ptr1++,'>')) )
+				{
+					*ptr2 = '\0';
+				}
+			}		
+			else
+			{
+				ptr1 = szInfo[0];
 			}
-		}		
+			fprintf(pipe,"%s\n",szSmtp);
+			fputs("tuxmaild\n",pipe);
+			fprintf(pipe,"<%s>\n",szFrom);
+			fprintf(pipe,"<%s>\n",ptr1);
+			fprintf(pipe,"From: %s\n",szFrom);
+			fprintf(pipe,"To: %s\n",szInfo[0]);
+			fprintf(pipe,"Subject: %s\n\n",szInfo[1]);
+/*
+			char szTmpOut[80];
+			sprintf(szTmpOut,"from:<%s> to:<%s>",szFrom,ptr1);
+			RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
+			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+*/		
+			int i,j;
+			j=MAXINFOLINES-1;
+			// skip empty lines
+			while( szInfo[j][0] == '\0' )
+			{
+				j--;
+			}
+			for( i=2; i<=j; i++)
+			{
+				fprintf(pipe,"%s\n",szInfo[i]);
+			}
+		}
 		else
 		{
-			ptr1 = szInfo[0];
-		}
-		fprintf(pipe,"%s\n",szSmtp);
-		fputs("tuxmaild\n",pipe);
-		fprintf(pipe,"<%s>\n",szFrom);
-		fprintf(pipe,"<%s>\n",ptr1);
-		fprintf(pipe,"From: %s\n",szFrom);
-		fprintf(pipe,"To: %s\n",szInfo[0]);
-		fprintf(pipe,"Subject: %s\n\n",szInfo[1]);
-/*
-		char szTmpOut[80];
-		sprintf(szTmpOut,"from:<%s> to:<%s>",szFrom,ptr1);
-		RenderString( szTmpOut, 2*BORDERSIZE, BORDERSIZE+(14)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, WHITE);
-		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
-*/		
-		int i,j;
-		j=MAXINFOLINES-1;
-		// skip empty lines
-		while( szInfo[j][0] == '\0' )
-		{
-			j--;
-		}
-		for( i=2; i<=j; i++)
-		{
-			fprintf(pipe,"%s\n",szInfo[i]);
+			// save config
+			WriteConf();
 		}
 	}
 	else
@@ -2431,7 +2970,16 @@ void EditMailFile(char* filename, int account, int mailindex )
 		fclose (pipeT9 );
 	}
 */
-	fclose(pipe);
+	if( pipe )
+	{
+		fclose(pipe);
+	}
+
+	if( account == -1)
+	{
+		SaveAndReloadDB(0);
+	}
+
 }
 
 /******************************************************************************
@@ -3135,7 +3683,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.35 $";
+	char cvs_revision[] = "$Revision: 1.36 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -3733,9 +4281,11 @@ void plugin_exec(PluginParam *par)
 
 					break;
 
-//				case RC_DBOX:
+				case RC_DBOX:
 
-//					break;
+					EditMailFile(NULL, -1, 0);
+
+					break;
 
 				default:
 

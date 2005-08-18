@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.28  2005/08/18 23:21:05  robspr1
+ * - add config GUI (DBOX key)
+ *
  * Revision 1.27  2005/06/19 17:21:50  robspr1
  * - dreambox tastatur now working
  *
@@ -328,6 +331,9 @@ int rcaltgrtable[] =
 #define KEYBOX_HEIGHT 25
 #define KEYBOX_WIDTH  90
 
+#define MAXINFOLINES 14
+#define MAXLINELEN	 80
+
 #define KEYBOX_KEYS 12
 
 char *szKeyBoxInfo[KEYBOX_KEYS] = {
@@ -381,6 +387,7 @@ char *szDirectStyle[4] = {
 
 void ShowMessage(int message);
 int CheckPIN(int Account);
+void SaveAndReloadDB(int iSave);
 
 // freetype stuff
 
@@ -409,6 +416,18 @@ char versioninfo_p[12], versioninfo_d[12] = "?.??";
 char admin = 'Y';
 char osd = 'G';
 int skin = 1;
+int startdelay = 30;
+int intervall = 15;
+char logging = 'Y';
+char logmode = 'S';
+char audio = 'Y';
+char savedb = 'Y';
+char lcdc = 'Y';
+int video=1;
+int webport=80;
+char webuser[32] = "";
+char webpass[32] = "";
+char security[80] = "";
 
 // mail database
 
@@ -430,11 +449,18 @@ struct
 	char nr[2];	/* 0...9 */
 	char time[6];	/* 00:00 */
 	char name[32];
+	char namebox[32];
 	char status[8];	/* 000/000 */
 	int pincount;
+	char pop3[64];
+	char user[64];
+	char pass[64];
 	char smtp[64];
 	char from[64];
 	char code[5];
+	int  auth;
+	char suser[64];
+	char spass[64];
 	struct mi mailinfo[MAXMAIL];
 
 }maildb[10];
@@ -477,6 +503,7 @@ char mailfile;
 char mailsend;
 char maildir[256];
 int mailcache = 0;
+char szInfo[MAXINFOLINES][MAXLINELEN];
 
 #if HAVE_DVB_API_VERSION == 3
 
@@ -487,7 +514,7 @@ struct input_event ev;
 unsigned short rccode;
 unsigned char kbcode;
 int sim_key = 0;
-			char tch[100];
+char tch[100];
 
 
 char scroll_up[] =
