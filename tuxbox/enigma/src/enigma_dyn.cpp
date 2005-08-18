@@ -1153,11 +1153,13 @@ static eString getZap(eString path)
 				result = "";
 		}
 		else
+#ifdef ENABLE_DYN_STREAMING
 		if (zapMode == ZAPMODESTREAMING)
 		{
 			result = getStreamingServer();
 		}
 		else
+#endif
 		{
 			result = readFile(TEMPLATE_DIR + "zap.tmp");
 			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS || zapSubMode == ZAPSUBMODEALLSERVICES);
