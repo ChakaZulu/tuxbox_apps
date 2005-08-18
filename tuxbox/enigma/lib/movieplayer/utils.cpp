@@ -27,7 +27,7 @@
 #define TS_SIZE          188
 #define IN_SIZE		 65424
 
-int tcpOpen(eString serverIP, int serverPort)
+int tcpOpen(eString serverIP, int serverPort, int i)
 {
 	struct sockaddr_in ads;
 	socklen_t adsLen;
@@ -44,7 +44,7 @@ int tcpOpen(eString serverIP, int serverPort)
 	{
 		if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
 			eDebug("[MOVIEPLAYER] tcpOpen: fcntl failed.");
-		int retry = 100;
+		int retry = 100 * i;
 		while (retry > 0)
 		{
 			rc = connect(fd, (struct sockaddr *)&ads, adsLen);
@@ -71,40 +71,31 @@ int tcpOpen(eString serverIP, int serverPort)
 int tcpRequest(int fd, char *ioBuffer, int maxLength)
 {
 	int rc = -1;
-	char *p = ioBuffer;
-	char temp[512];
+	int rd = -1;
+	fd_set rfds;
+	struct timeval tv;
 
 	int wr = write(fd, ioBuffer, strlen(ioBuffer));
 	eDebug("[MOVIEPLAYER] tcpRequest: fd = %d, wr = %d", fd, wr);
-	int retry = 100;
-	int rd = -1;
-	while (retry > 0)
+	
+	tv.tv_sec = 2;
+	tv.tv_usec = 0;
+	FD_ZERO(&rfds);
+	FD_SET(fd, &rfds);
+	rc = select(fd + 1, &rfds, NULL, NULL, &tv);
+	if (rc)
 	{
-		rd = read(fd, temp, sizeof(temp) - 1);
-		if (rd <= 0)
-		{
-			retry--;
-			usleep(10000);
-		}
-		else
-		{
-			int l = maxLength - (p - ioBuffer);
-			strncpy(p, temp, l);
-			if (l < rd)
-			{
-				p += l;
-				retry = 0;
-			}
-			else
-			{
-				p += rd;
-				retry = 100;
-			}
-			rc = 0;
-		}
+		rd = read(fd, ioBuffer, maxLength);
+		ioBuffer[rd] = '\0';
+		rc = 0;
 	}
-	*p = '\0';
-	eDebug("[MOVIEPLAYER] tcpRequest: rd = %d, rc = %d, response = %s", p - ioBuffer, rc, ioBuffer);
+	else
+	{
+		ioBuffer[0] = '\0';
+		rc = -1;
+	}
+
+	eDebug("[MOVIEPLAYER] tcpRequest: rd = %d, rc = %d, response = %s", rd, rc, ioBuffer);
 	return rc;
 }
 
