@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.38  2005/08/19 19:00:54  robspr1
+ * - add pin protection for config GUI
+ *
  * Revision 1.37  2005/08/19 09:00:04  robspr1
  * - add 3rd skin, bugfix config GUI
  *
@@ -184,6 +187,10 @@ void ReadConf()
 			{
 				sscanf(ptr + 4, "%c", &lcdc);
 			}
+			else if((ptr = strstr(line_buffer, "CONFIGCODE=")))
+			{
+				sscanf(ptr + 11, "%s", &configcode[0]);
+			}
 			else if((ptr = strstr(line_buffer, "ADMIN=")))
 			{
 				sscanf(ptr + 6, "%c", &admin);
@@ -355,6 +362,7 @@ int WriteConf()
 	fprintf(fd_conf, "LCD=%c\n", lcdc);
 	fprintf(fd_conf, "OSD=%c\n\n", osd);
 	fprintf(fd_conf, "SKIN=%d\n\n", skin);
+	fprintf(fd_conf, "CONFIGCODE=%s\n", configcode);
 	fprintf(fd_conf, "ADMIN=%c\n\n", admin);
 	fprintf(fd_conf, "MAILCACHE=%d\n", mailcache);
 	fprintf(fd_conf, "MAILDIR=%s\n", maildir);
@@ -1826,6 +1834,10 @@ void PaintSmtpMailHeader( int nEditDirectStyle , int nConfigPage)
 							strcpy(linebuffer, "WEBPASS:"); 
 							strcpy(szInfo[i],webpass);
 							break; 
+						case 9: 
+							strcpy(linebuffer, "CONFIGCODE:"); 
+							strcpy(szInfo[i],configcode);
+							break; 
 						default:
 							linebuffer[0]='\0';
 							szInfo[i][0]='\0';
@@ -1873,74 +1885,188 @@ void SaveConfigMailBox(int nConfigPage)
 			switch( i )
 			{
 				case 2: 
-					strcpy(maildb[nConfigPage].namebox,szInfo[i]);
+					strncpy(maildb[nConfigPage].namebox,szInfo[i],31);
 					break; 
 				case 3: 
-					strcpy(maildb[nConfigPage].pop3,szInfo[i]);
+					strncpy(maildb[nConfigPage].pop3,szInfo[i],63);
 					break; 
 				case 4: 
-					strcpy(maildb[nConfigPage].user,szInfo[i]);
+					strncpy(maildb[nConfigPage].user,szInfo[i],63);
 					break; 
 				case 5: 
-					strcpy(maildb[nConfigPage].pass,szInfo[i]);
+					strncpy(maildb[nConfigPage].pass,szInfo[i],63);
 					break; 
 				case 6: 
-					strcpy(maildb[nConfigPage].smtp,szInfo[i]);
+					strncpy(maildb[nConfigPage].smtp,szInfo[i],63);
 					break; 
 				case 7: 
-					strcpy(maildb[nConfigPage].from,szInfo[i]);
+					strncpy(maildb[nConfigPage].from,szInfo[i],63);
 					break; 
 				case 8: 
-					strcpy(maildb[nConfigPage].code,szInfo[i]);
+					strncpy(maildb[nConfigPage].code,szInfo[i],4);
 					break; 
 				case 9: 
 					maildb[nConfigPage].auth=atoi(szInfo[i]);
+					if( maildb[nConfigPage].auth < 0 )
+					{
+						maildb[nConfigPage].auth=0;
+					}
+					if( maildb[nConfigPage].auth > 2 )
+					{
+						maildb[nConfigPage].auth=2;
+					}
 					break; 
 				case 10: 
-					strcpy(maildb[nConfigPage].suser,szInfo[i]);
+					strncpy(maildb[nConfigPage].suser,szInfo[i],63);
 					break; 
 				case 11: 
-					strcpy(maildb[nConfigPage].spass,szInfo[i]);
+					strncpy(maildb[nConfigPage].spass,szInfo[i],63);
 					break; 
 			}
 		}
 	}
 	else if( nConfigPage == 10 )
 	{
-		int i;
+		int i, iTest;
 		for( i=2; i<12; i++)
 		{
 			switch( i )
 			{
 				case 2: 
-					startdelay=atoi(szInfo[i]);
+					iTest = atoi(szInfo[i]);
+					if( startdelay == iTest )
+					{
+						if( startdelay < 15 )
+						{ 
+							startdelay=15;
+						}
+						if( startdelay > 60 )
+						{ 
+							startdelay=60;
+						}
+					}
+					else
+					{
+						startdelay = iTest;
+					}
 					break; 
 				case 3: 
-					intervall=atoi(szInfo[i]);
+					iTest = atoi(szInfo[i]);
+					if( intervall == iTest )
+					{
+						if( intervall < 5 )
+						{ 
+							intervall=5;
+						}
+						if( intervall > 60 )
+						{ 
+							intervall=60;
+						}
+					}
+					else
+					{
+						intervall = iTest;
+					}
 					break; 
 				case 4: 
-					logging=szInfo[i][0];
+					if( logging != szInfo[i][0] )
+					{
+						if( logging == 'Y')
+						{
+							logging = 'N';
+						}
+						else
+						{
+							logging = 'Y';
+						}
+					}
 					break; 
 				case 5: 
-					logmode=szInfo[i][0];
+					if( logmode != szInfo[i][0] )
+					{
+						if( logmode == 'S')
+						{
+							logmode = 'A';
+						}
+						else
+						{
+							logmode = 'S';
+						}
+					}
 					break; 
 				case 6: 
-					savedb=szInfo[i][0];
+					if( savedb != szInfo[i][0] )
+					{
+						if( savedb == 'Y')
+						{
+							savedb = 'N';
+						}
+						else
+						{
+							savedb = 'Y';
+						}
+					}
 					break; 
 				case 7: 
-					audio=szInfo[i][0];
+					if( audio != szInfo[i][0] )
+					{
+						if( audio == 'Y')
+						{
+							audio = 'N';
+						}
+						else
+						{
+							audio = 'Y';
+						}
+					}
 					break; 
 				case 8: 
 					video=atoi(szInfo[i]);
+					if( video < 1 )
+					{
+						video = 1;
+					}
+					if( video > 5 )
+					{
+						video = 5;
+					}
 					break; 
 				case 9: 
-					lcdc=szInfo[i][0];
+					if( lcdc != szInfo[i][0] )
+					{
+						if( lcdc == 'Y')
+						{
+							lcdc = 'N';
+						}
+						else
+						{
+							lcdc = 'Y';
+						}
+					}
 					break; 
 				case 10: 
-					osd=szInfo[i][0];
+					if( osd != szInfo[i][0] )
+					{
+						if( osd == 'G')
+						{
+							osd = 'E';
+						}
+						else
+						{
+							osd = 'G';
+						}
+					}
 					break; 
 				case 11: 
 					skin=atoi(szInfo[i]);
+					if( skin < 1 )
+					{
+						skin = 1;
+					}
+					if( skin > 3 )
+					{
+						skin = 3;
+					}
 					break; 
 			}
 		}
@@ -1948,31 +2074,53 @@ void SaveConfigMailBox(int nConfigPage)
 	else
 	{
 		int i;
-		for( i=2; i<9; i++)
+		for( i=2; i<10; i++)
 		{
 			switch( i )
 			{
 				case 2: 
-					admin=szInfo[i][0];
+					if( admin != szInfo[i][0] )
+					{
+						if( admin == 'Y')
+						{
+							admin = 'N';
+						}
+						else
+						{
+							admin = 'Y';
+						}
+					}
 					break; 
 				case 3: 
 					mailcache=atoi(szInfo[i]);
+					if( mailcache < 0 )
+					{
+						mailcache = 0;
+					}
 					break; 
 				case 4: 
-					strcpy(maildir,szInfo[i]);
+					strncpy(maildir,szInfo[i],255);
 					break; 
 				case 5: 
-					strcpy(security,szInfo[i]);
+					strncpy(security,szInfo[i],79);
 					break; 
 				case 6: 
 					webport=atoi(szInfo[i]);
+					if( webport < 0 )
+					{
+						webport = 80;
+					}
 					break; 
 				case 7: 
-					strcpy(webuser,szInfo[i]);
+					strncpy(webuser,szInfo[i],31);
 					break; 
 				case 8: 
-					strcpy(webpass,szInfo[i]);
+					strncpy(webpass,szInfo[i],31);
 					break; 
+				case 9: 
+					strncpy(configcode,szInfo[i],4);
+					break; 
+
 			}
 		}
 	}
@@ -2893,9 +3041,12 @@ void EditMailFile(char* filename, int account, int mailindex )
 		if(( nConfigPage != -1 ) && ( rccode != RC_RED ) && ( rccode != RC_GREEN ))
 		{
 			SaveConfigMailBox(nConfigPage);
-			if(( maildb[nConfigPage].namebox[0] ) && (maildb[nConfigPage].user[0] == '\0'))
+			if( nConfigPage<10 )
 			{
-				maildb[nConfigPage].user[0] = ' ';
+				if(( maildb[nConfigPage].namebox[0] ) && (maildb[nConfigPage].user[0] == '\0'))
+				{
+					maildb[nConfigPage].user[0] = ' ';
+				}
 			}
 		}
 	}
@@ -3470,17 +3621,30 @@ int CheckPIN(int Account)
 	int skip;
 	int count = 0;
 	char code[4];
+	char* pcode;
+	int*  ppincount;
+	
+	if( Account == -1 )
+	{
+		pcode = &configcode[0];
+		ppincount = &configpincount;
+	}
+	else
+	{
+		pcode = &maildb[Account].code[0];
+		ppincount = &maildb[Account].pincount;
+	}
 
 	// pin active?
-
-		if(!maildb[Account].code[0])
+	
+		if(*ppincount == -1 || pcode[0] == 0)
 		{
 			return 1;
 		}
 
 	// account locked?
 
-		if(maildb[Account].pincount == 3)
+		if(*ppincount == 3)
 		{
 			RenderBox(155, 178, 464, 220, FILL, SKIN0);
 			RenderBox(155, 220, 464, 327, FILL, SKIN1);
@@ -3488,8 +3652,15 @@ int CheckPIN(int Account)
 			RenderBox(155, 220, 464, 327, GRID, SKIN2);
 
 			RenderString((osd == 'G') ? "Sicherheitsabfrage" : "Security Check", 157, 213, 306, CENTER, BIG, ORANGE);
-			RenderString((osd == 'G') ? "Konto gesperrt!" : "Account locked!", 157, 265, 306, CENTER, BIG, WHITE);
-			RenderString((osd == 'G') ? "Bitte anderes Konto wählen..." : "Try another Account...", 157, 305, 306, CENTER, SMALL, WHITE);
+			if( Account == -1 )
+			{
+				RenderString((osd == 'G') ? "Konfiguration gesperrt!" : "config locked!", 157, 265, 306, CENTER, BIG, WHITE);
+			}
+			else
+			{
+				RenderString((osd == 'G') ? "Konto gesperrt!" : "Account locked!", 157, 265, 306, CENTER, BIG, WHITE);
+				RenderString((osd == 'G') ? "Bitte anderes Konto wählen..." : "Try another Account...", 157, 305, 306, CENTER, SMALL, WHITE);
+			}
 
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 
@@ -3595,9 +3766,9 @@ int CheckPIN(int Account)
 
 		if(count == 4)
 		{
-			if(strncmp(code, maildb[Account].code, 4))
+			if(strncmp(code, pcode, 4))
 			{
-				maildb[Account].pincount++;
+				(*ppincount)++;
 
 				RenderBox(157, 222, 462, 325, FILL, SKIN1);
 				RenderString((osd == 'G') ? "Falsche PIN!" : "Wrong PIN!", 157, 265, 306, CENTER, BIG, WHITE);
@@ -3608,7 +3779,7 @@ int CheckPIN(int Account)
 			}
 			else
 			{
-				maildb[Account].code[0] = 0;
+				*ppincount = -1;
 				result = 1;
 			}
 		}
@@ -3617,7 +3788,10 @@ int CheckPIN(int Account)
 		{
 			RenderBox(157, 222, 462, 325, FILL, SKIN1);
 			RenderString((osd == 'G') ? "Zugriff verweigert!" : "Access denied!", 157, 265, 306, CENTER, BIG, WHITE);
-			RenderString((osd == 'G') ? "Bitte anderes Konto wählen..." : "Try another Account...", 157, 305, 306, CENTER, SMALL, WHITE);
+			if( Account != -1 )
+			{
+				RenderString((osd == 'G') ? "Bitte anderes Konto wählen..." : "Try another Account...", 157, 305, 306, CENTER, SMALL, WHITE);
+			}
 
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 		}
@@ -3680,7 +3854,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.37 $";
+	char cvs_revision[] = "$Revision: 1.38 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -4280,7 +4454,10 @@ void plugin_exec(PluginParam *par)
 
 				case RC_DBOX:
 
-					EditMailFile(NULL, -1, 0);
+					if( CheckPIN(-1) )
+					{
+						EditMailFile(NULL, -1, 0);
+					}
 
 					break;
 

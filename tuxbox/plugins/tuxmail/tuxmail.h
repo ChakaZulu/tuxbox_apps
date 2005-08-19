@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.30  2005/08/19 19:00:35  robspr1
+ * - add pin protection for config GUI
+ *
  * Revision 1.29  2005/08/19 09:00:23  robspr1
  * - add 3rd skin, bugfix config GUI
  *
@@ -431,6 +434,8 @@ int webport=80;
 char webuser[32] = "";
 char webpass[32] = "";
 char security[80] = "";
+char configcode[5] = "";
+int  configpincount = 0;
 
 // mail database
 
