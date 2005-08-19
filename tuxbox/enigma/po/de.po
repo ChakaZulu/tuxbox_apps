@@ -1,18 +1,14 @@
 # translation of de.po to 
-# translation of de.po to
-# created by Enigma Language Editor 0.2
-# 			 (c) 10/2002 ole <olest@gmx.net>
-# *************************************
-# *	 use/modify on your own risk!		*
-# *************************************
-# Michael Setzer <michael.setzer@layline.de>, 2005.
-#
+
+# $Id: de.po,v 1.56 2005/08/19 10:31:29 saruman Exp $
+# $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
+
 msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-08-05 17:08+0200\n"
-"PO-Revision-Date: 2005-07-06 15:44+0200\n"
+"PO-Revision-Date: 2005-08-19 12:28+0200\n"
 "Last-Translator: Michael Setzer <michael.setzer@layline.de>\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +26,7 @@ msgstr ""
 
 #: default.esml:382
 msgid "here you can change your sat/lnb mapping"
-msgstr "Hier können Sie ihre Sat/LNB Zuordnung ändern"
+msgstr "Hier können Sie Ihre Sat/LNB Zuordnung ändern"
 
 #: default.esml:417 src/enigma_scan.cpp:49
 msgid "Satfind"
@@ -106,7 +102,7 @@ msgstr "'Coderate HP' auswählen (links, rechts)"
 
 #: default.esml:390
 msgid "turn 12V output on (for 12V relais) (ok)"
-msgstr "Aktviert den 12 V Ausgang (für 12V Sat Relais) ('OK')"
+msgstr "Aktiviert den 12 V Ausgang (für 12V Sat Relais) ('OK')"
 
 #: default.esml:512
 msgid "enable/disable use BAT for scan (if exists)"
@@ -130,8 +126,7 @@ msgstr "Aufnahme Endzeit:"
 
 #: default.esml:443
 msgid "Use motor input power for running detection.. else use timeout"
-msgstr ""
-"Benutze Motor-Stromaufnahme zur Bewegungserkennung oder benutze 'timeout'"
+msgstr "Benutze Motor-Stromaufnahme zur Bewegungserkennung oder benutze 'timeout'"
 
 #: default.esml:526
 msgid "no circ polariz."
@@ -1106,8 +1101,7 @@ msgstr "(0..9, links, rechts, OK)"
 
 #: default.esml:410
 msgid "swaps committed and uncommitted DiSEqC Commands"
-msgstr ""
-"Vertausche 'committed' und 'uncommitted' Kommandos beim Senden(Reihenfolge)"
+msgstr "Vertausche 'committed' und 'uncommitted' Kommandos beim Senden(Reihenfolge)"
 
 #: default.esml:896
 msgid "vol-"
@@ -1894,7 +1888,7 @@ msgstr "Videotext anzeigen"
 
 #: src/enigma_main.cpp:99
 msgid "show extension Plugins"
-msgstr "Erweitertungs-Plugins anzeigen"
+msgstr "Erweiterungs-Plugins anzeigen"
 
 #: src/enigma_main.cpp:100
 msgid "show epg schedule list"
@@ -2204,7 +2198,7 @@ msgid ""
 "Really do this?"
 msgstr ""
 "Sie versuchen '%s' zu löschen'.\n"
-"Sind sie sicher?"
+"Sind Sie sicher?"
 
 #: src/enigma_main.cpp:3869
 msgid "Delete recorded stream"
@@ -2304,8 +2298,7 @@ msgstr "Sind Sie sicher?"
 
 #: src/enigma_main.cpp:5154
 msgid "please wait until the timer has started the recording (max 10 seconds)"
-msgstr ""
-"Bitte warten bis der Timer die Aufnahme gestartet hat (max. 10 Sekunden)"
+msgstr "Bitte warten bis der Timer die Aufnahme gestartet hat (max. 10 Sekunden)"
 
 #: src/enigma_main.cpp:5155
 msgid "information"
@@ -2318,8 +2311,7 @@ msgstr ""
 "konnte."
 
 #: src/enigma_main.cpp:5821
-msgid ""
-"Record stopped due to full harddisk. Delete some recordings and try again."
+msgid "Record stopped due to full harddisk. Delete some recordings and try again."
 msgstr ""
 "Aufnahme gestoppt, weil kein Speicherplatz mehr vorhanden ist. Nach "
 "freimachen von Speicherplatz (löschen von Aufnahmen) nochmal versuchen."
@@ -3102,8 +3094,7 @@ msgstr "Neu berechnen"
 
 #: src/rotorconfig.cpp:466
 msgid "recalculate stored positions rel. to current pos"
-msgstr ""
-"Gespeicherte Positionen in Relation zur derzeitigen Position neu berechnen"
+msgstr "Gespeicherte Positionen in Relation zur derzeitigen Position neu berechnen"
 
 #: src/rotorconfig.cpp:467
 msgid "set east limit"
@@ -3671,8 +3662,7 @@ msgstr ""
 "gewünschte Ziel manuell auswählen und OK drücken"
 
 #: src/scan.cpp:452
-msgid ""
-"A valid transponder has been found. Verify that the right network is selected"
+msgid "A valid transponder has been found. Verify that the right network is selected"
 msgstr ""
 "Ein gültiger Transponder wurde gefunden. Bestätigen, dass das richtige "
 "Netzwerk gewählt ist."
@@ -3683,7 +3673,7 @@ msgid ""
 "antenna-/cable-setup or try manual search if its some obscure satellite/"
 "network."
 msgstr ""
-"Alle bekannten Transponder wurden durchsucht, es war aber keine Lock "
+"Alle bekannten Transponder wurden durchsucht, es war aber kein Lock "
 "möglich. Bitte Antennen-Einstellungen prüfen oder manuelle Suche durchführen,"
 "falls es sich um einen unbekannten Satelliten/Netzwerk handelt."
 
@@ -3838,7 +3828,7 @@ msgstr "ist AC3 PID"
 
 #: src/scan.cpp:1607
 msgid "set this check when the entered audio pid is a ac3 audio pid"
-msgstr "den haken setzen, wenn die Audio PID eine AC3 PID ist"
+msgstr "den Haken setzen, wenn die Audio PID eine AC3 PID ist"
 
 #: src/scan.cpp:1622
 msgid "to enter (video) text pid press OK"
@@ -3878,8 +3868,7 @@ msgstr "kein DVB"
 
 #: src/scan.cpp:1676
 msgid "don't read PAT/PMT/SDT for this service (only use cached pids)"
-msgstr ""
-"keine DVB Tabellen (PAT/PMT/SDT) beim umschalten auf diesen Sender auswerten"
+msgstr "keine DVB Tabellen (PAT/PMT/SDT) beim umschalten auf diesen Sender auswerten"
 
 #: src/scan.cpp:1682
 msgid "use sdt"
@@ -3998,7 +3987,7 @@ msgstr "Software Aktualisierung"
 
 #: src/setup_extra.cpp:64
 msgid "open software update"
-msgstr "Software Auktualisierung öffnen"
+msgstr "Software Aktualisierung öffnen"
 
 #: src/setup_extra.cpp:70
 msgid "Remote Control"
@@ -4098,8 +4087,7 @@ msgstr "Bouquet automatisch wechseln"
 
 #: src/setup_extra.cpp:105
 msgid "change into next bouquet when end of current bouquet is reached"
-msgstr ""
-"Ins nächste Bouquet wechseln, wenn das Ende des aktuellen erreicht ist."
+msgstr "Ins nächste Bouquet wechseln, wenn das Ende des aktuellen erreicht ist."
 
 #: src/setup_extra.cpp:109
 msgid "Enable file sharing"
@@ -4125,7 +4113,7 @@ msgid ""
 "\n"
 "Really do factory reset?"
 msgstr ""
-"Durch Rücksetzen der Einstellungen verlieren Sie ALLE ihre Einstellungen\n"
+"Durch Rücksetzen der Einstellungen verlieren Sie ALLE Ihre Einstellungen\n"
 "(inklusive Bouquets, Kanal- und Satellitendaten, etc.)\n"
 "Nach dem Rücksetzen in den Auslieferungszustand startet Ihr Receiver "
 "automatisch neu!\n"
@@ -4142,7 +4130,7 @@ msgstr "Festplatte"
 
 #: src/setup_harddisk.cpp:303
 msgid "Are you SURE that you want to format this disk?\n"
-msgstr "Sind sie SICHER, dass Sie dieses Laufwerk formatieren wollen?\n"
+msgstr "Sind Sie sicher, dass Sie dieses Laufwerk formatieren wollen?\n"
 
 #: src/setup_harddisk.cpp:304 src/setup_harddisk.cpp:317
 #: src/setup_harddisk.cpp:339 src/setup_harddisk.cpp:349
@@ -4220,8 +4208,7 @@ msgstr ""
 "gefunden werden"
 
 #: src/setup_harddisk.cpp:585
-msgid ""
-"sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
+msgid "sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
 msgstr ""
 "Programm 'reiserfsck' zum Überprüfen des reiser Dateisystems konnte nicht "
 "gefunden werden."
@@ -4820,7 +4807,7 @@ msgstr "Internet Aktualisierung öffnen"
 
 #: src/software_update.cpp:35
 msgid "Manual Update"
-msgstr "Manuelle Aktualsisierung"
+msgstr "Manuelle Aktualisierung"
 
 #: src/software_update.cpp:35
 msgid "open manual update"
@@ -5272,8 +5259,7 @@ msgstr "Die neue Endzeit ist nun eingestellt"
 
 #: src/timer.cpp:2501
 msgid "The event has already finished... you can not change endtime!"
-msgstr ""
-"Dieser Eintrag ist bereits beendet... Endzeit kann nicht geändern werden!"
+msgstr "Dieser Eintrag ist bereits beendet... Endzeit kann nicht geändern werden!"
 
 #: src/timer.cpp:2523
 msgid ""
@@ -5400,8 +5386,7 @@ msgstr "Übertrage Image..."
 
 #: src/upgrade.cpp:305
 msgid "Please select version to upgrade or LAME! to abort"
-msgstr ""
-"Bitte gewünschte Version zur Aktualisierung wählen oder mit LAME! abbrechen"
+msgstr "Bitte gewünschte Version zur Aktualisierung wählen oder mit LAME! abbrechen"
 
 #: src/upgrade.cpp:426 src/upgrade.cpp:508 src/upgrade.cpp:522
 msgid "Error!"
@@ -5633,3 +5618,4 @@ msgstr ""
 #: src/time_settings.cpp:72
 msgid "time correction change error"
 msgstr "Fehler beim Ändern der Zeitkorrektur"
+
