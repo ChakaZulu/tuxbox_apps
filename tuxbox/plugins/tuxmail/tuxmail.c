@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.37  2005/08/19 09:00:04  robspr1
+ * - add 3rd skin, bugfix config GUI
+ *
  * Revision 1.36  2005/08/18 23:20:54  robspr1
  * - add config GUI (DBOX key)
  *
@@ -318,7 +321,7 @@ void ReadConf()
 			osd = 'G';
 		}
 
-		if(skin != 1 && skin != 2)
+		if(skin != 1 && skin != 2 && skin != 3)
 		{
 			printf("TuxMail <SKIN=%d invalid, set to \"1\">\n", skin);
 
@@ -1891,7 +1894,7 @@ void SaveConfigMailBox(int nConfigPage)
 					strcpy(maildb[nConfigPage].code,szInfo[i]);
 					break; 
 				case 9: 
-					maildb[nConfigPage].auth=szInfo[i][0]-'0';
+					maildb[nConfigPage].auth=atoi(szInfo[i]);
 					break; 
 				case 10: 
 					strcpy(maildb[nConfigPage].suser,szInfo[i]);
@@ -1937,7 +1940,7 @@ void SaveConfigMailBox(int nConfigPage)
 					osd=szInfo[i][0];
 					break; 
 				case 11: 
-					skin=szInfo[i][0]-'0';
+					skin=atoi(szInfo[i]);
 					break; 
 			}
 		}
@@ -2575,10 +2578,7 @@ void EditMailFile(char* filename, int account, int mailindex )
   				}
   				else
   				{
-  					if(( nConfigPage >= 0 ) && ( nConfigPage<10))
-  					{
-  						SaveConfigMailBox(nConfigPage);
-  					}
+  					SaveConfigMailBox(nConfigPage);
   					if( nConfigPage<11 )
   					{
   						nConfigPage++;
@@ -2595,10 +2595,7 @@ void EditMailFile(char* filename, int account, int mailindex )
   				}
   				else
   				{
-  					if(( nConfigPage >= 0 ) && ( nConfigPage<10))
-  					{
-  						SaveConfigMailBox(nConfigPage);
-  					}
+  					SaveConfigMailBox(nConfigPage);
   					if( nConfigPage )
   					{
   						nConfigPage--;
@@ -2893,7 +2890,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 			break;
 		}
 
-		if(( nConfigPage >= 0 ) && ( nConfigPage<10 ) && ( rccode != RC_RED ) && ( rccode != RC_GREEN ))
+		if(( nConfigPage != -1 ) && ( rccode != RC_RED ) && ( rccode != RC_GREEN ))
 		{
 			SaveConfigMailBox(nConfigPage);
 			if(( maildb[nConfigPage].namebox[0] ) && (maildb[nConfigPage].user[0] == '\0'))
@@ -3683,7 +3680,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.36 $";
+	char cvs_revision[] = "$Revision: 1.37 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -3769,7 +3766,7 @@ void plugin_exec(PluginParam *par)
 			return;
 		}
 
-		if(ioctl(fb, FBIOPUTCMAP, (skin == 1) ? &colormap1 : &colormap2) == -1)
+		if(ioctl(fb, FBIOPUTCMAP, (skin == 1) ? &colormap1 : (skin == 2) ? &colormap2 : &colormap3) == -1)
 		{
 			printf("TuxMail <FBIOPUTCMAP failed>\n");
 
