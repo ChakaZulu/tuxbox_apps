@@ -97,11 +97,13 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 		result << "<input name=\"" << buttonText << "\""
 			" type=\"button\" style=\"width: " << width << "px;"
 			"height: " << height << "px;";
-		if (buttonColor.find("#") == eString::npos)
-			result << "background-image: url(/" << buttonColor << "); background-repeat: repeat-x; ";
-		else
 		if (buttonColor)
-			result << "background-color: " << buttonColor << "; ";
+		{
+			if (buttonColor.find("#") == eString::npos)
+				result << "background-image: url(/" << buttonColor << "); background-repeat: repeat-x; ";
+			else
+				result << "background-color: " << buttonColor << "; ";
+		}
 		if (color)
 			result << "color: " << color << "; ";
 		result << "\" value=\"" << buttonText << "\" onclick=\"" << ref1 << buttonRef << ref2 << "\">";
