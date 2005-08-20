@@ -33,6 +33,7 @@ int tcpOpen(eString serverIP, int serverPort, int i)
 	socklen_t adsLen;
 	int fd = -1;
 	int rc = -1;
+	int retry = 0;
 
 	bzero((char *)&ads, sizeof(ads));
 	ads.sin_family = AF_INET;
@@ -42,28 +43,20 @@ int tcpOpen(eString serverIP, int serverPort, int i)
 
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) != -1)
 	{
-		if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
-			eDebug("[MOVIEPLAYER] tcpOpen: fcntl failed.");
-		int retry = 100 * i;
-		while (retry > 0)
+		fcntl(fd, F_SETFL, O_NONBLOCK);
+		retry = 100 * i;
+		while (retry-- > 0 && rc < 0)
 		{
-			rc = connect(fd, (struct sockaddr *)&ads, adsLen);
-			if (rc < 0)
-			{
-				usleep(10000);
-				retry--;
-			}
-			else
-				retry = 0;
+			if ((rc = connect(fd, (struct sockaddr *)&ads, adsLen)) < 0)
+				usleep(10000); // 10 milliseconds
 		}
 		if (rc < 0)
 		{
 			close(fd);
 			fd = -1;
 		}
-		else
-			eDebug("[MOVIEPLAYER] tcpOpen: socket fd = %d", fd);
 	}
+	eDebug("[MOVIEPLAYER] tcpOpen: socket fd = %d, waited %d milliseconds", fd, (100 * i - retry) * 10);
 
 	return fd;
 }
