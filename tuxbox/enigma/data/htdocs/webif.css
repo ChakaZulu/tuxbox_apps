@@ -53,7 +53,7 @@ a:hover {
 	color: #A91111;
 }
 
-#contentcell {
+#contentcell SELECT{
 	background-color: #f4f4f4;
 	padding: 10px;
 	font-family: Verdana, Arial, Helvetica, sans-serif;
