@@ -61,6 +61,7 @@
 #include <enigma_dyn_timer.h>
 #include <enigma_dyn_pda.h>
 #include <enigma_dyn_movieplayer.h>
+#include <enigma_dyn_dreamflash.h>
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
@@ -2586,6 +2587,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapMiscInitializeDyn(dyn_resolver, lockWeb);
 	ezapTimerInitializeDyn(dyn_resolver, lockWeb);
 	ezapPDAInitializeDyn(dyn_resolver, lockWeb);
+	ezapDreamflashInitializeDyn(dyn_resolver, lockWeb);
 #ifdef ENABLE_DYN_STREAM
 	ezapMoviePlayerInitializeDyn(dyn_resolver, lockWeb);
 #endif
