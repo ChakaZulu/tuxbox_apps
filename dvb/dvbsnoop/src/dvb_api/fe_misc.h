@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.h,v 1.3 2004/03/27 22:34:03 rasc Exp $
+$Id: fe_misc.h,v 1.4 2005/08/22 22:37:59 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: fe_misc.h,v 1.3 2004/03/27 22:34:03 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 */
 
@@ -52,6 +52,9 @@ int  print_FE_CurrentParameters (int v, int f);
 void print_FE_QPSK_param (int v, struct dvb_qpsk_parameters qp);
 void print_FE_QAM_param  (int v, struct dvb_qam_parameters qp);
 void print_FE_OFDM_param (int v, struct dvb_ofdm_parameters op);
+#ifdef FE_ATSC			// API 3.1
+void print_FE_VSB_param  (int v, struct dvb_vsb_parameters vsb);
+#endif
 
 
 fe_type_t  read_FEType(int f);

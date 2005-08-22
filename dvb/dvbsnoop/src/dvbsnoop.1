@@ -416,13 +416,14 @@ Other simple filter examples:
    dvbsnoop \-s sec \-f 0x4E.34.00 \-m 0xFF.FF.0F  0x12
    dvbsnoop \-s sec \-f 16.00 \-m 255.255  0x12
    dvbsnoop \-s sec \-nph \-n 5 0x10 | grep \-i "frequency"
+   dvbsnoop \-s ts \-nph 0x100 | grep \-i 'Transport_error\\|^PID'
 
 Selecting devices:
    dvbsnoop \-s feinfo -pd 9 -frontend /dev/dvb/adapter0/frontend1
    dvbsnoop \-s feinfo -pd 9 -adapter 0 -devnr 1
    dvbsnoop \-s feinfo -pd 9 -adapter 2
 
-... for more examples and example output of dvbsnoop, please visit http://dvbsnoop.sourceforge.net.
+... for more examples and example output of dvbsnoop, please visit http://dvbsnoop.sourceforge.net. 
 
 
 .SH NOTES 
@@ -441,6 +442,7 @@ dvbsnoop assumes correct DVB streams. Corrupted streams or streams with
 wrong semantics (e.g. incorrect length information) will result in
 wrong decoding output. For this reason, the use of '-crc' and '-sync'
 options is strongly recommended. 
+.br
 .br
 Depending on the firmware of your dvb card, dvbsnoop may not be able to sniff on pids,
 which are occupied by other processes. This is no bug, this is a driver/firmware issue.
@@ -465,7 +467,8 @@ Copyright (c) 2001-2005  Rainer Scherg
 .br
 
 Additional patches and bugfixes/\-reports were provided by members of the tuxbox project \- bringing digital TV to linux based set top boxes (e.g. "dbox2" digital tv receiver) and also by users of dvbsnoop (see the ChangeLog file for credits).
-
+.br
+.br
 For more information about DVBSNOOP please visit 'http://dvbsnoop.sourceforge.net'.
 
 

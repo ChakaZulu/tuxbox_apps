@@ -1,7 +1,9 @@
+ 
+ - New:  frontend info: ATSC included  (extension to dvb api 3)
  - Changed: -s pidscan improved
 
 1.4.0
- - New: option -adapter and -devnr as device shortcuts
+ - New: option -adapter and -devnr as device shortcuts (idea: Steve Malenfant)
  - New: option '-s ps'
  - New: Program Stream (PS) pack_header, system_header, ...
  - Changed: Soft filters for TS and Section rewritten

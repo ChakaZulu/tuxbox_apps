@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.19 2005/08/17 21:18:18 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.20 2005/08/22 22:37:59 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.19 2005/08/17 21:18:18 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.20  2005/08/22 22:37:59  rasc
+ATSC frontend info
+
 Revision 1.19  2005/08/17 21:18:18  rasc
 improvements on pidscan
 
@@ -155,7 +158,7 @@ static TS_PID *ts_payload_check (u_char *b, int pid, TS_PID *tspid);
 
 int ts_pidscan (OPTION *opt)
 {
-
+  // $$$ TODO   buffersize-option?
   u_char 	buf[TS_BUF_SIZE];
   struct pollfd pfd;
   struct dmx_pes_filter_params flt;
@@ -399,6 +402,7 @@ static int analyze_ts_pid (u_char *buf, int len)
 		   break;
 		}
 	}
+	// $$$ TODO: sync output report?
 
 	for (; i < len; i += TS_LEN) {
 		if (buf[i] == TS_SYNC_BYTE) {
@@ -425,37 +429,41 @@ static int analyze_ts_pid (u_char *buf, int len)
 static TS_PID *ts_payload_check (u_char *b, int pid, TS_PID *tspid)
 {
 
+	// $$$ TODO speedup by b[1] & 0x80  or  & 0x40;
+  	int err_bit 		= getBits (b, 0, 8, 1);
 	int payload_start 	= getBits (b, 0, 9, 1);
+	int scrambled		= getBits (b, 0,24, 2);
+
+
+	if (err_bit) {
+		return (TS_PID *) NULL;
+	}
+
+	if (scrambled) {
+		tspid->type = TS_SCRAMBLED;
+		return tspid;
+	}
 
 	if (payload_start != 0) {
 		int j;
-	  	int err_bit 		= getBits (b, 0, 8, 1);
-		int scrambled		= getBits (b, 0,24, 2);
+  		int adaptation_field_ctrl	= getBits (b, 0,26, 2);
 
 		tspid->type = TS_UNKNOWN;
-	  	if (err_bit == 0 && scrambled == 0) {
-	  		int adaptation_field_ctrl	= getBits (b, 0,26, 2);
+		j = 4;
+		if (adaptation_field_ctrl & 0x2)  j += b[j] + 1;	// add adapt.field.len
 
-			j = 4;
-			if (adaptation_field_ctrl & 0x2)  j += b[j] + 1;	// add adapt.field.len
-
-			if (adaptation_field_ctrl & 0x1) {
-				if (b[j]==0x00 && b[j+1]==0x00 && b[j+2]==0x01 && b[j+3]>=0xBC) {
-					// -- PES
-					tspid->type = TS_PES;
-					tspid->id   = b[j+3];
-				} else {
-					// -- section (eval pointer field)
-					int offset = j + b[j] +1;
-					tspid->type = TS_SECTION;
-					tspid->id   = b[offset];
-				}
-				return tspid;
+		if (adaptation_field_ctrl & 0x1) {
+			if (b[j]==0x00 && b[j+1]==0x00 && b[j+2]==0x01 && b[j+3]>=0xBC) {
+				// -- PES
+				tspid->type = TS_PES;
+				tspid->id   = b[j+3];
+			} else {
+				// -- section (eval pointer field)
+				int offset = j + b[j] +1;
+				tspid->type = TS_SECTION;
+				tspid->id   = b[offset];
 			}
-		} else if (err_bit) {
-			tspid->type = TS_ERROR;
-		} else if (scrambled) {
-			tspid->type = TS_SCRAMBLED;
+			return tspid;
 		}
 
 		return tspid;
@@ -463,6 +471,7 @@ static TS_PID *ts_payload_check (u_char *b, int pid, TS_PID *tspid)
 
 	if (pid == 0x1FFF) {
 		tspid->type = TS_STUFFING;
+		return tspid;
 	}
 
 

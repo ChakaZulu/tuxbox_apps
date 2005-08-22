@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.c,v 1.7 2005/08/13 00:06:56 rasc Exp $
+$Id: fe_misc.c,v 1.8 2005/08/22 22:37:59 rasc Exp $
 
 
  DVBSNOOP
@@ -11,12 +11,15 @@ $Id: fe_misc.c,v 1.7 2005/08/13 00:06:56 rasc Exp $
 
 
  -- FrontEnd routines...
- --  DVB-API 
+ --  DVB-API 3 (3.1)
 
 
 
 
 $Log: fe_misc.c,v $
+Revision 1.8  2005/08/22 22:37:59  rasc
+ATSC frontend info
+
 Revision 1.7  2005/08/13 00:06:56  rasc
 no message
 
@@ -149,6 +152,7 @@ void out_status_detail (int v,fe_status_t s)
         if (s & FE_TIMEDOUT)    out (v,"TIMOUT ");
         if (s & FE_REINIT)      out (v,"REINIT ");
 #endif
+	
         out (v,"]");
 }
 
@@ -215,6 +219,9 @@ int  print_FE_BasicCapabilities (int v, int fd_fe)
 	case FE_QPSK:   s = "QPSK (DVB-S)"; sf = "MHz";  break;
 	case FE_QAM:	s = "QAM (DVB-C)";  sf = "kHz";  break;
 	case FE_OFDM:	s = "OFDM (DVB-T)"; sf = "kHz";  break;
+#ifdef FE_ATSC			// API 3.1
+	case FE_ATSC:   s = " VSB/QAM (ATSC)"; sf = "khz"; break;	// (QAM | VSB) -> VSB_param
+#endif
 	default:	s = "unkonwn"; break;
      }
      out_nl (v,"Frontend-type:       %s", s);
@@ -264,7 +271,11 @@ int  print_FE_BasicCapabilities (int v, int fd_fe)
 #ifdef FE_CAN_CLEAN_SETUP
       if (fi.caps &  FE_CAN_CLEAN_SETUP)	out_nl (v,"clean setup");
 #endif
-#ifdef FE_NEED_BENDING
+#ifdef FE_CAN_16VSB
+      if (fi.caps &  FE_CAN_8VSB)		out_nl (v,"FE_CAN_8VSB");
+      if (fi.caps &  FE_CAN_16VSB)		out_nl (v,"FE_CAN_16VSB");
+#endif
+#ifdef FE_NEEDS_BENDING
       if (fi.caps &  FE_NEEDS_BENDING)		out_nl (v,"FE_NEEDS_BENDING");
 #endif
 #ifdef FE_CAN_RECOVER
@@ -325,6 +336,9 @@ int  print_FE_CurrentParameters (int v, int fd_fe)
 	   case FE_QPSK:  print_FE_QPSK_param (v,p.u.qpsk); break;
 	   case FE_QAM:   print_FE_QAM_param  (v,p.u.qam);  break;
 	   case FE_OFDM:  print_FE_OFDM_param (v,p.u.ofdm); break;
+#ifdef FE_ATSC
+	   case FE_ATSC:  print_FE_VSB_param  (v,p.u.vsb);  break;  // also for ATSC QAM
+#endif
    }
 
    indent(-1);
@@ -384,6 +398,18 @@ void print_FE_OFDM_param (int v, struct dvb_ofdm_parameters op)
    out_nl (v,"Hierarchy:  %s", festr_FE_hierarchy (op.hierarchy_information));
 }
 
+
+/*
+ * -- print_FE vsb parameters
+ */
+
+#ifdef FE_ATSC
+void print_FE_VSB_param (int v, struct dvb_vsb_parameters vsb)
+{
+
+   out_nl (v,"Modulation:  %s", festr_FE_modulation (vsb.modulation));
+}
+#endif
 
 
 
@@ -497,6 +523,10 @@ const char *festr_FE_modulation (fe_modulation_t modulation)
 	  case QAM_128:  s = "QAM 128"; break;
 	  case QAM_256:  s = "QAM 256"; break;
 	  case QAM_AUTO: s = "QAM AUTO"; break;
+#ifdef VSB_16
+	  case VSB_8:    s = "VSB 8"; break;
+	  case VSB_16:   s = "VSB 16"; break;
+#endif
   }
 
   return s;
