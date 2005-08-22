@@ -84,6 +84,7 @@ eString getConfigSwapFile(void)
 		free(swapfilename);
 	}
 	result.strReplace("#SWAPFILE#", rpl);
+	result.strReplace("#SWAPFILEBUTTON#", button(100, "Configure", NOCOLOR, "javascript:configSwapFile()", "#000000"));
 	
 	return result;
 }

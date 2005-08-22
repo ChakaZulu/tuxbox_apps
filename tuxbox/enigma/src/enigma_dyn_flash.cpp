@@ -335,6 +335,8 @@ eString eFlashMgr::htmlList(void)
 	for (std::list<t_mtd>::iterator mtd_it = mtds.begin(); mtd_it != mtds.end(); mtd_it++)
 	{
 		eString tmp = readFile(TEMPLATE_DIR + "mtd.tmp");
+		tmp.strReplace("#FLASHBUTTON#", button(80, "Flash", RED, "javascript:writeMenu('" + mtd_it->dev + "')", "#FFFFFF"));
+		tmp.strReplace("#SAVEBUTTON#", button(80, "Flash", GREEN, "javascript:saveMenu('" + mtd_it->dev + "')", "#FFFFFF"));
 		tmp.strReplace("#DEV#", mtd_it->dev);
 		tmp.strReplace("#SIZE#", mtd_it->size);
 		tmp.strReplace("#ERASESIZE#", mtd_it->erasesize);

@@ -29,6 +29,7 @@ using namespace std;
 eString getConfigMountMgr(void)
 {
 	eString result = readFile(TEMPLATE_DIR + "mountPoints.tmp");
+	result.strReplace("#ADDMOUNTPOINTBUTTON#", button(100, "Add", GREEN, "javascript:addMountPoint()", "#FFFFFF"));
 	eString skelleton = readFile(TEMPLATE_DIR + "mountPoint.tmp");
 	result.strReplace("#BODY#", eMountMgr::getInstance()->listMountPoints(skelleton));
 	return result;
