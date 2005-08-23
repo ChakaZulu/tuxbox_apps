@@ -109,48 +109,39 @@ struct hash_uniqueEPGKey
 	#define tidMap std::hash_map<__u32, hash_32, equal_32>
 #endif
 
+#define descriptorPair std::pair<int,__u8*>
+#define descriptorMap std::map<__u32, descriptorPair >
+
 class eventData
 {
  	friend class eEPGCache;
 private:
 	__u8* EITdata;
 	int ByteSize;
+	static descriptorMap descriptors;
 public:
 	int type;
 	static int CacheSize;
-	eventData(const eit_event_struct* e, int size, int type)
-	:ByteSize(size), type(type)
-	{
-		CacheSize+=size;
-		EITdata = new __u8[size];
-		if (e)
-			memcpy(EITdata, (__u8*) e, size);
-	}
-	~eventData()
-	{
-		CacheSize-=ByteSize;
-		delete [] EITdata;
-	}
+	static void load(FILE *);
+	static void save(FILE *);
+	eventData(const eit_event_struct* e, int size, int type);
+	~eventData();
+	const eit_event_struct* get() const;
 	operator const eit_event_struct*() const
 	{
-		return (const eit_event_struct*) EITdata;
-	}
-	const eit_event_struct* get() const
-	{
-		return (const eit_event_struct*) EITdata;
+		return get();
 	}
 	int getEventID()
 	{
-		return HILO( ((const eit_event_struct*) EITdata)->event_id );
+		return (EITdata[0] << 8) | EITdata[1];
 	}
 	time_t getStartTime()
 	{
-		return parseDVBtime(
-			((const eit_event_struct*)EITdata)->start_time_1,
-			((const eit_event_struct*)EITdata)->start_time_2,
-			((const eit_event_struct*)EITdata)->start_time_3,
-			((const eit_event_struct*)EITdata)->start_time_4,
-			((const eit_event_struct*)EITdata)->start_time_5);
+		return parseDVBtime(EITdata[2], EITdata[3], EITdata[4], EITdata[5], EITdata[6]);
+	}
+	int getDuration()
+	{
+		return fromBCD(EITdata[7])*3600+fromBCD(EITdata[8])*60+fromBCD(EITdata[9]);
 	}
 };
 

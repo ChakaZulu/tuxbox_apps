@@ -530,7 +530,7 @@ void eZapEPG::buildPage(int direction)
 		{
 			if ( s == services.end() )
 				break;
-			const eit_event_struct *e = (const eit_event_struct*) eEPGCache::getInstance()->lookupEvent( *s, (time_t)(start+tmp), true );
+			const eventData *e = (const eventData*) eEPGCache::getInstance()->lookupEvent( *s, (time_t)(start+tmp), true );
 			if ( e && (++cnt > numservices) )
 					break;
 			if ( s != services.begin() )
@@ -578,7 +578,7 @@ void eZapEPG::buildPage(int direction)
 		if ( curE == services.end() )
 			break;
 
-//		const eit_event_struct *e = (const eit_event_struct*) eEPGCache::getInstance()->lookupEvent( *curE, (time_t)(start+tmp), true );
+//		const eventData *e = (const eventData*) eEPGCache::getInstance()->lookupEvent( *curE, (time_t)(start+tmp), true );
 //		if ( e )
 		{
 			serviceentries.push_back(serviceentry());

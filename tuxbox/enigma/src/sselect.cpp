@@ -768,17 +768,16 @@ struct updateEPGChangedService
 				it = updatedEntrys->find( (const eServiceReferenceDVB&)l.service );
 			if ( (updatedEntrys && it != updatedEntrys->end()) )  // entry is updated
 			{
-				EITEvent *e=eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)l.service );
+				eventData *e=(eventData*)eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)l.service, (time_t)0, true );
 				if (e)
 				{
-					if ( e->event_id != l.curEventId )
+					if ( e->getEventID() != l.curEventId )
 					{
 						if ( redrawOnly )
 							((eListBox<eListBoxEntryService>*) l.listbox)->invalidateEntry(cnt);
 						else
 							l.invalidateDescr();
 					}
-					delete e;
 				}
 			}
 		}
