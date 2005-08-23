@@ -17,13 +17,11 @@
 			<input type="hidden" name="mtd" value="#MTD#">
 			<table width="100%" border="0" cellpadding="0" cellspacing="10">
 				<tr>
-					<td>Please select the image file to be written to partition #MTD# (#MTDNAME#):</td>
+					<td>Please specify the full filename of the image (e.g. /tmp/image.img) to be written to partition #MTD# (#MTDNAME#):</td>
 				</tr>
 				<tr>
 					<td>
-						<select name="files" size="1">
-							#FILES#
-						</select>
+						<input name="file" type="text" size="70" maxlength="70" value="#FILE#">
 					</td>
 				</tr>
 				<tr>

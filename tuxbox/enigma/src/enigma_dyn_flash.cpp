@@ -224,8 +224,6 @@ int eFlashOperationsHandler::readFlash(eString mtd, eString filename)
 	long filesize;
 	mtd_info_t meminfo;
 	
-	filename = "/tmp/" + filename;
-	
 	progressMessage1 = progressMessage2 = "";
 	progressComplete = 0;
 	
@@ -413,23 +411,7 @@ eString showWriteMenu(eString request, eString dirpath, eString opts, eHTTPConne
 	result.strReplace("#MTD#", mtd);
 	result.strReplace("#MTDNAME#", flashMgr.getMTDName(mtd));
 	result.strReplace("#FILE#", fileName);
-	
-	eString files;
-	DIR *d = opendir("/tmp");
-	if (d)
-	{
-		while (struct dirent *e = readdir(d))
-		{
-			eString filename = eString(e->d_name);
-			if (filename.right(4).upper() == ".IMG")
-				files += "<option value=\"" + filename + "\">" + filename + "</option>";
-		}
-		closedir(d);
-	}
-	if (!files)
-		files += "<option>no images available</option>";
-
-	result.strReplace("#FILES#", files);
+	result.strReplace("#FLASHBUTTON#", button(100, "Flash", NOCOLOR, "javascript:selectFile()", "#000000"));
 	return result;
 }
 

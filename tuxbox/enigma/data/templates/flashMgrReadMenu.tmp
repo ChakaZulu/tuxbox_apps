@@ -5,7 +5,7 @@
 	</head>
 	<body id="flashmgr">
 		Save flash partition #MTD# (#MTDNAME#) to the following file:<br>
-		Note: Just specify file name, file will be saved to /tmp directory.
+		Note: Please specify full path, e.g. /tmp/image.img.
 		<br><br>
 		<form name="fileselector" action="/readFlashPartition">
 			<input type="hidden" name="mtd" value="#MTD#">
