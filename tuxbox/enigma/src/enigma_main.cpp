@@ -2638,6 +2638,7 @@ void eZapMain::volumeUp()
 				return;
 		}
 
+#if 0
 	if (eAudioDynamicCompression::getInstance() &&
 			eAudioDynamicCompression::getInstance()->getEnable())
 		{
@@ -2647,7 +2648,9 @@ void eZapMain::volumeUp()
 				oldval = 100000;
 			eAudioDynamicCompression::getInstance()->setMax(oldval);
 		}
-	else if ( eZapStandby::getInstance() )
+	else
+#endif
+	if ( eZapStandby::getInstance() )
 		eAVSwitch::getInstance()->changeVCRVolume(0, -2);	
 	else
 		eAVSwitch::getInstance()->changeVolume(0, -2);
@@ -2672,6 +2675,7 @@ void eZapMain::volumeDown()
 				return;
 		}
 	
+#if 0
 	if (eAudioDynamicCompression::getInstance() &&
 			eAudioDynamicCompression::getInstance()->getEnable())
 		{
@@ -2681,7 +2685,9 @@ void eZapMain::volumeDown()
 				oldval = 0;
 			eAudioDynamicCompression::getInstance()->setMax(oldval);
 		}
-	else if ( eZapStandby::getInstance() )
+	else 
+#endif
+	if ( eZapStandby::getInstance() )
 		eAVSwitch::getInstance()->changeVCRVolume(0, +2);	
 	else
 		eAVSwitch::getInstance()->changeVolume(0, +2);
