@@ -664,6 +664,7 @@ ePSAudioSelector::ePSAudioSelector()
 	ePoint p(0,40);
 	list.move(m_stereo_mono->getPosition()+p);
 
+#if 0
 	if ( 0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-105));
@@ -672,6 +673,7 @@ ePSAudioSelector::ePSAudioSelector()
 		m_dyncfg->resize(eSize(getClientSize().width()-20, 50));
 	}
 	else
+#endif
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-40));
 }
 
@@ -850,6 +852,7 @@ eAudioSelector::eAudioSelector()
 	m_subtitles->loadDeco();
 	CONNECT(m_subtitles->selected, eAudioSelector::subtitleSelected);
 
+#if 0
 	if ( 0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-140));
@@ -859,6 +862,7 @@ eAudioSelector::eAudioSelector()
 		m_subtitles->move(ePoint(10, getClientSize().height()-100));
 	}
 	else
+#endif
 	{
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-80));
 		m_subtitles->move(ePoint(10, getClientSize().height()-40));
