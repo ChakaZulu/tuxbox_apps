@@ -1050,8 +1050,6 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 
 		for ( eventMap::iterator i( It->second.first.begin() ); i != It->second.first.end(); i++)
 		{
-			const eit_event_struct* eit_event = i->second->get();
-			int duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
 			time_t begTime = i->second->getStartTime();
 			if ( t >= begTime && t <= begTime+i->second->getDuration()) // then we have found
 			{
@@ -1390,8 +1388,6 @@ void eEPGCache::load()
 						event->EITdata = new __u8[len];
 						eventData::CacheSize+=len;
 						fread( event->EITdata, len, 1, f);
-						int eventID = event->getEventID();
-						time_t startTime = event->getStartTime();
 						evMap[ event->getEventID() ]=event;
 						tmMap[ event->getStartTime() ]=event;
 						++cnt;
