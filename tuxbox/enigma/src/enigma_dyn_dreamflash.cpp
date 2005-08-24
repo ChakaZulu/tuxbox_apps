@@ -1,3 +1,5 @@
+#ifdef ENABLE_DYN_DREAMFLASH
+
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -170,3 +172,5 @@ void ezapDreamflashInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWe
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/dreamflash", dreamflash, lockWeb);
 }
+
+#endif // ENABLE_DYN_DREAMFLASH

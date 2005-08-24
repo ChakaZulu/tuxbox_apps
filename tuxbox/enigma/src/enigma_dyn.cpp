@@ -2587,7 +2587,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapMiscInitializeDyn(dyn_resolver, lockWeb);
 	ezapTimerInitializeDyn(dyn_resolver, lockWeb);
 	ezapPDAInitializeDyn(dyn_resolver, lockWeb);
+#ifdef ENABLE_DYN_DREAMFLASH
 	ezapDreamflashInitializeDyn(dyn_resolver, lockWeb);
+#endif
 #ifdef ENABLE_DYN_STREAM
 	ezapMoviePlayerInitializeDyn(dyn_resolver, lockWeb);
 #endif
