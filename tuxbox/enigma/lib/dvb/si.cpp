@@ -849,6 +849,7 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr, int tsidoni
 	:Descriptor(descr), tsidonid(tsidonid)
 {
 	struct eit_extended_descriptor_struct *evt=(struct eit_extended_descriptor_struct *)descr;
+	items.setAutoDelete(true);
 	descriptor_number = evt->descriptor_number;
 	last_descriptor_number = evt->last_descriptor_number;
 	language_code[0]=evt->iso_639_2_language_code_1;
