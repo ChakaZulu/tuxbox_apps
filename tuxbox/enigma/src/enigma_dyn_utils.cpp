@@ -69,6 +69,22 @@ eString readFile(eString filename)
 {
 	eString result;
 	eString line;
+	
+	if (strstr(filename.c_str(), (TEMPLATE_DIR).c_str()) != 0)
+	{
+		char *pch = strrchr(filename.c_str(), '/');
+		eString filename2 = TEMPLATE_DIR2 + eString(strdup(pch + 1));
+		if (access(filename2.c_str(), R_OK) == 0)
+			filename = filename2;
+	}	
+			
+	if (strstr(filename.c_str(), (HTDOCS_DIR).c_str()) != 0)
+	{
+		char *pch = strrchr(filename.c_str(), '/');
+		eString filename2 = HTDOCS_DIR2 + eString(strdup(pch + 1));
+		if (access(filename2.c_str(), R_OK) == 0)
+			filename = filename2;
+	}
 
 	ifstream infile(filename.c_str());
 	if (infile)
