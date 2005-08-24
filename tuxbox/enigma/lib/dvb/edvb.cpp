@@ -1,5 +1,3 @@
-#define RECORD_TELETEXT
-#define RECORD_SUBTITLES
 #include <lib/dvb/edvb.h>
 #include <config.h>
 #include <unistd.h>

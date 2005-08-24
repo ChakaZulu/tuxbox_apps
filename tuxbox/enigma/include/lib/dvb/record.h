@@ -14,6 +14,9 @@
 
 #include <set>
 
+#define RECORD_TELETEXT
+#define RECORD_SUBTITLES
+
 /**
  * \brief The DVBRecorder
  *

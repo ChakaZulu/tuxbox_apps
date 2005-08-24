@@ -1,5 +1,4 @@
 #ifndef DISABLE_FILE
-
 #include <lib/dvb/record.h>
 #include <config.h>
 #include <fcntl.h>
@@ -179,7 +178,6 @@ void eDVBRecorder::PMTready(int error)
 		if ( pmt )
 		{
 			eDVBCaPMTClientHandler::distribute_gotPMT(recRef, pmt);
-
 			eDebug("UpdatePIDs");
 //			addNewPID(0); // PAT
 //			addNewPID(pmt->pid);  // PMT
@@ -319,7 +317,7 @@ void eDVBRecorder::open(const char *_filename)
 
 std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::addPID(int pid, int flags)
 {
-	eDebug("eDVBRecorder::addPID(0x%x)", pid );
+	eDebugNoNewLine("eDVBRecorder::addPID(0x%x)...", pid );
 	pid_t p;
 	p.pid=pid;
 	if ( pids.find(p) != pids.end() )
@@ -345,7 +343,7 @@ std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::addPID(int
 	flt.output=DMX_OUT_TS_TAP;
 
 	flt.flags=flags;
-	eDebug("pid %04x flags %08x", pid, flags);
+	eDebug("flags %08x", pid, flags);
 
 	if (::ioctl(p.fd, DMX_SET_PES_FILTER, &flt)<0)
 	{
@@ -367,12 +365,13 @@ void eDVBRecorder::addNewPID(int pid, int flags)
 
 void eDVBRecorder::validatePIDs()
 {
-	eDebug("validatePIDs");
-	for (std::set<pid_t>::iterator it(pids.begin()); it != pids.end(); ++it )
+	for (std::set<pid_t>::iterator it(pids.begin()); it != pids.end();)
 	{
 		std::set<pid_t>::iterator i = newpids.find(*it);
 		if ( i == newpids.end() )  // no more existing pid...
 			removePID((it++)->pid);
+		else
+			++it;
 	}
 	for (std::set<pid_t>::iterator it(newpids.begin()); it != newpids.end(); ++it )
 	{
@@ -404,8 +403,8 @@ void eDVBRecorder::removePID(int pid)
 		if (pi->fd >= 0)
 			::close(pi->fd);
 		pids.erase(pi);
+		eDebug("eDVBRecorder::removePID(0x%x)", pid);
 	}
-	eDebug("eDVBRecorder::removePID(0x%x)", pid);
 }
 
 void eDVBRecorder::start()
