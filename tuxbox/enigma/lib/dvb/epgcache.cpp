@@ -1007,7 +1007,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 									int event_id = ((TimeShiftedEventDescriptor*)descriptor)->reference_event_id;
 									for ( eventMap::iterator i( It->second.first.begin() ); i != It->second.first.end(); i++)
 									{
-										if ( HILO( i->second->get()->event_id ) == event_id )
+										if ( i->second->getEventID() == event_id )
 										{
 											if ( plain )
 												// get plain data... not in EITEvent Format !!!
