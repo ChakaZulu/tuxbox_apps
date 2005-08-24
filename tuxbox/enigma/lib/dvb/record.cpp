@@ -343,7 +343,7 @@ std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::addPID(int
 	flt.output=DMX_OUT_TS_TAP;
 
 	flt.flags=flags;
-	eDebug("flags %08x", pid, flags);
+	eDebug("flags %08x", flags);
 
 	if (::ioctl(p.fd, DMX_SET_PES_FILTER, &flt)<0)
 	{
