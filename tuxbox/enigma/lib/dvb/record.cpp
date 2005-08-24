@@ -424,7 +424,7 @@ void eDVBRecorder::start()
 
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 	{
-		printf("starting pidfilter for pid %d\n", i->pid );
+		eDebug("starting pidfilter for pid %d", i->pid );
 
 		if (::ioctl(i->fd, DMX_START, 0)<0)
 		{
