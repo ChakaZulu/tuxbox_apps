@@ -261,7 +261,23 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 					return new eHTTPError(conn, 401); // auth req'ed
 				}
 			}
-
+			
+			if (strstr(newpath.c_str(), (TEMPLATE_DIR).c_str()) != 0)
+			{
+				char *pch = strrchr(newpath.c_str(), '/');
+				eString newpath2 = TEMPLATE_DIR2 + eString(strdup(pch + 1));
+				if (access(newpath2.c_str(), R_OK) == 0)
+					newpath = newpath2;
+			}
+			
+			if (strstr(newpath.c_str(), (HTDOCS_DIR).c_str()) != 0)
+			{
+				char *pch = strrchr(newpath.c_str(), '/');
+				eString newpath2 = HTDOCS_DIR2 + eString(strdup(pch + 1));
+				if (access(newpath2.c_str(), R_OK) == 0)
+					newpath = newpath2;
+			}
+			
 			int fd=open(newpath.c_str(), (method==eHTTPFile::methodGET)?O_RDONLY|O_LARGEFILE:(O_WRONLY|O_CREAT|O_TRUNC|O_LARGEFILE), 0644);
 			if (fd==-1)
 			{
