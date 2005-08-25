@@ -78,6 +78,11 @@ function play()
 							<td id="nextd" class="epgdur" width="40px" align="left" background="mepg_grad.png">&nbsp;</td>
 							<td id="nextst" class="epgname_bold" width="*" align="left" background="mepg_grad.png">&nbsp;</td>
 						</tr>
+						<tr>
+							<td width="50px" align="left" background="mepg_grad.png">&nbsp;</td>
+							<td width="40px" align="left" background="mepg_grad.png">&nbsp;</td>
+							<td width="*" align="left" background="mepg_grad.png">#CHANNAVI#</td>
+						</tr>
 				</table>
 				<!-- end header -->
 		</td>
