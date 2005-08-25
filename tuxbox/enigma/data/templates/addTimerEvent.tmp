@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>Add Timer Event</title>
-		<link rel="stylesheet" type="text/css" href="#CSS#">
+		<link rel="stylesheet" type="text/css" href="/webif.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="timer.js"></script>
 		<script language="javascript" type="text/javascript" src="zap.js"></script>

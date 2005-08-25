@@ -290,7 +290,10 @@ eString getTimerList(eString format)
 	// buttons
 	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()", "#FFFFFF"));
 	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()", "#FFFFFF"));
-	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()", "#FFFFFF"));
+	if (pdaScreen == 0)
+		result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()", "#FFFFFF"));
+	else
+		result.strReplace("#BUTTONADD#", "");
 
 	return result;
 }
@@ -899,8 +902,6 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 
 	eString result = readFile(TEMPLATE_DIR + "addTimerEvent.tmp");
 
-	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
-
 	result.strReplace("#AFTEROPTS#", buildAfterEventOpts(0));
 
 	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
@@ -916,8 +917,6 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
 
 	result.strReplace("#ZAPDATA#", getZapContent(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, false, false, true));
-	if (pdaScreen == 1)
-		result = "<html><head><title>Info</title></head><body>This function is not available for PDAs.</body></html>";
 
 	return result;
 }
