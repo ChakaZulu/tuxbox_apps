@@ -35,7 +35,8 @@ function addTimerEvent()
 	var currentTimer = document.channelselector.type.selectedIndex;
 	var timer = document.channelselector.type.options[currentTimer].value;
 	var currentChannel = document.channelselector.channel.selectedIndex;
-	var channel = document.channelselector.channel.options[currentChannel].value;
+	var reference = document.channelselector.channel.options[currentChannel].value;
+	var channelName = document.channelselector.channel.options[currentChannel].text;
 	var currentSday = document.channelselector.sday.selectedIndex;
 	var sday = document.channelselector.sday.options[currentSday].text;
 	var currentSmonth = document.channelselector.smonth.selectedIndex;
@@ -86,17 +87,17 @@ function addTimerEvent()
 		if (document.channelselector.su.checked)
 			su = "on";
 
-		url = 'addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&smonth=' + smonth + '&syear=' + syear + '&ehour=' + ehour + '&emin=' + emin + '&emonth=' + emonth + '&eyear=' + eyear + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
+		url = 'addTimerEvent?timer=repeating&ref=' + reference + '&channel=' + channelName + '&shour=' + shour + '&smin=' + smin + '&smonth=' + smonth + '&syear=' + syear + '&ehour=' + ehour + '&emin=' + emin + '&emonth=' + emonth + '&eyear=' + eyear + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
 	}
 	else
-		url = 'addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&syear=' + syear + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&eyear=' + eyear + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
-
+		url = 'addTimerEvent?timer=regular&ref=' + reference + '&channel=' + channelName + '&sday=' + sday + '&smonth=' + smonth + '&syear=' + syear + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&eyear=' + eyear + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
+	alert(url);
 	NewWindow(url, 'add', '200', '200', 'no', '5000');
 }
 
-function showAddTimerEventWindow(timer)
+function showAddTimerEventWindow()
 {
-	NewWindow("showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '400', 'no');
+	NewWindow("showAddTimerEventWindow", 'addTimer', '780', '400', 'no');
 }
 
 
