@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.56 2005/08/19 10:31:29 saruman Exp $
+# $Id: de.po,v 1.57 2005/08/25 16:24:16 sat_man Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -3999,7 +3999,7 @@ msgstr "Fernbedienungseinstellungen anzeigen"
 
 #: src/setup_extra.cpp:72 src/setup_extra.cpp:226
 msgid "Factory reset"
-msgstr "Standardeinstellungen"
+msgstr "Werkseinstellungen"
 
 #: src/setup_extra.cpp:72
 msgid "all settings will set to factory defaults"
@@ -4122,7 +4122,7 @@ msgstr ""
 
 #: src/setup_extra.cpp:244
 msgid "Factory reset..."
-msgstr "Standardeinstellungen..."
+msgstr "Werkseinstellungen..."
 
 #: src/setup_harddisk.cpp:186
 msgid "Harddisk Setup"
@@ -5058,6 +5058,38 @@ msgstr "Verschlüsselungssysteme (links, rechts)"
 #: src/streaminfo.cpp:657
 msgid "Transponder information (left)"
 msgstr "Transponderinformationen (links)"
+
+#: src/time_correction.cpp:20
+msgid "Receiver Time:"
+msgstr "Receiver Zeit:"
+
+#: src/time_correction.cpp:33
+msgid "Transponder Time:"
+msgstr "Transponder Zeit:"
+
+#: src/time_correction.cpp:44
+msgid "New Time:"
+msgstr "Neue Zeit:"
+
+#: src/time_correction.cpp:63
+msgid "New Date:"
+msgstr "Neues Datum:"
+
+#: src/time_correction.cpp:57
+msgid "enter correct time here"
+msgstr "korrigierte Zeit hier eintragen"
+
+#: src/time_correction.cpp:72
+msgid "press ok to select another day"
+msgstr "'OK' drücken um einen anderen Tag auszuwählen"
+
+#: src/time_correction.cpp:78
+msgid "press ok to select another month"
+msgstr "'OK' drücken um einen anderen Monat auszuwählen"
+
+#: src/time_correction.cpp:87
+msgid "press ok to select another year"
+msgstr "'OK' drücken um ein anderes Jahr auszuwählen"
 
 #: src/timer.cpp:284
 msgid "Timerlist"
