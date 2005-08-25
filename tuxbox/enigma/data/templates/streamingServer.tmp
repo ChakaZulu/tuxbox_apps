@@ -28,14 +28,9 @@
 	{
 		document.location =  "/cgi-bin/movieplayer.m3u?command=terminate";
 	}
-	function init()
-	{
-		if (parent.leftnavi)
-			parent.leftnavi.location.reload();
-	}
 	</script>
 </head>
-<body style="padding: 10px; background-color: #F4F4F4;" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" id="contentcell" onLoad="init()">
+<body style="padding: 10px; background-color: #F4F4F4;" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" id="contentcell">
 	<form name="form1">
 		<input type="button" style="width: 100; height: 22" onClick="playFile()" value="File">
 		&nbsp;

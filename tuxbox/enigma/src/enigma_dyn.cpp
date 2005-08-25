@@ -575,6 +575,32 @@ eString getTopNavi()
 	return result;
 }
 
+eString getZapNavi()
+{
+	eString result;
+	eString pre, post;
+
+	if (zap[zapMode][ZAPSUBMODEALLSERVICES])
+	{
+		result += button(100, "All Services", RED, "javascript:zapnavi('?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEALLSERVICES) + "')", "#FFFFFF");
+	}
+	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite && zap[zapMode][ZAPSUBMODESATELLITES])
+	{
+		result += button(100, "Satellites", GREEN, "javascript:zapnavi('?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + "')", "#FFFFFF");
+	}
+	if (zap[zapMode][ZAPSUBMODEPROVIDERS])
+	{
+		result += button(100, "Providers", YELLOW, "javascript:zapnavi('?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEPROVIDERS) + "')", "#FFFFFF");
+	}
+	if (zap[zapMode][ZAPSUBMODEBOUQUETS])
+	{
+		result += button(100, "Bouquets", BLUE, "javascript:zapnavi('?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + "')", "#FFFFFF");
+	}
+
+	return result;
+}
+
+
 eString getLeftNavi(eString mode)
 {
 	eString result;
@@ -605,26 +631,6 @@ eString getLeftNavi(eString mode)
 			result += "<br>";
 			result += button(110, "Stream", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODESTREAMING) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
 #endif
-			result += "<br><br>";
-			if (zap[zapMode][ZAPSUBMODEALLSERVICES])
-			{
-				result += button(110, "All Services", RED, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEALLSERVICES) + post, "#FFFFFF");
-				result += "<br>";
-			}
-			if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite && zap[zapMode][ZAPSUBMODESATELLITES])
-			{
-				result += button(110, "Satellites", GREEN, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post, "#FFFFFF");
-				result += "<br>";
-			}
-			if (zap[zapMode][ZAPSUBMODEPROVIDERS])
-			{
-				result += button(110, "Providers", YELLOW, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEPROVIDERS) + post, "#FFFFFF");
-				result += "<br>";
-			}
-			if (zap[zapMode][ZAPSUBMODEBOUQUETS])
-			{
-				result += button(110, "Bouquets", BLUE, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
-			}
 		}
 		else
 		{
@@ -919,10 +925,18 @@ void genHTMLServicesList(std::list <myService> &myList, eString &serviceRefList,
 	serviceRefList = "";
 	serviceList = "";
 
-	for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+	if (myList.size() > 0)
 	{
-		serviceRefList += "\"" + myIt->serviceRef + "\", ";
-		serviceList += "\"" + myIt->serviceName + "\", ";
+		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+		{
+			serviceRefList += "\"" + myIt->serviceRef + "\", ";
+			serviceList += "\"" + myIt->serviceName + "\", ";
+		}
+	}
+	else
+	{
+		serviceRefList = "\"none\", ";
+		serviceList = "\"none\", ";
 	}
 	
 	serviceRefList = serviceRefList.left(serviceRefList.length() - 2);
@@ -1180,6 +1194,7 @@ static eString getZap(eString path)
 				result.strReplace("#WIDTH2#", "430");
 			}
 			tmp = button(100, "EPG-Overview", RED, "javascript:mepg()", "#FFFFFF");
+			result.strReplace("#ZAPNAVI#", getZapNavi());
 			result.strReplace("#MEPGBUTTON#", tmp);
 		}
 		result.strReplace("#SELSIZE#", eString().sprintf("%d", selsize));

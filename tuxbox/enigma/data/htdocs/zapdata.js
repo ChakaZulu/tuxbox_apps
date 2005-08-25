@@ -19,6 +19,4 @@ function init()
 
 	loadBouquets(currentBouquet);
 	loadChannels(currentBouquet, currentChannel);
-	if (parent.leftnavi)
-		parent.leftnavi.location.reload();
 }

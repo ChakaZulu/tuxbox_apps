@@ -1,3 +1,7 @@
+function zapnavi(command)
+{
+	parent.body.location = "body" + command;
+}
 function channelChange()
 {
 	currentChannel = document.channelselector.channel.selectedIndex;
