@@ -299,7 +299,7 @@ public:
 				const timeMap* evt = eEPGCache::getInstance()->getTimeMap(dref);
 				if (evt)
 				{
-					int tsidonid = (dref.getTransportStreamID().get()<<16)|dref.getOriginalNetworkID().get();
+					int tsidonid = (dref.getTransportStreamID().get() << 16) | dref.getOriginalNetworkID().get();
 					int tablePos = 0;
 					time_t tableTime = start;
 					result  << "<tr>"

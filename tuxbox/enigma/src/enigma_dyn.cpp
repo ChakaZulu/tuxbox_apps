@@ -123,6 +123,7 @@ eString firmwareLevel(eString verid)
 
 static eString tvMessageWindow(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	return readFile(TEMPLATE_DIR + "sendMessage.tmp");
 }
 
@@ -536,15 +537,16 @@ eString getCurService(void)
 	return filter_string(result);
 }
 
-eString getChanNavi()
+eString getChanNavi(bool showVLCButton)
 {
 	eString result;
 	result += button(100, "Audio", YELLOW, "javascript:selectAudio()", "#FFFFFF");
 	result += button(100, "Video", GREEN, "javascript:selectSubChannel()", "#FFFFFF");
-	result += button(100, "EPG", RED, "javascript:openEPG(\'\')", "#FFFFFF");
+	result += button(100, "EPG", RED, "javascript:openEPG('')", "#FFFFFF");
 	result += button(100, "Info", BLUE, "javascript:openChannelInfo()", "#FFFFFF");
 	result += button(100, "Stream Info", TOPNAVICOLOR, "javascript:openSI()", "#000000");
-	result += button(100, "VLC", TOPNAVICOLOR, "javascript:vlc()", "#000000");
+	if (showVLCButton)
+		result += button(100, "VLC", TOPNAVICOLOR, "javascript:vlc()", "#000000");
 	return result;
 }
 
@@ -2131,7 +2133,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 //		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
 			result.strReplace("#TOPBALK#", "topbalk4.png");
 		result.strReplace("#EMPTYCELL#", "&nbsp;");
-		result.strReplace("#CHANNAVI#", getChanNavi());
+		result.strReplace("#CHANNAVI#", getChanNavi(true));
 		result.strReplace("#TOPNAVI#", getTopNavi());
 #ifndef DISABLE_FILE
 		result.strReplace("#DVRCONTROLS#", readFile(TEMPLATE_DIR + "dvrcontrols.tmp"));
@@ -2326,6 +2328,7 @@ static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConne
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "webxtv" + opt["browser"] + ".tmp");
 	result.strReplace("#ZAPDATA#", getZapContent(zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, true, false, false));
+	result.strReplace("#CHANNAVI#", getChanNavi(false));
 	return result;
 }
 

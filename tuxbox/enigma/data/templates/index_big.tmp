@@ -116,7 +116,7 @@
 			}
 			function webxtv(browser)
 			{
-				NewWindow("/webxtv?browser=" + browser, "tv", "780", "700", "no", "0");
+				NewWindow("/webxtv?browser=" + browser, "tv", "780", "735", "no", "0");
 			}
 		</script>
 	</head>
