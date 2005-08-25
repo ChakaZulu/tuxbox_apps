@@ -5,8 +5,8 @@
 		<script>
 			function selectFile()
 			{
-				var i = document.fileselector.files.selectedIndex;
-				var file = document.fileselector.files.options[i].value;
+				var file = document.fileselector.file.value;
+				alert(file);
 				if (window.confirm('Do you really want to WRITE flash partition #MTD# (#MTDNAME#)? Note: All data in this partition will be lost.'))
 					document.location = "/writeFlashPartition?mtd=" + document.fileselector.mtd.value + "&file=" + file;
 			}
