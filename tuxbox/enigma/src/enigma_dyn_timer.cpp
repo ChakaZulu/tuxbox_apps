@@ -892,17 +892,12 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString timer = opt["timer"];
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
 	tm end = *localtime(&now);
 
-	eString result;
-	if (timer == "repeating")
-		result = readFile(TEMPLATE_DIR + "addRepeatingTimerEvent.tmp");
-	else
-		result = readFile(TEMPLATE_DIR + "addTimerEvent.tmp");
+	eString result = readFile(TEMPLATE_DIR + "addTimerEvent.tmp");
 
 	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
 
