@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.58 2005/07/04 18:37:34 chakazulu Exp $
+	$Id: controlapi.cpp,v 1.59 2005/08/25 17:39:37 digi_casi Exp $
 
 	License: GPL
 
@@ -308,7 +308,10 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 {
 	bool res = false;
 	std::string script;
-	request->SendPlainHeader("text/plain");          // Standard httpd header senden
+	if (request->ParameterList.size() > 1)
+		request->SendPlainHeader("text/html");          // Standard httpd header senden MIME html
+	else
+		request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if (request->ParameterList.size() > 0)
 	{
 		script = request->ParameterList["1"];
@@ -332,12 +335,20 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 					std::string abscmd(PLUGIN_DIRS[i].c_str());
 					abscmd += "/";
 					abscmd += script;
-					printf("[CControlAPI] executing %s\n",abscmd.c_str());
+
+					for(unsigned int y=2;y<=request->ParameterList.size();y++)
+					{
+						char number_buf[20];
+				 		sprintf(number_buf, "%d", y); 
+						abscmd += " ";
+						abscmd += (request->ParameterList[number_buf]).c_str();
+					}
+					printf("[CControlAPI] executingY %s\n",abscmd.c_str());
 					FILE *f = popen(abscmd.c_str(),"r");
 					if (f != NULL)
 					{
-						char output[1024];
-						while (fgets(output,1024,f))
+						char output[8192];
+						while (fgets(output,8192,f))
 						{
 							request->SocketWrite(output);
 						}

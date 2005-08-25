@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.42 2004/01/05 19:25:08 thegoodguy Exp $
+	$Id: request.cpp,v 1.43 2005/08/25 17:39:37 digi_casi Exp $
 
 	License: GPL
 
@@ -16,7 +16,7 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -37,15 +37,16 @@
 #include "debug.h"
 #include "webdbox.h"
 
-#define OUTBUFSIZE 2048
+#define OUTBUFSIZE 10240
+#define IADDR_LOCAL "127.0.0.1"
 
 //-------------------------------------------------------------------------
 
-CWebserverRequest::CWebserverRequest(CWebserver *server) 
+CWebserverRequest::CWebserverRequest(CWebserver *server)
 {
 	Parent = server;
 
-	Method = M_UNKNOWN; 
+	Method = M_UNKNOWN;
 	Host = "";
 	URL = "";
 	Filename = "";
@@ -132,12 +133,12 @@ void CWebserverRequest::SplitParameter(char *param_copy)
 {
         if (param_copy == NULL)
 		return;
-	
+
 	char *p = strchr(param_copy, '=');
 
 	if (p == NULL) {
 		char number_buf[20];
- 		sprintf(number_buf, "%d", ParameterList.size()+1); 
+ 		sprintf(number_buf, "%d", ParameterList.size()+1);
 		ParameterList[number_buf] = param_copy;
 		return;
         }
@@ -192,7 +193,7 @@ bool CWebserverRequest::ParseFirstLine(std::string zeile)				// parse first line
 {
 	int ende, anfang, t;
 
-	anfang = zeile.find(' ');				// GET /images/elist.gif HTTP/1.1 
+	anfang = zeile.find(' ');				// GET /images/elist.gif HTTP/1.1
 	ende = zeile.rfind(' ');				// nach leerzeichen splitten
 
 	if (anfang > 0 && ende > 0 && anfang != ende)
@@ -217,7 +218,7 @@ bool CWebserverRequest::ParseFirstLine(std::string zeile)				// parse first line
 			dprintf("Request: '%s'\n",rawbuffer.c_str());
 			return false;
 		}
-		
+
 		if((t = url.find('?')) > 0)			// eventuellen Parameter inner URL finden
 		{
 			URL = url.substr(0,t);
@@ -244,7 +245,7 @@ bool CWebserverRequest::ParseHeader(std::string header)					// parse the header 
 	{
 		if((pos = header.find_first_of("\n")) > 0)
 		{
-			sheader = header.substr(0,pos-1);	
+			sheader = header.substr(0,pos-1);
 			header = header.substr(pos+1,header.length() - (pos+1));
 		}
 		else
@@ -252,7 +253,7 @@ bool CWebserverRequest::ParseHeader(std::string header)					// parse the header 
 			sheader = header;
 			ende = true;
 		}
-		
+
 		if((pos = sheader.find_first_of(':')) > 0)
 		{
 			HeaderList[sheader.substr(0,pos)] = sheader.substr(pos+2,sheader.length() - pos - 2);
@@ -260,7 +261,7 @@ bool CWebserverRequest::ParseHeader(std::string header)					// parse the header 
 		}
 	}
 
-	return true;	
+	return true;
 }
 
 //-------------------------------------------------------------------------
@@ -272,7 +273,7 @@ bool CWebserverRequest::ParseBoundaries(std::string bounds)			// parse boundarie
 	char * anfang = (char *) bounds.c_str();
 	char * ende = (char *) bounds.c_str() + bounds.length();
 	do
-	{	
+	{
 		anfang = strstr(anfang,Boundary.c_str());
 //		dprintf("anfang: %s\n",anfang);
 		if(anfang != 0)
@@ -280,7 +281,7 @@ bool CWebserverRequest::ParseBoundaries(std::string bounds)			// parse boundarie
 			e_ende = strstr(anfang +1,Boundary.c_str());
 			if(e_ende == 0)
 				e_ende = ende - 4;
-//			dprintf("ende: %s\n",e_ende); 
+//			dprintf("ende: %s\n",e_ende);
 			boundaries[i] = std::string(anfang + Boundary.length() +2,e_ende - (anfang + Boundary.length()+2) -2);
 			aprintf("boundary[%d]='%s'\n",i,boundaries[i].c_str());
 			anfang = e_ende;
@@ -295,7 +296,7 @@ bool CWebserverRequest::ParseBoundaries(std::string bounds)			// parse boundarie
 bool CWebserverRequest::ParseRequest()
 {
 	int ende;
-	
+
 	if(rawbuffer_len > 0 )
 	{
 		if((ende = rawbuffer.find_first_of('\n')) == 0)
@@ -322,21 +323,20 @@ bool CWebserverRequest::ParseRequest()
 			ParseHeader(header);
 			Host = HeaderList["Host"];
 			if(Method == M_POST) // TODO: Und testen ob content = formdata
-			{				
-
+			{
 				std::string t = "multipart/form-data; boundary=";
 				if(HeaderList["Content-Type"].compare(0,t.length(),t) == 0)
 				{
-					SocketWriteLn("Sorry, momentan broken\n");
-					/*Boundary = "--" + HeaderList["Content-Type"].substr(t.length(),HeaderList["Content-Type"].length() - t.length());
-					dprintf("Boundary: '%s'\n",Boundary.c_str());
-					if((headerende + 3) < rawbuffer_len)
-						ParseBoundaries(rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3)));
-					HandleUpload();*/
-				}			
+//					SocketWriteLn("Sorry, momentan broken\n");
+					Boundary = "--" + HeaderList["Content-Type"].substr(t.length(),HeaderList["Content-Type"].length() - t.length());
+					aprintf("Boundary: '%s'\n",Boundary.c_str());
+//					if((headerende + 3) < rawbuffer_len)
+//						ParseBoundaries(rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3)));
+					HandleUpload();
+				}
 				else if(HeaderList["Content-Type"].compare("application/x-www-form-urlencoded") == 0)
 				{
-					dprintf("Form Daten in Parameter String\n");
+//					dprintf("Form Daten in Parameter String\n");
 					if((headerende + 3) < rawbuffer_len)
 					{
 						std::string params = rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3));
@@ -345,44 +345,11 @@ bool CWebserverRequest::ParseRequest()
 						ParseParams(params);
 					}
 				}
-				
+
 				dprintf("Method Post !\n");
 			}
 
-/*
-			if(Method == M_POST) // TODO: Und testen ob content = formdata
-			{
-				if( (ende + 3) < rawbuffer + rawbuffer_len)
-				{
-//					Parent->Debug("Post Parameter vorhanden\n");
-					anfang = ende + 3;
-					Param_String = std::string(anfang,rawbuffer + rawbuffer_len - anfang);
-					dprintf("Post Param_String: %s\n",Param_String.c_str());
-					ParseParams(Param_String);
-				}
-				if(HeaderList->GetIndex("Content-Type") != -1)
-				{
-					dprintf("Content-Type: %s\n",HeaderList->GetValue(HeaderList->GetIndex("Content-Type")));
-					if(strcasecmp("application/x-www-form-urlencoded",HeaderList->GetValue(HeaderList->GetIndex("Content-Type"))) == 0)
-						dprintf("Form Daten in Parameter String\n");
-					if(strstr(HeaderList->GetValue(HeaderList->GetIndex("Content-Type")),"multipart/form-data") != 0)
-					{
-						char * boundary;
-						boundary = strstr(HeaderList->GetValue(HeaderList->GetIndex("Content-Type")),"boundary=");
-						if(boundary)
-						{
-							boundary += strlen("boundary=");
 
-							dprintf("boundary : %s\n",boundary);
-							Upload = new TUpload(this);
-							Upload->Boundary = new TString(boundary);
-							Boundary = new TString(boundary);
-							dprintf("Form Daten in Parameter String und Datei upload\nBoundary: %ld\n",Boundary);
-						}
-					}					
-				}
-			}
-*/
 			return true;
 		}
 		else {
@@ -403,60 +370,115 @@ bool CWebserverRequest::ParseRequest()
 
 //-------------------------------------------------------------------------
 
-bool CWebserverRequest::HandleUpload()				// momentan broken 
+bool CWebserverRequest::HandleUpload()				// momentan broken
 {
-	int t = 0;
-//	FILE *output;
-//	int count = 0;
+	int t,y = 0;
 
 	SocketWrite("HTTP/1.1 100 Continue \r\n\r\n");		// Erstmal weitere Daten anfordern
 
 	if(HeaderList["Content-Length"] != "")
 	{
-		dprintf("Contenlaenge gefunden\n");
+		FILE *out = fopen("/var/tmp/upload.tmp","w"); // save tmp & mem - open here => File=0 tmp=Socket-space
+		// Get Multipart Upload
+		//--------------------------------
+		aprintf("Contenlaenge gefunden\n");
 		long contentsize = atol(HeaderList["Content-Length"].c_str());
-		dprintf("Contenlaenge :%ld\n",contentsize);
+		aprintf("Contenlaenge :%ld\n",contentsize);
 		char *buffer2 =(char *) malloc(contentsize);
 		if(!buffer2)
 		{
-			dprintf("Kein Speicher für upload\n");
+			aprintf("Kein Speicher für upload\n");
 			return false;
 		}
 		long long gelesen = 0;
-		dprintf("Buffer ok Groesse:%ld\n",contentsize);
+		aprintf("Buffer ok Groesse:%ld\n",contentsize);
+		fcntl(Socket, F_SETFL, fcntl(Socket,F_GETFL)|O_NONBLOCK); //Non blocking
 		while(gelesen < contentsize)
 		{
-			t = read(Socket,&buffer2[gelesen],contentsize-gelesen);
-			if(t <= 0)
-				dprintf("nix mehr\n");
-			gelesen += t;
-			dprintf("gelesen %lld\n",gelesen);
+
+//			if(y > 500)
+//				SocketWrite("HTTP/1.1 100 Continue \r\n\r\n");		// do it again sam
+			if(y > 500)
+			{
+				aprintf("y read Abbruch\n");
+				break;
+			}
+			aprintf("vor %lld noch %lld",gelesen,contentsize-gelesen);
+			t = read(Socket,&buffer2[gelesen],contentsize-gelesen);//Test -1
+			aprintf("nach read t%d\n",t);
+			if(t!=-1)//EAGAIN 
+			{
+				if(t <= 0)
+				{
+					aprintf("nix mehr\n");
+					break;
+				}
+				gelesen += t;
+				y=0; 
+			}
+			else
+				y++;
+//			aprintf("gelesen %lld\n",gelesen);
 		}
-		dprintf("fertig\n");
-		FILE *out = fopen("/var/tmp/test.ausgabe","w");
-		if(out != NULL)
-		{
-			fwrite(buffer2,gelesen,1,out);
-			fclose(out);
-		}
-		else
-			dprintf("nicht geschreiben\n");
-		free(buffer2);
-		
+		aprintf("fertig\n");
 		if(gelesen == contentsize)
 		{
-			dprintf("Upload komplett gelesen: %ld bytes\n",contentsize);
+			// Extract Upload File
+			//--------------------------------
+			std::string marker;
+			std::string buff;
+			//aprintf("build buff");
+			buff = std::string(buffer2, gelesen);
+			//aprintf("free buffer2");
+			free(buffer2);
+
+			int pos = 0;
+			if((pos = buff.find("\r\n")) > 0)	// find marker
+			{
+				marker = buff.substr(0,pos-1);
+				buff = buff.substr(pos+1,buff.length() - (pos+1)); // snip
+			}		
+			if((pos = buff.find("Content-Type")) > 0) // Multipart File
+			{
+				buff = buff.substr(pos+1,buff.length() - (pos+1)); // snip
+			}		
+			if((pos = buff.find("\r\n\r\n")) > 0) // Multipart File - Start offset
+			{
+				buff = buff.substr(pos+4,buff.length() - (pos+4)); // snip
+			}		
+			//aprintf("buff-3: %s\n",buff.c_str());
+			if((pos = buff.find(marker)) > 0)// find marker after file
+			{
+				buff= buff.substr(0,pos-2); // snip "\r\n"+marker
+			}		
+			//aprintf("buff-4: %s\n",buff.c_str());
+			aprintf("write");
+			
+			// Write Upload Extract file
+			//--------------------------------
+			if(out != NULL)
+			{
+				fwrite(buff.c_str(),buff.length(),1,out);
+			}
+			else
+				aprintf("nicht geschreiben\n");
+		}
+		if(out != NULL)
+			fclose(out);
+		if(gelesen == contentsize)
+		{
+			aprintf("Upload komplett gelesen: %ld bytes\n",contentsize);
 			return true;
-		} 
+		}
 		else
 		{
-			dprintf("Upload konnte nicht komplett gelesen werden  %ld bytes\n",contentsize);
+			aprintf("Upload konnte nicht komplett gelesen werden  %ld bytes\n",contentsize);
 			return false;
 		}
 	}
 	else
 	{
-		dprintf("Content-Length ist nicht in der HeaderListe\n");
+		aprintf("Content-Length ist nicht in der HeaderListe\n");
 		return false;
 	}
 }
@@ -550,7 +572,7 @@ void CWebserverRequest::RewriteURL()
 		if(split < URL.length())
 			Filename= URL.substr(split,URL.length()- split);
 		else
-			dprintf("Kein Dateiname !\n");	
+			dprintf("Kein Dateiname !\n");
 	}
 
 	if(Filename.find('%') > 0)	// Wenn Sonderzeichen im Dateinamen sind
@@ -564,8 +586,8 @@ void CWebserverRequest::RewriteURL()
 				switch (*((short *)(&str[i+1])))
 				{
 					case 0x3230 : filename[n++] = ' '; break;
-					default: filename[n++] = ' '; break;				
-				
+					default: filename[n++] = ' '; break;
+
 				}
 				i += 2;
 			}
@@ -576,7 +598,7 @@ void CWebserverRequest::RewriteURL()
 	}
 
 	FileExt = "";
-	if(Filename.length() > 0) 
+	if(Filename.length() > 0)
 	{
 		int fileext = Filename.rfind('.');
 
@@ -585,13 +607,26 @@ void CWebserverRequest::RewriteURL()
 			FileExt = Filename.substr(fileext+1,Filename.length()-(fileext+1));
 		}
 	}
-}		
+}
 
 //-------------------------------------------------------------------------
 
 bool CWebserverRequest::SendResponse()
 {
 	RewriteURL();		// Erst mal die URL umschreiben
+
+	if( Client_Addr.find(IADDR_LOCAL)>0 ) // != local
+	{
+//		aprintf("do auth:%s\n",Client_Addr.c_str());
+		if(!Authenticate()) // Jeder Aufruf muss geprueft werden
+        		return false;
+	}
+//	else
+//	{
+//
+//		aprintf("not auth:%s\n",Client_Addr.c_str());
+//	}
+	
 	if( (Path.compare("/control/") == 0) || (Path.compare("/cgi-bin/") == 0) )
 	{	// api for external programs
 		return Parent->WebDbox->ControlAPI->Execute(this);
@@ -708,7 +743,7 @@ std::string CWebserverRequest::GetContentType(std::string ext)
 
 bool CWebserverRequest::SendFile(const std::string path,const std::string filename)
 {
-	if( (tmpint = OpenFile(path, filename) ) != -1 )		
+	if( (tmpint = OpenFile(path, filename) ) != -1 )
 	{											// Wenn Datei geöffnet werden konnte
 		if (!SocketWrite("HTTP/1.0 200 OK\r\n"))
 		{
@@ -716,7 +751,7 @@ bool CWebserverRequest::SendFile(const std::string path,const std::string filena
 			return false;
 		}
 		HttpStatus = 200;
-		
+
 		if (!SocketWrite("Content-Type: " + GetContentType(FileExt) + "\r\n\r\n"))
 		{
 			close(tmpint);
@@ -750,7 +785,7 @@ std::string CWebserverRequest::GetFileName(std::string path, std::string filenam
 		tmpfilename = path + "/" + filename;
 	else
 		tmpfilename = path + filename;
-	
+
 	if( access(std::string(Parent->PublicDocumentRoot + tmpfilename).c_str(),4) == 0)
 			tmpfilename = Parent->PublicDocumentRoot + tmpfilename;
 	else if(access(std::string(Parent->PrivateDocumentRoot + tmpfilename).c_str(),4) == 0)
@@ -815,14 +850,14 @@ bool CWebserverRequest::ParseFile(const std::string filename,CStringList &params
 
 		file_buffer = new char[file_length];		// allocate buffer for file
 
-		out_buffer_size = file_length + 2048;		
+		out_buffer_size = file_length + 2048;
 		out_buffer = new char[out_buffer_size];		// allocate output buffer
-		
+
 		fread(file_buffer, file_length, 1, fd);		// read file
 
 		if((out_len = ParseBuffer(file_buffer, file_length, out_buffer, out_buffer_size, params)) > 0)
 			SocketWriteData(out_buffer,out_len);
-		
+
 		fclose(fd);
 
 		delete[] out_buffer;
@@ -843,8 +878,8 @@ long CWebserverRequest::ParseBuffer(char *file_buffer, long file_length, char *o
 		if(file_buffer[pos] == '%' && file_buffer[pos+1] == '%')	// begin of parameter
 		{
 			endpos = pos + 2;		// skip start seperators
-			parameter = "";			
-			while((endpos < (file_length -2)) && !((file_buffer[endpos] == '%') && (file_buffer[endpos+1] == '%')))  
+			parameter = "";
+			while((endpos < (file_length -2)) && !((file_buffer[endpos] == '%') && (file_buffer[endpos+1] == '%')))
 			{	// search for end of parameter
 				parameter += file_buffer[endpos++];
 			}
@@ -861,7 +896,7 @@ long CWebserverRequest::ParseBuffer(char *file_buffer, long file_length, char *o
 			pos = endpos + 2;	// skip end seperators
 		}
 		else
-			out_buffer[outpos++] = file_buffer[pos++];		
+			out_buffer[outpos++] = file_buffer[pos++];
 	}
 	out_buffer[outpos] = 0;
 
@@ -870,7 +905,7 @@ long CWebserverRequest::ParseBuffer(char *file_buffer, long file_length, char *o
 
 //-------------------------------------------------------------------------
 // Decode URLEncoded std::string
-void CWebserverRequest::URLDecode(std::string &encodedString) 
+void CWebserverRequest::URLDecode(std::string &encodedString)
 {
 	char *newString=NULL;
 	const char *string = encodedString.c_str();
@@ -892,7 +927,7 @@ void CWebserverRequest::URLDecode(std::string &encodedString)
 				hex[2]='\0';
 				iStr = strtoul(hex,NULL,16); /* convert to Hex char */
 				newString[count]=(char)iStr;
-				count++; 
+				count++;
 				string = string + 2; /* need to reset the pointer so that we don't write hex out */
 			}
 			else
