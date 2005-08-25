@@ -9,33 +9,32 @@
 #include <lib/base/eptrlist.h>
 #include <lib/dvb/dvbservice.h>
 
-class CAService
+class CAService: public Object
 {
 	int sock, clilen, lastPMTVersion;
 	struct sockaddr_un servaddr;
 	eServiceReferenceDVB me;
+	unsigned int state;
+	unsigned char *capmt;
+	eTimer retry;
 public:
 	const eServiceReferenceDVB &getRef() const { return me; }
+	void sendCAPMT();
+	void Connect();
 	CAService( const eServiceReferenceDVB &service )
-		:lastPMTVersion(-1), me(service)
+		:lastPMTVersion(-1), me(service), state(0), capmt(NULL), retry(eApp)
 	{
-		memset(&servaddr, 0, sizeof(struct sockaddr_un));
-		servaddr.sun_family = AF_UNIX;
-		strcpy(servaddr.sun_path, "/tmp/camd.socket");
-		clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-		sock = socket(PF_UNIX, SOCK_STREAM, 0);
-		connect(sock, (struct sockaddr *) &servaddr, clilen);
-		fcntl(sock, F_SETFL, O_NONBLOCK);
-		int val=1;
-		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+		CONNECT(retry.timeout, CAService::sendCAPMT);
+		Connect();
 //		eDebug("[eDVBCAHandler] new service %s", service.toString().c_str() );
 	}
 	~CAService()
 	{
+		delete [] capmt;
 		::close(sock);
 //		eDebug("[eDVBCAHandler] leave service %s", me.toString().c_str() );
 	}
-	void sendCAPMT( PMT *pmt );
+	void buildCAPMT( PMT *pmt );
 };
 
 static bool operator==( const CAService *caservice, const eServiceReferenceDVB &service )
@@ -67,7 +66,7 @@ public:
 		ePtrList<CAService>::iterator it =
 			std::find(services.begin(), services.end(), service );
 		if ( it != services.end() )
-			it->sendCAPMT(pmt);
+			it->buildCAPMT(pmt);
 	}
 	eDVBCAHandler();
 	~eDVBCAHandler();

@@ -48,14 +48,28 @@ void eDVBCAHandler::leaveTransponder( eTransponder* t )
 	}
 }
 
-void CAService::sendCAPMT( PMT *pmt )
+void CAService::Connect()
+{
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, "/tmp/camd.socket");
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	sock = socket(PF_UNIX, SOCK_STREAM, 0);
+	connect(sock, (struct sockaddr *) &servaddr, clilen);
+	fcntl(sock, F_SETFL, O_NONBLOCK);
+	int val=1;
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+}
+
+void CAService::buildCAPMT( PMT *pmt )
 {
 	if ( pmt->version == lastPMTVersion )
 	{
 		eDebug("[eDVBCAHandler] dont send the self pmt version");
 		return;
 	}
-	unsigned char capmt[1024];
+	if ( !capmt )
+		capmt = new unsigned char[1024];
 
 	memcpy(capmt,"\x9f\x80\x32\x82\x00\x00", 6);
 
@@ -166,18 +180,49 @@ void CAService::sendCAPMT( PMT *pmt )
 	capmt[4]=((wp-6)>>8) & 0xff;
 	capmt[5]=(wp-6) & 0xff;
 
+	if ( state != 0xFFFFFFFF )
+		state=0;
+	sendCAPMT();
+}
+
+void CAService::sendCAPMT()
+{
+	if ( state && state != 0xFFFFFFFF ) // broken pipe retry
+	{
+		::close(sock);
+		Connect();
+	}
+
+	int wp = capmt[4] << 8;
+	wp |= capmt[5];
+	wp+=6;
+
 	if ( write(sock, capmt, wp) == wp )
 	{
-#if 0
+		state=0xFFFFFFFF;
 		eDebug("[eDVBCAHandler] send %d bytes",wp);
-
+#if 0
 		for(int i=0;i<wp;i++)
 			eDebugNoNewLine("%02x ",capmt[i]);
 		eDebug("");
 #endif
 	}
 	else
-		eDebug("[eDVBCAHandler] (sendCAPMT) write (%m)");
+	{
+		switch(state)
+		{
+			case 0xFFFFFFFF:
+				++state;
+				retry.start(0,true);
+//				eDebug("[eDVBCAHandler] send failed .. immediate retry");
+				break;
+			default:
+				retry.start(5000,true);
+//				eDebug("[eDVBCAHandler] send failed .. retry in 5 sec");
+				break;
+		}
+		++state;
+	}
 }
 
 eAutoInitP0<eDVBCAHandler> init_eDVBCAHandler(eAutoInitNumbers::osd-2, "eDVBCAHandler");
