@@ -12,9 +12,9 @@
 #include <src/enigma_dyn_colors.h>
 
 #define TEMPLATE_DIR TUXBOXDATADIR+eString("/enigma/templates/")
-#define TEMPLATE_DIR2 "/var/tuxbox/config/enigma/templates/"
+#define TEMPLATE_DIR2 CONFIGDIR+eString("/enigma/templates/")
 #define HTDOCS_DIR TUXBOXDATADIR+eString("/enigma/htdocs/")
-#define HTDOCS_DIR2 "/var/tuxbox/config/enigma/htdocs/"
+#define HTDOCS_DIR2 CONFIGDIR+eString("/enigma/htdocs/")
 
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 #define WINDOWCLOSE "<html><head><META http-equiv=Content-Type content=\"text/html; charset=UTF-8\"></head><body><script  language=\"javascript\">close();</script></body></html>"
