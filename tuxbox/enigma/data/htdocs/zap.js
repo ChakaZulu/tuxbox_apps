@@ -120,7 +120,8 @@ function vlcStart()
 		else
 		{
 			parent.data.location.reload();
-			setTimeout("vlcStart()", 500);
+			if (parent.data.vlcparms.indexOf("ffffffff") == parent.data.vlcparms.lastIndexOf("ffffffff"))
+				setTimeout("vlcStart()", 500);
 		}
 	}
 	else
@@ -139,4 +140,3 @@ function setStreamingServiceRef()
 	else
 		setTimeout("setStreamingServiceRef()", 200);
 }
-
