@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.59 2005/08/25 17:39:37 digi_casi Exp $
+	$Id: controlapi.cpp,v 1.60 2005/08/26 16:57:41 yjogol Exp $
 
 	License: GPL
 
@@ -347,8 +347,8 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 					FILE *f = popen(abscmd.c_str(),"r");
 					if (f != NULL)
 					{
-						char output[8192];
-						while (fgets(output,8192,f))
+						char output[1024];
+						while (fgets(output,1024,f))
 						{
 							request->SocketWrite(output);
 						}

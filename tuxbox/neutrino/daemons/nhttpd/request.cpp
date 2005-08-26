@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.43 2005/08/25 17:39:37 digi_casi Exp $
+	$Id: request.cpp,v 1.44 2005/08/26 16:57:41 yjogol Exp $
 
 	License: GPL
 
@@ -395,9 +395,6 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 		fcntl(Socket, F_SETFL, fcntl(Socket,F_GETFL)|O_NONBLOCK); //Non blocking
 		while(gelesen < contentsize)
 		{
-
-//			if(y > 500)
-//				SocketWrite("HTTP/1.1 100 Continue \r\n\r\n");		// do it again sam
 			if(y > 500)
 			{
 				aprintf("y read Abbruch\n");
@@ -406,7 +403,7 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 			aprintf("vor %lld noch %lld",gelesen,contentsize-gelesen);
 			t = read(Socket,&buffer2[gelesen],contentsize-gelesen);//Test -1
 			aprintf("nach read t%d\n",t);
-			if(t!=-1)//EAGAIN 
+			if(t!=-1)//EAGAIN =-1
 			{
 				if(t <= 0)
 				{
@@ -418,7 +415,6 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 			}
 			else
 				y++;
-//			aprintf("gelesen %lld\n",gelesen);
 		}
 		aprintf("fertig\n");
 		if(gelesen == contentsize)
@@ -427,9 +423,7 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 			//--------------------------------
 			std::string marker;
 			std::string buff;
-			//aprintf("build buff");
 			buff = std::string(buffer2, gelesen);
-			//aprintf("free buffer2");
 			free(buffer2);
 
 			int pos = 0;
@@ -446,12 +440,10 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 			{
 				buff = buff.substr(pos+4,buff.length() - (pos+4)); // snip
 			}		
-			//aprintf("buff-3: %s\n",buff.c_str());
 			if((pos = buff.find(marker)) > 0)// find marker after file
 			{
 				buff= buff.substr(0,pos-2); // snip "\r\n"+marker
 			}		
-			//aprintf("buff-4: %s\n",buff.c_str());
 			aprintf("write");
 			
 			// Write Upload Extract file
