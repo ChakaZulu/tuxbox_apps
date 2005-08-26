@@ -58,17 +58,17 @@ GENRE.ARTS.5 kirjallisuus
 GENRE.ARTS.6 elokuva
 GENRE.ARTS.7 kokeellinen elokuva
 GENRE.ARTS.8 uutiset / lehdistÃ¶
-GENRE.ARTS.9 uusi media
+GENRE.ARTS.9 uusmedia
 GENRE.CHILDRENs_PROGRAMMES.0 lasten ja nuorten ohjelmaa
 GENRE.CHILDRENs_PROGRAMMES.1 esikouluikÃ€isten ohjelmaa
 GENRE.CHILDRENs_PROGRAMMES.2 viihdettÃ€ 6 - 14 vuotiaille
 GENRE.CHILDRENs_PROGRAMMES.3 viihdettÃ€ 10 - 16 vuotiaille
 GENRE.CHILDRENs_PROGRAMMES.4 opetusohjelmaa
-GENRE.CHILDRENs_PROGRAMMES.5 piirros/nukkeanimaatio
+GENRE.CHILDRENs_PROGRAMMES.5 piirros- / nukkeanimaatio
 GENRE.DOCUS_MAGAZINES.0 dokumentti ja makasiini
 GENRE.DOCUS_MAGAZINES.1 luonto
-GENRE.DOCUS_MAGAZINES.2 teknologia/luonnontiede
-GENRE.DOCUS_MAGAZINES.3 lÃ€Ã€ketiede/fysiologia/psykologia
+GENRE.DOCUS_MAGAZINES.2 teknologia / luonnontiede
+GENRE.DOCUS_MAGAZINES.3 lÃ€Ã€ketiede / fysiologia / psykologia
 GENRE.DOCUS_MAGAZINES.4 vieraat kulttuurit/tutkimusmatkailu
 GENRE.DOCUS_MAGAZINES.5 yhteiskunta ja hengellinen
 GENRE.DOCUS_MAGAZINES.6 koulutus
@@ -82,19 +82,19 @@ GENRE.MOVIE.5 sarjat/melodraama
 GENRE.MOVIE.6 romantiikka
 GENRE.MOVIE.7 historiallinen elokuva/draama
 GENRE.MOVIE.8 aikuisviihde/draama
-GENRE.MUSIC_DANCE.0 musiikki/tanssi
-GENRE.MUSIC_DANCE.1 rock/pop
+GENRE.MUSIC_DANCE.0 musiikki / tanssi
+GENRE.MUSIC_DANCE.1 rock / pop
 GENRE.MUSIC_DANCE.2 klassinen musiikki
 GENRE.MUSIC_DANCE.3 kansanmusiikki
 GENRE.MUSIC_DANCE.4 jazz
-GENRE.MUSIC_DANCE.5 musikaali/ooppera
+GENRE.MUSIC_DANCE.5 musikaali / ooppera
 GENRE.MUSIC_DANCE.6 baletti
 GENRE.NEWS.0 uutiset
 GENRE.NEWS.1 uutiset / sÃ€Ã€ennuste
 GENRE.NEWS.2 ajankohtaisohjelma
 GENRE.NEWS.3 dokumentti
 GENRE.NEWS.4 keskustelu / haastattelu 
-GENRE.SHOW.0 viihde/visailu
+GENRE.SHOW.0 viihde / visailu
 GENRE.SHOW.1 visailu
 GENRE.SHOW.2 viihdeohjelma
 GENRE.SHOW.3 keskusteluohjelma
@@ -114,22 +114,22 @@ GENRE.SPORTS.6 yleisurheilu
 GENRE.SPORTS.7 moottoriurheilu
 GENRE.SPORTS.8 vesiurheilu
 GENRE.SPORTS.9 talviurheilu
-GENRE.TRAVEL_HOBBIES.0 virkistys
+GENRE.TRAVEL_HOBBIES.0 harrasteet, viihde ja virkistys
 GENRE.TRAVEL_HOBBIES.1 matkailu ja turismi
 GENRE.TRAVEL_HOBBIES.2 kÃ€sityÃ¶t
 GENRE.TRAVEL_HOBBIES.3 autoilu
-GENRE.TRAVEL_HOBBIES.4 kuntoilu & terveys
+GENRE.TRAVEL_HOBBIES.4 kuntoilu ja terveys
 GENRE.TRAVEL_HOBBIES.5 ruoka
 GENRE.TRAVEL_HOBBIES.6 ostos-tv
 GENRE.TRAVEL_HOBBIES.7 puutarha
 GENRE.UNKNOWN tuntematon
-apids.hint_1 SyÃ¶tÃ€ APIDit jotka striimataan
-apids.hint_2 hexalukuina vÃ€lilyÃ¶nneillÃ€ erotettuna
+apids.hint_1 SyÃ¶tÃ€ streamattavat audio PIDit
+apids.hint_2 heksalukuina vÃ€lilyÃ¶nneillÃ€ erotettuna
 apidselector.head Valitse kieli
-audiomenu.PCMOffset Volume Decrease PCM
+audiomenu.PCMOffset PCM Ã€Ã€nen vaimennus
 audiomenu.analogout Analoginen lÃ€htÃ¶
 audiomenu.avs avs
-audiomenu.avs_control ÃÃ€nenvoimak. sÃ€Ã€tÃ¶ avs/ost
+audiomenu.avs_control ÃÃ€nenvoimakkuuden sÃ€Ã€tÃ¶
 audiomenu.dolbydigital Dolby Digital
 audiomenu.head ÃÃ€nen asetukset
 audiomenu.lirc lirc
@@ -193,14 +193,14 @@ bouqueteditor.lock Lukitse
 bouqueteditor.move SiirrÃ€
 bouqueteditor.name Kanavaniput
 bouqueteditor.newbouquetname Uusi nimi kanavanipulle
-bouqueteditor.rename UudelleennimeÃ€
+bouqueteditor.rename NimeÃ€
 bouqueteditor.return Valmis
 bouqueteditor.savechanges? Tallennetaanko muutokset?
 bouqueteditor.savingchanges Tallennetaan muutoksia. Odota hetki.
 bouqueteditor.switch TV/Radio
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Kanavaniput
-cablesetup.provider Kaapeli-tv tarjoaja
+cablesetup.provider Verkko
 channellist.head Kaikki palvelut
 channellist.nonefound Kanavia ei lÃ¶ytynyt!\nTee kanavahaku\n(dbox-nÃ€ppÃ€in -> asetukset)
 channellist.since alkaen %02d:%02d
@@ -212,14 +212,14 @@ colormenu.background Tausta
 colormenu.background_head Tausta
 colormenu.fade Fade valikot
 colormenu.font Kirjasinkoot
-colormenu.gtx_alpha LÃ€pinÃ€kyvyys (GTX)
+colormenu.gtx_alpha LÃ€pinÃ€kyvyys
 colormenu.head KÃ€yttÃ¶liittymÃ€n ulkoasu
 colormenu.menucolors Valikon vÃ€rit
 colormenu.statusbar Infopalkin vÃ€rit
 colormenu.textcolor Tekstin vÃ€ri
 colormenu.textcolor_head Tekstin vÃ€ri
 colormenu.themeselect Teeman valinta
-colormenu.timing OSD ajoitukset
+colormenu.timing OSD-ajoitukset
 colormenusetup.head Valikon vÃ€rit
 colormenusetup.menucontent Valitun ikkunan sisÃ€ltÃ¶
 colormenusetup.menucontent_inactive Passiivisen ikkunan sisÃ€ltÃ¶
@@ -238,8 +238,8 @@ date.Dec  Joulu
 date.Feb  Helmi
 date.Fri  Pe
 date.Jan  Tammi
-date.Jul  KesÃ€
-date.Jun  HeinÃ€
+date.Jul  HeinÃ€
+date.Jun  KesÃ€
 date.Mar  Maalis
 date.May  Touko
 date.Mon  Ma
@@ -271,14 +271,14 @@ favorites.bqcreated Kanavanippu "Suosikit" luotu...\n
 favorites.chadded Kanava lisÃ€tty suosikkeihisi...\n
 favorites.chalreadyinbq Kanava on jo suosikeissasi...\n
 favorites.finalhint \nKÃ€ytÃ€ kanavanippueditoria suosikkiesi muokkaamiseen.\n
-favorites.menueadd lisÃ€Ã€ kanava suosikkeihin
-favorites.nobouquets Suosikit ovat kÃ€ytettÃ€vissÃ€ vain nykyisestÃ€ kanavanipusta.
+favorites.menueadd LisÃ€Ã€ kanava suosikkeihin
+favorites.nobouquets Suosikit ovat kÃ€ytettÃ€vissÃ€ vain aktiivisista kanavanipuista.
 filebrowser.delete Poista
 filebrowser.denydirectoryleave Pakota aloitushakemisto
 filebrowser.dodelete1 Poista
 filebrowser.dodelete2 ?
-filebrowser.filter.active Suodatin pÃ€Ã€llÃ€
-filebrowser.filter.inactive Suodatin pois pÃ€Ã€ltÃ€
+filebrowser.filter.active Suodatus pÃ€Ã€lle
+filebrowser.filter.inactive Suodatus pois
 filebrowser.head Tiedostoselain
 filebrowser.mark Merkitse
 filebrowser.nextpage Seur. sivu
@@ -287,68 +287,68 @@ filebrowser.scan Selaan kansiota
 filebrowser.select Valitse
 filebrowser.showrights NÃ€ytÃ€ tiedosto-oikeudet
 filebrowser.sort.date (pvm)
-filebrowser.sort.name (tiedostonimi2)
-filebrowser.sort.namedirsfirst (tiedostonimi2)
+filebrowser.sort.name (nimi)
+filebrowser.sort.namedirsfirst (hak/tied)
 filebrowser.sort.size (koko)
 filebrowser.sort.type (tyyppi)
 filesystem.is.utf8 Tiedostonimien merkistÃ¶
 filesystem.is.utf8.option.iso8859.1 ISO-8859-1
 filesystem.is.utf8.option.utf8 UTF-8
-flashupdate.actionreadflash Luen
-flashupdate.cantopenfile Tiedostoa ei voi avata
-flashupdate.cantopenmtd mtd-laitetta ei voida kÃ€yttÃ€Ã€
-flashupdate.checkupdate etsi uutta versiota
+flashupdate.actionreadflash Luetaan
+flashupdate.cantopenfile Tiedostoa ei voida avata
+flashupdate.cantopenmtd MTD-laitetta ei voida kÃ€yttÃ€Ã€
+flashupdate.checkupdate Etsi uutta versiota
 flashupdate.currentreleasecycle Versio
 flashupdate.currentversion_sep Nykyinen versio
-flashupdate.currentversiondate PÃ€ivÃ€mÃ€Ã€rÃ€
+flashupdate.currentversiondate PÃ€ivÃ€ys
 flashupdate.currentversionsnapshot Tyyppi
 flashupdate.currentversiontime Aika
-flashupdate.erasefailed Flashin tyhjÃ€ys epÃ€onnistui
-flashupdate.erasing TyhjennÃ€n flash-muistia
+flashupdate.erasefailed Flashin tyhjennys epÃ€onnistui
+flashupdate.erasing Flash-muistin tyhjennys
 flashupdate.experimentalimage Ohjelmisto jonka valitsit on testaamaton. TÃ€mÃ€ tarkoittaa\n, ettÃ€ laitteesi ei ehkÃ€ kÃ€ynnisty pÃ€ivityksen jÃ€lkeen.\n\nOletko varma, ettÃ€ haluat pÃ€ivittÃ€Ã€ tÃ€hÃ€n versioon?
 flashupdate.expertfunctions Erikoistoiminnot
-flashupdate.fileis0bytes tiedoston koko on 0 tavua
-flashupdate.fileselector Tiedosto-valitsin
-flashupdate.flashreadyreboot OhjelmistopÃ€ivitys onnistui.\nDBox kÃ€ynnistyy uudelleen nyt.
-flashupdate.getinfofile versiotietoja ei voitu lukea
-flashupdate.getinfofileerror versiotietoja ei voitu lukea
-flashupdate.getupdatefile pÃ€ivityksen hakeminen epÃ€onnistui
-flashupdate.getupdatefileerror pÃ€ivityksen hakeminen epÃ€onnistui
+flashupdate.fileis0bytes Tiedosto on tyhjÃ€ (0 tavua)
+flashupdate.fileselector Valitse tiedosto
+flashupdate.flashreadyreboot OhjelmistopÃ€ivitys onnistui.\nDBox tÃ€ytyy kÃ€ynnistÃ€Ã€ uudelleen.
+flashupdate.getinfofile Versiotiedot
+flashupdate.getinfofileerror Versiotietoja ei voitu lukea
+flashupdate.getupdatefile PÃ€ivityksen haku
+flashupdate.getupdatefileerror PÃ€ivityksen hakeminen epÃ€onnistui
 flashupdate.globalprogress Kokonaiskesto:
 flashupdate.head OhjelmistopÃ€ivitys
-flashupdate.md5check tarkistan ohjelmistoa
-flashupdate.md5sumerror virheellinen ohjelmisto
+flashupdate.md5check Ohjelmiston tarkastus
+flashupdate.md5sumerror Virheellinen ohjelmisto
 flashupdate.msgbox Uusi ohjelmistoversio lÃ¶ydetty:\nPvm: %s, %s\nOhjelmistopohja: %s\nTyyppi: %s\n\nHaluatko asentaa tÃ€mÃ€n ohjelmistoversion?
 flashupdate.msgbox_manual Uusi ohjelmistoversio lÃ¶ydetty:\nPvm: %s, %s\nOhjelmistopohja: %s\nTyyppi: %s\n\nHaluatko asentaa tÃ€mÃ€n ohjelmistoversion?
-flashupdate.mtdselector Osio-valitsin
-flashupdate.programmingflash Ohjelmoin flash-muistin
-flashupdate.proxypassword JÃ€tÃ€ tyhjÃ€ksi, jos salasana ei ole kÃ€ytÃ¶ssÃ€.
-flashupdate.proxypassword_hint1 Anna vÃ€lityspalvelimen (proxy) salasana
-flashupdate.proxypassword_hint2 JÃ€tÃ€ tyhjÃ€ksi, jos salasana ei ole kÃ€ytÃ¶ssÃ€.
-flashupdate.proxyserver VÃ€lityspalvelin (proxy)
-flashupdate.proxyserver_hint1 Anna palvelimen nimi tai IP osoite, muotoa palvelin:portti
-flashupdate.proxyserver_hint2 tyhjÃ€ kenttÃ€ tarkoittaa, ettei vÃ€lityspalvelinta kÃ€ytetÃ€
+flashupdate.mtdselector Valitse osio
+flashupdate.programmingflash Flash-muistin kirjoitus
+flashupdate.proxypassword Salasana
+flashupdate.proxypassword_hint1 Anna vÃ€lityspalvelimen salasana.
+flashupdate.proxypassword_hint2 JÃ€tÃ€ tyhjÃ€ksi, jos salasanaa ei tarvita.
+flashupdate.proxyserver Osoite ja portti
+flashupdate.proxyserver_hint1 Anna palvelimen nimi tai IP-osoite, muodossa palvelin:portti
+flashupdate.proxyserver_hint2 JÃ€tÃ€ tyhjÃ€ksi mikÃ€li vÃ€lityspalvelinta ei kÃ€ytetÃ€.
 flashupdate.proxyserver_sep VÃ€lityspalvelin (proxy)
-flashupdate.proxyusername tyhjÃ€ kenttÃ€ tarkoittaa, ettÃ€ kÃ€yttÃ€nimeÃ€ ei ole kÃ€ytÃ¶ssÃ€
-flashupdate.proxyusername_hint1 vÃ€lityspalvelimen kÃ€yttÃ€jÃ€nimi
-flashupdate.proxyusername_hint2 tyhjÃ€ kenttÃ€ tarkoittaa, ettÃ€ kÃ€yttÃ€nimeÃ€ ei ole kÃ€ytÃ¶ssÃ€
-flashupdate.readflash Lue yksi osio
+flashupdate.proxyusername KÃ€yttÃ€jÃ€tunnus
+flashupdate.proxyusername_hint1 Anna vÃ€lityspalvelimen kÃ€yttÃ€jÃ€tunnus.
+flashupdate.proxyusername_hint2 JÃ€tÃ€ tyhjÃ€ksi mikÃ€li kÃ€yttÃ€tunnusta ei tarvita.
+flashupdate.readflash Lue koko flash-muisti
 flashupdate.readflashmtd Lue yksi osio
-flashupdate.ready valmis
-flashupdate.reallyflashmtd Haluatko varmasti pÃ€ivittÃ€Ã€?\n\nMikÃ€li pÃ€ivityksessÃ€ menee jokin pieleen tai\nohjelmisto on viallinen, laite ei enÃ€Ã€ kÃ€ynnisty uudelleen.\n\nOhjelmisto: %s\nKohde: %s
-flashupdate.savesuccess Ohjelma tallennettu hakemistoon %s.
+flashupdate.ready Valmis
+flashupdate.reallyflashmtd Haluatko varmasti pÃ€ivittÃ€Ã€?\n\nMikÃ€li pÃ€ivitys epÃ€onnistuu tai ohjelmisto\non viallinen, laite ei enÃ€Ã€ kÃ€ynnisty uudelleen.\n\nOhjelmisto: %s\nKohde: %s
+flashupdate.savesuccess Ohjelmisto tallennettu polkuun %s.
 flashupdate.selectimage Saatavilla olevat ohjelmistot
-flashupdate.squashfs.noversion SquashFS versiotarkastus ei toimi webin kautta pÃ€ivitettÃ€essÃ€.\nHaluatko jatkaa?
-flashupdate.titlereadflash Luen Flashia
-flashupdate.titlewriteflash Kirjoitan Flashia
-flashupdate.updatemode Manuaalinen (ftp)
-flashupdate.updatemode_internet internet
-flashupdate.updatemode_manual Manuaalinen (ftp)
-flashupdate.url_file configuraatio tiedosto 
-flashupdate.versioncheck tarkistan version
-flashupdate.writeflash Kirjoita yksi partitio
-flashupdate.writeflashmtd Kirjoita yksi partitio
-flashupdate.wrongbase Sinun versio eroaa uudesta. PÃ€ivitys ei ole\nmahdollinen mikÃ€li ohjelmistoversio ei ole oikea!
+flashupdate.squashfs.noversion SquashFS-versiotarkastus toimii vain\nwebin kautta pÃ€ivitettÃ€essÃ€.\n\nHaluatko jatkaa tarkastamatta versiota?
+flashupdate.titlereadflash Flash-muistin luku
+flashupdate.titlewriteflash Flash-muistin kirjoitus
+flashupdate.updatemode PÃ€ivitystapa
+flashupdate.updatemode_internet Internet
+flashupdate.updatemode_manual Manuaalinen
+flashupdate.url_file PÃ€ivitysasetukset 
+flashupdate.versioncheck Version tarkastus
+flashupdate.writeflash Kirjoita koko flash-muisti
+flashupdate.writeflashmtd Kirjoita yksi osio
+flashupdate.wrongbase Ohjelmistosi perusversio eroaa uudesta. PÃ€ivitys ei\nole mahdollista ilman koko ohjelmiston vaihtoa.
 fontmenu.channellist Kanavalista
 fontmenu.epg EPG
 fontmenu.eventlist Ohjelmalista
@@ -371,8 +371,8 @@ fontsize.filebrowser_item Tiedostoselain
 fontsize.gamelist_itemlarge Suuri
 fontsize.gamelist_itemsmall Pieni
 fontsize.hint Alustan kirjasinta,\nodota hetki...
-fontsize.imageinfo_info imageinformation
-fontsize.imageinfo_small imageinformation license
+fontsize.imageinfo_info Ohjelmistotiedot
+fontsize.imageinfo_small Ohjelmiston lisenssitiedot
 fontsize.infobar_channame Kanavan nimi
 fontsize.infobar_info Info
 fontsize.infobar_number Numero
@@ -382,25 +382,25 @@ fontsize.menu_info Valikkotiedot
 fontsize.menu_title Valikko-otsikko
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
-imageinfo.creator Creator:
-imageinfo.date Date:
-imageinfo.dokumentation Dokumentation:
-imageinfo.forum Forum:
-imageinfo.head Image information
-imageinfo.homepage Homepage:
-imageinfo.image Image:
-imageinfo.license License:
-imageinfo.version Version:
+imageinfo.creator Koonnut:
+imageinfo.date PÃ€ivÃ€ys:
+imageinfo.dokumentation Ohjeet:
+imageinfo.forum Keskustelu:
+imageinfo.head Ohjelmiston tiedot
+imageinfo.homepage Kotisivu:
+imageinfo.image Nimi:
+imageinfo.license Lisenssi:
+imageinfo.version Versio:
 infoviewer.epgnotload EPG ei vielÃ€ valmis...
 infoviewer.epgwait odotetaan EPG:tÃ€...
-infoviewer.eventlist Event-List
+infoviewer.eventlist Ohjelmatiedot
 infoviewer.languages ÃÃ€ni
 infoviewer.motor_moving Moottori kÃ€Ã€ntyy..
 infoviewer.nocurrent Ohjelmasta ei ole tietoja saatavilla
 infoviewer.noepg EPG ei ole kÃ€ytettÃ€vissÃ€
 infoviewer.notavailable Kanava ei ole kÃ€ytettÃ€vissÃ€
-infoviewer.selecttime Timeselection
-infoviewer.streaminfo Valikko
+infoviewer.selecttime Aikavalinta
+infoviewer.streaminfo LisÃ€toiminnot
 infoviewer.subchan_disp_pos Alikanavan nÃ€yttÃ¶
 infoviewer.subservice Subservices
 infoviewer.waittime Waiting for time...
@@ -460,12 +460,12 @@ lcdcontroler.brightnessstandby - valmiustilassa
 lcdcontroler.contrast Kontrasti
 lcdcontroler.head LCD asetukset
 lcdmenu.autodimm Automaattinen himmennys
-lcdmenu.dim_brightness Automaattisen himmennyksen kirkkaus
-lcdmenu.dim_time Himmennyksen aika
+lcdmenu.dim_brightness Himmennetty kirkkaus
+lcdmenu.dim_time Viive ennen himmennystÃ€
 lcdmenu.head LCD-nÃ€ytÃ¶n asetukset
 lcdmenu.inverse KÃ€Ã€nteinen
 lcdmenu.lcdcontroler Kontrasti / Kirkkaus
-lcdmenu.power Virta
+lcdmenu.power NÃ€yttÃ¶
 lcdmenu.statusline NÃ€ytÃ€
 lcdmenu.statusline.both Ã€Ã€nenvoim. / aikajana
 lcdmenu.statusline.playtime aikajana
@@ -477,9 +477,9 @@ mainmenu.movieplayer Mediasoitin
 mainmenu.pausesectionsd Lue EPG
 mainmenu.pictureviewer Kuvankatselu
 mainmenu.radiomode Radio
-mainmenu.recording PysÃ€ytys
-mainmenu.recording_start KÃ€ynnistys
-mainmenu.recording_stop PysÃ€ytys
+mainmenu.recording Tallennus
+mainmenu.recording_start KÃ€ynnistÃ€
+mainmenu.recording_stop PysÃ€ytÃ€
 mainmenu.scartmode Scart
 mainmenu.scripts Laajennukset
 mainmenu.service Huoltovalikko
@@ -505,7 +505,7 @@ messagebox.back Palaa
 messagebox.cancel Peruuta
 messagebox.discard Peruuta muutokset?
 messagebox.error Virhe
-messagebox.info Tiedot
+messagebox.info Info
 messagebox.no Ei
 messagebox.yes KyllÃ€
 miscsettings.bootinfo NÃ€ytÃ€ tiedot kÃ€ynnistyksessÃ€
@@ -529,19 +529,19 @@ miscsettings.sptsmode KÃ€ytÃ€ spts-tilaa
 miscsettings.startbhdriver Lataa BH-tilan ajurit
 miscsettings.tuxtxt_cache Teksti-tv:n vÃ€limuisti
 motorcontrol.head KÃ€Ã€ntÃ¶moottorin asetukset
-movieplayer.bookmark 
-movieplayer.bookmarkname 
+movieplayer.bookmark Kirjanmerkit
+movieplayer.bookmarkname Kirjanmerkki
 movieplayer.bookmarkname_hint1 SyÃ¶tÃ€ nimi uudelle kirjanmerkille
 movieplayer.bookmarkname_hint2 
 movieplayer.buffering Puskuroin...
-movieplayer.defdir Oletus hakemisto
+movieplayer.defdir Oletushakemisto
 movieplayer.defplugin KÃ€ynnistys-laajennus
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Toisto VLC:n kautta
 movieplayer.goto +,- -> suhteellinen hyppy
 movieplayer.goto.h1 = -> absoluuttinen hyppy
 movieplayer.goto.h2 +,- -> suhteellinen hyppy
-movieplayer.head Mediatoistin
+movieplayer.head Mediasoitin
 movieplayer.nostreamingserver Videon lÃ€hettÃ€jÃ€palvelimeen ei saatu yhteyttÃ€.
 movieplayer.pleasewait Odota hetki.\nYhdistÃ€n videopalvelimeen...
 movieplayer.toomanybookmarks Liian monta kirjanmerkkiÃ€.\nPoista vÃ€hintÃ€Ã€n yksi ensin.
@@ -558,7 +558,7 @@ movieplayer.tshelp7 n. minuutti eteenpÃ€in
 movieplayer.tshelp8 n. 5 minuuttia taaksepÃ€in
 movieplayer.tshelp9 n. 5 minuuttia eteenpÃ€in
 movieplayer.tsplayback Toista tiedosto
-movieplayer.tsplayback_pc Toista PIN koodilla suojattu tiedosto
+movieplayer.tsplayback_pc Toista tiedosto (PIN-koodattu)
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp1 Ohjeet: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.vlchelp10 n. 10 minuuttia taaksepÃ€in
@@ -585,28 +585,28 @@ networkmenu.setupnow Ota asetukset kÃ€yttÃ¶Ã¶n
 networkmenu.setuponstartup Verkko kÃ€ynnistyksessÃ€
 networkmenu.show NÃ€ytÃ€ nykyiset asetukset
 networkmenu.test Testaa verkkoasetukset
-nfs.alreadymounted Hakemisto jo liitetty
+nfs.alreadymounted Hakemisto on jo liitetty
 nfs.automount LiitÃ€ kÃ€ynnistyksessÃ€
-nfs.dir hakemisto/resurssi
-nfs.ip Palvelimen IP
+nfs.dir Palvelimen hakemisto
+nfs.ip Palvelimen IP-osoite
 nfs.localdir Paikallinen hakemisto
-nfs.mount LiitÃ€ verkkolevy
-nfs.mount_options Liitoksen asetukset
+nfs.mount Verkkolevyjen asetukset
+nfs.mount_options Liitosasetukset
 nfs.mounterror Tuntematon tiedostojÃ€rjestelmÃ€
 nfs.mounterror_notsup Tuntematon tiedostojÃ€rjestelmÃ€
 nfs.mountnow LiitÃ€ nyt
 nfs.mountok Liitos onnistui
 nfs.mounttimeout Liitos epÃ€onnistui: aikakatkaisu
 nfs.password Salasana
-nfs.remount Uudelleen liitÃ€ 
-nfs.type NFS
+nfs.remount LiitÃ€ verkkolevyt uudelleen
+nfs.type Verkkolevyn tyyppi
 nfs.type_cifs CIFS
 nfs.type_lufs FTPFS
 nfs.type_nfs NFS
 nfs.umount Vapauta verkkolevy
 nfs.umounterror Virhe vapauttaessa verkkolevyÃ€
-nfs.username KÃ€yttÃ€jÃ€nimi
-nfsmenu.head NFS/CIFS/FTPFS asetukset
+nfs.username KÃ€yttÃ€jÃ€tunnus
+nfsmenu.head Verkkolevyjen asetukset
 nvod.percentage (%d%% jÃ€ljellÃ€)
 nvod.starting (KÃ€ynnistys %d minuutin kuluttua)
 nvodselector.directormode Suora-Tila
@@ -618,10 +618,10 @@ options.null (null)
 options.off Pois
 options.on PÃ€Ã€llÃ€
 options.serial Sarjaportti
-parentallock.changepin PIN koodin vaihto
-parentallock.changepin_hint1 SyÃ¶tÃ€ lapsilukon uusi PIN koodi tÃ€hÃ€n.
+parentallock.changepin PIN-koodin vaihto
+parentallock.changepin_hint1 SyÃ¶tÃ€ lapsilukon uusi PIN-koodi tÃ€hÃ€n.
 parentallock.changetolocked lukituille kanavanipuille
-parentallock.head SyÃ¶tÃ€ lapsilukon PIN koodi
+parentallock.head SyÃ¶tÃ€ lapsilukon PIN-koodi
 parentallock.lockage Lukitse
 parentallock.lockage12 alle 12 vuotiailta
 parentallock.lockage16 alle 16 vuotiailta
@@ -672,10 +672,10 @@ ping.ok on tavoitettavissa (ping)
 ping.protocol ei ole tavoitettavissa (host or protocol error)
 ping.socket ei ole tavoitettavissa (socket error)
 ping.unreachable ei ole tavoitettavissa
-pinprotection.head SyÃ¶tÃ€ PIN koodi
-pinprotection.wrongcode Virheellinen PIN koodi. YritÃ€ uudelleen.
+pinprotection.head SyÃ¶tÃ€ PIN-koodi
+pinprotection.wrongcode Virheellinen PIN-koodi. YritÃ€ uudelleen.
 plugins.result laajennoksen tuloste
-rclock.lockmsg Sinun DBOX2:n kaukosÃ€Ã€din on lukittu.\nAvataksesi lukon paina punaista ja 'DBox' nÃ€ppÃ€intÃ€ yhtÃ€aikaa.
+rclock.lockmsg KaukosÃ€Ã€din on lukittu.\nAvataksesi lukon paina ensin punaista- ja sitten DBox-nÃ€ppÃ€intÃ€.
 rclock.menueadd Lukitse kaukosÃ€Ã€din 
 rclock.title Lukitse kaukosÃ€Ã€din
 rclock.unlockmsg KaukosÃ€Ã€timen lukitus avattu
@@ -692,8 +692,8 @@ recordingmenu.record_in_spts_mode Tallennus spts-tilassa
 recordingmenu.recording_type Tallennustapa
 recordingmenu.ringbuffers Rengaspuskureiden mÃ€Ã€rÃ€
 recordingmenu.server Palvelin (stream)
-recordingmenu.server_ip Palvelimen IP
-recordingmenu.server_mac MAC osoite
+recordingmenu.server_ip Palvelimen IP-osoite
+recordingmenu.server_mac Palvelimen MAC
 recordingmenu.server_port Palvelimen portti
 recordingmenu.server_wakeup Palvelimen Wake-On-Lan
 recordingmenu.setupnow Ota asetukset kÃ€yttÃ¶Ã¶n
@@ -732,17 +732,17 @@ scantp.pol V
 scantp.pol_h H
 scantp.pol_v V
 scantp.rate Symbolinopeus
-scantp.scan Nopea etsintÃ€
-scantp.scanmode Nopea etsintÃ€
-scants.abort_body KeskeytetÃ€Ã€nkÃ¶ etsintÃ€?
-scants.abort_header Kanavan etsintÃ€ keskeytetty
+scantp.scan Manuaalinen haku
+scantp.scanmode Nopea haku
+scants.abort_body KeskeytetÃ€Ã€nkÃ¶ haku?
+scants.abort_header Kanavien haku keskeytetty
 scants.actcable Kaapeli:
 scants.actsatellite Sateliitti:
-scants.bouquet pÃ€ivitÃ€
-scants.bouquet_create luo uusi
+scants.bouquet Kanavaniput
+scants.bouquet_create luo uudet
 scants.bouquet_erase poista kaikki
-scants.bouquet_leave jÃ€tÃ€ nykyinen
-scants.bouquet_satellite Satelliitti-nippu
+scants.bouquet_leave jÃ€tÃ€ nykyiset
+scants.bouquet_satellite satelliittinippu
 scants.bouquet_update pÃ€ivitÃ€
 scants.channel Kanava:
 scants.failed LÃ€hetinhaku epÃ€onnistui!
@@ -758,18 +758,18 @@ scants.startnow Aloita haku
 scants.transponders lÃ€hettimet:
 screensetup.lowerright vihreÃ€ = aseta oikea alakulma
 screensetup.upperleft punainen = aseta vasen ylÃ€kulma
-servicemenu.getplugins PÃ€ivitÃ€ laajennokset
+servicemenu.getplugins Lue laajennoslista uudelleen
 servicemenu.getplugins_hint Ladataan laajennoksia,\nodota hetki.
 servicemenu.head Huoltovalikko
-servicemenu.imageinfo Image information
-servicemenu.reload PÃ€ivitÃ€ kanavalista
+servicemenu.imageinfo Ohjelmiston tiedot
+servicemenu.reload Lue kanavalista uudelleen
 servicemenu.reload_hint Ladataan kanavalistoja,\nodota hetki.
-servicemenu.restart Restart Neutrino
-servicemenu.restart_failed Restarting Neutrino went wrong.
-servicemenu.restart_hint Restarting Neutrino...
-servicemenu.restart_refused_recording Recording runs. Restart not possible.
+servicemenu.restart KÃ€ynnistÃ€ Neutrino uudelleen
+servicemenu.restart_failed Neutrinon uudelleenkÃ€ynnistys epÃ€onnistui.
+servicemenu.restart_hint UudelleenkÃ€ynnistetÃ€Ã€n Neutrino...
+servicemenu.restart_refused_recording Tallennus kÃ€ynnissÃ€. UudelleenkÃ€ynnistys estetty.
 servicemenu.scants Kanavahaku
-servicemenu.ucodecheck Tarkista UCode:t
+servicemenu.ucodecheck ÂµCodejen tiedot
 servicemenu.update OhjelmistopÃ€ivitys
 settings.help Ohje
 settings.missingoptionsconffile Neutrinon asetukset pÃ€ivitetty.\nUudet asetukset on alustettu oletusarvoihin.
@@ -781,10 +781,10 @@ settings.pos_top_right oikea ylÃ€
 shutdown.recoding_query Tallennus kÃ€ynnissÃ€. Haluatko varmasti sammuttaa?
 shutdowntimer.announce Sammutus minuutin kuluttua.\nPeru sammutus?
 sleeptimerbox.announce Uniajastimessa minuutti jÃ€ljellÃ€.
-sleeptimerbox.hint1 Sammutusaika. (000=ei sammutusta)
-sleeptimerbox.hint2 Laite sammuu tÃ€ssÃ€ asetetun ajan kuluttua.
+sleeptimerbox.hint1 Sammutusaika minuutteina (000=ei sammutusta).
+sleeptimerbox.hint2 Laite sammuu itsestÃ€Ã€n asetetun ajan kuluttua.
 sleeptimerbox.title Uniajastin
-streamfeatures.head Valikko
+streamfeatures.head LisÃ€toiminnot
 streaminfo.aratio Kuvasuhde
 streaminfo.aratio_unknown Tuntematon kuvasuhde
 streaminfo.audiotype ÃÃ€niraita
@@ -806,26 +806,26 @@ streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
-streamingmenu.head Movieplayer Settings
+streamingmenu.head Mediasoittimen asetukset
 streamingmenu.mpeg1 MPEG1
 streamingmenu.mpeg2 MPEG2
-streamingmenu.off Off
-streamingmenu.on On
-streamingmenu.server_ip Streamingserver IP
-streamingmenu.server_port Streamingserver Portti
-streamingmenu.streaming_audiorate Datarate Audio
+streamingmenu.off PÃ€Ã€llÃ€
+streamingmenu.on Pois
+streamingmenu.server_ip Palvelimen IP-osoite
+streamingmenu.server_port Palvelimen portti
+streamingmenu.streaming_audiorate ÃÃ€nen datanopeus
 streamingmenu.streaming_force_avi_rawaudio Pakota AC3 AVI:lle
-streamingmenu.streaming_force_transcode_video Transcode MPG/VCD video
+streamingmenu.streaming_force_transcode_video Muunna video (MPG/VCD)
 streamingmenu.streaming_resolution Resoluutio
-streamingmenu.streaming_server_cddrive DVD Asema
-streamingmenu.streaming_server_startdir Hakemisto (VLC)
+streamingmenu.streaming_server_cddrive DVD-aseman polku
+streamingmenu.streaming_server_startdir Aloituspolku
 streamingmenu.streaming_transcode_audio Muunna audio (DVD/VCD/MPG)
 streamingmenu.streaming_transcode_video_codec MPEG video
-streamingmenu.streaming_type Stream-palvelin
-streamingmenu.streaming_videorate Datarate Video
+streamingmenu.streaming_type Palvelin (stream)
+streamingmenu.streaming_videorate Kuvan datanopeus
 streamingserver.noconnect Tallennuspalvelimelle ei saatu yhteyttÃ€.\nTallennus keskeytetty.
 stringinput.caps ABC / abc
-stringinput.clear tyhjennÃ€ kaikki
+stringinput.clear TyhjennÃ€ kaikki
 timer.eventrecord.msg Oletko varma?
 timer.eventrecord.title Ajasta tallennus
 timer.eventtimed.msg Tapahtuma ajastettu.\nLaite kÃ€ynnistyy ja vaihtaa\nkanavalle tÃ€hÃ€n aikaan.
@@ -891,16 +891,16 @@ timerlist.weekdays 'X'=ajastus '-' ei ajastusta
 timerlist.weekdays.hint_1 Ma Ti Ke To Pe La Su
 timerlist.weekdays.hint_2 'X'=ajastus '-' ei ajastusta
 timersettings.record_safety_time_after Ajastuksen pidennys
-timersettings.record_safety_time_after.hint_1 Pidennysaika. (00=off). Jokainen ajastus jatkuu
-timersettings.record_safety_time_after.hint_2 tÃ€mÃ€n verran yliaikaa.
+timersettings.record_safety_time_after.hint_1 Pidennysaika minuutteina (00=pois). Jokaista
+timersettings.record_safety_time_after.hint_2 tallennusta jatketaan tÃ€mÃ€n verran yliajalle.
 timersettings.record_safety_time_before Ajastuksen ennakko
-timersettings.record_safety_time_before.hint_1 Ennakkoaika. (00=off). Jokainen tallennus aloitetaan
-timersettings.record_safety_time_before.hint_2 tÃ€mÃ€n verran etuajassa.
+timersettings.record_safety_time_before.hint_1 Ennakkoaika minuutteina (00=pois). Jokainen
+timersettings.record_safety_time_before.hint_2 tallennus aloitetaan tÃ€mÃ€n verran etuajassa.
 timersettings.separator Ajastinasetukset
 timing.chanlist Kanavalista
 timing.epg EPG ohjelmaopas
 timing.filebrowser Tiedostoselain
-timing.head OSD ajoitukset
+timing.head OSD-ajoitukset
 timing.hint_1 Aika sekunteina. Infopalkkia/valikkoa
 timing.hint_2 nÃ€ytetÃ€Ã€n tÃ€mÃ€ aika.
 timing.infobar Infopalkki
@@ -909,9 +909,9 @@ timing.numericzap Kanavan valinta numerolla
 ucodecheck.avia500 Avia 500
 ucodecheck.avia600 Avia 600
 ucodecheck.cam-alpha Cam-Alpha
-ucodecheck.head UCode tarkistus
-ucodecheck.ucode UCode
-ucodes.failure VAROITUS, ÂµCode:ja ei lÃ¶ytynyt!\n\nOle hyvÃ€ ja siirrÃ€ ne FTP:llÃ€ (tai DBox-BootManagerilla) laitteeseen,\nja kÃ€ynnistÃ€ se uudelleen!
+ucodecheck.head ÂµCodejen tiedot
+ucodecheck.ucode ÂµCode
+ucodes.failure VAROITUS: ÂµCodeja ei lÃ¶ytynyt!\n\nOle hyvÃ€ ja siirrÃ€ ne FTP:llÃ€ (tai DBox-BootManagerilla) laitteeseen,\nja kÃ€ynnistÃ€ se uudelleen!
 videomenu.csync Tahdistuskorjaus
 videomenu.head Kuva-asetukset
 videomenu.rgb_centering RGB keskitys
@@ -928,9 +928,9 @@ videomenu.videosignal_rgb RGB + CVBS
 videomenu.videosignal_svideo S-Video
 videomenu.videosignal_yuv_c YUV + CVBS
 videomenu.videosignal_yuv_v YUV + VBS
-zapit.scantype tv ja radio kanavat
+zapit.scantype Haettavat palvelut
 zapit.scantype.all kaikki palvelut
 zapit.scantype.radio vain radiokanavat
-zapit.scantype.tv tv ja radio kanavat
-zapit.scantype.tvradio tv ja radio kanavat
+zapit.scantype.tv vain TV-kanavat
+zapit.scantype.tvradio TV- ja radiokanavat
 zaptotimer.announce Kanava vaihtuu ajastetulle kanavalle minuutin kuluttua
