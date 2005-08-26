@@ -22,6 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <ctype.h>
 
 #include <linux/fb.h>
@@ -75,6 +76,11 @@ extern int tuxtxt_is_dec(int i);
 extern int tuxtxt_next_hex(int i);
 extern void tuxtxt_decode_btt();
 extern void tuxtxt_decode_adip(); /* additional information table */
+extern void tuxtxt_compress_page(int p, int sp, unsigned char* buffer);
+extern void tuxtxt_decompress_page(int p, int sp, unsigned char* buffer);
+#if 1//DEBUG
+extern int tuxtxt_get_zipsize(int p, int sp);
+#endif
 #endif
 
 
@@ -259,69 +265,97 @@ FTC_SBit        sbit;
 FT_Face			face;
 FONTTYPE typettf;
 
-const unsigned short int nationaltable23[13][2] =
+
+// G2 Charset (0 = Latin, 1 = Cyrillic, 2 = Greek)
+const unsigned short int G2table[3][6*16] =
 {
-	{ '#', 367 }, /* 0  CS/SK   */
-	{ '£', '$' }, /* 1    EN    */
-	{ '#', 'ץ' }, /* 2    ET    */
-	{ 'י', 'ן' }, /* 3    FR    */
-	{ '#', '$' }, /* 4    DE    */
-	{ '£', '$' }, /* 5    IT    */
-	{ '#', '$' }, /* 6  LV/LT   */
-	{ '#', 329 }, /* 7    PL    */
-	{ 'ח', '$' }, /* 8  PT/ES   */
-	{ '#', '₪' }, /* 9    RO    */
-	{ '#', 'ֻ' }, /* A SR/HR/SL */
-	{ '#', '₪' }, /* B SV/FI/HU */
-	{ '£', 287 }, /* C    TR   ? */
+	{ ' ' ,'¡' ,'¢' ,'£' ,'$' ,'¥' ,'#' ,'§' ,'₪' ,'\'','\"','«' ,8592,8594,8595,8593,
+	  '°' ,'±' ,'²' ,'³' ,'x' ,'µ' ,'¶' ,'·' ,'ק' ,'\'','\"','»' ,'¼' ,'½' ,'¾' ,'¿' ,
+	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
+	  '­' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,' ' ,' ' ,' ' ,8539,8540,8541,8542,
+	  937 ,'ֶ' ,272 ,'×' ,294 ,' ' ,306 ,319 ,321 ,'״' ,338 ,'÷' ,'Þ' ,358 ,330 ,329 ,
+	  1082,'ז' ,273 ,'נ' ,295 ,305 ,307 ,320 ,322 ,'ר' ,339 ,'ß' ,'‏' ,359 ,951 ,0x7F},
+	{ ' ' ,'¡' ,'¢' ,'£' ,'$' ,'¥' ,' ' ,'§' ,' ' ,'\'','\"','«' ,8592,8594,8595,8593,
+	  '°' ,'±' ,'²' ,'³' ,'x' ,'µ' ,'¶' ,'·' ,'ק' ,'\'','\"','»' ,'¼' ,'½' ,'¾' ,'¿' ,
+	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
+	  '­' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,321 ,322 ,'ß' ,8539,8540,8541,8542,
+	  'D' ,'E' ,'F' ,'G' ,'I' ,'J' ,'K' ,'L' ,'N' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Z' ,
+	  'd' ,'e' ,'f' ,'g' ,'i' ,'j' ,'k' ,'l' ,'n' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'z' },
+	{ ' ' ,'a' ,'b' ,'£' ,'e' ,'h' ,'i' ,'§' ,':' ,'\'','\"','k' ,8592,8594,8595,8593,
+	  '°' ,'±' ,'²' ,'³' ,'x' ,'m' ,'n' ,'p' ,'ק' ,'\'','\"','t' ,'¼' ,'½' ,'¾' ,'x' ,
+	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
+	  '?' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,906 ,910 ,911 ,8539,8540,8541,8542,
+	  'C' ,'D' ,'F' ,'G' ,'J' ,'L' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Y' ,'Z' ,902 ,905 ,
+	  'c' ,'d' ,'f' ,'g' ,'j' ,'l' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'y' ,'z' ,904 ,0x7F}
 };
-const unsigned short int nationaltable40[13] =
+
+const unsigned short int nationaltable23[14][2] =
 {
-	269, /* 0  CS/SK   */
-	'@', /* 1    EN    */
-	352, /* 2    ET    */
-	'א', /* 3    FR    */
-	'§', /* 4    DE    */
-	'י', /* 5    IT    */
-	352, /* 6  LV/LT   */
-	261, /* 7    PL    */
-	'¡', /* 8  PT/ES   */
-	354, /* 9    RO    */
-	268, /* A SR/HR/SL */
-	'ֹ', /* B SV/FI/HU */
-	304, /* C    TR    */
+	{ '#', '₪' }, /* 0          */
+	{ '#', 367 }, /* 1  CS/SK   */
+	{ '£', '$' }, /* 2    EN    */
+	{ '#', 'ץ' }, /* 3    ET    */
+	{ 'י', 'ן' }, /* 4    FR    */
+	{ '#', '$' }, /* 5    DE    */
+	{ '£', '$' }, /* 6    IT    */
+	{ '#', '$' }, /* 7  LV/LT   */
+	{ '#', 329 }, /* 8    PL    */
+	{ 'ח', '$' }, /* 9  PT/ES   */
+	{ '#', '₪' }, /* A    RO    */
+	{ '#', 'ֻ' }, /* B SR/HR/SL */
+	{ '#', '₪' }, /* C SV/FI/HU */
+	{ '£', 287 }, /* D    TR   ? */
 };
-const unsigned short int nationaltable5b[13][6] =
+const unsigned short int nationaltable40[14] =
 {
-	{ 357, 382, '‎', 'ם', 345, 'י' }, /* 0  CS/SK   */
-	{8592, '½',8594,8593, '#', 822 }, /* 1    EN    */
-	{ 'ִ', 'ײ', 381, 'Ü', 'ױ', 353 }, /* 2    ET    */
-	{ 'כ', 'ך', 'ש', 'מ', '#', 'ט' }, /* 3    FR    */
-	{ 'ִ', 'ײ', 'Ü', '^', '_', '°' }, /* 4    DE    */
-	{ '°', 'ח',8594,8593, '#', 'ש' }, /* 5    IT    */
-	{ 'י', 553, 381, 269, 363, 353 }, /* 6  LV/LT   */
-	{ 437, 346, 321, 263, 'ף', 281 }, /* 7    PL    */
-	{ 'ב', 'י', 'ם', 'ף', 'ת', '¿' }, /* 8  PT/ES   */
-	{ 'ֲ', 350, 461, '־', 305, 355 }, /* 9    RO    */
-	{ 262, 381, 272, 352, 'כ', 269 }, /* A SR/HR/SL */
-	{ 'ִ', 'ײ', 'ֵ', 'Ü', '_', 'י' }, /* B SV/FI/HU */
-	{ 350, 'ײ', 'ַ', 'Ü', 486, 305 }, /* C    TR    */
+	'@', /* 0          */
+	269, /* 1  CS/SK   */
+	'@', /* 2    EN    */
+	352, /* 3    ET    */
+	'א', /* 4    FR    */
+	'§', /* 5    DE    */
+	'י', /* 6    IT    */
+	352, /* 7  LV/LT   */
+	261, /* 8    PL    */
+	'¡', /* 9  PT/ES   */
+	354, /* A    RO    */
+	268, /* B SR/HR/SL */
+	'ֹ', /* C SV/FI/HU */
+	304, /* D    TR    */
 };
-const unsigned short int nationaltable7b[13][4] =
+const unsigned short int nationaltable5b[14][6] =
 {
-	{ 'ב', 283, 'ת', 353 }, /* 0  CS/SK   */
-	{ '¼',8214, '¾', 'ק' }, /* 1    EN    */
-	{ 'ה', 'צ', 382, 'ü' }, /* 2    ET    */
-	{ 'ג', 'פ', 'û', 'ח' }, /* 3    FR    */
-	{ 'ה', 'צ', 'ü', 'ß' }, /* 4    DE    */
-	{ 'א', 'ע', 'ט', 'ל' }, /* 5    IT    */
-	{ 261, 371, 382, 303 }, /* 6  LV/LT   */
-	{ 380, 347, 322, 378 }, /* 7    PL    */
-	{ 'ü', 'ס', 'ט', 'א' }, /* 8  PT/ES   */
-	{ 'ג', 351, 462, 'מ' }, /* 9    RO    */
-	{ 263, 382, 273, 353 }, /* A SR/HR/SL */
-	{ 'ה', 'צ', 'ו', 'ü' }, /* B SV/FI/HU */
-	{ 351, 'צ', 231, 'ü' }, /* C    TR    */
+	{ '[','\\', ']', '^', '_', '`' }, /* 0          */
+	{ 357, 382, '‎', 'ם', 345, 'י' }, /* 1  CS/SK   */
+	{8592, '½',8594,8593, '#', 822 }, /* 2    EN    */
+	{ 'ִ', 'ײ', 381, 'Ü', 'ױ', 353 }, /* 3    ET    */
+	{ 'כ', 'ך', 'ש', 'מ', '#', 'ט' }, /* 4    FR    */
+	{ 'ִ', 'ײ', 'Ü', '^', '_', '°' }, /* 5    DE    */
+	{ '°', 'ח',8594,8593, '#', 'ש' }, /* 6    IT    */
+	{ 'י', 553, 381, 269, 363, 353 }, /* 7  LV/LT   */
+	{ 437, 346, 321, 263, 'ף', 281 }, /* 8    PL    */
+	{ 'ב', 'י', 'ם', 'ף', 'ת', '¿' }, /* 9  PT/ES   */
+	{ 'ֲ', 350, 461, '־', 305, 355 }, /* A    RO    */
+	{ 262, 381, 272, 352, 'כ', 269 }, /* B SR/HR/SL */
+	{ 'ִ', 'ײ', 'ֵ', 'Ü', '_', 'י' }, /* C SV/FI/HU */
+	{ 350, 'ײ', 'ַ', 'Ü', 486, 305 }, /* D    TR    */
+};
+const unsigned short int nationaltable7b[14][4] =
+{
+	{ '{', '|', '}', '~' }, /* 0          */
+	{ 'ב', 283, 'ת', 353 }, /* 1  CS/SK   */
+	{ '¼',8214, '¾', 'ק' }, /* 2    EN    */
+	{ 'ה', 'צ', 382, 'ü' }, /* 3    ET    */
+	{ 'ג', 'פ', 'û', 'ח' }, /* 4    FR    */
+	{ 'ה', 'צ', 'ü', 'ß' }, /* 5    DE    */
+	{ 'א', 'ע', 'ט', 'ל' }, /* 6    IT    */
+	{ 261, 371, 382, 303 }, /* 7  LV/LT   */
+	{ 380, 347, 322, 378 }, /* 8    PL    */
+	{ 'ü', 'ס', 'ט', 'א' }, /* 9  PT/ES   */
+	{ 'ג', 351, 462, 'מ' }, /* A    RO    */
+	{ 263, 382, 273, 353 }, /* B SR/HR/SL */
+	{ 'ה', 'צ', 'ו', 'ü' }, /* C SV/FI/HU */
+	{ 351, 'צ', 231, 'ü' }, /* D    TR    */
 };
 const unsigned short int arrowtable[] =
 {
@@ -330,35 +364,48 @@ const unsigned short int arrowtable[] =
 
 /* national subsets */
 const char countrystring[] =
-"  CS/SK   (#$@[\\]^_`{|}~) "   /*  0 czech, slovak */
-"    EN    (#$@[\\]^_`{|}~) "   /*  1 english */
-"    ET    (#$@[\\]^_`{|}~) "   /*  2 estonian */
-"    FR    (#$@[\\]^_`{|}~) "   /*  3 french */
-"    DE    (#$@[\\]^_`{|}~) "   /*  4 german */
-"    IT    (#$@[\\]^_`{|}~) "   /*  5 italian */
-"  LV/LT   (#$@[\\]^_`{|}~) "   /*  6 latvian, lithuanian */
-"    PL    (#$@[\\]^_`{|}~) "   /*  7 polish */
-"  PT/ES   (#$@[\\]^_`{|}~) "   /*  8 portuguese, spanish */
-"    RO    (#$@[\\]^_`{|}~) "   /*  9 romanian */
-" SR/HR/SL (#$@[\\]^_`{|}~) "   /* 10 serbian, croatian, slovenian */
-" SV/FI/HU (#$@[\\]^_`{|}~) "   /* 11 swedish, finnish, hungarian */
-"    TR    (#$@[\\]^_`{|}~) "   /* 12 turkish */
-" RU/BUL/SER/CRO/UKR (cyr)  "   /* 13 cyrillic */
-"    EK                     "   /* 14 greek */
+"          (#$@[\\]^_`{|}~) "   /*  0 no subset specified */
+"  CS/SK   (#$@[\\]^_`{|}~) "   /*  1 czech, slovak */
+"    EN    (#$@[\\]^_`{|}~) "   /*  2 english */
+"    ET    (#$@[\\]^_`{|}~) "   /*  3 estonian */
+"    FR    (#$@[\\]^_`{|}~) "   /*  4 french */
+"    DE    (#$@[\\]^_`{|}~) "   /*  5 german */
+"    IT    (#$@[\\]^_`{|}~) "   /*  6 italian */
+"  LV/LT   (#$@[\\]^_`{|}~) "   /*  7 latvian, lithuanian */
+"    PL    (#$@[\\]^_`{|}~) "   /*  8 polish */
+"  PT/ES   (#$@[\\]^_`{|}~) "   /*  9 portuguese, spanish */
+"    RO    (#$@[\\]^_`{|}~) "   /* 10 romanian */
+" SR/HR/SL (#$@[\\]^_`{|}~) "   /* 11 serbian, croatian, slovenian */
+" SV/FI/HU (#$@[\\]^_`{|}~) "   /* 12 swedish, finnish, hungarian */
+"    TR    (#$@[\\]^_`{|}~) "   /* 13 turkish */
+" RU/BUL/SER/CRO/UKR (cyr) "   /* 14 cyrillic */
+"    EK                    "   /* 15 greek */
 ;
 #define COUNTRYSTRING_WIDTH 26
 #define MAX_NATIONAL_SUBSET (sizeof(countrystring) / COUNTRYSTRING_WIDTH - 1)
 
 enum
 {
-	NAT_DEFAULT = 4,
-	NAT_DE = 4,
-	NAT_MAX_FROM_HEADER = 12,
-	NAT_RU = 13,
-	NAT_GR = 14
+	NAT_DEFAULT = 0,
+	NAT_CZ = 1,
+	NAT_UK = 2,
+	NAT_ET = 3,
+	NAT_FR = 4,
+	NAT_DE = 5,
+	NAT_IT = 6,
+	NAT_LV = 7,
+	NAT_PL = 8,
+	NAT_SP = 9,
+	NAT_RO = 10,
+	NAT_SR = 11,
+	NAT_SW = 12,
+	NAT_TR = 13,
+	NAT_MAX_FROM_HEADER = 13,
+	NAT_RU = 14,
+	NAT_GR = 15
 };
 
-const unsigned char countryconversiontable[] = { 1, 4, 11, 5, 3, 8, 0, 9 };
+const unsigned char countryconversiontable[] = { NAT_UK, NAT_DE, NAT_SW, NAT_IT, NAT_FR, NAT_SP, NAT_CZ, NAT_RO};
 
 
 /* some data */
@@ -375,7 +422,7 @@ int zoommode, screenmode, transpmode, hintmode, boxed, nofirst, savedscreenmode,
 char dumpl25;
 int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
-int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, national_subset, auto_national, swapupdown, showhex, menulanguage;
+int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, trans_mode, national_subset, national_subset_secondary, auto_national, swapupdown, showhex, menulanguage;
 int pids_found, current_service, getpidsdone;
 int SDT_ready;
 int pc_old_row, pc_old_col;     /* for page catching */
@@ -432,7 +479,9 @@ unsigned char avstable_dvb[3][7] =
 };
 
 /* language dependent texts */
-#define MAXMENULANGUAGE 5 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch */
+#define MAXMENULANGUAGE 6 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch, 6 polnisch */
+const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL };
+
 
 #define Menu_StartX (StartX + fontwidth*9/2)
 #define Menu_StartY (StartY + fontheight)
@@ -441,7 +490,7 @@ unsigned char avstable_dvb[3][7] =
 
 const char MenuLine[] =
 {
-	4,9,12,13,16,19,20,21
+	3,8,11,12,15,17,19,20,21
 };
 
 enum
@@ -451,6 +500,7 @@ enum
 	M_SC1,
 	M_SC2,
 	M_COL,
+	M_TRA,
 	M_AUN,
 	M_NAT,
 	M_LNG,
@@ -462,11 +512,11 @@ enum
 
 const char hotlistpagecolumn[] =	/* last(!) column of page to show in each language */
 {
-	22, 26, 28, 27, 28, 27
+	22, 26, 28, 27, 28, 27, 28
 };
 const char hotlisttextcolumn[] =
 {
-	24, 14, 14, 15, 14, 15
+	24, 14, 14, 15, 14, 15, 14
 };
 const char hotlisttext[][2*5] =
 {
@@ -476,6 +526,7 @@ const char hotlisttext[][2*5] =
 	{ "toev.verw." },
 	{ "pqoshavaiq" },
 	{ "agg. elim." },
+	{ "dodajkasuj" }
 };
 
 const char configonoff[][2*3] =
@@ -485,14 +536,14 @@ const char configonoff[][2*3] =
 	{ "desact" },
 	{ "uitaan" },
 	{ "emeape" },
-	{ "offon " }
+	{ "offon " },
+	{ "wy}w} " }
 };
 const char menuatr[Menu_Height*Menu_Width] =
 {
 	"0000000000000000000000000000002"
 	"0111111111111111111111111111102"
 	"0000000000000000000000000000002"
-	"3333333333333333333333333333332"
 	"3144444444444444444444444444432"
 	"3556655555555555555555555555532"
 	"3555555555555555555555555555532"
@@ -506,7 +557,8 @@ const char menuatr[Menu_Height*Menu_Width] =
 	"3333333333333333333333333333332"
 	"3144444444444444444444444444432"
 	"3555555555555555555555555555532"
-	"3333333333333333333333333333332"
+	"3144444444444444444444444444432"
+	"3555555555555555555555555555532"
 	"3144444444444444444444444444432"
 	"3555555555555555555555555555532"
 	"3555555555555555555555555555532"
@@ -522,7 +574,6 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
 		"ד     Konfigurationsmenue    הי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-		"ד                            הי"
 		"ד1 Favoriten: Seite 111 dazu הי"
 		"דםמסע                        הי"
 		"ד+-?                         הי"
@@ -536,10 +587,11 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד                            הי"
 		"ד5        Helligkeit         הי"
 		"דם                          מהי"
-		"ד                            הי"
-		"ד6  nationaler Zeichensatz   הי"
+		"ד6       Transparenz         הי"
+		"דם                          מהי"
+		"ד7  nationaler Zeichensatz   הי"
 		"דautomatische Erkennung      הי"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/Language deutsch מהי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -550,7 +602,6 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
 		"ד     Configuration menu     הי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-		"ד                            הי"
 		"ד1 Favorites:  add page 111  הי"
 		"דםמסע                        הי"
 		"ד+-?                         הי"
@@ -564,10 +615,11 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד                            הי"
 		"ד5        Brightness         הי"
 		"דם                          מהי"
-		"ד                            הי"
-		"ד6   national characterset   הי"
+		"ד6       Transparency        הי"
+		"דם                          מהי"
+		"ד7   national characterset   הי"
 		"ד automatic recognition      הי"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/language english מהי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -578,7 +630,6 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
 		"ד    Menu de configuration   הי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-		"ד                            הי"
 		"ד1 Favorites: ajout. page 111הי"
 		"דםמסע                        הי"
 		"ד+-?                         הי"
@@ -592,10 +643,11 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד                            הי"
 		"ד5          Clarte           הי"
 		"דם                          מהי"
-		"ד                            הי"
-		"ד6     police nationale      הי"
+		"ד6       Transparence        הי"
+		"דם                          מהי"
+		"ד7     police nationale      הי"
 		"דreconn. automatique         הי"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/language francaisמהי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -606,7 +658,6 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
 		"ד      Configuratiemenu      הי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-		"ד                            הי"
 		"ד1 Favorieten: toev. pag 111 הי"
 		"דםמסע                        הי"
 		"ד+-?                         הי"
@@ -620,10 +671,11 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד                            הי"
 		"ד5        Helderheid         הי"
 		"דם                          מהי"
-		"ד                            הי"
-		"ד6    nationale tekenset     הי"
+		"ד6       Transparantie       הי"
+		"דם                          מהי"
+		"ד7    nationale tekenset     הי"
 		"דautomatische herkenning     הי"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/Language nederl. מהי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -634,7 +686,6 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
 		"ד      Lemou quhliseym       הי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-		"ד                            הי"
 		"ד1 Vaboqi:    pqosh. sek. 111הי"
 		"דםמסע                        הי"
 		"ד+-?                         הי"
@@ -646,12 +697,13 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד3 Tqopor pqotupor   16:9    הי"
 		"ד4 Tqopor eij. jeil. 16:9    הי"
 		"ד                            הי"
-		"ד5      Vyteimotgta          הי"
+		"ד5       Vyteimotgta         הי"
 		"דם                          מהי"
-		"ד                            הי"
-		"ד6    Ehmijg tuposeiqa       הי"
+		"ד6       Transparency        הי"
+		"דם                          מהי"
+		"ד7    Ehmijg tuposeiqa       הי"
 		"דautolatg amacmyqisg         הי"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Ckyssa/Language ekkgmija מהי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
 		"כלללללללללללללללללללללללללללללך"
@@ -662,7 +714,6 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
 		"ד   Menu di configurazione   הי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-		"ד                            הי"
 		"ד1  Preferiti:  agg. pag.111 הי"
 		"דםמסע                        הי"
 		"ד+-?                         הי"
@@ -674,16 +725,45 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד3  Modo standard 16:9       הי"
 		"ד4  Text/Mod.TV 16:9         הי"
 		"ד                            הי"
-		"ד5        Luminositא         הי"
+		"ד5        Luminosit{         הי"
 		"דם                          מהי"
-		"ד                            הי"
-		"ד6   nazionalita'caratteri   הי"
+		"ד6        Trasparenza        הי"
+		"דם                          מהי"
+		"ד7   nazionalita'caratteri   הי"
 		"ד riconoscimento automatico  הי"
-		"דם   DE    (#$@[\\]^_`{|}~)  מהי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Lingua/Language Italiana מהי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
 		"כלללללללללללללללללללללללללללללך"
-	}
+	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד        Konfiguracja        הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד1 Ulubione : kasuj  str. 111הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2     Wyb_r telegazety      הי"
+		"דם          szukaj          מהי"
+		"ד                            הי"
+		"ד       Format obrazu        הי"
+		"ד3 Tryb standard 16:9        הי"
+		"ד4 Telegazeta/TV 16:9        הי"
+		"ד                            הי"
+		"ד5          Jasno|^          הי"
+		"דם                          מהי"
+		"ד6      Prze~roczysto|^      הי"
+		"דם                          מהי"
+		"ד7 Znaki charakterystyczne   הי"
+		"ד automatyczne rozpozn.      הי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם  J`zyk/Language   polski מהי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"כלללללללללללללללללללללללללללללך"
+	},
 };
 
 const char catchmenutext[][80] =
@@ -699,6 +779,8 @@ const char catchmenutext[][80] =
 	{ "        םןנמ epikocg  סע pqobokg        "
 	  "0000000011110000000000110000000000000000" },
 	{ "        םןנמseleziona סע mostra         "
+	  "0000000011110000000000110000000000000000" },
+	{ "        םןנמ wybiez   סע wyswietl       "
 	  "0000000011110000000000110000000000000000" }
 };
 
@@ -709,7 +791,8 @@ const char message_3[][38] =
 	{ "ד  recherche des services teletext  הי" },
 	{ "ד zoeken naar teletekst aanbieders  הי" },
 	{ "ד     amafgtgsg voqeym Teketent     הי" },
-	{ "ד     attesa opzioni televideo      הי" }
+	{ "ד     attesa opzioni televideo      הי" },
+	{ "ד  poszukiwanie sygna}u telegazety  הי" }
 };
 const char message_3_blank[] = "ד                                   הי";
 const char message_7[][38] =
@@ -719,7 +802,8 @@ const char message_7[][38] =
 	{ "ד pas de teletext sur le transponderהי" },
 	{ "ד geen teletekst op de transponder  הי" },
 	{ "ד jalela Teketent ston amaletadotg  הי" },
-	{ "ד nessun televideo sul trasponder   הי" }
+	{ "ד nessun televideo sul trasponder   הי" },
+	{ "ד   brak sygna}u na transponderze   הי" }
 };
 const char message_8[][38] =
 {
@@ -730,26 +814,13 @@ const char message_8[][38] =
 	{ "ד attentre la rיception de page 100 הי" },
 	{ "דwachten op ontvangst van pagina 100הי" },
 	{ "ד     amalemy kgxg sekidar 100      הי" },
-	{ "ד   attesa ricezione pagina 100     הי" }
+	{ "ד   attesa ricezione pagina 100     הי" },
+	{ "ד     oczekiwanie na stron` 100     הי" }
 };
 const char message8pagecolumn[] = /* last(!) column of page to show in each language */
 {
-	33, 34, 34, 35, 29, 30
+	33, 34, 34, 35, 29, 30, 30
 };
-#if 0
-const char message_9[][38] =
-{
-/*    0000000000111111111122222222223 */
-/*    0123456789012345678901234567890 */
-	{ "ד     Seite 100 existiert nicht!    הי" },
-	{ "ד      Page 100 does not exist!     הי" },
-	{ "ד      Page 100 n'existe pas!       הי" },
-	{ "ד    Pagina 100 bestaat niet!       הי" },
-	{ "ד    G sekida 100 dem upaqwei!      הי" },
-	{ "ד      Pagina 100 non esiste!       הי" }
-};
-#define MESSAGE9PAGECOLUMN 14
-#endif
 
 enum /* options for charset */
 {
@@ -778,7 +849,12 @@ typedef struct
 	unsigned char IgnoreAtBlackBgSubst:1;
 	unsigned char concealed:1; /* concealed information */
 	unsigned char inverted :1; /* colors inverted */
-//	unsigned char flash   :5; /* flash mode */
+	unsigned char flashing :5; /* flash mode */
+	unsigned char diacrit  :4; /* diacritical mark */
+	unsigned char underline:1; /* Text underlined */
+	unsigned char boxwin   :1; /* Text boxed/windowed */
+	unsigned char setX26   :1; /* Char is set by packet X/26 (no national subset used) */
+	unsigned char setG0G2  :7; /* G0+G2 set designation  */
 } tstPageAttr;
 
 enum /* indices in atrtable */
@@ -837,36 +913,36 @@ enum
 //const (avoid warnings :<)
 tstPageAttr atrtable[] =
 {
-	{ white  , black , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_WB */
-	{ white  , black , C_G0P, 0, 0, 1 ,0, 0}, /* ATR_PassiveDefault */
-	{ white  , red   , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_L250 */
-	{ black  , green , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_L251 */
-	{ black  , yellow, C_G0P, 0, 0, 0 ,0, 0}, /* ATR_L252 */
-	{ white  , blue  , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_L253 */
-	{ magenta, black , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_TOPMENU0 */
-	{ green  , black , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_TOPMENU1 */
-	{ yellow , black , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_TOPMENU2 */
-	{ cyan   , black , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_TOPMENU3 */
-	{ menu2  , menu3 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MSG0 */
-	{ yellow , menu3 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MSG1 */
-	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MSG2 */
-	{ white  , menu3 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MSG3 */
-	{ menu2  , menu1 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MSGDRM0 */
-	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MSGDRM1 */
-	{ menu2  , black , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MSGDRM2 */
-	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MSGDRM3 */
-	{ menu1  , blue  , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENUHIL0 5a Z */
-	{ white  , blue  , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENUHIL1 58 X */
-	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENUHIL2 9b › */
-	{ menu2  , menu1 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENU0 ab « */
-	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENU1 a4 ₪ */
-	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENU2 9b › */
-	{ menu2  , menu3 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENU3 cb ֻ */
-	{ cyan   , menu3 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENU4 c7 ַ */
-	{ white  , menu3 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENU5 c8 ָ */
-	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_MENU6 a8 ¨ */
-	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0}, /* ATR_CATCHMENU0 a4 ₪ */
-	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0}  /* ATR_CATCHMENU1 a8 ¨ */
+	{ white  , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_WB */
+	{ white  , black , C_G0P, 0, 0, 1 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_PassiveDefault */
+	{ white  , red   , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_L250 */
+	{ black  , green , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_L251 */
+	{ black  , yellow, C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_L252 */
+	{ white  , blue  , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_L253 */
+	{ magenta, black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_TOPMENU0 */
+	{ green  , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_TOPMENU1 */
+	{ yellow , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_TOPMENU2 */
+	{ cyan   , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_TOPMENU3 */
+	{ menu2  , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSG0 */
+	{ yellow , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSG1 */
+	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSG2 */
+	{ white  , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSG3 */
+	{ menu2  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSGDRM0 */
+	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSGDRM1 */
+	{ menu2  , black , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSGDRM2 */
+	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MSGDRM3 */
+	{ menu1  , blue  , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENUHIL0 5a Z */
+	{ white  , blue  , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENUHIL1 58 X */
+	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENUHIL2 9b › */
+	{ menu2  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU0 ab « */
+	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU1 a4 ₪ */
+	{ menu2  , transp, C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU2 9b › */
+	{ menu2  , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU3 cb ֻ */
+	{ cyan   , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU4 c7 ַ */
+	{ white  , menu3 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU5 c8 ָ */
+	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_MENU6 a8 ¨ */
+	{ yellow , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}, /* ATR_CATCHMENU0 a4 ₪ */
+	{ white  , menu1 , C_G0P, 0, 0, 0 ,0, 0, 0, 0, 0, 0, 0, 0x3f}  /* ATR_CATCHMENU1 a8 ¨ */
 };
 /* buffers */
 unsigned char  lcd_backbuffer[120*64 / 8];
@@ -905,9 +981,13 @@ enum
 	S_FVL, /* full vertical line: x-offset */
 	S_BOX, /* rectangle: x-offset, y-offset, width, height */
 	S_TRA, /* trapez: x0, y0, l0, x1, y1, l1 */
+	S_BTR, /* trapez in bgcolor: x0, y0, l0, x1, y1, l1 */
 	S_INV, /* invert */
 	S_LNK, /* call other shape: shapenumber */
-	S_CHR  /* Character from freetype hibyte, lowbyte*/
+	S_CHR, /* Character from freetype hibyte, lowbyte */
+	S_ADT, /* Character 2F alternating raster */
+	S_FLH, /* flip horizontal */
+	S_FLV  /* flip vertical */
 };
 
 /* shape coordinates */
@@ -932,94 +1012,95 @@ unsigned char aG3_22[] = { S_TRA, 0, S_H12, 1, 0, S_H11, S_W12, S_END };
 unsigned char aG3_23[] = { S_TRA, 0, S_H12, 1, 0, S_H11, S_W11, S_END };
 unsigned char aG3_24[] = { S_TRA, 0, 0, 1, 0, S_H11, S_W12, S_END };
 unsigned char aG3_25[] = { S_TRA, 0, 0, 1, 0, S_H11, S_W11, S_END };
-unsigned char aG3_26[] = { S_INV, S_LNK, 0x66 };
-unsigned char aG3_27[] = { S_INV, S_LNK, 0x67 };
-unsigned char aG3_28[] = { S_INV, S_LNK, 0x68 };
-unsigned char aG3_29[] = { S_INV, S_LNK, 0x69 };
-unsigned char aG3_2a[] = { S_INV, S_LNK, 0x6a };
-unsigned char aG3_2b[] = { S_INV, S_LNK, 0x6b };
-unsigned char aG3_2c[] = { S_INV, S_LNK, 0x6c };
-unsigned char aG3_2d[] = { S_INV, S_LNK, 0x6d };
-unsigned char aG3_2e[] = { S_BOX, 1, 0, 2, S_H11, S_END };
-unsigned char aG3_2f[] = { S_BOX, 0, 0, S_W11, S_H11, S_END }; /* FIXME: grey  */
-unsigned char aG3_30[] = { S_TRA, S_W11, S_H23, 0, S_W12, S_H11, S_W12, S_END };
-unsigned char aG3_31[] = { S_TRA, S_W11, S_H23, 0, 0, S_H11, S_W11, S_END };
-unsigned char aG3_32[] = { S_TRA, S_W11, S_H12, 0, S_W12, S_H11, S_W12, S_END };
-unsigned char aG3_33[] = { S_TRA, S_W11, S_H12, 0, 0, S_H11, S_W11, S_END };
-unsigned char aG3_34[] = { S_TRA, S_W11, 0, S_W12, S_H11, S_W12, S_END };
-unsigned char aG3_35[] = { S_TRA, S_W11, 0, 0, 0, S_H11, S_W11, S_END };
-unsigned char aG3_36[] = { S_INV, S_LNK, 0x76 };
-unsigned char aG3_37[] = { S_INV, S_LNK, 0x77 };
-unsigned char aG3_38[] = { S_INV, S_LNK, 0x78 };
-unsigned char aG3_39[] = { S_INV, S_LNK, 0x79 };
-unsigned char aG3_3a[] = { S_INV, S_LNK, 0x7a };
-unsigned char aG3_3b[] = { S_INV, S_LNK, 0x7b };
-unsigned char aG3_3c[] = { S_INV, S_LNK, 0x7c };
-unsigned char aG3_3d[] = { S_INV, S_LNK, 0x7d };
-unsigned char aG3_3e[] = { S_BOX, S_WM3, 0, 2, S_H11, S_END };
+unsigned char aG3_26[] = { S_INV, S_LNK, 0x66, S_END };
+unsigned char aG3_27[] = { S_INV, S_LNK, 0x67, S_END };
+unsigned char aG3_28[] = { S_INV, S_LNK, 0x68, S_END };
+unsigned char aG3_29[] = { S_INV, S_LNK, 0x69, S_END };
+unsigned char aG3_2a[] = { S_INV, S_LNK, 0x6a, S_END };
+unsigned char aG3_2b[] = { S_INV, S_LNK, 0x6b, S_END };
+unsigned char aG3_2c[] = { S_INV, S_LNK, 0x6c, S_END };
+unsigned char aG3_2d[] = { S_INV, S_LNK, 0x6d, S_END };
+unsigned char aG3_2e[] = { S_BOX, 2, 0, 3, S_H11, S_END };
+unsigned char aG3_2f[] = { S_ADT };
+unsigned char aG3_30[] = { S_LNK, 0x20, S_FLH, S_END };
+unsigned char aG3_31[] = { S_LNK, 0x21, S_FLH, S_END };
+unsigned char aG3_32[] = { S_LNK, 0x22, S_FLH, S_END };
+unsigned char aG3_33[] = { S_LNK, 0x23, S_FLH, S_END };
+unsigned char aG3_34[] = { S_LNK, 0x24, S_FLH, S_END };
+unsigned char aG3_35[] = { S_LNK, 0x25, S_FLH, S_END };
+unsigned char aG3_36[] = { S_INV, S_LNK, 0x76, S_END };
+unsigned char aG3_37[] = { S_INV, S_LNK, 0x77, S_END };
+unsigned char aG3_38[] = { S_INV, S_LNK, 0x78, S_END };
+unsigned char aG3_39[] = { S_INV, S_LNK, 0x79, S_END };
+unsigned char aG3_3a[] = { S_INV, S_LNK, 0x7a, S_END };
+unsigned char aG3_3b[] = { S_INV, S_LNK, 0x7b, S_END };
+unsigned char aG3_3c[] = { S_INV, S_LNK, 0x7c, S_END };
+unsigned char aG3_3d[] = { S_INV, S_LNK, 0x7d, S_END };
+unsigned char aG3_3e[] = { S_LNK, 0x2e, S_FLH, S_END };
 unsigned char aG3_3f[] = { S_BOX, 0, 0, S_W11, S_H11, S_END };
-unsigned char aG3_40[] = { S_BOX, 0, S_H12, S_W11, 4, S_BOX, S_W12, 0, 2, S_H12, S_END };
-unsigned char aG3_41[] = { S_BOX, 0, S_H12, S_W11, 4, S_BOX, S_W12, S_H12, 2, S_H12, S_END };
-unsigned char aG3_42[] = { S_BOX, S_W12, 0, 2, S_H11, S_BOX, S_W12, S_H12, S_W12, 4, S_END };
-unsigned char aG3_43[] = { S_BOX, S_W12, 0, 2, S_H11, S_BOX, 0, S_H12, S_W12, 4, S_END };
-unsigned char aG3_44[] = { S_TRA, S_W13, 0, S_W13, 0, S_H12, S_W13, S_TRA, 0, S_H12, S_W13, S_W13, S_H11, S_W13, S_END };
-unsigned char aG3_45[] = { S_TRA, S_W12, 0, S_W13, S_W23, S_H12, S_W13, S_TRA, S_W23, S_H12, S_W13, S_W12, S_H11, S_W13, S_END };
-unsigned char aG3_46[] = { S_TRA, 0, S_H12, 1, S_W13, S_H11, S_W12, S_TRA, S_W11, S_H12, 0, S_W13, S_H11, S_W12, S_END };
-unsigned char aG3_47[] = { S_TRA, S_W13, 0, S_W12, 0, S_H12, 1, S_TRA, S_W13, 0, S_W12, S_W11, S_H12, 0, S_END };
-unsigned char aG3_48[] = { S_TRA, S_W13, 0, S_W13, 0, S_H12, 1, S_END };
-unsigned char aG3_49[] = { S_TRA, S_W12, 0, S_W13, S_W11, S_H12, 0, S_END };
-unsigned char aG3_4a[] = { S_TRA, 0, S_H12, 1, S_W13, S_H11, S_H13, S_END };
-unsigned char aG3_4b[] = { S_TRA, S_W11, S_H12, 0, S_W12, S_H11, S_H13, S_END };
-unsigned char aG3_4c[] = { S_BOX, 0, S_H12, S_W11, 4, S_BOX, S_W12, 0, 2, S_H11, S_END };
-unsigned char aG3_4d[] = { S_BOX, S_W13, S_H13, S_W12, S_H12, S_END };/* FIXME (circles) */
-unsigned char aG3_4e[] = { S_BOX, S_W13, S_H13, S_W12, S_H12, S_END };/* FIXME */
-unsigned char aG3_4f[] = { S_BOX, S_W13, S_H13, S_W12, S_H12, S_END };/* FIXME */
-unsigned char aG3_50[] = { S_BOX, S_W12, 0, 2, S_H11, S_END };
-unsigned char aG3_51[] = { S_BOX, 0, S_H12, S_W11, 2, S_END };
-unsigned char aG3_52[] = { S_BOX, S_W12, S_H12, 2, S_H12, S_BOX, S_W12, S_H12, S_W12, 2, S_END };
-unsigned char aG3_53[] = { S_BOX, S_W12, S_H12, 2, S_H12, S_BOX, 0, S_H12, S_W12, 2, S_END };
-unsigned char aG3_54[] = { S_BOX, S_W12, 0, 2, S_H12, S_BOX, S_W12, S_H12, S_W12, 2, S_END };
-unsigned char aG3_55[] = { S_BOX, S_W12, 0, 2, S_H12, S_BOX, 0, S_H12, S_W12, 2, S_END };
-unsigned char aG3_56[] = { S_BOX, S_W12, 0, 2, S_H11, S_BOX, S_W12, S_H12, S_W12, 2, S_END };
-unsigned char aG3_57[] = { S_BOX, S_W12, 0, 2, S_H11, S_BOX, 0, S_H12, S_W12, 2, S_END };
-unsigned char aG3_58[] = { S_BOX, 0, S_H12, S_W11, 2, S_BOX, S_W12, S_H12, 2, S_H12, S_END };
-unsigned char aG3_59[] = { S_BOX, 0, S_H12, S_W11, 2, S_BOX, S_W12, 0, 2, S_H12, S_END };
-unsigned char aG3_5a[] = { S_BOX, 0, S_H12, S_W11, 2, S_BOX, S_W12, 0, 2, S_H11, S_END };
+unsigned char aG3_40[] = { S_BOX, 0, S_H13, S_W11, S_H13, S_LNK, 0x7e, S_END };
+unsigned char aG3_41[] = { S_BOX, 0, S_H13, S_W11, S_H13, S_LNK, 0x7e, S_FLV, S_END };
+unsigned char aG3_42[] = { S_LNK, 0x50, S_BOX, S_W12, S_H13, S_W12, S_H13, S_END };
+unsigned char aG3_43[] = { S_LNK, 0x50, S_BOX, 0, S_H13, S_W12, S_H13, S_END };
+unsigned char aG3_44[] = { S_LNK, 0x48, S_FLV, S_LNK, 0x48, S_END };
+unsigned char aG3_45[] = { S_LNK, 0x44, S_FLH, S_END };
+unsigned char aG3_46[] = { S_LNK, 0x47, S_FLV, S_END };
+unsigned char aG3_47[] = { S_LNK, 0x48, S_FLH, S_LNK, 0x48, S_END };
+unsigned char aG3_48[] = { S_TRA, 0, 0, S_W23, 0, S_H23, 0, S_BTR, 0, 0, S_W13, 0, S_H13, 0, S_END };
+unsigned char aG3_49[] = { S_LNK, 0x48, S_FLH, S_END };
+unsigned char aG3_4a[] = { S_LNK, 0x48, S_FLV, S_END };
+unsigned char aG3_4b[] = { S_LNK, 0x48, S_FLH, S_FLV, S_END };
+unsigned char aG3_4c[] = { S_LNK, 0x50, S_BOX, 0, S_H13, S_W11, S_H13, S_END };
+unsigned char aG3_4d[] = { S_CHR, 0x25, 0xE6 };
+unsigned char aG3_4e[] = { S_CHR, 0x25, 0xCF };
+unsigned char aG3_4f[] = { S_CHR, 0x25, 0xCB };
+unsigned char aG3_50[] = { S_BOX, S_W12, 0, 2, S_H11, S_FLH, S_BOX, S_W12, 0, 2, S_H11,S_END };
+unsigned char aG3_51[] = { S_BOX, 0, S_H12, S_W11, 2, S_FLV, S_BOX, 0, S_H12, S_W11, 2,S_END };
+unsigned char aG3_52[] = { S_LNK, 0x55, S_FLH, S_FLV, S_END };
+unsigned char aG3_53[] = { S_LNK, 0x55, S_FLV, S_END };
+unsigned char aG3_54[] = { S_LNK, 0x55, S_FLH, S_END };
+unsigned char aG3_55[] = { S_LNK, 0x7e, S_FLV, S_BOX, 0, S_H12, S_W12, 2, S_FLV, S_BOX, 0, S_H12, S_W12, 2, S_END };
+unsigned char aG3_56[] = { S_LNK, 0x57, S_FLH, S_END};
+unsigned char aG3_57[] = { S_LNK, 0x55, S_LNK, 0x50 , S_END};
+unsigned char aG3_58[] = { S_LNK, 0x59, S_FLV, S_END};
+unsigned char aG3_59[] = { S_LNK, 0x7e, S_LNK, 0x51 , S_END};
+unsigned char aG3_5a[] = { S_LNK, 0x50, S_LNK, 0x51 , S_END};
 unsigned char aG3_5b[] = { S_CHR, 0x21, 0x92};
 unsigned char aG3_5c[] = { S_CHR, 0x21, 0x90};
 unsigned char aG3_5d[] = { S_CHR, 0x21, 0x91};
 unsigned char aG3_5e[] = { S_CHR, 0x21, 0x93};
-unsigned char aG3_5f[] = { S_BOX, S_W13, S_H13, S_W12, S_H12, S_END };/* FIXME */
-unsigned char aG3_60[] = { S_INV, S_LNK, 0x20 };
-unsigned char aG3_61[] = { S_INV, S_LNK, 0x21 };
-unsigned char aG3_62[] = { S_INV, S_LNK, 0x22 };
-unsigned char aG3_63[] = { S_INV, S_LNK, 0x23 };
-unsigned char aG3_64[] = { S_INV, S_LNK, 0x24 };
-unsigned char aG3_65[] = { S_INV, S_LNK, 0x25 };
-unsigned char aG3_66[] = { S_TRA, 0, 0, S_W12, 0, S_H13, 1, S_END };
-unsigned char aG3_67[] = { S_TRA, 0, 0, S_W11, 0, S_H13, 1, S_END };
-unsigned char aG3_68[] = { S_TRA, 0, 0, S_W12, 0, S_H12, 1, S_END };
-unsigned char aG3_69[] = { S_TRA, 0, 0, S_W11, 0, S_H12, 1, S_END };
-unsigned char aG3_6a[] = { S_TRA, 0, 0, S_W12, 0, S_H11, 1, S_END };
+unsigned char aG3_5f[] = { S_CHR, 0x00, 0x20};
+unsigned char aG3_60[] = { S_INV, S_LNK, 0x20, S_END };
+unsigned char aG3_61[] = { S_INV, S_LNK, 0x21, S_END };
+unsigned char aG3_62[] = { S_INV, S_LNK, 0x22, S_END };
+unsigned char aG3_63[] = { S_INV, S_LNK, 0x23, S_END };
+unsigned char aG3_64[] = { S_INV, S_LNK, 0x24, S_END };
+unsigned char aG3_65[] = { S_INV, S_LNK, 0x25, S_END };
+unsigned char aG3_66[] = { S_LNK, 0x20, S_FLV, S_END };
+unsigned char aG3_67[] = { S_LNK, 0x21, S_FLV, S_END };
+unsigned char aG3_68[] = { S_LNK, 0x22, S_FLV, S_END };
+unsigned char aG3_69[] = { S_LNK, 0x23, S_FLV, S_END };
+unsigned char aG3_6a[] = { S_LNK, 0x24, S_FLV, S_END };
 unsigned char aG3_6b[] = { S_BOX, 0, 0, S_W11, S_H13, S_TRA, 0, S_H13, S_W11, 0, S_H23, 1, S_END };
-unsigned char aG3_6c[] = { S_TRA, 0, 0, 1, 0, S_H12, S_W12, S_TRA, 0, S_H12, S_W12, 0, S_H11, 1, S_END };
-unsigned char aG3_6d[] = { S_TRA, 0, 0, S_W11, S_W12, S_H12, 1, S_END };
-unsigned char aG3_6e[] = { S_BOX, S_W13, S_H13, S_W12, S_H12, S_END }; /* FIXME empty*/
-unsigned char aG3_6f[] = { S_BOX, S_W13, S_H13, S_W12, S_H12, S_END };
-unsigned char aG3_70[] = { S_INV, S_LNK, 0x30 };
-unsigned char aG3_71[] = { S_INV, S_LNK, 0x31 };
-unsigned char aG3_72[] = { S_INV, S_LNK, 0x32 };
-unsigned char aG3_73[] = { S_INV, S_LNK, 0x33 };
-unsigned char aG3_74[] = { S_INV, S_LNK, 0x34 };
-unsigned char aG3_75[] = { S_INV, S_LNK, 0x35 };
-unsigned char aG3_76[] = { S_TRA, S_W12, 0, S_W12, S_W11, S_H13, 0, S_END };
-unsigned char aG3_77[] = { S_TRA, 0, 0, S_W11, S_W11, S_H13, 0, S_END };
-unsigned char aG3_78[] = { S_TRA, S_W12, 0, S_W12, S_W11, S_H12, 0, S_END };
-unsigned char aG3_79[] = { S_TRA, 0, 0, S_W11, S_W11, S_H12, 0, S_END };
-unsigned char aG3_7a[] = { S_TRA, S_W12, 0, S_W12, S_W11, S_H23, 0, S_END };
-unsigned char aG3_7b[] = { S_BOX, 0, 0, S_W11, S_H13, S_TRA, 0, S_H13, S_W11, 0, S_H23, 1, S_END };
-unsigned char aG3_7c[] = { S_TRA, S_W11, 0, 0, S_W12, S_H12, S_W12, S_TRA, S_W12, S_H12, S_W12, S_W11, S_H11, 0, S_END };
-unsigned char aG3_7d[] = { S_TRA, S_W12, S_H12, 1, 0, S_H11, S_W11, S_END };
+unsigned char aG3_6c[] = { S_TRA, 0, 0, 1, 0, S_H12, S_W12, S_FLV, S_TRA, 0, 0, 1, 0, S_H12, S_W12, S_BOX, 0, S_H12, S_W12,1, S_END };
+unsigned char aG3_6d[] = { S_TRA, 0, 0, S_W12, S_W12, S_H12, 0, S_FLH, S_TRA, 0, 0, S_W12, S_W12, S_H12, 0, S_END };
+unsigned char aG3_6e[] = { S_CHR, 0x00, 0x20};
+unsigned char aG3_6f[] = { S_CHR, 0x00, 0x20};
+unsigned char aG3_70[] = { S_INV, S_LNK, 0x30, S_END };
+unsigned char aG3_71[] = { S_INV, S_LNK, 0x31, S_END };
+unsigned char aG3_72[] = { S_INV, S_LNK, 0x32, S_END };
+unsigned char aG3_73[] = { S_INV, S_LNK, 0x33, S_END };
+unsigned char aG3_74[] = { S_INV, S_LNK, 0x34, S_END };
+unsigned char aG3_75[] = { S_INV, S_LNK, 0x35, S_END };
+unsigned char aG3_76[] = { S_LNK, 0x66, S_FLH, S_END };
+unsigned char aG3_77[] = { S_LNK, 0x67, S_FLH, S_END };
+unsigned char aG3_78[] = { S_LNK, 0x68, S_FLH, S_END };
+unsigned char aG3_79[] = { S_LNK, 0x69, S_FLH, S_END };
+unsigned char aG3_7a[] = { S_LNK, 0x6a, S_FLH, S_END };
+unsigned char aG3_7b[] = { S_LNK, 0x6b, S_FLH, S_END };
+unsigned char aG3_7c[] = { S_LNK, 0x6c, S_FLH, S_END };
+unsigned char aG3_7d[] = { S_LNK, 0x6d, S_FLV, S_END };
+unsigned char aG3_7e[] = { S_BOX, S_W12, 0, 2, S_H12, S_FLH, S_BOX, S_W12, 0, 2, S_H12, S_END };// help char, not printed directly (only by S_LNK)
 
 unsigned char *aShapes[] =
 {
@@ -1028,7 +1109,7 @@ unsigned char *aShapes[] =
 	aG3_40, aG3_41, aG3_42, aG3_43, aG3_44, aG3_45, aG3_46, aG3_47, aG3_48, aG3_49, aG3_4a, aG3_4b, aG3_4c, aG3_4d, aG3_4e, aG3_4f,
 	aG3_50, aG3_51, aG3_52, aG3_53, aG3_54, aG3_55, aG3_56, aG3_57, aG3_58, aG3_59, aG3_5a, aG3_5b, aG3_5c, aG3_5d, aG3_5e, aG3_5f,
 	aG3_60, aG3_61, aG3_62, aG3_63, aG3_64, aG3_65, aG3_66, aG3_67, aG3_68, aG3_69, aG3_6a, aG3_6b, aG3_6c, aG3_6d, aG3_6e, aG3_6f,
-	aG3_70, aG3_71, aG3_72, aG3_73, aG3_74, aG3_75, aG3_76, aG3_77, aG3_78, aG3_79, aG3_7a, aG3_7b, aG3_7c, aG3_7d
+	aG3_70, aG3_71, aG3_72, aG3_73, aG3_74, aG3_75, aG3_76, aG3_77, aG3_78, aG3_79, aG3_7a, aG3_7b, aG3_7c, aG3_7d, aG3_7e
 };
 
 
@@ -1387,11 +1468,11 @@ int  eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 						unsigned char *pAPx, unsigned char *pAPy,
 						unsigned char *pAPx0, unsigned char *pAPy0,
 						unsigned char *drcssubp, unsigned char *gdrcssubp,
-						signed char *endcol, tstPageAttr *attrPassive);
+						signed char *endcol, tstPageAttr *attrPassive, unsigned char* pagedata);
 void eval_object(int iONr, tstCachedPage *pstCachedPage,
 					  unsigned char *pAPx, unsigned char *pAPy,
 					  unsigned char *pAPx0, unsigned char *pAPy0,
-					  tObjType ObjType);
+					  tObjType ObjType, unsigned char* pagedata);
 
 /* Local Variables: */
 /* indent-tabs-mode:t */

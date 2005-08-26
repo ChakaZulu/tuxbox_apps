@@ -1,6 +1,7 @@
 /******************************************************************************
  * definitions for plugin and lib                                             *
  ******************************************************************************/
+#define TUXTXT_COMPRESS 2 // compress page data: 0 no compression, 1 with zlib, 2 with own algorithm
 
 #include <config.h>
 
@@ -86,7 +87,15 @@ typedef struct
 {
 	tstPageinfo pageinfo;
 	unsigned char p0[24]; /* packet 0: center of headline */
+#if TUXTXT_COMPRESS == 1
+	unsigned char * pData;/* packet 1-23 */
+	unsigned short ziplen;
+#elif TUXTXT_COMPRESS == 2
+	unsigned char * pData;/* packet 1-23 */
+	unsigned char bitmask[23*5];
+#else
 	unsigned char data[23*40];	/* packet 1-23 */
+#endif
 } tstCachedPage;
 
 /* main data structure */

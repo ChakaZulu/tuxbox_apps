@@ -10,8 +10,11 @@
 
 #include "tuxtxt.h"
 
+#ifdef DEBUG
+#undef DEBUG
+#endif
 
-
+#define DEBUG 0
 
 void FillRect(int x, int y, int w, int h, int color)
 {
@@ -23,6 +26,16 @@ void FillRect(int x, int y, int w, int h, int color)
 			memset(p, color, w);
 			p += var_screeninfo.xres;
 		}
+}
+void FillBorder(int color)
+{
+	int ys =  (var_screeninfo.yres-var_screeninfo.yoffset);
+	FillRect(0     , ys                     ,StartX      ,var_screeninfo.yres                       ,color);
+	FillRect(StartX, ys                     ,displaywidth,StartY                                    ,color);
+	FillRect(StartX, ys+StartY+25*fontheight,displaywidth,var_screeninfo.yres-(StartY+25*fontheight),color);
+
+	if (screenmode == 0 )
+		FillRect(StartX+displaywidth, ys,var_screeninfo.xres-(StartX+displaywidth),var_screeninfo.yres   ,color);
 }
 
 int getIndexOfPageInHotlist()
@@ -135,6 +148,7 @@ int toptext_getnext(int startpage, int up, int findgroup)
 {
 	int current, nextgrp, nextblk;
 
+	int stoppage =  (tuxtxt_is_dec(startpage) ? startpage : startpage & 0xF00); // avoid endless loop in hexmode
 	nextgrp = nextblk = 0;
 	current = startpage;
 
@@ -159,7 +173,7 @@ int toptext_getnext(int startpage, int up, int findgroup)
 			if (!nextblk && (current&0x0FF) == 0)
 				nextblk = current;
 		}
-	} while (current != startpage);
+	} while (current != stoppage);
 
 	if (nextgrp)
 		return nextgrp;
@@ -247,6 +261,14 @@ void setcolors(unsigned short *pcolormap, int offset, int number)
 	int i, changed=0;
 	int j = offset; /* index in global color table */
 
+	unsigned short t = tr0[transp2];
+	tr0[transp2] = (trans_mode+7)<<11 | 0x7FF;
+#ifndef HAVE_DREAMBOX_HARDWARE
+	/* "correct" semi-transparent for Nokia (GTX only allows 2(?) levels of transparency) */
+	if (tuxbox_get_vendor() == TUXBOX_VENDOR_NOKIA)
+		tr0[transp2] = 0xFFFF;
+#endif
+	if (t != tr0[transp2]) changed = 1;
 	for (i = 0; i < number; i++)
 	{
 		int r = (pcolormap[i] << 12) & 0xf000;
@@ -285,12 +307,14 @@ void dump_page()
 {
 	int r, c;
 	char *p;
+	unsigned char pagedata[23*40];
 
 	if (!tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage])
 		return;
+	tuxtxt_decompress_page(tuxtxt_cache.page,tuxtxt_cache.subpage,pagedata);
 	for (r=1; r < 24; r++)
 	{
-		p = tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->data + 40*(r-1);
+		p = pagedata+40*(r-1);
 		for (c=0; c < 40; c++)
 			printf(" %02x", *p++);
 		printf("\n");
@@ -306,7 +330,7 @@ void dump_page()
 /* in: absolute triplet number (0..506, start at packet 3 byte 1) */
 /* in: pointer to cache struct of page data */
 /* out: 18 bit triplet data, <0 if invalid number, not cached, or hamming error */
-int iTripletNumber2Data(int iONr, tstCachedPage *pstCachedPage)
+int iTripletNumber2Data(int iONr, tstCachedPage *pstCachedPage, unsigned char* pagedata)
 {
 	if (iONr > 506 || 0 == pstCachedPage)
 		return -1;
@@ -316,7 +340,7 @@ int iTripletNumber2Data(int iONr, tstCachedPage *pstCachedPage)
 	int packetoffset = 3 * (iONr % 13);
 
 	if (packet <= 23)
-		p = pstCachedPage->data + 40*(packet-1) + packetoffset + 1;
+		p = pagedata + 40*(packet-1) + packetoffset + 1;
 	else if (packet <= 25)
 	{
 		if (0 == pstCachedPage->pageinfo.p24)
@@ -343,7 +367,7 @@ int iTripletNumber2Data(int iONr, tstCachedPage *pstCachedPage)
 void eval_object(int iONr, tstCachedPage *pstCachedPage,
 					  unsigned char *pAPx, unsigned char *pAPy,
 					  unsigned char *pAPx0, unsigned char *pAPy0,
-					  tObjType ObjType)
+					  tObjType ObjType, unsigned char* pagedata)
 {
 	int iOData;
 	int iONr1 = iONr + 1; /* don't terminate after first triplet */
@@ -353,7 +377,7 @@ void eval_object(int iONr, tstCachedPage *pstCachedPage,
 
 	do
 	{
-		iOData = iTripletNumber2Data(iONr, pstCachedPage);	/* get triplet data, next triplet */
+		iOData = iTripletNumber2Data(iONr, pstCachedPage,pagedata);	/* get triplet data, next triplet */
 		if (iOData < 0) /* invalid number, not cached, or hamming error: terminate */
 			break;
 #if DEBUG
@@ -371,7 +395,7 @@ void eval_object(int iONr, tstCachedPage *pstCachedPage,
 				int i;
 				for (i = iONr; i <= 506; i++)
 				{
-					int iTempOData = iTripletNumber2Data(i, pstCachedPage); /* get triplet data, next triplet */
+					int iTempOData = iTripletNumber2Data(i, pstCachedPage,pagedata); /* get triplet data, next triplet */
 					int iAddress = (iTempOData      ) & 0x3f;
 					int iMode    = (iTempOData >>  6) & 0x1f;
 					//int iData    = (iTempOData >> 11) & 0x7f;
@@ -393,7 +417,7 @@ void eval_object(int iONr, tstCachedPage *pstCachedPage,
 		}
 		iONr++;
 	}
-	while (0 == eval_triplet(iOData, pstCachedPage, pAPx, pAPy, pAPx0, pAPy0, &drcssubp, &gdrcssubp, &endcol, &attrPassive)
+	while (0 == eval_triplet(iOData, pstCachedPage, pAPx, pAPy, pAPx0, pAPy0, &drcssubp, &gdrcssubp, &endcol, &attrPassive, pagedata)
 			 || iONr1 == iONr); /* repeat until termination reached */
 }
 
@@ -403,8 +427,11 @@ void eval_NumberedObject(int p, int s, int packet, int triplet, int high,
 {
 	if (!packet || 0 == tuxtxt_cache.astCachetable[p][s])
 		return;
+	unsigned char pagedata[23*40];
+	tuxtxt_decompress_page(p, s,pagedata);
 
-	int idata = deh24(tuxtxt_cache.astCachetable[p][s]->data + 40*(packet-1) + 1 + 3*triplet);
+
+	int idata = deh24(pagedata + 40*(packet-1) + 1 + 3*triplet);
 	int iONr;
 
 	if (idata < 0)	/* hamming error: ignore triplet */
@@ -421,7 +448,7 @@ void eval_NumberedObject(int p, int s, int packet, int triplet, int high,
 					 ObjectType[triplet % 3], "PCD"[triplet % 3], 8*packet + 2*(triplet-1)/3, iONr);
 
 #endif
-		eval_object(iONr, tuxtxt_cache.astCachetable[p][s], pAPx, pAPy, pAPx0, pAPy0, (tObjType)(triplet % 3));
+		eval_object(iONr, tuxtxt_cache.astCachetable[p][s], pAPx, pAPy, pAPx0, pAPy0, (tObjType)(triplet % 3),pagedata);
 	}
 }
 
@@ -429,7 +456,7 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 					  unsigned char *pAPx, unsigned char *pAPy,
 					  unsigned char *pAPx0, unsigned char *pAPy0,
 					  unsigned char *drcssubp, unsigned char *gdrcssubp,
-					  signed char *endcol, tstPageAttr *attrPassive)
+					  signed char *endcol, tstPageAttr *attrPassive, unsigned char* pagedata)
 {
 	int iAddress = (iOData      ) & 0x3f;
 	int iMode    = (iOData >>  6) & 0x1f;
@@ -459,7 +486,7 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 				{
 					tstPageAttr *p = &page_atrb[offset];
 					int oldcolor = (p)->fg; /* current color (set-after) */
-					int c = *pAPx;	/* current column relative to object origin */
+					int c = *pAPx0 + *pAPx;	/* current column absolute */
 					do
 					{
 						p->fg = newcolor;
@@ -526,7 +553,7 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 				{
 					tstPageAttr *p = &page_atrb[offset];
 					int oldcolor = (p)->bg; /* current color (set-after) */
-					int c = *pAPx;	/* current column relative to object origin */
+					int c = *pAPx0 + *pAPx;	/* current column absolute */
 					do
 					{
 						p->bg = newcolor;
@@ -567,14 +594,27 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 			if (dumpl25)
 				printf("  ,%02d Flash M%xP%x", iAddress, iData & 0x03, (iData >> 2) & 0x07);
 #endif
-			/* TODO */
+			if ((iData & 0x60) != 0) break; // reserved data field
+			if (*endcol < 0) /* passive object */
+			{
+				attrPassive->flashing=iData & 0x1f;
+				page_atrb[offset] = *attrPassive;
+			}
+			else
+				page_atrb[offset].flashing=iData & 0x1f;
 			break;
 		case 0x08:
 #if DEBUG
 			if (dumpl25)
 				printf("  ,%02d G0+G2 set #%02x (p105)", iAddress, iData);
 #endif
-			/* TODO */
+			if (*endcol < 0) /* passive object */
+			{
+				attrPassive->setG0G2=iData & 0x3f;
+				page_atrb[offset] = *attrPassive;
+			}
+			else
+				page_atrb[offset].setG0G2=iData & 0x3f;
 			break;
 		case 0x09:
 #if DEBUG
@@ -585,10 +625,14 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 			if (*endcol < 0) /* passive object */
 			{
 				attrPassive->charset = C_G0P; /* FIXME: secondary? */
+				attrPassive->setX26  = 1;
 				page_atrb[offset] = *attrPassive;
 			}
 			else
+			{
 				page_atrb[offset].charset = C_G0P; /* FIXME: secondary? */
+				page_atrb[offset].setX26  = 1;
+			}
 			break;
 //		case 0x0b: (see 0x02)
 		case 0x0c:
@@ -605,9 +649,10 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 #endif
 			int conc = (iData & 0x04);
 			int inv  = (iData & 0x10);
-			int dw   = (iData & 0x01 ?1:0);
-			int dh   = (iData & 0x40 ?1:0);
+			int dw   = (iData & 0x40 ?1:0);
+			int dh   = (iData & 0x01 ?1:0);
 			int sep  = (iData & 0x20);
+			int bw   = (iData & 0x02 ?1:0);
 			if (*endcol < 0) /* passive object */
 			{
 				if (conc)
@@ -618,23 +663,28 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 				attrPassive->inverted = (inv ? 1- attrPassive->inverted : 0);
 				attrPassive->doubleh = dh;
 				attrPassive->doublew = dw;
+				attrPassive->boxwin = bw;
+				if (bw) attrPassive->IgnoreAtBlackBgSubst = 0;
 				if (sep)
 				{
 					if (attrPassive->charset == C_G1C)
 						attrPassive->charset = C_G1S;
-					/* FIXME underlining */
+					else
+						attrPassive->underline = 1;
 				}
 				else
 				{
 					if (attrPassive->charset == C_G1S)
 						attrPassive->charset = C_G1C;
-					/* FIXME underlining */
+					else
+						attrPassive->underline = 0;
 				}
 			}
 			else
 			{
 
-				int c = *pAPx;	/* current column relative to object origin */
+				int c = *pAPx0 + (*endcol == 40 ? *pAPx : 0);	/* current column */
+				int c1 = offset;
 				tstPageAttr *p = &page_atrb[offset];
 				do
 				{
@@ -648,18 +698,23 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 					{
 						if (p->charset == C_G1C)
 							p->charset = C_G1S;
-						/* FIXME underlining */
+						else
+							p->underline = 1;
 					}
 					else
 					{
 						if (p->charset == C_G1S)
 							p->charset = C_G1C;
-						/* FIXME underlining */
+						else
+							p->underline = 0;
 					}
 					p->doublew = dw;
 					p->doubleh = dh;
+					p->boxwin = bw;
+					if (bw) p->IgnoreAtBlackBgSubst = 0;
 					p++;
 					c++;
+					c1++;
 				} while (c < *endcol);
 			}
 			break;
@@ -704,11 +759,17 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 				page_char[offset] = iData;
 				if (*endcol < 0) /* passive object */
 				{
-					attrPassive->charset = C_G0P; /* FIXME: diacr, secondary? */
+					attrPassive->charset = C_G0P;
+					attrPassive->diacrit = iMode & 0x0f;
+					attrPassive->setX26  = 1;
 					page_atrb[offset] = *attrPassive;
 				}
 				else
-					page_atrb[offset].charset = C_G0P; /* FIXME: diacr, secondary? */
+				{
+					page_atrb[offset].charset = C_G0P;
+					page_atrb[offset].diacrit = iMode & 0x0f;
+					page_atrb[offset].setX26  = 1;
+				}
 			}
 			break; /* unsupported or not yet implemented mode: ignore */
 		} /* switch (iMode) */
@@ -837,6 +898,7 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 				int subp = iData & 0x0f;
 				int high = (iData >> 4) & 0x01;
 
+
 				if (APx0 < 40) /* not in side panel */
 				{
 #if DEBUG
@@ -875,7 +937,7 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 						printf("  local Object Invocation %5s %8s D%xT%x:\n---",
 								 ObjectSource[(iAddress >> 3) & 0x03], ObjectType[iMode & 0x03], descode, triplet);
 #endif
-					eval_object(13 * 23 + 13 * descode + triplet, pstCachedPage, &APx, &APy, &APx0, &APy0, (tObjType)(triplet % 3));
+					eval_object(13 * 23 + 13 * descode + triplet, pstCachedPage, &APx, &APy, &APx0, &APy0, (tObjType)(triplet % 3), pagedata);
 #if DEBUG
 					if (dumpl25)
 						printf("---");
@@ -954,24 +1016,58 @@ int eval_triplet(int iOData, tstCachedPage *pstCachedPage,
 
 	return 0; /* normal exit, no termination */
 }
+int setnational(unsigned char sec)
+{
+	switch (sec)
+	{
+		case 0x08:
+			return NAT_PL; //polish
+		case 0x16:
+		case 0x36:
+			return NAT_TR; //turkish
+		case 0x1d:
+			return NAT_SR; //serbian, croatian, slovenian
+		case 0x20:
+		case 0x24:
+		case 0x25:
+			return NAT_RU; // cyrillic
+		case 0x22:
+			return NAT_ET; // estonian
+		case 0x23:
+			return NAT_LV; // latvian, lithuanian
+		case 0x37:
+			return NAT_GR; // greek
+		case 0x47:
+		case 0x57:
+			// TODO : arabic
+			break;
+		case 0x55:
+			// TODO : hebrew
+			break;
 
+	}
+	return countryconversiontable[sec & 0x07];
+}
 
 /* evaluate level 2.5 information */
 void eval_l25()
 {
+	memset(FullRowColor, 0, sizeof(FullRowColor));
+	FullScrColor = black;
+
 	if (!tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage])
 		return;
 
 #if DEBUG
 	if (dumpl25)
-		printf("=== %03x/%02x ===\n", tuxtxt_cache.page, tuxtxt_cache.subpage);
+		printf("=== %03x/%02x %d/%d===\n", tuxtxt_cache.page, tuxtxt_cache.subpage,tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->pageinfo.nationalvalid,tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->pageinfo.national);
 #endif
 
 #if DEBUG
 	if (pageinfo->function == FUNC_MOT) /* magazine organization table */
 	{
 		int i;
-		unsigned char *p = tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->data;
+		unsigned char *p = pagedata;
 
 		printf("(G)POP/(G)DRCS-associations:\n");
 		printf("  0011223344556677889900112233445566778899");
@@ -985,7 +1081,7 @@ void eval_l25()
 		}
 		putchar('\n');
 
-		p = tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->data + 18*40;
+		p = pagedata + 18*40;
 		for (i = 0; i < 80; i += 10)
 		{
 			short pop = ((p[i] << 8) | (p[i+1] << 4) | p[i+2]) & 0x7ff;
@@ -1017,7 +1113,7 @@ void eval_l25()
 			}
 		}
 
-		p = tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->data + 20*40;
+		p = pagedata + 20*40;
 		for (i = 0; i < 4*8; i += 4)
 		{
 			short drcs = ((p[i] << 8) | (p[i+1] << 4) | p[i+2]) & 0x7ff;
@@ -1045,7 +1141,7 @@ void eval_l25()
 
 		for (packet = 1; packet <= 4; packet++)
 		{
-			unsigned char *ptriplet = tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->data + 40*(packet-1);
+			unsigned char *ptriplet = pagedata + 40*(packet-1);
  			int idata = dehamming[*ptriplet];
 			int triplet;
 
@@ -1075,8 +1171,6 @@ void eval_l25()
 
 
 		pop = gpop = drcs = gdrcs = 0;
-		memset(FullRowColor, 0, sizeof(FullRowColor));
-		FullScrColor = black;
 
 
 		if (pi->ext)
@@ -1106,6 +1200,8 @@ void eval_l25()
 				ColorTableRemapping = e->ColorTableRemapping;
 				memset(FullRowColor, e->DefRowColor, sizeof(FullRowColor));
 				FullScrColor = e->DefScreenColor;
+				national_subset = setnational(e->DefaultCharset);
+				national_subset_secondary = setnational(e->SecondCharset);
 #if DEBUG
 				if (dumpl25)
 				{
@@ -1136,6 +1232,8 @@ void eval_l25()
 			ColorTableRemapping = e->ColorTableRemapping;
 			memset(FullRowColor, e->DefRowColor, sizeof(FullRowColor));
 			FullScrColor = e->DefScreenColor;
+			national_subset = setnational(e->DefaultCharset);
+			national_subset_secondary = setnational(e->SecondCharset);
 #if DEBUG
 			if (dumpl25)
 			{
@@ -1172,7 +1270,10 @@ void eval_l25()
 		/* determine ?pop/?drcs from MOT */
 		if (pmot)
 		{
-			unsigned char *p = pmot->data; /* start of link data */
+			unsigned char pmot_data[23*40];
+			tuxtxt_decompress_page((tuxtxt_cache.page & 0xf00) | 0xfe,0,pmot_data);
+
+			unsigned char *p = pmot_data; /* start of link data */
 			int o = 2 * (((tuxtxt_cache.page & 0xf0) >> 4) * 10 + (tuxtxt_cache.page & 0x0f));	/* offset of links for current page */
 			int opop = p[o] & 0x07;	/* index of POP link */
 			int odrcs = p[o+1] & 0x07;	/* index of DRCS link */
@@ -1262,7 +1363,7 @@ void eval_l25()
 					}
 				}
 			}
-			// eval default objects in right order
+			// eval default objects in correct order
 			for (ct = 0; ct < 12; ct++)
 			{
 #if DEBUG
@@ -1331,35 +1432,28 @@ void eval_l25()
 				printf("p26/x:\n");
 #endif
 			APx0 = APy0 = APx = APy = tAPx = tAPy = 0;
-			eval_object(13 * (23-2 + 2), tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage], &APx, &APy, &APx0, &APy0, OBJ_ACTIVE); /* 1st triplet p26/0 */
+			eval_object(13 * (23-2 + 2), tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage], &APx, &APy, &APx0, &APy0, OBJ_ACTIVE, &page_char[40]); /* 1st triplet p26/0 */
 		}
-		/* handle Black Background Color Substitution and transparency (CLUT1#0) */
+
 		{
 			int r, c;
 			int o = 0;
+
 
 			for (r = 0; r < 25; r++)
 				for (c = 0; c < 39; c++)
 				{
 					if (BlackBgSubst && page_atrb[o].bg == black && !(page_atrb[o].IgnoreAtBlackBgSubst))
-						page_atrb[o].bg = FullRowColor[r];
-					if (page_atrb[o].bg == 0x08)
 					{
 						if (FullRowColor[r] == 0x08)
 							page_atrb[o].bg = FullScrColor;
 						else
 							page_atrb[o].bg = FullRowColor[r];
 					}
-					if (page_atrb[o].fg == 0x08)
-					{
-						if (FullRowColor[r] == 0x08)
-							page_atrb[o].fg = FullScrColor;
-						else
-							page_atrb[o].fg = FullRowColor[r];
-					}
 					o++;
 				}
 		}
+
 		if (!hintmode)
 		{
 			int i;
@@ -1368,6 +1462,12 @@ void eval_l25()
 				if (page_atrb[i].concealed) page_atrb[i].fg = page_atrb[i].bg;
 			}
 		}
+
+		if (boxed || transpmode)
+//			FullScrColor = transp;
+			FillBorder(transp);
+		else
+			FillBorder(FullScrColor);
 		if (colortable) /* as late as possible to shorten the time the old page is displayed with the new colors */
 			setcolors(colortable, 16, 16); /* set colors for CLUTs 2+3 */
 	} /* is_dec(page) */
@@ -1380,8 +1480,8 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.90 $";
-	
+	char cvs_revision[] = "$Revision: 1.91 $";
+
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
 	if ( initialized )
@@ -1562,12 +1662,12 @@ void plugin_exec(PluginParam *par)
 	/* exit */
 	CleanUp();
 
-#if !TUXTXT_CFG_STANDALONE	
+#if !TUXTXT_CFG_STANDALONE
 	if ( initialized )
 		tuxtxt_close();
 #endif
 
-	printf("Tuxtxt: plugin ended\n");
+ 	printf("Tuxtxt: plugin ended\n");
 
 }
 
@@ -1649,8 +1749,9 @@ int Init()
 	screen_mode1 = 0;
 	screen_mode2 = 0;
 	color_mode   = 10;
+	trans_mode   = 10;
 	menulanguage = 0;	/* german */
-	national_subset = 4;	/* german */
+	national_subset = 0;/* default */
 	auto_national   = 1;
 	swapupdown      = 0;
 	showhex         = 0;
@@ -1701,8 +1802,8 @@ int Init()
 				swapupdown = ival & 1;
 			else if (1 == sscanf(line, "ShowHexPages %i", &ival))
 				showhex = ival & 1;
-			else if (1 == sscanf(line, "OverlayTransparency %i", &ival))
-				tr0[transp2] = ival & 0xFFFF;
+			else if (1 == sscanf(line, "Transparency %i", &ival))
+				trans_mode = ival;
 			else if (1 == sscanf(line, "TTFWidthFactor16 %i", &ival))
 	            TTFWidthFactor16 = ival;
 			else if (1 == sscanf(line, "TTFHeightFactor16 %i", &ival))
@@ -1728,7 +1829,7 @@ int Init()
 	}
 	saveconfig = 0;
 	savedscreenmode = screenmode;
-
+	national_subset_secondary = NAT_DEFAULT;
 
 
 	/* init fontlibrary */
@@ -1837,6 +1938,7 @@ int Init()
 		perror("TuxTxt <FBIOPUT_VSCREENINFO>");
 		return 0;
 	}
+
 #if DEBUG
 	if (ioctl(fb, FBIOGET_VSCREENINFO, &var_screeninfo) == -1)
 	{
@@ -1850,11 +1952,6 @@ int Init()
 	       var_screeninfo.yoffset);
 #endif
 
-#ifndef HAVE_DREAMBOX_HARDWARE
-	/* "correct" semi-transparent for Nokia (GTX only allows 2(?) levels of transparency) */
-	if (tuxbox_get_vendor() == TUXBOX_VENDOR_NOKIA)
-		tr0[transp2] = 0xFFFF;
-#endif
 
 	/* set new colormap */
 	setcolors((unsigned short *)defaultcolors, 0, SIZECOLTABLE);
@@ -1989,7 +2086,7 @@ void CleanUp()
 #ifndef HAVE_DREAMBOX_HARDWARE
 		int vendor = tuxbox_get_vendor() - 1;
 #else
-		int vendor = 0; /* values unknown, rely on requested values */
+		int vendor = 3; /* values unknown, rely on requested values */
 #endif
 		if (vendor < 3) /* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 		{
@@ -2045,7 +2142,7 @@ void CleanUp()
 			fprintf(conf, "NationalSubset %d\n", national_subset);
 			fprintf(conf, "SwapUpDown %d\n", swapupdown);
 			fprintf(conf, "ShowHexPages %d\n", showhex);
-			fprintf(conf, "OverlayTransparency 0x%X\n", tr0[transp2]);
+			fprintf(conf, "Transparency 0x%X\n", trans_mode);
 			fprintf(conf, "TTFWidthFactor16 %d\n", TTFWidthFactor16);
 			fprintf(conf, "TTFHeightFactor16 %d\n", TTFHeightFactor16);
 			fprintf(conf, "TTFShiftX %d\n", TTFShiftX);
@@ -2388,21 +2485,115 @@ int GetNationalSubset(char *cc)
 /******************************************************************************
  * ConfigMenu                                                                 *
  ******************************************************************************/
+#if DEBUG
+void charpage()
+{
+	PosY = StartY;
+	PosX = StartX;
+	char cachefill[100];
+	int fullsize =0,hexcount = 0, col, p,sp;
+	int escpage = 0;
+	tstCachedPage* pg;
+	ClearFB(black);
 
+	int zipsize = 0;
+	for (p = 0; p < 0x900; p++)
+	{
+		for (sp = 0; sp < 0x80; sp++)
+		{
+			pg = tuxtxt_cache.astCachetable[p][sp];
+			if (pg)
+			{
+
+				fullsize+=23*40;
+				zipsize += tuxtxt_get_zipsize(p,sp);
+			}
+		}
+	}
+
+
+	memset(cachefill,' ',40);
+	sprintf(cachefill,"f:%d z:%d h:%d c:%d %03x",fullsize, zipsize, hexcount, tuxtxt_cache.cached_pages, escpage);
+
+	for (col = 0; col < 40; col++)
+	{
+		RenderCharFB(cachefill[col], &atrtable[ATR_WB]);
+	}
+	tstPageAttr atr;
+	memcpy(&atr,&atrtable[ATR_WB],sizeof(tstPageAttr));
+	int row;
+	atr.charset = C_G0P;
+	PosY = StartY+fontheight;
+	for (row = 0; row < 16; row++)
+	{
+		PosY+= fontheight;
+		SetPosX(1);
+		for (col=0; col < 6; col++)
+		{
+			RenderCharFB(col*16+row+0x20, &atr);
+		}
+	}
+	atr.setX26 = 1;
+	PosY = StartY+fontheight;
+	for (row = 0; row < 16; row++)
+	{
+		PosY+= fontheight;
+		SetPosX(10);
+		for (col=0; col < 6; col++)
+		{
+			RenderCharFB(col*16+row+0x20, &atr);
+		}
+	}
+	PosY = StartY+fontheight;
+	atr.charset = C_G2;
+	atr.setX26 = 0;
+	for (row = 0; row < 16; row++)
+	{
+		PosY+= fontheight;
+		SetPosX(20);
+		for (col=0; col < 6; col++)
+		{
+			RenderCharFB(col*16+row+0x20, &atr);
+		}
+	}
+	atr.charset = C_G3;
+	PosY = StartY+fontheight;
+	for (row = 0; row < 16; row++)
+	{
+		PosY+= fontheight;
+		SetPosX(30);
+		for (col=0; col < 6; col++)
+		{
+			RenderCharFB(col*16+row+0x20, &atr);
+		}
+	}
+	do
+	{
+		GetRCCode();
+	}
+	while (RCCode != RC_OK && RCCode != RC_HOME);
+}
+#endif
 void Menu_HighlightLine(char *menu, int line, int high)
 {
 	char hilitline[] = "0111111111111111111111111111102";
 	int itext = Menu_Width*line; /* index start menuline */
 	int byte;
+	int national_subset_bak = national_subset;
 
 	PosX = Menu_StartX;
 	PosY = Menu_StartY + line*fontheight;
+	if (line == MenuLine[M_NAT])
+		national_subset = national_subset_bak;
+	else
+		national_subset = menusubset[menulanguage];
 
 	for (byte = 0; byte < Menu_Width; byte++)
 		RenderCharFB(menu[itext + byte],
 						 high ?
 						 &atrtable[hilitline[byte] - '0' + ATR_MENUHIL0] :
 						 &atrtable[menuatr[itext + byte] - '0' + ATR_MENU0]);
+	national_subset = national_subset_bak;
 }
 
 void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
@@ -2412,7 +2603,7 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 
 	PosX = Menu_StartX + 6*fontwidth;
 	PosY = Menu_StartY + (MenuLine[M_HOT]+1)*fontheight;
-	j = 2*Menu_Width*(MenuLine[M_HOT]+1) + 6; /* start index in menu */
+	j = Menu_Width*(MenuLine[M_HOT]+1) + 6; /* start index in menu */
 
 	for (i = 0; i <= maxhotlist+1; i++)
 	{
@@ -2457,6 +2648,7 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 {
 	int byte, line;
+	int national_subset_bak = national_subset;
 
 	memcpy(menu, configmenu[menulanguage], Menu_Height*Menu_Width);
 
@@ -2484,9 +2676,13 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 	memset(&menu[Menu_Width*MenuLine[M_COL] + 3             ], 0x7f,color_mode);
 	memset(&menu[Menu_Width*MenuLine[M_COL] + 3+color_mode  ], 0x20,24-color_mode);
 //	memcpy(&menu[Menu_Width*MenuLine[M_COL] + Menu_Width - 5], &configonoff[menulanguage][color_mode    ? 3 : 0], 3);
+	menu[MenuLine[M_TRA]*Menu_Width +  1] = (trans_mode == 1  ? ' ' : 'í');
+	menu[MenuLine[M_TRA]*Menu_Width + 28] = (trans_mode == 24 ? ' ' : 'î');
+	memset(&menu[Menu_Width*MenuLine[M_TRA] + 3             ], 0x7f,trans_mode);
+	memset(&menu[Menu_Width*MenuLine[M_TRA] + 3+trans_mode  ], 0x20,24-trans_mode);
 
 	memcpy(&menu[Menu_Width*MenuLine[M_AUN] + Menu_Width - 5], &configonoff[menulanguage][auto_national ? 3 : 0], 3);
-	if (national_subset != 4)
+	if (national_subset != NAT_DE)
 		memcpy(&menu[Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*COUNTRYSTRING_WIDTH], COUNTRYSTRING_WIDTH);
 	if (national_subset == 0  || auto_national)
 		menu[MenuLine[M_NAT]*Menu_Width +  1] = ' ';
@@ -2494,18 +2690,22 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 		menu[MenuLine[M_NAT]*Menu_Width + 28] = ' ';
 	if (showhex)
 		menu[MenuLine[M_PID]*Menu_Width + 27] = '?';
-
 	/* render menu */
 	PosY = Menu_StartY;
 	for (line = 0; line < Menu_Height; line++)
 	{
 		PosX = Menu_StartX;
+		if (line == MenuLine[M_NAT])
+			national_subset = national_subset_bak;
+		else
+			national_subset = menusubset[menulanguage];
 
 		for (byte = 0; byte < Menu_Width; byte++)
 			RenderCharFB(menu[line*Menu_Width + byte], &atrtable[menuatr[line*Menu_Width + byte] - '0' + ATR_MENU0]);
 
 		PosY += fontheight;
 	}
+	national_subset = national_subset_bak;
 	Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 	Menu_UpdateHotlist(menu, hotindex, menuitem);
 }
@@ -2517,8 +2717,12 @@ void ConfigMenu(int Init)
 	int hotindex;
 	int oldscreenmode;
 	int i;
+	int national_subset_bak = national_subset;
 	char menu[Menu_Height*Menu_Width];
 
+	if (auto_national && tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage] &&
+		tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->pageinfo.nationalvalid)
+		national_subset = countryconversiontable[tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->pageinfo.national];
 
 	if (getpidsdone)
 	{
@@ -2605,6 +2809,17 @@ void ConfigMenu(int Init)
 					menu[MenuLine[M_COL]*Menu_Width + 28] = (color_mode == 24 ? ' ' : 'î');
 					memset(&menu[Menu_Width*MenuLine[M_COL] + 3             ], 0x7f,color_mode);
 					memset(&menu[Menu_Width*MenuLine[M_COL] + 3+color_mode  ], 0x20,24-color_mode);
+					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
+					setcolors((unsigned short *)defaultcolors, 0, SIZECOLTABLE);
+					break;
+				case M_TRA:
+					saveconfig = 1;
+					trans_mode--;
+					if (trans_mode < 1) trans_mode = 1;
+					menu[MenuLine[M_TRA]*Menu_Width +  1] = (trans_mode == 1  ? ' ' : 'í');
+					menu[MenuLine[M_TRA]*Menu_Width + 28] = (trans_mode == 24 ? ' ' : 'î');
+					memset(&menu[Menu_Width*MenuLine[M_TRA] + 3             ], 0x7f,trans_mode);
+					memset(&menu[Menu_Width*MenuLine[M_TRA] + 3+trans_mode  ], 0x20,24-trans_mode);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 					setcolors((unsigned short *)defaultcolors, 0, SIZECOLTABLE);
 					break;
@@ -2713,6 +2928,17 @@ void ConfigMenu(int Init)
 					menu[MenuLine[M_COL]*Menu_Width + 28] = (color_mode == 24 ? ' ' : 'î');
 					memset(&menu[Menu_Width*MenuLine[M_COL] + 3             ], 0x7f,color_mode);
 					memset(&menu[Menu_Width*MenuLine[M_COL] + 3+color_mode  ], 0x20,24-color_mode);
+					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
+					setcolors((unsigned short *)defaultcolors, 0, SIZECOLTABLE);
+					break;
+				case M_TRA:
+					saveconfig = 1;
+					trans_mode++;
+					if (trans_mode > 24) trans_mode = 24;
+					menu[MenuLine[M_TRA]*Menu_Width +  1] = (trans_mode == 1  ? ' ' : 'í');
+					menu[MenuLine[M_TRA]*Menu_Width + 28] = (trans_mode == 24 ? ' ' : 'î');
+					memset(&menu[Menu_Width*MenuLine[M_TRA] + 3             ], 0x7f,trans_mode);
+					memset(&menu[Menu_Width*MenuLine[M_TRA] + 3+trans_mode  ], 0x20,24-trans_mode);
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 					setcolors((unsigned short *)defaultcolors, 0, SIZECOLTABLE);
 					break;
@@ -2915,6 +3141,13 @@ void ConfigMenu(int Init)
 					menu[MenuLine[M_PID]*Menu_Width + 27] = (showhex ? '?' : ' ');
 					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 				break;
+#if DEBUG
+				case M_LNG:
+					charpage();
+					ClearFB(transp);
+					Menu_Init(menu, current_pid, menuitem, hotindex);
+				break;
+#endif
 				}
 				break; /* RC_MUTE */
 
@@ -3036,8 +3269,20 @@ void ConfigMenu(int Init)
 					saveconfig = 1;
 					auto_national++;
 					auto_national &= 1;
-					if (auto_national && getpidsdone)
-						national_subset = pid_table[current_pid].national_subset;
+					if (auto_national)
+					{
+					 	if (getpidsdone)
+							national_subset = pid_table[current_pid].national_subset;
+						else
+						{
+							if (tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage] &&
+								tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->pageinfo.nationalvalid)
+								national_subset = countryconversiontable[tuxtxt_cache.astCachetable[tuxtxt_cache.page][tuxtxt_cache.subpage]->pageinfo.national];
+							else
+								national_subset = national_subset_bak;
+						}
+
+					}
 					Menu_Init(menu, current_pid, menuitem, hotindex);
 					break;
 				case M_HOT: /* show selected page */
@@ -3599,7 +3844,7 @@ void SwitchScreenMode(int newscreenmode)
 #ifndef HAVE_DREAMBOX_HARDWARE
 	clearbbcolor = black;
 #else
-	clearbbcolor = screenmode?transp:black;
+	clearbbcolor = screenmode?transp:FullScrColor;
 #endif
 	ClearBB(clearbbcolor);
 
@@ -3607,12 +3852,7 @@ void SwitchScreenMode(int newscreenmode)
 	/* set mode */
 	if (screenmode)								 /* split */
 	{
-#ifdef HAVE_DREAMBOX_HARDWARE
-		if ( screenmode == 2 && zoommode )
-			ClearFB(clearbbcolor);
-#else
-		int sm = 0;
-#endif
+		ClearFB(clearbbcolor);
 
 		int fw, fh, tx, ty, tw, th;
 
@@ -3647,6 +3887,7 @@ void SwitchScreenMode(int newscreenmode)
 		avia_pig_set_stack(pig, 2);
 		avia_pig_show(pig);
 #else
+		int sm = 0;
 		ioctl(pig, VIDIOC_OVERLAY, &sm);
 		sm = 1;
 		ioctl(pig, VIDIOC_G_FMT, &format);
@@ -3700,7 +3941,7 @@ void SwitchTranspMode()
 	/* set mode */
 	if (!transpmode) /* normal text-only */
 	{
-		ClearBB(black);
+		ClearBB(FullScrColor);
 		tuxtxt_cache.pageupdate = 1;
 	}
 	else if (transpmode == 1) /* semi-transparent BG with FG text */
@@ -3719,7 +3960,7 @@ void SwitchTranspMode()
 		ioctl(saa, SAAIOSWSS, &saa_old);
 
 		ClearFB(transp);
-		clearbbcolor = black;
+		clearbbcolor = FullScrColor;
 	}
 }
 
@@ -3829,6 +4070,37 @@ void FillTrapez(int x0, int y0, int l0, int xoffset1, int h, int l1, int color)
 		p += var_screeninfo.xres;
 	}
 }
+void FlipHorz(int x, int y, int w, int h)
+{
+	unsigned char buf[w];
+	unsigned char *p = lfb + x + y * var_screeninfo.xres;
+	int w1,h1;
+
+	for (h1 = 0 ; h1 < h ; h1++)
+	{
+		memcpy(buf,p,w);
+		for (w1 = 0 ; w1 < w ; w1++)
+		{
+			*(p+w1) = buf[w-(w1+1)];
+		}
+		p += var_screeninfo.xres;
+	}
+}
+void FlipVert(int x, int y, int w, int h)
+{
+	unsigned char buf[w];
+	unsigned char *p = lfb + x + y * var_screeninfo.xres, *p1, *p2;
+	int h1;
+
+	for (h1 = 0 ; h1 < h/2 ; h1++)
+	{
+		p1 = (p+(h1*var_screeninfo.xres));
+		p2 = (p+(h-(h1+1))*var_screeninfo.xres);
+		memcpy(buf,p1,w);
+		memcpy(p1,p2,w);
+		memcpy(p2,buf,w);
+	}
+}
 
 int ShapeCoord(int param, int curfontwidth, int curfontheight)
 {
@@ -3857,9 +4129,9 @@ int ShapeCoord(int param, int curfontwidth, int curfontheight)
 	}
 }
 
-void DrawShape(int x, int y, int shapenumber, int curfontwidth, int curfontheight, int fgcolor, int bgcolor)
+void DrawShape(int x, int y, int shapenumber, int curfontwidth, int curfontheight, int fgcolor, int bgcolor, int clear)
 {
-	if (shapenumber < 0x20 || shapenumber > 0x7d)
+	if (shapenumber < 0x20 || shapenumber > 0x7e || (shapenumber == 0x7e && clear))
 		return;
 
 	unsigned char *p = aShapes[shapenumber - 0x20];
@@ -3872,7 +4144,8 @@ void DrawShape(int x, int y, int shapenumber, int curfontwidth, int curfontheigh
 		p++;
 	}
 
-	FillRect(x, y, curfontwidth, fontheight, bgcolor);
+	if (clear)
+		FillRect(x, y, curfontwidth, fontheight, bgcolor);
 	while (*p != S_END)
 		switch (*p++)
 		{
@@ -3888,6 +4161,12 @@ void DrawShape(int x, int y, int shapenumber, int curfontwidth, int curfontheigh
 			DrawVLine(x + offset, y, fontheight, fgcolor);
 			break;
 		}
+		case S_FLH:
+			FlipHorz(x,y,curfontwidth, fontheight);
+			break;
+		case S_FLV:
+			FlipVert(x,y,curfontwidth, fontheight);
+			break;
 		case S_BOX:
 		{
 			int xo = ShapeCoord(*p++, curfontwidth, curfontheight);
@@ -3908,9 +4187,21 @@ void DrawShape(int x, int y, int shapenumber, int curfontwidth, int curfontheigh
 			FillTrapez(x + x0, y + y0, l0, x1-x0, y1-y0, l1, fgcolor);
 			break;
 		}
+		case S_BTR:
+		{
+			int x0 = ShapeCoord(*p++, curfontwidth, curfontheight);
+			int y0 = ShapeCoord(*p++, curfontwidth, curfontheight);
+			int l0 = ShapeCoord(*p++, curfontwidth, curfontheight);
+			int x1 = ShapeCoord(*p++, curfontwidth, curfontheight);
+			int y1 = ShapeCoord(*p++, curfontwidth, curfontheight);
+			int l1 = ShapeCoord(*p++, curfontwidth, curfontheight);
+			FillTrapez(x + x0, y + y0, l0, x1-x0, y1-y0, l1, bgcolor);
+			break;
+		}
 		case S_LNK:
 		{
-			p = aShapes[ShapeCoord(*p, curfontwidth, curfontheight) - 0x20];
+			DrawShape(x, y, ShapeCoord(*p, curfontwidth, curfontheight), curfontwidth, curfontheight, fgcolor, bgcolor, 0);
+			//p = aShapes[ShapeCoord(*p, curfontwidth, curfontheight) - 0x20];
 			break;
 		}
 		default:
@@ -3929,10 +4220,39 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 	int error, glyph;
 	int bgcolor, fgcolor;
 	int factor, xfactor;
+	int national_subset_local = national_subset;
 	unsigned char *sbitbuffer;
 
 	int curfontwidth = GetCurFontWidth();
 
+	if (Attribute->setX26)
+	{
+		national_subset_local = 0; // no national subset
+	}
+
+	// G0+G2 set designation
+	if (Attribute->setG0G2 != 0x3f)
+	{
+		switch (Attribute->setG0G2)
+		{
+			case 0x20 :
+			case 0x24 :
+			case 0x25 :
+				national_subset_local = NAT_RU;
+				break;
+			case 0x37:
+				national_subset_local = NAT_GR;
+				break;
+				//TODO: arabic and hebrew
+			default:
+				national_subset_local = countryconversiontable[Attribute->setG0G2 & 0x07];
+				break;
+
+		}
+
+	}
+	if (Attribute->charset == C_G0S) // use secondary charset
+		national_subset_local = national_subset_secondary;
 	if (zoom && Attribute->doubleh)
 		factor = 4;
 	else if (zoom || Attribute->doubleh)
@@ -3979,23 +4299,23 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 	if ((Attribute->charset == C_G1C || Attribute->charset == C_G1S) &&
 		 ((Char&0xA0) == 0x20))
 	{
-		int w1 = curfontwidth / 2;
-		int w2 = curfontwidth - w1;
+		int w1 = (curfontwidth / 2 ) *xfactor;
+		int w2 = (curfontwidth - w1) *xfactor;
 		int y;
 
 		Char = (Char & 0x1f) | ((Char & 0x40) >> 1);
 		if (Attribute->charset == C_G1S) /* separated mosaic */
 			for (y = 0; y < 3; y++)
 			{
-				FillRectMosaicSeparated(PosX,      PosY + yoffset + ymosaic[y], w1, ymosaic[y+1] - ymosaic[y], fgcolor, bgcolor, Char & 0x01);
-				FillRectMosaicSeparated(PosX + w1, PosY + yoffset + ymosaic[y], w2, ymosaic[y+1] - ymosaic[y], fgcolor, bgcolor, Char & 0x02);
+				FillRectMosaicSeparated(PosX,      PosY + yoffset + ymosaic[y]*factor, w1, (ymosaic[y+1] - ymosaic[y])*factor, fgcolor, bgcolor, Char & 0x01);
+				FillRectMosaicSeparated(PosX + w1, PosY + yoffset + ymosaic[y]*factor, w2, (ymosaic[y+1] - ymosaic[y])*factor, fgcolor, bgcolor, Char & 0x02);
 				Char >>= 2;
 			}
 		else
 			for (y = 0; y < 3; y++)
 			{
-				FillRect(PosX,      PosY + yoffset + ymosaic[y], w1, ymosaic[y+1] - ymosaic[y], (Char & 0x01) ? fgcolor : bgcolor);
-				FillRect(PosX + w1, PosY + yoffset + ymosaic[y], w2, ymosaic[y+1] - ymosaic[y], (Char & 0x02) ? fgcolor : bgcolor);
+				FillRect(PosX,      PosY + yoffset + ymosaic[y]*factor, w1, (ymosaic[y+1] - ymosaic[y])*factor, (Char & 0x01) ? fgcolor : bgcolor);
+				FillRect(PosX + w1, PosY + yoffset + ymosaic[y]*factor, w2, (ymosaic[y+1] - ymosaic[y])*factor, (Char & 0x02) ? fgcolor : bgcolor);
 				Char >>= 2;
 			}
 
@@ -4013,25 +4333,47 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 		{
 			if (*aShapes[Char - 0x20] == S_CHR)
 			{
-				Char = (*aShapes[Char - 0x20+1] <<8) + (*aShapes[Char - 0x20+2]);
+				unsigned char *p = aShapes[Char - 0x20];
+				Char = (*(p+1) <<8) + (*(p+2));
+			}
+			else if (*aShapes[Char - 0x20] == S_ADT)
+			{
+				int x,y,f,c;
+				unsigned char* p = lfb + PosX + (PosY+yoffset)* var_screeninfo.xres;
+				for (y=0; y<fontheight;y++)
+				{
+					for (f=0; f<factor; f++)
+					{
+						for (x=0; x<curfontwidth*xfactor;x++)
+						{
+							c = (y&4 ? (x/3)&1 :((x+3)/3)&1);
+							*(p+x) = (c ? fgcolor : bgcolor);
+						}
+						p += var_screeninfo.xres;
+					}
+				}
+				PosX += curfontwidth;
+				return;
 			}
 			else
 			{
-				DrawShape(PosX, PosY + yoffset, Char, curfontwidth, factor*fontheight, fgcolor, bgcolor);
+				DrawShape(PosX, PosY + yoffset, Char, curfontwidth, factor*fontheight, fgcolor, bgcolor,1);
 				PosX += curfontwidth;
 				return;
 			}
 		}
 	}
-
-	if (Attribute->charset >= C_OFFSET_DRCS)
+	else if (Attribute->charset >= C_OFFSET_DRCS)
 	{
+
 		tstCachedPage *pcache = tuxtxt_cache.astCachetable[(Attribute->charset & 0x10) ? drcs : gdrcs][Attribute->charset & 0x0f];
 		if (pcache)
 		{
+			unsigned char drcs_data[23*40];
+			tuxtxt_decompress_page((Attribute->charset & 0x10) ? drcs : gdrcs,Attribute->charset & 0x0f,drcs_data);
 			unsigned char *p;
 			if (Char < 23*2)
-				p = pcache->data + 20*Char;
+				p = drcs_data + 20*Char;
 			else if (pcache->pageinfo.p24)
 				p = pcache->pageinfo.p24 + 20*(Char - 23*2);
 			else
@@ -4050,18 +4392,34 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 		PosX += curfontwidth;
 		return;
 	}
+	else if (Attribute->charset == C_G2 && Char >= 0x20 && Char <= 0x7F)
+	{
+		if (national_subset_local == NAT_GR)
+			Char = G2table[2][Char-0x20];
+		else if (national_subset_local == NAT_RU)
+			Char = G2table[1][Char-0x20];
+		else
+			Char = G2table[0][Char-0x20];
 
-	if (national_subset == NAT_GR && Char >= 0x40 && Char <= 0x7E)	/* remap complete areas for greek and cyrillic */
+		if (Char == 0x7F)
+		{
+			FillRect(PosX, PosY + yoffset, curfontwidth, factor*ascender, fgcolor);
+			FillRect(PosX, PosY + yoffset + factor*ascender, curfontwidth, factor*(fontheight-ascender), bgcolor);
+			PosX += curfontwidth;
+			return;
+		}
+	}
+	else if (national_subset_local == NAT_GR && Char >= 0x40 && Char <= 0x7E)	/* remap complete areas for greek and cyrillic */
 		Char += 0x390 - 0x40;
-	else if (national_subset == NAT_GR && Char == 0x52)
+	else if (national_subset_local == NAT_GR && Char == 0x52)
 		Char = 0x27; /* right-shifted apostrophe */
-	else if (national_subset == NAT_GR && Char == 0x3c)
+	else if (national_subset_local == NAT_GR && Char == 0x3c)
 		Char = 0x226a; /* much-less */
-	else if (national_subset == NAT_GR && Char == 0x3e)
+	else if (national_subset_local == NAT_GR && Char == 0x3e)
 		Char = 0x226b; /* much-greater */
-	else if (national_subset == NAT_GR && Char >= 0x23 && Char <= 0x24)
+	else if (national_subset_local == NAT_GR && Char >= 0x23 && Char <= 0x24)
 		Char = nationaltable23[NAT_DE][Char-0x23]; /* #$ as in german option */
-	else if (national_subset == NAT_RU &&
+	else if (national_subset_local == NAT_RU &&
 				Char >= 0x40 && Char <= 0x7E)
 		Char += 0x400 - 0x40;
 	else
@@ -4076,10 +4434,10 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 			return;
 		case 0x23:
 		case 0x24:
-			Char = nationaltable23[national_subset][Char-0x23];
+			Char = nationaltable23[national_subset_local][Char-0x23];
 			break;
 		case 0x40:
-			Char = nationaltable40[national_subset];
+			Char = nationaltable40[national_subset_local];
 			break;
 		case 0x5B:
 		case 0x5C:
@@ -4087,13 +4445,13 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 		case 0x5E:
 		case 0x5F:
 		case 0x60:
-			Char = nationaltable5b[national_subset][Char-0x5B];
+			Char = nationaltable5b[national_subset_local][Char-0x5B];
 			break;
 		case 0x7B:
 		case 0x7C:
 		case 0x7D:
 		case 0x7E:
-			Char = nationaltable7b[national_subset][Char-0x7B];
+			Char = nationaltable7b[national_subset_local][Char-0x7B];
 			break;
 		case 0x7F:
 			FillRect(PosX, PosY + yoffset, curfontwidth, factor*ascender, fgcolor);
@@ -4189,10 +4547,10 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 	}
 	if (Char <= 0x20)
 	{
-#if 0//DEBUG
+#if DEBUG
 		printf("TuxTxt found control char: %x \"%c\" \n", Char, Char);
 #endif
-		FillRect(PosX, PosY + yoffset, curfontwidth, fontheight, bgcolor);
+		FillRect(PosX, PosY + yoffset, curfontwidth, factor*fontheight, bgcolor);
 		PosX += curfontwidth;
 		return;
 	}
@@ -4202,12 +4560,11 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 #if DEBUG
 		printf("TuxTxt <FT_Get_Char_Index for Char %x \"%c\" failed\n", Char, Char);
 #endif
-		FillRect(PosX, PosY + yoffset, curfontwidth, fontheight, bgcolor);
+		FillRect(PosX, PosY + yoffset, curfontwidth, factor*fontheight, bgcolor);
 		PosX += curfontwidth;
 		return;
 	}
 
-//	typettf.font.pix_width  = (FT_UShort) curfontwidth * TTFWidthFactor16 / 16 - 2;
 #if HAVE_DVB_API_VERSION >= 3
 	if ((error = FTC_SBitCache_Lookup(cache, &typettf, glyph, &sbit, NULL)) != 0)
 #else
@@ -4225,6 +4582,45 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 
 	/* render char */
 	sbitbuffer = sbit->buffer;
+	char* localbuffer = NULL;
+	// add diacritical marks
+	if (Attribute->diacrit)
+	{
+		FTC_SBit        sbit_diacrit;
+
+		if (national_subset_local == NAT_GR)
+			Char = G2table[2][0x20+ Attribute->diacrit];
+		else if (national_subset_local == NAT_RU)
+			Char = G2table[1][0x20+ Attribute->diacrit];
+		else
+			Char = G2table[0][0x20+ Attribute->diacrit];
+		if ((glyph = FT_Get_Char_Index(face, Char)))
+		{
+#if HAVE_DVB_API_VERSION >= 3
+			if ((error = FTC_SBitCache_Lookup(cache, &typettf, glyph, &sbit_diacrit, NULL)) == 0)
+#else
+			if ((error = FTC_SBit_Cache_Lookup(cache, &typettf, glyph, &sbit_diacrit)) == 0)
+#endif
+			{
+				localbuffer = malloc(sbit->pitch*sbit->height);
+				if (localbuffer)
+				{
+					sbitbuffer = localbuffer;
+					memcpy(sbitbuffer,sbit->buffer,sbit->pitch*sbit->height);
+
+					for (Row = 0; Row < sbit->height; Row++)
+					{
+						for (Pitch = 0; Pitch < sbit->pitch; Pitch++)
+						{
+							if (sbit_diacrit->pitch > Pitch && sbit_diacrit->height > Row)
+								sbitbuffer[Row*sbit->pitch+Pitch] |= sbit_diacrit->buffer[Row*sbit->pitch+Pitch];
+						}
+					}
+				}
+			}
+		}
+	}
+
   	if (yoffset >= 0)	/* framebuffer */
 	{
 		unsigned char *p;
@@ -4274,12 +4670,14 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 						for (f = factor-1; f >= 0; f--)
 							*(p + f*var_screeninfo.xres) = color;
 						p++;
+						if (!usettf)
+							pixtodo--;
 					}
 				}
 				sbitbuffer++;
 			}
 
-			for (Bit = xfactor * (usettf ? (curfontwidth - sbit->width - sbit->left - TTFShiftX) : pixtodo);
+			for (Bit = (usettf ? (curfontwidth - xfactor*(sbit->width + sbit->left + TTFShiftX)) : pixtodo);
 				  Bit > 0; Bit--) /* fill rest of char width */
 			{
 				for (f = factor-1; f >= 0; f--)
@@ -4292,8 +4690,13 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 
 		Row = ascender - sbit->top + sbit->height + TTFShiftY;
 		FillRect(PosX, PosY + yoffset + Row*factor, curfontwidth, (fontheight - Row) * factor, bgcolor); /* fill lower margin */
+		if (Attribute->underline)
+			FillRect(PosX, PosY + yoffset + (fontheight-2)* factor, curfontwidth,2*factor, fgcolor); /* undeline char */
+
 
 		PosX += curfontwidth;
+		if (localbuffer)
+			free(localbuffer);
 	}
 #if 0
 	else /* yoffset<0: LCD */
@@ -4503,6 +4906,111 @@ void RenderMessage(int Message)
  * RenderPage                                                                 *
  ******************************************************************************/
 
+void DoFlashing(int startrow)
+{
+	int row, col;
+	/* get national subset */
+	if (auto_national &&
+		 national_subset <= NAT_MAX_FROM_HEADER && /* not for GR/RU as long as line28 is not evaluated */
+		 pageinfo && pageinfo->nationalvalid) /* individual subset according to page header */
+	{
+		national_subset = countryconversiontable[pageinfo->national];
+	}
+	/* Flashing */
+	tstPageAttr flashattr;
+	char flashchar;
+	struct timeval tv;
+	gettimeofday(&tv,NULL);
+	long flashphase = (tv.tv_usec / 1000) % 1000;
+	int srow = startrow;
+	int erow = 24;
+	int factor=1;
+	switch (zoommode)
+	{
+		case 1: erow = 12; factor=2;break;
+		case 2: srow = 12; factor=2;break;
+	}
+	PosY = StartY + startrow*fontheight*factor;
+	for (row = srow; row < erow; row++)
+	{
+		int index = row * 40;
+		int dhset = 0;
+		int incflash = 3;
+		int decflash = 2;
+		PosX = StartX;
+		for (col = nofirst; col < 40; col++)
+		{
+			if (page_atrb[index + col].flashing && page_char[index + col] > 0x20 && page_char[index + col]!= 0xff )
+			{
+				SetPosX(col);
+				flashchar = page_char[index + col];
+				int doflash = 0;
+				memcpy(&flashattr,&page_atrb[index + col],sizeof(tstPageAttr));
+				switch (flashattr.flashing &0x1c) // Flash Rate
+				{
+					case 0x00 :	// 1 Hz
+						if (flashphase>500) doflash = 1;
+						break;
+					case 0x04 :	// 2 Hz  Phase 1
+						if (flashphase<250) doflash = 1;
+						break;
+					case 0x08 :	// 2 Hz  Phase 2
+						if (flashphase>=250 && flashphase<500) doflash = 1;
+						break;
+					case 0x0c :	// 2 Hz  Phase 3
+						if (flashphase>=500 && flashphase<750) doflash = 1;
+						break;
+					case 0x10 :	// incremental flash
+						incflash++;
+						if (incflash>3) incflash = 1;
+						switch (incflash)
+						{
+							case 1: if (flashphase<250) doflash = 1; break;
+							case 2: if (flashphase>=250 && flashphase<500) doflash = 1;break;
+							case 3: if (flashphase>=500 && flashphase<750) doflash = 1;
+						}
+						break;
+					case 0x11 :	// decremental flash
+						decflash--;
+						if (decflash<1) decflash = 3;
+						switch (decflash)
+						{
+							case 1: if (flashphase<250) doflash = 1; break;
+							case 2: if (flashphase>=250 && flashphase<500) doflash = 1;break;
+							case 3: if (flashphase>=500 && flashphase<750) doflash = 1;
+						}
+						break;
+
+				}
+
+				switch (flashattr.flashing &0x03) // Flash Mode
+				{
+					case 0x01 :	// normal Flashing
+						if (doflash) flashattr.fg = flashattr.bg;
+						break;
+					case 0x02 :	// inverted Flashing
+						doflash = 1-doflash;
+						if (doflash) flashattr.fg = flashattr.bg;
+						break;
+					case 0x03 :	// color Flashing
+						if (doflash) flashattr.fg = flashattr.fg + (flashattr.fg > 7 ? (-8) : 8);
+						break;
+
+				}
+				RenderCharFB(flashchar,&flashattr);
+				if (flashattr.doublew) col++;
+				if (flashattr.doubleh) dhset = 1;
+			}
+		}
+		if (dhset)
+		{
+			row++;
+			PosY += fontheight*factor;
+		}
+		PosY += fontheight*factor;
+	}
+
+}
 void RenderPage()
 {
 	int row, col, byte, startrow = 0;;
@@ -4552,7 +5060,7 @@ void RenderPage()
 		}
 		if (transpmode || (boxed && !screenmode))
 		{
-			ClearBB(transp);
+			FillBorder(transp);//ClearBB(transp);
 #ifndef HAVE_DREAMBOX_HARDWARE
 			clearbbcolor = black;
 #else
@@ -4580,69 +5088,104 @@ void RenderPage()
 			for (col = nofirst; col < 40; col++)
 			{
 				RenderCharBB(page_char[index + col], &page_atrb[index + col]);
-				if (page_atrb[index + col].doubleh)	/* disable lower char in case of doubleh setting in l25 objects */
+
+				if (page_atrb[index + col].doubleh && page_char[index + col] != 0xff)	/* disable lower char in case of doubleh setting in l25 objects */
 					page_char[index + col + 40] = 0xff;
 				if (page_atrb[index + col].doublew)	/* skip next column if double width */
 				{
 					col++;
-					if (page_atrb[index + col-1].doubleh)	/* disable lower char in case of doubleh setting in l25 objects */
+					if (page_atrb[index + col-1].doubleh && page_char[index + col] != 0xff)	/* disable lower char in case of doubleh setting in l25 objects */
 						page_char[index + col + 40] = 0xff;
 				}
 			}
 			PosY += fontheight;
 		}
+		DoFlashing(startrow);
 		national_subset = national_subset_bak;
 
 		/* update framebuffer */
 		CopyBB2FB();
 	}
-	else if (transpmode != 2 && zoommode != 2)
+	else if (transpmode != 2)
 	{
-		PosY = StartY;
-		if (tuxtxt_cache.subpagetable[tuxtxt_cache.page] == 0xff)
+		if (zoommode != 2)
 		{
-			page_atrb[32].fg = yellow;
-			page_atrb[32].bg = menu1;
-
-			tstCachedPage *pCachedPage;
-
-			pCachedPage = tuxtxt_cache.astCachetable[tuxtxt_cache.page_receiving][tuxtxt_cache.subpagetable[tuxtxt_cache.page_receiving]];
-			if (pCachedPage && tuxtxt_is_dec(tuxtxt_cache.page_receiving))
+			PosY = StartY;
+			if (tuxtxt_cache.subpagetable[tuxtxt_cache.page] == 0xff)
 			{
-				PosX = StartX;
-				if (inputcounter == 2)
+				page_atrb[32].fg = yellow;
+				page_atrb[32].bg = menu1;
+
+				tstCachedPage *pCachedPage;
+
+				pCachedPage = tuxtxt_cache.astCachetable[tuxtxt_cache.page_receiving][tuxtxt_cache.subpagetable[tuxtxt_cache.page_receiving]];
+				if (pCachedPage && tuxtxt_is_dec(tuxtxt_cache.page_receiving))
 				{
-					if (tuxtxt_cache.bttok && !tuxtxt_cache.basictop[tuxtxt_cache.page]) /* page non-existent according to TOP (continue search anyway) */
+					PosX = StartX;
+					if (inputcounter == 2)
 					{
-						page_atrb[0].fg = white;
-						page_atrb[0].bg = red;
+						if (tuxtxt_cache.bttok && !tuxtxt_cache.basictop[tuxtxt_cache.page]) /* page non-existent according to TOP (continue search anyway) */
+						{
+							page_atrb[0].fg = white;
+							page_atrb[0].bg = red;
+						}
+						else
+						{
+							page_atrb[0].fg = yellow;
+							page_atrb[0].bg = menu1;
+						}
+						hex2str(page_char+3, tuxtxt_cache.page);
+						for (col = nofirst; col < 7; col++) // selected page
+						{
+							RenderCharFB(page_char[col], &page_atrb[0]);
+						}
+						RenderCharFB(page_char[col], &page_atrb[32]);
 					}
 					else
-					{
-						page_atrb[0].fg = yellow;
-						page_atrb[0].bg = menu1;
-					}
-					hex2str(page_char+3, tuxtxt_cache.page);
-					for (col = nofirst; col < 7; col++) // selected page
-					{
-						RenderCharFB(page_char[col], &page_atrb[0]);
-					}
-					RenderCharFB(page_char[col], &page_atrb[32]);
-				}
-				else
-					SetPosX(8);
+						SetPosX(8);
 
-				memcpy(&page_char[8], pCachedPage->p0, 24); /* header line without timestring */
-				for (col = 0; col < 24; col++)
-				{
-					RenderCharFB(pCachedPage->p0[col], &page_atrb[32]);
+					memcpy(&page_char[8], pCachedPage->p0, 24); /* header line without timestring */
+					for (col = 0; col < 24; col++)
+					{
+						RenderCharFB(pCachedPage->p0[col], &page_atrb[32]);
+					}
 				}
 			}
+			/* update timestring */
+			SetPosX(32);
+			for (byte = 0; byte < 8; byte++)
+			{
+				if (!page_atrb[32+byte].flashing)
+					RenderCharFB(tuxtxt_cache.timestring[byte], &page_atrb[32]);
+				else
+				{
+					SetPosX(33+byte);
+					page_char[32+byte] = page_char[32+byte];
+				}
+
+
+			}
 		}
-		/* update timestring */
-		SetPosX(32);
-		for (byte = 0; byte < 8; byte++)
-			RenderCharFB(tuxtxt_cache.timestring[byte], &page_atrb[32]);
+		DoFlashing(startrow);
+		national_subset = national_subset_bak;
+	}
+	else if (transpmode == 2 && tuxtxt_cache.pageupdate == 2)
+	{
+#if DEBUG
+		printf("received Update flag for page %03x\n",tuxtxt_cache.page);
+#endif
+		// display pagenr. when page has been updated while in transparency mode
+		PosY = StartY;
+
+		char ns[3];
+		SetPosX(1);
+		hex2str(ns+2,tuxtxt_cache.page);
+
+		RenderCharFB(ns[0],&atrtable[ATR_WB]);
+		RenderCharFB(ns[1],&atrtable[ATR_WB]);
+		RenderCharFB(ns[2],&atrtable[ATR_WB]);
+
+		tuxtxt_cache.pageupdate=0;
 	}
 }
 
@@ -4867,6 +5410,7 @@ void CopyBB2FB()
 	/* copy backbuffer to framebuffer */
 	if (!zoommode)
 	{
+
 		if (var_screeninfo.yoffset)
 			var_screeninfo.yoffset = 0;
 		else
@@ -4876,10 +5420,12 @@ void CopyBB2FB()
 			perror("TuxTxt <FBIOPAN_DISPLAY>");
 
 		if (StartX > 0 && *lfb != *(lfb + var_screeninfo.xres * var_screeninfo.yres)) /* adapt background of backbuffer if changed */
-			 ClearBB(*(lfb + var_screeninfo.xres * var_screeninfo.yoffset));
+			FillBorder(*(lfb + var_screeninfo.xres * var_screeninfo.yoffset));
+//			 ClearBB(*(lfb + var_screeninfo.xres * var_screeninfo.yoffset));
+
 		if (clearbbcolor >= 0)
 		{
-			ClearBB(clearbbcolor);
+//			ClearBB(clearbbcolor);
 			clearbbcolor = -1;
 		}
 		return;
@@ -4901,7 +5447,7 @@ void CopyBB2FB()
 	if (transpmode)
 		fillcolor = transp;
 	else
-		fillcolor = black;
+		fillcolor = FullScrColor;
 
 	if (zoommode == 2)
 		src += 12*fontheight*var_screeninfo.xres;
@@ -5121,8 +5667,8 @@ void UpdateLCD()
 void DecodePage()
 {
 	int row, col;
-	int hold, clear, loop;
-	int foreground, background, doubleheight, doublewidth, charset, mosaictype, IgnoreAtBlackBgSubst, concealed;
+	int hold, dhset;
+	int foreground, background, doubleheight, doublewidth, charset, mosaictype, IgnoreAtBlackBgSubst, concealed, flashmode, boxwin;
 	unsigned char held_mosaic, *p;
 	tstCachedPage *pCachedPage;
 
@@ -5136,7 +5682,8 @@ void DecodePage()
 	if (!pCachedPage)	/* not cached: do nothing */
 		return;
 
-	memcpy(&page_char[40], pCachedPage->data, 23*40); /* page body */
+	tuxtxt_decompress_page(tuxtxt_cache.page,tuxtxt_cache.subpage,&page_char[40]);
+
 	memcpy(&page_char[8], pCachedPage->p0, 24); /* header line without timestring */
 
 	pageinfo = &(pCachedPage->pageinfo);
@@ -5147,7 +5694,7 @@ void DecodePage()
 	memcpy(&page_char[32], &tuxtxt_cache.timestring, 8);
 
 	/* check for newsflash & subtitle */
-	if (pageinfo->boxed && !screenmode && tuxtxt_is_dec(tuxtxt_cache.page))
+	if (pageinfo->boxed && tuxtxt_is_dec(tuxtxt_cache.page))
 		boxed = 1;
 	else
 		boxed = 0;
@@ -5321,8 +5868,11 @@ void DecodePage()
 		charset      = C_G0P;
 		mosaictype   = 0;
 		concealed    = 0;
+		flashmode    = 0;
 		hold         = 0;
+		boxwin		 = 0;
 		held_mosaic  = ' ';
+		dhset        = 0;
 		IgnoreAtBlackBgSubst = 0;
 
 		if (boxed && memchr(&page_char[row*40], start_box, 40) == 0)
@@ -5339,10 +5889,16 @@ void DecodePage()
 			page_atrb[index].bg = background;
 			page_atrb[index].charset = charset;
 			page_atrb[index].doubleh = doubleheight;
-			page_atrb[index].doublew = doublewidth;
+			page_atrb[index].doublew = (col < 39 ? doublewidth : 0);
 			page_atrb[index].IgnoreAtBlackBgSubst = IgnoreAtBlackBgSubst;
 			page_atrb[index].concealed = concealed;
-			page_atrb[index].inverted = 0; // only relevant for Level 2.5
+			page_atrb[index].flashing  = flashmode;
+			page_atrb[index].boxwin    = boxwin;
+			page_atrb[index].inverted  = 0; // only relevant for Level 2.5
+			page_atrb[index].underline = 0; // only relevant for Level 2.5
+			page_atrb[index].diacrit   = 0; // only relevant for Level 2.5
+			page_atrb[index].setX26    = 0; // only relevant for Level 2.5
+			page_atrb[index].setG0G2   = 0x3f; // only relevant for Level 2.5
 
 			if (page_char[index] < ' ')
 			{
@@ -5364,24 +5920,31 @@ void DecodePage()
 					break;
 
 				case flash:
-					/* TODO */
+					flashmode = 1;
 					break;
-
 				case steady:
-					/* TODO */
+					flashmode = 0;
+					page_atrb[index].flashing = 0;
 					break;
-
 				case end_box:
-					if (boxed)
+					boxwin = 0;
+					IgnoreAtBlackBgSubst = 0;
+/*					if (boxed)
 					{
 						foreground = transp;
 						background = transp;
 						IgnoreAtBlackBgSubst = 0;
 					}
+*/
 					break;
 
 				case start_box:
-					if (boxed)
+					if (!boxwin)
+					{
+						boxwin = 1;
+						background = 0x08;
+					}
+/*					if (boxed)
 					{
 						int rowstart = row * 40;
 						if (col > 0)
@@ -5392,6 +5955,7 @@ void DecodePage()
 							page_atrb[rowstart + clear].IgnoreAtBlackBgSubst = 0;
 						}
 					}
+*/
 					break;
 
 				case normal_size:
@@ -5403,8 +5967,12 @@ void DecodePage()
 
 				case double_height:
 					if (row < 23)
+					{
 						doubleheight = 1;
+						dhset = 1;
+					}
 					doublewidth = 0;
+
 					break;
 
 				case double_width:
@@ -5415,7 +5983,10 @@ void DecodePage()
 
 				case double_size:
 					if (row < 23)
+					{
 						doubleheight = 1;
+						dhset = 1;
+					}
 					if (col < 39)
 						doublewidth = 1;
 					break;
@@ -5462,6 +6033,7 @@ void DecodePage()
 					break;
 
 				case esc:
+				printf("--------------- switching language %d/%d --------------\n",row,col);
 					if (charset == C_G0P)
 						charset = C_G0S;
 					else if (charset == C_G0S)
@@ -5509,26 +6081,101 @@ void DecodePage()
 				if ((charset == C_G1C || charset == C_G1S) &&
 					 ((page_char[index]&0xA0) == 0x20))
 					held_mosaic = page_char[index];
-
-				/* skip doubleheight chars in lower line */
-				if (doubleheight)
+				if (page_atrb[index].doubleh)
 					page_char[index + 40] = 0xFF;
+
 			}
 			if (!(charset == C_G1C || charset == C_G1S))
 				held_mosaic = ' '; /* forget if outside mosaic */
+
 		} /* for col */
 
-		/* copy attribute to lower line if doubleheight */
-		if (row < 25 && memchr(&page_char[(row+1)*40], 0xFF, 40) != 0)
+		/* skip row if doubleheight */
+		if (row < 23 && dhset)
 		{
-			for (loop = 0; loop < 40; loop++)
-				page_atrb[(row+1)*40 + loop].fg = page_atrb[(row+1)*40 + loop].bg = page_atrb[row*40 + loop].bg;
+			for (col = 0; col < 40; col++)
+			{
+				int index = row*40 + col;
+				page_atrb[index+40].bg = page_atrb[index].bg;
+				page_atrb[index+40].fg = white;
+				if (!page_atrb[index].doubleh)
+					page_char[index+40] = ' ';
+				page_atrb[index+40].flashing = 0;
+				page_atrb[index+40].charset = C_G0P;
+				page_atrb[index+40].doubleh = 0;
+				page_atrb[index+40].doublew = 0;
+				page_atrb[index+40].IgnoreAtBlackBgSubst = 0;
+				page_atrb[index+40].concealed = 0;
+				page_atrb[index+40].flashing  = 0;
+				page_atrb[index+40].boxwin    = page_atrb[index].boxwin;
+			}
 			row++;
 		}
 	} /* for row */
+	FullScrColor = black;
 
 	if (showl25)
 		eval_l25();
+
+
+	/* handle Black Background Color Substitution and transparency (CLUT1#0) */
+	{
+		int r, c;
+		int o = 0;
+		char bitmask ;
+
+
+
+		for (r = 0; r < 25; r++)
+		{
+			for (c = 0; c < 40; c++)
+			{
+				bitmask = (page_atrb[o].bg == 0x08 ? 0x08 : 0x00) | (FullRowColor[r] == 0x08 ? 0x04 : 0x00) | (page_atrb[o].boxwin <<1) | boxed;
+				switch (bitmask)
+				{
+					case 0x08:
+					case 0x0b:
+						if (FullRowColor[r] == 0x08)
+							page_atrb[o].bg = FullScrColor;
+						else
+							page_atrb[o].bg = FullRowColor[r];
+						break;
+					case 0x01:
+					case 0x05:
+					case 0x09:
+					case 0x0a:
+					case 0x0c:
+					case 0x0d:
+					case 0x0e:
+					case 0x0f:
+						page_atrb[o].bg = transp;
+						break;
+				}
+				bitmask = (page_atrb[o].fg  == 0x08 ? 0x08 : 0x00) | (FullRowColor[r] == 0x08 ? 0x04 : 0x00) | (page_atrb[o].boxwin <<1) | boxed;
+				switch (bitmask)
+				{
+					case 0x08:
+					case 0x0b:
+						if (FullRowColor[r] == 0x08)
+							page_atrb[o].fg = FullScrColor;
+						else
+							page_atrb[o].fg = FullRowColor[r];
+						break;
+					case 0x01:
+					case 0x05:
+					case 0x09:
+					case 0x0a:
+					case 0x0c:
+					case 0x0d:
+					case 0x0e:
+					case 0x0f:
+						page_atrb[o].fg = transp;
+						break;
+				}
+				o++;
+			}
+		}
+	}
 	return ;
 }
 

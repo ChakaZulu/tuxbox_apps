@@ -9,7 +9,11 @@
  *                                                                            *
  ******************************************************************************/
 
-#define DEBUG 1
+#ifdef DEBUG
+#undef DEBUG
+#endif
+
+#define DEBUG 0
 
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -26,14 +30,14 @@
  * Initialize                                                                 *
  ******************************************************************************/
 
-static int initialized=0;
+static int tuxtxt_initialized=0;
 
 int tuxtxt_init()
 {
-	if ( initialized )
+	if ( tuxtxt_initialized )
 		return 0;
-	
-	initialized=1;
+
+	tuxtxt_initialized=1;
 
 	/* init data */
 	memset(&tuxtxt_cache.astCachetable, 0, sizeof(tuxtxt_cache.astCachetable));
@@ -45,7 +49,7 @@ int tuxtxt_init()
 	tuxtxt_cache.vtxtpid = -1;
 	tuxtxt_cache.thread_id = 0;
 	tuxtxt_cache.dmx = -1;
-	return tuxtxt_init_demuxer();
+	return 1;//tuxtxt_init_demuxer();
 }
 
 /******************************************************************************
@@ -77,7 +81,6 @@ void tuxtxt_start(int tpid)
 
 void tuxtxt_close()
 {
-	initialized=0;
 #if DEBUG
 	printf ("cleaning up\n");
 #endif
@@ -86,6 +89,7 @@ void tuxtxt_close()
     	    close(tuxtxt_cache.dmx);
 	tuxtxt_cache.dmx = -1;
 	tuxtxt_clear_cache();
+	tuxtxt_initialized=0;
 }
 
 /* Local Variables: */
