@@ -205,6 +205,7 @@ elapsed_time( struct timeval *starttime ){
   if(( newtime->tv_sec - starttime->tv_sec ) > 0 ){
     elapsed += 1000 * ( newtime->tv_sec - starttime->tv_sec );
   }
+  free(newtime);
   return( elapsed );
 } 
 
