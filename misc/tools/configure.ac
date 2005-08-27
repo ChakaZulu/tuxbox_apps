@@ -22,5 +22,6 @@ Makefile
 etherwake/Makefile
 fbshot/Makefile
 mtd/Makefile
+rtc/Makefile
 ])
 
