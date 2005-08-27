@@ -1399,7 +1399,7 @@ void eEPGCache::load()
 #ifdef ENABLE_PRIVATE_EPG
 				char text2[11];
 				fread( text2, 11, 1, f);
-				if ( !strncmp( text1, "PRIVATE_EPG", 11) )
+				if ( !strncmp( text2, "PRIVATE_EPG", 11) )
 				{
 					size=0;
 					fread( &size, sizeof(int), 1, f);
