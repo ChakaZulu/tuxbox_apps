@@ -540,9 +540,9 @@ eString getCurService(void)
 eString getChanNavi(bool showVLCButton)
 {
 	eString result;
-	result += button(100, "Audio", YELLOW, "javascript:selectAudio()", "#FFFFFF");
-	result += button(100, "Video", GREEN, "javascript:selectSubChannel()", "#FFFFFF");
 	result += button(100, "EPG", RED, "javascript:openEPG('')", "#FFFFFF");
+	result += button(100, "Video", GREEN, "javascript:selectSubChannel()", "#FFFFFF");
+	result += button(100, "Audio", YELLOW, "javascript:selectAudio()", "#FFFFFF");
 	result += button(100, "Info", BLUE, "javascript:openChannelInfo()", "#FFFFFF");
 	result += button(100, "Stream Info", TOPNAVICOLOR, "javascript:openSI()", "#000000");
 	if (showVLCButton)
