@@ -1,5 +1,5 @@
 /*
- * $Id: hwrtc.c,v 1.1 2005/08/27 01:56:22 chakazulu Exp $
+ * $Id: hwrtc.c,v 1.2 2005/08/27 02:30:05 chakazulu Exp $
  *
  * Reads/Sets time from/to a RTC.
  *
@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
 	else if (argc == 4 && !strcmp(argv[1],"settime"))
 		settime(argv[2],argv[3]);
 	else {
-		printf("\nRead/Write RTC time\n$Version$ $Author: chakazulu $\n\n");
+		printf("\nRead/Write RTC time\n$Revision: 1.2 $\n\n");
 		printf("Usage: <rtctest> command\n");
 		printf("\ncommand:\n");
 		printf("hwtosys\t\t - set system time from rtc\n");
