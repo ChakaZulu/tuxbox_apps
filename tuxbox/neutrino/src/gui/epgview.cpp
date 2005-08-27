@@ -372,13 +372,13 @@ const neutrino_locale_t * genre_sub_classes_list[10] =
 
 bool CEpgData::hasFollowScreenings(const t_channel_id channel_id, const std::string & title) {
 	time_t curtime = time(NULL);
-	
+
 	for (CChannelEventList::iterator e = evtlist.begin(); e != evtlist.end(); ++e )
 	{
 		if (e->startTime > curtime && e->eventID && e->description == title)
 			return true;
 	}
-	return false;	
+	return false;
 }
 
 const char * GetGenre(const unsigned char contentClassification) // UTF-8
@@ -409,7 +409,6 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	int res = menu_return::RETURN_REPAINT;
 	static unsigned long long id;
 	static time_t startzeit;
-	 
 
 	if(a_startzeit)
 		startzeit=*a_startzeit;
@@ -476,15 +475,18 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 			std::string::size_type nPosDot = epgData.info1.find('.');
 			if (std::string::npos != nPosDot) {
 				nPosDot += 2; // Skip dot and first blank
-				if (nPosDot < epgData.info2.length()) {	// Make sure we don't overrun the buffer
-					// Check if the stuff after the dot equals the beginning of info2
+/*	Houdini: changed for safty reason (crashes with some events at WDR regional)
+			if (nPosDot < epgData.info2.length()) {   // Make sure we don't overrun the buffer
+*/
+			if (nPosDot < epgData.info2.length() && nPosDot < epgData.info1.length()) {   // Make sure we don't overrun the buffer
+
 					if (0 == epgData.info2.find(epgData.info1.substr(nPosDot, epgData.info1.length() - nPosDot))) {
 						strEpisode = epgData.info1.substr(0, nPosDot) + "\n";
 						bHide = true;
 					}
 				}
 			}
-			// Compare strings normally if not positively found to be equal before			
+			// Compare strings normally if not positively found to be equal before
 			if (false == bHide && false == (std::string::npos == epgData.info2.find(epgData.info1))) {
 				bHide = true;
 			}
@@ -649,24 +651,24 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 						CTimerdClient timerdclient;
 						if(timerdclient.isTimerdAvailable())
 						{
-							
+
 							char *recDir = g_settings.network_nfs_recordingdir;
 							if (g_settings.recording_choose_direct_rec_dir)
 							{
 								int id = -1;
 								CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
-								if (recDirs.hasItem()) 
+								if (recDirs.hasItem())
 								{
 									hide();
 									recDirs.exec(NULL,"");
 									show(channel_id,epgData.eventID,&epgData.epg_times.startzeit,false);
 								} else
 								{
-									printf("no network devices available\n");					
+									printf("no network devices available\n");
 								}
 								if (id != -1)
 									recDir = g_settings.network_nfs_local_dir[id];
-								else 
+								else
 									recDir = NULL;
 							}
 							if (recDir != NULL)
@@ -792,7 +794,7 @@ void CEpgData::GetEPGData(const t_channel_id channel_id, unsigned long long id, 
 			reformatExtendedEvents("Guests", g_Locale->getText(LOCALE_EPGEXTENDED_GUESTS), false, epgData);
 			reformatExtendedEvents("Presenter", g_Locale->getText(LOCALE_EPGEXTENDED_PRESENTER), false, epgData);
 		}
-		
+
 		struct tm *pStartZeit = localtime(&(epgData.epg_times).startzeit);
 		char temp[11];
 		strftime( temp, sizeof(temp), "%d.%m.%Y", pStartZeit);
@@ -948,7 +950,7 @@ void CEpgData::showTimerEventBar (bool show)
 //  -- EPG Data Viewer Menu Handler Class
 //  -- to be used for calls from Menue
 //  -- (2004-03-06 rasc)
-// 
+//
 
 int CEPGDataHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 {
