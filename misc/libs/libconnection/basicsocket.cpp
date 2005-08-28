@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicsocket.cpp,v 1.2 2003/02/24 21:14:15 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicsocket.cpp,v 1.3 2005/08/28 21:12:11 mogway Exp $
  *
  * Basic Socket Class - The Tuxbox Project
  *
@@ -38,6 +38,7 @@ bool send_data(int fd, const void * data, const size_t size, const timeval timeo
 	const void * buffer;
 	size_t       n;
 	int          rc;
+	int olderr;
 
 	n = size;
 
@@ -45,20 +46,24 @@ bool send_data(int fd, const void * data, const size_t size, const timeval timeo
 	{
 		buffer = (void *)((char *)data + (size - n));
 		rc = ::send(fd, buffer, n, MSG_DONTWAIT | MSG_NOSIGNAL);
-		
+
 		if (rc == -1)
 		{
+			olderr = errno;
 			perror("[basicsocket] send_data");
+/* It seems perror is changing errno so if broken pipe -> exit!
 			if (errno == EPIPE)
+*/
+			if (olderr == EPIPE)
 				return false;
-			
+
 			FD_ZERO(&writefds);
 			FD_SET(fd, &writefds);
-			
+
 			tv = timeout;
-			
+
 			rc = select(fd + 1, NULL, &writefds, NULL, &tv);
-			
+
 			if (rc == 0)
 			{
 				printf("[basicsocket] send timed out.\n");
@@ -91,11 +96,11 @@ bool receive_data(int fd, void * data, const size_t size, const timeval timeout)
 	{
 		FD_ZERO(&readfds);
 		FD_SET(fd, &readfds);
-		
+
 		tv = timeout;
-		
+
 		rc = select(fd + 1, &readfds, NULL, NULL, &tv);
-			
+
 		if (rc == 0)
 		{
 			printf("[basicsocket] receive timed out.\n");
@@ -108,7 +113,7 @@ bool receive_data(int fd, void * data, const size_t size, const timeval timeout)
 		}
 		buffer = (void *)((char *)data + (size - n));
 		rc = ::recv(fd, buffer, n, MSG_DONTWAIT | MSG_NOSIGNAL);
-		
+
 		if ((rc == 0) || (rc == -1))
 		{
 			if (rc == -1)
