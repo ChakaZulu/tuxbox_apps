@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.190 2005/08/23 21:31:48 mogway Exp $
+//  $Id: sectionsd.cpp,v 1.191 2005/08/28 21:44:21 mogway Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -135,7 +135,7 @@ static DMX dmxSDT(0x11, 256);
 
 // Houdini: added for Premiere Private EPG section for Sport/Direkt Portal
 static DMX dmxPPT(0xb11, 256);
-
+unsigned int privatePid=0;
 
 inline void lockServices(void)
 {
@@ -1094,7 +1094,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.190 2005/08/23 21:31:48 mogway Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.191 2005/08/28 21:44:21 mogway Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1434,11 +1434,6 @@ static time_t	messaging_last_requested = time(NULL);
 static bool	messaging_neutrino_sets_time = false;
 static bool 	messaging_WaitForServiceDesc = false;
 
-#include <zapit/client/zapitclient.h>
-CZapitClient	zapit;
-CZapitClient::responseGetPIDs current_PIDs;
-unsigned int privatePid=0;
-
 static void commandserviceChanged(int connfd, char *data, const unsigned dataLength)
 {
 
@@ -1525,14 +1520,6 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		// nur wenn lange genug her, oder wenn anderer Service :)
 		dmxEIT.change( 0 );
 		dmxSDT.change( 0 );
-		
-		zapit.getPIDS(current_PIDs);
-		if (privatePid != current_PIDs.PIDs.privatepid)
-		{
-			privatePid = current_PIDs.PIDs.privatepid;
-			dprintf("New PrivatePid %x\n", privatePid );
-		}
-		dmxPPT.change( 0 );
 	}
 	else
 		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
@@ -2526,6 +2513,31 @@ static void commandUnRegisterEventClient(int /*connfd*/, char *data, const unsig
 }
 
 
+static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLength)
+{
+	unsigned short pid;
+	
+	if (dataLength != 2)
+		return ;
+
+	/*d*/printf("Set PrivatePid: %x\n", *((unsigned short*)data));
+
+	lockMessaging();
+	pid = *((unsigned short*)data);
+	if (privatePid != pid )
+	{
+		privatePid = pid;
+		/*d*/printf("[sectionsd] wakeup PPT Thread...\n");
+		dmxPPT.change( 0 );
+	}
+	unlockMessaging();
+	
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = 0;
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
+	return ;
+}
+
 
 static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char *, const unsigned) =
     {
@@ -2557,7 +2569,8 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char
         commandLinkageDescriptorsUniqueKey,
         commandPauseSorting,
 	commandRegisterEventClient,
-	commandUnRegisterEventClient
+	commandUnRegisterEventClient,
+	commandSetPrivatePid
     };
 
 //static void *connectionThread(void *conn)
@@ -3588,7 +3601,7 @@ static void *pptThread(void *)
 				if (0 == privatePid)
 				{
 					sendToSleepNow = true; // if there is no valid pid -> sleep
-					dprintf("dmxPPT: no valid pid\n");
+					dprintf("dmxPPT: no valid pid 0\n");
 					continue;
 				}
 				pptpid = privatePid;
@@ -3681,7 +3694,7 @@ static void *pptThread(void *)
 							unlockServices();
 						}
 					} // for
-					//dprintf("[eitThread] added %d events (end)\n",  eit.events().size());
+					//dprintf("[eitThread] added %d events (end)\n",  ppt.events().size());
 				} // if
 			} // if
 			else
@@ -3820,7 +3833,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.190 2005/08/23 21:31:48 mogway Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.191 2005/08/28 21:44:21 mogway Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {

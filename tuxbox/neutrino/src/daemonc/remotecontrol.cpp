@@ -148,7 +148,7 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 		}
 		else
 			if ((msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE) ||
-			    (msg == NeutrinoMessages:: EVT_ZAP_SUB_FAILED ))
+			    (msg == NeutrinoMessages::EVT_ZAP_SUB_FAILED))
 			{
 				if ((*(t_channel_id *)data) != current_sub_channel_id)
 				{
@@ -252,6 +252,7 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 		{
 			CLCD::getInstance()->showServicename(current_channel_name); // UTF-8
 			g_Zapit->getPIDS( current_PIDs );
+			g_Sectionsd->setPrivatePid( current_PIDs.PIDs.privatepid );
 
 			t_channel_id * p = new t_channel_id;
 			*p = current_channel_id;
