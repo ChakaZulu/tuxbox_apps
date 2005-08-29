@@ -1,7 +1,11 @@
 /******************************************************************************
  * definitions for plugin and lib                                             *
  ******************************************************************************/
-#define TUXTXT_COMPRESS 2 // compress page data: 0 no compression, 1 with zlib, 2 with own algorithm
+#ifdef HAVE_DREAMBOX_HARDWARE
+ #define TUXTXT_COMPRESS 1 // compress page data: 0 no compression, 1 with zlib, 2 with own algorithm
+#else
+ #define TUXTXT_COMPRESS 2
+#endif
 
 #include <config.h>
 
