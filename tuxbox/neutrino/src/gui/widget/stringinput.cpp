@@ -192,6 +192,31 @@ void CStringInput::keyRightPressed()
 	}
 }
 
+void CStringInput::keyMinusPressed()
+{
+	int item = selected;
+	while (item < (size -1))
+	{
+		value[item] = value[item+1];
+		paintChar(item);
+		item++;
+	}
+	value[item] = ' ';
+	paintChar(item);
+}
+
+void CStringInput::keyPlusPressed()
+{
+	int item = size -1;
+	while (item > selected)
+	{
+		value[item] = value[item-1];
+		paintChar(item);
+		item--;
+	}
+	value[item] = ' ';
+	paintChar(item);
+}
 
 int CStringInput::exec( CMenuTarget* parent, const std::string & )
 {
@@ -269,6 +294,12 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		else if (msg==CRCInput::RC_down)
 		{
 			keyDownPressed();
+		} else if (msg==CRCInput::RC_plus)
+		{
+			keyPlusPressed();
+		} else if (msg==CRCInput::RC_minus)
+		{
+			keyMinusPressed();
 		}
 		else if (msg==CRCInput::RC_ok)
 		{

@@ -75,6 +75,8 @@ class CStringInput : public CMenuTarget
 		virtual void keyDownPressed();
 		virtual void keyLeftPressed();
 		virtual void keyRightPressed();
+		virtual void keyPlusPressed();
+		virtual void keyMinusPressed();
 
 		virtual int handleOthers(const neutrino_msg_t msg, const neutrino_msg_data_t data);
 
