@@ -404,7 +404,7 @@ void CIPInput::onBeforeExec()
 	if (ip->empty())
 	{
 		strcpy(value, "000.000.000.000");
-		printf("[neutrino] value-before(2): %s\n", value);
+		//printf("[neutrino] value-before(2): %s\n", value);
 		return;
 	}
 	unsigned char _ip[4];
