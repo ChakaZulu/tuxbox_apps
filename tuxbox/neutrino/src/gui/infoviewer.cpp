@@ -956,6 +956,7 @@ void CInfoViewer::showButton_Audio()
                 };
 */
 	// green, in case of several APIDs
+	// $$$ TODO  display always, if we switch to new menue (or check class, if avail)
 	uint count = g_RemoteControl->current_PIDs.APIDs.size();
 	if ( count > 1 )
 	{
