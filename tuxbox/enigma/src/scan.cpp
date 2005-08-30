@@ -2069,6 +2069,13 @@ void ManualPIDWindow::store()
 
 	bool newAdded=false;
 
+	if ( vpid->getText() != hex ? "0000" : "0" )
+		service.setServiceType(1);
+	else if ( apid->getText() != hex ? "0000" : "0" )
+		service.setServiceType(2);
+	else
+		service.setServiceType(100);
+
 	eServiceDVB &s =
 		tlist.createService( service, -1, &newAdded );
 
@@ -2106,12 +2113,8 @@ void ManualPIDWindow::store()
 	// reset cached pids
 	s.clearCache();  
 
-	if ( vpid->getText() != hex ? "0000" : "0" )
-		s.service_type = 1;
-	else if ( apid->getText() != hex ? "0000" : "0" )
-		s.service_type = 2;
-	else
-		s.service_type = 100; // Data
+	// set service type
+	s.service_type = service.getServiceType();
 
 	tmpval=0;
 	// video pid
@@ -2144,13 +2147,13 @@ void ManualPIDWindow::store()
 		s.cache[eServiceDVB::cPCRPID]=tmpval;
 
 	// DX Flags
-	s.dxflags=0;
+	s.dxflags=eServiceDVB::dxNewFound;
 	if (cNoDVB->isChecked())
-		s.dxflags |= 4;
+		s.dxflags |= eServiceDVB::dxNoDVB;
 	if (cUseSDT->isChecked())
-		s.dxflags |= 1;
+		s.dxflags |= eServiceDVB::dxNoSDT;
 	if (cHoldName->isChecked())
-		s.dxflags |= 8;
+		s.dxflags |= eServiceDVB::dxHoldName;
 
 	eDVB &dvb = *eDVB::getInstance();
 	dvb.settings->saveServices();
