@@ -118,10 +118,10 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		bool				skipShutdownTimer;
 
 		CColorSetupNotifier		*colorSetupNotifier;
-		CAudioSetupNotifier		*audioSetupNotifier;
+
 		CKeySetupNotifier       	*keySetupNotifier;
 		CShutdownCountNotifier		*shutdownCountNotifier;
-		CAPIDChangeExec         	*APIDChanger;
+
 		CNVODChangeExec         	*NVODChanger;
 		CUCodeCheckExec			*UCodeChecker;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;

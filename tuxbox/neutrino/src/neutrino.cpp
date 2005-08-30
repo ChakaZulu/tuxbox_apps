@@ -126,10 +126,11 @@
 
 // uncomment if you want to have a "test" menue entry  (rasc)
 
-// #define __EXPERIMENTAL_CODE__
+#define __EXPERIMENTAL_CODE__
 #ifdef __EXPERIMENTAL_CODE__
 
 #include "gui/ch_mosaic.h"
+#include "gui/audio_select.h"
 
 #endif
 
@@ -138,9 +139,12 @@ extern "C" int  tuxtxt_init();
 #endif
 
 
-CBouquetList   * bouquetList;
-CPlugins       * g_PluginList;
-CRemoteControl * g_RemoteControl;
+CBouquetList    	* bouquetList;
+CPlugins        	* g_PluginList;
+CRemoteControl  	* g_RemoteControl;
+CAPIDChangeExec		* APIDChanger;
+CAudioSetupNotifier	* audioSetupNotifier;
+
 // Globale Variablen - to use import global.h
 
 // I don't like globals, I would have hidden them in classes,
@@ -2826,6 +2830,7 @@ void CNeutrinoApp::SelectNVOD()
 	}
 }
 
+// $$$ TODO to be replaced after test >>>
 void CNeutrinoApp::SelectAPID()
 {
 	if( g_RemoteControl->current_PIDs.APIDs.size()> 1 )
@@ -2844,6 +2849,7 @@ void CNeutrinoApp::SelectAPID()
 		APIDSelector.exec(NULL, "");
 	}
 }
+// $$$ TODO  <<< to be replaced after test 
 
 #define MAINMENU_RECORDING_OPTION_COUNT 2
 const CMenuOptionChooser::keyval MAINMENU_RECORDING_OPTIONS[MAINMENU_RECORDING_OPTION_COUNT] =
@@ -2915,7 +2921,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// -- rasc (2003-12)
 
 
-	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental", true, NULL, new CChMosaicHandler(), id, CRCInput::RC_nokey, ""), false);
+//	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental1", true, NULL, new CChMosaicHandler(), id, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental2", true, NULL, new CAudioSelectMenuHandler(), id, CRCInput::RC_nokey, ""), false);
 
 
 #endif
@@ -3445,6 +3452,13 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if( msg == CRCInput::RC_green )
 			{	// APID
 				SelectAPID();
+				// $$$ TODO
+				// -- new Audio Selector Menu (rasc 2005-08-30)
+//				{  CAudioSelectMenuHandler  *audio_menu;
+//
+//				   audio_menu = new CAudioSelectMenuHandler;
+//				   audio_menu-> doMenu();
+//				}
 			}
 			else if( msg == CRCInput::RC_yellow )
 			{       // NVODs

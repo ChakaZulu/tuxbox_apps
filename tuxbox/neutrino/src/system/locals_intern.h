@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.53 2005/07/29 18:47:41 rasc Exp $
+ * $Id: locals_intern.h,v 1.54 2005/08/30 21:02:00 rasc Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -25,6 +25,7 @@
 const char * locale_real_names[] =
 {
 	"INTERNAL ERROR - PLEASE REPORT",
+	"AUDIOSelectMenue.head",
 	"EPGMenu.epgplus",
 	"EPGMenu.eventinfo",
 	"EPGMenu.eventlist",

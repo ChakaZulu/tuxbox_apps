@@ -1,5 +1,5 @@
-AC_INIT(tuxbox-neutrino,0.0.1)
-AM_INIT_AUTOMAKE(tuxbox-neutrino,0.0.1) 
+AC_INIT(tuxbox-neutrino,1.0.1)
+AM_INIT_AUTOMAKE(tuxbox-neutrino,1.0.1) 
 
 TUXBOX_APPS
 TUXBOX_APPS_DIRECTORY

@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.51 2005/07/29 18:47:41 rasc Exp $
+ * $Id: locals.h,v 1.52 2005/08/30 21:02:00 rasc Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -25,6 +25,7 @@
 typedef enum
 {
 	NONEXISTANT_LOCALE,
+	LOCALE_AUDIOSELECT_MENU_HEAD,
 	LOCALE_EPGMENU_EPGPLUS,
 	LOCALE_EPGMENU_EVENTINFO,
 	LOCALE_EPGMENU_EVENTLIST,
