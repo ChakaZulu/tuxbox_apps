@@ -49,7 +49,7 @@ tsSelectType::tsSelectType(eWidget *parent)
 
 void tsSelectType::selected(eListBoxEntryText *entry)
 {
-	if ( entry == check )
+	if ( entry && entry == check )
 		return;
 	if (entry && entry->getKey())
 		close((int)entry->getKey());

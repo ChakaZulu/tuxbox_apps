@@ -719,9 +719,8 @@ bool eEPGCache::finishEPG()
 		while (It != temp.end())
 		{
 //			eDebug("sid = %02x, onid = %02x, type %d", It->first.sid, It->first.onid, It->second.second );
-			if ( It->second.second == SCHEDULE
-				|| ( It->second.second == NOWNEXT && !(haveData&1) )
-				)
+			if ( It->first == curren_service || It->second.second == SCHEDULE
+				|| ( It->second.second == NOWNEXT && !(haveData&1) ) )
 			{
 //				eDebug("ADD to last updated Map");
 				serviceLastUpdated[It->first]=It->second.first;
