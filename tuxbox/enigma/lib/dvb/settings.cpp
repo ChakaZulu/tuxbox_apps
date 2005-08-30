@@ -9,56 +9,51 @@ eDVBSettings::eDVBSettings(eDVB &dvb): dvb(dvb)
 	transponderlist=new eTransponderList;
 	loadServices();
 	loadBouquets();
-	bouquets.setAutoDelete(true);
 	CONNECT( transponderlist->service_found, eDVBSettings::service_found );
 	CONNECT( transponderlist->service_removed, eDVBSettings::service_removed );
 }
 
 void eDVBSettings::removeDVBBouquets()
 {
-	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end();)
+	for (std::map<int, eBouquet*>::iterator i(bouquet_id_map.begin()); i != bouquet_id_map.end();)
 	{
-		if ( i->bouquet_id >= 0)
+		if ( i->first >= 0)
 		{
 //			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
-			i = bouquets.erase(i);
+			bouquet_name_map.erase(i->second->bouquet_name);  // remove from name map
+			delete i->second; // release heap memory
+			bouquet_id_map.erase(i++); // remove from id map
 			bouquetsChanged=1;
 		}
 		else
 		{
 //			eDebug("leaving bouquet '%s'", i->bouquet_name.c_str());
-			i++;
+			++i;
 		}
 	}
 }
 
 void eDVBSettings::removeDVBBouquet(int bouquet_id)
 {
-	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end();)
+	std::map<int, eBouquet*>::iterator i(bouquet_id_map.find(bouquet_id));
+	if ( i != bouquet_id_map.end() )
 	{
-		if ( i->bouquet_id == bouquet_id)
-		{
-//			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
-			bouquets.erase(i);
-			bouquetsChanged=1;
-			break;
-		}
-		++i;
+		bouquet_name_map.erase(i->second->bouquet_name);  // remove from name map
+		delete i->second; // release heap memory
+		bouquet_id_map.erase(i); // remove from id map
+		bouquetsChanged=1;
 	}
 }
 
 void eDVBSettings::renameDVBBouquet(int bouquet_id, eString& new_name)
 {
-	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end();)
+	std::map<int, eBouquet*>::iterator i(bouquet_id_map.find(bouquet_id));
+	if ( i != bouquet_id_map.end() )
 	{
-		if ( i->bouquet_id == bouquet_id)
-		{
-//			eDebug("renaming bouquet '%s' to '%s'", i->bouquet_name.c_str(), new_name.c_str());
-			i->bouquet_name=new_name;
-			bouquetsChanged=1;
-			break;
-		}
-		i++;
+		bouquet_name_map.erase(i->second->bouquet_name);  // remove from name map
+		bouquet_name_map[new_name] = i->second;
+		i->second->bouquet_name = new_name;
+		bouquetsChanged=1;
 	}
 }
 
@@ -95,9 +90,9 @@ void eDVBSettings::addDVBBouquet(eDVBNamespace origin, const BAT *bat )
 
 eBouquet *eDVBSettings::getBouquet(int bouquet_id)
 {
-	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-		if (i->bouquet_id==bouquet_id)
-			return *i;
+	std::map<int, eBouquet*>::iterator i(bouquet_id_map.find(bouquet_id));
+	if ( i != bouquet_id_map.end() )
+		return i->second;
 	return 0;
 }
 
@@ -137,9 +132,9 @@ static eString beautifyBouquetName(eString bouquet_name)
 
 eBouquet *eDVBSettings::getBouquet(eString& bouquet_name)
 {
-	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-		if (!i->bouquet_name.icompare(bouquet_name))
-			return *i;
+	std::map<eString, eBouquet*>::iterator i(bouquet_name_map.find(bouquet_name));
+	if ( i != bouquet_name_map.end() )
+		return i->second;
 	return 0;
 }
 
@@ -148,7 +143,9 @@ eBouquet* eDVBSettings::createBouquet(int bouquet_id, eString bouquet_name)
 	eBouquet *n=getBouquet(bouquet_id);
 	if (!n)
 	{
-		bouquets.push_back(n=new eBouquet(bouquet_id, bouquet_name));
+		n = new eBouquet(bouquet_id, bouquet_name);
+		bouquet_name_map[bouquet_name] = n;
+		bouquet_id_map[bouquet_id] = n;
 		bouquetsChanged=1;
 	}
 	return n;
@@ -160,7 +157,9 @@ eBouquet *eDVBSettings::createBouquet(eString bouquet_name)
 	if (!n)
 	{
 		int bouquet_id=getUnusedBouquetID(0);
-		bouquets.push_back(n=new eBouquet(bouquet_id, bouquet_name));
+		n = new eBouquet(bouquet_id, bouquet_name);
+		bouquet_name_map[bouquet_name] = n;
+		bouquet_id_map[bouquet_id] = n;
 		bouquetsChanged=1;
 	}
 	return n;
@@ -186,13 +185,6 @@ int eDVBSettings::getUnusedBouquetID(int range)
 
 void eDVBSettings::revalidateBouquets()
 {
-#if 0
-	eDebug("revalidating bouquets");
-	if (transponderlist)
-		for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-			for (ServiceReferenceDVBIterator service = i->list.begin(); service != i->list.end(); ++service)
-				service->service=transponderlist->searchService(service);
-#endif
 	/*emit*/ dvb.bouquetListChanged();
 }
 
@@ -495,9 +487,9 @@ void eDVBSettings::saveBouquets()
 		eFatal("couldn't open bouquetfile - create " CONFIGDIR "/enigma!");
 	fprintf(f, "eDVB bouquets /2/\n");
 	fprintf(f, "bouquets\n");
-	for (ePtrList<eBouquet>::iterator i(*getBouquets()); i != getBouquets()->end(); ++i)
+	for (std::map<int,eBouquet*>::iterator i(bouquet_id_map.begin()); i != bouquet_id_map.end(); ++i)
 	{
-		eBouquet *b=*i;
+		eBouquet *b = i->second;
 		fprintf(f, "%0d\n", b->bouquet_id);
 		fprintf(f, "%s\n", b->bouquet_name.c_str());
 		for (ServiceReferenceDVBIterator s = b->list.begin(); s != b->list.end(); s++)
@@ -529,7 +521,10 @@ void eDVBSettings::loadBouquets()
 		return;
 	}
 
-	bouquets.clear();
+	bouquet_id_map.clear();
+	for (std::map<eString, eBouquet*>::iterator it(bouquet_name_map.begin()); it != bouquet_name_map.end(); ++it)
+		delete it->second;
+	bouquet_name_map.clear();
 
 	while (!feof(f))
 	{
@@ -753,6 +748,8 @@ eDVBSettings::~eDVBSettings()
 {
 	saveServices();
 	saveBouquets();
+	for (std::map<int, eBouquet*>::iterator it(bouquet_id_map.begin()); it != bouquet_id_map.end(); ++it )
+		delete it->second;
 	if (transponderlist)
 		delete transponderlist;
 }

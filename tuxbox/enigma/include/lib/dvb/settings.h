@@ -9,7 +9,8 @@ class eDVB;
 class eDVBSettings: public Object
 {
 	eDVB &dvb;
-	ePtrList<eBouquet> bouquets;
+	std::map<eString, eBouquet*> bouquet_name_map;
+	std::map<int, eBouquet*> bouquet_id_map;
 	eTransponderList *transponderlist;
 	int bouquetsChanged;
 public:
@@ -26,7 +27,7 @@ public:
 	
 	void revalidateBouquets();
 	eTransponderList *getTransponders() { return transponderlist; }
-	ePtrList<eBouquet> *getBouquets() { return &bouquets; }
+	std::map<int, eBouquet*> *getBouquets() { return &bouquet_id_map; }
 	void sortInChannels();
 
 	void saveServices();

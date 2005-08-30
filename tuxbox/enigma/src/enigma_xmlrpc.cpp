@@ -7,19 +7,6 @@
 #include <lib/dvb/edvb.h>
 #include <lib/system/xmlrpc.h>
 
-static eBouquet *getBouquetByID(const char *id)
-{
-	ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->settings->getBouquets();
-	int bouquet_id;
-	if (sscanf(id, "B:%x", &bouquet_id)!=1)
-		return 0;
-	if (pBouquets)
-		for (ePtrList<eBouquet>::iterator i(*pBouquets); i != pBouquets->end(); ++i)
-			if (i->bouquet_id==bouquet_id)
-				return *i;
-	return 0;
-}
-
 static eServiceReferenceDVB getServiceByID(const char *id)
 {
 	eTransponderList *tl=eDVB::getInstance()->settings->getTransponders();
@@ -69,12 +56,13 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 	{
 		ePtrList<eXMLRPCVariant> l;
 		l.setAutoDelete(true);
-		ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->settings->getBouquets();
+
+		std::map<int,eBouquet*> *pBouquets=eDVB::getInstance()->settings->getBouquets();
 		if (pBouquets)
 		{
-			for (ePtrList<eBouquet>::iterator i(*pBouquets); i != pBouquets->end(); ++i)
+			for (std::map<int,eBouquet*>::iterator i(pBouquets->begin()); i != pBouquets->end(); ++i)
 			{
-				eBouquet *b=*i;
+				eBouquet *b=i->second;
 				std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
 				static eString s0("caption");
 				static eString s1("type");
@@ -92,11 +80,15 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 				l.push_back(new eXMLRPCVariant(s));
 			}
 		}
+
 		result.push_back( new eXMLRPCVariant( l.getVector() ) );
 
 	} else if (param[0]=='B')
 	{
-		eBouquet *b=getBouquetByID(param.c_str());
+		eBouquet *b=NULL;
+		int bouquet_id;
+		if (sscanf(param.c_str(), "B:%x", &bouquet_id)==1)
+			b=eDVB::getInstance()->settings->getBouquet(bouquet_id);
 		if (!b)
 			xmlrpc_fault(result, 3, "invalid handle");
 		else

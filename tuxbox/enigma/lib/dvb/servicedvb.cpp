@@ -1244,9 +1244,10 @@ void eServiceHandlerDVB::loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node
 		{
 		case -1:  // handle bouquets
 		{
-			ePtrList<eBouquet> &list=*eDVB::getInstance()->settings->getBouquets();
-			for (ePtrList<eBouquet>::iterator i(list.begin()); i != list.end(); ++i)
+			std::map<int, eBouquet*> &map=*eDVB::getInstance()->settings->getBouquets();
+			for (std::map<int, eBouquet*>::iterator x(map.begin()); x != map.end(); ++x)
 			{
+				eBouquet *i = x->second;
 				int flags=eServiceReference::mustDescent|eServiceReference::canDescent|eServiceReference::isDirectory;
 
 				if (i->bouquet_id >= 0) 		// sort only automatic generated services
