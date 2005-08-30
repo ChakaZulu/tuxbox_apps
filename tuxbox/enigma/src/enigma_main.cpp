@@ -5532,12 +5532,8 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 			{
 				if ( mode != modeFile )
-				{
-					eServiceReference oldref = eServiceInterface::getInstance()->service;
 					setMode(modeFile, 2);
-					if ( oldref == eServiceInterface::getInstance()->service)
-						showServiceSelector(-1);
-				}
+				showServiceSelector(-1);
 			}
 		}
 #ifndef DISABLE_FILE
