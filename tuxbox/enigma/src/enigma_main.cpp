@@ -1827,6 +1827,7 @@ void eZapMain::init_main()
 	if ( eDVB::getInstance()->DVBCI2 )
 		CONNECT( eDVB::getInstance()->DVBCI2->ci_mmi_progress, eZapMain::receiveMMIMessageCI2 );
 #endif
+	CONNECT( rdstext_decoder.textReady, eZapMain::gotRDSText );
 	int bootcount=1;
 	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
 	if ( bootcount > 1 )
@@ -7032,6 +7033,14 @@ void eZapMain::wakeUp()
 {
 	message_notifier.start();
 	message_notifier.send( messageWakeUp );
+}
+
+void eZapMain::gotRDSText(eString text)
+{
+//	eDebug("gotRDSText(%s)", text.c_str() );
+	dvbInfoBar->hide();
+	fileInfoBar->show();
+	fileinfos->setText(text);
 }
 
 eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *lcdTitle, eWidget *lcdElement)

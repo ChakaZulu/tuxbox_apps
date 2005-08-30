@@ -4,7 +4,9 @@
 #include <src/sselect.h>
 #include <src/enigma_lcd.h>
 #include <src/engrab.h>
+#include <src/rds_text.h>
 #include <lib/base/message.h>
+#include <lib/base/console.h>
 #include <lib/dvb/si.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/edvb.h>
@@ -342,6 +344,8 @@ private:
 	
 	eSubtitleWidget *subtitle;
 
+	RDSTextDecoder rdstext_decoder;
+
 	int dvrfunctions;
 	int stateOSD;
 
@@ -646,12 +650,13 @@ public:
 	void handleMMIMessage( const eMMIMessage &msg );
 #endif
 
+	void gotRDSText(eString);
+
 	int switchToNum( int num, bool onlyBouquets=false );
 
 	eZapMain();
 	~eZapMain();
 };
-
 
 class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
 {
