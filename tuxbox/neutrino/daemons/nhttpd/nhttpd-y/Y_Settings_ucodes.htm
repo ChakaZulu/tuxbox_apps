@@ -1,0 +1,61 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta NAME="author" CONTENT="yjogol">
+<link rel="stylesheet" type="text/css" href="global.css">
+<link rel="stylesheet" type="text/css" href="Y_Main.css">
+<script type="text/javascript" >
+function do_submit() 
+{
+	document.f.su.disabled=true;
+  	if (document.f.R1[0].checked == true) {
+		_url="/control/exec?Y_Tools&ucodes_upload&camalpha.bin";
+  	} else if (document.f.R1[1].checked == true) {
+		_url="/control/exec?Y_Tools&ucodes_upload&avia500.ux";
+  	} else if (document.f.R1[2].checked == true) {
+		_url="/control/exec?Y_Tools&ucodes_upload&avia600.ux";
+  	} else {
+    	alert("Bitte eine Auswahl treffen");
+  	}
+	document.f.action=_url;
+	document.f.submit();
+}
+</script>
+
+</head>
+<body>
+
+<br>
+<div class="y_head">ucodes</div>
+<div class="y_work_box">
+	<table border="0" cellpadding="5">
+		<tr>
+			<td class="y_work_table" valign="top">
+				<font size="2">
+				<b>Upload</b>
+				<form name="f" method="POST" enctype="multipart/form-data" action="/control/exec?Y_Tools&test_upload">
+					<p>
+					<input type="radio" name="R1" checked value="cam-alpha.bin">camalpha.bin<br>
+					<input type="radio" name="R1" value="avia500.ux">avia500.ux<br>
+					<input type="radio" name="R1" value="avia600.ux">avia600.ux<br>
+				
+					<input type="file" name="F1" size="20"><br>
+					<input type="button" id="su" value="Absenden" name="B1" onclick="do_submit()">
+					</p>
+				</form>
+				</font>
+			</td>
+			<td class="y_work_table" valign="top">
+			<font size="2">
+			<b>Download</b>
+			<br><br>
+			 <a type="application/octet-stream" href="/var/tuxbox/ucodes/avia500.ux"><u>avia500.ux</u></a><br>
+			 <a type="application/octet-stream" href="/var/tuxbox/ucodes/avia600.ux"><u>avia600.ux</u></a><br>
+			 <a type="application/octet-stream" href="/var/tuxbox/ucodes/cam-alpha.bin"><u>cam-alpha.bin</u></a><br>
+			</font>
+			</td>
+		</tr>
+	</table>
+</div>
+</body>
+</html>

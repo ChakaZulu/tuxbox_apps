@@ -1,0 +1,49 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta NAME="author" CONTENT="yjogol">
+<link rel="stylesheet" type="text/css" href="/global.css">
+<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+<script language="JavaScript" type="text/javascript" >
+function do_set() 
+{
+	_url="/control/exec?Y_Plugins&mount_set&"+
+		document.getElementById("type").value + "&"+
+		document.getElementById("ip").value + "&"+
+		document.getElementById("dir").value;
+	parent.frames[2].location.href=_url;
+}
+</script>
+
+</head>
+<body>
+
+<br>
+<div class="y_head">Mount Y_nr (BETA In Arbeit)</div>
+<div class="y_work_box">
+	<form>
+		<input type="hidden" name="nr" value="Y_nr">
+		<table border="0">
+			<tr>
+				<td>Type</td>
+				<td><input type="text" name="type" size="1" value="Y_type"></td>
+				<td>&nbsp;0=NFS,1=CIFS,2=FTPFS</td>
+			</tr>
+			<tr>
+				<td>IP</td>
+				<td><input type="text" name="ip" size="20" value="Y_ip"></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td>Dir</td>
+				<td><input type="text" name="dir" size="30" value="Y_dir"></td>
+				<td>&nbsp;</td>
+			</tr>
+	
+		</table>
+		<br>
+		<input type="button" value="Setzen ..." name="B1" onClick='do_set()'><input type="reset" value="Zurücksetzen" name="B2">&nbsp;&nbsp;&nbsp;
+	</form>
+</div>
+</body>
+</html>

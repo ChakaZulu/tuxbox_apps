@@ -1,0 +1,54 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta NAME="author" CONTENT="yjogol">
+<link rel="stylesheet" type="text/css" href="global.css">
+<link rel="STYLESHEET" type="text/css" href="Y_Main.css">
+<script language="JavaScript" type="text/javascript">
+var yurl
+function go_wait()
+{
+	parent.frames[1].location.href = yurl
+}
+function go_wait_url(_url)
+{
+	yurl=_url
+	parent.frames[1].location.href = "Y_Wait.htm";
+	window.setTimeout('go_wait()', 500);
+}
+function go_live()
+{
+    var agt=navigator.userAgent.toLowerCase();
+    var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
+    var _url = (is_ie) ? "Y_Tools_NetStream_IE.htm" : "Y_Tools_NetStream_Moz.htm";
+//	go_wait_url(_url);
+	yurl=_url;
+	go_wait();	
+}
+</script>
+</head>
+
+<body>
+<br>
+<div class="y_head" align=center>Tools</div>
+<table border="0" width="100%">
+	<tr>
+		<td align="center">
+			<table border="1" class="y_menu_sec">
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="/fb/timer.dbox2">Timer</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Boxcontrol.htm">Boxcontrol</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Info.htm">Info</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Flash.htm">Image</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a href="javascript:go_live()">NetStream</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Msg.htm">Message</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Test.htm">Test</a></td></tr>
+<!---				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Test2.htm">Upl Test</a></td></tr>--->
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Bootlogo.htm">Boot Logo</a></td></tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
+</body>
+
+</html>

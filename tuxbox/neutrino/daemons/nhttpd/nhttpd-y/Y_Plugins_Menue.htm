@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta NAME="author" CONTENT="yjogol">
+<link rel="stylesheet" type="text/css" href="global.css">
+<link rel="STYLESHEET" type="text/css" href="Y_Main.css">
+<script language="JavaScript" type="text/javascript">
+var yurl
+function go_wait()
+{
+	parent.frames[1].location.href = yurl
+}
+function go_wait_url(_url)
+{
+	yurl=_url
+	parent.frames[1].location.href = "Y_Wait.htm";
+	window.setTimeout('go_wait()', 500);
+}
+</script>
+
+</head>
+<body>
+
+<br>
+<div class="y_head" align=center>Settings</div>
+<table border="0" width="100%">
+	<tr>
+		<td align="center">
+		<table border="1"  class="y_menu_sec">
+			<tr>
+				<td class="y_menu_sec" width="80"><a href="javascript:go_wait_url('/control/exec?Y_Plugins&skin_build_form')">Skins</a></td>
+			</tr>
+			<tr>
+				<td class="y_menu_sec" width="80"><a href="javascript:go_wait_url('/control/exec?Y_Plugins&nhttpd_build_form')">WebServer</a></td>
+			</tr>
+			<tr>
+				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_ucodes.htm">ucodes</a></td>
+			</tr>
+			<tr>
+				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_zapit.htm">zapit</a></td>
+			</tr>
+<!---
+			<tr>
+				<td class="y_menu_sec" width="80"><a href="javascript:go_wait_url('/control/exec?Y_Plugins&mount_build_list_form')">Mounts</a></td>
+			</tr>
+			<tr>
+				<td class="y_menu_sec" width="80">
+				<a target="Rechts_oben" href="Y_Settings_mount_liste.htm">Test</a></td>
+			</tr>
+--->
+		</table>
+		</td>
+	</tr>
+</table>
+<br>
+
+<div class="y_head" align=center>Plugins</div>
+<table border="0" width="100%">
+	<tr>
+		<td align="center">
+		<table border="1"  class="y_menu_sec">
+			<tr>
+				<td class="y_menu_sec" width="80"><a href="javascript:go_wait_url('/control/exec?Y_Plugins&vnc_build_form')">VNC</a></td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+</table>
+<br>
+
+<div class="y_head" align=center>Info</div>
+<table border="0" width="100%">
+	<tr>
+		<td align="center">
+		<table border="1"  class="y_menu_sec">
+			<tr>
+				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_About.htm">About</a></td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+</table>
+
+</body>
+</html>

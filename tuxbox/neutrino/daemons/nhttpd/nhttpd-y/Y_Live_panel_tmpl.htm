@@ -1,0 +1,53 @@
+<html>
+<head>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<meta NAME="author" CONTENT="yjogol">
+<link rel="stylesheet" type="text/css" href="/global.css">
+<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function changeChannel()
+{
+	document.x.bouquets.disabled=true;
+	document.x.channels.disabled=true;
+
+	var sel=document.x.channels.selectedIndex;
+	if( sel != -1)
+	{
+		channel = document.x.channels[sel].value;
+		parent.live.do_stop();
+		parent.live.location.href="/control/exec?Y_Live&zapto&"+channel;
+	}
+	document.x.bouquets.disabled=false;
+	document.x.channels.disabled=false;
+};
+function changeBouquet()
+{
+	document.x.bouquets.disabled=true;
+	document.x.channels.disabled=true;
+	var sel=document.x.bouquets.selectedIndex;
+	if( sel != -1)
+	{
+		bouquet = document.x.bouquets[sel].value;
+		window.location.href="/control/exec?Y_Live&panel&"+bouquet
+	}
+};
+//-->
+</SCRIPT>
+</head>
+<body>
+
+<form name="x" action="">
+	<select size="1" class="y_live_button" name="bouquets" onChange="changeBouquet()">
+	<!---Y_Bouquets--->
+	</select>
+
+	<select size="1" class="y_live_button" name="channels">
+	<!---Y_Channels--->
+	</select>
+	<button name="go" class="y_live_button" type="button" value="aa" onClick="changeChannel()">
+	Go</button>
+</form>
+
+</body>
+</html>
