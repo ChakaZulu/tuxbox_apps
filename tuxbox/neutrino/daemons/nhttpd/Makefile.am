@@ -1,4 +1,4 @@
-SUBDIRS = data data-alt2
+SUBDIRS = data data-alt2 nhttpd-y
 
 INCLUDES = \
 	-I$(top_srcdir)/lib \

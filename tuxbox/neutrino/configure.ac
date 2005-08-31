@@ -59,6 +59,9 @@ daemons/nhttpd/data/Makefile
 daemons/nhttpd/data/images/Makefile
 daemons/nhttpd/data-alt2/Makefile
 daemons/nhttpd/data-alt2/images/Makefile
+daemons/nhttpd/nhttpd-y/Makefile
+daemons/nhttpd/nhttpd-y/images/Makefile
+daemons/nhttpd/nhttpd-y/scripts/Makefile
 daemons/sectionsd/Makefile
 daemons/timerd/Makefile
 src/Makefile
