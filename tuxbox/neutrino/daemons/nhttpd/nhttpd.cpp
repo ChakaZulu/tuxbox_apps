@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: nhttpd.cpp,v 1.19 2003/09/16 18:00:42 zwen Exp $
+	$Id: nhttpd.cpp,v 1.20 2005/08/31 17:54:25 yjogol Exp $
 
 	License: GPL
 
@@ -21,14 +21,9 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	// Revision 1.1  11.02.2002 20:20  dirch
-	// Revision 1.2  22.03.2002 20:20  dirch
-	// Revision 2.0b 20.09.2002 16:20  dirch
-	// Revision 2.0c 14.03.2003 05:00  obi
 
 */
 
-#define NHTTPD_VERSION "2.0c"
 
 // c++
 #include <csignal>

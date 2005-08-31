@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.60 2005/08/26 16:57:41 yjogol Exp $
+	$Id: controlapi.cpp,v 1.61 2005/08/31 17:54:25 yjogol Exp $
 
 	License: GPL
 
@@ -38,7 +38,8 @@
 
 // tuxbox
 #include <neutrinoMessages.h>
-
+#include <zapit/client/zapittools.h>
+#include <zapit/bouquets.h>
 // nhttpd
 #include "controlapi.h"
 #include "lcdapi.h"
@@ -85,7 +86,7 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		"timer","setmode","standby","getdate","gettime","settings","getservicesxml",
 		"getbouquetsxml","getonidsid","message","info","shutdown","volume",
 		"channellist","getbouquet","getbouquets","epg","version","zapto", "startplugin",
-		"getmode","exec","system","rc","lcd",NULL
+		"getmode","exec","system","rc","lcd","yweb",NULL
 	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
@@ -174,6 +175,8 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 	        return RCCGI(request);
 	case 24:
 	        return LCDAction(request);
+	case 25:
+	        return YWebCGI(request);
 	default:
 		request->SendError();
 		return false;
@@ -297,10 +300,12 @@ bool CControlAPI::GetModeCGI(CWebserverRequest *request)
 	return true;
 }
 
-static const unsigned int PLUGIN_DIR_COUNT = 3;
-static const std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT] = {
-	PLUGINDIR,
+static const unsigned int PLUGIN_DIR_COUNT = 5;
+static std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT] = {
+	"/share/tuxbox/neutrino/httpd/scripts", //dummy: override by WebServer->PublicDocumentRoot+/scripts
+	"/var/httpd/scripts" //dummy: override by WebServer->PriveDocumentRoot +/scripts
 	"/var/tuxbox/plugins",
+	PLUGINDIR,
 	"/mnt/plugins",
 };
 
@@ -308,6 +313,16 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 {
 	bool res = false;
 	std::string script;
+
+	// ToDo: There is no Contructor/init until now
+	if(Parent != NULL)
+		if(Parent->Parent != NULL)
+		{
+			PLUGIN_DIRS[0]=Parent->Parent->PublicDocumentRoot;
+			PLUGIN_DIRS[0].append("/scripts");
+			PLUGIN_DIRS[1]=Parent->Parent->PrivateDocumentRoot;
+			PLUGIN_DIRS[1].append("/scripts");
+		}
 	if (request->ParameterList.size() > 1)
 		request->SendPlainHeader("text/html");          // Standard httpd header senden MIME html
 	else
@@ -724,7 +739,7 @@ bool CControlAPI::ChannellistCGI(CWebserverRequest *request)
 bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 {
 	CZapitClient::BouquetChannelList *bouquet;
-
+	CZapitClient::BouquetList blist;
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 
 	if (!(request->ParameterList.empty()))
@@ -739,18 +754,39 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 				mode = CZapitClient::MODE_RADIO;
 		}
 
-		bouquet = Parent->GetBouquet(atoi(request->ParameterList["bouquet"].c_str()), mode);
-		CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
-
-		for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
-			request->printf("%u "
+		// Get Bouquet Number. First matching current channel
+		if (request->ParameterList["1"] == "actual")
+		{
+			int actual=0;
+			//easier?
+			for (unsigned int i = 0; i < Parent->BouquetList.size() && actual == 0;i++)
+			{
+				//request->printf("%u %s\n", (Parent->BouquetList[i].bouquet_nr) + 1, Parent->BouquetList[i].name);
+				bouquet = Parent->GetBouquet((Parent->BouquetList[i].bouquet_nr) + 1, mode);
+				CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
+				for (unsigned int j = 0; channel != bouquet->end() && actual == 0; channel++,j++)
+				{
+					if(channel->channel_id == Parent->Zapit->getCurrentServiceID())
+						actual=i+1;
+				}
+			}
+			request->printf("%d",actual);
+			return true;
+		}
+		else
+		{
+			bouquet = Parent->GetBouquet(atoi(request->ParameterList["bouquet"].c_str()), mode);
+			CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
+	
+			for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
+				request->printf("%u "
 					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 					" %s\n",
 					channel->nr,
 					channel->channel_id,
 					channel->name);
-
-		return true;
+			return true;
+		}
 	}
 	else
 	{
@@ -1404,3 +1440,62 @@ void CControlAPI::SendTimers(CWebserverRequest* request)
 	}
 }
 
+//-------------------------------------------------------------------------
+// yweb : Extentions
+//-------------------------------------------------------------------------
+
+// Dispatcher
+bool CControlAPI::YWebCGI(CWebserverRequest *request)
+{
+	bool status=true;
+	int para;
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden
+	if (request->ParameterList["1"] == "nhttpd_version")
+	{
+		request->printf("%s\n", NHTTPD_VERSION);
+	}
+	else if (request->ParameterList["video_stream_pids"] != "")
+	{
+		para=0;
+		sscanf( request->ParameterList["video_stream_pids"].c_str(), "%d", &para);
+		YWeb_SendVideoStreamingPids(request, para);
+	}
+	else if (request->ParameterList["1"] == "radio_stream_pid")
+	{
+		YWeb_SendRadioStreamingPid(request);
+	}
+
+	if(!status)
+		request->SendError();
+
+	return status;
+}
+
+//-------------------------------------------------------------------------
+// Get Streaming Pids 0x$pmt,0x$vpid,0x$apid with apid_no is the Number of Audio-Pid
+void CControlAPI::YWeb_SendVideoStreamingPids(CWebserverRequest* request, int apid_no)
+{
+	CZapitClient::responseGetPIDs pids;
+	int apid=0,apid_idx=0;
+	pids.PIDs.vpid=0;
+	Parent->Zapit->getPIDS(pids);
+
+	if( apid_no < (int)pids.APIDs.size())
+		apid_idx=apid_no;
+	if(!pids.APIDs.empty())
+		apid = pids.APIDs[apid_idx].pid;
+	request->printf("0x%04x,0x%04x,0x%04x",pids.PIDs.pmtpid,pids.PIDs.vpid,apid);
+}
+
+//-------------------------------------------------------------------------
+// Get Streaming Pids 0x$pmt,0x$vpid,0x$apid with apid_no is the Number of Audio-Pid
+void CControlAPI::YWeb_SendRadioStreamingPid(CWebserverRequest* request)
+{
+	CZapitClient::responseGetPIDs pids;
+	int apid=0;
+	Parent->Zapit->getPIDS(pids);
+
+	if(!pids.APIDs.empty())
+		apid = pids.APIDs[0].pid;
+	request->printf("0x%04x",apid);
+}

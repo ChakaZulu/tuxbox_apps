@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.22 2003/03/14 07:20:02 obi Exp $
+        $Id: webserver.h,v 1.23 2005/08/31 17:54:25 yjogol Exp $
 
         License: GPL
 
@@ -21,6 +21,12 @@
         along with this program; if not, write to the Free Software
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+	// Revision 1.1  11.02.2002 20:20  dirch
+	// Revision 1.2  22.03.2002 20:20  dirch
+	// Revision 2.0b 20.09.2002 16:20  dirch
+	// Revision 2.0c 14.03.2003 05:00  obi
+	// Revision 2.1a 28.08.2005        yjogol
+
 */
 
 #ifndef __nhttpd_webserver_h__
@@ -34,6 +40,8 @@
 
 #define SA	struct sockaddr
 #define SAI	struct sockaddr_in
+
+#define NHTTPD_VERSION "2.1a"
 
 #define PRIVATEDOCUMENTROOT	"/share/tuxbox/neutrino/httpd"
 #define PUBLICDOCUMENTROOT	"/var/httpd"

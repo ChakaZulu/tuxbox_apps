@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.11 2005/06/26 18:01:27 barf Exp $
+        $Id: controlapi.h,v 1.12 2005/08/31 17:54:25 yjogol Exp $
 
         License: GPL
 
@@ -45,6 +45,9 @@ class CControlAPI
 		void SendBouquet(CWebserverRequest *request,int BouquetNr);
 		void SendChannelList(CWebserverRequest *request);
 		void SendTimers(CWebserverRequest* request);
+		//yweb
+		void YWeb_SendVideoStreamingPids(CWebserverRequest* request, int apid_no);
+		void YWeb_SendRadioStreamingPid(CWebserverRequest* request);
 
 		// CGI functions for ExecuteCGI
 		bool TimerCGI(CWebserverRequest *request);
@@ -72,6 +75,7 @@ class CControlAPI
 		bool SystemCGI(CWebserverRequest *request);
 		bool RCCGI(CWebserverRequest *request);
 		bool LCDAction(CWebserverRequest *request);
+		bool YWebCGI(CWebserverRequest *request);
 	public:
 		CControlAPI(CWebDbox *parent) { Parent = parent; };
 		bool Execute(CWebserverRequest *request);
