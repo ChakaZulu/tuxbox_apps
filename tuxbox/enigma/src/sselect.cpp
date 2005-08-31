@@ -1874,7 +1874,7 @@ void eServiceSelector::setPath(const eServicePath &newpath, const eServiceRefere
 						eServiceDVB *service = eTransponderList::getInstance()->searchService(sref);
 						if ( service )
 						{
-							eBouquet *b = eDVB::getInstance()->settings->getBouquet(service->service_provider);
+							eBouquet *b = eDVB::getInstance()->settings->getBouquet(eString(service->service_provider).upper());
 							if (b)
 							{
 								tmp.sprintf("1:15:fffffffd:12:%x:%x:0:0:0:0:", b->bouquet_id, dvb_ref.getDVBNamespace().get() );
