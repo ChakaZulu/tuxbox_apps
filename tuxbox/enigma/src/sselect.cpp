@@ -1086,7 +1086,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						path.down( p->service );
 						fillServiceList( p->service );
 						if (!selectService( eServiceInterface::getInstance()->service ))
-						next();
+							next();
 					}
 				}
 				services->endAtomic();
@@ -1122,7 +1122,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						path.down( p->service );
 						fillServiceList( p->service );
 						if (!selectService( eServiceInterface::getInstance()->service ))
-						next();
+							next();
 					}
 				}
 				services->endAtomic();
@@ -1217,7 +1217,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				{
 					setPath(eServiceReference(eServiceReference::idDVB,
 						eServiceReference::flagDirectory|eServiceReference::shouldSort,
-						-2, (1<<4)|(1<<1), 0xFFFFFFFF ),eServiceReference() );
+						-2, (1<<4)|(1<<1), 0xFFFFFFFF ));
 				}
 			}
 			else if (event.action == &i_serviceSelectorActions->modeRadio && !movemode && !editMode)
@@ -1228,7 +1228,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				{
 					setPath(eServiceReference(eServiceReference::idDVB,
 						eServiceReference::flagDirectory|eServiceReference::shouldSort,
-						-2, 1<<2, 0xFFFFFFFF ),eServiceReference() );
+						-2, 1<<2, 0xFFFFFFFF ));
 				}
 			}
 #ifndef DISABLE_FILE
@@ -1453,6 +1453,7 @@ struct _selectService
 	}
 };
 
+#if 0
 struct copyEntry
 {
 	std::list<eServiceReference> &dest;
@@ -1503,6 +1504,7 @@ bool eServiceSelector::selServiceRec( eServiceReference &ref )
 	}
 	return false;
 }
+#endif
 
 bool eServiceSelector::selectService(const eServiceReference &ref)
 {
@@ -1628,7 +1630,7 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 		if ( services->isVisible() )
 			setFocus(services);
 		setKeyDescriptions();
- }
+	}
 	ci->show();
 }
 
@@ -1739,22 +1741,7 @@ eServiceSelector::~eServiceSelector()
 void eServiceSelector::enterDirectory(const eServiceReference &ref)
 {
 	path.down(ref);
-	services->beginAtomic();
-	actualize();
-	if (!selectService( eServiceInterface::getInstance()->service ))
-		services->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
-
-	// we have a problem when selection not changes..
-	// the listbox don't emit "selected"... then our current
-	// selected entry is not valid.. to prevent this we set
-	// it manual...
-	eListBoxEntryService *cur = services->getCurrent();
-	if ( cur )
-		selected = cur->service;
-	else
-		selected = eServiceReference();
-
-	services->endAtomic();
+	setPath(path);
 }
 
 void eServiceSelector::showMultiEPG()
@@ -1866,9 +1853,58 @@ void eServiceSelector::setPath(const eServicePath &newpath, const eServiceRefere
 	path=newpath;
 	if (services)
 	{
+		bool ret=false;
 		services->beginAtomic();
 		actualize();
-		selectService(select);
+		if (select)
+			ret=selectService(select);
+		else
+		{
+			eServiceReference &sref = eServiceInterface::getInstance()->service;
+			if (!(ret=selectService(sref)))
+			{
+				if ( sref.type == eServiceReference::idDVB && !sref.path )
+				{
+					eServiceReferenceDVB &dvb_ref = (eServiceReferenceDVB&) sref;
+					eString tmp;
+					tmp.sprintf("1:15:fffffffe:12:%x:0:0:0:0:0:", dvb_ref.getDVBNamespace().get());
+					eServiceReference sat_ref(tmp);
+					if (!(ret=selectService(sat_ref)))
+					{
+						eServiceDVB *service = eTransponderList::getInstance()->searchService(sref);
+						if ( service )
+						{
+							eBouquet *b = eDVB::getInstance()->settings->getBouquet(service->service_provider);
+							if (b)
+							{
+								tmp.sprintf("1:15:fffffffd:12:%x:%x:0:0:0:0:", b->bouquet_id, dvb_ref.getDVBNamespace().get() );
+								eServiceReference bref(tmp);
+								if (!(ret=selectService(bref)))
+								{
+									tmp.sprintf("1:15:fffffffd:12:%x:ffffffff:0:0:0:0:", b->bouquet_id, dvb_ref.getDVBNamespace().get() );
+									eServiceReference bref(tmp);
+									ret=selectService(bref);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (!ret)
+			services->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
+
+		// we have a problem when selection not changes..
+		// the listbox don't emit "selected"... then our current
+		// selected entry is not valid.. to prevent this we set
+		// it manual...
+		eListBoxEntryService *cur = services->getCurrent();
+		if ( cur )
+			selected = cur->service;
+		else
+			selected = eServiceReference();
+
 		services->endAtomic();
 	}
 }
