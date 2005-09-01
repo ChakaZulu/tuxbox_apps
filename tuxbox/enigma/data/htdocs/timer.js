@@ -91,7 +91,6 @@ function addTimerEvent()
 	}
 	else
 		url = 'addTimerEvent?timer=regular&ref=' + reference + '&channel=' + channelName + '&sday=' + sday + '&smonth=' + smonth + '&syear=' + syear + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&eyear=' + eyear + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event + '&action=' + action;
-	alert(url);
 	NewWindow(url, 'add', '200', '200', 'no', '5000');
 }
 
