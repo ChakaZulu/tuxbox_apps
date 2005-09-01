@@ -21,6 +21,7 @@ class eExpertSetup: public eSetupWindow
 	void reinitializeHTTPServer(bool);
 	void fastZappingChanged(bool b);
 	void init_eExpertSetup();
+	void fileToggle(bool newState, const char* filename);
 public:
 	eExpertSetup();
 };

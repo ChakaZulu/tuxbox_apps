@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.29 2005/08/03 20:05:49 timekiller Exp $
+ * $Id: setup_extra.cpp,v 1.30 2005/09/01 22:33:22 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -111,7 +111,29 @@ void eExpertSetup::init_eExpertSetup()
 #ifndef TUXTXT_CFG_STANDALONE
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable teletext caching"), "/ezap/extra/teletext_caching", _("don't cache teletext pages in background")))->selected, eExpertSetup::tuxtxtCachingChanged );
 #endif
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
+	    eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles creating"), "/extras/corefiles_disable", _("don't create corefiles after Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
 	setHelpID(92);
+}
+
+void eExpertSetup::fileToggle(bool newState, const char* filename)
+{
+	FILE* test;
+	test = fopen(filename,"r");
+	if (test != NULL)
+	{
+		fclose(test);
+		eString cmd = "rm ";
+		cmd += filename;
+		::unlink(filename);
+	}
+	else
+	{
+		eString cmd = "touch ";
+		cmd += filename;
+		system(cmd.c_str());
+	}
 }
 
 #ifndef TUXTXT_CFG_STANDALONE
