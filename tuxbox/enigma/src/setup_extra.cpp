@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.31 2005/09/01 22:35:08 timekiller Exp $
+ * $Id: setup_extra.cpp,v 1.32 2005/09/01 22:54:31 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -113,7 +113,7 @@ void eExpertSetup::init_eExpertSetup()
 #endif
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
 	    eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
-		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create corefiles after Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
+		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create 'Corefiles' after an Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
 	setHelpID(92);
 }
 
