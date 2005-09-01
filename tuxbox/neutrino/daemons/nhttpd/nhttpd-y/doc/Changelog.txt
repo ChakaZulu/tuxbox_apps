@@ -1,0 +1,93 @@
+Severity	id		Headline							Build
+
+4-Minor		JG200000064	Live: geht nicht wenn SPTS aus-> vorher einschalten		R1.3.0
+4-Minor		JG200000099	Tools-Format-Template (sed wie mount-liste) Vereinfachung	R1.3.0
+4-Minor		JG200000149	Flash: Vor Upload *.img in tmp löschen				R1.3.0
+5-Enhancement	JG200000062	Live: TV als PopUp						R1.3.0
+5-Enhancement	JG200000120	Live: LCD Display, FB, Playback sperren/Live View		R1.3.0
+5-Enhancement	JG200000121	Live Option Bilschirm am TV aus					R1.3.0
+5-Enhancement	JG200000133	start_neutrino raus wenn nhttpd im CVS				R1.3.0
+5-Enhancement	JG200000140	Live: Bouquet und Channel direkt auswählen			R1.3.0
+5-Enhancement	JG200000152	Live: Play/Pause als ToggleBar					R1.3.0
+5-Enhancement	JG200000153	Live: lock/unlock als ToggleBar					R1.3.0
+5-Enhancement	JG200000155	nhttpd: Controlapi.cpp Suchreihenfolge Plugins: Var... zuerst	R1.3.0
+5-Enhancement	JG200000157	Anderer Ort für die Scripte? Ja: .../httpd/scripts		R1.3.0
+5-Enhancement	JG200000158	nhttp: yweb-api: NHTTPD_VERSION via Controlapi.cpp anzeigen	R1.3.0
+5-Enhancement	JG200000159	y_reboot.sh raus Neu: yreboot in Tools				R1.3.0
+5-Enhancement	JG200000160	Tools: Alles aus info.sh nach tools.sh				R1.3.0
+5-Enhancement	JG200000161	nhttpd: scripts in Public/Private httpd Unterordner scripts	R1.3.0
+5-Enhancement	JG200000162	Global: y_url_control für wget/localhost verwenden		R1.3.0
+5-Enhancement	JG200000164	nhttps: aktuelles Bouquet ermitteln können: NEU: getbouquet?actual	R1.3.0
+5-Enhancement	JG200000165	nhttpd: neue yweb-API						R1.3.0
+5-Enhancement	JG200000166	nhttpd: yweb-api: video_stream_pids=<apid_idx> NEU		R1.3.0
+5-Enhancement	JG200000167	nhttpd: yweb-api : radio_stream_pid NEU				R1.3.0
+5-Enhancement	JG200000169	Live: Vor Aufruf auf TV umschalten				R1.3.0
+5-Enhancement	JG200000175	Y-Web.conf erstellen wenn nicht existiert			R1.3.0
+5-Enhancement	JG200000177	Live: "+" und "-" vertauschen					R1.3.0
+5-Enhancement	JG200000178	Bouquest TV/Radio: "+" und "-" vertauschen			R1.3.0
+
+3-Average	JG200000122	wget 127.0.0.1 geht nicht, wenn Authentication an ist.		R1.2.0
+3-Average	JG200000123	Live: Local IP Addr via ifconfig ermitteln. Sonst keine vollständige Stream-URL	R1.2.0
+4-Minor		JG200000086	Flash: MTDs sind unterschiedlich in den Images -> Menu dynamisch	R1.2.0
+5-Enhancement	JG200000080	nhttpd: Passwort-Schutz auf allen Seiten			R1.2.0
+5-Enhancement	JG200000083	nhttpd: Upload-Funktion (non blocking)				R1.2.0
+5-Enhancement	JG200000103	About nach Settings verschoben					R1.2.0
+5-Enhancement	JG200000104	Feature: Upload Bootlogo					R1.2.0
+5-Enhancement	JG200000105	Feature: Upload Bootlogo LCD					R1.2.0
+5-Enhancement	JG200000109	ucodes Upload & Download					R1.2.0
+5-Enhancement	JG200000111	Bouquet / Services Upload & Download				R1.2.0
+5-Enhancement	JG200000117	Start: Mit Uebersicht nicht mit Bouquets			R1.2.0
+
+4-Minor		JG200000044	Y_Live: url : Ohne Escape-Chars ausgeben			R1.1.0
+4-Minor		JG200000071	Layout: Fonts werden unter Linux nicht als Arial angezeigt	R1.1.0
+5-Enhancement	JG200000043	Y_Live: URL für Radio generieren				R1.1.0
+5-Enhancement	JG200000053	Alles: harte Verzeichnis Verlinkung raus od zentral konfigurieren	R1.1.0
+5-Enhancement	JG200000065	Layout: Zentalisieren - dann besser Austauschbar		R1.1.0
+5-Enhancement	JG200000070	Live: kleine Standard-Auflösung auf ...384*288			R1.1.0
+5-Enhancement	JG200000073	Tools:Net-Stream: Text wieder auf deutsch			R1.1.0
+5-Enhancement	JG200000076	Skripts: zentrales Include-Skript mit Pfadangaben		R1.1.0
+5-Enhancement	JG200000077	Layout: durchgehende Verwendung von Stylesheets (Y_Main.css)	R1.1.0
+5-Enhancement	JG200000087	PrimMenu: Plugins in Settings umbenennen			R1.1.0
+5-Enhancement	JG200000088	Settings: SecMenu: Setting und Plugins in einem Menue		R1.1.0
+5-Enhancement	JG200000091	NetStream auch mit FireFox/Mozilla				R1.1.0
+5-Enhancement	JG200000092	Y-Web Konfiguration speichern. (Y-Web.conf)			R1.1.0
+5-Enhancement	JG200000093	Skins: Y_Main-xxx.css automatisch zur Skin-Liste		R1.1.0
+5-Enhancement	JG200000094	Skins: Formular zur Auswahl unter Settings			R1.1.0
+5-Enhancement	JG200000097	Y-Web Version in Y_Version.txt					R1.1.0
+5-Enhancement	JG200000098	nhttpd Einstellungen setzen (unter Settings)			R1.1.0
+
+5-Enhancement	JG200000063	Y-Web Installer auch für andere Images				R1.1.0 rc0b
+5-Enhancement	JG200000067	Reboot optional mit mmops					R1.1.0 rc0b
+6-Question	JG200000007	Live: Funktioniert 'Live' auch unter Linux mit Mozilla? JA	R1.1.0 rc0b
+
+3-Average	JG200000010	IE-Live:Full-Screen Button geht nicht				R1.1.0 rc0
+4-Minor		JG200000036	Live: IE: Browser zeigt nachladen an				R1.1.0 rc0
+4-Minor		JG200000051	Live: startet bei Mozilla nicht automatisch			R1.1.0 rc0
+5-Enhancement	JG200000031	Info "Bitte warten" wenn Live aufgerufen wird			R1.1.0 rc0
+5-Enhancement	JG200000032	Neues Menu Plugins						R1.1.0 rc0
+5-Enhancement	JG200000033	Plugin-Conf: VNC						R1.1.0 rc0
+5-Enhancement	JG200000039	Menu: Timer nach Tools						R1.1.0 rc0
+5-Enhancement	JG200000040	Menu: "TV/Radio" anch "Bouquet" umbenennen			R1.1.0 rc0
+5-Enhancement	JG200000046	Info "Biite warten" bei Plugin-Konfiguratoren			R1.1.0 rc0
+5-Enhancement	JG200000047	Info "Bitte warten" bei Tools Flash auslesen			R1.1.0 rc0
+5-Enhancement	JG200000048	favicon								R1.1.0 rc0
+5-Enhancement	JG200000049	Tools: Boxen in Menues kleiner (nicht 100%)			R1.1.0 rc0
+5-Enhancement	JG200000059	Installer Y-Web: Frage ob gepatcher WebServer zuvor schon installiert wurde	R1.1.0 rc0
+5-Enhancement	JG200000060	Doc: Entwickler Dokumentation zur 1.0.2				R1.1.0 rc0
+5-Enhancement	JG200000061	Y_Web Installer: jetzt mit _Y-pre.bat: Zeigt Version an		R1.1.0 rc0
+
+3-Average	JG200000009	TV/Radio: Mute/Unmute ueber das Lautsprecher-Icon geht nicht	R1.0.2
+3-Average	JG200000029	Live: Moz: Jetzt html ohne Workaround				R1.0.2
+4-Minor		JG200000019	Live NetStream nach Tools veschieben				R1.0.2
+5-Enhancement	JG200000001	Live: Standard Fenstergrösse auf 4:3 				R1.0.2
+5-Enhancement	JG200000002	Live: autom. Browsererkennung / nur ein Live-Button		R1.0.2
+5-Enhancement	JG200000016	Flash Image download						R1.0.2
+5-Enhancement	JG200000020	Tools: Info: Teile aus Box-Control dorthin			R1.0.2
+5-Enhancement	JG200000021	Tools: Info: Kernel Stack ausgeben				R1.0.2
+5-Enhancement	JG200000022	Tools: Info: dbox-Prozesse anzeigen				R1.0.2
+5-Enhancement	JG200000023	Tools: Flash: Linux Partitionen anzeigen			R1.0.2
+5-Enhancement	JG200000024	nhttpd: execCGI erweitern für dyn. Webseiten			R1.0.2
+5-Enhancement	JG200000025	Test ob gepatchte WebServer läuft				R1.0.2
+5-Enhancement	JG200000026	Autom. Starten des gepatchten WebServers für JtG-Image		R1.0.2
+5-Enhancement	JG200000027	Tools: Test: WebServer testen					R1.0.2
+5-Enhancement	JG200000028	Prüfung ob Y-WebServer läuft bei Parameterübergaben		R1.0.2
