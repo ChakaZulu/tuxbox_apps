@@ -127,33 +127,3 @@ int CAudioSelectMenuHandler::doMenu ()
 
 
 
-
-
-
-
-//
-//
-//
-
-//void  CAudioSelectMenuHandler::SelectAPID()
-//{
-//	if( g_RemoteControl->current_PIDs.APIDs.size()> 1 )
-//	{
-//		// wir haben APIDs für diesen Kanal!
-//
-//		CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
-//		APIDSelector.addItem(GenericMenuSeparator);
-//
-//		for( unsigned int count=0; count<g_RemoteControl->current_PIDs.APIDs.size(); count++ )
-//		{
-//			char apid[5];
-//			sprintf(apid, "%d", count);
-//			APIDSelector.addItem(new CMenuForwarderNonLocalized(g_RemoteControl->current_PIDs.APIDs[count].desc, true, NULL, APIDChanger, apid, CRCInput::convertDigitToKey(count + 1)), (count == g_RemoteControl->current_PIDs.PIDs.selected_apid));
-//		}
-//		APIDSelector.exec(NULL, "");
-//	}
-//}
-
-
-
-

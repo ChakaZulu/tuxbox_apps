@@ -85,6 +85,7 @@
 #include "gui/color.h"
 
 #include "gui/bedit/bouqueteditor_bouquets.h"
+#include "gui/audio_select.h"
 #include "gui/bouquetlist.h"
 #include "gui/eventlist.h"
 #include "gui/channellist.h"
@@ -126,11 +127,10 @@
 
 // uncomment if you want to have a "test" menue entry  (rasc)
 
-#define __EXPERIMENTAL_CODE__
+//#define __EXPERIMENTAL_CODE__
 #ifdef __EXPERIMENTAL_CODE__
 
 #include "gui/ch_mosaic.h"
-#include "gui/audio_select.h"
 
 #endif
 
@@ -2830,26 +2830,7 @@ void CNeutrinoApp::SelectNVOD()
 	}
 }
 
-// $$$ TODO to be replaced after test >>>
-void CNeutrinoApp::SelectAPID()
-{
-	if( g_RemoteControl->current_PIDs.APIDs.size()> 1 )
-	{
-		// wir haben APIDs für diesen Kanal!
 
-		CMenuWidget APIDSelector(LOCALE_APIDSELECTOR_HEAD, "audio.raw", 300);
-		APIDSelector.addItem(GenericMenuSeparator);
-
-		for( unsigned int count=0; count<g_RemoteControl->current_PIDs.APIDs.size(); count++ )
-		{
-			char apid[5];
-			sprintf(apid, "%d", count);
-			APIDSelector.addItem(new CMenuForwarderNonLocalized(g_RemoteControl->current_PIDs.APIDs[count].desc, true, NULL, APIDChanger, apid, CRCInput::convertDigitToKey(count + 1)), (count == g_RemoteControl->current_PIDs.PIDs.selected_apid));
-		}
-		APIDSelector.exec(NULL, "");
-	}
-}
-// $$$ TODO  <<< to be replaced after test 
 
 #define MAINMENU_RECORDING_OPTION_COUNT 2
 const CMenuOptionChooser::keyval MAINMENU_RECORDING_OPTIONS[MAINMENU_RECORDING_OPTION_COUNT] =
@@ -2921,8 +2902,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// -- rasc (2003-12)
 
 
-//	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental1", true, NULL, new CChMosaicHandler(), id, CRCInput::RC_nokey, ""), false);
-	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental2", true, NULL, new CAudioSelectMenuHandler(), id, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental1", true, NULL, new CChMosaicHandler(), id, CRCInput::RC_nokey, ""), false);
 
 
 #endif
@@ -3450,15 +3430,13 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				ShowStreamFeatures();
 			}
 			else if( msg == CRCInput::RC_green )
-			{	// APID
-				SelectAPID();
-				// $$$ TODO
+			{
 				// -- new Audio Selector Menu (rasc 2005-08-30)
-//				{  CAudioSelectMenuHandler  *audio_menu;
-//
-//				   audio_menu = new CAudioSelectMenuHandler;
-//				   audio_menu-> doMenu();
-//				}
+				{  CAudioSelectMenuHandler  *audio_menu;
+
+				   audio_menu = new CAudioSelectMenuHandler;
+				   audio_menu-> doMenu();
+				}
 			}
 			else if( msg == CRCInput::RC_yellow )
 			{       // NVODs

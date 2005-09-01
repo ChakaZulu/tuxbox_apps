@@ -956,9 +956,10 @@ void CInfoViewer::showButton_Audio()
                 };
 */
 	// green, in case of several APIDs
-	// $$$ TODO  display always, if we switch to new menue (or check class, if avail)
+	// -- always show Audio Option, due to audio option restructuring (2005-08-31 rasc)
 	uint count = g_RemoteControl->current_PIDs.APIDs.size();
-	if ( count > 1 )
+///	if ( count > 1 )
+	if (1)
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, BoxEndX- ICON_OFFSET- 3* ButtonWidth + 2 + 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2) + 8, BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2 + 2), g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
