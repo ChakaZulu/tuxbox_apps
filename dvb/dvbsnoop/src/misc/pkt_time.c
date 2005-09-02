@@ -1,5 +1,5 @@
 /*
-$Id: pkt_time.c,v 1.9 2004/01/11 21:01:32 rasc Exp $
+$Id: pkt_time.c,v 1.10 2005/09/02 14:11:35 rasc Exp $
 
 
 
@@ -8,13 +8,16 @@ $Id: pkt_time.c,v 1.9 2004/01/11 21:01:32 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 
 $Log: pkt_time.c,v $
+Revision 1.10  2005/09/02 14:11:35  rasc
+TS code redesign, xPCR and DTS timestamps decoding
+
 Revision 1.9  2004/01/11 21:01:32  rasc
 PES stream directory, PES restructured
 

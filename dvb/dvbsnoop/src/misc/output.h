@@ -1,5 +1,5 @@
 /*
-$Id: output.h,v 1.11 2004/12/07 21:01:42 rasc Exp $
+$Id: output.h,v 1.12 2005/09/02 14:11:35 rasc Exp $
 
 
  DVBSNOOP
@@ -7,13 +7,16 @@ $Id: output.h,v 1.11 2004/12/07 21:01:42 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 
 $Log: output.h,v $
+Revision 1.12  2005/09/02 14:11:35  rasc
+TS code redesign, xPCR and DTS timestamps decoding
+
 Revision 1.11  2004/12/07 21:01:42  rasc
 Large file support (> 2 GB) for -if cmd option. (tnx to K.Zheng,  Philips.com for reporting)
 

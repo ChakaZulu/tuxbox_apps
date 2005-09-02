@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.65 2005/08/10 21:28:19 rasc Exp $
+$Id: dvb_str.c,v 1.66 2005/09/02 14:11:36 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.65 2005/08/10 21:28:19 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.66  2005/09/02 14:11:36  rasc
+TS code redesign, xPCR and DTS timestamps decoding
+
 Revision 1.65  2005/08/10 21:28:19  rasc
 New: Program Stream handling  (-s ps)
 
@@ -2085,6 +2088,41 @@ char *dvbstrTSpid_ID (u_int i)
      {  0,0, NULL }
   };
 
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- Transport Error Indicator [TEI] ISO 13818-1
+*/
+
+char *dvbstrTS_TEI (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "no error" },
+     {  0x01, 0x01,  "Packet has uncorrectable errors" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- PayLoad Unit Start Indicator[PUSI] ISO 13818-1
+*/
+
+char *dvbstrTS_PUSI (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "Packet data continues" },
+     {  0x01, 0x01,  "Packet data starts" },
+     {  0,0, NULL }
+  };
 
   return findTableID (Table, i);
 }

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.29 2004/08/25 19:51:09 rasc Exp $ 
+$Id: dvb_str.h,v 1.30 2005/09/02 14:11:36 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.29 2004/08/25 19:51:09 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.30  2005/09/02 14:11:36  rasc
+TS code redesign, xPCR and DTS timestamps decoding
+
 Revision 1.29  2004/08/25 19:51:09  rasc
  - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
 
@@ -172,6 +175,8 @@ char *dvbstrAnnouncementReference_TYPE(u_int id);
 
 char *dvbstrTSpid_ID (u_int id);
 char *dvbstrTS_AdaptationField_TYPE (u_int id);
+char *dvbstrTS_TEI (u_int id);
+char *dvbstrTS_PUSI (u_int id);
 char *dvbstrTS_ScramblingCtrl_TYPE (u_int id);
 
 /* -- PES stuff */

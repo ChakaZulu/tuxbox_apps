@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.37 2005/07/11 23:06:47 rasc Exp $
+$Id: helper.c,v 1.38 2005/09/02 14:11:35 rasc Exp $
 
 
  DVBSNOOP
@@ -7,12 +7,15 @@ $Id: helper.c,v 1.37 2005/07/11 23:06:47 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 $Log: helper.c,v $
+Revision 1.38  2005/09/02 14:11:35  rasc
+TS code redesign, xPCR and DTS timestamps decoding
+
 Revision 1.37  2005/07/11 23:06:47  rasc
 Multibyte section filter redesign:  -f 0x4F.22.33.44.55.66 -m 0x.FF.FF.FF etc.
 Manpage update
@@ -672,16 +675,41 @@ void print_timebase90kHz (int v, long long time90kHz)
    long long ull = time90kHz;
 
    	int     h,m,s,u;
-	u_long  p = ull/90;
+	u_long  p = ull/9;
 
-	// -- following lines taken from "dvbtextsubs  Dave Chapman"
-	h=(p/(1000*60*60));
-	m=(p/(1000*60))-(h*60);
-	s=(p/1000)-(h*3600)-(m*60);
-	u=p-(h*1000*60*60)-(m*1000*60)-(s*1000);
+
+	// -- following lines basically taken from "dvbtextsubs  Dave Chapman"
+	h=(p/(10000L*60*60));
+	m=(p/(10000L*60))-(h*60);
+	s=(p/10000L)-(h*3600)-(m*60);
+	u=p-(h*10000L*60*60)-(m*10000L*60)-(s*10000L);
 
     	out (v,"%llu (0x%08llx)", ull,ull);
-	out (v,"  [= 90 kHz-Timestamp: %d:%02d:%02d.%03d]", h,m,s,u);
+	out (v,"  [= 90 kHz-Timestamp: %d:%02d:%02d.%04d]", h,m,s,u);
+}
+
+
+/*
+ -- print PCR timebase, 27 MHz
+*/ 
+
+void print_pcr_time (int v, long long time90kHz, int ext_27MHz)
+{
+   long long ull = time90kHz * 300 + ext_27MHz;
+
+   	int        h,m,s;
+	long       u;
+	long long  p = ull/27;
+	long long  fa = 1000000;
+
+	// -- following lines basically taken from "dvbtextsubs  Dave Chapman"
+	h=(p/(fa*60*60));
+	m=(p/(fa*60))-(h*60);
+	s=(p/fa)-(h*3600)-(m*60);
+	u=p-(h*fa*60*60)-(m*fa*60)-(s*fa);
+
+    	out (v,"%llu (0x%08llx)", ull,ull);
+	out (v,"  [= PCR-Timestamp: %d:%02d:%02d.%06ld]", h,m,s,u);
 }
 
 

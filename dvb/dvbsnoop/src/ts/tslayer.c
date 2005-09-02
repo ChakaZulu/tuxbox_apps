@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.21 2005/08/02 22:57:47 rasc Exp $
+$Id: tslayer.c,v 1.22 2005/09/02 14:11:36 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: tslayer.c,v 1.21 2005/08/02 22:57:47 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2005   Rainer.Scherg@gmx.de
 
 
 
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.21 2005/08/02 22:57:47 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.22  2005/09/02 14:11:36  rasc
+TS code redesign, xPCR and DTS timestamps decoding
+
 Revision 1.21  2005/08/02 22:57:47  rasc
 Option -N, rewrite offline filters (TS & Section)
 
@@ -113,68 +116,35 @@ void decodeTS_buf (u_char *b, int len, u_int opt_pid)
 {
  /* IS13818-1  2.4.3.2  */
 
- typedef struct  _TS_PackLayer {
-    u_int      sync_byte;
-    u_int      transport_error_indicator;		
-    u_int      payload_unit_start_indicator;		
-    u_int      transport_priority;		
-    u_int      pid;		
-    u_int      transport_scrambling_control;		
-    u_int      adaptation_field_control;		
-    u_int      continuity_counter;		
-
-    // adaptation field
-    // or N ... data bytes
-
- } TS_PackLayer;
+ int            n;
+ int		tei;
+ int		pusi;
+ int		sc;
+ int		afc;
 
 
 
+	  outBit_Sx_NL  (3,"Sync-Byte 0x47: ", 			b,  0, 8);
+ tei 	= outBit_S2x_NL (3,"Transport_error_indicator: ", 	b,  8, 1,
+		 	(char *(*)(u_long))dvbstrTS_TEI ); 
+ pusi	= outBit_S2x_NL (3,"Payload_unit_start_indicator: ", 	b,  9, 1,
+			(char *(*)(u_long))dvbstrTS_PUSI ); 
+ 	  outBit_Sx_NL  (3,"transport_priority: ",		b, 10, 1);
+ 	  outBit_S2x_NL (3,"PID: ",			 	b, 11,13,
+			(char *(*)(u_long))dvbstrTSpid_ID ); 
+ sc	= outBit_S2x_NL (3,"transport_scrambling_control: ", 	b, 24, 2,
+			(char *(*)(u_long))dvbstrTS_ScramblingCtrl_TYPE ); 
+ afc	= outBit_S2x_NL (3,"adaptation_field_control: ", 	b, 26, 2,
+			(char *(*)(u_long))dvbstrTS_AdaptationField_TYPE ); 
+	  outBit_Sx_NL  (3,"continuity_counter: ", 		b, 28, 4);
 
- TS_PackLayer  t;
- int           n;
-
-
-
- t.sync_byte 			 = b[0];
- t.transport_error_indicator	 = getBits (b, 0, 8, 1);
- t.payload_unit_start_indicator	 = getBits (b, 0, 9, 1);
- t.transport_priority		 = getBits (b, 0,10, 1);
- t.pid				 = getBits (b, 0,11, 13);
- t.transport_scrambling_control	 = getBits (b, 0,24, 2);
- t.adaptation_field_control	 = getBits (b, 0,26, 2);
- t.continuity_counter		 = getBits (b, 0,28, 4);
-
-
-
- out_SB_NL (3,"Sync-Byte 0x47: ",t.sync_byte);
- out_SB    (3,"Transport_error_indicator: ",t.transport_error_indicator);
-    if (t.transport_error_indicator) out_nl (3,"  [= Packet has uncorrectable errors!]");
-    else out_NL (3);
-
- out_SB    (3,"Payload_unit_start_indicator: ",t.payload_unit_start_indicator);
-    if (t.payload_unit_start_indicator) out_nl (3,"  [= Packet data starts]");
-    else out_NL (3);
-
- out_SB_NL (3,"transport_priority: ",t.transport_priority);
- out_S2W_NL(3,"PID: ",t.pid, dvbstrTSpid_ID (t.pid) );
-
- out_S2B_NL (3,"transport_scrambling_control: ",
-	t.transport_scrambling_control,
-	dvbstrTS_ScramblingCtrl_TYPE (t.transport_scrambling_control) );
-
- out_S2B_NL (3,"adaptation_field_control: ",
-	t.adaptation_field_control,
-	dvbstrTS_AdaptationField_TYPE (t.adaptation_field_control) );
-
- out_SB_NL (3,"continuity_counter: ",t.continuity_counter);
 
 
  len -= 4;
  b   += 4;
 
 
- if (t.adaptation_field_control & 0x2) {
+ if (afc & 0x2) {
     indent (+1);
     out_nl (3,"Adaptation_field: ");
     	indent (+1);
@@ -186,17 +156,16 @@ void decodeTS_buf (u_char *b, int len, u_int opt_pid)
  }
 
  
- if (t.adaptation_field_control & 0x1) {
+ if (afc & 0x1) {
 
     indent (+1);
     out_nl (3,"Payload: (len: %d)",len);
 
 	// -- if payload_start, check PES/SECTION
-	// -- $$$ check PESStreamID if changed by ISO!!!
-	if (t.payload_unit_start_indicator &&
-		! (t.transport_scrambling_control || t.transport_error_indicator) ) {
+	if (pusi && ! (sc || tei) ) {
 	    indent (+1);
-	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
+//	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
+	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01) {
 		// -- PES
 		outBit_S2x_NL (4,"==> PES-stream: ",	b+3, 0,8,
 			(char *(*)(u_long))dvbstrPESstream_ID );
@@ -226,140 +195,66 @@ void decodeTS_buf (u_char *b, int len, u_int opt_pid)
 int ts_adaptation_field (u_char  *b)
 
 {
-
- typedef struct  _TS_AdaptationField {
-    u_int      adaptation_field_length;
-
-    // if length > 0
-    u_int      discontinuity_indicator;
-    u_int      random_access_indicator;
-    u_int      elementary_stream_priority_indicator;
-    u_int      PCR_flag;
-    u_int      OPCR_flag;
-    u_int      splicing_point_flag;
-    u_int      transport_private_data_flag;
-    u_int      adaptation_field_extension_flag;
-
-    // PCR_flag == 1
-    u_long     program_clock_reference_baseH;
-    u_long     program_clock_reference_baseL;
-    u_int      reserved1;
-    u_int      program_clock_reference_extension;
-   
-    // OPCR_flag == 1
-    u_long     original_program_clock_reference_baseH;
-    u_long     original_program_clock_reference_baseL;
-    u_int      reserved2;
-    u_int      original_program_clock_reference_extension;
-
-    // splicing_point_flag == 1
-    u_int      splice_countdown;
-
-    // transport_private_data_flag == 1
-    u_int      transport_private_data_length;
-	// N   data bytes
-
-    // adaptation_field_extension_flag == 1
-   
-	// N2  adaptation_field_extension  
-
-    // N stuffing bytes...
+ int    len;
+ int    af_len;
+ int    pcr_flag;
+ int    opcr_flag;
+ int    sp_flag;
+ int    tpd_flag;
+ int    afe_flag;
 
 
 
- } TS_AdaptationField;
+ af_len 	= outBit_Sx_NL  (3,"adaptation_field_length: ",  b, 0, 8);
 
-
- TS_AdaptationField  a;
- int               len,n;
-
-
-
- a.adaptation_field_length   	 		= b[0];
-
- out_SB_NL (3,"Adaptation_field_length: ",a.adaptation_field_length);
  b  += 1;
- len = a.adaptation_field_length;
-
- if (a.adaptation_field_length == 0)
-    return 1;
+ len = af_len;
+ if (af_len == 0) return 1;
 
 
- a.discontinuity_indicator			= getBits (b, 0, 0, 1);
- a.random_access_indicator			= getBits (b, 0, 1, 1);
- a.elementary_stream_priority_indicator		= getBits (b, 0, 2, 1);
- a.PCR_flag					= getBits (b, 0, 3, 1);
- a.OPCR_flag					= getBits (b, 0, 4, 1);
- a.splicing_point_flag				= getBits (b, 0, 5, 1);
- a.transport_private_data_flag			= getBits (b, 0, 6, 1);
- a.adaptation_field_extension_flag		= getBits (b, 0, 7, 1);
+  		outBit_Sx_NL  (3,"discontinuity_indicator: ", 			b, 0, 1);
+  		outBit_Sx_NL  (3,"random_access_indicator: ", 			b, 1, 1);
+  		outBit_Sx_NL  (3,"elementary_stream_priotity_indicator: ", 	b, 2, 1);
+ pcr_flag =  	outBit_Sx_NL  (3,"PCR_flag: ", 					b, 3, 1);
+ opcr_flag =  	outBit_Sx_NL  (3,"OPCR_flag: ", 				b, 4, 1);
+ sp_flag = 	outBit_Sx_NL  (3,"splicing_point_flag: ", 			b, 5, 1);
+ tpd_flag = 	outBit_Sx_NL  (3,"transport_private_data_flag: ", 		b, 6, 1);
+ afe_flag = 	outBit_Sx_NL  (3,"adaptation_field_extension_flag: ", 		b, 7, 1);
+
 
  b   += 1;
  len -= 1;
 
- out_SB_NL (3,"discontinuity_indicator: ",a.discontinuity_indicator);
- out_SB_NL (3,"random_access_indicator: ",a.random_access_indicator);
- out_SB_NL (3,"elementary_stream_priotity_indicator: ",a.elementary_stream_priority_indicator);
- out_SB_NL (3,"PCR_flag: ",a.PCR_flag);
- out_SB_NL (3,"OPCR_flag: ",a.OPCR_flag);
- out_SB_NL (3,"splicing_point_flag: ",a.splicing_point_flag);
- out_SB_NL (3,"transport_private_data_flag: ",a.transport_private_data_flag);
- out_SB_NL (3,"adaptation_field_extension_flag: ",a.adaptation_field_extension_flag);
 
-  if (a.PCR_flag) {
-     a.program_clock_reference_baseH		= getBits (b, 0, 0,  1);
-     a.program_clock_reference_baseL		= getBits (b, 0, 1, 32);
-     a.reserved1				= getBits (b, 0,33,  6);
-     a.program_clock_reference_extension	= getBits (b, 0,39,  9);
-
-     b   += 6;
-     len -= 6;
-
-     out_nl (3,"program_clock_reference_base: 0x%01lx%08lx",
-     	a.program_clock_reference_baseH, a.program_clock_reference_baseL);
-     out_SB_NL (3,"reserved: ",a.reserved1);
-     out_nl (3,"program_clock_reference_extension: 0x%03lx",
-     	a.program_clock_reference_extension);
+  if (pcr_flag) {
+     int n = print_PCR_field (3, "program_clock_reference", b, 0); 
+     b   += n;
+     len -= n;
   }
 
 
-  if (a.OPCR_flag) {
-     a.original_program_clock_reference_baseH	= getBits (b, 0, 0,  1);
-     a.original_program_clock_reference_baseL	= getBits (b, 0, 1, 32);
-     a.reserved2				= getBits (b, 0,33,  6);
-     a.original_program_clock_reference_extension = getBits (b, 0,39,  9);
-
-     b   += 6;
-     len -= 6;
-
-     out_nl (3,"original_program_clock_reference_base: 0x%01lx%08lx",
-     	a.original_program_clock_reference_baseH,
-	a.original_program_clock_reference_baseL);
-     out_SB_NL (3,"reserved: ",a.reserved2);
-     out_nl (3,"original_program_clock_reference_extension: 0x%03lx",
-     	a.original_program_clock_reference_extension);
+  if (opcr_flag) {
+     int n = print_PCR_field (3, "original_program_clock_reference", b, 0); 
+     b   += n;
+     len -= n;
   }
 
 
-  if (a.splicing_point_flag) {
-     a.splice_countdown 			= b[0];
-
+  if (sp_flag) {
+     outBit_Sx_NL  (3,"splice_countdown: ", 	b, 0, 8);
      b   += 1;
      len -= 1;
-
-     out_SB_NL (3,"splice_countdown: ",a.splice_countdown);
   }
 
 
-  if (a.transport_private_data_flag) {
-     a.transport_private_data_length		= b[0];
+  if (tpd_flag) {
+     int len1;
+     int n;
 
-     out_SB_NL (3,"transport_private_data_length: ",
-			a.transport_private_data_length);
-     print_databytes (3,"Transport_private_data:",b+1,
-			a.transport_private_data_length);
+     len1 = outBit_Sx_NL  (3,"transport_private_data_length: ", b, 0, 8);
+     print_databytes (3,"Transport_private_data:",b+1,len1);
 
-     n = 1 + a.transport_private_data_length;
+     n    = 1 + len1;
      b   += n;
      len -= n;
   }
@@ -367,13 +262,13 @@ int ts_adaptation_field (u_char  *b)
 
    // Extension
 
-  if (a.adaptation_field_extension_flag) {
-      indent (+1);
+  if (afe_flag) {
+      int n;
 
-      n = ts_adaptation_field_extension (b);
+      indent (+1);
+      n    = ts_adaptation_field_extension (b);
       b   += n;
       len -= n;
-
       indent (-1);
   }
 
@@ -386,7 +281,7 @@ int ts_adaptation_field (u_char  *b)
    }
 
 
- return (a.adaptation_field_length + 1);
+ return (af_len + 1);
 }
 
 
@@ -397,110 +292,73 @@ int ts_adaptation_field (u_char  *b)
 int ts_adaptation_field_extension (u_char  *b)
 
 {
-
- typedef struct  _TS_AdaptationExtField {
-    u_int      adaptation_field_extension_length;
-    u_int      ltw_flag;
-    u_int      piecewise_rate_flag;
-    u_int      seamless_splice_flag;
-    u_int      reserved1;
-
-    // if ltwflag == 1
-    u_int      ltw_valid_flag;
-    u_int      ltw_offset;
-
-    // if piecewise_rate_flag
-    u_int      reserved2;
-    u_long     piecewise_rate;
-
-    // if seamless_splice_flag
-    u_int      splice_type;
-    u_int      DTS_next_AU32_30;
-    u_int      marker_bit1;
-    u_int      DTS_next_AU29_15;
-    u_int      marker_bit2;
-    u_int      DTS_next_AU14_0;
-    u_int      marker_bit3;
-
-    // N ... Reserved
-
- } TS_AdaptationExtField;
+  int    len;
+  int    afe_len;
+  int    ltw_flag;
+  int    pr_flag;
+  int    ss_flag;
 
 
- TS_AdaptationExtField  a;
- int                  len;
+
+  afe_len = outBit_Sx_NL  (3,"adaptation_field_extension_length: ", b, 0, 8);
+  b  += 1;
+  len = afe_len;
+  if (afe_len == 0) return 1;
 
 
- a.adaptation_field_extension_length  		= b[0];
 
- out_SB_NL (3,"Adaptation_field_extension_length: ",
-	a.adaptation_field_extension_length);
- b  += 1;
- if (a.adaptation_field_extension_length == 0)
-    return 1;
-
- len = a.adaptation_field_extension_length;
-
-
-  a.ltw_flag				= getBits (b, 0, 0,  1);
-  a.piecewise_rate_flag			= getBits (b, 0, 1,  1);
-  a.seamless_splice_flag		= getBits (b, 0, 2,  1);
-  a.reserved1				= getBits (b, 0, 3,  5);
-
+  ltw_flag =   outBit_Sx_NL  (3,"ltw_flag: ", 			b, 0, 1);
+  pr_flag =    outBit_Sx_NL  (3,"piecewise_rate_flag: ", 	b, 1, 1);
+  ss_flag =    outBit_Sx_NL  (3,"seamless_splice_flag: ", 	b, 2, 1);
+               outBit_Sx_NL  (3,"reserved: ",		 	b, 3, 5);
   b   += 1;
   len -= 1;
 
 
-  out_SB_NL (3,"ltw_flag: ",a.ltw_flag);
-  out_SB_NL (3,"piecewise_rate_flag: ",a.piecewise_rate_flag);
-  out_SB_NL (3,"seamless_splice_flag: ",a.seamless_splice_flag);
-  out_SB_NL (3,"reserved: ",a.reserved1);
 
-
-  if (a.ltw_flag) {
-     a.ltw_valid_flag			= getBits (b, 0, 0,  1);
-     a.ltw_offset			= getBits (b, 0, 1, 15);
+  if (ltw_flag) {
+     outBit_Sx_NL  (3,"ltw_valid_flag: ",	 	b, 0,  1);
+     outBit_Sx_NL  (3,"ltw_offset: ",		 	b, 1, 15);
 
      b   += 2;
      len -= 2;
-  
-     out_SB_NL (3,"ltw_valid_flag: ",a.ltw_valid_flag);
-     out_SW_NL (3,"ltw_offset: ",a.ltw_offset);
   }
 
-  if (a.piecewise_rate_flag) {
-     a.reserved2			= getBits (b, 0, 0,  2);
-     a.piecewise_rate			= getBits (b, 0, 2,  22);
+
+  if (pr_flag) {
+     outBit_Sx_NL  (3,"reserved: ",		 	b, 0,  2);
+     outBit_Sx_NL  (3,"piecewise_rate: ",	 	b, 2, 22);
 
      b   += 3;
      len -= 3;
-
-     out_SB_NL (3,"reserved: ",a.reserved2);
-     out_SL_NL (3,"piecewise_rate: ",a.piecewise_rate);
   }
 
-  if (a.seamless_splice_flag) {
-     a.splice_type			= getBits (b, 0, 0,  4);
-     a.DTS_next_AU32_30			= getBits (b, 0, 4,  3);
-     a.marker_bit1			= getBits (b, 0, 7,  1);
-     a.DTS_next_AU29_15			= getBits (b, 0, 8, 15);
-     a.marker_bit2			= getBits (b, 0,23,  1);
-     a.DTS_next_AU14_0			= getBits (b, 0,24, 15);
-     a.marker_bit3			= getBits (b, 0,39,  1);
+
+  if (ss_flag) {
+
+     outBit_Sx_NL  (3,"splice_type: ",		 	b, 0,  4);
+
+     {		// $$$ TODO: this is basically the same as for PES
+      long long   xTS_32_30;
+      long long   xTS_29_15;
+      long long   xTS_14_0;
+      long long   ull;
+
+      xTS_32_30 = outBit_Sx_NL (3,"DTS_next_AU[32..30]: ",	b,  4,  3);
+                  outBit_Sx_NL (3,"marker_bit: ",		b,  7,  1);
+      xTS_29_15 = outBit_Sx_NL (3,"DTS_next_AU[29..15]: ",	b,  8, 15);
+                  outBit_Sx_NL (3,"marker_bit: ",		b, 23,  1);
+      xTS_14_0  = outBit_Sx_NL (3,"DTS_next_AU[14..0]: ",	b, 24, 15);
+                  outBit_Sx_NL (3,"marker_bit: ",		b, 39,  1);
+
+      ull = (xTS_32_30<<30) + (xTS_29_15<<15) + xTS_14_0;
+      out (3," ==> DTS_next_AU: ");
+      print_timebase90kHz (3, ull);
+      out_NL (3);
+     }
 
      b   += 5;
      len -= 5;
-
-//$$$ TODO types display ??
-     out_SB_NL (3,"splice_type: ",a.splice_type);
-     out_SB_NL (3,"DTS_next_AU[32..30]: ",a.DTS_next_AU32_30);
-     out_SB_NL (3,"marker_bit: ",a.marker_bit1);
-     out_SB_NL (3,"DTS_next_AU[29..15]: ",a.DTS_next_AU29_15);
-     out_SB_NL (3,"marker_bit: ",a.marker_bit2);
-     out_SB_NL (3,"DTS_next_AU[14..0]: ",a.DTS_next_AU14_0);
-     out_SB_NL (3,"marker_bit: ",a.marker_bit3);
-     out_SL_NL (3," ==> DTS_next_AU: ",
-		     (long)(a.DTS_next_AU32_30<<30) + (a.DTS_next_AU29_15<<15) +a.DTS_next_AU14_0);
   }
 
 
@@ -510,7 +368,46 @@ int ts_adaptation_field_extension (u_char  *b)
   }
 
 
- return a.adaptation_field_extension_length + 1;
+ return afe_len + 1;
 }
+
+
+
+
+
+/*
+ *  PCR
+ *  Len is 6 bytes fixed
+ */
+
+int  print_PCR_field (int v, const char *str, u_char *b, int bit_offset) 
+{
+  long long   pcr_H, pcr_L, pcr_Ext;
+  long long   ull;
+  int         bo = bit_offset;
+  int         v1 = v+1;
+
+
+  out_nl (v,"%s:",str);
+  indent (+1);
+
+    pcr_H    = outBit_Sx_NL (v1,"baseH: ",	b, bo+ 0,  1);
+    pcr_L    = outBit_Sx_NL (v1,"baseL: ",	b, bo+ 1, 32);
+               outBit_Sx_NL (v1,"reserved: ",	b, bo+33,  6);
+    pcr_Ext  = outBit_Sx_NL (v1,"extension: ",	b, bo+39,  9);
+
+    ull = (pcr_H << 32) + pcr_L;
+
+    out (v," ==> %s: ", str);
+    // print_timebase90kHz (v, ull);
+    print_pcr_time (v, ull,pcr_Ext);
+    out_NL (v);
+
+  indent (-1);
+
+  return 6;
+}
+
+
 
 

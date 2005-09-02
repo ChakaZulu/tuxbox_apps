@@ -1,4 +1,5 @@
- 
+
+ --Changed: TS cleanup, PCR/DTS time printout
  - New:  frontend info: ATSC included  (extension to dvb api 3)
  - Changed: -s pidscan improved
 

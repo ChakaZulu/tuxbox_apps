@@ -6,7 +6,7 @@
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -40,6 +40,7 @@ void print_time_utc (int v, u_long utc);
 void print_time_mjd (int v, u_long mjd);
 void print_time40 (int verbose, u_long mjd, u_long utc);
 void print_timebase90kHz (int v, long long time90kHz);
+void print_pcr_time (int v, long long time90kHz, int ext_27MHz);
 
 void print_databytes (int verbose, const char *str, u_char *b, u_int len);
 void print_databytes_line  (int v, const char *str, u_char *b, u_int len);
