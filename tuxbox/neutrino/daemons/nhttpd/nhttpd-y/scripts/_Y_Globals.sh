@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Globals (yjogol)
-# $Date: 2005/08/31 18:23:49 $
-# $Revision: 1.1 $
+# $Date: 2005/09/02 19:09:08 $
+# $Revision: 1.2 $
 # -----------------------------------------------------------
 
 # -----------------------------------------------------------
@@ -12,7 +12,7 @@ y_path_httpd="/share/tuxbox/neutrino/httpd-y"
 y_path_scripts="$y_path_httpd/scripts"
 y_path_usrbin="/var/bin"
 y_path_config="/var/tuxbox/config"
-y_path_tmp="/var/tmp"
+y_path_tmp="/tmp"
 y_path_ucodes="/var/tuxbox/ucodes"
 y_path_zapit="/var/tuxbox/config/zapit"
 
