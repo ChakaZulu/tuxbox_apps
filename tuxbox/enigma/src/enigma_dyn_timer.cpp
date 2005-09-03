@@ -771,6 +771,8 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	}
 
 	ePlaylistEntry entry(string2ref(serviceRef), eventStartTime, eventDuration, -1, type);
+	if (!channel)
+		channel = eDVB::getInstance()->settings->getTransponders()->searchService(string2ref(serviceRef))->service_name;
 	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
