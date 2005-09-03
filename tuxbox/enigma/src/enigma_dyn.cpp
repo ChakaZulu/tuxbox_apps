@@ -950,8 +950,9 @@ class eWebNavigatorListDirectory2: public Object
 	eServiceInterface &iface;
 	bool addEPG;
 	bool forceAll;
+	bool addSatPos;
 public:
-	eWebNavigatorListDirectory2(std::list <myService> &myList, eString path, eServiceInterface &iface, bool addEPG, bool forceAll): myList(myList), path(path), iface(iface), addEPG(addEPG), forceAll(forceAll)
+	eWebNavigatorListDirectory2(std::list <myService> &myList, eString path, eServiceInterface &iface, bool addEPG, bool forceAll, bool addSatPos): myList(myList), path(path), iface(iface), addEPG(addEPG), forceAll(forceAll), addSatPos(addSatPos)
 	{
 //		eDebug("[eWebNavigatorListDirectory2:] path: %s", path.c_str());
 	}
@@ -1018,6 +1019,15 @@ public:
 			eString r = e.toString();
 			tmp = "[" + eString().sprintf("%05lld", getMovieSize(r.right(r.length() - r.find("/hdd/movie"))) / 1024 / 1024) + " MB] " + tmp;
 		}
+		
+		if (addSatPos)
+		{
+			if (!(e.flags & eServiceReference::isDirectory))
+			{
+				int orbitalPosition = e.data[4] >> 16;
+				tmp = eString().sprintf("(%d.%d%c) ", abs(orbitalPosition / 10), abs(orbitalPosition % 10), orbitalPosition > 0 ? 'E' : 'W') + tmp;
+			}
+		}
 
 		if (!(e.data[0] == -1 && e.data[2] != (int)0xFFFFFFFF) && tmp)
 			myList.push_back(myService(ref2string(e), tmp));
@@ -1030,6 +1040,7 @@ eString getZapContent(eString path, int depth, bool addEPG, bool sortList, bool 
 	std::list <myService>::iterator myIt;
 	eString result, result1, result2;
 	eString bouquets, bouquetrefs, channels, channelrefs;
+	bool addSatPos = false;
 
 	eServiceReference current_service = string2ref(path);
 	eServiceInterface *iface = eServiceInterface::getInstance();
@@ -1043,7 +1054,7 @@ eString getZapContent(eString path, int depth, bool addEPG, bool sortList, bool 
 	{
 		// first pass thru is to get all user bouquets
 		myList.clear();
-		eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG, forceAll);
+		eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG, forceAll, addSatPos);
 		Signal1<void, const eServiceReference&> signal;
 		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 		iface->enterDirectory(current_service, signal);
@@ -1068,10 +1079,17 @@ eString getZapContent(eString path, int depth, bool addEPG, bool sortList, bool 
 				path = myIt->serviceRef;
 				if (path)
 				{
+					if (zapMode == ZAPMODETV || zapMode == ZAPMODERADIO || zapMode == ZAPMODEDATA)
+					{
+						int showSatPos = 1;
+						eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos);
+						addSatPos = (showSatPos == 1 && eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite);
+					}
+					
 					eServiceReference current_service = string2ref(path);
 
 					myList2.clear();
-					eWebNavigatorListDirectory2 navlist(myList2, path, *iface, addEPG, forceAll);
+					eWebNavigatorListDirectory2 navlist(myList2, path, *iface, addEPG, forceAll, addSatPos);
 					Signal1<void, const eServiceReference&> signal;
 					signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 
