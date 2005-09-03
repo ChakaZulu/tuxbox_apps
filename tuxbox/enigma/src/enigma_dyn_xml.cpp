@@ -65,6 +65,12 @@ static eString getXMLBoxStatus(eString request, eString dirpath, eString opt, eH
 extern eString getCurrentSubChannel(eString);
 extern eString getEITC(eString);
 
+eString XMLify(eString s)
+{
+	s.strReplace("&", "&amp;");
+	return s;
+}
+
 static eString getXMLCurrentServiceData(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString now_start, now_date, now_time, now_duration, now_text, now_longtext,
@@ -89,7 +95,7 @@ static eString getXMLCurrentServiceData(eString request, eString dirpath, eStrin
 				else
 					curService = curSubService;
 			}
-			result.strReplace("#NAME#", curService);
+			result.strReplace("#NAME#", XMLify(curService));
 			result.strReplace("#REFERENCE#", ref2string(sapi->service));
 		}
 		else
@@ -164,7 +170,7 @@ static eString getXMLCurrentServiceData(eString request, eString dirpath, eStrin
 									+ eString(nspace) + ":0:0:0:";
 								tmp << "<service>";
 								tmp << "<reference>" << subServiceRef << "</reference>";
-								tmp << "<name>" << subService << "</name>";
+								tmp << "<name>" << XMLify(subService) << "</name>";
 								if (subServiceRef == curServiceRef)
 									tmp << "<selected>1</selected>";
 								else
@@ -246,13 +252,13 @@ struct getContent: public Object
 			result += "<reference>" + ref.toString() + "</reference>";
 
 			if (ref.descr)
-				result += "<name>" + filter_string(ref.descr) + "</name>";
+				result += "<name>" + XMLify(filter_string(ref.descr)) + "</name>";
 			else
 			if (service)
 			{
-				result += "<name>" + filter_string(service->service_name) + "</name>";
+				result += "<name>" + XMLify(filter_string(service->service_name)) + "</name>";
 				if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
-					result += "<provider>" + filter_string(((eServiceDVB*)service)->service_provider) + "</provider>";
+					result += "<provider>" + XMLify(filter_string(((eServiceDVB*)service)->service_provider)) + "</provider>";
 			}
 
 			if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
@@ -345,8 +351,8 @@ static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, e
 	eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if (service)
 	{
-		result.strReplace("#SERVICENAME#", filter_string(service->service_name));
-		result.strReplace("#PROVIDER#", filter_string(service->service_provider));
+		result.strReplace("#SERVICENAME#", XMLify(filter_string(service->service_name)));
+		result.strReplace("#PROVIDER#", XMLify(filter_string(service->service_provider)));
 	}
 	else
 	{
@@ -474,7 +480,7 @@ static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, e
 						s != it->getSatelliteList().end(); s++)
 						if (s->getOrbitalPosition() == tp->satellite.orbital_position) 
 						{
-							result.strReplace("#SATELLITE#", s->getDescription().c_str());
+							result.strReplace("#SATELLITE#", XMLify(s->getDescription()));
 							tpData = 1;
 							break;
 						}
