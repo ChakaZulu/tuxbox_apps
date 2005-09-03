@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Live (yjogol)
-# $Date: 2005/08/31 18:23:49 $
-# $Revision: 1.1 $
+# $Date: 2005/09/03 16:21:10 $
+# $Revision: 1.2 $
 # -----------------------------------------------------------
 
 . /share/tuxbox/neutrino/httpd-y/scripts/_Y_Globals.sh
@@ -14,7 +14,8 @@
 # -----------------------------------------------------------
 buildHTMLbouquets()
 {
-	buildHTML=`wget -O - -q $y_url_control/getbouquets|sed -e 's/^. /<option value=&>/g'|sed -e 's/ *$/<\/option>/g'|sed -e "s/value=$1/& selected/g"`
+#	buildHTML=`wget -O - -q $y_url_control/getbouquets|sed -e 's/^. /<option value=&>/g'|sed -e 's/ *$/<\/option>/g'|sed -e "s/value=$1/& selected/g"`
+	buildHTML=`wget -O - -q $y_url_control/getbouquets|sed -e 's/^\([^ ]*\) \(.*$\)/<option value=\1>\2<\/option>/g'`
 	echo "$buildHTML"
 }
 # -----------------------------------------------------------
@@ -39,16 +40,20 @@ live_unlock()
 	wget -O - -q "$y_url_control/rc?unlock"  >/dev/null
 	wget -O - -q "$y_url_control/zapto?startplayback" >/dev/null
 }
+# -----------------------------------------------------------
+prepare_tv()
+{
+		# switch to TV
+		wget -O - -q "$y_url_control/setmode?tv" >/dev/null
+		# SPTS on
+		wget -O - -q "$y_url_control/system?setAViAExtPlayBack=spts" >/dev/null
+}
 
 # -----------------------------------
 # Main
 # -----------------------------------
 case "$1" in
 	panel)
-		# switch to TV
-		wget -O - -q "$y_url_control/setmode?tv" >/dev/null
-		# SPTS on
-		wget -O - -q "$y_url_control/system?setAViAExtPlayBack=spts" >/dev/null
 		# actual Bouquet
 		actualBouquet=`wget -O - -q $y_url_control/getbouquet?actual`
 		if [ "$2" = "" ]
@@ -77,11 +82,13 @@ case "$1" in
 		cat $y_wait_live
 		;;
 	ie)
+		prepare_tv
 		url=`buildStreamingURL`
 		buildHTML=`sed -e s/Y_URL/$url/g $y_path_httpd/Y_Live_IE_tmpl.htm`
 		echo "$buildHTML"
 		;;
 	moz)
+		prepare_tv
 		url=`buildStreamingURL`
 		cmd="sed -e s/Y_URL/$url/g $y_path_httpd/Y_Live_Moz_tmpl.htm"
 		buildHTML=`$cmd`
