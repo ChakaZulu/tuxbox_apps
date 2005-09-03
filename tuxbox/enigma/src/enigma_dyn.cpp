@@ -1052,6 +1052,12 @@ eString getZapContent(eString path, int depth, bool addEPG, bool sortList, bool 
 	}
 	else
 	{
+		if (zapMode == ZAPMODETV || zapMode == ZAPMODERADIO || zapMode == ZAPMODEDATA)
+		{
+			int showSatPos = 1;
+			eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos);
+			addSatPos = (showSatPos == 1 && eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite);
+		}
 		// first pass thru is to get all user bouquets
 		myList.clear();
 		eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG, forceAll, addSatPos);
@@ -1079,13 +1085,6 @@ eString getZapContent(eString path, int depth, bool addEPG, bool sortList, bool 
 				path = myIt->serviceRef;
 				if (path)
 				{
-					if (zapMode == ZAPMODETV || zapMode == ZAPMODERADIO || zapMode == ZAPMODEDATA)
-					{
-						int showSatPos = 1;
-						eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos);
-						addSatPos = (showSatPos == 1 && eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite);
-					}
-					
 					eServiceReference current_service = string2ref(path);
 
 					myList2.clear();
