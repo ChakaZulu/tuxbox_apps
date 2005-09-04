@@ -249,11 +249,6 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				sort_mode++;
 				sort(evtlist.begin(),evtlist.end(),sortByDescription);
 			}
-			else if(sort_mode==1)
-			{
-				sort_mode++;
-				sort(evtlist.begin(),evtlist.end(),sortById);
-			}
 			else
 			{
 				sort_mode=0;

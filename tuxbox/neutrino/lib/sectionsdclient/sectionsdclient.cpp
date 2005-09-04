@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.40 2005/08/28 21:44:21 mogway Exp $
+  $Id: sectionsdclient.cpp,v 1.41 2005/09/04 20:39:51 mogway Exp $
 
   License: GPL
 
@@ -210,6 +210,7 @@ bool CSectionsdClient::getComponentTagsUniqueKey(const event_id_t uniqueKey, CSe
 
 			tags.insert( tags.end(), response);
 		}
+		delete[] pData;
 		close_connection();
 
 		return true;
@@ -250,6 +251,7 @@ bool CSectionsdClient::getLinkageDescriptorsUniqueKey(const event_id_t uniqueKey
 
 			descriptors.insert( descriptors.end(), response);
 		}
+		delete[] pData;
 		close_connection();
 		return true;
 	}
@@ -283,6 +285,7 @@ bool CSectionsdClient::getNVODTimesServiceKey(const t_channel_id channel_id, CSe
 
 			nvod_list.insert( nvod_list.end(), response);
 		}
+		delete[] pData;
 		close_connection();
 		return true;
 	}
@@ -325,6 +328,7 @@ bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, C
 
 		current_next.current_fsk = *(char*) dp;
 
+		delete[] pData;
 		close_connection();
 		return true;
 	}

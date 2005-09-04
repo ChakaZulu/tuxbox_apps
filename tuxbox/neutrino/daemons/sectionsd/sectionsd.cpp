@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.191 2005/08/28 21:44:21 mogway Exp $
+//  $Id: sectionsd.cpp,v 1.192 2005/09/04 20:39:48 mogway Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -134,7 +134,7 @@ static DMX dmxEIT(0x12, 256);
 static DMX dmxSDT(0x11, 256);
 
 // Houdini: added for Premiere Private EPG section for Sport/Direkt Portal
-static DMX dmxPPT(0xb11, 256);
+static DMX dmxPPT(0x00, 256);
 unsigned int privatePid=0;
 
 inline void lockServices(void)
@@ -869,6 +869,8 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 	}
 
 	unlockServices();
+	if (strlen(serviceList) + 1 > 65*1024) 
+		printf("warning: commandDumpAllServices: length=%d\n", strlen(serviceList) + 1);
 
 	struct sectionsd::msgResponseHeader msgResponse;
 	msgResponse.dataLength = strlen(serviceList) + 1;
@@ -1016,6 +1018,8 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 	struct sectionsd::msgResponseHeader responseHeader;
 
+	if (liste - evtList > 65*1024) 
+		printf("warning: [sectionsd] all events - response-size: 0x%x\n", liste - evtList);
 	responseHeader.dataLength = liste - evtList;
 
 	dprintf("[sectionsd] all events - response-size: 0x%x\n", responseHeader.dataLength);
@@ -1094,7 +1098,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.191 2005/08/28 21:44:21 mogway Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.192 2005/09/04 20:39:48 mogway Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2162,6 +2166,8 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	EITThreadsUnPause();
 
 	struct sectionsd::msgResponseHeader msgResponse;
+	if (liste - evtList > 128*1024) 
+		printf("warning: [sectionsd] sendEventList- response-size: 0x%x\n", liste - evtList);
 	msgResponse.dataLength = liste - evtList;
 	dprintf("[sectionsd] all channels - response-size: 0x%x\n", msgResponse.dataLength);
 
@@ -2456,13 +2462,15 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 	if (rc == true)
 	{
 		if (responseHeader.dataLength)
-		{
 			writeNbytes(connfd, msgData, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
-			delete[] msgData;
-		}
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
+
+	if (responseHeader.dataLength)
+	{
+		delete[] msgData;
+	}
 
 	unlockEvents();
 
@@ -2520,15 +2528,15 @@ static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLeng
 	if (dataLength != 2)
 		return ;
 
-	/*d*/printf("Set PrivatePid: %x\n", *((unsigned short*)data));
-
 	lockMessaging();
 	pid = *((unsigned short*)data);
-	if (privatePid != pid )
+//	if (privatePid != pid)
 	{
 		privatePid = pid;
-		/*d*/printf("[sectionsd] wakeup PPT Thread...\n");
-		dmxPPT.change( 0 );
+		if (pid != 0) {
+			/*d*/printf("[sectionsd] wakeup PPT Thread, pid=%x\n", pid);
+			dmxPPT.change( 0 );
+		}
 	}
 	unlockMessaging();
 	
@@ -3596,14 +3604,16 @@ static void *pptThread(void *)
 				}
 			}
 
+			if (0 == privatePid)
+			{
+				sendToSleepNow = true; // if there is no valid pid -> sleep
+				dprintf("dmxPPT: no valid pid 0\n");
+				sleep(1);
+				continue;
+			}
+         
 			if (pptpid != privatePid)
 			{
-				if (0 == privatePid)
-				{
-					sendToSleepNow = true; // if there is no valid pid -> sleep
-					dprintf("dmxPPT: no valid pid 0\n");
-					continue;
-				}
 				pptpid = privatePid;
 				dprintf("Setting PrivatePid %x\n", pptpid);
 				dmxPPT.setPid(pptpid);
@@ -3630,6 +3640,14 @@ static void *pptThread(void *)
 			if ((header.current_next_indicator) && (!dmxPPT.pauseCounter ))
 			{
 				// Wir wollen nur aktuelle sections
+				if (start_section == 0) start_section = header.section_number;
+				else if (start_section == header.section_number) 
+				{
+					sendToSleepNow = true; // no more scanning
+					dprintf("[pptThread] got all sections\n");
+					delete[] buf;
+					continue;
+				}
 				SIsectionPPT ppt(SIsection(section_length + 3, buf));
 
 				if (ppt.header())
@@ -3637,13 +3655,6 @@ static void *pptThread(void *)
 					// == 0 -> kein event
 //					dprintf("[pptThread] adding %d events [table 0x%x] (begin)\n", ppt.events().size(), header.table_id);
 //					dprintf("got %d: ", header.section_number);
-					if (start_section == 0) start_section = header.section_number;
-					else if (start_section == header.section_number) 
-					{
-						sendToSleepNow = true; // no more scanning
-						dprintf("[pptThread] got all sections\n");
-					}
-
 					zeit = time(NULL);
 					// Nicht alle Events speichern
 					for (SIevents::iterator e = ppt.events().begin(); e != ppt.events().end(); e++)
@@ -3833,7 +3844,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.191 2005/08/28 21:44:21 mogway Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.192 2005/09/04 20:39:48 mogway Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
