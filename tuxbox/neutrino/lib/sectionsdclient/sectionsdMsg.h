@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.9 2005/08/28 21:44:21 mogway Exp $
+//  $Id: sectionsdMsg.h,v 1.10 2005/09/04 21:59:13 mogway Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -36,18 +36,19 @@
 
 struct sectionsd
 {
-	static const CBasicMessage::t_version ACTVERSION = 4;
+	static const CBasicMessage::t_version ACTVERSION = 5;
 
 	struct msgRequestHeader
 	{
 		unsigned char version;
 		unsigned char command;
-		unsigned short dataLength;
+		unsigned short stuff_bytes;
+		unsigned int dataLength;
 	} __attribute__ ((packed)) ;
 
 	struct msgResponseHeader
 	{
-		unsigned short dataLength;
+		unsigned int dataLength;
 	} __attribute__ ((packed)) ;
 
 	enum commands
