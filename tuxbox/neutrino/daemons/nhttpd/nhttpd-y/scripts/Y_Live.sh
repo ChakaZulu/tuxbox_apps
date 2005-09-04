@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Live (yjogol)
-# $Date: 2005/09/03 16:21:10 $
-# $Revision: 1.2 $
+# $Date: 2005/09/04 12:41:29 $
+# $Revision: 1.3 $
 # -----------------------------------------------------------
 
 . /share/tuxbox/neutrino/httpd-y/scripts/_Y_Globals.sh
@@ -14,8 +14,7 @@
 # -----------------------------------------------------------
 buildHTMLbouquets()
 {
-#	buildHTML=`wget -O - -q $y_url_control/getbouquets|sed -e 's/^. /<option value=&>/g'|sed -e 's/ *$/<\/option>/g'|sed -e "s/value=$1/& selected/g"`
-	buildHTML=`wget -O - -q $y_url_control/getbouquets|sed -e 's/^\([^ ]*\) \(.*$\)/<option value=\1>\2<\/option>/g'`
+	buildHTML=`wget -O - -q $y_url_control/getbouquets|sed -e 's/^\([^ ]*\) \(.*$\)/<option value=\1>\2<\/option>/g'|sed -e "s/value=$1/& selected/g"`
 	echo "$buildHTML"
 }
 # -----------------------------------------------------------
@@ -62,7 +61,7 @@ case "$1" in
 		else
 			bouquet="$2"
 		fi
-
+		
 		bouquets=`buildHTMLbouquets $bouquet`
 		echo "$bouquets" >$y_tmp
 		buildHTML=`sed "/Y_Bouquets/r $y_tmp" $y_path_httpd/Y_Live_panel_tmpl.htm`
