@@ -240,22 +240,25 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		int ret = wnd.exec();
 		open = 0;
 
-		unsigned char *buf = new unsigned char[ret == -1 ? 2 : 2 + nrcount];
+		if ( ret > -2 )
+		{
+			unsigned char *buf = new unsigned char[ret == -1 ? 2 : 2 + nrcount];
 
-		buf[1] = ret == -1 ? 0 : 1; // answer ok.. or user canceled
+			buf[1] = ret == -1 ? 0 : 1; // answer ok.. or user canceled
 
-		buf[0] = buf[1] ? nrcount+1 : 1;  // length
+			buf[0] = buf[1] ? nrcount+1 : 1;  // length
 
-		// when user have cancelled only one byte is answered to the ci
+			// when user have cancelled only one byte is answered to the ci
 
-		eString atext = wnd.getAnswer();  // get Answer from number
+			eString atext = wnd.getAnswer();  // get Answer from number
 
-		for (int i=0; i < buf[0]-1; ++i )  // copy user input to answer
-			buf[2+i] = atext[i];
+			for (int i=0; i < buf[0]-1; ++i )  // copy user input to answer
+				buf[2+i] = atext[i];
 
-		sendAnswer( ENQAnswer, 815, buf );
+			sendAnswer( ENQAnswer, 815, buf );
 
-		showWaitForAnswer(ret);
+			showWaitForAnswer(ret);
+		}
 	}
 	else if( memcmp(data+rp,TAG_MMI_MENU_LAST,TAG_LENGTH)==0 ||
 		 memcmp(data+rp,TAG_MMI_LIST_LAST,TAG_LENGTH)==0)

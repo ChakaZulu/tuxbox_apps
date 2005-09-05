@@ -32,26 +32,34 @@ eSocketMMIHandler::eSocketMMIHandler()
 		eDebug("[eSocketMMIHandler] socket (%m)");
 		return;
 	}
-	if (bind(listenfd, (struct sockaddr *) &servaddr, clilen) < 0)
-	{
+
+	int val = 1;
+	if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == -1)
+		eDebug("[eSocketMMIHandler] SO_REUSEADDR (%m)");
+	else if ((val = fcntl(listenfd, F_GETFL)) == -1)
+		eDebug("[eSocketMMIHandler] F_GETFL (%m)");
+	else if (fcntl(listenfd, F_SETFL, val | O_NONBLOCK) == -1)
+		eDebug("[eSocketMMIHandler] F_SETFL (%m)");
+	else if (bind(listenfd, (struct sockaddr *) &servaddr, clilen) == -1)
 		eDebug("[eSocketMMIHandler] bind (%m)");
-		return;
-	}
-	if (listen(listenfd, 5) < 0)
-	{
+	else if (listen(listenfd, 0) == -1)
 		eDebug("[eSocketMMIHandler] listen (%m)");
+	else {
+		listensn = new eSocketNotifier( eApp, listenfd, POLLIN );
+		listensn->start();
+		CONNECT( listensn->activated, eSocketMMIHandler::listenDataAvail );
+		CONNECT( eZapSetup::setupHook, eSocketMMIHandler::setupOpened );
+		eDebug("[eSocketMMIHandler] created successfully");
 		return;
 	}
-	listensn = new eSocketNotifier( eApp, listenfd, POLLIN ); // POLLIN
-	listensn->start();
-	CONNECT( listensn->activated, eSocketMMIHandler::listenDataAvail );
-	eDebug("[eSocketMMIHandler] created successfully");
-	CONNECT( eZapSetup::setupHook, eSocketMMIHandler::setupOpened );
+
+	close(listenfd);
+	listenfd = -1;
 }
 
 void eSocketMMIHandler::setupOpened( eSetupWindow* setup, int *entrynum )
 {
-	if ( !connsn )  // no mmi connection...
+	if (( !connsn ) || ( !name )) // no mmi connection...
 		return;
 	eListBox<eListBoxEntryMenu> *list = setup->getList();
 	CONNECT((
@@ -65,60 +73,52 @@ void eSocketMMIHandler::setupOpened( eSetupWindow* setup, int *entrynum )
 
 void eSocketMMIHandler::listenDataAvail(int what)
 {
-	switch(what)
-	{
-		case POLLIN:
-		{
-			if ( connsn )
-				return;
-			char msgbuffer[256];
-			connfd=accept(listenfd, (struct sockaddr *) &servaddr, (socklen_t *) &clilen);
-			ssize_t length = read(connfd, msgbuffer, sizeof(msgbuffer));
-//			eDebug("got %d bytes", length);
-			if ( !length || ( length == -1 && errno != EAGAIN ) )
-			{
-				eDebug("Connection error.. close connection");
-				closeConn();
-			}
-			else if ( (length < 4) || strncmp(msgbuffer, CMD_SET_NAME, 4) )
-			{
-				eDebug("CMD_SET_NAME not found.. close connection");
-				closeConn();
-				break;
-			}
-			length-=4;
-			if ( !length )
-			{
-				eDebug("CMD_SET_NAME failed.. no more characters for name left");
-				closeConn();
-				break;
-			}
-			name = new char[length+1];
-			memcpy(name, msgbuffer+4, length);
-			name[length]=0;
-			fcntl(connfd, F_SETFL, O_NONBLOCK);
-			int val=1;
-			setsockopt(connfd, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+	if (what & POLLIN) {
+		if ( connsn ) {
+			eDebug("[eSocketMMIHandler] connsn != NULL");
+			return;
+		}
+		connfd = accept(listenfd, (struct sockaddr *) &servaddr, (socklen_t *) &clilen);
+		if (connfd == -1) {
+			eDebug("[eSocketMMIHandler] accept (%m)");
+			return;
+		}
+
+		int val;
+		if ((val = fcntl(connfd, F_GETFL)) == -1)
+			eDebug("[eSocketMMIHandler] F_GETFL (%m)");
+		else if (fcntl(connfd, F_SETFL, val | O_NONBLOCK) == -1)
+			eDebug("[eSocketMMIHandler] F_SETFL (%m)");
+		else {
 			connsn = new eSocketNotifier( eApp, connfd, POLLIN|POLLHUP|POLLERR );
 			CONNECT( connsn->activated, eSocketMMIHandler::connDataAvail );
+			return;
 		}
+
+		close(connfd);
+		connfd = -1;
 	}
 }
 
 void eSocketMMIHandler::connDataAvail(int what)
 {
-	switch(what)
-	{
-		case POLLIN:
-		case POLLPRI:
-		{
-			char msgbuffer[4096];
-			ssize_t length = read(connfd, msgbuffer, sizeof(msgbuffer));
-			if ( !length || ( length == -1 && errno != EAGAIN ) )
-			{
-				closeConn();
-				break;
+	if (what & (POLLIN | POLLPRI | POLLRDNORM | POLLRDBAND)) {
+		char msgbuffer[4096];
+		ssize_t length = read(connfd, msgbuffer, sizeof(msgbuffer));
+
+		if (length == -1) {
+			if (errno != EAGAIN) {
+				eDebug("[eSocketMMIHandler] read (%m)");
+				what |= POLLERR;
 			}
+		} else if (length == 0){
+			what |= POLLHUP;
+		} else if ((!name) && (length > 4) && (!memcmp(msgbuffer, CMD_SET_NAME, 4))) {
+			length -= 4;
+			name = new char[length + 1];
+			memcpy(name, &msgbuffer[4], length);
+			name[length] = '\0';
+		} else {
 			if ( eSocketMMI::getInstance(this)->connected() )
 				eSocketMMI::getInstance(this)->gotMMIData(msgbuffer, length);
 			else
@@ -132,14 +132,12 @@ void eSocketMMIHandler::connDataAvail(int what)
 					eSocketMMI::getInstance(this)->gotMMIData(msgbuffer, length);
 				}
 			}
-			break;
 		}
-		default:
-		case POLLERR:
-		case POLLHUP:
-			closeConn();
-			eSocketMMI::getInstance(this)->gotMMIData("\x9f\x88\x00\x00",4);
-			break;
+	}
+	
+	if (what & (POLLERR | POLLHUP)) {
+		closeConn();
+		eSocketMMI::getInstance(this)->gotMMIData("\x9f\x88\x00\x00",4);
 	}
 }
 
@@ -216,7 +214,7 @@ void eSocketMMI::sendAnswer( AnswerType ans, int param, unsigned char *data )
 		case ENQAnswer:
 		{
 			unsigned char buffer[ data[0]+4 ];
-			memcpy(buffer,"x9f\x88\x08", 3);
+			memcpy(buffer,"\x9f\x88\x08", 3);
 			memcpy(buffer+3, data, data[0]+1 );
 			for (int i=0; i < data[0]+4; i++ )
 				eDebugNoNewLine("%02x ", buffer[i]);
