@@ -13,7 +13,7 @@
 
 tuxtxt_cache_struct tuxtxt_cache;
 static pthread_mutex_t tuxtxt_cache_lock = PTHREAD_MUTEX_INITIALIZER;
-
+#if DEBUG
 int tuxtxt_get_zipsize(int p,int sp)
 {
     tstCachedPage* pg = tuxtxt_cache.astCachetable[p][sp];
@@ -34,7 +34,7 @@ int tuxtxt_get_zipsize(int p,int sp)
 	return 23*40;
 #endif
 }
-
+#endif
 void tuxtxt_compress_page(int p, int sp, unsigned char* buffer)
 {
 	pthread_mutex_lock(&tuxtxt_cache_lock);
@@ -554,6 +554,7 @@ void *tuxtxt_CacheThread(void *arg)
 
 	printf("TuxTxt running thread...(%03x)\n",tuxtxt_cache.vtxtpid);
 	tuxtxt_cache.receiving = 1;
+	nice(3);
 	while (1)
 	{
 		/* check stopsignal */
