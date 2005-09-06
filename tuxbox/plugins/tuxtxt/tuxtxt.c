@@ -1480,7 +1480,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.91 $";
+	char cvs_revision[] = "$Revision: 1.92 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -2699,6 +2699,9 @@ void Menu_Init(char *menu, int current_pid, int menuitem, int hotindex)
 			national_subset = national_subset_bak;
 		else
 			national_subset = menusubset[menulanguage];
+
+		if (line == Menu_Height-2)
+			memcpy(&menu[line*Menu_Width + 21], versioninfo, 4);
 
 		for (byte = 0; byte < Menu_Width; byte++)
 			RenderCharFB(menu[line*Menu_Width + byte], &atrtable[menuatr[line*Menu_Width + byte] - '0' + ATR_MENU0]);
@@ -5115,39 +5118,43 @@ void RenderPage()
 			{
 				page_atrb[32].fg = yellow;
 				page_atrb[32].bg = menu1;
-
-				tstCachedPage *pCachedPage;
-
-				pCachedPage = tuxtxt_cache.astCachetable[tuxtxt_cache.page_receiving][tuxtxt_cache.subpagetable[tuxtxt_cache.page_receiving]];
-				if (pCachedPage && tuxtxt_is_dec(tuxtxt_cache.page_receiving))
+				int showpage = tuxtxt_cache.page_receiving;
+				int showsubpage = tuxtxt_cache.subpagetable[showpage];
+				if (showsubpage!=0xff)
 				{
-					PosX = StartX;
-					if (inputcounter == 2)
+
+					tstCachedPage *pCachedPage;
+					pCachedPage = tuxtxt_cache.astCachetable[showpage][showsubpage];
+					if (pCachedPage && tuxtxt_is_dec(showpage))
 					{
-						if (tuxtxt_cache.bttok && !tuxtxt_cache.basictop[tuxtxt_cache.page]) /* page non-existent according to TOP (continue search anyway) */
+						PosX = StartX;
+						if (inputcounter == 2)
 						{
-							page_atrb[0].fg = white;
-							page_atrb[0].bg = red;
+							if (tuxtxt_cache.bttok && !tuxtxt_cache.basictop[tuxtxt_cache.page]) /* page non-existent according to TOP (continue search anyway) */
+							{
+								page_atrb[0].fg = white;
+								page_atrb[0].bg = red;
+							}
+							else
+							{
+								page_atrb[0].fg = yellow;
+								page_atrb[0].bg = menu1;
+							}
+							hex2str(page_char+3, tuxtxt_cache.page);
+							for (col = nofirst; col < 7; col++) // selected page
+							{
+								RenderCharFB(page_char[col], &page_atrb[0]);
+							}
+							RenderCharFB(page_char[col], &page_atrb[32]);
 						}
 						else
+							SetPosX(8);
+	
+						memcpy(&page_char[8], pCachedPage->p0, 24); /* header line without timestring */
+						for (col = 0; col < 24; col++)
 						{
-							page_atrb[0].fg = yellow;
-							page_atrb[0].bg = menu1;
+							RenderCharFB(pCachedPage->p0[col], &page_atrb[32]);
 						}
-						hex2str(page_char+3, tuxtxt_cache.page);
-						for (col = nofirst; col < 7; col++) // selected page
-						{
-							RenderCharFB(page_char[col], &page_atrb[0]);
-						}
-						RenderCharFB(page_char[col], &page_atrb[32]);
-					}
-					else
-						SetPosX(8);
-
-					memcpy(&page_char[8], pCachedPage->p0, 24); /* header line without timestring */
-					for (col = 0; col < 24; col++)
-					{
-						RenderCharFB(pCachedPage->p0[col], &page_atrb[32]);
 					}
 				}
 			}
@@ -5942,7 +5949,7 @@ void DecodePage()
 					if (!boxwin)
 					{
 						boxwin = 1;
-						background = 0x08;
+						//background = 0x08;
 					}
 /*					if (boxed)
 					{
@@ -6033,7 +6040,6 @@ void DecodePage()
 					break;
 
 				case esc:
-				printf("--------------- switching language %d/%d --------------\n",row,col);
 					if (charset == C_G0P)
 						charset = C_G0S;
 					else if (charset == C_G0S)

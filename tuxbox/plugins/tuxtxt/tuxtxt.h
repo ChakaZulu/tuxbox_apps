@@ -78,7 +78,7 @@ extern void tuxtxt_decode_btt();
 extern void tuxtxt_decode_adip(); /* additional information table */
 extern void tuxtxt_compress_page(int p, int sp, unsigned char* buffer);
 extern void tuxtxt_decompress_page(int p, int sp, unsigned char* buffer);
-#if 1//DEBUG
+#if DEBUG
 extern int tuxtxt_get_zipsize(int p, int sp);
 #endif
 #endif
@@ -563,7 +563,7 @@ const char menuatr[Menu_Height*Menu_Width] =
 	"3555555555555555555555555555532"
 	"3555555555555555555555555555532"
 	"3555555555555555555555555555532"
-	"3333333333333333333333333333332"
+	"3334444444444444444444444443332"
 	"2222222222222222222222222222222"
 };
 const char configmenu[][Menu_Height*Menu_Width] =
@@ -572,7 +572,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 /*     0000000000111111111122222222223 */
 /*     0123456789012345678901234567890 */
 		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
-		"ד     Konfigurationsmenue    הי"
+		"ד     Konfigurationsmen}     הי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
 		"ד1 Favoriten: Seite 111 dazu הי"
 		"דםמסע                        הי"
@@ -593,7 +593,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דautomatische Erkennung      הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/Language deutsch מהי"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -621,7 +621,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד automatic recognition      הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/language english מהי"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -649,7 +649,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דreconn. automatique         הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/language francaisמהי"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -677,7 +677,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דautomatische herkenning     הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/Language nederl. מהי"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -705,7 +705,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דautolatg amacmyqisg         הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Ckyssa/Language ekkgmija מהי"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -733,7 +733,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד riconoscimento automatico  הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Lingua/Language Italiana מהי"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -761,7 +761,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד automatyczne rozpozn.      הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם  J`zyk/Language   polski מהי"
-		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"וז - www.tuxtxt.com  x.xx - זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 };
