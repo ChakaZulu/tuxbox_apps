@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.32 2005/08/02 22:57:46 rasc Exp $
+$Id: dmx_ts.c,v 1.33 2005/09/06 23:13:51 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.32 2005/08/02 22:57:46 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.33  2005/09/06 23:13:51  rasc
+catch OS signals (kill ...) for smooth program termination
+
 Revision 1.32  2005/08/02 22:57:46  rasc
 Option -N, rewrite offline filters (TS & Section)
 
@@ -138,6 +141,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/output.h"
 #include "misc/hexprint.h"
 #include "misc/print_header.h"
+#include "misc/sig_abort.h"
 
 #include "ts/tslayer.h"
 #include "ts/ts2secpes.h"
@@ -262,7 +266,7 @@ int  doReadTS (OPTION *opt)
 
   count = 0;
   filtered_count = 0;
-  while (1) {
+  while ( ! isSigAbort() ) {
     long   n;
     long   skipped_bytes    = 0;
     int    pid_filter_match = 1;

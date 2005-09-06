@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.30 2005/08/02 22:57:46 rasc Exp $
+$Id: dmx_sect.c,v 1.31 2005/09/06 23:13:51 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.30 2005/08/02 22:57:46 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.31  2005/09/06 23:13:51  rasc
+catch OS signals (kill ...) for smooth program termination
+
 Revision 1.30  2005/08/02 22:57:46  rasc
 Option -N, rewrite offline filters (TS & Section)
 
@@ -129,8 +132,9 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/cmdline.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
-#include "misc/print_header.h"
 #include "misc/pid_mem.h"
+#include "misc/print_header.h"
+#include "misc/sig_abort.h"
 
 #include "sections/sectables.h"
 #include "dvb_api.h"
@@ -172,7 +176,7 @@ int  doReadSECT (OPTION *opt)
    if (opt->spider_pid) {
    	u_int  pid;
 
-	while (1) {
+	while ( !isSigAbort() ) {
 		pid = get_UnusedPidFromMem ();
 		if (pid == INVALID_PID) break;
 
@@ -289,7 +293,7 @@ static int  doReadSECT_2 (OPTION *opt)
 
   count = 0;
   filtered_count = 0;
-  while (1) {
+  while ( !isSigAbort() ) {
     long   n;
     int    filter_match = 1;
 

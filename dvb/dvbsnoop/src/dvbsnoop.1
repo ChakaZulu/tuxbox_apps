@@ -23,7 +23,7 @@ DVBSNOOP also has some additional functionallity to analyze receiver (set top bo
 .br
 Dvbsnoop provides an online and offline input and different snoop/decoding modes (see below).
 
-Using dvbsnoop 'online' requires dvb\-api compliant devices (http://www.linuxtv.org) to grab live stream information from e.g. satellite or cable tv or data streams. You will also need DVB compliant hardware (e.g. DVB\-S pci card or a linux based setop box like dbox2 or Dreambox) to receive DVB data streams. To tune into a transponder or frequency, please use a program like 'szap', 'dvbtune' or a DVB-GUI like 'Enigma' or 'Neutrino'.
+Using dvbsnoop 'online' requires dvb\-api compliant devices (http://www.linuxtv.org) to grab live stream information from e.g. satellite or cable tv or data streams. You will also need DVB compliant hardware (e.g. DVB\-S pci card or a linux based setop box like dbox2 or Dreambox) to receive DVB data streams. To tune into a transponder or frequency, please use a program like 'szap', 'dvbtune' or a DVB-GUI like 'Enigma', 'Neutrino', 'MythTV', 'VDR', etc..
 
 The 'offline' mode enables you to analyze binary stream files (e.g. transport stream files or PES files).
 
@@ -446,6 +446,13 @@ options is strongly recommended.
 .br
 Depending on the firmware of your dvb card, dvbsnoop may not be able to sniff on pids,
 which are occupied by other processes. This is no bug, this is a driver/firmware issue.
+
+
+.SH "SIGNALS"
+dvbsnoop  catches signals to provide smooth program termination.
+   SIGHUP, SIGQUIT and SIGTERM  will terminate dvbsnoop smoothly.
+   SIGABORT will abort at once after flushing buffers.
+   SIGKILL  will just kill down dvbsnoop (OS specific).
 
 
 .SH "BUGS"

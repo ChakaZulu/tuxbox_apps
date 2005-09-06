@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.31 2005/08/13 00:06:56 rasc Exp $
+$Id: dvbsnoop.c,v 1.32 2005/09/06 23:13:50 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.31 2005/08/13 00:06:56 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.32  2005/09/06 23:13:50  rasc
+catch OS signals (kill ...) for smooth program termination
+
 Revision 1.31  2005/08/13 00:06:56  rasc
 no message
 
@@ -128,6 +131,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/hexprint.h"
 #include "misc/pkt_time.h"
 #include "misc/pid_mem.h"
+#include "misc/sig_abort.h"
 
 #include "dvb_api/dmx_sect.h"
 #include "dvb_api/dmx_pes.h"
@@ -198,6 +202,7 @@ int main(int argc, char **argv)
 
 
 
+  initOSSigHandler ();
   init_receive_time ();
 
 
@@ -237,6 +242,13 @@ int main(int argc, char **argv)
 
 	  }
 
+
+
+
+ if ( isSigAbort() ) {
+	 out_nl (1,"... aborted (Signal: %d)",isSigAbort());
+ }
+ restoreOSSigHandler();
  return err;
 
 }

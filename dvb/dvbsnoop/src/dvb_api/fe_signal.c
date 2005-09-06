@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.13 2005/08/13 00:06:56 rasc Exp $
+$Id: fe_signal.c,v 1.14 2005/09/06 23:13:51 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.13 2005/08/13 00:06:56 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.14  2005/09/06 23:13:51  rasc
+catch OS signals (kill ...) for smooth program termination
+
 Revision 1.13  2005/08/13 00:06:56  rasc
 no message
 
@@ -77,6 +80,7 @@ simple frontend signal status query added "-s signal"
 #include "misc/cmdline.h"
 #include "misc/output.h"
 #include "misc/pkt_time.h"
+#include "misc/sig_abort.h"
 
 #include "dmx_error.h"
 #include "dvb_api.h"
@@ -145,7 +149,7 @@ int  do_SignalStrength (OPTION *opt)
 
 
   count = 0;
-  while (1) {
+  while ( !isSigAbort() ) {
 	int  err;
 	int  d_tim_ms;
 

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.20 2005/08/22 22:37:59 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.21 2005/09/06 23:13:51 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.20 2005/08/22 22:37:59 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.21  2005/09/06 23:13:51  rasc
+catch OS signals (kill ...) for smooth program termination
+
 Revision 1.20  2005/08/22 22:37:59  rasc
 ATSC frontend info
 
@@ -103,6 +106,7 @@ pidscan on transponder
 #include "misc/cmdline.h"
 #include "misc/helper.h"
 #include "misc/output.h"
+#include "misc/sig_abort.h"
 
 #include "dvb_api.h"
 #include "dmx_error.h"
@@ -215,7 +219,7 @@ int ts_pidscan (OPTION *opt)
 
 
    pid = 0;
-   while (pid <= MAX_PID) {
+   while ( (pid <= MAX_PID) && !isSigAbort() )  {
 
 	pid_low = pid;
 	timeout_corr = 0;

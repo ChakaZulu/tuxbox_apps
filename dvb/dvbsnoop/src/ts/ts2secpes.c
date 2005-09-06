@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.6 2004/04/18 19:30:32 rasc Exp $
+$Id: ts2secpes.c,v 1.7 2005/09/06 23:13:52 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ts2secpes.c,v 1.6 2004/04/18 19:30:32 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.7  2005/09/06 23:13:52  rasc
+catch OS signals (kill ...) for smooth program termination
+
 Revision 1.6  2004/04/18 19:30:32  rasc
 Transport Stream payload sub-decoding (Section, PES data) improved
 
@@ -128,10 +131,11 @@ int ts2SecPes_AddPacketStart (int pid, int cc, u_char *b, u_int len)
     tsd.continuity_counter = cc;
     tsd.packet_counter = 1;
 
-    // -- Save PES or SECTION length information of incoming packet
+    // -- Save PES/PS or SECTION length information of incoming packet
     // -- set 0 for unspecified length
     l = 0;
     if (len > 6) {
+	// Non-System PES (<= 0xBC) will have an unknown length (= 0)
 	if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
 		l = (b[4]<<8) + b[5];		// PES packet size...
 		if (l) l += 6;			// length with PES-sync, etc.
@@ -336,10 +340,13 @@ void ts2SecPes_Output_subdecode (void)
 
 	if (b && len) {
 
-	    // -- PES or SECTION
-	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
+	    // $$$ TODO buffer may contain multiple PS/PES packets!! 
 
-		out_nl (3,"TS contains PES stream...");
+	    // -- PES/PS or SECTION
+	    // if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
+	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01) {
+
+		out_nl (3,"TS contains PES/PS stream...");
 	    	indent (+1);
 		decodePES_buf (b, len, tsd.pid);
 	    	indent (-1);
@@ -374,3 +381,5 @@ void ts2SecPes_Output_subdecode (void)
 // $$$ TODO:
 // sections: pui-start && pointer != 0 push data to last section????...
 //
+// $$$ TODO:
+//  unbound PES streams, non System PES-Streams! (length check will not work!)

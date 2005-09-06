@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.33 2005/09/02 14:11:34 rasc Exp $
+$Id: dmx_pes.c,v 1.34 2005/09/06 23:13:51 rasc Exp $
 
 
  DVBSNOOP
@@ -20,6 +20,9 @@ $Id: dmx_pes.c,v 1.33 2005/09/02 14:11:34 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.34  2005/09/06 23:13:51  rasc
+catch OS signals (kill ...) for smooth program termination
+
 Revision 1.33  2005/09/02 14:11:34  rasc
 TS code redesign, xPCR and DTS timestamps decoding
 
@@ -142,6 +145,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/output.h"
 #include "misc/hexprint.h"
 #include "misc/print_header.h"
+#include "misc/sig_abort.h"
 
 #include "pes/pespacket.h"
 #include "dvb_api.h"
@@ -243,7 +247,7 @@ int  doReadPES (OPTION *opt)
 */
 
   count = 0;
-  while (1) {
+  while (! isSigAbort() ) {
     long    n;
     u_long  skipped_bytes = 0;
 
