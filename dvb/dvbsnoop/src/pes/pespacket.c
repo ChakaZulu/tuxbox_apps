@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.29 2005/09/06 23:13:52 rasc Exp $
+$Id: pespacket.c,v 1.30 2005/09/06 23:32:04 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pespacket.c,v 1.29 2005/09/06 23:13:52 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.30  2005/09/06 23:32:04  rasc
+no message
+
 Revision 1.29  2005/09/06 23:13:52  rasc
 catch OS signals (kill ...) for smooth program termination
 
@@ -185,11 +188,26 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
 
 
-   // $$$ TODO  PES ID 0x00 - 0xB8
+
+
+   //
+   // -- PES Stream ID 0x00 - 0xB8
+   //
+   // $$$ TODO  PES Stream ID 0x00 - 0xB8
+
+   if (p.stream_id <= 0xB8) {
+
+	print_databytes (4,"Data streamID 0x00-0xB8:", b, len2);	// $$$ TODO
+	return;
+
+   }
+
+
 
 
 
    //
+   // -- PES Stream ID 0xB9 - 0xBB
    // -- check PS decoding (ProgramStream)
    //
 
@@ -211,27 +229,18 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
 
 
+
    // 
    // -- PES decoding ...
+   // -- StreamID 0xBC..0xFF
    //
 
-
- p.PES_packet_length = outBit_Sx_NL (3,"PES_packet_length: ",	b,32, 16);
-
-
- b   += 6;
- len -= 6;
+   p.PES_packet_length = outBit_Sx_NL (3,"PES_packet_length: ",	b,32, 16);
+   b   += 6;
+   len -= 6;
 
 
- switch (p.stream_id) {
-
-	// -- special ProgramStream (PS) - IDs
-	// $$$ TODO   (out of this control struct due to length handling, etc??)
-//	case 0xB9:		// MPEG_program_end
-//	case 0xBA:		// MPEG_pack_header_start
-//	case 0xBB:		// MPEG_system_header_start
-
-
+   switch (p.stream_id) {
 
 	case 0xBC:		// program_stream_map
 		PES_decodePSM (b, p.PES_packet_length);
@@ -293,7 +302,7 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 		}
 		break;
 
- }
+   } // switch
 
 
 }
@@ -316,7 +325,6 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
 // Annotations: 
 //
-// $$$ TODO  0x000001B9    ISO 13818-1/H.222.0 2.5.3.1  End Program Stream ???
 //
 // $$$ TODO  0x00000100-B8 ISO 13818-2  Start codes
 //

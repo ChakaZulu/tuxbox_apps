@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.31 2005/09/06 23:13:51 rasc Exp $
+$Id: dmx_sect.c,v 1.32 2005/09/06 23:32:03 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dmx_sect.c,v 1.31 2005/09/06 23:13:51 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
  --  Sections Streams
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.31 2005/09/06 23:13:51 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.32  2005/09/06 23:32:03  rasc
+no message
+
 Revision 1.31  2005/09/06 23:13:51  rasc
 catch OS signals (kill ...) for smooth program termination
 
