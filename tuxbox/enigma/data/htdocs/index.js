@@ -95,12 +95,12 @@ function sendMessage2TV()
 
 function selectAudio()
 {
-	NewWindow("/cgi-bin/selectAudio?requester=webif", "audio", "250", "130", "no");
+	NewWindow("/cgi-bin/selectAudio?requester=webif", "audio", "300", "150", "no");
 }
 
 function selectSubChannel()
 {
-	NewWindow("/cgi-bin/selectSubChannel", "subchannel", "250", "130", "no");
+	NewWindow("/cgi-bin/selectSubChannel", "subchannel", "300", "130", "no");
 }
 function setStreamingServiceRef()
 {
