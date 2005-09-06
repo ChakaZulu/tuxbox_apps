@@ -1,11 +1,10 @@
 <html>
 	<head>
-		<title>Timer List</title>
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="timer.js"></script>
 	</head>
-	<body bgcolor="#ffffff">
+	<body id="mainbody" style="padding: 10px; background-color: #F4F4F4">
 		#BODY#
 	</body>
 </html>
