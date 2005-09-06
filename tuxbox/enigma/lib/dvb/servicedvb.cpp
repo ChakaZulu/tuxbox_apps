@@ -1276,14 +1276,14 @@ void eServiceHandlerDVB::loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node
 		}
 		case -4:  // handle Satellites
 		{
-			static int flags=eServiceReference::mustDescent|eServiceReference::canDescent|eServiceReference::isDirectory|eServiceReference::shouldSort;
+			static int flags=eServiceReference::mustDescent|eServiceReference::canDescent|eServiceReference::isDirectory|eServiceReference::shouldSort|eServiceReference::hasSortKey;
 			std::set<int> filledSats;
 			eTransponderList::getInstance()->forEachTransponder( eServiceHandlerDVB_SatExist( filledSats ));
 			for ( std::set<int>::iterator it( filledSats.begin()) ; it != filledSats.end(); it++ )
 			{
-				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -1, ref.data[1], *it<<16 ));
-				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -2, ref.data[1], *it<<16 ));
-				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -5, ref.data[1], *it<<16 ));
+				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -1, ref.data[1], *it<<16, *it ));
+				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -2, ref.data[1], *it<<16, *it ));
+				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -5, ref.data[1], *it<<16, *it ));
 			}
 			break;
 		}
