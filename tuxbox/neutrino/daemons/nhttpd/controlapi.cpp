@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.61 2005/08/31 17:54:25 yjogol Exp $
+	$Id: controlapi.cpp,v 1.62 2005/09/06 18:18:30 yjogol Exp $
 
 	License: GPL
 
@@ -303,7 +303,7 @@ bool CControlAPI::GetModeCGI(CWebserverRequest *request)
 static const unsigned int PLUGIN_DIR_COUNT = 5;
 static std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT] = {
 	"/share/tuxbox/neutrino/httpd/scripts", //dummy: override by WebServer->PublicDocumentRoot+/scripts
-	"/var/httpd/scripts" //dummy: override by WebServer->PriveDocumentRoot +/scripts
+	"/var/httpd/scripts", //dummy: override by WebServer->PriveDocumentRoot +/scripts
 	"/var/tuxbox/plugins",
 	PLUGINDIR,
 	"/mnt/plugins",
@@ -354,7 +354,7 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 					for(unsigned int y=2;y<=request->ParameterList.size();y++)
 					{
 						char number_buf[20];
-				 		sprintf(number_buf, "%d", y); 
+				 		sprintf(number_buf, "%d", y);
 						abscmd += " ";
 						abscmd += (request->ParameterList[number_buf]).c_str();
 					}
@@ -777,7 +777,7 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 		{
 			bouquet = Parent->GetBouquet(atoi(request->ParameterList["bouquet"].c_str()), mode);
 			CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
-	
+
 			for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
 				request->printf("%u "
 					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
