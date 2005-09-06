@@ -403,6 +403,7 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 
 	eString result = readFile(TEMPLATE_DIR + "audioSelection.tmp");
 	result.strReplace("#LANGUAGES#", audioChannels);
+	result.strReplace("#SELECTBUTTON#", button(100, "Select", TOPNAVICOLOR, "javascript:audioChange()", "#000000"));
 
 	int channel = eAVSwitch::getInstance()->getAudioChannel();
 	result.strReplace(eString().sprintf("#%d#", channel).c_str(), eString("checked"));
@@ -519,6 +520,7 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 
 	eString result = readFile(TEMPLATE_DIR + "subChannelSelection.tmp");
 	result.strReplace("#SUBCHANS#", subChannels);
+	result.strReplace("#SELECTBUTTON#", button(100, "Select", TOPNAVICOLOR, "javascript:subChannelChange()", "#000000"));
 
 	return result;
 }
