@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.30 2005/09/06 23:32:04 rasc Exp $
+$Id: pespacket.c,v 1.31 2005/09/06 23:58:50 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pespacket.c,v 1.30 2005/09/06 23:32:04 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.31  2005/09/06 23:58:50  rasc
+typo fix
+
 Revision 1.30  2005/09/06 23:32:04  rasc
 no message
 
@@ -143,7 +146,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 void decodePS_buf (u_char *b, u_int len, int pid)
 {
-   decodePS_buf (b, len, pid);
+   decodePES_buf (b, len, pid);
 }
 
 
@@ -153,37 +156,29 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 {
  /* IS13818-1  2.4.3.6  */
 
- typedef struct  _PES_Packet {
-	u_long	  packet_start_code_prefix;		// 24 bit
-	u_int     stream_id;
-	u_int     PES_packet_length;
-
-	// N ... data
-
- } PES_Packet;
+  u_long    packet_start_code_prefix;		// 24 bit
+  u_int     stream_id;
+  u_int     PES_packet_length;
 
 
-
-
- PES_Packet   p;
 
 
 
  // -- Get/check packet header prefix (sync bits)
 
- p.packet_start_code_prefix		 = getBits (b, 0,  0, 24);
- if (p.packet_start_code_prefix != 0x000001) {
+ packet_start_code_prefix		 = getBits (b, 0,  0, 24);
+ if (packet_start_code_prefix != 0x000001) {
       out_nl (3," !!! Packet_Start_CODE [%06lx] is wrong (= no PES/PS [0x000001])!!!\n",
-		p.packet_start_code_prefix);
+		packet_start_code_prefix);
       // $$$    return;
  }
- out_nl (3,"Packet_start_code_prefix: 0x%06lx",p.packet_start_code_prefix);
+ out_nl (3,"Packet_start_code_prefix: 0x%06lx",packet_start_code_prefix);
 
 
 
  // -- PS/PES stream ID
 
- p.stream_id = outBit_S2x_NL(3,"Stream_id: ",	b, 24, 8,
+ stream_id = outBit_S2x_NL(3,"Stream_id: ",	b, 24, 8,
 		 (char *(*)(u_long))dvbstrPESstream_ID );
 
 
@@ -195,9 +190,9 @@ void decodePES_buf (u_char *b, u_int len, int pid)
    //
    // $$$ TODO  PES Stream ID 0x00 - 0xB8
 
-   if (p.stream_id <= 0xB8) {
+   if (stream_id <= 0xB8) {
 
-	print_databytes (4,"Data streamID 0x00-0xB8:", b, len2);	// $$$ TODO
+	print_databytes (4,"Data streamID 0x00-0xB8:", b, len);	// $$$ TODO
 	return;
 
    }
@@ -211,7 +206,7 @@ void decodePES_buf (u_char *b, u_int len, int pid)
    // -- check PS decoding (ProgramStream)
    //
 
-   switch (p.stream_id) {
+   switch (stream_id) {
 	case 0xB9:	// MPEG_program_end
 			// stream ID already printed, nothing else to do
 		return;
@@ -235,27 +230,27 @@ void decodePES_buf (u_char *b, u_int len, int pid)
    // -- StreamID 0xBC..0xFF
    //
 
-   p.PES_packet_length = outBit_Sx_NL (3,"PES_packet_length: ",	b,32, 16);
+   PES_packet_length = outBit_Sx_NL (3,"PES_packet_length: ",	b,32, 16);
    b   += 6;
    len -= 6;
 
 
-   switch (p.stream_id) {
+   switch (stream_id) {
 
 	case 0xBC:		// program_stream_map
-		PES_decodePSM (b, p.PES_packet_length);
+		PES_decodePSM (b, PES_packet_length);
 		break;
 
 	case 0xBE:		// padding stream!
-		print_databytes (3,"Padding_bytes:", b, p.PES_packet_length);
+		print_databytes (3,"Padding_bytes:", b, PES_packet_length);
 		break;
 
 	case 0xF2:		// DSMCC stream
-		PES_decodeDSMCC (b, p.PES_packet_length);
+		PES_decodeDSMCC (b, PES_packet_length);
 		break;
 
 	case 0xFF:		// program_stream_directory
-		PES_decodePSDIR (b, p.PES_packet_length);
+		PES_decodePSDIR (b, PES_packet_length);
 		break;
 
 
@@ -263,7 +258,7 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 	case 0xF0:		// ECM
 	case 0xF1:		// EMM
 	case 0xF8:		// ITU-T Rec. H.222.1 type E
-		print_databytes (3,"PES_packet_data_bytes:", b, p.PES_packet_length);
+		print_databytes (3,"PES_packet_data_bytes:", b, PES_packet_length);
 		break;
 
 	// case 0xFC:		// metadata stream	(see: H.222.0 AMD1)
@@ -284,19 +279,19 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 	// case 0xFE		// reserved data stream
 	
 	default:
- 		if ((p.PES_packet_length==0) && ((p.stream_id & 0xF0)==0xE0)) {
+ 		if ((PES_packet_length==0) && ((stream_id & 0xF0)==0xE0)) {
 
 			 out_nl (3," ==> unbound video elementary stream... \n");
 			 if (len > 0)  {
 				indent (+1);
-				PES_decode_std (b, len, p.stream_id);
+				PES_decode_std (b, len, stream_id);
 				indent (-1);
 			 }
 
  		} else {
 
 			indent (+1);
-			PES_decode_std (b, p.PES_packet_length, p.stream_id);
+			PES_decode_std (b, PES_packet_length, stream_id);
 			indent (-1);
 
 		}
