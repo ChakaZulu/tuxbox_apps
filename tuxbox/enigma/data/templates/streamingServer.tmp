@@ -30,13 +30,13 @@
 	}
 	</script>
 </head>
-<body style="padding: 10px; background-color: #F4F4F4;" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" id="contentcell">
+<body id="mainbody" style="padding: 10px; background-color: #F4F4F4;" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
 	<form name="form1">
-		<input type="button" style="width: 100; height: 22" onClick="playFile()" value="File">
+		#FILEBUTTON#
 		&nbsp;
 		<input type="file" size="40" height="22" name="mrl">
 		<br><br>
-		<input type="button" style="width: 100; height: 22" onClick="playDVD()" value="DVD">
+		#DVDBUTTON#
 		&nbsp;Drive:&nbsp;
 		<input type="text" name="drive1" value="#DRIVE#" readonly>
 		&nbsp;Title:&nbsp;
@@ -98,7 +98,7 @@
 			<option value="25">25</option>
 		</select>
 		<br><br>
-		<input type="button" style="width: 100; height: 22" onClick="playVCD()" value="(S)VCD">
+		#VCDBUTTON#
 		&nbsp;Drive:&nbsp;
 		<input type="text" name="drive2" value="#DRIVE#" readonly>
 		&nbsp;Title:&nbsp;
@@ -160,7 +160,7 @@
 			<option value="25">25</option>
 		</select>
 		<br><br><br>
-		<input type="button" style="width: 100; height: 22" onClick="settings()" value="Settings">
+		#SETTINGSBUTTON#
 		<br><br>
 		#TERMINATEBUTTON#
 	</form>

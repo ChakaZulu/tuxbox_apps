@@ -72,7 +72,7 @@ eString streamingServerSettings(eString request, eString dirpath, eString opts, 
 	result.strReplace("#FORCETRANSCODEVIDEO#", (forcetranscodevideo == 1) ? "checked" : "");
 	result.strReplace("#AUDIODATARATE#", eString().sprintf("%d", audiodatarate));
 	result.strReplace("#FORCETRANSCODEAUDIO#", (forcetranscodeaudio == 1) ? "checked" : "");
-			
+	result.strReplace("#CHANGEBUTTON#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
 	return result;
 }
 
@@ -104,6 +104,10 @@ eString getStreamingServer()
 		drive = strdup("D");
 	result.strReplace("#DRIVE#", eString(drive));
 	free(drive);
+	result.strReplace("#FILEBUTTON#", button(100, "File", TOPNAVICOLOR, "javascript:playFile()", "#000000"));
+	result.strReplace("#DVDBUTTON#", button(100, "DVD", TOPNAVICOLOR, "javascript:playDVD()", "#000000"));
+	result.strReplace("#VCDBUTTON#", button(100, "(S)VCD", TOPNAVICOLOR, "javascript:playVCD()", "#000000"));
+	result.strReplace("#SETTINGSBUTTON#", button(100, "Settings", TOPNAVICOLOR, "javascript:settings()", "#000000"));
 	eString tmp = button(100, "Terminate", RED, "javascript:terminateStreaming()", "#FFFFFF");
 	result.strReplace("#TERMINATEBUTTON#", tmp);
 	return result;

@@ -17,7 +17,7 @@
 			}
 		</script>
 	</head>
-	<body id="streamingserver" onUnload="parent.window.opener.location.reload(true)">
+	<body id="mainbody" style="padding: 10px; background-color: #F4F4F4;" onUnload="parent.window.opener.location.reload(true)">
 		<form name="f1" action="/cgi-bin/setStreamingServerSettings">
 			<table border="0" cellpadding="0" cellspacing="10">
 			<tbody>
@@ -102,9 +102,7 @@
 					<td colspan="2">&nbsp;</td>
 				</tr>
 				<tr>
-					<td colspan="2">
-						<input type="button" name="Change" onClick="javascript:submitSettings()" value="Change" style="width: 100px; color: #000000;">
-					</td>
+					<td colspan="2">#SUBMITBUTTON#</td>
 				</tr>
 			</tbody>
 			</table>
