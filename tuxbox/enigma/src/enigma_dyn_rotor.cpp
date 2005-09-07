@@ -74,6 +74,8 @@ eString getConfigRotor(void)
 			tmp.strReplace("#SATPOS#", satPos);
 			tmp.strReplace("#SATNAME#", satName);
 			tmp.strReplace("#MOTORPOS#", motorPos);
+			tmp.strReplace("#GOTOBUTTON#", button(100, "Goto", GREEN, "javascript:motor('gotostoredpos', '" + motorPos + "')", "#FFFFFF"));
+			tmp.strReplace("#STOREBUTTON#", button(100, "Store", RED, "javascript:motor('storetopos', '" + motorPos + "')", "#FFFFFF"));
 			positions += tmp;
 		}
 	}
