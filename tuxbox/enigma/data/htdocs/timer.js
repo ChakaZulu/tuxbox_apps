@@ -18,7 +18,7 @@ function clearTimerList()
 
 function editTimerEvent(xy)
 {
-	NewWindow('showEditTimerEventWindow?'+xy, 'editTimer', '780', '370', 'no');
+	NewWindow('showEditTimerEventWindow?'+xy, 'editTimer', '780', '400', 'no');
 }
 
 function deleteTimerEvent(xy)
@@ -96,7 +96,7 @@ function addTimerEvent()
 
 function showAddTimerEventWindow()
 {
-	NewWindow("showAddTimerEventWindow", 'addTimer', '780', '400', 'no');
+	NewWindow("showAddTimerEventWindow", 'addTimer', '780', '430', 'no');
 }
 
 

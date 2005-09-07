@@ -17,7 +17,7 @@
 			
 		</script>
 	</head>
-	<body>
+	<body id="mainbody" style="padding: 10px; background-color: #F4F4F4;">
 	<table border="0" cellspacing="0" cellpadding="0">
 	<tr>
 	<td>

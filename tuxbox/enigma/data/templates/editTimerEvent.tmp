@@ -3,7 +3,7 @@
 		<title>Edit Timer Event</title>
 		<link rel="stylesheet" type="text/css" href="#CSS#">
 	</head>
-	<body id="edittimer" onUnload="parent.window.opener.location.reload(true)">
+	<body id="mainbody" style="padding: 10px; background-color: #F4F4F4;" onUnload="parent.window.opener.location.reload(true)">
 		<form action="/changeTimerEvent">
 			<input type="hidden" name="ref" value="#SERVICEREF#">
 			<input type="hidden" name="old_type" value="#OLD_TYPE#">
