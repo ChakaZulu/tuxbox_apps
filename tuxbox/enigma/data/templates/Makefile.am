@@ -15,7 +15,7 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	XMLBoxInfo.tmp  HTMLBoxInfo.tmp \
 	XMLData.tmp HTMLData.tmp \
 	XMLServiceEPG.tmp XMLEPGEntry.tmp HTMLServiceEPG.tmp HTMLEPGEntry.tmp \
-	XMLTimerList.tmp XMLTimerEntry.tmp XMLTimerListBody.tmp HTMLTimerList.tmp HTMLTimerEntry.tmp HTMLTimerListBody.tmp
+	XMLTimerList.tmp XMLTimerEntry.tmp XMLTimerListBody.tmp HTMLTimerEntry.tmp HTMLTimerListBody.tmp
 
 install-data-local:
 	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/templates
