@@ -9,8 +9,8 @@ EXTRA_DIST = \
 	topbalk4.png zap.js zapdata.js up.gif down.gif topbalk_small.png \
 	webif_small.css topbalk2_small.png topbalk3_small.png \
 	topbalk4_small.png blue.png green.png red.png grey.png yellow.png \
-	locked.png unlocked.png 1rightarrow.png 1leftarrow.png player_stop.png \
-	player_fwd.png player_rew.png dvr.gif
+	locked.png unlocked.png 1rightarrow.gif 1leftarrow.gif player_stop.gif \
+	player_fwd.gif player_rew.gif dvr.gif
 
 install-data-local:
 	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/htdocs
