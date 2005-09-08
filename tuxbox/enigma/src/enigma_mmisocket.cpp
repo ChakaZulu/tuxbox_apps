@@ -119,19 +119,11 @@ void eSocketMMIHandler::connDataAvail(int what)
 			memcpy(name, &msgbuffer[4], length);
 			name[length] = '\0';
 		} else {
-			if ( eSocketMMI::getInstance(this)->connected() )
-				eSocketMMI::getInstance(this)->gotMMIData(msgbuffer, length);
-			else
-			{
-/*				eServiceHandler *handler = eServiceInterface::getInstance()->getService();
-				if ( handler && handler->getFlags() & eServiceHandler::flagIsScrambled && */
-//				if ( eApp->looplevel() == 1 && ( !currentFocus || currentFocus == eZapMain::getInstance() ) )
-				{
-					if ( eZapMain::getInstance()->isVisible() )
-						eZapMain::getInstance()->hide();
-					eSocketMMI::getInstance(this)->gotMMIData(msgbuffer, length);
-				}
+			if ( !eSocketMMI::getInstance(this)->connected() ) {
+				if ( eZapMain::getInstance()->isVisible() )
+					eZapMain::getInstance()->hide();
 			}
+			eSocketMMI::getInstance(this)->gotMMIData(msgbuffer, length);
 		}
 	}
 	

@@ -3,6 +3,7 @@
 
 #include <lib/gui/listbox.h>
 #include <lib/base/message.h>
+#include <lib/base/buffer.h>
 
 class eNumber;
 class eLabel;
@@ -48,6 +49,7 @@ public:
 class enigmaMMI : public eWindow
 {
 protected:
+	eIOBuffer buffer;
 	eFixedMessagePump<eMMIMsg> mmi_messages;
 	eWidget *open;
 	Connection conn;

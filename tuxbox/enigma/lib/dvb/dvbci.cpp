@@ -821,7 +821,7 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 	}
 	else if(data[4]==0x9f && data[5]==0x88)
 	{
-		char buffer[len+1];
+		char buffer[len-4];
 		eDebug("[DVBCI] [APPLICATION MANAGER] -> mmi_menu");
 #if 0
 		eDebug("[DVBCI] mmi len:%d",len);
@@ -829,9 +829,8 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 			eDebugNoNewLine("%02x ",data[i]);
 		eDebug("");
 #endif
-		memcpy(buffer+1,data,len);
-		buffer[0]=(len&0xff);
-		ci_mmi_progress(buffer,len);
+		memcpy(buffer,data+4,len-4);
+		ci_mmi_progress(buffer,len-4);
 	}
 	else
 	{

@@ -11,9 +11,10 @@
 
 #define TAG_LENGTH 3
 #define MAX_LENGTH_BYTES 4
+#define MIN_LENGTH_BYTES 1
 
 enigmaMMI::enigmaMMI()
-	:eWindow(1), mmi_messages(eApp, 1), open(0),
+	:eWindow(1), buffer(512), mmi_messages(eApp, 1), open(0),
 	responseTimer(eApp), delayTimer(eApp), closeTimer(eApp)
 {
 	eDebug("[enigmaMMI] created successfully");
@@ -34,36 +35,6 @@ void enigmaMMI::handleMessage( const eMMIMsg &msg )
 {
 	if ( handleMMIMessage( msg.data ) )
 		delete [] msg.data;
-}
-
-void enigmaMMI::gotMMIData( const char* data, int len )
-{
-	char *dest = new char[len];
-	memcpy( dest, data, len );
-/*	for (int i=0; i < len; i++)
-		eDebugNoNewLine("%x ", data[i]);
-	eDebug("");*/
-	mmi_messages.send( eMMIMsg( dest, len ) );
-}
-
-int enigmaMMI::eventHandler( const eWidgetEvent &e )
-{
-	switch (e.type)
-	{
-		case eWidgetEvent::execBegin:
-			show();
-			beginExec();
-			return 1;
-		case eWidgetEvent::execDone:
-			hide();
-			conn.disconnect();
-			responseTimer.stop();
-			endExec();
-			return 1;
-		default:
-			break;
-	}
-	return eWindow::eventHandler(e);
 }
 
 long LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen)
@@ -92,6 +63,80 @@ long LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen)
 		*fieldlen = 1;
 
 	return Length;
+}
+
+void enigmaMMI::gotMMIData( const char* data, int len )
+{
+	int clear = 1;
+
+	// If a new message starts, then the previous message
+	// should already have been processed. Otherwise the
+	// previous message was incomplete and should therefore
+	// be deleted.
+	if ((len >= 1) && (data[0] != 0x9f))
+		clear = 0;
+	if ((len >= 2) && (data[1] != 0x88))
+		clear = 0;
+	if (clear)
+		buffer.clear();
+
+	buffer.write( data, len );
+	while ( buffer.size() >= (3 + MIN_LENGTH_BYTES) )
+	{
+		unsigned char tmp[3+MAX_LENGTH_BYTES];
+		buffer.peek(tmp, 3+MIN_LENGTH_BYTES);
+		if (tmp[0] != 0x9f || tmp[1] != 0x88)
+		{
+			buffer.skip(1);
+#ifdef MMIDEBUG
+			eDebug("skip %02x", tmp[0]);
+#endif
+			continue;
+		}
+		if (tmp[3] & 0x80) {
+			int peekLength = (tmp[3] & 0x7f) + 4;
+			if (buffer.size() < peekLength)
+				continue;
+			buffer.peek(tmp, peekLength);
+		}
+		int LengthBytes=0;
+		int size=LengthField(tmp+3, MAX_LENGTH_BYTES, &LengthBytes);
+		int messageLength = 3+LengthBytes+size;
+		if ( buffer.size() >= messageLength )
+		{
+			char *dest = new char[messageLength];
+			buffer.read(dest, messageLength);
+#ifdef MMIDEBUG
+			for (int i=0; i < messageLength; ++i)
+				eDebugNoNewLine("%x ", dest[i]);
+			eDebug("");
+#endif
+			mmi_messages.send( eMMIMsg( dest, messageLength ) );
+		}
+#ifdef MMIDEBUG
+		eDebug("%d bytes left in mmi buffer", buffer.size());
+#endif
+	}
+}
+
+int enigmaMMI::eventHandler( const eWidgetEvent &e )
+{
+	switch (e.type)
+	{
+		case eWidgetEvent::execBegin:
+			show();
+			beginExec();
+			return 1;
+		case eWidgetEvent::execDone:
+			hide();
+			conn.disconnect();
+			responseTimer.stop();
+			endExec();
+			return 1;
+		default:
+			break;
+	}
+	return eWindow::eventHandler(e);
 }
 
 void enigmaMMI::showWaitForAnswer(int ret)
@@ -285,12 +330,13 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 
 		rp += LengthBytes;
 
+		int endpos=rp+size;
+
 /*		unsigned char choices=*/data[rp++];
 
 //		eDebug("Size: %x Choices: %d",size,choices);
 
 		int currElement=0;
-		int endpos=rp+size;
 
 		eString titleText, subTitleText, bottomText;
 		std::list< std::pair<eString, int> > entrys;
