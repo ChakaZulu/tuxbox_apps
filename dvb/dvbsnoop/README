@@ -100,6 +100,12 @@ Installation:
       installed. In cases, please update your system (check packages 
       automake, autoconf and libtool).
 
+  - Special Platforms
+      Cygwin:
+          dvbsnoop may be used on Microsoft Windows Platforms using cygwin
+	  (http://www.cygwin.com).  Due to a missing dvb hardware layer you may
+	  use dvbsnoop in offline mode only.  To compile dvbsnoop for cygwin,
+	  please read annex "cygwin".
 
 
 Posting dvbsnoop output:
@@ -156,4 +162,95 @@ Keywords:
 (c) 2001-2005   Rainer Scherg (Rainer.Scherg@gmx.de)
 http://dvbsnoop.sourceforge.net
 
+
+
+
+
+
+
+Annex
+=====
+
+Install on Cygwin
+=================
+
+To make dvbsnoop run on cygwin platforms, you have to:
+
+1.) copy dvb-api include files to your cygwin installation.
+2.) tweak some cygwin header files.
+
+Tnx to Kamal for this description:
+
+
+-----Original Message-----
+From: Kamalanand [mailto:kamal_dasu@xxxxxxxxxx] 
+Subject: RE: dvbsnoop as analyzer on Windows - worked
+
+Rainer,
+
+I had to apply a few fixes in my environment to make dvbsnoop build with
+cygwin. This might be very specific to my environment, however wanted to
+share this with you if others face a similar problem.
+
+I am using the following cygwin version downloaded using setup.exe on 
+http://wwww.cygwin.com :
+CYGWIN_NT-5.1 my-pc 1.5.18(0.132/4/2) 2005-07-02 20:30 i686 unknown unknown
+Cygwin
+
+I have the following installed in the cygwin environment
+1) Dvbsnoop http://dvbsnoop.sourceforge.net/ under ~/dvbsnoop-1.4.00/ 
+2) Downloaded the linux kernel 2.6.12 sources from http://www.kernel.org/ ,
+extracted to /linux-2.6
+
+These are the things I did to have a successful build,
+
+1) Copied the dvb includes from the /linux-2.6/include/linux/dvb under
+/usr/include/linux/dvb
+(Actaully I made a symbolic link but its upto you.)
+
+2) The cygwin installation had the __u64 type missing in the
+/usr/include/asm/types.h , 
+So added that to /usr/include/asm/types.h. This is needed by the struct
+dmx_stc in /usr/include/lnux/dvb/dmx.h
+..
+typedef __signed__ int __s64;
+typedef unsigned int __u64;
+..
+
+3) Then noticed the dmx_pes.c includes file_io.h which includes the
+sys/ioctl.h. I 
+figured that the IOCTL macros are needed to compile 
+~/dvbsnoop-1.4.0.0/src/dvb_api/dmx_pes.c file. The IOCTL macros are used in
+the /usr/include/linux/dvb/dmx.h which get called in the dmx_pes.c. Now
+cygwin /usr/include/sys/ioctl.h does not have the macros in it and
+/usr/include/asm/ioctl.h is missing in the cygwin environment for some
+reason. 
+Anyway I copied the /include/linux/asm-i386/ioctl.h from linux kernel
+sources to the /usr/include/asm/ioctl.h . Then added the following to the
+/usr/include/sys/ioctl.h
+
+#include <asm/ioctl.h>
+
+4) However the ~/dvbsnoop-1.4.0.0/src/misc/packet_mem.c refused to compile
+due to various type incopatabilities with strings.h and stdlib.h under
+cygwin. Basically it needed the definitions for u_char and u_long. So I
+tried the following to fix the problem :
+
+/* #include <string.h>  */
+/* #include <stdlib.h>   */
+#include <sys/types.h>
+
+Maybe there is a better way to do this, for now this seemed to work for me
+
+5) Ran the following 
+    ~/dvbsnoop-1.4.0.0/configure script 
+    ~/dvbsnoop-1.4.0.0/make clean
+    ~/dvbsnoop-1.4.0.0/make 
+    ~/dvbsnoop-1.4.0.0/make install
+ 
+
+Now I am able to do offline analysis and decode the MPEG streams. 
+
+Thanks & Regards
+Kamal
 

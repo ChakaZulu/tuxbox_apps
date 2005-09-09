@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.33 2005/09/06 23:13:51 rasc Exp $
+$Id: dmx_ts.c,v 1.34 2005/09/09 14:20:29 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.33 2005/09/06 23:13:51 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.34  2005/09/09 14:20:29  rasc
+TS continuity sequence check (cc verbose output)
+
 Revision 1.33  2005/09/06 23:13:51  rasc
 catch OS signals (kill ...) for smooth program termination
 
@@ -145,6 +148,8 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "ts/tslayer.h"
 #include "ts/ts2secpes.h"
+#include "ts/ts_cc_check.h"
+
 #include "dvb_api.h"
 #include "file_io.h"
 #include "dmx_error.h"
@@ -257,7 +262,8 @@ int  doReadTS (OPTION *opt)
   if (opt->ts_subdecode) {
 	ts2SecPesInit ();
   }
-
+  // -- init TS CC check
+  ts_cc_init ();
 
 
 /*
@@ -420,6 +426,8 @@ int  doReadTS (OPTION *opt)
 
   // -- release TS subdecoding buffer
   if (opt->ts_subdecode) ts2SecPesFree ();
+  // -- release TS CC checka buffer, etc.
+  ts_cc_init ();
 
 
   // -- Stop Demux

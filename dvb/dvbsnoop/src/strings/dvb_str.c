@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.66 2005/09/02 14:11:36 rasc Exp $
+$Id: dvb_str.c,v 1.67 2005/09/09 14:20:30 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.66 2005/09/02 14:11:36 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.67  2005/09/09 14:20:30  rasc
+TS continuity sequence check (cc verbose output)
+
 Revision 1.66  2005/09/02 14:11:36  rasc
 TS code redesign, xPCR and DTS timestamps decoding
 
@@ -2102,7 +2105,7 @@ char *dvbstrTS_TEI (u_int i)
 
 {
   STR_TABLE  Table[] = {
-     {  0x00, 0x00,  "no error" },
+     {  0x00, 0x00,  "packet ok" },
      {  0x01, 0x01,  "Packet has uncorrectable errors" },
      {  0,0, NULL }
   };

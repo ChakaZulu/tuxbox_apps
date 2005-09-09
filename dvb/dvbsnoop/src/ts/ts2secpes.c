@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.7 2005/09/06 23:13:52 rasc Exp $
+$Id: ts2secpes.c,v 1.8 2005/09/09 14:20:31 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: ts2secpes.c,v 1.7 2005/09/06 23:13:52 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2005   Rainer.Scherg@gmx.de
 
 
 
@@ -17,6 +17,9 @@ $Id: ts2secpes.c,v 1.7 2005/09/06 23:13:52 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.8  2005/09/09 14:20:31  rasc
+TS continuity sequence check (cc verbose output)
+
 Revision 1.7  2005/09/06 23:13:52  rasc
 catch OS signals (kill ...) for smooth program termination
 
@@ -178,6 +181,8 @@ int ts2SecPes_AddPacketContinue (int pid, int cc, u_char *b, u_int len)
     if ((tsd.status == TSD_no_error) && (cc != (++tsd.continuity_counter%16))) {
 	tsd.status = TSD_continuity_error;
     }
+
+    tsd.continuity_counter = cc;
 
     if (tsd.status == TSD_no_error) {
 	if (!packetMem_add_data (tsd.mem_handle,b,len) ) {
@@ -383,3 +388,5 @@ void ts2SecPes_Output_subdecode (void)
 //
 // $$$ TODO:
 //  unbound PES streams, non System PES-Streams! (length check will not work!)
+//
+// $$$ TODO: discontinuity signalling flag check?

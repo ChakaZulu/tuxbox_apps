@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.22 2005/09/02 14:11:36 rasc Exp $
+$Id: tslayer.c,v 1.23 2005/09/09 14:20:31 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.22 2005/09/02 14:11:36 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.23  2005/09/09 14:20:31  rasc
+TS continuity sequence check (cc verbose output)
+
 Revision 1.22  2005/09/02 14:11:36  rasc
 TS code redesign, xPCR and DTS timestamps decoding
 
@@ -104,6 +107,8 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "tslayer.h"
+#include "ts_cc_check.h"
+
 #include "strings/dvb_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
@@ -121,6 +126,7 @@ void decodeTS_buf (u_char *b, int len, u_int opt_pid)
  int		pusi;
  int		sc;
  int		afc;
+ int		pid; 
 
 
 
@@ -130,13 +136,16 @@ void decodeTS_buf (u_char *b, int len, u_int opt_pid)
  pusi	= outBit_S2x_NL (3,"Payload_unit_start_indicator: ", 	b,  9, 1,
 			(char *(*)(u_long))dvbstrTS_PUSI ); 
  	  outBit_Sx_NL  (3,"transport_priority: ",		b, 10, 1);
- 	  outBit_S2x_NL (3,"PID: ",			 	b, 11,13,
+ pid 	= outBit_S2x_NL (3,"PID: ",			 	b, 11,13,
 			(char *(*)(u_long))dvbstrTSpid_ID ); 
+ 	  ts_cc_SetPid (pid); // set this here for ts_cc_check...
+
  sc	= outBit_S2x_NL (3,"transport_scrambling_control: ", 	b, 24, 2,
 			(char *(*)(u_long))dvbstrTS_ScramblingCtrl_TYPE ); 
  afc	= outBit_S2x_NL (3,"adaptation_field_control: ", 	b, 26, 2,
 			(char *(*)(u_long))dvbstrTS_AdaptationField_TYPE ); 
-	  outBit_Sx_NL  (3,"continuity_counter: ", 		b, 28, 4);
+	  outBit_S2x_NL (3,"continuity_counter: ", 		b, 28, 4,
+			  (char *(*)(u_long))ts_cc_StatusStr );
 
 
 
@@ -214,6 +223,7 @@ int ts_adaptation_field (u_char  *b)
 
   		outBit_Sx_NL  (3,"discontinuity_indicator: ", 			b, 0, 1);
   		outBit_Sx_NL  (3,"random_access_indicator: ", 			b, 1, 1);
+ // $$$ TODO discontinuity signalling check
   		outBit_Sx_NL  (3,"elementary_stream_priotity_indicator: ", 	b, 2, 1);
  pcr_flag =  	outBit_Sx_NL  (3,"PCR_flag: ", 					b, 3, 1);
  opcr_flag =  	outBit_Sx_NL  (3,"OPCR_flag: ", 				b, 4, 1);

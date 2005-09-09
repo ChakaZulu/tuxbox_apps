@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.23 2005/01/17 19:41:21 rasc Exp $
+$Id: dvbsnoop.h,v 1.24 2005/09/09 14:20:29 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dvbsnoop.h,v 1.23 2005/01/17 19:41:21 rasc Exp $
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.24  2005/09/09 14:20:29  rasc
+TS continuity sequence check (cc verbose output)
+
 Revision 1.23  2005/01/17 19:41:21  rasc
 Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 
@@ -116,13 +119,29 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-/* some defs */
+//
+// -- some DVB definitions
+//
+
 #define MAX_PID      0x1FFF
 #define PID_FULL_TS  0x2000	/* special PID for reading full/raw TS */
 				/* THIS is defined by Linux DVB-API !! */
 
 #define DUMMY_PID    0xFFFF	/* special if no pid is needed */
 #define INVALID_PID  0xFEFE	/* a invalid PID*/
+
+
+
+
+//
+// -- BSD style type shortcuts...
+// -- may be already defined by system (typedef in linux/types.h)
+// -- so we overwrite this via #define to avoid compiler warnings
+//
+
+#define u_char  unsigned char
+#define u_int   unsigned int
+#define u_long  unsigned long
 
 
 #endif
