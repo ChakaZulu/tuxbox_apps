@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.12 2005/08/31 17:54:25 yjogol Exp $
+        $Id: controlapi.h,v 1.13 2005/09/10 12:39:26 yjogol Exp $
 
         License: GPL
 
@@ -26,6 +26,7 @@
 
 #ifndef __nhttpd_controlapi_h__
 #define __nhttpd_controlapi_h__
+#include <string>
 
 #include "request.h"
 #include "webdbox.h"
@@ -77,8 +78,14 @@ class CControlAPI
 		bool LCDAction(CWebserverRequest *request);
 		bool YWebCGI(CWebserverRequest *request);
 	public:
-		CControlAPI(CWebDbox *parent) { Parent = parent; };
+		static const unsigned int PLUGIN_DIR_COUNT = 5;
+		std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT];
+
+		CControlAPI(CWebDbox *webdbox);
 		bool Execute(CWebserverRequest *request);
+
+		std::string YexecuteScript(CWebserverRequest *request, std::string cmd); //shared use
+
 };
 
 #endif /* __nhttpd_controlapi_h__ */

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.62 2005/09/06 18:18:30 yjogol Exp $
+	$Id: controlapi.cpp,v 1.63 2005/09/10 12:39:26 yjogol Exp $
 
 	License: GPL
 
@@ -23,9 +23,9 @@
 
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+//#ifdef HAVE_CONFIG_H
+//#include <config.h>
+//#endif
 
 // system
 #include <unistd.h>
@@ -40,6 +40,10 @@
 #include <neutrinoMessages.h>
 #include <zapit/client/zapittools.h>
 #include <zapit/bouquets.h>
+
+#include <config.h>
+#include <configfile.h>
+
 // nhttpd
 #include "controlapi.h"
 #include "lcdapi.h"
@@ -184,6 +188,26 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 }
 
 //-------------------------------------------------------------------------
+// constructor und destructor
+//-------------------------------------------------------------------------
+
+CControlAPI::CControlAPI(CWebDbox *webdbox)
+{
+	Parent=webdbox;
+	if(Parent != NULL)
+		if(Parent->Parent != NULL)
+		{	// given in nhttpd.conf
+			PLUGIN_DIRS[0]=Parent->Parent->PublicDocumentRoot;
+			PLUGIN_DIRS[0].append("/scripts");
+			PLUGIN_DIRS[1]=Parent->Parent->PrivateDocumentRoot;
+			PLUGIN_DIRS[1].append("/scripts");
+			PLUGIN_DIRS[2]="/var/tuxbox/plugins";
+			PLUGIN_DIRS[3]=PLUGINDIR;
+			PLUGIN_DIRS[4]="/mnt/plugins";
+		}
+}
+
+//-------------------------------------------------------------------------
 
 bool CControlAPI::TimerCGI(CWebserverRequest *request)
 {
@@ -300,29 +324,12 @@ bool CControlAPI::GetModeCGI(CWebserverRequest *request)
 	return true;
 }
 
-static const unsigned int PLUGIN_DIR_COUNT = 5;
-static std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT] = {
-	"/share/tuxbox/neutrino/httpd/scripts", //dummy: override by WebServer->PublicDocumentRoot+/scripts
-	"/var/httpd/scripts", //dummy: override by WebServer->PriveDocumentRoot +/scripts
-	"/var/tuxbox/plugins",
-	PLUGINDIR,
-	"/mnt/plugins",
-};
-
 bool CControlAPI::ExecCGI(CWebserverRequest *request)
 {
 	bool res = false;
-	std::string script;
+	std::string script, result;
 
 	// ToDo: There is no Contructor/init until now
-	if(Parent != NULL)
-		if(Parent->Parent != NULL)
-		{
-			PLUGIN_DIRS[0]=Parent->Parent->PublicDocumentRoot;
-			PLUGIN_DIRS[0].append("/scripts");
-			PLUGIN_DIRS[1]=Parent->Parent->PrivateDocumentRoot;
-			PLUGIN_DIRS[1].append("/scripts");
-		}
 	if (request->ParameterList.size() > 1)
 		request->SendPlainHeader("text/html");          // Standard httpd header senden MIME html
 	else
@@ -330,75 +337,25 @@ bool CControlAPI::ExecCGI(CWebserverRequest *request)
 	if (request->ParameterList.size() > 0)
 	{
 		script = request->ParameterList["1"];
-		std::string::size_type i = script.find_last_of("/");
-		if (i != std::string::npos)
-			script = script.substr(i+1);
-		script += ".sh";
-		for (unsigned int i=0;i<PLUGIN_DIR_COUNT;i++) {
-			DIR *scriptdir = opendir(PLUGIN_DIRS[i].c_str());
-			if (scriptdir != NULL)
-			{
-				struct dirent *scriptfile = NULL;
-				while ((scriptfile = readdir(scriptdir)) != NULL)
-				{
-					if (strcmp(script.c_str(),scriptfile->d_name) == 0)
-						break;
-				}
-				if (scriptfile != NULL)
-				{
-					// script was found
-					std::string abscmd(PLUGIN_DIRS[i].c_str());
-					abscmd += "/";
-					abscmd += script;
-
-					for(unsigned int y=2;y<=request->ParameterList.size();y++)
-					{
-						char number_buf[20];
-				 		sprintf(number_buf, "%d", y);
-						abscmd += " ";
-						abscmd += (request->ParameterList[number_buf]).c_str();
-					}
-					printf("[CControlAPI] executingY %s\n",abscmd.c_str());
-					FILE *f = popen(abscmd.c_str(),"r");
-					if (f != NULL)
-					{
-						char output[1024];
-						while (fgets(output,1024,f))
-						{
-							request->SocketWrite(output);
-						}
-						pclose(f);
-						res = true;
-						break;
-					}
-					else
-					{
-						printf("[CControlAPI] can't open %s\n",abscmd.c_str());
-					}
-				}
-				closedir(scriptdir);
-			}
-			else
-			{
-				printf("[CControlAPI] could not open: %s\n",PLUGIN_DIRS[i].c_str());
-			}
-		}
-		if (!res)
+		for(unsigned int y=2;y<=request->ParameterList.size();y++)
 		{
-			printf("[CControlAPI] script %s not found in\n",script.c_str());
-			for (unsigned int i=0;i<PLUGIN_DIR_COUNT;i++) {
-				printf("%s\n",PLUGIN_DIRS[i].c_str());
-			}
+			char number_buf[20];
+	 		sprintf(number_buf, "%d", y); 
+			script += " ";
+			script += (request->ParameterList[number_buf]).c_str();
 		}
+		result = YexecuteScript( request, script);
 	}
 	else
 	{
 		printf("[CControlAPI] no script given\n");
 	}
-	if (!res)
-	{
+
+	res = (result != "error");
+	if (res)
+		request->SocketWrite(result);
+	else
 		request->Send404Error();
-	}
 	return res;
 }
 
@@ -777,7 +734,7 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 		{
 			bouquet = Parent->GetBouquet(atoi(request->ParameterList["bouquet"].c_str()), mode);
 			CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
-
+	
 			for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
 				request->printf("%u "
 					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -1388,8 +1345,6 @@ void CControlAPI::SendSettings(CWebserverRequest* request)
 	);
 }
 
-//-------------------------------------------------------------------------
-
 void CControlAPI::SendTimers(CWebserverRequest* request)
 {
 	CTimerd::TimerList timerlist;			// List of bouquets
@@ -1498,4 +1453,61 @@ void CControlAPI::YWeb_SendRadioStreamingPid(CWebserverRequest* request)
 	if(!pids.APIDs.empty())
 		apid = pids.APIDs[0].pid;
 	request->printf("0x%04x",apid);
+}
+
+
+
+
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
+std::string CControlAPI::YexecuteScript(CWebserverRequest *request, std::string cmd)
+{
+	std::string script, para, result;
+	bool found = false;
+
+	// split script and parameters
+	int pos;
+	if ((pos = cmd.find_first_of(" ")) > 0)
+	{
+		script = cmd.substr(0, pos);
+		para = cmd.substr(pos+1,cmd.length() - (pos+1)); // snip
+	}
+	else
+		script=cmd;
+	// get file
+	std::string fullfilename;
+	script += ".sh"; //add script extention
+
+	for (unsigned int i=0;i<PLUGIN_DIR_COUNT && !found;i++) 
+	{
+		fullfilename = PLUGIN_DIRS[i]+"/"+script;
+		FILE *test =fopen(fullfilename.c_str(),"r"); // use fopen: popen does not work
+		if( test != NULL )
+		{
+			fclose(test);
+			
+			FILE *f = popen( (fullfilename+" "+para).c_str(),"r"); //execute
+			if (f != NULL)
+			{
+				found = true;
+
+				char output[1024];
+				while (fgets(output,1024,f)) // get script output
+					result += output;
+				pclose(f);
+			}
+		}
+	}
+
+	if (!found)
+	{
+		printf("[CControlAPI] script %s not found in\n",script.c_str());
+		for (unsigned int i=0;i<PLUGIN_DIR_COUNT;i++) {
+			printf("%s\n",PLUGIN_DIRS[i].c_str());
+		}
+		result="error";
+	}
+	return result;
+
 }
