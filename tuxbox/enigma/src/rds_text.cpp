@@ -113,7 +113,20 @@ void RDSTextDecoder::process_data(int what)
 								++state; // ignore ...
 								break;
 							case 10:
-								message[m_ptr++]=c<0xFF?c:0x20;
+	// TODO build a complete radiotext charcode to UTF8 conversion table for all character > 0x80
+								switch (c)
+								{
+									case 0 ... 0x79: break;
+									case 0x8d: c='ß'; break;
+									case 0x91: c='ä'; break;
+									case 0xd1: c='Ä'; break;
+									case 0x97: c='ö'; break;
+									case 0xd7: c='Ö'; break;
+									case 0x99: c='ü'; break;
+									case 0xd9: c='Ü'; break;
+									default: c=' '; break;  // convert all unknown to space
+								}
+								message[m_ptr++]=c;
 								if(text_len)
 									--text_len;
 								else

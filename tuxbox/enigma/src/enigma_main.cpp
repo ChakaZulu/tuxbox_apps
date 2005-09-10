@@ -7040,7 +7040,7 @@ void eZapMain::gotRDSText(eString text)
 //	eDebug("gotRDSText(%s)", text.c_str() );
 	dvbInfoBar->hide();
 	fileInfoBar->show();
-	fileinfos->setText(text);
+	fileinfos->setText(convertLatin1UTF8(text));
 }
 
 eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path, eWidget *lcdTitle, eWidget *lcdElement)
