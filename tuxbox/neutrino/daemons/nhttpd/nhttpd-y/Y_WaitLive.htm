@@ -10,7 +10,7 @@ function go_live()
 {
     var agt=navigator.userAgent.toLowerCase();
     var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
-    var _url = (is_ie) ? "/control/exec?Y_Live&ie" : "/control/exec?Y_Live&moz";
+    var _url = (is_ie) ? "/control/exec?Y_Live&live&ie" : "/control/exec?Y_Live&live&moz";
 	window.location.href = _url;
 }
 </script>
