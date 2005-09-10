@@ -4,24 +4,16 @@
 <meta NAME="author" CONTENT="yjogol">
 <link rel="stylesheet" type="text/css" href="/global.css">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<script language="JavaScript" type="text/javascript" >
-function do_set() 
-{
-	_url="/control/exec?Y_Plugins&mount_build_form&"+
-		document.getElementById("R1").value;
-	parent.frames[1].location.href=_url;
-}
-</script>
 </head>
 <body>
 
 <br>
-<div class="y_head">Mount Uebersicht (BETA - In Arbeit)</div>
+<div class="y_head">Mount</div>
 <div class="y_work_box">
-	<form><font size="1">
-	<!---Y_list--->
-	</font>
-		<input type="button" value="Auswahl ..." name="B1" onClick='do_set()'>
+	<form action="/y/cgi" name="f" id="f">
+		{=func:mount-get-list=}
+		<input type="hidden" name="tmpl" value="Y_Settings_mount.htm">
+		<input type="submit" value="Auswahl ...">
 	</form>
 </div>
 </body>
