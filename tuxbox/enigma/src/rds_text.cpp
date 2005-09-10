@@ -116,7 +116,7 @@ void RDSTextDecoder::process_data(int what)
 	// TODO build a complete radiotext charcode to UTF8 conversion table for all character > 0x80
 								switch (c)
 								{
-									case 0 ... 0x79: break;
+									case 0 ... 0x7f: break;
 									case 0x8d: c='ß'; break;
 									case 0x91: c='ä'; break;
 									case 0xd1: c='Ä'; break;
