@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: yapi.cpp,v 1.1 2005/09/10 12:28:32 yjogol Exp $
+	$Id: yapi.cpp,v 1.2 2005/09/10 12:32:54 yjogol Exp $
 
 	License: GPL
 
@@ -47,12 +47,12 @@
 			example: replaces {=ini-get:/var/tuxbox/config/nhttpd.conf;AuthPassword=}
 				with the password for the WebInterface from the conf-file				 
 
-		-"inculde:<filename>" // TO BE IMPLEMENTED
+		-"inculde:<filename>"
 			insert file
 			example: {=include:/var/tuxbox/config/nhttpd.conf=} wile be replaced
 				with the given file (the output will be parsed}
 
-		-"shell:<shell commands>" // TO BE IMPLEMENTED
+		-"shell:<shell commands>"
 			execute shell command and replace with output
 			example: {=shell:echo "hello" >\tmp\a \ncat /tmp/a=} 
 
