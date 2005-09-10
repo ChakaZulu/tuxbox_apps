@@ -1,5 +1,20 @@
 Severity	id		Headline							Build
 
+3-Average	JG200000147	LiveView nur 9 Bouquets im Dropdown. fixed.			R1.3.1
+4-Minor		JG200000179	dietmarW-Images habe kein /var/tmp also /tmp nutzen		R1.3.1
+5-Enhancement	JG200000084	Plugins: Settings: Mount-Einstellungen				R1.3.1
+5-Enhancement	JG200000182	Live: Bouquets & Channel: Dropdown Breite begrenzen		R1.3.1
+5-Enhancement	JG200000183	Bouquets: epg und settings im yWeb_Layout			R1.3.1
+5-Enhancement	JG200000184	ycgi: execute=<script/func> wird als erstes ausgeführt		R1.3.1
+5-Enhancement	JG200000185	ycgi: Parameter tmpl=<html-Seite> wird geparsed und ausgegeben	R1.3.1
+5-Enhancement	JG200000187	nhhtpd.conf, wenn neu erstellt dann httpd-y in Private-Path	R1.3.1
+5-Enhancement	JG200000192	Link auf Tuxbox-Wiki. Klick Logo (links oben)			R1.3.1
+5-Enhancement	JG200000195	ycgi: New Parsing-Engine /y/cgi?...				R1.3.1
+5-Enhancement	JG200000196	nhttpd: simplfy execCGI in controlAPI				R1.3.1
+5-Enhancement	JG200000197	nhttpd: PLUGIN_DIRS jetzt in ControlAPI Constructor		R1.3.1
+5-Enhancement	JG200000198	Tools: Test wird nicht mehr gebraucht. nhttpd in CVS		R1.3.1
+5-Enhancement	JG200000199	Tools: nicht mehr mit Boxcontrol starten			R1.3.1
+
 4-Minor		JG200000064	Live: geht nicht wenn SPTS aus-> vorher einschalten		R1.3.0
 4-Minor		JG200000099	Tools-Format-Template (sed wie mount-liste) Vereinfachung	R1.3.0
 4-Minor		JG200000149	Flash: Vor Upload *.img in tmp löschen				R1.3.0
