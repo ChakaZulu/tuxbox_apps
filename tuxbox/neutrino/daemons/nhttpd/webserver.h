@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.23 2005/08/31 17:54:25 yjogol Exp $
+        $Id: webserver.h,v 1.24 2005/09/10 12:30:33 yjogol Exp $
 
         License: GPL
 
@@ -43,7 +43,7 @@
 
 #define NHTTPD_VERSION "2.1a"
 
-#define PRIVATEDOCUMENTROOT	"/share/tuxbox/neutrino/httpd"
+#define PRIVATEDOCUMENTROOT	"/share/tuxbox/neutrino/httpd-y"
 #define PUBLICDOCUMENTROOT	"/var/httpd"
 
 class CWebDbox;
