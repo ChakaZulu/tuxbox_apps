@@ -87,3 +87,30 @@ body
 	background: #FFFFCC;
 	border-spacing: 1px;
 }
+
+.y_live_button
+{
+	font-size: 8pt;
+	height: 20px;
+}
+.y_live_bouquets
+{
+	font-size: 8pt;
+	height: 20px;
+	width: 150px;
+}
+.y_live_channels
+{
+	font-size: 8pt;
+	height: 20px;
+	width: 150px;
+}
+
+.y_form_table
+{
+	font-size: 10pt;
+}
+input
+{
+	font-size: 10pt;
+}

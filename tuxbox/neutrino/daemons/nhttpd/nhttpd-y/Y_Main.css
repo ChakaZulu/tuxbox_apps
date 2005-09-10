@@ -71,6 +71,7 @@ body
 	padding-top: 10px;
 	padding-bottom: 10px;
 	float:left;
+	
 }
 
 .y_work_table
@@ -108,3 +109,11 @@ body
 	width: 150px;
 }
 
+.y_form_table
+{
+	font-size: 10pt;
+}
+input
+{
+	font-size: 10pt;
+}
