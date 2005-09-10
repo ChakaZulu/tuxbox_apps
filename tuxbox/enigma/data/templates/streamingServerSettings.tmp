@@ -102,7 +102,7 @@
 					<td colspan="2">&nbsp;</td>
 				</tr>
 				<tr>
-					<td colspan="2">#SUBMITBUTTON#</td>
+					<td colspan="2">#CHANGEBUTTON#</td>
 				</tr>
 			</tbody>
 			</table>
