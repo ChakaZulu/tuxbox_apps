@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Plugins (yjogol)
-# $Date: 2005/08/31 18:23:49 $
-# $Revision: 1.1 $
+# $Date: 2005/09/10 12:50:31 $
+# $Revision: 1.2 $
 # -----------------------------------------------------------
 
 . /share/tuxbox/neutrino/httpd-y/scripts/_Y_Globals.sh
@@ -154,74 +154,6 @@ nhttpd_set()
 	fi
 }
 
-# ===========================================================
-# Settings : Mount
-# ===========================================================
-mount_build_list_form()
-{
-	config_open $y_config_neutrino
-	list=""
-    for i in 0 1 2 3 4 5 6 7
-    do
-
-        ytype=`config_get_value "network_nfs_type_$i"`
-        yip=`config_get_value "network_nfs_ip_$i"`
-        ydir=`config_get_value "network_nfs_dir_$i"`
-
-		case "$ytype" in
-		0) yytype="NFS" ;;
-		1) yytype="CIFS" ;;
-		2) yytype="FTPFS" ;;
-		*) yytype="nix" ;;
-		esac
-		if [ "$ydir" != "" ]
-		then
-			ydir="($ydir)"
-		fi
-
-		sel=""
-		if [ "$i" = "0" ]
-		then
-			sel="checked"
-		fi
-
-		tmp="<input type='radio' name='R1' value='$i' $sel>$i $yytype - $yip $ydir<br>"
-		list="$list $tmp"
-	done
-	buildPage=`sed '/Y_list/i '"$list"' ' $y_path_httpd/Y_Settings_mount_liste.htm`
-	echo "$buildPage"
-}
-
-# -----------------------------------------------------------
-mount_build_form()
-{
-	config_open $y_config_neutrino
-
-	ytype=`config_get_value "network_nfs_type_$1"`
-	yip=`config_get_value "network_nfs_ip_$1"`
-	ydir=`config_get_value "network_nfs_dir_$1"`
-
-	buildPage=`sed -e s/Y_type/$ytype/g $y_path_httpd/Y_Settings_mount.htm | sed -e s/Y_ip/$yip/g | sed -e s/Y_dir/$ydir/g | sed -e s/Y_nr/$1/g`
-	echo "$buildPage"
-}
-
-# -----------------------------------------------------------
-mount_set()
-{
-	if [ "$#" -ne 4 ]
-	then
-		echo "zu wenig Parameter ($*)"
-	else
-		config_open $y_config_nhttpd
-		config_set_value 'AuthPassword' $1
-		config_set_value 'AuthUser' $2
-		config_set_value 'Authenticate' $3
-		config_set_value 'Port' $4
-		config_write $y_config_nhttpd
-		echo "nhttpd Parameter uebernommen"
-	fi
-}
-
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
@@ -254,23 +186,6 @@ case "$1" in
         else
         	shift 1
 			nhttpd_set $*
-		fi ;;
-
-	mount_build_list_form)
-		shift 1
-		mount_build_list_form $* ;;
-
-	mount_build_form)
-		shift 1
-		mount_build_form $* ;;
-
-	mount_set)
-        if [ "$#" -ne 5 ]
-        then
-            echo "nhttpd_set: zu wenig Parameter ($*)"
-        else
-        	shift 1
-			mount_set $*
 		fi ;;
 
 	skin_build_form)

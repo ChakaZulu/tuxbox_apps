@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Globals (yjogol)
-# $Date: 2005/09/02 19:09:08 $
-# $Revision: 1.2 $
+# $Date: 2005/09/10 12:50:31 $
+# $Revision: 1.3 $
 # -----------------------------------------------------------
 
 # -----------------------------------------------------------
@@ -32,6 +32,8 @@ y_boot_logo="/var/tuxbox/boot/logo-fb"
 y_boot_logo_lcd="/var/tuxbox/boot/logo-lcd"
 y_tmp="$y_path_tmp/y.tmp"
 y_wait_live="$y_path_httpd/Y_WaitLive.htm"
+y_tmp_m3u="$y_path_tmp/y.m3u"
+y_tmp_m4u="$y_path_tmp/y.m4u"
 
 
 
