@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.61 2005/06/26 18:01:27 barf Exp $
+	$Id: webdbox.cpp,v 1.62 2005/09/10 12:34:54 yjogol Exp $
 
 	License: GPL
 
@@ -34,6 +34,7 @@
 #include "debug.h"
 #include "webdbox.h"
 #include "lcdapi.h"
+#include "yapi.h"
 
 //-------------------------------------------------------------------------
 
@@ -99,6 +100,7 @@ CWebDbox::CWebDbox(CWebserver *server)
 	WebAPI = new CWebAPI(this);
 	BouqueteditAPI = new CBouqueteditAPI(this);
 	LcdAPI = new CLCDAPI(this);
+	yAPI = new CyAPI(this);
 
 	UpdateBouquets();
 
@@ -151,6 +153,8 @@ CWebDbox::~CWebDbox(void)
 		delete Zapit;
 	if (Timerd)
 		delete Timerd;
+	if (yAPI)
+		delete yAPI;
 	if (EventServer)
 		delete EventServer;
 }

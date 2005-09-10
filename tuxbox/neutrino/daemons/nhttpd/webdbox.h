@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.42 2005/06/26 18:01:27 barf Exp $
+        $Id: webdbox.h,v 1.43 2005/09/10 12:34:54 yjogol Exp $
 
         License: GPL
 
@@ -41,6 +41,7 @@
 #include "helper.h"
 #include "request.h"
 #include "lcdapi.h"
+#include "yapi.h"
 
 class CWebserver;
 class CWebserverRequest;
@@ -49,6 +50,7 @@ class CWebAPI;
 class CBouqueteditAPI;
 class CWebDbox;
 class CLCDAPI;
+class CyAPI;
 
 #include "controlapi.h"
 #include "bouqueteditapi.h"
@@ -66,7 +68,7 @@ class CWebDbox
 	CSectionsdClient	*Sectionsd;
 	CZapitClient		*Zapit;
 	CTimerdClient		*Timerd;
-	CLCDAPI                         *LcdAPI;
+	CLCDAPI                 *LcdAPI;
 
 	CEventServer		*EventServer;
 
@@ -116,10 +118,12 @@ public:
 	CControlAPI		*ControlAPI;
 	CWebAPI			*WebAPI;
 	CBouqueteditAPI		*BouqueteditAPI;
+	CyAPI                 	*yAPI;
 
 	friend class CWebAPI;
 	friend class CControlAPI;
 	friend class CBouqueteditAPI;
+	friend class CyAPI;
 };
 
 #endif /* __nhttpd_webdbox_h__ */
