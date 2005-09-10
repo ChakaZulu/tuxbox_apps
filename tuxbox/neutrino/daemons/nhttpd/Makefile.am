@@ -12,7 +12,7 @@ bin_PROGRAMS = nhttpd
 
 nhttpd_SOURCES = \
 	controlapi.cpp bouqueteditapi.cpp debug.cpp helper.cpp \
-	nhttpd.cpp request.cpp webapi.cpp webdbox.cpp webserver.cpp lcdapi.cpp
+	nhttpd.cpp request.cpp webapi.cpp webdbox.cpp webserver.cpp lcdapi.cpp yapi.cpp
 
 nhttpd_LDADD = \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
