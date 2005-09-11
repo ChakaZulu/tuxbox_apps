@@ -74,6 +74,7 @@ eZapLCDMain::eZapLCDMain(eWidget *parent)
 	
 	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapLCDMain::volumeUpdate);
 	CONNECT(eDVB::getInstance()->leaveService, eZapLCDMain::leaveService);
+	CONNECT(rdstext_decoder.textReady, eZapLCDMain::gotRDSText );
 }
 
 void eZapLCDMain::volumeUpdate(int mute_state, int vol)
@@ -112,6 +113,13 @@ void eZapLCDMain::leaveService(const eServiceReferenceDVB &service)
 		return;
 	Progress->hide();
 	ServiceName->setText("");
+}
+
+void eZapLCDMain::gotRDSText(eString text)
+{
+	//If available, display RDS-Data instead of Servicename.
+	//Fixme: Disable autoformat, add scolling.
+	ServiceName->setText(text);
 }
 
 eZapLCDMenu::eZapLCDMenu(eWidget *parent)

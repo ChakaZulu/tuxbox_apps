@@ -7,6 +7,7 @@
 #include <lib/gui/eprogress.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/multipage.h>
+#include <src/rds_text.h>
 
 class eService;
 class eZapLCDMain;
@@ -45,6 +46,8 @@ public:
 	void setServiceName(eString name);
 	eLabel *ServiceName;
 	eZapLCDMain(eWidget *parent);
+	void gotRDSText(eString);
+	RDSTextDecoder rdstext_decoder;
 };
 
 class eZapLCDMenu: public eWidget
