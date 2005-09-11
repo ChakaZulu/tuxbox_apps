@@ -2,7 +2,7 @@
 #pzapit -kill
 #dvbtune -c 0 -f 12603750 -p H -s 22000 -n 768
 dvbnetctrl -add 768
-ifconfig dvb0_0 10.0.0.1 255.0.0.0
+ifconfig dvb0_0 10.0.0.1 netmask 255.0.0.0
 #ip link set dvb0_0 up
 echo Device dvb0_0 aktiviert
 sleep 2
