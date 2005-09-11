@@ -2,8 +2,11 @@ TuxCom:
 
 Historie:
 ---------
+10.08.2005 Version 1.9a
+ - Schwedische Übersetzung eingebaut (Dank an yeager)
+
 10.08.2005 Version 1.9
- - Unterstützung für Dbox2-Tastaturen
+ - Unterstützung für Dbox2-Tastaturen (von robspr1)
 
 15.07.2005 Version 1.8a
  - Italienische Übersetzung eingebaut (Dank an fbrassin)

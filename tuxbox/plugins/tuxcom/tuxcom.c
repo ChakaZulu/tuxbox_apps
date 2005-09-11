@@ -226,7 +226,7 @@ int GetRCCode(int mode)
 /******************************************************************************
  * GetRCCode  (Code from Tuxmail)
  ******************************************************************************/
- 
+
 #if HAVE_DVB_API_VERSION == 3
 
 int GetRCCode(int mode)
@@ -296,7 +296,7 @@ int GetRCCode(int mode)
 					}
 					else if( rc_last_code == RC_ALT )
 					{
-						if((ev.code >=2) && ( ev.code <= 11 )) 
+						if((ev.code >=2) && ( ev.code <= 11 ))
 						{
 							rccode = (ev.code-1) | 0x0200;
 						}
@@ -305,7 +305,7 @@ int GetRCCode(int mode)
 					{
 //						rccode = -1;
 					}
-					
+
 			}
 			rc_last_code = rccode;
 			return 1;
@@ -722,6 +722,7 @@ void SetLanguage()
 		language=LANG_INT;
 		if (strncmp(setlocale( LC_ALL, NULL ),"de",2) == 0) language=LANG_DE;
 		if (strncmp(setlocale( LC_ALL, NULL ),"it",2) == 0) language=LANG_IT;
+		if (strncmp(setlocale( LC_ALL, NULL ),"sv",2) == 0) language=LANG_SV;
 	}
 	else
 	{
@@ -729,6 +730,7 @@ void SetLanguage()
 		{
 			case BTN_GERMAN : language = LANG_DE ; break;
 			case BTN_ITALIAN: language = LANG_IT ; break;
+			case BTN_SWEDISH: language = LANG_SV ; break;
 			default         : language = LANG_INT; break;
 		}
 	}
@@ -2393,7 +2395,8 @@ void DoMainMenu()
 							switch (langselect)
 							{
 								case BTN_AUTO   : langselect = BTN_ENGLISH; break;
-								case BTN_ITALIAN: langselect = BTN_AUTO   ; break;
+								case BTN_SWEDISH: langselect = BTN_AUTO   ; break;
+								case BTN_ITALIAN: langselect = BTN_SWEDISH; break;
 								case BTN_GERMAN : langselect = BTN_ITALIAN; break;
 								case BTN_ENGLISH: langselect = BTN_GERMAN ; break;
 							}
@@ -2416,7 +2419,8 @@ void DoMainMenu()
 						case 4:
 							switch (langselect)
 							{
-								case BTN_AUTO   : langselect = BTN_ITALIAN; break;
+								case BTN_AUTO   : langselect = BTN_SWEDISH; break;
+								case BTN_SWEDISH: langselect = BTN_ITALIAN; break;
 								case BTN_ITALIAN: langselect = BTN_GERMAN ; break;
 								case BTN_GERMAN : langselect = BTN_ENGLISH; break;
 								case BTN_ENGLISH: langselect = BTN_AUTO   ; break;

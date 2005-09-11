@@ -3,8 +3,11 @@ TuxCom:
 History:
 ---------
 
+11.09.2005 Version 1.9a
+ - added swedish language support (thanks to yeager)
+
 10.08.2005 Version 1.9
- - support of dbox2-keyboards integrated
+ - support of dbox2-keyboards integrate (by robspr)
 
 15.07.2005 Version 1.8a
  - added italian language support (thanks to fbrassin)
