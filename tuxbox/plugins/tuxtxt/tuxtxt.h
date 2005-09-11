@@ -288,6 +288,17 @@ const unsigned short int G2table[3][6*16] =
 	  'C' ,'D' ,'F' ,'G' ,'J' ,'L' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Y' ,'Z' ,902 ,905 ,
 	  'c' ,'d' ,'f' ,'g' ,'j' ,'l' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'y' ,'z' ,904 ,0x7F}
 };
+// cyrillic G0 Charset
+// TODO: different maps for serbian/russian/ukrainian
+const unsigned short int G0tablecyrillic[6*16] =
+{
+	  ' ' ,'!' ,'\"','#' ,'$' ,'%' ,'&' ,'\'','(' ,')' ,'*' ,'+' ,',' ,'-' ,'.' ,'/' ,
+	  '0' ,'1' ,'2' ,'3' ,'4' ,'5' ,'6' ,'7' ,'8' ,'9' ,':' ,';' ,'<' ,'=' ,'>' ,'?' ,
+	  1063,1040,1041,1061,1044,1045,1060,1043,1061,1048,1032,1050,1051,1052,1053,1054,
+	  1055,1036,1056,1057,1058,1059,1042,1027,1033,1034,1047,1035,1046,1026,1064,1119,
+	  1095,1072,1073,1076,1077,1092,1075,1093,1080,1112,1080,1082,1083,1084,1085,1086,
+	  1087,1116,1088,1089,1090,1091,1074,1107,1113,1114,1079,1115,1078,1106,1096,0x7F
+};
 
 const unsigned short int nationaltable23[14][2] =
 {
@@ -357,6 +368,7 @@ const unsigned short int nationaltable7b[14][4] =
 	{ 'ה', 'צ', 'ו', 'ü' }, /* C SV/FI/HU */
 	{ 351, 'צ', 231, 'ü' }, /* D    TR    */
 };
+
 const unsigned short int arrowtable[] =
 {
 	8592, 8594, 8593, 8595, 'O', 'K', 8592, 8592
@@ -479,8 +491,8 @@ unsigned char avstable_dvb[3][7] =
 };
 
 /* language dependent texts */
-#define MAXMENULANGUAGE 6 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch, 6 polnisch */
-const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL };
+#define MAXMENULANGUAGE 7 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch, 6 polnisch, 7 schwedisch */
+const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL    , NAT_SW};
 
 
 #define Menu_StartX (StartX + fontwidth*9/2)
@@ -512,11 +524,11 @@ enum
 
 const char hotlistpagecolumn[] =	/* last(!) column of page to show in each language */
 {
-	22, 26, 28, 27, 28, 27, 28
+	22, 26, 28, 27, 28, 27, 28, 27
 };
 const char hotlisttextcolumn[] =
 {
-	24, 14, 14, 15, 14, 15, 14
+	24, 14, 14, 15, 14, 15, 14, 14
 };
 const char hotlisttext[][2*5] =
 {
@@ -526,7 +538,8 @@ const char hotlisttext[][2*5] =
 	{ "toev.verw." },
 	{ "pqoshavaiq" },
 	{ "agg. elim." },
-	{ "dodajkasuj" }
+	{ "dodajkasuj" },
+	{ "  ny  bort" }
 };
 
 const char configonoff[][2*3] =
@@ -537,7 +550,8 @@ const char configonoff[][2*3] =
 	{ "uitaan" },
 	{ "emeape" },
 	{ "offon " },
-	{ "wy}w} " }
+	{ "wy}w} " },
+	{ "p} av " }
 };
 const char menuatr[Menu_Height*Menu_Width] =
 {
@@ -761,8 +775,36 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד automatyczne rozpozn.      הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם  J`zyk/Language   polski מהי"
-		"וז - www.tuxtxt.com  x.xx - זחי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
+	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+        "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+        "ד     Konfigurationsmeny     הי"
+        "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+        "ד1 Favoriter:    ny sida 111 הי"
+        "דםמסע                        הי"
+        "ד+-?                         הי"
+        "ד                            הי"
+        "ד2      TextTV v{ljaren      הי"
+        "דם            s|k           מהי"
+        "ד                            הי"
+        "ד        TV- format          הי"
+        "ד3 Standard l{ge 16:9        הי"
+        "ד4 Text/Bild l{ge  16:9      הי"
+        "ד                            הי"
+        "ד5        Ljusstyrka         הי"
+        "דם                          מהי"
+        "ד6     Genomskinlighet       הי"
+        "דם                          מהי"
+        "ד7nationell teckenupps{ttningהי"
+        "ד automatisk igenk{nning     הי"
+        "דם    DE    (#$@[\\]^_`{|}~) מהי"
+        "דם Sprache/language svenska מהי"
+        "וז   www.tuxtxt.com  x.xx   זחי"
+        "כלללללללללללללללללללללללללללללך"
 	},
 };
 
@@ -781,7 +823,9 @@ const char catchmenutext[][80] =
 	{ "        םןנמseleziona סע mostra         "
 	  "0000000011110000000000110000000000000000" },
 	{ "        םןנמ wybiez   סע wyswietl       "
-	  "0000000011110000000000110000000000000000" }
+	  "0000000011110000000000110000000000000000" },
+	{ "        םןנמ v{lj     סע visa           "
+      "0000000011110000000000110000000000000000" }
 };
 
 const char message_3[][38] =
@@ -792,7 +836,8 @@ const char message_3[][38] =
 	{ "ד zoeken naar teletekst aanbieders  הי" },
 	{ "ד     amafgtgsg voqeym Teketent     הי" },
 	{ "ד     attesa opzioni televideo      הי" },
-	{ "ד  poszukiwanie sygna}u telegazety  הי" }
+	{ "ד  poszukiwanie sygna}u telegazety  הי" },
+	{ "ד    s|ker efter TextTV tj{nster    הי" }
 };
 const char message_3_blank[] = "ד                                   הי";
 const char message_7[][38] =
@@ -803,7 +848,8 @@ const char message_7[][38] =
 	{ "ד geen teletekst op de transponder  הי" },
 	{ "ד jalela Teketent ston amaletadotg  הי" },
 	{ "ד nessun televideo sul trasponder   הי" },
-	{ "ד   brak sygna}u na transponderze   הי" }
+	{ "ד   brak sygna}u na transponderze   הי" },
+	{ "ד ingen TextTV p} denna transponder הי" }
 };
 const char message_8[][38] =
 {
@@ -815,11 +861,12 @@ const char message_8[][38] =
 	{ "דwachten op ontvangst van pagina 100הי" },
 	{ "ד     amalemy kgxg sekidar 100      הי" },
 	{ "ד   attesa ricezione pagina 100     הי" },
-	{ "ד     oczekiwanie na stron` 100     הי" }
+	{ "ד     oczekiwanie na stron` 100     הי" },
+	{ "ד  v{ntar p} mottagning av sida 100 הי" }
 };
 const char message8pagecolumn[] = /* last(!) column of page to show in each language */
 {
-	33, 34, 34, 35, 29, 30, 30
+	33, 34, 34, 35, 29, 30, 30, 34
 };
 
 enum /* options for charset */

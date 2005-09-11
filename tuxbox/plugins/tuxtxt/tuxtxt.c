@@ -1480,7 +1480,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.92 $";
+	char cvs_revision[] = "$Revision: 1.93 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -4412,19 +4412,16 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 			return;
 		}
 	}
-	else if (national_subset_local == NAT_GR && Char >= 0x40 && Char <= 0x7E)	/* remap complete areas for greek and cyrillic */
+	else if (national_subset_local == NAT_GR && Char >= 0x40 && Char <= 0x7E)	/* remap complete areas for greek */
 		Char += 0x390 - 0x40;
-	else if (national_subset_local == NAT_GR && Char == 0x52)
-		Char = 0x27; /* right-shifted apostrophe */
 	else if (national_subset_local == NAT_GR && Char == 0x3c)
-		Char = 0x226a; /* much-less */
+		Char = '«';
 	else if (national_subset_local == NAT_GR && Char == 0x3e)
-		Char = 0x226b; /* much-greater */
+		Char = '»';
 	else if (national_subset_local == NAT_GR && Char >= 0x23 && Char <= 0x24)
 		Char = nationaltable23[NAT_DE][Char-0x23]; /* #$ as in german option */
-	else if (national_subset_local == NAT_RU &&
-				Char >= 0x40 && Char <= 0x7E)
-		Char += 0x400 - 0x40;
+	else if (national_subset_local == NAT_RU && Char >= 0x40 && Char <= 0x7E) /* remap complete areas for cyrillic */
+		Char = G0tablecyrillic[Char-0x20];
 	else
 	{
 		/* load char */
@@ -5149,7 +5146,7 @@ void RenderPage()
 						}
 						else
 							SetPosX(8);
-	
+
 						memcpy(&page_char[8], pCachedPage->p0, 24); /* header line without timestring */
 						for (col = 0; col < 24; col++)
 						{

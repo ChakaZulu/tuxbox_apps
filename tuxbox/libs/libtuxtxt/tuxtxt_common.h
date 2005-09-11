@@ -101,8 +101,11 @@ void tuxtxt_decompress_page(int p, int sp, unsigned char* buffer)
 	if (pg->pData)
 	{
 #if TUXTXT_COMPRESS == 1
-		uLongf comprlen = 23*40;
-		uncompress(buffer,&comprlen,pg->pData,pg->ziplen);
+		if (pg->ziplen)
+		{
+			uLongf comprlen = 23*40;
+			uncompress(buffer,&comprlen,pg->pData,pg->ziplen);
+		}
 
 #elif TUXTXT_COMPRESS == 2
 		int i,j=0;
@@ -500,14 +503,21 @@ void tuxtxt_decode_p2829(unsigned char *vtxt_row, tstExtData **ptExtData)
 
 void tuxtxt_erase_page(int magazine)
 {
-	memset(&(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->pageinfo), 0, sizeof(tstPageinfo));	/* struct pageinfo */
-	memset(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->p0, ' ', 24);
+	pthread_mutex_lock(&tuxtxt_cache_lock);
+    tstCachedPage* pg = tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]];
+	if (pg)
+	{
+		memset(&(pg->pageinfo), 0, sizeof(tstPageinfo));	/* struct pageinfo */
+		memset(pg->p0, ' ', 24);
 #if TUXTXT_COMPRESS == 1
+    	if (pg->pData) {free(pg->pData); pg->pData = NULL;}
 #elif TUXTXT_COMPRESS == 2
-	memset(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->bitmask, 0, 23*5);
+		memset(pg->bitmask, 0, 23*5);
 #else
-	memset(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->data, ' ', 23*40);
+		memset(pg->data, ' ', 23*40);
 #endif
+	}
+	pthread_mutex_unlock(&tuxtxt_cache_lock);
 }
 
 void tuxtxt_allocate_cache(int magazine)
@@ -687,6 +697,7 @@ void *tuxtxt_CacheThread(void *arg)
 
 					/* check controlbits */
 					if (dehamming[vtxt_row[5]] & 8)   /* C4 -> erase page */
+					{
 #if TUXTXT_COMPRESS == 1
 						tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->ziplen = 0;
 #elif TUXTXT_COMPRESS == 2
@@ -694,6 +705,8 @@ void *tuxtxt_CacheThread(void *arg)
 #else
 						memset(tuxtxt_cache.astCachetable[tuxtxt_cache.current_page[magazine]][tuxtxt_cache.current_subpage[magazine]]->data, ' ', 23*40);
 #endif
+						memset(pagedata[magazine],' ', 23*40);
+					}
 					if (dehamming[vtxt_row[9]] & 8)   /* C8 -> update page */
 						doupdate = tuxtxt_cache.page_receiving;
 
