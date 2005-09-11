@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Live (yjogol)
-# $Date: 2005/09/10 12:51:31 $
-# $Revision: 1.4 $
+# $Date: 2005/09/11 10:30:09 $
+# $Revision: 1.5 $
 # -----------------------------------------------------------
 
 . /share/tuxbox/neutrino/httpd-y/scripts/_Y_Globals.sh
@@ -120,7 +120,7 @@ live_buildpanel()
 # -----------------------------------
 case "$1" in
 	panel)
-		live_buildpanel	;;
+		live_buildpanel	$* ;;
 
 	zapto)
 		wget -O - -q "$y_url_control/zapto?$2" >/dev/null
