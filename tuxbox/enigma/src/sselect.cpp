@@ -831,7 +831,7 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 		eServiceReference ref=entry->service;
 
 #ifndef DISABLE_FILE
-		if ( ref.type == 0x2000 ) // picviewer
+		if ((ref.type == 0x2000) && (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)) // picviewer
 		{
 			hide();
 			ePictureViewer e(ref.path);
@@ -1132,7 +1132,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				hide();
 #ifndef DISABLE_FILE
-				if (selected.type == 0x2000)  // Picture
+				if ((selected.type == 0x2000) && (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000))  // Picture
 				{
 					ePicViewerSettings f;
 #ifndef DISABLE_LCD

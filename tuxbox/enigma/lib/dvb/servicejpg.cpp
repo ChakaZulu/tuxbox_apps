@@ -7,6 +7,7 @@
 #include <lib/system/init_num.h>
 #include <lib/base/i18n.h>
 #include <lib/gdi/fb.h>
+#include <lib/system/info.h>
 #include <lib/picviewer/pictureviewer.h>
 
 #include <unistd.h>
@@ -30,20 +31,23 @@ eServiceHandlerJPG::~eServiceHandlerJPG()
 
 void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 {
-	if (filename.right(4).upper() == ".JPG" ||
-	    filename.right(5).upper() == ".JPEG" ||
-	    filename.right(4).upper() == ".CRW" ||
-	    filename.right(4).upper() == ".GIF" ||
-	    filename.right(4).upper() == ".PNG" ||
-	    filename.right(4).upper() == ".BMP")
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 	{
-		struct stat s;
-		if (!(::stat(filename.c_str(), &s)))
+		if (filename.right(4).upper() == ".JPG" ||
+		    filename.right(5).upper() == ".JPEG" ||
+		    filename.right(4).upper() == ".CRW" ||
+		    filename.right(4).upper() == ".GIF" ||
+		    filename.right(4).upper() == ".PNG" ||
+		    filename.right(4).upper() == ".BMP")
 		{
-			eServiceReference ref(id, 0, filename);
-			ref.descr = filename.substr(filename.find_last_of("/") + 1, filename.length() - 1);
-			ref.flags |= eServiceReference::isNotPlayable;
-			eServiceFileHandler::getInstance()->addReference(node, ref);
+			struct stat s;
+			if (!(::stat(filename.c_str(), &s)))
+			{
+				eServiceReference ref(id, 0, filename);
+				ref.descr = filename.substr(filename.find_last_of("/") + 1, filename.length() - 1);
+				ref.flags |= eServiceReference::isNotPlayable;
+				eServiceFileHandler::getInstance()->addReference(node, ref);
+			}
 		}
 	}
 }
