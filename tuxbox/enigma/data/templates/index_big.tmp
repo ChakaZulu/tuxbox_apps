@@ -81,7 +81,7 @@
 			}
 			function init()
 			{
-				data.location = "data";
+				data.location.reload();
 				var refresh = 10000;
 				if (data.updateCycleTime)
 					refresh = data.updateCycleTime;
@@ -290,6 +290,6 @@
 		</tbody>
 		</table>
 		<iframe name="vlccmd" src="" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe>
-		<iframe name="data" src="blank" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe>
+		<iframe name="data" src="data" height="0" frameborder="0" framemargin="0" framewidth="0"></iframe>
 	</body>
 </html>
