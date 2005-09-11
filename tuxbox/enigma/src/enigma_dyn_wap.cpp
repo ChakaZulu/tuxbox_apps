@@ -36,12 +36,12 @@
 #include <lib/system/econfig.h>
 #include <enigma_dyn.h>
 #include <enigma_dyn_utils.h>
+#include <enigma_dyn_epg.h>
 #include <enigma_dyn_wap.h>
 
 using namespace std;
 
 extern eString zap[5][5];
-extern eString getEITC(eString result);
 extern eString getCurService();
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 
@@ -468,7 +468,7 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 	else
 	{
 		result = readFile(TEMPLATE_DIR + "wap.tmp");
-		result = getEITC(result);
+		result = getEITC(result, "HTML");
 		result.strReplace("#SERVICE#", getCurService());
 	}
 

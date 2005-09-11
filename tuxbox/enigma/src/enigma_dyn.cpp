@@ -1221,7 +1221,7 @@ static eString getZap(eString path)
 	else
 	{
 		eString tmp = getPDAZapContent(path);
-		result = (tmp) ? getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp")) + tmp : "";
+		result = (tmp) ? getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"), "HTML") + tmp : "";
 	}
 
 	return result;
@@ -2383,7 +2383,7 @@ eString getBoxStatus(eString format)
 	result.strReplace("#TIME#", eString(ctime(&atime)));
 
 	// epg data
-	result = getEITC(result);
+	result = getEITC(result, format);
 
 	// webif update cycle
 	int updateCycle = 10000;

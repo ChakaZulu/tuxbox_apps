@@ -4,7 +4,7 @@
 class eHTTPDynPathResolver;
 void ezapEPGInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb);
 eString getServiceEPG(eString format, eString opts);
-eString getEITC(eString result);
+eString getEITC(eString result, eString format);
 
 #endif /* __enigma_dyn_epg_h */
 

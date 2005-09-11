@@ -57,7 +57,7 @@ using namespace std;
 extern int pdaScreen;
 extern eString getCurService(void);
 extern eString getCurrentSubChannel(eString curServiceRef);
-extern eString XMLify(eString s);
+extern eString XMLify(eString s, eString format);
 
 eString getServiceEPG(eString format, eString opts)
 {
@@ -140,9 +140,9 @@ eString getServiceEPG(eString format, eString opts)
 					result.strReplace("#TIME#", eString().sprintf("%02d:%02d", t->tm_hour, t->tm_min));
 					result.strReplace("#DURATION#", eString().sprintf("%d", event.duration));
 					eString tmp = filter_string(description);
-					result.strReplace("#DESCRIPTION#", XMLify(tmp)); 
+					result.strReplace("#DESCRIPTION#", XMLify(tmp, format)); 
 					tmp = filter_string(ext_description);
-					result.strReplace("#DETAILS#", XMLify(tmp));
+					result.strReplace("#DETAILS#", XMLify(tmp, format));
 					result.strReplace("#GENRE#", genre);
 					result.strReplace("#GENRECATEGORY#", eString().sprintf("%02d", genreCategory));
 					result.strReplace("#START#", eString().sprintf("%d", event.start_time));
@@ -161,7 +161,7 @@ eString getServiceEPG(eString format, eString opts)
 	return result1;
 }
 
-eString getEITC(eString result)
+eString getEITC(eString result, eString format)
 {
 	eString now_start, now_date, now_time, now_duration, now_text, now_longtext,
 		next_start, next_date, next_time, next_duration, next_text, next_longtext;
@@ -219,8 +219,8 @@ eString getEITC(eString result)
 	if (now_duration)
 		now_duration = "(" + now_duration + ")";
 	result.strReplace("#NOWD#", now_duration);
-	result.strReplace("#NOWST#", XMLify(filter_string(now_text.strReplace("\"", "'"))));
-	result.strReplace("#NOWLT#", XMLify(filter_string(now_longtext.strReplace("\"", "'"))));
+	result.strReplace("#NOWST#", XMLify(filter_string(now_text.strReplace("\"", "'")), format));
+	result.strReplace("#NOWLT#", XMLify(filter_string(now_longtext.strReplace("\"", "'")), format));
 	result.strReplace("#NEXTSTART#", next_start);
 	result.strReplace("#NEXTT#", next_time);
 	result.strReplace("#NEXTDATE#", next_date);
@@ -228,8 +228,8 @@ eString getEITC(eString result)
 	if (next_duration)
 		next_duration = "(" + next_duration + ")";
 	result.strReplace("#NEXTD#", next_duration);
-	result.strReplace("#NEXTST#", XMLify(filter_string(next_text.strReplace("\"", "'"))));
-	result.strReplace("#NEXTLT#", XMLify(filter_string(next_longtext.strReplace("\"", "'"))));
+	result.strReplace("#NEXTST#", XMLify(filter_string(next_text.strReplace("\"", "'")), format));
+	result.strReplace("#NEXTLT#", XMLify(filter_string(next_longtext.strReplace("\"", "'")), format));
 
 	eString curService = getCurService();
 	eString curServiceRef;
@@ -537,7 +537,7 @@ static eString getHTMLServiceEPG(eString request, eString dirpath, eString opts,
 static eString getchannelinfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {   
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eString result = getEITC(readFile(TEMPLATE_DIR + "eit.tmp"));
+	eString result = getEITC(readFile(TEMPLATE_DIR + "eit.tmp"), "HTML");
 	result.strReplace("#SERVICENAME#", getCurService());
     
 	return result;
