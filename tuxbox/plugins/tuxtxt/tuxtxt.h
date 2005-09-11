@@ -524,11 +524,11 @@ enum
 
 const char hotlistpagecolumn[] =	/* last(!) column of page to show in each language */
 {
-	22, 26, 28, 27, 28, 27, 28, 27
+	22, 26, 28, 27, 28, 27, 28, 21
 };
 const char hotlisttextcolumn[] =
 {
-	24, 14, 14, 15, 14, 15, 14, 14
+	24, 14, 14, 15, 14, 15, 14, 23
 };
 const char hotlisttext[][2*5] =
 {
@@ -784,7 +784,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
         "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
         "ד     Konfigurationsmeny     הי"
         "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-        "ד1 Favoriter:    ny sida 111 הי"
+        "ד1 Favoriter: sida 111 ny    הי"
         "דםמסע                        הי"
         "ד+-?                         הי"
         "ד                            הי"
