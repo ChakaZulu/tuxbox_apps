@@ -82,10 +82,7 @@
 			function init()
 			{
 				data.location.reload();
-				var refresh = 10000;
-				if (data.updateCycleTime)
-					refresh = data.updateCycleTime;
-				setTimeout("init()", refresh);
+				setTimeout("init()", 10000);
 			}
 			function updateVideoBar(videoPosition, videoTime, diskGB, diskH)
 			{
