@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.58 2005/09/01 22:56:52 timekiller Exp $
+# $Id: de.po,v 1.59 2005/09/12 20:19:14 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -4106,14 +4106,22 @@ msgid "don't cache teletext pages in background"
 msgstr "Im Hintergrund keine Videotext Seiten sammeln"
 
 #: src/setup_extra.cpp:116
+msgid "Enable History Zapping"
+msgstr "History Zapping aktivieren"
+
+#: src/setup_extra.cpp:116
+msgid "Do not care about actual mode when zapping in history list"
+msgstr "Ignoriert den aktuellen Modus wenn die History Liste benutzt wird"
+
+#: src/setup_extra.cpp:117
 msgid "Disable CoreFiles"
 msgstr "CoreFiles abschalten"
 
-#: src/setup_extra.cpp:116
+#: src/setup_extra.cpp:117
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "Keine 'Corefiles' nach einem Enigma Absturz erstellen"
 
-#: src/setup_extra.cpp:243
+#: src/setup_extra.cpp:244
 msgid ""
 "When you do a factory reset, you will lost ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4128,7 +4136,7 @@ msgstr ""
 "\n"
 "Wirklich den Vorgang fortsetzen?"
 
-#: src/setup_extra.cpp:270
+#: src/setup_extra.cpp:249
 msgid "Factory reset..."
 msgstr "Werkseinstellungen..."
 
