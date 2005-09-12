@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.32 2005/09/01 22:54:31 timekiller Exp $
+ * $Id: setup_extra.cpp,v 1.33 2005/09/12 19:49:09 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -111,6 +111,7 @@ void eExpertSetup::init_eExpertSetup()
 #ifndef TUXTXT_CFG_STANDALONE
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable teletext caching"), "/ezap/extra/teletext_caching", _("don't cache teletext pages in background")))->selected, eExpertSetup::tuxtxtCachingChanged );
 #endif
+	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Enable History Zapping"), "/elitedvb/extra/extzapping", _("Do not care about actual mode when zapping in history list"));	
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
 	    eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create 'Corefiles' after an Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
