@@ -1,5 +1,5 @@
 /*
-$Id: packet_mem.c,v 1.2 2005/09/06 23:13:51 rasc Exp $
+$Id: packet_mem.c,v 1.3 2005/09/12 20:56:16 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: packet_mem.c,v 1.2 2005/09/06 23:13:51 rasc Exp $
 
 
 $Log: packet_mem.c,v $
+Revision 1.3  2005/09/12 20:56:16  rasc
+Make dvbsnoop compile on Cygwin / Windows
+
 Revision 1.2  2005/09/06 23:13:51  rasc
 catch OS signals (kill ...) for smooth program termination
 
@@ -34,6 +37,7 @@ checks for continuity errors, etc. and decode in TS enclosed sections/pes packet
 #include <string.h>
 #include <stdlib.h>
 
+#include "dvbsnoop.h"
 
 
 

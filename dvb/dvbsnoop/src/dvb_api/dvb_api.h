@@ -1,5 +1,5 @@
 /*
-$Id: dvb_api.h,v 1.6 2005/08/12 23:02:33 rasc Exp $
+$Id: dvb_api.h,v 1.7 2005/09/12 20:56:16 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dvb_api.h,v 1.6 2005/08/12 23:02:33 rasc Exp $
 
 
 $Log: dvb_api.h,v $
+Revision 1.7  2005/09/12 20:56:16  rasc
+Make dvbsnoop compile on Cygwin / Windows
+
 Revision 1.6  2005/08/12 23:02:33  rasc
 New shortcut options: -adapter and -devnr to select dvb cards/adapters or device numbers on a card.
 This is a shortcut for -demux -dvr and -frontend...
@@ -29,6 +32,35 @@ This is a shortcut for -demux -dvr and -frontend...
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+
+
+
+//
+// -- Cygwin(??) environment
+// -- no IOCTLs or __types
+// -- Only offline analyze mode available
+//
+#ifndef ioctl
+
+#warning "----"
+#warning "IOCTL not defined (nneded for dvb-api), using dummy!"
+#warning "dvbsnoop only will support offline mode..."
+#warning "----"
+
+#define ioctl(...)  	dummyFunc()
+#define _IOR(...)  	dummyFunc()
+static int dummyFunc (void) {return 0;}
+#endif
+
+#ifndef __u64
+#define __s64   long long
+#define __u64   unsigned long long
+
+#endif
+
+
+
 
 
 
