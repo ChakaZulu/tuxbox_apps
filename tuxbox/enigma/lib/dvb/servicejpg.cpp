@@ -31,8 +31,10 @@ eServiceHandlerJPG::~eServiceHandlerJPG()
 
 void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 {
+#ifdef HAVE_DREAMBOX_HARDWARE
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 	{
+#endif
 		if (filename.right(4).upper() == ".JPG" ||
 		    filename.right(5).upper() == ".JPEG" ||
 		    filename.right(4).upper() == ".CRW" ||
@@ -49,7 +51,9 @@ void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 				eServiceFileHandler::getInstance()->addReference(node, ref);
 			}
 		}
+#ifdef HAVE_DREAMBOX_HARDWARE
 	}
+#endif
 }
 
 int eServiceHandlerJPG::play(const eServiceReference &service, int workaround )

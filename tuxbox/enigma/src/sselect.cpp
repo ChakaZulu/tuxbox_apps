@@ -831,7 +831,11 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 		eServiceReference ref=entry->service;
 
 #ifndef DISABLE_FILE
+#ifdef HAVE_DREAMBOX_HARDWARE
 		if ((ref.type == 0x2000) && (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)) // picviewer
+#else
+		if (ref.type == 0x2000) // picviewer
+#endif
 		{
 			hide();
 			ePictureViewer e(ref.path);
@@ -1132,7 +1136,11 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				hide();
 #ifndef DISABLE_FILE
+#ifdef HAVE_DREAMBOX_HARDWARE
 				if ((selected.type == 0x2000) && (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000))  // Picture
+#else
+				if (selected.type == 0x2000) // Picture
+#endif
 				{
 					ePicViewerSettings f;
 #ifndef DISABLE_LCD
