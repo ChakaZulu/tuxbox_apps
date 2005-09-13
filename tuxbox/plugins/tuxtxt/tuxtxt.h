@@ -536,10 +536,10 @@ const char hotlisttext[][2*5] =
 	{ " add rem. " },
 	{ "ajoutenlev" },
 	{ "toev.verw." },
-	{ "pqoshavaiq" },
+	{ "pq|shava_q" },
 	{ "agg. elim." },
 	{ "dodajkasuj" },
-	{ "  ny  bort" }
+	{ "ny   bort " }
 };
 
 const char configonoff[][2*3] =
@@ -698,27 +698,27 @@ const char configmenu[][Menu_Height*Menu_Width] =
 /*     0123456789012345678901234567890 */
 	{
 		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
-		"ד      Lemou quhliseym       הי"
+		"ד      Lemo} quhl_seym       הי"
 		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-		"ד1 Vaboqi:    pqosh. sek. 111הי"
+		"ד1 Vaboq_:    pqo_h. sek. 111הי"
 		"דםמסע                        הי"
 		"ד+-?                         הי"
 		"ד                            הי"
-		"ד2     Epikocg Teketent      הי"
-		"דם        amafgtgsg         מהי"
+		"ד2     Epikoc^ Teket]nt      הי"
+		"דם        Amaf^tgsg         מהי"
 		"ד                            הי"
-		"ד       Loqvg ohomgr         הי"
-		"ד3 Tqopor pqotupor   16:9    הי"
-		"ד4 Tqopor eij. jeil. 16:9    הי"
+		"ד       Loqv^ oh|mgr         הי"
+		"ד3 Tq|por pq|tupor   16:9    הי"
+		"ד4 Tq|por eij. jeil. 16:9    הי"
 		"ד                            הי"
-		"ד5       Vyteimotgta         הי"
+		"ד5       Kalpq|tgta          הי"
 		"דם                          מהי"
-		"ד6       Transparency        הי"
+		"ד6       Diav\\meia           הי"
 		"דם                          מהי"
-		"ד7    Ehmijg tuposeiqa       הי"
-		"דautolatg amacmyqisg         הי"
+		"ד7    Ehmij^ tuposeiq\\       הי"
+		"דaut|latg amacm~qisg         הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
-		"דם Ckyssa/Language ekkgmija מהי"
+		"דם Ck~ssa/Language ekkgmij\\ מהי"
 		"וז   www.tuxtxt.com  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
@@ -818,7 +818,7 @@ const char catchmenutext[][80] =
 	  "0011110000000000000000110000000000000000" },
 	{ "        םןנמ kiezen   סע tonen          "
 	  "0000000011110000000000110000000000000000" },
-	{ "        םןנמ epikocg  סע pqobokg        "
+	{ "        םןנמ epikoc^  סע pqobok^        "
 	  "0000000011110000000000110000000000000000" },
 	{ "        םןנמseleziona סע mostra         "
 	  "0000000011110000000000110000000000000000" },
@@ -834,7 +834,7 @@ const char message_3[][38] =
 	{ "ד  searching for teletext Services  הי" },
 	{ "ד  recherche des services teletext  הי" },
 	{ "ד zoeken naar teletekst aanbieders  הי" },
-	{ "ד     amafgtgsg voqeym Teketent     הי" },
+	{ "ד     amaf^tgsg voq]ym Teket]nt     הי" },
 	{ "ד     attesa opzioni televideo      הי" },
 	{ "ד  poszukiwanie sygna}u telegazety  הי" },
 	{ "ד    s|ker efter TextTV tj{nster    הי" }
@@ -846,7 +846,7 @@ const char message_7[][38] =
 	{ "ד   no teletext on the transponder  הי" },
 	{ "ד pas de teletext sur le transponderהי" },
 	{ "ד geen teletekst op de transponder  הי" },
-	{ "ד jalela Teketent ston amaletadotg  הי" },
+	{ "ד jal]la Teket]nt ston amaletadot^  הי" },
 	{ "ד nessun televideo sul trasponder   הי" },
 	{ "ד   brak sygna}u na transponderze   הי" },
 	{ "ד ingen TextTV p} denna transponder הי" }
@@ -859,7 +859,7 @@ const char message_8[][38] =
 	{ "ד waiting for reception of page 100 הי" },
 	{ "ד attentre la rיception de page 100 הי" },
 	{ "דwachten op ontvangst van pagina 100הי" },
-	{ "ד     amalemy kgxg sekidar 100      הי" },
+	{ "ד     amal]my k^xg sek_dar 100      הי" },
 	{ "ד   attesa ricezione pagina 100     הי" },
 	{ "ד     oczekiwanie na stron` 100     הי" },
 	{ "ד  v{ntar p} mottagning av sida 100 הי" }
