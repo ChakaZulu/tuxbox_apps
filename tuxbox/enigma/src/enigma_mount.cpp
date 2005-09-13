@@ -653,6 +653,7 @@ void eMountMgr::init()
 	
 	addMountedFileSystems();
 	
+#if 0
 	bool found = false;
 	for (int i = 0; i < MAX_NFS_ENTRIES; i++)
 	{
@@ -674,6 +675,7 @@ void eMountMgr::init()
 			}
 		}
 	}
+#endif
 }
 
 void eMountMgr::save()
