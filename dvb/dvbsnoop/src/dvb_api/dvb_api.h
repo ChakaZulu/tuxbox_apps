@@ -1,5 +1,5 @@
 /*
-$Id: dvb_api.h,v 1.7 2005/09/12 20:56:16 rasc Exp $
+$Id: dvb_api.h,v 1.8 2005/09/13 18:41:15 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dvb_api.h,v 1.7 2005/09/12 20:56:16 rasc Exp $
 
 
 $Log: dvb_api.h,v $
+Revision 1.8  2005/09/13 18:41:15  rasc
+... revert cygwin stuff
+
 Revision 1.7  2005/09/12 20:56:16  rasc
 Make dvbsnoop compile on Cygwin / Windows
 
@@ -38,26 +41,28 @@ This is a shortcut for -demux -dvr and -frontend...
 
 //
 // -- Cygwin(??) environment
-// -- no IOCTLs or __types
-// -- Only offline analyze mode available
+// -- uncomment the following lines...
+// --- no IOCTLs or __types
+// --- Only offline analyze mode available
 //
-#ifndef ioctl
 
-#warning "----"
-#warning "IOCTL not defined (nneded for dvb-api), using dummy!"
-#warning "dvbsnoop only will support offline mode..."
-#warning "----"
-
-#define ioctl(...)  	dummyFunc()
-#define _IOR(...)  	dummyFunc()
-static int dummyFunc (void) {return 0;}
-#endif
-
-#ifndef __u64
-#define __s64   long long
-#define __u64   unsigned long long
-
-#endif
+//#ifndef ioctl
+//
+//#warning "----"
+//#warning "IOCTL not defined (nneded for dvb-api), using dummy!"
+//#warning "dvbsnoop only will support offline mode..."
+//#warning "----"
+//
+//#define ioctl(...)  	dummyFunc()
+//#define _IOR(...)  	dummyFunc()
+//static int dummyFunc (void) {return 0;}
+//#endif
+//
+//#ifndef __u64
+//#define __s64   long long
+//#define __u64   unsigned long long
+//
+//#endif
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.14 2005/09/06 23:13:51 rasc Exp $
+$Id: fe_signal.c,v 1.15 2005/09/13 18:41:15 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.14 2005/09/06 23:13:51 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.15  2005/09/13 18:41:15  rasc
+... revert cygwin stuff
+
 Revision 1.14  2005/09/06 23:13:51  rasc
 catch OS signals (kill ...) for smooth program termination
 
@@ -178,7 +181,7 @@ int  do_SignalStrength (OPTION *opt)
 	if (has.strength)  out (1,"Sig: %u  ", s.strength & 0xFFFFL);
 	if (has.snr)	   out (2,"SNR: %u  ", s.snr & 0xFFFFL);
 	if (has.ber)	   out (3,"BER: %lu  ",s.ber);
-	if (has.ublocks)   out (4,"UBLK: %lu  ",s.ublocks);
+	if (has.ublocks)   out (4,"UBLK: %u  ",s.ublocks);
 	if (has.status) {
 		out (4,"Stat: 0x%02x ",s.status);
 		out_status_detail (5,s.status);
