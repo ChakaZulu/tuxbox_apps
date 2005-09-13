@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-09-12 21:25+0100\n"
+"POT-Creation-Date: 2005-09-12 22:40+0100\n"
 "PO-Revision-Date: 2005-08-13 07:34+0100\n"
 "Last-Translator: \n"
 "Language-Team: Spanish / J.M. Degen <info@comant.tv>\n"
@@ -4096,20 +4096,20 @@ msgid "don't cache teletext pages in background"
 msgstr "No usar memoria caché para teletexto"
 
 #: src/setup_extra.cpp:114
-msgid "Enable History Zapping"
-msgstr "Zapping historial"
+msgid "Enable Zapping History"
+msgstr "Historial del zapping"
 
 #: src/setup_extra.cpp:114
 msgid "Do not care about actual mode when zapping in history list"
-msgstr "Ignorar modo actual en el historial"
+msgstr "Ignorar modo actual al zapping en el historial"
 
 #: src/setup_extra.cpp:117
 msgid "Disable CoreFiles"
-msgstr "Desactivar Corefiles"
+msgstr "Desactivar ficheros core"
 
 #: src/setup_extra.cpp:117
 msgid "don't create 'Corefiles' after an Enigma crash"
-msgstr "No generar 'ficheros core' cuando se produce un crash"
+msgstr "No generar ficheros core cuando se produce un crash."
 
 #: src/setup_extra.cpp:245
 msgid ""
