@@ -1,1 +1,1 @@
-SUBDIRS = demo dreamdata ngrabstart ngrabstop dslconnect dsldisconnect
+SUBDIRS = demo dreamdata ngrabstart ngrabstop dslconnect dsldisconnect movieplayer
