@@ -20,7 +20,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
+#include <map>
 #include <plugin.h>
+
 #define SCRIPT "/var/etc/script.sh&"
 
 extern "C" int plugin_exec(PluginParam *par);
