@@ -68,6 +68,7 @@ enigma/ngrabstart/Makefile
 enigma/ngrabstop/Makefile
 enigma/dslconnect/Makefile
 enigma/dsldisconnect/Makefile
+enigma/script/Makefile
 tuxbox-plugins.pc
 ])
 
