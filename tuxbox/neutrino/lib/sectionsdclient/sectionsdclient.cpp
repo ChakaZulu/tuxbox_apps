@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.43 2005/09/16 08:07:23 metallica Exp $
+  $Id: sectionsdclient.cpp,v 1.44 2005/09/17 17:19:34 metallica Exp $
 
   License: GPL
 
@@ -388,7 +388,8 @@ CChannelEventList CSectionsdClient::getChannelEvents(const bool tv_mode)
 CChannelEventList CSectionsdClient::getEventsServiceKey(const t_channel_id channel_id)
 {
 	CChannelEventList eList;
-	unsigned int is_double=0;
+	 int is_double=0;
+	std::string test_double;
 	if (send(sectionsd::allEventsChannelID_, (char*)&channel_id, sizeof(channel_id)))
 	{
 		int nBufSize = readResponse();
@@ -418,11 +419,12 @@ CChannelEventList CSectionsdClient::getEventsServiceKey(const t_channel_id chann
 
 				aEvent.text= dp;
 				dp+=strlen(dp)+1;
-				if(is_double!=(aEvent.startTime+aEvent.duration))
+				if(!(is_double==aEvent.startTime &&test_double==aEvent.description))
 				{
 					eList.push_back(aEvent);
 				}
-				is_double=aEvent.startTime+aEvent.duration;
+				is_double=aEvent.startTime;
+				test_double=aEvent.description;
 			}
 			delete[] pData;
 		}
