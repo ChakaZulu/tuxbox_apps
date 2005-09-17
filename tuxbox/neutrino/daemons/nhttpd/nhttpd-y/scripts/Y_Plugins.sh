@@ -1,12 +1,12 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Plugins (yjogol)
-# $Date: 2005/09/10 12:50:31 $
-# $Revision: 1.2 $
+# $Date: 2005/09/17 10:05:18 $
+# $Revision: 1.3 $
 # -----------------------------------------------------------
 
-. /share/tuxbox/neutrino/httpd-y/scripts/_Y_Globals.sh
-. $y_path_scripts/_Y_Library.sh
+. ./_Y_Globals.sh
+. ./_Y_Library.sh
 
 # ===========================================================
 # Plugin : VNC
@@ -157,7 +157,7 @@ nhttpd_set()
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
-. $y_path_scripts/_Y_Webserver_Check.sh
+#. ./_Y_Webserver_Check.sh
 
 case "$1" in
 	vnc_build_form)

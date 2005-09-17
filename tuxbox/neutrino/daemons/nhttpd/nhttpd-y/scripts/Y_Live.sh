@@ -1,13 +1,13 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Live (yjogol)
-# $Date: 2005/09/11 10:30:09 $
-# $Revision: 1.5 $
+# $Date: 2005/09/17 10:05:18 $
+# $Revision: 1.6 $
 # -----------------------------------------------------------
 
-. /share/tuxbox/neutrino/httpd-y/scripts/_Y_Globals.sh
-. $y_path_scripts/_Y_Webserver_Check.sh
-. $y_path_scripts/_Y_Library.sh
+. ./_Y_Globals.sh
+. ./_Y_Webserver_Check.sh
+. ./_Y_Library.sh
 
 # -----------------------------------------------------------
 # $1=Bouquet //Bouquets-Liste als HTML-Options. Welche aktiv ist kann nicht festgestellt werden.

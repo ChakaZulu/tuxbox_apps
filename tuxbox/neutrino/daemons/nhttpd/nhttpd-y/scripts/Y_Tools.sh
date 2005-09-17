@@ -1,12 +1,12 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Flashing Library (yjogol)
-# $Date: 2005/08/31 18:23:49 $
-# $Revision: 1.1 $
+# $Date: 2005/09/17 10:05:18 $
+# $Revision: 1.2 $
 # -----------------------------------------------------------
 
-. /share/tuxbox/neutrino/httpd-y/scripts/_Y_Globals.sh
-. $y_path_scripts/_Y_Library.sh
+. ./_Y_Globals.sh
+. ./_Y_Library.sh
 
 # -----------------------------------------------------------
 # Image -helper - build form $1=HTML-Template
@@ -131,7 +131,7 @@ zapit_upload()
 # -----------------------------------
 # Main
 # -----------------------------------
-. $y_path_scripts/_Y_Webserver_Check.sh
+#. ./_Y_Webserver_Check.sh
 
 case "$1" in
 	image_backup_build_form)
