@@ -3212,12 +3212,14 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 			eZap::getInstance()->getServiceSelector()->actualize();
 
 			bool mustUnlock = false;
-			eit_event_struct *event=0;
+			const eit_event_struct *event=0;
 			EIT *eit=0;
 			if ( evtime )
 			{
 				eEPGCache::getInstance()->Lock();
-				event = (eit_event_struct*)eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)eServiceInterface::getInstance()->service, evtime, true );
+				eventData *d = (eventData*)eEPGCache::getInstance()->lookupEvent( (eServiceReferenceDVB&)eServiceInterface::getInstance()->service, evtime, true );
+				if ( d )
+					event = d->get();
 				mustUnlock=true;
 			}
 			if ( !event )

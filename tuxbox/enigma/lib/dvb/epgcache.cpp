@@ -959,8 +959,11 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_
 			if ( service.getServiceType() == 4 ) // nvod ref
 				return lookupEvent( service, i->second->getStartTime(), plain );
 			else if ( plain )
-		// get plain data... not in EITEvent Format !!!
-		// before use .. cast it to eit_event_struct*
+		// get plain data... the returned pointer is in eventData format !!
+		// to get a eit_event_struct .. use ->get() on the eventData*
+		// but take care the eit_event_struct is only valid until the next ->get() call of
+		// any eventData* .. when you will use the event_data for a longer time then make
+		// a copy of it.. with memcpy or by another way or use EITEvents (not plain)
 				return (EITEvent*) i->second;
 			else
 				return new EITEvent( *i->second, (It->first.tsid<<16)|It->first.onid );
@@ -1039,8 +1042,11 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, 
 				if ( t <= i->first+i->second->getDuration() )
 				{
 					if ( plain )
-						// get plain data... not in EITEvent Format !!!
-						// before use .. cast it to eit_event_struct*
+		// get plain data... the returned pointer is in eventData format !!
+		// to get a eit_event_struct .. use ->get() on the eventData*
+		// but take care the eit_event_struct is only valid until the next ->get() call of
+		// any eventData* .. when you will use the event_data for a longer time then make
+		// a copy of it.. with memcpy or by another way or use EITEvents (not plain)
 						return (EITEvent*) i->second;
 					return new EITEvent( *i->second, (It->first.tsid<<16)|It->first.onid  );
 				}

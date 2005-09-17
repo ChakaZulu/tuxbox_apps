@@ -16,7 +16,9 @@ class eExpertSetup: public eSetupWindow
 #endif
 	void factory_reset();
 	void rc_setup();
+#ifndef TUXTXT_CFG_STANDALONE
 	void tuxtxtCachingChanged(bool);
+#endif
 	void colorbuttonsChanged(bool);
 	void reinitializeHTTPServer(bool);
 	void fastZappingChanged(bool b);
