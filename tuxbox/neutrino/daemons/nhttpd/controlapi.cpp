@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.63 2005/09/10 12:39:26 yjogol Exp $
+	$Id: controlapi.cpp,v 1.64 2005/09/17 10:03:08 yjogol Exp $
 
 	License: GPL
 
@@ -1486,7 +1486,7 @@ std::string CControlAPI::YexecuteScript(CWebserverRequest *request, std::string 
 		if( test != NULL )
 		{
 			fclose(test);
-			
+			chdir(PLUGIN_DIRS[i].c_str());
 			FILE *f = popen( (fullfilename+" "+para).c_str(),"r"); //execute
 			if (f != NULL)
 			{
