@@ -772,7 +772,19 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 
 	ePlaylistEntry entry(string2ref(serviceRef), eventStartTime, eventDuration, -1, type);
 	if (!channel)
+	{
 		channel = eDVB::getInstance()->settings->getTransponders()->searchService(string2ref(serviceRef))->service_name;
+	}
+	else
+	{
+		// remove satellite position e.g. (19.2E)
+		if (channel.find("(") == 0)
+		{
+			unsigned int pos = channel.find(")");
+			if ((pos < channel.length() - 2) && (pos != eString::npos))
+				channel = channel.right(channel.length() - pos - 2);
+		}
+	}
 	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
