@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.15 2005/09/13 18:41:15 rasc Exp $
+$Id: fe_signal.c,v 1.16 2005/09/18 12:23:23 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_signal.c,v 1.15 2005/09/13 18:41:15 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.16  2005/09/18 12:23:23  rasc
+no message
+
 Revision 1.15  2005/09/13 18:41:15  rasc
 ... revert cygwin stuff
 
@@ -181,7 +184,7 @@ int  do_SignalStrength (OPTION *opt)
 	if (has.strength)  out (1,"Sig: %u  ", s.strength & 0xFFFFL);
 	if (has.snr)	   out (2,"SNR: %u  ", s.snr & 0xFFFFL);
 	if (has.ber)	   out (3,"BER: %lu  ",s.ber);
-	if (has.ublocks)   out (4,"UBLK: %u  ",s.ublocks);
+	if (has.ublocks)   out (4,"UBLK: %ld  ",s.ublocks);
 	if (has.status) {
 		out (4,"Stat: 0x%02x ",s.status);
 		out_status_detail (5,s.status);
