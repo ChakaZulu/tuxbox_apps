@@ -11,7 +11,7 @@ script_la_SOURCES = script.cpp
 
 script_la_LDFLAGS = -rpath $(PLUGINDIR) -module
 
-script_la_CXXFLAGS = -fno-rtti -fno-exceptions $(SIGC_CFLAGS) $(XMLTREE_CFLAGS)
+script_la_CXXFLAGS = -fno-rtti -fno-exceptions $(SIGC_CFLAGS) $(XMLTREE_CFLAGS) $(FREETYPE_CFLAGS)
 
 install-exec-local:
 	install -d $(PLUGINDIR)
