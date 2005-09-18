@@ -6,17 +6,6 @@ TUXBOX_APPS
 AC_PROG_CC
 AM_PROG_LIBTOOL
 
-/*
-AC_CHECK_HEADER([mtd/mtd-user.h],
-    [new_mtd=true],
-    [new_mtd=false],
-    [#include <linux/compiler.h>]
-)
-
-AM_CONDITIONAL(NEW_MTD, 
-    test x$new_mtd = xtrue )
-*/
-
 AC_OUTPUT([
 Makefile
 etherwake/Makefile
@@ -24,4 +13,3 @@ fbshot/Makefile
 mtd/Makefile
 rtc/Makefile
 ])
-
