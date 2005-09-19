@@ -53,54 +53,54 @@
 		<color name="red" color="#ff0303" />
 		<color name="blue" color="#0303ff" />
 		
-<color name="pal0" color="#1d003f80" />
-<color name="pal1" color="#01bdcae2" />
-<color name="pal2" color="#125d84b7" />
-<color name="pal3" color="#1d014081" />
-<color name="pal4" color="#164875ad" />
-<color name="pal5" color="#f6b5c3de" />
-<color name="pal6" color="#252c5f9d" />
-<color name="pal7" color="#174f79b0" />
-<color name="pal8" color="#0f89a4c9" />
-<color name="pal9" color="#1d064384" />
-<color name="pal10" color="#59154f90" />
-<color name="pal11" color="#17114c8d" />
-<color name="pal12" color="#2f195292" />
-<color name="pal13" color="#1d074586" />
-<color name="pal14" color="#b4bfcae2" />
-<color name="pal15" color="#0c7092c1" />
-<color name="pal16" color="#1d0b4788" />
-<color name="pal17" color="#1d3b6ba6" />
-<color name="pal18" color="#01c8d2e7" />
-<color name="pal19" color="#1a7c9ac0" />
-<color name="pal20" color="#01b7c7e0" />
-<color name="pal21" color="#2c1d5594" />
-<color name="pal22" color="#067f9dc8" />
-<color name="pal23" color="#0287a2cc" />
-<color name="pal24" color="#1d0e4a8b" />
-<color name="pal25" color="#12547eb3" />
-<color name="pal26" color="#213264a1" />
-<color name="pal27" color="#cbc3cde4" />
-<color name="pal28" color="#1d044283" />
-<color name="pal29" color="#1e5d83b2" />
-<color name="pal30" color="#05aebeda" />
-<color name="pal31" color="#29245a98" />
-<color name="pal32" color="#06a7b9d8" />
-<color name="pal33" color="#089eb3d3" />
-<color name="pal34" color="#146a8ebb" />
-<color name="pal35" color="#1c4673ab" />
-<color name="pal36" color="#0b95adcf" />
-<color name="pal37" color="#e3bfcae2" />
-<color name="pal38" color="#0196add2" />
-<color name="pal39" color="#01b4c3de" />
-<color name="pal40" color="#02bac6df" />
-<color name="pal41" color="#01b6c4df" />
-<color name="pal42" color="#01bdcbe2" />
-<color name="palx0" color="#ffff0000" />
-<color name="palx1" color="#ff3f3f54" />
-<color name="palx2" color="#feff0000" />
-<color name="palx3" color="#faff0000" />
-<color name="palx4" color="#fdff0000" />
+		<color name="pal0" color="#1d003f80" />
+		<color name="pal1" color="#01bdcae2" />
+		<color name="pal2" color="#125d84b7" />
+		<color name="pal3" color="#1d014081" />
+		<color name="pal4" color="#164875ad" />
+		<color name="pal5" color="#f6b5c3de" />
+		<color name="pal6" color="#252c5f9d" />
+		<color name="pal7" color="#174f79b0" />
+		<color name="pal8" color="#0f89a4c9" />
+		<color name="pal9" color="#1d064384" />
+		<color name="pal10" color="#59154f90" />
+		<color name="pal11" color="#17114c8d" />
+		<color name="pal12" color="#2f195292" />
+		<color name="pal13" color="#1d074586" />
+		<color name="pal14" color="#b4bfcae2" />
+		<color name="pal15" color="#0c7092c1" />
+		<color name="pal16" color="#1d0b4788" />
+		<color name="pal17" color="#1d3b6ba6" />
+		<color name="pal18" color="#01c8d2e7" />
+		<color name="pal19" color="#1a7c9ac0" />
+		<color name="pal20" color="#01b7c7e0" />
+		<color name="pal21" color="#2c1d5594" />
+		<color name="pal22" color="#067f9dc8" />
+		<color name="pal23" color="#0287a2cc" />
+		<color name="pal24" color="#1d0e4a8b" />
+		<color name="pal25" color="#12547eb3" />
+		<color name="pal26" color="#213264a1" />
+		<color name="pal27" color="#cbc3cde4" />
+		<color name="pal28" color="#1d044283" />
+		<color name="pal29" color="#1e5d83b2" />
+		<color name="pal30" color="#05aebeda" />
+		<color name="pal31" color="#29245a98" />
+		<color name="pal32" color="#06a7b9d8" />
+		<color name="pal33" color="#089eb3d3" />
+		<color name="pal34" color="#146a8ebb" />
+		<color name="pal35" color="#1c4673ab" />
+		<color name="pal36" color="#0b95adcf" />
+		<color name="pal37" color="#e3bfcae2" />
+		<color name="pal38" color="#0196add2" />
+		<color name="pal39" color="#01b4c3de" />
+		<color name="pal40" color="#02bac6df" />
+		<color name="pal41" color="#01b6c4df" />
+		<color name="pal42" color="#01bdcbe2" />
+		<color name="palx0" color="#ffff0000" />
+		<color name="palx1" color="#ff3f3f54" />
+		<color name="palx2" color="#feff0000" />
+		<color name="palx3" color="#faff0000" />
+		<color name="palx4" color="#fdff0000" />
 	</colors>
 
 	<colorscheme>
@@ -146,8 +146,7 @@
 		<value name="fontsize" value="19" />
 	</values>
 
-	<images basepath="chk_silver" target="fb">	
-		<img name="mainmenu.background" src="mainmenu/background-fs8.png" />
+	<images basepath="small" target="fb">
 		<img name="eComboBox.arrow" src="combo_arrow.png" />
 		<img name="eCheckbox.checked" src="checked.png" />
 		<img name="eCheckbox.unchecked" src="unchecked.png" />
@@ -170,52 +169,12 @@
 		<img name="lcd_scart" src="../video.png" nomerge="yes" />
 		<img name="speaker" src="../lcd-speaker.png" nomerge="yes" />
 		<img name="lcd-clock" src="../lcd-clock.png" nomerge="yes" />
-
-		<img name="eListBox.arrow.updown" src="lbarrow.png" />
-		<img name="eListBox.arrow.left" src="lbarrow_left.png" />
-		<img name="eListBox.arrow.right" src="lbarrow_right.png" />
-		<img name="eListBox.arrow.up" src="lbarrow_up.png" />
-		<img name="eListBox.arrow.down" src="lbarrow_down.png" />
-<!--
-		<img name="eWindow.top" src="t.png" />
-		<img name="eWindow.topLeft" src="tl.png" />
-		<img name="eWindow.topRight" src="tr.png" />
-		<img name="eWindow.left" src="l.png" />
-		<img name="eWindow.right" src="r.png" />
-		<img name="eWindow.bottomLeft" src="bl.png" />
-		<img name="eWindow.bottom" src="b.png" />
-		<img name="eWindow.bottomRight" src="br.png" />
-		<img name="3DBorder.unselected.corner.light.swap" src="3D_border_unselected_corner_light_swap.png" />
-		<img name="3DBorder.unselected.corner.dark.swap" src="3D_border_unselected_corner_dark_swap.png" />
-		<img name="3DBorder.unselected.corner.lightDark.swap" src="3D_border_unselected_corner_lightDark_swap.png" />
-		<img name="3DBorder.unselected.corner.darkLight.swap" src="3D_border_unselected_corner_darkLight_swap.png" />
-		<img name="3DBorder.unselected.corner.light" src="3D_border_unselected_corner_light.png" />
-		<img name="3DBorder.unselected.corner.dark" src="3D_border_unselected_corner_dark.png" />
-		<img name="3DBorder.unselected.corner.lightDark" src="3D_border_unselected_corner_lightDark.png" />
-		<img name="3DBorder.unselected.corner.darkLight" src="3D_border_unselected_corner_darkLight.png" />
-		<img name="3DBorder.unselected.hor.dark" src="3D_border_unselected_hor_dark.png" />
-		<img name="3DBorder.unselected.hor.light" src="3D_border_unselected_hor_light.png" />
-		<img name="3DBorder.unselected.ver.dark" src="3D_border_unselected_ver_dark.png" />		
-		<img name="3DBorder.unselected.ver.light" src="3D_border_unselected_ver_light.png" />-->
-	</images>
-	<images basepath="small" target="fb">	
 		<img name="corner" src="corner.png" />
 		<img name="line-h" src="line-h.png" />
 		<img name="line-v" src="line-v.png" />
-		
 	</images>
 
 	<imagealias>
-	<!--
-		<map name="eStatusBar.top" img="line-h" />
-		<map name="eStatusBar.left" img="line-v" />
-		<map name="eStatusBar.topLeft" img="corner" />
-		<map name="eStatusBar.bottom" img="line-h" />
-		<map name="eStatusBar.right" img="line-v" />
-		<map name="eStatusBar.bottomRight" img="corner" />		
-		<map name="eStatusBar.topRight" img="corner" />
-		<map name="eStatusBar.bottomLeft" img="corner" />		
--->
 		<map name="eComboBox.top" img="line-h" />
 		<map name="eComboBox.left" img="line-v" />
 		<map name="eComboBox.topLeft" img="corner" />

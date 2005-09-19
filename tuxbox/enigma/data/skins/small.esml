@@ -146,8 +146,7 @@
 		<value name="fontsize" value="19" />
 	</values>
 
-	<images basepath="chk_silver" target="fb">	
-		<img name="mainmenu.background" src="mainmenu/background-fs8.png" />
+	<images basepath="small" target="fb">
 		<img name="eComboBox.arrow" src="combo_arrow.png" />
 		<img name="eCheckbox.checked" src="checked.png" />
 		<img name="eCheckbox.unchecked" src="unchecked.png" />
@@ -170,52 +169,12 @@
 		<img name="lcd_scart" src="../video.png" nomerge="yes" />
 		<img name="speaker" src="../lcd-speaker.png" nomerge="yes" />
 		<img name="lcd-clock" src="../lcd-clock.png" nomerge="yes" />
-
-		<img name="eListBox.arrow.updown" src="lbarrow.png" />
-		<img name="eListBox.arrow.left" src="lbarrow_left.png" />
-		<img name="eListBox.arrow.right" src="lbarrow_right.png" />
-		<img name="eListBox.arrow.up" src="lbarrow_up.png" />
-		<img name="eListBox.arrow.down" src="lbarrow_down.png" />
-		<!--
-		<img name="eWindow.top" src="t.png" />
-		<img name="eWindow.topLeft" src="tl.png" />
-		<img name="eWindow.topRight" src="tr.png" />
-		<img name="eWindow.left" src="l.png" />
-		<img name="eWindow.right" src="r.png" />
-		<img name="eWindow.bottomLeft" src="bl.png" />
-		<img name="eWindow.bottom" src="b.png" />
-		<img name="eWindow.bottomRight" src="br.png" />
-		<img name="3DBorder.unselected.corner.light.swap" src="3D_border_unselected_corner_light_swap.png" />
-		<img name="3DBorder.unselected.corner.dark.swap" src="3D_border_unselected_corner_dark_swap.png" />
-		<img name="3DBorder.unselected.corner.lightDark.swap" src="3D_border_unselected_corner_lightDark_swap.png" />
-		<img name="3DBorder.unselected.corner.darkLight.swap" src="3D_border_unselected_corner_darkLight_swap.png" />
-		<img name="3DBorder.unselected.corner.light" src="3D_border_unselected_corner_light.png" />
-		<img name="3DBorder.unselected.corner.dark" src="3D_border_unselected_corner_dark.png" />
-		<img name="3DBorder.unselected.corner.lightDark" src="3D_border_unselected_corner_lightDark.png" />
-		<img name="3DBorder.unselected.corner.darkLight" src="3D_border_unselected_corner_darkLight.png" />
-		<img name="3DBorder.unselected.hor.dark" src="3D_border_unselected_hor_dark.png" />
-		<img name="3DBorder.unselected.hor.light" src="3D_border_unselected_hor_light.png" />
-		<img name="3DBorder.unselected.ver.dark" src="3D_border_unselected_ver_dark.png" />		
-		<img name="3DBorder.unselected.ver.light" src="3D_border_unselected_ver_light.png" />-->
-	</images>
-	<images basepath="small" target="fb">	
 		<img name="corner" src="corner.png" />
 		<img name="line-h" src="line-h.png" />
 		<img name="line-v" src="line-v.png" />
-		
 	</images>
 
 	<imagealias>
-		<!--
-		<map name="eStatusBar.top" img="line-h" />
-		<map name="eStatusBar.left" img="line-v" />
-		<map name="eStatusBar.topLeft" img="corner" />
-		<map name="eStatusBar.bottom" img="line-h" />
-		<map name="eStatusBar.right" img="line-v" />
-		<map name="eStatusBar.bottomRight" img="corner" />
-		<map name="eStatusBar.topRight" img="corner" />
-		<map name="eStatusBar.bottomLeft" img="corner" />
-		-->
 		<map name="eComboBox.top" img="line-h" />
 		<map name="eComboBox.left" img="line-v" />
 		<map name="eComboBox.topLeft" img="corner" />
