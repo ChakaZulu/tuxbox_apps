@@ -16,13 +16,21 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <dbox/lcd-ks0713.h>
 #include <config.h>
+
+
+#if HAVE_OLD_CAPTURE_API
 #if HAVE_DVB_API_VERSION >= 3
  #include <linux/dvb/avia/avia_gt_capture.h>
 #else
  #include <dbox/avia_gt_capture.h>
+#endif
+#else
+#include <linux/videodev.h>
+#define V4L2DEV "/dev/v4l/video0"
 #endif
 
 #include <rcinput.h>
@@ -77,10 +85,15 @@ inline int compute(int l, int d)
 	}
 }
 
+#if HAVE_OLD_CAPTURE_API
 #define XRES	120
 #define YRES	65
 //#define XRES	160
 //#define YRES  72
+#else
+#define XRES	120	// smallest possible capture size
+#define YRES 	72
+#endif
 
 void clr() {
 	if (ioctl(lcd_fd,LCD_IOCTL_CLEAR) < 0) {
@@ -147,9 +160,10 @@ unsigned char image[(LCD_ROWS+1)*LCD_COLS*8], intensity[LCD_ROWS*LCD_COLS*8];
 void *update_thread(void*dummy)
 {
 	unsigned char pic[XRES*YRES];	
-	int capture=open("/dev/dbox/capture0", O_RDONLY);
 	int x, y;
-	
+
+#if HAVE_OLD_CAPTURE_API
+	int capture=open("/dev/dbox/capture0", O_RDONLY);
 	capture_stop(capture);
 	capture_set_input_pos(capture, 0, 0);
 	capture_set_input_size(capture, 720, 576);
@@ -157,6 +171,33 @@ void *update_thread(void*dummy)
 	stride = capture_start(capture);
 	
 	printf("Capture driver reports stride=%d\n", stride);
+#else
+	int capture=open(V4L2DEV, O_RDONLY);
+	if (capture<0){
+		printf ("outdoor: could not open v4l2-device\n");
+		pthread_exit(NULL);
+	}
+	struct v4l2_crop crop;
+	struct v4l2_format format;
+
+	crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	ioctl (capture, VIDIOC_G_CROP, &crop);
+	crop.c.left = 0;
+	crop.c.top = 0;
+	crop.c.width = 720;
+	crop.c.height = 576;
+	ioctl (capture, VIDIOC_S_CROP, &crop);
+
+	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	ioctl (capture, VIDIOC_G_FMT, &format);
+	format.fmt.pix.width = XRES;
+	format.fmt.pix.height = YRES;
+	ioctl (capture, VIDIOC_S_FMT, &format);
+	ioctl (capture, VIDIOC_G_FMT, &format);
+
+	stride = format.fmt.pix.bytesperline;
+	printf("V4L2 reports stride=%d\n", stride);
+#endif
 	
 	while (!doexit)
 	{
@@ -167,8 +208,6 @@ void *update_thread(void*dummy)
 				image[LCD_COLS*y+x]=pic[y*XRES+x];
 		}
 	}
-
-	capture_stop(capture);
 	close(capture);
 	pthread_exit(NULL);
 }
@@ -182,9 +221,13 @@ int outdoor_exec()
 	// try other values
 	pthread_t ut;
 	init();
+printf("outdoor exec started\n");
 	
 	memset(intensity, 0, LCD_ROWS*LCD_COLS*8);
-	pthread_create(&ut, 0, update_thread, 0);
+	if (pthread_create(&ut, 0, update_thread, 0)){
+		perror("outdoor: could not create thread: ");
+		return errno;
+	}
 
 	for (y=0; y<65; y++)
 	{
