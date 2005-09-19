@@ -208,6 +208,9 @@ void *update_thread(void*dummy)
 				image[LCD_COLS*y+x]=pic[y*XRES+x];
 		}
 	}
+#if HAVE_OLD_CAPTURE_API
+	capture_stop(capture);
+#endif
 	close(capture);
 	pthread_exit(NULL);
 }
@@ -221,7 +224,6 @@ int outdoor_exec()
 	// try other values
 	pthread_t ut;
 	init();
-printf("outdoor exec started\n");
 	
 	memset(intensity, 0, LCD_ROWS*LCD_COLS*8);
 	if (pthread_create(&ut, 0, update_thread, 0)){
