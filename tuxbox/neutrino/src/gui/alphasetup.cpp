@@ -251,14 +251,21 @@ void CAlphaSetup::paint()
 
 void CAlphaSetup::paintSlider(const int x, const int y, const unsigned char * const spos, const neutrino_locale_t text, const char * const iconname, const bool selected) // UTF-8
 {
+	int startx = 170;
+	char wert[5];
+
 	if (!spos)
 		return;
 	int sspos = (*spos)*100/8;
 
-	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT_PLUS_0);
+	frameBuffer->paintBoxRel(x + startx, y, 120, mheight, COL_MENUCONTENT_PLUS_0);
 
-	frameBuffer->paintIcon("volumebody.raw", x + 70        , y + 2 + mheight / 4);
-	frameBuffer->paintIcon(iconname        , x + 73 + sspos, y     + mheight / 4);
+	frameBuffer->paintIcon("volumebody.raw", x + startx            , y + 2 + mheight / 4);
+	frameBuffer->paintIcon(iconname        , x + startx + 3 + sspos, y     + mheight / 4);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x,y+mheight, width, g_Locale->getText(text), COL_MENUCONTENT, 0, true); // UTF-8
+
+	sprintf(wert, "%3d", (*spos)); // UTF-8 encoded
+	frameBuffer->paintBoxRel(x + startx + 120 + 10, y, 50, mheight, COL_MENUCONTENT_PLUS_0);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x + startx + 120 + 10, y+mheight, width, wert, COL_MENUCONTENT, 0, true); // UTF-8
 }
