@@ -201,7 +201,6 @@ fi
 ])
 
 AC_DEFUN([TUXBOX_APPS_CAPTURE],[
-USING_OLD_CAPTURE_API=0
 AC_CHECK_HEADER(linux/dvb/avia/avia_gt_capture.h,[
 	AC_DEFINE(HAVE_OLD_CAPTURE_API,1,[Define this if you want to use the old dbox2 capture API])
 	AC_MSG_NOTICE([using old demux capture API])],[
