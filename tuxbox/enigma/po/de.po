@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.62 2005/09/20 21:43:11 timekiller Exp $
+# $Id: de.po,v 1.63 2005/09/20 21:46:57 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -4120,6 +4120,14 @@ msgstr "CoreFiles abschalten"
 #: src/setup_extra.cpp:117
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "Keine 'Corefiles' nach einem Enigma Absturz erstellen"
+
+#: src/setup_extra.cpp:120
+msgid "Show Boot-Info"
+msgstr "Boot-Informationen anzeigen"
+
+#: src/setup_extra.cpp:120
+msgid "Show Boot-Infos (IP, etc.)"
+msgstr "Boot-Informationen wie Imagedatum, IP, usw anzeigen"
 
 #: src/setup_extra.cpp:121
 msgid "Disable HW_Sections"
