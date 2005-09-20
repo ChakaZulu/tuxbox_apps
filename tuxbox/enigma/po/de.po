@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.61 2005/09/20 21:06:42 timekiller Exp $
+# $Id: de.po,v 1.62 2005/09/20 21:43:11 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -4121,39 +4121,39 @@ msgstr "CoreFiles abschalten"
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "Keine 'Corefiles' nach einem Enigma Absturz erstellen"
 
-#: src/setup_extra.cpp:120
+#: src/setup_extra.cpp:121
 msgid "Disable HW_Sections"
 msgstr "HW_Sections abschalten"
 
-#: src/setup_extra.cpp:120
+#: src/setup_extra.cpp:121
 msgid "Don't use hardware section filtering"
 msgstr "Keine 'Hardware Section' Filterung nutzen"
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:122
 msgid "Disable Watchdog"
 msgstr "Watchdog abschalten"
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:122
 msgid "Don't use the Watchdog"
 msgstr "Keinen Watchdog nutzen"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:123
 msgid "Disable ENX-Watchdog"
 msgstr "ENX-Watchdog abschalten"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:123
 msgid "Don't use the ENX-Watchdog"
 msgstr "Keinen ENX-Watchdog nutzen"
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:124
 msgid "Enable SPTS-Mode"
 msgstr "SPTS-Modus aktivieren"
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:124
 msgid "use SPTS-Mode (enables TS-recording)"
 msgstr "SPTS-Modus nutzen (aktiviert TS-recording)"
 
-#: src/setup_extra.cpp:251
+#: src/setup_extra.cpp:252
 msgid ""
 "When you do a factory reset, you will lost ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4168,7 +4168,7 @@ msgstr ""
 "\n"
 "Wirklich den Vorgang fortsetzen?"
 
-#: src/setup_extra.cpp:256
+#: src/setup_extra.cpp:257
 msgid "Factory reset..."
 msgstr "Werkseinstellungen..."
 

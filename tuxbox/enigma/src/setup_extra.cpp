@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.37 2005/09/20 21:08:54 timekiller Exp $
+ * $Id: setup_extra.cpp,v 1.38 2005/09/20 21:43:12 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -117,7 +117,8 @@ void eExpertSetup::init_eExpertSetup()
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create 'Corefiles' after an Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
 #ifndef HAVE_DREAMBOX_HARDWARE
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable HW_Sections"), "/extras/hw_sections_disable", _("Don't use hardware section filtering")))->selected, eExpertSetup::fileToggle,"/var/etc/.hw_sections ");
+		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Show Boot-Info"), "/extras/bootinfo", _("Show Boot-Infos (IP, etc.)")))->selected, eExpertSetup::fileToggle,"/var/etc/.boot_info");
+		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable HW_Sections"), "/extras/hw_sections_disable", _("Don't use hardware section filtering")))->selected, eExpertSetup::fileToggle,"/var/etc/.hw_sections");
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable Watchdog"), "/extras/watchdog_disable", _("Don't use the Watchdog")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_watchdog");
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable ENX-Watchdog"), "/extras/enxwatchdog_disable", _("Don't use the ENX-Watchdog")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_enxwatchdog");
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Enable SPTS-Mode"), "/extras/spts_mode", _("use SPTS-Mode (enables TS-recording)")))->selected, eExpertSetup::fileToggle,"/var/etc/.spts_mode");
