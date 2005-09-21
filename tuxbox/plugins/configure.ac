@@ -73,6 +73,7 @@ enigma/rss/Makefile
 enigma/script/Makefile
 enigma/weather/Makefile
 enigma/weather/icons/Makefile
+enigma/movieplayer/Makefile
 tuxbox-plugins.pc
 ])
 
