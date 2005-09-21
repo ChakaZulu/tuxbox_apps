@@ -1,1 +1,1 @@
-SUBDIRS = demo dreamdata ngrabstart ngrabstop dslconnect dsldisconnect script weather
+SUBDIRS = demo dreamdata ngrabstart ngrabstop dslconnect dsldisconnect rss script weather

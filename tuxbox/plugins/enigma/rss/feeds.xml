@@ -1,0 +1,35 @@
+<feeds>
+	<feed>
+		<name>BBC news</name>
+		<url>http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/front_page/rss.xml</url>
+	</feed>
+	<feed>
+		<name>CNN Topstories</name>
+		<url>http://rss.cnn.com/rss/cnn_topstories.rss</url>
+	</feed>
+	<feed>
+		<name>Yahoo world news</name>
+		<url>http://rss.news.yahoo.com/rss/world</url>
+	</feed>
+	<feed>
+		<name>Tagesschau</name>
+		<url>http://www.tagesschau.de/xml/tagesschau-meldungen</url>
+	</feed>
+	<feed>
+		<name>Focus Online News</name>
+		<url>http://focus.msn.de/fol/XML/rss_folnews.xml</url>
+	</feed>
+	<feed>
+		<name>Volkskrant</name>
+		<url>http://volkskrant.nl/rss/voorpagina.rss</url>
+	</feed>
+	<feed>
+		<name>Films op TV</name>
+		<url>http://www.filmtotaal.nl/trackers/rss/filmsoptv.xml</url>
+	</feed>
+	<feed>
+		<name>Webwereld</name>
+		<url>http://www.webwereld.nl/rss/trillian.rss</url>
+	</feed>
+</feeds>
+	

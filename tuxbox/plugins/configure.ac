@@ -69,6 +69,7 @@ enigma/ngrabstart/Makefile
 enigma/ngrabstop/Makefile
 enigma/dslconnect/Makefile
 enigma/dsldisconnect/Makefile
+enigma/rss/Makefile
 enigma/script/Makefile
 enigma/weather/Makefile
 enigma/weather/icons/Makefile
