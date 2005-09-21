@@ -11,5 +11,6 @@ install_DATA = \
 	carbon.esml carbon.info \
 	blueqt.esml blueqt.info \
 	small_snr.esml small_snr.info \
-	stone_snr.esml stone_snr.info
+	stone_snr.esml stone_snr.info \
+	small169_snr.esml small169_snr.info
 
