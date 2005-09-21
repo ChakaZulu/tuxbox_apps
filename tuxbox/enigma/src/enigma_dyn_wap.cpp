@@ -84,10 +84,16 @@ static eString admin2(eString command)
 		eZap::getInstance()->quit(2);
 	else
 	if (command == "wakeup")
-		eZapStandby::getInstance()->wakeUp(0);
+	{
+		if (eZapStandby::getInstance())
+			eZapStandby::getInstance()->wakeUp(0);
+	}
 	else
 	if (command == "standby")
-		eZapMain::getInstance()->gotoStandby();
+	{
+		if (eZapStandby::getInstance())
+			eZapMain::getInstance()->gotoStandby();
+	}
 
 	return "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Command " + command + " initiated.</p></card></wml>";
 }
