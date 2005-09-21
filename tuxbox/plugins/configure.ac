@@ -70,6 +70,8 @@ enigma/ngrabstop/Makefile
 enigma/dslconnect/Makefile
 enigma/dsldisconnect/Makefile
 enigma/script/Makefile
+enigma/weather/Makefile
+enigma/weather/icons/Makefile
 tuxbox-plugins.pc
 ])
 
