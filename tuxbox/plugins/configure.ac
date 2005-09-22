@@ -71,9 +71,10 @@ enigma/dslconnect/Makefile
 enigma/dsldisconnect/Makefile
 enigma/rss/Makefile
 enigma/script/Makefile
+enigma/getset/Makefile
+enigma/dbswitch/Makefile
 enigma/weather/Makefile
 enigma/weather/icons/Makefile
-enigma/movieplayer/Makefile
 tuxbox-plugins.pc
 ])
 
