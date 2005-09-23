@@ -54,8 +54,15 @@ function doLockUnlock()
 		<button class="y_live_button" type="button" value="plus" onClick="document.vlc.set_volume(document.vlc.get_volume()+10);">+</button>
 		<input class="y_live_button" type="button" value="Lock" name="lock" onClick="doLockUnlock()">
 	</form>
-	<script language="JavaScript" type="text/javascript">
-		document.vlc.play();
-	</script>
+<script language="JavaScript" type="text/javascript">
+	document.vlc.play();
+	var res_w=parseInt("Y_res_w",10);
+	var res_h=parseInt("Y_res_h",10);
+	if(isNaN(res_w)) res_w=384;
+	if(isNaN(res_h)) res_h=288;
+	
+	document.vlc.width=res_w;
+	document.vlc.height=res_h;
+</script>
 </body>
 </html>

@@ -4,14 +4,19 @@
 <meta NAME="author" CONTENT="yjogol">
 <link rel="stylesheet" type="text/css" href="/global.css">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
+
 <script language="JavaScript" type="text/javascript">
 function go_live()
 {
-//	if(tv != null)
-		tv = window.open('Y_LiveView.htm','tv','width=400,height=360')
-//	else
-//		tv.focus();
-	parent.frames[1].location.href = "Y_LiveMsg.htm";
+	var res_w=parseInt("{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_w=}",10);
+	var res_h=parseInt("{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_h=}",10);
+	if(isNaN(res_w)) res_w=384;
+	if(isNaN(res_h)) res_h=288;
+	res_w = res_w + 16;
+	res_h = res_h + 80;
+	var par = "width="+res_w+",height="+res_h;
+	tv = window.open('/Y_LiveView.htm','tv',par);
+	parent.frames[1].location.href = "/Y_LiveMsg.htm";
 }
 </script>
 </head>
@@ -24,15 +29,15 @@ function go_live()
 		<table border="0" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
 				<td class="y_head"><font size="4">dbox yWeb</font>
-				<font size="1">&nbsp; Version 1.3.1</font></td>
+				<font size="1">&nbsp; Version 1.3.2</font></td>
 			</tr>
 			<tr>
 				<td>
 					<table border="1" class="y_menu_prim">
 						<tr>
-							<td class="y_menu_prim" width="80"><a target="Base" href="Y_TvRadio.htm">Bouquet</a></td>
-							<td class="y_menu_prim" width="80"><a target="Base" href="Y_Tools.htm">Tools</a></font></td>
-							<td class="y_menu_prim" width="80"><a target="Base" href="Y_Plugins.htm">Settings</a></font></td>
+							<td class="y_menu_prim" width="80"><a target="Base" href="/Y_TvRadio.htm">Bouquet</a></td>
+							<td class="y_menu_prim" width="80"><a target="Base" href="/Y_Tools.htm">Tools</a></font></td>
+							<td class="y_menu_prim" width="80"><a target="Base" href="/Y_Plugins.htm">Settings</a></font></td>
 							<td class="y_menu_prim" width="80"><a href="javascript:go_live()">Live</a></td>
 						</tr>
 					</table>

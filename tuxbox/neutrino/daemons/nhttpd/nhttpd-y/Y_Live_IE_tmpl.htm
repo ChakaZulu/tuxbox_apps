@@ -61,5 +61,14 @@ function doLockUnlock()
 		<button class="y_live_button" type="button" value="Lock" name="lock" onClick="doLockUnlock()">Lock</button>
 	</form>
 
+<script language="JavaScript" type="text/javascript">
+	var res_w=parseInt("Y_res_w",10);
+	var res_h=parseInt("Y_res_h",10);
+	if(isNaN(res_w)) res_w=384;
+	if(isNaN(res_h)) res_h=288;
+	
+	document.vlc.width=res_w;
+	document.vlc.height=res_h;
+</script>	
 </body>
 </html>
