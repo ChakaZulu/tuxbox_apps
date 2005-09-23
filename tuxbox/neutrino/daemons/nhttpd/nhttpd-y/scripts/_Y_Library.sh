@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Library (yjogol)
-# $Date: 2005/08/31 18:23:49 $
-# $Revision: 1.1 $
+# $Date: 2005/09/23 16:26:02 $
+# $Revision: 1.2 $
 # -----------------------------------------------------------
 
 # ===========================================================
@@ -62,9 +62,6 @@ buildStreamingAudioRawURL()
 
 y_format_message_html()
 {
-#	cat $y_path_httpd/_Y_Tools_Format_tmpl-1.htm
-#	echo "$msg" | sed 's/$/<br>/g'
-#	cat $y_path_httpd/_Y_Tools_Format_tmpl-2.htm
 	echo "$msg" | sed 's/$/<br>/g' >$y_tmp
 	buildHTML=`sed "/Y_msg/r $y_tmp" $y_path_httpd/Y_Tools_Format_tmpl.htm`
 	echo "$buildHTML"
@@ -122,8 +119,14 @@ config_get_value_direct()
 # -----------------------------------------------------------
 config_set_value()
 {
-	cmd="sed -e s/^$1=.*/$1=$2/g"
-	cfg=`echo "$cfg" | $cmd`
+	tmp=`echo "$cfg" | sed -n "/^$1=.*/p"`
+	if [ "$tmp" = "" ]
+	then
+		cfg=`echo "$cfg\n$1=$2"`
+	else
+		cmd="sed -e s/^$1=.*/$1=$2/g"
+		cfg=`echo "$cfg" | $cmd`
+	fi
 }
 # -----------------------------------------------------------
 # Variablenwert zurueckgeben (ohne open)
@@ -171,18 +174,14 @@ msg_popup()
 }
 
 # -----------------------------------------------------------
-# $1= Template
-# $2= Ersetzungs-Tag - wird ersetzt
-# $3= einzufuegender Text
+# create Y_Web.conf if does not exists
 # -----------------------------------------------------------
-insert_text()
+check_Y_Web_conf()
 {
-#	echo "1:$1"
-#	echo "2:$2"
-#	echo "3:$3"
-	cat "$3" >"$y_tmp"
-#	c="sed "/$2/r $y_tmp" $1"
-	c=`sed "/$2/r $y_tmp" $1`
-	echo "$c"
+	if ! [ -e $y_config_Y_Web ]
+	then
+		echo "skin=Tuxbox"  >$y_config_Y_Web
+		echo "slavebox="	>>$y_config_Y_Web
+		echo "live_resolution=1"	>>$y_config_Y_Web
+	fi
 }
-

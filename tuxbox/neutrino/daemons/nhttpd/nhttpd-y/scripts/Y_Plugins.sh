@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Plugins (yjogol)
-# $Date: 2005/09/17 10:05:18 $
-# $Revision: 1.3 $
+# $Date: 2005/09/23 16:26:02 $
+# $Revision: 1.4 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -72,10 +72,7 @@ z="$z $i $_line"
 # -----------------------------------------------------------
 skin_get()
 {
-	if ! [ -e $y_config_Y_Web ]
-	then
-		echo "skin=Tuxbox" >$y_config_Y_Web
-	fi
+	check_Y_Web_conf
 	active_skin=`config_get_value_direct $y_config_Y_Web 'skin'`
 	html_option_list=""
 	skin_list=`find $y_path_httpd -name 'Y_Main-*'`
@@ -155,6 +152,19 @@ nhttpd_set()
 }
 
 # -----------------------------------------------------------
+yWeb_set()
+{
+		config_open $y_config_Y_Web
+		config_set_value 'slavebox' $1
+		config_set_value 'live_resolution_w' $2
+		config_set_value 'live_resolution_h' $3
+		config_write $y_config_Y_Web
+		msg="<b>Parameter uebernommen</b><br>Wenn die Aufloesung geaendert wurde, dann Browser Refresh"
+		y_format_message_html
+
+}
+
+# -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
 #. ./_Y_Webserver_Check.sh
@@ -193,6 +203,10 @@ case "$1" in
 
 	skin_set)
 		skin_set $2 ;;
+
+	yWeb_set)
+		shift 1
+		yWeb_set $* ;;
 
 	*)
 		echo "Parameter falsch: $*" ;;
