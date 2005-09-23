@@ -1,5 +1,13 @@
 Severity	id		Headline							Build
 
+5-Enhancement	JG200000035	Live: Window size configurable					R1.3.2
+5-Enhancement	JG200000107	Live: new: Double-View						R1.3.2
+5-Enhancement	JG200000206	nhttpd: Set Working dir for Skripts				R1.3.2
+5-Enhancement	JG200000207	scripts: relative local include path				R1.3.2
+5-Enhancement	JG200000209	correct Frame-Destinations VNC, Skins, WebServer		R1.3.2
+5-Enhancement	JG200000210	Settings: yWeb Configurator (slave box, live resolution)	R1.3.2
+5-Enhancement	JG200000211	add ucode.bin for up/download					R1.3.2
+
 5-Enhancement	JG200000200	Live: Radio: Player via Dateierweiterung m3u, m4u starten	R1.3.1
 3-Average	JG200000147	LiveView nur 9 Bouquets im Dropdown. fixed.			R1.3.1
 4-Minor		JG200000179	dietmarW-Images habe kein /var/tmp also /tmp nutzen		R1.3.1
