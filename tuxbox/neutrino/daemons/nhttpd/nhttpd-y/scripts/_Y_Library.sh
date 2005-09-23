@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Library (yjogol)
-# $Date: 2005/09/23 16:26:02 $
-# $Revision: 1.2 $
+# $Date: 2005/09/23 16:47:57 $
+# $Revision: 1.3 $
 # -----------------------------------------------------------
 
 # ===========================================================
@@ -182,6 +182,7 @@ check_Y_Web_conf()
 	then
 		echo "skin=Tuxbox"  >$y_config_Y_Web
 		echo "slavebox="	>>$y_config_Y_Web
-		echo "live_resolution=1"	>>$y_config_Y_Web
+		echo "live_resolution_w=384"	>>$y_config_Y_Web
+		echo "live_resolution_wh=288"	>>$y_config_Y_Web
 	fi
 }
