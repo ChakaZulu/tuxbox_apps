@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.2 2005/09/24 22:38:03 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.3 2005/09/24 22:46:21 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -234,7 +234,7 @@ bool stmenu::loadconfig()
 				timeoutValue = atoi(line + 8);
 			else 
 			if (!strncmp(line, "videoformat", 10))
-				videoformat = atoi(line + 11);
+				videoformat = atoi(line + 12);
 			else 
 			if (!strncmp(line, "selentry", 8))
 				sscanf(line, "selentry=%s", selentry_st);
