@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
-#include <dirent.h> //for Directory
+#include <dirent.h>
 
 #include "my_fb.h"
 #include "my_lcd.h"
@@ -13,16 +13,12 @@
 #include "processutils.h"
 #include "my_timer.h"
 
-//#define dreamflash
-
-class IMAGE
+class image
 {
  public:
-	std::string NAME;
-	std::string LOC;
+	std::string name;
+	std::string location;
 };
-
-typedef std::vector<IMAGE> ImageListe;
 
 class stmenu: public Object
 {
@@ -30,7 +26,7 @@ class stmenu: public Object
 	fbClass *display;
 	CLCDDisplay *lcd;
 
-	ImageListe imagelist;
+	std::vector<image> imagelist;
 
 	bool ver_use;
 	int ver_x, ver_y, ver_font, ver_r, ver_g, ver_b;
@@ -42,31 +38,25 @@ class stmenu: public Object
 	char version[256], selentry_st[256], skin_path[256], skin_name[256];
 	std::string tmp_ver;
 
-#ifdef dreamflash
 	char mpoint[256];
 	int inetd;
-#endif
 
 	void rc_event(unsigned short key);
-	bool main_loop();
+	void mainloop();
 	bool loadconfig();
 	bool loadskin();
-	void loadliste();
+	bool loadlist();
 	void timeout();
 
-	bool new_script();
+	void newscript();
 
-	void drawMenu();
-	bool show_pic();
+	void drawmenu();
+	void showpic();
 
  public:
-	static stmenu *getInstance()
-	{
-		if (instance == NULL) instance = new stmenu();
-		return instance;
-	}
+	static stmenu *getInstance() {return (instance) ? instance : instance = new stmenu();}
 	stmenu();
 	~stmenu();
  private:
- 	static void timeout (int);
+ 	static void timeout(int);
 };
