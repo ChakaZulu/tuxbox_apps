@@ -1,5 +1,5 @@
 /*
- * $Id: showlogo.cpp,v 1.2 2005/09/24 19:15:55 digi_casi Exp $
+ * $Id: showlogo.cpp,v 1.3 2005/09/24 19:20:25 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -73,12 +73,6 @@
 #define VIDEO_SET_FASTZAP	_IOW('o', 4, int)
 
 #define LOGO "/root/platform/kernel/bild"
-
-struct {
-	int mpeg;
-	int video;
-} fd;
-
 
 int displayIFrame(const char *frame, int len)
 {
