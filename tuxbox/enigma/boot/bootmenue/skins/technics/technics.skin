@@ -1,0 +1,14 @@
+#startmenu-skin-file
+
+#this skin was created and tested by CooLbOy (thx to mechatron 4 helping me)
+
+#first-line=x,y,font-size,r,g,b
+
+#menu-size=left,top,x-size, y-size
+menu-size=62,265,280,178
+
+#select-color=r,g,b
+select-color=225,236,255
+
+#string-color=r,g,b
+string-color=0,0,0
