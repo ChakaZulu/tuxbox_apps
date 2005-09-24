@@ -1,5 +1,5 @@
 /*
- * $Id: showlogo.cpp,v 1.1 2005/09/24 13:22:13 digi_casi Exp $
+ * $Id: showlogo.cpp,v 1.2 2005/09/24 19:15:55 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -52,7 +52,6 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <errno.h>
-#include <lib/base/estring.h>
 
 // #define OLD_VBI
 
@@ -73,58 +72,36 @@
 #define VIDEO_CLEAR_SCREEN      3
 #define VIDEO_SET_FASTZAP	_IOW('o', 4, int)
 
+#define LOGO "/root/platform/kernel/bild"
+
 struct {
 	int mpeg;
 	int video;
 } fd;
 
 
-void setAutoFlushScreen( int on )
-{
-	int wasOpen = fd.mpeg != -1;
-	if ( !wasOpen )
-		fd.mpeg = ::open("/dev/video", O_WRONLY);
-	if ( fd.mpeg > -1 )
-	{
-		::ioctl(fd.mpeg, VIDEO_SET_AUTOFLUSH, on);
-		if (!wasOpen)
-		{
-			::close(fd.mpeg);
-			fd.mpeg = -1;
-		}
-	}
-}
-
 int displayIFrame(const char *frame, int len)
 {
-	(void)frame;
-	(void)len;
-	int fdv=::open("/dev/video", O_WRONLY);
+	int fdv = open("/dev/video", O_WRONLY);
 	if (fdv < 0)
 		return -1;
 
-	int wasOpen = fd.video != -1;
-	if (!wasOpen)
-		fd.video = open(VIDEO_DEV, O_RDWR);
-	::ioctl(fd.video, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY );
-	::ioctl(fd.video, VIDEO_CLEAR_BUFFER);
-	::ioctl(fd.video, VIDEO_PLAY);
+	int fdvideo = open(VIDEO_DEV, O_RDWR);
+	ioctl(fdvideo, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY );
+	ioctl(fdvideo, VIDEO_CLEAR_BUFFER);
+	ioctl(fdvideo, VIDEO_PLAY);
 	
-	for ( int i=0; i < 2; i++ )
+	for (int i = 0; i < 2; i++)
 		write(fdv, frame, len);
 
 	unsigned char buf[128];
 	memset(&buf, 0, 128);
 	write(fdv, &buf, 128);
 
-	setAutoFlushScreen(0);
-	::ioctl(fd.video, VIDEO_SET_BLANK, 0);
-	if ( !wasOpen )
-	{
-		::close(fd.video);
-		fd.video=-1;
-	}
-	setAutoFlushScreen(1);
+	ioctl(fdv, VIDEO_SET_AUTOFLUSH, 0);
+	ioctl(fdvideo, VIDEO_SET_BLANK, 0);
+	close(fdvideo);
+	ioctl(fdv, VIDEO_SET_AUTOFLUSH, 1);
 
 	close(fdv);
 	return 0;
@@ -132,38 +109,27 @@ int displayIFrame(const char *frame, int len)
 
 int displayIFrameFromFile(const char *filename)
 {
-	int file=::open(filename, O_RDONLY);
+	int file = open(filename, O_RDONLY);
 	if (file < 0)
 		return -1;
-	int size=::lseek(file, 0, SEEK_END);
-	::lseek(file, 0, SEEK_SET);
+	int size = lseek(file, 0, SEEK_END);
+	lseek(file, 0, SEEK_SET);
 	if (size < 0)
 	{
-		::close(file);
+		close(file);
 		return -1;
 	}
 	char *buffer = new char[size];
-	::read(file, buffer, size);
-	::close(file);
-	int res=displayIFrame(buffer, size);
+	read(file, buffer, size);
+	close(file);
+	int res = displayIFrame(buffer, size);
 	delete[] buffer;
 	return res;
 }
 
-void showPic(eString fileName)
-{
-	FILE *f = fopen(fileName.c_str(), "r");
-	if (f)
-	{
-		fclose(f);
-		displayIFrameFromFile(fileName.c_str());
-	}
-}
-
 int main(int argc, char **argv) 
 {
-	fd.video = fd.mpeg = -1;
-	showPic("/root/platform/kernel/bild");
+	displayIFrameFromFile(LOGO);
 	return EXIT_SUCCESS;
 }
 
