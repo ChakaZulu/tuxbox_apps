@@ -1,5 +1,5 @@
 /*
- * $Id: showlogo.cpp,v 1.3 2005/09/24 19:20:25 digi_casi Exp $
+ * $Id: showlogo.cpp,v 1.4 2005/09/25 07:29:21 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -74,56 +74,54 @@
 
 #define LOGO "/root/platform/kernel/bild"
 
-int displayIFrame(const char *frame, int len)
+void displayIFrame(const char *frame, int len)
 {
 	int fdv = open("/dev/video", O_WRONLY);
-	if (fdv < 0)
-		return -1;
-
-	int fdvideo = open(VIDEO_DEV, O_RDWR);
-	ioctl(fdvideo, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY );
-	ioctl(fdvideo, VIDEO_CLEAR_BUFFER);
-	ioctl(fdvideo, VIDEO_PLAY);
+	if (fdv > 0)
+	{
+		int fdvideo = open(VIDEO_DEV, O_RDWR);
+		ioctl(fdvideo, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY );
+		ioctl(fdvideo, VIDEO_CLEAR_BUFFER);
+		ioctl(fdvideo, VIDEO_PLAY);
 	
-	for (int i = 0; i < 2; i++)
-		write(fdv, frame, len);
+		for (int i = 0; i < 2; i++)
+			write(fdv, frame, len);
 
-	unsigned char buf[128];
-	memset(&buf, 0, 128);
-	write(fdv, &buf, 128);
+		unsigned char buf[128];
+		memset(&buf, 0, 128);
+		write(fdv, &buf, 128);
 
-	ioctl(fdv, VIDEO_SET_AUTOFLUSH, 0);
-	ioctl(fdvideo, VIDEO_SET_BLANK, 0);
-	close(fdvideo);
-	ioctl(fdv, VIDEO_SET_AUTOFLUSH, 1);
+		ioctl(fdv, VIDEO_SET_AUTOFLUSH, 0);
+		ioctl(fdvideo, VIDEO_SET_BLANK, 0);
+		close(fdvideo);
+		ioctl(fdv, VIDEO_SET_AUTOFLUSH, 1);
 
-	close(fdv);
-	return 0;
+		close(fdv);
+	}
 }
 
-int displayIFrameFromFile(const char *filename)
+void displayIFrameFromFile(const char *filename)
 {
 	int file = open(filename, O_RDONLY);
-	if (file < 0)
-		return -1;
-	int size = lseek(file, 0, SEEK_END);
-	lseek(file, 0, SEEK_SET);
-	if (size < 0)
+	if (file > 0)
 	{
+		int size = lseek(file, 0, SEEK_END);
+		lseek(file, 0, SEEK_SET);
+		if (size > 0)
+		{
+			char *buffer = new char[size];
+			read(file, buffer, size);
+			displayIFrame(buffer, size);
+			delete[] buffer;
+		}
 		close(file);
-		return -1;
 	}
-	char *buffer = new char[size];
-	read(file, buffer, size);
-	close(file);
-	int res = displayIFrame(buffer, size);
-	delete[] buffer;
-	return res;
 }
 
 int main(int argc, char **argv) 
 {
-	displayIFrameFromFile(LOGO);
+	char *logo = (argc < 2) ? strdup(LOGO) : argv[1];
+	displayIFrameFromFile(logo);
 	return EXIT_SUCCESS;
 }
 
