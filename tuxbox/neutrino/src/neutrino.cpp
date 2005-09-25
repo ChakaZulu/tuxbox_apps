@@ -1226,7 +1226,7 @@ void CNeutrinoApp::channelsInit()
 
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
-	global_argv = new (char*)[argc+1];
+	global_argv = new char *[argc+1];
   	for (int i = 0; i < argc; i++)
     		global_argv[i] = argv[i];
   	global_argv[argc] = NULL;
