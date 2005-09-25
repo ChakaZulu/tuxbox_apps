@@ -1,3 +1,24 @@
+/*
+ * $Id: bootmenue.h,v 1.3 2005/09/25 09:49:13 digi_casi Exp $
+ *
+ * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -10,8 +31,9 @@
 #include "my_fb.h"
 #include "my_lcd.h"
 #include "my_rc.h"
-#include "processutils.h"
 #include "my_timer.h"
+
+#define VERSION "0.0.1"
 
 class image
 {
@@ -28,7 +50,6 @@ class stmenu: public Object
 
 	std::vector<image> imagelist;
 
-	bool ver_use;
 	int ver_x, ver_y, ver_font, ver_r, ver_g, ver_b;
 	int menu_x, menu_y, menu_xs, menu_ys;
 	int str_r, str_g, str_b;
@@ -45,10 +66,10 @@ class stmenu: public Object
 	void mainloop();
 	bool loadconfig();
 	bool loadskin();
-	bool loadlist();
+	bool loadimagelist();
 	void timeout();
 
-	void newscript();
+	void newscript(std::string image);
 
 	void drawmenu();
 	void showpic();

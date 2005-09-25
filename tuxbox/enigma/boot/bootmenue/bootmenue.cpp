@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.3 2005/09/24 22:46:21 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.4 2005/09/25 09:49:13 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -34,7 +34,6 @@ bool doexit = false;
 stmenu::stmenu()
 {
 	instance = this;
-	ver_use = false;
 
 	CONNECT(RcInput::getInstance()->selected, stmenu::rc_event);
 	display = new fbClass();
@@ -45,14 +44,13 @@ stmenu::stmenu()
 		CTimer::getInstance()->start(timeoutValue);
 		if (loadskin())
 		{
-			if (loadlist())
+			if (loadimagelist())
 			{
 				display->SetSAA(videoformat); //rgb = 0, fbas = 1, svideo = 2, component = 3;
 				display->SetMode(720, 576, 16);
 				showpic();
 
-				if (ver_use)
-					display->RenderString(tmp_ver, ver_x, ver_y, 400, 0, ver_font, ver_r, ver_g, ver_b);
+				display->RenderString(tmp_ver, ver_x, ver_y, 400, 0, ver_font, ver_r, ver_g, ver_b);
 
 				display->Fill_buffer(menu_x - 5, menu_y - 5, menu_xs + 10, menu_ys + 10);
 
@@ -140,12 +138,11 @@ void stmenu::mainloop()
 	lcd->update();
 	display->SetMode(720, 576, 8);
 
-	newscript();
+	newscript(imagelist[selentry].location);
 	
 	if (FILE *f = fopen(CONFIGFILE, "w"))
 	{
 		fprintf(f, "#BootManager-Config\n");
-		fprintf(f, "version=%s\n", version);
 		fprintf(f, "mountpoint=%s\n", mpoint);
 		fprintf(f, "selentry=%s\n", imagelist[selentry].name.c_str());
 		fprintf(f, "kill_inetd=%d", inetd);
@@ -161,25 +158,23 @@ bool stmenu::loadskin()
 {
 	if (strlen(skin_path) > 0 && strlen(skin_name) > 0)
 	{
-		std::string tmp = skin_path;
-		tmp += "/"; tmp += skin_name;
+		std::string tmp = std::string(skin_path) + "/" + std::string(skin_name);
 
-		if (FILE *in=fopen(tmp.c_str(), "rt"))
+		if (FILE *in = fopen(tmp.c_str(), "rt"))
 		{
-			printf("[STARTMENU] skin loaded\n");
 			char line[256];
-			while(fgets(line, 256, in))
+			while (fgets(line, 256, in))
 			{
 				if (!strncmp(line, "first-line", 10))
-				{
-					ver_use=true;
 					sscanf(line, "first-line=%d,%d,%d,%d,%d,%d", &ver_x, &ver_y, &ver_font, &ver_r, &ver_g, &ver_b);
-				}
-				else if (!strncmp(line, "menu-size", 9))
+				else 
+				if (!strncmp(line, "menu-size", 9))
 					sscanf(line, "menu-size=%d,%d,%d,%d", &menu_x, &menu_y, &menu_xs, &menu_ys);
-				else if (!strncmp(line, "string-color", 12))
+				else 
+				if (!strncmp(line, "string-color", 12))
 					sscanf(line, "string-color=%d,%d,%d", &str_r, &str_g, &str_b);
-				else if (!strncmp(line, "select-color", 12))
+				else 
+				if (!strncmp(line, "select-color", 12))
 					sscanf(line, "select-color=%d,%d,%d", &sel_r, &sel_g, &sel_b);
 			}
 			fclose(in);
@@ -215,6 +210,13 @@ void stmenu::showpic()
 
 bool stmenu::loadconfig()
 {
+	timeoutValue = 10;
+	videoformat = 1;
+	strcpy(selentry_st, "");
+	strcpy(skin_path, "/var/boot");
+	strcpy(skin_name, "california.skin");
+	strcpy(mpoint, "/var/mnt/usb");
+	inetd = 1;
 	if (FILE *in = fopen(CONFIGFILE, "rt"))
 	{
 		printf("[STARTMENU] config loaded\n");
@@ -226,9 +228,6 @@ bool stmenu::loadconfig()
 			else 
 			if (line[strlen(line)-1] == '\n')
 				line[strlen(line)-1] = 0;
-
-			if (!strncmp(line, "version", 7)) 
-				sscanf(line, "version=%s", version);
 			else 
 			if (!strncmp(line, "timeout", 7))
 				timeoutValue = atoi(line + 8);
@@ -249,37 +248,30 @@ bool stmenu::loadconfig()
 				sscanf(line, "mountpoint=%s", mpoint);
 			else 
 			if (!strncmp(line, "kill_inetd", 10))	
-			inetd = atoi(line + 11);
+				inetd = atoi(line + 11);
 		}
 		fclose(in);
 
-		//obere Zeile
-
-		tmp_ver = "BootManager ";
-		tmp_ver += version;
+		tmp_ver = std::string("BootManager ") + std::string(VERSION);
 	}
 	else
-	{
-		printf("[STARTMENU] <%s not found>\n",CONFIGFILE);
-		return false;
-	}
+		printf("[STARTMENU] <%s not found>, using defaults...\n", CONFIGFILE);
+
 	return true;
 }
 
-bool stmenu::loadlist()
+bool stmenu::loadimagelist()
 {
 	struct stat s;
-	imagelist.clear();
-
 	image a;
-
-	a.name = "Flash-Image";
-	a.location  = "";
 	
 	std::string dir[2];
 	dir[0] = std::string(mpoint) + "/image/";
 	dir[1] = std::string(mpoint) + "/fwpro/";
-
+	
+	imagelist.clear();
+	a.name = "Flash-Image";
+	a.location  = "";
 	imagelist.push_back(a);
 
 	selentry = 0;
@@ -292,28 +284,35 @@ bool stmenu::loadlist()
 		{
 			while (struct dirent *e = readdir(d))
 			{
-				if (!(strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))) continue;	
-
-				std::string name = dir[i] + e->d_name;
-				std::string tmp = e->d_name;
-				std::string tmp_file = name + "/go";
-
-				stat(name.c_str(), &s);
-
-				if (S_ISDIR(s.st_mode))
+				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))	
 				{
-					std::string tmp_file = name + "/go";
-					if (FILE *f = fopen(tmp_file.c_str(), "r"))
+					std::string name = dir[i] + e->d_name;
+					stat(name.c_str(), &s);
+					if (S_ISDIR(s.st_mode))
 					{
-						fclose(f);
+						std::string tmp = e->d_name;
+						std::string tmp_file = name + "/go";
+						if (access(tmp_file.c_str(), X_OK) == 0)
+						{
+							a.location = name;
+							a.name = e->d_name;
+							tmp = name + "/imagename";
+							if (FILE *in = fopen(tmp.c_str(), "rt"))
+							{
+								char line[256];
+								line[0] = '\0';
+								fgets(line, 256, in);
+								fclose(in);
+								if (strlen(line) > 0)
+									a.name = std::string(line);
+							}
+								
+							imagelist.push_back(a);
 
-						a.name = e->d_name;
-						a.location = name;
-						imagelist.push_back(a);
-
-						tmpcurr++;
-						if (!strcmp(selentry_st, e->d_name)) 
-							selentry = tmpcurr;
+							tmpcurr++;
+							if (!strcmp(selentry_st, e->d_name)) 
+								selentry = tmpcurr;
+						}
 					}
 				}
 			}
@@ -325,19 +324,23 @@ bool stmenu::loadlist()
 	return maxentry > 0;
 }
 
-void stmenu::newscript()
+void stmenu::newscript(std::string image)
 {
 	if (FILE *f = fopen(SCRIPTFILE, "w"))
 	{
-		ProcUtils::killProcess("smbd");
-		ProcUtils::killProcess("nmbd");
-		if (inetd == 1)
-			ProcUtils::killProcess("inetd");
-
-		fprintf(f,"#!/bin/sh\n");
-		fprintf(f,"killall -9 rcS\n");
-		fprintf(f,"killall -9 init\n");
-		fprintf(f, "chroot %s ../go\n", imagelist[selentry].location.c_str());
+		fprintf(f, "#!/bin/sh\n");
+		if (image != "")
+		{
+			if (inetd == 1)
+				fprintf(f, "killall -9 inetd\n");
+			fprintf(f, "killall -9 smbd\n");
+			fprintf(f, "killall -9 nmbd\n");
+			fprintf(f, "killall -9 rcS\n");
+			fprintf(f, "chroot %s ../etc/rcS\n", image.c_str());
+		}
+		else
+			fprintf(f, "echo booting flash image...\n");
+			
 		fclose(f);
 		system("chmod 755 "SCRIPTFILE);
 	}

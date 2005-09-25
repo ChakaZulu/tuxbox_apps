@@ -8,11 +8,11 @@ void CTimer::start(int val)
 		pthread_cancel(thrTimer);
 
 	pthread_join(thrTimer,NULL);
-	if (pthread_create (&thrTimer, NULL, ThreadTimer, (void *) val) != 0 )
+	if (pthread_create (&thrTimer, NULL, ThreadTimer, (void *)val) != 0 )
 		perror("[TIMER] pthread_created error");
 }
 
-void* CTimer::ThreadTimer(void * val)
+void *CTimer::ThreadTimer(void *val)
 {
 	sleep((int) val);
 	CTimer::getInstance()->selected();
@@ -25,9 +25,9 @@ CTimer::~CTimer()
 	pthread_exit(0);
 }
 
-CTimer* CTimer::getInstance()
+CTimer *CTimer::getInstance()
 {
 	static CTimer* mytimer = NULL;
-	if(mytimer == NULL) { mytimer = new CTimer(); }
+	if (mytimer == NULL) { mytimer = new CTimer(); }
 	return mytimer;
 }
