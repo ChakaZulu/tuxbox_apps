@@ -1,0 +1,22 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta NAME="author" CONTENT="yjogol">
+<title>Y-TV</title>
+</head>
+
+<frameset rows="27,*,0" framespacing="0" border="0" frameborder="0">
+	<frame name="panel" src="Y_Live_panel.yhtm" scrolling="no" noresize target="Mitte">
+	<frame name="live" src="Y_Live_Wait.yhtm" scrolling="no" noresize >
+	<frame name="dbox" target="unten">
+	<noframes>
+	<body>
+
+	<p>Diese Seite verwendet Frames. Frames werden von Ihrem Browser aber nicht 
+	unterstützt.</p>
+
+	</body>
+	</noframes>
+</frameset>
+
+</html>

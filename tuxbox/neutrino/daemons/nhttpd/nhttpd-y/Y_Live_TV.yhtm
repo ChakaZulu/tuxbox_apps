@@ -1,0 +1,93 @@
+<html>
+<head>
+<meta http-equiv="Content-Language" content="de">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" type="text/css" href="/global.css">
+<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+<script language="JavaScript" type="text/javascript">
+function do_stop()
+{
+        document.vlc.stop()
+}
+function doPlayOrPause()
+{
+    if( document.vlc.{=if-equal:{=browser=}~ie~playing~isplaying()=} )
+    {
+    	document.v.PlayOrPause.value = " Play ";
+        document.vlc.pause()
+    } else {
+	    document.v.PlayOrPause.value = "Pause";
+        document.vlc.play()
+    }
+}
+function doStop()
+{
+    	document.v.PlayOrPause.value = " Play ";
+        document.vlc.stop()
+}
+function doLockUnlock()
+{
+    if( document.v.lock.value == "Lock" )
+    {
+    	document.v.lock.value = "Unlock";
+        parent.dbox.location.href='/control/exec?Y_Live&live_lock'
+    } else {
+	    document.v.lock.value = "Lock";
+        parent.dbox.location.href='/control/exec?Y_Live&live_unlock'
+    }
+}
+
+</script>
+</head>
+{=script:Y_Live prepare_tv=}
+
+<body>
+{=if-equal:{=browser=}~ie~
+	<OBJECT classid="clsid:E23FE9C6-778E-49D4-B537-38FCDE4887D8" 
+	        width="384" height="288" id="vlc" events="True">
+			<param name="Src" value="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids=}" />
+			<param name="ShowDisplay" value="True" />
+			<param name="Loop" value="False" />
+			<param name="AutoPlay" value="True" />
+		The VideoLan Client ActiveX is not installed.<br>
+		You need <a href="http://www.videolan.org" target="_blank">VideoLan Client</a> V0.8.2 or higher.<br>
+		Install with Option "ActiveX".
+	</OBJECT>
+	<form name="v">
+		<button class="y_live_button" type="button" value="Pause" id="PlayOrPause" onClick="doPlayOrPause()">Pause</button>
+		<button class="y_live_button" type="button" value="stop" onClick="doStop()">Stop</button>
+		<button class="y_live_button" type="button" value="mute" onClick="document.vlc.toggleMute()">Mute</button>
+		<button class="y_live_button" type="button" value="fullscreen" onClick="document.vlc.fullscreen()">FScreen</button>
+		<button class="y_live_button" type="button" value="minus" onClick="document.vlc.volume=document.vlc.volume-10;">-</button>
+		<button class="y_live_button" type="button" value="plus" onClick="document.vlc.volume = document.vlc.volume+10;">+</button>
+		<button class="y_live_button" type="button" value="Lock" name="lock" onClick="doLockUnlock()">Lock</button>
+	</form>	
+~
+	<embed type="application/x-vlc-plugin"
+		name="vlc"  id="vlc"
+		autoplay="yes" loop="yes" width="384" height="288"
+		target="Y_URL" >
+	</embed>
+	<form name="v">
+		<input class="y_live_button" type="button" value="Pause" name="PlayOrPause" onClick="doPlayOrPause()">
+		<button class="y_live_button" type="button" value="stop" onClick="doStop()">Stop</button>
+		<button class="y_live_button" type="button" value="mute" onClick="document.vlc.mute()">Mute</button>
+		<button class="y_live_button" type="button" value="fullscreen" onClick="document.vlc.fullscreen()">FScreen</button>
+		<button class="y_live_button" type="button" value="minus" alt="minus" onClick="document.vlc.set_volume(document.vlc.get_volume()-10);">-</button>
+		<button class="y_live_button" type="button" value="plus" onClick="document.vlc.set_volume(document.vlc.get_volume()+10);">+</button>
+		<input class="y_live_button" type="button" value="Lock" name="lock" onClick="doLockUnlock()">
+	</form>	
+=}
+
+<script language="JavaScript" type="text/javascript">
+	var res_w=parseInt("{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_w;384=}",10);
+	var res_h=parseInt("{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_h;288=}",10);
+	if(isNaN(res_w)) res_w=384;
+	if(isNaN(res_h)) res_h=288;
+	
+	document.vlc.width=res_w;
+	document.vlc.height=res_h;
+</script>	
+
+</body>
+</html>

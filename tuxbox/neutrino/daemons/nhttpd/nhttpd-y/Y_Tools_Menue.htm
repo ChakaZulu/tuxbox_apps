@@ -20,7 +20,7 @@ function go_live()
 {
     var agt=navigator.userAgent.toLowerCase();
     var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
-    var _url = (is_ie) ? "Y_Tools_NetStream_IE.htm" : "Y_Tools_NetStream_Moz.htm";
+    var _url = (is_ie) ? "Y_Tools_NetStream.yhtm?browser=ie" : "Y_Tools_NetStream.yhtm?browser=moz";
 //	go_wait_url(_url);
 	yurl=_url;
 	go_wait();	
@@ -36,13 +36,13 @@ function go_live()
 		<td align="center">
 			<table border="1" class="y_menu_sec">
 				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="/fb/timer.dbox2">Timer</a></td></tr>
-				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Boxcontrol.htm">Boxcontrol</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Boxcontrol.yhtm">Boxcontrol</a></td></tr>
 				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Info.htm">Info</a></td></tr>
 				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Flash.htm">Image</a></td></tr>
 				<tr><td class="y_menu_sec" width="80"><a href="javascript:go_live()">NetStream</a></td></tr>
-				<tr><td class="y_menu_sec" width="80"><a href="javascript:go_wait_url('/y/cgi?tmpl=Y_Live_DoubleView.htm')">DoubleView</a></td></tr>
-				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Msg.htm">Message</a></td></tr>
-				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Bootlogo.htm">Boot Logo</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Live_DoubleView.yhtm">DoubleView</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Msg.yhtm">Message</a></td></tr>
+				<tr><td class="y_menu_sec" width="80"><a target="Hauptframe" href="Y_Tools_Bootlogo.yhtm">Boot Logo</a></td></tr>
 			</table>
 		</td>
 	</tr>
