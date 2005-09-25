@@ -117,3 +117,9 @@ input
 {
 	font-size: 10pt;
 }
+.y_invisible_table
+{
+	border: 0px;
+	border-spacing: 0px;
+	padding: 0;
+}
