@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.5 2005/09/25 12:45:39 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.6 2005/09/25 15:06:21 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -150,6 +150,7 @@ void stmenu::mainloop()
 	display->SetMode(720, 576, 8);
 
 	newscript(imagelist[selentry].location);
+	goscript(imagelist[selentry].location);
 	
 	saveconfig();
 }
@@ -289,16 +290,15 @@ bool stmenu::loadimagelist()
 	imagelist.push_back(a);
 
 	selentry = 0;
-	int tmpcurr = 0;
-	int i = 0;
-	for (i = 0; i < 2; i++)
+	int curentry = 0;
+	for (int i = 0; i < 2; i++)
 	{
 		DIR *d = opendir(dir[i].c_str());
 		if (d)
 		{
 			while (struct dirent *e = readdir(d))
 			{
-				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))	
+				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
 				{
 					std::string name = dir[i] + e->d_name;
 					stat(name.c_str(), &s);
@@ -323,12 +323,12 @@ bool stmenu::loadimagelist()
 									a.name = std::string(line);
 								}
 							}
-								
+	
 							imagelist.push_back(a);
 
-							tmpcurr++;
+							curentry++;
 							if (strcmp(selentry_st, name.c_str()) == 0)
-								selentry = tmpcurr;
+								selentry = curentry;
 						}
 					}
 				}
@@ -345,6 +345,7 @@ void stmenu::newscript(std::string image)
 {
 	if (FILE *f = fopen(SCRIPTFILE, "w"))
 	{
+		fprintf(f, "#!/bin/sh\n\n");
 		if (image != "")
 		{
 			ProcUtils::killProcess("smbd");
@@ -352,7 +353,6 @@ void stmenu::newscript(std::string image)
 			if (inetd == 1) 
 				ProcUtils::killProcess("inetd");
 				
-			fprintf(f, "#!/bin/sh\n\n");
 			fprintf(f, "killall -9 rcS\n");
 			fprintf(f, "killall -9 init\n");
 			if (strcmp(mpoint, "/hdd"))
@@ -365,6 +365,19 @@ void stmenu::newscript(std::string image)
 			
 		fclose(f);
 		system("chmod 755 "SCRIPTFILE);
+	}
+}
+
+void stmenu::goscript(std::string image)
+{
+	std::string go = image + "/go";
+	if (FILE *f = fopen(go.c_str(), "w"))
+	{
+		fprintf(f, "#!/bin/sh\n\n");		
+		fprintf(f, "mount -t devfs dev /dev\n");
+		fprintf(f, "/etc/init.d/rcS&\n");
+		fclose(f);
+		system(std::string("chmod 755 " + go).c_str());
 	}
 }
 

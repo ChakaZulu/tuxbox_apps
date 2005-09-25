@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.h,v 1.4 2005/09/25 12:45:40 digi_casi Exp $
+ * $Id: bootmenue.h,v 1.5 2005/09/25 15:06:21 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -34,7 +34,7 @@
 #include "my_timer.h"
 #include "processutils.h"
 
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 
 class image
 {
@@ -72,6 +72,7 @@ class stmenu: public Object
 	void timeout();
 
 	void newscript(std::string image);
+	void goscript(std::string image);
 
 	void drawmenu();
 	void showpic();
