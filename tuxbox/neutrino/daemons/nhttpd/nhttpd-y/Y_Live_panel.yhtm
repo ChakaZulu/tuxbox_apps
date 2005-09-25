@@ -5,7 +5,6 @@
 <link rel="stylesheet" type="text/css" href="/global.css">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
 <SCRIPT LANGUAGE="JavaScript">
-<!--
 function changeChannel()
 {
 	document.x.bouquets.disabled=true;
@@ -35,7 +34,6 @@ function yswitchto()
 	parent.live.location.href="/Y_Wait.htm";
 	parent.location.href="Y_Live_View.yhtm?execute=script:Y_Live%20switchto%20{=if-equal:{=func:get_mode=}~tv~Radio~TV=}";
 }
-//-->
 </SCRIPT>
 </head>
 <body>
