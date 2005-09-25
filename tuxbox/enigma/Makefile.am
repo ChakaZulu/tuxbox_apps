@@ -1,3 +1,3 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = include lib src po data doc
+SUBDIRS = include lib src po data doc boot

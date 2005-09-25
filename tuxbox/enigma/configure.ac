@@ -58,6 +58,9 @@ TUXBOX_APPS_GETTEXT
 
 AC_OUTPUT([
 Makefile
+boot/Makefile
+boot/showlogo/Makefile
+boot/bootmenue/Makefile
 data/Makefile
 data/fonts/Makefile
 data/htdocs/Makefile
