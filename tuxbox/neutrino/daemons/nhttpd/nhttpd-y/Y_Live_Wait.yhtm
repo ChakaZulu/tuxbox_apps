@@ -11,7 +11,7 @@ function go_live()
     var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
 //    var _url = (is_ie) ? "/control/exec?Y_Live&live&ie" : "/control/exec?Y_Live&live&moz";
     var _url = (is_ie) ? "Y_Live_TV.yhtm?browser=ie" : "Y_Live_TV.yhtm?browser=moz";
-	_url={=if-equal:{=func:get_mode=}~tv~_url~"Y_Live_Radio.yhtm"=};
+	_url={=if-equal:{=func:get_mode=}~radio~"Y_Live_Radio.yhtm"~_url=};
 	window.location.href = _url;
 }
 </script>
