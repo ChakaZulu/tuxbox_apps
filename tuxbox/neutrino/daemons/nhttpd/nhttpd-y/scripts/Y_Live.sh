@@ -1,30 +1,14 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Live (yjogol)
-# $Date: 2005/09/23 16:26:02 $
-# $Revision: 1.7 $
+# $Date: 2005/09/25 10:57:23 $
+# $Revision: 1.8 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
 . ./_Y_Webserver_Check.sh
 . ./_Y_Library.sh
 
-# -----------------------------------------------------------
-# $1=Bouquet //Bouquets-Liste als HTML-Options. Welche aktiv ist kann nicht festgestellt werden.
-# -----------------------------------------------------------
-buildHTMLbouquets()
-{
-	buildHTML=`wget -O - -q $y_url_control/getbouquets|sed -e 's/^\([^ ]*\) \(.*$\)/<option value=\1>\2<\/option>/g'|sed -e "s/value=$1/& selected/g"`
-	echo "$buildHTML"
-}
-# -----------------------------------------------------------
-# $1=Bouquet // Channel Liste
-# -----------------------------------------------------------
-buildHTMLbouquetChannels()
-{
-	buildHTML=`wget -O - -q $y_url_control/getbouquet?bouquet=$1|sed -e 's/^\([^ ]*\) \([^ ]*\) \(.*$\)/<option value=\2>\1 \3<\/option>/g'`
-	echo "$buildHTML"
-}
 # -----------------------------------------------------------
 live_lock()
 {
@@ -48,7 +32,7 @@ prepare_tv()
 # -----------------------------------------------------------
 prepare_radio()
 {
-		# SPTS on
+		# SPTS off
 		wget -O - -q "$y_url_control/system?setAViAExtPlayBack=pes" >/dev/null
 }
 
@@ -59,80 +43,17 @@ live_getmode()
 	mode=`echo "$mode"|sed -e "s/tv.*/tv/1"`
 	echo "$mode"
 }
-# -----------------------------------------------------------
-live_buildpage()
-{
-	check_Y_Web_conf
-	mode=`live_getmode`
-	if [ "$mode" = "tv" ]
-	then
-		prepare_tv
-		url=`buildStreamingURL`
-		case "$2" in
-			ie)
-				buildHTML=`sed -e s/Y_URL/$url/g $y_path_httpd/Y_Live_IE_tmpl.htm` ;;
-			moz)
-				buildHTML=`sed -e s/Y_URL/$url/g $y_path_httpd/Y_Live_Moz_tmpl.htm` ;;
-		esac
-		# set Resolution
-		config_open $y_config_Y_Web
-		res_w=`config_get_value 'live_resolution_w'`
-		res_h=`config_get_value 'live_resolution_h'`
-		buildHTML=`echo "$buildHTML"|sed -e s/Y_res_w/$res_w/g`
-		buildHTML=`echo "$buildHTML"|sed -e s/Y_res_h/$res_h/g`
 
-		echo "$buildHTML"
-	else
-		prepare_radio
-		url=`buildStreamingAudioRawURL`
-#		echo "url:($url) m3u:($y_tmp_m3u)"
-		echo "$url" > $y_tmp_m3u
-		echo "$url" > $y_tmp_m4u
-		cat $y_path_httpd/Y_Live_Radio.htm
-	fi
-}
-
-live_buildpanel()
-{
-	# actual Bouquet
-	actualBouquet=`wget -O - -q $y_url_control/getbouquet?actual`
-	if [ "$2" = "" ]
-	then
-		bouquet="$actualBouquet"
-	else
-		bouquet="$2"
-	fi
-		bouquets=`buildHTMLbouquets $bouquet`
-	echo "$bouquets" >$y_tmp
-	buildHTML=`sed "/Y_Bouquets/r $y_tmp" $y_path_httpd/Y_Live_panel_tmpl.htm`
-		channels=`buildHTMLbouquetChannels $bouquet`
-	actualChannel=`wget -O - -q $y_url_control/zapto`
-	channels=`echo $channels|sed -e "s/$actualChannel/& selected/g"`
-	echo "$channels" >$y_tmp
-	buildHTML=`echo "$buildHTML"|sed "/Y_Channels/r $y_tmp"`
-
-	mode=`live_getmode`
-	if [ "$mode" = "tv" ]
-	then
-		ymode="Radio"
-	else
-		ymode="TV"
-	fi
-	buildHTML=`echo "$buildHTML"|sed -e "s/Y_mode/$ymode/g"`
-
-	echo "$buildHTML"
-	echo "" >$y_tmp
-}
 # -----------------------------------
 # Main
 # -----------------------------------
 case "$1" in
-	panel)
-		live_buildpanel	$* ;;
 
 	zapto)
-		wget -O - -q "$y_url_control/zapto?$2" >/dev/null
-		cat $y_wait_live
+		if [ "$2" != "" ]
+		then
+			wget -O - -q "$y_url_control/zapto?$2" >/dev/null
+		fi
 		;;
 
 	switchto)
@@ -142,11 +63,6 @@ case "$1" in
 		else
 			wget -O - -q "$y_url_control/setmode?tv" >/dev/null
 		fi
-		cat $y_path_httpd/Y_LiveView.htm
-		;;
-
-	live)
-		live_buildpage $*
 		;;
 
 	url)
@@ -157,14 +73,25 @@ case "$1" in
 		url=`buildStreamingAudioRawURL`
 		echo "$url" ;;
 
-	buildHTMLbouquets)
-		buildHTMLbouquets ;;
-
 	live_lock)
 		live_lock ;;
 
 	live_unlock)
 		live_unlock ;;
+		
+	dboxIP)
+		buildLocalIP ;;
+		
+	prepare_radio)
+		prepare_radio
+		url=`buildStreamingAudioRawURL`
+		echo "$url" > $y_tmp_m3u
+		echo "$url" > $y_tmp_m4u
+		;;
+
+	prepare_tv)
+		prepare_tv
+		;;
 
 	*)
 		echo "Parameter falsch: $*" ;;

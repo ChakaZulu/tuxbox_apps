@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Plugins (yjogol)
-# $Date: 2005/09/23 16:26:02 $
-# $Revision: 1.4 $
+# $Date: 2005/09/25 10:57:23 $
+# $Revision: 1.5 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -11,20 +11,6 @@
 # ===========================================================
 # Plugin : VNC
 # ===========================================================
-vnc_build_form()
-{
-	config_open $y_config_vnc
-
-	vnc_server=`config_get_value 'server'`
-	vnc_port=`config_get_value 'port'`
-	vnc_pw=`config_get_value 'passwd'`
-	vnc_scale=`config_get_value 'scale'`
-
-	buildPage=`sed -e s/Y_server/$vnc_server/g $y_path_httpd/Y_Plugins_VNC.htm | sed -e s/Y_port/$vnc_port/g | sed -e s/Y_password/$vnc_pw/g | sed -e s/Y_scale/$vnc_scale/g`
-	echo "$buildPage"
-}
-
-# -----------------------------------------------------------
 vnc_set()
 {
 	if [ "$#" -ne 4 ]
@@ -37,36 +23,14 @@ vnc_set()
 		config_set_value 'passwd' $3
 		config_set_value 'scale' $4
 		config_write $y_config_vnc
-		echo "VNC Parameter uebernommen"
+		msg="VNC Parameter uebernommen"
+		y_format_message_html
 	fi
 }
 
-# -----------------------------------------------------------
-# BETA: Hier wird noch gebastelt
-# -----------------------------------------------------------
-news_build_form()
-{
-	a=`cat /var/tuxbox/config/tuxnews/tuxnews.list`
-#	echo "a:$a"
-z=""
-	echo "$a" | \
-        for i in 0 1 2 3 4 5 6 7 8 9
-        do
-            x=read _line
-z="$z $i $_line"
-#			echo "ii:$_line"
-#			echo "X:$x"
-#            if [ "$x" ]
-#            then
-#				echo "i:$_line"
-#            fi
-        done
-	echo "$z"
-}
 # ===========================================================
-# Settings : Y-Web : Skins
+# Settings : Skins
 # ===========================================================
-
 # -----------------------------------------------------------
 # Skin Liste
 # -----------------------------------------------------------
@@ -85,23 +49,14 @@ skin_get()
 		else
 			selec=""
 		fi
-		opt="<option $selec value='$skin'>$skin<\/option>"
-#		echo "skin:($skin) opt:($opt)"
+		opt="<option $selec value='$skin'>$skin</option>"
 		html_option_list="$html_option_list $opt"
 	done
 	echo "$html_option_list"
 }
-# -----------------------------------------------------------
-skin_build_form()
-{
-	opts=`skin_get`
-	buildPage=`sed -e "s/Y_opts/$opts/g" $y_path_httpd/Y_Settings_Skin.htm`
-	echo "$buildPage"
-}
 
 # -----------------------------------------------------------
-# Skin setzen : css ueberschreiben
-# $1=Skin-Name
+# Skin setzen : css ueberschreiben  $1=Skin-Name
 # -----------------------------------------------------------
 skin_set()
 {
@@ -114,26 +69,12 @@ skin_set()
 	fi
 	config_set_value_direct $y_config_Y_Web 'skin' $1
 
-	echo "Skin geaendert - Jetzt Browser Refresh/Aktualisierung ausfuehren"
+	msg="Skin geaendert - Jetzt Browser Refresh/Aktualisierung ausfuehren"
+	y_format_message_html
 }
 # ===========================================================
 # Settings : WebServer (nhttpd)
 # ===========================================================
-nhttpd_build_form()
-{
-	config_open $y_config_nhttpd
-
-	yAuthPassword=`config_get_value 'AuthPassword'`
-	yAuthUser=`config_get_value 'AuthUser'`
-	yAuthenticate=`config_get_value 'Authenticate'`
-#	yPort=`config_get_value 'Port'`
-
-#	buildPage=`sed -e s/Y_authpassword/$yAuthPassword/g $y_path_httpd/Y_Settings_nhttpd.htm | sed -e s/Y_authuser/$yAuthUser/g | sed -e s/Y_authenticate/$yAuthenticate/g | sed -e s/Y_port/$yPort/g`
-	buildPage=`sed -e s/Y_authpassword/$yAuthPassword/g $y_path_httpd/Y_Settings_nhttpd.htm | sed -e s/Y_authuser/$yAuthUser/g | sed -e s/Y_authenticate/$yAuthenticate/g`
-	echo "$buildPage"
-}
-
-# -----------------------------------------------------------
 nhttpd_set()
 {
 	if [ "$#" -ne 4 ]
@@ -151,7 +92,9 @@ nhttpd_set()
 	fi
 }
 
-# -----------------------------------------------------------
+# ===========================================================
+# Settings : yWeb
+# ===========================================================
 yWeb_set()
 {
 		config_open $y_config_Y_Web
@@ -161,18 +104,13 @@ yWeb_set()
 		config_write $y_config_Y_Web
 		msg="<b>Parameter uebernommen</b><br>Wenn die Aufloesung geaendert wurde, dann Browser Refresh"
 		y_format_message_html
-
 }
 
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
-#. ./_Y_Webserver_Check.sh
 
 case "$1" in
-	vnc_build_form)
-		vnc_build_form ;;
-
 	vnc_set)
         if [ "$#" -ne 5 ]
         then
@@ -180,14 +118,6 @@ case "$1" in
         else
 			vnc_set $2 $3 $4 $5
 		fi ;;
-	news_build_form)
-		news_build_form ;;
-
-	news_set)
-		;;
-
-	nhttpd_build_form)
-		nhttpd_build_form ;;
 
 	nhttpd_set)
         if [ "$#" -ne 5 ]
@@ -198,11 +128,11 @@ case "$1" in
 			nhttpd_set $*
 		fi ;;
 
-	skin_build_form)
-		skin_build_form ;;
-
 	skin_set)
 		skin_set $2 ;;
+
+	skin_get)
+		skin_get ;;
 
 	yWeb_set)
 		shift 1
