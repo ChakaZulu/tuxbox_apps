@@ -1337,19 +1337,27 @@ void plugin_exec(PluginParam *par)
 						RenderMenuLine(ACTION_MKDIR-1, YES);
 						char szDir[FILENAME_MAX];
 						szDir[0] = 0x00;
-						char szMsg[356];
-						sprintf(szMsg,msg[MSG_MKDIR*NUM_LANG+language]);
+						char szMsg[1000];
+						sprintf(szMsg,msg[MSG_MKDIR*NUM_LANG+language],finfo[curframe].path);
 						switch (GetInputString(400,255,szDir,szMsg, NO))
 						{
 							case RC_OK:
 							{
 								if (*szDir != 0x00)
 								{
-									sprintf(action,"mkdir -p \"%s%s\"",finfo[curframe].path, szDir);
-									DoExecute(action, SHOW_NO_OUTPUT);
-									FillDir(1-curframe,SELECT_NOCHANGE);
-									FillDir(  curframe,SELECT_NOCHANGE);
-									SetSelected(curframe,szDir);
+									if (FindFile(curframe,szDir) != NULL)
+									{
+										sprintf(szMsg,msg[MSG_FILE_EXISTS*NUM_LANG+language],szDir);
+										MessageBox(szMsg,"",OK);
+									}
+									else
+									{
+										sprintf(action,"mkdir -p \"%s%s\"",finfo[curframe].path, szDir);
+										DoExecute(action, SHOW_NO_OUTPUT);
+										FillDir(1-curframe,SELECT_NOCHANGE);
+										FillDir(  curframe,SELECT_NOCHANGE);
+										SetSelected(curframe,szDir);
+									}
 								}
 							}
 							default:
@@ -1649,8 +1657,6 @@ void RenderFrame(int frame)
 		{
 			tool[ACTION_MKDIR-1 ] = ACTION_MKDIR; // mkdir allowed
 			tool[ACTION_MKFILE-1] = ACTION_MKFILE; // mkfile allowed
-			if (finfo[1-frame].writable)
-				tool[ACTION_MKLINK-1] = ACTION_MKLINK; // mklink allowed
 		}
 	}
 	while (row < framerows && (finfo[frame].first + row < finfo[frame].count))
@@ -1659,8 +1665,12 @@ void RenderFrame(int frame)
 		bcolor = (bselected ? (IsMarked(frame,finfo[frame].first + row) ? BLUE3 : BLUE2)
 		                    : (IsMarked(frame,finfo[frame].first + row) ? trans_map_mark[curvisibility] : nBackColor));
 		pfe = getfileentry(frame, finfo[frame].first + row);
-		if (bselected && strcmp(pfe->name,"..") != 0)
-			tool[ACTION_PROPS-1] = ACTION_PROPS; // view properties allowed if entry is not ..
+		if (bselected && strcmp(pfe->name,"..") != 0 && strcmp(pfe->name,"/") != 0)
+		{
+		    tool[ACTION_PROPS-1] = ACTION_PROPS; // view properties allowed if entry is not .. or /
+		    if (finfo[1-frame].writable && finfo[frame].zipfile[0] == 0x00)
+			tool[ACTION_MKLINK-1] = ACTION_MKLINK; // mklink allowed
+		}
 		*sizeString = 0x00;
 		fcolor = WHITE;
 		if ((pfe->fentry.st_mode & S_IRUSR) == S_IRUSR )

@@ -77,7 +77,7 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.9a\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.10\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004-2005"
 //rc codes
 
@@ -511,7 +511,7 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
 				  "Delete %d files ?"                          ,"%d Datei(en) löschen ?"                          ,"Cancellare i %d file ?"                          ,"Radera %d fil(er) ?"                  ,
 				  "Deleting file '%s'..."                      ,"lösche Datei '%s' ..."                           ,"Sto cancellando i file '%s' ..."                 ,"Raderar filen '%s'..."                ,
 				  "rename file '%s' :"                         ,"Datei '%s' umbenennen:"                          ,"Rinominare il file '%s' :"                       ,"Byt namn på filen '%s'"               ,
-				  "create new directory"                       ,"neues Verzeichnis erstellen"                     ,"Creare una nuova directory"                      ,"Skapa ny mapp"                        ,
+				  "create new directory in '%s'"               ,"neues Verzeichnis in '%s' erstellen"             ,"Creare una nuova directory nella directory '%s'" ,"Skapa ny mapp i mappen '%s'"          ,
 				  "create new file in directory '%s'"          ,"neue Datei in Verzeichnis '%s' erstellen"        ,"Creare un nuovo file '%s' nella directory"       ,"Skapa ny fil i mappen '%s'"           ,
 				  "create link to '%s%s\' in directory '%s'"   ,"Verweis auf '%s%s' in Verzeichnis '%s' erstellen","Creare un link a '%s%s' nella directory '%s' "   ,"Skapa länk till '%s%s\' i mappen '%s'",
 				  "execute linux command"                      ,"Linux-Kommando ausführen"                        ,"Eseguire un comando linux"                       ,"Exekvera Linux kommando"              ,

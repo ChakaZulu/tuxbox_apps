@@ -2,7 +2,12 @@ TuxCom:
 
 Historie:
 ---------
-10.08.2005 Version 1.9a
+
+24.09.2005 Version 1.10
+ - Verweise auf Dateien in schreibgeschützen Verzeichnissen erstellbar
+ - Meldung beim Verzeichnis erstellen, wenn Datei bereits existiert
+ 
+11.09.2005 Version 1.9a
  - Schwedische Übersetzung eingebaut (Dank an yeager)
 
 10.08.2005 Version 1.9
@@ -111,18 +116,6 @@ Historie:
    erste Veröffentlichung
    
      
-  
-Quellen:
---------
-Ich habe Codeteile von T-Hydron's script-plugin (http://t-hydron.verkoyen.be/)
-und LazyT's TuxTxt (aus dem CDK)  übernommen. 
-
-
-Vorraussetzungen:
------------------
- - Eine Dreambox 7000-S ( nicht auf anderen Modellen getested)
- - Firmware Version 1.07.x oder höher ( nicht auf älteren Versionen getested)
-
 Installation:
 -------------
 Wie bei jedem Plugin, einfach tuxcom.so und tuxcom.cfg nach /var/tuxbox/plugins kopieren

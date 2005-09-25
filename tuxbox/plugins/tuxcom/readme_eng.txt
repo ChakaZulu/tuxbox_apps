@@ -3,6 +3,10 @@ TuxCom:
 History:
 ---------
 
+24.09.2005 Version 1.10
+ - link to files in read-only directories creatable
+ - check for existing files when creating directory
+
 11.09.2005 Version 1.9a
  - added swedish language support (thanks to yeager)
 
@@ -111,16 +115,6 @@ History:
 03.04.2004 version 1.0 : 
    first public version
 
-
-Sources:
---------
-I took code partially from T-Hydron's script-plugin (http://t-hydron.verkoyen.be/)
-and LazyT's TuxTxt (from the CDK) 
-
-Requirements:
--------------
- - A Dreambox 7000-S ( not tested on other Models )
- - Firmware Version 1.07.x or higher ( not tested on older Versions )
 
 Installation:
 -------------
