@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: yapi.h,v 1.1 2005/09/10 12:28:32 yjogol Exp $
+        $Id: yapi.h,v 1.2 2005/09/25 10:49:51 yjogol Exp $
 
         License: GPL
 
@@ -67,13 +67,28 @@ class CControlAPI;
 
 class CyAPI
 {
-	CWebDbox			*Parent;
+	CWebDbox	*Parent;
 
+	// parsing engine
+	std::string cgi_file_parsing(CWebserverRequest *request, std::string htmlfilename, bool ydebug);
+	std::string cgi_cmd_parsing(CWebserverRequest* request, std::string html_template, bool ydebug);
+	std::string YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd);
+	std::string YWeb_cgi_func(CWebserverRequest* request, std::string ycmd);
+	// func
+	std::string func_mount_get_list();
+	std::string func_mount_set_values(CWebserverRequest* request);
+	std::string func_get_bouquets_as_dropdown(std::string para);
+	std::string func_get_actual_bouquet_number();
+	std::string func_get_channels_as_dropdown(std::string para);
+	std::string func_get_actual_channel_id();
+	std::string func_get_mode();
+	std::string func_get_video_pids(std::string para);
+	std::string func_get_radio_pid();
+
+	// helpers
 	std::string YWeb_cgi_get_ini(std::string filename, std::string varname);
 	void YWeb_cgi_set_ini(std::string filename, std::string varname);
-	std::string YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd);
-	std::string cgi_cmd_parsing(CWebserverRequest* request, std::string html_template, bool ydebug);
-	std::string YWeb_cgi_func(CWebserverRequest* request, std::string ycmd);
+	
 
 public:
 
@@ -88,6 +103,7 @@ public:
 	// Execute calls
 	bool Execute(CWebserverRequest* request);
 	bool cgi(CWebserverRequest *request);
+	bool ParseAndSendFile(CWebserverRequest *request);
 
 	friend class CControlAPI;
 
