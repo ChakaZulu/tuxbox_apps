@@ -18,7 +18,6 @@ function changeChannel()
 	{
 		channel = document.x.channels[sel].value;
 		parent.live.do_stop();
-//		parent.live.location.href="/control/exec?Y_Live&zapto&"+channel;
 		parent.live.location.href="Y_Live_Wait.yhtm?execute=script:Y_Live%20zapto%20"+channel;
 	}
 	document.x.bouquets.disabled=false;
