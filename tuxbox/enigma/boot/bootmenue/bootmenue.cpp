@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.4 2005/09/25 09:49:13 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.5 2005/09/25 12:45:39 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -80,10 +80,22 @@ void stmenu::rc_event(unsigned short key)
 
 	switch (key)
 	{
-		case RC_EXIT: case RC_OK: doexit = true; break;
-		case RC_UP: selentry--; if (selentry < 0) selentry = maxentry; break;
-		case RC_DOWN: selentry++; if (selentry > maxentry) selentry = 0; break;
-		default: break;
+		case RC_EXIT: 
+		case RC_OK: 
+			doexit = true; 
+			break;
+		case RC_UP: 
+			selentry--; 
+			if (selentry < 0) 
+				selentry = maxentry; 
+			break;
+		case RC_DOWN: 
+			selentry++; 
+			if (selentry > maxentry) 
+			selentry = 0; 
+			break;
+		default: 
+			break;
 	}
 
 	drawmenu();
@@ -94,7 +106,6 @@ void stmenu::drawmenu()
 	int firstentry = 0;
 	int lastentry = 0;
 
-	if (selentry < 4)  firstentry  = 0;
 	if (selentry > 3)  firstentry = 4;
 	if (selentry > 7)  firstentry = 8;
 	if (selentry > 11) firstentry = 12;
@@ -104,25 +115,25 @@ void stmenu::drawmenu()
 	lastentry = firstentry + 3;
 	if (lastentry > maxentry) 
 		lastentry = maxentry;
-
+		
 	display->W_buffer(menu_x - 5, menu_y - 5, menu_xs + 10, menu_ys + 10);
 	lcd->draw_fill_rect (0, 0, 120, 64, CLCDDisplay::PIXEL_OFF);
 	
 	int a = 0;
 	int h = (menu_ys / 4) - 2;
 
-	for (int i = firstentry; i < lastentry + 1; i++)
+	for (int i = firstentry; i <= lastentry; i++)
 	{
 		lcd->RenderString(imagelist[i].name, 0, (a * 15) + 3, 120, CLCDDisplay::CENTER, 20, CLCDDisplay::PIXEL_ON);
 		int a1 = menu_y + (a * h);
 		if (i == selentry)
 		{
 			lcd->draw_fill_rect (0, (a * 15), 120, (a * 15) + 15, CLCDDisplay::PIXEL_INV);
-			//display->FillRect( menu_x, a1, menu_xs, h, sel_r, sel_g, sel_b);
-			display->RenderCircle( menu_x, a1 + 2 * (h / 3), sel_r, sel_g, sel_b);
+			//display->FillRect(menu_x + 5, a1, menu_xs + 25 + 5, h, sel_r, sel_g, sel_b);
+			display->RenderCircle(menu_x + 10, a1 + 2 * (h / 3) - 2, sel_r, sel_g, sel_b);
 		}
-							//25 ist platz fuer Kreis
-		display->RenderString(imagelist[i].name, menu_x + 25, a1+h, menu_xs - 25, CLCDDisplay::LEFT, h, str_r, str_g, str_b);
+								//25 ist platz fuer Kreis
+		display->RenderString(imagelist[i].name, menu_x + 25 + 10, a1 + h, menu_xs - 25 - 10, CLCDDisplay::LEFT, h, str_r, str_g, str_b);
 		a++;
 	}
 	lcd->update();
@@ -140,18 +151,7 @@ void stmenu::mainloop()
 
 	newscript(imagelist[selentry].location);
 	
-	if (FILE *f = fopen(CONFIGFILE, "w"))
-	{
-		fprintf(f, "#BootManager-Config\n");
-		fprintf(f, "mountpoint=%s\n", mpoint);
-		fprintf(f, "selentry=%s\n", imagelist[selentry].name.c_str());
-		fprintf(f, "kill_inetd=%d", inetd);
-		fprintf(f, "timeout=%d\n", timeoutValue);
-		fprintf(f, "videoformat=%d\n", videoformat);
-		fprintf(f, "skin-path=%s\n", skin_path);
-		fprintf(f, "skin-name=%s\n", skin_name);
-		fclose(f);
-	}
+	saveconfig();
 }
 
 bool stmenu::loadskin()
@@ -212,11 +212,11 @@ bool stmenu::loadconfig()
 {
 	timeoutValue = 10;
 	videoformat = 1;
-	strcpy(selentry_st, "");
+	selentry_st[0] = '\0';
 	strcpy(skin_path, "/var/boot");
 	strcpy(skin_name, "california.skin");
 	strcpy(mpoint, "/var/mnt/usb");
-	inetd = 1;
+	inetd = 0;
 	if (FILE *in = fopen(CONFIGFILE, "rt"))
 	{
 		printf("[STARTMENU] config loaded\n");
@@ -224,15 +224,13 @@ bool stmenu::loadconfig()
 		while(fgets(line, 256, in))
 		{
 			if (line[strlen(line) - 2] == '\r') 
-				line[strlen(line) - 2] = 0;
-			else 
-			if (line[strlen(line)-1] == '\n')
-				line[strlen(line)-1] = 0;
-			else 
+				line[strlen(line) - 2] = 0; 
+			if (line[strlen(line) - 1] == '\n')
+				line[strlen(line) - 1] = 0;
 			if (!strncmp(line, "timeout", 7))
 				timeoutValue = atoi(line + 8);
 			else 
-			if (!strncmp(line, "videoformat", 10))
+			if (!strncmp(line, "videoformat", 11))
 				videoformat = atoi(line + 12);
 			else 
 			if (!strncmp(line, "selentry", 8))
@@ -258,6 +256,22 @@ bool stmenu::loadconfig()
 		printf("[STARTMENU] <%s not found>, using defaults...\n", CONFIGFILE);
 
 	return true;
+}
+
+void stmenu::saveconfig()
+{
+	if (FILE *f = fopen(CONFIGFILE, "w"))
+	{
+		fprintf(f, "#BootManager-Config\n");
+		fprintf(f, "mountpoint=%s\n", mpoint);
+		fprintf(f, "selentry=%s\n", imagelist[selentry].location.c_str());
+		fprintf(f, "kill_inetd=%d\n", inetd);
+		fprintf(f, "timeout=%d\n", timeoutValue);
+		fprintf(f, "videoformat=%d\n", videoformat);
+		fprintf(f, "skin-path=%s\n", skin_path);
+		fprintf(f, "skin-name=%s\n", skin_name);
+		fclose(f);
+	}
 }
 
 bool stmenu::loadimagelist()
@@ -304,13 +318,16 @@ bool stmenu::loadimagelist()
 								fgets(line, 256, in);
 								fclose(in);
 								if (strlen(line) > 0)
+								{
+									line[strlen(line) - 1] = '\0';
 									a.name = std::string(line);
+								}
 							}
 								
 							imagelist.push_back(a);
 
 							tmpcurr++;
-							if (!strcmp(selentry_st, e->d_name)) 
+							if (strcmp(selentry_st, name.c_str()) == 0)
 								selentry = tmpcurr;
 						}
 					}
@@ -328,15 +345,20 @@ void stmenu::newscript(std::string image)
 {
 	if (FILE *f = fopen(SCRIPTFILE, "w"))
 	{
-		fprintf(f, "#!/bin/sh\n");
 		if (image != "")
 		{
-			if (inetd == 1)
-				fprintf(f, "killall -9 inetd\n");
-			fprintf(f, "killall -9 smbd\n");
-			fprintf(f, "killall -9 nmbd\n");
+			ProcUtils::killProcess("smbd");
+			ProcUtils::killProcess("nmbd");
+			if (inetd == 1) 
+				ProcUtils::killProcess("inetd");
+				
+			fprintf(f, "#!/bin/sh\n\n");
 			fprintf(f, "killall -9 rcS\n");
-			fprintf(f, "chroot %s ../etc/rcS\n", image.c_str());
+			fprintf(f, "killall -9 init\n");
+			if (strcmp(mpoint, "/hdd"))
+				fprintf(f, "umount /hdd\n");
+			fprintf(f, "rm %s\n",SCRIPTFILE);
+			fprintf(f, "chroot %s ../go\n", image.c_str());
 		}
 		else
 			fprintf(f, "echo booting flash image...\n");

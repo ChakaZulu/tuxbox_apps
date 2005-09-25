@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.h,v 1.3 2005/09/25 09:49:13 digi_casi Exp $
+ * $Id: bootmenue.h,v 1.4 2005/09/25 12:45:40 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -32,6 +32,7 @@
 #include "my_lcd.h"
 #include "my_rc.h"
 #include "my_timer.h"
+#include "processutils.h"
 
 #define VERSION "0.0.1"
 
@@ -65,6 +66,7 @@ class stmenu: public Object
 	void rc_event(unsigned short key);
 	void mainloop();
 	bool loadconfig();
+	void saveconfig();
 	bool loadskin();
 	bool loadimagelist();
 	void timeout();
