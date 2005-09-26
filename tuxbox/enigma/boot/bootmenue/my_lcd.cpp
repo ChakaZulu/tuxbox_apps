@@ -1,4 +1,4 @@
-
+#ifdef HAVE_DREAMBOX_HARDWARE
 #include "my_lcd.h"
 
 #include <fcntl.h>
@@ -3034,4 +3034,4 @@ void CLCDDisplay::draw_string(int x, int y, const char *string)
 	}
 }
 #endif//USEFREETYPELCD
-
+#endif

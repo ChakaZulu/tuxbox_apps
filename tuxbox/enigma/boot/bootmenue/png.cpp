@@ -1,3 +1,4 @@
+#ifdef HAVE_DREAMBOX_HARDWARE
 #include <png.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -155,4 +156,4 @@ int fh_png_getsize(const char *name, int *x, int *y, int wanted_width, int wante
 	fclose(fh);
 	return(FH_ERROR_OK);
 }
-
+#endif

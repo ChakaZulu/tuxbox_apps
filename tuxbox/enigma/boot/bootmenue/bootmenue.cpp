@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.6 2005/09/25 15:06:21 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.7 2005/09/26 17:06:34 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,6 +19,7 @@
  *
  */
 
+#ifdef HAVE_DREAMBOX_HARDWARE
 #include "bootmenue.h"
 
 #define CONFIGFILE "/var/boot/bootmenue.conf"
@@ -386,4 +387,4 @@ int main(int argc, char **argv)
 	stmenu::getInstance();
 	return 0;
 }
-
+#endif

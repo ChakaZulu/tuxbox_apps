@@ -1,3 +1,4 @@
+#ifdef HAVE_DREAMBOX_HARDWARE
 #include "my_fb.h"
 
 #define SAA_MODE_RGB    0
@@ -1653,6 +1654,6 @@ int fbClass::SetSAA(int value)
 	}
 	return 0;
 }
-
+#endif
 
 
