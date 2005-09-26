@@ -66,7 +66,7 @@ function doLockUnlock()
 	<embed type="application/x-vlc-plugin"
 		name="vlc"  id="vlc"
 		autoplay="yes" loop="yes" width="384" height="288"
-		target="Y_URL" >
+		target="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids=}" >
 	</embed>
 	<form name="v">
 		<input class="y_live_button" type="button" value="Pause" name="PlayOrPause" onClick="doPlayOrPause()">
@@ -87,6 +87,9 @@ function doLockUnlock()
 	
 	document.vlc.width=res_w;
 	document.vlc.height=res_h;
+{=if-equal:{=browser=}~moz~
+    document.vlc.play()
+~=}
 </script>	
 
 </body>

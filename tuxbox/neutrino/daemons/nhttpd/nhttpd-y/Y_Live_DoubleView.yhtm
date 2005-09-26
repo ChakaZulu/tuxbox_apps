@@ -14,10 +14,10 @@
 (only 384x288 resolution now)
 <div class="y_work_box">
 
-<iframe name="I1" src="Y_Live_View.htm" target="Hauptframe" width="400" height="360" scrolling="no">
+<iframe name="I1" src="Y_Live_View.yhtm" target="Hauptframe" width="400" height="360" scrolling="no">
 Ihr Browser unterstützt Inlineframes nicht oder zeigt sie in der derzeitigen Konfiguration nicht an.
 </iframe>
-<iframe name="I2" src="http://{=ini-get:/var/tuxbox/config/Y-Web.conf;slavebox=}/Y_Live_View.htm" width="400" height="360" scrolling="no">
+<iframe name="I2" src="http://{=ini-get:/var/tuxbox/config/Y-Web.conf;slavebox=}/Y_Live_View.yhtm" width="400" height="360" scrolling="no">
 Ihr Browser unterstützt Inlineframes nicht oder zeigt sie in der derzeitigen Konfiguration nicht an.
 </iframe></p>
 </div>
