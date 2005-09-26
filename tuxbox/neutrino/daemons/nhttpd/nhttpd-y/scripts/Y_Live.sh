@@ -1,12 +1,11 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Live (yjogol)
-# $Date: 2005/09/25 10:57:23 $
-# $Revision: 1.8 $
+# $Date: 2005/09/26 18:36:00 $
+# $Revision: 1.9 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
-. ./_Y_Webserver_Check.sh
 . ./_Y_Library.sh
 
 # -----------------------------------------------------------
@@ -78,10 +77,10 @@ case "$1" in
 
 	live_unlock)
 		live_unlock ;;
-		
+
 	dboxIP)
 		buildLocalIP ;;
-		
+
 	prepare_radio)
 		prepare_radio
 		url=`buildStreamingAudioRawURL`
