@@ -1,3 +1,4 @@
+#ifdef HAVE_DREAMBOX_HARDWARE
 #include "my_rc.h"
 
 RcInput::RcInput()
@@ -84,3 +85,4 @@ RcInput* RcInput::getInstance()
 	if(rcinput == NULL) { rcinput = new RcInput(); }
 	return rcinput;
 }
+#endif

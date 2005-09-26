@@ -1,3 +1,4 @@
+#ifdef HAVE_DREAMBOX_HARDWARE
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -87,3 +88,4 @@ void ProcUtils::killProcess(const char *procname)
 		free(pidList);
 	}
 }
+#endif

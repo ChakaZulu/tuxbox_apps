@@ -1,3 +1,4 @@
+#ifdef HAVE_DREAMBOX_HARDWARE
 #include "my_timer.h"
 
 pthread_t thrTimer;
@@ -31,3 +32,4 @@ CTimer *CTimer::getInstance()
 	if (mytimer == NULL) { mytimer = new CTimer(); }
 	return mytimer;
 }
+#endif
