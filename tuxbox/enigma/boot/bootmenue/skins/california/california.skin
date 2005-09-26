@@ -8,7 +8,7 @@
 menu-size=100,130,330,230
 
 #select-color=r,g,b
-select-color=0,0,0
+select-color=112,112,112
 
 #string-color=r,g,b
 string-color=255,255,255
