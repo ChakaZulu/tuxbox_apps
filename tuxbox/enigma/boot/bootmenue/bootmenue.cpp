@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.7 2005/09/26 17:06:34 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.8 2005/09/26 19:25:16 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -51,7 +51,7 @@ stmenu::stmenu()
 				display->SetMode(720, 576, 16);
 				showpic();
 
-				display->RenderString(tmp_ver, ver_x, ver_y, 400, 0, ver_font, ver_r, ver_g, ver_b);
+				display->RenderString(tmp_ver, ver_x + 25 + 10, ver_y, menu_xs - 25 - 10, CLCDDisplay::LEFT, ver_font, ver_r, ver_g, ver_b);
 
 				display->Fill_buffer(menu_x - 5, menu_y - 5, menu_xs + 10, menu_ys + 10);
 
@@ -60,14 +60,15 @@ stmenu::stmenu()
 			}
 		}
 	}
-}
-
-stmenu::~stmenu()
-{
+	
 	delete display;
 	delete lcd;
 	imagelist.clear();
 	printf("we are done.\n");
+}
+
+stmenu::~stmenu()
+{
 }
 
 void stmenu::timeout()
@@ -158,6 +159,7 @@ void stmenu::mainloop()
 
 bool stmenu::loadskin()
 {
+	bool showTitle = false;
 	if (strlen(skin_path) > 0 && strlen(skin_name) > 0)
 	{
 		std::string tmp = std::string(skin_path) + "/" + std::string(skin_name);
@@ -168,7 +170,10 @@ bool stmenu::loadskin()
 			while (fgets(line, 256, in))
 			{
 				if (!strncmp(line, "first-line", 10))
+				{
 					sscanf(line, "first-line=%d,%d,%d,%d,%d,%d", &ver_x, &ver_y, &ver_font, &ver_r, &ver_g, &ver_b);
+					showTitle = true;
+				}
 				else 
 				if (!strncmp(line, "menu-size", 9))
 					sscanf(line, "menu-size=%d,%d,%d,%d", &menu_x, &menu_y, &menu_xs, &menu_ys);
@@ -180,6 +185,8 @@ bool stmenu::loadskin()
 					sscanf(line, "select-color=%d,%d,%d", &sel_r, &sel_g, &sel_b);
 			}
 			fclose(in);
+			if (!showTitle)
+				tmp_ver = "";
 			return true;
 		}
 	}
@@ -252,7 +259,7 @@ bool stmenu::loadconfig()
 		}
 		fclose(in);
 
-		tmp_ver = std::string("BootManager ") + std::string(VERSION);
+		tmp_ver = std::string("BootManager - ") + std::string(VERSION);
 	}
 	else
 		printf("[STARTMENU] <%s not found>, using defaults...\n", CONFIGFILE);
@@ -306,31 +313,27 @@ bool stmenu::loadimagelist()
 					if (S_ISDIR(s.st_mode))
 					{
 						std::string tmp = e->d_name;
-						std::string tmp_file = name + "/go";
-						if (access(tmp_file.c_str(), X_OK) == 0)
+						a.location = name;
+						a.name = e->d_name;
+						tmp = name + "/imagename";
+						if (FILE *in = fopen(tmp.c_str(), "rt"))
 						{
-							a.location = name;
-							a.name = e->d_name;
-							tmp = name + "/imagename";
-							if (FILE *in = fopen(tmp.c_str(), "rt"))
+							char line[256];
+							line[0] = '\0';
+							fgets(line, 256, in);
+							fclose(in);
+							if (strlen(line) > 0)
 							{
-								char line[256];
-								line[0] = '\0';
-								fgets(line, 256, in);
-								fclose(in);
-								if (strlen(line) > 0)
-								{
-									line[strlen(line) - 1] = '\0';
-									a.name = std::string(line);
-								}
+								line[strlen(line) - 1] = '\0';
+								a.name = std::string(line);
 							}
-	
-							imagelist.push_back(a);
-
-							curentry++;
-							if (strcmp(selentry_st, name.c_str()) == 0)
-								selentry = curentry;
 						}
+	
+						imagelist.push_back(a);
+
+						curentry++;
+						if (strcmp(selentry_st, name.c_str()) == 0)
+							selentry = curentry;
 					}
 				}
 			}
