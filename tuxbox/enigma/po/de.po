@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.64 2005/09/21 21:36:03 timekiller Exp $
+# $Id: de.po,v 1.65 2005/09/26 08:03:55 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -4113,55 +4113,55 @@ msgstr "Zapping History aktivieren"
 msgid "Do not care about actual mode when zapping in history list"
 msgstr "Ignoriert den aktuellen Modus wenn die History Liste benutzt wird"
 
-#: src/setup_extra.cpp:117
+#: src/setup_extra.cpp:118
 msgid "Disable CoreFiles"
 msgstr "CoreFiles abschalten"
 
-#: src/setup_extra.cpp:117
+#: src/setup_extra.cpp:118
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "Keine 'Corefiles' nach einem Enigma Absturz erstellen"
 
-#: src/setup_extra.cpp:120
+#: src/setup_extra.cpp:122
 msgid "Show Boot-Info"
 msgstr "Boot-Informationen anzeigen"
 
-#: src/setup_extra.cpp:120
+#: src/setup_extra.cpp:122
 msgid "Show Boot-Infos (IP, etc.)"
 msgstr "Boot-Informationen wie Imagedatum, IP, usw anzeigen"
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:123
 msgid "Disable HW_Sections"
 msgstr "HW_Sections abschalten"
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:123
 msgid "Don't use hardware section filtering"
 msgstr "Keine 'Hardware Section' Filterung nutzen"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:124
 msgid "Disable Watchdog"
 msgstr "Watchdog abschalten"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:124
 msgid "Don't use the Watchdog"
 msgstr "Keinen Watchdog nutzen"
 
-#: src/setup_extra.cpp:124
+#: src/setup_extra.cpp:126
 msgid "Disable ENX-Watchdog"
 msgstr "ENX-Watchdog abschalten"
 
-#: src/setup_extra.cpp:124
+#: src/setup_extra.cpp:126
 msgid "Don't use the ENX-Watchdog"
 msgstr "Keinen ENX-Watchdog nutzen"
 
-#: src/setup_extra.cpp:125
+#: src/setup_extra.cpp:127
 msgid "Enable SPTS-Mode"
 msgstr "SPTS-Modus aktivieren"
 
-#: src/setup_extra.cpp:125
+#: src/setup_extra.cpp:127
 msgid "use SPTS-Mode (enables TS-recording)"
 msgstr "SPTS-Modus nutzen (aktiviert TS-recording)"
 
-#: src/setup_extra.cpp:253
+#: src/setup_extra.cpp:255
 msgid ""
 "When you do a factory reset, you will lost ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4176,7 +4176,7 @@ msgstr ""
 "\n"
 "Wirklich den Vorgang fortsetzen?"
 
-#: src/setup_extra.cpp:258
+#: src/setup_extra.cpp:260
 msgid "Factory reset..."
 msgstr "Werkseinstellungen..."
 
