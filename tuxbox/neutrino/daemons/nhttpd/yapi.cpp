@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: yapi.cpp,v 1.3 2005/09/25 10:49:51 yjogol Exp $
+	$Id: yapi.cpp,v 1.4 2005/09/26 18:35:06 yjogol Exp $
 
 	License: GPL
 
@@ -280,7 +280,7 @@ std::string CyAPI::cgi_file_parsing(CWebserverRequest *request, std::string html
 			while (!fin.eof()) 
 			{
 				getline(fin, ytmp);
-				html_template += ytmp;
+				html_template = html_template + ytmp + "\r\n";
 			}
 			yresult += cgi_cmd_parsing(request, html_template, ydebug); // parsing engine
 			fin.close();
