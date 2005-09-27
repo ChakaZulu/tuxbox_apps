@@ -193,9 +193,11 @@ void eZap::init_eZap(int argc, char **argv)
 		default:
 			break;
 	}
+#ifdef ENABLE_KEYBOARD
 	if ( eSystemInfo::getInstance()->hasKeyboard() && eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox_keyboard.xml") )
 		if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdreambox_keyboard.xml") )
 			eDebug("couldn't load Dreambox keyboard mapping (rcdreambox_keyboard.xml)");
+#endif
 #endif
 #ifndef DISABLE_DBOX_RC
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxold.xml") )
