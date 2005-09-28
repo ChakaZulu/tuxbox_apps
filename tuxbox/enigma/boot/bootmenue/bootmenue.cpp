@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.9 2005/09/28 07:34:57 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.10 2005/09/28 07:35:31 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -393,7 +393,6 @@ int main(int argc, char **argv)
 #else
 int main(int argc, char **argv)
 {
-	printf("not supported on dbox2\n");
 	return 0;
 }
 
