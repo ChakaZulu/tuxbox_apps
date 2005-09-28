@@ -56,8 +56,10 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/un.h>
 
+#include <errno.h>
 
 #include <daemonc/remotecontrol.h>
 #include <zapit/client/zapittools.h>
@@ -579,6 +581,40 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	std::string ext_channel_name = g_Zapit->getChannelName(channel_id);
 	if (g_settings.recording_epg_for_filename && !(ext_channel_name.empty()))
 	{
+		if (g_settings.recording_save_in_channeldir)
+		{
+			std::string channelPath(filename);
+			channelPath += ext_channel_name;
+			struct stat statInfo;
+			int res = stat(channelPath.c_str(),&statInfo);
+			if (res == -1)
+			{
+				if (errno == ENOENT)
+				{
+					res = mkdir(channelPath.c_str(),0755);
+					if (res == 0) 
+					{
+						channelPath += "/";
+						strncpy(filename,channelPath.c_str(),511);
+						pos = channelPath.size();
+					} else
+					{
+						perror("[vcrcontrol] mkdir");
+					}
+						
+				} else {
+					perror("[vcrcontrol] stat");
+				}
+			} else 
+			{
+				// directory exists
+				channelPath += "/";
+				strncpy(filename,channelPath.c_str(),511);
+				pos = channelPath.size();
+			}	
+					
+		}
+		
 		strcpy(&(filename[pos]), UTF8_TO_FILESYSTEM_ENCODING(ext_channel_name.c_str()));
 		char * p_act = &(filename[pos]);
 		do {

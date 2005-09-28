@@ -691,6 +691,7 @@ recordingmenu.off off
 recordingmenu.record_in_spts_mode switch to spts mode before recording
 recordingmenu.recording_type recording device
 recordingmenu.ringbuffers no. of ringbuffers
+recordingmenu.save_in_channeldir create subdirectory (per channel)
 recordingmenu.server server
 recordingmenu.server_ip recording server IP
 recordingmenu.server_mac MAC address

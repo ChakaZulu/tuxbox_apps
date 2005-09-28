@@ -681,6 +681,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.recording_ringbuffers, configfile.getString( "recordingmenu.ringbuffers", "20").c_str() );
 	g_settings.recording_choose_direct_rec_dir = configfile.getInt32( "recording_choose_direct_rec_dir", 0 );
 	g_settings.recording_epg_for_filename      = configfile.getBool("recording_epg_for_filename"         , true);
+	g_settings.recording_save_in_channeldir      = configfile.getBool("recording_save_in_channeldir"         , false);
 	g_settings.recording_in_spts_mode          = configfile.getBool("recording_in_spts_mode"         , true);
 
 	//streaming (server)
@@ -1018,6 +1019,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString("recordingmenu.ringbuffers"          , g_settings.recording_ringbuffers);
 	configfile.setInt32 ("recording_choose_direct_rec_dir"    , g_settings.recording_choose_direct_rec_dir);
 	configfile.setBool  ("recording_epg_for_filename"         , g_settings.recording_epg_for_filename     );
+	configfile.setBool  ("recording_save_in_channeldir"         , g_settings.recording_save_in_channeldir     );
 	configfile.setBool  ("recording_in_spts_mode"             , g_settings.recording_in_spts_mode         );
 
 	//streaming
@@ -2225,6 +2227,8 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	CMenuOptionChooser* oj11 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_EPG_FOR_FILENAME, &g_settings.recording_epg_for_filename, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
+	CMenuOptionChooser* oj13 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SAVE_IN_CHANNELDIR, &g_settings.recording_save_in_channeldir, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
+
 	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,oj12);
 
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, RECORDINGMENU_RECORDING_TYPE_OPTIONS, RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT, true, RecordingNotifier);
@@ -2263,6 +2267,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	directRecordingSettings->addItem(oj9);
 	directRecordingSettings->addItem(oj10);
 	directRecordingSettings->addItem(oj11);
+	directRecordingSettings->addItem(oj13);
 	recordingstatus = 0;
 }
 
@@ -4401,6 +4406,7 @@ void CNeutrinoApp::startNextRecording()
 					nextRecordingInfo->recordingDir : g_settings.network_nfs_recordingdir;
 				if (!CFSMounter::isMounted(recDir))
 				{
+					printf("[neutrino.cpp] trying to mount %s\n",recDir);
 					doRecord = false;
 					for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
 					{
@@ -4413,6 +4419,7 @@ void CNeutrinoApp::startNextRecording()
 										  g_settings.network_nfs_mount_options1[i], g_settings.network_nfs_mount_options2[i]);
 							if (mres == CFSMounter::MRES_OK)
 							{
+								printf("[neutrino.cpp] mount successful\n");
 								doRecord = true;
 							} else {
 								const char * merr = mntRes2Str(mres);
@@ -4437,7 +4444,11 @@ void CNeutrinoApp::startNextRecording()
 						doRecord = true;
 					}
 				}
-				(static_cast<CVCRControl::CFileDevice*>(recordingdevice))->Directory = std::string(recDir);
+				if (doRecord) 
+				{
+					printf("[neutrino.cpp] recording to %s\n",recDir);
+					(static_cast<CVCRControl::CFileDevice*>(recordingdevice))->Directory = std::string(recDir);
+				}
 			}
 			if(doRecord && CVCRControl::getInstance()->Record(nextRecordingInfo))
 				recordingstatus = 1;

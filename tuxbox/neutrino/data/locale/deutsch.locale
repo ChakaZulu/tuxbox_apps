@@ -691,6 +691,7 @@ recordingmenu.off aus
 recordingmenu.record_in_spts_mode in SPTS-Modus aufnehmen
 recordingmenu.recording_type Aufnahme Gerät
 recordingmenu.ringbuffers Anz. Ringpuffer
+recordingmenu.save_in_channeldir Unterverzeichnis (je Kanal) erstellen
 recordingmenu.server Server
 recordingmenu.server_ip Aufnahmeserver IP
 recordingmenu.server_mac Mac Adresse
