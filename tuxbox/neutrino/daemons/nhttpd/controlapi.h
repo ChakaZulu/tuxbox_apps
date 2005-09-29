@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.13 2005/09/10 12:39:26 yjogol Exp $
+        $Id: controlapi.h,v 1.14 2005/09/29 16:53:39 yjogol Exp $
 
         License: GPL
 
@@ -30,6 +30,9 @@
 
 #include "request.h"
 #include "webdbox.h"
+
+bool initialize_iso639_map(void);
+const char * getISO639Description(const char * const iso);
 
 class CControlAPI
 {

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: yapi.cpp,v 1.4 2005/09/26 18:35:06 yjogol Exp $
+	$Id: yapi.cpp,v 1.5 2005/09/29 16:53:39 yjogol Exp $
 
 	License: GPL
 
@@ -43,6 +43,7 @@
 			with argument "Y_Live.sh url"
 
 		-"ini-get:<ini/conf-filename>;<varname>[;<default>]"
+		
 			get value of a ini/conf file variable
 			example: replaces {=ini-get:/var/tuxbox/config/nhttpd.conf;AuthPassword=}
 				with the password for the WebInterface from the conf-file				 
@@ -91,6 +92,10 @@
 // tuxbox
 #include <global.h>
 #include <neutrino.h>
+#include <zapit/client/zapittypes.h>
+
+#include <zapit/bouquets.h>
+
 //#include <system/settings.h>
 
 #include <config.h>
@@ -99,18 +104,24 @@
 
 //#include <dbox/fp.h>
 //#include <fcntl.h>
-//#include <unistd.h>
+
 
 // nhttpd
 #include "debug.h"
 #include "yapi.h"
 
+//-------------------------------------------------------------------------
+// Helpers
+//-------------------------------------------------------------------------
+// ySplitString: spit string "str" in two strings "left" and "right" at
+//	"delimiter" 
+//-------------------------------------------------------------------------
 bool ySplitString(std::string str, std::string delimiter, std::string& left, std::string& right)
 {
 	unsigned int pos;
 	if ((pos = str.find_first_of(delimiter)) != std::string::npos)
 	{
-		left = str.substr(0, pos); // cmd type
+		left = str.substr(0, pos);
 		right = str.substr(pos + delimiter.length(), str.length() - (pos + delimiter.length() ));
 	}
 	else
@@ -275,6 +286,8 @@ std::string CyAPI::cgi_file_parsing(CWebserverRequest *request, std::string html
 		if(fin.good())
 		{
 			found = true;
+			chdir(HTML_DIRS[i].c_str()); // set working dir
+			
 			// read whole file into html_template
 			std::string ytmp;
 			while (!fin.eof()) 
@@ -316,7 +329,7 @@ std::string  CyAPI::cgi_cmd_parsing(CWebserverRequest* request, std::string html
 				if(ydebug) request->printf("[ycgi debug]: START at:%d following:%s<br>\n", start, (html_template.substr(start+esc_len, 10)).c_str() );
 
 				ycmd = html_template.substr(start+esc_len,end - (start+esc_len)); 	//3. get cmd
-				if(ydebug) request->printf("[ycgi debug]: CMD%s<br>\n", ycmd.c_str());
+				if(ydebug) request->printf("[ycgi debug]: CMD:[%s]<br>\n", ycmd.c_str());
 				yresult = YWeb_cgi_cmd( request, ycmd ); 				// 4. execute cmd
 				html_template.replace(start,end - start + esc_len, yresult); 		// 5. replace cmd with output
 				is_cmd = true;	// one command found
@@ -356,7 +369,6 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 			if(ySplitString(ycmd_name,"~",if_value,if_then))
 			{
 				ySplitString(if_then,"~",if_then,if_else);
-//aprintf("if_value:(%s) if_then:(%s) if_else:(%s)\n",if_value.c_str(), if_then.c_str(), if_else.c_str());				
 				yresult = (if_value == "") ? if_then : if_else;
 			}
 		}
@@ -446,11 +458,11 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 	const char *operations[] = {
 		"mount-get-list", "mount-set-values", 
 		"get_bouquets_as_dropdown", "get_actual_bouquet_number", "get_channels_as_dropdown", "get_actual_channel_id",
-		"get_mode", "get_video_pids", "get_audio_pid",
+		"get_mode", "get_video_pids", "get_audio_pid", "get_audio_pids_as_dropdown",
 		 NULL};
 
 	ySplitString(ycmd," ",func, para);
-	aprintf("ycgi func dispatcher %s\n",func.c_str());
+	aprintf("ycgi func dispatcher func:[%s] para:[%s]\n",func.c_str(),para.c_str());
 
 	while (operations[operation]) {
 		if (func.compare(operations[operation]) == 0) {
@@ -489,6 +501,9 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 			break;
 			
 		case 8:	yresult = func_get_radio_pid();
+			break;
+			
+		case 9:	yresult = func_get_audio_pids_as_dropdown(para);
 			break;
 			
 		default:
@@ -561,7 +576,7 @@ std::string  CyAPI::func_get_bouquets_as_dropdown(std::string para)
 {
 	std::string ynr, yresult, sel;
 	char buf[60];
-	unsigned int nr=0;
+	unsigned int nr=1;
 	
 	nr = atoi(para.c_str());
 	for (unsigned int i = 0; i < Parent->BouquetList.size();i++)
@@ -570,6 +585,12 @@ std::string  CyAPI::func_get_bouquets_as_dropdown(std::string para)
 		sprintf(buf,"<option value=%u %s>%s</option>\n", (Parent->BouquetList[i].bouquet_nr) + 1, sel.c_str(), Parent->BouquetList[i].name);
 		yresult += buf;
 	}
+/* NOT activated in R1.3.4 - still work on getPIDS for not current channel	
+	// Transponder View
+	sel=(nr==0) ? "selected" : "";
+	sprintf(buf,"<option value=0 %s>Transponder</option>\n", sel.c_str());
+	yresult += buf;
+*/	
 	return yresult;
 }
 
@@ -606,24 +627,50 @@ std::string  CyAPI::func_get_channels_as_dropdown(std::string para)
 	char buf[100],id[20];
 	
 	int bnumber = 1;
-	unsigned int sel_channel_id=0;
 	int mode = CZapitClient::MODE_CURRENT;
 	
 	ySplitString(para," ",abouquet, achannel_id);
 	if(abouquet != "")
 		bnumber = atoi(abouquet.c_str());
 	
-	bouquet = Parent->GetBouquet(bnumber, mode);
-	CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
-	
-	for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
-	{	
-		sprintf(id,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,channel->channel_id);
+	if(bnumber != 0) //Bouquet View
+	{
+		bouquet = Parent->GetBouquet(bnumber, mode);
+		CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
+		CEPGData epg;
 		std::string sid = id;
 		
-		sel = (sid == achannel_id) ? "selected" : "";
-		sprintf(buf,"<option value="PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS" %s>%s</option>\n", channel->channel_id, sel.c_str(), channel->name);
-		yresult += buf;
+		for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
+		{	
+			sprintf(id,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,channel->channel_id);
+			sid = std::string(id);
+
+			sel = (sid == achannel_id) ? "selected" : "";
+			Parent->Sectionsd->getActualEPGServiceKey(channel->channel_id, &epg);
+			sprintf(buf,"<option value="PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS" %s>%.20s - %.30s</option>\n", channel->channel_id, sel.c_str(), channel->name,epg.title.c_str());
+			yresult += buf;
+		}
+	}
+	else // Transponder View		
+	{
+		bouquet = Parent->GetChannelList(mode);
+		CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
+		CEPGData epg;
+		std::string sid = id;
+		t_channel_id actual_channel=Parent->Zapit->getCurrentServiceID();
+		for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
+		{	
+			if((channel->channel_id >> 64)==(actual_channel >> 64))
+			{
+				sprintf(id,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,channel->channel_id);
+				sid = std::string(id);
+				sel = (sid == achannel_id) ? "selected" : "";
+			
+				Parent->Sectionsd->getActualEPGServiceKey(channel->channel_id, &epg);
+				sprintf(buf,"<option value="PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS" %s>%.20s - %.30s</option>\n", channel->channel_id, sel.c_str(), channel->name,epg.title.c_str());
+				yresult += buf;
+			}
+		}
 	}		
 	return yresult;
 }
@@ -689,6 +736,84 @@ std::string  CyAPI::func_get_radio_pid()
 	
 	sprintf(buf,"0x%04x",apid);
 	return std::string(buf);	
+}
+
+//-------------------------------------------------------------------------
+// y-func : get_audio_pids_as_dropdown (from controlapi)
+// prara: [apid] option value = apid-Value. Default apid-Index
+//-------------------------------------------------------------------------
+std::string  CyAPI::func_get_audio_pids_as_dropdown(std::string para)
+{
+	std::string yresult;
+	char buf[60];
+	static bool init_iso=true;
+	bool idx_as_id=true;
+	
+	if(para == "apid") 
+		idx_as_id=false;
+	if(init_iso)
+	{
+		if(initialize_iso639_map())
+			init_iso=false;
+	}
+	bool eit_not_ok=true;
+	CZapitClient::responseGetPIDs pids;
+
+	CSectionsdClient::ComponentTagList tags;
+	pids.PIDs.vpid=0;
+	Parent->Zapit->getPIDS(pids);
+
+
+	t_channel_id current_channel = Parent->Zapit->getCurrentServiceID();
+	CSectionsdClient::responseGetCurrentNextInfoChannelID currentNextInfo;
+	Parent->Sectionsd->getCurrentNextServiceKey(current_channel, currentNextInfo);
+	if (Parent->Sectionsd->getComponentTagsUniqueKey(currentNextInfo.current_uniqueKey,tags))
+	{
+		for (unsigned int i=0; i< tags.size(); i++)
+		{
+			for (unsigned short j=0; j< pids.APIDs.size(); j++)
+			{
+				if ( pids.APIDs[j].component_tag == tags[i].componentTag )
+				{
+ 					if(!tags[i].component.empty())
+					{
+						if(!(isalnum(tags[i].component[0])))
+							tags[i].component=tags[i].component.substr(1,tags[i].component.length()-1);
+						sprintf(buf,"<option value=%05u>%s</option>\r\n",idx_as_id ? j : pids.APIDs[j].pid,tags[i].component.c_str());
+					}
+					else
+					{
+						if(!(init_iso))
+						{
+							strcpy( pids.APIDs[j].desc, getISO639Description( pids.APIDs[j].desc ) );
+						}
+			 			sprintf(buf,"<option value=%05u>%s %s</option>\r\n",idx_as_id ? j : pids.APIDs[j].pid,pids.APIDs[j].desc,pids.APIDs[j].is_ac3 ? " (AC3)": " ");
+					}
+					yresult += buf;
+					eit_not_ok=false;
+					break;
+				}
+			}
+		}
+	}
+	if(eit_not_ok)
+	{
+		unsigned short i = 0;
+		for (CZapitClient::APIDList::iterator it = pids.APIDs.begin(); it!=pids.APIDs.end(); it++)
+		{
+			if(!(init_iso))
+			{
+				strcpy( pids.APIDs[i].desc, getISO639Description( pids.APIDs[i].desc ) );
+			}
+ 			sprintf(buf,"<option value=%05u>%s %s</option>\r\n",idx_as_id ? i : it->pid,pids.APIDs[i].desc,pids.APIDs[i].is_ac3 ? " (AC3)": " ");
+			yresult += buf;
+			i++;
+		}
+	}
+
+	if(pids.APIDs.empty())
+		yresult = ""; // shouldnt happen, but print at least one apid
+	return yresult;
 }
 
 
