@@ -1,10 +1,11 @@
 body
 {
-	font-family:Arial,Sans-Serif; background-color:#EBEBEB;
+	font-family: Arial,Sans-Serif;
+	background-color: White;
 	margin-left: 0px;
 	margin-right: 0px;
 	margin-top: 0px;
-	margin-bottom: 0px;	
+	margin-bottom: 0px;
 }
 
 .y_menu_prim
@@ -12,11 +13,12 @@ body
 	font-size: 10pt;
 	text-align: center;
 	font-weight: bold;
-	border: 1px solid Gray;
+	border: 1px solid #177298;
 	border-collapse: collapse;
-	background: White;
+	background: #EDF6F7;
 	border-spacing: 1px;
 }
+
 
 .y_menu_prim a:hover
 {
@@ -26,7 +28,7 @@ body
 
 .y_menu_logo
 {
-	background-image: url(images/y-logo.png);
+	background-image: url(images/tuxbox3.gif);
 	background-position: center;
 	background-repeat: no-repeat;
 }
@@ -35,33 +37,35 @@ body
 	font-size: 10pt;
 	text-align: center;
 	font-weight: bold;
-	border: 1px solid Gray;
+	border: 1px solid #177298;
 	border-collapse: collapse;
-	background: White;
+	background: #EDF6F7;
 	border-spacing: 1px;
 }
 
 .y_menu_sec a:hover
 {
+
 	text-decoration:underline;
 	font-weight:bold;
 }
 
+
 .y_audio_bar
 {
-	background: #808080;
+	background: #177298;
 }
 
 .y_head
 {
 	font: bold large;
-	color: #666666;
+	color: #177298;
 	font-size: 14pt;
 }
 
 .y_work_box
 {
-	border: 1px solid Gray;
+	border: 1px solid #177298;
 	background: White;
 	border-spacing: 1px;
 	padding-left: 20px;
@@ -69,11 +73,12 @@ body
 	padding-top: 10px;
 	padding-bottom: 10px;
 	float:left;
+
 }
 
 .y_work_table
 {
-	border: 1px solid Silver;
+	border: 1px solid #35AFE1;
 	background: White;
 	border-collapse: collapse;
 	border-spacing: 1px;
@@ -97,13 +102,13 @@ body
 {
 	font-size: 8pt;
 	height: 20px;
-	width: 150px;
+	width: 300px;
 }
 .y_live_channels
 {
 	font-size: 8pt;
 	height: 20px;
-	width: 150px;
+	width: 300px;
 }
 
 .y_form_table
@@ -113,4 +118,10 @@ body
 input
 {
 	font-size: 10pt;
+}
+.y_invisible_table
+{
+	border: 0px;
+	border-spacing: 0px;
+	padding: 0;
 }

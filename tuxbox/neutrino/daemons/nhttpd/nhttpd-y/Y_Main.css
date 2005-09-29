@@ -19,6 +19,7 @@ body
 	border-spacing: 1px;
 }
 
+
 .y_menu_prim a:hover
 {
 	text-decoration:underline;
@@ -44,6 +45,7 @@ body
 
 .y_menu_sec a:hover
 {
+
 	text-decoration:underline;
 	font-weight:bold;
 }
@@ -71,7 +73,7 @@ body
 	padding-top: 10px;
 	padding-bottom: 10px;
 	float:left;
-	
+
 }
 
 .y_work_table
@@ -100,13 +102,13 @@ body
 {
 	font-size: 8pt;
 	height: 20px;
-	width: 150px;
+	width: 300px;
 }
 .y_live_channels
 {
 	font-size: 8pt;
 	height: 20px;
-	width: 150px;
+	width: 300px;
 }
 
 .y_form_table

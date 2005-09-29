@@ -1,5 +1,23 @@
 Severity	id		Headline							Build
 
+4-Minor		JG200000216	nhttp: Upload temporary file moved from /var/tmp to /tmp/upload.tmp	R1.3.4
+5-Enhancement	JG200000139	Live: EPG-Title in Channel-Dropdown				R1.3.4
+5-Enhancement	JG200000212	nhttpd: use relative path for includes				R1.3.4
+5-Enhancement	JG200000217	nhttpd: ycgi: set Working-Dir to template path			R1.3.4
+5-Enhancement	JG200000227	ycgi: new:func:get_audio_pids_as_dropdown			R1.3.4
+5-Enhancement	JG200000229	remote RC via Web						R1.3.4
+
+5-Enhancement	JG200000218	ycgi: new cmd: if-empty						R1.3.3
+5-Enhancement	JG200000219	ycgi: new cmd: if-equal						R1.3.3
+5-Enhancement	JG200000220	ycgi: new:func:get_bouquts_as_dropdown				R1.3.3
+5-Enhancement	JG200000221	ycgi: new:func:get_actual_bouquet_numer				R1.3.3
+5-Enhancement	JG200000222	ycgi: new:func:get_canel_as_dropdown				R1.3.3
+5-Enhancement	JG200000223	ycgi: new:func:get_actual_channel_id				R1.3.3
+5-Enhancement	JG200000224	ycgi: new:func:get_mode						R1.3.3
+5-Enhancement	JG200000225	ycgi: new:func:get_video_pids					R1.3.3
+5-Enhancement	JG200000226	ycgi: new:func:get_radio_pid					R1.3.3
+5-Enhancement	JG200000235	ycgi: Neu *.yhtm-Dateien & Reorg der Dateien			R1.3.3
+
 5-Enhancement	JG200000035	Live: Window size configurable					R1.3.2
 5-Enhancement	JG200000107	Live: new: Double-View						R1.3.2
 5-Enhancement	JG200000206	nhttpd: Set Working dir for Skripts				R1.3.2
@@ -9,8 +27,8 @@ Severity	id		Headline							Build
 5-Enhancement	JG200000211	add ucode.bin for up/download					R1.3.2
 
 5-Enhancement	JG200000200	Live: Radio: Player via Dateierweiterung m3u, m4u starten	R1.3.1
-3-Average	JG200000147	LiveView nur 9 Bouquets im Dropdown. fixed.			R1.3.1
-4-Minor		JG200000179	dietmarW-Images habe kein /var/tmp also /tmp nutzen		R1.3.1
+3-Average		JG200000147	LiveView nur 9 Bouquets im Dropdown. fixed.			R1.3.1
+4-Minor			JG200000179	dietmarW-Images habe kein /var/tmp also /tmp nutzen		R1.3.1
 5-Enhancement	JG200000084	Plugins: Settings: Mount-Einstellungen				R1.3.1
 5-Enhancement	JG200000182	Live: Bouquets & Channel: Dropdown Breite begrenzen		R1.3.1
 5-Enhancement	JG200000183	Bouquets: epg und settings im yWeb_Layout			R1.3.1
@@ -115,3 +133,4 @@ Severity	id		Headline							Build
 5-Enhancement	JG200000026	Autom. Starten des gepatchten WebServers für JtG-Image		R1.0.2
 5-Enhancement	JG200000027	Tools: Test: WebServer testen					R1.0.2
 5-Enhancement	JG200000028	Prüfung ob Y-WebServer läuft bei Parameterübergaben		R1.0.2
+

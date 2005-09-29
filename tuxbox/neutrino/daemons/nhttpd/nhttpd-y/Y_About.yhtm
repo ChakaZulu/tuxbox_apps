@@ -19,7 +19,11 @@
 							<a href="http://www.yjogol.de" target="_new"><img border="0" src="images/y-smile.png" width="112" height="133"></a></td>
 							<td><font size="3">
 							<b>dbox yWeb</b><p>
-							V1.3.3b<br>26.09.2005</p></font>
+							{=ini-get:Y_Version.txt;version=}<br>
+							{=ini-get:Y_Version.txt;date=}<br>
+							{=ini-get:Y_Version.txt;type=}<br><br>
+							{=ini-get:Y_Version.txt;info=}<br>
+							</p></font>
 						</td>
 					</tr>
 				</table>
