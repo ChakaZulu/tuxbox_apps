@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Flashing Library (yjogol)
-# $Date: 2005/09/25 10:57:23 $
-# $Revision: 1.4 $
+# $Date: 2005/09/29 17:08:37 $
+# $Revision: 1.5 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -190,6 +190,9 @@ case "$1" in
 
 	check_yWeb_conf)
 		check_Y_Web_conf ;;
+		
+	rcsim)
+		rcsim $2 >/dev/null ;;
 
 	*)
 		echo "Parameter falsch: $*" ;;
