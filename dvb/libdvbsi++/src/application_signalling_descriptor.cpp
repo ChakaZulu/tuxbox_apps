@@ -1,5 +1,5 @@
 /*
- * $Id: application_signalling_descriptor.cpp,v 1.2 2004/02/13 17:51:07 obi Exp $
+ * $Id: application_signalling_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -50,7 +50,7 @@ ApplicationSignallingDescriptor::~ApplicationSignallingDescriptor(void)
 		delete *i;
 }
 
-const ApplicationSignallingVector *ApplicationSignallingDescriptor::getApplicationSignallings(void) const
+const ApplicationSignallingList *ApplicationSignallingDescriptor::getApplicationSignallings(void) const
 {
 	return &applicationSignallings;
 }

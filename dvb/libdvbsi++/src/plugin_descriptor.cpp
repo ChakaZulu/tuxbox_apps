@@ -36,7 +36,7 @@ uint16_t PluginDescriptor::getApplicationType(void) const
 	return applicationType;
 }
 
-const ApplicationProfileVector *PluginDescriptor::getApplicationProfiles(void) const
+const ApplicationProfileList *PluginDescriptor::getApplicationProfiles(void) const
 {
 	return &applicationProfiles;
 }

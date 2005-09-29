@@ -1,5 +1,5 @@
 /*
- * $Id: application_information_section.h,v 1.2 2004/05/31 21:21:22 obi Exp $
+ * $Id: application_information_section.h,v 1.3 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -43,16 +43,16 @@ class ApplicationInformation : public DescriptorContainer
 	friend class ApplicationInformationSection;
 };
 
-typedef std::vector<ApplicationInformation *> ApplicationInformationVector;
-typedef ApplicationInformationVector::iterator ApplicationInformationIterator;
-typedef ApplicationInformationVector::const_iterator ApplicationInformationConstIterator;
+typedef std::list<ApplicationInformation *> ApplicationInformationList;
+typedef ApplicationInformationList::iterator ApplicationInformationIterator;
+typedef ApplicationInformationList::const_iterator ApplicationInformationConstIterator;
 
 class ApplicationInformationSection : public LongCrcSection, public DescriptorContainer
 {
 	protected:
 		unsigned commonDescriptorsLength		: 12;
 		unsigned applicationLoopLength			: 12;
-		ApplicationInformationVector applicationInformation;
+		ApplicationInformationList applicationInformation;
 
 	public:
 		ApplicationInformationSection(const uint8_t * const buffer);
@@ -61,11 +61,11 @@ class ApplicationInformationSection : public LongCrcSection, public DescriptorCo
 		static const enum TableId TID = TID_AIT;
 		static const uint32_t TIMEOUT = 12000;
 
-		const ApplicationInformationVector *getApplicationInformation(void) const;
+		const ApplicationInformationList *getApplicationInformation(void) const;
 };
 
-typedef std::vector<ApplicationInformationSection *> ApplicationInformationSectionVector;
-typedef ApplicationInformationSectionVector::iterator ApplicationInformationSectionIterator;
-typedef ApplicationInformationSectionVector::const_iterator ApplicationInformationSectionConstIterator;
+typedef std::list<ApplicationInformationSection *> ApplicationInformationSectionList;
+typedef ApplicationInformationSectionList::iterator ApplicationInformationSectionIterator;
+typedef ApplicationInformationSectionList::const_iterator ApplicationInformationSectionConstIterator;
 
 #endif /* __application_information_section_h__ */

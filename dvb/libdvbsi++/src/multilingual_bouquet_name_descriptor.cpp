@@ -1,5 +1,5 @@
 /*
- * $Id: multilingual_bouquet_name_descriptor.cpp,v 1.2 2004/06/18 19:05:19 sestegra Exp $
+ * $Id: multilingual_bouquet_name_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -50,7 +50,7 @@ MultilingualBouquetNameDescriptor::~MultilingualBouquetNameDescriptor(void)
 		delete *i;
 }
 
-const MultilingualBouquetNameVector *MultilingualBouquetNameDescriptor::getMultilingualBouquetNames(void) const
+const MultilingualBouquetNameList *MultilingualBouquetNameDescriptor::getMultilingualBouquetNames(void) const
 {
 	return &multilingualBouquetNames;
 }

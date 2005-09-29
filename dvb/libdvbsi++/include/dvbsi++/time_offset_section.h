@@ -1,5 +1,5 @@
 /*
- * $Id: time_offset_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: time_offset_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -43,8 +43,8 @@ class TimeOffsetSection : public ShortCrcSection, public DescriptorContainer
 		uint32_t getUtcTimeBcd(void) const;
 };
 
-typedef std::vector<TimeOffsetSection *> TimeOffsetSectionVector;
-typedef TimeOffsetSectionVector::iterator TimeOffsetSectionIterator;
-typedef TimeOffsetSectionVector::const_iterator TimeOffsetSectionConstIterator;
+typedef std::list<TimeOffsetSection *> TimeOffsetSectionList;
+typedef TimeOffsetSectionList::iterator TimeOffsetSectionIterator;
+typedef TimeOffsetSectionList::const_iterator TimeOffsetSectionConstIterator;
 
 #endif /* __time_offset_section_h__ */

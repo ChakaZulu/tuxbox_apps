@@ -1,5 +1,5 @@
 /*
- * $Id: iso639_language_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: iso639_language_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,20 +37,20 @@ class Iso639Language
 		uint8_t getAudioType(void) const;
 };
 
-typedef std::vector<Iso639Language *> Iso639LanguageVector;
-typedef Iso639LanguageVector::iterator Iso639LanguageIterator;
-typedef Iso639LanguageVector::const_iterator Iso639LanguageConstIterator;
+typedef std::list<Iso639Language *> Iso639LanguageList;
+typedef Iso639LanguageList::iterator Iso639LanguageIterator;
+typedef Iso639LanguageList::const_iterator Iso639LanguageConstIterator;
 
 class Iso639LanguageDescriptor : public Descriptor
 {
 	protected:
-		Iso639LanguageVector iso639Languages;
+		Iso639LanguageList iso639Languages;
 
 	public:
 		Iso639LanguageDescriptor(const uint8_t * const buffer);
 		~Iso639LanguageDescriptor(void);
 
-		const Iso639LanguageVector *getIso639Languages(void) const;
+		const Iso639LanguageList *getIso639Languages(void) const;
 };
 
 #endif /* __iso639_language_descriptor_h__ */

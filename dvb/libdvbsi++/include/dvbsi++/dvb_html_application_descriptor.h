@@ -20,21 +20,21 @@
 
 #include "descriptor.h"
 
-typedef std::vector<uint16_t> ApplicationIdVector;
-typedef ApplicationIdVector::iterator ApplicationIdIterator;
-typedef ApplicationIdVector::const_iterator ApplicationIdConstIterator;
+typedef std::list<uint16_t> ApplicationIdList;
+typedef ApplicationIdList::iterator ApplicationIdIterator;
+typedef ApplicationIdList::const_iterator ApplicationIdConstIterator;
 
 class DvbHtmlApplicationDescriptor : public Descriptor
 {
 	protected:
 		unsigned appidSetLength				: 8;
-		ApplicationIdVector applicationIds;
+		ApplicationIdList applicationIds;
 		std::string parameter;
 
 	public:
 		DvbHtmlApplicationDescriptor(const uint8_t * const buffer);
 
-		const ApplicationIdVector *getApplicationIds(void) const;
+		const ApplicationIdList *getApplicationIds(void) const;
 		const std::string &getParameter(void) const;
 };
 

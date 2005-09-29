@@ -53,7 +53,7 @@ uint8_t DiiLocationDescriptor::getTransportProtocolLabel(void) const
 	return transportProtocolLabel;
 }
 
-const DiiLocationVector *DiiLocationDescriptor::getDiiLocations(void) const
+const DiiLocationList *DiiLocationDescriptor::getDiiLocations(void) const
 {
 	return &diiLocations;
 }

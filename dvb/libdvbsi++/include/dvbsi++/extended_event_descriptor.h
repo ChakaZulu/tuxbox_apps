@@ -1,5 +1,5 @@
 /*
- * $Id: extended_event_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: extended_event_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -41,9 +41,9 @@ class ExtendedEvent
 	friend class ExtendedEventDescriptor;
 };
 
-typedef std::vector<ExtendedEvent *> ExtendedEventVector;
-typedef ExtendedEventVector::iterator ExtendedEventIterator;
-typedef ExtendedEventVector::const_iterator ExtendedEventConstIterator;
+typedef std::list<ExtendedEvent *> ExtendedEventList;
+typedef ExtendedEventList::iterator ExtendedEventIterator;
+typedef ExtendedEventList::const_iterator ExtendedEventConstIterator;
 
 class ExtendedEventDescriptor : public Descriptor
 {
@@ -52,7 +52,7 @@ class ExtendedEventDescriptor : public Descriptor
 		unsigned lastDescriptorNumber			: 4;
 		std::string iso639LanguageCode;
 		unsigned lengthOfItems				: 8;
-		ExtendedEventVector items;
+		ExtendedEventList items;
 		unsigned textLength				: 8;
 		std::string text;
 
@@ -63,7 +63,7 @@ class ExtendedEventDescriptor : public Descriptor
 		uint8_t getDescriptorNumber(void) const;
 		uint8_t getLastDescriptorNumber(void) const;
 		const std::string &getIso639LanguageCode(void) const;
-		const ExtendedEventVector *getItems(void) const;
+		const ExtendedEventList *getItems(void) const;
 		const std::string &getText(void) const;
 };
 

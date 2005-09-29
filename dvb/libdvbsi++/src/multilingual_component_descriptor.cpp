@@ -1,5 +1,5 @@
 /*
- * $Id: multilingual_component_descriptor.cpp,v 1.2 2004/06/18 19:23:21 sestegra Exp $
+ * $Id: multilingual_component_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -57,7 +57,7 @@ uint8_t MultilingualComponentDescriptor::getComponentTag(void) const
 	return componentTag;
 }
 
-const MultilingualComponentVector *MultilingualComponentDescriptor::getMultilingualComponents(void) const
+const MultilingualComponentList *MultilingualComponentDescriptor::getMultilingualComponents(void) const
 {
 	return &multilingualComponents;
 }

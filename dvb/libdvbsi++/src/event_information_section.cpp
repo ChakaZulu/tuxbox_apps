@@ -1,5 +1,5 @@
 /*
- * $Id: event_information_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
+ * $Id: event_information_section.cpp,v 1.4 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -103,7 +103,7 @@ uint8_t EventInformationSection::getLastTableId(void) const
 	return lastTableId;
 }
 
-const EventVector *EventInformationSection::getEvents(void) const
+const EventList *EventInformationSection::getEvents(void) const
 {
 	return &events;
 }

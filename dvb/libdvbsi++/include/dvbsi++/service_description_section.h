@@ -1,5 +1,5 @@
 /*
- * $Id: service_description_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: service_description_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -45,15 +45,15 @@ class ServiceDescription : public DescriptorContainer
 		uint8_t getFreeCaMode(void) const;
 };
 
-typedef std::vector<ServiceDescription *> ServiceDescriptionVector;
-typedef ServiceDescriptionVector::iterator ServiceDescriptionIterator;
-typedef ServiceDescriptionVector::const_iterator ServiceDescriptionConstIterator;
+typedef std::list<ServiceDescription *> ServiceDescriptionList;
+typedef ServiceDescriptionList::iterator ServiceDescriptionIterator;
+typedef ServiceDescriptionList::const_iterator ServiceDescriptionConstIterator;
 
 class ServiceDescriptionSection : public LongCrcSection
 {
 	protected:
 		unsigned originalNetworkId			: 16;
-		ServiceDescriptionVector description;
+		ServiceDescriptionList description;
 
 	public:
 		ServiceDescriptionSection(const uint8_t * const buffer);
@@ -64,11 +64,12 @@ class ServiceDescriptionSection : public LongCrcSection
 		static const uint32_t TIMEOUT = 3000;
 
 		uint16_t getOriginalNetworkId(void) const;
-		const ServiceDescriptionVector *getDescriptions(void) const;
+		uint16_t getTransportStreamId(void) const;
+		const ServiceDescriptionList *getDescriptions(void) const;
 };
 
-typedef std::vector<ServiceDescriptionSection *> ServiceDescriptionSectionVector;
-typedef ServiceDescriptionSectionVector::iterator ServiceDescriptionSectionIterator;
-typedef ServiceDescriptionSectionVector::const_iterator ServiceDescriptionSectionConstIterator;
+typedef std::list<ServiceDescriptionSection *> ServiceDescriptionSectionList;
+typedef ServiceDescriptionSectionList::iterator ServiceDescriptionSectionIterator;
+typedef ServiceDescriptionSectionList::const_iterator ServiceDescriptionSectionConstIterator;
 
 #endif /* __service_description_section_h__ */

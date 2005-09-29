@@ -24,13 +24,13 @@
 class DelegatedApplicationDescriptor : public Descriptor
 {
 	protected:
-		ApplicationIdentifierVector applicationIdentifiers;
+		ApplicationIdentifierList applicationIdentifiers;
 
 	public:
 		DelegatedApplicationDescriptor(const uint8_t * const buffer);
 		~DelegatedApplicationDescriptor(void);
 
-		const ApplicationIdentifierVector *getApplicationIdentifiers(void) const;
+		const ApplicationIdentifierList *getApplicationIdentifiers(void) const;
 };
 
 #endif /* __delegated_application_descriptor_h__ */

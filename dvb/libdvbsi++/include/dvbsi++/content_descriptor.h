@@ -1,5 +1,5 @@
 /*
- * $Id: content_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: content_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -41,20 +41,20 @@ class ContentClassification
 		uint8_t getUserNibble2(void) const;
 };
 
-typedef std::vector<ContentClassification *> ContentClassificationVector;
-typedef ContentClassificationVector::iterator ContentClassificationIterator;
-typedef ContentClassificationVector::const_iterator ContentClassificationConstIterator;
+typedef std::list<ContentClassification *> ContentClassificationList;
+typedef ContentClassificationList::iterator ContentClassificationIterator;
+typedef ContentClassificationList::const_iterator ContentClassificationConstIterator;
 
 class ContentDescriptor : public Descriptor
 {
 	protected:
-		ContentClassificationVector classifications;
+		ContentClassificationList classifications;
 
 	public:
 		ContentDescriptor(const uint8_t * const buffer);
 		~ContentDescriptor(void);
 
-		const ContentClassificationVector *getClassifications(void) const;
+		const ContentClassificationList *getClassifications(void) const;
 };
 
 #endif /* __content_descriptor_h__ */

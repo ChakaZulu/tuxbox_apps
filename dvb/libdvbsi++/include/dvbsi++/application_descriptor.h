@@ -21,29 +21,29 @@
 #include "application_profile.h"
 #include "descriptor.h"
 
-typedef std::vector<uint8_t> TransportProtocolLabelVector;
-typedef TransportProtocolLabelVector::iterator TransportProtocolLabelIterator;
-typedef TransportProtocolLabelVector::const_iterator TransportProtocolLabelConstIterator;
+typedef std::list<uint8_t> TransportProtocolLabelList;
+typedef TransportProtocolLabelList::iterator TransportProtocolLabelIterator;
+typedef TransportProtocolLabelList::const_iterator TransportProtocolLabelConstIterator;
 
 class ApplicationDescriptor : public Descriptor
 {
 	protected:
 		unsigned applicationProfilesLength		:8;
-		ApplicationProfileVector applicationProfiles;
+		ApplicationProfileList applicationProfiles;
 		unsigned serviceBoundFlag			:1;
 		unsigned visibility				:2;
 		unsigned applicationPriority			:8;
-		TransportProtocolLabelVector transportProtocolLabels;
+		TransportProtocolLabelList transportProtocolLabels;
 	
 	public:
 		ApplicationDescriptor(const uint8_t * const buffer);
 		~ApplicationDescriptor(void);
 
-		const ApplicationProfileVector *getApplicationProfiles(void) const;
+		const ApplicationProfileList *getApplicationProfiles(void) const;
 		uint8_t getServiceBoundFlag(void) const;
 		uint8_t getVisibility(void) const;
 		uint8_t getApplicationPriority(void) const;
-		const TransportProtocolLabelVector *getTransportProtocolLabels(void) const;
+		const TransportProtocolLabelList *getTransportProtocolLabels(void) const;
 };
 
 #endif /* __application_descriptor_h__ */

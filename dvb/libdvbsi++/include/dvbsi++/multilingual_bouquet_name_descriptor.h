@@ -1,5 +1,5 @@
 /*
- * $Id: multilingual_bouquet_name_descriptor.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: multilingual_bouquet_name_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -38,20 +38,20 @@ class MultilingualBouquetName
 		const std::string &getBouquetName(void) const;
 };
 
-typedef std::vector<MultilingualBouquetName *> MultilingualBouquetNameVector;
-typedef MultilingualBouquetNameVector::iterator MultilingualBouquetNameIterator;
-typedef MultilingualBouquetNameVector::const_iterator MultilingualBouquetNameConstIterator;
+typedef std::list<MultilingualBouquetName *> MultilingualBouquetNameList;
+typedef MultilingualBouquetNameList::iterator MultilingualBouquetNameIterator;
+typedef MultilingualBouquetNameList::const_iterator MultilingualBouquetNameConstIterator;
 
 class MultilingualBouquetNameDescriptor : public Descriptor
 {
 	protected:
-		MultilingualBouquetNameVector multilingualBouquetNames;
+		MultilingualBouquetNameList multilingualBouquetNames;
 
 	public:
 		MultilingualBouquetNameDescriptor(const uint8_t * const buffer);
 		~MultilingualBouquetNameDescriptor(void);
 
-		const MultilingualBouquetNameVector *getMultilingualBouquetNames(void) const;
+		const MultilingualBouquetNameList *getMultilingualBouquetNames(void) const;
 };
 
 #endif /* __multilingual_bouquet_name_descriptor_h__ */

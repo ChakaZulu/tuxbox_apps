@@ -1,5 +1,5 @@
 /*
- * $Id: application_information_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
+ * $Id: application_information_section.cpp,v 1.4 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -69,7 +69,7 @@ ApplicationInformationSection::~ApplicationInformationSection(void)
 		delete *i;
 }
 
-const ApplicationInformationVector *ApplicationInformationSection::getApplicationInformation(void) const
+const ApplicationInformationList *ApplicationInformationSection::getApplicationInformation(void) const
 {
 	return &applicationInformation;
 }

@@ -52,7 +52,7 @@ ExternalApplicationAuthorisationDescriptor::~ExternalApplicationAuthorisationDes
 		delete *i;
 }
 
-const ExternalApplicationAuthorisationVector *ExternalApplicationAuthorisationDescriptor::getExternalApplicationAuthorisations(void) const
+const ExternalApplicationAuthorisationList *ExternalApplicationAuthorisationDescriptor::getExternalApplicationAuthorisations(void) const
 {
 	return &externalApplicationAuthorisations;
 }

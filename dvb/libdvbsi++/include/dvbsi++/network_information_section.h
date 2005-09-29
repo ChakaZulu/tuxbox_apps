@@ -1,5 +1,5 @@
 /*
- * $Id: network_information_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: network_information_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -39,16 +39,16 @@ class TransportStreamInfo : public DescriptorContainer
 		uint16_t getOriginalNetworkId(void) const;
 };
 
-typedef std::vector<TransportStreamInfo *> TransportStreamInfoVector;
-typedef TransportStreamInfoVector::iterator TransportStreamInfoIterator;
-typedef TransportStreamInfoVector::const_iterator TransportStreamInfoConstIterator;
+typedef std::list<TransportStreamInfo *> TransportStreamInfoList;
+typedef TransportStreamInfoList::iterator TransportStreamInfoIterator;
+typedef TransportStreamInfoList::const_iterator TransportStreamInfoConstIterator;
 
 class NetworkInformationSection : public LongCrcSection, public DescriptorContainer
 {
 	protected:
 		unsigned networkDescriptorsLength		: 12;
 		unsigned transportStreamLoopLength		: 12;
-		TransportStreamInfoVector tsInfo;
+		TransportStreamInfoList tsInfo;
 
 	public:
 		NetworkInformationSection(const uint8_t * const buffer);
@@ -58,11 +58,11 @@ class NetworkInformationSection : public LongCrcSection, public DescriptorContai
 		static const enum TableId TID = TID_NIT_ACTUAL;
 		static const uint32_t TIMEOUT = 12000;
 
-		const TransportStreamInfoVector *getTsInfo(void) const;
+		const TransportStreamInfoList *getTsInfo(void) const;
 };
 
-typedef std::vector<NetworkInformationSection *> NetworkInformationSectionVector;
-typedef NetworkInformationSectionVector::iterator NetworkInformationSectionIterator;
-typedef NetworkInformationSectionVector::const_iterator NetworkInformationSectionConstIterator;
+typedef std::list<NetworkInformationSection *> NetworkInformationSectionList;
+typedef NetworkInformationSectionList::iterator NetworkInformationSectionIterator;
+typedef NetworkInformationSectionList::const_iterator NetworkInformationSectionConstIterator;
 
 #endif /* __network_information_section_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: frequency_list_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: frequency_list_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,21 +24,21 @@
 
 #include "descriptor.h"
 
-typedef std::vector<uint32_t> CentreFrequencyVector;
-typedef CentreFrequencyVector::iterator CentreFrequencyIterator;
-typedef CentreFrequencyVector::const_iterator CentreFrequencyConstIterator;
+typedef std::list<uint32_t> CentreFrequencyList;
+typedef CentreFrequencyList::iterator CentreFrequencyIterator;
+typedef CentreFrequencyList::const_iterator CentreFrequencyConstIterator;
 
 class FrequencyListDescriptor : public Descriptor
 {
 	protected:
 		unsigned codingType				: 2;
-		CentreFrequencyVector centreFrequencies;
+		CentreFrequencyList centreFrequencies;
 
 	public:
 		FrequencyListDescriptor(const uint8_t * const buffer);
 
 		uint8_t getCodingType(void) const;
-		const CentreFrequencyVector *getCentreFrequencies(void) const;
+		const CentreFrequencyList *getCentreFrequencies(void) const;
 };
 
 #endif /* __frequency_list_descriptor_h__ */

@@ -25,14 +25,14 @@ class PluginDescriptor : public Descriptor
 {
 	protected:
 		unsigned applicationType			: 16;
-		ApplicationProfileVector applicationProfiles;
+		ApplicationProfileList applicationProfiles;
 
 	public:
 		PluginDescriptor(const uint8_t * const buffer);
 		~PluginDescriptor(void);
 
 		uint16_t getApplicationType(void) const;
-		const ApplicationProfileVector *getApplicationProfiles(void) const;
+		const ApplicationProfileList *getApplicationProfiles(void) const;
 };
 
 #endif /* __plugin_descriptor_h__ */

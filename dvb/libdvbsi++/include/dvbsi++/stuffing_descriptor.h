@@ -1,5 +1,5 @@
 /*
- * $Id: stuffing_descriptor.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: stuffing_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -27,7 +27,7 @@
 class StuffingDescriptor : public Descriptor
 {
 	protected:
-		std::vector<uint8_t> stuffingByte;
+		std::list<uint8_t> stuffingByte;
 
 	public:
 		StuffingDescriptor(const uint8_t * const buffer);

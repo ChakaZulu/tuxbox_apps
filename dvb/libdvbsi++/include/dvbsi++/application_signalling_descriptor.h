@@ -1,5 +1,5 @@
 /*
- * $Id: application_signalling_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: application_signalling_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,20 +37,20 @@ class ApplicationSignalling
 		uint8_t getAitVersionNumber(void) const;
 };
 
-typedef std::vector<ApplicationSignalling *> ApplicationSignallingVector;
-typedef ApplicationSignallingVector::iterator ApplicationSignallingIterator;
-typedef ApplicationSignallingVector::const_iterator ApplicationSignallingConstIterator;
+typedef std::list<ApplicationSignalling *> ApplicationSignallingList;
+typedef ApplicationSignallingList::iterator ApplicationSignallingIterator;
+typedef ApplicationSignallingList::const_iterator ApplicationSignallingConstIterator;
 
 class ApplicationSignallingDescriptor : public Descriptor
 {
 	protected:
-		ApplicationSignallingVector applicationSignallings;
+		ApplicationSignallingList applicationSignallings;
 
 	public:
 		ApplicationSignallingDescriptor(const uint8_t * const buffer);
 		~ApplicationSignallingDescriptor(void);
 
-		const ApplicationSignallingVector *getApplicationSignallings(void) const;
+		const ApplicationSignallingList *getApplicationSignallings(void) const;
 };
 
 #endif /* __application_signalling_descriptor_h__ */

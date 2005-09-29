@@ -1,5 +1,5 @@
 /*
- * $Id: announcement_support_descriptor.cpp,v 1.2 2004/02/13 17:51:07 obi Exp $
+ * $Id: announcement_support_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -97,7 +97,7 @@ uint16_t AnnouncementSupportDescriptor::getAnnouncementSupportIndicator(void) co
 	return announcementSupportIndicator;
 }
 
-const AnnouncementVector *AnnouncementSupportDescriptor::getAnnouncements(void) const
+const AnnouncementList *AnnouncementSupportDescriptor::getAnnouncements(void) const
 {
 	return &announcements;
 }

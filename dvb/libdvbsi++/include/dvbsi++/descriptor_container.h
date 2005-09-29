@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.h,v 1.2 2004/05/31 21:21:22 obi Exp $
+ * $Id: descriptor_container.h,v 1.3 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,12 +37,12 @@ class DescriptorContainer
 		void descriptorSi(const uint8_t * const buffer);
 		void descriptorCarousel(const uint8_t * const buffer);
 		void descriptorMhp(const uint8_t * const buffer);
-		DescriptorVector descriptorVector;
+		DescriptorList descriptorList;
 
 	public:
 		~DescriptorContainer(void);
 
-		const DescriptorVector *getDescriptors(void) const;
+		const DescriptorList *getDescriptors(void) const;
 };
 
 #endif /* __descriptor_container_h__ */

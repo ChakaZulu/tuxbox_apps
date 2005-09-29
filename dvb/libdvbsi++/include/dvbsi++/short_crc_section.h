@@ -1,5 +1,5 @@
 /*
- * $Id: short_crc_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: short_crc_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,8 +37,8 @@ class ShortCrcSection : public ShortSection
 		uint32_t getCrc32(void) const;
 };
 
-typedef std::vector<ShortCrcSection *> ShortCrcSectionVector;
-typedef ShortCrcSectionVector::iterator ShortCrcSectionIterator;
-typedef ShortCrcSectionVector::const_iterator ShortCrcSectionConstIterator;
+typedef std::list<ShortCrcSection *> ShortCrcSectionList;
+typedef ShortCrcSectionList::iterator ShortCrcSectionIterator;
+typedef ShortCrcSectionList::const_iterator ShortCrcSectionConstIterator;
 
 #endif /* __short_crc_section_h__ */

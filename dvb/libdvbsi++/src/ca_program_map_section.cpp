@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: ca_program_map_section.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -54,7 +54,7 @@ size_t CaLengthField::writeToBuffer(uint8_t * const buffer) const
 	}
 	else {
 		buffer[total++] = (sizeIndicator << 7) | lengthFieldSize;
-		for (std::vector<uint8_t>::const_iterator i = lengthValueByte.begin(); i != lengthValueByte.end(); i++)
+		for (std::list<uint8_t>::const_iterator i = lengthValueByte.begin(); i != lengthValueByte.end(); i++)
 			buffer[total++] = *i;
 	}
 
@@ -109,37 +109,41 @@ size_t CaElementaryStreamInfo::writeToBuffer(uint8_t * const buffer) const
 	return total;
 }
 
-CaProgramMapSection::CaProgramMapSection(const ProgramMapSection * const pmt, const uint8_t listManagement, const uint8_t cmdId)
+bool CaProgramMapSection::append(const ProgramMapSection * const pmt)
 {
-	uint32_t length = 6;
-
-	caPmtTag = 0x9f8032;
-	caPmtListManagement = listManagement;
-
-	programNumber = pmt->tableIdExtension;
-	versionNumber = pmt->versionNumber;
-	currentNextIndicator = pmt->currentNextIndicator;
-	programInfoLength = 0;
+	if ( pmt->tableIdExtension != programNumber || pmt->versionNumber != versionNumber || currentNextIndicator != pmt->currentNextIndicator )
+		return false;
 
 	for (DescriptorConstIterator i = pmt->getDescriptors()->begin(); i != pmt->getDescriptors()->end(); ++i)
 		if ((*i)->getTag() == CA_DESCRIPTOR) {
 			descriptors.push_back(new CaDescriptor(*(CaDescriptor *)*i));
 			programInfoLength += (*i)->getLength() + 2;
+			length += (*i)->getLength() + 2;
 		}
 
-	if (programInfoLength) {
-		caPmtCmdId = cmdId;
-		programInfoLength++;
-		length += programInfoLength;
-	}
-
 	for (ElementaryStreamInfoConstIterator i = pmt->esInfo.begin(); i != pmt->esInfo.end(); ++i) {
-		CaElementaryStreamInfo *info = new CaElementaryStreamInfo(*i, cmdId);
+		CaElementaryStreamInfo *info = new CaElementaryStreamInfo(*i, caPmtCmdId);
 		esInfo.push_back(info);
 		length += info->getLength();
 	}
+	
+	return true;
+}
 
-	lengthField = new CaLengthField(length);
+CaProgramMapSection::CaProgramMapSection(const ProgramMapSection * const pmt, const uint8_t listManagement, const uint8_t cmdId)
+	:programInfoLength(0)
+{
+	length = 6;
+
+	caPmtTag = 0x9f8032;
+	caPmtListManagement = listManagement;
+	caPmtCmdId = cmdId;
+
+	programNumber = pmt->tableIdExtension;
+	versionNumber = pmt->versionNumber;
+	currentNextIndicator = pmt->currentNextIndicator;
+
+	append(pmt);
 }
 
 CaProgramMapSection::~CaProgramMapSection(void)
@@ -149,19 +153,38 @@ CaProgramMapSection::~CaProgramMapSection(void)
 
 	for (CaElementaryStreamInfoIterator i = esInfo.begin(); i != esInfo.end(); ++i)
 		delete *i;
+}
 
-	delete lengthField;
+void CaProgramMapSection::injectProgramInfoDescriptor(const uint8_t *descr, bool front)
+{
+	CaDescriptor *d = new CaDescriptor(descr);
+	if ( front )
+		descriptors.push_front(d);
+	else
+		descriptors.push_back(d);
+	programInfoLength += d->getLength() + 2;
+	length += d->getLength() + 2;
 }
 
 size_t CaProgramMapSection::writeToBuffer(uint8_t * const buffer) const
 {
+	unsigned programInfoLength = this->programInfoLength;
+	uint32_t length = this->length;
+
 	size_t total = 0;
+
+	if (programInfoLength) {
+			programInfoLength++;
+			length++;
+	}
+
+	CaLengthField lengthField(length);
 
 	buffer[total++] = (caPmtTag >> 16) & 0xff;
 	buffer[total++] = (caPmtTag >>  8) & 0xff;
 	buffer[total++] = (caPmtTag >>  0) & 0xff;
 
-	total += lengthField->writeToBuffer(&buffer[total]);
+	total += lengthField.writeToBuffer(&buffer[total]);
 
 	buffer[total++] = caPmtListManagement;
 	buffer[total++] = (programNumber >> 8) & 0xff;

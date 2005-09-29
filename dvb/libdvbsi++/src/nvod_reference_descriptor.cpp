@@ -1,5 +1,5 @@
 /*
- * $Id: nvod_reference_descriptor.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: nvod_reference_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -56,7 +56,7 @@ NvodReferenceDescriptor::~NvodReferenceDescriptor(void)
 		delete *i;
 }
 
-const NvodReferenceVector *NvodReferenceDescriptor::getNvodReferences(void) const
+const NvodReferenceList *NvodReferenceDescriptor::getNvodReferences(void) const
 {
 	return &nvodReferences;
 }

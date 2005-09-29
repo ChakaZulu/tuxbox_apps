@@ -1,5 +1,5 @@
 /*
- * $Id: ca_section.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: ca_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -35,8 +35,8 @@ class ConditionalAccessSection : public LongCrcSection, public DescriptorContain
 		static const uint32_t TIMEOUT = 200;
 };
 
-typedef std::vector<ConditionalAccessSection *> ConditionalAccessSectionVector;
-typedef ConditionalAccessSectionVector::iterator ConditionalAccessSectionIterator;
-typedef ConditionalAccessSectionVector::const_iterator ConditionalAccessSectionConstIterator;
+typedef std::list<ConditionalAccessSection *> ConditionalAccessSectionList;
+typedef ConditionalAccessSectionList::iterator ConditionalAccessSectionIterator;
+typedef ConditionalAccessSectionList::const_iterator ConditionalAccessSectionConstIterator;
 
 #endif /* __ca_section_h__ */

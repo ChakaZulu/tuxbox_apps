@@ -95,7 +95,7 @@ const std::string &CarouselIdentifierDescriptor::getObjectKey(void) const
 	return objectKey;
 }
 
-const PrivateDataByteVector *CarouselIdentifierDescriptor::getPrivateDataBytes(void) const
+const PrivateDataByteList *CarouselIdentifierDescriptor::getPrivateDataBytes(void) const
 {
         return &privateDataBytes;
 }

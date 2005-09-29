@@ -1,5 +1,5 @@
 /*
- * $Id: network_information_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
+ * $Id: network_information_section.cpp,v 1.4 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -61,7 +61,7 @@ NetworkInformationSection::~NetworkInformationSection(void)
 		delete *i;
 }
 
-const TransportStreamInfoVector *NetworkInformationSection::getTsInfo(void) const
+const TransportStreamInfoList *NetworkInformationSection::getTsInfo(void) const
 {
 	return &tsInfo;
 }

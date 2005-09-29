@@ -1,5 +1,5 @@
 /*
- * $Id: short_section.h,v 1.3 2005/01/01 15:23:38 mws Exp $
+ * $Id: short_section.h,v 1.4 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -35,7 +35,7 @@ class ShortSection
 
 	public:
 		ShortSection(const uint8_t * const buffer);
-		virtual ~ShortSection();
+		virtual ~ShortSection() { };
 
 		static const uint8_t CRC32 = 0;
 		static const uint16_t LENGTH = 1024;
@@ -49,8 +49,8 @@ class ShortSection
 		uint16_t getSectionLength(void) const;
 };
 
-typedef std::vector<ShortSection *> ShortSectionVector;
-typedef ShortSectionVector::iterator ShortSectionIterator;
-typedef ShortSectionVector::const_iterator ShortSectionConstIterator;
+typedef std::list<ShortSection *> ShortSectionList;
+typedef ShortSectionList::iterator ShortSectionIterator;
+typedef ShortSectionList::const_iterator ShortSectionConstIterator;
 
 #endif /* __short_section_h__ */

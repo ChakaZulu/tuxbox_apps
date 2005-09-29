@@ -1,5 +1,5 @@
 /*
- * $Id: parental_rating_descriptor.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: parental_rating_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,20 +37,20 @@ class ParentalRating
 		uint8_t getRating(void) const;
 };
 
-typedef std::vector<ParentalRating *> ParentalRatingVector;
-typedef ParentalRatingVector::iterator ParentalRatingIterator;
-typedef ParentalRatingVector::const_iterator ParentalRatingConstIterator;
+typedef std::list<ParentalRating *> ParentalRatingList;
+typedef ParentalRatingList::iterator ParentalRatingIterator;
+typedef ParentalRatingList::const_iterator ParentalRatingConstIterator;
 
 class ParentalRatingDescriptor : public Descriptor
 {
 	protected:
-		ParentalRatingVector parentalRatings;
+		ParentalRatingList parentalRatings;
 
 	public:
 		ParentalRatingDescriptor(const uint8_t * const buffer);
 		~ParentalRatingDescriptor(void);
 
-		const ParentalRatingVector *getParentalRatings(void) const;
+		const ParentalRatingList *getParentalRatings(void) const;
 };
 
 #endif /* __parental_rating_descriptor_h__ */

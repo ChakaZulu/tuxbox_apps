@@ -1,5 +1,5 @@
 /*
- * $Id: program_map_section.cpp,v 1.5 2004/06/17 09:54:21 obi Exp $
+ * $Id: program_map_section.cpp,v 1.6 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -59,7 +59,12 @@ uint16_t ProgramMapSection::getPcrPid(void) const
 	return pcrPid;
 }
 
-const ElementaryStreamInfoVector *ProgramMapSection::getEsInfo(void) const
+uint16_t ProgramMapSection::getProgramNumber(void) const
+{
+	return getTableIdExtension();
+}
+
+const ElementaryStreamInfoList *ProgramMapSection::getEsInfo(void) const
 {
 	return &esInfo;
 }

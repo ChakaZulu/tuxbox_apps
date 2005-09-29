@@ -35,22 +35,22 @@ class PrefetchLabel
 		uint8_t getPrefetchPriority(void) const;
 };
 
-typedef std::vector<PrefetchLabel *> PrefetchLabelVector;
-typedef PrefetchLabelVector::iterator PrefetchLabelIterator;
-typedef PrefetchLabelVector::const_iterator PrefetchLabelConstIterator;
+typedef std::list<PrefetchLabel *> PrefetchLabelList;
+typedef PrefetchLabelList::iterator PrefetchLabelIterator;
+typedef PrefetchLabelList::const_iterator PrefetchLabelConstIterator;
 
 class PrefetchDescriptor : public Descriptor
 {
 	protected:
 		unsigned transportProtocolLabel			: 8;
-		PrefetchLabelVector prefetchLabels;
+		PrefetchLabelList prefetchLabels;
 
 	public:
 		PrefetchDescriptor(const uint8_t * const buffer);
 		~PrefetchDescriptor(void);
 		
 		uint8_t getTransportProtocolLabel(void) const;
-		const PrefetchLabelVector *getPrefetchLabels(void) const;
+		const PrefetchLabelList *getPrefetchLabels(void) const;
 };
 
 #endif /* __prefetch_descriptor_h__ */

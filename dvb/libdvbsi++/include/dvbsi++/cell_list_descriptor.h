@@ -1,5 +1,5 @@
 /*
- * $Id: cell_list_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: cell_list_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -43,9 +43,9 @@ class Subcell
 		uint16_t getSubcellExtendOfLongtitude(void) const;
 };
 
-typedef std::vector<Subcell *> SubcellVector;
-typedef SubcellVector::iterator SubcellIterator;
-typedef SubcellVector::const_iterator SubcellConstIterator;
+typedef std::list<Subcell *> SubcellList;
+typedef SubcellList::iterator SubcellIterator;
+typedef SubcellList::const_iterator SubcellConstIterator;
 
 class Cell
 {
@@ -56,7 +56,7 @@ class Cell
 		unsigned cellExtendOfLatitude			: 12;
 		unsigned cellExtendOfLongtitude			: 12;
 		unsigned subcellInfoLoopLength			: 8;
-		SubcellVector subcells;
+		SubcellList subcells;
 
 	public:
 		Cell(const uint8_t * const buffer);
@@ -67,23 +67,23 @@ class Cell
 		uint16_t getCellLongtitude(void) const;
 		uint16_t getCellExtendOfLatitude(void) const;
 		uint16_t getCellExtendOfLongtitude(void) const;
-		const SubcellVector *getSubcells(void) const;
+		const SubcellList *getSubcells(void) const;
 };
 
-typedef std::vector<Cell *> CellVector;
-typedef CellVector::iterator CellIterator;
-typedef CellVector::const_iterator CellConstIterator;
+typedef std::list<Cell *> CellList;
+typedef CellList::iterator CellIterator;
+typedef CellList::const_iterator CellConstIterator;
 
 class CellListDescriptor : public Descriptor
 {
 	protected:
-		CellVector cells;
+		CellList cells;
 
 	public:
 		CellListDescriptor(const uint8_t * const buffer);
 		~CellListDescriptor(void);
 
-		const CellVector *getCells(void) const;
+		const CellList *getCells(void) const;
 };
 
 #endif /* __cell_list_descriptor_h__ */

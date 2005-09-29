@@ -48,7 +48,7 @@ DvbJApplicationDescriptor::~DvbJApplicationDescriptor	(void)
 		delete *i;
 }
 
-const DvbJApplicationVector *DvbJApplicationDescriptor::getDvbJApplications(void) const
+const DvbJApplicationList *DvbJApplicationDescriptor::getDvbJApplications(void) const
 {
 	return &dvbJApplications;
 }

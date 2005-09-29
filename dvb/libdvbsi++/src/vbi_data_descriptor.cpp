@@ -1,5 +1,5 @@
 /*
- * $Id: vbi_data_descriptor.cpp,v 1.2 2004/06/18 19:10:43 sestegra Exp $
+ * $Id: vbi_data_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -71,7 +71,7 @@ uint8_t VbiDataService::getDataServiceId(void) const
 	return dataServiceId;
 }
 
-const VbiDataLineVector *VbiDataService::getVbiDataLines(void) const
+const VbiDataLineList *VbiDataService::getVbiDataLines(void) const
 {
 	return &vbiDataLines;
 }
@@ -88,7 +88,7 @@ VbiDataDescriptor::~VbiDataDescriptor(void)
 		delete *i;
 }
 
-const VbiDataServiceVector *VbiDataDescriptor::getVbiDataServices(void) const
+const VbiDataServiceList *VbiDataDescriptor::getVbiDataServices(void) const
 {
 	return &vbiDataServices;
 }

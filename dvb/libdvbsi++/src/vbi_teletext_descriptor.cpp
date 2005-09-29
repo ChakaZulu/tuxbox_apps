@@ -1,5 +1,5 @@
 /*
- * $Id: vbi_teletext_descriptor.cpp,v 1.1 2004/02/13 15:27:47 obi Exp $
+ * $Id: vbi_teletext_descriptor.cpp,v 1.2 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -61,7 +61,7 @@ VbiTeletextDescriptor::~VbiTeletextDescriptor(void)
 		delete *i;
 }
 
-const VbiTeletextVector *VbiTeletextDescriptor::getVbiTeletexts(void) const
+const VbiTeletextList *VbiTeletextDescriptor::getVbiTeletexts(void) const
 {
 	return &vbiTeletexts;
 }

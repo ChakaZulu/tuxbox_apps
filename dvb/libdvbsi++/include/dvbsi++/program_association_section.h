@@ -1,5 +1,5 @@
 /*
- * $Id: program_association_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: program_association_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -36,9 +36,9 @@ class NetworkAssociation
 		uint16_t getNetworkPid(void) const;
 };
 
-typedef std::vector<NetworkAssociation *> NetworkAssociationVector;
-typedef NetworkAssociationVector::iterator NetworkAssociationIterator;
-typedef NetworkAssociationVector::const_iterator NetworkAssociationConstIterator;
+typedef std::list<NetworkAssociation *> NetworkAssociationList;
+typedef NetworkAssociationList::iterator NetworkAssociationIterator;
+typedef NetworkAssociationList::const_iterator NetworkAssociationConstIterator;
 
 class ProgramAssociation
 {
@@ -53,15 +53,15 @@ class ProgramAssociation
 		uint16_t getProgramMapPid(void) const;
 };
 
-typedef std::vector<ProgramAssociation *> ProgramAssociationVector;
-typedef ProgramAssociationVector::iterator ProgramAssociationIterator;
-typedef ProgramAssociationVector::const_iterator ProgramAssociationConstIterator;
+typedef std::list<ProgramAssociation *> ProgramAssociationList;
+typedef ProgramAssociationList::iterator ProgramAssociationIterator;
+typedef ProgramAssociationList::const_iterator ProgramAssociationConstIterator;
 
 class ProgramAssociationSection : public LongCrcSection
 {
 	protected:
-		NetworkAssociationVector networks;
-		ProgramAssociationVector programs;
+		NetworkAssociationList networks;
+		ProgramAssociationList programs;
 
 	public:
 		ProgramAssociationSection(const uint8_t * const buffer);
@@ -71,12 +71,12 @@ class ProgramAssociationSection : public LongCrcSection
 		static const enum TableId TID = TID_PAT;
 		static const uint32_t TIMEOUT = 1200;
 
-		const NetworkAssociationVector *getNetworks(void) const;
-		const ProgramAssociationVector *getPrograms(void) const;
+		const NetworkAssociationList *getNetworks(void) const;
+		const ProgramAssociationList *getPrograms(void) const;
 };
 
-typedef std::vector<ProgramAssociationSection *> ProgramAssociationSectionVector;
-typedef ProgramAssociationSectionVector::iterator ProgramAssociationSectionIterator;
-typedef ProgramAssociationSectionVector::const_iterator ProgramAssociationSectionConstIterator;
+typedef std::list<ProgramAssociationSection *> ProgramAssociationSectionList;
+typedef ProgramAssociationSectionList::iterator ProgramAssociationSectionIterator;
+typedef ProgramAssociationSectionList::const_iterator ProgramAssociationSectionConstIterator;
 
 #endif /* __program_association_section_h__ */

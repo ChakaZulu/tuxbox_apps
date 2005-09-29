@@ -52,9 +52,9 @@ class Url
 		const std::string &getUrl(void) const;
 };
 
-typedef std::vector<Url *> UrlVector;
-typedef UrlVector::iterator UrlIterator;
-typedef UrlVector::const_iterator UrlConstIterator;
+typedef std::list<Url *> UrlList;
+typedef UrlList::iterator UrlIterator;
+typedef UrlList::const_iterator UrlConstIterator;
 
 class IpTransport
 {
@@ -64,7 +64,7 @@ class IpTransport
 		unsigned transportStreamId			: 16;
 		unsigned serviceId				: 16;
 		unsigned alignmentIndicator			: 1;
-		UrlVector urls;
+		UrlList urls;
 
 	public:
 		IpTransport(const uint8_t * const buffer, size_t length);
@@ -75,21 +75,21 @@ class IpTransport
 		uint16_t getTransportStreamId(void) const;
 		uint16_t getServiceId(void) const;
 		uint8_t getAlignmentIndicator(void) const;
-		const UrlVector *getUrls(void) const;
+		const UrlList *getUrls(void) const;
 };
 
 class InteractionTransport
 {
 	protected:
 		Url *urlBase;
-		UrlVector urlExtensions;
+		UrlList urlExtensions;
 
 	public:
 		InteractionTransport(const uint8_t * const buffer, size_t length);
 		~InteractionTransport(void);
 
 		const Url *getUrlBase(void) const;
-		const UrlVector *getUrlExtensions(void) const;
+		const UrlList *getUrlExtensions(void) const;
 };
 
 class TransportProtocolDescriptor : public Descriptor

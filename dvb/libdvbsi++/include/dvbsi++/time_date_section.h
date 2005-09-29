@@ -1,5 +1,5 @@
 /*
- * $Id: time_date_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: time_date_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -41,8 +41,8 @@ class TimeAndDateSection : public ShortSection
 		uint32_t getUtcTimeBcd(void) const;
 };
 
-typedef std::vector<TimeAndDateSection *> TimeAndDateSectionVector;
-typedef TimeAndDateSectionVector::iterator TimeAndDateSectionIterator;
-typedef TimeAndDateSectionVector::const_iterator TimeAndDateSectionConstIterator;
+typedef std::list<TimeAndDateSection *> TimeAndDateSectionList;
+typedef TimeAndDateSectionList::iterator TimeAndDateSectionIterator;
+typedef TimeAndDateSectionList::const_iterator TimeAndDateSectionConstIterator;
 
 #endif /* __time_date_section_h__ */

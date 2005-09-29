@@ -1,5 +1,5 @@
 /*
- * $Id: local_time_offset_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: local_time_offset_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -47,20 +47,20 @@ class LocalTimeOffset
 		uint16_t getNextTimeOffset(void) const;
 };
 
-typedef std::vector<LocalTimeOffset *> LocalTimeOffsetVector;
-typedef LocalTimeOffsetVector::iterator LocalTimeOffsetIterator;
-typedef LocalTimeOffsetVector::const_iterator LocalTimeOffsetConstIterator;
+typedef std::list<LocalTimeOffset *> LocalTimeOffsetList;
+typedef LocalTimeOffsetList::iterator LocalTimeOffsetIterator;
+typedef LocalTimeOffsetList::const_iterator LocalTimeOffsetConstIterator;
 
 class LocalTimeOffsetDescriptor : public Descriptor
 {
 	protected:
-		LocalTimeOffsetVector localTimeOffsets;
+		LocalTimeOffsetList localTimeOffsets;
 
 	public:
 		LocalTimeOffsetDescriptor(const uint8_t * const buffer);
 		~LocalTimeOffsetDescriptor(void);
 
-		const LocalTimeOffsetVector *getLocalTimeOffsets(void) const;
+		const LocalTimeOffsetList *getLocalTimeOffsets(void) const;
 };
 
 #endif /* __local_time_offset_descriptor_h__ */

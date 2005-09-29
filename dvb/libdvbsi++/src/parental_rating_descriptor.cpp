@@ -1,5 +1,5 @@
 /*
- * $Id: parental_rating_descriptor.cpp,v 1.1 2004/02/13 15:27:47 obi Exp $
+ * $Id: parental_rating_descriptor.cpp,v 1.2 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -49,7 +49,7 @@ ParentalRatingDescriptor::~ParentalRatingDescriptor(void)
 		delete *i;
 }
 
-const ParentalRatingVector *ParentalRatingDescriptor::getParentalRatings(void) const
+const ParentalRatingList *ParentalRatingDescriptor::getParentalRatings(void) const
 {
 	return &parentalRatings;
 }

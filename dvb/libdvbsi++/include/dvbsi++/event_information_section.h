@@ -1,5 +1,5 @@
 /*
- * $Id: event_information_section.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: event_information_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -47,9 +47,9 @@ class Event : public DescriptorContainer
 		uint8_t getFreeCaMode(void) const;
 };
 
-typedef std::vector<Event *> EventVector;
-typedef EventVector::iterator EventIterator;
-typedef EventVector::const_iterator EventConstIterator;
+typedef std::list<Event *> EventList;
+typedef EventList::iterator EventIterator;
+typedef EventList::const_iterator EventConstIterator;
 
 class EventInformationSection : public LongCrcSection
 {
@@ -58,7 +58,7 @@ class EventInformationSection : public LongCrcSection
 		unsigned originalNetworkId			: 16;
 		unsigned segmentLastSectionNumber		: 8;
 		unsigned lastTableId				: 8;
-		EventVector events;
+		EventList events;
 
 	public:
 		EventInformationSection(const uint8_t * const buffer);
@@ -73,11 +73,11 @@ class EventInformationSection : public LongCrcSection
 		uint16_t getOriginalNetworkId(void) const;
 		uint8_t getSegmentLastSectionNumber(void) const;
 		uint8_t getLastTableId(void) const;
-		const EventVector *getEvents(void) const;
+		const EventList *getEvents(void) const;
 };
 
-typedef std::vector<EventInformationSection *> EventInformationSectionVector;
-typedef EventInformationSectionVector::iterator EventInformationSectionIterator;
-typedef EventInformationSectionVector::const_iterator EventInformationSectionConstIterator;
+typedef std::list<EventInformationSection *> EventInformationSectionList;
+typedef EventInformationSectionList::iterator EventInformationSectionIterator;
+typedef EventInformationSectionList::const_iterator EventInformationSectionConstIterator;
 
 #endif /* __event_information_section_h__ */

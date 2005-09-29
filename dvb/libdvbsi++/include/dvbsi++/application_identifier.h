@@ -33,8 +33,8 @@ class ApplicationIdentifier
 		uint16_t getApplicationId(void) const;
 };
 
-typedef std::vector<ApplicationIdentifier *> ApplicationIdentifierVector;
-typedef ApplicationIdentifierVector::iterator ApplicationIdentifierIterator;
-typedef ApplicationIdentifierVector::const_iterator ApplicationIdentifierConstIterator;
+typedef std::list<ApplicationIdentifier *> ApplicationIdentifierList;
+typedef ApplicationIdentifierList::iterator ApplicationIdentifierIterator;
+typedef ApplicationIdentifierList::const_iterator ApplicationIdentifierConstIterator;
 
 #endif /* __application_identifier_h__ */

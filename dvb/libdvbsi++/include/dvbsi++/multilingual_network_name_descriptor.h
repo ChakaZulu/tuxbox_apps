@@ -1,5 +1,5 @@
 /*
- * $Id: multilingual_network_name_descriptor.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: multilingual_network_name_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -38,20 +38,20 @@ class MultilingualNetworkName
 		const std::string &getNetworkName(void) const;
 };
 
-typedef std::vector<MultilingualNetworkName *> MultilingualNetworkNameVector;
-typedef MultilingualNetworkNameVector::iterator MultilingualNetworkNameIterator;
-typedef MultilingualNetworkNameVector::const_iterator MultilingualNetworkNameConstIterator;
+typedef std::list<MultilingualNetworkName *> MultilingualNetworkNameList;
+typedef MultilingualNetworkNameList::iterator MultilingualNetworkNameIterator;
+typedef MultilingualNetworkNameList::const_iterator MultilingualNetworkNameConstIterator;
 
 class MultilingualNetworkNameDescriptor : public Descriptor
 {
 	protected:
-		MultilingualNetworkNameVector multilingualNetworkNames;
+		MultilingualNetworkNameList multilingualNetworkNames;
 
 	public:
 		MultilingualNetworkNameDescriptor(const uint8_t * const buffer);
 		~MultilingualNetworkNameDescriptor(void);
 
-		const MultilingualNetworkNameVector *getMultilingualNetworkNames(void) const;
+		const MultilingualNetworkNameList *getMultilingualNetworkNames(void) const;
 };
 
 #endif /* __multilingual_network_name_descriptor_h__ */

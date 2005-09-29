@@ -1,5 +1,5 @@
 /*
- * $Id: long_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: long_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -52,8 +52,8 @@ class LongSection : public ShortSection
 		bool operator!= (const LongSection &t) const;
 };
 
-typedef std::vector<LongSection *> LongSectionVector;
-typedef LongSectionVector::iterator LongSectionIterator;
-typedef LongSectionVector::const_iterator LongSectionConstIterator;
+typedef std::list<LongSection *> LongSectionList;
+typedef LongSectionList::iterator LongSectionIterator;
+typedef LongSectionList::const_iterator LongSectionConstIterator;
 
 #endif /* __long_section_h__ */

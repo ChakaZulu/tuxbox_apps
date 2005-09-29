@@ -36,7 +36,7 @@ ApplicationDescriptor::~ApplicationDescriptor(void)
 		delete *i;
 }
 
-const ApplicationProfileVector *ApplicationDescriptor::getApplicationProfiles(void) const
+const ApplicationProfileList *ApplicationDescriptor::getApplicationProfiles(void) const
 {
 	return &applicationProfiles;
 }
@@ -56,7 +56,7 @@ uint8_t ApplicationDescriptor::getApplicationPriority(void) const
 	return applicationPriority;
 }
 
-const TransportProtocolLabelVector *ApplicationDescriptor::getTransportProtocolLabels(void) const
+const TransportProtocolLabelList *ApplicationDescriptor::getTransportProtocolLabels(void) const
 {
 	return &transportProtocolLabels;
 }

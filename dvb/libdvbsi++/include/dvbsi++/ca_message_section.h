@@ -1,5 +1,5 @@
 /*
- * $Id: ca_message_section.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: ca_message_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -27,7 +27,7 @@
 class ConditionalAccessMessageSection : public ShortSection
 {
 	protected:
-		std::vector<uint8_t> caDataByte;
+		std::list<uint8_t> caDataByte;
 
 	public:
 		ConditionalAccessMessageSection(const uint8_t * const buffer);
@@ -36,8 +36,8 @@ class ConditionalAccessMessageSection : public ShortSection
 		static const enum TableId TID = TID_CAMT_ECM_0;
 };
 
-typedef std::vector<ConditionalAccessMessageSection *> ConditionalAccessMessageSectionVector;
-typedef ConditionalAccessMessageSectionVector::iterator ConditionalAccessMessageSectionIterator;
-typedef ConditionalAccessMessageSectionVector::const_iterator ConditionalAccessMessageSectionConstIterator;
+typedef std::list<ConditionalAccessMessageSection *> ConditionalAccessMessageSectionList;
+typedef ConditionalAccessMessageSectionList::iterator ConditionalAccessMessageSectionIterator;
+typedef ConditionalAccessMessageSectionList::const_iterator ConditionalAccessMessageSectionConstIterator;
 
 #endif /* __ca_message_section_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: multilingual_component_descriptor.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: multilingual_component_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -38,22 +38,22 @@ class MultilingualComponent
 		const std::string &getText(void) const;
 };
 
-typedef std::vector<MultilingualComponent *> MultilingualComponentVector;
-typedef MultilingualComponentVector::iterator MultilingualComponentIterator;
-typedef MultilingualComponentVector::const_iterator MultilingualComponentConstIterator;
+typedef std::list<MultilingualComponent *> MultilingualComponentList;
+typedef MultilingualComponentList::iterator MultilingualComponentIterator;
+typedef MultilingualComponentList::const_iterator MultilingualComponentConstIterator;
 
 class MultilingualComponentDescriptor : public Descriptor
 {
 	protected:
 		unsigned componentTag				: 8;
-		MultilingualComponentVector multilingualComponents;
+		MultilingualComponentList multilingualComponents;
 
 	public:
 		MultilingualComponentDescriptor(const uint8_t * const buffer);
 		~MultilingualComponentDescriptor(void);
 
 		uint8_t getComponentTag(void) const;
-		const MultilingualComponentVector *getMultilingualComponents(void) const;
+		const MultilingualComponentList *getMultilingualComponents(void) const;
 };
 
 #endif /* __multilingual_component_descriptor_h__ */

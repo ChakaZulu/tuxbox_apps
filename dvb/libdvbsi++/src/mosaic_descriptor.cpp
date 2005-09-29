@@ -1,5 +1,5 @@
 /*
- * $Id: mosaic_descriptor.cpp,v 1.3 2004/06/18 19:20:34 sestegra Exp $
+ * $Id: mosaic_descriptor.cpp,v 1.4 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -77,7 +77,7 @@ uint8_t MosaicCell::getLogicalCellPresentationInfo(void) const
 	return logicalCellPresentationInfo;
 }
 
-const ElementaryCellFieldVector *MosaicCell::getElementaryCellFields(void) const
+const ElementaryCellFieldList *MosaicCell::getElementaryCellFields(void) const
 {
 	return &elementaryCellFields;
 }
@@ -160,7 +160,7 @@ uint8_t MosaicDescriptor::getNumberOfVerticalElementaryCells(void) const
 	return numberOfVerticalElementaryCells;
 }
 
-const MosaicCellVector *MosaicDescriptor::getMosaicCells(void) const
+const MosaicCellList *MosaicDescriptor::getMosaicCells(void) const
 {
 	return &mosaicCells;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: compat.h,v 1.1 2004/02/13 17:51:07 obi Exp $
+ * $Id: compat.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -39,6 +39,6 @@
 #endif
 
 #include <string>
-#include <vector>
+#include <list>
 
 #endif /* __compat_h__ */

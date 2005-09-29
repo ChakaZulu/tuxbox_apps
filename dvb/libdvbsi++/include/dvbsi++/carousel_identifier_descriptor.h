@@ -20,9 +20,9 @@
 
 #include "descriptor.h"
 
-typedef std::vector<uint8_t> PrivateDataByteVector;
-typedef PrivateDataByteVector::iterator PrivateDataByteIterator;
-typedef PrivateDataByteVector::const_iterator PrivateDataByteConstIterator;
+typedef std::list<uint8_t> PrivateDataByteList;
+typedef PrivateDataByteList::iterator PrivateDataByteIterator;
+typedef PrivateDataByteList::const_iterator PrivateDataByteConstIterator;
 
 class CarouselIdentifierDescriptor : public Descriptor
 {
@@ -38,7 +38,7 @@ class CarouselIdentifierDescriptor : public Descriptor
 		unsigned timeout				: 8;
 		unsigned objectKeyLength			: 8;
 		std::string objectKey;
-		PrivateDataByteVector privateDataBytes;
+		PrivateDataByteList privateDataBytes;
 
 	public:
 		CarouselIdentifierDescriptor(const uint8_t * const buffer);
@@ -53,7 +53,7 @@ class CarouselIdentifierDescriptor : public Descriptor
 		uint32_t getOriginalSize(void) const;
 		uint8_t getTimeout(void) const;
 		const std::string &getObjectKey(void) const;
-		const PrivateDataByteVector *getPrivateDataBytes(void) const;
+		const PrivateDataByteList *getPrivateDataBytes(void) const;
 };
 
 #endif /* __carousel_identifier_descriptor_h__ */

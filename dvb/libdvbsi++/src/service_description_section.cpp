@@ -1,5 +1,5 @@
 /*
- * $Id: service_description_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
+ * $Id: service_description_section.cpp,v 1.4 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -79,7 +79,12 @@ uint16_t ServiceDescriptionSection::getOriginalNetworkId(void) const
 	return originalNetworkId;
 }
 
-const ServiceDescriptionVector *ServiceDescriptionSection::getDescriptions(void) const
+uint16_t ServiceDescriptionSection::getTransportStreamId(void) const
+{
+	return getTableIdExtension();
+}
+
+const ServiceDescriptionList *ServiceDescriptionSection::getDescriptions(void) const
 {
 	return &description;
 }

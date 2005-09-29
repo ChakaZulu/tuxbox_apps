@@ -29,7 +29,7 @@ DelegatedApplicationDescriptor::~DelegatedApplicationDescriptor(void)
 		delete *i;
 }
 
-const ApplicationIdentifierVector *DelegatedApplicationDescriptor::getApplicationIdentifiers(void) const
+const ApplicationIdentifierList *DelegatedApplicationDescriptor::getApplicationIdentifiers(void) const
 {
 	return &applicationIdentifiers;
 }

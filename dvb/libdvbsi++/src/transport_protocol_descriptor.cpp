@@ -112,7 +112,7 @@ uint8_t IpTransport::getAlignmentIndicator(void) const
 	return alignmentIndicator;
 }
 
-const UrlVector *IpTransport::getUrls(void) const
+const UrlList *IpTransport::getUrls(void) const
 {
 	return &urls;
 }
@@ -139,7 +139,7 @@ const Url *InteractionTransport::getUrlBase(void) const
 	return urlBase;
 }
 
-const UrlVector *InteractionTransport::getUrlExtensions(void) const
+const UrlList *InteractionTransport::getUrlExtensions(void) const
 {
 	return &urlExtensions;
 }

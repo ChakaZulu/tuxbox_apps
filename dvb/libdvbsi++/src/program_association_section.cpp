@@ -1,5 +1,5 @@
 /*
- * $Id: program_association_section.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: program_association_section.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -68,12 +68,12 @@ ProgramAssociationSection::~ProgramAssociationSection(void)
 		delete *i;
 }
 
-const NetworkAssociationVector *ProgramAssociationSection::getNetworks(void) const
+const NetworkAssociationList *ProgramAssociationSection::getNetworks(void) const
 {
 	return &networks;
 }
 
-const ProgramAssociationVector *ProgramAssociationSection::getPrograms(void) const
+const ProgramAssociationList *ProgramAssociationSection::getPrograms(void) const
 {
 	return &programs;
 }

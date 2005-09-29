@@ -37,8 +37,8 @@ class ApplicationProfile
 		uint8_t getVersionMicro(void) const;
 };
 
-typedef std::vector<ApplicationProfile *> ApplicationProfileVector;
-typedef ApplicationProfileVector::iterator ApplicationProfileIterator;
-typedef ApplicationProfileVector::const_iterator ApplicationProfileConstIterator;
+typedef std::list<ApplicationProfile *> ApplicationProfileList;
+typedef ApplicationProfileList::iterator ApplicationProfileIterator;
+typedef ApplicationProfileList::const_iterator ApplicationProfileConstIterator;
 
 #endif /* __application_profile_h__ */

@@ -33,22 +33,22 @@ class DiiLocation
 		uint16_t getAssociationTag(void) const;
 };
 
-typedef std::vector<DiiLocation *> DiiLocationVector;
-typedef DiiLocationVector::iterator DiiLocationIterator;
-typedef DiiLocationVector::const_iterator DiiLocationConstIterator;
+typedef std::list<DiiLocation *> DiiLocationList;
+typedef DiiLocationList::iterator DiiLocationIterator;
+typedef DiiLocationList::const_iterator DiiLocationConstIterator;
 
 class DiiLocationDescriptor : public Descriptor
 {
 	protected:
 		unsigned transportProtocolLabel			: 8;
-		DiiLocationVector diiLocations;
+		DiiLocationList diiLocations;
 
 	public:
 		DiiLocationDescriptor(const uint8_t * const buffer);
 		~DiiLocationDescriptor(void);
 		
 		uint8_t getTransportProtocolLabel(void) const;
-		const DiiLocationVector *getDiiLocations(void) const;
+		const DiiLocationList *getDiiLocations(void) const;
 };
 
 #endif /* __dii_location_descriptor_h__ */

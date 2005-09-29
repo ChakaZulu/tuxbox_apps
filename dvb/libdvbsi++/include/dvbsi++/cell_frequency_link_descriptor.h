@@ -1,5 +1,5 @@
 /*
- * $Id: cell_frequency_link_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: cell_frequency_link_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,9 +37,9 @@ class SubcellInfo
 		uint32_t getTransposerFrequency(void) const;
 };
 
-typedef std::vector<SubcellInfo *> SubcellInfoVector;
-typedef SubcellInfoVector::iterator SubcellInfoIterator;
-typedef SubcellInfoVector::const_iterator SubcellInfoConstIterator;
+typedef std::list<SubcellInfo *> SubcellInfoList;
+typedef SubcellInfoList::iterator SubcellInfoIterator;
+typedef SubcellInfoList::const_iterator SubcellInfoConstIterator;
 
 class CellFrequencyLink
 {
@@ -47,7 +47,7 @@ class CellFrequencyLink
 		unsigned cellId					: 16;
 		unsigned frequency				: 32;
 		unsigned subcellInfoLoopLength			: 8;
-		SubcellInfoVector subcells;
+		SubcellInfoList subcells;
 
 	public:
 		CellFrequencyLink(const uint8_t * const buffer);
@@ -55,24 +55,24 @@ class CellFrequencyLink
 
 		uint16_t getCellId(void) const;
 		uint32_t getFrequency(void) const;
-		const SubcellInfoVector *getSubcells(void) const;
+		const SubcellInfoList *getSubcells(void) const;
 
 };
 
-typedef std::vector<CellFrequencyLink *> CellFrequencyLinkVector;
-typedef CellFrequencyLinkVector::iterator CellFrequencyLinkIterator;
-typedef CellFrequencyLinkVector::const_iterator CellFrequencyLinkConstIterator;
+typedef std::list<CellFrequencyLink *> CellFrequencyLinkList;
+typedef CellFrequencyLinkList::iterator CellFrequencyLinkIterator;
+typedef CellFrequencyLinkList::const_iterator CellFrequencyLinkConstIterator;
 
 class CellFrequencyLinkDescriptor : public Descriptor
 {
 	protected:
-		CellFrequencyLinkVector cellFrequencyLinks;
+		CellFrequencyLinkList cellFrequencyLinks;
 
 	public:
 		CellFrequencyLinkDescriptor(const uint8_t * const buffer);
 		~CellFrequencyLinkDescriptor(void);
 
-		const CellFrequencyLinkVector *getCellFrequencyLinks(void) const;
+		const CellFrequencyLinkList *getCellFrequencyLinks(void) const;
 };
 
 #endif /* __cell_frequency_link_descriptor_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: multilingual_network_name_descriptor.cpp,v 1.1 2004/02/13 15:27:47 obi Exp $
+ * $Id: multilingual_network_name_descriptor.cpp,v 1.2 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -50,7 +50,7 @@ MultilingualNetworkNameDescriptor::~MultilingualNetworkNameDescriptor(void)
 		delete *i;
 }
 
-const MultilingualNetworkNameVector *MultilingualNetworkNameDescriptor::getMultilingualNetworkNames(void) const
+const MultilingualNetworkNameList *MultilingualNetworkNameDescriptor::getMultilingualNetworkNames(void) const
 {
 	return &multilingualNetworkNames;
 }

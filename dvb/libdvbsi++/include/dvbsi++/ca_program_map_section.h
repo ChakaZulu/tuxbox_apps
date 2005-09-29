@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: ca_program_map_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -31,7 +31,7 @@ class CaLengthField
 		unsigned sizeIndicator				: 1;
 		unsigned lengthValue				: 7;
 		unsigned lengthFieldSize			: 7;
-		std::vector<uint8_t> lengthValueByte;
+		std::list<uint8_t> lengthValueByte;
 
 	public:
 		CaLengthField(const uint32_t length);
@@ -46,7 +46,7 @@ class CaElementaryStreamInfo
 		unsigned elementaryPid				: 13;
 		unsigned esInfoLength				: 12;
 		unsigned caPmtCmdId				: 8;
-		CaDescriptorVector descriptors;
+		CaDescriptorList descriptors;
 
 	public:
 		CaElementaryStreamInfo(const ElementaryStreamInfo * const info, const uint8_t cmdId);
@@ -57,34 +57,36 @@ class CaElementaryStreamInfo
 		size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
-typedef std::vector<CaElementaryStreamInfo *> CaElementaryStreamInfoVector;
-typedef CaElementaryStreamInfoVector::iterator CaElementaryStreamInfoIterator;
-typedef CaElementaryStreamInfoVector::const_iterator CaElementaryStreamInfoConstIterator;
+typedef std::list<CaElementaryStreamInfo *> CaElementaryStreamInfoList;
+typedef CaElementaryStreamInfoList::iterator CaElementaryStreamInfoIterator;
+typedef CaElementaryStreamInfoList::const_iterator CaElementaryStreamInfoConstIterator;
 
 class CaProgramMapSection
 {
 	protected:
+		uint32_t length;
 		unsigned caPmtTag				: 24;
-		CaLengthField *lengthField;
 		unsigned caPmtListManagement			: 8;
 		unsigned programNumber				: 16;
 		unsigned versionNumber				: 5;
 		unsigned currentNextIndicator			: 1;
 		unsigned programInfoLength			: 12;
 		unsigned caPmtCmdId				: 8;
-		CaDescriptorVector descriptors;
-		CaElementaryStreamInfoVector esInfo;
+		CaDescriptorList descriptors;
+		CaElementaryStreamInfoList esInfo;
 
 	public:
 		CaProgramMapSection(const ProgramMapSection * const pmt, const uint8_t listManagement, const uint8_t cmdId);
 		~CaProgramMapSection(void);
 
+		bool append(const ProgramMapSection * const pmt);
+		void injectProgramInfoDescriptor(const uint8_t *descriptor, bool front=true);
 		size_t writeToBuffer(uint8_t * const buffer) const;
 		ssize_t writeToFile(int fd) const;
 };
 
-typedef std::vector<CaProgramMapSection *> CaProgramMapSectionVector;
-typedef CaProgramMapSectionVector::iterator CaProgramMapSectionIterator;
-typedef CaProgramMapSectionVector::const_iterator CaProgramMapSectionConstIterator;
+typedef std::list<CaProgramMapSection *> CaProgramMapSectionList;
+typedef CaProgramMapSectionList::iterator CaProgramMapSectionIterator;
+typedef CaProgramMapSectionList::const_iterator CaProgramMapSectionConstIterator;
 
 #endif /* __ca_program_map_section_h__ */

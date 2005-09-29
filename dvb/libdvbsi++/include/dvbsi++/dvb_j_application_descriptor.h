@@ -33,20 +33,20 @@ class DvbJApplication
 		const std::string &getParameter(void) const;
 };
 
-typedef std::vector<DvbJApplication *> DvbJApplicationVector;
-typedef DvbJApplicationVector::iterator DvbJApplicationIterator;
-typedef DvbJApplicationVector::const_iterator DvbJApplicationConstIterator;
+typedef std::list<DvbJApplication *> DvbJApplicationList;
+typedef DvbJApplicationList::iterator DvbJApplicationIterator;
+typedef DvbJApplicationList::const_iterator DvbJApplicationConstIterator;
 
 class DvbJApplicationDescriptor : public Descriptor
 {
 	protected:
-		DvbJApplicationVector dvbJApplications;
+		DvbJApplicationList dvbJApplications;
 
 	public:
 		DvbJApplicationDescriptor(const uint8_t * const buffer);
 		~DvbJApplicationDescriptor(void);
 
-		const DvbJApplicationVector *getDvbJApplications(void) const;
+		const DvbJApplicationList *getDvbJApplications(void) const;
 };
 
 #endif /* __dvb_j_application_descriptor_h__ */

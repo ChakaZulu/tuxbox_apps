@@ -1,5 +1,5 @@
 /*
- * $Id: ca_identifier_descriptor.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: ca_identifier_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -28,7 +28,7 @@ CaIdentifierDescriptor::CaIdentifierDescriptor(const uint8_t * const buffer) : D
 		caSystemIds.push_back(UINT16(&buffer[i + 2]));
 }
 
-const CaSystemIdVector *CaIdentifierDescriptor::getCaSystemIds(void) const
+const CaSystemIdList *CaIdentifierDescriptor::getCaSystemIds(void) const
 {
 	return &caSystemIds;
 }

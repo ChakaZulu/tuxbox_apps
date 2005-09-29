@@ -1,5 +1,5 @@
 /*
- * $Id: cell_frequency_link_descriptor.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: cell_frequency_link_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -64,7 +64,7 @@ uint32_t CellFrequencyLink::getFrequency(void) const
 	return frequency;
 }
 
-const SubcellInfoVector *CellFrequencyLink::getSubcells(void) const
+const SubcellInfoList *CellFrequencyLink::getSubcells(void) const
 {
 	return &subcells;
 }
@@ -81,7 +81,7 @@ CellFrequencyLinkDescriptor::~CellFrequencyLinkDescriptor(void)
 		delete *i;
 }
 
-const CellFrequencyLinkVector *CellFrequencyLinkDescriptor::getCellFrequencyLinks(void) const
+const CellFrequencyLinkList *CellFrequencyLinkDescriptor::getCellFrequencyLinks(void) const
 {
 	return &cellFrequencyLinks;
 }

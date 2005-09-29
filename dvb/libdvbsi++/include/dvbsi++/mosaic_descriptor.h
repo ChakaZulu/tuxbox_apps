@@ -1,5 +1,5 @@
 /*
- * $Id: mosaic_descriptor.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: mosaic_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -35,9 +35,9 @@ class ElementaryCellField
 		uint8_t getElementaryCellId(void) const;
 };
 
-typedef std::vector<ElementaryCellField *> ElementaryCellFieldVector;
-typedef ElementaryCellFieldVector::iterator ElementaryCellFieldIterator;
-typedef ElementaryCellFieldVector::const_iterator ElementaryCellFieldConstIterator;
+typedef std::list<ElementaryCellField *> ElementaryCellFieldList;
+typedef ElementaryCellFieldList::iterator ElementaryCellFieldIterator;
+typedef ElementaryCellFieldList::const_iterator ElementaryCellFieldConstIterator;
 
 class MosaicCell
 {
@@ -45,7 +45,7 @@ class MosaicCell
 		unsigned logicalCellId				: 6;
 		unsigned logicalCellPresentationInfo		: 3;
 		unsigned elementaryCellFieldLength		: 8;
-		ElementaryCellFieldVector elementaryCellFields;
+		ElementaryCellFieldList elementaryCellFields;
 		unsigned cellLinkageInfo			: 8;
 		unsigned bouquetId				: 16;
 		unsigned originalNetworkId			: 16;
@@ -59,7 +59,7 @@ class MosaicCell
 
 		uint8_t getLogicalCellId(void) const;
 		uint8_t getLogicalCellPresentationInfo(void) const;
-		const ElementaryCellFieldVector *getElementaryCellFields(void) const;
+		const ElementaryCellFieldList *getElementaryCellFields(void) const;
 		uint8_t getCellLinkageInfo(void) const;
 		uint16_t getBouquetId(void) const;
 		uint16_t getOriginalNetworkId(void) const;
@@ -68,9 +68,9 @@ class MosaicCell
 		uint16_t getEventId(void) const;
 };
 
-typedef std::vector<MosaicCell *> MosaicCellVector;
-typedef MosaicCellVector::iterator MosaicCellIterator;
-typedef MosaicCellVector::const_iterator MosaicCellConstIterator;
+typedef std::list<MosaicCell *> MosaicCellList;
+typedef MosaicCellList::iterator MosaicCellIterator;
+typedef MosaicCellList::const_iterator MosaicCellConstIterator;
 
 class MosaicDescriptor : public Descriptor
 {
@@ -78,7 +78,7 @@ class MosaicDescriptor : public Descriptor
 		unsigned mosaicEntryPoint			: 1;
 		unsigned numberOfHorizontalElementaryCells	: 3;
 		unsigned numberOfVerticalElementaryCells	: 3;
-		MosaicCellVector mosaicCells;
+		MosaicCellList mosaicCells;
 
 	public:
 		MosaicDescriptor(const uint8_t * const buffer);
@@ -87,7 +87,7 @@ class MosaicDescriptor : public Descriptor
 		uint8_t getMosaicEntryPoint(void) const;
 		uint8_t getNumberOfHorizontalElementaryCells(void) const;
 		uint8_t getNumberOfVerticalElementaryCells(void) const;
-		const MosaicCellVector *getMosaicCells(void) const;
+		const MosaicCellList *getMosaicCells(void) const;
 };
 
 #endif /* __mosaic_descriptor_h__ */

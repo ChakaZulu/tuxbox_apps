@@ -1,5 +1,5 @@
 /*
- * $Id: subtitling_descriptor.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: subtitling_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -62,7 +62,7 @@ SubtitlingDescriptor::~SubtitlingDescriptor(void)
 		delete *i;
 }
 
-const SubtitlingVector *SubtitlingDescriptor::getSubtitlings(void) const
+const SubtitlingList *SubtitlingDescriptor::getSubtitlings(void) const
 {
 	return &subtitlings;
 }

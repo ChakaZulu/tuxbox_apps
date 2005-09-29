@@ -1,5 +1,5 @@
 /*
- * $Id: content_descriptor.cpp,v 1.1 2004/02/13 15:27:46 obi Exp $
+ * $Id: content_descriptor.cpp,v 1.2 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -57,11 +57,11 @@ ContentDescriptor::ContentDescriptor(const uint8_t * const buffer) : Descriptor(
 
 ContentDescriptor::~ContentDescriptor(void)
 {
-	for (ContentClassificationVector::iterator i = classifications.begin(); i != classifications.end(); ++i)
+	for (ContentClassificationList::iterator i = classifications.begin(); i != classifications.end(); ++i)
 		delete *i;
 }
 
-const ContentClassificationVector *ContentDescriptor::getClassifications(void) const
+const ContentClassificationList *ContentDescriptor::getClassifications(void) const
 {
 	return &classifications;
 }

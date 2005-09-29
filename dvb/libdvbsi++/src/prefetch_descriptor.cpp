@@ -61,7 +61,7 @@ uint8_t PrefetchDescriptor::getTransportProtocolLabel(void) const
 	return transportProtocolLabel;
 }
 
-const PrefetchLabelVector *PrefetchDescriptor::getPrefetchLabels(void) const
+const PrefetchLabelList *PrefetchDescriptor::getPrefetchLabels(void) const
 {
 	return &prefetchLabels;
 }

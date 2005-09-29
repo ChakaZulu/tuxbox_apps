@@ -23,7 +23,7 @@ public:
 	void testServiceListDescriptor(void)
 	{
 		ServiceListDescriptor *descriptor = new ServiceListDescriptor((uint8_t *) serviceListDescriptor1);
-		const ServiceListItemVector *list = descriptor->getServiceList();
+		const ServiceListItemList *list = descriptor->getServiceList();
 
 		ServiceListItemConstIterator i = list->begin();
 		uint16_t serviceId = (* i)->getServiceId();
@@ -106,13 +106,13 @@ public:
 	void testVbiDataDescriptor(void)
 	{
 		VbiDataDescriptor *descriptor = new VbiDataDescriptor((uint8_t *) vbiDataDescriptor1);
-		const VbiDataServiceVector *dataServices = descriptor->getVbiDataServices();
+		const VbiDataServiceList *dataServices = descriptor->getVbiDataServices();
 
 		VbiDataServiceConstIterator dataService = dataServices->begin();
 		uint8_t dataServiceId = (*dataService)->getDataServiceId();
 		TS_ASSERT_EQUALS(dataServiceId, 0x01);
 
-		const VbiDataLineVector *dataLines = (*dataService)->getVbiDataLines();
+		const VbiDataLineList *dataLines = (*dataService)->getVbiDataLines();
 
 		VbiDataLineConstIterator dataLine = dataLines->begin();
 		uint8_t fieldParity = (*dataLine)->getFieldParity();
@@ -242,7 +242,7 @@ public:
 	void testVbiTeletextDescriptor(void)
 	{
 		VbiTeletextDescriptor *descriptor = new VbiTeletextDescriptor((uint8_t *) vbiTeletextDescriptor1);
-		const VbiTeletextVector *teletexts = descriptor->getVbiTeletexts();
+		const VbiTeletextList *teletexts = descriptor->getVbiTeletexts();
 
 		VbiTeletextConstIterator i = teletexts->begin();
 		std::string code = (* i)->getIso639LanguageCode();
@@ -346,7 +346,7 @@ public:
 		CountryAvailabilityDescriptor *descriptor = new CountryAvailabilityDescriptor((uint8_t *) countryAvailabilityDescriptor1);
 		uint8_t countryAvailabilityFlag = descriptor->getCountryAvailabilityFlag();
 		TS_ASSERT_EQUALS(countryAvailabilityFlag, (0x80 & 0x80) >> 7);
-		const CountryCodeVector *list = descriptor->getCountryCodes();
+		const CountryCodeList *list = descriptor->getCountryCodes();
 
 		CountryCodeConstIterator code = list->begin();
 		TS_ASSERT_SAME_DATA((* code).c_str(), eng.c_str(), eng.length());
@@ -448,7 +448,7 @@ public:
 	void testNvodReferenceDescriptor(void)
 	{
 		NvodReferenceDescriptor *descriptor = new NvodReferenceDescriptor((uint8_t *) nvodReferenceDescriptor1);
-		const NvodReferenceVector *nvods = descriptor->getNvodReferences();
+		const NvodReferenceList *nvods = descriptor->getNvodReferences();
 
 		NvodReferenceConstIterator i = nvods->begin();
 		uint16_t transportStreamId = (*i)->getTransportStreamId();
@@ -544,7 +544,7 @@ public:
 		TS_ASSERT_EQUALS(descriptorNumber, (extendedEventDescriptor1[2] >> 4) & 0x0F);
 		TS_ASSERT_EQUALS(lastDescriptorNumber, extendedEventDescriptor1[2] & 0x0F);
 
-		const ExtendedEventVector *items = descriptor->getItems();
+		const ExtendedEventList *items = descriptor->getItems();
 		ExtendedEventConstIterator i = items->begin();
 		std::string itemDescription = (*i)->getItemDescription();
 		std::string item = (*i)->getItem();
@@ -683,14 +683,14 @@ public:
 		TS_ASSERT_EQUALS(numberOfHorizontalElementaryCells, (mosaicDescriptor1[2] >> 4) & 0x07);
 		TS_ASSERT_EQUALS(numberOfVerticalElementaryCells, mosaicDescriptor1[2] & 0x07);
 
-		const MosaicCellVector *cells = descriptor->getMosaicCells();
+		const MosaicCellList *cells = descriptor->getMosaicCells();
 		MosaicCellConstIterator cell = cells->begin();
 		uint8_t logicalCellId = (*cell)->getLogicalCellId();
 		uint8_t logicalCellPresentationInfo = (*cell)->getLogicalCellPresentationInfo();
 		TS_ASSERT_EQUALS(logicalCellId, (mosaicDescriptor1[3] >> 2) & 0x3F);
 		TS_ASSERT_EQUALS(logicalCellPresentationInfo, mosaicDescriptor1[4] & 0x07);
 
-		const ElementaryCellFieldVector *fields = (*cell)->getElementaryCellFields();
+		const ElementaryCellFieldList *fields = (*cell)->getElementaryCellFields();
 		ElementaryCellFieldConstIterator field = fields->begin();
 		uint8_t elementaryCellId = (*field)->getElementaryCellId();
 		TS_ASSERT_EQUALS(elementaryCellId, mosaicDescriptor1[6] & 0x3F);
@@ -779,7 +779,7 @@ public:
 	void testCaIdentifierDescriptor(void)
 	{
 		CaIdentifierDescriptor *descriptor = new CaIdentifierDescriptor((uint8_t *) caIdentifierDescriptor1);
-		const CaSystemIdVector *systemIds = descriptor->getCaSystemIds();
+		const CaSystemIdList *systemIds = descriptor->getCaSystemIds();
 		CaSystemIdConstIterator systemId = systemIds->begin();
 		TS_ASSERT_EQUALS(*systemId, r16(&caIdentifierDescriptor1[2]));
 		systemId++;
@@ -800,7 +800,7 @@ public:
 	void testContentDescriptor(void)
 	{
 		ContentDescriptor *descriptor = new ContentDescriptor((uint8_t *) contentDescriptor1);
-		const ContentClassificationVector *nibbles = descriptor->getClassifications();
+		const ContentClassificationList *nibbles = descriptor->getClassifications();
 		ContentClassificationConstIterator nibble = nibbles->begin();
 		uint8_t contentNibbleLevel1 = (*nibble)->getContentNibbleLevel1();
 		uint8_t contentNibbleLevel2 = (*nibble)->getContentNibbleLevel2();
@@ -846,7 +846,7 @@ public:
 	void testParentalRatingDescriptor(void)
 	{
 		ParentalRatingDescriptor *descriptor = new ParentalRatingDescriptor((uint8_t *) parentalRatingDescriptor1);
-		const ParentalRatingVector *ratings = descriptor->getParentalRatings();
+		const ParentalRatingList *ratings = descriptor->getParentalRatings();
 		ParentalRatingConstIterator rating = ratings->begin();
 		std::string code = (*rating)->getCountryCode();
 		uint8_t rate = (*rating)->getRating();
@@ -882,7 +882,7 @@ public:
 	void testTeletextDescriptor(void)
 	{
 		TeletextDescriptor *descriptor = new TeletextDescriptor((uint8_t *) teletextDescriptor1);
-		const VbiTeletextVector *teletexts = descriptor->getVbiTeletexts();
+		const VbiTeletextList *teletexts = descriptor->getVbiTeletexts();
 
 		VbiTeletextConstIterator i = teletexts->begin();
 		std::string code = (* i)->getIso639LanguageCode();
@@ -952,7 +952,7 @@ public:
 	void testLocalTimeOffsetDescriptor(void)
 	{
 		LocalTimeOffsetDescriptor *descriptor = new LocalTimeOffsetDescriptor((uint8_t *) localTimeOffsetDescriptor1);
-		const LocalTimeOffsetVector *offsets = descriptor->getLocalTimeOffsets();
+		const LocalTimeOffsetList *offsets = descriptor->getLocalTimeOffsets();
 		LocalTimeOffsetConstIterator offset = offsets->begin();
 		std::string code = (*offset)->getCountryCode();
 		uint8_t regionId = (*offset)->getCountryRegionId();
@@ -1010,7 +1010,7 @@ public:
 	void testSubtitlingDescriptor(void)
 	{
 		SubtitlingDescriptor *descriptor = new SubtitlingDescriptor((uint8_t *) subtitlingDescriptor1);
-		const SubtitlingVector *subtitlings = descriptor->getSubtitlings();
+		const SubtitlingList *subtitlings = descriptor->getSubtitlings();
 		SubtitlingConstIterator subtitling = subtitlings->begin();
 		std::string code = (*subtitling)->getIso639LanguageCode();
 		uint8_t subtitlingType = (*subtitling)->getSubtitlingType();
@@ -1074,7 +1074,7 @@ public:
 	void testMultilingualNetworkNameDescriptor(void)
 	{
 		MultilingualNetworkNameDescriptor *descriptor = new MultilingualNetworkNameDescriptor((uint8_t *) multilingualNetworkNameDescriptor1);
-		const MultilingualNetworkNameVector *names = descriptor->getMultilingualNetworkNames();
+		const MultilingualNetworkNameList *names = descriptor->getMultilingualNetworkNames();
 
 		MultilingualNetworkNameConstIterator i = names->begin();
 		std::string code = (* i)->getIso639LanguageCode();
@@ -1112,7 +1112,7 @@ public:
 	void testMultilingualBouquetNameDescriptor(void)
 	{
 		MultilingualBouquetNameDescriptor *descriptor = new MultilingualBouquetNameDescriptor((uint8_t *) multilingualBouquetNameDescriptor1);
-		const MultilingualBouquetNameVector *names = descriptor->getMultilingualBouquetNames();
+		const MultilingualBouquetNameList *names = descriptor->getMultilingualBouquetNames();
 
 		MultilingualBouquetNameConstIterator i = names->begin();
 		std::string code = (* i)->getIso639LanguageCode();
@@ -1150,7 +1150,7 @@ public:
 	void testMultilingualServiceNameDescriptor(void)
 	{
 		MultilingualServiceNameDescriptor *descriptor = new MultilingualServiceNameDescriptor((uint8_t *) multilingualServiceNameDescriptor1);
-		const MultilingualServiceNameVector *names = descriptor->getMultilingualServiceNames();
+		const MultilingualServiceNameList *names = descriptor->getMultilingualServiceNames();
 
 		MultilingualServiceNameConstIterator i = names->begin();
 		std::string code = (* i)->getIso639LanguageCode();
@@ -1196,7 +1196,7 @@ public:
 		MultilingualComponentDescriptor *descriptor = new MultilingualComponentDescriptor((uint8_t *) multilingualComponentDescriptor1);
 		uint8_t tag = descriptor->getComponentTag();
 		TS_ASSERT_EQUALS(tag, multilingualComponentDescriptor1[2]);
-		const MultilingualComponentVector *components = descriptor->getMultilingualComponents();
+		const MultilingualComponentList *components = descriptor->getMultilingualComponents();
 
 		MultilingualComponentConstIterator i = components->begin();
 		std::string code = (* i)->getIso639LanguageCode();
@@ -1263,7 +1263,7 @@ public:
 		FrequencyListDescriptor *descriptor = new FrequencyListDescriptor((uint8_t *) frequencyListDescriptor1);
 		uint8_t codingType = descriptor->getCodingType();
 		TS_ASSERT_EQUALS(codingType, frequencyListDescriptor1[2] & 0x03);
-		const CentreFrequencyVector *centreFrequencies = descriptor->getCentreFrequencies();
+		const CentreFrequencyList *centreFrequencies = descriptor->getCentreFrequencies();
 		CentreFrequencyConstIterator centreFrequency = centreFrequencies->begin();
 		TS_ASSERT_EQUALS(*centreFrequency, r32(&frequencyListDescriptor1[3]));
 

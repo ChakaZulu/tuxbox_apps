@@ -1,5 +1,5 @@
 /*
- * $Id: country_availability_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: country_availability_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,21 +24,21 @@
 
 #include "descriptor.h"
 
-typedef std::vector<std::string> CountryCodeVector;
-typedef CountryCodeVector::iterator CountryCodeIterator;
-typedef CountryCodeVector::const_iterator CountryCodeConstIterator;
+typedef std::list<std::string> CountryCodeList;
+typedef CountryCodeList::iterator CountryCodeIterator;
+typedef CountryCodeList::const_iterator CountryCodeConstIterator;
 
 class CountryAvailabilityDescriptor : public Descriptor
 {
 	protected:
 		unsigned countryAvailabilityFlag		: 1;
-		CountryCodeVector countryCodes;
+		CountryCodeList countryCodes;
 
 	public:
 		CountryAvailabilityDescriptor(const uint8_t * const buffer);
 
 		uint8_t getCountryAvailabilityFlag(void) const;
-		const CountryCodeVector *getCountryCodes(void) const;
+		const CountryCodeList *getCountryCodes(void) const;
 };
 
 #endif /* __country_availability_descriptor_h__ */

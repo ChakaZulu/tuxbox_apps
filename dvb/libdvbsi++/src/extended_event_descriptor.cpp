@@ -1,5 +1,5 @@
 /*
- * $Id: extended_event_descriptor.cpp,v 1.1 2004/02/13 15:27:46 obi Exp $
+ * $Id: extended_event_descriptor.cpp,v 1.2 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -78,7 +78,7 @@ const std::string &ExtendedEventDescriptor::getIso639LanguageCode(void) const
 	return iso639LanguageCode;
 }
 
-const ExtendedEventVector *ExtendedEventDescriptor::getItems(void) const
+const ExtendedEventList *ExtendedEventDescriptor::getItems(void) const
 {
 	return &items;
 }

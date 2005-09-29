@@ -34,20 +34,20 @@ class ExternalApplicationAuthorisation
 		uint8_t getApplicationPriority(void) const;
 };
 
-typedef std::vector<ExternalApplicationAuthorisation *> ExternalApplicationAuthorisationVector;
-typedef ExternalApplicationAuthorisationVector::iterator ExternalApplicationAuthorisationIterator;
-typedef ExternalApplicationAuthorisationVector::const_iterator ExternalApplicationAuthorisationConstIterator;
+typedef std::list<ExternalApplicationAuthorisation *> ExternalApplicationAuthorisationList;
+typedef ExternalApplicationAuthorisationList::iterator ExternalApplicationAuthorisationIterator;
+typedef ExternalApplicationAuthorisationList::const_iterator ExternalApplicationAuthorisationConstIterator;
 
 class ExternalApplicationAuthorisationDescriptor : public Descriptor
 {
 	protected:
-		ExternalApplicationAuthorisationVector externalApplicationAuthorisations;
+		ExternalApplicationAuthorisationList externalApplicationAuthorisations;
 
 	public:
 		ExternalApplicationAuthorisationDescriptor(const uint8_t * const buffer);
 		~ExternalApplicationAuthorisationDescriptor(void);
 		
-		const ExternalApplicationAuthorisationVector *getExternalApplicationAuthorisations(void) const;
+		const ExternalApplicationAuthorisationList *getExternalApplicationAuthorisations(void) const;
 };
 
 #endif /* __external_application_authorisation_descriptor_h__ */

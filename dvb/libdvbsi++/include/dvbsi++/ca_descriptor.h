@@ -1,5 +1,5 @@
 /*
- * $Id: ca_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: ca_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,29 +24,29 @@
 
 #include "descriptor.h"
 
-typedef std::vector<uint8_t> PrivateDataByteVector;
-typedef PrivateDataByteVector::iterator PrivateDataByteIterator;
-typedef PrivateDataByteVector::const_iterator PrivateDataByteConstIterator;
+typedef std::list<uint8_t> PrivateDataByteList;
+typedef PrivateDataByteList::iterator PrivateDataByteIterator;
+typedef PrivateDataByteList::const_iterator PrivateDataByteConstIterator;
 
 class CaDescriptor : public Descriptor
 {
 	protected:
 		unsigned caSystemId				: 16;
 		unsigned caPid					: 13;
-		PrivateDataByteVector privateDataBytes;
+		PrivateDataByteList privateDataBytes;
 
 	public:
 		CaDescriptor(const uint8_t * const buffer);
 
 		uint16_t getCaSystemId(void) const;
 		uint16_t getCaPid(void) const;
-		const PrivateDataByteVector *getPrivateDataBytes(void) const;
+		const PrivateDataByteList *getPrivateDataBytes(void) const;
 
 		size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
-typedef std::vector<CaDescriptor *> CaDescriptorVector;
-typedef CaDescriptorVector::iterator CaDescriptorIterator;
-typedef CaDescriptorVector::const_iterator CaDescriptorConstIterator;
+typedef std::list<CaDescriptor *> CaDescriptorList;
+typedef CaDescriptorList::iterator CaDescriptorIterator;
+typedef CaDescriptorList::const_iterator CaDescriptorConstIterator;
 
 #endif /* __ca_descriptor_h__ */

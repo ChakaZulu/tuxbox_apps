@@ -1,5 +1,5 @@
 /*
- * $Id: cell_list_descriptor.cpp,v 1.2 2004/02/13 17:51:08 obi Exp $
+ * $Id: cell_list_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -100,7 +100,7 @@ uint16_t Cell::getCellExtendOfLongtitude(void) const
 	return cellExtendOfLongtitude;
 }
 
-const SubcellVector *Cell::getSubcells(void) const
+const SubcellList *Cell::getSubcells(void) const
 {
 	return &subcells;
 }
@@ -117,7 +117,7 @@ CellListDescriptor::~CellListDescriptor(void)
 		delete *i;
 }
 
-const CellVector *CellListDescriptor::getCells(void) const
+const CellList *CellListDescriptor::getCells(void) const
 {
 	return &cells;
 }

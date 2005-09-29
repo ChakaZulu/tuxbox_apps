@@ -1,5 +1,5 @@
 /*
- * $Id: vbi_data_descriptor.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: vbi_data_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,39 +37,39 @@ class VbiDataLine
 		uint8_t getLineOffset(void) const;
 };
 
-typedef std::vector<VbiDataLine *> VbiDataLineVector;
-typedef VbiDataLineVector::iterator VbiDataLineIterator;
-typedef VbiDataLineVector::const_iterator VbiDataLineConstIterator;
+typedef std::list<VbiDataLine *> VbiDataLineList;
+typedef VbiDataLineList::iterator VbiDataLineIterator;
+typedef VbiDataLineList::const_iterator VbiDataLineConstIterator;
 
 class VbiDataService
 {
 	protected:
 		unsigned dataServiceId				: 8;
 		unsigned dataServiceDescriptorLength		: 8;
-		VbiDataLineVector vbiDataLines;
+		VbiDataLineList vbiDataLines;
 
 	public:
 		VbiDataService(const uint8_t * const buffer);
 		~VbiDataService(void);
 
 		uint8_t getDataServiceId(void) const;
-		const VbiDataLineVector *getVbiDataLines(void) const;
+		const VbiDataLineList *getVbiDataLines(void) const;
 };
 
-typedef std::vector<VbiDataService *> VbiDataServiceVector;
-typedef VbiDataServiceVector::iterator VbiDataServiceIterator;
-typedef VbiDataServiceVector::const_iterator VbiDataServiceConstIterator;
+typedef std::list<VbiDataService *> VbiDataServiceList;
+typedef VbiDataServiceList::iterator VbiDataServiceIterator;
+typedef VbiDataServiceList::const_iterator VbiDataServiceConstIterator;
 
 class VbiDataDescriptor : public Descriptor
 {
 	protected:
-		VbiDataServiceVector vbiDataServices;
+		VbiDataServiceList vbiDataServices;
 
 	public:
 		VbiDataDescriptor(const uint8_t * const buffer);
 		~VbiDataDescriptor(void);
 
-		const VbiDataServiceVector *getVbiDataServices(void) const;
+		const VbiDataServiceList *getVbiDataServices(void) const;
 };
 
 #endif /* __vbi_data_descriptor_h__ */

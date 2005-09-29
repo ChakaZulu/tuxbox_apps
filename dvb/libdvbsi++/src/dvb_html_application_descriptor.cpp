@@ -26,7 +26,7 @@ DvbHtmlApplicationDescriptor::DvbHtmlApplicationDescriptor(const uint8_t * const
 	parameter.assign((char *)&buffer[appidSetLength + 3], descriptorLength - appidSetLength - 1);
 }
 
-const ApplicationIdVector *DvbHtmlApplicationDescriptor::getApplicationIds(void) const
+const ApplicationIdList *DvbHtmlApplicationDescriptor::getApplicationIds(void) const
 {
 	return &applicationIds;
 }

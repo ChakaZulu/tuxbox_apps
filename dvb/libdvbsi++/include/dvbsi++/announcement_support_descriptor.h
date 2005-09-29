@@ -1,5 +1,5 @@
 /*
- * $Id: announcement_support_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: announcement_support_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -45,22 +45,22 @@ class Announcement
 		uint8_t getComponentTag(void) const;
 };
 
-typedef std::vector<Announcement *> AnnouncementVector;
-typedef AnnouncementVector::iterator AnnouncementIterator;
-typedef AnnouncementVector::const_iterator AnnouncementConstIterator;
+typedef std::list<Announcement *> AnnouncementList;
+typedef AnnouncementList::iterator AnnouncementIterator;
+typedef AnnouncementList::const_iterator AnnouncementConstIterator;
 
 class AnnouncementSupportDescriptor : public Descriptor
 {
 	protected:
 		unsigned announcementSupportIndicator		: 16;
-		AnnouncementVector announcements;
+		AnnouncementList announcements;
 
 	public:
 		AnnouncementSupportDescriptor(const uint8_t * const buffer);
 		~AnnouncementSupportDescriptor(void);
 
 		uint16_t getAnnouncementSupportIndicator(void) const;
-		const AnnouncementVector *getAnnouncements(void) const;
+		const AnnouncementList *getAnnouncements(void) const;
 };
 
 #endif /* __announcement_support_descriptor_h__ */

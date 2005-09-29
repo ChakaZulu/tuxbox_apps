@@ -1,5 +1,5 @@
 /*
- * $Id: long_crc_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: long_crc_section.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,8 +37,8 @@ class LongCrcSection : public LongSection
 		uint32_t getCrc32(void) const;
 };
 
-typedef std::vector<LongCrcSection *> LongCrcSectionVector;
-typedef LongCrcSectionVector::iterator LongCrcSectionIterator;
-typedef LongCrcSectionVector::const_iterator LongCrcSectionConstIterator;
+typedef std::list<LongCrcSection *> LongCrcSectionList;
+typedef LongCrcSectionList::iterator LongCrcSectionIterator;
+typedef LongCrcSectionList::const_iterator LongCrcSectionConstIterator;
 
 #endif /* __long_crc_section_h__ */

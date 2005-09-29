@@ -1,5 +1,5 @@
 /*
- * $Id: linkage_descriptor.h,v 1.1 2004/02/13 15:27:37 obi Exp $
+ * $Id: linkage_descriptor.h,v 1.2 2005/09/29 23:49:41 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,9 +24,9 @@
 
 #include "descriptor.h"
 
-typedef std::vector<uint8_t> PrivateDataByteVector;
-typedef PrivateDataByteVector::iterator PrivateDataByteIterator;
-typedef PrivateDataByteVector::const_iterator PrivateDataByteConstIterator;
+typedef std::list<uint8_t> PrivateDataByteList;
+typedef PrivateDataByteList::iterator PrivateDataByteIterator;
+typedef PrivateDataByteList::const_iterator PrivateDataByteConstIterator;
 
 class LinkageDescriptor : public Descriptor
 {
@@ -35,7 +35,7 @@ class LinkageDescriptor : public Descriptor
 		unsigned originalNetworkId			: 16;
 		unsigned serviceId				: 16;
 		unsigned linkageType				: 8;
-		PrivateDataByteVector privateDataBytes;
+		PrivateDataByteList privateDataBytes;
 		unsigned handOverType				: 4;
 		unsigned originType				: 1;
 		unsigned networkId				: 16;
@@ -48,7 +48,7 @@ class LinkageDescriptor : public Descriptor
 		uint16_t getOriginalNetworkId(void) const;
 		uint16_t getServiceId(void) const;
 		uint8_t getLinkageType(void) const;
-		const PrivateDataByteVector *getPrivateDataBytes(void) const;
+		const PrivateDataByteList *getPrivateDataBytes(void) const;
 		uint8_t getHandOverType(void) const;
 		uint8_t getOriginType(void) const;
 		uint16_t getNetworkId(void) const;

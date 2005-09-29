@@ -46,7 +46,7 @@ ApplicationNameDescriptor::~ApplicationNameDescriptor(void)
 		delete *i;
 }
 
-const ApplicationNameVector *ApplicationNameDescriptor::getApplicationNames(void) const
+const ApplicationNameList *ApplicationNameDescriptor::getApplicationNames(void) const
 {
 	return &applicationNames;
 }

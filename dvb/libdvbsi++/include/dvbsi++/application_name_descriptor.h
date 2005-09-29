@@ -34,20 +34,20 @@ class ApplicationName
 		const std::string &getApplicationName(void) const;
 };
 
-typedef std::vector<ApplicationName *> ApplicationNameVector;
-typedef ApplicationNameVector::iterator ApplicationNameIterator;
-typedef ApplicationNameVector::const_iterator ApplicationNameConstIterator;
+typedef std::list<ApplicationName *> ApplicationNameList;
+typedef ApplicationNameList::iterator ApplicationNameIterator;
+typedef ApplicationNameList::const_iterator ApplicationNameConstIterator;
 
 class ApplicationNameDescriptor : public Descriptor
 {
 	protected:
-		ApplicationNameVector applicationNames;
+		ApplicationNameList applicationNames;
 
 	public:
 		ApplicationNameDescriptor(const uint8_t * const buffer);
 		~ApplicationNameDescriptor(void);
 
-		const ApplicationNameVector *getApplicationNames(void) const;
+		const ApplicationNameList *getApplicationNames(void) const;
 };
 
 #endif /* __application_name_descriptor_h__ */
