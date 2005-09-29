@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.65 2005/09/26 08:03:55 timekiller Exp $
+# $Id: de.po,v 1.66 2005/09/29 16:11:26 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -4105,63 +4105,71 @@ msgstr "Videotext 'caching' abschalten"
 msgid "don't cache teletext pages in background"
 msgstr "Im Hintergrund keine Videotext Seiten sammeln"
 
-#: src/setup_extra.cpp:116
+#: src/setup_extra.cpp:114
 msgid "Enable Zapping History"
 msgstr "Zapping History aktivieren"
 
-#: src/setup_extra.cpp:116
-msgid "Do not care about actual mode when zapping in history list"
+#: src/setup_extra.cpp:114
+msgid "don't care about actual mode when zapping in history list"
 msgstr "Ignoriert den aktuellen Modus wenn die History Liste benutzt wird"
 
-#: src/setup_extra.cpp:118
+#: src/setup_extra.cpp:115
+msgid "Disable Standby"
+msgstr "Standby deaktivieren"
+
+#: src/setup_extra.cpp:115
+msgid "Box goes direct into Deep-Standby"
+msgstr "Box geht direkt in den Deep-Standby"
+
+#: src/setup_extra.cpp:119
 msgid "Disable CoreFiles"
 msgstr "CoreFiles abschalten"
 
-#: src/setup_extra.cpp:118
+#: src/setup_extra.cpp:119
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "Keine 'Corefiles' nach einem Enigma Absturz erstellen"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:123
 msgid "Show Boot-Info"
 msgstr "Boot-Informationen anzeigen"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:123
 msgid "Show Boot-Infos (IP, etc.)"
 msgstr "Boot-Informationen wie Imagedatum, IP, usw anzeigen"
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:124
 msgid "Disable HW_Sections"
 msgstr "HW_Sections abschalten"
 
-#: src/setup_extra.cpp:123
-msgid "Don't use hardware section filtering"
+#: src/setup_extra.cpp:124
+msgid "don't use hardware section filtering"
 msgstr "Keine 'Hardware Section' Filterung nutzen"
 
-#: src/setup_extra.cpp:124
+#: src/setup_extra.cpp:125
 msgid "Disable Watchdog"
 msgstr "Watchdog abschalten"
 
-#: src/setup_extra.cpp:124
-msgid "Don't use the Watchdog"
+#: src/setup_extra.cpp:125
+msgid "don't use the Watchdog"
 msgstr "Keinen Watchdog nutzen"
 
-#: src/setup_extra.cpp:126
+#: src/setup_extra.cpp:127
 msgid "Disable ENX-Watchdog"
 msgstr "ENX-Watchdog abschalten"
 
-#: src/setup_extra.cpp:126
-msgid "Don't use the ENX-Watchdog"
+#: src/setup_extra.cpp:127
+msgid "don't use the ENX-Watchdog"
 msgstr "Keinen ENX-Watchdog nutzen"
 
-#: src/setup_extra.cpp:127
+#: src/setup_extra.cpp:128
 msgid "Enable SPTS-Mode"
 msgstr "SPTS-Modus aktivieren"
 
-#: src/setup_extra.cpp:127
+#: src/setup_extra.cpp:128
 msgid "use SPTS-Mode (enables TS-recording)"
 msgstr "SPTS-Modus nutzen (aktiviert TS-recording)"
 
-#: src/setup_extra.cpp:255
+#: src/setup_extra.cpp:256
 msgid ""
 "When you do a factory reset, you will lost ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4176,7 +4184,7 @@ msgstr ""
 "\n"
 "Wirklich den Vorgang fortsetzen?"
 
-#: src/setup_extra.cpp:260
+#: src/setup_extra.cpp:261
 msgid "Factory reset..."
 msgstr "Werkseinstellungen..."
 
