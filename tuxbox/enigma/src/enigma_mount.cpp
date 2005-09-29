@@ -211,6 +211,9 @@ int eMountPoint::mount()
 
 							int rc = system(cmd.c_str());
 							eDebug("[ENIGMA_MOUNT] mount rc = %d", rc);
+							
+							if (mp.localDir == "/hdd")
+								system("wget http://127.0.0.1/cgi-bin/reloadRecordings");
 							_exit(0);
 							break;
 						}
