@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta NAME="author" CONTENT="yjogol">
+<link rel="stylesheet" type="text/css" href="/global.css">
+<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+<title>RC</title>
+<script language="JavaScript" type="text/javascript" >
+function rcsim(_key)
+{
+	out.location.href = "/control/exec?Y_Tools&rcsim&"+_key;
+}
+</script>
+</head>
+<!---
+	KEY_POWER,KEY_MUTE,
+	KEY_TOPLEFT,KEY_TOPRIGHT,KEY_BOTTOMLEFT,KEY_BOTTOMRIGHT,
+	KEY_PAGEDOWN,KEY_PAGEUP
+--->
+<body>
+
+<br>
+<div class="y_head">Remote Control</div>
+<div class="y_work_box">
+	<form>
+		<table cellpadding="4" cellspacing="0" >
+			<tr bgcolor="">
+				<td bgcolor="Silver"><INPUT type=button value="1" onClick='rcsim("KEY_1");'></td>
+				<td bgcolor="Silver"><INPUT type=button value="2" onClick='rcsim("KEY_2");'></td>
+				<td bgcolor="Silver"><INPUT type=button value="3" onClick='rcsim("KEY_3");'></td>
+				<td>&nbsp;</td>
+				<td align="center"><INPUT type=button value="Home" onClick='rcsim("KEY_HOME");'></td>
+			</tr>
+			<tr>
+				<td bgcolor="Silver"><INPUT type=button value="4" onClick='rcsim("KEY_4");'></td>
+				<td bgcolor="Silver"><INPUT type=button value="5" onClick='rcsim("KEY_5");'></td>
+				<td bgcolor="Silver"><INPUT type=button value="6" onClick='rcsim("KEY_6");'></td>
+				<td>&nbsp;</td>
+				<td align="center"><INPUT type=button value="ok" onClick='rcsim("KEY_OK");'></td>
+			</tr>
+			<tr>
+				<td bgcolor="Silver"><INPUT type=button value="7" onClick='rcsim("KEY_7");'></td>
+				<td bgcolor="Silver"><INPUT type=button value="8" onClick='rcsim("KEY_8");'></td>
+				<td bgcolor="Silver"><INPUT type=button value="9" onClick='rcsim("KEY_9");'></td>
+				<td>&nbsp;</td>
+				<td align="center"><INPUT type=button value="dbox" onClick='rcsim("KEY_SETUP");'></td>
+			</tr>
+			<tr>
+				<td bgcolor="Silver"><INPUT type=button value="-" onClick='rcsim("KEY_VOLUMENDOWN");'></td>
+				<td bgcolor="Silver"><INPUT type=button value="0" onClick='rcsim("KEY_0");'></td>
+				<td bgcolor="Silver"><INPUT type=button value="+" onClick='rcsim("KEY_VOLUMENUP");'></td>
+				<td>&nbsp;</td>
+				<td align="center"><INPUT type=button value="?" onClick='rcsim("KEY_HELP");'></td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td><INPUT type=button value="^" onClick='rcsim("KEY_UP");'></td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td><INPUT type=button value="<" onClick='rcsim("KEY_LEFT");'></td>
+				<td>&nbsp;</td>
+				<td><INPUT type=button value=">" onClick='rcsim("KEY_RIGHT");'></td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td><INPUT type=button value="v" onClick='rcsim("KEY_DOWN");'></td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td bgcolor="Red"><INPUT type=button value="x" onClick='rcsim("KEY_RED");'></td>
+				<td bgcolor="Green"><INPUT type=button value="x" onClick='rcsim("KEY_GREEN");'></td>
+				<td bgcolor="Yellow"><INPUT type=button value="x" onClick='rcsim("KEY_YELLOW");'></td>
+				<td bgcolor="Blue"><INPUT type=button value="x" onClick='rcsim("KEY_BLUE");'></td>
+				<td>&nbsp;</td>
+			</tr>
+		</table>
+	</form>
+
+</div>
+
+<iframe name="out" id="out" width="100%" height="200" align="left" frameborder="0">Your Browser does not support IFrames.</iframe>
+
+</body>
+
+</html>

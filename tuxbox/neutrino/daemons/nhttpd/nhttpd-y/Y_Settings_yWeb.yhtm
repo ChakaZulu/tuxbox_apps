@@ -8,9 +8,9 @@
 function do_set() 
 {
 	_url="/control/exec?Y_Plugins&yWeb_set&"+
-		document.f.slavebox.value
-		+"&"+document.f.liveResolution_w.value
+		document.f.liveResolution_w.value
 		+"&"+document.f.liveResolution_h.value
+		+"&"+document.f.slavebox.value
 		;
 	parent.frames[1].location.href=_url;
 }

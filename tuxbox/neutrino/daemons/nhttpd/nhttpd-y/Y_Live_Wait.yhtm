@@ -10,7 +10,7 @@ function go_live()
 {
     var agt=navigator.userAgent.toLowerCase();
     var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
-    var _url = (is_ie) ? "Y_Live_TV.yhtm?browser=ie" : "Y_Live_TV.yhtm?browser=moz";
+    var _url = (is_ie) ? "Y_Live_TV.yhtm?browser=ie{=if-empty:{=audiopid=}~~&audiopid={=audiopid=}=}" : "Y_Live_TV.yhtm?browser=moz";
 	_url={=if-equal:{=func:get_mode=}~tv~_url~"Y_Live_Radio.yhtm"=};
 	window.location.href = _url;
 }
@@ -22,7 +22,7 @@ function go_live()
 <table class="y_wait_box" cellpadding="8">
 	<tr>
 		<td>
-			<p align="center"><font color="#666666"><b>Y-TV</b><br>Streaming-Informationen<br>werden ermittelt.</font><br>
+			<p align="center"><font color="#666666"><b>LiveView</b><br>Streaming-Informationen<br>werden ermittelt.</font><br>
 			<img border="0" src="/images/hourglas.gif" width="32" height="32"></p>
 			<p align="center"><font size="2">
 			Bitte warten ...</font></p>

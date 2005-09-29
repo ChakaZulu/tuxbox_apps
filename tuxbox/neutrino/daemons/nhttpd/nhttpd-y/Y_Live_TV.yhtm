@@ -42,10 +42,12 @@ function doLockUnlock()
 {=script:Y_Live prepare_tv=}
 
 <body>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr><td>
 {=if-equal:{=browser=}~ie~
 	<OBJECT classid="clsid:E23FE9C6-778E-49D4-B537-38FCDE4887D8" 
 	        width="384" height="288" id="vlc" events="True">
-			<param name="Src" value="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids=}" />
+			<param name="Src" value="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids {=audiopid=}=}" />
 			<param name="ShowDisplay" value="True" />
 			<param name="Loop" value="False" />
 			<param name="AutoPlay" value="True" />
@@ -53,6 +55,8 @@ function doLockUnlock()
 		You need <a href="http://www.videolan.org" target="_blank">VideoLan Client</a> V0.8.2 or higher.<br>
 		Install with Option "ActiveX".
 	</OBJECT>
+</td></tr>
+<tr><td>
 	<form name="v">
 		<button class="y_live_button" type="button" value="Pause" id="PlayOrPause" onClick="doPlayOrPause()">Pause</button>
 		<button class="y_live_button" type="button" value="stop" onClick="doStop()">Stop</button>
@@ -66,8 +70,10 @@ function doLockUnlock()
 	<embed type="application/x-vlc-plugin"
 		name="vlc"  id="vlc"
 		autoplay="yes" loop="yes" width="384" height="288"
-		target="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids=}" >
+		target="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids {=audiopid=}=}" >
 	</embed>
+</td></tr>
+<tr><td>
 	<form name="v">
 		<input class="y_live_button" type="button" value="Pause" name="PlayOrPause" onClick="doPlayOrPause()">
 		<button class="y_live_button" type="button" value="stop" onClick="doStop()">Stop</button>
@@ -78,7 +84,8 @@ function doLockUnlock()
 		<input class="y_live_button" type="button" value="Lock" name="lock" onClick="doLockUnlock()">
 	</form>	
 =}
-
+</td></tr>
+</table>
 <script language="JavaScript" type="text/javascript">
 	var res_w=parseInt("{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_w;384=}",10);
 	var res_h=parseInt("{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_h;288=}",10);

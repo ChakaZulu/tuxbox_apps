@@ -5,7 +5,7 @@
 <title>Y-TV</title>
 </head>
 
-<frameset rows="27,*,0" framespacing="0" border="0" frameborder="0">
+<frameset rows="50,*,0" framespacing="0" border="0" frameborder="0">
 	<frame name="panel" src="Y_Live_panel.yhtm" scrolling="no" noresize target="Mitte">
 	<frame name="live" src="Y_Live_Wait.yhtm" scrolling="no" noresize >
 	<frame name="dbox" target="unten">
