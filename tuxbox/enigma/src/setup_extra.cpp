@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.42 2005/09/29 19:37:31 timekiller Exp $
+ * $Id: setup_extra.cpp,v 1.43 2005/09/30 15:36:05 digi_casi Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -258,10 +258,10 @@ void eExpertSetup::factory_reset()
 {
 	hide();
 	eMessageBox mb(
-		_("When you do a factory reset, you will lost ALL your configuration data\n"
+		_("When you do a factory reset, you will lose ALL your configuration data\n"
 			"(including bouquets, services, satellite data ...)\n"
-			"After finishing the factory reset, your receiver restarts automatically!\n\n"
-			"Really do factory reset?"),
+			"After completion of factory reset, your receiver will restart automatically!\n\n"
+			"Really do a factory reset?"),
 		_("Factory reset"),
 		eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
 		eMessageBox::btNo );
