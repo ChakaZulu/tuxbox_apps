@@ -1,5 +1,5 @@
 /*
- * $Id: ca_descriptor.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
+ * $Id: ca_descriptor.cpp,v 1.4 2005/09/30 16:13:49 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -22,13 +22,12 @@
 #include <dvbsi++/byte_stream.h>
 #include <dvbsi++/ca_descriptor.h>
 
-CaDescriptor::CaDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
+CaDescriptor::CaDescriptor(const uint8_t * const buffer) : Descriptor(buffer), caDataBytes(descriptorLength-4)
 {
 	caSystemId = UINT16(&buffer[2]);
 	caPid = DVB_PID(&buffer[4]);
 
-	for (size_t i = 0; i < descriptorLength - 4; ++i)
-		privateDataBytes.push_back(buffer[i + 6]);
+	memcpy(&caDataBytes[0], buffer+6, descriptorLength-4);
 }
 
 uint16_t CaDescriptor::getCaSystemId(void) const
@@ -41,9 +40,9 @@ uint16_t CaDescriptor::getCaPid(void) const
 	return caPid;
 }
 
-const PrivateDataByteList *CaDescriptor::getPrivateDataBytes(void) const
+const CaDataByteVector *CaDescriptor::getCaDataBytes(void) const
 {
-	return &privateDataBytes;
+	return &caDataBytes;
 }
 
 size_t CaDescriptor::writeToBuffer(uint8_t * const buffer) const
@@ -57,9 +56,8 @@ size_t CaDescriptor::writeToBuffer(uint8_t * const buffer) const
 	buffer[total++] = (caPid >> 8) & 0xff;
 	buffer[total++] = (caPid >> 0) & 0xff;
 
-	for (PrivateDataByteConstIterator i = privateDataBytes.begin(); i != privateDataBytes.end(); ++i)
-		buffer[total++] = *i;
+	memcpy(buffer+total, &caDataBytes[0], caDataBytes.size());
 
-	return total;
+	return total+caDataBytes.size();
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.h,v 1.3 2005/09/29 23:49:41 ghostrider Exp $
+ * $Id: descriptor_container.h,v 1.4 2005/09/30 16:13:49 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -33,10 +33,10 @@ enum DescriptorScope {
 class DescriptorContainer
 {
 	protected:
-		void descriptor(const uint8_t * const buffer, const enum DescriptorScope scope);
-		void descriptorSi(const uint8_t * const buffer);
-		void descriptorCarousel(const uint8_t * const buffer);
-		void descriptorMhp(const uint8_t * const buffer);
+		void descriptor(const uint8_t * const buffer, const enum DescriptorScope scope, bool back=true);
+		void descriptorSi(const uint8_t * const buffer, bool back=true);
+		void descriptorCarousel(const uint8_t * const buffer, bool back=true);
+		void descriptorMhp(const uint8_t * const buffer, bool back=true);
 		DescriptorList descriptorList;
 
 	public:

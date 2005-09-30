@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.cpp,v 1.3 2005/09/29 23:49:44 ghostrider Exp $
+ * $Id: ca_program_map_section.cpp,v 1.4 2005/09/30 16:13:49 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -116,7 +116,7 @@ bool CaProgramMapSection::append(const ProgramMapSection * const pmt)
 
 	for (DescriptorConstIterator i = pmt->getDescriptors()->begin(); i != pmt->getDescriptors()->end(); ++i)
 		if ((*i)->getTag() == CA_DESCRIPTOR) {
-			descriptors.push_back(new CaDescriptor(*(CaDescriptor *)*i));
+			descriptorList.push_back(new CaDescriptor(*(CaDescriptor *)*i));
 			programInfoLength += (*i)->getLength() + 2;
 			length += (*i)->getLength() + 2;
 		}
@@ -148,22 +148,15 @@ CaProgramMapSection::CaProgramMapSection(const ProgramMapSection * const pmt, co
 
 CaProgramMapSection::~CaProgramMapSection(void)
 {
-	for (CaDescriptorIterator i = descriptors.begin(); i != descriptors.end(); ++i)
-		delete *i;
-
 	for (CaElementaryStreamInfoIterator i = esInfo.begin(); i != esInfo.end(); ++i)
 		delete *i;
 }
 
-void CaProgramMapSection::injectProgramInfoDescriptor(const uint8_t *descr, bool front)
+void CaProgramMapSection::injectDescriptor(const uint8_t *descr)
 {
-	CaDescriptor *d = new CaDescriptor(descr);
-	if ( front )
-		descriptors.push_front(d);
-	else
-		descriptors.push_back(d);
-	programInfoLength += d->getLength() + 2;
-	length += d->getLength() + 2;
+	descriptorSi(descr);
+	programInfoLength += descriptorList.back()->getLength() + 2;
+	length += descriptorList.back()->getLength() + 2;
 }
 
 size_t CaProgramMapSection::writeToBuffer(uint8_t * const buffer) const
@@ -195,7 +188,7 @@ size_t CaProgramMapSection::writeToBuffer(uint8_t * const buffer) const
 
 	if (programInfoLength) {
 		buffer[total++] = caPmtCmdId;
-		for (CaDescriptorConstIterator i = descriptors.begin(); i != descriptors.end(); ++i)
+		for (DescriptorConstIterator i = descriptorList.begin(); i != descriptorList.end(); ++i)
 			total += (*i)->writeToBuffer(&buffer[total]);
 	}
 
