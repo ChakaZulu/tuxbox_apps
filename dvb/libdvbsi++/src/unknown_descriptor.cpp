@@ -1,5 +1,5 @@
 /*
- * $Id: unknown_descriptor.cpp,v 1.1 2005/09/30 16:14:42 ghostrider Exp $
+ * $Id: unknown_descriptor.cpp,v 1.2 2005/09/30 18:57:45 ghostrider Exp $
  *
  * Copyright (C) 2005 Andreas Monzner <andreas.monzner@multimedia-labs.de>
  *
@@ -23,8 +23,7 @@
 
 UnknownDescriptor::UnknownDescriptor(const uint8_t * const buffer) : Descriptor(buffer), dataBytes(descriptorLength)
 {
-	for (size_t i = 0; i < descriptorLength; ++i)
-		dataBytes[i]=buffer[i+2];
+	memcpy(&dataBytes[0], buffer+2, descriptorLength);
 }
 
 size_t UnknownDescriptor::writeToBuffer(uint8_t * const buffer) const

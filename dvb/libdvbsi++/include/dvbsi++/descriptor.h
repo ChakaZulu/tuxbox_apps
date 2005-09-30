@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor.h,v 1.4 2005/09/29 23:49:41 ghostrider Exp $
+ * $Id: descriptor.h,v 1.5 2005/09/30 18:57:45 ghostrider Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,7 +37,7 @@ class Descriptor
 		uint8_t getTag(void) const;
 		uint8_t getLength(void) const;
 
-		size_t writeToBuffer(uint8_t * const buffer) const;
+		virtual size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
 typedef std::list<Descriptor *> DescriptorList;
