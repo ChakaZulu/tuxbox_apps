@@ -100,6 +100,7 @@ libdvbsi___la_SOURCES = \
 	time_shifted_service_descriptor.cpp \
 	transport_protocol_descriptor.cpp \
 	type_descriptor.cpp \
+	unknown_descriptor.cpp \
 	vbi_data_descriptor.cpp \
 	vbi_teletext_descriptor.cpp \
 	video_stream_descriptor.cpp \
