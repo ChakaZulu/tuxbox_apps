@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.11 2005/10/01 21:45:28 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.12 2005/10/01 21:58:54 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -22,7 +22,7 @@
 #ifdef HAVE_DREAMBOX_HARDWARE
 #include "bootmenue.h"
 
-#define CONFIGFILE "/var/boot/bootmenue.conf"
+#define CONFIGFILE "/var/tuxbox/config/enigma/bootmenue.conf"
 #define SCRIPTFILE "/tmp/bm.sh"
 
 extern int fh_png_getsize(const char *, int *, int *, int, int);
@@ -395,5 +395,4 @@ int main(int argc, char **argv)
 {
 	return 0;
 }
-
 #endif
