@@ -492,7 +492,6 @@ eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 		CONNECT( tPMT.tableReady, eDVBRecorder::PMTready );
 		tPMT.start((PMT*)pmt->createNext(), DEMUX1_DEV );
 		PmtData=pmt->getRAW();
-		pmtpid=pmt->pid;
 		if (pat)
 		{
 			PAT p;
@@ -502,7 +501,7 @@ eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 			for (ePtrList<PATEntry>::iterator it(pat->entries);
 				it != pat->entries.end(); ++it)
 			{
-				if ( it->program_map_PID == pmtpid )
+				if ( it->program_number == pmt->program_number )
 				{
 					p.entries.push_back(*it);
 					PatData=p.getRAW();
