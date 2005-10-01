@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.374 2005/08/16 21:59:54 metallica Exp $
+ * $Id: zapit.cpp,v 1.375 2005/10/01 00:05:14 racker Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -212,6 +212,11 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	bool transponder_change;
 	tallchans_iterator cit;
 	transponder_id_t current_transponder_id;
+
+#ifndef SKIP_CA_STATUS
+	eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_CLEAR, CEventServer::INITID_ZAPIT);
+//	INFO("Event: CA_CLEAR send");
+#endif
 
 	DBG("tuned_transponder_id: " PRINTF_TRANSPONDER_ID_TYPE, tuned_transponder_id);
 
@@ -1802,7 +1807,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.374 2005/08/16 21:59:54 metallica Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.375 2005/10/01 00:05:14 racker Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

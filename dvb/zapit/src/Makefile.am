@@ -42,3 +42,5 @@ zapit_LDADD = \
 installdir = $(CONFIGDIR)/zapit
 
 install_DATA = 
+
+AM_CPPFLAGS = -DSKIP_CA_STATUS
