@@ -61,6 +61,8 @@ Makefile
 boot/Makefile
 boot/showlogo/Makefile
 boot/bootmenue/Makefile
+boot/bootmenue/skins/Makefile
+boot/bootmenue/skins/blank/Makefile
 data/Makefile
 data/fonts/Makefile
 data/htdocs/Makefile

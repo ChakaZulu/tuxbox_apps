@@ -1,3 +1,5 @@
+SUBDIRS = skins
+
 AM_CPPFLAGS = -Ienigma
 
 bin_PROGRAMS = bootmenue
