@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.10 2005/09/28 07:35:31 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.11 2005/10/01 21:45:28 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -222,8 +222,8 @@ bool stmenu::loadconfig()
 	timeoutValue = 10;
 	videoformat = 1;
 	selentry_st[0] = '\0';
-	strcpy(skin_path, "/var/boot");
-	strcpy(skin_name, "california.skin");
+	strcpy(skin_path, "/share/tuxbox/enigma/boot");
+	strcpy(skin_name, "blank.skin");
 	strcpy(mpoint, "/var/mnt/usb");
 	inetd = 0;
 	if (FILE *in = fopen(CONFIGFILE, "rt"))
