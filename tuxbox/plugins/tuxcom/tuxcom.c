@@ -409,7 +409,7 @@ int GetRCCode(int mode)
 			}
 			return 1;
 		}
-		else if (bytesread == 0)
+		else if (bytesread <= 0)
 		{
 			if (kbcode == '0') { kbcode = 0x00;rccode = RC_0  ; LastKey = rccode; return 1;}
 			if (kbcode == '1') { kbcode = 0x00;rccode = RC_1  ; LastKey = rccode; return 1;}

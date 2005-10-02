@@ -3,6 +3,9 @@ TuxCom:
 Historie:
 ---------
 
+01.10.2005 Version 1.10a
+ - Zahlentasten auf USB-Tastatur funktionieren wieder
+
 24.09.2005 Version 1.10
  - Verweise auf Dateien in schreibgeschützen Verzeichnissen erstellbar
  - Meldung beim Verzeichnis erstellen, wenn Datei bereits existiert
@@ -293,7 +296,7 @@ Die Sonderzeichen bei den Zifferntasten (²³{[]}\) erhält man über Ziffer und ALT
 
 Nutzung des Passwortschutzes:
 -----------------------------
-Wenn man ein Passwort vergeben hat (im Taskmanager über blaue Taste),
+Wenn man ein Passwort vergeben hat (im Hauptmenü),
 dann wird beim Starten des Plugins dieses Passwort abgefragt.
 Die Passwortabfrage kann wieder gelöscht werden, indem einfach ein leeres Passwort gesetzt wird.
 Wenn man das Passwort vergessen hat, kann man durch Löschen der Datei /var/tuxbox/config/tuxcom.conf das Passwort wieder löschen.

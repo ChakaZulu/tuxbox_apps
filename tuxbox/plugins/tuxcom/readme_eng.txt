@@ -3,6 +3,9 @@ TuxCom:
 History:
 ---------
 
+01.10.2005 Version 1.10a
+ - numbers on USB-Keyboard now working again
+
 24.09.2005 Version 1.10
  - link to files in read-only directories creatable
  - check for existing files when creating directory
@@ -296,7 +299,7 @@ You get the special characters at the number-keys (²³{[]}\), if you press ALTGR 
 
 use of password protection:
 ---------------------------
-if you have entered a password (in taskmanager with blue button),
+if you have entered a password (in main menu),
 you will be asked for the password after starting the plugin.
 you can remove the password protection by simply setting an empty password.
 if you have forgotten your password, you can reset it by deleting /var/tuxbox/config/tuxcom.conf.
