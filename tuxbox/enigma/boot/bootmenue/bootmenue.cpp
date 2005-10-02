@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.12 2005/10/01 21:58:54 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.13 2005/10/02 13:20:34 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -209,7 +209,7 @@ void stmenu::showpic()
 			fh_png_getsize(pic, &x, &y, INT_MAX, INT_MAX);
 			unsigned char *buffer = (unsigned char *)malloc(x * y * 3);
 
-			if (fh_png_load(pic,buffer,x,y) == 0)
+			if (fh_png_load(pic,buffer, x, y) == 0)
 				display->fb_display(buffer, NULL, x, y, 0, 0, 0, 0);
 
 			free(buffer);
@@ -262,7 +262,7 @@ bool stmenu::loadconfig()
 		tmp_ver = std::string("BootManager - ") + std::string(VERSION);
 	}
 	else
-		printf("[STARTMENU] <%s not found>, using defaults...\n", CONFIGFILE);
+		printf("[BOOTMANAGER] <%s not found>, using defaults...\n", CONFIGFILE);
 
 	return true;
 }
@@ -271,7 +271,7 @@ void stmenu::saveconfig()
 {
 	if (FILE *f = fopen(CONFIGFILE, "w"))
 	{
-		fprintf(f, "#BootManager-Config\n");
+		fprintf(f, "#BootManager-Config (%s)\n", VERSION);
 		fprintf(f, "mountpoint=%s\n", mpoint);
 		fprintf(f, "selentry=%s\n", imagelist[selentry].location.c_str());
 		fprintf(f, "kill_inetd=%d\n", inetd);

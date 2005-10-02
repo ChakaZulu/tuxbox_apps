@@ -16,7 +16,7 @@ FT_Error LCD_FaceRequester(FTC_FaceID face_id, FT_Library library, FT_Pointer re
 	return ((CLCDDisplay*)request_data)->FTC_Face_Requester(face_id, aface);
 }
 
-FT_Error CLCDDisplay::FTC_Face_Requester(FTC_FaceID	face_id, FT_Face* aface)
+FT_Error CLCDDisplay::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* aface)
 {
 	int error;
 	if ((error=FT_New_Face(library, FONT, 0, aface)))

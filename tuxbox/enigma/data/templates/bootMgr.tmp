@@ -1,0 +1,28 @@
+<script>
+function deleteImage(image)
+{
+	document.location = 'cgi-bin/deleteimage?image=' + image;
+	window.setTimeout("document.location.reload()", 5000);
+}
+function editImageSettings(image)
+{
+	NewWindow('cgi-bin/editimagesettings?image=' + xy, 'editMenu', '500', '200', 'no');
+}
+</script>
+<h2>BootMenu</h2>
+#MENU#
+<br>
+#BMSETTINGSBUTTON#
+<h2>Installed Images</h2>
+<table border="1" cellspacing="0" cellpadding="5">
+	<thead align="left">
+		<th>Name</th>
+		<th>Location</th>
+		<th>Version</th>
+		<th>&nbsp;</th>
+		<th>&nbsp;</th>
+	</thead>
+	<tbody>
+		#IMAGES#
+	</tbody
+</table>

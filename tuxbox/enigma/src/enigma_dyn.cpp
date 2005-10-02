@@ -61,7 +61,7 @@
 #include <enigma_dyn_timer.h>
 #include <enigma_dyn_pda.h>
 #include <enigma_dyn_movieplayer.h>
-#include <enigma_dyn_dreamflash.h>
+#include <enigma_dyn_boot.h>
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
@@ -568,7 +568,7 @@ eString getTopNavi()
 	result += button(100, "CONTROL", TOPNAVICOLOR, pre + "?mode=control" + post);
 	if (pdaScreen == 0)
 	{
-#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
+#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH || ENABLE_DYN_BOOT || ENABLE_DYN_ROTOR
 		result += button(100, "CONFIG", TOPNAVICOLOR, pre + "?mode=config" + post);
 #endif
 	}
@@ -720,6 +720,10 @@ eString getLeftNavi(eString mode)
 #endif
 #ifdef ENABLE_DYN_ROTOR
 		result += button(110, "Rotor", LEFTNAVICOLOR, pre + "?mode=configRotor" + post);
+#endif
+#ifdef ENABLE_DYN_BOOT
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+			result += button(110, "Boot Manager", LEFTNAVICOLOR, pre + "?mode=configBoot" + post);
 #endif
 	}
 	else
@@ -1855,6 +1859,18 @@ eString getContent(eString mode, eString path, eString opts)
 	}
 	else
 #endif
+#if ENABLE_DYN_BOOT
+	if (mode == "configBoot")
+	{
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+		{
+			result = getTitle("CONFIG: Boot Manager");
+			result += getConfigBoot();
+		}
+	}
+	else
+#endif
+
 	if (mode == "help")
 	{
 		result = getTitle("HELP");
@@ -2624,8 +2640,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapMiscInitializeDyn(dyn_resolver, lockWeb);
 	ezapTimerInitializeDyn(dyn_resolver, lockWeb);
 	ezapPDAInitializeDyn(dyn_resolver, lockWeb);
-#ifdef ENABLE_DYN_DREAMFLASH
-	ezapDreamflashInitializeDyn(dyn_resolver, lockWeb);
+#ifdef ENABLE_DYN_BOOT
+	ezapBootManagerInitializeDyn(dyn_resolver, lockWeb);
 #endif
 #ifdef ENABLE_DYN_STREAM
 	ezapMoviePlayerInitializeDyn(dyn_resolver, lockWeb);
