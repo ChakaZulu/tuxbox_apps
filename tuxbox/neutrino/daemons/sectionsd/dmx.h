@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.6 2005/08/16 21:59:56 metallica Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.7 2005/10/02 21:27:58 mogway Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -86,3 +86,4 @@ class DMX
 };
 
 #endif /* __sectionsd__dmx_h__ */
+

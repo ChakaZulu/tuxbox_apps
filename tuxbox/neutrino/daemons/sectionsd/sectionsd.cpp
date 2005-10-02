@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.192 2005/09/04 20:39:48 mogway Exp $
+//  $Id: sectionsd.cpp,v 1.193 2005/10/02 21:27:58 mogway Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1098,7 +1098,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.192 2005/09/04 20:39:48 mogway Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.193 2005/10/02 21:27:58 mogway Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1182,7 +1182,7 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 				unlockEvents();
 				dmxEIT.unpause();
 				EITThreadsUnPause();
-//				return ;
+				return ;
 			}
 
 			struct tm *pStartZeit = localtime(&zeitEvt1.startzeit);
@@ -2701,10 +2701,10 @@ static void *sdtThread(void *)
 					{
 						dprintf("dmxSDT: waking up again - looking for new events :)\n");
 						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
-						dmxSDT.change( 0 ); // -> restart
 #ifdef PAUSE_EQUALS_STOP
 						dmxSDT.real_unpause();
 #endif
+						dmxSDT.change( 0 ); // -> restart
 					}
 					else if (rs == 0)
 					{
@@ -2720,7 +2720,8 @@ static void *sdtThread(void *)
 						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
 						dmxSDT.real_unpause();
 					}
-
+					// update zeit after sleep
+					zeit = time(NULL);
 					timeoutsDMX = 0;
 				}
 				else if (zeit > dmxSDT.lastChanged + TIME_SDT_SKIPPING )
@@ -3084,6 +3085,7 @@ static void *eitThread(void *)
 	bool sendToSleepNow = false;
 	//dmxEIT.addfilter( 0x4e, (0xff) );
 	//dmxEIT.addfilter( 0x4f, (0xff) );
+/*	
 	dmxEIT.addfilter( 0x4e, (0xff - 0x01) );
 	dmxEIT.addfilter( 0x50, (0xff) );
 	dmxEIT.addfilter( 0x51, (0xff) );
@@ -3095,7 +3097,9 @@ static void *eitThread(void *)
 	dmxEIT.addfilter( 0x64, (0xff - 0x03) );
 	dmxEIT.addfilter( 0x68, (0xff - 0x03) );
 	dmxEIT.addfilter( 0x6c, (0xff - 0x03) );
-
+*/
+	dmxEIT.addfilter( 0x4e, 0xfe );
+	dmxEIT.addfilter( 0x50, 0xe0 );
 	try
 	{
 		dprintf("[%sThread] pid %d start\n", "eit", getpid());
@@ -3129,6 +3133,7 @@ static void *eitThread(void *)
 							PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 							" reset to 0 (not broadcast)\n", messaging_current_servicekey );
 
+						dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
 						dmxEIT.change( dmxEIT.filter_index + 1 );
 					}
 					else
@@ -3151,9 +3156,9 @@ static void *eitThread(void *)
 
 							if ( !dont_change )
 							{
-								dprintf("Change Filterindex: %d (ges. %d)\n", dmxEIT.filter_index, (signed) dmxEIT.filters.size() );
 								if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 								{
+									dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
 									dmxEIT.change(dmxEIT.filter_index + 1);
 									//dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n" );
 
@@ -3241,10 +3246,14 @@ static void *eitThread(void *)
 					{
 						dprintf("dmxEIT: waking up again - looking for new events :)\n");
 						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
-						dmxEIT.change( 0 ); // -> restart
+						
 #ifdef PAUSE_EQUALS_STOP
 						dmxEIT.real_unpause();
 #endif
+// must call dmxEIT.change after! unpause otherwise dev is not open, 
+// dmxEIT.lastChanded will not be set, and filter is advanced the next iteration
+						dprintf("New Filterindex3: %d (ges. %d)\n", 0, (signed) dmxEIT.filters.size() );
+						dmxEIT.change( 0 ); // -> restart
 					}
 					else if (rs == 0)
 					{
@@ -3260,6 +3269,8 @@ static void *eitThread(void *)
 						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
 						dmxEIT.real_unpause();
 					}
+					// update zeit after sleep
+					zeit = time(NULL);
 				}
 				else if (zeit > dmxEIT.lastChanged + TIME_EIT_SKIPPING )
 				{
@@ -3267,8 +3278,8 @@ static void *eitThread(void *)
 
 					if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 					{
+						dprintf("[eitThread] skipping to next filter(%d) (> TIME_EIT_SKIPPING)\n", dmxEIT.filter_index+1 );
 						dmxEIT.change(dmxEIT.filter_index + 1);
-						dprintf("[eitThread] skipping to next filter (> TIME_EIT_SKIPPING)\n" );
 					}
 					else
 						sendToSleepNow = true;
@@ -3429,8 +3440,10 @@ static void *eitThread(void *)
 
 						if ( change_filter > 0 )
 						{
-							if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
+							if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() ) {
+								dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
 								dmxEIT.change(dmxEIT.filter_index + 1);
+							}
 							else
 								sendToSleepNow = true;
 						}
@@ -3577,10 +3590,10 @@ static void *pptThread(void *)
 					{
 						dprintf("dmxPPT: waking up again - looking for new events :)\n");
 						pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
-						dmxPPT.change( 0 ); // -> restart
 #ifdef PAUSE_EQUALS_STOP
 						dmxPPT.real_unpause();
 #endif
+						dmxPPT.change( 0 ); // -> restart
 					}
 					else if (rs == 0)
 					{
@@ -3844,7 +3857,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.192 2005/09/04 20:39:48 mogway Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.193 2005/10/02 21:27:58 mogway Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
