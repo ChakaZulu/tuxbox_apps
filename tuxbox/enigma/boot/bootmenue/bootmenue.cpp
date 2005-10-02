@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.13 2005/10/02 13:20:34 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.14 2005/10/02 14:26:45 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -258,11 +258,11 @@ bool stmenu::loadconfig()
 				inetd = atoi(line + 11);
 		}
 		fclose(in);
-
-		tmp_ver = std::string("BootManager - ") + std::string(VERSION);
 	}
 	else
 		printf("[BOOTMANAGER] <%s not found>, using defaults...\n", CONFIGFILE);
+	
+	tmp_ver = std::string("BootManager - ") + std::string(VERSION);
 
 	return true;
 }
