@@ -3,19 +3,13 @@
 	{
 		var i = document.selector.menu.selectedIndex;
 		var menu = document.selector.menu.options[i].value;
-		document.location = "/control/selectBootMenu?id=" + menu;
+		document.location = "/cgi-bin/selectbootmenu?menu=" + menu;
 		window.setTimeout("document.location.reload()", 3000);
 	}
 </script>
 <form name="selector">
-	<table border="0" cellpadding="0" cellspacing="0">
-	<tr>
-		<td>
-			<select name="menu" size="1" onChange="bootMenuChange()">
-				#OPTIONS#
-			</select>
-		</td>
-	</tr>
-	</table>
+	<select name="menu" size="1" onChange="bootMenuChange()">
+		#OPTIONS#
+	</select>
 </form>
 

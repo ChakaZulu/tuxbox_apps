@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.1 2005/10/02 13:20:38 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.2 2005/10/02 17:20:42 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -117,6 +117,7 @@ void activateMenu(eString menu)
 	FILE *out = fopen("/var/etc/init", "w");
 	fprintf(out, file.c_str());
 	fclose(out);
+	system("chmod +x /var/etc/init");
 }
 
 eString getMenus(bool *bootmanager)
@@ -154,7 +155,8 @@ eString getMenus(bool *bootmanager)
 		}
 	
 		result = readFile(TEMPLATE_DIR + "bootMenus.tmp");
-		eString menus = "<option value=\"BM\"" + eString((bm) ? " selected" : "") + ">BootManager</option>";
+		eString menus = "<option value=\"none\">none</option>";
+		menus += "<option value=\"BM\"" + eString((bm) ? " selected" : "") + ">BootManager</option>";
 		menus += "<option value=\"FW\"" + eString((fw) ? " selected" : "") + ">FlashWizzard</option>";
 		result.strReplace("#OPTIONS#", menus);
 	}
@@ -219,6 +221,17 @@ eString getInstalledImages()
 			closedir(d);
 		}
 	}
+	
+	if (!images)
+	{
+		eString image = readFile(TEMPLATE_DIR + "image.tmp");
+		image.strReplace("#NAME#", "none");
+		image.strReplace("#LOCATION#", "n/a");
+		image.strReplace("#VERSION#", "n/a");
+		image.strReplace("#SETTINGSBUTTON#", "n/a");
+		image.strReplace("#DELETEBUTTON#", "n/a");
+		images += image;
+	} 
 
 	return images;
 }
@@ -228,12 +241,16 @@ eString getConfigBoot(void)
 	bool bm = false;
 	eString result = readFile(TEMPLATE_DIR + "bootMgr.tmp");
 	result.strReplace("#MENU#", getMenus(&bm));
-	result.strReplace("#IMAGES#", getInstalledImages());
-	
 	if (bm)
+	{
 		result.strReplace("#BMSETTINGSBUTTON#", button(100, "Settings", GREEN, "javascript:editBootManagerSettings('')", "#FFFFFF"));
+	}
 	else
+	{
 		result.strReplace("#BMSETTINGSBUTTON#", "");
+	}
+	result.strReplace("#IMAGES#", getInstalledImages());
+	result.strReplace("#ADDIMAGEBUTTON#", button(100, "Add", GREEN, "javascript:showAddImageWindow('')", "#FFFFFF"));
 
 	return result;
 }
@@ -399,11 +416,67 @@ eString editImageSettings(eString request, eString dirpath, eString opts, eHTTPC
 	return "function not available yet.";
 }
 
+
+eString setImageSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	return closeWindow(content, "", 10);
+}
+
+eString editBootManagerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	return "function not available yet.";
+}
+
+eString setBootManagerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	return closeWindow(content, "", 10);
+}
+
+eString selectBootMenu(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString menu = opt["menu"];
+	
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	if (menu == "BM" || menu == "FW")
+		activateMenu(menu);
+	
+	return closeWindow(content, "", 10);
+}
+
+eString showAddImageWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+//	return closeWindow(content, "", 10);
+	return "function not available yet.";
+}
+
 void ezapBootManagerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/installimage", installImage, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/deleteimage", deleteImage, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/editimagesettings", editImageSettings, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setimagesettings", setImageSettings, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/selectbootmenu", selectBootMenu, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/showaddimagewindow", showAddImageWindow, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/editbootmanagersettings", editBootManagerSettings, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setbootmanagersettings", setBootManagerSettings, lockWeb);
 }
 
 #endif // ENABLE_DYN_BOOT
