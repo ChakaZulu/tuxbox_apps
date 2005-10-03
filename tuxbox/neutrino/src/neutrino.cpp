@@ -681,8 +681,13 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.recording_ringbuffers, configfile.getString( "recordingmenu.ringbuffers", "20").c_str() );
 	g_settings.recording_choose_direct_rec_dir = configfile.getInt32( "recording_choose_direct_rec_dir", 0 );
 	g_settings.recording_epg_for_filename      = configfile.getBool("recording_epg_for_filename"         , true);
-	g_settings.recording_save_in_channeldir      = configfile.getBool("recording_save_in_channeldir"         , false);
 	g_settings.recording_in_spts_mode          = configfile.getBool("recording_in_spts_mode"         , true);
+	for(int i=0 ; i < REC_FILENAME_TEMPLATE_NR_OF_ENTRIES; i++)
+	{
+		sprintf(cfg_key, "recording_filename_template_%d", i);
+		g_settings.recording_filename_template[i] = configfile.getString(cfg_key, "%c_%i_%d_%t");
+		
+	}
 
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
@@ -1019,8 +1024,12 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString("recordingmenu.ringbuffers"          , g_settings.recording_ringbuffers);
 	configfile.setInt32 ("recording_choose_direct_rec_dir"    , g_settings.recording_choose_direct_rec_dir);
 	configfile.setBool  ("recording_epg_for_filename"         , g_settings.recording_epg_for_filename     );
-	configfile.setBool  ("recording_save_in_channeldir"         , g_settings.recording_save_in_channeldir     );
 	configfile.setBool  ("recording_in_spts_mode"             , g_settings.recording_in_spts_mode         );
+	for(int i=0 ; i < REC_FILENAME_TEMPLATE_NR_OF_ENTRIES ; i++)
+	{
+		sprintf(cfg_key, "recording_filename_template_%d", i);
+		configfile.setString( cfg_key, g_settings.recording_filename_template[i] );
+	}
 
 	//streaming
 	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
@@ -2227,7 +2236,8 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	CMenuOptionChooser* oj11 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_EPG_FOR_FILENAME, &g_settings.recording_epg_for_filename, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
-	CMenuOptionChooser* oj13 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SAVE_IN_CHANNELDIR, &g_settings.recording_save_in_channeldir, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
+	CStringInput * recordingSettings_filenameTemplate = new CStringInput(LOCALE_RECORDINGMENU_FILENAME_TEMPLATE, &g_settings.recording_filename_template[0], 21, LOCALE_RECORDINGMENU_FILENAME_TEMPLATE_HINT, LOCALE_IPSETUP_HINT_2, "%cidt/-_0123456789 ");
+	CMenuForwarder* mf11 = new CMenuForwarder(LOCALE_RECORDINGMENU_FILENAME_TEMPLATE, true, g_settings.recording_filename_template[0],recordingSettings_filenameTemplate);
 
 	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,oj12);
 
@@ -2267,7 +2277,8 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	directRecordingSettings->addItem(oj9);
 	directRecordingSettings->addItem(oj10);
 	directRecordingSettings->addItem(oj11);
-	directRecordingSettings->addItem(oj13);
+	directRecordingSettings->addItem(mf11);
+	
 	recordingstatus = 0;
 }
 
@@ -2995,7 +3006,16 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 						doRecord = false;
 					}
 				}
-				(static_cast<CVCRControl::CFileDevice*>(recordingdevice))->Directory = recDir;
+				CVCRControl::CFileDevice *fileDevice;
+				if ((fileDevice = dynamic_cast<CVCRControl::CFileDevice*>(recordingdevice)) != NULL)
+				{
+					fileDevice->Directory = recDir;
+					fileDevice->FilenameTemplate = g_settings.recording_filename_template[0];
+				} else
+				{
+					puts("[neutrino] could not set directory and filename template");
+				}
+
 			}
 			if(!doRecord || (CVCRControl::getInstance()->Record(&eventinfo)==false))
 			{
@@ -4447,7 +4467,15 @@ void CNeutrinoApp::startNextRecording()
 				if (doRecord) 
 				{
 					printf("[neutrino.cpp] recording to %s\n",recDir);
-					(static_cast<CVCRControl::CFileDevice*>(recordingdevice))->Directory = std::string(recDir);
+					CVCRControl::CFileDevice *fileDevice;
+					if ((fileDevice = dynamic_cast<CVCRControl::CFileDevice*>(recordingdevice)) != NULL)
+					{
+						fileDevice->Directory = recDir;
+						fileDevice->FilenameTemplate = g_settings.recording_filename_template[0];
+					} else
+					{
+						puts("[neutrino] could not set directory and filename template");
+					}
 				}
 			}
 			if(doRecord && CVCRControl::getInstance()->Record(nextRecordingInfo))

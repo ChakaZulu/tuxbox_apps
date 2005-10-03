@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.55 2005/09/28 23:04:10 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.56 2005/10/03 00:55:37 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -710,6 +710,8 @@ const char * locale_real_names[] =
 	"recordingmenu.defdir",
 	"recordingmenu.epg_for_filename",
 	"recordingmenu.file",
+	"recordingmenu.filename_template",
+	"recordingmenu.filename_template_hint",
 	"recordingmenu.filesettings",
 	"recordingmenu.head",
 	"recordingmenu.help",
@@ -718,7 +720,6 @@ const char * locale_real_names[] =
 	"recordingmenu.record_in_spts_mode",
 	"recordingmenu.recording_type",
 	"recordingmenu.ringbuffers",
-	"recordingmenu.save_in_channeldir",
 	"recordingmenu.server",
 	"recordingmenu.server_ip",
 	"recordingmenu.server_mac",

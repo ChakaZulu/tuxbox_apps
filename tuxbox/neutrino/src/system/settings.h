@@ -172,11 +172,12 @@ struct SNeutrinoSettings
 	int  recording_stream_all_audio_pids;
 	int  recording_stream_vtxt_pid;
 	char recording_ringbuffers[10];
+	int recording_in_spts_mode;
 	int recording_choose_direct_rec_dir;
 	int recording_epg_for_filename;
-	int recording_save_in_channeldir;
-	int recording_in_spts_mode;
-
+#define REC_FILENAME_TEMPLATE_NR_OF_ENTRIES 4
+	std::string recording_filename_template[REC_FILENAME_TEMPLATE_NR_OF_ENTRIES];
+	
 	//streaming
 	int  streaming_type;
 	std::string streaming_server_ip;

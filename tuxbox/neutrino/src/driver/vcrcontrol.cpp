@@ -578,93 +578,64 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		filename[pos] = '\0';
 	}
 
-	std::string ext_channel_name = g_Zapit->getChannelName(channel_id);
-	if (g_settings.recording_epg_for_filename && !(ext_channel_name.empty()))
-	{
-		if (g_settings.recording_save_in_channeldir)
-		{
-			std::string channelPath(filename);
-			channelPath += ext_channel_name;
-			struct stat statInfo;
-			int res = stat(channelPath.c_str(),&statInfo);
-			if (res == -1)
-			{
-				if (errno == ENOENT)
-				{
-					res = mkdir(channelPath.c_str(),0755);
-					if (res == 0) 
-					{
-						channelPath += "/";
-						strncpy(filename,channelPath.c_str(),511);
-						pos = channelPath.size();
-					} else
-					{
-						perror("[vcrcontrol] mkdir");
-					}
-						
-				} else {
-					perror("[vcrcontrol] stat");
-				}
-			} else 
-			{
-				// directory exists
-				channelPath += "/";
-				strncpy(filename,channelPath.c_str(),511);
-				pos = channelPath.size();
-			}	
-					
-		}
-		
-		strcpy(&(filename[pos]), UTF8_TO_FILESYSTEM_ENCODING(ext_channel_name.c_str()));
-		char * p_act = &(filename[pos]);
-		do {
-			p_act += strcspn(p_act, "/ \"%&-\t`'´!,:;");
-			if (*p_act)
-			{
-				*p_act++ = '_';
-			}
-		} while (*p_act);
-								
-		strcat(filename, "_");
-	}
-
-	pos = strlen(filename);
-	if (g_settings.recording_epg_for_filename && epgid != 0)
-	{
-		CSectionsdClient sdc;
-		CShortEPGData epgdata;
-		if (sdc.getEPGidShort(epgid, &epgdata))
-		{
-			if (!(epgdata.title.empty()))
-			{
-#warning fixme sectionsd should deliver data in UTF-8 format
-//				strcpy(&(filename[pos]), Latin1_to_UTF8(epgdata.title).c_str());
-// all characters with code >= 128 will be discarded anyway
-				strcpy(&(filename[pos]), epgdata.title.c_str());
-				char * p_act = &(filename[pos]);
-				do {
-					p_act +=  strcspn(p_act, "/ \"%&-\t`'~<>!,:;?^°$\\=*#@¤|");
-					if (*p_act) {
-						*p_act++ = '_';
-					}
-				} while (*p_act);
-				
-				p_act = &(filename[pos]);
-				do
-				{
-					if ((unsigned char) (*p_act) >= 128) {
-						*p_act = '_';
-					}
-				} while (*p_act++);
-				
-				strcat(filename, "_");
-			}
-		}
-	}
-
-	pos = strlen(filename);
 	time_t t = time(NULL);
-	strftime(&(filename[pos]), sizeof(filename) - pos - 1, "%Y%m%d_%H%M%S", localtime(&t));
+
+	if (FilenameTemplate.empty())
+	{
+		if (g_settings.recording_epg_for_filename)
+			FilenameTemplate = "%c_%i_";
+		FilenameTemplate += "%d_%t";
+	}
+		
+	// %c == channel, %i == info, %d == date, %t == time
+	std::string expandedTemplate(FilenameTemplate);
+	
+	unsigned int searchPos = std::string::npos;
+	unsigned int startAt = 0;
+	unsigned int dataLength = 0;
+	char buf[256];
+	buf[255] = '\0';
+
+	if (g_settings.recording_epg_for_filename) {
+		appendChannelName(buf,255,channel_id);
+		dataLength = strlen(buf);
+		
+		while ((searchPos = expandedTemplate.find("%c",startAt)) != std::string::npos) {
+			expandedTemplate.erase(searchPos,2);
+			expandedTemplate.insert(searchPos,buf);
+			startAt = searchPos + dataLength;
+		}
+		startAt = 0;
+		appendEPGInfo(buf,255,epgid);
+		dataLength = strlen(buf);
+		while ((searchPos = expandedTemplate.find("%i",startAt)) != std::string::npos) {
+			expandedTemplate.erase(searchPos,2);
+			expandedTemplate.insert(searchPos,buf);
+			startAt = searchPos + dataLength;
+		}
+	}
+
+	strftime(buf,11,"%Y-%m-%d",localtime(&t));
+	dataLength = strlen(buf);
+	startAt = 0;
+	while ((searchPos = expandedTemplate.find("%d",startAt)) != std::string::npos) {
+		expandedTemplate.erase(searchPos,2);
+		expandedTemplate.insert(searchPos,buf);
+		startAt = searchPos + dataLength;
+	}
+	
+	strftime(buf,9,"%H:%M:%S",localtime(&t));
+	dataLength = strlen(buf);
+	startAt = 0;
+	while ((searchPos = expandedTemplate.find("%t",startAt)) != std::string::npos) {
+		expandedTemplate.erase(searchPos,2);
+		expandedTemplate.insert(searchPos,buf);
+		startAt = searchPos + dataLength;
+	}
+	
+	strncpy(&(filename[pos]),expandedTemplate.c_str(),511-pos);
+	createRecordingDir(filename);
+
 
 	stream2file_error_msg_t error_msg = ::start_recording(filename,
 							      getCommandString(CMD_VCR_RECORD, channel_id, epgid, apids).c_str(),
@@ -686,7 +657,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	{
 		RestoreNeutrino();
 
-		printf("[vcrcontrol] stream2file error code: %d\n", error_msg);
+		printf("[CFileDevice] stream2file error code: %d\n", error_msg);
 #warning FIXME: Use better error message
 		DisplayErrorMessage(g_Locale->getText(
 						      error_msg == STREAM2FILE_BUSY ? LOCALE_STREAMING_BUSY :
@@ -698,10 +669,99 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	}
 }
 
+void CVCRControl::CFileDevice::appendEPGInfo(char *buf, unsigned int size, const event_id_t epgid) {
+	
+	CSectionsdClient sdc;
+	CShortEPGData epgdata;
+	if (sdc.getEPGidShort(epgid, &epgdata))
+	{
+		if (!(epgdata.title.empty()) && epgdata.title.size() < size)
+		{
+#warning fixme sectionsd should deliver data in UTF-8 format
+//				strcpy(&(filename[pos]), Latin1_to_UTF8(epgdata.title).c_str());
+// all characters with code >= 128 will be discarded anyway
+			strcpy(buf, epgdata.title.c_str());
+			char * p_act = buf;
+			do {
+				p_act +=  strcspn(p_act, "/ \"%&-\t`'~<>!,:;?^°$\\=*#@¤|");
+				if (*p_act) {
+					*p_act++ = '_';
+				}
+			} while (*p_act);
+			
+			p_act = buf;
+			do
+			{
+				if ((unsigned char) (*p_act) >= 128) {
+					*p_act = '_';
+				}
+			} while (*p_act++);
+		}
+	}
+}
+
+void CVCRControl::CFileDevice::appendChannelName(char *buf, unsigned int size, const t_channel_id channel_id) {
+	
+	std::string ext_channel_name = g_Zapit->getChannelName(channel_id);
+	if (ext_channel_name.size() < size)
+	{
+		strcpy(buf, UTF8_TO_FILESYSTEM_ENCODING(ext_channel_name.c_str()));
+		
+		char * p_act = buf;
+		do {
+			p_act += strcspn(p_act, "/ \"%&-\t`'´!,:;");
+			if (*p_act)
+			{
+				*p_act++ = '_';
+			}
+		} while (*p_act);
+	}
+}
 
 
 
-
+bool CVCRControl::CFileDevice::createRecordingDir(const char *filename) 
+{
+	char *pos;
+	unsigned int start = 0;
+	while ((pos = strchr(&(filename[start]),'/')) != NULL) {
+		if (pos == &filename[0]) {
+			start = 1;
+			continue;
+		}
+		*pos = '\0';
+		start = strlen(filename)+1;
+		struct stat statInfo;
+		int res = stat(filename,&statInfo);
+		if (res == -1)
+		{
+			if (errno == ENOENT)
+			{	
+				res = mkdir(filename,0755);
+				if (res != 0) 
+				{
+					perror("[CFileDevice] mkdir");
+					return false;
+					*pos = '/';
+				}
+				
+			} else {
+				perror("[CFileDevice] stat");
+				*pos = '/';
+				return false;
+			}
+		} else {
+			if (!S_ISDIR(statInfo.st_mode)) {
+				printf("[CFileDevice] cannot create directory %s\n",filename);
+				*pos = '/';
+				return false;
+			}
+		}		
+		*pos = '/';
+	}
+	return true;
+}
+//-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CServerDevice::Stop()

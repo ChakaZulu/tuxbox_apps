@@ -683,6 +683,8 @@ recordingmenu.choose_direct_rec_dir Bei Sofortaufn. Verzeichnisauswahl
 recordingmenu.defdir Aufnahmeverzeichnis
 recordingmenu.epg_for_filename lange Dateinamen (mit EPG-Daten)
 recordingmenu.file Direkt (Datei)
+recordingmenu.filename_template Vorlage für Dateinamen
+recordingmenu.filename_template_hint %c=Kanal, %i=Titel, %d=Datum, %t=Uhrzeit
 recordingmenu.filesettings Direktaufnahme Einstellungen
 recordingmenu.head Aufnahme Einstellungen
 recordingmenu.help Aufnahmegeräte:\n-----------------------\nServer:\nauf PC mit Hilfe eines Streaming-Programmes\n\n(analoger) Videorekorder:\nüber VCR-Ausgang\n\nDirekt (Datei):\nauf ein per NFS gemountetes Verzeichnis\noder eine interne Festplatte\nTS: SPTS-Mode Treiber laden\nPES: SPTS-Mode Treiber nicht laden\n\n\nMaximale Dateigröße:\n----------------------\nNFS V2: 2 GB (2048 MB)\nNFS V3: fast unendlich (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
@@ -691,7 +693,6 @@ recordingmenu.off aus
 recordingmenu.record_in_spts_mode in SPTS-Modus aufnehmen
 recordingmenu.recording_type Aufnahme Gerät
 recordingmenu.ringbuffers Anz. Ringpuffer
-recordingmenu.save_in_channeldir Unterverzeichnis (je Kanal) erstellen
 recordingmenu.server Server
 recordingmenu.server_ip Aufnahmeserver IP
 recordingmenu.server_mac Mac Adresse

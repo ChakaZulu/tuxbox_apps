@@ -125,6 +125,7 @@ class CVCRControl
 		{
 		public:
 			std::string  Directory;
+			std::string  FilenameTemplate;
 			unsigned int SplitSize;
 			bool         Use_O_Sync;
 			bool         Use_Fdatasync;
@@ -155,6 +156,11 @@ class CVCRControl
 			virtual ~CFileDevice()
 				{
 				};
+		private:
+			void appendEPGInfo(char *buf, unsigned int size, const event_id_t epgid);
+			void appendChannelName(char *buf, unsigned int size, const t_channel_id channel_id);
+			bool createRecordingDir(const char *filename);
+
 		};
 
 	class CServerDevice : public CFileAndServerDevice // externer Streamingserver per tcp
