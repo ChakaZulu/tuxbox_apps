@@ -57,10 +57,12 @@ class CStringInput : public CMenuTarget
 		std::string iconfile;
 		const char * validchars;
 		char *       value;
+		std::string  *valueString;
 		int          size;
 		int          selected;
 		CChangeObserver * observ;
 
+		virtual void init();
 		virtual const char * getHint1(void);
 
 		virtual void paint();
@@ -83,6 +85,8 @@ class CStringInput : public CMenuTarget
 	public:
 
 		CStringInput(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, const char * const Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		CStringInput(const neutrino_locale_t Name, std::string* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, const char * const Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		~CStringInput();
 
 		void hide();
 		int exec( CMenuTarget* parent, const std::string & actionKey );

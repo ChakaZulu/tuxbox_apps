@@ -53,6 +53,7 @@ CStringInput::CStringInput(const neutrino_locale_t Name, char* Value, int Size, 
 	frameBuffer = CFrameBuffer::getInstance();
 	name =  Name;
 	value = Value;
+	valueString = NULL;
 	size =  Size;
 
 	hint_1 = Hint_1;
@@ -61,7 +62,39 @@ CStringInput::CStringInput(const neutrino_locale_t Name, char* Value, int Size, 
 	iconfile = Icon ? Icon : "";
 
 	observ = Observ;
-	width = (Size*20)+40;
+	init();
+}
+
+CStringInput::CStringInput(const neutrino_locale_t Name, std::string* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ, const char * const Icon)
+{
+	frameBuffer = CFrameBuffer::getInstance();
+	name =  Name;
+	value = new char[Size+1];
+	value[Size] = '\0';
+	strncpy(value,Value->c_str(),Size);
+	valueString = Value;
+	size = Size;
+
+	hint_1 = Hint_1;
+	hint_2 = Hint_2;
+	validchars = Valid_Chars;
+	iconfile = Icon ? Icon : "";
+
+	observ = Observ;
+	init();
+}
+
+CStringInput::~CStringInput() 
+{
+	if (valueString != NULL) 
+	{
+		delete[] value;
+	}
+}
+
+void CStringInput::init() 
+{
+	width = (size*20)+40;
 
 	if (width<420)
 		width = 420;
@@ -87,7 +120,9 @@ CStringInput::CStringInput(const neutrino_locale_t Name, char* Value, int Size, 
 	x = ((720-width)>>1);
 	y = ((500-height)>>1);
 	selected = 0;
+	
 }
+
 
 void CStringInput::NormalKeyPressed(const neutrino_msg_t key)
 {
@@ -224,14 +259,16 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 	neutrino_msg_data_t data;
 
 	int res = menu_return::RETURN_REPAINT;
-	char oldval[size], dispval[size];
+	char oldval[size+1], dispval[size+1];
+	oldval[size] = 0;
+	dispval[size] = 0;
 
 	if (parent)
 		parent->hide();
 
 	for(int count=strlen(value)-1;count<size-1;count++)
 		strcat(value, " ");
-	strcpy(oldval, value);
+	strncpy(oldval, value, size);
 
 	paint();
 
@@ -240,10 +277,10 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 	bool loop=true;
 	while (loop)
 	{
-		if ( strcmp(value, dispval) != 0)
+		if ( strncmp(value, dispval, size) != 0)
 		{
 			CLCD::getInstance()->showMenuText(1, value, selected+1);
-			strcpy(dispval, value);
+			strncpy(dispval, value, size);
 		}
 
 		g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd, true );
@@ -311,7 +348,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 			     (ShowLocalizedMessage(name, LOCALE_MESSAGEBOX_DISCARD, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel))
 				continue;
 
-			strcpy(value, oldval);
+			strncpy(value, oldval, size);
 			loop=false;
 		}
 		else
@@ -351,6 +388,10 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		observ->changeNotify(name, value);
 	}
 
+	if (valueString != NULL)
+	{
+		*valueString = value;
+	}
 	return res;
 }
 
