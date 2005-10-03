@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.3 2005/10/03 14:44:20 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.4 2005/10/03 15:13:43 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -48,7 +48,8 @@ extern eString firmwareLevel(eString versionString);
 using namespace std;
 
 #define CONFIGFILE "/tmp/jffs2/tuxbox/config/enigma/bootmenue.conf"
-#define SKINDIR "/tmp/jffs2/tuxbox/config/enigma/boot"
+#define SKINDIR1 "/tmp/jffs2/tuxbox/config/enigma/boot"
+#define SKINDIR2 "/tmp/jffs2/share/tuxbox/enigma/boot"
 
 void mountJFFS2()
 {
@@ -132,35 +133,40 @@ eString getSkins(eString selectedEntry, int *selentry)
 {
 	eString skins;
 	
-	eString dir = SKINDIR;
+	eString dir[2];
+	dir[0] = SKINDIR1;
+	dir[1] = SKINDIR2;
 
 	mountJFFS2();
 	
 	*selentry = 0;
 	int curentry = 0;
 	
-	DIR *d = opendir(dir.c_str());
-	if (d)
+	for (int i = 0; i < 2; i++)
 	{
-		while (struct dirent *e = readdir(d))
+		DIR *d = opendir(dir[i].c_str());
+		if (d)
 		{
-			if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
+			while (struct dirent *e = readdir(d))
 			{
-				eString location = dir + "/" + eString(e->d_name);
-				eString name = eString(e->d_name);
-					
-				if (location.right(5) == ".skin")
+				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
 				{
-					if (name == selectedEntry)
-						*selentry = curentry;
-					location = location.left(location.length() - 5);
-					skins = skins + "<option value=\"" + location + "\"" + eString((*selentry == curentry) ? " selected" : "") + ">" + name + "</option>";
+					eString location = dir[i] + "/" + eString(e->d_name);
+					eString name = eString(e->d_name);
+					
+					if (location.right(5) == ".skin")
+					{
+						if (name == selectedEntry)
+							*selentry = curentry;
+						location = location.left(location.length() - 5);
+						skins = skins + "<option value=\"" + location + "\"" + eString((*selentry == curentry) ? " selected" : "") + ">" + name + "</option>";
 						
-					curentry++;
+						curentry++;
+					}
 				}
 			}
+			closedir(d);
 		}
-		closedir(d);
 	}
 	unmountJFFS2();
 	
