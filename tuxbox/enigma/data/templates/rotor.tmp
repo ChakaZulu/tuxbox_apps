@@ -49,6 +49,7 @@ function motor(cmd, parm)
 	}
 }
 </script>
+<h2>Diseqc 1.2 Motor Positions</h2>
 <table border="1" cellpadding="5" cellspacing="0">
 	#MOTORPOSITIONS#
 </table>
