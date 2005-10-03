@@ -624,7 +624,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		startAt = searchPos + dataLength;
 	}
 	
-	strftime(buf,9,"%H:%M:%S",localtime(&t));
+	strftime(buf,7,"%H%M%S",localtime(&t));
 	dataLength = strlen(buf);
 	startAt = 0;
 	while ((searchPos = expandedTemplate.find("%t",startAt)) != std::string::npos) {
