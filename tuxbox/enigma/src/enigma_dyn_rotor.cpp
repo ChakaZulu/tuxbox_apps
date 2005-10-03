@@ -50,6 +50,7 @@ eString getConfigRotor(void)
 	eString positions;
 	eTransponder *tp = NULL;
 	eString satPos, satName, motorPos, current;
+	bool gotoX = false;
 	
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi && sapi->transponder)
@@ -57,27 +58,39 @@ eString getConfigRotor(void)
 	
 	for (std::list<eLNB>::iterator it(eTransponderList::getInstance()->getLNBs().begin()); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 	{
-		// go thru all satellites...
-		for (ePtrList<eSatellite>::iterator s (it->getSatelliteList().begin()); s != it->getSatelliteList().end(); s++)
+		if (it->getDiSEqC().useGotoXX & 1 == 0)
 		{
-			eString tmp  = readFile(TEMPLATE_DIR + "rotorSat.tmp");
-			if (tp && s->getOrbitalPosition() == tp->satellite.orbital_position)
-				current = "on.gif";
-			else
-				current = "trans.gif";
-			satName = s->getDescription();
-			satPos = eString().sprintf("%d", s->getOrbitalPosition());
-			int motorPosition = it->getDiSEqC().RotorTable[s->getOrbitalPosition()];
-			motorPos = eString().sprintf("%d", motorPosition);
+			// go thru all satellites...
+			for (ePtrList<eSatellite>::iterator s (it->getSatelliteList().begin()); s != it->getSatelliteList().end(); s++)
+			{
+				eString tmp  = readFile(TEMPLATE_DIR + "rotorSat.tmp");
+				if (tp && s->getOrbitalPosition() == tp->satellite.orbital_position)
+					current = "on.gif";
+				else
+					current = "trans.gif";
+				satName = s->getDescription();
+				satPos = eString().sprintf("%d", s->getOrbitalPosition());
+				int motorPosition = it->getDiSEqC().RotorTable[s->getOrbitalPosition()];
+				motorPos = eString().sprintf("%d", motorPosition);
 
-			tmp.strReplace("#CURRENT#", current);
-			tmp.strReplace("#SATPOS#", satPos);
-			tmp.strReplace("#SATNAME#", satName);
-			tmp.strReplace("#MOTORPOS#", motorPos);
-			tmp.strReplace("#GOTOBUTTON#", button(100, "Goto", GREEN, "javascript:motor('gotostoredpos', '" + motorPos + "')", "#FFFFFF"));
-			tmp.strReplace("#STOREBUTTON#", button(100, "Store", RED, "javascript:motor('storetopos', '" + motorPos + "')", "#FFFFFF"));
-			positions += tmp;
+				tmp.strReplace("#CURRENT#", current);
+				tmp.strReplace("#SATPOS#", satPos);
+				tmp.strReplace("#SATNAME#", satName);
+				tmp.strReplace("#MOTORPOS#", motorPos);
+				tmp.strReplace("#GOTOBUTTON#", button(100, "Goto", GREEN, "javascript:motor('gotostoredpos', '" + motorPos + "')", "#FFFFFF"));
+				tmp.strReplace("#STOREBUTTON#", button(100, "Store", RED, "javascript:motor('storetopos', '" + motorPos + "')", "#FFFFFF"));
+				positions += tmp;
+			}
 		}
+		else
+			gotoX = true;
+	}
+	if (!positions)
+	{
+		if (!gotoX)
+			positions = "<tr><td colspan=\"6\">No motor position table available.</td></tr>";
+		else
+			positions = "<tr><td colspan=\"6\">GotoX active.</td></tr>";
 	}
 	result.strReplace("#MOTORPOSITIONS#", positions);
 
