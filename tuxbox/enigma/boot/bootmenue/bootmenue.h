@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.h,v 1.6 2005/09/26 19:25:54 digi_casi Exp $
+ * $Id: bootmenue.h,v 1.7 2005/10/03 14:44:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -34,7 +34,7 @@
 #include "my_timer.h"
 #include "processutils.h"
 
-#define VERSION "0.0.3"
+#define VERSION "0.0.4"
 
 class image
 {

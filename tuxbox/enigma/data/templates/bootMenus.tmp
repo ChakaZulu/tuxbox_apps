@@ -8,8 +8,18 @@
 	}
 </script>
 <form name="selector">
-	<select name="menu" size="1" onChange="bootMenuChange()">
-		#OPTIONS#
-	</select>
+	<table border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td>
+			<select name="menu" size="1" onChange="bootMenuChange()">
+				#OPTIONS#
+			</select>
+		</td>
+		<td>&nbsp;&nbsp;</td>
+		<td>
+			#BMSETTINGSBUTTON#
+		</td>
+	</tr>
+	</table>
 </form>
 
