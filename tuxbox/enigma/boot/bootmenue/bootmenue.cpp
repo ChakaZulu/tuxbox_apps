@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.14 2005/10/02 14:26:45 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.15 2005/10/03 20:14:36 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -163,6 +163,9 @@ bool stmenu::loadskin()
 	if (strlen(skin_path) > 0 && strlen(skin_name) > 0)
 	{
 		std::string tmp = std::string(skin_path) + "/" + std::string(skin_name);
+		
+		if (access(tmp.c_str(), R_OK) != 0)
+			tmp = "/share/tuxbox/enigma/boot/blank.skin";
 
 		if (FILE *in = fopen(tmp.c_str(), "rt"))
 		{
