@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<title>BootManager Settings</title>
+		<script>
+			function init()
+			{
+				document.settings.skinName.selectedIndex = #SELECTEDINDEX#;
+			}
+			function submitSettings()
+			{
+				var i = document.settings.skinName.selectedIndex;
+				var skinName = document.settings.skinName.options[i].value;
+				var mpoint = document.settings.mpoint.value;
+				var inetd = document.settings.inetd.value;
+				var selectedEntry = document.settings.selectedEntry.value;
+				var videoFormat = document.settings.videoFormat.value;
+				var skinPath = document.settings.skinPath.value;
+				var skinName = document.settings.skinName.value; 
+				var timeoutValue = document.settings.timeoutValue.value;
+				document.location = "/cgi-bin/setbootmanagersettings?skinName=" + skinName + "&mpoint=" + mpoint + "&inetd=" + inetd + "&selectedEntry=" + selectedEntry + "&videoFormat=" + videoFormat + "&skinPath=" + skinPath + "&timeoutValue=" + timeoutValue;
+				window.setTimeout("window.close()", 3000);
+			}
+		</script>
+	</head>
+	<body id="mainbody" style="padding: 10px; background-color: #F4F4F4" onLoad="init()">
+		<form name="settings">
+			<table border="0" cellspacing="5" cellpadding="0">
+			<tr>
+				<td>Skin path:</td>
+				<td>
+					<input style="color:#000000" name="skinPath" type="text" size="50" maxlength="50" value="#SKINPATH#">
+				</td>
+			</tr>
+			<tr>
+				<td>Skin name:</td>
+				<td>
+					<select name="skinName" size="1">
+						#SKINOPTIONS#
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>Menu timeout:</td>
+				<td>
+					<input style="color:#000000" name="timeoutValue" type="text" size="3" maxlength="3" value="#TIMEOUTVALUE#">
+				</td>
+			</tr>
+			<tr>
+				<td>Mount Point (for images):</td>
+				<td>
+					<input style="color:#000000" name="mpoint" type="text" size="50" maxlength="50" value="#MPOINT#">
+				</td>
+			</tr>
+			<tr>
+				<td>Kill inetd (0/1):</td>
+				<td>
+					<input style="color:#000000" name="inetd" type="text" size="3" maxlength="3" value="#INETD#">
+				</td>
+			</tr>
+			<tr>
+				<td>Video format:</td>
+				<td>
+					<input style="color:#000000" name="videoFormat" type="text" size="3" maxlength="3" value="#VIDEOFORMAT#">
+				</td>
+			</tr>
+			<tr>
+				<td>Selected Image:</td>
+				<td>
+					<input style="color:#000000" name="selectedEntry" type="text" size="50" maxlength="50" value="#SELECTEDENTRY#" readonly>
+				</td>
+			</tr>
+			</table>
+			<br>
+			#BUTTONSUBMIT#
+		</form>
+	</body>
+</html>
