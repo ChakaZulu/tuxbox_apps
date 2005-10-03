@@ -175,6 +175,8 @@ void eFrontend::tuneOK()
 	// stop userspace lock timeout
 	timeout.stop();  
 #endif
+	if (!transponder)
+		return;
 	if (type==eSystemInfo::feSatellite)
 	{
 		eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
@@ -211,6 +213,8 @@ void eFrontend::tuneOK()
 
 void eFrontend::tuneFailed()
 {
+	if (!transponder)
+		return;
 	if (type==eSystemInfo::feSatellite)
 	{
 		eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
@@ -249,8 +253,7 @@ void eFrontend::tuneFailed()
 		{
 			needreset=2;
 			lostlockcount=0;
-			if ( transponder )
-				transponder->tune();
+			transponder->tune();
 		}
 		else
 			setFrontend();
