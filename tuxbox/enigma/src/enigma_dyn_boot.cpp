@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.4 2005/10/03 15:13:43 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.5 2005/10/04 21:08:44 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -48,8 +48,7 @@ extern eString firmwareLevel(eString versionString);
 using namespace std;
 
 #define CONFIGFILE "/tmp/jffs2/tuxbox/config/enigma/bootmenue.conf"
-#define SKINDIR1 "/tmp/jffs2/tuxbox/config/enigma/boot"
-#define SKINDIR2 "/tmp/jffs2/share/tuxbox/enigma/boot"
+#define SKINDIR "/var/tuxbox/config/enigma/boot"
 
 void mountJFFS2()
 {
@@ -101,7 +100,7 @@ void loadconfig(eString& mpoint, eString& selectedEntry, eString& inetd, eString
 				mpoint = line.right(line.length() - 11);
 			else 
 			if (line.find("kill_inetd") == 0)	
-				inetd = line.right(line.length() - 12);
+				inetd = line.right(line.length() - 11);
 		}
 		configFile.close();
 	}
@@ -129,29 +128,26 @@ void saveconfig(eString mpoint, eString selectedEntry, eString inetd, eString ti
 }
 
 
-eString getSkins(eString selectedEntry, int *selentry)
-{
-	eString skins;
-	
-	eString dir[2];
-	dir[0] = SKINDIR1;
-	dir[1] = SKINDIR2;
-
-	mountJFFS2();
-	
+eString getSkins(eString skinPath, eString selectedEntry, int *selentry)
+{	
 	*selentry = 0;
 	int curentry = 0;
 	
-	for (int i = 0; i < 2; i++)
+	mountJFFS2();
+	
+	eString skins = "<option value=\"/share/tuxbox/enigma/boot/blank\">blank.skin</option>";
+	
+	if (skinPath.find("/var") == 0)
 	{
-		DIR *d = opendir(dir[i].c_str());
+		skinPath = "/tmp/jffs2" + skinPath.right(skinPath.length() - 4);
+		DIR *d = opendir(skinPath.c_str());
 		if (d)
 		{
 			while (struct dirent *e = readdir(d))
 			{
 				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
 				{
-					eString location = dir[i] + "/" + eString(e->d_name);
+					eString location = skinPath + "/" + eString(e->d_name);
 					eString name = eString(e->d_name);
 					
 					if (location.right(5) == ".skin")
@@ -159,6 +155,8 @@ eString getSkins(eString selectedEntry, int *selentry)
 						if (name == selectedEntry)
 							*selentry = curentry;
 						location = location.left(location.length() - 5);
+						if (location.find("/tmp/jffs2") == 0)
+							location = "/var" + location.right(location.length() - 10);
 						skins = skins + "<option value=\"" + location + "\"" + eString((*selentry == curentry) ? " selected" : "") + ">" + name + "</option>";
 						
 						curentry++;
@@ -169,12 +167,6 @@ eString getSkins(eString selectedEntry, int *selentry)
 		}
 	}
 	unmountJFFS2();
-	
-	if (!skins)
-	{
-		skins = "<option value=\"/share/tuxbox/enigma/boot/blank\">blank</option>";
-		selentry = 0;
-	}
 	
 	return skins;
 }
@@ -237,7 +229,10 @@ void activateMenu(eString menu)
 					}
 				}
 			}
-			file += line;
+			if (file)
+				file += "\n" + line;
+			else
+				file = line;
 		}
 	}
 	initFile.close();
@@ -560,14 +555,14 @@ eString editBootManagerSettings(eString request, eString dirpath, eString opts, 
 	
 	int selentry = 0;
 	eString result = readFile(TEMPLATE_DIR + "bootMgrSettings.tmp");
-	result.strReplace("#SKINOPTIONS#", getSkins(selectedEntry, &selentry));
+	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, selectedEntry, &selentry));
 	result.strReplace("#SELECTEDINDEX#", eString().sprintf("%d", selentry));
 	result.strReplace("#MPOINT#", mpoint);
 	result.strReplace("#SELECTEDENTRY#", selectedEntry);
 	result.strReplace("#INETD#", inetd);
 	result.strReplace("#TIMEOUTVALUE#", timeoutValue);
 	result.strReplace("#VIDEOFORMAT#", videoFormat);
-	result.strReplace("#SKINPATH#", skinPath);
+	result.strReplace("#SKINPATH#", SKINDIR);
 	result.strReplace("#SKINNAME#", skinName);
 	
 	result.strReplace("#BUTTONSUBMIT#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
@@ -588,6 +583,13 @@ eString setBootManagerSettings(eString request, eString dirpath, eString opts, e
 	eString videoFormat = opt["videoFormat"];
 	eString skinPath = opt["skinPath"];
 	eString skinName = opt["skinName"];
+	eString skinPath2 = skinName;
+	unsigned int pos = skinName.find_last_of("/");
+	if (pos != eString::npos && pos > 0)
+	{
+		skinName = skinName.right(skinName.length() - pos - 1);
+		skinPath2 = skinPath2.left(pos);
+	}
 	
 	saveconfig(mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName);
 	
