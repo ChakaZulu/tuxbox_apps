@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.15 2005/10/03 20:14:36 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.16 2005/10/04 20:01:25 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -228,7 +228,7 @@ bool stmenu::loadconfig()
 	strcpy(skin_path, "/share/tuxbox/enigma/boot");
 	strcpy(skin_name, "blank.skin");
 	strcpy(mpoint, "/var/mnt/usb");
-	inetd = 0;
+	inetd = 1;
 	if (FILE *in = fopen(CONFIGFILE, "rt"))
 	{
 		printf("[STARTMENU] config loaded\n");
@@ -364,7 +364,7 @@ void stmenu::newscript(std::string image)
 			fprintf(f, "killall -9 init\n");
 			if (strcmp(mpoint, "/hdd"))
 				fprintf(f, "umount /hdd\n");
-			fprintf(f, "rm %s\n",SCRIPTFILE);
+			fprintf(f, "rm %s\n", SCRIPTFILE);
 			fprintf(f, "chroot %s ../go\n", image.c_str());
 		}
 		else
