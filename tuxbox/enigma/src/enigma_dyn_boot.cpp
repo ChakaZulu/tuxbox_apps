@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.5 2005/10/04 21:08:44 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.6 2005/10/05 05:58:07 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -187,7 +187,7 @@ void activateMenu(eString menu)
 	{
 		while (getline(initFile, line, '\n'))
 		{
-			if (line.find("fwpro"))
+			if (line.find("fwpro") != eString::npos)
 			{
 				int pos = line.find_first_not_of(" ");
 				active = (line[pos] != '#' && line[pos] != ':');
@@ -208,7 +208,7 @@ void activateMenu(eString menu)
 					}
 				}
 			}
-			if (line.find("bm.sh"))
+			if (line.find("bm.sh") != eString::npos)
 			{
 				int pos = line.find_first_not_of(" ");
 				active = (line[pos] != '#' && line[pos] != ':');
