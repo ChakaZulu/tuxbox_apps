@@ -2,10 +2,6 @@
 	<head>
 		<title>BootManager Settings</title>
 		<script>
-			function init()
-			{
-				document.settings.skinName.selectedIndex = #SELECTEDINDEX#;
-			}
 			function submitSettings()
 			{
 				var i = document.settings.skinName.selectedIndex;
@@ -22,13 +18,13 @@
 			}
 		</script>
 	</head>
-	<body id="mainbody" style="padding: 10px; background-color: #F4F4F4" onLoad="init()">
+	<body id="mainbody" style="padding: 10px; background-color: #F4F4F4">
 		<form name="settings">
 			<table border="0" cellspacing="5" cellpadding="0">
 			<tr>
 				<td>Skin path:</td>
 				<td>
-					<input style="color:#000000" name="skinPath" type="text" size="50" maxlength="50" value="#SKINPATH#">
+					<input style="color:#000000" name="skinPath" type="text" size="50" maxlength="50" value="#SKINPATH#" readonly>&nbsp;(all skins must be in this directory.)
 				</td>
 			</tr>
 			<tr>

@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.8 2005/10/05 20:39:50 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.9 2005/10/05 21:34:38 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -128,14 +128,10 @@ void saveconfig(eString mpoint, eString selectedEntry, eString inetd, eString ti
 }
 
 
-eString getSkins(eString skinPath, eString selectedEntry, int *selentry)
+eString getSkins(eString skinPath, eString skinName)
 {	
-	*selentry = 0;
-	int curentry = 0;
-	
+	eString skins;
 	mountJFFS2();
-	
-	eString skins = "<option value=\"/share/tuxbox/enigma/boot/blank\">blank.skin</option>";
 	
 	if (skinPath.find("/var") == 0)
 	{
@@ -152,14 +148,10 @@ eString getSkins(eString skinPath, eString selectedEntry, int *selentry)
 					
 					if (location.right(5) == ".skin")
 					{
-						if (name == selectedEntry)
-							*selentry = curentry;
 						location = location.left(location.length() - 5);
 						if (location.find("/tmp/jffs2") == 0)
 							location = "/var" + location.right(location.length() - 10);
-						skins = skins + "<option value=\"" + location + "\"" + eString((*selentry == curentry) ? " selected" : "") + ">" + name + "</option>";
-						
-						curentry++;
+						skins = skins + "<option value=\"" + location + "\"" + eString((skinName == name) ? " selected" : "") + ">" + name + "</option>";
 					}
 				}
 			}
@@ -167,6 +159,9 @@ eString getSkins(eString skinPath, eString selectedEntry, int *selentry)
 		}
 	}
 	unmountJFFS2();
+	
+	if (!skins)
+		skins = "<option value=\"" + skinPath + "\">none</option>";
 	
 	return skins;
 }
@@ -553,10 +548,8 @@ eString editBootManagerSettings(eString request, eString dirpath, eString opts, 
 	eString mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName;
 	loadconfig(mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName);
 	
-	int selentry = 0;
 	eString result = readFile(TEMPLATE_DIR + "bootMgrSettings.tmp");
-	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, selectedEntry, &selentry));
-	result.strReplace("#SELECTEDINDEX#", eString().sprintf("%d", selentry));
+	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, skinName));
 	result.strReplace("#MPOINT#", mpoint);
 	result.strReplace("#SELECTEDENTRY#", selectedEntry);
 	result.strReplace("#INETD#", inetd);
@@ -587,7 +580,7 @@ eString setBootManagerSettings(eString request, eString dirpath, eString opts, e
 	unsigned int pos = skinName.find_last_of("/");
 	if (pos != eString::npos && pos > 0)
 	{
-		skinName = skinName.right(skinName.length() - pos - 1);
+		skinName = skinName.right(skinName.length() - pos - 1) + ".skin";
 		skinPath = skinPath.left(pos);
 	}
 	
