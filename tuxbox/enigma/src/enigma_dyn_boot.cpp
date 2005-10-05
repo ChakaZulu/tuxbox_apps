@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.7 2005/10/05 20:36:12 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.8 2005/10/05 20:39:50 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -587,8 +587,8 @@ eString setBootManagerSettings(eString request, eString dirpath, eString opts, e
 	unsigned int pos = skinName.find_last_of("/");
 	if (pos != eString::npos && pos > 0)
 	{
-		skinName = skinName.right(skinName.length() - pos - 1) + ".skin";
-		skinPath = skinName.left(pos);
+		skinName = skinName.right(skinName.length() - pos - 1);
+		skinPath = skinPath.left(pos);
 	}
 	
 	saveconfig(mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName);
