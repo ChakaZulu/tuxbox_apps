@@ -1314,6 +1314,7 @@ int TransponderScan::Exec()
 						eTransponderList::getInstance()->removeNewFlags(sapi->getOrbitalPosition());
 					else
 						eTransponderList::getInstance()->removeNewFlags(-1);
+					eDVB::getInstance()->settings->saveServices();
 				}
 
 				toScan.erase(toScan.begin());
@@ -1375,6 +1376,8 @@ int TransponderScan::Exec()
 				else
 					eTransponderList::getInstance()->removeNewFlags(-1);
 				remove_new_flags=false;
+
+				eDVB::getInstance()->settings->saveServices();
 			}
 
 			text.sprintf(_("The transponder scan has finished and found \n   %i new Transponders,\n   %i new TV Services,\n   %i new Radio Services and\n   %i new Data Services.\n%i Transponders with %i Services scanned."), scan.newTransponders, scan.newTVServices, scan.newRadioServices, scan.newDataServices, scan.tpScanned, scan.servicesScanned );
