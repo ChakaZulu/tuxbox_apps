@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.18 2005/10/05 21:34:37 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.19 2005/10/05 21:43:23 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -226,7 +226,7 @@ bool stmenu::loadconfig()
 	videoformat = 1;
 	selentry_st[0] = '\0';
 	strcpy(skin_path, "/var/tuxbox/config/enigma/boot");
-	strcpy(skin_name, "");
+	strcpy(skin_name, "blank.skin");
 	strcpy(mpoint, "/var/mnt/usb");
 	inetd = 1;
 	if (FILE *in = fopen(CONFIGFILE, "rt"))
