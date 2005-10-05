@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.6 2005/10/05 05:58:07 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.7 2005/10/05 20:36:12 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -266,13 +266,13 @@ eString getMenus()
 	{
 		while (getline(initFile, line, '\n'))
 		{
-			if (line.find("fwpro"))
+			if (line.find("fwpro") != eString::npos)
 			{
 				int pos = line.find_first_not_of(" ");
 				fw = line[pos] != '#' && line[pos] != ':';
 				fwInstalled = true;
 			}
-			if (line.find("bm.sh"))
+			if (line.find("bm.sh") != eString::npos)
 			{
 				int pos = line.find_first_not_of(" ");
 				bm = line[pos] != '#' && line[pos] != ':';
@@ -581,14 +581,14 @@ eString setBootManagerSettings(eString request, eString dirpath, eString opts, e
 	eString inetd = opt["inetd"];
 	eString timeoutValue = opt["timeoutValue"];
 	eString videoFormat = opt["videoFormat"];
-	eString skinPath = opt["skinPath"];
+//	eString skinPath = opt["skinPath"];
 	eString skinName = opt["skinName"];
-	eString skinPath2 = skinName;
+	eString skinPath = skinName;
 	unsigned int pos = skinName.find_last_of("/");
 	if (pos != eString::npos && pos > 0)
 	{
-		skinName = skinName.right(skinName.length() - pos - 1);
-		skinPath2 = skinPath2.left(pos);
+		skinName = skinName.right(skinName.length() - pos - 1) + ".skin";
+		skinPath = skinName.left(pos);
 	}
 	
 	saveconfig(mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName);
