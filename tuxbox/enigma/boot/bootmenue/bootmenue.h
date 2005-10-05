@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.h,v 1.7 2005/10/03 14:44:19 digi_casi Exp $
+ * $Id: bootmenue.h,v 1.8 2005/10/05 20:01:00 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -66,7 +66,7 @@ class stmenu: public Object
 	void rc_event(unsigned short key);
 	void mainloop();
 	bool loadconfig();
-	void saveconfig();
+	void saveconfig(bool);
 	bool loadskin();
 	bool loadimagelist();
 	void timeout();

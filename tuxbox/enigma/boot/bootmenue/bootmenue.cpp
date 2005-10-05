@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.16 2005/10/04 20:01:25 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.17 2005/10/05 20:01:00 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -145,6 +145,8 @@ void stmenu::mainloop()
 {
 	while (!doexit)
 		usleep(50000);
+		
+	saveconfig(true);
 
 	//clear menu
 	lcd->draw_fill_rect (0, 0, 120, 64, CLCDDisplay::PIXEL_OFF);
@@ -153,8 +155,6 @@ void stmenu::mainloop()
 
 	newscript(imagelist[selentry].location);
 	goscript(imagelist[selentry].location);
-	
-	saveconfig();
 }
 
 bool stmenu::loadskin()
@@ -263,20 +263,24 @@ bool stmenu::loadconfig()
 		fclose(in);
 	}
 	else
+	{
 		printf("[BOOTMANAGER] <%s not found>, using defaults...\n", CONFIGFILE);
+		saveconfig(false);
+	}
 	
 	tmp_ver = std::string("BootManager - ") + std::string(VERSION);
 
 	return true;
 }
 
-void stmenu::saveconfig()
+void stmenu::saveconfig(bool saveSelEntry)
 {
 	if (FILE *f = fopen(CONFIGFILE, "w"))
 	{
 		fprintf(f, "#BootManager-Config (%s)\n", VERSION);
 		fprintf(f, "mountpoint=%s\n", mpoint);
-		fprintf(f, "selentry=%s\n", imagelist[selentry].location.c_str());
+		if (saveSelEntry)
+			fprintf(f, "selentry=%s\n", imagelist[selentry].location.c_str());
 		fprintf(f, "kill_inetd=%d\n", inetd);
 		fprintf(f, "timeout=%d\n", timeoutValue);
 		fprintf(f, "videoformat=%d\n", videoformat);
