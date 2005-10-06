@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.9 2005/10/05 21:34:38 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.10 2005/10/06 21:11:41 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -73,7 +73,7 @@ void loadconfig(eString& mpoint, eString& selectedEntry, eString& inetd, eString
 	skinPath = "/share/tuxbox/enigma/boot";
 	skinName = "blank.skin";
 	mpoint = "/var/mnt/usb";
-	inetd = "0";
+	inetd = "1";
 	
 	ifstream configFile(CONFIGFILE);
 	eString line;
