@@ -634,19 +634,23 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	}
 	
 	strncpy(&(filename[pos]),expandedTemplate.c_str(),511-pos);
-	createRecordingDir(filename);
 
-
-	stream2file_error_msg_t error_msg = ::start_recording(filename,
-							      getCommandString(CMD_VCR_RECORD, channel_id, epgid, apids).c_str(),
-							      Use_O_Sync,
-							      Use_Fdatasync,
-							      ((unsigned long long)SplitSize) * 1048576ULL,
-							      numpids,
-							      pids,
-							      sptsmode,
-							      RingBuffers);
-
+	stream2file_error_msg_t error_msg;
+	if (!createRecordingDir(filename))
+	{
+		error_msg = STREAM2FILE_INVALID_DIRECTORY;
+	} else
+	{
+		error_msg = ::start_recording(filename,
+					      getCommandString(CMD_VCR_RECORD, channel_id, epgid, apids).c_str(),
+					      Use_O_Sync,
+					      Use_Fdatasync,
+					      ((unsigned long long)SplitSize) * 1048576ULL,
+					      numpids,
+					      pids,
+					      sptsmode,
+					      RingBuffers);
+	}
 
 	if (error_msg == STREAM2FILE_OK)
 	{
