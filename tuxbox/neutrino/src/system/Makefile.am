@@ -13,4 +13,5 @@ libneutrino_system_a_SOURCES = \
 	localize.cpp setting_helpers.cpp debug.cpp \
 	ping.c flashtool.cpp httptool.cpp \
 	settings.cpp lastchannel.cpp \
-	configure_network.cpp fsmounter.cpp helper.cpp
+	configure_network.cpp fsmounter.cpp helper.cpp \
+	checksquashfs.cpp
