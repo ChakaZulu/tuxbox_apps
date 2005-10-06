@@ -52,7 +52,9 @@
 #include <system/flashtool.h>
 #include <system/httptool.h>
 
-#ifndef SQUASHFS
+#ifdef SQUASHFS
+#include <system/checksquashfs.h>
+#else
 #include <libcramfs.h>
 #endif
 
@@ -328,8 +330,10 @@ bool CFlashUpdate::checkVersion4Update()
 		hide();
 
 #ifdef SQUASHFS
-#warning no squash filesystem version check in non-internet update mode
-		strcpy(msg, g_Locale->getText(LOCALE_FLASHUPDATE_SQUASHFS_NOVERSION));
+    CCheckSquashfs* checkSquashfs;
+	checkSquashfs = new CCheckSquashfs();
+
+	versionInfo = new CFlashVersionInfo(checkSquashfs->GetVersionInfo(UPDATE_LOCAL_FILENAME));
 #else
 		//bestimmung der CramfsDaten
 		char cramfsName[30];
@@ -340,7 +344,7 @@ bool CFlashUpdate::checkVersion4Update()
 
 		msg_body = LOCALE_FLASHUPDATE_MSGBOX_MANUAL;
 	}
-#ifndef SQUASHFS
+
 	sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getReleaseCycle(), versionInfo->getType());
 
 	if (strcmp(RELEASE_CYCLE, versionInfo->getReleaseCycle()))
@@ -358,7 +362,7 @@ bool CFlashUpdate::checkVersion4Update()
 	}
 
 	delete versionInfo;
-#endif
+
 	return (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") == CMessageBox::mbrYes); // UTF-8
 }
 

@@ -42,19 +42,25 @@ CCheckSquashfs::CCheckSquashfs()
 
 const char * CCheckSquashfs::GetVersionInfo(const char * squashfsimage)
 {
+	char versionFile[] = ".version";
+	char versionPath[sizeof(versionFile) + sizeof(LOCAL_MOUNT_DIR)+5] = "";
+
+	sprintf((char*) versionPath, "%s/.version", LOCAL_MOUNT_DIR);
+
 	if (mountSquashfsImage(squashfsimage))
 	{
-		char versionsFile[50] = "";
-		sprintf((char*) versionsFile, "%s/.version", LOCAL_MOUNT_DIR);
-
 		CConfigFile configfile('\t');
-		const char * versionString = (configfile.loadConfig(versionsFile)) ? (configfile.getString( "version", "????????????????").c_str()) : "????????????????";
+		const char * versionString = (configfile.loadConfig(versionPath)) ? (configfile.getString( "version", "????????????????").c_str()) : "????????????????";
+
+		printf("[chkSquashfs] read version string: %s\n", versionString);
 
 		unmountSquashfsImage(squashfsimage);
 
 		return versionString;
 	} else {
-		const char * versionString = "????????????????";
+		printf("[chkSquashfs] mount error\n");
+
+		return "????????????????";
 	}
 }
 
@@ -62,22 +68,22 @@ bool CCheckSquashfs::mountSquashfsImage(const char * squashfsimage)
 {
 	std::string cmd;
 
-	if (mkdir(LOCAL_MOUNT_DIR, 0700) < 0)
+	if (mkdir(LOCAL_MOUNT_DIR, 0700) != 0)
 	{
-		printf("[chkSquashfs] can't create mount directory: %s ", LOCAL_MOUNT_DIR);
+		printf("[chkSquashfs] can't create mount directory: %s\n", LOCAL_MOUNT_DIR);
 		return false;
 
 	} else	{
-		cmd  = "mount -o loop -t squashfs ";
+		cmd  = "mount -o loop -o ro -t squashfs ";
 		cmd += TMPPATH;
 		cmd += squashfsimage;
 		cmd += " ";
 		cmd += LOCAL_MOUNT_DIR;
 		system (cmd.c_str());
 
-		if (system (cmd.c_str()) < 0)
+		if (system(cmd.c_str()) != 0)
 		{
-			printf("[chkSquashfs] can't mount squashfs image %s ", squashfsimage);
+			printf("[chkSquashfs] can't mount squashfs image %s\n", squashfsimage);
 			return false;
 
 		} else {
@@ -90,6 +96,10 @@ void CCheckSquashfs::unmountSquashfsImage(const char * squashfsimage)
 {
 	umount(LOCAL_MOUNT_DIR);
 
-	if (rmdir(LOCAL_MOUNT_DIR) < 0)
-		printf("[chkSquashfs] can't remove mount directory: %s ", LOCAL_MOUNT_DIR);
+	if (rmdir(LOCAL_MOUNT_DIR) != 0)
+	{
+		umount(LOCAL_MOUNT_DIR);
+		if (rmdir(LOCAL_MOUNT_DIR) != 0)
+			printf("[chkSquashfs] can't remove mount directory: %s\n", LOCAL_MOUNT_DIR);
+	}
 }
