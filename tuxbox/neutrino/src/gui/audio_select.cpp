@@ -84,7 +84,7 @@ int CAudioSelectMenuHandler::exec(CMenuTarget* parent, const std::string &action
 
 int CAudioSelectMenuHandler::doMenu ()
 {
-	CMenuWidget AudioSelector(LOCALE_AUDIOSELECT_MENU_HEAD, "audio.raw", 360);
+	CMenuWidget AudioSelector(LOCALE_AUDIOSELECTMENUE_HEAD, "audio.raw", 360);
 
 
 	// -- setup menue due to Audio PIDs
@@ -106,7 +106,7 @@ int CAudioSelectMenuHandler::doMenu ()
 	// -- setup menue for to Dual Channel Stereo
 
 
-	if (1) {
+	if (g_settings.audio_left_right_selectable) {
 
 	   AudioSelector.addItem(GenericMenuSeparatorLine);
 

@@ -728,6 +728,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
 	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
 	g_settings.audiochannel_up_down_enable = configfile.getBool("audiochannel_up_down_enable", false);
+	g_settings.audio_left_right_selectable = configfile.getBool("audio_left_right_selectable", false);
 
 	//screen configuration
 	g_settings.screen_StartX = configfile.getInt32( "screen_StartX", 37 );
@@ -1070,6 +1071,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "repeat_blocker", g_settings.repeat_blocker );
 	configfile.setString( "repeat_genericblocker", g_settings.repeat_genericblocker );
 	configfile.setBool  ( "audiochannel_up_down_enable", g_settings.audiochannel_up_down_enable );
+	configfile.setBool  ( "audio_left_right_selectable", g_settings.audio_left_right_selectable );
 
 	//screen configuration
 	configfile.setInt32( "screen_StartX", g_settings.screen_StartX );
@@ -1980,6 +1982,20 @@ const CMenuOptionChooser::keyval AUDIOMENU_AVS_CONTROL_OPTIONS[AUDIOMENU_AVS_CON
 	{ CControld::TYPE_LIRC, LOCALE_AUDIOMENU_LIRC }
 };
 
+#define AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT 2
+const CMenuOptionChooser::keyval AUDIOMENU_LEFT_RIGHT_SELECTABEL_OPTIONS[AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT] =
+{
+      { true, LOCALE_OPTIONS_ON },
+      { false, LOCALE_OPTIONS_OFF }
+};
+
+#define AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_COUNT 2
+const CMenuOptionChooser::keyval AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_OPTIONS[AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_COUNT] =
+{
+        { true, LOCALE_OPTIONS_ON },
+        { false, LOCALE_OPTIONS_OFF }
+};
+
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier)
 {
 	audioSettings.addItem(GenericMenuSeparator);
@@ -1989,6 +2005,11 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_ANALOGOUT, &g_settings.audio_AnalogMode, AUDIOMENU_ANALOGOUT_OPTIONS, AUDIOMENU_ANALOGOUT_OPTION_COUNT, true, audioSetupNotifier);
 
 	audioSettings.addItem( oj );
+	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AUDIO_LEFT_RIGHT_SELECTABLE, &g_settings.audio_left_right_selectable, AUDIOMENU_LEFT_RIGHT_SELECTABEL_OPTIONS, AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT, true, audioSetupNotifier);
+	audioSettings.addItem( oj );
+
+	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE, &g_settings.audiochannel_up_down_enable, AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_OPTIONS, AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_COUNT, true, audioSetupNotifier);
+        audioSettings.addItem( oj );
 
 	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_DOLBYDIGITAL, &g_settings.audio_DolbyDigital, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, audioSetupNotifier);
 	audioSettings.addItem(oj);
@@ -3457,6 +3478,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if( msg == CRCInput::RC_green )
 			{
 				// -- new Audio Selector Menu (rasc 2005-08-30)
+		       		if (g_settings.audio_left_right_selectable || 
+				    g_RemoteControl->current_PIDs.APIDs.size() > 1)
 				{  CAudioSelectMenuHandler  *audio_menu;
 
 				   audio_menu = new CAudioSelectMenuHandler;

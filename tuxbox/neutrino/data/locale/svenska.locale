@@ -129,6 +129,8 @@ apids.hint_2 i hexadec separerade med ' '
 apidselector.head Välj språk
 audiomenu.PCMOffset Sänk volymen (PCM)
 audiomenu.analogout Analog utgång
+audiomenu.audio_left_right_selectable Höger/vänster kanal som mono
+audiomenu.audiochannel_up_down_enable Ljudkanaler blädderbara
 audiomenu.avs avs
 audiomenu.avs_control Volymkontroll avs/ost
 audiomenu.dolbydigital Dolby Digital
@@ -483,7 +485,7 @@ mainmenu.recording_start start
 mainmenu.recording_stop stopp
 mainmenu.scartmode Scart-läge
 mainmenu.scripts Skript
-mainmenu.service Program
+mainmenu.service Service
 mainmenu.settings Inställningar
 mainmenu.shutdown Avstängning
 mainmenu.sleeptimer Sovtimer
@@ -683,6 +685,8 @@ recordingmenu.choose_direct_rec_dir välj mapp vid direkt inspel.
 recordingmenu.defdir inspelningsmapp
 recordingmenu.epg_for_filename långa filnamn (med EPG data)
 recordingmenu.file direkt (fil)
+recordingmenu.filename_template Schablon för filnamn
+recordingmenu.filename_template_hint %c=Kanal, %i=Titel, %d=Datum, %t=Tid
 recordingmenu.filesettings direktinspelning inställning
 recordingmenu.head Inspelningsinställningar
 recordingmenu.help Inspelningsenheter:\n--------------------------\nserver:\nmed en streaming programvara på en PC\n\n(analog) vcr:\nmed ett VCR uttag\n\ndirekt (fil):\ndirekt till en NFS-monterad mapp\neller till en intern hårddisk\nTS: använd spts-läge\nPES: använd inte spts-läget\n\n\nMax. filstorlek:\n---------------------\nNFS V2: 2 GB (2048 MB)\nNFS V3: så stor hårddisken är (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
@@ -760,7 +764,7 @@ screensetup.lowerright grön = inställning nedre höger
 screensetup.upperleft röd = inställning övre vänster
 servicemenu.getplugins Läs in plugins
 servicemenu.getplugins_hint Läser in plugins,\nvar god vänta.
-servicemenu.head Program
+servicemenu.head Service
 servicemenu.imageinfo Bildinformation
 servicemenu.reload Läs in kanallistor
 servicemenu.reload_hint Läser in kanallistor,\nvar god vänta.

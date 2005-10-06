@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.56 2005/10/03 00:55:37 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.57 2005/10/06 20:09:49 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -156,6 +156,8 @@ const char * locale_real_names[] =
 	"apidselector.head",
 	"audiomenu.PCMOffset",
 	"audiomenu.analogout",
+	"audiomenu.audio_left_right_selectable",
+	"audiomenu.audiochannel_up_down_enable",
 	"audiomenu.avs",
 	"audiomenu.avs_control",
 	"audiomenu.dolbydigital",
