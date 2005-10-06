@@ -683,6 +683,8 @@ rclock.title Lock Remote Control
 rclock.unlockmsg Remote control reactivated.
 recordingmenu.choose_direct_rec_dir choose dir on imm. recording
 recordingmenu.defdir recording directory
+recordingmenu.dir_permissions directory permissions
+recordingmenu.dir_permissions_hint permissions in 'chmod' style
 recordingmenu.epg_for_filename long filenames (with EPG data)
 recordingmenu.file direct (file)
 recordingmenu.filename_template template for filename

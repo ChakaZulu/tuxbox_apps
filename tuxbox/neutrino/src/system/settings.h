@@ -177,7 +177,8 @@ struct SNeutrinoSettings
 	int recording_epg_for_filename;
 #define REC_FILENAME_TEMPLATE_NR_OF_ENTRIES 4
 	std::string recording_filename_template[REC_FILENAME_TEMPLATE_NR_OF_ENTRIES];
-	
+	char recording_dir_permissions[REC_FILENAME_TEMPLATE_NR_OF_ENTRIES][4];
+
 	//streaming
 	int  streaming_type;
 	std::string streaming_server_ip;

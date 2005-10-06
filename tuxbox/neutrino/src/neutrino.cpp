@@ -686,7 +686,9 @@ int CNeutrinoApp::loadSetup()
 	{
 		sprintf(cfg_key, "recording_filename_template_%d", i);
 		g_settings.recording_filename_template[i] = configfile.getString(cfg_key, "%c_%i_%d_%t");
-		
+		sprintf(cfg_key, "recording_dir_permissions_%d", i);
+		strncpy(g_settings.recording_dir_permissions[i], configfile.getString(cfg_key,"755").c_str(),3);
+		g_settings.recording_dir_permissions[i][3] = '\0';
 	}
 
 	//streaming (server)
@@ -1030,6 +1032,8 @@ void CNeutrinoApp::saveSetup()
 	{
 		sprintf(cfg_key, "recording_filename_template_%d", i);
 		configfile.setString( cfg_key, g_settings.recording_filename_template[i] );
+		sprintf(cfg_key, "recording_dir_permissions_%d", i);
+		configfile.setString( cfg_key, g_settings.recording_dir_permissions[i] );
 	}
 
 	//streaming
@@ -2260,6 +2264,9 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput * recordingSettings_filenameTemplate = new CStringInput(LOCALE_RECORDINGMENU_FILENAME_TEMPLATE, &g_settings.recording_filename_template[0], 21, LOCALE_RECORDINGMENU_FILENAME_TEMPLATE_HINT, LOCALE_IPSETUP_HINT_2, "%/-_abcdefghijklmnopqrstuvwxyz0123456789 ");
 	CMenuForwarder* mf11 = new CMenuForwarder(LOCALE_RECORDINGMENU_FILENAME_TEMPLATE, true, g_settings.recording_filename_template[0],recordingSettings_filenameTemplate);
 
+	CStringInput * recordingSettings_dirPermissions = new CStringInput(LOCALE_RECORDINGMENU_DIR_PERMISSIONS, g_settings.recording_dir_permissions[0], 3, LOCALE_RECORDINGMENU_DIR_PERMISSIONS_HINT, LOCALE_IPSETUP_HINT_2, "01234567");
+	CMenuForwarder* mf12 = new CMenuForwarder(LOCALE_RECORDINGMENU_DIR_PERMISSIONS, true, g_settings.recording_dir_permissions[0],recordingSettings_dirPermissions);
+
 	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,oj12);
 
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, RECORDINGMENU_RECORDING_TYPE_OPTIONS, RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT, true, RecordingNotifier);
@@ -2299,6 +2306,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	directRecordingSettings->addItem(oj10);
 	directRecordingSettings->addItem(oj11);
 	directRecordingSettings->addItem(mf11);
+	directRecordingSettings->addItem(mf12);
 	
 	recordingstatus = 0;
 }

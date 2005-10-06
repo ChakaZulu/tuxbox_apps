@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.57 2005/10/06 20:09:49 barf Exp $
+ * $Id: locals_intern.h,v 1.58 2005/10/06 20:35:35 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -710,6 +710,8 @@ const char * locale_real_names[] =
 	"rclock.unlockmsg",
 	"recordingmenu.choose_direct_rec_dir",
 	"recordingmenu.defdir",
+	"recordingmenu.dir_permissions",
+	"recordingmenu.dir_permissions_hint",
 	"recordingmenu.epg_for_filename",
 	"recordingmenu.file",
 	"recordingmenu.filename_template",

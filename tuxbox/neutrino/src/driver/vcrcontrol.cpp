@@ -673,6 +673,8 @@ void CVCRControl::CFileDevice::appendEPGInfo(char *buf, unsigned int size, const
 	
 	CSectionsdClient sdc;
 	CShortEPGData epgdata;
+	if (size > 0)
+		buf[0] = '\0';
 	if (sdc.getEPGidShort(epgid, &epgdata))
 	{
 		if (!(epgdata.title.empty()) && epgdata.title.size() < size)
@@ -702,6 +704,8 @@ void CVCRControl::CFileDevice::appendEPGInfo(char *buf, unsigned int size, const
 
 void CVCRControl::CFileDevice::appendChannelName(char *buf, unsigned int size, const t_channel_id channel_id) {
 	
+	if (size > 0)
+		buf[0] = '\0';
 	std::string ext_channel_name = g_Zapit->getChannelName(channel_id);
 	if (ext_channel_name.size() < size)
 	{
@@ -732,17 +736,24 @@ bool CVCRControl::CFileDevice::createRecordingDir(const char *filename)
 		*pos = '\0';
 		start = strlen(filename)+1;
 		struct stat statInfo;
-		int res = stat(filename,&statInfo);
-		if (res == -1)
+		if (stat(filename,&statInfo) == -1)
 		{
 			if (errno == ENOENT)
 			{	
-				res = mkdir(filename,0755);
-				if (res != 0) 
+				if (mkdir(filename,0000) == 0)
+				{
+					mode_t mode = strtoul(g_settings.recording_dir_permissions[0],(char**)NULL,8);
+					if (chmod(filename,mode) != 0)
+					{
+						perror("[CFileDevice] chmod:");
+						*pos = '/';
+						return false;
+					}
+				} else
 				{
 					perror("[CFileDevice] mkdir");
-					return false;
 					*pos = '/';
+					return false;
 				}
 				
 			} else {
