@@ -75,6 +75,7 @@ enigma/getset/Makefile
 enigma/dbswitch/Makefile
 enigma/weather/Makefile
 enigma/weather/icons/Makefile
+enigma/dreamflash/Makefile
 tuxbox-plugins.pc
 ])
 
