@@ -255,7 +255,8 @@ bool CFlashUpdate::checkVersion4Update()
 		versionInfo = new CFlashVersionInfo(newVersion);
 
 		msg_body = LOCALE_FLASHUPDATE_MSGBOX;
-#ifdef SQUASHFS
+#ifdef SQUASHFS_XXXXXXXX  // -- #ifdef block to be deleted by request of Riker
+			  // -- (2005-10-09 rasc)  renamed macro, to prevent compilation
 		sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getReleaseCycle(), versionInfo->getType());
 
 		if (strcmp(RELEASE_CYCLE, versionInfo->getReleaseCycle()))
