@@ -129,11 +129,11 @@ apids.hint_2 getrennt durch ' ' in hexadezimaler Form
 apidselector.head Sprachauswahl
 audiomenu.PCMOffset Lautstärkeabsenkung PCM
 audiomenu.analogout Analog-Ausgang
-audiomenu.audio_left_right_selectable Links/Rechts als mono wählbar
-audiomenu.audiochannel_up_down_enable Audiokanäle blätterbar
+audiomenu.audio_left_right_selectable in Tonwahl wählbar
+audiomenu.audiochannel_up_down_enable Audio mit Links/Rechts wählbar
 audiomenu.avs avs
-audiomenu.avs_control Volume Steuerung avs/ost
-audiomenu.dolbydigital Dolby Digital automatisch
+audiomenu.avs_control Volume Steuerung
+audiomenu.dolbydigital Dolby Digital Default
 audiomenu.head Audio-Einstellungen
 audiomenu.lirc lirc
 audiomenu.monoleft mono links

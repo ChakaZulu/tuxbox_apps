@@ -129,11 +129,11 @@ apids.hint_2 i hexadec separerade med ' '
 apidselector.head Välj språk
 audiomenu.PCMOffset Sänk volymen (PCM)
 audiomenu.analogout Analog utgång
-audiomenu.audio_left_right_selectable Höger/vänster kanal som mono
-audiomenu.audiochannel_up_down_enable Ljudkanaler blädderbara
+audiomenu.audio_left_right_selectable väljbar i Ljudmenu
+audiomenu.audiochannel_up_down_enable Ljudval med höger/vänster 
 audiomenu.avs avs
-audiomenu.avs_control Volymkontroll avs/ost
-audiomenu.dolbydigital Dolby Digital
+audiomenu.avs_control Volymkontroll 
+audiomenu.dolbydigital Dolby Digital som default
 audiomenu.head Ljudinställningar
 audiomenu.lirc lirc
 audiomenu.monoleft mono vänster
