@@ -24,7 +24,10 @@
 			<tr>
 				<td>Skin path:</td>
 				<td>
-					<input style="color:#000000" name="skinPath" type="text" size="50" maxlength="50" value="#SKINPATH#" readonly>&nbsp;(all skins must be in this directory.)
+					<input style="color:#000000" name="skinPath" type="text" size="50" maxlength="50" value="#SKINPATH#" readonly>&nbsp;
+				</td>
+				<td>
+					all skins must be in this directory
 				</td>
 			</tr>
 			<tr>
@@ -34,36 +37,42 @@
 						#SKINOPTIONS#
 					</select>
 				</td>
+				<td>&nbsp;</td>
 			</tr>
 			<tr>
 				<td>Menu timeout:</td>
 				<td>
 					<input style="color:#000000" name="timeoutValue" type="text" size="3" maxlength="3" value="#TIMEOUTVALUE#">
 				</td>
+				<td>&nbsp;</td>
 			</tr>
 			<tr>
-				<td>Mount Point (for images):</td>
+				<td>Mount Point:</td>
 				<td>
 					<input style="color:#000000" name="mpoint" type="text" size="50" maxlength="50" value="#MPOINT#">
 				</td>
+				<td>root directory of images</td>
 			</tr>
 			<tr>
-				<td>Kill inetd (0/1):</td>
+				<td>Kill inetd:</td>
 				<td>
 					<input style="color:#000000" name="inetd" type="text" size="3" maxlength="3" value="#INETD#">
 				</td>
+				<td>0/1</td>
 			</tr>
 			<tr>
 				<td>Video format:</td>
 				<td>
 					<input style="color:#000000" name="videoFormat" type="text" size="3" maxlength="3" value="#VIDEOFORMAT#">
 				</td>
+				<td>0: rgb, 1: fbas, 2: svideo, 3: component</td>
 			</tr>
 			<tr>
 				<td>Selected Image:</td>
 				<td>
 					<input style="color:#000000" name="selectedEntry" type="text" size="50" maxlength="50" value="#SELECTEDENTRY#" readonly>
 				</td>
+				<td>&nbsp;</td>
 			</tr>
 			</table>
 			<br>

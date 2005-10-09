@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.10 2005/10/06 21:11:41 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.11 2005/10/09 08:30:28 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -42,12 +42,12 @@
 #include <lib/system/http_dyn.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_boot.h>
+#include <bootmenue/bmconfig.h>
 
 extern eString firmwareLevel(eString versionString);
 
 using namespace std;
 
-#define CONFIGFILE "/tmp/jffs2/tuxbox/config/enigma/bootmenue.conf"
 #define SKINDIR "/var/tuxbox/config/enigma/boot"
 
 void mountJFFS2()
@@ -62,71 +62,6 @@ void unmountJFFS2()
 	system("umount /tmp/jffs2");
 	system("rm -rf /tmp/jffs2");
 }
-
-void loadconfig(eString& mpoint, eString& selectedEntry, eString& inetd, eString& timeoutValue, eString& videoFormat, eString& skinPath, eString& skinName)
-{
-	mountJFFS2();
-	
-	timeoutValue = "10";
-	videoFormat = "1";
-	selectedEntry = "";
-	skinPath = "/share/tuxbox/enigma/boot";
-	skinName = "blank.skin";
-	mpoint = "/var/mnt/usb";
-	inetd = "1";
-	
-	ifstream configFile(CONFIGFILE);
-	eString line;
-	if (configFile)
-	{
-		while (getline(configFile, line, '\n'))
-		{
-			if (line.find("timeout") == 0)
-				timeoutValue = line.right(line.length() - 8);
-			else 
-			if (line.find("videoformat") == 0)
-				videoFormat = line.right(line.length() - 12);
-			else 
-			if (line.find("selentry") == 0)
-				selectedEntry = line.right(line.length() - 9);
-			else 
-			if (line.find("skin-path") == 0)
-				skinPath = line.right(line.length() - 10);
-			else 
-			if (line.find("skin-name") == 0)
-				skinName = line.right(line.length() - 10);
-			else 
-			if (line.find("mountpoint") == 0)
-				mpoint = line.right(line.length() - 11);
-			else 
-			if (line.find("kill_inetd") == 0)	
-				inetd = line.right(line.length() - 11);
-		}
-		configFile.close();
-	}
-	
-	unmountJFFS2();
-}
-
-void saveconfig(eString mpoint, eString selectedEntry, eString inetd, eString timeoutValue, eString videoFormat, eString skinPath, eString skinName)
-{
-	mountJFFS2();
-	
-	if (FILE *f = fopen(CONFIGFILE, "w"))
-	{
-		fprintf(f, "#BootManager-Config\n");
-		fprintf(f, "mountpoint=%s\n", mpoint.c_str());
-		fprintf(f, "selentry=%s\n", selectedEntry.c_str());
-		fprintf(f, "kill_inetd=%s\n", inetd.c_str());
-		fprintf(f, "timeout=%s\n", timeoutValue.c_str());
-		fprintf(f, "videoformat=%s\n", videoFormat.c_str());
-		fprintf(f, "skin-path=%s\n", skinPath.c_str());
-		fprintf(f, "skin-name=%s\n", skinName.c_str());
-		fclose(f);
-	}
-	unmountJFFS2();
-}
-
 
 eString getSkins(eString skinPath, eString skinName)
 {	
@@ -148,7 +83,6 @@ eString getSkins(eString skinPath, eString skinName)
 					
 					if (location.right(5) == ".skin")
 					{
-						location = location.left(location.length() - 5);
 						if (location.find("/tmp/jffs2") == 0)
 							location = "/var" + location.right(location.length() - 10);
 						skins = skins + "<option value=\"" + location + "\"" + eString((skinName == name) ? " selected" : "") + ">" + name + "</option>";
@@ -172,6 +106,7 @@ void activateMenu(eString menu)
 	bool fw = (menu == "FW");
 	bool found = false;
 	bool active = false;
+	bool initChanged = false;
 	eString line;
 	eString file;
 	
@@ -189,7 +124,10 @@ void activateMenu(eString menu)
 				if (fw)
 				{
 					if (!active)
+					{
 						line[pos] = ' ';
+						initChanged = true;
+					}
 					found = true;
 				}
 				else
@@ -199,7 +137,8 @@ void activateMenu(eString menu)
 						if (pos > 1)
 							line[pos - 2] = ':';
 						else
-							line = ": " + line;	
+							line = ": " + line;
+						initChanged = true;	
 					}
 				}
 			}
@@ -210,7 +149,10 @@ void activateMenu(eString menu)
 				if (bm)
 				{
 					if (!active)
+					{
 						line[pos] = ' ';
+						initChanged = true;
+					}
 					found = true;
 				}
 				else
@@ -221,6 +163,7 @@ void activateMenu(eString menu)
 							line[pos - 2] = ':';
 						else
 							line = ": " + line;	
+						initChanged = true;
 					}
 				}
 			}
@@ -235,13 +178,16 @@ void activateMenu(eString menu)
 	if (!found)
 	{
 		if (bm)
-			file = "/bin/bootmenue && /tmp/bm.sh\n" + file;
+			file += "\n/bin/bootmenue && /tmp/bm.sh";
 	}
 	
-	FILE *out = fopen("/tmp/jffs2/etc/init", "w");
-	fprintf(out, file.c_str());
-	fclose(out);
-	system("chmod +x /tmp/jffs2/etc/init");
+	if (initChanged)
+	{
+		FILE *out = fopen("/tmp/jffs2/etc/init", "w");
+		fprintf(out, file.c_str());
+		fclose(out);
+		system("chmod +x /tmp/jffs2/etc/init");
+	}
 	
 	unmountJFFS2();
 }
@@ -303,9 +249,7 @@ eString getInstalledImages()
 	eString images;
 	struct stat s;
 	
-	std::string dir[2];
-	dir[0] = "/mnt/usb/image/";
-	dir[1] = "/mnt/usb/fwpro/";
+	eString dir[2] = {"/mnt/usb/image/", "/mnt/usb/fwpro/"};
 	
 	for (int i = 0; i < 2; i++)
 	{
@@ -316,25 +260,20 @@ eString getInstalledImages()
 			{
 				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
 				{
-					std::string name = dir[i] + e->d_name;
-					stat(name.c_str(), &s);
+					eString location = dir[i] + eString(e->d_name);
+					stat(location.c_str(), &s);
 					if (S_ISDIR(s.st_mode))
 					{
-						eString tmp = e->d_name;
-						eString location = name;
 						eString name = e->d_name;
-						tmp = name + "/imagename";
-						if (FILE *in = fopen(tmp.c_str(), "rt"))
+						eString tmp = name + "/imagename";
+						ifstream nameFile(tmp.c_str());
+						if (nameFile)
 						{
-							char line[256];
-							line[0] = '\0';
-							fgets(line, 256, in);
-							fclose(in);
-							if (strlen(line) > 0)
-							{
-								line[strlen(line) - 1] = '\0';
-								name = std::string(line);
-							}
+							eString line;
+							getline(nameFile, line, '\n');
+							nameFile.close();
+							if (line.length() > 0)
+								name = line;
 						}
 	
 						eString image = readFile(TEMPLATE_DIR + "image.tmp");
@@ -353,7 +292,7 @@ eString getInstalledImages()
 	}
 	
 	if (!images)
-		images = "<tr><td colspan=\"5\">No images found on /mnt/usb.</td></tr>";
+		images = "<tr><td colspan=\"5\">No images found on selected boot device.</td></tr>";
 
 	return images;
 }
@@ -544,19 +483,22 @@ eString editBootManagerSettings(eString request, eString dirpath, eString opts, 
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	bmconfig *config = new bmconfig();
 	
-	eString mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName;
-	loadconfig(mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName);
+	mountJFFS2();
+	config->load();
+	unmountJFFS2();
 	
 	eString result = readFile(TEMPLATE_DIR + "bootMgrSettings.tmp");
-	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, skinName));
-	result.strReplace("#MPOINT#", mpoint);
-	result.strReplace("#SELECTEDENTRY#", selectedEntry);
-	result.strReplace("#INETD#", inetd);
-	result.strReplace("#TIMEOUTVALUE#", timeoutValue);
-	result.strReplace("#VIDEOFORMAT#", videoFormat);
-	result.strReplace("#SKINPATH#", SKINDIR);
-	result.strReplace("#SKINNAME#", skinName);
+	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, config->skinName));
+	result.strReplace("#MPOINT#", config->mpoint);
+	result.strReplace("#SELECTEDENTRY#", config->selectedEntry);
+	result.strReplace("#INETD#", config->inetd);
+	result.strReplace("#TIMEOUTVALUE#", config->timeoutValue);
+	result.strReplace("#VIDEOFORMAT#", config->videoFormat);
+	result.strReplace("#SKINPATH#", config->skinPath);
+	result.strReplace("#SKINNAME#", config->skinName);
 	
 	result.strReplace("#BUTTONSUBMIT#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
 	
@@ -566,25 +508,25 @@ eString editBootManagerSettings(eString request, eString dirpath, eString opts, 
 eString setBootManagerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	bmconfig *config;
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
-	eString mpoint = opt["mpoint"];
-	eString selectedEntry = opt["selectedEntry"];
-	eString inetd = opt["inetd"];
-	eString timeoutValue = opt["timeoutValue"];
-	eString videoFormat = opt["videoFormat"];
-//	eString skinPath = opt["skinPath"];
-	eString skinName = opt["skinName"];
-	eString skinPath = skinName;
-	unsigned int pos = skinName.find_last_of("/");
+	config = new bmconfig();
+	config->mpoint = opt["mpoint"];
+	config->selectedEntry = opt["selectedEntry"];
+	config->inetd = opt["inetd"];
+	config->timeoutValue = opt["timeoutValue"];
+	config->videoFormat = opt["videoFormat"];
+	config->skinPath = opt["skinPath"];
+	config->skinName = opt["skinName"];
+	unsigned int pos = config->skinName.find_last_of("/");
 	if (pos != eString::npos && pos > 0)
-	{
-		skinName = skinName.right(skinName.length() - pos - 1) + ".skin";
-		skinPath = skinPath.left(pos);
-	}
+		config->skinName = config->skinName.right(config->skinName.length() - pos - 1);
 	
-	saveconfig(mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName);
+	mountJFFS2();
+	config->save();
+	unmountJFFS2();
 	
 	return closeWindow(content, "", 10);
 }

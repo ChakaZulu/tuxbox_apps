@@ -1,7 +1,8 @@
 /*
- * $Id: bootmenue.cpp,v 1.19 2005/10/05 21:43:23 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.20 2005/10/09 08:30:10 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ *          based on dreamflash by mechatron
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +23,6 @@
 #ifdef HAVE_DREAMBOX_HARDWARE
 #include "bootmenue.h"
 
-#define CONFIGFILE "/var/tuxbox/config/enigma/bootmenue.conf"
 #define SCRIPTFILE "/tmp/bm.sh"
 
 extern int fh_png_getsize(const char *, int *, int *, int, int);
@@ -35,34 +35,33 @@ bool doexit = false;
 stmenu::stmenu()
 {
 	instance = this;
-
+	config = new bmconfig();
 	CONNECT(RcInput::getInstance()->selected, stmenu::rc_event);
 	display = new fbClass();
 	lcd = new CLCDDisplay();
 	CONNECT(CTimer::getInstance()->selected, stmenu::timeout);
-	if (loadconfig())
+	config->load();
+	CTimer::getInstance()->start(atoi(config->timeoutValue.c_str()));
+	if (loadskin())
 	{
-		CTimer::getInstance()->start(timeoutValue);
-		if (loadskin())
+		if (loadimagelist())
 		{
-			if (loadimagelist())
-			{
-				display->SetSAA(videoformat); //rgb = 0, fbas = 1, svideo = 2, component = 3;
-				display->SetMode(720, 576, 16);
-				showpic();
+			display->SetSAA(atoi(config->videoFormat.c_str())); //rgb = 0, fbas = 1, svideo = 2, component = 3;
+			display->SetMode(720, 576, 16);
+			showpic();
 
-				display->RenderString(tmp_ver, ver_x + 25 + 10, ver_y, menu_xs - 25 - 10, CLCDDisplay::LEFT, ver_font, ver_r, ver_g, ver_b);
+			display->RenderString(tmp_ver, ver_x + 25 + 10, ver_y, menu_xs - 25 - 10, CLCDDisplay::LEFT, ver_font, ver_r, ver_g, ver_b);
 
-				display->Fill_buffer(menu_x - 5, menu_y - 5, menu_xs + 10, menu_ys + 10);
-
-				drawmenu();
-				mainloop();
-			}
+			display->Fill_buffer(menu_x - 5, menu_y - 5, menu_xs + 10, menu_ys + 10);
+			
+			drawmenu();
+			mainloop();
 		}
 	}
 	
 	delete display;
 	delete lcd;
+	delete config;
 	imagelist.clear();
 	printf("we are done.\n");
 }
@@ -78,7 +77,7 @@ void stmenu::timeout()
 
 void stmenu::rc_event(unsigned short key)
 {
-	CTimer::getInstance()->start(timeoutValue);
+	CTimer::getInstance()->start(atoi(config->timeoutValue.c_str()));
 
 	switch (key)
 	{
@@ -145,51 +144,53 @@ void stmenu::mainloop()
 {
 	while (!doexit)
 		usleep(50000);
-		
-	saveconfig(true);
+	
+	config->selectedEntry = imagelist[selentry].location;
+	config->save();
 
 	//clear menu
 	lcd->draw_fill_rect (0, 0, 120, 64, CLCDDisplay::PIXEL_OFF);
 	lcd->update();
 	display->SetMode(720, 576, 8);
 
-	newscript(imagelist[selentry].location);
+	startscript(imagelist[selentry].location);
 	goscript(imagelist[selentry].location);
 }
 
 bool stmenu::loadskin()
 {
 	bool showTitle = false;
-	if (strlen(skin_path) > 0 && strlen(skin_name) > 0)
+	if (config->skinPath && config->skinName)
 	{
-		std::string tmp = std::string(skin_path) + "/" + std::string(skin_name);
+		eString skin = config->skinPath + "/" + config->skinName;
 		
-		if (access(tmp.c_str(), R_OK) != 0)
-			tmp = "/share/tuxbox/enigma/boot/blank.skin";
-
-		if (FILE *in = fopen(tmp.c_str(), "rt"))
+		if (access(skin.c_str(), R_OK) != 0)
+			skin = "/share/tuxbox/enigma/boot/blank.skin";
+		
+		ifstream skinFile(skin.c_str());
+		eString line;
+		if (skinFile)
 		{
-			char line[256];
-			while (fgets(line, 256, in))
+			while (getline(skinFile, line, '\n'))
 			{
-				if (!strncmp(line, "first-line", 10))
+				if (line.find("first-line") == 0)
 				{
-					sscanf(line, "first-line=%d,%d,%d,%d,%d,%d", &ver_x, &ver_y, &ver_font, &ver_r, &ver_g, &ver_b);
+					sscanf(line.c_str(), "first-line=%d,%d,%d,%d,%d,%d", &ver_x, &ver_y, &ver_font, &ver_r, &ver_g, &ver_b);
 					showTitle = true;
 				}
 				else 
-				if (!strncmp(line, "menu-size", 9))
-					sscanf(line, "menu-size=%d,%d,%d,%d", &menu_x, &menu_y, &menu_xs, &menu_ys);
+				if (line.find("menu-size") == 0)
+					sscanf(line.c_str(), "menu-size=%d,%d,%d,%d", &menu_x, &menu_y, &menu_xs, &menu_ys);
 				else 
-				if (!strncmp(line, "string-color", 12))
-					sscanf(line, "string-color=%d,%d,%d", &str_r, &str_g, &str_b);
+				if (line.find("string-color") == 0)
+					sscanf(line.c_str(), "string-color=%d,%d,%d", &str_r, &str_g, &str_b);
 				else 
-				if (!strncmp(line, "select-color", 12))
-					sscanf(line, "select-color=%d,%d,%d", &sel_r, &sel_g, &sel_b);
+				if (line.find("select-color") == 0)
+					sscanf(line.c_str(), "select-color=%d,%d,%d", &sel_r, &sel_g, &sel_b);
 			}
-			fclose(in);
-			if (!showTitle)
-				tmp_ver = "";
+			skinFile.close();
+			if (showTitle)
+				tmp_ver = "Bootmanager - " + eString(BMVERSION);
 			return true;
 		}
 	}
@@ -198,95 +199,24 @@ bool stmenu::loadskin()
 
 void stmenu::showpic()
 {
-	if (strlen(skin_path) > 0 && strlen(skin_name) > 0)
+	if (config->skinPath && config->skinName)
 	{
-		char pic[1024];
-		strcpy(pic, skin_path); strcat(pic, "/"); strcat(pic, skin_name);
-		if (strlen(pic) > 4) 
-			pic[strlen(pic) - 4] = 0;
-		strcat(pic, "png");
+		eString pic = config->skinPath + "/" + config->skinName;
+		if (pic.length() > 4) 
+			pic = pic.left(pic.length() - 4);
+		pic += "png";
 
-		if (fh_png_id(pic) == 1)
+		if (fh_png_id(pic.c_str()) == 1)
 		{
 			int x, y;
-			fh_png_getsize(pic, &x, &y, INT_MAX, INT_MAX);
+			fh_png_getsize(pic.c_str(), &x, &y, INT_MAX, INT_MAX);
 			unsigned char *buffer = (unsigned char *)malloc(x * y * 3);
 
-			if (fh_png_load(pic,buffer, x, y) == 0)
+			if (fh_png_load(pic.c_str(), buffer, x, y) == 0)
 				display->fb_display(buffer, NULL, x, y, 0, 0, 0, 0);
 
 			free(buffer);
 		}
-	}
-}
-
-bool stmenu::loadconfig()
-{
-	timeoutValue = 10;
-	videoformat = 1;
-	selentry_st[0] = '\0';
-	strcpy(skin_path, "/var/tuxbox/config/enigma/boot");
-	strcpy(skin_name, "blank.skin");
-	strcpy(mpoint, "/var/mnt/usb");
-	inetd = 1;
-	if (FILE *in = fopen(CONFIGFILE, "rt"))
-	{
-		printf("[STARTMENU] config loaded\n");
-		char line[256];
-		while(fgets(line, 256, in))
-		{
-			if (line[strlen(line) - 2] == '\r') 
-				line[strlen(line) - 2] = 0; 
-			if (line[strlen(line) - 1] == '\n')
-				line[strlen(line) - 1] = 0;
-			if (!strncmp(line, "timeout", 7))
-				timeoutValue = atoi(line + 8);
-			else 
-			if (!strncmp(line, "videoformat", 11))
-				videoformat = atoi(line + 12);
-			else 
-			if (!strncmp(line, "selentry", 8))
-				sscanf(line, "selentry=%s", selentry_st);
-			else 
-			if (!strncmp(line, "skin-path", 9))
-				sscanf(line, "skin-path=%s", skin_path);
-			else 
-			if (!strncmp(line, "skin-name", 9))
-				sscanf(line, "skin-name=%s", skin_name);
-			else 
-			if (!strncmp(line, "mountpoint", 10))
-				sscanf(line, "mountpoint=%s", mpoint);
-			else 
-			if (!strncmp(line, "kill_inetd", 10))	
-				inetd = atoi(line + 11);
-		}
-		fclose(in);
-	}
-	else
-	{
-		printf("[BOOTMANAGER] <%s not found>, using defaults...\n", CONFIGFILE);
-		saveconfig(false);
-	}
-	
-	tmp_ver = std::string("BootManager - ") + std::string(VERSION);
-
-	return true;
-}
-
-void stmenu::saveconfig(bool saveSelEntry)
-{
-	if (FILE *f = fopen(CONFIGFILE, "w"))
-	{
-		fprintf(f, "#BootManager-Config (%s)\n", VERSION);
-		fprintf(f, "mountpoint=%s\n", mpoint);
-		if (saveSelEntry)
-			fprintf(f, "selentry=%s\n", imagelist[selentry].location.c_str());
-		fprintf(f, "kill_inetd=%d\n", inetd);
-		fprintf(f, "timeout=%d\n", timeoutValue);
-		fprintf(f, "videoformat=%d\n", videoformat);
-		fprintf(f, "skin-path=%s\n", skin_path);
-		fprintf(f, "skin-name=%s\n", skin_name);
-		fclose(f);
 	}
 }
 
@@ -295,9 +225,7 @@ bool stmenu::loadimagelist()
 	struct stat s;
 	image a;
 	
-	std::string dir[2];
-	dir[0] = std::string(mpoint) + "/image/";
-	dir[1] = std::string(mpoint) + "/fwpro/";
+	eString dir[2] = {config->mpoint + "/image/", config->mpoint + "/fwpro/"};
 	
 	imagelist.clear();
 	a.name = "Flash-Image";
@@ -315,31 +243,28 @@ bool stmenu::loadimagelist()
 			{
 				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
 				{
-					std::string name = dir[i] + e->d_name;
+					eString name = dir[i] + eString(e->d_name);
 					stat(name.c_str(), &s);
 					if (S_ISDIR(s.st_mode))
 					{
-						std::string tmp = e->d_name;
+						eString tmp = e->d_name;
 						a.location = name;
 						a.name = e->d_name;
 						tmp = name + "/imagename";
-						if (FILE *in = fopen(tmp.c_str(), "rt"))
+						ifstream nameFile(tmp.c_str());
+						if (nameFile)
 						{
-							char line[256];
-							line[0] = '\0';
-							fgets(line, 256, in);
-							fclose(in);
-							if (strlen(line) > 0)
-							{
-								line[strlen(line) - 1] = '\0';
-								a.name = std::string(line);
-							}
+							eString line;
+							getline(nameFile, line, '\n');
+							nameFile.close();
+							if (line.length() > 0)
+								a.name = eString(line);
 						}
 	
 						imagelist.push_back(a);
 
 						curentry++;
-						if (strcmp(selentry_st, name.c_str()) == 0)
+						if (config->selectedEntry == name)
 							selentry = curentry;
 					}
 				}
@@ -352,21 +277,21 @@ bool stmenu::loadimagelist()
 	return maxentry > 0;
 }
 
-void stmenu::newscript(std::string image)
+void stmenu::startscript(eString image)
 {
 	if (FILE *f = fopen(SCRIPTFILE, "w"))
 	{
-		fprintf(f, "#!/bin/sh\n\n");
+		fprintf(f, "#!/bin/sh\n");
 		if (image != "")
 		{
 			ProcUtils::killProcess("smbd");
 			ProcUtils::killProcess("nmbd");
-			if (inetd == 1) 
+			if (config->inetd == "1") 
 				ProcUtils::killProcess("inetd");
 				
 			fprintf(f, "killall -9 rcS\n");
 			fprintf(f, "killall -9 init\n");
-			if (strcmp(mpoint, "/hdd"))
+			if (config->mpoint == "/hdd")
 				fprintf(f, "umount /hdd\n");
 			fprintf(f, "rm %s\n", SCRIPTFILE);
 			fprintf(f, "chroot %s ../go\n", image.c_str());
@@ -379,16 +304,16 @@ void stmenu::newscript(std::string image)
 	}
 }
 
-void stmenu::goscript(std::string image)
+void stmenu::goscript(eString image)
 {
-	std::string go = image + "/go";
+	eString go = image + "/go";
 	if (FILE *f = fopen(go.c_str(), "w"))
 	{
 		fprintf(f, "#!/bin/sh\n\n");		
 		fprintf(f, "mount -t devfs dev /dev\n");
 		fprintf(f, "/etc/init.d/rcS&\n");
 		fclose(f);
-		system(std::string("chmod 755 " + go).c_str());
+		system(eString("chmod 755 " + go).c_str());
 	}
 }
 
