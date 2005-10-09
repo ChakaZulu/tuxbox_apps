@@ -1,5 +1,5 @@
 /*
- * $Id: bmconfig.h,v 1.1 2005/10/09 08:30:14 digi_casi Exp $
+ * $Id: bmconfig.h,v 1.2 2005/10/09 08:37:44 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -105,13 +105,4 @@ class bmconfig: public Object
 			fclose(f);
 		}
 	}
-	
-	
-	void mountJFFS2()
-	{
-		system("umount /tmp/jffs2");
-		system("mkdir /tmp/jffs2");
-		system("mount -t jffs2 /dev/mtdblock/1 /tmp/jffs2");
-	}
-
 };
