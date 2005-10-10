@@ -1,9 +1,9 @@
 #startmenu-skin-file
 
-#creator mechatron
+#creator mechatron, digi_casi
 
 #first-line=x,y,font-size,r,g,b
-first-line=160,165,30,0,0,0
+first-line=120,185,30,0,0,0
 
 #menu-size=left,top,x-size, y-size
 menu-size=120,195,320,180
