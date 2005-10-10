@@ -255,26 +255,6 @@ bool CFlashUpdate::checkVersion4Update()
 		versionInfo = new CFlashVersionInfo(newVersion);
 
 		msg_body = LOCALE_FLASHUPDATE_MSGBOX;
-#ifdef SQUASHFS_XXXXXXXX  // -- #ifdef block to be deleted by request of Riker
-			  // -- (2005-10-09 rasc)  renamed macro, to prevent compilation
-		sprintf(msg, g_Locale->getText(msg_body), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getReleaseCycle(), versionInfo->getType());
-
-		if (strcmp(RELEASE_CYCLE, versionInfo->getReleaseCycle()))
-		{
-			delete versionInfo;
-			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_WRONGBASE)); // UTF-8
-			return false;
-		}
-
-		if ((strcmp("Release", versionInfo->getType()) != 0) &&
-		    (ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_FLASHUPDATE_EXPERIMENTALIMAGE, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes))
-		{
-			delete versionInfo;
-			return false;
-		}
-
-		delete versionInfo;
-#endif
 	}
 	else
 	{
@@ -331,10 +311,10 @@ bool CFlashUpdate::checkVersion4Update()
 		hide();
 
 #ifdef SQUASHFS
-    CCheckSquashfs* checkSquashfs;
-	checkSquashfs = new CCheckSquashfs();
+		CCheckSquashfs* checkSquashfs;
+		checkSquashfs = new CCheckSquashfs();
 
-	versionInfo = new CFlashVersionInfo(checkSquashfs->GetVersionInfo(UPDATE_LOCAL_FILENAME));
+		versionInfo = new CFlashVersionInfo(checkSquashfs->GetVersionInfo(UPDATE_LOCAL_FILENAME));
 #else
 		//bestimmung der CramfsDaten
 		char cramfsName[30];
