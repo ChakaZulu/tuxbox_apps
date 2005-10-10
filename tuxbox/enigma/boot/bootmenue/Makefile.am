@@ -9,7 +9,7 @@ AM_CPPFLAGS = \
 
 bin_PROGRAMS = bootmenue
 
-bootmenue_SOURCES = processutils.cpp my_fb.cpp my_rc.cpp my_lcd.cpp png.cpp my_timer.cpp bootmenue.cpp
+bootmenue_SOURCES = my_fb.cpp my_rc.cpp my_lcd.cpp png.cpp my_timer.cpp bootmenue.cpp
 
 bootmenue_LDADD = \
 	@SIGC_LIBS@ \

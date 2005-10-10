@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.20 2005/10/09 08:30:10 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.21 2005/10/10 17:55:34 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on dreamflash by mechatron
@@ -284,14 +284,13 @@ void stmenu::startscript(eString image)
 		fprintf(f, "#!/bin/sh\n");
 		if (image != "")
 		{
-			ProcUtils::killProcess("smbd");
-			ProcUtils::killProcess("nmbd");
+			fprintf(f, "killall -9 smbd\n");
+			fprintf(f, "killall -9 nmbd\n");
 			if (config->inetd == "1") 
-				ProcUtils::killProcess("inetd");
-				
+				fprintf(f, "killall -9 inetd\n");
 			fprintf(f, "killall -9 rcS\n");
 			fprintf(f, "killall -9 init\n");
-			if (config->mpoint == "/hdd")
+			if (config->mpoint != "/hdd")
 				fprintf(f, "umount /hdd\n");
 			fprintf(f, "rm %s\n", SCRIPTFILE);
 			fprintf(f, "chroot %s ../go\n", image.c_str());
@@ -309,7 +308,7 @@ void stmenu::goscript(eString image)
 	eString go = image + "/go";
 	if (FILE *f = fopen(go.c_str(), "w"))
 	{
-		fprintf(f, "#!/bin/sh\n\n");		
+		fprintf(f, "#!/bin/sh\n\n");
 		fprintf(f, "mount -t devfs dev /dev\n");
 		fprintf(f, "/etc/init.d/rcS&\n");
 		fclose(f);

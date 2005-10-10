@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.h,v 1.9 2005/10/09 08:30:10 digi_casi Exp $
+ * $Id: bootmenue.h,v 1.10 2005/10/10 17:55:34 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -32,10 +32,9 @@
 #include "my_lcd.h"
 #include "my_rc.h"
 #include "my_timer.h"
-#include "processutils.h"
 #include <bootmenue/bmconfig.h>
 
-#define BMVERSION "0.1.0"
+#define BMVERSION "0.1.1"
 
 class image
 {
