@@ -1385,10 +1385,25 @@ EITEvent::EITEvent(const eit_event_struct *event, int tsidonid)
 	free_CA_mode=event->free_CA_mode;
 	int ptr=0;
 	int len=HILO(event->descriptors_loop_length);
+	ShortEventDescriptor *sdescr=0;
 	while (ptr<len)
 	{
 		descr_gen_t *d=(descr_gen_t*) (((__u8*)(event+1))+ptr);
-		descriptor.push_back(Descriptor::create(d,tsidonid));
+		Descriptor *descr = Descriptor::create(d,tsidonid);
+		descriptor.push_back(descr);
+// HACK
+		if ( descr->Tag() == DESCR_SHORT_EVENT )
+			sdescr = (ShortEventDescriptor*)descr;
+		else if ( descr->Tag() == DESCR_EXTENDED_EVENT && sdescr )
+		{
+			ExtendedEventDescriptor *edescr = (ExtendedEventDescriptor*) descr;
+			unsigned int s1 = sdescr->text.size();
+			unsigned int s2 = edescr->text.size();
+			if ( !strncmp( sdescr->text.c_str(), edescr->text.c_str(), s2 < s1 ? s2 : s1 ) )
+				sdescr->text.clear();
+			sdescr=0;
+		}
+///
 		ptr+=d->descriptor_length+2;
 	}
 }
