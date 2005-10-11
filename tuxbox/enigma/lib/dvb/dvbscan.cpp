@@ -168,7 +168,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		else
 			scanOK|=8;
 
-		dvb.tSDT.start(new SDT());
+		dvb.tSDT.start(new SDT(SDT::typeBoth, pat->transport_stream_id));
 
 		if (flags & flagUseBAT)
 			;

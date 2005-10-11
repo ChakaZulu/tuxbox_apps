@@ -423,8 +423,8 @@ class SDT: public eTable
 protected:
 	int data(__u8 *data);
 public:
-	enum { typeActual=0, typeOther=1 };
-	SDT(int type=typeActual);
+	enum { typeActual=0, typeOther=1, typeBoth=2 };
+	SDT(int type=typeActual, int tsid=-1);
 
 	int transport_stream_id, original_network_id;
 	ePtrList<SDTEntry> entries;

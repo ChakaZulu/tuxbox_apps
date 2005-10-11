@@ -80,6 +80,7 @@ protected:
 public:
 	Signal1<void, int> tableReady;
 	eTable(int pid, int tableid, int tableidext=-1, int version=-1);
+	eTable(int pid, int tableid, int tableidmask, int tableidext, int version);
 	eTable();
 	virtual eTable *createNext();
 	virtual __u8* getRAW() { return NULL; }

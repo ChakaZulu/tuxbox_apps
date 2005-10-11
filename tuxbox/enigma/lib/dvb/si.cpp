@@ -1170,8 +1170,9 @@ SDTEntry::SDTEntry(sdt_descr_t *descr, int tsidonid)
 	}
 }
 
-SDT::SDT(int type)
-	:eTable(PID_SDT, type?TID_SDT_OTH:TID_SDT_ACT)
+SDT::SDT(int type, int tsid)
+	:eTable(PID_SDT, type == 1 ? TID_SDT_OTH : TID_SDT_ACT,
+	type == typeBoth ? 0xFB : 0xFF, tsid, -1)
 {
 	entries.setAutoDelete(true);
 }
@@ -1531,7 +1532,7 @@ int TDT::data(__u8 *data)
 }
 
 TDT::TDT()
-	:eTable(PID_TDT, TID_TDT)
+	:eTable(PID_TDT, TID_TDT, 0xFC, -1, -1)
 {
 }
 
