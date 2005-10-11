@@ -63,12 +63,17 @@ void CAService::Connect()
 
 void CAService::buildCAPMT( PMT *pmt )
 {
+	if ( pmt->version == lastPMTVersion )
+	{
+		eDebug("[eDVBCAHandler] dont send the self pmt version");
+		return;
+	}
 	if ( !capmt )
 		capmt = new unsigned char[1024];
 
 	memcpy(capmt,"\x9f\x80\x32\x82\x00\x00", 6);
 
-	capmt[6]=lastPMTVersion==-1 ? 0x03 /*only*/ : pmt->version == lastPMTVersion ? 0x06 /*self*/ : 0x05 /*update*/;
+	capmt[6]=lastPMTVersion==-1 ? 0x03 /*only*/ : 0x05 /*update*/;
 	capmt[7]=(unsigned char)((pmt->program_number>>8) & 0xff);			//prg-nr
 	capmt[8]=(unsigned char)(pmt->program_number & 0xff);					//prg-nr
 
