@@ -72,9 +72,10 @@ class eDVBRecorder: private eThread, public Object
 
 	char buf[524144]; 
 	int bufptr;
-
+	unsigned short prgnumber;
 	void thread();
 	void gotBackMessage(const eDVBRecorderMessage &msg);
+	void sendCARecordMessage(int recordstart);
 	inline int flushBuffer();
 	int openFile(int suffix=0);
 	void PatPmtWrite();

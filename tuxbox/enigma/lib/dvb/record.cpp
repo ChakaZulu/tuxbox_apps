@@ -11,6 +11,12 @@
 #include <lib/system/econfig.h>
 #include <signal.h>
 
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 #ifndef DMX_LOW_BITRATE
 #define DMX_LOW_BITRATE 0x4000
 #endif
@@ -407,10 +413,43 @@ void eDVBRecorder::removePID(int pid)
 	}
 }
 
+void eDVBRecorder::sendCARecordMessage(int recordstart)
+{
+	int sock, clilen;
+	struct sockaddr_un servaddr;
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, "/tmp/camd.socket");
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	sock = socket(PF_UNIX, SOCK_STREAM, 0);
+	int err=0;
+	if ( connect(sock, (struct sockaddr *) &servaddr, clilen) )
+	{
+		eDebug("[eDVBRecorder] (start) connect (%m)");
+		err = 1;
+	}
+	fcntl(sock, F_SETFL, O_NONBLOCK);
+	int val=1;
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+	if (!err)
+	{
+		unsigned char msg[4];
+		msg[0]= recordstart ? 0x2D : 0x2E;
+		msg[1]=0x02;
+		msg[2]=(unsigned char)((prgnumber>>8) & 0xff);			//prg-nr
+		msg[3]=(unsigned char)(prgnumber & 0xff);					//prg-nr
+		if ( ::write(sock, msg, 4) != 4 )
+			eDebug("[eDVBRecorder] write (%m)");
+	}
+	::close(sock);
+}
+
 void eDVBRecorder::start()
 {
 	if ( state == stateRunning )
 		return;
+
+	sendCARecordMessage(1);
 
 	eDebug("eDVBRecorder::start()");
 
@@ -456,6 +495,8 @@ void eDVBRecorder::stop()
 			::ioctl(i->fd, DMX_STOP, 0);
 
 	flushBuffer();
+
+	sendCARecordMessage(0);
 }
 
 void eDVBRecorder::close()
@@ -486,9 +527,10 @@ eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 {
 	CONNECT(rmessagepump.recv_msg, eDVBRecorder::gotBackMessage);
 	rmessagepump.start();
-
+	prgnumber = 0;
 	if (pmt)
 	{
+		prgnumber = pmt->program_number;
 		CONNECT( tPMT.tableReady, eDVBRecorder::PMTready );
 		tPMT.start((PMT*)pmt->createNext(), DEMUX1_DEV );
 		PmtData=pmt->getRAW();
