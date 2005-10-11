@@ -23,51 +23,86 @@ pthread_mutex_t eEPGCache::cache_lock=
 
 descriptorMap eventData::descriptors;
 
-extern unsigned int crc32_table[256];
+static const __u16 crc_ccitt_table[256] = {
+	0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf,
+	0x8c48, 0x9dc1, 0xaf5a, 0xbed3, 0xca6c, 0xdbe5, 0xe97e, 0xf8f7,
+	0x1081, 0x0108, 0x3393, 0x221a, 0x56a5, 0x472c, 0x75b7, 0x643e,
+	0x9cc9, 0x8d40, 0xbfdb, 0xae52, 0xdaed, 0xcb64, 0xf9ff, 0xe876,
+	0x2102, 0x308b, 0x0210, 0x1399, 0x6726, 0x76af, 0x4434, 0x55bd,
+	0xad4a, 0xbcc3, 0x8e58, 0x9fd1, 0xeb6e, 0xfae7, 0xc87c, 0xd9f5,
+	0x3183, 0x200a, 0x1291, 0x0318, 0x77a7, 0x662e, 0x54b5, 0x453c,
+	0xbdcb, 0xac42, 0x9ed9, 0x8f50, 0xfbef, 0xea66, 0xd8fd, 0xc974,
+	0x4204, 0x538d, 0x6116, 0x709f, 0x0420, 0x15a9, 0x2732, 0x36bb,
+	0xce4c, 0xdfc5, 0xed5e, 0xfcd7, 0x8868, 0x99e1, 0xab7a, 0xbaf3,
+	0x5285, 0x430c, 0x7197, 0x601e, 0x14a1, 0x0528, 0x37b3, 0x263a,
+	0xdecd, 0xcf44, 0xfddf, 0xec56, 0x98e9, 0x8960, 0xbbfb, 0xaa72,
+	0x6306, 0x728f, 0x4014, 0x519d, 0x2522, 0x34ab, 0x0630, 0x17b9,
+	0xef4e, 0xfec7, 0xcc5c, 0xddd5, 0xa96a, 0xb8e3, 0x8a78, 0x9bf1,
+	0x7387, 0x620e, 0x5095, 0x411c, 0x35a3, 0x242a, 0x16b1, 0x0738,
+	0xffcf, 0xee46, 0xdcdd, 0xcd54, 0xb9eb, 0xa862, 0x9af9, 0x8b70,
+	0x8408, 0x9581, 0xa71a, 0xb693, 0xc22c, 0xd3a5, 0xe13e, 0xf0b7,
+	0x0840, 0x19c9, 0x2b52, 0x3adb, 0x4e64, 0x5fed, 0x6d76, 0x7cff,
+	0x9489, 0x8500, 0xb79b, 0xa612, 0xd2ad, 0xc324, 0xf1bf, 0xe036,
+	0x18c1, 0x0948, 0x3bd3, 0x2a5a, 0x5ee5, 0x4f6c, 0x7df7, 0x6c7e,
+	0xa50a, 0xb483, 0x8618, 0x9791, 0xe32e, 0xf2a7, 0xc03c, 0xd1b5,
+	0x2942, 0x38cb, 0x0a50, 0x1bd9, 0x6f66, 0x7eef, 0x4c74, 0x5dfd,
+	0xb58b, 0xa402, 0x9699, 0x8710, 0xf3af, 0xe226, 0xd0bd, 0xc134,
+	0x39c3, 0x284a, 0x1ad1, 0x0b58, 0x7fe7, 0x6e6e, 0x5cf5, 0x4d7c,
+	0xc60c, 0xd785, 0xe51e, 0xf497, 0x8028, 0x91a1, 0xa33a, 0xb2b3,
+	0x4a44, 0x5bcd, 0x6956, 0x78df, 0x0c60, 0x1de9, 0x2f72, 0x3efb,
+	0xd68d, 0xc704, 0xf59f, 0xe416, 0x90a9, 0x8120, 0xb3bb, 0xa232,
+	0x5ac5, 0x4b4c, 0x79d7, 0x685e, 0x1ce1, 0x0d68, 0x3ff3, 0x2e7a,
+	0xe70e, 0xf687, 0xc41c, 0xd595, 0xa12a, 0xb0a3, 0x8238, 0x93b1,
+	0x6b46, 0x7acf, 0x4854, 0x59dd, 0x2d62, 0x3ceb, 0x0e70, 0x1ff9,
+	0xf78f, 0xe606, 0xd49d, 0xc514, 0xb1ab, 0xa022, 0x92b9, 0x8330,
+	0x7bc7, 0x6a4e, 0x58d5, 0x495c, 0x3de3, 0x2c6a, 0x1ef1, 0x0f78
+};
 
 eventData::eventData(const eit_event_struct* e, int size, int type)
-	:ByteSize(size), type(type)
+	:ByteSize(size&0xFF), type(type&0xFF)
 {
 	if (!e)
 		return;
-	std::list<__u32> d;
+
+	__u32 descr[65];
+	__u32 *pdescr=descr;
+
 	__u8 *data = (__u8*)e;
 	int ptr=10;
 	int descriptors_length = (data[ptr++]&0x0F) << 8;
 	descriptors_length |= data[ptr++];
 	while ( descriptors_length > 0 )
 	{
-		int descr_len = data[ptr+1] + 2;
-		__u8 *descr = new __u8[descr_len];
-		unsigned int crc=0;
+		__u16 crc=0;
+		__u32 hash = (data[ptr++] << 24);
+		int descr_len = data[ptr++];
+		hash |= (descr_len << 16);
+
+		__u8 *descr = data+ptr;
 		int cnt=0;
-		while(cnt < descr_len && descriptors_length > 0)
-		{
-			crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ data[ptr]) & 0xff];
-			descr[cnt++] = data[ptr++];
-			--descriptors_length;
-		}
+		while(cnt++ < descr_len)
+			crc = (crc >> 8) ^ crc_ccitt_table[(crc ^ data[ptr++]) & 0xFF];
+		hash |= crc;
+
 		descriptorMap::iterator it =
-			descriptors.find(crc);
+			descriptors.find(hash);
 		if ( it == descriptors.end() )
 		{
 			CacheSize+=descr_len;
-			descriptors[crc] = descriptorPair(1, descr);
+			__u8 *d = new __u8[descr_len];
+			memcpy(d, descr, descr_len);
+			descriptors[hash] = descriptorPair(1, d);
 		}
 		else
-		{
 			++it->second.first;
-			delete [] descr;
-		}
-		d.push_back(crc);
+		*pdescr++=hash;
+		descriptors_length -= (descr_len+2);
 	}
-	ByteSize = 12+d.size()*4;
+	ByteSize = 12+((pdescr-descr)*4);
 	EITdata = new __u8[ByteSize];
 	CacheSize+=ByteSize;
 	memcpy(EITdata, (__u8*) e, 12);
-	__u32 *p = (__u32*)(EITdata+12);
-	for (std::list<__u32>::iterator it(d.begin()); it != d.end(); ++it)
-		*p++ = *it;
+	memcpy(EITdata+12, descr, ByteSize-12);
 }
 
 const eit_event_struct* eventData::get() const
@@ -77,10 +112,12 @@ const eit_event_struct* eventData::get() const
 		delete [] data;
 
 	int bytes = 12;
-	std::list<__u8*> d;
-
-// cnt needed bytes
 	int tmp = ByteSize-12;
+
+	descriptorMap::iterator descr[tmp/4];
+	descriptorMap::iterator *pdescr = descr;
+
+	// cnt needed bytes
 	__u32 *p = (__u32*)(EITdata+12);
 	while(tmp>0)
 	{
@@ -88,10 +125,10 @@ const eit_event_struct* eventData::get() const
 			descriptors.find(*p++);
 		if ( it != descriptors.end() )
 		{
-			d.push_back(it->second.second);
-			bytes += it->second.second[1];
+			*pdescr++=it;
+			bytes += (it->first>>16)&0xFF;
+			bytes += 2; // descr_type, descr_len
 		}
-		bytes += 2; // descr_type, descr_len
 		tmp-=4;
 	}
 
@@ -101,11 +138,15 @@ const eit_event_struct* eventData::get() const
 
 	tmp=12;
 // copy all descriptors to buffer
-	for(std::list<__u8*>::iterator it(d.begin()); it != d.end(); ++it)
+	descriptorMap::iterator *d = descr;
+	while(d < pdescr)
 	{
-		int b=(*it)[1]+2;
-		memcpy(data+tmp, *it, b);
-		tmp+=b;
+		const descriptorMap::iterator &i = *d++;
+		const __u32 &hash = i->first;
+		data[tmp++]=(hash>>24)&0xFF;
+		data[tmp++]=(hash>>16)&0xFF;
+		memcpy(data+tmp, i->second.second, data[tmp-1]);
+		tmp+=data[tmp-1];
 	}
 
 	return (const eit_event_struct*)data;
@@ -127,7 +168,7 @@ eventData::~eventData()
 				descriptorPair &p = it->second;
 				if (!--p.first) // no more used descriptor
 				{
-					CacheSize -= p.second[1]+2;
+					CacheSize -= (it->first>>16)&0xFF;
 					delete [] p.second;  	// free descriptor memory
 					descriptors.erase(it);	// remove entry from descriptor map
 				}
@@ -142,19 +183,16 @@ void eventData::load(FILE *f)
 {
 	int size=0;
 	int id=0;
-	__u8 header[2];
 	descriptorPair p;
 	fread(&size, sizeof(int), 1, f);
+	eDebug("read %d descriptors", size );
 	while(size)
 	{
 		fread(&id, sizeof(__u32), 1, f);
-		fread(&p.first, sizeof(int), 1, f);
-		fread(header, 2, 1, f);
-		int bytes = header[1]+2;
+		fread(&p.first, sizeof(__u16), 1, f);
+		int bytes = (id>>16)&0xFF;
 		p.second = new __u8[bytes];
-		p.second[0] = header[0];
-		p.second[1] = header[1];
-		fread(p.second+2, bytes-2, 1, f);
+		fread(p.second, bytes, 1, f);
 		descriptors[id]=p;
 		--size;
 		CacheSize+=bytes;
@@ -164,13 +202,14 @@ void eventData::load(FILE *f)
 void eventData::save(FILE *f)
 {
 	int size=descriptors.size();
+	eDebug("save %d descriptors", size );
 	descriptorMap::iterator it(descriptors.begin());
 	fwrite(&size, sizeof(int), 1, f);
 	while(size)
 	{
 		fwrite(&it->first, sizeof(__u32), 1, f);
-		fwrite(&it->second.first, sizeof(int), 1, f);
-		fwrite(it->second.second, it->second.second[1]+2, 1, f);
+		fwrite(&it->second.first, sizeof(__u16), 1, f);
+		fwrite(it->second.second, (it->first>>16)&0xFF, 1, f);
 		++it;
 		--size;
 	}
@@ -256,7 +295,6 @@ int ePrivateContent::sectionRead(__u8 *data)
 	if ( seenSections.find( data[6] ) == seenSections.end() )
 	{
 		std::map< date_time, std::list<uniqueEPGKey>, less_datetime > start_times;
-		std::list<__u8*> descriptors;
 		eventCache &eventDB = instance.eventDB;
 		eventMap &evMap = eventDB[current_service].first;
 		timeMap &tmMap = eventDB[current_service].second;
@@ -266,9 +304,9 @@ int ePrivateContent::sectionRead(__u8 *data)
 		content_id |= data[ptr++] << 8;
 		content_id |= data[ptr++];
 
-		std::map<time_t, std::pair<time_t, __u16> > &time_event_map =
+		contentTimeMap &time_event_map =
 			content_time_table[content_id];
-		for ( std::map<time_t, std::pair<time_t, __u16> >::iterator it( time_event_map.begin() );
+		for ( contentTimeMap::iterator it( time_event_map.begin() );
 			it != time_event_map.end(); ++it )
 		{
 			eventMap::iterator evIt( evMap.find(it->second.second) );
@@ -286,6 +324,10 @@ int ePrivateContent::sectionRead(__u8 *data)
 		ptr+=3;
 		int duration_sec =
 			fromBCD(duration[0])*3600+fromBCD(duration[1])*60+fromBCD(duration[2]);
+
+		__u8 *descriptors[65];
+		__u8 **pdescr = descriptors;
+
 		int descriptors_length = (data[ptr++]&0x0F) << 8;
 		descriptors_length |= data[ptr++];
 		while ( descriptors_length > 0 )
@@ -317,32 +359,28 @@ int ePrivateContent::sectionRead(__u8 *data)
 						ptr+=3;
 						descr_len -= 3;
 						tmp_len -= 3;
-						std::map<date_time, std::list<uniqueEPGKey> >::iterator x =
-							start_times.find(datetime);
-						if ( x != start_times.end() )
-							x->second.push_back(service);
-						else
-							start_times[datetime].push_back(service);
+						start_times[datetime].push_back(service);
 					}
 				}
 			}
 			else
 			{
-				descriptors.push_back(data+ptr);
+				*pdescr++=data+ptr;
 				ptr += 2;
 				ptr += descr_len;
 			}
 		}
-		__u8 *event = new __u8[4098];
+		__u8 event[4098];
 		eit_event_struct *ev_struct = (eit_event_struct*) event;
 		ev_struct->running_status = 0;
 		ev_struct->free_CA_mode = 1;
 		memcpy(event+7, duration, 3);
 		ptr = 12;
-		for ( std::list<__u8*>::iterator dit(descriptors.begin()); dit != descriptors.end(); ++dit)
+		__u8 **d=descriptors;
+		while ( d < pdescr )
 		{
-			memcpy(event+ptr, *dit, ((*dit)[1])+2);
-			ptr+=(*dit)[1];
+			memcpy(event+ptr, *d, ((*d)[1])+2);
+			ptr+=(*d++)[1];
 			ptr+=2;
 		}
 		for ( std::map< date_time, std::list<uniqueEPGKey> >::iterator it(start_times.begin()); it != start_times.end(); ++it )
@@ -387,7 +425,6 @@ int ePrivateContent::sectionRead(__u8 *data)
 			evMap[event_id] = d;
 			tmMap[stime] = d;
 		}
-		delete [] event;
 		seenSections.insert(data[6]);
 	}
 	if ( seenSections.size() == (unsigned int)(data[7] + 1) )
@@ -719,8 +756,7 @@ bool eEPGCache::finishEPG()
 		while (It != temp.end())
 		{
 //			eDebug("sid = %02x, onid = %02x, type %d", It->first.sid, It->first.onid, It->second.second );
-			if ( It->first == current_service || It->second.second == SCHEDULE
-				|| ( It->second.second == NOWNEXT && !(haveData&1) ) )
+			if ( It->first.tsid == current_service.tsid || It->second.second == SCHEDULE )
 			{
 //				eDebug("ADD to last updated Map");
 				serviceLastUpdated[It->first]=It->second.first;
@@ -789,7 +825,6 @@ void eEPGCache::flushEPG(const uniqueEPGKey & s)
 		eventDB.clear();
 #ifdef ENABLE_PRIVATE_EPG
 		content_time_tables.clear();
-		contentReader.restart();
 #endif
 	}
 	eDebug("[EPGC] %i bytes for cache used", eventData::CacheSize);
@@ -853,7 +888,7 @@ void eEPGCache::cleanLoop()
 					timeMap &tmMap = eventDB[DBIt->first].second;
 					for ( contentMap::iterator i = x->second.begin(); i != x->second.end(); )
 					{
-						for ( std::map<time_t, std::pair<time_t, __u16> >::iterator it(i->second.begin());
+						for ( contentTimeMap::iterator it(i->second.begin());
 							it != i->second.end(); )
 						{
 							if ( tmMap.find(it->second.first) == tmMap.end() )
@@ -1371,7 +1406,7 @@ void eEPGCache::load()
 		{
 			char text1[13];
 			fread( text1, 13, 1, f);
-			if ( !strncmp( text1, "ENIGMA_EPG_V2", 13) )
+			if ( !strncmp( text1, "ENIGMA_EPG_V3", 13) )
 			{
 				fread( &size, sizeof(int), 1, f);
 				while(size--)
@@ -1384,11 +1419,11 @@ void eEPGCache::load()
 					fread( &size, sizeof(int), 1, f);
 					while(size--)
 					{
-						int len=0;
-						int type=0;
+						__u8 len=0;
+						__u8 type=0;
 						eventData *event=0;
-						fread( &type, sizeof(int), 1, f);
-						fread( &len, sizeof(int), 1, f);
+						fread( &type, sizeof(__u8), 1, f);
+						fread( &len, sizeof(__u8), 1, f);
 						event = new eventData(0, len, type);
 						event->EITdata = new __u8[len];
 						eventData::CacheSize+=len;
@@ -1467,7 +1502,7 @@ void eEPGCache::save()
 	int cnt=0;
 	if ( f )
 	{
-		const char *text = "ENIGMA_EPG_V2";
+		const char *text = "ENIGMA_EPG_V3";
 		fwrite( text, 13, 1, f );
 		int size = eventDB.size();
 		fwrite( &size, sizeof(int), 1, f );
@@ -1479,9 +1514,9 @@ void eEPGCache::save()
 			fwrite( &size, sizeof(int), 1, f);
 			for (timeMap::iterator time_it(timemap.begin()); time_it != timemap.end(); ++time_it)
 			{
-				int len = time_it->second->ByteSize;
-				fwrite( &time_it->second->type, sizeof(int), 1, f );
-				fwrite( &len, sizeof(int), 1, f);
+				__u8 len = time_it->second->ByteSize;
+				fwrite( &time_it->second->type, sizeof(__u8), 1, f );
+				fwrite( &len, sizeof(__u8), 1, f);
 				fwrite( time_it->second->EITdata, len, 1, f);
 				++cnt;
 			}
@@ -1489,8 +1524,8 @@ void eEPGCache::save()
 		eDebug("%d events written to /hdd/epg.dat", cnt);
 		eventData::save(f);
 #ifdef ENABLE_PRIVATE_EPG
-		const char* text2 = "PRIVATE_EPG";
-		fwrite( text2, 11, 1, f );
+		const char* text3 = "PRIVATE_EPG";
+		fwrite( text3, 11, 1, f );
 		size = content_time_tables.size();
 		fwrite( &size, sizeof(int), 1, f);
 		for (contentMaps::iterator a = content_time_tables.begin(); a != content_time_tables.end(); ++a)
@@ -1504,7 +1539,7 @@ void eEPGCache::save()
 				int size = i->second.size();
 				fwrite( &i->first, sizeof(int), 1, f);
 				fwrite( &size, sizeof(int), 1, f);
-				for ( std::map<time_t, std::pair<time_t, __u16> >::iterator it(i->second.begin());
+				for ( contentTimeMap::iterator it(i->second.begin());
 					it != i->second.end(); ++it )
 				{
 					fwrite( &it->first, sizeof(time_t), 1, f);

@@ -70,40 +70,46 @@ struct uniqueEPGKey
 #define tmpMap std::map<uniqueEPGKey, std::pair<time_t, int> >
 #define nvodMap std::map<uniqueEPGKey, std::list<NVODReferenceEntry> >
 
-#ifdef ENABLE_PRIVATE_EPG
-#define contentMap std::map<int, std::map<time_t, std::pair<time_t, __u16> > >
-#define contentMaps std::map<uniqueEPGKey, contentMap>
-#endif
-
 struct hash_uniqueEPGKey
 {
 	inline size_t operator()( const uniqueEPGKey &x) const
 	{
-		return (x.onid << 16) | x.tsid;
+		return (x.tsid << 16) | x.sid;
 	}
 };
 
-	#define tidMap std::set<__u32>
+#define tidMap std::set<__u32>
+#define descriptorPair std::pair<__u16,__u8*>
+
 #if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 1) || __GNUC__ == 4 )  // check if gcc version >= 3.1
 	#define eventCache __gnu_cxx::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, hash_uniqueEPGKey, uniqueEPGKey::equal>
 	#define updateMap __gnu_cxx::hash_map<uniqueEPGKey, time_t, hash_uniqueEPGKey, uniqueEPGKey::equal >
+	#define descriptorMap __gnu_cxx::hash_map<__u32, descriptorPair >
+	#ifdef ENABLE_PRIVATE_EPG
+		#define contentTimeMap __gnu_cxx::hash_map<time_t, std::pair<time_t, __u16> >
+		#define contentMap __gnu_cxx::hash_map<int, contentTimeMap >	    
+		#define contentMaps __gnu_cxx::hash_map<uniqueEPGKey, contentMap, hash_uniqueEPGKey, uniqueEPGKey::equal >
+	#endif
 #else // for older gcc use following
 	#define eventCache std::hash_map<uniqueEPGKey, std::pair<eventMap, timeMap>, hash_uniqueEPGKey, uniqueEPGKey::equal >
 	#define updateMap std::hash_map<uniqueEPGKey, time_t, hash_uniqueEPGKey, uniqueEPGKey::equal >
+	#define descriptorMap std::hash_map<__u32, descriptorPair, hash_descriptor >
+	#ifdef ENABLE_PRIVATE_EPG
+		#define contentTimeMap std::hash_map<time_t, std::pair<time_t, __u16> >
+		#define contentMap std::hash_map<int, contentTimeMap >
+		#define contentMaps std::hash_map<uniqueEPGKey, contentMap, hash_uniqueEPGKey, uniqueEPGKey::equal>
+	#endif
 #endif
-
-#define descriptorPair std::pair<int,__u8*>
-#define descriptorMap std::map<__u32, descriptorPair >
 
 class eventData
 {
  	friend class eEPGCache;
 private:
 	__u8* EITdata;
-	int ByteSize;
+	__u8 ByteSize;
 	static descriptorMap descriptors;
 public:
-	int type;
+	__u8 type;
 	static int CacheSize;
 	static void load(FILE *);
 	static void save(FILE *);
