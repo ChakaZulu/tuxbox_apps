@@ -32,8 +32,8 @@ class eSatelliteConfigurationManager: public eWindow
 	eComboBox *combo_type;
 	eMultipage satPages;
 	std::list<SatelliteEntry*> deleteEntryList;
-	std::list<int> pageEnds;
-	std::list<int>::iterator curScrollPos;
+	int pageEnds[17];
+	int curScrollPos;
 	ePtrList<eSatellite> sats;
 
 	int complexity;

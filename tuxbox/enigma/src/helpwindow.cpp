@@ -48,9 +48,10 @@ eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 	scrollbox->move(ePoint(0, 0));
 	scrollbox->resize(eSize(visible->width(), visible->height()*8));
 
-	const std::set<eString> styles=eActionMapList::getInstance()->getCurrentStyles();
+	const std::set<eString> &styles=eActionMapList::getInstance()->getCurrentStyles();
 
-	entryBeg.push_back(0);
+	lastEntry=0;
+	entryBeg[lastEntry++]=0;
 	int pageend=visible->height();
 
 	for ( ePtrList<eAction>::iterator it( parseActionHelpList.begin() ); it != parseActionHelpList.end() ; it++ )
@@ -99,8 +100,9 @@ eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 					ypos+=(labelheight>imgheight?labelheight:imgheight)+20;
 					if ( ypos-20 > pageend )
 					{
-						entryBeg.push_back(ypos-(labelheight>imgheight?labelheight:imgheight)-20);
-						pageend=entryBeg.back()+visible->height();
+						pageend=ypos-(labelheight>imgheight?labelheight:imgheight)-20;
+						entryBeg[lastEntry++]=pageend;
+						pageend+=visible->height();
 					}
 					break;  // add only once :)
 				}
@@ -123,13 +125,14 @@ eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 		int tmp = ypos+labelheight;
 		while ( tmp > pageend )
 		{
-			entryBeg.push_back(ypos);
-			pageend=entryBeg.back()+visible->height();
+			entryBeg[lastEntry++]=ypos;
 			ypos+=visible->height();
+			pageend=ypos;
 		}
 	}
 
-	cur = entryBeg.begin();
+	--lastEntry;
+	cur = 0;
 	doscroll=ypos>visible->height();
 
 	if (!doscroll)
@@ -205,21 +208,19 @@ int eHelpWindow::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_helpwindowActions->up)
 		{
-			if (doscroll && *cur != entryBeg.front() ) // valid it
+			if (doscroll && entryBeg[cur] != entryBeg[0] ) // valid it
 			{
-				cur--;
-				curPage--;
-				scrollbox->move(ePoint(0, -(*cur)));
+				--curPage;
+				scrollbox->move(ePoint(0, -entryBeg[--cur]));
 				updateScrollbar();
 			}
 		}
 		else if (event.action == &i_helpwindowActions->down)
 		{
-			if (doscroll && *cur != entryBeg.back() ) // valid it
+			if (doscroll && entryBeg[cur] != entryBeg[lastEntry] ) // valid it
 			{
-				cur++;
-				curPage++;
-				scrollbox->move(ePoint(0, -(*cur)));
+				++curPage;
+				scrollbox->move(ePoint(0, -entryBeg[++cur]));
 				updateScrollbar();
 			}
 		}
@@ -236,7 +237,7 @@ int eHelpWindow::eventHandler(const eWidgetEvent &event)
 
 void eHelpWindow::updateScrollbar()
 {
-	int total=entryBeg.size()*visible->height();
+	int total=(lastEntry+1)*visible->height();
 	int start=curPage*visible->height()*100/total;
 	int vis=visible->getSize().height()*100/total;
 //	eDebug("total=%d, start = %d, vis = %d", total, start, vis);

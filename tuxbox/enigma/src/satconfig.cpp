@@ -87,9 +87,9 @@ void eSatelliteConfigurationManager::init_eSatelliteConfigurationManager()
 	combo_type->setCurrent( (void*)complexity, true );
 
 	for ( int i = 0; i < 17; i++ )
-		pageEnds.push_back( i * 200 );
+		pageEnds[i]=i*200;
 
-	curScrollPos = pageEnds.begin();
+	curScrollPos = 0;
 
 	repositionWidgets();
 
@@ -102,11 +102,10 @@ void eSatelliteConfigurationManager::focusChanged( const eWidget* focus )
 {
 	if ( focus && focus->getName() == "satWidget" )
 	{
-		std::list<int>::iterator old = curScrollPos;
-		curScrollPos = pageEnds.end();
-		for (std::list<int>::iterator it( pageEnds.begin() ); it != pageEnds.end(); it++ )
+		int old = curScrollPos;
+		for (unsigned int it=0; it < (sizeof(pageEnds)/sizeof(int)); ++it )
 		{
-			if ( focus->getPosition().y() < *it )
+			if ( focus->getPosition().y() < pageEnds[it] )
 			{
 				curScrollPos=it;
 				--curScrollPos;
@@ -115,7 +114,7 @@ void eSatelliteConfigurationManager::focusChanged( const eWidget* focus )
 		}
 		if ( curScrollPos != old )
 		{
-			w_buttons->move( ePoint(0, -(*curScrollPos)) );
+			w_buttons->move( ePoint(0, -pageEnds[curScrollPos]) );
 			updateScrollbar(complexity > 2 && complexity < 5);
 		}
 	}
@@ -536,7 +535,7 @@ void eSatelliteConfigurationManager::cleanupWidgets()
 void eSatelliteConfigurationManager::repositionWidgets()
 {
 	cleanupWidgets();
-	int count=0, y=POS_Y;
+	int lnbcount=0, y=POS_Y, satcount=0, cnt=0;
 
 	int tmp = complexity;
 	if (tmp > 4)
@@ -544,17 +543,24 @@ void eSatelliteConfigurationManager::repositionWidgets()
 
 	eWidget *old = focus;
 
-	std::list<std::pair<eSatellite*,int> > sats;
+	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+		satcount += it->getSatelliteList().size();
+
+	std::pair<eSatellite*,int> sats[satcount];
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 	{
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-			sats.push_back(std::pair<eSatellite*,int>(s,count));
-		++count;
+		{
+			sats[cnt].first=s;
+			sats[cnt++].second=lnbcount;
+		}
+		++lnbcount;
 	}
 
-	for ( std::list<std::pair<eSatellite*,int> >::iterator it(sats.begin()); it != sats.end(); ++it)
+	cnt=0;
+	while(cnt < satcount)
 	{
-		SatelliteEntry& entry = entryMap[ it->first ];
+		SatelliteEntry& entry = entryMap[ sats[cnt].first ];
 		// search eComboBox for this eSatellite and move
 
 		entry.sat->hide();
@@ -568,7 +574,7 @@ void eSatelliteConfigurationManager::repositionWidgets()
 		entry.fixed->move( ePoint(0, y) );
 		entry.description->move( ePoint(DESC_POS_X, y) );
 		entry.lnb->move( ePoint(LNB_POS_X, y) );
-		entry.lnb->setText( eString().sprintf("%d", it->second) );
+		entry.lnb->setText( eString().sprintf("%d", sats[cnt].second ) );
 		entry.fixed->setShortcut(eString().sprintf("%d", (y - POS_Y) / 40 + 1 ) );
 		entry.fixed->setShortcutPixmap(eString().sprintf("%d", (y - POS_Y) / 40 + 1 ));
 
@@ -588,6 +594,7 @@ void eSatelliteConfigurationManager::repositionWidgets()
 			entry.description->show();
 		}
 		y+=40;
+		++cnt;
 	}
 	if ( old )
 		setFocus(old);
