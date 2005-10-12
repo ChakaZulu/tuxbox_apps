@@ -1,3 +1,24 @@
+/*
+ * $Id: enigma_dyn.cpp,v 1.544 2005/10/12 20:46:27 digi_casi Exp $
+ *
+ * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+ 
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -272,7 +293,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString sReference = opt["sref"];
 	eServiceReference sref = string2ref(sReference);
 	eString command = opt["command"];
-#ifdef ENABLE_DYN_STREAM
+#ifdef ENABLE_EXPERT_WEBIF
 	if (eMoviePlayer::getInstance()->getStatus())
 	{
 		eMoviePlayer::getInstance()->control(command.c_str(), "");
@@ -568,7 +589,7 @@ eString getTopNavi()
 	result += button(100, "CONTROL", TOPNAVICOLOR, pre + "?mode=control" + post);
 	if (pdaScreen == 0)
 	{
-#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH || ENABLE_DYN_BOOT || ENABLE_DYN_ROTOR
+#ifdef ENABLE_EXPERT_WEBIF
 		result += button(100, "CONFIG", TOPNAVICOLOR, pre + "?mode=config" + post);
 #endif
 	}
@@ -629,7 +650,7 @@ eString getLeftNavi(eString mode)
 			result += "<br>";
 			result += button(110, "Root", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
 #endif
-#ifdef ENABLE_DYN_STREAM
+#ifdef ENABLE_EXPERT_WEBIF
 			result += "<br>";
 			result += button(110, "Stream", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODESTREAMING) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#000000");
 #endif
@@ -701,27 +722,27 @@ eString getLeftNavi(eString mode)
 	if (mode.find("config") == 0)
 	{
 #ifndef DISABLE_FILE
-#ifdef ENABLE_DYN_CONF
+#ifdef ENABLE_EXPERT_WEBIF
 		result += button(110, "Mount Manager", LEFTNAVICOLOR, pre + "?mode=configMountMgr" + post);
 		result += "<br>";
 #endif
 #endif
-#ifdef ENABLE_DYN_FLASH
+#ifdef ENABLE_EXPERT_WEBIF
 		result += button(110, "Flash Manager", LEFTNAVICOLOR, pre + "?mode=configFlashMgr" + post);
 		result += "<br>";
 #endif
 #ifndef DISABLE_FILE
-#ifdef ENABLE_DYN_CONF
+#ifdef ENABLE_EXPERT_WEBIF
 		result += button(110, "Swap File", LEFTNAVICOLOR, pre + "?mode=configSwapFile" + post);
 		result += "<br>";
 		result += button(110, "Settings", LEFTNAVICOLOR, pre + "?mode=configSettings" + post);
 		result += "<br>";
 #endif
 #endif
-#ifdef ENABLE_DYN_ROTOR
+#ifdef ENABLE_EXPERT_WEBIF
 		result += button(110, "Rotor", LEFTNAVICOLOR, pre + "?mode=configRotor" + post);
 #endif
-#ifdef ENABLE_DYN_BOOT
+#ifdef ENABLE_EXPERT_WEBIF
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
 			result += button(110, "Boot Manager", LEFTNAVICOLOR, pre + "?mode=configBoot" + post);
 #endif
@@ -1164,7 +1185,7 @@ static eString getZap(eString path)
 			result = readFile(TEMPLATE_DIR + "movies.tmp");
 			result.strReplace("#ZAPDATA#", getZapContent(path, 1, false, false, false));
 			selsize = (screenWidth > 1024) ? 25 : 10;
-#ifdef ENABLE_DYN_MOUNT
+#ifdef ENABLE_EXPERT_WEBIF
 			tmp = readFile(TEMPLATE_DIR + "movieSources.tmp");
 			tmp.strReplace("#OPTIONS#", eMountMgr::getInstance()->listMovieSources());
 #endif
@@ -1193,7 +1214,7 @@ static eString getZap(eString path)
 				result = "";
 		}
 		else
-#ifdef ENABLE_DYN_STREAM
+#ifdef ENABLE_EXPERT_WEBIF
 		if (zapMode == ZAPMODESTREAMING)
 		{
 			result = getStreamingServer();
@@ -1811,7 +1832,7 @@ eString getContent(eString mode, eString path, eString opts)
 			result = "";
 	}
 	else
-#if ENABLE_DYN_MOUNT || ENABLE_DYN_CONF || ENABLE_DYN_FLASH
+#if ENABLE_EXPERT_WEBIF
 	if (mode == "config")
 	{
 		result = getTitle("CONFIG");
@@ -1819,7 +1840,7 @@ eString getContent(eString mode, eString path, eString opts)
 	}
 	else
 #endif
-#ifdef ENABLE_DYN_FLASH
+#ifdef ENABLE_EXPERT_WEBIF
 	if (mode == "configFlashMgr")
 	{
 		result = getTitle("CONFIG: Flash Manager");
@@ -1828,7 +1849,7 @@ eString getContent(eString mode, eString path, eString opts)
 	else
 #endif
 #ifndef DISABLE_FILE
-#ifdef ENABLE_DYN_MOUNT
+#ifdef ENABLE_EXPERT_WEBIF
 	if (mode == "configMountMgr")
 	{
 		result = getTitle("CONFIG: Mount Manager");
@@ -1836,7 +1857,7 @@ eString getContent(eString mode, eString path, eString opts)
 	}
 	else
 #endif
-#ifdef ENABLE_DYN_CONF
+#ifdef ENABLE_EXPERT_WEBIF
 	if (mode == "configSwapFile")
 	{
 		result = getTitle("CONFIG: Swap File");
@@ -1851,7 +1872,7 @@ eString getContent(eString mode, eString path, eString opts)
 	else
 #endif
 #endif
-#if ENABLE_DYN_ROTOR
+#if ENABLE_EXPERT_WEBIF
 	if (mode == "configRotor")
 	{
 		result = getTitle("CONFIG: Rotor");
@@ -1859,7 +1880,7 @@ eString getContent(eString mode, eString path, eString opts)
 	}
 	else
 #endif
-#if ENABLE_DYN_BOOT
+#if ENABLE_EXPERT_WEBIF
 	if (mode == "configBoot")
 	{
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
@@ -2505,7 +2526,7 @@ eString getBoxStatus(eString format)
 	result.strReplace("#AGC#", eString().sprintf("%d", fe->SignalStrength() * 100 / 65535));
 	result.strReplace("#BER#", eString().sprintf("%u", fe->BER()));
 	
-#ifdef ENABLE_DYN_STREAM
+#ifdef ENABLE_EXPERT_WEBIF
 	// streaming client status
 	result.strReplace("#STREAMINGCLIENTSTATUS#", eString().sprintf("%d", eMoviePlayer::getInstance()->getStatus()));
 #else
@@ -2640,22 +2661,12 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapMiscInitializeDyn(dyn_resolver, lockWeb);
 	ezapTimerInitializeDyn(dyn_resolver, lockWeb);
 	ezapPDAInitializeDyn(dyn_resolver, lockWeb);
-#ifdef ENABLE_DYN_BOOT
+#ifdef ENABLE_EXPERT_WEBIF
 	ezapBootManagerInitializeDyn(dyn_resolver, lockWeb);
-#endif
-#ifdef ENABLE_DYN_STREAM
 	ezapMoviePlayerInitializeDyn(dyn_resolver, lockWeb);
-#endif
-#ifdef ENABLE_DYN_MOUNT
 	ezapMountInitializeDyn(dyn_resolver, lockWeb);
-#endif
-#ifdef ENABLE_DYN_CONF
 	ezapConfInitializeDyn(dyn_resolver, lockWeb);
-#endif
-#ifdef ENABLE_DYN_FLASH
 	ezapFlashInitializeDyn(dyn_resolver, lockWeb);
-#endif
-#ifdef ENABLE_DYN_ROTOR
 	ezapRotorInitializeDyn(dyn_resolver, lockWeb);
 #endif
 }

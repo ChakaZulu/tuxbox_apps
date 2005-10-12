@@ -228,7 +228,7 @@ void eZap::init_eZap(int argc, char **argv)
 
 	eString::readEncodingFile();
 
-#ifdef ENABLE_DYN_CONF
+#ifdef ENABLE_EXPERT_WEBIF
 #ifndef DISABLE_FILE
 	extern void initHDDparms(void);
 	initHDDparms();
@@ -259,7 +259,7 @@ void eZap::init_eZap(int argc, char **argv)
 
 	reconfigureHTTPServer();
 	
-#ifdef ENABLE_DYN_MOUNT
+#ifdef ENABLE_EXPERT_WEBIF
 	eMountMgr *mountMgr = new eMountMgr();
 	mountMgr->automountMountPoints();
 	delete mountMgr;

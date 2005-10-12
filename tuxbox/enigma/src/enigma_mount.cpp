@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.47 2005/10/12 13:04:14 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.48 2005/10/12 20:46:27 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,7 +19,7 @@
  *
  */
 
-#ifdef ENABLE_DYN_MOUNT
+#ifdef ENABLE_EXPERT_WEBIF
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +38,7 @@
 #include <configfile.h>
 #include <enigma_dyn_utils.h>
 #include <enigma_mount.h>
+#include <configfile.h>
 
 using namespace std;
 
@@ -45,22 +46,6 @@ eMountMgr *eMountMgr::instance;
 
 eMountPoint::~eMountPoint()
 {
-}
-
-eMountPoint::eMountPoint(CConfigFile *config, int i)
-{
-	mp.localDir = config->getString(eString().sprintf("localdir_%d", i));
-	mp.fstype = config->getInt32(eString().sprintf("fstype_%d", i));
-	mp.password = config->getString(eString().sprintf("password_%d", i));
-	mp.userName = config->getString(eString().sprintf("username_%d", i));
-	mp.mountDir = config->getString(eString().sprintf("mountdir_%d", i));
-	mp.automount = config->getInt32(eString().sprintf("automount_%d", i));
-	mp.options = config->getString(eString().sprintf("options_%d", i));
-	mp.description = config->getString(eString().sprintf("description_%d", i));
-	eString sip = config->getString(eString().sprintf("ip_%d", i));
-	sscanf(sip.c_str(), "%d.%d.%d.%d", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
-	mp.mounted = isMounted();
-	mp.id = i;
 }
 
 eMountPoint::eMountPoint(t_mount pmp)
@@ -129,7 +114,7 @@ bool eMountPoint::isIdentical(eString mountOn, eString mountDev)
 	bool found = false;
 	eString dir;
 	
-	switch(mp.fstype)
+	switch (mp.fstype)
 	{
 		case 0: //NFS
 			found = (eString().sprintf("%d.%d.%d.%d:%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()) == mountDev);
@@ -605,92 +590,9 @@ void eMountMgr::addMountedFileSystems()
 	in.close();
 }
 
-t_mount loadMPFromConfig(int i)
-{
-	t_mount mp;
-	__u32 sip = ntohl(0x0a000061);
-	char *ctmp  = 0;
-	int itmp = 0;
-	
-	eString cmd = eString().sprintf("/elitedvb/network/nfs%d/", i);
-
-	eConfig::getInstance()->getKey((cmd + "ip").c_str(), sip);
-	eNumber::unpack(sip, mp.ip);
-
-	eConfig::getInstance()->getKey((cmd + "fstype").c_str(), mp.fstype);
-	if (mp.fstype == 2)
-		mp.fstype = 3; 
-
-	if (!eConfig::getInstance()->getKey((cmd + "sdir").c_str(), ctmp))
-	{
-		mp.mountDir = eString(ctmp);
-		free(ctmp);
-	}
-
-	if (!eConfig::getInstance()->getKey((cmd + "ldir").c_str(), ctmp))
-	{
-		mp.localDir = eString(ctmp);
-		free(ctmp);
-	}
-
-	if (!mp.localDir)
-		mp.localDir = "/mnt";
-
-	itmp = 0;
-	eConfig::getInstance()->getKey((cmd + "options").c_str(), itmp);
-	switch (itmp)
-	{
-		case 1: mp.options = "ro"; break;
-		case 2: mp.options = "rw"; break;
-		case 3: mp.options = "ro,nolock"; break;
-		case 4: mp.options = "rw,nolock"; break;
-		case 5: mp.options = "ro,soft"; break;
-		case 6: mp.options = "rw,soft"; break;
-		case 7: mp.options = "ro,soft,nolock";  break;
-		case 8: mp.options = "rw,soft,nolock"; break;
-		case 9: mp.options = "ro,udp,nolock"; break;
-		case 10: mp.options = "rw,udp,nolock"; break;
-		case 11: mp.options = "ro,soft,udp"; break;
-		case 12: mp.options = "rw,soft,udp,nolock"; break;
-		case 13: mp.options = "ro,soft,udp,nolock"; break;
-		case 14: mp.options = "rw,soft,udp,nolock"; break;
-		default: mp.options = "";
-	}
-
-	if (!eConfig::getInstance()->getKey((cmd + "extraoptions").c_str(), ctmp))
-	{
-		mp.options += eString(ctmp) ? ("," + eString(ctmp)) : "";
-		free(ctmp);
-	}
-	else 
-	if (!itmp)
-	{
-		mp.options = "nolock";
-	}
-
-	if (!eConfig::getInstance()->getKey((cmd + "username").c_str(), ctmp))
-	{
-		mp.userName = eString(ctmp);
-		free(ctmp);
-	}
-
-	if (!eConfig::getInstance()->getKey((cmd + "password").c_str(), ctmp))
-	{
-		mp.password = eString(ctmp);
-		free(ctmp);
-	}
-
-	itmp = 0;
-	eConfig::getInstance()->getKey((cmd + "automount").c_str(), itmp);
-	mp.automount = itmp;
-	
-	return mp;
-}
-
-#define MAX_NFS_ENTRIES 8
-
 void eMountMgr::init()
 {
+	t_mount mp;
 	mountPoints.clear();
 	CConfigFile *config = new CConfigFile(',');
 	if (config->loadConfig(MOUNTCONFIGFILE))
@@ -698,7 +600,22 @@ void eMountMgr::init()
 		for (int i = 0; true; i++)
 		{
 			if (config->getString(eString().sprintf("localdir_%d", i)) != "")
-				mountPoints.push_back(eMountPoint(config, i));
+			{
+				mp.localDir = config->getString(eString().sprintf("localdir_%d", i));
+				mp.fstype = config->getInt32(eString().sprintf("fstype_%d", i));
+				mp.password = config->getString(eString().sprintf("password_%d", i));
+				mp.userName = config->getString(eString().sprintf("username_%d", i));
+				mp.mountDir = config->getString(eString().sprintf("mountdir_%d", i));
+				mp.automount = config->getInt32(eString().sprintf("automount_%d", i));
+				mp.options = config->getString(eString().sprintf("options_%d", i));
+				mp.description = config->getString(eString().sprintf("description_%d", i));
+				eString sip = config->getString(eString().sprintf("ip_%d", i));
+				sscanf(sip.c_str(), "%d.%d.%d.%d", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
+				mp.id = i;
+				eMountPoint m = eMountPoint(mp);
+				m.mp.mounted = m.isMounted();
+				mountPoints.push_back(m);
+			}
 			else
 				break;
 		}

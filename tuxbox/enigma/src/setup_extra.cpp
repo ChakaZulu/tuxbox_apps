@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.43 2005/09/30 15:36:05 digi_casi Exp $
+ * $Id: setup_extra.cpp,v 1.44 2005/10/12 20:46:27 digi_casi Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -118,7 +118,7 @@ void eExpertSetup::init_eExpertSetup()
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
 	    eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create 'Corefiles' after an Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
-#if ENABLE_DYN_MOUNT && ENABLE_DYN_CONF && ENABLE_DYN_FLASH && ENABLE_DYN_ROTOR && ENABLE_DYN_STREAM
+#if ENABLE_EXPERT_WEBIF
 	CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable HDD mount"), "/extras/dont_mount_hdd", _("don't mount the HDD via 'rcS'")))->selected, eExpertSetup::fileToggle,"/var/etc/.dont_mount_hdd");
 #endif
 #endif

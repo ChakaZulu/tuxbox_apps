@@ -1,16 +1,5 @@
-#ifndef __enigma_dyn_utils_h
-#define __enigma_dyn_utils_h
-
-#include <lib/dvb/dvb.h>
-#include <lib/dvb/edvb.h>
-#include <lib/dvb/servicestructure.h>
-#include <lib/dvb/decoder.h>
-#include <lib/dvb/dvbservice.h>
-#include <lib/dvb/service.h>
-#include <lib/dvb/serviceplaylist.h>
-#include <lib/system/http_dyn.h>
 /*
- * $Id: enigma_dyn_utils.h,v 1.18 2005/10/12 07:39:43 digi_casi Exp $
+ * $Id: enigma_dyn_utils.h,v 1.19 2005/10/12 20:46:27 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -30,6 +19,17 @@
  *
  */
 
+#ifndef __enigma_dyn_utils_h
+#define __enigma_dyn_utils_h
+
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/servicestructure.h>
+#include <lib/dvb/decoder.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/service.h>
+#include <lib/dvb/serviceplaylist.h>
+#include <lib/system/http_dyn.h>
 #include <src/enigma_dyn_colors.h>
 
 #define TEMPLATE_DIR TUXBOXDATADIR+eString("/enigma/templates/")

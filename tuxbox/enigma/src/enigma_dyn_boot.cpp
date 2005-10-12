@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.11 2005/10/09 08:30:28 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.12 2005/10/12 20:46:27 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,7 +19,7 @@
  *
  */
  
-#ifdef ENABLE_DYN_BOOT
+#ifdef ENABLE_EXPERT_WEBIF
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -565,4 +565,4 @@ void ezapBootManagerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockW
 	dyn_resolver->addDyn("GET", "/cgi-bin/setbootmanagersettings", setBootManagerSettings, lockWeb);
 }
 
-#endif // ENABLE_DYN_BOOT
+#endif
