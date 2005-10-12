@@ -9,6 +9,27 @@
 #include <lib/dvb/service.h>
 #include <lib/dvb/serviceplaylist.h>
 #include <lib/system/http_dyn.h>
+/*
+ * $Id: enigma_dyn_utils.h,v 1.18 2005/10/12 07:39:43 digi_casi Exp $
+ *
+ * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+
 #include <src/enigma_dyn_colors.h>
 
 #define TEMPLATE_DIR TUXBOXDATADIR+eString("/enigma/templates/")
@@ -36,6 +57,7 @@ eString htmlChars(eString);
 eString unHtmlChars(eString);
 eString getIP(void);
 off64_t getMovieSize(eString);
+eString getWebifVersion();
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
