@@ -1,3 +1,24 @@
+/*
+ * $Id: enigma_mount.cpp,v 1.46 2005/10/12 12:29:53 digi_casi Exp $
+ *
+ * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+
 #ifdef ENABLE_DYN_MOUNT
 #include <errno.h>
 #include <stdio.h>
@@ -316,6 +337,21 @@ int eMountMgr::mountMountPoint(int id)
 		if (mp_it->mp.id == id)
 		{
 			rc = mp_it->mount();
+			break;
+		}
+	}
+	return rc;
+}
+
+int eMountMgr::mountMountPoint(eString localDir)
+{
+	int rc = 0;
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
+		if (mp_it->mp.localDir == localDir)
+		{
+			if (!mp_it->mp.mounted)
+				rc = mp_it->mount();
 			break;
 		}
 	}
@@ -655,30 +691,6 @@ void eMountMgr::init()
 	delete config;
 	
 	addMountedFileSystems();
-	
-#if 0
-	bool found = false;
-	for (int i = 0; i < MAX_NFS_ENTRIES; i++)
-	{
-		int fstype = -1;
-		eString key = eString().sprintf("/elitedvb/network/nfs%d/fstype", i);
-		eConfig::getInstance()->getKey((key).c_str(), fstype);
-		if (fstype != -1)
-		{
-			t_mount mp2 = loadMPFromConfig(i);
-			if (mp2.mountDir && mp2.localDir)
-			{
-				for (std::vector <eMountPoint>::iterator mp_it2 = mountPoints.begin(); mp_it2 != mountPoints.end(); mp_it2++)
-				{
-					if (found = ((mp_it2->mp.localDir == mp2.localDir) && (mp_it2->mp.mountDir == mp2.mountDir)))
-						break;
-				}
-				if (!found)
-					addMountPoint(mp2);
-			}
-		}
-	}
-#endif
 }
 
 void eMountMgr::save()
