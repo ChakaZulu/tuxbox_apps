@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.h,v 1.22 2005/10/12 12:29:53 digi_casi Exp $
+ * $Id: enigma_mount.h,v 1.23 2005/10/12 13:04:14 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -80,6 +80,7 @@ public:
 	int mountMountPoint(int);
 	int mountMountPoint(eString);
 	int unmountMountPoint(int);
+	bool isMountPointMounted(eString);
 	void automountMountPoints(void);
 	void unmountAllMountPoints(void);
 	int selectMovieSource(int);

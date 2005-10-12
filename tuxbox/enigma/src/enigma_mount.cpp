@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.46 2005/10/12 12:29:53 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.47 2005/10/12 13:04:14 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -352,6 +352,21 @@ int eMountMgr::mountMountPoint(eString localDir)
 		{
 			if (!mp_it->mp.mounted)
 				rc = mp_it->mount();
+			break;
+		}
+	}
+	return rc;
+}
+
+bool eMountMgr::isMountPointMounted(eString localDir)
+{
+	bool rc = false;
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
+		if (mp_it->mp.localDir == localDir)
+		{
+			if (mp_it->mp.mounted)
+				rc = true;
 			break;
 		}
 	}
