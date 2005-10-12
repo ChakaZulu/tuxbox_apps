@@ -1034,7 +1034,7 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	if ( service
 #ifndef DISABLE_FILE
-		&& !service.path
+//		&& !service.path
 		&& Decoder::locked != 2 // leave service for (timer) zap in Background
 		&& service != recRef
 #endif
