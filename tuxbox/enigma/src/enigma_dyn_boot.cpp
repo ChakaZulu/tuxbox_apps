@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.12 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.13 2005/10/14 20:43:37 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -43,6 +43,7 @@
 #include <enigma_dyn_utils.h>
 #include <enigma_dyn_boot.h>
 #include <bootmenue/bmconfig.h>
+#include <bootmenue/bmimage.h>
 
 extern eString firmwareLevel(eString versionString);
 
@@ -247,49 +248,37 @@ eString getMenus()
 eString getInstalledImages()
 {
 	eString images;
-	struct stat s;
+	bmconfig *cfg = new bmconfig();
+	bmimages *img = new bmimages();
 	
-	eString dir[2] = {"/mnt/usb/image/", "/mnt/usb/fwpro/"};
+	cfg->load();
+	img->load(cfg->mpoint, true);
 	
-	for (int i = 0; i < 2; i++)
+	for (unsigned int i = 0; i < img->imageList.size(); i++)
 	{
-		DIR *d = opendir(dir[i].c_str());
-		if (d)
+		eString name = img->imageList[i].name;
+		eString location = img->imageList[i].location;
+		eString image = readFile(TEMPLATE_DIR + "image.tmp");
+		image.strReplace("#NAME#", name);
+		eString version = firmwareLevel(getAttribute(location + "/.version", "version"));
+		image.strReplace("#VERSION#", version);
+		if (location)
 		{
-			while (struct dirent *e = readdir(d))
-			{
-				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
-				{
-					eString location = dir[i] + eString(e->d_name);
-					stat(location.c_str(), &s);
-					if (S_ISDIR(s.st_mode))
-					{
-						eString name = e->d_name;
-						eString tmp = name + "/imagename";
-						ifstream nameFile(tmp.c_str());
-						if (nameFile)
-						{
-							eString line;
-							getline(nameFile, line, '\n');
-							nameFile.close();
-							if (line.length() > 0)
-								name = line;
-						}
-	
-						eString image = readFile(TEMPLATE_DIR + "image.tmp");
-						image.strReplace("#NAME#", name);
-						image.strReplace("#LOCATION#", location);
-						eString version = firmwareLevel(getAttribute(location + "/.version", "version"));
-						image.strReplace("#VERSION#", version);
-						image.strReplace("#SETTINGSBUTTON#", button(80, "Settings", GREEN, "javascript:editImageSettings('" + location + "')", "#FFFFFF"));
-						image.strReplace("#DELETEBUTTON#", button(80, "Delete", RED, "javascript:deleteImage('" + location + "')", "#FFFFFF"));
-						images += image;
-					}
-				}
-			}
-			closedir(d);
+			image.strReplace("#LOCATION#", location);
+			image.strReplace("#SETTINGSBUTTON#", button(80, "Settings", GREEN, "javascript:editImageSettings('" + location + "')", "#FFFFFF"));
+			image.strReplace("#DELETEBUTTON#", button(80, "Delete", RED, "javascript:deleteImage('" + location + "')", "#FFFFFF"));
 		}
+		else
+		{
+			image.strReplace("#LOCATION#", "&nbsp;");
+			image.strReplace("#SETTINGSBUTTON#", "&nbsp;");
+			image.strReplace("#DELETEBUTTON#", "&nbsp;");
+		}
+		images += image;
 	}
+	
+	delete cfg;
+	delete img;
 	
 	if (!images)
 		images = "<tr><td colspan=\"5\">No images found on selected boot device.</td></tr>";
