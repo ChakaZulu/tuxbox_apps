@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.21 2005/10/10 17:55:34 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.22 2005/10/14 19:50:52 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on dreamflash by mechatron
@@ -36,33 +36,26 @@ stmenu::stmenu()
 {
 	instance = this;
 	config = new bmconfig();
+	img = new bmimages();
 	CONNECT(RcInput::getInstance()->selected, stmenu::rc_event);
 	display = new fbClass();
 	lcd = new CLCDDisplay();
 	CONNECT(CTimer::getInstance()->selected, stmenu::timeout);
 	config->load();
 	CTimer::getInstance()->start(atoi(config->timeoutValue.c_str()));
-	if (loadskin())
+	if (loadImageList() > 0)
 	{
-		if (loadimagelist())
-		{
-			display->SetSAA(atoi(config->videoFormat.c_str())); //rgb = 0, fbas = 1, svideo = 2, component = 3;
-			display->SetMode(720, 576, 16);
-			showpic();
-
-			display->RenderString(tmp_ver, ver_x + 25 + 10, ver_y, menu_xs - 25 - 10, CLCDDisplay::LEFT, ver_font, ver_r, ver_g, ver_b);
-
-			display->Fill_buffer(menu_x - 5, menu_y - 5, menu_xs + 10, menu_ys + 10);
-			
-			drawmenu();
-			mainloop();
-		}
+		loadSkin();
+		showpic();
+		drawversion();
+		drawmenu();
+		mainloop();
 	}
 	
 	delete display;
 	delete lcd;
 	delete config;
-	imagelist.clear();
+	delete img;
 	printf("we are done.\n");
 }
 
@@ -102,11 +95,17 @@ void stmenu::rc_event(unsigned short key)
 	drawmenu();
 }
 
+void stmenu::drawversion()
+{
+	display->RenderString(tmp_ver, ver_x + 25 + 10, ver_y, menu_xs - 25 - 10, CLCDDisplay::LEFT, ver_font, ver_r, ver_g, ver_b);
+	display->Fill_buffer(menu_x - 5, menu_y - 5, menu_xs + 10, menu_ys + 10);
+}
+
 void stmenu::drawmenu()
 {
 	int firstentry = 0;
 	int lastentry = 0;
-
+	
 	if (selentry > 3)  firstentry = 4;
 	if (selentry > 7)  firstentry = 8;
 	if (selentry > 11) firstentry = 12;
@@ -125,7 +124,7 @@ void stmenu::drawmenu()
 
 	for (int i = firstentry; i <= lastentry; i++)
 	{
-		lcd->RenderString(imagelist[i].name, 0, (a * 15) + 3, 120, CLCDDisplay::CENTER, 20, CLCDDisplay::PIXEL_ON);
+		lcd->RenderString(img->imageList[i].name, 0, (a * 15) + 3, 120, CLCDDisplay::CENTER, 20, CLCDDisplay::PIXEL_ON);
 		int a1 = menu_y + (a * h);
 		if (i == selentry)
 		{
@@ -134,7 +133,7 @@ void stmenu::drawmenu()
 			display->RenderCircle(menu_x + 10, a1 + 2 * (h / 3) - 2, sel_r, sel_g, sel_b);
 		}
 								//25 ist platz fuer Kreis
-		display->RenderString(imagelist[i].name, menu_x + 25 + 10, a1 + h, menu_xs - 25 - 10, CLCDDisplay::LEFT, h, str_r, str_g, str_b);
+		display->RenderString(img->imageList[i].name, menu_x + 25 + 10, a1 + h, menu_xs - 25 - 10, CLCDDisplay::LEFT, h, str_r, str_g, str_b);
 		a++;
 	}
 	lcd->update();
@@ -145,7 +144,7 @@ void stmenu::mainloop()
 	while (!doexit)
 		usleep(50000);
 	
-	config->selectedEntry = imagelist[selentry].location;
+	config->selectedEntry = img->imageList[selentry].location;
 	config->save();
 
 	//clear menu
@@ -153,11 +152,11 @@ void stmenu::mainloop()
 	lcd->update();
 	display->SetMode(720, 576, 8);
 
-	startscript(imagelist[selentry].location);
-	goscript(imagelist[selentry].location);
+	startscript(img->imageList[selentry].location);
+	goscript(img->imageList[selentry].location);
 }
 
-bool stmenu::loadskin()
+bool stmenu::loadSkin()
 {
 	bool showTitle = false;
 	if (config->skinPath && config->skinName)
@@ -197,6 +196,24 @@ bool stmenu::loadskin()
 	return false;
 }
 
+int stmenu::loadImageList()
+{
+	int numberOfImages = 0;
+	if ((numberOfImages = img->load(config->mpoint, true)) > 0)
+	{
+		maxentry = numberOfImages - 1;
+		for (int i = 0; i <= maxentry; i++)
+		{
+			if (img->imageList[i].location == config->selectedEntry)
+			{
+				selentry = i;
+				break;
+			}
+		}
+	}
+	return numberOfImages;
+}
+
 void stmenu::showpic()
 {
 	if (config->skinPath && config->skinName)
@@ -213,68 +230,15 @@ void stmenu::showpic()
 			unsigned char *buffer = (unsigned char *)malloc(x * y * 3);
 
 			if (fh_png_load(pic.c_str(), buffer, x, y) == 0)
+			{
+				display->SetSAA(atoi(config->videoFormat.c_str())); //rgb = 0, fbas = 1, svideo = 2, component = 3;
+				display->SetMode(720, 576, 16);
 				display->fb_display(buffer, NULL, x, y, 0, 0, 0, 0);
+			}
 
 			free(buffer);
 		}
 	}
-}
-
-bool stmenu::loadimagelist()
-{
-	struct stat s;
-	image a;
-	
-	eString dir[2] = {config->mpoint + "/image/", config->mpoint + "/fwpro/"};
-	
-	imagelist.clear();
-	a.name = "Flash-Image";
-	a.location  = "";
-	imagelist.push_back(a);
-
-	selentry = 0;
-	int curentry = 0;
-	for (int i = 0; i < 2; i++)
-	{
-		DIR *d = opendir(dir[i].c_str());
-		if (d)
-		{
-			while (struct dirent *e = readdir(d))
-			{
-				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
-				{
-					eString name = dir[i] + eString(e->d_name);
-					stat(name.c_str(), &s);
-					if (S_ISDIR(s.st_mode))
-					{
-						eString tmp = e->d_name;
-						a.location = name;
-						a.name = e->d_name;
-						tmp = name + "/imagename";
-						ifstream nameFile(tmp.c_str());
-						if (nameFile)
-						{
-							eString line;
-							getline(nameFile, line, '\n');
-							nameFile.close();
-							if (line.length() > 0)
-								a.name = eString(line);
-						}
-	
-						imagelist.push_back(a);
-
-						curentry++;
-						if (config->selectedEntry == name)
-							selentry = curentry;
-					}
-				}
-			}
-			closedir(d);
-		}
-	}
-
-	maxentry = imagelist.size() - 1;
-	return maxentry > 0;
 }
 
 void stmenu::startscript(eString image)
