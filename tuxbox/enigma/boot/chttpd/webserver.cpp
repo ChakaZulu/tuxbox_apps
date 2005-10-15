@@ -1,5 +1,5 @@
 /*
- * $Id: webserver.cpp,v 1.1 2005/10/15 11:35:47 digi_casi Exp $
+ * $Id: webserver.cpp,v 1.2 2005/10/15 14:46:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -61,7 +61,7 @@ CWebserver::CWebserver(bool debug)
 CWebserver::~CWebserver()
 {
 
-	if(ListenSocket)
+	if (ListenSocket)
 		Stop();
 }
 
@@ -88,15 +88,15 @@ void CWebserver::ReadConfig()
 void CWebserver::SaveConfig()
 {
 	CConfigFile *Config = new CConfigFile(',');
-	Config->setInt32("Port", 80);
-	Config->setBool("THREADS",true);
-	Config->setBool("VERBOSE",false);
-	Config->setBool("LOG",false);
-	Config->setBool("Authenticate",false);
-	Config->setString("AuthUser","root");
+	Config->setInt32("Port", 8085);
+	Config->setBool("THREADS", true);
+	Config->setBool("VERBOSE", false);
+	Config->setBool("LOG", false);
+	Config->setBool("Authenticate", false);
+	Config->setString("AuthUser", "root");
 	Config->setString("AuthPassword","dreambox");
-	Config->setString("PublicDocRoot",PUBLICDOCUMENTROOT);
-	Config->setString("PrivatDocRoot",PRIVATEDOCUMENTROOT);
+	Config->setString("PublicDocRoot", PUBLICDOCUMENTROOT);
+	Config->setString("PrivatDocRoot", PRIVATEDOCUMENTROOT);
 	Config->saveConfig(CHTTPD_CONFIGFILE);
 	delete Config;
 }
@@ -118,31 +118,31 @@ bool CWebserver::Start()
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(Port);
 	
-	if ( bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0)
+	if ( bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) != 0)
 	{
 		int i = 1;
-			do
-			{
-				aprintf("bind to port %d failed...\n",Port);
-				aprintf("%d. Versuch, warte 5 Sekunden\n",i++);
-				sleep(5);
-			}while(bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) !=0);
-//			return false;
+		do
+		{
+			aprintf("bind to port %d failed...\n",Port);
+			aprintf("%d. Versuch, warte 5 Sekunden\n",i++);
+			sleep(5);
+		} while (bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) != 0);
+//		return false;
 	}
 
-	if (listen(ListenSocket, 5) !=0)
+	if (listen(ListenSocket, 5) != 0)
 	{
 			perror("listen failed...");
 			return false;
 	}
 	dprintf("Server gestartet\n");
-				
+	
 	return true;
 }
 
 void * WebThread(void * myconn)
 {
-CWebserverRequest	*req;
+	CWebserverRequest *req;
 	pthread_detach(pthread_self());
 	req = new CWebserverRequest(((Cmyconn *)myconn)->Parent);
 	req->Client_Addr = ((Cmyconn *)myconn)->Client_Addr;
@@ -154,7 +154,7 @@ CWebserverRequest	*req;
 	pthread_mutex_unlock( &ServerData_mutex );
 	if(req->GetRawRequest())
 	{
-		while(ThreadsCount > 15)
+		while (ThreadsCount > 15)
 		{
 			aprintf("Too many requests, waitin one sec\n");
 			sleep(1);
@@ -215,7 +215,7 @@ void CWebserver::DoLoop()
 			myconn->Client_Addr = inet_ntoa(cliaddr.sin_addr);
 			myconn->Socket = sock_connect;
 			myconn->Parent = this;
-			if (pthread_create (&Threads[thread_num], &attr, WebThread, (void *)myconn) != 0 )	// start WebThread 
+			if (pthread_create (&Threads[thread_num], &attr, WebThread, (void *)myconn) != 0 ) // start WebThread 
 				dperror("pthread_create(WebThread)");
 			if (thread_num == 20)			// testing
 				thread_num = 0;
@@ -275,7 +275,7 @@ int CWebserver::SocketConnect(Tmconnect * con,int Port)
 	#endif
 
 
-	if(connect(con->sock_fd, (SA *)&con->servaddr, sizeof(con->servaddr))==-1)
+	if (connect(con->sock_fd, (SA *)&con->servaddr, sizeof(con->servaddr))==-1)
 	{
 		aprintf("[chttp]: connect to socket %d failed\n",Port);
 		return -1;
