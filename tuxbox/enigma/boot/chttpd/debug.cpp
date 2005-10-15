@@ -1,5 +1,5 @@
 /*
- * $Id: debug.cpp,v 1.1 2005/10/15 11:35:47 digi_casi Exp $
+ * $Id: debug.cpp,v 1.2 2005/10/15 20:31:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,6 +19,7 @@
  *
  */
 
+#ifdef ENABLE_EXPERT_WEBIF
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -162,5 +163,7 @@ void CDEBUG::printf ( const char *fmt, ... )
 
 	pthread_mutex_unlock( &Log_mutex );
 }
+#endif
+
 
 

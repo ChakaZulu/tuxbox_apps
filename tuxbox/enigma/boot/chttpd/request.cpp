@@ -1,5 +1,5 @@
 /*
- * $Id: request.cpp,v 1.1 2005/10/15 11:35:47 digi_casi Exp $
+ * $Id: request.cpp,v 1.2 2005/10/15 20:31:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,6 +19,7 @@
  *
  */
 
+#ifdef ENABLE_EXPERT_WEBIF
 #include <cstdarg>
 #include <cstdio>
 #include <fcntl.h>
@@ -846,4 +847,5 @@ void CWebserverRequest::URLDecode(std::string &encodedString)
 	encodedString = newString;
 	free(newString);
 }
+#endif
 

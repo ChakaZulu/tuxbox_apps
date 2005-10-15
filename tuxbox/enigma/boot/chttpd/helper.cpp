@@ -1,5 +1,5 @@
 /*
- * $Id: helper.cpp,v 1.1 2005/10/15 11:35:47 digi_casi Exp $
+ * $Id: helper.cpp,v 1.2 2005/10/15 20:31:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,6 +19,7 @@
  *
  */
 
+#ifdef ENABLE_EXPERT_WEBIF
 #include <stdlib.h>                      // calloc and free prototypes.
 #include <stdio.h>                       // printf prototype.
 #include <string.h>                      // str* and memset prototypes.
@@ -188,5 +189,5 @@ char *b64buffer(char *s, bool f)
               (f ? "encode" : "decode"), s);
     return  b;                              // Return the pointer or null.
 }
-
+#endif
 

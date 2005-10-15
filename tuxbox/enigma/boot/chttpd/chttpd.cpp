@@ -1,5 +1,5 @@
 /*
- * $Id: chttpd.cpp,v 1.1 2005/10/15 11:35:47 digi_casi Exp $
+ * $Id: chttpd.cpp,v 1.2 2005/10/15 20:31:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,6 +19,7 @@
  *
  */
 
+#ifdef ENABLE_EXPERT_WEBIF
 #define CHTTPD_VERSION "0.1"
 
 #include <signal.h>
@@ -131,4 +132,10 @@ int main(int argc, char **argv)
 
 	return 0; 
 }
+#else
+int main(int argc, char **argv)
+{
+	return 0;
+}
+#endif
 

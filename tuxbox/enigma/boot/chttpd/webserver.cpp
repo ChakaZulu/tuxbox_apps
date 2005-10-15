@@ -1,5 +1,5 @@
 /*
- * $Id: webserver.cpp,v 1.2 2005/10/15 14:46:56 digi_casi Exp $
+ * $Id: webserver.cpp,v 1.3 2005/10/15 20:31:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,6 +19,7 @@
  *
  */
 
+#ifdef ENABLE_EXPERT_WEBIF
 #include <netinet/in.h> 
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
@@ -283,3 +284,5 @@ int CWebserver::SocketConnect(Tmconnect * con,int Port)
 	else
 		return con->sock_fd;
 }
+#endif
+
