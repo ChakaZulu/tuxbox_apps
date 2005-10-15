@@ -1,3 +1,3 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = showlogo bootmenue
+SUBDIRS = showlogo bootmenue chttpd
