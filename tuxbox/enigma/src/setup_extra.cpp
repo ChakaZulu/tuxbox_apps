@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.44 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: setup_extra.cpp,v 1.45 2005/10/15 17:01:24 digi_casi Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -119,6 +119,10 @@ void eExpertSetup::init_eExpertSetup()
 	    eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create 'Corefiles' after an Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
 #if ENABLE_EXPERT_WEBIF
+	int dontMountHDD = 0;
+	if (access("/var/etc/.dont_mount_hdd", R_OK) == 0)
+		dontMountHDD = 1;
+	eConfig::getInstance()->setKey("/extras/dont_mount_hdd", dontMountHDD);
 	CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable HDD mount"), "/extras/dont_mount_hdd", _("don't mount the HDD via 'rcS'")))->selected, eExpertSetup::fileToggle,"/var/etc/.dont_mount_hdd");
 #endif
 #endif
@@ -141,8 +145,6 @@ void eExpertSetup::fileToggle(bool newState, const char* filename)
 	if (test != NULL)
 	{
 		fclose(test);
-		eString cmd = "rm ";
-		cmd += filename;
 		::unlink(filename);
 	}
 	else
