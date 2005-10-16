@@ -228,22 +228,6 @@ void eZap::init_eZap(int argc, char **argv)
 
 	eString::readEncodingFile();
 
-#ifdef ENABLE_EXPERT_WEBIF
-#ifndef DISABLE_FILE
-	extern void initHDDparms(void);
-	initHDDparms();
-
-	int swapfile = 0;
-	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
-	char *swapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
-		swapfilename = strdup("");
-	extern void activateSwapFile(eString);
-	if (swapfile == 1)
-		activateSwapFile(eString(swapfilename));
-	free(swapfilename);
-#endif
-#endif
 	eDVB::getInstance()->configureNetwork();
 
 	// build Service Selector
@@ -263,6 +247,20 @@ void eZap::init_eZap(int argc, char **argv)
 	eMountMgr *mountMgr = new eMountMgr();
 	mountMgr->automountMountPoints();
 	delete mountMgr;
+#ifndef DISABLE_FILE
+	extern void initHDDparms(void);
+	initHDDparms();
+
+	int swapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = strdup("");
+	extern void activateSwapFile(eString);
+	if (swapfile == 1)
+		activateSwapFile(eString(swapfilename));
+	free(swapfilename);
+#endif
 #endif
 
 	eDebug("[ENIGMA] ok, beginning mainloop");
