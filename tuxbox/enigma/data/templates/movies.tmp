@@ -6,7 +6,45 @@
 		<script language="javascript" type="text/javascript" src="dhtml.js"></script>
 		<script language="javascript" type="text/javascript" src="zap.js"></script>
 		<script language="javascript" type="text/javascript">#ZAPDATA#</script>
-		<script>		
+		<script>
+			function update_desc_field()
+			{
+				var i = document.channelselector.channel.selectedIndex;
+				var nm = document.channelselector.channel.options[i].text; 
+				var reg_exp = /^\[\d* MB\] (.*)$/;
+				if (reg_exp.test(nm)) 
+				{
+					nm = RegExp.$1;
+				}
+				document.channelselector.description.value = nm;
+			}
+
+			function renameMovie()
+			{
+				var selChannel = document.channelselector.channel.selectedIndex;
+				var channel = "";
+				var newname = document.channelselector.description.value ;
+
+				if (selChannel >= 0)
+				{
+					if ( newname.length > 0 )
+					{
+					currentChannel = selChannel;
+					channel = document.channelselector.channel.options[selChannel].value;
+					document.location = "/cgi-bin/renameMovie?ref="+channel+"&desc="+escape(newname);
+					setTimeout("document.location.reload()", 1000);
+					document.channelselector.description.value = "" ;
+					}
+					else
+					{
+						alert("Empty name not permitted.");
+						document.channelselector.description.value = document.channelselector.channel.options[selChannel].text ;
+					}
+				}
+				else
+					alert("Please select a movie first!");
+			}
+				
 			function deleteMovie(channel)
 			{
 				if (window.confirm('Do you really want to delete this movie?'))
@@ -87,7 +125,14 @@
 						<select style="width: 0px; font-weight: bold; background-color: #F4F4F4" name="bouquet" size="0"></select>
 					</td>
 					<td>
-						<select style="width: 630px; font-weight: bold; background-color: #F4F4F4" name="channel" size="#SELSIZE#"></select>
+						<select style="width: 630px; font-weight: bold; background-color: #F4F4F4" name="channel" size="#SELSIZE#" onchange="javascript:update_desc_field()"></select>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<input name="description" type="text" size="70">
+						&nbsp;&nbsp;
+						#RENAMEBUTTON#
 					</td>
 				</tr>
 			</table>

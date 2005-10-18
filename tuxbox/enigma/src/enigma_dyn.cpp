@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.545 2005/10/18 19:23:54 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.546 2005/10/18 20:02:15 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -1226,6 +1226,8 @@ static eString getZap(eString path)
 			result.strReplace("#STREAMBUTTON#", tmp);
 			tmp = button(100, "Recover", BLUE, "javascript:recoverMovies()", "#FFFFFF");
 			result.strReplace("#RECOVERBUTTON#", tmp);
+			tmp = button(100, "Rename", TOPNAVICOLOR, "javascript:renameMovie()", "#000000");
+			result.strReplace("#RENAMEBUTTON#", tmp);
 		}
 		else
 #endif
