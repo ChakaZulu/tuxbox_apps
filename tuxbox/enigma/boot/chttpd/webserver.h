@@ -1,7 +1,8 @@
 /*
- * $Id: webserver.h,v 1.2 2005/10/18 11:30:19 digi_casi Exp $
+ * $Id: webserver.h,v 1.3 2005/10/18 19:20:34 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ * based on nhttpd (C) 2001/2002 Dirk Szymanski
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +28,6 @@
 #include <netinet/in.h>
 #include <config.h>
 #include <string>
-#include <configfile.h>
 
 using namespace std;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: debug.cpp,v 1.3 2005/10/18 11:30:19 digi_casi Exp $
+ * $Id: debug.cpp,v 1.4 2005/10/18 19:20:34 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
   * based on nhttpd (C) 2001/2002 Dirk Szymanski
@@ -37,14 +37,6 @@ CDEBUG *CDEBUG::getInstance(void)
 		instance = new CDEBUG();
 
 	return instance;
-}
-
-void CDEBUG::deleteInstance(void)
-{
-	if (instance)
-		delete instance;
-
-	instance = NULL;
 }
 
 CDEBUG::CDEBUG(void)
