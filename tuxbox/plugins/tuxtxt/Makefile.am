@@ -18,7 +18,7 @@ AM_CPPFLAGS = \
 
 tuxtxt_la_LIBADD = \
 	@TUXBOX_LIBS@  \
-	@FREETYPE_LIBS@
+	@FREETYPE_LIBS@ \
 	@TUXTXT_LIBS@ 
 endif
 
