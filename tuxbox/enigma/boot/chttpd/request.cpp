@@ -1,7 +1,8 @@
 /*
- * $Id: request.cpp,v 1.2 2005/10/15 20:31:56 digi_casi Exp $
+ * $Id: request.cpp,v 1.3 2005/10/18 11:30:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+  * based on nhttpd (C) 2001/2002 Dirk Szymanski
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +29,13 @@
 #include <unistd.h>
 #include "debug.h"
 #include "helper.h"
+#include <chttpd/chttpdconfig.h>
 
 #define OUTBUFSIZE 10240
 #define IADDR_LOCAL "127.0.0.1"
 #define UPLOAD_TMP_FILE "/tmp/upload.tmp"
+
+extern chttpdConfig cfg;
 
 CWebserverRequest::CWebserverRequest(CWebserver *server)
 {
@@ -61,7 +65,7 @@ CWebserverRequest::~CWebserverRequest(void)
 // check if authentication is required
 bool CWebserverRequest::Authenticate(void)
 {
-	if (!Parent->MustAuthenticate)
+	if (!cfg.MustAuthenticate)
 		return true;
 
 	if (CheckAuth())
@@ -88,8 +92,8 @@ bool CWebserverRequest::CheckAuth()
 	std::string user = decodet.substr(0,pos);
 	std::string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
 
-	return (user.compare(Parent->AuthUser) == 0 &&
-	        passwd.compare(Parent->AuthPassword) == 0);
+	return (user.compare(cfg.AuthUser) == 0 &&
+	        passwd.compare(cfg.AuthPassword) == 0);
 }
 
 bool CWebserverRequest::GetRawRequest()
@@ -691,10 +695,10 @@ std::string CWebserverRequest::GetFileName(std::string path, std::string filenam
 	else
 		tmpfilename = path + filename;
 
-	if( access(std::string(Parent->PublicDocumentRoot + tmpfilename).c_str(),4) == 0)
-			tmpfilename = Parent->PublicDocumentRoot + tmpfilename;
-	else if(access(std::string(Parent->PrivateDocumentRoot + tmpfilename).c_str(),4) == 0)
-			tmpfilename = Parent->PrivateDocumentRoot + tmpfilename;
+	if( access(std::string(cfg.PublicDocumentRoot + tmpfilename).c_str(),4) == 0)
+			tmpfilename = cfg.PublicDocumentRoot + tmpfilename;
+	else if(access(std::string(cfg.PrivateDocumentRoot + tmpfilename).c_str(),4) == 0)
+			tmpfilename = cfg.PrivateDocumentRoot + tmpfilename;
 	else if(access(tmpfilename.c_str(),4) == 0)
 			;
 	else

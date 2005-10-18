@@ -1,7 +1,8 @@
 /*
- * $Id: chttpd.cpp,v 1.2 2005/10/15 20:31:56 digi_casi Exp $
+ * $Id: chttpd.cpp,v 1.3 2005/10/18 11:30:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+  * based on nhttpd (C) 2001/2002 Dirk Szymanski
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +29,12 @@
 #include <config.h>
 #include "webserver.h"
 #include "debug.h"
+#include <chttpd/chttpdconfig.h>
 
 using namespace std;
 
 CWebserver *webserver;
+chttpdConfig cfg;
 
 void sig_catch(int msignal)
 {
@@ -39,7 +42,7 @@ void sig_catch(int msignal)
 	{
 		case SIGHUP:
 			aprintf("got signal HUP, reading config\n");
-			webserver->ReadConfig();
+			cfg.load();
 			break;
 		default:
 			aprintf("stop requested...\n");
@@ -58,7 +61,7 @@ int main(int argc, char **argv)
 
 	if (argc > 1)
 	{
-		for(i = 1; i < argc; i++)
+		for (i = 1; i < argc; i++)
 		{
 
 			if (strncmp(argv[i], "-d", 2) == 0)

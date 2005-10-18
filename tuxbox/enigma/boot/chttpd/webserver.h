@@ -1,5 +1,5 @@
 /*
- * $Id: webserver.h,v 1.1 2005/10/15 11:35:47 digi_casi Exp $
+ * $Id: webserver.h,v 1.2 2005/10/18 11:30:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -33,8 +33,6 @@ using namespace std;
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
-#define PRIVATEDOCUMENTROOT "/var/tuxbox/config/enigma/httpd"
-#define PUBLICDOCUMENTROOT "/var/tmp/httpd"
 
 class TWebserverRequest;
 
@@ -46,22 +44,10 @@ struct Tmconnect
 
 class CWebserver
 {
-	int Port;
 	int ListenSocket;
-	bool THREADS;
-
 public:
 	bool STOP;
-	bool VERBOSE;
-	bool MustAuthenticate;
-	bool NewGui;
-
-	string PrivateDocumentRoot;
-	string PublicDocumentRoot;
-
-	string AuthUser;
-	string AuthPassword;
-
+	
 	CWebserver(bool debug);
 	~CWebserver();
 
@@ -71,8 +57,5 @@ public:
 	void Stop();
 
 	int SocketConnect(Tmconnect * con,int Port);
-
-	void SaveConfig();
-	void ReadConfig();
 };
 #endif

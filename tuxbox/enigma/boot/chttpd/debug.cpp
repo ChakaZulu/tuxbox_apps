@@ -1,7 +1,8 @@
 /*
- * $Id: debug.cpp,v 1.2 2005/10/15 20:31:56 digi_casi Exp $
+ * $Id: debug.cpp,v 1.3 2005/10/18 11:30:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+  * based on nhttpd (C) 2001/2002 Dirk Szymanski
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include "debug.h"
+#include <chttpd/chttpdconfig.h>
+
+extern chttpdConfig cfg;
 
 CDEBUG *CDEBUG::instance = NULL;
 
@@ -46,8 +50,8 @@ void CDEBUG::deleteInstance(void)
 CDEBUG::CDEBUG(void)
 {
 	Debug = false;
-	Log = false;
-	Verbose = false;
+	cfg.Log = false;
+	cfg.Verbose = false;
 	Logfile = NULL;
 	buffer = new char[1024 * 4];
 	pthread_mutex_init(&Log_mutex, NULL);
@@ -66,9 +70,9 @@ CDEBUG::~CDEBUG(void)
 
 void CDEBUG::LogRequest(CWebserverRequest *Request)
 {
-	if ((Log) || (Verbose))
+	if ((cfg.Log) || (cfg.Verbose))
 	{
-		if ((Log) && (!Logfile))
+		if ((cfg.Log) && (!Logfile))
 			Logfile = fopen("/tmp/httpd_log","a");
 
 		pthread_mutex_lock(&Log_mutex);
@@ -105,10 +109,10 @@ void CDEBUG::LogRequest(CWebserverRequest *Request)
 			//Request->ContentType.c_str(),
 			Request->Param_String.c_str());
 
-		if ((Log) && (Logfile))
+		if ((cfg.Log) && (Logfile))
 			::fprintf(Logfile, "%s", buffer);
 
-		if (Verbose)
+		if (cfg.Verbose)
 			::printf("%s",buffer);
 
 		pthread_mutex_unlock(&Log_mutex);
@@ -117,7 +121,7 @@ void CDEBUG::LogRequest(CWebserverRequest *Request)
 
 void CDEBUG::debugprintf ( const char *fmt, ... )
 {
-	if(Debug)
+	if (Debug)
 	{
 		pthread_mutex_lock( &Log_mutex );
 
@@ -134,7 +138,7 @@ void CDEBUG::debugprintf ( const char *fmt, ... )
 
 void CDEBUG::logprintf ( const char *fmt, ... )
 {
-	if(Debug)
+	if (Debug)
 	{
 		pthread_mutex_lock( &Log_mutex );
 

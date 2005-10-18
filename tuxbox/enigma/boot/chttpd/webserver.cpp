@@ -1,7 +1,8 @@
 /*
- * $Id: webserver.cpp,v 1.3 2005/10/15 20:31:56 digi_casi Exp $
+ * $Id: webserver.cpp,v 1.4 2005/10/18 11:30:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ * based on nhttpd (C) 2001/2002 Dirk Szymanski
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +30,9 @@
 #include "webserver.h"
 #include "request.h"
 #include "debug.h"
+#include <chttpd/chttpdconfig.h>
 
-#define CHTTPD_CONFIGFILE CONFIGDIR "/enigma/chttpd.conf"
-
+extern chttpdConfig cfg;
 
 struct Cmyconn
 {
@@ -47,16 +48,10 @@ int ThreadsCount = 0;
 
 CWebserver::CWebserver(bool debug)
 {
-	Port = 0;
 	ListenSocket = 0;
-	PublicDocumentRoot = "";
-	PrivateDocumentRoot = "";
 	STOP = false;
-	CDEBUG::getInstance()->Debug = debug;
-	AuthUser = "";
-	AuthPassword = "";
  
-	ReadConfig();
+	cfg.load();
 }
 
 CWebserver::~CWebserver()
@@ -64,42 +59,6 @@ CWebserver::~CWebserver()
 
 	if (ListenSocket)
 		Stop();
-}
-
-void CWebserver::ReadConfig()
-{
-	CConfigFile *Config = new CConfigFile(',');
-	if (!Config->loadConfig(CHTTPD_CONFIGFILE))
-	{
-		SaveConfig();
-		Config->loadConfig(CHTTPD_CONFIGFILE);
-	}
-	Port = Config->getInt32("Port");
-	THREADS = Config->getBool("THREADS");
-	CDEBUG::getInstance()->Verbose = Config->getBool("VERBOSE");
-	CDEBUG::getInstance()->Log = Config->getBool("LOG");
-	MustAuthenticate = Config->getBool("Authenticate");
-	PrivateDocumentRoot = Config->getString("PrivatDocRoot");
-	PublicDocumentRoot = Config->getString("PublicDocRoot");
-	AuthUser = Config->getString("AuthUser");
-	AuthPassword = Config->getString("AuthPassword");
-	delete Config;
-}
-
-void CWebserver::SaveConfig()
-{
-	CConfigFile *Config = new CConfigFile(',');
-	Config->setInt32("Port", 8085);
-	Config->setBool("THREADS", true);
-	Config->setBool("VERBOSE", false);
-	Config->setBool("LOG", false);
-	Config->setBool("Authenticate", false);
-	Config->setString("AuthUser", "root");
-	Config->setString("AuthPassword","dreambox");
-	Config->setString("PublicDocRoot", PUBLICDOCUMENTROOT);
-	Config->setString("PrivatDocRoot", PRIVATEDOCUMENTROOT);
-	Config->saveConfig(CHTTPD_CONFIGFILE);
-	delete Config;
 }
 
 bool CWebserver::Init(bool debug)
@@ -117,14 +76,14 @@ bool CWebserver::Start()
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(Port);
+	servaddr.sin_port = htons(cfg.Port);
 	
 	if ( bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) != 0)
 	{
 		int i = 1;
 		do
 		{
-			aprintf("bind to port %d failed...\n",Port);
+			aprintf("bind to port %d failed...\n", cfg.Port);
 			aprintf("%d. Versuch, warte 5 Sekunden\n",i++);
 			sleep(5);
 		} while (bind(ListenSocket, (SA *) &servaddr, sizeof(servaddr)) != 0);
@@ -209,7 +168,7 @@ void CWebserver::DoLoop()
 		setsockopt(sock_connect,SOL_TCP,TCP_CORK,&t,sizeof(t));
 		dprintf("chttpd: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));	// request from client arrives
 
-		if(THREADS)		
+		if(cfg.THREADS)		
 		{						// Multi Threaded 
 			Cmyconn *myconn = new Cmyconn;		// prepare Cmyconn struct
 			myconn->clilen = clilen;
@@ -261,7 +220,7 @@ void CWebserver::Stop()
 	}
 }
 
-int CWebserver::SocketConnect(Tmconnect * con,int Port)
+int CWebserver::SocketConnect(Tmconnect * con, int Port)
 {
 	char rip[]="127.0.0.1";
 

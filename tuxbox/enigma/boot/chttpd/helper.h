@@ -1,7 +1,8 @@
 /*
- * $Id: helper.h,v 1.1 2005/10/15 11:35:47 digi_casi Exp $
+ * $Id: helper.h,v 1.2 2005/10/18 11:30:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+  * based on nhttpd (C) 2001/2002 Dirk Szymanski
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
