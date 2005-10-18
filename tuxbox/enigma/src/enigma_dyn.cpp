@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.544 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.545 2005/10/18 19:23:54 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -927,6 +927,34 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 		}
 	}
 	return closeWindow(content, "Please wait...", 2000);
+}
+
+static eString renameMovie(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	bool changed = false ;
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+
+	eString sref = opt["ref"];
+	eString newname = opt["desc"];
+	eServiceReference ref = string2ref(sref);
+	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
+
+	if (newname)
+	{
+		for (std::list<ePlaylistEntry>::iterator it(recordings->getList().begin()); it != recordings->getList().end(); ++it) 
+		{
+			if (it->service.path == ref.path)
+			{
+				it->service.descr = newname ;
+				changed = true ;
+				break;
+			}
+		}
+	}
+	if (changed)
+		recordings->save();
+	
+	return closeWindow(content, "Please wait...", 100);
 }
 #endif
 
@@ -2652,6 +2680,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/recoverRecordings", recoverRecordings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/deleteMovie", deleteMovie, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/renameMovie", renameMovie, lockWeb);
 #endif
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot, lockWeb);
 	
