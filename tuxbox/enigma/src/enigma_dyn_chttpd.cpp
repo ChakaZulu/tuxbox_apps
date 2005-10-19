@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_chttpd.cpp,v 1.1 2005/10/19 16:41:30 digi_casi Exp $
+ * $Id: enigma_dyn_chttpd.cpp,v 1.2 2005/10/19 19:28:24 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -57,7 +57,7 @@ eString getConfigCHTTPD(void)
 	if (*pidList != -1)
 		chttpdStatus = "Running";
 	
-	chttpdConfig.load();
+	chttpdconf.load();
 	
 	eString result = readFile(TEMPLATE_DIR + "chttpdSettings.tmp");
 	
