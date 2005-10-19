@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.13 2005/10/14 20:43:37 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.14 2005/10/19 15:35:15 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -179,7 +179,10 @@ void activateMenu(eString menu)
 	if (!found)
 	{
 		if (bm)
+		{
 			file += "\n/bin/bootmenue && /tmp/bm.sh";
+			initChanged = true;
+		}
 	}
 	
 	if (initChanged)
