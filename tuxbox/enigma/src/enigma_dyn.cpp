@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.546 2005/10/18 20:02:15 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.547 2005/10/19 16:41:30 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -83,6 +83,7 @@
 #include <enigma_dyn_pda.h>
 #include <enigma_dyn_movieplayer.h>
 #include <enigma_dyn_boot.h>
+#include <enigma_dyn_chttpd.h>
 #include <enigma_streamer.h>
 #include <enigma_processutils.h>
 #include <epgwindow.h>
@@ -721,30 +722,20 @@ eString getLeftNavi(eString mode)
 	else
 	if (mode.find("config") == 0)
 	{
-#ifndef DISABLE_FILE
 #ifdef ENABLE_EXPERT_WEBIF
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+			result += button(110, "Boot Manager", LEFTNAVICOLOR, pre + "?mode=configBoot" + post);
 		result += button(110, "Mount Manager", LEFTNAVICOLOR, pre + "?mode=configMountMgr" + post);
 		result += "<br>";
-#endif
-#endif
-#ifdef ENABLE_EXPERT_WEBIF
 		result += button(110, "Flash Manager", LEFTNAVICOLOR, pre + "?mode=configFlashMgr" + post);
 		result += "<br>";
-#endif
-#ifndef DISABLE_FILE
-#ifdef ENABLE_EXPERT_WEBIF
 		result += button(110, "Swap File", LEFTNAVICOLOR, pre + "?mode=configSwapFile" + post);
 		result += "<br>";
 		result += button(110, "Settings", LEFTNAVICOLOR, pre + "?mode=configSettings" + post);
 		result += "<br>";
-#endif
-#endif
-#ifdef ENABLE_EXPERT_WEBIF
 		result += button(110, "Rotor", LEFTNAVICOLOR, pre + "?mode=configRotor" + post);
-#endif
-#ifdef ENABLE_EXPERT_WEBIF
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
-			result += button(110, "Boot Manager", LEFTNAVICOLOR, pre + "?mode=configBoot" + post);
+		result += "<br>";
+		result += button(110, "Web Server", LEFTNAVICOLOR, pre + "?mode=configWebserver" + post);
 #endif
 	}
 	else
@@ -1869,25 +1860,18 @@ eString getContent(eString mode, eString path, eString opts)
 		result += "Select one of the configuration categories on the left";
 	}
 	else
-#endif
-#ifdef ENABLE_EXPERT_WEBIF
 	if (mode == "configFlashMgr")
 	{
 		result = getTitle("CONFIG: Flash Manager");
 		result += getConfigFlashMgr();
 	}
 	else
-#endif
-#ifndef DISABLE_FILE
-#ifdef ENABLE_EXPERT_WEBIF
 	if (mode == "configMountMgr")
 	{
 		result = getTitle("CONFIG: Mount Manager");
 		result += getConfigMountMgr();
 	}
 	else
-#endif
-#ifdef ENABLE_EXPERT_WEBIF
 	if (mode == "configSwapFile")
 	{
 		result = getTitle("CONFIG: Swap File");
@@ -1900,17 +1884,18 @@ eString getContent(eString mode, eString path, eString opts)
 		result += getConfigSettings();
 	}
 	else
-#endif
-#endif
-#if ENABLE_EXPERT_WEBIF
 	if (mode == "configRotor")
 	{
 		result = getTitle("CONFIG: Rotor");
 		result += getConfigRotor();
 	}
 	else
-#endif
-#if ENABLE_EXPERT_WEBIF
+	if (mode == "configWebserver")
+	{
+		result = getTitle("CONFIG: Web Server");
+		result += getConfigCHTTPD();
+	}
+	else
 	if (mode == "configBoot")
 	{
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
@@ -1921,7 +1906,6 @@ eString getContent(eString mode, eString path, eString opts)
 	}
 	else
 #endif
-
 	if (mode == "help")
 	{
 		result = getTitle("HELP");
@@ -2699,6 +2683,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	ezapConfInitializeDyn(dyn_resolver, lockWeb);
 	ezapFlashInitializeDyn(dyn_resolver, lockWeb);
 	ezapRotorInitializeDyn(dyn_resolver, lockWeb);
+	ezapCHTTPDInitializeDyn(dyn_resolver, lockWeb);
 #endif
 }
 

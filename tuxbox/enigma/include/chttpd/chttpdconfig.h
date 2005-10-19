@@ -1,5 +1,5 @@
 /*
- * $Id: chttpdconfig.h,v 1.1 2005/10/18 11:30:20 digi_casi Exp $
+ * $Id: chttpdconfig.h,v 1.2 2005/10/19 16:41:30 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -41,7 +41,6 @@ public:
 	bool AutoStart;
 	int Port;
 	bool THREADS;
-	bool VERBOSE;
 	bool MustAuthenticate;
 	bool Verbose;
 	bool Log;
