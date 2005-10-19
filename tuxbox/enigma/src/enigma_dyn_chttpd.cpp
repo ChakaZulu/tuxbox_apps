@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_chttpd.cpp,v 1.2 2005/10/19 19:28:24 digi_casi Exp $
+ * $Id: enigma_dyn_chttpd.cpp,v 1.3 2005/10/19 20:08:34 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -111,7 +111,7 @@ eString setCHTTPDSettings(eString request, eString dirpath, eString opts, eHTTPC
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
-	chttpdconf.AutoStart = opt["autoStart"] == "on";
+	chttpdconf.AutoStart = opt["AutoStart"] == "on";
 	chttpdconf.Port = atoi(opt["Port"].c_str());
 	chttpdconf.THREADS = opt["Threads"] == "on";
 	chttpdconf.Verbose = opt["Verbose"] == "on";
