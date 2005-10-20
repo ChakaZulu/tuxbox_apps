@@ -169,7 +169,6 @@ Default is 0 (no limit).
 .br
 Read binary stream data from file instead of the demux device.
 Depending on the decoding mode this might be transport stream, packetized elemtary stream or sections.
-Ensure packet sync by using \-sync option.
   <file> \= '-' reads from standard input.
 
 
@@ -253,15 +252,11 @@ Transport Stream mode.
 .TP
 .B \-sync
 .br
-Do simple packet header sync when reading transport streams.
-This option enforces sync byte aligning (default) ans is normally
-done by receiption hardware/firmware.
+(obsolete as of 1.4.10, \-sync is default. This option enforces software packet sync for TS and PS/PES).
 .TP
 .B \-nosync
 .br
-Switch off packet header sync when reading transport streams.
-Switching of packet sync may result in odd decoding results or
-even dvbsnoop crashes. This may not work on some hardware.
+(obsolete as of 1.4.10).
 
 .TP
 .B \-tssubdecode
@@ -296,15 +291,12 @@ Packetized Elementary Stream mode.
 .TP
 .B \-sync
 .br
-Do simple packet header sync when reading PES or PS data.
-This option enforces sync byte aligning (default) ans is normally
-done by receiption hardware/firmware.
+(obsolete as of 1.4.10, \-sync is default. This option enforces software packet sync for TS and PS/PES).
 .TP
 .B \-nosync
 .br
-Switch off packet header sync when reading PES data.
-Switching of packet sync may result in odd decoding results or
-even dvbsnoop crashes. This may not work on some hardware.
+(obsolete as of 1.4.10).
+.TP
 
 
 .SH "PID Scan Mode Specific Command Line Options"
@@ -374,7 +366,7 @@ Display PAT transport stream (ts) and do subdecoding of sections and descriptors
 
 Read PES (e.g. Videotext, Video, Audio) stream:
    dvbsnoop \-s pes 0x28F
-   dvbsnoop \-s pes 0x28F -sync -b > pes.bin.file
+   dvbsnoop \-s pes 0x28F -b > pes.bin.file
 
 Read PS from file and do not show hex dump:
    dvbsnoop -if hdtv_ps_file.mpg -s ps -ph 0 -nohexdumpbuffer -n 30
@@ -403,8 +395,8 @@ Save 1000 packets of a transport stream to a file:
    dvbsnoop \-b \-n 1000 \-s ts -tsraw  > ts_file.bin
 
 Read transport stream (ts) from file and decode:
-   dvbsnoop \-s ts \-if ts_stream.bin  -sync
-   dvbsnoop \-s ts \-if ts_file.pid0x200.bin -sync  0x200
+   dvbsnoop \-s ts \-if ts_stream.bin  
+   dvbsnoop \-s ts \-if ts_file.pid0x200.bin   0x200
 
 Simple filter for some PID values, some examples:
    dvbsnoop \-n 5 \-nph 0x00 | grep \-i "PID: "
@@ -432,16 +424,14 @@ dvbsnoop tries to decode all of the data it receives, e.g. if you try
 to decode a video or audio stream in section mode, dvbsnoop may assume
 a section table and will decode the data wrong. In this case the decoding
 will be garbage. Using the '-crc' option should prevent this
-(if supported at the hardware/driver level). Also, the '-sync' option
-is very helpful when using '-s pes' or '-s ts'. The '-sync' option tries
-to find TS or PES packet start sync bytes before decoding. 
+(if supported at the hardware/driver level).
 .br
 .br
 dvbsnoop does not do DVB stream validation.
 dvbsnoop assumes correct DVB streams. Corrupted streams or streams with
 wrong semantics (e.g. incorrect length information) will result in
-wrong decoding output. For this reason, the use of '-crc' and '-sync'
-options is strongly recommended. 
+wrong decoding output. For this reason, the use of '-crc' options is
+strongly recommended. 
 .br
 .br
 Depending on the firmware of your dvb card, dvbsnoop may not be able to sniff on pids,

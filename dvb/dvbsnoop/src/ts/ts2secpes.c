@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.8 2005/09/09 14:20:31 rasc Exp $
+$Id: ts2secpes.c,v 1.9 2005/10/20 22:25:31 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,12 @@ $Id: ts2secpes.c,v 1.8 2005/09/09 14:20:31 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.9  2005/10/20 22:25:31  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.8  2005/09/09 14:20:31  rasc
 TS continuity sequence check (cc verbose output)
 
@@ -262,13 +268,26 @@ void ts2SecPes_subdecode (u_char *b, int len, u_int opt_pid)
 	// -- if payload_start, check PES/SECTION
 	if (payload_unit_start_indicator) {
 
+		// -- sections: pui-start && pointer != 0 push data to last section!
+		// -- (PES would be also 0x00)
+
+		int SI_offset = b[0];	// pointer
+		if (SI_offset) {
+		  ts2SecPes_AddPacketContinue (pid, continuity_counter, b+1, (u_long)SI_offset);
+		  // -- because re-add data below, we have to fake cc
+		  tsd.continuity_counter--;
+		}
+
+		// $$$ TODO: here we have a flaw, when pointer != 0, we do not display the new 
+		//           TS packet, but we are subdecoding (display) using the TS overflow data...
+
 		// -- output data of prev. collected packets
 		// -- if not already decoded or length was unspecified
      		if ((tsd.status != TSD_output_done) && packetMem_length(tsd.mem_handle))  {
-			ts2SecPes_Output_subdecode ();
+			ts2SecPes_Output_subdecode (SI_offset);
 		}
 
-		// -- first buffer data
+		// -- first buffer data (also "old" prior to "pointer" offset...)
 		ts2SecPes_AddPacketStart (pid, continuity_counter, b, (u_long)len);
 
 	} else {
@@ -295,7 +314,7 @@ int  ts2SecPes_checkAndDo_PacketSubdecode_Output (void)
 	// -- already read all data? decode & output data...
 	if ( (tsd.payload_length) && (tsd.payload_length <= packetMem_length(tsd.mem_handle)) ) {
      		if (tsd.status != TSD_output_done) {
-			ts2SecPes_Output_subdecode ();
+			ts2SecPes_Output_subdecode (0);
 			return 1;
 		}
 	}
@@ -307,8 +326,10 @@ int  ts2SecPes_checkAndDo_PacketSubdecode_Output (void)
 
 //
 // -- TS  SECTION/PES  subdecoding  output
+// --  overleap_bytes: !=0 indicator how many bytes are from the "next" packet
+// --                  (pointer!=0)
 //
-void ts2SecPes_Output_subdecode (void)
+void ts2SecPes_Output_subdecode (u_int overleap_bytes)
 {
 
      indent (+1);
@@ -319,6 +340,11 @@ void ts2SecPes_Output_subdecode (void)
      	out_nl (3,"TS sub-decoding (%d packet(s) stored for PID 0x%04x):",
 			tsd.packet_counter,tsd.pid & 0xFFFF);
      }
+     
+     if (overleap_bytes) {
+     	out_nl (3,"Subdecoding takes %u bytes from next TS packet", overleap_bytes);
+     }
+
      out_nl (3,"=====================================================");
 
 
@@ -346,6 +372,7 @@ void ts2SecPes_Output_subdecode (void)
 	if (b && len) {
 
 	    // $$$ TODO buffer may contain multiple PS/PES packets!! 
+	    // $$$ TODO buffer may contain multiple SI packets!! 
 
 	    // -- PES/PS or SECTION
 	    // if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
@@ -353,7 +380,7 @@ void ts2SecPes_Output_subdecode (void)
 
 		out_nl (3,"TS contains PES/PS stream...");
 	    	indent (+1);
-		decodePES_buf (b, len, tsd.pid);
+		decodePS_PES_packet (b, len, tsd.pid);
 	    	indent (-1);
 
 	    } else {
@@ -362,7 +389,7 @@ void ts2SecPes_Output_subdecode (void)
 
 		out_nl (3,"TS contains Section...");
 	    	indent (+1);
-		decodeSections_buf (b, len-pointer, tsd.pid);
+		decodeSI_packet (b, len-pointer, tsd.pid);
 	    	indent (-1);
 	    }
 
@@ -383,10 +410,10 @@ void ts2SecPes_Output_subdecode (void)
 
 
 // 
-// $$$ TODO:
-// sections: pui-start && pointer != 0 push data to last section????...
 //
 // $$$ TODO:
 //  unbound PES streams, non System PES-Streams! (length check will not work!)
 //
 // $$$ TODO: discontinuity signalling flag check?
+//
+// $$$ TODO: packet may contain server sections!!!

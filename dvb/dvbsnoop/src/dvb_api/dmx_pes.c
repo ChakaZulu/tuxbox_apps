@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.34 2005/09/06 23:13:51 rasc Exp $
+$Id: dmx_pes.c,v 1.35 2005/10/20 22:25:06 rasc Exp $
 
 
  DVBSNOOP
@@ -20,6 +20,12 @@ $Id: dmx_pes.c,v 1.34 2005/09/06 23:13:51 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.35  2005/10/20 22:25:06  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.34  2005/09/06 23:13:51  rasc
 catch OS signals (kill ...) for smooth program termination
 
@@ -143,8 +149,6 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvbsnoop.h"
 #include "misc/cmdline.h"
 #include "misc/output.h"
-#include "misc/hexprint.h"
-#include "misc/print_header.h"
 #include "misc/sig_abort.h"
 
 #include "pes/pespacket.h"
@@ -161,7 +165,6 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-static long pes_UnsyncRead (int fd, u_char *buf, u_long len);
 static long pes_SyncRead   (int fd, u_char *buf, u_long len, u_long *skipped_bytes);
 static long ps_chainread_packheader (int fd, u_char *buf);
 
@@ -187,7 +190,7 @@ int  doReadPES (OPTION *opt)
 
   if (opt->inpPidFile) {
   	f        = opt->inpPidFile;
-  	openMode = O_RDONLY | O_LARGEFILE;
+  	openMode = O_RDONLY | O_LARGEFILE | O_BINARY;
         dmxMode  = 0;
   } else {
   	f        = opt->devDemux;
@@ -252,17 +255,10 @@ int  doReadPES (OPTION *opt)
     u_long  skipped_bytes = 0;
 
 
-    /*
-      -- Read PES packet
-     */
+    //  -- Read PES packet  (sync Read)
 
-    if (opt->packet_header_sync) {
-    	n = pes_SyncRead(fd,buf,sizeof(buf), &skipped_bytes);
-	b = buf;
-    } else {
-    	n = pes_UnsyncRead(fd,buf,sizeof(buf));
-	b = buf;
-    }
+    n = pes_SyncRead(fd,buf,sizeof(buf), &skipped_bytes);
+    b = buf;
 
 
     // -- error or eof?
@@ -284,28 +280,18 @@ int  doReadPES (OPTION *opt)
 
     if (opt->binary_out) {
 
-       // direct write to FD 1 ( == stdout)
-       write (1, b, n);
+	// direct write to FD 1 ( == stdout)
+	write (1, b, n);
 
     } else {
-       char *strx = (opt->packet_mode == PES) ? "PES" : "PS";
 
-       indent (0);
-       print_packet_header (opt, strx, opt->pid, count, n, skipped_bytes);
+    	// -- skipped Data to get sync byte?
+    	if (skipped_bytes) {
+		out_nl (3,"!!! %ld bytes skipped to get PS/PES sync!!!");
+    	}
 
+	processPS_PES_packet (opt->pid, count, b, n);
 
-       if (opt->buffer_hexdump) {
-           printhex_buf (0, b, n);
-           out_NL(0);
-       }
-
-
-       // decode protocol
-       if (opt->printdecode) {
-          decodePES_buf (b, n ,opt->pid);
-          out_nl (3,"==========================================================");
-          out_NL (3);
-       }
     } // bin_out
 
 
@@ -340,38 +326,6 @@ int  doReadPES (OPTION *opt)
 
 
 
-
-/*
-  -- read PES packet (unsynced)
-  -- return: len // read()-return code
-*/
-
-static long pes_UnsyncRead (int fd, u_char *buf, u_long len)
-
-{
-    long    n,n1;
-    long    l;
-
-
-    /*
-     -- read first 6 bytes to get length of Packet
-     -- read following data ...
-     -- $$$ TODO: will not work for PS!
-    */
-
-    n = read(fd,buf,6);
-    if (n == 6) {
-        l = (buf[4]<<8) + buf[5];		// PES packet size...
-
-	if (l > 0) {
-           n1 = read(fd, buf+6, (unsigned int) l );
-           n = (n1 < 0) ? n1 : 6+n1;
-	}
-    }
-
-
-    return n;
-}
 
 
 

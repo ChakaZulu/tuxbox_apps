@@ -1,5 +1,5 @@
 /*
-$Id: file_io.h,v 1.1 2004/12/07 21:01:41 rasc Exp $
+$Id: file_io.h,v 1.2 2005/10/20 22:25:06 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: file_io.h,v 1.1 2004/12/07 21:01:41 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 */
 
@@ -29,6 +29,12 @@ $Id: file_io.h,v 1.1 2004/12/07 21:01:41 rasc Exp $
 /* dummy Flag, if not supported */
 #warning "No large file support..."
 #define O_LARGEFILE 0x00
+#endif
+
+
+#ifndef O_BINARY
+/* dummy Flag, if not supported - needed for CYGWIN support */
+#define O_BINARY 0x00
 #endif
 
 

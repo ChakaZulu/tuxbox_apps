@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.34 2005/09/09 14:20:29 rasc Exp $
+$Id: dmx_ts.c,v 1.35 2005/10/20 22:25:06 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: dmx_ts.c,v 1.34 2005/09/09 14:20:29 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.35  2005/10/20 22:25:06  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.34  2005/09/09 14:20:29  rasc
 TS continuity sequence check (cc verbose output)
 
@@ -142,8 +148,6 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvbsnoop.h"
 #include "misc/cmdline.h"
 #include "misc/output.h"
-#include "misc/hexprint.h"
-#include "misc/print_header.h"
 #include "misc/sig_abort.h"
 
 #include "ts/tslayer.h"
@@ -161,12 +165,11 @@ dvbsnoop v0.7  -- Commit to CVS
 #define TS_PACKET_LEN (188)              /* TS RDSIZE is fixed !! */
 #define TS_SYNC_BYTE  (0x47)             /* SyncByte fuer TS  ISO 138181-1 */
 #define TS_BUF_SIZE   (256 * 1024)	 /* default DMX_Buffer Size for TS */
-#define READ_BUF_SIZE (3*TS_PACKET_LEN)	 /* min. 2x TS_PACKET_LEN!!! */
+#define READ_BUF_SIZE (3*TS_PACKET_LEN)  /* min. 2x TS_PACKET_LEN!!! */
 
 
 
-// $$ static long ts_SyncRead (int fd, u_char *buf, long max_buflen, long *skipped_bytes);
-static long ts_SyncRead2 (int fd, u_char *buf, long max_buflen, long *skipped_bytes);
+static long ts_SyncRead (int fd, u_char *buf, long max_buflen, long *skipped_bytes);
 
 
 
@@ -190,7 +193,7 @@ int  doReadTS (OPTION *opt)
 
   if (opt->inpPidFile) {
   	f        = opt->inpPidFile;
-  	openMode = O_RDONLY | O_LARGEFILE;
+  	openMode = O_RDONLY | O_LARGEFILE | O_BINARY;
         fileMode = 1;
   } else {
   	f        = opt->devDvr;
@@ -276,20 +279,14 @@ int  doReadTS (OPTION *opt)
     long   n;
     long   skipped_bytes    = 0;
     int    pid_filter_match = 1;
-    int    is_ts_packet     = 1;
     int    packet_pid       = -1;
 
 
 
-    if (opt->packet_header_sync) {
-    	// $$ n = ts_SyncRead (fd_dvr,buf,sizeof(buf), &skipped_bytes);
-	// $$ b = buf;
-    	n = ts_SyncRead2 (fd_dvr,buf,sizeof(buf), &skipped_bytes);
-        b = buf+(skipped_bytes % TS_PACKET_LEN);
-    } else {
-    	n = read(fd_dvr,buf,TS_PACKET_LEN);
-	b = buf;
-    }
+    // -- Sync TS read!
+    n = ts_SyncRead (fd_dvr,buf,sizeof(buf), &skipped_bytes);
+    b = buf+(skipped_bytes % TS_PACKET_LEN);
+
 
 
     // -- error or eof?
@@ -312,37 +309,31 @@ int  doReadTS (OPTION *opt)
 
 
 
+    // -- skipped Data to get sync byte?
+    if (skipped_bytes) {
+	if (! opt->binary_out) {
+		out_nl (3,"!!! %ld bytes skipped to get TS sync!!!");
+	}
+    }
 
     // -- SyncByte for TS packet and correct len?
- 
     if (b[0] != TS_SYNC_BYTE || n != TS_PACKET_LEN) {
-	is_ts_packet = 0; 
+	if (! opt->binary_out) {
+		out_nl (3,"!!! Wrong SyncByte or packet length mismatch (= no TS)!!!");
+	}
+	continue;
     }
+
 
 
     // -- PID soft filter mode
     // -- We alway do this check (even if we are reading directly
     // -- from dvb device and PID has already been filtered by demux)
    
-    if (is_ts_packet) {
-	packet_pid = getBits (b, 0,11, 13);
-
-	if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && (opt->pid != packet_pid)) {
-		pid_filter_match = 0;
-	}
+    packet_pid = getBits (b, 0,11, 13);
+    if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && (opt->pid != packet_pid)) {
+	pid_filter_match = 0;
     }
-
-
-    // -- PID soft filter mode when reading from file 
-    // -- (e.g. if multi-pid-ts-file)
-
-//    if (fileMode && is_ts_packet) {				// file read mode
-//	if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && (opt->pid != packet_pid)) {
-//		filter_match = 0;
-//	}
-//    }
-
-
 
 
 
@@ -357,58 +348,18 @@ int  doReadTS (OPTION *opt)
 
 	if (opt->binary_out) {
 
-	       // direct write to FD 1 ( == stdout)
-	       write (1, b, n);
+		// direct write to FD 1 ( == stdout)
+		write (1, b, n);
 
     	} else {
 
+		processTS_packet (packet_pid, filtered_count, b, n);
 
-
-
-	       // -- subdecode prev. collected TS data
-	       if (opt->printdecode && opt->ts_subdecode) {
-		       ts2SecPes_subdecode (b, n, opt->pid);
-	       }
-
-
-	       // -- new packet, output header
-	       indent (0);
-	       print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
-
-
-		// -- SyncByte for TS packet and correct len?
-		if (! is_ts_packet) {
-		   out_nl (3,"!!! Wrong SyncByte or packet length mismatch (= no TS)!!!");
-	 	}
-
-
-
-	       // hex output (also on wrong packets)
-	       if (opt->buffer_hexdump && pid_filter_match) {
-	           printhex_buf (0, b, n);
-	           out_NL(0);
-	       }
-
-
-	       // decode protocol (if ts packet)
-	       if (opt->printdecode && is_ts_packet && pid_filter_match) {
-	          decodeTS_buf (b, n ,opt->pid);
-	          out_nl (3,"==========================================================");
-	          out_NL (3);
-	          if (opt->ts_subdecode) {
-	             // -- check if stored packet(s) length is sufficient for output
-		     ts2SecPes_checkAndDo_PacketSubdecode_Output();
-	          }
-
-	       }
-	} // bin_out
+	} 
 
     } // pid_filter_match: packet out
 
 
-
-    // Clean Buffer
-//    if (n > 0 && n < sizeof(b)) memset (buf,0,n+1); 
 
 
     // count packets ?
@@ -443,6 +394,9 @@ int  doReadTS (OPTION *opt)
 
 
 
+
+
+
 /*
  * -- sync read (optimized = avoid multiple byte reads)
  * -- Seek TS sync-byte and read packet in buffer
@@ -451,8 +405,7 @@ int  doReadTS (OPTION *opt)
  * -- return: equivalent to read();
  */
 
-static long  ts_SyncRead2 (int fd, u_char *buf, long max_buflen, long *skipped_bytes)
-
+static long  ts_SyncRead (int fd, u_char *buf, long max_buflen, long *skipped_bytes)
 {
     int    n1,n2;
     int    i;
@@ -492,48 +445,6 @@ static long  ts_SyncRead2 (int fd, u_char *buf, long max_buflen, long *skipped_b
 
 
 
-
-
-#if 0
-// $$ old routine....
-
-/*
- * -- sync read
- * -- Seek TS sync-byte and read buffer
- * -- return: equivalent to read();
- */
-
-static long  ts_SyncRead (int fd, u_char *buf, long buflen, long *skipped_bytes)
-
-{
-    int    n = 0;
-
-
-    // -- simple TS sync...
-    // -- $$$ to be improved:
-    // -- $$$  (best would be: check if buf[188] is also a sync byte)
- 
-    // -- $$$ todo  speed optimize! (read TS_PACKET_LEN, seek Sync, read missing parts)
-
-    *skipped_bytes = 0;
-    while (1) {
-    	n = read(fd,buf,1);
-	if (n <= 0) return n;			// error or strange, abort
-
-	if (buf[0] == TS_SYNC_BYTE) break;
-	(*skipped_bytes)++;			// sync skip counter
-    }
-
-    // -- Sync found!
-    // -- read buffersize-1
-
-    n = read(fd,buf+1,TS_PACKET_LEN-1);		// read TS
-    if (n >=0) n++;				// we already read one byte...
-
-    return n;
-}
-
-#endif
 
 
 

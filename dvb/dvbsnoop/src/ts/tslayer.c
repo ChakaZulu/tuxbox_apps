@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.23 2005/09/09 14:20:31 rasc Exp $
+$Id: tslayer.c,v 1.24 2005/10/20 22:25:31 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,12 @@ $Id: tslayer.c,v 1.23 2005/09/09 14:20:31 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.24  2005/10/20 22:25:31  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.23  2005/09/09 14:20:31  rasc
 TS continuity sequence check (cc verbose output)
 
@@ -107,17 +113,72 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "tslayer.h"
+#include "ts2secpes.h"
 #include "ts_cc_check.h"
 
 #include "strings/dvb_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
+#include "misc/print_header.h"
+#include "misc/cmdline.h"
 
 
 
 
 
-void decodeTS_buf (u_char *b, int len, u_int opt_pid)
+//
+// -- process TS packet (in sync) 
+// -- hexdump, subdecode processing, decoding
+//
+
+void processTS_packet (u_int pid, long pkt_nr, u_char *b, int len)
+{
+
+  OPTION *opt  = getOptionPtr();
+
+
+       // -- subdecode prev. collected TS data
+       if (opt->printdecode && opt->ts_subdecode) {
+	       ts2SecPes_subdecode (b, len, pid);
+       }
+
+
+       // -- new packet, output header
+       indent (0);
+       print_packet_header (opt, "TS", opt->pid, pkt_nr, len);
+
+
+       // hex output (also on wrong packets)
+       if (opt->buffer_hexdump) {
+           printhex_buf (0, b, len);
+           out_NL(0);
+       }
+
+
+       // -- decode protocol (if ts packet)
+       if (opt->printdecode) {
+          decodeTS_packet (b, len, opt->pid);
+          out_nl (3,"==========================================================");
+          out_NL (3);
+          if (opt->ts_subdecode) {
+             // -- check if stored packet(s) length is sufficient for output
+	     ts2SecPes_checkAndDo_PacketSubdecode_Output();
+          }
+
+       }
+
+}
+
+
+
+
+
+
+//
+// -- Decode TS packet content
+//
+
+void decodeTS_packet (u_char *b, int len, u_int opt_pid)
 {
  /* IS13818-1  2.4.3.2  */
 
@@ -192,6 +253,12 @@ void decodeTS_buf (u_char *b, int len, u_int opt_pid)
 
     indent (-1);
 
+ }
+
+
+ if (afc == 0x00) {
+    // -- ISO/IEC reserved...
+    print_databytes (5, "Data-Bytes:", b,len); 
  }
 
 }

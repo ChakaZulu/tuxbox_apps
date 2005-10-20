@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.31 2005/09/06 23:58:50 rasc Exp $
+$Id: pespacket.c,v 1.32 2005/10/20 22:25:07 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: pespacket.c,v 1.31 2005/09/06 23:58:50 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.32  2005/10/20 22:25:07  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.31  2005/09/06 23:58:50  rasc
 typo fix
 
@@ -136,23 +142,54 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "pes_psm.h"
 #include "pes_psdir.h"
 #include "pes_misc.h"
+
 #include "strings/dvb_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
+#include "misc/print_header.h"
+#include "misc/cmdline.h"
 
 
 
+//
+// -- process PS PES packet (in sync) 
+// -- hexdump, decoding
+//
 
-
-void decodePS_buf (u_char *b, u_int len, int pid)
+void processPS_PES_packet (u_int pid, long pkt_nr, u_char *buf, int len)
 {
-   decodePES_buf (b, len, pid);
+	
+  OPTION *opt  = getOptionPtr();
+  char *strx   = (opt->packet_mode == PES) ? "PES" : "PS";
+
+
+       indent (0);
+       print_packet_header (opt, strx, opt->pid, pkt_nr, len);
+
+
+       if (opt->buffer_hexdump) {
+           printhex_buf (0, buf, len);
+           out_NL(0);
+       }
+
+
+       // decode protocol
+       if (opt->printdecode) {
+          decodePS_PES_packet (buf, len ,opt->pid);
+          out_nl (3,"==========================================================");
+          out_NL (3);
+       }
+
+
 }
 
 
 
 
-void decodePES_buf (u_char *b, u_int len, int pid)
+
+
+
+void decodePS_PES_packet (u_char *b, u_int len, int pid)
 {
  /* IS13818-1  2.4.3.6  */
 

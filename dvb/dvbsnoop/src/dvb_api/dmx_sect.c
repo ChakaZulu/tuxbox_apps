@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.32 2005/09/06 23:32:03 rasc Exp $
+$Id: dmx_sect.c,v 1.33 2005/10/20 22:25:06 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: dmx_sect.c,v 1.32 2005/09/06 23:32:03 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.33  2005/10/20 22:25:06  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.32  2005/09/06 23:32:03  rasc
 no message
 
@@ -134,12 +140,11 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvbsnoop.h"
 #include "misc/cmdline.h"
 #include "misc/output.h"
-#include "misc/hexprint.h"
 #include "misc/pid_mem.h"
-#include "misc/print_header.h"
 #include "misc/sig_abort.h"
 
 #include "sections/sectables.h"
+
 #include "dvb_api.h"
 #include "file_io.h"
 #include "dmx_error.h"
@@ -220,7 +225,7 @@ static int  doReadSECT_2 (OPTION *opt)
 
   if (opt->inpPidFile) {
   	f        = opt->inpPidFile;
-  	openMode = O_RDONLY | O_LARGEFILE;
+  	openMode = O_RDONLY | O_LARGEFILE | O_BINARY;
         dmxMode  = 0;
   } else {
   	f        = opt->devDemux;
@@ -357,24 +362,9 @@ static int  doReadSECT_2 (OPTION *opt)
 
 	} else {
 
-	       indent (0);
-	       print_packet_header (opt, "SECT", opt->pid, count, n, 0);
+	       processSI_packet (opt->pid, count, buf, n);
 
-
-	       if (opt->buffer_hexdump) {
-	           printhex_buf (0,buf, n);
-	           out_NL(0);
-	       }
-
-
-	       // decode protocol
-	       if (opt->printdecode) {
-	          decodeSections_buf (buf,n ,opt->pid);
-	          out_nl (3,"==========================================================");
-	          out_NL (3);
-	       }
-
-	} // bin_out
+	} 
 
     }  // filter_match: packet out
 

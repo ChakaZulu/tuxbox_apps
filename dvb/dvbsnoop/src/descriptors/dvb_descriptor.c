@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.41 2005/01/17 19:41:22 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.42 2005/10/20 22:25:05 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: dvb_descriptor.c,v 1.41 2005/01/17 19:41:22 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.42  2005/10/20 22:25:05  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.41  2005/01/17 19:41:22  rasc
 Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 
@@ -1144,7 +1150,7 @@ void descriptorDVB_ExtendedEvent  (u_char *b)
 
  out_SB_NL (4,"descriptor_number: ",d.descriptor_number);
  out_SB_NL (4,"last_descriptor_number: ",d.last_descriptor_number);
- out_nl    (4,"iSO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
+ out_nl    (4,"ISO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
  out_SB_NL (5,"length_of_items: ",d.length_of_items);
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.48 2005/08/12 23:02:35 rasc Exp $
+$Id: cmdline.c,v 1.49 2005/10/20 22:25:07 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: cmdline.c,v 1.48 2005/08/12 23:02:35 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.49  2005/10/20 22:25:07  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.48  2005/08/12 23:02:35  rasc
 New shortcut options: -adapter and -devnr to select dvb cards/adapters or device numbers on a card.
 This is a shortcut for -demux -dvr and -frontend...
@@ -254,7 +260,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->ts_raw_mode = 0;
   opt->rd_packet_count = 0;
   opt->dec_packet_count = 0;
-  opt->packet_header_sync = 1;
+  opt->packet_header_sync = 1;  // $$$ OBSOLETE!
   opt->packet_mode = SECT;
   opt->time_mode = FULL_TIME;
   opt->hide_copyright= 0;
@@ -287,8 +293,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-nocrc")) opt->crc = 0;
      else if (!strcmp (argv[i],"-softcrc")) opt->soft_crc = 1;
      else if (!strcmp (argv[i],"-nosoftcrc")) opt->soft_crc = 0;
-     else if (!strcmp (argv[i],"-sync")) opt->packet_header_sync = 1;
-     else if (!strcmp (argv[i],"-nosync")) opt->packet_header_sync = 0;
+     else if (!strcmp (argv[i],"-sync")) opt->packet_header_sync = 1; 
+     else if (!strcmp (argv[i],"-nosync")) opt->packet_header_sync = 0;  // -- obsolete
      else if (!strcmp (argv[i],"-n")) opt->rd_packet_count = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-N")) opt->dec_packet_count = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-b")) opt->binary_out = 1;
@@ -512,7 +518,7 @@ static void usage (void)
     printf("   -softcrc:     internal soft CRC check when reading 'sec' [-nosoftcrc]\n");
     printf("   -nosoftcrc:   no internal soft CRC check when reading 'sec' [-nosoftcrc]\n");
     printf("   -sync:        simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
-    printf("   -nosync:      no header sync when reading 'ts' or 'pes' [-snyc]\n");
+    printf("   -nosync:      (obsolete option) \n");
     printf("   -n count:     receive/read max. <count> packets (0=no limit) [-n 0]\n");
     printf("   -N count:     decode max. <count> packets (0=no limit) [-N 0]\n");
     printf("                 this will limit -n, e.g. when using soft filters.\n");

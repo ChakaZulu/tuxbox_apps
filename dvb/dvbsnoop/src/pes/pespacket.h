@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.h,v 1.8 2005/08/10 21:28:18 rasc Exp $
+$Id: pespacket.h,v 1.9 2005/10/20 22:25:07 rasc Exp $
 
    
  DVBSNOOP
@@ -7,17 +7,18 @@ $Id: pespacket.h,v 1.8 2005/08/10 21:28:18 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
 */
 
 #ifndef __PESPACKET_H
-#define __PESPACKET_H 1
+#define __PESPACKET_H 
 
-void decodePS_buf (u_char *b, u_int len, int pid);
-void decodePES_buf (u_char *b, u_int len, int pid);
+void processPS_PES_packet (u_int pid, long pkt_nr, u_char *buf, int len);
+void decodePS_PES_packet (u_char *b, u_int len, int pid);
+
 
 #endif
 

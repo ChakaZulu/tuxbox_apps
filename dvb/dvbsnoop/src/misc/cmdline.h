@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.30 2005/08/12 23:02:36 rasc Exp $
+$Id: cmdline.h,v 1.31 2005/10/20 22:25:07 rasc Exp $
 
 
  DVBSNOOP
@@ -32,7 +32,7 @@ enum TIME_MODE    {NO_TIME, FULL_TIME, DELTA_TIME};
 
 typedef struct _OPTIONS {
   int         packet_mode;
-  int         packet_header_sync;	// Try to do a softsync of packet sync bytes
+  int         packet_header_sync;	// Try to do a softsync of packet sync bytes -- $$$ OBSOLETE!!!
   int         buffer_hexdump;		// 0/1: print hexdump prior to decoding
   int         printhex;			// hexdump mode
   int         printdecode;		// decode verbose mode

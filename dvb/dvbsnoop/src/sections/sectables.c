@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.32 2005/07/31 21:48:03 rasc Exp $
+$Id: sectables.c,v 1.33 2005/10/20 22:25:08 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: sectables.c,v 1.32 2005/07/31 21:48:03 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.33  2005/10/20 22:25:08  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.32  2005/07/31 21:48:03  rasc
 soft CRC for sections...
 
@@ -176,11 +182,44 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/hexprint.h"
 #include "misc/cmdline.h"
 #include "misc/crc32.h"
-
+#include "misc/print_header.h"
 
 
 
 void  guess_table (u_char *buf, int len, u_int pid);
+
+
+
+
+//
+// -- process SI packet (Sections)
+// -- hexdump, decoding
+//
+
+void processSI_packet (u_int pid, long pkt_nr, u_char *buf, int len)
+{
+	
+  OPTION *opt  = getOptionPtr();
+
+
+       indent (0);
+       print_packet_header (opt, "SECT", opt->pid, pkt_nr, len);
+
+
+       if (opt->buffer_hexdump) {
+           printhex_buf (0,buf, len);
+           out_NL(0);
+       }
+
+
+       // -- decode protocol
+       if (opt->printdecode) {
+          decodeSI_packet (buf,len ,opt->pid);
+          out_nl (3,"==========================================================");
+          out_NL (3);
+       }
+
+}
 
 
 
@@ -191,7 +230,7 @@ void  guess_table (u_char *buf, int len, u_int pid);
  -- siehe EN 300 468 S.14 
 */
 
-void decodeSections_buf (u_char *buf, int len, u_int pid)
+void decodeSI_packet (u_char *buf, int len, u_int pid)
 
 {
   OPTION *opt;

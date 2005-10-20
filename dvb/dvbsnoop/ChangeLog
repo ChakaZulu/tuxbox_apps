@@ -1,4 +1,7 @@
 
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
  - Bugfix: make dvbsnoop compile on Cygwin/Windows
  - New:  TS continuity sequence check
  - New:  catch signals, (kill -1, kill -6, kill -15) 
@@ -6,7 +9,7 @@
  - New:  frontend info: ATSC included  (extension to dvb api 3)
  - Changed: -s pidscan improved
 
-1.4.0
+   release 1.4.0
  - New: option -adapter and -devnr as device shortcuts (idea: Steve Malenfant)
  - New: option '-s ps'
  - New: Program Stream (PS) pack_header, system_header, ...

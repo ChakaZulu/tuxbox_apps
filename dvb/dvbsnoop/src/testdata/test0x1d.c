@@ -1,5 +1,5 @@
 /*
-$Id: test0x1d.c,v 1.8 2004/10/17 22:20:39 rasc Exp $
+$Id: test0x1d.c,v 1.9 2005/10/20 22:25:19 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,12 @@ $Id: test0x1d.c,v 1.8 2004/10/17 22:20:39 rasc Exp $
 
 
 $Log: test0x1d.c,v $
+Revision 1.9  2005/10/20 22:25:19  rasc
+ - Bugfix: tssubdecode check for PUSI and SI pointer offset
+   still losing packets, when multiple sections in one TS packet.
+ - Changed: some Code rewrite
+ - Changed: obsolete option -nosync, do always packet sync
+
 Revision 1.8  2004/10/17 22:20:39  rasc
 section decoding functions renamed due to preparation of private structures
 
@@ -94,11 +100,8 @@ void section_TESTDATA (u_char *b, int len)
  out_SB_NL (3,"section_syntax_indicator: ",t.section_syntax_indicator);
 
 
-
- out_nl (3,"... $$$ TODO ....");
- out_nl (3,"... Report!!! if you find a transponder with test data!!! ....");
  // $$$ TODO   ...
- printhex_buf (5, b, len);
+ print_databytes(5,"Data:",b,len);
 
 }
 
