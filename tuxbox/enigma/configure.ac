@@ -25,6 +25,30 @@ AC_SUBST(WEBIF)
 AM_CONDITIONAL(WEBIF_STANDARD, test "$WEBIF" != "expert")
 AM_CONDITIONAL(WEBIF_EXPERT, test "$WEBIF" = "expert")
 
+AC_ARG_WITH(epg,
+	[  --with-epg=NAME epg type [[standard,private,...]]],
+	[EPG="$withval"],[EPG="standard"])
+	
+AC_SUBST(EPG)
+AM_CONDITIONAL(EPG_STANDARD,test "$EPG" != "private")
+AM_CONDITIONAL(EPG_PRIVATE,test "$EPG" = "private")
+
+AC_ARG_WITH(flashtool,
+	[  --with-flashtool=NAME type flashtool [[standard,expert]]],
+	[FLASHTOOL="$withval"],[FLASHTOOL="standard"])
+
+AC_SUBST(FLASHTOOL)
+AM_CONDITIONAL(FLASHTOOL_STANDARD,test "$FLASHTOOL" != "expert")
+AM_CONDITIONAL(FLASHTOOL_EXPERT,test "$FLASHTOOL" = "expert")
+
+AC_ARG_WITH(reiserfs,
+	[  --with-reiserfs=NAME type reiserfs [[yes,no]]],
+	[REISERFS="$withval"],[REISERFS="no"])
+
+AC_SUBST(REISERFS)
+AM_CONDITIONAL(REISERFS_NO,test "$REISERFS" != "yes")
+AM_CONDITIONAL(REISERFS_YES,test "$REISERFS" = "yes")
+
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 
@@ -54,6 +78,17 @@ fi
 
 if test "$WEBIF" = "expert" ; then
 	CPPFLAGS="$CPPFLAGS -DENABLE_EXPERT_WEBIF"
+fi
+
+if test "$EPG" = "private" ; then
+	CPPFLAGS="$CPPFLAGS -DENABLE_PRIVATE_EPG"
+fi
+
+if test "$FLASHTOOL" = "expert" ; then
+	CPPFLAGS="$CPPFLAGS -DENABLE_FLASHTOOL"
+fi
+if test "$REISERFS" = "yes" ; then
+	CPPFLAGS="$CPPFLAGS -DENABLE_REISERFS"
 fi
 
 if test "$BOXTYPE" = "dm56x0" ; then
