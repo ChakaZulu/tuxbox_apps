@@ -16,6 +16,15 @@ AC_SUBST(BOXTYPE)
 AM_CONDITIONAL(BOXTYPE_DBOX2, test "$BOXTYPE" = "dbox2")
 AM_CONDITIONAL(BOXTYPE_DREAMBOX, test "$BOXTYPE" != "dbox2")
 
+
+AC_ARG_WITH(webif,
+	[  --with-webif=NAME webif type [[standard,expert,...]]],
+	[WEBIF="$withval"],[WEBIF="standard"])
+	
+AC_SUBST(WEBIF)
+AM_CONDITIONAL(WEBIF_STANDARD, test "$BOXTYPE" != "expert")
+AM_CONDITIONAL(WEBIF_EXPERT, test "$BOXTYPE" = "expert")
+
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
 
@@ -31,12 +40,20 @@ TUXBOX_APPS_LIB_PKGCONFIG(TUXTXT,tuxbox-tuxtxt)
 if test "$BOXTYPE" = "dbox2" ; then
 	TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 	TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
+else
+	if test "$WEBIF" = "expert" ; then
+		TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
+	fi
 fi
 
 if test "$BOXTYPE" = "dbox2" ; then
-	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DENABLE_EXPERT_WEBIF -DENABLE_FLASHTOOL -DENABLE_PRIVATE_EPG"
+	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DENABLE_FLASHTOOL -DENABLE_PRIVATE_EPG"
 else
 	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DDISABLE_LIRC -DENABLE_KEYBOARD -DUSE_EXTERNAL_FLASHTOOL -DDEBUG"
+fi
+
+if test "$WEBIF" = "expert" ; then
+	CPPFLAGS="$CPPFLAGS -DENABLE_EXPERT_WEBIF"
 fi
 
 if test "$BOXTYPE" = "dm56x0" ; then
