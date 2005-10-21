@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.69 2005/10/21 13:20:09 sat_man Exp $
+# $Id: de.po,v 1.70 2005/10/21 16:39:08 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -5727,3 +5727,10 @@ msgstr ""
 msgid "time correction change error"
 msgstr "Fehler beim Ändern der Zeitkorrektur"
 
+#: src/flashtool.cpp:52
+msgid "Save image or part of it"
+msgstr "Image oder ein Teil davon sichern"
+
+#: src/flashtool.cpp:53
+msgid "Flash image or part of it"
+msgstr "Image oder ein Teil davon einspielen"
