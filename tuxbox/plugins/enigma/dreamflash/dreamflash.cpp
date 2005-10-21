@@ -1,5 +1,5 @@
 /*
- * $Id: dreamflash.cpp,v 1.1 2005/10/09 09:23:05 digi_casi Exp $
+ * $Id: dreamflash.cpp,v 1.2 2005/10/21 20:43:13 digi_casi Exp $
  *
  * (C) 2005 by mechatron
  *
@@ -20,11 +20,10 @@
  */
  
 #include "dreamflash.h"
-//#include "tools.h"
 
-#define VDF "v2.5a"
+#define VDF "v2.6"
 
-#define CONFIGFILE "/var/tuxbox/config/df.conf"
+#define CONFIGFILE "/var/tuxbox/config/enigma/bootmenue.conf"
 #define TMPFILE "/tmp/.dftemp"
 
 extern "C" int plugin_exec( PluginParam *par );
@@ -168,41 +167,44 @@ bool image_liste(int func)
 	
 	if(func)
 	{
-		eString dir = mpoint + "/image";
+		eString dir[2] = {"/image", "/fwpro"};
 		struct stat s;
 
-		if(DIR *d=opendir(dir.c_str()))
+		for (int i = 0; i < 2; i++)
 		{
-			while (struct dirent *e=readdir(d))
+			if(DIR *d=opendir(eString(mpoint + dir[i]).c_str()))
 			{
-				if (!(strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))) continue;
-
-				eString name = dir + "/" + e->d_name;
-				stat(name.c_str(),&s);
-				if (S_ISDIR(s.st_mode))
+				while (struct dirent *e=readdir(d))
 				{
-					if(func == 2)
+					if (!(strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))) continue;
+
+					eString name = mpoint + dir[i] + "/" + eString(e->d_name);
+					stat(name.c_str(),&s);
+					if (S_ISDIR(s.st_mode))
 					{
-						new eListBoxEntryText(liste, e->d_name, (void*)new eString(name));
-						get = true;
-					}
-					else
-					{
-						eString tmp = name + "/go";
-						if(FILE *f=fopen(tmp.c_str(), "r"))
+						if(func == 2)
 						{
-							fclose(f);
 							new eListBoxEntryText(liste, e->d_name, (void*)new eString(name));
 							get = true;
 						}
 						else
 						{
-							if(func == 4) new eListBoxEntryText(liste, e->d_name, (void*)new eString("_#"));
+							eString tmp = name + "/go";
+							if(FILE *f=fopen(tmp.c_str(), "r"))
+							{
+								fclose(f);
+								new eListBoxEntryText(liste, e->d_name, (void*)new eString(name));
+								get = true;
+							}
+							else
+							{
+								if(func == 4) new eListBoxEntryText(liste, e->d_name, (void*)new eString("_#"));
+							}
 						}
 					}
 				}
+				closedir(d);
 			}
-			closedir(d);
 		}
 	}
 	else
@@ -341,7 +343,7 @@ void setup_df::new_init()
 	if(FILE *a=fopen("/var/etc/init","r"))
 	{
 		char line[256];
-		const char *such="if [ -e /tmp/dfsh ]";
+		const char *such="/tmp/bm.sh";
 		while((fgets(line,256, a)!=NULL))
 		{
 			if (!strncmp(line, such, strlen(such)))
@@ -359,12 +361,11 @@ void setup_df::new_init()
 	{
 		if(FILE *c=fopen("/var/etc/init","a"))
 		{
-			fprintf(c,"\n/var/tuxbox/plugins/startmenu\n\n");
-			fprintf(c,"if [ -e /tmp/dfsh ] ; then\n\t/tmp/dfsh\nelse\n\techo \"start Flash-Image\"\nfi\n");
+			fprintf(c,"/bin/bootmenue && /tmp/bm.sh\n");
 			fclose(c);
 		}
 	}
-	system("chmod 755 /var/etc/init /var/tuxbox/plugins/startmenu");
+	system("chmod 755 /var/etc/init");
 }
 
 void setup_df::okselected()
@@ -436,6 +437,7 @@ void info_df::Listeselchanged(eListBoxEntryText *item)
 	if (item)
 	{
 		eString loc=((eString*) liste->getCurrent()->getKey())->c_str();
+#if 0
 		if(loc)
 		{
 			if(loc == "_#") x->setText("Image is corrupted");
@@ -455,7 +457,9 @@ void info_df::Listeselchanged(eListBoxEntryText *item)
 				}
 			}
 		}
-		else x->setText(ver);
+		else 
+#endif
+			x->setText(ver);
 	}
 }
 
@@ -636,6 +640,8 @@ bool image_df::image_install(const char *i_dir, const char *f_name)
 	//var
 	system(eString().sprintf("rm -rf \"%s/var\" \"%s/var_init/tmp/init\"", i_dir, i_dir).c_str());
 	system(eString().sprintf("mv \"%s/var_init\" \"%s/var\"", i_dir, i_dir).c_str());
+	//root
+	system(eString().sprintf("mkdir \"%s/root\"", i_dir).c_str());
 	//rcS
 	system(eString().sprintf("cp \"%s/etc/init.d/rcS\" \"%s/etc/init.d/rcS_org\"", i_dir, i_dir).c_str());
 	eString rcS_pl=i_dir; rcS_pl+="/etc/init.d/rcS";
