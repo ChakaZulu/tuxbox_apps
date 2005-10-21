@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.67 2005/09/29 19:37:31 timekiller Exp $
+# $Id: de.po,v 1.68 2005/10/21 12:52:49 sat_man Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -5162,6 +5162,10 @@ msgstr "'OK' drücken um einen anderen Monat auszuwählen"
 #: src/time_correction.cpp:87
 msgid "press ok to select another year"
 msgstr "'OK' drücken um ein anderes Jahr auszuwählen"
+
+#: src/time_correction.cpp:103
+msgid "set new time and close window"
+msgstr "Neue Zeit speichern und Fenster schlie�~_en 'OK'"
 
 #: src/timer.cpp:284
 msgid "Timerlist"
