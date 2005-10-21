@@ -1,19 +1,16 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta NAME="author" CONTENT="yjogol">
-<link rel="stylesheet" type="text/css" href="global.css">
 <link rel="stylesheet" type="text/css" href="Y_Main.css">
 <script language="JavaScript" type="text/javascript" >
 function do_submit() 
 {
 	document.f.su.disabled=true;
+	if(document.f.logotype[0].checked == true)
+		document.f.action="/control/exec?Y_Tools&bootlogo_upload";
+	else
+		document.f.action="/control/exec?Y_Tools&bootlogo_lcd_upload";
 	document.f.submit();
-}
-function do_submit_lcd() 
-{
-	document.flcd.sulcd.disabled=true;
-	document.flcd.submit();
 }
 </script>
 </head>
@@ -24,21 +21,11 @@ function do_submit_lcd()
 <div class="y_work_box">
 	<form name="f" method="POST" enctype="multipart/form-data" action="/control/exec?Y_Tools&bootlogo_upload">
 		<p>
-		Boot-Logo<br>
 		<font size="2" color="Red">Achtung<br>Das Boot-Logo muss schon im Zielformat vorliegen!</font><br>
+		<INPUT type="radio" checked name="logotype" value="bootlogo_upload">Boot Logo<br>
+		<INPUT type="radio" name="logotype" value="bootlogo_lcd_upload">Boot LCD Logo<br>
 		<input type="file" name="F1" size="20"><br>
-		<input type="button" name="su" value="hochladen" onClick="do_submit()">
-		</p>
-	</form>
-</div>
-
-<div class="y_work_box">
-	<form name="flcd" method="POST" enctype="multipart/form-data" action="/control/exec?Y_Tools&bootlogo_lcd_upload">
-		<p>
-		Boot-LCD-Logo<br>
-		<font size="2" color="Red">Achtung<br>Das Boot-Logo muss schon im Zielformat vorliegen!</font><br>
-		<input type="file" name="F2" size="20"><br>
-		<input type="button" value="hochladen" name="sulcd" onClick="do_submit_lcd()">
+		<input type="button" name="su" value="hochladen" title="upload" onClick="do_submit()">
 		</p>
 	</form>
 </div>

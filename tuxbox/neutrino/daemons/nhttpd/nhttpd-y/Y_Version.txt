@@ -1,6 +1,6 @@
-version=1.3.4
-date=29.09.2005
-type=Release
+version=1.3.5
+date=21.10.2005
+type=
 info=
 
 

@@ -1,8 +1,6 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta NAME="author" CONTENT="yjogol">
-<link rel="stylesheet" type="text/css" href="/global.css">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
 <script language="JavaScript" type="text/javascript">
 var yurl
@@ -29,30 +27,29 @@ function do_submit()
 <div class="y_head">Image</div>
 <div class="y_work_box">
 
-		<table border="0" cellpadding="5">
-			<tr>
-				<td class="y_work_table">
-			<b><font size="2">Image auslesen und runterladen</font></b><br>
-			<br>
-				<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&0')"><u>0 Y_mtd0</u></a><br>
-				<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&1')"><u>1 Y_mtd1</u></a><br>
-				<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&2')"><u>2 Y_mtd2</u></a><br>
-				<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&3')"><u>3 Y_mtd3</u></a><br>
-				<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&4')"><u>4 Y_mtd4</u></a><br>
-				<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&5')"><u>5 Y_mtd5</u></a>
-			</td>
-			<td class="y_work_table">
-				<b><font size="2">Image hochladen und flashen</font></b><br>
-				<form method="POST" name="f" enctype="multipart/form-data" action="/control/exec?Y_Tools&image_flash_build_form">
-					<p>
-					<input type="file" name="F1" size="20"><br>
-					<input type="button" value="Image hochladen" name="su" onClick="do_submit()">
-					</p>
-				</form>
-				<b><font size="2">Partitionen anzeigen</font></b><br>
-				<a target="unten" href="/control/exec?Y_Tools&image_list"><u>anzeigen</u></a>
-			</td>
-		</tr>
+	<table border="0" cellpadding="5">
+	<tr>
+		<td class="y_work_table">
+			<b><font size="2">Image auslesen und runterladen</font></b><br><br>
+			<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&0')"><u>0 Y_mtd0</u></a><br>
+			<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&1')"><u>1 Y_mtd1</u></a><br>
+			<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&2')"><u>2 Y_mtd2</u></a><br>
+			<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&3')"><u>3 Y_mtd3</u></a><br>
+			<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&4')"><u>4 Y_mtd4</u></a><br>
+			<a href="javascript:go_wait_url('/control/exec?Y_Tools&image_backup&5')"><u>5 Y_mtd5</u></a>
+		</td>
+		<td class="y_work_table">
+			<b><font size="2">Image hochladen und flashen</font></b><br>
+			<form method="POST" name="f" enctype="multipart/form-data" action="/control/exec?Y_Tools&image_flash_build_form">
+				<p>
+				<input type="file" name="F1" size="20"><br>
+				<input type="button" value="Image hochladen" title="upload" name="su" onClick="do_submit()">
+				</p>
+			</form>
+			<b><font size="2">Partitionen anzeigen</font></b><br>
+			<a target="unten" title="show partitions" href="/control/exec?Y_Tools&image_list"><u>anzeigen</u></a>
+		</td>
+	</tr>
 	</table>
 </div>
 

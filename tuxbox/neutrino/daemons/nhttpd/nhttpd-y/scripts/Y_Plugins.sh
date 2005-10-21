@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Plugins (yjogol)
-# $Date: 2005/09/29 17:08:37 $
-# $Revision: 1.6 $
+# $Date: 2005/10/21 13:05:22 $
+# $Revision: 1.7 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -60,12 +60,13 @@ skin_get()
 # -----------------------------------------------------------
 skin_set()
 {
-	cp $y_path_httpd/Y_Main-$1.css $y_path_httpd/Y_Main.css
-	if [ -e $y_path_httpd/global-$1.css ]
+	cd $y_path_httpd
+	cp Y_Main-$1.css Y_Main.css
+	if [ -e global-$1.css ]
 	then
-		cp $y_path_httpd/global-$1.css $y_path_httpd/global.css
+		cp global-$1.css global.css
 	else
-		cp $y_path_httpd/global-Standard.css $y_path_httpd/global.css
+		cp global-Standard.css global.css
 	fi
 	config_set_value_direct $y_config_Y_Web 'skin' $1
 
@@ -77,7 +78,7 @@ skin_set()
 # ===========================================================
 nhttpd_set()
 {
-	if [ "$#" -ne 4 ]
+	if [ "$#" -ne 3 ]
 	then
 		echo "zu wenig Parameter ($*)"
 	else
@@ -117,17 +118,12 @@ case "$1" in
         then
             echo "vnc_set: zu wenig Parameter ($*)"
         else
-			vnc_set $2 $3 $4 $5
-		fi ;;
+		vnc_set $2 $3 $4 $5
+	fi ;;
 
 	nhttpd_set)
-        if [ "$#" -ne 5 ]
-        then
-            echo "nhttpd_set: zu wenig Parameter ($*)"
-        else
         	shift 1
-			nhttpd_set $*
-		fi ;;
+		nhttpd_set $* ;;
 
 	skin_set)
 		skin_set $2 ;;

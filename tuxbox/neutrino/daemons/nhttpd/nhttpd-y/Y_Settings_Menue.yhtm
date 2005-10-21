@@ -1,8 +1,6 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta NAME="author" CONTENT="yjogol">
-<link rel="stylesheet" type="text/css" href="global.css">
 <link rel="STYLESHEET" type="text/css" href="Y_Main.css">
 <script language="JavaScript" type="text/javascript">
 var yurl
@@ -26,26 +24,14 @@ function go_wait_url(_url)
 <table border="0" width="100%">
 	<tr>
 		<td align="center">
-		<table border="1"  class="y_menu_sec">
-			<tr>
-				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_yWeb.yhtm">yWeb</a></td>
-			</tr>
-			<tr>
-				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_Skin.yhtm">Skins</a></td>
-			</tr>
-			<tr>
-				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_nhttpd.yhtm"">WebServer</a></td>
-			</tr>
-			<tr>
-				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_mount_liste.yhtm">Mounts</a></td>
-			</tr>
-			<tr>
-				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_ucodes.htm">ucodes</a></td>
-			</tr>
-			<tr>
-				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_zapit.htm">zapit</a></td>
-			</tr>
-		</table>
+		<ul id="menu_sec" class="y_menu_sec">
+			<li class="plain"><a class="y_menu_item" title="settings for yWeb itselfs" target="Rechts_oben" href="Y_Settings_yWeb.yhtm">yWeb</a></li>
+			<li class="plain"><a class="y_menu_item" title="change layout skin" target="Rechts_oben" href="Y_Settings_Skin.yhtm">Skins</a></li>
+			<li class="plain"><a class="y_menu_item" title="settings for Web Server daemon" target="Rechts_oben" href="Y_Settings_nhttpd.yhtm">WebServer</a></li>
+			<li class="plain"><a class="y_menu_item" title="organize file mounts" target="Rechts_oben" href="Y_Settings_mount_liste.yhtm">Mounts</a></li>
+			<li class="plain"><a class="y_menu_item" title="download or upload ucodes" target="Rechts_oben" href="Y_Settings_ucodes.htm">ucodes</a></li>
+			<li class="plain"><a class="y_menu_item" title="download or upload Bouquetlist, Channellist, ..." target="Rechts_oben" href="Y_Settings_zapit.htm">zapit</a></li>
+		</ul>		
 		</td>
 	</tr>
 </table>
@@ -55,11 +41,9 @@ function go_wait_url(_url)
 <table border="0" width="100%">
 	<tr>
 		<td align="center">
-		<table border="1"  class="y_menu_sec">
-			<tr>
-				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_Settings_VNC.yhtm">VNC</a></td>
-			</tr>
-		</table>
+		<ul id="menu_sec" class="y_menu_sec">
+			<li class="plain"><a class="y_menu_item" title="configure VNC-Plugin" target="Rechts_oben" href="Y_Settings_VNC.yhtm">VNC</a></li>
+		</ul>		
 		</td>
 	</tr>
 </table>
@@ -69,11 +53,9 @@ function go_wait_url(_url)
 <table border="0" width="100%">
 	<tr>
 		<td align="center">
-		<table border="1"  class="y_menu_sec">
-			<tr>
-				<td class="y_menu_sec" width="80"><a target="Rechts_oben" href="Y_About.yhtm">About</a></td>
-			</tr>
-		</table>
+		<ul id="menu_sec" class="y_menu_sec">
+			<li class="plain"><a class="y_menu_item" title="about yWeb" target="Rechts_oben" href="Y_About.yhtm">About</a></li>
+		</ul>		
 		</td>
 	</tr>
 </table>

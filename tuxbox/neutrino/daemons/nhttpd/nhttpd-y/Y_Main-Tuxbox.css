@@ -1,25 +1,137 @@
 body
 {
-	font-family: Arial,Sans-Serif;
+	font-family: Arial, Tahoma, Verdana, Geneva, Helvetica, sans-serif;
 	background-color: White;
 	margin-left: 0px;
 	margin-right: 0px;
 	margin-top: 0px;
 	margin-bottom: 0px;
+	font-size:10pt;
+	color: #436976; 
 }
 
-.y_menu_prim
+img	{border:0;}
+
+a
+{ 
+	color: #436976; 
+	font-size:10pt;
+	text-decoration:none; 
+}
+
+td
+{
+	color: #436976; 
+	font-family:Arial,Sans-Serif;
+}
+
+tr
+{
+	color: #436976; 
+	font-family:Arial,Sans-Serif;
+}
+/* primary Navigation */
+.y_menu_prim {
+    background-color: transparent;
+    padding: 0em 0em 0em 0em;
+    white-space: nowrap;
+    list-style: none;
+    margin: 0;
+    height: auto;
+    line-height: normal;
+}
+.y_menu_prim li {
+    display: inline;
+
+}
+.y_menu_prim_item {
+    margin: 0;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-position: 0 1px;
+    text-align:center;
+}
+.y_menu_prim li a {
+    background-color: #F0FAFF;
+    border-color: #6D96A9;
+    border-width: 1px; 
+    border-style: solid;
+    color: #436976;
+    height: auto;
+    padding: 0em 1.5em;
+    text-decoration: none;
+}
+.y_menu_prim li.selected a {
+    background-color: #dee7ec;
+    border: 1px solid #6D96A9;
+    color: #436976;
+}
+.y_menu_prim li a:hover {
+    background-color: #dee7ec;
+    border-color: #6D96A9;
+    color: #436976;
+}
+
+/* secondary Navigation */
+.y_menu_sec {
+    background-color: transparent;
+    padding: 0em 0em 0em 0em;
+    white-space: nowrap;
+    list-style: none;
+    height: auto;
+    line-height: normal;
+    text-align: center;
+    width: 100px;
+}
+
+.y_menu_item {
+    margin: 0;
+    display: block;
+    background-repeat: no-repeat;
+    /*background-position: 0 1px;*/
+}
+.y_menu_sec li {
+    background-color: transparent;
+    border-color: #6D96A9;
+    border-width: 1px; 
+    border-style: solid;
+    color: #436976;
+    height: auto;
+    margin-bottom: 0.1em;
+    width: 100px;
+}
+.y_menu_sec li a {
+    background-color: #F0FAFF;
+    color: #436976;
+    text-decoration: none;
+}
+.y_menu_sec li.selected a {
+    background-color: #dee7ec;
+    border: 1px solid #6D96A9;
+    color: #436976
+}
+.y_menu_sec li a:hover {
+    background-color: #dee7ec;
+    border-color: #6D96A9;
+    color: #436976;
+}
+
+/* zz tv-radio-controlpanel */
+.y_menu
 {
 	font-size: 10pt;
 	text-align: center;
-	font-weight: bold;
-	border: 1px solid #177298;
+/*	font-weight: bold;*/
+	border: 1px solid #6D96A9;
 	border-collapse: collapse;
-	background: #EDF6F7;
+	background: #F0FAFF;
 	border-spacing: 1px;
+    height: auto;
+
 }
 
-.y_menu_prim a:hover
+
+.y_menu a:hover
 {
 	text-decoration:underline;
 	font-weight:bold;
@@ -31,6 +143,7 @@ body
 	background-position: center;
 	background-repeat: no-repeat;
 }
+/*
 .y_menu_sec
 {
 	font-size: 10pt;
@@ -44,10 +157,11 @@ body
 
 .y_menu_sec a:hover
 {
+
 	text-decoration:underline;
 	font-weight:bold;
 }
-
+*/
 
 .y_audio_bar
 {
@@ -56,30 +170,38 @@ body
 
 .y_head
 {
-	font: bold large;
-	color: #177298;
+	font-weight: bold;
+	color: #436976;
 	font-size: 14pt;
+	clear:both;
 }
 
 .y_work_box
 {
-	border: 1px solid #177298;
-	background: White;
+	border: 1px solid #6D96A9;
+	/*
+	border: 1px solid #177298;*/
+	background-color: #F0FAFF;
 	border-spacing: 1px;
 	padding-left: 20px;
 	padding-right: 20px;
 	padding-top: 10px;
 	padding-bottom: 10px;
 	float:left;
-	
+	width: auto;
+	color: #436976;
+	display:block;
+
 }
 
 .y_work_table
 {
-	border: 1px solid #35AFE1;
+	border: 1px solid #6D96A9;
 	background: White;
 	border-collapse: collapse;
 	border-spacing: 1px;
+	color: #436976;
+
 }
 
 .y_wait_box
@@ -90,23 +212,42 @@ body
 	background: #FFFFCC;
 	border-spacing: 1px;
 }
-
+.y_live_table
+{
+	color: #436976;
+	background-color: #F0FAFF;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
 .y_live_button
 {
 	font-size: 8pt;
 	height: 20px;
+	padding: 0;
+	color: #436976;
+
 }
 .y_live_bouquets
 {
 	font-size: 8pt;
 	height: 20px;
-	width: 150px;
+	width: 300px;
+	color: #436976;
 }
 .y_live_channels
 {
 	font-size: 8pt;
 	height: 20px;
-	width: 150px;
+	width: 300px;
+	color: #436976;
+}
+.y_live_audio_pids
+{
+	font-size: 8pt;
+	height: 20px;
+	width: 100px;
+	color: #436976;
 }
 
 .y_form_table
@@ -116,4 +257,12 @@ body
 input
 {
 	font-size: 10pt;
+	color: #436976;
+
+}
+.y_invisible_table
+{
+	border: 0px;
+	border-spacing: 0px;
+	padding: 0;
 }

@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Live (yjogol)
-# $Date: 2005/09/26 18:36:00 $
-# $Revision: 1.9 $
+# $Date: 2005/10/21 13:05:22 $
+# $Revision: 1.10 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -11,7 +11,7 @@
 # -----------------------------------------------------------
 live_lock()
 {
-	wget -O - -q "$y_url_control/lcd?lock=1&clear=1&rect=10,10,110,50,1,0&xpos=20&ypos=27&size=22&font=2&text=%20%20%20%20Y-Web%0A%20%20LiveView&update=1" >/dev/null
+	wget -O - -q "$y_url_control/lcd?lock=1&clear=1&rect=10,10,110,50,1,0&xpos=20&ypos=27&size=22&font=2&text=%20%20%20%20yWeb%0A%20%20LiveView&update=1" >/dev/null
 	wget -O - -q "$y_url_control/rc?lock" >/dev/null
 	wget -O - -q "$y_url_control/zapto?stopplayback" >/dev/null
 }
@@ -25,22 +25,14 @@ live_unlock()
 # -----------------------------------------------------------
 prepare_tv()
 {
-		# SPTS on
-		wget -O - -q "$y_url_control/system?setAViAExtPlayBack=spts" >/dev/null
+	# SPTS on
+	wget -O - -q "$y_url_control/system?setAViAExtPlayBack=spts" >/dev/null
 }
 # -----------------------------------------------------------
 prepare_radio()
 {
-		# SPTS off
-		wget -O - -q "$y_url_control/system?setAViAExtPlayBack=pes" >/dev/null
-}
-
-# -----------------------------------------------------------
-live_getmode()
-{
-	mode=`wget -O - -q "$y_url_control/getmode"`
-	mode=`echo "$mode"|sed -e "s/tv.*/tv/1"`
-	echo "$mode"
+	# SPTS off
+	wget -O - -q "$y_url_control/system?setAViAExtPlayBack=pes" >/dev/null
 }
 
 # -----------------------------------

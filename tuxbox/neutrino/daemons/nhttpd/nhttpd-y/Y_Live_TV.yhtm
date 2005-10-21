@@ -1,8 +1,6 @@
 <html>
 <head>
-<meta http-equiv="Content-Language" content="de">
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="stylesheet" type="text/css" href="/global.css">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
 <script language="JavaScript" type="text/javascript">
 function do_stop()
@@ -41,8 +39,8 @@ function doLockUnlock()
 </head>
 {=script:Y_Live prepare_tv=}
 
-<body>
-<table border="0" cellspacing="0" cellpadding="0">
+<body style="background-color: #f0faff">
+<table class="y_live_table" cellspacing="0" bgcolor="#F0FAFF">
 <tr><td>
 {=if-equal:{=browser=}~ie~
 	<OBJECT classid="clsid:E23FE9C6-778E-49D4-B537-38FCDE4887D8" 
@@ -57,14 +55,18 @@ function doLockUnlock()
 	</OBJECT>
 </td></tr>
 <tr><td>
-	<form name="v">
-		<button class="y_live_button" type="button" value="Pause" id="PlayOrPause" onClick="doPlayOrPause()">Pause</button>
-		<button class="y_live_button" type="button" value="stop" onClick="doStop()">Stop</button>
-		<button class="y_live_button" type="button" value="mute" onClick="document.vlc.toggleMute()">Mute</button>
-		<button class="y_live_button" type="button" value="fullscreen" onClick="document.vlc.fullscreen()">FScreen</button>
-		<button class="y_live_button" type="button" value="minus" onClick="document.vlc.volume=document.vlc.volume-10;">-</button>
-		<button class="y_live_button" type="button" value="plus" onClick="document.vlc.volume = document.vlc.volume+10;">+</button>
-		<button class="y_live_button" type="button" value="Lock" name="lock" onClick="doLockUnlock()">Lock</button>
+	<form name="v" action="/Y_Live_Wait.yhtm" method="get">
+		<button class="y_live_button" type="button" value="Pause" title="play or pause streaming" id="PlayOrPause" onClick="doPlayOrPause()">Pause</button>
+		<button class="y_live_button" type="button" value="stop" title="stop streaming" onClick="doStop()">Stop</button>
+		<button class="y_live_button" type="button" value="mute" title="mute / unmute volume" onClick="document.vlc.toggleMute()">Mute</button>
+		<button class="y_live_button" type="button" value="fullscreen" title="switch to fullscreen-mode - or use double-click" onClick="document.vlc.fullscreen()">FScreen</button>
+		<button class="y_live_button" type="button" value="minus" title="lower volume" onClick="document.vlc.volume=document.vlc.volume-10;">-</button>
+		<button class="y_live_button" type="button" value="plus" title="higher volume" onClick="document.vlc.volume = document.vlc.volume+10;">+</button>
+		<button class="y_live_button" type="button" value="Lock" title="lock / unlock TV (record mode, rc, lcd)" name="lock" onClick="doLockUnlock()">Lock</button>
+		<select size="1" class="y_live_audio_pids" name="audiopid" onChange="document.v.submit()">
+		{=func:get_audio_pids_as_dropdown=}
+		</select>
+		<input type="hidden" name="browser" value="{=browser=}">
 	</form>	
 ~
 	<embed type="application/x-vlc-plugin"
@@ -74,14 +76,18 @@ function doLockUnlock()
 	</embed>
 </td></tr>
 <tr><td>
-	<form name="v">
-		<input class="y_live_button" type="button" value="Pause" name="PlayOrPause" onClick="doPlayOrPause()">
-		<button class="y_live_button" type="button" value="stop" onClick="doStop()">Stop</button>
-		<button class="y_live_button" type="button" value="mute" onClick="document.vlc.mute()">Mute</button>
-		<button class="y_live_button" type="button" value="fullscreen" onClick="document.vlc.fullscreen()">FScreen</button>
-		<button class="y_live_button" type="button" value="minus" alt="minus" onClick="document.vlc.set_volume(document.vlc.get_volume()-10);">-</button>
-		<button class="y_live_button" type="button" value="plus" onClick="document.vlc.set_volume(document.vlc.get_volume()+10);">+</button>
-		<input class="y_live_button" type="button" value="Lock" name="lock" onClick="doLockUnlock()">
+	<form name="v" action="/Y_Live_Wait.yhtm" method="get">
+		<input class="y_live_button" type="button" value="Pause" title="play or pause streaming" name="PlayOrPause" onClick="doPlayOrPause()">
+		<button class="y_live_button" type="button" value="stop" title="stop streaming" onClick="doStop()">Stop</button>
+		<button class="y_live_button" type="button" value="mute" title="mute / unmute volume" onClick="document.vlc.mute()">Mute</button>
+		<button class="y_live_button" type="button" value="fullscreen" title="switch to fullscreen-mode - or use double-click" onClick="document.vlc.fullscreen()">F</button>
+		<button class="y_live_button" type="button" value="minus" title="lower volume" onClick="document.vlc.set_volume(document.vlc.get_volume()-10);">-</button>
+		<button class="y_live_button" type="button" value="plus" title="higher volume" onClick="document.vlc.set_volume(document.vlc.get_volume()+10);">+</button>
+		<input class="y_live_button" type="button" value="Lock" title="lock / unlock TV (record mode, rc, lcd)" name="lock" onClick="doLockUnlock()">
+		<select size="1" class="y_live_audio_pids" name="audiopid" onChange="document.v.submit()">
+		{=func:get_audio_pids_as_dropdown=}
+		</select>
+		<input type="hidden" name="browser" value="{=browser=}">
 	</form>	
 =}
 </td></tr>
@@ -94,6 +100,10 @@ function doLockUnlock()
 	
 	document.vlc.width=res_w;
 	document.vlc.height=res_h;
+	for (i = 0; i < document.v.audiopid.length; i++)
+		if (document.v.audiopid.options[i].value == "{=if-empty:{=audiopid=}~00000~{=audiopid=}=}")
+			document.v.audiopid.options[i].selected = true;
+
 {=if-equal:{=browser=}~moz~
     document.vlc.play()
 ~=}

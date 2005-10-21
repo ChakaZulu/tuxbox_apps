@@ -1,9 +1,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta NAME="author" CONTENT="yjogol">
-<link rel="stylesheet" type="text/css" href="/global.css">
-<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+<link rel="stylesheet" type="text/css" href="Y_Main.css">
 
 <script language="JavaScript" type="text/javascript">
 function go_live()
@@ -20,7 +18,7 @@ function go_live()
 }
 function go_rc()
 {
-	window.open("Y_Tools_Rcsim.yhtm","rc","width=270,height=320");
+	window.open("Y_Tools_Rcsim.yhtm","rc","width=270,height=650");
 }
 </script>
 </head>
@@ -32,25 +30,24 @@ function go_rc()
 		<td>
 		<table border="0" width="100%" cellspacing="0" cellpadding="0">
 			<tr>
-				<td class="y_head"><font size="4">dbox yWeb</font>
+				<td><span style="font-weight: bold;font-size: 14pt;">dbox yWeb</span>
 				<font size="1">&nbsp; Version {=ini-get:Y_Version.txt;version=}</font></td>
 			</tr>
 			<tr>
 				<td>
-					<table border="1" class="y_menu_prim">
-						<tr>
-							<td class="y_menu_prim" width="80"><a target="Base" href="Y_TvRadio.htm">Bouquet</a></td>
-							<td class="y_menu_prim" width="80"><a target="Base" href="Y_Tools.htm">Tools</a></font></td>
-							<td class="y_menu_prim" width="80"><a target="Base" href="Y_Settings.yhtm">Settings</a></font></td>
-							<td class="y_menu_prim" width="80"><a href="javascript:go_live()">Live</a></td>
-							<td class="y_menu_prim" width="20"><a href="javascript:go_rc()">RC</a></td>
-						</tr>
-					</table>
+					<ul id="menu_prim" class="y_menu_prim">
+						<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_TvRadio.htm" title="View &#038;edit Bouquets">Bouquet</a></li>
+						<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_Tools.htm" title="Box &#038; Test Tools">Tools</a></li>
+						<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_Settings.yhtm" title="Settings for Box, Web, Plugins ...">Settings</a></li>
+						<li class="plain"><a class="y_menu_prim_item" href="javascript:go_live()" title="TV or Radio Live-Streaming">Live</a></li>
+						<li class="plain"><a class="y_menu_prim_item" href="javascript:go_rc()" title="Web-based Remote Control">RC</a></li>
+					</ul>
 				</td>
 			</tr>
 		</table>
 		</td>
 	</tr>
 </table>
+
 </body>
 </html>

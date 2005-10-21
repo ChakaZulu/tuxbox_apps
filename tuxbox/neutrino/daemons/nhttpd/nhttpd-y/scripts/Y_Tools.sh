@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Flashing Library (yjogol)
-# $Date: 2005/09/29 17:08:37 $
-# $Revision: 1.5 $
+# $Date: 2005/10/21 13:05:22 $
+# $Revision: 1.6 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -128,6 +128,65 @@ zapit_upload()
 	y_format_message_html
 }
 
+# -----------------------------------------------------------
+# 1-fstype, 2-ip, 3-dir, 4-localdir, 5-mac, 6-opt1, 7-opt2, 8-usr, 9-psw
+do_mount()
+{
+echo "$*"
+}
+
+a()
+{
+	fstype="nfs"
+	if [ "$1" = "1" ]
+	then
+		if [ "$1" = "2" ]
+		then
+			fstype="ftpfs"
+		else
+			fstype="cifs"
+		fi
+	fi
+	
+	opt=""
+	if [ "$6" != "" ]
+	then
+		opt="$6"
+	fi
+	
+	if [ "$7" != "" ]
+	then
+		if [ "$opt" != "" ]
+		then
+			opt="$opt,$7"
+		else
+			opt="$7"
+		fi
+	fi
+
+	if [ "$8" != "" ]
+	then
+		if [ "$opt" != "" ]
+		then
+			opt="$opt,user=$8"
+		else
+			opt="user=$8"
+		fi
+	fi
+
+	if [ "$9" != "" ]
+	then
+		if [ "$opt" != "" ]
+		then
+			opt="$opt,pass=$9"
+		else
+			opt="user=$9"
+		fi
+	fi
+		
+	echo "mount -t $fstype -o $opt $ip:$3 $4"
+#	mount -t $fstype -o $opt $ip:$3 $4
+}
 # -----------------------------------
 # Main
 # -----------------------------------
@@ -194,6 +253,9 @@ case "$1" in
 	rcsim)
 		rcsim $2 >/dev/null ;;
 
+	domount)
+		shift 1
+		do_mount $* ;;
 	*)
 		echo "Parameter falsch: $*" ;;
 esac

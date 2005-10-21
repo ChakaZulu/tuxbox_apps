@@ -1,5 +1,17 @@
 Severity	id		Headline							Build
 
+4-Minor		JG200000266	Settings: WebServer JavaScript-Error for field port		R1.3.5
+4-Minor		JG200000269	_Y_Library.sh:config_set_value()  interpret backslash		R1.3.5
+4-Minor		JG200000232	Live:Sprache: DropDown ins TV Fenster				R1.3.5
+5-Enhancement	JG200000141	Live: enable select audio-pid					R1.3.5
+5-Enhancement	JG200000237	robots.txt in html-root						R1.3.5
+5-Enhancement	JG200000255	keine hard-links nach httpd-y (z.B. _Y_Globals.sh)		R1.3.5
+5-Enhancement	JG200000272	Dialog Boot-Logo und LCD-Logo zusammenfassen			R1.3.5
+5-Enhancement	JG200000277	Tooltips in english						R1.3.5
+5-Enhancement	JG200000278	Tools->msg beide Dialoge zusammenfassen				R1.3.5
+5-Enhancement	JG200000280	tools: move Message to  Boxcontrol				R1.3.5
+5-Enhancement	JG200000284	use image am maps for web-based remote control			R1.3.5
+
 4-Minor		JG200000216	nhttp: Upload temporary file moved from /var/tmp to /tmp/upload.tmp	R1.3.4
 5-Enhancement	JG200000139	Live: EPG-Title in Channel-Dropdown				R1.3.4
 5-Enhancement	JG200000212	nhttpd: use relative path for includes				R1.3.4
@@ -27,8 +39,8 @@ Severity	id		Headline							Build
 5-Enhancement	JG200000211	add ucode.bin for up/download					R1.3.2
 
 5-Enhancement	JG200000200	Live: Radio: Player via Dateierweiterung m3u, m4u starten	R1.3.1
-3-Average		JG200000147	LiveView nur 9 Bouquets im Dropdown. fixed.			R1.3.1
-4-Minor			JG200000179	dietmarW-Images habe kein /var/tmp also /tmp nutzen		R1.3.1
+3-Average	JG200000147	LiveView nur 9 Bouquets im Dropdown. fixed.			R1.3.1
+4-Minor		JG200000179	dietmarW-Images habe kein /var/tmp also /tmp nutzen		R1.3.1
 5-Enhancement	JG200000084	Plugins: Settings: Mount-Einstellungen				R1.3.1
 5-Enhancement	JG200000182	Live: Bouquets & Channel: Dropdown Breite begrenzen		R1.3.1
 5-Enhancement	JG200000183	Bouquets: epg und settings im yWeb_Layout			R1.3.1

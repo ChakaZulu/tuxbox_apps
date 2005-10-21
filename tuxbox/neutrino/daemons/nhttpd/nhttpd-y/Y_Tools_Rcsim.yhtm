@@ -1,8 +1,6 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta NAME="author" CONTENT="yjogol">
-<link rel="stylesheet" type="text/css" href="/global.css">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
 <title>RC</title>
 <script language="JavaScript" type="text/javascript" >
@@ -12,78 +10,40 @@ function rcsim(_key)
 }
 </script>
 </head>
-<!---
-	KEY_POWER,KEY_MUTE,
-	KEY_TOPLEFT,KEY_TOPRIGHT,KEY_BOTTOMLEFT,KEY_BOTTOMRIGHT,
-	KEY_PAGEDOWN,KEY_PAGEUP
---->
+
 <body>
-
-<br>
-<div class="y_head">Remote Control</div>
-<div class="y_work_box">
-	<form>
-		<table cellpadding="4" cellspacing="0" >
-			<tr bgcolor="">
-				<td bgcolor="Silver"><INPUT type=button value="1" onClick='rcsim("KEY_1");'></td>
-				<td bgcolor="Silver"><INPUT type=button value="2" onClick='rcsim("KEY_2");'></td>
-				<td bgcolor="Silver"><INPUT type=button value="3" onClick='rcsim("KEY_3");'></td>
-				<td>&nbsp;</td>
-				<td align="center"><INPUT type=button value="Home" onClick='rcsim("KEY_HOME");'></td>
-			</tr>
-			<tr>
-				<td bgcolor="Silver"><INPUT type=button value="4" onClick='rcsim("KEY_4");'></td>
-				<td bgcolor="Silver"><INPUT type=button value="5" onClick='rcsim("KEY_5");'></td>
-				<td bgcolor="Silver"><INPUT type=button value="6" onClick='rcsim("KEY_6");'></td>
-				<td>&nbsp;</td>
-				<td align="center"><INPUT type=button value="ok" onClick='rcsim("KEY_OK");'></td>
-			</tr>
-			<tr>
-				<td bgcolor="Silver"><INPUT type=button value="7" onClick='rcsim("KEY_7");'></td>
-				<td bgcolor="Silver"><INPUT type=button value="8" onClick='rcsim("KEY_8");'></td>
-				<td bgcolor="Silver"><INPUT type=button value="9" onClick='rcsim("KEY_9");'></td>
-				<td>&nbsp;</td>
-				<td align="center"><INPUT type=button value="dbox" onClick='rcsim("KEY_SETUP");'></td>
-			</tr>
-			<tr>
-				<td bgcolor="Silver"><INPUT type=button value="-" onClick='rcsim("KEY_VOLUMENDOWN");'></td>
-				<td bgcolor="Silver"><INPUT type=button value="0" onClick='rcsim("KEY_0");'></td>
-				<td bgcolor="Silver"><INPUT type=button value="+" onClick='rcsim("KEY_VOLUMENUP");'></td>
-				<td>&nbsp;</td>
-				<td align="center"><INPUT type=button value="?" onClick='rcsim("KEY_HELP");'></td>
-			</tr>
-			<tr>
-				<td>&nbsp;</td>
-				<td><INPUT type=button value="^" onClick='rcsim("KEY_UP");'></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>
-			<tr>
-				<td><INPUT type=button value="<" onClick='rcsim("KEY_LEFT");'></td>
-				<td>&nbsp;</td>
-				<td><INPUT type=button value=">" onClick='rcsim("KEY_RIGHT");'></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>
-			<tr>
-				<td>&nbsp;</td>
-				<td><INPUT type=button value="v" onClick='rcsim("KEY_DOWN");'></td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>
-			<tr>
-				<td bgcolor="Red"><INPUT type=button value="x" onClick='rcsim("KEY_RED");'></td>
-				<td bgcolor="Green"><INPUT type=button value="x" onClick='rcsim("KEY_GREEN");'></td>
-				<td bgcolor="Yellow"><INPUT type=button value="x" onClick='rcsim("KEY_YELLOW");'></td>
-				<td bgcolor="Blue"><INPUT type=button value="x" onClick='rcsim("KEY_BLUE");'></td>
-				<td>&nbsp;</td>
-			</tr>
-		</table>
-	</form>
-
-</div>
+<img src="images/rc.jpg" usemap="#rc">
+<map name="rc">
+  <area shape="poly" href="javascript:rcsim('KEY_UP')" coords="77,248,135,234,187,246,187,266,132,286,77,266" />
+  <area shape="poly" href="javascript:rcsim('KEY_DOWN')" coords="76,354,134,340,186,352,186,372,131,392,76,372" />
+  <area shape="rect" href="javascript:rcsim('KEY_RIGHT')" coords="171,279,214,346" />
+  <area shape="rect" href="javascript:rcsim('KEY_LEFT')" coords="48,278,95,344" />
+  <area shape="rect" href="javascript:rcsim('KEY_OK')" coords="102,287,164,336" />
+  <area shape="circle" href="javascript:rcsim('KEY_BLUE')" coords="197,485,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_YELLOW')" coords="152,491,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_GREEN')" coords="107,490,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_RED')" coords="62,484,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_SETUP')" coords="204,428,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_HELP')" coords="56,427,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_HOME')" coords="51,371,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_SETUP')" coords="210,372,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_VOLUMENUP')" coords="218,250,22" />
+  <area shape="circle" href="javascript:rcsim('KEY_VOLUMENDOWN')" coords="47,249,22" />
+  <area shape="rect" href="javascript:rcsim('KEY_PAGEUP')" coords="170,182,226,211" />
+  <area shape="rect" href="javascript:rcsim('KEY_0')" coords="107,181,163,210" />
+  <area shape="rect" href="javascript:rcsim('KEY_PAGEDOWN')" coords="44,181,100,210" />
+  <area shape="rect" href="javascript:rcsim('KEY_9')" coords="170,144,226,173" />
+  <area shape="rect" href="javascript:rcsim('KEY_8')" coords="107,143,163,172" />
+  <area shape="rect" href="javascript:rcsim('KEY_7')" coords="44,143,100,172" />
+  <area shape="rect" href="javascript:rcsim('KEY_6')" coords="170,106,226,135" />
+  <area shape="rect" href="javascript:rcsim('KEY_5')" coords="107,106,163,135" />
+  <area shape="rect" href="javascript:rcsim('KEY_4')" coords="44,106,100,135" />
+  <area shape="rect" href="javascript:rcsim('KEY_3')" coords="170,69,226,98" />
+  <area shape="rect" href="javascript:rcsim('KEY_2')" coords="107,69,163,98" />
+  <area shape="rect" href="javascript:rcsim('KEY_1')" coords="43,69,100,98" />
+  <area shape="rect" href="javascript:rcsim('KEY_POWER')" coords="140,25,205,60" />
+  <area shape="rect" href="javascript:rcsim('KEY_MUTE')" coords="64,25,130,60" />
+</map>
 
 <iframe name="out" id="out" width="100%" height="200" align="left" frameborder="0">Your Browser does not support IFrames.</iframe>
 

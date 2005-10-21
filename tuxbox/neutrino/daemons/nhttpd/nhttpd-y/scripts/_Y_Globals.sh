@@ -1,14 +1,15 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Globals (yjogol)
-# $Date: 2005/09/25 10:57:23 $
-# $Revision: 1.4 $
+# $Date: 2005/10/21 13:05:22 $
+# $Revision: 1.5 $
 # -----------------------------------------------------------
 
 # -----------------------------------------------------------
 # Pathes
 # -----------------------------------------------------------
-y_path_httpd="/share/tuxbox/neutrino/httpd-y"
+#y_path_httpd="/share/tuxbox/neutrino/httpd-y"
+y_path_httpd=".."
 y_path_scripts="$y_path_httpd/scripts"
 y_path_usrbin="/var/bin"
 y_path_config="/var/tuxbox/config"

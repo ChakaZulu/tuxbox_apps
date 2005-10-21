@@ -1,8 +1,6 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta NAME="author" CONTENT="yjogol">
-<link rel="stylesheet" type="text/css" href="/global.css">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
 <script type="text/javascript">
 function vnc_set() 
@@ -47,7 +45,7 @@ function vnc_set()
 	
 		</table>
 		<br>
-		<input type="button" value="Setzen" name="B1" onClick="vnc_set()">
+		<input type="button" value="Setzen" name="B1" title="submit values" onClick="vnc_set()">
 	</form>
 </div>
 </body>
