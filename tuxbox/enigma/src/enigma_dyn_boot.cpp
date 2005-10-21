@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.14 2005/10/19 15:35:15 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.15 2005/10/21 18:22:57 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -48,8 +48,6 @@
 extern eString firmwareLevel(eString versionString);
 
 using namespace std;
-
-#define SKINDIR "/var/tuxbox/config/enigma/boot"
 
 void mountJFFS2()
 {

@@ -1,5 +1,5 @@
 /*
- * $Id: bmconfig.h,v 1.2 2005/10/09 08:37:44 digi_casi Exp $
+ * $Id: bmconfig.h,v 1.3 2005/10/21 18:21:50 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -20,6 +20,7 @@
  */
  
 #define CONFIGFILE "/tuxbox/config/enigma/bootmenue.conf"
+#define SKINDIR "/var/tuxbox/config/enigma/boot"
 
 #include <iomanip>
 #include <iostream>
@@ -42,7 +43,7 @@ class bmconfig: public Object
 		timeoutValue = "10";
 		videoFormat = "1";
 		selectedEntry = "";
-		skinPath = "/share/tuxbox/enigma/boot";
+		skinPath = SKINDIR;
 		skinName = "blank.skin";
 		mpoint = "/var/mnt/usb";
 		inetd = "1";
