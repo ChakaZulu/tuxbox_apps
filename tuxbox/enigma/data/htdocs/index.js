@@ -90,7 +90,7 @@ function DVRrecord(command)
 
 function sendMessage2TV()
 {
-	NewWindow("/tvMessageWindow", "msg", "780", "150", "no");
+	NewWindow("/tvMessageWindow", "msg", "780", "175", "no");
 }
 
 function selectAudio()

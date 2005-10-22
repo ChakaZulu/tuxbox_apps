@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.548 2005/10/22 19:21:56 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.549 2005/10/22 21:24:08 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2148,13 +2148,15 @@ static eString satFinder(eString request, eString dirpath, eString opts, eHTTPCo
 static eString message(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	std::map<eString, eString> opts = getRequestOptions(opt, '&');
+	eString wait = opts["wait"];
 	eString msg = opts["message"];
 	if (!msg)
 		msg = opt;
 	if (!msg)
 		msg = "Error: No message text available.";
 		
-	eZapMain::getInstance()->postMessage(eZapMessage(1, _("External Message"), httpUnescape(msg), 10), 0);
+	int timeout = (wait == "on") ? 0 : 10;
+	eZapMain::getInstance()->postMessage(eZapMessage(1, _("External Message"), httpUnescape(msg), timeout), 0);
 		
 	return closeWindow(content, "", 10);
 }
