@@ -1,5 +1,5 @@
 /*
- * $Id: bmimage.h,v 1.2 2005/10/22 21:24:07 digi_casi Exp $
+ * $Id: bmimage.h,v 1.3 2005/10/22 21:27:47 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -98,7 +98,7 @@ public:
 			}
 			closedir(d);
 		}
-		return imageList.size() - 1;
+		return imageList.size();
 	}
 	
 	void discard(eString location)
