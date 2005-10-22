@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.22 2005/10/14 19:50:52 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.23 2005/10/22 19:52:34 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on dreamflash by mechatron
@@ -43,7 +43,7 @@ stmenu::stmenu()
 	CONNECT(CTimer::getInstance()->selected, stmenu::timeout);
 	config->load();
 	CTimer::getInstance()->start(atoi(config->timeoutValue.c_str()));
-	if (loadImageList() > 0)
+	if (loadImageList() > 1)
 	{
 		loadSkin();
 		showpic();
