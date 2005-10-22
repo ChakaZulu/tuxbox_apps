@@ -51,7 +51,7 @@ AM_CONDITIONAL(REISERFS_YES,test "$REISERFS" = "yes")
 
 AC_ARG_WITH(ext-flashtool,
 	[  --with-ext-flashtool=NAME type ext-flashtool [[yes,no]]],
-	[EXTFLASHTOOL="$withval"],[EXTFLASHTOOL="yes"])
+	[EXTFLASHTOOL="$withval"],[EXTFLASHTOOL="no"])
 
 AC_SUBST(EXTFLASHTOOL)
 AM_CONDITIONAL(EXTFLASHTOOL_NO,test "$EXTFLASHTOOL" != "yes")
@@ -59,7 +59,7 @@ AM_CONDITIONAL(EXTFLASHTOOL_YES,test "$EXTFLASHTOOL" = "yes")
 
 AC_ARG_WITH(enigma-debug,
 	[  --with-enigma-debug=NAME type enigma-debug [[yes,no]]],
-	[ENIGMA_DEBUG="$withval"],[ENIGMA_DEBUG="yes"])
+	[ENIGMA_DEBUG="$withval"],[ENIGMA_DEBUG="no"])
 
 AC_SUBST(ENIGMA_DEBUG)
 AM_CONDITIONAL(ENIGMA_DEBUG_NO,test "$ENIGMA_DEBUG" != "yes")
