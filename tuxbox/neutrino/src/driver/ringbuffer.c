@@ -59,6 +59,9 @@ void ringbuffer_free (ringbuffer_t * rb)
 		munlock (rb->buf, rb->size);
 
 	free (rb->buf);
+	rb->buf=0;
+	free (rb);
+	rb=0;
 }
 
 /* Lock the data block of `rb' using the system call 'mlock'.  */
