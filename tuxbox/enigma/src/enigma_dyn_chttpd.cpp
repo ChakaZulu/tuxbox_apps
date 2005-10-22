@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_chttpd.cpp,v 1.3 2005/10/19 20:08:34 digi_casi Exp $
+ * $Id: enigma_dyn_chttpd.cpp,v 1.4 2005/10/22 19:22:52 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -99,7 +99,7 @@ eString startCHTTPD(eString request, eString dirpath, eString opts, eHTTPConnect
 	
 	pidList = eProcessUtils::getPID("chttpd");
 	if (*pidList == -1)
-		system("/bin/chttpd&");
+		system("chttpd&");
 	free(pidList);
 	
 	return closeWindow(content, "", 10);
