@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.10 2005/10/23 20:58:15 rasc Exp $
+$Id: ts2secpes.c,v 1.11 2005/10/23 22:50:28 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: ts2secpes.c,v 1.10 2005/10/23 20:58:15 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.11  2005/10/23 22:50:28  rasc
+ - New:  started ISO 13818-2 StreamIDs
+ - New:  decode multiple PS/PES packets within TS packets (-tssubdecode)
+
 Revision 1.10  2005/10/23 20:58:15  rasc
 subdecode multiple SI packets with TS packet using -tssubdecode
 
@@ -320,6 +324,7 @@ void ts2SecPes_subdecode (u_char *b, int len, u_int opt_pid)
 //
 // $$$ Remark: this routine is obsolete and in fact do nothing,
 //             due to code modification mark (1)
+//             $$$ TODO: the last packet read prior to prog termination may not be subdecoded
 //
 int  ts2SecPes_checkAndDo_PacketSubdecode_Output (void)
 {
@@ -385,16 +390,17 @@ void ts2SecPes_Output_subdecode (u_int overleap_bytes)
 	if (b && len) {
 
 	    // $$$ TODO buffer may contain multiple PS/PES packets!! 
-	    // $$$ TODO buffer may contain multiple SI packets!! 
 
 	    // -- PES/PS or SECTION
 	    // if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
 	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01) {
 
 		out_nl (3,"TS contains PES/PS stream...");
-	    	indent (+1);
-		decodePS_PES_packet (b, len, tsd.pid);
-	    	indent (-1);
+		ts2ps_pes_multipacket (b, len, tsd.pid);
+
+	    	//indent (+1);
+		//decodePS_PES_packet (b, len, tsd.pid);
+	    	//indent (-1);
 
 	    } else {
 		int pointer = b[0]+1;
@@ -421,6 +427,10 @@ void ts2SecPes_Output_subdecode (u_int overleap_bytes)
 
 
 
+//
+// -- decode SI packets in saved TS data
+// -- check for consecutive SI packets
+//
 
 void  ts2sec_multipacket (u_char *b, int len, u_int pid)
 {
@@ -431,13 +441,13 @@ void  ts2sec_multipacket (u_char *b, int len, u_int pid)
 		if (b[0] == 0xFF) break;			// stuffing, no more data
 
 		// sect_len  = getBits (b, 0, 12, 12) + 3;
-		sect_len = ((b[1] & 0x0F) << 8) + b[2] + 3; 	// sect size  (get_bits)
+		sect_len = ((b[1] & 0x0F) << 8) + b[2] + 3; 	// sect size  (getBits)
 		if (sect_len > len) {				// this should not happen!
 			out_nl (3,"$$$ something is wrong here!!...");
 			break;
 		}
 
-		out_nl (3,"SI packet:");
+		out_nl (3,"SI packet (length=%d): ",sect_len);
 	    	indent (+1);
 		decodeSI_packet (b, sect_len, pid);
 	    	indent (-1);
@@ -450,11 +460,60 @@ void  ts2sec_multipacket (u_char *b, int len, u_int pid)
 }
 
 
+//
+// -- decode PS/PES packets in saved TS data
+// -- check for consecutive PS/PES packets
+//
+
+void  ts2ps_pes_multipacket (u_char *b, int len, u_int pid)
+{
+  int pkt_len;
+
+	while (len > 0) {
+		// we are on packet start:  b[0..2] =  0x000001
+
+		pkt_len = 0;
+		if (b[3] >0xBC) {			// has length field?
+			pkt_len = (b[4]<<8) + b[5];	// PES packet size... (getBits)
+			if (pkt_len) pkt_len += 6;	// not 0? get total length
+		}
+
+
+		if (pkt_len == 0) {			// unbound stream?, seek next pkt
+
+			int i = 5;
+			while (i < (len-3)) {
+				i++;			// seek next 0x000001
+				if (b[i]   != 0x00) continue;
+				if (b[i+1] != 0x00) continue;
+				if (b[i+2] != 0x01) continue;
+
+				pkt_len = i;
+				break;
+			}
+
+		}
+
+		if (pkt_len == 0) {			// still not found, or last pkt in buffer
+			pkt_len = len;
+		}
+
+
+		out_nl (3,"PS/PES packet (length=%d): ",pkt_len);
+	    	indent (+1);
+		decodePS_PES_packet (b, pkt_len, pid);
+	    	indent (-1);
+		out_NL (3);
+
+		b += pkt_len;
+		len -= pkt_len;
+
+	}
+
+}
+
+
+
 // 
-//
-// $$$ TODO:
-//  unbound PES streams, non System PES-Streams! (length check will not work!)
-//
 // $$$ TODO: discontinuity signalling flag check?
 //
-// $$$ TODO: packet may contain server sections!!!

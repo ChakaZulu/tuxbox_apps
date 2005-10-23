@@ -1,3 +1,5 @@
+ - New:  started ISO 13818-2 StreamIDs
+ - New:  decode multiple PS/PES packets within TS packets (-tssubdecode)
  - New:  decode multiple SI packets within TS packets (-tssubdecode)
  - Bugfix: tssubdecode check for PUSI and SI pointer offset (tnx to Souloumiac Olivier)
  - Changed: some Code rewrite

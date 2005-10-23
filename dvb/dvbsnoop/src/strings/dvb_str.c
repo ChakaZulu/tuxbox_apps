@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.67 2005/09/09 14:20:30 rasc Exp $
+$Id: dvb_str.c,v 1.68 2005/10/23 22:50:27 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,10 @@ $Id: dvb_str.c,v 1.67 2005/09/09 14:20:30 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.68  2005/10/23 22:50:27  rasc
+ - New:  started ISO 13818-2 StreamIDs
+ - New:  decode multiple PS/PES packets within TS packets (-tssubdecode)
+
 Revision 1.67  2005/09/09 14:20:30  rasc
 TS continuity sequence check (cc verbose output)
 
@@ -2186,6 +2190,7 @@ char *dvbstrTS_AdaptationField_TYPE (u_int i)
 
 /*
   -- PES Stream_id  ISO 13818-1  2.4.3.6
+  -- PS Stream_id   ISO 13818-2 
 */
 
 char *dvbstrPESstream_ID (u_int i)
@@ -2194,10 +2199,21 @@ char *dvbstrPESstream_ID (u_int i)
   STR_TABLE  Table[] = {
 	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
 	// -- updated 2004-08-11  from ITU-T Rec H.222.0 AMD3
+	// -- updated 2005-10-22  ISO13816-2 (code 0x00-0xB8)
 	//
      // on changes:  adapt dmx_pes.c!!! etc. (search for PESstream_ID)
-     // $$$ TODO streamID 00-B8 (ISO 13818-2)
-     {  0x00, 0xB8,  "!!!unknown or PES stream not in sync... (!!!)" },
+ 
+     // streamID 00-B8 (ISO 13818-2)
+     {  0x00, 0x00,  "picture_start_code"},
+     {  0x01, 0xAF,  "slice_start_code"},
+     {  0xB0, 0xB1,  "reserved"},
+     {  0xB2, 0xB2,  "user_data_start_code"},
+     {  0xB3, 0xB3,  "sequence_header_code"},
+     {  0xB4, 0xB4,  "sequence_error_code"},
+     {  0xB5, 0xB5,  "extension_start_code"},
+     {  0xB6, 0xB6,  "reserved"},
+     {  0xB7, 0xB7,  "sequence_end_code"},
+     {  0xB8, 0xB8,  "group_start_code"},
      // special PS_stream_IDs (these are not PES stream IDs)
      {  0xB9, 0xB9,  "MPEG_program_stream_end (PS)" },
      {  0xBA, 0xBA,  "MPEG_pack_start (PS)" },
