@@ -1,4 +1,4 @@
-
+ - New:  decode multiple SI packets within TS packets (-tssubdecode)
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
  - Changed: some Code rewrite
  - Changed: obsolete option -nosync, do always packet sync

@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.9 2005/10/20 22:25:31 rasc Exp $
+$Id: ts2secpes.c,v 1.10 2005/10/23 20:58:15 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ts2secpes.c,v 1.9 2005/10/20 22:25:31 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.10  2005/10/23 20:58:15  rasc
+subdecode multiple SI packets with TS packet using -tssubdecode
+
 Revision 1.9  2005/10/20 22:25:31  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.
@@ -143,19 +146,24 @@ int ts2SecPes_AddPacketStart (int pid, int cc, u_char *b, u_int len)
     // -- Save PES/PS or SECTION length information of incoming packet
     // -- set 0 for unspecified length
     l = 0;
-    if (len > 6) {
-	// Non-System PES (<= 0xBC) will have an unknown length (= 0)
-	if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
-		l = (b[4]<<8) + b[5];		// PES packet size...
-		if (l) l += 6;			// length with PES-sync, etc.
-    	} else {
-		int pointer = b[0]+1;
-		if (pointer+3 <= len) {	// not out of this packet?
-			l = ((b[pointer+1] & 0x0F) << 8) + b[pointer+2]; // sect size
-		}
-		if (l) l += pointer + 3;	// length with pointer & tableId
-    	}
-    }
+
+// -- TS can contain multiple packets streamed in payload, so calc will be wrong!!!
+// -- so I skip this at this time...
+// -- $$$ code modification mark (1)
+//    if (len > 6) {
+//	// Non-System PES (<= 0xBC) will have an unknown length (= 0)
+//	if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
+//		l = (b[4]<<8) + b[5];		// PES packet size...
+//		if (l) l += 6;			// length with PES-sync, etc.
+//   	} else {
+//		int pointer = b[0]+1;
+//		if (pointer+3 <= len) {	// not out of this packet?
+//			l = ((b[pointer+1] & 0x0F) << 8) + b[pointer+2]; // sect size  (get_bits)
+//		}
+//		if (l) l += pointer + 3;	// length with pointer & tableId
+//   	}
+//   }
+
     tsd.payload_length = l;
 
 
@@ -280,6 +288,8 @@ void ts2SecPes_subdecode (u_char *b, int len, u_int opt_pid)
 
 		// $$$ TODO: here we have a flaw, when pointer != 0, we do not display the new 
 		//           TS packet, but we are subdecoding (display) using the TS overflow data...
+		//           Workaround: pass SI_offset to output to display, that we are using data
+		//                       from next TS packet... (this should do for now)
 
 		// -- output data of prev. collected packets
 		// -- if not already decoded or length was unspecified
@@ -307,6 +317,9 @@ void ts2SecPes_subdecode (u_char *b, int len, u_int opt_pid)
 // -- check if TS packet should already be sent to sub-decoding and output... 
 // -- if so, do sub-decoding and do output
 // -- return: 0 = no output, 1 = output done
+//
+// $$$ Remark: this routine is obsolete and in fact do nothing,
+//             due to code modification mark (1)
 //
 int  ts2SecPes_checkAndDo_PacketSubdecode_Output (void)
 {
@@ -388,9 +401,8 @@ void ts2SecPes_Output_subdecode (u_int overleap_bytes)
 		b += pointer;
 
 		out_nl (3,"TS contains Section...");
-	    	indent (+1);
-		decodeSI_packet (b, len-pointer, tsd.pid);
-	    	indent (-1);
+		ts2sec_multipacket (b, len-pointer, tsd.pid);
+
 	    }
 
 	} else {
@@ -407,6 +419,35 @@ void ts2SecPes_Output_subdecode (u_int overleap_bytes)
 }
 
 
+
+
+
+void  ts2sec_multipacket (u_char *b, int len, u_int pid)
+{
+  int sect_len;
+
+	while (len > 0) {
+
+		if (b[0] == 0xFF) break;			// stuffing, no more data
+
+		// sect_len  = getBits (b, 0, 12, 12) + 3;
+		sect_len = ((b[1] & 0x0F) << 8) + b[2] + 3; 	// sect size  (get_bits)
+		if (sect_len > len) {				// this should not happen!
+			out_nl (3,"$$$ something is wrong here!!...");
+			break;
+		}
+
+		out_nl (3,"SI packet:");
+	    	indent (+1);
+		decodeSI_packet (b, sect_len, pid);
+	    	indent (-1);
+		out_NL (3);
+
+		b += sect_len;
+		len -= sect_len;
+
+	}
+}
 
 
 // 
