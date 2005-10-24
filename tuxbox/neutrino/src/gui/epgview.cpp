@@ -46,6 +46,7 @@
 
 #include <driver/encoding.h>
 #include <driver/screen_max.h>
+#define ICON_LARGE_WIDTH 26
 
 int findItem(std::string strItem, std::vector<std::string> & vecItems) {
 	for (std::vector<std::string>::size_type nCnt = 0; nCnt < vecItems.size(); nCnt++) {
@@ -564,6 +565,23 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 	// show Timer Event Buttons
 	showTimerEventBar (true);
+
+	//show Content&Component for Dolby & 16:9
+	CSectionsdClient::ComponentTagList tags;
+	if ( g_Sectionsd->getComponentTagsUniqueKey( epgData.eventID, tags ) )
+	{
+		for (unsigned int i=0; i< tags.size(); i++)
+		{
+			if( tags[i].streamContent == 1 && (tags[i].componentType == 2 || tags[i].componentType == 3) )
+			{
+				frameBuffer->paintIcon("16_9.raw" ,ox+sx-(ICON_LARGE_WIDTH+2)-(ICON_LARGE_WIDTH+2),sy + oy+5 );
+			}
+			else if( tags[i].streamContent == 2 && tags[i].componentType == 5 )
+			{
+				frameBuffer->paintIcon("dd.raw", ox+sx-(ICON_LARGE_WIDTH+2), sy + oy+5);
+			}
+		}
+	}
 
 	//show progressbar
 	if ( epg_done!= -1 )
