@@ -19,7 +19,7 @@ AM_CONDITIONAL(BOXTYPE_DREAMBOX, test "$BOXTYPE" != "dbox2")
 
 AC_ARG_WITH(webif,
 	[  --with-webif=NAME webif type [[standard,expert,...]]],
-	[WEBIF="$withval"],[WEBIF="standard"])
+	[WEBIF="$withval"],[WEBIF="expert"])
 	
 AC_SUBST(WEBIF)
 AM_CONDITIONAL(WEBIF_STANDARD, test "$WEBIF" != "expert")
