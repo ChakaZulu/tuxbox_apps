@@ -11,6 +11,10 @@ AC_ARG_WITH(target,
 	[  --with-target=TARGET    target for compilation [[native,cdk]]],
 	[TARGET="$withval"],[TARGET="native"])
 
+AC_SUBST(TARGET)
+AM_CONDITIONAL(TARGET_NATIVE,test "$TARGET" = "native")
+AM_CONDITIONAL(TARGET_CDK,test "$TARGET" = "cdk")
+
 AC_ARG_WITH(targetprefix,
 	[  --with-targetprefix=PATH  prefix relative to target root (only applicable in cdk mode)],
 	[targetprefix="$withval"],[targetprefix="NONE"])
@@ -105,10 +109,13 @@ if test "$TARGET" = "cdk"; then
 	targetsysconfdir="\${targetprefix}/etc"
 	targetlocalstatedir="\${targetprefix}/var"
 	targetlibdir="\${targetprefix}/lib"
+	TUXBOX_APPS_DIRECTORY_ONE(configdir,CONFIGDIR,localstatedir,/var,/tuxbox/config,
+		[--with-configdir=PATH   ],[where to find the config files])
+else
+	TUXBOX_APPS_DIRECTORY_ONE(configdir,CONFIGDIR,sysconfdir,/etc,,
+		[--with-configdir=PATH   ],[where to find the config files])
 fi
 
-TUXBOX_APPS_DIRECTORY_ONE(configdir,CONFIGDIR,localstatedir,/var,/tuxbox/config,
-	[--with-configdir=PATH   ],[where to find the config files])
 
 TUXBOX_APPS_DIRECTORY_ONE(datadir,DATADIR,datadir,/share,,
 	[--with-datadir=PATH     ],[where to find data])
@@ -153,19 +160,21 @@ AC_C_BIGENDIAN
 ])
 
 AC_DEFUN(TUXBOX_APPS_DRIVER,[
-AC_ARG_WITH(driver,
-	[  --with-driver=PATH      path for driver sources [[NONE]]],
-	[DRIVER="$withval"],[DRIVER=""])
+if test "$TARGET" = "cdk"; then
+	AC_ARG_WITH(driver,
+		[  --with-driver=PATH      path for driver sources [[NONE]]],
+		[DRIVER="$withval"],[DRIVER=""])
 
-if test -d "$DRIVER/include"; then
-	AC_DEFINE(HAVE_DBOX2_DRIVER,1,[Define to 1 if you have the dbox2 driver sources])
-else
-	AC_MSG_ERROR([can't find driver sources])
+	if test -d "$DRIVER/include"; then
+		AC_DEFINE(HAVE_DBOX2_DRIVER,1,[Define to 1 if you have the dbox2 driver sources])
+	else
+		AC_MSG_ERROR([can't find driver sources])
+	fi
+
+	AC_SUBST(DRIVER)
+
+	CPPFLAGS="$CPPFLAGS -I$DRIVER/include"
 fi
-
-AC_SUBST(DRIVER)
-
-CPPFLAGS="$CPPFLAGS -I$DRIVER/include"
 ])
 
 AC_DEFUN([TUXBOX_APPS_DVB],[
@@ -239,16 +248,19 @@ fi
 ])
 
 AC_DEFUN(_TUXBOX_APPS_LIB_PKGCONFIG,[
-AC_REQUIRE([TUXBOX_APPS_PKGCONFIG])
-AC_MSG_CHECKING(for package $2)
-if PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --exists "$2" ; then
-	AC_MSG_RESULT(yes)
-	$1_CFLAGS=$(PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --cflags "$2")
-	$1_LIBS=$(PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --libs "$2")
+if test "$TARGET" = "cdk"; then
+	AC_REQUIRE([TUXBOX_APPS_PKGCONFIG])
+	AC_MSG_CHECKING(for package $2)
+	if PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --exists "$2" ; then
+		AC_MSG_RESULT(yes)
+		$1_CFLAGS=$(PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --cflags "$2")
+		$1_LIBS=$(PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --libs "$2")
+	else
+		AC_MSG_RESULT(no)
+	fi
 else
-	AC_MSG_RESULT(no)
+	PKG_CHECK_MODULES($1,$2)
 fi
-
 AC_SUBST($1_CFLAGS)
 AC_SUBST($1_LIBS)
 ])
