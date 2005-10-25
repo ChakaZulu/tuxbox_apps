@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.11 2005/10/23 22:50:28 rasc Exp $
+$Id: ts2secpes.c,v 1.12 2005/10/25 18:41:41 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ts2secpes.c,v 1.11 2005/10/23 22:50:28 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.12  2005/10/25 18:41:41  rasc
+minor code rewrite
+
 Revision 1.11  2005/10/23 22:50:28  rasc
  - New:  started ISO 13818-2 StreamIDs
  - New:  decode multiple PS/PES packets within TS packets (-tssubdecode)
@@ -389,18 +392,12 @@ void ts2SecPes_Output_subdecode (u_int overleap_bytes)
 
 	if (b && len) {
 
-	    // $$$ TODO buffer may contain multiple PS/PES packets!! 
-
 	    // -- PES/PS or SECTION
-	    // if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
+
 	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01) {
 
 		out_nl (3,"TS contains PES/PS stream...");
 		ts2ps_pes_multipacket (b, len, tsd.pid);
-
-	    	//indent (+1);
-		//decodePS_PES_packet (b, len, tsd.pid);
-	    	//indent (-1);
 
 	    } else {
 		int pointer = b[0]+1;

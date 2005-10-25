@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.42 2005/10/20 22:25:05 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.43 2005/10/25 18:41:40 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.42 2005/10/20 22:25:05 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.43  2005/10/25 18:41:40  rasc
+minor code rewrite
+
 Revision 1.42  2005/10/20 22:25:05  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.
@@ -1826,7 +1829,7 @@ void descriptorDVB_LocalTimeOffset  (u_char *b)
     out_SB_NL (4,"Country_region_ID: ",d2.country_region_id);
     out_SB_NL (6,"reserved_1: ",d2.reserved_1);
 
-    out_nl    (4,"local_time_offset_polarity: %u  (= %s to UTC)",
+    out_nl    (4,"local_time_offset_polarity: %u  [= %s to UTC]",
 	d2.local_time_offset_polarity,
 	(d2.local_time_offset_polarity) ? "minus" : "plus");
 

@@ -1,5 +1,5 @@
 /*
-$Id: tdt.c,v 1.7 2004/10/17 22:20:36 rasc Exp $
+$Id: tdt.c,v 1.8 2005/10/25 18:41:40 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: tdt.c,v 1.7 2004/10/17 22:20:36 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- TDT section
@@ -17,6 +17,9 @@ $Id: tdt.c,v 1.7 2004/10/17 22:20:36 rasc Exp $
 
 
 $Log: tdt.c,v $
+Revision 1.8  2005/10/25 18:41:40  rasc
+minor code rewrite
+
 Revision 1.7  2004/10/17 22:20:36  rasc
 section decoding functions renamed due to preparation of private structures
 
@@ -60,48 +63,33 @@ dvbsnoop v0.7  -- Commit to CVS
 void section_TDT (u_char *b, int len)
 {
 
- typedef struct  _TDT {
-    u_int      table_id;
-    u_int      section_syntax_indicator;		
-    u_int      reserved_1;
-    u_int      reserved_2;
-    u_int      section_length;
-    u_long     UTC_time_MJD;
-    u_long     UTC_time_UTC;
-
-
- } TDT;
+   u_int      table_id;
+   u_long     UTC_time_MJD;
+   u_long     UTC_time_UTC;
 
 
 
- TDT        t;
+   out_nl (3,"TDT-decoding....");
+   table_id = outBit_S2x_NL (3,"Table_ID: ",  b,  0, 8,
+		  (char *(*)(u_long)) dvbstrTableID );     
+   if (table_id != 0x70) {
+	out_nl (3,"wrong Table ID");
+	return;
+   }
 
 
- 
- t.table_id 			 = b[0];
- t.section_syntax_indicator	 = getBits (b, 0, 8, 1);
- t.reserved_1 			 = getBits (b, 0, 9, 1);
- t.reserved_2 			 = getBits (b, 0, 10, 2);
- t.section_length		 = getBits (b, 0, 12, 12);
- t.UTC_time_MJD			 = getBits (b, 0, 24, 16);
- t.UTC_time_UTC			 = getBits (b, 0, 40, 24);
+
+  outBit_Sx_NL (3,"section_syntax_indicator: ",		b,  8,  1);
+  outBit_Sx_NL (6,"reserved_1: ",			b,  9,  1);
+  outBit_Sx_NL (6,"reserved_2: ",			b, 10,  2);
+  outBit_Sx_NL (3,"Section_length: ",			b, 12, 12);
 
 
- out_nl (3,"TDT-decoding....");
- out_S2B_NL (3,"Table_ID: ",t.table_id, dvbstrTableID (t.table_id));
- if (t.table_id != 0x70) {
-   out_nl (3,"wrong Table ID");
-   return;
- }
-
- out_SB_NL (3,"section_syntax_indicator: ",t.section_syntax_indicator);
- out_SB_NL (6,"reserved_1: ",t.reserved_1);
- out_SB_NL (6,"reserved_2: ",t.reserved_2);
- out_SW_NL (5,"Section_length: ",t.section_length);
-
- out (3,"UTC_time: ");
- print_time40 (3,t.UTC_time_MJD,t.UTC_time_UTC);
- out_NL (3);
+  out (3,"UTC_time: ");
+  UTC_time_MJD		 = getBits (b, 0, 24, 16);
+  UTC_time_UTC		 = getBits (b, 0, 40, 24);
+  print_time40 (3, UTC_time_MJD,UTC_time_UTC);
+  out_NL (3);
 
 }
 
