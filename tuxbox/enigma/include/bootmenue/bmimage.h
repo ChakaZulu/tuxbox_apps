@@ -1,5 +1,5 @@
 /*
- * $Id: bmimage.h,v 1.3 2005/10/22 21:27:47 digi_casi Exp $
+ * $Id: bmimage.h,v 1.4 2005/10/25 20:57:12 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -31,6 +31,9 @@
 #include <iostream>
 #include <fstream>
 #include <include/lib/base/estring.h>
+#ifdef INSTIMAGESUPPORT
+#include <src/enigma.h>
+#endif
 
 using namespace std;
 
@@ -130,15 +133,78 @@ public:
 		}
 	}
 	
-	void add(eString mpoint, eString imageName)
+#ifdef INSTIMAGESUPPORT
+	int add(eString sourceImage, eString imageName, eString mountDir)
 	{
-		eImage image;
-		eString imageLocation = mpoint + "/fwpro/" + imageName;
+		int freeSpace = 0;
+		eString imageDir = mountDir + "/fwpro/" + imageName;
+
+		eDebug("[BOOTMANAGER] unpackImage: installation device = %s, image file = %s, image dir = %s", mountDir.c_str(), sourceImage.c_str(), imageDir.c_str());
 		
-		// Todo: unpack and istall image here...
+		// check if enough space is available
+		struct statfs s;
+		if (statfs(mountDir.c_str(), &s) >= 0) 
+			freeSpace = (s.f_bavail * (s.f_bsize / 1024));
+		eDebug("[BOOTMANAGER] unpackImage: free space on device = %d", freeSpace);
+		if (freeSpace < 20000)
+			return -1;
 		
-		image.name = imageName;
-		image.location = imageLocation;
-		imageList.push_back(image);
+		if (access(mountDir.c_str(), W_OK) != 0)
+			return -2;
+
+		// check if directory is available, delete it and recreate it
+		if (access(imageDir.c_str(), W_OK) == 0)
+			system(eString("rm -rf " + imageDir).c_str());
+			system(eString("mkdir " + imageDir + " --mode=777 --parents").c_str());
+		if (access(imageDir.c_str(), W_OK) != 0)
+			return -3;
+	
+		// split image file
+		eString squashfsPart = mountDir + "/squashfs.img";
+		remove(eString(squashfsPart + "/squashfs.img").c_str());
+		if (system(eString("dd if=" + sourceImage + " of=" + squashfsPart + " bs=1024 skip=1152 count=4992").c_str()) >> 8)
+			return -4;
+		eString cramfsPart = mountDir + "/cramfs.img";
+		remove(eString(cramfsPart + "/cramfs.img").c_str());
+		if (system(eString("dd if=" + sourceImage + " of=" + cramfsPart + " bs=1024 skip=0 count=1152").c_str()) >> 8)
+			return -5;
+		remove(sourceImage.c_str());
+	
+		if (FILE *f = fopen("/tmp/instimg.sh", "w"))
+		{
+			// mount squashfs part of the image
+			fprintf(f, "#!/bin/sh\n");
+			fprintf(f, "while pidof enigma > /dev/null ; do sleep 1 ; done;\n");
+			fprintf(f, "rm -rf /tmp/image\n");
+			fprintf(f, "mkdir /tmp/image\n");
+			fprintf(f, "mount -t squashfs %s /tmp/image -o loop\n", squashfsPart.c_str());
+			// copy files
+			fprintf(f, "cp -rd /tmp/image/* %s\n", imageDir.c_str());
+			// unmount squashfs part of the image
+			fprintf(f, "umount /tmp/image\n");
+			fprintf(f, "rm %s\n", squashfsPart.c_str());
+			// mount cramfs part of the image
+			fprintf(f, "mount -t cramfs %s /tmp/image -o loop\n", cramfsPart.c_str());
+			// copy files
+			fprintf(f, "cp -rd /tmp/image/* %s\n", imageDir.c_str());
+			// unmount cramfs part of the image
+			fprintf(f, "umount /tmp/image\n");
+			fprintf(f, "rm %s\n", cramfsPart.c_str());
+			// delete temp mount dir
+			fprintf(f, "rm -rf /tmp/image\n");
+			// construct /var
+			fprintf(f, "rm -rf %s/var\n", imageDir.c_str());
+			fprintf(f, "mv %s/var_init %s/var\n", imageDir.c_str(), imageDir.c_str());
+			fprintf(f, "touch %s/var/.init\n", imageDir.c_str());
+			fprintf(f, "rm /var/etc/.dont_restart_enigma\n");
+			fclose(f);
+			
+			system("chmod +x /tmp/instimg.sh");
+			system("touch /var/etc/.dont_restart_enigma");
+			system("/tmp/instimg.sh&");
+			eZap::getInstance()->quit(2);
+		}
+		return -6;
 	}
+#endif
 };
