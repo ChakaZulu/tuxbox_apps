@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.16 2005/10/25 20:57:12 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.17 2005/10/26 19:27:03 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -45,154 +45,30 @@
 #include <bootmenue/bmconfig.h>
 #define INSTIMAGESUPPORT
 #include <bootmenue/bmimage.h>
+#include <bootmenue/bmboot.h>
 
 extern eString firmwareLevel(eString versionString);
 
 using namespace std;
 
-void mountJFFS2()
-{
-	system("umount /tmp/jffs2");
-	system("mkdir /tmp/jffs2");
-	system("mount -t jffs2 /dev/mtdblock/1 /tmp/jffs2");
-}
-
-void unmountJFFS2()
-{
-	system("umount /tmp/jffs2");
-	system("rm -rf /tmp/jffs2");
-}
-
 eString getSkins(eString skinPath, eString skinName)
 {	
+	bmboot bmgr;
 	eString skins;
-	mountJFFS2();
 	
-	if (skinPath.find("/var") == 0)
+	bmgr.getSkins(skinPath);
+	for (unsigned int i = 0; i < bmgr.skinList.size(); i++)
 	{
-		skinPath = "/tmp/jffs2" + skinPath.right(skinPath.length() - 4);
-		DIR *d = opendir(skinPath.c_str());
-		if (d)
-		{
-			while (struct dirent *e = readdir(d))
-			{
-				if (strcmp(e->d_name, ".") && strcmp(e->d_name, ".."))
-				{
-					eString location = skinPath + "/" + eString(e->d_name);
-					eString name = eString(e->d_name);
-					
-					if (location.right(5) == ".skin")
-					{
-						if (location.find("/tmp/jffs2") == 0)
-							location = "/var" + location.right(location.length() - 10);
-						skins = skins + "<option value=\"" + location + "\"" + eString((skinName == name) ? " selected" : "") + ">" + name + "</option>";
-					}
-				}
-			}
-			closedir(d);
-		}
+		eString name = bmgr.skinList[i];
+		eString location = skinPath + "/" + name;
+		
+		skins = skins + "<option value=\"" + location + "\"" + eString((skinName == name) ? " selected" : "") + ">" + name + "</option>";
 	}
-	unmountJFFS2();
-	
+
 	if (!skins)
 		skins = "<option value=\"" + skinPath + "\">none</option>";
 	
 	return skins;
-}
-
-void activateMenu(eString menu)
-{
-	bool bm = (menu == "BM");
-	bool fw = (menu == "FW");
-	bool found = false;
-	bool active = false;
-	bool initChanged = false;
-	eString line;
-	eString file;
-	
-	mountJFFS2();
-	
-	ifstream initFile ("/tmp/jffs2/etc/init");
-	if (initFile)
-	{
-		while (getline(initFile, line, '\n'))
-		{
-			if (line.find("fwpro") != eString::npos)
-			{
-				int pos = line.find_first_not_of(" ");
-				active = (line[pos] != '#' && line[pos] != ':');
-				if (fw)
-				{
-					if (!active)
-					{
-						line[pos] = ' ';
-						initChanged = true;
-					}
-					found = true;
-				}
-				else
-				{
-					if (active)
-					{
-						if (pos > 1)
-							line[pos - 2] = ':';
-						else
-							line = ": " + line;
-						initChanged = true;	
-					}
-				}
-			}
-			if (line.find("bm.sh") != eString::npos)
-			{
-				int pos = line.find_first_not_of(" ");
-				active = (line[pos] != '#' && line[pos] != ':');
-				if (bm)
-				{
-					if (!active)
-					{
-						line[pos] = ' ';
-						initChanged = true;
-					}
-					found = true;
-				}
-				else
-				{
-					if (active)
-					{
-						if (pos > 1)
-							line[pos - 2] = ':';
-						else
-							line = ": " + line;	
-						initChanged = true;
-					}
-				}
-			}
-			if (file)
-				file += "\n" + line;
-			else
-				file = line;
-		}
-	}
-	initFile.close();
-	
-	if (!found)
-	{
-		if (bm)
-		{
-			file += "\n/bin/bootmenue && /tmp/bm.sh";
-			initChanged = true;
-		}
-	}
-	
-	if (initChanged)
-	{
-		FILE *out = fopen("/tmp/jffs2/etc/init", "w");
-		fprintf(out, file.c_str());
-		fclose(out);
-		system("chmod +x /tmp/jffs2/etc/init");
-	}
-	
-	unmountJFFS2();
 }
 
 eString getMenus()
@@ -202,8 +78,9 @@ eString getMenus()
 	bool fwInstalled = false;
 	eString line;
 	eString result;
+	bmboot bmgr;
 	
-	mountJFFS2();
+	bmgr.mountJFFS2();
 		
 	ifstream initFile ("/tmp/jffs2/etc/init");
 	if (initFile)
@@ -227,7 +104,7 @@ eString getMenus()
 	
 	if (bm && fw)
 	{
-		activateMenu("BM");
+		bmgr.activateMenu("BM");
 		fw = false;
 	}
 	
@@ -242,7 +119,7 @@ eString getMenus()
 	else
 		result.strReplace("#BMSETTINGSBUTTON#", "&nbsp;");
 	
-	unmountJFFS2();
+	bmgr.unmountJFFS2();
 		
 	return result;
 }
@@ -250,16 +127,16 @@ eString getMenus()
 eString getInstalledImages()
 {
 	eString images;
-	bmconfig *cfg = new bmconfig();
-	bmimages *img = new bmimages();
+	bmconfig cfg;
+	bmimages imgs;
 	
-	cfg->load();
-	img->load(cfg->mpoint, true);
+	cfg.load();
+	imgs.load(cfg.mpoint, true);
 	
-	for (unsigned int i = 0; i < img->imageList.size(); i++)
+	for (unsigned int i = 0; i < imgs.imageList.size(); i++)
 	{
-		eString name = img->imageList[i].name;
-		eString location = img->imageList[i].location;
+		eString name = imgs.imageList[i].name;
+		eString location = imgs.imageList[i].location;
 		eString image = readFile(TEMPLATE_DIR + "image.tmp");
 		image.strReplace("#NAME#", name);
 		eString version = firmwareLevel(getAttribute(location + "/.version", "version"));
@@ -278,9 +155,6 @@ eString getInstalledImages()
 		}
 		images += image;
 	}
-	
-	delete cfg;
-	delete img;
 	
 	if (!images)
 		images = "<tr><td colspan=\"5\">No images found on selected boot device.</td></tr>";
@@ -350,21 +224,22 @@ eString editBootManagerSettings(eString request, eString dirpath, eString opts, 
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	bmconfig *config = new bmconfig();
+	bmconfig cfg;
+	bmboot bmgr;
 	
-	mountJFFS2();
-	config->load();
-	unmountJFFS2();
+	bmgr.mountJFFS2();
+	cfg.load();
+	bmgr.unmountJFFS2();
 	
 	eString result = readFile(TEMPLATE_DIR + "bootMgrSettings.tmp");
-	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, config->skinName));
-	result.strReplace("#MPOINT#", config->mpoint);
-	result.strReplace("#SELECTEDENTRY#", config->selectedEntry);
-	result.strReplace("#INETD#", config->inetd);
-	result.strReplace("#TIMEOUTVALUE#", config->timeoutValue);
-	result.strReplace("#VIDEOFORMAT#", config->videoFormat);
-	result.strReplace("#SKINPATH#", config->skinPath);
-	result.strReplace("#SKINNAME#", config->skinName);
+	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, cfg.skinName));
+	result.strReplace("#MPOINT#", cfg.mpoint);
+	result.strReplace("#SELECTEDENTRY#", cfg.selectedEntry);
+	result.strReplace("#INETD#", cfg.inetd);
+	result.strReplace("#TIMEOUTVALUE#", cfg.timeoutValue);
+	result.strReplace("#VIDEOFORMAT#", cfg.videoFormat);
+	result.strReplace("#SKINPATH#", cfg.skinPath);
+	result.strReplace("#SKINNAME#", cfg.skinName);
 	
 	result.strReplace("#BUTTONSUBMIT#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
 	
@@ -374,37 +249,38 @@ eString editBootManagerSettings(eString request, eString dirpath, eString opts, 
 eString setBootManagerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	bmconfig *config;
+	bmconfig cfg;
+	bmboot bmgr;
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
-	config = new bmconfig();
-	config->mpoint = opt["mpoint"];
-	config->selectedEntry = opt["selectedEntry"];
-	config->inetd = opt["inetd"];
-	config->timeoutValue = opt["timeoutValue"];
-	config->videoFormat = opt["videoFormat"];
-	config->skinPath = opt["skinPath"];
-	config->skinName = opt["skinName"];
-	unsigned int pos = config->skinName.find_last_of("/");
+	cfg.mpoint = opt["mpoint"];
+	cfg.selectedEntry = opt["selectedEntry"];
+	cfg.inetd = opt["inetd"];
+	cfg.timeoutValue = opt["timeoutValue"];
+	cfg.videoFormat = opt["videoFormat"];
+	cfg.skinPath = opt["skinPath"];
+	cfg.skinName = opt["skinName"];
+	unsigned int pos = cfg.skinName.find_last_of("/");
 	if (pos != eString::npos && pos > 0)
-		config->skinName = config->skinName.right(config->skinName.length() - pos - 1);
+		cfg.skinName = cfg.skinName.right(cfg.skinName.length() - pos - 1);
 	
-	mountJFFS2();
-	config->save();
-	unmountJFFS2();
+	bmgr.mountJFFS2();
+	cfg.save();
+	bmgr.unmountJFFS2();
 	
 	return closeWindow(content, "", 10);
 }
 
 eString selectBootMenu(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	bmboot bmgr;
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString menu = opt["menu"];
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
-	activateMenu(menu);
+	bmgr.activateMenu(menu);
 	
 	return closeWindow(content, "", 10);
 }
@@ -430,5 +306,4 @@ void ezapBootManagerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockW
 	dyn_resolver->addDyn("GET", "/cgi-bin/editbootmanagersettings", editBootManagerSettings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setbootmanagersettings", setBootManagerSettings, lockWeb);
 }
-
 #endif

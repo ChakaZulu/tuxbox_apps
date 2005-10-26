@@ -1,5 +1,5 @@
 /*
- * $Id: bmconfig.h,v 1.3 2005/10/21 18:21:50 digi_casi Exp $
+ * $Id: bmconfig.h,v 1.4 2005/10/26 19:26:59 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -19,7 +19,7 @@
  *
  */
  
-#define CONFIGFILE "/tuxbox/config/enigma/bootmenue.conf"
+#define BMCONFIGFILE "/tuxbox/config/enigma/bootmenue.conf"
 #define SKINDIR "/var/tuxbox/config/enigma/boot"
 
 #include <iomanip>
@@ -50,9 +50,9 @@ class bmconfig: public Object
 		
 		eString file;
 		if (access("/tmp/jffs2", R_OK) == 0)
-			file = "/tmp/jffs2"CONFIGFILE;
+			file = "/tmp/jffs2"BMCONFIGFILE;
 		else
-			file = "/var"CONFIGFILE;
+			file = "/var"BMCONFIGFILE;
 		ifstream configFile(file.c_str());
 		eString line;
 		if (configFile)
@@ -90,9 +90,9 @@ class bmconfig: public Object
 	{
 		eString file;
 		if (access("/tmp/jffs2", R_OK) == 0)
-			file = "/tmp/jffs2"CONFIGFILE;
+			file = "/tmp/jffs2"BMCONFIGFILE;
 		else
-			file = "/var"CONFIGFILE;
+			file = "/var"BMCONFIGFILE;
 		if (FILE *f = fopen(file.c_str(), "w"))
 		{
 			fprintf(f, "#BootManager-Config\n");
