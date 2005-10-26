@@ -1,7 +1,8 @@
 INCLUDES = -I$(srcdir)/../lib \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/../enigma/include \
-	-I$(top_srcdir)/../enigma
+	-I$(top_srcdir)/../enigma \
+	-I$(top_srcdir)/../enigma/src
 
 noinst_LTLIBRARIES = dreamflash.la
 

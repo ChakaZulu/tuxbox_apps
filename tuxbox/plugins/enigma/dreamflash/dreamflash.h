@@ -1,3 +1,24 @@
+/*
+ * $Id: dreamflash.h,v 1.2 2005/10/26 19:35:12 digi_casi Exp $
+ *
+ * (C) 2005 by mechatron, digi_casi
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+ 
 #include <plugin.h>
 #include <stdio.h>
 #include <sys/mount.h> //for mount
@@ -28,7 +49,6 @@ class setup_df: public eWindow
 	eTextInputField *ed_skin_path;
 	void okselected();
 	void load_sliste();
-	void new_init();
 public:
 	setup_df();
 };
@@ -50,7 +70,6 @@ class image_df: public eWindow
 	
 	int was1, free_space;
 	void oksel();
-	bool image_install(const char *i_dir, const char *f_name);
 	void Listeselchanged(eListBoxEntryText *item);
 public:
 	image_df(int was);
