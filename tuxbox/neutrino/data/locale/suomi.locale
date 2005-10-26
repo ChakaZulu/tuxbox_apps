@@ -129,9 +129,11 @@ apids.hint_2 heksalukuina välilyönneillä erotettuna
 apidselector.head Valitse kieli
 audiomenu.PCMOffset PCM äänen vaimennus
 audiomenu.analogout Analoginen lähtö
+audiomenu.audio_left_right_selectable Stereo/mono-valinta
+audiomenu.audiochannel_up_down_enable Valitse ääniraita nuolilla
 audiomenu.avs avs
 audiomenu.avs_control Äänenvoimakkuuden säätö
-audiomenu.dolbydigital Dolby Digital
+audiomenu.dolbydigital Suosi AC3/DD-ääniraitaa
 audiomenu.head Ääniasetukset
 audiomenu.lirc lirc
 audiomenu.monoleft mono vasen
@@ -682,8 +684,12 @@ rclock.title Kaukosäätimen lukitus
 rclock.unlockmsg Lukitus avattu.
 recordingmenu.choose_direct_rec_dir Hakemiston valinta välittömässä tall.
 recordingmenu.defdir Tallennushakemisto
+recordingmenu.dir_permissions Hakemisto-oikeudet
+recordingmenu.dir_permissions_hint Hakemiston oikeudet unix-tyyliin. Yleensä 755.
 recordingmenu.epg_for_filename Pitkät tiedostonimet (sis. EPG-tiedot)
 recordingmenu.file Tiedosto
+recordingmenu.filename_template Tiedostojen nimeäminen
+recordingmenu.filename_template_hint %c=kanava, %i=ohjelman nimi,%d=päiväys, %t=aika
 recordingmenu.filesettings Tiedostotallennuksen asetukset
 recordingmenu.head Tallennusasetukset
 recordingmenu.help Tallennustavat:\n- Palvelin:\n-- Tallennus käyttäen PC:ssä olevaa erillistä ohjelmistoa\n- Videonauhuri:\n-- Tallennus VCR-scart:iin kytketylle videonauhurille\n\n- Tiedosto:\n-- Tallennus suoraan tiedostoon\n -- verkkolevylle tai sisäiselle kiintolevylle\nTallennus spts-tilassa:\n- Päällä = TS\n- Pois = PES\n\nTiedostojärjestelmien suurimmat tiedostokoot:\n- NFS V2: 2 GB (2048 MB)\n- NFS V3: lähes rajoittamaton (0 MB)\n- FAT: 2 GB (2048 MB)\n- FAT32: 4 GB (4096 MB)
