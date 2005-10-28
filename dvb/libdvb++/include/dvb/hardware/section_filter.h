@@ -1,5 +1,5 @@
 /*
- * $Id: section_filter.h,v 1.4 2003/11/20 03:18:47 obi Exp $
+ * $Id: section_filter.h,v 1.5 2005/10/28 19:39:33 mws Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -353,8 +353,8 @@ bool SectionFilter<T>::section(const uint8_t * const data, const uint16_t size)
 			else if (sectionsCounter.size() > (unsigned)(data[7] + 1)) {
 				DVB_FATAL("sectionsCounter.size() > (data[7] + 1)");
 			}
-			startTime = time(NULL);
 		}
+		startTime = time(NULL);
 	}
 
 	return done;
