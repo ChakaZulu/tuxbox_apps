@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.549 2005/10/22 21:24:08 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.550 2005/10/28 13:30:26 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -125,7 +125,7 @@ eString firmwareLevel(eString verid)
 {
 	eString result = "unknown";
 
-	if (verid)
+	if (verid && verid != "&nbsp;")
 	{
 		int type = atoi(verid.left(1).c_str());
 		char *typea[3];
