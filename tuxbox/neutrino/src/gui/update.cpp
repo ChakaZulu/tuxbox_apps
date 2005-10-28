@@ -74,7 +74,7 @@
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
 
-// Only Squashfs v2.1 is supported in U-Boot Bootloader
+// Only Squashfs v2.1 - v2.2r2 is supported in U-Boot Bootloader
 #ifdef SQUASHFS
 #define LIST_OF_UPDATES_LOCAL_FILENAME "squashfs.list"
 #define UPDATE_LOCAL_FILENAME          "update.squashfs"
@@ -314,7 +314,7 @@ bool CFlashUpdate::checkVersion4Update()
 		CCheckSquashfs* checkSquashfs;
 		checkSquashfs = new CCheckSquashfs();
 
-		versionInfo = new CFlashVersionInfo(checkSquashfs->GetVersionInfo(UPDATE_LOCAL_FILENAME));
+		versionInfo = new CFlashVersionInfo(checkSquashfs->GetVersionInfo(filename.c_str()));
 #else
 		//bestimmung der CramfsDaten
 		char cramfsName[30];

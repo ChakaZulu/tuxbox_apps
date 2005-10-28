@@ -26,6 +26,7 @@
 
 #include <global.h>
 #include <neutrino.h>
+#include <libmd5sum.h>
 
 #include <string>
 #include <stdio.h>
@@ -33,7 +34,6 @@
 #include <sys/mount.h>
 
 #define LOCAL_MOUNT_DIR   "/tmp/checkSquashfs"
-#define TMPPATH           "/var/tmp/"
 
 
 CCheckSquashfs::CCheckSquashfs()
@@ -46,6 +46,8 @@ const char * CCheckSquashfs::GetVersionInfo(const char * squashfsimage)
 	char versionPath[sizeof(versionFile) + sizeof(LOCAL_MOUNT_DIR)+5] = "";
 
 	sprintf((char*) versionPath, "%s/.version", LOCAL_MOUNT_DIR);
+
+	printf("[chkSquashfs] check filename: %s\n", squashfsimage);
 
 	if (mountSquashfsImage(squashfsimage))
 	{
@@ -64,6 +66,26 @@ const char * CCheckSquashfs::GetVersionInfo(const char * squashfsimage)
 	}
 }
 
+bool CCheckSquashfs::MD5Check(const char * squashfsimage, unsigned char checkmd5[16])
+{
+	unsigned char md5[16];
+
+	md5_file(squashfsimage, 1, (unsigned char*) &md5);
+
+	printf("[chkSquashfs] check md5 : %s => ", checkmd5);
+	printMD5(md5);
+
+	if (memcmp(md5, checkmd5, 16))
+	{
+		printf("[chkSquashfs] md5 check failed!\n");
+		return false;
+	}
+
+	printf("[chkSquashfs] md5 is ok\n");
+
+	return true;
+}
+
 bool CCheckSquashfs::mountSquashfsImage(const char * squashfsimage)
 {
 	std::string cmd;
@@ -75,7 +97,6 @@ bool CCheckSquashfs::mountSquashfsImage(const char * squashfsimage)
 
 	} else	{
 		cmd  = "mount -o loop -o ro -t squashfs ";
-		cmd += TMPPATH;
 		cmd += squashfsimage;
 		cmd += " ";
 		cmd += LOCAL_MOUNT_DIR;
@@ -83,7 +104,9 @@ bool CCheckSquashfs::mountSquashfsImage(const char * squashfsimage)
 
 		if (system(cmd.c_str()) != 0)
 		{
-			printf("[chkSquashfs] can't mount squashfs image %s\n", squashfsimage);
+			// TODO: ShowHintUTF "can't mount squashfs image"
+			printf("[chkSquashfs] can't mount squashfs image: %s\n", squashfsimage);
+			rmdir(LOCAL_MOUNT_DIR);
 			return false;
 
 		} else {
@@ -102,4 +125,16 @@ void CCheckSquashfs::unmountSquashfsImage(const char * squashfsimage)
 		if (rmdir(LOCAL_MOUNT_DIR) != 0)
 			printf("[chkSquashfs] can't remove mount directory: %s\n", LOCAL_MOUNT_DIR);
 	}
+}
+
+void CCheckSquashfs::printMD5(unsigned char md5[16])
+{
+	int count;
+
+	for(count=0;count<16;count++)
+	{
+		printf("%02x", md5[count] );
+	}
+
+	printf("\n");
 }
