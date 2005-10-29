@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.24 2005/10/26 21:02:52 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.25 2005/10/29 15:00:15 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on dreamflash by mechatron
@@ -35,27 +35,31 @@ bool doexit = false;
 stmenu::stmenu()
 {
 	instance = this;
-	config = new bmconfig();
-	img = new bmimages();
-	CONNECT(RcInput::getInstance()->selected, stmenu::rc_event);
-	display = new fbClass();
-	lcd = new CLCDDisplay();
-	CONNECT(CTimer::getInstance()->selected, stmenu::timeout);
-	config->load();
-	CTimer::getInstance()->start(atoi(config->timeoutValue.c_str()));
-	if (loadImageList() > 1)
-	{
-		loadSkin();
-		showpic();
-		drawversion();
-		drawmenu();
-		mainloop();
-	}
 	
-	delete display;
-	delete lcd;
-	delete config;
-	delete img;
+	if (access("/root/platform/kernel", R_OK) != 0)
+	{
+		config = new bmconfig();
+		img = new bmimages();
+		CONNECT(RcInput::getInstance()->selected, stmenu::rc_event);
+		display = new fbClass();
+		lcd = new CLCDDisplay();
+		CONNECT(CTimer::getInstance()->selected, stmenu::timeout);
+		config->load();
+		CTimer::getInstance()->start(atoi(config->timeoutValue.c_str()));
+		if (loadImageList() > 1)
+		{
+			loadSkin();
+			showpic();
+			drawversion();
+			drawmenu();
+			mainloop();
+		}
+	
+		delete display;
+		delete lcd;
+		delete config;
+		delete img;
+	}
 	printf("we are done.\n");
 }
 
