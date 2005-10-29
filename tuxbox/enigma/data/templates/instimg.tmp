@@ -15,16 +15,19 @@ done
 echo "enigma has shut down... continuing with image installation..." >> /tmp/instimg.log
 rm -rf /tmp/image
 mkdir /tmp/image
-mount -t squashfs $3 /tmp/image -o loop
-cp -rd /tmp/image/* $1
-umount /tmp/image
-rm $3
-echo "squashfs installed." >> /tmp/instimg.log
+# install cramfs
 mount -t cramfs $2 /tmp/image -o loop
 cp -rd /tmp/image/* $1
 umount /tmp/image
 rm $2
 echo "cramfs installed." >> /tmp/instimg.log
+# install squashfs
+mount -t squashfs $3 /tmp/image -o loop
+cp -rd /tmp/image/* $1
+umount /tmp/image
+rm $3
+echo "squashfs installed." >> /tmp/instimg.log
+# prepare var
 rm -rf /tmp/image
 rm -rf $1/var
 mv $1/var_init $1/var

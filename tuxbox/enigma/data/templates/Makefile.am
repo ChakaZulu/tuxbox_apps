@@ -10,7 +10,7 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	pdaRemoteControlDbox2.tmp configSwapFileMenu.tmp movieSources.tmp bootMenus.tmp bootMgr.tmp \
 	XMLStreaminfo.tmp streaminfo_satellite.xsl streaminfo_cable.xsl streaminfo_terrestrial.xsl serviceepg.xsl \
 	HTMLImageInfo.tmp image.tmp bootMgrSettings.tmp chttpdSettings.tmp instimg.tmp \
-	XMLCurrentServiceData.tmp \
+	XMLCurrentServiceData.tmp editImageSettingsWindow.tmp addImageWindow.tmp \
 	dvrcontrols.tmp webxtvMSIE.tmp webxtvFirefox.tmp \
 	XMLBoxInfo.tmp  HTMLBoxInfo.tmp \
 	XMLData.tmp HTMLData.tmp \

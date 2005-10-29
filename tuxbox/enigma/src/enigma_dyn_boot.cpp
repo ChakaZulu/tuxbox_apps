@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.17 2005/10/26 19:27:03 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.18 2005/10/29 21:01:05 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -129,8 +129,12 @@ eString getInstalledImages()
 	eString images;
 	bmconfig cfg;
 	bmimages imgs;
+	bmboot bmgr;
 	
+	bmgr.mountJFFS2();
 	cfg.load();
+	bmgr.unmountJFFS2();
+	
 	imgs.load(cfg.mpoint, true);
 	
 	for (unsigned int i = 0; i < imgs.imageList.size(); i++)
@@ -175,45 +179,100 @@ eString getConfigBoot(void)
 eString installImage(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	bmimages imgs;
+	bmconfig cfg;
+	bmboot bmgr;
+	
+	bmgr.mountJFFS2();
+	cfg.load();
+	bmgr.unmountJFFS2();
+	
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString sourceImage = opt["image"];
 	eString mountDir = opt["target"];
+	if (!mountDir)
+		mountDir = cfg.mpoint;
 	eString imageName = opt["name"];
+	if (!imageName)
+	{
+		unsigned int pos = sourceImage.find_last_of("/");
+		imageName = sourceImage.right(sourceImage.length() - pos - 1);
+		imageName = imageName.left(imageName.length() - 4);
+	}
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	imgs.add(sourceImage, imageName, mountDir);
 	
-	return closeWindow(content, "", 10);
+	eString result = "<html><head><title>Image installation in process</title></head><body>Enigma will shut down during the installation process and restart once installation is complete.<br><br>Please wait...</body></html>";
+	
+	return result;
 }
 
 eString deleteImage(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	bmimages imgs;
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString image = opt["image"];
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
-	system(eString("rm -rf " + image).c_str());
+	imgs.discard(image);
 	
 	return closeWindow(content, "", 10);
 }
 
 eString editImageSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	bmimages imgs;
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString image = opt["image"];
 	
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString result = readFile(TEMPLATE_DIR + "editImageSettingsWindow.tmp");
 	
-	return "function not available yet.";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	bool reload_modules = (access(eString(image + "/lib/modules/2.6.9/.reload_modules").c_str(), R_OK) == 0);
+	bool fast_boot = (access(eString(image + "/var/etc/.dont_mount_hdd").c_str(), R_OK) == 0);
+	bool dont_start_dccamd = (access(eString(image + "/var/etc/.dont_start_dccamd").c_str(), R_OK) == 0);
+	
+	result.strReplace("#IMAGE#", image);
+	result.strReplace("#NAME#", imgs.getImageName(image));
+	result.strReplace("#RELOADMODULES#", (reload_modules) ? "checked" : "");
+	result.strReplace("#FASTBOOT#", (fast_boot) ? "checked" : "");
+	result.strReplace("#DONTSTARTDCCAMD#", (dont_start_dccamd) ? "checked" : "");
+	
+	return result;
 }
 
 
 eString setImageSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	bmimages imgs;
+	
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+	eString image = opt["image"];
+	eString name = opt["name"];
+	eString reload_modules = opt["reload_modules"];
+	eString fast_boot = opt["fast_boot"];
+	eString dont_start_dccamd = opt["dont_start_dccamd"];
+	
+	imgs.setImageName(image, name);
+	if (reload_modules == "on")
+		system(eString("touch " + image + "/lib/2.6.9/.reload_modules").c_str());
+	else
+		system(eString("rm " + image + "/lib/2.6.9/.reload_modules").c_str());
+	
+	if (fast_boot == "on")
+		system(eString("touch " + image + "/var/etc/.dont_mount_hdd").c_str());
+	else
+		system(eString("rm " + image + "/var/etc/.dont_mount_hdd").c_str());
+	
+	if (dont_start_dccamd == "on")
+		system(eString("touch " + image + "/var/etc/.dont_start_dccamd").c_str());
+	else
+		system(eString("rm " + image + "/var/etc/.dont_start_dccamd").c_str());
 	
 	return closeWindow(content, "", 10);
 }
@@ -269,7 +328,7 @@ eString setBootManagerSettings(eString request, eString dirpath, eString opts, e
 	cfg.save();
 	bmgr.unmountJFFS2();
 	
-	return closeWindow(content, "", 10);
+	return WINDOWCLOSE;
 }
 
 eString selectBootMenu(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -287,12 +346,39 @@ eString selectBootMenu(eString request, eString dirpath, eString opts, eHTTPConn
 
 eString showAddImageWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	bmconfig cfg;
+	bmboot bmgr;
+	
+	bmgr.mountJFFS2();
+	cfg.load();
+	bmgr.unmountJFFS2();
+	
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
-//	return closeWindow(content, "", 10);
-	return "function not available yet.";
+	eString result = readFile(TEMPLATE_DIR + "addImageWindow.tmp");
+	
+	eString images;
+	if (DIR *p = opendir(cfg.mpoint.c_str()))
+	{
+		while (struct dirent *e = readdir(p))
+		{
+			eString name = cfg.mpoint + "/" + e->d_name;
+			eString tmp = name; 
+			tmp.upper();
+			if (tmp.find(".IMG") != eString::npos)
+				images += "<option value=\"" + name + "\">" + e->d_name + "</option>\n";
+		}
+		closedir(p);
+	}
+	if (!images)
+		images = "<option value=\"none\">none</option>";
+	
+	result.strReplace("#MPOINT#", cfg.mpoint);
+	result.strReplace("#IMAGES#", images);
+	
+	return result;
 }
 
 void ezapBootManagerInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)

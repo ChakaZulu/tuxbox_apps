@@ -1,5 +1,5 @@
 /*
- * $Id: bmimage.h,v 1.6 2005/10/29 10:52:12 digi_casi Exp $
+ * $Id: bmimage.h,v 1.7 2005/10/29 21:01:04 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -58,6 +58,31 @@ public:
 		imageList.clear();
 	};
 	
+	void setImageName(eString imageDir, eString imageName)
+	{
+		if (FILE *f = fopen(eString(imageDir + "/imagename").c_str(), "w"))
+		{
+			fprintf(f, "%s", imageName.c_str());
+			fclose(f);
+		}
+	}
+	
+	eString getImageName(eString imageDir)
+	{
+		unsigned int pos = imageDir.find_last_of("/");
+		eString imageName = imageDir.right(imageDir.length() - pos -1);
+		ifstream nameFile(eString(imageDir + "/imagename").c_str());
+		if (nameFile)
+		{
+			eString line;
+			getline(nameFile, line, '\n');
+			nameFile.close();
+			if (line)
+				imageName = line;
+		}
+		return imageName;
+	}
+	
 	int load(eString mpoint, bool clearList)
 	{
 		struct stat s;
@@ -86,16 +111,7 @@ public:
 						if (S_ISDIR(s.st_mode))
 						{
 							image.location = name;
-							image.name = e->d_name;
-							ifstream nameFile(eString(name + "/imagename").c_str());
-							if (nameFile)
-							{
-								eString line;
-								getline(nameFile, line, '\n');
-								nameFile.close();
-								if (line)
-									image.name = line;
-							}
+							image.name = getImageName(name);
 							imageList.push_back(image);
 						}
 					}
@@ -126,11 +142,7 @@ public:
 			{
 				system(eString("mv \"" + from + "\" \"" + to + "\"").c_str());
 				eString name = to.right(to.length() - to.find_last_of("/") - 1);
-				if (FILE *f = fopen(eString(to + "/imagename").c_str(), "w"))
-				{
-					fprintf(f, "%s", name.c_str());
-					fclose(f);
-				}
+				setImageName(to, name);
 			}
 		}
 	}

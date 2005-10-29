@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.h,v 1.12 2005/10/21 18:20:55 digi_casi Exp $
+ * $Id: bootmenue.h,v 1.13 2005/10/29 21:01:00 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -35,7 +35,7 @@
 #include <bootmenue/bmconfig.h>
 #include <bootmenue/bmimage.h>
 
-#define BMVERSION "0.3"
+#define BMVERSION "0.4"
 
 class stmenu: public Object
 {
