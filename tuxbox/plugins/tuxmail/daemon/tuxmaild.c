@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.32  2005/10/29 12:53:01  robspr1
+ * - bugfix for too long mail-headers
+ *
  * Revision 1.31  2005/08/13 18:47:37  robspr1
  * - correct RSET command, change USR1 / USR2 meaning
  *
@@ -1494,10 +1497,10 @@ int SendPOPCommand(int command, char *param)
 	struct hostent *server;
 	struct sockaddr_in SockAddr;
 	FILE *fd_log;
-	char send_buffer[128], recv_buffer[4096], month[4];
+	char send_buffer[128], recv_buffer[8192], month[4];
 	char *ptr, *ptr1, *ptr2;
 	int loop, day, hour, minute;
-	char linelen;
+	int linelen;
 
 	// build commandstring
 
@@ -1662,6 +1665,11 @@ int SendPOPCommand(int command, char *param)
 			{
 				if(command == TOP)
 				{
+					if((recv_buffer[stringindex] == '\n') || (recv_buffer[stringindex] == '\r'))
+					{
+						linelen = 0;
+					}
+					linelen ++;
 					if(recv_buffer[stringindex] == '\n' && recv_buffer[stringindex - 3] == '\n')
 					{
 						recv_buffer[stringindex+1] = '\0';
@@ -1678,7 +1686,10 @@ int SendPOPCommand(int command, char *param)
 
 				if(stringindex < sizeof(recv_buffer) - 4)
 				{
-					stringindex++;
+					if((linelen < 100) || (command != TOP))		// restrict linelen
+					{
+						stringindex++;
+					} 
 				}
 				else
 				{
@@ -1725,7 +1736,6 @@ int SendPOPCommand(int command, char *param)
 
 					stringindex = 0;
 					headersize = strlen(recv_buffer);
-					
 					memset(header, 0, sizeof(header));
 
 					if((ptr = strstr(recv_buffer, "\nDate:")))
@@ -3372,7 +3382,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.31 $";
+	char cvs_revision[] = "$Revision: 1.32 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
