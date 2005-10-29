@@ -1,5 +1,5 @@
 /*
- * $Id: bmimage.h,v 1.5 2005/10/29 09:37:08 digi_casi Exp $
+ * $Id: bmimage.h,v 1.6 2005/10/29 10:52:12 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -18,7 +18,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
- 
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -33,6 +33,8 @@
 #include <include/lib/base/estring.h>
 #ifdef INSTIMAGESUPPORT
 #include <src/enigma.h>
+#define TUXBOXDATADIR "/share/tuxbox"
+#include <src/enigma_dyn_utils.h>
 #endif
 
 using namespace std;
