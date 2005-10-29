@@ -1,5 +1,5 @@
 /*
- * $Id: bmimage.h,v 1.4 2005/10/25 20:57:12 digi_casi Exp $
+ * $Id: bmimage.h,v 1.5 2005/10/29 09:37:08 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -170,40 +170,12 @@ public:
 			return -5;
 		remove(sourceImage.c_str());
 	
-		if (FILE *f = fopen("/tmp/instimg.sh", "w"))
-		{
-			// mount squashfs part of the image
-			fprintf(f, "#!/bin/sh\n");
-			fprintf(f, "while pidof enigma > /dev/null ; do sleep 1 ; done;\n");
-			fprintf(f, "rm -rf /tmp/image\n");
-			fprintf(f, "mkdir /tmp/image\n");
-			fprintf(f, "mount -t squashfs %s /tmp/image -o loop\n", squashfsPart.c_str());
-			// copy files
-			fprintf(f, "cp -rd /tmp/image/* %s\n", imageDir.c_str());
-			// unmount squashfs part of the image
-			fprintf(f, "umount /tmp/image\n");
-			fprintf(f, "rm %s\n", squashfsPart.c_str());
-			// mount cramfs part of the image
-			fprintf(f, "mount -t cramfs %s /tmp/image -o loop\n", cramfsPart.c_str());
-			// copy files
-			fprintf(f, "cp -rd /tmp/image/* %s\n", imageDir.c_str());
-			// unmount cramfs part of the image
-			fprintf(f, "umount /tmp/image\n");
-			fprintf(f, "rm %s\n", cramfsPart.c_str());
-			// delete temp mount dir
-			fprintf(f, "rm -rf /tmp/image\n");
-			// construct /var
-			fprintf(f, "rm -rf %s/var\n", imageDir.c_str());
-			fprintf(f, "mv %s/var_init %s/var\n", imageDir.c_str(), imageDir.c_str());
-			fprintf(f, "touch %s/var/.init\n", imageDir.c_str());
-			fprintf(f, "rm /var/etc/.dont_restart_enigma\n");
-			fclose(f);
-			
-			system("chmod +x /tmp/instimg.sh");
-			system("touch /var/etc/.dont_restart_enigma");
-			system("/tmp/instimg.sh&");
-			eZap::getInstance()->quit(2);
-		}
+		system(eString("cp " + eString(TEMPLATE_DIR) + "instimg.tmp /tmp/instimg.sh").c_str());
+		system("chmod +x /tmp/instimg.sh");
+		system("touch /var/etc/.dont_restart_enigma");
+		system(eString("/tmp/instimg.sh " + imageDir + " " + cramfsPart + " " + squashfsPart + " &").c_str());
+		eZap::getInstance()->quit(2);
+		
 		return -6;
 	}
 #endif
