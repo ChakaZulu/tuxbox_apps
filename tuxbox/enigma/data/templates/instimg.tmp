@@ -23,7 +23,7 @@ echo "squashfs installed." >> /tmp/instimg.log
 mount -t cramfs $2 /tmp/image -o loop
 cp -rd /tmp/image/* $1
 umount /tmp/image
-rm $1
+rm $2
 echo "cramfs installed." >> /tmp/instimg.log
 rm -rf /tmp/image
 rm -rf $1/var
