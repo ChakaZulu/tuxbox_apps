@@ -1,5 +1,5 @@
 /*
- * $Id: bmimage.h,v 1.7 2005/10/29 21:01:04 digi_casi Exp $
+ * $Id: bmimage.h,v 1.8 2005/10/29 21:31:49 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -124,27 +124,13 @@ public:
 	
 	void discard(eString location)
 	{
-		for (it = imageList.begin(); it != imageList.end(); it++)
-		{
-			if (it->location == location)
-			{
-				system(eString("rm -rf \"" + location + "\"").c_str());
-				break;
-			}
-		}
+		system(eString("rm -rf \"" + location + "\"").c_str());
 	}
 	
 	void rename(eString from, eString to)
 	{
-		for (it = imageList.begin(); it != imageList.end(); it++)
-		{
-			if (it->name == from)
-			{
-				system(eString("mv \"" + from + "\" \"" + to + "\"").c_str());
-				eString name = to.right(to.length() - to.find_last_of("/") - 1);
-				setImageName(to, name);
-			}
-		}
+		eString name = to.right(to.length() - to.find_last_of("/") - 1);
+		setImageName(to, name);
 	}
 	
 #ifdef INSTIMAGESUPPORT
