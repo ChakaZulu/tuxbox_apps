@@ -6,9 +6,9 @@ while pidof enigma > /dev/null ; do
 		echo "enigma is not terminating itself... so, killing it" >> /tmp/instimg.log
 		killall -9 enigma
 	else
-		sleep 1
 		echo "waiting for enigma to terminate..." >> /tmp/instimg.log
 	fi
+	sleep 1
 	let i=i+1	
 done
 echo "enigma has shut down... continuing with image installation..." >> /tmp/instimg.log
