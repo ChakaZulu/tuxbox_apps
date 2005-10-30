@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_conf.cpp,v 1.19 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn_conf.cpp,v 1.20 2005/10/30 15:45:16 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -153,6 +153,12 @@ eString setConfigSwapFile(eString request, eString dirpath, eString opts, eHTTPC
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString swap = opt["swap"];
 	eString swapFile = opt["swapfile"];
+	
+	if (swap == "on")
+	{
+		if (access(swapFile.c_str(), W_OK) != 0)
+			system(eString("dd if=/dev/zero of=" + swapFile + " bs=1024 count=32768").c_str());
+	}
 
 	setSwapFile((swap == "on") ? 1 : 0, swapFile);
 

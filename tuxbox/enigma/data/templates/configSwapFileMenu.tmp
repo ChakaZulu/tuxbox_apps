@@ -20,4 +20,5 @@ function configSwapFile()
 	#SWAPFILEBUTTON#
 </form>
 <br><br>
-Please note that this version does not automatically create the swap file. You have to create it manually before you can assign it.
+Please note that a 32 MB swap file will automatically be created if the file does not exist. 
+This takes a while, so please be patient. 
