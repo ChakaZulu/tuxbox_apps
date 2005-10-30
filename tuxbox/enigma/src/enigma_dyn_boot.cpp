@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.18 2005/10/29 21:01:05 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.19 2005/10/30 07:56:05 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -181,6 +181,7 @@ eString installImage(eString request, eString dirpath, eString opts, eHTTPConnec
 	bmimages imgs;
 	bmconfig cfg;
 	bmboot bmgr;
+	eString result;
 	
 	bmgr.mountJFFS2();
 	cfg.load();
@@ -188,21 +189,28 @@ eString installImage(eString request, eString dirpath, eString opts, eHTTPConnec
 	
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString sourceImage = opt["image"];
-	eString mountDir = opt["target"];
-	if (!mountDir)
-		mountDir = cfg.mpoint;
-	eString imageName = opt["name"];
-	if (!imageName)
+	if (sourceImage != "none")
 	{
-		unsigned int pos = sourceImage.find_last_of("/");
-		imageName = sourceImage.right(sourceImage.length() - pos - 1);
-		imageName = imageName.left(imageName.length() - 4);
+		eString mountDir = opt["target"];
+		if (!mountDir)
+			mountDir = cfg.mpoint;
+		eString imageName = opt["name"];
+		if (!imageName)
+		{
+			unsigned int pos = sourceImage.find_last_of("/");
+			imageName = sourceImage.right(sourceImage.length() - pos - 1);
+			imageName = imageName.left(imageName.length() - 4);
+		}
+		content->local_header["Content-Type"]="text/html; charset=utf-8";
+	
+		int rc = imgs.add(sourceImage, imageName, mountDir);
+		if (rc == 0)
+			result = "<html><head><title>Image installation in process</title></head><body>Enigma will shut down during the installation process and restart once installation is complete.<br><br>Please wait...</body></html>";
+		else
+			result = "<html><head><title>Error during image installation</title></head><body>The image could not be installed due to error: " + eString().sprintf("%d", rc) + "</body></html>";
 	}
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	
-	imgs.add(sourceImage, imageName, mountDir);
-	
-	eString result = "<html><head><title>Image installation in process</title></head><body>Enigma will shut down during the installation process and restart once installation is complete.<br><br>Please wait...</body></html>";
+	else
+		result =  closeWindow(content, "", 10);
 	
 	return result;
 }
@@ -260,9 +268,9 @@ eString setImageSettings(eString request, eString dirpath, eString opts, eHTTPCo
 	
 	imgs.setImageName(image, name);
 	if (reload_modules == "on")
-		system(eString("touch " + image + "/lib/2.6.9/.reload_modules").c_str());
+		system(eString("touch " + image + "/lib/modules/2.6.9/.reload_modules").c_str());
 	else
-		system(eString("rm " + image + "/lib/2.6.9/.reload_modules").c_str());
+		system(eString("rm " + image + "/lib/modules/2.6.9/.reload_modules").c_str());
 	
 	if (fast_boot == "on")
 		system(eString("touch " + image + "/var/etc/.dont_mount_hdd").c_str());
@@ -274,7 +282,7 @@ eString setImageSettings(eString request, eString dirpath, eString opts, eHTTPCo
 	else
 		system(eString("rm " + image + "/var/etc/.dont_start_dccamd").c_str());
 	
-	return closeWindow(content, "", 10);
+	return WINDOWCLOSE;
 }
 
 eString editBootManagerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
