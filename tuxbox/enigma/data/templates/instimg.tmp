@@ -20,6 +20,7 @@ mount -t cramfs $2 /tmp/image -o loop
 cp -rd /tmp/image/* $1
 umount /tmp/image
 rm $2
+rm $1/root/platform/kernel/os
 echo "cramfs installed." >> /tmp/instimg.log
 # install squashfs
 mount -t squashfs $3 /tmp/image -o loop
