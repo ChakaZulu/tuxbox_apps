@@ -12,8 +12,11 @@ void eSocket::close()
 		int wasconnected=(mystate==Connection) || (mystate==Closing);
 		delete rsn;
 		rsn=0;
-		::close(socketdesc);
-		socketdesc=-1;
+		if (socketdesc >= 0)
+		{
+			::close(socketdesc);
+			socketdesc=-1;
+		}
 		mystate=Idle;
 		if (wasconnected)
 			connectionClosed_();
@@ -83,6 +86,7 @@ int eSocket::state()
 int eSocket::setSocket(int s, int iss, eMainloop *ml)
 {
 	socketdesc=s;
+	if (socketdesc < 0) return -1;
 	issocket=iss;
 	fcntl(socketdesc, F_SETFL, O_NONBLOCK);
 	last_break = -1;
@@ -230,7 +234,7 @@ int eSocket::connectToHost(eString hostname, int port)
 	struct hostent *server;
 	int res;
 
-	if(!socketdesc){
+	if(socketdesc < 0){
 		error_(errno);
 		return(-1);
 	}
@@ -267,6 +271,12 @@ int eSocket::connectToHost(eString hostname, int port)
 	return(0);
 }
 
+eSocket::eSocket(): readbuffer(32768), writebuffer(32768), rsn(0)
+{
+	socketdesc=-1;
+	mystate=Invalid;
+}
+
 eSocket::eSocket(eMainloop *ml): readbuffer(32768), writebuffer(32768), rsn(0)
 {
 	int s=socket(AF_INET, SOCK_STREAM, 0);
@@ -291,4 +301,51 @@ eSocket::~eSocket()
 	{
 		::close(socketdesc);
 	}
+}
+
+eUnixDomainSocket::eUnixDomainSocket(eMainloop *ml)
+{
+	int s=socket(AF_LOCAL, SOCK_STREAM, 0);
+	mystate=Idle;
+	setSocket(s, 1, ml);
+}
+
+eUnixDomainSocket::eUnixDomainSocket(int socket, int issocket, eMainloop *ml)
+ : eSocket(socket, issocket, ml)
+{
+}
+
+eUnixDomainSocket::~eUnixDomainSocket()
+{
+}
+
+int eUnixDomainSocket::connectToPath(eString path)
+{
+	int res;
+	
+	if(socketdesc < 0){
+		error_(errno);
+		return(-1);
+	}
+	bzero((char*)&serv_addr_un, sizeof(serv_addr_un));
+	serv_addr_un.sun_family = AF_UNIX;
+	strcpy(serv_addr_un.sun_path, path.c_str());
+	res=::connect(socketdesc, (const sockaddr*)&serv_addr_un, sizeof(serv_addr_un));
+	if ((res < 0) && (errno != EINPROGRESS))
+	{
+		eDebug("can't connect to: %s", path.c_str());
+		close();
+		error_(errno);
+		return(-3);
+	}
+	if (res < 0)	// EINPROGRESS
+	{
+		rsn->setRequested(rsn->getRequested()|eSocketNotifier::Write);
+		mystate=Connecting;
+	} else
+	{
+		mystate=Connection;
+		connected_();
+	}
+	return(0);
 }
