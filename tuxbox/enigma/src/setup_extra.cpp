@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.45 2005/10/15 17:01:24 digi_casi Exp $
+ * $Id: setup_extra.cpp,v 1.46 2005/10/31 12:16:19 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -112,7 +112,8 @@ void eExpertSetup::init_eExpertSetup()
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable teletext caching"), "/ezap/extra/teletext_caching", _("don't cache teletext pages in background")))->selected, eExpertSetup::tuxtxtCachingChanged );
 #endif
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Enable Zapping History"), "/elitedvb/extra/extzapping", _("don't care about actual mode when zapping in history list"));	
-	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable Standby"), "/extras/fastshutdown", _("Box goes direct into Deep-Standby"));
+	if ( eSystemInfo::getInstance()->getHwType() < eSystemInfo::DM5600 )
+		new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable Standby"), "/extras/fastshutdown", _("Box goes direct into Deep-Standby"));
 #ifdef HAVE_DREAMBOX_HARDWARE
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||

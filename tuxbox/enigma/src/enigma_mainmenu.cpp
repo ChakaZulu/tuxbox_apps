@@ -37,10 +37,8 @@ eAutoInitP0<enigmaMainmenuActions> i_mainmenuActions(eAutoInitNumbers::actions, 
 void eMainMenu::setActive(int i)
 {
 	int count = MENU_ENTRIES;
-#ifdef DISABLE_FILE
 	if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
 		--count;
-#endif
 	for (int a=0; a<7; a++)
 	{
 		int c=(i+a+count-3)%count;
@@ -165,10 +163,8 @@ eMainMenu::eMainMenu()
 		};
 
 		int count = MENU_ENTRIES;
-#ifdef DISABLE_FILE
 		if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
 			--count;
-#endif
 		for (int i=0; i<count; i++)
 		{
 			pixmaps[i][0]=eSkin::getActive()->queryImage(eString("mainmenu.") + eString(pixmap_name[i]) );
@@ -190,7 +186,8 @@ eMainMenu::eMainMenu()
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Radio mode"), eString().sprintf("(%d) %s", ++entry, _("Radio mode")) ))->selected, eMainMenu::sel_radio);
 #ifndef DISABLE_FILE
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("File mode"), eString().sprintf("(%d) %s", ++entry, _("File mode")) ))->selected, eMainMenu::sel_file);
-		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("VCR"), eString().sprintf("(%d) %s", ++entry, _("VCR")) ))->selected, eMainMenu::sel_vcr);
+		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500 )
+			CONNECT((new eListBoxEntryMenu(wnd.getList(), _("VCR"), eString().sprintf("(%d) %s", ++entry, _("VCR")) ))->selected, eMainMenu::sel_vcr);
 		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Timer"), eString().sprintf("(%d) %s", ++entry, _("Timer")) ))->selected, eMainMenu::sel_timer);
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Setup"), eString().sprintf("(%d) %s", ++entry, _("Setup")) ))->selected, eMainMenu::sel_setup);
@@ -347,10 +344,8 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 		case eWidgetEvent::evtAction:
 		{
 			int count = MENU_ENTRIES;
-#ifdef DISABLE_FILE
 			if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
 				--count;
-#endif
 			if (event.action == &i_mainmenuActions->close)
 				close(0);
 			else if (event.action == &i_mainmenuActions->prev)
