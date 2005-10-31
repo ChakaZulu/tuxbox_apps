@@ -126,16 +126,18 @@ int eIOBuffer::fromfile(int fd, int len)
 		if (tc > allocationsize-buffer.back().len)
 			tc=allocationsize-buffer.back().len;
 		r=::read(fd, buffer.back().data+buffer.back().len, tc);
-		buffer.back().len+=r;
-		if (r < 0 && errno != EWOULDBLOCK )
-			eDebug("couldn't read: %m");
-		else
+		if (r < 0)
 		{
-			len-=r;
-			re+=r;
-			if (r != tc)
-				break;
+			if (errno == EINTR) continue;
+			if (errno != EWOULDBLOCK)
+				eDebug("couldn't read: %m");
+			r=0;
 		}
+		buffer.back().len+=r;
+		len-=r;
+		re+=r;
+		if (r != tc)
+			break;
 	}
 	return re;
 }
@@ -155,8 +157,9 @@ int eIOBuffer::tofile(int fd, int len)
 		w=::write(fd, buffer.front().data+ptr, tc);
 		if (w < 0)
 		{
+			if (errno == EINTR) continue;
 			if (errno != EWOULDBLOCK)
-				eDebug("write: %m");
+				eDebug("couldn't write: %m");
 			w=0;
 		}
 		ptr+=w;
