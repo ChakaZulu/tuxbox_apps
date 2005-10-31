@@ -108,6 +108,7 @@ private:
 	__u8* EITdata;
 	__u8 ByteSize;
 	static descriptorMap descriptors;
+	static __u8 data[4108];
 public:
 	__u8 type;
 	static int CacheSize;

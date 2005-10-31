@@ -22,6 +22,7 @@ pthread_mutex_t eEPGCache::cache_lock=
 	PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 
 descriptorMap eventData::descriptors;
+__u8 eventData::data[4108];
 
 extern unsigned int crc32_table[256];
 
@@ -72,17 +73,10 @@ eventData::eventData(const eit_event_struct* e, int size, int type)
 
 const eit_event_struct* eventData::get() const
 {
-	static __u8 *data=NULL;
-	if ( data )
-		delete [] data;
-
-	int bytes = 12;
+	int pos = 12;
 	int tmp = ByteSize-12;
 
-	descriptorMap::iterator descr[tmp/4];
-	descriptorMap::iterator *pdescr = descr;
-
-	// cnt needed bytes
+	memcpy(data, EITdata, 12);
 	__u32 *p = (__u32*)(EITdata+12);
 	while(tmp>0)
 	{
@@ -90,26 +84,11 @@ const eit_event_struct* eventData::get() const
 			descriptors.find(*p++);
 		if ( it != descriptors.end() )
 		{
-			*pdescr++=it;
-			bytes += it->second.second[1];
-			bytes += 2; // descr_type, descr_len
+			int b = it->second.second[1]+2;
+			memcpy(data+pos, it->second.second, b );
+			pos += b;
 		}
 		tmp-=4;
-	}
-
-// copy eit_event header to buffer
-	data = new __u8[bytes];
-	memcpy(data, EITdata, 12);
-
-	tmp=12;
-// copy all descriptors to buffer
-	descriptorMap::iterator *d = descr;
-	while(d < pdescr)
-	{
-		const descriptorMap::iterator &i = *d++;
-		int bytes = i->second.second[1]+2;
-		memcpy(data+tmp, i->second.second, bytes );
-		tmp+=bytes;
 	}
 
 	return (const eit_event_struct*)data;
@@ -495,6 +474,9 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 		while (ptr<len)
 		{
 			eit_event_size = HILO(eit_event->descriptors_loop_length)+EIT_LOOP_SIZE;
+
+			if ( eit_event_size < EIT_LOOP_SIZE+	2 ) // skip events without descriptors
+				goto next;
 	
 			duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
 			TM = parseDVBtime(
