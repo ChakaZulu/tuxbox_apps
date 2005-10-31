@@ -64,7 +64,7 @@ eSatEditDialog::eSatEditDialog( tpPacket *tp )
 	name->setMaxChars(50);
 	name->loadDeco();
 	name->setText( tp->name );
-	name->setUseableChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,/-°");
+	name->setUseableChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,/()-°");
 	eLabel *l = new eLabel(this);
 	l->move( ePoint(10, 55) );
 	l->resize( eSize(250, 35) );
@@ -250,6 +250,7 @@ int eTransponderEditWindow::eventHandler( const eWidgetEvent & event )
 				mb.show();
 				int ret = mb.exec();
 				mb.hide();
+				eTransponderList::getInstance()->invalidateNetworks();
 				if ( ret == eMessageBox::btNo || ret == -1 )
 					return 0;
 				if ( eTransponderList::getInstance()->saveNetworks() )
@@ -261,8 +262,6 @@ int eTransponderEditWindow::eventHandler( const eWidgetEvent & event )
 					mb.exec();
 					mb.hide();
 				}
-				else
-					eTransponderList::getInstance()->invalidateNetworks();
 			}
 			return 0;
 		case eWidgetEvent::evtAction:
