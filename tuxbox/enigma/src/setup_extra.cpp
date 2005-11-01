@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.47 2005/11/01 05:45:32 digi_casi Exp $
+ * $Id: setup_extra.cpp,v 1.48 2005/11/01 14:37:48 sat_man Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -115,10 +115,12 @@ void eExpertSetup::init_eExpertSetup()
 	if ( eSystemInfo::getInstance()->getHwType() < eSystemInfo::DM5600 )
 		new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable Standby"), "/extras/fastshutdown", _("Box goes directly into Deep-Standby"));
 #ifdef HAVE_DREAMBOX_HARDWARE
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
 	    eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+	{
+		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create 'Corefiles' after an Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
+	}
 #if ENABLE_EXPERT_WEBIF
 	int dontMountHDD = 0;
 	if (access("/var/etc/.dont_mount_hdd", R_OK) == 0)
