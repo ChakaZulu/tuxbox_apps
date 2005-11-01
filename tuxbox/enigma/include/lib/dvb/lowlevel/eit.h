@@ -32,6 +32,8 @@
 // Service Description Section
 #include <sys/types.h>
 
+#define EIT_MAX_SIZE 4096
+
 typedef struct {
 	u_char	table_id			: 8;
 

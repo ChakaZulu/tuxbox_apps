@@ -40,6 +40,14 @@ int fromBCD(int bcd)
 	return ((bcd&0xF0)>>4)*10+(bcd&0xF);
 }
 
+int toBCD(int dec)
+{
+	if (dec >= 100)
+		return -1;
+	return int(dec/10)*0x10 + dec%10;
+}
+
+
 time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5)
 {
 	tm t;

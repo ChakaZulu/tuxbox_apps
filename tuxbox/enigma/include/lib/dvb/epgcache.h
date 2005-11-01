@@ -9,6 +9,9 @@
 #include <errno.h>
 
 #include "si.h"
+#ifdef ENABLE_MHW_EPG
+#include "lowlevel/mhw.h"
+#endif
 #include "dvb.h"
 #include "edvb.h"
 #include <lib/base/ebase.h>
@@ -159,6 +162,32 @@ class eScheduleOther: public eSection
 	}
 };
 
+#ifdef ENABLE_MHW_EPG
+class eScheduleMhw: public eSection
+{
+	friend class eEPGCache;
+	std::vector<mhw_channel_name_t> channels;
+	std::map<__u8, mhw_theme_name_t> themes;
+	std::map<__u32, mhw_title_t> titles;
+	std::set<__u32> program_ids;
+	std::map<__u32, eString> summaries;
+	time_t tnew_summary_read;
+	
+	void cleanup();
+	__u8 *delimitName( __u8 *in, __u8 *out, int len_in );
+	void eScheduleMhw::timeMHW2DVB( u_char hours, u_char minutes, u_char *return_time);
+	void eScheduleMhw::timeMHW2DVB( int minutes, u_char *return_time);
+	void eScheduleMhw::timeMHW2DVB( u_char day, u_char hours, u_char minutes, u_char *return_time);
+	int sectionRead(__u8 *data);
+	void sectionFinish(int);
+	int start()
+	{
+		return setFilter( 0xD3, 0x91, -1, -1, SECREAD_NOTIMEOUT, 0xFF );
+	}
+	eScheduleMhw()	{}
+};
+#endif
+
 class eNowNext: public eSection
 {
 	friend class eEPGCache;
@@ -208,7 +237,12 @@ class ePrivateContent: public eSection
 class eEPGCache: public eMainloop, private eThread, public Object
 {
 public:
+#ifdef ENABLE_MHW_EPG
+	enum {NOWNEXT, SCHEDULE, SCHEDULE_OTHER, SCHEDULE_MHW};
+	friend class eScheduleMhw;
+#else
 	enum {NOWNEXT, SCHEDULE, SCHEDULE_OTHER};
+#endif
 	friend class eSchedule;
 	friend class eScheduleOther;
 	friend class eNowNext;
@@ -276,6 +310,9 @@ private:
 	tidMap seenSections[3], calcedSections[3];
 	eSchedule scheduleReader;
 	eScheduleOther scheduleOtherReader;
+#ifdef ENABLE_MHW_EPG
+	eScheduleMhw scheduleMhwReader;
+#endif
 	eNowNext nownextReader;
 #ifdef ENABLE_PRIVATE_EPG
 	contentMaps content_time_tables;

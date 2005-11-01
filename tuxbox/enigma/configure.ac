@@ -33,6 +33,10 @@ AC_SUBST(EPG)
 AM_CONDITIONAL(EPG_STANDARD,test "$EPG" != "private")
 AM_CONDITIONAL(EPG_PRIVATE,test "$EPG" = "private")
 
+AC_ARG_WITH(mhw-epg,
+	[  --with-mhw-epg          enable capture of mhw epg (default off)],
+	[MHW_EPG="$withval"],[MHW_EPG="no"])
+
 AC_ARG_WITH(flashtool,
 	[  --with-flashtool=NAME type flashtool [[standard,expert]]],
 	[FLASHTOOL="$withval"],[FLASHTOOL="standard"])
@@ -98,6 +102,10 @@ fi
 
 if test "$EPG" = "private" ; then
 	CPPFLAGS="$CPPFLAGS -DENABLE_PRIVATE_EPG"
+fi
+
+if test "$MHW_EPG" = "yes" ; then
+	CPPFLAGS="$CPPFLAGS -DENABLE_MHW_EPG"
 fi
 
 if test "$FLASHTOOL" = "expert" ; then
