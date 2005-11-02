@@ -19,6 +19,12 @@ class eExpertSetup: public eSetupWindow
 #ifndef TUXTXT_CFG_STANDALONE
 	void tuxtxtCachingChanged(bool);
 #endif
+
+// timeoutInfobar begin
+	eListBoxEntryMulti *timeout_infobar;
+	void selInfobarChanged(eListBoxEntryMenu* e);
+// timeoutInfobar end
+
 	void colorbuttonsChanged(bool);
 	void reinitializeHTTPServer(bool);
 	void fastZappingChanged(bool b);

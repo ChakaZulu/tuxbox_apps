@@ -1548,6 +1548,20 @@ void eZapMain::init_main()
 	wasSleeping = wasDeepstandby ? 2 : 0;
 	eDebug("[eZapMain]wasSleeping is %d, wasDeepStandby is %d", wasSleeping, wasDeepstandby);
 
+// get Infobar timeout
+	if ((eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar)) != 0)
+	{
+		timeoutInfobar = 6;
+		eConfig::getInstance()->setKey("/enigma/timeoutInfobar", timeoutInfobar);
+	}
+
+	if ((timeoutInfobar < 2) || (timeoutInfobar > 12))
+	{
+		if (timeoutInfobar < 2) timeoutInfobar = 2;
+		if (timeoutInfobar > 12) timeoutInfobar = 12;
+		eConfig::getInstance()->setKey("/enigma/timeoutInfobar", timeoutInfobar);
+	}
+
 // Mute Symbol
 	gPixmap *pm = eSkin::getActive()->queryImage("mute_symbol");
 	int x = eSkin::getActive()->queryValue("mute.pos.x", 0),
@@ -2908,8 +2922,11 @@ void eZapMain::showInfobar(bool startTimeout)
 		( !currentFocus || currentFocus == this ) )
 		show();
 
-	if (startTimeout && doHideInfobar())
-		timeout.start(6000, 1);
+        if (startTimeout && doHideInfobar())
+	{
+                eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
+		timeout.start((timeoutInfobar * 1000), 1);
+	}
 
 /* SNR,AGC DISPLAY begin */
 /* SNR,AGC Display function call */
@@ -5504,7 +5521,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 					1);
 				}
-				showServiceSelector(-1);
+				else showServiceSelector(-1);
 			}
 		}
 		else if (event.action == &i_enigmaMainActions->modeTV)
@@ -5523,7 +5540,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 					1);
 				}
-				showServiceSelector(-1);
+				else showServiceSelector(-1);
 			}
 		}
 		else if (event.action == &i_enigmaMainActions->modeFile)
@@ -6162,13 +6179,17 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 	eAVSwitch::getInstance()->sendVolumeChanged();
 
 	if (doHideInfobar())
-		timeout.start((sapi->getState() == eServiceHandler::statePlaying)?5000:2000, 1);
+	{
+                eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
+		timeout.start((sapi->getState() == eServiceHandler::statePlaying)
+			      ?(timeoutInfobar * 1000) - 1000:2000, 1);
+	}
 }
 
 void eZapMain::gotEIT()
 {
-//	eDebug("eZapMain::gotEIT");
 	eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
+
 	if (!sapi)
 	{
 		eDebug("no sapi");
@@ -6176,11 +6197,9 @@ void eZapMain::gotEIT()
 	}
 
 	EIT *eit=sapi->getEIT();
-//	eDebug("eit = %p", eit);
 	int old_event_id=cur_event_id;
-//	eDebug("old_event_id = %d...call setEIT", cur_event_id);
 	setEIT(eit);
-//	eDebug("cur_event_id = %d", cur_event_id);
+
 	if (eit)
 	{
 		int state=0;
@@ -6192,11 +6211,16 @@ void eZapMain::gotEIT()
 			{
 				if (old_event_id != -1)
 					showInfobar(true);
+
 				if ( doHideInfobar() && isVisible() )
-					timeout.start((sapi->getState() == eServiceHandler::statePlaying)?6000:2000, 1);
+				{
+					eConfig::getInstance()->getKey("/enigma/timeoutInfobar", 
+									timeoutInfobar);
+					timeout.start((sapi->getState() == eServiceHandler::statePlaying)
+						      ?(timeoutInfobar * 1000) - 1000:2000, 1);
+				}
 			}
 		}
-//		eDebug("unlock eit");
 		eit->unlock();
 	}
 	else

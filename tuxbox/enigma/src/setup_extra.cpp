@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.48 2005/11/01 14:37:48 sat_man Exp $
+ * $Id: setup_extra.cpp,v 1.49 2005/11/02 22:03:41 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -92,6 +92,28 @@ void eExpertSetup::init_eExpertSetup()
 		CONNECT( list.selchanged, eExpertSetup::selChanged );
 	}
 #endif
+
+// timeoutInfobar begin
+        list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
+        timeout_infobar = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("infobar timeout (left, right)"));
+        timeout_infobar->add("  Infobar timeout 2 sec >", 2);
+        timeout_infobar->add("< Infobar timeout 3 sec >", 3);
+        timeout_infobar->add("< Infobar timeout 4 sec >", 4);
+        timeout_infobar->add("< Infobar timeout 5 sec >", 5);
+        timeout_infobar->add("< Infobar timeout 6 sec >", 6);
+        timeout_infobar->add("< Infobar timeout 7 sec >", 7);
+        timeout_infobar->add("< Infobar timeout 8 sec >", 8);
+        timeout_infobar->add("< Infobar timeout 9 sec >", 9);
+        timeout_infobar->add("< Infobar timeout 10 sec >", 10);
+        timeout_infobar->add("< Infobar timeout 11 sec >", 11);
+        timeout_infobar->add("< Infobar timeout 12 sec  ", 12);
+        int timeoutInfobar = 6;
+        if (eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar))
+                timeoutInfobar = 6;
+        timeout_infobar->setCurrent(timeoutInfobar);
+        CONNECT( list.selchanged, eExpertSetup::selInfobarChanged );
+// timeoutInfobar end
+
 	CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Serviceselector help buttons"),"/ezap/serviceselector/showButtons",_("show colored help buttons in service selector")))->selected, eExpertSetup::colorbuttonsChanged );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Show Sat position"), "/extras/showSatPos", _("show sat position in the infobar"));
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
@@ -115,13 +137,12 @@ void eExpertSetup::init_eExpertSetup()
 	if ( eSystemInfo::getInstance()->getHwType() < eSystemInfo::DM5600 )
 		new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable Standby"), "/extras/fastshutdown", _("Box goes directly into Deep-Standby"));
 #ifdef HAVE_DREAMBOX_HARDWARE
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 ||
-	    eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
 		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create 'Corefiles' after an Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
 	}
-#if ENABLE_EXPERT_WEBIF
+#ifdef ENABLE_EXPERT_WEBIF
 	int dontMountHDD = 0;
 	if (access("/var/etc/.dont_mount_hdd", R_OK) == 0)
 		dontMountHDD = 1;
@@ -184,6 +205,12 @@ void eExpertSetup::selChanged(eListBoxEntryMenu* e)
 		eConfig::getInstance()->setKey("/extras/record_splitsize", (int)e->getKey());
 }
 #endif
+
+void eExpertSetup::selInfobarChanged(eListBoxEntryMenu* e)
+{
+        if ( e == (eListBoxEntryMenu*)timeout_infobar )
+                eConfig::getInstance()->setKey("/enigma/timeoutInfobar", (int)e->getKey());
+}
 
 void eExpertSetup::colorbuttonsChanged(bool b)
 {

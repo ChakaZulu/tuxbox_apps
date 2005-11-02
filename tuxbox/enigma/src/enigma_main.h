@@ -348,6 +348,7 @@ private:
 
 	int dvrfunctions;
 	int stateOSD;
+	int timeoutInfobar;
 
 	// eRecordingStatus *recstatus;
 
