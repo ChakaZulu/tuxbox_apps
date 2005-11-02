@@ -491,8 +491,8 @@ unsigned char avstable_dvb[3][7] =
 };
 
 /* language dependent texts */
-#define MAXMENULANGUAGE 7 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch, 6 polnisch, 7 schwedisch */
-const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL    , NAT_SW};
+#define MAXMENULANGUAGE 8 /* 0 deutsch, 1 englisch, 2 franzצsisch, 3 niederlהndisch, 4 griechisch, 5 italienisch, 6 polnisch, 7 schwedisch, 8 suomi */
+const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL    , NAT_SW, NAT_SW };
 
 
 #define Menu_StartX (StartX + fontwidth*9/2)
@@ -524,11 +524,11 @@ enum
 
 const char hotlistpagecolumn[] =	/* last(!) column of page to show in each language */
 {
-	22, 26, 28, 27, 28, 27, 28, 21
+	22, 26, 28, 27, 28, 27, 28, 21, 20
 };
 const char hotlisttextcolumn[] =
 {
-	24, 14, 14, 15, 14, 15, 14, 23
+	24, 14, 14, 15, 14, 15, 14, 23, 22
 };
 const char hotlisttext[][2*5] =
 {
@@ -539,7 +539,8 @@ const char hotlisttext[][2*5] =
 	{ "pq|shava_q" },
 	{ "agg. elim." },
 	{ "dodajkasuj" },
-	{ "ny   bort " }
+	{ "ny   bort " },
+	{ "lis{{pois " },
 };
 
 const char configonoff[][2*3] =
@@ -551,7 +552,8 @@ const char configonoff[][2*3] =
 	{ "emeape" },
 	{ "offon " },
 	{ "wy}w} " },
-	{ "p} av " }
+	{ "p} av " },
+	{ "EI ON " },
 };
 const char menuatr[Menu_Height*Menu_Width] =
 {
@@ -781,30 +783,58 @@ const char configmenu[][Menu_Height*Menu_Width] =
 /*     0000000000111111111122222222223 */
 /*     0123456789012345678901234567890 */
 	{
-        "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
-        "ד     Konfigurationsmeny     הי"
-        "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
-        "ד1 Favoriter: sida 111 ny    הי"
-        "דםמסע                        הי"
-        "ד+-?                         הי"
-        "ד                            הי"
-        "ד2      TextTV v{ljaren      הי"
-        "דם            s|k           מהי"
-        "ד                            הי"
-        "ד        TV- format          הי"
-        "ד3 Standard l{ge 16:9        הי"
-        "ד4 Text/Bild l{ge  16:9      הי"
-        "ד                            הי"
-        "ד5        Ljusstyrka         הי"
-        "דם                          מהי"
-        "ד6     Genomskinlighet       הי"
-        "דם                          מהי"
-        "ד7nationell teckenupps{ttningהי"
-        "ד automatisk igenk{nning     הי"
-        "דם    DE    (#$@[\\]^_`{|}~) מהי"
-        "דם Sprache/language svenska מהי"
-        "וז   www.tuxtxt.com  x.xx   זחי"
-        "כלללללללללללללללללללללללללללללך"
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד     Konfigurationsmeny     הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד1 Favoriter: sida 111 ny    הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2      TextTV v{ljaren      הי"
+		"דם            s|k           מהי"
+		"ד                            הי"
+		"ד        TV- format          הי"
+		"ד3 Standard l{ge 16:9        הי"
+		"ד4 Text/Bild l{ge  16:9      הי"
+		"ד                            הי"
+		"ד5        Ljusstyrka         הי"
+		"דם                          מהי"
+		"ד6     Genomskinlighet       הי"
+		"דם                          מהי"
+		"ד7nationell teckenupps{ttningהי"
+		"ד automatisk igenk{nning     הי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם Sprache/language svenska מהי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
+		"כלללללללללללללללללללללללללללללך"
+	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+		"אבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט"
+		"ד        Asetusvalikko       הי"
+		"וזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי"
+		"ד1 Suosikit: sivu 111 lis{{  הי"
+		"דםמסע                        הי"
+		"ד+-?                         הי"
+		"ד                            הי"
+		"ד2   Tekstikanavan valinta   הי"
+		"דם          search          מהי"
+		"ד                            הי"
+		"ד         N{ytt|tila         הי"
+		"ד3 Vakiotila     16:9        הי"
+		"ד4 Teksti/TV     16:9        הי"
+		"ד                            הי"
+		"ד5         Kirkkaus          הי"
+		"דם                          מהי"
+		"ד6       L{pin{kyvyys        הי"
+		"דם                          מהי"
+		"ד7   kansallinen merkist|    הי"
+		"ד automaattinen tunnistus    הי"
+		"דם    DE    (#$@[\\]^_`{|}~) מהי"
+		"דם Kieli            suomi   מהי"
+		"וז   www.tuxtxt.com  x.xx   זחי"
+		"כלללללללללללללללללללללללללללללך"
 	},
 };
 
@@ -825,7 +855,9 @@ const char catchmenutext[][80] =
 	{ "        םןנמ wybiez   סע wyswietl       "
 	  "0000000011110000000000110000000000000000" },
 	{ "        םןנמ v{lj     סע visa           "
-      "0000000011110000000000110000000000000000" }
+     "0000000011110000000000110000000000000000" },
+	{ "        םןנמ valitse  סע n{yt{          "
+	  "0000000011110000000000110000000000000000" },
 };
 
 const char message_3[][38] =
@@ -837,7 +869,8 @@ const char message_3[][38] =
 	{ "ד     amaf^tgsg voq]ym Teket]nt     הי" },
 	{ "ד     attesa opzioni televideo      הי" },
 	{ "ד  poszukiwanie sygna}u telegazety  הי" },
-	{ "ד    s|ker efter TextTV tj{nster    הי" }
+	{ "ד    s|ker efter TextTV tj{nster    הי" },
+	{ "ד   etsit{{n Teksti-TV -palvelua    הי" },
 };
 const char message_3_blank[] = "ד                                   הי";
 const char message_7[][38] =
@@ -849,7 +882,8 @@ const char message_7[][38] =
 	{ "ד jal]la Teket]nt ston amaletadot^  הי" },
 	{ "ד nessun televideo sul trasponder   הי" },
 	{ "ד   brak sygna}u na transponderze   הי" },
-	{ "ד ingen TextTV p} denna transponder הי" }
+	{ "ד ingen TextTV p} denna transponder הי" },
+	{ "ד    Ei Teksti-TV:t{ l{hettimell{   הי" },
 };
 const char message_8[][38] =
 {
@@ -862,11 +896,12 @@ const char message_8[][38] =
 	{ "ד     amal]my k^xg sek_dar 100      הי" },
 	{ "ד   attesa ricezione pagina 100     הי" },
 	{ "ד     oczekiwanie na stron` 100     הי" },
-	{ "ד  v{ntar p} mottagning av sida 100 הי" }
+	{ "ד  v{ntar p} mottagning av sida 100 הי" },
+	{ "ד        Odotetaan sivua 100        הי" },
 };
 const char message8pagecolumn[] = /* last(!) column of page to show in each language */
 {
-	33, 34, 34, 35, 29, 30, 30, 34
+	33, 34, 34, 35, 29, 30, 30, 34, 34
 };
 
 enum /* options for charset */
