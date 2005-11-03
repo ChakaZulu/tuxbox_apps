@@ -1,5 +1,5 @@
 /*
- * $Id: section_filter.h,v 1.5 2005/10/28 19:39:33 mws Exp $
+ * $Id: section_filter.h,v 1.6 2005/11/03 12:27:37 mws Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -320,7 +320,6 @@ void SectionFilter<T>::release(void)
 	if (fd != -1) {
 		if (!done) {
 			stop();
-			pool->removeFilter(fd);
 		}
 		pool->closeDemux(fd);
 		fd = -1;
