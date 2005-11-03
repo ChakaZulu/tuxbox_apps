@@ -1291,6 +1291,7 @@ eListBoxEntryMulti::eListBoxEntryMulti( eListBox<eListBoxEntryMulti> *lb, const 
 	:eListBoxEntryText( (eListBox<eListBoxEntryText>*)lb, 0, 0, (int)eTextPara::dirCenter, hlptext ),
 	cur(entrys.end())
 {
+	selectable=1;
 }
 
 void eListBoxEntryMulti::add( const char *text, int key )
