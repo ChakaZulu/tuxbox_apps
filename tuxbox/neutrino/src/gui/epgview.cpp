@@ -164,31 +164,37 @@ void CEpgData::processTextToArray(std::string text) // UTF-8
 	{
 		if ( (*text_==' ') || (*text_=='\n') || (*text_=='-') || (*text_=='.') )
 		{
-			//check the wordwidth - add to this line if size ok
-			if(*text_=='\n')
-			{	//enter-handler
-				//printf("enter-");
-				addTextToArray( aktLine );
-				aktLine = "";
-				aktWidth= 0;
-			}
-			else
-			{
+			// Houdini: if there is a newline (especially in the Premiere Portal EPGs) do not forget to add aktWord to aktLine 
+			// after width check, if width check failes do newline, add aktWord to next line 
+			// and "reinsert" i.e. reloop for the \n
+			if(*text_!='\n')
 				aktWord += *text_;
 
-				int aktWordWidth = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getRenderWidth(aktWord);
-				if((aktWordWidth+aktWidth)<(ox- 20- 15))
-				{//space ok, add
-					aktWidth += aktWordWidth;
-					aktLine += aktWord;
-				}
-				else
-				{//new line needed
+			// check the wordwidth - add to this line if size ok
+			int aktWordWidth = g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getRenderWidth(aktWord);
+			if((aktWordWidth+aktWidth)<(ox- 20- 15))
+			{//space ok, add
+				aktWidth += aktWordWidth;
+				aktLine += aktWord;
+			
+				if(*text_=='\n')
+				{	//enter-handler
 					addTextToArray( aktLine );
-					aktLine = aktWord;
-					aktWidth = aktWordWidth;
-				}
+					aktLine = "";
+					aktWidth= 0;
+				}	
 				aktWord = "";
+			}
+			else
+			{//new line needed
+				addTextToArray( aktLine );
+				aktLine = aktWord;
+				aktWidth = aktWordWidth;
+				aktWord = "";
+				// Houdini: in this case where we skipped \n and space is too low, exec newline and rescan \n 
+				// otherwise next word comes direct after aktLine
+				if(*text_=='\n')
+					continue;
 			}
 		}
 		else
