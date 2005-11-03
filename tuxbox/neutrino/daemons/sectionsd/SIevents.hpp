@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.22 2005/08/15 12:09:16 metallica Exp $
+// $Id: SIevents.hpp,v 1.23 2005/11/03 21:08:52 mogway Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -355,10 +355,11 @@ public:
     int saveXML(FILE *file, const char *serviceName) const; // saves the event
     void dump(void) const; // dumps the event to stdout
     void dumpSmall(void) const; // dumps the event to stdout (not all information)
+#ifndef DO_NOT_INCLUDE_STUFF_NOT_NEEDED_FOR_SECTIONSD
     // Liefert das aktuelle EPG des senders mit der uebergebenen serviceID,
     // bei Fehler ist die serviceID des zurueckgelieferten Events 0
     static SIevent readActualEvent(t_service_id serviceID, unsigned timeoutInSeconds=2);
-
+#endif
     char getFSK() const;
  protected:
     int saveXML0(FILE *f) const;

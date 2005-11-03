@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.26 2004/02/13 14:39:59 thegoodguy Exp $
+// $Id: SIevents.cpp,v 1.27 2005/11/03 21:08:52 mogway Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -253,6 +253,7 @@ return j;
 }
 */
 
+#ifndef DO_NOT_INCLUDE_STUFF_NOT_NEEDED_FOR_SECTIONSD
 // Liest n Bytes aus einem Socket per read
 // Liefert 0 bei timeout
 // und -1 bei Fehler
@@ -474,3 +475,4 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
 			it++;
 	}
 }
+#endif

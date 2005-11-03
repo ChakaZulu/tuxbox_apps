@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.193 2005/10/02 21:27:58 mogway Exp $
+//  $Id: sectionsd.cpp,v 1.194 2005/11/03 21:08:51 mogway Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -130,8 +130,11 @@ static pthread_mutex_t messagingLock = PTHREAD_MUTEX_INITIALIZER;
 static DMX dmxEIT(0x12, 0x4f, (0xff- 0x01), 0x50, (0xff- 0x0f), 256);
 static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 */
-static DMX dmxEIT(0x12, 256);
-static DMX dmxSDT(0x11, 256);
+// Houdini: changed sizes, EIT thread no more receives POLLER, saves some mem in sdt
+//static DMX dmxEIT(0x12, 256);
+//static DMX dmxSDT(0x11, 256);
+static DMX dmxEIT(0x12, 1024);
+static DMX dmxSDT(0x11, 64);
 
 // Houdini: added for Premiere Private EPG section for Sport/Direkt Portal
 static DMX dmxPPT(0x00, 256);
@@ -1098,7 +1101,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.193 2005/10/02 21:27:58 mogway Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.194 2005/11/03 21:08:51 mogway Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1180,7 +1183,6 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 			{
 				fprintf(stderr, "low on memory!\n");
 				unlockEvents();
-				dmxEIT.unpause();
 				EITThreadsUnPause();
 				return ;
 			}
@@ -1829,6 +1831,10 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 	{
 		dprintf("next epg found.\n");
 		sendEPG(connfd, nextEvt, zeit);
+// these 2 calls are made in sendEPG()
+//		unlockEvents();
+//		EITThreadsUnPause(); // -> unlock
+		
 	}
 	else
 	{
@@ -2251,6 +2257,9 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 	{
 		dprintf("next short found.\n");
 		sendShort(connfd, nextEvt, zeit);
+// these 2 calls are made in sendShort()
+//		unlockEvents();
+//		EITThreadsUnPause(); // -> unlock
 	}
 	else
 	{
@@ -2325,6 +2334,9 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 			dputs("EPG found.");
 			// Sendet ein EPG, unlocked die events, unpaused dmxEIT
 			sendEPG(connfd, evt, *t);
+// these 2 calls are made in sendEPG()
+//			unlockEvents();
+//			EITThreadsUnPause(); // -> unlock
 		}
 	}
 	else
@@ -2361,6 +2373,9 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 	{ // Event found
 		dputs("EPG found.");
 		sendEPG(connfd, evt, SItime(0, 0), 1);
+// these 2 calls are made in sendEPG()
+//			unlockEvents();
+//		EITThreadsUnPause(); // -> unlock
 	}
 	else
 	{
@@ -2777,7 +2792,8 @@ static void *sdtThread(void *)
 				// Wir wollen nur aktuelle sections
 				dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
 
-				SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
+//				SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
+				SIsectionSDT sdt(sizeof(header) + section_length - 5, buf);
 
 				lockServices();
 
@@ -3251,7 +3267,7 @@ static void *eitThread(void *)
 						dmxEIT.real_unpause();
 #endif
 // must call dmxEIT.change after! unpause otherwise dev is not open, 
-// dmxEIT.lastChanded will not be set, and filter is advanced the next iteration
+// dmxEIT.lastChanged will not be set, and filter is advanced the next iteration
 						dprintf("New Filterindex3: %d (ges. %d)\n", 0, (signed) dmxEIT.filters.size() );
 						dmxEIT.change( 0 ); // -> restart
 					}
@@ -3324,9 +3340,13 @@ static void *eitThread(void *)
 				                }
 				*/
 
-				SIsectionEIT eit(SIsection(section_length + 3, buf));
-
-				if (eit.header())
+// Houdini: added new constructor where the buffer is given as a parameter and must be allocated outside 
+// -> no allocation and copy of data into a 2nd buffer
+//				SIsectionEIT eit(SIsection(section_length + 3, buf));
+				SIsectionEIT eit(section_length + 3, buf);
+// Houdini: if section is not parsed (too short) -> no need to check events
+				if (eit.is_parsed()) 
+					if (eit.header())
 				{
 					// == 0 -> kein event
 
@@ -3451,6 +3471,9 @@ static void *eitThread(void *)
 				}
 
 				unlockMessaging();
+// buf is deleted in destructor of SIsectionEIT 
+//				delete[] buf;
+//				buf = NULL;
 
 			} // if
 			else
@@ -3471,6 +3494,7 @@ static void *eitThread(void *)
 				unlockMessaging();
 
 				delete[] buf;
+				buf = NULL;
 
 				dprintf("[eitThread] skipped sections for table 0x%x\n", header.table_id);
 			}
@@ -3661,9 +3685,11 @@ static void *pptThread(void *)
 					delete[] buf;
 					continue;
 				}
-				SIsectionPPT ppt(SIsection(section_length + 3, buf));
-
-				if (ppt.header())
+				
+//				SIsectionPPT ppt(SIsection(section_length + 3, buf));
+				SIsectionPPT ppt(section_length + 3, buf);
+				if (ppt.is_parsed()) 
+					if (ppt.header())
 				{
 					// == 0 -> kein event
 //					dprintf("[pptThread] adding %d events [table 0x%x] (begin)\n", ppt.events().size(), header.table_id);
@@ -3724,6 +3750,7 @@ static void *pptThread(void *)
 			else
 			{
 				delete[] buf;
+				buf = NULL;
 			}
 		} // for
 	} // try
@@ -3857,7 +3884,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.193 2005/10/02 21:27:58 mogway Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.194 2005/11/03 21:08:51 mogway Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {

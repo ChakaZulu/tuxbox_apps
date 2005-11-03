@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.17 2005/08/15 12:09:16 metallica Exp $
+//    $Id: SIsections.hpp,v 1.18 2005/11/03 21:08:52 mogway Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -467,6 +467,12 @@ public:
 		parsed = s.parsed;
 	}
 
+	// Benutzt den uebergebenen Puffer (sollte mit new char[n] allokiert sein)
+	SIsectionEIT(unsigned bufLength, char *buf) : SIsection(bufLength, buf) {
+		parsed = 0;
+		parse();
+	}
+
 	t_service_id service_id(void) const {
 		return buffer ? ((((struct SI_section_EIT_header *)buffer)->service_id_hi << 8) |
 				((struct SI_section_EIT_header *)buffer)->service_id_lo): 0;
@@ -514,6 +520,10 @@ public:
 		return evts;
 	}
 
+	const int is_parsed(void) const {
+		return parsed;
+	}
+
 protected:
 	SIevents evts;
 	int parsed;
@@ -539,6 +549,12 @@ public:
 	SIsectionPPT(const SIsectionPPT &s) : SIsection(s) {
 		evts = s.evts;
 		parsed = s.parsed;
+	}
+
+	// Benutzt den uebergebenen Puffer (sollte mit new char[n] allokiert sein)
+	SIsectionPPT(unsigned bufLength, char *buf) : SIsection(bufLength, buf) {
+		parsed = 0;
+		parse();
 	}
 
 	long content_id(void) const {
@@ -597,6 +613,10 @@ public:
 		return evts;
 	}
 
+	const int is_parsed(void) const {
+		return parsed;
+	}
+
 protected:
 	SIevents evts;
 	int parsed;
@@ -615,7 +635,7 @@ protected:
 
 };
 
-
+#ifndef DO_NOT_INCLUDE_STUFF_NOT_NEEDED_FOR_SECTIONSD
 // Fuer for_each
 struct printSIsectionEIT : public std::unary_function<SIsectionEIT, void>
 {
@@ -681,6 +701,7 @@ public:
 		return rc;
 	}
 };
+#endif
 
 class SIsectionSDT : public SIsection
 {
@@ -696,6 +717,12 @@ public:
 		parsed = s.parsed;
 	}
 
+	// Benutzt den uebergebenen Puffer (sollte mit new char[n] allokiert sein)
+	SIsectionSDT(unsigned bufLength, char *buf) : SIsection(bufLength, buf) {
+		parsed = 0;
+		parse();
+	}
+	
 	t_transport_stream_id transport_stream_id(void) const {
 		return buffer ? ((((struct SI_section_SDT_header *)buffer)->transport_stream_id_hi << 8) |
 				((struct SI_section_SDT_header *)buffer)->transport_stream_id_lo) : 0;
@@ -744,6 +771,7 @@ private:
 	void parseNVODreferenceDescriptor(const char *buf, SIservice &s);
 };
 
+#ifndef DO_NOT_INCLUDE_STUFF_NOT_NEEDED_FOR_SECTIONSD
 // Fuer for_each
 struct printSIsectionSDT : public std::unary_function<SIsectionSDT, void>
 {
@@ -872,5 +900,6 @@ public:
 		return rc;
 	}
 };
+#endif
 
 #endif // SISECTIONS_HPP

@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.14 2003/03/03 13:38:33 obi Exp $
+// $Id: SIutils.cpp,v 1.15 2005/11/03 21:08:52 mogway Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,17 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.15  2005/11/03 21:08:52  mogway
+// sectionsd update by Houdini
+//
+// Changes:
+// - EIT und SDT DMX buffer verändert
+// -> keine(weniger) POLLER, kostet Speicher beim EITDMX, spart Speicher beim SDTDMX
+//
+// - vor dem Parsen der Sections werden die Buffer nicht mehr (unnötig) ein zweites mal allokiert und umkopiert -> mehr Performance, weniger Speicherfragmentierung
+//
+// - unnötige/unbenutze Funktionen auskommentiert -> das gestrippte sectionsd binary wird 23kB kleiner, Test-/Beispielprogramme wie sdt, epg, nit, ... können dann nicht mehr kompiliert werden.
+//
 // Revision 1.14  2003/03/03 13:38:33  obi
 // - cleaned up changeUTCtoCtime a bit
 // - finish pthreads using pthread_exit(NULL) instead of return 0
@@ -74,6 +85,8 @@
 #include <time.h>
 #include <string.h>
 
+// Houdini: not used in the code at the moment, found in SIsections.cpp
+#if 0
 static const char descr_tbl[][50] = {
 // defined by ISO/IEC 13818-1 P64
 	"Reserved",
@@ -160,6 +173,7 @@ const char *decode_descr (unsigned char _index) {
 
 	return descr_tbl[index];
 }
+#endif
 
 // Thanks to kwon
 time_t changeUTCtoCtime(const unsigned char *buffer, int local_time)
