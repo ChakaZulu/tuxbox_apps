@@ -5,6 +5,7 @@
 
 class eExpertSetup: public eSetupWindow
 {
+	eListBoxEntryMulti *timeout_infobar;
 #ifndef DISABLE_FILE
 	eListBoxEntryMulti *record_split_size;
 	void selChanged(eListBoxEntryMenu* e);
@@ -19,17 +20,12 @@ class eExpertSetup: public eSetupWindow
 #ifndef TUXTXT_CFG_STANDALONE
 	void tuxtxtCachingChanged(bool);
 #endif
-
-// timeoutInfobar begin
-	eListBoxEntryMulti *timeout_infobar;
-	void selInfobarChanged(eListBoxEntryMenu* e);
-// timeoutInfobar end
-
 	void colorbuttonsChanged(bool);
 	void reinitializeHTTPServer(bool);
 	void fastZappingChanged(bool b);
 	void init_eExpertSetup();
 	void fileToggle(bool newState, const char* filename);
+	void selInfobarChanged(eListBoxEntryMenu* e);
 public:
 	eExpertSetup();
 };

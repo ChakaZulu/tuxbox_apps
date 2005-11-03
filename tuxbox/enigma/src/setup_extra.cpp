@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.49 2005/11/02 22:03:41 timekiller Exp $
+ * $Id: setup_extra.cpp,v 1.50 2005/11/03 12:31:31 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -71,10 +71,10 @@ void eExpertSetup::init_eExpertSetup()
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 		CONNECT((new eListBoxEntryMenu(&list, _("Factory reset"), eString().sprintf("(%d) %s", ++entry, _("all settings will set to factory defaults")) ))->selected, eExpertSetup::factory_reset);
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
 #ifndef DISABLE_FILE
 	if ( eSystemInfo::getInstance()->canRecordTS() && !eDVB::getInstance()->recorder )
 	{
-		list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
 		record_split_size = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("record split size (left, right)"));
 		record_split_size->add("         650MB        >", 650*1024);
 		record_split_size->add("<        700MB        >", 700*1024);
@@ -92,27 +92,22 @@ void eExpertSetup::init_eExpertSetup()
 		CONNECT( list.selchanged, eExpertSetup::selChanged );
 	}
 #endif
-
-// timeoutInfobar begin
-        list.setFlags(list.getFlags()|eListBoxBase::flagNoPageMovement);
-        timeout_infobar = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("infobar timeout (left, right)"));
-        timeout_infobar->add("  Infobar timeout 2 sec >", 2);
-        timeout_infobar->add("< Infobar timeout 3 sec >", 3);
-        timeout_infobar->add("< Infobar timeout 4 sec >", 4);
-        timeout_infobar->add("< Infobar timeout 5 sec >", 5);
-        timeout_infobar->add("< Infobar timeout 6 sec >", 6);
-        timeout_infobar->add("< Infobar timeout 7 sec >", 7);
-        timeout_infobar->add("< Infobar timeout 8 sec >", 8);
-        timeout_infobar->add("< Infobar timeout 9 sec >", 9);
-        timeout_infobar->add("< Infobar timeout 10 sec >", 10);
-        timeout_infobar->add("< Infobar timeout 11 sec >", 11);
-        timeout_infobar->add("< Infobar timeout 12 sec  ", 12);
-        int timeoutInfobar = 6;
-        if (eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar))
-                timeoutInfobar = 6;
-        timeout_infobar->setCurrent(timeoutInfobar);
-        CONNECT( list.selchanged, eExpertSetup::selInfobarChanged );
-// timeoutInfobar end
+	timeout_infobar = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("infobar timeout (left, right)"));
+	timeout_infobar->add("  Infobar timeout 2 sec >", 2);
+	timeout_infobar->add("< Infobar timeout 3 sec >", 3);
+	timeout_infobar->add("< Infobar timeout 4 sec >", 4);
+	timeout_infobar->add("< Infobar timeout 5 sec >", 5);
+	timeout_infobar->add("< Infobar timeout 6 sec >", 6);
+	timeout_infobar->add("< Infobar timeout 7 sec >", 7);
+	timeout_infobar->add("< Infobar timeout 8 sec >", 8);
+	timeout_infobar->add("< Infobar timeout 9 sec >", 9);
+	timeout_infobar->add("< Infobar timeout 10 sec >", 10);
+	timeout_infobar->add("< Infobar timeout 11 sec >", 11);
+	timeout_infobar->add("< Infobar timeout 12 sec  ", 12);
+	int timeoutInfobar = 6;
+	eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
+	timeout_infobar->setCurrent(timeoutInfobar);
+	CONNECT( list.selchanged, eExpertSetup::selInfobarChanged );
 
 	CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Serviceselector help buttons"),"/ezap/serviceselector/showButtons",_("show colored help buttons in service selector")))->selected, eExpertSetup::colorbuttonsChanged );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Show Sat position"), "/extras/showSatPos", _("show sat position in the infobar"));
@@ -200,16 +195,16 @@ void eExpertSetup::tuxtxtCachingChanged(bool b)
 #ifndef DISABLE_FILE
 void eExpertSetup::selChanged(eListBoxEntryMenu* e)
 {
-	if ( eSystemInfo::getInstance()->canRecordTS() && 
-	    e == (eListBoxEntryMenu*)record_split_size )
+	if ( eSystemInfo::getInstance()->canRecordTS() &&
+		e == (eListBoxEntryMenu*)record_split_size )
 		eConfig::getInstance()->setKey("/extras/record_splitsize", (int)e->getKey());
 }
 #endif
 
 void eExpertSetup::selInfobarChanged(eListBoxEntryMenu* e)
 {
-        if ( e == (eListBoxEntryMenu*)timeout_infobar )
-                eConfig::getInstance()->setKey("/enigma/timeoutInfobar", (int)e->getKey());
+	if ( e == (eListBoxEntryMenu*)timeout_infobar )
+		eConfig::getInstance()->setKey("/enigma/timeoutInfobar", (int)e->getKey());
 }
 
 void eExpertSetup::colorbuttonsChanged(bool b)

@@ -2922,9 +2922,9 @@ void eZapMain::showInfobar(bool startTimeout)
 		( !currentFocus || currentFocus == this ) )
 		show();
 
-        if (startTimeout && doHideInfobar())
+	if (startTimeout && doHideInfobar())
 	{
-                eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
+		eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
 		timeout.start((timeoutInfobar * 1000), 1);
 	}
 
@@ -6180,9 +6180,10 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 
 	if (doHideInfobar())
 	{
-                eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
-		timeout.start((sapi->getState() == eServiceHandler::statePlaying)
-			      ?(timeoutInfobar * 1000) - 1000:2000, 1);
+		eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
+		timeout.start((sapi->getState() == eServiceHandler::statePlaying) ?
+			(timeoutInfobar * 1000) - 1000 :
+			2000, 1);
 	}
 }
 
@@ -6216,8 +6217,9 @@ void eZapMain::gotEIT()
 				{
 					eConfig::getInstance()->getKey("/enigma/timeoutInfobar", 
 									timeoutInfobar);
-					timeout.start((sapi->getState() == eServiceHandler::statePlaying)
-						      ?(timeoutInfobar * 1000) - 1000:2000, 1);
+					timeout.start((sapi->getState() == eServiceHandler::statePlaying) ?
+						(timeoutInfobar * 1000) - 1000 :
+						2000, 1);
 				}
 			}
 		}
