@@ -5521,7 +5521,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 					1);
 				}
-				else showServiceSelector(-1);
+				showServiceSelector(-1);
 			}
 		}
 		else if (event.action == &i_enigmaMainActions->modeTV)
@@ -5540,7 +5540,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 					1);
 				}
-				else showServiceSelector(-1);
+				showServiceSelector(-1);
 			}
 		}
 		else if (event.action == &i_enigmaMainActions->modeFile)
