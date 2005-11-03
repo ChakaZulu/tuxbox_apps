@@ -1,5 +1,5 @@
 /*
- * $Id: section_pool.cpp,v 1.2 2003/08/20 22:47:34 obi Exp $
+ * $Id: section_pool.cpp,v 1.3 2005/11/03 08:12:17 mws Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -111,11 +111,12 @@ void *SectionPool::select(void *)
 			// note that riscs caused by not locking while
 			// select() is waiting should be thought of.
 			pthread_mutex_lock(&pool_locked_mutex);
-			for (SectionPoolMap::iterator i = pool.begin(); i != pool.end(); ++i) {
+			for (SectionPoolMap::iterator i = pool.begin(); i != pool.end(); /* inc done within loop */ ) {
 				int fd = i->first;
 				if (FD_ISSET(fd, &rfds)) {
 					ssize_t size;
 					if ((size = DVB_FOP(read, buffer, sizeof(buffer))) == -1) {
+						++i;
 						continue;
 					}
 					else if ((size < 8) || (size != DVB_LENGTH(&buffer[1]) + 3)) {
@@ -123,10 +124,12 @@ void *SectionPool::select(void *)
 							size, (size < 3) ? -1 : DVB_LENGTH(&buffer[1]) + 3);
 					}
 					else if (i->second->section(buffer, size) == true) {
-							pool.erase(i); // remove finished table fd
 							i->second->release();
+							pool.erase(i++); // remove finished table fd
+							continue;
 					}
 				}
+				++i;
 			}
 			pthread_mutex_unlock(&pool_locked_mutex);
 		}
