@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.22 2005/11/04 13:36:58 sat_man Exp $
+ * $Id: enigma_scan.cpp,v 1.23 2005/11/04 13:40:03 sat_man Exp $
  */
 
 #include <enigma_scan.h>
@@ -56,7 +56,7 @@ eZapScan::eZapScan()
 		(new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable 5V"), "/elitedvb/DVB/config/disable_5V", _("disable 5V for passive terrerstrial antennas")))
 			->selected.connect( slot(*eFrontend::getInstance(), &eFrontend::setTerrestrialAntennaVoltage) );
 	}
-	if ( eSystemInfo::getInstance()->getFEType() != eSystemInfo::feCable)
+	if ( eSystemInfo::getInstance()->getFEType() != eSystemInfo::feCable )
 	{
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	}
