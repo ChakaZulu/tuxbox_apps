@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.33  2005/11/04 16:00:37  robspr1
+ * - adding IMAP support
+ *
  * Revision 1.32  2005/10/29 12:53:01  robspr1
  * - bugfix for too long mail-headers
  *
@@ -164,12 +167,16 @@ int ReadConf()
 			fprintf(fd_conf, "WEBPASS=\n\n");
 			fprintf(fd_conf, "NAME0=\n");
 			fprintf(fd_conf, "POP30=\n");
+			fprintf(fd_conf, "IMAP0=\n");
 			fprintf(fd_conf, "USER0=\n");
 			fprintf(fd_conf, "PASS0=\n");
 			fprintf(fd_conf, "SMTP0=\n");
 			fprintf(fd_conf, "FROM0=\n");
 			fprintf(fd_conf, "CODE0=\n");
 			fprintf(fd_conf, "AUTH0=0\n");
+			fprintf(fd_conf, "SUSER0=\n");
+			fprintf(fd_conf, "SPASS0=\n");
+			fprintf(fd_conf, "INBOX0=\n");
 
 			fclose(fd_conf);
 
@@ -270,6 +277,14 @@ int ReadConf()
 					sscanf(ptr + 6, "%s", account_db[index-'0'].pop3);
 				}
 			}
+			else if((ptr = strstr(line_buffer, "IMAP")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", account_db[index-'0'].imap);
+				}
+			}
 			else if((ptr = strstr(line_buffer, "USER")) && (*(ptr+5) == '='))
 			{
 				char index = *(ptr+4);
@@ -333,6 +348,14 @@ int ReadConf()
 				if((index >= '0') && (index <= '9'))
 				{
 					sscanf(ptr + 7, "%s", account_db[index-'0'].spass);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "INBOX")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", account_db[index-'0'].inbox);
 				}
 			}
 		}
@@ -427,6 +450,7 @@ int ReadConf()
 			{
 				fprintf(fd_conf, "\nNAME%d=%s\n", loop, account_db[loop].name);
 				fprintf(fd_conf, "POP3%d=%s\n", loop, account_db[loop].pop3);
+				fprintf(fd_conf, "IMAP%d=%s\n", loop, account_db[loop].imap);
 				fprintf(fd_conf, "USER%d=%s\n", loop, account_db[loop].user);
 				fprintf(fd_conf, "PASS%d=%s\n", loop, account_db[loop].pass);
 				fprintf(fd_conf, "SMTP%d=%s\n", loop, account_db[loop].smtp);
@@ -435,6 +459,7 @@ int ReadConf()
 				fprintf(fd_conf, "AUTH%d=%d\n", loop, account_db[loop].auth);
 				fprintf(fd_conf, "SUSER%d=%s\n", loop, account_db[loop].suser);
 				fprintf(fd_conf, "SPASS%d=%s\n", loop, account_db[loop].spass);
+				fprintf(fd_conf, "INBOX%d=%s\n", loop, account_db[loop].inbox);
 
 				if(!account_db[loop + 1].name[0])
 				{
@@ -539,7 +564,7 @@ int ReadConf()
 
 		for(loop = 0; loop <= 9; loop++)
 		{
-			if(account_db[loop].name[0] && account_db[loop].pop3[0] && account_db[loop].user[0] && account_db[loop].pass[0])
+			if(account_db[loop].name[0] && (account_db[loop].pop3[0] || account_db[loop].imap[0]) && account_db[loop].user[0] && account_db[loop].pass[0])
 			{
 				accounts++;
 			}
@@ -1501,6 +1526,7 @@ int SendPOPCommand(int command, char *param)
 	char *ptr, *ptr1, *ptr2;
 	int loop, day, hour, minute;
 	int linelen;
+	char* portpos;
 
 	// build commandstring
 
@@ -1508,15 +1534,24 @@ int SendPOPCommand(int command, char *param)
 		{
 			case INIT:
 
-				if(!(server = gethostbyname(param)))
+				strcpy(send_buffer,param);
+				// check if port is given
+				portpos = strchr( send_buffer, ':');
+				if( portpos )
 				{
-				    slog ? syslog(LOG_DAEMON | LOG_INFO, "could not resolve Host \"%s\", will try again in 10s", param) : printf("TuxMailD <could not resolve Host \"%s\", will try again in 10s>\n", param);
+					*portpos = '\0';
+					portpos++;
+				}
+						
+				if(!(server = gethostbyname(send_buffer)))
+				{
+				    slog ? syslog(LOG_DAEMON | LOG_INFO, "could not resolve Host \"%s\", will try again in 10s", send_buffer) : printf("TuxMailD <could not resolve Host \"%s\", will try again in 10s>\n", send_buffer);
 
 				    sleep(10);	/* give some routers a second chance */
 
-				    if(!(server = gethostbyname(param)))
+				    if(!(server = gethostbyname(send_buffer)))
 				    {
-					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not resolve Host \"%s\"", param) : printf("TuxMailD <could not resolve Host \"%s\">\n", param);
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not resolve Host \"%s\"", send_buffer) : printf("TuxMailD <could not resolve Host \"%s\">\n", send_buffer);
 
 					return 0;
 				    }
@@ -1530,7 +1565,14 @@ int SendPOPCommand(int command, char *param)
 				}
 
 				SockAddr.sin_family = AF_INET;
-				SockAddr.sin_port = htons(110);
+				if( portpos )
+				{
+					SockAddr.sin_port = htons(atoi(portpos));
+				}
+				else
+				{
+					SockAddr.sin_port = htons(110);
+				}
 				SockAddr.sin_addr = *(struct in_addr*) server->h_addr_list[0];
 
 				if(connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
@@ -1900,6 +1942,521 @@ int SendPOPCommand(int command, char *param)
 }
 
 /******************************************************************************
+ * SendIMAPCommand (0=fail, 1=done)
+ ******************************************************************************/
+
+int SendIMAPCommand(int command, char *param, char *param2)
+{
+	struct hostent *server;
+	struct sockaddr_in SockAddr;
+	FILE *fd_log;
+	char send_buffer[128], recv_buffer[8192], month[4];
+	char *ptr, *ptr1, *ptr2;
+	int loop, day, hour, minute;
+	int linelen;
+	char* portpos;
+	
+	// build commandstring
+
+		switch(command)
+		{
+			case INIT:
+
+				strcpy(send_buffer,param);
+				// check if port is given
+				portpos = strchr( send_buffer, ':');
+				if( portpos )
+				{
+					*portpos = '\0';
+					portpos++;
+				}
+						
+				if(!(server = gethostbyname(send_buffer)))
+				{
+				    slog ? syslog(LOG_DAEMON | LOG_INFO, "could not resolve Host \"%s\", will try again in 10s", param) : printf("TuxMailD <could not resolve Host \"%s\", will try again in 10s>\n", param);
+
+				    sleep(10);	/* give some routers a second chance */
+
+				    if(!(server = gethostbyname(send_buffer)))
+				    {
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not resolve Host \"%s\"", send_buffer) : printf("TuxMailD <could not resolve Host \"%s\">\n", send_buffer);
+
+					return 0;
+				    }
+				}
+
+				if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not create Socket") : printf("TuxMailD <could not create Socket>\n");
+
+					return 0;
+				}
+
+				SockAddr.sin_family = AF_INET;
+				if( portpos )
+				{
+					SockAddr.sin_port = htons(atoi(portpos));
+				}
+				else
+				{
+					SockAddr.sin_port = htons(143);
+				}
+				SockAddr.sin_addr = *(struct in_addr*) server->h_addr_list[0];
+
+				if(connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not connect to Host \"%s\"", param) : printf("TuxMailD <could not connect to Host \"%s\">\n", param);
+
+					close(sock);
+
+					return 0;
+				}
+
+				break;
+
+			case LOGIN:
+
+				sprintf(send_buffer, "? LOGIN %s %s\r\n",param, param2);
+
+				break;
+
+			case SELECT:
+
+				if( param[0]=='\0' )
+				{
+					sprintf(send_buffer, "? SELECT INBOX\r\n");
+				}
+				else
+				{
+					sprintf(send_buffer, "? SELECT %s\r\n", param);
+				}
+
+				break;
+
+			case UIDL:
+
+				sprintf(send_buffer, "? FETCH %s UID\r\n",param);
+
+				break;
+
+			case FETCH:
+
+				sprintf(send_buffer, "? FETCH %s (FLAGS BODY[HEADER.FIELDS (DATE FROM SUBJECT)])\r\n",param);
+
+				break;
+
+			case DELE:
+
+				sprintf(send_buffer, "? STORE %s +FLAGS (\\Deleted)\r\n",param);
+
+				break;
+
+			case RETR:
+				
+				sprintf(send_buffer, "? FETCH %s BODY[TEXT]<0.75000>\r\n",param);
+
+				break;
+
+			case CLOSE:
+
+				sprintf(send_buffer, "? CLOSE\r\n");
+
+				break;
+
+			case LOGOUT:
+
+				sprintf(send_buffer, "? LOGOUT\r\n");
+
+				break;
+		}
+
+	// send command to server
+
+		if(command != INIT)
+		{
+			if(logging == 'Y')
+			{
+				if((fd_log = fopen(LOGFILE, "a")))
+				{
+					fprintf(fd_log, "IMAP <- %s", send_buffer);
+
+					fclose(fd_log);
+				}
+				else
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not log IMAP-Command") : printf("TuxMailD <could not log IMAP-Command>\n");
+				}
+			}
+
+			send(sock, send_buffer, strlen(send_buffer), 0);
+		}
+
+		// get server response
+
+		stringindex = 0;
+		linelen = 0;
+   		state = cNorm;
+   		nStrich = 0;
+   		nStartSpalte = 1;
+   		nCharInLine = 0;
+   		nCharInWord = 0;
+   		cLast = 0;
+   		nRead = nWrite = 0;
+   		fPre = 0;
+   		fHtml = 0;
+    		
+		if(command == RETR)
+		{
+	   		while(recv(sock, &recv_buffer[stringindex], 1, 0) > 0)
+			{
+				// read line by line
+				if((nRead) && (nRead < 75000)) 
+				{
+					nRead++;
+					doOneChar( recv_buffer[stringindex] );
+				}
+				
+				if(recv_buffer[stringindex] == '\n')
+				{
+					if( !nRead )
+					{
+						ptr2 = strstr(recv_buffer, "BODY[TEXT]<0> ");					
+						sscanf(ptr2, "BODY[TEXT]<0> {%d", &linelen);
+						stringindex=0;
+						nRead++;
+					}
+					else
+					{
+						recv_buffer[stringindex + 1] = '\0';
+//						printf("linelen: read:%d max:%d <%s>",nRead,linelen,recv_buffer);
+						if( nRead >= linelen)
+						{
+							if(!strncmp(recv_buffer, "? OK", 4))
+							{
+								return 1;
+							}
+							if(!strncmp(recv_buffer, "? NO", 4))
+							{
+								return 0;
+							}
+						}
+						nRead++;
+						stringindex=0;
+					}
+				}
+				else
+				{
+					if(stringindex < sizeof(recv_buffer) - 4)
+					{	
+						stringindex++;
+					}
+					else
+					{
+						slog ? syslog(LOG_DAEMON | LOG_INFO, "Buffer Overflow") : printf("TuxMailD <Buffer Overflow>\n");
+						recv_buffer[stringindex + 1] = '\0';
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			while(recv(sock, &recv_buffer[stringindex], 1, 0) > 0)
+			{
+				// read line by line and end if leading character hast been '?' or after one line after INIT
+				if(recv_buffer[stringindex] == '\n')
+				{
+					if((recv_buffer[nRead] == '?') || (command == INIT))
+					{
+						recv_buffer[stringindex + 1] = '\0';
+						break;
+					}
+					else
+					{
+						nRead=stringindex + 1;
+					}
+				}
+	
+				if(stringindex < sizeof(recv_buffer) - 4)
+				{
+					stringindex++;
+				}
+				else
+				{
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "Buffer Overflow") : printf("TuxMailD <Buffer Overflow>\n");
+					recv_buffer[stringindex + 1] = '\0';
+					break;
+				}
+			}
+		}
+
+		if(logging == 'Y')
+		{
+			if((fd_log = fopen(LOGFILE, "a")))
+			{
+				fprintf(fd_log, "IMAP -> %s", recv_buffer);
+
+				fclose(fd_log);
+			}
+			else
+			{
+				slog ? syslog(LOG_DAEMON | LOG_INFO, "could not log IMAP-Response") : printf("TuxMailD <could not log IMAP-Response>\n");
+			}
+		}
+
+	// check server response
+
+//		if(!strncmp(recv_buffer, "? OK", 4))
+//		{
+			switch(command)
+			{
+				case INIT:
+					
+					if(!strncmp(recv_buffer, "* OK", 4))
+					{
+						return 1;
+					}
+					break;
+					
+				case LOGIN:
+
+					if(!strncmp(recv_buffer, "? OK", 4))
+					{
+						return 1;
+					}
+					break;
+
+				case SELECT:
+					
+					ptr1 = &recv_buffer[0];
+					ptr2 = strstr(recv_buffer, "EXISTS");					
+					do
+					{
+						ptr = strchr(ptr1,'\n');					
+						if( ptr2 < ptr )
+						{
+							sscanf(ptr1, "* %d", &messages);
+							break;
+						}
+						ptr1 = ptr + 1;
+					} while( ptr );
+			
+					ptr2 = strstr(recv_buffer, "UIDVALIDITY");					
+					sscanf(ptr2, "UIDVALIDITY %ld", &v_uid);
+
+					if(!strncmp(&recv_buffer[nRead], "? OK", 4))
+					{
+						return 1;
+					}
+					break;
+
+				case UIDL:
+
+					ptr2 = strstr(recv_buffer, "UID");					
+					sscanf(ptr2, "UID %ld", &m_uid);
+					sprintf(uid,"%08lX%08lX",v_uid,m_uid);
+
+					if(!strncmp(&recv_buffer[nRead], "? OK", 4))
+					{
+						return 1;
+					}
+					break;
+
+				case FETCH:
+
+					stringindex = 0;
+					headersize = strlen(recv_buffer);
+					memset(header, 0, sizeof(header));
+
+					if((ptr = strstr(recv_buffer, "\nDate:")))
+					{
+						ptr += 6;
+
+						while(*ptr == ' ')
+						{
+							ptr++;
+						}
+
+						if(*ptr < '0' || *ptr > '9')
+						{
+							sscanf(ptr, "%*s %d %s %*d %d:%d", &day, &month[0], &hour, &minute);
+						}
+						else
+						{
+							sscanf(ptr, "%d %s %*d %d:%d", &day, &month[0], &hour, &minute);
+						}
+
+						sprintf(header, "%.2d.%.3s|%.2d:%.2d|", day, month, hour, minute);
+						stringindex += 13;
+					}
+					else
+					{
+						memcpy(header, "??.???|??:??|", 13);
+						stringindex += 13;
+					}
+		
+					if((ptr = strstr(recv_buffer, "\nFrom:")))
+					{
+						ptr += 6;
+
+						while(*ptr == ' ')
+						{
+							ptr++;
+						}
+
+						ptr1 = &header[stringindex];
+
+						while(*ptr != '\r')
+						{
+							if(*ptr == '=' && *(ptr + 1) == '?')
+							{
+								ptr += DecodeHeader(ptr);
+
+								/* skip space(s) between encoded words */
+
+								ptr2 = ptr;
+
+								while(*ptr2 == ' ')
+								{
+									ptr2++;
+								}
+
+								if(*ptr2 == '?' && *(ptr2 + 1) == '=')
+								{
+									ptr = ptr2;
+								}
+							}
+							else
+							{
+								memcpy(&header[stringindex++], ptr++, 1);
+							}
+						}
+
+						if(use_spamfilter)
+						{
+							spam_detected = 0;
+
+							for(loop = 0; loop < spam_entries; loop++)
+							{
+								if(strstr(ptr1, spamfilter[loop].address))
+								{
+									slog ? syslog(LOG_DAEMON | LOG_INFO, "Spamfilter active, delete Mail from \"%s\"", ptr1) : printf("TuxMailD <Spamfilter active, delete Mail from \"%s\">\n", ptr1);
+
+									spam_detected = 1;
+
+									break;
+								}
+							}
+						}
+
+						header[stringindex++] = '|';
+					}
+					else
+					{
+						memcpy(&header[stringindex], "-?-|", 4);
+						stringindex += 4;
+					}
+
+					if((ptr = strstr(recv_buffer, "\nSubject:")))
+					{
+						ptr += 9;
+
+						while(*ptr == ' ')
+						{
+							ptr++;
+						}
+
+						while(*ptr != '\r')
+						{
+							if(*ptr == '=' && *(ptr + 1) == '?')
+							{
+								ptr += DecodeHeader(ptr);
+
+								/* skip space(s) between encoded words */
+
+								ptr2 = ptr;
+
+								while(*ptr2 == ' ')
+								{
+									ptr2++;
+								}
+
+								if(*ptr2 == '?' && *(ptr2 + 1) == '=')
+								{
+									ptr = ptr2;
+								}
+							}
+							else
+							{
+								memcpy(&header[stringindex++], ptr++, 1);
+							}
+						}
+
+						header[stringindex++] = '|';
+					}
+					else
+					{
+						memcpy(&header[stringindex], "-?-|", 4);
+						stringindex += 4;
+					}
+
+					header[stringindex] = '\0';
+
+					if(!strncmp(&recv_buffer[nRead], "? OK", 4))
+					{
+						return 1;
+					}
+					break;
+					
+				case DELE:
+
+					if(!strncmp(recv_buffer, "? OK", 4))
+					{
+						return 1;
+					}
+					break;
+
+				case CLOSE:
+
+					if(!strncmp(recv_buffer, "? OK", 4))
+					{
+						return 1;
+					}
+					break;
+
+				case RETR:
+					return 1;
+					break;
+
+				case LOGOUT:
+
+					close(sock);
+					return 1;
+					
+				default:
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "IMAP Server (%s)", recv_buffer) : printf("TuxMailD <IMAP Server (%s)>\n", recv_buffer);
+					
+			}
+	/*
+		}
+		else
+		{
+			if((ptr = strchr(recv_buffer, '\r')))
+			{
+				*ptr = 0;
+			}
+
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "Server Error (%s)", recv_buffer + 5) : printf("TuxMailD <Server Error (%s)>\n", recv_buffer + 5);
+
+			close(sock);
+
+			return 0;
+		}
+*/
+	return 0;
+}
+
+/******************************************************************************
  * SendSMTPCommand (0=fail, 1=done)
  ******************************************************************************/
 
@@ -1911,6 +2468,7 @@ int SendSMTPCommand(int command, char *param)
 	struct sockaddr_in SockAddr;
 	char send_buffer[128], recv_buffer[4096];
 	bool cancel = false;
+	char* portpos;
 
 	// clear buffers
 
@@ -1923,11 +2481,20 @@ int SendSMTPCommand(int command, char *param)
 		{
 			case INIT:
 
-				if(!(server = gethostbyname(param)))
+				strcpy(send_buffer,param);
+				// check if port is given
+				portpos = strchr( send_buffer, ':');
+				if( portpos )
+				{
+					*portpos = '\0';
+					portpos++;
+				}
+						
+				if(!(server = gethostbyname(send_buffer)))
 				{
 				    sleep(10);	/* give some routers a second chance */
 
-				    if(!(server = gethostbyname(param)))
+				    if(!(server = gethostbyname(send_buffer)))
 				    {
 					return 0;
 				    }
@@ -1939,7 +2506,14 @@ int SendSMTPCommand(int command, char *param)
 				}
 
 				SockAddr.sin_family = AF_INET;
-				SockAddr.sin_port = htons(25);
+				if( portpos )
+				{
+					SockAddr.sin_port = htons(atoi(portpos));
+				}
+				else
+				{
+					SockAddr.sin_port = htons(25);
+				}
 				SockAddr.sin_addr = *(struct in_addr*) server->h_addr_list[0];
 
 				if(connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
@@ -2300,7 +2874,12 @@ int SaveMail(int account, char* mailuid)
 {
 	int loop;
 	char mailnumber[12];
-
+	char imap1 = 0;
+	
+	if( account_db[account].imap[0] != '\0' )
+	{
+		imap1 = 1;
+	}
 	
 	if((fd_mail = fopen(POP3FILE, "w")))
 	{
@@ -2309,48 +2888,83 @@ int SaveMail(int account, char* mailuid)
 
 	// get mail count
 
-		if(!SendPOPCommand(INIT, account_db[account].pop3))
+		if( !imap1 )
 		{
-			if(fd_mail)
+			if(!SendPOPCommand(INIT, account_db[account].pop3))
 			{
-				fclose(fd_mail);
+				if(fd_mail)
+				{
+					fclose(fd_mail);
+				}
+
+				return 0;
 			}
 
-			return 0;
-		}
-
-		if(!SendPOPCommand(USER, account_db[account].user))
-		{
-			if(fd_mail)
+			if(!SendPOPCommand(USER, account_db[account].user))
 			{
-				fclose(fd_mail);
+				if(fd_mail)
+				{
+					fclose(fd_mail);
+				}
+	
+				return 0;
 			}
 
-			SendPOPCommand(QUIT, "");
-			return 0;
-		}
-
-		if(!SendPOPCommand(PASS, account_db[account].pass))
-		{
-			if(fd_mail)
+			if(!SendPOPCommand(PASS, account_db[account].pass))
 			{
-				fclose(fd_mail);
+				if(fd_mail)
+				{
+					fclose(fd_mail);
+				}
+	
+				return 0;
 			}
 
-			SendPOPCommand(QUIT, "");
-			return 0;
-		}
-
-		if(!SendPOPCommand(STAT, ""))
-		{
-			if(fd_mail)
+			if(!SendPOPCommand(STAT, ""))
 			{
-				fclose(fd_mail);
+				if(fd_mail)
+				{
+					fclose(fd_mail);
+				}
+
+				return 0;
+			}
+		}
+		else
+		{
+			if(!SendIMAPCommand(INIT, account_db[account].imap, ""))
+			{
+				if(fd_mail)
+				{
+					fclose(fd_mail);
+				}
+
+				return 0;
 			}
 
-			SendPOPCommand(QUIT, "");
-			return 0;
+			// login to mail server
+			if(!SendIMAPCommand(LOGIN, account_db[account].user, account_db[account].pass))
+			{
+				if(fd_mail)
+				{
+					fclose(fd_mail);
+				}
+
+				return 0;
+			}
+		
+			// select folder, get mail count and UID
+			if(!SendIMAPCommand(SELECT, account_db[account].inbox, ""))
+			{
+				if(fd_mail)
+				{
+					fclose(fd_mail);
+				}
+
+				return 0;
+			}
 		}
+
 
 
 		if (!messages) return 0;
@@ -2359,42 +2973,81 @@ int SaveMail(int account, char* mailuid)
 		{
 			sprintf(mailnumber, "%d", loop);
 
-			if(!SendPOPCommand(UIDL, mailnumber))
+			if( !imap1 )
 			{
-				if(fd_mail)
-				{
-					fclose(fd_mail);
-				}
-
-
-				SendPOPCommand(QUIT, "");
-				return 0;
-			}
-//			printf("TuxMailD <SaveFile idx(%u) uid(%s)>\n", loop,uid);
-			if(!strcmp(uid,mailuid))
-			{
-				printf("TuxMailD <SaveFile idx(%u) uid(%s)>\n", loop,uid);
-
-				if(!SendPOPCommand(RETR, mailnumber))
+				if(!SendPOPCommand(UIDL, mailnumber))
 				{
 					if(fd_mail)
 					{
 						fclose(fd_mail);
 					}
 
-					SendPOPCommand(QUIT, "");
 					return 0;
 				}
+			}
+			else
+			{
+				if(!SendIMAPCommand(UIDL, mailnumber, ""))
+				{
+					if(fd_mail)
+					{
+						fclose(fd_mail);
+					}
+
+					return 0;
+				}
+			}
+			
+//			printf("TuxMailD <SaveFile idx(%u) uid(%s)>\n", loop,uid);
+			if(!strcmp(uid,mailuid))
+			{
+				printf("TuxMailD <SaveFile idx(%u) uid(%s)>\n", loop,uid);
+
+				if( !imap1 )
+				{ 
+					if(!SendPOPCommand(RETR, mailnumber))
+					{
+						if(fd_mail)
+						{
+							fclose(fd_mail);
+						}
+
+						return 0;
+					}					
 				
-				fclose(fd_mail);
-				SendPOPCommand(QUIT, "");
+					fclose(fd_mail);
+					SendPOPCommand(QUIT, "");
+				}
+				else
+				{
+					if(!SendIMAPCommand(RETR, mailnumber, ""))
+					{
+						if(fd_mail)
+						{
+							fclose(fd_mail);
+						}
+
+						return 0;
+					}					
+				
+					fclose(fd_mail);
+					SendIMAPCommand(LOGOUT, "", "");
+				}
 				return 1;
 				
 			}
 		}
 
 		fclose(fd_mail);
-		SendPOPCommand(QUIT, "");
+		
+		if( !imap1 )
+		{
+			SendPOPCommand(QUIT, "");
+		}
+		else
+		{
+			SendIMAPCommand(LOGOUT, "", "");
+		}
 	}
 
 	return 0;
@@ -2552,16 +3205,33 @@ int AddNewMailFile(int account, char *mailnumber)
 		
 		if(fd_mail)
 		{
-			if(!SendPOPCommand(RETR, mailnumber))
+			if( !imap )
 			{
-				idx1 = 0;
-				fclose(fd_mail);
+				if(!SendPOPCommand(RETR, mailnumber))
+				{
+					idx1 = 0;
+					fclose(fd_mail);
+				}
+				else
+				{
+//				printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
+					fclose(fd_mail);
+					ExecuteMail(mailfile);
+				}
 			}
 			else
 			{
-//				printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
-				fclose(fd_mail);
-				ExecuteMail(mailfile);
+				if(!SendIMAPCommand(RETR, mailnumber, ""))
+				{
+					idx1 = 0;
+					fclose(fd_mail);
+				}
+				else
+				{
+//					printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
+					fclose(fd_mail);
+					ExecuteMail(mailfile);
+				}
 			}
 		}
 
@@ -2605,14 +3275,40 @@ int CheckAccount(int account)
 	char *known_uids = 0, *ptr = 0;
 	char mailnumber[12];
 	int readmails = 0;
-	
+
+	imap = 0;
+		
 	// timestamp
 
-		time(&tt);
-		strftime(timeinfo, 22, "%R", localtime(&tt));
+	time(&tt);
+	strftime(timeinfo, 22, "%R", localtime(&tt));
 
-	// get mail count
+	// check if we should use an IMAP server
+	if( account_db[account].imap[0] != '\0' )
+	{
+		imap = 1;
 
+		// init connection to server
+		if(!SendIMAPCommand(INIT, account_db[account].imap, ""))
+		{
+			return 0;
+		}
+
+		// login to mail server
+		if(!SendIMAPCommand(LOGIN, account_db[account].user, account_db[account].pass))
+		{
+			return 0;
+		}
+		
+		// select folder, get mail count and UID
+		if(!SendIMAPCommand(SELECT, account_db[account].inbox, ""))
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		// get mail count
 		if(!SendPOPCommand(INIT, account_db[account].pop3))
 		{
 			return 0;
@@ -2620,28 +3316,25 @@ int CheckAccount(int account)
 
 		if(!SendPOPCommand(USER, account_db[account].user))
 		{
-			SendPOPCommand(QUIT, "");	
 			return 0;
 		}
 
 		if(!SendPOPCommand(PASS, account_db[account].pass))
 		{
-			SendPOPCommand(QUIT, "");	
 			return 0;
 		}
 
 		if(!SendPOPCommand(STAT, ""))
 		{
-			SendPOPCommand(QUIT, "");	
 			return 0;
 		}
 
 		if(!SendPOPCommand(RSET, ""))
 		{
-			SendPOPCommand(QUIT, "");	
 			return 0;
 		}
-
+	}
+	
 		account_db[account].mail_all = messages;
 		account_db[account].mail_new = 0;
 		deleted_messages = 0;
@@ -2702,47 +3395,95 @@ int CheckAccount(int account)
 				{
 					sprintf(mailnumber, "%d", loop);
 
-					if(!SendPOPCommand(UIDL, mailnumber))
+					if( !imap )
 					{
-						free(known_uids);
-
-						if(fd_status)
-						{
-							fclose(fd_status);
-						}
-
-						SendPOPCommand(QUIT, "");	
-						return 0;
-					}
-
-					if(skip_uid_check)
-					{
-						if(!SendPOPCommand(TOP, mailnumber))
+						if(!SendPOPCommand(UIDL, mailnumber))
 						{
 							free(known_uids);
-
+	
 							if(fd_status)
 							{
 								fclose(fd_status);
 							}
-
-							SendPOPCommand(QUIT, "");	
+	
 							return 0;
 						}
-
-						if(use_spamfilter && spam_detected)
+					}
+					else
+					{
+						if(!SendIMAPCommand(UIDL, mailnumber, ""))
 						{
-							if(!SendPOPCommand(DELE, mailnumber))
+							free(known_uids);
+	
+							if(fd_status)
+							{
+								fclose(fd_status);
+							}
+	
+							return 0;
+						}
+					}
+
+					if(skip_uid_check)
+					{
+						if( !imap )
+						{
+							if(!SendPOPCommand(TOP, mailnumber))
 							{
 								free(known_uids);
-
+	
 								if(fd_status)
 								{
 									fclose(fd_status);
 								}
-
-								SendPOPCommand(QUIT, "");	
+	
 								return 0;
+							}
+						}
+						else
+						{
+							if(!SendIMAPCommand(FETCH, mailnumber, ""))
+							{
+								free(known_uids);
+	
+								if(fd_status)
+								{
+									fclose(fd_status);
+								}
+	
+								return 0;
+							}
+						}
+
+						if(use_spamfilter && spam_detected)
+						{
+							if( !imap )
+							{
+								if(!SendPOPCommand(DELE, mailnumber))
+								{
+									free(known_uids);
+	
+									if(fd_status)
+									{
+										fclose(fd_status);
+									}
+	
+									return 0;
+								}
+							}
+							else
+							{
+								if(!SendIMAPCommand(DELE, mailnumber, ""))
+								{
+									free(known_uids);
+	
+									if(fd_status)
+									{
+										fclose(fd_status);
+									}
+	
+									return 0;
+								}
 							}
 						}
 						else
@@ -2767,17 +3508,33 @@ int CheckAccount(int account)
 						{
 							if(*(ptr - 2) == 'D')
 							{
-								if(!SendPOPCommand(DELE, mailnumber))
+								if( !imap )
 								{
-									free(known_uids);
-
-									if(fd_status)
+									if(!SendPOPCommand(DELE, mailnumber))
 									{
-										fclose(fd_status);
+										free(known_uids);
+	
+										if(fd_status)
+										{
+											fclose(fd_status);
+										}
+	
+										return 0;
 									}
-
-									SendPOPCommand(QUIT, "");	
-									return 0;
+								}
+								else
+								{
+									if(!SendIMAPCommand(DELE, mailnumber, ""))
+									{
+										free(known_uids);
+	
+										if(fd_status)
+										{
+											fclose(fd_status);
+										}
+	
+										return 0;
+									}
 								}
 
 								deleted_messages++;
@@ -2799,32 +3556,63 @@ int CheckAccount(int account)
 						}
 						else
 						{
-							if(!SendPOPCommand(TOP, mailnumber))
+							if( !imap )
 							{
-								free(known_uids);
-
-								if(fd_status)
-								{
-									fclose(fd_status);
-								}
-
-								SendPOPCommand(QUIT, "");	
-								return 0;
-							}
-
-							if(use_spamfilter && spam_detected)
-							{
-								if(!SendPOPCommand(DELE, mailnumber))
+								if(!SendPOPCommand(TOP, mailnumber))
 								{
 									free(known_uids);
-
+	
 									if(fd_status)
 									{
 										fclose(fd_status);
 									}
-
-									SendPOPCommand(QUIT, "");	
+	
 									return 0;
+								}
+							}
+							else
+							{
+								if(!SendIMAPCommand(FETCH, mailnumber, ""))
+								{
+									free(known_uids);
+	
+									if(fd_status)
+									{
+										fclose(fd_status);
+									}
+	
+									return 0;
+								}
+							}
+							if(use_spamfilter && spam_detected)
+							{
+								if( !imap )
+								{
+									if(!SendPOPCommand(DELE, mailnumber))
+									{
+										free(known_uids);
+	
+										if(fd_status)
+										{
+											fclose(fd_status);
+										}
+	
+										return 0;
+									}
+								}
+								else
+								{
+									if(!SendIMAPCommand(DELE, mailnumber, ""))
+									{
+										free(known_uids);
+	
+										if(fd_status)
+										{
+											fclose(fd_status);
+										}
+	
+										return 0;
+									}
 								}
 							}
 							else
@@ -2857,7 +3645,7 @@ int CheckAccount(int account)
 						j = readmails-i;
 						while(fgets(linebuffer,sizeof(linebuffer),fd_idx))
 						{
-//							printf("idx:%d j:%d line:%s\n",i,j,linebuffer);
+	//						printf("idx:%d j:%d line:%s\n",i,j,linebuffer);
 							j--;
 							if( !j ) break;							
 						}				
@@ -2873,11 +3661,10 @@ int CheckAccount(int account)
 					}
 				}
 				
-				if( !deleted_messages )
+				if(( !deleted_messages ) && ( !imap ))
 				{
 					if(!SendPOPCommand(RSET, ""))
 					{
-						SendPOPCommand(QUIT, "");	
 						return 0;
 					}
 				}
@@ -2919,11 +3706,25 @@ int CheckAccount(int account)
 
 	// close session
 
-		if(!SendPOPCommand(QUIT, ""))
+		if( !imap )
 		{
-			return 0;
+			if(!SendPOPCommand(QUIT, ""))
+			{
+				return 0;
+			}	
 		}
-
+		else
+		{
+			if(!SendIMAPCommand(CLOSE, "", ""))
+			{
+				return 0;
+			}	
+			if(!SendIMAPCommand(LOGOUT, "", ""))
+			{
+				return 0;
+			}	
+		}
+		
 	return 1;
 }
 
@@ -3382,7 +4183,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.32 $";
+	char cvs_revision[] = "$Revision: 1.33 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;

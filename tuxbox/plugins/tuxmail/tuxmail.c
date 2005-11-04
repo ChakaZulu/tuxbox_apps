@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.39  2005/11/04 15:59:32  robspr1
+ * - adding IMAP support
+ *
  * Revision 1.38  2005/08/19 19:00:54  robspr1
  * - add pin protection for config GUI
  *
@@ -268,6 +271,14 @@ void ReadConf()
 					sscanf(ptr + 6, "%s", maildb[index-'0'].pop3);
 				}
 			}
+			else if((ptr = strstr(line_buffer, "IMAP")) && (*(ptr+5) == '='))
+			{
+				char index = *(ptr+4);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 6, "%s", maildb[index-'0'].imap);
+				}
+			}
 			else if((ptr = strstr(line_buffer, "USER")) && (*(ptr+5) == '='))
 			{
 				char index = *(ptr+4);
@@ -306,6 +317,14 @@ void ReadConf()
 				if((index >= '0') && (index <= '9'))
 				{
 					sscanf(ptr + 7, "%s", maildb[index-'0'].spass);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "INBOX")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", maildb[index-'0'].inbox);
 				}
 			}
 		}
@@ -375,6 +394,7 @@ int WriteConf()
 	{
 		fprintf(fd_conf, "\nNAME%d=%s\n", loop, maildb[loop].namebox);
 		fprintf(fd_conf, "POP3%d=%s\n", loop, maildb[loop].pop3);
+		fprintf(fd_conf, "IMAP%d=%s\n", loop, maildb[loop].imap);
 		fprintf(fd_conf, "USER%d=%s\n", loop, maildb[loop].user);
 		fprintf(fd_conf, "PASS%d=%s\n", loop, maildb[loop].pass);
 		fprintf(fd_conf, "SMTP%d=%s\n", loop, maildb[loop].smtp);
@@ -383,6 +403,7 @@ int WriteConf()
 		fprintf(fd_conf, "AUTH%d=%d\n", loop, maildb[loop].auth);
 		fprintf(fd_conf, "SUSER%d=%s\n", loop, maildb[loop].suser);
 		fprintf(fd_conf, "SPASS%d=%s\n", loop, maildb[loop].spass);
+		fprintf(fd_conf, "INBOX%d=%s\n", loop, maildb[loop].inbox);
 		if(!maildb[loop + 1].user[0])
 		{
 			break;
@@ -1686,12 +1707,12 @@ void PaintSmtpMailHeader( int nEditDirectStyle , int nConfigPage)
 
 		if( nConfigPage < 10 )
 		{			
-			RenderString((osd == 'G') ? "POP3 / SMPT Einstellungen für die Mailbox:" : "POP3 / SMTP setting for mailbox:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-6  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, ORANGE);
+			RenderString((osd == 'G') ? "POP3/IMAP/SMTP Einstellungen Mailbox:" : "POP3/IMAP/SMTP  setting mailbox:", 2*BORDERSIZE, BORDERSIZE+3*FONTHEIGHT_SMALL-6  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, ORANGE);
 			sprintf(linebuffer,"%d",nConfigPage);
 			RenderString(linebuffer, 2*BORDERSIZE+380, BORDERSIZE+3*FONTHEIGHT_SMALL-6  , VIEWX-4*BORDERSIZE, LEFT, NORMAL, WHITE);			
 				
 			int i;
-			for( i=2; i<12; i++)
+			for( i=2; i<14; i++)
 			{
 				switch( i )
 				{
@@ -1738,6 +1759,14 @@ void PaintSmtpMailHeader( int nEditDirectStyle , int nConfigPage)
 					case 11: 
 						strcpy(linebuffer, "SPASS:"); 
 						strcpy(szInfo[i],maildb[nConfigPage].spass);
+						break; 
+					case 12: 
+						strcpy(linebuffer, "IMAP:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].imap);
+						break; 
+					case 13: 
+						strcpy(linebuffer, "INBOX:"); 
+						strcpy(szInfo[i],maildb[nConfigPage].inbox);
 						break; 
 				}
 				RenderString( linebuffer, 2*BORDERSIZE, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
@@ -1880,7 +1909,7 @@ void SaveConfigMailBox(int nConfigPage)
 	if( nConfigPage < 10 )
 	{				
 		int i;
-		for( i=2; i<12; i++)
+		for( i=2; i<14; i++)
 		{
 			switch( i )
 			{
@@ -1921,6 +1950,12 @@ void SaveConfigMailBox(int nConfigPage)
 					break; 
 				case 11: 
 					strncpy(maildb[nConfigPage].spass,szInfo[i],63);
+					break; 
+				case 12: 
+					strncpy(maildb[nConfigPage].imap,szInfo[i],63);
+					break; 
+				case 13: 
+					strncpy(maildb[nConfigPage].inbox,szInfo[i],63);
 					break; 
 			}
 		}
@@ -2169,7 +2204,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 		strcpy(szInfo[1],"Re: ");
 		strncpy(&szInfo[1][4],maildb[account].mailinfo[mailindex].subj,MAXLINELEN-5);
 		szInfo[1][MAXLINELEN-1]='\0';
-
+		
 	}
 	else
 	{
@@ -2939,7 +2974,7 @@ void EditMailFile(char* filename, int account, int mailindex )
   			case RC_DOWN:
   				if((nEditType == 2) && ( nEditLine < (MAXINFOLINES-1) ))
   				{
-					if(( nConfigPage == -1) || (nEditLine<12))
+					if(( nConfigPage == -1) || (nEditLine<(MAXINFOLINES-2)))
 					{
 						nEditLine ++;
 					}
@@ -3854,7 +3889,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.38 $";
+	char cvs_revision[] = "$Revision: 1.39 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;

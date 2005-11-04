@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.24  2005/11/04 16:00:24  robspr1
+ * - adding IMAP support
+ *
  * Revision 1.23  2005/07/05 19:59:35  robspr1
  * - add execution of special mail
  *
@@ -209,7 +212,8 @@ enum
 {
 	INIT, QUIT,
 	USER, PASS, STAT, UIDL, TOP, DELE, RETR, RSET,
-	EHLO, AUTH, MAIL, RCPT, DATA1, DATA2, DATA3
+	EHLO, AUTH, MAIL, RCPT, DATA1, DATA2, DATA3,
+	LOGIN, SELECT, FETCH, LOGOUT, CLOSE
 };
 
 // account database
@@ -218,6 +222,7 @@ struct
 {
 	char name[32];
 	char pop3[64];
+	char imap[64];
 	char user[64];
 	char pass[64];
 	char smtp[64];
@@ -226,6 +231,7 @@ struct
 	int  auth;
 	char suser[64];
 	char spass[64];
+	char inbox[64];
 	int  mail_all;
 	int  mail_new;
 
@@ -281,6 +287,9 @@ int messages, deleted_messages;
 int stringindex;
 int use_spamfilter, spam_entries, spam_detected;
 char uid[128];
+long v_uid;
+long m_uid;
+char imap;
 char header[1024];
 int headersize;
 char timeinfo[22];

@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.31  2005/11/04 16:00:06  robspr1
+ * - adding IMAP support
+ *
  * Revision 1.30  2005/08/19 19:00:35  robspr1
  * - add pin protection for config GUI
  *
@@ -337,7 +340,8 @@ int rcaltgrtable[] =
 #define KEYBOX_HEIGHT 25
 #define KEYBOX_WIDTH  90
 
-#define MAXINFOLINES 14
+
+#define MAXINFOLINES 15
 #define MAXLINELEN	 80
 
 #define KEYBOX_KEYS 12
@@ -461,6 +465,7 @@ struct
 	char status[8];	/* 000/000 */
 	int pincount;
 	char pop3[64];
+	char imap[64];
 	char user[64];
 	char pass[64];
 	char smtp[64];
@@ -469,6 +474,7 @@ struct
 	int  auth;
 	char suser[64];
 	char spass[64];
+	char inbox[64];
 	struct mi mailinfo[MAXMAIL];
 
 }maildb[10];
