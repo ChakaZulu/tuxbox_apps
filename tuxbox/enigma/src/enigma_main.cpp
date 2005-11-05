@@ -6543,7 +6543,26 @@ void eZapMain::nextMessage()
 		int showonly=msg.getTimeout()>=0;
 		if (!showonly)
 			hide();
-		pMsg = new eMessageBox(msg.getBody(), msg.getCaption(), showonly?0:eMessageBox::btOK);
+		int flags = 0;
+		switch (msg.getIcon()) 
+		{
+			case 1:
+				flags = eMessageBox::iconInfo;
+				break;
+			case 2:
+				flags = eMessageBox::iconWarning;
+				break;
+			case 3:
+				flags = eMessageBox::iconQuestion;
+				break;
+			case 4:
+				flags = eMessageBox::iconError;
+				break;
+		}
+		if (!showonly)
+			flags |= eMessageBox::btOK;
+			
+		pMsg = new eMessageBox(msg.getBody(), msg.getCaption(), flags);
 		pMsg->show();
 		if (!showonly)
 		{

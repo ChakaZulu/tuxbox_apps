@@ -65,9 +65,10 @@ class eZapMessage
 	int type;
 	eString caption, body;
 	int timeout;
+	int icon;
 public:
-	eZapMessage(int type, const eString &caption, const eString &body, int timeout=0)
-		: type(type), caption(caption), body(body), timeout(timeout)
+	eZapMessage(int type, const eString &caption, const eString &body, int timeout=0, int icon=-1)
+		: type(type), caption(caption), body(body), timeout(timeout), icon(icon)
 	{
 	}
 
@@ -82,6 +83,7 @@ public:
 
 	const eString & getCaption() const { return caption; }
 	const eString & getBody() const { return body; }
+	const int getIcon() const { return icon; }
 	void setTimeout(int _timeout)
 	{
 		timeout=_timeout;
