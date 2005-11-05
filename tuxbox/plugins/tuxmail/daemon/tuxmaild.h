@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.25  2005/11/05 17:29:31  robspr1
+ * - IMAP bugfix delete mails and restore Seen flag
+ *
  * Revision 1.24  2005/11/04 16:00:24  robspr1
  * - adding IMAP support
  *
@@ -213,7 +216,8 @@ enum
 	INIT, QUIT,
 	USER, PASS, STAT, UIDL, TOP, DELE, RETR, RSET,
 	EHLO, AUTH, MAIL, RCPT, DATA1, DATA2, DATA3,
-	LOGIN, SELECT, FETCH, LOGOUT, CLOSE
+	LOGIN, SELECT, FETCH, LOGOUT, CLOSE, FLAGS,
+	UNSEEN, EXPUNGE
 };
 
 // account database

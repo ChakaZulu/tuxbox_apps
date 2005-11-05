@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.34  2005/11/05 17:29:08  robspr1
+ * - IMAP bugfix delete mails and restore Seen flag
+ *
  * Revision 1.33  2005/11/04 16:00:37  robspr1
  * - adding IMAP support
  *
@@ -539,7 +542,7 @@ int ReadConf()
 			osd = 'G';
 		}
 
-		if(skin != 1 && skin != 2)
+		if(skin != 1 && skin != 2 && skin != 3)
 		{
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "SKIN=%d invalid, set to \"1\"", skin) : printf("TuxMailD <SKIN=%d invalid, set to \"1\">\n", skin);
 
@@ -2039,6 +2042,18 @@ int SendIMAPCommand(int command, char *param, char *param2)
 
 				break;
 
+			case FLAGS:
+
+				sprintf(send_buffer, "? FETCH %s FLAGS\r\n",param);
+
+				break;
+
+			case UNSEEN:
+
+				sprintf(send_buffer, "? STORE %s -FLAGS (\\Seen)\r\n",param);
+
+				break;
+
 			case FETCH:
 
 				sprintf(send_buffer, "? FETCH %s (FLAGS BODY[HEADER.FIELDS (DATE FROM SUBJECT)])\r\n",param);
@@ -2048,6 +2063,12 @@ int SendIMAPCommand(int command, char *param, char *param2)
 			case DELE:
 
 				sprintf(send_buffer, "? STORE %s +FLAGS (\\Deleted)\r\n",param);
+
+				break;
+
+			case EXPUNGE:
+
+				sprintf(send_buffer, "? EXPUNGE\r\n");
 
 				break;
 
@@ -2219,8 +2240,12 @@ int SendIMAPCommand(int command, char *param, char *param2)
 					break;
 					
 				case LOGIN:
+				case DELE:
+				case CLOSE:
+				case EXPUNGE:
+				case UNSEEN:
 
-					if(!strncmp(recv_buffer, "? OK", 4))
+					if(!strncmp(&recv_buffer[nRead], "? OK", 4))
 					{
 						return 1;
 					}
@@ -2256,6 +2281,24 @@ int SendIMAPCommand(int command, char *param, char *param2)
 					sscanf(ptr2, "UID %ld", &m_uid);
 					sprintf(uid,"%08lX%08lX",v_uid,m_uid);
 
+					if(!strncmp(&recv_buffer[nRead], "? OK", 4))
+					{
+						return 1;
+					}
+					break;
+
+				case FLAGS:
+
+					// check if already seen
+					if( strstr(recv_buffer, "\\Seen") == NULL )
+					{
+						*param2='S';
+					}
+					else
+					{
+						*param2='U';
+					}					
+					
 					if(!strncmp(&recv_buffer[nRead], "? OK", 4))
 					{
 						return 1;
@@ -2408,26 +2451,6 @@ int SendIMAPCommand(int command, char *param, char *param2)
 					}
 					break;
 					
-				case DELE:
-
-					if(!strncmp(recv_buffer, "? OK", 4))
-					{
-						return 1;
-					}
-					break;
-
-				case CLOSE:
-
-					if(!strncmp(recv_buffer, "? OK", 4))
-					{
-						return 1;
-					}
-					break;
-
-				case RETR:
-					return 1;
-					break;
-
 				case LOGOUT:
 
 					close(sock);
@@ -2435,24 +2458,10 @@ int SendIMAPCommand(int command, char *param, char *param2)
 					
 				default:
 					slog ? syslog(LOG_DAEMON | LOG_INFO, "IMAP Server (%s)", recv_buffer) : printf("TuxMailD <IMAP Server (%s)>\n", recv_buffer);
-					
-			}
-	/*
-		}
-		else
-		{
-			if((ptr = strchr(recv_buffer, '\r')))
-			{
-				*ptr = 0;
+				
 			}
 
-			slog ? syslog(LOG_DAEMON | LOG_INFO, "Server Error (%s)", recv_buffer + 5) : printf("TuxMailD <Server Error (%s)>\n", recv_buffer + 5);
-
-			close(sock);
-
-			return 0;
-		}
-*/
+	slog ? syslog(LOG_DAEMON | LOG_INFO, "IMAP Server (%s)", recv_buffer) : printf("TuxMailD <IMAP Server (%s)>\n", recv_buffer);
 	return 0;
 }
 
@@ -3020,6 +3029,17 @@ int SaveMail(int account, char* mailuid)
 				}
 				else
 				{
+					char seen;
+					if(!SendIMAPCommand(FLAGS, mailnumber, &seen))
+					{
+						if(fd_mail)
+						{
+							fclose(fd_mail);
+						}
+
+						return 0;
+					}
+					
 					if(!SendIMAPCommand(RETR, mailnumber, ""))
 					{
 						if(fd_mail)
@@ -3029,7 +3049,20 @@ int SaveMail(int account, char* mailuid)
 
 						return 0;
 					}					
-				
+
+					if( seen == 'U' )
+					{
+						if(!SendIMAPCommand(UNSEEN, mailnumber, ""))
+						{
+							if(fd_mail)
+							{
+								fclose(fd_mail);
+							}
+
+							return 0;
+						}					
+					}
+									
 					fclose(fd_mail);
 					SendIMAPCommand(LOGOUT, "", "");
 				}
@@ -3220,8 +3253,15 @@ int AddNewMailFile(int account, char *mailnumber)
 				}
 			}
 			else
-			{
-				if(!SendIMAPCommand(RETR, mailnumber, ""))
+			{				
+				char seen=0;
+
+				if(!SendIMAPCommand(FLAGS, mailnumber, &seen))
+				{
+					seen=0;
+				}
+									
+				if((!seen) || (!SendIMAPCommand(RETR, mailnumber, "")))
 				{
 					idx1 = 0;
 					fclose(fd_mail);
@@ -3229,6 +3269,11 @@ int AddNewMailFile(int account, char *mailnumber)
 				else
 				{
 //					printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
+					if( seen == 'U' )
+					{
+						SendIMAPCommand(UNSEEN, mailnumber, "");
+					}
+
 					fclose(fd_mail);
 					ExecuteMail(mailfile);
 				}
@@ -3715,6 +3760,10 @@ int CheckAccount(int account)
 		}
 		else
 		{
+			if(!SendIMAPCommand(EXPUNGE, "", ""))
+			{
+				return 0;
+			}	
 			if(!SendIMAPCommand(CLOSE, "", ""))
 			{
 				return 0;
@@ -4183,7 +4232,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.33 $";
+	char cvs_revision[] = "$Revision: 1.34 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
