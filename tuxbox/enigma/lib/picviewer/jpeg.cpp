@@ -1,5 +1,5 @@
 #ifndef DISABLE_FILE
-#include "format_config.h"
+#include <lib/picviewer/format_config.h>
 #ifdef FBV_SUPPORT_JPEG
 #include <lib/picviewer/pictureviewer.h>
 #include <fcntl.h>

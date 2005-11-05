@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.cpp,v 1.41 2005/10/12 20:46:26 digi_casi Exp $
+ * $Id: pictureviewer.cpp,v 1.42 2005/11/05 09:54:40 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -42,7 +42,7 @@
 #include <lib/gdi/font.h>
 #include <lib/picviewer/pictureviewer.h>
 #include "fb_display.h"
-#include "format_config.h"
+#include <lib/picviewer/format_config.h>
 #include <lib/driver/eavswitch.h>
 
 /* resize.cpp */
