@@ -87,6 +87,7 @@ if test "$BOXTYPE" = "dbox2" ; then
 else
 	if test "$WEBIF" = "expert" ; then
 		TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
+		TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 	fi
 fi
 

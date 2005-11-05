@@ -1,12 +1,37 @@
+/*
+ * $Id: movieplayer.cpp,v 1.2 2005/11/05 15:00:26 digi_casi Exp $
+ *
+ * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ *          based on vlc plugin by mechatron
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
+ 
 #include <plugin.h>
 
 #include "movieplayer.h"
 
-#define REL "Streaming Client GUI, Version 0.0.1 "
+#define REL "Streaming Client GUI, Version 0.0.2 "
 #define CONFFILE0 "/etc/movieplayer.xml"
 #define CONFFILE1 "/var/tuxbox/config/movieplayer.xml"
 
+player_value eSCplay::play_parms;
+
 extern "C" int plugin_exec(PluginParam *par);
+extern eString getWebifVersion();
 
 bool sortByName(const PLAYLIST& a, const PLAYLIST& b)
 {
@@ -24,6 +49,7 @@ bool sortByType(const PLAYLIST& a, const PLAYLIST& b)
 eSCGui::eSCGui(): MODE(DATA), menu(true)
 {
 	int fd = eSkin::getActive()->queryValue("fontsize", 20);
+	
 	bufferingBox = new eMessageBox(_("Please wait..."),_("Buffering..."), eMessageBox::iconInfo);
 
 	cmove(ePoint(90, 110)); cresize(eSize(550, 350));
@@ -33,65 +59,70 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 
 	eConfig::getInstance()->getKey("/enigma/plugins/movieplayer/lastmode", MODE);
 
-	list=new eListBox<eListBoxEntryText>(this);
+	list = new eListBox<eListBoxEntryText>(this);
 	list->move(ePoint(10, 10));
 	list->resize(eSize(clientrect.width() - 20, 260));
 	CONNECT(list->selected, eSCGui::listSelected);
 	CONNECT(list->selchanged, eSCGui::listSelChanged);
 
 	eLabel *l_root = new eLabel(this);
-	l_root->move(ePoint(10, clientrect.height()-80));l_root->resize(eSize(130, fd+10));
-	l_root->setProperty("align","center"); l_root->setProperty("vcenter","");
-	l_root->setProperty("backgroundColor","std_dred");l_root->setText("File");
+	l_root->move(ePoint(10, clientrect.height() - 80));
+	l_root->resize(eSize(130, fd + 10));
+	l_root->setProperty("align", "center"); 
+	l_root->setProperty("vcenter", "");
+	l_root->setProperty("backgroundColor", "std_dred");
+	l_root->setText("File");
 
 	eLabel *l_vcd = new eLabel(this);
-	l_vcd->move(ePoint(140, clientrect.height()-80));l_vcd->resize(eSize(130, fd+10));
-	l_vcd->setProperty("align","center"); l_vcd->setProperty("vcenter","");
-	l_vcd->setProperty("backgroundColor","std_dgreen");l_vcd->setText("VCD");
+	l_vcd->move(ePoint(140, clientrect.height() - 80));
+	l_vcd->resize(eSize(130, fd + 10));
+	l_vcd->setProperty("align", "center"); 
+	l_vcd->setProperty("vcenter", "");
+	l_vcd->setProperty("backgroundColor", "std_dgreen");
+	l_vcd->setText("VCD");
 
 	eLabel *l_svcd = new eLabel(this);
-	l_svcd->move(ePoint(270, clientrect.height()-80)); l_svcd->resize(eSize(130, fd+10));
-	l_svcd->setProperty("align","center"); l_svcd->setProperty("vcenter","");
-	l_svcd->setProperty("backgroundColor","std_dyellow"); l_svcd->setText("SVCD");
+	l_svcd->move(ePoint(270, clientrect.height() - 80)); 
+	l_svcd->resize(eSize(130, fd + 10));
+	l_svcd->setProperty("align", "center"); 
+	l_svcd->setProperty("vcenter", "");
+	l_svcd->setProperty("backgroundColor", "std_dyellow"); 
+	l_svcd->setText("SVCD");
 
 	eLabel *l_dvd = new eLabel(this);
-	l_dvd->move(ePoint(400, clientrect.height()-80));l_dvd->resize(eSize(130, fd+10));
-	l_dvd->setProperty("align","center"); l_dvd->setProperty("vcenter","");
-	l_dvd->setProperty("backgroundColor","std_dblue");l_dvd->setText("DVD");
+	l_dvd->move(ePoint(400, clientrect.height() - 80));
+	l_dvd->resize(eSize(130, fd + 10));
+	l_dvd->setProperty("align", "center"); 
+	l_dvd->setProperty("vcenter", "");
+	l_dvd->setProperty("backgroundColor", "std_dblue");
+	l_dvd->setText("DVD");
 
 	eStatusBar *status = new eStatusBar(this);
-	status->move(ePoint(10, clientrect.height()-35));status->resize(eSize(clientrect.width()-20, 30));
+	status->move(ePoint(10, clientrect.height() - 35));
+	status->resize(eSize(clientrect.width() - 20, 30));
 	status->loadDeco();
 
 	timer = new eTimer(eApp);
 	CONNECT(timer->timeout, eSCGui::playerStop);
 
 	bool loading = false;
-	if (FILE *f = fopen(CONFFILE0, "r"))
-	{
-		fclose(f);
-		loading = loadXML(CONFFILE0);
-	}
+	if (access(CONFFILE1, R_OK) == 0)
+		loading = loadXML(CONFFILE1);
 	else
-	{
-		if (FILE *f = fopen(CONFFILE1, "r"))
-		{
-			fclose(f);
-			loading = loadXML(CONFFILE1);
-		}
-	}
+	if (access(CONFFILE0, R_OK) == 0)
+		loading = loadXML(CONFFILE0);
+		
 	if (loading)
 		loadList();
 	else
 	{
 		hide();
-		eMessageBox msg(_("Unable to open configuration file\nor parse error in movieplayer.xml"), _("Error"), eMessageBox::btOK);
+		eMessageBox msg(_("Unable to open or parse configuration file movieplayer.xml"), _("Error"), eMessageBox::btOK);
 		msg.show();
 		msg.exec();
 		msg.hide();
 		show();
 	}
-
 }
 
 eSCGui::~eSCGui()
@@ -113,16 +144,22 @@ void eSCGui::loadList()
 	switch(MODE)
 	{
 		case DATA:
-			setText("VLC File-Mode  Path: " + pathfull);
+			setText("VLC File Mode  Path: " + pathfull);
 			break;
 		case VCD:
-			tmp2 = "VCD-Mode";  setText("VLC" + tmp2 + "  Drive: " + cddrive); tmp3="vcd:" + cddrive + "@1:1";
+			tmp2 = "VCD Mode";  
+			setText("VLC" + tmp2 + "  Drive: " + cddrive); 
+			tmp3 = "vcd:" + cddrive + "@1:1";
 			break;
 		case SVCD:
-			tmp2 = "SVCD-Mode"; setText("VLC" + tmp2 + "  Drive: " + cddrive); tmp3="vcd:" + cddrive + "@1:1";
+			tmp2 = "SVCD Mode"; 
+			setText("VLC" + tmp2 + "  Drive: " + cddrive); 
+			tmp3 = "vcd:" + cddrive + "@1:1";
 			break;
 		case DVD:
-			tmp2 = "DVD-Mode";  setText("VLC" + tmp2 + "  Drive: " + cddrive); tmp3="dvdsimple:" + cddrive + "@1:1";
+			tmp2 = "DVD Mode";  
+			setText("VLC" + tmp2 + "  Drive: " + cddrive); 
+			tmp3 = "dvdsimple:" + cddrive + "@1:1";
 			break;
 	}
 
@@ -135,17 +172,17 @@ void eSCGui::loadList()
 	{
 		if (MODE == DATA)
 		{
-			unsigned int start=0;
-			for (unsigned int pos=response.find('\n',0) ; pos != std::string::npos ; pos=response.find('\n',start))
+			unsigned int start = 0;
+			for (unsigned int pos = response.find('\n', 0); pos != std::string::npos; pos = response.find('\n', start))
 			{
-				eString entry = response.substr(start, pos-start);
+				eString entry = response.substr(start, pos - start);
 				//eDebug("%s",entry.c_str());
-				if (entry.find("DIR:")==0)
+				if (entry.find("DIR:") == 0)
 				{
-					if (entry.find("/..")!= eString::npos)
+					if (entry.find("/..") != eString::npos)
 					{
-						if (pathfull == startdir || entry.mid(4, entry.length()-7) == startdir)
-							eDebug("[VLC] startdir=pathdir");
+						if (pathfull == startdir || entry.mid(4, entry.length() - 7) == startdir)
+							eDebug("[VLC] startdir = pathdir");
 						else
 						{
 							a.Filename = _("[GO UP]");
@@ -164,8 +201,9 @@ void eSCGui::loadList()
 				}
 				else
 				{
-					eString tmp = entry; tmp.upper();
-					for(ExtList::iterator p = extList.begin(); p != extList.end(); p++)
+					eString tmp = entry; 
+					tmp.upper();
+					for (ExtList::iterator p = extList.begin(); p != extList.end(); p++)
 					{
 						if (tmp.find((*p).EXT) != eString::npos)
 						{
@@ -184,10 +222,10 @@ void eSCGui::loadList()
 		else
 		{
 			char line[1024];
-			strcpy(line,cddrive.c_str());
-			if (line[strlen(line)-1] == ':' && strlen(line)==2) pathfull = cddrive + "/";
+			strcpy(line, cddrive.c_str());
+			if (line[strlen(line) - 1] == ':' && strlen(line) == 2) pathfull = cddrive + "/";
 
-			for(ExtList::iterator p = extList.begin(); p!=extList.end() ;p++)
+			for (ExtList::iterator p = extList.begin(); p != extList.end(); p++)
 			{
 				if ((*p).NAME == tmp2)
 				{
@@ -207,22 +245,22 @@ void eSCGui::loadList()
 
 void eSCGui::viewList()
 {
-	sort(playList.begin(),playList.end(),sortByType);
+	sort(playList.begin(), playList.end(), sortByType);
 
 	list->beginAtomic();
 	list->clearList();
-	int current=0;
+	int current = 0;
 
-	for (PlayList::iterator p = playList.begin(); p != playList.end() ;p++)
+	for (PlayList::iterator p = playList.begin(); p != playList.end(); p++)
 	{
-		switch((*p).Filetype)
+		switch ((*p).Filetype)
 		{
 			case GOUP:
-				new eListBoxEntryText(list,(*p).Filename,(void*)current,2);
+				new eListBoxEntryText(list, (*p).Filename, (void *)current, 2);
 				break;
 			case DIRS:
 			case FILES:
-				new eListBoxEntryText(list,(*p).Filename,(void*)current);
+				new eListBoxEntryText(list, (*p).Filename, (void *)current);
 				break;
 		}
 		current++;
@@ -236,13 +274,13 @@ void eSCGui::setStatus(int val)
 {
 	if (playList.size())
 	{
-		switch(playList[val].Filetype)
+		switch (playList[val].Filetype)
 		{
 			case GOUP:
-				list->setHelpText(_("Go up a directory"));
+				list->setHelpText(_("Go up one directory level"));
 				break;
 			case DIRS:
-				list->setHelpText(_("Enter Directory"));
+				list->setHelpText(_("Enter directory"));
 				break;
 			case FILES:
 				list->setHelpText(_("Press OK to play"));
@@ -277,15 +315,20 @@ bool eSCGui::loadXML(eString file)
 	extList.clear();
 
 	XMLTreeParser parser("ISO-8859-1");
-	int done=0;
 
-	FILE *in=fopen(file.c_str(), "rt");
-	if (!in) { eDebug("[VLC] <unable to open %s>",file.c_str()); return false; }
+	FILE *in = fopen(file.c_str(), "rt");
+	if (!in) 
+	{ 
+		eDebug("[VLC] <unable to open %s>", file.c_str()); 
+		return false; 
+	}
 
-	do
+	bool done = false;
+	while (done == 0)
 	{
-		char buf[2048]; unsigned int len=fread(buf, 1, sizeof(buf), in);
-		done=len<sizeof(buf);
+		char buf[2048]; 
+		unsigned int len = fread(buf, 1, sizeof(buf), in);
+		done = len < sizeof(buf);
 		if (!parser.Parse(buf, len, done))
 		{
 			eDebug("[VLC] <parse: %s at line %d>", parser.ErrorString(parser.GetErrorCode()), parser.GetCurrentLineNumber());
@@ -293,15 +336,14 @@ bool eSCGui::loadXML(eString file)
 			return false;
 		}
 	}
-	while (!done);
 
 	fclose(in);
 
-	XMLTreeNode *root=parser.RootNode();
+	XMLTreeNode *root = parser.RootNode();
 	if (!root)
 		return false;
 
-	int extcount=0;
+	int extcount = 0;
 	for (XMLTreeNode *node = root->GetChild(); node; node = node->GetNext())
 	{
 		if (!strcmp(node->GetType(), "server"))
@@ -317,20 +359,22 @@ bool eSCGui::loadXML(eString file)
 				VLCsend::getInstance()->send_parms.AUTH = tmpuser + ":" + tmppass;
 
 		}
-		else if (!strcmp(node->GetType(), "config"))
+		else 
+		if (!strcmp(node->GetType(), "config"))
 		{
 			startdir = node->GetAttributeValue("startdir");
 			cddrive  = node->GetAttributeValue("cddrive");
-
-			pathfull=startdir;
+			pathfull = startdir;
 		}
-		else if (!strcmp(node->GetType(), "codec"))
+		else 
+		if (!strcmp(node->GetType(), "codec"))
 		{
 			str_mpeg1 = node->GetAttributeValue("mpeg1");
 			str_mpeg2 = node->GetAttributeValue("mpeg2");
 			str_audio = node->GetAttributeValue("audio");
 		}
-		else if (!strcmp(node->GetType(), "setup"))
+		else 
+		if (!strcmp(node->GetType(), "setup"))
 		{
 			eString tmpname = node->GetAttributeValue("name");
 			eString tmpext = node->GetAttributeValue("ext");
@@ -350,25 +394,16 @@ bool eSCGui::loadXML(eString file)
 			else
 			{
 				EXTLIST a;
-				a.NAME			= tmpname;
-				a.EXT			= "." + tmpext;
-				a.VRATE			= tmpvrate;
-				if (tmpvtrans == "1")
-					a.VTRANS = true;
-				else
-					a.VTRANS = false;
-				a.VCODEC		= tmpvcodec;
-				a.VSIZE			= tmpvsize;
-				a.ARATE			= tmparate;
-				a.ITEM			= extcount++;
-				if (tmpatrans == "1")
-					a.ATRANS = true;
-				else
-					a.ATRANS = false;
-				if (tmpac3 == "1")
-					a.AC3 = true;
-				else
-					a.AC3 = false;
+				a.NAME = tmpname;
+				a.EXT = "." + tmpext;
+				a.VRATE = tmpvrate;
+				a.VTRANS = (tmpvtrans == "1");
+				a.VCODEC = tmpvcodec;
+				a.VSIZE	 = tmpvsize;
+				a.ARATE = tmparate;
+				a.ITEM = extcount++;
+				a.ATRANS = (tmpatrans == "1");
+				a.AC3 = (tmpac3 == "1");
 				extList.push_back(a);
 			}
 		}
@@ -396,32 +431,31 @@ bool eSCGui::loadXML(eString file)
 
 void eSCGui::parseSout(int val)
 {
-	int curr=playList[val].Extitem;
+	int curr = playList[val].Extitem;
 
-	//AC3
-	if (extList[curr].AC3)
-		eSCplay::play_parms.ACT_AC3 = true;
-	else
-		eSCplay::play_parms.ACT_AC3 = false;
+	eSCplay::play_parms.ACT_AC3 = extList[curr].AC3;
 
 	eString res_horiz, res_vert;
 	
-	if (extList[curr].VSIZE 	== "352x288")
+	if (extList[curr].VSIZE == "352x288")
 	{
 		res_horiz = "352";
 		res_vert = "288";
 	}
-	else if (extList[curr].VSIZE	== "352x576")
+	else 
+	if (extList[curr].VSIZE == "352x576")
 	{
 		res_horiz = "352";
 		res_vert = "576";
 	}
-	else if (extList[curr].VSIZE	== "480x576")
+	else 
+	if (extList[curr].VSIZE == "480x576")
 	{
 		res_horiz = "480";
 		res_vert = "576";
 	}
-	else if (extList[curr].VSIZE 	== "576x576")
+	else 
+	if (extList[curr].VSIZE == "576x576")
 	{
 		res_horiz = "576";
 		res_vert = "576";
@@ -433,7 +467,7 @@ void eSCGui::parseSout(int val)
 	}
 
 	eString conf = "#";
-	if (extList[curr].VTRANS == true || extList[curr].ATRANS == true)
+	if (extList[curr].VTRANS || extList[curr].ATRANS)
 	{
 		conf += "transcode{";
 		if (extList[curr].VTRANS == true)
@@ -464,7 +498,7 @@ void eSCGui::showMenu()
 	if (!menu)
 	{
 		hide();
-		resize(eSize(550,350));
+		resize(eSize(550, 350));
 		show();
 
 		timer->stop();
@@ -479,7 +513,8 @@ void eSCGui::playerStop()
 	{
 		if (MODE == DATA && !menu)
 		{
-			if (next_val >= (int) playList.size()) next_val=0;
+			if (next_val >= (int) playList.size()) 
+				next_val = 0;
 
 			if (playList[next_val].Filetype == FILES)
 			{
@@ -492,7 +527,7 @@ void eSCGui::playerStop()
 	}
 	else
 	{
-		if (! eSCplay::play_parms.BUFFERFILLED)
+		if (!eSCplay::play_parms.BUFFERFILLED)
 			bufferingBox->show();
 		else
 			bufferingBox->hide();
@@ -506,7 +541,7 @@ void eSCGui::playerStart(int val)
 	if (menu)
 	{
 		hide();
-		resize(eSize(0,0));
+		resize(eSize(0, 0));
 		show();
 		menu = false;
 	}
@@ -533,13 +568,14 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 
 			if (eSCplay::play_parms.STAT != eSCplay::STOPPED)
 			{
-				eSCplay::play_parms.STAT=eSCplay::STOPPED;
+				eSCplay::play_parms.STAT = eSCplay::STOPPED;
 				showMenu();
 			}
 			else
 				close(0);
 		}
-		else if (e.action == &i_cursorActions->help && menu)
+		else 
+		if (e.action == &i_cursorActions->help && menu)
 		{
 			hide();
 			eSCGuiInfo dlg;
@@ -548,7 +584,8 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			dlg.hide();
 			show();
 		}
-		else if (e.action == &i_shortcutActions->red)
+		else 
+		if (e.action == &i_shortcutActions->red)
 		{
 			if (menu)
 			{
@@ -559,11 +596,12 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			else
 				eSCplay::play_parms.STAT = eSCplay::REW;
 		}
-		else if (e.action == &i_shortcutActions->green)
+		else 
+		if (e.action == &i_shortcutActions->green)
 		{
 			if (menu)
 			{
-				MODE=VCD;
+				MODE = VCD;
 				loadList();
 			}
 			else
@@ -574,41 +612,88 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 					eSCplay::play_parms.STAT = eSCplay::PLAY;
 			}
 		}
-		else if (e.action == &i_shortcutActions->yellow)
+		else 
+		if (e.action == &i_shortcutActions->yellow)
 		{
 			if (menu)
 			{
-				MODE=SVCD;
+				MODE = SVCD;
 				loadList();
 			}
 			else
 				eSCplay::play_parms.STAT = eSCplay::STOPPED;
 		}
-		else if (e.action == &i_shortcutActions->blue)
+		else 
+		if (e.action == &i_shortcutActions->blue)
 		{
 			if (menu)
 			{
-				MODE=DVD;
+				MODE = DVD;
 				loadList();
 			}
 			else
 				eSCplay::play_parms.STAT = eSCplay::FF;
 		}
-		else if (e.action == &i_shortcutActions->number1) { eSCplay::play_parms.JUMPMIN = 1; new_jump=true; }
-		else if (e.action == &i_shortcutActions->number2) { eSCplay::play_parms.JUMPMIN = 2; new_jump=true; }
-		else if (e.action == &i_shortcutActions->number3) { eSCplay::play_parms.JUMPMIN = 3; new_jump=true; }
-		else if (e.action == &i_shortcutActions->number4) { eSCplay::play_parms.JUMPMIN = 4; new_jump=true; }
-		else if (e.action == &i_shortcutActions->number5) { eSCplay::play_parms.JUMPMIN = 5; new_jump=true; }
-		else if (e.action == &i_shortcutActions->number6) { eSCplay::play_parms.JUMPMIN = 6; new_jump=true; }
-		else if (e.action == &i_shortcutActions->number7) { eSCplay::play_parms.JUMPMIN = 7; new_jump=true; }
-		else if (e.action == &i_shortcutActions->number8) { eSCplay::play_parms.JUMPMIN = 8; new_jump=true; }
-		else if (e.action == &i_shortcutActions->number9) { eSCplay::play_parms.JUMPMIN = 9; new_jump=true; }
+		else 
+		if (e.action == &i_shortcutActions->number1) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 1; 
+			new_jump = true; 
+		}
+		else 
+		if (e.action == &i_shortcutActions->number2) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 2; 
+			new_jump = true; 
+		}
+		else 
+		if (e.action == &i_shortcutActions->number3) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 3; 
+			new_jump = true; 
+		}
+		else 
+		if (e.action == &i_shortcutActions->number4) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 4; 
+			new_jump = true; 
+		}
+		else 
+		if (e.action == &i_shortcutActions->number5) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 5; 
+			new_jump = true; 
+		}
+		else 
+		if (e.action == &i_shortcutActions->number6) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 6; 
+			new_jump = true; 	
+		}
+		else 
+		if (e.action == &i_shortcutActions->number7) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 7; 
+			new_jump = true; 
+		}
+		else 
+		if (e.action == &i_shortcutActions->number8) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 8; 
+			new_jump = true; 
+		}
+		else 
+		if (e.action == &i_shortcutActions->number9) 
+		{ 
+			eSCplay::play_parms.JUMPMIN = 9; 
+			new_jump = true; 
+		}
 		else
 			break;
 
 		if (new_jump)
 		{
-			eMessageBox mb(eString().sprintf("skip +/- %d minute(s)",eSCplay::play_parms.JUMPMIN).c_str(), _("information"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK, 3);
+			eMessageBox mb(eString().sprintf("Skip +/- %d minute(s)", eSCplay::play_parms.JUMPMIN).c_str(), _("Information"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK, 3);
 			mb.show();
 			mb.exec();
 			mb.hide();
@@ -620,38 +705,36 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 	return eWindow::eventHandler(e);
 }
 
-static char * NAME[]={
-"Keys (Menu is not visible)",
-"red:",
-_("Start skipping reverse"),
-"green:",
-_("Resync"),
-"yellow:",
-_("Select next entry"),
-"blue:",
-_("Start skipping forward"),
-"1-9:",
-"Set skip",
-" "
+static char * NAME[] = 
+{
+	"Keys (Menu is not visible)",
+	"red:",
+	_("Start skipping reverse"),
+	"green:",
+	_("Resync"),
+	"yellow:",
+	_("Select next entry"),
+	"blue:",
+	_("Start skipping forward"),
+	"1 - 9:",
+	"Set skip",
+	" "
 };
 
 void eSCGuiInfo::info()
 {
-	cmove(ePoint(140, 100)); cresize(eSize(440, 420)); setText(_("Help window"));
+	cmove(ePoint(140, 100)); 
+	cresize(eSize(440, 420)); 
+	setText(_("Help window"));
 
-	eListBox<eListBoxEntryText> *list=new eListBox<eListBoxEntryText>(this);
+	eListBox<eListBoxEntryText> *list = new eListBox<eListBoxEntryText>(this);
 	list->move(ePoint(5, 5));
-	list->resize(eSize(clientrect.width()-10, clientrect.height()-10));
+	list->resize(eSize(clientrect.width() - 10, clientrect.height() - 10));
 
-	new eListBoxEntryText(list,REL);
-	bool doexit=0; int i=0;
-	while(!doexit)
-	{
-		if (NAME[i] == " ")
-			doexit = true;
-		else
-			new eListBoxEntryText(list,NAME[i++]);
-	}
+	new eListBoxEntryText(list, REL);
+	int i = 0;
+	while (NAME[i] != " ")
+		new eListBoxEntryText(list, NAME[i++]);
 }
 
 void eSCplay::playnow()
@@ -832,12 +915,68 @@ int eSCplay::PlayStreamThread(void *mrl)
 	return 0;
 }
 
+size_t CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
+{
+	std::string *pStr = (std::string *) data;
+	*pStr += (char*) ptr;
+	return size * nmemb;
+}
+
+CURLcode VLCsend::sendGetRequest (const eString& url, eString & response)
+{
+	CURL *curl;
+	CURLcode httpres;
+
+	eString tmpurl= "http://" + send_parms.IP + ":" + send_parms.IF_PORT + url;
+	//eDebug("[VLC] GET: %s", tmpurl.c_str());
+
+	curl = curl_easy_init();
+	curl_easy_setopt(curl, CURLOPT_URL, tmpurl.c_str());
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+	curl_easy_setopt(curl, CURLOPT_FILE, (void *)&response);
+
+	if(send_parms.AUTH)
+		curl_easy_setopt (curl, CURLOPT_USERPWD, send_parms.AUTH.c_str());	
+	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
+	httpres = curl_easy_perform (curl);
+	//eDebug("[VLC] HTTP Result: %d", httpres);
+	curl_easy_cleanup(curl);
+	return httpres;
+}
+
+void VLCsend::send(eString val)
+{
+	send_parms.RESPONSE = "";
+	if(send_parms.IP && send_parms.IF_PORT && val)
+		sendGetRequest(val, send_parms.RESPONSE);
+	else
+		eDebug("[VLC] <send>");
+}
+
+VLCsend *VLCsend::getInstance()
+{
+	static VLCsend *m_VLCsend = NULL;
+	if (m_VLCsend == NULL)
+		m_VLCsend = new VLCsend();
+	return m_VLCsend;
+}
 
 int plugin_exec(PluginParam *par)
 {
 	eSCGui dlg;
-	dlg.show();
-	dlg.exec();
-	dlg.hide();
+	eString webifVersion = getWebifVersion();
+	if (webifVersion.find("Expert") != eString::npos)
+	{
+		dlg.show();
+		dlg.exec();
+		dlg.hide();
+	}
+	else
+	{
+		eMessageBox msg(eString("This plugin requires the EXPERT version of the web interface to be installed.\nInstalled web interface version: " + webifVersion), _("Error"), eMessageBox::btOK);
+		msg.show();
+		msg.exec();
+		msg.hide();
+	}
 	return 0;
 }

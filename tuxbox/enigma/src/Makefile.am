@@ -46,6 +46,7 @@ enigma_LDADD = \
 	@CONFIGFILE_LIBS@ \
 	@NET_LIBS@ \
 	@TUXTXT_LIBS@ \
+	@CURL_LIBS@ \
 	-ldl -lpthread -lcrypt -lresolv -ljpeg -lungif
 
 enigma$(EXEEXT): $(enigma_OBJECTS) $(enigma_DEPENDENCIES) $(enigma_LDADD_WHOLE)
