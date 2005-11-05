@@ -303,22 +303,39 @@ static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConn
 
 	if (opts.find("timeout") == opts.end())
 		return "E: no timeout set";
+	int timeout = atoi(opts["timeout"].c_str());
 
 	if (opts.find("caption") == opts.end())
 		return "E: no caption set";
+	eString caption = opts["caption"];
 
 	if (opts.find("body") == opts.end())
 		return "E: no body set";
+	eString body = opts["body"];
 
 	int type = -1;
 	if (opts.find("type") != opts.end())
-		type=atoi(opts["type"].c_str());
+		type = atoi(opts["type"].c_str());
+	
+	if (opts.find("charset") != opts.end())
+	{
+		eString charset = opts["charset"].upper();
+		if ((charset == "LATIN1") || (charset == "ISO8859-1"))
+		{
+			caption = convertLatin1UTF8(caption);
+			body = convertLatin1UTF8(body);
+		} 
+		else 
+			return "E: unknown charset";
+	}
+	
+	int icon = -1;
+	if (opts.find("icon") != opts.end())
+		icon = atoi(opts["icon"].c_str());
 
-	int timeout = atoi(opts["timeout"].c_str());
+	eZapMain::getInstance()->postMessage(eZapMessage(1, caption, body, timeout, icon), type != -1);
 
-	eZapMain::getInstance()->postMessage(eZapMessage(1, opts["caption"], opts["body"], timeout), type != -1);
-
-	return eString("+ok");
+	return "+ok";
 }
 
 static eString reload_networks(eString request, eString dirpath, eString opt, eHTTPConnection *content)
