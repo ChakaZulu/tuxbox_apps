@@ -530,8 +530,7 @@ void eZapEPG::buildPage(int direction)
 		{
 			if ( s == services.end() )
 				break;
-			const eventData *e = (const eventData*) eEPGCache::getInstance()->lookupEvent( *s, (time_t)(start+tmp), true );
-			if ( e && (++cnt > numservices) )
+			if ( ++cnt > numservices )
 					break;
 			if ( s != services.begin() )
 				--s;
@@ -644,6 +643,8 @@ void eZapEPG::buildPage(int direction)
 
 	std::set<int>::iterator it =
 		nonEmptyServices.lower_bound(focusColumn);
+	/* scroll back to the bottom non-empty service */
+	while ( it == nonEmptyServices.end() && it != nonEmptyServices.begin() ) --it;
 	if ( it != nonEmptyServices.end() )
 		focusColumn = *it;
 	else
