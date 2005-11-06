@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.32 2005/11/06 21:29:24 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.33 2005/11/06 21:59:35 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -127,7 +127,6 @@ eMoviePlayer::eMoviePlayer(): messages(this,1)
 
 eMoviePlayer::~eMoviePlayer()
 {
-#if 0
 	killThreads();
 	messages.send(Message::quit);
 	if (thread_running())
@@ -135,7 +134,6 @@ eMoviePlayer::~eMoviePlayer()
 	if (instance == this)
 		instance = 0;
 	status.ACTIVE = false;
-#endif
 }
 
 void eMoviePlayer::thread()
