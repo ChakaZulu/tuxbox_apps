@@ -807,6 +807,9 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	if ( Decoder::parms.pcrpid != pmt->PCR_PID && !service.path.size() )
 		Decoder::parms.pcrpid = pmt->PCR_PID;
+	
+	// set preferred audio language
+	audio = priorityAudio(audio);
 
 	// get last selected audio / video pid from pid cache
 	eService *sp=eServiceInterface::getInstance()->addRef(service);
@@ -949,8 +952,6 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	if ( content_pid != -1 )
 		/*emit*/ dvb.gotContentPid(content_pid);
-
-	audio = priorityAudio(audio);
 
 	ePtrList<PMTEntry>::iterator tmp = pmt->streams.end();
 	if (TTXIt != tmp)
