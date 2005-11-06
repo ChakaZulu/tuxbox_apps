@@ -327,13 +327,15 @@ eDVRPlayerThread::~eDVRPlayerThread()
 	bool wasOpen = fd != -1;
 	if (!wasOpen)
 		fd = open(AUDIO_DEV, O_RDWR);
-	if (ioctl(fd, AUDIO_SET_MUTE, 0) < 0)
+	if (fd >= 0 && ioctl(fd, AUDIO_SET_MUTE, 0) < 0)
 		eDebug("AUDIO_SET_MUTE error (%m)");
-	if (!wasOpen)
+	if (!wasOpen && fd >= 0)
 		close(fd);
 
-	delete inputsn;
-	delete outputsn;
+	if (inputsn)
+		delete inputsn;
+	if (outputsn)
+		delete outputsn;
 	if (dvrfd >= 0)
 		::close(dvrfd);
 	if (sourcefd >= 0)
