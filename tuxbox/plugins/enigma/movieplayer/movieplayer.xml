@@ -8,7 +8,7 @@
 -->
 
 <vlc>
-	<server ip="192.168.0.1" webif-port="8080" stream-port="31000" user="admin" pass="admin" />
+	<server ip="192.168.0.1" webif-port="8080" stream-port="9090" user="admin" pass="admin" />
 	<config startdir="c:/movies" cddrive="f:" />
 	<codec mpeg1="mpgv" mpeg2="mp2v" audio="mpga" />
 	<setup name="SVCD-Mode" ext="none" Videorate="1000" Videotranscode="0" Videocodec="mpeg2" Videosize="352x576" Audiorate="192"  Audiotranscode="0" ac3="0" />

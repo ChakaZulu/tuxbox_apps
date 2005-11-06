@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.2 2005/11/05 15:00:26 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.3 2005/11/06 16:59:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -25,6 +25,7 @@
 #include <lib/gui/listbox.h>
 #include <lib/gui/ewindow.h>
 #include <lib/system/econfig.h>
+#include <lib/movieplayer/movieplayer.h>
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
@@ -73,8 +74,8 @@ class eSCGui: public eWindow
 	void listSelChanged(eListBoxEntryText *item);
 	int eventHandler(const eWidgetEvent &);
 
-	void parseSout(int val);
-	void playerStop();
+	eString parseSout(int val);
+	void timerHandler();
 	void playerStart(int val);
 	void showMenu();
 public:
@@ -84,10 +85,10 @@ public:
 
 class eSCGuiInfo: public eWindow
 {
+	eListBox<eListBoxEntryText> *list;
 public:
-	void info();
+	eSCGuiInfo();
 };
-
 
 class VLCsend
 {
@@ -102,27 +103,6 @@ public:
 	void send(eString val);
 };
 
-
-struct player_value
-{
-	int STAT, BUFFERTIME, JUMPMIN;
-	bool ACT_AC3, BUFFERFILLED, AVPIDS_FOUND;
-	unsigned short PIDA, PIDV;
-	short AC3;
-};
-
-class eSCplay
-{
-	static int PlayStreamThread (void *mrl);
-	static int VlcGetStreamTime();
-	//static int VlcGetStreamLength();
-	static int cnt;
-public:
-	enum{STOPPED, PREPARING, STREAMERROR, PLAY, PAUSE, FF, REW, RESYNC, JF, JB, SKIP, SOFTRESET = 99};
-
-	static player_value play_parms;
-	static void playnow();
-};
 
 
 

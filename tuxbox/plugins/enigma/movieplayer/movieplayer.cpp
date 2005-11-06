@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.2 2005/11/05 15:00:26 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.3 2005/11/06 16:59:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -24,11 +24,9 @@
 
 #include "movieplayer.h"
 
-#define REL "Streaming Client GUI, Version 0.0.2 "
+#define REL "Streaming Client GUI, Version 0.0.3 "
 #define CONFFILE0 "/etc/movieplayer.xml"
 #define CONFFILE1 "/var/tuxbox/config/movieplayer.xml"
-
-player_value eSCplay::play_parms;
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -52,7 +50,8 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 	
 	bufferingBox = new eMessageBox(_("Please wait..."),_("Buffering..."), eMessageBox::iconInfo);
 
-	cmove(ePoint(90, 110)); cresize(eSize(550, 350));
+	cmove(ePoint(90, 110)); 
+	cresize(eSize(550, 350));
 
 	addActionMap(&i_shortcutActions->map);
 	addActionMap(&i_cursorActions->map);
@@ -103,7 +102,7 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 	status->loadDeco();
 
 	timer = new eTimer(eApp);
-	CONNECT(timer->timeout, eSCGui::playerStop);
+	CONNECT(timer->timeout, eSCGui::timerHandler);
 
 	bool loading = false;
 	if (access(CONFFILE1, R_OK) == 0)
@@ -141,36 +140,38 @@ void eSCGui::loadList()
 	PLAYLIST a;
 
 	eString tmp2, tmp3;
-	switch(MODE)
+	switch (MODE)
 	{
 		case DATA:
-			setText("VLC File Mode  Path: " + pathfull);
+			tmp2 = "File-Mode";
+			setText("VLC " + tmp2 + " - Path: " + pathfull);
+			tmp3 = "";
 			break;
 		case VCD:
-			tmp2 = "VCD Mode";  
-			setText("VLC" + tmp2 + "  Drive: " + cddrive); 
+			tmp2 = "VCD-Mode";  
+			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "vcd:" + cddrive + "@1:1";
 			break;
 		case SVCD:
-			tmp2 = "SVCD Mode"; 
-			setText("VLC" + tmp2 + "  Drive: " + cddrive); 
+			tmp2 = "SVCD-Mode"; 
+			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "vcd:" + cddrive + "@1:1";
 			break;
 		case DVD:
-			tmp2 = "DVD Mode";  
-			setText("VLC" + tmp2 + "  Drive: " + cddrive); 
+			tmp2 = "DVD-Mode";  
+			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "dvdsimple:" + cddrive + "@1:1";
 			break;
 	}
 
-	VLCsend::getInstance()->send("/admin/dboxfiles.html?dir=" + pathfull);
-	eString response = VLCsend::getInstance()->send_parms.RESPONSE;
-
-	std::replace(response.begin(), response.end(), '\\', '/');
-
-	if (response && response != "-1")
+	if (MODE == DATA)
 	{
-		if (MODE == DATA)
+		VLCsend::getInstance()->send("/admin/dboxfiles.html?dir=" + pathfull);
+		eString response = VLCsend::getInstance()->send_parms.RESPONSE;
+
+		std::replace(response.begin(), response.end(), '\\', '/');
+
+		if (response && response != "-1")
 		{
 			unsigned int start = 0;
 			for (unsigned int pos = response.find('\n', 0); pos != std::string::npos; pos = response.find('\n', start))
@@ -219,28 +220,28 @@ void eSCGui::loadList()
 				start = pos + 1;
 			}
 		}
-		else
-		{
-			char line[1024];
-			strcpy(line, cddrive.c_str());
-			if (line[strlen(line) - 1] == ':' && strlen(line) == 2) pathfull = cddrive + "/";
+	}
+	else
+	{
+		char line[1024];
+		strcpy(line, cddrive.c_str());
+		if (line[strlen(line) - 1] == ':' && strlen(line) == 2) 
+			pathfull = cddrive + "/";
 
-			for (ExtList::iterator p = extList.begin(); p != extList.end(); p++)
+		for (ExtList::iterator p = extList.begin(); p != extList.end(); p++)
+		{
+			if ((*p).NAME == tmp2)
 			{
-				if ((*p).NAME == tmp2)
-				{
-					a.Filename = _("Play");
-					a.Fullname = tmp3;
-					a.Filetype = FILES;
-					a.Extitem = (*p).ITEM;
-					playList.push_back(a);
-					break;
-				}
+				a.Filename = _("Play");
+				a.Fullname = tmp3;
+				a.Filetype = FILES;
+				a.Extitem = (*p).ITEM;
+				playList.push_back(a);
+				break;
 			}
 		}
-		if (playList.size())
-			viewList();
 	}
+	viewList();
 }
 
 void eSCGui::viewList()
@@ -298,16 +299,7 @@ void eSCGui::listSelChanged(eListBoxEntryText *item)
 void eSCGui::listSelected(eListBoxEntryText *item)
 {
 	if (item)
-	{
-		int val = (int)item->getKey();
-		if (playList[val].Filetype == FILES)
-			playerStart(val);
-		else
-		{
-			pathfull = playList[val].Fullname;
-			loadList();
-		}
-	}
+		playerStart((int)item->getKey());
 }
 
 bool eSCGui::loadXML(eString file)
@@ -324,7 +316,7 @@ bool eSCGui::loadXML(eString file)
 	}
 
 	bool done = false;
-	while (done == 0)
+	while (!done)
 	{
 		char buf[2048]; 
 		unsigned int len = fread(buf, 1, sizeof(buf), in);
@@ -429,11 +421,11 @@ bool eSCGui::loadXML(eString file)
 	return true;
 }
 
-void eSCGui::parseSout(int val)
+eString eSCGui::parseSout(int val)
 {
 	int curr = playList[val].Extitem;
 
-	eSCplay::play_parms.ACT_AC3 = extList[curr].AC3;
+	eMoviePlayer::getInstance()->status.ACT_AC3 = extList[curr].AC3;
 
 	eString res_horiz, res_vert;
 	
@@ -489,8 +481,8 @@ void eSCGui::parseSout(int val)
 	}
 	conf += "duplicate{dst=std{access=http,mux=ts,url=:" + VLCsend::getInstance()->send_parms.STREAM_PORT + "/dboxstream}}";
 
-	VLCsend::getInstance()->send("/?sout=" + conf);
 	eDebug("[VLC] sout:%s", conf.c_str());
+	return conf;
 }
 
 void eSCGui::showMenu()
@@ -507,32 +499,20 @@ void eSCGui::showMenu()
 	}
 }
 
-void eSCGui::playerStop()
+void eSCGui::timerHandler()
 {
-	if (eSCplay::play_parms.STAT == eSCplay::STOPPED)
+	if (eMoviePlayer::getInstance()->status.STAT == eMoviePlayer::STOPPED)
 	{
-		if (MODE == DATA && !menu)
-		{
-			if (next_val >= (int) playList.size()) 
-				next_val = 0;
-
-			if (playList[next_val].Filetype == FILES)
-			{
-				playerStart(next_val);
-				return;
-			}
-		}
-
 		showMenu();
 	}
 	else
 	{
-		if (!eSCplay::play_parms.BUFFERFILLED)
+		if (!eMoviePlayer::getInstance()->status.BUFFERFILLED)
 			bufferingBox->show();
 		else
 			bufferingBox->hide();
 
-		timer->start(1000,true);
+		timer->start(1000, true);
 	}
 }
 
@@ -546,12 +526,14 @@ void eSCGui::playerStart(int val)
 		menu = false;
 	}
 
-	//start play
 	eDebug("\n[VLC] play %d \"%s\"", val, playList[val].Fullname.c_str());
+	eMoviePlayer::getInstance()->control("stop", "");
+	VLCsend::getInstance()->send("/?control=stop");
+	VLCsend::getInstance()->send("/?control=empty");
 	VLCsend::getInstance()->send("/?control=add&mrl=" + playList[val].Fullname);
-	next_val = val + 1;
-	parseSout(val);
-	eSCplay::playnow();
+	VLCsend::getInstance()->send("/?sout=" + parseSout(val));
+	VLCsend::getInstance()->send("/?control=play&item=0");
+	eMoviePlayer::getInstance()->control("start", playList[val].Fullname.c_str());
 	timer->start(1000, true);
 }
 
@@ -564,25 +546,25 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 	case eWidgetEvent::evtAction:
 		if (e.action == &i_cursorActions->cancel)
 		{
-			showMenu();
-
-			if (eSCplay::play_parms.STAT != eSCplay::STOPPED)
-			{
-				eSCplay::play_parms.STAT = eSCplay::STOPPED;
+			if (eMoviePlayer::getInstance()->status.STAT != eMoviePlayer::STOPPED)
+				eMoviePlayer::getInstance()->control("stop", "");
+				
+			if (!menu)
 				showMenu();
-			}
 			else
 				close(0);
 		}
 		else 
-		if (e.action == &i_cursorActions->help && menu)
+		if (e.action == &i_cursorActions->help)
 		{
-			hide();
-			eSCGuiInfo dlg;
-			dlg.show();
-			dlg.exec();
-			dlg.hide();
-			show();
+			if (menu)
+				hide();
+			eSCGuiInfo info;
+			info.show();
+			info.exec();
+			info.hide();
+			if (menu)
+				show();
 		}
 		else 
 		if (e.action == &i_shortcutActions->red)
@@ -594,7 +576,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 				loadList();
 			}
 			else
-				eSCplay::play_parms.STAT = eSCplay::REW;
+				eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::REW;
 		}
 		else 
 		if (e.action == &i_shortcutActions->green)
@@ -606,10 +588,10 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			}
 			else
 			{
-				if (eSCplay::play_parms.STAT == eSCplay::PLAY)
-					eSCplay::play_parms.STAT = eSCplay::RESYNC;
+				if (eMoviePlayer::getInstance()->status.STAT == eMoviePlayer::PLAY)
+					eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::RESYNC;
 				else
-					eSCplay::play_parms.STAT = eSCplay::PLAY;
+					eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::PLAY;
 			}
 		}
 		else 
@@ -621,7 +603,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 				loadList();
 			}
 			else
-				eSCplay::play_parms.STAT = eSCplay::STOPPED;
+				eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::STOPPED;
 		}
 		else 
 		if (e.action == &i_shortcutActions->blue)
@@ -632,60 +614,60 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 				loadList();
 			}
 			else
-				eSCplay::play_parms.STAT = eSCplay::FF;
+				eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::FF;
 		}
 		else 
 		if (e.action == &i_shortcutActions->number1) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 1; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 1; 
 			new_jump = true; 
 		}
 		else 
 		if (e.action == &i_shortcutActions->number2) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 2; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 2; 
 			new_jump = true; 
 		}
 		else 
 		if (e.action == &i_shortcutActions->number3) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 3; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 3; 
 			new_jump = true; 
 		}
 		else 
 		if (e.action == &i_shortcutActions->number4) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 4; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 4; 
 			new_jump = true; 
 		}
 		else 
 		if (e.action == &i_shortcutActions->number5) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 5; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 5; 
 			new_jump = true; 
 		}
 		else 
 		if (e.action == &i_shortcutActions->number6) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 6; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 6; 
 			new_jump = true; 	
 		}
 		else 
 		if (e.action == &i_shortcutActions->number7) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 7; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 7; 
 			new_jump = true; 
 		}
 		else 
 		if (e.action == &i_shortcutActions->number8) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 8; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 8; 
 			new_jump = true; 
 		}
 		else 
 		if (e.action == &i_shortcutActions->number9) 
 		{ 
-			eSCplay::play_parms.JUMPMIN = 9; 
+			eMoviePlayer::getInstance()->status.JUMPMIN = 9; 
 			new_jump = true; 
 		}
 		else
@@ -693,7 +675,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 
 		if (new_jump)
 		{
-			eMessageBox mb(eString().sprintf("Skip +/- %d minute(s)", eSCplay::play_parms.JUMPMIN).c_str(), _("Information"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK, 3);
+			eMessageBox mb(eString().sprintf("Skip +/- %d minute(s)", eMoviePlayer::getInstance()->status.JUMPMIN).c_str(), _("Information"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK, 3);
 			mb.show();
 			mb.exec();
 			mb.hide();
@@ -705,9 +687,9 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 	return eWindow::eventHandler(e);
 }
 
-static char * NAME[] = 
+static char *NAME[] = 
 {
-	"Keys (Menu is not visible)",
+	"Keys (if menu is not visible)",
 	"red:",
 	_("Start skipping reverse"),
 	"green:",
@@ -721,204 +703,26 @@ static char * NAME[] =
 	" "
 };
 
-void eSCGuiInfo::info()
+eSCGuiInfo::eSCGuiInfo()
 {
 	cmove(ePoint(140, 100)); 
 	cresize(eSize(440, 420)); 
-	setText(_("Help window"));
+	setText(_("Help"));
 
-	eListBox<eListBoxEntryText> *list = new eListBox<eListBoxEntryText>(this);
+	list = new eListBox<eListBoxEntryText>(this);
 	list->move(ePoint(5, 5));
 	list->resize(eSize(clientrect.width() - 10, clientrect.height() - 10));
 
 	new eListBoxEntryText(list, REL);
 	int i = 0;
-	while (NAME[i] != " ")
+	while (eString(NAME[i]) != " ")
 		new eListBoxEntryText(list, NAME[i++]);
-}
-
-void eSCplay::playnow()
-{
-	play_parms.BUFFERFILLED = false;
-	play_parms.AVPIDS_FOUND = false;
-	play_parms.BUFFERTIME = 0;
-
-	PlayStreamThread((void *) " ");
-}
-
-int eSCplay::VlcGetStreamTime()
-{
-	VLCsend::getInstance()->send("/admin/dboxfiles.html?stream_time=true");
-
-	if (VLCsend::getInstance()->send_parms.RESPONSE)
-		return atoi(VLCsend::getInstance()->send_parms.RESPONSE.c_str());
-	else
-		return -1;
-}
-
-int eSCplay::PlayStreamThread(void *mrl)
-{
-#if 0
-	char buf[348 * 188];
-	// use global pida and pidv
-	play_parms.PIDA = 0, play_parms.PIDV = 0, play_parms.AC3 = -1;
-	int dvr = -1;
-
-	play_parms.STAT = SOFTRESET;
-
-	int count=0;
-	do
-	{
-		if ((dvr  = ::open (DVR, O_WRONLY | O_NONBLOCK)) < 0)
-		{
-			if (errno == EBUSY)
-			{
-				//eDebug("[VLC] pvr device busy try %d", count++);
-				if (count < 40)
-				{
-					usleep(20000);
-					continue;
-				}
-			}
-			perror("[VLC] couldn't open /dev/pvr");
-			play_parms.STAT = STOPPED;
-		}
-		break;
-	}
-	while(dvr < 0);
-
-	ssize_t wr;
-	size_t readsize, len = 0;
-	bool driverready = false;
-
-	while (play_parms.STAT > STOPPED)
-	{
-		readsize = ringbuffer_read_space (ringbuf);
-
-		if (readsize > MAXREADSIZE)
-			readsize = MAXREADSIZE;
-
-		if (play_parms.BUFFERFILLED && readsize)
-		{
-			if (!driverready)
-			{
-				driverready = true;
-
-				Decoder::parms.vpid=play_parms.PIDV;
-				Decoder::parms.apid=play_parms.PIDA;
-				Decoder::parms.audio_type= (play_parms.AC3 == 1 && play_parms.ACT_AC3) ? DECODE_AUDIO_AC3 : DECODE_AUDIO_MPEG;
-				Decoder::Set();
-
-				if ((play_parms.BUFFERTIME = VlcGetStreamTime()) < 0)
-					play_parms.BUFFERTIME=0;
-			}
-
-			len = ringbuffer_read (ringbuf, buf, (readsize / 188) * 188);
-
-			switch(play_parms.STAT)
-			{
-				case FF: case REW:
-				{
-					if (play_parms.STAT == FF)
-						VLCsend::getInstance()->send(eString().sprintf("/?seek_value=%2B%dmin&control=seek",play_parms.JUMPMIN).c_str());
-					else
-						VLCsend::getInstance()->send(eString().sprintf("/?seek_value=%2D%dmin&control=seek",play_parms.JUMPMIN).c_str());
-					cnt=0;
-					play_parms.STAT = SKIP;
-					if (::ioctl(dvr, 0)< 0)
-					{
-						//eDebug("PVR_FLUSH_BUFFER failed (%m)");
-					}
-					Decoder::flushBuffer();
-					break;
-				}
-				case RESYNC:
-				{
-					//eDebug("[VLC] RESYNC: Buffering");
-					Decoder::Pause();
-					Decoder::Resume();
-					play_parms.STAT = PLAY;
-					break;
-				}
-				case PLAY:
-				{
-					int done = 0;
-					while (len > 0)
-					{
-						wr = write (dvr, &buf[done], len);
-						if (wr < 0)
-						{
-							if (errno != EAGAIN)
-							{
-								perror("[VLC] <write failed>");
-								play_parms.STAT = STOPPED;
-								break;
-							}
-							else
-							{
-								usleep(1000);
-								continue;
-							}
-						}
-
-						len -= wr;
-						done += wr;
-					}
-					break;
-				}
-				case SOFTRESET:
-				{
-					play_parms.STAT = PLAY;
-					break;
-				}
-				/*case PAUSE:
-				{
-					VLCsend::getInstance()->send("/?control=pause");
-					Decoder::Pause();
-
-					while (play_parms.STAT == PAUSE)
-					{
-						usleep(100000);
-					}
-					//eDebug("[VLC] PAUSE END");
-					play_parms.BUFFERFILLED = false;
-					VLCsend::getInstance()->send("/?control=pause");
-					Decoder::Resume();
-					//speed = 1;
-					break;
-				}
-				case JF:
-				case PREPARING:
-				case STREAMERROR:
-				case JB:*/
-			}
-		}
-	}
-
-	::close(dvr);
-
-	Decoder::flushBuffer();
-	if (::ioctl(dvr, 0)< 0)
-	{
-		//eDebug("PVR_FLUSH_BUFFER failed (%m)");
-	}
-	Decoder::Flush();
-
-	pthread_join (rcst, NULL);
-	//eDebug("[VLC] stopped succesfully\n");
-
-	VLCsend::getInstance()->send("/?control=stop");
-	VLCsend::getInstance()->send("/?control=empty");
-	ringbuffer_free(ringbuf);
-	pthread_exit (NULL);
-#endif
-	return 0;
 }
 
 size_t CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 {
-	std::string *pStr = (std::string *) data;
-	*pStr += (char*) ptr;
+	std::string *pStr = (std::string *)data;
+	*pStr += (char *)ptr;
 	return size * nmemb;
 }
 

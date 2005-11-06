@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.550 2005/10/28 13:30:26 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.551 2005/11/06 16:57:52 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -295,7 +295,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eServiceReference sref = string2ref(sReference);
 	eString command = opt["command"];
 #ifdef ENABLE_EXPERT_WEBIF
-	if (eMoviePlayer::getInstance()->getStatus())
+	if (eMoviePlayer::getInstance()->getStatus().ACTIVE)
 	{
 		eMoviePlayer::getInstance()->control(command.c_str(), "");
 	}

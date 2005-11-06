@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.30 2005/10/12 20:46:23 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.31 2005/11/06 16:57:51 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -121,6 +121,7 @@ eMoviePlayer::eMoviePlayer(): messages(this,1)
 		
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
 	eDebug("[MOVIEPLAYER] Version 1.6 starting...");
+	status.ACTIVE = false;
 	run();
 }
 
@@ -132,7 +133,7 @@ eMoviePlayer::~eMoviePlayer()
 		kill();
 	if (instance == this)
 		instance = 0;
-	status = 0;
+	status.ACTIVE = false;
 }
 
 void eMoviePlayer::thread()
@@ -148,7 +149,8 @@ void eMoviePlayer::leaveStreamingClient()
 	Decoder::Flush();
 	// restore suspended dvb service
 	playService(suspendedServiceReference);
-	status = 0;
+	status.ACTIVE = false;
+	status.STAT = STOPPED;
 }
 
 void eMoviePlayer::control(const char *command, const char *filename)
@@ -284,6 +286,8 @@ int eMoviePlayer::playStream(eString mrl)
 	// receive video stream from VLC on PC
 	eDebug("[MOVIEPLAYER] start playing stream...");
 	
+	status.STAT = PLAY;
+	
 	tsBuffer.clear();
 	
 	if (requestStream() < 0)
@@ -300,6 +304,8 @@ int eMoviePlayer::playStream(eString mrl)
 		return -4;
 	}
 	
+	status.BUFFERFILLED = true;
+	
 	find_avpids(&tsBuffer, &vpid, &apid, &ac3);
 	if (vpid == -1 || apid == -1)
 	{
@@ -308,7 +314,7 @@ int eMoviePlayer::playStream(eString mrl)
 		return -5;
 	}
 	
-	status = 1;
+	status.AVPIDS_FOUND = true;
 	
 	// save current dvb service for later
 	eDVBServiceController *sapi;
@@ -341,6 +347,8 @@ int eMoviePlayer::playStream(eString mrl)
 #endif
 
 	createThreads();
+	
+	status.ACTIVE = true;
 	
 	return 0;
 }
