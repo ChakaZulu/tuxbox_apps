@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.3 2005/11/06 16:59:56 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.4 2005/11/06 21:29:24 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -64,6 +64,7 @@ class eSCGui: public eWindow
 	eListBox<eListBoxEntryText> *list;
 	eTimer *timer;
 	eMessageBox *bufferingBox;
+	eStatusBar *status;
 
 	void loadList();
 	void viewList();

@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.16 2005/11/06 16:57:51 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.17 2005/11/06 21:29:24 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *

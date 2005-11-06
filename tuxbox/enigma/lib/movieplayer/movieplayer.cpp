@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.31 2005/11/06 16:57:51 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.32 2005/11/06 21:29:24 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -127,6 +127,7 @@ eMoviePlayer::eMoviePlayer(): messages(this,1)
 
 eMoviePlayer::~eMoviePlayer()
 {
+#if 0
 	killThreads();
 	messages.send(Message::quit);
 	if (thread_running())
@@ -134,6 +135,7 @@ eMoviePlayer::~eMoviePlayer()
 	if (instance == this)
 		instance = 0;
 	status.ACTIVE = false;
+#endif
 }
 
 void eMoviePlayer::thread()
@@ -147,10 +149,12 @@ void eMoviePlayer::leaveStreamingClient()
 	eMoviePlayer::getInstance()->sendRequest2VLC("?control=stop");
 	tsBuffer.clear();
 	Decoder::Flush();
-	// restore suspended dvb service
-	playService(suspendedServiceReference);
 	status.ACTIVE = false;
 	status.STAT = STOPPED;
+	status.BUFFERFILLED = false;
+	// restore suspended dvb service
+	playService(suspendedServiceReference);
+	eDebug("[MOVIEPLAYER] leaving...");
 }
 
 void eMoviePlayer::control(const char *command, const char *filename)
@@ -167,7 +171,11 @@ void eMoviePlayer::control(const char *command, const char *filename)
 		messages.send(Message(Message::start, filename ? strdup(filename) : 0));
 	else
 	if (cmd == "stop" || cmd == "terminate")
-		messages.send(Message(Message::stop, 0));
+	{
+//		messages.send(Message(Message::stop, 0));
+		killThreads();
+		leaveStreamingClient();
+	}
 	else
 	if (cmd == "play")
 		messages.send(Message(Message::play, 0));
@@ -217,6 +225,7 @@ int bufferStream(int fd, int bufferSize)
 {
 	int len = 0;
 	int rc = 1;
+	int error = 0;
 	char tempBuffer[BLOCKSIZE];
 	fd_set rfds;
 	struct timeval tv;
@@ -236,8 +245,14 @@ int bufferStream(int fd, int bufferSize)
 			len = recv(fd, tempBuffer, BLOCKSIZE, 0);
 			if (len > 0)
 			{
+				error = 0;
 				eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, tsBuffer.size());
 				tsBuffer.write(tempBuffer, len);
+			}
+			else 
+			{
+				if (error++ > 100)
+					rc = 0;
 			}
 		}
 	}
@@ -379,7 +394,12 @@ void eMoviePlayer::gotMessage(const Message &msg )
 				eDebug("[MOVIEPLAYER] Server Port: %d", serverPort);
 				
 				// receive and play ts stream
-				playStream(mrl);
+				if (playStream(mrl) < 0)
+				{
+					status.ACTIVE = false;
+					status.STAT = STOPPED;
+					status.BUFFERFILLED = false;
+				}
 			}
 			break;
 		}
@@ -391,6 +411,7 @@ void eMoviePlayer::gotMessage(const Message &msg )
 			break;
 		case Message::stop:
 		{
+			killThreads();
 			leaveStreamingClient();
 			break;
 		}

@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.3 2005/11/06 16:59:56 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.4 2005/11/06 21:29:24 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -24,7 +24,7 @@
 
 #include "movieplayer.h"
 
-#define REL "Streaming Client GUI, Version 0.0.3 "
+#define REL "Streaming Client GUI, Version 0.0.4"
 #define CONFFILE0 "/etc/movieplayer.xml"
 #define CONFFILE1 "/var/tuxbox/config/movieplayer.xml"
 
@@ -96,7 +96,7 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 	l_dvd->setProperty("backgroundColor", "std_dblue");
 	l_dvd->setText("DVD");
 
-	eStatusBar *status = new eStatusBar(this);
+	status = new eStatusBar(this);
 	status->move(ePoint(10, clientrect.height() - 35));
 	status->resize(eSize(clientrect.width() - 20, 30));
 	status->loadDeco();
@@ -223,9 +223,7 @@ void eSCGui::loadList()
 	}
 	else
 	{
-		char line[1024];
-		strcpy(line, cddrive.c_str());
-		if (line[strlen(line) - 1] == ':' && strlen(line) == 2) 
+		if (cddrive[cddrive.length() - 1] == ':' && cddrive.length() == 2) 
 			pathfull = cddrive + "/";
 
 		for (ExtList::iterator p = extList.begin(); p != extList.end(); p++)
@@ -340,9 +338,13 @@ bool eSCGui::loadXML(eString file)
 	{
 		if (!strcmp(node->GetType(), "server"))
 		{
-			VLCsend::getInstance()->send_parms.IP = node->GetAttributeValue("ip");
-			VLCsend::getInstance()->send_parms.IF_PORT = node->GetAttributeValue("webif-port");
-			VLCsend::getInstance()->send_parms.STREAM_PORT = node->GetAttributeValue("stream-port");
+			eString serverIP = node->GetAttributeValue("ip");
+			VLCsend::getInstance()->send_parms.IP = serverIP;
+			eConfig::getInstance()->setKey("/movieplayer/serverip", serverIP.c_str());
+			VLCsend::getInstance()->send_parms.IF_PORT = "8080";  // force to 8080 :-)
+			eString serverPort = node->GetAttributeValue("stream-port");
+			VLCsend::getInstance()->send_parms.STREAM_PORT = serverPort;
+			eConfig::getInstance()->setKey("/movieplayer/serverport", atoi(serverPort.c_str()));
 
 			eString tmpuser = node->GetAttributeValue("user");
 			eString tmppass = node->GetAttributeValue("pass");
@@ -489,18 +491,22 @@ void eSCGui::showMenu()
 {
 	if (!menu)
 	{
-		hide();
-		resize(eSize(550, 350));
-		show();
-
 		timer->stop();
 		bufferingBox->hide();
+		
+		hide();
+		resize(eSize(550, 350));
+		status->loadDeco();
+		show();
+		
 		menu = true;
 	}
 }
 
 void eSCGui::timerHandler()
 {
+	eDebug("[MOVIEPLAYER PLUGIN] timerHandler: status = %d", eMoviePlayer::getInstance()->status.STAT);
+	
 	if (eMoviePlayer::getInstance()->status.STAT == eMoviePlayer::STOPPED)
 	{
 		showMenu();
@@ -527,19 +533,23 @@ void eSCGui::playerStart(int val)
 	}
 
 	eDebug("\n[VLC] play %d \"%s\"", val, playList[val].Fullname.c_str());
-	eMoviePlayer::getInstance()->control("stop", "");
+	if (eMoviePlayer::getInstance()->status.STAT != eMoviePlayer::STOPPED)
+	{
+		eMoviePlayer::getInstance()->control("stop", "");
+		sleep(2);
+	}
 	VLCsend::getInstance()->send("/?control=stop");
 	VLCsend::getInstance()->send("/?control=empty");
 	VLCsend::getInstance()->send("/?control=add&mrl=" + playList[val].Fullname);
 	VLCsend::getInstance()->send("/?sout=" + parseSout(val));
 	VLCsend::getInstance()->send("/?control=play&item=0");
 	eMoviePlayer::getInstance()->control("start", playList[val].Fullname.c_str());
-	timer->start(1000, true);
+	timer->start(3000, true);
 }
 
 int eSCGui::eventHandler(const eWidgetEvent &e)
 {
-	bool new_jump = false;
+	int jump = 0;
 
 	switch (e.type)
 	{
@@ -571,12 +581,12 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 		{
 			if (menu)
 			{
-				MODE=DATA;
+				MODE = DATA;
 				pathfull = startdir;
 				loadList();
 			}
 			else
-				eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::REW;
+				eMoviePlayer::getInstance()->control("rewind", "");
 		}
 		else 
 		if (e.action == &i_shortcutActions->green)
@@ -589,9 +599,9 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			else
 			{
 				if (eMoviePlayer::getInstance()->status.STAT == eMoviePlayer::PLAY)
-					eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::RESYNC;
+					eMoviePlayer::getInstance()->control("resync", "");
 				else
-					eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::PLAY;
+					eMoviePlayer::getInstance()->control("play", "");
 			}
 		}
 		else 
@@ -603,7 +613,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 				loadList();
 			}
 			else
-				eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::STOPPED;
+				eMoviePlayer::getInstance()->control("pause", "");
 		}
 		else 
 		if (e.action == &i_shortcutActions->blue)
@@ -614,71 +624,45 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 				loadList();
 			}
 			else
-				eMoviePlayer::getInstance()->status.STAT = eMoviePlayer::FF;
+				eMoviePlayer::getInstance()->control("forward", "");
 		}
 		else 
 		if (e.action == &i_shortcutActions->number1) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 1; 
-			new_jump = true; 
-		}
+			jump = 1; 
 		else 
 		if (e.action == &i_shortcutActions->number2) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 2; 
-			new_jump = true; 
-		}
+			jump = 2; 
 		else 
 		if (e.action == &i_shortcutActions->number3) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 3; 
-			new_jump = true; 
-		}
+			jump = 3; 
 		else 
 		if (e.action == &i_shortcutActions->number4) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 4; 
-			new_jump = true; 
-		}
+			jump = 4; 
 		else 
 		if (e.action == &i_shortcutActions->number5) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 5; 
-			new_jump = true; 
-		}
+			jump = 5; 
 		else 
 		if (e.action == &i_shortcutActions->number6) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 6; 
-			new_jump = true; 	
-		}
+			jump = 6; 	
 		else 
 		if (e.action == &i_shortcutActions->number7) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 7; 
-			new_jump = true; 
-		}
+			jump = 7; 
 		else 
 		if (e.action == &i_shortcutActions->number8) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 8; 
-			new_jump = true; 
-		}
+			jump = 8; 
 		else 
 		if (e.action == &i_shortcutActions->number9) 
-		{ 
-			eMoviePlayer::getInstance()->status.JUMPMIN = 9; 
-			new_jump = true; 
-		}
+			jump = 9; 
 		else
 			break;
 
-		if (new_jump)
+		if (jump > 0)
 		{
-			eMessageBox mb(eString().sprintf("Skip +/- %d minute(s)", eMoviePlayer::getInstance()->status.JUMPMIN).c_str(), _("Information"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK, 3);
+			eMessageBox mb(eString().sprintf("Skip %d minute(s)", jump), _("Information"), eMessageBox::btOK|eMessageBox::iconInfo, eMessageBox::btOK, 3);
 			mb.show();
 			mb.exec();
 			mb.hide();
+			eMoviePlayer::getInstance()->control("jump", eString().sprintf("%d", jump).c_str());
 		}
 		return 1;
 	default:
@@ -689,24 +673,26 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 
 static char *NAME[] = 
 {
+	"-----------------------------",
 	"Keys (if menu is not visible)",
+	"-----------------------------",
 	"red:",
 	_("Start skipping reverse"),
 	"green:",
-	_("Resync"),
+	_("Play/Resync"),
 	"yellow:",
-	_("Select next entry"),
+	_("Pause"),
 	"blue:",
 	_("Start skipping forward"),
 	"1 - 9:",
-	"Set skip",
+	"Skip 1 - 9 minutes",
 	" "
 };
 
 eSCGuiInfo::eSCGuiInfo()
 {
 	cmove(ePoint(140, 100)); 
-	cresize(eSize(440, 420)); 
+	cresize(eSize(440, 400)); 
 	setText(_("Help"));
 
 	list = new eListBox<eListBoxEntryText>(this);
