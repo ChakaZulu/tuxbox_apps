@@ -23,15 +23,14 @@ private:
 	eIOBuffer readbuffer;
 	eIOBuffer writebuffer;
 	int writebusy;
-	sockaddr_in  serv_addr;	
 protected:
-	int mystate;
 	int socketdesc;
+	int mystate;
 	eSocketNotifier	*rsn;
+	eMainloop *mainloop;
 	virtual void notifier(int);
 public:
-	eSocket();
-	eSocket(eMainloop *ml);
+	eSocket(eMainloop *ml, int domain = AF_INET);
 	eSocket(int socket, int issocket, eMainloop *ml);
 	virtual ~eSocket();
 	int connectToHost(eString hostname, int port);
@@ -50,7 +49,7 @@ public:
 	
 	void inject(const char *data, int len);
 	
-	enum State {	Invalid, Idle, HostLookup, Connecting,
+	enum State { Invalid, Idle, HostLookup, Connecting,
 			Listening, Connection, Closing };
 	int state();
 	
@@ -64,8 +63,6 @@ public:
 
 class eUnixDomainSocket: public eSocket
 {
-protected:
-	sockaddr_un serv_addr_un;
 public:
 	eUnixDomainSocket(eMainloop *ml);
 	eUnixDomainSocket(int socket, int issocket, eMainloop *ml);

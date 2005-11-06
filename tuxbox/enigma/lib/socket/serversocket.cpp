@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <lib/socket/serversocket.h>
 
 bool eServerSocket::ok()
@@ -28,6 +29,7 @@ eServerSocket::eServerSocket(int port, eMainloop *ml): eSocket(ml)
 {
 	struct sockaddr_in serv_addr;
 
+	bzero(&serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family=AF_INET;
 	serv_addr.sin_addr.s_addr=INADDR_ANY;
 	serv_addr.sin_port=htons(port);
@@ -35,8 +37,31 @@ eServerSocket::eServerSocket(int port, eMainloop *ml): eSocket(ml)
 	okflag=1;
 	int val=1;
 	
-	setsockopt(getDescriptor(), SOL_SOCKET, SO_REUSEADDR, &val, 4);
+	setsockopt(getDescriptor(), SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
 
+	if(bind(getDescriptor(),
+		(struct sockaddr *) &serv_addr,
+		sizeof(serv_addr))<0)
+	{
+		eDebug("[SERVERSOCKET] ERROR on bind() (%m)");
+		okflag=0;
+	}
+	listen(getDescriptor(), 0);
+
+	rsn->setRequested(eSocketNotifier::Read);
+}
+
+eServerSocket::eServerSocket(eString path, eMainloop *ml) : eSocket(ml, AF_LOCAL)
+{
+	struct sockaddr_un serv_addr;
+
+	bzero(&serv_addr, sizeof(serv_addr));
+	serv_addr.sun_family = AF_LOCAL;
+	strcpy(serv_addr.sun_path, path.c_str());
+
+	okflag=1;
+
+	unlink(path.c_str());
 	if(bind(getDescriptor(),
 		(struct sockaddr *) &serv_addr,
 		sizeof(serv_addr))<0)
@@ -54,4 +79,37 @@ eServerSocket::~eServerSocket()
 #if 0
 	eDebug("[SERVERSOCKET] destructed");
 #endif
+}
+
+int eServerSocket::bind(int sockfd, struct sockaddr *addr, socklen_t addrlen)
+{
+	int result;
+	while (1)
+	{
+		if ((result = ::bind(sockfd, addr, addrlen)) < 0 && errno == EINTR) continue;
+		break;
+	}
+	return result;
+}
+
+int eServerSocket::listen(int sockfd, int backlog)
+{
+	int result;
+	while (1)
+	{
+		if ((result = ::listen(sockfd, backlog)) < 0 && errno == EINTR) continue;
+		break;
+	}
+	return result;
+}
+
+int eServerSocket::accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+{
+	int result;
+	while (1)
+	{
+		if ((result = ::accept(sockfd, addr, addrlen)) < 0 && errno == EINTR) continue;
+		break;
+	}
+	return result;
 }

@@ -621,7 +621,7 @@ eHTTPD::eHTTPD(int port, eMainloop *ml): eServerSocket(port, ml), ml(ml)
 
 eHTTPConnection::~eHTTPConnection()
 {
-	if ((!persistent) && (state()!=Idle))
+	if ((!persistent) && (state()!=Idle) && (state()!=Invalid))
 		eWarning("~eHTTPConnection, status still %d", state());
 	if (data)
 		delete data;

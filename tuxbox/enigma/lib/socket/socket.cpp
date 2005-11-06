@@ -17,7 +17,7 @@ void eSocket::close()
 			::close(socketdesc);
 			socketdesc=-1;
 		}
-		mystate=Idle;
+		mystate=Invalid;
 		if (wasconnected)
 			connectionClosed_();
 	} else
@@ -231,9 +231,18 @@ int eSocket::getDescriptor()
 
 int eSocket::connectToHost(eString hostname, int port)
 {
+	sockaddr_in  serv_addr;
 	struct hostent *server;
 	int res;
 
+	if (mystate == Invalid)
+	{
+		/* the socket has been closed, create a new socket descriptor */
+		int s=socket(AF_INET, SOCK_STREAM, 0);
+		mystate=Idle;
+		setSocket(s, 1, mainloop);
+	}
+	
 	if(socketdesc < 0){
 		error_(errno);
 		return(-1);
@@ -245,11 +254,9 @@ int eSocket::connectToHost(eString hostname, int port)
 		error_(errno);
 		return(-2);
 	}
-	bzero(	(char*)&serv_addr, sizeof(serv_addr));
+	bzero(&serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family=AF_INET;
-	bcopy(	(char*)server->h_addr,
-		(char*)&serv_addr.sin_addr.s_addr,
-		server->h_length);
+	bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
 	serv_addr.sin_port=htons(port);
 	res=::connect(socketdesc, (const sockaddr*)&serv_addr, sizeof(serv_addr));
 	if ((res < 0) && (errno != EINPROGRESS))
@@ -271,15 +278,9 @@ int eSocket::connectToHost(eString hostname, int port)
 	return(0);
 }
 
-eSocket::eSocket(): readbuffer(32768), writebuffer(32768), rsn(0)
+eSocket::eSocket(eMainloop *ml, int domain): readbuffer(32768), writebuffer(32768), rsn(0), mainloop(ml)
 {
-	socketdesc=-1;
-	mystate=Invalid;
-}
-
-eSocket::eSocket(eMainloop *ml): readbuffer(32768), writebuffer(32768), rsn(0)
-{
-	int s=socket(AF_INET, SOCK_STREAM, 0);
+	int s=socket(domain, SOCK_STREAM, 0);
 #if 0
 	eDebug("[SOCKET]: initalized socket %d", socketdesc);
 #endif
@@ -287,7 +288,7 @@ eSocket::eSocket(eMainloop *ml): readbuffer(32768), writebuffer(32768), rsn(0)
 	setSocket(s, 1, ml);
 }
 
-eSocket::eSocket(int socket, int issocket, eMainloop *ml): readbuffer(32768), writebuffer(32768), rsn(0)
+eSocket::eSocket(int socket, int issocket, eMainloop *ml): readbuffer(32768), writebuffer(32768), rsn(0), mainloop(ml)
 {
 	setSocket(socket, issocket, ml);
 	mystate=Connection;
@@ -303,15 +304,11 @@ eSocket::~eSocket()
 	}
 }
 
-eUnixDomainSocket::eUnixDomainSocket(eMainloop *ml)
+eUnixDomainSocket::eUnixDomainSocket(eMainloop *ml) : eSocket(ml, AF_LOCAL)
 {
-	int s=socket(AF_LOCAL, SOCK_STREAM, 0);
-	mystate=Idle;
-	setSocket(s, 1, ml);
 }
 
-eUnixDomainSocket::eUnixDomainSocket(int socket, int issocket, eMainloop *ml)
- : eSocket(socket, issocket, ml)
+eUnixDomainSocket::eUnixDomainSocket(int socket, int issocket, eMainloop *ml) : eSocket(socket, issocket, ml)
 {
 }
 
@@ -321,14 +318,23 @@ eUnixDomainSocket::~eUnixDomainSocket()
 
 int eUnixDomainSocket::connectToPath(eString path)
 {
+	sockaddr_un serv_addr_un;
 	int res;
+
+	if (mystate == Invalid)
+	{
+		/* the socket has been closed, create a new socket descriptor */
+		int s=socket(AF_LOCAL, SOCK_STREAM, 0);
+		mystate=Idle;
+		setSocket(s, 1, mainloop);
+	}
 	
 	if(socketdesc < 0){
 		error_(errno);
 		return(-1);
 	}
-	bzero((char*)&serv_addr_un, sizeof(serv_addr_un));
-	serv_addr_un.sun_family = AF_UNIX;
+	bzero(&serv_addr_un, sizeof(serv_addr_un));
+	serv_addr_un.sun_family = AF_LOCAL;
 	strcpy(serv_addr_un.sun_path, path.c_str());
 	res=::connect(socketdesc, (const sockaddr*)&serv_addr_un, sizeof(serv_addr_un));
 	if ((res < 0) && (errno != EINPROGRESS))
