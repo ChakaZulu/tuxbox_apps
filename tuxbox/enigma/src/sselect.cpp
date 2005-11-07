@@ -29,6 +29,7 @@
 #include <lib/system/init_num.h>
 #include <enigma_streamer.h>
 #include <enigma_picmanager.h>
+#include <epgwindow.h>
 
 gFont eListBoxEntryService::serviceFont;
 gFont eListBoxEntryService::descrFont;
@@ -326,18 +327,12 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 				EITEvent *e=eEPGCache::getInstance()->lookupEvent((const eServiceReferenceDVB&)service);
 				if (e)
 				{
-					for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+					eString descr;
+					LocalEventData led;
+					led.getLocalData(e, &descr);
+					if (descr.length())
 					{
-						if (d->Tag()==DESCR_SHORT_EVENT)
-						{
-							ShortEventDescriptor *ss=(ShortEventDescriptor*)*d;
-							if ( ss->event_name )
-								sdescr='('+ss->event_name+')';
-							break;
-						}
-					}
-					if (sdescr.length())
-					{
+						sdescr='('+descr+')';
 						curEventId = e->event_id;
 						descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
 						descrPara->setFont( descrFont );
