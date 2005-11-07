@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.194 2005/11/03 21:08:51 mogway Exp $
+//  $Id: sectionsd.cpp,v 1.195 2005/11/07 16:33:34 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -956,6 +956,8 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 		lockEvents();
 		int serviceIDfound = 0;
+		int is_double=0;//für rtl fix
+		std::string test_double;//für rtl fix
 
 		for (MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++)
 		{
@@ -965,44 +967,55 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 				for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++)
 				{
-					if ( oldFormat )
+					if(!(is_double==t->startzeit &&test_double==(*e)->name.c_str()))//für rtl fix
 					{
-						char strZeit[50];
-						sprintf(strZeit, "%012llx ", (*e)->uniqueKey());
-						strcat(liste, strZeit);
-
-						struct tm *tmZeit;
-						tmZeit = localtime(&(t->startzeit));
-						sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
-						        tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
-						strcat(liste, strZeit);
-						strcat(liste, (*e)->name.c_str());
-						strcat(liste, "\n");
-					}
-					else
-					{
-						*((event_id_t *)liste) = (*e)->uniqueKey();
-						liste += sizeof(event_id_t);
-						*((unsigned *)liste) = t->startzeit;
-						liste += 4;
-						*((unsigned *)liste) = t->dauer;
-						liste += 4;
-						strcpy(liste, (*e)->name.c_str());
-						liste += strlen(liste);
-						liste++;
-
-						if (((*e)->text).empty())
+						if ( oldFormat )
 						{
-							strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
-							liste += strlen(liste);
+							char strZeit[50];
+							sprintf(strZeit, "%012llx ", (*e)->uniqueKey());
+							strcat(liste, strZeit);
+
+							struct tm *tmZeit;
+							tmZeit = localtime(&(t->startzeit));
+							sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
+									tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
+							strcat(liste, strZeit);
+							strcat(liste, (*e)->name.c_str());
+							strcat(liste, "\n");
 						}
 						else
 						{
-							strcpy(liste, (*e)->text.c_str());
+							*((event_id_t *)liste) = (*e)->uniqueKey();
+							liste += sizeof(event_id_t);
+							*((unsigned *)liste) = t->startzeit;
+							liste += 4;
+							*((unsigned *)liste) = t->dauer;
+							liste += 4;
+							strcpy(liste, (*e)->name.c_str());
 							liste += strlen(liste);
-						}
+							liste++;
 
-						liste++;
+							if (((*e)->text).empty())
+							{
+								strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
+								liste += strlen(liste);
+							}
+							else
+							{
+								strcpy(liste, (*e)->text.c_str());
+								liste += strlen(liste);
+							}
+
+							liste++;
+						}
+						is_double=t->startzeit;
+						test_double=(*e)->name.c_str();
+					}
+					else
+					{
+						is_double=t->startzeit; 	 
+						test_double=(*e)->name.c_str();
+						continue;
 					}
 				}
 			} // if = serviceID
@@ -1101,7 +1114,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.194 2005/11/03 21:08:51 mogway Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.195 2005/11/07 16:33:34 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3884,7 +3897,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.194 2005/11/03 21:08:51 mogway Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.195 2005/11/07 16:33:34 metallica Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
