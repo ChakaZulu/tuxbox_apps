@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.4 2005/11/06 21:29:24 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.5 2005/11/08 15:16:59 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -143,22 +143,22 @@ void eSCGui::loadList()
 	switch (MODE)
 	{
 		case DATA:
-			tmp2 = "File-Mode";
+			tmp2 = "File";
 			setText("VLC " + tmp2 + " - Path: " + pathfull);
 			tmp3 = "";
 			break;
 		case VCD:
-			tmp2 = "VCD-Mode";  
+			tmp2 = "VCD";  
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "vcd:" + cddrive + "@1:1";
 			break;
 		case SVCD:
-			tmp2 = "SVCD-Mode"; 
+			tmp2 = "SVCD"; 
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "vcd:" + cddrive + "@1:1";
 			break;
 		case DVD:
-			tmp2 = "DVD-Mode";  
+			tmp2 = "DVD";  
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "dvdsimple:" + cddrive + "@1:1";
 			break;
