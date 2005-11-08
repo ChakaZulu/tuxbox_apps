@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.21 2005/09/06 23:13:51 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.22 2005/11/08 23:15:25 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: dmx_tspidscan.c,v 1.21 2005/09/06 23:13:51 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.22  2005/11/08 23:15:25  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.21  2005/09/06 23:13:51  rasc
 catch OS signals (kill ...) for smooth program termination
 
@@ -153,6 +158,8 @@ typedef struct _TS_PID {
 
 
 static TS_PID *pidArray;
+
+
 static int    analyze_ts_pid (u_char *buf, int len);
 static TS_PID *ts_payload_check (u_char *b, int pid, TS_PID *tspid);
 
@@ -351,7 +358,7 @@ int ts_pidscan (OPTION *opt)
 					break;
 
 				case TS_PES:
-					out (3,"[PES: %s]",dvbstrPESstream_ID(p->id) );
+					out (3,"[PS/PES: %s]",dvbstrPESstream_ID(p->id) );
 					break;
 
 				case TS_STUFFING:
@@ -408,17 +415,24 @@ static int analyze_ts_pid (u_char *buf, int len)
 	}
 	// $$$ TODO: sync output report?
 
-	for (; i < len; i += TS_LEN) {
+	for (; i < len; ) {
 		if (buf[i] == TS_SYNC_BYTE) {
+			TS_PID *pa;
+
 			pid	 = getBits (buf, i, 11, 13);
 
-			(pidArray+pid)->count++;
-			if ((pidArray+pid)->type == TS_NOPID) {
+			pa = (pidArray+pid);
+			pa->count++;
+			if ( (pa->type == TS_NOPID) || (pa->type == TS_UNKNOWN) ) {
 				found = 1;
-				ts_payload_check (buf+i, pid, (pidArray+pid));
+				ts_payload_check (buf+i, pid, pa);
 			}
 
-		} // if syncbyte
+			i += TS_LEN;
+
+		} else {
+			i++;	// no sync on byte
+		}
 	}
 
 
@@ -457,8 +471,8 @@ static TS_PID *ts_payload_check (u_char *b, int pid, TS_PID *tspid)
 		if (adaptation_field_ctrl & 0x2)  j += b[j] + 1;	// add adapt.field.len
 
 		if (adaptation_field_ctrl & 0x1) {
-			if (b[j]==0x00 && b[j+1]==0x00 && b[j+2]==0x01 && b[j+3]>=0xBC) {
-				// -- PES
+			if (b[j]==0x00 && b[j+1]==0x00 && b[j+2]==0x01) {
+				// -- PES/PS
 				tspid->type = TS_PES;
 				tspid->id   = b[j+3];
 			} else {
@@ -481,6 +495,10 @@ static TS_PID *ts_payload_check (u_char *b, int pid, TS_PID *tspid)
 
 	return (TS_PID *) NULL;
 }
+
+
+
+
 
 
 // $$$ TODO:   optional: Pidscan by -tsraw

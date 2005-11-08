@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.12 2005/10/25 18:41:41 rasc Exp $
+$Id: ts2secpes.c,v 1.13 2005/11/08 23:15:27 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,11 @@ $Id: ts2secpes.c,v 1.12 2005/10/25 18:41:41 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.13  2005/11/08 23:15:27  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.12  2005/10/25 18:41:41  rasc
 minor code rewrite
 
@@ -156,7 +161,7 @@ int ts2SecPes_AddPacketStart (int pid, int cc, u_char *b, u_int len)
 
 // -- TS can contain multiple packets streamed in payload, so calc will be wrong!!!
 // -- so I skip this at this time...
-// -- $$$ code modification mark (1)
+// -- $$$ code modification mark (1) start
 //    if (len > 6) {
 //	// Non-System PES (<= 0xBC) will have an unknown length (= 0)
 //	if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
@@ -170,6 +175,8 @@ int ts2SecPes_AddPacketStart (int pid, int cc, u_char *b, u_int len)
 //		if (l) l += pointer + 3;	// length with pointer & tableId
 //   	}
 //   }
+// -- $$$ code modification mark (1) end
+//
 
     tsd.payload_length = l;
 
@@ -325,9 +332,8 @@ void ts2SecPes_subdecode (u_char *b, int len, u_int opt_pid)
 // -- if so, do sub-decoding and do output
 // -- return: 0 = no output, 1 = output done
 //
-// $$$ Remark: this routine is obsolete and in fact do nothing,
+// $$$ Remark: this routine is obsolete and in fact does nothing,
 //             due to code modification mark (1)
-//             $$$ TODO: the last packet read prior to prog termination may not be subdecoded
 //
 int  ts2SecPes_checkAndDo_PacketSubdecode_Output (void)
 {
@@ -338,6 +344,24 @@ int  ts2SecPes_checkAndDo_PacketSubdecode_Output (void)
 			ts2SecPes_Output_subdecode (0);
 			return 1;
 		}
+	}
+	return 0;
+}
+
+
+
+//
+// -- last packet read subdecode output
+// --- This is needed when eof arrives, when reading files
+// --- and no new PUSI will follow.
+// -- return: 0 = no output, 1 = output done
+//
+int  ts2SecPes_LastPacketReadSubdecode_Output (void)
+{
+
+     	if (tsd.status != TSD_output_done) {
+		ts2SecPes_Output_subdecode (0);
+		return 1;
 	}
 	return 0;
 }
@@ -445,8 +469,12 @@ void  ts2sec_multipacket (u_char *b, int len, u_int pid)
 		}
 
 		out_nl (3,"SI packet (length=%d): ",sect_len);
+		out_NL (9);
+			print_databytes (9,"SI packet hexdump:", b, sect_len);
+		out_NL (9);
+
 	    	indent (+1);
-		decodeSI_packet (b, sect_len, pid);
+			decodeSI_packet (b, sect_len, pid);
 	    	indent (-1);
 		out_NL (3);
 
@@ -497,6 +525,10 @@ void  ts2ps_pes_multipacket (u_char *b, int len, u_int pid)
 
 
 		out_nl (3,"PS/PES packet (length=%d): ",pkt_len);
+		out_NL (9);
+			print_databytes (9,"PS/PES packet hexdump:", b, pkt_len);
+		out_NL (9);
+
 	    	indent (+1);
 		decodePS_PES_packet (b, pkt_len, pid);
 	    	indent (-1);
@@ -514,3 +546,5 @@ void  ts2ps_pes_multipacket (u_char *b, int len, u_int pid)
 // 
 // $$$ TODO: discontinuity signalling flag check?
 //
+//
+// $$$ TODO: hexdump prior to decoding (-pd 9)

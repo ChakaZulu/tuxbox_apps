@@ -1,5 +1,5 @@
 /*
-$Id: pes_std.c,v 1.4 2004/08/12 22:57:18 rasc Exp $
+$Id: pes_std.c,v 1.5 2005/11/08 23:15:25 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,11 @@ $Id: pes_std.c,v 1.4 2004/08/12 22:57:18 rasc Exp $
 
 
 $Log: pes_std.c,v $
+Revision 1.5  2005/11/08 23:15:25  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.4  2004/08/12 22:57:18  rasc
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
@@ -104,7 +109,6 @@ void  PES_decode_std (u_char *b, int len, u_int PES_streamID)
  p.PES_CRC_flag				= getBits (b, 0, 14, 1);
  p.PES_extension_flag			= getBits (b, 0, 15, 1);
  p.PES_header_data_length		= getBits (b, 0, 16, 8);
-
 
 
  // $$$ TODO own subroutine for PES_header (get and out)
@@ -312,6 +316,7 @@ void  PES_decode_std (u_char *b, int len, u_int PES_streamID)
 
 
    if (PES_extension_flag2 == 0x01) {
+	// -- ITU-T Rec. H.222.0 (2000)/Amd.2 (06/2003)
 
 	u_int  PES_extension_field_length;
 	u_int  streamID_extension_flag;
@@ -342,40 +347,42 @@ void  PES_decode_std (u_char *b, int len, u_int PES_streamID)
 
 
 
-
- /* 
-  * -- stuffing bytes
-  */
-
   // PES_header_data_length : An 8-bit field specifying the total number of
   // bytes occupied by the optional fields and any stuffing bytes contained
   // in this PES packet header. The presence of optional fields is indicated
   // in the byte that precedes the PES_header_data_length field.
-  //
-  // --> This means (??) +3, due to the option fields before ..._length field
-  // $$$ TODO be checked!  (so far verified by experience)
+  // (PES_header_data_length has the length up to this point)
+ 
 
+
+
+
+  // stuffing_byte:
+  // This is a fixed 8-bit value equal to '1111 1111' that
+  // can be inserted by the encoder, for example to meet the requirements
+  // of the channel. It is discarded by the decoder. No more than 32 stuffing
+  // bytes shall be present in one PES packet header.
 
   {
-    int len2 = p.PES_header_data_length + 3 - (b - b_start);
+    int    i   = 0;
+    u_char *bx = b;
 
-    if (len2 > 0) {
-    	print_databytes (4,"stuffing bytes:", b, len2);
-    	b += len2;
+    while (*bx++ == 0xFF) i++;
+    if (i > 0) {
+    	print_databytes (4,"stuffing bytes:", b, i);
+    	b += i;
     }
+
   }
 
 
 
-
- /* 
-  * -- PES packet_data_bytes
-  * -- check streamID
-  */
-
-   // $$$ TODO data_identifier (Teletext, DVB subtitles, etc...)
+  // -- PES packet_data_bytes
+  // -- check streamID
+  // $$$ TODO: data_identifier (Teletext, DVB subtitles, etc...)
 
   {
+    // $$$ TODO: unbound streams: len = 0 !!
     int len2 = len - (b - b_start);
 
 

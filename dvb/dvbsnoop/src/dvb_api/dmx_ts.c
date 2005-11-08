@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.35 2005/10/20 22:25:06 rasc Exp $
+$Id: dmx_ts.c,v 1.36 2005/11/08 23:15:25 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: dmx_ts.c,v 1.35 2005/10/20 22:25:06 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.36  2005/11/08 23:15:25  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.35  2005/10/20 22:25:06  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.
@@ -300,7 +305,10 @@ int  doReadTS (OPTION *opt)
 
     if (n == 0) {
 	if (!fileMode) continue;	// DVRmode = no eof!
-	else break;			// filemode eof 
+	else {			// filemode eof 
+	  ts2SecPes_LastPacketReadSubdecode_Output ();
+	  break;
+	}
     }
 
 

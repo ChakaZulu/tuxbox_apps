@@ -215,6 +215,7 @@ Default is 0 (no limit).
 .br
 Do CRC checking, when reading section data. 
 Default is off. This is only supported, if your DVB hardware/firmware supports CRC checking.
+Remark: Some section types may use Checksum instead of CRC.
 .TP
 .B \-nocrc
 .br
@@ -226,6 +227,7 @@ Some DVB sections do not have proper CRC set!
 .br
 Do soft CRC checking, when reading section data.
 Hardware/firmware CRC should be preferred. Default is \-nosoftcrc.
+Remark: Some section types may use Checksum instead of CRC.
 .TP
 .B \-nosoftcrc
 .br
@@ -235,7 +237,7 @@ Don't do soft CRC, when reading sections. (default)
 .B \-spiderpid
 .br
 Snoop referenced section PIDs.
-This option recursivly reads all PIDs referenced by a section. This option also sets number of packets to be read to 1 (sets \-n 1).
+This option recursivly reads all PIDs referenced by a section. This option also sets number of packets to be read to 1 (sets \-n 1). To read more packets for a pid, use \-n \<count\> after specifying \-spiderpid.
 .TP
 .B \-privateprovider \<id\>
 .br
@@ -261,7 +263,7 @@ Transport Stream mode.
 .TP
 .B \-tssubdecode
 .br
-Sub\-decode SECTION data or PES data from transport stream decoding. This reads transport stream packets and tries to decode its content.
+Sub\-decode SI data (sections) or PS/PES data from transport stream decoding. This reads transport stream packets and tries to decode its content.  Useful to decode PES or SI data from a transport stream file.
 
 .TP
 .B \-tsraw
@@ -447,7 +449,9 @@ dvbsnoop  catches signals to provide smooth program termination.
 
 .SH "BUGS"
 Please check http://dvbsnoop.sourceforge.net for bug reports.
-
+.br
+Bug reports: http://sourceforge.net/tracker/?group_id=85040
+.br
 
 .SH SEE ALSO
 .BR dvbtune 

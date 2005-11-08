@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.32 2005/10/20 22:25:07 rasc Exp $
+$Id: pespacket.c,v 1.33 2005/11/08 23:15:25 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,11 @@ $Id: pespacket.c,v 1.32 2005/10/20 22:25:07 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.33  2005/11/08 23:15:25  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.32  2005/10/20 22:25:07  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.
@@ -205,9 +210,10 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
 
  packet_start_code_prefix		 = getBits (b, 0,  0, 24);
  if (packet_start_code_prefix != 0x000001) {
-      out_nl (3," !!! Packet_Start_CODE [%06lx] is wrong (= no PES/PS [0x000001])!!!\n",
+	out_nl (3," !!! Packet_Start_CODE [%06lx] is wrong (= no PES/PS [0x000001])!!!\n",
 		packet_start_code_prefix);
-      // $$$    return;
+	print_databytes (4,"Unknown packet data:", b, len);
+	return;
  }
  out_nl (3,"Packet_start_code_prefix: 0x%06lx",packet_start_code_prefix);
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.68 2005/10/23 22:50:27 rasc Exp $
+$Id: dvb_str.c,v 1.69 2005/11/08 23:15:26 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dvb_str.c,v 1.68 2005/10/23 22:50:27 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2005   Rainer.Scherg@gmx.de
 
 
   -- DVB-Strings
@@ -19,6 +19,11 @@ $Id: dvb_str.c,v 1.68 2005/10/23 22:50:27 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.69  2005/11/08 23:15:26  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.68  2005/10/23 22:50:27  rasc
  - New:  started ISO 13818-2 StreamIDs
  - New:  decode multiple PS/PES packets within TS packets (-tssubdecode)
@@ -526,7 +531,8 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x76, 0x76,  "content_identifier_descriptor" }, 	// TS 102 323
      {  0x77, 0x77,  "time_slice_fec_identifier_descriptor" }, 	// EN 300 468 v1.6.1
      {  0x78, 0x78,  "ECM_repetition_rate_descriptor" }, 	// EN 300 468 v1.6.1
-     {  0x79, 0x7F,  "reserved_descriptor" },
+     {  0x79, 0x79,  "S2_satellite_delivery_system_descriptor" }, 	// EN 300 468 v1.7.1
+     {  0x7A, 0x7F,  "reserved_descriptor" },
      {  0x80, 0xAF,  "User defined/ATSC reserved" },		/* ETR 211e02 */
      {  0xB0, 0xFE,  "User defined" },
      {  0xFF, 0xFF,  "Forbidden" },
@@ -577,7 +583,6 @@ char *dvbstrWEST_EAST_FLAG (u_int flag)
 
 
 char *dvbstrPolarisation_FLAG (u_int flag)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "linear - horizontal" },
@@ -592,12 +597,14 @@ char *dvbstrPolarisation_FLAG (u_int flag)
 
 
 char *dvbstrModulationSAT_FLAG (u_int flag)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "not defined" },
      {  0x01, 0x01,  "QPSK" },
-     {  0x02, 0x1F,  "reserved for future use" },
+     {  0x02, 0x02,  "8PSK" },		// EN 300 468 1.7.1
+     {  0x03, 0x03,  "16-QAM" },	// EN 300 468 1.7.1
+     // $$$ TODO: to be verified
+     {  0x04, 0x1F,  "reserved for future use" },
      {  0,0, NULL }
   };
 
@@ -605,9 +612,21 @@ char *dvbstrModulationSAT_FLAG (u_int flag)
 }
 
 
+char *dvbstrRollOffSAT_FLAG (u_int flag)
+{
+  STR_TABLE  Table[] = {		// EN 300 468 1.7.1
+     {  0x00, 0x00,  "Alpha 0,35" },
+     {  0x01, 0x01,  "Alpha 0,25" },
+     {  0x02, 0x02,  "Alpha 0,20" },
+     {  0x03, 0x1F,  "reserved for future use" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, flag);
+}
+
 
 char *dvbstrModulationCable_FLAG (u_int flag)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "not defined" },
@@ -627,7 +646,6 @@ char *dvbstrModulationCable_FLAG (u_int flag)
 
 
 char *dvbstrFECinner_SCHEME (u_int flag)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "not defined" },
@@ -636,7 +654,11 @@ char *dvbstrFECinner_SCHEME (u_int flag)
      {  0x03, 0x03,  "3/4 conv. code rate" },
      {  0x04, 0x04,  "5/6 conv. code rate" },
      {  0x05, 0x05,  "7/8 conv. code rate" },
-     {  0x06, 0x0E,  "reserved" },
+     {  0x06, 0x06,  "8/9 conv. code rate" },	// EN 300 468 1.7.1
+     {  0x07, 0x07,  "3/5 conv. code rate" },	// ...
+     {  0x08, 0x08,  "4/5 conv. code rate" },
+     {  0x09, 0x09,  "9/10 conv. code rate"},
+     {  0x0A, 0x0E,  "reserved" },
      {  0x0F, 0x0F,  "No conv. coding" },
      {  0,0, NULL }
   };
@@ -647,7 +669,6 @@ char *dvbstrFECinner_SCHEME (u_int flag)
 
 
 char *dvbstrFECouter_SCHEME (u_int flag)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "not defined" },

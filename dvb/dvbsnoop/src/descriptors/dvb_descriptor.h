@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.h,v 1.12 2005/01/17 19:41:22 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.13 2005/11/08 23:15:24 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: dvb_descriptor.h,v 1.12 2005/01/17 19:41:22 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.13  2005/11/08 23:15:24  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.12  2005/01/17 19:41:22  rasc
 Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 
@@ -135,6 +140,7 @@ void  descriptorDVB_ContentIdentifier(u_char *b);
 		 // EN 301 192 v1.4.1  MPE_FEC
 void  descriptorDVB_TimesliceFecIdentifier(u_char *b);
 void  descriptorDVB_ECM_RepetitionRate(u_char *b);
+void  descriptorDVB_S2SatelliteDeliverySystem(u_char *b);
 
 
 

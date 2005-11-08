@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.33 2005/10/20 22:25:08 rasc Exp $
+$Id: sectables.c,v 1.34 2005/11/08 23:15:26 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: sectables.c,v 1.33 2005/10/20 22:25:08 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.34  2005/11/08 23:15:26  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.33  2005/10/20 22:25:08  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.
@@ -248,6 +253,7 @@ void decodeSI_packet (u_char *buf, int len, u_int pid)
 
   	s =  dvbstrPID_assignment(pid);
 	if (*s) out (2,"  [= assigned for: %s]", s);
+	out_NL (2);
 	out_NL (2);
   }
 

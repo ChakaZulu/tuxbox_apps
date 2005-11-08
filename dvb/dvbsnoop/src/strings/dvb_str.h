@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.30 2005/09/02 14:11:36 rasc Exp $ 
+$Id: dvb_str.h,v 1.31 2005/11/08 23:15:26 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dvb_str.h,v 1.30 2005/09/02 14:11:36 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2005   Rainer.Scherg@gmx.de
 
 
  -- dvb strings
@@ -15,6 +15,11 @@ $Id: dvb_str.h,v 1.30 2005/09/02 14:11:36 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.31  2005/11/08 23:15:26  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.30  2005/09/02 14:11:36  rasc
 TS code redesign, xPCR and DTS timestamps decoding
 
@@ -126,6 +131,7 @@ char *dvbstrWEST_EAST_FLAG (u_int tag);
 char *dvbstrPolarisation_FLAG (u_int tag);
 char *dvbstrModulationCable_FLAG(u_int flag);
 char *dvbstrModulationSAT_FLAG (u_int tag);
+char *dvbstrRollOffSAT_FLAG (u_int flag);
 char *dvbstrFECinner_SCHEME (u_int tag);
 char *dvbstrFECouter_SCHEME (u_int tag);
 char *dvbstrLinkage_TYPE(u_int tag);

@@ -1,4 +1,7 @@
- - New:  started ISO 13818-2 StreamIDs
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign
+ - New:  started ISO 13818-2 StreamIDs (PS/PES)
  - New:  decode multiple PS/PES packets within TS packets (-tssubdecode)
  - New:  decode multiple SI packets within TS packets (-tssubdecode)
  - Bugfix: tssubdecode check for PUSI and SI pointer offset (tnx to Souloumiac Olivier)

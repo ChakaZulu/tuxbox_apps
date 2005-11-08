@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.h,v 1.6 2005/10/23 22:50:28 rasc Exp $
+$Id: ts2secpes.h,v 1.7 2005/11/08 23:15:27 rasc Exp $
 
 
    
@@ -25,6 +25,7 @@ int  ts2SecPes_AddPacketContinue (int pid, int cc, u_char *b, u_int len);
 
 void ts2SecPes_subdecode (u_char *b, int len, u_int pid);
 int  ts2SecPes_checkAndDo_PacketSubdecode_Output (void);
+int  ts2SecPes_LastPacketReadSubdecode_Output (void);
 void ts2SecPes_Output_subdecode (u_int overleap_bytes);
 
 void  ts2sec_multipacket (u_char *b, int len, u_int pid);

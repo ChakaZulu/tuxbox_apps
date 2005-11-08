@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.35 2005/10/20 22:25:06 rasc Exp $
+$Id: dmx_pes.c,v 1.36 2005/11/08 23:15:25 rasc Exp $
 
 
  DVBSNOOP
@@ -20,6 +20,11 @@ $Id: dmx_pes.c,v 1.35 2005/10/20 22:25:06 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.36  2005/11/08 23:15:25  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.35  2005/10/20 22:25:06  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.
@@ -159,14 +164,21 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-#define PES_BUF_SIZE  (256 * 1024)		/* default PES dmx buffer size */
-#define READ_BUF_SIZE (2 * 64 * 1024)  		/* larger (64KB + 6 Bytes) !!! */
+#define PES_BUF_SIZE  (256 * 1024)	// default PES dmx buffer size 
+#define READ_BUF_SIZE (256 * 1024)  	// larger (64KB + 6 Bytes) !!!/
+#define PUSHBACK_BUF_SIZE (128)		// < 1024 bytes!!  see below  
+#define SKIP_BUF_SIZE  (1024)		// for debugging, etc. 
 
 
 
 
-static long pes_SyncRead   (int fd, u_char *buf, u_long len, u_long *skipped_bytes);
-static long ps_chainread_packheader (int fd, u_char *buf);
+static void out_SkipBuffer (int v, int len);
+static long pes_SyncBufferRead (int fd, u_char *buf, u_long max_len, u_long *skipped_bytes);
+
+#define  DIRECT_BUFFERED_READ  1		// see below!
+static int  pes_rawBufferedPushByte (u_char c);
+static long pes_rawBufferedRead (int fd, u_char *dest_buf, u_long dest_len);
+
 
 
 
@@ -256,8 +268,7 @@ int  doReadPES (OPTION *opt)
 
 
     //  -- Read PES packet  (sync Read)
-
-    n = pes_SyncRead(fd,buf,sizeof(buf), &skipped_bytes);
+    n = pes_SyncBufferRead (fd,buf,sizeof(buf), &skipped_bytes);
     b = buf;
 
 
@@ -287,7 +298,8 @@ int  doReadPES (OPTION *opt)
 
     	// -- skipped Data to get sync byte?
     	if (skipped_bytes) {
-		out_nl (3,"!!! %ld bytes skipped to get PS/PES sync!!!");
+		out_nl (3,"!!! %ld bytes skipped to get PS/PES sync!!!",skipped_bytes);
+		out_SkipBuffer (8, skipped_bytes);
     	}
 
 	processPS_PES_packet (opt->pid, count, b, n);
@@ -327,127 +339,331 @@ int  doReadPES (OPTION *opt)
 
 
 
+// -----------------------------------------------------------
+
+
+
+u_char SkipBuffer[SKIP_BUF_SIZE];
+
+
+
+/*
+  -- output skipped bytes from last read
+ */
+
+static void  out_SkipBuffer (int v, int len)
+
+{
+  int  lmax;
+  int  l;
+
+   lmax = (sizeof(SkipBuffer)/sizeof(u_char));
+   l = (len > lmax) ? lmax : len;
+
+   print_databytes (v,"Skipped bytes:", SkipBuffer, l);
+   
+   if (l == lmax) {
+   	out_nl (v,"...");
+   	out_NL (v);
+   }
+
+}
+
 
 
 
 /*
   -- read PES packet (Synced)
+  -- buffer pre-read bytes for next execution
   -- return: len // read()-return code
 */
 
-static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes)
+static long pes_SyncBufferRead (int fd, u_char *buf, u_long max_len, u_long *skipped_bytes)
 
 {
-    long    n1,n2;
-    long    l;
     u_long  sync;
+    u_char  *org_buf = buf;
 
-    
 
     // -- simple PES sync... seek for 0x000001 (PES_SYNC_BYTE)
-    // -- $$$ Q: has this to be byteshifted or bit shifted???
-    //
     // ISO/IEC 13818-1:
     // -- packet_start_code_prefix -- The packet_start_code_prefix is
     // -- a 24-bit code. Together with the stream_id that follows it constitutes
     // -- a packet start code that identifies the beginning of a packet.
-    // -- The packet_start_code_prefix  is the bit string '0000 0000 0000 0000
-    // -- 0000 0001' (0x000001).
-    // ==>   Check the stream_id with "dvb_str.c", if you do changes!
- 
+    // -- The packet_start_code_prefix  is the bit stream
+    // -- '0000 0000 0000 0000 0000 0001' (0x000001).
 
-    buf[0] = 0x00;   // pre write packet_start_code_prefix to buffer
-    buf[1] = 0x00;
-    buf[2] = 0x01;
+
     *skipped_bytes = 0;
     sync = 0xFFFFFFFF;
-    while (1) {
-	u_char c;
 
-    	n1 = read(fd,buf+3,1);
-	if (n1 <= 0) return n1;			// error or strange, abort
+
+    // -- seek packet sync start
+
+    while (1) {
+	u_char b[4];
+        int    n;
+
+	n = pes_rawBufferedRead (fd, b,1);
+	if (n <= 0) return n;			// error or strange, abort
 
 	// -- byte shift for packet_start_code_prefix
 	// -- sync found? 0x000001 + valid PESstream_ID or PS_stream_ID
-	// -- $$$ check this if streamID defs will be enhanced by ISO!!!
 
-	c = buf[3];
-	sync = (sync << 8) | c;
+	sync = (sync << 8) | *b;
 	if ( (sync & 0xFFFFFF00) == 0x00000100 ) {
-		// Program Stream ID check (PS)
-		if (c == 0xB9) {		// MPEG_program_end
-    		   *skipped_bytes -= 3;
-		   return 4;
-		}
-		if (c == 0xBA)  {		// pack_header_start
-		   n1 = ps_chainread_packheader (fd, buf+4);
-    		   *skipped_bytes -= 3;
-		   return (n1 > 0) ? n1+4 : n1;
-		}
-		if (c == 0xBB)  break; 		// system_header_start  (same as PES packet)
-		if (c >= 0xBC)  break;		// PES packet	
+		*skipped_bytes -= 3;
+    		buf[0] = 0x00;			// write sync + ID to buffer
+		buf[1] = 0x00;
+		buf[2] = 0x01;
+		buf[3] = *b;
+		break;
 	}
 
-	(*skipped_bytes)++;			// sync skip counter
+	// -- store skipped bytes
+	if ( (*skipped_bytes) < (sizeof(SkipBuffer)/sizeof(u_char)) ) {
+		SkipBuffer[*skipped_bytes] = *b;
+	}
+
+	(*skipped_bytes)++;
     }
+
 
 
     // -- Sync found!
-
-    *skipped_bytes -= 3;
-    // buf[0] = 0x00;   // write packet_start_code_prefix to buffer
-    // buf[1] = 0x00;
-    // buf[2] = 0x01;
-    // buf[3] = streamID == recent read
+    // -- evaluate packet_id and seek packet end (next sync)
 
 
-    // -- read more 2 bytes (packet length)
-    // -- read rest ...
+    if (buf[3] >= 0xBC)  {			// PES system packet with length
 
-    n1 = read(fd,buf+4,2);
-    if (n1 == 2) {
-        l = (buf[4]<<8) + buf[5];		// PES packet size...
-	n1 = 6; 				// 4+2 bytes read
-	// $$$ TODO    if len == 0, special unbound length
+        long    n1,n2;
+	long    l;
 
-	if (l > 0) {
-           n2 = read(fd, buf+6, (unsigned int) l );
-           n1 = (n2 < 0) ? n2 : n1+n2;
+	n1 = pes_rawBufferedRead (fd, buf+4,2);
+	if (n1 < 0) return n1;
+
+    	if (n1 == 2) {
+        	l = (buf[4]<<8) + buf[5];		// PES packet size...
+		n1 = 6; 				// 4+2 bytes read
+
+		if (l > 0) {
+			n2 = pes_rawBufferedRead (fd, buf+n1, (unsigned int) l );
+           		return  (n2 < 0) ? n2 : n1+n2;
+		} else {	// unbound stream!
+			max_len -= n1;					// l=0
+			buf     += n1;
+		}
+    	} else {
+		max_len -= n1 + 4;
+		buf     += n1 + 4;
 	}
+
+    } else {
+	max_len -=  4;
+	buf     +=  4;
     }
 
 
-    return n1;
+
+    // -- seek packet end (sync to next packet)
+    // -- ISO 13818-1 length=0 packets (unbound video streams)
+    // -- ISO 13818-2 packets
+
+
+    sync = 0xFFFFFFFF;
+    while (max_len > 0) {
+	u_char c;
+	int    n;
+
+	// $$$ TODO: may be optimized 
+	n = pes_rawBufferedRead (fd, buf,1);
+	if (n < 0) return n;
+
+	c = *buf++;
+	max_len -= n;
+
+	// -- EOF
+	if (n == 0) {
+		return (long) (buf - org_buf);
+	}
+
+
+	// -- next packet found? (sync detected)
+	sync = (sync << 8) | c;
+	if ( (sync & 0x00FFFFFF) == 0x000001 ) {
+		pes_rawBufferedPushByte (*(--buf));	 // push back sync bytes
+		pes_rawBufferedPushByte (*(--buf));
+		pes_rawBufferedPushByte (*(--buf));
+		return (long) (buf - org_buf);
+	}
+    }
+
+    return -1;					// buffer overflow
 }
 
 
 
 
+
+
+
+// -----------------------------------------------------------
+
+
+
 //
-// -- chain read PS pack_header
-// -- packet_start_code + id already in buffer (4 bytes)
-// -- DOES NOT READ system_header, when following pack_header!!!
-// -- return: <=0: err  >0: len
+// -- PS/PES raw buffer operations (prior to pes sync)
 //
-static long ps_chainread_packheader (int fd, u_char *buf)
+
+//
+// -- Byte Push Back Buffer to raw stream buffer
+// -- return: -1: buffer overflow
+//
+
+
+static u_char  PB_buffer[PUSHBACK_BUF_SIZE];   // not to large, many bytes might be pushed
+static int     PB_pos = 0;
+
+
+static int pes_rawBufferedPushByte (u_char c)
+{
+	if ( PB_pos >= (sizeof(PB_buffer) / sizeof(u_char)) ) {
+		return -1;		// overflow
+	}
+
+	PB_buffer[PB_pos++] = c;
+	return 0;
+}
+
+
+
+
+
+
+
+//
+// -- 2 implementations to choose...
+// -- over time only one will survive...
+//
+
+
+#ifdef DIRECT_BUFFERED_READ
+
+/*
+  -- raw read PES stream (check push backs)
+  -- pre-read bytes for next call
+  -- return: len // read()-return code
+*/
+
+static long pes_rawBufferedRead (int fd, u_char *dest_buf, u_long dest_len)
 
 {
-   int  n1, n2;
-   int  len;
+ int n1 = 0;
+ int n2 = 0;
 
 
-   n1 = read(fd, buf, 10);
-   if (n1 <= 0) return n1;
-   if (n1 != 10) return -1;
+  // -- Bytes in PushBack buffer?
+  // -- copy to destination buffer
+ 
+  while ( (PB_pos > 0) && (dest_len > 0) ) {
+	*dest_buf++ = PB_buffer[--PB_pos];
+	dest_len--;
+	n1++;
+  }
 
-   // -- get pack_stuffing_length
-   len = getBits (buf+9, 0, 5, 3);
+  if (dest_len > 0) {
+  	n2 = read(fd,dest_buf,dest_len);
+	if (n2 < 0) return n2;
+  }
 
-   n2 = read(fd, buf+10, len);
-   if (n2 < 0) return n2;
-
-   return n1+n2;
+  return n1 + n2;
 }
+
+
+
+#else
+
+
+
+/*
+  -- raw read PES stream buffered (+ check push backs)
+  -- buffer pre-read bytes for next call
+  -- disadvantage:  driver -> memcopy -> readbuffer -> memcopy -> pes_packet-buffer
+  -- return: len // read()-return code
+*/
+
+static long pes_rawBufferedRead (int fd, u_char *dest_buf, u_long dest_len)
+
+{
+#define RAW_READ_BUF_SIZE (16 * 1024)		/* buffered read buffer        */ 
+  static u_char  *rd_buf = (u_char *)NULL;
+  static u_int   pos_Start;
+  static u_int   pos_End;
+
+  u_char	 *org_dest_buf = dest_buf;
+
+
+
+  // -- first time, init buffer
+  if (! rd_buf) {
+	  pos_Start = 0;
+	  pos_End   = 0;
+	  rd_buf = malloc (RAW_READ_BUF_SIZE * sizeof(u_char));
+	  if (! rd_buf) {
+		  IO_error("malloc");
+		  exit (1);
+	  }
+  }
+
+
+  // -- Bytes in PushBack buffer?
+  // -- copy to destination buffer
+ 
+  while ( (PB_pos > 0) && (dest_len > 0) ) {
+	*dest_buf++ = PB_buffer[--PB_pos];
+	dest_len--;
+  }
+
+
+
+
+  // -- transfere data from rd buffer 
+
+  while (dest_len > 0) {
+	int  copy_len;
+	int  stored_len;
+	int  n;
+
+
+	stored_len = pos_End - pos_Start;
+	copy_len   = (dest_len <= stored_len) ? dest_len : stored_len;
+
+	if (copy_len > 0) {
+		memcpy (dest_buf, rd_buf+pos_Start, copy_len);
+		pos_Start += copy_len;
+		dest_buf  += copy_len;
+		dest_len  -= copy_len;
+	} else {
+		pos_Start = 0;
+		pos_End   = 0;
+    		n = read(fd,rd_buf,RAW_READ_BUF_SIZE);
+		if (n <= 0) return n;
+		pos_End = n;
+	}
+
+  }
+
+  return (long) (dest_buf - org_dest_buf);
+}
+
+#endif
+
+
+
+
+
+
+
 
 
 

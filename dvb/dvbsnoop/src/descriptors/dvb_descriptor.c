@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.43 2005/10/25 18:41:40 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.44 2005/11/08 23:15:24 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: dvb_descriptor.c,v 1.43 2005/10/25 18:41:40 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.44  2005/11/08 23:15:24  rasc
+ - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
+ - Bugfix: PES packet stuffing
+ - New:  PS/PES read redesign and some code changes
+
 Revision 1.43  2005/10/25 18:41:40  rasc
 minor code rewrite
 
@@ -290,6 +295,7 @@ int  descriptorDVB  (u_char *b)
 		 // EN 301 192 v1.4.1  MPE_FEC
      case 0x77:  descriptorDVB_TimesliceFecIdentifier(b);  break;
      case 0x78:  descriptorDVB_ECM_RepetitionRate(b);  break;
+     case 0x79:  descriptorDVB_S2SatelliteDeliverySystem(b);  break;
 
      default: 
 	if (b[0] < 0x80) {
@@ -403,6 +409,8 @@ void descriptorDVB_Stuffing (u_char *b)
   0x43 SatDelivSys  descriptor  (Satellite delivery system descriptor)
   EN 300 468
   -- adapted v1.6.1
+  -- adapted v1.7.1  
+  // $$$ TODO: to be verified  with final v1.7.1
 */
 
 void descriptorDVB_SatDelivSys (u_char *b)
@@ -416,14 +424,17 @@ void descriptorDVB_SatDelivSys (u_char *b)
     u_int      orbital_position;
     u_int      west_east_flag;
     u_int      polarisation;
-    u_int      modulation;
+    // u_int      modulation;   	// v1.6.1
+    u_int      roll_off;		// v1.7.1 replaces mod.
+    u_int      kind;			// v1.7.1 replaces mod.
+    u_int      narrow_modulation;	// v1.7.1 replaces mod.
     u_long     symbol_rate;
     u_int      FEC_inner;
 
  } descSDS;
 
  descSDS  d;
- //int      i;
+ char     *s;
 
 
 
@@ -436,7 +447,10 @@ void descriptorDVB_SatDelivSys (u_char *b)
  d.orbital_position		 = getBits (b, 0, 48, 16);
  d.west_east_flag		 = getBits (b, 0, 64, 1);
  d.polarisation			 = getBits (b, 0, 65, 2);
- d.modulation			 = getBits (b, 0, 67, 5);
+ // d.modulation			 = getBits (b, 0, 67, 5);
+ d.roll_off			 = getBits (b, 0, 67, 2);
+ d.kind				 = getBits (b, 0, 69, 1);
+ d.narrow_modulation		 = getBits (b, 0, 70, 2);
  d.symbol_rate			 = getBits (b, 0, 72, 28);
  d.FEC_inner			 = getBits (b, 0, 100, 4);
 
@@ -452,15 +466,30 @@ void descriptorDVB_SatDelivSys (u_char *b)
  out_S2B_NL (4,"Polarisation: ",d.polarisation,
 	 dvbstrPolarisation_FLAG(d.polarisation));
 
- out_S2B_NL (4,"Modulation (Sat): ",d.modulation,
-	 dvbstrModulationSAT_FLAG(d.modulation));
+// -- replaces/enhanced by ETSI EN 300 468 v1.7.1
+// out_S2B_NL (4,"Modulation (Sat): ",d.modulation,
+//	 dvbstrModulationSAT_FLAG(d.modulation));
+
+
+ s = (d.kind == 0) ? "DVB-S" : "DVB-S2";
+ if (0 == d.kind) {
+	out_S2B_NL (4,"Kind: ", d.kind, "DVB-S");
+ } else {
+	out_S2B_NL (4,"Kind: ", d.kind, "DVB-S2");
+	out_S2B_NL (4,"Roll Off Faktor: ", d.roll_off,
+		dvbstrRollOffSAT_FLAG(d.roll_off));
+ }
+
+
+ // $$$ TODO: something might be missing here
+#warning "narror_modulation missing in descriptor for DVB-S2 (???)"
+
 
  out_nl (4,"Symbol_rate: %u (= %3x.%04x)",d.symbol_rate,
 	 d.symbol_rate >> 16, d.symbol_rate & 0x0000FFFF );
 
  out_S2B_NL (4,"FEC_inner: ",d.FEC_inner,
 	 dvbstrFECinner_SCHEME (d.FEC_inner));
-
 
 }
 
@@ -3801,6 +3830,66 @@ void descriptorDVB_ECM_RepetitionRate (u_char *b)
 }
 
 
+
+
+/*
+  0x79 S2 Satellite Delivery System Descriptor 
+  ETSI EN 301 192  1.7.1
+  // $$$ TODO: to be verified  with final v1.7.1
+*/
+
+void  descriptorDVB_S2SatelliteDeliverySystem(u_char *b)
+{
+    typedef struct  _descS2SatelliteDeliverySystem{
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    u_int      scrambling_sequence_selector;
+    u_int      multiple_input_stream_flag;
+    u_int      backwards_compatibility_indicator;
+    u_int      reserved_future_use;
+    u_int      reserved;
+    int        scrambling_sequence_index;
+    u_int      input_stream_identifier;
+} descS2SatelliteDeliverySystem;
+
+  int len;
+  descS2SatelliteDeliverySystem d;
+
+
+#warning "descriptor to be checked against draft final! (DVB-S2) (???)"
+
+  // tag	 = b[0];
+  len       	 = b[1];
+  b +=2;
+
+  d.scrambling_sequence_selector        = getBits (b, 0, 0, 1);
+  d.multiple_input_stream_flag          = getBits (b, 0, 1, 1);
+  d.backwards_compatibility_indicator   = getBits (b, 0, 2, 1);
+  d.reserved_future_use                 = getBits (b, 0, 3, 5);
+  b +=1;
+
+  out_SB_NL (4,"scrambling_sequence_selector flag: ", d.scrambling_sequence_selector);
+  out_SB_NL (4,"multiple_input_stream_flag: ",d.multiple_input_stream_flag);
+  out_SB_NL (4,"backwards_compatibility_indicator: ",d.backwards_compatibility_indicator);
+  out_SB_NL (4,"reserved_future_use: ",d.reserved_future_use);
+
+  if (1 == d.scrambling_sequence_selector) {
+      d.reserved                       = getBits (b, 0, 0, 6);
+      d.scrambling_sequence_index      = getBits (b, 0, 6, 18);
+      b += 3;
+
+      out_SB_NL (4,"reserved: ",d.reserved);
+      out_SB_NL (4,"scrambling_sequence_index: ",d.scrambling_sequence_index);
+  }
+
+  if (1 == d.multiple_input_stream_flag) {
+      d.input_stream_identifier        = getBits (b, 0, 0, 8);
+      b += 1;
+      out_SB_NL (4,"input_stream_identifier: ",d.input_stream_identifier);
+  }
+
+}
 
 
 
