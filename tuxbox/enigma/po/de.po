@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.71 2005/11/02 22:48:28 timekiller Exp $
+# $Id: de.po,v 1.72 2005/11/08 16:31:27 happydude Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -3997,7 +3997,7 @@ msgstr "Fernbedienung"
 msgid "open remote control setup"
 msgstr "Fernbedienungseinstellungen anzeigen"
 
-#: src/setup_extra.cpp:72 src/setup_extra.cpp:226
+#: src/setup_extra.cpp:72 src/setup_extra.cpp:298
 msgid "Factory reset"
 msgstr "Werkseinstellungen"
 
@@ -4009,179 +4009,187 @@ msgstr "Alle Einstellungen werden in den Auslieferungszustand zurückgesetzt"
 msgid "record split size (left, right)"
 msgstr "Splitgrösse für Aufnahmen (links,rechts)"
 
-#: src/setup_extra.cpp:98
+#: src/setup_extra.cpp:95
 msgid "infobar timeout (left, right)"
 msgstr "Timeout der Infobar (links,rechts)"
 
-#: src/setup_extra.cpp:117
+#: src/setup_extra.cpp:112
 msgid "Serviceselector help buttons"
 msgstr "Hilfebuttons in der Serviceliste"
 
-#: src/setup_extra.cpp:117
+#: src/setup_extra.cpp:112
 msgid "show colored help buttons in service selector"
 msgstr "Farbige Hilfebuttons in der Serviceliste zeigen"
 
-#: src/setup_extra.cpp:118
+#: src/setup_extra.cpp:113
 msgid "Show Sat position"
 msgstr "Sat Position anzeigen"
 
-#: src/setup_extra.cpp:118
+#: src/setup_extra.cpp:113
 msgid "show sat position in the infobar"
 msgstr "Sat Position in der Infoleiste anzeigen"
 
-#: src/setup_extra.cpp:120
+#: src/setup_extra.cpp:115
 msgid "Enable fast zapping"
 msgstr "Schnelles Umschalten"
 
-#: src/setup_extra.cpp:120
+#: src/setup_extra.cpp:115
 msgid "enables faster zapping.. but with visible sync"
 msgstr "Schaltet 'Schnelles Umschalten' an (mit sichtbarem Sync)"
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:116
 msgid "Skip confirmations"
 msgstr "Keine Bestätigungsmeldungen"
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:116
 msgid "enable/disable confirmations"
 msgstr "Bestätigungen an-/ausschalten"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:117
 msgid "Hide error windows"
 msgstr "Keine Fehlermeldungen"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:117
 msgid "don't show zap error messages"
 msgstr "Keine Umschalt-Fehlermeldungen anzeigen"
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:118
 msgid "Auto show Infobar"
 msgstr "Infoleiste automatisch anzeigen"
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:118
 msgid "always show infobar when new event info is avail"
 msgstr "Infoleiste anzeigen wenn eine neue Sendung beginnt"
 
-#: src/setup_extra.cpp:124
+#: src/setup_extra.cpp:119
 msgid "Show remaining Time"
 msgstr "Restzeit anzeigen"
 
-#: src/setup_extra.cpp:124
+#: src/setup_extra.cpp:119
 msgid "show event remaining time in the infobar"
 msgstr "Restzeit der laufenden Sendung in Infoleiste anzeigen"
 
-#: src/setup_extra.cpp:125
+#: src/setup_extra.cpp:120
 msgid "Use http authentification"
 msgstr "Http-Authentifizierung benutzen"
 
-#: src/setup_extra.cpp:125
+#: src/setup_extra.cpp:120
 msgid "enables the http (user/password) authentification"
 msgstr "Schaltet die http-Authentifizierung (Benutzer/Passwort) ein"
 
-#: src/setup_extra.cpp:126
+#: src/setup_extra.cpp:121
 msgid "Don't open serial port"
 msgstr "Serielle Schnittstelle nicht öffnen"
 
-#: src/setup_extra.cpp:126
+#: src/setup_extra.cpp:121
 msgid "don't write debug messages to /dev/tts/0"
 msgstr "Keine Debug-Messages auf /dev/tts/0 ausgeben"
 
-#: src/setup_extra.cpp:127
+#: src/setup_extra.cpp:122
 msgid "Auto bouquet change"
 msgstr "Bouquet automatisch wechseln"
 
-#: src/setup_extra.cpp:127
+#: src/setup_extra.cpp:122
 msgid "change into next bouquet when end of current bouquet is reached"
 msgstr "Ins nächste Bouquet wechseln, wenn das Ende des aktuellen erreicht ist."
 
-#: src/setup_extra.cpp:131
+#: src/setup_extra.cpp:126
 msgid "Enable file sharing"
 msgstr "Dateifreigaben aktivieren"
 
-#: src/setup_extra.cpp:131
+#: src/setup_extra.cpp:126
 msgid "start file sharing(samba) on startup"
 msgstr "starte Samba beim Systemstart"
 
-#: src/setup_extra.cpp:134
+#: src/setup_extra.cpp:129
 msgid "Disable teletext caching"
 msgstr "Videotext 'caching' abschalten"
 
-#: src/setup_extra.cpp:134
+#: src/setup_extra.cpp:129
 msgid "don't cache teletext pages in background"
 msgstr "Im Hintergrund keine Videotext Seiten sammeln"
 
-#: src/setup_extra.cpp:136
+#: src/setup_extra.cpp:131
 msgid "Enable Zapping History"
 msgstr "Zapping History aktivieren"
 
-#: src/setup_extra.cpp:136
+#: src/setup_extra.cpp:131
 msgid "don't care about actual mode when zapping in history list"
 msgstr "Ignoriert den aktuellen Modus wenn die History Liste benutzt wird"
 
-#: src/setup_extra.cpp:138
+#: src/setup_extra.cpp:133
 msgid "Disable Standby"
 msgstr "Standby deaktivieren"
 
-#: src/setup_extra.cpp:138
+#: src/setup_extra.cpp:133
 msgid "Box goes direct into Deep-Standby"
 msgstr "Box geht direkt in den Deep-Standby"
+
+#: src/setup_extra.cpp:138
+msgid "Enable MHW EPG"
+msgstr "MHW EPG aktivieren"
+
+#: src/setup_extra.cpp:138
+msgid "Mediahighway EPG, activate swap space when using with multiple operators"
+msgstr "Mediahighway EPG einlesen, bei mehreren Anbietern Swap Partition aktivieren"
 
 #: src/setup_extra.cpp:143
 msgid "Disable CoreFiles"
 msgstr "CoreFiles abschalten"
 
-#: src/setup_extra.cpp:143
+#: src/setup_extra.cpp:144
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "Keine 'Corefiles' nach einem Enigma Absturz erstellen"
 
-#: src/setup_extra.cpp:150
+#: src/setup_extra.cpp:151
 msgid "Disable HDD mount"
 msgstr "HDD mount deaktivieren"
 
-#: src/setup_extra.cpp:150
+#: src/setup_extra.cpp:151
 msgid "don't mount the HDD via 'rcS'"
 msgstr "keine HDD via 'rcS' laden"
 
-#: src/setup_extra.cpp:155
+#: src/setup_extra.cpp:156
 msgid "Show Boot-Info"
 msgstr "Boot-Informationen anzeigen"
 
-#: src/setup_extra.cpp:155
+#: src/setup_extra.cpp:156
 msgid "Show Boot-Infos (IP, etc.)"
 msgstr "Boot-Informationen wie Imagedatum, IP, usw anzeigen"
 
-#: src/setup_extra.cpp:156
+#: src/setup_extra.cpp:157
 msgid "Disable HW_Sections"
 msgstr "HW_Sections abschalten"
 
-#: src/setup_extra.cpp:156
+#: src/setup_extra.cpp:157
 msgid "don't use hardware section filtering"
 msgstr "Keine 'Hardware Section' Filterung nutzen"
 
-#: src/setup_extra.cpp:157
+#: src/setup_extra.cpp:158
 msgid "Disable Watchdog"
 msgstr "Watchdog abschalten"
 
-#: src/setup_extra.cpp:157
+#: src/setup_extra.cpp:158
 msgid "don't use the Watchdog"
 msgstr "Keinen Watchdog nutzen"
 
-#: src/setup_extra.cpp:159
+#: src/setup_extra.cpp:160
 msgid "Disable ENX-Watchdog"
 msgstr "ENX-Watchdog abschalten"
 
-#: src/setup_extra.cpp:159
+#: src/setup_extra.cpp:160
 msgid "don't use the ENX-Watchdog"
 msgstr "Keinen ENX-Watchdog nutzen"
 
-#: src/setup_extra.cpp:160
+#: src/setup_extra.cpp:161
 msgid "Enable SPTS-Mode"
 msgstr "SPTS-Modus aktivieren"
 
-#: src/setup_extra.cpp:160
+#: src/setup_extra.cpp:161
 msgid "use SPTS-Mode (enables TS-recording)"
 msgstr "SPTS-Modus nutzen (aktiviert TS-recording)"
 
-#: src/setup_extra.cpp:292
+#: src/setup_extra.cpp:294
 msgid ""
 "When you do a factory reset, you will lost ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4196,7 +4204,7 @@ msgstr ""
 "\n"
 "Wirklich den Vorgang fortsetzen?"
 
-#: src/setup_extra.cpp:297
+#: src/setup_extra.cpp:316
 msgid "Factory reset..."
 msgstr "Werkseinstellungen..."
 

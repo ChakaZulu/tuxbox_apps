@@ -1140,8 +1140,13 @@ void eEPGCache::startEPG()
 		scheduleOtherReader.start();
 		isRunning |= 4;
 #ifdef ENABLE_MHW_EPG
-		scheduleMhwReader.start();
-		isRunning |= 8;
+		int mhwepg = 1;
+		eConfig::getInstance()->getKey("/extras/mhwepg", mhwepg);
+		if (mhwepg)
+		{
+			scheduleMhwReader.start();
+			isRunning |= 8;
+		}
 #endif
 		abortTimer.start(7000,true);
 	}
