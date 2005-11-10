@@ -29,7 +29,7 @@ function view_epg()
 	if(sel != -1)
 	{
 		channel = document.x.channels[sel].value;
-		window.open("http://192.168.0.15/fb/epg.dbox2?eventlist="+channel,"preview");
+		window.open("/fb/epg.dbox2?eventlist="+channel,"preview");
 	}
 }
 function yswitchto()
