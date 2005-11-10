@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: yapi.cpp,v 1.5 2005/09/29 16:53:39 yjogol Exp $
+	$Id: yapi.cpp,v 1.6 2005/11/10 19:41:43 yjogol Exp $
 
 	License: GPL
 
@@ -458,7 +458,7 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 	const char *operations[] = {
 		"mount-get-list", "mount-set-values", 
 		"get_bouquets_as_dropdown", "get_actual_bouquet_number", "get_channels_as_dropdown", "get_actual_channel_id",
-		"get_mode", "get_video_pids", "get_audio_pid", "get_audio_pids_as_dropdown",
+		"get_mode", "get_video_pids", "get_audio_pid", "get_audio_pids_as_dropdown", "get_request_data",
 		 NULL};
 
 	ySplitString(ycmd," ",func, para);
@@ -504,6 +504,9 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 			break;
 			
 		case 9:	yresult = func_get_audio_pids_as_dropdown(para);
+			break;
+			
+		case 10:yresult = func_get_request_data(request, para);
 			break;
 			
 		default:
@@ -813,6 +816,29 @@ std::string  CyAPI::func_get_audio_pids_as_dropdown(std::string para)
 
 	if(pids.APIDs.empty())
 		yresult = ""; // shouldnt happen, but print at least one apid
+	return yresult;
+}
+
+//-------------------------------------------------------------------------
+// y-func : get_actual_request_data
+//-------------------------------------------------------------------------
+std::string  CyAPI::func_get_request_data(CWebserverRequest* request, std::string para)
+{
+	std::string yresult;
+	if(para == "host")
+		yresult = request->Host;
+	else if (para == "url")
+		yresult = request->URL;
+	else if (para == "path")
+		yresult = request->Path;
+	else if (para == "filename")
+		yresult = request->Filename;
+	else if (para == "fileext")
+		yresult = request->FileExt;
+	else if (para == "client_addr")
+		yresult = request->Client_Addr;
+	else if (para == "url")
+		yresult = request->URL;
 	return yresult;
 }
 

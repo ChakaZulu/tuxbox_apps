@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: yapi.h,v 1.3 2005/09/29 16:53:39 yjogol Exp $
+        $Id: yapi.h,v 1.4 2005/11/10 19:41:43 yjogol Exp $
 
         License: GPL
 
@@ -35,7 +35,7 @@
 #include <global.h>
 #include <neutrino.h>
 #include <system/settings.h>
-
+#include <system/fsmounter.h>
 //#include <ydisplay/ydisplay.h>
 //#include <ydisplay/fontrenderer.h>
 
@@ -85,6 +85,8 @@ class CyAPI
 	std::string func_get_video_pids(std::string para);
 	std::string func_get_radio_pid();
 	std::string func_get_audio_pids_as_dropdown(std::string para);
+	std::string func_get_request_data(CWebserverRequest* request, std::string para);
+	
 
 	// helpers
 	std::string YWeb_cgi_get_ini(std::string filename, std::string varname);
