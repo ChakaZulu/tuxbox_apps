@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.cpp,v 1.5 2005/10/29 00:10:16 obi Exp $
+ * $Id: descriptor_container.cpp,v 1.6 2005/11/10 23:55:33 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -31,10 +31,12 @@
 #include <dvbsi++/component_descriptor.h>
 #include <dvbsi++/compressed_module_descriptor.h>
 #include <dvbsi++/content_descriptor.h>
+#include <dvbsi++/content_identifier_descriptor.h>
 #include <dvbsi++/content_type_descriptor.h>
 #include <dvbsi++/country_availability_descriptor.h>
 #include <dvbsi++/data_broadcast_descriptor.h>
 #include <dvbsi++/data_broadcast_id_descriptor.h>
+#include <dvbsi++/default_authority_descriptor.h>
 #include <dvbsi++/delegated_application_descriptor.h>
 #include <dvbsi++/descriptor_container.h>
 #include <dvbsi++/descriptor_tag.h>
@@ -44,6 +46,7 @@
 #include <dvbsi++/dvb_html_application_location_descriptor.h>
 #include <dvbsi++/dvb_j_application_descriptor.h>
 #include <dvbsi++/dvb_j_application_location_descriptor.h>
+#include <dvbsi++/ecm_repetition_rate_descriptor.h>
 #include <dvbsi++/est_download_time_descriptor.h>
 #include <dvbsi++/extended_event_descriptor.h>
 #include <dvbsi++/external_application_authorisation_descriptor.h>
@@ -70,7 +73,9 @@
 #include <dvbsi++/plugin_descriptor.h>
 #include <dvbsi++/prefetch_descriptor.h>
 #include <dvbsi++/private_data_specifier_descriptor.h>
+#include <dvbsi++/related_content_descriptor.h>
 #include <dvbsi++/satellite_delivery_system_descriptor.h>
+#include <dvbsi++/s2_satellite_delivery_system_descriptor.h>
 #include <dvbsi++/service_descriptor.h>
 #include <dvbsi++/service_identifier_descriptor.h>
 #include <dvbsi++/service_list_descriptor.h>
@@ -84,7 +89,9 @@
 #include <dvbsi++/teletext_descriptor.h>
 #include <dvbsi++/terrestrial_delivery_system_descriptor.h>
 #include <dvbsi++/time_shifted_service_descriptor.h>
+#include <dvbsi++/time_slice_fec_identifier_descriptor.h>
 #include <dvbsi++/transport_protocol_descriptor.h>
+#include <dvbsi++/tva_id_descriptor.h>
 #include <dvbsi++/type_descriptor.h>
 #include <dvbsi++/unknown_descriptor.h>
 #include <dvbsi++/vbi_data_descriptor.h>
@@ -326,7 +333,27 @@ void DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool back)
 	case SERVICE_IDENTIFIER_DESCRIPTOR:
 		(descriptorList.*pushFunc)(new ServiceIdentifierDescriptor(buffer));
 		break;
-
+	case DEFAULT_AUTHORITY_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new DefaultAuthorityDescriptor(buffer));
+		break;
+	case RELATED_CONTENT_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new RelatedContentDescriptor(buffer));
+		break;
+	case TVA_ID_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new TVAIdDescriptor(buffer));
+		break;
+	case CONTENT_IDENTIFIER_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new ContentIdentifierDescriptor(buffer));
+		break;
+	case TIME_SLICE_FEC_IDENTIFIER_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new TimeSliceFecIdentifierDescriptor(buffer));
+		break;
+	case ECM_REPETITION_RATE_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new ECMRepetitionRateDecriptor(buffer));
+		break;
+	case S2_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new S2SatelliteDeliverySystemDescriptor(buffer));
+		break;
 	default:
 		(descriptorList.*pushFunc)(new UnknownDescriptor(buffer));
 		break;

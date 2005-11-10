@@ -33,11 +33,13 @@ libdvbsi___la_SOURCES = \
 	component_descriptor.cpp \
 	compressed_module_descriptor.cpp \
 	content_descriptor.cpp \
+	content_identifier_descriptor.cpp \
 	content_type_descriptor.cpp \
 	country_availability_descriptor.cpp \
 	crc32_descriptor.cpp \
 	data_broadcast_descriptor.cpp \
 	data_broadcast_id_descriptor.cpp \
+	default_authority_descriptor.cpp \
 	delegated_application_descriptor.cpp \
 	descriptor.cpp \
 	descriptor_container.cpp \
@@ -47,6 +49,7 @@ libdvbsi___la_SOURCES = \
 	dvb_html_application_location_descriptor.cpp \
 	dvb_j_application_descriptor.cpp \
 	dvb_j_application_location_descriptor.cpp \
+	ecm_repetition_rate_descriptor.cpp \
 	est_download_time_descriptor.cpp \
 	event_information_section.cpp \
 	external_application_authorisation_descriptor.cpp \
@@ -79,7 +82,9 @@ libdvbsi___la_SOURCES = \
 	private_data_specifier_descriptor.cpp \
 	program_association_section.cpp \
 	program_map_section.cpp \
+	related_content_descriptor.cpp \
 	satellite_delivery_system_descriptor.cpp \
+	s2_satellite_delivery_system_descriptor.cpp \
 	service_description_section.cpp \
 	service_descriptor.cpp \
 	service_identifier_descriptor.cpp \
@@ -98,7 +103,9 @@ libdvbsi___la_SOURCES = \
 	time_date_section.cpp \
 	time_offset_section.cpp \
 	time_shifted_service_descriptor.cpp \
+	time_slice_fec_identifier_descriptor.cpp \
 	transport_protocol_descriptor.cpp \
+	tva_id_descriptor.cpp \
 	type_descriptor.cpp \
 	unknown_descriptor.cpp \
 	vbi_data_descriptor.cpp \
