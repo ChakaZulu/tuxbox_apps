@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.33 2005/11/06 21:59:35 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.34 2005/11/10 21:54:50 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -35,6 +35,7 @@
 #include <lib/base/buffer.h>
 #include <lib/system/econfig.h>
 #include <lib/dvb/decoder.h>
+#include <lib/movieplayer/mpconfig.h>
 #include <lib/movieplayer/movieplayer.h>
 #include <src/enigma_main.h>
 #include <src/enigma_dyn_utils.h>
@@ -120,7 +121,7 @@ eMoviePlayer::eMoviePlayer(): messages(this,1)
 		instance = this;
 		
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
-	eDebug("[MOVIEPLAYER] Version 1.6 starting...");
+	eDebug("[MOVIEPLAYER] Version 2.0 starting...");
 	status.ACTIVE = false;
 	run();
 }
@@ -164,16 +165,24 @@ void eMoviePlayer::control(const char *command, const char *filename)
 		
 	eString cmd = eString(command);
 	
+	if (cmd.find("start") != eString::npos)
+	{
+		mpconfig.load();
+		server = mpconfig.getServerConfig();
+	}
+	
+	eDebug("[MOVIEPLAYER] control: serverIP = %s", server.serverIP.c_str());
+	eDebug("[MOVIEPLAYER] control: webifPort = %d", atoi(server.webifPort.c_str()));
+	eDebug("[MOVIEPLAYER] control: streamingPort = %d", atoi(server.streamingPort.c_str()));
+	
 	eDebug("[MOVIEPLAYER] control: command = %s", command);
 	if (cmd == "start")
 		messages.send(Message(Message::start, filename ? strdup(filename) : 0));
 	else
-	if (cmd == "stop" || cmd == "terminate")
-	{
-//		messages.send(Message(Message::stop, 0));
-		killThreads();
-		leaveStreamingClient();
-	}
+	if (cmd == "start2")
+		messages.send(Message(Message::start2, filename ? strdup(filename) : 0));
+	if (cmd == "stop")
+		messages.send(Message(Message::stop, 0));
 	else
 	if (cmd == "play")
 		messages.send(Message(Message::play, 0));
@@ -186,13 +195,19 @@ void eMoviePlayer::control(const char *command, const char *filename)
 	else
 	if (cmd == "forward")
 		messages.send(Message(Message::forward, 0));
+	else
+	if (cmd == "jump")
+		messages.send(Message(Message::jump, filename ? strdup(filename) : 0));
+	else
+	if (cmd == "terminate")
+		messages.send(Message(Message::terminate, 0));
 }
 
 int eMoviePlayer::sendRequest2VLC(eString command)
 {
 	char ioBuffer[512];
 	int rc = -1;
-	int fd = tcpOpen(serverIP, 8080, 1);
+	int fd = tcpOpen(server.serverIP, atoi(server.webifPort.c_str()), 1);
 	if (fd > 0)
 	{
 		eString url = "GET /" + command + " HTTP/1.0\r\n\r\n";
@@ -264,7 +279,7 @@ int eMoviePlayer::requestStream()
 	
 	eDebug("[MOVIEPLAYER] requesting VLC stream...");
 	
-	fd = tcpOpen(serverIP, serverPort, 10);
+	fd = tcpOpen(server.serverIP, atoi(server.streamingPort.c_str()), 10);
 	if (fd < 0)
 	{
 		eDebug("[MOVIEPLAYER] tcpOpen failed.");
@@ -366,6 +381,13 @@ int eMoviePlayer::playStream(eString mrl)
 	return 0;
 }
 
+void eMoviePlayer::setErrorStatus()
+{
+	status.ACTIVE = false;
+	status.STAT = STREAMERROR;
+	status.BUFFERFILLED = false;
+}
+
 void eMoviePlayer::gotMessage(const Message &msg )
 {
 	eString mrl;
@@ -373,6 +395,7 @@ void eMoviePlayer::gotMessage(const Message &msg )
 	switch (msg.type)
 	{
 		case Message::start:
+		case Message::start2:
 		{
 			killThreads();
 			if (msg.filename)
@@ -381,22 +404,53 @@ void eMoviePlayer::gotMessage(const Message &msg )
 				eDebug("[MOVIEPLAYER] mrl = %s", mrl.c_str());
 				free((char*)msg.filename);
 				
-				serverPort = 9090;
-				eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
-				char *serverip;
-				if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
-					serverip = strdup("");
-				serverIP = eString(serverip);
-				free(serverip);
-				eDebug("[MOVIEPLAYER] Server IP: %s", serverIP.c_str());
-				eDebug("[MOVIEPLAYER] Server Port: %d", serverPort);
+				eDebug("[MOVIEPLAYER] Server IP: %s", server.serverIP.c_str());
+				eDebug("[MOVIEPLAYER] Server Port: %d", atoi(server.streamingPort.c_str()));
+				
+				if (msg.type == Message::start2)
+				{
+					// stop vlc, just to check whether vlc is up and running
+					if (sendRequest2VLC("?control=stop") < 0)
+					{
+						eDebug("[MOVIEPLAYER] couldn't communicate with vlc, streaming server ip address may be wrong in settings.");
+						setErrorStatus();
+						break;
+					}
+					else
+					// empty vlc's playlist
+					if (sendRequest2VLC("?control=empty") < 0)
+					{
+						setErrorStatus();
+						break;
+					}
+					else
+					// vlc: add mrl to playlist
+					if (sendRequest2VLC("?control=add&mrl=" + httpEscape(mrl)) < 0)
+					{
+						setErrorStatus();
+						break;
+					}
+					else
+					// vlc: set sout...
+					if (sendRequest2VLC("?sout=" + httpEscape(sout(mrl))) < 0)
+					{
+						setErrorStatus();
+						break;
+					}
+					else
+					// vlc: start playback of first item in playlist
+					if (sendRequest2VLC("?control=play&item=0") < 0)
+					{
+						setErrorStatus();
+						break;
+					}
+				}
 				
 				// receive and play ts stream
 				if (playStream(mrl) < 0)
 				{
-					status.ACTIVE = false;
-					status.STAT = STOPPED;
-					status.BUFFERFILLED = false;
+					setErrorStatus();
+					break;
 				}
 			}
 			break;
@@ -408,9 +462,16 @@ void eMoviePlayer::gotMessage(const Message &msg )
 		case Message::forward:
 			break;
 		case Message::stop:
+		case Message::terminate:
 		{
 			killThreads();
 			leaveStreamingClient();
+			break;
+		}
+		case Message::jump:
+		{
+			int jump = atoi(eString(msg.filename).c_str());
+			eDebug("[MOVIEPLAYER] jump: %d seconds", jump);
 			break;
 		}
 		case Message::quit:
@@ -427,14 +488,15 @@ void eMoviePlayer::gotMessage(const Message &msg )
 eString eMoviePlayer::sout(eString mrl)
 {
 	eString soutURL = "#";
-	eString serverIP, DVDDrive;
-	int serverPort;
-	int settingVideoRate, settingResolution, settingTranscodeVideoCodec, settingTranscodeVideo, settingAudioRate, settingTranscodeAudio;
 	
-	readStreamingServerSettings(serverIP, serverPort, DVDDrive, settingVideoRate, settingResolution, settingTranscodeVideoCodec, settingTranscodeVideo, settingAudioRate, settingTranscodeAudio);
+	unsigned int pos = mrl.find_last_of('.');
+	eString extension = mrl.right(mrl.length() - pos - 1);
+	
+	struct serverConfig server = mpconfig.getServerConfig();
+	struct videoTypeParms video = mpconfig.getVideoParms(extension);
 	
 	eDebug("[MOVIEPLAYER] determine ?sout for mrl: %s", mrl.c_str());
-	eDebug("[MOVIEPLAYER] transcoding audio: %d, video: %d", settingTranscodeAudio, settingTranscodeVideo);
+	eDebug("[MOVIEPLAYER] transcoding audio: %d, video: %d", video.transcodeAudio, video.transcodeVideo);
 
 	// add sout (URL encoded)
 	// example (with transcode to mpeg1):
@@ -442,92 +504,33 @@ eString eMoviePlayer::sout(eString mrl)
 	// example (without transcode to mpeg1): 
 	// ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
 
-	eString res_horiz;
-	eString res_vert;
-	switch (settingResolution)
-	{
-		case 1:
-			res_horiz = "352";
-			res_vert = "576";
-			break;
-		case 2:
-			res_horiz = "480";
-			res_vert = "576";
-			break;
-		case 3:
-			res_horiz = "704";
-			res_vert = "576";
-			break;
-		default:
-			res_horiz = "352";
-			res_vert = "288";
-	}
+	pos = video.videoRatio.find("x");
+	eString res_horiz = video.videoRatio.left(pos);
+	eString res_vert = video.videoRatio.right(video.videoRatio.length() - pos - 1);
+	eDebug("[MOVIEPLAYER] res_horiz = %s, res_vert = %s", res_horiz.c_str(), res_vert.c_str());
 	
-	if (settingTranscodeVideo || settingTranscodeAudio)
+	if (video.transcodeVideo || video.transcodeAudio)
 	{
 		soutURL += "transcode{";
-		if (settingTranscodeVideo)
+		if (video.transcodeVideo)
 		{
-			eString videoCodec = (settingTranscodeVideoCodec == 1) ? "mpgv" : "mp2v";
-			soutURL += "vcodec=" + videoCodec;
-			soutURL += ",vb=" + eString().sprintf("%d", settingVideoRate);
+			soutURL += "vcodec=" + video.videoCodec;
+			soutURL += ",vb=" + video.videoRate;
 			soutURL += ",width=" + res_horiz;
 			soutURL += ",height=" + res_vert;
 		}
-		if (settingTranscodeAudio)
+		if (video.transcodeAudio)
 		{
-			if (settingTranscodeVideo)
+			if (video.transcodeVideo)
 				soutURL += ",";
-			soutURL += "acodec=mpga,ab=" + eString().sprintf("%d", settingAudioRate) + ",channels=2";
+			soutURL += "acodec=mpga,ab=" + video.audioRate + ",channels=2";
 		}
 		soutURL += "}:";
 	}
 	
-	soutURL += "duplicate{dst=std{access=http,mux=ts,url=:" + eString().sprintf("%d", serverPort) + "/dboxstream}}";
+	soutURL += "duplicate{dst=std{access=http,mux=ts,url=:" + server.streamingPort + "/dboxstream}}";
 	eDebug("[MOVIEPLAYER] sout = %s", soutURL.c_str());
 	return soutURL;
-}
-
-void eMoviePlayer::readStreamingServerSettings(eString& serverIP, int& serverPort, eString& 
-DVDDrive, int& settingVideoRate, int& settingResolution, int& settingTranscodeVideoCodec, int& settingTranscodeVideo, int& settingAudioRate, int& settingTranscodeAudio)
-{
-	char *serverip;
-	if (eConfig::getInstance()->getKey("/movieplayer/serverip", serverip))
-		serverip = strdup("");
-	serverIP = eString(serverip);
-	free(serverip);
-	serverPort = 9090;
-	eConfig::getInstance()->getKey("/movieplayer/serverport", serverPort);
-	char *dvddrive;
-	if (eConfig::getInstance()->getKey("/movieplayer/dvddrive", dvddrive))
-		dvddrive = strdup("D");
-	DVDDrive = eString(dvddrive);
-	free(dvddrive);
-	settingResolution = 3;
-	eConfig::getInstance()->getKey("/movieplayer/resolution", settingResolution);
-	settingAudioRate = 192;
-	eConfig::getInstance()->getKey("/movieplayer/audiorate", settingAudioRate);
-	settingVideoRate = 2048;
-	eConfig::getInstance()->getKey("/movieplayer/videorate", settingVideoRate);
-	settingTranscodeVideoCodec = 2;
-	eConfig::getInstance()->getKey("/movieplayer/transcodevideocodec", settingTranscodeVideoCodec);
-	settingTranscodeVideo = 0;
-	eConfig::getInstance()->getKey("/movieplayer/transcodevideo", settingTranscodeVideo);
-	settingTranscodeAudio = 0;
-	eConfig::getInstance()->getKey("/movieplayer/transcodeaudio", settingTranscodeAudio);
-}
-
-void eMoviePlayer::writeStreamingServerSettings(eString serverIP, int serverPort, eString DVDDrive, int settingVideoRate, int settingResolution, int settingTranscodeVideoCodec, int settingTranscodeVideo, int settingAudioRate, int settingTranscodeAudio)
-{
-	eConfig::getInstance()->setKey("/movieplayer/serverip", serverIP.c_str());
-	eConfig::getInstance()->setKey("/movieplayer/serverport", serverPort);
-	eConfig::getInstance()->setKey("/movieplayer/dvddrive", DVDDrive.c_str());
-	eConfig::getInstance()->setKey("/movieplayer/resolution", settingResolution);
-	eConfig::getInstance()->setKey("/movieplayer/audiorate", settingAudioRate);
-	eConfig::getInstance()->setKey("/movieplayer/videorate", settingVideoRate);
-	eConfig::getInstance()->setKey("/movieplayer/transcodevideocodec", settingTranscodeVideoCodec);
-	eConfig::getInstance()->setKey("/movieplayer/transcodevideo", settingTranscodeVideo);
-	eConfig::getInstance()->setKey("/movieplayer/transcodeaudio", settingTranscodeAudio);
 }
 
 void pvrThreadCleanup(void *pvrfd)

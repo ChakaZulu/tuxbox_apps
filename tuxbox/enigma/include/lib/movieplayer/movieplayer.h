@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.17 2005/11/06 21:29:24 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.18 2005/11/10 21:54:50 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -28,6 +28,7 @@
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/service.h>
 #include <lib/dvb/dvbservice.h>
+#include <lib/movieplayer/mpconfig.h>
 
 struct player_value
 {
@@ -46,11 +47,14 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 		enum
 		{
 			start,
+			start2,
 			stop,
 			play,
 			pause,
 			forward,
 			rewind,
+			jump,
+			terminate,
 			quit
 		};
 		Message(int type = 0, const char *filename = 0)
@@ -59,26 +63,25 @@ class eMoviePlayer: public eMainloop, private eThread, public Object
 	};
 	eFixedMessagePump<Message> messages;
 	static eMoviePlayer *instance;
-	int serverPort;
-	eString serverIP;
 	eServiceReference suspendedServiceReference;
 	void gotMessage(const Message &message);
 	void thread();
 	int requestStream();
 	int playStream(eString mrl);
+	void setErrorStatus();
 public:
 	eMoviePlayer();
 	~eMoviePlayer();
 	player_value status;
+	struct serverConfig server;
+	eMPConfig mpconfig;
 	int sendRequest2VLC(eString command);
 	void control(const char *command, const char *filename);
 	void leaveStreamingClient();
 	player_value getStatus() { return status; }
 	eString sout(eString mrl);
-	void readStreamingServerSettings(eString& ip, int& port, eString& dvddrive, int& videodatarate, int& resolution, int& mpegcodec, int& transcodevideo, int& audiodatarate, int& transcodeaudio);
-	void writeStreamingServerSettings(eString ip, int port, eString dvddrive, int videodatarate, int resolution, int mpegcodec, int transcodevideo, int audiodatarate, int transcodeaudio);
 	static eMoviePlayer *getInstance() { return instance; }
-	enum {STOPPED, PREPARING, STREAMERROR, PLAY, PAUSE, FF, REW, RESYNC, JF, JB, SKIP, SOFTRESET = 99};
+	enum {STOPPED, STREAMERROR, PLAY, PAUSE, FORWARD, REWIND, RESYNC, SKIP};
 };
 
 #endif
