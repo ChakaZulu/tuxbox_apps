@@ -1,6 +1,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta http-equiv="refresh" content="300; URL=/Y_Live_panel.yhtm">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
 <SCRIPT LANGUAGE="JavaScript">
 function changeChannel()
@@ -14,11 +15,6 @@ function changeChannel()
 	if(sel != -1)
 	{
 		channel = document.x.channels[sel].value;
-/*		selaudio = document.x.audio_pids.selectedIndex;
-		var audio="";
-		if(selaudio != -1)
-			audio = "&audiopid=" + document.x.audio_pids[selaudio].value;
-*/
 		parent.live.do_stop();
 		parent.live.location.href="Y_Live_Wait.yhtm?execute=script:Y_Live%20zapto%20"+channel/*+audio*/;
 	}
@@ -26,7 +22,16 @@ function changeChannel()
 	document.x.channels.disabled=false;
 	document.x.go.disabled=false;
 	document.x.yswitch.disabled=false;
-};
+}
+function view_epg()
+{
+	var sel=document.x.channels.selectedIndex;
+	if(sel != -1)
+	{
+		channel = document.x.channels[sel].value;
+		window.open("http://192.168.0.15/fb/epg.dbox2?eventlist="+channel,"preview");
+	}
+}
 function yswitchto()
 {
 	document.x.bouquets.disabled=true;
@@ -43,17 +48,18 @@ function yswitchto()
 <form name="x" action="/Y_Live_panel.yhtm" method="get">
 	<table class="y_live_table" cellspacing="0" bgcolor="#F0FAFF">
 		<TR><TD>
-			<select size="1" class="y_live_bouquets" name="bouquets" onChange="document.x.submit()">
+			<select size="1" class="y_live_bouquets" name="bouquets" onChange="document.x.submit()" title="select bouquet - channels will be updated">
 			{=func:get_bouquets_as_dropdown {=if-empty:{=bouquets=}~{=func:get_actual_bouquet_number=}~{=bouquets=}=}=}
 			</select>
 			&nbsp;<button name="yswitch" class="y_live_button" type="button" title="toggle to Radio/TV" onClick="yswitchto()">
 			{=if-equal:{=func:get_mode=}~tv~Radio~TV=}</button>
 		</TD></TR>
 		<TR><TD>
-			<select size="1" class="y_live_channels" name="channels">
+			<select size="1" class="y_live_channels" name="channels" title="select channel - use go to zap">
 			{=func:get_channels_as_dropdown {=if-empty:{=bouquets=}~{=func:get_actual_bouquet_number=}~{=bouquets=}=} {=if-empty:{=channels=}~{=func:get_actual_channel_id=}~{=channels=}=}=}
 			</select>
 			&nbsp;<button name="go" class="y_live_button" type="button" title="change channel" onClick="changeChannel()">Go</button>
+			<button name="epg" class="y_live_button" type="button" title="view epg for selected channel" onClick="view_epg()">EPG</button>
 		</TD></TR>
 	</table>
 </form>

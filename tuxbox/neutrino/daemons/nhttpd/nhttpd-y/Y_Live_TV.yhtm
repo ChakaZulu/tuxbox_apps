@@ -34,6 +34,10 @@ function doLockUnlock()
         parent.dbox.location.href='/control/exec?Y_Live&live_unlock'
     }
 }
+function view_streaminfo()
+{
+	window.open("/fb/info.dbox2","streaminfo","width=400,height=400");
+}
 
 </script>
 </head>
@@ -63,9 +67,11 @@ function doLockUnlock()
 		<button class="y_live_button" type="button" value="minus" title="lower volume" onClick="document.vlc.volume=document.vlc.volume-10;">-</button>
 		<button class="y_live_button" type="button" value="plus" title="higher volume" onClick="document.vlc.volume = document.vlc.volume+10;">+</button>
 		<button class="y_live_button" type="button" value="Lock" title="lock / unlock TV (record mode, rc, lcd)" name="lock" onClick="doLockUnlock()">Lock</button>
+		<button class="y_live_button" type="button" value="Streaminfo" title="view streaminfo" name="streaminfo" onClick="view_streaminfo()">sinfo</button>
 		<select size="1" class="y_live_audio_pids" name="audiopid" onChange="document.v.submit()">
 		{=func:get_audio_pids_as_dropdown=}
 		</select>
+		<br>
 		<input type="hidden" name="browser" value="{=browser=}">
 	</form>	
 ~
@@ -84,6 +90,7 @@ function doLockUnlock()
 		<button class="y_live_button" type="button" value="minus" title="lower volume" onClick="document.vlc.set_volume(document.vlc.get_volume()-10);">-</button>
 		<button class="y_live_button" type="button" value="plus" title="higher volume" onClick="document.vlc.set_volume(document.vlc.get_volume()+10);">+</button>
 		<input class="y_live_button" type="button" value="Lock" title="lock / unlock TV (record mode, rc, lcd)" name="lock" onClick="doLockUnlock()">
+		<button class="y_live_button" type="button" value="Streaminfo" title="view streaminfo" name="streaminfo" onClick="view_streaminfo()">sinfo</button>
 		<select size="1" class="y_live_audio_pids" name="audiopid" onChange="document.v.submit()">
 		{=func:get_audio_pids_as_dropdown=}
 		</select>
