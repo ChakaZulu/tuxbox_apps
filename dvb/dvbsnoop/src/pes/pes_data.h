@@ -1,5 +1,5 @@
 /*
-$Id: pes_data.h,v 1.2 2004/02/02 23:34:08 rasc Exp $
+$Id: pes_data.h,v 1.3 2005/11/10 00:05:45 rasc Exp $
 
    
  DVBSNOOP
@@ -7,14 +7,14 @@ $Id: pes_data.h,v 1.2 2004/02/02 23:34:08 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
 */
 
 #ifndef __PES_DATA_H
-#define __PES_DATA_H 1
+#define __PES_DATA_H
 
 
 void PES_decodeDATA_private_stream_1 (u_char *b, int len);

@@ -1,5 +1,5 @@
 /*
-$Id: pes_std.c,v 1.5 2005/11/08 23:15:25 rasc Exp $
+$Id: pes_std.c,v 1.6 2005/11/10 00:05:45 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: pes_std.c,v 1.5 2005/11/08 23:15:25 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de  (rasc)
 
 
 
@@ -16,6 +16,9 @@ $Id: pes_std.c,v 1.5 2005/11/08 23:15:25 rasc Exp $
 
 
 $Log: pes_std.c,v $
+Revision 1.6  2005/11/10 00:05:45  rasc
+ - New: PS MPEG2 UserData + GOP, DVB-S2 fix
+
 Revision 1.5  2005/11/08 23:15:25  rasc
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
  - Bugfix: PES packet stuffing
@@ -50,6 +53,7 @@ PES stream directory, PES restructured
 #include "pes_std.h"
 #include "pes_data.h"
 #include "pes_misc.h"
+#include "mpeg_packheader.h"
 #include "strings/dvb_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -279,7 +283,7 @@ void  PES_decode_std (u_char *b, int len, u_int PES_streamID)
 	indent (+1);
 	pack_field_length             = getBits (b, 0,  0,  8);
    	out_SB_NL  (3,"pack_field_length: ", pack_field_length);
-	pack_header (3, b+1, pack_field_length);
+	mpeg_pack_header (3, b+1, pack_field_length);
    	b += pack_field_length +1;
    	indent (-1);
 

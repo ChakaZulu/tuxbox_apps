@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.44 2005/11/08 23:15:24 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.45 2005/11/10 00:05:44 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.44 2005/11/08 23:15:24 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.45  2005/11/10 00:05:44  rasc
+ - New: PS MPEG2 UserData + GOP, DVB-S2 fix
+
 Revision 1.44  2005/11/08 23:15:24  rasc
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
  - Bugfix: PES packet stuffing
@@ -466,7 +469,7 @@ void descriptorDVB_SatDelivSys (u_char *b)
  out_S2B_NL (4,"Polarisation: ",d.polarisation,
 	 dvbstrPolarisation_FLAG(d.polarisation));
 
-// -- replaces/enhanced by ETSI EN 300 468 v1.7.1
+// -- replaced/enhanced by ETSI EN 300 468 v1.7.1
 // out_S2B_NL (4,"Modulation (Sat): ",d.modulation,
 //	 dvbstrModulationSAT_FLAG(d.modulation));
 
@@ -481,8 +484,8 @@ void descriptorDVB_SatDelivSys (u_char *b)
  }
 
 
- // $$$ TODO: something might be missing here
-#warning "narror_modulation missing in descriptor for DVB-S2 (???)"
+ out_nl (4,"Narrow_Modulation (Sat): ",d.narrow_modulation,
+	dvbstrModulationSAT_FLAG(d.narrow_modulation));
 
 
  out_nl (4,"Symbol_rate: %u (= %3x.%04x)",d.symbol_rate,

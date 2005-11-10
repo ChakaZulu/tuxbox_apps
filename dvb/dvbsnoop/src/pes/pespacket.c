@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.33 2005/11/08 23:15:25 rasc Exp $
+$Id: pespacket.c,v 1.34 2005/11/10 00:05:45 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pespacket.c,v 1.33 2005/11/08 23:15:25 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.34  2005/11/10 00:05:45  rasc
+ - New: PS MPEG2 UserData + GOP, DVB-S2 fix
+
 Revision 1.33  2005/11/08 23:15:25  rasc
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
  - Bugfix: PES packet stuffing
@@ -146,7 +149,9 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "pes_dsmcc.h"
 #include "pes_psm.h"
 #include "pes_psdir.h"
-#include "pes_misc.h"
+#include "mpeg_packheader.h"
+#include "mpeg_sysheader.h"
+#include "mpeg2_video.h"
 
 #include "strings/dvb_str.h"
 #include "misc/hexprint.h"
@@ -231,11 +236,40 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
    //
    // -- PES Stream ID 0x00 - 0xB8
    //
-   // $$$ TODO  PES Stream ID 0x00 - 0xB8
 
    if (stream_id <= 0xB8) {
 
-	print_databytes (4,"Data streamID 0x00-0xB8:", b, len);	// $$$ TODO
+   		// $$$ TODO  PES Stream ID 0x00 - 0xB8
+		//    picture_start_code	00
+		//    slice_start_code	01 through AF
+		//    reserved	B0
+		//    reserved	B1
+		//    sequence_header_code	B3
+		//    sequence_error_code	B4
+		//    extension_start_code	B5
+		//    reserved	B6
+		//    sequence_end_code	B7
+
+	indent (+1);
+	switch (stream_id) {
+
+	  case 0xB2:			// user_data_start_code B2
+		MPEG2_decodeUserData (b, len);
+		break;
+
+	  case 0xB8:			//    group_start_code	B8
+		MPEG2_decodeGroupOfPictures (b, len);
+		break;
+
+
+	  default:
+		if (len > 4) {		// sync + stream_id = 4 bytes
+			print_databytes (4,"MPEG2 Data (incl. sync + id):", b, len);
+		}
+		break;
+	}
+	indent (-1);
+
 	return;
 
    }
@@ -255,11 +289,11 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
 		return;
 
 	case 0xBA:	// MPEG_pack_header_start
-		pack_header (3, b, -1);		// startcode & ID already printed
+		mpeg_pack_header (3, b, -1);		// startcode & ID already printed
 		return;
 
 	case 0xBB:	// MPEG_system_header_start
-		system_header (3, b, -1);	// startcode & ID already printed
+		mpeg_system_header (3, b, -1);	// startcode & ID already printed
 		return;
    }
 
@@ -322,20 +356,18 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
 	// case 0xFE		// reserved data stream
 	
 	default:
- 		if ((PES_packet_length==0) && ((stream_id & 0xF0)==0xE0)) {
+		{
+		   int xlen = PES_packet_length;
 
+ 		   if ((PES_packet_length==0) && ((stream_id & 0xF0)==0xE0)) {
 			 out_nl (3," ==> unbound video elementary stream... \n");
-			 if (len > 0)  {
-				indent (+1);
-				PES_decode_std (b, len, stream_id);
-				indent (-1);
-			 }
-
- 		} else {
-
+			 xlen = len;	// PES len field == 0, use read packet len
+ 		   }
+		   if (xlen > 0) {
 			indent (+1);
-			PES_decode_std (b, PES_packet_length, stream_id);
+			PES_decode_std (b, xlen, stream_id);
 			indent (-1);
+		   }
 
 		}
 		break;
@@ -366,10 +398,6 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
 //
 // $$$ TODO  0x00000100-B8 ISO 13818-2  Start codes
 //
-// $$$ TODO  len may contain multiple PS/PES packets (e.g. from ts subdecode)
-//           has to be implemented somewhere
-//           also TS read of unbound streams
-
 
 
 

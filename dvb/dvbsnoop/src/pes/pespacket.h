@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.h,v 1.9 2005/10/20 22:25:07 rasc Exp $
+$Id: pespacket.h,v 1.10 2005/11/10 00:05:45 rasc Exp $
 
    
  DVBSNOOP
@@ -13,8 +13,8 @@ $Id: pespacket.h,v 1.9 2005/10/20 22:25:07 rasc Exp $
 
 */
 
-#ifndef __PESPACKET_H
-#define __PESPACKET_H 
+#ifndef __PESPACKET_H__
+#define __PESPACKET_H__ 
 
 void processPS_PES_packet (u_int pid, long pkt_nr, u_char *buf, int len);
 void decodePS_PES_packet (u_char *b, u_int len, int pid);

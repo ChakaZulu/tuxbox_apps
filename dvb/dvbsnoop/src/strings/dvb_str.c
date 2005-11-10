@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.69 2005/11/08 23:15:26 rasc Exp $
+$Id: dvb_str.c,v 1.70 2005/11/10 00:05:45 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.69 2005/11/08 23:15:26 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.70  2005/11/10 00:05:45  rasc
+ - New: PS MPEG2 UserData + GOP, DVB-S2 fix
+
 Revision 1.69  2005/11/08 23:15:26  rasc
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
  - Bugfix: PES packet stuffing
@@ -603,8 +606,6 @@ char *dvbstrModulationSAT_FLAG (u_int flag)
      {  0x01, 0x01,  "QPSK" },
      {  0x02, 0x02,  "8PSK" },		// EN 300 468 1.7.1
      {  0x03, 0x03,  "16-QAM" },	// EN 300 468 1.7.1
-     // $$$ TODO: to be verified
-     {  0x04, 0x1F,  "reserved for future use" },
      {  0,0, NULL }
   };
 
