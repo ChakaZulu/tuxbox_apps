@@ -1572,7 +1572,6 @@ void eScheduleMhw::cleanup()
 	themes.clear();
 	titles.clear();
 	program_ids.clear();
-	summaries.clear();
 }
 
 __u8 *eScheduleMhw::delimitName( __u8 *in, __u8 *out, int len_in )
@@ -1655,6 +1654,132 @@ void eScheduleMhw::timeMHW2DVB( u_char day, u_char hours, u_char minutes, u_char
 	timeMHW2DVB( recdate->tm_hour, minutes, return_time+2 );
 }
 
+void eScheduleMhw::storeTitle(std::map<__u32, mhw_title_t>::iterator itTitle, eString sumText, __u8 *data)
+// data is borrowed from calling proc to save memory space.
+{
+	// For each title a separate EIT packet will be sent to eEPGCache::sectionRead()
+	__u8 name[24];
+					
+	eit_t *packet = (eit_t *) data;
+	packet->table_id = 0x50;
+	packet->section_syntax_indicator = 1;
+	packet->service_id_hi = channels[ itTitle->second.channel_id - 1 ].channel_id_hi;
+	packet->service_id_lo = channels[ itTitle->second.channel_id - 1 ].channel_id_lo;
+	packet->version_number = 0;	// eEPGCache::sectionRead() will dig this for the moment
+	packet->current_next_indicator = 0;
+	packet->section_number = 0;	// eEPGCache::sectionRead() will dig this for the moment
+	packet->last_section_number = 0;	// eEPGCache::sectionRead() will dig this for the moment
+	packet->transport_stream_id_hi = channels[ itTitle->second.channel_id - 1 ].transport_stream_id_hi;
+	packet->transport_stream_id_lo = channels[ itTitle->second.channel_id - 1 ].transport_stream_id_lo;
+	packet->original_network_id_hi = channels[ itTitle->second.channel_id - 1 ].network_id_hi;
+	packet->original_network_id_lo = channels[ itTitle->second.channel_id - 1 ].network_id_lo;
+	packet->segment_last_section_number = 0; // eEPGCache::sectionRead() will dig this for the moment
+	packet->segment_last_table_id = 0x50;
+	
+	eString prog_title = (char *) delimitName( itTitle->second.title, name, 23 );
+	int prog_title_length = prog_title.length();
+
+	int packet_length = EIT_SIZE + EIT_LOOP_SIZE + EIT_SHORT_EVENT_DESCRIPTOR_SIZE +
+		prog_title_length + 1;
+
+	eit_event_t *event_data = (eit_event_t *) (data + EIT_SIZE);
+	event_data->event_id_hi = itTitle->second.program_id_ml;
+	event_data->event_id_lo = itTitle->second.program_id_lo;
+
+	timeMHW2DVB( itTitle->second.day, itTitle->second.hours, itTitle->second.minutes, 
+		(u_char *) event_data + 2 );
+	timeMHW2DVB( HILO(itTitle->second.duration), (u_char *) event_data+7 );
+			
+	event_data->running_status = 0;
+	event_data->free_CA_mode = 0;
+	int descr_ll = EIT_SHORT_EVENT_DESCRIPTOR_SIZE + 1 + prog_title_length;
+
+	eit_short_event_descriptor_struct *short_event_descriptor =
+		(eit_short_event_descriptor_struct *) ( (u_char *) event_data + EIT_LOOP_SIZE);
+	short_event_descriptor->descriptor_tag = EIT_SHORT_EVENT_DESCRIPTOR;
+	short_event_descriptor->descriptor_length = EIT_SHORT_EVENT_DESCRIPTOR_SIZE + 
+		prog_title_length - 1;
+	short_event_descriptor->language_code_1 = 'e';
+	short_event_descriptor->language_code_2 = 'n';
+	short_event_descriptor->language_code_3 = 'g';
+	short_event_descriptor->event_name_length = prog_title_length;
+	delimitName( itTitle->second.title, name, 23 );
+	u_char *event_name = (u_char *) short_event_descriptor + EIT_SHORT_EVENT_DESCRIPTOR_SIZE;
+	for ( int i = 0; i < prog_title_length; i++ )
+		event_name[i] = name[i];
+
+	// Set text length
+	event_name[prog_title_length] = 0;
+
+	if ( sumText.length() > 0 )
+	// There is summary info
+	{
+		unsigned int sum_length = sumText.length();
+		if ( sum_length + short_event_descriptor->descriptor_length <= 0xff )
+		// Store summary in short event descriptor
+		{
+			// Increase all relevant lengths
+			event_name[prog_title_length] = sum_length;
+			short_event_descriptor->descriptor_length += sum_length;
+			packet_length += sum_length;
+			descr_ll += sum_length;
+			sumText.copy( (char *) event_name+prog_title_length+1, sum_length );
+		}
+		else
+		// Store summary in extended event descriptors
+		{
+			int remaining_sum_length = sumText.length();
+			int nbr_descr = int(remaining_sum_length/247) + 1;
+			for ( int i=0; i < nbr_descr; i++)
+			// Loop once per extended event descriptor
+			{
+				eit_extended_descriptor_struct *ext_event_descriptor = (eit_extended_descriptor_struct *) (data + packet_length);
+				sum_length = remaining_sum_length > 247 ? 247 : remaining_sum_length;
+				remaining_sum_length -= sum_length;
+				packet_length += 8 + sum_length;
+				descr_ll += 8 + sum_length;
+					
+				ext_event_descriptor->descriptor_tag = EIT_EXTENDED_EVENT_DESCRIPOR;
+				ext_event_descriptor->descriptor_length = sum_length + 6;
+				ext_event_descriptor->descriptor_number = i;
+				ext_event_descriptor->last_descriptor_number = nbr_descr - 1;
+				ext_event_descriptor->iso_639_2_language_code_1 = 'e';
+				ext_event_descriptor->iso_639_2_language_code_2 = 'n';
+				ext_event_descriptor->iso_639_2_language_code_3 = 'g';
+				u_char *the_text = (u_char *) ext_event_descriptor + 8;
+				the_text[-2] = 0;
+				the_text[-1] = sum_length;
+				sumText.copy( (char *) the_text, sum_length, sumText.length() - sum_length - remaining_sum_length );
+			}
+		}
+	}
+	// Add content descriptor
+	u_char *descriptor = (u_char *) data + packet_length;
+	packet_length += 4;
+	descr_ll += 4;
+		
+	int content_id = 0;
+	eString content_descr = (char *) delimitName( themes[itTitle->second.theme_id].name, name, 15 );
+	if ( content_descr.find( "FILM" ) != eString::npos )
+		content_id = 0x10;
+	else if ( content_descr.find( "SPORT" ) != eString::npos )
+		content_id = 0x40;
+
+	descriptor[0] = 0x54;
+	descriptor[1] = 2;
+	descriptor[2] = content_id;
+	descriptor[3] = 0;
+		
+	event_data->descriptors_loop_length_hi = (descr_ll & 0xf00)>>8;
+	event_data->descriptors_loop_length_lo = (descr_ll & 0xff);
+
+	packet->section_length_hi =  ((packet_length - 3)&0xf00)>>8;
+	packet->section_length_lo =  (packet_length - 3)&0xff;
+
+	eEPGCache *e = eEPGCache::getInstance();
+	e->sectionRead( data, eEPGCache::SCHEDULE_MHW );  // Feed the data to eEPGCache::sectionRead()
+}
+
 int eScheduleMhw::sectionRead(__u8 *data)
 {
 	eEPGCache *cache = eEPGCache::getInstance();
@@ -1722,8 +1847,8 @@ int eScheduleMhw::sectionRead(__u8 *data)
 			{
 				titles[ title_id ] = *title;
 				if ( (title->summary_available) && (program_ids.find(program_id) == program_ids.end()) )
-					// program_ids will be used to gather all summaries.
-					program_ids.insert( program_id );
+					// program_ids will be used to gather summaries.
+					program_ids[ program_id ] = title_id;
 				return 0;	// Continue reading of the current table.
 			}
 		}
@@ -1738,9 +1863,10 @@ int eScheduleMhw::sectionRead(__u8 *data)
 			((summary->program_id_ml)<<8)|(summary->program_id_lo);
 		int len = ((data[1]&0xf)<<8) + data[2];
 		data[len+3] = 0;	// Terminate as a string.
-		if ( program_ids.find( program_id ) == program_ids.end() )
+		std::map<__u32, __u32>::iterator itProgid( program_ids.find( program_id ) );
+		if ( itProgid == program_ids.end() )
 		{ /*	This part is to prevent to looping forever if some summaries are not received yet.
-			There is a timeout of 4 sec. after the last summary successfully read. */
+			There is a timeout of 4 sec. after the last successfully read summary. */
 			
 			if ( !program_ids.empty() && 
 				time(0)+eDVB::getInstance()->time_difference - tnew_summary_read <= 4 )
@@ -1748,11 +1874,19 @@ int eScheduleMhw::sectionRead(__u8 *data)
 		}
 		else
 		{
-			program_ids.erase( program_id );
 			tnew_summary_read = time(0)+eDVB::getInstance()->time_difference;
 			eString the_text = (char *) (data + 11 + summary->nb_replays * 7);
 			the_text.strReplace( "\r\n", " " );
-			summaries[ program_id ] = the_text;
+			
+			// Find corresponding title, store title and summary in epgcache.
+			std::map<__u32, mhw_title_t>::iterator itTitle( titles.find( itProgid->second ) );
+			if ( itTitle != titles.end() )
+			{
+				storeTitle( itTitle, the_text, data );
+				titles.erase( itTitle );
+			}
+			
+			program_ids.erase( itProgid );
 			if ( !program_ids.empty() )
 				return 0;	// Continue reading of the current table.
 		}
@@ -1779,175 +1913,20 @@ void eScheduleMhw::sectionFinish(int err)
 		}
 		if ( ( pid == 0xD2 ) && ( tableid == 0x90 ) && ( err == -EAGAIN ) && ( !program_ids.empty() ) )
 		{
-			// Titles table has been read, there are summaries to read, start reading the summaries table.
+			// Titles table has been read, there are summaries to read.
+			// Start reading summaries, store corresponding titles on the fly.
 			tnew_summary_read = time(0)+eDVB::getInstance()->time_difference;
 			setFilter( 0xD3, 0x90, -1, -1, SECREAD_NOTIMEOUT, 0xFF );
 			return;
 		}
 		if ( err == -EAGAIN )
 		{
-			// At this point the data is collected. Next it will be stored.
-			eDebug("[EPGC] mhw data read");
-			__u8 name[24];
-			__u8 data[4096];
-			
-			std::map<__u32, mhw_title_t>::iterator itTitle = titles.begin();
-			int channel = itTitle->second.channel_id;
-			while ( itTitle != titles.end() )
-			// Loop once per channel/service
+			// Summaries have been read, titles that have summaries have been stored.
+			// Now store titles that do not have summaries.
+			__u8 data[65];
+			for (std::map<__u32, mhw_title_t>::iterator itTitle(titles.begin()); itTitle != titles.end(); itTitle++)
 			{
-				while ( itTitle != titles.end() && channel == itTitle->second.channel_id )
-				// Loop once per EIT packet
-				{
-					eit_t *packet = (eit_t *) data;
-					packet->table_id = 0x50;
-					packet->section_syntax_indicator = 1;
-					packet->service_id_hi = channels[ itTitle->second.channel_id - 1 ].channel_id_hi;
-					packet->service_id_lo = channels[ itTitle->second.channel_id - 1 ].channel_id_lo;
-					packet->version_number = 0;	// eEPGCache::sectionRead() will dig this for the moment
-					packet->current_next_indicator = 0;
-					packet->section_number = 0;	// eEPGCache::sectionRead() will dig this for the moment
-					packet->last_section_number = 0;	// eEPGCache::sectionRead() will dig this for the moment
-					packet->transport_stream_id_hi = channels[ itTitle->second.channel_id - 1 ].transport_stream_id_hi;
-					packet->transport_stream_id_lo = channels[ itTitle->second.channel_id - 1 ].transport_stream_id_lo;
-					packet->original_network_id_hi = channels[ itTitle->second.channel_id - 1 ].network_id_hi;
-					packet->original_network_id_lo = channels[ itTitle->second.channel_id - 1 ].network_id_lo;
-					packet->segment_last_section_number = 0; // eEPGCache::sectionRead() will dig this for the moment
-					packet->segment_last_table_id = 0x50;
-
-					int packet_length = EIT_SIZE;
-					int additional_length = 0;
-
-					while ( itTitle != titles.end() && channel == itTitle->second.channel_id &&
-						packet_length + additional_length < EIT_MAX_SIZE )
-					// Loop once per added title
-					{
-						eString prog_title = (char *) delimitName( itTitle->second.title, name, 23 );
-						int prog_title_length = prog_title.length();
-						additional_length = EIT_LOOP_SIZE + EIT_SHORT_EVENT_DESCRIPTOR_SIZE + prog_title_length + 1;
-
-						if ( packet_length + additional_length < EIT_MAX_SIZE )
-						{
-							eit_event_t *event_data = (eit_event_t *) (data + packet_length);
-							event_data->event_id_hi = itTitle->second.program_id_ml;
-							event_data->event_id_lo = itTitle->second.program_id_lo;
-
-							timeMHW2DVB( itTitle->second.day, itTitle->second.hours, 
-								itTitle->second.minutes, (u_char *) event_data + 2 );
-							timeMHW2DVB( HILO(itTitle->second.duration), (u_char *) event_data+7 );
-
-							event_data->running_status = 0;
-							event_data->free_CA_mode = 0;
-							int descr_ll = EIT_SHORT_EVENT_DESCRIPTOR_SIZE + 1 + prog_title_length;
-
-							__u32 program_id = ((itTitle->second.program_id_hi)<<24)|
-								((itTitle->second.program_id_mh)<<16)|((itTitle->second.program_id_ml)<<8)|
-								(itTitle->second.program_id_lo);
-
-							eit_short_event_descriptor_struct *short_event_descriptor =
-								(eit_short_event_descriptor_struct *) ( (u_char *) event_data + EIT_LOOP_SIZE);
-							short_event_descriptor->descriptor_tag = EIT_SHORT_EVENT_DESCRIPTOR;
-							short_event_descriptor->descriptor_length = EIT_SHORT_EVENT_DESCRIPTOR_SIZE + prog_title_length - 1;
-							short_event_descriptor->language_code_1 = 'e';
-							short_event_descriptor->language_code_2 = 'n';
-							short_event_descriptor->language_code_3 = 'g';
-							short_event_descriptor->event_name_length = prog_title_length;
-							delimitName( itTitle->second.title, name, 23 );
-							u_char *event_name = (u_char *) short_event_descriptor + EIT_SHORT_EVENT_DESCRIPTOR_SIZE;
-							for ( int i = 0; i < prog_title_length; i++ )
-								event_name[i] = name[i];
-
-							// Set text length
-							event_name[prog_title_length] = 0;
-
-							if ( itTitle->second.summary_available )
-							{
-								std::map<__u32, eString>::iterator itSummary = summaries.find( program_id );
-								if ( itSummary != summaries.end() )
-								{
-									unsigned int sum_length = itSummary->second.length();
-
-									if ( sum_length + short_event_descriptor->descriptor_length <= 0xff )
-									// Store summary in short event descriptor
-									{
-										// Increase all relevant lengths
-										event_name[prog_title_length] = sum_length;
-										short_event_descriptor->descriptor_length += sum_length;
-										additional_length += sum_length;
-										descr_ll += sum_length;
-
-										if ( packet_length + additional_length < EIT_MAX_SIZE )
-											itSummary->second.copy( (char *) event_name+prog_title_length+1, sum_length );
-									}
-									else
-									// Store summary in extended event descriptors
-									{
-										int remaining_sum_length = itSummary->second.length();
-										int nbr_descr = int(remaining_sum_length/247) + 1;
-										for ( int i=0; i < nbr_descr; i++)
-										// Loop once per extended event descriptor
-										{
-											eit_extended_descriptor_struct *ext_event_descriptor = (eit_extended_descriptor_struct *) (data + packet_length + additional_length);
-											sum_length = remaining_sum_length > 247 ? 247 : remaining_sum_length;
-											remaining_sum_length -= sum_length;
-											additional_length += 8 + sum_length;
-											descr_ll += 8 + sum_length;
-											if ( packet_length + additional_length < EIT_MAX_SIZE )
-											{
-												ext_event_descriptor->descriptor_tag = EIT_EXTENDED_EVENT_DESCRIPOR;
-												ext_event_descriptor->descriptor_length = sum_length + 6;
-												ext_event_descriptor->descriptor_number = i;
-												ext_event_descriptor->last_descriptor_number = nbr_descr - 1;
-												ext_event_descriptor->iso_639_2_language_code_1 = 'e';
-												ext_event_descriptor->iso_639_2_language_code_2 = 'n';
-												ext_event_descriptor->iso_639_2_language_code_3 = 'g';
-												u_char *the_text = (u_char *) ext_event_descriptor + 8;
-												the_text[-2] = 0;
-												the_text[-1] = sum_length;
-												itSummary->second.copy( (char *) the_text, sum_length, itSummary->second.length() - sum_length - remaining_sum_length );
-											}
-										}
-									}
-								}
-							}
-
-							// Add content descriptor
-							u_char *descriptor = (u_char *) data + packet_length + additional_length;
-							additional_length += 4;
-							descr_ll += 4;
-							if ( packet_length + additional_length < EIT_MAX_SIZE )
-							{
-								int content_id = 0;
-								eString content_descr = (char *) delimitName( themes[itTitle->second.theme_id].name, name, 15 );
-								if ( content_descr.find( "FILM" ) != eString::npos )
-									content_id = 0x10;
-								else if ( content_descr.find( "SPORT" ) != eString::npos )
-									content_id = 0x40;
-
-								descriptor[0] = 0x54;
-								descriptor[1] = 2;
-								descriptor[2] = content_id;
-								descriptor[3] = 0;
-							}
-
-							event_data->descriptors_loop_length_hi = (descr_ll & 0xf00)>>8;
-							event_data->descriptors_loop_length_lo = (descr_ll & 0xff);
-							// Skip to next title only if max length is not exceeded.
-							if ( packet_length + additional_length < EIT_MAX_SIZE )
-							{
-								packet_length += additional_length;
-								additional_length = 0;
-								itTitle++;
-							}
-						}
-					}
-					packet->section_length_hi =  ((packet_length - 3)&0xf00)>>8;
-					packet->section_length_lo =  (packet_length - 3)&0xff;
-
-					e->sectionRead( data, eEPGCache::SCHEDULE_MHW );	// Feed the data to eEPGCache::sectionRead()
-				}
-				if ( itTitle != titles.end() )
-					channel = itTitle->second.channel_id;
+				storeTitle( itTitle, "", data );
 			}
 		}
 		eDebug("[EPGC] stop schedule mhw");

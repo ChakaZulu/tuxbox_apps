@@ -169,8 +169,7 @@ class eScheduleMhw: public eSection
 	std::vector<mhw_channel_name_t> channels;
 	std::map<__u8, mhw_theme_name_t> themes;
 	std::map<__u32, mhw_title_t> titles;
-	std::set<__u32> program_ids;
-	std::map<__u32, eString> summaries;
+	std::map<__u32, __u32> program_ids;
 	time_t tnew_summary_read;
 	
 	void cleanup();
@@ -178,6 +177,8 @@ class eScheduleMhw: public eSection
 	void eScheduleMhw::timeMHW2DVB( u_char hours, u_char minutes, u_char *return_time);
 	void eScheduleMhw::timeMHW2DVB( int minutes, u_char *return_time);
 	void eScheduleMhw::timeMHW2DVB( u_char day, u_char hours, u_char minutes, u_char *return_time);
+	void eScheduleMhw::storeTitle(std::map<__u32, mhw_title_t>::iterator itTitle, 
+		eString sumText, __u8 *data);
 	int sectionRead(__u8 *data);
 	void sectionFinish(int);
 	int start()
