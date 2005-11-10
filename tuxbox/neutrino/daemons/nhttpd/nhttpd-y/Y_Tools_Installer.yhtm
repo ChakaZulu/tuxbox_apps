@@ -1,0 +1,33 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" type="text/css" href="Y_Main.css">
+<script language="JavaScript" type="text/javascript" >
+function do_submit() 
+{
+	if(document.f.filename.value != "")
+	{
+		out.location.href = "Y_Wait.htm";
+		document.f.su.disabled=true;
+		window.setTimeout("document.f.submit()",1000);
+		document.f.su.disabled=false;
+	}
+}
+</script>
+</head>
+<body>
+
+<br>
+<div class="y_head">Installer</div>
+<div class="y_work_box">
+	<form name="f" method="POST" enctype="multipart/form-data" action="/control/exec?Y_Tools&installer" target="out">
+		tar-File:&nbsp;<input type="file" name="filename" size="80">&nbsp;<br>
+		<input type="button" name="su" value="hochladen und installieren" title="upload and install" onClick="do_submit()">
+		<br><br>
+	</form>
+	<iframe height="400" width="600" scrolling="no" align="left" frameborder="0" name="out" id="out">Your Browser does not support IFrames.</iframe>
+</div>
+
+</body>
+
+</html>

@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Globals (yjogol)
-# $Date: 2005/10/21 13:05:22 $
-# $Revision: 1.5 $
+# $Date: 2005/11/10 19:47:00 $
+# $Revision: 1.6 $
 # -----------------------------------------------------------
 
 # -----------------------------------------------------------
@@ -36,5 +36,7 @@ y_wait_live="$y_path_httpd/Y_Live_Wait.yhtm"
 y_tmp_m3u="$y_path_tmp/y.m3u"
 y_tmp_m4u="$y_path_tmp/y.m4u"
 
+y_out_html="$y_path_tmp/y_out.yhtm"
+y_install="$y_path_tmp/install.sh"
 
 

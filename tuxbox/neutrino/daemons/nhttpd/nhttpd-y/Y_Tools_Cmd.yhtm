@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" type="text/css" href="Y_Main.css">
+<script language="JavaScript" type="text/javascript" >
+function do_submit() 
+{
+	if(document.f.cmd.value != "")
+	{
+		var app="false";
+		if(document.f.appendx.checked == true)
+			app="true";
+		_url="/control/exec?Y_Tools&cmd&"+document.f.pwd.value +"&"+app+"&'"+ document.f.cmd.value +"'";
+		out.location.href = _url;
+		document.f.cmd.value="";
+	}
+}
+function set_pwd(_pwd) 
+{
+	document.f.pwd.value = _pwd;
+}
+function do_clear() 
+{
+	document.co.cmds.value = "";
+}
+/* Cursor to end . works only with IE */
+function setCaretToEnd(control) 
+{
+	if (control.createTextRange) {
+		var range = control.createTextRange();
+		range.collapse(false);
+		range.select();
+	}
+	else if (control.setSelectionRange) {
+		control.focus();
+		var l = control.value.length;
+		control.setSelectionRange(l, l);
+	}
+}
+</script>
+</head>
+<body>
+
+<br>
+<div class="y_head">Command Shell</div>
+<div class="y_work_box">
+	<form name="co">
+		<textarea style="display: block" name="cmds" cols="100" rows="25"  title="shell output window" style="background : white; font : 'Courier New',medium  monospace; color : #436976;"></textarea>
+	</form>
+
+	<form name="f" target="tmp" onSubmit="do_submit();return false;" action="">
+		<table>
+		<TR>
+			<TD><input type="button" name="clear" value="clear" title="clear output screeb" onClick="do_clear()"></TD>
+			<td><input type="checkbox" name="appendx" value="1" title="append output (only IE)">&nbsp;fortlaufende Ausgabe (nur IE - wg. scrollen)</td>
+			</tr><tr>
+			<td>Path:&nbsp;</td>
+			<td><input name="pwd" type="text" size="90" maxlength="255" title="actual path" value="/"></td>
+			</tr><tr>
+			<td>Command:</td>
+			<td><input name="cmd" type="text" size="90" maxlength="255" title="enter command to execute">
+			<input type="submit" name="Submit" value="do it" title="execute shell command"></td>
+		</TR>
+		</table>
+	</form>
+</div>
+
+<iframe height="0" width="0" scrolling="no" align="left" frameborder="0" name="out" id="out">Your Browser does not support IFrames.</iframe>
+<iframe height="0" width="0" scrolling="no" align="left" frameborder="0" name="tmp" id="tmp">Your Browser does not support IFrames.</iframe>
+
+<script language="JavaScript" type="text/javascript" >
+	var agt=navigator.userAgent.toLowerCase();
+	var is_ie = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
+	if(is_ie)
+		document.f.appendx.checked = true;
+	window.document.f.cmd.focus();
+</script>
+</body>
+
+</html>
