@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.70 2005/11/10 00:05:45 rasc Exp $
+$Id: dvb_str.c,v 1.71 2005/11/10 23:34:38 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.70 2005/11/10 00:05:45 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.71  2005/11/10 23:34:38  rasc
+Some H.222.1 AMD 4+5 update
+
 Revision 1.70  2005/11/10 00:05:45  rasc
  - New: PS MPEG2 UserData + GOP, DVB-S2 fix
 
@@ -395,6 +398,7 @@ char *dvbstrTableID (u_int id)
   -- ISO 13818-1, etc.
   -- 2004-08-11 Updated H.222.0 AMD1
   -- 2004-08-12 Updated H.222.0 AMD3
+  -- 2005-11-10 Updated H.222.0 (2000)/Cor.4 (09/2005)
 */
 
 char *dvbstrMPEGDescriptorTAG (u_int tag)
@@ -439,7 +443,6 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x21, 0x21,  "MuxCode_descriptor" },
      {  0x22, 0x22,  "FMXBufferSize_descriptor" },
      {  0x23, 0x23,  "MultiplexBuffer_descriptor" },
-//     {  0x24, 0x24,  "FlexMuxTiming_descriptor" }, // $$$ TODO collision with ContentLabeling descr.  (obsolete??)
      {  0x24, 0x24,  "Content_labeling_descriptor" },
      	/* TV ANYTIME TS 102 323 descriptors, ISO 13818-1 */
      {  0x25, 0x25,  "metadata_pointer_descriptor" },
@@ -448,7 +451,10 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x28, 0x28,  "AVC_video_descriptor" },
      {  0x29, 0x29,  "IPMP_descriptor (MPEG-2 IPMP, ISO 13818-11)" },
      {  0x2A, 0x2A,  "AVC_timing_and_HRD_descriptor" },
-     {  0x2B, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
+
+     {  0x2B, 0x2B,  "MPEG-2_AAC_audio_descriptor" },
+     {  0x2C, 0x2C,  "FlexMuxTiming_descriptor" },
+     {  0x2D, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
 
      {  0x40, 0xFF,  "Forbidden descriptor in MPEG context" },	// DVB Context
      {  0,0, NULL }
@@ -886,6 +892,7 @@ char *dvbstrStream_TYPE_SHORT (u_int flag)
 
 /*
  -- Audio Types (descriptor e.g. ISO 639)
+ -- Update ISO/IEC 13818-1:2000/Amd.5:2005 (E)
 */
 
 char *dvbstrAudio_TYPE (u_int flag)
@@ -896,7 +903,8 @@ char *dvbstrAudio_TYPE (u_int flag)
      {  0x01, 0x01,  "clean effects" },
      {  0x02, 0x02,  "hearing impaired" },
      {  0x03, 0x03,  "visual impaired commentary" },
-     {  0x04, 0xFF,  "reserved" },
+     {  0x04, 0x7F,  "user private" },
+     {  0x80, 0xFF,  "reserved" },
      {  0,0, NULL }
   };
 
@@ -3462,3 +3470,13 @@ char *dvbstrMPEG_metadata_section_frag_indication (u_int i)
 
 */
 
+/*
+ $$$ TODO 
+
+ISO/IEC 13818-1:2000/Amd.5:2005 (E):
+  Table 2-62 – MPEG-4_audio_profile_and_level assignment values
+
+  Table Amd.5-2 – MPEG-2_AAC_additional_information field values
+
+
+*/

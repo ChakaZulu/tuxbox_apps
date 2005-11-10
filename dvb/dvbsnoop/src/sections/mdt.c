@@ -1,5 +1,5 @@
 /*
-$Id: mdt.c,v 1.4 2004/10/17 22:20:36 rasc Exp $
+$Id: mdt.c,v 1.5 2005/11/10 23:34:38 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: mdt.c,v 1.4 2004/10/17 22:20:36 rasc Exp $
 
 
 $Log: mdt.c,v $
+Revision 1.5  2005/11/10 23:34:38  rasc
+Some H.222.1 AMD 4+5 update
+
 Revision 1.4  2004/10/17 22:20:36  rasc
 section decoding functions renamed due to preparation of private structures
 
@@ -145,6 +148,34 @@ Metadata_AU_cell () {
 		AU_cell_data_byte
 	}
 }
+
+
+
+
+$$$ TODO H.222.1 AMD4
+
+Replace Table Amd.1-2 (metadata_application_format) with the following:
+Table Amd.1-2 – Metadata_application_format
+
+Value Description
+
+0x0000-0x000F Reserved
+0x0010 ISO 15706 (ISAN) encoded in its binary form (see Notes 1 and 3)
+0x0011 ISO 15706-2 (V-ISAN) encoded in its binary form (see Notes 2 and 3)
+0x0012-0x00FF Reserved
+0x0100-0xFFFE User defined
+0xFFFF Defined by the metadata_application_format_identifier field
+
+NOTE 1 – For ISAN, the content_reference_id_byte is set to binary encoding and the content_reference_id_record_length
+is set to 0x08.
+
+NOTE 2 – For V-ISAN, the content_reference_id_byte is set to binary encoding and the
+content_reference_id_record_length is set to 0x0C.
+
+NOTE 3 – For interoperability amongst metadata applications that use the metadata_application_format values of 0x0010
+and 0x0011, it is recommended that the content_reference_id_flag be set to '1' and the content_time_base_indicator be set
+to '00'.
+
 
 
 */

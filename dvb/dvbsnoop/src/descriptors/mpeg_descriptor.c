@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.26 2004/11/03 21:00:52 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.27 2005/11/10 23:34:37 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: mpeg_descriptor.c,v 1.26 2004/11/03 21:00:52 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.26 2004/11/03 21:00:52 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.27  2005/11/10 23:34:37  rasc
+Some H.222.1 AMD 4+5 update
+
 Revision 1.26  2004/11/03 21:00:52  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"
@@ -213,7 +216,6 @@ int  descriptorMPEG  (u_char *b)
      case 0x21:  descriptorMPEG_MuxCode (b);  break; 
      case 0x22:  descriptorMPEG_FMXBufferSize (b);  break; 
      case 0x23:  descriptorMPEG_MultiplexBuffer (b);  break; 
-     // case 0x24:  descriptorMPEG_FlexMuxTiming (b);  break;  // collision with content_labeling desc.  H.222.0 (obsolete??)
      case 0x24:  descriptorMPEG_ContentLabeling(b);  break;
 
      /* TV ANYTIME, TS 102 323 */
@@ -225,6 +227,10 @@ int  descriptorMPEG  (u_char *b)
      case 0x28:  descriptorMPEG_AVC_video (b);  break; 
      case 0x29:  descriptorMPEG_IPMP (b);  break; 
      case 0x2A:  descriptorMPEG_AVC_timing_and_HRD (b);  break; 
+
+     /* H.222.0 Corr 4 */
+     case 0x2B:  descriptorMPEG_MPEG2_AAC_audio (b);  break;
+     case 0x2C:  descriptorMPEG_FlexMuxTiming (b);  break;
 
      default: 
 	if (b[0] < 0x80) {
@@ -1606,27 +1612,6 @@ void descriptorMPEG_MultiplexBuffer (u_char *b)
 
 
 
-// ---- collision with old H.222.0 draft, obsolete??
-
-// /*
-//   0x24   Flex-Mux-Timing descriptor
-//   ITU-T H.222.0-I-Cor1 
-// */
-// 
-// void descriptorMPEG_FlexMuxTiming (u_char *b)
-// 
-// {
-//   // d.descriptor_tag		 = b[0];
-//   // d.descriptor_length       	 = b[1];
-// 
-// 
-//  outBit_Sx_NL   (4,"FCR_ES_ID: ",  	b,16,16);
-//  outBit_S2Tx_NL (4,"FCRResolution: ",  	b,32,32,"(cycles/s)");
-//  outBit_Sx_NL   (4,"FCRLength: ",  	b,64, 8);
-//  outBit_Sx_NL   (4,"FCRRateLength: ",  	b,72, 8);
-// 
-// }
-
 
 
 
@@ -1699,7 +1684,7 @@ void descriptorMPEG_ContentLabeling (u_char *b)
   	outBit_Sx_NL   (6,"reserved: ",  	b, 40,  7);
 	ll = getBits48 (b, 0,  47, 33);
 	out_S2LL_NL(4,"metadata_time_base_value: ",ll,"90kHz units");
-	// -- following is wrong, because of different unit measuring
+	// -- following is wrong, because of different unit measuring  $$$ TODO: check
 	// out (4,"metadata_time_base_value: ");
 	// print_timebase90kHz (4, ll);
 	// out_NL (4);
@@ -1841,6 +1826,8 @@ void descriptorMPEG_IPMP (u_char *b)
 
 
 
+
+
 /*
   0x2A  AVC_timing_and_HRD descriptor
   H.222.0 AMD 3
@@ -1862,5 +1849,49 @@ void descriptorMPEG_AVC_timing_and_HRD (u_char *b)
 
 
 
+
+
+/*
+  0x2B  MPEG-2_AAC_audio descriptor
+  H.222.0 AMD 4
+  ISO/IEC 13818-1:2000/Amd.5:2005 (E)
+*/
+
+void descriptorMPEG_MPEG2_AAC_audio (u_char *b)
+{
+  // d.descriptor_tag		 = b[0];
+  // d.descriptor_length       	 = b[1];
+
+  outBit_Sx_NL   (4,"MPEG-2_AAC_profile: ",  			b, 16,  8);
+	// $$$ TODO:  ISO/IEC 13818-7:2004 subclause 7.1 Table 31.
+
+  outBit_Sx_NL   (4,"MPEG-2_AAC_channel_configuration: ",  	b, 24,  8);
+	// $$$ TODO:  ISO/IEC 13818-7:2004 subclause 8.9 Table 42
+
+  outBit_Sx_NL   (4,"MPEG-2_AAC_additional_information: ",  	b, 32,  8);
+  	// $$$ TODO:  ISO/IEC 13818-7:2004 is embedded in the AAC bitstream according to Table Amd.5-2.
+
+}
+
+
+
+
+/*
+   0x2C   Flex-Mux-Timing descriptor
+   ITU-T H.222.0-I-Cor1 
+*/
+ 
+void descriptorMPEG_FlexMuxTiming (u_char *b)
+{
+  // d.descriptor_tag		 = b[0];
+  // d.descriptor_length       	 = b[1];
+
+
+  outBit_Sx_NL   (4,"FCR_ES_ID: ",  	b,16,16);
+  outBit_S2Tx_NL (4,"FCRResolution: ", 	b,32,32,"(cycles/s)");
+  outBit_Sx_NL   (4,"FCRLength: ",  	b,64, 8);
+  outBit_Sx_NL   (4,"FCRRateLength: ", 	b,72, 8);
+ 
+}
 
 

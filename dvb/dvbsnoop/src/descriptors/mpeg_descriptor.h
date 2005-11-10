@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.h,v 1.11 2004/08/12 22:57:18 rasc Exp $ 
+$Id: mpeg_descriptor.h,v 1.12 2005/11/10 23:34:37 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: mpeg_descriptor.h,v 1.11 2004/08/12 22:57:18 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2005   Rainer.Scherg@gmx.de  (rasc)
 
  -- MPEG Descriptors  ISO/IEC 13818-2
 
@@ -15,6 +15,9 @@ $Id: mpeg_descriptor.h,v 1.11 2004/08/12 22:57:18 rasc Exp $
 
 
 $Log: mpeg_descriptor.h,v $
+Revision 1.12  2005/11/10 23:34:37  rasc
+Some H.222.1 AMD 4+5 update
+
 Revision 1.11  2004/08/12 22:57:18  rasc
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
@@ -63,7 +66,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 */
 
 #ifndef _MPEG_DESCRIPTOR_H
-#define _MPEG_DESCRIPTOR_H 1
+#define _MPEG_DESCRIPTOR_H 
 
 
 int   descriptorMPEG (u_char *b);
@@ -106,7 +109,6 @@ void  descriptorMPEG_External_ES_ID (u_char *b);
 void  descriptorMPEG_MuxCode (u_char *b);
 void  descriptorMPEG_FMXBufferSize (u_char *b);
 void  descriptorMPEG_MultiplexBuffer (u_char *b);
-// void  descriptorMPEG_FlexMuxTiming (u_char *b);
 void  descriptorMPEG_ContentLabeling (u_char *b);
 
 
@@ -116,10 +118,13 @@ void descriptorMPEG_TVA_metadata (u_char *b);
 void descriptorMPEG_TVA_metadata_STD (u_char *b);
 
      /* H.222.0 AMD3 */
-
 void descriptorMPEG_AVC_video (u_char *b);
 void descriptorMPEG_IPMP (u_char *b);
 void descriptorMPEG_AVC_timing_and_HRD (u_char *b);
+
+     /* H.222.0 AMD4 */
+void descriptorMPEG_MPEG2_AAC_audio (u_char *b);
+void descriptorMPEG_FlexMuxTiming (u_char *b);
 
 
 #endif
