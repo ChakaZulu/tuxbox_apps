@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.5 2005/11/08 15:16:59 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.6 2005/11/10 21:55:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -21,12 +21,9 @@
  */
  
 #include <plugin.h>
-
 #include "movieplayer.h"
 
-#define REL "Streaming Client GUI, Version 0.0.4"
-#define CONFFILE0 "/etc/movieplayer.xml"
-#define CONFFILE1 "/var/tuxbox/config/movieplayer.xml"
+#define REL "Movieplayer Plugin, Version 0.1"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -48,7 +45,7 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 {
 	int fd = eSkin::getActive()->queryValue("fontsize", 20);
 	
-	bufferingBox = new eMessageBox(_("Please wait..."),_("Buffering..."), eMessageBox::iconInfo);
+	bufferingBox = new eMessageBox(_("Buffering video stream... Please wait."),_("Information"), eMessageBox::iconInfo);
 
 	cmove(ePoint(90, 110)); 
 	cresize(eSize(550, 350));
@@ -104,30 +101,26 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 	timer = new eTimer(eApp);
 	CONNECT(timer->timeout, eSCGui::timerHandler);
 
-	bool loading = false;
-	if (access(CONFFILE1, R_OK) == 0)
-		loading = loadXML(CONFFILE1);
-	else
-	if (access(CONFFILE0, R_OK) == 0)
-		loading = loadXML(CONFFILE0);
-		
-	if (loading)
-		loadList();
-	else
-	{
-		hide();
-		eMessageBox msg(_("Unable to open or parse configuration file movieplayer.xml"), _("Error"), eMessageBox::btOK);
-		msg.show();
-		msg.exec();
-		msg.hide();
-		show();
-	}
+	eMoviePlayer::getInstance()->mpconfig.load();
+	server = eMoviePlayer::getInstance()->mpconfig.getServerConfig();
+	
+	VLCsend::getInstance()->send_parms.IP = server.serverIP;
+	VLCsend::getInstance()->send_parms.IF_PORT = server.webifPort;
+	VLCsend::getInstance()->send_parms.STREAM_PORT = server.streamingPort;
+	
+	startdir = server.startDir;
+	cddrive = server.CDDrive;	
+	pathfull = startdir;
+
+	if (server.vlcUser && server.vlcPass)
+		VLCsend::getInstance()->send_parms.AUTH = server.vlcUser + ":" + server.vlcPass;
+	
+	loadList();
 }
 
 eSCGui::~eSCGui()
 {
 	playList.clear();
-	extList.clear();
 	if (timer) 
 		delete timer;
 
@@ -202,20 +195,11 @@ void eSCGui::loadList()
 				}
 				else
 				{
-					eString tmp = entry; 
-					tmp.upper();
-					for (ExtList::iterator p = extList.begin(); p != extList.end(); p++)
-					{
-						if (tmp.find((*p).EXT) != eString::npos)
-						{
-							a.Filename = entry;
-							a.Fullname = entry;
-							a.Filetype = FILES;
-							a.Extitem = (*p).ITEM;
-							playList.push_back(a);
-							break;
-						}
-					}
+					a.Filename = entry;
+					a.Fullname = entry;
+					a.Filetype = FILES;
+					
+					playList.push_back(a);
 				}
 				start = pos + 1;
 			}
@@ -226,19 +210,12 @@ void eSCGui::loadList()
 		if (cddrive[cddrive.length() - 1] == ':' && cddrive.length() == 2) 
 			pathfull = cddrive + "/";
 
-		for (ExtList::iterator p = extList.begin(); p != extList.end(); p++)
-		{
-			if ((*p).NAME == tmp2)
-			{
-				a.Filename = _("Play");
-				a.Fullname = tmp3;
-				a.Filetype = FILES;
-				a.Extitem = (*p).ITEM;
-				playList.push_back(a);
-				break;
-			}
-		}
+		a.Filename = _("Play");
+		a.Fullname = tmp3;
+		a.Filetype = FILES;
+		playList.push_back(a);
 	}
+	
 	viewList();
 }
 
@@ -300,193 +277,6 @@ void eSCGui::listSelected(eListBoxEntryText *item)
 		playerStart((int)item->getKey());
 }
 
-bool eSCGui::loadXML(eString file)
-{
-	extList.clear();
-
-	XMLTreeParser parser("ISO-8859-1");
-
-	FILE *in = fopen(file.c_str(), "rt");
-	if (!in) 
-	{ 
-		eDebug("[VLC] <unable to open %s>", file.c_str()); 
-		return false; 
-	}
-
-	bool done = false;
-	while (!done)
-	{
-		char buf[2048]; 
-		unsigned int len = fread(buf, 1, sizeof(buf), in);
-		done = len < sizeof(buf);
-		if (!parser.Parse(buf, len, done))
-		{
-			eDebug("[VLC] <parse: %s at line %d>", parser.ErrorString(parser.GetErrorCode()), parser.GetCurrentLineNumber());
-			fclose(in);
-			return false;
-		}
-	}
-
-	fclose(in);
-
-	XMLTreeNode *root = parser.RootNode();
-	if (!root)
-		return false;
-
-	int extcount = 0;
-	for (XMLTreeNode *node = root->GetChild(); node; node = node->GetNext())
-	{
-		if (!strcmp(node->GetType(), "server"))
-		{
-			eString serverIP = node->GetAttributeValue("ip");
-			VLCsend::getInstance()->send_parms.IP = serverIP;
-			eConfig::getInstance()->setKey("/movieplayer/serverip", serverIP.c_str());
-			VLCsend::getInstance()->send_parms.IF_PORT = "8080";  // force to 8080 :-)
-			eString serverPort = node->GetAttributeValue("stream-port");
-			VLCsend::getInstance()->send_parms.STREAM_PORT = serverPort;
-			eConfig::getInstance()->setKey("/movieplayer/serverport", atoi(serverPort.c_str()));
-
-			eString tmpuser = node->GetAttributeValue("user");
-			eString tmppass = node->GetAttributeValue("pass");
-
-			if (tmpuser && tmppass)
-				VLCsend::getInstance()->send_parms.AUTH = tmpuser + ":" + tmppass;
-
-		}
-		else 
-		if (!strcmp(node->GetType(), "config"))
-		{
-			startdir = node->GetAttributeValue("startdir");
-			cddrive  = node->GetAttributeValue("cddrive");
-			pathfull = startdir;
-		}
-		else 
-		if (!strcmp(node->GetType(), "codec"))
-		{
-			str_mpeg1 = node->GetAttributeValue("mpeg1");
-			str_mpeg2 = node->GetAttributeValue("mpeg2");
-			str_audio = node->GetAttributeValue("audio");
-		}
-		else 
-		if (!strcmp(node->GetType(), "setup"))
-		{
-			eString tmpname = node->GetAttributeValue("name");
-			eString tmpext = node->GetAttributeValue("ext");
-			eString tmpvrate = node->GetAttributeValue("Videorate");
-			eString tmpvtrans = node->GetAttributeValue("Videotranscode");
-			eString tmpvcodec = node->GetAttributeValue("Videocodec");
-			eString tmpvsize = node->GetAttributeValue("Videosize");
-			eString tmparate = node->GetAttributeValue("Audiorate");
-			eString tmpatrans = node->GetAttributeValue("Audiotranscode");
-			eString tmpac3 = node->GetAttributeValue("ac3");
-
-			if (!tmpname || !tmpext || !tmpvrate || !tmpvtrans || !tmpvcodec || !tmpvsize || !tmparate  || !tmpatrans || !tmpac3)
-			{
-				eDebug("[VLC] <parse error in setup>");
-				return false;
-			}
-			else
-			{
-				EXTLIST a;
-				a.NAME = tmpname;
-				a.EXT = "." + tmpext;
-				a.VRATE = tmpvrate;
-				a.VTRANS = (tmpvtrans == "1");
-				a.VCODEC = tmpvcodec;
-				a.VSIZE	 = tmpvsize;
-				a.ARATE = tmparate;
-				a.ITEM = extcount++;
-				a.ATRANS = (tmpatrans == "1");
-				a.AC3 = (tmpac3 == "1");
-				extList.push_back(a);
-			}
-		}
-	}
-
-	/*eDebug("\nIP:%s",VLCsend::getInstance()->send_parms.IP.c_str());
-	eDebug("WEBIF-PORT:%s",VLCsend::getInstance()->send_parms.IF_PORT.c_str());
-	eDebug("Stream-PORT:%s\n",VLCsend::getInstance()->send_parms.STREAM_PORT.c_str());
-
-	eDebug("STARTDIR:%s",startdir.c_str());
-	eDebug("CDDRIVE:%s\n",cddrive.c_str());
-
-	eDebug("MPEG1:%s",str_mpeg1.c_str());
-	eDebug("MPEG2:%s",str_mpeg2.c_str());
-	eDebug("Audio:%s\n",str_audio.c_str());
-
-	for(ExtList::iterator p=extList.begin(); p!=extList.end() ;p++)
-	{
-		eDebug("name=%s ext=%s vrate=%s vcodec=%s vsize=%s arate=%s item=%d", (*p).NAME.c_str(), (*p).EXT.c_str(), (*p).VRATE.c_str(), (*p).VCODEC.c_str(),
-		(*p).VSIZE.c_str(), (*p).ARATE.c_str(), (*p).ITEM);
-	}*/
-
-	return true;
-}
-
-eString eSCGui::parseSout(int val)
-{
-	int curr = playList[val].Extitem;
-
-	eMoviePlayer::getInstance()->status.ACT_AC3 = extList[curr].AC3;
-
-	eString res_horiz, res_vert;
-	
-	if (extList[curr].VSIZE == "352x288")
-	{
-		res_horiz = "352";
-		res_vert = "288";
-	}
-	else 
-	if (extList[curr].VSIZE == "352x576")
-	{
-		res_horiz = "352";
-		res_vert = "576";
-	}
-	else 
-	if (extList[curr].VSIZE == "480x576")
-	{
-		res_horiz = "480";
-		res_vert = "576";
-	}
-	else 
-	if (extList[curr].VSIZE == "576x576")
-	{
-		res_horiz = "576";
-		res_vert = "576";
-	}
-	else
-	{
-		res_horiz = "704";
-		res_vert = "576";
-	}
-
-	eString conf = "#";
-	if (extList[curr].VTRANS || extList[curr].ATRANS)
-	{
-		conf += "transcode{";
-		if (extList[curr].VTRANS == true)
-		{
-			conf += "vcodec=";
-			if (extList[curr].VCODEC == "mpeg2")
-				conf += str_mpeg2;
-			else
-				conf += str_mpeg1;
-			conf += ",vb=" + extList[curr].VRATE + ",width=" + res_horiz + ",height=" + res_vert;
-		}
-		if (extList[curr].ATRANS == true)
-		{
-			if (extList[curr].VTRANS == true)
-				conf += ",";
-			conf += "acodec=" + str_audio + ",ab=" + extList[curr].ARATE + ",channels=2";
-		}
-		conf += "}:";
-	}
-	conf += "duplicate{dst=std{access=http,mux=ts,url=:" + VLCsend::getInstance()->send_parms.STREAM_PORT + "/dboxstream}}";
-
-	eDebug("[VLC] sout:%s", conf.c_str());
-	return conf;
-}
-
 void eSCGui::showMenu()
 {
 	if (!menu)
@@ -495,7 +285,7 @@ void eSCGui::showMenu()
 		bufferingBox->hide();
 		
 		hide();
-		resize(eSize(550, 350));
+		cmove(ePoint(90, 110)); 
 		status->loadDeco();
 		show();
 		
@@ -507,18 +297,30 @@ void eSCGui::timerHandler()
 {
 	eDebug("[MOVIEPLAYER PLUGIN] timerHandler: status = %d", eMoviePlayer::getInstance()->status.STAT);
 	
-	if (eMoviePlayer::getInstance()->status.STAT == eMoviePlayer::STOPPED)
+	switch (eMoviePlayer::getInstance()->status.STAT)
 	{
-		showMenu();
-	}
-	else
-	{
-		if (!eMoviePlayer::getInstance()->status.BUFFERFILLED)
-			bufferingBox->show();
-		else
-			bufferingBox->hide();
+		case eMoviePlayer::STREAMERROR:
+		{
+			eMessageBox msg(_("A streaming error occurred.\nPlease make sure that VLC is started on the PC and that it can play the file you selected."), _("Error"), eMessageBox::btOK|eMessageBox::iconError); 
+			msg.show(); 
+			msg.exec(); 
+			msg.hide();
+		}
+		case eMoviePlayer::STOPPED:
+		{	
+			showMenu();
+			break;
+		}
+		default:
+		{
+			if (!eMoviePlayer::getInstance()->status.BUFFERFILLED)
+				bufferingBox->show();
+			else
+				bufferingBox->hide();
 
-		timer->start(1000, true);
+			timer->start(1000, true);
+			break;
+		}
 	}
 }
 
@@ -527,24 +329,17 @@ void eSCGui::playerStart(int val)
 	if (menu)
 	{
 		hide();
-		resize(eSize(0, 0));
+		cmove(ePoint(90, 800)); 
 		show();
 		menu = false;
 	}
 
 	eDebug("\n[VLC] play %d \"%s\"", val, playList[val].Fullname.c_str());
 	if (eMoviePlayer::getInstance()->status.STAT != eMoviePlayer::STOPPED)
-	{
-		eMoviePlayer::getInstance()->control("stop", "");
-		sleep(2);
-	}
-	VLCsend::getInstance()->send("/?control=stop");
-	VLCsend::getInstance()->send("/?control=empty");
-	VLCsend::getInstance()->send("/?control=add&mrl=" + playList[val].Fullname);
-	VLCsend::getInstance()->send("/?sout=" + parseSout(val));
-	VLCsend::getInstance()->send("/?control=play&item=0");
-	eMoviePlayer::getInstance()->control("start", playList[val].Fullname.c_str());
-	timer->start(3000, true);
+		eMoviePlayer::getInstance()->control("terminate", "");
+	
+	eMoviePlayer::getInstance()->control("start2", playList[val].Fullname.c_str());
+	timer->start(2000, true);
 }
 
 int eSCGui::eventHandler(const eWidgetEvent &e)

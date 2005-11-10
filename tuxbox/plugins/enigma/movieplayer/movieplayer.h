@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.4 2005/11/06 21:29:24 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.5 2005/11/10 21:55:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -26,6 +26,7 @@
 #include <lib/gui/ewindow.h>
 #include <lib/system/econfig.h>
 #include <lib/movieplayer/movieplayer.h>
+#include <lib/movieplayer/mpconfig.h>
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
@@ -33,33 +34,24 @@
 class PLAYLIST
 {
 public:
-	int Filetype, Extitem;
+	int Filetype;
 	eString Filename, Fullname;
 };
 
-class EXTLIST
-{
-public:
-	int ITEM;
-	eString NAME, EXT, VRATE, ARATE, VCODEC, VSIZE;
-	bool VTRANS, ATRANS, AC3;
-};
-
 typedef std::vector<PLAYLIST> PlayList;
-typedef std::vector<EXTLIST> ExtList;
 
 class eSCGui: public eWindow
 {
-	enum{GOUP, DIRS, FILES};
-	enum{DATA, VCD, SVCD, DVD};
+	enum {GOUP, DIRS, FILES};
+	enum {DATA, VCD, SVCD, DVD};
 
-	ExtList extList;
 	PlayList playList;
+	
+	struct serverConfig server;
 
 	eString startdir, pathfull, cddrive;
-	eString str_mpeg1, str_mpeg2, str_audio;
-	int a_pit, v_pit, a_type;
-	int MODE, next_val;
+	
+	int MODE;
 	bool menu;
 	eListBox<eListBoxEntryText> *list;
 	eTimer *timer;
@@ -69,13 +61,11 @@ class eSCGui: public eWindow
 	void loadList();
 	void viewList();
 	void setStatus(int val);
-	bool loadXML(eString file);
 
 	void listSelected(eListBoxEntryText *item);
 	void listSelChanged(eListBoxEntryText *item);
 	int eventHandler(const eWidgetEvent &);
 
-	eString parseSout(int val);
 	void timerHandler();
 	void playerStart(int val);
 	void showMenu();
