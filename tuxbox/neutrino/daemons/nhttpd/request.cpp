@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.47 2005/09/29 16:53:39 yjogol Exp $
+	$Id: request.cpp,v 1.48 2005/11/10 19:38:49 yjogol Exp $
 
 	License: GPL
 
@@ -266,6 +266,7 @@ bool CWebserverRequest::ParseHeader(std::string header)					// parse the header 
 }
 
 //-------------------------------------------------------------------------
+// not used now 
 bool CWebserverRequest::ParseBoundaries(std::string bounds)			// parse boundaries of post method
 {
 	aprintf("formdata: '%s'\n",bounds.c_str());
@@ -323,21 +324,23 @@ bool CWebserverRequest::ParseRequest()
 			std::string header = rawbuffer.substr(ende+1,headerende - ende - 2);
 			ParseHeader(header);
 			Host = HeaderList["Host"];
-			if(Method == M_POST) // TODO: Und testen ob content = formdata
+			if(Method == M_POST)
 			{
 				std::string t = "multipart/form-data; boundary=";
 				if(HeaderList["Content-Type"].compare(0,t.length(),t) == 0)
 				{
-//					SocketWriteLn("Sorry, momentan broken\n");
 					Boundary = "--" + HeaderList["Content-Type"].substr(t.length(),HeaderList["Content-Type"].length() - t.length());
 					aprintf("Boundary: '%s'\n",Boundary.c_str());
-//					if((headerende + 3) < rawbuffer_len)
-//						ParseBoundaries(rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3)));
-					HandleUpload();
+					if(HeaderList["Content-Length"] != "")
+						HandleUpload();
+					else
+					{
+						aprintf("Content-Length not in HeaderList\n");
+						return false;
+					}
 				}
 				else if(HeaderList["Content-Type"].compare("application/x-www-form-urlencoded") == 0)
 				{
-//					dprintf("Form Daten in Parameter String\n");
 					if((headerende + 3) < rawbuffer_len)
 					{
 						std::string params = rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3));
@@ -346,11 +349,8 @@ bool CWebserverRequest::ParseRequest()
 						ParseParams(params);
 					}
 				}
-
 				dprintf("Method Post !\n");
 			}
-
-
 			return true;
 		}
 		else {
@@ -370,110 +370,134 @@ bool CWebserverRequest::ParseRequest()
 }
 
 //-------------------------------------------------------------------------
+// determine already send data (Mozilla Engines etc.)
+int CWebserverRequest::UploadAlreadyRead(char *UploadBuffer)
+{
+	std::string already_send;
+	int ypos = 0;
+	if((ypos = rawbuffer.find("Content-Length")) > 0)
+		already_send = rawbuffer.substr(ypos+1,rawbuffer.length() - (ypos+1)); // snip
+	if((ypos = already_send.find("\r\n\r\n")) > 0) // Multipart File - Start offset
+		already_send = already_send.substr(ypos+4,already_send.length() - (ypos+4)); // snip
+	memcpy(UploadBuffer, already_send.c_str(), already_send.length()); //put to file read-buffer
+	return already_send.length();
+}
+
+//-------------------------------------------------------------------------
+// read data from socket - non-blocking read
+#define READ_RETRIES 500
+int CWebserverRequest::UploadReadFromSocket(char *UploadBuffer, long contentsize, long readbytes)
+{
+	long t, y=0;
+	fcntl(Socket, F_SETFL, fcntl(Socket,F_GETFL)|O_NONBLOCK); //Non blocking
+	while(readbytes < contentsize)
+	{
+		if(y > READ_RETRIES) // non-blocking retries
+		{
+			aprintf("Upload: Upload canceled. Retry limit exceed\n");
+			break;
+		}
+		t = read(Socket,&UploadBuffer[readbytes],contentsize-readbytes);
+		aprintf("Upload: Bytes Read-Total:%ld Rest:%ld Read-Now:%d\n",readbytes, contentsize-readbytes, t);
+		if(t!=-1)//EAGAIN =-1 = nothing read but no error
+		{
+			if(t <= 0)
+			{
+				aprintf("Upload: Read error number:%d\n",t);
+				break;
+			}
+			readbytes += t;
+			y=0; 
+		}
+		else
+			y++;
+	}
+	return readbytes;
+}
+
+//-------------------------------------------------------------------------
+// Extract Upload file from read content
+char* CWebserverRequest::UploadExtractUploadFile(char *UploadBuffer, long contentsize, long& UploadFileLength)
+{
+	char *start = NULL, *end = NULL, *ptr;
+	long size = 0;
+
+	std::string tmp = "Content-Type";
+	if((start = (char *)memmem(UploadBuffer, contentsize, tmp.c_str(), tmp.length())) != NULL) // find file section
+	{
+		size = contentsize - (long)(start - UploadBuffer);
+		tmp = "\r\n\r\n";
+		if((ptr = (char *)memmem(start, size, tmp.c_str(), tmp.length())) != NULL) // find file start
+		{
+			size = contentsize - (long)(start - ptr);
+			start = ptr;
+			start += tmp.length(); // skip "\r\n\r\n"
+			size -= tmp.length();
+			UploadFileLength = size; // if no Boundary anymore
+			if((end = (char *)memmem(start, size, Boundary.c_str(), Boundary.length() )) != NULL) // find file end
+			{
+				end -= 2; // snip "\r\n"
+				UploadFileLength = (long)(end - start);
+			}
+		}
+	}
+	return start;
+}
+
+//-------------------------------------------------------------------------
+// Upload File to #UPLOAD_TMP_FILE
+// IE send first Header in one part; next socket read sends multipart content
+// Mozilla engines send multipart content with header: some data in rawbuffer already
 
 bool CWebserverRequest::HandleUpload()	
 {
-	int t,y = 0;
+	SocketWrite("HTTP/1.1 100 Continue \r\n\r\n"); // ok, send more
 
-	SocketWrite("HTTP/1.1 100 Continue \r\n\r\n");		// Erstmal weitere Daten anfordern
-
-	if(HeaderList["Content-Length"] != "")
+	remove(UPLOAD_TMP_FILE); // free memory ... uploadfiles are in tmp
+	
+	// ----------- load multipart request to buffer
+	long contentsize = atol(HeaderList["Content-Length"].c_str());
+	aprintf("Upload: Contenlaenge :%ld\n",contentsize);
+	
+	char *UploadBuffer =(char *) malloc(contentsize);
+	if(!UploadBuffer)
 	{
-		remove(UPLOAD_TMP_FILE);
-		// Get Multipart Upload
-		//--------------------------------
-		aprintf("Contenlaenge gefunden\n");
-		long contentsize = atol(HeaderList["Content-Length"].c_str());
-		aprintf("Contenlaenge :%ld\n",contentsize);
-		char *buffer2 =(char *) malloc(contentsize);
-		if(!buffer2)
-		{
-			aprintf("Kein Speicher für upload\n");
-			return false;
-		}
-		long long gelesen = 0;
-		aprintf("Buffer ok Groesse:%ld\n",contentsize);
-		fcntl(Socket, F_SETFL, fcntl(Socket,F_GETFL)|O_NONBLOCK); //Non blocking
-		while(gelesen < contentsize)
-		{
-			if(y > 500)
-			{
-				aprintf("y read Abbruch\n");
-				break;
-			}
-			aprintf("vor %lld noch %lld",gelesen,contentsize-gelesen);
-			t = read(Socket,&buffer2[gelesen],contentsize-gelesen);//Test -1
-			aprintf("nach read t%d\n",t);
-			if(t!=-1)//EAGAIN =-1
-			{
-				if(t <= 0)
-				{
-					aprintf("nix mehr\n");
-					break;
-				}
-				gelesen += t;
-				y=0; 
-			}
-			else
-				y++;
-		}
-		aprintf("fertig\n");
-		if(gelesen == contentsize)
-		{
-			// Extract Upload File
-			//--------------------------------
-			std::string marker;
-			std::string buff;
-			buff = std::string(buffer2, gelesen);
-			free(buffer2);
-
-			int pos = 0;
-			if((pos = buff.find("\r\n")) > 0)	// find marker
-			{
-				marker = buff.substr(0,pos-1);
-				buff = buff.substr(pos+1,buff.length() - (pos+1)); // snip
-			}		
-			if((pos = buff.find("Content-Type")) > 0) // Multipart File
-			{
-				buff = buff.substr(pos+1,buff.length() - (pos+1)); // snip
-			}		
-			if((pos = buff.find("\r\n\r\n")) > 0) // Multipart File - Start offset
-			{
-				buff = buff.substr(pos+4,buff.length() - (pos+4)); // snip
-			}		
-			if((pos = buff.find(marker)) > 0)// find marker after file
-			{
-				buff= buff.substr(0,pos-2); // snip "\r\n"+marker
-			}		
-			aprintf("write");
-			
-			// Write Upload Extract file
-			//--------------------------------
-			FILE *out = fopen(UPLOAD_TMP_FILE,"w"); // save tmp & mem - open here => File=0 tmp=Socket-space
-			if(out != NULL)
-			{
-				fwrite(buff.c_str(),buff.length(),1,out);
-				fclose(out);
-			}
-			else
-				aprintf("nicht geschrieben\n");
-		}
-		if(gelesen == contentsize)
-		{
-			aprintf("Upload komplett gelesen: %ld bytes\n",contentsize);
-			return true;
-		}
-		else
-		{
-			aprintf("Upload konnte nicht komplett gelesen werden  %ld bytes\n",contentsize);
-			return false;
-		}
-	}
-	else
-	{
-		aprintf("Content-Length ist nicht in der HeaderListe\n");
+		aprintf("Upload: No memory for upload\n");
 		return false;
 	}
+	else
+		aprintf("Upload: Allocate memory for upload OK - Size:%ld\n",contentsize);
+	
+	long readbytes = UploadAlreadyRead(UploadBuffer); // look for alread gotten data
+	aprintf("Upload: already read bytes :%ld\n", readbytes);
+	
+	readbytes = UploadReadFromSocket(UploadBuffer, contentsize, readbytes); // read rest of data
+	aprintf("Upload: ReadFromSocket readbytes :%ld\n", readbytes);
+
+	if(readbytes == contentsize)
+	{
+		char *UploadFileBuffer=NULL;
+		long UploadFileLength=0;
+		
+		// ----------- extract file from buffer
+		UploadFileBuffer = UploadExtractUploadFile(UploadBuffer, contentsize, UploadFileLength);
+		aprintf("Upload: ExtractUploadfFile Length:%ld\n", UploadFileLength);
+		
+		// ----------- write file
+		FILE *out = fopen(UPLOAD_TMP_FILE,"w");
+		if(out != NULL)
+		{
+			fwrite(UploadFileBuffer,UploadFileLength,1,out);
+			fclose(out);
+			aprintf("Upload: Upload File written\n");
+		}
+		else
+			aprintf("Upload: could not write uppload file\n");
+	}
+	else
+		aprintf("Upload: could not read full content. Read Bytes:%ld bytes\n",readbytes);
+	free(UploadBuffer);
+	return (readbytes == contentsize);
 }
 //-------------------------------------------------------------------------
 
@@ -606,38 +630,26 @@ void CWebserverRequest::RewriteURL()
 
 bool CWebserverRequest::SendResponse()
 {
-	RewriteURL();		// Erst mal die URL umschreiben
+	RewriteURL();
 
-	if( Client_Addr.find(IADDR_LOCAL)>0 ) // != local
+	if( Client_Addr.find(IADDR_LOCAL)>0 ) 						// dont check local calls
 	{
-		if(!Authenticate()) // Jeder Aufruf muss geprueft werden
+		if(!Authenticate()) 							// check every call for authtication
         		return false;
 	}
 	
-	if( (Path.compare("/control/") == 0) || (Path.compare("/cgi-bin/") == 0) )
-	{	// api for external programs
+	if( (Path.compare("/control/") == 0) || (Path.compare("/cgi-bin/") == 0) )	// api for external programs
 		return Parent->WebDbox->ControlAPI->Execute(this);
-	}
-	else if(Path.compare("/bouquetedit/") == 0)	// bouquetedit api
-	{
+	else if(Path.compare("/bouquetedit/") == 0)					// bouquetedit api
 		return Parent->WebDbox->BouqueteditAPI->Execute(this);
-	}
-	else if(Path.compare("/fb/") == 0)	// webbrowser api
-	{
+	else if(Path.compare("/fb/") == 0)						// webbrowser api
 		return Parent->WebDbox->WebAPI->Execute(this);
-	}
-	else if(Path.compare("/y/") == 0)			// y api
-	{
+	else if(Path.compare("/y/") == 0)						// y api
 		return Parent->WebDbox->yAPI->Execute(this);
-	}
-	else if(FileExt.compare("yhtm") == 0)			// y pasrsing
-	{
+	else if(FileExt.compare("yhtm") == 0)						// y pasrsing
 		return Parent->WebDbox->yAPI->ParseAndSendFile(this);
-	}
-	else
-	{														//normal file
+	else 										//normal file
 		return SendFile(Path,Filename);
-	}
 }
 
 //-------------------------------------------------------------------------
@@ -717,7 +729,7 @@ std::string CWebserverRequest::GetContentType(std::string ext)
 {
 	std::string ctype;
 		// Anhand der Dateiendung den Content bestimmen
-	if(  (ext.compare("html") == 0) || (ext.compare("htm") == 0) )
+	if(  (ext.compare("html") == 0) || (ext.compare("htm") == 0) || (ext.compare("yhtm") == 0))
 		ctype = "text/html";
 	else if(ext.compare("gif") == 0)
 		ctype = "image/gif";
