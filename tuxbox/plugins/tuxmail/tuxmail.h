@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.32  2005/11/11 18:40:34  robspr1
+ * - /tmp/tuxmail.new holds number of new files /  reread tuxmail.conf after writing
+ *
  * Revision 1.31  2005/11/04 16:00:06  robspr1
  * - adding IMAP support
  *
@@ -145,6 +148,7 @@
 #define SPMFILE "spamlist"
 #define POP3FILE "/tmp/tuxmail.pop3"
 #define SMTPFILE "/tmp/tuxmail.smtp"
+#define NOTIFILE "/tmp/tuxmail.new"
 #define TEXTFILE "/var/tuxbox/config/tuxmail/mailtext"
 #define ADDRFILE "/var/tuxbox/config/tuxmail/tuxmail.addr"
 #define T9FILE   "/var/tuxbox/config/tuxmail/tuxmail.t9"
@@ -485,7 +489,7 @@ int fb, rc, kb, lcd;
 
 // daemon commands
 
-enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST, GET_VERSION, GET_MAIL, SEND_MAIL};
+enum {GET_STATUS, SET_STATUS, RELOAD_SPAMLIST, GET_VERSION, GET_MAIL, SEND_MAIL, RELOAD_CONFIG};
 
 // framebuffer stuff
 

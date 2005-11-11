@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.40  2005/11/11 18:40:15  robspr1
+ * - /tmp/tuxmail.new holds number of new files /  reread tuxmail.conf after writing
+ *
  * Revision 1.39  2005/11/04 15:59:32  robspr1
  * - adding IMAP support
  *
@@ -472,6 +475,12 @@ int ControlDaemon(int command, int account, int mailindex)
 
 				break;
 
+			case RELOAD_CONFIG:
+
+				send(fd_sock, "R", 1, 0);
+
+				break;
+
 			case GET_VERSION:
 
 				send(fd_sock, "V", 1, 0);
@@ -781,300 +790,8 @@ int GetRCCode()
 	while( rccode == 0xFFFF);
 	return rccode;
 }
-
-/*
-int GetRCCode()
-{
-	static unsigned short LastKey = -1;
-
-	if(sim_key)
-	{
-		sim_key = 0;
-
-		return rccode;
-	}
-
-	read(rc, &rccode, sizeof(rccode));
-
-	if(rccode != LastKey)
-	{
-		LastKey = rccode;
-
-		// translation required?
-
-			if((rccode & 0xFF00) == 0x5C00)
-			{
-				switch(rccode)
-				{
-					case RC1_UP:
-
-						rccode = RC_UP;
-
-						break;
-
-					case RC1_DOWN:
-
-						rccode = RC_DOWN;
-
-						break;
-
-					case RC1_LEFT:
-
-						rccode = RC_LEFT;
-
-						break;
-
-					case RC1_RIGHT:
-
-						rccode = RC_RIGHT;
-
-						break;
-
-					case RC1_OK:
-
-						rccode = RC_OK;
-
-						break;
-
-					case RC1_0:
-
-						rccode = RC_0;
-
-						break;
-
-					case RC1_1:
-
-						rccode = RC_1;
-
-						break;
-
-					case RC1_2:
-
-						rccode = RC_2;
-
-						break;
-
-					case RC1_3:
-
-						rccode = RC_3;
-
-						break;
-
-					case RC1_4:
-
-						rccode = RC_4;
-
-						break;
-
-					case RC1_5:
-
-						rccode = RC_5;
-
-						break;
-
-					case RC1_6:
-
-						rccode = RC_6;
-
-						break;
-
-					case RC1_7:
-
-						rccode = RC_7;
-
-						break;
-
-					case RC1_8:
-
-						rccode = RC_8;
-
-						break;
-
-					case RC1_9:
-
-						rccode = RC_9;
-
-						break;
-
-					case RC1_RED:
-
-						rccode = RC_RED;
-
-						break;
-
-					case RC1_GREEN:
-
-						rccode = RC_GREEN;
-
-						break;
-
-					case RC1_YELLOW:
-
-						rccode = RC_YELLOW;
-
-						break;
-
-					case RC1_BLUE:
-
-						rccode = RC_BLUE;
-
-						break;
-
-					case RC1_PLUS:
-
-						rccode = RC_PLUS;
-
-						break;
-
-					case RC1_MINUS:
-
-						rccode = RC_MINUS;
-
-						break;
-
-					case RC1_MUTE:
-
-						rccode = RC_MUTE;
-
-						break;
-
-					case RC1_HELP:
-
-						rccode = RC_HELP;
-
-						break;
-
-					case RC1_DBOX:
-
-						rccode = RC_DBOX;
-
-						break;
-
-					case RC1_HOME:
-
-						rccode = RC_HOME;
-
-						break;
-
-					case RC1_STANDBY:
-
-						rccode = RC_STANDBY;
-				}
-			}
-			else
-			{
-				rccode &= 0x003F;
-			}
-	}
-	else
-	{
-		rccode = -1;
-	}
-
-	return rccode;
-}
-*/
 #endif
 
-/******************************************************************************
- * GetKBCode
- ******************************************************************************/
-/*
-unsigned char GetKBCode()
-{
-	int available;
-	unsigned char keycode[8];
-
-	kbcode = 0;
-
-	if(kb != -1)
-	{
-		ioctl(kb, FIONREAD, &available);
-
-		if(available)
-		{
-			if(available>8) available=8;
-			read(kb, &keycode, available);
-			
-			switch(available)
-			{
-				case 1:
-
-					if(keycode[0] == 0x0A)
-					{
-						kbcode = KBC_RETURN;
-					}
-					else if(keycode[0] == 0x7F)
-					{
-						kbcode = KBC_BACKSPACE;
-					}
-					else
-					{
-						kbcode = keycode[0];
-					}
-
-					break;
-
-				case 3:
-
-					if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x41)
-					{
-						kbcode = KBC_UP;
-					}
-					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x42)
-					{
-						kbcode = KBC_DOWN;
-					}
-					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x43)
-					{
-						kbcode = KBC_RIGHT;
-					}
-					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x44)
-					{
-						kbcode = KBC_LEFT;
-					}
-
-					break;
-
-				case 4:
-
-					if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x31 && keycode[3] == 0x7E)
-					{
-						kbcode = KBC_POS1;
-					}
-					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x32 && keycode[3] == 0x7E)
-					{
-						kbcode = KBC_INS;
-					}
-					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x33 && keycode[3] == 0x7E)
-					{
-						kbcode = KBC_DEL;
-					}
-					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x34 && keycode[3] == 0x7E)
-					{
-						kbcode = KBC_END;
-					}
-					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x35 && keycode[3] == 0x7E)
-					{
-						kbcode = KBC_PAGEUP;
-					}
-					else if(keycode[0] == 0x1B && keycode[1] == 0x5B && keycode[2] == 0x36 && keycode[3] == 0x7E)
-					{
-						kbcode = KBC_PAGEDOWN;
-					}
-
-					break;
-			}
-		}
-		else
-		{
-			usleep(1000000/100);
-		}
-	}
-
-	return kbcode;
-}
-*/
 /******************************************************************************
  * MyFaceRequester
  ******************************************************************************/
@@ -3141,6 +2858,7 @@ void EditMailFile(char* filename, int account, int mailindex )
 		{
 			// save config
 			WriteConf();
+			ControlDaemon(RELOAD_CONFIG,0,0);
 		}
 	}
 	else
@@ -3889,7 +3607,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.39 $";
+	char cvs_revision[] = "$Revision: 1.40 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -4065,6 +3783,10 @@ void plugin_exec(PluginParam *par)
 		startx = sx + (((ex-sx) - 620)/2);
 		starty = sy + (((ey-sy) - 505)/2);
 
+	// remove notify file
+	
+		unlink(NOTIFILE);
+	
 	// get daemon status
 
 		if(!ControlDaemon(GET_STATUS,0,0))
