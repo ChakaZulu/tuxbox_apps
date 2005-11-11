@@ -18,6 +18,7 @@ mkdir /tmp/image
 # install cramfs
 mount -t cramfs $2 /tmp/image -o loop
 cp -rd /tmp/image/* $1
+cp -a /tmp/image/.version $1
 umount /tmp/image
 rm $2
 rm $1/root/platform/kernel/os
