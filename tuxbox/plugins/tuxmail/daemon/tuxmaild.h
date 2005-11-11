@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.26  2005/11/11 18:42:16  robspr1
+ * - /tmp/tuxmail.new holds number of new files /  restrict reset flags for unseen mails in IMAP
+ *
  * Revision 1.25  2005/11/05 17:29:31  robspr1
  * - IMAP bugfix delete mails and restore Seen flag
  *
@@ -129,6 +132,7 @@
 #define LCKFILE "/tmp/lcd.locked"
 #define POP3FILE "/tmp/tuxmail.pop3"
 #define SMTPFILE "/tmp/tuxmail.smtp"
+#define NOTIFILE "/tmp/tuxmail.new"
 
 #define bool char
 #define true 1
