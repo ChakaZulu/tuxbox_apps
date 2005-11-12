@@ -845,24 +845,36 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 {
 	prev_id= 0;
 	next_id= 0;
+	unsigned int i;
 
-	for ( unsigned int i= 0; i< evtlist.size(); i++ )
+	for ( i= 0; i< evtlist.size(); i++ )
 	{
 		//printf("%d %llx/%llx - %x %x\n", i, evtlist[i].eventID, id, evtlist[i].startTime, *startzeit);
-    	if ( ( evtlist[i].eventID == id ) && ( evtlist[i].startTime == *startzeit ) )
-    	{
-        	if ( i > 0 )
+		if ( ( evtlist[i].eventID == id ) && ( evtlist[i].startTime == *startzeit ) )
         	{
-        		prev_id= evtlist[i- 1].eventID;
-        		prev_zeit= evtlist[i- 1].startTime;
-        	}
+			if ( i > 0 )
+			{
+				prev_id= evtlist[i- 1].eventID;
+				prev_zeit= evtlist[i- 1].startTime;
+			}
  			if ( i < ( evtlist.size()- 1 ) )
-        	{
-        		next_id= evtlist[i+ 1].eventID;
-        		next_zeit= evtlist[i+ 1].startTime;
-        	}
+			{
+				next_id= evtlist[i+ 1].eventID;
+				next_zeit= evtlist[i+ 1].startTime;
+			}
 			break;
+		}
     	}
+	/* Houdini: dirty RTL double event workaround, if prev/next event has same starttime as actual event skip it */
+	if ((prev_zeit == *startzeit) && ((i-1) > 0))
+	{
+		prev_id   = evtlist[i- 2].eventID;
+		prev_zeit = evtlist[i- 2].startTime;
+	}
+	if ((next_zeit == *startzeit) && ((i+1) < (evtlist.size()- 1)))
+	{
+		next_id   = evtlist[i+ 2].eventID;
+		next_zeit = evtlist[i+ 2].startTime;
 	}
 
 }

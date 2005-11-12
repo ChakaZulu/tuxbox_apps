@@ -169,6 +169,15 @@ void EventList::readEvents(const t_channel_id channel_id)
 		}
 		// Houdini added for Private Premiere EPG, start sorted by start date/time
 		sort(evtlist.begin(),evtlist.end(),sortByDateTime);
+		// Houdini: dirty workaround for RTL double events, remove them
+		CChannelEventList::iterator e2;
+		for ( e=evtlist.begin(); e!=evtlist.end(); ++e )
+		{
+			e2 = e+1;
+			if ( e2!=evtlist.end() && (e->startTime == e2->startTime)) {
+				evtlist.erase(e2);
+			}
+		}
 	}
 	
 	current_event = (unsigned int)-1;
