@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_utils.cpp,v 1.22 2005/10/12 07:39:42 digi_casi Exp $
+ * $Id: enigma_dyn_utils.cpp,v 1.23 2005/11/12 19:44:59 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -121,7 +121,7 @@ eString readFile(eString filename)
 	return result;
 }
 
-eString button(int width, eString buttonText, eString buttonColor, eString buttonRef, eString color)
+eString button(int width, eString buttonText, eString buttonColor, eString buttonRef, eString color, bool xml)
 {
 	eString ref1, ref2;
 
@@ -149,7 +149,10 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 		}
 		if (color)
 			result << "color: " << color << "; ";
-		result << "\" value=\"" << buttonText << "\" onclick=\"" << ref1 << buttonRef << ref2 << "\">";
+			
+		eString ending = (xml) ? " />" : ">";
+		
+		result << "\" value=\"" << buttonText << "\" onclick=\"" << ref1 << buttonRef << ref2 << "\"" << ending;
 	}
 	else
 		result << "<a href=\"" << buttonRef << "\"><span class=\"button\">" << buttonText << "</span></a>&nbsp;";

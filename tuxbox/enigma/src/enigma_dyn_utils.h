@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_utils.h,v 1.19 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn_utils.h,v 1.20 2005/11/12 19:44:59 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -43,7 +43,7 @@
 
 eString getAttribute(eString filename, eString attribute);
 eString readFile(eString filename);
-eString button(int width, eString buttonText, eString buttonColor, eString buttonRef, eString color="");
+eString button(int width, eString buttonText, eString buttonColor, eString buttonRef, eString color="", bool xml=false);
 eString getTitle(eString title);
 int getHex(int c);
 eString httpUnescape(const eString &string);
