@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.72 2005/11/08 16:31:27 happydude Exp $
+# $Id: de.po,v 1.73 2005/11/12 20:57:10 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -4133,63 +4133,63 @@ msgstr "MHW EPG aktivieren"
 msgid "Mediahighway EPG, activate swap space when using with multiple operators"
 msgstr "Mediahighway EPG einlesen, bei mehreren Anbietern Swap Partition aktivieren"
 
-#: src/setup_extra.cpp:143
+#: src/setup_extra.cpp:148
 msgid "Disable CoreFiles"
 msgstr "CoreFiles abschalten"
 
-#: src/setup_extra.cpp:144
+#: src/setup_extra.cpp:148
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "Keine 'Corefiles' nach einem Enigma Absturz erstellen"
 
-#: src/setup_extra.cpp:151
+#: src/setup_extra.cpp:155
 msgid "Disable HDD mount"
 msgstr "HDD mount deaktivieren"
 
-#: src/setup_extra.cpp:151
+#: src/setup_extra.cpp:155
 msgid "don't mount the HDD via 'rcS'"
 msgstr "keine HDD via 'rcS' laden"
 
-#: src/setup_extra.cpp:156
+#: src/setup_extra.cpp:164
 msgid "Show Boot-Info"
 msgstr "Boot-Informationen anzeigen"
 
-#: src/setup_extra.cpp:156
+#: src/setup_extra.cpp:164
 msgid "Show Boot-Infos (IP, etc.)"
 msgstr "Boot-Informationen wie Imagedatum, IP, usw anzeigen"
 
-#: src/setup_extra.cpp:157
+#: src/setup_extra.cpp:169
 msgid "Disable HW_Sections"
 msgstr "HW_Sections abschalten"
 
-#: src/setup_extra.cpp:157
+#: src/setup_extra.cpp:169
 msgid "don't use hardware section filtering"
 msgstr "Keine 'Hardware Section' Filterung nutzen"
 
-#: src/setup_extra.cpp:158
+#: src/setup_extra.cpp:174
 msgid "Disable Watchdog"
 msgstr "Watchdog abschalten"
 
-#: src/setup_extra.cpp:158
+#: src/setup_extra.cpp:174
 msgid "don't use the Watchdog"
 msgstr "Keinen Watchdog nutzen"
 
-#: src/setup_extra.cpp:160
+#: src/setup_extra.cpp:181
 msgid "Disable ENX-Watchdog"
 msgstr "ENX-Watchdog abschalten"
 
-#: src/setup_extra.cpp:160
+#: src/setup_extra.cpp:181
 msgid "don't use the ENX-Watchdog"
 msgstr "Keinen ENX-Watchdog nutzen"
 
-#: src/setup_extra.cpp:161
+#: src/setup_extra.cpp:187
 msgid "Enable SPTS-Mode"
 msgstr "SPTS-Modus aktivieren"
 
-#: src/setup_extra.cpp:161
+#: src/setup_extra.cpp:187
 msgid "use SPTS-Mode (enables TS-recording)"
 msgstr "SPTS-Modus nutzen (aktiviert TS-recording)"
 
-#: src/setup_extra.cpp:294
+#: src/setup_extra.cpp:319
 msgid ""
 "When you do a factory reset, you will lost ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4204,7 +4204,7 @@ msgstr ""
 "\n"
 "Wirklich den Vorgang fortsetzen?"
 
-#: src/setup_extra.cpp:316
+#: src/setup_extra.cpp:324
 msgid "Factory reset..."
 msgstr "Werkseinstellungen..."
 
