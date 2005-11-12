@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.51 2005/11/08 16:31:26 happydude Exp $
+ * $Id: setup_extra.cpp,v 1.52 2005/11/12 08:27:32 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -131,15 +131,13 @@ void eExpertSetup::init_eExpertSetup()
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Enable Zapping History"), "/elitedvb/extra/extzapping", _("don't care about actual mode when zapping in history list"));	
 	if ( eSystemInfo::getInstance()->getHwType() < eSystemInfo::DM5600 )
 		new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable Standby"), "/extras/fastshutdown", _("Box goes directly into Deep-Standby"));
-#ifdef ENABLE_MHW_EPG
-	int mhwepg=1;
-	if ( eConfig::getInstance()->getKey("/extras/mhwepg", mhwepg) )
-		eConfig::getInstance()->setKey("/extras/mhwepg", mhwepg);
-	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Enable MHW EPG"), "/extras/mhwepg", _("Mediahighway EPG, activate swap space when using with multiple operators"));
-#endif
 #ifdef HAVE_DREAMBOX_HARDWARE
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
+		int corefilesDisable = 0;
+		if (access("/var/etc/.no_corefiles", R_OK) == 0)
+			corefilesDisable = 1;
+		eConfig::getInstance()->setKey("/extras/corefiles_disable", corefilesDisable);
 		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable CoreFiles"), "/extras/corefiles_disable", _("don't create 'Corefiles' after an Enigma crash")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_corefiles");
 	}
@@ -153,11 +151,33 @@ void eExpertSetup::init_eExpertSetup()
 #endif
 #ifndef HAVE_DREAMBOX_HARDWARE
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	int bootInfo = 0;
+	if (access("/var/etc/.boot_info", R_OK) == 0)
+		bootInfo = 1;
+	eConfig::getInstance()->setKey("/extras/bootinfo", bootInfo);
 	CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Show Boot-Info"), "/extras/bootinfo", _("Show Boot-Infos (IP, etc.)")))->selected, eExpertSetup::fileToggle,"/var/etc/.boot_info");
+	int hwSectionsDisable = 0;
+	if (access("/var/etc/.hw_sections", R_OK) == 0)
+		hwSectionsDisable = 1;
+	eConfig::getInstance()->setKey("/extras/hw_sections_disable", hwSectionsDisable);
 	CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable HW_Sections"), "/extras/hw_sections_disable", _("don't use hardware section filtering")))->selected, eExpertSetup::fileToggle,"/var/etc/.hw_sections");
+	int watchdogDisable = 0;
+	if (access("/var/etc/.no_watchdog", R_OK) == 0)
+		watchdogDisable = 1;
+	eConfig::getInstance()->setKey("/extras/watchdog_disable", watchdogDisable);
 	CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable Watchdog"), "/extras/watchdog_disable", _("don't use the Watchdog")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_watchdog");
 	if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::dbox2Nokia )
+	{
+		int enxWatchdogDisable = 0;
+		if (access("/var/etc/.no_enxwatchdog", R_OK) == 0)
+			enxWatchdogDisable = 1;
+		eConfig::getInstance()->setKey("/extras/enxwatchdog_disable", enxWatchdogDisable);
 		CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable ENX-Watchdog"), "/extras/enxwatchdog_disable", _("don't use the ENX-Watchdog")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_enxwatchdog");
+	}
+	int sptsMode = 0;
+	if (access("/var/etc/.spts_mode", R_OK) == 0)
+		sptsMode = 1;
+	eConfig::getInstance()->setKey("/extras/spts_mode", sptsMode);
 	CONNECT_2_1((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Enable SPTS-Mode"), "/extras/spts_mode", _("use SPTS-Mode (enables TS-recording)")))->selected, eExpertSetup::fileToggle,"/var/etc/.spts_mode");
 #endif
 	setHelpID(92);
