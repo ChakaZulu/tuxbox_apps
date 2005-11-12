@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.36  2005/11/12 17:44:06  robspr1
+ * - IMAP \Seen Flag bugfix (also clear \Seen Flag after reading mail-header)
+ *
  * Revision 1.35  2005/11/11 18:41:56  robspr1
  * - /tmp/tuxmail.new holds number of new files /  restrict reset flags for unseen mails in IMAP
  *
@@ -3498,6 +3501,19 @@ int CheckAccount(int account)
 						}
 						else
 						{
+							char seen;
+							if(!SendIMAPCommand(FLAGS, mailnumber, &seen))
+							{
+								free(known_uids);
+	
+								if(fd_status)
+								{
+									fclose(fd_status);
+								}
+	
+								return 0;
+							}
+
 							if(!SendIMAPCommand(FETCH, mailnumber, ""))
 							{
 								free(known_uids);
@@ -3509,6 +3525,22 @@ int CheckAccount(int account)
 	
 								return 0;
 							}
+							
+							if( seen == 'U' )
+							{
+								if(!SendIMAPCommand(UNSEEN, mailnumber, ""))
+								{
+									free(known_uids);
+		
+									if(fd_status)
+									{
+										fclose(fd_status);
+									}
+	
+									return 0;
+								}					
+							}
+							
 						}
 
 						if(use_spamfilter && spam_detected)
@@ -3628,6 +3660,19 @@ int CheckAccount(int account)
 							}
 							else
 							{
+								char seen;
+								if(!SendIMAPCommand(FLAGS, mailnumber, &seen))
+								{
+									free(known_uids);
+		
+									if(fd_status)
+									{
+										fclose(fd_status);
+									}
+		
+									return 0;
+								}
+
 								if(!SendIMAPCommand(FETCH, mailnumber, ""))
 								{
 									free(known_uids);
@@ -3639,6 +3684,22 @@ int CheckAccount(int account)
 	
 									return 0;
 								}
+
+								if( seen == 'U' )
+								{
+									if(!SendIMAPCommand(UNSEEN, mailnumber, ""))
+									{
+										free(known_uids);
+			
+										if(fd_status)
+										{
+											fclose(fd_status);
+										}
+		
+										return 0;
+									}					
+								}
+
 							}
 							if(use_spamfilter && spam_detected)
 							{
@@ -4072,6 +4133,15 @@ void NotifyUser(int mails)
 	char *http_cmd3 = "GET /control/message?nmsg=";
 	char *http_cmd4 = "GET /control/message?popup=";
 
+	// write notify-file
+		FILE* pipe;
+		pipe = fopen(NOTIFILE,"w");
+		if( pipe != NULL)
+		{
+			fprintf(pipe, "%d", mails);
+			fclose(pipe);
+		}
+
 	// lcd notify
 
 		if(lcd == 'Y')
@@ -4175,17 +4245,7 @@ void NotifyUser(int mails)
 			send(sock, http_cmd, strlen(http_cmd), 0);
 
 			close(sock);
-		}
-
-	// write notify-file
-	FILE* pipe;
-	pipe = fopen(NOTIFILE,"w");
-	if( pipe != NULL)
-	{
-		fprintf(pipe, "%d", mails);
-		fclose(pipe);
-	}
-		
+		}		
 }		
 
 /******************************************************************************
@@ -4253,7 +4313,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.35 $";
+	char cvs_revision[] = "$Revision: 1.36 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
