@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.37  2005/11/13 14:18:30  robspr1
+ * - don't clear audio-flag in cause of DSP error
+ *
  * Revision 1.36  2005/11/12 17:44:06  robspr1
  * - IMAP \Seen Flag bugfix (also clear \Seen Flag after reading mail-header)
  *
@@ -3968,7 +3971,10 @@ void PlaySound(unsigned char *file)
 		{
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "could not open DSP") : printf("TuxMailD <could not open DSP>\n");
 
-			audio = 'N';
+//			audio = 'N';
+// don't disable audio-notification, because DSP could also be locked from Audioplayer
+// and if we disable audio from now on, we would never have a audio-notification until
+// configuration is reread
 
 			return;
 		}
@@ -4313,7 +4319,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.36 $";
+	char cvs_revision[] = "$Revision: 1.37 $";
 	int param, nodelay = 0, account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -4535,6 +4541,10 @@ int main(int argc, char **argv)
 
 		    system("cp /var/tuxbox/config/tuxmail/tuxmail.[0-9] /tmp 2>/dev/null");
 		}
+
+	// remove any nitification file
+	
+		unlink(NOTIFILE);
 		
 	// check accounts
 
