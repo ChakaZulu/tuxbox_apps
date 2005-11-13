@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.73 2005/11/12 20:57:10 timekiller Exp $
+# $Id: de.po,v 1.74 2005/11/13 08:05:15 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -4122,7 +4122,7 @@ msgid "Disable Standby"
 msgstr "Standby deaktivieren"
 
 #: src/setup_extra.cpp:133
-msgid "Box goes direct into Deep-Standby"
+msgid "Box goes directly into Deep-Standby"
 msgstr "Box geht direkt in den Deep-Standby"
 
 #: src/setup_extra.cpp:138
