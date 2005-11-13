@@ -138,7 +138,7 @@
 						if (pos >= 0)
 						{
 							var fileName = channel.substr(pos + 3, channel.length - pos - 3);
-							fileName = unescape(fileName);
+							fileName = decode_utf8(unescape(fileName));
 							document.location = "/rootX/" + fileName;
 						}
 						else 
