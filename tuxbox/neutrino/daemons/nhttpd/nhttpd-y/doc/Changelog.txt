@@ -1,5 +1,14 @@
 Severity	id		Headline							Build
 
+3-Average	JG200000308	nhttpd: re-write file upload handling (solved: problems with pre-send data - mozilla engines)	R1.3.6
+5-Enhancement	JG200000144	Live: add Streaminfo button					R1.3.6
+5-Enhancement	JG200000145	yInstaller: upload a tar-file and execude included install.sh	R1.3.6
+5-Enhancement	JG200000287	WebIF: telnet like commandline					R1.3.6
+5-Enhancement	JG200000292	Live: channel-EPG-Panel autorefresh all 5min			R1.3.6
+5-Enhancement	JG200000297	Live: epg preview for selected channel				R1.3.6
+5-Enhancement	JG200000304	nhttpd: new func get_request_data				R1.3.6
+5-Enhancement	JG200000307	nhttpd: re-write file upload handling (saving memory)		R1.3.6
+
 4-Minor		JG200000266	Settings: WebServer JavaScript-Error for field port		R1.3.5
 4-Minor		JG200000269	_Y_Library.sh:config_set_value()  interpret backslash		R1.3.5
 4-Minor		JG200000232	Live:Sprache: DropDown ins TV Fenster				R1.3.5
