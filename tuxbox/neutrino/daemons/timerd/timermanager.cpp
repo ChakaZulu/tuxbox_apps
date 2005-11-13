@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.79 2005/11/13 13:39:31 chakazulu Exp $
+   $Id: timermanager.cpp,v 1.80 2005/11/13 19:04:28 mogway Exp $
 
 	License: GPL
 
@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <errno.h>
 
 #include <sstream>
 
