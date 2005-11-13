@@ -1,5 +1,5 @@
 /*
- * $Id: mpconfig.cpp,v 1.2 2005/11/10 21:54:50 digi_casi Exp $
+ * $Id: mpconfig.cpp,v 1.3 2005/11/13 19:12:55 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -127,7 +127,7 @@ bool eMPConfig::load()
 				a.videoRate = tmpvrate;
 				a.transcodeVideo = (tmpvtrans == "1");
 				a.videoCodec = tmpvcodec;
-				a.videoRate = tmpvsize;
+				a.videoRatio = tmpvsize;
 				a.audioRate = tmparate;
 				a.transcodeAudio = (tmpatrans == "1");
 				a.AC3 = (tmpac3 == "1");
@@ -161,8 +161,8 @@ void eMPConfig::save()
 {
 	if (FILE *f = fopen(CONFFILE1, "w"))
 	{
-		fprintf(f, "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>");
-		fprintf(f, "<?xml-stylesheet type=\"text/xsl\" href=\"/XSLMPSettings.xsl\"?>");
+		fprintf(f, "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>\n");
+		fprintf(f, "<?xml-stylesheet type=\"text/xsl\" href=\"/XSLMPSettings.xsl\"?>\n");
 		fprintf(f, "<vlc>\n");
 		fprintf(f, "   <server ip=\"%s\" webif-port=\"%s\" stream-port=\"%s\" user=\"%s\" pass=\"%s\" />\n", serverConf.serverIP.c_str(), serverConf.webifPort.c_str(), serverConf.streamingPort.c_str(), serverConf.vlcUser.c_str(), serverConf.vlcPass.c_str());
 		fprintf(f, "   <config startdir=\"%s\" cddrive=\"%s\" />\n", serverConf.startDir.c_str(), serverConf.CDDrive.c_str());
@@ -177,11 +177,13 @@ void eMPConfig::save()
 	}
 }
 
-struct videoTypeParms eMPConfig::getVideoParms(eString extension)
+struct videoTypeParms eMPConfig::getVideoParms(eString name, eString extension)
 {
 	struct videoTypeParms vparms;
 	
 	extension = extension.upper();
+	
+	eDebug("[MPCONFIG] name = %s, extension = %s", name.c_str(), extension.c_str());
 	
 	vparms.name = "default";
 	vparms.extension = extension;
@@ -195,7 +197,7 @@ struct videoTypeParms eMPConfig::getVideoParms(eString extension)
 	
 	for (unsigned int i = 0; i < videoParmList.size(); i++)
 	{
-		if (videoParmList[i].extension == extension)
+		if ((videoParmList[i].extension == extension) && (videoParmList[i].name == name))
 		{
 			vparms = videoParmList[i];
 			break;
@@ -212,5 +214,27 @@ struct serverConfig eMPConfig::getServerConfig()
 struct codecs eMPConfig::getAVCodecs()
 {
 	return avcodecs;
+}
+
+void eMPConfig::setVideoParms(struct videoTypeParms vparms)
+{
+	for (unsigned int i = 0; i < videoParmList.size(); i++)
+	{
+		if (videoParmList[i].extension == vparms.extension && videoParmList[i].name == vparms.name)
+		{
+			videoParmList[i] = vparms;
+			break;
+		}
+	}
+}
+
+void eMPConfig::setServerConfig(struct serverConfig server)
+{
+	serverConf = server;
+}
+
+void eMPConfig::setAVCodecs(struct codecs avCodecs)
+{
+	avcodecs = avCodecs;
 }
 #endif

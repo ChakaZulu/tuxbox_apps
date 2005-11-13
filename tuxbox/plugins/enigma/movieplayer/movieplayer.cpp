@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.6 2005/11/10 21:55:56 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.7 2005/11/13 19:13:52 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -471,16 +471,11 @@ static char *NAME[] =
 	"-----------------------------",
 	"Keys (if menu is not visible)",
 	"-----------------------------",
-	"red:",
-	_("Start skipping reverse"),
-	"green:",
-	_("Play/Resync"),
-	"yellow:",
-	_("Pause"),
-	"blue:",
-	_("Start skipping forward"),
-	"1 - 9:",
-	"Skip 1 - 9 minutes",
+	"red: Start skipping reverse",
+	"green: Play/Resync",
+	"yellow: Pause",
+	"blue: Start skipping forward",
+	"1-9: Skip 1-9 minutes",
 	" "
 };
 

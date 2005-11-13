@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.34 2005/11/10 21:54:50 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.35 2005/11/13 19:12:55 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -492,8 +492,15 @@ eString eMoviePlayer::sout(eString mrl)
 	unsigned int pos = mrl.find_last_of('.');
 	eString extension = mrl.right(mrl.length() - pos - 1);
 	
+	eString name = "File";
+	if (mrl.find("dvdsimple:") != eString::npos)
+		name = "DVD";
+	else
+	if (mrl.find("vcd:") != eString::npos)
+		name = "VCD";
+	
 	struct serverConfig server = mpconfig.getServerConfig();
-	struct videoTypeParms video = mpconfig.getVideoParms(extension);
+	struct videoTypeParms video = mpconfig.getVideoParms(name, extension);
 	
 	eDebug("[MOVIEPLAYER] determine ?sout for mrl: %s", mrl.c_str());
 	eDebug("[MOVIEPLAYER] transcoding audio: %d, video: %d", video.transcodeAudio, video.transcodeVideo);

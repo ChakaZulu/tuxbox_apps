@@ -1,5 +1,5 @@
 /*
- * $Id: mpconfig.h,v 1.1 2005/11/09 08:47:34 digi_casi Exp $
+ * $Id: mpconfig.h,v 1.2 2005/11/13 19:12:36 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -25,7 +25,7 @@
 #include <vector>
 #include <lib/base/estring.h>
 
-#define CONFFILE0 "/etc/movieplayer.xml"
+#define CONFFILE0 "/share/tuxbox/enigma/templates/movieplayer.xml"
 #define CONFFILE1 "/var/tuxbox/config/movieplayer.xml"
 
 struct serverConfig
@@ -69,8 +69,11 @@ public:
 	~eMPConfig();
 	bool load();
 	void save();
-	struct videoTypeParms getVideoParms(eString extension);
+	struct videoTypeParms getVideoParms(eString name, eString extension);
 	struct serverConfig getServerConfig();
 	struct codecs getAVCodecs();
+	void setVideoParms(struct videoTypeParms videoParms);
+	void setServerConfig(struct serverConfig serverConf);
+	void setAVCodecs(struct codecs avCodecs);
 };
 #endif
