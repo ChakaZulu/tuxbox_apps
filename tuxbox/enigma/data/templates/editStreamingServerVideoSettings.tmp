@@ -49,7 +49,7 @@
 					<td>Video Ratio:</td>
 					<td>
 						<select name="videoRatio" size="1">
-							#VIDEORATIONS#
+							#VIDEORATIOS#
 						</select>
 					</td>
 				</tr>

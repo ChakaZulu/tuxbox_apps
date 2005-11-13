@@ -1,5 +1,5 @@
 EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tmp \
-	mepg.tmp audioSelection.tmp editTimerEvent.tmp sendMessage.tmp \
+	mepg.tmp audioSelection.tmp editTimerEvent.tmp sendMessage.tmp movieplayer.xml \
 	configSwapFile.tmp msgWindow.tmp zap.tmp movies.tmp index2.tmp rotorSat.tmp \
 	index_small.tmp index_big.tmp eit_small.tmp addTimerEvent.tmp wap.tmp wapepg.tmp wapzap.tmp \
 	wapEPGDetails.tmp wapTimerList.tmp queryEditTimer.tmp queryDeleteTimer.tmp deleteTimerComplete.tmp \
