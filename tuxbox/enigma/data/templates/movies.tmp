@@ -7,6 +7,31 @@
 		<script language="javascript" type="text/javascript" src="zap.js"></script>
 		<script language="javascript" type="text/javascript">#ZAPDATA#</script>
 		<script>
+			function encode_utf8(inputtext) 
+			{
+				inputtext = inputtext.replace(/\r\n/g, "\n");
+				var utftext = "";
+				for (var n = 0; n < inputtext.length; n++)
+				{
+					var c = inputtext.charCodeAt(n);
+					if (c < 128)
+						utftext += String.fromCharCode(c);
+					else 
+					if ((c > 127) && (c < 2048)) 
+					{
+						utftext += String.fromCharCode((c >> 6) | 192);
+						utftext += String.fromCharCode((c & 63) | 128);
+					}
+					else 
+					{
+						utftext += String.fromCharCode((c >> 12) | 224);
+						utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+						utftext += String.fromCharCode((c & 63) | 128);
+					}
+				}
+				return utftext;
+			}
+			
 			function update_desc_field()
 			{
 				var i = document.channelselector.channel.selectedIndex;
@@ -27,17 +52,17 @@
 
 				if (selChannel >= 0)
 				{
-					if ( newname.length > 0 )
+					if (newname.length > 0)
 					{
-					currentChannel = selChannel;
-					channel = document.channelselector.channel.options[selChannel].value;
-					document.location = "/cgi-bin/renameMovie?ref="+channel+"&desc="+escape(newname);
-					setTimeout("document.location.reload()", 1000);
-					document.channelselector.description.value = "" ;
+						currentChannel = selChannel;
+						channel = document.channelselector.channel.options[selChannel].value;
+						document.location = "/cgi-bin/renameMovie?ref="+channel+"&desc="+escape(encode_utf8(newname));
+						setTimeout("document.location.reload()", 1000);
+						document.channelselector.description.value = "" ;
 					}
 					else
 					{
-						alert("Empty name not permitted.");
+						alert("Please enter a new name first!");
 						document.channelselector.description.value = document.channelselector.channel.options[selChannel].text ;
 					}
 				}
