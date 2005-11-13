@@ -15,12 +15,13 @@
 					<tr>
 						<td width="144" valign="top"><a href="http://www.yjogol.de" target="_new"><img border="0" src="images/y-smile.png"></a></td>
 						<td valign="top">
-							<small><b>dbox yWeb</b><p>
+							<b>dbox yWeb</b><p>
 							{=ini-get:Y_Version.txt;version=}<br>
 							{=ini-get:Y_Version.txt;date=}<br>
 							{=ini-get:Y_Version.txt;type=}<br><br>
 							{=ini-get:Y_Version.txt;info=}<br>
-							</p></small>
+							<a href="http://www.yjogol.de" target="_new">www.yjogol.de</a><br>
+							</p>
 						</td>
 					</tr>
 				</table>

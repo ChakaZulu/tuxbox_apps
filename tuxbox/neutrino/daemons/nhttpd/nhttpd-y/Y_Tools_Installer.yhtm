@@ -21,11 +21,11 @@ function do_submit()
 <div class="y_head">Installer</div>
 <div class="y_work_box">
 	<form name="f" method="POST" enctype="multipart/form-data" action="/control/exec?Y_Tools&installer" target="out">
-		tar-File:&nbsp;<input type="file" name="filename" size="80">&nbsp;<br>
+		tar-File:&nbsp;<input type="file" name="filename" size="70">&nbsp;<br>
 		<input type="button" name="su" value="hochladen und installieren" title="upload and install" onClick="do_submit()">
 		<br><br>
 	</form>
-	<iframe height="400" width="600" scrolling="no" align="left" frameborder="0" name="out" id="out">Your Browser does not support IFrames.</iframe>
+	<iframe height="250" width="500" scrolling="no" align="left" frameborder="0" name="out" id="out">Your Browser does not support IFrames.</iframe>
 </div>
 
 </body>

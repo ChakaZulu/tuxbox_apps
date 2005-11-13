@@ -45,7 +45,7 @@ function setCaretToEnd(control)
 <div class="y_head">Command Shell</div>
 <div class="y_work_box">
 	<form name="co">
-		<textarea style="display: block" name="cmds" cols="100" rows="25"  title="shell output window" style="background : white; font : 'Courier New',medium  monospace; color : #436976;"></textarea>
+		<textarea style="display: block" name="cmds" cols="80" rows="18"  title="shell output window" style="background : white; font : 'Courier New',medium  monospace; color : #436976;"></textarea>
 	</form>
 
 	<form name="f" target="tmp" onSubmit="do_submit();return false;" action="">
@@ -55,10 +55,10 @@ function setCaretToEnd(control)
 			<td><input type="checkbox" name="appendx" value="1" title="append output (only IE)">&nbsp;fortlaufende Ausgabe (nur IE - wg. scrollen)</td>
 			</tr><tr>
 			<td>Path:&nbsp;</td>
-			<td><input name="pwd" type="text" size="90" maxlength="255" title="actual path" value="/"></td>
+			<td><input name="pwd" type="text" size="70" maxlength="255" title="actual path" value="/"></td>
 			</tr><tr>
 			<td>Command:</td>
-			<td><input name="cmd" type="text" size="90" maxlength="255" title="enter command to execute">
+			<td><input name="cmd" type="text" size="70" maxlength="255" title="enter command to execute">
 			<input type="submit" name="Submit" value="do it" title="execute shell command"></td>
 		</TR>
 		</table>
