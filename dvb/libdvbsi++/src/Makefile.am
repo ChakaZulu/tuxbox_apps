@@ -34,6 +34,7 @@ libdvbsi___la_SOURCES = \
 	compressed_module_descriptor.cpp \
 	content_descriptor.cpp \
 	content_identifier_descriptor.cpp \
+	content_identifier_section.cpp \
 	content_type_descriptor.cpp \
 	country_availability_descriptor.cpp \
 	crc32_descriptor.cpp \

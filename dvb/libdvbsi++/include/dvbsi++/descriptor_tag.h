@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_tag.h,v 1.4 2005/11/10 23:55:32 mws Exp $
+ * $Id: descriptor_tag.h,v 1.5 2005/11/13 17:40:12 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -119,7 +119,7 @@ enum CarouselDescriptorTag {
 	CACHING_PRIORITY_DESCRIPTOR			= 0x71,
 	CONTENT_TYPE_DESCRIPTOR				= 0x72,
 	/* 0x5F: PRIVATE_DATA_SPECIFIER_DESCRIPTOR */
-	/* 0x73 - 0x7F: Reseved */
+	/* 0x73 - 0x7F: Reserved */
 	/* 0x80 - 0xFE: User defined */
 	/* 0xFF: FORBIDDEN_DESCRIPTOR */
 };

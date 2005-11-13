@@ -1,5 +1,5 @@
 /*
- * $Id: table_id.h,v 1.3 2005/10/29 00:10:08 obi Exp $
+ * $Id: table_id.h,v 1.4 2005/11/13 17:40:12 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -82,6 +82,7 @@ enum TableId {
 	TID_ST			= 0x72,	/* stuffing_section */
 	TID_TOT			= 0x73,	/* time_offset_section */
 	TID_AIT			= 0x74, /* application_information_section */
+	TID_CIT			= 0x77, /* content_identifier_section */
 	TID_DIT			= 0x7E,	/* discontinuity_information_section */
 	TID_SIT			= 0x7F,	/* selection_information_section */
 
