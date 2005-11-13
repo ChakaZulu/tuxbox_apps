@@ -1,5 +1,5 @@
 EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tmp \
-	mepg.tmp audioSelection.tmp editTimerEvent.tmp sendMessage.tmp streamingServerSettings.tmp \
+	mepg.tmp audioSelection.tmp editTimerEvent.tmp sendMessage.tmp \
 	configSwapFile.tmp msgWindow.tmp zap.tmp movies.tmp index2.tmp rotorSat.tmp \
 	index_small.tmp index_big.tmp eit_small.tmp addTimerEvent.tmp wap.tmp wapepg.tmp wapzap.tmp \
 	wapEPGDetails.tmp wapTimerList.tmp queryEditTimer.tmp queryDeleteTimer.tmp deleteTimerComplete.tmp \
@@ -11,6 +11,7 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	XMLStreaminfo.tmp streaminfo_satellite.xsl streaminfo_cable.xsl streaminfo_terrestrial.xsl serviceepg.xsl \
 	HTMLImageInfo.tmp image.tmp bootMgrSettings.tmp chttpdSettings.tmp instimg.tmp \
 	XMLCurrentServiceData.tmp editImageSettingsWindow.tmp addImageWindow.tmp XSLMPSettings.xsl \
+	editStreamingServerSettings.tmp editStreamingServerVLCSettings.tmp editStreamingServerVideoSettings.tmp \ 
 	dvrcontrols.tmp webxtvMSIE.tmp webxtvFirefox.tmp \
 	XMLBoxInfo.tmp  HTMLBoxInfo.tmp \
 	XMLData.tmp HTMLData.tmp \

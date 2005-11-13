@@ -107,7 +107,7 @@
 							<xsl:value-of select="@ac3"/>
 						</td>
 						<td>
-							<a href="javascript:editVideoTypeSettings('{@name}', '{@ext}')">
+							<a href="javascript:editStreamingServerVideoSettings('{@name}', '{@ext}')">
 								<img src="/edit.gif" border="0"/>
 							</a>
 						</td>
