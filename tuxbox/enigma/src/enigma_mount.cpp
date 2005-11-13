@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.48 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.49 2005/11/13 08:37:21 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -215,7 +215,8 @@ int eMountPoint::mount()
 							for (unsigned int i = 0; i < 90; ++i )
 								close(i);
 
-							int rc = system(cmd.c_str());
+							int retry = 10;
+							while ((rc = system(cmd.c_str())) >> 8 && retry-- > 0);
 							eDebug("[ENIGMA_MOUNT] mount rc = %d", rc);
 							
 							if (mp.localDir == "/hdd")
