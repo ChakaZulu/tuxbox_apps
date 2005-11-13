@@ -6,7 +6,7 @@
 			function submitSettings()
 			{
 				var parms = "webifPort=" + document.f1.webifPort.value + "&streamingPort=" + document.f1.streamingPort.value + "&vlcUser=" + document.f1.vlcUser.value + "&vlcPass=" + document.f1.vlcPass.value;
-				document.location = "/cgi-bin/setStreamingServerSettings?" + parms;
+				document.location = "/cgi-bin/setStreamingServerVLCSettings?" + parms;
 				setTimeout("window.close()", 500);
 			}
 		</script>

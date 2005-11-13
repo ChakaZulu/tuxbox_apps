@@ -5,8 +5,8 @@
 		<script>
 			function submitSettings()
 			{
-				var parms = "webifPort=" + document.f1.webifPort.value + "&streamingPort=" + document.f1.streamingPort.value + "&vlcUser=" + document.f1.vlcUser.value + "&vlcPass=" + document.f1.vlcPass.value;
-				document.location = "/cgi-bin/setStreamingServerSettings?" + parms;
+				var parms = "name=" + document.f1.name.value + "&extension=" + document.f1.extension.value + "&transcodeVideo=" + document.f1.transcodeVideo.value + "&videoRate=" + document.f1.videoRate.value + "&videoRatio=" + document.f1.videoRatio.value + "&videoCodec=" + document.f1.videoCodec.value + "&transcodeAudio=" + document.f1.transcodeAudio.value + "&audioRate=" + document.f1.audioRate.value + "&AC3=" + document.f1.AC3.value;
+				document.location = "/cgi-bin/setStreamingServerVideoSettings?" + parms;
 				setTimeout("window.close()", 500);
 			}
 		</script>
@@ -65,7 +65,7 @@
 				</tr>
 				<tr>
 					<td>AC3:</td>
-					<td><input type="checkbox" name="ac3" value="on" #AC3#></td>
+					<td><input type="checkbox" name="AC3" value="on" #AC3#></td>
 				</tr>
 				<tr>
 					<td colspan="2">#CHANGEBUTTON#</td>
