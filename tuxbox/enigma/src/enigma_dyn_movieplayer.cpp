@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_movieplayer.cpp,v 1.16 2005/11/10 21:54:51 digi_casi Exp $
+ * $Id: enigma_dyn_movieplayer.cpp,v 1.17 2005/11/13 19:50:07 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -72,7 +72,10 @@ eString streamingServerSettings(eString request, eString dirpath, eString opts, 
 {
 	content->local_header["Content-Type"]="text/html; charset=iso-8859-1";
 	eMoviePlayer::getInstance()->mpconfig.load();
-	return readFile(TEMPLATE_DIR + "movieplayer.xml");
+	eString result = readFile("/var/tuxbox/config/movieplayer.xml");
+	if (!result)
+		result = readFile(TEMPLATE_DIR + "movieplayer.xml");
+	return result;
 }
 
 
@@ -80,8 +83,8 @@ eString XSLMPSettings(eString request, eString dirpath, eString opts, eHTTPConne
 {
 	content->local_header["Content-Type"]="text/html; charset=iso-8859-1";
 	eString result = readFile(TEMPLATE_DIR + "XSLMPSettings.xsl");
-	result.strReplace("#SERVEREDITBUTTON#", button(100, "Edit", NOCOLOR, "javascript:mpServerConfig()", "#000000"));
-	result.strReplace("#VLCEDITBUTTON#", button(100, "Edit", NOCOLOR, "javascript:mpVLCConfig()", "#000000"));
+	result.strReplace("#SERVEREDITBUTTON#", button(100, "Edit", NOCOLOR, "javascript:editStreamingServerSettings()", "#000000", true));
+	result.strReplace("#VLCEDITBUTTON#", button(100, "Edit", NOCOLOR, "javascript:editStreamingServerVLCSettings()", "#000000", true));
 	return result;
 }
 
@@ -92,6 +95,16 @@ eString setStreamingServerSettings(eString request, eString dirpath, eString opt
 	
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	
+	eMoviePlayer::getInstance()->mpconfig.load();
+	struct serverConfig server = eMoviePlayer::getInstance()->mpconfig.getServerConfig();
+	
+	server.serverIP = opt["serverIP"];
+	server.startDir = opt["startDir"];
+	server.CDDrive = opt["CDDrive"];
+	
+	eMoviePlayer::getInstance()->mpconfig.setServerConfig(server);
+	eMoviePlayer::getInstance()->mpconfig.save();
+	
 	return closeWindow(content, "", 500);
 }
 
@@ -100,6 +113,21 @@ eString setStreamingServerVideoSettings(eString request, eString dirpath, eStrin
 	content->local_header["Content-Type"]="text/html; charset=iso-8859-1";
 	
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	struct videoTypeParms videoParms;
+	
+	videoParms.name = opt["name"];
+	videoParms.extension = opt["extension"];
+	videoParms.videoRate = opt["videoRate"];
+	videoParms.audioRate = opt["audioRate"];
+	videoParms.videoCodec = opt["videoCodec"];
+	videoParms.videoRatio = opt["videoRatio"];
+	videoParms.transcodeVideo = (opt["transcodeVideo"] == "on");
+	videoParms.transcodeAudio = (opt["transcodeAudio"] == "on");
+	videoParms.AC3  = (opt["AC3"] == "on");
+	
+	eMoviePlayer::getInstance()->mpconfig.setVideoParms(videoParms);
+	eMoviePlayer::getInstance()->mpconfig.save();
 	
 	return closeWindow(content, "", 500);
 }
@@ -110,6 +138,17 @@ eString setStreamingServerVLCSettings(eString request, eString dirpath, eString 
 	content->local_header["Content-Type"]="text/html; charset=iso-8859-1";
 	
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	eMoviePlayer::getInstance()->mpconfig.load();
+	struct serverConfig server = eMoviePlayer::getInstance()->mpconfig.getServerConfig();
+	
+	server.webifPort = opt["webifPort"];
+	server.streamingPort = opt["streamingPort"];
+	server.vlcUser = opt["vlcUser"];
+	server.vlcPass = opt["vlcPass"];
+	
+	eMoviePlayer::getInstance()->mpconfig.setServerConfig(server);
+	eMoviePlayer::getInstance()->mpconfig.save();
 	
 	return closeWindow(content, "", 500);
 }
@@ -122,7 +161,16 @@ eString editStreamingServerSettings(eString request, eString dirpath, eString op
 	
 	eString result = readFile(TEMPLATE_DIR + "editStreamingServerSettings.tmp");
 	
-	return closeWindow(content, "", 500);
+	eMoviePlayer::getInstance()->mpconfig.load();
+	struct serverConfig server = eMoviePlayer::getInstance()->mpconfig.getServerConfig();
+	
+	result.strReplace("#SERVERIP#", server.serverIP);
+	result.strReplace("#STARTDIR#", server.startDir);
+	result.strReplace("#CDDRIVE#", server.CDDrive);
+	
+	result.strReplace("#CHANGEBUTTON#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
+	
+	return result;
 }
 
 eString editStreamingServerVideoSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -130,12 +178,58 @@ eString editStreamingServerVideoSettings(eString request, eString dirpath, eStri
 	content->local_header["Content-Type"]="text/html; charset=iso-8859-1";
 	
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString tmp;
+	eString name = opt["name"];
+	eString extension = opt["extension"];
 	
 	eString result = readFile(TEMPLATE_DIR + "editStreamingServerVideoSettings.tmp");
 	
-	return closeWindow(content, "", 500);
-}
+	struct videoTypeParms videoParms;
+	eMoviePlayer::getInstance()->mpconfig.load();
+	videoParms = eMoviePlayer::getInstance()->mpconfig.getVideoParms(name, extension);
+	
+	struct codecs avCodecs = eMoviePlayer::getInstance()->mpconfig.getAVCodecs();
+	
+	result.strReplace("#NAME#", videoParms.name);
+	result.strReplace("#EXTENSION#", videoParms.extension);
+	result.strReplace("#VIDEORATE#", videoParms.videoRate);
+	result.strReplace("#AUDIORATE#", videoParms.audioRate);
+	tmp = "";
+	eString videoCodecs[2];
+	videoCodecs[0] = avCodecs.mpeg1;
+	videoCodecs[1] = avCodecs.mpeg2;
+	for (int i = 0; i < 2; i++)
+	{
+		if (videoCodecs[i] == videoParms.videoCodec)
+			tmp += "<option selected value=\"" + videoCodecs[i] + "\">";
+		else
+			tmp += "<option value=\"" + videoCodecs[i] + "\">";
 
+		tmp += videoCodecs[i];
+		tmp += "</option>";
+	}
+	result.strReplace("#VIDEOCODECS#", tmp);
+	tmp = "";
+	static eString videoRatios[] = {"352x288", "352x576", "480x576", "576x576", "704x576"};
+	for (int i = 0; i < 5; i++)
+	{
+		if (videoRatios[i] == videoParms.videoRatio)
+			tmp += "<option selected value=\"" + videoRatios[i] + "\">";
+		else
+			tmp += "<option value=\"" + videoRatios[i] + "\">";
+
+		tmp += videoRatios[i];
+		tmp += "</option>";
+	}
+	result.strReplace("#VIDEORATIOS#", tmp);
+	result.strReplace("#TRANSCODEVIDEO#", (videoParms.transcodeVideo ? "checked" : ""));
+	result.strReplace("#TRANSCODEAUDIO#", (videoParms.transcodeAudio ? "checked" : ""));
+	result.strReplace("#AC3#", (videoParms.AC3 ? "checked" : ""));
+	
+	result.strReplace("#CHANGEBUTTON#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
+	
+	return result;
+}
 
 eString editStreamingServerVLCSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -145,17 +239,27 @@ eString editStreamingServerVLCSettings(eString request, eString dirpath, eString
 	
 	eString result = readFile(TEMPLATE_DIR + "editStreamingServerVLCSettings.tmp");
 	
-	return closeWindow(content, "", 500);
+	eMoviePlayer::getInstance()->mpconfig.load();
+	struct serverConfig server = eMoviePlayer::getInstance()->mpconfig.getServerConfig();
+	
+	result.strReplace("#WEBIFPORT#", server.webifPort);
+	result.strReplace("#STREAMINGPORT#", server.streamingPort);
+	result.strReplace("#VLCUSER#", server.vlcUser);
+	result.strReplace("#VLCPASS#", server.vlcPass);
+	
+	result.strReplace("#CHANGEBUTTON#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
+	
+	return result;
 }
 
 eString getStreamingServer()
 {
 	eString result = readFile(TEMPLATE_DIR + "streamingServer.tmp");
-	char *drive;
-	if (eConfig::getInstance()->getKey("/movieplayer/dvddrive", drive))
-		drive = strdup("D");
-	result.strReplace("#DRIVE#", eString(drive));
-	free(drive);
+	
+	eMoviePlayer::getInstance()->mpconfig.load();
+	struct serverConfig server = eMoviePlayer::getInstance()->mpconfig.getServerConfig();
+
+	result.strReplace("#DRIVE#", server.CDDrive);
 	result.strReplace("#FILEBUTTON#", button(100, "File", NOCOLOR, "javascript:playFile()", "#000000"));
 	result.strReplace("#DVDBUTTON#", button(100, "DVD", NOCOLOR, "javascript:playDVD()", "#000000"));
 	result.strReplace("#VCDBUTTON#", button(100, "(S)VCD", NOCOLOR, "javascript:playVCD()", "#000000"));
