@@ -5,7 +5,7 @@ function editStreamingServerSettings()
 
 function editStreamingServerVideoSettings(name, extension)
 {
-	NewWindow('/cgi-bin/editStreamingServerVideoSettings?name=' + name + '&extension=' + extension, 'video', '400', '600', 'no');
+	NewWindow('/cgi-bin/editStreamingServerVideoSettings?name=' + name + '&extension=' + extension, 'video', '400', '400', 'no');
 }
 
 function editStreamingServerVLCSettings()
