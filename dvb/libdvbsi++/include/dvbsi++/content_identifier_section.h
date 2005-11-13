@@ -1,5 +1,5 @@
 /*
- *  $Id: content_identifier_section.h,v 1.1 2005/11/13 17:40:12 mws Exp $
+ *  $Id: content_identifier_section.h,v 1.2 2005/11/13 17:56:20 mws Exp $
  *
  *  Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -35,7 +35,7 @@ class CridLabel
 		uint8_t getPrependStringIndex() const;
 		uint8_t getUniqueStringLength() const;
 
-		const ContentIdentifierByteVector& getUniqueStringBytes() const;
+		const ContentIdentifierByteVector* getUniqueStringBytes() const;
 };
 
 typedef std::list<CridLabel*> CridLabelList;
@@ -67,7 +67,8 @@ class ContentIdentifierSection : public LongCrcSection
 		uint16_t getOriginalNetworkId() const;
 		uint8_t getPrependStringLength() const;
 
-		const CridLabelList& getCridLabels() const;
+		const ContentIdentifierByteVector* getPrependStringBytes() const;
+		const CridLabelList* getCridLabels() const;
 };
 
 typedef std::list<ContentIdentifierSection*> ContentIdentifierSectionList;

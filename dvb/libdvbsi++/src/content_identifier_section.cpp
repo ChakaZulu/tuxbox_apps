@@ -1,5 +1,5 @@
 /*
- * $Id: content_identifier_section.cpp,v 1.1 2005/11/13 17:40:12 mws Exp $
+ * $Id: content_identifier_section.cpp,v 1.2 2005/11/13 17:56:20 mws Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -44,9 +44,9 @@ uint8_t CridLabel::getUniqueStringLength() const
 	return uniqueStringLength;
 }
 
-const ContentIdentifierByteVector& CridLabel::getUniqueStringBytes() const
+const ContentIdentifierByteVector* CridLabel::getUniqueStringBytes() const
 {
-	return uniqueStringBytes;
+	return &uniqueStringBytes;
 }
 
 
@@ -91,7 +91,12 @@ uint8_t ContentIdentifierSection::getPrependStringLength(void) const
 	return prependStringLength;
 }
 
-const CridLabelList& ContentIdentifierSection::getCridLabels() const
+const ContentIdentifierByteVector* ContentIdentifierSection::getPrependStringBytes() const
 {
-	return cridLabels;
+	return &prependStringsBytes;
+}
+
+const CridLabelList* ContentIdentifierSection::getCridLabels() const
+{
+	return &cridLabels;
 }
