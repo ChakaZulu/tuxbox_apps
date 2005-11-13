@@ -22,11 +22,7 @@
 	}
 	function settings()
 	{
-		NewWindow('/cgi-bin/streamingServerSettings', 'streamingserver', '780', '600', 'yes');
-	}
-	function terminateStreaming()
-	{
-		document.location =  "/cgi-bin/movieplayer.m3u?command=terminate";
+		NewWindow('/cgi-bin/streamingServerSettings', 'streamingserver', '780', screen.height, 'yes');
 	}
 	</script>
 </head>
@@ -161,8 +157,6 @@
 		</select>
 		<br><br><br>
 		#SETTINGSBUTTON#
-		<br><br>
-		#TERMINATEBUTTON#
 	</form>
 </body>
 </html> 
