@@ -5,7 +5,16 @@
 		<script>
 			function submitSettings()
 			{
-				var parms = "name=" + document.f1.name.value + "&extension=" + document.f1.extension.value + "&transcodeVideo=" + document.f1.transcodeVideo.value + "&videoRate=" + document.f1.videoRate.value + "&videoRatio=" + document.f1.videoRatio.value + "&videoCodec=" + document.f1.videoCodec.value + "&transcodeAudio=" + document.f1.transcodeAudio.value + "&audioRate=" + document.f1.audioRate.value + "&AC3=" + document.f1.AC3.value;
+				var transcodeAudio = "off";
+				if (document.f1.transcodeAudio.checked)
+					transcodeAudio = "on";
+				var transcodeVideo = "off";
+				if (document.f1.transcodeVideo.checked)
+					transcodeVideo = "on";
+				var AC3 = "off";
+				if (document.f1.AC3.checked)
+					AC3 = "on";
+				var parms = "name=" + document.f1.name.value + "&extension=" + document.f1.extension.value + "&transcodeVideo=" + transcodeVideo + "&videoRate=" + document.f1.videoRate.value + "&videoRatio=" + document.f1.videoRatio.value + "&videoCodec=" + document.f1.videoCodec.value + "&transcodeAudio=" + transcodeAudio + "&audioRate=" + document.f1.audioRate.value + "&AC3=" + AC3;
 				document.location = "/cgi-bin/setStreamingServerVideoSettings?" + parms;
 				setTimeout("window.close()", 500);
 			}
