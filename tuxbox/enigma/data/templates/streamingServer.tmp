@@ -8,16 +8,16 @@
 	}
 	function playDVD()
 	{
-		var parms = ":";
+		var parms = "";
 		if (document.form1.title1.value > 0)
-			parms = ":@" + document.form1.title1.value + ":" + document.form1.chapter1.value + "-";
+			parms = "@" + document.form1.title1.value + ":" + document.form1.chapter1.value + "-";
 		document.location = "/cgi-bin/movieplayer.m3u?command=start&mrl=dvdsimple:" + document.form1.drive1.value + parms;
 	}
 	function playVCD()
 	{
-		var parms = ":";
+		var parms = "";
 		if (document.form1.title2.value > 0)
-			parms = ":@" + document.form1.title2.value + ":" + document.form1.chapter2.value + "-";
+			parms = "@" + document.form1.title2.value + ":" + document.form1.chapter2.value + "-";
 		document.location = "/cgi-bin/movieplayer.m3u?command=start&mrl=vcd:" + document.form1.drive2.value + parms;
 	}
 	function settings()
