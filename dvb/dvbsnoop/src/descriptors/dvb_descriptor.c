@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.45 2005/11/10 00:05:44 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.46 2005/11/16 20:12:18 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.45 2005/11/10 00:05:44 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.46  2005/11/16 20:12:18  rasc
+bugfix
+
 Revision 1.45  2005/11/10 00:05:44  rasc
  - New: PS MPEG2 UserData + GOP, DVB-S2 fix
 
@@ -484,7 +487,7 @@ void descriptorDVB_SatDelivSys (u_char *b)
  }
 
 
- out_nl (4,"Narrow_Modulation (Sat): ",d.narrow_modulation,
+ out_S2B_NL (4,"Narrow_Modulation (Sat): ",d.narrow_modulation,
 	dvbstrModulationSAT_FLAG(d.narrow_modulation));
 
 
