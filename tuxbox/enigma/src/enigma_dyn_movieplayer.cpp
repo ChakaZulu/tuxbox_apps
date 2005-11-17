@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_movieplayer.cpp,v 1.17 2005/11/13 19:50:07 digi_casi Exp $
+ * $Id: enigma_dyn_movieplayer.cpp,v 1.18 2005/11/17 14:32:51 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -70,7 +70,7 @@ eMoviePlayer moviePlayer;
 
 eString streamingServerSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=iso-8859-1";
+	content->local_header["Content-Type"]="text/xml; charset=iso-8859-1";
 	eMoviePlayer::getInstance()->mpconfig.load();
 	eString result = readFile("/var/tuxbox/config/movieplayer.xml");
 	if (!result)
@@ -81,7 +81,7 @@ eString streamingServerSettings(eString request, eString dirpath, eString opts, 
 
 eString XSLMPSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=iso-8859-1";
+	content->local_header["Content-Type"]="text/xml; charset=iso-8859-1";
 	eString result = readFile(TEMPLATE_DIR + "XSLMPSettings.xsl");
 	result.strReplace("#SERVEREDITBUTTON#", button(100, "Edit", NOCOLOR, "javascript:editStreamingServerSettings()", "#000000", true));
 	result.strReplace("#VLCEDITBUTTON#", button(100, "Edit", NOCOLOR, "javascript:editStreamingServerVLCSettings()", "#000000", true));
