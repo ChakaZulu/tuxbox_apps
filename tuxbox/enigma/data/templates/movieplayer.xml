@@ -14,13 +14,14 @@
 	<codec mpeg1="mpgv" mpeg2="mp2v" audio="mpga" />
 	<setup name="SVCD" ext="NONE" Videorate="1000" Videotranscode="0" Videocodec="mpeg2" Videosize="352x576" Audiorate="192"  Audiotranscode="0" ac3="0" />
 	<setup name="VCD" ext="NONE" Videorate="1000" Videotranscode="0" Videocodec="mpeg1" Videosize="352x576" Audiorate="192"  Audiotranscode="0" ac3="0" />
-	<setup name="DVD" ext="NONE" Videorate="1000" Videotranscode="0" Videocodec="mp2v" Videosize="704x576" Audiorate="192"  Audiotranscode="0" ac3="1" />
+	<setup name="DVD" ext="NONE" Videorate="1000" Videotranscode="0" Videocodec="mp2v" Videosize="704x576" Audiorate="192"  Audiotranscode="1" ac3="1" />
 	<setup name="File" ext="MPG" Videorate="1000" Videotranscode="0" Videocodec="mpgv" Videosize="704x576" Audiorate="192"  Audiotranscode="0" ac3="0" />
 	<setup name="File" ext="MPEG" Videorate="1000" Videotranscode="0" Videocodec="mpgv" Videosize="704x576" Audiorate="192"  Audiotranscode="0" ac3="0" />
 	<setup name="File" ext="M2P" Videorate="1000" Videotranscode="0" Videocodec="mpgv" Videosize="704x576" Audiorate="192"  Audiotranscode="0" ac3="0" />
 	<setup name="File" ext="MPV" Videorate="1000" Videotranscode="0" Videocodec="mpgv" Videosize="704x576" Audiorate="192"  Audiotranscode="0" ac3="0" />
 	<setup name="File" ext="DAT" Videorate="1000" Videotranscode="0" Videocodec="mpgv" Videosize="704x576" Audiorate="192"  Audiotranscode="0" ac3="0" />
 	<setup name="File" ext="AVI" Videorate="1000" Videotranscode="1" Videocodec="mpgv" Videosize="704x576" Audiorate="192"  Audiotranscode="1" ac3="0" />
+	<setup name="File" ext="ASF" Videorate="1000" Videotranscode="1" Videocodec="mpgv" Videosize="704x576" Audiorate="192"  Audiotranscode="1" ac3="0" />
 	<setup name="File" ext="TS" Videorate="1000" Videotranscode="0" Videocodec="mp2v" Videosize="704x576" Audiorate="192"  Audiotranscode="0" ac3="1" />
 	<setup name="File" ext="VOB" Videorate="1000" Videotranscode="0" Videocodec="mp2v" Videosize="704x576" Audiorate="192"  Audiotranscode="0" ac3="1" />
 </vlc>
