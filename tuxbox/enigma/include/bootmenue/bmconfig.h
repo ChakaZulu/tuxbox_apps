@@ -1,5 +1,5 @@
 /*
- * $Id: bmconfig.h,v 1.4 2005/10/26 19:26:59 digi_casi Exp $
+ * $Id: bmconfig.h,v 1.5 2005/11/17 14:01:26 sat_turner Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -28,7 +28,7 @@
 
 using namespace std;
 
-#include <include/lib/base/estring.h>
+#include <lib/base/estring.h>
 
 class bmconfig: public Object
 {

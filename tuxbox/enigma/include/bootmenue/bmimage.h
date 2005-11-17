@@ -1,5 +1,5 @@
 /*
- * $Id: bmimage.h,v 1.9 2005/10/30 14:02:31 digi_casi Exp $
+ * $Id: bmimage.h,v 1.10 2005/11/17 14:01:26 sat_turner Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -30,7 +30,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
-#include <include/lib/base/estring.h>
+#include <lib/base/estring.h>
 #ifdef INSTIMAGESUPPORT
 #include <src/enigma.h>
 #define TUXBOXDATADIR "/share/tuxbox"

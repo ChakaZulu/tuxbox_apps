@@ -1,5 +1,5 @@
 /*
- * $Id: bmboot.h,v 1.1 2005/10/26 19:27:42 digi_casi Exp $
+ * $Id: bmboot.h,v 1.2 2005/11/17 14:01:26 sat_turner Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -25,7 +25,7 @@
 
 using namespace std;
 
-#include <include/lib/base/estring.h>
+#include <lib/base/estring.h>
 
 class bmboot: public Object
 {
