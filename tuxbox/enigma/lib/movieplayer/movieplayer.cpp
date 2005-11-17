@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.35 2005/11/13 19:12:55 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.36 2005/11/17 19:35:08 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -494,10 +494,16 @@ eString eMoviePlayer::sout(eString mrl)
 	
 	eString name = "File";
 	if (mrl.find("dvdsimple:") != eString::npos)
+	{
 		name = "DVD";
+		extension = "NONE";
+	}
 	else
 	if (mrl.find("vcd:") != eString::npos)
+	{
 		name = "VCD";
+		extension = "NONE";
+	}
 	
 	struct serverConfig server = mpconfig.getServerConfig();
 	struct videoTypeParms video = mpconfig.getVideoParms(name, extension);
