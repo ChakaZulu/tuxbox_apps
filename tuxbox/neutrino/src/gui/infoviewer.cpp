@@ -195,8 +195,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	if ( !gotTime )
 		gotTime = g_Sectionsd->getIsTimeSet();
 
-	info_CurrentNext = getEPG(channel_id);
-
 	if ( fadeIn )
 	{
 		fadeValue = 100;
@@ -257,7 +255,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 
 	frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
 
-
 	if ( showButtonBar )
 	{
 		sec_timer_id = g_RCInput->addTimer(1000000, false);
@@ -265,185 +262,196 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		if ( BOTTOM_BAR_OFFSET> 0 )
 			frameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
 
-       		frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS_BACKGROUND);
-		}
+		frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS_BACKGROUND);
 
-		if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_later | CSectionsdClient::epgflags::has_current |  CSectionsdClient::epgflags::not_broadcast ) ) )
-		{
-			// nicht gefunden / noch nicht geladen
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), g_Locale->getText(gotTime?(showButtonBar ? LOCALE_INFOVIEWER_EPGWAIT : LOCALE_INFOVIEWER_EPGNOTLOAD) : LOCALE_INFOVIEWER_WAITTIME), COL_INFOBAR, 0, true); // UTF-8
-		}
-		else
-			show_Data();
+		// blau
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, BoxEndX- ICON_OFFSET- ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2 + 2), g_Locale->getText(LOCALE_INFOVIEWER_STREAMINFO), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 
-
-		if ( showButtonBar )
-		{
-			// blau
-			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, BoxEndX- ICON_OFFSET- ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2 + 2), g_Locale->getText(LOCALE_INFOVIEWER_STREAMINFO), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
-
-			showButton_Audio();
-			showButton_SubServices();
+		showButton_Audio();
+		showButton_SubServices();
 #ifndef SKIP_CA_STATUS
-			showIcon_CA_Status();
+		showIcon_CA_Status();
 #endif
-			showIcon_16_9();
-			showIcon_VTXT();
-		}
-		showLcdPercentOver();
+		showIcon_16_9();
+		showIcon_VTXT();
+	}
+	info_CurrentNext = getEPG(channel_id);
 
-		if ( ( g_RemoteControl->current_channel_id == channel_id) &&
-		     !( ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) &&
-				    ( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_no_current ) ) ) ||
-				    ( info_CurrentNext.flags & CSectionsdClient::epgflags::not_broadcast ) ) )
+	if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_later | CSectionsdClient::epgflags::has_current |  CSectionsdClient::epgflags::not_broadcast ) ) )
+	{
+		// nicht gefunden / noch nicht geladen
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(ChanNameX+ 10, ChanInfoY+ 2* g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getHeight()+ 5, BoxEndX- (ChanNameX+ 20), g_Locale->getText(gotTime?(showButtonBar ? LOCALE_INFOVIEWER_EPGWAIT : LOCALE_INFOVIEWER_EPGNOTLOAD) : LOCALE_INFOVIEWER_WAITTIME), COL_INFOBAR, 0, true); // UTF-8
+	}
+	else
+	{
+		show_Data();
+	}
 
+	showLcdPercentOver();
+
+	if ( ( g_RemoteControl->current_channel_id == channel_id) &&
+		!( ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) &&
+			( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_no_current ) ) ) ||
+				( info_CurrentNext.flags & CSectionsdClient::epgflags::not_broadcast ) ) )
+	{
+		// EVENT anfordern!
+		g_Sectionsd->setServiceChanged(channel_id, true );
+	}
+
+	// Schatten
+	frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW_PLUS_0);
+	frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW_PLUS_0);
+
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
+	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
+
+	if ( !calledFromNumZap )
+	{
+		bool show_dot= true;
+		if ( fadeIn )
+			fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
+
+		bool hideIt = true;
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]);
+
+		int res = messages_return::none;
+		time_t ta,tb;
+
+		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 		{
-			// EVENT anfordern!
-			g_Sectionsd->setServiceChanged(channel_id, true );
-		}
+			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+			//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
 
-		// Schatten
-		frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW_PLUS_0);
-		frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW_PLUS_0);
-
-		neutrino_msg_t      msg;
-		neutrino_msg_data_t data;
-
-		CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
-
-		if ( !calledFromNumZap )
-		{
-			bool show_dot= true;
-			if ( fadeIn )
-				fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
-
-			bool hideIt = true;
-			unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]);
-
-			int res = messages_return::none;
-
-			while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
+			if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_current ) ) )
 			{
-				g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
-				//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
-
-				if ( msg == CRCInput::RC_help )
+				if(difftime(time(&tb),ta) > 1.1)
 				{
-					g_RCInput->postMsg( NeutrinoMessages::SHOW_EPG, 0 );
-					res = messages_return::cancel_info;
-				}
-				else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == fadeTimer ) )
-				{
-					if ( fadeOut )
+					time(&ta);
+					info_CurrentNext = getEPG(channel_id);
+					if ( ( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_current ) ) )
 					{
-						fadeValue+= 15;
+						show_Data();
+						showLcdPercentOver();
+					}
+				}
+			}
 
-						if ( fadeValue>= 100 )
-						{
-							fadeValue= 100;
-							g_RCInput->killTimer(fadeTimer);
-							res = messages_return::cancel_info;
-							frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(100) );
-						}
-						else
-							frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
+			if ( msg == CRCInput::RC_help )
+			{
+				g_RCInput->postMsg( NeutrinoMessages::SHOW_EPG, 0 );
+				res = messages_return::cancel_info;
+			}
+			else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == fadeTimer ) )
+			{
+				if ( fadeOut )
+				{
+					fadeValue+= 15;
+
+					if ( fadeValue>= 100 )
+					{
+						fadeValue= 100;
+						g_RCInput->killTimer(fadeTimer);
+						res = messages_return::cancel_info;
+						frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(100) );
 					}
 					else
-       					{
-						fadeValue-= 15;
-						if ( fadeValue<= g_settings.infobar_alpha )
-						{
-							fadeValue= g_settings.infobar_alpha;
-							g_RCInput->killTimer(fadeTimer);
-							fadeIn = false;
-							frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
-						}
-						else
-							frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
-					}
-
-					frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(fadeValue) );
-					frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
-					frameBuffer->paletteSet();
+						frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
 				}
-				else if ( ( msg == CRCInput::RC_ok ) ||
-					  ( msg == CRCInput::RC_home ) ||
-						  ( msg == CRCInput::RC_timeout ) )
-				{
-					if ( fadeIn )
+				else
+       				{
+					fadeValue-= 15;
+					if ( fadeValue<= g_settings.infobar_alpha )
 					{
+						fadeValue= g_settings.infobar_alpha;
 						g_RCInput->killTimer(fadeTimer);
 						fadeIn = false;
-					}
-					if (((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
-						(!fadeOut) &&
-						g_settings.widget_fade
-						)
-					{
-						fadeOut = true;
-						fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
-						timeoutEnd = CRCInput::calcTimeoutEnd( 1 );
+						frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
 					}
 					else
-					{
-						if (( msg != CRCInput::RC_timeout ) && (msg != CRCInput::RC_ok))
-							g_RCInput->postMsg( msg, data );
-						res = messages_return::cancel_info;
-					}
+						frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
 				}
-				else if ( ( msg == (neutrino_msg_t)g_settings.key_quickzap_up  ) ||
-					  ( msg == (neutrino_msg_t)g_settings.key_quickzap_down) ||
-					  ( msg == CRCInput::RC_0 ) ||
-					  ( msg == NeutrinoMessages::SHOW_INFOBAR ) )
-       				{
-					hideIt = false;
-					g_RCInput->postMsg( msg, data );
-					res = messages_return::cancel_info;
-				}
-				else if ( msg == NeutrinoMessages::EVT_TIMESET )
-	       			{
-					// Handle anyway!
-					neutrino->handleMsg(msg, data);
-					g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
-					hideIt = false;
-					res = messages_return::cancel_all;
-				}
-				else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == sec_timer_id ) )
+
+				frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(fadeValue) );
+				frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
+				frameBuffer->paletteSet();
+			}
+			else if ( ( msg == CRCInput::RC_ok ) ||
+					( msg == CRCInput::RC_home ) ||
+						( msg == CRCInput::RC_timeout ) )
+			{
+				if ( fadeIn )
 				{
-					paintTime( show_dot, false );
-					showRecordIcon(show_dot);
- 					show_dot = !show_dot;
+					g_RCInput->killTimer(fadeTimer);
+					fadeIn = false;
+				}
+				if (((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
+					(!fadeOut) && g_settings.widget_fade )
+				{
+					fadeOut = true;
+					fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
+					timeoutEnd = CRCInput::calcTimeoutEnd( 1 );
 				}
 				else
 				{
-					res = neutrino->handleMsg(msg, data);
-
-					if ( res & messages_return::unhandled )
-					{
-						// raus hier und im Hauptfenster behandeln...
-						g_RCInput->postMsg(  msg, data );
-						res = messages_return::cancel_info;
-					}
+					if (( msg != CRCInput::RC_timeout ) && (msg != CRCInput::RC_ok))
+						g_RCInput->postMsg( msg, data );
+					res = messages_return::cancel_info;
 				}
 			}
-
-
-			if ( hideIt )
-				killTitle();
-
-			g_RCInput->killTimer(sec_timer_id);
-
-
-			if ( fadeIn || fadeOut )
+			else if ( ( msg == (neutrino_msg_t)g_settings.key_quickzap_up  ) ||
+				    ( msg == (neutrino_msg_t)g_settings.key_quickzap_down) ||
+				    ( msg == CRCInput::RC_0 ) ||
+				    ( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 			{
-				g_RCInput->killTimer(fadeTimer);
-				frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-				frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
-				frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
-				frameBuffer->paletteSet();
+				hideIt = false;
+				g_RCInput->postMsg( msg, data );
+				res = messages_return::cancel_info;
 			}
+			else if ( msg == NeutrinoMessages::EVT_TIMESET )
+	       		{
+				// Handle anyway!
+				neutrino->handleMsg(msg, data);
+				g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
+				hideIt = false;
+				res = messages_return::cancel_all;
+			}
+			else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == sec_timer_id ) )
+			{
+				paintTime( show_dot, false );
+				showRecordIcon(show_dot);
+ 				show_dot = !show_dot;
+			}
+			else
+			{
+				res = neutrino->handleMsg(msg, data);
 
+				if ( res & messages_return::unhandled )
+				{
+					// raus hier und im Hauptfenster behandeln...
+					g_RCInput->postMsg(  msg, data );
+					res = messages_return::cancel_info;
+				}
+			}
+		}
+
+
+	if ( hideIt )
+		killTitle();
+
+		g_RCInput->killTimer(sec_timer_id);
+
+
+		if ( fadeIn || fadeOut )
+		{
+			g_RCInput->killTimer(fadeTimer);
+			frameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+			frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+			frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
+			frameBuffer->paletteSet();
+		}
 	}
 }
 
@@ -617,9 +625,9 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	if ((msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG) ||
 	    (msg == NeutrinoMessages::EVT_NEXTPROGRAM    ))
 	{
-		CSectionsdClient::CurrentNextInfo info = getEPG( *(t_channel_id *)data );
 		if ((*(t_channel_id *)data) == channel_id)
 		{
+			CSectionsdClient::CurrentNextInfo info = getEPG( *(t_channel_id *)data );
 			info_CurrentNext = info;
 			if ( is_visible )
 				show_Data( true );
