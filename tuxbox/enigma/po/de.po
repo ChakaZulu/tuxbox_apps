@@ -1,6 +1,6 @@
 # translation of de.po to 
 
-# $Id: de.po,v 1.75 2005/11/17 23:26:41 timekiller Exp $
+# $Id: de.po,v 1.76 2005/11/18 21:30:18 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 
 msgid ""
@@ -4140,14 +4140,6 @@ msgstr "CoreFiles abschalten"
 #: src/setup_extra.cpp:148
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "Keine 'Corefiles' nach einem Enigma Absturz erstellen"
-
-#: src/setup_extra.cpp:154
-msgid "HDD is 'Slave'"
-msgstr "HDD ist 'Slave'"
-
-#: src/setup_extra.cpp:154
-msgid "HDD runs as 'slave'"
-msgstr "Festplatte läuft als 'Slave'"
 
 #: src/setup_extra.cpp:160
 msgid "Disable HDD mount"
