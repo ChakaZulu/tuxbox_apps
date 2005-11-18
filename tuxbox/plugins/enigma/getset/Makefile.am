@@ -13,11 +13,11 @@ enigma_getset_la_LDFLAGS = -rpath $(PLUGINDIR) -module
 enigma_getset_la_CXXFLAGS = -fno-rtti -fno-exceptions $(SIGC_CFLAGS) $(XMLTREE_CFLAGS) 
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install .libs/enigma_getset.so $(PLUGINDIR)
-	install -m 0644  enigma_getset.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install .libs/enigma_getset.so $(DESTDIR)$(PLUGINDIR)
+	install -m 0644  enigma_getset.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/enigma_getset.so
-	-rm $(PLUGINDIR)/enigma_getset.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/enigma_getset.so
+	-rm $(DESTDIR)$(PLUGINDIR)/enigma_getset.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

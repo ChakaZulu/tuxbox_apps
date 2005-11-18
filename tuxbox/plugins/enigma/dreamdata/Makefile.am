@@ -14,16 +14,16 @@ dreamdata_la_LDFLAGS = -rpath $(PLUGINDIR) -module
 dreamdata_la_CXXFLAGS = -fno-rtti -fno-exceptions $(SIGC_CFLAGS) $(XMLTREE_CFLAGS)
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install -d $(CONFIGDIR)
-	install .libs/dreamdata.so $(PLUGINDIR)
-	install -m 0644 dreamdata.cfg $(PLUGINDIR)
-	install -m 0644 dreamdata.xml $(CONFIGDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)
+	install .libs/dreamdata.so $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 dreamdata.cfg $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 dreamdata.xml $(DESTDIR)$(CONFIGDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/dreamdata.so
-	-rm $(PLUGINDIR)/dreamdata.cfg
-	-rm $(CONFIGDIR)/dreamdata.xml
-	-rmdir $(PLUGINDIR)
-	-rmdir $(CONFIGDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/dreamdata.so
+	-rm $(DESTDIR)$(PLUGINDIR)/dreamdata.cfg
+	-rm $(DESTDIR)$(CONFIGDIR)/dreamdata.xml
+	-rmdir $(DESTDIR)$(PLUGINDIR)
+	-rmdir $(DESTDIR)$(CONFIGDIR)
 

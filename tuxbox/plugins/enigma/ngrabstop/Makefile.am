@@ -14,11 +14,11 @@ ngrabstop_la_LDFLAGS = -rpath $(PLUGINDIR) -module -pthread
 ngrabstop_la_CXXFLAGS = $(SIGC_CFLAGS) $(XMLTREE_CFLAGS) -fno-exceptions -fno-rtti
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install .libs/ngrabstop.so $(PLUGINDIR)
-	install -m 0644 ngrabstop.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install .libs/ngrabstop.so $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 ngrabstop.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/ngrabstop.so
-	-rm $(PLUGINDIR)/ngrabstop.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/ngrabstop.so
+	-rm $(DESTDIR)$(PLUGINDIR)/ngrabstop.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

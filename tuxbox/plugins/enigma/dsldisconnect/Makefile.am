@@ -14,11 +14,11 @@ dsldisconnect_la_LDFLAGS = -rpath $(PLUGINDIR) -module
 dsldisconnect_la_CXXFLAGS = $(SIGC_CFLAGS) $(XMLTREE_CFLAGS) -fno-exceptions -fno-rtti
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install .libs/dsldisconnect.so $(PLUGINDIR)
-	install -m 0644 dsldisconnect.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install .libs/dsldisconnect.so $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 dsldisconnect.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/dsldisconnect.so
-	-rm $(PLUGINDIR)/dsldisconnect.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/dsldisconnect.so
+	-rm $(DESTDIR)$(PLUGINDIR)/dsldisconnect.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)

@@ -14,12 +14,12 @@ movieplayer_la_LDFLAGS = -rpath $(PLUGINDIR) -module
 movieplayer_la_CXXFLAGS = -fno-rtti -fno-exceptions $(SIGC_CFLAGS) $(XMLTREE_CFLAGS)
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install .libs/movieplayer.so $(PLUGINDIR)
-	install -m 0644 movieplayer.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install .libs/movieplayer.so $(DESTDIR)$(PLUGINDIR)
+	install -m 0644 movieplayer.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/movieplayer.so
-	-rm $(PLUGINDIR)/movieplayer.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/movieplayer.so
+	-rm $(DESTDIR)$(PLUGINDIR)/movieplayer.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)
 

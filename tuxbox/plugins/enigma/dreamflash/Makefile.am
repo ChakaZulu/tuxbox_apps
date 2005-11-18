@@ -13,11 +13,11 @@ dreamflash_la_LDFLAGS = -rpath $(PLUGINDIR) -module
 dreamflash_la_CXXFLAGS = -fno-rtti -fno-exceptions $(SIGC_CFLAGS) $(XMLTREE_CFLAGS)
 
 install-exec-local:
-	install -d $(PLUGINDIR)
-	install .libs/dreamflash.so $(PLUGINDIR)
-	install -m 0644  dreamflash.cfg $(PLUGINDIR)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install .libs/dreamflash.so $(DESTDIR)$(PLUGINDIR)
+	install -m 0644  dreamflash.cfg $(DESTDIR)$(PLUGINDIR)
 
 uninstall-local:
-	-rm $(PLUGINDIR)/dreamflash.so
-	-rm $(PLUGINDIR)/dreamflash.cfg
-	-rmdir $(PLUGINDIR)
+	-rm $(DESTDIR)$(PLUGINDIR)/dreamflash.so
+	-rm $(DESTDIR)$(PLUGINDIR)/dreamflash.cfg
+	-rmdir $(DESTDIR)$(PLUGINDIR)
