@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.376 2005/11/16 07:01:21 metallica Exp $
+ * $Id: zapit.cpp,v 1.377 2005/11/18 11:54:33 metallica Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1815,7 +1815,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.376 2005/11/16 07:01:21 metallica Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.377 2005/11/18 11:54:33 metallica Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1920,6 +1920,10 @@ int main(int argc, char **argv)
 	eventServer = new CEventServer;
 
 	leaveStandby();
+	//zap to lastchannel with zapit TEST
+	CZapitClient::responseGetLastChannel lastchannel;
+	lastchannel=load_settings();
+	zapTo(lastchannel.channelNumber);
 
 	if (update_pmt) {
 		while (zapit_server.run(parse_command, CZapitMessages::ACTVERSION, true)) {
