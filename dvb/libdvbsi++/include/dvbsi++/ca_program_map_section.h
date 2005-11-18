@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.h,v 1.5 2005/10/29 00:10:08 obi Exp $
+ * $Id: ca_program_map_section.h,v 1.6 2005/11/18 17:57:56 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -31,6 +31,10 @@ class CaLengthField
 		size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
+typedef std::vector<uint16_t> CaIdVector;
+typedef CaIdVector::iterator CaIdVectorIterator;
+typedef CaIdVector::const_iterator CaIdVectorConstIterator;
+
 class CaElementaryStreamInfo
 {
 	protected:
@@ -41,7 +45,7 @@ class CaElementaryStreamInfo
 		CaDescriptorList descriptors;
 
 	public:
-		CaElementaryStreamInfo(const ElementaryStreamInfo * const info, const uint8_t cmdId);
+		CaElementaryStreamInfo(const ElementaryStreamInfo * const info, const uint8_t cmdId, const CaIdVector &caids=CaIdVector());
 		~CaElementaryStreamInfo(void);
 
 		uint16_t getLength(void) const;
@@ -65,9 +69,10 @@ class CaProgramMapSection : public DescriptorContainer
 		unsigned programInfoLength			: 12;
 		unsigned caPmtCmdId				: 8;
 		CaElementaryStreamInfoList esInfo;
+		CaIdVector caids;
 
 	public:
-		CaProgramMapSection(const ProgramMapSection * const pmt, const uint8_t listManagement, const uint8_t cmdId);
+		CaProgramMapSection(const ProgramMapSection * const pmt, const uint8_t listManagement, const uint8_t cmdId, const CaIdVector &caids=CaIdVector());
 		~CaProgramMapSection(void);
 
 		bool append(const ProgramMapSection * const pmt);
