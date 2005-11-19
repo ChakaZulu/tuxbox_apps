@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.41  2005/11/19 14:37:38  robspr1
+ * - add different behaviour in marking mails green in the plugin
+ *
  * Revision 1.40  2005/11/11 18:40:15  robspr1
  * - /tmp/tuxmail.new holds number of new files /  reread tuxmail.conf after writing
  *
@@ -217,6 +220,10 @@ void ReadConf()
 			{
 				sscanf(ptr + 5, "%d", &skin);
 			}
+			else if((ptr = strstr(line_buffer, "TYPEFLAG=")))
+			{
+				sscanf(ptr + 9, "%d", &typeflag);
+			}
 			else if((ptr = strstr(line_buffer, "SECURITY=")))
 			{
 				sscanf(ptr + 9, "%s", &security[0]);
@@ -356,6 +363,14 @@ void ReadConf()
 
 			skin = 1;
 		}
+		
+		if(typeflag < 1 || typeflag > 3)
+		{
+			printf("TuxMail <TYPEFLAG=%d invalid, set to \"1\">\n", typeflag);
+
+			typeflag = 1;
+		}
+		
 }
 
 /******************************************************************************
@@ -384,6 +399,7 @@ int WriteConf()
 	fprintf(fd_conf, "LCD=%c\n", lcdc);
 	fprintf(fd_conf, "OSD=%c\n\n", osd);
 	fprintf(fd_conf, "SKIN=%d\n\n", skin);
+	fprintf(fd_conf, "TYPEFLAG=%d\n\n", typeflag);
 	fprintf(fd_conf, "CONFIGCODE=%s\n", configcode);
 	fprintf(fd_conf, "ADMIN=%c\n\n", admin);
 	fprintf(fd_conf, "MAILCACHE=%d\n", mailcache);
@@ -1107,7 +1123,9 @@ void RenderCircle(int sx, int sy, char type)
 
 		switch(type)
 		{
+			case 'n':
 			case 'N':
+			case 'o':
 
 				color = GREEN;
 
@@ -1497,7 +1515,7 @@ void PaintSmtpMailHeader( int nEditDirectStyle , int nConfigPage)
 			if( nConfigPage == 10 )
 			{
 				int i;
-				for( i=2; i<12; i++)
+				for( i=2; i<13; i++)
 				{
 					switch( i )
 					{
@@ -1540,6 +1558,10 @@ void PaintSmtpMailHeader( int nEditDirectStyle , int nConfigPage)
 						case 11: 
 							strcpy(linebuffer, "SKIN:"); 
 							sprintf(szInfo[i],"%d",skin);
+							break; 
+						case 12: 
+							strcpy(linebuffer, "TYPEFLAG:"); 
+							sprintf(szInfo[i],"%d",typeflag);
 							break; 
 					}
 					RenderString( linebuffer, 2*BORDERSIZE, BORDERSIZE+(2+i)*FONTHEIGHT_SMALL  , VIEWX-4*BORDERSIZE, LEFT, SMALL, ORANGE);
@@ -1680,7 +1702,7 @@ void SaveConfigMailBox(int nConfigPage)
 	else if( nConfigPage == 10 )
 	{
 		int i, iTest;
-		for( i=2; i<12; i++)
+		for( i=2; i<13; i++)
 		{
 			switch( i )
 			{
@@ -1818,6 +1840,17 @@ void SaveConfigMailBox(int nConfigPage)
 					if( skin > 3 )
 					{
 						skin = 3;
+					}
+					break; 
+				case 12: 
+					typeflag=atoi(szInfo[i]);
+					if( typeflag < 1 )
+					{
+						typeflag = 1;
+					}
+					if( typeflag > 3 )
+					{
+						typeflag = 3;
 					}
 					break; 
 			}
@@ -3210,7 +3243,7 @@ void FillDB(int account)
 				strcpy(maildb[account].mailinfo[line].subj, (osd == 'G') ? "TuxMail: DB-Eintrag defekt!" : "TuxMail: DB-Entry broken!");
 			}
 
-			maildb[account].mailinfo[line].save[0] = maildb[account].mailinfo[line].type[0];
+//			maildb[account].mailinfo[line].save[0] = maildb[account].mailinfo[line].type[0];
 
 			if(++line >= MAXMAIL)
 			{
@@ -3607,7 +3640,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.40 $";
+	char cvs_revision[] = "$Revision: 1.41 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -4013,10 +4046,10 @@ void plugin_exec(PluginParam *par)
 							if(maildb[account].mailinfo[mailindex].type[0] != 'D')
 							{
 						    		maildb[account].mailinfo[mailindex].type[0] = 'D';
-						    		}
+						    }
 							else
 							{
-								maildb[account].mailinfo[mailindex].type[0] = maildb[account].mailinfo[mailindex].save[0];
+//								maildb[account].mailinfo[mailindex].type[0] = maildb[account].mailinfo[mailindex].save[0];
 								
 								if(maildb[account].mailinfo[mailindex].type[0] == 'D')
 								{
@@ -4047,7 +4080,7 @@ void plugin_exec(PluginParam *par)
 				case RC_YELLOW:
 
 					if(maildb[account].mails)
-					{
+					{				
 						if( mailcache )
 						{
 							char *stored_uids = 0, *ptr = 0;
@@ -4229,12 +4262,38 @@ void plugin_exec(PluginParam *par)
 
 	// reset lcd lock
 
-	    unlink(LCKFILE);
-
+    	unlink(LCKFILE);
+    	
 	// update database
 
 		for(loop = 0; loop < 10; loop++)
 		{
+			if( typeflag > 1 )
+			{
+				if( maildb[loop].mails )
+				{
+					for( mailindex = 0; mailindex < maildb[loop].mails; mailindex++)
+					{
+						if(( maildb[loop].mailinfo[mailindex].type[0] == 'N' ) || ( maildb[loop].mailinfo[mailindex].type[0] == 'n' ))
+						{
+							if( typeflag == 2 )
+							{
+								maildb[loop].mailinfo[mailindex].type[0] = 'o';
+							}
+							else
+							{
+								maildb[loop].mailinfo[mailindex].type[0] = 'O';
+							}
+						}
+					}
+					if( typeflag == 3 )
+					{
+						maildb[loop].status[0] = '0';
+						maildb[loop].status[1] = '0';
+						maildb[loop].status[2] = '0';
+					}
+				}
+			}
 			UpdateDB(loop);
 		}
 

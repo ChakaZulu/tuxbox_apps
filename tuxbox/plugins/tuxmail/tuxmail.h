@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.33  2005/11/19 14:37:48  robspr1
+ * - add different behaviour in marking mails green in the plugin
+ *
  * Revision 1.32  2005/11/11 18:40:34  robspr1
  * - /tmp/tuxmail.new holds number of new files /  reread tuxmail.conf after writing
  *
@@ -437,6 +440,7 @@ char logmode = 'S';
 char audio = 'Y';
 char savedb = 'Y';
 char lcdc = 'Y';
+int typeflag = 1;
 int video=1;
 int webport=80;
 char webuser[32] = "";

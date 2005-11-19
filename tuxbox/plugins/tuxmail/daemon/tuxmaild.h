@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.27  2005/11/19 14:38:12  robspr1
+ * - add different behaviour in marking mails green in the plugin
+ *
  * Revision 1.26  2005/11/11 18:42:16  robspr1
  * - /tmp/tuxmail.new holds number of new files /  restrict reset flags for unseen mails in IMAP
  *
@@ -224,6 +227,8 @@ enum
 	UNSEEN, EXPUNGE
 };
 
+#define MAXMAIL 100													// should be the same in tuxmail.h
+
 // account database
 
 struct
@@ -242,6 +247,8 @@ struct
 	char inbox[64];
 	int  mail_all;
 	int  mail_new;
+	int  mail_unread;
+	int  mail_read;
 
 }account_db[10];
 
@@ -285,7 +292,7 @@ char webuser[32], webpass[32];
 char encodedstring[512], decodedstring[512];
 int startdelay, intervall, skin;
 char logging, logmode, audio, lcd, osd, admin, savedb, mailrd;
-int video;
+int video, typeflag;
 char online = 1;
 char mailread = 0;
 char inPOPCmd = 0;

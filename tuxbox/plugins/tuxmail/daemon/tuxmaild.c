@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.38  2005/11/19 14:38:24  robspr1
+ * - add different behaviour in marking mails green in the plugin
+ *
  * Revision 1.37  2005/11/13 14:18:30  robspr1
  * - don't clear audio-flag in cause of DSP error
  *
@@ -170,6 +173,7 @@ int ReadConf()
 			fprintf(fd_conf, "LCD=Y\n");
 			fprintf(fd_conf, "OSD=G\n\n");
 			fprintf(fd_conf, "SKIN=1\n\n");
+			fprintf(fd_conf, "TYPEFLAG=1\n\n");
 			fprintf(fd_conf, "ADMIN=Y\n\n");
 			fprintf(fd_conf, "MAILCACHE=0\n");
 			fprintf(fd_conf, "MAILDIR=\\tmp\\\n");		
@@ -244,6 +248,10 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "SKIN=")))
 			{
 				sscanf(ptr + 5, "%d", &skin);
+			}
+			else if((ptr = strstr(line_buffer, "TYPEFLAG=")))
+			{
+				sscanf(ptr + 9, "%d", &typeflag);
 			}
 			else if((ptr = strstr(line_buffer, "ADMIN=")))
 			{
@@ -374,7 +382,7 @@ int ReadConf()
 
 	// check for update
 
-		if(!startdelay || !intervall || !logging || !logmode || !savedb || !audio || !video || !lcd || !osd || !skin || !admin || !webport)
+		if(!startdelay || !intervall || !logging || !logmode || !savedb || !audio || !video || !lcd || !osd || !skin || !typeflag || !admin || !webport)
 		{
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "missing Param(s), update Config") : printf("TuxMailD <missing Param(s), update Config>\n");
 
@@ -429,6 +437,11 @@ int ReadConf()
 			{
 				skin = 1;
 			}
+			
+			if(!typeflag)
+			{
+				typeflag = 1;
+			}
 
 			if(!admin)
 			{
@@ -450,6 +463,7 @@ int ReadConf()
 			fprintf(fd_conf, "LCD=%c\n", lcd);
 			fprintf(fd_conf, "OSD=%c\n\n", osd);
 			fprintf(fd_conf, "SKIN=%d\n\n", skin);
+			fprintf(fd_conf, "TYPEFLAG=%d\n\n", typeflag);
 			fprintf(fd_conf, "ADMIN=%c\n\n", admin);
 			fprintf(fd_conf, "MAILCACHE=%d\n", mailcache);
 			fprintf(fd_conf, "MAILDIR=%s\n", maildir);
@@ -556,6 +570,13 @@ int ReadConf()
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "SKIN=%d invalid, set to \"1\"", skin) : printf("TuxMailD <SKIN=%d invalid, set to \"1\">\n", skin);
 
 			skin = 1;
+		}
+
+		if(typeflag < 1 || typeflag > 3)
+		{
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "TYPEFLAG=%d invalid, set to \"1\"", typeflag) : printf("TuxMailD <TYPEFLAG=%d invalid, set to \"1\">\n", typeflag);
+
+			typeflag = 1;
 		}
 
 		if(admin != 'Y' && admin != 'N')
@@ -3399,6 +3420,8 @@ int CheckAccount(int account)
 	
 		account_db[account].mail_all = messages;
 		account_db[account].mail_new = 0;
+		account_db[account].mail_unread = 0;
+		account_db[account].mail_read = 0;
 		deleted_messages = 0;
 
 	// get mail info
@@ -3634,8 +3657,27 @@ int CheckAccount(int account)
 							{
 								if(fd_status)
 								{
-									fprintf(fd_status, "|O|");
-
+									if( typeflag > 1 )
+									{
+										if((*(ptr - 2) == 'N') || (*(ptr - 2) == 'n'))
+										{
+											fprintf(fd_status, "|n|");
+											if( (account_db[account].mail_read + account_db[account].mail_new + account_db[account].mail_unread) < MAXMAIL )
+											{
+												account_db[account].mail_unread++;
+											}
+										}
+										else
+										{
+											fprintf(fd_status, "|O|");
+											account_db[account].mail_read++;
+										}
+									}
+									else
+									{
+										fprintf(fd_status, "|O|");
+									}
+									
 									while(*ptr != '\n')
 									{
 										fprintf(fd_status, "%c", *ptr++);
@@ -3793,7 +3835,7 @@ int CheckAccount(int account)
 				{
 					rewind(fd_status);
 
-					fprintf(fd_status, "%.1d %s %s %.3d/%.3d\n", account, timeinfo, account_db[account].name, account_db[account].mail_new, account_db[account].mail_all - deleted_messages);
+					fprintf(fd_status, "%.1d %s %s %.3d/%.3d\n", account, timeinfo, account_db[account].name, account_db[account].mail_new + account_db[account].mail_unread, account_db[account].mail_all - deleted_messages);
 				}
 
 				free(known_uids);
@@ -4066,48 +4108,55 @@ void ShowLCD(int mails)
 {
 	int fd_lcd;
 	int x, y;
-	static int sum = 0;
-
-	// mark lcd as locked
-
-		if(unlink(LCKFILE))
-		{
-			sum = mails;
-		}
-		else
-		{
-			sum += mails;
-		}
-
-		fclose(fopen(LCKFILE, "w"));
-
-	// clear counter area
-
-		for(y = 0; y < 15; y++)
-		{
-	    		for(x = 0; x < 34; x++)
-			{
-				lcd_buffer[74 + x + ((23 + y)/8)*120] &= ~(1 << ((23 + y)%8));
-			}
-		}
-
-	// set new counter
-
-		if(sum > 99)
-		{
-    	    		RenderLCDDigit(sum/100, 74, 23);
-    	    		RenderLCDDigit(sum%100/10, 86, 23);
-    	    		RenderLCDDigit(sum%10, 98, 23);
-		}
-		else if(sum > 9)
-		{
-    	    		RenderLCDDigit(sum/10, 80, 23);
-    	    		RenderLCDDigit(sum%10, 92, 23);
-		}
-		else
-		{
-			RenderLCDDigit(sum, 86, 23);
-		}
+    static int sum = 0;
+    
+    // mark lcd as locked
+    
+	    if(unlink(LCKFILE))
+    	{
+    		sum = mails;
+    	}
+    	else
+    	{
+    		if( typeflag == 1 )
+    		{
+    			sum += mails;
+    		}
+    		else
+    		{
+    			sum = mails;
+    		}
+    	}
+    
+    	fclose(fopen(LCKFILE, "w"));
+    
+    // clear counter area
+    
+    	for(y = 0; y < 15; y++)
+    	{	
+        	for(x = 0; x < 34; x++)
+    		{
+    			lcd_buffer[74 + x + ((23 + y)/8)*120] &= ~(1 << ((23 + y)%8));
+    		}
+    	}
+    
+    // set new counter
+    
+    	if(sum > 99)
+    	{
+            RenderLCDDigit(sum/100, 74, 23);
+            RenderLCDDigit(sum%100/10, 86, 23);
+            RenderLCDDigit(sum%10, 98, 23);
+    	}
+    	else if(sum > 9)
+    	{
+            RenderLCDDigit(sum/10, 80, 23);
+            RenderLCDDigit(sum%10, 92, 23);
+    	}
+    	else
+    	{
+    		RenderLCDDigit(sum, 86, 23);
+    	}
 
 	// copy to lcd
 
@@ -4138,13 +4187,29 @@ void NotifyUser(int mails)
 	char *http_cmd2 = "GET /cgi-bin/xmessage?timeout=10&caption=TuxMail%20Information&body=";
 	char *http_cmd3 = "GET /control/message?nmsg=";
 	char *http_cmd4 = "GET /control/message?popup=";
+	static int sum = 0;
 
 	// write notify-file
+	    if(unlink(NOTIFILE))
+   		{
+	   		sum = mails;
+   		}
+    	else
+    	{
+    		if( typeflag == 1 )
+	    	{
+    			sum += mails;
+    		}
+    		else
+    		{
+	    		sum = mails;
+    		}
+    	}
 		FILE* pipe;
 		pipe = fopen(NOTIFILE,"w");
 		if( pipe != NULL)
 		{
-			fprintf(pipe, "%d", mails);
+			fprintf(pipe, "%d", sum);
 			fclose(pipe);
 		}
 
@@ -4196,12 +4261,12 @@ void NotifyUser(int mails)
 					{
 						if(video == 2)
 						{
-							sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
+							sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new + account_db[loop].mail_unread, account_db[loop].name);
 						}
 
 						if(video == 3 || video == 4)
 						{
-							sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
+							sprintf(tmp_buffer, (osd == 'G') ? "Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A" : "Account%%20#%d:%%20%.3d%%20Mail(s)%%20for%%20%s%%0A", loop, account_db[loop].mail_new + account_db[loop].mail_unread, account_db[loop].name);
 						}
 
 						strcat(http_cmd, tmp_buffer);
@@ -4319,8 +4384,8 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.37 $";
-	int param, nodelay = 0, account, mailstatus;
+	char cvs_revision[] = "$Revision: 1.38 $";
+	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
 
@@ -4542,7 +4607,7 @@ int main(int argc, char **argv)
 		    system("cp /var/tuxbox/config/tuxmail/tuxmail.[0-9] /tmp 2>/dev/null");
 		}
 
-	// remove any nitification file
+	// remove any notification file
 	
 		unlink(NOTIFILE);
 		
@@ -4563,6 +4628,7 @@ int main(int argc, char **argv)
 				}
 
 				mailstatus = 0;
+				unread_mailstatus = 0;
 				if (!inPOPCmd)
 				{
 					inPOPCmd = 1;
@@ -4570,9 +4636,10 @@ int main(int argc, char **argv)
 					{
 						if(CheckAccount(account))
 						{
-							slog ? syslog(LOG_DAEMON | LOG_INFO, "Account %d = %.3d/%.3d Mail(s) for %s", account, account_db[account].mail_new, account_db[account].mail_all - deleted_messages, account_db[account].name) : printf("TuxMailD <Account %d = %.3d/%.3d Mail(s) for %s>\n", account, account_db[account].mail_new, account_db[account].mail_all - deleted_messages, account_db[account].name);
+							slog ? syslog(LOG_DAEMON | LOG_INFO, "Account %d = %.3d(%.3d)/%.3d Mail(s) for %s", account, account_db[account].mail_new, account_db[account].mail_unread, account_db[account].mail_all - deleted_messages, account_db[account].name) : printf("TuxMailD <Account %d = %.3d(%.3d)/%.3d Mail(s) for %s>\n", account, account_db[account].mail_new, account_db[account].mail_unread, account_db[account].mail_all - deleted_messages, account_db[account].name);
 	
 							mailstatus += account_db[account].mail_new;
+							unread_mailstatus += account_db[account].mail_unread;
 						}
 						else
 						{
@@ -4584,7 +4651,7 @@ int main(int argc, char **argv)
 
 				if(mailstatus)
 				{
-					NotifyUser(mailstatus);
+					NotifyUser(mailstatus + unread_mailstatus);
 				}
 			}
 
