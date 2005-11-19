@@ -15,4 +15,4 @@ install_DATA = \
 	folder.png format_off.png format_on.png green-button.png info-bg.png l.png lbarrow.png \
 	lbarrow_down.png lbarrow_left.png lbarrow_right.png lbarrow_up.png lcdmenu.png logo.png \
 	no-button.png r.png rec_symbol-fs8.png red-button.png \
-	tl.png tr.png unchecked.png yellow-button.png
+	tl.png tr.png unchecked.png yellow-button.png t.png
