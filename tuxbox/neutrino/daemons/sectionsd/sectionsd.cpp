@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.196 2005/11/12 12:10:37 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.197 2005/11/20 15:11:40 mogway Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -60,6 +60,10 @@
 #include <connection/basicsocket.h>
 #include <connection/basicserver.h>
 
+#include <zapit/xmlinterface.h>
+#include <zapit/settings.h>
+//#include <configfile.h>
+
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
 #include <boost/shared_ptr.hpp>
 
@@ -70,6 +74,8 @@
 #include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
+#include "SIbouquets.hpp"
+#include "SInetworks.hpp"
 #include "SIsections.hpp"
 
 
@@ -92,8 +98,28 @@
 //#define TIME_SDT_SCHEDULED_PAUSE 12* 60* 60
 // -- shorter time for pause should  result in better behavior  (rasc, 2005-05-02)
 #define TIME_SDT_SCHEDULED_PAUSE 2* 60* 60
-#define TIME_SDT_SKIPPING 5
+//#define TIME_SDT_SKIPPING 5
+//We are very nice here. Start scanning for channels, if the user stays for XX secs on that channel
+#define TIME_SDT_BACKOFF	30
+//Sleeping when TIME_SDT_NODATA seconds no NEW section was received
+#define TIME_SDT_NONEWDATA	5
+//How many BATs shall we read per transponder
+#define MAX_BAT 5
+//How many other SDTs shall we puzzle per transponder at the same time
+#define MAX_CONCURRENT_OTHER_SDT 5
+//How many other SDTs shall we assume per tranponder
+#define MAX_OTHER_SDT 70
+//How many sections can a table consist off?
+#define MAX_SECTIONS 0x1f
+//Okay, since zapit has got nothing do to with scanning - we read it on our own
+#define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
 
+//Set pause for NIT
+#define TIME_NIT_SCHEDULED_PAUSE 2* 60* 60
+//We are very nice here. Start scanning for channels, if the user stays for XX secs on that channel
+#define TIME_NIT_BACKOFF	20
+//Sleeping when TIME_NIT_NODATA seconds no NEW section was received
+#define TIME_NIT_NONEWDATA	5
 
 // Timeout bei tcp/ip connections in ms
 #define READ_TIMEOUT_IN_SECONDS  2
@@ -135,6 +161,7 @@ static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 //static DMX dmxSDT(0x11, 256);
 static DMX dmxEIT(0x12, 1024);
 static DMX dmxSDT(0x11, 64);
+static DMX dmxNIT(0x10, 64);
 
 // Houdini: added for Premiere Private EPG section for Sport/Direkt Portal
 static DMX dmxPPT(0x00, 256);
@@ -461,6 +488,39 @@ struct OrderServiceName
 		return strcasecmp(p1->serviceName.c_str(), p2->serviceName.c_str()) < 0;
 	}
 };
+/*
+std::string UTF8_to_UTF8XML(const char * s)
+{
+	std::string r;
+	
+	while ((*s) != 0)
+	{
+		switch (*s)
+		{
+		case '<':           
+			r += "&lt;";
+			break;
+		case '>':
+			r += "&gt;";
+			break;
+		case '&':
+			r += "&amp;";
+			break;
+		case '\"':
+			r += "&quot;";
+			break;
+		case '\'':
+			r += "&apos;";
+			break;
+		default:
+			r += *s;
+		}
+		s++;
+	}
+	return r;
+}
+
+*/
 
 typedef std::set<SIservicePtr, OrderServiceName > MySIservicesOrderServiceName;
 static MySIservicesOrderServiceName mySIservicesOrderServiceName;
@@ -478,24 +538,59 @@ static void addService(const SIservice &s)
 
 	SIservicePtr sptr(sp);
 
-	// Controlcodes entfernen
+	// Leere Servicenamen in ServiceID in hex umbenennen
 	char servicename[50];
 
-	strncpy(servicename, sptr->serviceName.c_str(), sizeof(servicename) - 1);
+	if (sptr->serviceName.empty()) {
+		sprintf(servicename, "%04x",  sptr->service_id);
+		servicename[sizeof(servicename) - 1] = 0;
+		sptr->serviceName = servicename;
+	} 
+//	else {	
+		//strncpy(servicename, UTF8_to_UTF8XML(sptr->serviceName.c_str()).c_str(), sizeof(servicename) - 1);
+//		strncpy(servicename, sptr->serviceName.c_str(), sizeof(servicename) - 1);
+//	}
+//	servicename[sizeof(servicename) - 1] = 0;
+//	convert_UTF8_To_UTF8_XML(cI->second.getName().c_str()).c_str(),
+		
+//	removeControlCodes(servicename);
+	
+	//	servicename[sizeof(servicename) - 1] = 0;
+	//}
 
-	servicename[sizeof(servicename) - 1] = 0;
-
-	removeControlCodes(servicename);
-
-	sptr->serviceName = servicename;
-
-	mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
+//	sptr->serviceName = servicename;
+	
+//	printf("Service-Name: %s\n", sptr->serviceName.c_str());
+	
+	mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));	
 
 	if (sptr->nvods.size())
 		mySIservicesNVODorderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
 
 	//  if(sptr->serviceID==0x01 || sptr->serviceID==0x02 || sptr->serviceID==0x04)
 	mySIservicesOrderServiceName.insert(sptr);
+}
+
+// Fuegt einen BouquetEntry in alle Mengen ein
+static void addBouquetEntry(const SIbouquet &s)
+{
+	SIbouquet *bp = new SIbouquet(s);
+
+	if (!bp)
+	{
+		printf("[sectionsd::addBouquetEntry] new SIbouquet failed.\n");
+		throw std::bad_alloc();
+	}
+
+//	printf("Service Name: %s\n",(*s)->serviceName.c_str());
+	dprintf("Bouquet ID: %hu\n",bp->bouquet_id);
+	dprintf("Bouquet Name: %s\n",bp->bouquetName.c_str());
+	dprintf("Original Network ID: %hu\n",bp->original_network_id);
+	dprintf("Transport Stream ID: %hu\n",bp->transport_stream_id);
+	dprintf("Service ID: %hu\n",bp->service_id);
+	dprintf("Service Typ: %hhu\n",bp->serviceTyp);
+//	printf("Provider Name: %s\n",(*s)->providerName.c_str());
+
 }
 
 /*
@@ -1101,7 +1196,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.196 2005/11/12 12:10:37 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.197 2005/11/20 15:11:40 mogway Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1431,14 +1526,67 @@ std::vector<long long>	messaging_skipped_sections_ID [0x22];			// 0x4e .. 0x6f
 static long long 	messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
 static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
 
-std::vector<long long>	messaging_sdt_skipped_sections_ID [2];			// 0x42, 0x46
-static long long 	messaging_sdt_sections_max_ID [2];			// 0x42, 0x46
-static int 		messaging_sdt_sections_got_all [2];			// 0x42, 0x46
+//std::vector<long long>	messaging_sdt_skipped_sections_ID [2];			// 0x42, 0x46
+//static long long 	messaging_sdt_sections_max_ID [2];			// 0x42, 0x46
+//static int 		messaging_sdt_sections_got_all [2];			// 0x42, 0x46
+static bool 		messaging_sdt_actual_sections_got_all;						// 0x42
+static bool		messaging_sdt_actual_sections_so_far [MAX_SECTIONS];				// 0x42
+static t_transponder_id	messaging_sdt_other_sections_got_all [MAX_OTHER_SDT];				// 0x46
+static bool		messaging_sdt_other_sections_so_far [MAX_CONCURRENT_OTHER_SDT] [MAX_SECTIONS];	// 0x46
+static t_transponder_id	messaging_sdt_other_tid [MAX_CONCURRENT_OTHER_SDT];				// 0x46
+static bool		messaging_bat_sections_got_all [MAX_BAT];					// 0x4A
+static bool		messaging_bat_sections_so_far [MAX_BAT] [MAX_SECTIONS];				// 0x4A
+static t_bouquet_id	messaging_bat_bouquet_id [MAX_BAT];						// 0x4A
+static bool		sdt_backoff = true;
+static bool		new_services = false;
+
+static bool		nit_backoff = true;
+static bool 		messaging_nit_actual_sections_got_all;						// 0x40
+static bool		messaging_nit_actual_sections_so_far [MAX_SECTIONS];				// 0x40
 
 static bool	messaging_wants_current_next_Event = false;
 static time_t	messaging_last_requested = time(NULL);
 static bool	messaging_neutrino_sets_time = false;
 static bool 	messaging_WaitForServiceDesc = false;
+
+static void initSDTtables()
+{
+	//Init SDT Actual		
+	messaging_sdt_actual_sections_got_all = false;
+	for (int i = 0; i < MAX_SECTIONS; i++) messaging_sdt_actual_sections_so_far[i] = false;
+	
+	//Init MAX_BAT BAT - Tables. There can mere more than one!
+	for ( int i = 0; i < MAX_BAT; i++) {
+		for (int j = 0; j < MAX_SECTIONS; j++)
+			messaging_bat_sections_so_far[i] [j] = false;
+		messaging_bat_bouquet_id[i] = 0;
+		messaging_bat_sections_got_all[i] = false;
+	}
+	//Init MAX_OTHER_SDT - Tables. There can mere more than one!
+	for ( int i = 0; i < MAX_CONCURRENT_OTHER_SDT; i++) {
+		for (int j = 0; j < MAX_SECTIONS; j++)
+			messaging_sdt_other_sections_so_far[i] [j] = false;
+		messaging_sdt_other_tid[i] = 0;
+	}
+	for ( int i = 0; i < MAX_OTHER_SDT; i++)
+		messaging_sdt_other_sections_got_all[i] = 0;
+	//User tuned. We are not greedy. So backoff timeout
+	sdt_backoff = true;
+	new_services = false;
+	return;
+}
+
+static void initNITtables()
+{
+
+	//Init NIT Actual		
+	messaging_nit_actual_sections_got_all = false;
+	for (int i = 0; i < MAX_SECTIONS; i++) messaging_nit_actual_sections_so_far[i] = false;
+
+
+	nit_backoff = true;
+	return; 
+}
 
 static void commandserviceChanged(int connfd, char *data, const unsigned dataLength)
 {
@@ -1471,14 +1619,16 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 			messaging_sections_max_ID[i - 0x4e] = -1;
 			messaging_sections_got_all[i - 0x4e] = false;
 		}
-
+/*
 		for ( int i = 0; i <= 1; i++)
 		{
 			messaging_sdt_skipped_sections_ID[i].clear();
 			messaging_sdt_sections_max_ID[i] = -1;
 			messaging_sdt_sections_got_all[i] = false;
 		}
-
+*/
+		initNITtables();
+		initSDTtables();		
 		doWakeUp = true;
 
 
@@ -1526,6 +1676,7 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		// nur wenn lange genug her, oder wenn anderer Service :)
 		dmxEIT.change( 0 );
 		dmxSDT.change( 0 );
+		dmxNIT.change( 0 );
 	}
 	else
 		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
@@ -2664,8 +2815,839 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	return true;
 }
 
+//Parses services.xml and delivers the node with the concerning transponder
+xmlNodePtr FindTransponder(xmlNodePtr provider, const t_original_network_id onid, const t_transport_stream_id tsid)
+{
+	xmlNodePtr found = NULL;
+	
+	while (provider && !found)
+	{
+		
+		dprintf("going to search dvb-%c provider %s\n", xmlGetName(provider)[0], xmlGetAttribute(provider, "name"));
+		xmlNodePtr transponder = provider->xmlChildrenNode;
+		
+		while (transponder && !found)
+		{
+			if ( (xmlGetNumericAttribute(transponder, "id", 16) == tsid) && (xmlGetNumericAttribute(transponder, "onid", 16) == onid) )
+				found = transponder;
+			else
+			 	transponder = transponder->xmlNextNode;
+		}
+		if (!found)
+			provider = provider->xmlNextNode;
+	}
+	return found;
+}
+
+xmlNodePtr GetProvider(xmlNodePtr provider, xmlNodePtr tp_node)
+{
+	xmlNodePtr found = NULL;
+
+	while (provider && !found)
+	{		
+		xmlNodePtr transponder = provider->xmlChildrenNode;
+		
+		while (transponder && !found)
+		{
+			if ( (xmlGetNumericAttribute(transponder, "id", 16) == xmlGetNumericAttribute(tp_node, "id", 16)) &&
+				(xmlGetNumericAttribute(transponder, "onid", 16) == xmlGetNumericAttribute(tp_node, "onid", 16)) )
+				found = provider;
+			else
+				transponder = transponder->xmlNextNode;
+		}
+		if (!found)
+			provider = provider->xmlNextNode;
+	}
+	return found;
+}
+
+//stolen from zapitools.cpp
+std::string UTF8_to_UTF8XML(const char * s)
+{
+	std::string r;
+	
+	while ((*s) != 0)
+	{
+		/* cf.
+		 * http://www.w3.org/TR/2004/REC-xml-20040204/#syntax
+		 * and
+		 * http://www.w3.org/TR/2004/REC-xml-20040204/#sec-predefined-ent
+		 */
+		switch (*s)
+		{
+		case '<':           
+			r += "&lt;";
+			break;
+		case '>':
+			r += "&gt;";
+			break;
+		case '&':
+			r += "&amp;";
+			break;
+		case '\"':
+			r += "&quot;";
+			break;
+		case '\'':
+			r += "&apos;";
+			break;
+		default:
+			r += *s;
+		}
+		s++;
+	}
+	return r;
+}
+//stolen from scan.cpp
+void cp(char * from, char * to)
+{
+	char cmd[256] = "cp -f ";
+	strcat(cmd, from);
+	strcat(cmd, " ");
+	strcat(cmd, to);
+	system(cmd);
+}
+
+static void write_xml_header(FILE * fd)
+{
+	fprintf(fd, 
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<!--\n"
+		"  This file was automatically generated by the sectionsd.\n"
+		"  It contains all differences between the services.xml and\n"
+		"  what is currently signalled within the SDTs.\n"
+		"  It shall be merged with services.xml when the box shuts down.\n"
+		"-->\n"
+	       "<zapit>\n");
+}
+
+static void write_xml_footer(FILE *fd)
+{
+	fprintf(fd, "</zapit>\n");
+}
+
+//Writes transponder entry or copies all existing tps of a provider.
+static void write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node, const bool is_sat, const bool copy)
+{
+	char tp_str[256] = "";
+	char buffer[256] = "";
+	char prov_end[10] = "";
+	
+	std::string tsid_str;
+	std::string onid_str;	
+	std::string frequency;
+	std::string symbol_rate;
+	std::string inversion;
+	std::string fec_inner;
+	std::string modulation;
+	
+	onid_str = xmlGetAttribute(tp_node, "onid");
+	tsid_str = xmlGetAttribute(tp_node, "id");
+	frequency = xmlGetAttribute(tp_node, "frequency");
+	symbol_rate = xmlGetAttribute(tp_node, "symbol_rate");
+	inversion =  xmlGetAttribute(tp_node, "inversion");
+	fec_inner =  xmlGetAttribute(tp_node, "fec_inner");
+	
+	if (is_sat)
+		modulation =  xmlGetAttribute(tp_node, "polarization");
+	else
+		modulation =  xmlGetAttribute(tp_node, "modulation");
+	
+	sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" polarization=\"%s\">\n",tsid_str.c_str(),
+				onid_str.c_str(),
+				frequency.c_str(),
+				inversion.c_str(),
+				symbol_rate.c_str(),
+				fec_inner.c_str(),
+				modulation.c_str());
+
+	if (!copy)
+		fprintf(dst, tp_str);
+	else {
+		if (!feof(src)) {
+			fgets(buffer, 255, src);
+			
+			if (is_sat)
+				strncpy(prov_end,"\t</sat>\n", 8);
+			else
+				strncpy(prov_end,"\t</cable>\n", 10);
+			
+			//find tp in currentservices.xml
+			while( (!feof(src)) && (strcmp(buffer, prov_end) != 0) && (strcmp(buffer, tp_str) != 0) )
+			{
+				fprintf(dst, buffer);
+				fgets(buffer, 255, src);
+			}
+			//If the Transponder alredy existed. This isn't reached at the moment because if the transponder
+			//didn't exist we don't call the update function. But maybe this is to be changed:
+			//We should save if the update came from SDT other and update it once again, if
+			//we find SDT ACTUAL. So we leave it here. Save could be done through another node SDT in
+			//currentservices.xml. Should be easy to realize...
+			if ( (!feof(src)) && (!strcmp(buffer, tp_str)) ) {
+				while( (!feof(src)) && (strncmp(buffer, "\t\t</transponder>\n",17) != 0) )
+					fgets(buffer, 255, src);
+			}
+		}	
+	}
+	return;
+}
+
+//return true for sat, false for cable
+//The function fulfills two purposes. It writes the correct provider entry (if copy = false) or it copies
+//all data including the provider entry if it existed
+//Otherwise it reads to the end signalling that it didn't find the provider
+static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, const bool copy)
+{
+	char prov_str[256] = "";
+	char buffer[256] = "";
+	std::string frontendType; 
+	std::string provider_name;
+	std::string diseqc;
+	bool is_sat = false;
+	
+	frontendType = xmlGetName(provider);
+	provider_name = xmlGetAttribute(provider, "name");
+	
+	if (!strcmp(frontendType.c_str(), "sat")) {
+		diseqc = xmlGetAttribute(provider, "diseqc");
+		sprintf(prov_str,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());	
+		is_sat = true;
+	}
+	else {
+		sprintf(prov_str,"\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
+		is_sat = false;
+	}
+	
+	if (!copy)
+		fprintf(dst, prov_str);
+	else {
+		if (!feof(src)) {
+			fgets(buffer, 255, src);
+			//find prov in currentservices.xml
+			while( (!feof(src)) && (strncmp(buffer, "</zapit>\n", 8) != 0) && (strcmp(buffer, prov_str) != 0) )
+			{
+				fprintf(dst, buffer);
+				fgets(buffer, 255, src);
+			}
+			if (strcmp(buffer, prov_str) != 0) {
+				while (!feof(src))
+					fgets(buffer, 255, src);
+				//printf("reading to the end!\n");
+			} else
+				fprintf(dst, buffer);
+		}
+	}
+	
+	return is_sat;
+}
+
+//Determines which action (none, add, replace) should be taken for current service
+//This funtion considers the entry scanType in scan.conf.
+static int get_action(const xmlNodePtr tp_node, const MySIservicesOrderUniqueKey::iterator s, const int scanType, const bool overwrite)
+{
+	//And now node points to transponders channels first entry
+	xmlNodePtr node = tp_node->xmlChildrenNode;
+	std::string name;
+	
+	if ( ((s->second->serviceTyp == 1) && (scanType == 1)) || 
+	     ((s->second->serviceTyp == 2) && (scanType == 2)) || 
+	     (((s->second->serviceTyp == 1) || (s->second->serviceTyp == 2)) && (scanType == 0)) || 
+	     (scanType == 3) ) {
+	
+		while (xmlGetNextOccurence(node, "channel") != NULL) {
+			if (s->second->service_id == xmlGetNumericAttribute(node, "service_id", 16)) {
+				name = xmlGetAttribute(node, "name");
+				if ( (s->second->serviceTyp == xmlGetNumericAttribute(node, "service_type", 16)) &&
+				     (!strcmp(s->second->serviceName.c_str(), name.c_str())) ) {
+				     	dprintf("[sectionsd] Service %s okay\n", name.c_str());
+					return 0;	//service okay
+				}	
+				else {
+					if (overwrite) {
+						dprintf("[sectionsd] Replacing Service %s\n", name.c_str());
+						return 2; //replace
+					}
+					else {
+						dprintf("[sectionsd] Service %s changed but signalled from SDT_Other\n", name.c_str());
+						return 0; //service not okay, but came from SDT_OTHER - we can't truly trust
+					}
+				}
+			}
+			node = node->xmlNextNode;
+		}
+		dprintf("[sectionsd] Adding Service %s\n", s->second->serviceName.c_str());
+		return 1;	//add
+	}
+	return 0;		//scanType didn't match do not handle in any case
+}
+
+//This updates the /tmp/currentservices.xml with the differences between services.xml and SDT content
+//It contains two loops. Each is nested. First loop adds and replaces the services which are new in the SDT
+//The second loop removes Services which are in services.xml and not in the SDT anymore.
+//Returns true if the transponder needs to be updated
+bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwrite, const int scanType, const bool is_current)
+{
+	bool is_needed = false;
+	bool newprov = false;
+	bool is_sat = false;
+	
+	std::string name;
+	
+	FILE * src = NULL;
+	FILE * dst = NULL;
+	char buffer[256] = "";
+	char prov_end[10] = "";
+	
+
+//	lockServices();
+	for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s != mySIservicesOrderUniqueKey.end(); s++)
+	{
+		
+		if ( (s->second->transport_stream_id == xmlGetNumericAttribute(tp_node, "id", 16)) && 
+			(s->second->original_network_id == xmlGetNumericAttribute(tp_node, "onid", 16)) )
+		{
+			int action = get_action(tp_node, s, scanType, overwrite);
+			
+			if (action > 0) {
+				if (!is_needed) {
+					is_needed = true;
+					//create new currentservices
+					if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
+						dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
+						return false;
+					}
+					if (!(src = fopen(CURRENTSERVICES_XML, "r"))) {
+						//if currentservices doesn't yet exist
+						newprov = true;
+						write_xml_header(dst);
+						is_sat = write_xml_provider(src, dst, provider, false);
+					} else {
+						//if it exists. copy till provider
+						is_sat = write_xml_provider(src, dst, provider, true);
+						//if eof provider didn't exist
+						if (feof(src)) {
+							newprov = true;
+							write_xml_provider(src, dst, provider, false);
+						}
+						else
+							//copy all transponders belonging to current prov
+							write_xml_transponder(src, dst, tp_node, is_sat, true);
+					}
+					// write new transponder node
+					write_xml_transponder(src, dst, tp_node, is_sat, false);
+				}
+				//check which action is necessary for current service
+				//0 = nothing / 1 = add / 2 = replace
+				switch (action)
+				{
+					case 1:
+						fprintf(dst,
+						"\t\t\t<channel action=\"%s\" service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
+						"add",
+						s->second->service_id,
+						UTF8_to_UTF8XML(s->second->serviceName.c_str()).c_str(),
+						s->second->serviceTyp);	
+						break;
+					case 2:
+						fprintf(dst,
+						"\t\t\t<channel action=\"%s\" service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
+						"replace",
+						s->second->service_id,
+						UTF8_to_UTF8XML(s->second->serviceName.c_str()).c_str(),
+						s->second->serviceTyp);	
+						break;
+					default:
+						break;
+				}
+
+			}
+		}
+	}
+	//Second loop to detect services which are not longer in SDT
+	//Only remove if Actual SDT. This could be changed, if all providers would send correct data
+	//It is pretty much the same as the first loop. Check there. Later: merge them together?
+	if (overwrite) {
+		xmlNodePtr node = tp_node->xmlChildrenNode;
+	
+		while (xmlGetNextOccurence(node, "channel") != NULL) {
+		
+			MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin();
+			while ( (s != mySIservicesOrderUniqueKey.end()) && 
+				(s->second->service_id != xmlGetNumericAttribute(node, "service_id", 16)) )
+				s++;
+			if (s == mySIservicesOrderUniqueKey.end()) {
+				if (!is_needed) {
+				
+					is_needed = true;
+					//create new currentservices
+					if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
+						dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
+						return false;
+					}
+					if (!(src = fopen(CURRENTSERVICES_XML, "r"))) {
+						newprov = true;
+						write_xml_header(dst);
+						is_sat = write_xml_provider(src, dst, provider, false);
+					} else {
+						
+						is_sat = write_xml_provider(src, dst, provider, true);
+						if (!feof(src)) {
+							newprov = true;
+							write_xml_provider(src, dst, provider, false);
+						}
+						write_xml_transponder(src, dst, tp_node, is_sat, true);
+					}
+					
+					write_xml_transponder(src, dst, tp_node, is_sat, false);
+				}
+				name = xmlGetAttribute(node, "name");
+				
+				dprintf("[sectionsd] Removing Service %s\n", name.c_str());
+				fprintf(dst,
+					"\t\t\t<channel action=\"%s\" service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
+					"remove",
+					xmlGetNumericAttribute(node, "service_id", 16),
+					UTF8_to_UTF8XML(name.c_str()).c_str(),
+					xmlGetNumericAttribute(node, "service_type", 16));
+			}
+			node = node->xmlNextNode;
+		}	
+	}
+		
+//	unlockServices();
+
+	//If we chnged some services write the closing tags.
+	if (is_needed) {
+
+		fprintf(dst,"\t\t</transponder>\n");
+	
+		if (is_sat)
+			strncpy(prov_end,"\t</sat>\n", 8);
+		else
+			strncpy(prov_end,"\t</cable>\n", 10);
+		fprintf(dst,prov_end);
+		
+		if (newprov) {
+			write_xml_footer(dst);
+		}
+		else {
+			fgets(buffer, 255, src);
+			while(!feof(src))
+			{
+				fprintf(dst, buffer);
+				fgets(buffer, 255, src);
+			}	
+			fclose(src);
+		}
+
+		fclose(dst);
+	}
+		
+	return is_needed;
+}
+//SDT-Thread calls this function if it found a complete Service Description Table (SDT). Overwrite for actual = true - for other = false
+static bool updateTP(const t_original_network_id onid, const t_transport_stream_id tsid, const int scanType, const bool overwrite)
+{
+	xmlDocPtr service_parser = parseXmlFile(SERVICES_XML);
+	bool need_update = false;
+	
+	if (service_parser == NULL)
+		return false;
+			
+	xmlNodePtr services_tp = FindTransponder(xmlDocGetRootElement(service_parser)->xmlChildrenNode, onid, tsid);
+	
+	if (services_tp)
+	{
+		xmlNodePtr provider = GetProvider(xmlDocGetRootElement(service_parser)->xmlChildrenNode, services_tp);
+			
+		xmlDocPtr current_parser = parseXmlFile(CURRENTSERVICES_XML);
+		xmlNodePtr current_tp = NULL;
+		
+		if (current_parser != NULL)
+			current_tp = FindTransponder(xmlDocGetRootElement(current_parser)->xmlChildrenNode, onid, tsid);
+			
+		if (!current_tp)
+			need_update = updateCurrentXML(provider, services_tp, overwrite, scanType, false);
+		
+		xmlFreeDoc(current_parser);
+	}
+	else
+		printf("[sectionsd] No Transponder with ONID: %04x TSID: %04x was found in services.xml!\n", onid, tsid);
+		
+	xmlFreeDoc(service_parser);
+	
+	if (need_update)
+	{
+		cp(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
+		unlink(CURRENTSERVICES_TMP);
+
+		printf("[sectionsd] We updated Transponder ONID: %04x TSID: %04x in currentservices.xml!\n", onid, tsid);	
+
+	} else
+		dprintf("[sectionsd] No new services found!\n");	
+
+	return need_update;
+}
+
+xmlNodePtr getProvbyOrbitalPos(xmlNodePtr node, const unsigned short orbital_pos, const unsigned short east_west) {
+	while (node) {
+		if ( (xmlGetNumericAttribute(node, "orbital", 16) == orbital_pos) && (xmlGetNumericAttribute(node, "east_west", 16) == east_west) )
+			return node;
+		node = node->xmlNextNode;
+	}
+	return NULL;
+}
+
+xmlNodePtr FindTransponderFromProv(xmlNodePtr node, const t_original_network_id, const t_transport_stream_id tsid) {
+	xmlNodePtr transponder = NULL;	
+	
+	
+	return transponder;
+}
+
+// Fuegt einen Transponder in alle Mengen ein
+static bool updateNetwork(const SInetwork &s, const bool is_actual)
+{
+	SInetwork *nw = new SInetwork(s);
+	
+	t_transport_stream_id tsid;
+	t_original_network_id onid;
+	unsigned short orbital_pos;
+	struct satellite_delivery_descriptor *sdd;
+	const char *ddp;
+	unsigned long frequency;
+	unsigned short east_west;
+	unsigned short polarization;
+	unsigned short modulation;
+	unsigned long symbol_rate;
+	unsigned short fec_inner;
+	const bool need_update = false;
+	
+	xmlDocPtr service_parser = parseXmlFile(SERVICES_XML);
+	
+	xmlNodePtr services_tp = NULL;
+	
+	if (service_parser == NULL)
+		return false;
+
+	if (!nw)
+	{
+		printf("[sectionsd::updateNetwork] new SInetwork failed.\n");
+		throw std::bad_alloc();
+	}
+
+	ddp = &nw->delivery_descriptor[0];
+	sdd = (struct satellite_delivery_descriptor *)ddp;
+	tsid = nw->transport_stream_id;
+	onid = nw->original_network_id;
+	orbital_pos = (sdd->orbital_pos_hi << 8) | sdd->orbital_pos_lo;
+	frequency =  (sdd->frequency_1 << 24) | (sdd->frequency_2 << 16) | (sdd->frequency_3 << 8) | sdd->frequency_4;
+	east_west = sdd->west_east_flag;
+	polarization = sdd->polarization;
+	modulation = sdd->modulation;
+	fec_inner = sdd->fec_inner;
+	symbol_rate =  (sdd->symbol_rate_1 << 20) | (sdd->symbol_rate_2 << 12) | (sdd->symbol_rate_3 << 4) | sdd->symbol_rate_4;
+      //printf("ON:%04x TS:%04x Orb:%d E/W:%d Freq:%lu Pol:%d Mod:%d SR:%lu FEC:%d\n", onid, tsid, orbital_pos, east_west, frequency, polarization, modulation, symbol_rate, fec_inner);
+      /*
+	xmlNodePtr provider = getProvbyOrbitalPos(xmlDocGetRootElement(service_parser)->xmlChildrenNode, orbital_pos, east_west);
+      
+	if (!provider) {
+		provider = getProviderFromTransponder(xmlDocGetRootElement(service_parser)->xmlChildrenNode, onid, tsid);
+		if (!provider) {
+			printf("[sectionsd::updateNetwork] Provider not found.\n");
+			return false;
+		}
+	} else
+		services_tp = FindTransponderFromProv(provider, onid, tsid);
+*/	
+	if (!services_tp) {
+		printf("[sectionsd::updateNetwork] Transponder not found.\n");
+	
+	}
+
+
+	xmlFreeDoc(service_parser);
+	
+//	printf("Service Name: %s\n",(*s)->serviceName.c_str());
+//	dprintf("Bouquet ID: %hu\n",bp->bouquet_id);
+//	dprintf("Bouquet Name: %s\n",bp->bouquetName.c_str());
+//	dprintf("Original Network ID: %hu\n",bp->original_network_id);
+//	dprintf("Transport Stream ID: %hu\n",bp->transport_stream_id);
+//	dprintf("Service ID: %hu\n",bp->service_id);
+//	dprintf("Service Typ: %hhu\n",bp->serviceTyp);
+//	printf("Provider Name: %s\n",(*s)->providerName.c_str());
+
+	return need_update;
+}
+
+//little helper for sdt-thread
+static int get_bat_slot( t_bouquet_id bouquet_id)
+{
+	for (int i = 0; i < MAX_BAT; i++) {
+		if ( (messaging_bat_bouquet_id[i] == 0) || (messaging_bat_bouquet_id[i] == bouquet_id) ) {
+			messaging_bat_bouquet_id[i] = bouquet_id;
+			return i;
+		}
+	}
+	return -1;
+}
+
+//little helper for sdt-thread
+static int get_sdt_slot(t_transponder_id tid)
+{
+	for (int i = 0; i < MAX_CONCURRENT_OTHER_SDT; i++) {
+		//printf("1 pass trying to continue TID: %08x\n", messaging_sdt_other_tid[i]);
+	
+		if (messaging_sdt_other_tid[i] == tid) {
+			messaging_sdt_other_tid[i] = tid;
+			return i;
+		}
+	}
+	for (int i = 0; i < MAX_CONCURRENT_OTHER_SDT; i++) {
+		//printf("2 pass finding new slot for TID: %08x\n", messaging_sdt_other_tid[i]);
+		
+		if (messaging_sdt_other_tid[i] == 0) {
+			messaging_sdt_other_tid[i] = tid;
+			return i;		
+		}
+	}
+	return -1;
+}
+
+static bool is_other_sdt_ready(t_transponder_id tid)
+{
+	int i = 0;
+	while ( (i < MAX_OTHER_SDT) && (messaging_sdt_other_sections_got_all[i] != tid) )
+		i++;
+	if (messaging_sdt_other_sections_got_all[i] == tid)
+		return true;
+	else
+		return false;
+}
+
+static void tid_complete(t_transponder_id tid)
+{
+	int i = 0;
+	while ( (i < MAX_OTHER_SDT) && (messaging_sdt_other_sections_got_all[i] != 0) )
+		i++;
+	if (i < MAX_OTHER_SDT)
+		messaging_sdt_other_sections_got_all[i] = tid;
+	else {
+		messaging_sdt_other_sections_got_all[0] = tid;
+		printf("[sectionsd tid_complete] Too many completed SDTs. Try increasing MAX_OTHER_SDT!\n");
+	}
+		
+}
+
+//This has to be rewritten. I don't know how neutrino accesses its conf files...
+static int getscanType()
+{
+	FILE * scanconf = NULL;
+	char buffer[256] = "";
+	
+	if (!(scanconf = fopen(NEUTRINO_SCAN_SETTINGS_FILE, "r"))) {
+		dprintf("unable to open %s for reading", NEUTRINO_SCAN_SETTINGS_FILE);
+		return 3;
+	}
+	
+	while ( (!feof(scanconf)) && (strncmp(buffer, "scanType=", 9) != 0) )
+		fgets(buffer, 255, scanconf);
+	
+	if (!strncmp(buffer, "scanType=", 9))
+	{
+		switch (buffer[9]) {
+			case 0x30:	return 0;
+			case 0x31:	return 1;
+			case 0x32:	return 2;
+			case 0x33:	return 3;
+			case 0x34:	return 4;
+			default:	return 3;
+		}
+	}
+	else return 3;
+}
+
+
 //---------------------------------------------------------------------
-//			sdt-thread
+//nit-thread
+// reads nit for transponder list
+//---------------------------------------------------------------------
+static void *nitThread(void *)
+{
+
+	struct SI_section_header header;
+	char *buf;
+	const unsigned timeoutInMSeconds = 2000;
+
+	dmxNIT.addfilter(0x40, 0xfe);		//NIT actual = 0x40 + NIT other = 0x41
+
+	try
+	{
+		printf("[%sThread] pid %d start\n", "nit", getpid());
+
+		int timeoutsDMX = 0;
+		initNITtables();
+
+		time_t lastRestarted = time(NULL);
+		time_t lastData = time(NULL);
+		dmxNIT.start(); // -> unlock
+
+		for (;;)
+		{
+			time_t zeit = time(NULL);
+			
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
+			{
+				dmxNIT.stop(); // -> lock
+				dmxNIT.start(); // -> unlock
+				dprintf("[nitThread] dmxNIT restarted (dt=%ld)\n", (int)zeit - lastRestarted);
+
+				lastRestarted = zeit;
+				timeoutsDMX = 0;
+				lastData = zeit;
+			}
+
+			if (timeset)
+			{
+				// Nur wenn ne richtige Uhrzeit da ist
+
+				if ( (zeit > lastData + TIME_NIT_NONEWDATA) || nit_backoff )
+				{					
+					struct timespec abs_wait;
+
+					struct timeval now;
+
+					gettimeofday(&now, NULL);
+					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+					if ( nit_backoff ) {
+						abs_wait.tv_sec += (TIME_NIT_BACKOFF);
+						dprintf("dmxNIT: backing off %d seconds...\n",TIME_NIT_BACKOFF);
+					}
+					else
+					{
+						abs_wait.tv_sec += (TIME_NIT_SCHEDULED_PAUSE);
+						dprintf("dmxNIT: no new data for %d seconds\n", TIME_NIT_NONEWDATA);
+					}	
+					dmxNIT.real_pause();
+					pthread_mutex_lock( &dmxNIT.start_stop_mutex );
+										
+					dprintf("dmxNIT: going to sleep...\n");
+					
+					nit_backoff = false;
+					
+					int rs = pthread_cond_timedwait( &dmxNIT.change_cond, &dmxNIT.start_stop_mutex, &abs_wait );
+
+					if (rs == ETIMEDOUT)
+					{
+						dprintf("dmxNIT: waking up again - looking for new transponders :)\n");
+						pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
+#ifdef PAUSE_EQUALS_STOP
+						dmxNIT.real_unpause();
+#endif
+						dmxNIT.change( 0 ); // -> restart
+					}
+					else if (rs == 0)
+					{
+						dprintf("dmxNIT: waking up again - requested from .change()\n");
+						pthread_mutex_unlock( &dmxNIT.start_stop_mutex );						
+#ifdef PAUSE_EQUALS_STOP	
+						dmxNIT.real_unpause();
+#endif
+					}
+					else
+					{
+						dprintf("dmxNIT:  waking up again - unknown reason?!\n");
+						pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
+						dmxNIT.real_unpause();
+					}
+					// update zeit after sleep
+					zeit = time(NULL);
+					lastData = zeit;
+				}
+			}
+
+			if ( !nit_backoff ) {
+
+				buf = dmxNIT.getSection(timeoutInMSeconds, timeoutsDMX);
+
+				if (buf == NULL)
+					continue;
+
+				unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
+								((SI_section_header*)buf)->section_length_lo;
+				// copy the header
+				memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
+			
+				switch (header.table_id)
+				{
+				
+				case 0x40:
+					
+					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))					
+					{									
+						// Wir wollen nur aktuelle sections
+
+						lockMessaging();
+
+						if ( (!messaging_nit_actual_sections_got_all) &&
+							(!messaging_nit_actual_sections_so_far[header.section_number]) )
+						{
+							lastData = zeit;	
+					
+							dprintf("[nitThread] adding transponders [table 0x%x] (begin)\n", header.table_id);
+
+							SIsectionNIT nit(SIsection(sizeof(header) + section_length - 5, buf));
+
+							//lockServices();
+
+							for (SInetworks::iterator s = nit.networks().begin(); s != nit.networks().end(); s++)
+								updateNetwork(*s, true);
+
+							//unlockServices();
+
+							printf("[nitThread] added %d transponders (end)\n",  nit.networks().size());
+		
+							messaging_nit_actual_sections_so_far[header.section_number] = true;
+							messaging_nit_actual_sections_got_all = true;
+					
+							for (int i = 0; i <= (int) header.last_section_number; i++)
+							{
+								if (!messaging_nit_actual_sections_so_far[i])
+									messaging_nit_actual_sections_got_all = false;
+							}
+					
+							// überprüfen, ob nächster Filter gewünscht :)
+							if ( messaging_nit_actual_sections_got_all )
+							{
+							}	
+						}
+						unlockMessaging();
+	
+					} 
+					break;
+				default:
+					break;
+				}
+			}
+		} // for
+
+		dmxNIT.closefd();
+	} // try
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
+	}
+	catch (...)
+	{
+		fprintf(stderr, "Caught exception in nit-thread!\n");
+	}
+
+	printf("nit-thread ended\n");
+
+	pthread_exit(NULL);
+}
+
+//---------------------------------------------------------------------
+//sdt-thread
 // reads sdt for service list
 //---------------------------------------------------------------------
 static void *sdtThread(void *)
@@ -2673,48 +3655,78 @@ static void *sdtThread(void *)
 
 	struct SI_section_header header;
 	char *buf;
-	const unsigned timeoutInMSeconds = 250;
-	bool sendToSleepNow = false;
+	const unsigned timeoutInMSeconds = 2000;
+	int current_other_sdt;
+	t_transponder_id tid;
+	int scanType = 3;	//deafault scan all
 
-	dmxSDT.addfilter(0x42, 0xff );
-	//    dmxSDT.addfilter(0x46, 0xff );
+
+	dmxSDT.addfilter(0x42, 0xf3 );		//SDT actual = 0x42 + SDT other = 0x46 + BAT = 0x4A
 
 	try
 	{
 		dprintf("[%sThread] pid %d start\n", "sdt", getpid());
 
 		int timeoutsDMX = 0;
+		initSDTtables();
+
+		time_t lastRestarted = time(NULL);
+		time_t lastData = time(NULL);
 		dmxSDT.start(); // -> unlock
+		scanType = getscanType();
+		dprintf("ScanType is: %hu\n", scanType);
 
 		for (;;)
 		{
 			time_t zeit = time(NULL);
+			
+			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
+			{
+				dmxSDT.stop(); // -> lock
+				dmxSDT.start(); // -> unlock
+				dprintf("[sdtThread] dmxSDT restarted (dt=%ld)\n", (int)zeit - lastRestarted);
+
+				lastRestarted = zeit;
+				timeoutsDMX = 0;
+				lastData = zeit;
+			}
 
 			if (timeset)
 			{
 				// Nur wenn ne richtige Uhrzeit da ist
 
-				if ( (sendToSleepNow) )
-				{
-					sendToSleepNow = false;
-
+				if ( (zeit > lastData + TIME_SDT_NONEWDATA) || sdt_backoff )
+				{					
 					struct timespec abs_wait;
 
 					struct timeval now;
 
 					gettimeofday(&now, NULL);
 					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-					abs_wait.tv_sec += (TIME_SDT_SCHEDULED_PAUSE);
-
+					if ( sdt_backoff ) {
+						abs_wait.tv_sec += (TIME_SDT_BACKOFF);
+						dprintf("dmxSDT: backing off %d seconds...\n",TIME_SDT_BACKOFF);
+					}
+					else
+					{
+						abs_wait.tv_sec += (TIME_SDT_SCHEDULED_PAUSE);
+						dprintf("dmxSDT: no new data for %d seconds\n", TIME_SDT_NONEWDATA);
+						if (new_services)						
+							eventServer->sendEvent(CSectionsdClient::EVT_SERVICES_UPDATE,
+											CEventServer::INITID_SECTIONSD);
+					}	
 					dmxSDT.real_pause();
 					pthread_mutex_lock( &dmxSDT.start_stop_mutex );
+										
 					dprintf("dmxSDT: going to sleep...\n");
-
+					
+					sdt_backoff = false;
+					
 					int rs = pthread_cond_timedwait( &dmxSDT.change_cond, &dmxSDT.start_stop_mutex, &abs_wait );
 
 					if (rs == ETIMEDOUT)
 					{
-						dprintf("dmxSDT: waking up again - looking for new events :)\n");
+						dprintf("dmxSDT: waking up again - looking for new services :)\n");
 						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
 #ifdef PAUSE_EQUALS_STOP
 						dmxSDT.real_unpause();
@@ -2724,8 +3736,8 @@ static void *sdtThread(void *)
 					else if (rs == 0)
 					{
 						dprintf("dmxSDT: waking up again - requested from .change()\n");
-						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
-#ifdef PAUSE_EQUALS_STOP
+						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );						
+#ifdef PAUSE_EQUALS_STOP	
 						dmxSDT.real_unpause();
 #endif
 					}
@@ -2737,169 +3749,245 @@ static void *sdtThread(void *)
 					}
 					// update zeit after sleep
 					zeit = time(NULL);
-					timeoutsDMX = 0;
+					lastData = zeit;
 				}
-				else if (zeit > dmxSDT.lastChanged + TIME_SDT_SKIPPING )
-				{
-					lockMessaging();
-
-					if ( dmxSDT.filter_index + 1 < (signed) dmxSDT.filters.size() )
-					{
-						dmxSDT.change(dmxSDT.filter_index + 1);
-						dputs("[sdtThread] skipping to next filter (> TIME_SDT_SKIPPING)");
-						unlockMessaging();
-					}
-					else
-					{
-						sendToSleepNow = true;
-						dputs("[sdtThread] sending to sleep (> TIME_SDT_SKIPPING)");
-						unlockMessaging();
-						continue;
-					}
-				};
 			}
 
-			if (timeoutsDMX >= RESTART_DMX_AFTER_TIMEOUTS && scanning)
-			{
-				timeoutsDMX = 0;
-				dmxSDT.stop();
-				dmxSDT.start(); // leaves unlocked
-				dputs("\n !!! dmxSDT restarted !!!\n");
-			}
+			if ( !sdt_backoff ) {
 
-			struct timeval tv;
+				buf = dmxSDT.getSection(timeoutInMSeconds, timeoutsDMX);
 
-			gettimeofday( &tv, NULL );
-			long long _now = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+				if (buf == NULL)
+					continue;	
 
-			buf = dmxSDT.getSection(timeoutInMSeconds, timeoutsDMX);
+				unsigned short current_onid;
 
-			gettimeofday( &tv, NULL );
-			_now = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000)- _now;
-        		dprintf("[sdtThread] dmxSDT.getSection returned after %f\n", _now / 1000.);
-
-
-			if (buf == NULL)
-				continue;
-
-			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
-							((SI_section_header*)buf)->section_length_lo;
-			// copy the header
-			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
-
-			if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
-			{
-				// Wir wollen nur aktuelle sections
-				dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
-
-//				SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
-				SIsectionSDT sdt(sizeof(header) + section_length - 5, buf);
-
-				lockServices();
-
-				for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
-					addService(*s);
-
-				unlockServices();
-
-				dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
-
-
-				lockMessaging();
-
-
-				//SI_section_SDT_header* _header = (SI_section_SDT_header*) &header;
-				int msg_index = ( header.table_id == 0x42) ? 0 : 1;
-
-				if ( !messaging_sdt_sections_got_all[msg_index] )
+				unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
+								((SI_section_header*)buf)->section_length_lo;
+				// copy the header
+				memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
+			
+				switch (header.table_id)
 				{
-					long long _id = (((unsigned long long)header.table_id) << 40) +
-					                (((unsigned long long)header.table_id_extension_hi) << 32) +
-					                (((unsigned long long)header.table_id_extension_lo) << 24) +
-					                (((unsigned long long)header.section_number) << 16) +
-					                (((unsigned long long)header.version_number) << 8) +
-					                (((unsigned long long)header.current_next_indicator));
+				
+				case 0x42:
+			
+					memcpy(&current_onid, buf+8, sizeof(current_onid)); //extremly dirty - section_header_SDT doesn't work.
+			
+					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))					
+					{									
+						// Wir wollen nur aktuelle sections
 
-					if ( messaging_sdt_sections_max_ID[msg_index] == -1 )
-					{
-						messaging_sdt_sections_max_ID[msg_index] = _id;
-						dprintf("[sdtThread] first msg_index 0x%llx\n", _id);
-					}
-					else
-					{
-						for ( std::vector<long long>::iterator i = messaging_sdt_skipped_sections_ID[msg_index].begin();
-						        i != messaging_sdt_skipped_sections_ID[msg_index].end(); ++i )
-							if ( *i == _id)
+						lockMessaging();
+
+						if ( (!messaging_sdt_actual_sections_got_all) &&
+							(!messaging_sdt_actual_sections_so_far[header.section_number]) )
+						{
+							lastData = zeit;	
+					
+							dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
+
+							SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
+	
+							lockServices();
+
+							for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
+								addService(*s);
+
+							unlockServices();
+
+							dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
+		
+							if ( header.table_id == 0x42)
 							{
-								messaging_sdt_skipped_sections_ID[msg_index].erase(i);
-								break;
+								messaging_sdt_actual_sections_so_far[header.section_number] = true;
+								messaging_sdt_actual_sections_got_all = true;
+					
+								for (int i = 0; i <= (int) header.last_section_number; i++)
+								{
+									if (!messaging_sdt_actual_sections_so_far[i])
+										messaging_sdt_actual_sections_got_all = false;
+								}
 							}
-						dprintf("[sdtThread] now msg_index 0x%llx / skipsize %d\n", _id, messaging_sdt_skipped_sections_ID[msg_index].size());
-
-						if ((messaging_sdt_sections_max_ID[msg_index] == _id) &&
-						    (messaging_sdt_skipped_sections_ID[msg_index].empty()))
-						{
-							// alle pakete für den ServiceKey da!
-							dprintf("[sdtThread] got all packages for table_id 0x%x (%d)\n", header.table_id, msg_index);
-							messaging_sdt_sections_got_all[msg_index] = true;
-						}
-					}
-
-					// überprüfen, ob nächster Filter gewünscht :)
-					if ( messaging_sdt_sections_got_all[dmxSDT.filter_index] )
-					{
-						if ( ( messaging_WaitForServiceDesc ) && ( dmxSDT.filter_index == 0 ) )
-						{
-					        	// restart EIT!
-					        	for ( int i = 0x4e; i <= 0x6f; i++)
+					
+							// überprüfen, ob nächster Filter gewünscht :)
+							if ( messaging_sdt_actual_sections_got_all )
 							{
-								messaging_skipped_sections_ID[i - 0x4e].clear();
-								messaging_sections_max_ID[i - 0x4e] = -1;
-								messaging_sections_got_all[i - 0x4e] = false;
+
+								unsigned short current_tsid = (unsigned short)
+										(((unsigned long long) header.table_id_extension_hi) << 8) +
+						  	  			 ((unsigned long long) header.table_id_extension_lo);
+							
+								dprintf("[sdtThread] Actual SDT complete for ONID: 0x%x TSID: 0x%x\n", 
+									current_onid, current_tsid);
+							
+								tid = CREATE_TRANSPONDER_ID_FROM_ORIGINALNETWORK_TRANSPORTSTREAM_ID(current_onid,
+																    current_tsid);
+								if (scanType != 4) 
+									
+									if ( updateTP(current_onid, current_tsid, scanType, true) )
+										new_services = true;
+										
+							
+								//Nirvana: I don't know what this is for. Ask the event guys...
+								if ( ( messaging_WaitForServiceDesc ) && ( dmxSDT.filter_index == 0 ) )
+								{
+							        	// restart EIT!
+							        	for ( int i = 0x4e; i <= 0x6f; i++)
+									{
+										messaging_skipped_sections_ID[i - 0x4e].clear();
+										messaging_sections_max_ID[i - 0x4e] = -1;
+										messaging_sections_got_all[i - 0x4e] = false;
+									}
+
+									messaging_wants_current_next_Event = true;
+									dmxEIT.change( 0 );
+
+									messaging_WaitForServiceDesc = false;
+								}
+							}	
+						}
+
+						unlockMessaging();
+	
+					} 
+					break;
+				case 0x46:
+					
+					memcpy(&current_onid, buf+8, sizeof(current_onid)); //extremly dirty - section_header_SDT doesn't work.
+			
+					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))					
+					{									
+						// Wir wollen nur aktuelle sections
+
+						lockMessaging();
+						
+						unsigned short current_tsid = (unsigned short)
+										(((unsigned long long) header.table_id_extension_hi) << 8) +
+						  	  			 ((unsigned long long) header.table_id_extension_lo);
+						
+						tid = CREATE_TRANSPONDER_ID_FROM_ORIGINALNETWORK_TRANSPORTSTREAM_ID(current_onid,
+															      current_tsid);
+														
+						if (!is_other_sdt_ready(tid)) {
+							current_other_sdt = get_sdt_slot(tid);
+						
+						if ( current_other_sdt != -1) {
+							//We found a free slot and start or continue to collect sections.
+							if (!messaging_sdt_other_sections_so_far[current_other_sdt] [header.section_number])
+							{
+								//The transponder is not finished. And it's a new section.
+								lastData = zeit;	
+					
+								dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
+
+								SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
+	
+								lockServices();
+
+								for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
+									addService(*s);
+
+								unlockServices();
+
+								dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
+							
+								messaging_sdt_other_sections_so_far[current_other_sdt][header.section_number] = true;
+								//messaging_sdt_other_sections_got_all[current_other_sdt] = true;
+								bool is_complete = true;
+					
+								for (int i = 0; i <= (int) header.last_section_number; i++)
+								{
+									if (!messaging_sdt_other_sections_so_far[current_other_sdt] [i])
+										is_complete = false;
+								}					
+							
+								if ( is_complete )
+								{
+									tid_complete(tid);
+									
+									dprintf("[sdtThread] Other SDT with ID: 0x%x complete\n",tid);
+									
+									if (scanType != 4) 
+									
+										if ( updateTP(current_onid, current_tsid, scanType, false) )
+											new_services = true;
+									
+									for ( int i = 0; i < MAX_SECTIONS; i++)
+										messaging_sdt_other_sections_so_far[current_other_sdt] [i] = false;
+									messaging_sdt_other_tid[current_other_sdt] = 0;
+								}
+														
 							}
+						}
+						else {
+							printf("[sdtThread] No free slot for Transponder ID: 0x%x Consider increasing MAX_CONCURRENT_SDT_OTHER\n", tid);
+						}
+						}			
+						unlockMessaging();
+					} 
+					break;					
+				case 0x4a:
+					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))					
+					{
+						// Wir wollen nur aktuelle sections
+						
+						t_bouquet_id bouquet_id = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
+					
+						dprintf("[sdtThread] BAT section received for Bouquet ID: 0x%x\n",bouquet_id);
+					
+						lockMessaging();
+					
+						// This is 0 .. MAX_BAT - 1 if already started or new and free or -1 if no free slot available.
+						int current_bouquet = get_bat_slot(bouquet_id);
+					
+						if ( current_bouquet != -1) {
+							//printf("[sdtThread] get_slot returned: 0x%x\n",current_bouquet);
+							if ( (!messaging_bat_sections_got_all[current_bouquet]) &&
+								(!messaging_bat_sections_so_far[current_bouquet] [header.section_number]) )
+							{	
+								//This is new stuff - restart timer
+								lastData = zeit;
 
-							messaging_wants_current_next_Event = true;
-							dmxEIT.change( 0 );
+								dprintf("[sdtThread] adding services to bouquet [table 0x%x] (begin)\n", header.table_id);
 
-							messaging_WaitForServiceDesc = false;
+								SIsectionBAT bat(SIsection(section_length + 3, buf));
+
+								//lock AND unlock bouquets later
+										
+								for (SIbouquets::iterator s = bat.bouquets().begin(); s != bat.bouquets().end(); s++)
+									addBouquetEntry(*s);
+											
+								//unlock bouquets here...
+
+								dprintf("[sdtThread] added %d services to bouquet (end)\n",  bat.bouquets().size());
+															
+								messaging_bat_sections_so_far[current_bouquet][header.section_number] = true;
+								messaging_bat_sections_got_all[current_bouquet] = true;
+					
+								for (int i = 0; i <= (int) header.last_section_number; i++)
+								{
+									if (!messaging_bat_sections_so_far[current_bouquet] [i])
+										messaging_bat_sections_got_all[current_bouquet] = false;
+								}					
+							
+								if ( messaging_bat_sections_got_all[current_bouquet] )
+								{
+									dprintf("[sdtThread] BAT with ID: 0x%x complete\n",bouquet_id);
+									eventServer->sendEvent(CSectionsdClient::EVT_BOUQUETS_UPDATE, CEventServer::INITID_SECTIONSD, &bouquet_id, sizeof(bouquet_id) );
+								}
+							}
 						}
-						if ( dmxSDT.filter_index + 1 < (signed) dmxSDT.filters.size() )
-						{
-							dmxSDT.change(dmxSDT.filter_index + 1);
-							dputs("[sdtThread] change!")
+						else {
+							printf("[sdtThread] No free slot for Bouquet ID: 0x%x Consider increasing MAX_BAT\n",bouquet_id);
 						}
-						else
-						{
-							sendToSleepNow = true;
-							dputs("[sdtThread] sendtosleep!")
-						}
+						unlockMessaging();
+
 					}
+					break;
+				default:
+					break;
 				}
-
-				unlockMessaging();
-
-
-			} // if
-			else
-			{
-				lockMessaging();
-
-				int msg_index = ( header.table_id == 0x42) ? 0 : 1;
-				long long _id = (((unsigned long long)header.table_id) << 40) +
-				                (((unsigned long long)header.table_id_extension_hi) << 32) +
-				                (((unsigned long long)header.table_id_extension_lo) << 24) +
-				                (((unsigned long long)header.section_number) << 16) +
-				                (((unsigned long long)header.version_number) << 8) +
-				                (((unsigned long long)header.current_next_indicator));
-
-				if (messaging_sdt_sections_max_ID[msg_index] != -1)
-					messaging_sdt_skipped_sections_ID[msg_index].push_back(_id);
-
-				unlockMessaging();
-
-				dprintf("[sdtThread] skipped sections for table 0x%x\n", header.table_id);
-
-				delete[] buf;
 			}
 		} // for
 
@@ -2914,7 +4002,7 @@ static void *sdtThread(void *)
 		fprintf(stderr, "Caught exception in sdt-thread!\n");
 	}
 
-	dprintf("sdt-thread ended\n");
+	printf("sdt-thread ended\n");
 
 	pthread_exit(NULL);
 }
@@ -3881,10 +4969,10 @@ static void signalHandler(int signum)
 
 int main(int argc, char **argv)
 {
-	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT;
+	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.196 2005/11/12 12:10:37 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.197 2005/11/20 15:11:40 mogway Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
@@ -3973,6 +5061,16 @@ int main(int argc, char **argv)
 			fprintf(stderr, "[sectionsd] failed to create ppt-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
+
+/*
+		// nit -Thread starten
+		rc = pthread_create(&threadNIT, 0, nitThread, 0);
+
+		if (rc) {
+			fprintf(stderr, "[sectionsd] failed to create nit-thread (rc=%d)\n", rc);
+			return EXIT_FAILURE;
+		}
+*/
 
 		// housekeeping-Thread starten
 		rc = pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);

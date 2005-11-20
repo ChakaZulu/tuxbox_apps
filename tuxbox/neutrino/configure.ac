@@ -44,6 +44,12 @@ AC_ARG_ENABLE(restore-prev-mode,
          [  --enable-restore-prev-mode          enable return from graphics mode],
          [AC_DEFINE(RETURN_FROM_GRAPHICS_MODE,1,[enable return from graphics mode])])
 
+AC_ARG_ENABLE(use-libxml2,
+   [  --enable-use-libxml2    use libxml2 instead of libxmltree],
+      [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
+               TUXBOX_APPS_LIB_PKGCONFIG(XML,libxml-2.0)],
+                       [TUXBOX_APPS_LIB_PKGCONFIG(XML,tuxbox-xmltree)])
+
 AC_OUTPUT([
 Makefile
 lib/Makefile

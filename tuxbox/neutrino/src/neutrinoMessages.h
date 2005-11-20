@@ -98,6 +98,8 @@ struct NeutrinoMessages {
  		EVT_SCAN_FOUND_TV_CHAN                   = CRCInput::RC_Events + 34,
  		EVT_SCAN_REPORT_FREQUENCYP               = CRCInput::RC_Events + 36,
  		EVT_ZAP_MOTOR                            = CRCInput::RC_Events + 37,
+		/* sectionsd */
+		EVT_SERVICES_UPD                         = CRCInput::RC_Events + 38,
 
 
 		EVT_CURRENTEPG                           = CRCInput::RC_WithData +  1,

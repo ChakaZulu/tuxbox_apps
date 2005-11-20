@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.107 2005/03/03 19:59:32 diemade Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.108 2005/11/20 15:10:50 mogway Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -408,6 +408,15 @@ void CZapitClient::reinitChannels()
 	close_connection();
 }
 
+//called when sectionsd updates currentservices.xml
+void CZapitClient::reloadCurrentServices()
+{
+	send(CZapitMessages::CMD_RELOAD_CURRENTSERVICES);
+
+	CZapitMessages::responseCmd response;
+	CBasicClient::receive_data((char* )&response, sizeof(response), true);
+	close_connection();
+}
 
 void CZapitClient::muteAudio(const bool mute)
 {

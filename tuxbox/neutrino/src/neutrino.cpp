@@ -3285,6 +3285,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_TIMESET, 222, NEUTRINO_UDS_NAME);
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_GOT_CN_EPG, 222, NEUTRINO_UDS_NAME);
+	g_Sectionsd->registerEvent(CSectionsdClient::EVT_SERVICES_UPDATE, 222, NEUTRINO_UDS_NAME);
+	g_Sectionsd->registerEvent(CSectionsdClient::EVT_BOUQUETS_UPDATE, 222, NEUTRINO_UDS_NAME);
 
 #ifndef SKIP_CA_STATUS
 #define ZAPIT_EVENT_COUNT 26
@@ -3735,6 +3737,10 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 		if((old_id == 0) || (!(channelList->adjustToChannelID(old_id))))
 			channelList->zapTo(0);
+			
+		// Houdini: after channels have been reloaded, g_Zapit's actual channel is the initial channel from zapit.conf
+		// so zap to old channel (what is when in record mode?)
+		g_Zapit->zapTo_serviceID_NOWAIT(old_id);
 
 		return messages_return::handled;
 	}
@@ -4074,6 +4080,15 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 		delete (unsigned char*) data;
 		return messages_return::handled;
+	}
+	else if (msg == NeutrinoMessages::EVT_SERVICES_UPD)
+	{
+		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO,
+		g_Locale->getText(LOCALE_SERVICEMENU_RELOAD_HINT));
+		hintBox->paint();
+		g_Zapit->reloadCurrentServices();
+		hintBox->hide();
+		delete hintBox;
 	}
 
 	if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000))

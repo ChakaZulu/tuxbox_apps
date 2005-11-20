@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.32 2005/08/28 21:44:21 mogway Exp $
+  $Id: sectionsdclient.h,v 1.33 2005/11/20 15:11:44 mogway Exp $
 
   License: GPL
 
@@ -74,7 +74,9 @@ class CSectionsdClient : private CBasicClient
 	enum events
 		{
 			EVT_TIMESET,
-			EVT_GOT_CN_EPG
+			EVT_GOT_CN_EPG,
+			EVT_SERVICES_UPDATE,
+			EVT_BOUQUETS_UPDATE
 		};
 	
 	struct epgflags {

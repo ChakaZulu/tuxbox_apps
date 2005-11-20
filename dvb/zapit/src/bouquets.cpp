@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.105 2005/07/02 13:44:33 barf Exp $
+ * $Id: bouquets.cpp,v 1.106 2005/11/20 15:10:52 mogway Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -285,7 +285,7 @@ void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode, 
 		Bouquets.clear();
 		remainChannels = NULL;
 		
-		LoadServices(frontend->getInfo()->type, frontend->getDiseqcType());
+		LoadServices(frontend->getInfo()->type, frontend->getDiseqcType(), false);
 		
 		loadBouquets();
 		

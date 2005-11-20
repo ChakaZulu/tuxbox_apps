@@ -864,6 +864,12 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 									*data         = (neutrino_msg_data_t) p;
 									dont_delete_p = true;
 								break;
+							case CSectionsdClient::EVT_SERVICES_UPDATE:
+									*msg          = NeutrinoMessages::EVT_SERVICES_UPD;
+									*data         = 0;
+								break;
+							case CSectionsdClient::EVT_BOUQUETS_UPDATE:
+								break;
 							default:
 								printf("[neutrino] event INITID_SECTIONSD - unknown eventID 0x%x\n",  emsg.eventID );
 						}

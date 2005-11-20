@@ -1,8 +1,8 @@
 INCLUDES = \
 	-I$(top_srcdir)/lib \
 	@CONNECTION_CFLAGS@ \
-	@EVENTSERVER_CFLAGS@
-
+	@EVENTSERVER_CFLAGS@ \
+	@XML_CFLAGS@
 
 if TRUE
 AM_CPPFLAGS = -D DO_NOT_INCLUDE_STUFF_NOT_NEEDED_FOR_SECTIONSD
@@ -16,10 +16,11 @@ nit_SOURCES = nit.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp
 sdt_SOURCES = sdt.cpp dmxapi.cpp SIsections.cpp SIevents.cpp SIutils.cpp
 endif
 
-sectionsd_SOURCES = sectionsd.cpp dmxapi.cpp debug.cpp dmx.cpp SIsections.cpp SIevents.cpp SIutils.cpp
+sectionsd_SOURCES = sectionsd.cpp dmxapi.cpp debug.cpp dmx.cpp SIsections.cpp SIevents.cpp SIutils.cpp xmlinterface.cpp dvbstring.cpp
 
 sectionsd_LDADD = \
 	@CONNECTION_LIBS@ \
 	@EVENTSERVER_LIBS@ \
+	@XML_LIBS@ \
 	-lpthread
 

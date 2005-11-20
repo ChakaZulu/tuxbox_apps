@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.18 2005/11/03 21:08:52 mogway Exp $
+//    $Id: SIsections.hpp,v 1.19 2005/11/20 15:11:40 mogway Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -771,32 +771,26 @@ private:
 	void parseNVODreferenceDescriptor(const char *buf, SIservice &s);
 };
 
-#ifndef DO_NOT_INCLUDE_STUFF_NOT_NEEDED_FOR_SECTIONSD
-// Fuer for_each
-struct printSIsectionSDT : public std::unary_function<SIsectionSDT, void>
-{
-	void operator() (const SIsectionSDT &s) { s.dump();}
-};
-
-// Menge aller SDTs (actual TS)
-class SIsectionsSDT : public std::set <SIsectionSDT, std::less<SIsectionSDT> >
-{
-public:
-	int readSections(void) {
-		SIsections sections;
-		int rc=sections.readSections(0x11, 0x42, 0xff);
-
-		for (SIsections::iterator k=sections.begin(); k!=sections.end(); k++)
-			insert(*k);
-
-		return rc;
-	}
-};
 
 class SIsectionBAT : public SIsection
 {
 public:
-	SIsectionBAT(const SIsection &s) : SIsection(s) {}
+	SIsectionBAT(const SIsection &s) : SIsection(s) {
+		parsed = 0;
+		parse();	
+	}
+	
+	// Std-Copy
+	SIsectionBAT(const SIsectionBAT &s) : SIsection(s) {
+		bsv = s.bsv;
+		parsed = s.parsed;
+	}
+	
+	// Benutzt den uebergebenen Puffer (sollte mit new char[n] allokiert sein)
+	SIsectionBAT(unsigned bufLength, char *buf) : SIsection(bufLength, buf) {
+		parsed = 0;
+		parse();
+	}
 
 	unsigned short bouquetID(void) const {
 		return buffer ? ((((struct SI_section_BAT_header *)buffer)->bouquet_id_hi << 8) |
@@ -824,34 +818,42 @@ public:
 	void dump(void) const {
 		dump((struct SI_section_BAT_header *)buffer);
 	}
-};
-
-// Fuer for_each
-struct printSIsectionBAT : public std::unary_function<SIsectionBAT, void>
-{
-	void operator() (const SIsectionBAT &s) { s.dump();}
-};
-
-// Menge aller BATs
-class SIsectionsBAT : public std::set <SIsectionBAT, std::less<SIsectionBAT> >
-{
-public:
-	int readSections(void) {
-		SIsections sections;
-		int rc=sections.readSections(0x11, 0x4a, 0xff);
-
-		for (SIsections::iterator k=sections.begin(); k!=sections.end(); k++)
-			insert(*k);
-
-		return rc;
+	
+	const SIbouquets &bouquets(void) const {
+		//if(!parsed)
+		//	parse(); -> nicht const
+		return bsv;
 	}
+	
+protected:
+	SIbouquets bsv;
+	int parsed;
+	void parse(void);
+	void parseDescriptors(const char *desc, unsigned len, SIbouquet &s);
+	void parseBouquetNameDescriptor(const char *buf, SIbouquet &s);
+	void parseServiceListDescriptor(const char *buf, SIbouquet &s);
 };
 
 class SIsectionNIT : public SIsection
 {
 public:
-	SIsectionNIT(const SIsection &s) : SIsection(s) {}
-
+	SIsectionNIT(const SIsection &s) : SIsection(s) {
+		parsed = 0;
+		parse();	
+	}
+	
+	// Std-Copy
+	SIsectionNIT(const SIsectionNIT &s) : SIsection(s) {
+		ntw = s.ntw;
+		parsed = s.parsed;
+	}
+	
+	// Benutzt den uebergebenen Puffer (sollte mit new char[n] allokiert sein)
+	SIsectionNIT(unsigned bufLength, char *buf) : SIsection(bufLength, buf) {
+		parsed = 0;
+		parse();
+	}
+		
 	unsigned short networkID(void) const {
 		return buffer ? ((((struct SI_section_NIT_header *)buffer)->network_id_hi << 8) |
 				((struct SI_section_NIT_header *)buffer)->network_id_lo) : (unsigned short) -1;
@@ -878,7 +880,66 @@ public:
 	void dump(void) const {
 		dump((struct SI_section_NIT_header *)buffer);
 	}
+	
+	const SInetworks &networks(void) const {
+		//if(!parsed)
+		//	parse(); -> nicht const
+		return ntw;
+	}
+	
+protected:
+	SInetworks ntw;
+	int parsed;
+	void parse(void);
+	void parseDescriptors(const char *desc, unsigned len, SInetwork &s);
+	void copyDeliveryDescriptor(const char *buf, SInetwork &s);
 };
+
+#ifndef DO_NOT_INCLUDE_STUFF_NOT_NEEDED_FOR_SECTIONSD
+// Fuer for_each
+struct printSIsectionSDT : public std::unary_function<SIsectionSDT, void>
+{
+	void operator() (const SIsectionSDT &s) { s.dump();}
+};
+
+// Menge aller SDTs (actual TS)
+class SIsectionsSDT : public std::set <SIsectionSDT, std::less<SIsectionSDT> >
+{
+public:
+	int readSections(void) {
+		SIsections sections;
+		int rc=sections.readSections(0x11, 0x42, 0xff);
+
+		for (SIsections::iterator k=sections.begin(); k!=sections.end(); k++)
+			insert(*k);
+
+		return rc;
+	}
+};
+
+
+
+// Fuer for_each
+struct printSIsectionBAT : public std::unary_function<SIsectionBAT, void>
+{
+	void operator() (const SIsectionBAT &s) { s.dump();}
+};
+
+// Menge aller BATs
+class SIsectionsBAT : public std::set <SIsectionBAT, std::less<SIsectionBAT> >
+{
+public:
+	int readSections(void) {
+		SIsections sections;
+		int rc=sections.readSections(0x11, 0x4a, 0xff);
+
+		for (SIsections::iterator k=sections.begin(); k!=sections.end(); k++)
+			insert(*k);
+
+		return rc;
+	}
+};
+
 
 // Fuer for_each
 struct printSIsectionNIT : public std::unary_function<SIsectionNIT, void>

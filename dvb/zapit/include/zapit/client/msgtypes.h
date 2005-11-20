@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.27 2005/03/03 19:59:32 diemade Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.28 2005/11/20 15:10:50 mogway Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -130,7 +130,8 @@ class CZapitMessages
 			CMD_SET_AE_PLAYBACK_SPTS           = 76,
 			CMD_SET_AE_PLAYBACK_PES            = 77,
 			CMD_GET_AE_PLAYBACK_STATE          = 78,
-			CMD_SCANSETTYPE                    = 79		
+			CMD_SCANSETTYPE                    = 79,
+			CMD_RELOAD_CURRENTSERVICES	   = 80
 		};
 
 	struct commandBoolean

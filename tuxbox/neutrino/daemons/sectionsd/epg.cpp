@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.17 2003/03/14 04:27:55 obi Exp $
+// $Id: epg.cpp,v 1.18 2005/11/20 15:11:40 mogway Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,13 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.18  2005/11/20 15:11:40  mogway
+//
+//
+// automatic services update for neutrino. Patch provided by Nirvana
+//
+// Forum thread: http://forum.tuxbox.org/forum/viewtopic.php?t=39266
+//
 // Revision 1.17  2003/03/14 04:27:55  obi
 // make it compileable with -W -Werror
 //
@@ -81,6 +88,7 @@
 #include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
+#include "SIbouquets.hpp"
 #include "SIsections.hpp"
 
 int main(int /*argc*/, char** /*argv*/)

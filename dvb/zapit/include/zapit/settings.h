@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.14 2005/06/19 14:28:22 barf Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.15 2005/11/20 15:10:50 mogway Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -26,32 +26,34 @@
 
 
 #ifdef HAVE_CONFIG_H
-#include                "config.h"
+#include                	"config.h"
 #else
-#define CONFIGDIR       "/var/tuxbox/config"
+#define CONFIGDIR       	"/var/tuxbox/config"
 #endif
 
-#define ZAPITCONFIGDIR  CONFIGDIR "/zapit"
+#define ZAPITCONFIGDIR  	CONFIGDIR "/zapit"
 
-#define CONFIGFILE      ZAPITCONFIGDIR "/zapit.conf"
-#define MOTORCONFIGFILE ZAPITCONFIGDIR "/motor.conf"
-#define SERVICES_XML    ZAPITCONFIGDIR "/services.xml"
-#define MYSERVICES_XML  ZAPITCONFIGDIR "/myservices.xml"
-#define ANTISERVICES_XML ZAPITCONFIGDIR "/antiservices.xml"
-#define SERVICES_TMP    "/tmp/services.tmp"
-#define BOUQUETS_XML    ZAPITCONFIGDIR "/bouquets.xml"
-#define BOUQUETS_TMP    "/tmp/bouquets.tmp"
+#define CONFIGFILE		ZAPITCONFIGDIR "/zapit.conf"
+#define MOTORCONFIGFILE		ZAPITCONFIGDIR "/motor.conf"
+#define SERVICES_XML		ZAPITCONFIGDIR "/services.xml"
+#define MYSERVICES_XML		ZAPITCONFIGDIR "/myservices.xml"
+#define ANTISERVICES_XML	ZAPITCONFIGDIR "/antiservices.xml"
+#define SERVICES_TMP    	"/tmp/services.tmp"
+#define BOUQUETS_XML    	ZAPITCONFIGDIR "/bouquets.xml"
+#define BOUQUETS_TMP    	"/tmp/bouquets.tmp"
+#define CURRENTSERVICES_XML	"/tmp/currentservices.xml"
+#define CURRENTSERVICES_TMP	"/tmp/currentservices.tmp"
 
-#define CABLES_XML      DATADIR "/cables.xml"
-#define SATELLITES_XML  DATADIR "/satellites.xml"
-#define TERRESTRIAL_XML DATADIR "/terrestrial.xml"
+#define CABLES_XML      	DATADIR "/cables.xml"
+#define SATELLITES_XML  	DATADIR "/satellites.xml"
+#define TERRESTRIAL_XML 	DATADIR "/terrestrial.xml"
 
-#define AUDIO_DEVICE    "/dev/dvb/adapter0/audio0"
-#define DEMUX_DEVICE    "/dev/dvb/adapter0/demux0"
-#define FRONTEND_DEVICE "/dev/dvb/adapter0/frontend0"
-#define VIDEO_DEVICE    "/dev/dvb/adapter0/video0"
+#define AUDIO_DEVICE    	"/dev/dvb/adapter0/audio0"
+#define DEMUX_DEVICE    	"/dev/dvb/adapter0/demux0"
+#define FRONTEND_DEVICE 	"/dev/dvb/adapter0/frontend0"
+#define VIDEO_DEVICE    	"/dev/dvb/adapter0/video0"
 
-#define CAMD_UDS_NAME  "/tmp/camd.socket"
+#define CAMD_UDS_NAME  		"/tmp/camd.socket"
 
 
 #endif /* __zapit__settings_h__ */

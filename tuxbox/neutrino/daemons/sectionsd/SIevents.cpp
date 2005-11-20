@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.27 2005/11/03 21:08:52 mogway Exp $
+// $Id: SIevents.cpp,v 1.28 2005/11/20 15:11:40 mogway Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -39,6 +39,8 @@
 #include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
+#include "SIbouquets.hpp"
+#include "SInetworks.hpp"
 #include "SIsections.hpp"
 #include <dmxapi.h>
 

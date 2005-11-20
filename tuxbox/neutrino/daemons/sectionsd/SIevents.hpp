@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.23 2005/11/03 21:08:52 mogway Exp $
+// $Id: SIevents.hpp,v 1.24 2005/11/20 15:11:40 mogway Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -32,6 +32,7 @@
 // forward references
 class SIservice;
 class SIservices;
+class SIbouquets;
 
 struct eit_event {
 	unsigned event_id_hi			: 8;

@@ -307,6 +307,9 @@ class CZapitClient:public CBasicClient
 	/* reloads channels and services*/
 	void reinitChannels();
 
+	/* called when sectionsd updates currentservices.xml */
+	void reloadCurrentServices();
+
 	/* get current APID-List */
 	void getPIDS( responseGetPIDs& pids );
 

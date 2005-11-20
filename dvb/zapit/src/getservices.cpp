@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.95 2005/07/03 11:24:49 barf Exp $
+ * $Id: getservices.cpp,v 1.96 2005/11/20 15:10:52 mogway Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -274,7 +274,7 @@ int LoadSatellitePositions(void)
 	return 0;
 }
 
-int LoadServices(fe_type_t frontendType, diseqc_t diseqcType)
+int LoadServices(fe_type_t frontendType, diseqc_t diseqcType, bool only_current_services)
 {
 	if (frontendType == FE_QPSK)
 	{
@@ -283,27 +283,37 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType)
 		if (diseqcType == DISEQC_1_2)
 			LoadMotorPositions();
 	}
-	
+
 	xmlDocPtr parser = parseXmlFile(SERVICES_XML);
 
 	if (parser == NULL)
 		return -1;
 
-	FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
-	xmlFreeDoc(parser);
-
-        if ((parser = parseXmlFile(ANTISERVICES_XML, false))) {
-                printf("[getservices] " ANTISERVICES_XML " found.\n");
-                printf("[getservices] WARNING: antiservices.xml is depreciated; please use myservices.xml and 'action=\"remove\"' instead.\n");
-                FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, true);
-                xmlFreeDoc(parser);
-        }
-
-	if ((parser = parseXmlFile(MYSERVICES_XML, false))) {
-		printf("[getservices] " MYSERVICES_XML "  found.\n");
+	if (!only_current_services) {
 		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
 		xmlFreeDoc(parser);
 	}
+	
+	if ((parser = parseXmlFile(CURRENTSERVICES_XML, false))) {
+		printf("[getservices] " CURRENTSERVICES_XML "  found.\n");
+		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
+		xmlFreeDoc(parser);
+	}
+
+	if (!only_current_services) {	
+	        if ((parser = parseXmlFile(ANTISERVICES_XML, false))) {
+        	        printf("[getservices] " ANTISERVICES_XML " found.\n");
+                	printf("[getservices] WARNING: antiservices.xml is depreciated; please use myservices.xml and 'action=\"remove\"' instead.\n");
+	                FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, true);
+        	        xmlFreeDoc(parser);
+        	}
+
+		if ((parser = parseXmlFile(MYSERVICES_XML, false))) {
+			printf("[getservices] " MYSERVICES_XML "  found.\n");
+			FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
+			xmlFreeDoc(parser);
+		}
+	}	
 
 	return 0;
 }
