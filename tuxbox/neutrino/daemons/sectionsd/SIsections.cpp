@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.41 2005/11/20 15:11:40 mogway Exp $
+// $Id: SIsections.cpp,v 1.42 2005/11/21 14:57:28 metallica Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -618,6 +618,7 @@ void SIsectionSDT::parse(void)
 
 	parsed = 1;
 }
+
 /************************************/
 
 //Within the Service List all Channels of a bouquet are specified
@@ -765,6 +766,7 @@ void SIsectionNIT::parse(void)
 	unsigned short descriptors_loop_length;
 	unsigned short descriptors_length;
 	struct loop_len *ll;
+	//t_network_id network_id;
 
 	if (!buffer || parsed)
 		return;
@@ -794,6 +796,7 @@ void SIsectionNIT::parse(void)
 	while (actPos <= &buffer[bufferLength - sizeof(struct nit_transponder)]) {
 		tp = (struct nit_transponder *)actPos;
 		SInetwork s(tp);
+		s.network_id = (nh->network_id_hi << 8) | nh->network_id_lo;
 		s.transport_stream_id = (tp->transport_stream_id_hi << 8) | tp->transport_stream_id_lo;
 		s.original_network_id = (tp->original_network_id_hi << 8) | tp->original_network_id_lo;
 		descriptors_length = (tp->descriptors_loop_length_hi << 8) | tp->descriptors_loop_length_lo;

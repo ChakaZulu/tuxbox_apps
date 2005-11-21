@@ -1,7 +1,7 @@
 #ifndef SINETWORKS_HPP
 #define SINETWORKS_HPP
 //
-// $Id: SInetworks.hpp,v 1.1 2005/11/20 15:11:40 mogway Exp $
+// $Id: SInetworks.hpp,v 1.2 2005/11/21 14:57:28 metallica Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -121,27 +121,31 @@ struct cable_delivery_descriptor {
 class SInetwork {
 public:
 	SInetwork(const struct nit_transponder *s) {
-	
+		
+		network_id		= 0;
 		transport_stream_id	= 0;
 		original_network_id	= 0;
 		delivery_type		= 0;
 	}
 	
 	// Um einen service zum Suchen zu erstellen
-	SInetwork(const t_original_network_id _original_network_id, const t_transport_stream_id _transport_stream_id)
+	SInetwork(const t_network_id _network_id, const t_original_network_id _original_network_id, const t_transport_stream_id _transport_stream_id)
 	{
+		network_id		= _network_id;
 		original_network_id	= _original_network_id;
 		transport_stream_id	= _transport_stream_id;
 	}
 	// Std-Copy
 	SInetwork(const SInetwork &s) {
 	
+		network_id		= s.network_id;
 		original_network_id	= s.original_network_id;
 		transport_stream_id 	= s.transport_stream_id;
 		delivery_type		= s.delivery_type;
 		memcpy(delivery_descriptor, s.delivery_descriptor, sizeof(struct satellite_delivery_descriptor));
 	}
 	
+	t_network_id network_id;
 	t_original_network_id original_network_id;
 	t_transport_stream_id transport_stream_id;
 	unsigned short delivery_type;

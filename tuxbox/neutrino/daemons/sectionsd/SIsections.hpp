@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.19 2005/11/20 15:11:40 mogway Exp $
+//    $Id: SIsections.hpp,v 1.20 2005/11/21 14:57:28 metallica Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -853,7 +853,7 @@ public:
 		parsed = 0;
 		parse();
 	}
-		
+
 	unsigned short networkID(void) const {
 		return buffer ? ((((struct SI_section_NIT_header *)buffer)->network_id_hi << 8) |
 				((struct SI_section_NIT_header *)buffer)->network_id_lo) : (unsigned short) -1;
@@ -917,8 +917,6 @@ public:
 	}
 };
 
-
-
 // Fuer for_each
 struct printSIsectionBAT : public std::unary_function<SIsectionBAT, void>
 {
@@ -939,7 +937,6 @@ public:
 		return rc;
 	}
 };
-
 
 // Fuer for_each
 struct printSIsectionNIT : public std::unary_function<SIsectionNIT, void>

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.378 2005/11/20 15:10:52 mogway Exp $
+ * $Id: zapit.cpp,v 1.379 2005/11/21 14:56:44 metallica Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -216,6 +216,9 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 	std::string diseqc;
 	bool is_sat = false;
 	
+	unsigned short orbital = 0;
+	unsigned short east_west = 0;
+	
 	frontendType = xmlGetName(provider);
 	
 	if (start) {
@@ -223,7 +226,18 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 	
 		if (!strcmp(frontendType.c_str(), "sat")) {
 			diseqc = xmlGetAttribute(provider, "diseqc");
-			sprintf(prov_str,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
+			orbital = xmlGetNumericAttribute(provider, "orbital", 16);
+			if (orbital == 0)
+				sprintf(prov_str,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
+			else {
+				east_west = xmlGetNumericAttribute(provider, "east_west", 16);
+				sprintf(prov_str,"\t<%s name=\"%s\" orbital=\"%04x\" east_west=\"%hu\" diseqc=\"%s\">\n", 
+					frontendType.c_str(), 
+					provider_name.c_str(),
+					orbital,
+					east_west,
+					diseqc.c_str());			
+			}
 			is_sat = true;
 		}
 		else
@@ -401,6 +415,11 @@ void mergeServices()
 	bool is_sat = false;
 	bool found = false;
 	
+	if (!(tmp = fopen(CURRENTSERVICES_XML, "r")))
+		return;
+		
+	fclose(tmp);
+	
 	xmlDocPtr current_parser = parseXmlFile(CURRENTSERVICES_XML);
 	if (current_parser == NULL)
 		return;
@@ -415,13 +434,16 @@ void mergeServices()
 	provider = xmlDocGetRootElement(service_parser)->xmlChildrenNode;
 	write_header(tmp);
 	//xmlNodePtr services_tp = FindTransponder(xmlDocGetRootElement(service_parser)->xmlChildrenNode, onid, tsid);
-	while (provider) {
-		is_sat = write_provider(tmp, provider, true);
+	while (provider) {		
 		current_provider = xmlDocGetRootElement(current_parser)->xmlChildrenNode;
 		transponder = provider->xmlChildrenNode;
 		while ( (current_provider) && (strcmp(xmlGetAttribute(provider, "name"), xmlGetAttribute(current_provider, "name"))) )
 			current_provider = current_provider->xmlNextNode;
-		if (current_provider) {			
+//		if (!current_provider)
+
+//		else {
+		if (current_provider) {		
+			is_sat = write_provider(tmp, current_provider, true);
 			while (transponder) {
 				found = false;
 				onid = xmlGetNumericAttribute(transponder, "onid", 16);
@@ -429,7 +451,7 @@ void mergeServices()
 //				printf("ONID from services.xml: %04x\n",onid);
 //				printf("TSID from services.xml: %04x\n",tsid);
 				current_transponder = current_provider->xmlChildrenNode;
-				while ( current_transponder && !found) {
+				while ( current_transponder && !found ) {
 					current_onid = xmlGetNumericAttribute(current_transponder, "onid", 16);
 					current_tsid = xmlGetNumericAttribute(current_transponder, "id", 16);				
 /*					printf("ONID from currentservices.xml: %04x\n",current_onid);
@@ -449,7 +471,29 @@ void mergeServices()
 				fprintf(tmp, "\t\t</transponder>\n");
 				transponder = transponder->xmlNextNode;
 			}
+			//And now check for new transponders vice versa
+			current_transponder = current_provider->xmlChildrenNode;			
+			while (current_transponder) {
+				found = false;
+				current_onid = xmlGetNumericAttribute(current_transponder, "onid", 16);
+				current_tsid = xmlGetNumericAttribute(current_transponder, "id", 16);
+				transponder = provider->xmlChildrenNode;
+				while ( transponder && !found ) {
+					onid = xmlGetNumericAttribute(transponder, "onid", 16);
+					tsid = xmlGetNumericAttribute(transponder, "id", 16);
+					if ( (tsid == current_tsid) &&
+						(onid == current_onid) )
+						found = true;
+					transponder = transponder->xmlNextNode;
+				}
+				if (!found) {
+					copy_transponder(tmp, current_transponder, is_sat);
+					fprintf(tmp, "\t\t</transponder>\n");
+				}
+				current_transponder = current_transponder->xmlNextNode;
+			}
 		} else {
+			is_sat = write_provider(tmp, provider, true);
 			while (transponder) {
 				copy_transponder(tmp, transponder, is_sat);
 				fprintf(tmp, "\t\t</transponder>\n");
@@ -2155,7 +2199,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.378 2005/11/20 15:10:52 mogway Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.379 2005/11/21 14:56:44 metallica Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
