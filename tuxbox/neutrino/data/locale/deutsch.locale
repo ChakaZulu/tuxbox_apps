@@ -619,6 +619,7 @@ options.fb framebuffer
 options.null null
 options.off aus
 options.on ein
+options.on.without_messages (keine info) ein
 options.serial seriell
 parentallock.changepin PIN-Code festlegen
 parentallock.changepin_hint1 Geben Sie hier Ihren neuen PIN-Code ein!
@@ -764,6 +765,7 @@ scants.startnow Kanalsuche starten
 scants.transponders Transponder:
 screensetup.lowerright grün = Bildrand unten, rechts
 screensetup.upperleft rot = Bildrand oben, links
+sectionsd.scanmode Sections Scan
 servicemenu.getplugins Plugins neu laden
 servicemenu.getplugins_hint Plugins werden neu geladen,\nbitte warten...
 servicemenu.head Service

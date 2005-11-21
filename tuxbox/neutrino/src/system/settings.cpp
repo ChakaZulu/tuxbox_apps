@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.39 2005/10/01 10:52:38 metallica Exp $
+        $Id: settings.cpp,v 1.40 2005/11/21 19:37:14 metallica Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -260,7 +260,9 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 	strcpy(TP_rate, configfile.getString("TP_rate", "27500000").c_str());
 #if HAVE_DVB_API_VERSION >= 3
 	if(TP_fec == 4) TP_fec = 5;
-#endif	
+#endif
+	scanSectionsd = configfile.getInt32("scanSectionsd", 0);
+
 	return true;
 }
 
@@ -305,6 +307,8 @@ bool CScanSettings::saveSettings(const char * const fileName)
 	configfile.setInt32("TP_pol", TP_pol);
 	configfile.setString("TP_freq", TP_freq);
 	configfile.setString("TP_rate", TP_rate);
+
+	configfile.setInt32("scanSectionsd",scanSectionsd );
 
 	if(configfile.getModifiedFlag())
 		configfile.saveConfig(fileName);

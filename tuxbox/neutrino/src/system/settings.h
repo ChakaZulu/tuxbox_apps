@@ -382,6 +382,8 @@ class CScanSettings
 	char	                  satName[MAX_SATELLITES][30];
 	delivery_system_t         delivery_system;
 
+	int		scanSectionsd;
+
 	int		scan_mode;
 	int		TP_scan;
 	int		TP_fec;

@@ -1531,6 +1531,13 @@ const CMenuOptionChooser::keyval OPTIONS_OFF0_ON1_OPTIONS[OPTIONS_OFF0_ON1_OPTIO
 	{ 1, LOCALE_OPTIONS_ON  }
 };
 
+#define SECTIONSD_SCAN_OPTIONS_COUNT 3
+const CMenuOptionChooser::keyval SECTIONSD_SCAN_OPTIONS[SECTIONSD_SCAN_OPTIONS_COUNT] =
+{
+	{ 0, LOCALE_OPTIONS_OFF },
+	{ 1, LOCALE_OPTIONS_ON  },
+	{ 2, LOCALE_OPTIONS_ON_WITHOUT_MESSAGES  }
+};
 
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
@@ -1656,12 +1663,16 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 	CMenuOptionChooser* fec = new CMenuOptionChooser(LOCALE_SCANTP_FEC, (int *)&scanSettings.TP_fec, SATSETUP_SCANTP_FEC, SATSETUP_SCANTP_FEC_COUNT, true);
 	CMenuOptionChooser* pol = new CMenuOptionChooser(LOCALE_SCANTP_POL, (int *)&scanSettings.TP_pol, SATSETUP_SCANTP_POL, SATSETUP_SCANTP_POL_COUNT, true);
+	
+	CMenuOptionChooser* onoffscanSectionsd = ( new CMenuOptionChooser(LOCALE_SECTIONSD_SCANMODE, (int *)&scanSettings.scanSectionsd, SECTIONSD_SCAN_OPTIONS, SECTIONSD_SCAN_OPTIONS_COUNT, true));
 
 	settings.addItem(onoff);
 	settings.addItem(new CMenuForwarder(LOCALE_SCANTP_FREQ, true, scanSettings.TP_freq, freq));
 	settings.addItem(new CMenuForwarder(LOCALE_SCANTP_RATE, true, scanSettings.TP_rate, rate));
 	settings.addItem(fec);
 	settings.addItem(pol);
+	settings.addItem(GenericMenuSeparatorLine);
+	settings.addItem(onoffscanSectionsd);
 	settings.addItem(GenericMenuSeparatorLine);
 
 	settings.addItem(new CMenuForwarder(LOCALE_SCANTS_STARTNOW, true, NULL, new CScanTs(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));

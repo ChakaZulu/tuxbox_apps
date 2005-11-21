@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.58 2005/10/06 20:35:35 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.59 2005/11/21 19:37:14 metallica Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -646,6 +646,7 @@ const char * locale_real_names[] =
 	"options.null",
 	"options.off",
 	"options.on",
+	"options.on.without_messages",
 	"options.serial",
 	"parentallock.changepin",
 	"parentallock.changepin_hint1",
@@ -791,6 +792,7 @@ const char * locale_real_names[] =
 	"scants.transponders",
 	"screensetup.lowerright",
 	"screensetup.upperleft",
+	"sectionsd.scanmode",
 	"servicemenu.getplugins",
 	"servicemenu.getplugins_hint",
 	"servicemenu.head",

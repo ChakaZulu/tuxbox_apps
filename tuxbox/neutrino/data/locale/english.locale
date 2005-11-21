@@ -619,6 +619,7 @@ options.fb framebuffer
 options.null null
 options.off off
 options.on on
+options.on.without_messages (w/o msgs.) on
 options.serial serial
 parentallock.changepin change PIN code
 parentallock.changepin_hint1 Enter your new youth protection pin code here!
@@ -764,6 +765,7 @@ scants.startnow start scan
 scants.transponders Transponders:
 screensetup.lowerright green = setup lower right
 screensetup.upperleft red = setup upper left
+sectionsd.scanmode Sections Scan
 servicemenu.getplugins Reload plugins
 servicemenu.getplugins_hint Reloading plugins,\nplease be patient.
 servicemenu.head Service
