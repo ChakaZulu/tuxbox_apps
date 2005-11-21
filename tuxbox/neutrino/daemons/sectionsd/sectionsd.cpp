@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.198 2005/11/21 14:57:28 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.199 2005/11/21 19:41:54 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1222,7 +1222,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.198 2005/11/21 14:57:28 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.199 2005/11/21 19:41:54 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1592,7 +1592,8 @@ static bool getscanning()
 	
 	while ( (!feof(scanconf)) && (strncmp(buffer, "scanSectionsd=", 14) != 0) )
 		fgets(buffer, 255, scanconf);
-	
+	fclose(scanconf);
+
 	if (!strncmp(buffer, "scanSectionsd=", 14))
 	{
 		switch (buffer[14]) {
@@ -5466,7 +5467,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.198 2005/11/21 14:57:28 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.199 2005/11/21 19:41:54 metallica Exp $\n");
 	
 	auto_scanning = getscanning();
 	
