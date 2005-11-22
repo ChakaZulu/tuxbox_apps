@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.199 2005/11/21 19:41:54 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.200 2005/11/22 13:06:41 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1222,7 +1222,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.199 2005/11/21 19:41:54 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.200 2005/11/22 13:06:41 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3181,7 +3181,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 	FILE * src = NULL;
 	FILE * dst = NULL;
 	char buffer[256] = "";
-	char prov_end[10] = "";
+//	char prov_end[10] = "";
 	
 //	lockServices();
 	for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s != mySIservicesOrderUniqueKey.end(); s++)
@@ -3306,10 +3306,12 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 	
 		if (!tp_existed) {
 			if (is_sat)
-				strncpy(prov_end,"\t</sat>\n", 8);
+				fprintf(dst,"\t</sat>\n");
+				//strncpy(prov_end,"\t</sat>\n", 8);
 			else
-				strncpy(prov_end,"\t</cable>\n", 10);
-			fprintf(dst,prov_end);
+				fprintf(dst,"\t</cable>\n");
+				//strncpy(prov_end,"\t</cable>\n", 10);
+			
 		}
 		if (newprov) {
 			write_xml_footer(dst);
@@ -3398,7 +3400,8 @@ static bool updateTP(const t_original_network_id onid, const t_transport_stream_
 	}	
 	
 	xmlDocPtr current_parser = NULL;
-	if (tmp = fopen(CURRENTSERVICES_XML, "r")) {
+	tmp = fopen(CURRENTSERVICES_XML, "r");
+	if (tmp) {
 		fclose(tmp);
 		current_parser= parseXmlFile(CURRENTSERVICES_XML);
 	}
@@ -3657,7 +3660,8 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 	xmlNodePtr current_tp = NULL;
 	xmlNodePtr current_provider = NULL;
 	
-	if (tmp = fopen(CURRENTSERVICES_XML, "r")) {
+	tmp = fopen(CURRENTSERVICES_XML, "r");
+	if (tmp) {
 		fclose(tmp);
 		current_parser= parseXmlFile(CURRENTSERVICES_XML);
 	}
@@ -5467,7 +5471,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.199 2005/11/21 19:41:54 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.200 2005/11/22 13:06:41 metallica Exp $\n");
 	
 	auto_scanning = getscanning();
 	
