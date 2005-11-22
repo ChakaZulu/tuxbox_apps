@@ -2,6 +2,11 @@ TuxCom:
 
 History:
 ---------
+22.11.2005 Version 1.11
+ - better keyboard handling when using Exit/Enter on DMM-Keyboard
+ - small bugs fixed in editor
+ - less memory usage 
+ - file /tmp/tuxcom.out is deleted when exiting plugin
 
 01.10.2005 Version 1.10a
  - numbers on USB-Keyboard now working again

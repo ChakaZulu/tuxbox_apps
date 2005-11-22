@@ -77,15 +77,12 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.10a\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.11\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004-2005"
-//rc codes
 
-//rc codes
 #ifdef HAVE_DREAMBOX_HARDWARE
 
-#if TUXCOM_DBOX_VERSION < 3
-
+//rc codes
 #define KEY_0		0x5C00
 #define KEY_1		0x5C01
 #define KEY_2		0x5C02
@@ -112,7 +109,7 @@
 #define KEY_YELLOW	0x5C52
 #define KEY_GREEN	0x5C55
 #define KEY_HELP	0x5C82
-#endif
+
 #define	RC_0		0x00
 #define	RC_1		0x01
 #define	RC_2		0x02
@@ -142,8 +139,6 @@
 
 #else
 // rc codes
-
-
 #define	RC_0			'0'
 #define	RC_1			'1'
 #define	RC_2			'2'
@@ -336,9 +331,6 @@ int viewy;
 int menuitemwidth;
 int menuitemnumber;
 
-char szFileBuffer[FILEBUFFER_SIZE];
-char* szCommand;
-char* szZipCommand;
 char tmpzipdir[256];
 char szClipboard[256];
 char szSearchstring[FILENAME_MAX];
@@ -677,7 +669,7 @@ int 			  	CheckOverwrite(const char* szFile, int mode, char* szNew);
 void	          	ReadSettings();
 void	          	WriteSettings();
 void	          	DoExecute(char* szAction, int showoutput);
-int 				DoCopy(struct fileentry* pfe, int typ, int checkmode);
+int 				DoCopy(struct fileentry* pfe, int typ, int checkmode, char* szZipCommand);
 void 				DoZipCopyEnd();
 int 				DoMove(char* szFile, int typ, int checktype);
 void	          	DoViewFile();

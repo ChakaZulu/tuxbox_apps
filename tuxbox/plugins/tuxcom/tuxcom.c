@@ -23,211 +23,11 @@
 */
 
 #include "tuxcom.h"
-#ifdef ORG_RC
-/******************************************************************************
- * GetRCCode  (Code from TuxTxt)
- ******************************************************************************/
-
-int GetRCCode(int mode)
-{
-	static int count = 0;
-	//get code
-#ifdef HAVE_DREAMBOX_HARDWARE
-	static unsigned short LastKey = -1;
-	static char LastKBCode = 0x00;
-	rccode = -1;
-	int bytesavail = 0;
-	int bytesread = read(rc, &rccode, 2);
-	unsigned short tmprc;
-	kbcode = 0;
-
-	if (bytesread == 2)
-	{
-		if (read(rc, &tmprc, 2) == 2)
-		{
-			if (rccode == tmprc && count >= 0)
-				count++;
-		}
-	}
-
-
-	// Tastaturabfrage
-	ioctl(kb, FIONREAD, &bytesavail);
-	if (bytesavail>0)
-	{
-		char tch[100];
-//			read(kb,&kbcode,1);
-		if (bytesavail > 99) bytesavail = 99;
-		read(kb,tch,bytesavail);
-		tch[bytesavail] = 0x00;
-		kbcode = tch[0];
-		LastKBCode = kbcode;
-		if (bytesavail == 1 && kbcode == 0x1b) { kbcode =LastKBCode = 0x00;rccode = RC_HOME; LastKey = rccode; count = -1; return 1;} // ESC-Taste
-		if (bytesavail == 1 && kbcode == '\n') { kbcode =LastKBCode = 0x00;rccode = RC_OK  ; LastKey = rccode; count = -1; return 1;} // Enter-Taste
-		if (bytesavail == 1 && kbcode == '+' ) { LastKey = RC_PLUS ; rccode = -1  ; count = -1; return 1;}
-		if (bytesavail == 1 && kbcode == '-' ) { LastKey = RC_MINUS; rccode = -1  ; count = -1; return 1;}
-		if (bytesavail >= 3 && tch[0] == 0x1b && tch[1] == 0x5b)
-		{
-			if (tch[2] == 0x41 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_UP        ; LastKey = rccode; count = -1; return 1; }// Cursortasten
-			if (tch[2] == 0x42 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_DOWN      ; LastKey = rccode; count = -1; return 1; }// Cursortasten
-			if (tch[2] == 0x43 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_RIGHT     ; LastKey = rccode; count = -1; return 1; }// Cursortasten
-			if (tch[2] == 0x44 )                                    { kbcode = LastKBCode = 0x00; rccode = RC_LEFT      ; LastKey = rccode; count = -1; return 1; }// Cursortasten
-			if (tch[2] == 0x33 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_MINUS     ; LastKey = rccode; count = -1; return 1; }// entf-Taste
-			if (tch[2] == 0x32 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_PLUS      ; LastKey = rccode; count = -1; return 1; }// einf-Taste
-			if (tch[2] == 0x35 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_PLUS      ; LastKey = rccode; count = -1; return 1; }// PgUp-Taste
-			if (tch[2] == 0x36 && tch[3] == 0x7e)                   { kbcode = LastKBCode = 0x00; rccode = RC_MINUS     ; LastKey = rccode; count = -1; return 1; }// PgDn-Taste
-			if (tch[2] == 0x5b && tch[3] == 0x45)                   { kbcode = LastKBCode = 0x00; rccode = RC_RED       ; LastKey = rccode; count = -1; return 1; }// F5-Taste
-			if (tch[2] == 0x31 && tch[3] == 0x37 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_GREEN     ; LastKey = rccode; count = -1; return 1; }// F6-Taste
-			if (tch[2] == 0x31 && tch[3] == 0x38 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_YELLOW    ; LastKey = rccode; count = -1; return 1; }// F7-Taste
-			if (tch[2] == 0x31 && tch[3] == 0x39 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_BLUE      ; LastKey = rccode; count = -1; return 1; }// F8-Taste
-			if (tch[2] == 0x32 && tch[3] == 0x30 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_DBOX      ; LastKey = rccode; count = -1; return 1; }// F9-Taste
-			if (tch[2] == 0x32 && tch[3] == 0x31 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_HELP      ; LastKey = rccode; count = -1; return 1; }// F10-Taste
-			if (tch[2] == 0x32 && tch[3] == 0x33 && tch[4] == 0x7e) { kbcode = LastKBCode = 0x00; rccode = RC_MUTE      ; LastKey = rccode; count = -1; return 1; }// F11-Taste
-		}
-		if (mode == RC_EDIT)
-		{
-/*
-			char tmsg[100];
-			int i;
-			sprintf(tmsg,"KeyboardCode:avail:%d, char:%c, rccode:%x ",bytesavail,(kbcode == 0x00 ? '*' : kbcode ),rccode);
-			for (i = 0; i < bytesavail; i++) sprintf(tmsg,"%s%x",tmsg,tch[i]);
-			MessageBox(tmsg,"",NOBUTTON);
-*/
-			LastKey = rccode;
-			count = -1;
-			switch (rccode)
-			{
-				case KEY_0:
-				case KEY_1:
-				case KEY_2:
-				case KEY_3:
-				case KEY_4:
-				case KEY_5:
-				case KEY_6:
-				case KEY_7:
-				case KEY_8:
-				case KEY_9:
-					// SMS-Style verhindern
-					rccode = -1;
-					break;
-			}
-			return 1;
-		}
-		else if (bytesread == 0)
-		{
-			if (kbcode == '0') { kbcode = 0x00;rccode = RC_0  ; LastKey = rccode; return 1;}
-			if (kbcode == '1') { kbcode = 0x00;rccode = RC_1  ; LastKey = rccode; return 1;}
-			if (kbcode == '2') { kbcode = 0x00;rccode = RC_2  ; LastKey = rccode; return 1;}
-			if (kbcode == '3') { kbcode = 0x00;rccode = RC_3  ; LastKey = rccode; return 1;}
-			if (kbcode == '4') { kbcode = 0x00;rccode = RC_4  ; LastKey = rccode; return 1;}
-			if (kbcode == '5') { kbcode = 0x00;rccode = RC_5  ; LastKey = rccode; return 1;}
-			if (kbcode == '6') { kbcode = 0x00;rccode = RC_6  ; LastKey = rccode; return 1;}
-			if (kbcode == '7') { kbcode = 0x00;rccode = RC_7  ; LastKey = rccode; return 1;}
-			if (kbcode == '8') { kbcode = 0x00;rccode = RC_8  ; LastKey = rccode; return 1;}
-			if (kbcode == '9') { kbcode = 0x00;rccode = RC_9  ; LastKey = rccode; return 1;}
-		}
-	}
-	if (bytesread == 2)
-	{
-		if (rccode == LastKey && LastKBCode != 0x00 && LastKBCode == kbcode)
-		{
-				return 1;
-		}
-		LastKBCode = 0x00;
-		if (rccode == LastKey)
-		{
-			if (count < REPEAT_TIMER)
-			{
-				if (count >= 0)
-					count++;
-				rccode = -1;
-				return 1;
-			}
-		}
-		else
-			count = 0;
-		LastKey = rccode;
-		if ((rccode & 0xFF00) == 0x5C00)
-		{
-			kbcode = 0;
-			switch(rccode)
-#else
-	struct input_event ev;
-	static __u16 rc_last_key = KEY_RESERVED;
-	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
-	{
-		if(ev.value)
-		{
-			if(ev.code == rc_last_key)
-			{
-				if (count < REPEAT_TIMER)
-				{
-					count++;
-					rccode = -1;
-					return 1;
-				}
-			}
-			else
-				count = 0;
-			rc_last_key = ev.code;
-			switch(ev.code)
-#endif
-			{
-				case KEY_UP:		rccode = RC_UP;			break;
-				case KEY_DOWN:		rccode = RC_DOWN;		break;
-				case KEY_LEFT:		rccode = RC_LEFT;		break;
-				case KEY_RIGHT:		rccode = RC_RIGHT;		break;
-				case KEY_OK:		rccode = RC_OK;			break;
-				case KEY_0:			rccode = RC_0;			break;
-				case KEY_1:			rccode = RC_1;			break;
-				case KEY_2:			rccode = RC_2;			break;
-				case KEY_3:			rccode = RC_3;			break;
-				case KEY_4:			rccode = RC_4;			break;
-				case KEY_5:			rccode = RC_5;			break;
-				case KEY_6:			rccode = RC_6;			break;
-				case KEY_7:			rccode = RC_7;			break;
-				case KEY_8:			rccode = RC_8;			break;
-				case KEY_9:			rccode = RC_9;			break;
-				case KEY_RED:		rccode = RC_RED;		break;
-				case KEY_GREEN:		rccode = RC_GREEN;		break;
-				case KEY_YELLOW:	rccode = RC_YELLOW;		break;
-				case KEY_BLUE:		rccode = RC_BLUE;		break;
-				case KEY_VOLUMEUP:	rccode = RC_PLUS;		break;
-				case KEY_VOLUMEDOWN:rccode = RC_MINUS;		break;
-				case KEY_MUTE:		rccode = RC_MUTE;		break;
-				case KEY_HELP:		rccode = RC_HELP;		break;
-				case KEY_SETUP:		rccode = RC_DBOX;		break;
-				case KEY_HOME:		rccode = RC_HOME;		break;
-				case KEY_POWER:		rccode = RC_STANDBY;	break;
-			}
-			return 1;
-		}
-
-#ifdef HAVE_DREAMBOX_HARDWARE
-		else
-		{
-			rccode &= 0x003F;
-		}
-		return 0;
-#else
-		else
-		{
-			rccode = -1;
-			rc_last_key = KEY_RESERVED;
-		}
-#endif
-	}
-
-		rccode = -1;
-		usleep(1000000/100);
-		return 0;
-}
-#else
 /******************************************************************************
  * GetRCCode  (Code from Tuxmail)
  ******************************************************************************/
 
-#if HAVE_DVB_API_VERSION == 3
+#ifndef HAVE_DREAMBOX_HARDWARE
 
 int GetRCCode(int mode)
 {
@@ -352,14 +152,13 @@ int GetRCCode(int mode)
 	if (bytesavail>0)
 	{
 		char tch[100];
-//			read(kb,&kbcode,1);
 		if (bytesavail > 99) bytesavail = 99;
 		read(kb,tch,bytesavail);
 		tch[bytesavail] = 0x00;
 		kbcode = tch[0];
 		LastKBCode = kbcode;
-		if (bytesavail == 1 && kbcode == 0x1b) { kbcode =LastKBCode = 0x00;rccode = RC_HOME; LastKey = rccode; count = -1; return 1;} // ESC-Taste
-		if (bytesavail == 1 && kbcode == '\n') { kbcode =LastKBCode = 0x00;rccode = RC_OK  ; LastKey = rccode; count = -1; return 1;} // Enter-Taste
+		if (bytesavail == 1 && kbcode == 0x1b) { LastKey = RC_HOME ; rccode = -1  ; count = -1; return 1;} // ESC-Taste
+		if (bytesavail == 1 && kbcode == '\n') { LastKey = RC_OK   ; rccode = -1  ; count = -1; return 1;} // Enter-Taste
 		if (bytesavail == 1 && kbcode == '+' ) { LastKey = RC_PLUS ; rccode = -1  ; count = -1; return 1;}
 		if (bytesavail == 1 && kbcode == '-' ) { LastKey = RC_MINUS; rccode = -1  ; count = -1; return 1;}
 		if (bytesavail >= 3 && tch[0] == 0x1b && tch[1] == 0x5b)
@@ -490,7 +289,6 @@ int GetRCCode(int mode)
 }
 #endif
 
-#endif
 /******************************************************************************
  * MyFaceRequester
  ******************************************************************************/
@@ -891,10 +689,6 @@ void plugin_exec(PluginParam *par)
 	autosave = BTN_ASK; // ask on exit
 
 	commandsize =sysconf(_SC_ARG_MAX )-100;
-	szCommand = (char*)malloc(commandsize);
-	szCommand [0]= 0x00;
-	szZipCommand = (char*)malloc(commandsize);
-	szZipCommand [0]= 0x00;
 	szClipboard[0] = 0x00;
 	szSearchstring[0] = 0x00;
 	szTextSearchstring[0] = 0x00;
@@ -1211,8 +1005,9 @@ void plugin_exec(PluginParam *par)
 				case RC_5:
 					if (tool[ACTION_COPY-1] == ACTION_COPY)
 					{
-						szZipCommand[0] = 0x00;
 						tmpzipdir[0] = 0x00;
+						char* szZipCommand = (char*)malloc(commandsize);					
+						szZipCommand[0] = 0x00;
 						RenderMenuLine(ACTION_COPY-1, YES);
 						pfe = GetSelected(curframe);
 						if ((finfo[curframe].zipfile[0] == 0x00) && (strcmp(finfo[curframe].path, finfo[1-curframe].path) == 0))
@@ -1232,10 +1027,10 @@ void plugin_exec(PluginParam *par)
 											if (IsMarked(curframe,pos))
 											{
 												pfe = getfileentry(curframe, pos);
-												if (DoCopy(pfe,YES, OVERWRITESKIPCANCEL) < 0) break;
+												if (DoCopy(pfe,YES, OVERWRITESKIPCANCEL,szZipCommand) < 0) break;
 											}
 										}
-										DoZipCopyEnd();
+										DoZipCopyEnd(szZipCommand);
 										FillDir(1-curframe,SELECT_NOCHANGE);
 										FillDir(  curframe,SELECT_NOCHANGE);
 										break;
@@ -1245,7 +1040,7 @@ void plugin_exec(PluginParam *par)
 											if (IsMarked(curframe,pos))
 											{
 												pfe = getfileentry(curframe, pos);
-												if (DoCopy(pfe,HIDDEN, OVERWRITESKIPCANCEL) < 0) break;
+												if (DoCopy(pfe,HIDDEN, OVERWRITESKIPCANCEL,szZipCommand) < 0) break;
 											}
 										}
 										break;
@@ -1259,19 +1054,20 @@ void plugin_exec(PluginParam *par)
 								switch (MessageBox(szMessage,(finfo[curframe].zipfile[0] == 0x00 ? info[INFO_COPY*NUM_LANG+language]:""),(finfo[curframe].zipfile[0] == 0x00 ? OKHIDDENCANCEL : OKCANCEL )))
 								{
 									case YES:
-										if (DoCopy(pfe,YES, OVERWRITECANCEL) < 0) break;
-										DoZipCopyEnd();
+										if (DoCopy(pfe,YES, OVERWRITECANCEL,szZipCommand) < 0) break;
+										DoZipCopyEnd(szZipCommand);
 										FillDir(1-curframe,SELECT_NOCHANGE);
 										FillDir(  curframe,SELECT_NOCHANGE);
 										break;
 									case HIDDEN:
-										DoCopy(pfe,HIDDEN, OVERWRITECANCEL);
+										DoCopy(pfe,HIDDEN, OVERWRITECANCEL,szZipCommand);
 										break;
 									default:
 										rccode = 0;
 								}
 							}
 						}
+						free(szZipCommand);
 					}
 					break;
 				case RC_6:
@@ -1463,6 +1259,8 @@ void plugin_exec(PluginParam *par)
 					{
 						char szMsg[356];
 						sprintf(szMsg,msg[MSG_COMMAND*NUM_LANG+language]);
+						char* szCommand = (char*)malloc(commandsize);
+					    	szCommand [0]= 0x00;
 						switch (GetInputString(400,commandsize,szCommand,szMsg, NO))
 						{
 							case RC_OK:
@@ -1473,6 +1271,7 @@ void plugin_exec(PluginParam *par)
 							default:
 								rccode = 0;
 						}
+						free (szCommand);
 					}
 					break;
 				case RC_GREEN: // toggle marker
@@ -1538,6 +1337,7 @@ void plugin_exec(PluginParam *par)
 	if (dosave == BTN_YES)
 		WriteSettings();
 
+	system("rm -f /tmp/tuxcom.out");
 	rccode = -1;
 	FTC_Manager_Done(manager);
 	FT_Done_FreeType(library);
@@ -1559,8 +1359,6 @@ void plugin_exec(PluginParam *par)
 	ClearMarker    (RIGHTFRAME);
 	ClearZipEntries(LEFTFRAME );
 	ClearZipEntries(RIGHTFRAME);
-	free(szCommand);
-	free(szZipCommand);
 #ifdef HAVE_DREAMBOX_HARDWARE
 	if (kb != -1) close(kb);
 #endif
@@ -3382,7 +3180,7 @@ void FillDir(int frame, int selmode)
  * DoCopy                                                                     *
  ******************************************************************************/
 
-int DoCopy(struct fileentry* pfe, int typ, int checktype)
+int DoCopy(struct fileentry* pfe, int typ, int checktype, char* szZipCommand)
 {
 	int i = 1;
 	char action[512], szFullFile[1000], tp;
@@ -3652,7 +3450,7 @@ int DoCopy(struct fileentry* pfe, int typ, int checktype)
  * DoZipCopyEnd                                                               *
  ******************************************************************************/
 
-void DoZipCopyEnd()
+void DoZipCopyEnd(char* szZipCommand)
 {
 	if (finfo[curframe].zipfile[0] != 0x00 && finfo[curframe].ftpconn == NULL)
 	{
@@ -3746,12 +3544,14 @@ void InsertText(char* pStart, char* pEnd,char* szText, int sel, int* pcount)
 		memmove((void*)(pStart+newlen+step),pEnd,movlen);
 	if (sel > 0 && (*(pStart-1) != '\n')) {*pStart = '\n'; pStart++; (*pcount)++;}
 	strncpy(pStart,szText,newlen);
-	if (szText[newlen-1] != '\n') *(pStart+newlen+step-1)='\n';
-	if (sel >= (*pcount)-1) *(pStart+newlen+step) = 0x00;
+	*(pStart+newlen+step+movlen) = 0x00;
 }
 void DoEditFile(char* szFile, char* szTitle,  int writable)
 {
 	FILE* pFile = fopen(szFile,"r");
+	char* szFileBuffer = (char*)malloc(FILEBUFFER_SIZE);
+	szFileBuffer [0]= 0x00;
+	
 	char *p = szFileBuffer, *p1, *pcur = szFileBuffer, *pStart = szFileBuffer, *pStop = NULL, *pMarkStart = NULL,*pMarkStop = NULL, *pMark = NULL;
 	char szInputBuffer[1001];
 	char szLineNumber[20];
@@ -4210,12 +4010,13 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 								fputs(szFileBuffer,pFile);
 								fclose(pFile);
 							}
-
+							free(szFileBuffer);
 							rccode = -1;
 							return;
 						case NO:
 							rccode = -1;
 							fclose(pFile);
+							free(szFileBuffer);
 							return;
 					}
 				}
@@ -4223,6 +4024,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 				{
 					rccode = -1;
 					fclose(pFile);
+					free(szFileBuffer);
 					return;
 				}
 
@@ -4231,6 +4033,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 	}
 	rccode = -1;
 	fclose(pFile);
+	free(szFileBuffer);
 }
 /******************************************************************************
  * DoTaskManager                                                              *
@@ -4239,6 +4042,8 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 void DoTaskManager()
 {
 	FILE* pFile = OpenPipe("ps -aux");
+	char* szFileBuffer = (char*)malloc(FILEBUFFER_SIZE);
+	szFileBuffer [0]= 0x00;
 	char *p = szFileBuffer, *p1, *p2, *pcur = szFileBuffer;
 	char szMsg[2000], procname[256], prid[20]="",uid[100]="";
 	int offset = 0, count = 0;
@@ -4409,10 +4214,12 @@ void DoTaskManager()
 			if (rccode == RC_HOME)
 			{
 				rccode = -1;
+				free(szFileBuffer);
 				return;
 			}
 		}
 	}
+	free(szFileBuffer);
 	rccode = -1;
 }
 /******************************************************************************

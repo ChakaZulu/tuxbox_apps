@@ -2,6 +2,11 @@ TuxCom:
 
 Historie:
 ---------
+22.11.2005 Version 1.11
+ - Bessere Tastaturabfrage bei Exit/Enter auf DMM-Tastatur
+ - kleinere Fehler im Editor ausgebessert
+ - weniger Speicherverbrauch 
+ - Datei /tmp/tuxcom.out wird beim Beenden des Plugins gelöscht
 
 01.10.2005 Version 1.10a
  - Zahlentasten auf USB-Tastatur funktionieren wieder
