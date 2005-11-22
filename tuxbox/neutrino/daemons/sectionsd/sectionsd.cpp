@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.200 2005/11/22 13:06:41 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.201 2005/11/22 20:59:33 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -917,7 +917,6 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 
 	return ;
 }
-
 static void commandGetIsScanningActive(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
 	struct sectionsd::msgResponseHeader responseHeader;
@@ -1222,7 +1221,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.200 2005/11/22 13:06:41 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.201 2005/11/22 20:59:33 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1695,7 +1694,6 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 */
 		initNITtables();
 		initSDTtables();
-		auto_scanning = getscanning();
 
 		doWakeUp = true;
 
@@ -2779,6 +2777,23 @@ static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLeng
 	return ;
 }
 
+static void commandSetSectionsdScanMode(int connfd, char *data, const unsigned dataLength)
+{
+	if (dataLength != 4)
+		return ;
+
+	lockMessaging();
+	auto_scanning = *((int*)data);
+
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = 0;
+	
+	unlockMessaging();
+
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
+	return ;
+
+}
 
 static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char *, const unsigned) =
     {
@@ -2811,7 +2826,8 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char
         commandPauseSorting,
 	commandRegisterEventClient,
 	commandUnRegisterEventClient,
-	commandSetPrivatePid
+	commandSetPrivatePid,
+	commandSetSectionsdScanMode
     };
 
 //static void *connectionThread(void *conn)
@@ -5471,7 +5487,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.200 2005/11/22 13:06:41 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.201 2005/11/22 20:59:33 metallica Exp $\n");
 	
 	auto_scanning = getscanning();
 	

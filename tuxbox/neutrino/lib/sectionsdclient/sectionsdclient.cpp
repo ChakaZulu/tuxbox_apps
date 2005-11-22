@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.45 2005/11/04 06:41:42 metallica Exp $
+  $Id: sectionsdclient.cpp,v 1.46 2005/11/22 20:59:34 metallica Exp $
 
   License: GPL
 
@@ -614,3 +614,10 @@ void CSectionsdClient::setPrivatePid(const unsigned short pid)
 	close_connection();
 }
 
+void CSectionsdClient::setSectionsdScanMode(const int scanMode)
+{
+	 send(sectionsd::setSectionsdScanMode, (char*)&scanMode, sizeof(scanMode));
+
+	readResponse();
+	close_connection();
+}

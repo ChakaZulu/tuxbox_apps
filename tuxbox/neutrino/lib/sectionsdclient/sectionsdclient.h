@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.33 2005/11/20 15:11:44 mogway Exp $
+  $Id: sectionsdclient.h,v 1.34 2005/11/22 20:59:34 metallica Exp $
 
   License: GPL
 
@@ -173,6 +173,8 @@ class CSectionsdClient : private CBasicClient
 	bool getEPGidShort(const event_id_t eventid, CShortEPGData * epgdata);
 
 	void setPrivatePid(const unsigned short pid);
+
+	void setSectionsdScanMode(const int scanMode);
 
 	/*
 	  ein beliebiges Event anmelden

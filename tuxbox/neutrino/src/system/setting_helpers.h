@@ -129,6 +129,12 @@ class CSPTSNotifier : public CChangeObserver
 	public:
 		bool changeNotify(const neutrino_locale_t, void *);
 };
+		
+class CScanModeSectionsdNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(const neutrino_locale_t, void * );
+};
 
 class CTouchFileNotifier : public CChangeObserver
 {

@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.10 2005/09/04 21:59:13 mogway Exp $
+//  $Id: sectionsdMsg.h,v 1.11 2005/11/22 20:59:34 metallica Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -83,6 +83,7 @@ struct sectionsd
 		CMD_registerEvents,
 		CMD_unregisterEvents,
 		setPrivatePid,
+		setSectionsdScanMode,
 		numberOfCommands        // <- no actual command, end of command marker
 	};
 
