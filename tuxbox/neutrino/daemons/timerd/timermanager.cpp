@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.80 2005/11/13 19:04:28 mogway Exp $
+   $Id: timermanager.cpp,v 1.81 2005/11/22 14:24:12 zwen Exp $
 
 	License: GPL
 
@@ -727,10 +727,12 @@ void CTimerManager::shutdownOnWakeup()
 	{
 		CTimerEvent *event = pos->second;
 		if((event->eventType == CTimerd::TIMER_RECORD ||
-			 event->eventType == CTimerd::TIMER_ZAPTO ) &&
-			event->eventState == CTimerd::TIMERSTATE_SCHEDULED)
+		    event->eventType == CTimerd::TIMER_ZAPTO ) &&
+		   (event->eventState == CTimerd::TIMERSTATE_SCHEDULED ||
+		    event->eventState == CTimerd::TIMERSTATE_PREANNOUNCE ||
+		    event->eventState == CTimerd::TIMERSTATE_ISRUNNING))
 		{
-			// Wir wachen nur für Records und Zaptos wieder auf
+			// Bei anstehendem/laufendem RECORD oder ZAPTO Timer nicht runterfahren
 			if(event->announceTime < nextAnnounceTime || nextAnnounceTime==0)
 			{
 				nextAnnounceTime=event->announceTime;
