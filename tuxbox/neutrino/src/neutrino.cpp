@@ -3749,10 +3749,6 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		if((old_id == 0) || (!(channelList->adjustToChannelID(old_id))))
 			channelList->zapTo(0);
 			
-		// Houdini: after channels have been reloaded, g_Zapit's actual channel is the initial channel from zapit.conf
-		// so zap to old channel (what is when in record mode?)
-		g_Zapit->zapTo_serviceID_NOWAIT(old_id);
-
 		return messages_return::handled;
 	}
 	else if (msg == NeutrinoMessages::RECORD_START)
