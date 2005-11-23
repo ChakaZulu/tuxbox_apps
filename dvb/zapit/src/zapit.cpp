@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.380 2005/11/22 20:17:52 mws Exp $
+ * $Id: zapit.cpp,v 1.381 2005/11/23 12:56:00 metallica Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -274,18 +274,26 @@ void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sa
 	inversion =  xmlGetAttribute(transponder, "inversion");
 	fec_inner =  xmlGetAttribute(transponder, "fec_inner");
 	
-	if (is_sat)
+	if (is_sat) {
 		modulation =  xmlGetAttribute(transponder, "polarization");
-	else
-		modulation =  xmlGetAttribute(transponder, "modulation");
-	
-	sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" polarization=\"%s\">\n",tsid_str.c_str(),
+		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" polarization=\"%s\">\n",tsid_str.c_str(),
 				onid_str.c_str(),
 				frequency.c_str(),
 				inversion.c_str(),
 				symbol_rate.c_str(),
 				fec_inner.c_str(),
 				modulation.c_str());
+	}
+	else {
+		modulation =  xmlGetAttribute(transponder, "modulation");
+		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" modulation=\"%s\">\n",tsid_str.c_str(),
+				onid_str.c_str(),
+				frequency.c_str(),
+				inversion.c_str(),
+				symbol_rate.c_str(),
+				fec_inner.c_str(),
+				modulation.c_str());	
+	}
 
 	fprintf(tmp, tp_str);
 }
@@ -435,14 +443,14 @@ void mergeServices()
 	write_header(tmp);
 	//xmlNodePtr services_tp = FindTransponder(xmlDocGetRootElement(service_parser)->xmlChildrenNode, onid, tsid);
 	while (provider) {		
-		current_provider = xmlDocGetRootElement(current_parser)->xmlChildrenNode;
 		transponder = provider->xmlChildrenNode;
+		current_provider = xmlDocGetRootElement(current_parser)->xmlChildrenNode;		
 		while ( (current_provider) && (strcmp(xmlGetAttribute(provider, "name"), xmlGetAttribute(current_provider, "name"))) )
 			current_provider = current_provider->xmlNextNode;
 //		if (!current_provider)
 
 //		else {
-		if (current_provider) {		
+		if (current_provider) {			
 			is_sat = write_provider(tmp, current_provider, true);
 			while (transponder) {
 				found = false;
@@ -2199,7 +2207,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.380 2005/11/22 20:17:52 mws Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.381 2005/11/23 12:56:00 metallica Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

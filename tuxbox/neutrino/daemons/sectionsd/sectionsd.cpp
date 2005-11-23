@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.201 2005/11/22 20:59:33 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.202 2005/11/23 12:56:00 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1221,7 +1221,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.201 2005/11/22 20:59:33 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.202 2005/11/23 12:56:00 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3008,12 +3008,20 @@ static void write_xml_footer(FILE *fd)
 	fprintf(fd, "</zapit>\n");
 }
 
+static void write_xml_provend(FILE *dst, const bool is_sat)
+{
+	if (is_sat)
+		fprintf(dst,"\t</sat>\n");
+	else
+		fprintf(dst,"\t</cable>\n");
+}
+
 //Writes transponder entry or copies all existing tps of a provider.
 static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node, const bool is_sat, const bool copy)
 {
 	char tp_str[256] = "";
 	char buffer[256] = "";
-	char prov_end[10] = "";
+//	char prov_end[10] = "";
 	
 	std::string tsid_str;
 	std::string onid_str;	
@@ -3032,35 +3040,47 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 	inversion =  xmlGetAttribute(tp_node, "inversion");
 	fec_inner =  xmlGetAttribute(tp_node, "fec_inner");
 	
-	if (is_sat)
+	if (is_sat) {
 		modulation =  xmlGetAttribute(tp_node, "polarization");
-	else
+		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" polarization=\"%s\">\n",tsid_str.c_str(),
+				onid_str.c_str(),
+				frequency.c_str(),
+				inversion.c_str(),
+				symbol_rate.c_str(),
+				fec_inner.c_str(),
+				modulation.c_str());	
+	}
+	else {
 		modulation =  xmlGetAttribute(tp_node, "modulation");
-	
-	sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" polarization=\"%s\">\n",tsid_str.c_str(),
+		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" modulation=\"%s\">\n",tsid_str.c_str(),
 				onid_str.c_str(),
 				frequency.c_str(),
 				inversion.c_str(),
 				symbol_rate.c_str(),
 				fec_inner.c_str(),
 				modulation.c_str());
-
+	}
+	
 	if (!copy)
 		fprintf(dst, tp_str);
 	else {
 		if (!feof(src)) {
 			fgets(buffer, 255, src);
 			
-			if (is_sat)
-				sprintf(prov_end,"\t</sat>\n");
-			else
-				sprintf(prov_end,"\t</cable>\n");
-			
-			//find tp in currentservices.xml
-			while( (!feof(src)) && (strcmp(buffer, prov_end) != 0) && (strcmp(buffer, tp_str) != 0) )
-			{
-				fprintf(dst, buffer);
-				fgets(buffer, 255, src);				
+			if (is_sat) {
+				//find tp in currentservices.xml
+				while( (!feof(src)) && (strcmp(buffer, "\t</sat>\n") != 0) && (strcmp(buffer, tp_str) != 0) )
+				{
+					fprintf(dst, buffer);
+					fgets(buffer, 255, src);				
+				}
+			}
+			else {
+				while( (!feof(src)) && (strcmp(buffer, "\t</cable>\n") != 0) && (strcmp(buffer, tp_str) != 0) )
+				{
+					fprintf(dst, buffer);
+					fgets(buffer, 255, src);				
+				}			
 			}
 			//If the Transponder alredy existed. This isn't reached at the moment because if the transponder
 			//didn't exist we don't call the update function. But maybe this is to be changed:
@@ -3068,7 +3088,7 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 			//we find SDT ACTUAL. So we leave it here. Save could be done through another node SDT in
 			//currentservices.xml. Should be easy to realize...
 			if ( (!feof(src)) && (!strcmp(buffer, tp_str)) ) {
-				while( (!feof(src)) && (strncmp(buffer, "\t\t</transponder>\n",17) != 0) ) {
+				while( (!feof(src)) && (strcmp(buffer, "\t\t</transponder>\n") != 0) ) {
 					tp_existed = true;
 					fgets(buffer, 255, src);
 				}
@@ -3320,15 +3340,9 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 
 		fprintf(dst,"\t\t</transponder>\n");
 	
-		if (!tp_existed) {
-			if (is_sat)
-				fprintf(dst,"\t</sat>\n");
-				//strncpy(prov_end,"\t</sat>\n", 8);
-			else
-				fprintf(dst,"\t</cable>\n");
-				//strncpy(prov_end,"\t</cable>\n", 10);
-			
-		}
+		if (!tp_existed)
+			write_xml_provend(dst, is_sat);			
+		
 		if (newprov) {
 			write_xml_footer(dst);
 		}
@@ -3540,10 +3554,10 @@ static void writeTransponderFromDescriptor(FILE *dst, const t_original_network_i
 	}
 	else {
 		cdd = (struct cable_delivery_descriptor *)ddp;
-		fprintf(dst,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%08x\" inversion=\"%hu\" symbol_rate=\"%08x\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
+		fprintf(dst,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%09x\" inversion=\"%hu\" symbol_rate=\"%07x\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
 		tsid,
 		onid,
-		((cdd->frequency_1 << 24) | (cdd->frequency_2 << 16) | (cdd->frequency_3 << 8) | cdd->frequency_4) << 4,
+		((cdd->frequency_1 << 24) | (cdd->frequency_2 << 16) | (cdd->frequency_3 << 8) | cdd->frequency_4) << 8,
 //		cdd->fec_outer,
 		INVERSION_AUTO,
 		((cdd->symbol_rate_1 << 20) | (cdd->symbol_rate_2 << 12) | (cdd->symbol_rate_3 << 4) | cdd->symbol_rate_4) << 8,
@@ -3563,7 +3577,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 	
 //	char prov_str_alt[256] = "";
 	char prov_str_neu[256] = "";
-	char prov_end[10] = "";
+//	char prov_end[10] = "";
 	char buffer[256] = "";
 	
 	std::string frontendType; 
@@ -3587,13 +3601,13 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 //			sprintf(prov_str_alt,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
 //		else
 //			sprintf(prov_str_alt,prov_str_neu);
-		sprintf(prov_end,"\t</sat>\n");
+//		sprintf(prov_end,"\t</sat>\n");
 		is_sat = true;
 	}
 	else {
 //		sprintf(prov_str_alt,"\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
 		sprintf(prov_str_neu,"\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
-		sprintf(prov_end,"\t</cable>\n");
+//		sprintf(prov_end,"\t</cable>\n");
 		is_sat = false;
 	}
 
@@ -3603,7 +3617,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 		fprintf(dst, prov_str_neu);
 		if (ddp != NULL)
 			writeTransponderFromDescriptor(dst, onid, tsid, ddp, is_sat);
-		fprintf(dst, prov_end);
+		write_xml_provend(dst, is_sat);
 		write_xml_footer(dst);
 	} 
 	else {
@@ -3618,19 +3632,31 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 			fprintf(dst, prov_str_neu);
 			
 			if (strncmp(buffer, "</zapit>\n", 8) == 0)
-				fprintf(dst, prov_end);
+				write_xml_provend(dst, is_sat);
+				//fprintf(dst, prov_end);
 			else {
 				if (!feof(src))
 					fgets(buffer, 255, src);
 			}
 			if (ddp != NULL) {
-				while( (!feof(src)) && (strcmp(buffer, prov_end) != 0) )
-				{
-					fprintf(dst, buffer);
-					fgets(buffer, 255, src);
+				if (is_sat) {
+					while( (!feof(src)) && (strcmp(buffer, "\t</sat>\n") != 0) )
+					{
+						fprintf(dst, buffer);
+						fgets(buffer, 255, src);
+					}
+					if (strcmp(buffer, "\t</sat>\n") == 0)
+						writeTransponderFromDescriptor(dst, onid, tsid, ddp, is_sat);
 				}
-				if (strcmp(buffer, prov_end) == 0)
-					writeTransponderFromDescriptor(dst, onid, tsid, ddp, is_sat);
+				else {
+					while( (!feof(src)) && (strcmp(buffer, "\t</cable>\n") != 0) )
+					{
+						fprintf(dst, buffer);
+						fgets(buffer, 255, src);
+					}
+					if (strcmp(buffer, "\t</cable>\n") == 0)
+						writeTransponderFromDescriptor(dst, onid, tsid, ddp, is_sat);
+				}	
 			}
 
 			while (!feof(src))
@@ -3888,6 +3914,7 @@ static int getscanType()
 	
 	while ( (!feof(scanconf)) && (strncmp(buffer, "scanType=", 9) != 0) )
 		fgets(buffer, 255, scanconf);
+	fclose(scanconf);
 	
 	if (!strncmp(buffer, "scanType=", 9))
 	{
@@ -5487,7 +5514,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.201 2005/11/22 20:59:33 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.202 2005/11/23 12:56:00 metallica Exp $\n");
 	
 	auto_scanning = getscanning();
 	
