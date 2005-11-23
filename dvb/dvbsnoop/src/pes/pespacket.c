@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.34 2005/11/10 00:05:45 rasc Exp $
+$Id: pespacket.c,v 1.35 2005/11/23 23:06:10 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pespacket.c,v 1.34 2005/11/10 00:05:45 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.35  2005/11/23 23:06:10  rasc
+ISO13818-2  MPEG2 sequence header
+
 Revision 1.34  2005/11/10 00:05:45  rasc
  - New: PS MPEG2 UserData + GOP, DVB-S2 fix
 
@@ -235,6 +238,7 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
 
    //
    // -- PES Stream ID 0x00 - 0xB8
+   // -- ISO 13818-2
    //
 
    if (stream_id <= 0xB8) {
@@ -244,11 +248,9 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
 		//    slice_start_code	01 through AF
 		//    reserved	B0
 		//    reserved	B1
-		//    sequence_header_code	B3
-		//    sequence_error_code	B4
+		//    sequence_error_code	B4  (not for streams)
 		//    extension_start_code	B5
 		//    reserved	B6
-		//    sequence_end_code	B7
 
 	indent (+1);
 	switch (stream_id) {
@@ -256,6 +258,14 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
 	  case 0xB2:			// user_data_start_code B2
 		MPEG2_decodeUserData (b, len);
 		break;
+
+	  case 0xB3:			// sequence_header_code	B3
+		MPEG2_decodeSequenceHeader (b, len);
+		break;
+
+	  case 0xB7:	// sequence_end_code	B7
+			// stream ID already printed, nothing else to do
+		return;
 
 	  case 0xB8:			//    group_start_code	B8
 		MPEG2_decodeGroupOfPictures (b, len);

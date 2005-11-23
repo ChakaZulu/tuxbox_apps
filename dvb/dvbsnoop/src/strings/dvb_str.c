@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.71 2005/11/10 23:34:38 rasc Exp $
+$Id: dvb_str.c,v 1.72 2005/11/23 23:06:10 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.71 2005/11/10 23:34:38 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.72  2005/11/23 23:06:10  rasc
+ISO13818-2  MPEG2 sequence header
+
 Revision 1.71  2005/11/10 23:34:38  rasc
 Some H.222.1 AMD 4+5 update
 
@@ -1425,7 +1428,6 @@ char *dvbstrTerrMPE_FEC_Indicator (u_int i)
 */
 
 char *dvbstrAspectRatioInfo_FLAG (u_int i)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "forbidden" },
@@ -2229,7 +2231,7 @@ char *dvbstrPESstream_ID (u_int i)
   STR_TABLE  Table[] = {
 	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
 	// -- updated 2004-08-11  from ITU-T Rec H.222.0 AMD3
-	// -- updated 2005-10-22  ISO13816-2 (code 0x00-0xB8)
+	// -- updated 2005-10-22  ISO13818-2 (code 0x00-0xB8)
 	//
      // on changes:  adapt dmx_pes.c!!! etc. (search for PESstream_ID)
  
@@ -3453,6 +3455,39 @@ char *dvbstrMPEG_metadata_section_frag_indication (u_int i)
 }
 
 
+
+
+
+
+/*
+ * ------------------------------------------------------------------------------
+ */
+
+
+
+/*
+ -- frame_rate_code
+ -- ISO 13818-2 Table 6.4
+*/
+
+char *dvbstrMPEG_FrameRateCode (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "forbidden" },
+     {  0x01, 0x01,  "23.976" },
+     {  0x02, 0x02,  "24" },
+     {  0x03, 0x03,  "25" },
+     {  0x04, 0x04,  "29.97" },
+     {  0x05, 0x05,  "30" },
+     {  0x06, 0x06,  "50" },
+     {  0x07, 0x07,  "59.94" },
+     {  0x08, 0x08,  "60" },
+     {  0x09, 0x0F,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
 
 
 

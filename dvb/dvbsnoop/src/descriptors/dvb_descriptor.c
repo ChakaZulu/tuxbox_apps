@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.46 2005/11/16 20:12:18 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.47 2005/11/23 23:06:08 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.46 2005/11/16 20:12:18 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.47  2005/11/23 23:06:08  rasc
+ISO13818-2  MPEG2 sequence header
+
 Revision 1.46  2005/11/16 20:12:18  rasc
 bugfix
 
@@ -478,10 +481,8 @@ void descriptorDVB_SatDelivSys (u_char *b)
 
 
  s = (d.kind == 0) ? "DVB-S" : "DVB-S2";
- if (0 == d.kind) {
-	out_S2B_NL (4,"Kind: ", d.kind, "DVB-S");
- } else {
-	out_S2B_NL (4,"Kind: ", d.kind, "DVB-S2");
+ out_S2B_NL (4,"Kind: ", d.kind, s);
+ if (d.kind) {
 	out_S2B_NL (4,"Roll Off Faktor: ", d.roll_off,
 		dvbstrRollOffSAT_FLAG(d.roll_off));
  }

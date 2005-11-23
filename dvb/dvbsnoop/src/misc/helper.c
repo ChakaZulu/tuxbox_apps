@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.39 2005/09/12 20:56:16 rasc Exp $
+$Id: helper.c,v 1.40 2005/11/23 23:06:09 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.39 2005/09/12 20:56:16 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.40  2005/11/23 23:06:09  rasc
+ISO13818-2  MPEG2 sequence header
+
 Revision 1.39  2005/09/12 20:56:16  rasc
 Make dvbsnoop compile on Cygwin / Windows
 
@@ -512,6 +515,15 @@ u_char *getISO639_3 (u_char *str, u_char *buf)
 
 
 
+
+/*
+  -----------------------------------------------------------------------------------
+ */
+
+
+
+
+
 /*
   -- print_text_468A 
   -- ETSI EN 300 468  Annex A
@@ -717,10 +729,13 @@ void print_pcr_time (int v, long long time90kHz, int ext_27MHz)
 }
 
 
+
+
+
+
 /*
   -- print data bytes (str + hexdump)
   -- print  "Private Data" and Hex-Dump
-
 */
 void print_databytes (int v, const char *str, u_char *b, u_int len)
 {
@@ -748,6 +763,51 @@ void print_databytes_line  (int v, const char *str, u_char *b, u_int len)
 
 
 
+/*
+  -- print Bit Matrix  x * y
+  -- print  Hex-Value and Bit-String  
+  -- Matrix may start at any bit position
+  -- x <= 64 bits !!
+*/
+void print_BitMatrix (int v, char *str, u_char *b, int bitoffset,  int matrix_x, int matrix_y)
+{
+  unsigned long long c;
+  int                i;
+
+
+  if (matrix_x <= 0 || matrix_y <= 0)  return;
+
+
+  out_nl (v,"%s (%d x %d)",str,matrix_x,matrix_y);
+  indent (1);
+  while (matrix_y-- > 0) {
+
+	if (matrix_x <= 32) {
+		c = outBit_Sx   (v, "", b, bitoffset , matrix_x);
+	} else {
+		c = outBit64_Sx (v, "", b, bitoffset , matrix_x);
+	}
+
+	out (v,"   [= ");
+        i = matrix_x;
+	while (--i >= 0) {
+		out (v, (c & 1<<i) ? "1" : "0");
+	}
+	out_nl (v,"]");
+
+	bitoffset += matrix_x;
+  }
+  indent (-1);
+
+}
+
+
+
+
+
+/*
+  -----------------------------------------------------------------------------------
+ */
 
 
 
@@ -875,6 +935,11 @@ static char *_str_cell_latitude_longitude (long ll, int angle)
 
 
 
+/*
+  -----------------------------------------------------------------------------------
+ */
+
+
 
 
 /*
@@ -939,6 +1004,11 @@ void displ_IPv6_addr (int v, struct IPv6ADDR *a)
 
 
 
+
+
+/*
+  -----------------------------------------------------------------------------------
+ */
 
 
 

@@ -1,3 +1,4 @@
+ - New: PS MPEG2 sequence header
  - New: H.222.1 AMD 4+5 + Corr. stuff
  - New: PS MPEG2 UserData + GOP, DVB-S2 fix
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)

@@ -46,6 +46,8 @@ void print_databytes (int verbose, const char *str, u_char *b, u_int len);
 void print_databytes_line  (int v, const char *str, u_char *b, u_int len);
 void print_private_data (int verbose, u_char *b, u_int len);
 
+void print_BitMatrix (int v, char *str, u_char *b, int bitoffset,  int matrix_x, int matrix_y);
+
 long str2i (char *s);
 int  str2barray  (char *s, u_char *barray, int max_len);
 

@@ -1,5 +1,5 @@
 /*
-$Id: mpeg2_video.c,v 1.1 2005/11/10 00:07:18 rasc Exp $
+$Id: mpeg2_video.c,v 1.2 2005/11/23 23:06:10 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: mpeg2_video.c,v 1.1 2005/11/10 00:07:18 rasc Exp $
 
 
 $Log: mpeg2_video.c,v $
+Revision 1.2  2005/11/23 23:06:10  rasc
+ISO13818-2  MPEG2 sequence header
+
 Revision 1.1  2005/11/10 00:07:18  rasc
  - New: PS MPEG2 UserData + GOP, DVB-S2 fix
 
@@ -92,10 +95,61 @@ void MPEG2_decodeGroupOfPictures (u_char *b, int len)
    outBit_Sx_NL (4,"broken_link: ",		b, 26,  1);
 
 }
+
+
+
+
+/*
+   -- MPEG sequence header
+   -- ISO 13818-2
+   -- Sync and streamID already displayed
+*/
+
+void MPEG2_decodeSequenceHeader (u_char *b, int len)
+{
+
+  int liqm;
+  int nliqm;
+  int bo;	// bit offset;
+
+   // outBit_Sx_NL (3,"packet_start_code: ",	b, 0, 24);
+   // outBit_S2x_NL(3,"Stream_id: ",		b, 24, 8,
+   // 		   (char *(*)(u_long))dvbstrPESstream_ID );
+   // len -= 4;
+
+   b += 4;
+
+   outBit_Sx_NL (4,"horizontal_size_value: ",		b,  0,  12);
+   outBit_Sx_NL (4,"vertical_size_value: ",		b, 12,  12);
+   outBit_S2x_NL(4,"aspect_ratio_information: ",	b, 24,   4,
+    		   (char *(*)(u_long))dvbstrAspectRatioInfo_FLAG);
+   outBit_S2x_NL(4,"frame_rate_code: ",			b, 28,   4,
+    		   (char *(*)(u_long))dvbstrMPEG_FrameRateCode);
+
+   outBit_Sx_NL (4,"bit_rate_value: ",			b, 32,  18);
+   outBit_Sx_NL (4,"marker_bit: ",			b, 50,   1);
+   outBit_Sx_NL (4,"vbv_buffer_size_value: ",		b, 51,  10);
+   outBit_Sx_NL (4,"contraint_parameters_flag: ",	b, 61,   1);
+
+   liqm  = outBit_Sx_NL (4,"load_intra_quantiser_matrix: ",	b, 62,   1);
+   bo = 63;
+   if (liqm) {
+	   // 8x[64]
+	   print_BitMatrix (4,"intra_quantiser_matrix: ", b, bo,  8,64);
+	   bo += 64;
+   }
+
+   nliqm = outBit_Sx_NL (4,"load_non_intra_quantiser_matrix: ",	b, bo,   1);
+   bo++;
+   if (nliqm) {
+	   // 8x[64]
+	   print_BitMatrix (4,"non_intra_quantiser_matrix: ", b, bo,  8,64);
+   }
+
+
+
+}
  
-
-
-
 
 
 

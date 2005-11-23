@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.31 2005/11/08 23:15:26 rasc Exp $ 
+$Id: dvb_str.h,v 1.32 2005/11/23 23:06:11 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.31 2005/11/08 23:15:26 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.32  2005/11/23 23:06:11  rasc
+ISO13818-2  MPEG2 sequence header
+
 Revision 1.31  2005/11/08 23:15:26  rasc
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
  - Bugfix: PES packet stuffing
@@ -251,6 +254,11 @@ char *dvbstrMPEG_metadata_application_format (u_int i);
 char *dvbstrMPEG_Content_time_base_indicator (u_int i);
 char *dvbstrMPEG_metadata_section_frag_indication (u_int i);
 
+
+
+/* ISO 13818-2 */
+
+char *dvbstrMPEG_FrameRateCode (u_int i);
 
 
 #endif

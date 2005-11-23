@@ -1,5 +1,5 @@
 /*
-$Id: mpeg2_video.h,v 1.1 2005/11/10 00:07:18 rasc Exp $
+$Id: mpeg2_video.h,v 1.2 2005/11/23 23:06:10 rasc Exp $
 
    
  DVBSNOOP
@@ -19,6 +19,7 @@ $Id: mpeg2_video.h,v 1.1 2005/11/10 00:07:18 rasc Exp $
 
 void MPEG2_decodeUserData (u_char *b, int len);
 void MPEG2_decodeGroupOfPictures (u_char *b, int len);
+void MPEG2_decodeSequenceHeader (u_char *b, int len);
 
 
 #endif
