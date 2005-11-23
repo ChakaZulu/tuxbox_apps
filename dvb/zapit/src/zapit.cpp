@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.381 2005/11/23 12:56:00 metallica Exp $
+ * $Id: zapit.cpp,v 1.382 2005/11/23 19:55:29 metallica Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -231,11 +231,10 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 				sprintf(prov_str,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
 			else {
 				east_west = xmlGetNumericAttribute(provider, "east_west", 16);
-				sprintf(prov_str,"\t<%s name=\"%s\" orbital=\"%04x\" east_west=\"%hu\" diseqc=\"%s\">\n", 
+				sprintf(prov_str,"\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", 
 					frontendType.c_str(), 
 					provider_name.c_str(),
 					orbital,
-					east_west,
 					diseqc.c_str());			
 			}
 			is_sat = true;
@@ -2207,7 +2206,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.381 2005/11/23 12:56:00 metallica Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.382 2005/11/23 19:55:29 metallica Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
