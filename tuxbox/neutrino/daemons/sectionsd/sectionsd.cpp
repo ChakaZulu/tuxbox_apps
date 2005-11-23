@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.202 2005/11/23 12:56:00 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.203 2005/11/23 20:25:23 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1221,7 +1221,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.202 2005/11/23 12:56:00 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.203 2005/11/23 20:25:23 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3022,7 +3022,7 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 	char tp_str[256] = "";
 	char buffer[256] = "";
 //	char prov_end[10] = "";
-	
+	/*
 	std::string tsid_str;
 	std::string onid_str;	
 	std::string frequency;
@@ -3030,35 +3030,45 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 	std::string inversion;
 	std::string fec_inner;
 	std::string modulation;
-	
+	*/
 	bool tp_existed = false;
-	
+	/*
 	onid_str = xmlGetAttribute(tp_node, "onid");
 	tsid_str = xmlGetAttribute(tp_node, "id");
 	frequency = xmlGetAttribute(tp_node, "frequency");
 	symbol_rate = xmlGetAttribute(tp_node, "symbol_rate");
 	inversion =  xmlGetAttribute(tp_node, "inversion");
 	fec_inner =  xmlGetAttribute(tp_node, "fec_inner");
-	
+	*/
 	if (is_sat) {
-		modulation =  xmlGetAttribute(tp_node, "polarization");
-		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" polarization=\"%s\">\n",tsid_str.c_str(),
-				onid_str.c_str(),
-				frequency.c_str(),
-				inversion.c_str(),
-				symbol_rate.c_str(),
-				fec_inner.c_str(),
-				modulation.c_str());	
+//		modulation =  xmlGetAttribute(tp_node, "polarization");
+		sprintf(tp_str,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n", 
+				(t_transport_stream_id) xmlGetNumericAttribute(tp_node, "id", 16),
+				(t_original_network_id) xmlGetNumericAttribute(tp_node, "onid", 16),
+				(uint32_t) xmlGetNumericAttribute(tp_node, "frequency", 0),
+				(fe_spectral_inversion_t) xmlGetNumericAttribute(tp_node, "inversion", 0),
+				(uint32_t) xmlGetNumericAttribute(tp_node, "symbol_rate", 0),
+				(fe_code_rate_t) xmlGetNumericAttribute(tp_node, "fec_inner", 0),
+				(uint8_t) xmlGetNumericAttribute(tp_node, "polarization", 0));
 	}
 	else {
-		modulation =  xmlGetAttribute(tp_node, "modulation");
+	/*	modulation =  xmlGetAttribute(tp_node, "modulation");
 		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" modulation=\"%s\">\n",tsid_str.c_str(),
 				onid_str.c_str(),
 				frequency.c_str(),
 				inversion.c_str(),
 				symbol_rate.c_str(),
 				fec_inner.c_str(),
-				modulation.c_str());
+				modulation.c_str());*/
+				
+		sprintf(tp_str,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n", 
+				(t_transport_stream_id) xmlGetNumericAttribute(tp_node, "id", 16),
+				(t_original_network_id) xmlGetNumericAttribute(tp_node, "onid", 16),
+				(uint32_t) xmlGetNumericAttribute(tp_node, "frequency", 0),
+				(fe_spectral_inversion_t) xmlGetNumericAttribute(tp_node, "inversion", 0),
+				(uint32_t) xmlGetNumericAttribute(tp_node, "symbol_rate", 0),
+				(fe_code_rate_t) xmlGetNumericAttribute(tp_node, "fec_inner", 0),
+				(fe_modulation_t) xmlGetNumericAttribute(tp_node, "modulation", 0));
 	}
 	
 	if (!copy)
@@ -3110,25 +3120,26 @@ static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, 
 	std::string provider_name;
 	std::string diseqc;
 	bool is_sat = false;
-	unsigned short orbital = 0;
-	unsigned short east_west = 0;
+//	unsigned short orbital = 0;
+//	unsigned short east_west = 0;
+	int position = 0;
 	
 	frontendType = xmlGetName(provider);
 	provider_name = xmlGetAttribute(provider, "name");
 	
 	if (!strcmp(frontendType.c_str(), "sat")) {
 		diseqc = xmlGetAttribute(provider, "diseqc");
-		orbital = xmlGetNumericAttribute(provider, "orbital", 16);
-		if (orbital == 0)
+		position = xmlGetSignedNumericAttribute(provider, "position", 16);
+		if (position == 0)
 			sprintf(prov_str,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(),
 				provider_name.c_str(), diseqc.c_str());
 		else {
-			east_west = xmlGetNumericAttribute(provider, "east_west", 16);
-			sprintf(prov_str,"\t<%s name=\"%s\" orbital=\"%04x\" east_west=\"%hu\" diseqc=\"%s\">\n", 
+			//east_west = xmlGetNumericAttribute(provider, "east_west", 16);
+			sprintf(prov_str,"\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", 
 				frontendType.c_str(), 
 				provider_name.c_str(),
-				orbital,
-				east_west,
+				position,
+				//east_west,
 				diseqc.c_str());
 		}
 		is_sat = true;
@@ -3362,11 +3373,12 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 	return is_needed;
 }
 
-xmlNodePtr getProvbyOrbitalPos(xmlNodePtr node, const unsigned short orbital_pos, const unsigned short east_west) {
+xmlNodePtr getProvbyPosition(xmlNodePtr node, const int position) {
 	while (node) {
 //		printf("Pos: %d e/w: %d\n", xmlGetNumericAttribute(node, "orbital", 16), xmlGetNumericAttribute(node, "east_west", 16));
 //		printf("Pos: %d e/w: %d\n", orbital_pos, east_west);
-		if ((xmlGetNumericAttribute(node, "orbital", 16) == orbital_pos) && (xmlGetNumericAttribute(node, "east_west", 16) == east_west))
+		//if ((xmlGetNumericAttribute(node, "orbital", 16) == orbital_pos) && (xmlGetNumericAttribute(node, "east_west", 16) == east_west))
+		if (xmlGetSignedNumericAttribute(node, "position", 16) == position)
 //		{
 //			printf("Hier found %d\n", orbital_pos);
 			return node;
@@ -3376,6 +3388,25 @@ xmlNodePtr getProvbyOrbitalPos(xmlNodePtr node, const unsigned short orbital_pos
 	return NULL;
 }
 
+xmlNodePtr getProviderFromSatellitesXML(xmlNodePtr node, const int position) {
+	xmlDocPtr satellites_parser = parseXmlFile(SATELLITES_XML);
+	if (satellites_parser == NULL)
+		return NULL;
+	xmlNodePtr satellite = xmlDocGetRootElement(satellites_parser)->xmlChildrenNode;
+	while (satellite) {
+		if (xmlGetSignedNumericAttribute(satellite, "position", 16) == position) {
+			while (node) {
+				if (!strcmp(xmlGetAttribute(satellite, "name"), xmlGetAttribute(node, "name")))
+					return node;
+				node = node->xmlNextNode;
+			}
+		}
+		satellite = satellite->xmlNextNode;
+	}
+	return NULL;
+}
+
+/*
 xmlNodePtr getProviderFromTransponder(xmlNodePtr provider, const t_original_network_id onid, const t_transport_stream_id tsid) {
 	xmlNodePtr transponder;
 	while (provider) {
@@ -3389,7 +3420,7 @@ xmlNodePtr getProviderFromTransponder(xmlNodePtr provider, const t_original_netw
 	}
 	return NULL;
 }
-
+*/
 xmlNodePtr getProviderbyName(xmlNodePtr current_provider, xmlNodePtr provider) {	
 	while (current_provider) {
 		if (!strcmp(xmlGetAttribute(current_provider, "name"), xmlGetAttribute(provider, "name")))
@@ -3446,8 +3477,14 @@ static bool updateTP(const t_original_network_id onid, const t_transport_stream_
 				
 		}
 		else {
+			current_provider = GetProvider(xmlDocGetRootElement(current_parser)->xmlChildrenNode, current_tp);
 			//printf("getProvbyTrans\n");
-			current_provider = getProviderFromTransponder(xmlDocGetRootElement(current_parser)->xmlChildrenNode, onid, tsid);
+			//current_provider = getProviderFromTransponder(xmlDocGetRootElement(current_parser)->xmlChildrenNode, onid, tsid);
+			//if (!strcmp(xmlGetName(xmlDocGetRootElement(current_parser)->xmlChildrenNode), "sat")) {
+				//current_provider = getProviderFromSatellitesXML(xmlDocGetRootElement(current_parser)->xmlChildrenNode, onid, tsid);
+			//}
+			//else
+			//	current_provider = xmlDocGetRootElement(current_parser)->xmlChildrenNode;
 		}
 	}
 			
@@ -3455,7 +3492,8 @@ static bool updateTP(const t_original_network_id onid, const t_transport_stream_
 		if (provider) {
 			if (current_provider) {
 				//printf("update with current\n");
-				need_update = updateCurrentXML(current_provider, services_tp, overwrite, scanType, false);
+				if (!strcmp(xmlGetAttribute(current_provider, "name"), xmlGetAttribute(provider, "name")))
+					need_update = updateCurrentXML(current_provider, services_tp, overwrite, scanType, false);
 					
 			}
 			else {
@@ -3568,7 +3606,7 @@ static void writeTransponderFromDescriptor(FILE *dst, const t_original_network_i
 }
 
 static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, const t_transport_stream_id tsid, 
-				const char *ddp, const unsigned short orbital, const unsigned short east_west/*, const bool needs_fix*/)
+				const char *ddp, const int position/*, const bool needs_fix*/)
 {	
 	FILE * src = NULL;
 	FILE * dst = NULL;
@@ -3582,7 +3620,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 	
 	std::string frontendType; 
 	std::string provider_name;
-	std::string diseqc;
+	std::string diseqc;		
 		
 	//printf("Starting NITXML\n");
 	if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
@@ -3595,8 +3633,8 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 	
 	if (!strcmp(frontendType.c_str(), "sat")) {
 		diseqc = xmlGetAttribute(provider, "diseqc");
-		sprintf(prov_str_neu,"\t<%s name=\"%s\" orbital=\"%04x\" east_west=\"%hu\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(),
-			orbital, east_west, diseqc.c_str());
+		sprintf(prov_str_neu,"\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(),
+			position, diseqc.c_str());
 //		if (needs_fix)
 //			sprintf(prov_str_alt,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
 //		else
@@ -3680,8 +3718,9 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 {
 	t_transport_stream_id tsid;
 	t_original_network_id onid;
-	unsigned short orbital_pos = 0;
-	unsigned short east_west = 0;
+	//unsigned short orbital_pos = 0;
+	//unsigned short east_west = 0;
+	int position = 0;
 	struct satellite_delivery_descriptor *sdd;
 	const char *ddp;
 	
@@ -3718,15 +3757,16 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 			
 			if (s->second->delivery_type == 0x43) {
 				sdd = (struct satellite_delivery_descriptor *)ddp;
-				orbital_pos = (sdd->orbital_pos_hi << 8) | sdd->orbital_pos_lo;
-				east_west = sdd->west_east_flag;
-				provider = getProvbyOrbitalPos(xmlDocGetRootElement(service_parser)->xmlChildrenNode, orbital_pos, east_west);
+				position = (sdd->orbital_pos_hi << 8) | sdd->orbital_pos_lo;
+				if (!sdd->west_east_flag)
+					position = -position;
+				provider = getProvbyPosition(xmlDocGetRootElement(service_parser)->xmlChildrenNode, position);
 			}
 			else
 				provider = xmlDocGetRootElement(service_parser)->xmlChildrenNode;
       
 			if (!provider) {
-				provider = getProviderFromTransponder(xmlDocGetRootElement(service_parser)->xmlChildrenNode, onid, tsid);
+				provider = getProviderFromSatellitesXML(xmlDocGetRootElement(service_parser)->xmlChildrenNode, position);
 				needs_fix = true;
 			}
 			if (!provider) {
@@ -3734,8 +3774,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 				//	fclose(tmp);
 				if (current_parser != NULL) {	
 					//current_parser= parseXmlFile(CURRENTSERVICES_XML);
-		 			provider = getProvbyOrbitalPos(xmlDocGetRootElement(current_parser)->xmlChildrenNode, orbital_pos,
-												 east_west);
+		 			provider = getProvbyPosition(xmlDocGetRootElement(current_parser)->xmlChildrenNode, position);
 				}
 			}			
 			if (!provider) {
@@ -3748,8 +3787,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 				 	if (current_parser != NULL) {
 						if (s->second->delivery_type == 0x43)
 							current_provider = 
-							getProvbyOrbitalPos(xmlDocGetRootElement(current_parser)->xmlChildrenNode,
-							orbital_pos, east_west);
+							getProvbyPosition(xmlDocGetRootElement(current_parser)->xmlChildrenNode, position);
 						else
 							current_provider = xmlDocGetRootElement(current_parser)->xmlChildrenNode;
 						if (current_provider)
@@ -3757,7 +3795,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 					}
 					
 					if (!current_tp) {
-						updateXMLnet(provider, onid, tsid, ddp, orbital_pos, east_west);
+						updateXMLnet(provider, onid, tsid, ddp, position);
 						xmlFreeDoc(current_parser);
 						current_parser= parseXmlFile(CURRENTSERVICES_XML);
 					}
@@ -3768,7 +3806,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 						//if(!(tmp = fopen(CURRENTSERVICES_XML, "r"))) {
 						if (current_parser == NULL) {
 							dprintf("[sectionsd::updateNetwork] services.xml provider needs update.\n");
-							updateXMLnet(provider, onid, tsid, NULL, orbital_pos, east_west);
+							updateXMLnet(provider, onid, tsid, NULL, position);
 							current_parser= parseXmlFile(CURRENTSERVICES_XML);
 						}
 						else {
@@ -3776,10 +3814,10 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 						//	current_parser= parseXmlFile(CURRENTSERVICES_XML);
 							
 					 		current_provider = 
-								getProvbyOrbitalPos(xmlDocGetRootElement(current_parser)->xmlChildrenNode,
-													orbital_pos, east_west);
+								getProvbyPosition(xmlDocGetRootElement(current_parser)->xmlChildrenNode,
+													position);
 							if (!current_provider) {
-								updateXMLnet(provider, onid, tsid, NULL, orbital_pos, east_west);
+								updateXMLnet(provider, onid, tsid, NULL, position);
 								xmlFreeDoc(current_parser);
 								current_parser= parseXmlFile(CURRENTSERVICES_XML);
 							}
@@ -5514,7 +5552,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.202 2005/11/23 12:56:00 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.203 2005/11/23 20:25:23 metallica Exp $\n");
 	
 	auto_scanning = getscanning();
 	

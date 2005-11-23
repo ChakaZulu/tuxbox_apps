@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.382 2005/11/23 19:55:29 metallica Exp $
+ * $Id: zapit.cpp,v 1.383 2005/11/23 20:25:22 metallica Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -216,8 +216,9 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 	std::string diseqc;
 	bool is_sat = false;
 	
-	unsigned short orbital = 0;
-	unsigned short east_west = 0;
+//	unsigned short orbital = 0;
+//	unsigned short east_west = 0;
+	int position = 0;
 	
 	frontendType = xmlGetName(provider);
 	
@@ -226,15 +227,15 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 	
 		if (!strcmp(frontendType.c_str(), "sat")) {
 			diseqc = xmlGetAttribute(provider, "diseqc");
-			orbital = xmlGetNumericAttribute(provider, "orbital", 16);
-			if (orbital == 0)
+			position = xmlGetSignedNumericAttribute(provider, "position", 16);
+			if (position == 0)
 				sprintf(prov_str,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
 			else {
-				east_west = xmlGetNumericAttribute(provider, "east_west", 16);
+				//east_west = xmlGetNumericAttribute(provider, "east_west", 16);
 				sprintf(prov_str,"\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", 
 					frontendType.c_str(), 
 					provider_name.c_str(),
-					orbital,
+					position,
 					diseqc.c_str());			
 			}
 			is_sat = true;
@@ -257,7 +258,7 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sat)
 {
 	char tp_str[256] = "";
-	
+	/*
 	std::string tsid_str;
 	std::string onid_str;	
 	std::string frequency;
@@ -272,8 +273,9 @@ void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sa
 	symbol_rate = xmlGetAttribute(transponder, "symbol_rate");
 	inversion =  xmlGetAttribute(transponder, "inversion");
 	fec_inner =  xmlGetAttribute(transponder, "fec_inner");
-	
+	*/
 	if (is_sat) {
+	/*
 		modulation =  xmlGetAttribute(transponder, "polarization");
 		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" polarization=\"%s\">\n",tsid_str.c_str(),
 				onid_str.c_str(),
@@ -282,8 +284,18 @@ void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sa
 				symbol_rate.c_str(),
 				fec_inner.c_str(),
 				modulation.c_str());
+	*/
+		sprintf(tp_str,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n", 
+				(t_transport_stream_id) xmlGetNumericAttribute(transponder, "id", 16),
+				(t_original_network_id) xmlGetNumericAttribute(transponder, "onid", 16),
+				(uint32_t) xmlGetNumericAttribute(transponder, "frequency", 0),
+				(fe_spectral_inversion_t) xmlGetNumericAttribute(transponder, "inversion", 0),
+				(uint32_t) xmlGetNumericAttribute(transponder, "symbol_rate", 0),
+				(fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0),
+				(uint8_t) xmlGetNumericAttribute(transponder, "polarization", 0));
 	}
 	else {
+	/*
 		modulation =  xmlGetAttribute(transponder, "modulation");
 		sprintf(tp_str,"\t\t<transponder id=\"%s\" onid=\"%s\" frequency=\"%s\" inversion=\"%s\" symbol_rate=\"%s\" fec_inner=\"%s\" modulation=\"%s\">\n",tsid_str.c_str(),
 				onid_str.c_str(),
@@ -291,7 +303,16 @@ void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sa
 				inversion.c_str(),
 				symbol_rate.c_str(),
 				fec_inner.c_str(),
-				modulation.c_str());	
+				modulation.c_str());
+	*/
+		sprintf(tp_str,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n", 
+				(t_transport_stream_id) xmlGetNumericAttribute(transponder, "id", 16),
+				(t_original_network_id) xmlGetNumericAttribute(transponder, "onid", 16),
+				(uint32_t) xmlGetNumericAttribute(transponder, "frequency", 0),
+				(fe_spectral_inversion_t) xmlGetNumericAttribute(transponder, "inversion", 0),
+				(uint32_t) xmlGetNumericAttribute(transponder, "symbol_rate", 0),
+				(fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0),
+				(fe_modulation_t) xmlGetNumericAttribute(transponder, "modulation", 0));
 	}
 
 	fprintf(tmp, tp_str);
@@ -343,6 +364,9 @@ void merge_transponder(FILE * tmp, xmlNodePtr transponder, xmlNodePtr current_tr
 	bool take_from_current = false;
 	bool remove = false;
 	
+	t_service_id sid;
+	t_service_id csid;
+	
 //	fprintf(tmp, "Merging TP\n");
 	
 	write_transponder_node(tmp, transponder, is_sat);
@@ -355,54 +379,66 @@ void merge_transponder(FILE * tmp, xmlNodePtr transponder, xmlNodePtr current_tr
 		remove = false;	
 		//Both have services
 		if ( (xmlGetNextOccurence(node, "channel") != NULL) && (xmlGetNextOccurence(current_node, "channel") != NULL) ) {
-			
+			sid = xmlGetNumericAttribute(node, "service_id", 16);
+			csid = xmlGetNumericAttribute(current_node, "service_id", 16);
 			//Take service from node
-			if (xmlGetNumericAttribute(node, "service_id", 16) < xmlGetNumericAttribute(current_node, "service_id", 16))
+			if ( sid < csid )
 				take_from_current = false;
 			//Replace ro remove service
-			if (xmlGetNumericAttribute(node, "service_id", 16) == xmlGetNumericAttribute(current_node, "service_id", 16)) {
-				if (!strcmp(xmlGetAttribute(current_node, "action"), "remove"))
-					remove = true;
-				else {
-					take_from_current = true;
-					node = getNextNode(transponder->xmlChildrenNode, xmlGetNumericAttribute(node, "service_id", 16));
+			else {
+				if (sid == csid) {
+					if (!strcmp(xmlGetAttribute(current_node, "action"), "remove")) {
+						remove = true;
+					//printf("Removing\n");
+						current_node = getNextNode(current_transponder->xmlChildrenNode, csid);
+						node = getNextNode(transponder->xmlChildrenNode, sid);
+					}					
+					else {
+						//Replace
+						take_from_current = true;
+						node = getNextNode(transponder->xmlChildrenNode, sid);
+					}
 				}
+				//not < or == Add service
+				else //if xmlGetNumericAttribute(node, "service_id", 16) > xmlGetNumericAttribute(current_node, "service_id", 16))
+					take_from_current = true;
 			}
-			//Add service
-			if (xmlGetNumericAttribute(node, "service_id", 16) > xmlGetNumericAttribute(current_node, "service_id", 16))
-				take_from_current = true;
 		} 
 		//only one has services
 		else {
 			//There are services in node
-			if (xmlGetNextOccurence(node, "channel") != NULL)
-				take_from_current = false;			
+			if (xmlGetNextOccurence(node, "channel") != NULL) {
+				take_from_current = false;
+				sid = xmlGetNumericAttribute(node, "service_id", 16);
+				csid = 0;
+			}
 			//Only current_node has services (can only be action add...)
-			else
+			else {
 				take_from_current = true;
+				csid = xmlGetNumericAttribute(current_node, "service_id", 16);
+				sid = 0;
+			}
 		}
 		if (!remove) {
 			if (take_from_current) {
 				name = xmlGetAttribute(current_node, "name");
+//				printf("Taking from current: %s\n",name.c_str());
 				fprintf(tmp,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
-					xmlGetNumericAttribute(current_node, "service_id", 16),
+					csid,
 					UTF8_to_UTF8XML(name.c_str()).c_str(),
 					xmlGetNumericAttribute(current_node, "service_type", 16));
-				current_node = getNextNode(current_transponder->xmlChildrenNode, xmlGetNumericAttribute(current_node, "service_id", 16));
+				current_node = getNextNode(current_transponder->xmlChildrenNode, csid);
 			} else {
 				name = xmlGetAttribute(node, "name");
+//				printf("Taking from services: %s\n",name.c_str());
 				fprintf(tmp,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
-					xmlGetNumericAttribute(node, "service_id", 16),
+					sid,
 					UTF8_to_UTF8XML(name.c_str()).c_str(),
 					xmlGetNumericAttribute(node, "service_type", 16));
-				node = getNextNode(transponder->xmlChildrenNode, xmlGetNumericAttribute(node, "service_id", 16));
+				node = getNextNode(transponder->xmlChildrenNode, sid);
 			}
-		}
-		else {
-			current_node = getNextNode(current_transponder->xmlChildrenNode, xmlGetNumericAttribute(current_node, "service_id", 16));
-			node = getNextNode(transponder->xmlChildrenNode, xmlGetNumericAttribute(node, "service_id", 16));
 		}
 	}
 }
@@ -440,36 +476,30 @@ void mergeServices()
 	
 	provider = xmlDocGetRootElement(service_parser)->xmlChildrenNode;
 	write_header(tmp);
-	//xmlNodePtr services_tp = FindTransponder(xmlDocGetRootElement(service_parser)->xmlChildrenNode, onid, tsid);
+	
 	while (provider) {		
 		transponder = provider->xmlChildrenNode;
 		current_provider = xmlDocGetRootElement(current_parser)->xmlChildrenNode;		
 		while ( (current_provider) && (strcmp(xmlGetAttribute(provider, "name"), xmlGetAttribute(current_provider, "name"))) )
 			current_provider = current_provider->xmlNextNode;
-//		if (!current_provider)
-
-//		else {
+		
 		if (current_provider) {			
 			is_sat = write_provider(tmp, current_provider, true);
 			while (transponder) {
 				found = false;
 				onid = xmlGetNumericAttribute(transponder, "onid", 16);
 				tsid = xmlGetNumericAttribute(transponder, "id", 16);
-//				printf("ONID from services.xml: %04x\n",onid);
-//				printf("TSID from services.xml: %04x\n",tsid);
+//				printf("ONID: %04x TSID: %04x from services.xml\n",onid, tsid);
 				current_transponder = current_provider->xmlChildrenNode;
 				while ( current_transponder && !found ) {
 					current_onid = xmlGetNumericAttribute(current_transponder, "onid", 16);
-					current_tsid = xmlGetNumericAttribute(current_transponder, "id", 16);				
-/*					printf("ONID from currentservices.xml: %04x\n",current_onid);
-					printf("TSID from currentservices.xml: %04x\n",current_tsid);				
-					if ( (tsid == xmlGetNumericAttribute(current_transponder, "id", 16)) &&
-						(onid == xmlGetNumericAttribute(current_transponder, "onid", 16)) ) {
-*/					if ( (tsid == current_tsid) &&
+					current_tsid = xmlGetNumericAttribute(current_transponder, "id", 16);
+//					printf("ONID: %04x TSID: %04x from currentservices.xml\n",current_onid, current_tsid);
+					if ( (tsid == current_tsid) &&
 						(onid == current_onid) ) {
 						merge_transponder(tmp, transponder, current_transponder, is_sat);	
 						found = true;
-//						printf("Using merge\n");
+						//printf("Using merge\n");
 					}
 					current_transponder = current_transponder->xmlNextNode;
 				}	
@@ -2206,7 +2236,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.382 2005/11/23 19:55:29 metallica Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.383 2005/11/23 20:25:22 metallica Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
