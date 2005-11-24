@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.cpp,v 1.10 2005/11/22 20:43:53 ghostrider Exp $
+ * $Id: ca_program_map_section.cpp,v 1.11 2005/11/24 17:57:47 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -123,7 +123,7 @@ bool CaProgramMapSection::append(const ProgramMapSection * const pmt)
 		}
 
 	for (ElementaryStreamInfoConstIterator i = pmt->esInfo.begin(); i != pmt->esInfo.end(); ++i) {
-		CaElementaryStreamInfo *info = new CaElementaryStreamInfo(*i, caPmtCmdId);
+		CaElementaryStreamInfo *info = new CaElementaryStreamInfo(*i, caPmtCmdId, caids);
 		esInfo.push_back(info);
 		length += info->getLength();
 	}
@@ -131,10 +131,10 @@ bool CaProgramMapSection::append(const ProgramMapSection * const pmt)
 	return true;
 }
 
-CaProgramMapSection::CaProgramMapSection(const ProgramMapSection * const pmt, const uint8_t listManagement, const uint8_t cmdId, const CaIdVector &caids)
-	:programInfoLength(0), caids(caids)
+CaProgramMapSection::CaProgramMapSection(const ProgramMapSection * const pmt, const uint8_t listManagement, const uint8_t cmdId, const CaIdVector &pcaids)
+	:programInfoLength(0), caids(pcaids)
 {
-	std::sort(this->caids.begin(), this->caids.end());  // we use std::lower_bound (binary_search).. so we must sort the vector..
+	std::sort(caids.begin(), caids.end());  // we use std::lower_bound (binary_search).. so we must sort the vector..
 	length = 6;
 
 	caPmtTag = 0x9f8032;
