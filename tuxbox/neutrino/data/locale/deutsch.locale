@@ -531,6 +531,102 @@ miscsettings.sptsmode SPTS-Mode Treiber laden
 miscsettings.startbhdriver BH-Mode Treiber laden
 miscsettings.tuxtxt_cache Videotext zwischenspeichern
 motorcontrol.head Motor-Setup
+moviebrowser.book_head Markierungen
+moviebrowser.book_lastmoviestop letzter Wiedergabestop:
+moviebrowser.book_movieend Filmende:
+moviebrowser.book_moviestart Filmanfang:
+moviebrowser.book_name Name:
+moviebrowser.book_new Neue Markierung
+moviebrowser.book_position Position:
+moviebrowser.book_type Sprung (<0 zurück , >0 vor):
+moviebrowser.book_type_backward Wiederholung
+moviebrowser.book_type_forward überspringen
+moviebrowser.edit_book Bookmark ändern
+moviebrowser.edit_book_name_info1 Neuer Markierungsname
+moviebrowser.edit_book_name_info2 
+moviebrowser.edit_book_pos_info1 Neue Position (s)
+moviebrowser.edit_book_pos_info2 
+moviebrowser.edit_book_type_info1 Neue Sprunglänge (s)
+moviebrowser.edit_book_type_info2 <0 zurück , >0 vor 0: kein
+moviebrowser.edit_serie Name der Serie
+moviebrowser.error_no_movies Keine Filme gefunden
+moviebrowser.foot_filter Filter:
+moviebrowser.foot_play Film starten
+moviebrowser.foot_sort Sortieren:
+moviebrowser.head TS Filmarchiv
+moviebrowser.head_filter Filme nach Kategorie filtern:
+moviebrowser.head_playlist Zuletzt gesehen:
+moviebrowser.head_recordlist Zuletzt aufgenommen:
+moviebrowser.hint_jumpbackward Rücksprung in 5 s\n '0' zum weitersehen 
+moviebrowser.hint_jumpforward Werbung überspringen in 5 s\n '0' zum ansehen 
+moviebrowser.hint_movieend Filmende in 5 s\n '0' zum weitersehen 
+moviebrowser.hint_newbook_backward Neue Wiederholung\n 'blau' für Endposition 
+moviebrowser.hint_newbook_forward Neuer Werbesprung\n 'blau' für Endposition 
+moviebrowser.info_audio Audio
+moviebrowser.info_channel Kanal
+moviebrowser.info_filename Name
+moviebrowser.info_genre_major Genre
+moviebrowser.info_genre_minor Genre
+moviebrowser.info_head Film Informationen
+moviebrowser.info_info1 Info 1
+moviebrowser.info_info2 Info 2
+moviebrowser.info_length Spieldauer (Min)
+moviebrowser.info_parental_lockage Altersfreigabe
+moviebrowser.info_parental_lockage_0year immer
+moviebrowser.info_parental_lockage_12year 12 Jahre
+moviebrowser.info_parental_lockage_16year 16 Jahre
+moviebrowser.info_parental_lockage_18year 18 Jahre
+moviebrowser.info_parental_lockage_6year 6 Jahre
+moviebrowser.info_parental_lockage_always nie 
+moviebrowser.info_path Verzeichnis
+moviebrowser.info_prevplaydate Letzte Wiedergabe
+moviebrowser.info_prodcountry Land
+moviebrowser.info_prodyear Jahr
+moviebrowser.info_quality Qualität
+moviebrowser.info_recorddate Aufnahmedatum
+moviebrowser.info_serie Serie
+moviebrowser.info_size Dateigröße (MB)
+moviebrowser.info_title Titel
+moviebrowser.info_videoformat Bild
+moviebrowser.menu_directories_head Verzeichnisse
+moviebrowser.menu_help_head Hilfe
+moviebrowser.menu_main_bookmarks Markierungen
+moviebrowser.menu_main_head Einstellungen
+moviebrowser.menu_main_movieinfo Film-Info
+moviebrowser.menu_main_saveandback Speichern und verlassen
+moviebrowser.menu_nfs_head NFS Einstellung
+moviebrowser.menu_parental_lock_activated aktiviert
+moviebrowser.menu_parental_lock_activated_no nein
+moviebrowser.menu_parental_lock_activated_yes ja
+moviebrowser.menu_parental_lock_activated_yes_temp ja (temporär)
+moviebrowser.menu_parental_lock_head Jugendschutz
+moviebrowser.menu_parental_lock_rate_head Filme sperren ab
+moviebrowser.scan_for_movies Suche Filme ...
+moviebrowser.serie_existingname Vorhandene Serie
+moviebrowser.serie_head Serie
+moviebrowser.serie_name Name ändern
+moviebrowser.short_audio Audio
+moviebrowser.short_book Marker
+moviebrowser.short_channel Kanal
+moviebrowser.short_country Land
+moviebrowser.short_filename Name
+moviebrowser.short_format Format
+moviebrowser.short_genre_major Genre
+moviebrowser.short_genre_minor Genre
+moviebrowser.short_info1 Info 1
+moviebrowser.short_info2 Info 2
+moviebrowser.short_length Min
+moviebrowser.short_parental_lockage FSK
+moviebrowser.short_path Pfad
+moviebrowser.short_prevplaydate Zuletzt
+moviebrowser.short_prodyear Jahr
+moviebrowser.short_quality * (Qualität)
+moviebrowser.short_recorddate Datum
+moviebrowser.short_serie Serie
+moviebrowser.short_size MB
+moviebrowser.short_title Titel
+moviebrowser.start_head Film starten von Position:
+moviebrowser.start_record_start Aufnahmestart
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmark Name
 movieplayer.bookmarkname_hint1 Geben Sie den Namen

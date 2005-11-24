@@ -33,7 +33,13 @@
 #include <config.h>
 #endif
 
+#define MOVIEBROWSER
+
 #include <driver/vcrcontrol.h>
+
+#ifdef MOVIEBROWSER
+#include <gui/movieinfo.h>
+#endif /* MOVIEBROWSER */
 
 #include <driver/encoding.h>
 #include <driver/stream2file.h>
@@ -121,7 +127,11 @@ bool CVCRControl::Record(const CTimerd::RecordingInfo * const eventinfo)
 {
 	int mode = g_Zapit->isChannelTVChannel(eventinfo->channel_id) ? NeutrinoMessages::mode_tv : NeutrinoMessages::mode_radio;
 
+#ifdef MOVIEBROWSER
+	return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->apids,eventinfo->epg_starttime); 
+#else /* MOVIEBROWSER */
 	return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->apids); 
+#endif /* MOVIEBROWSER */
 }
 
 
@@ -140,7 +150,11 @@ bool CVCRControl::CVCRDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
+#ifdef MOVIEBROWSER
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids,const time_t epg_time)
+#else /* MOVIEBROWSER */
 bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids)
+#endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -289,6 +303,117 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 
 	g_Zapit->setRecordMode( true );					// recordmode einschalten
 }
+
+#ifdef MOVIEBROWSER  		
+				
+std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids,const time_t epg_time) const
+{
+	std::string extMessage;
+	char tmp[40];
+	CMovieInfo cMovieInfo;
+	MI_MOVIE_INFO movieInfo;
+	std::string apids10;
+	std::string info1, info2;
+
+	cMovieInfo.clearMovieInfo(&movieInfo);
+//		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
+	CZapitClient::responseGetPIDs pids;
+	g_Zapit->getPIDS (pids);
+	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
+
+	if (apids.empty())
+	{
+		sprintf(tmp,"%u", si.apid);
+		apids10=tmp;
+	}
+	else
+	{
+		unsigned int index=0,pos=0;
+		apids10="";
+		while(pos!=std::string::npos)
+		{
+			pos = apids.find(' ', index);
+			if(pos!=std::string::npos)
+			{
+				sprintf(tmp, "%ld ", strtol(apids.substr(index,pos-index).c_str(),NULL,16));
+				index=pos+1;
+			}
+			else
+			{
+				sprintf(tmp, "%ld", strtol(apids.substr(index).c_str(),NULL,16));
+			}
+			apids10 += tmp;
+		}
+	}
+	std::string tmpstring = g_Zapit->getChannelName(channel_id);
+	if (tmpstring.empty())
+		movieInfo.epgChannel = "unknown";
+	else
+		movieInfo.epgChannel = ZapitTools::UTF8_to_UTF8XML(tmpstring.c_str());
+
+	tmpstring = "not available";
+	if (epgid != 0)
+	{
+//#define SHORT_EPG
+#ifdef SHORT_EPG
+		CSectionsdClient sdc;
+		CShortEPGData epgdata;
+		
+		if (sdc.getEPGidShort(epgid, &epgdata))
+		{
+#warning fixme sectionsd should deliver data in UTF-8 format
+			tmpstring = Latin1_to_UTF8(epgdata.title);
+			info1 = Latin1_to_UTF8(epgdata.info1);
+			info2 = Latin1_to_UTF8(epgdata.info2);
+		}
+#else
+		CSectionsdClient sdc;
+		CEPGData epgdata;
+		if (sdc.getEPGid(epgid, epg_time,&epgdata))
+		{
+#warning fixme sectionsd should deliver data in UTF-8 format
+			tmpstring = Latin1_to_UTF8(epgdata.title);
+			info1 = Latin1_to_UTF8(epgdata.info1);
+			info2 = Latin1_to_UTF8(epgdata.info2);
+			
+			movieInfo.parentalLockAge = epgdata.fsk;
+			if(epgdata.contentClassification.size() > 0 )
+				movieInfo.genreMajor = epgdata.contentClassification[0];
+				
+			movieInfo.length = epgdata.epg_times.dauer	/ 60;
+				
+			printf("fsk:%d, Genre:%d, Dauer: %d\r\n",movieInfo.parentalLockAge,movieInfo.genreMajor,movieInfo.length);	
+		}
+#endif
+	}
+	movieInfo.epgTitle = 	ZapitTools::UTF8_to_UTF8XML(tmpstring.c_str());
+	movieInfo.epgId = 		channel_id;
+	movieInfo.epgInfo1 = 	ZapitTools::UTF8_to_UTF8XML(info1.c_str());
+	movieInfo.epgInfo2 = 	ZapitTools::UTF8_to_UTF8XML(info2.c_str());
+	movieInfo.epgEpgId =  	epgid ;
+	movieInfo.epgMode = 	g_Zapit->getMode();
+	movieInfo.epgVideoPid = si.vpid;
+
+	EPG_AUDIO_PIDS audio_pids;
+	// super hack :-), der einfachste weg an die apid descriptions ranzukommen
+	g_RemoteControl->current_PIDs = pids;
+	g_RemoteControl->processAPIDnames();
+
+	for(unsigned int i= 0; i< pids.APIDs.size(); i++)
+	{
+		audio_pids.epgAudioPid = pids.APIDs[i].pid;
+		audio_pids.epgAudioPidName = ZapitTools::UTF8_to_UTF8XML(g_RemoteControl->current_PIDs.APIDs[i].desc);
+		movieInfo.audioPids.push_back(audio_pids);
+	}
+	movieInfo.epgVTXPID = si.vtxtpid;
+
+	cMovieInfo.encodeMovieInfoXml(&extMessage,movieInfo);
+	
+	movieInfo.audioPids.clear();
+
+	return extMessage;
+}
+#endif /* MOVIEBROWSER */
 
 std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids) const
 {
@@ -462,7 +587,11 @@ bool CVCRControl::CFileDevice::Stop()
 	return return_value;
 }
 
+#ifdef MOVIEBROWSER
+bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids,const time_t epg_time) 
+#else /* MOVIEBROWSER */
 bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids) 
+#endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -642,7 +771,11 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	} else
 	{
 		error_msg = ::start_recording(filename,
+#ifdef MOVIEBROWSER  		
+					      getMovieInfoString(CMD_VCR_RECORD, channel_id, epgid, apids,epg_time).c_str(),
+#else /* MOVIEBROWSER */
 					      getCommandString(CMD_VCR_RECORD, channel_id, epgid, apids).c_str(),
+#endif /* MOVIEBROWSER */
 					      Use_O_Sync,
 					      Use_Fdatasync,
 					      ((unsigned long long)SplitSize) * 1048576ULL,
@@ -795,7 +928,11 @@ bool CVCRControl::CServerDevice::Stop()
 }
 
 //-------------------------------------------------------------------------
+#ifdef MOVIEBROWSER
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids,const time_t epg_time) 
+#else /* MOVIEBROWSER */
 bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids) 
+#endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
