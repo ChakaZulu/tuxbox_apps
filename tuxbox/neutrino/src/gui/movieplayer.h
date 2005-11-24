@@ -39,6 +39,13 @@
 #include "gui/filebrowser.h"
 #include "gui/bookmarkmanager.h"
 #include "gui/widget/menue.h"
+
+#define MOVIEBROWSER
+#ifdef MOVIEBROWSER
+#include "gui/moviebrowser.h"
+#include "gui/movieinfo.h"
+#endif /* MOVIEBROWSER */
+
 extern "C" {
            	#include <driver/ringbuffer.h>
 }           	
@@ -81,6 +88,10 @@ class CMoviePlayerGui : public CMenuTarget
 	std::string Path_vlc_settings;
 
 	CFileBrowser * filebrowser;
+#ifdef MOVIEBROWSER  			
+	CMovieBrowser* moviebrowser;
+#endif /* MOVIEBROWSER */
+	
 	CBookmarkManager * bookmarkmanager;
 
 	void PlayStream(int streamtype);

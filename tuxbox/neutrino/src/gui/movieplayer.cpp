@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.114 2005/08/14 07:17:38 digi_casi Exp $
+  $Id: movieplayer.cpp,v 1.115 2005/11/24 13:56:05 metallica Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -86,6 +86,12 @@ extern CPlugins       * g_PluginList;
 
 #include <poll.h>
 
+#ifdef MOVIEBROWSER  			
+#include <sys/timeb.h>
+#define MOVIE_HINT_BOX_TIMER 5 // time to show bookmark hints in seconds
+#endif /* MOVIEBROWSER */
+
+
 #define ADAP	"/dev/dvb/adapter0"
 #define ADEC	ADAP "/audio0"
 #define VDEC	ADAP "/video0"
@@ -117,6 +123,11 @@ extern CPlugins       * g_PluginList;
 
 static CMoviePlayerGui::state g_playstate;
 static bool isTS, isPES, isBookmark;
+
+#ifdef MOVIEBROWSER  			
+static bool isMovieBrowser = false;
+#endif /* MOVIEBROWSER */
+
 int g_speed = 1;
 #ifndef __USE_FILE_OFFSET64
 #error not using 64 bit file offsets
@@ -195,6 +206,10 @@ CMoviePlayerGui::CMoviePlayerGui()
 	filebrowser->Multi_Select = false;
 	filebrowser->Dirs_Selectable = false;
 
+#ifdef MOVIEBROWSER  			
+	moviebrowser= new CMovieBrowser();
+#endif /* MOVIEBROWSER */
+
 	tsfilefilter.addFilter ("ts");
 	vlcfilefilter.addFilter ("mpg");
 	vlcfilefilter.addFilter ("mpeg");
@@ -210,6 +225,9 @@ CMoviePlayerGui::CMoviePlayerGui()
 CMoviePlayerGui::~CMoviePlayerGui ()
 {
 	delete filebrowser;
+#ifdef MOVIEBROWSER  			
+	delete moviebrowser;
+#endif /* MOVIEBROWSER */
 	if(bookmarkmanager)
 		delete bookmarkmanager;
 	g_Zapit->setStandby (false);
@@ -276,6 +294,10 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	isTS=false;
 	isPES=false;
 
+#ifdef MOVIEBROWSER  			
+	isMovieBrowser = false;
+#endif /* MOVIEBROWSER */
+
 	if(actionKey=="fileplayback")
 	{
 		PlayStream (STREAMTYPE_FILE);
@@ -293,6 +315,14 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		isTS=true;
 		PlayFile();
 	}
+#ifdef MOVIEBROWSER  			
+	else if(actionKey=="tsmoviebrowser")
+	{
+		isMovieBrowser = true;
+		isTS = true;
+		PlayFile();
+	}
+#endif /* MOVIEBROWSER */
 	else if(actionKey=="tsplayback_pc")
 	{
 		//isPES=true;
@@ -2115,6 +2145,41 @@ void CMoviePlayerGui::PlayFile (int parental)
 	std::string sel_filename;
 	std::string hlpstr;
 
+#ifdef MOVIEBROWSER  			
+	timeb current_time;
+	CMovieInfo cMovieInfo;				// funktions to save and load movie info
+	MI_MOVIE_INFO* p_movie_info = NULL;	// movie info handle which comes from the MovieBrowser, if not NULL MoviePlayer is able to save new bookmarks
+	CBox position(200,480,280,65);	// window position for the hint boxes 
+
+	CTextBox endHintBox(g_Locale->getText(LOCALE_MOVIEBROWSER_HINT_MOVIEEND), NULL, CTextBox::CENTER/*CTextBox::AUTO_WIDTH | CTextBox::AUTO_HIGH*/, &position);
+	CTextBox comHintBox(g_Locale->getText(LOCALE_MOVIEBROWSER_HINT_JUMPFORWARD), NULL,CTextBox::CENTER /*CTextBox::AUTO_WIDTH | CTextBox::AUTO_HIGH*/, &position);
+	CTextBox loopHintBox(g_Locale->getText(LOCALE_MOVIEBROWSER_HINT_JUMPBACKWARD), NULL, CTextBox::CENTER /*CTextBox::AUTO_WIDTH | CTextBox::AUTO_HIGH*/, &position);
+	CTextBox newLoopHintBox(g_Locale->getText(LOCALE_MOVIEBROWSER_HINT_NEWBOOK_BACKWARD), NULL, CTextBox::CENTER /*CTextBox::AUTO_WIDTH | CTextBox::AUTO_HIGH*/, &position);
+	CTextBox newComHintBox(g_Locale->getText(LOCALE_MOVIEBROWSER_HINT_NEWBOOK_FORWARD), NULL, CTextBox::CENTER /*CTextBox::AUTO_WIDTH | CTextBox::AUTO_HIGH*/, &position);
+	
+	bool showEndHintBox = false;	// flag to check whether the box shall be painted
+	bool showComHintBox = false;	// flag to check whether the box shall be painted
+	bool showLoopHintBox = false;	// flag to check whether the box shall be painted
+	int jump_not_until = 0;  		// any jump shall be avoided until this time (in seconds from moviestart)
+	MI_BOOKMARK new_bookmark;		// used for new movie info bookmarks created from the movieplayer
+	new_bookmark.pos = 0;			// clear , since this is used as flag for bookmark activity
+	new_bookmark.length = 0;
+
+	// very dirty usage of the menue, but it works and I already spent to much time with it, feel free to make it better ;-)
+	#define BOOKMARK_START_MENU_MAX_ITEMS 6
+	CSelectedMenu cSelectedMenuBookStart[BOOKMARK_START_MENU_MAX_ITEMS];
+
+	CMenuWidget bookStartMenu(LOCALE_MOVIEBROWSER_BOOK_NEW, "streaming.raw");
+	bookStartMenu.addItem(GenericMenuSeparator);
+	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEPLAYER_HEAD, 	true,NULL,&cSelectedMenuBookStart[0]));
+	bookStartMenu.addItem(GenericMenuSeparatorLine);
+	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_HEAD, 	true,NULL,&cSelectedMenuBookStart[1]));
+	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_BOOK_TYPE_FORWARD, 	true,NULL,&cSelectedMenuBookStart[2]));
+	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_BOOK_TYPE_BACKWARD, 	true,NULL,&cSelectedMenuBookStart[3]));
+	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_BOOK_MOVIESTART, 		true,NULL,&cSelectedMenuBookStart[4]));
+	bookStartMenu.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_BOOK_MOVIEEND, 		true,NULL,&cSelectedMenuBookStart[5]));
+#endif /* MOVIEBROWSER */
+
 	CTimeOSD    FileTime;
 	bool        update_lcd       = true;
 	bool        open_filebrowser = true;
@@ -2150,29 +2215,184 @@ void CMoviePlayerGui::PlayFile (int parental)
 			isBookmark       = false;
 		}
 
+#ifdef MOVIEBROWSER  			
+		if(isMovieBrowser == true) 
+		{
+			// do all moviebrowser stuff here ( like commercial jump ect.)
+			if(g_playstate == CMoviePlayerGui::PLAY)
+			{
+				int play_sec = g_fileposition / (MINUTEOFFSET/60);  // get current seconds from moviestart 
+				TRACE(" %6ds\r\n",play_sec);
+
+				if(play_sec + 10 < jump_not_until || play_sec  > jump_not_until +10) jump_not_until = 0; // check if !jump is stale (e.g. if user jumped forward or backward)
+				
+				if(new_bookmark.pos == 0)// do bookmark activities only, if there is no new bookmark started
+				{
+					if(p_movie_info != NULL) // process bookmarks if we have any movie info
+					{
+						if(p_movie_info->bookmarks.end != 0)
+						{
+							// *********** Check for stop position *******************************
+							if( play_sec >= p_movie_info->bookmarks.end - MOVIE_HINT_BOX_TIMER && 
+								play_sec < p_movie_info->bookmarks.end &&
+								play_sec > jump_not_until)  
+							{
+								if(showEndHintBox == false)
+								{
+									endHintBox.paint();// we are 5 sec before the end postition, show warning
+									showEndHintBox = true;
+									TRACE("[mp]  user stop in 5 sec...\r\n");
+								}
+							}
+							else
+							{	
+								if(showEndHintBox == true)
+								{
+									endHintBox.hide();// if we showed the warning before, hide the box again
+									showEndHintBox = false;
+								}
+							}
+							
+							if( play_sec >= p_movie_info->bookmarks.end && 
+								play_sec <= p_movie_info->bookmarks.end + 2 &&
+								play_sec > jump_not_until)  // stop playing
+							{
+								// *********** we ARE close behind the stop position, stop playing *******************************
+								TRACE("[mp]  user stop\r\n");
+								g_playstate = CMoviePlayerGui::STOPPED;
+								pthread_join(rct, NULL);
+								open_filebrowser = true;
+							}
+						}
+	
+						// *************  Check for bookmark jumps *******************************
+						int loop = true;
+						showLoopHintBox = false;
+						showComHintBox = false;
+						for(int book_nr = 0; book_nr < MI_MOVIE_BOOK_USER_MAX && loop == true; book_nr++)
+						{
+							if( p_movie_info->bookmarks.user[book_nr].pos != 0 && p_movie_info->bookmarks.user[book_nr].length != 0 )
+							{
+								// valid bookmark found, now check if we are close before or after it
+								if( play_sec >= p_movie_info->bookmarks.user[book_nr].pos - MOVIE_HINT_BOX_TIMER && 
+									play_sec < p_movie_info->bookmarks.user[book_nr].pos &&
+									play_sec > jump_not_until )  
+								{
+									if(p_movie_info->bookmarks.user[book_nr].length < 0)
+										showLoopHintBox = true;// we are 5 sec before , show warning
+									else if(p_movie_info->bookmarks.user[book_nr].length > 0)
+										showComHintBox = true;// we are 5 sec before, show warning
+									//else  // TODO should we show a plain bookmark infomation as well?
+								}									
+								
+								if( 	play_sec >= p_movie_info->bookmarks.user[book_nr].pos && 
+										play_sec <= p_movie_info->bookmarks.user[book_nr].pos + 2 &&
+										play_sec > jump_not_until)  // 
+								{
+									//for plain bookmark, the following calc shall result in 0 (no jump)
+									g_jumpminutes = (p_movie_info->bookmarks.user[book_nr].length  *PF_JMP_DIV)/60 ;    //Einheit [1/4 min]
+	
+									// we are close behind the bookmark, do bookmark activity (if any)
+									if(p_movie_info->bookmarks.user[book_nr].length < 0)
+									{
+										g_playstate   = CMoviePlayerGui::JB;  // bookmark  is of type loop, jump backward
+										g_jumpminutes--; // since we can jump in 1/4 min only, jump back a little bit more
+										
+										// if the jump back time is to less, it does sometimes cause problems (it does probably jump only 5 sec which will cause the next jump, and so on)
+										if(g_jumpminutes > -2 )
+											g_jumpminutes = -2;
+									}
+									else if(p_movie_info->bookmarks.user[book_nr].length > 0)
+									{
+										g_playstate   = CMoviePlayerGui::JF;  // bookmark  is of type commercial, jump forward 
+										// jump at least 1/4 minute
+										if(g_jumpminutes < 1 )
+											g_jumpminutes = 1;
+									}
+	
+									TRACE("[mp]  do jump %d, %d\r\n",g_playstate,g_jumpminutes);
+									update_lcd    = true;
+									FileTime.hide();
+									loop = false; // do no further bookmark checks
+								}
+							}
+						}
+						// check if we shall show the commercial warning 
+						if(showComHintBox == true)
+						{ 
+							comHintBox.paint();	
+							TRACE("[mp]  com jump in 5 sec...\r\n");
+						}						
+						else 
+							comHintBox.hide();
+							
+						// check if we shall show the loop warning 
+						if(showLoopHintBox == true)
+						{ 
+							loopHintBox.paint();
+							//loopHintBox.setText("ich teste das einmal jajdf\n sdfjh fhjsdk  \n skdjf j");
+							TRACE("[mp]  loop jump in 5 sec...\r\n");
+						}
+						else 
+							loopHintBox.hide();
+					}
+				}
+			}
+		} // isMovieBrowser == true
+#endif /* MOVIEBROWSER */
+
 		//-- file browser --
 		//------------------
 		if(open_filebrowser)
 		{
 			open_filebrowser    = false;
 			filename            = NULL;
-			filebrowser->Filter = &tsfilefilter;
-
-			//-- play selected file or ... --
-			if(filebrowser->exec(Path_local.c_str()))
+#ifdef MOVIEBROWSER  			
+			if(isMovieBrowser == true)
 			{
-				Path_local = filebrowser->getCurrentDir();
-				CFile *file;
-
-				if((file = filebrowser->getSelectedFile()) != NULL)
+				// start the moviebrowser instead of the filebrowser
+				if(moviebrowser->exec(Path_local.c_str()))
 				{
-					filename     = file->Name.c_str();
-					sel_filename = file->getFileName();
-
-					update_lcd   = true;
-					start_play   = true;
+					// get the current path and file name 
+					Path_local = moviebrowser->getCurrentDir(); 
+					CFile *file;					
+	
+					if((file = moviebrowser->getSelectedFile()) != NULL)
+					{
+						filename     = file->Name.c_str();
+						sel_filename = file->getFileName();
+						// get the start position for the movie
+						g_startposition = (off_t)moviebrowser->getCurrentStartPos()*(off_t)(MINUTEOFFSET/60); // sec = g_fileposition / (MINUTEOFFSET/60)
+						TRACE("[mp] start pos %llu, %d s Name: %s\r\n",g_startposition,moviebrowser->getCurrentStartPos(),filename);
+						// get the movie info handle (to be used for e.g. bookmark handling)
+						p_movie_info = moviebrowser->getCurrentMovieInfo();
+	
+						update_lcd   = true;
+						start_play   = true;
+					}
 				}
 			}
+			else
+#endif /* MOVIEBROWSER */
+			{ // MOVIEBROWSER added
+				filebrowser->Filter = &tsfilefilter;
+	
+				//-- play selected file or ... --
+				if(filebrowser->exec(Path_local.c_str()))
+				{
+					Path_local = filebrowser->getCurrentDir();
+					CFile *file;
+	
+					if((file = filebrowser->getSelectedFile()) != NULL)
+					{
+						filename     = file->Name.c_str();
+						sel_filename = file->getFileName();
+	
+						update_lcd   = true;
+						start_play   = true;
+					}
+				}
+			}// MOVIEBROWSER added
 
 			//-- ... regular exit --
 			if(!start_play && (g_playstate == CMoviePlayerGui::STOPPED) )
@@ -2305,6 +2525,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 		g_RCInput->getMsg (&msg, &data, 10);  // 1 secs..
 		switch(msg)
 		{
+
 			//-- terminate player --
 			case CRCInput::RC_red:
 				g_PluginList->start_plugin_by_name(g_settings.movieplayer_plugin.c_str(),pidt);
@@ -2312,6 +2533,19 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- stop playback + start filebrowser --
 			case CRCInput::RC_home:
+#ifdef MOVIEBROWSER  			
+				if(isMovieBrowser == true && p_movie_info != NULL)
+				{ 
+					// if we have a movie information, try to save the stop position
+					ftime(&current_time);
+					p_movie_info->dateOfLastPlay = current_time.time;
+					current_time.time = time( NULL );
+					p_movie_info->bookmarks.lastPlayStop = g_fileposition / (MINUTEOFFSET/60);  // sec = g_fileposition / (MINUTEOFFSET/60);
+					
+					cMovieInfo.saveMovieInfo(*p_movie_info);
+					//p_movie_info->fileInfoStale(); //TODO: we might to tell the Moviebrowser that the movie info has changed, but this could cause long reload times  when reentering the Moviebrowser
+				} 
+#endif /* MOVIEBROWSER */
 				g_playstate = CMoviePlayerGui::STOPPED;
 				pthread_join(rct, NULL);
 				open_filebrowser = true;
@@ -2329,6 +2563,132 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- invoke bookmark manager --
 			case CRCInput::RC_blue:
+#ifdef MOVIEBROWSER  	
+					// is there already a bookmark activity?
+				if(isMovieBrowser != true)
+				{
+					if(bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount())
+					{
+						char timerstring[200];
+						fprintf(stderr, "fileposition: %lld\n",g_fileposition);
+						sprintf(timerstring, "%lld",g_fileposition);
+						fprintf(stderr, "timerstring: %s\n",timerstring);
+						std::string bookmarktime = "";
+						bookmarktime.append(timerstring);
+						fprintf(stderr, "bookmarktime: %s\n",bookmarktime.c_str());
+						bookmarkmanager->createBookmark(filename, bookmarktime);
+					}
+					else
+					{
+						fprintf(stderr, "too many bookmarks\n");
+						DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
+					}
+				}
+				else
+				{
+					int pos_sec = g_fileposition / (MINUTEOFFSET/60);
+					if (newComHintBox.isPainted() == true)
+					{
+						// yes, let's get the end pos of the jump forward
+						new_bookmark.length = pos_sec - new_bookmark.pos;
+						TRACE("[mp] commercial length: %d\r\n",new_bookmark.length);
+						if(cMovieInfo.addNewBookmark(p_movie_info,new_bookmark) == true)
+						{
+							cMovieInfo.saveMovieInfo(*p_movie_info);/* save immediately in xml file */
+						}	
+						new_bookmark.pos =0;// clear again, since this is used as flag for bookmark activity
+						newComHintBox.hide();
+					}
+					else if(newLoopHintBox.isPainted()== true)
+					{
+						// yes, let's get the end pos of the jump backward
+						new_bookmark.length = new_bookmark.pos - pos_sec;
+						new_bookmark.pos = pos_sec;
+						TRACE("[mp] loop length: %d\r\n",new_bookmark.length);
+						if(cMovieInfo.addNewBookmark(p_movie_info,new_bookmark) == true)
+						{
+							cMovieInfo.saveMovieInfo(*p_movie_info);/* save immediately in xml file */
+							jump_not_until = pos_sec +5; // avoid jumping for this time
+						}	
+						new_bookmark.pos =0;// clear again, since this is used as flag for bookmark activity
+						newLoopHintBox.hide();
+					}
+					else 
+					{
+						// no, nothing else to do, we open a new bookmark menu 
+						new_bookmark.name = "" ; // use default name
+						new_bookmark.pos =0;
+						new_bookmark.length = 0;	
+	
+						bookStartMenu.exec(NULL,"none");
+						if(cSelectedMenuBookStart[0].selected == true)
+						{
+							/* Movieplayer bookmark */
+							if(bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount())
+							{
+								char timerstring[200];
+								fprintf(stderr, "fileposition: %lld\n",g_fileposition);
+								sprintf(timerstring, "%lld",g_fileposition);
+								fprintf(stderr, "timerstring: %s\n",timerstring);
+								std::string bookmarktime = "";
+								bookmarktime.append(timerstring);
+								fprintf(stderr, "bookmarktime: %s\n",bookmarktime.c_str());
+								bookmarkmanager->createBookmark(filename, bookmarktime);
+							}
+							else
+							{
+								fprintf(stderr, "too many bookmarks\n");
+								DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
+							}
+							cSelectedMenuBookStart[0].selected = false;// clear for next bookmark menu
+						}
+						else if(cSelectedMenuBookStart[1].selected == true)
+						{
+							/* Moviebrowser plain bookmark */
+							new_bookmark.pos = pos_sec;
+							new_bookmark.length = 0;	
+							if(cMovieInfo.addNewBookmark(p_movie_info,new_bookmark) == true)
+								cMovieInfo.saveMovieInfo(*p_movie_info);/* save immediately in xml file */
+							new_bookmark.pos =0; // clear again, since this is used as flag for bookmark activity
+							cSelectedMenuBookStart[1].selected = false;// clear for next bookmark menu
+						}
+						else if(cSelectedMenuBookStart[2].selected == true)
+						{
+							/* Moviebrowser jump forward bookmark */
+							new_bookmark.pos = pos_sec;
+							TRACE("[mp] new bookmark 1. pos: %d\r\n",new_bookmark.pos);
+							newComHintBox.paint();
+							
+							cSelectedMenuBookStart[2].selected = false;// clear for next bookmark menu
+						}
+						else if(cSelectedMenuBookStart[3].selected == true)
+						{
+							/* Moviebrowser jump backward bookmark */
+							new_bookmark.pos = pos_sec;
+							TRACE("[mp] new bookmark 1. pos: %d\r\n",new_bookmark.pos);
+							newLoopHintBox.paint();
+							cSelectedMenuBookStart[3].selected = false;// clear for next bookmark menu
+						}
+						else if(cSelectedMenuBookStart[4].selected == true)
+						{
+							/* Moviebrowser movie start bookmark */
+							p_movie_info->bookmarks.start = pos_sec;
+							TRACE("[mp] New movie start pos: %d\r\n",p_movie_info->bookmarks.start);
+							cMovieInfo.saveMovieInfo(*p_movie_info);/* save immediately in xml file */
+							cSelectedMenuBookStart[4].selected = false;// clear for next bookmark menu
+						}
+						else if(cSelectedMenuBookStart[5].selected == true)
+						{
+							/* Moviebrowser movie end bookmark */
+							p_movie_info->bookmarks.end = pos_sec;
+							TRACE("[mp]  New movie end pos: %d\r\n",p_movie_info->bookmarks.start);
+							cMovieInfo.saveMovieInfo(*p_movie_info);/* save immediately in xml file */
+							cSelectedMenuBookStart[5].selected = false;// clear for next bookmark menu
+						}
+					}
+				}
+				break; // do not process the old stuff
+	#endif /* MOVIEBROWSER */
 				if(bookmarkmanager->getBookmarkCount() < bookmarkmanager->getMaxBookmarkCount())
 				{
 					char timerstring[200];
@@ -2345,6 +2705,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 					fprintf(stderr, "too many bookmarks\n");
 					DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
 				}
+
 				break;
 
 				//-- request for audio selector --
@@ -2384,6 +2745,19 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- Resync A/V --
 			case CRCInput::RC_0:
+#ifdef MOVIEBROWSER  		
+				if(isMovieBrowser == true)
+				{
+					if(new_bookmark.pos != 0)
+					{
+						new_bookmark.pos = 0; // stop current bookmark activity, TODO:  might be moved to another key
+						newLoopHintBox.hide(); // hide hint box if any
+						newComHintBox.hide();
+						break;
+					}
+					jump_not_until = (g_fileposition / (MINUTEOFFSET/60)) + 10;  // avoid bookmark jumping for the next 10 seconds, , TODO:  might be moved to another key
+				}	
+#endif /* MOVIEBROWSER */
 				if(g_playstate != CMoviePlayerGui::PAUSE)
 					//g_playstate = CMoviePlayerGui::RESYNC;
 					g_playstate = CMoviePlayerGui::SOFTRESET;
@@ -2509,6 +2883,10 @@ void CMoviePlayerGui::PlayFile (int parental)
 		}
 	}
 	while(requestStop==false);
+
+#ifdef MOVIEBROWSER  			
+	isMovieBrowser = false;
+#endif /* MOVIEBROWSER */
 
 	//-- request stop only on a running player --
 	if(g_playstate >= CMoviePlayerGui::PLAY)
@@ -2869,7 +3247,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.114 $");
+	helpbox.addLine("Version: $Revision: 1.115 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2890,7 +3268,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.114 $");
+	helpbox.addLine("Version: $Revision: 1.115 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
