@@ -4,7 +4,7 @@
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
         Copyright (C) 2005 SnowHead
 
-        $Id: lcdapi.h,v 1.3 2005/06/30 17:31:24 mogway Exp $
+        $Id: lcdapi.h,v 1.4 2005/11/24 23:37:15 carjay Exp $
 
         License: GPL
 
@@ -65,7 +65,7 @@ class CLCDAPI
 	CLCDDisplay			display;
 	LcdFontRenderClass	*fontRenderer;
 	LcdFont				*font;
-	const char 			*style_name[2];
+	const char 			*style_name[3];
 public:
 	CLCDAPI(CWebDbox *webdbox);
 	~CLCDAPI(void);
