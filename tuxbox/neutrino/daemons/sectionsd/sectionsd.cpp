@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.203 2005/11/23 20:25:23 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.204 2005/11/25 13:35:48 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -92,7 +92,7 @@
 // Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
 #define TIME_EIT_SKIPPING 30
 
-// 12h Pause für SDT
+// 12h Pause fr SDT
 //#define TIME_SDT_SCHEDULED_PAUSE 12* 60* 60
 // -- shorter time for pause should  result in better behavior  (rasc, 2005-05-02)
 #define TIME_SDT_SCHEDULED_PAUSE 2* 60* 60
@@ -130,7 +130,7 @@
 // Gibt die Anzahl Timeouts an, nach der die Verbindung zum DMX neu gestartet wird (wegen evtl. buffer overflow)
 #define RESTART_DMX_AFTER_TIMEOUTS 5
 
-// Gibt die Anzahl Timeouts an, nach der überprüft wird, ob die Timeouts von einem Sender ohne EIT kommen oder nicht
+// Gibt die Anzahl Timeouts an, nach der berprft wird, ob die Timeouts von einem Sender ohne EIT kommen oder nicht
 #define CHECK_RESTART_DMX_AFTER_TIMEOUTS 3
 
 // Wieviele Sekunden EPG gecached werden sollen
@@ -694,13 +694,13 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id se
 		if ((*e)->get_channel_id() == serviceUniqueKey)
 		{
 			if (flag != 0)
-				*flag |= CSectionsdClient::epgflags::has_anything; // überhaupt was da...
+				*flag |= CSectionsdClient::epgflags::has_anything; // berhaupt was da...
 
 			for (SItimes::reverse_iterator t = (*e)->times.rend(); t != (*e)->times.rbegin(); t--)
 				if ((long)(azeit + plusminus) < (long)(t->startzeit + t->dauer))
 				{
 					if (flag != 0)
-						*flag |= CSectionsdClient::epgflags::has_later; // spätere events da...
+						*flag |= CSectionsdClient::epgflags::has_later; // spï¿½ere events da...
 
 					if (t->startzeit <= (long)(azeit + plusminus))
 					{
@@ -1052,7 +1052,7 @@ static void commandSetHoursToCache(int connfd, char *data, const unsigned dataLe
 
 static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true )
 {
-	char *evtList = new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
+	char *evtList = new char[128*1024]; // 128kb should be enough and dataLength is unsigned short
 
 	if (!evtList)
 	{
@@ -1141,7 +1141,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 	struct sectionsd::msgResponseHeader responseHeader;
 
-	if (liste - evtList > 65*1024) 
+	if (liste - evtList > 128*1024) 
 		printf("warning: [sectionsd] all events - response-size: 0x%x\n", liste - evtList);
 	responseHeader.dataLength = liste - evtList;
 
@@ -1221,7 +1221,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.203 2005/11/23 20:25:23 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.204 2005/11/25 13:35:48 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2316,7 +2316,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 			}
 			else
 			{
-				// wenn noch nie hingetuned wurde, dann gibts keine Info über den ServiceTyp...
+				// wenn noch nie hingetuned wurde, dann gibts keine Info ber den ServiceTyp...
 				// im Zweifel mitnehmen
 				found_already = false;
 			}
@@ -4121,7 +4121,7 @@ static void *nitThread(void *)
 									messaging_nit_actual_sections_got_all = false;
 							}
 					
-							// überprüfen, ob nächster Filter gewünscht :)
+							// berprfen, ob nï¿½hster Filter gewnscht :)
 							if ( messaging_nit_actual_sections_got_all )
 							{
 								if (auto_scanning > 0) {
@@ -4390,7 +4390,7 @@ static void *sdtThread(void *)
 
 							}
 	
-							// überprüfen, ob nächster Filter gewünscht :)
+							// berprfen, ob nï¿½hster Filter gewnscht :)
 							if ( messaging_sdt_actual_sections_got_all )
 							{
 
@@ -4863,7 +4863,7 @@ static void *eitThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
-				if ( (zeit > lastRestarted + 3) || (dmxEIT.real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
+				if ( (zeit > lastRestarted + 3) || (dmxEIT.real_pauseCounter != 0) ) // letzter restart lï¿½ger als 3secs her, daher cache NICHT verkleinern
 				{
 					dmxEIT.stop(); // -> lock
 					dmxEIT.start(); // -> unlock
@@ -5097,7 +5097,7 @@ static void *eitThread(void *)
 								if ((messaging_sections_max_ID[header.table_id - 0x4e] == _id) &&
 								    (messaging_skipped_sections_ID[header.table_id - 0x4e].empty()))
 								{
-									// alle pakete für den ServiceKey da!
+									// alle pakete fr den ServiceKey da!
 									dprintf("[eitThread] got all packages for table_id 0x%x\n", header.table_id);
 									messaging_sections_got_all[header.table_id - 0x4e] = true;
 								}
@@ -5111,7 +5111,7 @@ static void *eitThread(void *)
 							eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
 						}
 
-						// überprüfen, ob nächster Filter gewünscht :)
+						// berprfen, ob nï¿½hster Filter gewnscht :)
 						int	change_filter = 0;
 
 						for ( int i = (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i <= ( dmxEIT.filters[dmxEIT.filter_index].filter | ( !dmxEIT.filters[dmxEIT.filter_index].mask ) ); i++)
@@ -5215,7 +5215,7 @@ static void *pptThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
-				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
+				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // letzter restart lï¿½ger als 3secs her, daher cache NICHT verkleinern
 				{
 					dmxPPT.stop(); // -> lock
 					dmxPPT.start(); // -> unlock
@@ -5552,7 +5552,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.203 2005/11/23 20:25:23 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.204 2005/11/25 13:35:48 metallica Exp $\n");
 	
 	auto_scanning = getscanning();
 	
