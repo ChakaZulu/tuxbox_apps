@@ -1,5 +1,5 @@
 /*
- * $Id: dreamflash.cpp,v 1.3 2005/10/26 19:35:12 digi_casi Exp $
+ * $Id: dreamflash.cpp,v 1.4 2005/11/26 17:26:59 digi_casi Exp $
  *
  * (C) 2005 by mechatron, digi_casi
  *
@@ -182,11 +182,11 @@ setup_df::setup_df()
 	starttimer->setHelpText(_("Enter startmenu timeout in seconds"));
 	starttimer->loadDeco();
 
-	ch_inetd=new eCheckbox(this, atoi(cfg.inetd.c_str()));
+	ch_inetd=new eCheckbox(this, atoi(cfg.randomSkin.c_str()));
 	ch_inetd->move(ePoint(10, 100));
 	ch_inetd->resize(eSize(clientrect.width() - 20, fd + 10));
-	ch_inetd->setText("Kill process inetd");
-	ch_inetd->setHelpText("Default is enabled");
+	ch_inetd->setText("Select random skin");
+	ch_inetd->setHelpText("Default is disabled");
 
 	ed_skin_path = new eTextInputField(this);
 	ed_skin_path->move(ePoint(10, clientrect.height() - 220));
@@ -250,10 +250,12 @@ void setup_df::load_sliste()
 	sliste->beginAtomic(); 
 	sliste->clearList();
 
-	bmgr.getSkins(cfg.skinPath);
+	bmgr.getSkins(cfg.skinPath, cfg.mpoint);
 	for (unsigned int i = 0; i < bmgr.skinList.size(); i++)
 	{
 		eString name = bmgr.skinList[i];
+		unsigned int pos = name.find_last_of('/');
+		name = name.right(name.length() - pos - 1);
 		eString tmp = name.left(name.length() - 5);
 		eListBoxEntryText *s = new eListBoxEntryText(sliste, tmp, (void *)new eString(name));
 		if (cfg.skinName == name) 
@@ -275,7 +277,7 @@ void setup_df::okselected()
 	cfg.timeoutValue = eString().sprintf("%d", starttimer->getNumber());
 	cfg.skinPath = ed_skin_path->getText();
 	cfg.skinName = sliste->getCount() ? ((eString *)sliste->getCurrent()->getKey())->c_str() : "";
-	cfg.inetd = ch_inetd->isChecked() ? "1" : "0";
+	cfg.randomSkin = ch_inetd->isChecked() ? "1" : "0";
 	//video norm
 	unsigned int colorformat;
 	if (eConfig::getInstance()->getKey("/elitedvb/video/colorformat", colorformat)) 
