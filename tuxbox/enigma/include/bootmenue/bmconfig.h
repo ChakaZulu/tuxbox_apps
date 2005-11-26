@@ -1,5 +1,5 @@
 /*
- * $Id: bmconfig.h,v 1.5 2005/11/17 14:01:26 sat_turner Exp $
+ * $Id: bmconfig.h,v 1.6 2005/11/26 14:40:20 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -36,7 +36,7 @@ class bmconfig: public Object
 	bmconfig() {};
 	~bmconfig() {};
 	
-	eString mpoint, selectedEntry, inetd, timeoutValue, videoFormat, skinPath, skinName;
+	eString mpoint, selectedEntry, randomSkin, timeoutValue, videoFormat, skinPath, skinName;
 	
 	void load()
 	{
@@ -46,7 +46,7 @@ class bmconfig: public Object
 		skinPath = SKINDIR;
 		skinName = "blank.skin";
 		mpoint = "/var/mnt/usb";
-		inetd = "1";
+		randomSkin = "0";
 		
 		eString file;
 		if (access("/tmp/jffs2", R_OK) == 0)
@@ -77,8 +77,8 @@ class bmconfig: public Object
 				if (line.find("mountpoint") == 0)
 					mpoint = line.right(line.length() - 11);
 				else 
-				if (line.find("kill_inetd") == 0)	
-					inetd = line.right(line.length() - 11);
+				if (line.find("randomskin") == 0)	
+					randomSkin = line.right(line.length() - 11);
 			}
 			configFile.close();
 		}
@@ -98,7 +98,7 @@ class bmconfig: public Object
 			fprintf(f, "#BootManager-Config\n");
 			fprintf(f, "mountpoint=%s\n", mpoint.c_str());
 			fprintf(f, "selentry=%s\n", selectedEntry.c_str());
-			fprintf(f, "kill_inetd=%s\n", inetd.c_str());
+			fprintf(f, "randomskin=%s\n", randomSkin.c_str());
 			fprintf(f, "timeout=%s\n", timeoutValue.c_str());
 			fprintf(f, "videoformat=%s\n", videoFormat.c_str());
 			fprintf(f, "skin-path=%s\n", skinPath.c_str());

@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.h,v 1.13 2005/10/29 21:01:00 digi_casi Exp $
+ * $Id: bootmenue.h,v 1.14 2005/11/26 14:40:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -34,8 +34,9 @@
 #include "my_timer.h"
 #include <bootmenue/bmconfig.h>
 #include <bootmenue/bmimage.h>
+#include <bootmenue/bmboot.h>
 
-#define BMVERSION "0.4"
+#define BMVERSION "0.5"
 
 class stmenu: public Object
 {
@@ -44,18 +45,19 @@ class stmenu: public Object
 	CLCDDisplay *lcd;
 	bmconfig *config;
 	bmimages *img;
+	bmboot *bmgr;
 
 	int ver_x, ver_y, ver_font, ver_r, ver_g, ver_b;
 	int menu_x, menu_y, menu_xs, menu_ys;
 	int str_r, str_g, str_b;
 	int sel_r, sel_g, sel_b;
+	int skinIndex, skinMax;
 
 	int selentry, maxentry;
-	eString tmp_ver;
 
 	void rc_event(unsigned short key);
 	void mainloop();
-	bool loadSkin();
+	void loadSkin(eString skin);
 	int loadImageList();
 	void timeout();
 
@@ -64,7 +66,7 @@ class stmenu: public Object
 
 	void drawversion();
 	void drawmenu();
-	void showpic();
+	void showpic(eString pic);
 
  public:
 	static stmenu *getInstance() {return (instance) ? instance : instance = new stmenu();}

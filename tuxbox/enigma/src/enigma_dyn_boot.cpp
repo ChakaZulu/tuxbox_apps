@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.19 2005/10/30 07:56:05 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.20 2005/11/26 14:40:20 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -51,18 +51,20 @@ extern eString firmwareLevel(eString versionString);
 
 using namespace std;
 
-eString getSkins(eString skinPath, eString skinName)
+eString getSkins(eString skinPath, eString skinName, eString mountPoint)
 {	
 	bmboot bmgr;
 	eString skins;
 	
-	bmgr.getSkins(skinPath);
+	bmgr.getSkins(skinPath, mountPoint);
 	for (unsigned int i = 0; i < bmgr.skinList.size(); i++)
 	{
-		eString name = bmgr.skinList[i];
-		eString location = skinPath + "/" + name;
+		eString skin = bmgr.skinList[i];
+		unsigned int pos = skin.find_last_of('/');
+		eString name = skin.right(skin.length() - pos - 1);
+		eString skinPath2 = skin.left(pos);
 		
-		skins = skins + "<option value=\"" + location + "\"" + eString((skinName == name) ? " selected" : "") + ">" + name + "</option>";
+		skins = skins + "<option value=\"" + skin + "\"" + eString((skinName == name && skinPath == skinPath2) ? " selected" : "") + ">" + name + "</option>";
 	}
 
 	if (!skins)
@@ -299,10 +301,10 @@ eString editBootManagerSettings(eString request, eString dirpath, eString opts, 
 	bmgr.unmountJFFS2();
 	
 	eString result = readFile(TEMPLATE_DIR + "bootMgrSettings.tmp");
-	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, cfg.skinName));
+	result.strReplace("#SKINOPTIONS#", getSkins(SKINDIR, cfg.skinName, cfg.mpoint));
 	result.strReplace("#MPOINT#", cfg.mpoint);
 	result.strReplace("#SELECTEDENTRY#", cfg.selectedEntry);
-	result.strReplace("#INETD#", cfg.inetd);
+	result.strReplace("#RANDOMSKIN#", cfg.randomSkin);
 	result.strReplace("#TIMEOUTVALUE#", cfg.timeoutValue);
 	result.strReplace("#VIDEOFORMAT#", cfg.videoFormat);
 	result.strReplace("#SKINPATH#", cfg.skinPath);
@@ -323,7 +325,7 @@ eString setBootManagerSettings(eString request, eString dirpath, eString opts, e
 	
 	cfg.mpoint = opt["mpoint"];
 	cfg.selectedEntry = opt["selectedEntry"];
-	cfg.inetd = opt["inetd"];
+	cfg.randomSkin = opt["randomSkin"];
 	cfg.timeoutValue = opt["timeoutValue"];
 	cfg.videoFormat = opt["videoFormat"];
 	cfg.skinPath = opt["skinPath"];

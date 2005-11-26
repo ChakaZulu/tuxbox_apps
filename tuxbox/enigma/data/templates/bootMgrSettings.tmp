@@ -7,13 +7,13 @@
 				var i = document.settings.skinName.selectedIndex;
 				var skinName = document.settings.skinName.options[i].value;
 				var mpoint = document.settings.mpoint.value;
-				var inetd = document.settings.inetd.value;
+				var randomSkin = document.settings.randomSkin.value;
 				var selectedEntry = document.settings.selectedEntry.value;
 				var videoFormat = document.settings.videoFormat.value;
 				var skinPath = document.settings.skinPath.value;
 				var skinName = document.settings.skinName.value; 
 				var timeoutValue = document.settings.timeoutValue.value;
-				document.location = "/cgi-bin/setbootmanagersettings?skinName=" + skinName + "&mpoint=" + mpoint + "&inetd=" + inetd + "&selectedEntry=" + selectedEntry + "&videoFormat=" + videoFormat + "&skinPath=" + skinPath + "&timeoutValue=" + timeoutValue;
+				document.location = "/cgi-bin/setbootmanagersettings?skinName=" + skinName + "&mpoint=" + mpoint + "&randomSkin=" + randomSkin + "&selectedEntry=" + selectedEntry + "&videoFormat=" + videoFormat + "&skinPath=" + skinPath + "&timeoutValue=" + timeoutValue;
 				window.setTimeout("window.close()", 3000);
 			}
 		</script>
@@ -54,9 +54,9 @@
 				<td>root directory of images</td>
 			</tr>
 			<tr>
-				<td>Kill inetd:</td>
+				<td>Random Skin:</td>
 				<td>
-					<input style="color:#000000" name="inetd" type="text" size="3" maxlength="3" value="#INETD#">
+					<input style="color:#000000" name="randomSkin" type="text" size="3" maxlength="3" value="#RANDOMSKIN#">
 				</td>
 				<td>0/1</td>
 			</tr>

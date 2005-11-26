@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.25 2005/10/29 15:00:15 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.26 2005/11/26 14:40:19 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on dreamflash by mechatron
@@ -46,10 +46,23 @@ stmenu::stmenu()
 		CONNECT(CTimer::getInstance()->selected, stmenu::timeout);
 		config->load();
 		CTimer::getInstance()->start(atoi(config->timeoutValue.c_str()));
+		bmgr = new bmboot();
+		bmgr->getSkins(config->skinPath, config->mpoint);
+		eString skin = config->skinPath + "/" + config->skinName;
+		skinMax = bmgr->skinList.size() - 1;
+		for (skinIndex = 0; skinIndex <= skinMax; skinIndex++)
+			if (bmgr->skinList[skinIndex] == skin)
+				break;
 		if (loadImageList() > 1)
 		{
-			loadSkin();
-			showpic();
+			if (config->randomSkin == "1")
+			{
+				srand((unsigned)time(NULL));
+				skin = bmgr->skinList[rand() % bmgr->skinList.size()];
+			}
+			loadSkin(skin);
+			eString pic = skin.replace(skin.find(".skin"), 5, ".png");
+			showpic(pic);
 			drawversion();
 			drawmenu();
 			mainloop();
@@ -60,7 +73,6 @@ stmenu::stmenu()
 		delete config;
 		delete img;
 	}
-	printf("we are done.\n");
 }
 
 stmenu::~stmenu()
@@ -75,48 +87,59 @@ void stmenu::timeout()
 void stmenu::rc_event(unsigned short key)
 {
 	CTimer::getInstance()->start(atoi(config->timeoutValue.c_str()));
+	eString skin, pic;
 
 	switch (key)
 	{
-		case RC_EXIT: 
-		case RC_OK: 
+		case RC_EXIT:
+		case RC_OK:
 			doexit = true; 
 			break;
-		case RC_UP: 
-			selentry--; 
-			if (selentry < 0) 
-				selentry = maxentry; 
+		case RC_UP:
+			if (--selentry < 0)
+				selentry = maxentry;
+			drawmenu();
 			break;
-		case RC_DOWN: 
-			selentry++; 
-			if (selentry > maxentry) 
-			selentry = 0; 
+		case RC_DOWN:
+			if (++selentry > maxentry)
+				selentry = 0;
+			drawmenu();
 			break;
-		default: 
+		case RC_LEFT:
+		case RC_RIGHT:
+			skinIndex = (key == RC_LEFT) ? skinIndex - 1 : skinIndex + 1;
+			if (skinIndex < 0)
+				skinIndex = skinMax;
+			else
+			if (skinIndex > skinMax)
+				skinIndex = 0;
+			skin = bmgr->skinList[skinIndex];
+			unsigned int pos = skin.find_last_of('/');
+			config->skinName = skin.right(skin.length() - pos - 1);
+			config->skinPath = skin.left(pos);
+			loadSkin(skin);
+			pic = skin.replace(skin.find(".skin"), 5, ".png");
+			showpic(pic);
+			drawversion();
+			drawmenu();
+			break;
+		default:
 			break;
 	}
-
-	drawmenu();
 }
 
 void stmenu::drawversion()
 {
+	eString tmp_ver = (ver_x != -1 && ver_y != -1) ? "Bootmanager - " + eString(BMVERSION) : "";
 	display->RenderString(tmp_ver, ver_x + 25 + 10, ver_y, menu_xs - 25 - 10, CLCDDisplay::LEFT, ver_font, ver_r, ver_g, ver_b);
 	display->Fill_buffer(menu_x - 5, menu_y - 5, menu_xs + 10, menu_ys + 10);
 }
 
 void stmenu::drawmenu()
 {
-	int firstentry = 0;
-	int lastentry = 0;
+	int firstentry = (selentry / 4) * 4;
+	int lastentry = firstentry + 3;
 	
-	if (selentry > 3)  firstentry = 4;
-	if (selentry > 7)  firstentry = 8;
-	if (selentry > 11) firstentry = 12;
-	if (selentry > 15) firstentry = 16;
-	if (selentry > 19) firstentry = 20;
-
-	lastentry = firstentry + 3;
 	if (lastentry > maxentry) 
 		lastentry = maxentry;
 		
@@ -136,7 +159,6 @@ void stmenu::drawmenu()
 			//display->FillRect(menu_x + 5, a1, menu_xs + 25 + 5, h, sel_r, sel_g, sel_b);
 			display->RenderCircle(menu_x + 10, a1 + 2 * (h / 3) - 2, sel_r, sel_g, sel_b);
 		}
-								//25 ist platz fuer Kreis
 		display->RenderString(img->imageList[i].name, menu_x + 25 + 10, a1 + h, menu_xs - 25 - 10, CLCDDisplay::LEFT, h, str_r, str_g, str_b);
 		a++;
 	}
@@ -160,44 +182,33 @@ void stmenu::mainloop()
 	goscript(img->imageList[selentry].location);
 }
 
-bool stmenu::loadSkin()
+void stmenu::loadSkin(eString skin)
 {
-	bool showTitle = false;
-	if (config->skinPath && config->skinName)
+	if (access(skin.c_str(), R_OK) != 0)
+		skin = "/share/tuxbox/enigma/boot/blank.skin";
+
+	ver_x = ver_y = -1;
+		
+	ifstream skinFile(skin.c_str());
+	if (skinFile)
 	{
-		eString skin = config->skinPath + "/" + config->skinName;
-		
-		if (access(skin.c_str(), R_OK) != 0)
-			skin = "/share/tuxbox/enigma/boot/blank.skin";
-		
-		ifstream skinFile(skin.c_str());
 		eString line;
-		if (skinFile)
+		while (getline(skinFile, line, '\n'))
 		{
-			while (getline(skinFile, line, '\n'))
-			{
-				if (line.find("first-line") == 0)
-				{
-					sscanf(line.c_str(), "first-line=%d,%d,%d,%d,%d,%d", &ver_x, &ver_y, &ver_font, &ver_r, &ver_g, &ver_b);
-					showTitle = true;
-				}
-				else 
-				if (line.find("menu-size") == 0)
-					sscanf(line.c_str(), "menu-size=%d,%d,%d,%d", &menu_x, &menu_y, &menu_xs, &menu_ys);
-				else 
-				if (line.find("string-color") == 0)
-					sscanf(line.c_str(), "string-color=%d,%d,%d", &str_r, &str_g, &str_b);
-				else 
-				if (line.find("select-color") == 0)
-					sscanf(line.c_str(), "select-color=%d,%d,%d", &sel_r, &sel_g, &sel_b);
-			}
-			skinFile.close();
-			if (showTitle)
-				tmp_ver = "Bootmanager - " + eString(BMVERSION);
-			return true;
+			if (line.find("first-line") == 0)
+				sscanf(line.c_str(), "first-line=%d,%d,%d,%d,%d,%d", &ver_x, &ver_y, &ver_font, &ver_r, &ver_g, &ver_b);
+			else
+			if (line.find("menu-size") == 0)
+				sscanf(line.c_str(), "menu-size=%d,%d,%d,%d", &menu_x, &menu_y, &menu_xs, &menu_ys);
+			else
+			if (line.find("string-color") == 0)
+				sscanf(line.c_str(), "string-color=%d,%d,%d", &str_r, &str_g, &str_b);
+			else
+			if (line.find("select-color") == 0)
+				sscanf(line.c_str(), "select-color=%d,%d,%d", &sel_r, &sel_g, &sel_b);
 		}
+		skinFile.close();
 	}
-	return false;
 }
 
 int stmenu::loadImageList()
@@ -218,33 +229,25 @@ int stmenu::loadImageList()
 	return numberOfImages;
 }
 
-void stmenu::showpic()
+void stmenu::showpic(eString pic)
 {
-	if (config->skinPath && config->skinName)
+	if (access(pic.c_str(), R_OK) != 0)
+		pic = "/share/tuxbox/enigma/boot/blank.png";
+
+	if (fh_png_id(pic.c_str()) == 1)
 	{
-		eString pic = config->skinPath + "/" + config->skinName;
-		if (pic.length() > 4) 
-			pic = pic.left(pic.length() - 4);
-		pic += "png";
-		
-		if (access(pic.c_str(), R_OK) != 0)
-			pic = "/share/tuxbox/enigma/boot/blank.png";
+		int x, y;
+		fh_png_getsize(pic.c_str(), &x, &y, INT_MAX, INT_MAX);
+		unsigned char *buffer = (unsigned char *)malloc(x * y * 3);
 
-		if (fh_png_id(pic.c_str()) == 1)
+		if (fh_png_load(pic.c_str(), buffer, x, y) == 0)
 		{
-			int x, y;
-			fh_png_getsize(pic.c_str(), &x, &y, INT_MAX, INT_MAX);
-			unsigned char *buffer = (unsigned char *)malloc(x * y * 3);
-
-			if (fh_png_load(pic.c_str(), buffer, x, y) == 0)
-			{
-				display->SetSAA(atoi(config->videoFormat.c_str())); //rgb = 0, fbas = 1, svideo = 2, component = 3;
-				display->SetMode(720, 576, 16);
-				display->fb_display(buffer, NULL, x, y, 0, 0, 0, 0);
-			}
-
-			free(buffer);
+			display->SetSAA(atoi(config->videoFormat.c_str())); //rgb = 0, fbas = 1, svideo = 2, component = 3;
+			display->SetMode(720, 576, 16);
+			display->fb_display(buffer, NULL, x, y, 0, 0, 0, 0);
 		}
+
+		free(buffer);
 	}
 }
 
@@ -257,18 +260,14 @@ void stmenu::startscript(eString image)
 		{
 			fprintf(f, "killall -9 smbd\n");
 			fprintf(f, "killall -9 nmbd\n");
-			if (config->inetd == "1") 
-				fprintf(f, "killall -9 inetd\n");
+			fprintf(f, "killall -9 inetd\n");
 			fprintf(f, "killall -9 rcS\n");
 			fprintf(f, "killall -9 init\n");
-			if (config->mpoint != "/hdd")
-				fprintf(f, "umount /hdd\n");
-			fprintf(f, "rm %s\n", SCRIPTFILE);
 			fprintf(f, "chroot %s ../go\n", image.c_str());
 		}
 		else
 			fprintf(f, "echo booting flash image...\n");
-			
+
 		fclose(f);
 		system("chmod 755 "SCRIPTFILE);
 	}
