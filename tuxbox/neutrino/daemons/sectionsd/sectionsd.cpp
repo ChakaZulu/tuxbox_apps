@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.204 2005/11/25 13:35:48 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.205 2005/11/26 15:38:28 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -92,7 +92,7 @@
 // Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
 #define TIME_EIT_SKIPPING 30
 
-// 12h Pause fr SDT
+// 12h Pause für SDT
 //#define TIME_SDT_SCHEDULED_PAUSE 12* 60* 60
 // -- shorter time for pause should  result in better behavior  (rasc, 2005-05-02)
 #define TIME_SDT_SCHEDULED_PAUSE 2* 60* 60
@@ -130,7 +130,7 @@
 // Gibt die Anzahl Timeouts an, nach der die Verbindung zum DMX neu gestartet wird (wegen evtl. buffer overflow)
 #define RESTART_DMX_AFTER_TIMEOUTS 5
 
-// Gibt die Anzahl Timeouts an, nach der berprft wird, ob die Timeouts von einem Sender ohne EIT kommen oder nicht
+// Gibt die Anzahl Timeouts an, nach der überprüft wird, ob die Timeouts von einem Sender ohne EIT kommen oder nicht
 #define CHECK_RESTART_DMX_AFTER_TIMEOUTS 3
 
 // Wieviele Sekunden EPG gecached werden sollen
@@ -541,11 +541,12 @@ static void addService(const SIservice &s)
 	SIservicePtr sptr(sp);
 
 	// Leere Servicenamen in ServiceID in hex umbenennen
-	char servicename[50];
+#define MAX_SIZE_SERVICENAME	50
+	char servicename[MAX_SIZE_SERVICENAME];
 
 	if (sptr->serviceName.empty()) {
-		sprintf(servicename, "%04x",  sptr->service_id);
-		servicename[sizeof(servicename) - 1] = 0;
+		snprintf(servicename, MAX_SIZE_SERVICENAME, "%04x",  sptr->service_id);
+//		servicename[sizeof(servicename) - 1] = 0;
 		sptr->serviceName = servicename;
 	} 
 //	else {	
@@ -694,13 +695,13 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id se
 		if ((*e)->get_channel_id() == serviceUniqueKey)
 		{
 			if (flag != 0)
-				*flag |= CSectionsdClient::epgflags::has_anything; // berhaupt was da...
+				*flag |= CSectionsdClient::epgflags::has_anything; // überhaupt was da...
 
 			for (SItimes::reverse_iterator t = (*e)->times.rend(); t != (*e)->times.rbegin(); t--)
 				if ((long)(azeit + plusminus) < (long)(t->startzeit + t->dauer))
 				{
 					if (flag != 0)
-						*flag |= CSectionsdClient::epgflags::has_later; // spï¿½ere events da...
+						*flag |= CSectionsdClient::epgflags::has_later; // spätere events da...
 
 					if (t->startzeit <= (long)(azeit + plusminus))
 					{
@@ -960,8 +961,9 @@ static void commandPauseSorting(int connfd, char *data, const unsigned dataLengt
 static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
 	dputs("Request of service list.\n");
-
-	char *serviceList = new char[65*1024]; // 65kb should be enough and dataLength is unsigned short
+	long count=0;
+#define MAX_SIZE_SERVICELIST	64*1024
+	char *serviceList = new char[MAX_SIZE_SERVICELIST]; // 65kb should be enough and dataLength is unsigned short
 
 	if (!serviceList)
 	{
@@ -971,28 +973,38 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 
 	*serviceList = 0;
 	lockServices();
-	char daten[200];
+#define MAX_SIZE_DATEN	200
+	char daten[MAX_SIZE_DATEN];
 
 	for (MySIservicesOrderServiceName::iterator s = mySIservicesOrderServiceName.begin(); s != mySIservicesOrderServiceName.end(); s++)
 	{
-		sprintf(daten,
-			PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-			" %hu %hhu %d %d %d %d %u ",
-		        (*s)->uniqueKey(),
-		        (*s)->service_id, (*s)->serviceTyp,
-		        (*s)->eitScheduleFlag(), (*s)->eitPresentFollowingFlag(),
-		        (*s)->runningStatus(), (*s)->freeCAmode(),
-		        (*s)->nvods.size());
-		strcat(serviceList, daten);
-		strcat(serviceList, "\n");
-		strcat(serviceList, (*s)->serviceName.c_str());
-		strcat(serviceList, "\n");
-		strcat(serviceList, (*s)->providerName.c_str());
-		strcat(serviceList, "\n");
+		count += 1 + snprintf(daten, MAX_SIZE_DATEN, 
+				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				" %hu %hhu %d %d %d %d %u ",
+			        (*s)->uniqueKey(),
+		        	(*s)->service_id, (*s)->serviceTyp,
+		        	(*s)->eitScheduleFlag(), (*s)->eitPresentFollowingFlag(),
+			        (*s)->runningStatus(), (*s)->freeCAmode(),
+			        (*s)->nvods.size()) 
+			+ strlen((*s)->serviceName.c_str()) + 1
+			+ strlen((*s)->providerName.c_str()) + 1
+			+ 3; /* '\n' */
+		if (count < MAX_SIZE_SERVICELIST) 
+		{
+			strcat(serviceList, daten);
+			strcat(serviceList, "\n");
+			strcat(serviceList, (*s)->serviceName.c_str());
+			strcat(serviceList, "\n");
+			strcat(serviceList, (*s)->providerName.c_str());
+			strcat(serviceList, "\n");
+		} else {
+			dprintf("warning: commandDumpAllServices: serviceList cut\n")
+			break;
+		}	
 	}
 
 	unlockServices();
-	if (strlen(serviceList) + 1 > 65*1024) 
+	if (strlen(serviceList) + 1 > MAX_SIZE_SERVICELIST) 
 		printf("warning: commandDumpAllServices: length=%d\n", strlen(serviceList) + 1);
 
 	struct sectionsd::msgResponseHeader msgResponse;
@@ -1052,7 +1064,9 @@ static void commandSetHoursToCache(int connfd, char *data, const unsigned dataLe
 
 static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true )
 {
-	char *evtList = new char[128*1024]; // 128kb should be enough and dataLength is unsigned short
+#define MAX_SIZE_EVENTLIST	64*1024
+	char *evtList = new char[MAX_SIZE_EVENTLIST]; // 64kb should be enough and dataLength is unsigned short
+	long count=0;
 
 	if (!evtList)
 	{
@@ -1067,7 +1081,6 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 	if (serviceUniqueKey != 0)
 	{
 		// service Found
-
 		if (EITThreadsPause())
 		{
 			delete[] evtList;
@@ -1087,42 +1100,66 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 				{
 					if ( oldFormat )
 					{
-						char strZeit[50];
-						sprintf(strZeit, "%012llx ", (*e)->uniqueKey());
-						strcat(liste, strZeit);
-
+#define MAX_SIZE_STRTIME	50
+						char strZeit[MAX_SIZE_STRTIME];
+						char strZeit2[MAX_SIZE_STRTIME];
 						struct tm *tmZeit;
+						
 						tmZeit = localtime(&(t->startzeit));
-						sprintf(strZeit, "%02d.%02d %02d:%02d %u ",
+						count += snprintf(strZeit, MAX_SIZE_STRTIME, "%012llx ", (*e)->uniqueKey());
+						count += snprintf(strZeit2, MAX_SIZE_STRTIME, "%02d.%02d %02d:%02d %u ",
 								tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
-						strcat(liste, strZeit);
-						strcat(liste, (*e)->name.c_str());
-						strcat(liste, "\n");
+						count += strlen((*e)->name.c_str()) + 1;
+						
+						if (count < MAX_SIZE_EVENTLIST) {
+							strcat(liste, strZeit);
+							strcat(liste, strZeit2);
+							strcat(liste, (*e)->name.c_str());
+							strcat(liste, "\n");
+						} else {
+							dprintf("warning: sendAllEvents eventlist cut\n")
+							break;
+						}
 					}
 					else
 					{
-						*((event_id_t *)liste) = (*e)->uniqueKey();
-						liste += sizeof(event_id_t);
-						*((unsigned *)liste) = t->startzeit;
-						liste += 4;
-						*((unsigned *)liste) = t->dauer;
-						liste += 4;
-						strcpy(liste, (*e)->name.c_str());
-						liste += strlen(liste);
-						liste++;
-
+						count += sizeof(event_id_t) + 4 + 4 + strlen((*e)->name.c_str()) + 1;
 						if (((*e)->text).empty())
 						{
-							strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
-							liste += strlen(liste);
+							count += strlen((*e)->extendedText.substr(0, 40).c_str());
 						}
 						else
 						{
-							strcpy(liste, (*e)->text.c_str());
-							liste += strlen(liste);
+							count += strlen((*e)->text.c_str());
 						}
+						count++;
 
-						liste++;
+						if (count < MAX_SIZE_EVENTLIST) {
+							*((event_id_t *)liste) = (*e)->uniqueKey();
+							liste += sizeof(event_id_t);
+							*((unsigned *)liste) = t->startzeit;
+							liste += 4;
+							*((unsigned *)liste) = t->dauer;
+							liste += 4;
+							strcpy(liste, (*e)->name.c_str());
+							liste += strlen(liste);
+							liste++;
+
+							if (((*e)->text).empty())
+							{
+								strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
+								liste += strlen(liste);
+							}
+							else
+							{
+								strcpy(liste, (*e)->text.c_str());
+								liste += strlen(liste);
+							}
+							liste++;
+						} else {
+							dprintf("warning: sendAllEvents eventlist cut\n")
+							break;
+						}
 					}
 				}
 			} // if = serviceID
@@ -1141,7 +1178,8 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 	struct sectionsd::msgResponseHeader responseHeader;
 
-	if (liste - evtList > 128*1024) 
+	//printf("warning: [sectionsd] all events - response-size: 0x%x, count = %lx\n", liste - evtList, count);
+	if (liste - evtList > MAX_SIZE_EVENTLIST) 
 		printf("warning: [sectionsd] all events - response-size: 0x%x\n", liste - evtList);
 	responseHeader.dataLength = liste - evtList;
 
@@ -1218,10 +1256,11 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	//  getrusage(RUSAGE_SELF, &resourceUsage);
 	time_t zeit = time(NULL);
 
-	char stati[2024];
+#define MAX_SIZE_STATI	2024
+	char stati[MAX_SIZE_STATI];
 
-	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.204 2005/11/25 13:35:48 metallica Exp $\n"
+	snprintf(stati, MAX_SIZE_STATI, 
+	        "$Id: sectionsd.cpp,v 1.205 2005/11/26 15:38:28 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2262,7 +2301,9 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 
 static void sendEventList(int connfd, const unsigned char serviceTyp1, const unsigned char serviceTyp2 = 0, int sendServiceName = 1)
 {
-	char *evtList = new char[128* 1024]; // 256kb..? should be enough and dataLength is unsigned short
+#define MAX_SIZE_BIGEVENTLIST	128*1024	
+	char *evtList = new char[MAX_SIZE_BIGEVENTLIST]; // 256kb..? should be enough and dataLength is unsigned short
+	long count=0;
 
 	if (!evtList)
 	{
@@ -2316,7 +2357,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 			}
 			else
 			{
-				// wenn noch nie hingetuned wurde, dann gibts keine Info ber den ServiceTyp...
+				// wenn noch nie hingetuned wurde, dann gibts keine Info über den ServiceTyp...
 				// im Zweifel mitnehmen
 				found_already = false;
 			}
@@ -2331,41 +2372,63 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 				{
 					if (sendServiceName)
 					{
-						sprintf(liste, "%012llx\n", (*e)->uniqueKey());
-						liste += 13;
-						strcpy(liste, sname.c_str());
-						liste += strlen(sname.c_str());
-						*liste = '\n';
-						liste++;
-						strcpy(liste, (*e)->name.c_str());
-						liste += strlen((*e)->name.c_str());
-						*liste = '\n';
-						liste++;
+						count += 13 + strlen(sname.c_str()) + 1 + strlen((*e)->name.c_str()) + 1;
+						if (count < MAX_SIZE_BIGEVENTLIST) {
+							sprintf(liste, "%012llx\n", (*e)->uniqueKey());
+							liste += 13;
+							strcpy(liste, sname.c_str());
+							liste += strlen(sname.c_str());
+							*liste = '\n';
+							liste++;
+							strcpy(liste, (*e)->name.c_str());
+							liste += strlen((*e)->name.c_str());
+							*liste = '\n';
+							liste++;
+						} else {
+							dprintf("warning: sendEventList - eventlist cut\n")
+							break;
+						}
+											
 					} // if sendServiceName
 					else
 					{
-						*((event_id_t *)liste) = (*e)->uniqueKey();
-						liste += sizeof(event_id_t);
-						*((unsigned *)liste) = t->startzeit;
-						liste += 4;
-						*((unsigned *)liste) = t->dauer;
-						liste += 4;
-						strcpy(liste, (*e)->name.c_str());
-						liste += strlen(liste);
-						liste++;
-
+						count += sizeof(event_id_t) + 4 + 4 + strlen((*e)->name.c_str()) + 1;
 						if (((*e)->text).empty())
 						{
-							strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
-							liste += strlen(liste);
+							count += strlen((*e)->extendedText.substr(0, 40).c_str());
 						}
 						else
 						{
-							strcpy(liste, (*e)->text.c_str());
-							liste += strlen(liste);
+							count += strlen((*e)->text.c_str());
 						}
+						count++;
+						
+						if (count < MAX_SIZE_BIGEVENTLIST) {
+							*((event_id_t *)liste) = (*e)->uniqueKey();
+							liste += sizeof(event_id_t);
+							*((unsigned *)liste) = t->startzeit;
+							liste += 4;
+							*((unsigned *)liste) = t->dauer;
+							liste += 4;
+							strcpy(liste, (*e)->name.c_str());
+							liste += strlen(liste);
+							liste++;
 
-						liste++;
+							if (((*e)->text).empty())
+							{
+								strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
+								liste += strlen(liste);
+							}
+							else
+							{
+								strcpy(liste, (*e)->text.c_str());
+								liste += strlen(liste);
+							}
+							liste++;
+						} else {
+							dprintf("warning: sendEventList - eventlist cut\n")
+							break;
+						}
 					} // else !sendServiceName
 
 					found_already = true;
@@ -2375,10 +2438,11 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 		}
 	}
 
-	if (sendServiceName)
+	if (sendServiceName && (count+1 < MAX_SIZE_BIGEVENTLIST))
 	{
 		*liste = 0;
 		liste++;
+		count++;
 	}
 
 	unlockEvents();
@@ -2387,11 +2451,12 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	dmxSDT.unpause();
 	EITThreadsUnPause();
 
+	//printf("warning: [sectionsd] sendEventList - response-size: 0x%x, count = %lx\n", liste - evtList, count);
 	struct sectionsd::msgResponseHeader msgResponse;
-	if (liste - evtList > 128*1024) 
+	if (liste - evtList > MAX_SIZE_BIGEVENTLIST) 
 		printf("warning: [sectionsd] sendEventList- response-size: 0x%x\n", liste - evtList);
 	msgResponse.dataLength = liste - evtList;
-	dprintf("[sectionsd] all channels - response-size: 0x%x\n", msgResponse.dataLength);
+	dprintf("[sectionsd] sendEventList - response-size: 0x%x\n", msgResponse.dataLength);
 
 	if ( msgResponse.dataLength == 1 )
 		msgResponse.dataLength = 0;
@@ -2983,10 +3048,8 @@ std::string UTF8_to_UTF8XML(const char * s)
 //stolen from scan.cpp
 void cp(char * from, char * to)
 {
-	char cmd[256] = "cp -f ";
-	strcat(cmd, from);
-	strcat(cmd, " ");
-	strcat(cmd, to);
+	char cmd[256];
+	snprintf(cmd, 256, "cp -f %s %s", from, to);
 	system(cmd);
 }
 
@@ -3019,7 +3082,8 @@ static void write_xml_provend(FILE *dst, const bool is_sat)
 //Writes transponder entry or copies all existing tps of a provider.
 static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node, const bool is_sat, const bool copy)
 {
-	char tp_str[256] = "";
+#define MAX_SIZE_TP_STR	256
+	char tp_str[MAX_SIZE_TP_STR] = "";
 	char buffer[256] = "";
 //	char prov_end[10] = "";
 	/*
@@ -3042,7 +3106,7 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 	*/
 	if (is_sat) {
 //		modulation =  xmlGetAttribute(tp_node, "polarization");
-		sprintf(tp_str,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n", 
+		snprintf(tp_str, MAX_SIZE_TP_STR, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n", 
 				(t_transport_stream_id) xmlGetNumericAttribute(tp_node, "id", 16),
 				(t_original_network_id) xmlGetNumericAttribute(tp_node, "onid", 16),
 				(uint32_t) xmlGetNumericAttribute(tp_node, "frequency", 0),
@@ -3061,7 +3125,7 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 				fec_inner.c_str(),
 				modulation.c_str());*/
 				
-		sprintf(tp_str,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n", 
+		snprintf(tp_str, MAX_SIZE_TP_STR, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n", 
 				(t_transport_stream_id) xmlGetNumericAttribute(tp_node, "id", 16),
 				(t_original_network_id) xmlGetNumericAttribute(tp_node, "onid", 16),
 				(uint32_t) xmlGetNumericAttribute(tp_node, "frequency", 0),
@@ -3114,7 +3178,8 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 //Otherwise it reads to the end signalling that it didn't find the provider
 static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, const bool copy)
 {
-	char prov_str[256] = "";
+#define MAX_SIZE_PROV_STR	256
+	char prov_str[MAX_SIZE_PROV_STR] = "";
 	char buffer[256] = "";
 	std::string frontendType; 
 	std::string provider_name;
@@ -3131,11 +3196,11 @@ static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, 
 		diseqc = xmlGetAttribute(provider, "diseqc");
 		position = xmlGetSignedNumericAttribute(provider, "position", 16);
 		if (position == 0)
-			sprintf(prov_str,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(),
+			snprintf(prov_str, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(),
 				provider_name.c_str(), diseqc.c_str());
 		else {
 			//east_west = xmlGetNumericAttribute(provider, "east_west", 16);
-			sprintf(prov_str,"\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", 
+			snprintf(prov_str, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", 
 				frontendType.c_str(), 
 				provider_name.c_str(),
 				position,
@@ -3145,7 +3210,7 @@ static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, 
 		is_sat = true;
 	}
 	else {
-		sprintf(prov_str,"\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
+		snprintf(prov_str, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
 		is_sat = false;
 	}
 	
@@ -3614,7 +3679,8 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 	bool is_sat = false;
 	
 //	char prov_str_alt[256] = "";
-	char prov_str_neu[256] = "";
+#define MAX_SIZE_PROV_STR	256
+	char prov_str_neu[MAX_SIZE_PROV_STR] = "";
 //	char prov_end[10] = "";
 	char buffer[256] = "";
 	
@@ -3633,7 +3699,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 	
 	if (!strcmp(frontendType.c_str(), "sat")) {
 		diseqc = xmlGetAttribute(provider, "diseqc");
-		sprintf(prov_str_neu,"\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(),
+		snprintf(prov_str_neu, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(),
 			position, diseqc.c_str());
 //		if (needs_fix)
 //			sprintf(prov_str_alt,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
@@ -3644,7 +3710,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 	}
 	else {
 //		sprintf(prov_str_alt,"\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
-		sprintf(prov_str_neu,"\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
+		snprintf(prov_str_neu, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
 //		sprintf(prov_end,"\t</cable>\n");
 		is_sat = false;
 	}
@@ -4121,7 +4187,7 @@ static void *nitThread(void *)
 									messaging_nit_actual_sections_got_all = false;
 							}
 					
-							// berprfen, ob nï¿½hster Filter gewnscht :)
+							// überprüfen, ob nächster Filter gewünscht :)
 							if ( messaging_nit_actual_sections_got_all )
 							{
 								if (auto_scanning > 0) {
@@ -4390,7 +4456,7 @@ static void *sdtThread(void *)
 
 							}
 	
-							// berprfen, ob nï¿½hster Filter gewnscht :)
+							// überprüfen, ob nächster Filter gewünscht :)
 							if ( messaging_sdt_actual_sections_got_all )
 							{
 
@@ -4863,7 +4929,7 @@ static void *eitThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
-				if ( (zeit > lastRestarted + 3) || (dmxEIT.real_pauseCounter != 0) ) // letzter restart lï¿½ger als 3secs her, daher cache NICHT verkleinern
+				if ( (zeit > lastRestarted + 3) || (dmxEIT.real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
 				{
 					dmxEIT.stop(); // -> lock
 					dmxEIT.start(); // -> unlock
@@ -5097,7 +5163,7 @@ static void *eitThread(void *)
 								if ((messaging_sections_max_ID[header.table_id - 0x4e] == _id) &&
 								    (messaging_skipped_sections_ID[header.table_id - 0x4e].empty()))
 								{
-									// alle pakete fr den ServiceKey da!
+									// alle pakete für den ServiceKey da!
 									dprintf("[eitThread] got all packages for table_id 0x%x\n", header.table_id);
 									messaging_sections_got_all[header.table_id - 0x4e] = true;
 								}
@@ -5111,7 +5177,7 @@ static void *eitThread(void *)
 							eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
 						}
 
-						// berprfen, ob nï¿½hster Filter gewnscht :)
+						// überprüfen, ob nächster Filter gewünscht :)
 						int	change_filter = 0;
 
 						for ( int i = (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i <= ( dmxEIT.filters[dmxEIT.filter_index].filter | ( !dmxEIT.filters[dmxEIT.filter_index].mask ) ); i++)
@@ -5215,7 +5281,7 @@ static void *pptThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
-				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // letzter restart lï¿½ger als 3secs her, daher cache NICHT verkleinern
+				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
 				{
 					dmxPPT.stop(); // -> lock
 					dmxPPT.start(); // -> unlock
@@ -5552,7 +5618,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.204 2005/11/25 13:35:48 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.205 2005/11/26 15:38:28 metallica Exp $\n");
 	
 	auto_scanning = getscanning();
 	
