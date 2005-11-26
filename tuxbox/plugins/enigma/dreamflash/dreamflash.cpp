@@ -1,5 +1,5 @@
 /*
- * $Id: dreamflash.cpp,v 1.4 2005/11/26 17:26:59 digi_casi Exp $
+ * $Id: dreamflash.cpp,v 1.5 2005/11/26 17:44:54 digi_casi Exp $
  *
  * (C) 2005 by mechatron, digi_casi
  *
@@ -25,7 +25,7 @@
 #include <bootmenue/bmconfig.h>
 #include <bootmenue/bmboot.h>
 
-#define VDF "Version 2.7"
+#define VDF "Version 2.8"
 
 //#define TMPFILE "/tmp/.dftemp"
 
