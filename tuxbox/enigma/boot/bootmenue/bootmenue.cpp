@@ -1,5 +1,5 @@
 /*
- * $Id: bootmenue.cpp,v 1.26 2005/11/26 14:40:19 digi_casi Exp $
+ * $Id: bootmenue.cpp,v 1.27 2005/11/26 16:04:53 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on dreamflash by mechatron
@@ -59,6 +59,9 @@ stmenu::stmenu()
 			{
 				srand((unsigned)time(NULL));
 				skin = bmgr->skinList[rand() % bmgr->skinList.size()];
+				unsigned int pos = skin.find_last_of('/');
+				config->skinName = skin.right(skin.length() - pos - 1);
+				config->skinPath = skin.left(pos);
 			}
 			loadSkin(skin);
 			eString pic = skin.replace(skin.find(".skin"), 5, ".png");
