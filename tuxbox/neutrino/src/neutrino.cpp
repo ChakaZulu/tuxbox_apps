@@ -3098,6 +3098,8 @@ void CNeutrinoApp::InitZapper()
 
 	firstChannel();
 
+	g_Sectionsd->setSectionsdScanMode(scanSettings.scanSectionsd);
+
 #ifndef TUXTXT_CFG_STANDALONE
 	if(g_settings.tuxtxt_cache)
 	{
