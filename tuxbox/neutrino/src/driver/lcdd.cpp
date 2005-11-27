@@ -63,16 +63,7 @@ void CLCD::count_down() {
 	if (timeout_cnt > 0) {
 		timeout_cnt--;
 		if (timeout_cnt == 0) {
-			if (atoi(g_settings.lcd_setting_dim_brightness) > 0) 
-			{
-				// save lcd brightness, setBrightness() changes global setting
-				int b = g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS];
-				setBrightness(atoi(g_settings.lcd_setting_dim_brightness));
-				g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS] = b;
-			} else
-			{
-				setPower(0);
-			}
+			setlcdparameter();
 		}
 	} 
 }
@@ -80,11 +71,8 @@ void CLCD::count_down() {
 void CLCD::wake_up() {
 	if (atoi(g_settings.lcd_setting_dim_time) > 0) {
 		timeout_cnt = atoi(g_settings.lcd_setting_dim_time);
-		atoi(g_settings.lcd_setting_dim_brightness) > 0 ?
-			setBrightness(g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS]) : setPower(1);
+		setlcdparameter();
 	}
-	else
-		setPower(1);
 }
 
 void* CLCD::TimeThread(void *)
@@ -255,10 +243,18 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 
 void CLCD::setlcdparameter(void)
 {
+	bool timeouted = (atoi(g_settings.lcd_setting_dim_time) > 0)
+	  & (timeout_cnt == 0);
 	last_toggle_state_power = g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER];
-	setlcdparameter((mode == MODE_STANDBY) ? g_settings.lcd_setting[SNeutrinoSettings::LCD_STANDBY_BRIGHTNESS] : g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS],
+	setlcdparameter((mode == MODE_STANDBY)
+			? g_settings.lcd_setting[SNeutrinoSettings::LCD_STANDBY_BRIGHTNESS]
+			: timeouted 
+			? atoi(g_settings.lcd_setting_dim_brightness)
+			: g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS],
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST],
-			last_toggle_state_power,
+			last_toggle_state_power
+			& (! timeouted
+			   || (atoi(g_settings.lcd_setting_dim_brightness) > 0)),
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
 }
 
