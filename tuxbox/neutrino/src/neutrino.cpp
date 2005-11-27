@@ -3533,6 +3533,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if( ( msg == CRCInput::RC_help ) ||
 						( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 			{
+			         // turn on LCD display
+				CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO); 
 				// show Infoviewer
 				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
