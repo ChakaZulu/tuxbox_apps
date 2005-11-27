@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.206 2005/11/26 17:11:10 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.207 2005/11/27 12:21:15 rasc Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1212,7 +1212,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI, 
-	        "$Id: sectionsd.cpp,v 1.206 2005/11/26 17:11:10 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.207 2005/11/27 12:21:15 rasc Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4691,23 +4691,11 @@ static void *eitThread(void *)
 	char *buf;
 	unsigned timeoutInMSeconds = 500;
 	bool sendToSleepNow = false;
-	//dmxEIT.addfilter( 0x4e, (0xff) );
-	//dmxEIT.addfilter( 0x4f, (0xff) );
-/*	
-	dmxEIT.addfilter( 0x4e, (0xff - 0x01) );
-	dmxEIT.addfilter( 0x50, (0xff) );
-	dmxEIT.addfilter( 0x51, (0xff) );
-	dmxEIT.addfilter( 0x52, (0xff - 0x01) );
-	dmxEIT.addfilter( 0x54, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x58, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x5c, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x60, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x64, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x68, (0xff - 0x03) );
-	dmxEIT.addfilter( 0x6c, (0xff - 0x03) );
-*/
+
+	// -- set EIT filter  0x4e-0x6F
 	dmxEIT.addfilter( 0x4e, 0xfe );
-	dmxEIT.addfilter( 0x50, 0xe0 );
+	dmxEIT.addfilter( 0x50, 0xf0 );
+	dmxEIT.addfilter( 0x60, 0xf0 );
 	try
 	{
 		dprintf("[%sThread] pid %d start\n", "eit", getpid());
@@ -5476,7 +5464,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.206 2005/11/26 17:11:10 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.207 2005/11/27 12:21:15 rasc Exp $\n");
 	
 //	auto_scanmode = getscanning();
 	
