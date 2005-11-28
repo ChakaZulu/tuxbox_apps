@@ -1,5 +1,5 @@
 /*
- * $Id: linkage_descriptor.cpp,v 1.5 2005/11/28 16:20:24 ghostrider Exp $
+ * $Id: linkage_descriptor.cpp,v 1.6 2005/11/28 21:00:28 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -21,9 +21,10 @@ LinkageDescriptor::LinkageDescriptor(const uint8_t * const buffer) : Descriptor(
 	linkageType = buffer[8];
 
 	if (linkageType != 0x08)
-		for (size_t i = 0; i < descriptorLength - 7; ++i)
-			privateDataBytes.push_back(buffer[i + 9]);
-
+	{
+		privateDataBytes.reserve(descriptorLength - 7);
+		memcpy(&privateDataBytes[0], buffer+9, descriptorLength-7);
+	}
 	else {
 		handOverType = (buffer[9] >> 4) & 0x0f;
 		originType = buffer[9] & 0x01;
@@ -39,9 +40,8 @@ LinkageDescriptor::LinkageDescriptor(const uint8_t * const buffer) : Descriptor(
 			initialServiceId = UINT16(&buffer[offset + 10]);
 			offset += 2;
 		}
-
-		for (size_t i = 0; i < descriptorLength - (offset + 8); ++i)
-			privateDataBytes.push_back(buffer[i + offset + 10]);
+		privateDataBytes.reserve(descriptorLength - (offset+8));
+		memcpy(&privateDataBytes[0], buffer+offset+10, descriptorLength-(offset+8));
 	}
 }
 

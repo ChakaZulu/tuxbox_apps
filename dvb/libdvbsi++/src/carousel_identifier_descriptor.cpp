@@ -1,5 +1,5 @@
 /*
- * $Id: carousel_identifier_descriptor.cpp,v 1.4 2005/11/28 16:20:24 ghostrider Exp $
+ * $Id: carousel_identifier_descriptor.cpp,v 1.5 2005/11/28 21:00:27 mws Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -19,8 +19,8 @@ CarouselIdentifierDescriptor::CarouselIdentifierDescriptor(const uint8_t * const
 	formatId = buffer[6];
 	switch ( formatId ) {
 	case 0x00:
-		for (size_t i = 0; i < descriptorLength - 5; ++i)
-                        privateDataBytes.push_back(buffer[i + 7]);
+		privateDataBytes.reserve(descriptorLength-5);
+		memcpy(&privateDataBytes[0], buffer+7, descriptorLength-5);	
 		break;
 	case 0x01:
 		moduleVersion = buffer[7];
@@ -32,8 +32,8 @@ CarouselIdentifierDescriptor::CarouselIdentifierDescriptor(const uint8_t * const
 		timeout = buffer[21];
 		objectKeyLength = buffer[22];
 		objectKey.assign((char *)&buffer[23], objectKeyLength);
-		for (size_t i = 0; i < descriptorLength - objectKeyLength - 21; ++i)
-                        privateDataBytes.push_back(buffer[i + objectKeyLength + 23]);
+		privateDataBytes.reserve(descriptorLength-objectKeyLength-21);
+		memcpy(&privateDataBytes[0], buffer+objectKeyLength+23, descriptorLength-objectKeyLength-21);	
 		break;
 	}
 	
