@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.49 2005/11/13 08:37:21 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.50 2005/11/28 12:51:16 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -176,7 +176,7 @@ int eMountPoint::mount()
 							cmd = "mount -t cifs //";
 							cmd += ip + "/" + mp.mountDir + " " + mp.localDir + " -o user=";
 							cmd += (mp.userName) ? mp.userName : "anonymous";
-							cmd += (mp.password) ? ("pass=" + mp.password) : "";
+							cmd += (mp.password) ? (",pass=" + mp.password) : "";
 							cmd += ",unc=//" + ip + "/" + mp.mountDir;
 							cmd += (mp.options) ? ("," + mp.options) : "";
 						}
