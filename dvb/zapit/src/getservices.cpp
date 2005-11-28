@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.96 2005/11/20 15:10:52 mogway Exp $
+ * $Id: getservices.cpp,v 1.97 2005/11/28 05:24:40 metallica Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -27,6 +27,7 @@
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
 #include <configfile.h>
+#include <sys/stat.h>
 
 extern transponder_list_t transponders;
 extern tallchans allchans;
@@ -289,29 +290,38 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType, bool only_current_
 	if (parser == NULL)
 		return -1;
 
+	struct stat testbuf;
+
 	if (!only_current_services) {
 		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
 		xmlFreeDoc(parser);
 	}
-	
-	if ((parser = parseXmlFile(CURRENTSERVICES_XML, false))) {
-		printf("[getservices] " CURRENTSERVICES_XML "  found.\n");
-		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
-		xmlFreeDoc(parser);
+	if(stat(CURRENTSERVICES_XML,&testbuf) == 0)
+	{
+		if ((parser = parseXmlFile(CURRENTSERVICES_XML, false))) {
+			printf("[getservices] " CURRENTSERVICES_XML "  found.\n");
+			FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
+			xmlFreeDoc(parser);
+		}
 	}
 
 	if (!only_current_services) {	
-	        if ((parser = parseXmlFile(ANTISERVICES_XML, false))) {
-        	        printf("[getservices] " ANTISERVICES_XML " found.\n");
-                	printf("[getservices] WARNING: antiservices.xml is depreciated; please use myservices.xml and 'action=\"remove\"' instead.\n");
-	                FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, true);
-        	        xmlFreeDoc(parser);
-        	}
-
-		if ((parser = parseXmlFile(MYSERVICES_XML, false))) {
-			printf("[getservices] " MYSERVICES_XML "  found.\n");
-			FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
-			xmlFreeDoc(parser);
+		if(stat(ANTISERVICES_XML,&testbuf) == 0)
+		{
+	        	if ((parser = parseXmlFile(ANTISERVICES_XML, false))) {
+				printf("[getservices] " ANTISERVICES_XML " found.\n");
+				printf("[getservices] WARNING: antiservices.xml is depreciated; please use myservices.xml and 'action=\"remove\"' instead.\n");
+				FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, true);
+				xmlFreeDoc(parser);
+        		}
+		}
+		if(stat(MYSERVICES_XML,&testbuf) == 0)
+		{
+			if ((parser = parseXmlFile(MYSERVICES_XML, false))) {
+				printf("[getservices] " MYSERVICES_XML "  found.\n");
+				FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
+				xmlFreeDoc(parser);
+			}
 		}
 	}	
 
