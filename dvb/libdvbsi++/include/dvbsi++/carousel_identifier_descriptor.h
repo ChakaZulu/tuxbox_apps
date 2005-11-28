@@ -1,5 +1,5 @@
 /*
- * $Id: carousel_identifier_descriptor.h,v 1.3 2005/10/29 00:10:08 obi Exp $
+ * $Id: carousel_identifier_descriptor.h,v 1.4 2005/11/28 16:20:24 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -15,9 +15,9 @@
 
 #include "descriptor.h"
 
-typedef std::list<uint8_t> PrivateDataByteList;
-typedef PrivateDataByteList::iterator PrivateDataByteIterator;
-typedef PrivateDataByteList::const_iterator PrivateDataByteConstIterator;
+typedef std::list<uint8_t> PrivateDataByteVector;
+typedef PrivateDataByteVector::iterator PrivateDataByteIterator;
+typedef PrivateDataByteVector::const_iterator PrivateDataByteConstIterator;
 
 class CarouselIdentifierDescriptor : public Descriptor
 {
@@ -33,7 +33,7 @@ class CarouselIdentifierDescriptor : public Descriptor
 		unsigned timeout				: 8;
 		unsigned objectKeyLength			: 8;
 		std::string objectKey;
-		PrivateDataByteList privateDataBytes;
+		PrivateDataByteVector privateDataBytes;
 
 	public:
 		CarouselIdentifierDescriptor(const uint8_t * const buffer);
@@ -48,7 +48,7 @@ class CarouselIdentifierDescriptor : public Descriptor
 		uint32_t getOriginalSize(void) const;
 		uint8_t getTimeout(void) const;
 		const std::string &getObjectKey(void) const;
-		const PrivateDataByteList *getPrivateDataBytes(void) const;
+		const PrivateDataByteVector *getPrivateDataBytes(void) const;
 };
 
 #endif /* __carousel_identifier_descriptor_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: carousel_identifier_descriptor.cpp,v 1.3 2005/10/29 00:10:16 obi Exp $
+ * $Id: carousel_identifier_descriptor.cpp,v 1.4 2005/11/28 16:20:24 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -90,7 +90,7 @@ const std::string &CarouselIdentifierDescriptor::getObjectKey(void) const
 	return objectKey;
 }
 
-const PrivateDataByteList *CarouselIdentifierDescriptor::getPrivateDataBytes(void) const
+const PrivateDataByteVector *CarouselIdentifierDescriptor::getPrivateDataBytes(void) const
 {
         return &privateDataBytes;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: linkage_descriptor.cpp,v 1.4 2005/10/29 00:10:17 obi Exp $
+ * $Id: linkage_descriptor.cpp,v 1.5 2005/11/28 16:20:24 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -65,7 +65,7 @@ uint8_t LinkageDescriptor::getLinkageType(void) const
 	return linkageType;
 }
 
-const PrivateDataByteList *LinkageDescriptor::getPrivateDataBytes(void) const
+const PrivateDataByteVector *LinkageDescriptor::getPrivateDataBytes(void) const
 {
 	return &privateDataBytes;
 }
