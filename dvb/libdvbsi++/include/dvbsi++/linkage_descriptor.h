@@ -1,5 +1,5 @@
 /*
- * $Id: linkage_descriptor.h,v 1.4 2005/11/28 16:20:24 ghostrider Exp $
+ * $Id: linkage_descriptor.h,v 1.5 2005/11/28 16:25:09 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,7 +15,7 @@
 
 #include "descriptor.h"
 
-typedef std::list<uint8_t> PrivateDataByteVector;
+typedef std::vector<uint8_t> PrivateDataByteVector;
 typedef PrivateDataByteVector::iterator PrivateDataByteIterator;
 typedef PrivateDataByteVector::const_iterator PrivateDataByteConstIterator;
 
