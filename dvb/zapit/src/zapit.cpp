@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.383 2005/11/23 20:25:22 metallica Exp $
+ * $Id: zapit.cpp,v 1.384 2005/11/28 05:19:39 metallica Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1184,11 +1184,16 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_RELOAD_CURRENTSERVICES:
 	{
 		CZapitMessages::responseCmd response;
+		t_channel_id cid= channel ? channel->getChannelID() : 0; 
+
 		transponders.clear();
 		bouquetManager->clearAll();
 		allchans.clear();  // <- this invalidates all bouquets, too!
 		LoadServices(frontend->getInfo()->type, diseqcType, false); //true for only loading currentservices...
 		bouquetManager->loadBouquets();
+		tallchans_iterator cit = allchans.find(cid);
+		if (cit != allchans.end()) 
+			channel = &(cit->second); 
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
@@ -2236,7 +2241,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.383 2005/11/23 20:25:22 metallica Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.384 2005/11/28 05:19:39 metallica Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
