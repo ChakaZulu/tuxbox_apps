@@ -68,6 +68,7 @@ libdvbsi___la_SOURCES = \
 	long_section.cpp \
 	module_link_descriptor.cpp \
 	mosaic_descriptor.cpp \
+	mpe_fec_section.cpp \
 	multilingual_bouquet_name_descriptor.cpp \
 	multilingual_component_descriptor.cpp \
 	multilingual_network_name_descriptor.cpp \
