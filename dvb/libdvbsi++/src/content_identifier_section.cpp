@@ -1,5 +1,5 @@
 /*
- * $Id: content_identifier_section.cpp,v 1.2 2005/11/13 17:56:20 mws Exp $
+ * $Id: content_identifier_section.cpp,v 1.3 2005/11/30 16:48:55 mws Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -61,9 +61,9 @@ ContentIdentifierSection::ContentIdentifierSection(const uint8_t* const buffer) 
 		// TODO Mws check for 0 as index indicator
 		prependStringsBytes.push_back(buffer[i+13]);
 	}
-	for (size_t i = 0; i < sectionLength - 1; i += 4)
+	for (size_t i = 0; i < sectionLength - prependStringLength - 13; i += 4)
 	{
-		CridLabel* cridLabel = new CridLabel(&buffer[i+13]);
+		CridLabel* cridLabel = new CridLabel(&buffer[i+prependStringLength+13]);
 		i += cridLabel->getUniqueStringLength();
 	}
 }
