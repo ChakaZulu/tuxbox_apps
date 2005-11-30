@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.cpp,v 1.6 2004/03/14 22:28:13 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.cpp,v 1.7 2005/11/30 04:51:49 metallica Exp $
  *
  * abstract fb_window class - d-box2 linux project
  *
@@ -58,7 +58,7 @@ CFBWindow::~CFBWindow(void)
 	{
 		if (((CPrivateData *)private_data)->Background != NULL)
 			((CPrivateData *)private_data)->frameBuffer->RestoreScreen(x, y, dx, dy, (fb_pixel_t *)((CPrivateData *)private_data)->Background);
-		
+		delete ((CPrivateData *)private_data)->Background;
 		delete ((CPrivateData *)private_data);
 		private_data = NULL;
 	}
