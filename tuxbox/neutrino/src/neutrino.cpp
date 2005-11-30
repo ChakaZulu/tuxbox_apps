@@ -4648,6 +4648,11 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 			CNeutrinoApp::getInstance()->getScanSettings().toMotorPosList(motorPosList);
 			g_Zapit->setScanMotorPosList(motorPosList);
 		}
+		// Houdini set DiseqcType/Repeat so you don't have to reboot for changes to take effect
+		/* send diseqc type to zapit */
+		g_Zapit->setDiseqcType(CNeutrinoApp::getInstance()->getScanSettings().diseqcMode);
+		/* send diseqc repeat to zapit */
+		g_Zapit->setDiseqcRepeat(CNeutrinoApp::getInstance()->getScanSettings().diseqcRepeat); 
 
 		hintBox->hide();
 		delete hintBox;
