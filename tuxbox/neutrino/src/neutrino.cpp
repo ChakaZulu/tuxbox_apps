@@ -163,6 +163,7 @@ CZapitClient::SatelliteList satList;
 CVCRControl::CDevice * recordingdevice = NULL;
 
 #define NEUTRINO_SETTINGS_FILE          CONFIGDIR "/neutrino.conf"
+#define NEUTRINO_RECORDING_TIMER_SCRIPT CONFIGDIR "/recording.timer"
 #define NEUTRINO_RECORDING_START_SCRIPT CONFIGDIR "/recording.start"
 #define NEUTRINO_RECORDING_ENDED_SCRIPT CONFIGDIR "/recording.end"
 #define NEUTRINO_ENTER_STANDBY_SCRIPT CONFIGDIR "/standby.on"
@@ -3862,6 +3863,10 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
 	{
+		puts("[neutrino.cpp] executing " NEUTRINO_RECORDING_TIMER_SCRIPT "."); 
+		if (system(NEUTRINO_RECORDING_TIMER_SCRIPT) != 0)
+			perror("Datei " NEUTRINO_RECORDING_TIMER_SCRIPT " fehlt. Bitte erstellen, wenn gebraucht.\nFile " NEUTRINO_RECORDING_TIMER_SCRIPT " not found. Please create if needed.\n");
+
 		if( g_settings.recording_server_wakeup )
 		{
 			std::string command = "etherwake ";

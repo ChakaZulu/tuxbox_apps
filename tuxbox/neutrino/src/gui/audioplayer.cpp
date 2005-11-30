@@ -94,6 +94,8 @@
 
 // check if files to be added are already in the playlist
 #define AUDIOPLAYER_CHECK_FOR_DUPLICATES
+#define AUDIOPLAYER_START_SCRIPT CONFIGDIR "/audioplayer.start"
+#define AUDIOPLAYER_END_SCRIPT CONFIGDIR "/audioplayer.end"
 
 CAudiofileExt::CAudiofileExt()
 	: CAudiofile(), firstChar('\0')
@@ -240,7 +242,11 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 		
 	//Send ir
 	CIRSend irs("audioplayeron");
-	irs.Send(); 
+	irs.Send();
+	
+	puts("[audioplayer.cpp] executing " AUDIOPLAYER_START_SCRIPT "."); 
+	if (system(AUDIOPLAYER_START_SCRIPT) != 0) 
+		perror("Datei " AUDIOPLAYER_START_SCRIPT " fehlt.Bitte erstellen, wenn gebraucht.\nFile " AUDIOPLAYER_START_SCRIPT " not found. Please create if needed.\n");
 
 #ifdef DBOX
 	// disable iec aka digi out
@@ -270,6 +276,10 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	//Send ir
 	CIRSend irs2("audioplayeroff");
 	irs2.Send();
+	
+	puts("[audioplayer.cpp] executing " AUDIOPLAYER_END_SCRIPT "."); 
+	if (system(AUDIOPLAYER_END_SCRIPT) != 0) 
+		perror("Datei " AUDIOPLAYER_END_SCRIPT " fehlt. Bitte erstellen, wenn gebraucht.\nFile " AUDIOPLAYER_END_SCRIPT " not found. Please create if needed.\n");
 	
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
