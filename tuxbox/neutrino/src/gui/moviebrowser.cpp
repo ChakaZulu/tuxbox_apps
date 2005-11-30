@@ -2239,7 +2239,7 @@ bool CMovieBrowser::delFile_vlc(CFile& file)
 bool CMovieBrowser::delFile_std(CFile& file)
 {
 	bool result = true;
-	unlink(file.getFileName().c_str()); 
+	unlink(file.Name.c_str()); // fix: use full path
 	TRACE("  delete file: %s\r\n",file.Name.c_str());
 	return(result);
 }

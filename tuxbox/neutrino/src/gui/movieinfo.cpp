@@ -91,30 +91,33 @@ bool CMovieInfo::convertTs2XmlName(char* char_filename,int size)
 ************************************************************************/
 bool CMovieInfo::convertTs2XmlName(std::string* filename)
 {
-	//TRACE("[mi]->convertTs2XmlName\r\n");
-    int bytes = filename->find(".ts"); 
-    bool result = false;
-  
-    if(bytes != -1) 
-    {
-    	if(bytes > 3)
-    	{
-	    	if((*filename)[bytes-4] == '.')
-	    	{
-	    		bytes = bytes-4;
-	    	}
-    	}
-		*filename = filename->substr(0, bytes) + ".xml"; 
+//TRACE("[mi]->convertTs2XmlName\r\n");
+	int bytes = filename->find(".ts");
+	bool result = false;
+
+	if(bytes != -1)
+	{
+		if(bytes > 3)
+		{
+			if((*filename)[bytes-4] == '.') // FileName.001.ts
+			{
+				bytes = bytes-4;
+			}
+			else if((*filename)[bytes-3] == '_') // fix for udrec support: FileName_01.ts , but why the hell do they use another format ????
+			{
+				bytes = bytes-3;
+			}// fix end
+		}
+		*filename = filename->substr(0, bytes) + ".xml";
 		result = true;
-    }
-    else // not a TS file, return!!!!! 
-    { 
-  		TRACE( "    not a TS file ");
-    }
- 
+	}
+	else // not a TS file, return!!!!!
+	{
+		TRACE( " not a TS file ");
+	}
+
 	return(result);
 }
-
 
 /************************************************************************
 
