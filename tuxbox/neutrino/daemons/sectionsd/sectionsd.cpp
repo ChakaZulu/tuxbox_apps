@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.207 2005/11/27 12:21:15 rasc Exp $
+//  $Id: sectionsd.cpp,v 1.208 2005/12/01 00:39:07 homar Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -201,14 +201,23 @@ inline void unlockEvents(void)
 
 inline int EITThreadsPause(void)
 {
-	return(	dmxEIT.pause() || 
+	return(	dmxEIT.pause() ||
 		dmxPPT.pause());
 }
 
 inline int EITThreadsUnPause(void)
 {
-	return(	dmxEIT.unpause() || 
+	return(	dmxEIT.unpause() ||
 		dmxPPT.unpause());
+}
+
+bool timeset = false;
+
+inline bool waitForTimeset(void)
+{
+	while(!timeset)
+		sleep(1);
+	return true;
 }
 
 static long long last_profile_call;
@@ -226,7 +235,6 @@ void showProfiling( std::string text )
 	last_profile_call = now;
 }
 
-bool timeset = false;
 static const SIevent nullEvt; // Null-Event
 
 //------------------------------------------------------------
@@ -515,9 +523,9 @@ static void addService(const SIservice &s)
 		snprintf(servicename, MAX_SIZE_SERVICENAME, "%04x",  sptr->service_id);
 //		servicename[sizeof(servicename) - 1] = 0;
 		sptr->serviceName = servicename;
-	} 
-	
-	mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));	
+	}
+
+	mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
 
 	if (sptr->nvods.size())
 		mySIservicesNVODorderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
@@ -553,19 +561,19 @@ static void addBouquetEntry(const SIbouquet &s)
  * communication with sectionsdclient:
  *
  */
- 
+
  //  SIsPtr;
 typedef boost::shared_ptr<class SInetwork>
 SInetworkPtr;
 
 typedef std::map<t_transponder_id, SInetworkPtr, std::less<t_transponder_id> > MySItranspondersOrderUniqueKey;
 static MySItranspondersOrderUniqueKey mySItranspondersOrderUniqueKey;
- 
+
 // Fuegt einen Tranponder in alle Mengen ein
 static void addTransponder(const SInetwork &s)
 {
 	SInetwork *nw = new SInetwork(s);
-	
+
 	if (!nw)
 	{
 		printf("[sectionsd::updateNetwork] new SInetwork failed.\n");
@@ -573,7 +581,7 @@ static void addTransponder(const SInetwork &s)
 	}
 
 	SInetworkPtr tpptr(nw);
-	
+
 	mySItranspondersOrderUniqueKey.insert(std::make_pair(tpptr->uniqueKey(), tpptr));
 
 }
@@ -930,18 +938,18 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 
 	for (MySIservicesOrderServiceName::iterator s = mySIservicesOrderServiceName.begin(); s != mySIservicesOrderServiceName.end(); s++)
 	{
-		count += 1 + snprintf(daten, MAX_SIZE_DATEN, 
+		count += 1 + snprintf(daten, MAX_SIZE_DATEN,
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 				" %hu %hhu %d %d %d %d %u ",
 			        (*s)->uniqueKey(),
 		        	(*s)->service_id, (*s)->serviceTyp,
 		        	(*s)->eitScheduleFlag(), (*s)->eitPresentFollowingFlag(),
 			        (*s)->runningStatus(), (*s)->freeCAmode(),
-			        (*s)->nvods.size()) 
+			        (*s)->nvods.size())
 			+ strlen((*s)->serviceName.c_str()) + 1
 			+ strlen((*s)->providerName.c_str()) + 1
 			+ 3; /* '\n' */
-		if (count < MAX_SIZE_SERVICELIST) 
+		if (count < MAX_SIZE_SERVICELIST)
 		{
 			strcat(serviceList, daten);
 			strcat(serviceList, "\n");
@@ -952,11 +960,11 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 		} else {
 			dprintf("warning: commandDumpAllServices: serviceList cut\n")
 			break;
-		}	
+		}
 	}
 
 	unlockServices();
-	if (strlen(serviceList) + 1 > MAX_SIZE_SERVICELIST) 
+	if (strlen(serviceList) + 1 > MAX_SIZE_SERVICELIST)
 		printf("warning: commandDumpAllServices: length=%d\n", strlen(serviceList) + 1);
 
 	struct sectionsd::msgResponseHeader msgResponse;
@@ -1056,13 +1064,13 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 						char strZeit[MAX_SIZE_STRTIME];
 						char strZeit2[MAX_SIZE_STRTIME];
 						struct tm *tmZeit;
-						
+
 						tmZeit = localtime(&(t->startzeit));
 						count += snprintf(strZeit, MAX_SIZE_STRTIME, "%012llx ", (*e)->uniqueKey());
 						count += snprintf(strZeit2, MAX_SIZE_STRTIME, "%02d.%02d %02d:%02d %u ",
 								tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
 						count += strlen((*e)->name.c_str()) + 1;
-						
+
 						if (count < MAX_SIZE_EVENTLIST) {
 							strcat(liste, strZeit);
 							strcat(liste, strZeit2);
@@ -1131,7 +1139,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 	struct sectionsd::msgResponseHeader responseHeader;
 
 	//printf("warning: [sectionsd] all events - response-size: 0x%x, count = %lx\n", liste - evtList, count);
-	if (liste - evtList > MAX_SIZE_EVENTLIST) 
+	if (liste - evtList > MAX_SIZE_EVENTLIST)
 		printf("warning: [sectionsd] all events - response-size: 0x%x\n", liste - evtList);
 	responseHeader.dataLength = liste - evtList;
 
@@ -1211,8 +1219,8 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 #define MAX_SIZE_STATI	2024
 	char stati[MAX_SIZE_STATI];
 
-	snprintf(stati, MAX_SIZE_STATI, 
-	        "$Id: sectionsd.cpp,v 1.207 2005/11/27 12:21:15 rasc Exp $\n"
+	snprintf(stati, MAX_SIZE_STATI,
+	        "$Id: sectionsd.cpp,v 1.208 2005/12/01 00:39:07 homar Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1325,7 +1333,7 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 
 	unlockEvents();
 	EITThreadsUnPause(); // -> unlock
-	
+
 	// response
 
 	struct sectionsd::msgResponseHeader pmResponse;
@@ -1571,10 +1579,10 @@ static bool 	messaging_WaitForServiceDesc = false;
 
 static void initSDTtables()
 {
-	//Init SDT Actual		
+	//Init SDT Actual
 	messaging_sdt_actual_sections_got_all = false;
 	for (int i = 0; i < MAX_SECTIONS; i++) messaging_sdt_actual_sections_so_far[i] = false;
-	
+
 	//Init MAX_BAT BAT - Tables. There can mere more than one!
 	for ( int i = 0; i < MAX_BAT; i++) {
 		for (int j = 0; j < MAX_SECTIONS; j++)
@@ -1599,7 +1607,7 @@ static void initSDTtables()
 static void initNITtables()
 {
 
-	//Init NIT Actual		
+	//Init NIT Actual
 	messaging_nit_actual_sections_got_all = false;
 	for (int i = 0; i < MAX_SECTIONS; i++) messaging_nit_actual_sections_so_far[i] = false;
 
@@ -1614,7 +1622,7 @@ static void initNITtables()
 
 
 	nit_backoff = true;
-	return; 
+	return;
 }
 
 static void commandserviceChanged(int connfd, char *data, const unsigned dataLength)
@@ -2014,7 +2022,7 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 // these 2 calls are made in sendEPG()
 //		unlockEvents();
 //		EITThreadsUnPause(); // -> unlock
-		
+
 	}
 	else
 	{
@@ -2226,7 +2234,7 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 
 static void sendEventList(int connfd, const unsigned char serviceTyp1, const unsigned char serviceTyp2 = 0, int sendServiceName = 1)
 {
-#define MAX_SIZE_BIGEVENTLIST	128*1024	
+#define MAX_SIZE_BIGEVENTLIST	128*1024
 	char *evtList = new char[MAX_SIZE_BIGEVENTLIST]; // 256kb..? should be enough and dataLength is unsigned short
 	long count=0;
 
@@ -2313,7 +2321,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 							dprintf("warning: sendEventList - eventlist cut\n")
 							break;
 						}
-											
+
 					} // if sendServiceName
 					else
 					{
@@ -2327,7 +2335,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 							count += strlen((*e)->text.c_str());
 						}
 						count++;
-						
+
 						if (count < MAX_SIZE_BIGEVENTLIST) {
 							*((event_id_t *)liste) = (*e)->uniqueKey();
 							liste += sizeof(event_id_t);
@@ -2378,7 +2386,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 
 	//printf("warning: [sectionsd] sendEventList - response-size: 0x%x, count = %lx\n", liste - evtList, count);
 	struct sectionsd::msgResponseHeader msgResponse;
-	if (liste - evtList > MAX_SIZE_BIGEVENTLIST) 
+	if (liste - evtList > MAX_SIZE_BIGEVENTLIST)
 		printf("warning: [sectionsd] sendEventList- response-size: 0x%x\n", liste - evtList);
 	msgResponse.dataLength = liste - evtList;
 	dprintf("[sectionsd] sendEventList - response-size: 0x%x\n", msgResponse.dataLength);
@@ -2745,7 +2753,7 @@ static void commandUnRegisterEventClient(int /*connfd*/, char *data, const unsig
 static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLength)
 {
 	unsigned short pid;
-	
+
 	if (dataLength != 2)
 		return ;
 
@@ -2760,7 +2768,7 @@ static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLeng
 		}
 	}
 	unlockMessaging();
-	
+
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
@@ -2777,7 +2785,7 @@ static void commandSetSectionsdScanMode(int connfd, char *data, const unsigned d
 
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
-	
+
 	unlockMessaging();
 
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
@@ -2907,12 +2915,12 @@ xmlNodePtr FindTransponder(xmlNodePtr provider, const t_original_network_id onid
 			return NULL;
 		}
 	}
-	
+
 	while (provider)
-	{		
+	{
 		dprintf("going to search dvb-%c provider %s\n", xmlGetName(provider)[0], xmlGetAttribute(provider, "name"));
 		xmlNodePtr transponder = provider->xmlChildrenNode;
-		
+
 		while (transponder)
 		{
 			if ((xmlGetNumericAttribute(transponder, "id", 16) == tsid) && (xmlGetNumericAttribute(transponder, "onid", 16) == onid))
@@ -2930,9 +2938,9 @@ xmlNodePtr GetProvider(xmlNodePtr provider, xmlNodePtr tp_node)
 	xmlNodePtr found = NULL;
 
 	while (provider && !found)
-	{		
+	{
 		xmlNodePtr transponder = provider->xmlChildrenNode;
-		
+
 		while (transponder && !found)
 		{
 			if ( (xmlGetNumericAttribute(transponder, "id", 16) == xmlGetNumericAttribute(tp_node, "id", 16)) &&
@@ -2951,7 +2959,7 @@ xmlNodePtr GetProvider(xmlNodePtr provider, xmlNodePtr tp_node)
 std::string UTF8_to_UTF8XML(const char * s)
 {
 	std::string r;
-	
+
 	while ((*s) != 0)
 	{
 		/* cf.
@@ -2961,7 +2969,7 @@ std::string UTF8_to_UTF8XML(const char * s)
 		 */
 		switch (*s)
 		{
-		case '<':           
+		case '<':
 			r += "&lt;";
 			break;
 		case '>':
@@ -2993,7 +3001,7 @@ void cp(char * from, char * to)
 
 static void write_xml_header(FILE * fd)
 {
-	fprintf(fd, 
+	fprintf(fd,
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		"<!--\n"
 		"  This file was automatically generated by the sectionsd.\n"
@@ -3025,7 +3033,7 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 	char buffer[256] = "";
 	bool tp_existed = false;
 	if (is_sat) {
-		snprintf(tp_str, MAX_SIZE_TP_STR, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n", 
+		snprintf(tp_str, MAX_SIZE_TP_STR, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
 				(t_transport_stream_id) xmlGetNumericAttribute(tp_node, "id", 16),
 				(t_original_network_id) xmlGetNumericAttribute(tp_node, "onid", 16),
 				(uint32_t) xmlGetNumericAttribute(tp_node, "frequency", 0),
@@ -3035,7 +3043,7 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 				(uint8_t) xmlGetNumericAttribute(tp_node, "polarization", 0));
 	}
 	else {
-		snprintf(tp_str, MAX_SIZE_TP_STR, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n", 
+		snprintf(tp_str, MAX_SIZE_TP_STR, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
 				(t_transport_stream_id) xmlGetNumericAttribute(tp_node, "id", 16),
 				(t_original_network_id) xmlGetNumericAttribute(tp_node, "onid", 16),
 				(uint32_t) xmlGetNumericAttribute(tp_node, "frequency", 0),
@@ -3044,27 +3052,27 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 				(fe_code_rate_t) xmlGetNumericAttribute(tp_node, "fec_inner", 0),
 				(fe_modulation_t) xmlGetNumericAttribute(tp_node, "modulation", 0));
 	}
-	
+
 	if (!copy)
 		fprintf(dst, tp_str);
 	else {
 		if (!feof(src)) {
 			fgets(buffer, 255, src);
-			
+
 			if (is_sat) {
 				//find tp in currentservices.xml
 				while( (!feof(src)) && (strcmp(buffer, "\t</sat>\n") != 0) && (strcmp(buffer, tp_str) != 0) )
 				{
 					fprintf(dst, buffer);
-					fgets(buffer, 255, src);				
+					fgets(buffer, 255, src);
 				}
 			}
 			else {
 				while( (!feof(src)) && (strcmp(buffer, "\t</cable>\n") != 0) && (strcmp(buffer, tp_str) != 0) )
 				{
 					fprintf(dst, buffer);
-					fgets(buffer, 255, src);				
-				}			
+					fgets(buffer, 255, src);
+				}
 			}
 			//If the Transponder alredy existed. This isn't reached at the moment because if the transponder
 			//didn't exist we don't call the update function. But maybe this is to be changed:
@@ -3077,7 +3085,7 @@ static bool write_xml_transponder(FILE *src, FILE *dst, const xmlNodePtr tp_node
 					fgets(buffer, 255, src);
 				}
 			}
-		}	
+		}
 	}
 	return tp_existed;
 }
@@ -3091,15 +3099,15 @@ static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, 
 #define MAX_SIZE_PROV_STR	256
 	char prov_str[MAX_SIZE_PROV_STR] = "";
 	char buffer[256] = "";
-	std::string frontendType; 
+	std::string frontendType;
 	std::string provider_name;
 	std::string diseqc;
 	bool is_sat = false;
 	int position = 0;
-	
+
 	frontendType = xmlGetName(provider);
 	provider_name = xmlGetAttribute(provider, "name");
-	
+
 	if (!strcmp(frontendType.c_str(), "sat")) {
 		diseqc = xmlGetAttribute(provider, "diseqc");
 		position = xmlGetSignedNumericAttribute(provider, "position", 16);
@@ -3108,8 +3116,8 @@ static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, 
 				provider_name.c_str(), diseqc.c_str());
 		else {
 			//east_west = xmlGetNumericAttribute(provider, "east_west", 16);
-			snprintf(prov_str, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", 
-				frontendType.c_str(), 
+			snprintf(prov_str, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n",
+				frontendType.c_str(),
 				provider_name.c_str(),
 				position,
 				//east_west,
@@ -3121,7 +3129,7 @@ static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, 
 		snprintf(prov_str, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
 		is_sat = false;
 	}
-	
+
 	if (!copy)
 		fprintf(dst, prov_str);
 	else {
@@ -3141,7 +3149,7 @@ static bool write_xml_provider(FILE *src, FILE *dst, const xmlNodePtr provider, 
 				fprintf(dst, buffer);
 		}
 	}
-	
+
 	return is_sat;
 }
 
@@ -3152,12 +3160,12 @@ static int get_action(const xmlNodePtr tp_node, const MySIservicesOrderUniqueKey
 	//And now node points to transponders channels first entry
 	xmlNodePtr node = tp_node->xmlChildrenNode;
 	std::string name;
-	
-	if ( ((s->second->serviceTyp == 1) && (scanType == 1)) || 
-	     ((s->second->serviceTyp == 2) && (scanType == 2)) || 
-	     (((s->second->serviceTyp == 1) || (s->second->serviceTyp == 2)) && (scanType == 0)) || 
+
+	if ( ((s->second->serviceTyp == 1) && (scanType == 1)) ||
+	     ((s->second->serviceTyp == 2) && (scanType == 2)) ||
+	     (((s->second->serviceTyp == 1) || (s->second->serviceTyp == 2)) && (scanType == 0)) ||
 	     (scanType == 3) ) {
-	
+
 		while (xmlGetNextOccurence(node, "channel") != NULL) {
 			if (s->second->service_id == xmlGetNumericAttribute(node, "service_id", 16)) {
 				name = xmlGetAttribute(node, "name");
@@ -3165,7 +3173,7 @@ static int get_action(const xmlNodePtr tp_node, const MySIservicesOrderUniqueKey
 				     (!strcmp(s->second->serviceName.c_str(), name.c_str())) ) {
 				     	dprintf("[sectionsd] Service %s okay\n", name.c_str());
 					return 0;	//service okay
-				}	
+				}
 				else {
 					if (overwrite) {
 						dprintf("[sectionsd] Replacing Service %s\n", name.c_str());
@@ -3195,22 +3203,22 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 	bool newprov = false;
 	bool is_sat = false;
 	bool tp_existed = false;
-	
+
 	std::string name;
-	
+
 	FILE * src = NULL;
 	FILE * dst = NULL;
 	char buffer[256] = "";
-	
+
 //	lockServices();
 	for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s != mySIservicesOrderUniqueKey.end(); s++)
 	{
-		
-		if ( (s->second->transport_stream_id == xmlGetNumericAttribute(tp_node, "id", 16)) && 
+
+		if ( (s->second->transport_stream_id == xmlGetNumericAttribute(tp_node, "id", 16)) &&
 			(s->second->original_network_id == xmlGetNumericAttribute(tp_node, "onid", 16)) )
 		{
 			int action = get_action(tp_node, s, scanType, overwrite);
-			
+
 			if (action > 0) {
 				if (!is_needed) {
 					is_needed = true;
@@ -3249,7 +3257,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 						"add",
 						s->second->service_id,
 						UTF8_to_UTF8XML(s->second->serviceName.c_str()).c_str(),
-						s->second->serviceTyp);	
+						s->second->serviceTyp);
 						break;
 					case 2:
 						fprintf(dst,
@@ -3257,7 +3265,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 						"replace",
 						s->second->service_id,
 						UTF8_to_UTF8XML(s->second->serviceName.c_str()).c_str(),
-						s->second->serviceTyp);	
+						s->second->serviceTyp);
 						break;
 					default:
 						break;
@@ -3271,16 +3279,16 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 	//It is pretty much the same as the first loop. Check there. Later: merge them together?
 	if (overwrite) {
 		xmlNodePtr node = tp_node->xmlChildrenNode;
-	
+
 		while (xmlGetNextOccurence(node, "channel") != NULL) {
-		
+
 			MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin();
-			while ( (s != mySIservicesOrderUniqueKey.end()) && 
+			while ( (s != mySIservicesOrderUniqueKey.end()) &&
 				(s->second->service_id != xmlGetNumericAttribute(node, "service_id", 16)) )
 				s++;
 			if (s == mySIservicesOrderUniqueKey.end()) {
 				if (!is_needed) {
-				
+
 					is_needed = true;
 					//create new currentservices
 					if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
@@ -3292,7 +3300,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 						write_xml_header(dst);
 						is_sat = write_xml_provider(src, dst, provider, false);
 					} else {
-						
+
 						is_sat = write_xml_provider(src, dst, provider, true);
 						if (feof(src)) {
 							newprov = true;
@@ -3303,7 +3311,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 					write_xml_transponder(src, dst, tp_node, is_sat, false);
 				}
 				name = xmlGetAttribute(node, "name");
-				
+
 				dprintf("[sectionsd] Removing Service %s\n", name.c_str());
 				fprintf(dst,
 					"\t\t\t<channel action=\"%s\" service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
@@ -3313,19 +3321,19 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 					xmlGetNumericAttribute(node, "service_type", 16));
 			}
 			node = node->xmlNextNode;
-		}	
+		}
 	}
-		
+
 //	unlockServices();
 
 	//If we chnged some services write the closing tags.
 	if (is_needed) {
 
 		fprintf(dst,"\t\t</transponder>\n");
-	
+
 		if (!tp_existed)
-			write_xml_provend(dst, is_sat);			
-		
+			write_xml_provend(dst, is_sat);
+
 		if (newprov) {
 			write_xml_footer(dst);
 		}
@@ -3335,13 +3343,13 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 			{
 				fprintf(dst, buffer);
 				fgets(buffer, 255, src);
-			}	
+			}
 			fclose(src);
 		}
 
 		fclose(dst);
 	}
-		
+
 	return is_needed;
 }
 
@@ -3363,7 +3371,7 @@ xmlNodePtr getProviderFromSatellitesXML(xmlNodePtr node, const int position) {
 	return NULL;
 }
 
-xmlNodePtr getProviderbyName(xmlNodePtr current_provider, xmlNodePtr provider) {	
+xmlNodePtr getProviderbyName(xmlNodePtr current_provider, xmlNodePtr provider) {
 	while (current_provider) {
 		if (!strcmp(xmlGetAttribute(current_provider, "name"), xmlGetAttribute(provider, "name")))
 			return current_provider;
@@ -3377,7 +3385,7 @@ xmlNodePtr findTransponderFromProv(xmlNodePtr transponder, const t_original_netw
 		if ((xmlGetNumericAttribute(transponder, "onid", 16) == onid) && (xmlGetNumericAttribute(transponder, "id", 16) == tsid))
 			return transponder;
 		transponder = transponder->xmlNextNode;
-	}		
+	}
 	return NULL;
 }
 
@@ -3389,51 +3397,51 @@ static bool updateTP(const t_original_network_id onid, const t_transport_stream_
 	FILE * tmp = NULL;
 	xmlNodePtr provider = NULL;
 	xmlNodePtr current_provider = NULL;
-	
+
 	if (service_parser == NULL)
 		return false;
-			
+
 	xmlNodePtr services_tp = FindTransponder(xmlDocGetRootElement(service_parser)->xmlChildrenNode, onid, tsid);
-	
+
 	if (services_tp)
 	{
 		provider = GetProvider(xmlDocGetRootElement(service_parser)->xmlChildrenNode, services_tp);
-	}	
-	
+	}
+
 	xmlDocPtr current_parser = NULL;
 	tmp = fopen(CURRENTSERVICES_XML, "r");
 	if (tmp) {
 		fclose(tmp);
 		current_parser= parseXmlFile(CURRENTSERVICES_XML);
 	}
-			 
+
 	xmlNodePtr current_tp = NULL;
-		
+
 	if (current_parser != NULL) {
 		current_tp = FindTransponder(xmlDocGetRootElement(current_parser)->xmlChildrenNode, onid, tsid);
 		if (provider) {
 			//printf("getProvbyname\n");
 			current_provider = getProviderbyName(xmlDocGetRootElement(current_parser)->xmlChildrenNode, provider);
-				
+
 		}
 		else {
 			if (current_tp)
 				current_provider = GetProvider(xmlDocGetRootElement(current_parser)->xmlChildrenNode, current_tp);
 		}
 	}
-			
+
 	if (!current_tp) {
 		if (provider) {
 			if (current_provider) {
 				//printf("update with current\n");
 				if (!strcmp(xmlGetAttribute(current_provider, "name"), xmlGetAttribute(provider, "name")))
 					need_update = updateCurrentXML(current_provider, services_tp, overwrite, scanType, false);
-					
+
 			}
 			else {
 				//printf("update with prov\n");
 				need_update = updateCurrentXML(provider, services_tp, overwrite, scanType, false);
-				
+
 			}
 		}
 		else
@@ -3442,27 +3450,27 @@ static bool updateTP(const t_original_network_id onid, const t_transport_stream_
 	else {
 		if (!provider) {
 			//printf("update with current / current\n");
-		
+
 			need_update = updateCurrentXML(current_provider, current_tp, overwrite, scanType, false);
-			
+
 		}
 		else
 			dprintf("[sectionsd] No Update needed for Transponder with ONID: %04x TSID: %04x!\n", onid, tsid);
 	}
 	if (current_parser != NULL)
 		xmlFreeDoc(current_parser);
-	
+
 	xmlFreeDoc(service_parser);
-	
+
 	if (need_update)
 	{
 		cp(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
 		unlink(CURRENTSERVICES_TMP);
 
-		dprintf("[sectionsd] We updated Transponder ONID: %04x TSID: %04x in currentservices.xml!\n", onid, tsid);	
+		dprintf("[sectionsd] We updated Transponder ONID: %04x TSID: %04x in currentservices.xml!\n", onid, tsid);
 
 	} else
-		dprintf("[sectionsd] No new services found!\n");	
+		dprintf("[sectionsd] No new services found!\n");
 //printf("Finishing updateTP\n");
 	return need_update;
 }
@@ -3536,33 +3544,33 @@ static void writeTransponderFromDescriptor(FILE *dst, const t_original_network_i
 		(fe_code_rate_t) getCodeRate(cdd->fec_inner & 0x0F),
 		(fe_modulation_t) getModulation(cdd->modulation));
 	}
-	fprintf(dst,"\t\t</transponder>\n");	
+	fprintf(dst,"\t\t</transponder>\n");
 }
 
-static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, const t_transport_stream_id tsid, 
+static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, const t_transport_stream_id tsid,
 				const char *ddp, const int position)
-{	
+{
 	FILE * src = NULL;
 	FILE * dst = NULL;
 	bool is_new = false;
 	bool is_sat = false;
-	
+
 #define MAX_SIZE_PROV_STR	256
 	char prov_str_neu[MAX_SIZE_PROV_STR] = "";
 	char buffer[256] = "";
-	
-	std::string frontendType; 
+
+	std::string frontendType;
 	std::string provider_name;
-	std::string diseqc;		
-		
+	std::string diseqc;
+
 	if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
 		dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
 		return;
 	}
-	
+
 	frontendType = xmlGetName(provider);
 	provider_name = xmlGetAttribute(provider, "name");
-	
+
 	if (!strcmp(frontendType.c_str(), "sat")) {
 		diseqc = xmlGetAttribute(provider, "diseqc");
 		snprintf(prov_str_neu, MAX_SIZE_PROV_STR, "\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(),
@@ -3582,7 +3590,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 			writeTransponderFromDescriptor(dst, onid, tsid, ddp, is_sat);
 		write_xml_provend(dst, is_sat);
 		write_xml_footer(dst);
-	} 
+	}
 	else {
 		if (!feof(src)) {
 			fgets(buffer, 255, src);
@@ -3595,7 +3603,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 			if (strcmp(buffer, prov_str_neu) != 0)
 				fprintf(dst, prov_str_neu);
 			if (ddp != NULL) {
-				while( (!feof(src)) && (strcmp(buffer, "</zapit>\n") != 0) && 
+				while( (!feof(src)) && (strcmp(buffer, "</zapit>\n") != 0) &&
 					(strcmp(buffer, "\t</sat>\n") != 0) && (strcmp(buffer, "\t</cable>\n")) )
 				{
 					fprintf(dst, buffer);
@@ -3613,14 +3621,14 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 				fgets(buffer, 255, src);
 			}
 		}
-		
+
 		fclose(src);
 	}
 	fclose(dst);
-	
+
 	cp(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
 	unlink(CURRENTSERVICES_TMP);
-	
+
 	return;
 }
 
@@ -3628,28 +3636,28 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 {
 	t_transport_stream_id tsid;
 	t_original_network_id onid;
-	
+
 	int position = 0;
 	struct satellite_delivery_descriptor *sdd;
 	const char *ddp;
-	
+
 	bool need_update = false;
 	bool needs_fix = false;
-	
+
 	xmlNodePtr provider;
 	xmlNodePtr tp;
-	
+
 	FILE * tmp;
-	
+
 	xmlDocPtr service_parser = parseXmlFile(SERVICES_XML);
-	
+
 	if (service_parser == NULL)
 		return false;
 
 	xmlDocPtr current_parser = NULL;
 	xmlNodePtr current_tp = NULL;
 	xmlNodePtr current_provider = NULL;
-	
+
 	tmp = fopen(CURRENTSERVICES_XML, "r");
 	if (tmp) {
 		fclose(tmp);
@@ -3657,15 +3665,15 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 	}
 	// go through all transpopnders currently cached by neutrino - I won't need them after this loop. They COULD be cleared. Should they?
      	for (MySItranspondersOrderUniqueKey::iterator s = mySItranspondersOrderUniqueKey.begin(); s != mySItranspondersOrderUniqueKey.end(); s++)
-	{	
+	{
 		if (s->second->network_id == network_id) {
 			needs_fix = false;
 			tsid = s->second->transport_stream_id;
 			onid = s->second->original_network_id;
 			ddp = &s->second->delivery_descriptor[0];
-			
+
 			//printf("Descriptor_type: %02x\n", s->second->delivery_type);
-			
+
 			switch (s->second->delivery_type) {
 				case 0x43:
 					sdd = (struct satellite_delivery_descriptor *)ddp;
@@ -3682,7 +3690,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 					provider = NULL;
 					break;
 			}
-      
+
 			//provider with satellite position does not exist in services.xml
 			if (!provider) {
 				provider = getProviderFromSatellitesXML(xmlDocGetRootElement(service_parser)->xmlChildrenNode, position);
@@ -3691,7 +3699,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 			}
 			//provider also not found in satellites.xml...
 			if (!provider) {
-				if (current_parser != NULL) {	
+				if (current_parser != NULL) {
 		 			provider = getProvbyPosition(xmlDocGetRootElement(current_parser)->xmlChildrenNode, position);
 				}
 			}
@@ -3705,14 +3713,14 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 				if (!tp) {
 					dprintf("[sectionsd::updateNetwork] Transponder ONID: %04x TSID: %04x not found.\n", onid, tsid);
 				 	if (current_parser != NULL) {
-					
+
 						switch (s->second->delivery_type) {
 							 case 0x43: //satellite descriptor
-								current_provider = 
+								current_provider =
 								getProvbyPosition(xmlDocGetRootElement(current_parser)->xmlChildrenNode,
 													position);
 								break;
-							case 0x44: //cable						
+							case 0x44: //cable
 								current_provider = xmlDocGetRootElement(current_parser)->xmlChildrenNode;
 								break;
 							default:
@@ -3727,7 +3735,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 						xmlFreeDoc(current_parser);
 						current_parser= parseXmlFile(CURRENTSERVICES_XML);
 					}
-					
+
 				} else {
 					dprintf("[sectionsd::updateNetwork] Transponder ONID: %04x TSID: %04x found.\n", onid, tsid);
 					if ( (is_actual) && (needs_fix) ) {
@@ -3738,7 +3746,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 							current_parser= parseXmlFile(CURRENTSERVICES_XML);
 						}
 						else {
-					 		current_provider = 
+					 		current_provider =
 								getProvbyPosition(xmlDocGetRootElement(current_parser)->xmlChildrenNode,
 													position);
 							if (!current_provider) {
@@ -3755,7 +3763,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 	if (current_parser != NULL)
 		xmlFreeDoc(current_parser);
 	xmlFreeDoc(service_parser);
-	
+
 	return need_update;
 }
 
@@ -3776,7 +3784,7 @@ static int get_sdt_slot(t_transponder_id tid)
 {
 	for (int i = 0; i < MAX_CONCURRENT_OTHER_SDT; i++) {
 		//printf("1 pass trying to continue TID: %08x\n", messaging_sdt_other_tid[i]);
-	
+
 		if (messaging_sdt_other_tid[i] == tid) {
 			messaging_sdt_other_tid[i] = tid;
 			return i;
@@ -3784,10 +3792,10 @@ static int get_sdt_slot(t_transponder_id tid)
 	}
 	for (int i = 0; i < MAX_CONCURRENT_OTHER_SDT; i++) {
 		//printf("2 pass finding new slot for TID: %08x\n", messaging_sdt_other_tid[i]);
-		
+
 		if (messaging_sdt_other_tid[i] == 0) {
 			messaging_sdt_other_tid[i] = tid;
-			return i;		
+			return i;
 		}
 	}
 	return -1;
@@ -3815,24 +3823,24 @@ static void tid_complete(t_transponder_id tid)
 		messaging_sdt_other_sections_got_all[0] = tid;
 		printf("[sectionsd tid_complete] Too many completed SDTs. Try increasing MAX_OTHER_SDT!\n");
 	}
-		
+
 }
 
 //little helper for nit-thread
 static int get_nit_slot(t_network_id nid)
 {
 	for (int i = 0; i < MAX_CONCURRENT_OTHER_NIT; i++) {
-	
+
 		if (messaging_nit_other_nid[i] == nid) {
 			messaging_nit_other_nid[i] = nid;
 			return i;
 		}
 	}
 	for (int i = 0; i < MAX_CONCURRENT_OTHER_NIT; i++) {
-		
+
 		if (messaging_nit_other_nid[i] == 0) {
 			messaging_nit_other_nid[i] = nid;
-			return i;		
+			return i;
 		}
 	}
 	return -1;
@@ -3860,7 +3868,7 @@ static void nid_complete(t_network_id nid)
 		messaging_nit_other_sections_got_all[0] = nid;
 		printf("[sectionsd nid_complete] Too many completed NITs. Try increasing MAX_OTHER_NIT!\n");
 	}
-		
+
 }
 
 //This has to be rewritten. I don't know how neutrino accesses its conf files...
@@ -3868,16 +3876,16 @@ static int getscanType()
 {
 	FILE * scanconf = NULL;
 	char buffer[256] = "";
-	
+
 	if (!(scanconf = fopen(NEUTRINO_SCAN_SETTINGS_FILE, "r"))) {
 		dprintf("unable to open %s for reading", NEUTRINO_SCAN_SETTINGS_FILE);
 		return 3;
 	}
-	
+
 	while ( (!feof(scanconf)) && (strncmp(buffer, "scanType=", 9) != 0) )
 		fgets(buffer, 255, scanconf);
 	fclose(scanconf);
-	
+
 	if (!strncmp(buffer, "scanType=", 9))
 	{
 		switch (buffer[9]) {
@@ -3922,7 +3930,7 @@ static void *nitThread(void *)
 		for (;;)
 		{
 			time_t zeit = time(NULL);
-			
+
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
 				dmxNIT.stop(); // -> lock
@@ -3934,12 +3942,12 @@ static void *nitThread(void *)
 				lastData = zeit;
 			}
 
-			if (timeset)
+			if (waitForTimeset())
 			{
 				// Nur wenn ne richtige Uhrzeit da ist
 
 				if ( (zeit > lastData + TIME_NIT_NONEWDATA) || nit_backoff )
-				{					
+				{
 					struct timespec abs_wait;
 
 					struct timeval now;
@@ -3957,14 +3965,14 @@ static void *nitThread(void *)
 						sdt_backoff = false;
 						dmxSDT.change( 0 );
 
-					}	
+					}
 					dmxNIT.real_pause();
 					pthread_mutex_lock( &dmxNIT.start_stop_mutex );
-										
+
 					dprintf("dmxNIT: going to sleep...\n");
-										
+
 					nit_backoff = false;
-					
+
 					int rs = pthread_cond_timedwait( &dmxNIT.change_cond, &dmxNIT.start_stop_mutex, &abs_wait );
 
 					if (rs == ETIMEDOUT)
@@ -3979,8 +3987,8 @@ static void *nitThread(void *)
 					else if (rs == 0)
 					{
 						dprintf("dmxNIT: waking up again - requested from .change()\n");
-						pthread_mutex_unlock( &dmxNIT.start_stop_mutex );						
-#ifdef PAUSE_EQUALS_STOP	
+						pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
+#ifdef PAUSE_EQUALS_STOP
 						dmxNIT.real_unpause();
 #endif
 					}
@@ -4007,110 +4015,110 @@ static void *nitThread(void *)
 								((SI_section_header*)buf)->section_length_lo;
 				// copy the header
 				memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
-			
+
 				switch (header.table_id)
 				{
-				
+
 				case 0x40:
-					
-					if ((header.current_next_indicator) && (!dmxNIT.pauseCounter))					
-					{									
-						// Wir wollen nur aktuelle sections						
+
+					if ((header.current_next_indicator) && (!dmxNIT.pauseCounter))
+					{
+						// Wir wollen nur aktuelle sections
 
 						lockMessaging();
 
 						if ( (!messaging_nit_actual_sections_got_all) &&
 							(!messaging_nit_actual_sections_so_far[header.section_number]) )
 						{
-							lastData = zeit;	
-					
+							lastData = zeit;
+
 							dprintf("[nitThread] adding transponders [table 0x%x] (begin)\n", header.table_id);
 
 							SIsectionNIT nit(SIsection(sizeof(header) + section_length - 5, buf));
 
-							
+
 							for (SInetworks::iterator s = nit.networks().begin(); s != nit.networks().end(); s++)
 								addTransponder(*s);
-	
+
 
 							dprintf("[nitThread] added %d transponders (end)\n",  nit.networks().size());
 							//printf("current\n");
-		
+
 							messaging_nit_actual_sections_so_far[header.section_number] = true;
 							messaging_nit_actual_sections_got_all = true;
-					
+
 							for (int i = 0; i <= (int) header.last_section_number; i++)
 							{
 								if (!messaging_nit_actual_sections_so_far[i])
 									messaging_nit_actual_sections_got_all = false;
 							}
-					
+
 							// überprüfen, ob nächster Filter gewünscht :)
 							if ( messaging_nit_actual_sections_got_all )
 							{
 								if (auto_scanning > 0) {
-									network_id = (header.table_id_extension_hi) << 8 | 
+									network_id = (header.table_id_extension_hi) << 8 |
 											header.table_id_extension_lo;
 									updateNetwork(network_id, true);
 								}
-							}	
+							}
 						}
 						unlockMessaging();
-	
-					} 
+
+					}
 					break;
 				case 0x41:
-					
-					if ((header.current_next_indicator) && (!dmxNIT.pauseCounter))					
-					{									
-						// Wir wollen nur aktuelle sections						
+
+					if ((header.current_next_indicator) && (!dmxNIT.pauseCounter))
+					{
+						// Wir wollen nur aktuelle sections
 
 						network_id = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
 
 						lockMessaging();
-						
+
 						if (!is_other_nit_ready(network_id)) {
 							current_other_nit = get_nit_slot(network_id);
-						
+
 							if ( current_other_nit != -1) {
 								//We found a free slot and start or continue to collect sections.
 								if (!messaging_nit_other_sections_so_far[current_other_nit] [header.section_number])
 								{
-									lastData = zeit;	
-					
+									lastData = zeit;
+
 									dprintf("[nitThread] adding transponders [table 0x%x] (begin)\n",
 									header.table_id);
 
 									SIsectionNIT nit(SIsection(sizeof(header) + section_length - 5, buf));
 
-							
+
 									for (SInetworks::iterator s = nit.networks().begin(); s !=
 									 nit.networks().end(); s++)
 										addTransponder(*s);
-	
+
 
 									dprintf("[nitThread] added %d transponders (end)\n",  nit.networks().size());
 									//printf("other\n");
-									
+
 									messaging_nit_other_sections_so_far[current_other_nit][header.section_number] = true;
-									
+
 									is_complete = true;
-					
+
 									for (int i = 0; i <= (int) header.last_section_number; i++)
 									{
 										if (!messaging_nit_other_sections_so_far[current_other_nit] [i])
 											is_complete = false;
 									}
-		
+
 									if ( is_complete )
 									{
 										nid_complete(network_id);
-									
+
 										dprintf("[nitThread] Other NIT with ID: 0x%x complete\n",network_id);
-										
+
 										if (auto_scanning > 0)
 											updateNetwork(network_id, false);
-										
+
 																												for ( int i = 0; i < MAX_SECTIONS; i++)
 											messaging_nit_other_sections_so_far[current_other_nit] [i] = false;
 										messaging_nit_other_nid[current_other_nit] = 0;
@@ -4119,11 +4127,11 @@ static void *nitThread(void *)
 							}
 							else {
 								printf("[nitThread] No free slot for Network ID: 0x%x Consider increasing MAX_CONCURRENT_NIT_OTHER\n", network_id);
-							}	
+							}
 						}
 						unlockMessaging();
-	
-					} 
+
+					}
 					break;
 				default:
 					break;
@@ -4162,7 +4170,7 @@ static void *sdtThread(void *)
 	int scanType = 3;	//deafault scan all
 	unsigned short current_tsid;
 	t_bouquet_id bouquet_id;
-	
+
 
 	dmxSDT.addfilter(0x42, 0xf3 );		//SDT actual = 0x42 + SDT other = 0x46 + BAT = 0x4A
 
@@ -4182,7 +4190,7 @@ static void *sdtThread(void *)
 		for (;;)
 		{
 			time_t zeit = time(NULL);
-			
+
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
 				dmxSDT.stop(); // -> lock
@@ -4194,12 +4202,12 @@ static void *sdtThread(void *)
 				lastData = zeit;
 			}
 
-			if (timeset)
+			if (waitForTimeset())
 			{
 				// Nur wenn ne richtige Uhrzeit da ist
 
 				if ( (zeit > lastData + TIME_SDT_NONEWDATA) || sdt_backoff )
-				{					
+				{
 					struct timespec abs_wait;
 
 					struct timeval now;
@@ -4217,14 +4225,14 @@ static void *sdtThread(void *)
 						if ( (new_services) && (auto_scanning == 1) )
 							eventServer->sendEvent(CSectionsdClient::EVT_SERVICES_UPDATE,
 											CEventServer::INITID_SECTIONSD);
-					}	
+					}
 					dmxSDT.real_pause();
 					pthread_mutex_lock( &dmxSDT.start_stop_mutex );
-										
+
 					dprintf("dmxSDT: going to sleep...\n");
-					
+
 					sdt_backoff = false;
-					
+
 					int rs = pthread_cond_timedwait( &dmxSDT.change_cond, &dmxSDT.start_stop_mutex, &abs_wait );
 
 					if (rs == ETIMEDOUT)
@@ -4239,8 +4247,8 @@ static void *sdtThread(void *)
 					else if (rs == 0)
 					{
 						dprintf("dmxSDT: waking up again - requested from .change()\n");
-						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );						
-#ifdef PAUSE_EQUALS_STOP	
+						pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
+#ifdef PAUSE_EQUALS_STOP
 						dmxSDT.real_unpause();
 #endif
 					}
@@ -4261,7 +4269,7 @@ static void *sdtThread(void *)
 				buf = dmxSDT.getSection(timeoutInMSeconds, timeoutsDMX);
 
 				if (buf == NULL)
-					continue;	
+					continue;
 
 				unsigned short current_onid;
 
@@ -4269,16 +4277,16 @@ static void *sdtThread(void *)
 								((SI_section_header*)buf)->section_length_lo;
 				// copy the header
 				memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
-			
+
 				switch (header.table_id)
 				{
-				
+
 				case 0x42:
-			
+
 					memcpy(&current_onid, buf+8, sizeof(current_onid)); //extremly dirty - section_header_SDT doesn't work.
-			
-					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))					
-					{									
+
+					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
+					{
 						// Wir wollen nur aktuelle sections
 
 						lockMessaging();
@@ -4286,12 +4294,12 @@ static void *sdtThread(void *)
 						if ( (!messaging_sdt_actual_sections_got_all) &&
 							(!messaging_sdt_actual_sections_so_far[header.section_number]) )
 						{
-							lastData = zeit;	
-					
+							lastData = zeit;
+
 							dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
 
 							SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
-	
+
 							lockServices();
 
 							for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
@@ -4300,12 +4308,12 @@ static void *sdtThread(void *)
 							unlockServices();
 
 							dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
-		
+
 							if ( header.table_id == 0x42)
 							{
 								messaging_sdt_actual_sections_so_far[header.section_number] = true;
 								messaging_sdt_actual_sections_got_all = true;
-					
+
 								for (int i = 0; i <= (int) header.last_section_number; i++)
 								{
 									if (!messaging_sdt_actual_sections_so_far[i])
@@ -4313,7 +4321,7 @@ static void *sdtThread(void *)
 								}
 
 							}
-	
+
 							// überprüfen, ob nächster Filter gewünscht :)
 							if ( messaging_sdt_actual_sections_got_all )
 							{
@@ -4321,18 +4329,18 @@ static void *sdtThread(void *)
 								current_tsid = (unsigned short)
 										(((unsigned long long) header.table_id_extension_hi) << 8) +
 						  	  			 ((unsigned long long) header.table_id_extension_lo);
-							
-								dprintf("[sdtThread] Actual SDT complete for ONID: 0x%x TSID: 0x%x\n", 
+
+								dprintf("[sdtThread] Actual SDT complete for ONID: 0x%x TSID: 0x%x\n",
 									current_onid, current_tsid);
-							
+
 								tid = CREATE_TRANSPONDER_ID_FROM_ORIGINALNETWORK_TRANSPORTSTREAM_ID(current_onid,
 																    current_tsid);
-								if (auto_scanning > 0) 
-									
+								if (auto_scanning > 0)
+
 									if ( updateTP(current_onid, current_tsid, scanType, true) )
 										new_services = true;
-										
-							
+
+
 								//Nirvana: I don't know what this is for. Ask the event guys...
 								if ( ( messaging_WaitForServiceDesc ) && ( dmxSDT.filter_index == 0 ) )
 								{
@@ -4349,44 +4357,44 @@ static void *sdtThread(void *)
 
 									messaging_WaitForServiceDesc = false;
 								}
-							}	
+							}
 						}
 
 						unlockMessaging();
-	
-					} 
+
+					}
 					break;
 				case 0x46:
-					
+
 					memcpy(&current_onid, buf+8, sizeof(current_onid)); //extremly dirty - section_header_SDT doesn't work.
-			
-					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))					
-					{									
+
+					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
+					{
 						// Wir wollen nur aktuelle sections
 
 						lockMessaging();
-						
+
 						current_tsid = (unsigned short)
 								(((unsigned long long) header.table_id_extension_hi) << 8) +
 								 ((unsigned long long) header.table_id_extension_lo);
-						
+
 						tid = CREATE_TRANSPONDER_ID_FROM_ORIGINALNETWORK_TRANSPORTSTREAM_ID(current_onid,
 															      current_tsid);
-														
+
 						if (!is_other_sdt_ready(tid)) {
 							current_other_sdt = get_sdt_slot(tid);
-						
+
 							if ( current_other_sdt != -1) {
 								//We found a free slot and start or continue to collect sections.
 								if (!messaging_sdt_other_sections_so_far[current_other_sdt] [header.section_number])
 								{
 									//The transponder is not finished. And it's a new section.
-									lastData = zeit;	
-					
+									lastData = zeit;
+
 									dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
 
 									SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
-		
+
 									lockServices();
 
 									for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
@@ -4395,61 +4403,61 @@ static void *sdtThread(void *)
 									unlockServices();
 
 									dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
-							
+
 									messaging_sdt_other_sections_so_far[current_other_sdt][header.section_number] = true;
 									//messaging_sdt_other_sections_got_all[current_other_sdt] = true;
 									bool is_complete = true;
-					
+
 									for (int i = 0; i <= (int) header.last_section_number; i++)
 									{
 										if (!messaging_sdt_other_sections_so_far[current_other_sdt] [i])
 											is_complete = false;
-									}					
-							
+									}
+
 									if ( is_complete )
 									{
 										tid_complete(tid);
-									
+
 										dprintf("[sdtThread] Other SDT with ID: 0x%x complete\n",tid);
-									
-										if (auto_scanning > 0) 
-									
+
+										if (auto_scanning > 0)
+
 											if ( updateTP(current_onid, current_tsid, scanType, false) )
 												new_services = true;
-									
+
 										for ( int i = 0; i < MAX_SECTIONS; i++)
 											messaging_sdt_other_sections_so_far[current_other_sdt] [i] = false;
 										messaging_sdt_other_tid[current_other_sdt] = 0;
 									}
-														
+
 								}
 							}
 							else {
 								printf("[sdtThread] No free slot for Transponder ID: 0x%x Consider increasing MAX_CONCURRENT_SDT_OTHER\n", tid);
 							}
-						}			
+						}
 						unlockMessaging();
-					} 
-					break;					
+					}
+					break;
 				case 0x4a:
-					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))					
+					if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
 					{
 						// Wir wollen nur aktuelle sections
-						
+
 						bouquet_id = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
-					
+
 						dprintf("[sdtThread] BAT section received for Bouquet ID: 0x%x\n",bouquet_id);
-					
+
 						lockMessaging();
-					
+
 						// This is 0 .. MAX_BAT - 1 if already started or new and free or -1 if no free slot available.
 						int current_bouquet = get_bat_slot(bouquet_id);
-					
+
 						if ( current_bouquet != -1) {
 							//printf("[sdtThread] get_slot returned: 0x%x\n",current_bouquet);
 							if ( (!messaging_bat_sections_got_all[current_bouquet]) &&
 								(!messaging_bat_sections_so_far[current_bouquet] [header.section_number]) )
-							{	
+							{
 								//This is new stuff - restart timer
 								lastData = zeit;
 
@@ -4458,23 +4466,23 @@ static void *sdtThread(void *)
 								SIsectionBAT bat(SIsection(section_length + 3, buf));
 
 								//lock AND unlock bouquets later
-										
+
 								for (SIbouquets::iterator s = bat.bouquets().begin(); s != bat.bouquets().end(); s++)
 									addBouquetEntry(*s);
-											
+
 								//unlock bouquets here...
 
 								dprintf("[sdtThread] added %d services to bouquet (end)\n",  bat.bouquets().size());
-															
+
 								messaging_bat_sections_so_far[current_bouquet][header.section_number] = true;
 								messaging_bat_sections_got_all[current_bouquet] = true;
-					
+
 								for (int i = 0; i <= (int) header.last_section_number; i++)
 								{
 									if (!messaging_bat_sections_so_far[current_bouquet] [i])
 										messaging_bat_sections_got_all[current_bouquet] = false;
-								}					
-							
+								}
+
 								if ( messaging_bat_sections_got_all[current_bouquet] )
 								{
 									dprintf("[sdtThread] BAT with ID: 0x%x complete\n",bouquet_id);
@@ -4583,7 +4591,7 @@ static void *timeThread(void *)
 	time_t tim;
 	unsigned int seconds;
 	bool first_time = true; /* we don't sleep the first time (we try to get a TOT header) */
-	
+
 	try
 	{
 		dprintf("[%sThread] pid %d start\n", "time", getpid());
@@ -4612,7 +4620,7 @@ static void *timeThread(void *)
 			if (scanning && (getUTC(&UTC, true))) // always use TDT, a lot of transponders don't provide a TOT
 			{
 				tim = changeUTCtoCtime((const unsigned char *) &UTC);
-				
+
 				if (tim) {
 					if ((!messaging_neutrino_sets_time) && (geteuid() == 0)) {
 						struct timeval tv;
@@ -4634,14 +4642,14 @@ static void *timeThread(void *)
 					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim));
 				}
 			}
-			
+
 			if (timeset && first_time)
 			{
 				first_time = false;
 
 				/*
 				 * automatically restart scanning of events, because
-				 * current events were most likely ignored as they seem 
+				 * current events were most likely ignored as they seem
 				 * to be too far in the future (cf. secondsToCache)
 				 */
 				// -- do not trash read events, cleanup will be done hopefully
@@ -4660,7 +4668,7 @@ static void *timeThread(void *)
 				else {
 					seconds = 1;
 				}
-				
+
 				while (seconds)
 					seconds = sleep(seconds);
 			}
@@ -4816,7 +4824,7 @@ static void *eitThread(void *)
 				timeoutsDMX = 0;
 			}
 
-			if (timeset)
+			if (waitForTimeset())
 			{
 				// Nur wenn ne richtige Uhrzeit da ist
 
@@ -4842,11 +4850,11 @@ static void *eitThread(void *)
 					{
 						dprintf("dmxEIT: waking up again - looking for new events :)\n");
 						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
-						
+
 #ifdef PAUSE_EQUALS_STOP
 						dmxEIT.real_unpause();
 #endif
-// must call dmxEIT.change after! unpause otherwise dev is not open, 
+// must call dmxEIT.change after! unpause otherwise dev is not open,
 // dmxEIT.lastChanged will not be set, and filter is advanced the next iteration
 						dprintf("New Filterindex3: %d (ges. %d)\n", 0, (signed) dmxEIT.filters.size() );
 						dmxEIT.change( 0 ); // -> restart
@@ -4891,7 +4899,7 @@ static void *eitThread(void *)
 
 			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
 							((SI_section_header*)buf)->section_length_lo;
-			
+
 			// copy the header
 			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
@@ -4920,12 +4928,12 @@ static void *eitThread(void *)
 				                }
 				*/
 
-// Houdini: added new constructor where the buffer is given as a parameter and must be allocated outside 
+// Houdini: added new constructor where the buffer is given as a parameter and must be allocated outside
 // -> no allocation and copy of data into a 2nd buffer
 //				SIsectionEIT eit(SIsection(section_length + 3, buf));
 				SIsectionEIT eit(section_length + 3, buf);
 // Houdini: if section is not parsed (too short) -> no need to check events
-				if (eit.is_parsed()) 
+				if (eit.is_parsed())
 					if (eit.header())
 				{
 					// == 0 -> kein event
@@ -5051,7 +5059,7 @@ static void *eitThread(void *)
 				}
 
 				unlockMessaging();
-// buf is deleted in destructor of SIsectionEIT 
+// buf is deleted in destructor of SIsectionEIT
 //				delete[] buf;
 //				buf = NULL;
 
@@ -5117,7 +5125,7 @@ static void *pptThread(void *)
 		int timeoutsDMX = 0;
 		time_t lastRestarted = time(NULL);
 		time_t lastData = time(NULL);
-		
+
 		dmxPPT.start(); // -> unlock
 
 		for (;;)
@@ -5169,7 +5177,7 @@ static void *pptThread(void *)
 				lastData = zeit;
 			}
 
-			if (timeset)
+			if (waitForTimeset())
 			{
 				// Nur wenn ne richtige Uhrzeit da ist
 				if ( (sendToSleepNow) )
@@ -5217,7 +5225,7 @@ static void *pptThread(void *)
 					zeit = time(NULL);
 					start_section = 0; // fetch new? events
 					lastData = zeit; // restart timer
-					
+
 				}
 			}
 
@@ -5228,7 +5236,7 @@ static void *pptThread(void *)
 				sleep(1);
 				continue;
 			}
-         
+
 			if (pptpid != privatePid)
 			{
 				pptpid = privatePid;
@@ -5239,7 +5247,7 @@ static void *pptThread(void *)
 			buf = dmxPPT.getSection(timeoutInMSeconds, timeoutsDMX);
 
 			if (buf == NULL) {
-				if (zeit > lastData + 5) 
+				if (zeit > lastData + 5)
 				{
 					sendToSleepNow = true; // if there are no data for 5 seconds -> sleep
 					dprintf("dmxPPT: no data for 5 seconds\n");
@@ -5247,10 +5255,10 @@ static void *pptThread(void *)
 				continue;
 			}
 			lastData = zeit;
-			
+
 			unsigned short section_length = (((SI_section_header*)buf)->section_length_hi << 8) |
 							((SI_section_header*)buf)->section_length_lo;
-			
+
 			// copy the header
 			memcpy(&header, buf, std::min((unsigned)section_length + 3, sizeof(header)));
 
@@ -5258,17 +5266,17 @@ static void *pptThread(void *)
 			{
 				// Wir wollen nur aktuelle sections
 				if (start_section == 0) start_section = header.section_number;
-				else if (start_section == header.section_number) 
+				else if (start_section == header.section_number)
 				{
 					sendToSleepNow = true; // no more scanning
 					dprintf("[pptThread] got all sections\n");
 					delete[] buf;
 					continue;
 				}
-				
+
 //				SIsectionPPT ppt(SIsection(section_length + 3, buf));
 				SIsectionPPT ppt(section_length + 3, buf);
-				if (ppt.is_parsed()) 
+				if (ppt.is_parsed())
 					if (ppt.header())
 				{
 					// == 0 -> kein event
@@ -5293,15 +5301,15 @@ static void *pptThread(void *)
 									unlockEvents();
 									break; // only add the event once
 								}
-#if 0									
-// why is the following not compiling, fuXX STL								
+#if 0
+// why is the following not compiling, fuXX STL
 								else {
 									// remove unusable times in event
 									SItimes::iterator kt = t;
 									t--; // the iterator t points to the last element
 									e->times.erase(kt);
 								}
-#endif							
+#endif
 							}
 						}
 						else
@@ -5372,7 +5380,7 @@ static void *houseKeepingThread(void *)
 			dprintf("housekeeping.\n");
 
 			EITThreadsPause();
-			
+
 			dmxSDT.pause();
 
 			struct mallinfo speicherinfo1;
@@ -5464,10 +5472,10 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.207 2005/11/27 12:21:15 rasc Exp $\n");
-	
+	printf("$Id: sectionsd.cpp,v 1.208 2005/12/01 00:39:07 homar Exp $\n");
+
 //	auto_scanmode = getscanning();
-	
+
 	try {
 		if (argc != 1 && argc != 2) {
 			printHelp();
@@ -5524,6 +5532,14 @@ int main(int argc, char **argv)
 				else
 					printf("[sectionsd ] timerd NOT available\n");
 		*/
+		// time-Thread starten
+		rc = pthread_create(&threadTOT, 0, timeThread, 0);
+
+		if (rc) {
+			fprintf(stderr, "[sectionsd] failed to create time-thread (rc=%d)\n", rc);
+			return EXIT_FAILURE;
+		}
+
 		// SDT-Thread starten
 		rc = pthread_create(&threadSDT, 0, sdtThread, 0);
 
@@ -5537,14 +5553,6 @@ int main(int argc, char **argv)
 
 		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create eit-thread (rc=%d)\n", rc);
-			return EXIT_FAILURE;
-		}
-
-		// time-Thread starten
-		rc = pthread_create(&threadTOT, 0, timeThread, 0);
-
-		if (rc) {
-			fprintf(stderr, "[sectionsd] failed to create time-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
 
