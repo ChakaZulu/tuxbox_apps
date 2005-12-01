@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.209 2005/12/01 19:25:58 mws Exp $
+//  $Id: sectionsd.cpp,v 1.210 2005/12/01 20:19:00 mws Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1224,7 +1224,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.209 2005/12/01 19:25:58 mws Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.210 2005/12/01 20:19:00 mws Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4589,12 +4589,17 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
 }
 
 */
+pthread_cond_t timeThreadSleepCond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t timeThreadSleepMutex = PTHREAD_MUTEX_INITIALIZER;
+
 static void *timeThread(void *)
 {
 	UTC_t UTC;
 	time_t tim;
 	unsigned int seconds;
 	bool first_time = true; /* we don't sleep the first time (we try to get a TOT header) */
+	struct timespec restartWait;
+	struct timeval now;
 
 	try
 	{
@@ -4677,9 +4682,21 @@ static void *timeThread(void *)
 				else {
 					seconds = 1;
 				}
-
-				while (seconds)
-					seconds = sleep(seconds);
+				gettimeofday(&now, NULL);
+				TIMEVAL_TO_TIMESPEC(&now, &restartWait);
+				restartWait.tv_sec += seconds;
+				pthread_mutex_lock( &timeThreadSleepMutex );
+				int ret = pthread_cond_timedwait( &timeThreadSleepCond, &timeThreadSleepMutex, &restartWait );
+				if (ret == ETIMEDOUT)
+				{
+					dprintf("TDT-Thread sleeping is over - no signal received\n");
+				}
+				else if (ret == EINTR)
+				{
+					dprintf("TDT-Thread sleeping interrupted\n");
+				}
+				// else if (ret == 0) //everything is fine :) e.g. timeThreadSleepCond maybe signalled @zap time to get a valid time 
+				pthread_mutex_unlock( &timeThreadSleepMutex );
 			}
 		}
 	}
@@ -5481,7 +5498,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.209 2005/12/01 19:25:58 mws Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.210 2005/12/01 20:19:00 mws Exp $\n");
 
 //	auto_scanmode = getscanning();
 
