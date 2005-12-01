@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.208 2005/12/01 00:39:07 homar Exp $
+//  $Id: sectionsd.cpp,v 1.209 2005/12/01 19:25:58 mws Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -212,11 +212,15 @@ inline int EITThreadsUnPause(void)
 }
 
 bool timeset = false;
+pthread_cond_t timeIsSetCond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t timeIsSetMutex = PTHREAD_MUTEX_INITIALIZER;
 
 inline bool waitForTimeset(void)
 {
+	pthread_mutex_lock(&timeIsSetMutex);
 	while(!timeset)
-		sleep(1);
+		pthread_cond_wait(&timeIsSetCond, &timeIsSetMutex);
+	pthread_mutex_unlock(&timeIsSetMutex);
 	return true;
 }
 
@@ -1220,7 +1224,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.208 2005/12/01 00:39:07 homar Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.209 2005/12/01 19:25:58 mws Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4608,8 +4612,11 @@ static void *timeThread(void *)
 		  // -- do we already have a valid(???) date/time?
 		  if ((tmTime->tm_year + 1900) >= 2005) {
 			first_time = false;
+			pthread_mutex_lock(&timeIsSetMutex);
 			timeset = true;
-		  	dprintf("we already have a time set\n");
+			pthread_cond_broadcast(&timeIsSetCond);
+			pthread_mutex_unlock(&timeIsSetMutex );
+			dprintf("we already have a time set\n");
 		  }
 		}
 
@@ -4637,8 +4644,10 @@ static void *timeThread(void *)
 					actTime=time(NULL);
 					tmTime = localtime(&actTime);
 					printf("[%sThread] time(): %02d.%02d.%04d %02d:%02d:%02d, tim: %s", "time", tmTime->tm_mday, tmTime->tm_mon+1, tmTime->tm_year+1900, tmTime->tm_hour, tmTime->tm_min, tmTime->tm_sec, ctime(&tim));
-
+					pthread_mutex_lock(&timeIsSetMutex);
 					timeset = true;
+					pthread_cond_broadcast(&timeIsSetCond);
+					pthread_mutex_unlock(&timeIsSetMutex );
 					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim));
 				}
 			}
@@ -5472,7 +5481,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.208 2005/12/01 00:39:07 homar Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.209 2005/12/01 19:25:58 mws Exp $\n");
 
 //	auto_scanmode = getscanning();
 
