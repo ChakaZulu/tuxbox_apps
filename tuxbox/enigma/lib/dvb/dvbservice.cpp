@@ -883,7 +883,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 						case DESCR_LESRADIOS:
 						{
 							LesRadiosDescriptor *d = (LesRadiosDescriptor*)*ii;
-							if ( d->id && d->name )
+							if ( (stream.component_tag >= 0 || d->id) && d->name )
 								stream.text.sprintf("%d.) %s", d->id, d->name.c_str());
 							else
 								isAudio=false;
