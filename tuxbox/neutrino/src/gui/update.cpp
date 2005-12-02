@@ -145,6 +145,11 @@ bool CFlashUpdate::selectHttpImage(void)
 	std::vector<std::string> updates_lists, urls, names, versions, descriptions;
 	int selected = -1;
 
+	// get default update url from .version
+	CConfigFile config('\t');
+	config.loadConfig("/.version");
+	const std::string updateURL  = config.getString("update",  "");
+
 	httpTool.setStatusViewer(this);
 	showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_GETINFOFILE)); // UTF-8
 
@@ -157,6 +162,13 @@ bool CFlashUpdate::selectHttpImage(void)
 	unsigned int i = 0;
 	while (urlFile >> url)
 	{
+		// add update url from .version if exists, then seek back to start
+		if (updateURL.length() > 0 && i==0)
+		{
+			url = updateURL + url;
+			urlFile.seekg(0, std::ios::beg);
+		}
+
 		std::string::size_type startpos, endpos;
 
 		/* extract domain name */
