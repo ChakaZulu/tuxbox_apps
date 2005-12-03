@@ -6,28 +6,27 @@
 <body>
 
 <table border="0" id="table4" style="font-family: Arial; font-size: 8pt">
-	<tr>
-		<td >
-			<br>
-			<div class="y_head">About</div>
-			<div class="y_work_box">
-				<table border="0" width="100%" id="table5" cellpadding="2" cellspacing="4">
-					<tr>
-						<td width="144" valign="top"><a href="http://www.yjogol.de" target="_new"><img border="0" src="images/y-smile.png"></a></td>
-						<td valign="top">
-							<b>dbox yWeb</b><p>
-							{=ini-get:Y_Version.txt;version=}<br>
-							{=ini-get:Y_Version.txt;date=}<br>
-							{=ini-get:Y_Version.txt;type=}<br><br>
-							{=ini-get:Y_Version.txt;info=}<br>
-							<a href="http://www.yjogol.de" target="_new">www.yjogol.de</a><br>
-							</p>
-						</td>
-					</tr>
-				</table>
-			</div>
-
-		</td>
-	</tr>
+<tr>
+	<td >
+	<br>
+	<div class="y_head">About</div>
+	<div class="y_work_box">
+		<table border="0" width="100%" id="table5" cellpadding="2" cellspacing="4">
+		<tr>
+			<td width="144" valign="top"><a href="http://www.yjogol.de" target="_new"><img border="0" src="images/y-smile.png"></a></td>
+			<td valign="top">
+				<b>dbox yWeb</b><p>
+				{=ini-get:Y_Version.txt;version=}<br>
+				{=ini-get:Y_Version.txt;date=}<br>
+				{=ini-get:Y_Version.txt;type=}<br><br>
+				{=ini-get:Y_Version.txt;info=}<br>
+				<a href="http://www.yjogol.de" target="_new">www.yjogol.de</a><br>
+				</p>
+			</td>
+		</tr>
+		</table>
+	</div>
+	</td>
+</tr>
 </table>
 </html>

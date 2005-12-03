@@ -1,43 +1,70 @@
+{=include-block:Y_Blocks.txt;management_check_top=}
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<script language="JavaScript" type="text/javascript" >
-function do_set() 
+<script language="JavaScript" type="text/javascript">
+function form_init() 
 {
-	_url="/control/exec?Y_Plugins&nhttpd_set&"+
-		document.f.authpassword.value + "&"+
-		document.f.authuser.value + "&"+
-		document.f.authenticate.value;
-	parent.frames[1].location.href=_url;
+	var val = "{=ini-get:/var/tuxbox/config/nhttpd.conf;Authenticate;false=}";
+	if(val == "true")
+		document.f.authenticate[1].checked = true
+	else
+		document.f.authenticate[0].checked = true;
+}
+function do_submit()
+{
+	if(document.f.authpassword.value.length < 5)
+		alert("Passwort muss mind. 4 Zeichen haben");
+/*
+	else
+	if(document.f.port.value == "")
+		alert("Port muss angegeben werden");*/
+	else
+	{
+		document.all.wait.style.visibility="visible"
+		document.f.submit();
+	}
 }
 </script>
 </head>
-<body>
+<body onLoad="form_init()">
+{=var-set:wait_text=Werte werden übernommen (Save).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <br>
 <div class="y_head">WebServer (nhttpd)</div>
 <div class="y_work_box">
-	<form name="f" action="">
+	<form name="f" action="/y/cgi">
 		<table border="0">
 			<tr>
 				<td>Benutzer</td>
-				<td><input type="text" name="authuser" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;AuthUser;root=}"></td>
-				<td>&nbsp;</td>
+				<td><input type="text" name="authuser" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;AuthUser;root=}" title="username"></td>
 			</tr>
 			<tr>
 				<td>Passwort</td>
-				<td><input type="text" name="authpassword" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;AuthPassword;dbox2=}"></td>
-				<td>&nbsp;</td>
+				<td><input type="password" name="authpassword" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;AuthPassword;dbox2=}" title="password"></td>
 			</tr>
 			<tr>
 				<td>Authentifikation</td>
-				<td><input type="text" name="authenticate" size="5" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;Authenticate;false=}"></td>
-				<td>&nbsp;true / false</td>
+				<td>
+					<INPUT type="radio" name="authenticate" value="false" title="authentication: off">AUS&nbsp;
+					<INPUT type="radio" name="authenticate" value="true" title="authentication: on">AN
+				</td>
 			</tr>
+			<!---
+			<tr>
+				<td>Port</td>
+				<td><input type="text" name="port" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;Port;80=}" title="port">
+				<br>Änderung des Ports wird erst nach einem Neustart wirksam.
+				</td>
+			</tr>
+			--->
 		</table>
 		<br>
-		<input type="button" value="Setzen" name="B1" title="submit values" onClick='do_set()'>
+		<input type="hidden" name="tmpl" value="Y_Settings_nhttpd.yhtm">
+		<input type="hidden" name="execute" value="include-block:Y_Blocks.txt;nhttpd_save_settings;nix">
+		<input type="button" value="Speichern ..." title="submit and save values" onClick="do_submit()">
 	</form>
 </div>
 </body>
 </html>
+{=include-block:Y_Blocks.txt;management_check_bottom=}

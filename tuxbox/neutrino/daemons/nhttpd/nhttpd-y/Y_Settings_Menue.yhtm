@@ -2,22 +2,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <link rel="STYLESHEET" type="text/css" href="Y_Main.css">
-<script language="JavaScript" type="text/javascript">
-var yurl
-function go_wait()
-{
-	parent.frames[1].location.href = yurl
-}
-function go_wait_url(_url)
-{
-	yurl=_url
-	parent.frames[1].location.href = "Y_Wait.htm";
-	window.setTimeout('go_wait()', 500);
-}
-</script>
-
 </head>
 <body>
+{=var-set:management={=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip;{=func:get_request_data client_addr=}=}~1~=}{=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip2=}~1~=}=}
 
 <br>
 <div class="y_head" align=center>Settings</div>
@@ -25,29 +12,41 @@ function go_wait_url(_url)
 	<tr>
 		<td align="center">
 		<ul id="menu_sec" class="y_menu_sec">
+		{=if-empty:{=var-get:management=}~
+			<li class="disabled" title="settings for yWeb itselfs (restricted by ManagementIP)">yWeb</li>
+			<li class="disabled" title="settings for Web Server daemon (restricted by ManagementIP)">WebServer</li>
+			<li class="disabled" title="organize file mounts (restricted by ManagementIP)">Mounts</li>
+			<li class="disabled" title="Wake on LAN (restricted by ManagementIP)">Wake on LAN</li>
+			<li class="disabled" title="download or upload ucodes (restricted by ManagementIP)">ucodes</li>
+			<li class="disabled" title="download or upload Bouquetlist, Channellist, ... (restricted by ManagementIP)">zapit</li>
+		~
 			<li class="plain"><a class="y_menu_item" title="settings for yWeb itselfs" target="Rechts_oben" href="Y_Settings_yWeb.yhtm">yWeb</a></li>
-			<li class="plain"><a class="y_menu_item" title="change layout skin" target="Rechts_oben" href="Y_Settings_Skin.yhtm">Skins</a></li>
 			<li class="plain"><a class="y_menu_item" title="settings for Web Server daemon" target="Rechts_oben" href="Y_Settings_nhttpd.yhtm">WebServer</a></li>
 			<li class="plain"><a class="y_menu_item" title="organize file mounts" target="Rechts_oben" href="Y_Settings_mount_liste.yhtm">Mounts</a></li>
+			<li class="plain"><a class="y_menu_item" title="Wake on LAN" target="Rechts_oben" href="Y_Settings_wol.yhtm">Wake on LAN</a></li>
 			<li class="plain"><a class="y_menu_item" title="download or upload ucodes" target="Rechts_oben" href="Y_Settings_ucodes.htm">ucodes</a></li>
 			<li class="plain"><a class="y_menu_item" title="download or upload Bouquetlist, Channellist, ..." target="Rechts_oben" href="Y_Settings_zapit.htm">zapit</a></li>
-		</ul>		
+		=}	
+			<li class="plain"><a class="y_menu_item" title="change layout skin" target="Rechts_oben" href="Y_Settings_Skin.yhtm">Skins</a></li>
+		</ul>
 		</td>
 	</tr>
 </table>
-<br>
 
 <div class="y_head" align=center>Plugins</div>
 <table border="0" width="100%">
 	<tr>
 		<td align="center">
 		<ul id="menu_sec" class="y_menu_sec">
+		{=if-empty:{=var-get:management=}~
+			<li class="disabled" title="configure VNC-Plugin (restricted by ManagementIP)">VNC</li>
+		~
 			<li class="plain"><a class="y_menu_item" title="configure VNC-Plugin" target="Rechts_oben" href="Y_Settings_VNC.yhtm">VNC</a></li>
-		</ul>		
+		=}
+		</ul>
 		</td>
 	</tr>
 </table>
-<br>
 
 <div class="y_head" align=center>Info</div>
 <table border="0" width="100%">
@@ -55,7 +54,7 @@ function go_wait_url(_url)
 		<td align="center">
 		<ul id="menu_sec" class="y_menu_sec">
 			<li class="plain"><a class="y_menu_item" title="about yWeb" target="Rechts_oben" href="Y_About.yhtm">About</a></li>
-		</ul>		
+		</ul>
 		</td>
 	</tr>
 </table>

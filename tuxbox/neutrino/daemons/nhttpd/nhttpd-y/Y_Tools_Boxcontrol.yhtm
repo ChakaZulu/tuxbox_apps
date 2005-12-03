@@ -5,7 +5,6 @@
 <script language="JavaScript" type="text/javascript" >
 function goConfirmUrl(_meld, _url) 
 {
-	
 	if (confirm(_meld)==true) goUrl(_url);
 }
 
@@ -18,89 +17,87 @@ function goUrl(_url)
 <body>
 
 <br>
-
 <div class="y_head">Box-Control</div>
 <div class="y_work_box">
 	<form>
 		<table class="y_work_table" cellpadding="8">
-			<tr>
-				<td>
-				<b><font size="2">dbox</font></b><br>
-				<INPUT type=button value="Neu starten" title="reboot" onClick='goConfirmUrl("dbox wirklich neu starten?","/control/exec?Y_Tools&yreboot");'>
-				<INPUT type=button value="Ausschalten" title="shutdown" onClick='goConfirmUrl("dbox wirklich ausschalten?","/control/shutdown");'>
-				<INPUT type=button value="Standby" onClick='goConfirmUrl("dbox wirklich in Standby-Modus?","/control/standby");'>
-				</td>
-				<td>
-				<b><font size="2">Standby Modus</font></b><br>
-				<INPUT type=button value="An" onClick='goUrl("/control/standby?on");'>
-				<INPUT type=button value="Aus" onClick='goUrl("/control/standby?off");'>
-				</td>
-			</tr>
+		<tr>
+			<td>
+			<b><font size="2">dbox</font></b><br>
+			<INPUT type=button value="Neu starten" title="reboot" onClick='goConfirmUrl("dbox wirklich neu starten?","/control/exec?Y_Tools&yreboot");'>
+			<INPUT type=button value="Ausschalten" title="shutdown" onClick='goConfirmUrl("dbox wirklich ausschalten?","/control/shutdown");'>
+			<INPUT type=button value="Standby" onClick='goConfirmUrl("dbox wirklich in Standby-Modus?","/control/standby");'>
+			</td>
+			<td>
+			<b><font size="2">Standby Modus</font></b><br>
+			<INPUT type=button value="An" onClick='goUrl("/control/standby?on");'>
+			<INPUT type=button value="Aus" onClick='goUrl("/control/standby?off");'>
+			</td>
+		</tr>
 		</table>
 		<br>
 		<table class="y_work_table" cellpadding="8">
-			<tr>
-				<td>
-				<b><font size="2">Playback</font></b><br>
-				<INPUT type=button value="An" onClick='goUrl("/control/zapto?startplayback");'>
-				<INPUT type=button value="Aus" onClick='goUrl("/control/zapto?stopplayback");'>
-				<INPUT type=button value="Status" onClick='goUrl("/control/zapto?statusplayback");'>
-				</td>
-				<td>
-				<b><font size="2">Sectionsd</font></b><br>
-				<INPUT type=button value="An" onClick='goUrl("/control/zapto?startsectionsd");'>
-				<INPUT type=button value="Aus" onClick='goUrl("/control/zapto?stopsectionsd");'>
-				<INPUT type=button value="Status" onClick='goUrl("/control/zapto?statussectionsd");'>
-				</td>
-			</tr>
+		<tr>
+			<td>
+			<b><font size="2">Playback</font></b><br>
+			<INPUT type=button value="An" onClick='goUrl("/control/zapto?startplayback");'>
+			<INPUT type=button value="Aus" onClick='goUrl("/control/zapto?stopplayback");'>
+			<INPUT type=button value="Status" onClick='goUrl("/control/zapto?statusplayback");'>
+			</td>
+			<td>
+			<b><font size="2">Sectionsd</font></b><br>
+			<INPUT type=button value="An" onClick='goUrl("/control/zapto?startsectionsd");'>
+			<INPUT type=button value="Aus" onClick='goUrl("/control/zapto?stopsectionsd");'>
+			<INPUT type=button value="Status" onClick='goUrl("/control/zapto?statussectionsd");'>
+			</td>
+		</tr>
 		</table>
 		<br>
 		<table class="y_work_table" cellpadding="8">
-			<tr>
-				<td>
-				<b><font size="2">Aufnahme-Modus</font></b><br>
-				<INPUT type=button value="An" onClick='goUrl("/control/setmode?record=start");'>
-				<INPUT type=button value="Aus" onClick='goUrl("/control/setmode?record=stop");'>
-				</td>
-				<td>
-				<b><font size="2">SPTS</font></b><br>
-				<INPUT type=button value="An" onClick='goUrl("/control/system?setAViAExtPlayBack=spts");'>
-				<INPUT type=button value="Aus" onClick='goUrl("/control/system?setAViAExtPlayBack=pes");'>
-				</td>
-				<td>
-				<b><font size="2">Fernbedienung</font></b><br>
-				<INPUT type=button value="An" onClick='goUrl("/control/rc?unlock");'>
-				<INPUT type=button value="Aus" onClick='goUrl("/control/rc?lock");'>
-				<INPUT type=button value="LCD Unlock" onClick='goUrl("/control/exec?Y_Live&live_LCD_off");'>
-				</td>
-			</tr>
+		<tr>
+			<td>
+			<b><font size="2">Aufnahme-Modus</font></b><br>
+			<INPUT type=button value="An" onClick='goUrl("/control/setmode?record=start");'>
+			<INPUT type=button value="Aus" onClick='goUrl("/control/setmode?record=stop");'>
+			</td>
+			<td>
+			<b><font size="2">SPTS</font></b><br>
+			<INPUT type=button value="An" onClick='goUrl("/control/system?setAViAExtPlayBack=spts");'>
+			<INPUT type=button value="Aus" onClick='goUrl("/control/system?setAViAExtPlayBack=pes");'>
+			</td>
+			<td>
+			<b><font size="2">Fernbedienung</font></b><br>
+			<INPUT type=button value="An" onClick='goUrl("/control/rc?unlock");'>
+			<INPUT type=button value="Aus" onClick='goUrl("/control/rc?lock");'>
+			<INPUT type=button value="LCD Unlock" onClick='goUrl("/control/exec?Y_Live&live_LCD_off");'>
+			</td>
+		</tr>
 		</table>
 	</form>
-
 </div>
 <div style="clear:both">&nbsp;</div>
 <div class="y_head" style="display: block">Message</div>
 <div class="y_work_box">
 	<form name="msg1" action="/control/message?" method="get" enctype="application/x-www-form-urlencoded" accept-charset="UTF-8" target="out">
 		<table class="y_work_table" cellpadding="5">
-			<tr>
-				<td>
-				<font size="2"><b>Meldung auf dbox-Bildschirm</b></font><br>
-				<input name="nmsg" type="text" size="50" maxlength="255" title="enter message to send to TV screen">
-				<input type="submit" name="Submit" value="senden" title="send message">
-				</td>
-			</tr>
+		<tr>
+			<td>
+			<font size="2"><b>Meldung auf dbox-Bildschirm</b></font><br>
+			<input name="nmsg" type="text" size="50" maxlength="255" title="enter message to send to TV screen">
+			<input type="submit" name="Submit" value="senden" title="send message">
+			</td>
+		</tr>
 		</table>
 	</form>
 	<form name="msg2" action="/control/message?" method="get" enctype="application/x-www-form-urlencoded" accept-charset="UTF-8" target="out">
 		<table class="y_work_table" cellpadding="5">
-			<tr>
-				<td>
-				<font size="2"><b>Meldung auf dbox-Bildschirm </b>(schliesst automatisch)</font><br>
-				<input name="popup" type="text" size="50" maxlength="255" title="enter message to send to TV screen">
-				<input type="submit" name="Submit" value="senden" title="send message">
-				</td>
-			</tr>
+		<tr>
+			<td>
+			<font size="2"><b>Meldung auf dbox-Bildschirm </b>(schliesst automatisch)</font><br>
+			<input name="popup" type="text" size="50" maxlength="255" title="enter message to send to TV screen">
+			<input type="submit" name="Submit" value="senden" title="send message">
+			</td>
+		</tr>
 		</table>
 	</form>
 </div>
@@ -108,5 +105,4 @@ function goUrl(_url)
 <iframe name="out" id="out" width="100%" height="200" align="left" frameborder="0">Your Browser does not support IFrames.</iframe>
 
 </body>
-
 </html>

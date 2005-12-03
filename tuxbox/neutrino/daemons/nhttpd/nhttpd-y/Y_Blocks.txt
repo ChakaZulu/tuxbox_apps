@@ -1,0 +1,82 @@
+# ------- yWeb save Settings
+start-block~yWeb_save_settings
+{=ini-set:/var/tuxbox/config/Y-Web.conf;live_resolution_w;{=liveResolution_w=}=}
+{=ini-set:/var/tuxbox/config/Y-Web.conf;live_resolution_h;{=liveResolution_h=}=}
+{=ini-set:/var/tuxbox/config/Y-Web.conf;slavebox;{=slavebox=}=}
+{=ini-set:/var/tuxbox/config/Y-Web.conf;management_ip;{=managementIP=}=}
+{=ini-set:/var/tuxbox/config/Y-Web.conf;management_ip2;{=managementIP2=}=}
+{=ini-set:/var/tuxbox/config/Y-Web.conf;wol_mac_1;{=wol_mac_1=}=}
+{=ini-set:/var/tuxbox/config/Y-Web.conf;wol_mac_2;{=wol_mac_2=}=}
+{=ini-set:/var/tuxbox/config/Y-Web.conf;wol_mac_3;{=wol_mac_3=}=}
+end-block~yWeb_save_settings
+
+# ------- nhttpd save Settings
+start-block~nhttpd_save_settings
+{=ini-set:/var/tuxbox/config/nhttpd.conf;AuthUser;{=authuser=}=}
+{=ini-set:/var/tuxbox/config/nhttpd.conf;AuthPassword;{=authpassword=}=}
+{=ini-set:/var/tuxbox/config/nhttpd.conf;Authenticate;{=authenticate=}=}
+{=ini-set:/var/tuxbox/config/nhttpd.conf;Port;{=port=}=}
+{=func:do_reload_nhttpd_config=}
+end-block~nhttpd_save_settings
+
+# ------- VNC save Settings
+start-block~vnc_save_settings
+{=ini-set:/var/tuxbox/config/vnc.conf;server;{=server=}=}
+{=ini-set:/var/tuxbox/config/vnc.conf;port;{=port=}=}
+{=ini-set:/var/tuxbox/config/vnc.conf;passwd;{=password=}=}
+{=ini-set:/var/tuxbox/config/vnc.conf;scale;{=scale=}=}
+end-block~vnc_save_settings
+
+# ------- Standard HEAD
+start-block~std_head
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+end-block~std_head
+
+
+# ------- No Managemant Error
+start-block~no_management
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+</head>
+<body>
+<br>
+<div class="y_head">Error</div>
+<div class="y_work_box" title="This page could be used for management proposes only">
+	Der Aufruf dieser Seite ist nur für Management Zwecke erlaubt.
+</div>
+</body>
+</html>
+end-block~no_management
+
+# ------- Managemant Check : insert at Top of Page
+start-block~management_check_top
+{=var-set:management={=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip;{=func:get_request_data client_addr=}=}~1~=}{=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip2=}~1~=}=}
+{=if-empty:{=var-get:management=}
+~
+	{=include-block:Y_Blocks.txt;no_management=}
+~
+end-block~management_check_top
+
+# ------- Managemant Check : insert at End of Page
+start-block~management_check_bottom
+=}
+end-block~management_check_bottom
+
+# ------- Snip: Wait Message Layer-div
+start-block~snip_wait
+<div name="wait" id="wait" class="y_wait_box" style="left : 100px; position : absolute; top : 100px; padding: 10px; visibility : hidden; z-index : 5;">
+	<p align="center">
+	<font color="#666666"><b>{=if-empty:{=var-get:wait_text=}~Anfrage wird bearbeitet~{=var-get:wait_text=}=}</b></font><br>
+	<img border="0" src="/images/hourglas.gif" width="32" height="32"><br><br>
+	Bitte warten<br>
+	Please wait
+	</p>
+</div>
+end-block~snip_wait
+
+

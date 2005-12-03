@@ -1,0 +1,111 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+<script language="JavaScript" type="text/javascript">
+var aktiv;
+var flashing = false;
+function do_submit() 
+{
+	if(confirm("Image flashen?")==true)
+	{
+		document.all.wait.style.visibility="visible";
+		document.f.submit();
+		document.f.su.disabled = true;
+		document.f.file.disabled = true;
+	}
+}
+function do_image_upload_ready() 
+{
+	document.all.wait.style.visibility="hidden";
+	document.all.wait_flash.style.visibility="visible";
+	/* random url to prevent IE caching */
+	aktiv = window.setInterval('loadXMLDoc("/tmp/e.txt?hash=" + Math.random())', 3000);
+	document.all.status.style.visibility="visible";
+	window.setTimeout('out.location.href = "/control/exec?Y_Tools&image_flash&{=mtd=}";',1000);
+}
+function do_image_upload_ready_error() 
+{
+	document.f.su.disabled = false;
+	document.f.file.disabled = false;
+	document.all.wait.style.visibility="hidden";
+}
+function do_image_flash_ready() 
+{
+	window.clearInterval(aktiv);
+	document.all.wait_flash.style.visibility="hidden";
+	/*window.setTimeout('out.location.href = "/control/exec?Y_Tools&yreboot";',1000);*/
+	alert("Image geflasht. Nach Reboot OK drücken");
+	top.location.href="/";
+}
+/* load fcp status from /tmp/e.txt*/
+var req;
+function processReqChange() 
+{
+	if (req.readyState == 4) {
+		if (req.status == 200) 
+		{
+			var last = req.responseText.lastIndexOf("\r");
+			var last_line = req.responseText.slice(last, req.responseText.length);
+			document.f.progress.value = last_line;
+		}
+	}
+}
+function loadXMLDoc(url) 
+{
+	/* branch for native XMLHttpRequest object*/
+	if (window.XMLHttpRequest) 
+	{
+		req = new XMLHttpRequest();
+		req.onreadystatechange = processReqChange;
+		req.open("GET", url, true);
+		req.send(null);
+	} 
+	/* branch for IE/Windows ActiveX version*/
+	else if (window.ActiveXObject)
+	{
+		req = new ActiveXObject("Microsoft.XMLHTTP");
+		if (req) 
+		{
+			req.onreadystatechange = processReqChange;
+			req.open("GET", url, true);
+			req.send();
+		}
+	} 
+	else
+		alert("Kein Browser-Support für XMLHttpRequest");
+}
+</script>
+</head>
+<body>
+{=var-set:fcp={=if-file-exists:/sbin/fcp~true~{=if-file-exists:/var/bin/fcp~true~{=if-file-exists:/bin/fcp~true~false=}=}=}=}
+{=var-set:wait_text=Image wird hochgeladen (upload image).=}{=include-block:Y_Blocks.txt;snip_wait=}
+<div name="wait_flash" id="wait_flash" class="y_wait_box" style="left : 100px; position : absolute; top : 200px; padding: 10px; visibility : hidden; z-index : 6;">
+	<p align="center">
+	<font color="#666666"><b>Image wird geflasht. Nicht unterbrechen!<br>Image will be flashed. Do not interrupt!</b></font><br>
+	<img border="0" src="/images/hourglas.gif" width="32" height="32"><br><br>
+	Bitte warten<br>
+	Please wait
+	</p>
+</div>
+<br>
+<div class="y_head">Image flashen</div>
+<div class="y_work_box">
+	<b><font size="2">Partition mtd {=mtd=}</font><br>{=mtd_text=}</b>
+	{=if-equal:{=var-get:fcp=}~true~
+		<form method="POST" name="f" enctype="multipart/form-data" action="/control/exec?Y_Tools&image_upload" target="out">
+			<p>
+			<input type="file" name="file" size="40"><br>
+			<input type="button" value="Image hochladen und flashen" title="upload and flash" name="su" onClick="do_submit()"><br>
+			<div name="status" id="status" style="visibility : hidden;">
+				<br>Status:<br><input type="text" name="progress" value="" size="40" readonly="true" disabled="true">
+			</div>
+			</p>
+		</form>
+	~
+		<h2><br><br><br><b><font color="#FF0000">fcp ist nicht installiert!</font></b></h2>
+	=}
+</div>
+<iframe name="out" id="out" width="100%" height="200" align="left" frameborder="0">Your Browser does not support IFrames.</iframe>
+</body>
+</html>

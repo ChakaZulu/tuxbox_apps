@@ -2,21 +2,21 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<script type="text/javascript">
-function vnc_set() 
+<script language="JavaScript" type="text/javascript">
+function form_init() 
 {
-	_url="/control/exec?Y_Plugins&vnc_set&"+
-		document.f.server.value + "&"+
-		document.f.port.value + "&"+
-		document.f.password.value + "&"+
-		document.f.scale.value;
-	parent.frames[1].location.href=_url;
+	var val = {=ini-get:/var/tuxbox/config/vnc.conf;scale;1=};
+	document.f.scale[val-1].selected = true;
+}
+function do_submit()
+{
+	document.all.wait.style.visibility="visible"
+	document.f.submit();
 }
 </script>
-
 </head>
-<body>
-
+<body onLoad="form_init()">
+{=var-set:wait_text=Werte werden übernommen (Save).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <br>
 <div class="y_head">VNC</div>
 <div class="y_work_box">
@@ -24,28 +24,32 @@ function vnc_set()
 		<table border="0">
 			<tr>
 				<td>Server</td>
-				<td><input type="text" name="server" id"yserver" size="20" value="{=ini-get:/var/tuxbox/config/vnc.conf;server=}"></td>
-				<td>Format xxx.xxx.xxx.xxx</td>
+				<td><input type="text" name="server" size="20" value="{=ini-get:/var/tuxbox/config/vnc.conf;server=}" title="enter IP (xxx.xxx.xxx.xxx)"></td>
 			</tr>
 			<tr>
 				<td>Port</td>
-				<td><input type="text" name="port" id="port"size="5" value="{=ini-get:/var/tuxbox/config/vnc.conf;port=}"></td>
-				<td>&nbsp;</td>
+				<td><input type="text" name="port" size="5" value="{=ini-get:/var/tuxbox/config/vnc.conf;port=}"></td>
 			</tr>
 			<tr>
 				<td>Passwort</td>
-				<td><input type="text" name="password" id="password" size="20" value="{=ini-get:/var/tuxbox/config/vnc.conf;passwd=}"></td>
-				<td>&nbsp;</td>
+				<td><input type="password" name="password" size="20" value="{=ini-get:/var/tuxbox/config/vnc.conf;passwd=}"></td>
 			</tr>
 			<tr>
 				<td>Skalierung</td>
-				<td><input type="text" name="scale" id="scale" size="1" value="{=ini-get:/var/tuxbox/config/vnc.conf;scale=}"></td>
-				<td>&nbsp;[1-4] für 1 - 1/4</td>
+				<td>
+				<SELECT name="scale" title="enter scale for Screen">
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				</SELECT>
+				</td>
 			</tr>
-	
 		</table>
 		<br>
-		<input type="button" value="Setzen" name="B1" title="submit values" onClick="vnc_set()">
+		<input type="hidden" name="tmpl" value="Y_Settings_nhttpd.yhtm">
+		<input type="hidden" name="execute" value="include-block:Y_Blocks.txt;vnc_save_settings;nix">
+		<input type="button" value="Speichern ..." title="submit and save values" onClick="do_submit()">
 	</form>
 </div>
 </body>

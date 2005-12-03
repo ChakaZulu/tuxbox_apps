@@ -1,87 +1,70 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Flashing Library (yjogol)
-# $Date: 2005/11/10 19:47:00 $
-# $Revision: 1.7 $
+# $Date: 2005/12/03 14:39:26 $
+# $Revision: 1.8 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
 . ./_Y_Library.sh
 
 # -----------------------------------------------------------
-# Image -helper - build form $1=HTML-Template
-# -----------------------------------------------------------
-image_sub_build_form()
-{
-	mtd_partition_list=`cat /proc/mtd|sed -n 2,7p|sed -e 's/^.* \"//g'|sed -e 's/\"$//g'`
-	ymtd0=`echo "$mtd_partition_list"|sed -n 1p`
-	ymtd1=`echo "$mtd_partition_list"|sed -n 2p`
-	ymtd2=`echo "$mtd_partition_list"|sed -n 3p`
-	ymtd3=`echo "$mtd_partition_list"|sed -n 4p`
-	ymtd4=`echo "$mtd_partition_list"|sed -n 5p`
-	ymtd5=`echo "$mtd_partition_list"|sed -n 6p`
-
-	buildPage=`sed -e 's/Y_mtd0/'"$ymtd0"'/g' $1 | sed -e 's/Y_mtd1/'"$ymtd1"'/g' | sed -e 's/Y_mtd2/'"$ymtd2"'/g' | sed -e 's/Y_mtd3/'"$ymtd3"'/g' | sed -e 's/Y_mtd4/'"$ymtd4"'/g' | sed -e 's/Y_mtd5/'"$ymtd5"'/g'`
-	echo "$buildPage"
-}
-# -----------------------------------------------------------
 # Image Backup - build form
 # -----------------------------------------------------------
-image_backup_build_form()
-{
-	rm /tmp/*.img
-	image_sub_build_form "$y_path_httpd/Y_Tools_Flash_Menue.htm"
-}
-# -----------------------------------------------------------
-# Image Backup - build form
-# -----------------------------------------------------------
-image_flash_build_form()
+image_upload()
 {
 	if [ -s "$y_upload_file" ]
 	then
-		image_sub_build_form "$y_path_httpd/Y_Tools_Image_Flash_Menue.htm"
+		msg="<b>Image upload ok</b><br>"
+		msg="$msg <script language='JavaScript' type='text/javascript'>window.setTimeout('parent.do_image_upload_ready()',1000)</script>"
 	else
 		msg="Upload-Problem.<br>Bitte nochmal hochladen."
-		y_format_message_html
+		msg="$msg <script language='JavaScript' type='text/javascript'>window.setTimeout('parent.do_image_upload_ready_error()',1000)</script>"
 	fi
+	y_format_message_html
 }
-
 # -----------------------------------
 # Flash-Backup ($1=mtd Nummer)
 # -----------------------------------
-backup_mtd()
+image_backup_mtd()
 {
 	rm /tmp/*.img
 	cat /dev/mtd/$1 > /tmp/flash_mtd$1.img
 }
-
 # -----------------------------------
 # Sende Download-Page ($1=mtd Nummer)
 # -----------------------------------
-response_download_page()
+image_backup_download_page()
 {
-	cmd="sed -e s/Y_URL/\/tmp\/flash_mtd$1.img/g $y_path_httpd/Y_Flash-backup_tmpl.htm"
-	buildHTML=`$cmd`
-	echo $buildHTML
+	msg="<div class='y_work_box'><b>Das Image wurde erstellt.</b><p>"
+	msg="$msg <a type='application/octet-stream' href='/tmp/flash_mtd$1.img'><u>Download</u></a></p></div>"
+	msg="$msg  <script language='JavaScript' type='text/javascript'>parent.do_image_download_ready()</script>"
+	y_format_message_html
 }
-
 # -----------------------------------------------------------
 # Flash ($1=mtd Nummer) Upload-File
 # -----------------------------------------------------------
 flash_mtd()
 {
+simulate="false"
+
 	rm /tmp/*.img
-	msg_nmsg "Image%20wird%20geflasht!"
-	eraseall /dev/mtd/$1 >/dev/null
 	if [ -s "$y_upload_file" ]
 	then
-		cat "$y_upload_file" > /dev/mtd/$1
-		msg_nmsg "Reboot"
-		msg="geflasht ... reboot ..."
+		msg_nmsg "Image%20wird%20geflasht!"
+		if [ "$simulate" != "true" ]
+		then
+#			eraseall /dev/mtd/$1 >/dev/null
+#			eraseall /dev/mtd/$1 >/tmp/e.txt
+			fcp -v "$y_upload_file" /dev/mtd/$1 >/tmp/e.txt
+		fi
+		msg_nmsg "flashen%20fertig.%20Reboot..."
+		msg="geflasht ... bitte jetzt box neu starten ..."
+		msg="$msg <script language='JavaScript' type='text/javascript'>window.setTimeout('parent.do_image_flash_ready()',1000)</script>"
 		y_format_message_html
-		yreboot
 	else
 		msg="Upload-Problem.<br>Bitte nochmal hochladen."
+		msg="$msg <script language='JavaScript' type='text/javascript'>window.setTimeout('parent.do_image_flash_ready()',1000)</script>"
 		y_format_message_html
 	fi
 }
@@ -97,7 +80,6 @@ upload_copy()
 		msg="Upload-Problem.<br>Bitte nochmal hochladen."
 	fi
 }
-
 # -----------------------------------------------------------
 bootlogo_upload()
 {
@@ -105,7 +87,6 @@ bootlogo_upload()
 	upload_copy "$y_boot_logo"
 	y_format_message_html
 }
-
 # -----------------------------------------------------------
 bootlogo_lcd_upload()
 {
@@ -127,69 +108,82 @@ zapit_upload()
 	upload_copy "$y_path_zapit/$1"
 	y_format_message_html
 }
-
 # -----------------------------------------------------------
-# 1-fstype, 2-ip, 3-dir, 4-localdir, 5-mac, 6-opt1, 7-opt2, 8-usr, 9-psw
+# Mount from Neutrino-Settings $1=nr
+# -----------------------------------------------------------
 do_mount()
 {
-echo "$*"
-}
+	config_open $y_config_neutrino
+	fstype=`config_get_value "network_nfs_type_$1"`
+	ip=`config_get_value "network_nfs_ip_$1"`
+	local_dir=`config_get_value "network_nfs_local_dir_$1"`
+	dir=`config_get_value "network_nfs_dir_$1"`
+	options1=`config_get_value "network_nfs_mount_options1_$1"`
+	options2=`config_get_value "network_nfs_mount_options2_$1"`
+	username=`config_get_value "network_nfs_username_$1"`
+	password=`config_get_value "network_nfs_password_$1"`
 
-a()
-{
-	fstype="nfs"
-	if [ "$1" = "1" ]
+	# check options
+	if [ "$options1" = "" ]
 	then
-		if [ "$1" = "2" ]
+		options1=options2
+		options2=""
+	fi
+
+	# default options
+	if [ "$options1" = "" ]
+	then
+		if [ "$options2" = "" ]
 		then
-			fstype="ftpfs"
-		else
-			fstype="cifs"
+			if [ "$fstype" = "0" ]
+			then
+				options1="ro,soft,udp"
+				options2="nolock,rsize=8192,wsize=8192"
+			fi
+			if [ "$fstype" = "1" ]
+			then
+				options1="ro"
+			fi
 		fi
 	fi
+	# build mount command
+	case "$fstype" in
+		0) #nfs
+			cmd="mount -t nfs $ip:$dir $local_dir -o $options1"
+			;;
+		1)
+			cmd="mount -t cifs //$ip/$dir $local_dir -o username=$username,password=$password,unc=//$ip/$dir,$options1";
+			;;
+		2)
+			cmd="lufsd none $local_dir -o fs=ftpfs,username=$username,password=$password,host=$ip,root=/$dir,$options1";
+			;;
+		default)
+			echo "mount type not supported"
+	esac
 	
-	opt=""
-	if [ "$6" != "" ]
+	if [ "$options2" != "" ]
 	then
-		opt="$6"
-	fi
-	
-	if [ "$7" != "" ]
-	then
-		if [ "$opt" != "" ]
-		then
-			opt="$opt,$7"
-		else
-			opt="$7"
-		fi
+		cmd="$cmd,$options2"
 	fi
 
-#	if [ "$8" != "" ]
-#	then
-#		if [ "$opt" != "" ]
-#		then
-#			opt="$opt,user=$8"
-#		else
-#			opt="user=$8"
-#		fi
-#	fi
-#
-#	if [ "$9" != "" ]
-#	then
-#		if [ "$opt" != "" ]
-#		then
-#			opt="$opt,pass=$9"
-#		else
-#			opt="user=$9"
-#		fi
-#	fi
-		
-	echo "mount -t nfs $2:$3 $4 -o $opt $ip:$3 $4"
-#	mount -t $fstype -o $opt $ip:$3 $4
+	res=`$cmd`
+	echo "$res"
+	echo "view mounts"
+	m=`mount`
+	msg="mount cmd:$cmd<br><br>res=$res<br>view Mounts;<br>$m"
+	y_format_message_html
 }
-
 # -----------------------------------------------------------
+# unmount $1=local_dir
+# -----------------------------------------------------------
+do_unmount()
+{
+	umount $1
+}
+# -----------------------------------------------------------
+# Execute shell command
 # 1: directory 2: append [true|false] 3+: cmd
+# -----------------------------------------------------------
 do_cmd()
 {
 	cd $1
@@ -220,6 +214,9 @@ do_cmd()
 	echo 'parent.document.f.cmd.focus();'
 	echo '</script></body></html>'
 }
+# -----------------------------------------------------------
+# yInstaller
+# un-tar uploaded file to /tmp. Execute included install.sh
 # -----------------------------------------------------------
 do_installer()
 {
@@ -262,40 +259,53 @@ do_installer()
 		y_format_message_html
 	fi
 }
-
-
-# -----------------------------------
+# -----------------------------------------------------------
+# view /proc/$1 Informations
+# -----------------------------------------------------------
+proc()
+{
+	msg=`cat /proc/$1`
+	msg="<b>proc: $1</b><br><br>$msg"
+	y_format_message_html
+}
+# -----------------------------------------------------------
+# wake up $1=MAC
+# -----------------------------------------------------------
+wol()
+{
+	msg=`etherwake $1`
+	msg="<b>Wake on LAN $1</b><br><br>$msg"
+	y_format_message_html
+}
+# -----------------------------------------------------------
+# wake up $1=MAC
+# -----------------------------------------------------------
+dofbshot()
+{
+	rm -r /tmp/a.png
+	fbshot /tmp/a.png >/dev/null
+	msg="<img src='' name="fb" id="fb">"
+	msg="$msg <script language='JavaScript' type='text/javascript'>document.fb.src='/tmp/a.png?hash=' + Math.random();window.setTimeout('parent.do_ready()',1000)</script>"
+	y_format_message_html2
+}
+# -----------------------------------------------------------
 # Main
-# -----------------------------------
-
+# -----------------------------------------------------------
 case "$1" in
-	image_backup_build_form)
-		image_backup_build_form ;;
+	image_upload)
+		image_upload ;;
 
-	image_flash_build_form)
-		image_flash_build_form ;;
-
-	image_backup)
-		backup_mtd $2
-		response_download_page $2 ;;
+	image_backup) # $2=mtd#
+		image_backup_mtd $2
+		image_backup_download_page $2 ;;
 
 	image_flash)
 		flash_mtd $2 ;;
 
-	image_list)
-		msg=`cat /proc/mtd`
-		y_format_message_html ;;
-
-	test_upload)
-		if [ -s "$y_upload_file" ]
-		then
-			a=`ls -l /tmp`
-			msg="Upload erfolgreich<br><br>$a"
-		else
-			msg="Upload-Problem.<br>Bitte nochmal hochladen."
-		fi
-		y_format_message_html ;;
-
+	image_flash_free_tmp)
+		rm -r /tmp/*.img
+		;;
+		
 	bootlogo_upload)
 		bootlogo_upload	;;
 
@@ -334,6 +344,10 @@ case "$1" in
 		shift 1
 		do_mount $* ;;
 		
+	dounmount)
+		shift 1
+		do_unmount $* ;;
+		
 	cmd)
 		shift 1
 		do_cmd $* ;;
@@ -342,6 +356,18 @@ case "$1" in
 		shift 1
 		do_installer $* ;;
 		
+	proc)
+		shift 1
+		proc $* ;;
+	
+	wol)
+		shift 1
+		wol $* ;;
+	
+	dofbshot)
+		dofbshot
+		;;
+	
 	*)
 		echo "Parameter falsch: $*" ;;
 esac

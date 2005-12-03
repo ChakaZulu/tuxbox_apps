@@ -2,7 +2,6 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <link rel="stylesheet" type="text/css" href="Y_Main.css">
-
 <script language="JavaScript" type="text/javascript">
 function go_live()
 {
@@ -25,28 +24,30 @@ function go_rc()
 <body>
 
 <table border="0" width="100%">
+<tr>
+	<td width="150" align="center" class="y_menu_logo"><a href="http://wiki.tuxbox.org" target="_blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></td>
+	<td>
+	<table border="0" width="100%" cellspacing="0" cellpadding="0">
 	<tr>
-		<td width="150" align="center" class="y_menu_logo"><a href="http://wiki.tuxbox.org" target="_blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></td>
 		<td>
-		<table border="0" width="100%" cellspacing="0" cellpadding="0">
-			<tr>
-				<td><span style="font-weight: bold;font-size: 14pt;">dbox yWeb</span>
-				<font size="1">&nbsp; Version {=ini-get:Y_Version.txt;version=}</font></td>
-			</tr>
-			<tr>
-				<td>
-					<ul id="menu_prim" class="y_menu_prim">
-						<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_TvRadio.htm" title="View &#038;edit Bouquets">Bouquet</a></li>
-						<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_Tools.htm" title="Box &#038; Test Tools">Tools</a></li>
-						<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_Settings.yhtm" title="Settings for Box, Web, Plugins ...">Settings</a></li>
-						<li class="plain"><a class="y_menu_prim_item" href="javascript:go_live()" title="TV or Radio Live-Streaming">Live</a></li>
-						<li class="plain"><a class="y_menu_prim_item" href="javascript:go_rc()" title="Web-based Remote Control">RC</a></li>
-					</ul>
-				</td>
-			</tr>
-		</table>
+		<span style="font-weight: bold;font-size: 14pt;">dbox yWeb</span>
+		<font size="1">&nbsp; Version {=ini-get:Y_Version.txt;version=}</font>
 		</td>
 	</tr>
+	<tr>
+		<td>
+		<ul id="menu_prim" class="y_menu_prim">
+			<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_TvRadio.htm" title="View &#038;edit Bouquets">Bouquet</a></li>
+			<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_Tools.htm" title="Box &#038; Test Tools">Tools</a></li>
+			<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_Settings.yhtm" title="Settings for Box, Web, Plugins ...">Settings</a></li>
+			<li class="plain"><a class="y_menu_prim_item" href="javascript:go_live()" title="TV or Radio Live-Streaming">Live</a></li>
+			<li class="plain"><a class="y_menu_prim_item" href="javascript:go_rc()" title="Web-based Remote Control">RC</a></li>
+		</ul>
+		</td>
+	</tr>
+	</table>
+	</td>
+</tr>
 </table>
 
 </body>

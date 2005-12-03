@@ -5,40 +5,131 @@
 <script language="JavaScript" type="text/javascript">
 function do_stop()
 {
-        document.vlc.stop()
+	document.vlc.stop()
 }
 function doPlayOrPause()
 {
-    if( document.vlc.{=if-equal:{=browser=}~ie~playing~isplaying()=} )
-    {
-    	document.v.PlayOrPause.value = " Play ";
-        document.vlc.pause()
-    } else {
-	    document.v.PlayOrPause.value = "Pause";
-        document.vlc.play()
-    }
+	if( document.vlc.{=if-equal:{=browser=}~ie~playing~isplaying()=} )
+	{
+		document.v.PlayOrPause.value = " Play ";
+		document.vlc.pause()
+	} else 
+	{
+		document.v.PlayOrPause.value = "Pause";
+		document.vlc.play()
+	}
+}
+function setControlsForRecording(state)
+{
+	if(state == 0)
+	{
+		parent.panel.enablePanel(1);
+		document.v.PlayOrPause.disabled=false;
+		document.v.audiopid.disabled=false;
+		document.v.stop.disabled=false;
+		{=if-equal:{=browser=}~ie~
+		document.v.record.value="Record";
+		~=}
+		document.v.audio_track.disabled=false;
+		document.v.snapshot.disabled=false;
+	
+	}
+	else
+	{
+		parent.panel.enablePanel(0);
+		document.v.PlayOrPause.disabled=true;
+		document.v.audiopid.disabled=true;
+		document.v.stop.disabled=true;
+		{=if-equal:{=browser=}~ie~
+		document.v.record.value="Stop Record";
+		~=}
+		document.v.audio_track.disabled=true;
+		document.v.snapshot.disabled=true;	
+	}
 }
 function doStop()
 {
-    	document.v.PlayOrPause.value = " Play ";
-        document.vlc.stop()
+	document.v.PlayOrPause.value = " Play ";
+	document.vlc.stop()
 }
 function doLockUnlock()
 {
-    if( document.v.lock.value == "Lock" )
-    {
-    	document.v.lock.value = "Unlock";
-        parent.dbox.location.href='/control/exec?Y_Live&live_lock'
-    } else {
-	    document.v.lock.value = "Lock";
-        parent.dbox.location.href='/control/exec?Y_Live&live_unlock'
-    }
+	if( document.v.lock.value == "Lock" )
+	{
+		document.v.lock.value = "Unlock";
+		parent.dbox.location.href='/control/exec?Y_Live&live_lock'
+	} else 
+	{
+		document.v.lock.value = "Lock";
+		parent.dbox.location.href='/control/exec?Y_Live&live_unlock'
+	}
 }
 function view_streaminfo()
 {
 	window.open("/fb/info.dbox2","streaminfo","width=400,height=400");
 }
-
+function doRecord()
+{
+	if(document.v.record.value == "Record")
+	{
+		var sel = document.v.mux.selectedIndex;
+		var ymux = (sel != -1) ? document.v.mux[sel].value : "ts";
+		var options = new Array(":sout=#duplicate{dst=display,dst=std{access=file,mux="+ymux+",url="+document.v.record_filename.value+"}}",":input-repeat=1");
+		setControlsForRecording(1);
+	}
+	else
+	{
+		doStop();
+		var options = new Array(":input-repeat=1");
+		setControlsForRecording(0);
+	}
+	document.vlc.addTarget(document.v.url.value, options, 4+8, -666);
+	document.vlc.next();
+	document.vlc.play();
+}
+function doChangeAudioPid()
+{
+	doToggleExpertMode(1);
+	document.v.submit()
+}
+function doToggleExpertMode(docollapse)
+{
+	if(document.v.expert.value == "E+" && docollapse==0)
+	{
+		top.resizeBy(0,80);
+		document.v.expert.value = "E-";
+		document.all.ex.style.visibility="visible";
+	} 
+	else 	
+		if(document.v.expert.value == "E-")
+		{
+			top.resizeBy(0,-80);
+			document.v.expert.value = "E+";
+			document.all.ex.style.visibility="hidden";
+		}
+}
+function vlcPressKey(key)
+{
+	{=if-equal:{=browser=}~ie~
+		keyvalue = document.vlc.getVariable(key);
+		document.vlc.setVariable("key-pressed", keyvalue);
+	~
+		keyvalue = document.vlc.get_int_variable(key);
+		document.vlc.set_int_variable("key-pressed", keyvalue);
+	=}
+}
+function doSnapshot()
+{
+	vlcPressKey("key-snapshot");
+}
+function doChangeAudioChannel()
+{
+	vlcPressKey("key-audio-track");
+}
+function doRecord2()
+{
+	vlcPressKey("key-record");
+}
 </script>
 </head>
 {=script:Y_Live prepare_tv=}
@@ -60,20 +151,34 @@ function view_streaminfo()
 </td></tr>
 <tr><td>
 	<form name="v" action="/Y_Live_Wait.yhtm" method="get">
+		<button class="y_live_button" type="button" value="E+" title="expert mode" name="expert" onClick="doToggleExpertMode(0)">E+</button>
 		<button class="y_live_button" type="button" value="Pause" title="play or pause streaming" id="PlayOrPause" onClick="doPlayOrPause()">Pause</button>
-		<button class="y_live_button" type="button" value="stop" title="stop streaming" onClick="doStop()">Stop</button>
+		<button class="y_live_button" type="button" value="stop" title="stop streaming" name="stop" onClick="doStop()">Stop</button>
 		<button class="y_live_button" type="button" value="mute" title="mute / unmute volume" onClick="document.vlc.toggleMute()">Mute</button>
-		<button class="y_live_button" type="button" value="fullscreen" title="switch to fullscreen-mode - or use double-click" onClick="document.vlc.fullscreen()">FScreen</button>
 		<button class="y_live_button" type="button" value="minus" title="lower volume" onClick="document.vlc.volume=document.vlc.volume-10;">-</button>
 		<button class="y_live_button" type="button" value="plus" title="higher volume" onClick="document.vlc.volume = document.vlc.volume+10;">+</button>
+		<button class="y_live_button" type="button" value="fullscreen" title="switch to fullscreen-mode - or use double-click" onClick="document.vlc.fullscreen()">F</button>
 		<button class="y_live_button" type="button" value="Lock" title="lock / unlock TV (record mode, rc, lcd)" name="lock" onClick="doLockUnlock()">Lock</button>
-		<button class="y_live_button" type="button" value="Streaminfo" title="view streaminfo" name="streaminfo" onClick="view_streaminfo()">sinfo</button>
-		<select size="1" class="y_live_audio_pids" name="audiopid" onChange="document.v.submit()">
+		<button class="y_live_button" type="button" value="Streaminfo" title="view streaminfo" name="streaminfo" onClick="view_streaminfo()">S</button>
+		<select size="1" class="y_live_audio_pids" name="audiopid" onChange="doChangeAudioPid()">
 		{=func:get_audio_pids_as_dropdown=}
 		</select>
 		<br>
 		<input type="hidden" name="browser" value="{=browser=}">
-	</form>	
+		<input type="hidden" name="url" value="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids {=audiopid=}=}">
+		<div name="ex" id="ex" style="visibility : hidden;">
+			<b>Expert Mode - (ActiveX - Experimental)</b><br>
+			<input type="text" name="record_filename" value="D:\aufnahme.ts">&nbsp;
+			mux: <SELECT name="mux">
+				<option value="ts" selected>ts</option>          
+				<option value="ps">ps</option>          
+        		</SELECT>
+			<button class="y_live_button" type="button" value="r" title="record stream to file" name="record" onClick="doRecord()">Record</button>
+			<br>
+			<button class="y_live_button" type="button" title="create snapshot picture" name="snapshot" onClick="doSnapshot()">Snapshot</button>
+			<button class="y_live_button" type="button" title="change VLC audio channel" name="audio_track" onClick="doChangeAudioChannel()">change Audio Channel</button>
+		</div>
+	</form>
 ~
 	<embed type="application/x-vlc-plugin"
 		name="vlc"  id="vlc"
@@ -83,19 +188,28 @@ function view_streaminfo()
 </td></tr>
 <tr><td>
 	<form name="v" action="/Y_Live_Wait.yhtm" method="get">
+		<input class="y_live_button" type="button" value="E+" title="expert mode" name="expert" onClick="doToggleExpertMode(0)">
 		<input class="y_live_button" type="button" value="Pause" title="play or pause streaming" name="PlayOrPause" onClick="doPlayOrPause()">
-		<button class="y_live_button" type="button" value="stop" title="stop streaming" onClick="doStop()">Stop</button>
+		<button class="y_live_button" type="button" value="stop" title="stop streaming" name="stop" onClick="doStop()">Stop</button>
 		<button class="y_live_button" type="button" value="mute" title="mute / unmute volume" onClick="document.vlc.mute()">Mute</button>
-		<button class="y_live_button" type="button" value="fullscreen" title="switch to fullscreen-mode - or use double-click" onClick="document.vlc.fullscreen()">F</button>
 		<button class="y_live_button" type="button" value="minus" title="lower volume" onClick="document.vlc.set_volume(document.vlc.get_volume()-10);">-</button>
 		<button class="y_live_button" type="button" value="plus" title="higher volume" onClick="document.vlc.set_volume(document.vlc.get_volume()+10);">+</button>
+		<button class="y_live_button" type="button" value="fullscreen" title="switch to fullscreen-mode - or use double-click" onClick="document.vlc.fullscreen()">F</button>
 		<input class="y_live_button" type="button" value="Lock" title="lock / unlock TV (record mode, rc, lcd)" name="lock" onClick="doLockUnlock()">
 		<button class="y_live_button" type="button" value="Streaminfo" title="view streaminfo" name="streaminfo" onClick="view_streaminfo()">sinfo</button>
-		<select size="1" class="y_live_audio_pids" name="audiopid" onChange="document.v.submit()">
+		<select size="1" class="y_live_audio_pids" name="audiopid" onChange="doChangeAudioPid()">
 		{=func:get_audio_pids_as_dropdown=}
 		</select>
+		<br>
 		<input type="hidden" name="browser" value="{=browser=}">
-	</form>	
+		<input type="hidden" name="url" value="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids {=audiopid=}=}">
+		<div name="ex" id="ex" style="visibility : hidden;">
+			<hr>
+			<b>Expert Mode - (Mozilla - Experimental)</b><br>
+			<button class="y_live_button" type="button" title="create snapshot picture" name="snapshot" onClick="doSnapshot()">Snapshot</button>
+			<button class="y_live_button" type="button" title="change VLC audio channel" name="audio_track" onClick="doChangeAudioChannel()">change Audio Channel</button>
+		</div>
+	</form>
 =}
 </td></tr>
 </table>
@@ -111,10 +225,10 @@ function view_streaminfo()
 		if (document.v.audiopid.options[i].value == "{=if-empty:{=audiopid=}~00000~{=audiopid=}=}")
 			document.v.audiopid.options[i].selected = true;
 
-{=if-equal:{=browser=}~moz~
-    document.vlc.play()
-~=}
-</script>	
+	{=if-equal:{=browser=}~moz~
+	document.vlc.play()
+	~=}
+</script>
 
 </body>
 </html>

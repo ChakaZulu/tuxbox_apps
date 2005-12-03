@@ -33,6 +33,12 @@ tr
 	font-size:10pt;
 }
 /* primary Navigation */
+.y_menu_item {
+    margin: 0;
+    display: block;
+    background-repeat: no-repeat;
+    /*background-position: 0 1px;*/
+}
 .y_menu_prim {
     background-color: transparent;
     padding: 0em 0em 0em 0em;
@@ -86,36 +92,39 @@ tr
     width: 100px;
 }
 
-.y_menu_item {
-    margin: 0;
-    display: block;
-    background-repeat: no-repeat;
-    /*background-position: 0 1px;*/
-}
 .y_menu_sec li {
-    background-color: transparent;
+    background-color:  #F0FAFF;
+/*    background-color: transparent;*/
     border-color: #6D96A9;
     border-width: 1px; 
     border-style: solid;
-    color: #436976;
     height: auto;
     margin-bottom: 0.1em;
     width: 100px;
+    color: #436976
+}
+.y_menu_sec li.disabled {
+/*    background-color: transparent;*/
+    background-color: #EBEBEB;
+    border-color: #808080;
+    border-width: 1px; 
+    border-style: solid;
+    height: auto;
+    margin-bottom: 0.1em;
+    width: 100px;
+    color: #808080
 }
 .y_menu_sec li a {
-    background-color: #F0FAFF;
-    color: #436976;
     text-decoration: none;
 }
 .y_menu_sec li.selected a {
-    background-color: #dee7ec;
-    border: 1px solid #6D96A9;
     color: #436976
+}
+.y_menu_sec li.disabled a {
 }
 .y_menu_sec li a:hover {
     background-color: #dee7ec;
     border-color: #6D96A9;
-    color: #436976;
 }
 
 /* zz tv-radio-controlpanel */

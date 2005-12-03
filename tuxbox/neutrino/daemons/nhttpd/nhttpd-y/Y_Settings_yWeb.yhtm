@@ -1,42 +1,63 @@
+{=include-block:Y_Blocks.txt;management_check_top=}
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<script language="JavaScript" type="text/javascript" >
-function do_set() 
+<script type="text/javascript" >
+function do_submit()
 {
-	_url="/control/exec?Y_Plugins&yWeb_set&"+
-		document.f.liveResolution_w.value
-		+"&"+document.f.liveResolution_h.value
-		+"&"+document.f.slavebox.value
-		;
-	parent.frames[1].location.href=_url;
+	document.all.wait.style.visibility="visible"
+	document.f.submit();
 }
 </script>
 </head>
 <body>
+{=var-set:wait_text=Werte werden übernommen (Save).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <!--- Rapid Prototyping using ini-get --->
 <br>
 <div class="y_head">yWeb</div>
 <div class="y_work_box">
-	<form name="f" action="">
+	<form name="f" action="/y/cgi">
 		<table border="0" class="y_form_table">
 			<tr>
-				<td>Live Resolution (Width)</td>
-				<td><input type="text" name="liveResolution_w" size="1" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_w;384=}"></td>
+				<td>LiveView Auflösung (Breite)</td>
+				<td><input type="text" name="liveResolution_w" size="1" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_w;384=}" title="LiveView resolution width"></td>
 			</tr>
 			<tr>
-				<td>Live Resolution (Height) [Change: Clieck Refresh]</td>
-				<td><input type="text" name="liveResolution_h" size="1" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_h;288=}"></td>
+				<td>LiveView Auflösung (Höhe)</td>
+				<td><input type="text" name="liveResolution_h" size="1" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;live_resolution_h;288=}" title="LiveView resolution height"></td>
 			</tr>
 			<tr>
-				<td>Slave Box / 2. dbox IP</td>
-				<td><input type="text" name="slavebox" size="15" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;slavebox=}" title="enter ip (xxx.xxx.xxx.xxx) of slave-box"></td>
+				<td>Slave Box IP (2. dbox)</td>
+				<td><input type="text" name="slavebox" size="15" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;slavebox=}" title="enter IP (xxx.xxx.xxx.xxx) of slave-box"></td>
+			</tr>
+			<tr>
+				<td>Management IP 1</td>
+				<td><input type="text" name="managementIP" size="15" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip=}" title="enter IP (xxx.xxx.xxx.xxx)"></td>
+			</tr>
+			<tr>
+				<td>Management IP 2</td>
+				<td><input type="text" name="managementIP2" size="15" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip2=}" title="enter IP (xxx.xxx.xxx.xxx)"></td>
+			</tr>
+			<tr>
+				<td>Wake on Lan MAC 1</td>
+				<td><input type="text" name="wol_mac_1" size="17" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;wol_mac_1=}" title="enter MAC Adress (xx:xx:xx:xx:xx:xx)"></td>
+			</tr>
+			<tr>
+				<td>Wake on Lan MAC 2</td>
+				<td><input type="text" name="wol_mac_2" size="17" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;wol_mac_2=}" title="enter MAC Adress (xx:xx:xx:xx:xx:xx)"></td>
+			</tr>
+			<tr>
+				<td>Wake on Lan MAC 3</td>
+				<td><input type="text" name="wol_mac_3" size="17" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;wol_mac_3=}" title="enter MAC Adress (xx:xx:xx:xx:xx:xx)"></td>
 			</tr>
 		</table>
 		<br>
-		<input type="button" value="Setzen" name="B1" title="submit values" onClick='do_set()'>
+		<input type="hidden" name="tmpl" value="Y_Settings_yWeb.yhtm">
+		<input type="hidden" name="execute" value="include-block:Y_Blocks.txt;yWeb_save_settings;nix">
+		<input type="button" value="Speichern ..." title="submit and save values" onClick="do_submit()">
 	</form>
 </div>
 </body>
 </html>
+{=include-block:Y_Blocks.txt;management_check_bottom=}

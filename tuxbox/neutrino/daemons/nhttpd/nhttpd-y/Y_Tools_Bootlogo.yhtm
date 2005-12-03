@@ -5,6 +5,7 @@
 <script language="JavaScript" type="text/javascript" >
 function do_submit() 
 {
+	document.all.wait.style.visibility="visible"
 	document.f.su.disabled=true;
 	if(document.f.logotype[0].checked == true)
 		document.f.action="/control/exec?Y_Tools&bootlogo_upload";
@@ -15,7 +16,7 @@ function do_submit()
 </script>
 </head>
 <body>
-
+{=var-set:wait_text=Logo wird hochgeladen (Upload).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <br>
 <div class="y_head">Bootlogo / LCD</div>
 <div class="y_work_box">

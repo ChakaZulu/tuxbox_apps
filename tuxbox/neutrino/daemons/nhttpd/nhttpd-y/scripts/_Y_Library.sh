@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Library (yjogol)
-# $Date: 2005/10/21 13:05:22 $
-# $Revision: 1.5 $
+# $Date: 2005/12/03 14:39:26 $
+# $Revision: 1.6 $
 # -----------------------------------------------------------
 
 # ===========================================================
@@ -62,12 +62,18 @@ buildStreamingAudioRawURL()
 
 y_format_message_html()
 {
-	echo "$msg" | sed 's/$/<br>/g' >$y_tmp
-	buildHTML=`sed "/Y_msg/r $y_tmp" $y_path_httpd/Y_Tools_Format_tmpl.htm`
-	echo "$buildHTML"
-	echo "" >$y_tmp
+	tmp="<html><head><meta http-equiv='Content-Type' content='text/html; charset=windows-1252'>"
+	tmp="$tmp <link rel='stylesheet' type='text/css' href='/Y_Main.css'></head>"
+	tmp="$tmp <body><div class='y_work_box'><pre>\n$msg\n</pre></div></body></html>"
+	echo "$tmp"
 }
-
+y_format_message_html2()
+{
+	tmp="<html><head><meta http-equiv='Content-Type' content='text/html; charset=windows-1252'>"
+	tmp="$tmp <link rel='stylesheet' type='text/css' href='/Y_Main.css'></head>"
+	tmp="$tmp <body>$msg</body></html>"
+	echo "$tmp"
+}
 # ===========================================================
 # config-Dateien - lesen / schreiben
 # (Zeilenformat: VarName=VarValue)
@@ -98,7 +104,7 @@ config_get_value()
 {
 	cmd="sed -n /^$1=/p"
 	tmp=`echo "$cfg" | $cmd`
-	cmd="sed -e s/^.*=//1"
+	cmd="sed -e s/^$1=//1"
 	tmp=`echo "$tmp" | $cmd`
 	echo $tmp
 }
@@ -162,7 +168,7 @@ yreboot()
 # -----------------------------------------------------------
 msg_nmsg()
 {
-    wget -O - -q "$y_url_control/control/message?nmsg=$1"
+    wget -O - -q "$y_url_control/message?nmsg=$1"
 }
 
 # -----------------------------------------------------------
@@ -170,7 +176,7 @@ msg_nmsg()
 # -----------------------------------------------------------
 msg_popup()
 {
-    wget -O - -q "$y_url_control/control/message?popup=$1"
+    wget -O - -q "$y_url_control/message?popup=$1"
 }
 
 # -----------------------------------------------------------

@@ -1,0 +1,28 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link rel="stylesheet" type="text/css" href="Y_Main.css">
+<script language="JavaScript" type="text/javascript">
+function do_snapshot()
+{
+	document.all.wait.style.visibility="visible";
+	out.location.href = "/control/exec?Y_Tools&dofbshot";
+}
+function do_ready()
+{
+	document.all.wait.style.visibility="hidden";
+}
+</script>
+</head>
+<body>
+{=var-set:wait_text=Schnappschuss wird erstellt (take snapshot)=}{=include-block:Y_Blocks.txt;snip_wait=}
+<br>
+<div class="y_head">OSD Screenshot</div>
+<div class="y_work_box">
+	<button name="snapshot" onClick="do_snapshot()">Snapshot</button>
+	<div name="pic" id="pic">
+		<iframe name="out" id="out" width="740" height="600" align="left" frameborder="0" scrolling="no">Your Browser does not support IFrames.</iframe>
+	</div>
+</div>
+</body>
+</html>

@@ -3,10 +3,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <link rel="stylesheet" type="text/css" href="/Y_Main.css">
 <script language="JavaScript" type="text/javascript" >
-function goConfirmUrl(_meld, _url) 
-{
-	if (confirm(_meld)==true) goUrl(_url);
-}
 function goUrl(_url)
 {
 	parent.frames[1].location.href = _url;
@@ -18,29 +14,42 @@ function goUrl(_url)
 <br>
 <div class="y_head">Info</div>
 <div class="y_work_box">
-
 	<form>
 		<table  class="y_work_table" cellpadding="8">
-			<tr>
-				<td>
-				<b><font size="2">Linux</font></b><br>
-				<INPUT type=button value="Kernel Meldungen" title="show Linux kernel stack messages" onClick='goUrl("/control/exec?Y_Tools&kernel-stack");'>
-				<INPUT type=button value="Prozesse" title="show currently running processes" onClick='goUrl("/control/exec?Y_Tools&ps");'>
-				<INPUT type=button value="Speicher" title="show memory space" onClick='goUrl("/control/exec?Y_Tools&free");'>
-				</td>
-			</tr>
+		<tr>
+			<td>
+			<b><font size="2">Linux</font></b><br>
+			<INPUT type=button value="Kernel Meldungen" title="show Linux kernel stack messages" onClick='goUrl("/control/exec?Y_Tools&kernel-stack");'>
+			<INPUT type=button value="Prozesse" title="show currently running processes" onClick='goUrl("/control/exec?Y_Tools&ps");'>
+			<INPUT type=button value="Speicher" title="show memory space" onClick='goUrl("/control/exec?Y_Tools&free");'>
+			</td>
+		</tr>
 		</table>
 		<br>
 		<table class="y_work_table" cellpadding="8">
-			<tr>
-				<td>
-				<b><font size="2">dbox</font></b><br>
-				<INPUT type=button value="Info" onClick='goUrl("/control/info");'>
-				<INPUT type=button value="Version" onClick='goUrl("/control/info?version");'>
-				<INPUT type=button value="Settings" onClick='goUrl("/control/info?settings");'>
-				<INPUT type=button value="dbox Zeit" onClick='goUrl("/control/gettime");'>
-				</td>
-			</tr>
+		<tr>
+			<td>
+			<b><font size="2">dbox</font></b><br>
+			<INPUT type=button value="Info" onClick='goUrl("/control/info");'>
+			<INPUT type=button value="Version" onClick='goUrl("/control/info?version");'>
+			<INPUT type=button value="Settings" onClick='goUrl("/control/info?settings");'>
+			<INPUT type=button value="dbox Zeit" onClick='goUrl("/control/gettime");'>
+			</td>
+		</tr>
+		</table>
+		<br>
+		<table class="y_work_table" cellpadding="8">
+		<tr>
+			<td>
+			<b><font size="2">proc</font></b><br>
+			<INPUT type=button value="CPU info" onClick='goUrl("/control/exec?Y_Tools&proc&cpuinfo");'>
+			<INPUT type=button value="MEM info" onClick='goUrl("/control/exec?Y_Tools&proc&meminfo");'>
+			<INPUT type=button value="Partitions" onClick='goUrl("/control/exec?Y_Tools&proc&partitions");'>
+			<INPUT type=button value="mtd" onClick='goUrl("/control/exec?Y_Tools&proc&mtd");'>
+			<INPUT type=button value="Stat" onClick='goUrl("/control/exec?Y_Tools&proc&stat");'>
+			<INPUT type=button value="version" onClick='goUrl("/control/exec?Y_Tools&proc&version");'>
+			</td>
+		</tr>
 		</table>
 	</form>
 </div>

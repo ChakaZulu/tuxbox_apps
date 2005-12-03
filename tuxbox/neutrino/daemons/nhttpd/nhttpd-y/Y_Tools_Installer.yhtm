@@ -1,3 +1,4 @@
+{=include-block:Y_Blocks.txt;management_check_top=}
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
@@ -18,7 +19,7 @@ function do_submit()
 <body>
 
 <br>
-<div class="y_head">Installer</div>
+<div class="y_head">yInstaller</div>
 <div class="y_work_box">
 	<form name="f" method="POST" enctype="multipart/form-data" action="/control/exec?Y_Tools&installer" target="out">
 		tar-File:&nbsp;<input type="file" name="filename" size="70">&nbsp;<br>
@@ -29,5 +30,5 @@ function do_submit()
 </div>
 
 </body>
-
 </html>
+{=include-block:Y_Blocks.txt;management_check_bottom=}
