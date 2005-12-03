@@ -1,5 +1,25 @@
 Severity	id		Headline							Build
 
+3-Average	JG200000156	Flash: Error in mtd list if length!=5				R1.4.0
+5-Enhancement	JG200000326	Flash: New Dialogs						R1.4.0
+5-Enhancement	JG200000233	Tools: new: Wake on LAN for 3 MACs				R1.4.0
+5-Enhancement	JG200000246	mount: do mount at mount list					R1.4.0
+5-Enhancement	JG200000247	mount: new: unmount list					R1.4.0
+5-Enhancement	JG200000305	infos: /proc/cpuinfo, meminfo, version...			R1.4.0
+5-Enhancement	JG200000271	nhttpd: ycgi: new: include-block:<filename>;<blockname>;<default>	R1.4.0
+5-Enhancement	JG200000314	nhttpd: ycgi: new: ini-set:<filename>;<varname>;<value>		R1.4.0
+5-Enhancement	JG200000234	nhttpd: ycgi: new: if-file-exists:<filename>~<true>~<false>	R1.4.0
+5-Enhancement	JG200000315	nhttpd: ycgi: new: if-not-equal					R1.4.0
+5-Enhancement	JG200000317	nhttpd: ycgi: new: add var-set, var-get for local ycgi varables	R1.4.0
+5-Enhancement	JG200000318	Live: Experimental: Change VLC audio channel			R1.4.0
+5-Enhancement	JG200000311	Live: record (Expert Mode ActiveX)..				R1.4.0
+5-Enhancement	JG200000312	Live: record: mux type = ts, ps					R1.4.0
+5-Enhancement	JG200000319	Live: Expert Mode: Take VLC Snapshot				R1.4.0
+5-Enhancement	JG200000320	after change Web Password: reload nhttpd.conf			R1.4.0
+5-Enhancement	JG200000325	General from-dialog updates					R1.4.0
+5-Enhancement	JG200000327	New: OSD Snapshot with fbshot					R1.4.0
+5-Enhancement	JG200000316	Management IP for some dialogs required				R1.4.0
+
 3-Average	JG200000308	nhttpd: re-write file upload handling (solved: problems with pre-send data - mozilla engines)	R1.3.6
 5-Enhancement	JG200000144	Live: add Streaminfo button					R1.3.6
 5-Enhancement	JG200000145	yInstaller: upload a tar-file and execude included install.sh	R1.3.6
