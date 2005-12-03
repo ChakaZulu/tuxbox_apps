@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: yapi.h,v 1.4 2005/11/10 19:41:43 yjogol Exp $
+        $Id: yapi.h,v 1.5 2005/12/03 14:47:07 yjogol Exp $
 
         License: GPL
 
@@ -64,16 +64,20 @@ class CControlAPI;
 
 //-------------------------------------------------------------------------
 
-
 class CyAPI
 {
+private:
 	CWebDbox	*Parent;
 
+	std::map<std::string, std::string> ycgi_vars;
+	
 	// parsing engine
 	std::string cgi_file_parsing(CWebserverRequest *request, std::string htmlfilename, bool ydebug);
 	std::string cgi_cmd_parsing(CWebserverRequest* request, std::string html_template, bool ydebug);
 	std::string YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd);
 	std::string YWeb_cgi_func(CWebserverRequest* request, std::string ycmd);
+	void reset_parsing_engine(void);
+
 	// func
 	std::string func_mount_get_list();
 	std::string func_mount_set_values(CWebserverRequest* request);
@@ -86,12 +90,14 @@ class CyAPI
 	std::string func_get_radio_pid();
 	std::string func_get_audio_pids_as_dropdown(std::string para);
 	std::string func_get_request_data(CWebserverRequest* request, std::string para);
-	
+	std::string func_unmount_get_list();
+	std::string func_do_reload_nhttpd_config(CWebserverRequest* request);
+	std::string func_get_partition_list();
 
 	// helpers
 	std::string YWeb_cgi_get_ini(std::string filename, std::string varname);
-	void YWeb_cgi_set_ini(std::string filename, std::string varname);
-	
+	void YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue);
+	std::string YWeb_cgi_include_block(std::string filename, std::string blockname, std::string ydefault);
 
 public:
 
@@ -109,7 +115,6 @@ public:
 	bool ParseAndSendFile(CWebserverRequest *request);
 
 	friend class CControlAPI;
-
 };
 
 #endif /* __nhttpd_yapi_h__ */

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: yapi.cpp,v 1.6 2005/11/10 19:41:43 yjogol Exp $
+	$Id: yapi.cpp,v 1.7 2005/12/03 14:47:07 yjogol Exp $
 
 	License: GPL
 
@@ -37,17 +37,25 @@
 			get value of a http GET argument
 			example: /y/cgi?a=hello -> replaces {=a=} with "hello"
 
+		-"var-get:<varname>"
+			get value of a ycgi variable
+		
+		-"var-set:<varname>=<value>"
+			set value of a ycgi variable
+		
 		- "script:<shell-script-filename without .sh>
 			get output of a shell-script
 			example: replaces {=script:Y_Live url=} Output of shell-script-call
 			with argument "Y_Live.sh url"
 
 		-"ini-get:<ini/conf-filename>;<varname>[;<default>]"
-		
 			get value of a ini/conf file variable
 			example: replaces {=ini-get:/var/tuxbox/config/nhttpd.conf;AuthPassword=}
 				with the password for the WebInterface from the conf-file				 
 
+		-"ini-set:<ini/conf-filename>;<varname>;<value>"
+			set value for a ini/conf file variable with value
+		
 		-"inculde:<filename>"
 			insert file
 			example: {=include:/var/tuxbox/config/nhttpd.conf=} wile be replaced
@@ -66,7 +74,16 @@
 		
 		-"if-equal:<left_value>~<right_value>~<then>~<else>"
 			 (left_value == right_value?)
-			 
+		
+		-"if-not-equal:<left_value>~<right_value>~<then>~<else>"
+			 (left_value != right_value?)
+		
+		- "if-file-exists:<filename>~<them>~<else>"
+
+		-"include-block:<filename>;<block-name>[;<default-text>]"
+			insert text from file <filename> beeginning after "start-block+<blockname>"
+			and ends before "end-block+<blockname>"
+
 	Special url calls
 		- /y/cgi?[...&]tmpl=<html file> parses html file (e.g. given in a form)
 		- /y/cgi?<html file> parses html file
@@ -128,7 +145,23 @@ bool ySplitString(std::string str, std::string delimiter, std::string& left, std
 		left = str; //default if not found
 	return (pos != std::string::npos);
 }
+//-------------------------------------------------------------------------
+// trim wwwhitespaces
+//-------------------------------------------------------------------------
+std::string trim(std::string const& source, char const* delims = " \t\r\n") 
+{
+  std::string result(source);
+  std::string::size_type index = result.find_last_not_of(delims);
+  if(index != std::string::npos)
+    result.erase(++index);
 
+  index = result.find_first_not_of(delims);
+  if(index != std::string::npos)
+    result.erase(0, index);
+  else
+    result.erase();
+  return result;
+}
 //-------------------------------------------------------------------------
 // constructor und destructor
 //-------------------------------------------------------------------------
@@ -184,6 +217,15 @@ bool CyAPI::Execute(CWebserverRequest* request)
 }
 
 //-------------------------------------------------------------------------
+// reset state and vars of parsing engine
+//-------------------------------------------------------------------------
+
+void CyAPI::reset_parsing_engine(void)
+{
+	ycgi_vars.clear();
+}
+
+//-------------------------------------------------------------------------
 // mini cgi Engine (Entry for ycgi) 
 //-------------------------------------------------------------------------
 
@@ -193,6 +235,7 @@ bool CyAPI::cgi(CWebserverRequest *request)
 	bool ydebug = false, yexecute = false;
 	std::string htmlfilename, yresult, ycmd;
 
+	reset_parsing_engine();
 	request->SendPlainHeader("text/html");          // Standard httpd header senden MIME html
 
 	if (request->ParameterList.size() > 0)
@@ -241,6 +284,7 @@ bool CyAPI::ParseAndSendFile(CWebserverRequest *request)
 	bool ydebug = false;
 	std::string yresult, ycmd;
 
+	reset_parsing_engine();
 	request->SendPlainHeader("text/html");          // Standard httpd header senden MIME html
 	if (request->Method == M_HEAD) {
 			return true;
@@ -351,8 +395,14 @@ std::string  CyAPI::cgi_cmd_parsing(CWebserverRequest* request, std::string html
 //	include:<filename>
 //	func:<funcname> (funcname to be implemented in CyAPI::YWeb_cgi_func)
 //	ini-get:<filename>;<varname>[;<default>]
+//	ini-set:<filename>;<varname>;<value>
 //	if-empty:<value>~<then>~<else>
 //	if-equal:<left_value>~<right_value>~<then>~<else> (left_value == right_value?)
+//	if-not-equal:<left_value>~<right_value>~<then>~<else> (left_val!e == right_value?)
+//	if-file-exists:<filename>~<them>~<else>
+//	include-block:<filename>;<block-name>[;<default-text>]
+//	var-get:<varname>
+//	var-set:<varname>=<varvalue>
 //-------------------------------------------------------------------------
 
 std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
@@ -384,13 +434,49 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 				}
 			}
 		}
+		else if(ycmd_type == "if-not-equal")
+		{
+			std::string if_left_value, if_right_value, if_then, if_else;
+			if(ySplitString(ycmd_name,"~",if_left_value,if_right_value))
+			{
+				if(ySplitString(if_right_value,"~",if_right_value,if_then))
+				{
+					ySplitString(if_then,"~",if_then,if_else);
+					yresult = (if_left_value != if_right_value) ? if_then : if_else;
+				}
+			}
+		}
+		else if(ycmd_type == "if-file-exists")
+		{
+			std::string if_value, if_then, if_else;
+			if(ySplitString(ycmd_name,"~",if_value,if_then))
+			{
+				ySplitString(if_then,"~",if_then,if_else);
+				yresult = (access(if_value.c_str(), 4) == 0) ? if_then : if_else;
+			}
+		}
 		else if(ycmd_type == "include")
 		{
 			std::string ytmp;
-			std::fstream fin(ycmd_name.c_str());
-			while (fin >> ytmp) 
-				yresult += ytmp;
-			fin.close();
+			std::fstream fin(ycmd_name.c_str(), std::fstream::in);
+			if(fin.good())
+			{
+				while (!fin.eof())
+				{
+					getline(fin, ytmp);
+					yresult += ytmp;
+				}
+				fin.close();
+			}
+		}
+		else if(ycmd_type == "include-block")
+		{
+			std::string filename, blockname, tmp, ydefault;
+			if (ySplitString(ycmd_name,";",filename,tmp))
+			{
+				ySplitString(tmp,";",blockname, ydefault);
+				yresult = YWeb_cgi_include_block(filename, blockname, ydefault);
+			}
 		}
 		else if(ycmd_type == "func")
 			yresult = YWeb_cgi_func(request, ycmd_name);
@@ -406,6 +492,27 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 			}
 			else
 				yresult = "ycgi: ini-get: no ; found";
+		}
+		else if(ycmd_type == "ini-set")
+		{
+			std::string filename, varname, varvalue, tmp;
+			if (ySplitString(ycmd_name,";",filename,tmp))
+			{
+				if(ySplitString(tmp,";",varname, varvalue))
+					YWeb_cgi_set_ini(filename, varname, varvalue);
+			}
+			else
+				yresult = "ycgi: ini-get: no ; found";
+		}
+		else if(ycmd_type == "var-get")
+		{
+			yresult = ycgi_vars[ycmd_name];
+		}
+		else if(ycmd_type == "var-set")
+		{
+			std::string varname, varvalue;
+			if (ySplitString(ycmd_name,"=",varname,varvalue))
+				ycgi_vars[varname] = varvalue;
 		}
 		else
 			yresult = "ycgi-type unknown";
@@ -431,16 +538,56 @@ std::string  CyAPI::YWeb_cgi_get_ini(std::string filename, std::string varname)
 }
 
 //-------------------------------------------------------------------------
-void  CyAPI::YWeb_cgi_set_ini(std::string filename, std::string varname)
+void  CyAPI::YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue)
 {
 	CConfigFile *Config = new CConfigFile(',');
 	std::string result;
 
 	Config->loadConfig(filename);
-	Config->setString(varname, "");
+	Config->setString(varname, varvalue);
 	Config->saveConfig(filename);
 	delete Config;
 }
+
+//-------------------------------------------------------------------------
+// Get text block named <blockname> from file <filename>
+// The textblock starts with "start-block~<blockname>" and ends with
+// "end-block~<blockname>"
+//-------------------------------------------------------------------------
+std::string  CyAPI::YWeb_cgi_include_block(std::string filename, std::string blockname, std::string ydefault)
+{
+	std::string ytmp, yfile, yresult;
+	
+	yresult = ydefault;
+
+	std::fstream fin(filename.c_str(), std::fstream::in);
+	if(fin.good())
+	{
+		while (!fin.eof()) // read whole file into yfile 
+		{
+			getline(fin, ytmp);
+			yfile += ytmp;
+		}
+		fin.close();
+	}
+	if(yfile.length() != 0)
+	{
+		std::string t = "start-block~"+blockname;
+		unsigned int start, end;
+		if((start = yfile.find(t)) != std::string::npos)
+		{
+			if((end = yfile.find("end-block~"+blockname, start+t.length())) != std::string::npos)
+			{
+				yresult = yfile.substr(start+t.length(),end - (start+t.length()) );
+			}
+		}
+	}
+	else
+		aprintf("include-blocks: file not found:%s\n",filename.c_str() );
+
+	return yresult;
+}
+
 // =============================================================================================
 // y-func : Dispatching
 // =============================================================================================
@@ -459,6 +606,7 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 		"mount-get-list", "mount-set-values", 
 		"get_bouquets_as_dropdown", "get_actual_bouquet_number", "get_channels_as_dropdown", "get_actual_channel_id",
 		"get_mode", "get_video_pids", "get_audio_pid", "get_audio_pids_as_dropdown", "get_request_data",
+		"umount_get_list", "do_reload_nhttpd_config", "get_partition_list",
 		 NULL};
 
 	ySplitString(ycmd," ",func, para);
@@ -508,13 +656,21 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 			
 		case 10:yresult = func_get_request_data(request, para);
 			break;
-			
+		
+		case 11:yresult = func_unmount_get_list();
+			break;
+		
+		case 12:yresult = func_do_reload_nhttpd_config(request);
+			break;
+		
+		case 13:yresult = func_get_partition_list();
+			break;
+		
 		default:
 			yresult = "ycgi func not found";
 	}
 	return yresult;
 }
-
 
 //-------------------------------------------------------------------------
 // y-func : mount_get_list
@@ -522,7 +678,7 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 std::string  CyAPI::func_mount_get_list()
 {
 	CConfigFile *Config = new CConfigFile(',');
-	std::string ysel, ytype, yip, ydir, ynr, yresult;
+	std::string ysel, ytype, yip, ylocal_dir, ydir, ynr, yresult;
 	int yitype;
 	char ytmp[100];
 
@@ -530,17 +686,17 @@ std::string  CyAPI::func_mount_get_list()
 	for(unsigned int i=0; i <= 7; i++)
 	{
 		ynr=itoa(i);
-		ysel = ((i==0) ? "selected" : "");
+		ysel = ((i==0) ? "checked" : "");
 		yitype = Config->getInt32("network_nfs_type_"+ynr,0);
 		ytype = ( (yitype==0) ? "NFS" :((yitype==1) ? "CIFS" : "FTPFS") ); 
 		yip = Config->getString("network_nfs_ip_"+ynr,"");
 		ydir = Config->getString("network_nfs_dir_"+ynr,"");
-		
+		ylocal_dir = Config->getString("network_nfs_local_dir_"+ynr,"");
 		if(ydir != "") 
 			ydir="("+ydir+")";
 
-		sprintf(ytmp,"<input type='radio' name='R1' value='%d' %s>%d %s - %s %s<br>",
-			i,ysel.c_str(),i,ytype.c_str(),yip.c_str(),ydir.c_str());
+		sprintf(ytmp,"<input type='radio' name='R1' value='%d' %s>%d %s - %s %s %s<br>",
+			i,ysel.c_str(),i,ytype.c_str(),yip.c_str(),ylocal_dir.c_str(), ydir.c_str());
 
 		yresult += ytmp;
 	}
@@ -565,6 +721,7 @@ std::string  CyAPI::func_mount_set_values(CWebserverRequest* request)
 	Config->setString("network_nfs_mac_"+ynr,request->ParameterList["mac"]);
 	Config->setString("network_nfs_mount_options1_"+ynr,request->ParameterList["opt1"]);
 	Config->setString("network_nfs_mount_options2_"+ynr,request->ParameterList["opt2"]);
+	Config->setString("network_nfs_automount_"+ynr,request->ParameterList["automount"]);
 	Config->setString("network_nfs_username_"+ynr,request->ParameterList["username"]);
 	Config->setString("network_nfs_password_"+ynr,request->ParameterList["password"]);
 	Config->saveConfig(NEUTRINO_CONFIGFILE);
@@ -815,7 +972,7 @@ std::string  CyAPI::func_get_audio_pids_as_dropdown(std::string para)
 	}
 
 	if(pids.APIDs.empty())
-		yresult = ""; // shouldnt happen, but print at least one apid
+		yresult = "00000"; // shouldnt happen, but print at least one apid
 	return yresult;
 }
 
@@ -842,5 +999,70 @@ std::string  CyAPI::func_get_request_data(CWebserverRequest* request, std::strin
 	return yresult;
 }
 
+//-------------------------------------------------------------------------
+// y-func : build umount list
+//-------------------------------------------------------------------------
+std::string  CyAPI::func_unmount_get_list()
+{
+	std::string ysel, ymount, ylocal_dir, yfstype, ynr, yresult, mounts;
+	char ytmp[200];
+	
+	std::ifstream in;
+	in.open("/proc/mounts", std::ifstream::in);
+	int j=0;
+	while(in.good() && (j<8))
+	{
+		yfstype="";
+		in >> ymount >> ylocal_dir >> yfstype;
+		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		yfstype = trim(yfstype);
+		if( (yfstype == "nfs") << (yfstype == "ftp") || (yfstype == "lufsd") )
+		{
+			mounts=ylocal_dir +" on "+ ymount + " ("+yfstype+")";
+			ysel = ((j==0) ? "checked" : "");
+			sprintf(ytmp,"<input type='radio' name='R1' value='%s' %s>%d %.120s<br>",
+				ylocal_dir.c_str(),ysel.c_str(),j,mounts.c_str());
 
+			yresult += ytmp;
+			j++;
+		}
+	}
+	return yresult;
+}
+//-------------------------------------------------------------------------
+// y-func : Reload the nhttpd.conf
+//-------------------------------------------------------------------------
+std::string  CyAPI::func_do_reload_nhttpd_config(CWebserverRequest* request)
+{
+	Parent->Parent->ReadConfig();
+	return "";
+}
 
+//-------------------------------------------------------------------------
+// y-func : build partition list
+//-------------------------------------------------------------------------
+std::string  CyAPI::func_get_partition_list()
+{
+	std::string ysel, ymtd, yname, dummy, yresult;
+	char ytmp[200];
+	
+	std::ifstream in;
+	in.open("/proc/mtd", std::ifstream::in);
+	int j=0;
+	while(in.good() && (j<8))
+	{
+		ymtd="";
+		in >> ymtd >> dummy >> dummy; //format:  mtd# start end "name  "
+		in.getline(ytmp, 200); // Rest of line is the mtd description
+		yname = ytmp;
+		if((j>0) && (ymtd != ""))// iggnore first line
+		{
+			ysel = ((j==1) ? "checked" : "");
+			sprintf(ytmp,"<input type='radio' name='R1' value='%d' %s title='%s'>%d %s<br>",
+				j-1,ysel.c_str(),yname.c_str(),j-1,yname.c_str());
+			yresult += ytmp;
+		}
+		j++;
+	}
+	return yresult;
+}
