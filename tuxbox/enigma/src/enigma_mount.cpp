@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.50 2005/11/28 12:51:16 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.51 2005/12/04 14:18:04 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -140,19 +140,13 @@ int eMountPoint::mount()
 	eString cmd;
 	eString ip;
 	int rc = 0;
-	
+
 	static int lastpid=-1;
-	if (lastpid != -1)
-	{
-		kill(lastpid, SIGKILL);
-		waitpid(lastpid, 0, 0);
-		lastpid=-1;
-	}
 	
-	if (!mp.mounted)
-	{
-		if (!isMounted())
-		{
+//	if (!mp.mounted)
+//	{
+//		if (!isMounted())
+//		{
 			if (access(mp.localDir.c_str(), R_OK) == -1)
 				system(eString("mkdir " + mp.localDir).c_str());
 			if (access(mp.localDir.c_str(), R_OK) == 0)
@@ -220,7 +214,10 @@ int eMountPoint::mount()
 							eDebug("[ENIGMA_MOUNT] mount rc = %d", rc);
 							
 							if (mp.localDir == "/hdd")
-								system("wget http://127.0.0.1/cgi-bin/reloadRecordings");
+							{
+								sleep(5);
+								system("wget http://127.0.0.1/cgi-bin/reloadRecordings > /dev/null");
+							}
 							_exit(0);
 							break;
 						}
@@ -229,12 +226,12 @@ int eMountPoint::mount()
 			}
 			else
 				rc = -10; //couldn't create local dir
-		}
-		else
-			rc = -2; //local dir is already a mountpoint
-	}
-	else
-		rc = -1; //mount point is already mounted
+//		}
+//		else
+//			rc = -2; //local dir is already a mountpoint
+//	}
+//	else
+//		rc = -1; //mount point is already mounted
 
 	return rc;
 /*
