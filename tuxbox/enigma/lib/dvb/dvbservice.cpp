@@ -39,27 +39,21 @@ PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 	char *audiochannelspriority = 0;
 	eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority);
 
-	eString audiochannel;
-
 	if (audiochannelspriority)
 	{
-		std::stringstream audiochannels;
-
-		audiochannels.clear();
-		audiochannels.str(eString(audiochannelspriority));
-		while (audiochannels && audio2 == 0)
+		char *audiochannel = strtok(audiochannelspriority, "#");
+		while (audiochannel && audio2 == 0)
 		{
-			audiochannels >> audiochannel;
-			audiochannel.upper();
 			for (std::list<eDVBServiceController::audioStream>::iterator it(audioStreams.begin())
 				;it != audioStreams.end(); ++it)
 			{
-				if (audiochannel == eString(it->text).upper())
+				if (strcasecmp(audiochannel, it->text.c_str()) == 0)
 				{
 					audio2 = it->pmtentry;
 					break;
 				}
 			}
+			audiochannel = strtok(NULL, "#");
 		}
 		free(audiochannelspriority);
 	}
@@ -947,10 +941,11 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 		}
 	}
 
-	if (audiopid == -1) audio = priorityAudio(audio);
-
 	if ( content_pid != -1 )
 		/*emit*/ dvb.gotContentPid(content_pid);
+
+	// get audio priority channel
+	audio = priorityAudio(audio);
 
 	ePtrList<PMTEntry>::iterator tmp = pmt->streams.end();
 	if (TTXIt != tmp)
