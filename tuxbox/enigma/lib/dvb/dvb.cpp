@@ -1096,7 +1096,7 @@ void eTransponderList::gotPMT(int err)
 				eTransponder *t = searchTS( newService.getDVBNamespace(),
 					newService.getTransportStreamID(),
 					newService.getOriginalNetworkID());
-				if ( t )
+				if ( t && (!service.service_name || !(service.dxflags & service.dxHoldName)) )
 				{
 					if ( t->satellite.isValid() )
 					{
@@ -1118,7 +1118,7 @@ void eTransponderList::gotPMT(int err)
 					service.service_name +=
 						eString().sprintf(" SID 0x%02x", newService.getServiceID().get());
 				}
-				else
+				else if ( !t )
 				{
 					service.service_name="unnamed service";
 					service.service_provider="unnamed provider";
