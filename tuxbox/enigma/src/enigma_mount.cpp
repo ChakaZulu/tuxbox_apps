@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.51 2005/12/04 14:18:04 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.52 2005/12/05 22:57:44 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -140,8 +140,6 @@ int eMountPoint::mount()
 	eString cmd;
 	eString ip;
 	int rc = 0;
-
-	static int lastpid=-1;
 	
 //	if (!mp.mounted)
 //	{
@@ -199,24 +197,22 @@ int eMountPoint::mount()
 				{
 					eDebug("[ENIGMA_MOUNT] mounting: %s", cmd.c_str());
 
-					switch (lastpid = fork())
+					switch (fork())
 					{
 						case -1:
-							eDebug("fork failed!");
-							return -5;
+							eDebug("[ENIGMA_MOUNT] fork failed!");
+							rc = -5;
 						case 0:
 						{
 							for (unsigned int i = 0; i < 90; ++i )
 								close(i);
 
-							int retry = 10;
-							while ((rc = system(cmd.c_str())) >> 8 && retry-- > 0);
-							eDebug("[ENIGMA_MOUNT] mount rc = %d", rc);
-							
+							rc = system(eString(cmd + "&").c_str());
 							if (mp.localDir == "/hdd")
 							{
-								sleep(5);
-								system("wget http://127.0.0.1/cgi-bin/reloadRecordings > /dev/null");
+								sleep(10);
+								system("cd /tmp && wget http://127.0.0.1/cgi-bin/reloadRecordings");
+								remove("/tmp/reloadRecordings");
 							}
 							_exit(0);
 							break;
