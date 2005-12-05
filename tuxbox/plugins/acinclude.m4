@@ -411,3 +411,7 @@ AC_DEFUN([AC_PROG_EGREP],
  EGREP=$ac_cv_prog_egrep
  AC_SUBST([EGREP])
 ])
+
+dnl Pick up AM_PATH_PROG_WITH_TEST from our version of progtest.m4 
+dnl (this is not a standard file).
+m4_include([../enigma/progtest.m4])
