@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.11 2004/02/13 14:40:00 thegoodguy Exp $
+// $Id: SIservices.hpp,v 1.12 2005/12/06 10:20:15 mogway Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -128,6 +128,7 @@ public:
 		flags.EIT_present_following_flag = s->EIT_present_following_flag;
 		flags.running_status = s->running_status;
 		flags.free_CA_mode = s->free_CA_mode;
+		is_actual = false;
 	}
 	// Um einen service zum Suchen zu erstellen
 	SIservice(const t_service_id _service_id, const t_original_network_id _original_network_id, const t_transport_stream_id _transport_stream_id)
@@ -148,11 +149,13 @@ public:
 		serviceName=s.serviceName;
 		flags=s.flags;
 		nvods=s.nvods;
+		is_actual=s.is_actual;
 	}
 	t_service_id          service_id;
 	t_original_network_id original_network_id; // Ist innerhalb einer section unnoetig
 	t_transport_stream_id transport_stream_id;
 	unsigned char serviceTyp;
+	bool is_actual;
 	SInvodReferences nvods;
 	std::string serviceName; // Name aus dem Service-Descriptor
 	std::string providerName; // Name aus dem Service-Descriptor
@@ -166,7 +169,9 @@ public:
 	}
 
 	t_channel_id uniqueKey(void) const {
-		return CREATE_CHANNEL_ID;
+		//return CREATE_CHANNEL_ID;
+		//notice that tsid & onid were changed for compatibility sake - order should be onid tsid when being sorted
+		return CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id, transport_stream_id, original_network_id);
 	}
 
 	void dump(void) const {

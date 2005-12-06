@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.11 2005/11/22 20:59:34 metallica Exp $
+//  $Id: sectionsdMsg.h,v 1.12 2005/12/06 10:20:17 mogway Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -53,11 +53,14 @@ struct sectionsd
 
 	enum commands
 	{
-		actualEPGchannelName=0,
+		//actualEPGchannelName=0,
+		dummy1,
 		actualEventListTVshort,
-		currentNextInformation,
+		//currentNextInformation,
+		dummy2,
 		dumpStatusinformation,
-		allEventsChannelName,
+		//allEventsChannelName,
+		dummy3,
 		setHoursToCache,
 		setEventsAreOldInMinutes,
 		dumpAllServices,

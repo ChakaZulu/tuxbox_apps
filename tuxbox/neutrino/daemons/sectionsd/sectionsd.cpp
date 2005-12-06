@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.211 2005/12/05 21:59:15 mogway Exp $
+//  $Id: sectionsd.cpp,v 1.212 2005/12/06 10:20:15 mogway Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -150,6 +150,8 @@ CEventServer *eventServer;
 
 static pthread_mutex_t eventsLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
+static pthread_mutex_t transpondersLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge transponders geschrieben und gelesen wird
+static pthread_mutex_t bouquetsLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge bouquets geschrieben und gelesen wird
 static pthread_mutex_t messagingLock = PTHREAD_MUTEX_INITIALIZER;
 
 // k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
@@ -197,6 +199,26 @@ inline void lockEvents(void)
 inline void unlockEvents(void)
 {
 	pthread_mutex_unlock(&eventsLock);
+}
+
+inline void lockTransponders(void)
+{
+	pthread_mutex_lock(&transpondersLock);
+}
+
+inline void unlockTransponders(void)
+{
+	pthread_mutex_unlock(&transpondersLock);
+}
+
+inline void lockBouquets(void)
+{
+	pthread_mutex_lock(&bouquetsLock);
+}
+
+inline void unlockBouquets(void)
+{
+	pthread_mutex_unlock(&bouquetsLock);
 }
 
 inline int EITThreadsPause(void)
@@ -499,7 +521,7 @@ static MySIservicesNVODorderUniqueKey mySIservicesNVODorderUniqueKey;
 
 // Hier sollte man die hash-funktion fuer strings der stl benutzen
 // Muss mal schauen ob es die auch fuer 'ignore_case' gibt
-
+/*
 struct OrderServiceName
 {
 	bool operator()(const SIservicePtr &p1, const SIservicePtr &p2)
@@ -510,37 +532,56 @@ struct OrderServiceName
 
 typedef std::set<SIservicePtr, OrderServiceName > MySIservicesOrderServiceName;
 static MySIservicesOrderServiceName mySIservicesOrderServiceName;
-
+*/
 // Fuegt ein Service in alle Mengen ein
-static void addService(const SIservice &s)
+static bool addService(const SIservice &s, const bool is_actual)
 {
-	SIservice *sp = new SIservice(s);
+	bool already_exists;
+	bool is_new = false;
 
-	if (!sp)
-	{
-		printf("[sectionsd::addService] new SIservice failed.\n");
-		throw std::bad_alloc();
-	}
+	//if (mySIservicesNVODorderUniqueKey.find(s.uniqueKey()))
+	MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.find(s.uniqueKey());
+	already_exists = (si != mySIservicesOrderUniqueKey.end());
+	
+	if ( (!already_exists) ||
+		((is_actual) && (!si->second->is_actual)) ) {
+		
+		if (already_exists)
+			mySIservicesOrderUniqueKey.erase(s.uniqueKey());
 
-	SIservicePtr sptr(sp);
+		SIservice *sp = new SIservice(s);	
+
+		if (!sp)
+		{
+			printf("[sectionsd::addService] new SIservice failed.\n");
+			throw std::bad_alloc();
+		}
+
+		SIservicePtr sptr(sp);
 
 	// Leere Servicenamen in ServiceID in hex umbenennen
 #define MAX_SIZE_SERVICENAME	50
 	char servicename[MAX_SIZE_SERVICENAME];
 
-	if (sptr->serviceName.empty()) {
-		snprintf(servicename, MAX_SIZE_SERVICENAME, "%04x",  sptr->service_id);
-//		servicename[sizeof(servicename) - 1] = 0;
-		sptr->serviceName = servicename;
+		if (sptr->serviceName.empty()) {
+			sprintf(servicename, "%04x",  sptr->service_id);
+			servicename[sizeof(servicename) - 1] = 0;
+			sptr->serviceName = servicename;
+		}
+	
+		sptr->is_actual = is_actual;
+	
+		mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));	
+	
+		if (sptr->nvods.size())
+			mySIservicesNVODorderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
+
+		//  if(sptr->serviceID==0x01 || sptr->serviceID==0x02 || sptr->serviceID==0x04)
+//		mySIservicesOrderServiceName.insert(sptr);
+		is_new = true;
 	}
-
-	mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
-
-	if (sptr->nvods.size())
-		mySIservicesNVODorderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
-
-	//  if(sptr->serviceID==0x01 || sptr->serviceID==0x02 || sptr->serviceID==0x04)
-	mySIservicesOrderServiceName.insert(sptr);
+	
+	return is_new;
 }
 
 // Fuegt einen BouquetEntry in alle Mengen ein
@@ -555,12 +596,12 @@ static void addBouquetEntry(const SIbouquet &s)
 	}
 
 //	printf("Service Name: %s\n",(*s)->serviceName.c_str());
-	dprintf("Bouquet ID: %hu\n",bp->bouquet_id);
-	dprintf("Bouquet Name: %s\n",bp->bouquetName.c_str());
-	dprintf("Original Network ID: %hu\n",bp->original_network_id);
-	dprintf("Transport Stream ID: %hu\n",bp->transport_stream_id);
-	dprintf("Service ID: %hu\n",bp->service_id);
-	dprintf("Service Typ: %hhu\n",bp->serviceTyp);
+//	dprintf("Bouquet ID: %hu\n",bp->bouquet_id);
+//	dprintf("Bouquet Name: %s\n",bp->bouquetName.c_str());
+//	dprintf("Original Network ID: %hu\n",bp->original_network_id);
+//	dprintf("Transport Stream ID: %hu\n",bp->transport_stream_id);
+//	dprintf("Service ID: %hu\n",bp->service_id);
+//	dprintf("Service Typ: %hhu\n",bp->serviceTyp);
 //	printf("Provider Name: %s\n",(*s)->providerName.c_str());
 
 }
@@ -579,20 +620,27 @@ typedef std::map<t_transponder_id, SInetworkPtr, std::less<t_transponder_id> > M
 static MySItranspondersOrderUniqueKey mySItranspondersOrderUniqueKey;
 
 // Fuegt einen Tranponder in alle Mengen ein
-static void addTransponder(const SInetwork &s)
+static bool addTransponder(const SInetwork &s)
 {
-	SInetwork *nw = new SInetwork(s);
+	MySItranspondersOrderUniqueKey::iterator si = mySItranspondersOrderUniqueKey.find(s.uniqueKey());
+	bool already_exists = (si != mySItranspondersOrderUniqueKey.end());
 
-	if (!nw)
-	{
-		printf("[sectionsd::updateNetwork] new SInetwork failed.\n");
-		throw std::bad_alloc();
+	if (!already_exists) {
+	
+		SInetwork *nw = new SInetwork(s);
+	
+		if (!nw)
+		{
+			printf("[sectionsd::updateNetwork] new SInetwork failed.\n");
+			throw std::bad_alloc();
+		}
+
+		SInetworkPtr tpptr(nw);
+	
+		mySItranspondersOrderUniqueKey.insert(std::make_pair(tpptr->uniqueKey(), tpptr));
 	}
-
-	SInetworkPtr tpptr(nw);
-
-	mySItranspondersOrderUniqueKey.insert(std::make_pair(tpptr->uniqueKey(), tpptr));
-
+	
+	return !already_exists;
 }
 
 inline bool readNbytes(int fd, char *buf, const size_t numberOfBytes, const time_t timeoutInSeconds)
@@ -615,7 +663,7 @@ inline bool writeNbytes(int fd, const char *buf,  const size_t numberOfBytes, co
 //------------------------------------------------------------
 // misc. functions
 //------------------------------------------------------------
-
+/*
 static t_channel_id findServiceUniqueKeyforServiceName(const char * const serviceName)
 {
 	SIservice *sp = new SIservice(0, 0, 0);
@@ -641,7 +689,7 @@ static t_channel_id findServiceUniqueKeyforServiceName(const char * const servic
 
 	return 0;
 }
-
+*/
 static const SIevent& findSIeventForEventUniqueKey(const event_id_t eventUniqueKey)
 {
 	// Event (eventid) suchen
@@ -707,7 +755,7 @@ static const SIevent& findNextSIeventForServiceUniqueKey(const t_channel_id serv
 	return nullEvt;
 }
 
-
+/*
 static const SIevent &findActualSIeventForServiceName(const char * const serviceName, SItime& zeit)
 {
 	t_channel_id serviceUniqueKey = findServiceUniqueKeyforServiceName(serviceName);
@@ -717,7 +765,7 @@ static const SIevent &findActualSIeventForServiceName(const char * const service
 
 	return nullEvt;
 }
-
+*/
 
 
 // Sucht das naechste Event anhand unique key und Startzeit
@@ -945,26 +993,26 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 #define MAX_SIZE_DATEN	200
 	char daten[MAX_SIZE_DATEN];
 
-	for (MySIservicesOrderServiceName::iterator s = mySIservicesOrderServiceName.begin(); s != mySIservicesOrderServiceName.end(); s++)
+	for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s != mySIservicesOrderUniqueKey.end(); s++)
 	{
 		count += 1 + snprintf(daten, MAX_SIZE_DATEN,
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 				" %hu %hhu %d %d %d %d %u ",
-			        (*s)->uniqueKey(),
-		        	(*s)->service_id, (*s)->serviceTyp,
-		        	(*s)->eitScheduleFlag(), (*s)->eitPresentFollowingFlag(),
-			        (*s)->runningStatus(), (*s)->freeCAmode(),
-			        (*s)->nvods.size())
-			+ strlen((*s)->serviceName.c_str()) + 1
-			+ strlen((*s)->providerName.c_str()) + 1
+			        s->first,
+			        s->second->service_id, s->second->serviceTyp,
+			        s->second->eitScheduleFlag(), s->second->eitPresentFollowingFlag(),
+		        	s->second->runningStatus(), s->second->freeCAmode(),
+		        	s->second->nvods.size());
+			+ strlen(s->second->serviceName.c_str()) + 1
+			+ strlen(s->second->providerName.c_str()) + 1
 			+ 3; /* '\n' */
 		if (count < MAX_SIZE_SERVICELIST)
 		{
 			strcat(serviceList, daten);
 			strcat(serviceList, "\n");
-			strcat(serviceList, (*s)->serviceName.c_str());
+			strcat(serviceList, s->second->serviceName.c_str());
 			strcat(serviceList, "\n");
-			strcat(serviceList, (*s)->providerName.c_str());
+			strcat(serviceList, s->second->providerName.c_str());
 			strcat(serviceList, "\n");
 		} else {
 			dprintf("warning: commandDumpAllServices: serviceList cut\n")
@@ -1169,7 +1217,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 	return ;
 }
-
+/*
 static void commandAllEventsChannelName(int connfd, char *data, const unsigned dataLength)
 {
 	data[dataLength - 1] = 0; // to be sure it has an trailing 0
@@ -1180,7 +1228,7 @@ static void commandAllEventsChannelName(int connfd, char *data, const unsigned d
 	sendAllEvents(connfd, uniqueServiceKey);
 	return ;
 }
-
+*/
 static void commandAllEventsChannelID(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != sizeof(t_channel_id))
@@ -1229,7 +1277,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.211 2005/12/05 21:59:15 mogway Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.212 2005/12/06 10:20:15 mogway Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1262,7 +1310,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 
 	return ;
 }
-
+/*
 static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
@@ -1365,7 +1413,7 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 
 	return ;
 }
-
+*/
 static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
@@ -2152,7 +2200,7 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 }
 
 // Mostly copied from epgd (something bugfixed ;) )
-
+/*
 static void commandActualEPGchannelName(int connfd, char *data, const unsigned dataLength)
 {
 	int nResultDataSize = 0;
@@ -2240,7 +2288,7 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 		delete[] pResultData;
 	}
 }
-
+*/
 static void sendEventList(int connfd, const unsigned char serviceTyp1, const unsigned char serviceTyp2 = 0, int sendServiceName = 1)
 {
 #define MAX_SIZE_BIGEVENTLIST	128*1024
@@ -2802,13 +2850,31 @@ static void commandSetSectionsdScanMode(int connfd, char *data, const unsigned d
 
 }
 
+static void commandDummy1(int connfd, char *data, const unsigned dataLength)
+{
+	return;
+}
+
+static void commandDummy2(int connfd, char *data, const unsigned dataLength)
+{
+	return;
+}
+
+static void commandDummy3(int connfd, char *data, const unsigned dataLength)
+{
+	return;
+}
+
 static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char *, const unsigned) =
     {
-        commandActualEPGchannelName,
+        //commandActualEPGchannelName,
+	commandDummy1,
         commandEventListTV,
-        commandCurrentNextInfoChannelName,
+        //commandCurrentNextInfoChannelName,
+	commandDummy2,
         commandDumpStatusInformation,
-        commandAllEventsChannelName,
+        //commandAllEventsChannelName,
+	commandDummy3,
         commandSetHoursToCache,
         commandSetEventsAreOldInMinutes,
         commandDumpAllServices,
@@ -3767,6 +3833,7 @@ static bool updateNetwork(t_network_id network_id, const bool is_actual)
 					}
 				}
 			}
+			//sleep(10);
 		}
 	}
 	if (current_parser != NULL)
@@ -3922,6 +3989,7 @@ static void *nitThread(void *)
 	t_network_id network_id;
 	int current_other_nit;
 	bool is_complete;
+	bool is_new;
 
 	dmxNIT.addfilter(0x40, 0xfe);		//NIT actual = 0x40 + NIT other = 0x41
 
@@ -4039,18 +4107,23 @@ static void *nitThread(void *)
 						if ( (!messaging_nit_actual_sections_got_all) &&
 							(!messaging_nit_actual_sections_so_far[header.section_number]) )
 						{
-							lastData = zeit;
-
-							dprintf("[nitThread] adding transponders [table 0x%x] (begin)\n", header.table_id);
-
+							lastData = zeit;	
+					
 							SIsectionNIT nit(SIsection(sizeof(header) + section_length - 5, buf));
 
+							dprintf("[nitThread] adding %d transponders [table 0x%x] (begin)\n", nit.networks().size(), header.table_id);
+							
+							is_new = false;
 
+							lockTransponders();
+							
 							for (SInetworks::iterator s = nit.networks().begin(); s != nit.networks().end(); s++)
-								addTransponder(*s);
+								if (addTransponder(*s))
+									is_new = true;
 
+							unlockTransponders();
 
-							dprintf("[nitThread] added %d transponders (end)\n",  nit.networks().size());
+							//dprintf("[nitThread] added %d transponders (end)\n",  nit.networks().size());
 							//printf("current\n");
 
 							messaging_nit_actual_sections_so_far[header.section_number] = true;
@@ -4061,12 +4134,11 @@ static void *nitThread(void *)
 								if (!messaging_nit_actual_sections_so_far[i])
 									messaging_nit_actual_sections_got_all = false;
 							}
-
-							// überprüfen, ob nächster Filter gewünscht :)
+							
 							if ( messaging_nit_actual_sections_got_all )
 							{
-								if (auto_scanning > 0) {
-									network_id = (header.table_id_extension_hi) << 8 |
+								if ((auto_scanning > 0) && (is_new)) {
+									network_id = (header.table_id_extension_hi) << 8 | 
 											header.table_id_extension_lo;
 									updateNetwork(network_id, true);
 								}
@@ -4093,20 +4165,25 @@ static void *nitThread(void *)
 								//We found a free slot and start or continue to collect sections.
 								if (!messaging_nit_other_sections_so_far[current_other_nit] [header.section_number])
 								{
-									lastData = zeit;
-
-									dprintf("[nitThread] adding transponders [table 0x%x] (begin)\n",
-									header.table_id);
-
+									lastData = zeit;	
+					
 									SIsectionNIT nit(SIsection(sizeof(header) + section_length - 5, buf));
 
+									dprintf("[nitThread] adding %d transponders [table 0x%x] (begin)\n",
+									nit.networks().size(), header.table_id);
 
+									is_new = false;
+									
+									lockTransponders();
+							
 									for (SInetworks::iterator s = nit.networks().begin(); s !=
 									 nit.networks().end(); s++)
-										addTransponder(*s);
+									 	if (addTransponder(*s))
+											is_new = true;
+	
+									unlockTransponders();
 
-
-									dprintf("[nitThread] added %d transponders (end)\n",  nit.networks().size());
+									//dprintf("[nitThread] added %d transponders (end)\n",  nit.networks().size());
 									//printf("other\n");
 
 									messaging_nit_other_sections_so_far[current_other_nit][header.section_number] = true;
@@ -4124,10 +4201,9 @@ static void *nitThread(void *)
 										nid_complete(network_id);
 
 										dprintf("[nitThread] Other NIT with ID: 0x%x complete\n",network_id);
-
-										if (auto_scanning > 0)
+										
+										if ((auto_scanning > 0) && (is_new))
 											updateNetwork(network_id, false);
-
 																												for ( int i = 0; i < MAX_SECTIONS; i++)
 											messaging_nit_other_sections_so_far[current_other_nit] [i] = false;
 										messaging_nit_other_nid[current_other_nit] = 0;
@@ -4179,8 +4255,8 @@ static void *sdtThread(void *)
 	int scanType = 3;	//deafault scan all
 	unsigned short current_tsid;
 	t_bouquet_id bouquet_id;
-
-
+	bool is_new;
+	
 	dmxSDT.addfilter(0x42, 0xf3 );		//SDT actual = 0x42 + SDT other = 0x46 + BAT = 0x4A
 
 	try
@@ -4303,21 +4379,24 @@ static void *sdtThread(void *)
 						if ( (!messaging_sdt_actual_sections_got_all) &&
 							(!messaging_sdt_actual_sections_so_far[header.section_number]) )
 						{
-							lastData = zeit;
-
-							dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
-
+							lastData = zeit;	
+					
 							SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
+	
+							dprintf("[sdtThread] adding %d services [table 0x%x] (begin)\n", sdt.services().size(), header.table_id);
+							
+							is_new = false;
 
 							lockServices();
 
 							for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
-								addService(*s);
+								if (addService(*s, true))
+									is_new = true;
 
 							unlockServices();
 
-							dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
-
+							//dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
+		
 							if ( header.table_id == 0x42)
 							{
 								messaging_sdt_actual_sections_so_far[header.section_number] = true;
@@ -4344,8 +4423,8 @@ static void *sdtThread(void *)
 
 								tid = CREATE_TRANSPONDER_ID_FROM_ORIGINALNETWORK_TRANSPORTSTREAM_ID(current_onid,
 																    current_tsid);
-								if (auto_scanning > 0)
-
+								if ((auto_scanning > 0) && (is_new))
+									
 									if ( updateTP(current_onid, current_tsid, scanType, true) )
 										new_services = true;
 
@@ -4398,21 +4477,24 @@ static void *sdtThread(void *)
 								if (!messaging_sdt_other_sections_so_far[current_other_sdt] [header.section_number])
 								{
 									//The transponder is not finished. And it's a new section.
-									lastData = zeit;
-
-									dprintf("[sdtThread] adding services [table 0x%x] (begin)\n", header.table_id);
-
+									lastData = zeit;	
+					
 									SIsectionSDT sdt(SIsection(sizeof(header) + section_length - 5, buf));
+		
+									dprintf("[sdtThread] adding %d services [table 0x%x] (begin)\n", sdt.services().size(), header.table_id);
 
+									is_new = false;
+									
 									lockServices();
 
 									for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
-									addService(*s);
+										if (addService(*s, false))
+											is_new = true;
 
 									unlockServices();
 
-									dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
-
+									//dprintf("[sdtThread] added %d services (end)\n",  sdt.services().size());
+							
 									messaging_sdt_other_sections_so_far[current_other_sdt][header.section_number] = true;
 									//messaging_sdt_other_sections_got_all[current_other_sdt] = true;
 									bool is_complete = true;
@@ -4428,9 +4510,9 @@ static void *sdtThread(void *)
 										tid_complete(tid);
 
 										dprintf("[sdtThread] Other SDT with ID: 0x%x complete\n",tid);
-
-										if (auto_scanning > 0)
-
+									
+										if ((auto_scanning > 0) && (is_new))
+									
 											if ( updateTP(current_onid, current_tsid, scanType, false) )
 												new_services = true;
 
@@ -4470,9 +4552,9 @@ static void *sdtThread(void *)
 								//This is new stuff - restart timer
 								lastData = zeit;
 
-								dprintf("[sdtThread] adding services to bouquet [table 0x%x] (begin)\n", header.table_id);
-
 								SIsectionBAT bat(SIsection(section_length + 3, buf));
+
+								dprintf("[sdtThread] adding %d services to bouquet [table 0x%x] (begin)\n", bat.bouquets().size(), header.table_id);
 
 								//lock AND unlock bouquets later
 
@@ -4481,8 +4563,8 @@ static void *sdtThread(void *)
 
 								//unlock bouquets here...
 
-								dprintf("[sdtThread] added %d services to bouquet (end)\n",  bat.bouquets().size());
-
+								//dprintf("[sdtThread] added %d services to bouquet (end)\n",  bat.bouquets().size());
+															
 								messaging_bat_sections_so_far[current_bouquet][header.section_number] = true;
 								messaging_bat_sections_got_all[current_bouquet] = true;
 
@@ -5446,9 +5528,51 @@ static void *houseKeepingThread(void *)
 			{
 				lockServices();
 				dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
-				dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
+				//dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
 				dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
+				/*
+				for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s !=  mySIservicesOrderUniqueKey.end(); s++) {
+					printf("ONID: %04x TSID: %04x SID: %04x Prov: %s Name: %s actual: %d\n", 
+						s->second->original_network_id,
+						s->second->transport_stream_id,
+						s->second->service_id,
+						s->second->providerName.c_str(),
+						s->second->serviceName.c_str(),
+						(int) s->second->is_actual);
+				}
+				*/
 				unlockServices();
+				/*
+				lockTransponders();
+				for (MySItranspondersOrderUniqueKey::iterator s = mySItranspondersOrderUniqueKey.begin(); s != mySItranspondersOrderUniqueKey.end(); s++)
+				{
+//					tsid = s->second->transport_stream_id;
+//					onid = s->second->original_network_id;
+					const char *ddp = &s->second->delivery_descriptor[0];
+			
+					//printf("Descriptor_type: %02x\n", s->second->delivery_type);
+			
+					switch (s->second->delivery_type) {
+						case 0x43:
+							struct satellite_delivery_descriptor *sdd = (struct satellite_delivery_descriptor *)ddp;
+							printf("Sat TP - Orbital %04x ONID: %04x TSID: %04x\n",
+								(sdd->orbital_pos_hi << 8) | sdd->orbital_pos_lo,
+								s->second->original_network_id,
+								s->second->transport_stream_id);
+						
+						//	if (!sdd->west_east_flag)
+						//		position = -position;
+						//	provider = getProvbyPosition(xmlDocGetRootElement(service_parser)->xmlChildrenNode, //position);
+							break;
+						case 0x44:
+							//provider = xmlDocGetRootElement(service_parser)->xmlChildrenNode;
+							break;
+						default:
+							break;
+					}
+				}
+				unlockTransponders();
+				*/
 			}
 
 			if (debug)
@@ -5503,7 +5627,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.211 2005/12/05 21:59:15 mogway Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.212 2005/12/06 10:20:15 mogway Exp $\n");
 
 //	auto_scanmode = getscanning();
 
@@ -5571,14 +5695,6 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 
-		// SDT-Thread starten
-		rc = pthread_create(&threadSDT, 0, sdtThread, 0);
-
-		if (rc) {
-			fprintf(stderr, "[sectionsd] failed to create sdt-thread (rc=%d)\n", rc);
-			return EXIT_FAILURE;
-		}
-
 		// EIT-Thread starten
 		rc = pthread_create(&threadEIT, 0, eitThread, 0);
 
@@ -5594,14 +5710,33 @@ int main(int argc, char **argv)
 			fprintf(stderr, "[sectionsd] failed to create ppt-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
+	
+		pthread_attr_t attr;
+		pthread_attr_init(&attr);
+		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+		
+		struct sched_param param;
+		pthread_attr_setschedpolicy(&attr, SCHED_RR);
+		param.sched_priority=-10;
+		pthread_attr_setschedparam(&attr, &param);
+		
+		// SDT-Thread starten
+		rc = pthread_create(&threadSDT, &attr, sdtThread, 0);
 
+		if (rc) {
+			fprintf(stderr, "[sectionsd] failed to create sdt-thread (rc=%d)\n", rc);
+			return EXIT_FAILURE;
+		}
+			
 		// nit -Thread starten
-		rc = pthread_create(&threadNIT, 0, nitThread, 0);
+		rc = pthread_create (&threadNIT, &attr, nitThread, 0);
+//		rc = pthread_create(&threadNIT, 0, nitThread, 0);
 
 		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create nit-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
+		pthread_attr_destroy(&attr);
 
 		// housekeeping-Thread starten
 		rc = pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
