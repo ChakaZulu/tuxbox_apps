@@ -412,6 +412,14 @@ AC_DEFUN([AC_PROG_EGREP],
  AC_SUBST([EGREP])
 ])
 
+AC_DEFUN([TUXBOX_APPS_CAPTURE],[
+AC_CHECK_HEADER(linux/dvb/avia/avia_gt_capture.h,[
+	AC_DEFINE(HAVE_OLD_CAPTURE_API,1,[Define this if you want to use the old dbox2 capture API])
+	AC_MSG_NOTICE([using old demux capture API])],[
+	AC_MSG_NOTICE([using v4l2 capture API])
+	])
+])	
+
 dnl Pick up AM_PATH_PROG_WITH_TEST from our version of progtest.m4 
 dnl (this is not a standard file).
 m4_include([../enigma/progtest.m4])
