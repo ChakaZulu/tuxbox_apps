@@ -1,7 +1,7 @@
 /*
  * MPE_FEC Section ETSI EN 301 192 V1.4.1
  *
- * $Id: mpe_fec_section.cpp,v 1.1 2005/11/30 16:43:25 mws Exp $
+ * $Id: mpe_fec_section.cpp,v 1.2 2005/12/06 23:51:25 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -45,9 +45,8 @@ uint32_t RealTimeParameters::getAddress() const
 	return address;
 }
 
-MpeFecSection::MpeFecSection(const uint8_t* const buffer):LongCrcSection(buffer), rtParam(buffer+8)
+MpeFecSection::MpeFecSection(const uint8_t* const buffer):LongCrcSection(buffer), rtParam(buffer+8), rsDataBytes(sectionLength - 13)
 {
-	rsDataBytes.reserve( sectionLength - 13 );
 	memcpy(&rsDataBytes[0], buffer+11, sectionLength-13);
 }
 
