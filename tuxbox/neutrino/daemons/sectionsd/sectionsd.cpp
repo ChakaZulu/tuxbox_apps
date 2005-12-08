@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.212 2005/12/06 10:20:15 mogway Exp $
+//  $Id: sectionsd.cpp,v 1.213 2005/12/08 18:41:40 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -351,6 +351,8 @@ static bool deleteEvent(const event_id_t uniqueKey)
 
 		mySIeventsOrderUniqueKey.erase(uniqueKey);
 		mySIeventsNVODorderUniqueKey.erase(uniqueKey);
+		
+//		printf("Deleting: %04x\n", (int) uniqueKey);
 		return true;
 	}
 	else
@@ -366,98 +368,109 @@ static bool deleteEvent(const event_id_t uniqueKey)
 // Fuegt ein Event in alle Mengen ein
 static void addEvent(const SIevent &evt)
 {
-	SIevent *eptr = new SIevent(evt);
+	MySIeventsOrderUniqueKey::iterator si = mySIeventsOrderUniqueKey.find(evt.uniqueKey());
+	bool already_exists = (si != mySIeventsOrderUniqueKey.end());
 
-	if (!eptr)
-	{
-		printf("[sectionsd::addEvent] new SIevent failed.\n");
-		throw std::bad_alloc();
-	}
+	if (!already_exists) {
+		SIevent *eptr = new SIevent(evt);
 
-	SIeventPtr e(eptr);
+		if (!eptr)
+		{
+			printf("[sectionsd::addEvent] new SIevent failed.\n");
+			throw std::bad_alloc();
+		}
 
-	// Damit in den nicht nach Event-ID sortierten Mengen
-	// Mehrere Events mit gleicher ID sind, diese vorher loeschen
-	deleteEvent(e->uniqueKey());
+		SIeventPtr e(eptr);
 
-	// Pruefen ob es ein Meta-Event ist
-	MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i = mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(e->get_channel_id());
+		// Damit in den nicht nach Event-ID sortierten Mengen
+		// Mehrere Events mit gleicher ID sind, diese vorher loeschen
+		//deleteEvent(e->uniqueKey());
 
-	if (i != mySIeventUniqueKeysMetaOrderServiceUniqueKey.end())
-	{
-		// ist ein MetaEvent, d.h. mit Zeiten fuer NVOD-Event
+		// Pruefen ob es ein Meta-Event ist
+		MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i = mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(e->get_channel_id());
+
+		if (i != mySIeventUniqueKeysMetaOrderServiceUniqueKey.end())
+		{
+			// ist ein MetaEvent, d.h. mit Zeiten fuer NVOD-Event
+
+			if (e->times.size())
+			{
+				// D.h. wir fuegen die Zeiten in das richtige Event ein
+				MySIeventsOrderUniqueKey::iterator ie = mySIeventsOrderUniqueKey.find(i->second);
+
+				if (ie != mySIeventsOrderUniqueKey.end())
+				{
+					// Event vorhanden
+					// Falls das Event in den beiden Mengen mit Zeiten nicht vorhanden
+					// ist, dieses dort einfuegen
+					MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator i2 = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.find(ie->second);
+
+					if (i2 == mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end())
+					{
+						// nicht vorhanden -> einfuegen
+						mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(ie->second);
+						mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(ie->second);
+
+					}
+
+					// Und die Zeiten im Event updaten
+					ie->second->times.insert(e->times.begin(), e->times.end());
+				}
+			}
+		}
+//		printf("Adding: %04x\n", (int) e->uniqueKey());
+
+		// normales Event
+		mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
 
 		if (e->times.size())
 		{
-			// D.h. wir fuegen die Zeiten in das richtige Event ein
-			MySIeventsOrderUniqueKey::iterator ie = mySIeventsOrderUniqueKey.find(i->second);
+			// diese beiden Mengen enthalten nur Events mit Zeiten
+			mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
+			mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
 
-			if (ie != mySIeventsOrderUniqueKey.end())
-			{
-				// Event vorhanden
-				// Falls das Event in den beiden Mengen mit Zeiten nicht vorhanden
-				// ist, dieses dort einfuegen
-				MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator i2 = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.find(ie->second);
-
-				if (i2 == mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end())
-				{
-					// nicht vorhanden -> einfuegen
-					mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(ie->second);
-					mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(ie->second);
-
-				}
-
-				// Und die Zeiten im Event updaten
-				ie->second->times.insert(e->times.begin(), e->times.end());
-			}
 		}
-	}
-
-	// normales Event
-	mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
-
-	if (e->times.size())
-	{
-		// diese beiden Mengen enthalten nur Events mit Zeiten
-		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
-		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
-
 	}
 }
 
 static void addNVODevent(const SIevent &evt)
 {
-	SIevent *eptr = new SIevent(evt);
+	MySIeventsOrderUniqueKey::iterator si = mySIeventsOrderUniqueKey.find(evt.uniqueKey());
+	bool already_exists = (si != mySIeventsOrderUniqueKey.end());
 
-	if (!eptr)
-	{
-		printf("[sectionsd::addNVODevent] new SIevent failed.\n");
-		throw std::bad_alloc();
-	}
+	if (!already_exists) {
+		SIevent *eptr = new SIevent(evt);
 
-	SIeventPtr e(eptr);
+		if (!eptr)
+		{
+			printf("[sectionsd::addNVODevent] new SIevent failed.\n");
+			throw std::bad_alloc();
+		}
 
-	MySIeventsOrderUniqueKey::iterator e2 = mySIeventsOrderUniqueKey.find(e->uniqueKey());
+		SIeventPtr e(eptr);
 
-	if (e2 != mySIeventsOrderUniqueKey.end())
-	{
-		// bisher gespeicherte Zeiten retten
-		e->times.insert(e2->second->times.begin(), e2->second->times.end());
-	}
+		MySIeventsOrderUniqueKey::iterator e2 = mySIeventsOrderUniqueKey.find(e->uniqueKey());
 
-	// Damit in den nicht nach Event-ID sortierten Mengen
-	// mehrere Events mit gleicher ID sind, diese vorher loeschen
-	deleteEvent(e->uniqueKey());
+		if (e2 != mySIeventsOrderUniqueKey.end())
+		{
+			// bisher gespeicherte Zeiten retten
+			e->times.insert(e2->second->times.begin(), e2->second->times.end());
+		}
 
-	mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
+		// Damit in den nicht nach Event-ID sortierten Mengen
+		// mehrere Events mit gleicher ID sind, diese vorher loeschen
+		//deleteEvent(e->uniqueKey());
 
-	mySIeventsNVODorderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
+		mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
 
-	if (e->times.size())
-	{
-		// diese beiden Mengen enthalten nur Events mit Zeiten
-		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
-		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
+		mySIeventsNVODorderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
+
+		if (e->times.size())
+		{
+			// diese beiden Mengen enthalten nur Events mit Zeiten
+			mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
+			mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
+		}
 	}
 }
 
@@ -548,7 +561,7 @@ static bool addService(const SIservice &s, const bool is_actual)
 		
 		if (already_exists)
 			mySIservicesOrderUniqueKey.erase(s.uniqueKey());
-
+		
 		SIservice *sp = new SIservice(s);	
 
 		if (!sp)
@@ -624,7 +637,7 @@ static bool addTransponder(const SInetwork &s)
 {
 	MySItranspondersOrderUniqueKey::iterator si = mySItranspondersOrderUniqueKey.find(s.uniqueKey());
 	bool already_exists = (si != mySItranspondersOrderUniqueKey.end());
-
+	
 	if (!already_exists) {
 	
 		SInetwork *nw = new SInetwork(s);
@@ -1277,7 +1290,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.212 2005/12/06 10:20:15 mogway Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.213 2005/12/08 18:41:40 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -5627,7 +5640,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.212 2005/12/06 10:20:15 mogway Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.213 2005/12/08 18:41:40 metallica Exp $\n");
 
 //	auto_scanmode = getscanning();
 

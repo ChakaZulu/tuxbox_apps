@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.42 2005/11/21 14:57:28 metallica Exp $
+// $Id: SIsections.cpp,v 1.43 2005/12/08 18:41:40 metallica Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -87,7 +87,15 @@ inline unsigned min(unsigned a, unsigned b)
 	return b < a ? b : a;
 }
 
-
+bool check_blacklisted(const t_original_network_id onid, const t_transport_stream_id tsid)
+{
+	if ( (onid == 0x0001) &&
+		((tsid == 0x03F0) || (tsid == 0x0408) || (tsid == 0x040E) || (tsid == 0x0412) || (tsid == 0x0416) || (tsid == 0x041E) ||
+		 (tsid == 0x0420) || (tsid == 0x0422) || (tsid == 0x0424)) )
+		return true;
+	else
+		return false;
+}
 //-----------------------------------------------------------------------
 // Da es vorkommen kann das defekte Packete empfangen werden
 // sollte hier alles ueberprueft werden.
@@ -526,7 +534,6 @@ void SIsectionPPT::parse(void)
 	parsed = 1;
 }
 /********************/
-
 void SIsectionSDT::parseNVODreferenceDescriptor(const char *buf, SIservice &s)
 {
   struct descr_generic_header *hdr=(struct descr_generic_header *)buf;
@@ -541,26 +548,30 @@ void SIsectionSDT::parseNVODreferenceDescriptor(const char *buf, SIservice &s)
 
 void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
 {
+  bool is_blacklisted;
+
   struct descr_service_header *sv=(struct descr_service_header *)buf;
   buf+=sizeof(struct descr_service_header);
   s.serviceTyp=sv->service_typ;
+  is_blacklisted = check_blacklisted(s.original_network_id, s.transport_stream_id);
   if(sv->service_provider_name_length) {
-    if(*buf < 0x06) // other code table
-      s.providerName=std::string(buf+1, sv->service_provider_name_length-1);
-    else
-      s.providerName=std::string(buf, sv->service_provider_name_length);
+    //if(*buf < 0x06) // other code table
+//      s.providerName=std::string(buf+1, sv->service_provider_name_length-1);
+//    else
+//      s.providerName=std::string(buf, sv->service_provider_name_length);
+  	if ((*buf > 0x05) && (is_blacklisted))
+    		s.providerName  = CDVBString(("\x05" + std::string((const char *)(buf))).c_str(), sv->service_provider_name_length+1).getContent();
+	else
+		s.providerName  = CDVBString((const char *)(buf), sv->service_provider_name_length).getContent();
   }
   buf+=sv->service_provider_name_length;
   unsigned char servicenamelength=*((unsigned char *)buf);
   if(servicenamelength) {
-    //if(*(buf+1) < 0x06) // other code table
-    	s.serviceName  = CDVBString((const char *)((++buf)), servicenamelength).getContent();
-	//printf("%s\n", s.serviceName.c_str());
-      //s.serviceName=std::string((++buf)+1, servicenamelength-1);
-    //else
-      //s.serviceName=std::string(++buf, servicenamelength);
+  	if ((*buf+1 > 0x05) && (is_blacklisted))
+    		s.serviceName  = CDVBString(("\x05" + std::string((const char *)(++buf))).c_str(), servicenamelength+1).getContent();
+	else
+		s.serviceName  = CDVBString((const char *)(++buf), servicenamelength).getContent();
   }
-  //s.serviceName = Latin1_to_UTF8(s.serviceName.c_str());
 //  printf("Provider-Name: %s\n", s.providerName.c_str());
 //  printf("Service-Name: %s\n", s.serviceName.c_str());
 }
