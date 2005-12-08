@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.213 2005/12/08 18:41:40 metallica Exp $
+//  $Id: sectionsd.cpp,v 1.214 2005/12/08 22:11:44 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -498,8 +498,8 @@ static void removeOldEvents(const long seconds)
 	// Alte events loeschen
 	time_t zeit = time(NULL);
 
-	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); 
-			e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++) {
+	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin();
+	while (e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end()) {
 		goodtimefound = false;
 		for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++) {
 			if (t->startzeit + (long)t->dauer >= zeit - seconds) {
@@ -511,12 +511,18 @@ static void removeOldEvents(const long seconds)
 		if (false == goodtimefound) {
 			// keep track of our iterator
 			etmp = e;
-			etmp--;
-			deleteEvent((*e)->uniqueKey());
+			if (etmp == mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) {
+				etmp++; // get next element
+				deleteEvent((*e)->uniqueKey());
+			} else {
+				etmp--; // get last element and iterate later
+				deleteEvent((*e)->uniqueKey());
+				etmp++;
+			}
 			e = etmp;
 		}
 		else
-			;// solange das nicht richtig funktioniert einfach bis zum ende suchen
+			e++;   // solange das nicht richtig funktioniert einfach bis zum ende suchen
 			// break; // sortiert nach Endzeit, daher weiteres Suchen unnoetig
 	}
 	return ;
@@ -1290,7 +1296,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.213 2005/12/08 18:41:40 metallica Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.214 2005/12/08 22:11:44 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -5640,7 +5646,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.213 2005/12/08 18:41:40 metallica Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.214 2005/12/08 22:11:44 metallica Exp $\n");
 
 //	auto_scanmode = getscanning();
 
