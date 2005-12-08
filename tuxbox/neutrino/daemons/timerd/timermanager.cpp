@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.81 2005/11/22 14:24:12 zwen Exp $
+   $Id: timermanager.cpp,v 1.82 2005/12/08 22:38:24 zwen Exp $
 
 	License: GPL
 
@@ -717,7 +717,7 @@ bool CTimerManager::shutdown()
 	return status;
 }
 //------------------------------------------------------------
-void CTimerManager::shutdownOnWakeup()
+void CTimerManager::shutdownOnWakeup(int currEventID)
 {
 	time_t nextAnnounceTime=0;
 	pthread_mutex_lock(&tm_eventsMutex);
@@ -730,7 +730,8 @@ void CTimerManager::shutdownOnWakeup()
 		    event->eventType == CTimerd::TIMER_ZAPTO ) &&
 		   (event->eventState == CTimerd::TIMERSTATE_SCHEDULED ||
 		    event->eventState == CTimerd::TIMERSTATE_PREANNOUNCE ||
-		    event->eventState == CTimerd::TIMERSTATE_ISRUNNING))
+		    event->eventState == CTimerd::TIMERSTATE_ISRUNNING) &&
+			event->eventID != currEventID)
 		{
 			// Bei anstehendem/laufendem RECORD oder ZAPTO Timer nicht runterfahren
 			if(event->announceTime < nextAnnounceTime || nextAnnounceTime==0)
@@ -1141,7 +1142,7 @@ void CTimerEvent_Record::stopEvent()
 								  &stopinfo,
 								  sizeof(CTimerd::RecordingStopInfo));
 	// Programmiere shutdown timer, wenn in wakeup state und kein record/zapto timer in 10 min
-	CTimerManager::getInstance()->shutdownOnWakeup();
+	CTimerManager::getInstance()->shutdownOnWakeup(eventID);
 	dprintf("Recording stopped\n"); 
 }
 //------------------------------------------------------------
