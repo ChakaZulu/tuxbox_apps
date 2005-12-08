@@ -11,11 +11,11 @@ start-block~yWeb_save_settings
 end-block~yWeb_save_settings
 
 # ------- nhttpd save Settings
+#{=ini-set:/var/tuxbox/config/nhttpd.conf;Port;{=port=}=}
 start-block~nhttpd_save_settings
 {=ini-set:/var/tuxbox/config/nhttpd.conf;AuthUser;{=authuser=}=}
 {=ini-set:/var/tuxbox/config/nhttpd.conf;AuthPassword;{=authpassword=}=}
 {=ini-set:/var/tuxbox/config/nhttpd.conf;Authenticate;{=authenticate=}=}
-{=ini-set:/var/tuxbox/config/nhttpd.conf;Port;{=port=}=}
 {=func:do_reload_nhttpd_config=}
 end-block~nhttpd_save_settings
 
