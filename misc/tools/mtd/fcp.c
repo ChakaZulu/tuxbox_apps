@@ -4,7 +4,7 @@
  * Written by Abraham vd Merwe <abraham@2d3d.co.za>
  * All rights reserved.
  *
- * $Id: fcp.c,v 1.2 2005/06/27 21:28:09 mogway Exp $
+ * $Id: fcp.c,v 1.3 2005/12/09 22:06:02 mogway Exp $
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,6 +37,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/reboot.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <mtd/mtd-user.h>
@@ -66,8 +67,8 @@ typedef int bool;
 
 /* cmd-line flags */
 #define FLAG_NONE		0x00
-#define FLAG_VERBOSE	0x01
-#define FLAG_HELP		0x02
+#define FLAG_REBOOT		0x01
+#define FLAG_VERBOSE	0x02
 #define FLAG_FILENAME	0x04
 #define FLAG_DEVICE		0x08
 
@@ -93,10 +94,11 @@ static void showusage (const char *progname,bool error)
 			   "\n"
 			   "Flash Copy - Written by Abraham van der Merwe <abraham@2d3d.co.za>\n"
 			   "\n"
-			   "usage: %s [ -v | --verbose ] <filename> <device>\n"
+			   "usage: %s [ -v | --verbose ] [ -r | --reboot ] <filename> <device>\n"
 			   "       %s -h | --help\n"
 			   "\n"
 			   "   -h | --help      Show this help message\n"
+			   "   -r | --reboot    Reboot after progress\n"
 			   "   -v | --verbose   Show progress reports\n"
 			   "   <filename>       File which you want to copy to flash\n"
 			   "   <device>         Flash device to write to (e.g. /dev/mtd0, /dev/mtd1, etc.)\n"
@@ -177,52 +179,57 @@ int main (int argc,char *argv[])
    (progname = strrchr (argv[0],'/')) ? progname++ : (progname = argv[0]);
 
    /*********************
-	* parse cmd-line 
+	* parse cmd-line
 	*****************/
 
-   for (;;) {
-   	int option_index = 0;
-   	static const char *short_options = "hv";
-   	static const struct option long_options[] = {
-   		{"help", no_argument, 0, 'h'},
-   		{"verbose", no_argument, 0, 'v'},
-   		{0, 0, 0, 0},
-   	};
+	for (;;) {
+		int option_index = 0;
+		static const char *short_options = "hvr";
+		static const struct option long_options[] = {
+			{"help", no_argument, 0, 'h'},
+			{"verbose", no_argument, 0, 'v'},
+			{"reboot", no_argument, 0, 'r'},
+			{0, 0, 0, 0},
+		};
 
-   	int c = getopt_long(argc, argv, short_options,
-   			    long_options, &option_index);
-   	if (c == EOF) {
-   		break;
-   	}
+		int c = getopt_long(argc, argv, short_options, long_options, &option_index);
+		if (c == EOF) {
+			break;
+		}
 
-   	switch (c) {
-   	case 'h':
-		flags |= FLAG_HELP;
-		DEBUG("Got FLAG_HELP\n");
-   		break;
-   	case 'v':
-		flags |= FLAG_VERBOSE;
-		DEBUG("Got FLAG_VERBOSE\n");
-		break;
-	default:
-		DEBUG("Unknown parameter: %s\n",argv[option_index]);
+		switch (c) {
+			case 'h':
+				DEBUG("Got FLAG_HELP\n");
+				showusage (progname,false);
+				break;
+			case 'v':
+				flags |= FLAG_VERBOSE;
+				DEBUG("Got FLAG_VERBOSE\n");
+				break;
+			case 'r':
+				flags |= FLAG_REBOOT;
+				DEBUG("Got FLAG_REBOOT\n");
+				break;
+			default:
+				DEBUG("Unknown parameter: %s\n",argv[option_index]);
+				showusage (progname,true);
+		}
+	}
+
+	if (optind+2 == argc) {
+		flags |= FLAG_FILENAME;
+		filename = argv[optind];
+		DEBUG("Got filename: %s\n",filename);
+
+		flags |= FLAG_DEVICE;
+		device = argv[optind+1];
+		DEBUG("Got device: %s\n",device);
+	}
+
+	if (progname == NULL || device == NULL)
 		showusage (progname,true);
-   	}
-   }
-   if (optind+2 == argc) {
-	flags |= FLAG_FILENAME;
-   	filename = argv[optind];
-	DEBUG("Got filename: %s\n",filename);
 
-	flags |= FLAG_DEVICE;
-   	device = argv[optind+1];
-	DEBUG("Got device: %s\n",device);
-   }
-
-   if (flags & FLAG_HELP || progname == NULL || device == NULL)
-	 showusage (progname,flags != FLAG_HELP);
-
-   atexit (cleanup);
+	atexit (cleanup);
 
    /* get some info about the flash device */
    dev_fd = safe_open (device,O_SYNC | O_RDWR);
@@ -377,13 +384,23 @@ int main (int argc,char *argv[])
 		written += i;
 		size -= i;
 	 }
-   if (flags & FLAG_VERBOSE)
-	 log_printf (LOG_NORMAL,
-				 "\rVerifying data: %luk/%luk (100%%)\n",
-				 KB (filestat.st_size),
-				 KB (filestat.st_size));
-   DEBUG("Verified %d / %luk bytes\n",written,filestat.st_size);
 
-   exit (EXIT_SUCCESS);
+	if (flags & FLAG_VERBOSE)
+		log_printf (LOG_NORMAL,
+				"\rVerifying data: %luk/%luk (100%%)\n",
+				KB (filestat.st_size),
+				KB (filestat.st_size));
+
+	DEBUG("Verified %d / %luk bytes\n",written,filestat.st_size);
+
+	if (flags & FLAG_REBOOT)
+	{
+		log_printf (LOG_NORMAL,"rebooting...\n");
+		DEBUG("Rebooting now\n");
+		sleep(1);
+		reboot(RB_AUTOBOOT);
+	}
+
+	exit (EXIT_SUCCESS);
 }
 
