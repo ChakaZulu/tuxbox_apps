@@ -480,6 +480,7 @@ mainmenu.movieplayer Movieplayer
 mainmenu.pausesectionsd EPG auslesen
 mainmenu.pictureviewer Bildbetrachter
 mainmenu.radiomode Radio-Modus
+mainmenu.reboot Neu starten
 mainmenu.recording Aufnehmen
 mainmenu.recording_start Start
 mainmenu.recording_stop Stopp

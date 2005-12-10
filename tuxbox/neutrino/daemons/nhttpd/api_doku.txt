@@ -28,6 +28,7 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 20. Shellscript ausführen           http://dbox/cgi-bin/exec
 21. System-/Treiberfunktionen       http://dbox/control/system
 22. Fernbedienung                   http://dbox/control/rc
+23. Die DBox neu starten	    http://dbox/control/reboot
 **********************************************************************************************
 1. Die Kanalliste
 **********************************************************************************************
@@ -1156,3 +1157,20 @@ Beispiel:
 http://dbox/control/rc?unlock
 ok
 
+**********************************************************************************************
+23. Die DBox neu starten
+**********************************************************************************************
+Handler: http://dbox/control/reboot
+
+Parameter: keine
+Rückgabe:
+
+Es wird der Text ok bei Erfolg oder error im Fehlerfall zurückgegeben. Die Dbox startet sich bei ok sofort neu.
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/reboot
+ok
+ 

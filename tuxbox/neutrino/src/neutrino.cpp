@@ -1444,6 +1444,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL,
 										CRCInput::convertDigitToKey(shortcut++)));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_REBOOT, true, NULL, this, "reboot",
+										CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SHUTDOWN, true, NULL, this, "shutdown", CRCInput::RC_standby, "power.raw"));
 
 	mainSettings.addItem(GenericMenuSeparator);
@@ -4581,6 +4583,12 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey=="shutdown")
 	{
+		ExitRun();
+	}
+	else if(actionKey=="reboot")
+	{
+		FILE *f = fopen("/tmp/.reboot", "w");
+		fclose(f);
 		ExitRun();
 	}
 	else if(actionKey=="tv")

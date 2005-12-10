@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.14 2005/09/29 16:53:39 yjogol Exp $
+        $Id: controlapi.h,v 1.15 2005/12/10 10:49:21 barf Exp $
 
         License: GPL
 
@@ -80,6 +80,7 @@ class CControlAPI
 		bool RCCGI(CWebserverRequest *request);
 		bool LCDAction(CWebserverRequest *request);
 		bool YWebCGI(CWebserverRequest *request);
+		bool RebootCGI(CWebserverRequest *request);
 	public:
 		static const unsigned int PLUGIN_DIR_COUNT = 5;
 		std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT];

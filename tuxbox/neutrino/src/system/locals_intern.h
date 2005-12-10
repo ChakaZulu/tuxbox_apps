@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.60 2005/11/24 14:22:44 metallica Exp $
+ * $Id: locals_intern.h,v 1.61 2005/12/10 10:49:20 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -507,6 +507,7 @@ const char * locale_real_names[] =
 	"mainmenu.pausesectionsd",
 	"mainmenu.pictureviewer",
 	"mainmenu.radiomode",
+	"mainmenu.reboot",
 	"mainmenu.recording",
 	"mainmenu.recording_start",
 	"mainmenu.recording_stop",

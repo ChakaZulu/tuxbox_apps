@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.59 2005/12/10 10:28:51 barf Exp $
+ * $Id: locals.h,v 1.60 2005/12/10 10:49:20 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -507,6 +507,7 @@ typedef enum
 	LOCALE_MAINMENU_PAUSESECTIONSD,
 	LOCALE_MAINMENU_PICTUREVIEWER,
 	LOCALE_MAINMENU_RADIOMODE,
+	LOCALE_MAINMENU_REBOOT,
 	LOCALE_MAINMENU_RECORDING,
 	LOCALE_MAINMENU_RECORDING_START,
 	LOCALE_MAINMENU_RECORDING_STOP,
