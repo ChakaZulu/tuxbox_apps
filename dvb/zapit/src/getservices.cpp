@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.97 2005/11/28 05:24:40 metallica Exp $
+ * $Id: getservices.cpp,v 1.98 2005/12/10 11:27:54 barf Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -37,7 +37,7 @@ std::map<std::string, t_satellite_position> satellitePositions; //satellite posi
 std::map<t_satellite_position, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
 std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 
-void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_position satellitePosition, bool remove_as_default)
+void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_position satellitePosition)
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
@@ -108,7 +108,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 		);
 
 		/* read channels that belong to the current transponder */
-		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC, satellitePosition, feparams.frequency, remove_as_default);
+		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC, satellitePosition, feparams.frequency);
 
 		/* hop to next transponder */
 		node = node->xmlNextNode;
@@ -117,7 +117,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 	return;
 }
 
-void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, t_satellite_position satellitePosition, const uint32_t frequency, bool remove_as_default)
+void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, t_satellite_position satellitePosition, const uint32_t frequency)
 {
 	extern CConfigFile config;
 	bool trace_nukes = config.getBool("traceNukes", false);
@@ -134,8 +134,8 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 		service_type = xmlGetNumericAttribute(node, "service_type", 16);
 
 		char *ptr = xmlGetAttribute(node, "action");
-		bool remove = ptr ? (!strcmp(ptr, "remove") || !strcmp(ptr, "replace")) : remove_as_default;
-		bool add    = ptr ? (!strcmp(ptr, "add")    || !strcmp(ptr, "replace")) : !remove_as_default;
+		bool remove = ptr ? (!strcmp(ptr, "remove") || !strcmp(ptr, "replace")) : false;
+		bool add    = ptr ? (!strcmp(ptr, "add")    || !strcmp(ptr, "replace")) : true;
 		if (remove) {
 		  int result = allchans.erase(CREATE_CHANNEL_ID);
 		  if (!result || trace_nukes)
@@ -179,7 +179,7 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 	return;
 }
 
-void FindTransponder(xmlNodePtr search, bool remove_as_default)
+void FindTransponder(xmlNodePtr search)
 {
 	uint8_t DiSEqC;
 	t_satellite_position satellitePosition = SATELLITE_POSITION_OF_NON_SATELLITE_SOURCE;
@@ -208,7 +208,7 @@ void FindTransponder(xmlNodePtr search, bool remove_as_default)
 		}
 
 		INFO("going to parse dvb-%c provider %s", xmlGetName(search)[0], xmlGetAttribute(search, "name"));
-		ParseTransponders(search->xmlChildrenNode, DiSEqC, satellitePosition, remove_as_default);
+		ParseTransponders(search->xmlChildrenNode, DiSEqC, satellitePosition);
 		search = search->xmlNextNode;
 	}
 }
@@ -293,33 +293,24 @@ int LoadServices(fe_type_t frontendType, diseqc_t diseqcType, bool only_current_
 	struct stat testbuf;
 
 	if (!only_current_services) {
-		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
+		FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
 		xmlFreeDoc(parser);
 	}
 	if(stat(CURRENTSERVICES_XML,&testbuf) == 0)
 	{
 		if ((parser = parseXmlFile(CURRENTSERVICES_XML, false))) {
 			printf("[getservices] " CURRENTSERVICES_XML "  found.\n");
-			FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
+			FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
 			xmlFreeDoc(parser);
 		}
 	}
 
-	if (!only_current_services) {	
-		if(stat(ANTISERVICES_XML,&testbuf) == 0)
-		{
-	        	if ((parser = parseXmlFile(ANTISERVICES_XML, false))) {
-				printf("[getservices] " ANTISERVICES_XML " found.\n");
-				printf("[getservices] WARNING: antiservices.xml is depreciated; please use myservices.xml and 'action=\"remove\"' instead.\n");
-				FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, true);
-				xmlFreeDoc(parser);
-        		}
-		}
+	if (!only_current_services) {
 		if(stat(MYSERVICES_XML,&testbuf) == 0)
 		{
 			if ((parser = parseXmlFile(MYSERVICES_XML, false))) {
 				printf("[getservices] " MYSERVICES_XML "  found.\n");
-				FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode, false);
+				FindTransponder(xmlDocGetRootElement(parser)->xmlChildrenNode);
 				xmlFreeDoc(parser);
 			}
 		}
