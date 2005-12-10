@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.7 2005/11/13 19:13:52 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.8 2005/12/10 20:46:47 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -23,7 +23,7 @@
 #include <plugin.h>
 #include "movieplayer.h"
 
-#define REL "Movieplayer Plugin, Version 0.1"
+#define REL "Movieplayer Plugin, Version 0.2"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -170,10 +170,10 @@ void eSCGui::loadList()
 			for (unsigned int pos = response.find('\n', 0); pos != std::string::npos; pos = response.find('\n', start))
 			{
 				eString entry = response.substr(start, pos - start);
-				//eDebug("%s",entry.c_str());
+				eDebug("[MOVIEPLAYER] file: %s",entry.c_str());
 				if (entry.find("DIR:") == 0)
 				{
-					if (entry.find("/..") != eString::npos)
+					if (entry.right(3) == "/..")
 					{
 						if (pathfull == startdir || entry.mid(4, entry.length() - 7) == startdir)
 							eDebug("[VLC] startdir = pathdir");
@@ -181,7 +181,10 @@ void eSCGui::loadList()
 						{
 							a.Filename = _("[GO UP]");
 							a.Fullname = entry.mid(4);
+							a.Fullname = a.Fullname.left(a.Fullname.length() - 3);
+							a.Fullname = a.Fullname.left(a.Fullname.find_last_of("/") + 1);
 							a.Filetype = GOUP;
+							eDebug("[MOVIEPLAYER] goup: %s",a.Fullname.c_str());
 							playList.push_back(a);
 						}
 					}
@@ -190,6 +193,7 @@ void eSCGui::loadList()
 						a.Filename = "[DIR] " + entry.mid(4);
 						a.Fullname = entry.mid(4);
 						a.Filetype = DIRS;
+						eDebug("[MOVIEPLAYER] dir: %s",a.Fullname.c_str());
 						playList.push_back(a);
 					}
 				}
@@ -198,7 +202,7 @@ void eSCGui::loadList()
 					a.Filename = entry;
 					a.Fullname = entry;
 					a.Filetype = FILES;
-					
+					eDebug("[MOVIEPLAYER] file: %s",a.Fullname.c_str());
 					playList.push_back(a);
 				}
 				start = pos + 1;
@@ -274,7 +278,16 @@ void eSCGui::listSelChanged(eListBoxEntryText *item)
 void eSCGui::listSelected(eListBoxEntryText *item)
 {
 	if (item)
-		playerStart((int)item->getKey());
+	{
+		int val = (int)item->getKey();
+		if (playList[val].Filetype == FILES)
+			playerStart(val);
+		else
+		{
+			pathfull = playList[val].Fullname;
+			loadList();
+		}
+	}
 }
 
 void eSCGui::showMenu()
