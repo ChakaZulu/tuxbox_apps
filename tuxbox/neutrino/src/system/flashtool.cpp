@@ -305,13 +305,7 @@ bool CFlashTool::check_cramfs( const std::string & filename )
 void CFlashTool::reboot()
 {
 	::sync();
-	
-	/* Nokia is trash and can not reboot after writing directly to flash */
-	if(g_info.box_Type == CControld::TUXBOX_MAKER_NOKIA)
-		::reboot(RB_POWER_OFF);
-	else
-		::reboot(RB_AUTOBOOT);
-	
+	::reboot(RB_AUTOBOOT);
 	::exit(0);
 }
 
