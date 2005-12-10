@@ -9,7 +9,7 @@ noinst_LTLIBRARIES = movieplayer.la
 
 movieplayer_la_SOURCES = movieplayer.cpp
 
-movieplayer_la_LDFLAGS = -rpath $(PLUGINDIR) -lcurl -module
+movieplayer_la_LDFLAGS = -rpath $(PLUGINDIR) @CURL_LIBS@ -module
 
 movieplayer_la_CXXFLAGS = -fno-rtti -fno-exceptions $(SIGC_CFLAGS) $(XMLTREE_CFLAGS)
 
