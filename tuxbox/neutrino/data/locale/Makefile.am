@@ -22,15 +22,15 @@ if MAINTAINER_MODE
 locals: locals.h locals_intern.h
 
 ordercheck: deutsch.locale
-	cut -d' ' -f1 deutsch.locale | sort | uniq > /tmp/log
+	cut -d' ' -f1 deutsch.locale | LC_ALL=C sort | uniq > /tmp/log
 	cut -d' ' -f1 deutsch.locale | uniq  | diff - /tmp/log || \
 		(echo "ERROR: deutsch.locale not ordered or contains empty lines" && false)
 
 locals.h: ordercheck deutsch.locale
-	cut -d' ' -f1 deutsch.locale | sort | uniq | tr [:lower:] [:upper:] | tr \. \_  | tr \- \_ | tr -d \? | ./create.locals.h
+	cut -d' ' -f1 deutsch.locale | LC_ALL=C sort | uniq | tr [:lower:] [:upper:] | tr \. \_  | tr \- \_ | tr -d \? | ./create.locals.h
 
 locals_intern.h: ordercheck deutsch.locale
-	cut -d' ' -f1 deutsch.locale | sort | uniq | ./create.locals_intern.h
+	cut -d' ' -f1 deutsch.locale | LC_ALL=C sort | uniq | ./create.locals_intern.h
 
 check: locals.h locals_intern.h
 	diff locals.h ../../src/system
