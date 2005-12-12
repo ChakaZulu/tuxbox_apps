@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.42  2005/12/12 18:59:51  robspr1
+ * -bugfix USER/SUSER and PASS/SPASS extraction
+ *
  * Revision 1.41  2005/11/19 14:37:38  robspr1
  * - add different behaviour in marking mails green in the plugin
  *
@@ -289,6 +292,22 @@ void ReadConf()
 					sscanf(ptr + 6, "%s", maildb[index-'0'].imap);
 				}
 			}
+			else if((ptr = strstr(line_buffer, "SUSER")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", maildb[index-'0'].suser);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "SPASS")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", maildb[index-'0'].spass);
+				}
+			}
 			else if((ptr = strstr(line_buffer, "USER")) && (*(ptr+5) == '='))
 			{
 				char index = *(ptr+4);
@@ -311,22 +330,6 @@ void ReadConf()
 				if((index >= '0') && (index <= '9'))
 				{
 					sscanf(ptr + 6, "%d", &maildb[index-'0'].auth);
-				}
-			}
-			else if((ptr = strstr(line_buffer, "SUSER")) && (*(ptr+6) == '='))
-			{
-				char index = *(ptr+5);
-				if((index >= '0') && (index <= '9'))
-				{
-					sscanf(ptr + 7, "%s", maildb[index-'0'].suser);
-				}
-			}
-			else if((ptr = strstr(line_buffer, "SPASS")) && (*(ptr+6) == '='))
-			{
-				char index = *(ptr+5);
-				if((index >= '0') && (index <= '9'))
-				{
-					sscanf(ptr + 7, "%s", maildb[index-'0'].spass);
 				}
 			}
 			else if((ptr = strstr(line_buffer, "INBOX")) && (*(ptr+6) == '='))
@@ -796,7 +799,10 @@ int GetRCCode()
 			}
 			else
 			{
-				rccode &= 0x003F;
+				if( rccode != 0xFFFF)
+				{
+					rccode &= 0x003F;
+				}
 			}
 			return rccode;
 		}
@@ -3640,7 +3646,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.41 $";
+	char cvs_revision[] = "$Revision: 1.42 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;

@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.39  2005/12/12 19:00:04  robspr1
+ * -bugfix USER/SUSER and PASS/SPASS extraction
+ *
  * Revision 1.38  2005/11/19 14:38:24  robspr1
  * - add different behaviour in marking mails green in the plugin
  *
@@ -305,6 +308,22 @@ int ReadConf()
 					sscanf(ptr + 6, "%s", account_db[index-'0'].imap);
 				}
 			}
+			else if((ptr = strstr(line_buffer, "SUSER")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", account_db[index-'0'].suser);
+				}
+			}
+			else if((ptr = strstr(line_buffer, "SPASS")) && (*(ptr+6) == '='))
+			{
+				char index = *(ptr+5);
+				if((index >= '0') && (index <= '9'))
+				{
+					sscanf(ptr + 7, "%s", account_db[index-'0'].spass);
+				}
+			}
 			else if((ptr = strstr(line_buffer, "USER")) && (*(ptr+5) == '='))
 			{
 				char index = *(ptr+4);
@@ -352,22 +371,6 @@ int ReadConf()
 				if((index >= '0') && (index <= '9'))
 				{
 					sscanf(ptr + 6, "%d", &account_db[index-'0'].auth);
-				}
-			}
-			else if((ptr = strstr(line_buffer, "SUSER")) && (*(ptr+6) == '='))
-			{
-				char index = *(ptr+5);
-				if((index >= '0') && (index <= '9'))
-				{
-					sscanf(ptr + 7, "%s", account_db[index-'0'].suser);
-				}
-			}
-			else if((ptr = strstr(line_buffer, "SPASS")) && (*(ptr+6) == '='))
-			{
-				char index = *(ptr+5);
-				if((index >= '0') && (index <= '9'))
-				{
-					sscanf(ptr + 7, "%s", account_db[index-'0'].spass);
 				}
 			}
 			else if((ptr = strstr(line_buffer, "INBOX")) && (*(ptr+6) == '='))
@@ -3351,13 +3354,14 @@ int AddNewMailFile(int account, char *mailnumber)
 
 int CheckAccount(int account)
 {
-	int loop;
+	int loop, minloop = 0;
 	FILE *fd_status, *fd_idx;
 	int filesize, skip_uid_check = 0;
 	char statusfile[] = "/tmp/tuxmail.?";
 	char *known_uids = 0, *ptr = 0;
 	char mailnumber[12];
 	int readmails = 0;
+	int knownmails = 0;
 
 	imap = 0;
 		
@@ -3476,7 +3480,11 @@ int CheckAccount(int account)
 					fprintf(fd_status, "- --:-- %s ---/---\n", account_db[account].name); /* reserve space */
 				}
 
-				for(loop = messages; loop != 0; loop--)
+				if((messages > 2*MAXMAIL) && ( typeflag > 1 ))
+				{
+					minloop = messages - 2*MAXMAIL;
+				}
+				for(loop = messages; loop != minloop; loop--)
 				{
 					sprintf(mailnumber, "%d", loop);
 
@@ -3620,6 +3628,8 @@ int CheckAccount(int account)
 					{
 						if((ptr = strstr(known_uids, uid)))
 						{
+							knownmails++;
+							
 							if(*(ptr - 2) == 'D')
 							{
 								if( !imap )
@@ -3779,17 +3789,36 @@ int CheckAccount(int account)
 							}
 							else
 							{
-								account_db[account].mail_new++;
+								if((!knownmails) || ( typeflag == 1 ))
+								{
+									account_db[account].mail_new++;
 	
-								if((fd_idx) && (readmails < mailcache))
-								{
-									fprintf(fd_idx,"|%4d|%s\n",loop,uid);
-									readmails++;
-								}
+									if((fd_idx) && (readmails < mailcache))
+									{
+										fprintf(fd_idx,"|%4d|%s\n",loop,uid);
+										readmails++;
+									}
 
-								if(fd_status)
-								{
-									fprintf(fd_status, "|N|%s|%s\n", uid, header);
+									if(fd_status)
+									{
+										fprintf(fd_status, "|N|%s|%s\n", uid, header);
+									}
+								}
+								else
+								{				
+									// if new mail have been found after already found mails, mark the mails as unread, but not new			
+									account_db[account].mail_unread++;
+	
+									if((fd_idx) && (readmails < mailcache))
+									{
+										fprintf(fd_idx,"|%4d|%s\n",loop,uid);
+										readmails++;
+									}
+	
+									if(fd_status)
+									{
+										fprintf(fd_status, "|n|%s|%s\n", uid, header);
+									}
 								}
 							}
 						}
@@ -4384,7 +4413,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.38 $";
+	char cvs_revision[] = "$Revision: 1.39 $";
 	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
