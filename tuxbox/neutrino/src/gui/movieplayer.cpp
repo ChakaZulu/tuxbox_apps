@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.117 2005/11/30 09:50:10 metallica Exp $
+  $Id: movieplayer.cpp,v 1.118 2005/12/12 08:06:36 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -129,6 +129,7 @@ static bool isTS, isPES, isBookmark;
 
 #ifdef MOVIEBROWSER  			
 static bool isMovieBrowser = false;
+static bool movieBrowserDelOnExit = false;
 #endif /* MOVIEBROWSER */
 
 int g_speed = 1;
@@ -209,8 +210,8 @@ CMoviePlayerGui::CMoviePlayerGui()
 	filebrowser->Multi_Select = false;
 	filebrowser->Dirs_Selectable = false;
 
-#ifdef MOVIEBROWSER  			
-	moviebrowser= new CMovieBrowser();
+#ifdef MOVIEBROWSER  
+	moviebrowser = NULL;			
 #endif /* MOVIEBROWSER */
 
 	tsfilefilter.addFilter ("ts");
@@ -228,8 +229,11 @@ CMoviePlayerGui::CMoviePlayerGui()
 CMoviePlayerGui::~CMoviePlayerGui ()
 {
 	delete filebrowser;
-#ifdef MOVIEBROWSER  			
-	delete moviebrowser;
+#ifdef MOVIEBROWSER  
+	if(moviebrowser != NULL)
+	{	
+		delete moviebrowser;
+	}
 #endif /* MOVIEBROWSER */
 	if(bookmarkmanager)
 		delete bookmarkmanager;
@@ -325,9 +329,21 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 #ifdef MOVIEBROWSER  			
 	else if(actionKey=="tsmoviebrowser")
 	{
-		isMovieBrowser = true;
-		isTS = true;
-		PlayFile();
+		if(moviebrowser == NULL)
+		{
+			TRACE("[mp] new MovieBrowser");
+			moviebrowser= new CMovieBrowser();
+		}
+		if(moviebrowser != NULL)
+		{
+			isMovieBrowser = true;
+			isTS = true;
+			PlayFile();
+		}
+		else
+		{
+			TRACE("[mp] error: cannot create MovieBrowser");
+		}
 	}
 #endif /* MOVIEBROWSER */
 	else if(actionKey=="tsplayback_pc")
@@ -392,6 +408,15 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		delete bookmarkmanager;
 		bookmarkmanager=0;
 	}
+	
+	if(moviebrowser != NULL && movieBrowserDelOnExit == TRUE)
+	{
+		//moviebrowser->fileInfoStale();
+		TRACE("[mp] delete MovieBrowser");
+		delete moviebrowser;
+		moviebrowser = NULL;
+	}
+		
 	return menu_return::RETURN_REPAINT;
 }
 
@@ -3258,7 +3283,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.117 $");
+	helpbox.addLine("Version: $Revision: 1.118 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -3279,7 +3304,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.117 $");
+	helpbox.addLine("Version: $Revision: 1.118 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
