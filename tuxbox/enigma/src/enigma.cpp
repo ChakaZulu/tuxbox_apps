@@ -405,6 +405,12 @@ eZap::~eZap()
 	delete main;
 	eDebug("[ENIGMA] serviceSelector");
 	delete serviceSelector;
+#ifdef ENABLE_EXPERT_WEBIF
+	eDebug("[ENIGMA] unmountAllMountPoints");
+	eMountMgr *mountMgr = new eMountMgr();
+	mountMgr->unmountAllMountPoints();
+	delete mountMgr;
+#endif
 	eDebug("[ENIGMA] fertig");
 	init->setRunlevel(-1);
 
