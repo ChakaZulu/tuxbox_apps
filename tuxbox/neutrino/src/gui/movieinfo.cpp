@@ -861,7 +861,8 @@ bool CMovieInfo::loadFile_std(CFile& file,char* buffer, int buffer_size)
    int fd = open(file.Name.c_str(), O_RDONLY); 
     if (fd == -1) // cannot open file, return!!!!! 
     { 
-   		TRACE( "[mi] loadXml: cannot open (%s)\r\n" ,file.getFileName().c_str());
+   		//TRACE( "[mi] !open:%s\r\n" ,file.getFileName().c_str());
+   		TRACE("!");
 		return(false); 
     } 
  
@@ -870,7 +871,8 @@ bool CMovieInfo::loadFile_std(CFile& file,char* buffer, int buffer_size)
     int bytes = read(fd, buffer, buffer_size-1); 
     if(bytes <= 0) // cannot read file into buffer, return!!!! 
     { 
-   		TRACE( "[mi] loadXml: cannot read (%s)\r\n" ,file.getFileName().c_str() );
+   		//TRACE( "[mi] !read:%s\r\n" ,file.getFileName().c_str() );
+   		TRACE("#");
  		return(false); 
     } 
 	close(fd);
@@ -917,7 +919,8 @@ bool CMovieInfo::saveFile_std(const CFile& file, const char* text, const int tex
 	}
 	else
 	{
-		TRACE("[mi] ERROR: cannot open\r\n");
+		//TRACE("[mi] ERROR: cannot open\r\n");
+		TRACE("?");
 	}
  	return(result);
 }
