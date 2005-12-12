@@ -3,6 +3,8 @@
  
  	Homepage: http://dbox.cyberphoria.org/
 
+	$Id: moviebrowser.h,v 1.2 2005/12/12 07:58:02 guenther Exp $
+
 	Kommentar:
 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
@@ -41,6 +43,10 @@
 	Revision History:
 	Date			Author		Change Description
 	   Nov 2005		Günther	initial implementation
+	$Log: moviebrowser.h,v $
+	Revision 1.2  2005/12/12 07:58:02  guenther
+	- fix bug on deleting CMovieBrowser - speed up parse time (20 ms per .ts file now)- update stale function- refresh directories on reload- print scan time in debug console
+	
 
 ****************************************************************************/
 #ifndef MOVIEBROWSER_H_
@@ -260,7 +266,7 @@ class CMovieBrowser
 		MI_MOVIE_BOOKMARKS* getCurrentMovieBookmark(void){if(m_movieSelectionHandler == NULL) return NULL; return(&(m_movieSelectionHandler->bookmarks));};
 		int getCurrentStartPos(void){return(m_currentStartPos);}; //P1 return start position in [s]
 		MI_MOVIE_INFO* getCurrentMovieInfo(void){return(m_movieSelectionHandler);}; //P1 return start position in [s]
-		void fileInfoStale(void){m_file_info_stale = true;}; // call this function to force the Moviebrowser to reload all movie information from HD
+		void fileInfoStale(void); // call this function to force the Moviebrowser to reload all movie information from HD
 
 		bool readDir(const std::string & dirname, CFileList* flist);
 		bool readDir_vlc(const std::string & dirname, CFileList* flist);

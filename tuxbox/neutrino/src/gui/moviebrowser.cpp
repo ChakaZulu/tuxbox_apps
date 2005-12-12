@@ -3,6 +3,8 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
+	$Id: moviebrowser.cpp,v 1.4 2005/12/12 07:58:02 guenther Exp $
+
 	Kommentar:
 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
@@ -43,6 +45,10 @@
 	Revision History:
 	Date			Author		Change Description
 	   Nov 2005		Günther	initial implementation
+	$Log: moviebrowser.cpp,v $
+	Revision 1.4  2005/12/12 07:58:02  guenther
+	- fix bug on deleting CMovieBrowser - speed up parse time (20 ms per .ts file now)- update stale function- refresh directories on reload- print scan time in debug console
+	
 
 ****************************************************************************/
 
@@ -335,20 +341,56 @@ CMovieBrowser::~CMovieBrowser()
 	m_repositoryDir.clear();
 
 	m_dirNames.clear();
+	for(int i; i < m_vMovieInfo.size(); i++)
+	{
+		m_vMovieInfo[i].audioPids.clear();
+	}
 	m_vMovieInfo.clear();
 	m_vHandleBrowserList.clear();
 	m_vHandleRecordList.clear();
 	m_vHandlePlayList.clear();
+	m_serienames.clear();
 	
 	for(int i = 0; i < LF_MAX_ROWS; i++)
 	{
 		m_browserListLines.lineArray[i].clear();
 		m_recordListLines.lineArray[i].clear();
 		m_playListLines.lineArray[i].clear();
+		m_FilterLines.lineArray[i].clear();
 	}
 }
 
 
+/************************************************************************
+
+************************************************************************/
+void CMovieBrowser::fileInfoStale(void)
+{
+	m_file_info_stale = true;
+	
+	 // Also release memory buffers, since we have to reload this stuff next time anyhow 
+	m_dirNames.clear();
+	
+	for(int i; i < m_vMovieInfo.size(); i++)
+	{
+		m_vMovieInfo[i].audioPids.clear();
+	}
+	
+	m_vMovieInfo.clear();
+	m_vHandleBrowserList.clear();
+	m_vHandleRecordList.clear();
+	m_vHandlePlayList.clear();
+	m_serienames.clear();
+	
+	for(int i = 0; i < LF_MAX_ROWS; i++)
+	{
+		m_browserListLines.lineArray[i].clear();
+		m_recordListLines.lineArray[i].clear();
+		m_playListLines.lineArray[i].clear();
+		m_FilterLines.lineArray[i].clear();
+	}
+
+}; 
 
 
 /************************************************************************
@@ -808,10 +850,6 @@ bool CMovieBrowser::hide(void)
 {
 	//TRACE("[mb]->Hide\r\n");
 
-	m_currentBrowserSelection = m_pcBrowser->getSelectedLine();
-	m_currentRecordSelection  = m_pcLastRecord->getSelectedLine();
-	m_currentPlaySelection    = m_pcLastPlay->getSelectedLine();
-	m_currentFilterSelection  = m_pcFilter->getSelectedLine();
 	
 	if ( m_windowFocus == MB_FOCUS_LAST_PLAY)
 	{
@@ -835,19 +873,35 @@ bool CMovieBrowser::hide(void)
 		}
 	}
 	
-	if (m_pcFilter != NULL) delete m_pcFilter;
-	if (m_pcBrowser != NULL) delete m_pcBrowser;
-	if (m_pcLastPlay != NULL) delete m_pcLastPlay;
-	if (m_pcLastRecord != NULL) delete m_pcLastRecord;
+	if (m_pcFilter != NULL)
+	{
+		m_currentFilterSelection  = m_pcFilter->getSelectedLine();
+		delete m_pcFilter;
+		m_pcFilter = NULL;
+	}
+	if (m_pcBrowser != NULL)
+	{
+		m_currentBrowserSelection = m_pcBrowser->getSelectedLine();
+		delete m_pcBrowser;
+		m_pcBrowser = NULL;
+	}
+	if (m_pcLastPlay != NULL)
+	{
+		m_currentPlaySelection    = m_pcLastPlay->getSelectedLine();
+		delete m_pcLastPlay;
+		m_pcLastPlay = NULL;
+	}
+	if (m_pcLastRecord != NULL) 
+	{
+		m_currentRecordSelection  = m_pcLastRecord->getSelectedLine();
+		delete m_pcLastRecord;
+		m_pcLastRecord = NULL;
+	}
 	if (m_pcInfo != NULL) delete m_pcInfo;
 	if (m_pcWindow != NULL) delete m_pcWindow;
 
 	m_pcWindow = NULL;
-	m_pcBrowser = NULL;
-	m_pcLastPlay = NULL;
-	m_pcLastRecord = NULL;
 	m_pcInfo = NULL;
-	m_pcFilter = NULL;
 	
 	return (true);
 }
@@ -2042,6 +2096,24 @@ void CMovieBrowser::loadAllTsFileNamesFromStorage(void)
 	m_dirNames.clear();
 	m_vMovieInfo.clear();
 	
+	m_repositoryDir.clear();
+	addRepositoryDir(m_selectedDir);
+	for(int i = 0; i < MB_MAX_DIRS; i++)
+	{
+		if(!m_settings.storageDir[i].empty())
+			addRepositoryDir(m_settings.storageDir[i]);
+	}
+	if(g_settings.network_nfs_moviedir[0] != 0)
+	{
+		std::string name = g_settings.network_nfs_moviedir;
+		addRepositoryDir(name);
+	}
+	if(g_settings.network_nfs_recordingdir[0] != 0)
+	{
+		std::string name = g_settings.network_nfs_recordingdir;
+		addRepositoryDir(name);
+	}
+
 	size = m_repositoryDir.size();
 	for(i=0; i < size;i++)
 	{
@@ -2091,49 +2163,43 @@ bool CMovieBrowser::loadTsFileNamesFromDir(const std::string & dirname)
 	if(readDir(dirname, &flist) == true)
 	{
 		MI_MOVIE_INFO movieInfo;
+		m_movieInfo.clearMovieInfo(&movieInfo); // refresh structure
 		for(int i = 0; i < flist.size(); i++)
 		{
-			if(strcmp(flist[i].getFileName().c_str(),".") != 0 &&
-			   strcmp(flist[i].getFileName().c_str(),"..") != 0)
+			if( S_ISDIR(flist[i].Mode)) 
 			{
-				if( S_ISDIR(flist[i].Mode)) 
+				flist[i].Name += '/';
+				//TRACE("[mb] Dir: '%s'\r\n",movieInfo.file.Name.c_str());
+				loadTsFileNamesFromDir(flist[i].Name);
+			}
+			else
+			{
+				 if(flist[i].getFileName().find(".ts") == -1)
 				{
-					flist[i].Name += '/';
-					//TRACE("[mb] Dir: '%s'\r\n",movieInfo.file.Name.c_str());
-					loadTsFileNamesFromDir(flist[i].Name);
+					//TRACE("[mb] other file: '%s'\r\n",movieInfo.file.Name.c_str());
 				}
 				else
 				{
-					 if(flist[i].getFileName().find(".ts") == -1)
+					movieInfo.file.Name = flist[i].Name;
+					movieInfo.file.Mode = flist[i].Mode;
+					movieInfo.file.Size = flist[i].Size;
+					movieInfo.file.Time = flist[i].Time;
+					//TRACE(" N:%s,s:%d,t:%d\r\n",movieInfo.file.getFileName().c_str(),movieInfo.file.Size,movieInfo.file.Time);
+					//TRACE(" N:%s,s:%d\r\n",movieInfo.file.getFileName().c_str(),movieInfo.file.Size>>20);
+					//TRACE(" s:%d\r\n",movieInfo.file.getFileName().c_str(),movieInfo.file.Size);
+					//TRACE(" s:%llu\r\n",movieInfo.file.getFileName().c_str(),movieInfo.file.Size);
+					if(file_found_in_dir == false)
 					{
-						//TRACE("[mb] other file: '%s'\r\n",movieInfo.file.Name.c_str());
+						// first file in directory found, add directory to list 
+						m_dirNames.push_back(dirname);
+						file_found_in_dir = true;
+						//TRACE("[mb] new dir: :%s\r\n",dirname);
 					}
-					else
-					{
-						m_movieInfo.clearMovieInfo(&movieInfo); // refresh structure
-						
-						movieInfo.file.Name = flist[i].Name;
-						movieInfo.file.Mode = flist[i].Mode;
-						movieInfo.file.Size = flist[i].Size;
-						movieInfo.file.Time = flist[i].Time;
-						//TRACE(" N:%s,s:%d,t:%d\r\n",movieInfo.file.getFileName().c_str(),movieInfo.file.Size,movieInfo.file.Time);
-						//TRACE(" N:%s,s:%d\r\n",movieInfo.file.getFileName().c_str(),movieInfo.file.Size>>20);
-						//TRACE(" s:%d\r\n",movieInfo.file.getFileName().c_str(),movieInfo.file.Size);
-						//TRACE(" s:%llu\r\n",movieInfo.file.getFileName().c_str(),movieInfo.file.Size);
-						if(file_found_in_dir == false)
-						{
-							// first file in directory found, add directory to list 
-							m_dirNames.push_back(dirname);
-							file_found_in_dir = true;
-							//TRACE("[mb] new dir: :%s\r\n",dirname);
-						}
-						movieInfo.dirItNr = m_dirNames.size()-1;
-						m_vMovieInfo.push_back(movieInfo);
-					}
+					movieInfo.dirItNr = m_dirNames.size()-1;
+					m_vMovieInfo.push_back(movieInfo);
 				}
 			}
 		}
-		movieInfo.audioPids.clear();
 		result = true;
 	}	
  	
@@ -2178,13 +2244,13 @@ bool CMovieBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 	n = my_scandir(dirname.c_str(), &namelist, 0, my_alphasort);
 	if (n < 0)
 	{
-		perror(("Moviebrowser scandir: "+dirname).c_str());
+		perror(("[mb] scandir: "+dirname).c_str());
 		return false;
 	}
+	CFile file;
 	for(int i = 0; i < n;i++)
 	{
-		CFile file;
-		if(strcmp(namelist[i]->d_name,".") != 0)
+		if(namelist[i]->d_name[0] != '.')
 		{
 			file.Name = dirname;
 			file.Name += namelist[i]->d_name;
@@ -2387,21 +2453,33 @@ bool CMovieBrowser::addRepositoryDir(std::string& dirname)
 ************************************************************************/
 void CMovieBrowser::loadMovies(void)
 {
+		time_t time_start = time(NULL);
+		clock_t clock_start = clock()/10000; // CLOCKS_PER_SECOND
+		clock_t clock_prev = clock_start;
+		clock_t clock_act = clock_start;
+
+		TRACE("[mb] loadMovies:  %d,%d\r\n",clock(),time_start);
+		
 		CHintBox loadBox(LOCALE_MOVIEBROWSER_HEAD,g_Locale->getText(LOCALE_MOVIEBROWSER_SCAN_FOR_MOVIES));
 		loadBox.paint();
 
 		loadAllTsFileNamesFromStorage(); // P1
+		clock_act = clock()/10000;TRACE("[mb] *1:%3d,%3d*\r\n",clock_act - clock_prev,time(NULL));clock_prev = clock_act;	
 		loadAllMovieInfo(); // P1
+		clock_act = clock()/10000;TRACE("[mb] *2:%3d,%3d*\r\n",clock_act - clock_prev,time(NULL));clock_prev = clock_act;
 		updateSerienames();
 		m_file_info_stale = false;
 
 		loadBox.hide();
 
+		clock_act = clock()/10000;TRACE("[mb] *3:%3d,%3d*\r\n",clock_act - clock_prev,time(NULL));clock_prev = clock_act;
 		refreshBrowserList();	
+		clock_act = clock()/10000;TRACE("[mb] *4:%3d,%3d*\r\n",clock_act - clock_prev,time(NULL));clock_prev = clock_act;
 		refreshLastPlayList();	
 		refreshLastRecordList();
 		refreshFilterList();
 		refreshMovieInfo();	// is done by refreshBrowserList if needed
+		TRACE("[mb] ***Total:%d,%d***\r\n",(time(NULL)-time_start), ((clock()/10000)-clock_start));
 }
 /************************************************************************
 
