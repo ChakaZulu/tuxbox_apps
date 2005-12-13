@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = gnu
 
 SUBDIRS = \
-	etherwake fbshot mtd rtc 
+	etherwake fbshot mtd rtc devinit
 

@@ -12,4 +12,5 @@ etherwake/Makefile
 fbshot/Makefile
 mtd/Makefile
 rtc/Makefile
+devinit/Makefile
 ])
