@@ -27,6 +27,7 @@
 
 #include <global.h>
 
+#define KB(x) ((x) / 1024)
 
 CHTTPTool::CHTTPTool()
 {
@@ -58,6 +59,13 @@ int CHTTPTool::show_progress( void *clientp, double dltotal, double dlnow, doubl
 
 bool CHTTPTool::downloadFile(const std::string & URL, const char * const downloadTarget, int globalProgressEnd)
 {
+	double total_time = 0.0;
+	double connect_time = 0.0;
+	double download_size = 0.0;
+	unsigned long header_bytes = 0L;
+	unsigned long request_size = 0L;
+	double download_speed = 0.0;
+
 	CURL *curl;
 	CURLcode res;
 	FILE *headerfile;
@@ -96,7 +104,19 @@ bool CHTTPTool::downloadFile(const std::string & URL, const char * const downloa
 				curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, tmp);
 			}
 		}
+
 		res = curl_easy_perform(curl);
+
+		// get & print download stats
+		curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
+		curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &connect_time);
+		curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &header_bytes);
+		curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &download_size);
+		curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &download_speed);
+		curl_easy_getinfo(curl, CURLINFO_REQUEST_SIZE, &request_size);
+
+		printf("[httptool] size: %.0f KB, time: %.2f sec, speed: %.2f KB/sec\n", KB(download_size), total_time, KB(download_speed));
+
 		curl_easy_cleanup(curl);
 	}
 	if (headerfile)
