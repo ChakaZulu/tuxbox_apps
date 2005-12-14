@@ -28,7 +28,6 @@
 #include <neutrino.h>
 #include <libmd5sum.h>
 
-#include <string>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/mount.h>
@@ -56,7 +55,7 @@ const char * CCheckSquashfs::GetVersionInfo(const char * squashfsimage)
 
 		printf("[chkSquashfs] read version string: %s\n", versionString);
 
-		unmountSquashfsImage(squashfsimage);
+		unmountSquashfsImage();
 
 		return versionString;
 	} else {
@@ -66,23 +65,28 @@ const char * CCheckSquashfs::GetVersionInfo(const char * squashfsimage)
 	}
 }
 
-bool CCheckSquashfs::MD5Check(const char * squashfsimage, unsigned char checkmd5[16])
+bool CCheckSquashfs::MD5Check(const std::string squashfsimage, const std::string checkmd5)
 {
-	unsigned char md5[16];
+	char md5binary[17];
+	char md5result[33];
 
-	md5_file(squashfsimage, 1, (unsigned char*) &md5);
+	md5_file(squashfsimage.c_str(), 1, (unsigned char*) md5binary);
 
-	printf("[chkSquashfs] check md5 : %s => ", checkmd5);
-	printMD5(md5);
+	int i;
+	for (i=0; i<16; i++) {
+		snprintf(&md5result[i*2], 3, "%02x", md5binary[i]);
+	}
 
-	if (memcmp(md5, checkmd5, 16))
+	printf("[chkSquashfs] %s\n", md5result);
+	printf("[chkSquashfs] %s\n", checkmd5.c_str());
+
+	if (strcmp(md5result, checkmd5.c_str()))
 	{
 		printf("[chkSquashfs] md5 check failed!\n");
 		return false;
 	}
 
-	printf("[chkSquashfs] md5 is ok\n");
-
+	printf("[chkSquashfs] md5 check successfull\n");
 	return true;
 }
 
@@ -115,7 +119,7 @@ bool CCheckSquashfs::mountSquashfsImage(const char * squashfsimage)
 	}
 }
 
-void CCheckSquashfs::unmountSquashfsImage(const char * squashfsimage)
+void CCheckSquashfs::unmountSquashfsImage()
 {
 	umount(LOCAL_MOUNT_DIR);
 
@@ -125,16 +129,4 @@ void CCheckSquashfs::unmountSquashfsImage(const char * squashfsimage)
 		if (rmdir(LOCAL_MOUNT_DIR) != 0)
 			printf("[chkSquashfs] can't remove mount directory: %s\n", LOCAL_MOUNT_DIR);
 	}
-}
-
-void CCheckSquashfs::printMD5(unsigned char md5[16])
-{
-	int count;
-
-	for(count=0;count<16;count++)
-	{
-		printf("%02x", md5[count] );
-	}
-
-	printf("\n");
 }

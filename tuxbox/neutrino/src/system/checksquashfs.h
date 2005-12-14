@@ -33,17 +33,18 @@
 #ifndef __checksquashfs__
 #define __checksquashfs__
 
+#include <string>
+
 class CCheckSquashfs
 {
  private:
 	bool mountSquashfsImage(const char * squashfsimage);
-	void unmountSquashfsImage(const char * squashfsimage);
-	void printMD5(unsigned char md5[16]);
+	void unmountSquashfsImage();
 
  public:
 	CCheckSquashfs();
 	const char * GetVersionInfo(const char * squashfsimage);
-	bool MD5Check(const char * squashfsimage, unsigned char checkmd5[16]);
+	bool MD5Check(const std::string squashfsimage, const std::string checkmd5);
 };
 
 #endif
