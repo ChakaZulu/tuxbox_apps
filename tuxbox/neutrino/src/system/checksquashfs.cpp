@@ -77,9 +77,6 @@ bool CCheckSquashfs::MD5Check(const std::string squashfsimage, const std::string
 		snprintf(&md5result[i*2], 3, "%02x", md5binary[i]);
 	}
 
-	printf("[chkSquashfs] %s\n", md5result);
-	printf("[chkSquashfs] %s\n", checkmd5.c_str());
-
 	if (strcmp(md5result, checkmd5.c_str()))
 	{
 		printf("[chkSquashfs] md5 check failed!\n");
