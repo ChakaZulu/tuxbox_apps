@@ -72,7 +72,7 @@
 
 
 #define gTmpPath "/var/tmp/"
-#define gUserAgent "neutrino/softupdater 1.0"
+#define gUserAgent "neutrino/softupdater 1.1"
 
 // Only Squashfs v2.1 - v2.2r2 is supported in U-Boot Bootloader
 #ifdef SQUASHFS
@@ -140,9 +140,10 @@ bool CFlashUpdate::selectHttpImage(void)
 {
 	CHTTPTool httpTool;
 	std::string url;
+	std::string md5;
 	std::string name;
 	std::string version;
-	std::vector<std::string> updates_lists, urls, names, versions, descriptions;
+	std::vector<std::string> updates_lists, urls, md5s, names, versions, descriptions;
 	int selected = -1;
 
 	// get default update url from .version
@@ -190,9 +191,10 @@ bool CFlashUpdate::selectHttpImage(void)
 		if (httpTool.downloadFile(url, gTmpPath LIST_OF_UPDATES_LOCAL_FILENAME, 20))
 		{
 			std::ifstream in(gTmpPath LIST_OF_UPDATES_LOCAL_FILENAME);
-			while (in >> url >> version >> std::ws)
+			while (in >> url >> md5 >> version >> std::ws)
 			{
 				urls.push_back(url);
+				md5s.push_back(md5);
 				versions.push_back(version);
 				std::getline(in, name);
 				names.push_back(name);
@@ -227,6 +229,7 @@ bool CFlashUpdate::selectHttpImage(void)
 		return false;
 
 	filename = urls[selected];
+	filemd5 = md5s[selected];
 	newVersion = versions[selected];
 
 	return true;
@@ -394,9 +397,24 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	ft.setStatusViewer(this);
 
 #ifdef SQUASHFS
-#warning no squash filesystem check implemented
+#warning no squash filesystem check by manual (ftp) update implemented
+// only for i-net update. the question is: where to get the md5sum for the manual update file
+	if(g_settings.softupdate_mode==1) //internet-update
+	{
+		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_MD5CHECK)); // UTF-8
+
+		CCheckSquashfs* checkSquashfs;
+		checkSquashfs = new CCheckSquashfs();
+
+		if(!checkSquashfs->MD5Check(filename, filemd5))
+		{
+			hide();
+			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_MD5SUMERROR)); // UTF-8
+			return menu_return::RETURN_REPAINT;
+		}
+	}
 #else
-	//image-check
+	//cramfs filesystem check
 	showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_MD5CHECK)); // UTF-8
 	if(!ft.check_cramfs(filename))
 	{

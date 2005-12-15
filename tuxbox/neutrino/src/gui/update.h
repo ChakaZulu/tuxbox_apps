@@ -45,14 +45,15 @@ class CFlashUpdate : public CProgressWindow
 {
  private:
 	std::string filename;
-	
+	std::string filemd5;
+
 	std::string installedVersion;
 	std::string newVersion;
-	
+
 	bool selectHttpImage(void);
 	bool getUpdateImage(const std::string & version);
 	bool checkVersion4Update();
-	
+
  public:
 	CFlashUpdate();
 	int exec( CMenuTarget* parent, const std::string & actionKey );
