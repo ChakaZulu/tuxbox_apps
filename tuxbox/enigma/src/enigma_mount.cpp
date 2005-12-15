@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.53 2005/12/12 08:34:29 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.54 2005/12/15 08:41:10 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -210,7 +210,14 @@ int eMountPoint::mount()
 							rc = system(eString(cmd + "&").c_str());
 							if (mp.localDir == "/hdd")
 							{
-								sleep(10);
+								int time;
+								rc = 15;
+								do
+								{
+									time = rc;
+									rc = sleep(time);
+								}
+								while ((rc > 0) && (rc < time));
 								system("cd /tmp && wget http://127.0.0.1/cgi-bin/reloadRecordings");
 								remove("/tmp/reloadRecordings");
 							}
