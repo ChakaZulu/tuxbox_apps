@@ -97,7 +97,10 @@ int eDVBRecorder::flushBuffer()
 		if ( wr < towrite )  // to less bytes written?
 		{
 			if ( wr < 0 )
+			{
+				if (errno == EINTR) continue;
 				goto Error;
+			}
 			if ( !retrycount-- )
 				goto Error;
 		}
@@ -118,7 +121,10 @@ int eDVBRecorder::flushBuffer()
 			if ( wr < towrite ) // to less bytes written?
 			{
 				if ( wr < 0 )
+				{
+					if (errno == EINTR) continue;
 					goto Error;
+				}
 				if ( !retrycount-- )
 					goto Error;
 			}
@@ -138,7 +144,7 @@ Error:
 
 void SAHandler(int ptr)
 {
-	if ( eDVB::getInstance()->recorder )
+	if ( eDVB::getInstance() && eDVB::getInstance()->recorder )
 		eDVB::getInstance()->recorder->setWritePatPmtFlag();
 }
 
@@ -153,7 +159,18 @@ void eDVBRecorder::thread()
 			rd = 65424;
 		int r = ::read(dvrfd, buf+bufptr, rd);
 		if ( r < 0 )
-			continue;
+		{
+			if (errno == EINTR) continue;
+			/*
+			 * any other error will immediately cause the same error
+			 * when we would call 'read' again with the same arguments
+			 */
+			eDebug("recording read error %i", errno);
+			state = stateError;
+			rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+			break;
+		}
+		/* note that some dvr devices occasionally return EOF, we should ignore that */
 
 		bufptr += r;
 
@@ -235,7 +252,7 @@ void eDVBRecorder::PMTready(int error)
 			validatePIDs();
 
 			singleLock s(PMTLock);
-			delete [] PmtData;
+			if (PmtData) delete [] PmtData;
 			PmtData = pmt->getRAW();
 
 			pmt->unlock();
@@ -270,7 +287,8 @@ int eDVBRecorder::openFile(int suffix)
 	if ( !stat64(tfilename.c_str(), &s) )
 	{
 		rename(tfilename.c_str(), (tfilename+".$$$").c_str() );
-		eBackgroundFileEraser::getInstance()->erase((tfilename+".$$$").c_str());
+		if (eBackgroundFileEraser::getInstance())
+			eBackgroundFileEraser::getInstance()->erase((tfilename+".$$$").c_str());
 	}
 	outfd=::open(tfilename.c_str(), O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
 
@@ -291,7 +309,7 @@ void eDVBRecorder::open(const char *_filename)
 	filename=_filename;
 
 	int tmp=1024*1024;  // 1G
-	eConfig::getInstance()->getKey("/extras/record_splitsize", tmp);
+	if (eConfig::getInstance()) eConfig::getInstance()->getKey("/extras/record_splitsize", tmp);
 
 	splitsize=tmp;
 	splitsize*=1024;
@@ -380,10 +398,13 @@ void eDVBRecorder::validatePIDs()
 		{
 			if ( state == stateRunning )
 			{
-				if (::ioctl(newpid.first->fd, DMX_START, 0)<0)
+				if (newpid.first->fd >= 0)
 				{
-					eDebug("DMX_START failed (%m)");
-					::close(newpid.first->fd);
+					if (::ioctl(newpid.first->fd, DMX_START, 0)<0)
+					{
+						eDebug("DMX_START failed (%m)");
+						removePID(it->pid);
+					}
 				}
 			}
 		}
@@ -426,11 +447,14 @@ void eDVBRecorder::start()
 	{
 		eDebug("starting pidfilter for pid %d", i->pid );
 
-		if (::ioctl(i->fd, DMX_START, 0)<0)
+		if (i->fd >= 0)
 		{
-			eDebug("DMX_START failed");
-			::close(i->fd);
-			continue;
+			if (::ioctl(i->fd, DMX_START, 0)<0)
+			{
+				eDebug("DMX_START failed");
+				::close(i->fd);
+				pids.erase(i);
+			}
 		}
 	}
 }
@@ -465,15 +489,22 @@ void eDVBRecorder::close()
 
 	eDebug("eDVBRecorder::close()");
 
-	if (outfd < 0)
-		return;
-
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 		if (i->fd >= 0)
 			::close(i->fd);
 
-	::close(dvrfd);
-	::close(outfd);
+	pids.clear();
+
+	if (dvrfd >= 0)
+	{
+		::close(dvrfd);
+		dvrfd = -1;
+	}
+	if (outfd >= 0)
+	{
+		::close(outfd);
+		outfd = -1;
+	}
 
 	if ( thread_running() )
 		kill(true);
@@ -515,18 +546,22 @@ eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
 
 eDVBRecorder::~eDVBRecorder()
 {
-	delete [] PatData;
-	delete [] PmtData;
-	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if (PatData) delete [] PatData;
+	if (PmtData) delete [] PmtData;
+	eDVBServiceController *sapi = NULL;
+	if (eDVB::getInstance()) sapi = eDVB::getInstance()->getServiceAPI();
 
-// workaround for faked service types..
-	eServiceReferenceDVB tmp = sapi->service;
-	tmp.data[0] = recRef.getServiceType();
-
-	if ( sapi && tmp != recRef )
+	if (sapi)
 	{
-		eServiceReferenceDVB ref=sapi->service;
-		eDVBCaPMTClientHandler::distribute_leaveService(recRef);
+		// workaround for faked service types..
+		eServiceReferenceDVB tmp = sapi->service;
+		tmp.data[0] = recRef.getServiceType();
+	
+		if ( tmp != recRef )
+		{
+			eServiceReferenceDVB ref=sapi->service;
+			eDVBCaPMTClientHandler::distribute_leaveService(recRef);
+		}
 	}
 	close();
 }
