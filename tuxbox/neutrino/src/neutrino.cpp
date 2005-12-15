@@ -3498,11 +3498,10 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// g_EventList->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName()); // UTF-8
 
 				// -- new EPG Menu (rasc 2004-03-06)
-				{  CEPGMenuHandler  *epg_menu;
-
-				   epg_menu = new CEPGMenuHandler;
-				   epg_menu-> doMenu();
-				}
+				CEPGMenuHandler  *epg_menu;
+				epg_menu = new CEPGMenuHandler;
+				epg_menu->doMenu();
+				delete epg_menu;
 			}
 			else if( msg == CRCInput::RC_blue )
 			{	// streaminfo
@@ -3511,12 +3510,13 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else if( msg == CRCInput::RC_green )
 			{
 				// -- new Audio Selector Menu (rasc 2005-08-30)
-		       		if (g_settings.audio_left_right_selectable || 
+				if (g_settings.audio_left_right_selectable || 
 				    g_RemoteControl->current_PIDs.APIDs.size() > 1)
-				{  CAudioSelectMenuHandler  *audio_menu;
-
-				   audio_menu = new CAudioSelectMenuHandler;
-				   audio_menu-> doMenu();
+				{
+					CAudioSelectMenuHandler  *audio_menu;
+					audio_menu = new CAudioSelectMenuHandler;
+					audio_menu-> doMenu();
+					delete audio_menu;
 				}
 			}
 			else if( msg == CRCInput::RC_yellow )

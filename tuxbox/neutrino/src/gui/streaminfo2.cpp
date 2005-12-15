@@ -82,15 +82,13 @@ CStreamInfo2::CStreamInfo2()
 
 	sigBox_pos = 0;
 	paint_mode = 0;
-
+	delete pig;
 }
 
 
 
 CStreamInfo2::~CStreamInfo2()
 {
-	delete pig;
-
 }
 
 
