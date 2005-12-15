@@ -259,14 +259,14 @@ int eSocket::connectToHost(eString hostname, int port)
 	bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
 	serv_addr.sin_port=htons(port);
 	res=::connect(socketdesc, (const sockaddr*)&serv_addr, sizeof(serv_addr));
-	if ((res < 0) && (errno != EINPROGRESS))
+	if ((res < 0) && (errno != EINPROGRESS) && (errno != EINTR))
 	{
 		eDebug("can't connect to host: %s", hostname.c_str());
 		close();
 		error_(errno);
 		return(-3);
 	}
-	if (res < 0)	// EINPROGRESS
+	if (res < 0)	// EINPROGRESS or EINTR
 	{
 		rsn->setRequested(rsn->getRequested()|eSocketNotifier::Write);
 		mystate=Connecting;
@@ -337,14 +337,14 @@ int eUnixDomainSocket::connectToPath(eString path)
 	serv_addr_un.sun_family = AF_LOCAL;
 	strcpy(serv_addr_un.sun_path, path.c_str());
 	res=::connect(socketdesc, (const sockaddr*)&serv_addr_un, sizeof(serv_addr_un));
-	if ((res < 0) && (errno != EINPROGRESS))
+	if ((res < 0) && (errno != EINPROGRESS) && (errno != EINTR))
 	{
 		eDebug("can't connect to: %s", path.c_str());
 		close();
 		error_(errno);
 		return(-3);
 	}
-	if (res < 0)	// EINPROGRESS
+	if (res < 0)	// EINPROGRESS or EINTR
 	{
 		rsn->setRequested(rsn->getRequested()|eSocketNotifier::Write);
 		mystate=Connecting;
