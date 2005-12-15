@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.54 2005/12/15 08:41:10 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.55 2005/12/15 21:49:27 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -120,14 +120,11 @@ bool eMountPoint::isIdentical(eString mountOn, eString mountDev)
 			found = (eString().sprintf("%d.%d.%d.%d:%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()) == mountDev);
 			break;
 		case 1: //CIFS
+		case 3: //SMBFS
 			found = (eString().sprintf("//%d.%d.%d.%d/%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()) == mountDev);
 			break;
 		case 2: //DEVICE
 			found = ((mountOn == mp.localDir) && (mountDev == mp.mountDir) && (mp.ip[0] == 0) && (mp.ip[1] == 0) && (mp.ip[2] == 0) && (mp.ip[3] == 0));
-			break;
-		case 3: //SMBFS
-			dir = mp.mountDir;
-			found = ((mountOn == mp.localDir) && (mountDev.upper() == dir.upper()));
 			break;
 		default:
 			break;
@@ -182,7 +179,7 @@ int eMountPoint::mount()
 						if (fileSystemIsSupported("smbfs"))
 						{
 							cmd = "smbmount ";
-							cmd += mp.mountDir;
+							cmd += "//" + ip + "/" + mp.mountDir;
 							cmd += " " + ((mp.password) ? mp.password : "guest");
 							cmd += " -U " + ((mp.userName) ? mp.userName : "guest");
 							cmd += " -I " + ip;
@@ -202,12 +199,13 @@ int eMountPoint::mount()
 						case -1:
 							eDebug("[ENIGMA_MOUNT] fork failed!");
 							rc = -5;
+							break;
 						case 0:
 						{
 							for (unsigned int i = 0; i < 90; ++i )
 								close(i);
 
-							rc = system(eString(cmd + "&").c_str());
+							rc = system(cmd.c_str());
 							if (mp.localDir == "/hdd")
 							{
 								int time;
@@ -555,10 +553,27 @@ void eMountMgr::addMountedFileSystems()
 			if (mountType.upper() == "CIFS")
 			{
 				sscanf(mountDev.c_str(), "//%d.%d.%d.%d/%*s", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
-				mountDev = mountDev.right(2); //strip off leading slashes
+				mountDev = mountDev.right(mountDev.length() - 2); //strip off leading slashes
 				mp.mountDir = getRight(mountDev, '/');
 				mp.localDir = mountOn;
 				mp.fstype = 1;
+				mp.password = "";
+				mp.userName = "";
+				mp.automount = 0;
+				mp.options = "";
+				mp.description = "";
+				mp.mounted = true;
+				mp.id = -1; //don't care
+				addMountPoint(mp);
+			}
+			else
+			if (mountType.upper() == "SMBFS")
+			{
+				sscanf(mountDev.c_str(), "//%d.%d.%d.%d/%*s", &mp.ip[0], &mp.ip[1], &mp.ip[2], &mp.ip[3]);
+				mountDev = mountDev.right(mountDev.length() - 2); //strip off leading slashes
+				mp.mountDir = getRight(mountDev, '/');
+				mp.localDir = mountOn;
+				mp.fstype = 3;
 				mp.password = "";
 				mp.userName = "";
 				mp.automount = 0;
