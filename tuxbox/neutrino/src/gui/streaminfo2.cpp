@@ -86,7 +86,7 @@ CStreamInfo2::CStreamInfo2()
 
 CStreamInfo2::~CStreamInfo2()
 {
-	delete pig;
+	//destructor funktioniert hier nicht richtig 
 }
 
 int CStreamInfo2::exec(CMenuTarget* parent, const std::string &)
@@ -102,7 +102,7 @@ int CStreamInfo2::exec(CMenuTarget* parent, const std::string &)
 	doSignalStrengthLoop ();
 
 	hide();
-
+	delete pig;
 	res = menu_return::RETURN_EXIT_ALL;
 	return res;
 }
