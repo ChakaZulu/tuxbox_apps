@@ -82,22 +82,16 @@ CStreamInfo2::CStreamInfo2()
 
 	sigBox_pos = 0;
 	paint_mode = 0;
-	delete pig;
 }
-
-
 
 CStreamInfo2::~CStreamInfo2()
 {
+	delete pig;
 }
-
-
-
-
 
 int CStreamInfo2::exec(CMenuTarget* parent, const std::string &)
 {
-   int res; 
+	int res;
 
 	if (parent)
 	{
@@ -109,12 +103,9 @@ int CStreamInfo2::exec(CMenuTarget* parent, const std::string &)
 
 	hide();
 
-        res = menu_return::RETURN_EXIT_ALL;
+	res = menu_return::RETURN_EXIT_ALL;
 	return res;
 }
-
-
-
 
 int CStreamInfo2::doSignalStrengthLoop ()
 {
@@ -163,14 +154,9 @@ int CStreamInfo2::doSignalStrengthLoop ()
 			CNeutrinoApp::getInstance()->handleMsg( msg, data ); 
 		}
 
-
 	}
-
 	return msg;
 }
-
-
-
 
 void CStreamInfo2::hide()
 {
@@ -178,31 +164,24 @@ void CStreamInfo2::hide()
 	frameBuffer->paintBackgroundBoxRel(0,0, max_width,max_height);
 }
 
-
-
 void CStreamInfo2::paint_pig(int x, int y, int w, int h)
 {
   	frameBuffer->paintBoxRel(x,y,w,h, COL_BACKGROUND);
 	pig->show (x,y,w,h);
 }
 
-
-
-
 void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 {
-   int y1;
-   int xd = w/3;
-
+	int y1;
+	int xd = w/3;
 
 	g_Font[font_info]->RenderString(x, y+iheight, width-10, g_Locale->getText(LOCALE_STREAMINFO_SIGNAL), COL_MENUCONTENT, 0, true);
-
 
 	sigBox_x = x;
 	sigBox_y = y+iheight;
 	sigBox_w = w;
 	sigBox_h = h-iheight*3;
-  	frameBuffer->paintBoxRel(sigBox_x,sigBox_y,sigBox_w,sigBox_h, COL_BLACK);
+	frameBuffer->paintBoxRel(sigBox_x,sigBox_y,sigBox_w,sigBox_h, COL_BLACK);
 
 	y1  = y + h;
 
@@ -220,7 +199,6 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	sig_text_snr_x = x+05+xd*1;
 	sig_text_sig_x = x+05+xd*2;
 
-
 	// --  first draw of dummy signal
 	// --  init some values
 	{
@@ -233,24 +211,18 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 		struct feSignal s = {0,0,  0,0,   0,0 };
 		paint_signal_fe(s);
 	}
-
 }
-
-
-
 
 void CStreamInfo2::paint_signal_fe(struct feSignal  s)
 {
-   int   x_now = sigBox_pos;
-   int   y = sig_text_y;
-   int   yd;
-
+	int   x_now = sigBox_pos;
+	int   y = sig_text_y;
+	int   yd;
 
 	sigBox_pos = (++sigBox_pos) % sigBox_w;
 
 	frameBuffer->paintVLine(sigBox_x+sigBox_pos,sigBox_y,sigBox_y+sigBox_h,COL_WHITE);
 	frameBuffer->paintVLine(sigBox_x+x_now,sigBox_y,sigBox_y+sigBox_h+1,COL_BLACK);
-
 
 	if (s.ber != s.old_ber) {
 		SignalRenderStr (s.ber,sig_text_ber_x,y);
@@ -271,8 +243,6 @@ void CStreamInfo2::paint_signal_fe(struct feSignal  s)
 	}
 	yd = y_signal_fe (s.snr, 65000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_BLUE);
-
-
 }
 
 
@@ -283,7 +253,7 @@ int CStreamInfo2::y_signal_fe(unsigned long value, unsigned long max_value, int 
 
 	if (!max_value) max_value = 1;
 
-    	l = ((long) max_y * (long) value ) / (long) max_value;
+	l = ((long) max_y * (long) value ) / (long) max_value;
 	if (l > max_y) l = max_y;
 
 	return (int) l;
@@ -342,17 +312,9 @@ void CStreamInfo2::paint(int mode)
 
 }
 
-
-
-
-
-
 void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 {
-
-
 	// Info Output
-
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
 	if (fd==NULL)
 	{
@@ -379,7 +341,6 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 		}
 	}
 	fclose(fd);
-
 
 	ypos+= iheight;
 	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText(LOCALE_STREAMINFO_RESOLUTION), (int)bitInfo[0], (int)bitInfo[1] );
@@ -447,9 +408,6 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	}
 	g_Font[font_info]->RenderString(xpos, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= iheight+ 10;
-
-
-
 
 	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
 
@@ -521,10 +479,3 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
 	g_Font[font_info]->RenderString(xpos, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
-
-
-
-
-
-
-
