@@ -55,8 +55,10 @@ class CControldClient:private CBasicClient
 
 		//VideoOutput
 		static const char VIDEOOUTPUT_COMPOSITE = 0;
-		static const char VIDEOOUTPUT_SVIDEO    = 2;
 		static const char VIDEOOUTPUT_RGB       = 1;
+		static const char VIDEOOUTPUT_SVIDEO    = 2;
+		static const char VIDEOOUTPUT_YUV_VBS   = 3;
+		static const char VIDEOOUTPUT_YUV_CVBS  = 4;
 
 		//mute
 		static const bool VOLUME_MUTE = true;
@@ -114,10 +116,12 @@ class CControldClient:private CBasicClient
 		char getAspectRatio();
 
 		/*
-			setVideoOutput(char) : Setzten des Videooutputs ( composite / svhs / rgb )
-			Parameter: VIDEOOUTPUT_COMPOSITE = composite video
-			           VIDEOOUTPUT_SVIDEO    = svhs video
-			           VIDEOOUTPUT_RGB       = rgb
+			setVideoOutput(char) : Setzten des Videooutputs ( composite (= cvbs) / svideo / rgb+cvbs / yuv+vbs / yuv+cvbs )
+			Parameter: VIDEOOUTPUT_COMPOSITE = cvbs (composite) video
+			           VIDEOOUTPUT_SVIDEO    = svideo
+			           VIDEOOUTPUT_RGB       = rgb+cvbs
+			           VIDEOOUTPUT_YUV_VBS   = yuv+vbs
+			           VIDEOOUTPUT_YUV_CVBS  = yuv+cvbs
 		*/
 		void setVideoOutput(char);
 		char getVideoOutput();
