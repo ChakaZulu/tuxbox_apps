@@ -186,9 +186,7 @@
 				</tr>
 				<tr>
 					<td colspan="2">
-						<input name="description" type="text" size="70">
-						&nbsp;&nbsp;
-						#RENAMEBUTTON#
+						<input name="description" type="text" size="82">#RENAMEBUTTON#
 					</td>
 				</tr>
 			</table>
