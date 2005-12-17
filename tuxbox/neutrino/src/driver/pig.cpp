@@ -139,11 +139,26 @@ void CPIG::pigclose ()
 void CPIG::_set_window (int x, int y, int w, int h)
 {
   // -- Modul interne Routine
-  struct v4l2_format coord;
-  int    err;
+	struct v4l2_crop crop;
+	struct v4l2_format coord;
+	int    err;
 
-	coord.fmt.win.w.left   = x;
-	coord.fmt.win.w.top    = y;
+	crop.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
+	err = ioctl(fd, VIDIOC_G_CROP, &crop);
+
+	// take whole input frame
+	crop.c.left = 0;
+	crop.c.top = 0;
+	crop.c.width = 720;
+	crop.c.height = 576;
+	err = ioctl(fd, VIDIOC_S_CROP, &crop);
+	
+	coord.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
+	err = ioctl(fd, VIDIOC_G_FMT, &coord);
+
+	// fit into small window
+	coord.fmt.win.w.left = x;
+	coord.fmt.win.w.top = y;
 	coord.fmt.win.w.width  = w;
 	coord.fmt.win.w.height = h;
 
