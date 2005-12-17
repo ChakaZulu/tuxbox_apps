@@ -169,7 +169,7 @@ class CMenuForwarderNonLocalized : public CMenuForwarder
  public:
 	// Text must be UTF-8 encoded:
 	CMenuForwarderNonLocalized(const char * const Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, const char * const ActionKey = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const char * const IconName = NULL);
-	virtual CMenuForwarderNonLocalized(){}
+	virtual ~CMenuForwarderNonLocalized(){}
 };
 
 class CAbstractMenuOptionChooser : public CMenuItem
