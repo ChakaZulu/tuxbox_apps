@@ -125,6 +125,7 @@ class CMenuSeparator : public CMenuItem
 
 
 		CMenuSeparator(const int Type = 0, const neutrino_locale_t Text = NONEXISTANT_LOCALE);
+		virtual ~CMenuSeparator(){}
 
 		int paint(bool selected=false);
 		int getHeight(void) const;
@@ -149,6 +150,8 @@ class CMenuForwarder : public CMenuItem
 
 	CMenuForwarder(const neutrino_locale_t Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, const char * const ActionKey = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const char * const IconName = NULL);
 	CMenuForwarder(const neutrino_locale_t Text, const bool Active, const std::string &Option, CMenuTarget* Target=NULL, const char * const ActionKey = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const char * const IconName = NULL);
+	virtual ~CMenuForwarder(){}
+
 	int paint(bool selected=false);
 	int getHeight(void) const;
 	int exec(CMenuTarget* parent);
@@ -166,6 +169,7 @@ class CMenuForwarderNonLocalized : public CMenuForwarder
  public:
 	// Text must be UTF-8 encoded:
 	CMenuForwarderNonLocalized(const char * const Text, const bool Active=true, const char * const Option=NULL, CMenuTarget* Target=NULL, const char * const ActionKey = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const char * const IconName = NULL);
+	virtual CMenuForwarderNonLocalized(){}
 };
 
 class CAbstractMenuOptionChooser : public CMenuItem
