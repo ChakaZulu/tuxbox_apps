@@ -8,13 +8,13 @@
  *                                                                            *
  ******************************************************************************/
 
-#include "tuxtxt.h"
-
 #ifdef DEBUG
 #undef DEBUG
 #endif
 
 #define DEBUG 0
+
+#include "tuxtxt.h"
 
 void FillRect(int x, int y, int w, int h, int color)
 {
@@ -1480,7 +1480,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.93 $";
+	char cvs_revision[] = "$Revision: 1.94 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -1623,8 +1623,41 @@ void plugin_exec(PluginParam *par)
 			case RC_DOWN:
 				GetNextPageOne(swapupdown);
 				break;
-			case RC_RIGHT:	GetNextSubPage(1);	break;
-			case RC_LEFT:	GetNextSubPage(-1);	break;
+			case RC_RIGHT:	
+				if (boxed)
+				{
+				    subtitledelay++;				    
+		    		    // display subtitledelay
+				    PosY = StartY;
+				    char ns[10];
+				    SetPosX(1);
+				    sprintf(ns,"+%d    ",subtitledelay);
+				    RenderCharFB(ns[0],&atrtable[ATR_WB]);
+				    RenderCharFB(ns[1],&atrtable[ATR_WB]);
+				    RenderCharFB(ns[2],&atrtable[ATR_WB]);
+				    RenderCharFB(ns[4],&atrtable[ATR_WB]);					    
+				}
+				else
+    				    GetNextSubPage(1);	
+				break;
+			case RC_LEFT:
+				if (boxed)
+				{
+				    subtitledelay--;
+				    if (subtitledelay < 0) subtitledelay = 0;
+		    		    // display subtitledelay
+				    PosY = StartY;
+				    char ns[10];
+				    SetPosX(1);
+				    sprintf(ns,"+%d    ",subtitledelay);
+				    RenderCharFB(ns[0],&atrtable[ATR_WB]);
+				    RenderCharFB(ns[1],&atrtable[ATR_WB]);
+				    RenderCharFB(ns[2],&atrtable[ATR_WB]);
+				    RenderCharFB(ns[4],&atrtable[ATR_WB]);					    
+				}
+				else
+				    GetNextSubPage(-1);	
+				break;
 			case RC_OK:
 				if (tuxtxt_cache.subpagetable[tuxtxt_cache.page] == 0xFF)
 					continue;
@@ -1736,10 +1769,16 @@ int Init()
 	prev_10    = 0x100;
 	next_100   = 0x100;
 	next_10    = 0x100;
+	tuxtxt_cache.subpage    = tuxtxt_cache.subpagetable[tuxtxt_cache.page];
+	if (tuxtxt_cache.subpage == 0xff)
 	tuxtxt_cache.subpage    = 0;
+	
 	tuxtxt_cache.pageupdate = 0;
 
 	tuxtxt_cache.zap_subpage_manual = 0;
+
+	subtitledelay = 0;
+	delaystarted = 0;
 
 	/* init lcd */
 	UpdateLCD();
@@ -1907,7 +1946,7 @@ int Init()
 			return 0;
 		}
 	}
-	ascender = (usettf ? fontheight * face->ascender / face->units_per_EM : 18);
+	ascender = (usettf ? fontheight * face->ascender / face->units_per_EM : 16);
 #if DEBUG
 	printf("TuxTxt <fh%d fw%d fs%d tm%d ts%d ym%d %d %d sx%d sy%d a%d>\n",
 			 fontheight, fontwidth, fontwidth_small, fontwidth_topmenumain, fontwidth_topmenusmall,
@@ -2506,7 +2545,7 @@ void charpage()
 			{
 
 				fullsize+=23*40;
-				zipsize += tuxtxt_get_zipsize(p,sp);
+//				zipsize += tuxtxt_get_zipsize(p,sp);
 			}
 		}
 	}
@@ -3172,21 +3211,18 @@ void ConfigMenu(int Init)
 					}
 					else if (pids_found > 1)
 					{
-						if (Init)
-							tuxtxt_cache.vtxtpid = pid_table[current_pid].vtxt_pid;
-						else
-						{
-
 							if (hotlistchanged)
 								savehotlist();
 
-							if (tuxtxt_cache.vtxtpid != pid_table[current_pid].vtxt_pid)
+						if (Init || tuxtxt_cache.vtxtpid != pid_table[current_pid].vtxt_pid)
 							{
 #if TUXTXT_CFG_STANDALONE
 								tuxtxt_stop_thread();
 								tuxtxt_clear_cache();
 #else
 								tuxtxt_stop();
+							if (Init)
+								tuxtxt_cache.vtxtpid = 0; // force clear cache
 #endif
 								/* reset data */
 
@@ -3231,7 +3267,6 @@ void ConfigMenu(int Init)
 
 							ClearBB(black);
 							gethotlist();
-						}
 
 						/* show new teletext */
 						current_service = current_pid;
@@ -4582,7 +4617,7 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 
 	/* render char */
 	sbitbuffer = sbit->buffer;
-	char* localbuffer = NULL;
+	char localbuffer[1000]; // should be enough to store one character-bitmap...
 	// add diacritical marks
 	if (Attribute->diacrit)
 	{
@@ -4602,9 +4637,6 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 			if ((error = FTC_SBit_Cache_Lookup(cache, &typettf, glyph, &sbit_diacrit)) == 0)
 #endif
 			{
-				localbuffer = malloc(sbit->pitch*sbit->height);
-				if (localbuffer)
-				{
 					sbitbuffer = localbuffer;
 					memcpy(sbitbuffer,sbit->buffer,sbit->pitch*sbit->height);
 
@@ -4619,10 +4651,7 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 				}
 			}
 		}
-	}
 
-  	if (yoffset >= 0)	/* framebuffer */
-	{
 		unsigned char *p;
 		int f; /* running counter for zoom factor */
 
@@ -4631,6 +4660,7 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 
 		if (ascender - sbit->top + TTFShiftY + sbit->height > fontheight)
 			sbit->height = fontheight - ascender + sbit->top - TTFShiftY; /* limit char height to defined/calculated fontheight */
+
 
 		p = lfb + PosX + (yoffset + PosY + Row) * var_screeninfo.xres; /* running pointer into framebuffer */
 		for (Row = sbit->height; Row; Row--) /* row counts up, but down may be a little faster :) */
@@ -4676,7 +4706,6 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 				}
 				sbitbuffer++;
 			}
-
 			for (Bit = (usettf ? (curfontwidth - xfactor*(sbit->width + sbit->left + TTFShiftX)) : pixtodo);
 				  Bit > 0; Bit--) /* fill rest of char width */
 			{
@@ -4691,46 +4720,9 @@ void RenderChar(int Char, tstPageAttr *Attribute, int zoom, int yoffset)
 		Row = ascender - sbit->top + sbit->height + TTFShiftY;
 		FillRect(PosX, PosY + yoffset + Row*factor, curfontwidth, (fontheight - Row) * factor, bgcolor); /* fill lower margin */
 		if (Attribute->underline)
-			FillRect(PosX, PosY + yoffset + (fontheight-2)* factor, curfontwidth,2*factor, fgcolor); /* undeline char */
-
+			FillRect(PosX, PosY + yoffset + (fontheight-2)* factor, curfontwidth,2*factor, fgcolor); /* underline char */
 
 		PosX += curfontwidth;
-		if (localbuffer)
-			free(localbuffer);
-	}
-#if 0
-	else /* yoffset<0: LCD */
-	{
-		int x = ((-yoffset) & 0xFF) + sbit->left;
-		int y = ((-yoffset)>>8 & 0xFF) + ascender - sbit->top;
-		int xstart = x;
-
-		for (Row = fontheight; Row; Row--) /* row counts up, but down may be a little faster :) */
-		{
-			int pixtodo = sbit->width;
-			int lcdbase = (y/8)*120;
-			int lcdmask = 1 << (y%8);
-
-			for (Pitch = sbit->pitch; Pitch; Pitch--)
-			{
-				for (Bit = 0x80; Bit; Bit >>= 1)
-				{
-					if (--pixtodo < 0)
-						break;
-
-					if (*sbitbuffer & Bit)
-						lcd_backbuffer[x + lcdbase] |= lcdmask;
-					else
-						lcd_backbuffer[x + lcdbase] &= ~lcdmask;
-					x++;
-				}
-				sbitbuffer++;
-			}
-			x = xstart;
-			y++;
-		}
-	}
-#endif
 }
 
 /******************************************************************************
@@ -5020,10 +5012,30 @@ void RenderPage()
 	/* update lcd */
 	UpdateLCD();
 
+	if (transpmode != 2 && delaystarted)
+	{
+	    struct timeval tv;
+    	    gettimeofday(&tv,NULL);
+	    if (tv.tv_sec - tv_delay.tv_sec < subtitledelay)
+		return;
+	}
+	
 
 	/* update page or timestring */
 	if (transpmode != 2 && tuxtxt_cache.pageupdate && tuxtxt_cache.page_receiving != tuxtxt_cache.page && inputcounter == 2)
 	{
+	    if (boxed && subtitledelay) 
+	    {
+		if (!delaystarted)
+		{
+		    gettimeofday(&tv_delay,NULL);
+		    delaystarted = 1;
+		    return;
+		}
+		else
+		    delaystarted = 0;
+
+	    }
 
 		/* reset update flag */
 		tuxtxt_cache.pageupdate = 0;
