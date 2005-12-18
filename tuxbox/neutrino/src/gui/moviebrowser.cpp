@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: moviebrowser.cpp,v 1.4 2005/12/12 07:58:02 guenther Exp $
+	$Id: moviebrowser.cpp,v 1.5 2005/12/18 09:23:53 metallica Exp $
 
 	Kommentar:
 
@@ -46,6 +46,9 @@
 	Date			Author		Change Description
 	   Nov 2005		Günther	initial implementation
 	$Log: moviebrowser.cpp,v $
+	Revision 1.5  2005/12/18 09:23:53  metallica
+	fix compil warnings
+	
 	Revision 1.4  2005/12/12 07:58:02  guenther
 	- fix bug on deleting CMovieBrowser - speed up parse time (20 ms per .ts file now)- update stale function- refresh directories on reload- print scan time in debug console
 	
@@ -341,7 +344,7 @@ CMovieBrowser::~CMovieBrowser()
 	m_repositoryDir.clear();
 
 	m_dirNames.clear();
-	for(int i; i < m_vMovieInfo.size(); i++)
+	for(unsigned int i=0; i < m_vMovieInfo.size(); i++)
 	{
 		m_vMovieInfo[i].audioPids.clear();
 	}
@@ -371,7 +374,7 @@ void CMovieBrowser::fileInfoStale(void)
 	 // Also release memory buffers, since we have to reload this stuff next time anyhow 
 	m_dirNames.clear();
 	
-	for(int i; i < m_vMovieInfo.size(); i++)
+	for(unsigned int i=0; i < m_vMovieInfo.size(); i++)
 	{
 		m_vMovieInfo[i].audioPids.clear();
 	}
@@ -1782,16 +1785,16 @@ bool CMovieBrowser::onButtonPressMovieInfoList(neutrino_msg_t msg)
 ************************************************************************/
 void CMovieBrowser::onDeleteFile(CFile& file_ts)
 {
- 	//TRACE( "[onDeleteFile] ");
- 
-    if(file_ts.Name.find(".ts") == -1) 
-    { 
-  		// not a TS file, return!!!!! 
-  		TRACE( "show_ts_info: not a TS file ");
-     }
-    else
-    {
- 		std::string msg = g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1);
+	//TRACE( "[onDeleteFile] ");
+	int test= file_ts.Name.find(".ts");
+	if(test == -1) 
+	{ 
+		// not a TS file, return!!!!! 
+		TRACE( "show_ts_info: not a TS file ");
+	}
+	else
+	{
+		std::string msg = g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1);
 		msg += "\r\n ";
 		if (file_ts.Name.length() > 40)
 		{
@@ -1808,8 +1811,8 @@ void CMovieBrowser::onDeleteFile(CFile& file_ts)
 			delFile(file_ts);
 			
 			CFile file_xml  = file_ts; 
-	    	if(m_movieInfo.convertTs2XmlName(&file_xml.Name) == true)  
-	    	{
+		if(m_movieInfo.convertTs2XmlName(&file_xml.Name) == true)  
+		{
 				delFile(file_xml);
 	    	}
 			loadMovies(); // //TODO we might remove the handle from the handle list only, to avoid reload .....
@@ -2164,7 +2167,7 @@ bool CMovieBrowser::loadTsFileNamesFromDir(const std::string & dirname)
 	{
 		MI_MOVIE_INFO movieInfo;
 		m_movieInfo.clearMovieInfo(&movieInfo); // refresh structure
-		for(int i = 0; i < flist.size(); i++)
+		for(unsigned int i = 0; i < flist.size(); i++)
 		{
 			if( S_ISDIR(flist[i].Mode)) 
 			{
@@ -2174,7 +2177,8 @@ bool CMovieBrowser::loadTsFileNamesFromDir(const std::string & dirname)
 			}
 			else
 			{
-				 if(flist[i].getFileName().find(".ts") == -1)
+				int test=flist[i].getFileName().find(".ts");
+				if( test == -1)
 				{
 					//TRACE("[mb] other file: '%s'\r\n",movieInfo.file.Name.c_str());
 				}
@@ -2488,7 +2492,7 @@ void CMovieBrowser::loadAllMovieInfo(void)
 {
 	//TRACE("[mb]->loadAllMovieInfo \r\n");
 
-	for(int i=0; i < m_vMovieInfo.size();i++)
+	for(unsigned int i=0; i < m_vMovieInfo.size();i++)
 	{
 		m_movieInfo.loadMovieInfo( &(m_vMovieInfo[i]));
 	}

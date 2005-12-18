@@ -3,7 +3,7 @@
  
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: moviebrowser.h,v 1.2 2005/12/12 07:58:02 guenther Exp $
+	$Id: moviebrowser.h,v 1.3 2005/12/18 09:23:53 metallica Exp $
 
 	Kommentar:
 
@@ -44,6 +44,9 @@
 	Date			Author		Change Description
 	   Nov 2005		Günther	initial implementation
 	$Log: moviebrowser.h,v $
+	Revision 1.3  2005/12/18 09:23:53  metallica
+	fix compil warnings
+	
 	Revision 1.2  2005/12/12 07:58:02  guenther
 	- fix bug on deleting CMovieBrowser - speed up parse time (20 ms per .ts file now)- update stale function- refresh directories on reload- print scan time in debug console
 	
@@ -338,7 +341,7 @@ class CMovieBrowser
 		void saveMovieInfo(std::string* filename, MI_MOVIE_INFO* movie_info); // P2
 	
 		// misc
-		void CMovieBrowser::showHelp(void);
+		void showHelp(void);
 		bool isFiltered(MI_MOVIE_INFO& movie_info);
 		bool isParentalLock(MI_MOVIE_INFO& movie_info);
 		bool getMovieInfoItem(MI_MOVIE_INFO& movie_info, MB_INFO_ITEM item, std::string* item_string);

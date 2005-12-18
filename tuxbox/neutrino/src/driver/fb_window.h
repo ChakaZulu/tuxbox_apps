@@ -1,7 +1,7 @@
 #ifndef __fb_window_h__
 #define __fb_window_h__
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.h,v 1.3 2004/03/13 12:45:41 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.h,v 1.4 2005/12/18 09:23:53 metallica Exp $
  *
  * abstract fb_window class - d-box2 linux project
  *
@@ -38,7 +38,7 @@ class CFBWindow
 	int dx, dy; /* dimension         */
 
 	CFBWindow(const int _x, const int _y, const int _dx, const int _dy);
-	~CFBWindow();
+	virtual~CFBWindow();
 
 	void paintBoxRel(const int _x, const int _y, const int _dx, const int _dy, const color_t _col);
 	bool paintIcon(const char * const _filename, const int _x, const int _y, const color_t _offset = 1);

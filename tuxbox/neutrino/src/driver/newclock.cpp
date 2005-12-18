@@ -48,9 +48,9 @@ static bool	signs[] = {1, 1, 1, 1,
 void loadSkin(char * const filename, char * const backup_filename, const unsigned int modify_char_filename, const unsigned int modify_char_backup_filename, bool * const dest, const unsigned int count, const unsigned int width, const unsigned int height, const char * const name)
 {
 	FILE * fd;
-	int i, row, byte, bit;
+	int row, bit;
 	char * file;
-	unsigned int digit_pos;
+	unsigned int i ,byte, digit_pos;
 	unsigned char BMPWidth;
 	unsigned char BMPHeight;
 	char line_buffer[4];

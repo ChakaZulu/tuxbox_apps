@@ -623,7 +623,7 @@ bool CMovieInfo::parseXmlQuickFix(char* text, MI_MOVIE_INFO* movie_info)
 {
 	int bookmark_nr = 0;
 	movie_info->dateOfLastPlay = 0;//100*366*24*60*60; 		// (date, month, year)
-	bool result = false;
+	//	bool result = false;//unused variable
 	
 	int bytes = strlen(text);
 	/** search ****/ 
