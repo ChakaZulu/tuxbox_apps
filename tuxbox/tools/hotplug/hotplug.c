@@ -1,4 +1,4 @@
-/* $Id: hotplug.c,v 1.1 2005/12/18 01:30:56 carjay Exp $
+/* $Id: hotplug.c,v 1.2 2005/12/18 14:40:41 carjay Exp $
 
    Hotplug written in C to speed things up
    
@@ -78,10 +78,11 @@ static int filecopy(int out, int in)
 
 	todo = st.st_size;
 	do {
+		ssize_t wr_off = 0;
 		ssize_t readsize=todo;
 		if (todo>sizeof(block))
 			readsize = sizeof(block);
-		ssize_t res = read(in,&block,readsize);
+		ssize_t res = read(in,block,readsize);
 		if (res<=0){
 			output_debug("hotplug: error reading firmware\n");
 			return -1;
@@ -89,12 +90,13 @@ static int filecopy(int out, int in)
 			todo -= res;
 		}
 		do {
-			ssize_t written = write(out,&block,res);
+			ssize_t written = write(out,block+wr_off,res);
 			if (written<=0){
 				output_debug("hotplug: error writing firmware\n");
 				return -1;
 			} else {
 				res -= written;
+				wr_off += written;
 			}
 			
 		} while (res);
