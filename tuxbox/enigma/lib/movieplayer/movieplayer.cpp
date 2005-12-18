@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.36 2005/11/17 19:35:08 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.37 2005/12/18 14:00:56 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -531,6 +531,7 @@ eString eMoviePlayer::sout(eString mrl)
 			soutURL += ",vb=" + video.videoRate;
 			soutURL += ",width=" + res_horiz;
 			soutURL += ",height=" + res_vert;
+			soutURL += ",fps=25";
 		}
 		if (video.transcodeAudio)
 		{
