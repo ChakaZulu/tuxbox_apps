@@ -90,9 +90,9 @@ class CChannelList
 
 		bool historyMode;
 
-		void paintDetails(int index);
+		void paintDetails(unsigned int index);
 		void clearItem2DetailsLine ();
-		void paintItem2DetailsLine (int pos, int ch_index);
+		void paintItem2DetailsLine (int pos,unsigned  int ch_index);
 		void paintItem(int pos);
 		void paint();
 		void paintHead();

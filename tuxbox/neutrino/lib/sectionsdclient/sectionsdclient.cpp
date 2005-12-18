@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.46 2005/11/22 20:59:34 metallica Exp $
+  $Id: sectionsdclient.cpp,v 1.47 2005/12/18 07:49:17 metallica Exp $
 
   License: GPL
 
@@ -39,7 +39,7 @@ const          char * CSectionsdClient::getSocketName() const
 	return SECTIONSD_UDS_NAME;
 }
 
-int CSectionsdClient::readResponse(char* data, int size)
+int CSectionsdClient::readResponse(char* data,unsigned int size)
 {
 	struct sectionsd::msgResponseHeader responseHeader;
 	if (!receive_data((char*)&responseHeader, sizeof(responseHeader)))

@@ -335,7 +335,7 @@ void CMsgBox::refreshFoot(void)
 								m_cBoxFrameFootRel.iHeight,  
 								(CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
 
-	const char* text;
+	// 	const char* text;//unused variable
 
 	int MaxButtonTextWidth = m_pcFontFoot->getRenderWidth(g_Locale->getText(LOCALE_MESSAGEBOX_CANCEL), true); // UTF-8
 	int ButtonWidth = 20 + 33 + MaxButtonTextWidth;

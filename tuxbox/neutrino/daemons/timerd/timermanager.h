@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.43 2005/12/08 22:38:24 zwen Exp $
+	$Id: timermanager.h,v 1.44 2005/12/18 07:49:17 metallica Exp $
 
 	License: GPL
 
@@ -68,6 +68,7 @@ class CTimerEvent
 	virtual void announceEvent(){};
 	virtual void saveToConfig(CConfigFile *config);
 	virtual void Refresh(){};
+	virtual ~CTimerEvent(){};
 };
 
 typedef std::map<int, CTimerEvent*> CTimerEventMap;

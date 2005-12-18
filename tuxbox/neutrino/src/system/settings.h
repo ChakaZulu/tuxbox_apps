@@ -395,8 +395,8 @@ class CScanSettings
 
 	int* diseqscOfSat( char* satname);
 	int* motorPosOfSat( char* satname);
-	char* CScanSettings::satOfDiseqc(int diseqc) const;
-	char* CScanSettings::satOfMotorPos(int32_t motorPos) const;
+	char* satOfDiseqc(int diseqc) const;
+	char* satOfMotorPos(int32_t motorPos) const;
 	void toSatList( CZapitClient::ScanSatelliteList& ) const;
 	void toMotorPosList( CZapitClient::ScanMotorPosList& ) const;
 

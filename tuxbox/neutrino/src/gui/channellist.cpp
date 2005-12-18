@@ -795,7 +795,7 @@ void CChannelList::setSelected( int nChannelNr)
 	selected = nChannelNr;
 }
 
-void CChannelList::paintDetails(int index)
+void CChannelList::paintDetails(unsigned int index)
 {
   	if (index >= chanlist.size() || chanlist[index]->currentEvent.description.empty())
 	{
@@ -869,7 +869,7 @@ void CChannelList::clearItem2DetailsLine ()
  paintItem2DetailsLine (-1, 0);
 }
 
-void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
+void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 {
 	#define ConnectLineBox_Width	16
 

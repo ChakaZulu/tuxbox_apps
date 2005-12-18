@@ -733,7 +733,7 @@ int CMenuOptionLanguageChooser::paint( bool selected )
 
 	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor);
 
-	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(optionValue);
+	// 	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(optionValue);//unused variable
 	int stringstartposOption = x + offx + 10;
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), optionValue, color);
 

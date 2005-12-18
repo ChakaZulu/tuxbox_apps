@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.34 2005/11/22 20:59:34 metallica Exp $
+  $Id: sectionsdclient.h,v 1.35 2005/12/18 07:49:17 metallica Exp $
 
   License: GPL
 
@@ -66,7 +66,7 @@ class CSectionsdClient : private CBasicClient
 	virtual const unsigned char   getVersion   () const;
 	virtual const          char * getSocketName() const;
 
-	int readResponse(char* data = NULL, int size = 0);
+	int readResponse(char* data = NULL, unsigned int size = 0);
 	bool send(const unsigned char command, const char* data = NULL, const unsigned int size = 0);
 	char * parseExtendedEvents(char * dp, CEPGData * epgdata);
 

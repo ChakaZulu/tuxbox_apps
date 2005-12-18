@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.215 2005/12/10 03:56:15 homar Exp $
+//  $Id: sectionsd.cpp,v 1.216 2005/12/18 07:49:16 metallica Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1022,9 +1022,10 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 			        s->second->eitScheduleFlag(), s->second->eitPresentFollowingFlag(),
 		        	s->second->runningStatus(), s->second->freeCAmode(),
 		        	s->second->nvods.size());
+/**	soll es in count ? 
 			+ strlen(s->second->serviceName.c_str()) + 1
-			+ strlen(s->second->providerName.c_str()) + 1
-			+ 3; /* '\n' */
+ 			+ strlen(s->second->providerName.c_str()) + 1
+ 			+ 3;  **/
 		if (count < MAX_SIZE_SERVICELIST)
 		{
 			strcat(serviceList, daten);
@@ -1296,7 +1297,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.215 2005/12/10 03:56:15 homar Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.216 2005/12/18 07:49:16 metallica Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3413,7 +3414,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const bool overwr
 
 				dprintf("[sectionsd] Removing Service %s\n", name.c_str());
 				fprintf(dst,
-					"\t\t\t<channel action=\"%s\" service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
+					"\t\t\t<channel action=\"%s\" service_id=\"%04lx\" name=\"%s\" service_type=\"%02lx\"/>\n",
 					"remove",
 					xmlGetNumericAttribute(node, "service_id", 16),
 					UTF8_to_UTF8XML(name.c_str()).c_str(),
@@ -5677,7 +5678,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.215 2005/12/10 03:56:15 homar Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.216 2005/12/18 07:49:16 metallica Exp $\n");
 
 //	auto_scanmode = getscanning();
 

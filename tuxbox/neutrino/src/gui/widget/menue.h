@@ -333,6 +333,7 @@ class CPINProtection
 		virtual CMenuTarget* getParent() = NULL;
 	public:
 		CPINProtection( char* validpin){ validPIN = validpin;};
+		virtual ~CPINProtection(){}
 };
 
 class CZapProtection : public CPINProtection

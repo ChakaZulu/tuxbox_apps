@@ -249,7 +249,7 @@ bool CFlashUpdate::getUpdateImage(const std::string & version)
 bool CFlashUpdate::checkVersion4Update()
 {
 	char msg[400];
-	CFlashVersionInfo * versionInfo;
+	CFlashVersionInfo * versionInfo=0;
 	neutrino_locale_t msg_body;
 
 	if(g_settings.softupdate_mode==1) //internet-update

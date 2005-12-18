@@ -462,7 +462,7 @@ void CInfoViewer::showSubchan()
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
 	std::string subChannelName; 	// holds the name of the subchannel/audio channel
-	int subchannel;			// holds the channel index
+	int subchannel=0;			// holds the channel index
 
 	if (!(g_RemoteControl->subChannels.empty())) {
 		// get info for nvod/subchannel

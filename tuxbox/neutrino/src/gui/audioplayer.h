@@ -211,7 +211,7 @@ class CAudioPlayerGui : public CMenuTarget
 	 * @param filename the name of the file
 	 * @return true if file should be overwritten, false otherwise
 	 */
-	bool CAudioPlayerGui::askToOverwriteFile(const std::string& filename);
+	bool askToOverwriteFile(const std::string& filename);
 	
  public:
 	CAudioPlayerGui();

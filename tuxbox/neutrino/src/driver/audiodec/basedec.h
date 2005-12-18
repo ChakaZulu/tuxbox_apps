@@ -36,6 +36,7 @@
 class CBaseDec
 {
 public:
+	virtual ~CBaseDec(){}
 	enum State {STOP = 0, STOP_REQ, PLAY, PAUSE, FF, REV};
 	enum RetCode { OK = 0, READ_ERR, WRITE_ERR, DSPSET_ERR, DATA_ERR, INTERNAL_ERR };
 

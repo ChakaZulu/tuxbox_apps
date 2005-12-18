@@ -47,6 +47,7 @@ class CBouquetEditorEvents
 {
 public:
 	virtual void onBouquetsChanged() {};
+	virtual ~CBouquetEditorEvents() {};
 };
 
 class CBEBouquetWidget : public CMenuWidget
