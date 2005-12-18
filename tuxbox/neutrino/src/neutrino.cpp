@@ -2108,7 +2108,7 @@ public:
 			{
 				g_Controld->setVideoOutput(video_out_signal);
 
-				SyncControlerForwarder->setActive((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == 3) || (video_out_signal == 4));
+				SyncControlerForwarder->setActive((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_CVBS));
 			}
 			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT))
 			{
@@ -2122,7 +2122,7 @@ public:
 		{
 			video_out_signal = g_Controld->getVideoOutput();
 
-			SyncControlerForwarder->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == 3) || (video_out_signal == 4));
+			SyncControlerForwarder->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal ==  CControldClient::VIDEOOUTPUT_YUV_CVBS));
 
 			g_settings.video_Format = g_Controld->getVideoFormat();
 
