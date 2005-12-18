@@ -422,4 +422,4 @@ AC_CHECK_HEADER(linux/dvb/avia/avia_gt_capture.h,[
 
 dnl Pick up AM_PATH_PROG_WITH_TEST from our version of progtest.m4 
 dnl (this is not a standard file).
-m4_include([../enigma/progtest.m4])
+m4_include([progtest.m4])
