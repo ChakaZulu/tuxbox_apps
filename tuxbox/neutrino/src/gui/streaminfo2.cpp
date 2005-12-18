@@ -89,20 +89,14 @@ CStreamInfo2::~CStreamInfo2()
 	delete pig;
 }
 
-int CStreamInfo2::exec(CMenuTarget* parent, const std::string &)
+int CStreamInfo2::exec()
 {
 	int res;
-
-	if (parent)
-	{
-		parent->hide();
-	}
 	paint(paint_mode);
-
 	doSignalStrengthLoop ();
-
 	hide();
-	res = menu_return::RETURN_EXIT_ALL;
+
+	res = menu_return::RETURN_REPAINT;
 	return res;
 }
 
@@ -266,9 +260,6 @@ void CStreamInfo2::SignalRenderStr (unsigned long value, int x, int y)
 	sprintf(str,"%6lu",value);
 	g_Font[font_small]->RenderString(x, y, 50, str, COL_MENUCONTENT, 0, true);
 }
-
-
-
 
 void CStreamInfo2::paint(int mode)
 {
@@ -478,3 +469,17 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
 	g_Font[font_info]->RenderString(xpos, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
+
+int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
+{
+	int res = menu_return::RETURN_EXIT_ALL;
+	if (parent)
+	{
+		parent->hide();
+	}
+	CStreamInfo2 *e = new CStreamInfo2;
+	e->exec(); 
+	delete e;
+	return res;
+}
+

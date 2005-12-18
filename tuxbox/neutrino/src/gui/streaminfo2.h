@@ -29,7 +29,7 @@
 #include <driver/pig.h>
 
 
-class CStreamInfo2 : public CMenuTarget
+class CStreamInfo2
 {
 	private:
 
@@ -83,17 +83,17 @@ class CStreamInfo2 : public CMenuTarget
 		void paint_signal_fe(struct feSignal s);
 		int  y_signal_fe(unsigned long value, unsigned long max_range, int max_y);
 		void SignalRenderStr (unsigned long value, int x, int y);
-
-
-
-	public:
-
-		CStreamInfo2();
-		virtual ~CStreamInfo2();
-
 		void hide();
-		int exec(CMenuTarget* parent, const std::string & actionKey);
+	public:
+		CStreamInfo2();
+		 ~CStreamInfo2();
+		int exec();
 
+};
+class CStreamInfo2Handler : public CMenuTarget
+{
+	public:
+		int exec( CMenuTarget* parent,  const std::string &actionKey);
 };
 
 

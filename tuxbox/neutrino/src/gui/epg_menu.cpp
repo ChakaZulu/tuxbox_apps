@@ -78,7 +78,7 @@ int CEPGMenuHandler::doMenu ()
 	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EVENTLIST , true, NULL, new CEventListHandler(), NULL, CRCInput::RC_red   , NEUTRINO_ICON_BUTTON_RED   ), false);
 	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EPGPLUS   , true, NULL, new CEPGplusHandler()  , NULL, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ), false);
 	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EVENTINFO , true, NULL, new CEPGDataHandler()  , NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
-	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_STREAMINFO, true, NULL, new CStreamInfo2()     , NULL, CRCInput::RC_blue  , NEUTRINO_ICON_BUTTON_BLUE  ), false);
+	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_STREAMINFO, true, NULL, new CStreamInfo2Handler()     , NULL, CRCInput::RC_blue  , NEUTRINO_ICON_BUTTON_BLUE  ), false);
 
 	EPGSelector.addItem(GenericMenuSeparator);
 
