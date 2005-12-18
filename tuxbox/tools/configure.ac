@@ -15,7 +15,6 @@ TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 AC_OUTPUT([
 Makefile
 camd/Makefile
-hotplug/Makefile
 misc/Makefile
 satfind/Makefile
 test/Makefile
