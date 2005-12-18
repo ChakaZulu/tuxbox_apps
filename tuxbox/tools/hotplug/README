@@ -1,2 +1,7 @@
-A basic hotplug script for firmware loading (2.6)
-Needs to be installed as /sbin/hotplug
+- hotplug.sh is a basic script for firmware loading (2.6)
+  (for tests)
+
+- hotplug.c is the same, but written in C
+
+Either needs to be installed as /sbin/hotplug and gets executed by
+the kernel at module-(un)load time

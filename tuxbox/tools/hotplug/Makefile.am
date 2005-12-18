@@ -1,2 +1,6 @@
 EXTRA_DIST = \
-	hotplug README
+	hotplug.sh README
+
+sbin_PROGRAMS = hotplug
+hotplug_SOURCES = hotplug.c
+hotplug_CFLAGS = -Wall -Werror
