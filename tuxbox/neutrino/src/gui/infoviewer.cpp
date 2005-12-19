@@ -318,7 +318,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]);
 
 		int res = messages_return::none;
-		time_t ta,tb;
+		time_t ta=0,tb=0;
 
 		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 		{
