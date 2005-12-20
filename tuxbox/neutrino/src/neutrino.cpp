@@ -1662,19 +1662,22 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 	settings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionChooser* onoff = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
-
 	CStringInput* freq = new CStringInput(LOCALE_SCANTP_FREQ, (char *) scanSettings.TP_freq, 8, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 	CStringInput* rate = new CStringInput(LOCALE_SCANTP_RATE, (char *) scanSettings.TP_rate, 8, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 
-	CMenuOptionChooser* fec = new CMenuOptionChooser(LOCALE_SCANTP_FEC, (int *)&scanSettings.TP_fec, SATSETUP_SCANTP_FEC, SATSETUP_SCANTP_FEC_COUNT, true);
-	CMenuOptionChooser* pol = new CMenuOptionChooser(LOCALE_SCANTP_POL, (int *)&scanSettings.TP_pol, SATSETUP_SCANTP_POL, SATSETUP_SCANTP_POL_COUNT, true);
+	CMenuOptionChooser* fec = new CMenuOptionChooser(LOCALE_SCANTP_FEC, (int *)&scanSettings.TP_fec, SATSETUP_SCANTP_FEC, SATSETUP_SCANTP_FEC_COUNT, scanSettings.TP_scan);
+	CMenuOptionChooser* pol = new CMenuOptionChooser(LOCALE_SCANTP_POL, (int *)&scanSettings.TP_pol, SATSETUP_SCANTP_POL, SATSETUP_SCANTP_POL_COUNT, scanSettings.TP_scan);
 	
 	CMenuOptionChooser* onoffscanSectionsd = ( new CMenuOptionChooser(LOCALE_SECTIONSD_SCANMODE, (int *)&scanSettings.scanSectionsd, SECTIONSD_SCAN_OPTIONS, SECTIONSD_SCAN_OPTIONS_COUNT, true,new CScanModeSectionsdNotifier));
+	CMenuForwarder *Rate =new CMenuForwarder(LOCALE_SCANTP_RATE, scanSettings.TP_scan, scanSettings.TP_rate, rate);
+	CMenuForwarder *Freq = new CMenuForwarder(LOCALE_SCANTP_FREQ, scanSettings.TP_scan, scanSettings.TP_freq, freq);
+	CTP_scanNotifier *TP_scanNotifier = new CTP_scanNotifier(fec,pol,Freq,Rate);
+	
+	CMenuOptionChooser* onoff = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_info.delivery_system == DVB_S),TP_scanNotifier));
 
 	settings.addItem(onoff);
-	settings.addItem(new CMenuForwarder(LOCALE_SCANTP_FREQ, true, scanSettings.TP_freq, freq));
-	settings.addItem(new CMenuForwarder(LOCALE_SCANTP_RATE, true, scanSettings.TP_rate, rate));
+	settings.addItem(Freq);
+	settings.addItem(Rate);
 	settings.addItem(fec);
 	settings.addItem(pol);
 	settings.addItem(GenericMenuSeparatorLine);

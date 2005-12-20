@@ -90,6 +90,25 @@ bool CSatDiseqcNotifier::changeNotify(const neutrino_locale_t, void * Data)
 	}
 	return true;
 }
+CTP_scanNotifier::CTP_scanNotifier(CMenuOptionChooser* i1, CMenuOptionChooser* i2, CMenuForwarder* i3, CMenuForwarder* i4)
+{
+	toDisable1[0]=i1;
+	toDisable1[1]=i2;
+	toDisable2[0]=i3;
+	toDisable2[1]=i4;
+}
+
+bool CTP_scanNotifier::changeNotify(const neutrino_locale_t, void *)
+{
+	bool set_true_false=CNeutrinoApp::getInstance()->getScanSettings().TP_scan;
+	for (int i=0; i<2; i++)
+	{
+		toDisable1[i]->setActive(set_true_false);
+		toDisable2[i]->setActive(set_true_false);
+	}
+	return true;
+
+}
 
 CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwarder* a3, CMenuForwarder* a4, CMenuForwarder* a5)
 {
@@ -99,7 +118,6 @@ CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwa
 	toDisable[3] = a4;
 	toDisable[4] = a5;
 }
-
 
 bool CDHCPNotifier::changeNotify(const neutrino_locale_t, void * data)
 {

@@ -54,6 +54,17 @@ class CSatDiseqcNotifier : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void * Data);
 };
 
+class CTP_scanNotifier : public CChangeObserver
+{
+	private:
+		CMenuOptionChooser* toDisable1[2];
+		CMenuForwarder* toDisable2[2];
+
+	public:
+		CTP_scanNotifier(CMenuOptionChooser*, CMenuOptionChooser*, CMenuForwarder*, CMenuForwarder*);
+		bool changeNotify(const neutrino_locale_t, void *);
+};
+
 class CDHCPNotifier : public CChangeObserver
 {
 	private:
