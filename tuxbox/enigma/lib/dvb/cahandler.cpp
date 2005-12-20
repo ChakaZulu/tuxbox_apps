@@ -1,14 +1,28 @@
-#include <lib/dvb/cahandler.h>
 #include <unistd.h>
+#include <string.h>
+
+#include <lib/dvb/cahandler.h>
 #include <lib/base/eerror.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/info.h>
-#include <lib/gdi/font.h>
+
+ePMTClient::ePMTClient(eDVBCAHandler *handler, int socket)
+ : eUnixDomainSocket(socket, 1, eApp), parent(handler)
+{
+	CONNECT(connectionClosed_, ePMTClient::connectionLost);
+}
+
+void ePMTClient::connectionLost()
+{
+	if (parent) parent->connectionLost(this);
+}
 
 eDVBCAHandler::eDVBCAHandler()
+ : eServerSocket(PMT_SERVER_SOCKET, eApp)
 {
 	services.setAutoDelete(true);
+	clients.setAutoDelete(true);
 	CONNECT( eDVB::getInstance()->leaveTransponder, eDVBCAHandler::leaveTransponder );
 	eDVBCaPMTClientHandler::registerCaPMTClient(this);  // static method...
 }
@@ -18,62 +32,156 @@ eDVBCAHandler::~eDVBCAHandler()
 	eDVBCaPMTClientHandler::unregisterCaPMTClient(this);  // static method...
 }
 
+void eDVBCAHandler::newConnection(int socket)
+{
+	ePMTClient *client = new ePMTClient(this, socket);
+	clients.push_back(client);
+
+	/* inform the new client about our current services, if we have any */
+	distributeCAPMT();
+}
+
+void eDVBCAHandler::connectionLost(ePMTClient *client)
+{
+	ePtrList<ePMTClient>::iterator it = std::find(clients.begin(), clients.end(), client);
+	if (it != clients.end())
+	{
+		clients.erase(it);
+	}
+}
+
 void eDVBCAHandler::leaveTransponder( eTransponder* t )
 {
 	if ( t )
 	{
-		int sock, clilen;
-		struct sockaddr_un servaddr;
-		memset(&servaddr, 0, sizeof(struct sockaddr_un));
-		servaddr.sun_family = AF_UNIX;
-		strcpy(servaddr.sun_path, "/tmp/camd.socket");
-		clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-		sock = socket(PF_UNIX, SOCK_STREAM, 0);
-		int err=0;
-		if ( connect(sock, (struct sockaddr *) &servaddr, clilen) )
-		{
-			eDebug("[eDVBCAHandler] (leaveTP) connect (%m)");
-			err = 1;
-		}
-		fcntl(sock, F_SETFL, O_NONBLOCK);
-		int val=1;
-		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
-		if (!err)
-		{
-			const char *msg="\x9f\x80\x3f\x04\x83\x02\x03\x01";
-			if ( ::write(sock, msg, 8) != 8 )
-				eDebug("[eDVBCAHandler] (leaveTP) write (%m)");
-		}
-		::close(sock);
+		const char *msg = "\x9f\x80\x3f\x04\x83\x02\x03\x01";
+		
+		/* send msg to the listening client */
+		eUnixDomainSocket socket(eApp);
+		socket.connectToPath(PMT_CLIENT_SOCKET);
+		if (socket.state() == eSocket::Connection) socket.writeBlock(msg, strlen(msg));
 	}
 }
 
-void CAService::Connect()
+void eDVBCAHandler::enterService( const eServiceReferenceDVB &service )
 {
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, "/tmp/camd.socket");
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	sock = socket(PF_UNIX, SOCK_STREAM, 0);
-	connect(sock, (struct sockaddr *) &servaddr, clilen);
-	fcntl(sock, F_SETFL, O_NONBLOCK);
-	int val=1;
-	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+	ePtrList<CAService>::iterator it =
+		std::find(services.begin(), services.end(), service );
+	if ( it == services.end() )
+	{
+		services.push_back(new CAService( service ));
+	}
+
+	/*
+	 * our servicelist has changed, but we have to wait till we receive PMT data
+	 * for this service, before we distribute a new list of CAPMT objects to our clients.
+	 */
+}
+
+void eDVBCAHandler::leaveService( const eServiceReferenceDVB &service )
+{
+	ePtrList<CAService>::iterator it =
+		std::find(services.begin(), services.end(), service );
+	if ( it != services.end() )
+	{
+		services.erase(it);
+	}
+
+	/* our servicelist has changed, distribute the list of CAPMT objects to all our clients */
+	distributeCAPMT();
+}
+
+void eDVBCAHandler::distributeCAPMT()
+{
+	/*
+	 * write the list of CAPMT objects to each connected client, if it's not empty
+	 */
+	if (services.empty()) return;
+
+	ePtrList<ePMTClient>::iterator client_it = clients.begin();
+	for ( ; client_it != clients.end(); ++client_it)
+	{
+		if (client_it->state() == eSocket::Connection)
+		{
+			unsigned char list_management = LIST_FIRST;
+			ePtrList<CAService>::iterator it = services.begin();
+			for ( ; it != services.end(); )
+			{
+				CAService *current = it;
+				++it;
+				if (it == services.end()) list_management |= LIST_LAST;
+				current->writeCAPMTObject(*client_it, list_management);
+				list_management = LIST_MORE;
+			}
+		}
+	}
+}
+
+void eDVBCAHandler::handlePMT( const eServiceReferenceDVB &service, PMT *pmt )
+{
+	ePtrList<CAService>::iterator it = std::find(services.begin(), services.end(), service);
+	if (it != services.end())
+	{
+		/* we found the service in our list */
+		if (it->getCAPMTVersion() == pmt->version)
+		{
+			eDebug("[eDVBCAHandler] dont send the self pmt version");
+			return;
+		}
+		
+		bool isUpdate = (it->getCAPMTVersion() >= 0);
+
+		/* prepare the data */
+		it->buildCAPMT(pmt);
+
+		/* send the data to the listening client */
+		it->sendCAPMT();
+
+		if (isUpdate)
+		{
+			/* this is a PMT update, we should distribute the new CAPMT object to all our connected clients */
+			ePtrList<ePMTClient>::iterator client_it = clients.begin();
+			for ( ; client_it != clients.end(); ++client_it)
+			{
+				if (client_it->state() == eSocket::Connection)
+				{
+					it->writeCAPMTObject(*client_it, LIST_UPDATE);
+				}
+			}
+		}
+		else
+		{
+			/*
+			 * this is PMT information for a new service, so we can now distribute
+			 * the CAPMT objects to all our connected clients
+			 */
+			distributeCAPMT();
+		}
+	}
+}
+ 
+CAService::CAService( const eServiceReferenceDVB &service )
+	: eUnixDomainSocket(eApp), lastPMTVersion(-1), me(service), capmt(NULL), retry(eApp)
+{
+	CONNECT(retry.timeout, CAService::sendCAPMT);
+	CONNECT(connectionClosed_, CAService::connectionLost);
+//		eDebug("[eDVBCAHandler] new service %s", service.toString().c_str() );
+}
+
+void CAService::connectionLost()
+{
+	/* reconnect in 1s */
+	retry.startLongTimer(1);
 }
 
 void CAService::buildCAPMT( PMT *pmt )
 {
-	if ( pmt->version == lastPMTVersion )
-	{
-		eDebug("[eDVBCAHandler] dont send the self pmt version");
-		return;
-	}
 	if ( !capmt )
 		capmt = new unsigned char[1024];
 
 	memcpy(capmt,"\x9f\x80\x32\x82\x00\x00", 6);
 
-	capmt[6]=lastPMTVersion==-1 ? 0x03 /*only*/ : 0x05 /*update*/;
+	capmt[6]=lastPMTVersion==-1 ? LIST_ONLY : LIST_UPDATE;
 	capmt[7]=(unsigned char)((pmt->program_number>>8) & 0xff);			//prg-nr
 	capmt[8]=(unsigned char)(pmt->program_number & 0xff);					//prg-nr
 
@@ -81,7 +189,7 @@ void CAService::buildCAPMT( PMT *pmt )
 	capmt[10]=0x00;	//reserved - prg-info len
 	capmt[11]=0x00;	//prg-info len
 
-	capmt[12]=0x01;  // ca pmt command id
+	capmt[12]=CMD_OK_DESCRAMBLING;  // ca pmt command id
 	capmt[13]=0x81;  // private descr.. dvbnamespace
 	capmt[14]=0x08;
 	capmt[15]=me.getDVBNamespace().get()>>24;
@@ -179,50 +287,40 @@ void CAService::buildCAPMT( PMT *pmt )
 
 	capmt[4]=((wp-6)>>8) & 0xff;
 	capmt[5]=(wp-6) & 0xff;
-
-	if ( state != 0xFFFFFFFF )
-		state=0;
-	sendCAPMT();
 }
 
 void CAService::sendCAPMT()
 {
-	if ( state && state != 0xFFFFFFFF ) // broken pipe retry
+	if (state() == Idle || state() == Invalid)
 	{
-		::close(sock);
-		Connect();
+		/* we're not connected yet */
+		connectToPath(PMT_CLIENT_SOCKET);
 	}
 
-	int wp = capmt[4] << 8;
-	wp |= capmt[5];
-	wp+=6;
-
-	if ( write(sock, capmt, wp) == wp )
+	if (state() == Connection)
 	{
-		state=0xFFFFFFFF;
-		eDebug("[eDVBCAHandler] send %d bytes",wp);
-#if 0
-		for(int i=0;i<wp;i++)
-			eDebugNoNewLine("%02x ",capmt[i]);
-		eDebug("");
-#endif
+		writeCAPMTObject(this, LIST_ONLY);
 	}
 	else
 	{
-		switch(state)
-		{
-			case 0xFFFFFFFF:
-				++state;
-				retry.start(0,true);
-//				eDebug("[eDVBCAHandler] send failed .. immediate retry");
-				break;
-			default:
-				retry.start(5000,true);
-//				eDebug("[eDVBCAHandler] send failed .. retry in 5 sec");
-				break;
-		}
-		++state;
+		/* we're not connected, try again in 5s */
+		retry.startLongTimer(5);
 	}
+}
+
+int CAService::writeCAPMTObject(eSocket *socket, int list_management)
+{
+	int wp;
+
+	if (!capmt) return 0;
+
+	if (list_management >= 0) capmt[6] = (unsigned char)list_management;
+
+	wp = capmt[4] << 8;
+	wp |= capmt[5];
+	wp += 6;
+
+	return socket->writeBlock((const char*)capmt, wp);
 }
 
 eAutoInitP0<eDVBCAHandler> init_eDVBCAHandler(eAutoInitNumbers::osd-2, "eDVBCAHandler");
