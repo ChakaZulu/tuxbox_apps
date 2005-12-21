@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: yapi.cpp,v 1.7 2005/12/03 14:47:07 yjogol Exp $
+	$Id: yapi.cpp,v 1.8 2005/12/21 18:03:38 yjogol Exp $
 
 	License: GPL
 
@@ -38,10 +38,16 @@
 			example: /y/cgi?a=hello -> replaces {=a=} with "hello"
 
 		-"var-get:<varname>"
-			get value of a ycgi variable
+			get value of a ycgi variable (scope: one parsing session)
 		
 		-"var-set:<varname>=<value>"
-			set value of a ycgi variable
+			set value of a ycgi variable (scope: one parsing session)
+		
+		-"global-var-get:<varname>"
+			get value of a ycgi variable (scope: nhttpd session)
+		
+		-"global-var-set:<varname>=<value>"
+			set value of a ycgi variable (scope: nhttpd session)
 		
 		- "script:<shell-script-filename without .sh>
 			get output of a shell-script
@@ -79,6 +85,9 @@
 			 (left_value != right_value?)
 		
 		- "if-file-exists:<filename>~<them>~<else>"
+		- "file-action:<filename>;<action>[;<content>]
+			<action>::=none | write | append | delete
+			<content> Content to write or append
 
 		-"include-block:<filename>;<block-name>[;<default-text>]"
 			insert text from file <filename> beeginning after "start-block+<blockname>"
@@ -146,26 +155,25 @@ bool ySplitString(std::string str, std::string delimiter, std::string& left, std
 	return (pos != std::string::npos);
 }
 //-------------------------------------------------------------------------
-// trim wwwhitespaces
+// trim whitespaces
 //-------------------------------------------------------------------------
 std::string trim(std::string const& source, char const* delims = " \t\r\n") 
 {
-  std::string result(source);
-  std::string::size_type index = result.find_last_not_of(delims);
-  if(index != std::string::npos)
-    result.erase(++index);
+	std::string result(source);
+	std::string::size_type index = result.find_last_not_of(delims);
+	if(index != std::string::npos)
+		result.erase(++index);
 
-  index = result.find_first_not_of(delims);
-  if(index != std::string::npos)
-    result.erase(0, index);
-  else
-    result.erase();
-  return result;
+	index = result.find_first_not_of(delims);
+	if(index != std::string::npos)
+		result.erase(0, index);
+	else
+		result.erase();
+	return result;
 }
 //-------------------------------------------------------------------------
 // constructor und destructor
 //-------------------------------------------------------------------------
-
 CyAPI::CyAPI(CWebDbox *webdbox)
 {
 	Parent=webdbox;
@@ -176,8 +184,14 @@ CyAPI::CyAPI(CWebDbox *webdbox)
 			HTML_DIRS[1]=Parent->Parent->PrivateDocumentRoot;
 			HTML_DIRS[2]=yHTML_SEARCHFOLDER_MOUNT;
 		}
+	Config = new CConfigFile(',');
 }
-
+//-------------------------------------------------------------------------
+CyAPI::~CyAPI(void)
+{
+	if(Config != NULL)
+		delete Config;
+}
 //-------------------------------------------------------------------------
 //	Call Dispatcher (/y/<execute command>)
 //-------------------------------------------------------------------------
@@ -394,8 +408,8 @@ std::string  CyAPI::cgi_cmd_parsing(CWebserverRequest* request, std::string html
 //	script:<scriptname without .sh>
 //	include:<filename>
 //	func:<funcname> (funcname to be implemented in CyAPI::YWeb_cgi_func)
-//	ini-get:<filename>;<varname>[;<default>]
-//	ini-set:<filename>;<varname>;<value>
+//	ini-get:<filename>;<varname>[;<default>][~open|cache]
+//	ini-set:<filename>;<varname>;<value>[~open|save|cache]
 //	if-empty:<value>~<then>~<else>
 //	if-equal:<left_value>~<right_value>~<then>~<else> (left_value == right_value?)
 //	if-not-equal:<left_value>~<right_value>~<then>~<else> (left_val!e == right_value?)
@@ -403,6 +417,8 @@ std::string  CyAPI::cgi_cmd_parsing(CWebserverRequest* request, std::string html
 //	include-block:<filename>;<block-name>[;<default-text>]
 //	var-get:<varname>
 //	var-set:<varname>=<varvalue>
+//	global-var-get:<varname>
+//	global-var-set:<varname>=<varvalue>
 //-------------------------------------------------------------------------
 
 std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
@@ -482,11 +498,12 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 			yresult = YWeb_cgi_func(request, ycmd_name);
 		else if(ycmd_type == "ini-get")
 		{
-			std::string filename, varname, tmp, ydefault;
-			if (ySplitString(ycmd_name,";",filename,tmp))
+			std::string filename, varname, tmp, ydefault, yaccess;
+			ySplitString(ycmd_name,"~",filename,yaccess);
+			if (ySplitString(filename,";",filename,tmp))
 			{
 				ySplitString(tmp,";",varname, ydefault);
-				yresult = YWeb_cgi_get_ini(filename, varname);
+				yresult = YWeb_cgi_get_ini(filename, varname, yaccess);
 				if(yresult == "" && ydefault != "")
 					yresult = ydefault;
 			}
@@ -495,11 +512,12 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 		}
 		else if(ycmd_type == "ini-set")
 		{
-			std::string filename, varname, varvalue, tmp;
-			if (ySplitString(ycmd_name,";",filename,tmp))
+			std::string filename, varname, varvalue, tmp, yaccess;
+			ySplitString(ycmd_name,"~",filename,yaccess);
+			if (ySplitString(filename,";",filename,tmp))
 			{
 				if(ySplitString(tmp,";",varname, varvalue))
-					YWeb_cgi_set_ini(filename, varname, varvalue);
+					YWeb_cgi_set_ini(filename, varname, varvalue, yaccess);
 			}
 			else
 				yresult = "ycgi: ini-get: no ; found";
@@ -514,6 +532,42 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 			if (ySplitString(ycmd_name,"=",varname,varvalue))
 				ycgi_vars[varname] = varvalue;
 		}
+		else if(ycmd_type == "global-var-get")
+		{
+			yresult = ycgi_global_vars[ycmd_name];
+		}
+		else if(ycmd_type == "global-var-set")
+		{
+			std::string varname, varvalue;
+			if (ySplitString(ycmd_name,"=",varname,varvalue))
+				ycgi_global_vars[varname] = varvalue;
+		}
+		else if(ycmd_type == "file-action")
+		{
+			std::string filename, actionname, content, tmp, ydefault;
+			if (ySplitString(ycmd_name,";",filename,tmp))
+			{
+				ySplitString(tmp,";",actionname, content);
+				if(actionname == "add")
+				{
+					std::fstream fout(filename.c_str(), std::fstream::out );
+					fout << content;
+					fout.close();
+				}
+				else
+				if(actionname == "append")
+				{
+					std::fstream fout(filename.c_str(), std::fstream::app );
+					fout << content;
+					fout.close();
+				}
+				else
+				if(actionname == "delete")
+				{
+					remove(filename.c_str());
+				}
+			}
+		}
 		else
 			yresult = "ycgi-type unknown";
 	}
@@ -524,29 +578,32 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 }
 
 //-------------------------------------------------------------------------
-// Get Value from ini/conf-file (filename) vor var (varname)
+// Get Value from ini/conf-file (filename) for var (varname)
+// yaccess = open | cache 
 //-------------------------------------------------------------------------
-std::string  CyAPI::YWeb_cgi_get_ini(std::string filename, std::string varname)
+std::string  CyAPI::YWeb_cgi_get_ini(std::string filename, std::string varname, std::string yaccess)
 {
-	CConfigFile *Config = new CConfigFile(',');
+//	aprintf("ini-get: var:%s yaccess:(%s)\n", varname.c_str(), yaccess.c_str());
 	std::string result;
-
-	Config->loadConfig(filename);
+	if((yaccess == "open") || (yaccess == ""))
+		Config->loadConfig(filename);
 	result = Config->getString(varname, "");
-	delete Config;
 	return result;	
 }
 
 //-------------------------------------------------------------------------
-void  CyAPI::YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue)
+// set Value from ini/conf-file (filename) for var (varname)
+// yaccess = open | cache | save
+//-------------------------------------------------------------------------
+void  CyAPI::YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue, std::string yaccess)
 {
-	CConfigFile *Config = new CConfigFile(',');
+//	aprintf("ini-set: var:%s yaccess:(%s)\n", varname.c_str(), yaccess.c_str());
 	std::string result;
-
-	Config->loadConfig(filename);
+	if((yaccess == "open") || (yaccess == ""))
+		Config->loadConfig(filename);
 	Config->setString(varname, varvalue);
-	Config->saveConfig(filename);
-	delete Config;
+	if((yaccess == "save") || (yaccess == ""))
+		Config->saveConfig(filename);
 }
 
 //-------------------------------------------------------------------------

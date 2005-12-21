@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: yapi.h,v 1.5 2005/12/03 14:47:07 yjogol Exp $
+        $Id: yapi.h,v 1.6 2005/12/21 18:03:38 yjogol Exp $
 
         License: GPL
 
@@ -70,6 +70,8 @@ private:
 	CWebDbox	*Parent;
 
 	std::map<std::string, std::string> ycgi_vars;
+	std::map<std::string, std::string> ycgi_global_vars;
+	CConfigFile *Config;
 	
 	// parsing engine
 	std::string cgi_file_parsing(CWebserverRequest *request, std::string htmlfilename, bool ydebug);
@@ -95,8 +97,8 @@ private:
 	std::string func_get_partition_list();
 
 	// helpers
-	std::string YWeb_cgi_get_ini(std::string filename, std::string varname);
-	void YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue);
+	std::string YWeb_cgi_get_ini(std::string filename, std::string varname, std::string yaccess);
+	void YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue, std::string yaccess);
 	std::string YWeb_cgi_include_block(std::string filename, std::string blockname, std::string ydefault);
 
 public:
@@ -105,10 +107,10 @@ public:
 // Search folders for html files
 //-------------------------------------------------------------------------
 	static const unsigned int HTML_DIR_COUNT = 3;
- 	std::string HTML_DIRS[HTML_DIR_COUNT];
+	std::string HTML_DIRS[HTML_DIR_COUNT];
 
 	CyAPI(CWebDbox *webdbox);
-
+	~CyAPI(void);
 	// Execute calls
 	bool Execute(CWebserverRequest* request);
 	bool cgi(CWebserverRequest *request);
