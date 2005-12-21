@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.63 2005/03/28 14:12:33 chakazulu Exp $
+	$Id: webapi.cpp,v 1.64 2005/12/21 18:02:59 yjogol Exp $
 
 	License: GPL
 
@@ -27,10 +27,14 @@
 
 #include <unistd.h>
 
+#include "webserver.h"
 #include "webapi.h"
 #include "debug.h"
 #include "algorithm"
 #include "sstream"
+
+#include <config.h>
+#include <configfile.h>
 
 #include <zapit/client/zapittools.h>
 
@@ -195,7 +199,7 @@ bool CWebAPI::ShowBouquets(CWebserverRequest* request)
 
 	request->SocketWrite("<SCRIPT LANGUAGE=\"JavaScript\">\n<!--\n function go_to(url1, url2)\n{\n top.content.location.href = url1;\n top.bouquets.location.href = url2;\n }\n//-->\n </SCRIPT>\n</HEAD><BODY>");
 
-	request->SocketWriteLn("<TABLE cellspacing=0 cellpadding=0 border=0 width=\"100%\">");
+	request->SocketWriteLn("<TABLE class=\"bouquetlist\" width=\"100%\">");
 	request->SocketWriteLn("<TR><TD><A CLASS=\"blist\" HREF=\"/bouquetedit/main\" TARGET=\"content\">Bouqueteditor</A></TD></TR>\n<TR><TD><HR></TD></TR>");
 
 	if(BouquetNr == 0)
@@ -531,9 +535,9 @@ bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 	CChannelEventList::iterator eventIterator;
 	request->SendHTMLHeader("DBOX2-Neutrino Channellist");
 
-	request->SocketWrite("<CENTER><H3 CLASS=\"epg\">Programmvorschau: " + Parent->GetServiceName(channel_id));
-	request->SocketWrite("</H3></CENTER>\n"
-			     "<CENTER><TABLE WIDTH=\"95%\" CELLSPACING=\"0\">\n");
+	request->SocketWrite("<div CLASS=\"epg\">Programmvorschau: " + Parent->GetServiceName(channel_id));
+	request->SocketWrite("</div>\n"
+			     "<TABLE class=\"epglist\">\n");
 
 	for( eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, pos++ )
 	{
@@ -541,7 +545,7 @@ bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 		char zbuffer[25] = {0};
 		struct tm *mtime = localtime(&eventIterator->startTime); //(const time_t*)eventIterator->startTime);
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
-		request->printf("<TR VALIGN=\"middle\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
+		request->printf("<TR VALIGN=\"middle\" CLASS=\"%c\">\n",classname);
 		request->printf("<TD><NOBR>");
 		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&amp;type=%d&amp;alarm=%u&amp;stop=%u&amp;channel_id="
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -558,7 +562,7 @@ bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 
 	}
 
-	request->SocketWriteLn("</TABLE></CENTER>");
+	request->SocketWriteLn("</TABLE>");
 	request->SendHTMLFooter();
 	return true;
 }
@@ -593,7 +597,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 		"\n"
 		"<body>\n"
 		);
-	request->SocketWriteLn("<table cellspacing=\"0\" border=\"0\" width=\"90%\">");
+	request->SocketWriteLn("<table class=\"bouquetitemlist\">");
 
 	int i = 1;
 	char classname;
@@ -611,7 +615,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 		std::string bouquetstr = (BouquetNr >= 0) ? ("&amp;bouquet=" + itoa(BouquetNr)) : "";
 		
-		request->printf("<tr style=\"border-top: 2px solid #707070\"><td colspan=\"2\" class=\"%c\">",classname);
+		request->printf("<tr><td colspan=\"2\" class=\"%c\">",classname);
 		request->printf("%s<a class=\"clist\" href=\"switch.dbox2?zapto="
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 				",%s\">%d. %s%s</a>&nbsp;<a href=\"epg.dbox2?eventlist="
@@ -687,10 +691,10 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 			timeString(event->startTime, timestr);
 			request->printf("<tr>"
 					"<td align=\"left\" style=\"width: 32px\" class=\"%cepg\">"
-			                "<table border=\"0\" rules=\"none\" style=\"height: 10px; border: 1px solid black; width: 30px\" cellspacing=\"0\" cellpadding=\"0\">"
+			                "<table border=\"0\" rules=\"none\" class=\"cslider_table\">"
 					"<tr>"
-					"<td style=\"background-color: #2211FF; height: 10px; width: %dpx\"></td>"
-					"<td style=\"background-color: #EAEBFF; height: 10px; width: %dpx\"></td>"
+					"<td class=\"cslider_used\" width=\"%d\"></td>"
+					"<td class=\"cslider_free\" width=\"%d\"></td>"
 					"</tr>"
 					"</table></td>"
 					, classname
@@ -855,7 +859,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 	channellist_radio.clear();
 
 	request->SendHTMLHeader("TIMERLISTE");
-	request->SocketWrite("<center>\n<TABLE CLASS=\"timer\" border=0>\n<TR>\n"
+	request->SocketWrite("<TABLE CLASS=\"timer\" border=0>\n<TR>\n"
 	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Alarm-Zeit</TD>\n"
 	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Stop-Zeit</TD>\n"
 	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Wiederholung</TD>\n"
@@ -1006,8 +1010,7 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	request->SocketWrite("  focusNMark();}\n");
 	request->SocketWrite("</script>\n");
 	
-	request->SocketWrite("<center>");
-	request->SocketWrite("<TABLE border=2 ><tr CLASS=\"a\"><TD>\n");
+	request->SocketWrite("<TABLE class=\"timer\"><tr CLASS=\"a\"><TD>\n");
 	request->SocketWrite("<form method=\"GET\" name=\"modify\" action=\"/fb/timer.dbox2\">\n");
 	request->SocketWrite("<INPUT TYPE=\"hidden\" name=\"action\" value=\"modify\">\n");
 	request->printf("<INPUT name=\"id\" TYPE=\"hidden\" value=\"%d\">\n",timerId);
@@ -1083,6 +1086,12 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	request->printf("Wochentage <INPUT TYPE=\"text\" name=\"wd\" value=\"%s\" size=7 maxlength=7> (Mo-So, X=Timer)</TD></TR>\n",
 		 weekdays);
 
+	if(timer.eventType == CTimerd::TIMER_RECORD)
+	{
+		request->printf("<tr><td colspan=2>Verzeichnis: <INPUT TYPE=\"text\" name=\"rec_dir\" value=\"%s\" size=20 maxlength=%d></td></tr>\n",
+		timer.recordingDir, RECORD_DIR_MAXLEN-1);
+
+	}
 	request->SocketWrite("<TR><TD colspan=2 height=10></TR>\n"
 	                     "<TR><TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form></TD>\n"
 	                     "<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\">\n"
@@ -1158,7 +1167,11 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	(CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
 	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && request->ParameterList["wd"] != "")
 		Parent->Timerd->getWeekdaysFromStr((int*)&rep, request->ParameterList["wd"].c_str());
-	Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep,repCount);
+	if(timer.eventType == CTimerd::TIMER_RECORD)
+		Parent->Timerd->modifyRecordTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep,repCount,request->ParameterList["rec_dir"].c_str());
+	else
+		Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep,repCount);
+	
 	if(request->ParameterList["ap"] != "")
 	{
 		std::string apids = request->ParameterList["ap"];
@@ -1199,7 +1212,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("</script>\n");
 
 	// head of TABLE
-	request->SocketWrite("<center><TABLE border=2 width=\"70%\"><tr CLASS=\"a\"><TD>\n");
+	request->SocketWrite("<TABLE class=\"timer\" width=\"70%\"><tr CLASS=\"a\"><TD>\n");
 	// Form
 	request->SocketWrite("<form method=\"GET\" action=\"/fb/timer.dbox2\" name=\"NewTimerForm\">\n");
 	request->SocketWrite("<INPUT TYPE=\"hidden\" name=\"action\" value=\"new\">\n");
@@ -1275,7 +1288,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></NOBR></TD></TR>\n",
 		  now->tm_min);
 	// ONID-SID
-	request->SocketWrite("<tr id=\"ProgramRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
+	request->SocketWrite("<tr id=\"ProgramRow\" style=\"visibility:hidden\"><TD>\n");
 	request->SocketWrite("<select name=\"channel_id\">\n");
 	CZapitClient::BouquetChannelList channellist;     
 	channellist.clear();
@@ -1304,7 +1317,17 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 			request->SocketWrite(" selected");
 		request->printf(">%s\n",channel->name);
 	}
-	request->SocketWrite("</selected></TR>\n");
+	request->SocketWrite("</selected></td>\n");
+	// get Default Recordingdir
+	CConfigFile *Config = new CConfigFile(',');
+	std::string rec_dir;
+	Config->loadConfig(NEUTRINO_CONF);
+	rec_dir = Config->getString("network_nfs_recordingdir", "/mnt/filme");
+	// recordingDir
+	request->printf("<td>Verzeichnis: <INPUT TYPE=\"text\" name=\"rec_dir\" value=\"%s\" size=20 maxlength=%d>\n",
+		rec_dir.c_str(), RECORD_DIR_MAXLEN-1);
+
+	request->SocketWrite("</td></TR>\n");
 	//standby
 	request->SocketWrite("<tr><TD id=\"StandbyRow\" style=\"visibility:hidden\">\n");
 	request->SocketWrite("Standby <INPUT TYPE=\"radio\" name=\"sbon\" value=\"1\">An\n");
@@ -1430,7 +1453,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 	else if (type==CTimerd::TIMER_RECORD)
 	{
 		recinfo = eventinfo;
-		strcpy(recinfo.recordingDir,"");
+		strncpy(recinfo.recordingDir, (request->ParameterList["rec_dir"]).c_str(), RECORD_DIR_MAXLEN-1);
 		data = &recinfo;
 	}
 	else if(type==CTimerd::TIMER_REMIND)
