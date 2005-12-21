@@ -41,3 +41,54 @@ a.copy{color:#BBC5D4; text-decoration:none; font-size:8pt;}
 a.copy:hover{color:#BBC5D4; font-size:8pt; text-decoration:underline; font-weight:normal;}
 iframe {background-color: transparent;}
 .tableborder {border: 1px solid #c5c5c5;}
+.bouquetlist
+{
+	border: 0px;
+	border-spacing: 0px;
+	padding: 0px;
+
+}
+tr.bouquetlist
+{
+	background-color:#88B5FF;
+}
+
+/*channels*/
+.bouquetitemlist
+{
+	border: 0px;
+	border-spacing: 0px;
+	padding: 0px;
+	width: 90%;
+}
+.cslider_table
+{
+	height: 10px; 
+	border: 1px solid Black; 
+	width: 30px;
+	border-spacing: 0px;
+	padding: 0px;
+}
+.cslider_used
+{
+	background-color: #2211FF;
+	height: 10px;
+}
+.cslider_free
+{
+	background-color: #EAEBFF;
+	height: 10px;
+}
+/*EPG*/
+.epg
+{
+	font-weight: bold;
+	color: #436976;
+	font-size: 14pt;
+	clear:both;
+
+}
+.epglist
+{
+	border-spacing: 0px;
+	width: 90%;
