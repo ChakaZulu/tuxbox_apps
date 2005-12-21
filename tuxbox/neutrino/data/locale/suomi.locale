@@ -23,7 +23,7 @@ EPGPlus.footer_fontbouquetchannelname Valitse kanavanipun/kanavan nimi
 EPGPlus.footer_fontbuttons Näppäimet
 EPGPlus.footer_fonteventdescription Ohjelman kuvaus
 EPGPlus.footer_fonteventshortdescription Ohjelman kuvaus lyhyesti
-EPGPlus.head EPG ohjelmatiedot
+EPGPlus.head EPG ohjelmaopas
 EPGPlus.header_font Header
 EPGPlus.horgap1_height height hor. gap 1
 EPGPlus.horgap2_height height hor. gap 2
@@ -396,14 +396,14 @@ imageinfo.license Lisenssi:
 imageinfo.version Versio:
 infoviewer.epgnotload EPG ei vielä valmis...
 infoviewer.epgwait odotetaan EPG:tä...
-infoviewer.eventlist Ohjelmatiedot
+infoviewer.eventlist Ohjelmaopas
 infoviewer.languages Ääni
 infoviewer.motor_moving Moottori kääntyy..
 infoviewer.nocurrent Ohjelmasta ei ole tietoja saatavilla
 infoviewer.noepg EPG ei ole käytettävissä
 infoviewer.notavailable Kanava ei ole käytettävissä
 infoviewer.selecttime Aikavalinta
-infoviewer.streaminfo Lisätoiminnot
+infoviewer.streaminfo Lisätoim.
 infoviewer.subchan_disp_pos Alikanavan näyttö
 infoviewer.subservice Subservices
 infoviewer.waittime Waiting for time...
@@ -480,6 +480,7 @@ mainmenu.movieplayer Mediasoitin
 mainmenu.pausesectionsd Lue EPG
 mainmenu.pictureviewer Kuvankatselu
 mainmenu.radiomode Radio
+mainmenu.reboot Käynnistä uudelleen
 mainmenu.recording Tallennus
 mainmenu.recording_start Käynnistä
 mainmenu.recording_stop Pysäytä
@@ -532,6 +533,102 @@ miscsettings.sptsmode Käytä spts-tilaa
 miscsettings.startbhdriver Lataa BH-tilan ajurit
 miscsettings.tuxtxt_cache Teksti-tv:n välimuisti
 motorcontrol.head Kääntömoottorin asetukset
+moviebrowser.book_head Bookmarks
+moviebrowser.book_lastmoviestop Last play stop:
+moviebrowser.book_movieend Movie end:
+moviebrowser.book_moviestart Movie start:
+moviebrowser.book_name Name:
+moviebrowser.book_new New Bookmark
+moviebrowser.book_position Position:
+moviebrowser.book_type Jump (<0 back , >0 for):
+moviebrowser.book_type_backward Repeat
+moviebrowser.book_type_forward jump over
+moviebrowser.edit_book Bookmark change
+moviebrowser.edit_book_name_info1 Enter new Bookmark name
+moviebrowser.edit_book_name_info2 
+moviebrowser.edit_book_pos_info1 Enter new Position (s)
+moviebrowser.edit_book_pos_info2 
+moviebrowser.edit_book_type_info1 Enter new jump length (s)
+moviebrowser.edit_book_type_info2 <0 back , >0 for, 0: none
+moviebrowser.edit_serie Enter name of serie
+moviebrowser.error_no_movies No movies found
+moviebrowser.foot_filter Filter:
+moviebrowser.foot_play Start movie
+moviebrowser.foot_sort Sort:
+moviebrowser.head TS MovieBrowser
+moviebrowser.head_filter Filter movies by category:
+moviebrowser.head_playlist Last played:
+moviebrowser.head_recordlist Last recorded:
+moviebrowser.hint_jumpbackward Jump back in 5 s\n '0' to cancel 
+moviebrowser.hint_jumpforward Jump forward in 5 s\n '0' to cancel 
+moviebrowser.hint_movieend Filmende in 5 s\n '0' zum weitersehen 
+moviebrowser.hint_newbook_backward New jump back\n 'blue' for endposition 
+moviebrowser.hint_newbook_forward New jump forward\n 'blue' for endposition 
+moviebrowser.info_audio Audio
+moviebrowser.info_channel Channel
+moviebrowser.info_filename Name
+moviebrowser.info_genre_major Genre
+moviebrowser.info_genre_minor Genre
+moviebrowser.info_head Film Informationen
+moviebrowser.info_info1 Info 1
+moviebrowser.info_info2 Info 2
+moviebrowser.info_length Length (Min)
+moviebrowser.info_parental_lockage Parental Lock age
+moviebrowser.info_parental_lockage_0year always
+moviebrowser.info_parental_lockage_12year 12 years
+moviebrowser.info_parental_lockage_16year 16 years
+moviebrowser.info_parental_lockage_18year 18 years
+moviebrowser.info_parental_lockage_6year 6 years
+moviebrowser.info_parental_lockage_always never 
+moviebrowser.info_path Path
+moviebrowser.info_prevplaydate Last play date
+moviebrowser.info_prodcountry Country
+moviebrowser.info_prodyear Year
+moviebrowser.info_quality Quality
+moviebrowser.info_recorddate Record date
+moviebrowser.info_serie Serie
+moviebrowser.info_size File size (MB)
+moviebrowser.info_title Titel
+moviebrowser.info_videoformat Picture
+moviebrowser.menu_directories_head Paths
+moviebrowser.menu_help_head Help
+moviebrowser.menu_main_bookmarks Bookmarks
+moviebrowser.menu_main_head Settings
+moviebrowser.menu_main_movieinfo Movie info
+moviebrowser.menu_main_saveandback save and back
+moviebrowser.menu_nfs_head NFS settings
+moviebrowser.menu_parental_lock_activated activated
+moviebrowser.menu_parental_lock_activated_no no
+moviebrowser.menu_parental_lock_activated_yes yes
+moviebrowser.menu_parental_lock_activated_yes_temp yes (temporary)
+moviebrowser.menu_parental_lock_head Parental Lock
+moviebrowser.menu_parental_lock_rate_head Lock movies from
+moviebrowser.scan_for_movies Scan for Movies ...
+moviebrowser.serie_existingname Existing series
+moviebrowser.serie_head Serie
+moviebrowser.serie_name Change name
+moviebrowser.short_audio Audio
+moviebrowser.short_book Book
+moviebrowser.short_channel Channel
+moviebrowser.short_country Country
+moviebrowser.short_filename Name
+moviebrowser.short_format Format
+moviebrowser.short_genre_major Genre
+moviebrowser.short_genre_minor Genre
+moviebrowser.short_info1 Info 1
+moviebrowser.short_info2 Info 2
+moviebrowser.short_length Min
+moviebrowser.short_parental_lockage Age
+moviebrowser.short_path Path
+moviebrowser.short_prevplaydate Last
+moviebrowser.short_prodyear Year
+moviebrowser.short_quality * (quality)
+moviebrowser.short_recorddate Date
+moviebrowser.short_serie Serie
+moviebrowser.short_size MB
+moviebrowser.short_title Title
+moviebrowser.start_head Start movie from:
+moviebrowser.start_record_start Movie start
 movieplayer.bookmark Kirjanmerkit
 movieplayer.bookmarkname Kirjanmerkki
 movieplayer.bookmarkname_hint1 Syötä nimi uudelle kirjanmerkille
@@ -620,6 +717,7 @@ options.fb Framebuffer
 options.null (null)
 options.off Pois
 options.on Päällä
+options.on.without_messages Hiljaisesti
 options.serial Sarjaportti
 parentallock.changepin PIN-koodin vaihto
 parentallock.changepin_hint1 Syötä lapsilukon uusi PIN-koodi.
@@ -765,6 +863,7 @@ scants.startnow Aloita haku
 scants.transponders lähettimet:
 screensetup.lowerright vihreä = säädä alakulmaa
 screensetup.upperleft punainen = säädä yläkulmaa
+sectionsd.scanmode Autom. kanavapäivitys
 servicemenu.getplugins Lue laajennoslista uudelleen
 servicemenu.getplugins_hint Ladataan laajennoksia,\nodota hetki.
 servicemenu.head Huoltovalikko
