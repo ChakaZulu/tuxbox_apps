@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.52 2005/01/18 07:53:07 diemade Exp $
+ * $Id: pzapit.cpp,v 1.53 2005/12/21 17:13:38 mws Exp $
  *
  * simple commandline client for zapit
  *
@@ -65,6 +65,7 @@ int usage (const char * basename)
 	std::cout << "set decoder to PES mode (requires aviaEXT driver): " << basename << " --pes>" << std::endl;
 	std::cout << "set decoder to SPTS mode (requires aviaEXT driver): " << basename << " --spts>" << std::endl;
 	std::cout << "get decoder mode (0=PES, 1=SPTS): " << basename << " --decmode>" << std::endl;
+	std::cout << "get current PIDs: " << basename << " --getpids>" << std::endl;
 	return -1;
 }
 
@@ -107,6 +108,7 @@ int main (int argc, char** argv)
 	bool pes = false;
 	bool spts = false;
 	bool decmode = false;
+	bool getpids = false;
 	uint8_t motorCmdType = 0;
 	uint8_t motorCmd = 0;
 	uint8_t motorNumParameters = 0;
@@ -307,6 +309,11 @@ int main (int argc, char** argv)
 				sscanf(argv[++i], "%d", &volume);
 				continue;
 			}
+		}
+		else if (!strncmp(argv[i], "--getpids", 9)) 
+		{
+			getpids = true;
+			continue;
 		}
 		else if (i < argc - 1)
 		{
@@ -569,6 +576,9 @@ int main (int argc, char** argv)
 		}
 		else /* zap by bouquet number and channel number */
 		{
+			if (getpids && bouquet == -1) {
+				goto getpids;
+			}
 			/* read channel list */
 			if (bouquet != -1)
 				zapit.getBouquetChannels(bouquet - 1, channels);
@@ -610,6 +620,7 @@ int main (int argc, char** argv)
 	}
 
 	
+getpids:
 	{	
 		CZapitClient::responseGetPIDs pids;
 		zapit.getPIDS(pids);
@@ -617,15 +628,29 @@ int main (int argc, char** argv)
 		if (pids.PIDs.vpid)
 			std::cout << "   video: 0x" << std::hex << pids.PIDs.vpid << std::endl;
 
+		if (pids.PIDs.ecmpid) 
+			std::cout << "  ecmpid: 0x" << std::hex << pids.PIDs.ecmpid << std::endl;
+
 		if (pids.PIDs.vtxtpid)
 			std::cout << "teletext: 0x" << std::hex << pids.PIDs.vtxtpid << std::endl;
 
 		if (pids.PIDs.pcrpid)
 			std::cout << "     pcr: 0x" << std::hex << pids.PIDs.pcrpid << std::endl;
 
+		if (pids.PIDs.pmtpid)
+			std::cout << "     pmt: 0x" << std::hex << pids.PIDs.pmtpid << std::endl;
+
+		if (pids.PIDs.privatepid)
+			std::cout << " private: 0x" << std::hex << pids.PIDs.privatepid << std::endl;
+
 		for (count = 0; count < pids.APIDs.size(); count++)
 		{
-			std::cout << " audio " << std::dec << count + 1 << ": 0x" << std::hex << pids.APIDs[count].pid << " (" << pids.APIDs[count].desc;
+			if (count == pids.PIDs.selected_apid)
+				std::cout << "*";
+			else 
+				std::cout << " ";
+	
+			std::cout << "audio " << std::dec << count + 1 << ": 0x" << std::hex << pids.APIDs[count].pid << " (" << pids.APIDs[count].desc;
 			if (pids.APIDs[count].is_ac3)
 				std::cout << ", ac3";
 			std::cout << ")" << std::endl;
