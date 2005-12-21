@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Flashing Library (yjogol)
-# $Date: 2005/12/03 14:39:26 $
-# $Revision: 1.8 $
+# $Date: 2005/12/21 18:10:07 $
+# $Revision: 1.9 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -37,8 +37,16 @@ image_backup_mtd()
 image_backup_download_page()
 {
 	msg="<div class='y_work_box'><b>Das Image wurde erstellt.</b><p>"
-	msg="$msg <a type='application/octet-stream' href='/tmp/flash_mtd$1.img'><u>Download</u></a></p></div>"
+	msg="$msg <a type='application/octet-stream' href='/tmp/flash_mtd$1.img'><u>Download</u></a><br><br>"
+	msg="$msg <a href='/control/exec?Y_Tools&image_delete'><u>Download fertig. Image in /tmp loeschen.</u></a></p></div>"
 	msg="$msg  <script language='JavaScript' type='text/javascript'>parent.do_image_download_ready()</script>"
+	y_format_message_html
+}
+# -----------------------------------
+image_delete_download_page()
+{
+	rm -r /tmp/*.img
+	msg="<div class='y_work_box'><b>Die Image-Datei in tmp wurde geloescht.</b></div>"
 	y_format_message_html
 }
 # -----------------------------------------------------------
@@ -51,12 +59,42 @@ simulate="false"
 	rm /tmp/*.img
 	if [ -s "$y_upload_file" ]
 	then
+		echo "" >/tmp/e.txt
 		msg_nmsg "Image%20wird%20geflasht!"
 		if [ "$simulate" != "true" ]
 		then
-#			eraseall /dev/mtd/$1 >/dev/null
-#			eraseall /dev/mtd/$1 >/tmp/e.txt
 			fcp -v "$y_upload_file" /dev/mtd/$1 >/tmp/e.txt
+		else #simulation/DEMO
+			i="0"
+			while test $i -le 10
+			do
+				p=`expr $i \* 10`
+				b=`expr $i \* 63`
+				b=`expr $b / 10`
+				echo "\rDEMO: Erasing blocks: $b/63 ($p%)" >>/tmp/e.txt
+				i=`expr $i + 1`	
+				sleep 1
+			done
+			i="0"
+			while test $i -le 20
+			do
+				p=`expr $i \* 5`
+				b=`expr $i \* 8064`
+				b=`expr $b / 20`
+				echo "\rDEMO: Writing data: $b k/8064k ($p%)" >>/tmp/e.txt
+				i=`expr $i + 1`	
+				sleep 2
+			done
+			i="0"
+			while test $i -le 5
+			do
+				p=`expr $i \* 20`
+				b=`expr $i \* 8064`
+				b=`expr $b / 5`
+				echo "\rDEMO: Verifying data: $b k/8064k ($p%)" >>/tmp/e.txt
+				i=`expr $i + 1`	
+				sleep 1
+			done
 		fi
 		msg_nmsg "flashen%20fertig.%20Reboot..."
 		msg="geflasht ... bitte jetzt box neu starten ..."
@@ -305,7 +343,9 @@ case "$1" in
 	image_flash_free_tmp)
 		rm -r /tmp/*.img
 		;;
-		
+	image_delete)
+		image_delete_download_page
+		;;
 	bootlogo_upload)
 		bootlogo_upload	;;
 

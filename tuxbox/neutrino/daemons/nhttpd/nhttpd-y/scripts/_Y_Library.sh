@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Library (yjogol)
-# $Date: 2005/12/03 14:39:26 $
-# $Revision: 1.6 $
+# $Date: 2005/12/21 18:10:07 $
+# $Revision: 1.7 $
 # -----------------------------------------------------------
 
 # ===========================================================
@@ -151,16 +151,8 @@ config_set_value_direct()
 # -----------------------------------------------------------
 yreboot()
 {
-
-    killall -9 nhttpd
-    killall -9 controld
-    killall zapit
-    sleep 1
-    killall -9 camd2
-    killall -9 timerd
-    killall -9 sectionsd
-    sleep 1
-    reboot
+	reboot
+#	wget -O - -q "$y_url_control/reboot"
 }
 
 # -----------------------------------------------------------
