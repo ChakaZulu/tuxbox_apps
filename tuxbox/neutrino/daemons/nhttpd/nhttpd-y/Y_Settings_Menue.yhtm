@@ -7,57 +7,66 @@
 {=var-set:management={=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip;{=func:get_request_data client_addr=}=}~1~=}{=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip2=}~1~=}=}
 
 <br>
-<div class="y_head" align=center>Settings</div>
-<table border="0" width="100%">
-	<tr>
-		<td align="center">
-		<ul id="menu_sec" class="y_menu_sec">
-		{=if-empty:{=var-get:management=}~
-			<li class="disabled" title="settings for yWeb itselfs (restricted by ManagementIP)">yWeb</li>
-			<li class="disabled" title="settings for Web Server daemon (restricted by ManagementIP)">WebServer</li>
-			<li class="disabled" title="organize file mounts (restricted by ManagementIP)">Mounts</li>
-			<li class="disabled" title="Wake on LAN (restricted by ManagementIP)">Wake on LAN</li>
-			<li class="disabled" title="download or upload ucodes (restricted by ManagementIP)">ucodes</li>
-			<li class="disabled" title="download or upload Bouquetlist, Channellist, ... (restricted by ManagementIP)">zapit</li>
-		~
-			<li class="plain"><a class="y_menu_item" title="settings for yWeb itselfs" target="Rechts_oben" href="Y_Settings_yWeb.yhtm">yWeb</a></li>
-			<li class="plain"><a class="y_menu_item" title="settings for Web Server daemon" target="Rechts_oben" href="Y_Settings_nhttpd.yhtm">WebServer</a></li>
-			<li class="plain"><a class="y_menu_item" title="organize file mounts" target="Rechts_oben" href="Y_Settings_mount_liste.yhtm">Mounts</a></li>
-			<li class="plain"><a class="y_menu_item" title="Wake on LAN" target="Rechts_oben" href="Y_Settings_wol.yhtm">Wake on LAN</a></li>
-			<li class="plain"><a class="y_menu_item" title="download or upload ucodes" target="Rechts_oben" href="Y_Settings_ucodes.htm">ucodes</a></li>
-			<li class="plain"><a class="y_menu_item" title="download or upload Bouquetlist, Channellist, ..." target="Rechts_oben" href="Y_Settings_zapit.htm">zapit</a></li>
-		=}	
-			<li class="plain"><a class="y_menu_item" title="change layout skin" target="Rechts_oben" href="Y_Settings_Skin.yhtm">Skins</a></li>
-		</ul>
-		</td>
-	</tr>
-</table>
+<div class="y_head" align=center style="width:100%">Settings</div>
+<div class="y_menu_sec" style="	margin-left: 25px;">
+	<ul id="menu_sec">
+	{=if-empty:{=var-get:management=}~
+		<li class="disabled" title="settings for yWeb itselfs (restricted by ManagementIP)">yWeb</li>
+		<li class="disabled" title="settings for Web Server daemon (restricted by ManagementIP)">WebServer</li>
+		<li class="disabled" title="Wake on LAN (restricted by ManagementIP)">Wake on LAN</li>
+		<li class="disabled" title="download or upload ucodes (restricted by ManagementIP)">ucodes</li>
+		<li class="disabled" title="download or upload Bouquetlist, Channellist, ... (restricted by ManagementIP)">zapit</li>
+	~
+		<li class="plain"><a class="y_menu_item" title="settings for yWeb itselfs" target="Rechts_oben" href="Y_Settings_yWeb.yhtm">yWeb</a></li>
+		<li class="plain"><a class="y_menu_item" title="settings for Web Server daemon" target="Rechts_oben" href="Y_Settings_nhttpd.yhtm">WebServer</a></li>
+		<li class="plain"><a class="y_menu_item" title="Wake on LAN" target="Rechts_oben" href="Y_Settings_wol.yhtm">Wake on LAN</a></li>
+		<li class="plain"><a class="y_menu_item" title="download or upload ucodes" target="Rechts_oben" href="Y_Settings_ucodes.htm">ucodes</a></li>
+		<li class="plain"><a class="y_menu_item" title="download or upload Bouquetlist, Channellist, ..." target="Rechts_oben" href="Y_Settings_zapit.htm">zapit</a></li>
+	=}	
+		<li class="plain"><a class="y_menu_item" title="change layout skin" target="Rechts_oben" href="Y_Settings_Skin.yhtm">Skins</a></li>
+	</ul>
+</div>
 
-<div class="y_head" align=center>Plugins</div>
-<table border="0" width="100%">
-	<tr>
-		<td align="center">
-		<ul id="menu_sec" class="y_menu_sec">
-		{=if-empty:{=var-get:management=}~
-			<li class="disabled" title="configure VNC-Plugin (restricted by ManagementIP)">VNC</li>
-		~
-			<li class="plain"><a class="y_menu_item" title="configure VNC-Plugin" target="Rechts_oben" href="Y_Settings_VNC.yhtm">VNC</a></li>
-		=}
-		</ul>
-		</td>
-	</tr>
-</table>
+<div class="y_head" align=center style="width:100%">Neutrino</div>
+<div class="y_menu_sec" style="	margin-left: 25px;">
+	<ul id="menu_sec">
+	{=if-empty:{=var-get:management=}~
+		<li class="disabled" title="organize file mounts (restricted by ManagementIP)">Mounts</li>
+		<li class="disabled" title="Parental settings">Jugendschutz</a></li>
+		<li class="disabled" title="Recording settings">Aufnahme</a></li>
+		<li class="disabled" title="Movieplayer settings">Movieplayer</a></li>
+		<li class="disabled" title="Audioplayer settings">Audioplayer</a></li>
+		<li class="disabled" title="Pictureviewer settings">Bildbetrachter</a></li>
+		<li class="disabled" title="boot settings">Bootoptionen</a></li>
+		<li class="disabled" title="rest of settings">Diverse</a></li>
+	~
+		<li class="plain"><a class="y_menu_item" title="organize file mounts" target="Rechts_oben" href="Y_Settings_mount_liste.yhtm">Mounts</a></li>
+		<li class="plain"><a class="y_menu_item" title="Parental settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_parental">Jugendschutz</a></li>
+		<li class="plain"><a class="y_menu_item" title="Recording settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_record">Aufnahme</a></li>
+		<li class="plain"><a class="y_menu_item" title="Movieplayer settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_movieplayer">Movieplayer</a></li>
+		<li class="plain"><a class="y_menu_item" title="Audioplayer settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_audioplayer">Audioplayer</a></li>
+		<li class="plain"><a class="y_menu_item" title="Pictureviewer settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_pictureviewer">Bildbetrachter</a></li>
+		<li class="plain"><a class="y_menu_item" title="boot settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_bootoptions">Bootoptionen</a></li>
+		<li class="plain"><a class="y_menu_item" title="rest of settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_diverse">Diverse</a></li>
+	=}	
+	</ul>
+</div>
+<div class="y_head" align=center style="width:100%">Plugins</div>
+<div class="y_menu_sec" style="	margin-left: 25px;">
+	<ul id="menu_sec">
+	{=if-empty:{=var-get:management=}~
+		<li class="disabled" title="configure VNC-Plugin (restricted by ManagementIP)">VNC</li>
+	~
+		<li class="plain"><a class="y_menu_item" title="configure VNC-Plugin" target="Rechts_oben" href="Y_Settings_VNC.yhtm">VNC</a></li>
+	=}
+	</ul>
+</div>
 
-<div class="y_head" align=center>Info</div>
-<table border="0" width="100%">
-	<tr>
-		<td align="center">
-		<ul id="menu_sec" class="y_menu_sec">
-			<li class="plain"><a class="y_menu_item" title="about yWeb" target="Rechts_oben" href="Y_About.yhtm">About</a></li>
-		</ul>
-		</td>
-	</tr>
-</table>
-
+<div class="y_head" align=center style="width:100%">Info</div>
+<div class="y_menu_sec" style="	margin-left: 25px;">
+	<ul id="menu_sec">
+		<li class="plain"><a class="y_menu_item" title="about yWeb" target="Rechts_oben" href="Y_About.yhtm">About</a></li>
+	</ul>
+</div>
 </body>
 </html>

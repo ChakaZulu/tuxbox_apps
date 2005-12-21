@@ -6,87 +6,89 @@ body
 }
 
 img	{border:0;}
-
+a
+{ 
+	color: #436976; 
+	font-size:10pt;
+	text-decoration:none; 
+}
+a:hover
+{ 
+	color:#436976;
+	font-size:10pt;
+	text-decoration:underline;
+	font-weight:bold;
+}
 td
 {
-	color:#000000;
+	color: #436976; 
 	font-family:Arial,Sans-Serif;
+	font-size:10pt;
 }
 
 tr
 {
-	color:#000000;
+	color: #436976; 
 	font-family:Arial,Sans-Serif;
+	font-size:10pt;
 }
+h1{font-family:Arial,Sans-Serif;	color:#436976;}
+h2{font-family:Arial,Sans-Serif;	color:#436976;}
+h3{font-family:Arial,Sans-Serif;	color:#436976;}
+h4{font-family:Arial,Sans-Serif;	color:#436976;}
+h5{font-family:Arial,Sans-Serif;	color:#436976;}
+input{font-family:Arial,Sans-Serif;	color:#436976;}
+select{font-family:Arial,Sans-Serif;	color:#436976;}
+/* bouquet*/
+.bouquetlist
+{
+	border: 1px solid #6D96A9;
+	background-color: #F0FAFF;
+	border-collapse: collapse;
+	border-spacing: 1px;
+	color: #436976;
+	padding: 3px;
 
-tr.bouquet
+}
+tr.bouquetlist
 {
 	background-color:#88B5FF;
 }
-
-
-h1{font-family:Arial,Sans-Serif;	color:#008ADE;}
-h2{font-family:Arial,Sans-Serif;	color:#008ADE;}
-h3{font-family:Arial,Sans-Serif;	color:#008ADE;}
-h4{font-family:Arial,Sans-Serif;	color:#008ADE;}
-h5{font-family:Arial,Sans-Serif;	color:#008ADE;}
-
-.epg
-{
-	color:#000000;
-}
-
-a
-{ 
-	color:#000000;
-	font-size:10pt;
-	text-decoration:none; 
-}
-
 a:hover.blist
 { 
-	color:#000000;
+	color:#436976;
 	font-size:10pt;
 	text-decoration:underline;
 	font-weight:bold;
 }
-
-a:hover.clist
-{ 
-	color:#000000;
-	font-size:10pt;
-	text-decoration:underline;
-	font-weight:bold;
+/* ------*/
+/*channels*/
+.bouquetitemlist
+{
+	border: 1px solid #6D96A9;
+	background-color: #F0FAFF;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	padding: 0px;
+	color: #436976;
+	width: 100%;
 }
-
-a:hover.clistsmall
-{ 
-	color:#000000;
-	font-size:10pt;
-	text-decoration:underline;
-}
-
-a:hover.elist
-{ 
-	color:#000000;
-	font-size:10pt;
-	text-decoration:underline;
-	font-weight:bold;
-}
-
 .a
 {
-	background-color:#E0E0E0;
-	font-weight:bold;
+/*	border-bottom: 1px solid #6D96A9;*/
+
+	background-color: #F0FAFF;
 	font-family:Arial,Sans-Serif;
 	font-size:11pt;
+	border-spacing: 0px;
+	padding: 0px;
 	padding-left: 10px;
 	padding-right: 20px;
 }
 
 .aepg
 {
-	background-color:#E0E0E0;
+	background-color: #F0FAFF;
 	font-weight:normal;
 	font-size:10pt;
 	padding-left: 10px;
@@ -94,73 +96,131 @@ a:hover.elist
 
 .b
 {
-	background-color:#C0C0C0;
-	font-weight:bold;
+/*	border-bottom: 1px solid #6D96A9;*/
+	background-color: white;
 	font-size:11pt;
+	border-spacing: 0px;
+	padding: 0px;
 	padding-left: 10px;
 	padding-right: 20px;
 }
 
 .bepg
 {
-	background-color:#C0C0C0;
+	background-color: white;
 	font-weight:normal;
 	font-size:10pt;
 	padding-left: 10px;
 }
 
+a:hover.clist
+{ 
+	font-size:10pt;
+	text-decoration:underline;
+}
+
+a:hover.clistsmall
+{ 
+	font-size:10pt;
+	text-decoration:underline;
+}
+
 .c
 {
-	background-color:#88B5FF;
+	background-color:#dee7ec;
 	font-weight:bold;
 	font-size:11pt;
 	padding-left: 10px;
  	padding-right: 20px;
 }
-
 .cepg
 {
-	background-color:#88B5FF;
+	background-color:#dee7ec;
 	font-weight:normal;
 	font-size:10pt;
 	padding-left: 10px;
 }
 
-table.timer
+.cslider_table
 {
-        border-collapse: separated;
-	border-spacing: 0px 2px;    	
+	height: 10px; 
+	border: 1px solid #436976; 
+	width: 30px;
+	border-spacing: 0px;
+	padding: 0px;
+}
+.cslider_used
+{
+	background-color: #6D96A9;
+	height: 10px;
+}
+.cslider_free
+{
+	background-color: #EAEBFF;
+	height: 10px;
+}
+/*EPG*/
+.epg
+{
+	font-weight: bold;
+	color: #436976;
+	font-size: 14pt;
+	clear:both;
+
+}
+.epglist
+{
+	border: 1px solid #6D96A9;
+	background-color: #F0FAFF;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	padding: 0px;
+	color: #436976;
+}
+a:hover.elist
+{ 
+	font-size:10pt;
+	text-decoration:underline;
+	font-weight:bold;
+}
+
+/*Timer*/
+.timer
+{
+	border: 1px solid #6D96A9;
+	background-color: #F0FAFF;
+	border-collapse: collapse;
+	border-spacing: 0px;
+	padding: 0px;
+	margin: 0px;
+	color: #436976;
 }
 
 a.timer
 {
-	color:#000080;
 	text-decoration:underline;
 }
 
 .atimer
 {
-	background-color:#E0E0E0;
+	background-color: #F0FAFF;
 	font-weight:normal;
-	font-size:9pt;
 	padding-left: 5px;
 	padding-right: 5px;
 }
 
 .btimer
 {
-	background-color:#C0C0C0;
+	background-color:White;
 	font-weight:normal;
-	font-size:9pt;
 	padding-left: 5px;
 	padding-right: 5px;
 }
 
 .ctimer
 {
-	background-color:#88B5FF;
+	background-color:#dee7ec;
 	font-weight:normal;
-	font-size:9pt;
 	padding-left: 5px;
 	padding-right: 5px;
 }

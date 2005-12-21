@@ -11,7 +11,9 @@ body
 }
 
 img	{border:0;}
-
+button{font-family:Arial,Sans-Serif;	color:#436976;}
+input{font-family:Arial,Sans-Serif;	color:#436976;}
+select{font-family:Arial,Sans-Serif;	color:#436976;}
 a
 { 
 	color: #436976; 
@@ -82,36 +84,35 @@ tr
 
 /* secondary Navigation */
 .y_menu_sec {
-    background-color: transparent;
+	margin: 0px;
     padding: 0em 0em 0em 0em;
-    white-space: nowrap;
-    list-style: none;
+/*    white-space: nowrap;
     height: auto;
-    line-height: normal;
-    text-align: center;
-    width: 100px;
+    line-height: normal;*/
+}
+.y_menu_sec ul {
+	padding: 0em 0em 0em 0em;
+	list-style: none;
+	margin: 0px;
 }
 
 .y_menu_sec li {
-    background-color:  #F0FAFF;
-/*    background-color: transparent;*/
-    border-color: #6D96A9;
-    border-width: 1px; 
-    border-style: solid;
-    height: auto;
-    margin-bottom: 0.1em;
-    width: 100px;
-    color: #436976
+	border: 1px solid #6D96A9;
+	background-color:  #F0FAFF;
+	text-align: center;
+	height: auto;
+	margin-bottom: 1px;
+	width: 100px;
+	color: #436976
 }
 .y_menu_sec li.disabled {
-/*    background-color: transparent;*/
+    text-align: center;
     background-color: #EBEBEB;
     border-color: #808080;
     border-width: 1px; 
     border-style: solid;
     height: auto;
     margin-bottom: 0.1em;
-    width: 100px;
     color: #808080
 }
 .y_menu_sec li a {
@@ -176,7 +177,7 @@ tr
 
 .y_audio_bar
 {
-	background: #177298;
+	background: #6D96A9;
 }
 
 .y_head
@@ -265,12 +266,7 @@ tr
 {
 	font-size: 10pt;
 }
-input
-{
-	font-size: 10pt;
-	color: #436976;
 
-}
 .y_invisible_table
 {
 	border: 0px;

@@ -1,6 +1,6 @@
-version=1.4.0
-date=03.12.2005
-type=
-info=
+version=1.4.1
+date=21.12.2005
+type=Release
+info=X-Mas Release
 
 

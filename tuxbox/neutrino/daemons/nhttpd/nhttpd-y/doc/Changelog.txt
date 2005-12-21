@@ -1,5 +1,16 @@
 Severity	id		Headline							Build
 
+5-Enhancement	JG200000127	flash download: button for delete download-image in /tmp	R1.4.1
+5-Enhancement	JG200000339	nhttpd: new: file-action:<filename>;<action>;<content>		R1.4.1
+5-Enhancement	JG200000340	new: Neutrino-Settings: pictureviewer				R1.4.1
+5-Enhancement	JG200000341	new: Neutrino-Settings: Audioplayer				R1.4.1
+5-Enhancement	JG200000342	new: Neutrino-Settings: Movieplayer				R1.4.1
+5-Enhancement	JG200000343	new: Neutrino-Settings: Diverse					R1.4.1
+5-Enhancement	JG200000344	new: Neutrino-Settings: Boot Options				R1.4.1
+5-Enhancement	JG200000345	new: Neutrino-Settings: Parental				R1.4.1
+5-Enhancement	JG200000346	new: Neutrino-Settings: Recording				R1.4.1
+5-Enhancement	JG200000347	Timer: add recordingDir						R1.4.1
+
 3-Average	JG200000156	Flash: Error in mtd list if length!=5				R1.4.0
 5-Enhancement	JG200000326	Flash: New Dialogs						R1.4.0
 5-Enhancement	JG200000233	Tools: new: Wake on LAN for 3 MACs				R1.4.0
