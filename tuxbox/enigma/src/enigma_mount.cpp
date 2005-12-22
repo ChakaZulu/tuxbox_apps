@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.57 2005/12/22 08:38:39 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.58 2005/12/22 08:48:48 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -426,7 +426,7 @@ void eMountMgr::unmountAllMountPoints(void)
 {
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 	{
-		if (mp_it->mp.mounted == 1)
+		if (mp_it->mp.mounted == 1 && mp_it->mp.automount == 1)
 			mp_it->unmount();
 	}
 }
