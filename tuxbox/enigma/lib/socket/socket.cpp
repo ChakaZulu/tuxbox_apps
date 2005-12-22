@@ -339,7 +339,6 @@ int eUnixDomainSocket::connectToPath(eString path)
 	res=::connect(socketdesc, (const sockaddr*)&serv_addr_un, sizeof(serv_addr_un));
 	if ((res < 0) && (errno != EINPROGRESS) && (errno != EINTR))
 	{
-		eDebug("can't connect to: %s", path.c_str());
 		close();
 		error_(errno);
 		return(-3);
