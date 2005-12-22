@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.72 2005/11/23 23:06:10 rasc Exp $
+$Id: dvb_str.c,v 1.73 2005/12/22 16:21:51 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.72 2005/11/23 23:06:10 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.73  2005/12/22 16:21:51  rasc
+Update and new descriptors EN 300 468 v1.7.1
+
 Revision 1.72  2005/11/23 23:06:10  rasc
 ISO13818-2  MPEG2 sequence header
 
@@ -286,7 +289,6 @@ dvbsnoop v0.7  -- Commit to CVS
 */
 
 char *dvbstrPID_assignment (u_int id)
-
 {
   STR_TABLE  TableIDs[] = {
      {  0x0000, 0x0000,  "ISO 13818-1 Program Association Table (PAT)" },
@@ -339,6 +341,7 @@ char *dvbstrTableID (u_int id)
 	// -- updated 2004-07-26  from ITU-T Rec H.222.0 | ISO/IEC 13818-1:2000/FDAM 1
 	// -- updated 2004-08-12  from ITU-T Rec H.222.0 AMD2
 	// ATSC Table IDs could be included...
+
      {  0x00, 0x00,  "Program Association Table (PAT)" },
      {  0x01, 0x01,  "Conditional Access Table (CAT)" },
      {  0x02, 0x02,  "Program Map Table (PMT)" },
@@ -523,7 +526,7 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x62, 0x62,  "frequency_list_descriptor" },
      {  0x63, 0x63,  "partial_transport_stream_descriptor" },
      {  0x64, 0x64,  "data_broadcast_descriptor" },
-     {  0x65, 0x65,  "CA_system_descriptor" },
+     {  0x65, 0x65,  "scrambling_descriptor" },
      {  0x66, 0x66,  "data_broadcast_id_descriptor" },
      {  0x67, 0x67,  "transport_stream_descriptor" },
      {  0x68, 0x68,  "DSNG_descriptor" },
@@ -544,7 +547,11 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x77, 0x77,  "time_slice_fec_identifier_descriptor" }, 	// EN 300 468 v1.6.1
      {  0x78, 0x78,  "ECM_repetition_rate_descriptor" }, 	// EN 300 468 v1.6.1
      {  0x79, 0x79,  "S2_satellite_delivery_system_descriptor" }, 	// EN 300 468 v1.7.1
-     {  0x7A, 0x7F,  "reserved_descriptor" },
+     {  0x7A, 0x7A,  "enhanced_AC-3_descriptor" },	 	// EN 300 468 v1.7.1
+     {  0x7B, 0x7B,  "DTS_descriptor" },	 		// EN 300 468 v1.7.1
+     {  0x7C, 0x7C,  "AAC_descriptor" },	 		// EN 300 468 v1.7.1
+     {  0x7D, 0x7E,  "reserved_descriptor" },	 		// EN 300 468 v1.7.1
+     {  0x7F, 0x7F,  "extension_descriptor" },	 		// EN 300 468 v1.7.1
      {  0x80, 0xAF,  "User defined/ATSC reserved" },		/* ETR 211e02 */
      {  0xB0, 0xFE,  "User defined" },
      {  0xFF, 0xFF,  "Forbidden" },
@@ -611,7 +618,7 @@ char *dvbstrPolarisation_FLAG (u_int flag)
 char *dvbstrModulationSAT_FLAG (u_int flag)
 {
   STR_TABLE  Table[] = {
-     {  0x00, 0x00,  "not defined" },
+     {  0x00, 0x00,  "Auto" },
      {  0x01, 0x01,  "QPSK" },
      {  0x02, 0x02,  "8PSK" },		// EN 300 468 1.7.1
      {  0x03, 0x03,  "16-QAM" },	// EN 300 468 1.7.1
@@ -625,9 +632,9 @@ char *dvbstrModulationSAT_FLAG (u_int flag)
 char *dvbstrRollOffSAT_FLAG (u_int flag)
 {
   STR_TABLE  Table[] = {		// EN 300 468 1.7.1
-     {  0x00, 0x00,  "Alpha 0,35" },
-     {  0x01, 0x01,  "Alpha 0,25" },
-     {  0x02, 0x02,  "Alpha 0,20" },
+     {  0x00, 0x00,  "Alpha 0.35" },
+     {  0x01, 0x01,  "Alpha 0.25" },
+     {  0x02, 0x02,  "Alpha 0.20" },
      {  0x03, 0x1F,  "reserved for future use" },
      {  0,0, NULL }
   };
@@ -763,10 +770,10 @@ char *dvbstrOrigin_TYPE (u_int flag)
 
 /*
  -- Service Link Descriptor
+ -- Updated: EN 300 468 1.7.1
 */ 
 
 char *dvbstrService_TYPE (u_int flag)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "reserved" },
@@ -775,18 +782,24 @@ char *dvbstrService_TYPE (u_int flag)
      {  0x03, 0x03,  "Teletext service" },
      {  0x04, 0x04,  "NVOD reference service" },
      {  0x05, 0x05,  "NVOD time-shifted service" },
-     {  0x06, 0x06,  "mosaic service" },
-     {  0x07, 0x07,  "PAL coded signal" },
-     {  0x08, 0x08,  "SECAM coded signal" },
-     {  0x09, 0x09,  "D/D2-MAC" },
-     {  0x0A, 0x0A,  "FM-Radio" },
-     {  0x0B, 0x0B,  "NTSC coded signal" },
+     	// -- 0x06 - 0x0B has been changed in EN 300 468 v1.7.1
+     {  0x06, 0x09,  "reserved" },
+     {  0x0A, 0x0A,  "advanced codec digital radio sound service" },
+     {  0x0B, 0x0B,  "advanced codec mosaic service" },
      {  0x0C, 0x0C,  "data broadcast service" },
      {  0x0D, 0x0D,  "reserved for Common Interface Usage" },
      {  0x0E, 0x0E,  "RCS Map" },
      {  0x0F, 0x0F,  "RCS FLS" },
      {  0x10, 0x10,  "DVB  MHP service" },
-     {  0x11, 0x7F,  "reserved" },
+     {  0x11, 0x11,  "MPEG-2 HD digital television service" },
+     {  0x12, 0x15,  "reserved" },
+     {  0x16, 0x16,  "advanced codec SD digital television service" },
+     {  0x17, 0x17,  "advanced codec SD NVOD time-shifted service" },
+     {  0x18, 0x18,  "advanced codec SD NVOD reference service" },
+     {  0x19, 0x19,  "advanced codec HD digital television service" },
+     {  0x1A, 0x1A,  "advanced codec HD NVOD time-shifted service" },
+     {  0x1B, 0x1B,  "advanced codec HD NVOD reference service" },
+     {  0x1C, 0x7F,  "reserved" },
      {  0x80, 0xFE,  "User defined" },
      {  0xFF, 0xFF,  "reserved" },
      {  0,0, NULL }
@@ -1563,6 +1576,7 @@ char *dvbstrDataService_ID (u_int i)
 /*
   -- Stream Content & Component Type
   -- ETSI EN 300 468   6.2.7
+  -- updated: EN 300 468 v1.7.1
 */
 
 char *dvbstrStreamContent_Component_TYPE (u_int i)
@@ -1571,47 +1585,47 @@ char *dvbstrStreamContent_Component_TYPE (u_int i)
   STR_TABLE  Table[] = {
      // streamComponentID << 8    | ComponentID
      {  0x0000, 0x00FF,  "reserved" },
+
      {  0x0100, 0x0100,  "reserved" },
+     {  0x0101, 0x0101,  "MPEG-2 video, 4:3 aspect ratio, 25 Hz" },
+     {  0x0102, 0x0102,  "MPEG-2 video, 16:9 aspect ratio with pan vectors, 25 Hz" },
+     {  0x0103, 0x0103,  "MPEG-2 video, 16:9 aspect ratio without pan vectors, 25 Hz" },
+     {  0x0104, 0x0104,  "MPEG-2 video, >16:9 aspect ratio, 25 Hz" },
+     {  0x0105, 0x0105,  "MPEG-2 video, 4:3 aspect ratio, 30 Hz" },
+     {  0x0106, 0x0106,  "MPEG-2 video, 16:9 aspect ratio with pan vectors, 30 Hz" },
+     {  0x0107, 0x0107,  "MPEG-2 video, 16:9 aspect ratio without pan vectors, 30 Hz" },
+     {  0x0108, 0x0108,  "MPEG-2 video, >16:9 aspect ratio, 30 Hz" },
 
-     {  0x0101, 0x0101,  "video, 4:3  aspect ratio, 25 Hz" },
-     {  0x0102, 0x0102,  "video, 16:9 aspect ratio with pan vectors, 25 Hz" },
-     {  0x0103, 0x0103,  "video, 16:9 aspect ratio without pan vectors, 25 Hz" },
-     {  0x0104, 0x0104,  "video, > 16:9 aspect ratio, 25 Hz" },
-     {  0x0105, 0x0105,  "video, 4:3  aspect ratio, 30 Hz" },
-     {  0x0106, 0x0106,  "video, 16:9 aspect ratio with pan vectors, 30 Hz" },
-     {  0x0107, 0x0107,  "video, 16:9 aspect ratio without pan vectors, 30 Hz" },
-     {  0x0108, 0x0108,  "video, > 16:9 aspect ratio, 30 Hz" },
-
-     {  0x0109, 0x0109,  "high definition video, 4:3  aspect ratio, 25 Hz" },
-     {  0x010A, 0x010A,  "high definition video, 16:9 aspect ratio with pan vectors, 25 Hz" },
-     {  0x010B, 0x010B,  "high definition video, 16:9 aspect ratio without pan vectors, 25 Hz" },
-     {  0x010C, 0x010C,  "high definition video, > 16:9 aspect ratio, 25 Hz" },
-     {  0x010D, 0x010D,  "high definition video, 4:3  aspect ratio, 30 Hz" },
-     {  0x010E, 0x010E,  "high definition video, 16:9 aspect ratio with pan vectors, 30 Hz" },
-     {  0x010F, 0x010F,  "high definition video, 16:9 aspect ratio without pan vectors, 30 Hz" },
-     {  0x0110, 0x0110,  "high definition video, > 16:9 aspect ratio, 30 Hz" },
+     {  0x0109, 0x0109,  "MPEG-2 high definition video, 4:3 aspect ratio, 25 Hz" },
+     {  0x010A, 0x010A,  "MPEG-2 high definition video, 16:9 aspect ratio with pan vectors, 25 Hz" },
+     {  0x010B, 0x010B,  "MPEG-2 high definition video, 16:9 aspect ratio without pan vectors, 25 Hz" },
+     {  0x010C, 0x010C,  "MPEG-2 high definition video, >16:9 aspect ratio, 25 Hz" },
+     {  0x010D, 0x010D,  "MPEG-2 high definition video, 4:3 aspect ratio, 30 Hz" },
+     {  0x010E, 0x010E,  "MPEG-2 high definition video, 16:9 aspect ratio with pan vectors, 30 Hz" },
+     {  0x010F, 0x010F,  "MPEG-2 high definition video, 16:9 aspect ratio without pan vectors, 30 Hz" },
+     {  0x0110, 0x0110,  "MPEG-2 high definition video, >16:9 aspect ratio, 30 Hz" },
 
      {  0x0111, 0x01AF,  "reserved" },
      {  0x01B0, 0x01FE,  "User defined" },
      {  0x01FF, 0x01FF,  "reserved" },
-     {  0x0200, 0x0200,  "reserved" },
 
-     {  0x0201, 0x0201,  "audio, single mono channel" },
-     {  0x0202, 0x0202,  "audio, dual mono channel" },
-     {  0x0203, 0x0203,  "audio, stereo (2 channels)" },
-     {  0x0204, 0x0204,  "audio, multilingual, multi-channel)" },
-     {  0x0205, 0x0205,  "audio, surround sound" },
+     {  0x0200, 0x0200,  "reserved" },
+     {  0x0201, 0x0201,  "MPEG-1 Layer 2 audio, single mono channel" },
+     {  0x0202, 0x0202,  "MPEG-1 Layer 2 audio, dual mono channel" },
+     {  0x0203, 0x0203,  "MPEG-1 Layer 2 audio, stereo (2 channels)" },
+     {  0x0204, 0x0204,  "MPEG-1 Layer 2 audio, multilingual, multi-channel)" },
+     {  0x0205, 0x0205,  "MPEG-1 Layer 2 audio, surround sound" },
      {  0x0206, 0x023F,  "reserved" },
-     {  0x0240, 0x0240,  "audio description for visually impaired" },
-     {  0x0241, 0x0241,  "audio for the hard of hearing" },
+     {  0x0240, 0x0240,  "MPEG-1 Layer 2 audio description for visually impaired" },
+     {  0x0241, 0x0241,  "MPEG-1 Layer 2 audio for the hard of hearing" },
 
      {  0x0242, 0x02AF,  "reserved" },
      {  0x02B0, 0x02FE,  "User defined" },
      {  0x02FF, 0x02FF,  "reserved" },
-     {  0x0300, 0x0300,  "reserved" },
 
+     {  0x0300, 0x0300,  "reserved" },
      {  0x0301, 0x0301,  "EBU Teletext subtitles" },
-     {  0x0302, 0x0302,  "associated Teletext" },
+     {  0x0302, 0x0302,  "associated EBU Teletext" },
      {  0x0303, 0x0303,  "VBI data" },
      {  0x0304, 0x030F,  "reserved" },
 
@@ -1624,15 +1638,54 @@ char *dvbstrStreamContent_Component_TYPE (u_int i)
      {  0x0321, 0x0321,  "DVB subtitles (for the hard hearing) for display 4:3 aspect ratio monitor" },
      {  0x0322, 0x0322,  "DVB subtitles (for the hard hearing) for display 16:9 aspect ratio monitor" },
      {  0x0323, 0x0323,  "DVB subtitles (for the hard hearing) for display 2.21:1 aspect ratio monitor" },
-
      {  0x0324, 0x03AF,  "reserved" },
      {  0x03B0, 0x03FE,  "User defined" },
      {  0x03FF, 0x03FF,  "reserved" },
-     {  0x0400, 0x0400,  "reserved" },
-     {  0x0401, 0x047F,  "AC3 modes  (to be defined more specific $$$)" },
 
-     {  0x0480, 0x04FF,  "reserved" },
-     {  0x0500, 0x0BFF,  "reserved" },
+     {  0x0400, 0x047F,  "reserved for AC-3 audio modes" },	// $$$ TODO
+     {  0x0480, 0x04FF,  "reserved for enhanced AC-3 audio modes" },	// $$$ TODO
+
+     {  0x0500, 0x0500,  "reserved" },
+     {  0x0501, 0x0501,  "H.264/AVC standard definition video, 4:3 aspect ratio, 25 Hz" },
+     {  0x0502, 0x0502,  "reserved" },
+     {  0x0503, 0x0503,  "H.264/AVC standard definition video, 16:9 aspect ratio, 25 Hz" },
+     {  0x0504, 0x0504,  "H.264/AVC standard definition video, >16:9 aspect ratio, 25 Hz" },
+     {  0x0505, 0x0505,  "H.264/AVC standard definition video, 4:3 aspect ratio, 30 Hz" },
+     {  0x0506, 0x0506,  "reserved" },
+     {  0x0507, 0x0507,  "H.264/AVC standard definition video, 16:9 aspect ratio, 30 Hz" },
+     {  0x0508, 0x0508,  "H.264/AVC standard definition video, >16:9 aspect ratio, 30 Hz" },
+     {  0x0509, 0x050A,  "reserved" },
+     {  0x050B, 0x050B,  "H.264/AVC high definition video, 16:9 aspect ratio, 25 Hz" },
+     {  0x050C, 0x050C,  "H.264/AVC high definition video, >16:9 aspect ratio, 25 Hz" },
+     {  0x050D, 0x050E,  "reserved" },
+     {  0x050F, 0x050F,  "H.264/AVC high definition video, 16:9 aspect ratio, 30 Hz" },
+     {  0x0510, 0x0510,  "H.264/AVC high definition video, >16:9 aspect ratio, 30 Hz" },
+     {  0x0511, 0x05AF,  "reserved" },
+     {  0x05B0, 0x05FE,  "user defined" },
+     {  0x05FF, 0x05FF,  "reserved" },
+
+     {  0x0600, 0x0600,  "reserved" },
+     {  0x0601, 0x0601,  "HE-AAC audio, single mono channel" },
+     {  0x0602, 0x0602,  "reserved" },
+     {  0x0603, 0x0603,  "HE-AAC audio, stereo" },
+     {  0x0604, 0x0604,  "reserved" },
+     {  0x0605, 0x0605,  "HE-AAC audio, surround sound" },
+     {  0x0606, 0x063F,  "reserved" },
+     {  0x0640, 0x0640,  "HE-AAC audio description for the visually impaired" },
+     {  0x0641, 0x0641,  "HE-AAC audio for the hard of hearing" },
+     {  0x0642, 0x0642,  "HE-AAC audio receiver-mixed supplementary audio" },
+     {  0x0643, 0x0643,  "HE-AAC v2 audio, stereo" },
+     {  0x0644, 0x0644,  "HE-AAC v2 audio description for the visually impaired" },
+     {  0x0645, 0x0645,  "HE-AAC v2 audio for the hard of hearing" },
+     {  0x0646, 0x0646,  "HE-AAC v2 audio receiver-mixed supplementary audio" },
+     {  0x0647, 0x06AF,  "reserved" },
+     {  0x06B0, 0x65FE,  "user defined" },
+     {  0x06FF, 0x65FF,  "reserved" },
+
+     {  0x0700, 0x77F,  "reserved for DTS audio modes" },	// $$$ TODO
+     {  0x0780, 0x7FF,  "reserved" },
+
+     {  0x0800, 0x0BFF,  "reserved" },
      {  0x0C00, 0x0FFF,  "User defined" },
 
      {  0,0, NULL }
@@ -1871,7 +1924,6 @@ char *dvbstrContentNibble_TYPE(u_int i)
 */
 
 char *dvbstrParentalRating_TYPE (u_int i)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "undefined" },
@@ -1906,7 +1958,6 @@ char *dvbstrParentalRating_TYPE (u_int i)
 */
 
 char *dvbstrDelivSysCoding_TYPE (u_int i)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "undefined" },
@@ -1931,7 +1982,6 @@ char *dvbstrDelivSysCoding_TYPE (u_int i)
 */
 
 char *dvbstrShortSmoothingBufSize_TYPE (u_int i)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "reserved" },
@@ -1948,7 +1998,6 @@ char *dvbstrShortSmoothingBufSize_TYPE (u_int i)
 
 
 char *dvbstrShortSmoothingBufLeakRate_TYPE (u_int i)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "reserved" },
@@ -2026,17 +2075,146 @@ char *dvbstrShortSmoothingBufLeakRate_TYPE (u_int i)
 
 /*
   -- AC3 Component Type
-  -- ETSI EN 300 468   ANNEX D
+  -- ETSI EN 300 468, TS 102 114
 */
 
-char *dvbstrAC3Component_TYPE (u_int i)
-
+char *dvbstrDVB_AC3_ComponentType (u_int i)
 {
-  char *s = "TODO:  $$$  - AC3 Component type";	// $$$ TODO
+  char *s = "TODO:  $$$ - AC3 Component type";	// $$$ TODO
 
 
   return s;
 }
+
+
+/*
+  -- AUDIO DTS Sample Rate Code
+  -- ETSI EN 300 468, TS 102 114
+*/
+
+char *dvbstrDVB_DTS_Audio_SampleRateCode (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "invalid" },
+     {  0x01, 0x01,  "8 kHz" },
+     {  0x02, 0x02,  "16 kHz" },
+     {  0x03, 0x03,  "32 kHz" },
+     {  0x04, 0x04,  "64 kHz" },
+     {  0x05, 0x05,  "128 kHz" },
+     {  0x06, 0x06,  "11.025 kHz" },
+     {  0x07, 0x07,  "22.05 kHz" },
+     {  0x08, 0x08,  "44.1 kHz" },
+     {  0x09, 0x09,  "88.02 kHz" },
+     {  0x0A, 0x0A,  "176.4 kHz" },
+     {  0x0B, 0x0B,  "18 kHz" },
+     {  0x0C, 0x0C,  "24 kHz" },
+     {  0x0D, 0x0D,  "48 kHz" },
+     {  0x0E, 0x0E,  "96 kHz" },
+     {  0x0F, 0x0F,  "192 kHz" },
+     {  0,0, NULL }
+  };
+
+
+  return findTableID (Table, i);
+}
+
+
+
+
+/*
+  -- AUDIO DTS Bit Rate 
+  -- ETSI EN 300 468, TS 102 114
+*/
+
+char *dvbstrDVB_DTS_Audio_BitRate (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x05, 0x05,  "128 kbps" },
+     {  0x06, 0x06,  "192 kbps" },
+     {  0x07, 0x07,  "224 kbps" },
+     {  0x08, 0x08,  "256 kbps" },
+     {  0x09, 0x09,  "320 kbps" },
+     {  0x0A, 0x0A,  "384 kbps" },
+     {  0x0B, 0x0B,  "448 kbps" },
+     {  0x0C, 0x0C,  "512 kbps" },
+     {  0x0D, 0x0D,  "576 kbps" },
+     {  0x0E, 0x0E,  "640 kbps" },
+     {  0x0F, 0x0F,  "768 kbps" },
+     {  0x10, 0x10,  "960 kbps" },
+     {  0x11, 0x11,  "1024 kbps" },
+     {  0x12, 0x12,  "1152 kbps" },
+     {  0x13, 0x13,  "1280 kbps" },
+     {  0x14, 0x14,  "1344 kbps" },
+     {  0x15, 0x15,  "1408 kbps" },
+     {  0x16, 0x16,  "1411.2 kbps" },
+     {  0x17, 0x17,  "1472 kbps" },
+     {  0x18, 0x18,  "1536 kbps" },
+     {  0x19, 0x19,  "1920 kbps" },
+     {  0x1A, 0x1A,  "2048 kbps" },
+     {  0x1B, 0x1B,  "3072 kbps" },
+     {  0x1C, 0x1C,  "3840 kbps" },
+     {  0x1D, 0x1D,  "open" },
+     {  0x1E, 0x1E,  "variable" },
+     {  0x1F, 0x1F,  "lossless" },
+     {  0,0, NULL }
+  };
+
+
+  i &= 0x1F;	// ignore bit 6  (En 300 468 v1.7.1 Table G.3)
+  return findTableID (Table, i);
+}
+
+
+
+
+
+/*
+  -- AUDIO DTS Surround Mode
+  -- ETSI EN 300 468, TS 102 114
+*/
+
+char *dvbstrDVB_DTS_Audio_SurroundMode (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "1 / mono" },
+     {  0x02, 0x02,  "2 / L+R (stereo)" },
+     {  0x03, 0x03,  "2 / (L+R)+(L-R)" },
+     {  0x04, 0x04,  "2 / LT+RT (left and right total)" },
+     {  0x05, 0x05,  "3 / L+R+C" },
+     {  0x06, 0x06,  "3 / L+R+S" },
+     {  0x07, 0x07,  "4 / C+L+R+S" },
+     {  0x08, 0x08,  "4 / L+R+SL+SR" },
+     {  0x09, 0x09,  "5 / C+L+R+SL+SR" },
+     {  0x0A, 0x0F,  "user defined" },
+     {  0x10, 0x1F,  "user defined" },
+     {  0,0, NULL }
+  };
+
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- AUDIO DTS Extended Surround Mode
+  -- ETSI EN 300 468, TS 102 114
+*/
+
+char *dvbstrDVB_DTS_Audio_ExtendedSurroundFlag (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "no extended surround" },
+     {  0x01, 0x01,  "matrixed extended surround" },
+     {  0x02, 0x02,  "discrete extended surround" },
+     {  0x03, 0x03,  "undefined" },
+     {  0,0, NULL }
+  };
+
+
+  return findTableID (Table, i);
+}
+
+
 
 
 
@@ -2046,11 +2224,9 @@ char *dvbstrAC3Component_TYPE (u_int i)
 */
 
 char *dvbstrAncillaryData_ID (u_int i)
-
 {
 
- // $$$ coded in descriptor
-
+  // $$$ coded in descriptor
 
   return NULL;
 }
@@ -2063,7 +2239,6 @@ char *dvbstrAncillaryData_ID (u_int i)
 */
 
 char *dvbstrAnnouncement_TYPE (u_int i)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "Emergency alarm" },

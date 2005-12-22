@@ -1,3 +1,4 @@
+ - New: Updates, new descriptors due to EN 300 468 v1.7.1
  - New: PS MPEG2 sequence header
  - New: H.222.1 AMD 4+5 + Corr. stuff
  - New: PS MPEG2 UserData + GOP, DVB-S2 fix

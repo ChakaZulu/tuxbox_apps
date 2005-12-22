@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.47 2005/11/23 23:06:08 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.48 2005/12/22 16:21:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.47 2005/11/23 23:06:08 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.48  2005/12/22 16:21:50  rasc
+Update and new descriptors EN 300 468 v1.7.1
+
 Revision 1.47  2005/11/23 23:06:08  rasc
 ISO13818-2  MPEG2 sequence header
 
@@ -282,7 +285,7 @@ int  descriptorDVB  (u_char *b)
      case 0x62:  descriptorDVB_FrequencyList (b);  break;
      case 0x63:  descriptorDVB_PartialTransportStream(b);  break;
      case 0x64:  descriptorDVB_DataBroadcast(b);  break;
-     case 0x65:  descriptorDVB_CASystem(b);  break;    /* $$$ reserved now ?? */
+     case 0x65:  descriptorDVB_Scrambling(b);  break;
      case 0x66:  descriptorDVB_DataBroadcastID(b);  break;
      case 0x67:  descriptorDVB_TransportStream(b);  break;
      case 0x68:  descriptorDVB_DSNG(b);  break;
@@ -304,7 +307,14 @@ int  descriptorDVB  (u_char *b)
 		 // EN 301 192 v1.4.1  MPE_FEC
      case 0x77:  descriptorDVB_TimesliceFecIdentifier(b);  break;
      case 0x78:  descriptorDVB_ECM_RepetitionRate(b);  break;
+		 // EN 300 468 v1.7.1
      case 0x79:  descriptorDVB_S2SatelliteDeliverySystem(b);  break;
+     case 0x7A:  descriptorDVB_Enhanced_AC3(b);  break;
+     case 0x7B:  descriptorDVB_DTS_Audio(b);  break;
+     case 0x7C:  descriptorDVB_AAC(b);  break;
+     case 0x7D:  descriptor_any(b);  break;	// $$$ TODO: currently reserved
+     case 0x7E:  descriptor_any(b);  break;	// $$$ TODO: currently reserved
+     case 0x7F:  descriptorDVB_Extension(b);  break;
 
      default: 
 	if (b[0] < 0x80) {
@@ -369,7 +379,6 @@ void descriptorDVB_ServList (u_char *b)
  len 		= b[1];
 
  b   += 2;
- len -= 2;
 
  indent (+1);
  while (len > 0) {
@@ -419,84 +428,71 @@ void descriptorDVB_Stuffing (u_char *b)
   EN 300 468
   -- adapted v1.6.1
   -- adapted v1.7.1  
-  // $$$ TODO: to be verified  with final v1.7.1
 */
 
 void descriptorDVB_SatDelivSys (u_char *b)
 {
-
- typedef struct  _descSDS {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
     u_long     frequency;
     u_int      orbital_position;
     u_int      west_east_flag;
     u_int      polarisation;
     // u_int      modulation;   	// v1.6.1
     u_int      roll_off;		// v1.7.1 replaces mod.
-    u_int      kind;			// v1.7.1 replaces mod.
-    u_int      narrow_modulation;	// v1.7.1 replaces mod.
+    u_int      modulation_system;	// v1.7.1 replaces mod.
+    u_int      modulation_type;		// v1.7.1 replaces mod.
     u_long     symbol_rate;
     u_int      FEC_inner;
-
- } descSDS;
-
- descSDS  d;
- char     *s;
+    char       *s;
 
 
 
 
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
+  // tag 	= b[0];
+  // len	= b[1];
 
 
- d.frequency			 = getBits (b, 0, 16, 32);
- d.orbital_position		 = getBits (b, 0, 48, 16);
- d.west_east_flag		 = getBits (b, 0, 64, 1);
- d.polarisation			 = getBits (b, 0, 65, 2);
- // d.modulation			 = getBits (b, 0, 67, 5);
- d.roll_off			 = getBits (b, 0, 67, 2);
- d.kind				 = getBits (b, 0, 69, 1);
- d.narrow_modulation		 = getBits (b, 0, 70, 2);
- d.symbol_rate			 = getBits (b, 0, 72, 28);
- d.FEC_inner			 = getBits (b, 0, 100, 4);
+  frequency			 = getBits (b, 0, 16, 32);
+  orbital_position		 = getBits (b, 0, 48, 16);
+  west_east_flag		 = getBits (b, 0, 64, 1);
+  polarisation			 = getBits (b, 0, 65, 2);
+  roll_off			 = getBits (b, 0, 67, 2);
+  modulation_system		 = getBits (b, 0, 69, 1);
+  modulation_type		 = getBits (b, 0, 70, 2);
+  symbol_rate			 = getBits (b, 0, 72, 28);
+  FEC_inner			 = getBits (b, 0, 100, 4);
 
 
- out_nl (4,"Frequency: %lu (= %3lx.%05lx GHz)",d.frequency,
-	 d.frequency >> 20, d.frequency & 0x000FFFFF );
- out_nl (4,"Orbital_position: %u (= %3x.%01x)",d.orbital_position,
-	 d.orbital_position >> 4, d.orbital_position & 0x000F);
+  out_nl (4,"Frequency: %lu (= %3lx.%05lx GHz)",frequency,
+	 frequency >> 20, frequency & 0x000FFFFF );
+  out_nl (4,"Orbital_position: %u (= %3x.%01x)",orbital_position,
+	 orbital_position >> 4, orbital_position & 0x000F);
 
- out_S2B_NL (4,"West_East_flag: ",d.west_east_flag,
-	 dvbstrWEST_EAST_FLAG(d.west_east_flag));
+  out_S2B_NL (4,"West_East_flag: ",west_east_flag,
+	 dvbstrWEST_EAST_FLAG(west_east_flag));
 
- out_S2B_NL (4,"Polarisation: ",d.polarisation,
-	 dvbstrPolarisation_FLAG(d.polarisation));
-
-// -- replaced/enhanced by ETSI EN 300 468 v1.7.1
-// out_S2B_NL (4,"Modulation (Sat): ",d.modulation,
-//	 dvbstrModulationSAT_FLAG(d.modulation));
+  out_S2B_NL (4,"Polarisation: ",polarisation,
+	 dvbstrPolarisation_FLAG(polarisation));
 
 
- s = (d.kind == 0) ? "DVB-S" : "DVB-S2";
- out_S2B_NL (4,"Kind: ", d.kind, s);
- if (d.kind) {
-	out_S2B_NL (4,"Roll Off Faktor: ", d.roll_off,
-		dvbstrRollOffSAT_FLAG(d.roll_off));
- }
+  s = (modulation_system == 0) ? "DVB-S" : "DVB-S2";
+  out_S2B_NL (4,"Kind: ", modulation_system, s);
+  if (modulation_system) {
+	out_S2B_NL (4,"Roll Off Faktor: ", roll_off,
+		dvbstrRollOffSAT_FLAG(roll_off));
+  } else {
+ 	out_SB_NL (4,"fixed ('00'): ",roll_off);
+  }
 
 
- out_S2B_NL (4,"Narrow_Modulation (Sat): ",d.narrow_modulation,
-	dvbstrModulationSAT_FLAG(d.narrow_modulation));
+  out_S2B_NL (4,"Modulation_type: ",modulation_type,
+	dvbstrModulationSAT_FLAG(modulation_type));
 
 
- out_nl (4,"Symbol_rate: %u (= %3x.%04x)",d.symbol_rate,
-	 d.symbol_rate >> 16, d.symbol_rate & 0x0000FFFF );
+  out_nl (4,"Symbol_rate: %u (= %3x.%04x)",symbol_rate,
+	 symbol_rate >> 16, symbol_rate & 0x0000FFFF );
 
- out_S2B_NL (4,"FEC_inner: ",d.FEC_inner,
-	 dvbstrFECinner_SCHEME (d.FEC_inner));
+  out_S2B_NL (4,"FEC_inner: ",FEC_inner,
+	 dvbstrFECinner_SCHEME (FEC_inner));
 
 }
 
@@ -1006,23 +1002,17 @@ void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
 void sub_descriptorDVB_Linkage0x0C (u_char *b, int len)
 {
 
- typedef struct  _descLinkage0x0C {
-    u_int      table_id;		
-    // conditional
-    u_int      bouquet_id;
-
- } descLinkage0x0C;
+  u_int      table_id;		
+  u_int      bouquet_id;
 
 
 
- descLinkage0x0C  d;
+ table_id				= getBits (b, 0,  0, 8);
+ out_S2W_NL  (4,"Table_id: ",table_id, dsmccStrLinkage0CTable_TYPE(table_id));
 
- d.table_id				= getBits (b, 0,  0, 8);
- out_S2W_NL  (4,"Table_id: ",d.table_id, dsmccStrLinkage0CTable_TYPE(d.table_id));
-
- if (d.table_id == 2) {
-	d.bouquet_id			= getBits (b, 0,  8, 16);
- 	out_S2W_NL  (4,"Bouquet_id: ",d.bouquet_id, dvbstrBouquetTable_ID (d.bouquet_id));
+ if (table_id == 2) {
+	bouquet_id			= getBits (b, 0,  8, 16);
+ 	out_S2W_NL  (4,"Bouquet_id: ",bouquet_id, dvbstrBouquetTable_ID (bouquet_id));
  }
 
 }
@@ -2309,35 +2299,13 @@ void descriptorDVB_ServiceMove  (u_char *b)
 
 {
 
- typedef struct  _descServMove {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
+  // tag	= b[0];
+  // len	= b[1];
 
-    u_int      new_original_network_id;
-    u_int      new_transport_stream_id;
-    u_int      new_service_id;
-
- } descServMove;
-
-
- descServMove    d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.new_original_network_id	 = getBits (b, 0, 16, 16);
- d.new_transport_stream_id	 = getBits (b, 0, 32, 16);
- d.new_service_id		 = getBits (b, 0, 48, 16);
-
-
-
-  out_S2W_NL (4,"New_original_network_ID: ",d.new_original_network_id,
-	dvbstrOriginalNetwork_ID(d.new_original_network_id));
-  out_SW_NL  (4,"New_transport_stream_ID: ",d.new_transport_stream_id);
-  out_SW_NL (4,"Service_ID: ",d.new_service_id);
-
+  outBit_S2x_NL (4,"New_original_network_ID: ",		b, 16, 16,
+	 	(char *(*)(u_long)) dvbstrOriginalNetwork_ID );
+  outBit_Sx_NL  (4,"New_transport_stream_ID: ",		b, 32, 16);
+  outBit_Sx_NL  (4,"Service_ID: ",			b, 48, 16);
 }
 
 
@@ -2356,34 +2324,19 @@ void descriptorDVB_ShortSmoothingBuffer  (u_char *b)
 
 {
 
- typedef struct  _descSSBuf {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_int      sb_size;
-    u_int      sb_leak_rate;
-
- } descSSBuf;
+  u_int   len;
 
 
- descSSBuf  d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.sb_size			 = getBits (b, 0, 16, 2);
- d.sb_leak_rate			 = getBits (b, 0, 16, 6);
+  // tag 	= b[0];
+  len 		= b[1];
 
  
- out_S2B_NL (4,"sb_size: ", d.sb_size,
-	dvbstrShortSmoothingBufSize_TYPE (d.sb_size) );
- out_S2B_NL (4,"sb_leak_rate: ", d.sb_leak_rate,
-	dvbstrShortSmoothingBufLeakRate_TYPE (d.sb_leak_rate) );
+  outBit_S2x_NL (4,"sb_size: ", 		b, 16, 2,
+	 	(char *(*)(u_long)) dvbstrShortSmoothingBufSize_TYPE );
+  outBit_S2x_NL (4,"sb_leak_rate: ", 	b, 18, 6,
+	 	(char *(*)(u_long)) dvbstrShortSmoothingBufLeakRate_TYPE );
 
- print_databytes (6,"reserved:", b+3,d.descriptor_length-1);
-
+  print_databytes (6,"reserved:", b+3, len-1);
 }
 
 
@@ -2806,17 +2759,19 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
 
 /*
-  0x65  CA System descriptor 
-  ETSI EN 300 468     6.2.x
+  0x65  Scrambling descriptor 
+  ETSI EN 300 468     
+  -- updated 1.7.1 (maybe prior) 
 */
 
-void descriptorDVB_CASystem (u_char *b)
+void descriptorDVB_Scrambling (u_char *b)
 
 {
 
+  // tag = b[0];
+  // len = b[1];
 
-  descriptor_any (b);
-
+  outBit_Sx_NL (4,"scrambling_mode: ",	b,  16, 8);
 }
 
 
@@ -2983,25 +2938,13 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 void descriptorDVB_TransportStream  (u_char *b)
 
 {
-
- typedef struct  _descTransportStream {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    //   N ... bytes
- } descTransportStream;
+  u_int    len;
 
 
- descTransportStream   d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
+  // tag	= b[0];
+  len 		= b[1];
  
- print_databytes (4,"transport_stream_bytes:", b+2, d.descriptor_length);
-
+  print_databytes (4,"transport_stream_bytes:", b+2, len);
 }
 
 
@@ -3019,24 +2962,13 @@ void descriptorDVB_TransportStream  (u_char *b)
 void descriptorDVB_DSNG  (u_char *b)
 
 {
-
- typedef struct  _descDSNG {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    //  N ... bytes
- } descDSNG;
+  u_int   len;
 
 
- descDSNG   d;
+  // tag	= b[0];
+  len 		= b[1];
 
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- print_databytes (4,"DSNG_bytes:", b+2, d.descriptor_length);
-
+  print_databytes (4,"DSNG_bytes:", b+2, len);
 }
 
 
@@ -3049,13 +2981,6 @@ void descriptorDVB_DSNG  (u_char *b)
 void descriptorDVB_PDC  (u_char *b)
 
 {
-
- typedef struct  _descPDC {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;
-
-
-    u_int      reserved_1;
     u_long     programme_identification_label;
     // ... splits in
     u_int     day;
@@ -3063,32 +2988,22 @@ void descriptorDVB_PDC  (u_char *b)
     u_int     hour;
     u_int     minute;
 
- } descPDC;
 
 
- descPDC   d;
+ // tag		 = b[0];
+ // lenh       	 = b[1];
 
+ outBit_Sx_NL (6,"reserved: ",   	b,  16,  4);
 
+ programme_identification_label = getBits (b, 0, 20, 20);
+    day     = getBits (b,0,20,5);
+    month   = getBits (b,0,25,4);
+    hour    = getBits (b,0,29,5);
+    minute  = getBits (b,0,34,6);
 
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.reserved_1			 = getBits (b, 0, 16, 4);
- d.programme_identification_label = getBits (b, 0, 20, 20);
-
-    d.day     = getBits (b,0,20,5);
-    d.month   = getBits (b,0,25,4);
-    d.hour    = getBits (b,0,29,5);
-    d.minute  = getBits (b,0,34,6);
-
-
- out_SB_NL (6,"reserved_1: ",d.reserved_1);
- out       (4,"Programme_identification_label: 0x%05lx ",
-	d.programme_identification_label);
- out       (4,"[= month=%d  day=%d   hour=%d  min=%d]",
-	d.month, d.day, d.hour, d.minute);
+ out (4,"Programme_identification_label: 0x%05lx ", programme_identification_label);
+ out (4,"[= month=%d  day=%d   hour=%d  min=%d]", month, day, hour, minute);
  out_NL (4);
-
 }
 
 
@@ -3098,87 +3013,55 @@ void descriptorDVB_PDC  (u_char *b)
 /*
   0x6A  AC-3  descriptor 
   ETSI EN 300 468    ANNEX E 
+  -- updated
 */
 
 void descriptorDVB_AC3  (u_char *b)
 
 {
 
- typedef struct  _descAC3 {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;
-
-    u_int      AC3_type_flag;
-    u_int      bsid_flag;
-    u_int      mainid_flag;
-    u_int      asvc_flag;
-    u_int      reserved_1;
-
-    // conditional vars
-    u_int      AC3_type;
-    u_int      bsid_type;
-    u_int      mainid_type;
-    u_int      asvc_type;
-
-    // N ...  bytes add info
-
- } descAC3;
+   u_int      len;
+   u_int      comp_type_flag;
+   u_int      bsid_flag;
+   u_int      mainid_flag;
+   u_int      asvc_flag;
 
 
- descAC3   d;
- int       len;
+  // tag 	= b[0];
+  len 		= b[1];
+
+  comp_type_flag= outBit_Sx_NL (4,"component_type_flag: ",b,16,  1);
+  bsid_flag     = outBit_Sx_NL (4,"bsid_flag: ",   	b,  17,  1);
+  mainid_flag   = outBit_Sx_NL (4,"mainid_flag: ",   	b,  18,  1);
+  asvc_flag     = outBit_Sx_NL (4,"asvc_flag: ",   	b,  19,  1);
+                  outBit_Sx_NL (4,"reserved: ",   	b,  20,  4);
+
+  b   += 3;
+  len -= 1;
 
 
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.AC3_type_flag		 = getBits (b, 0, 16, 1);
- d.bsid_flag			 = getBits (b, 0, 17, 1);
- d.mainid_flag			 = getBits (b, 0, 18, 1);
- d.asvc_flag			 = getBits (b, 0, 19, 1);
- d.reserved_1			 = getBits (b, 0, 20, 4);
-
-
-
- out_SB_NL (4,"AC3_type_flag: ",d.AC3_type_flag);
- out_SB_NL (4,"bsid_flag: ",d.bsid_flag);
- out_SB_NL (4,"mainid_flag: ",d.mainid_flag);
- out_SB_NL (4,"asvc_flag: ",d.asvc_flag);
- out_SB_NL (6,"reserved_1: ",d.reserved_1);
-
- b   += 3;
- len  = d.descriptor_length - 2;
-
- if (d.AC3_type_flag) {
-     d.AC3_type			 = b[0];
-     b++;
+ if (comp_type_flag) {
+     outBit_S2x_NL (4,"component_type: ", b++,  0, 8,
+	 	(char *(*)(u_long)) dvbstrDVB_AC3_ComponentType );
      len--;
-     out_SB_NL (4,"AC3_type: ",d.AC3_type);
  }
 
- if (d.bsid_flag) {
-     d.bsid_flag		 = b[0];
-     b++;
+ if (bsid_flag) {
+     outBit_Sx_NL (4,"bsid: ",		b++,  0, 8);
      len--;
-     out_SB_NL (4,"bsid_flag: ",d.bsid_flag);
  }
 
- if (d.mainid_flag) {
-     d.mainid_flag		 = b[0];
-     b++;
+ if (mainid_flag) {
+     outBit_Sx_NL (4,"mainid: ",	b++,  0, 8);
      len--;
-     out_SB_NL (4,"mainid_flag: ",d.mainid_flag);
  }
 
- if (d.asvc_flag) {
-     d.asvc_flag		 = b[0];
-     b++;
+ if (asvc_flag) {
+     outBit_Sx_NL (4,"asvc: ",		b++,  0, 8);
      len--;
-     out_SB_NL (4,"asvc_flag: ",d.asvc_flag);
  }
 
- print_databytes (4,"Additional info:", b, len);
+ print_databytes (4,"Additional_info:", b, len);
 
 }
 
@@ -3189,7 +3072,7 @@ void descriptorDVB_AC3  (u_char *b)
 /*
   0x6B  Ancillary Data  descriptor 
   ETSI EN 300 468 v1.6.1
-
+  -- updated EN 300 468 v1.7.1
 */
 
 void descriptorDVB_AncillaryData  (u_char *b)
@@ -3197,7 +3080,7 @@ void descriptorDVB_AncillaryData  (u_char *b)
   u_int  adi;
 
 
-  // tag		 = b[0];
+  // tag	 = b[0];
   // len       	 = b[1];
 
 
@@ -3210,7 +3093,9 @@ void descriptorDVB_AncillaryData  (u_char *b)
    if (adi & 0x04) out_nl (4,"[= Announcement Switching Data]");
    if (adi & 0x08) out_nl (4,"[= DAB Ancillary Data]");
    if (adi & 0x10) out_nl (4,"[= Scale Factor Error Check]");
-   if (adi & 0xE0) out_nl (4,"[= reserved ]");
+   if (adi & 0x20) out_nl (4,"[= MPEG-4 ancillary data]");
+   if (adi & 0x40) out_nl (4,"[= RDS via UECP]");
+   if (adi & 0x80) out_nl (4,"[= reserved ]");
   indent (-1);
 
 }
@@ -3842,62 +3727,224 @@ void descriptorDVB_ECM_RepetitionRate (u_char *b)
 /*
   0x79 S2 Satellite Delivery System Descriptor 
   ETSI EN 301 192  1.7.1
-  // $$$ TODO: to be verified  with final v1.7.1
 */
 
 void  descriptorDVB_S2SatelliteDeliverySystem(u_char *b)
 {
-    typedef struct  _descS2SatelliteDeliverySystem{
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
 
-    u_int      scrambling_sequence_selector;
-    u_int      multiple_input_stream_flag;
-    u_int      backwards_compatibility_indicator;
-    u_int      reserved_future_use;
-    u_int      reserved;
-    int        scrambling_sequence_index;
-    u_int      input_stream_identifier;
-} descS2SatelliteDeliverySystem;
+  u_int   sss;
+  u_int   misf;
 
-  int len;
-  descS2SatelliteDeliverySystem d;
-
-
-#warning "descriptor to be checked against draft final! (DVB-S2) (???)"
 
   // tag	 = b[0];
-  len       	 = b[1];
+  // len       	 = b[1];
   b +=2;
 
-  d.scrambling_sequence_selector        = getBits (b, 0, 0, 1);
-  d.multiple_input_stream_flag          = getBits (b, 0, 1, 1);
-  d.backwards_compatibility_indicator   = getBits (b, 0, 2, 1);
-  d.reserved_future_use                 = getBits (b, 0, 3, 5);
+
+  sss =  outBit_Sx_NL (4,"scrambling_sequence_selector: ", 	b,  0, 1);
+  misf = outBit_Sx_NL (4,"multiple_input_stream_flag: ",	b,  1, 1);
+         outBit_Sx_NL (4,"backwards_compatibility_indicator: ", b,  2, 1);
+         outBit_Sx_NL (4,"reserved_future_use: ",		b,  3, 5);
   b +=1;
 
-  out_SB_NL (4,"scrambling_sequence_selector flag: ", d.scrambling_sequence_selector);
-  out_SB_NL (4,"multiple_input_stream_flag: ",d.multiple_input_stream_flag);
-  out_SB_NL (4,"backwards_compatibility_indicator: ",d.backwards_compatibility_indicator);
-  out_SB_NL (4,"reserved_future_use: ",d.reserved_future_use);
-
-  if (1 == d.scrambling_sequence_selector) {
-      d.reserved                       = getBits (b, 0, 0, 6);
-      d.scrambling_sequence_index      = getBits (b, 0, 6, 18);
+  if (sss) {
+      outBit_Sx_NL (4,"reserved: ",			b,  0, 6);
+      outBit_Sx_NL (4,"scrambling_sequence_index: ",	b,  6,18); // $$$ TODO
       b += 3;
-
-      out_SB_NL (4,"reserved: ",d.reserved);
-      out_SB_NL (4,"scrambling_sequence_index: ",d.scrambling_sequence_index);
   }
 
-  if (1 == d.multiple_input_stream_flag) {
-      d.input_stream_identifier        = getBits (b, 0, 0, 8);
+  if (misf) {
+      outBit_Sx_NL (4,"input_stream_identifier: ",	b,  0, 8);  // $$$TODO EN 302 307
       b += 1;
-      out_SB_NL (4,"input_stream_identifier: ",d.input_stream_identifier);
   }
 
 }
 
+
+
+
+
+/*
+  0x7A  Enhanced AC-3  descriptor 
+  ETSI EN 300 468 v.1.7.1   ANNEX D 
+*/
+
+void descriptorDVB_Enhanced_AC3  (u_char *b)
+{
+
+   u_int      len;
+   u_int      comp_type_flag;
+   u_int      bsid_flag;
+   u_int      mainid_flag;
+   u_int      asvc_flag;
+   u_int      substream1_flag;
+   u_int      substream2_flag;
+   u_int      substream3_flag;
+
+
+  // tag 	= b[0];
+  len 		= b[1];
+
+  comp_type_flag  = outBit_Sx_NL (4,"component_type_flag: ",	b,  16,  1);
+  bsid_flag       = outBit_Sx_NL (4,"bsid_flag: ",   		b,  17,  1);
+  mainid_flag     = outBit_Sx_NL (4,"mainid_flag: ",   		b,  18,  1);
+  asvc_flag       = outBit_Sx_NL (4,"asvc_flag: ",  	 	b,  19,  1);
+                    outBit_Sx_NL (4,"mixinfoexists: ", 		b,  20,  1);
+  substream1_flag = outBit_Sx_NL (4,"substream1_flag: ", 	b,  21,  1);
+  substream2_flag = outBit_Sx_NL (4,"substream2_flag: ", 	b,  22,  1);
+  substream3_flag = outBit_Sx_NL (4,"substream3_flag: ", 	b,  23,  1);
+
+  b   += 3;
+  len -= 1;
+
+
+ if (comp_type_flag) {
+     outBit_S2x_NL (4,"component_type: ",b++,  0, 8,
+	 	(char *(*)(u_long)) dvbstrDVB_AC3_ComponentType );
+     len--;
+ }
+
+ if (bsid_flag) {
+     outBit_Sx_NL (4,"bsid: ",		b++,  0, 8);
+     len--;
+ }
+
+ if (mainid_flag) {
+     outBit_Sx_NL (4,"mainid: ",	b++,  0, 8);
+     len--;
+ }
+
+ if (asvc_flag) {
+     outBit_Sx_NL (4,"asvc: ",		b++,  0, 8);
+     len--;
+ }
+
+ if (substream1_flag) {
+     outBit_Sx_NL (4,"substream1: ",	b++,  0, 8);	// $$$ TODO
+     len--;
+ }
+
+ if (substream2_flag) {
+     outBit_Sx_NL (4,"substream2: ",	b++,  0, 8);	// $$$ TODO
+     len--;
+ }
+
+ if (substream3_flag) {
+     outBit_Sx_NL (4,"substream3: ",	b++,  0, 8);	// $$$ TODO
+     len--;
+ }
+
+ print_databytes (4,"additional_info:", b, len);
+
+}
+
+
+
+
+
+/*
+  0x7B  DTS_Audio  descriptor 
+  ETSI EN 300 468 v.1.7.1   ANNEX G 
+*/
+
+void descriptorDVB_DTS_Audio (u_char *b)
+{
+
+   u_int      len;
+
+
+  // tag 	= b[0];
+  len 		= b[1];
+
+  outBit_S2x_NL(4,"sample_rate_code: ", 		b,  16,  4,
+	 	(char *(*)(u_long)) dvbstrDVB_DTS_Audio_SampleRateCode );
+  outBit_S2x_NL(4,"bit_rate_code: ",	 		b,  20,  6,
+	 	(char *(*)(u_long)) dvbstrDVB_DTS_Audio_BitRate );
+  outBit_Sx_NL (4,"nblks: ",		 		b,  26,  7);
+  outBit_Sx_NL (4,"fsize: ",		 		b,  33, 14);
+  outBit_S2x_NL(4,"surround_mode: ",	 		b,  47,  6,
+	 	(char *(*)(u_long)) dvbstrDVB_DTS_Audio_SurroundMode );
+  outBit_Sx_NL (4,"lfe_flag: ",		 		b,  53,  1);
+  outBit_S2x_NL(4,"extended_surround_flag: ",		b,  54,  2,
+	 	(char *(*)(u_long)) dvbstrDVB_DTS_Audio_ExtendedSurroundFlag );
+
+  print_databytes (4,"additional_info:", b+7, len-6);
+}
+
+
+
+
+
+/*
+  0x7C  AAC  descriptor 
+  ETSI EN 300 468 v.1.7.1   ANNEX H 
+*/
+
+void descriptorDVB_AAC (u_char *b)
+{
+
+   u_int      len;
+   u_int      atf;
+
+
+  // tag 	= b[0];
+  len 		= b[1];
+
+        outBit_Sx_NL (4,"profile_and_level: ",		b,  16,  8); 
+  atf = outBit_Sx_NL (4,"AAC_type_flag: ", 		b,  24,  1);
+        outBit_Sx_NL (4,"reserved: ",			b,  25,  7);
+
+  b   += 4;
+  len -= 2;
+
+  if (atf) {
+        outBit_Sx_NL (4,"AAC_type: ", 			b,   0,  8);
+	b++;
+	len--;
+  }
+
+  print_databytes (4,"additional_info:", b, len);
+}
+
+
+
+
+
+// 0x7D -- reserved
+
+// 0x7E -- reserved
+
+
+
+
+/*
+  0x7F  Extension  descriptor 
+  ETSI EN 300 468 v.1.7.1 
+*/
+
+void descriptorDVB_Extension (u_char *b)
+{
+
+   u_int      len;
+   u_int      ext_tag;
+
+
+  // tag 	= b[0];
+  len 		= b[1];
+
+  ext_tag = outBit_Sx_NL (4,"descriptor_tag_extension: ",	b,  16,  8); 
+
+  switch (ext_tag) {
+
+//    case  xx:
+//	    break;
+
+    default: 
+  	print_databytes (4,"selector_bytes:", b+3, len-1);
+	break;
+  }
+
+}
 
 
 

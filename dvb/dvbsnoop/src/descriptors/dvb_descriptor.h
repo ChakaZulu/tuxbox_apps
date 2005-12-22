@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.h,v 1.13 2005/11/08 23:15:24 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.14 2005/12/22 16:21:50 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_descriptor.h,v 1.13 2005/11/08 23:15:24 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.14  2005/12/22 16:21:50  rasc
+Update and new descriptors EN 300 468 v1.7.1
+
 Revision 1.13  2005/11/08 23:15:24  rasc
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
  - Bugfix: PES packet stuffing
@@ -118,7 +121,7 @@ void  descriptorDVB_FrequencyList (u_char *b);
 void  descriptorDVB_ShortSmoothingBuffer(u_char *b);
 void  descriptorDVB_PartialTransportStream(u_char *b);
 void  descriptorDVB_DataBroadcast (u_char *b);
-void  descriptorDVB_CASystem(u_char *b);
+void  descriptorDVB_Scrambling(u_char *b);
 void  descriptorDVB_DataBroadcastID(u_char *b);
 void  descriptorDVB_TransportStream(u_char *b);
 void  descriptorDVB_DSNG(u_char *b);
@@ -140,7 +143,12 @@ void  descriptorDVB_ContentIdentifier(u_char *b);
 		 // EN 301 192 v1.4.1  MPE_FEC
 void  descriptorDVB_TimesliceFecIdentifier(u_char *b);
 void  descriptorDVB_ECM_RepetitionRate(u_char *b);
+		 // EN 300 468 v1.7.1
 void  descriptorDVB_S2SatelliteDeliverySystem(u_char *b);
+void  descriptorDVB_Enhanced_AC3(u_char *b);
+void  descriptorDVB_DTS_Audio (u_char *b);
+void  descriptorDVB_AAC (u_char *b);
+void  descriptorDVB_Extension (u_char *b);
 
 
 

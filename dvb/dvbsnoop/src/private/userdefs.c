@@ -1,5 +1,5 @@
 /*
-$Id: userdefs.c,v 1.2 2005/08/10 21:28:18 rasc Exp $
+$Id: userdefs.c,v 1.3 2005/12/22 16:21:51 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: userdefs.c,v 1.2 2005/08/10 21:28:18 rasc Exp $
  
 
 $Log: userdefs.c,v $
+Revision 1.3  2005/12/22 16:21:51  rasc
+Update and new descriptors EN 300 468 v1.7.1
+
 Revision 1.2  2005/08/10 21:28:18  rasc
 New: Program Stream handling  (-s ps)
 
@@ -263,3 +266,12 @@ static void *get_tag_table_for_ProviderStr (int type)
 
 
 
+
+
+// $$$ TODO:  change interface mimic (call priv. data decoding):
+//       output if data matches for output
+//       return: true/false if data was decoded 
+//        exec should be done to any standard table/descriptor checking
+//        so we can overlay also standard descriptors/table (e.g. if change by provider)
+//        --> see descriptor enhancments for e.g. IDSB (ARIB STD-10, japanese)
+//

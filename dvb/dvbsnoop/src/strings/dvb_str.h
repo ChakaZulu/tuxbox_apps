@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.32 2005/11/23 23:06:11 rasc Exp $ 
+$Id: dvb_str.h,v 1.33 2005/12/22 16:21:51 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.32 2005/11/23 23:06:11 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.33  2005/12/22 16:21:51  rasc
+Update and new descriptors EN 300 468 v1.7.1
+
 Revision 1.32  2005/11/23 23:06:11  rasc
 ISO13818-2  MPEG2 sequence header
 
@@ -174,7 +177,11 @@ char *dvbstrParentalRating_TYPE(u_int id);
 char *dvbstrDelivSysCoding_TYPE(u_int id);
 char *dvbstrShortSmoothingBufSize_TYPE(u_int id);
 char *dvbstrShortSmoothingBufLeakRate_TYPE(u_int id);
-char *dvbstrAC3Component_TYPE(u_int id);
+char *dvbstrDVB_AC3_ComponentType (u_int i);
+char *dvbstrDVB_DTS_Audio_SampleRateCode(u_int i);
+char *dvbstrDVB_DTS_Audio_BitRate (u_int i);
+char *dvbstrDVB_DTS_Audio_SurroundMode (u_int i);
+char *dvbstrDVB_DTS_Audio_ExtendedSurroundFlag (u_int i);
 char *dvbstrAncillaryData_ID(u_int id);
 char *dvbstrAnnouncement_TYPE(u_int id);
 char *dvbstrAnnouncementReference_TYPE(u_int id);
