@@ -71,7 +71,7 @@
 					<th>Video Ratio</th>
 					<th>Audio Transcode</th>
 					<th>Audio Rate</th>
-					<th>AC3</th>
+					<th>FPS</th>
 					<th>Action</th>
 					
 				</tr>
@@ -104,7 +104,7 @@
 							<xsl:value-of select="@Audiorate"/>
 						</td>
 						<td>
-							<xsl:value-of select="@ac3"/>
+							<xsl:value-of select="@fps"/>
 						</td>
 						<td>
 							<a href="javascript:editStreamingServerVideoSettings('{@name}', '{@ext}')">

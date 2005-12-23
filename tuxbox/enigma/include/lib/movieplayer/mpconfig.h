@@ -1,5 +1,5 @@
 /*
- * $Id: mpconfig.h,v 1.2 2005/11/13 19:12:36 digi_casi Exp $
+ * $Id: mpconfig.h,v 1.3 2005/12/23 17:00:07 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -49,7 +49,7 @@ struct videoTypeParms
 	eString videoRatio;
 	bool transcodeVideo;
 	bool transcodeAudio;
-	bool AC3;
+	eString fps;
 };
 
 struct codecs

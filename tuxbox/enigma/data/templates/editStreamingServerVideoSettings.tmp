@@ -11,10 +11,7 @@
 				var transcodeVideo = "off";
 				if (document.f1.transcodeVideo.checked)
 					transcodeVideo = "on";
-				var AC3 = "off";
-				if (document.f1.AC3.checked)
-					AC3 = "on";
-				var parms = "name=" + document.f1.name.value + "&extension=" + document.f1.extension.value + "&transcodeVideo=" + transcodeVideo + "&videoRate=" + document.f1.videoRate.value + "&videoRatio=" + document.f1.videoRatio.value + "&videoCodec=" + document.f1.videoCodec.value + "&transcodeAudio=" + transcodeAudio + "&audioRate=" + document.f1.audioRate.value + "&AC3=" + AC3;
+				var parms = "name=" + document.f1.name.value + "&extension=" + document.f1.extension.value + "&transcodeVideo=" + transcodeVideo + "&videoRate=" + document.f1.videoRate.value + "&videoRatio=" + document.f1.videoRatio.value + "&videoCodec=" + document.f1.videoCodec.value + "&transcodeAudio=" + transcodeAudio + "&audioRate=" + document.f1.audioRate.value + "&fps=" + document.f1.fps.value;
 				document.location = "/cgi-bin/setStreamingServerVideoSettings?" + parms;
 				setTimeout("window.close()", 500);
 			}
@@ -73,8 +70,10 @@
 					</td>
 				</tr>
 				<tr>
-					<td>AC3:</td>
-					<td><input type="checkbox" name="AC3" value="on" #AC3#></td>
+					<td>Frames per second:</td>
+					<td>
+						<input name="fps" type="text" size="6" maxlength="6" value="#FPS#" style="color: #000000">
+					</td>
 				</tr>
 				<tr>
 					<td colspan="2">#CHANGEBUTTON#</td>

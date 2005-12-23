@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_movieplayer.cpp,v 1.18 2005/11/17 14:32:51 digi_casi Exp $
+ * $Id: enigma_dyn_movieplayer.cpp,v 1.19 2005/12/23 17:00:08 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -124,7 +124,7 @@ eString setStreamingServerVideoSettings(eString request, eString dirpath, eStrin
 	videoParms.videoRatio = opt["videoRatio"];
 	videoParms.transcodeVideo = (opt["transcodeVideo"] == "on");
 	videoParms.transcodeAudio = (opt["transcodeAudio"] == "on");
-	videoParms.AC3  = (opt["AC3"] == "on");
+	videoParms.fps = opt["fps"];
 	
 	eMoviePlayer::getInstance()->mpconfig.setVideoParms(videoParms);
 	eMoviePlayer::getInstance()->mpconfig.save();
@@ -224,7 +224,7 @@ eString editStreamingServerVideoSettings(eString request, eString dirpath, eStri
 	result.strReplace("#VIDEORATIOS#", tmp);
 	result.strReplace("#TRANSCODEVIDEO#", (videoParms.transcodeVideo ? "checked" : ""));
 	result.strReplace("#TRANSCODEAUDIO#", (videoParms.transcodeAudio ? "checked" : ""));
-	result.strReplace("#AC3#", (videoParms.AC3 ? "checked" : ""));
+	result.strReplace("#FPS#", videoParms.fps);
 	
 	result.strReplace("#CHANGEBUTTON#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
 	

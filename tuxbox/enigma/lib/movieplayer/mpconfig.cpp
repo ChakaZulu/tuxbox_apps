@@ -1,5 +1,5 @@
 /*
- * $Id: mpconfig.cpp,v 1.3 2005/11/13 19:12:55 digi_casi Exp $
+ * $Id: mpconfig.cpp,v 1.4 2005/12/23 17:00:07 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -112,9 +112,9 @@ bool eMPConfig::load()
 			eString tmpvsize = node->GetAttributeValue("Videosize");
 			eString tmparate = node->GetAttributeValue("Audiorate");
 			eString tmpatrans = node->GetAttributeValue("Audiotranscode");
-			eString tmpac3 = node->GetAttributeValue("ac3");
+			eString tmpfps = node->GetAttributeValue("fps");
 
-			if (!tmpname || !tmpext || !tmpvrate || !tmpvtrans || !tmpvcodec || !tmpvsize || !tmparate || !tmpatrans || !tmpac3)
+			if (!tmpname || !tmpext || !tmpvrate || !tmpvtrans || !tmpvcodec || !tmpvsize || !tmparate || !tmpatrans || !tmpfps)
 			{
 				eDebug("[MOVIEPLAYER] parse error in settings file");
 				return false;
@@ -130,7 +130,7 @@ bool eMPConfig::load()
 				a.videoRatio = tmpvsize;
 				a.audioRate = tmparate;
 				a.transcodeAudio = (tmpatrans == "1");
-				a.AC3 = (tmpac3 == "1");
+				a.fps = tmpfps;
 
 				videoParmList.push_back(a);
 			}
@@ -170,7 +170,7 @@ void eMPConfig::save()
 		for (unsigned int i = 0; i < videoParmList.size(); i++)
 		{
 			struct videoTypeParms a = videoParmList[i];
-			fprintf(f, "   <setup name=\"%s\" ext=\"%s\" Videorate=\"%s\" Videotranscode=\"%d\" Videocodec=\"%s\" Videosize=\"%s\" Audiorate=\"%s\" Audiotranscode=\"%d\" ac3=\"%d\" />\n", a.name.c_str(), a.extension.c_str(), a.videoRate.c_str(), a.transcodeVideo, a.videoCodec.c_str(), a.videoRatio.c_str(), a.audioRate.c_str(), a.transcodeAudio, a.AC3);
+			fprintf(f, "   <setup name=\"%s\" ext=\"%s\" Videorate=\"%s\" Videotranscode=\"%d\" Videocodec=\"%s\" Videosize=\"%s\" Audiorate=\"%s\" Audiotranscode=\"%d\" fps=\"%s\" />\n", a.name.c_str(), a.extension.c_str(), a.videoRate.c_str(), a.transcodeVideo, a.videoCodec.c_str(), a.videoRatio.c_str(), a.audioRate.c_str(), a.transcodeAudio, a.fps.c_str());
 		}
 		fprintf(f, "</vlc>\n");
 		fclose(f);
@@ -193,7 +193,7 @@ struct videoTypeParms eMPConfig::getVideoParms(eString name, eString extension)
 	vparms.videoRatio = "704x576";
 	vparms.transcodeVideo = false;
 	vparms.transcodeAudio = false;
-	vparms.AC3 = false;
+	vparms.fps = "25";
 	
 	for (unsigned int i = 0; i < videoParmList.size(); i++)
 	{
