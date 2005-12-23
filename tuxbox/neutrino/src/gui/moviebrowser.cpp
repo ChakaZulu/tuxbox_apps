@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: moviebrowser.cpp,v 1.5 2005/12/18 09:23:53 metallica Exp $
+	$Id: moviebrowser.cpp,v 1.6 2005/12/23 18:45:42 metallica Exp $
 
 	Kommentar:
 
@@ -42,15 +42,19 @@
 	Author: Günther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
 
-	Revision History:
-	Date			Author		Change Description
-	   Nov 2005		Günther	initial implementation
 	$Log: moviebrowser.cpp,v $
+	Revision 1.6  2005/12/23 18:45:42  metallica
+	G�nther moviebrowser.cpp update
+	
 	Revision 1.5  2005/12/18 09:23:53  metallica
 	fix compil warnings
 	
 	Revision 1.4  2005/12/12 07:58:02  guenther
-	- fix bug on deleting CMovieBrowser - speed up parse time (20 ms per .ts file now)- update stale function- refresh directories on reload- print scan time in debug console
+	- fix bug on deleting CMovieBrowser 
+	- speed up parse time (20 ms per .ts file now)
+	- update stale function
+	- refresh directories on reload
+	- print scan time in debug console
 	
 
 ****************************************************************************/
@@ -328,8 +332,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE(MOVIEBROWSER_INFO);
-	TRACE("\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.6 2005/12/23 18:45:42 metallica Exp $\r\n");
 	init();
 }
 
@@ -339,7 +342,7 @@ CMovieBrowser::CMovieBrowser(): configfile ('\t')
 CMovieBrowser::~CMovieBrowser()
 {
 	//TRACE("[mb] del\r\n");
-	saveSettings(&m_settings);		
+	//saveSettings(&m_settings);		
 	hide();
 	m_repositoryDir.clear();
 
@@ -489,7 +492,10 @@ void CMovieBrowser::init(void)
 	initRows();
 	//initDevelopment();
 
-	
+	refreshLastPlayList();	
+	refreshLastRecordList();	
+	refreshBrowserList();	
+	refreshFilterList();	
 #if 0
 	TRACE_1("Frames\r\n\tScren:\t%3d,%3d,%3d,%3d\r\n\tMain:\t%3d,%3d,%3d,%3d\r\n\tTitle:\t%3d,%3d,%3d,%3d \r\n\tBrowsr:\t%3d,%3d,%3d,%3d \r\n\tPlay:\t%3d,%3d,%3d,%3d \r\n\tRecord:\t%3d,%3d,%3d,%3d\r\n\r\n",
 	g_settings.screen_StartX,
@@ -755,24 +761,19 @@ bool CMovieBrowser::saveSettings(MB_SETTINGS* settings)
 ************************************************************************/
 int CMovieBrowser::exec(const char* path)
 {
+	bool res = false;
+
 	TRACE("[mb] start MovieBrowser\r\n");
 	int timeout = -1;
 	int returnDefaultOnTimeout = false;
-	
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
 	m_selectedDir = path; 
-	addRepositoryDir(m_selectedDir);
+	//addRepositoryDir(m_selectedDir);
 	
-	int res = false;
-
-	paint();
-
-	if (m_pcWindow == NULL)
-	{
-		return res; /* out of memory */
-	}
+	if(paint() == false)
+		return res;// paint failed due to less memory , exit 
 
 	if ( timeout == -1 )
 		timeout = g_settings.timing[SNeutrinoSettings::TIMING_FILEBROWSER];
@@ -784,6 +785,10 @@ int CMovieBrowser::exec(const char* path)
 		loadMovies();
 	}
 	
+ 	m_pcBrowser->setSelectedLine(m_currentBrowserSelection);
+	m_pcLastRecord->setSelectedLine(m_currentRecordSelection);
+	m_pcLastPlay->setSelectedLine(m_currentPlaySelection);
+ 
  	bool loop = true;
 	bool result;
 	while (loop)
@@ -914,19 +919,18 @@ bool CMovieBrowser::hide(void)
 ************************************************************************/
 int CMovieBrowser::paint(void)
 {
-	//TRACE("[mb]->Paint\r\n");
-
-	//Font* font = TEXT_FONT;
-	Font* font = NULL;
-	
 	if (m_pcWindow != NULL)
 	{
 		TRACE("[mb]  return -> window already exists\r\n");
 		return (false);
 	}
+	TRACE("[mb]->Paint\r\n");
 
-	//int mode =  CListFrame::SCROLL | CListFrame::HEADER_LINE | CListFrame::TITLE;
-	
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(LOCALE_MOVIEBROWSER_HEAD));
+
+	//Font* font = TEXT_FONT;
+	Font* font = NULL;
+
 	// create new window
 	m_pcWindow = new CFBWindow( m_cBoxFrame.iX,
 								m_cBoxFrame.iY,
@@ -960,51 +964,31 @@ int CMovieBrowser::paint(void)
 							CTextBox::SCROLL,
 							&m_cBoxFrameInfo);							
 
-	m_pcBrowser->setSelectedLine(m_currentBrowserSelection);
-	m_pcLastRecord->setSelectedLine(m_currentRecordSelection);
-	m_pcLastPlay->setSelectedLine(m_currentPlaySelection);
 
-	if(m_windowFocus == MB_FOCUS_BROWSER)
+	if(  m_pcWindow == NULL || 
+		m_pcBrowser == NULL || 
+		m_pcLastPlay == NULL || 
+		m_pcLastRecord == NULL || 
+		m_pcInfo == NULL || 
+		m_pcFilter == NULL)
 	{
-		m_pcBrowser->showSelection(true);
-		m_pcLastRecord->showSelection(false);
-		m_pcLastPlay->showSelection(false);
-		m_pcFilter->showSelection(false);
-		//m_pcInfo->showSelection(false);
-	}
-	else if(m_windowFocus == MB_FOCUS_LAST_PLAY)
-	{
-		m_pcLastPlay->showSelection(true);
-		m_pcBrowser->showSelection(false);
-		m_pcLastRecord->showSelection(false);
-		m_pcFilter->showSelection(false);
-		//m_pcInfo->showSelection(false);
-	}
-	else if(m_windowFocus == MB_FOCUS_LAST_RECORD)
-	{
-		m_pcLastRecord->showSelection(true);
-		m_pcLastPlay->showSelection(false);
-		m_pcBrowser->showSelection(false);
-		m_pcFilter->showSelection(false);
-		//m_pcInfo->showSelection(false);
-	}
-	else if(m_windowFocus == MB_FOCUS_FILTER)
-	{
-		m_pcBrowser->showSelection(true);
-		m_pcLastRecord->showSelection(false);
-		m_pcLastPlay->showSelection(false);
-		m_pcFilter->showSelection(false);
-		//m_pcInfo->showSelection(false);
-	}
-	else if(m_windowFocus == MB_FOCUS_MOVIE_INFO)
-	{
-		//m_pcInfo->showSelection(true);
-		m_pcBrowser->showSelection(false);
-		m_pcLastRecord->showSelection(false);
-		m_pcLastPlay->showSelection(false);
-		m_pcFilter->showSelection(false);
-	}
+		TRACE("[mb] paint, ERROR: not enought memory to allocate windows");
+		if (m_pcFilter != NULL)delete m_pcFilter;
+		if (m_pcBrowser != NULL)delete m_pcBrowser;
+		if (m_pcLastPlay != NULL) delete m_pcLastPlay;
+		if (m_pcLastRecord != NULL)delete m_pcLastRecord;
+		if (m_pcInfo != NULL) delete m_pcInfo;
+		if (m_pcWindow != NULL) delete m_pcWindow;
 
+		m_pcWindow = NULL;
+		m_pcInfo = NULL;
+		m_pcLastPlay = NULL;
+		m_pcLastRecord = NULL;
+		m_pcBrowser = NULL;
+		m_pcFilter = NULL;
+
+		return (false);
+	}  
 	onSetGUIWindow(m_settings.gui);	
 							
 	refreshTitle();
@@ -1112,6 +1096,9 @@ void CMovieBrowser::refreshFilterList(void)
 	m_FilterLines.rowWidth[0] = 400;
 	m_FilterLines.lineHeader[0]= "";
 
+	if(m_vMovieInfo.size() <= 0) 
+		return; // exit here if nothing else is to do
+
 	if(m_settings.filter.item == MB_INFO_MAX_NUMBER)
 	{
 		// show Main List
@@ -1178,6 +1165,7 @@ void CMovieBrowser::refreshLastPlayList(void) //P2
 	//TRACE("[mb]->refreshlastPlayList \r\n");
 	std::string string_item;
 
+	// Initialise and clear list array
 	m_playListLines.rows = m_settings.lastPlayRowNr;
 	for(int row = 0 ;row < m_settings.lastPlayRowNr; row++)
 	{
@@ -1186,6 +1174,10 @@ void CMovieBrowser::refreshLastPlayList(void) //P2
 		m_playListLines.lineHeader[row]= g_Locale->getText(m_localizedItemName[m_settings.lastPlayRow[row]]);
 	}
 	m_vHandlePlayList.clear();
+
+	if(m_vMovieInfo.size() <= 0) 
+		return; // exit here if nothing else is to do
+
 	MI_MOVIE_INFO* movie_handle;
 	// prepare Browser list for sorting and filtering
 	for(unsigned int file=0; file < m_vMovieInfo.size(); file++)
@@ -1231,6 +1223,7 @@ void CMovieBrowser::refreshLastRecordList(void) //P2
 	//TRACE("[mb]->refreshLastRecordList \r\n");
 	std::string string_item;
 
+	// Initialise and clear list array
 	m_recordListLines.rows = m_settings.lastRecordRowNr;
 	for(int row = 0 ;row < m_settings.lastRecordRowNr; row++)
 	{
@@ -1239,6 +1232,10 @@ void CMovieBrowser::refreshLastRecordList(void) //P2
 		m_recordListLines.lineHeader[row]= g_Locale->getText(m_localizedItemName[m_settings.lastRecordRow[row]]);
 	}
 	m_vHandleRecordList.clear();
+
+	if(m_vMovieInfo.size() <= 0) 
+		return; // exit here if nothing else is to do
+
 	MI_MOVIE_INFO* movie_handle;
 	// prepare Browser list for sorting and filtering
 	for(unsigned int file=0; file < m_vMovieInfo.size()  ;file++)
@@ -1283,10 +1280,9 @@ void CMovieBrowser::refreshLastRecordList(void) //P2
 void CMovieBrowser::refreshBrowserList(void) //P1
 {
 	//TRACE("[mb]->refreshBrowserList \r\n");
-	if(m_vMovieInfo.size() <= 0) return;
-	
 	std::string string_item;
 
+	// Initialise and clear list array
 	m_browserListLines.rows = m_settings.browserRowNr;
 	for(int row = 0; row < m_settings.browserRowNr; row++)
 	{
@@ -1295,6 +1291,10 @@ void CMovieBrowser::refreshBrowserList(void) //P1
 		m_browserListLines.lineHeader[row]= g_Locale->getText(m_localizedItemName[m_settings.browserRowItem[row]]);
 	}
 	m_vHandleBrowserList.clear();
+	
+	if(m_vMovieInfo.size() <= 0) 
+		return; // exit here if nothing else is to do
+	
 	MI_MOVIE_INFO* movie_handle;
 	// prepare Browser list for sorting and filtering
 	for(unsigned int file=0; file < m_vMovieInfo.size(); file++)
@@ -1944,6 +1944,7 @@ void CMovieBrowser::onSetGUIWindowPrev(void)
 ************************************************************************/
 void CMovieBrowser::onSetFocus(MB_FOCUS new_focus)
 {
+	//TRACE("[mb]->onSetFocus %d \r\n",new_focus);
 	m_windowFocus = new_focus;
 	if(m_windowFocus == MB_FOCUS_BROWSER)
 	{
@@ -2052,7 +2053,10 @@ void CMovieBrowser::onSetFocusNext(void)
 bool CMovieBrowser::onSortMovieInfoHandleList(std::vector<MI_MOVIE_INFO*>& handle_list, MB_INFO_ITEM sort_item, MB_DIRECTION direction)
 {
 	//TRACE("sort: %d\r\n",direction);
-	if(sortBy[sort_item] == NULL) return (false);
+	if(handle_list.size() <= 0) 
+	    return (false); // nothing to sort, return immedately
+	if(sortBy[sort_item] == NULL) 
+	    return (false);
 	
 	if(direction == MB_DIRECTION_AUTO)
 	{
@@ -2346,25 +2350,45 @@ void CMovieBrowser::updateMovieSelection(void)
 	}
 	else if(m_windowFocus == MB_FOCUS_LAST_PLAY)
 	{
-		old_movie_selection = m_currentPlaySelection;
-		m_currentPlaySelection = m_pcLastPlay->getSelectedLine();
-		//TRACE("    sel2:%d\r\n",m_currentPlaySelection);
-		if(m_currentPlaySelection != old_movie_selection)
+		if(m_vHandlePlayList.size() == 0)
+		{
+			// There are no elements in the Filebrowser, clear all handles
+			m_currentPlaySelection = 0;
+			m_movieSelectionHandler = NULL;
 			new_selection = true;
-
-		 if(m_currentPlaySelection < m_vHandlePlayList.size())
-			m_movieSelectionHandler = m_vHandlePlayList[m_currentPlaySelection];
+		}
+		else
+		{
+			old_movie_selection = m_currentPlaySelection;
+			m_currentPlaySelection = m_pcLastPlay->getSelectedLine();
+			//TRACE("    sel2:%d\r\n",m_currentPlaySelection);
+			if(m_currentPlaySelection != old_movie_selection)
+				new_selection = true;
+	
+			 if(m_currentPlaySelection < m_vHandlePlayList.size())
+				m_movieSelectionHandler = m_vHandlePlayList[m_currentPlaySelection];
+		}
 	}
 	else if(m_windowFocus == MB_FOCUS_LAST_RECORD)
 	{
-		old_movie_selection = m_currentRecordSelection;
-		m_currentRecordSelection = m_pcLastRecord->getSelectedLine();
-		//TRACE("    sel3:%d\r\n",m_currentRecordSelection);
-		if(m_currentRecordSelection != old_movie_selection)
+		if(m_vHandleRecordList.size() == 0)
+		{
+			// There are no elements in the Filebrowser, clear all handles
+			m_currentRecordSelection = 0;
+			m_movieSelectionHandler = NULL;
 			new_selection = true;
-
-		if(m_currentRecordSelection < m_vHandleRecordList.size())
-			m_movieSelectionHandler = m_vHandleRecordList[m_currentRecordSelection];
+		}
+		else
+		{
+			old_movie_selection = m_currentRecordSelection;
+			m_currentRecordSelection = m_pcLastRecord->getSelectedLine();
+			//TRACE("    sel3:%d\r\n",m_currentRecordSelection);
+			if(m_currentRecordSelection != old_movie_selection)
+				new_selection = true;
+	
+			if(m_currentRecordSelection < m_vHandleRecordList.size())
+				m_movieSelectionHandler = m_vHandleRecordList[m_currentRecordSelection];
+		}
 	}	
 	
 	if(new_selection == true)
@@ -2633,7 +2657,7 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* movie_info)
 	CStringInputSMS channelUserInputSMS(LOCALE_MOVIEBROWSER_INFO_CHANNEL, epgChannel, 15, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 	CStringInputSMS epgUserInputSMS(LOCALE_MOVIEBROWSER_INFO_INFO1, epgInfo1, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 	CStringInput lengthUserInput(LOCALE_MOVIEBROWSER_INFO_LENGTH, length, 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-	CStringInput countryUserInput(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY, country, 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
+	CStringInput countryUserInput(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY, country, 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
 	CStringInput yearUserInput(LOCALE_MOVIEBROWSER_INFO_PRODYEAR, year, 4, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
 
 	CMenuWidget movieInfoMenu (LOCALE_MOVIEBROWSER_INFO_HEAD, "streaming.raw",m_cBoxFrame.iWidth);
@@ -3086,7 +3110,7 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, " Markierungsmenu ");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
-	helpbox.addLine(MOVIEBROWSER_INFO);
+	helpbox.addLine("MovieBrowser $Revision: 1.6 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
