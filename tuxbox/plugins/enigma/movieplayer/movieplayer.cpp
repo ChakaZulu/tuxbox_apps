@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.9 2005/12/15 16:35:43 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.10 2005/12/24 09:25:12 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -23,7 +23,7 @@
 #include <plugin.h>
 #include "movieplayer.h"
 
-#define REL "Movieplayer Plugin, Version 0.3"
+#define REL "Movieplayer Plugin, Version 0.4"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -281,7 +281,7 @@ void eSCGui::listSelected(eListBoxEntryText *item)
 {
 	if (item)
 	{
-		int val = (int)item->getKey();
+		val = (int)item->getKey();
 		if (playList[val].Filetype == FILES)
 			playerStart(val);
 		else
@@ -322,8 +322,11 @@ void eSCGui::timerHandler()
 			msg.hide();
 		}
 		case eMoviePlayer::STOPPED:
-		{	
-			showMenu();
+		{
+			if (++val >= playList.size())
+				val = 0;
+			playerStart(val);
+//			showMenu();
 			break;
 		}
 		default:
@@ -374,7 +377,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			else
 				close(0);
 		}
-		else 
+		else
 		if (e.action == &i_cursorActions->help)
 		{
 			if (menu)
