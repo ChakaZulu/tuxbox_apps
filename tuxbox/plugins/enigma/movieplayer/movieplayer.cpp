@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.10 2005/12/24 09:25:12 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.11 2005/12/25 21:08:51 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -23,7 +23,7 @@
 #include <plugin.h>
 #include "movieplayer.h"
 
-#define REL "Movieplayer Plugin, Version 0.4"
+#define REL "Movieplayer Plugin, Version 0.5"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -110,12 +110,11 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 	
 	startdir = server.startDir;
 	cddrive = server.CDDrive;	
-	pathfull = startdir;
 
 	if (server.vlcUser && server.vlcPass)
 		VLCsend::getInstance()->send_parms.AUTH = server.vlcUser + ":" + server.vlcPass;
 	
-	loadList();
+	loadList(startdir);
 }
 
 eSCGui::~eSCGui()
@@ -127,7 +126,7 @@ eSCGui::~eSCGui()
 	eConfig::getInstance()->setKey("/enigma/plugins/movieplayer/lastmode", MODE);
 }
 
-void eSCGui::loadList()
+void eSCGui::loadList(eString pathfull)
 {
 	playList.clear();
 	PLAYLIST a;
@@ -159,7 +158,7 @@ void eSCGui::loadList()
 
 	if (MODE == DATA)
 	{
-		VLCsend::getInstance()->send("/admin/dboxfiles.html?dir=" + pathfull);
+		VLCsend::getInstance()->send("/admin/dboxfiles.html?dir=" + pathfull.strReplace(" ", "%20"));
 		eString response = VLCsend::getInstance()->send_parms.RESPONSE;
 
 		std::replace(response.begin(), response.end(), '\\', '/');
@@ -183,7 +182,6 @@ void eSCGui::loadList()
 							a.Fullname = entry.mid(4);
 							a.Fullname = a.Fullname.left(a.Fullname.length() - 3);
 							a.Fullname = a.Fullname.left(a.Fullname.find_last_of("/") + 1);
-							a.Fullname = a.Fullname.strReplace(" ", "%20");
 							a.Filetype = GOUP;
 							eDebug("[MOVIEPLAYER] goup: %s",a.Fullname.c_str());
 							playList.push_back(a);
@@ -193,7 +191,6 @@ void eSCGui::loadList()
 					{
 						a.Filename = "[DIR] " + entry.mid(4);
 						a.Fullname = entry.mid(4);
-						a.Fullname = a.Fullname.strReplace(" ", "%20");
 						a.Filetype = DIRS;
 						eDebug("[MOVIEPLAYER] dir: %s",a.Fullname.c_str());
 						playList.push_back(a);
@@ -209,6 +206,13 @@ void eSCGui::loadList()
 				}
 				start = pos + 1;
 			}
+		}
+		else
+		{
+			eMessageBox msg(eString("Movieplayer could not communicate to VLC.\nPlease make sure that the IP address of the PC is configured correctly in the streaming settings and that VLC is started."), _("Error"), eMessageBox::btOK);
+			msg.show();
+			msg.exec();
+			msg.hide();
 		}
 	}
 	else
@@ -285,10 +289,7 @@ void eSCGui::listSelected(eListBoxEntryText *item)
 		if (playList[val].Filetype == FILES)
 			playerStart(val);
 		else
-		{
-			pathfull = playList[val].Fullname;
-			loadList();
-		}
+			loadList(playList[val].Fullname);
 	}
 }
 
@@ -395,8 +396,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			if (menu)
 			{
 				MODE = DATA;
-				pathfull = startdir;
-				loadList();
+				loadList(startdir);
 			}
 			else
 				eMoviePlayer::getInstance()->control("rewind", "");
@@ -407,7 +407,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			if (menu)
 			{
 				MODE = VCD;
-				loadList();
+				loadList("");
 			}
 			else
 			{
@@ -423,7 +423,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			if (menu)
 			{
 				MODE = SVCD;
-				loadList();
+				loadList("");
 			}
 			else
 				eMoviePlayer::getInstance()->control("pause", "");
@@ -434,7 +434,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			if (menu)
 			{
 				MODE = DVD;
-				loadList();
+				loadList("");
 			}
 			else
 				eMoviePlayer::getInstance()->control("forward", "");
@@ -536,6 +536,7 @@ CURLcode VLCsend::sendGetRequest (const eString& url, eString & response)
 	if(send_parms.AUTH)
 		curl_easy_setopt (curl, CURLOPT_USERPWD, send_parms.AUTH.c_str());	
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
+	curl_easy_setopt (curl, CURLOPT_TIMEOUT, 5);
 	httpres = curl_easy_perform (curl);
 	//eDebug("[VLC] HTTP Result: %d", httpres);
 	curl_easy_cleanup(curl);

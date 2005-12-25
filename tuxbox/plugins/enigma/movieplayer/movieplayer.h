@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.6 2005/12/24 09:25:12 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.7 2005/12/25 21:08:51 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -49,7 +49,7 @@ class eSCGui: public eWindow
 	
 	struct serverConfig server;
 
-	eString startdir, pathfull, cddrive;
+	eString startdir, cddrive;
 	
 	int MODE;
 	bool menu;
@@ -60,7 +60,7 @@ class eSCGui: public eWindow
 	eMessageBox *bufferingBox;
 	eStatusBar *status;
 
-	void loadList();
+	void loadList(eString path);
 	void viewList();
 	void setStatus(int val);
 
