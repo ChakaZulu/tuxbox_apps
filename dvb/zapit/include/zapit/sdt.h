@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.20 2005/04/17 06:56:14 metallica Exp $
+ * $Id: sdt.h,v 1.21 2005/12/25 19:07:54 racker Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,6 +26,6 @@
 
 uint32_t get_sdt_TsidOnid(void);
 int nvod_service_ids(const t_transport_stream_id, const t_original_network_id, const t_service_id, const unsigned int num, t_transport_stream_id * const, t_original_network_id * const, t_service_id * const);
-int parse_sdt(const t_satellite_position satellite_position, const t_transport_stream_id, const t_original_network_id, const unsigned char diseqc, const uint32_t);
+int parse_sdt(const t_satellite_position satellite_position, const t_transport_stream_id, const t_original_network_id, const unsigned char diseqc, const uint32_t, const std::string sat_provider);
 
 #endif /* __zapit_sdt_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.152 2005/12/10 22:20:16 barf Exp $
+ * $Id: scan.cpp,v 1.153 2005/12/25 19:07:55 racker Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -263,7 +263,7 @@ int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, con
 	return status;
 }
 
-int get_sdts(const t_satellite_position satellite_position, const char * const frontendType)
+int get_sdts(const t_satellite_position satellite_position, const char * const frontendType, const std::string sat_provider)
 {
 	uint32_t TsidOnid;
 
@@ -296,12 +296,12 @@ int get_sdts(const t_satellite_position satellite_position, const char * const f
 				tI->second.original_network_id = TsidOnid &0xFFFF;
 
 				INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-				parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq);
+				parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq, sat_provider);
 			}
 			else
 			{
 				INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-				status = parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq);
+				status = parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq, sat_provider);
 		
 				if (status == -1)
 				{
@@ -314,7 +314,7 @@ int get_sdts(const t_satellite_position satellite_position, const char * const f
 						tI->second.original_network_id = TsidOnid &0xFFFF;
 
 						INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-						parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq);
+						parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC, actual_freq, sat_provider);
 					}
 				}
 			}
@@ -601,7 +601,11 @@ void scan_provider(xmlNodePtr search, const char * const providerName, uint8_t d
 	 * bouquet association table,
 	 * network information table
 	 */
-	status = get_sdts(satellite_position, frontendType);
+	std::string sat_provider;
+	if (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET)
+		sat_provider = providerName;
+
+	status = get_sdts(satellite_position, frontendType, sat_provider);
 
 	/*
 	 * channels from PAT do not have service_type set.
@@ -836,8 +840,12 @@ int scan_transponder(TP_params *TP)
 
 	satellite_position = driveMotorToSatellitePosition(providerName);
 
+	std::string sat_provider;
+	if (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET)
+		sat_provider = providerName;
+
 	get_nits(&(TP->feparams), TP->polarization, satellite_position, diseqc_pos);
-	status = get_sdts(satellite_position, frontendType);
+	status = get_sdts(satellite_position, frontendType, sat_provider);
 
 	if(allchans.empty())
 	{

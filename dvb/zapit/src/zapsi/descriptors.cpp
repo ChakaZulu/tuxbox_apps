@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.72 2005/12/23 18:56:37 metallica Exp $
+ * $Id: descriptors.cpp,v 1.73 2005/12/25 19:07:55 racker Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -399,7 +399,7 @@ bool check_blacklisted_digital_plus(const t_original_network_id onid, const t_tr
 }
 
 /* 0x48 */
-void service_descriptor(const unsigned char * const buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const t_satellite_position satellite_position, const uint8_t DiSEqC, const uint32_t frequency)
+void service_descriptor(const unsigned char * const buffer, const t_service_id service_id, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const t_satellite_position satellite_position, const uint8_t DiSEqC, const uint32_t frequency, const std::string sat_provider)
 {
 	frequency_kHz_t zfrequency;
 	tallchans_iterator I = allchans.find(CREATE_CHANNEL_ID);
@@ -517,6 +517,9 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 	case ST_NVOD_REFERENCE_SERVICE:
 	case ST_NVOD_TIME_SHIFTED_SERVICE:
 	{
+		if (!(sat_provider.empty()))
+			providerName = sat_provider;
+
 		CBouquet* bouquet;
 		int bouquetId;
 
