@@ -163,13 +163,13 @@ void eDVBCAHandler::handlePMT( const eServiceReferenceDVB &service, PMT *pmt )
 CAService::CAService( const eServiceReferenceDVB &service )
 	: eUnixDomainSocket(eApp), lastPMTVersion(-1), me(service), capmt(NULL), retry(eApp)
 {
+	int socketReconnect = 0;
+	eConfig::getInstance()->getKey("/elitedvb/extra/cahandlerReconnect", socketReconnect);
+	if (socketReconnect)
+	{
+		CONNECT(connectionClosed_, CAService::connectionLost);
+	}
 	CONNECT(retry.timeout, CAService::sendCAPMT);
-#if 0
-	// disabled connection lost handling for old (camd.socket) method
-	// the most clients closes the connection immediately after receive a valid capmt
-	// this is shit.. but we have to respect this
-	CONNECT(connectionClosed_, CAService::connectionLost);
-#endif
 //		eDebug("[eDVBCAHandler] new service %s", service.toString().c_str() );
 }
 
