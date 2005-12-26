@@ -164,7 +164,12 @@ CAService::CAService( const eServiceReferenceDVB &service )
 	: eUnixDomainSocket(eApp), lastPMTVersion(-1), me(service), capmt(NULL), retry(eApp)
 {
 	CONNECT(retry.timeout, CAService::sendCAPMT);
+#if 0
+	// disabled connection lost handling for old (camd.socket) method
+	// the most clients closes the connection immediately after receive a valid capmt
+	// this is shit.. but we have to respect this
 	CONNECT(connectionClosed_, CAService::connectionLost);
+#endif
 //		eDebug("[eDVBCAHandler] new service %s", service.toString().c_str() );
 }
 
@@ -291,15 +296,18 @@ void CAService::buildCAPMT( PMT *pmt )
 
 void CAService::sendCAPMT()
 {
+	bool wasConnected=false;
 	if (state() == Idle || state() == Invalid)
 	{
 		/* we're not connected yet */
 		connectToPath(PMT_CLIENT_SOCKET);
 	}
+	else
+		wasConnected=true;
 
 	if (state() == Connection)
 	{
-		writeCAPMTObject(this, LIST_ONLY);
+		writeCAPMTObject(this, wasConnected ? -1 : LIST_ONLY);
 	}
 	else
 	{
