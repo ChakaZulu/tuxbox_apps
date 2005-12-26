@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.7 2005/12/25 21:08:51 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.8 2005/12/26 11:51:22 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -45,13 +45,17 @@ class eSCGui: public eWindow
 	enum {GOUP, DIRS, FILES};
 	enum {DATA, VCD, SVCD, DVD};
 
+	struct server_value
+	{
+		eString IP, IF_PORT, AUTH;
+	} send_parms;
+
 	PlayList playList;
 	
 	struct serverConfig server;
 
 	eString startdir, cddrive;
 	
-	int MODE;
 	bool menu;
 	unsigned int val;
 
@@ -60,7 +64,7 @@ class eSCGui: public eWindow
 	eMessageBox *bufferingBox;
 	eStatusBar *status;
 
-	void loadList(eString path);
+	void loadList(int mode, eString path);
 	void viewList();
 	void setStatus(int val);
 
@@ -71,6 +75,8 @@ class eSCGui: public eWindow
 	void timerHandler();
 	void playerStart(int val);
 	void showMenu();
+
+	CURLcode sendGetRequest (const eString& url, eString& response);
 public:
 	eSCGui();
 	~eSCGui();
@@ -83,18 +89,6 @@ public:
 	eSCGuiInfo();
 };
 
-class VLCsend
-{
-	CURLcode sendGetRequest (const eString & url, eString & response);
-public:
-	struct server_value
-	{
-		eString IP, IF_PORT, STREAM_PORT, AUTH, RESPONSE;
-	} send_parms;
-	
-	static VLCsend *getInstance();
-	void send(eString val);
-};
 
 
 

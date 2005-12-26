@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.11 2005/12/25 21:08:51 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.12 2005/12/26 11:51:22 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -23,7 +23,7 @@
 #include <plugin.h>
 #include "movieplayer.h"
 
-#define REL "Movieplayer Plugin, Version 0.5"
+#define REL "Movieplayer Plugin, Version 0.6.1"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -41,7 +41,7 @@ bool sortByType(const PLAYLIST& a, const PLAYLIST& b)
 		return a.Filetype < b.Filetype;
 }
 
-eSCGui::eSCGui(): MODE(DATA), menu(true)
+eSCGui::eSCGui(): menu(true)
 {
 	int fd = eSkin::getActive()->queryValue("fontsize", 20);
 	
@@ -52,8 +52,6 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 
 	addActionMap(&i_shortcutActions->map);
 	addActionMap(&i_cursorActions->map);
-
-	eConfig::getInstance()->getKey("/enigma/plugins/movieplayer/lastmode", MODE);
 
 	list = new eListBox<eListBoxEntryText>(this);
 	list->move(ePoint(10, 10));
@@ -104,35 +102,33 @@ eSCGui::eSCGui(): MODE(DATA), menu(true)
 	eMoviePlayer::getInstance()->mpconfig.load();
 	server = eMoviePlayer::getInstance()->mpconfig.getServerConfig();
 	
-	VLCsend::getInstance()->send_parms.IP = server.serverIP;
-	VLCsend::getInstance()->send_parms.IF_PORT = server.webifPort;
-	VLCsend::getInstance()->send_parms.STREAM_PORT = server.streamingPort;
+	send_parms.IP = server.serverIP;
+	send_parms.IF_PORT = server.webifPort;
 	
 	startdir = server.startDir;
 	cddrive = server.CDDrive;	
 
 	if (server.vlcUser && server.vlcPass)
-		VLCsend::getInstance()->send_parms.AUTH = server.vlcUser + ":" + server.vlcPass;
+		send_parms.AUTH = server.vlcUser + ":" + server.vlcPass;
 	
-	loadList(startdir);
+	int mode = DATA;
+	eConfig::getInstance()->getKey("/enigma/plugins/movieplayer/lastmode", mode);
+	loadList(mode, startdir);
 }
 
 eSCGui::~eSCGui()
 {
 	playList.clear();
-	if (timer) 
-		delete timer;
-
-	eConfig::getInstance()->setKey("/enigma/plugins/movieplayer/lastmode", MODE);
+	delete timer;
 }
 
-void eSCGui::loadList(eString pathfull)
+void eSCGui::loadList(int mode, eString pathfull)
 {
 	playList.clear();
 	PLAYLIST a;
 
 	eString tmp2, tmp3;
-	switch (MODE)
+	switch (mode)
 	{
 		case DATA:
 			tmp2 = "File";
@@ -156,10 +152,10 @@ void eSCGui::loadList(eString pathfull)
 			break;
 	}
 
-	if (MODE == DATA)
+	if (mode == DATA)
 	{
-		VLCsend::getInstance()->send("/admin/dboxfiles.html?dir=" + pathfull.strReplace(" ", "%20"));
-		eString response = VLCsend::getInstance()->send_parms.RESPONSE;
+		eString response;
+		sendGetRequest("/admin/dboxfiles.html?dir=" + pathfull.strReplace(" ", "%20"), response);
 
 		std::replace(response.begin(), response.end(), '\\', '/');
 
@@ -227,6 +223,8 @@ void eSCGui::loadList(eString pathfull)
 	}
 	
 	viewList();
+
+	eConfig::getInstance()->setKey("/enigma/plugins/movieplayer/lastmode", mode);
 }
 
 void eSCGui::viewList()
@@ -238,20 +236,8 @@ void eSCGui::viewList()
 	int current = 0;
 
 	for (PlayList::iterator p = playList.begin(); p != playList.end(); p++)
-	{
-		switch ((*p).Filetype)
-		{
-			case GOUP:
-				new eListBoxEntryText(list, (*p).Filename, (void *)current, 2);
-				break;
-			case DIRS:
-			case FILES:
-				new eListBoxEntryText(list, (*p).Filename, (void *)current);
-				break;
-		}
-		current++;
-		//eDebug("\n\nENTRY:%d\nFiletype:%d\nExtitem:%d\nFullname:%s",(*p).Filecounter, (*p).Filetype, (*p).Extitem, (*p).Fullname.c_str());
-	}
+		new eListBoxEntryText(list, (*p).Filename, (void *)current++);
+		
 	list->endAtomic();
 	setStatus(0);
 }
@@ -289,7 +275,7 @@ void eSCGui::listSelected(eListBoxEntryText *item)
 		if (playList[val].Filetype == FILES)
 			playerStart(val);
 		else
-			loadList(playList[val].Fullname);
+			loadList(DATA, playList[val].Fullname);
 	}
 }
 
@@ -324,10 +310,14 @@ void eSCGui::timerHandler()
 		}
 		case eMoviePlayer::STOPPED:
 		{
-			if (++val >= playList.size())
-				val = 0;
-			playerStart(val);
-//			showMenu();
+			if (playList.size() > 1)
+			{
+				if (++val >= playList.size())
+					val = 0;
+				playerStart(val);
+			}
+			else
+				showMenu();
 			break;
 		}
 		default:
@@ -349,7 +339,6 @@ void eSCGui::playerStart(int val)
 	{
 		hide();
 		cmove(ePoint(90, 800)); 
-		show();
 		menu = false;
 	}
 
@@ -394,10 +383,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 		if (e.action == &i_shortcutActions->red)
 		{
 			if (menu)
-			{
-				MODE = DATA;
-				loadList(startdir);
-			}
+				loadList(DATA, startdir);
 			else
 				eMoviePlayer::getInstance()->control("rewind", "");
 		}
@@ -405,10 +391,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 		if (e.action == &i_shortcutActions->green)
 		{
 			if (menu)
-			{
-				MODE = VCD;
-				loadList("");
-			}
+				loadList(VCD, "");
 			else
 			{
 				if (eMoviePlayer::getInstance()->status.STAT == eMoviePlayer::PLAY)
@@ -421,10 +404,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 		if (e.action == &i_shortcutActions->yellow)
 		{
 			if (menu)
-			{
-				MODE = SVCD;
-				loadList("");
-			}
+				loadList(SVCD, "");
 			else
 				eMoviePlayer::getInstance()->control("pause", "");
 		}
@@ -432,10 +412,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 		if (e.action == &i_shortcutActions->blue)
 		{
 			if (menu)
-			{
-				MODE = DVD;
-				loadList("");
-			}
+				loadList(DVD, "");
 			else
 				eMoviePlayer::getInstance()->control("forward", "");
 		}
@@ -520,13 +497,13 @@ size_t CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 	return size * nmemb;
 }
 
-CURLcode VLCsend::sendGetRequest (const eString& url, eString & response)
+CURLcode eSCGui::sendGetRequest (const eString& url, eString& response)
 {
 	CURL *curl;
 	CURLcode httpres;
 
 	eString tmpurl= "http://" + send_parms.IP + ":" + send_parms.IF_PORT + url;
-	//eDebug("[VLC] GET: %s", tmpurl.c_str());
+	response = "";
 
 	curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_URL, tmpurl.c_str());
@@ -541,23 +518,6 @@ CURLcode VLCsend::sendGetRequest (const eString& url, eString & response)
 	//eDebug("[VLC] HTTP Result: %d", httpres);
 	curl_easy_cleanup(curl);
 	return httpres;
-}
-
-void VLCsend::send(eString val)
-{
-	send_parms.RESPONSE = "";
-	if(send_parms.IP && send_parms.IF_PORT && val)
-		sendGetRequest(val, send_parms.RESPONSE);
-	else
-		eDebug("[VLC] <send>");
-}
-
-VLCsend *VLCsend::getInstance()
-{
-	static VLCsend *m_VLCsend = NULL;
-	if (m_VLCsend == NULL)
-		m_VLCsend = new VLCsend();
-	return m_VLCsend;
 }
 
 int plugin_exec(PluginParam *par)
