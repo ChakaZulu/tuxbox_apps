@@ -296,18 +296,19 @@ void CAService::buildCAPMT( PMT *pmt )
 
 void CAService::sendCAPMT()
 {
-	bool wasConnected=false;
 	if (state() == Idle || state() == Invalid)
 	{
 		/* we're not connected yet */
 		connectToPath(PMT_CLIENT_SOCKET);
 	}
-	else
-		wasConnected=true;
 
 	if (state() == Connection)
 	{
-		writeCAPMTObject(this, wasConnected ? -1 : LIST_ONLY);
+		/*
+		 * Send the CAPMT object which we just constructed, with unmodified list_management field.
+		 * This should work in case of a new service, as well as for an updated service.
+		 */
+		writeCAPMTObject(this, -1);
 	}
 	else
 	{
