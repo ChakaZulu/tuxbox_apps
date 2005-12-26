@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.cpp,v 1.6 2005/11/10 23:55:33 mws Exp $
+ * $Id: descriptor_container.cpp,v 1.7 2005/12/26 20:48:58 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -10,6 +10,7 @@
  * See the file 'COPYING' in the top level directory for details.
  */
 
+#include <dvbsi++/aac_descriptor.h>
 #include <dvbsi++/ac3_descriptor.h>
 #include <dvbsi++/ancillary_data_descriptor.h>
 #include <dvbsi++/announcement_support_descriptor.h>
@@ -41,14 +42,17 @@
 #include <dvbsi++/descriptor_container.h>
 #include <dvbsi++/descriptor_tag.h>
 #include <dvbsi++/dii_location_descriptor.h>
+#include <dvbsi++/dts_descriptor.h>
 #include <dvbsi++/dvb_html_application_boundary_descriptor.h>
 #include <dvbsi++/dvb_html_application_descriptor.h>
 #include <dvbsi++/dvb_html_application_location_descriptor.h>
 #include <dvbsi++/dvb_j_application_descriptor.h>
 #include <dvbsi++/dvb_j_application_location_descriptor.h>
 #include <dvbsi++/ecm_repetition_rate_descriptor.h>
+#include <dvbsi++/enhanced_ac3_descriptor.h>
 #include <dvbsi++/est_download_time_descriptor.h>
 #include <dvbsi++/extended_event_descriptor.h>
+#include <dvbsi++/extension_descriptor.h>
 #include <dvbsi++/external_application_authorisation_descriptor.h>
 #include <dvbsi++/frequency_list_descriptor.h>
 #include <dvbsi++/group_link_descriptor.h>
@@ -76,6 +80,7 @@
 #include <dvbsi++/related_content_descriptor.h>
 #include <dvbsi++/satellite_delivery_system_descriptor.h>
 #include <dvbsi++/s2_satellite_delivery_system_descriptor.h>
+#include <dvbsi++/scrambling_descriptor.h>
 #include <dvbsi++/service_descriptor.h>
 #include <dvbsi++/service_identifier_descriptor.h>
 #include <dvbsi++/service_list_descriptor.h>
@@ -298,6 +303,10 @@ void DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool back)
 		(descriptorList.*pushFunc)(new DataBroadcastDescriptor(buffer));
 		break;
 
+	case SCRAMBLING_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new ScramblingDescriptor(buffer));
+		break;
+
 	case DATA_BROADCAST_ID_DESCRIPTOR:
 		(descriptorList.*pushFunc)(new DataBroadcastIdDescriptor(buffer));
 		break;
@@ -349,10 +358,22 @@ void DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool back)
 		(descriptorList.*pushFunc)(new TimeSliceFecIdentifierDescriptor(buffer));
 		break;
 	case ECM_REPETITION_RATE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ECMRepetitionRateDecriptor(buffer));
+		(descriptorList.*pushFunc)(new ECMRepetitionRateDescriptor(buffer));
 		break;
 	case S2_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
 		(descriptorList.*pushFunc)(new S2SatelliteDeliverySystemDescriptor(buffer));
+		break;
+	case ENHANCED_AC3_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new EnhancedAC3Descriptor(buffer));
+		break;
+	case DTS_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new DTSDescriptor(buffer));
+		break;
+	case AAC_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new AACDescriptor(buffer));
+		break;
+	case EXTENSION_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new ExtensionDescriptor(buffer));
 		break;
 	default:
 		(descriptorList.*pushFunc)(new UnknownDescriptor(buffer));

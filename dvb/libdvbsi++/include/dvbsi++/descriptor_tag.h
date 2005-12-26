@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_tag.h,v 1.5 2005/11/13 17:40:12 mws Exp $
+ * $Id: descriptor_tag.h,v 1.6 2005/12/26 20:48:57 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -71,7 +71,7 @@ enum SiDescriptorTag {
 	FREQUENCY_LIST_DESCRIPTOR			= 0x62,
 	PARTIAL_TRANSPORT_STREAM_DESCRIPTOR		= 0x63,
 	DATA_BROADCAST_DESCRIPTOR			= 0x64,
-	/* 0x65: Reserved */
+	SCRAMBLING_DESCRIPTOR				= 0x65,
 	DATA_BROADCAST_ID_DESCRIPTOR			= 0x66,
 	TRANSPORT_STREAM_DESCRIPTOR			= 0x67,
 	DSNG_DESCRIPTOR					= 0x68,
@@ -93,8 +93,13 @@ enum SiDescriptorTag {
 	// EN 301 192
 	TIME_SLICE_FEC_IDENTIFIER_DESCRIPTOR		= 0x77,
 	ECM_REPETITION_RATE_DESCRIPTOR			= 0x78,
-	// EN 300 468 1.7.1
+	// EN 300 468 1.7.1 defines 0x79 - 0x7C / 0x7F
 	S2_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR		= 0x79,
+	ENHANCED_AC3_DESCRIPTOR				= 0x7A,
+	DTS_DESCRIPTOR					= 0x7B,
+	AAC_DESCRIPTOR					= 0x7C,
+	// EN 300 468 1.7.1 defines 0x7D - 0x7E reserved
+	EXTENSION_DESCRIPTOR				= 0x7F,
 	/* 0x80 - 0xFE: User defined */
 	/* 0xFF: Forbidden */
 	FORBIDDEN_DESCRIPTOR				= 0xFF

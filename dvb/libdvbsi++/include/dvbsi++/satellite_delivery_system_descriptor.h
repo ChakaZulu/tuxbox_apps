@@ -1,5 +1,5 @@
 /*
- * $Id: satellite_delivery_system_descriptor.h,v 1.3 2005/11/10 23:55:32 mws Exp $
+ * $Id: satellite_delivery_system_descriptor.h,v 1.4 2005/12/26 20:48:57 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -22,11 +22,9 @@ class SatelliteDeliverySystemDescriptor : public Descriptor
 		unsigned orbitalPosition			: 16;
 		unsigned westEastFlag				: 1;
 		unsigned polarization				: 2;
-		// TODO remove later on if verified with final standard
-		//unsigned modulation				: 5;
 		unsigned rollOff				: 2;
-		unsigned kind					: 1;
-		unsigned narrowModulation			: 2;
+		unsigned modulationSystem			: 1;
+		unsigned modulationType				: 2;
 		unsigned symbolRate				: 28;
 		unsigned fecInner				: 4;
 
@@ -38,7 +36,7 @@ class SatelliteDeliverySystemDescriptor : public Descriptor
 		uint8_t getWestEastFlag(void) const;
 		uint8_t getPolarization(void) const;
 		uint8_t getRollOff(void) const;
-		uint8_t getKind(void) const;
+		uint8_t getModulationSystem(void) const;
 		uint8_t getModulation(void) const;
 		uint32_t getSymbolRate(void) const;
 		uint8_t getFecInner(void) const;

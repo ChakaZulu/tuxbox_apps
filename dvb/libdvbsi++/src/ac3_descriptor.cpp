@@ -1,5 +1,5 @@
 /*
- * $Id: ac3_descriptor.cpp,v 1.3 2005/10/29 00:10:16 obi Exp $
+ * $Id: ac3_descriptor.cpp,v 1.4 2005/12/26 20:48:58 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -27,20 +27,27 @@ Ac3Descriptor::Ac3Descriptor(const uint8_t * const buffer) : Descriptor(buffer)
 		asvcFlag = 0;
 	}
 
+	size_t i = 3;
 	if (ac3TypeFlag == 1)
-		ac3Type = buffer[3];
+		ac3Type = buffer[i++];
 
 	if (bsidFlag == 1)
-		bsid = buffer[ac3TypeFlag + 3];
+		bsid = buffer[i++];
 
 	if (mainidFlag == 1)
-		mainid = buffer[ac3TypeFlag + mainidFlag + 3];
+		mainid = buffer[i++];
 
 	if (asvcFlag == 1)
-		avsc = buffer[ac3TypeFlag + bsidFlag + mainidFlag + 3];
+		avsc = buffer[i++];
 
-	for (size_t i = 0; i < descriptorLength - ac3TypeFlag - bsidFlag - mainidFlag - asvcFlag - 1; ++i)
-		additionalInfo.push_back(buffer[ac3TypeFlag + bsidFlag + mainidFlag + asvcFlag + i + 3]);
+	if ( descriptorLength > 0)
+	{
+		additionalInfo.resize(descriptorLength - (i - 2));
+		memcpy(&additionalInfo[0], buffer + i, descriptorLength - (i - 2));
+	}
+	// TODO cleanup after verify
+//	for (size_t i = 0; i < descriptorLength - ac3TypeFlag - bsidFlag - mainidFlag - asvcFlag - 1; ++i)
+//		additionalInfo.push_back(buffer[ac3TypeFlag + bsidFlag + mainidFlag + asvcFlag + i + 3]);
 }
 
 uint8_t Ac3Descriptor::getAc3TypeFlag(void) const
@@ -83,7 +90,7 @@ uint8_t Ac3Descriptor::getAvsc(void) const
 	return avsc;
 }
 
-const AdditionalInfoList *Ac3Descriptor::getAdditionalInfo(void) const
+const AdditionalInfoVector *Ac3Descriptor::getAdditionalInfo(void) const
 {
 	return &additionalInfo;
 }

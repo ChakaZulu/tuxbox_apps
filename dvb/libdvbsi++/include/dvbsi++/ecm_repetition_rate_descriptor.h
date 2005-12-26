@@ -1,5 +1,5 @@
 /*
- *  $Id: ecm_repetition_rate_descriptor.h,v 1.1 2005/11/10 23:55:32 mws Exp $
+ *  $Id: ecm_repetition_rate_descriptor.h,v 1.2 2005/12/26 20:48:57 mws Exp $
  *
  *  Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -18,7 +18,7 @@ typedef std::vector<uint8_t> ECMRepetitionPrivateByteVector;
 typedef ECMRepetitionPrivateByteVector::iterator ECMRepetitionPrivateByteIterator;
 typedef ECMRepetitionPrivateByteVector::const_iterator ECMRepetitionPrivateByteConstIterator;
 
-class ECMRepetitionRateDecriptor : public Descriptor
+class ECMRepetitionRateDescriptor : public Descriptor
 {
 	protected:
 		unsigned caSystemId			:16;
@@ -27,8 +27,8 @@ class ECMRepetitionRateDecriptor : public Descriptor
 		ECMRepetitionPrivateByteVector privateDataBytes;
 
 	public:
-		ECMRepetitionRateDecriptor(const uint8_t* const buffer);
-		virtual ~ECMRepetitionRateDecriptor();
+		ECMRepetitionRateDescriptor(const uint8_t* const buffer);
+		virtual ~ECMRepetitionRateDescriptor();
 
 		uint16_t getCaSystemId(void) const;
 		uint16_t getRepetitionRate(void) const;

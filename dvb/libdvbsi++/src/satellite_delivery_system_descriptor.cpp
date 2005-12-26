@@ -1,5 +1,5 @@
 /*
- * $Id: satellite_delivery_system_descriptor.cpp,v 1.4 2005/11/10 23:55:33 mws Exp $
+ * $Id: satellite_delivery_system_descriptor.cpp,v 1.5 2005/12/26 20:48:58 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -30,11 +30,9 @@ SatelliteDeliverySystemDescriptor::SatelliteDeliverySystemDescriptor(const uint8
 	orbitalPosition = UINT16(&buffer[6]);
 	westEastFlag = (buffer[8] >> 7) & 0x01;
 	polarization = (buffer[8] >> 5) & 0x03;
-	// TODO remove after verification final version of EN300468 1.7.1
-	//modulation = buffer[8] & 0x1F;
 	rollOff = (buffer[8] >> 4) & 0x03;
-	kind = (buffer[8] >> 2) & 0x01;
-	narrowModulation = (buffer[8]) & 0x03;
+	modulationSystem = (buffer[8] >> 2) & 0x01;
+	modulationType = (buffer[8]) & 0x03;
 
 	symbolRate =
 	(
@@ -72,19 +70,17 @@ uint8_t SatelliteDeliverySystemDescriptor::getPolarization(void) const
 
 uint8_t SatelliteDeliverySystemDescriptor::getModulation(void) const
 {
-	return narrowModulation;
+	return modulationType;
 }
 
 uint8_t SatelliteDeliverySystemDescriptor::getRollOff(void) const
 {
-	// DVB-S2
 	return rollOff;
 }
 
-uint8_t SatelliteDeliverySystemDescriptor::getKind(void) const
+uint8_t SatelliteDeliverySystemDescriptor::getModulationSystem(void) const
 {
-	// DVB-S2
-	return kind;
+	return modulationSystem;
 }
 
 uint32_t SatelliteDeliverySystemDescriptor::getSymbolRate(void) const

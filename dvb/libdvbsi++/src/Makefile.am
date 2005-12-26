@@ -6,6 +6,7 @@ libdvbsi___la_LDFLAGS = \
 	-release $(LT_RELEASE)
 
 libdvbsi___la_SOURCES = \
+	aac_descriptor.cpp \
 	ac3_descriptor.cpp \
 	ancillary_data_descriptor.cpp \
 	announcement_support_descriptor.cpp \
@@ -45,14 +46,17 @@ libdvbsi___la_SOURCES = \
 	descriptor.cpp \
 	descriptor_container.cpp \
 	dii_location_descriptor.cpp \
+	dts_descriptor.cpp \
 	dvb_html_application_boundary_descriptor.cpp \
 	dvb_html_application_descriptor.cpp \
 	dvb_html_application_location_descriptor.cpp \
 	dvb_j_application_descriptor.cpp \
 	dvb_j_application_location_descriptor.cpp \
 	ecm_repetition_rate_descriptor.cpp \
+	enhanced_ac3_descriptor.cpp \
 	est_download_time_descriptor.cpp \
 	event_information_section.cpp \
+	extension_descriptor.cpp \
 	external_application_authorisation_descriptor.cpp \
 	extended_event_descriptor.cpp \
 	frequency_list_descriptor.cpp \
@@ -87,6 +91,7 @@ libdvbsi___la_SOURCES = \
 	related_content_descriptor.cpp \
 	satellite_delivery_system_descriptor.cpp \
 	s2_satellite_delivery_system_descriptor.cpp \
+	scrambling_descriptor.cpp \
 	service_description_section.cpp \
 	service_descriptor.cpp \
 	service_identifier_descriptor.cpp \
