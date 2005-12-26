@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.12 2005/12/26 11:51:22 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.13 2005/12/26 14:11:48 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -338,7 +338,8 @@ void eSCGui::playerStart(int val)
 	if (menu)
 	{
 		hide();
-		cmove(ePoint(90, 800)); 
+		cmove(ePoint(90, 800));
+		show();
 		menu = false;
 	}
 
