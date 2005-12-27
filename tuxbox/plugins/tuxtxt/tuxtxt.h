@@ -611,7 +611,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דautomatische Erkennung      הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/Language deutsch מהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -639,7 +639,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד automatic recognition      הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/language english מהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -667,7 +667,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דreconn. automatique         הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/language francaisמהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -695,7 +695,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דautomatische herkenning     הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/Language nederl. מהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -723,7 +723,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"דaut|latg amacm~qisg         הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Ck~ssa/Language ekkgmij\\ מהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -751,7 +751,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד riconoscimento automatico  הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Lingua/Language Italiana מהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -779,7 +779,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד automatyczne rozpozn.      הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם  J`zyk/Language   polski מהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -807,7 +807,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד automatisk igenk{nning     הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Sprache/language svenska מהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 /*     0000000000111111111122222222223 */
@@ -835,7 +835,7 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"ד automaattinen tunnistus    הי"
 		"דם    DE    (#$@[\\]^_`{|}~) מהי"
 		"דם Kieli            suomi   מהי"
-		"וז   www.tuxtxt.com  x.xx   זחי"
+		"וז   www.tuxtxt.net  x.xx   זחי"
 		"כלללללללללללללללללללללללללללללך"
 	},
 };
