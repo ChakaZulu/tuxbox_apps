@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.59 2005/12/26 14:38:26 pieterg Exp $
+ * $Id: setup_extra.cpp,v 1.60 2005/12/27 12:21:32 pieterg Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -93,17 +93,17 @@ void eExpertSetup::init_eExpertSetup()
 	}
 #endif
 	timeout_infobar = new eListBoxEntryMulti( (eListBox<eListBoxEntryMulti>*)&list, _("infobar timeout (left, right)"));
-	timeout_infobar->add("  Infobar timeout 2 sec >", 2);
-	timeout_infobar->add("< Infobar timeout 3 sec >", 3);
-	timeout_infobar->add("< Infobar timeout 4 sec >", 4);
-	timeout_infobar->add("< Infobar timeout 5 sec >", 5);
-	timeout_infobar->add("< Infobar timeout 6 sec >", 6);
-	timeout_infobar->add("< Infobar timeout 7 sec >", 7);
-	timeout_infobar->add("< Infobar timeout 8 sec >", 8);
-	timeout_infobar->add("< Infobar timeout 9 sec >", 9);
-	timeout_infobar->add("< Infobar timeout 10 sec >", 10);
-	timeout_infobar->add("< Infobar timeout 11 sec >", 11);
-	timeout_infobar->add("< Infobar timeout 12 sec  ", 12);
+	timeout_infobar->add((eString)"  " + eString().sprintf(_("Infobar timeout %d sec"), 2) + (eString)" >", 2);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 3) + (eString)" >", 3);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 4) + (eString)" >", 4);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 5) + (eString)" >", 5);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 6) + (eString)" >", 6);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 7) + (eString)" >", 7);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 8) + (eString)" >", 8);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 9) + (eString)" >", 9);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 10) + (eString)" >", 10);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 11) + (eString)" >", 11);
+	timeout_infobar->add((eString)"< " + eString().sprintf(_("Infobar timeout %d sec"), 12) + (eString)"  ", 12);
 	int timeoutInfobar = 6;
 	eConfig::getInstance()->getKey("/enigma/timeoutInfobar", timeoutInfobar);
 	timeout_infobar->setCurrent(timeoutInfobar);
