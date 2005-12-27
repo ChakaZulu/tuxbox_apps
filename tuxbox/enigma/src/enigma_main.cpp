@@ -3969,6 +3969,44 @@ void eZapMain::deleteService( eServiceSelector *sel )
 }
 
 #ifndef DISABLE_FILE
+void eZapMain::deleteFile(eServiceReference ref)
+{
+	bool isTS = (ref.path.right(3).upper() == ".TS");
+	int slice=0;
+	eString filename=ref.path;
+	if ( isTS )
+	{
+		for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
+			it != recordings->getList().end(); ++it )
+		{
+			if ( it->service.path == ref.path )
+			{
+				recordings->getList().erase(it);
+				recordings->save();
+				break;
+			}
+		}
+		filename.erase(filename.length()-2,2);
+		filename+="eit";
+		::unlink(filename.c_str());
+		::unlink((ref.path+".indexmarks").c_str());
+	}
+	while (1)
+	{
+		filename=ref.path;
+		if ( isTS )
+		{
+			if (slice)
+				filename+=eString().sprintf(".%03d", slice);
+			slice++;
+		}
+		struct stat64 s;
+		if (::stat64(filename.c_str(), &s) < 0)
+			break;
+		eBackgroundFileEraser::getInstance()->erase(filename.c_str());
+	}
+}
+
 void eZapMain::deleteFile( eServiceSelector *sel )
 {
 	eServiceReference ref=sel->getSelected();
@@ -3992,42 +4030,52 @@ void eZapMain::deleteFile( eServiceSelector *sel )
 
 	if (removeEntry)
 	{
-		bool isTS = (ref.path.right(3).upper() == ".TS");
-		int slice=0;
-		eString filename=ref.path;
-		if ( isTS )
+		deleteFile(ref);
+		sel->removeCurrent(false);
+	}
+}
+
+int eZapMain::renameFile(eString oldFilePath, eString newFilePath)
+{
+	int rc = 0;
+
+	if ( ::rename( oldFilePath.c_str(), newFilePath.c_str() ) < 0 )
+		eDebug("rename File '%s' to '%s' failed (%m)",
+			oldFilePath.c_str(), newFilePath.c_str() );
+	else
+	{
+		if (oldFilePath.right(3).upper() == ".TS")
 		{
+			int ret = 0;
+			int cnt = 1;
+			do
+			{
+				eString tmpold, tmpnew;
+				tmpold.sprintf("%s.%03d", oldFilePath.c_str(), cnt);
+				tmpnew.sprintf("%s.%03d", newFilePath.c_str(), cnt++);
+				ret = ::rename(tmpold.c_str(), tmpnew.c_str());
+			}
+			while( !ret );
 			for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
 				it != recordings->getList().end(); ++it )
 			{
-				if ( it->service.path == ref.path )
+				if ( it->service.path == oldFilePath )
 				{
-					recordings->getList().erase(it);
+					it->service.path=newFilePath;
 					recordings->save();
 					break;
 				}
 			}
-			filename.erase(filename.length()-2,2);
-			filename+="eit";
-			::unlink(filename.c_str());
-			::unlink((ref.path+".indexmarks").c_str());
+			::rename((oldFilePath + ".indexmarks").c_str(), (newFilePath + ".indexmarks").c_str());
+			eString fname = oldFilePath;
+			fname.erase(fname.length()-2,2);
+			fname += "eit";
+			newFilePath.erase(newFilePath.length() - 2, 2);
+			::rename(fname.c_str(), (newFilePath + "eit").c_str());
 		}
-		while (1)
-		{
-			filename=ref.path;
-			if ( isTS )
-			{
-				if (slice)
-					filename+=eString().sprintf(".%03d", slice);
-				slice++;
-			}
-			struct stat64 s;
-			if (::stat64(filename.c_str(), &s) < 0)
-				break;
-			eBackgroundFileEraser::getInstance()->erase(filename.c_str());
-		}
-		sel->removeCurrent(false);
+		rc = 1;
 	}
+	return rc;
 }
 
 void eZapMain::renameFile( eServiceSelector *sel )
@@ -4058,40 +4106,8 @@ void eZapMain::renameFile( eServiceSelector *sel )
 			if ( c != eString::npos )
 				newFilePath += ref.path.mid( c );
 
-			if ( ::rename( oldFilePath.c_str(), newFilePath.c_str() ) < 0 )
-				eDebug("rename File '%s' to '%s' failed (%m)",
-					ref.path.c_str(), newFilePath.c_str() );
-			else
+			if (renameFile(oldFilePath, newFilePath))
 			{
-				if ( ref.path.right(3).upper() == ".TS" )
-				{
-					int ret = 0;
-					int cnt = 1;
-					do
-					{
-						eString tmpold, tmpnew;
-						tmpold.sprintf("%s.%03d", ref.path.c_str(), cnt);
-						tmpnew.sprintf("%s.%03d", newFilePath.c_str(), cnt++);
-						ret = ::rename(tmpold.c_str(), tmpnew.c_str());
-					}
-					while( !ret );
-					for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
-						it != recordings->getList().end(); ++it )
-					{
-						if ( it->service.path == ref.path )
-						{
-							it->service.path=newFilePath;
-							recordings->save();
-							break;
-						}
-					}
-					::rename((ref.path+".indexmarks").c_str(), (newFilePath+".indexmarks").c_str());
-					eString fname=ref.path;
-					fname.erase(fname.length()-2,2);
-					fname+="eit";
-					newFilePath.erase(newFilePath.length()-2,2);
-					::rename(fname.c_str(), (newFilePath+"eit").c_str());
-				}
 				ref.path=newFilePath;
 				sel->invalidateCurrent(ref);
 			}

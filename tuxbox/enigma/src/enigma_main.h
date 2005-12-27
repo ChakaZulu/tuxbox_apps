@@ -565,6 +565,8 @@ private:
 	void EPGAvail(bool);
 
 public:
+	void deleteFile(eServiceReference);
+	int renameFile(eString, eString);
 	bool checkRecordState() { return handleState(); }
     	eServicePath getRoot(int list, int mode=-1);
 	int getFirstBouquetServiceNum( eServiceReference ref, int mode=-1);

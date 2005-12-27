@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_timer.cpp,v 1.17 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn_timer.cpp,v 1.18 2005/12/27 17:40:30 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -78,11 +78,12 @@
 
 using namespace std;
 
-extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
-extern bool canPlayService(const eServiceReference & ref); // implemented in timer.cpp
+extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB& ref2); // implemented in timer.cpp
+extern bool canPlayService(const eServiceReference& ref); // implemented in timer.cpp
 extern int pdaScreen;
 extern eString zap[5][5];
 extern eString getZapContent(eString path, int depth, bool addEPG, bool sortList, bool forceAll);
+extern bool playService(const eServiceReference& ref);
 
 class myTimerEntry
 {
@@ -404,45 +405,61 @@ static eString addTVBrowserTimerEvent(eString request, eString dirpath, eString 
 		eDebug("exited");
 	}
 
-	if (result1)
+	if (command == "zap")
 	{
-		if (command == "add")
+		if (result1)
 		{
-			ePlaylistEntry entry(string2ref(result1), eventStartTime, duration, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-			entry.service.descr = channel + "/" + description;
-
-			if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-			{
-				content->code = 400;
-				content->code_descr = "Function failed.";
-				result = "Timer event could not be added because time of the event overlaps with an already existing event.";
-			}
-			else
-				result = "Timer event was created successfully.";
-			eTimerManager::getInstance()->saveTimerList();
+			playService(string2ref(result1));
 		}
-		if (command == "delete")
-		{
-			ePlaylistEntry e(
-				string2ref(result1),
-				eventStartTime,
-				-1, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
-
-			eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
-			eTimerManager::getInstance()->saveTimerList();
-			result = "Timer event deleted successfully.";
-		}
-	}
-	else
-	{
-		if (command == "add")
+		else
 		{
 			content->code = 400;
 			content->code_descr = "Function failed.";
 			result = "TVBrowser and Enigma service name don't match.";
 		}
+	}
+	else
+	{
+		if (result1)
+		{
+			if (command == "add")
+			{
+				ePlaylistEntry entry(string2ref(result1), eventStartTime, duration, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+				entry.service.descr = channel + "/" + description;
+
+				if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
+				{
+					content->code = 400;
+					content->code_descr = "Function failed.";
+					result = "Timer event could not be added because time of the event overlaps with an already existing event.";
+				}
+				else
+					result = "Timer event was created successfully.";
+				eTimerManager::getInstance()->saveTimerList();
+			}
+			if (command == "delete")
+			{
+				ePlaylistEntry e(
+					string2ref(result1),
+					eventStartTime,
+					-1, -1, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+
+				eTimerManager::getInstance()->deleteEventFromTimerList(e, true);
+				eTimerManager::getInstance()->saveTimerList();
+				result = "Timer event deleted successfully.";
+			}
+		}
 		else
-			result = "Service of timer event does not exist, or no longer exists.";
+		{
+			if (command == "add")
+			{
+				content->code = 400;
+				content->code_descr = "Function failed.";
+				result = "TVBrowser and Enigma service name don't match.";
+			}
+			else
+				result = "Service of timer event does not exist, or no longer exists.";
+		}
 	}
 
 	return result;
