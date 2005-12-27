@@ -2,6 +2,10 @@ TuxCom:
 
 History:
 ---------
+27.12.2005 Version 1.12
+ - portugese translation added
+ - two little bugfixes in editor
+ 
 22.11.2005 Version 1.11
  - better keyboard handling when using Exit/Enter on DMM-Keyboard
  - small bugs fixed in editor

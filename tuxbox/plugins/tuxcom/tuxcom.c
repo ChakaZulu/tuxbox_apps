@@ -521,15 +521,17 @@ void SetLanguage()
 		if (strncmp(setlocale( LC_ALL, NULL ),"de",2) == 0) language=LANG_DE;
 		if (strncmp(setlocale( LC_ALL, NULL ),"it",2) == 0) language=LANG_IT;
 		if (strncmp(setlocale( LC_ALL, NULL ),"sv",2) == 0) language=LANG_SV;
+		if (strncmp(setlocale( LC_ALL, NULL ),"pt",2) == 0) language=LANG_PT;
 	}
 	else
 	{
 		switch (langselect)
 		{
-			case BTN_GERMAN : language = LANG_DE ; break;
-			case BTN_ITALIAN: language = LANG_IT ; break;
-			case BTN_SWEDISH: language = LANG_SV ; break;
-			default         : language = LANG_INT; break;
+			case BTN_GERMAN   : language = LANG_DE ; break;
+			case BTN_ITALIAN  : language = LANG_IT ; break;
+			case BTN_SWEDISH  : language = LANG_SV ; break;
+			case BTN_PORTUGUES: language = LANG_PT ; break;
+			default           : language = LANG_INT; break;
 		}
 	}
 }
@@ -1006,7 +1008,7 @@ void plugin_exec(PluginParam *par)
 					if (tool[ACTION_COPY-1] == ACTION_COPY)
 					{
 						tmpzipdir[0] = 0x00;
-						char* szZipCommand = (char*)malloc(commandsize);					
+						char* szZipCommand = (char*)malloc(commandsize);
 						szZipCommand[0] = 0x00;
 						RenderMenuLine(ACTION_COPY-1, YES);
 						pfe = GetSelected(curframe);
@@ -2202,11 +2204,12 @@ void DoMainMenu()
 						case 4:
 							switch (langselect)
 							{
-								case BTN_AUTO   : langselect = BTN_ENGLISH; break;
-								case BTN_SWEDISH: langselect = BTN_AUTO   ; break;
-								case BTN_ITALIAN: langselect = BTN_SWEDISH; break;
-								case BTN_GERMAN : langselect = BTN_ITALIAN; break;
-								case BTN_ENGLISH: langselect = BTN_GERMAN ; break;
+								case BTN_AUTO     : langselect = BTN_ENGLISH  ; break;
+								case BTN_PORTUGUES: langselect = BTN_AUTO     ; break;
+								case BTN_SWEDISH  : langselect = BTN_PORTUGUES; break;
+								case BTN_ITALIAN  : langselect = BTN_SWEDISH  ; break;
+								case BTN_GERMAN   : langselect = BTN_ITALIAN  ; break;
+								case BTN_ENGLISH  : langselect = BTN_GERMAN   ; break;
 							}
 							SetLanguage();
 							break;
@@ -2227,11 +2230,12 @@ void DoMainMenu()
 						case 4:
 							switch (langselect)
 							{
-								case BTN_AUTO   : langselect = BTN_SWEDISH; break;
-								case BTN_SWEDISH: langselect = BTN_ITALIAN; break;
-								case BTN_ITALIAN: langselect = BTN_GERMAN ; break;
-								case BTN_GERMAN : langselect = BTN_ENGLISH; break;
-								case BTN_ENGLISH: langselect = BTN_AUTO   ; break;
+								case BTN_AUTO     : langselect = BTN_PORTUGUES; break;
+								case BTN_PORTUGUES: langselect = BTN_SWEDISH  ; break;
+								case BTN_SWEDISH  : langselect = BTN_ITALIAN  ; break;
+								case BTN_ITALIAN  : langselect = BTN_GERMAN   ; break;
+								case BTN_GERMAN   : langselect = BTN_ENGLISH  ; break;
+								case BTN_ENGLISH  : langselect = BTN_AUTO     ; break;
 							}
 							SetLanguage();
 							break;
@@ -2617,7 +2621,11 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 		{
 			if (pos > maxchars) pos = maxchars;
 			else
+			{
+				char* c = strchr(szdst,'\n');
+				if (c) *c = ' ';
 				strcat(szdst," ");
+			}
 		}
 		if (start > pos) start = pos;
 		while (1)
@@ -3538,6 +3546,7 @@ void InsertText(char* pStart, char* pEnd,char* szText, int sel, int* pcount)
 {
 	int oldlen = (pEnd ? pEnd-pStart: strlen(pStart));
 	int newlen = strlen(szText);
+	if (pEnd && szText[newlen-1] != '\n') {szText[newlen] = '\n'; newlen++;}
 	int movlen = (pEnd ? (FILEBUFFER_SIZE-newlen <= strlen(pEnd) ? FILEBUFFER_SIZE-newlen-1 : strlen(pEnd)) : 0);
 	int step = (sel > 0 && (*(pStart-1) != '\n') ? 1 : 0)+ (szText[newlen-1] != '\n' ? 1 : 0);
 	if (pEnd && (oldlen != newlen+step) && movlen > 0)
@@ -3551,7 +3560,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 	FILE* pFile = fopen(szFile,"r");
 	char* szFileBuffer = (char*)malloc(FILEBUFFER_SIZE);
 	szFileBuffer [0]= 0x00;
-	
+
 	char *p = szFileBuffer, *p1, *pcur = szFileBuffer, *pStart = szFileBuffer, *pStop = NULL, *pMarkStart = NULL,*pMarkStop = NULL, *pMark = NULL;
 	char szInputBuffer[1001];
 	char szLineNumber[20];

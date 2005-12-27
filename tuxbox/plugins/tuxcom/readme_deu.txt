@@ -2,6 +2,10 @@ TuxCom:
 
 Historie:
 ---------
+27.12.2005 Version 1.12
+ - Portugiesische Übersetzung eingebaut (Dank an jlmota)
+ - zwei kleine Fehler im Editor behoben
+ 
 22.11.2005 Version 1.11
  - Bessere Tastaturabfrage bei Exit/Enter auf DMM-Tastatur
  - kleinere Fehler im Editor ausgebessert

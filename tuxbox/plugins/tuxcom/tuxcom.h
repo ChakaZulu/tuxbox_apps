@@ -77,7 +77,7 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.11\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.12\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004-2005"
 
 #ifdef HAVE_DREAMBOX_HARDWARE
@@ -256,7 +256,7 @@ int rcaltgrtable[] =
 // if font is not in usual place, we look here:
 #define FONT2 "/var/tuxbox/config/enigma/fonts/pakenham.ttf"
 
-enum {LANG_INT,LANG_DE, LANG_IT, LANG_SV};
+enum {LANG_INT,LANG_DE, LANG_IT, LANG_SV, LANG_PT};
 enum {RC_NORMAL,RC_EDIT};
 enum {LEFT, CENTER, RIGHT};
 enum {VERY_SMALL, SMALL, BIG};
@@ -389,6 +389,7 @@ int language, langselect, autosave;
 #define BTN_ENGLISH       13
 #define BTN_ITALIAN       14
 #define BTN_SWEDISH       15
+#define BTN_PORTUGUES     16
 
 #define SORT_UP    1
 #define SORT_DOWN -1
@@ -405,7 +406,7 @@ int language, langselect, autosave;
 
 #define INI_VERSION 1
 
-#define NUM_LANG 4
+#define NUM_LANG 5
 
 #define MAINMENU 7
 
@@ -473,131 +474,132 @@ char *numberchars[] = {  "0#!$%&?*()@\\",
                  		 "tuv8",
                  		 "wxyz9" };
 
-char *info[]   = { "(select 'hidden' to copy in background)"               ,"('versteckt' wählen zum Kopieren im Hintergrund)"              ,"(Seleziona 'nascosto' per copiare in background)"              ,"(välj 'gömd' för att kopiera i bakgrunden)"        ,
-                   "(select 'hidden' to move in background)"               ,"('versteckt' wählen zum Verschieben im Hintergrund)"           ,"(Seleziona 'nascosto' per muovere in background)"              ,"(välj 'gömd' för att flytta i bakgrund)"           ,
-                   "(select 'hidden' to execute in background)"            ,"('versteckt' wählen zum Ausführen im Hintergrund)"             ,"(Seleziona 'nascosto' per eseguire in background)"             ,"(välj 'hidden' för att starta i bakgrunden)"       ,
-                   "selected:%d"                                           ,"markiert:%d"                                                   ,"Seleziona:%d"                                                  ,"vald:%d"                                           ,
-				   "Warning: killing a process can make your box unstable!","Warnung: Prozesse beenden kann die Box instabil werden lassen!","Attenzione: fermare un processo può rendere il DB instabile!"  ,"Varning: döda en process kan göra din box ostabil!",
-				   "Please enter your password"                            ,"Bitte Passwort eingeben"                                       ,"Per fovore inserire la password"                               ,"Skriv in ditt lösenord"                            ,
-				   "Please enter new password"                             ,"Bitte neues Passwort eingeben"                                 ,"Per fovore inserire la nuova password"                         ,"Skriv in ditt nya lösenord"                        ,
-				   "Please enter new password again"                       ,"Bitte neues Passwort wiederholen"                              ,"Per fovore inserire la nuova password di nuovo"                ,"Skriv in ditt nya lösenord igen"                   ,
-				   "password has been changed"                             ,"Passwort wurde geändert"                                       ,"La password è stata cambiata"                                  ,"lösenordet har ändrats"                            ,
-				   "searching..."							               ,"Suche läuft..."                                                ,"Ricerca in corso..."                                           ,"Söker..."                                          ,
-				   "search result"									       ,"Suchergebnis"                                                  ,"Risultato della ricerca"                                       ,"Sökresultat"                                       ,
-				   "settings saved"                                        ,"Einstellungen gespeichert"                                     ,"Impostazioni salvate"                                          ,"Inställningar sparade"                             ,
-				   "last access"                                           ,"letzter Zugriff"                                               ,"last access"                                                   ,"Senast öppnad"                                     ,
-				   "last modified"                                         ,"letze Änderung"                                                ,"last modified"                                                 ,"Senast modifierad"                                 ,
-				   "created"                                               ,"Erstellung"                                                    ,"created"                                                       ,"skapad"                                            ,
-				   "%m/%d/%Y %H:%M:%S"                                     ,"%d.%m.%Y %H:%M:%S"                                             ,"%m/%d/%Y %H:%M:%S"                                             ,"%Y-%m-%d %H:%M:%S"                                 };
+char *info[]   = { "(select 'hidden' to copy in background)"               ,"('versteckt' wählen zum Kopieren im Hintergrund)"              ,"(Seleziona 'nascosto' per copiare in background)"              ,"(välj 'gömd' för att kopiera i bakgrunden)"        ,"(Seleccionar 'Escondido' para copiar em background)"  ,
+                   "(select 'hidden' to move in background)"               ,"('versteckt' wählen zum Verschieben im Hintergrund)"           ,"(Seleziona 'nascosto' per muovere in background)"              ,"(välj 'gömd' för att flytta i bakgrund)"           ,"(Seleccionar 'Escondido' para mover em background)"   ,
+                   "(select 'hidden' to execute in background)"            ,"('versteckt' wählen zum Ausführen im Hintergrund)"             ,"(Seleziona 'nascosto' per eseguire in background)"             ,"(välj 'hidden' för att starta i bakgrunden)"       ,"(Seleccionar 'Escondido' para executar em background)",
+                   "selected:%d"                                           ,"markiert:%d"                                                   ,"Seleziona:%d"                                                  ,"vald:%d"                                           ,"Seleccionado:%d"                                      ,
+				   "Warning: killing a process can make your box unstable!","Warnung: Prozesse beenden kann die Box instabil werden lassen!","Attenzione: fermare un processo può rendere il DB instabile!"  ,"Varning: döda en process kan göra din box ostabil!","Matar um processo pode pox a BOX instavel"            ,
+				   "Please enter your password"                            ,"Bitte Passwort eingeben"                                       ,"Per fovore inserire la password"                               ,"Skriv in ditt lösenord"                            ,"Por favor introduza password"                         ,
+				   "Please enter new password"                             ,"Bitte neues Passwort eingeben"                                 ,"Per fovore inserire la nuova password"                         ,"Skriv in ditt nya lösenord"                        ,"Por favor imtroduza nova password"                    ,
+				   "Please enter new password again"                       ,"Bitte neues Passwort wiederholen"                              ,"Per fovore inserire la nuova password di nuovo"                ,"Skriv in ditt nya lösenord igen"                   ,"Por favor introduza nova password outra vez"          ,
+				   "password has been changed"                             ,"Passwort wurde geändert"                                       ,"La password è stata cambiata"                                  ,"lösenordet har ändrats"                            ,"Password foi alterada"                                ,
+				   "searching..."							               ,"Suche läuft..."                                                ,"Ricerca in corso..."                                           ,"Söker..."                                          ,"Procurando..."                                        ,
+				   "search result"									       ,"Suchergebnis"                                                  ,"Risultato della ricerca"                                       ,"Sökresultat"                                       ,"Resultado da pesquisa"                                ,
+				   "settings saved"                                        ,"Einstellungen gespeichert"                                     ,"Impostazioni salvate"                                          ,"Inställningar sparade"                             ,"Gravar configuracoes"                                 ,
+				   "last access"                                           ,"letzter Zugriff"                                               ,"last access"                                                   ,"Senast öppnad"                                     ,"Ultimo acesso"                                        ,
+				   "last modified"                                         ,"letze Änderung"                                                ,"last modified"                                                 ,"Senast modifierad"                                 ,"Modificado a ultima vez"                              ,
+				   "created"                                               ,"Erstellung"                                                    ,"created"                                                       ,"skapad"                                            ,"Criado"                                               ,
+				   "%m/%d/%Y %H:%M:%S"                                     ,"%d.%m.%Y %H:%M:%S"                                             ,"%m/%d/%Y %H:%M:%S"                                             ,"%Y-%m-%d %H:%M:%S"                                 ,"%m/%d/%Y %H:%M:%S"                                    };
 
-char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen ?"                                ,"Eseguire '%s'  ?"                                ,"Starta '%s' ?"                        ,
-                  "Cannot execute file '%s'"                   ,"Kann '%s' nicht ausführen"                       ,"Impossibile eseguire il file '%s' "              ,"Kan inte starta fil"                  ,
-                  "Copy '%s' to '%s' ?"                        ,"'%s' nach '%s' kopieren ?"                       ,"Copiare '%s' a '%s'  ?"                          ,"Kopiera '%s' till '%s'?"              ,
-                  "Copy %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' kopieren ?"               ,"Copiare %d file in '%s'  ?"                      ,"Kopiera %d fil(er) till '%s'?"        ,
-                  "Copying file '%s' to '%s'..."               ,"kopiere '%s' nach '%s' ..."                      ,"Sto copiando file '%s' in '%s' ..."              ,"Kopierar filen '%s' till '%s'..."     ,
-                  "Cannot copy to same Directory"              ,"kann nicht in das gleiche Verzeichnis kopieren"  ,"Impossibile copiare alla stessa directory"       ,"Kan inte kopiera till samma mapp"     ,
-                  "Move '%s' to '%s' ?"                        ,"'%s' nach '%s' verschieben ?"                    ,"Muovere '%s' in '%s' ?"                          ,"Flytta '%s' till '%s' ?"              ,
-				  "Move %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' verschieben ?"            ,"Muovere %d file in '%s' ?"                       ,"Flytta %d fil(er) till '%s' ?"        ,
-				  "Moving file '%s' to '%s'..."                ,"verschiebe '%s' nach '%s' ..."                   ,"Sto muovendo file '%s' in '%s' ..."              ,"Flyttar filen '%s' till '%s'..."      ,
-				  "Delete '%s' ?"                              ,"'%s' löschen ?"                                  ,"Cancellare '%s' ?"                               ,"Radera '%s' ?"                        ,
-				  "Delete %d files ?"                          ,"%d Datei(en) löschen ?"                          ,"Cancellare i %d file ?"                          ,"Radera %d fil(er) ?"                  ,
-				  "Deleting file '%s'..."                      ,"lösche Datei '%s' ..."                           ,"Sto cancellando i file '%s' ..."                 ,"Raderar filen '%s'..."                ,
-				  "rename file '%s' :"                         ,"Datei '%s' umbenennen:"                          ,"Rinominare il file '%s' :"                       ,"Byt namn på filen '%s'"               ,
-				  "create new directory in '%s'"               ,"neues Verzeichnis in '%s' erstellen"             ,"Creare una nuova directory nella directory '%s'" ,"Skapa ny mapp i mappen '%s'"          ,
-				  "create new file in directory '%s'"          ,"neue Datei in Verzeichnis '%s' erstellen"        ,"Creare un nuovo file '%s' nella directory"       ,"Skapa ny fil i mappen '%s'"           ,
-				  "create link to '%s%s\' in directory '%s'"   ,"Verweis auf '%s%s' in Verzeichnis '%s' erstellen","Creare un link a '%s%s' nella directory '%s' "   ,"Skapa länk till '%s%s\' i mappen '%s'",
-				  "execute linux command"                      ,"Linux-Kommando ausführen"                        ,"Eseguire un comando linux"                       ,"Exekvera Linux kommando"              ,
-				  "save changes to '%s' ?"                     ,"Änderungen an '%s' speichern ?"                  ,"Salvare i cambiamenti a '%s' ?"                  ,"Spara ändringar till '%s'?"           ,
-				  "file '%s' already exists"                   ,"Datei '%s' existiert bereits"                    ,"Il file '%s' esiste già"                         ,"Filen '%s' finns redan"               ,
-				  "line %d of %d%s"                            ,"Zeile %d von %d%s"                               ,"Linea %d di %d%s"                                ,"Linje %d av %d%s"                     ,
-				  "reading archive directory..."               ,"Lese Archiv-Verzeichnis..."                      ,"Sto leggendo la directory dell'archivio..."      ,"Läser arkivmapp..."                   ,
-				  "extracting from file '%s'..."               ,"Entpacke aus Datei '%s'"                         ,"Sto estraendo dal file '%s'"                     ,"Extraherar från filen '%s'..."        ,
-				  "no connection to"                           ,"Keine Verbindung zu"                             ,"Nessuna connessione"                             ,"Ingen anslutning till"                ,
-				  "connecting to"                              ,"Verbinde mit"                                    ,"Mi sto connettendo"                              ,"Ansluten till"                        ,
-				  "error in ftp command '%s%s'"                ,"Fehler bei FTP-Kommando '%s%s'"                  ,"Errore nel comando ftp '%s%s'"                   ,"Fel i FTP-kommando '%s%s'"            ,
-				  "reading directory"                          ,"Lese Verzeichnis"                                ,"Sto leggendo la directory"                       ,"läser mappinformation"                ,
-				  "Do you really want to kill process '%s'?"   ,"Wollen sie wirklich den Prozess '%s' beenden?"   ,"Vuoi davvero fermare il processo '%s' ?"         ,"Vill du verkligen döda process '%s'?" ,
-				  "process id"                                 ,"Prozess ID"                                      ,"ID processo"                                     ,"process ID"                           ,
-				  "owner"                                      ,"Besitzer"                                        ,"Proprietario"                                    ,"ägare"                                ,
-				  "process"                                    ,"Prozess"                                         ,"Processo"                                        ,"process"                              ,
-				  "cancel download ?"                          ,"Download abbrechen ?"                            ,"Cancellare Download ?"                           ,"avbryt nedladdning ?"                 ,
-				  "append to file '%s' ?"                      ,"An Datei '%s' anhängen ?"                        ,"Aggiungere al file '%s' ?"                       ,"Lägg till i fil '%s' ?"               ,
-				  "search in directory %s for file:"           ,"In Verzeichnis %s suchen nach Datei:"            ,"Sto cercando il file %s:"                        ,"sök i mappen %s efter fil:"           ,
-				  "save current settings ?"                    ,"Einstellungen speichern ?"                       ,"Salvare le impostazioni correnti ?"              ,"spara nuvarande inställningar ?"      };
+char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen ?"                                ,"Eseguire '%s'  ?"                                ,"Starta '%s' ?"                        ,"Executa '%s' ?"                                   ,
+                  "Cannot execute file '%s'"                   ,"Kann '%s' nicht ausführen"                       ,"Impossibile eseguire il file '%s' "              ,"Kan inte starta fil"                  ,"Nao pode executar o ficheiro '%s'"                ,
+                  "Copy '%s' to '%s' ?"                        ,"'%s' nach '%s' kopieren ?"                       ,"Copiare '%s' a '%s'  ?"                          ,"Kopiera '%s' till '%s'?"              ,"Copia '%s' para '%s' ?"                           ,
+                  "Copy %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' kopieren ?"               ,"Copiare %d file in '%s'  ?"                      ,"Kopiera %d fil(er) till '%s'?"        ,"Copiar %d ficheiros '%s' para '%s' ?"             ,
+                  "Copying file '%s' to '%s'..."               ,"kopiere '%s' nach '%s' ..."                      ,"Sto copiando file '%s' in '%s' ..."              ,"Kopierar filen '%s' till '%s'..."     ,"Copiando ficheiro '%s' para '%s'"                 ,
+                  "Cannot copy to same Directory"              ,"kann nicht in das gleiche Verzeichnis kopieren"  ,"Impossibile copiare alla stessa directory"       ,"Kan inte kopiera till samma mapp"     ,"Nao pode copiar para a mesma Directoria"          ,
+                  "Move '%s' to '%s' ?"                        ,"'%s' nach '%s' verschieben ?"                    ,"Muovere '%s' in '%s' ?"                          ,"Flytta '%s' till '%s' ?"              ,"Mover '%s' para '%s' ?"                           ,
+				  "Move %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' verschieben ?"            ,"Muovere %d file in '%s' ?"                       ,"Flytta %d fil(er) till '%s' ?"        ,"Mover %d ficheiros para '%s' ..."                 ,
+				  "Moving file '%s' to '%s'..."                ,"verschiebe '%s' nach '%s' ..."                   ,"Sto muovendo file '%s' in '%s' ..."              ,"Flyttar filen '%s' till '%s'..."      ,"Movendo os ficheiros '%s' para '%s' ..."          ,
+				  "Delete '%s' ?"                              ,"'%s' löschen ?"                                  ,"Cancellare '%s' ?"                               ,"Radera '%s' ?"                        ,"Apagando '%s' ?"                                  ,
+				  "Delete %d files ?"                          ,"%d Datei(en) löschen ?"                          ,"Cancellare i %d file ?"                          ,"Radera %d fil(er) ?"                  ,"Apagando %d ficheiros ?"                          ,
+				  "Deleting file '%s'..."                      ,"lösche Datei '%s' ..."                           ,"Sto cancellando i file '%s' ..."                 ,"Raderar filen '%s'..."                ,"Apagando ficheiros '%s' :"                        ,
+				  "rename file '%s' :"                         ,"Datei '%s' umbenennen:"                          ,"Rinominare il file '%s' :"                       ,"Byt namn på filen '%s'"               ,"Mudar nome do ficheiro '%s' :"                    ,
+				  "create new directory in '%s'"               ,"neues Verzeichnis in '%s' erstellen"             ,"Creare una nuova directory nella directory '%s'" ,"Skapa ny mapp i mappen '%s'"          ,"Criar novo directorio en '%s'"                    ,
+				  "create new file in directory '%s'"          ,"neue Datei in Verzeichnis '%s' erstellen"        ,"Creare un nuovo file '%s' nella directory"       ,"Skapa ny fil i mappen '%s'"           ,"Criar novo ficheiro no directorio '%s'"           ,
+				  "create link to '%s%s\' in directory '%s'"   ,"Verweis auf '%s%s' in Verzeichnis '%s' erstellen","Creare un link a '%s%s' nella directory '%s' "   ,"Skapa länk till '%s%s\' i mappen '%s'","Criar uma ligacao para '%s%s\' no directorio '%s'",
+				  "execute linux command"                      ,"Linux-Kommando ausführen"                        ,"Eseguire un comando linux"                       ,"Exekvera Linux kommando"              ,"Executar comando linux"                           ,
+				  "save changes to '%s' ?"                     ,"Änderungen an '%s' speichern ?"                  ,"Salvare i cambiamenti a '%s' ?"                  ,"Spara ändringar till '%s'?"           ,"Gravar alteracoes em '%s'"                        ,
+				  "file '%s' already exists"                   ,"Datei '%s' existiert bereits"                    ,"Il file '%s' esiste già"                         ,"Filen '%s' finns redan"               ,"Ficheiro '%s' ja existe"                          ,
+				  "line %d of %d%s"                            ,"Zeile %d von %d%s"                               ,"Linea %d di %d%s"                                ,"Linje %d av %d%s"                     ,"Linha %d de %d%s"                                 ,
+				  "reading archive directory..."               ,"Lese Archiv-Verzeichnis..."                      ,"Sto leggendo la directory dell'archivio..."      ,"Läser arkivmapp..."                   ,"Ler arquivo de directorio"                        ,
+				  "extracting from file '%s'..."               ,"Entpacke aus Datei '%s'"                         ,"Sto estraendo dal file '%s'"                     ,"Extraherar från filen '%s'..."        ,"Extrair do ficheiro '%s' ..."                     ,
+				  "no connection to"                           ,"Keine Verbindung zu"                             ,"Nessuna connessione"                             ,"Ingen anslutning till"                ,"Nao ha ligacao para"                              ,
+				  "connecting to"                              ,"Verbinde mit"                                    ,"Mi sto connettendo"                              ,"Ansluten till"                        ,"A ligar a"                                        ,
+				  "error in ftp command '%s%s'"                ,"Fehler bei FTP-Kommando '%s%s'"                  ,"Errore nel comando ftp '%s%s'"                   ,"Fel i FTP-kommando '%s%s'"            ,"Erro no comando ftp '%s%s'"                       ,
+				  "reading directory"                          ,"Lese Verzeichnis"                                ,"Sto leggendo la directory"                       ,"läser mappinformation"                ,"Ler directorio"                                   ,
+				  "Do you really want to kill process '%s'?"   ,"Wollen sie wirklich den Prozess '%s' beenden?"   ,"Vuoi davvero fermare il processo '%s' ?"         ,"Vill du verkligen döda process '%s'?" ,"Quer mesmo matar este processo '%s'"              ,
+				  "process id"                                 ,"Prozess ID"                                      ,"ID processo"                                     ,"process ID"                           ,"ID do processo"                                   ,
+				  "owner"                                      ,"Besitzer"                                        ,"Proprietario"                                    ,"ägare"                                ,"Proprietario"                                     ,
+				  "process"                                    ,"Prozess"                                         ,"Processo"                                        ,"process"                              ,"Processo"                                         ,
+				  "cancel download ?"                          ,"Download abbrechen ?"                            ,"Cancellare Download ?"                           ,"avbryt nedladdning ?"                 ,"Parar download ?"                                 ,
+				  "append to file '%s' ?"                      ,"An Datei '%s' anhängen ?"                        ,"Aggiungere al file '%s' ?"                       ,"Lägg till i fil '%s' ?"               ,"Acrescentar ao ficheiro '%s' ?"                   ,
+				  "search in directory %s for file:"           ,"In Verzeichnis %s suchen nach Datei:"            ,"Sto cercando il file %s:"                        ,"sök i mappen %s efter fil:"           ,"Procurar no directorio %s pelo ficheiro:"         ,
+				  "save current settings ?"                    ,"Einstellungen speichern ?"                       ,"Salvare le impostazioni correnti ?"              ,"spara nuvarande inställningar ?"      ,"Gravar configuracao corrente"                     };
 
-char *menuline[]  = { ""      , ""       ,""      ,""       ,
-                      "rights", "Rechte" ,"Attrib","rätti." ,
-                      "rename", "umben." ,"Rinom.","byt na.",
-                      "view"  , "Ansicht","Vedi"  ,"visa"   ,
-                      "edit"  , "bearb." ,"Edita" ,"ändra"  ,
-                      "copy"  , "kopier.","Copia" ,"kopiera",
-                      "move"  , "versch.","Muovi" ,"flytta" ,
-                      "mkdir" , "mkdir"  ,"mkdir" ,"mkdir"  ,
-                      "delete", "löschen","Canc." ,"radera" ,
-                      "touch" , "neu"    ,"Crea"  ,"touch"  ,
-                      "link"  , "Verw."  ,"Link"  ,"länk"   };
+char *menuline[]  = { ""      , ""       ,""      ,""       ,""      ,
+                      "rights", "Rechte" ,"Attrib","rätti." ,"Attrib",
+                      "rename", "umben." ,"Rinom.","byt na.","Renom.",
+                      "view"  , "Ansicht","Vedi"  ,"visa"   ,"Ver"   ,
+                      "edit"  , "bearb." ,"Edita" ,"ändra"  ,"Edita" ,
+                      "copy"  , "kopier.","Copia" ,"kopiera","Copia" ,
+                      "move"  , "versch.","Muovi" ,"flytta" ,"Mover" ,
+                      "mkdir" , "mkdir"  ,"mkdir" ,"mkdir"  ,"mkdir" ,
+                      "delete", "löschen","Canc." ,"radera" ,"Apagar",
+                      "touch" , "neu"    ,"Crea"  ,"touch"  ,"Cria"  ,
+                      "link"  , "Verw."  ,"Link"  ,"länk"   ,"Ligar" };
 
-char *editorline[]= { ""      , ""       ,""         ,""       ,
-                      ""      , ""       ,""         ,""       ,
-                      ""      , ""       ,""         ,""       ,
-                      "mark"  , "mark."  ,"Seleziona","markera",
-                      ""      , ""       ,""         ,""       ,
-                      "copy"  , "kopier.","Copia"    ,"kopiera",
-                      "move"  , "versch.","Muovi"    ,"flytta" ,
-                      ""      , ""       ,""         ,""       ,
-                      "delete", "löschen","Cancella" ,"radera" ,
-                      ""      , ""       ,""         ,""       ,
-                      ""      , ""       ,""         ,""       };
+char *editorline[]= { ""      , ""       ,""         ,""       ,""      ,
+                      ""      , ""       ,""         ,""       ,""      ,
+                      ""      , ""       ,""         ,""       ,""      ,
+                      "mark"  , "mark."  ,"Seleziona","markera","Marcar",
+                      ""      , ""       ,""         ,""       ,""      ,
+                      "copy"  , "kopier.","Copia"    ,"kopiera","Copia" ,
+                      "move"  , "versch.","Muovi"    ,"flytta" ,"mover" ,
+                      ""      , ""       ,""         ,""       ,""      ,
+                      "delete", "löschen","Cancella" ,"radera" ,"Apagar",
+                      ""      , ""       ,""         ,""       ,""      ,
+                      ""      , ""       ,""         ,""       ,""      };
 
-char *colorline[] = { ""               , ""                     ,""                ,""                 ,
-                      "execute command", "Kommando ausführen"   ,"Esegui comando"  ,"starta kommando"  ,
-                      "toggle marker"  , "Datei markieren"      ,"Seleziona"       ,"växla markering"  ,
-                      "sort directory" , "Verzeichnis sortieren","Ordina directory","sortera mapp"     ,
-                      "refresh view"   , "Ansicht aktualisieren","Rivisualizza"    ,"uppdatera vy"     ,
-                      "delete line"    , "Zeile löschen"        ,"Cancella riga"   ,"radera linje"     ,
-                      "insert line"    , "Zeile einfügen"       ,"Inserisci riga"  ,"lägg till linje"  ,
-                      "clear input"    , "Eingabe löschen"      ,"Cancella ins."   ,"rensa inmatning"  ,
-                      "set uppercase"  , "Grossbuchstaben"      ,"Imposta su"      ,"sätt versaler"    ,
-                      "set lowercase"  , "Kleinbuchstaben"      ,"Imposta giù"     ,"sätt gemener"     ,
-                      "kill process"   , "Prozess beenden"      ,"Ferma processo"  ,"döda process"     ,
-                      "to linux format", "in Linux-Format"      ,"A formato linux" ,"till Linux format",
-                      "mark text"      , "Text markieren"       ,"Marca testo"     ,"markera text"     ,
-                      "insert text"    , "Text einfügen"        ,"Inserisci testo" ,"lägg till text"   };
+char *colorline[] = { ""               , ""                     ,""                ,""                 ,""                  ,
+                      "execute command", "Kommando ausführen"   ,"Esegui comando"  ,"starta kommando"  ,"Executar comando"  ,
+                      "toggle marker"  , "Datei markieren"      ,"Seleziona"       ,"växla markering"  ,"Seleccionar"       ,
+                      "sort directory" , "Verzeichnis sortieren","Ordina directory","sortera mapp"     ,"Ordenar Directorio",
+                      "refresh view"   , "Ansicht aktualisieren","Rivisualizza"    ,"uppdatera vy"     ,"Fazer refresh"     ,
+                      "delete line"    , "Zeile löschen"        ,"Cancella riga"   ,"radera linje"     ,"Apagar linha"      ,
+                      "insert line"    , "Zeile einfügen"       ,"Inserisci riga"  ,"lägg till linje"  ,"Inserir linha"     ,
+                      "clear input"    , "Eingabe löschen"      ,"Cancella ins."   ,"rensa inmatning"  ,"Cancelar insercao" ,
+                      "set uppercase"  , "Grossbuchstaben"      ,"Imposta su"      ,"sätt versaler"    ,"Por letra grande"  ,
+                      "set lowercase"  , "Kleinbuchstaben"      ,"Imposta giù"     ,"sätt gemener"     ,"Por letra pequena" ,
+                      "kill process"   , "Prozess beenden"      ,"Ferma processo"  ,"döda process"     ,"Matar processo"    ,
+                      "to linux format", "in Linux-Format"      ,"A formato linux" ,"till Linux format","Formato linux"     ,
+                      "mark text"      , "Text markieren"       ,"Marca testo"     ,"markera text"     ,"Marcar texto"      ,
+                      "insert text"    , "Text einfügen"        ,"Inserisci testo" ,"lägg till text"   ,"inserir Texto"     };
 
-char *mbox[]     = { "OK"           , "OK"                ,"OK"                ,"OK"             ,
-                     "Cancel"       , "Abbrechen"         ,"Annulla"           ,"Avbryt"         ,
-                     "Hidden"       , "Versteckt"         ,"Nascosto"          ,"Gömd"           ,
-                     "yes"          , "ja"                ,"Si"                ,"ja"             ,
-                     "no"           , "nein"              ,"No"                ,"nej"            ,
-                     "overwrite"    , "überschr."         ,"Sovrascrivi"       ,"skriv över"     ,
-                     "skip"         , "überspringen"      ,"Salta"             ,"hoppa över"     ,
-                     "overwrite all", "alle überschreiben","Sovrascivi tutto"  ,"skriv över alla",
-                     "skip all"     , "alle überspringen" ,"Salta tutto"       ,"hoppa över alla",
-                     "rename"       , "umben."            ,"Rinomina"          ,"byt namn"       ,
-                     "ask"          , "nachfragen"        ,"Chiedi"            ,"fråga"          ,
-                     "auto"			, "automatisch"       ,"automatico"        ,"auto"           ,
-                     "Deutsch"      , "Deutsch"           ,"Deutsch"           ,"Deutsch"        ,
-                     "english"      , "english"           ,"english"           ,"english"        ,
-                     "Italiano"     , "Italiano"          ,"Italiano"          ,"Italiano"       ,
-                     "svenska"      , "svenska"           ,"svenska"           ,"svenska"        };
+char *mbox[]     = { "OK"           , "OK"                ,"OK"                ,"OK"             ,"OK"           ,
+                     "Cancel"       , "Abbrechen"         ,"Annulla"           ,"Avbryt"         ,"Cancelar"     ,
+                     "Hidden"       , "Versteckt"         ,"Nascosto"          ,"Gömd"           ,"Esconder"     ,
+                     "yes"          , "ja"                ,"Si"                ,"ja"             ,"Sim"          ,
+                     "no"           , "nein"              ,"No"                ,"nej"            ,"Nao"          ,
+                     "overwrite"    , "überschr."         ,"Sovrascrivi"       ,"skriv över"     ,"Sobrepor"     ,
+                     "skip"         , "überspringen"      ,"Salta"             ,"hoppa över"     ,"Saltar"       ,
+                     "overwrite all", "alle überschreiben","Sovrascivi tutto"  ,"skriv över alla","Sobrepor tudo",
+                     "skip all"     , "alle überspringen" ,"Salta tutto"       ,"hoppa över alla","Saltar tudo"  ,
+                     "rename"       , "umben."            ,"Rinomina"          ,"byt namn"       ,"Mudar nome"   ,
+                     "ask"          , "nachfragen"        ,"Chiedi"            ,"fråga"          ,"Pergunta"     ,
+                     "auto"			, "automatisch"       ,"automatico"        ,"auto"           ,"Auto"         ,
+                     "Deutsch"      , "Deutsch"           ,"Deutsch"           ,"Deutsch"        ,"Deutsch"      ,
+                     "english"      , "english"           ,"english"           ,"english"        ,"english"      ,
+                     "Italiano"     , "Italiano"          ,"Italiano"          ,"Italiano"       ,"Italiano"     ,
+                     "svenska"      , "svenska"           ,"svenska"           ,"svenska"        ,"svenska"      ,
+                     "Portugues"    , "Portugues"         ,"Portugues"         ,"Portugues"      ,"Portugues"    };
 
-char *props[]    = { "read"   , "lesen"    ,"Lettura"   ,"läs"     ,
-                     "write"  , "schreiben","Scrittura" ,"skriv"   ,
-                     "execute", "ausführen","Esecuzione","exekvera"};
+char *props[]    = { "read"   , "lesen"    ,"Lettura"   ,"läs"     ,"Ler"       ,
+                     "write"  , "schreiben","Scrittura" ,"skriv"   ,"Escrever"  ,
+                     "execute", "ausführen","Esecuzione","exekvera","Exececutar"};
 
-char *ftpstr[]   = { "host"     , "Adresse"    ,"Host"       ,"serveraddress",
-                     "port"     , "Port"       ,"Porta"      ,"port"         ,
-                     "user"     , "Nutzer"     ,"Utente"     ,"användare"    ,
-                     "password" , "Passwort"   ,"Password"   ,"lösenord"     ,
-                     "directory", "Verzeichnis","Directory"  ,"mapp"         };
+char *ftpstr[]   = { "host"     , "Adresse"    ,"Host"       ,"serveraddress","Host"      ,
+                     "port"     , "Port"       ,"Porta"      ,"port"         ,"Porta"     ,
+                     "user"     , "Nutzer"     ,"Utente"     ,"användare"    ,"User"      ,
+                     "password" , "Passwort"   ,"Password"   ,"lösenord"     ,"Password"  ,
+                     "directory", "Verzeichnis","Directory"  ,"mapp"         ,"Directorio"};
 
-char *mainmenu[] = { "search files"                       , "Dateien suchen"                            ,"Cerca file"                                ,"sök filer"                           ,
-                     "taskmanager"                        , "Prozessübersicht"                          ,"Taskmanager"                               ,"Processöversikt"                     ,
-                     "toggle 16:9 mode"                   , "16:9-Modus setzen"                         ,"Passa a modalità 16:9"                     ,"växla 16:9 läge"                     ,
-                     "set password"                       , "Passwort setzen"                           ,"Imposta password"                          ,"sätt lösenord"                       ,
-                     "language/Sprache/Lingua/Språk: <%s>", "Sprache/language/Lingua/Språk: <%s>"       ,"Lingua/language/Sprache/Språk: <%s>"       ,"Lingua/language/Sprache/Språk: <%s>" ,
-                     "save settings on exit: <%s>"        , "Einstellungen beim Beenden speichern: <%s>","Salvare le impostazioni in uscita: <%s>"   ,"spara inställningar vid avslut: <%s>",
-                     "save settings now"                  , "Einstellungen jetzt speichern"             ,"Salvare le impostazioni adesso"            ,"spara inställningar nu"              };
+char *mainmenu[] = { "search files"                       , "Dateien suchen"                            ,"Cerca file"                                ,"sök filer"                           ,"Procurar ficheiros"                 ,
+                     "taskmanager"                        , "Prozessübersicht"                          ,"Taskmanager"                               ,"Processöversikt"                     ,"List de processos"                  ,
+                     "toggle 16:9 mode"                   , "16:9-Modus setzen"                         ,"Passa a modalità 16:9"                     ,"växla 16:9 läge"                     ,"Mudar para 16:9"                    ,
+                     "set password"                       , "Passwort setzen"                           ,"Imposta password"                          ,"sätt lösenord"                       ,"Por password"                       ,
+                     "language/Sprache/Lingua/Språk: <%s>", "Sprache/language/Lingua/Språk: <%s>"       ,"Lingua/language/Sprache/Språk: <%s>"       ,"Lingua/language/Sprache/Språk: <%s>" ,"Lingua/language/Sprache/Språk: <%s>",
+                     "save settings on exit: <%s>"        , "Einstellungen beim Beenden speichern: <%s>","Salvare le impostazioni in uscita: <%s>"   ,"spara inställningar vid avslut: <%s>","Gravar e sair: <%s>"                ,
+                     "save settings now"                  , "Einstellungen jetzt speichern"             ,"Salvare le impostazioni adesso"            ,"spara inställningar nu"              ,"Gravar configuracoes agora"         };
 
 struct fileentry
 {
