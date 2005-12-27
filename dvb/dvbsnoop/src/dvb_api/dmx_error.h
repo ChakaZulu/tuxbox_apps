@@ -1,5 +1,5 @@
 /*
-$Id: dmx_error.h,v 1.3 2004/12/07 21:01:40 rasc Exp $
+$Id: dmx_error.h,v 1.4 2005/12/27 23:30:27 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dmx_error.h,v 1.3 2004/12/07 21:01:40 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 */
 
@@ -15,7 +15,7 @@ $Id: dmx_error.h,v 1.3 2004/12/07 21:01:40 rasc Exp $
 #define __DMX_ERROR_H
 
 
-int  IO_error (u_char *str);
+int  IO_error (char *str);
 
 
 #endif

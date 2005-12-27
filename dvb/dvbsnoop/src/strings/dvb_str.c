@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.73 2005/12/22 16:21:51 rasc Exp $
+$Id: dvb_str.c,v 1.74 2005/12/27 23:30:30 rasc Exp $
 
 
  DVBSNOOP
@@ -7,10 +7,11 @@ $Id: dvb_str.c,v 1.73 2005/12/22 16:21:51 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
   -- DVB-Strings
+  -- MPEG-Strings
   -- dvb decoder helper functions
 
 
@@ -19,6 +20,9 @@ $Id: dvb_str.c,v 1.73 2005/12/22 16:21:51 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.74  2005/12/27 23:30:30  rasc
+PS MPEG-2 Extension data packets, MPEG-2 decoding
+
 Revision 1.73  2005/12/22 16:21:51  rasc
 Update and new descriptors EN 300 468 v1.7.1
 
@@ -3663,6 +3667,302 @@ char *dvbstrMPEG_FrameRateCode (u_int i)
 
   return findTableID (Table, i);
 }
+
+
+
+
+/*
+ -- Picture Coding Type 
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_PictureCodingType (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "forbidden" },
+     {  0x01, 0x01,  "intra-coded (I)" },
+     {  0x02, 0x02,  "predictive-coded (P)" },
+     {  0x03, 0x03,  "bidirectionally-predictive-coded (B)" },
+     {  0x04, 0x04,  "dc-intra-coded (D) (ISO/IEC 11172-2)" },
+     {  0x05, 0x07,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+ -- MPEG-2 Extension Start Code Identifier
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_ExtensionStartCodeIdentifier (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0x01, 0x01,  "Sequence Extension ID" },
+     {  0x02, 0x02,  "Sequence Display Extension ID" },
+     {  0x03, 0x03,  "Quant Matrix Extension ID" },
+     {  0x04, 0x04,  "Copyright Extension ID" },
+     {  0x05, 0x05,  "Sequence Scalable Extension ID" },
+     {  0x06, 0x06,  "reserved" },
+     {  0x07, 0x07,  "Picture Display Extension ID" },
+     {  0x08, 0x08,  "Picture Coding Extension ID" },
+     {  0x09, 0x09,  "Picture Spatial Scalable Extension ID" },
+     {  0x0A, 0x0A,  "Picture Temporal Scalable Extension ID" },
+     {  0x0B, 0x0F,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+/*
+ -- MPEG-2 Profile Indication
+ --  profile_and_level_indication
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_ProfileIndication (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0x01, 0x01,  "High" },
+     {  0x02, 0x02,  "Spatially Scalable" },
+     {  0x03, 0x03,  "SNR Scalable" },
+     {  0x04, 0x04,  "Main" },
+     {  0x05, 0x05,  "Simple" },
+     {  0x06, 0x07,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- MPEG-2 Level Indication
+ --  profile_and_level_indication
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_LevelIndication (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x03,  "reserved" },
+     {  0x04, 0x04,  "High" },
+     {  0x05, 0x05,  "reserved" },
+     {  0x06, 0x06,  "High 1440" },
+     {  0x07, 0x07,  "reserved" },
+     {  0x08, 0x08,  "Main" },
+     {  0x09, 0x09,  "reserved" },
+     {  0x0A, 0x0A,  "Low" },
+     {  0x0B, 0x0F,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- MPEG Chroma Format
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_ChromaFormat (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0x01, 0x01,  "4:2:0" },
+     {  0x02, 0x02,  "4:2:2" },
+     {  0x03, 0x03,  "4:4:4" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- MPEG VideoFormat
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_VideoFormat (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "component" },
+     {  0x01, 0x01,  "PAL" },
+     {  0x02, 0x02,  "NTSC" },
+     {  0x03, 0x03,  "SECAM" },
+     {  0x04, 0x04,  "MAC" },
+     {  0x05, 0x05,  "Unspecified video format" },
+     {  0x06, 0x07,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- MPEG Color Primaries
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_ColorPrimaries (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "forbidden" },
+     {  0x01, 0x01,  "Recommendation ITU-R BT.709" },
+     {  0x02, 0x02,  "Unspecified Video" },
+     {  0x03, 0x03,  "reserved" },
+     {  0x04, 0x04,  "Recommendation ITU-R BT.470-2 System M" },
+     {  0x05, 0x05,  "Recommendation ITU-R BT.470-2 System B,G" },
+     {  0x06, 0x06,  "SMPTE 170M" },
+     {  0x07, 0x07,  "SMPTE 240M (1987)" },
+     {  0x08, 0xFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- MPEG Transfer Characteristics
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_TransferCharacteristics (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "forbidden" },
+     {  0x01, 0x01,  "Recommendation ITU-R BT.709" },
+     {  0x02, 0x02,  "Unspecified Video" },
+     {  0x03, 0x03,  "reserved" },
+     {  0x04, 0x04,  "Recommendation ITU-R BT.470-2 System M" },
+     {  0x05, 0x05,  "Recommendation ITU-R BT.470-2 System B,G" },
+     {  0x06, 0x06,  "SMPTE 170M" },
+     {  0x07, 0x07,  "SMPTE 240M (1987)" },
+     {  0x08, 0x08,  "Linear transfer characteristics" },
+     {  0x09, 0xFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+ -- MPEG Matrix Coefficients
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_MatrixCoefficients (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "forbidden" },
+     {  0x01, 0x01,  "Recommendation ITU-R BT.709" },
+     {  0x02, 0x02,  "Unspecified Video" },
+     {  0x03, 0x03,  "reserved" },
+     {  0x04, 0x04,  "FCC" },
+     {  0x05, 0x05,  "Recommendation ITU-R BT.470-2 System B,G" },
+     {  0x06, 0x06,  "SMPTE 170M" },
+     {  0x07, 0x07,  "SMPTE 240M (1987)" },
+     {  0x08, 0xFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+ -- MPEG Scalable Mode
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_ScalableMode (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "data partitioning" },
+     {  0x01, 0x01,  "spatial scalability" },
+     {  0x02, 0x02,  "SNR scalability" },
+     {  0x03, 0x03,  "temporal scalability" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- MPEG Intra DC Precision
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_Intra_DC_Precision (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "8 bits" },
+     {  0x01, 0x01,  "9 bits" },
+     {  0x02, 0x02,  "10 bits" },
+     {  0x03, 0x03,  "11 bits" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+ -- MPEG Picture Structure
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_PictureStructure (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0x01, 0x01,  "top field" },
+     {  0x02, 0x02,  "bottom field" },
+     {  0x03, 0x03,  "frame picture" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+ -- MPEG Copyright Extension  original_or_copy
+ -- ISO 13818-2 
+*/
+
+char *dvbstrMPEG_Original_Or_Copy (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "copy" },
+     {  0x01, 0x01,  "original" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
 
 
 

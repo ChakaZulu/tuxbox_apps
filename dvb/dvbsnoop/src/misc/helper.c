@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.40 2005/11/23 23:06:09 rasc Exp $
+$Id: helper.c,v 1.41 2005/12/27 23:30:28 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.40 2005/11/23 23:06:09 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.41  2005/12/27 23:30:28  rasc
+PS MPEG-2 Extension data packets, MPEG-2 decoding
+
 Revision 1.40  2005/11/23 23:06:09  rasc
 ISO13818-2  MPEG2 sequence header
 
@@ -499,7 +502,7 @@ u_char *getISO639_3 (u_char *str, u_char *buf)
 {
   int i;
 
-  strncpy (str, buf, 3);
+  strncpy ((char *) str, (char *)buf, 3);
   *(str+3) = '\0';
 
   // secure print of string

@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.35 2005/11/23 23:06:10 rasc Exp $
+$Id: pespacket.c,v 1.36 2005/12/27 23:30:29 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pespacket.c,v 1.35 2005/11/23 23:06:10 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.36  2005/12/27 23:30:29  rasc
+PS MPEG-2 Extension data packets, MPEG-2 decoding
+
 Revision 1.35  2005/11/23 23:06:10  rasc
 ISO13818-2  MPEG2 sequence header
 
@@ -244,37 +247,50 @@ void decodePS_PES_packet (u_char *b, u_int len, int pid)
    if (stream_id <= 0xB8) {
 
    		// $$$ TODO  PES Stream ID 0x00 - 0xB8
-		//    picture_start_code	00
-		//    slice_start_code	01 through AF
 		//    reserved	B0
 		//    reserved	B1
 		//    sequence_error_code	B4  (not for streams)
-		//    extension_start_code	B5
 		//    reserved	B6
 
 	indent (+1);
 	switch (stream_id) {
 
+	  case 0x00:			// picture_start_code   00
+		MPEG2_decodePictureHeader (4, b, len);
+		break;
+
 	  case 0xB2:			// user_data_start_code B2
-		MPEG2_decodeUserData (b, len);
+		MPEG2_decodeUserData (4, b, len);
 		break;
 
-	  case 0xB3:			// sequence_header_code	B3
-		MPEG2_decodeSequenceHeader (b, len);
+	  case 0xB3:			// sequence_header_code B3
+		MPEG2_decodeSequenceHeader (4, b, len);
 		break;
 
-	  case 0xB7:	// sequence_end_code	B7
-			// stream ID already printed, nothing else to do
+	  case 0xB5:			// extension_data       B5
+		MPEG2_decodeExtension (4, b, len);
+		break;
+
+	  case 0xB7:			// sequence_end_code	B7
+		MPEG2_decodeSequenceEnd (4, b, len);
 		return;
 
 	  case 0xB8:			//    group_start_code	B8
-		MPEG2_decodeGroupOfPictures (b, len);
+		MPEG2_decodeGroupOfPictures (4, b, len);
 		break;
 
-
 	  default:
-		if (len > 4) {		// sync + stream_id = 4 bytes
+					//    slice_start_code	01 through AF
+		if (stream_id >= 0x01 && stream_id <= 0xAF) {
+
+			MPEG2_decodeSlice (4, b, len);
+
+		} else {
+					//    unkown
+		   if (len > 4) {		// sync + stream_id = 4 bytes
 			print_databytes (4,"MPEG2 Data (incl. sync + id):", b, len);
+		   }
+
 		}
 		break;
 	}

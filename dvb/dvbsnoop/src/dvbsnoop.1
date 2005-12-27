@@ -417,6 +417,10 @@ Selecting devices:
    dvbsnoop \-s feinfo -pd 9 -adapter 0 -devnr 1
    dvbsnoop \-s feinfo -pd 9 -adapter 2
 
+Sending dvbsnoop data over network, using netcat:
+   dvbsnoop \-s pes 0x28F -b \| nc -s 127.0.0.1 -p 37117
+
+
 ... for more examples and example output of dvbsnoop, please visit http://dvbsnoop.sourceforge.net. 
 
 

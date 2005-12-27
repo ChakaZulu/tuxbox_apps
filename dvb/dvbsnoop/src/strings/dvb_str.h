@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.33 2005/12/22 16:21:51 rasc Exp $ 
+$Id: dvb_str.h,v 1.34 2005/12/27 23:30:30 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dvb_str.h,v 1.33 2005/12/22 16:21:51 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
  -- dvb strings
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.33 2005/12/22 16:21:51 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.34  2005/12/27 23:30:30  rasc
+PS MPEG-2 Extension data packets, MPEG-2 decoding
+
 Revision 1.33  2005/12/22 16:21:51  rasc
 Update and new descriptors EN 300 468 v1.7.1
 
@@ -266,6 +269,19 @@ char *dvbstrMPEG_metadata_section_frag_indication (u_int i);
 /* ISO 13818-2 */
 
 char *dvbstrMPEG_FrameRateCode (u_int i);
+char *dvbstrMPEG_PictureCodingType (u_int i);
+char *dvbstrMPEG_ExtensionStartCodeIdentifier (u_int i);
+char *dvbstrMPEG_ProfileIndication (u_int i);
+char *dvbstrMPEG_LevelIndication (u_int i);
+char *dvbstrMPEG_ChromaFormat (u_int i);
+char *dvbstrMPEG_VideoFormat (u_int i);
+char *dvbstrMPEG_ColorPrimaries (u_int i);
+char *dvbstrMPEG_TransferCharacteristics (u_int i);
+char *dvbstrMPEG_MatrixCoefficients (u_int i);
+char *dvbstrMPEG_ScalableMode (u_int i);
+char *dvbstrMPEG_Intra_DC_Precision (u_int i);
+char *dvbstrMPEG_PictureStructure (u_int i);
+char *dvbstrMPEG_Original_Or_Copy (u_int i);
 
 
 #endif

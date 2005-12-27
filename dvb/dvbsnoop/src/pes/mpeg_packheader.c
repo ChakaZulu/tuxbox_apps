@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_packheader.c,v 1.1 2005/11/10 00:07:18 rasc Exp $
+$Id: mpeg_packheader.c,v 1.2 2005/12/27 23:30:29 rasc Exp $
 
 
  DVBSNOOP
@@ -7,13 +7,16 @@ $Id: mpeg_packheader.c,v 1.1 2005/11/10 00:07:18 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
 
 
 
 
 
 $Log: mpeg_packheader.c,v $
+Revision 1.2  2005/12/27 23:30:29  rasc
+PS MPEG-2 Extension data packets, MPEG-2 decoding
+
 Revision 1.1  2005/11/10 00:07:18  rasc
  - New: PS MPEG2 UserData + GOP, DVB-S2 fix
 
@@ -29,6 +32,7 @@ Revision 1.1  2005/11/10 00:07:18  rasc
 #include "dvbsnoop.h"
 #include "mpeg_packheader.h"
 #include "mpeg_sysheader.h"
+#include "pes_misc.h"
 #include "strings/dvb_str.h"
 #include "misc/hexprint.h"
 #include "misc/helper.h"
