@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.551 2005/11/06 16:57:52 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.552 2005/12/28 10:42:06 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -886,70 +886,25 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 
 	eString sref = opt["ref"];
-	eServiceReference ref = string2ref(sref);
-	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
+	eZapMain::getInstance()->deleteFile(string2ref(sref));
 
-	if (ref.path.right(3).upper() == ".TS")
-	{
-		for (std::list<ePlaylistEntry>::iterator it(recordings->getList().begin()); it != recordings->getList().end(); ++it) 
-		{
-			if (it->service.path == ref.path)
-			{
-				recordings->getList().erase(it);
-				recordings->save();
-				break;
-			}
-		}
-		eString filename = ref.path;
-		filename.erase(filename.length() - 2, 2);
-		filename += "eit";
-		eDebug("[ENIGMA_DYN] deleting %s", filename.c_str());
-		remove(filename.c_str());
-		eDebug("[ENIGMA_DYN] deleting %s", eString(ref.path + ".indexmarks").c_str());
-		remove((ref.path + ".indexmarks").c_str());
-		
-		int slice = 0;
-		while (1)
-		{
-			filename = ref.path;
-			if (slice)
-				filename += eString().sprintf(".%03d", slice);
-			slice++;
-			struct stat64 s;
-			if (::stat64(filename.c_str(), &s) < 0)
-				break;
-			eDebug("[ENIGMA_DYN] deleting %s", filename.c_str());
-			eBackgroundFileEraser::getInstance()->erase(filename.c_str());
-		}
-	}
 	return closeWindow(content, "Please wait...", 2000);
 }
 
 static eString renameMovie(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	bool changed = false ;
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 
 	eString sref = opt["ref"];
 	eString newname = opt["desc"];
 	eServiceReference ref = string2ref(sref);
-	ePlaylist *recordings = eZapMain::getInstance()->getRecordings();
-
+	
 	if (newname)
 	{
-		for (std::list<ePlaylistEntry>::iterator it(recordings->getList().begin()); it != recordings->getList().end(); ++it) 
-		{
-			if (it->service.path == ref.path)
-			{
-				it->service.descr = newname ;
-				changed = true ;
-				break;
-			}
-		}
+		eString dir = ref.path.left(ref.path.find_last_of("/") + 1);
+		eZapMain::getInstance()->renameFile(ref.path, eString(dir + newname + ".ts"), newname);
 	}
-	if (changed)
-		recordings->save();
-	
+
 	return closeWindow(content, "Please wait...", 100);
 }
 #endif

@@ -4035,9 +4035,11 @@ void eZapMain::deleteFile( eServiceSelector *sel )
 	}
 }
 
-int eZapMain::renameFile(eString oldFilePath, eString newFilePath)
+int eZapMain::renameFile(eString oldFilePath, eString newFilePath, eString description)
 {
 	int rc = 0;
+
+	eDebug("[ENIGMA_MAIN] renameFile %s to %s", oldFilePath.c_str(), newFilePath.c_str());
 
 	if ( ::rename( oldFilePath.c_str(), newFilePath.c_str() ) < 0 )
 		eDebug("rename File '%s' to '%s' failed (%m)",
@@ -4062,6 +4064,8 @@ int eZapMain::renameFile(eString oldFilePath, eString newFilePath)
 				if ( it->service.path == oldFilePath )
 				{
 					it->service.path=newFilePath;
+					if (description)
+						it->service.descr = description;
 					recordings->save();
 					break;
 				}
@@ -4106,7 +4110,7 @@ void eZapMain::renameFile( eServiceSelector *sel )
 			if ( c != eString::npos )
 				newFilePath += ref.path.mid( c );
 
-			if (renameFile(oldFilePath, newFilePath))
+			if (renameFile(oldFilePath, newFilePath, ""))
 			{
 				ref.path=newFilePath;
 				sel->invalidateCurrent(ref);

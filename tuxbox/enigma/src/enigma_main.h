@@ -566,7 +566,7 @@ private:
 
 public:
 	void deleteFile(eServiceReference);
-	int renameFile(eString, eString);
+	int renameFile(eString, eString, eString);
 	bool checkRecordState() { return handleState(); }
     	eServicePath getRoot(int list, int mode=-1);
 	int getFirstBouquetServiceNum( eServiceReference ref, int mode=-1);

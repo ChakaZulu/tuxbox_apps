@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_boot.cpp,v 1.20 2005/11/26 14:40:20 digi_casi Exp $
+ * $Id: enigma_dyn_boot.cpp,v 1.21 2005/12/28 10:42:06 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -307,7 +307,8 @@ eString editBootManagerSettings(eString request, eString dirpath, eString opts, 
 	result.strReplace("#RANDOMSKIN#", cfg.randomSkin);
 	result.strReplace("#TIMEOUTVALUE#", cfg.timeoutValue);
 	result.strReplace("#VIDEOFORMAT#", cfg.videoFormat);
-	result.strReplace("#SKINPATH#", cfg.skinPath);
+	result.strReplace("#SKINPATH1#", cfg.skinPath);
+	result.strReplace("#SKINPATH2#", cfg.mpoint + "/boot/skins");
 	result.strReplace("#SKINNAME#", cfg.skinName);
 	
 	result.strReplace("#BUTTONSUBMIT#", button(100, "Change", TOPNAVICOLOR, "javascript:submitSettings()", "#000000"));
@@ -328,7 +329,7 @@ eString setBootManagerSettings(eString request, eString dirpath, eString opts, e
 	cfg.randomSkin = opt["randomSkin"];
 	cfg.timeoutValue = opt["timeoutValue"];
 	cfg.videoFormat = opt["videoFormat"];
-	cfg.skinPath = opt["skinPath"];
+	cfg.skinPath = opt["skinPath1"];
 	cfg.skinName = opt["skinName"];
 	unsigned int pos = cfg.skinName.find_last_of("/");
 	if (pos != eString::npos && pos > 0)
