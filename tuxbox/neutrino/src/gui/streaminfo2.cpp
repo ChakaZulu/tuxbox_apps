@@ -418,8 +418,9 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 
 	//tsfrequenz
 	ypos+= sheight;
-	sprintf((char*) buf, "%s: %d.%d MHz (%c)", "Freq", si.tsfrequency/1000, si.tsfrequency%1000,
-			(si.polarisation == HORIZONTAL) ? 'h' : 'v');
+	int written = sprintf((char*) buf, "%s: %d.%d MHz", "Freq", si.tsfrequency/1000, si.tsfrequency%1000);
+	if (si.polarisation != 2) /* only satellite has polarisation */
+		sprintf((char*) buf+written, " (%c)", (si.polarisation == HORIZONTAL) ? 'h' : 'v');
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//pmtpid
