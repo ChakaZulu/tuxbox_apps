@@ -293,18 +293,16 @@ _TUXBOX_APPS_LIB_SYMBOL($1,$2,$3,WARN)
 ])
 
 AC_DEFUN([TUXBOX_APPS_GETTEXT],[
+AM_PATH_PROG_WITH_TEST(MSGFMT, msgfmt,
+        [$ac_dir/$ac_word --statistics /dev/null >/dev/null 2>&1 &&
+        (if $ac_dir/$ac_word --statistics /dev/null 2>&1 >/dev/null | grep usage >/dev/null; then exit 1; else exit 0; fi)],
+        :)
 AC_PATH_PROG(GMSGFMT, gmsgfmt, $MSGFMT)
 
 if test "$TARGET" = "cdk"; then
-	AC_PATH_PROG(MSGFMT, msgfmt, no)
 	AC_PATH_PROG(XGETTEXT, xgettext, no)
 	AC_PATH_PROG(MSGMERGE, msgmerge, no)
 else
-	AM_PATH_PROG_WITH_TEST(MSGFMT, msgfmt,
-		[$ac_dir/$ac_word --statistics /dev/null >/dev/null 2>&1 &&
-		(if $ac_dir/$ac_word --statistics /dev/null 2>&1 >/dev/null | grep usage >/dev/null; then exit 1; else exit 0; fi)],
-		:)
-
 	AM_PATH_PROG_WITH_TEST(XGETTEXT, xgettext,
 		[$ac_dir/$ac_word --omit-header --copyright-holder= /dev/null >/dev/null 2>&1 &&
 		(if $ac_dir/$ac_word --omit-header --copyright-holder= /dev/null 2>&1 >/dev/null | grep usage >/dev/null; then exit 1; else exit 0; fi)],
