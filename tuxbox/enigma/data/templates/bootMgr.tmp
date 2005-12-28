@@ -13,7 +13,7 @@ function editImageSettings(image)
 }
 function editBootManagerSettings()
 {
-	NewWindow('/cgi-bin/editbootmanagersettings', 'editMenu', '780', '300', 'no');
+	NewWindow('/cgi-bin/editbootmanagersettings', 'editMenu', '780', '320', 'no');
 }
 function showAddImageWindow()
 {

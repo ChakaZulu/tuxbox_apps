@@ -13,7 +13,7 @@
 				var skinPath = document.settings.skinPath.value;
 				var skinName = document.settings.skinName.value; 
 				var timeoutValue = document.settings.timeoutValue.value;
-				document.location = "/cgi-bin/setbootmanagersettings?skinName=" + skinName + "&mpoint=" + mpoint + "&randomSkin=" + randomSkin + "&selectedEntry=" + selectedEntry + "&videoFormat=" + videoFormat + "&skinPath=" + skinPath + "&timeoutValue=" + timeoutValue;
+				document.location = "/cgi-bin/setbootmanagersettings?skinName=" + skinName + "&mpoint=" + mpoint + "&randomSkin=" + randomSkin + "&selectedEntry=" + selectedEntry + "&videoFormat=" + videoFormat + "&skinPath1=" + skinPath1 + "&skinPath2=" + skinPath2 + "&timeoutValue=" + timeoutValue;
 				window.setTimeout("window.close()", 3000);
 			}
 		</script>
@@ -22,12 +22,21 @@
 		<form name="settings">
 			<table border="0" cellspacing="5" cellpadding="0">
 			<tr>
-				<td>Skin path:</td>
+				<td>Skin path 1:</td>
 				<td>
-					<input style="color:#000000" name="skinPath" type="text" size="50" maxlength="50" value="#SKINPATH#" readonly>&nbsp;
+					<input style="color:#000000" name="skinPath1" type="text" size="50" maxlength="50" value="#SKINPATH1#" readonly>&nbsp;
 				</td>
 				<td>
-					all skins must be in this directory
+					skins can be in this directory...
+				</td>
+			</tr>
+			<tr>
+				<td>Skin path 2:</td>
+				<td>
+					<input style="color:#000000" name="skinPath2" type="text" size="50" maxlength="50" value="#SKINPATH2#" readonly>&nbsp;
+				</td>
+				<td>
+					... or this directory
 				</td>
 			</tr>
 			<tr>
