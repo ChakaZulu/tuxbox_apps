@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.19 2004/08/07 22:10:00 rasc Exp $
+$Id: dsmcc_misc.c,v 1.20 2005/12/29 02:43:37 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.19 2004/08/07 22:10:00 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.20  2005/12/29 02:43:37  rasc
+gcc fixes, man page update
+
 Revision 1.19  2004/08/07 22:10:00  rasc
 Bugfix: NIT cable frequency display (reported by Karsten Siebert )
 
@@ -119,7 +122,7 @@ static int subDescriptor (u_char *b);
  * -- return: len
  */
 
-int dsmcc_pto_descriptor_loop (u_char *name, u_char *b)
+int dsmcc_pto_descriptor_loop (char *name, u_char *b)
 {
    int loop_length;
    int len,i;

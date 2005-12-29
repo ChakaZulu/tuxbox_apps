@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.34 2005/11/08 23:15:26 rasc Exp $
+$Id: sectables.c,v 1.35 2005/12/29 02:43:39 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: sectables.c,v 1.34 2005/11/08 23:15:26 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- For more information please see: ISO 13818 (-1) and ETSI 300 468
@@ -15,6 +15,9 @@ $Id: sectables.c,v 1.34 2005/11/08 23:15:26 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.35  2005/12/29 02:43:39  rasc
+gcc fixes, man page update
+
 Revision 1.34  2005/11/08 23:15:26  rasc
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
  - Bugfix: PES packet stuffing
@@ -266,7 +269,7 @@ void decodeSI_packet (u_char *buf, int len, u_int pid)
   softcrc_fail = 0;
 
   if (opt->soft_crc) {
-    u_long crc = crc32 (buf,len);
+    u_long crc = crc32 ((char *)buf,len);
     if (crc) {
 	softcrc_fail = 1;
     }

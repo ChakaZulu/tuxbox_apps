@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.49 2005/10/20 22:25:07 rasc Exp $
+$Id: cmdline.c,v 1.50 2005/12/29 02:43:38 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: cmdline.c,v 1.49 2005/10/20 22:25:07 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.49 2005/10/20 22:25:07 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.50  2005/12/29 02:43:38  rasc
+gcc fixes, man page update
+
 Revision 1.49  2005/10/20 22:25:07  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.

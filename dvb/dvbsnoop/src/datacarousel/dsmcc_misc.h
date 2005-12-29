@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.h,v 1.6 2004/02/17 23:54:12 rasc Exp $
+$Id: dsmcc_misc.h,v 1.7 2005/12/29 02:43:37 rasc Exp $
 
 
  DVBSNOOP
@@ -37,7 +37,7 @@ typedef struct _DSMCC_MSG_HEADER {
 
 
 
-int   dsmcc_pto_descriptor_loop (u_char *name, u_char *b);
+int   dsmcc_pto_descriptor_loop (char *name, u_char *b);
 int   dsmcc_CompatibilityDescriptor(u_char *b);
 
 int   dsmcc_MessageHeader (int v, u_char *b, int len, DSMCC_MSG_HD *dmh);

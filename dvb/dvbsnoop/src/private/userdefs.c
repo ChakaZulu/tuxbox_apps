@@ -1,5 +1,5 @@
 /*
-$Id: userdefs.c,v 1.3 2005/12/22 16:21:51 rasc Exp $
+$Id: userdefs.c,v 1.4 2005/12/29 02:43:38 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: userdefs.c,v 1.3 2005/12/22 16:21:51 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
 
 
   Private Sections & Descriptors
@@ -16,6 +16,9 @@ $Id: userdefs.c,v 1.3 2005/12/22 16:21:51 rasc Exp $
  
 
 $Log: userdefs.c,v $
+Revision 1.4  2005/12/29 02:43:38  rasc
+gcc fixes, man page update
+
 Revision 1.3  2005/12/22 16:21:51  rasc
 Update and new descriptors EN 300 468 v1.7.1
 
@@ -194,7 +197,7 @@ void descriptor_PRIVATE (u_char *b, DTAG_SCOPE tag_scope)
 // -- z.B. "premiere.de"
 //
 
-void set_PRIVATE_ProviderStr (u_char *s)
+void set_PRIVATE_ProviderStr (char *s)
 {
    int i = sizeof (privProviderStr)-1;
 

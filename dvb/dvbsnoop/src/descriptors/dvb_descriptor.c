@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.48 2005/12/22 16:21:50 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.49 2005/12/29 02:43:38 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dvb_descriptor.c,v 1.48 2005/12/22 16:21:50 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.48 2005/12/22 16:21:50 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.49  2005/12/29 02:43:38  rasc
+gcc fixes, man page update
+
 Revision 1.48  2005/12/22 16:21:50  rasc
 Update and new descriptors EN 300 468 v1.7.1
 
@@ -730,7 +733,7 @@ void descriptorDVB_CountryAvail  (u_char *b)
  while (len > 0) {
     u_char  country_code[4];
 
-    strncpy (country_code, b, 3);	// 24 bit
+    strncpy ((char *)country_code, (char *)b, 3);	// 24 bit
     *(country_code+3) = '\0';
     b   += 3;
     len -= 3;
@@ -1631,7 +1634,7 @@ void descriptorDVB_ParentalRating (u_char *b)
  } descParentalRating;
 
  typedef struct  _descParentalRating2 {
-    u_char     country_code[4];
+    char       country_code[4];
     u_int      rating;		
  } descParentalRating2;
 
@@ -1652,7 +1655,7 @@ void descriptorDVB_ParentalRating (u_char *b)
 
  indent (+1);
  while (len > 0) {
-    strncpy (d2.country_code, b, 3);	
+    strncpy (d2.country_code, (char *)b, 3);	
     d2.rating			 = getBits (b,0,24,8);
 
     b += 4;
@@ -1812,7 +1815,7 @@ void descriptorDVB_LocalTimeOffset  (u_char *b)
  } descLocalTimeOffset;
 
  typedef struct  _descLocalTimeOffset2 {
-   u_char        country_code[4];
+   char          country_code[4];
    u_int         country_region_id;
    u_int         reserved_1;
    u_int         local_time_offset_polarity;
@@ -1839,7 +1842,7 @@ void descriptorDVB_LocalTimeOffset  (u_char *b)
  indent (+1);
  while (len > 0) {
 
-    strncpy (d2.country_code, b, 3);	
+    strncpy (d2.country_code, (char *)b, 3);	
     d2.country_region_id	 = getBits (b, 0, 24,  6);
     d2.reserved_1		 = getBits (b, 0, 30,  1);
     d2.local_time_offset_polarity = getBits (b, 0, 31,  1);
@@ -2149,8 +2152,8 @@ void descriptorDVB_MultilingServiceName (u_char *b)
 
  indent (+1);
  while (len > 0 ) {
-    int len2;
-    char ISO639_2_language_code[4];
+    int    len2;
+    u_char ISO639_2_language_code[4];
 
 
     getISO639_3 (ISO639_2_language_code, b);

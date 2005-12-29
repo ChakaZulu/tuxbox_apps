@@ -1,12 +1,12 @@
 /*
-$Id: userdefs.h,v 1.2 2005/08/10 21:28:18 rasc Exp $
+$Id: userdefs.h,v 1.3 2005/12/29 02:43:38 rasc Exp $
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -44,7 +44,7 @@ typedef struct _PRIVATE_DESCRIPTOR_STRUCTURES_FUNC {
 void section_PRIVATE (u_char *b, int len);
 void descriptor_PRIVATE (u_char *b, DTAG_SCOPE scope);
 
-void set_PRIVATE_ProviderStr (u_char *s);
+void set_PRIVATE_ProviderStr (char *s);
 void list_PRIVATE_ProviderStrs (void);
 
 
