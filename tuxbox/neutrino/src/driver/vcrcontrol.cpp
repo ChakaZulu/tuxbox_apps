@@ -767,7 +767,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		expandedTemplate.insert(searchPos,buf);
 		startAt = searchPos + dataLength;
 	}
-	printf("[CFileDevice] filename: %s, expandedTemplate: %s\n",filename,expandedTemplate.c_str());
+	//printf("[CFileDevice] filename: %s, expandedTemplate: %s\n",filename,expandedTemplate.c_str());
 	
 	strncpy(&(filename[pos]),expandedTemplate.c_str(),511-pos);
 
@@ -870,7 +870,7 @@ void CVCRControl::CFileDevice::appendChannelName(char *buf, unsigned int size, c
 
 bool CVCRControl::CFileDevice::createRecordingDir(const char *filename) 
 {
-	printf("[CFileDevice] trying to create directory %s\n",filename);
+	//printf("[CFileDevice] trying to create directory %s\n",filename);
 	char *pos;
 	unsigned int start = 0;
 	while ((pos = strchr(&(filename[start]),'/')) != NULL) {
