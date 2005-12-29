@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-08-11 13:48+0200\n"
+"POT-Creation-Date: 2005-12-27 13:16+0100\n"
 "PO-Revision-Date: Thu Aug 11 13:47:26 CEST 2005\n"
 "Last-Translator: unknown\n"
 "Language-Team: Arabic / Kaiser <sales@digital-v.net>\n"
@@ -20,15 +20,15 @@ msgstr ""
 msgid "FF "
 msgstr "ف ف"
 
-#: default.esml:877
+#: default.esml:876
 msgid "&#53;"
 msgstr ""
 
-#: default.esml:383
+#: default.esml:382
 msgid "here you can change your sat/lnb mapping"
 msgstr "هنا يمكنك تغيير خريطة اللواقط LNB/الأقمار"
 
-#: default.esml:418 src/enigma_scan.cpp:49
+#: default.esml:417 src/enigma_scan.cpp:49
 msgid "Satfind"
 msgstr "إيجاد قمر"
 
@@ -36,115 +36,115 @@ msgstr "إيجاد قمر"
 msgid "Pause "
 msgstr "توقف مؤقت"
 
-#: default.esml:445
+#: default.esml:444
 msgid "motor power input difference between running and not running"
 msgstr "فرق تغذية الموتور بين التحرك وعدم التحرك"
 
-#: default.esml:409
+#: default.esml:408
 msgid "send the complete DiSEqC sequence twice"
 msgstr "إرسال الجملة كاملة للدايزك مرتين"
 
-#: default.esml:433 default.esml:481 default.esml:585 src/rotorconfig.cpp:597
+#: default.esml:432 default.esml:480 default.esml:584 src/rotorconfig.cpp:597
 msgid "Satellite:"
 msgstr "قمر صناعي"
 
-#: default.esml:410
+#: default.esml:409
 msgid "send no DiSEqC when only Hi/Lo or H/V changes"
 msgstr "عدم تفعيل الدايزك فقط فى حالة التغيير منخفض/عالى أو رأسى/أفقى"
 
-#: default.esml:652
+#: default.esml:651
 msgid "SNR"
 msgstr "نسبة الإشارة للشوشره"
 
-#: default.esml:408
+#: default.esml:407
 msgid "Uncommitted Switch:"
 msgstr "المفتاح الحر"
 
-#: default.esml:591 default.esml:609 default.esml:628
+#: default.esml:590 default.esml:608 default.esml:627
 msgid "enable/disable inversion here (ok)"
 msgstr "تشغيل/إغلاق التحويل هنا وافق"
 
-#: default.esml:412
+#: default.esml:411
 msgid "prev. page"
 msgstr "الصفحة السابقة"
 
-#: default.esml:385
+#: default.esml:384
 msgid "LOF/L:"
 msgstr "تردد المذبذب/منخفض"
 
-#: default.esml:754 src/timer.cpp:2651
+#: default.esml:753 src/timer.cpp:2651
 msgid "Wednesday"
 msgstr "الأربعاء"
 
-#: default.esml:847
+#: default.esml:846
 msgid "Partition Check"
 msgstr "فحص تقسيم القرص الصلب"
 
-#: default.esml:795 default.esml:819
+#: default.esml:794 default.esml:818
 msgid "enter recording end time (0..9, left, right, ok)"
 msgstr "أدخل وقت نهاية التسجيل (0..9،يسار،يمين،موافق"
 
-#: default.esml:759 default.esml:763
+#: default.esml:758 default.esml:762
 msgid "select year (ok)"
 msgstr "اختر السنه وافق"
 
-#: default.esml:390
+#: default.esml:389
 msgid "increased voltage"
 msgstr "زيادة في الفولت"
 
-#: default.esml:421 default.esml:655
+#: default.esml:420 default.esml:654
 msgid "LOCK"
 msgstr "غلق برقم سرى"
 
-#: default.esml:640
+#: default.esml:639
 msgid "choose the code rate HP (left, right)"
 msgstr "إختيار معدل الشفرة (يسار/يمين)"
 
-#: default.esml:391
+#: default.esml:390
 msgid "turn 12V output on (for 12V relais) (ok)"
 msgstr "تشغيل مخرج 12فولت (للتوصيلات 12فولت) (OK)"
 
-#: default.esml:513
+#: default.esml:512
 msgid "enable/disable use BAT for scan (if exists)"
 msgstr "تشغيل/إيقاف استخدام بات للبحث إن وجد"
 
-#: default.esml:575
+#: default.esml:574
 msgid "Skin Selector"
 msgstr "اختيار الجلد"
 
-#: default.esml:555
+#: default.esml:554
 msgid "transponder scanned:"
 msgstr "تم البحث في الباقه"
 
-#: default.esml:747
+#: default.esml:746
 msgid "press ok to change event name manually"
 msgstr "إضغط OK لتغيير اسم البرنامج/الحدث"
 
-#: default.esml:818
+#: default.esml:817
 msgid "recording end time:"
 msgstr "وقت نهاية التسجيل"
 
-#: default.esml:444
+#: default.esml:443
 msgid "Use motor input power for running detection.. else use timeout"
 msgstr "استخدم الطاقة الداخلة للموتور في الكشف...وغير ذلك أعط  انتهى الوقت"
 
-#: default.esml:527
+#: default.esml:526
 msgid "no circ polariz."
 msgstr "بدون قطبية دائرية"
 
-#: default.esml:465 default.esml:486
+#: default.esml:464 default.esml:485
 msgid "Direction:"
 msgstr "توجيه"
 
-#: default.esml:590 default.esml:608
+#: default.esml:589 default.esml:607
 msgid "MHz"
 msgstr "ميجا هيرتز"
 
-#: default.esml:554
+#: default.esml:553
 msgid "services scanned     :"
 msgstr "تم البحث عن الخدمة"
 
-#: default.esml:578 src/parentallock.cpp:101 src/setup_lcd.cpp:118
+#: default.esml:577 src/parentallock.cpp:101 src/setup_lcd.cpp:118
 #: src/setup_keyboard.cpp:55 src/setup_osd.cpp:269 src/setup_rc.cpp:127
 #: src/setup_timezone.cpp:47 src/setupengrab.cpp:102 src/setupnetwork.cpp:648
 #: src/setupvideo.cpp:180 src/setupvideo.cpp:418 src/tpeditwindow.cpp:112
@@ -152,108 +152,108 @@ msgstr "تم البحث عن الخدمة"
 msgid "save changes and return"
 msgstr "خزن التغيرات وارجع"
 
-#: default.esml:537
+#: default.esml:536
 msgid "aborts the transponder scan"
 msgstr "ينهى بحث الناقل"
 
-#: default.esml:469 default.esml:738 default.esml:898 default.esml:935
+#: default.esml:468 default.esml:737 default.esml:897 default.esml:934
 msgid "remove"
 msgstr "احذف"
 
-#: default.esml:443 default.esml:478
+#: default.esml:442 default.esml:477
 msgid "Motor Config"
 msgstr "تهيئة الموتور"
 
-#: default.esml:469
+#: default.esml:468
 msgid "remove selected entry"
 msgstr "احذف الإدخال الذي تم اختياره"
 
-#: default.esml:893
+#: default.esml:892
 msgid "abc &lt;-&gt; ABC"
 msgstr ""
 
-#: default.esml:887
+#: default.esml:886
 msgid "&lt;"
 msgstr ""
 
-#: default.esml:401
+#: default.esml:400
 msgid "select DiSEqC mode (ok)"
 msgstr "اختر نظام الدايسك"
 
-#: default.esml:411
+#: default.esml:410
 msgid "Swap Commands"
 msgstr "بدل الأوامر"
 
-#: default.esml:389
+#: default.esml:388
 msgid "enter LNB threshold frequency (0..9, ok)"
 msgstr "أدخل تردد حافة مذبذب ال ال ان بي "
 
-#: default.esml:494
+#: default.esml:493
 msgid "close motor setup"
 msgstr "أغلق إعداد الموتور"
 
-#: default.esml:460
+#: default.esml:459
 msgid "insert rotor memory cell for this orbital position"
 msgstr "إدخال رقم لذاكرة وحدة الحركة لهذا الموفع المدارى"
 
-#: default.esml:526 default.esml:545
+#: default.esml:525 default.esml:544
 msgid "add only unscrambled services"
 msgstr "أضف القنوات غير المشفرة فقط"
 
-#: default.esml:537 default.esml:862
+#: default.esml:536 default.esml:861
 msgid "abort"
 msgstr "اخرج"
 
-#: default.esml:841
+#: default.esml:840
 msgid "select filsystem to format"
 msgstr "اختر نظام الملفات للتجهيز"
 
-#: default.esml:850
+#: default.esml:849
 msgid "close window"
 msgstr "أغلق النافذه"
 
-#: default.esml:429 default.esml:654
+#: default.esml:428 default.esml:653
 msgid "BER"
 msgstr "معدل نسبة الخطأ في النبضات"
 
-#: default.esml:488
+#: default.esml:487
 msgid "Recalc Params:"
 msgstr "إعادة حساب المتغيرات"
 
-#: default.esml:589 default.esml:607 default.esml:626
+#: default.esml:588 default.esml:606 default.esml:625
 msgid "enter transponder frequeny (0..9, left, right)"
 msgstr "أدخل تردد الباقه 0....9"
 
-#: default.esml:468 default.esml:739 default.esml:933
+#: default.esml:467 default.esml:738 default.esml:932
 msgid "add"
 msgstr "أضف"
 
-#: default.esml:516
+#: default.esml:515
 msgid "start the transponder scan"
 msgstr "إبدأ البحث في الباقات"
 
-#: default.esml:516 default.esml:528 default.esml:547 default.esml:570
+#: default.esml:515 default.esml:527 default.esml:546 default.esml:569
 msgid "start scan"
 msgstr "إبدأ البحث"
 
-#: default.esml:839
+#: default.esml:838
 msgid "check"
 msgstr "افحص"
 
-#: default.esml:668 default.esml:675 default.esml:682 default.esml:690
-#: default.esml:701 default.esml:712
+#: default.esml:667 default.esml:674 default.esml:681 default.esml:689
+#: default.esml:700 default.esml:711
 msgid "Services"
 msgstr "قنوات"
 
-#: default.esml:879
+#: default.esml:878
 msgid "&#54;"
 msgstr ""
 
-#: default.esml:873
+#: default.esml:872
 msgid "&#51;"
 msgstr ""
 
-#: default.esml:637
+#: default.esml:636
 msgid "Coderate LP:"
 msgstr "معدل الشفرة LP:"
 
@@ -261,131 +261,131 @@ msgstr "معدل الشفرة LP:"
 msgid "subservices"
 msgstr "القنوات/ الخدمات الفرعية"
 
-#: default.esml:634
+#: default.esml:633
 msgid "choose the bandwidth (left, right)"
 msgstr "إختيار سعة الموجة (يسار/يمين)"
 
-#: default.esml:891
+#: default.esml:890
 msgid "&gt;"
 msgstr ""
 
-#: default.esml:760 default.esml:764
+#: default.esml:759 default.esml:763
 msgid "select month (ok)"
 msgstr "اختر الشهر أوكي"
 
-#: default.esml:454
+#: default.esml:453
 msgid "enter your latitude (0..9, +, -, ok)"
 msgstr "أدخل خط العرض 0...9 ، + ، - ، أوكي"
 
-#: default.esml:402
+#: default.esml:401
 msgid "DiSEqC Mode:"
 msgstr " نظام دايسك سي"
 
-#: default.esml:375
+#: default.esml:374
 msgid "LNB Configuration"
 msgstr "تهيئة ال ال ان بي"
 
-#: default.esml:534 default.esml:553 src/scan.cpp:663
+#: default.esml:533 default.esml:552 src/scan.cpp:663
 msgid "scanning..."
 msgstr "بحث عن القنوات"
 
-#: default.esml:491
+#: default.esml:490
 msgid "calc param 3 (see your motor manual or let it 00)"
 msgstr "احسب المعامل 3 انظر لكتيب الموتور أو ضعها 00"
 
-#: default.esml:653
+#: default.esml:652
 msgid "AGC"
 msgstr "التحكم االأتوماتيكي في الكسب"
 
-#: default.esml:407
+#: default.esml:406
 msgid "select uncommitted input"
 msgstr "إختيار التغذية/المدخلات الحرة"
 
-#: default.esml:444
+#: default.esml:443
 msgid "Use Motor Input Power"
 msgstr "استخدم الطاقة المغذية للموتور"
 
-#: default.esml:448
+#: default.esml:447
 msgid "when the motor support this, then use"
 msgstr "إذا كان الموتور يدعم هذا ، إذا استخدم "
 
-#: default.esml:748
+#: default.esml:747
 msgid "Starttime"
 msgstr "وقت البدء"
 
-#: default.esml:627
+#: default.esml:626
 msgid "KHz"
 msgstr "ك/هيرتز"
 
-#: default.esml:353
+#: default.esml:352
 msgid "HTTP Download"
 msgstr "تنزيل اتش تي بي بي"
 
-#: default.esml:412
+#: default.esml:411
 msgid "goto prev page (LNB)"
 msgstr "اذهب للصفحة السابقة لل ال ان بي"
 
-#: default.esml:448
+#: default.esml:447
 msgid "Use gotoXX Function"
 msgstr "استخدم خاصية إذهب إلى إكس"
 
-#: default.esml:895
+#: default.esml:894
 msgid "vol+"
 msgstr "مستوى الصوت+"
 
-#: default.esml:633
+#: default.esml:632
 msgid "Bandwidth:"
 msgstr "نطاق الموجة / عرض الموجة/سعة الموجة"
 
-#: default.esml:750
+#: default.esml:749
 msgid "for a multiple event enable this"
 msgstr "لعدة أحداث حفز هذه"
 
-#: default.esml:737
+#: default.esml:736
 msgid "press ok to select another event"
 msgstr "إضغط OK لاختيار برنامج/حدث آخر"
 
-#: default.esml:797 default.esml:809 default.esml:821
+#: default.esml:796 default.esml:808 default.esml:820
 msgid "shutdown  "
 msgstr "إغلاق جهاز الاستقبال"
 
-#: default.esml:436 default.esml:484
+#: default.esml:435 default.esml:483
 msgid "Transponder:"
 msgstr "باقه"
 
-#: default.esml:363
+#: default.esml:362
 msgid "22Khz"
 msgstr "ذبذبة 22 كيلوهيرتز"
 
-#: default.esml:820
+#: default.esml:819
 msgid "o'clock"
 msgstr "0 ساعه"
 
-#: default.esml:387
+#: default.esml:386
 msgid "LOF/H:"
 msgstr "تردد المذبذب/مرتفع"
 
-#: default.esml:871
+#: default.esml:870
 msgid "&#50;"
 msgstr ""
 
-#: default.esml:776 src/enigma_info.cpp:43
+#: default.esml:775 src/enigma_info.cpp:43
 msgid "About..."
 msgstr " عن"
 
-#: default.esml:739
+#: default.esml:738
 msgid "add new Timer (ok)"
 msgstr "اضف مؤقت جديد"
 
-#: default.esml:768
+#: default.esml:767
 msgid "to change service press ok"
 msgstr "لتغيير القناه اضغط  أوكي"
 
-#: default.esml:881
+#: default.esml:880
 msgid "&#55;"
 msgstr ""
 
-#: default.esml:770
+#: default.esml:769
 msgid "scan EPG"
 msgstr "ابحث في الدليل الأكتروني للمعلومات"
 
@@ -393,156 +393,156 @@ msgstr "ابحث في الدليل الأكتروني للمعلومات"
 msgid "audio track"
 msgstr "مسار الصوت"
 
-#: default.esml:758
+#: default.esml:757
 msgid "Su"
 msgstr "الأحد"
 
-#: default.esml:368
+#: default.esml:367
 msgid "new"
 msgstr "جديد"
 
-#: default.esml:806
+#: default.esml:805
 msgid "duration:"
 msgstr "طول المدة"
 
-#: default.esml:410
+#: default.esml:409
 msgid "Fast DiSEqC"
 msgstr "دايزك (قسام) سريع"
 
-#: default.esml:754 src/epgwindow.cpp:113 src/timer.cpp:222
+#: default.esml:753 src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Wed"
 msgstr "الأربعاء"
 
-#: default.esml:450
+#: default.esml:449
 msgid "Longitude:"
 msgstr "خط الطول"
 
-#: default.esml:452 default.esml:455 default.esml:466
+#: default.esml:451 default.esml:454 default.esml:465
 msgid "choose direction"
 msgstr "اختر الاتجاه"
 
-#: default.esml:832
+#: default.esml:831
 msgid "capacity:"
 msgstr "سعه"
 
-#: default.esml:638
+#: default.esml:637
 msgid "choose the code rate LP (left, right)"
 msgstr "إختيار معدل الشفرة LP (يسار/يمين)"
 
-#: default.esml:489
+#: default.esml:488
 msgid "calc param 1 (see your motor manual or let it 00)"
 msgstr "احسب المعامل 1 انظر لكتيب تشغيل الموتورأو ضع 00"
 
-#: default.esml:494
+#: default.esml:493
 msgid "prev page"
 msgstr "الصفحة السابقه"
 
-#: default.esml:755 src/epgwindow.cpp:113 src/timer.cpp:222
+#: default.esml:754 src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Thu"
 msgstr "الخميس"
 
-#: default.esml:635
+#: default.esml:634
 msgid "Transm. Mode:"
 msgstr "نوعية البث:"
 
-#: default.esml:391
+#: default.esml:390
 msgid "12V output on"
 msgstr "مخرج 12 فولت يعمل"
 
-#: default.esml:809
+#: default.esml:808
 msgid "shutdown the box to deepstandby (ok)"
 msgstr "إغلاق جهاز الاستقبال و الدخول فى انتظار طويل (OK)"
 
-#: default.esml:766
+#: default.esml:765
 msgid "edit the end time (0..9, left, right)"
 msgstr "حرر وقت الانتهاء 0...9، يمين ، يسار"
 
-#: default.esml:753 src/timer.cpp:2651
+#: default.esml:752 src/timer.cpp:2651
 msgid "Tuesday"
 msgstr "الثلاثاء"
 
-#: default.esml:794
+#: default.esml:793
 msgid "recording duration:"
 msgstr "زمن التسجيل"
 
-#: default.esml:740
+#: default.esml:739
 msgid "delete expired timer (ok)"
 msgstr "احذف التوقيتات منتهية الصلاحية"
 
-#: default.esml:437 default.esml:485
+#: default.esml:436 default.esml:484
 msgid "choose the Transponder you wish to find"
 msgstr "اختر التردد الذي تريد ايجاده"
 
-#: default.esml:933
+#: default.esml:932
 msgid "add new Transponder to selected sat (ok)"
 msgstr "أضف باقت جديدة للقمر الذي اخترته"
 
-#: default.esml:755 src/timer.cpp:2652
+#: default.esml:754 src/timer.cpp:2652
 msgid "Thursday"
 msgstr "الخميس"
 
-#: default.esml:811
+#: default.esml:810
 msgid "set sleeptimer and close window (ok)"
 msgstr "إضبط مؤقت النوم و أغلق النافذة (OK)"
 
-#: default.esml:368
+#: default.esml:367
 msgid "add a new Satellite"
 msgstr "اضف قمرا صناعيا جديدا"
 
-#: default.esml:496
+#: default.esml:495
 msgid "open transponder scan"
 msgstr "افتح البحث عن الباقات"
 
-#: default.esml:796 default.esml:808
+#: default.esml:795 default.esml:807
 msgid "min"
 msgstr "دقيقه"
 
-#: default.esml:446
+#: default.esml:445
 msgid "mA"
 msgstr "ملي امبير"
 
-#: default.esml:472
+#: default.esml:471
 msgid "goto advanced motor setup"
 msgstr "اذهب لإعداد المتقدم للموتور"
 
-#: default.esml:751 src/timer.cpp:2651
+#: default.esml:750 src/timer.cpp:2651
 msgid "Monday"
 msgstr "الإثنين"
 
-#: default.esml:838
+#: default.esml:837
 msgid "format"
 msgstr "تجهيز القرص الصلب"
 
-#: default.esml:528 default.esml:547
+#: default.esml:527 default.esml:546
 msgid "starts the transponder scan"
 msgstr "ابدأ البحث عن الترددات"
 
-#: default.esml:932
+#: default.esml:931
 msgid "sat"
 msgstr "قمر صناعى "
 
-#: default.esml:364
+#: default.esml:363
 msgid "Voltage"
 msgstr "فولت"
 
-#: default.esml:636
+#: default.esml:635
 msgid "choose the transmission mode (left, right)"
 msgstr "إختيار نوعية البث (يسار/يمين)"
 
-#: default.esml:661
+#: default.esml:660
 msgid "Help"
 msgstr "مساعده"
 
-#: default.esml:896
+#: default.esml:895
 msgid "insert"
 msgstr "إدخال"
 
-#: default.esml:770
+#: default.esml:769
 msgid "search event name for this beg-/end time in epg"
 msgstr "ابحث عن اسم الحدث لهذا الابتداء/ النهاية في الدليل الإلكتروني للقنوات"
 
-#: default.esml:367 default.esml:392 default.esml:413 default.esml:471
-#: default.esml:578 src/parentallock.cpp:96 src/scan.cpp:1723
+#: default.esml:366 default.esml:391 default.esml:412 default.esml:470
+#: default.esml:577 src/parentallock.cpp:96 src/scan.cpp:1726
 #: src/setup_lcd.cpp:113 src/setup_keyboard.cpp:50 src/setup_osd.cpp:264
 #: src/setup_rc.cpp:122 src/setup_rfmod.cpp:144 src/setup_timezone.cpp:42
 #: src/setupengrab.cpp:97 src/setupnetwork.cpp:643 src/setupnetwork.cpp:1120
@@ -551,7 +551,7 @@ msgstr "ابحث عن اسم الحدث لهذا الابتداء/ النهاي�
 msgid "save"
 msgstr "تخزين"
 
-#: default.esml:753 src/epgwindow.cpp:113 src/timer.cpp:222
+#: default.esml:752 src/epgwindow.cpp:113 src/timer.cpp:222
 msgid "Tue"
 msgstr "الثلاثاء"
 
@@ -559,88 +559,88 @@ msgstr "الثلاثاء"
 msgid "Play "
 msgstr "إعرض"
 
-#: default.esml:434 default.esml:482
+#: default.esml:433 default.esml:481
 msgid "choose the Satellite you wish to find"
 msgstr "اختر القمر الصناعي الذي تريد ايجاده"
 
-#: default.esml:457
+#: default.esml:456
 msgid "choose entry to edit or remove"
 msgstr "اختر إدخال للتعديل أو الحذف"
 
-#: default.esml:779
+#: default.esml:778
 msgid "processor: "
 msgstr "معالج"
 
-#: default.esml:749
+#: default.esml:748
 msgid "Endtime"
 msgstr "وقت الانتهاء"
 
-#: default.esml:875
+#: default.esml:874
 msgid "&#52;"
 msgstr ""
 
-#: default.esml:468
+#: default.esml:467
 msgid "add to table/existing will be overwritten"
 msgstr "أضف الى القائمة/ سيتم الكتابة على الموجودة (سيتم استبدال الحالية)"
 
-#: default.esml:780
+#: default.esml:779
 msgid "frontend: "
 msgstr "الواجهه"
 
-#: default.esml:885
+#: default.esml:884
 msgid "&#57;"
 msgstr ""
 
-#: default.esml:346 default.esml:424
+#: default.esml:345 default.esml:423
 msgid "AGC:"
 msgstr "تعديل الكسب أتوماتيكيا"
 
-#: default.esml:517
+#: default.esml:516
 #, fuzzy
 msgid "enter manual pids"
 msgstr "فتح قائمة التحديث اليدوى"
 
-#: default.esml:400
+#: default.esml:399
 msgid "Toneburst:"
 msgstr "وحدة تنظيم الاشارة من عدة أطباف"
 
-#: default.esml:798 default.esml:810 default.esml:822
+#: default.esml:797 default.esml:809 default.esml:821
 msgid "standby  "
 msgstr "انتظار"
 
-#: default.esml:595 default.esml:613
+#: default.esml:594 default.esml:612
 msgid "FEC:"
 msgstr "معامل التصحيح"
 
-#: default.esml:426 default.esml:656
+#: default.esml:425 default.esml:655
 msgid "SYNC"
 msgstr "تزامن"
 
-#: default.esml:453
+#: default.esml:452
 msgid "Latitude:"
 msgstr "إرتفاع"
 
-#: default.esml:576
+#: default.esml:575
 msgid "Skins:"
 msgstr "جلد"
 
-#: default.esml:786
+#: default.esml:785
 msgid "ok"
 msgstr "موافق"
 
-#: default.esml:594
+#: default.esml:593
 msgid "choose polarity (left, right)"
 msgstr "اخترالقطبية يمين ، يسار "
 
-#: default.esml:591 default.esml:609 default.esml:628
+#: default.esml:590 default.esml:608 default.esml:627
 msgid "Inv:"
 msgstr "معكوس"
 
-#: default.esml:762
+#: default.esml:761
 msgid "edit the start time (0..9, left, right)"
 msgstr "تحريروقت البدء0...9، يسار، يمين"
 
-#: default.esml:384
+#: default.esml:383
 msgid "enter LNB lowband offset frequency (0..9, ok)"
 msgstr "أدخل قيمة تردد مذبذب ال ال ان بي المنخفض"
 
@@ -648,79 +648,79 @@ msgstr "أدخل قيمة تردد مذبذب ال ال ان بي المنخفض
 msgid "Record "
 msgstr "التسجيل"
 
-#: default.esml:612 default.esml:630
+#: default.esml:611 default.esml:629
 msgid "choose modulation (left, right)"
 msgstr "خيارات الموائمة / خيارات فك الشفرات (يسار/ يمين)"
 
-#: default.esml:756 src/timer.cpp:2652
+#: default.esml:755 src/timer.cpp:2652
 msgid "Friday"
 msgstr "الجمعة"
 
-#: default.esml:869
+#: default.esml:868
 msgid "&#49;"
 msgstr ""
 
-#: default.esml:752
+#: default.esml:751
 msgid "select what todo after event"
 msgstr "اختيار الخطوة التى تلى الحدث/البرنامج"
 
-#: default.esml:462 src/tpeditwindow.cpp:71
+#: default.esml:461 src/tpeditwindow.cpp:71
 msgid "Orbital Position:"
 msgstr "موقع مداري"
 
-#: default.esml:406
+#: default.esml:405
 msgid "DiSEqC Repeats:"
 msgstr "تكرار الدايسك"
 
-#: default.esml:386
+#: default.esml:385
 msgid "enter LNB highband offset frequency (0..9, ok)"
 msgstr "أدخل مذبذب ال ال ان بي للنطاق المرتفع 0...9 ووافق"
 
-#: default.esml:797 default.esml:821
+#: default.esml:796 default.esml:820
 msgid "shutdown the box after recording (ok)"
 msgstr "أغلق الجهاز بعد التسجيل وافق"
 
-#: default.esml:921
+#: default.esml:920
 msgid "Please choose your DiSEqC-Configuration:"
 msgstr "الرجاء اختيارنظام الدايسك الذي لديك"
 
-#: default.esml:793 default.esml:817
+#: default.esml:792 default.esml:816
 msgid "Stop Record"
 msgstr "أوقف التسجيل"
 
-#: default.esml:740
+#: default.esml:739
 msgid "cleanup"
 msgstr "تنظيف/ ترتيب / حذف الملفات غير المطلوبة"
 
-#: default.esml:479
+#: default.esml:478
 msgid "Mode:"
 msgstr "نظام"
 
-#: default.esml:600 default.esml:618
+#: default.esml:599 default.esml:617
 msgid "KSymb/s"
 msgstr "كيلو سيمبول / الثانيه"
 
-#: default.esml:558
+#: default.esml:557
 msgid "Progress:"
 msgstr "تقدم"
 
-#: default.esml:343 default.esml:419
+#: default.esml:342 default.esml:418
 msgid "SNR:"
 msgstr "معدل الإشارة للشوشره"
 
-#: default.esml:359 src/enigma_scan.cpp:48
+#: default.esml:358 src/enigma_scan.cpp:48
 msgid "Satellite Configuration"
 msgstr "تهيئة القمر الصناعي"
 
-#: default.esml:769
+#: default.esml:768
 msgid "save data and close window"
 msgstr "إحفظ البيانات و أغلق النافذة"
 
-#: default.esml:388
+#: default.esml:387
 msgid "Threshold:"
 msgstr "حافه"
 
-#: default.esml:413
+#: default.esml:412
 msgid "save changes"
 msgstr "حفظ التغييرات"
 
@@ -728,177 +728,177 @@ msgstr "حفظ التغييرات"
 msgid "plugins"
 msgstr "البرامج الملحقة/البرامج المضافة"
 
-#: default.esml:934
+#: default.esml:933
 msgid "edit selected transponder (ok)"
 msgstr "تحرير الناقل المختار (OK)"
 
-#: default.esml:495
+#: default.esml:494
 msgid "save in motor"
 msgstr "إحفظ في الموتور"
 
-#: default.esml:593
+#: default.esml:592
 msgid "Polarity:"
 msgstr "استقطاب"
 
-#: default.esml:839
+#: default.esml:838
 msgid "do a filesystem check"
 msgstr "قم بعمل فحص لنظام الملفات"
 
-#: default.esml:838
+#: default.esml:837
 msgid "initialize the disk for use with the dreambox"
 msgstr "هيئ القرص الصلب للاستخدام مع دريم بوكس"
 
-#: default.esml:362
+#: default.esml:361
 msgid "LNB"
 msgstr "ال ان بي"
 
-#: default.esml:751
+#: default.esml:750
 msgid "Mo"
 msgstr "يوم الاثنين"
 
-#: default.esml:403
+#: default.esml:402
 msgid "select DiSEqC parameter (ok)"
 msgstr "اختر بيانات الدايسك وافق"
 
-#: default.esml:850
+#: default.esml:849
 msgid "close"
 msgstr "أغلق"
 
-#: default.esml:588 default.esml:606 default.esml:625
+#: default.esml:587 default.esml:605 default.esml:624
 msgid "Frequency:"
 msgstr "تردد"
 
-#: default.esml:935
+#: default.esml:934
 msgid "remove selected satellite"
 msgstr "حذف القمر المختار"
 
-#: default.esml:599 default.esml:617
+#: default.esml:598 default.esml:616
 msgid "enter symbol rate (0..9, left, right)"
 msgstr "أدخل معدل الترميز"
 
-#: default.esml:905
+#: default.esml:904
 msgid "press ok to enter the name"
 msgstr "اضغط أوكي لإدخال الاسم"
 
-#: default.esml:639
+#: default.esml:638
 msgid "Coderate HP:"
 msgstr "معدل الشفرة HP:"
 
-#: default.esml:738
+#: default.esml:737
 msgid "delete the current selected timer (ok)"
 msgstr "احذف المؤقت الذي تم اختياره حاليا"
 
-#: default.esml:399
+#: default.esml:398
 msgid "select MiniDiSEqC parameter (ok)"
 msgstr "اختر متغيرات ميني دايسك"
 
-#: default.esml:783
+#: default.esml:782
 msgid "Software Version:"
 msgstr "نسخة البرنامج التشغيلي"
 
-#: default.esml:451
+#: default.esml:450
 msgid "enter your longitude (0..9, +, -, ok)"
 msgstr "أدخل خط الطول 0...9 ، + ، - ، موافق"
 
-#: default.esml:894
+#: default.esml:893
 msgid "abc2 &lt;-&gt; 2abc"
 msgstr ""
 
-#: default.esml:369
+#: default.esml:368
 msgid "remove the selected Satellite"
 msgstr "أحذف القمر الصناعي الذي تم اختياره"
 
-#: default.esml:810
+#: default.esml:809
 msgid "goto standby (ok)"
 msgstr "الدخول الى الانتظار (OK)"
 
-#: default.esml:586
+#: default.esml:585
 msgid "choose wished satellite (ok)"
 msgstr "اختر القمر الصناعي المرغوب"
 
-#: default.esml:840
+#: default.esml:839
 msgid "show extended configuration"
 msgstr "إظهار كافة الاعدادات"
 
-#: default.esml:480
+#: default.esml:479
 msgid "choose what you want to do"
 msgstr "اختر مالذي تريد عمله"
 
-#: default.esml:758 src/timer.cpp:2651
+#: default.esml:757 src/timer.cpp:2651
 msgid "Sunday"
 msgstr "الأحد"
 
-#: default.esml:459
+#: default.esml:458
 msgid "Number in motor:"
 msgstr "الرقم في الموتور"
 
-#: default.esml:830
+#: default.esml:829
 msgid "model:"
 msgstr "طراز"
 
-#: default.esml:369
+#: default.esml:368
 msgid "erase"
 msgstr "احذف"
 
-#: default.esml:361
+#: default.esml:360
 msgid "Sat/Position"
 msgstr "قمر / موقع"
 
-#: default.esml:382
+#: default.esml:381
 msgid "Sat/LNB mapping:"
 msgstr "خريطة الأقمار/ اللواقظ LNB"
 
-#: default.esml:392
+#: default.esml:391
 msgid "save changes and use current selected LNB for the chosen satellite"
 msgstr "احفظ التغيرات واستخدم ال ال ان بي المختار حاليا للقمر الذي اخترته"
 
-#: default.esml:471
+#: default.esml:470
 msgid ""
 "save changes and use the selected LNB (in first page) for the choosen "
 "satellite"
 msgstr "احفظ التغيرات واستخدم ال ال ان بي في الصفحة الأولى للقمر الذي اخترته"
 
-#: default.esml:404
+#: default.esml:403
 msgid "DiSEqC Parameter:"
 msgstr "إعدادات الدايسك"
 
-#: default.esml:390
+#: default.esml:389
 msgid "0,5V higher LNB Voltage (for long cables) (ok)"
 msgstr "  نصف فولت زياده للكيبلات الطويله "
 
-#: default.esml:611
+#: default.esml:610
 msgid "Modulation:"
 msgstr "موائمة مفردات الإشارة / فك التشفير"
 
-#: default.esml:512
+#: default.esml:511
 msgid "enable/disable check ONIT on any transponder"
 msgstr "تشغيل / إيقاف أونت لأي باقه"
 
-#: default.esml:781
+#: default.esml:780
 msgid "harddisk: "
 msgstr "قرص صلب"
 
-#: default.esml:785
+#: default.esml:784
 msgid "FP Version:"
 msgstr "إصدار FP"
 
-#: default.esml:836
+#: default.esml:835
 msgid "status:"
 msgstr "حاله"
 
-#: default.esml:513
+#: default.esml:512
 msgid "use BAT"
 msgstr "استخدم جدول ترابط الباقات"
 
-#: default.esml:805
+#: default.esml:804
 msgid "Set Sleeptimer"
 msgstr "تحديد موعد النوم للمؤقت"
 
-#: default.esml:569
+#: default.esml:568
 msgid "press ok to change"
 msgstr "إضغط Ok للتغيير"
 
-#: default.esml:929
+#: default.esml:928
 msgid "Transponders"
 msgstr "النواقل"
 
@@ -906,75 +906,75 @@ msgstr "النواقل"
 msgid "FR "
 msgstr "الجمعة"
 
-#: default.esml:799 default.esml:823
+#: default.esml:798 default.esml:822
 msgid "set recording end time and close window (ok)"
 msgstr "ثبت وقت نهاية التسجيل واغلق النافذه"
 
-#: default.esml:367
+#: default.esml:366
 msgid "close Satellite Configuration"
 msgstr "اغلق تهيئة القمر الصناعي"
 
-#: default.esml:730 default.esml:736 stone.esml:462 silver.esml:469
+#: default.esml:729 default.esml:735 stone.esml:462 silver.esml:469
 msgid "EPG"
 msgstr "الدليل الإلكتروني للمعلومات"
 
-#: default.esml:934
+#: default.esml:933
 msgid "edit"
 msgstr "تحرير"
 
-#: default.esml:757
+#: default.esml:756
 msgid "Sa"
 msgstr "السبت"
 
-#: default.esml:834
+#: default.esml:833
 msgid "connected:"
 msgstr "متصل"
 
-#: default.esml:393 default.esml:472
+#: default.esml:392 default.esml:471
 msgid "next page"
 msgstr "الصفحة الثانيه"
 
-#: default.esml:598 default.esml:616
+#: default.esml:597 default.esml:615
 msgid "Symbol Rate:"
 msgstr "معدل الترميز"
 
-#: default.esml:799 default.esml:811 default.esml:823
+#: default.esml:798 default.esml:810 default.esml:822
 msgid "set"
 msgstr "اضبط"
 
-#: default.esml:487
+#: default.esml:486
 msgid "press left or right to move motor"
 msgstr "اضغط يمين أو يسار لتحريك الموتور"
 
-#: default.esml:490
+#: default.esml:489
 msgid "calc param 2 (see your motor manual or let it 00)"
 msgstr "احسب المعدل 2 انظر لكتيب الموتور أو ضع 00"
 
-#: default.esml:767
+#: default.esml:766
 msgid "select the timer type (ok)"
 msgstr "اضبط نوع المؤقت  أوكي"
 
-#: default.esml:523 default.esml:543
+#: default.esml:522 default.esml:542
 msgid "choose satellite/cable provider (ok)"
 msgstr "اختر مرسل الخدمه ساتيلايت أو /كيبل"
 
-#: default.esml:512
+#: default.esml:511
 msgid "use ONIT"
 msgstr "استخدم أو نت"
 
-#: default.esml:496
+#: default.esml:495
 msgid "search"
 msgstr "بحث"
 
-#: default.esml:492
+#: default.esml:491
 msgid "Counter(Movement)"
 msgstr "عداد للحركه"
 
-#: default.esml:515
+#: default.esml:514
 msgid "enable/disable initiate network search"
 msgstr "تشغيل / إيقاف البحث الشبكي"
 
-#: default.esml:631
+#: default.esml:630
 msgid "Guard:"
 msgstr "الحماية:"
 
@@ -982,137 +982,137 @@ msgstr "الحماية:"
 msgid "Stop "
 msgstr "توقف"
 
-#: default.esml:360
+#: default.esml:359
 msgid "select your configuration here"
 msgstr "إختيار إعداداتك من هنا"
 
-#: default.esml:883
+#: default.esml:882
 msgid "&#56;"
 msgstr ""
 
-#: default.esml:405
+#: default.esml:404
 msgid "select DiSEqC repeats (ok)"
 msgstr "اختر تكرار دايسك سي"
 
-#: default.esml:596 default.esml:614 default.esml:632
+#: default.esml:595 default.esml:613 default.esml:631
 msgid "choose the FEC (left, right)"
 msgstr "اختر معامل التصحيح يمين أو يسار"
 
-#: default.esml:912 src/system_settings.cpp:60
+#: default.esml:911 src/system_settings.cpp:60
 msgid "OSD Language"
 msgstr "لغة العرض على الشاشة"
 
-#: default.esml:856
+#: default.esml:855
 msgid "Software upgrade..."
 msgstr "ترقية البرنامج التشغيلي"
 
-#: default.esml:920
+#: default.esml:919
 msgid "DiSEqC..."
 msgstr "دايسك"
 
-#: default.esml:577
+#: default.esml:576
 msgid "select skin and press ok or choose save"
 msgstr "اختر الواجهة واضغط أوكي أو اختر تخزين"
 
-#: default.esml:761 default.esml:765
+#: default.esml:760 default.esml:764
 msgid "select day (ok)"
 msgstr "اختر اليوم أوكي"
 
-#: default.esml:527
+#: default.esml:526
 msgid "change circular to linear polarization"
 msgstr "تغيير القطبية الدائرية الى خطية"
 
-#: default.esml:393
+#: default.esml:392
 msgid "goto next page (DiSEqC)"
 msgstr "اذهب للصفحة التالية دايسك سي"
 
-#: default.esml:932
+#: default.esml:931
 msgid "select sat(up/down), ok(edit), green(add new), red(delete)"
 msgstr "إختيار قمر (أعلى / أسفل)، OK (تحرير)، أخضر (إضافة جديد), أحمر (حذف)"
 
-#: default.esml:746
+#: default.esml:745
 msgid "Timer Edit"
 msgstr "تحرير المؤقت"
 
-#: default.esml:769
+#: default.esml:768
 msgid "apply"
 msgstr "طبق"
 
-#: default.esml:889
+#: default.esml:888
 msgid "&#48;"
 msgstr ""
 
-#: default.esml:756
+#: default.esml:755
 msgid "Fr"
 msgstr "يوم الجمعة / مفتاح ربط الشبكة"
 
-#: default.esml:517
+#: default.esml:516
 #, fuzzy
 msgid "enter pids"
 msgstr "رياضات شتوية"
 
-#: default.esml:750
+#: default.esml:749
 msgid "Repeated timer"
 msgstr "تكرار المؤقت"
 
-#: default.esml:483
+#: default.esml:482
 msgid "enter stored satellite pos"
 msgstr "أدخل موضع القمر المخزن"
 
-#: default.esml:409
+#: default.esml:408
 msgid "Sequence repeat"
 msgstr "مرات التكرار"
 
-#: default.esml:848
+#: default.esml:847
 msgid "status output:"
 msgstr "نتيجة الحاله"
 
-#: default.esml:829
+#: default.esml:828
 msgid "Harddisk"
 msgstr "قرص صلب"
 
-#: default.esml:493
+#: default.esml:492
 msgid "bla"
 msgstr "أسود / bla"
 
-#: default.esml:798 default.esml:822
+#: default.esml:797 default.esml:821
 msgid "goto standby after recording (ok)"
 msgstr "اذهب غلى الانتظار بعد التسجيل أوكي"
 
-#: default.esml:514 default.esml:526 default.esml:545
+#: default.esml:513 default.esml:525 default.esml:544
 msgid "only Free"
 msgstr "المفتوحة فقط"
 
-#: default.esml:629
+#: default.esml:628
 msgid "Constellation:"
 msgstr "تجميع:"
 
-#: default.esml:757 src/timer.cpp:2652
+#: default.esml:756 src/timer.cpp:2652
 msgid "Saturday"
 msgstr "السبت"
 
-#: default.esml:807
+#: default.esml:806
 msgid "(0..9, left, right, ok)"
 msgstr "OK, (9..0)   يسار، يمين "
 
-#: default.esml:411
+#: default.esml:410
 msgid "swaps committed and uncommitted DiSEqC Commands"
 msgstr "تغيير أوامر الدايزك الحرة و العادية"
 
-#: default.esml:897
+#: default.esml:896
 msgid "vol-"
 msgstr "مستوى الصوت-"
 
-#: default.esml:515
+#: default.esml:514
 msgid "network search"
 msgstr "بحث شبكة"
 
-#: default.esml:514
+#: default.esml:513
 msgid "add only not scrambled services"
 msgstr "إضافة القنوات غير المشفرة فقط"
 
 #: lib/dvb/dvbci.cpp:60 lib/dvb/dvbci.cpp:109 lib/dvb/dvbci.cpp:127
-#: lib/dvb/dvbci.cpp:1280
+#: lib/dvb/dvbci.cpp:1279
 msgid "no module"
 msgstr "لا يوجد وحدة نفاذ مشروط/ لا تتوافر أى مكونات"
 
@@ -1153,56 +1153,56 @@ msgid "QPSK"
 msgstr "ارسال البيانات لشبكة العمل عبر الكابلات / الأسلاك"
 
 #: lib/dvb/service.cpp:202 lib/dvb/service.cpp:230 src/enigma_bouquet.cpp:212
-#: src/enigma_main.cpp:4313 src/enigma_main.cpp:4325 src/parentallock.cpp:123
+#: src/enigma_main.cpp:4343 src/enigma_main.cpp:4355 src/parentallock.cpp:123
 #: src/parentallock.cpp:155 src/timer.cpp:2362
 msgid "parental"
 msgstr "أبوى / والدىّ"
 
-#: lib/dvb/servicedvb.cpp:721
+#: lib/dvb/servicedvb.cpp:723
 msgid "Providers (TV)"
 msgstr "موفر الخدمة (تلفزيون)"
 
-#: lib/dvb/servicedvb.cpp:725
+#: lib/dvb/servicedvb.cpp:727
 msgid "Providers (Radio)"
 msgstr "موفر الخدمة (إذاعة)"
 
-#: lib/dvb/servicedvb.cpp:729
+#: lib/dvb/servicedvb.cpp:731
 msgid "Providers (Data)"
 msgstr "موفر الخدمة (بيانات)"
 
-#: lib/dvb/servicedvb.cpp:734
+#: lib/dvb/servicedvb.cpp:736
 msgid "All services (TV)"
 msgstr "كل القنوات (تلفزيون)"
 
-#: lib/dvb/servicedvb.cpp:738
+#: lib/dvb/servicedvb.cpp:740
 msgid "All services (Radio)"
 msgstr "كل القنوات(إذاعة)"
 
-#: lib/dvb/servicedvb.cpp:742
+#: lib/dvb/servicedvb.cpp:744
 msgid "All services (Data)"
 msgstr "كل القنوات (بيانات)"
 
-#: lib/dvb/servicedvb.cpp:749
+#: lib/dvb/servicedvb.cpp:751
 msgid "Satellites (TV)"
 msgstr "الأقمار الصناعية (تلفزيون)"
 
-#: lib/dvb/servicedvb.cpp:753
+#: lib/dvb/servicedvb.cpp:755
 msgid "Satellites (Radio)"
 msgstr "الأقمار الصناعية(إذاعة)"
 
-#: lib/dvb/servicedvb.cpp:757
+#: lib/dvb/servicedvb.cpp:759
 msgid "Satellites (Data)"
 msgstr "الأقمار الصناعية (بيانات)"
 
-#: lib/dvb/servicedvb.cpp:1149
+#: lib/dvb/servicedvb.cpp:1151
 msgid " - provider"
 msgstr "موفر الخدمة / مقدم الخدمة"
 
-#: lib/dvb/servicedvb.cpp:1157
+#: lib/dvb/servicedvb.cpp:1159
 msgid " - services"
 msgstr "القنوات/ الخدمات"
 
-#: lib/dvb/servicedvb.cpp:1165
+#: lib/dvb/servicedvb.cpp:1167
 msgid " - new found"
 msgstr ""
 
@@ -1227,8 +1227,8 @@ msgstr "(%d د مدخلات)"
 msgid "root node"
 msgstr "النقطة الجذريه"
 
-#: lib/dvb/servicestructure.cpp:11 src/enigma_mainmenu.cpp:56
-#: src/enigma_mainmenu.cpp:189
+#: lib/dvb/servicestructure.cpp:11 src/enigma_mainmenu.cpp:54
+#: src/enigma_mainmenu.cpp:185
 msgid "TV mode"
 msgstr "نظام تلفزيون"
 
@@ -1244,8 +1244,8 @@ msgstr "وضع الملفات المسجلة"
 msgid "TV/Radio"
 msgstr "تلفزيون/راديو"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7497
-#: src/sselect.cpp:393 src/sselect.cpp:400
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7559
+#: src/sselect.cpp:388 src/sselect.cpp:395
 msgid "Bouquets"
 msgstr "الباقات"
 
@@ -1751,7 +1751,7 @@ msgstr "وحدة النفاذ المشروط - إم إم آي"
 msgid "waiting for CI answer..."
 msgstr "فى انتظار استجابة مسرب وحدة النفاذ المشروط"
 
-#: src/enigma_dyn.cpp:2010
+#: src/enigma_dyn.cpp:2159
 #, fuzzy
 msgid "External Message"
 msgstr "رسالة من المؤقت"
@@ -1948,7 +1948,7 @@ msgstr "توقف مؤقت للعرض"
 msgid "resume playback"
 msgstr "أعد العرض"
 
-#: src/enigma_main.cpp:120 src/enigma_main.cpp:133 src/enigma_main.cpp:3080
+#: src/enigma_main.cpp:120 src/enigma_main.cpp:133 src/enigma_main.cpp:3108
 msgid "record"
 msgstr "تسجيل"
 
@@ -1992,15 +1992,15 @@ msgstr "افتح قائمة اختيار الخدمات واعرض الأفلا�
 msgid "open the serviceselector and shows the playlist"
 msgstr "افتح اختيار الخدمات واعرض قائمة العرض"
 
-#: src/enigma_main.cpp:148 src/sselect.cpp:131
+#: src/enigma_main.cpp:148 src/sselect.cpp:132
 msgid "switch to TV mode"
 msgstr "انتقل لنظام التلفزيون"
 
-#: src/enigma_main.cpp:149 src/sselect.cpp:132
+#: src/enigma_main.cpp:149 src/sselect.cpp:133
 msgid "switch to Radio mode"
 msgstr "انتقل لنظام الراديو"
 
-#: src/enigma_main.cpp:150 src/sselect.cpp:133
+#: src/enigma_main.cpp:150 src/sselect.cpp:134
 msgid "switch to File mode"
 msgstr "انتقل لنظام الأفلام"
 
@@ -2040,225 +2040,225 @@ msgstr "فيديو تحت الطلب تقريبا"
 msgid "Video"
 msgstr "صورة/ فيديو"
 
-#: src/enigma_main.cpp:644 src/enigma_main.cpp:826
+#: src/enigma_main.cpp:644 src/enigma_main.cpp:828
 msgid "Audio"
 msgstr "صوت"
 
-#: src/enigma_main.cpp:660 src/enigma_main.cpp:842
+#: src/enigma_main.cpp:660 src/enigma_main.cpp:844
 msgid "   Left Mono  >"
 msgstr "<فردى يسار"
 
-#: src/enigma_main.cpp:661 src/enigma_main.cpp:843
+#: src/enigma_main.cpp:661 src/enigma_main.cpp:845
 msgid "<  Stereo  >"
 msgstr "<صوت مجسم>"
 
-#: src/enigma_main.cpp:662 src/enigma_main.cpp:844
+#: src/enigma_main.cpp:662 src/enigma_main.cpp:846
 msgid "<  Right Mono  "
 msgstr ">فردى يمين"
 
-#: src/enigma_main.cpp:690
+#: src/enigma_main.cpp:692
 msgid "Audiotrack(AC3)"
 msgstr "مسار الصوت (AC3)"
 
-#: src/enigma_main.cpp:690
+#: src/enigma_main.cpp:692
 msgid "Audiotrack"
 msgstr "مسار الصوت"
 
-#: src/enigma_main.cpp:880
+#: src/enigma_main.cpp:884
 msgid "no subtitles"
 msgstr "لا تتوفر ترجمة مصاحبة"
 
-#: src/enigma_main.cpp:921
+#: src/enigma_main.cpp:925
 msgid "multiple Services"
 msgstr "قنوات متعدده"
 
-#: src/enigma_main.cpp:932 src/enigma_main.cpp:983 src/enigma_main.cpp:997
+#: src/enigma_main.cpp:936 src/enigma_main.cpp:987 src/enigma_main.cpp:1001
 msgid "enable quickzap"
 msgstr "تحفيز الزاب السريع"
 
-#: src/enigma_main.cpp:940
+#: src/enigma_main.cpp:944
 msgid "add to bouquet"
 msgstr "أضف الى الباقة"
 
-#: src/enigma_main.cpp:979
+#: src/enigma_main.cpp:983
 msgid "disable quickzap"
 msgstr "إبطال التنقل السريع"
 
-#: src/enigma_main.cpp:1077
+#: src/enigma_main.cpp:1081
 msgid "Channel"
 msgstr "قناة"
 
-#: src/enigma_main.cpp:1082
+#: src/enigma_main.cpp:1086
 msgid "Channel:"
 msgstr "قناة"
 
-#: src/enigma_main.cpp:1157
+#: src/enigma_main.cpp:1161
 #, c-format
 msgid "Please wait while the motor is turning to %d.%d°%c ...."
 msgstr ""
 
-#: src/enigma_main.cpp:1157
+#: src/enigma_main.cpp:1161
 msgid "Message"
 msgstr "رساله"
 
-#: src/enigma_main.cpp:1251
+#: src/enigma_main.cpp:1255
 msgid "recorded movies"
 msgstr "أفلام مسجله"
 
-#: src/enigma_main.cpp:1372
+#: src/enigma_main.cpp:1376
 msgid "Bouquets (TV)"
 msgstr "باقات (تلفزيون)"
 
-#: src/enigma_main.cpp:1383
+#: src/enigma_main.cpp:1387
 msgid "Bouquets (File)"
 msgstr "باقات (ملفات مسجلة)"
 
-#: src/enigma_main.cpp:1395
+#: src/enigma_main.cpp:1399
 msgid "Bouquets (Radio)"
 msgstr "باقات (إذاعة)"
 
-#: src/enigma_main.cpp:1444
+#: src/enigma_main.cpp:1448
 msgid "Favourites (TV)"
 msgstr "المفضله  تلفزيون"
 
-#: src/enigma_main.cpp:1450
+#: src/enigma_main.cpp:1454
 msgid "Favourites (Radio)"
 msgstr "المفضله راديو"
 
-#: src/enigma_main.cpp:1456
+#: src/enigma_main.cpp:1460
 msgid "Favourites (File)"
 msgstr "المفضلة (ملفات)"
 
-#: src/enigma_main.cpp:1874
+#: src/enigma_main.cpp:1893
 msgid "please wait while initializing Common Interface ..."
 msgstr "إنتظر أثناء عملية الابتداء و التثبيت لمسرب وحدات النفاذ المشروط"
 
-#: src/enigma_main.cpp:2176
+#: src/enigma_main.cpp:2195
 msgid "no EPG available"
 msgstr "لايوجد دليل إلكتروني"
 
-#: src/enigma_main.cpp:2834
+#: src/enigma_main.cpp:2859
 msgid "ShutdownTimer"
 msgstr "إغلاق المؤقت"
 
-#: src/enigma_main.cpp:2834
+#: src/enigma_main.cpp:2859
 msgid "SleepTimer"
 msgstr "مؤقت النوم"
 
-#: src/enigma_main.cpp:3080
+#: src/enigma_main.cpp:3108
 msgid "Sorry, you cannot record this service."
 msgstr "نأسف لايمكنك تسجيل هذه القناة"
 
-#: src/enigma_main.cpp:3285
+#: src/enigma_main.cpp:3315
 msgid "Show recorded movies?"
 msgstr "هل تريد عرض الفيلم المسجل؟"
 
-#: src/enigma_main.cpp:3285
+#: src/enigma_main.cpp:3315
 msgid "recording finished"
 msgstr "إنتهت عملية التسجيل"
 
-#: src/enigma_main.cpp:3639
+#: src/enigma_main.cpp:3669
 msgid "Shutdown your Receiver now?"
 msgstr "هل تريد اغلاق جهاز الاستقبال الآن؟"
 
-#: src/enigma_main.cpp:3639 src/enigma_main.cpp:3659
+#: src/enigma_main.cpp:3669 src/enigma_main.cpp:3689
 msgid "Timer Message"
 msgstr "رسالة من المؤقت"
 
-#: src/enigma_main.cpp:3659
+#: src/enigma_main.cpp:3689
 msgid "Go to Standby now?"
 msgstr "هل تريد الدخول فى وضع الانتظار الآن؟"
 
-#: src/enigma_main.cpp:3716 src/enigma_main.cpp:3778
+#: src/enigma_main.cpp:3746 src/enigma_main.cpp:3808
 msgid "Enter new name:"
 msgstr "أدخل اسم جديد"
 
-#: src/enigma_main.cpp:3717 src/enigma_main.cpp:3779
+#: src/enigma_main.cpp:3747 src/enigma_main.cpp:3809
 msgid "Rename entry"
 msgstr "غير الاسم المدخل"
 
-#: src/enigma_main.cpp:3841
+#: src/enigma_main.cpp:3871
 msgid "Sorry, you cannot delete this service."
 msgstr "نأسف لا يمكنك مسح هذه القناة"
 
-#: src/enigma_main.cpp:3841
+#: src/enigma_main.cpp:3871
 msgid "delete service"
 msgstr "امسح القناة"
 
-#: src/enigma_main.cpp:3868 src/enigma_main.cpp:3954
+#: src/enigma_main.cpp:3898 src/enigma_main.cpp:3984
 #, c-format
 msgid ""
 "You are trying to delete '%s'.\n"
 "Really do this?"
 msgstr ""
 
-#: src/enigma_main.cpp:3869
+#: src/enigma_main.cpp:3899
 msgid "Delete recorded stream"
 msgstr "مسح ماده مسجله"
 
-#: src/enigma_main.cpp:3900
+#: src/enigma_main.cpp:3930
 msgid ""
 "This is a complete Bouquet!\n"
 "Really delete?"
 msgstr "هذه باقة كاملة! هل تريد الحذف فعلا؟"
 
-#: src/enigma_main.cpp:3901
+#: src/enigma_main.cpp:3931
 msgid "Delete bouquet"
 msgstr "حذف باقة"
 
-#: src/enigma_main.cpp:3955
+#: src/enigma_main.cpp:3985
 msgid "Delete File"
 msgstr "حذف الملف"
 
-#: src/enigma_main.cpp:4013
+#: src/enigma_main.cpp:4043
 msgid "Enter new Filename:"
 msgstr "أدخل إسما جديدا للملف"
 
-#: src/enigma_main.cpp:4014
+#: src/enigma_main.cpp:4044
 msgid "Rename File"
 msgstr "أعد تسمية الملف"
 
-#: src/enigma_main.cpp:4078
+#: src/enigma_main.cpp:4108
 msgid "Enter new name for the bouquet:"
 msgstr "أدخل إسما للباقة"
 
-#: src/enigma_main.cpp:4079
+#: src/enigma_main.cpp:4109
 msgid "Rename bouquet"
 msgstr "إعادة تسمية الباقة"
 
-#: src/enigma_main.cpp:4104
+#: src/enigma_main.cpp:4134
 msgid "Enter name for the new bouquet:"
 msgstr "أدخل اسم للباقة الجديدة"
 
-#: src/enigma_main.cpp:4105
+#: src/enigma_main.cpp:4135
 msgid "Add new bouquet"
 msgstr "أضف باقة جديدة"
 
-#: src/enigma_main.cpp:4160
+#: src/enigma_main.cpp:4190
 msgid "unnamed"
 msgstr "بلا إسم"
 
-#: src/enigma_main.cpp:4161
+#: src/enigma_main.cpp:4191
 msgid "Enter marker name:"
 msgstr "أدخل اسما للرمز"
 
-#: src/enigma_main.cpp:4162
+#: src/enigma_main.cpp:4192
 msgid "create marker"
 msgstr "إنشاء رمز"
 
-#: src/enigma_main.cpp:4203
+#: src/enigma_main.cpp:4233
 msgid "unnamed bouquet"
 msgstr "باقة غير مسماة"
 
-#: src/enigma_main.cpp:4534 src/enigma_main.cpp:4535
+#: src/enigma_main.cpp:4564 src/enigma_main.cpp:4565
 msgid "This directory doesn't contain anything playable!"
 msgstr "هذا الفهرس لا يحتوي مادة يمكن عرضها"
 
-#: src/enigma_main.cpp:4535
+#: src/enigma_main.cpp:4565
 msgid "Play"
 msgstr "إعرض"
 
-#: src/enigma_main.cpp:5025
+#: src/enigma_main.cpp:5055
 msgid ""
 "A timer based recording is currently in progress!\n"
 "This stops the timer, and recording!"
@@ -2266,7 +2266,7 @@ msgstr ""
 "جارى الآن عملية تسجيل!\n"
 " و هذا يوقف التسجيل!"
 
-#: src/enigma_main.cpp:5035
+#: src/enigma_main.cpp:5065
 msgid ""
 "A recording is currently in progress!\n"
 "This stops the recording!"
@@ -2274,34 +2274,34 @@ msgstr ""
 "جارى الآن عملية تسجيل!\n"
 " و هذا يوقف التسجيل!"
 
-#: src/enigma_main.cpp:5047
+#: src/enigma_main.cpp:5077
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
 msgstr "هذا يوقف مؤقت الحدث"
 
-#: src/enigma_main.cpp:5055
+#: src/enigma_main.cpp:5085
 msgid "Really do this?"
 msgstr "حقيقة افعل هذا"
 
-#: src/enigma_main.cpp:5154
+#: src/enigma_main.cpp:5184
 msgid "please wait until the timer has started the recording (max 10 seconds)"
 msgstr "إنتظر حتى يبدأ الميقاتى عملية التسجيل (10 ثوان كحد أقصى)"
 
-#: src/enigma_main.cpp:5155
+#: src/enigma_main.cpp:5185
 msgid "information"
 msgstr "المعلومات"
 
-#: src/enigma_main.cpp:5815
+#: src/enigma_main.cpp:5841
 msgid "Record failed due to inaccessable storage."
 msgstr "إخفاق التسجيل بسبب صعوبة التخزين (الحفظ)"
 
-#: src/enigma_main.cpp:5817
+#: src/enigma_main.cpp:5843
 msgid ""
 "Record stopped due to full harddisk. Delete some recordings and try again."
 msgstr "توقف التسجيل بسبب إمتلاء القرص الصلب"
 
-#: src/enigma_main.cpp:5819
+#: src/enigma_main.cpp:5845
 msgid ""
 "Record failed due to an write error during recording. Check for filesystem "
 "corruption."
@@ -2309,304 +2309,304 @@ msgstr ""
 "إخفاق التسجيل بسبب خطأ فى الكتابة أثناء عملية التسجيل. راجع العطب فى نظام "
 "الملفات"
 
-#: src/enigma_main.cpp:5821
+#: src/enigma_main.cpp:5847
 msgid "record failed"
 msgstr "إخفاق عملية التسجيل"
 
-#: src/enigma_main.cpp:6060 src/enigma_main.cpp:6061
+#: src/enigma_main.cpp:6086 src/enigma_main.cpp:6087
 msgid "One moment please..."
 msgstr "لحظة من فضلك"
 
-#: src/enigma_main.cpp:6061 src/enigma_main.cpp:6065 src/enigma_main.cpp:6073
-#: src/enigma_main.cpp:6080 src/enigma_main.cpp:6086 src/enigma_main.cpp:6091
-#: src/enigma_main.cpp:6096 src/timer.cpp:2243
+#: src/enigma_main.cpp:6087 src/enigma_main.cpp:6091 src/enigma_main.cpp:6099
+#: src/enigma_main.cpp:6106 src/enigma_main.cpp:6112 src/enigma_main.cpp:6117
+#: src/enigma_main.cpp:6122 src/timer.cpp:2243
 msgid "switch"
 msgstr "مفتاح"
 
-#: src/enigma_main.cpp:6064 src/enigma_main.cpp:6065
+#: src/enigma_main.cpp:6090 src/enigma_main.cpp:6091
 msgid "Service could not be found !"
 msgstr "لم  أتمكن من إيجاد القناة"
 
-#: src/enigma_main.cpp:6072 src/enigma_main.cpp:6073
+#: src/enigma_main.cpp:6098 src/enigma_main.cpp:6099
 msgid "This service could not be descrambled"
 msgstr "لا يمكن فك تشفير القناة"
 
-#: src/enigma_main.cpp:6079 src/enigma_main.cpp:6080
+#: src/enigma_main.cpp:6105 src/enigma_main.cpp:6106
 msgid "This service doesn't currently send a signal"
 msgstr "لا توجد إشاره من هذه القناة"
 
-#: src/enigma_main.cpp:6084 src/enigma_main.cpp:6086
+#: src/enigma_main.cpp:6110 src/enigma_main.cpp:6112
 msgid "This content could not be displayed"
 msgstr "لا يمكن عرض محتويات القناة"
 
-#: src/enigma_main.cpp:6089 src/enigma_main.cpp:6091
+#: src/enigma_main.cpp:6115 src/enigma_main.cpp:6117
 msgid "NVOD Service - please select a starttime"
 msgstr "خدمة العرض تحت الطلب تقريبا اختر وقت بدء الخدمة"
 
-#: src/enigma_main.cpp:6094 src/enigma_main.cpp:6096
+#: src/enigma_main.cpp:6120 src/enigma_main.cpp:6122
 msgid "Unknown error!!"
 msgstr "خطأ غير معروف"
 
-#: src/enigma_main.cpp:6594 src/sselect.cpp:399
+#: src/enigma_main.cpp:6648 src/sselect.cpp:394
 msgid "Playlist"
 msgstr "إعرض اللائحة"
 
-#: src/enigma_main.cpp:6596
+#: src/enigma_main.cpp:6650
 msgid "History"
 msgstr "تاريخ"
 
-#: src/enigma_main.cpp:7032
+#: src/enigma_main.cpp:7094
 msgid "Service Menu"
 msgstr "قائمة القنوات"
 
-#: src/enigma_main.cpp:7049 src/sselect.cpp:129
+#: src/enigma_main.cpp:7111 src/sselect.cpp:130
 msgid "add service to playlist"
 msgstr "أضف قناة للائحة عرض القنوات"
 
-#: src/enigma_main.cpp:7049
+#: src/enigma_main.cpp:7111
 msgid "add selected service to the playlist"
 msgstr "إضافة القناة المختارة الى قائمة التشغيل"
 
-#: src/enigma_main.cpp:7060
+#: src/enigma_main.cpp:7122
 msgid "remove 'new found flag'"
 msgstr ""
 
-#: src/enigma_main.cpp:7060
+#: src/enigma_main.cpp:7122
 #, fuzzy
 msgid "select to remove the 'new found flag'"
 msgstr "إختيار إنشاء باقة جديدة"
 
-#: src/enigma_main.cpp:7063
+#: src/enigma_main.cpp:7125
 msgid "create new bouquet"
 msgstr "إنشاء باقة جديدة"
 
-#: src/enigma_main.cpp:7063
+#: src/enigma_main.cpp:7125
 msgid "select to create a new bouquet"
 msgstr "إختيار إنشاء باقة جديدة"
 
-#: src/enigma_main.cpp:7075
+#: src/enigma_main.cpp:7137
 msgid "duplicate bouquet"
 msgstr "نسخ باقة"
 
-#: src/enigma_main.cpp:7075
+#: src/enigma_main.cpp:7137
 msgid "duplicate the complete bouquet with all content"
 msgstr "نسخ الباقة كاملة مع كل محتوياتها"
 
-#: src/enigma_main.cpp:7081 src/enigma_main.cpp:7134 src/enigma_main.cpp:7139
-#: src/enigma_main.cpp:7154
+#: src/enigma_main.cpp:7143 src/enigma_main.cpp:7196 src/enigma_main.cpp:7201
+#: src/enigma_main.cpp:7216
 msgid "add to specific bouquet"
 msgstr "إضافة الى باقة محددة"
 
-#: src/enigma_main.cpp:7081
+#: src/enigma_main.cpp:7143
 msgid "add the selected service to another bouquet"
 msgstr "أضف القناة المختارة الى باقة أخرى"
 
-#: src/enigma_main.cpp:7083
+#: src/enigma_main.cpp:7145
 msgid "add marker"
 msgstr "إضافة رمز"
 
-#: src/enigma_main.cpp:7083
+#: src/enigma_main.cpp:7145
 msgid "create a new marker in the current bouquet"
 msgstr "إنشاء رمز جديد فى الباقة الحالية"
 
-#: src/enigma_main.cpp:7092 src/enigma_main.cpp:7106 src/enigma_main.cpp:7141
-#: src/sselect.cpp:378
+#: src/enigma_main.cpp:7154 src/enigma_main.cpp:7168 src/enigma_main.cpp:7203
+#: src/sselect.cpp:373
 msgid "rename"
 msgstr "غير اسم"
 
-#: src/enigma_main.cpp:7092
+#: src/enigma_main.cpp:7154
 msgid "rename the current selected bouquet"
 msgstr "أعد تسمية الباقة المختارة حاليا"
 
-#: src/enigma_main.cpp:7106 src/enigma_main.cpp:7141
+#: src/enigma_main.cpp:7168 src/enigma_main.cpp:7203
 msgid "rename the current selected service/movie"
 msgstr "إعادة تسمية القناة/الملف المختار حاليا "
 
-#: src/enigma_main.cpp:7110 src/enigma_main.cpp:7142 src/sselect.cpp:376
+#: src/enigma_main.cpp:7172 src/enigma_main.cpp:7204 src/sselect.cpp:371
 msgid "delete"
 msgstr "امسح"
 
-#: src/enigma_main.cpp:7110 src/enigma_main.cpp:7142
+#: src/enigma_main.cpp:7172 src/enigma_main.cpp:7204
 msgid "delete the current selected service/movie"
 msgstr "حذف القناة/ الفيلم المختار حاليا"
 
-#: src/enigma_main.cpp:7117
+#: src/enigma_main.cpp:7179
 msgid "disable move mode"
 msgstr "أوقف نظام النقل"
 
-#: src/enigma_main.cpp:7117
+#: src/enigma_main.cpp:7179
 msgid "switch move mode off"
 msgstr "إبطال خاصية النقل/ التحريك"
 
-#: src/enigma_main.cpp:7119
+#: src/enigma_main.cpp:7181
 msgid "enable move mode"
 msgstr "شغل نظام النقل"
 
-#: src/enigma_main.cpp:7119
+#: src/enigma_main.cpp:7181
 msgid "activate mode to simply change the entry order"
 msgstr "تنشيط خاصية تغييرترتيب المداخل"
 
-#: src/enigma_main.cpp:7128
+#: src/enigma_main.cpp:7190
 msgid "copy to bouquet list"
 msgstr "نسخ الى قائمة الباقات"
 
-#: src/enigma_main.cpp:7128
+#: src/enigma_main.cpp:7190
 msgid "copy the selected provider to the bouquet list"
 msgstr "نسخ موفر الخدمة المختار الى قائمة الباقات"
 
-#: src/enigma_main.cpp:7134 src/enigma_main.cpp:7139
+#: src/enigma_main.cpp:7196 src/enigma_main.cpp:7201
 msgid "add the selected service to a selectable bouquet"
 msgstr "أضف القناة المختارة اللى الباقة المختارة"
 
-#: src/enigma_main.cpp:7154
+#: src/enigma_main.cpp:7216
 msgid "add the selected file to a selectable bouquet"
 msgstr "أضف الملف المختار الى الباقة المختارة"
 
-#: src/enigma_main.cpp:7156
+#: src/enigma_main.cpp:7218
 msgid "delete file"
 msgstr "حذف الملف"
 
-#: src/enigma_main.cpp:7156
+#: src/enigma_main.cpp:7218
 msgid "delete the selected file (and all corresponding ts files"
 msgstr "حذف الملف المختار (وكل الملفات المسجلة TS ذات الصلة)"
 
-#: src/enigma_main.cpp:7157
+#: src/enigma_main.cpp:7219
 msgid "rename file"
 msgstr "أعد تسمية الملف"
 
-#: src/enigma_main.cpp:7157
+#: src/enigma_main.cpp:7219
 msgid "rename the selected file (and all corresponding ts files"
 msgstr "أعد تسمية الملف (و كل الملفات المسجلة TS ذات الصلة)"
 
-#: src/enigma_main.cpp:7171
+#: src/enigma_main.cpp:7233
 msgid "disable edit mode"
 msgstr "أوقف نظام التعديل"
 
-#: src/enigma_main.cpp:7171
+#: src/enigma_main.cpp:7233
 msgid "disable the edit mode"
 msgstr "إبطال حالة (خاصية) التحرير"
 
-#: src/enigma_main.cpp:7173
+#: src/enigma_main.cpp:7235
 msgid "enable edit mode"
 msgstr "شغل نظام التعديل"
 
-#: src/enigma_main.cpp:7173
+#: src/enigma_main.cpp:7235
 msgid "activate mode to simply add many services to a selectable bouquet"
 msgstr "تنشيط حالة إضافة كثير من القنوات أو الملفات للباقة المختارة"
 
-#: src/enigma_main.cpp:7183
+#: src/enigma_main.cpp:7245
 msgid "unlock"
 msgstr "فتح / بدون اغلاق أبوى"
 
-#: src/enigma_main.cpp:7183
+#: src/enigma_main.cpp:7245
 msgid "do parental-unlock the selected service or file"
 msgstr "فتح الاغلاق الأبوى للقناة أو الملف المختار"
 
-#: src/enigma_main.cpp:7185
+#: src/enigma_main.cpp:7247
 msgid "lock"
 msgstr "الاغلاق/ أغلق"
 
-#: src/enigma_main.cpp:7185
+#: src/enigma_main.cpp:7247
 msgid "do parentallock the selected service or file"
 msgstr "تفعيل الاغلاق الأبوى للقناة أو الملف المختار"
 
-#: src/enigma_main.cpp:7189
+#: src/enigma_main.cpp:7251
 msgid "disable parental lock"
 msgstr "إبطال الاغلاق الأبوى"
 
-#: src/enigma_main.cpp:7189
+#: src/enigma_main.cpp:7251
 msgid "temporary disable the parental locking"
 msgstr "إبطال الاغلاق الأبوى مؤقتا"
 
-#: src/enigma_main.cpp:7191
+#: src/enigma_main.cpp:7253
 msgid "enable parental lock"
 msgstr "تفعيل الاغلاق الأبوى"
 
-#: src/enigma_main.cpp:7191
+#: src/enigma_main.cpp:7253
 msgid "re-enable the parental locking"
 msgstr "اعادة تفعيل الاغلاق الأبوى"
 
-#: src/enigma_main.cpp:7209
+#: src/enigma_main.cpp:7271
 msgid "Shutdown/Standby Menu"
 msgstr "قائمة اغلاق/ انتظار "
 
-#: src/enigma_main.cpp:7220 src/enigma_main.cpp:7223
+#: src/enigma_main.cpp:7282 src/enigma_main.cpp:7285
 msgid "reboot now"
 msgstr "أعد التشغيل الآن"
 
-#: src/enigma_main.cpp:7220 src/enigma_main.cpp:7228
+#: src/enigma_main.cpp:7282 src/enigma_main.cpp:7290
 msgid "restart your dreambox"
 msgstr "أعد تشغيل جهازك دريم وكس"
 
-#: src/enigma_main.cpp:7223
+#: src/enigma_main.cpp:7285
 msgid "restart your receiver"
 msgstr "أعد تشغيل جهاز الاستقبال"
 
-#: src/enigma_main.cpp:7227 src/enigma_main.cpp:7231
+#: src/enigma_main.cpp:7289 src/enigma_main.cpp:7293
 msgid "shutdown now"
 msgstr "أغلق الآن"
 
-#: src/enigma_main.cpp:7227
+#: src/enigma_main.cpp:7289
 msgid "shutdown your dreambox"
 msgstr "أغلق جهازك دريم بوكس"
 
-#: src/enigma_main.cpp:7228 src/enigma_main.cpp:7232
+#: src/enigma_main.cpp:7290 src/enigma_main.cpp:7294
 msgid "restart"
 msgstr "اعادة التشغيل"
 
-#: src/enigma_main.cpp:7231
+#: src/enigma_main.cpp:7293
 msgid "shutdown your dbox-2"
 msgstr "اغلاق جهاز الاستقبال dbox-2"
 
-#: src/enigma_main.cpp:7232
+#: src/enigma_main.cpp:7294
 msgid "restart your dbox-2"
 msgstr "اعادة تشغيل حهاز الاستقبال dbox-2"
 
-#: src/enigma_main.cpp:7236
+#: src/enigma_main.cpp:7298
 msgid "goto standby"
 msgstr "بداية وضع الانتظار"
 
-#: src/enigma_main.cpp:7236
+#: src/enigma_main.cpp:7298
 msgid "goto standby mode"
 msgstr "الدخول الى وضع الانتظار"
 
-#: src/enigma_main.cpp:7237
+#: src/enigma_main.cpp:7299
 msgid "set sleeptimer"
 msgstr "ضبط توقيت النوم"
 
-#: src/enigma_main.cpp:7237
+#: src/enigma_main.cpp:7299
 msgid "set a sleep timer"
 msgstr "تحديد وقت النوم"
 
-#: src/enigma_main.cpp:7357
+#: src/enigma_main.cpp:7419
 msgid "Record Menu"
 msgstr "قائمة التسجيل"
 
-#: src/enigma_main.cpp:7363
+#: src/enigma_main.cpp:7425
 msgid "stop record now"
 msgstr "أوقف قائمة التسجيل"
 
-#: src/enigma_main.cpp:7363
+#: src/enigma_main.cpp:7425
 msgid "immediate stop the recording"
 msgstr "ايقاف التسجيل فورا"
 
-#: src/enigma_main.cpp:7365
+#: src/enigma_main.cpp:7427
 msgid "set record duration"
 msgstr "إعداد قائمة التسجيل"
 
-#: src/enigma_main.cpp:7365
+#: src/enigma_main.cpp:7427
 msgid "set the recording time (in minutes)"
 msgstr "تحديد وقت التسجيل بالدقائق"
 
-#: src/enigma_main.cpp:7366
+#: src/enigma_main.cpp:7428
 msgid "set record stop time"
 msgstr "إعداد وقت توقف التسجيل"
 
-#: src/enigma_main.cpp:7366
+#: src/enigma_main.cpp:7428
 msgid "set the recording end time"
 msgstr "تحديد نهاية وقت التسجيل"
 
-#: src/enigma_main.cpp:7461
+#: src/enigma_main.cpp:7523
 msgid "press ok to start edit mode"
 msgstr "اضغط أوكي لبدء نظام التعديل"
 
@@ -2626,51 +2626,51 @@ msgstr "اختيار المدخل السابق"
 msgid "select next entry"
 msgstr "اختيار المدخل التالى"
 
-#: src/enigma_mainmenu.cpp:59 src/enigma_mainmenu.cpp:190
+#: src/enigma_mainmenu.cpp:57 src/enigma_mainmenu.cpp:186
 msgid "Radio mode"
 msgstr "نظام الراديو"
 
-#: src/enigma_mainmenu.cpp:63 src/enigma_mainmenu.cpp:192
+#: src/enigma_mainmenu.cpp:61 src/enigma_mainmenu.cpp:188
 msgid "File mode"
 msgstr "نظام الملفات"
 
-#: src/enigma_mainmenu.cpp:66 src/enigma_mainmenu.cpp:85
-#: src/enigma_mainmenu.cpp:198 src/enigma_mainmenu.cpp:208
+#: src/enigma_mainmenu.cpp:64 src/enigma_mainmenu.cpp:83
+#: src/enigma_mainmenu.cpp:195 src/enigma_mainmenu.cpp:205
 #: src/rotorconfig.cpp:917 src/timer.cpp:2695
 msgid "Information"
 msgstr "معلومات"
 
-#: src/enigma_mainmenu.cpp:69 src/enigma_mainmenu.cpp:200 src/timer.cpp:2147
+#: src/enigma_mainmenu.cpp:67 src/enigma_mainmenu.cpp:197 src/timer.cpp:2147
 msgid "Shutdown"
 msgstr "إغلاق"
 
-#: src/enigma_mainmenu.cpp:72 src/enigma_mainmenu.cpp:88
-#: src/enigma_mainmenu.cpp:196 src/enigma_mainmenu.cpp:206
+#: src/enigma_mainmenu.cpp:70 src/enigma_mainmenu.cpp:86
+#: src/enigma_mainmenu.cpp:193 src/enigma_mainmenu.cpp:203
 #: src/enigma_setup.cpp:36
 msgid "Setup"
 msgstr "قائمة الاعدادات"
 
-#: src/enigma_mainmenu.cpp:75 src/enigma_mainmenu.cpp:197
+#: src/enigma_mainmenu.cpp:73 src/enigma_mainmenu.cpp:194
 #: src/enigma_plugins.cpp:122
 msgid "Games"
 msgstr "ألعاب"
 
-#: src/enigma_mainmenu.cpp:78 src/enigma_mainmenu.cpp:91
-#: src/enigma_mainmenu.cpp:195 src/enigma_mainmenu.cpp:205
+#: src/enigma_mainmenu.cpp:76 src/enigma_mainmenu.cpp:89
+#: src/enigma_mainmenu.cpp:192 src/enigma_mainmenu.cpp:202
 msgid "Timer"
 msgstr "مؤقت"
 
-#: src/enigma_mainmenu.cpp:81 src/enigma_mainmenu.cpp:94
-#: src/enigma_mainmenu.cpp:193 src/enigma_mainmenu.cpp:203
+#: src/enigma_mainmenu.cpp:79 src/enigma_mainmenu.cpp:92
+#: src/enigma_mainmenu.cpp:190 src/enigma_mainmenu.cpp:200
 msgid "VCR"
 msgstr "مسجل فيديو كاسيت"
 
-#: src/enigma_mainmenu.cpp:100 src/enigma_mainmenu.cpp:108
-#: src/enigma_mainmenu.cpp:342
+#: src/enigma_mainmenu.cpp:98 src/enigma_mainmenu.cpp:106
+#: src/enigma_mainmenu.cpp:339
 msgid "Mainmenu"
 msgstr "القائمة الرئيسة"
 
-#: src/enigma_mainmenu.cpp:278 src/parentallock.cpp:143
+#: src/enigma_mainmenu.cpp:275 src/parentallock.cpp:143
 #: src/parentallock.cpp:155
 msgid "setup"
 msgstr "قائمة الاعدادات"
@@ -2688,8 +2688,8 @@ msgstr "اختر المترابطات واضغط أوكي"
 msgid "Couldn't read plugin directory %s"
 msgstr ""
 
-#: src/enigma_plugins.cpp:156 src/scan.cpp:1870 src/scan.cpp:1925
-#: src/scan.cpp:2032
+#: src/enigma_plugins.cpp:156 src/scan.cpp:1873 src/scan.cpp:1928
+#: src/scan.cpp:2035
 msgid "Error"
 msgstr "خطأ"
 
@@ -2753,31 +2753,31 @@ msgstr "إيقاف الدايسك سي"
 msgid "disable 5V for passive terrerstrial antennas"
 msgstr ""
 
-#: src/enigma_scan.cpp:60 src/scan.cpp:43
+#: src/enigma_scan.cpp:61 src/scan.cpp:43
 msgid "Automatic Transponder Scan"
 msgstr "بحث آلى للناقل"
 
-#: src/enigma_scan.cpp:60 src/scan.cpp:43
+#: src/enigma_scan.cpp:61 src/scan.cpp:43
 msgid "open automatic transponder scan"
 msgstr "افتح البحث الأتوماتيكي عن الباقات"
 
-#: src/enigma_scan.cpp:62 src/scan.cpp:45
+#: src/enigma_scan.cpp:63 src/scan.cpp:45
 msgid "Automatic Multisat Scan"
 msgstr "بحث آلى لعدة أقمار"
 
-#: src/enigma_scan.cpp:62 src/scan.cpp:45
+#: src/enigma_scan.cpp:63 src/scan.cpp:45
 msgid "open automatic multisat transponder scan"
 msgstr "فتح قائمة البحث الآلى لعدة أقمار و نواقل"
 
-#: src/enigma_scan.cpp:64
+#: src/enigma_scan.cpp:65
 msgid "Manual Transponder Scan"
 msgstr "البحث اليدوى للنواقل"
 
-#: src/enigma_scan.cpp:64 src/scan.cpp:46
+#: src/enigma_scan.cpp:65 src/scan.cpp:46
 msgid "open manual transponder scan"
 msgstr "افتح البحث اليدوي عن الباقات"
 
-#: src/enigma_scan.cpp:141
+#: src/enigma_scan.cpp:142
 msgid ""
 "DiSEqC 1.2 is enabled on more than one LNB, please select the LNB the motor "
 "is connected to"
@@ -2785,25 +2785,25 @@ msgstr ""
 "تم تفعيل دايزك 1.2 لأكثر من لاقط، من فضلك قم باختيار اللاقط الذى تتصل به "
 "وحدة الحركة"
 
-#: src/enigma_scan.cpp:141 src/setupnetwork.cpp:938
+#: src/enigma_scan.cpp:142 src/setupnetwork.cpp:938
 msgid "Info"
 msgstr "معلومات"
 
-#: src/enigma_scan.cpp:155
+#: src/enigma_scan.cpp:156
 msgid ""
 "Found no LNB with DiSEqC 1.2 enabled,\n"
 "please goto Satellite Config first, and enable DiSEqC 1.2"
 msgstr "الرجاء الذهاب لتهيئة الموتور وتشغيل دايسك 1.2"
 
-#: src/enigma_scan.cpp:155 src/rotorconfig.cpp:692 src/rotorconfig.cpp:893
+#: src/enigma_scan.cpp:156 src/rotorconfig.cpp:692 src/rotorconfig.cpp:893
 msgid "Warning"
 msgstr "تحذير"
 
-#: src/enigma_scan.cpp:197
+#: src/enigma_scan.cpp:198
 msgid "Select LNB"
 msgstr "اختر ال ال ان بي"
 
-#: src/enigma_scan.cpp:204
+#: src/enigma_scan.cpp:205
 #, c-format
 msgid "use LNB %d for Motor"
 msgstr "اختر ال ان بي %d للموتور"
@@ -3260,337 +3260,337 @@ msgstr "تهيئة غير قياسية عبر المستخدم"
 msgid "special"
 msgstr "خصوصي"
 
-#: src/satconfig.cpp:136
+#: src/satconfig.cpp:135
 msgid ""
 "Configuration contains some elements\n"
 "which don't fit into new DiSEqC-Type. Drop these items?"
 msgstr "ما لا يتوافق مع الدايسك. اترك هذه الموضوعات"
 
-#: src/satconfig.cpp:136
+#: src/satconfig.cpp:135
 msgid "Change DiSEqC-Type..."
 msgstr "غير نوع الدايسك"
 
-#: src/satconfig.cpp:334
+#: src/satconfig.cpp:333
 msgid "direct connection"
 msgstr "توصيلة مباشرة"
 
-#: src/satconfig.cpp:734
+#: src/satconfig.cpp:741
 msgid "press ok to select another satellite"
 msgstr "إضغط OK لاختيار قمرآخر"
 
-#: src/satconfig.cpp:749
+#: src/satconfig.cpp:756
 msgid "press ok to goto LNB config"
 msgstr "اضغط أو كي للذهاب لتهيئ ال ال ان بي"
 
-#: src/satconfig.cpp:767
+#: src/satconfig.cpp:774
 msgid "press ok to select another 22kHz mode"
 msgstr "اضغط أو كي لاختيار نظام22كيلو هيرتز آخر"
 
-#: src/satconfig.cpp:768
+#: src/satconfig.cpp:775
 msgid "22kHz signal is automatically switched"
 msgstr "يتم تشغيل ذبذبة 22 كيلوهيرتز أتوماتيكيا"
 
-#: src/satconfig.cpp:769
+#: src/satconfig.cpp:776
 msgid "22kHz is always enabled (high band)"
 msgstr "ذبذبة 22 كيلو هيرتز شغالة دائما"
 
-#: src/satconfig.cpp:770
+#: src/satconfig.cpp:777
 msgid "22kHz is always disabled (low band)"
 msgstr "ذبذبة 22 كيلو هيرتز  تم إيقافها"
 
-#: src/satconfig.cpp:780
+#: src/satconfig.cpp:787
 msgid "press ok to select another LNB Voltage mode"
 msgstr "اضغط أوكي لاختيار فولت تغذية مختلف لل ال ان بي "
 
-#: src/satconfig.cpp:781
+#: src/satconfig.cpp:788
 msgid "Voltage is automatically changed"
 msgstr "يتم تغيير الفولت أتوماتيكيا"
 
-#: src/satconfig.cpp:782
+#: src/satconfig.cpp:789
 msgid "Voltage is always 14V (vertical)"
 msgstr "الفولت دائما 14 فولت راسي"
 
-#: src/satconfig.cpp:783
+#: src/satconfig.cpp:790
 msgid "Voltage is always 18V (horizontal)"
 msgstr "الفولت دائما 18 فولت أفقي"
 
-#: src/satconfig.cpp:784
+#: src/satconfig.cpp:791
 msgid "Voltage is always off"
 msgstr "الفولت دائما موقوف"
 
-#: src/satconfig.cpp:1143 src/satconfig.cpp:1189 src/satconfig.cpp:1199
+#: src/satconfig.cpp:1150 src/satconfig.cpp:1196 src/satconfig.cpp:1206
 msgid "None"
 msgstr "لا يوجد"
 
-#: src/satconfig.cpp:1143
+#: src/satconfig.cpp:1150
 msgid "sends no tone burst"
 msgstr "لا ترسل نبضة تون بيرست"
 
-#: src/satconfig.cpp:1144
+#: src/satconfig.cpp:1151
 msgid "sends modulated tone burst"
 msgstr "غرسال نبضة تون بيرست موالفه"
 
-#: src/satconfig.cpp:1145
+#: src/satconfig.cpp:1152
 msgid "sends unmodulated tone burst"
 msgstr "إرسال نبضة تون بيرست غير موالفه"
 
-#: src/satconfig.cpp:1152
+#: src/satconfig.cpp:1159
 msgid "Disable DiSEqC"
 msgstr "إيقاف الدايسك سي"
 
-#: src/satconfig.cpp:1153
+#: src/satconfig.cpp:1160
 msgid "Use DiSEqC Version 1.0"
 msgstr "استخدم نسخة دايسك سي 1.0"
 
-#: src/satconfig.cpp:1154
+#: src/satconfig.cpp:1161
 msgid "Use DiSEqC Version 1.1"
 msgstr "استخدم نسخة دايسك سي 1.1"
 
-#: src/satconfig.cpp:1155
+#: src/satconfig.cpp:1162
 msgid "Use DiSEqC Version 1.2"
 msgstr "استخدم نسخة دايسك سي 1.2"
 
-#: src/satconfig.cpp:1163
+#: src/satconfig.cpp:1170
 msgid "sends DiSEqC cmd A/A"
 msgstr " أرسل دايسك سي سي إم دي آ / آ"
 
-#: src/satconfig.cpp:1164
+#: src/satconfig.cpp:1171
 msgid "sends DiSEqC cmd A/B"
 msgstr "أرسل دايسك سي سي إم دي آ / ب"
 
-#: src/satconfig.cpp:1165
+#: src/satconfig.cpp:1172
 msgid "sends DiSEqC cmd B/A"
 msgstr "إرسل دايسك سي سي إم دي ب / آ"
 
-#: src/satconfig.cpp:1166
+#: src/satconfig.cpp:1173
 msgid "sends DiSEqC cmd B/B"
 msgstr "أرسل دايسك سي سي إم دي ب / ب"
 
-#: src/satconfig.cpp:1167
+#: src/satconfig.cpp:1174
 msgid "sends no committed DiSEqC cmd"
 msgstr "عدم ارسال أوامر حرة للقسام (دايزك)"
 
-#: src/satconfig.cpp:1168
+#: src/satconfig.cpp:1175
 msgid "sends switch cmd 1"
 msgstr " أرسل مفتاح سي إم دي 1"
 
-#: src/satconfig.cpp:1169
+#: src/satconfig.cpp:1176
 msgid "sends switch cmd 2"
 msgstr "أرسل مفتاح سي إم دي 2"
 
-#: src/satconfig.cpp:1170
+#: src/satconfig.cpp:1177
 msgid "sends switch cmd 3"
 msgstr "أرسل مفتاح سي إم دي 3"
 
-#: src/satconfig.cpp:1171
+#: src/satconfig.cpp:1178
 msgid "sends switch cmd 4"
 msgstr "أرسل مفتاح سي إم دي 4"
 
-#: src/satconfig.cpp:1172
+#: src/satconfig.cpp:1179
 msgid "sends switch cmd 5"
 msgstr "أرسل مفتاح سي إم دي 5"
 
-#: src/satconfig.cpp:1173
+#: src/satconfig.cpp:1180
 msgid "sends switch cmd 6"
 msgstr "أرسل مفتاح سي إم دي 6"
 
-#: src/satconfig.cpp:1174
+#: src/satconfig.cpp:1181
 msgid "sends switch cmd 7"
 msgstr "أرسل مفتاح سي إم دي 7"
 
-#: src/satconfig.cpp:1175
+#: src/satconfig.cpp:1182
 msgid "sends switch cmd 8"
 msgstr "أرسل مفتاح سي إم دي 8"
 
-#: src/satconfig.cpp:1176
+#: src/satconfig.cpp:1183
 msgid "sends switch cmd 9"
 msgstr "أرسل مفتاح سي إم دي 9"
 
-#: src/satconfig.cpp:1177
+#: src/satconfig.cpp:1184
 msgid "sends switch cmd 10"
 msgstr "أرسل مفتاح سي إم دي 10"
 
-#: src/satconfig.cpp:1178
+#: src/satconfig.cpp:1185
 msgid "sends switch cmd 11"
 msgstr "أرسل مفتاح سي إم دي 11"
 
-#: src/satconfig.cpp:1179
+#: src/satconfig.cpp:1186
 msgid "sends switch cmd 12"
 msgstr "أرسل مفتاح سي إم دي 12"
 
-#: src/satconfig.cpp:1180
+#: src/satconfig.cpp:1187
 msgid "sends switch cmd 13"
 msgstr "أرسل مفتاح سي إم دي 13"
 
-#: src/satconfig.cpp:1181
+#: src/satconfig.cpp:1188
 msgid "sends switch cmd 14"
 msgstr "أرسل مفتاح سي إم دي 14"
 
-#: src/satconfig.cpp:1182
+#: src/satconfig.cpp:1189
 msgid "sends switch cmd 15"
 msgstr "أرسل مفتاح سي إم دي 15"
 
-#: src/satconfig.cpp:1183
+#: src/satconfig.cpp:1190
 msgid "sends switch cmd 16"
 msgstr "أرسل مفتاح سي إم دي 16"
 
-#: src/satconfig.cpp:1189
+#: src/satconfig.cpp:1196
 msgid "sends no DiSEqC repeats"
 msgstr "لا ترسل إشارات تكرار دايسك"
 
-#: src/satconfig.cpp:1190
+#: src/satconfig.cpp:1197
 msgid "One"
 msgstr "واحد"
 
-#: src/satconfig.cpp:1190
+#: src/satconfig.cpp:1197
 msgid "sends one repeat"
 msgstr "أرسل تكرار واحد"
 
-#: src/satconfig.cpp:1191
+#: src/satconfig.cpp:1198
 msgid "Two"
 msgstr "إثنين"
 
-#: src/satconfig.cpp:1191
+#: src/satconfig.cpp:1198
 msgid "sends two repeats"
 msgstr "أرسل تكرارين"
 
-#: src/satconfig.cpp:1192
+#: src/satconfig.cpp:1199
 msgid "Three"
 msgstr "ثلاثة"
 
-#: src/satconfig.cpp:1192
+#: src/satconfig.cpp:1199
 msgid "sends three repeats"
 msgstr "أرسل ثلاثة تكرارات"
 
-#: src/satconfig.cpp:1199
+#: src/satconfig.cpp:1206
 msgid "sends no uncommitted switch command"
 msgstr "عدم ارسال أوامر حرة للمفتاح"
 
-#: src/satconfig.cpp:1200
+#: src/satconfig.cpp:1207
 msgid "Input 1"
 msgstr "مدخل1"
 
-#: src/satconfig.cpp:1200
+#: src/satconfig.cpp:1207
 msgid "select uncommitted switch Input 1"
 msgstr "إختيار المدخل الحرللمفتاح 1"
 
-#: src/satconfig.cpp:1201
+#: src/satconfig.cpp:1208
 msgid "Input 2"
 msgstr "مدخل2"
 
-#: src/satconfig.cpp:1201
+#: src/satconfig.cpp:1208
 msgid "select uncommitted switch Input 2"
 msgstr "إختيار المدخل الحرللمفتاح 2"
 
-#: src/satconfig.cpp:1202
+#: src/satconfig.cpp:1209
 msgid "Input 3"
 msgstr "مدخل3"
 
-#: src/satconfig.cpp:1202
+#: src/satconfig.cpp:1209
 msgid "select uncommitted switch Input 3"
 msgstr "إختيار المدخل الحرللمفتاح 3"
 
-#: src/satconfig.cpp:1203
+#: src/satconfig.cpp:1210
 msgid "Input 4"
 msgstr "مدخل4"
 
-#: src/satconfig.cpp:1203
+#: src/satconfig.cpp:1210
 msgid "select uncommitted switch Input 4"
 msgstr "إختيار المدخل الحرللمفتاح 4"
 
-#: src/satconfig.cpp:1204
+#: src/satconfig.cpp:1211
 msgid "Input 5"
 msgstr "مدخل5"
 
-#: src/satconfig.cpp:1204
+#: src/satconfig.cpp:1211
 msgid "select uncommitted switch Input 5"
 msgstr "إختيار المدخل الحرللمفتاح 5"
 
-#: src/satconfig.cpp:1205
+#: src/satconfig.cpp:1212
 msgid "Input 6"
 msgstr "مدخل6"
 
-#: src/satconfig.cpp:1205
+#: src/satconfig.cpp:1212
 msgid "select uncommitted switch Input 6"
 msgstr "إختيار المدخل الحرللمفتاح 6"
 
-#: src/satconfig.cpp:1206
+#: src/satconfig.cpp:1213
 msgid "Input 7"
 msgstr "مدخل7"
 
-#: src/satconfig.cpp:1206
+#: src/satconfig.cpp:1213
 msgid "select uncommitted switch Input 7"
 msgstr "إختيار المدخل الحرللمفتاح 7"
 
-#: src/satconfig.cpp:1207
+#: src/satconfig.cpp:1214
 msgid "Input 8"
 msgstr "مدخل 8"
 
-#: src/satconfig.cpp:1207
+#: src/satconfig.cpp:1214
 msgid "select uncommitted switch Input 8"
 msgstr "إختيار المدخل الحرللمفتاح 8"
 
-#: src/satconfig.cpp:1208
+#: src/satconfig.cpp:1215
 msgid "Input 9"
 msgstr "مدخل 9"
 
-#: src/satconfig.cpp:1208
+#: src/satconfig.cpp:1215
 msgid "select uncommitted switch Input 9"
 msgstr "إختيار المدخل الحرللمفتاح 9"
 
-#: src/satconfig.cpp:1209
+#: src/satconfig.cpp:1216
 msgid "Input 10"
 msgstr "مدخل 10"
 
-#: src/satconfig.cpp:1209
+#: src/satconfig.cpp:1216
 msgid "select uncommitted switch Input 10"
 msgstr "إختيار المدخل الحرللمفتاح 10"
 
-#: src/satconfig.cpp:1210
+#: src/satconfig.cpp:1217
 msgid "Input 11"
 msgstr "مدخل11"
 
-#: src/satconfig.cpp:1210
+#: src/satconfig.cpp:1217
 msgid "select uncommitted switch Input 11"
 msgstr "إختيار المدخل الحرللمفتاح 11"
 
-#: src/satconfig.cpp:1211
+#: src/satconfig.cpp:1218
 msgid "Input 12"
 msgstr "مدخل 12"
 
-#: src/satconfig.cpp:1211
+#: src/satconfig.cpp:1218
 msgid "select uncommitted switch Input 12"
 msgstr "إختيار المدخل الحرللمفتاح 12"
 
-#: src/satconfig.cpp:1212
+#: src/satconfig.cpp:1219
 msgid "Input 13"
 msgstr "مدخل 13"
 
-#: src/satconfig.cpp:1212
+#: src/satconfig.cpp:1219
 msgid "select uncommitted switch Input 13"
 msgstr "إختيار المدخل الحرللمفتاح 13"
 
-#: src/satconfig.cpp:1213
+#: src/satconfig.cpp:1220
 msgid "Input 14"
 msgstr "مدخل 14"
 
-#: src/satconfig.cpp:1213
+#: src/satconfig.cpp:1220
 msgid "select uncommitted switch Input 14"
 msgstr "إختيار المدخل الحرللمفتاح 14"
 
-#: src/satconfig.cpp:1214
+#: src/satconfig.cpp:1221
 msgid "Input 15"
 msgstr "مدخل 15"
 
-#: src/satconfig.cpp:1214
+#: src/satconfig.cpp:1221
 msgid "select uncommitted switch Input 15"
 msgstr "إختيار المدخل الحرللمفتاح 15"
 
-#: src/satconfig.cpp:1215
+#: src/satconfig.cpp:1222
 msgid "Input 16"
 msgstr "16 مدخل"
 
-#: src/satconfig.cpp:1215
+#: src/satconfig.cpp:1222
 msgid "select uncommitted switch Input 16"
 msgstr "إختيار المدخل الحرللمفتاح 16"
 
@@ -3690,11 +3690,11 @@ msgstr "البحث عن القنوات"
 msgid "Waiting for tuner lock... please wait"
 msgstr "فى انتظار ثبات وحدة التوليف ...الرجاء الانتظار"
 
-#: src/scan.cpp:1299 src/scan.cpp:1366
+#: src/scan.cpp:1299 src/scan.cpp:1367
 msgid "Scan is in progress... please wait"
 msgstr "البحث جار ..رجاء الانتظار"
 
-#: src/scan.cpp:1329 src/scan.cpp:1380
+#: src/scan.cpp:1330 src/scan.cpp:1383
 #, c-format
 msgid ""
 "The transponder scan has finished and found \n"
@@ -3705,15 +3705,15 @@ msgid ""
 "%i Transponders with %i Services scanned."
 msgstr ""
 
-#: src/scan.cpp:1392
+#: src/scan.cpp:1395
 msgid "Done."
 msgstr "انتهى"
 
-#: src/scan.cpp:1400
+#: src/scan.cpp:1403
 msgid "Scan is in finished, press ok to close window"
 msgstr "البحث انتهى يرجى إغلاق النافذه"
 
-#: src/scan.cpp:1408
+#: src/scan.cpp:1411
 #, c-format
 msgid ""
 "Do you want\n"
@@ -3721,180 +3721,180 @@ msgid ""
 "%s?"
 msgstr ""
 
-#: src/scan.cpp:1408
+#: src/scan.cpp:1411
 #, c-format
 msgid "Transponder"
 msgstr "الناقل (تردد الباقات)"
 
-#: src/scan.cpp:1408
+#: src/scan.cpp:1411
 #, c-format
 msgid "Satellite"
 msgstr "قمر صناعى "
 
-#: src/scan.cpp:1409
+#: src/scan.cpp:1412
 msgid "Scan finished"
 msgstr "انتهى البحث"
 
-#: src/scan.cpp:1515
+#: src/scan.cpp:1518
 msgid "Manual PIDs"
 msgstr ""
 
-#: src/scan.cpp:1537
+#: src/scan.cpp:1540
 #, fuzzy
 msgid "to enter service name press OK"
 msgstr "لتغيير القناه اضغط  أوكي"
 
-#: src/scan.cpp:1538
+#: src/scan.cpp:1541
 #, fuzzy
 msgid "enter service name"
 msgstr "امسح القناة"
 
-#: src/scan.cpp:1553
+#: src/scan.cpp:1556
 msgid "to enter provider name press OK"
 msgstr ""
 
-#: src/scan.cpp:1554
+#: src/scan.cpp:1557
 #, fuzzy
 msgid "enter provider name"
 msgstr "أدخل اسما للرمز"
 
-#: src/scan.cpp:1569
+#: src/scan.cpp:1572
 #, fuzzy
 msgid "to enter video pid press OK"
 msgstr "لتغيير القناه اضغط  أوكي"
 
-#: src/scan.cpp:1570
+#: src/scan.cpp:1573
 msgid "enter video pid"
 msgstr ""
 
-#: src/scan.cpp:1583
+#: src/scan.cpp:1586
 msgid "to enter pcr pid press OK"
 msgstr ""
 
-#: src/scan.cpp:1584
+#: src/scan.cpp:1587
 msgid "enter pcr pid (in most case the same pid as the video pid)"
 msgstr ""
 
-#: src/scan.cpp:1599
+#: src/scan.cpp:1602
 msgid "to enter audio pid press OK"
 msgstr ""
 
-#: src/scan.cpp:1600
+#: src/scan.cpp:1603
 msgid "enter audio pid"
 msgstr ""
 
-#: src/scan.cpp:1606
+#: src/scan.cpp:1609
 msgid "is AC3 Pid"
 msgstr ""
 
-#: src/scan.cpp:1607
+#: src/scan.cpp:1610
 msgid "set this check when the entered audio pid is a ac3 audio pid"
 msgstr ""
 
-#: src/scan.cpp:1622
+#: src/scan.cpp:1625
 msgid "to enter (video) text pid press OK"
 msgstr ""
 
-#: src/scan.cpp:1623
+#: src/scan.cpp:1626
 msgid "enter (video) text pid"
 msgstr ""
 
-#: src/scan.cpp:1636
+#: src/scan.cpp:1639
 #, fuzzy
 msgid "to enter service id press OK"
 msgstr "لتغيير القناه اضغط  أوكي"
 
-#: src/scan.cpp:1637
+#: src/scan.cpp:1640
 #, fuzzy
 msgid "enter service id"
 msgstr "امسح القناة"
 
-#: src/scan.cpp:1652
+#: src/scan.cpp:1655
 msgid "to enter tsid (transport stream id) press OK"
 msgstr ""
 
-#: src/scan.cpp:1653
+#: src/scan.cpp:1656
 msgid "enter tsid (transport stream id)"
 msgstr ""
 
-#: src/scan.cpp:1666
+#: src/scan.cpp:1669
 msgid "to enter onid (original network id) press OK"
 msgstr ""
 
-#: src/scan.cpp:1667
+#: src/scan.cpp:1670
 msgid "enter onid (original network id)"
 msgstr ""
 
-#: src/scan.cpp:1675
+#: src/scan.cpp:1678
 msgid "no DVB"
 msgstr ""
 
-#: src/scan.cpp:1676
+#: src/scan.cpp:1679
 msgid "don't read PAT/PMT/SDT for this service (only use cached pids)"
 msgstr ""
 
-#: src/scan.cpp:1682
+#: src/scan.cpp:1685
 #, fuzzy
 msgid "use sdt"
 msgstr "توقف مؤقت"
 
-#: src/scan.cpp:1683
+#: src/scan.cpp:1686
 msgid ""
 "update name/provider/service type with content of the sdt (and auto remove "
 "service)"
 msgstr ""
 
-#: src/scan.cpp:1689
+#: src/scan.cpp:1692
 msgid "hold name"
 msgstr ""
 
-#: src/scan.cpp:1690
+#: src/scan.cpp:1693
 msgid "don't update the service name with content of the sdt"
 msgstr ""
 
-#: src/scan.cpp:1703
+#: src/scan.cpp:1706
 #, fuzzy
 msgid "read NIT"
 msgstr "استخدم أو نت"
 
-#: src/scan.cpp:1704
+#: src/scan.cpp:1707
 msgid "read tsid and onid from the nit (this can take up to 10 seconds)"
 msgstr ""
 
-#: src/scan.cpp:1713
+#: src/scan.cpp:1716
 msgid "test values"
 msgstr ""
 
-#: src/scan.cpp:1714
+#: src/scan.cpp:1717
 msgid "test entered values"
 msgstr ""
 
-#: src/scan.cpp:1724
+#: src/scan.cpp:1727
 msgid ""
 "save data and close window (the new channel could be found in the all "
 "services list)"
 msgstr ""
 
-#: src/scan.cpp:1869
+#: src/scan.cpp:1872
 msgid ""
 "Reading NIT failed... this transponder have no NIT..\n"
 "so you can use random values for tsid and onid or set both to 0"
 msgstr ""
 
-#: src/scan.cpp:1924
+#: src/scan.cpp:1927
 msgid ""
 "No NIT Entry for current transponder values found...\n"
 "so you can use random values for tsid and onid or set both to 0"
 msgstr ""
 
-#: src/scan.cpp:2031
+#: src/scan.cpp:2034
 msgid ""
 "A transponder with the same tsid / onid but other frequency/pol/... already "
 "exist.. create a new transponder with the same data is no possible.. please "
 "do change tsid and/or onid"
 msgstr ""
 
-#: src/scan.cpp:2080
+#: src/scan.cpp:2090
 #, c-format
 msgid ""
 "A service named '%s' with this sid/onid/tsid/namespace is already exist\n"
@@ -3902,16 +3902,16 @@ msgid ""
 "Should i use this service name and provider name?"
 msgstr ""
 
-#: src/scan.cpp:2082
+#: src/scan.cpp:2092
 #, fuzzy
 msgid "Service already exist"
 msgstr "تنظيم القنوات / و الملفات"
 
-#: src/scan.cpp:2174
+#: src/scan.cpp:2180
 msgid "show/enter values as hexadecimal"
 msgstr ""
 
-#: src/scan.cpp:2180
+#: src/scan.cpp:2186
 msgid "show/enter values as decimal"
 msgstr ""
 
@@ -3947,7 +3947,7 @@ msgstr "وحدة التحكم عن بعد (الريموت كنترول)"
 msgid "open remote control setup"
 msgstr "إفتح غعداد جهاز التحكم عن بعد"
 
-#: src/setup_extra.cpp:72 src/setup_extra.cpp:226
+#: src/setup_extra.cpp:72 src/setup_extra.cpp:325
 msgid "Factory reset"
 msgstr "العودة لضبط المصنع"
 
@@ -3960,114 +3960,226 @@ msgid "record split size (left, right)"
 msgstr "تقسيم حجم المادة المسحلة (يسارا و يمينا)"
 
 #: src/setup_extra.cpp:95
+#, fuzzy
+msgid "infobar timeout (left, right)"
+msgstr "تقسيم حجم المادة المسحلة (يسارا و يمينا)"
+
+#: src/setup_extra.cpp:96 src/setup_extra.cpp:97 src/setup_extra.cpp:98
+#: src/setup_extra.cpp:99 src/setup_extra.cpp:100 src/setup_extra.cpp:101
+#: src/setup_extra.cpp:102 src/setup_extra.cpp:103 src/setup_extra.cpp:104
+#: src/setup_extra.cpp:105 src/setup_extra.cpp:106
+#, c-format
+msgid "Infobar timeout %d sec"
+msgstr ""
+
+#: src/setup_extra.cpp:112
 msgid "Serviceselector help buttons"
 msgstr "أزرار المساعدة لاختيار الخدمات"
 
-#: src/setup_extra.cpp:95
+#: src/setup_extra.cpp:112
 msgid "show colored help buttons in service selector"
 msgstr "إظهار أزرار المساعدة الملونة عند اختيار الخدمات (القنوات)"
 
-#: src/setup_extra.cpp:96
+#: src/setup_extra.cpp:113
 msgid "Show Sat position"
 msgstr "إظهار الموقع المدارى للقمر"
 
-#: src/setup_extra.cpp:96
+#: src/setup_extra.cpp:113
 msgid "show sat position in the infobar"
 msgstr "إظهار الموقع المدارى للقمر فى شريط المعلومات"
 
-#: src/setup_extra.cpp:98
+#: src/setup_extra.cpp:115
 msgid "Enable fast zapping"
 msgstr "تفعيل التنقل السريع"
 
-#: src/setup_extra.cpp:98
+#: src/setup_extra.cpp:115
 msgid "enables faster zapping.. but with visible sync"
 msgstr "تفعيل التنقل السريع.. لكن مع اظهارخاصية عمل الملفات بانسيابية "
 
-#: src/setup_extra.cpp:99
+#: src/setup_extra.cpp:116
 msgid "Skip confirmations"
 msgstr "تخطى التوكيد"
 
-#: src/setup_extra.cpp:99
+#: src/setup_extra.cpp:116
 msgid "enable/disable confirmations"
 msgstr "تفعيل/ إبطال التوكيد "
 
-#: src/setup_extra.cpp:100
+#: src/setup_extra.cpp:117
 msgid "Hide error windows"
 msgstr "إخفاء نافذة الأخطاء"
 
-#: src/setup_extra.cpp:100
+#: src/setup_extra.cpp:117
 msgid "don't show zap error messages"
 msgstr "لا تظهر رسائل الأخطاء العابرة"
 
-#: src/setup_extra.cpp:101
+#: src/setup_extra.cpp:118
 msgid "Auto show Infobar"
 msgstr "إظهار تلقائى لشريط المعلومات"
 
-#: src/setup_extra.cpp:101
+#: src/setup_extra.cpp:118
 msgid "always show infobar when new event info is avail"
 msgstr "إظهار شريط المعلومات بصورة دائمة عند توفر معلومات جديدة عن البرنامج"
 
-#: src/setup_extra.cpp:102
+#: src/setup_extra.cpp:119
 msgid "Show remaining Time"
 msgstr "إظهار الوقت المتبقى"
 
-#: src/setup_extra.cpp:102
+#: src/setup_extra.cpp:119
 msgid "show event remaining time in the infobar"
 msgstr "إظهار الوقت المتبقى للبرنامج فى شريط المعلومات"
 
-#: src/setup_extra.cpp:103
+#: src/setup_extra.cpp:120
 msgid "Use http authentification"
 msgstr "استخدم خاصية طلب بروتوكول التخاطب http"
 
-#: src/setup_extra.cpp:103
+#: src/setup_extra.cpp:120
 msgid "enables the http (user/password) authentification"
 msgstr "هذا يُفعل طلب (اسم المستخدم / كلمة المرور) مع بروتوكول التخاطب http"
 
-#: src/setup_extra.cpp:104
+#: src/setup_extra.cpp:121
 msgid "Don't open serial port"
 msgstr "لا تفتح منفذ الاتصال المتوالى"
 
-#: src/setup_extra.cpp:104
+#: src/setup_extra.cpp:121
 msgid "don't write debug messages to /dev/tts/0"
 msgstr "لا تكتب رسائل تصويب للمسار dev/tts/0/ "
 
-#: src/setup_extra.cpp:105
+#: src/setup_extra.cpp:122
 msgid "Auto bouquet change"
 msgstr "تغيير تلقائى للباقات"
 
-#: src/setup_extra.cpp:105
+#: src/setup_extra.cpp:122
 msgid "change into next bouquet when end of current bouquet is reached"
 msgstr "الانتقال للباقة التالية عند الوصول لتهاية الباقة الحالية"
 
-#: src/setup_extra.cpp:109
+#: src/setup_extra.cpp:123
+#, fuzzy
+msgid "Auto reconnect cahandler"
+msgstr "تغيير تلقائى للباقات"
+
+#: src/setup_extra.cpp:123
+msgid "try to reconnect when an external cahandler connection was lost"
+msgstr ""
+
+#: src/setup_extra.cpp:127
 #, fuzzy
 msgid "Enable file sharing"
 msgstr "تفعيل التنقل السريع"
 
-#: src/setup_extra.cpp:109
+#: src/setup_extra.cpp:127
 msgid "start file sharing(samba) on startup"
 msgstr ""
 
-#: src/setup_extra.cpp:112
+#: src/setup_extra.cpp:130
 msgid "Disable teletext caching"
 msgstr ""
 
-#: src/setup_extra.cpp:112
+#: src/setup_extra.cpp:130
 msgid "don't cache teletext pages in background"
 msgstr ""
 
-#: src/setup_extra.cpp:222
+#: src/setup_extra.cpp:132
+#, fuzzy
+msgid "Enable Zapping History"
+msgstr "تفعيل التنقل السريع"
+
+#: src/setup_extra.cpp:132
+msgid "don't care about actual mode when zapping in history list"
+msgstr ""
+
+#: src/setup_extra.cpp:134
+#, fuzzy
+msgid "Disable Standby"
+msgstr "إيقاف الدايسك سي"
+
+#: src/setup_extra.cpp:134
+msgid "Box goes directly into Deep-Standby"
+msgstr ""
+
+#: src/setup_extra.cpp:139
+#, fuzzy
+msgid "Enable MHW EPG"
+msgstr "دليل البرامج الالكترونى الخارجى"
+
+#: src/setup_extra.cpp:139
 msgid ""
-"When you do a factory reset, you will lost ALL your configuration data\n"
+"Mediahighway EPG, activate swap space when using with multiple operators"
+msgstr ""
+
+#: src/setup_extra.cpp:149
+msgid "Disable CoreFiles"
+msgstr ""
+
+#: src/setup_extra.cpp:149
+msgid "don't create 'Corefiles' after an Enigma crash"
+msgstr ""
+
+#: src/setup_extra.cpp:155
+#, fuzzy
+msgid "Disable HDD mount"
+msgstr " إبطال خاصية الشاشة العريضة WSS على الوضع 4:3"
+
+#: src/setup_extra.cpp:155
+msgid "don't mount the HDD via 'rcS'"
+msgstr ""
+
+#: src/setup_extra.cpp:165
+msgid "Show Boot-Info"
+msgstr ""
+
+#: src/setup_extra.cpp:165
+msgid "Show Boot-Infos (IP, etc.)"
+msgstr ""
+
+#: src/setup_extra.cpp:170
+#, fuzzy
+msgid "Disable HW_Sections"
+msgstr " إبطال خاصية الشاشة العريضة WSS على الوضع 4:3"
+
+#: src/setup_extra.cpp:170
+msgid "don't use hardware section filtering"
+msgstr ""
+
+#: src/setup_extra.cpp:175
+#, fuzzy
+msgid "Disable Watchdog"
+msgstr "إيقاف الدايسك سي"
+
+#: src/setup_extra.cpp:175
+msgid "don't use the Watchdog"
+msgstr ""
+
+#: src/setup_extra.cpp:182
+msgid "Disable ENX-Watchdog"
+msgstr ""
+
+#: src/setup_extra.cpp:182
+msgid "don't use the ENX-Watchdog"
+msgstr ""
+
+#: src/setup_extra.cpp:188
+#, fuzzy
+msgid "Enable SPTS-Mode"
+msgstr "شغل الصوت"
+
+#: src/setup_extra.cpp:188
+msgid "use SPTS-Mode (enables TS-recording)"
+msgstr ""
+
+#: src/setup_extra.cpp:321
+#, fuzzy
+msgid ""
+"When you do a factory reset, you will lose ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
-"After finishing the factory reset, your receiver restarts automatically!\n"
+"After completion of factory reset, your receiver will restart "
+"automatically!\n"
 "\n"
-"Really do factory reset?"
+"Really do a factory reset?"
 msgstr ""
 "العودة لضبط المصنع، سيقوم جهاز الاستقبال بإعدة التشغيل التلقائى!\n"
 "هل تريد فعلا العودة لضبط المصنع؟"
 
-#: src/setup_extra.cpp:244
+#: src/setup_extra.cpp:343
 msgid "Factory reset..."
 msgstr "العودة لضبط المصنع..."
 
@@ -4775,159 +4887,159 @@ msgstr ""
 msgid "Manual update"
 msgstr "تحديث يدوى"
 
-#: src/sselect.cpp:52
+#: src/sselect.cpp:53
 msgid "EPG Style Selector"
 msgstr "تحديد نمط دليل البرامج الالكترونى"
 
-#: src/sselect.cpp:53
+#: src/sselect.cpp:54
 msgid "open the EPG with selected style"
 msgstr "فتح دليل البرامج الالكترونى حسب النمط المختار"
 
-#: src/sselect.cpp:60
+#: src/sselect.cpp:61
 msgid "EPG Style"
 msgstr "نمط دليل البرامج الالكترونى"
 
-#: src/sselect.cpp:71
+#: src/sselect.cpp:72
 msgid "Channel EPG"
 msgstr "دليل البرامج الالكترونى الخاص بالقناة"
 
-#: src/sselect.cpp:71
+#: src/sselect.cpp:72
 msgid "open EPG for selected Channel"
 msgstr "فتح دليل البرامج الالكترونى للقناة المختارة"
 
-#: src/sselect.cpp:72
+#: src/sselect.cpp:73
 msgid "Multi EPG"
 msgstr "دليل البرامج الالكترونى المتعدد (الموسع / الشامل)"
 
-#: src/sselect.cpp:72
+#: src/sselect.cpp:73
 msgid "open EPG for next five channels"
 msgstr "فتح دليل البرامج الالكترونى لخمس قنوات تالية"
 
-#: src/sselect.cpp:78
+#: src/sselect.cpp:79
 msgid "External EPG"
 msgstr "دليل البرامج الالكترونى الخارجى"
 
-#: src/sselect.cpp:78
+#: src/sselect.cpp:79
 msgid "open external plugin EPG"
 msgstr "فتح دليل البرامج الالكترونى من البرامج الخارجية الملحقة"
 
-#: src/sselect.cpp:123
+#: src/sselect.cpp:124
 msgid "service selector"
 msgstr "اختيار الخدمة"
 
-#: src/sselect.cpp:124
+#: src/sselect.cpp:125
 msgid "switch to next bouquet"
 msgstr "انتقل للباقة التالية"
 
-#: src/sselect.cpp:125
+#: src/sselect.cpp:126
 msgid "switch to previous bouquet"
 msgstr "انتقل للباقة السابقة"
 
-#: src/sselect.cpp:126
+#: src/sselect.cpp:127
 msgid "go up a directory"
 msgstr "انتقل فهرسا للأعلى"
 
-#: src/sselect.cpp:127
+#: src/sselect.cpp:128
 msgid "shows the EPG selector for the highlighted channel"
 msgstr "إعرض اختيار الدليل الإلكتروني للقناة المعلم عليها"
 
-#: src/sselect.cpp:128
+#: src/sselect.cpp:129
 msgid "show service selector menu"
 msgstr "إعرض قائمة اختيار القنوات"
 
-#: src/sselect.cpp:130
+#: src/sselect.cpp:131
 msgid "add service to a specific bouquet"
 msgstr "أضف خدمة لباقة مستخدم محدد"
 
-#: src/sselect.cpp:134
+#: src/sselect.cpp:135
 msgid "toggle between classic and multi column style"
 msgstr "تنقل بين الشكل الكلاسيكي ومتعدد الأعمدة"
 
-#: src/sselect.cpp:135
+#: src/sselect.cpp:136
 msgid "toggle focus between service and bouquet list (in combi column style)"
 msgstr "تركيز حركة الأزرار بين قائمة القنوات و الباقات (فى شكل أعمدة)"
 
-#: src/sselect.cpp:136
+#: src/sselect.cpp:137
 msgid "go to the prev Marker if exist.. else goto first service"
 msgstr "الذهاب الى رمز العلامة  السابق إن وجد.. أو الذهاب الى أول قناة"
 
-#: src/sselect.cpp:137
+#: src/sselect.cpp:138
 msgid "go to the next Marker if exist.. else goto last service"
 msgstr "الذهاب الى رمز العلامة  التالى إن وجد.. أو الذهاب الى آخر قناة"
 
-#: src/sselect.cpp:139
+#: src/sselect.cpp:140
 msgid "show all services"
 msgstr "إظهار كل القنوات"
 
-#: src/sselect.cpp:140
+#: src/sselect.cpp:141
 msgid "show satellite list"
 msgstr "إظهار قائمة الأقمار"
 
-#: src/sselect.cpp:141
+#: src/sselect.cpp:142
 msgid "show provider list"
 msgstr "اعرض قائمة مزودي الخدمة "
 
-#: src/sselect.cpp:142
+#: src/sselect.cpp:143
 msgid "show bouquet list"
 msgstr "إظهار قائمة الباقات"
 
-#: src/sselect.cpp:144
+#: src/sselect.cpp:145
 msgid "delete selected entry"
 msgstr "حذف المدخل المختار"
 
-#: src/sselect.cpp:145
+#: src/sselect.cpp:146
 msgid "mark selected entry for move"
 msgstr "وضع علامة للمدخل المختار لتحريكه/لنقله"
 
-#: src/sselect.cpp:146
+#: src/sselect.cpp:147
 msgid "rename selected entry"
 msgstr "إعادة تسمية المدخل المختار"
 
-#: src/sselect.cpp:147
+#: src/sselect.cpp:148
 msgid "create new marker entry"
 msgstr "إنشاء رمز لمدخل جديد"
 
-#: src/sselect.cpp:296
+#: src/sselect.cpp:297
 msgid "[GO UP]"
 msgstr "إذهب للأعلى"
 
-#: src/sselect.cpp:298
+#: src/sselect.cpp:299
 msgid "(removed service)"
 msgstr "قناة محذوفة"
 
-#: src/sselect.cpp:377
+#: src/sselect.cpp:372
 msgid "mark"
 msgstr "وضع علامة"
 
-#: src/sselect.cpp:379
+#: src/sselect.cpp:374
 msgid "marker"
 msgstr "رمز /علامة"
 
-#: src/sselect.cpp:387
+#: src/sselect.cpp:382
 msgid "All Services"
 msgstr "كل القنوات"
 
-#: src/sselect.cpp:389
+#: src/sselect.cpp:384
 msgid "Satellites"
 msgstr "الأقمار"
 
-#: src/sselect.cpp:392
+#: src/sselect.cpp:387
 msgid "Providers"
 msgstr "مزودي الخدمة"
 
-#: src/sselect.cpp:397
+#: src/sselect.cpp:392
 msgid "Root"
 msgstr "المجلد الأصلى /  أصل المجلد"
 
-#: src/sselect.cpp:398
+#: src/sselect.cpp:393
 msgid "Movies"
 msgstr "الأفلام"
 
-#: src/sselect.cpp:856
+#: src/sselect.cpp:854
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr "اختيار (لا) أو الضغط (إنهاء) لغلق/ فتح المجلد بالكامل"
 
-#: src/sselect.cpp:856
+#: src/sselect.cpp:854
 msgid "Enter Directory"
 msgstr "أدخل مجلدا"
 
@@ -5262,23 +5374,23 @@ msgstr " هل تريد حفظ التغيرات فى النواقل (تردد ا�
 msgid "Transponders changed"
 msgstr "تم تغيير النواقل (ترددات الباقات)"
 
-#: src/tpeditwindow.cpp:257
+#: src/tpeditwindow.cpp:258
 msgid "Transponders couldn't be written to file!"
 msgstr "ليس بالامكان كتابة الناقل (تردد الباقة) فى الملف"
 
-#: src/tpeditwindow.cpp:258
+#: src/tpeditwindow.cpp:259
 msgid "Write Error"
 msgstr "خطأ فى الكتابة"
 
-#: src/tpeditwindow.cpp:440
+#: src/tpeditwindow.cpp:439
 msgid "new Satellite"
 msgstr "قمر صناعى جديد"
 
-#: src/tpeditwindow.cpp:469
+#: src/tpeditwindow.cpp:468
 msgid "Really delete the selected satellite?"
 msgstr "هل تريد فعلا أن تحذف الأقمار المختارة؟"
 
-#: src/tpeditwindow.cpp:470
+#: src/tpeditwindow.cpp:469
 #, c-format
 msgid "Delete %s"
 msgstr "تم حذف ..%s"
