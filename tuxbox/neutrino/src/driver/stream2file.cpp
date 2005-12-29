@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.20 2005/08/15 14:49:34 metallica Exp $
+ * $Id: stream2file.cpp,v 1.21 2005/12/29 17:22:32 chakazulu Exp $
  * 
  * streaming to file/disc
  * 
@@ -402,6 +402,7 @@ void * DMXThread(void * v_arg)
 		stream2file_status2_t s;
 		s.status = exit_flag;
 		strncpy(s.dir,dirname(myfilename),100);
+		s.dir[99] = '\0';
 		eventServer.sendEvent(NeutrinoMessages::EVT_RECORDING_ENDED, CEventServer::INITID_NEUTRINO, &s, sizeof(s));
 		printf("[stream2file] pthreads exit code: %u\n", exit_flag);
 	}

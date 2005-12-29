@@ -2994,10 +2994,10 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 		{
 			puts("[neutrino.cpp] executing " NEUTRINO_RECORDING_START_SCRIPT ".");
 			if (system(NEUTRINO_RECORDING_START_SCRIPT) != 0)
-			perror(NEUTRINO_RECORDING_START_SCRIPT "failed");
+				perror(NEUTRINO_RECORDING_START_SCRIPT "failed");
 			CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
 			eventinfo.channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(si.sid, si.onid, si.tsid);
-			CEPGData		epgData;
+			CEPGData epgData;
 			if (g_Sectionsd->getActualEPGServiceKey(g_RemoteControl->current_channel_id, &epgData ))
 			{
 				eventinfo.epgID = epgData.eventID;
@@ -3062,6 +3062,11 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 				CVCRControl::CFileDevice *fileDevice;
 				if ((fileDevice = dynamic_cast<CVCRControl::CFileDevice*>(recordingdevice)) != NULL)
 				{
+					if (preselectedDir != NULL) {
+						// recording has been interrupted, we are starting again
+						// all directories have already been created so we should not create them again
+						fileDevice->CreateTemplateDirectories = false;
+					}
 					fileDevice->Directory = recDir;
 					fileDevice->FilenameTemplate = g_settings.recording_filename_template[0];
 				} else
@@ -3151,7 +3156,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
 		sscanf(g_settings.recording_ringbuffers, "%u", &ringbuffers);
 
-		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_all_audio_pids, g_settings.recording_stream_vtxt_pid, ringbuffers);
+		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_all_audio_pids, g_settings.recording_stream_vtxt_pid, ringbuffers,true);
 
 		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}

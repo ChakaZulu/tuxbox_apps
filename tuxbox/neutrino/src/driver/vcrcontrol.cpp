@@ -706,25 +706,31 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		pos++;
 		filename[pos] = '\0';
 	}
-
+	
 	time_t t = time(NULL);
-
+	
 	if (FilenameTemplate.empty())
 	{
 		if (g_settings.recording_epg_for_filename)
 			FilenameTemplate = "%c_%i_";
 		FilenameTemplate += "%d_%t";
 	}
-		
-	// %c == channel, %i == info, %d == date, %t == time
-	std::string expandedTemplate(FilenameTemplate);
 	
+	// %c == channel, %i == info, %d == date, %t == time
+	std::string expandedTemplate;
+	if (CreateTemplateDirectories)
+	{	
+		expandedTemplate = FilenameTemplate;
+	} else
+	{
+		expandedTemplate = std::string(basename(FilenameTemplate.c_str()));
+	}
 	unsigned int searchPos = std::string::npos;
 	unsigned int startAt = 0;
 	unsigned int dataLength = 0;
 	char buf[256];
 	buf[255] = '\0';
-
+	
 	if (g_settings.recording_epg_for_filename) {
 		appendChannelName(buf,255,channel_id);
 		dataLength = strlen(buf);
@@ -743,7 +749,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 			startAt = searchPos + dataLength;
 		}
 	}
-
+	
 	strftime(buf,11,"%Y-%m-%d",localtime(&t));
 	dataLength = strlen(buf);
 	startAt = 0;
@@ -761,11 +767,12 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		expandedTemplate.insert(searchPos,buf);
 		startAt = searchPos + dataLength;
 	}
+	printf("[CFileDevice] filename: %s, expandedTemplate: %s\n",filename,expandedTemplate.c_str());
 	
 	strncpy(&(filename[pos]),expandedTemplate.c_str(),511-pos);
 
 	stream2file_error_msg_t error_msg;
-	if (!createRecordingDir(filename))
+	if (CreateTemplateDirectories && !createRecordingDir(filename))
 	{
 		error_msg = STREAM2FILE_INVALID_DIRECTORY;
 	} else
@@ -784,7 +791,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 					      sptsmode,
 					      RingBuffers);
 	}
-
+	CreateTemplateDirectories = true;
 	if (error_msg == STREAM2FILE_OK)
 	{
 		deviceState = CMD_VCR_RECORD;
@@ -863,10 +870,12 @@ void CVCRControl::CFileDevice::appendChannelName(char *buf, unsigned int size, c
 
 bool CVCRControl::CFileDevice::createRecordingDir(const char *filename) 
 {
+	printf("[CFileDevice] trying to create directory %s\n",filename);
 	char *pos;
 	unsigned int start = 0;
 	while ((pos = strchr(&(filename[start]),'/')) != NULL) {
-		if (pos == &filename[0]) {
+		if (pos == &filename[0])
+		{
 			start = 1;
 			continue;
 		}
