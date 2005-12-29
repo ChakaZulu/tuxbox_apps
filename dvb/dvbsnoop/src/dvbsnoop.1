@@ -18,7 +18,7 @@ DVBSNOOP is a text based DVB and MPEG stream analyzer for viewing/debugging stre
 
 DVBSNOOP also has some additional functionallity to analyze receiver (set top box, dvb card) data, bandwidth of a transport stream, pid scan, etc.
 
-Using special network programs like netcat (nc), dvbsnoop may also be used to do remote sniffing and decoding.
+Using special network programs like netcat (nc), dvbsnoop may also be used to do remote sniffing and decoding. For post-processing dvbsnoop output, you may use the full range of unix tools and scripting languages (grep, perl, python, mrtg, gnuplot, etc.).
 
 
 .SH "Usage "
@@ -415,9 +415,9 @@ Other simple filter examples:
    dvbsnoop \-s ts \-nph 0x100 | grep \-i 'Transport_error\\|^PID'
 
 Selecting devices:
-   dvbsnoop \-s feinfo -pd 9 -frontend /dev/dvb/adapter0/frontend1
-   dvbsnoop \-s feinfo -pd 9 -adapter 0 -devnr 1
-   dvbsnoop \-s feinfo -pd 9 -adapter 2
+   dvbsnoop \-s feinfo \-pd 9 \-frontend /dev/dvb/adapter0/frontend1
+   dvbsnoop \-s feinfo \-pd 9 \-adapter 0 -devnr 1
+   dvbsnoop \-s feinfo \-pd 9 \-adapter 2
 
 Sending dvbsnoop data over network, using netcat:
    dvbsnoop \-s pes 0x28F -b  \|  nc \-q  ServerName 31337
