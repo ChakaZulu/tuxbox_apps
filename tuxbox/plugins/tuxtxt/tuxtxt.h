@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 #define TUXTXT_CFG_STANDALONE 0  // 1:plugin only 0:use library
-#define TUXTXT_DEBUG 1
+#define TUXTXT_DEBUG 0
 
 #include <config.h>
 
