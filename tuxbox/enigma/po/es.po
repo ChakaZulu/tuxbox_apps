@@ -3998,9 +3998,8 @@ msgid "record split size (left, right)"
 msgstr "Tamaño máximo de cada fichero grabado (izquierda, derecha)"
 
 #: src/setup_extra.cpp:95
-#, fuzzy
 msgid "infobar timeout (left, right)"
-msgstr "Tamaño máximo de cada fichero grabado (izquierda, derecha)"
+msgstr "Visibilidad del Infobar (izquierda, derecha)"
 
 #: src/setup_extra.cpp:96 src/setup_extra.cpp:97 src/setup_extra.cpp:98
 #: src/setup_extra.cpp:99 src/setup_extra.cpp:100 src/setup_extra.cpp:101
@@ -4008,7 +4007,7 @@ msgstr "Tamaño máximo de cada fichero grabado (izquierda, derecha)"
 #: src/setup_extra.cpp:105 src/setup_extra.cpp:106
 #, c-format
 msgid "Infobar timeout %d sec"
-msgstr ""
+msgstr "Infobar timeout %d sec"
 
 #: src/setup_extra.cpp:112
 msgid "Serviceselector help buttons"
@@ -4093,13 +4092,12 @@ msgstr ""
 "actual"
 
 #: src/setup_extra.cpp:123
-#, fuzzy
 msgid "Auto reconnect cahandler"
-msgstr "Cambio bouquete automático"
+msgstr "Reconectar cahandler"
 
 #: src/setup_extra.cpp:123
 msgid "try to reconnect when an external cahandler connection was lost"
-msgstr ""
+msgstr "Intentar de reconectar cahandler externo al perder la conexión"
 
 #: src/setup_extra.cpp:127
 msgid "Enable file sharing"
@@ -4134,14 +4132,13 @@ msgid "Box goes directly into Deep-Standby"
 msgstr "El receptor se apaga directamente"
 
 #: src/setup_extra.cpp:139
-#, fuzzy
 msgid "Enable MHW EPG"
-msgstr "EPG externo"
+msgstr "Activar EPG MHW"
 
 #: src/setup_extra.cpp:139
 msgid ""
 "Mediahighway EPG, activate swap space when using with multiple operators"
-msgstr ""
+msgstr "EPG Mediahighway, memoria swap recommendable"
 
 #: src/setup_extra.cpp:149
 msgid "Disable CoreFiles"
