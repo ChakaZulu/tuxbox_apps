@@ -570,8 +570,13 @@ void CFlashExpert::showFileSelector(const std::string & actionkey)
 		for(int count=0;count<n;count++)
 		{
 			std::string filen = namelist[count]->d_name;
-			int pos = filen.find(".img");
-			if(pos!=-1)
+			if((int(filen.find(".img")) != -1) 
+#ifdef SQUASHFS
+			   || (int(filen.find(".squashfs")) != -1)
+#else
+			   || (int(filen.find(".cramfs")) != -1)
+#endif
+			   || (int(filen.find(".jffs2")) != -1))
 			{
 				fileselector->addItem(new CMenuForwarderNonLocalized(filen.c_str(), true, NULL, this, (actionkey + filen).c_str()));
 #warning TODO: make sure filen is UTF-8 encoded
