@@ -423,10 +423,13 @@ Sending dvbsnoop data over network, using netcat:
    dvbsnoop \-s pes 0x28F -b  \|  nc \-q  ServerName 31337
 
 Do remote decoding of dvb data over network using dvbsnoop and netcat:
-  sender site:
-    dvbsnoop \-s ts 0x0065 \-b  \|  nc \-q  ServerName 31000
-  remote site:
-    nc \-l \-p 31000  \|  dvbsnoop \-nph \-s ts \-tssubdecode \-if \-
+  streaming site:
+      dvbsnoop \-s ts 0x0065 \-b  \|  nc \-q  ServerName 31000
+  reveiving site:
+      nc \-l \-p 31000  \|  dvbsnoop \-nph \-s ts \-tssubdecode \-if \-
+
+  You may also use e.g. dvbtools for sending dvb data over a network:
+      dvbstream ....  \-\->  dumprtp \| dvbsnoop ß-s ts \-if \-
 
 
 ... for more examples and example output of dvbsnoop, please visit http://dvbsnoop.sourceforge.net. 
