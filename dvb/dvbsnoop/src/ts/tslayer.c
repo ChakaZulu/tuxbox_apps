@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.24 2005/10/20 22:25:31 rasc Exp $
+$Id: tslayer.c,v 1.25 2006/01/02 18:24:34 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: tslayer.c,v 1.24 2005/10/20 22:25:31 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
 
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.24 2005/10/20 22:25:31 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.25  2006/01/02 18:24:34  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.24  2005/10/20 22:25:31  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.h,v 1.5 2004/02/12 21:21:20 rasc Exp $ 
+$Id: mhp_ait_descriptor.h,v 1.6 2006/01/02 18:23:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: mhp_ait_descriptor.h,v 1.5 2004/02/12 21:21:20 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Private TAG Space  MHP AIT
@@ -16,6 +16,9 @@ $Id: mhp_ait_descriptor.h,v 1.5 2004/02/12 21:21:20 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.h,v $
+Revision 1.6  2006/01/02 18:23:58  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.5  2004/02/12 21:21:20  rasc
 MHP AIT descriptors
 some smaller changes

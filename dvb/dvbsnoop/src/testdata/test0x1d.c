@@ -1,5 +1,5 @@
 /*
-$Id: test0x1d.c,v 1.9 2005/10/20 22:25:19 rasc Exp $
+$Id: test0x1d.c,v 1.10 2006/01/02 18:24:33 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: test0x1d.c,v 1.9 2005/10/20 22:25:19 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
 
@@ -18,6 +18,9 @@ $Id: test0x1d.c,v 1.9 2005/10/20 22:25:19 rasc Exp $
 
 
 $Log: test0x1d.c,v $
+Revision 1.10  2006/01/02 18:24:33  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.9  2005/10/20 22:25:19  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.
@@ -74,30 +77,11 @@ more PES stuff, DSM descriptors, testdata
 void section_TESTDATA (u_char *b, int len)
 {
 
- typedef struct  _TESTDATA {
-    u_int      table_id;
-    u_int      priority_level;
-    u_int      section_syntax_indicator;		
-
-    unsigned long crc;
- } TESTDATA;
-
-
-
- TESTDATA   t;
-
-
- 
- t.table_id 			 = getBits (b, 0, 0, 6);
- t.priority_level		 = getBits (b, 0, 6, 2);
- t.section_syntax_indicator	 = getBits (b, 0, 8, 1);
-
-
  out_nl (3,"TESTDATA-decoding....");
- out_SB_NL (3,"Table_ID: ",t.table_id);
- out_SB_NL (3,"priority_level: ",t.priority_level);
 
- out_SB_NL (3,"section_syntax_indicator: ",t.section_syntax_indicator);
+ outBit_Sx_NL (3,"Table_ID: ",			b,  0, 6);
+ outBit_Sx_NL (3,"priority_level: ",		b,  6, 2);
+ outBit_Sx_NL (3,"section_syntax_indicator: ",	b,  8, 1);
 
 
  // $$$ TODO   ...

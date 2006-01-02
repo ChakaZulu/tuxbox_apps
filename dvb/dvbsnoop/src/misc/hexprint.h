@@ -1,5 +1,5 @@
 /*
-$Id: hexprint.h,v 1.8 2004/03/09 20:59:23 rasc Exp $
+$Id: hexprint.h,v 1.9 2006/01/02 18:24:04 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: hexprint.h,v 1.8 2004/03/09 20:59:23 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.41 2005/12/27 23:30:28 rasc Exp $
+$Id: helper.c,v 1.42 2006/01/02 18:24:04 rasc Exp $
 
 
  DVBSNOOP
@@ -7,12 +7,15 @@ $Id: helper.c,v 1.41 2005/12/27 23:30:28 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 $Log: helper.c,v $
+Revision 1.42  2006/01/02 18:24:04  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.41  2005/12/27 23:30:28  rasc
 PS MPEG-2 Extension data packets, MPEG-2 decoding
 

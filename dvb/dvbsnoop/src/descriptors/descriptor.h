@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.h,v 1.11 2004/11/03 21:00:50 rasc Exp $ 
+$Id: descriptor.h,v 1.12 2006/01/02 18:23:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: descriptor.h,v 1.11 2004/11/03 21:00:50 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Descriptors Section
@@ -16,6 +16,9 @@ $Id: descriptor.h,v 1.11 2004/11/03 21:00:50 rasc Exp $
 
 
 $Log: descriptor.h,v $
+Revision 1.12  2006/01/02 18:23:58  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.11  2004/11/03 21:00:50  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"

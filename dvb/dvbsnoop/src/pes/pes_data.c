@@ -1,5 +1,5 @@
 /*
-$Id: pes_data.c,v 1.2 2004/02/02 23:34:08 rasc Exp $
+$Id: pes_data.c,v 1.3 2006/01/02 18:24:12 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: pes_data.c,v 1.2 2004/02/02 23:34:08 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
 
 
 
@@ -18,6 +18,9 @@ $Id: pes_data.c,v 1.2 2004/02/02 23:34:08 rasc Exp $
 
 
 $Log: pes_data.c,v $
+Revision 1.3  2006/01/02 18:24:12  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.2  2004/02/02 23:34:08  rasc
 - output indent changed to avoid \r  (which sucks on logged output)
 - EBU PES data started (teletext, vps, wss, ...)

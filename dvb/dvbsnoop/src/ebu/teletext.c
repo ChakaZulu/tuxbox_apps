@@ -1,5 +1,5 @@
 /*
-$Id: teletext.c,v 1.7 2005/01/17 19:41:22 rasc Exp $
+$Id: teletext.c,v 1.8 2006/01/02 18:24:03 rasc Exp $
 
 
 
@@ -8,7 +8,7 @@ $Id: teletext.c,v 1.7 2005/01/17 19:41:22 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  -- misc routines for EBU teletext
@@ -17,6 +17,9 @@ $Id: teletext.c,v 1.7 2005/01/17 19:41:22 rasc Exp $
 
 
 $Log: teletext.c,v $
+Revision 1.8  2006/01/02 18:24:03  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.7  2005/01/17 19:41:22  rasc
 Bugfix: data broadcast descriptor (tnx to Sergio SAGLIOCCO, SecureLAB)
 

@@ -1,5 +1,5 @@
 /*
-$Id: packet_mem.c,v 1.3 2005/09/12 20:56:16 rasc Exp $
+$Id: packet_mem.c,v 1.4 2006/01/02 18:24:04 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: packet_mem.c,v 1.3 2005/09/12 20:56:16 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
 
@@ -17,6 +17,9 @@ $Id: packet_mem.c,v 1.3 2005/09/12 20:56:16 rasc Exp $
 
 
 $Log: packet_mem.c,v $
+Revision 1.4  2006/01/02 18:24:04  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.3  2005/09/12 20:56:16  rasc
 Make dvbsnoop compile on Cygwin / Windows
 

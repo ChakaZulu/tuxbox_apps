@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.28 2004/08/06 22:21:38 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.29 2006/01/02 18:24:32 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dsmcc_str.h,v 1.28 2004/08/06 22:21:38 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
  -- dsmcc strings
@@ -16,6 +16,9 @@ $Id: dsmcc_str.h,v 1.28 2004/08/06 22:21:38 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.29  2006/01/02 18:24:32  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.28  2004/08/06 22:21:38  rasc
 New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 

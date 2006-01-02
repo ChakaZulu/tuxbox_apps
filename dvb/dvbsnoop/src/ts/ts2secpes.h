@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.h,v 1.7 2005/11/08 23:15:27 rasc Exp $
+$Id: ts2secpes.h,v 1.8 2006/01/02 18:24:34 rasc Exp $
 
 
    
@@ -8,7 +8,7 @@ $Id: ts2secpes.h,v 1.7 2005/11/08 23:15:27 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
 */

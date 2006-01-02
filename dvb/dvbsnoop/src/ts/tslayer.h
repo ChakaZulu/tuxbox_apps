@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.h,v 1.9 2005/10/20 22:25:31 rasc Exp $
+$Id: tslayer.h,v 1.10 2006/01/02 18:24:34 rasc Exp $
 
 
    
@@ -8,14 +8,14 @@ $Id: tslayer.h,v 1.9 2005/10/20 22:25:31 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
 */
 
 
 #ifndef __TSLAYER_H
-#define __TS_LAYER_H 
+#define __TSLAYER_H 
 
 
 void processTS_packet (u_int pid, long packet_nr, u_char *b, int len);

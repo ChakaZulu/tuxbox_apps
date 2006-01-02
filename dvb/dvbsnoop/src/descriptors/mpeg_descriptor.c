@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.27 2005/11/10 23:34:37 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.28 2006/01/02 18:23:58 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: mpeg_descriptor.c,v 1.27 2005/11/10 23:34:37 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.27 2005/11/10 23:34:37 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.28  2006/01/02 18:23:58  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.27  2005/11/10 23:34:37  rasc
 Some H.222.1 AMD 4+5 update
 

@@ -1,5 +1,5 @@
 /*
-$Id: mdt.c,v 1.5 2005/11/10 23:34:38 rasc Exp $
+$Id: mdt.c,v 1.6 2006/01/02 18:24:24 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: mdt.c,v 1.5 2005/11/10 23:34:38 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- MDT section  (MetaData Section)
@@ -15,6 +15,9 @@ $Id: mdt.c,v 1.5 2005/11/10 23:34:38 rasc Exp $
 
 
 $Log: mdt.c,v $
+Revision 1.6  2006/01/02 18:24:24  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.5  2005/11/10 23:34:38  rasc
 Some H.222.1 AMD 4+5 update
 

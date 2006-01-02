@@ -1,5 +1,5 @@
 /*
-$Id: rnt.c,v 1.4 2005/07/18 21:11:41 rasc Exp $
+$Id: rnt.c,v 1.5 2006/01/02 18:24:46 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: rnt.c,v 1.4 2005/07/18 21:11:41 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  --  Resolution Notification Table (RNT)
@@ -17,6 +17,9 @@ $Id: rnt.c,v 1.4 2005/07/18 21:11:41 rasc Exp $
 
 
 $Log: rnt.c,v $
+Revision 1.5  2006/01/02 18:24:46  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.4  2005/07/18 21:11:41  rasc
 TVA Content Section
 

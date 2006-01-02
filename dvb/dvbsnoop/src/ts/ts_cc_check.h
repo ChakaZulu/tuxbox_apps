@@ -1,5 +1,5 @@
 /*
-$Id: ts_cc_check.h,v 1.1 2005/09/09 14:21:12 rasc Exp $
+$Id: ts_cc_check.h,v 1.2 2006/01/02 18:24:34 rasc Exp $
 
 
    
@@ -8,7 +8,7 @@ $Id: ts_cc_check.h,v 1.1 2005/09/09 14:21:12 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
 */

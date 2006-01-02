@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.h,v 1.10 2005/11/10 00:05:45 rasc Exp $
+$Id: pespacket.h,v 1.11 2006/01/02 18:24:12 rasc Exp $
 
    
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: pespacket.h,v 1.10 2005/11/10 00:05:45 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 

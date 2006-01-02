@@ -1,5 +1,5 @@
 /*
-$Id: section_premiere_cit.c,v 1.2 2004/11/04 19:21:11 rasc Exp $
+$Id: section_premiere_cit.c,v 1.3 2006/01/02 18:24:16 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: section_premiere_cit.c,v 1.2 2004/11/04 19:21:11 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
 
 
   -- User defined table // Private
@@ -16,6 +16,9 @@ $Id: section_premiere_cit.c,v 1.2 2004/11/04 19:21:11 rasc Exp $
 
 
 $Log: section_premiere_cit.c,v $
+Revision 1.3  2006/01/02 18:24:16  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.2  2004/11/04 19:21:11  rasc
 Fixes and changes on "premiere.de" private sections
 Cleaning up "premiere.de" private descriptors (should be final now)

@@ -1,5 +1,5 @@
 /*
-$Id: packet_mem.h,v 1.1 2004/04/15 03:40:39 rasc Exp $
+$Id: packet_mem.h,v 1.2 2006/01/02 18:24:04 rasc Exp $
 
 
    
@@ -8,7 +8,7 @@ $Id: packet_mem.h,v 1.1 2004/04/15 03:40:39 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
 */

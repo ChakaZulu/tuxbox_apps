@@ -1,5 +1,5 @@
 /*
-$Id: cs.c,v 1.1 2005/07/18 21:13:05 rasc Exp $
+$Id: cs.c,v 1.2 2006/01/02 18:24:46 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: cs.c,v 1.1 2005/07/18 21:13:05 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  --  Container section (CS)
@@ -16,6 +16,9 @@ $Id: cs.c,v 1.1 2005/07/18 21:13:05 rasc Exp $
 
 
 $Log: cs.c,v $
+Revision 1.2  2006/01/02 18:24:46  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.1  2005/07/18 21:13:05  rasc
 TVA Content Section
 

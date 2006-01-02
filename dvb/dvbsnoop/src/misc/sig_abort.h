@@ -1,5 +1,5 @@
 /*
-$Id: sig_abort.h,v 1.1 2005/09/06 23:39:04 rasc Exp $
+$Id: sig_abort.h,v 1.2 2006/01/02 18:24:04 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: sig_abort.h,v 1.1 2005/09/06 23:39:04 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Handle Kill/Interrupt Signals from User/OS
@@ -17,6 +17,9 @@ $Id: sig_abort.h,v 1.1 2005/09/06 23:39:04 rasc Exp $
 
 
 $Log: sig_abort.h,v $
+Revision 1.2  2006/01/02 18:24:04  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.1  2005/09/06 23:39:04  rasc
 catch OS signals (kill ...) for smooth program termination
 

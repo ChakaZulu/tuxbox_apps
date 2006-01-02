@@ -1,5 +1,5 @@
 /*
-$Id: tva_rnt_descriptor.c,v 1.4 2004/11/03 21:00:58 rasc Exp $ 
+$Id: tva_rnt_descriptor.c,v 1.5 2006/01/02 18:23:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: tva_rnt_descriptor.c,v 1.4 2004/11/03 21:00:58 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- Private TAG Space  TS 102 323  TV-Anytime 
@@ -17,6 +17,9 @@ $Id: tva_rnt_descriptor.c,v 1.4 2004/11/03 21:00:58 rasc Exp $
 
 
 $Log: tva_rnt_descriptor.c,v $
+Revision 1.5  2006/01/02 18:23:58  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.4  2004/11/03 21:00:58  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"

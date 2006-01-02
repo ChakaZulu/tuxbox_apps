@@ -1,5 +1,5 @@
 /*
-$Id: fe_info.h,v 1.1 2004/03/21 00:38:45 rasc Exp $
+$Id: fe_info.h,v 1.2 2006/01/02 18:23:59 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: fe_info.h,v 1.1 2004/03/21 00:38:45 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 */
 

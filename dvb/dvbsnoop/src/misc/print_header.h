@@ -1,5 +1,5 @@
 /*
-$Id: print_header.h,v 1.3 2005/10/20 22:25:07 rasc Exp $
+$Id: print_header.h,v 1.4 2006/01/02 18:24:04 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: print_header.h,v 1.3 2005/10/20 22:25:07 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 

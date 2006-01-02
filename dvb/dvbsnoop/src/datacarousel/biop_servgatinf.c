@@ -1,5 +1,5 @@
 /*
-$Id: biop_servgatinf.c,v 1.1 2004/02/24 23:03:04 rasc Exp $
+$Id: biop_servgatinf.c,v 1.2 2006/01/02 18:23:47 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: biop_servgatinf.c,v 1.1 2004/02/24 23:03:04 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
  -- dsmcc  BIOP::ServiceGatewayInfo()
  -- TR 101 202 v1.2.1  4.7.5.2
@@ -16,6 +16,9 @@ $Id: biop_servgatinf.c,v 1.1 2004/02/24 23:03:04 rasc Exp $
 
 
 $Log: biop_servgatinf.c,v $
+Revision 1.2  2006/01/02 18:23:47  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.1  2004/02/24 23:03:04  rasc
 private data of DSMCC::DSI
 BIOP::ServiceGatewayInformation()

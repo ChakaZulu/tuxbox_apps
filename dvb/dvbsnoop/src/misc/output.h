@@ -1,5 +1,5 @@
 /*
-$Id: output.h,v 1.12 2005/09/02 14:11:35 rasc Exp $
+$Id: output.h,v 1.13 2006/01/02 18:24:04 rasc Exp $
 
 
  DVBSNOOP
@@ -7,13 +7,16 @@ $Id: output.h,v 1.12 2005/09/02 14:11:35 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 
 $Log: output.h,v $
+Revision 1.13  2006/01/02 18:24:04  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.12  2005/09/02 14:11:35  rasc
 TS code redesign, xPCR and DTS timestamps decoding
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.20 2005/12/29 02:43:37 rasc Exp $
+$Id: dsmcc_misc.c,v 1.21 2006/01/02 18:23:47 rasc Exp $
 
 
  DVBSNOOP
@@ -7,12 +7,15 @@ $Id: dsmcc_misc.c,v 1.20 2005/12/29 02:43:37 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.21  2006/01/02 18:23:47  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.20  2005/12/29 02:43:37  rasc
 gcc fixes, man page update
 

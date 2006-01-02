@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.36 2005/11/08 23:15:25 rasc Exp $
+$Id: dmx_pes.c,v 1.37 2006/01/02 18:23:58 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dmx_pes.c,v 1.36 2005/11/08 23:15:25 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Streams: PES  & PS
@@ -20,6 +20,9 @@ $Id: dmx_pes.c,v 1.36 2005/11/08 23:15:25 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.37  2006/01/02 18:23:58  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.36  2005/11/08 23:15:25  rasc
  - New: DVB-S2 Descriptor and DVB-S2 changes (tnx to Axel Katzur)
  - Bugfix: PES packet stuffing

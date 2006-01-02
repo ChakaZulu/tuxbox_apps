@@ -1,5 +1,5 @@
 /*
-$Id: llc_snap.c,v 1.5 2004/01/25 21:37:27 rasc Exp $
+$Id: llc_snap.c,v 1.6 2006/01/02 18:23:47 rasc Exp $
 
 
  DVBSNOOP
@@ -7,12 +7,15 @@ $Id: llc_snap.c,v 1.5 2004/01/25 21:37:27 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 $Log: llc_snap.c,v $
+Revision 1.6  2006/01/02 18:23:47  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.5  2004/01/25 21:37:27  rasc
 bugfixes, minor changes & enhancments
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.34 2004/07/25 20:12:59 rasc Exp $
+$Id: dsmcc_str.c,v 1.35 2006/01/02 18:24:32 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dsmcc_str.c,v 1.34 2004/07/25 20:12:59 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de
+ (c) 2001-2006   Rainer.Scherg@gmx.de
 
 
  -- DSM-CC -Strings
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.34 2004/07/25 20:12:59 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.35  2006/01/02 18:24:32  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.34  2004/07/25 20:12:59  rasc
  - New: content_identifier_descriptor (TS 102 323)
  - New: TVA_id_descriptor (TS 102 323)

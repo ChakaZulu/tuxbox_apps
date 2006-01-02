@@ -1,5 +1,5 @@
 /*
-$Id: pid_mem.h,v 1.1 2004/03/31 21:14:23 rasc Exp $
+$Id: pid_mem.h,v 1.2 2006/01/02 18:24:04 rasc Exp $
 
 
  DVBSNOOP
@@ -7,13 +7,16 @@ $Id: pid_mem.h,v 1.1 2004/03/31 21:14:23 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 
 $Log: pid_mem.h,v $
+Revision 1.2  2006/01/02 18:24:04  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.1  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes

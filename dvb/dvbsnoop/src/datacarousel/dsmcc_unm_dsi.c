@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dsi.c,v 1.6 2004/02/29 20:42:55 rasc Exp $
+$Id: dsmcc_unm_dsi.c,v 1.7 2006/01/02 18:23:47 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dsmcc_unm_dsi.c,v 1.6 2004/02/29 20:42:55 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
  -- dsmcc download Server Initiate
  -- to be called from U-N-Message
@@ -15,6 +15,9 @@ $Id: dsmcc_unm_dsi.c,v 1.6 2004/02/29 20:42:55 rasc Exp $
 
 
 $Log: dsmcc_unm_dsi.c,v $
+Revision 1.7  2006/01/02 18:23:47  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.6  2004/02/29 20:42:55  rasc
 no message
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc.c,v 1.10 2004/10/17 22:20:35 rasc Exp $
+$Id: dsmcc.c,v 1.11 2006/01/02 18:23:47 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dsmcc.c,v 1.10 2004/10/17 22:20:35 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  --  DSM-CC Section
@@ -18,6 +18,9 @@ $Id: dsmcc.c,v 1.10 2004/10/17 22:20:35 rasc Exp $
 
 
 $Log: dsmcc.c,v $
+Revision 1.11  2006/01/02 18:23:47  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.10  2004/10/17 22:20:35  rasc
 section decoding functions renamed due to preparation of private structures
 

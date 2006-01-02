@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.h,v 1.14 2005/12/22 16:21:50 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.15 2006/01/02 18:23:58 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dvb_descriptor.h,v 1.14 2005/12/22 16:21:50 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
  -- DVB Descriptors  ETSI 300 468
@@ -15,6 +15,9 @@ $Id: dvb_descriptor.h,v 1.14 2005/12/22 16:21:50 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.15  2006/01/02 18:23:58  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.14  2005/12/22 16:21:50  rasc
 Update and new descriptors EN 300 468 v1.7.1
 

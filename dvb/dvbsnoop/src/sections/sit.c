@@ -1,5 +1,5 @@
 /*
-$Id: sit.c,v 1.10 2004/10/17 22:20:36 rasc Exp $
+$Id: sit.c,v 1.11 2006/01/02 18:24:24 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: sit.c,v 1.10 2004/10/17 22:20:36 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
 
    -- SIT section
    -- Selection Information Table
@@ -16,6 +16,9 @@ $Id: sit.c,v 1.10 2004/10/17 22:20:36 rasc Exp $
 
 
 $Log: sit.c,v $
+Revision 1.11  2006/01/02 18:24:24  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.10  2004/10/17 22:20:36  rasc
 section decoding functions renamed due to preparation of private structures
 

@@ -1,5 +1,5 @@
 /*
-$Id: print_header.c,v 1.6 2005/10/20 22:25:07 rasc Exp $
+$Id: print_header.c,v 1.7 2006/01/02 18:24:04 rasc Exp $
 
 
  DVBSNOOP
@@ -7,12 +7,15 @@ $Id: print_header.c,v 1.6 2005/10/20 22:25:07 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 $Log: print_header.c,v $
+Revision 1.7  2006/01/02 18:24:04  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.6  2005/10/20 22:25:07  rasc
  - Bugfix: tssubdecode check for PUSI and SI pointer offset
    still losing packets, when multiple sections in one TS packet.

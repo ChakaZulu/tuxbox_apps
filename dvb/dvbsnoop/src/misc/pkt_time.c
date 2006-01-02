@@ -1,5 +1,5 @@
 /*
-$Id: pkt_time.c,v 1.11 2005/09/12 20:56:16 rasc Exp $
+$Id: pkt_time.c,v 1.12 2006/01/02 18:24:04 rasc Exp $
 
 
 
@@ -8,13 +8,16 @@ $Id: pkt_time.c,v 1.11 2005/09/12 20:56:16 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2005   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 
 $Log: pkt_time.c,v $
+Revision 1.12  2006/01/02 18:24:04  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.11  2005/09/12 20:56:16  rasc
 Make dvbsnoop compile on Cygwin / Windows
 

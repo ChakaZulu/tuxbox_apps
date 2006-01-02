@@ -1,5 +1,5 @@
 /*
-$Id: vps.c,v 1.3 2004/03/10 21:05:53 rasc Exp $
+$Id: vps.c,v 1.4 2006/01/02 18:24:03 rasc Exp $
 
 
 
@@ -8,7 +8,7 @@ $Id: vps.c,v 1.3 2004/03/10 21:05:53 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -19,6 +19,9 @@ $Id: vps.c,v 1.3 2004/03/10 21:05:53 rasc Exp $
 
 
 $Log: vps.c,v $
+Revision 1.4  2006/01/02 18:24:03  rasc
+just update copyright and prepare for a new public tar ball
+
 Revision 1.3  2004/03/10 21:05:53  rasc
 WSS (Wide Screen Signalling)  data decoding
 
