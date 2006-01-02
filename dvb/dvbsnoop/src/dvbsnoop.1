@@ -429,7 +429,7 @@ Do remote decoding of dvb data over network using dvbsnoop and netcat:
       nc \-l \-p 31000  \|  dvbsnoop \-nph \-s ts \-tssubdecode \-if \-
 
   You may also use e.g. dvbtools for sending dvb data over a network:
-      dvbstream ....  \-\->  dumprtp \| dvbsnoop ß-s ts \-if \-
+      dvbstream ....  \-\->  dumprtp \| dvbsnoop \-s ts \-if \-
 
 
 ... for more examples and example output of dvbsnoop, please visit http://dvbsnoop.sourceforge.net. 
