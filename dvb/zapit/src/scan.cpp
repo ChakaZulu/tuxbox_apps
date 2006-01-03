@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.153 2005/12/25 19:07:55 racker Exp $
+ * $Id: scan.cpp,v 1.154 2006/01/03 20:48:50 racker Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -727,8 +727,8 @@ void *start_scanthread(void *scanmode)
 			}
 		}
 		else
-			scan_success = write_provider(fd, frontendType, providerName);
-	
+                        scan_success = write_provider(fd, frontendType, scanProviders.begin()->second.c_str());
+
 		write_xml_footer(fd);
 		chmod(SERVICES_XML, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
