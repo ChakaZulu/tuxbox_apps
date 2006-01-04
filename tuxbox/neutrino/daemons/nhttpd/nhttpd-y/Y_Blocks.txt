@@ -8,6 +8,7 @@ start-block~yWeb_save_settings
 {=ini-set:/var/tuxbox/config/Y-Web.conf;wol_mac_1;{=wol_mac_1=}=}
 {=ini-set:/var/tuxbox/config/Y-Web.conf;wol_mac_2;{=wol_mac_2=}=}
 {=ini-set:/var/tuxbox/config/Y-Web.conf;wol_mac_3;{=wol_mac_3=}=}
+{=ini-set:/var/tuxbox/config/Y-Web.conf;vlc_record_path;{=vlc_record_path=}=}
 end-block~yWeb_save_settings
 
 # ------- nhttpd save Settings

@@ -51,6 +51,15 @@ function do_submit()
 				<td>Wake on Lan MAC 3</td>
 				<td><input type="text" name="wol_mac_3" size="17" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;wol_mac_3=}" title="enter MAC Adress (xx:xx:xx:xx:xx:xx)"></td>
 			</tr>
+			<tr>
+				<td>VLC Aufnahmepfad</td>
+				<td><input type="text" name="vlc_record_path" size="17" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;vlc_record_path=}" title="VLC record path"></td>
+			</tr>
+<!---			<tr>
+				<td>VLC Aufnahmetyp</td>
+				<td><input type="text" name="vlc_record_mux_type" size="17" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;vlc_record_mux_type=}" title="VLC record mux type"></td>
+			</tr>
+-->
 		</table>
 		<br>
 		<input type="hidden" name="tmpl" value="Y_Settings_yWeb.yhtm">

@@ -8,27 +8,27 @@ body
 img	{border:0;}
 a
 { 
-	color: #436976; 
+	color: black; 
 	font-size:10pt;
 	text-decoration:none; 
 }
 a:hover
 { 
-	color:#436976;
+	color:black;
 	font-size:10pt;
 	text-decoration:underline;
 	font-weight:bold;
 }
 td
 {
-	color: #436976; 
+	color: black; 
 	font-family:Arial,Sans-Serif;
 	font-size:10pt;
 }
 
 tr
 {
-	color: #436976; 
+	color: black; 
 	font-family:Arial,Sans-Serif;
 	font-size:10pt;
 }

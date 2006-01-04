@@ -1,5 +1,10 @@
 Severity	id		Headline							Build
 
+4-Minor		JG200000359	tools: fix reboot after flash					R1.4.2
+5-Enhancement	JG200000332	Live: record: filepath settings at settings->yWeb		R1.4.2
+5-Enhancement	JG200000337	bouquets: start bouquetlist at actual bouquet			R1.4.2
+5-Enhancement	JG200000360	bouquet: text in black again					R1.4.2
+
 5-Enhancement	JG200000127	flash download: button for delete download-image in /tmp	R1.4.1
 5-Enhancement	JG200000339	nhttpd: new: file-action:<filename>;<action>;<content>		R1.4.1
 5-Enhancement	JG200000340	new: Neutrino-Settings: pictureviewer				R1.4.1

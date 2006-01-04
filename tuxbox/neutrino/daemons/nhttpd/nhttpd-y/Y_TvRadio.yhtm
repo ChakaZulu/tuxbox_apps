@@ -7,7 +7,7 @@
 	<frame name="controlpanel" scrolling="no" noresize src="/fb/controlpanel.dbox2" marginwidth="0" marginheight="0">
 	<frameset cols="150,*">
 		<frame name="bouquets" target="content" src="/fb/bouquetlist.dbox2?js=0&bouquet=#akt" scrolling="auto">
-		<frame name="content" src="/fb/channellist.dbox2?bouquet=1#akt" scrolling="auto">
+		<frame name="content" src="/fb/channellist.dbox2?bouquet={=func:get_actual_bouquet_number=}" scrolling="auto">
 	</frameset>
 	<noframes>
 	<body topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0" marginwidth="0" marginheight="0">

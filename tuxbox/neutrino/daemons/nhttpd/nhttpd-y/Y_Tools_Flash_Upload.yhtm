@@ -34,7 +34,7 @@ function do_image_flash_ready()
 {
 	window.clearInterval(aktiv);
 	document.all.wait_flash.style.visibility="hidden";
-	/*window.setTimeout('out.location.href = "/control/exec?Y_Tools&yreboot";',1000);*/
+	window.setTimeout('out.location.href = "/control/reboot";',1000);
 	alert("Image geflasht. Nach Reboot OK drücken");
 	top.location.href="/";
 }

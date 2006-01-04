@@ -37,7 +37,7 @@ function go_rc()
 	<tr>
 		<td>
 		<ul id="menu_prim" class="y_menu_prim">
-			<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_TvRadio.htm" title="View &#038;edit Bouquets">Bouquet</a></li>
+			<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_TvRadio.yhtm" title="View &#038;edit Bouquets">Bouquet</a></li>
 			<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_Tools.htm" title="Box &#038; Test Tools">Tools</a></li>
 			<li class="plain"><a class="y_menu_prim_item" target="Base" href="Y_Settings.yhtm" title="Settings for Box, Web, Plugins ...">Settings</a></li>
 			<li class="plain"><a class="y_menu_prim_item" href="javascript:go_live()" title="TV or Radio Live-Streaming">Live</a></li>

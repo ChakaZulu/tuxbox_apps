@@ -168,7 +168,7 @@ function doRecord2()
 		<input type="hidden" name="url" value="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids {=audiopid=}=}">
 		<div name="ex" id="ex" style="visibility : hidden;">
 			<b>Expert Mode - (ActiveX - Experimental)</b><br>
-			<input type="text" name="record_filename" value="D:\aufnahme.ts">&nbsp;
+			<input type="text" name="record_filename" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;vlc_record_path=}">&nbsp;
 			mux: <SELECT name="mux">
 				<option value="ts" selected>ts</option>          
 				<option value="ps">ps</option>          
