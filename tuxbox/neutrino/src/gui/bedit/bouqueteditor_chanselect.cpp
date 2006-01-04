@@ -54,8 +54,14 @@ CBEChannelSelectWidget::CBEChannelSelectWidget(const std::string & Caption, unsi
 	// height =  440;
         width  = w_max (500, 0);
         height = h_max (440, 50);
-
-	x = (((g_settings.screen_EndX - g_settings.screen_StartX) - width) / 2) + g_settings.screen_StartX;
+	ButtonHeight = 25;
+	theight     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+	fheight     = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getHeight();
+	listmaxshow = (height-theight-0)/fheight;
+	height = theight+0+listmaxshow*fheight; // recalc height
+	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	liststart = 0;
 }
 
 uint	CBEChannelSelectWidget::getItemCount()
@@ -82,7 +88,7 @@ bool CBEChannelSelectWidget::hasChanged()
 
 void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 {
-	int ypos = y+ theight + paintNr*getItemHeight();
+	int ypos = y+ theight + paintNr*fheight;
 
 	uint8_t    color;
 	fb_pixel_t bgcolor;
@@ -97,7 +103,7 @@ void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 		bgcolor = COL_MENUCONTENT_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, getItemHeight(), bgcolor);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
 
 	if(itemNr < getItemCount())
 	{
@@ -124,7 +130,7 @@ void CBEChannelSelectWidget::onOkKeyPressed()
 		g_Zapit->addChannelToBouquet( bouquet, Channels[selected].channel_id);
 	bouquetChannels.clear();
 	g_Zapit->getBouquetChannels( bouquet, bouquetChannels, mode);
-	
+
 	paintItem( selected, selected - liststart, false);
 	g_RCInput->postMsg( CRCInput::RC_down, 0 );
 }
