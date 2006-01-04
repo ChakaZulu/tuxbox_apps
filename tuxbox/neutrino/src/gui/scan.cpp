@@ -98,10 +98,10 @@ if(get_set.TP_scan)
 #endif
 
 	//return menu_return::RETURN_REPAINT;
-	
+
 }
 	success = false;
-	
+
 	if (!frameBuffer->getActive())
 		return menu_return::RETURN_EXIT_ALL;
 
@@ -116,7 +116,7 @@ if(get_set.TP_scan)
 	/* send diseqc type to zapit */
 	diseqcType = CNeutrinoApp::getInstance()->getScanSettings().diseqcMode;
 	g_Zapit->setDiseqcType(diseqcType);
-	
+
 	/* send diseqc repeat to zapit */
 	g_Zapit->setDiseqcRepeat( CNeutrinoApp::getInstance()->getScanSettings().diseqcRepeat);
 	g_Zapit->setScanBouquetMode( CNeutrinoApp::getInstance()->getScanSettings().bouquetMode);
@@ -128,7 +128,7 @@ if(get_set.TP_scan)
 
         /* send scantype to zapit */
         g_Zapit->setScanType( CNeutrinoApp::getInstance()->getScanSettings().scanType );
-	
+
 	/* send motor position list to zapit */
 	if (diseqcType == DISEQC_1_2)
 	{
@@ -167,9 +167,9 @@ if(get_set.TP_scan)
 	ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, success ? LOCALE_SCANTS_FINISHED : LOCALE_SCANTS_FAILED, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 
 	hide();
-	
+
 	g_Sectionsd->setPauseScanning(false);
-	
+
 
 	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
 		g_Controld->setVideoFormat(g_settings.video_Format);
@@ -185,13 +185,13 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 		case NeutrinoMessages::EVT_SCAN_SATELLITE:
 			paintLine(xpos2, ypos_cur_satellite, width - xpos2, (char *)data);
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS:
 			sprintf(buffer, "%d", data);
 			paintLine(xpos2, ypos_transponder, width - xpos2 - 95, buffer);
 			found_transponder = data;
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS:
 			if (found_transponder == 0) data = 0;
 			sprintf(buffer, "%d/%d", data, found_transponder);
@@ -200,42 +200,43 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 
 		case NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY:
 			sprintf(buffer, "%u", data);
-			paintLine(xpos2, ypos_frequency, 110, buffer);
+			xpos_frequency = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(buffer, true);
+			paintLine(xpos2, ypos_frequency, xpos_frequency, buffer);
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP:
 			(data == 0) ? sprintf(buffer, "-H") : sprintf(buffer, "-V");
-			paintLine(xpos2 + 110, ypos_frequency, 30, buffer);
+			paintLine(xpos2 + xpos_frequency, ypos_frequency, 30, buffer);
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_PROVIDER:
 			paintLine(xpos2, ypos_provider, width - xpos2, (char*)data); // UTF-8
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_SERVICENAME:
 			paintLine(xpos2, ypos_channel, width - xpos2, (char *)data); // UTF-8
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_NUM_CHANNELS:
 			sprintf(buffer, " = %d", data);
 			paintLine(xpos1 + 3 * 72, ypos_service_numbers + mheight, width - 3 * 72 - 10, buffer);
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN:
 			sprintf(buffer, "%d", data);
 			paintLine(xpos1, ypos_service_numbers + mheight, 72, buffer);
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_FOUND_RADIO_CHAN:
 			sprintf(buffer, "%d", data);
 			paintLine(xpos1 + 72, ypos_service_numbers + mheight, 72, buffer);
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN:
 			sprintf(buffer, "%d", data);
 			paintLine(xpos1 + 2 * 72, ypos_service_numbers + mheight, 72, buffer);
 			break;
-			
+
 		case NeutrinoMessages::EVT_SCAN_COMPLETE:
 		case NeutrinoMessages::EVT_SCAN_FAILED:
 			success = (msg == NeutrinoMessages::EVT_SCAN_COMPLETE);
@@ -252,7 +253,7 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 			}
 			break;
 		default:
-			if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000)) 
+			if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000))
 				delete (unsigned char*) data;
 			break;
 	}
@@ -262,7 +263,7 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 void CScanTs::paintRadar(void)
 {
 	char filename[30];
-	
+
 	sprintf(filename, "radar%d.raw", radar);
 	radar = (radar + 1) % 10;
 	frameBuffer->paintIcon8(filename, xpos_radar, ypos_radar, 17);
@@ -293,17 +294,17 @@ void CScanTs::paint()
 	int ypos;
 
 	ypos = y;
-	
+
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(xpos1, ypos + hheight, width, g_Locale->getText(LOCALE_SCANTS_HEAD), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0);
-	
+
 	frameBuffer->loadPal("radar.pal", 17, 37);
-	 
+
 	ypos = y + hheight + (mheight >> 1);
-	
+
 	ypos_cur_satellite = ypos;
-	
+
 	if (g_info.delivery_system == DVB_S)
 	{	//sat
 		paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_ACTSATELLITE);
@@ -324,11 +325,11 @@ void CScanTs::paint()
 	xpos2 = greater_xpos(xpos2, LOCALE_SCANTS_FREQDATA);
 
 	ypos += mheight >> 1; // 1/2 blank line
-	
+
 	ypos_provider = ypos;
 	paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_PROVIDER);
 	xpos2 = greater_xpos(xpos2, LOCALE_SCANTS_PROVIDER);
-	
+
 	ypos_channel = ypos;
 	paintLineLocale(xpos1, &ypos, width - xpos1, LOCALE_SCANTS_CHANNEL);
 	xpos2 = greater_xpos(xpos2, LOCALE_SCANTS_CHANNEL);
@@ -346,6 +347,6 @@ int CScanTs::greater_xpos(int xpos, const neutrino_locale_t txt)
 	int txt_xpos = xpos1 + 10 + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(g_Locale->getText(txt), true); // UTF-8
 	if (txt_xpos > xpos)
 		return txt_xpos;
-	else 
+	else
 		return xpos;
 }
