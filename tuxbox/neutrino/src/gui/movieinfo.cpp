@@ -523,7 +523,7 @@ void CMovieInfo::printDebugMovieInfo(MI_MOVIE_INFO& movie_info)
 	//TRACE(" FileStatus: %d", movie_info.file.GetStatus );	
 
 	TRACE(" ********** Movie Data ***********\r\n"); 		// (date, month, year)
-	TRACE(" dateOfLastPlay: \t%d\r\n", movie_info.dateOfLastPlay ); 		// (date, month, year)
+	TRACE(" dateOfLastPlay: \t%ld\r\n", (long)movie_info.dateOfLastPlay ); 		// (date, month, year)
 	TRACE(" dirItNr: \t\t%d\r\n", movie_info.dirItNr );  // 
     TRACE(" genreMajor: \t\t%d\r\n", movie_info.genreMajor );		//genreMajor;				
     TRACE(" genreMinor: \t\t%d\r\n", movie_info.genreMinor );		//genreMinor;				
@@ -539,8 +539,8 @@ void CMovieInfo::printDebugMovieInfo(MI_MOVIE_INFO& movie_info)
 	TRACE(" epgMode: \t\t%d\r\n",  movie_info.epgMode );
 	TRACE(" epgVideoPid: \t\t%d\r\n",  movie_info.epgVideoPid ); 
 	TRACE(" epgVTXPID: \t\t%d\r\n",	 movie_info.epgVTXPID );
-	TRACE(" Size: \t\t%d\r\n",	 movie_info.file.Size>>20 );
-	TRACE(" Date: \t\t%d\r\n",	 movie_info.file.Time );
+	TRACE(" Size: \t\t%ld\r\n",	 (long)movie_info.file.Size>>20 );
+	TRACE(" Date: \t\t%ld\r\n",	 (long)movie_info.file.Time );
 
 	for(unsigned int i = 0; i < movie_info.audioPids.size(); i++) 
 	{

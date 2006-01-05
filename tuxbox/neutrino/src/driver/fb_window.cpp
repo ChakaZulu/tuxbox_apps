@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.cpp,v 1.7 2005/11/30 04:51:49 metallica Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/fb_window.cpp,v 1.8 2006/01/05 03:58:49 Arzka Exp $
  *
  * abstract fb_window class - d-box2 linux project
  *
@@ -34,7 +34,7 @@ class CPrivateData
 {
  public:
 	CFrameBuffer * frameBuffer;
-	void         * Background;
+	fb_pixel_t   * Background;
 };
 
 CFBWindow::CFBWindow(const int _x, const int _y, const int _dx, const int _dy)
@@ -46,9 +46,9 @@ CFBWindow::CFBWindow(const int _x, const int _y, const int _dx, const int _dy)
 
 	private_data = (void *) new CPrivateData;
 	((CPrivateData *)private_data)->frameBuffer = CFrameBuffer::getInstance();
-	((CPrivateData *)private_data)->Background = (void *) new fb_pixel_t [_dx * _dy];
+	((CPrivateData *)private_data)->Background = new fb_pixel_t [_dx * _dy];
 	if (((CPrivateData *)private_data)->Background != NULL)
-		((CPrivateData *)private_data)->frameBuffer->SaveScreen(_x, _y, _dx, _dy, (fb_pixel_t *)((CPrivateData *)private_data)->Background);
+		((CPrivateData *)private_data)->frameBuffer->SaveScreen(_x, _y, _dx, _dy, ((CPrivateData *)private_data)->Background);
 
 }
 
@@ -57,8 +57,8 @@ CFBWindow::~CFBWindow(void)
 	if (private_data != NULL)
 	{
 		if (((CPrivateData *)private_data)->Background != NULL)
-			((CPrivateData *)private_data)->frameBuffer->RestoreScreen(x, y, dx, dy, (fb_pixel_t *)((CPrivateData *)private_data)->Background);
-		delete ((CPrivateData *)private_data)->Background;
+			((CPrivateData *)private_data)->frameBuffer->RestoreScreen(x, y, dx, dy, ((CPrivateData *)private_data)->Background);
+		delete[] ((CPrivateData *)private_data)->Background;
 		delete ((CPrivateData *)private_data);
 		private_data = NULL;
 	}
