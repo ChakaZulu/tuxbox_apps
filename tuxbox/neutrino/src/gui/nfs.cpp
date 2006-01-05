@@ -181,7 +181,15 @@ int CNFSMountGui::menu()
 	{
 		sprintf(s2,"mountentry%d",i);
 		sprintf(ISO_8859_1_entry[i],ZapitTools::UTF8_to_Latin1(m_entry[i]).c_str()); 
-		mountMenuW.addItem(new CMenuForwarderNonLocalized("", true, ISO_8859_1_entry[i], this, s2));
+		CMenuForwarderNonLocalized *forwarder = new CMenuForwarderNonLocalized("", true, ISO_8859_1_entry[i], this, s2);
+		if (CFSMounter::isMounted(g_settings.network_nfs_local_dir[i]))
+		{
+			forwarder->iconName = NEUTRINO_ICON_MOUNTED;
+		} else
+		{
+			forwarder->iconName = NEUTRINO_ICON_NOT_MOUNTED;
+		}
+		mountMenuW.addItem(forwarder);
 	}
 	int ret=mountMenuW.exec(this,"");
 	return ret;
@@ -314,7 +322,9 @@ int CNFSUmountGui::menu()
 			s1 += it->mountPoint;
 			std::string s2 = "doumount ";
 			s2 += it->mountPoint;
-			umountMenu.addItem(new CMenuForwarderNonLocalized(s1.c_str(), true, NULL, this, s2.c_str()));
+			CMenuForwarder *forwarder = new CMenuForwarderNonLocalized(s1.c_str(), true, NULL, this, s2.c_str());
+			forwarder->iconName = NEUTRINO_ICON_MOUNTED;
+			umountMenu.addItem(forwarder);
 		}
 	}
 	if(infos.size() > 0)
