@@ -2,7 +2,7 @@
 #define __gui_widget_icons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.8 2005/01/12 20:54:50 chakazulu Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.9 2006/01/05 21:38:01 chakazulu Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -59,9 +59,12 @@
 #define NEUTRINO_ICON_FILE          "file.raw"
 #define NEUTRINO_ICON_GAMES         "games.raw"
 #define NEUTRINO_ICON_INFO          "info.raw"
+#define NEUTRINO_ICON_MOUNTED       "mounted.raw"
+#define NEUTRINO_ICON_NOT_MOUNTED   "not_mounted.raw"
 #define NEUTRINO_ICON_RECORDING     "recording.raw"
 #define NEUTRINO_ICON_SETTINGS      "settings.raw"
 #define NEUTRINO_ICON_SHELL         "shell.raw"
+
 
 /* icon widths */
 

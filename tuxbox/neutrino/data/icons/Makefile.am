@@ -5,7 +5,7 @@ install_DATA = \
 	colors.raw dbox.raw dd.raw dd_avail.raw dd_gray.raw error.raw features.raw \
 	file.raw folder.raw games.raw gelb.raw gruen.raw help.raw help_small.raw \
 	home.raw info.raw keybinding.raw language.raw lcd.raw lock.raw mainmenue.raw \
-	mp3.raw mute.raw network.raw numericpad.raw ok.raw power.raw radar.pal \
+	mounted.raw mp3.raw mute.raw network.raw not_mounted.raw numericpad.raw ok.raw power.raw radar.pal \
 	radar0.raw radar1.raw radar2.raw radar3.raw radar4.raw radar5.raw radar6.raw \
 	radar7.raw radar8.raw radar9.raw radiomode.pal radiomode.raw recording.raw \
 	rot.raw scan.pal scan.raw settings.raw shell.raw shutdown.pal shutdown.raw softupdate.raw \
