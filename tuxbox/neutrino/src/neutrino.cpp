@@ -3751,12 +3751,19 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		if( ( !g_InfoViewer->is_visible ) && data )
 			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
-		t_channel_id old_id = channelList->getActiveChannel_ChannelID();
-
+		static t_channel_id old_parent_id;
+		t_channel_id old_id=g_Zapit->getCurrentServiceID();
+		if (data)
+			old_parent_id = channelList->getActiveChannel_ChannelID();
 		channelsInit();
 
-		if((old_id == 0) || (!(channelList->adjustToChannelID(old_id))))
-			channelList->zapTo(0);
+		// if a neutrino channel for current channel_id cannot be found (eg tuned to a sub service)
+		// adjust to old main channel
+		if (!channelList->adjustToChannelID(old_id) && !data)
+			channelList->adjustToChannelID(old_parent_id);
+
+		if(old_id == 0)
+			channelList->zapTo(0);		
 	}
 	else if( msg == NeutrinoMessages::EVT_BOUQUETSCHANGED )			// EVT_BOUQUETSCHANGED: initiated by zapit ; EVT_SERVICESCHANGED: no longer used
 	{
