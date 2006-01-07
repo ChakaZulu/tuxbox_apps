@@ -126,7 +126,7 @@ void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
 
 	uint8_t    color;
 	fb_pixel_t bgcolor;
-	
+
 	if (selected)
 	{
 		color   = COL_MENUCONTENTSELECTED;
@@ -213,7 +213,7 @@ int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 				}
 			}
 		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown)
 		{
 			selected+=listmaxshow;
 			if (selected>getItemCount()-1)
@@ -221,7 +221,7 @@ int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown)
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=getItemCount()-1;
