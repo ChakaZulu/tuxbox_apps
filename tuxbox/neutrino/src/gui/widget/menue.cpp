@@ -261,7 +261,7 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 
 			if ( msg <= CRCInput::RC_MaxRC )
 			{
-				// recalculate timeout für RC-Tasten
+				// recalculate timeout fr RC-Tasten
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 			}
 		}
@@ -565,7 +565,7 @@ int CMenuOptionChooser::paint( bool selected )
 	}
 	else if (CRCInput::isNumeric(directKey))
 	{
-		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(x + 15, y+ height, height, CRCInput::getKeyName(directKey), color, height);
 	}
 
 
@@ -848,7 +848,7 @@ int CMenuForwarder::paint(bool selected)
 	}
 	else if (CRCInput::isNumeric(directKey))
 	{
-		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(x + 10, y+ height, height, CRCInput::getKeyName(directKey), color, height);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(x + 15, y+ height, height, CRCInput::getKeyName(directKey), color, height);
 	}
 
 	if (option_text != NULL)
