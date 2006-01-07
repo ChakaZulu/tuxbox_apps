@@ -2,7 +2,7 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Timerliste by Zwen
-	
+
 	Homepage: http://dbox.cyberphoria.org/
 
 	Kommentar:
@@ -85,7 +85,7 @@ private:
 	int* iType;
 	time_t* stopTime;
 public:
-	CTimerListNewNotifier( int* Type, time_t* time,CMenuItem* a1, CMenuItem* a2, 
+	CTimerListNewNotifier( int* Type, time_t* time,CMenuItem* a1, CMenuItem* a2,
 			       CMenuItem* a3, CMenuItem* a4, CMenuItem* a5, CMenuItem* a6,char* d)
 	{
 		m1 = a1;
@@ -211,14 +211,14 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			timerlist[selected].announceTime -= 120; // 2 more mins for rec timer
 			Timer->modifyTimerAPid(timerlist[selected].eventID,timerlist[selected].apids);
-			Timer->modifyRecordTimerEvent(timerlist[selected].eventID, timerlist[selected].announceTime, 
-						      timerlist[selected].alarmTime, 
+			Timer->modifyRecordTimerEvent(timerlist[selected].eventID, timerlist[selected].announceTime,
+						      timerlist[selected].alarmTime,
 						      timerlist[selected].stopTime, timerlist[selected].eventRepeat,
 						      timerlist[selected].repeatCount,timerlist[selected].recordingDir);
-		} else 
-		{	
-			Timer->modifyTimerEvent(timerlist[selected].eventID, timerlist[selected].announceTime, 
-						timerlist[selected].alarmTime, 
+		} else
+		{
+			Timer->modifyTimerEvent(timerlist[selected].eventID, timerlist[selected].announceTime,
+						timerlist[selected].alarmTime,
 						timerlist[selected].stopTime, timerlist[selected].eventRepeat,
 						timerlist[selected].repeatCount);
 		}
@@ -238,24 +238,24 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		void *data=NULL;
 		if(timerNew.eventType == CTimerd::TIMER_STANDBY)
 			data=&(timerNew.standby_on);
-		else if(timerNew.eventType==CTimerd::TIMER_NEXTPROGRAM || 
+		else if(timerNew.eventType==CTimerd::TIMER_NEXTPROGRAM ||
 			timerNew.eventType==CTimerd::TIMER_ZAPTO ||
 			timerNew.eventType==CTimerd::TIMER_RECORD)
 		{
 			if (strcmp(timerNew_channel_name, "---")==0)
 				return menu_return::RETURN_REPAINT;
-			if (timerNew.eventType==CTimerd::TIMER_RECORD) 
+			if (timerNew.eventType==CTimerd::TIMER_RECORD)
 			{
 				recinfo.epgID=0;
 				recinfo.epg_starttime=0;
 				recinfo.channel_id=timerNew.channel_id;
 				strcpy(recinfo.apids,"");
 				recinfo.recordingSafety = false;
-				
+
 				timerNew.announceTime-= 120; // 2 more mins for rec timer
 				strncpy(recinfo.recordingDir,timerNew.recordingDir,sizeof(recinfo.recordingDir));
 				data = &recinfo;
-			} else 
+			} else
 				data= &eventinfo;
 		}
 		else if(timerNew.eventType==CTimerd::TIMER_REMIND)
@@ -268,16 +268,16 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		}
 		if(timerNew.eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
 			Timer->getWeekdaysFromStr((int *)&timerNew.eventRepeat, m_weekdaysStr);
-		
+
 		if (Timer->addTimerEvent(timerNew.eventType,data,timerNew.announceTime,timerNew.alarmTime,
 					 timerNew.stopTime,timerNew.eventRepeat,timerNew.repeatCount,false) == -1)
 		{
 			bool forceAdd = askUserOnTimerConflict(timerNew.announceTime,timerNew.stopTime);
- 
+
 			if (forceAdd)
 			{
 				Timer->addTimerEvent(timerNew.eventType,data,timerNew.announceTime,timerNew.alarmTime,
-						     timerNew.stopTime, timerNew.eventRepeat,timerNew.repeatCount,true);		
+						     timerNew.stopTime, timerNew.eventRepeat,timerNew.repeatCount,true);
 			}
 		}
 		return menu_return::RETURN_EXIT;
@@ -543,7 +543,7 @@ void CTimerList::paintItem(int pos)
 	{
 		real_width-=15; //scrollbar
 	}
-	
+
 	frameBuffer->paintBoxRel(x,ypos, real_width, 2*fheight, bgcolor);
 	if(liststart+pos<timerlist.size())
 	{
@@ -741,7 +741,7 @@ std::string CTimerList::convertTimerRepeat2String(const CTimerd::CTimerEventRepe
 		case CTimerd::TIMERREPEAT_FOURWEEKLY         : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_FOURWEEKLY        );
 		case CTimerd::TIMERREPEAT_MONTHLY            : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_MONTHLY           );
 		case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION : return g_Locale->getText(LOCALE_TIMERLIST_REPEAT_BYEVENTDESCRIPTION);
-		default: 
+		default:
 			if(rep >=CTimerd::TIMERREPEAT_WEEKDAYS)
 			{
 				int weekdays = (((int)rep) >> 9);
@@ -779,7 +779,7 @@ std::string CTimerList::convertChannelId2String(const t_channel_id id) // UTF-8
 	std::string name = Zapit.getChannelName(id); // UTF-8
 	if (name.empty())
 		name = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
-   
+
 	return name;
 }
 
@@ -828,6 +828,8 @@ int CTimerList::modifyTimer()
 	timerSettings.addItem(GenericMenuSeparator);
 	timerSettings.addItem(GenericMenuBack);
 	timerSettings.addItem(GenericMenuSeparatorLine);
+	timerSettings.addItem(new CMenuForwarder(LOCALE_TIMERLIST_SAVE, true, NULL, this, "modifytimer", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+	timerSettings.addItem(GenericMenuSeparatorLine);
 
 	char type[80];
 	strcpy(type, ZapitTools::UTF8_to_Latin1(convertTimerType2String(timer->eventType)).c_str()); // UTF8, UTF8 -> Latin1
@@ -849,7 +851,7 @@ int CTimerList::modifyTimer()
 	timer->eventRepeat = (CTimerd::CTimerEventRepeat)(((int)timer->eventRepeat) & 0x1FF);
 	CStringInput timerSettings_weekdays(LOCALE_TIMERLIST_WEEKDAYS, m_weekdaysStr, 7, LOCALE_TIMERLIST_WEEKDAYS_HINT_1, LOCALE_TIMERLIST_WEEKDAYS_HINT_2, "-X");
 	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_TIMERLIST_WEEKDAYS, ((int)timer->eventRepeat) >= (int)CTimerd::TIMERREPEAT_WEEKDAYS, m_weekdaysStr, &timerSettings_weekdays );
-	CIntInput timerSettings_repeatCount(LOCALE_TIMERLIST_REPEATCOUNT, (long&)timer->repeatCount,3, LOCALE_TIMERLIST_REPEATCOUNT_HELP1, LOCALE_TIMERLIST_REPEATCOUNT_HELP1);
+	CIntInput timerSettings_repeatCount(LOCALE_TIMERLIST_REPEATCOUNT, (long&)timer->repeatCount,3, LOCALE_TIMERLIST_REPEATCOUNT_HELP1, LOCALE_TIMERLIST_REPEATCOUNT_HELP2);
 
 	CMenuForwarder *m5 = new CMenuForwarder(LOCALE_TIMERLIST_REPEATCOUNT, timer->eventRepeat != (int)CTimerd::TIMERREPEAT_ONCE ,timerSettings_repeatCount.getValue() , &timerSettings_repeatCount);
 
@@ -857,9 +859,9 @@ int CTimerList::modifyTimer()
 	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timer->eventRepeat, TIMERLIST_REPEAT_OPTIONS, TIMERLIST_REPEAT_OPTION_COUNT, true, &notifier);
 
 	CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timer->recordingDir,g_settings.network_nfs_recordingdir);
-	if (!recDirs.hasItem()) 
+	if (!recDirs.hasItem())
 	{
-		printf("[CTimerList] warning: no network devices available\n");									
+		printf("[CTimerList] warning: no network devices available\n");
 	}
 	bool recDirEnabled = (timer->eventType == CTimerd::TIMER_RECORD) && (g_settings.recording_type == RECORDING_FILE);
 	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,recDirEnabled,timer->recordingDir, &recDirs);
@@ -876,8 +878,6 @@ int CTimerList::modifyTimer()
 		CMenuForwarder *m6 = new CMenuForwarder(LOCALE_TIMERLIST_APIDS, true, timer->apids, &timerSettings_apids );
 		timerSettings.addItem( m6);
 	}
-
-	timerSettings.addItem(new CMenuForwarder(LOCALE_TIMERLIST_SAVE, true, NULL, this, "modifytimer"));
 
 	return timerSettings.exec(this,"");
 }
@@ -968,13 +968,13 @@ int CTimerList::newTimer()
 	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_CHANNEL, false, timerNew_channel_name, &mm);
 
 	CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timerNew.recordingDir,g_settings.network_nfs_recordingdir);
-	if (!recDirs.hasItem()) 
+	if (!recDirs.hasItem())
 	{
-		printf("[CTimerList] warning: no network devices available\n");									
+		printf("[CTimerList] warning: no network devices available\n");
 	}
 	CMenuForwarder* m7 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,false,timerNew.recordingDir, &recDirs);
-	
-	CMenuOptionChooser* m8 = new CMenuOptionChooser(LOCALE_TIMERLIST_STANDBY, &timerNew_standby_on, TIMERLIST_STANDBY_OPTIONS, TIMERLIST_STANDBY_OPTION_COUNT, false); 
+
+	CMenuOptionChooser* m8 = new CMenuOptionChooser(LOCALE_TIMERLIST_STANDBY, &timerNew_standby_on, TIMERLIST_STANDBY_OPTIONS, TIMERLIST_STANDBY_OPTION_COUNT, false);
 
 	CStringInputSMS timerSettings_msg(LOCALE_TIMERLIST_MESSAGE, timerNew.message, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
 	CMenuForwarder *m9 = new CMenuForwarder(LOCALE_TIMERLIST_MESSAGE, false, timerNew.message, &timerSettings_msg );
@@ -983,11 +983,11 @@ int CTimerList::newTimer()
 	CPluginChooser plugin_chooser(LOCALE_TIMERLIST_PLUGIN, CPlugins::P_TYPE_SCRIPT | CPlugins::P_TYPE_TOOL, timerNew.pluginName);
 	CMenuForwarder *m10 = new CMenuForwarder(LOCALE_TIMERLIST_PLUGIN, false, timerNew.pluginName, &plugin_chooser);
 
-	
+
 	CTimerListNewNotifier notifier2((int *)&timerNew.eventType,
 					&timerNew.stopTime,m2,m6,m8,m9,m10,m7,
 					timerSettings_stopTime.getValue());
-	CMenuOptionChooser* m0 = new CMenuOptionChooser(LOCALE_TIMERLIST_TYPE, (int *)&timerNew.eventType, TIMERLIST_TYPE_OPTIONS, TIMERLIST_TYPE_OPTION_COUNT, true, &notifier2); 
+	CMenuOptionChooser* m0 = new CMenuOptionChooser(LOCALE_TIMERLIST_TYPE, (int *)&timerNew.eventType, TIMERLIST_TYPE_OPTIONS, TIMERLIST_TYPE_OPTION_COUNT, true, &notifier2);
 
 	timerSettings.addItem( m0);
 	timerSettings.addItem( m1);
@@ -1002,7 +1002,7 @@ int CTimerList::newTimer()
 	timerSettings.addItem( m10);
 	timerSettings.addItem(new CMenuForwarder(LOCALE_TIMERLIST_SAVE, true, NULL, this, "newtimer"));
 	strcpy(timerSettings_stopTime.getValue (), "                ");
-	
+
 	int ret=timerSettings.exec(this,"");
 
 	// delete dynamic created objects
@@ -1020,11 +1020,11 @@ bool askUserOnTimerConflict(time_t announceTime, time_t stopTime)
 	CTimerdClient Timer;
 	CTimerd::TimerList overlappingTimers = Timer.getOverlappingTimers(announceTime,stopTime);
 	//printf("[CTimerdClient] attention\n%d\t%d\t%d conflicts with:\n",timerNew.announceTime,timerNew.alarmTime,timerNew.stopTime);
-	
+
 	std::string timerbuf = g_Locale->getText(LOCALE_TIMERLIST_OVERLAPPING_TIMER);
 	timerbuf += "\n";
 	for (CTimerd::TimerList::iterator it = overlappingTimers.begin();
-	     it != overlappingTimers.end();it++) 
+	     it != overlappingTimers.end();it++)
 	{
 		timerbuf += CTimerList::convertTimerType2String(it->eventType);
 		timerbuf += " (";
@@ -1047,7 +1047,7 @@ bool askUserOnTimerConflict(time_t announceTime, time_t stopTime)
 		strftime(at,20,"%d.%m. %H:%M",annTime);
 		timerbuf += at;
 		timerbuf += " - ";
-		
+
 		char st[25] = {0};
 		struct tm *sTime = localtime(&(it->stopTime));
 		strftime(st,20,"%d.%m. %H:%M",sTime);
@@ -1058,6 +1058,6 @@ bool askUserOnTimerConflict(time_t announceTime, time_t stopTime)
 	//printf("message:\n%s\n",timerbuf.c_str());
 	// todo: localize message
 	//g_Locale->getText(TIMERLIST_OVERLAPPING_MESSAGE);
-	
+
 	return (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO,timerbuf,CMessageBox::mbrNo,CMessageBox::mbNo|CMessageBox::mbYes) == CMessageBox::mbrYes);
 }
