@@ -84,15 +84,15 @@ CStringInput::CStringInput(const neutrino_locale_t Name, std::string* Value, int
 	init();
 }
 
-CStringInput::~CStringInput() 
+CStringInput::~CStringInput()
 {
-	if (valueString != NULL) 
+	if (valueString != NULL)
 	{
 		delete[] value;
 	}
 }
 
-void CStringInput::init() 
+void CStringInput::init()
 {
 	width = (size*20)+40;
 
@@ -120,7 +120,7 @@ void CStringInput::init()
 	x = ((720-width)>>1);
 	y = ((500-height)>>1);
 	selected = 0;
-	
+
 }
 
 
@@ -135,7 +135,7 @@ void CStringInput::NormalKeyPressed(const neutrino_msg_t key)
 			selected++;
 			paintChar(selected - 1);
 		}
-		
+
 		paintChar(selected);
 	}
 }
@@ -167,7 +167,7 @@ void CStringInput::keyRedPressed()
 			selected++;
 			paintChar(selected - 1);
 		}
-  
+
 		paintChar(selected);
 	}
 }
@@ -321,7 +321,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 				selected++;
 				paintChar(selected - 1);
 			}
-  
+
 			paintChar(selected);
 		}
 		else if (msg==CRCInput::RC_up)
@@ -450,7 +450,7 @@ void CStringInput::paintChar(int pos, const char c)
 
 	uint8_t    color;
 	fb_pixel_t bgcolor;
-	
+
 	if (pos == selected)
 	{
 		color   = COL_MENUCONTENTSELECTED;
@@ -480,15 +480,15 @@ CStringInputSMS::CStringInputSMS(const neutrino_locale_t Name, char* Value, int 
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
 	last_digit = -1;				// no key pressed yet
-	const char CharList[10][10] = { "0 -/()<>=",	// 9 characters
+	const char CharList[10][11] = { "0 -_/()<>=",	// 9 characters
 					"1.,:!?\\",
-					"abc2ä",
+					"abc2",
 					"def3",
 					"ghi4",
 					"jkl5",
-					"mno6ö",
-					"pqrs7ß",
-					"tuv8ü",
+					"mno6",
+					"pqrs7",
+					"tuv8",
 					"wxyz9" };
 
 	for (int i = 0; i < 10; i++)
@@ -498,7 +498,7 @@ CStringInputSMS::CStringInputSMS(const neutrino_locale_t Name, char* Value, int 
 			if (strchr(Valid_Chars, CharList[i][k]) != NULL)
 				Chars[i][j++] = CharList[i][k];
 		if (j == 0)
-			Chars[i][j++] = ' ';	// prevent empty char lists 
+			Chars[i][j++] = ' ';	// prevent empty char lists
 		arraySizes[i] = j;
 	}
 
@@ -574,7 +574,7 @@ void CStringInputSMS::keyDownPressed()
 	last_digit = -1;
 
 	int lastselected = selected;
-	
+
 	selected = size - 1;
 
 	while (value[selected] == ' ')
@@ -586,7 +586,7 @@ void CStringInputSMS::keyDownPressed()
 
 	if (selected < (size - 1))
 		selected++;
-	
+
 	paintChar(lastselected);
 	paintChar(selected);
 }
