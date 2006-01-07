@@ -480,7 +480,7 @@ CStringInputSMS::CStringInputSMS(const neutrino_locale_t Name, char* Value, int 
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
 	last_digit = -1;				// no key pressed yet
-	const char CharList[10][11] = { "0 -_/()<>=",	// 9 characters
+	const char CharList[10][11] = { "0 -_/()<>=",	// 10 characters
 					"1.,:!?\\",
 					"abc2",
 					"def3",
