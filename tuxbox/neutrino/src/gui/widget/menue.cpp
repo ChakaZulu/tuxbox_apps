@@ -261,7 +261,7 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 
 			if ( msg <= CRCInput::RC_MaxRC )
 			{
-				// recalculate timeout fr RC-Tasten
+				// recalculate timeout für RC-Tasten
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 			}
 		}
