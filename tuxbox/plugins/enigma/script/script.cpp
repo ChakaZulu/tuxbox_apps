@@ -1,7 +1,7 @@
 /*
 	Script - Enigma Plugin
 
-	Simple plugin that just calls a script
+	Plugin that calls scripts and displays the output on screen
 	
 	License: GPL
 
@@ -29,15 +29,19 @@
 #include <lib/gui/eprogress.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/guiactions.h>
+#include <lib/system/info.h>
+#include <lib/gui/emessage.h>
+
+#define NUM_SCRIPTS 10
 
 class eScriptWindow: public eWindow
 {
 	eButton *bt_scripts[10];
+	eLabel *label;
 	void runScript(int i);
-	void onCancel();
+	void initButtons();
 public:
 	eScriptWindow();
-	~eScriptWindow();
 };
 
 class eShowFile: public eWindow
@@ -51,7 +55,6 @@ class eShowFile: public eWindow
 	void updateScrollbar();
 public:
 	eShowFile();
-	~eShowFile();
 };
 
 extern "C" int plugin_exec( PluginParam *par )
@@ -68,35 +71,63 @@ eScriptWindow::eScriptWindow(): eWindow(1)
 	cmove(ePoint(100, 100));
 	cresize(eSize(520, 376));
 	setText((_("Script Plugin")));
-	
-	for(int i=1; i<10; i++)
-	{
-		bt_scripts[i-1]=new eButton(this);
-		bt_scripts[i-1]->move(ePoint(10, 10+((i-1)*32)));
-		bt_scripts[i-1]->resize(eSize(clientrect.width()-20, 30));
-		bt_scripts[i-1]->setShortcut(eString().sprintf("%d",i));
-		bt_scripts[i-1]->setShortcutPixmap(eString().sprintf("%d",i));
-		bt_scripts[i-1]->loadDeco();
-		bt_scripts[i-1]->setText(eString().sprintf("Script %d (/var/bin/script%.02d.sh)", i, i));
-		CONNECT_1_0(bt_scripts[i-1]->selected, eScriptWindow::runScript, i);
-	}
-	
-	setFocus(bt_scripts[0]);
+	initButtons();
 }
 
-eScriptWindow::~eScriptWindow()
+void eScriptWindow::initButtons()
 {
+	bool empty=true;
+	int j = 1;
+	eString filename;
+
+	for(int i=1; i<NUM_SCRIPTS; i++)
+	{
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+			filename.sprintf("/usr/bin/script%.02d.sh", i);
+		else 
+			filename.sprintf("/var/bin/script%.02d.sh", i);
+		if (access(filename.c_str(), 0) == 0)
+		{
+			bt_scripts[j-1]=new eButton(this);
+			bt_scripts[j-1]->move(ePoint(10, 10+((j-1)*32)));
+			bt_scripts[j-1]->resize(eSize(clientrect.width()-20, 30));
+			bt_scripts[j-1]->setShortcut(eString().sprintf("%d",i));
+			bt_scripts[j-1]->setShortcutPixmap(eString().sprintf("%d",j));
+			bt_scripts[j-1]->loadDeco();
+			bt_scripts[j-1]->setText(eString().sprintf("Script #%d (%s)", j, filename.c_str()));
+			CONNECT_1_0(bt_scripts[j-1]->selected, eScriptWindow::runScript, i);
+			if (empty)
+				empty = false;
+			++j;
+		}
+	}
+
+	if (empty)
+	{	
+		label = new eLabel(this);
+		label->setFlags(RS_WRAP);
+   		label->setText((_("No Scripts Found!\n\nYou can place script01.sh - script09.sh in /var/bin (/usr/bin on the Dreambox 7020)")));
+   		label->move(ePoint(10, 10));
+   		label->resize(eSize(clientrect.width()-20, 100));
+   		label->loadDeco();
+	}	
+	else 
+		setFocus(bt_scripts[0]);
 }
 
 void eScriptWindow::runScript(int i)
 {
-	system(eString().sprintf("/var/bin/script%.02d.sh > /tmp/script.out 2>&1", i).c_str());
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+		system(eString().sprintf("/usr/bin/script%.02d.sh > /var/tmp/script.out 2>&1", i).c_str());
+	else
+		system(eString().sprintf("/var/bin/script%.02d.sh > /var/tmp/script.out 2>&1", i).c_str());
 	hide();
 	eShowFile execute;
 	execute.show();
 	execute.exec();
 	execute.hide();
 	show();
+	setFocus(bt_scripts[0]);
 }
 
 
@@ -125,7 +156,7 @@ eWindow(1)
    eString strview;
    char buf[256];
 
-   FILE *f = fopen("/tmp/script.out", "rt");
+   FILE *f = fopen("/var/tmp/script.out", "rt");
    if (f)
    {
       int len = 0;
@@ -138,7 +169,7 @@ eWindow(1)
       fclose(f);
    }
 
-   unlink("/tmp/script.out");
+   ::unlink("/var/tmp/script.out");
 
 
    label = new eLabel(visible);
@@ -209,7 +240,3 @@ void eShowFile::updateScrollbar()
       total = 0;
 }
 
-eShowFile::~eShowFile()
-{
-
-}
