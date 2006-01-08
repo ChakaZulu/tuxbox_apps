@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.40  2006/01/08 22:34:41  robspr1
+ * - show correct unread-mails notification
+ *
  * Revision 1.39  2005/12/12 19:00:04  robspr1
  * -bugfix USER/SUSER and PASS/SPASS extraction
  *
@@ -4207,7 +4210,7 @@ void ShowLCD(int mails)
  * NotifyUser
  ******************************************************************************/
 
-void NotifyUser(int mails)
+void NotifyUser(int newmails, int oldmails)
 {
 	int loop;
 	struct sockaddr_in SockAddr;
@@ -4217,8 +4220,26 @@ void NotifyUser(int mails)
 	char *http_cmd3 = "GET /control/message?nmsg=";
 	char *http_cmd4 = "GET /control/message?popup=";
 	static int sum = 0;
+	int mails = newmails + oldmails;
 
-	// write notify-file
+	// first check if we have to remove old notifications
+	
+	if(newmails == 0)									// we do not have new mails
+	{
+		if((typeflag != 1) && (oldmails == 0))			// we have no unread mails
+		{
+			unlink(LCKFILE);							// clear LCD output
+			unlink(NOTIFILE);							// clear notify-file
+			return;
+		}
+		if(typeflag == 1)								// no further processing in this mode
+		{
+			return;
+		}
+	}
+	
+	// write notify-file (used by other programs to know the number of unread messages)
+	
 	    if(unlink(NOTIFILE))
    		{
 	   		sum = mails;
@@ -4249,6 +4270,13 @@ void NotifyUser(int mails)
 			ShowLCD(mails);
 		}
 
+	// further notification only if new mails have be detected
+	
+		if(newmails == 0)
+		{
+			return;
+		}
+		
 	// audio notify
 
 		if(audio == 'Y')
@@ -4413,7 +4441,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.39 $";
+	char cvs_revision[] = "$Revision: 1.40 $";
 	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -4678,10 +4706,8 @@ int main(int argc, char **argv)
 					inPOPCmd = 0;
 				}
 
-				if(mailstatus)
-				{
-					NotifyUser(mailstatus + unread_mailstatus);
-				}
+				NotifyUser(mailstatus,unread_mailstatus);
+
 			}
 
 			sleep(intervall * 60);
