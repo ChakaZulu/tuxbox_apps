@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.13 2005/12/26 14:11:48 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.14 2006/01/08 20:20:08 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -23,7 +23,7 @@
 #include <plugin.h>
 #include "movieplayer.h"
 
-#define REL "Movieplayer Plugin, Version 0.6.1"
+#define REL "Movieplayer Plugin, Version 0.6.2"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -138,17 +138,17 @@ void eSCGui::loadList(int mode, eString pathfull)
 		case VCD:
 			tmp2 = "VCD";  
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
-			tmp3 = "vcd:" + cddrive + "@1:1";
+			tmp3 = "vcd:" + cddrive + "@1:1-";
 			break;
 		case SVCD:
 			tmp2 = "SVCD"; 
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
-			tmp3 = "vcd:" + cddrive + "@1:1";
+			tmp3 = "vcd:" + cddrive + "@1:1-";
 			break;
 		case DVD:
 			tmp2 = "DVD";  
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
-			tmp3 = "dvdsimple:" + cddrive + "@1:1";
+			tmp3 = "dvdsimple:" + cddrive + "@1:1-";
 			break;
 	}
 
