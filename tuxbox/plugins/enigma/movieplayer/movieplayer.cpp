@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.14 2006/01/08 20:20:08 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.15 2006/01/08 21:25:57 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -23,7 +23,7 @@
 #include <plugin.h>
 #include "movieplayer.h"
 
-#define REL "Movieplayer Plugin, Version 0.6.2"
+#define REL "Movieplayer Plugin, Version 0.7.0"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -138,17 +138,17 @@ void eSCGui::loadList(int mode, eString pathfull)
 		case VCD:
 			tmp2 = "VCD";  
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
-			tmp3 = "vcd:" + cddrive + "@1:1-";
+			tmp3 = "vcd:";
 			break;
 		case SVCD:
 			tmp2 = "SVCD"; 
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
-			tmp3 = "vcd:" + cddrive + "@1:1-";
+			tmp3 = "vcd:";
 			break;
 		case DVD:
 			tmp2 = "DVD";  
 			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
-			tmp3 = "dvdsimple:" + cddrive + "@1:1-";
+			tmp3 = "dvdsimple:";
 			break;
 	}
 
@@ -216,10 +216,13 @@ void eSCGui::loadList(int mode, eString pathfull)
 		if (cddrive[cddrive.length() - 1] == ':' && cddrive.length() == 2) 
 			pathfull = cddrive + "/";
 
-		a.Filename = _("Play");
-		a.Fullname = tmp3;
-		a.Filetype = FILES;
-		playList.push_back(a);
+		for (int i = 1; i <= 20; i++)
+		{
+			a.Filename = "Play chapter " + eString().sprintf("%02d", i);
+			a.Fullname = tmp3 + cddrive + "@1:" + eString().sprintf("%02d", i) + "-";
+			a.Filetype = FILES;
+			playList.push_back(a);
+		}
 	}
 	
 	viewList();
