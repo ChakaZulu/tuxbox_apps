@@ -37,7 +37,6 @@
 		<input type="text" name="drive1" value="#DRIVE#" readonly>
 		&nbsp;Title:&nbsp;
 		<select name="title1" size="1">
-			<option value="0">None</option>
 			<option value="1">1</option>
 			<option value="2">2</option>
 			<option value="3">3</option>
@@ -66,7 +65,6 @@
 		</select>
 		&nbsp;Chapter:&nbsp;
 		<select name="chapter1" size="1">
-			<option value="0">None</option>
 			<option value="1">1</option>
 			<option value="2">2</option>
 			<option value="3">3</option>
@@ -99,7 +97,6 @@
 		<input type="text" name="drive2" value="#DRIVE#" readonly>
 		&nbsp;Title:&nbsp;
 		<select name="title2" size="1">
-			<option value="0">None</option>
 			<option value="1">1</option>
 			<option value="2">2</option>
 			<option value="3">3</option>
@@ -128,7 +125,6 @@
 		</select>
 		&nbsp;Chapter:&nbsp;
 		<select name="chapter2" size="1">
-			<option value="0">None</option>
 			<option value="1">1</option>
 			<option value="2">2</option>
 			<option value="3">3</option>
