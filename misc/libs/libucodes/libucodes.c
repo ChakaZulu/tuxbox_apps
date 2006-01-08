@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.27 2004/08/22 15:37:43 obi Exp $
+  $Id: libucodes.c,v 1.28 2006/01/08 20:50:18 carjay Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.28  2006/01/08 20:50:18  carjay
+  add ucode found in Freesat CI-220 firmware
+
   Revision 1.27  2004/08/22 15:37:43  obi
   cam_01_02_106F
 
@@ -86,6 +89,7 @@ static struct Sucode ucodes[] =
 	{"c31dc570cf941afb6fc4813f561aa378","avia600vb018"},
 	{"6a748fb28000738cafeb9e27443ac623","avia600vb022"},
 	{"f8577c6a7056590ca5847520d81339fc","avia600vb028"},
+	{"8c6b24c751d9ce3106a01f4b7f7f26d4","avia600vd030"},
 	{"53c5bc4081dfadab9935ad256e4d6239","ucode_0000"},
 	{"936b13b9018b2541036a7f20e76648ff","ucode_0001"},
 	{"0f610f3e0f1f2b56fc2bb4007700836b","ucode_000C"},
