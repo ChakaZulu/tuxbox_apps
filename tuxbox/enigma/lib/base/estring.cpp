@@ -323,6 +323,7 @@ static inline unsigned int doVideoTexSuppl(int c1, int c2)
 				case 0x61: return 259;				case 0x41: return 258;
 				case 0x67: return 287;				case 0x47: return 286;
 				case 0x75: return 365;				case 0x55: return 364;
+				case 0x73: return 353;				case 0x53: return 352;
 				default: return 0;
 			}
 		case 0xC7: // dot above
