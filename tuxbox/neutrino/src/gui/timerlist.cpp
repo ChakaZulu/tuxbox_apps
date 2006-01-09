@@ -866,10 +866,11 @@ int CTimerList::modifyTimer()
 	bool recDirEnabled = (timer->eventType == CTimerd::TIMER_RECORD) && (g_settings.recording_type == RECORDING_FILE);
 	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,recDirEnabled,timer->recordingDir, &recDirs);
 
-
+	timerSettings.addItem(GenericMenuSeparatorLine);
 	timerSettings.addItem(m3);
 	timerSettings.addItem(m4);
 	timerSettings.addItem(m5);
+	timerSettings.addItem(GenericMenuSeparatorLine);
 	timerSettings.addItem(m6);
 
 	CStringInput timerSettings_apids(LOCALE_TIMERLIST_APIDS, timer->apids , 25, LOCALE_APIDS_HINT_1, LOCALE_APIDS_HINT_2, "0123456789ABCDEF ");
