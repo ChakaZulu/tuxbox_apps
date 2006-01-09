@@ -901,6 +901,8 @@ int CTimerList::newTimer()
 	timerSettings.addItem(GenericMenuSeparator);
 	timerSettings.addItem(GenericMenuBack);
 	timerSettings.addItem(GenericMenuSeparatorLine);
+	timerSettings.addItem(new CMenuForwarder(LOCALE_TIMERLIST_SAVE, true, NULL, this, "newtimer", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+	timerSettings.addItem(GenericMenuSeparatorLine);
 
 	CDateInput timerSettings_alarmTime(LOCALE_TIMERLIST_ALARMTIME, &(timerNew.alarmTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder *m1 = new CMenuForwarder(LOCALE_TIMERLIST_ALARMTIME, true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
@@ -992,15 +994,16 @@ int CTimerList::newTimer()
 	timerSettings.addItem( m0);
 	timerSettings.addItem( m1);
 	timerSettings.addItem( m2);
+	timerSettings.addItem(GenericMenuSeparatorLine);
 	timerSettings.addItem( m3);
 	timerSettings.addItem( m4);
 	timerSettings.addItem( m5);
+	timerSettings.addItem(GenericMenuSeparatorLine);
 	timerSettings.addItem( m6);
 	timerSettings.addItem( m7);
 	timerSettings.addItem( m8);
 	timerSettings.addItem( m9);
 	timerSettings.addItem( m10);
-	timerSettings.addItem(new CMenuForwarder(LOCALE_TIMERLIST_SAVE, true, NULL, this, "newtimer"));
 	strcpy(timerSettings_stopTime.getValue (), "                ");
 
 	int ret=timerSettings.exec(this,"");
