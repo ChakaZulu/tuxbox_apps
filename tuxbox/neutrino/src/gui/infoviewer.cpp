@@ -996,6 +996,7 @@ void CInfoViewer::killTitle()
 #ifndef SKIP_CA_STATUS
 void CInfoViewer::showIcon_CA_Status() const
 {
+	if (g_settings.show_ca_status)
 	frameBuffer->paintIcon( ( CA_Status)?"ca.raw":"fta.raw", BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2), BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 }
 
