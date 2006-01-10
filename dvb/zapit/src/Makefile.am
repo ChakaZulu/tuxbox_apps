@@ -43,4 +43,4 @@ installdir = $(CONFIGDIR)/zapit
 
 install_DATA = 
 
-AM_CPPFLAGS = -DSKIP_CA_STATUS
+#AM_CPPFLAGS = -DSKIP_CA_STATUS
