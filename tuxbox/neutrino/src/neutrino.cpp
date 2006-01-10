@@ -548,6 +548,11 @@ int CNeutrinoApp::loadSetup()
 	        parentallocked = true;
 	        checkParentallocked.close();
 	}
+
+	//experimental_setup
+	g_settings.show_experimental_settings = configfile.getBool("show_experimental_settings", true );
+	g_settings.show_ca_status = configfile.getBool("show_ca_status", false );
+	
 	//video
 	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
 	g_settings.video_csync = configfile.getInt32( "video_csync", 0 );
@@ -895,6 +900,10 @@ void CNeutrinoApp::saveSetup()
 		dprintf(DEBUG_NORMAL, "error while saving scan-settings!\n");
 	}
 
+        //experimental_setup
+	configfile.setBool("show_experimental_settings", g_settings.show_experimental_settings );
+	configfile.setBool("show_ca_status", g_settings.show_ca_status );
+	                
 	//video
 	configfile.setInt32( "video_Format", g_settings.video_Format );
 	configfile.setInt32( "video_csync", g_settings.video_csync );
@@ -1394,7 +1403,8 @@ void CNeutrinoApp::SetupTiming()
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
 				CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
 				CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
-				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &audiopl_picSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer)
+				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &audiopl_picSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer,
+				CMenuWidget &experimentalSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem(GenericMenuSeparator);
@@ -1470,6 +1480,14 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, CRCInput::RC_0));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, CRCInput::RC_yellow , NEUTRINO_ICON_BUTTON_YELLOW ));
+
+#define EXPERIMENTAL_SETTINGS_OPTION_COUNT 1
+	if (g_settings.show_experimental_settings){
+		if (EXPERIMENTAL_SETTINGS_OPTION_COUNT > 0 )
+			mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_EXPERIMENTAL      , true, NULL, &experimentalSettings     , NULL, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ));
+		else
+			mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_EXPERIMENTAL      , false, NULL, &experimentalSettings     , NULL, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ));
+	}
 }
 
 #define SCANTS_BOUQUET_OPTION_COUNT 5
@@ -1951,6 +1969,15 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE, &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
 }
 
+void CNeutrinoApp::InitExperimentalSettings(CMenuWidget &experimentalSettings)
+{
+        dprintf(DEBUG_DEBUG, "init experimentalsettings\n");
+        experimentalSettings.addItem(GenericMenuSeparator);
+        experimentalSettings.addItem(GenericMenuBack);
+        experimentalSettings.addItem(GenericMenuSeparator);
+	experimentalSettings.addItem( new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, (int*) &g_settings.show_ca_status, true, 0, 1, 0, 0, LOCALE_OPTIONS_OFF, "show CA Status"));
+					
+}
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 {
@@ -3280,6 +3307,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 420);
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 400);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    experimentalSettings        (LOCALE_EXPERIMENTALSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
@@ -3287,7 +3315,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
-					 service, fontSettings, audioplPicSettings, streamingSettings, moviePlayer);
+					 service, fontSettings, audioplPicSettings, streamingSettings, moviePlayer, experimentalSettings);
 
 	//service
 	InitServiceSettings(service, scanSettings);
@@ -3300,6 +3328,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
    	//misc Setup
 	InitMiscSettings(miscSettings);
+
+	// experimental Setup
+	InitExperimentalSettings(experimentalSettings);
 
 	//audio Setup
 	InitAudioSettings(audioSettings, audioSetupNotifier);
