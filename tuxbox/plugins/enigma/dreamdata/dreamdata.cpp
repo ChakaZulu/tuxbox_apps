@@ -35,10 +35,10 @@
 #endif
 
 #define MROUTEDCONF	"/tmp/mrouted.conf"
-#define CONFIGFILE0	"/etc/dreamdata.xml"
-#define CONFIGFILE1	"/var/tuxbox/config/dreamdata.xml"
+#define CONFIGFILE1	CONFIGDIR"/dreamdata.xml"
+#define CONFIGFILE0	"/var/tuxbox/config/dreamdata.xml"
 #define SCANPIC0	"/var/tuxbox/config/enigma/pictures/scan.mvi"
-#define SCANPIC1	"/share/tuxbox/enigma/pictures/scan.mvi"
+#define SCANPIC1	DATADIR"/enigma/pictures/scan.mvi"
 
 extern "C" int plugin_exec( PluginParam *par );
 

@@ -438,6 +438,8 @@ ConfigParser::ConfigParser()
 {	XMLTreeParser * parser;
 
 	FILE *in = fopen("/var/tuxbox/config/weather.xml", "rt");
+	if (!in)
+		in = fopen(CONFIGDIR"/weather.xml", "rt");
 	
 	if(in)
 	{	parser = new XMLTreeParser("ISO-8859-1");
