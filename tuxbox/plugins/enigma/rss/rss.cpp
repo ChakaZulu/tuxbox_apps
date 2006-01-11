@@ -82,9 +82,7 @@ rssMain::rssMain(): eWindow(1)
 
 	setFocus(theList);
 
-	if theConfigParser.parse("/var/tuxbox/config/feeds.xml")
-		theConfigParser.parse(CONFIGDIR"/feeds.xml")
-	//theConfigParser.parse("/var/tuxbox/plugins/feeds.xml");
+	theConfigParser.parse("/var/tuxbox/config/feeds.xml");
 
 	theRssFeed = new rssFeed();
 	theRssFeed->hide();
