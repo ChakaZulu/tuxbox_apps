@@ -82,7 +82,8 @@ rssMain::rssMain(): eWindow(1)
 
 	setFocus(theList);
 
-	theConfigParser.parse("/var/tuxbox/config/feeds.xml");
+	if (!theConfigParser.parse("/var/tuxbox/config/feeds.xml"))
+		theConfigParser.parse(CONFIGDIR"/feeds.xml");
 
 	theRssFeed = new rssFeed();
 	theRssFeed->hide();
@@ -256,7 +257,7 @@ void ConfigParser::save(ConfigItem i)
 {	configItems.push_back(i);
 }
 
-void ConfigParser::parse(eString file)
+int ConfigParser::parse(eString file)
 {	XMLTreeParser * parser;
 	FILE *in = fopen(file.c_str(), "rt");
 
@@ -273,7 +274,7 @@ void ConfigParser::parse(eString file)
 		                msg.show();     msg.exec();     msg.hide();
 				delete parser;
 				parser = NULL;
-				return;
+				return 0;
 			}
 		} 
 		while (!done);
@@ -284,12 +285,12 @@ void ConfigParser::parse(eString file)
 		if(!root)
 		{	eMessageBox msg(_("Configfile parse error"), _("User Abort"), eMessageBox::iconWarning|eMessageBox::btOK);
 		        msg.show();     msg.exec();     msg.hide();	
-			return;
+			return 0;
 		}
 		if ( strcmp( root->GetType(), "feeds") ) 
 		{	eMessageBox msg(_("Invalid configfile"), _("User Abort"), eMessageBox::iconWarning|eMessageBox::btOK);
 		        msg.show();     msg.exec();     msg.hide();
-	                return;
+	                return 0;
 	        }
 	
 		ConfigItem thisItem;
@@ -312,11 +313,14 @@ void ConfigParser::parse(eString file)
 
 
 		delete parser;
+		return 1;
 	}
 	else
 	{	eMessageBox msg(_("Config file not found"), _("User Abort"), eMessageBox::iconWarning|eMessageBox::btOK);
 		msg.show();     msg.exec();     msg.hide();
+		return 0;
 	}
+	return 0;
 }
 
 rssDetail::rssDetail(const char *title, const char *desc) : eWindow(0)

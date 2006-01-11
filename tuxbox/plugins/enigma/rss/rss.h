@@ -86,7 +86,7 @@ class ConfigParser : public Object
 
 public:
 	std::list<ConfigItem> configItems;
-	void parse(eString file);
+	int parse(eString file);
 	void save(ConfigItem i);
 };
 
