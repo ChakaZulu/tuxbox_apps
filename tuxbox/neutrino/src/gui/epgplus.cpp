@@ -1401,7 +1401,122 @@ int EpgPlus::exec
 			if ( msg <= CRCInput::RC_MaxRC )
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-			if ( (msg == (neutrino_msg_t)g_settings.key_channelList_pageup) 
+//new pageupdown
+			if ( ((msg == (neutrino_msg_t)g_settings.key_channelList_pagedown) 
+         ||(msg == CRCInput::RC_yellow)) && (g_settings.enable_new_pageupdown)
+         )
+			{
+	if (this->channelList->getSize() > 0 ) {
+        switch (this->currentSwapMode)
+        {
+          case SwapMode_ByPage:
+            {      
+              int selectedChannelEntryIndex = this->selectedChannelEntry->index;
+				      selectedChannelEntryIndex    += this->maxNumberOfDisplayableEntries;
+
+				      if (selectedChannelEntryIndex > this->channelList->getSize() - 1)
+					      selectedChannelEntryIndex = 0;
+
+				      this->createChannelEntries(selectedChannelEntryIndex);
+
+				      this->paint();
+            }
+            break;
+          case SwapMode_ByBouquet:
+            {
+              unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
+					    #ifdef DEBUG_
+						    std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
+					    #endif
+
+              ++currentBouquetNumber;
+
+              if (currentBouquetNumber == bouquetList->Bouquets.size())
+                currentBouquetNumber = 0;
+
+              CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
+					    #ifdef DEBUG_
+                std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
+					    #endif
+
+              if (bouquet->channelList->getSize() > 0)
+              {
+                // select first channel of bouquet
+					      #ifdef DEBUG_
+                  std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
+					      #endif
+
+                bouquetList->activateBouquet(currentBouquetNumber);
+
+                this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
+                this->createChannelEntries(this->channelListStartIndex);
+
+      					this->paint();
+              }
+            }
+	
+            break;
+         }
+			}
+			}
+			else if ( ((msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
+              ||(msg == CRCInput::RC_green)) && (g_settings.enable_new_pageupdown)
+              )
+			{
+	if (this->channelList->getSize() > 0 ) {
+        switch (this->currentSwapMode)
+        {
+          case SwapMode_ByPage:
+            {      
+				      int selectedChannelEntryIndex = this->selectedChannelEntry->index;
+				      selectedChannelEntryIndex    -= this->maxNumberOfDisplayableEntries;
+
+				      if (selectedChannelEntryIndex < 0)
+					      selectedChannelEntryIndex = this->channelList->getSize() - 1;
+
+				      this->createChannelEntries(selectedChannelEntryIndex);
+
+				      this->paint();
+            }
+            break;
+          case SwapMode_ByBouquet:
+				    {
+              unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
+					    #ifdef DEBUG_
+						    std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
+					    #endif
+
+              --currentBouquetNumber;
+
+              if (currentBouquetNumber == unsigned(-1))
+                currentBouquetNumber = bouquetList->Bouquets.size() - 1;
+
+              CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
+					    #ifdef DEBUG_
+                std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
+					    #endif
+
+              if (bouquet->channelList->getSize() > 0)
+              {
+                // select first channel of bouquet
+					      #ifdef DEBUG_
+                  std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
+					      #endif
+
+                bouquetList->activateBouquet(currentBouquetNumber);
+
+                this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
+                this->createChannelEntries(this->channelListStartIndex);
+
+      					this->paint();
+              }
+            }
+            break;
+        }
+			}
+			}
+// new pageupdown end
+			else if ( (msg == (neutrino_msg_t)g_settings.key_channelList_pageup) 
          ||(msg == CRCInput::RC_yellow)
          )
 			{
@@ -1598,6 +1713,7 @@ int EpgPlus::exec
 			}
 			else if ( msg == CRCInput::RC_up )
 			{
+				if (this->channelList->getSize() > 0 ) {
 				#ifdef DEBUG_
 					std::cout << "RC_up" << std::endl;
 				#endif
@@ -1636,9 +1752,11 @@ int EpgPlus::exec
 					this->paintChannelEntry(prevSelectedChannelEntryIndex - this->channelListStartIndex);
 					this->paintChannelEntry(selectedChannelEntryIndex     - this->channelListStartIndex);
 				}
+				}
 			}
 			else if ( msg == CRCInput::RC_down )
 			{
+				if (this->channelList->getSize() > 0 ) {
 				int selectedChannelEntryIndex     = this->selectedChannelEntry->index;
 				int prevSelectedChannelEntryIndex = this->selectedChannelEntry->index;
 
@@ -1661,14 +1779,14 @@ int EpgPlus::exec
 					this->paintChannelEntry(prevSelectedChannelEntryIndex - this->channelListStartIndex);
 					this->paintChannelEntry(this->selectedChannelEntry->index - this->channelListStartIndex);
 				}
-
+				}
 			}
 			else if ((msg == CRCInput::RC_timeout                             ) ||
 				(msg == (neutrino_msg_t)g_settings.key_channelList_cancel))
 			{
 				loop=false;
 			}
-
+			
 			else if ( msg==CRCInput::RC_left )
 			{
         switch (this->currentViewMode)

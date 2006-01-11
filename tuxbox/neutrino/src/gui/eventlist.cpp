@@ -233,7 +233,61 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-		if (msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
+		//new page_up_down
+		if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup) && (g_settings.enable_new_pageupdown))
+		{
+//			if (!(evtlist.empty()))
+//			{
+				int step = 0;
+				int prev_selected = selected;
+
+				step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+				selected -= step;
+				if((prev_selected-step) < 0)		// because of uint
+				{
+					selected = evtlist.size() - 1;
+				}
+
+				paintItem(prev_selected - liststart);
+				unsigned int oldliststart = liststart;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				if(oldliststart!=liststart)
+				{
+					paint();
+				}
+				else
+				{
+					paintItem(selected - liststart);
+				}
+//			}
+		}
+		else if ((msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown) && (g_settings.enable_new_pageupdown))
+		{
+			int step = 0;
+			int prev_selected = selected;
+
+			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
+			selected += step;
+
+			if(selected >= evtlist.size())
+			{
+				selected = 0;
+			}
+
+			paintItem(prev_selected - liststart);
+			unsigned int oldliststart = liststart;
+			liststart = (selected/listmaxshow)*listmaxshow;
+			if(oldliststart!=liststart)
+			{
+				paint();
+			}
+			else
+			{
+				paintItem(selected - liststart);
+			}
+		}
+		//new page_up_down end
+		else if (msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
 			if (selected>evtlist.size()-1)

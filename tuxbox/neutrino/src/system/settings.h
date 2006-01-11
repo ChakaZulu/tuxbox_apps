@@ -43,6 +43,7 @@ struct SNeutrinoSettings
 	// experimental_setup
 	int show_experimental_settings;
 	int show_ca_status;
+	int enable_new_pageupdown;
 
 	//video
 	int video_Format;
