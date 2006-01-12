@@ -255,7 +255,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	{
 			//The current plugin is a script
 			FILE *f_script;
-			if ((access(plugin->sopath.c_str(), 0) == 0) && (f_script = popen(plugin->sopath.c_str(),"r")))
+			if ((access(plugin->sopath.c_str(), X_OK) == 0) && (f_script = popen(plugin->sopath.c_str(),"r")))
 			{
 				char output[1024];
 				eString scriptOutput;
