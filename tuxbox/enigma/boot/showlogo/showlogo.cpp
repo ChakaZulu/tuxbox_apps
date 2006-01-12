@@ -1,5 +1,5 @@
 /*
- * $Id: showlogo.cpp,v 1.4 2005/09/25 07:29:21 digi_casi Exp $
+ * $Id: showlogo.cpp,v 1.5 2006/01/12 20:27:31 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -52,6 +52,9 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <errno.h>
+#include <lib/base/estring.h>
+#include <lib/driver/eavswitch.h>
+#include <dbox/avs_core.h>
 
 // #define OLD_VBI
 
@@ -72,7 +75,85 @@
 #define VIDEO_CLEAR_SCREEN      3
 #define VIDEO_SET_FASTZAP	_IOW('o', 4, int)
 
+#define SAAIOGREG               1 /* read registers                             */
+#define SAAIOSINP               2 /* input control                              */
+#define SAAIOSOUT               3 /* output control                     */
+#define SAAIOSENC               4 /* set encoder (pal/ntsc)             */
+#define SAAIOSMODE              5 /* set mode (rgb/fbas/svideo/component) */
+#define SAAIOSWSS              10 /* set wide screen signaling data */
+
+#define SAA_MODE_RGB    0
+#define SAA_MODE_FBAS   1
+#define SAA_MODE_SVIDEO 2
+#define SAA_MODE_COMPONENT 3
+
 #define LOGO "/root/platform/kernel/bild"
+
+int getKey(eString findkey)
+{
+	int res = 1;
+	FILE *f = fopen("/var/tuxbox/config/enigma/config", "r");
+	if (f)
+	{
+		char buffer[1024];
+		while (1)
+		{
+			if (!fgets(buffer, 1024, f))
+				break;
+			if (strlen(buffer) < 4)
+				break;
+			if (buffer[0] == 'i')
+			{
+				eString b = eString(buffer);
+				b = b.right(b.length() - 2);
+				unsigned int pos = b.find("=");
+				eString key = b.left(pos);
+				if (key == findkey)
+				{
+					printf("found key = %s\n", key.c_str());
+					eString result = b.right(b.length() - pos - 1);
+					res = atoi(result.c_str());
+					break;
+				}
+			}
+		}
+		fclose(f);
+	}
+	printf("returning %d\n", res);
+	return res;
+}
+
+int setColorFormat(eAVColorFormat c)
+{
+	printf("setting color format %d\n", c);
+	int saafd = open("/dev/dbox/saa0", O_RDWR);
+	int avsfd = open("/dev/dbox/avs0", O_RDWR);
+	int arg=0;
+	switch (c)
+	{
+	case cfNull:
+		return -1;
+	default:
+	case cfCVBS:
+		arg=SAA_MODE_FBAS;
+		break;
+	case cfRGB:
+		arg=SAA_MODE_RGB;
+		break;
+	case cfYC:
+		arg=SAA_MODE_SVIDEO;
+		break;
+	case cfYPbPr:
+		arg=SAA_MODE_COMPONENT;
+		break;
+	}
+	int fblk = ((c == cfRGB) || (c == cfYPbPr)) ? 1 : 0;
+	ioctl(saafd, SAAIOSMODE, &arg);
+	ioctl(avsfd, AVSIOSFBLK, &fblk);
+	close(saafd);
+	close(avsfd);
+	return 0;
+}
 
 void displayIFrame(const char *frame, int len)
 {
@@ -121,6 +202,8 @@ void displayIFrameFromFile(const char *filename)
 int main(int argc, char **argv) 
 {
 	char *logo = (argc < 2) ? strdup(LOGO) : argv[1];
+	int colorformat = getKey("/elitedvb/video/colorformat");
+	setColorFormat((eAVColorFormat)colorformat);
 	displayIFrameFromFile(logo);
 	return EXIT_SUCCESS;
 }
