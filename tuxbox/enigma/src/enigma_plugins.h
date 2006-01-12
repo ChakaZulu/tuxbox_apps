@@ -10,7 +10,7 @@ class ePlugin: public eListBoxEntryText
 	friend class eZapPlugins;
 	friend class eListBox<ePlugin>;
 public:
-	int version;
+	int version, type;
 	eString depend, sopath, pluginname, requires, cfgname, desc, name;
 	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
 	int posx, posy, sizex, sizey;
@@ -70,6 +70,21 @@ public:
 	}
 	void start();
 	static ePluginThread *getInstance() { return instance; }
+};
+
+class eScriptOutputWindow: public eWindow
+{
+private:
+	eLabel *label;
+	eWidget *visible;
+	eProgress *scrollbar;
+	int pageHeight;
+	int total;
+	int lines;
+	int eventHandler(const eWidgetEvent &event);
+	void updateScrollbar();
+public:
+	eScriptOutputWindow(eString title, eString out);
 };
 
 #endif /* __enigma_plugins_h */

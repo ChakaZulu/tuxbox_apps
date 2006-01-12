@@ -109,9 +109,13 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 	needvtxtpid=(aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid.c_str()));
 	needoffsets=(aneedoffsets.isNull()?false:atoi(aneedoffsets.c_str()));
 	version=(apluginVersion.isNull()?0:atoi(apluginVersion.c_str()));
+	type=(atype.isNull()?0:atoi(atype.c_str()));
 	showpig=(apigon.isNull()?false:atoi(apigon.c_str()));
 
-	sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg
+	if (type == 3)
+		sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".sh";	// uarg
+	else 
+		sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg	
 
 	pluginname=eString(cfgfile).mid(eString(cfgfile).rfind('/')+1);
 
@@ -167,8 +171,13 @@ int eZapPlugins::find(bool ignore_requires)
 			if ( FileName.find(".cfg") != eString::npos )
 			{
 				eString cfgname=(PluginPath[i]+FileName).c_str();
-				int ttype=atoi(getInfo(cfgname.c_str(), "type").c_str());
-				if ((type == -1) || (type == ttype))
+				int current_type=atoi(getInfo(cfgname.c_str(), "type").c_str());
+				
+				//Scripts should be treated as normal plugins in this context
+				if (current_type == 3)
+					current_type = 2;
+					
+				if ((type == -1) || (type == current_type))
 				{
 					// do not add existing plugins twice
 					if ( exist.find(FileName) != exist.end() )
@@ -242,8 +251,41 @@ eString eZapPlugins::execPluginByName(const char* name, bool onlySearch)
 
 void eZapPlugins::execPlugin(ePlugin* plugin)
 {
-	ePluginThread *p = new ePluginThread(plugin, PluginPath, in_loop?this:0);
-	p->start();
+	if (plugin->type == 3)
+	{
+			//The current plugin is a script
+			FILE *f_script;
+			if ((access(plugin->sopath.c_str(), 0) == 0) && (f_script = popen(plugin->sopath.c_str(),"r")))
+			{
+				char output[1024];
+				eString scriptOutput;
+				while (fgets(output,1024,f_script))
+				{
+					scriptOutput += output;
+				}
+				pclose(f_script);
+				
+				eScriptOutputWindow wnd(plugin->sopath, scriptOutput);
+				hide();
+				wnd.show();
+				wnd.exec();
+				wnd.hide();
+				show();
+			}
+			else
+			{
+				eDebug("can't execute %s",plugin->sopath.c_str());
+				eMessageBox mbox(eString().sprintf(_("Cannot execute %s"), plugin->sopath.c_str()), (_("Error")), eMessageBox::iconError | eMessageBox::btOK, eMessageBox::btOK, 5);
+  	 			mbox.show();
+   				mbox.exec();
+   				mbox.hide();
+			}
+	}
+	else
+	{
+			ePluginThread *p = new ePluginThread(plugin, PluginPath, in_loop?this:0);
+			p->start();
+	}
 }
 
 void eZapPlugins::selected(ePlugin *plugin)
@@ -495,3 +537,93 @@ void ePluginThread::finalize_plugin()
 	}
 	delete this;
 }
+
+eScriptOutputWindow::eScriptOutputWindow(eString title, eString output):
+eWindow(1)
+{
+   cmove(ePoint(70, 85));
+   cresize(eSize(595, 450));
+
+   setText((_((title.isNull())?_("Script Output"):title.c_str())));
+
+   scrollbar = new eProgress(this);
+   scrollbar->setName("scrollbar");
+   scrollbar->setStart(0);
+   scrollbar->setPerc(100);
+   scrollbar->move(ePoint(width() - 30, 5));
+   scrollbar->resize(eSize(20, height() - 100));
+   scrollbar->setProperty("direction", "1");
+
+   visible = new eWidget(this);
+   visible->setName("visible");
+   visible->move(ePoint(10, 5));
+   visible->resize(eSize(width() - 40, height() - 100));
+
+   label = new eLabel(visible);
+   label->setFlags(RS_WRAP);
+   float lineheight = fontRenderClass::getInstance()->getLineHeight(label->getFont());
+   int lines = (int) (visible->getSize().height() / lineheight);
+   pageHeight = (int) (lines * lineheight);
+   visible->resize(eSize(visible->getSize().width(), pageHeight + (int) (lineheight / 6)));
+   label->resize(eSize(visible->getSize().width(), pageHeight * 16));
+
+   label->hide();
+   label->move(ePoint(0, 0));
+   label->setText(output);
+   updateScrollbar();
+   label->show();
+}
+
+int eScriptOutputWindow::eventHandler(const eWidgetEvent & event)
+{
+   switch (event.type)
+   {
+   case eWidgetEvent::evtAction:
+      if (total && event.action == &i_cursorActions->up)
+      {
+         ePoint curPos = label->getPosition();
+         if (curPos.y() < 0)
+         {
+            label->move(ePoint(curPos.x(), curPos.y() + pageHeight));
+            updateScrollbar();
+         }
+      }
+      else if (total && event.action == &i_cursorActions->down)
+      {
+         ePoint curPos = label->getPosition();
+         if ((total - pageHeight) >= abs(curPos.y() - pageHeight))
+         {
+            label->move(ePoint(curPos.x(), curPos.y() - pageHeight));
+            updateScrollbar();
+         }
+      }
+      else if (event.action == &i_cursorActions->cancel)
+         close(0);
+      else
+         break;
+      return 1;
+   default:
+      break;
+   }
+   return eWindow::eventHandler(event);
+}
+
+void eScriptOutputWindow::updateScrollbar()
+{
+   total = pageHeight;
+   int pages = 1;
+   while (total < label->getExtend().height())
+   {
+      total += pageHeight;
+      pages++;
+   }
+
+   int start = -label->getPosition().y() * 100 / total;
+   int vis = pageHeight * 100 / total;
+   scrollbar->setParams(start, vis);
+   scrollbar->show();
+   if (pages == 1)
+      total = 0;
+}
+
+
