@@ -553,7 +553,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.show_experimental_settings = configfile.getBool("show_experimental_settings", true );
 	g_settings.show_ca_status = configfile.getBool("show_ca_status", false );
 	g_settings.enable_new_pageupdown = configfile.getBool("enable_new_pageupdown", false );
-	
+
 	//video
 	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
 	g_settings.video_csync = configfile.getInt32( "video_csync", 0 );
@@ -905,7 +905,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool("show_experimental_settings", g_settings.show_experimental_settings );
 	configfile.setBool("show_ca_status", g_settings.show_ca_status );
 	configfile.setBool("enable_new_pageupdown", g_settings.enable_new_pageupdown );
-	                
+
 	//video
 	configfile.setInt32( "video_Format", g_settings.video_Format );
 	configfile.setInt32( "video_csync", g_settings.video_csync );
@@ -1402,11 +1402,24 @@ void CNeutrinoApp::SetupTiming()
 *                                                                                     *
 **************************************************************************************/
 
-void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
-				CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
-				CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
-				CMenuWidget &service, CMenuWidget &fontSettings, CMenuWidget &audiopl_picSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer,
-				CMenuWidget &experimentalSettings)
+void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
+								CMenuWidget &mainSettings,
+								CMenuWidget &audioSettings,
+								CMenuWidget &parentallockSettings,
+								CMenuWidget &networkSettings,
+								CMenuWidget &recordingSettings,
+								CMenuWidget &colorSettings,
+								CMenuWidget &lcdSettings,
+								CMenuWidget &keySettings,
+								CMenuWidget &videoSettings,
+								CMenuWidget &languageSettings,
+								CMenuWidget &miscSettings,
+								CMenuWidget &service,
+								CMenuWidget &fontSettings,
+								CMenuWidget &audiopl_picSettings,
+								CMenuWidget &streamingSettings,
+								CMenuWidget &moviePlayer,
+								CMenuWidget &experimentalSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem(GenericMenuSeparator);
@@ -1973,13 +1986,12 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 void CNeutrinoApp::InitExperimentalSettings(CMenuWidget &experimentalSettings)
 {
-        dprintf(DEBUG_DEBUG, "init experimentalsettings\n");
-        experimentalSettings.addItem(GenericMenuSeparator);
-        experimentalSettings.addItem(GenericMenuBack);
-        experimentalSettings.addItem(GenericMenuSeparator);
+	dprintf(DEBUG_DEBUG, "init experimentalsettings\n");
+	experimentalSettings.addItem(GenericMenuSeparator);
+	experimentalSettings.addItem(GenericMenuBack);
+	experimentalSettings.addItem(GenericMenuSeparator);
 	experimentalSettings.addItem( new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, (int*) &g_settings.show_ca_status, true, 0, 1, 0, 0, LOCALE_OPTIONS_OFF, "show CA Status"));
 	experimentalSettings.addItem( new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, (int*) &g_settings.enable_new_pageupdown, true, 0, 1, 0, 0, LOCALE_OPTIONS_OFF, "enable_new_pageupdown"));
-					
 }
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
@@ -3316,9 +3328,24 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD              , "streaming.raw"       );
 
-	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
-					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
-					 service, fontSettings, audioplPicSettings, streamingSettings, moviePlayer, experimentalSettings);
+	InitMainMenu(	mainMenu,
+					mainSettings,
+					audioSettings,
+					parentallockSettings,
+					networkSettings,
+					recordingSettings,
+					colorSettings,
+					lcdSettings,
+					keySettings,
+					videoSettings,
+					languageSettings,
+					miscSettings,
+					service,
+					fontSettings,
+					audioplPicSettings,
+					streamingSettings,
+					moviePlayer,
+					experimentalSettings);
 
 	//service
 	InitServiceSettings(service, scanSettings);

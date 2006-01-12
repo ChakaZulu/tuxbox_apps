@@ -178,11 +178,25 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitExperimentalSettings(CMenuWidget &);
 		void InitScanSettings(CMenuWidget &);
 		void InitParentalLockSettings(CMenuWidget &);
-		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings,
-		                  CMenuWidget &parentallockSettings, CMenuWidget &networkSettings, CMenuWidget &networkSettings,
-		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
-		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service, CMenuWidget &fontSettings,
-                        	  CMenuWidget &audioplPicSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer, CMenuWidget &experimentalSettings);
+		void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
+								CMenuWidget &mainSettings,
+								CMenuWidget &audioSettings,
+								CMenuWidget &parentallockSettings,
+								CMenuWidget &networkSettings,
+								CMenuWidget &recordingSettings,
+								CMenuWidget &colorSettings,
+								CMenuWidget &lcdSettings,
+								CMenuWidget &keySettings,
+								CMenuWidget &videoSettings,
+								CMenuWidget &languageSettings,
+								CMenuWidget &miscSettings,
+								CMenuWidget &service,
+								CMenuWidget &fontSettings,
+								CMenuWidget &audiopl_picSettings,
+								CMenuWidget &streamingSettings,
+								CMenuWidget &moviePlayer,
+								CMenuWidget &experimentalSettings);
+
 		void SetupTiming();
 		void SetupFrameBuffer();
 		void SelectAPID();
