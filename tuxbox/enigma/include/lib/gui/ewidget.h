@@ -12,6 +12,7 @@
 #include <lib/driver/rc.h>
 #include <lib/gui/actions.h>
 #include <lib/gui/decoration.h>
+#include <lib/system/econfig.h>
 
 class eWidgetEvent
 {
@@ -289,6 +290,14 @@ public:
 	 */
 	void cmove(const ePoint& position);
 	
+	 /**
+         * \brief vertically align the widget.
+         *
+         * Set the new vertical align position of the widget to center of the screen
+         */
+
+	void valign();
+
 	/**
 	 * \brief Returns the current size.
 	 *

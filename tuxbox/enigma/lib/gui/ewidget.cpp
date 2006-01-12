@@ -216,6 +216,21 @@ void eWidget::cmove(const ePoint& nposition)
 	move(ePoint(nposition.x()-clientrect.x(), nposition.y()-clientrect.y()));
 }
 
+void eWidget::valign()
+{ 
+	unsigned int v_tvsystem;
+	eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", v_tvsystem );
+	
+	if ( v_tvsystem==2)
+	{
+		move(ePoint((720-size.width())/2, (480-size.height())/2 )); // NTSC: 720x480
+  	}
+	else 
+	{
+		move(ePoint((720-size.width())/2, (576-size.height())/2)); // PAL: 720x576
+  	}
+}
+
 void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 {
 	if (getTLW()->just_showing)
