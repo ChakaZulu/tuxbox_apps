@@ -550,7 +550,7 @@ int CNeutrinoApp::loadSetup()
 	}
 
 	//experimental_setup
-	g_settings.show_experimental_settings = configfile.getBool("show_experimental_settings", true );
+	g_settings.show_experimental_settings = configfile.getBool("show_experimental_settings", false );
 	g_settings.show_ca_status = configfile.getBool("show_ca_status", false );
 
 	//video
