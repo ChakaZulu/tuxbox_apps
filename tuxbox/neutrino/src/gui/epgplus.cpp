@@ -174,11 +174,11 @@ EpgPlus::Settings::Settings
 Font* EpgPlus::Header::font      = NULL;
 int   EpgPlus::Header::color = 0;
 
-EpgPlus::Header::Header 
-  ( CFrameBuffer* frameBuffer 
-  , int x 
-  , int y 
-  , int width 
+EpgPlus::Header::Header
+  ( CFrameBuffer* frameBuffer
+  , int x
+  , int y
+  , int width
   )
 {
 	this->frameBuffer = frameBuffer;
@@ -218,7 +218,7 @@ void EpgPlus::Header::paint()
 		, this->color
 		, 0
 		, true
-		); 
+		);
 
 }
 
@@ -229,11 +229,11 @@ int EpgPlus::Header::getUsedHeight()
 
 Font* EpgPlus::TimeLine::fontTime = NULL;
 Font* EpgPlus::TimeLine::fontDate = NULL;
-int   EpgPlus::TimeLine::color1        = 0;     
-int   EpgPlus::TimeLine::color2        = 0;     
-int   EpgPlus::TimeLine::markColor     = 0;      
-int   EpgPlus::TimeLine::backMarkColor = 0;  
-int   EpgPlus::TimeLine::gridColor     = 0;      
+int   EpgPlus::TimeLine::color1        = 0;
+int   EpgPlus::TimeLine::color2        = 0;
+int   EpgPlus::TimeLine::markColor     = 0;
+int   EpgPlus::TimeLine::backMarkColor = 0;
+int   EpgPlus::TimeLine::gridColor     = 0;
 
 EpgPlus::TimeLine::TimeLine
   ( CFrameBuffer* frameBuffer
@@ -269,8 +269,8 @@ EpgPlus::TimeLine::~TimeLine()
 {
 }
 
-void EpgPlus::TimeLine::paint 
-  ( time_t startTime 
+void EpgPlus::TimeLine::paint
+  ( time_t startTime
   , int    duration
   )
 {
@@ -384,10 +384,10 @@ void EpgPlus::TimeLine::paintGrid()
 	}
 }
 
-void EpgPlus::TimeLine::paintMark 
-  ( time_t startTime 
-  , int    duration 
-  , int    x 
+void EpgPlus::TimeLine::paintMark
+  ( time_t startTime
+  , int    duration
+  , int    x
   , int    width
   )
 {
@@ -474,18 +474,18 @@ Font* EpgPlus::ChannelEventEntry::font = NULL;
 int   EpgPlus::ChannelEventEntry::separationLineHeight = 0;
 int   EpgPlus::ChannelEventEntry::separationLineColor  = 0;
 int   EpgPlus::ChannelEventEntry::normalColor1         = 0;
-int   EpgPlus::ChannelEventEntry::normalColor2         = 0;   
-int   EpgPlus::ChannelEventEntry::selectionColor       = 0; 
+int   EpgPlus::ChannelEventEntry::normalColor2         = 0;
+int   EpgPlus::ChannelEventEntry::selectionColor       = 0;
 int   EpgPlus::ChannelEventEntry::dummyEventColor      = 0;
 
-EpgPlus::ChannelEventEntry::ChannelEventEntry 
+EpgPlus::ChannelEventEntry::ChannelEventEntry
   ( const CChannelEvent* channelEvent
-  , CFrameBuffer* frameBuffer 
-  , TimeLine* timeLine 
-  , Footer* footer 
-  ,	int x 
-  , int y 
-  , int width 
+  , CFrameBuffer* frameBuffer
+  , TimeLine* timeLine
+  , Footer* footer
+  ,	int x
+  , int y
+  , int width
   )
 {
 	// copy neccessary?
@@ -518,7 +518,7 @@ EpgPlus::ChannelEventEntry::~ChannelEventEntry()
 {
 }
 
-bool EpgPlus::ChannelEventEntry::isSelected 
+bool EpgPlus::ChannelEventEntry::isSelected
   ( time_t selectedTime
   ) const
 {
@@ -530,8 +530,8 @@ bool EpgPlus::ChannelEventEntry::isSelected
 }
 
 
-void EpgPlus::ChannelEventEntry::paint 
-  ( bool isSelected 
+void EpgPlus::ChannelEventEntry::paint
+  ( bool isSelected
   , bool toggleColor
   )
 {
@@ -615,15 +615,15 @@ int   EpgPlus::ChannelEntry::separationLineColor  = 0;
 int   EpgPlus::ChannelEntry::selectionColor       = 0;
 int   EpgPlus::ChannelEntry::normalColor          = 0;
 
-EpgPlus::ChannelEntry::ChannelEntry 
-  ( const CChannelList::CChannel* channel 
-  , int index 
-  ,	CFrameBuffer* frameBuffer 
-  ,	Footer* footer 
+EpgPlus::ChannelEntry::ChannelEntry
+  ( const CChannelList::CChannel* channel
+  , int index
+  ,	CFrameBuffer* frameBuffer
+  ,	Footer* footer
   , CBouquetList* bouquetList
-  , int x 
-  , int y 
-  , int width 
+  , int x
+  , int y
+  , int width
   )
 {
 	this->channel = channel;
@@ -722,7 +722,7 @@ void EpgPlus::ChannelEntry::paint
             );
 
           bouquet = NULL;
-        
+
           break;
         }
       }
@@ -768,11 +768,11 @@ Font* EpgPlus::Footer::fontEventShortDescription = NULL;
 Font* EpgPlus::Footer::fontButtons = NULL;
 int   EpgPlus::Footer::color   = 0;
 
-EpgPlus::Footer::Footer 
-  ( CFrameBuffer* frameBuffer 
-  , int x 
-  , int y 
-  , int width 
+EpgPlus::Footer::Footer
+  ( CFrameBuffer* frameBuffer
+  , int x
+  , int y
+  , int width
   )
 {
 	this->frameBuffer = frameBuffer;
@@ -814,8 +814,8 @@ int EpgPlus::Footer::getUsedHeight()
          + fontButtons->getHeight();
 }
 
-void EpgPlus::Footer::paintEventDetails 
-  ( const std::string& description 
+void EpgPlus::Footer::paintEventDetails
+  ( const std::string& description
   , const std::string& shortDescription
   )
 {
@@ -940,7 +940,7 @@ EpgPlus::~EpgPlus()
   this->free();
 }
 
-void EpgPlus::createChannelEntries 
+void EpgPlus::createChannelEntries
   ( int selectedChannelEntryIndex
   )
 {
@@ -1150,7 +1150,7 @@ void EpgPlus::createChannelEntries
  					, yPosEventEntry
 					, (channelEvent.duration * this->eventsTableWidth)/this->duration + 1
  					);
- 
+
  				channelEntry->channelEventEntries.push_back(channelEventEntry);
  			}
 
@@ -1193,7 +1193,7 @@ void EpgPlus::init()
 
 		this->fonts[fontSetting->settingID] = font;
 	}
-  
+
 	for ( size_t i = 0
 	    ; i < NumberOfColorSettings
 	    ; ++i
@@ -1202,7 +1202,7 @@ void EpgPlus::init()
 		ColorSetting* colorSetting = &this->settings.colorSettings[i];
 		this->colors[colorSetting->settingID] = colorSetting->color;
 	}
-  
+
 	for ( size_t i = 0
 		  ; i < NumberOfSizeSettings
 	    ; ++i
@@ -1211,7 +1211,7 @@ void EpgPlus::init()
 		SizeSetting* sizeSetting = &this->settings.sizeSettings[i];
 		this->sizes[sizeSetting->settingID] = sizeSetting->size;
 	}
-  
+
 	Header::init();
 	TimeLine::init();
 	ChannelEntry::init();
@@ -1240,7 +1240,7 @@ void EpgPlus::init()
 	int timeLineHeight = TimeLine::getUsedHeight();
 	this->entryHeight  = ChannelEntry::getUsedHeight();
 	int footerHeight   = Footer::getUsedHeight();
-	
+
 	this->maxNumberOfDisplayableEntries = (this->usableScreenHeight - headerHeight - timeLineHeight - horGap1Height - horGap2Height - footerHeight)/this->entryHeight;
 
 	this->usableScreenHeight = headerHeight + timeLineHeight + horGap1Height + this->maxNumberOfDisplayableEntries*this->entryHeight + horGap2Height + footerHeight; // recalc deltaY
@@ -1287,7 +1287,7 @@ void EpgPlus::init()
 	this->verGap2X      = this->sliderX - verGap2Width;
 	this->verGap2Y      = this->channelsTableY;
 	this->verGap2Height = this->channelsTableHeight;
-  
+
 	this->channelListStartIndex = 0;
 	this->startTime = 0;
 	this->duration = settings.durationSetting; // 2h
@@ -1335,11 +1335,11 @@ void EpgPlus::free()
   }
 }
 
-int EpgPlus::exec 
-  ( CChannelList* channelList 
+int EpgPlus::exec
+  ( CChannelList* channelList
   , int selectedChannelIndex
   , CBouquetList* bouquetList
-  ) 
+  )
 {
 	this->channelList = channelList;
 	this->channelListStartIndex = int(selectedChannelIndex/maxNumberOfDisplayableEntries)*maxNumberOfDisplayableEntries;
@@ -1401,228 +1401,113 @@ int EpgPlus::exec
 			if ( msg <= CRCInput::RC_MaxRC )
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-//new pageupdown
-			if ( ((msg == (neutrino_msg_t)g_settings.key_channelList_pagedown) 
-         ||(msg == CRCInput::RC_yellow)) && (g_settings.enable_new_pageupdown)
-         )
+			if ( ((msg == (neutrino_msg_t)g_settings.key_channelList_pagedown) || (msg == CRCInput::RC_yellow)))
 			{
-	if (this->channelList->getSize() > 0 ) {
-        switch (this->currentSwapMode)
-        {
-          case SwapMode_ByPage:
-            {      
-              int selectedChannelEntryIndex = this->selectedChannelEntry->index;
-				      selectedChannelEntryIndex    += this->maxNumberOfDisplayableEntries;
+				if (this->channelList->getSize() > 0 )
+					{
+						switch (this->currentSwapMode)
+						{
+							case SwapMode_ByPage:
+							{
+								int selectedChannelEntryIndex = this->selectedChannelEntry->index;
+								selectedChannelEntryIndex    += this->maxNumberOfDisplayableEntries;
 
-				      if (selectedChannelEntryIndex > this->channelList->getSize() - 1)
-					      selectedChannelEntryIndex = 0;
+								if (selectedChannelEntryIndex > this->channelList->getSize() - 1)
+									selectedChannelEntryIndex = 0;
 
-				      this->createChannelEntries(selectedChannelEntryIndex);
+								this->createChannelEntries(selectedChannelEntryIndex);
+								this->paint();
+							}
+							break;
 
-				      this->paint();
-            }
-            break;
-          case SwapMode_ByBouquet:
-            {
-              unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
-					    #ifdef DEBUG_
-						    std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
-					    #endif
+							case SwapMode_ByBouquet:
+							{
+								unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
+#ifdef DEBUG_
+								std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
+#endif
 
-              ++currentBouquetNumber;
+								++currentBouquetNumber;
 
-              if (currentBouquetNumber == bouquetList->Bouquets.size())
-                currentBouquetNumber = 0;
+								if (currentBouquetNumber == bouquetList->Bouquets.size())
+									currentBouquetNumber = 0;
 
-              CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
-					    #ifdef DEBUG_
-                std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
-					    #endif
+								CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
+#ifdef DEBUG_
+								std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
+#endif
 
-              if (bouquet->channelList->getSize() > 0)
-              {
-                // select first channel of bouquet
-					      #ifdef DEBUG_
-                  std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
-					      #endif
+								if (bouquet->channelList->getSize() > 0)
+								{
+									// select first channel of bouquet
+#ifdef DEBUG_
+									std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
+#endif
 
-                bouquetList->activateBouquet(currentBouquetNumber);
+									bouquetList->activateBouquet(currentBouquetNumber);
 
-                this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
-                this->createChannelEntries(this->channelListStartIndex);
-
-      					this->paint();
-              }
-            }
-	
-            break;
-         }
+									this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
+									this->createChannelEntries(this->channelListStartIndex);
+									this->paint();
+								}
+							}
+							break;
+						}
+					}
 			}
-			}
-			else if ( ((msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
-              ||(msg == CRCInput::RC_green)) && (g_settings.enable_new_pageupdown)
-              )
+			else if (((msg == (neutrino_msg_t)g_settings.key_channelList_pageup) || (msg == CRCInput::RC_green)))
 			{
-	if (this->channelList->getSize() > 0 ) {
-        switch (this->currentSwapMode)
-        {
-          case SwapMode_ByPage:
-            {      
-				      int selectedChannelEntryIndex = this->selectedChannelEntry->index;
-				      selectedChannelEntryIndex    -= this->maxNumberOfDisplayableEntries;
+				if (this->channelList->getSize() > 0 )
+				{
+					switch (this->currentSwapMode)
+					{
+						case SwapMode_ByPage:
+						{
+							int selectedChannelEntryIndex = this->selectedChannelEntry->index;
+							selectedChannelEntryIndex    -= this->maxNumberOfDisplayableEntries;
 
-				      if (selectedChannelEntryIndex < 0)
-					      selectedChannelEntryIndex = this->channelList->getSize() - 1;
+							if (selectedChannelEntryIndex < 0)
+							selectedChannelEntryIndex = this->channelList->getSize() - 1;
 
-				      this->createChannelEntries(selectedChannelEntryIndex);
+							this->createChannelEntries(selectedChannelEntryIndex);
+							this->paint();
+						}
+						break;
 
-				      this->paint();
-            }
-            break;
-          case SwapMode_ByBouquet:
-				    {
-              unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
-					    #ifdef DEBUG_
-						    std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
-					    #endif
+						case SwapMode_ByBouquet:
+						{
+							unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
+#ifdef DEBUG_
+							std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
+#endif
 
-              --currentBouquetNumber;
+							--currentBouquetNumber;
 
-              if (currentBouquetNumber == unsigned(-1))
-                currentBouquetNumber = bouquetList->Bouquets.size() - 1;
+							if (currentBouquetNumber == unsigned(-1))
+								currentBouquetNumber = bouquetList->Bouquets.size() - 1;
 
-              CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
-					    #ifdef DEBUG_
-                std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
-					    #endif
+							CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
+#ifdef DEBUG_
+							std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
+#endif
 
-              if (bouquet->channelList->getSize() > 0)
-              {
-                // select first channel of bouquet
-					      #ifdef DEBUG_
-                  std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
-					      #endif
+							if (bouquet->channelList->getSize() > 0)
+							{
+								// select first channel of bouquet
+#ifdef DEBUG_
+								std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
+#endif
 
-                bouquetList->activateBouquet(currentBouquetNumber);
+								bouquetList->activateBouquet(currentBouquetNumber);
 
-                this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
-                this->createChannelEntries(this->channelListStartIndex);
-
-      					this->paint();
-              }
-            }
-            break;
-        }
-			}
-			}
-// new pageupdown end
-			else if ( (msg == (neutrino_msg_t)g_settings.key_channelList_pageup) 
-         ||(msg == CRCInput::RC_yellow)
-         )
-			{
-        switch (this->currentSwapMode)
-        {
-          case SwapMode_ByPage:
-            {      
-              int selectedChannelEntryIndex = this->selectedChannelEntry->index;
-				      selectedChannelEntryIndex    += this->maxNumberOfDisplayableEntries;
-
-				      if (selectedChannelEntryIndex > this->channelList->getSize() - 1)
-					      selectedChannelEntryIndex = 0;
-
-				      this->createChannelEntries(selectedChannelEntryIndex);
-
-				      this->paint();
-            }
-            break;
-          case SwapMode_ByBouquet:
-            {
-              unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
-					    #ifdef DEBUG_
-						    std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
-					    #endif
-
-              ++currentBouquetNumber;
-
-              if (currentBouquetNumber == bouquetList->Bouquets.size())
-                currentBouquetNumber = 0;
-
-              CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
-					    #ifdef DEBUG_
-                std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
-					    #endif
-
-              if (bouquet->channelList->getSize() > 0)
-              {
-                // select first channel of bouquet
-					      #ifdef DEBUG_
-                  std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
-					      #endif
-
-                bouquetList->activateBouquet(currentBouquetNumber);
-
-                this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
-                this->createChannelEntries(this->channelListStartIndex);
-
-      					this->paint();
-              }
-            }
-            break;
-         }
-			}
-			else if ( (msg == (neutrino_msg_t)g_settings.key_channelList_pagedown)
-              ||(msg == CRCInput::RC_green)
-              )
-			{
-        switch (this->currentSwapMode)
-        {
-          case SwapMode_ByPage:
-            {      
-				      int selectedChannelEntryIndex = this->selectedChannelEntry->index;
-				      selectedChannelEntryIndex    -= this->maxNumberOfDisplayableEntries;
-
-				      if (selectedChannelEntryIndex < 0)
-					      selectedChannelEntryIndex = this->channelList->getSize() - 1;
-
-				      this->createChannelEntries(selectedChannelEntryIndex);
-
-				      this->paint();
-            }
-            break;
-          case SwapMode_ByBouquet:
-				    {
-              unsigned int currentBouquetNumber = bouquetList->getActiveBouquetNumber();
-					    #ifdef DEBUG_
-						    std::cout << "ViewMode_Bouquets " << currentBouquetNumber << std::endl;
-					    #endif
-
-              --currentBouquetNumber;
-
-              if (currentBouquetNumber == unsigned(-1))
-                currentBouquetNumber = bouquetList->Bouquets.size() - 1;
-
-              CBouquet* bouquet = bouquetList->Bouquets[currentBouquetNumber];
-					    #ifdef DEBUG_
-                std::cout << "bouquet->unique_key " << bouquet->unique_key << " " << bouquet->channelList->getName() << std::endl;
-					    #endif
-
-              if (bouquet->channelList->getSize() > 0)
-              {
-                // select first channel of bouquet
-					      #ifdef DEBUG_
-                  std::cout << "(*bouquet->channelList)[0]->number " << (*bouquet->channelList)[0]->number << std::endl;
-					      #endif
-
-                bouquetList->activateBouquet(currentBouquetNumber);
-
-                this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
-                this->createChannelEntries(this->channelListStartIndex);
-
-      					this->paint();
-              }
-            }
-            break;
-        }
+								this->channelListStartIndex = (*bouquet->channelList)[0]->number - 1;
+								this->createChannelEntries(this->channelListStartIndex);
+								this->paint();
+							}
+            			}
+            			break;
+        			}
+				}
 			}
 			else if (msg == (neutrino_msg_t) CRCInput::RC_red)
 			{
@@ -1664,7 +1549,7 @@ int EpgPlus::exec
         CMenuWidget menuWidgetOptions(LOCALE_EPGPLUS_OPTIONS, "features.raw", 500);
 /*        menuWidgetOptions.addItem
           ( new CMenuForwarder
-            ( LOCALE_EPGPLUS_SETTINGS 
+            ( LOCALE_EPGPLUS_SETTINGS
             , true
             , NULL
             , new MenuTargetSettings(this)
@@ -1786,7 +1671,7 @@ int EpgPlus::exec
 			{
 				loop=false;
 			}
-			
+
 			else if ( msg==CRCInput::RC_left )
 			{
         switch (this->currentViewMode)
@@ -1870,7 +1755,7 @@ int EpgPlus::exec
 					    }
 				    }
             break;
-          
+
           case ViewMode_Scroll:
 				    {
 					    #ifdef DEBUG_
@@ -2044,7 +1929,7 @@ void EpgPlus::loadSettings
       It->second.size  = configFile.getInt32 (std::string(setting2StringConverter[It->first]) + ".Size" , It->second.size );
     }
   }
-  
+
   for ( ColorSettings::iterator It = settings.colorSettings.begin()
       ; It != settings.colorSettings.end()
       ; ++It
@@ -2055,7 +1940,7 @@ void EpgPlus::loadSettings
       It->second.color  = configFile.getInt32(setting2StringConverter[It->first], It->second.color);
     }
   }
-  
+
   for ( SizeSettings::iterator It = settings.sizeSettings.begin()
       ; It != settings.sizeSettings.end()
       ; ++It
@@ -2086,7 +1971,7 @@ void EpgPlus::saveSettings
       configFile.setInt32 (std::string(setting2StringConverter[It->first]) + ".Size" , It->second.size );
     }
   }
-  
+
   for ( ColorSettings::const_iterator It = settings.colorSettings.begin()
       ; It != settings.colorSettings.end()
       ; ++It
@@ -2097,7 +1982,7 @@ void EpgPlus::saveSettings
       configFile.setInt32(setting2StringConverter[It->first], It->second.color);
     }
   }
-  
+
   for ( SizeSettings::const_iterator It = settings.sizeSettings.begin()
       ; It != settings.sizeSettings.end()
       ; ++It
@@ -2120,9 +2005,9 @@ void EpgPlus::hide()
 	, this->usableScreenWidth
 	, this->usableScreenHeight
 	);
-} 
+}
 
-void EpgPlus::paintChannelEntry 
+void EpgPlus::paintChannelEntry
   ( int position
   )
 {
@@ -2151,8 +2036,8 @@ void EpgPlus::paintChannelEntry
 
 }
 
-std::string EpgPlus::getTimeString 
-  ( const time_t& time 
+std::string EpgPlus::getTimeString
+  ( const time_t& time
   , const std::string& format
   )
 {
@@ -2260,7 +2145,7 @@ void EpgPlus::paint()
 //  -- EPG+ Menue Handler Class
 //  -- to be used for calls from Menue
 //  -- (2004-03-05 rasc)
-// 
+//
 
 int CEPGplusHandler::exec(CMenuTarget* parent, const std::string &actionKey)
 {
@@ -2359,23 +2244,23 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 			{
 				int id = -1;
 				CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
-				if (recDirs.hasItem()) 
+				if (recDirs.hasItem())
 				{
 					epgPlus->hide();
 					recDirs.exec(NULL,"");
 					epgPlus->paint();
 				} else
 				{
-					printf("[CEventList] no network devices available\n");					
+					printf("[CEventList] no network devices available\n");
 				}
 				if (id != -1)
 					recDir = g_settings.network_nfs_local_dir[id];
-				else 
+				else
 					recDir = NULL;
 			}
 			if (recDir != NULL)
 			{
-				
+
 				if (timerdclient.addRecordTimerEvent
 				    ( this->epgPlus->selectedChannelEntry->channel->channel_id
 				      , (*It)->channelEvent.startTime
@@ -2387,8 +2272,8 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 				      , true
 				      , recDir
 				      , false
-				      ) == -1) 
-				{	
+				      ) == -1)
+				{
 					if(askUserOnTimerConflict((*It)->channelEvent.startTime - (ANNOUNCETIME + 120),
 								  (*It)->channelEvent.startTime + (*It)->channelEvent.duration))
 					{
@@ -2408,7 +2293,7 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 					ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 				}
 			}
-			
+
 		}
 		else
 			printf("timerd not available\n");
@@ -2473,12 +2358,12 @@ EpgPlus::MenuOptionChooserSwitchSwapMode::~MenuOptionChooserSwitchSwapMode()
   {
 	  switch (this->epgPlus->currentSwapMode)
     {
-      case SwapMode_ByPage: 
-        buttonLabels[1].locale = LOCALE_EPGPLUS_PAGE_DOWN; 
-        buttonLabels[2].locale = LOCALE_EPGPLUS_PAGE_UP; 
+      case SwapMode_ByPage:
+        buttonLabels[1].locale = LOCALE_EPGPLUS_PAGE_DOWN;
+        buttonLabels[2].locale = LOCALE_EPGPLUS_PAGE_UP;
         break;
-      case SwapMode_ByBouquet: 
-        buttonLabels[1].locale = LOCALE_EPGPLUS_PREV_BOUQUET; 
+      case SwapMode_ByBouquet:
+        buttonLabels[1].locale = LOCALE_EPGPLUS_PREV_BOUQUET;
         buttonLabels[2].locale = LOCALE_EPGPLUS_NEXT_BOUQUET;
         break;
     }
@@ -2493,7 +2378,7 @@ int EpgPlus::MenuOptionChooserSwitchSwapMode::exec
 {
   // change time out settings temporary
   g_settings.timing[SNeutrinoSettings::TIMING_MENU] = 1;
-        
+
   CMenuOptionChooser::exec(parent);
 
   return menu_return::RETURN_REPAINT;
@@ -2533,9 +2418,9 @@ int EpgPlus::MenuOptionChooserSwitchViewMode::exec
 {
   // change time out settings temporary
   g_settings.timing[SNeutrinoSettings::TIMING_MENU] = 1;
-        
+
   CMenuOptionChooser::exec(parent);
-    
+
   return menu_return::RETURN_REPAINT;
 }
 /*
@@ -2681,7 +2566,7 @@ int EpgPlus::MenuWidgetFontSetting::MenuTargetSelectFontName::exec
   CFileBrowser fileBrowser;
   CFileFilter fileFilter;
   fileFilter.addFilter("ttf");
-  
+
   fileBrowser.Filter = &fileFilter;
   if (fileBrowser.exec(FONTDIR) == true)
   {

@@ -552,7 +552,6 @@ int CNeutrinoApp::loadSetup()
 	//experimental_setup
 	g_settings.show_experimental_settings = configfile.getBool("show_experimental_settings", true );
 	g_settings.show_ca_status = configfile.getBool("show_ca_status", false );
-	g_settings.enable_new_pageupdown = configfile.getBool("enable_new_pageupdown", false );
 
 	//video
 	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
@@ -901,10 +900,9 @@ void CNeutrinoApp::saveSetup()
 		dprintf(DEBUG_NORMAL, "error while saving scan-settings!\n");
 	}
 
-        //experimental_setup
+	//experimental_setup
 	configfile.setBool("show_experimental_settings", g_settings.show_experimental_settings );
 	configfile.setBool("show_ca_status", g_settings.show_ca_status );
-	configfile.setBool("enable_new_pageupdown", g_settings.enable_new_pageupdown );
 
 	//video
 	configfile.setInt32( "video_Format", g_settings.video_Format );
@@ -1991,7 +1989,6 @@ void CNeutrinoApp::InitExperimentalSettings(CMenuWidget &experimentalSettings)
 	experimentalSettings.addItem(GenericMenuBack);
 	experimentalSettings.addItem(GenericMenuSeparator);
 	experimentalSettings.addItem( new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, (int*) &g_settings.show_ca_status, true, 0, 1, 0, 0, LOCALE_OPTIONS_OFF, "show CA Status"));
-	experimentalSettings.addItem( new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, (int*) &g_settings.enable_new_pageupdown, true, 0, 1, 0, 0, LOCALE_OPTIONS_OFF, "enable_new_pageupdown"));
 }
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)

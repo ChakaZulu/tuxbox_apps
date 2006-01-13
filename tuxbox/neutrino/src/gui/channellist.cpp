@@ -84,7 +84,7 @@ CChannelList::CChannelList(const char * const Name, bool historyMode)
 	selected = 0;
 	// width = 560;
 	// height = 420 + (1 + 3 + 16 + 3);
-	
+
 	liststart = 0;
 	tuned=0xfffffff;
 	zapProtection = NULL;
@@ -246,35 +246,25 @@ int CChannelList::show()
 			selected = oldselected;
 			loop=false;
 		}
-		// new page_up_down
-		else if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup) && (g_settings.enable_new_pageupdown))
+		else if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup))
 		{
-//			if (!(chanlist.empty()))
-//			{
-				int step = 0;
-				int prev_selected = selected;
+			int step = 0;
+			int prev_selected = selected;
 
-				step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
-				selected -= step;
-				if((prev_selected-step) < 0)		// because of uint
-				{
-					selected = chanlist.size() - 1;
-				}
+			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+			selected -= step;
+			if((prev_selected-step) < 0)		// because of uint
+				selected = chanlist.size() - 1;
 
-				paintItem(prev_selected - liststart);
-				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				if(oldliststart!=liststart)
-				{
-					paint();
-				}
-				else
-				{
-					paintItem(selected - liststart);
-				}
-//			}
+			paintItem(prev_selected - liststart);
+			unsigned int oldliststart = liststart;
+			liststart = (selected/listmaxshow)*listmaxshow;
+			if(oldliststart!=liststart)
+				paint();
+			else
+				paintItem(selected - liststart);
 		}
-		else if ((msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown) && (g_settings.enable_new_pageupdown))
+		else if ((msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown))
 		{
 			int step = 0;
 			int prev_selected = selected;
@@ -283,76 +273,15 @@ int CChannelList::show()
 			selected += step;
 
 			if(selected >= chanlist.size())
-			{
 				selected = 0;
-			}
 
 			paintItem(prev_selected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
-			{
 				paint();
-			}
 			else
-			{
 				paintItem(selected - liststart);
-			}
-		}
-		// new_page_up_down end
-		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup )
-		{
-			selected+=listmaxshow;
-			if (selected>chanlist.size()-1)
-				selected=0;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
-		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown )
-		{
-			if ((int(selected)-int(listmaxshow))<0)
-				selected=chanlist.size()-1;
-			else
-				selected -= listmaxshow;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
-		}
-		else if ( msg == CRCInput::RC_up )
-		{
-			int prevselected=selected;
-			if(selected==0)
-			{
-				selected = chanlist.size()-1;
-			}
-			else
-				selected--;
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
-			{
-				paint();
-			}
-			else
-			{
-				paintItem(selected - liststart);
-			}
-		}
-		else if ( msg == CRCInput::RC_down )
-		{
-			int prevselected=selected;
-			selected = (selected+1)%chanlist.size();
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
-			{
-				paint();
-			}
-			else
-			{
-				paintItem(selected - liststart);
-			}
 		}
 		else if ( ( msg == (neutrino_msg_t)g_settings.key_bouquet_up ) && ( bouquetList != NULL ) )
 		{
@@ -441,7 +370,7 @@ int CChannelList::show()
 		else if ( msg == CRCInput::RC_help )
 		{
 			hide();
-			g_EpgData->show(chanlist[selected]->channel_id); 
+			g_EpgData->show(chanlist[selected]->channel_id);
 			paintHead();
 			paint();
 
@@ -520,11 +449,11 @@ int CChannelList::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 				{
 					g_RemoteControl->stopvideo();
 					zapProtection = new CZapProtection( g_settings.parentallock_pincode, data );
-					
+
 					if ( zapProtection->check() )
 					{
 						g_RemoteControl->startvideo();
-						
+
 						// remember it for the next time
 						chanlist[selected]->last_unlocked_EPGid= g_RemoteControl->current_EPGid;
 					}
@@ -697,7 +626,7 @@ int CChannelList::numericZap(int key)
 		{
 			sprintf((char*) &valstr, "%d", chn);
 			while(strlen(valstr)<4)
-				strcat(valstr,"·");   //"_"
+				strcat(valstr,"");   //"_"
 
 			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR_PLUS_0);
 
@@ -891,7 +820,7 @@ void CChannelList::paintDetails(unsigned int index)
 
 			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1);
 			if (!(text2.empty()))
-				text3 += " · ";
+				text3 += "  ";
 
 			xstart += g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text3);
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3, COL_MENUCONTENTDARK);
@@ -999,7 +928,7 @@ void CChannelList::paintItem(int pos)
 		//number
 		char tmp[10];
 		sprintf((char*) tmp, "%d", this->historyMode?pos:CNeutrinoApp::getInstance ()->recordingstatus ?liststart+pos+1: chan->number);
-		
+
 		if (liststart+pos==selected)
 		{
 			CLCD::getInstance()->showMenuText(0, chan->name.c_str(), -1, true); // UTF-8
@@ -1013,9 +942,9 @@ void CChannelList::paintItem(int pos)
 			char nameAndDescription[100];
 
       if (this->historyMode)
-        snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s · ", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+        snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s  ", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
       else
-        snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+        snprintf(nameAndDescription, sizeof(nameAndDescription), "%s  ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
 
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(chan->currentEvent.description);
@@ -1028,10 +957,10 @@ void CChannelList::paintItem(int pos)
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
 
 
-			// rechtsbündig - auskommentiert
+			// rechtsbndig - auskommentiert
 			// g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 
-			// linksbündig
+			// linksbndig
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 		}
 		else

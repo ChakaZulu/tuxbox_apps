@@ -78,7 +78,7 @@ EventList::EventList()
 	// //height = 440;
 	//height = 480;
 	width  = w_max (580, 20);
-	height = h_max (480, 20); 
+	height = h_max (480, 20);
 
 
 	iheight = 30;	// info bar height (see below, hard coded at this time)
@@ -113,7 +113,7 @@ void EventList::readEvents(const t_channel_id channel_id)
 	evtlist = g_Sectionsd->getEventsServiceKey(channel_id);
 	time_t azeit=time(NULL);
 	CChannelEventList::iterator e;
-	
+
 	if ( evtlist.size() != 0 ) {
 
 		CEPGData epgData;
@@ -129,7 +129,7 @@ void EventList::readEvents(const t_channel_id channel_id)
 				{
 					CChannelEventList evtlist2; // stores the temporary eventlist of the subchannel channelid
 					t_channel_id channel_id2;
-#if 0				
+#if 0
 					for (e=evtlist.begin(); e!=evtlist.end(); ++e )
 					{
 						if ( e->startTime > azeit ) {
@@ -138,14 +138,14 @@ void EventList::readEvents(const t_channel_id channel_id)
 					}
 					// next line is to have a valid e
 					if (evtlist.end() == e) --e;
-#endif				
+#endif
 					for (unsigned int i=0; i<linkedServices.size(); i++)
 					{
 						channel_id2 = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(
 								linkedServices[i].serviceId,
 								linkedServices[i].originalNetworkId,
 								linkedServices[i].transportStreamId);
-							
+
 						// do not add parent events
 						if (channel_id != channel_id2) {
 							evtlist2 = g_Sectionsd->getEventsServiceKey(channel_id2);
@@ -153,10 +153,10 @@ void EventList::readEvents(const t_channel_id channel_id)
 							for (unsigned int loop=0 ; loop<evtlist2.size(); loop++ )
 							{
 								// check if event is in the range of the portal parent event
-#if 0								
-								if ( (evtlist2[loop].startTime >= azeit) /*&& 
+#if 0
+								if ( (evtlist2[loop].startTime >= azeit) /*&&
 								     (evtlist2[loop].startTime < e->startTime + (int)e->duration)*/ )
-#endif								
+#endif
 								{
 									evtlist.push_back(evtlist2[loop]);
 								}
@@ -179,7 +179,7 @@ void EventList::readEvents(const t_channel_id channel_id)
 			}
 		}
 	}
-	
+
 	current_event = (unsigned int)-1;
 	for ( e=evtlist.begin(); e!=evtlist.end(); ++e )
 	{
@@ -188,7 +188,7 @@ void EventList::readEvents(const t_channel_id channel_id)
 		}
 		current_event++;
 	}
-	
+
 	if ( evtlist.size() == 0 )
 	{
 		CChannelEvent evt;
@@ -233,35 +233,26 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
-		//new page_up_down
-		if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup) && (g_settings.enable_new_pageupdown))
+		if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup))
 		{
-//			if (!(evtlist.empty()))
-//			{
-				int step = 0;
-				int prev_selected = selected;
+			int step = 0;
+			int prev_selected = selected;
 
-				step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
-				selected -= step;
-				if((prev_selected-step) < 0)		// because of uint
-				{
-					selected = evtlist.size() - 1;
-				}
+			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+			selected -= step;
+			if((prev_selected-step) < 0)		// because of uint
+				selected = evtlist.size() - 1;
 
-				paintItem(prev_selected - liststart);
-				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				if(oldliststart!=liststart)
-				{
-					paint();
-				}
-				else
-				{
-					paintItem(selected - liststart);
-				}
-//			}
+			paintItem(prev_selected - liststart);
+			unsigned int oldliststart = liststart;
+			liststart = (selected/listmaxshow)*listmaxshow;
+
+			if(oldliststart!=liststart)
+				paint();
+			else
+				paintItem(selected - liststart);
 		}
-		else if ((msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown) && (g_settings.enable_new_pageupdown))
+		else if ((msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown))
 		{
 			int step = 0;
 			int prev_selected = selected;
@@ -270,39 +261,15 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			selected += step;
 
 			if(selected >= evtlist.size())
-			{
 				selected = 0;
-			}
 
 			paintItem(prev_selected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			if(oldliststart!=liststart)
-			{
 				paint();
-			}
 			else
-			{
 				paintItem(selected - liststart);
-			}
-		}
-		//new page_up_down end
-		else if (msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
-		{
-			selected+=listmaxshow;
-			if (selected>evtlist.size()-1)
-				selected=0;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
-		}
-		else if (msg == (neutrino_msg_t)g_settings.key_channelList_pagedown)
-		{
-			if ((int(selected)-int(listmaxshow))<0)
-				selected=evtlist.size()-1;
-			else
-				selected -= listmaxshow;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
 		}
 		else if (msg == (neutrino_msg_t)g_settings.key_channelList_sort)
 		{
@@ -317,7 +284,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				sort_mode=0;
 				sort(evtlist.begin(),evtlist.end(),sortByDateTime);
 			}
-			
+
 			// find selected
 			for ( selected=0 ; selected < evtlist.size(); selected++ )
 			{
@@ -357,23 +324,23 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 					{
 						int id = -1;
 						CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
-						if (recDirs.hasItem()) 
+						if (recDirs.hasItem())
 						{
 							hide();
 							recDirs.exec(NULL,"");
 							paint();
 						} else
 						{
-							printf("[CEventList] no network devices available\n");					
+							printf("[CEventList] no network devices available\n");
 						}
 						if (id != -1)
 							recDir = g_settings.network_nfs_local_dir[id];
-						else 
+						else
 							recDir = NULL;
 					}
 					if (recDir != NULL)
 					{
-						
+
 //						if (timerdclient.addRecordTimerEvent(channel_id,
 						if (timerdclient.addRecordTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID),
 										     evtlist[selected].startTime,
@@ -403,15 +370,15 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				}
 				else
 					printf("timerd not available\n");
-			}					
+			}
 		}
 		else if ( msg == (neutrino_msg_t) g_settings.key_channelList_addremind )
 		{
 			CTimerdClient timerdclient;
 			if(timerdclient.isTimerdAvailable())
 			{
-//				timerdclient.addZaptoTimerEvent(channel_id, 
-				timerdclient.addZaptoTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID), 
+//				timerdclient.addZaptoTimerEvent(channel_id,
+				timerdclient.addZaptoTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID),
 								evtlist[selected].startTime,
 								evtlist[selected].startTime - ANNOUNCETIME, 0,
 								evtlist[selected].eventID, evtlist[selected].startTime,
@@ -422,43 +389,6 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				printf("timerd not available\n");
 		}
 
-		else if ( msg == CRCInput::RC_up )
-		{
-			int prevselected=selected;
-			if(selected==0)
-			{
-				selected = evtlist.size()-1;
-			}
-			else
-				selected--;
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
-			{
-				paint();
-			}
-			else
-			{
-				paintItem(selected - liststart);
-			}
-		}
-		else if ( msg == CRCInput::RC_down )
-		{
-			int prevselected=selected;
-			selected = (selected+1)%evtlist.size();
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
-			{
-				paint();
-			}
-			else
-			{
-				paintItem(selected - liststart);
-			}
-		}
 		else if ((msg == CRCInput::RC_timeout                             ) ||
 			 (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))
 		{
@@ -485,14 +415,14 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				else
 				{
 					g_RCInput->getMsg( &msg, &data, 0 );
-					
+
 					if ( ( msg != CRCInput::RC_red ) &&
 					     ( msg != CRCInput::RC_timeout ) )
 					{
 						// RC_red schlucken
 						g_RCInput->postMsg( msg, data );
 					}
-					
+
 					paintHead();
 					paint();
 					showFunctionBar(true);
@@ -696,7 +626,7 @@ void  EventList::showFunctionBar (bool show)
 //  -- EventList Menu Handler Class
 //  -- to be used for calls from Menue
 //  -- (2004-03-06 rasc)
-// 
+//
 
 int CEventListHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 {
