@@ -626,7 +626,7 @@ int CChannelList::numericZap(int key)
 		{
 			sprintf((char*) &valstr, "%d", chn);
 			while(strlen(valstr)<4)
-				strcat(valstr,"");   //"_"
+				strcat(valstr,"·");   //"_"
 
 			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR_PLUS_0);
 
@@ -820,7 +820,7 @@ void CChannelList::paintDetails(unsigned int index)
 
 			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1);
 			if (!(text2.empty()))
-				text3 += "  ";
+				text3 += " · ";
 
 			xstart += g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text3);
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 10, y+ height+ 5+ 2* fheight, width - 30- noch_len, text3, COL_MENUCONTENTDARK);
@@ -942,9 +942,9 @@ void CChannelList::paintItem(int pos)
 			char nameAndDescription[100];
 
       if (this->historyMode)
-        snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s  ", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+        snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s · ", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
       else
-        snprintf(nameAndDescription, sizeof(nameAndDescription), "%s  ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+        snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
 
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(chan->currentEvent.description);
@@ -957,10 +957,10 @@ void CChannelList::paintItem(int pos)
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
 
 
-			// rechtsbndig - auskommentiert
+			// align right - auskommentiert
 			// g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 
-			// linksbndig
+			// align left
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 		}
 		else
