@@ -170,65 +170,43 @@ int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			loop = false;
 		}
-		else if ( msg ==CRCInput::RC_up)
+		if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup))
 		{
-			if(getItemCount()!=0)
-			{
-				int prevselected=selected;
-				if(selected==0)
-				{
-					selected = getItemCount()-1;
-				}
-				else
-					selected--;
-				paintItem(prevselected - liststart);
-				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				if(oldliststart!=liststart)
-				{
-					paint();
-				}
-				else
-				{
-					paintItem(selected - liststart);
-				}
-			}
-		}
-		else if ( msg ==CRCInput::RC_down)
-		{
-			if(getItemCount()!=0)
-			{
-				int prevselected=selected;
-				selected = (selected+1)%getItemCount();
-				paintItem(prevselected - liststart);
-				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				if(oldliststart!=liststart)
-				{
-					paint();
-				}
-				else
-				{
-					paintItem(selected - liststart);
-				}
-			}
-		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown)
-		{
-			selected+=listmaxshow;
-			if (selected>getItemCount()-1)
-				selected=0;
+			int step = 0;
+			int prev_selected = selected;
+
+			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+			selected -= step;
+			if((prev_selected-step) < 0)		// because of uint
+				selected = getItemCount() - 1;
+
+			paintItem(prev_selected - liststart);
+			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
-		}
-		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup)
-		{
-			if ((int(selected)-int(listmaxshow))<0)
-				selected=getItemCount()-1;
+
+			if(oldliststart!=liststart)
+				paint();
 			else
-				selected -= listmaxshow;
+				paintItem(selected - liststart);
+		}
+		else if ((msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown))
+		{
+			int step = 0;
+			int prev_selected = selected;
+
+			step = (msg==(neutrino_msg_t)g_settings.key_channelList_pagedown) ? listmaxshow : 1;  // browse or step 1
+			selected += step;
+
+			if(selected >= getItemCount())
+				selected = 0;
+
+			paintItem(prev_selected - liststart);
+			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
-			paint();
+			if(oldliststart!=liststart)
+				paint();
+			else
+				paintItem(selected - liststart);
 		}
 		else if( msg ==CRCInput::RC_ok)
 		{
