@@ -170,7 +170,7 @@ int CListBox::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			loop = false;
 		}
-		if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup))
+		else if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup))
 		{
 			int step = 0;
 			int prev_selected = selected;
