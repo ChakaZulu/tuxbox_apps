@@ -544,7 +544,7 @@ eWindow(1)
    cmove(ePoint(70, 85));
    cresize(eSize(595, 450));
 
-   setText((_((title.isNull())?_("Script Output"):title.c_str())));
+   setText(title.isNull() ? _("Script Output") : title.c_str());
 
    scrollbar = new eProgress(this);
    scrollbar->setName("scrollbar");
