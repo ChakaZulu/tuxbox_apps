@@ -1,5 +1,5 @@
 /*
-$Id: pes_std.c,v 1.7 2006/01/02 18:24:12 rasc Exp $
+$Id: pes_std.c,v 1.8 2006/01/15 17:50:31 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pes_std.c,v 1.7 2006/01/02 18:24:12 rasc Exp $
 
 
 $Log: pes_std.c,v $
+Revision 1.8  2006/01/15 17:50:31  rasc
+no message
+
 Revision 1.7  2006/01/02 18:24:12  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -147,7 +150,7 @@ void  PES_decode_std (u_char *b, int len, u_int PES_streamID)
  }
 
  if (p.PTS_DTS_flags == 0x03) {    // 10 + 01
-   // PTS from "if" before...
+   // PTS already printed, from "if" before...
    out_nl (3,"DTS: ");
    indent (+1);
    outBit_Sx_NL (3,"Fixed: ",b,0,4);
