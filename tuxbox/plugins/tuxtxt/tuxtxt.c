@@ -1476,7 +1476,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.95 $";
+	char cvs_revision[] = "$Revision: 1.96 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -4791,7 +4791,7 @@ void RenderMessage(int Message)
 
 /*                     00000000001111111111222222222233333333334 */
 /*                     01234567890123456789012345678901234567890 */
-	char message_1[] = "אבבבבבבב www.tuxtxt.com x.xx בבבבבבבגט";
+	char message_1[] = "אבבבבבבב www.tuxtxt.net x.xx בבבבבבבגט";
 	char message_2[] = "ד                                   הי";
 /* 	char message_3[] = "ד   suche nach Teletext-Anbietern   הי"; */
 	char message_4[] = "ד                                   הי";
