@@ -1,5 +1,4 @@
-SUBDIRS = include src
-#qa comment cause .pl script is not found
+SUBDIRS = include src qa
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libdvbsi++.pc
