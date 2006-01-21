@@ -1,0 +1,26 @@
+fbgl.c
+------
+
+fbgl.c is not a standalone program, it's startup code 
+necessary for Fabrice Bellard's TinyGL. Basically it 
+just sets up the RGB565 surface and hands it over to 
+TinyGL's GL-code.
+
+To build TinyGL, just type "make tinygl" in the 
+cvs-directory and it will make TinyGL and copy the
+examples and the static lib to the cdkroot.
+
+So this gives us GL on the dbox2, well, ok, just a
+subset and, ok, it just works for the 2.6 kernel
+and ok, it just works on the eNX-boxes (GTX don't
+feature RGB565).
+
+Still it was great fun to make it work. Oh, and 
+don't think the mech demo does nothing, it just 
+takes 1:10 mins to draw one(!) frame. 
+
+If you have information about any secret 3D hardware
+acceleration on the eNX, then step forward, please. :)
+
+Oh, and no, the GL_ARB_shader_objects extension is not
+supported. ;)
