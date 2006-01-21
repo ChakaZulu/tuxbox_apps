@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.552 2005/12/28 10:42:06 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.553 2006/01/21 22:23:18 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2033,7 +2033,7 @@ static eString moviem3u(eString request, eString dirpath, eString opts, eHTTPCon
 	content->local_header["Content-Type"]="video/mpegfile";
 	content->local_header["Cache-Control"] = "no-cache";
 
-	return "http://" + getIP() + ":31342" + movieFile;
+	return "http://" + getIP() + ":31342" + movieFile.strReplace(" ", "%20");
 }
 
 static eString mPlayer(eString request, eString dirpath, eString opt, eHTTPConnection *content)
