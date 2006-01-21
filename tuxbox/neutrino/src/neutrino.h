@@ -175,7 +175,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitScreenSettings(CMenuWidget &);
 		void InitAudioplPicSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);
-		void InitExperimentalSettings(CMenuWidget &);
 		void InitScanSettings(CMenuWidget &);
 		void InitParentalLockSettings(CMenuWidget &);
 		void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
@@ -194,8 +193,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 								CMenuWidget &fontSettings,
 								CMenuWidget &audiopl_picSettings,
 								CMenuWidget &streamingSettings,
-								CMenuWidget &moviePlayer,
-								CMenuWidget &experimentalSettings);
+								CMenuWidget &moviePlayer);
 
 		void SetupTiming();
 		void SetupFrameBuffer();

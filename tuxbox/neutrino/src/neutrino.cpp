@@ -124,15 +124,8 @@
 
 #include <string.h>
 
-
-// uncomment if you want to have a "test" menue entry  (rasc)
-
-//#define __EXPERIMENTAL_CODE__
-#ifdef __EXPERIMENTAL_CODE__
-
-#include "gui/ch_mosaic.h"
-
-#endif
+// external menus
+#include "gui/experimental_menu.h"
 
 #ifndef TUXTXT_CFG_STANDALONE
 extern "C" int  tuxtxt_init();
@@ -549,10 +542,6 @@ int CNeutrinoApp::loadSetup()
 	        checkParentallocked.close();
 	}
 
-	//experimental_setup
-	g_settings.show_experimental_settings = configfile.getBool("show_experimental_settings", false );
-	g_settings.show_ca_status = configfile.getBool("show_ca_status", false );
-
 	//video
 	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
 	g_settings.video_csync = configfile.getInt32( "video_csync", 0 );
@@ -899,10 +888,6 @@ void CNeutrinoApp::saveSetup()
 	{
 		dprintf(DEBUG_NORMAL, "error while saving scan-settings!\n");
 	}
-
-	//experimental_setup
-	configfile.setBool("show_experimental_settings", g_settings.show_experimental_settings );
-	configfile.setBool("show_ca_status", g_settings.show_ca_status );
 
 	//video
 	configfile.setInt32( "video_Format", g_settings.video_Format );
@@ -1416,8 +1401,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &fontSettings,
 								CMenuWidget &audiopl_picSettings,
 								CMenuWidget &streamingSettings,
-								CMenuWidget &moviePlayer,
-								CMenuWidget &experimentalSettings)
+								CMenuWidget &moviePlayer)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem(GenericMenuSeparator);
@@ -1494,13 +1478,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, CRCInput::RC_yellow , NEUTRINO_ICON_BUTTON_YELLOW ));
 
-#define EXPERIMENTAL_SETTINGS_OPTION_COUNT 1
-	if (g_settings.show_experimental_settings){
-		if (EXPERIMENTAL_SETTINGS_OPTION_COUNT > 0 )
-			mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_EXPERIMENTAL      , true, NULL, &experimentalSettings     , NULL, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ));
-		else
-			mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_EXPERIMENTAL      , false, NULL, &experimentalSettings     , NULL, CRCInput::RC_green , NEUTRINO_ICON_BUTTON_GREEN ));
-	}
 }
 
 #define SCANTS_BOUQUET_OPTION_COUNT 5
@@ -1982,14 +1959,6 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE, &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
 }
 
-void CNeutrinoApp::InitExperimentalSettings(CMenuWidget &experimentalSettings)
-{
-	dprintf(DEBUG_DEBUG, "init experimentalsettings\n");
-	experimentalSettings.addItem(GenericMenuSeparator);
-	experimentalSettings.addItem(GenericMenuBack);
-	experimentalSettings.addItem(GenericMenuSeparator);
-	experimentalSettings.addItem( new CMenuOptionNumberChooser(NONEXISTANT_LOCALE, (int*) &g_settings.show_ca_status, true, 0, 1, 0, 0, LOCALE_OPTIONS_OFF, "show CA Status"));
-}
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 {
@@ -3006,22 +2975,10 @@ void CNeutrinoApp::ShowStreamFeatures()
 	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_PAUSESECTIONSD, &dummy, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, new CPauseSectionsdNotifier );
 	StreamFeatureSelector.addItem(oj);
 
-	// -- Stream Info
-	// -- !! obsolete (rasc 2004-03-06)
-	// StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_STREAMFEATURES_INFO, true, NULL, StreamFeaturesChanger, id, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL), false);
-
-
-	// ------
-#ifdef __EXPERIMENTAL_CODE__
-	// -- Experimental Code
-	// -- rasc (2003-12)
-
-
-	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental1", true, NULL, new CChMosaicHandler(), id, CRCInput::RC_nokey, ""), false);
-
-
-#endif
-	// ------
+#ifdef _EXPERIMENTAL_SETTINGS_
+	//Experimental Settings
+	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_EXPERIMENTALSETTINGS, true, NULL, new CExperimentalSettingsMenuHandler(), id, CRCInput::RC_nokey, ""), false);
+#endif	
 
 	StreamFeatureSelector.exec(NULL,"");
 
@@ -3319,7 +3276,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 420);
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 400);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
-	CMenuWidget    experimentalSettings        (LOCALE_EXPERIMENTALSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
@@ -3341,8 +3297,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 					fontSettings,
 					audioplPicSettings,
 					streamingSettings,
-					moviePlayer,
-					experimentalSettings);
+					moviePlayer);
 
 	//service
 	InitServiceSettings(service, scanSettings);
@@ -3355,9 +3310,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
    	//misc Setup
 	InitMiscSettings(miscSettings);
-
-	// experimental Setup
-	InitExperimentalSettings(experimentalSettings);
 
 	//audio Setup
 	InitAudioSettings(audioSettings, audioSetupNotifier);

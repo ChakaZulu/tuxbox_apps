@@ -40,10 +40,6 @@
 
 struct SNeutrinoSettings
 {
-	// experimental_setup
-	int show_experimental_settings;
-	int show_ca_status;
-
 	//video
 	int video_Format;
 	unsigned char video_csync;

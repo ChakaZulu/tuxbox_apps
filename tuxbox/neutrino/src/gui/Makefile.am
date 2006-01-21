@@ -24,6 +24,7 @@ libneutrino_gui_a_SOURCES = \
 	streaminfo2.cpp plugins.cpp imageinfo.cpp \
 	audio_select.cpp \
 	moviebrowser.cpp movieinfo.cpp
+#	experimental_menu.cpp
 #	ch_mosaic.cpp
 
 libneutrino_gui2_a_SOURCES = \

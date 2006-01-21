@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.62 2006/01/10 20:26:57 racker Exp $
+ * $Id: locals_intern.h,v 1.63 2006/01/21 15:45:50 racker Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -295,6 +295,7 @@ const char * locale_real_names[] =
 	"eventlistbar.channelswitch",
 	"eventlistbar.eventsort",
 	"eventlistbar.recordevent",
+	"experimentalsettings",
 	"experimentalsettings.head",
 	"favorites.addchannel",
 	"favorites.bouquetname",
@@ -521,7 +522,6 @@ const char * locale_real_names[] =
 	"mainmenu.tvmode",
 	"mainsettings.audio",
 	"mainsettings.colors",
-	"mainsettings.experimental",
 	"mainsettings.head",
 	"mainsettings.keybinding",
 	"mainsettings.language",
