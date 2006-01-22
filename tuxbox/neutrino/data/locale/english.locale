@@ -1008,8 +1008,8 @@ timing.chanlist Channellist
 timing.epg Epg
 timing.filebrowser Filebrowser
 timing.head OSD Timeouts
-timing.hint_1 Time in sec. After this time the
-timing.hint_2 infobar will be faded out.
+timing.hint_1 Time in sec. After this time the infobar will
+timing.hint_2 be faded out. (Use 0 to switch of fading.)
 timing.infobar Infobar
 timing.menu Menu
 timing.numericzap Numeric Zap

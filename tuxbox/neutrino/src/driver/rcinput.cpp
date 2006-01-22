@@ -439,7 +439,7 @@ long long CRCInput::calcTimeoutEnd(const int timeout_in_seconds)
 
 	gettimeofday(&tv, NULL);
 
-	return (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec + (unsigned long long)timeout_in_seconds) * (unsigned long long) 1000000;
+	return timeout_in_seconds > 0 ? (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec + (unsigned long long)timeout_in_seconds) * (unsigned long long) 1000000 : (unsigned long long) -1;
 }
 
 long long CRCInput::calcTimeoutEnd_MS(const int timeout_in_milliseconds)
