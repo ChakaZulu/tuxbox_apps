@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.39 2006/01/22 15:10:50 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.40 2006/01/22 21:55:20 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -564,6 +564,8 @@ eString eMoviePlayer::sout(eString mrl)
 void pvrThreadCleanup(void *pvrfd)
 {
 	close(*(int *)pvrfd);
+	killReceiverThread();
+	eMoviePlayer::getInstance()->leaveStreamingClient();
 	eDebug("[MOVIEPLAYER] pvrThreadCleanup done.");
 }
 
@@ -572,6 +574,7 @@ void *pvrThread(void *pvrfd)
 	char tempBuffer[BLOCKSIZE];
 	int rd = 0;
 	int tsBufferSize = 0;
+	int errors = 0;
 	eDebug("[MOVIEPLAYER] pvrThread starting: pvrfd = %d", *(int *)pvrfd);
 	pthread_cleanup_push(pvrThreadCleanup, (void *)pvrfd);
 	nice(-1);
@@ -584,18 +587,27 @@ void *pvrThread(void *pvrfd)
 		pthread_mutex_unlock(&mutex);
 		if (rd > 0)
 		{
+			errors = 0;
 			write(*(int *)pvrfd, tempBuffer, rd);
 			eDebug("[MOVIEPLAYER] %d >>> writing %d bytes to pvr...", tsBufferSize, rd);
 		}
+		else
+		{
+			errors++;
+			if (errors > 100000 && tsBufferSize == 0)
+			{
+				sleep(7);
+				break;
+			}
+		}
 	}
+	pthread_exit(NULL);
 	pthread_cleanup_pop(1);
 }
 
 void receiverThreadCleanup(void *fd)
 {
 	close(*(int *)fd);
-	killPVRThread();
-	eMoviePlayer::getInstance()->leaveStreamingClient();
 	eDebug("[MOVIEPLAYER] receiverThreadCleanup done.");
 }
 
@@ -604,8 +616,7 @@ void *receiverThread(void *fd)
 	char tempBuffer[BLOCKSIZE];
 	int len = 0;
 	int tsBufferSize = 0;
-	int errors = 0;
-
+	
 	eDebug("[MOVIEPLAYER] receiverThread starting: fd = %d", *(int *)fd);
 	pthread_cleanup_push(receiverThreadCleanup, (void *)fd);
 	nice(-1);
@@ -616,9 +627,6 @@ void *receiverThread(void *fd)
 		pthread_mutex_lock(&mutex);
 		tsBufferSize = tsBuffer.size();
 		pthread_mutex_unlock(&mutex);
-		errors = (tsBufferSize == 0) ? errors + 1 : 0;
-		if (errors > 100000)
-			break;
 		if (tsBufferSize < INITIALBUFFER)
 		{
 			len = recv(*(int *)fd, tempBuffer, BLOCKSIZE, 0);
