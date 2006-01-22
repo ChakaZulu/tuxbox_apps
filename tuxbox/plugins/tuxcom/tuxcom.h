@@ -77,7 +77,7 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.12\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.13\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004-2005"
 
 #ifdef HAVE_DREAMBOX_HARDWARE
@@ -667,13 +667,13 @@ void	          	ClearMarker(int frame);
 void	          	RenameMarker(int frame, const char* szOld, const char* szNew);
 void	          	ToggleMarker(int frame);
 int               	IsMarked(int frame, int pos);
-int 			  	CheckOverwrite(const char* szFile, int mode, char* szNew);
+int 			  	CheckOverwrite(struct fileentry* pfe, int mode, char* szNew);
 void	          	ReadSettings();
 void	          	WriteSettings();
 void	          	DoExecute(char* szAction, int showoutput);
 int 				DoCopy(struct fileentry* pfe, int typ, int checkmode, char* szZipCommand);
 void 				DoZipCopyEnd();
-int 				DoMove(char* szFile, int typ, int checktype);
+int 				DoMove(struct fileentry* pfe, int typ, int checktype);
 void	          	DoViewFile();
 void	          	DoEditFile(char* szFile, char* szTitle, int writable);
 void	          	DoTaskManager();

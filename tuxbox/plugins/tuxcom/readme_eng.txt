@@ -2,8 +2,11 @@ TuxCom:
 
 History:
 ---------
+22.01.2006 Version 1.13
+ - overwrite directory corrected
+
 27.12.2005 Version 1.12
- - portugese translation added
+ - portugese translation added (thanks to jlmota)
  - two little bugfixes in editor
  
 22.11.2005 Version 1.11

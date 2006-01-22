@@ -1088,7 +1088,7 @@ void plugin_exec(PluginParam *par)
 										if (IsMarked(curframe,pos))
 										{
 											pfe = getfileentry(curframe, pos);
-											if (DoMove(pfe->name, YES, OVERWRITESKIPCANCEL) < 0) break;
+											if (DoMove(pfe, YES, OVERWRITESKIPCANCEL) < 0) break;
 										}
 									}
 									ClearMarker(curframe);
@@ -1101,7 +1101,7 @@ void plugin_exec(PluginParam *par)
 										if (IsMarked(curframe,pos))
 										{
 											pfe = getfileentry(curframe, pos);
-											if (DoMove(pfe->name, HIDDEN, OVERWRITESKIPCANCEL) < 0) break;
+											if (DoMove(pfe, HIDDEN, OVERWRITESKIPCANCEL) < 0) break;
 										}
 									}
 									ClearMarker(curframe);
@@ -1116,12 +1116,12 @@ void plugin_exec(PluginParam *par)
 							switch (MessageBox(szMessage,info[INFO_MOVE*NUM_LANG+language],OKHIDDENCANCEL))
 							{
 								case YES:
-									if (DoMove(pfe->name,YES,OVERWRITECANCEL) < 0) break;
+									if (DoMove(pfe,YES,OVERWRITECANCEL) < 0) break;
 									FillDir(1-curframe,SELECT_NOCHANGE);
 									FillDir(  curframe,SELECT_NOCHANGE);
 									break;
 								case HIDDEN:
-									DoMove(pfe->name,HIDDEN,OVERWRITECANCEL);
+									DoMove(pfe,HIDDEN,OVERWRITECANCEL);
 									break;
 								default:
 									rccode = 0;
@@ -2928,23 +2928,29 @@ int IsMarked(int frame, int pos)
 /******************************************************************************
  * CheckOverwrite                                                             *
  ******************************************************************************/
-int CheckOverwrite(const char* szFile, int mode, char* szNew)
+int CheckOverwrite(struct fileentry* pfe, int mode, char* szNew)
 {
 	char szMessage[356];
 
-	strcpy(szNew,szFile);
-	if (overwriteall != 0) return overwriteall;
+	strcpy(szNew,pfe->name);
+	if (overwriteall != 0)
+	{
+	    if (S_ISDIR(pfe->fentry.st_mode)) *szNew = 0x00;
+	    return overwriteall;
+	}
 
-	if (FindFile(1-curframe,szFile) != NULL)
+	if (FindFile(1-curframe,pfe->name) != NULL)
 	{
 		if (skipall != 0)      return skipall;
-		sprintf(szMessage,msg[MSG_FILE_EXISTS*NUM_LANG+language], szFile);
+		sprintf(szMessage,msg[MSG_FILE_EXISTS*NUM_LANG+language], pfe->name);
 		switch (MessageBox(szMessage,"",mode))
 		{
 			case OVERWRITE:
+				if (S_ISDIR(pfe->fentry.st_mode)) *szNew = 0x00;
 				return OVERWRITE;
 				break;
 			case OVERWRITEALL:
+				if (S_ISDIR(pfe->fentry.st_mode)) *szNew = 0x00;
 				overwriteall = OVERWRITE;
 				return OVERWRITE;
 			case SKIP:
@@ -2953,7 +2959,7 @@ int CheckOverwrite(const char* szFile, int mode, char* szNew)
 				skipall = SKIP;
 				return SKIP;
 			case RENAME:
-				sprintf(szMessage,msg[MSG_RENAME*NUM_LANG+language], szFile);
+				sprintf(szMessage,msg[MSG_RENAME*NUM_LANG+language], pfe->name);
 				if (GetInputString(400,255,szNew,szMessage, NO) == RC_OK)
 					return RENAME;
 				else
@@ -3194,7 +3200,7 @@ int DoCopy(struct fileentry* pfe, int typ, int checktype, char* szZipCommand)
 	char action[512], szFullFile[1000], tp;
 	char szNew[FILENAME_MAX];
 
-	int check = CheckOverwrite(pfe->name, checktype, szNew);
+	int check = CheckOverwrite(pfe, checktype, szNew);
 	if (check < 0 || check == SKIP) return check;
 
 	if (finfo[curframe].ftpconn != NULL)
@@ -3474,22 +3480,22 @@ void DoZipCopyEnd(char* szZipCommand)
  * DoMove                                                                     *
  ******************************************************************************/
 
-int DoMove(char* szFile, int typ, int checktype)
+int DoMove(struct fileentry* pfe, int typ, int checktype)
 {
 	char action[1000];
 	char szMessage[400];
 	char szNew[FILENAME_MAX];
 
 
-	int check = CheckOverwrite(szFile, checktype, szNew);
+	int check = CheckOverwrite(pfe, checktype, szNew);
 	if (check < 0 || check == SKIP) return check;
 
 	if (typ != HIDDEN)
 	{
-		sprintf(szMessage,msg[MSG_MOVE_PROGRESS*NUM_LANG+language], szFile, finfo[1-curframe].path, szNew);
+		sprintf(szMessage,msg[MSG_MOVE_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path, szNew);
 		MessageBox(szMessage,"",NOBUTTON);
 	}
-	sprintf(action,"mv -f \"%s%s\" \"%s%s\"%s",finfo[curframe].path,szFile, finfo[1-curframe].path,szNew,typ == HIDDEN ? " &":"");
+	sprintf(action,"mv -f \"%s%s\" \"%s%s\"%s",finfo[curframe].path,pfe->name, finfo[1-curframe].path,szNew,typ == HIDDEN ? " &":"");
 	DoExecute(action, SHOW_NO_OUTPUT);
 	return check;
 }

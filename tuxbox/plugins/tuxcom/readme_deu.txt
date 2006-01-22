@@ -2,6 +2,9 @@ TuxCom:
 
 Historie:
 ---------
+22.01.2006 Version 1.13
+ - Überschreiben von Verzeichnissen korrigiert
+ 
 27.12.2005 Version 1.12
  - Portugiesische Übersetzung eingebaut (Dank an jlmota)
  - zwei kleine Fehler im Editor behoben
