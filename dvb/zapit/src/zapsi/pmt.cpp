@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.45 2006/01/22 12:26:14 carjay Exp $
+ * $Id: pmt.cpp,v 1.46 2006/01/22 12:31:41 carjay Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -409,7 +409,7 @@ int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 int pmt_stop_update_filter(int *fd)
 {
 	if ((*fd == -1)) {
-		fprintf(stderr,"check your code - nothing to stop");
+		fprintf(stderr,"check your code - nothing to stop\n");
 		return 0;
 	}
 	if (ioctl(*fd, DMX_STOP) < 0) {
