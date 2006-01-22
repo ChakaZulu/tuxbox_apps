@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.38 2005/12/23 17:00:07 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.39 2006/01/22 15:10:50 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -51,6 +51,7 @@
 #endif
 
 eIOBuffer tsBuffer(BLOCKSIZE*4);
+
 static pthread_mutex_t mutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 extern void find_avpids(eIOBuffer *tsBuffer, int *vpid, int *apid, int *ac3);
@@ -115,13 +116,13 @@ void killThreads()
 	killPVRThread();
 }
 
-eMoviePlayer::eMoviePlayer(): messages(this,1)
+eMoviePlayer::eMoviePlayer(): messages(this, 1)
 {
 	if (!instance)
 		instance = this;
 		
 	CONNECT(messages.recv_msg, eMoviePlayer::gotMessage);
-	eDebug("[MOVIEPLAYER] Version 2.0 starting...");
+	eDebug("[MOVIEPLAYER] Version 2.1 starting...");
 	status.ACTIVE = false;
 	run();
 }
@@ -248,7 +249,7 @@ int bufferStream(int fd, int bufferSize)
 	// fill buffer and temp file
 	while (tsBuffer.size() < bufferSize && rc)
 	{
-		tv.tv_sec = 10;
+		tv.tv_sec = 5;
 		tv.tv_usec = 0;
 		FD_ZERO(&rfds);
 		FD_SET(fd, &rfds);
@@ -313,8 +314,6 @@ int eMoviePlayer::playStream(eString mrl)
 	
 	// receive video stream from VLC on PC
 	eDebug("[MOVIEPLAYER] start playing stream...");
-	
-	status.STAT = PLAY;
 	
 	tsBuffer.clear();
 	
@@ -397,6 +396,7 @@ void eMoviePlayer::gotMessage(const Message &msg )
 		case Message::start:
 		case Message::start2:
 		{
+			status.STAT = PLAY;
 			killThreads();
 			if (msg.filename)
 			{
@@ -416,30 +416,44 @@ void eMoviePlayer::gotMessage(const Message &msg )
 						setErrorStatus();
 						break;
 					}
-					else
+					usleep(200000);
 					// empty vlc's playlist
 					if (sendRequest2VLC("?control=empty") < 0)
 					{
 						setErrorStatus();
 						break;
 					}
-					else
+					usleep(200000);
 					// vlc: add mrl to playlist
 					if (sendRequest2VLC("?control=add&mrl=" + httpEscape(mrl)) < 0)
 					{
 						setErrorStatus();
 						break;
 					}
-					else
+					usleep(200000);
 					// vlc: set sout...
 					if (sendRequest2VLC("?sout=" + httpEscape(sout(mrl))) < 0)
 					{
 						setErrorStatus();
 						break;
 					}
-					else
+					usleep(200000);
+					// vlc: play (circumvention for vlc deficiency)
+					if (sendRequest2VLC("?control=play") < 0)
+					{
+						setErrorStatus();
+						break;
+					}
+					usleep(200000);
+					// vlc: stop (circumvention for vlc deficiency)
+					if (sendRequest2VLC("?control=stop") < 0)
+					{
+						setErrorStatus();
+						break;
+					}
+					usleep(200000);
 					// vlc: start playback of first item in playlist
-					if (sendRequest2VLC("?control=play&item=0") < 0)
+					if (sendRequest2VLC("?control=play") < 0)
 					{
 						setErrorStatus();
 						break;
@@ -465,7 +479,7 @@ void eMoviePlayer::gotMessage(const Message &msg )
 		case Message::terminate:
 		{
 			killThreads();
-			leaveStreamingClient();
+//			leaveStreamingClient();
 			break;
 		}
 		case Message::jump:
