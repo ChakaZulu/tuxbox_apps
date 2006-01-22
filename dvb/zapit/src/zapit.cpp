@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.385 2006/01/22 12:26:14 carjay Exp $
+ * $Id: zapit.cpp,v 1.386 2006/01/22 13:16:29 carjay Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -955,7 +955,7 @@ int start_scan(bool scan_mode)
 
 	bouquetManager->clearAll();
 	stopPlayBack();
-	if (pmt_update_fd>0) {
+	if (pmt_update_fd>=0) {
 		pmt_stop_update_filter(&pmt_update_fd);
 		pmt_update_fd = -1;
 	}
@@ -2243,7 +2243,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.385 2006/01/22 12:26:14 carjay Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.386 2006/01/22 13:16:29 carjay Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
