@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.40 2006/01/22 21:55:20 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.41 2006/01/24 19:36:17 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -66,6 +66,8 @@ void *receiverThread(void *);
 
 static int fd = -1;
 static int pvrfd = -1;
+
+static int cancelBuffering = 0;
 
 eMoviePlayer *eMoviePlayer::instance;
 
@@ -171,6 +173,8 @@ void eMoviePlayer::control(const char *command, const char *filename)
 		mpconfig.load();
 		server = mpconfig.getServerConfig();
 	}
+
+	cancelBuffering = 0;
 	
 	eDebug("[MOVIEPLAYER] control: serverIP = %s", server.serverIP.c_str());
 	eDebug("[MOVIEPLAYER] control: webifPort = %d", atoi(server.webifPort.c_str()));
@@ -182,8 +186,19 @@ void eMoviePlayer::control(const char *command, const char *filename)
 	else
 	if (cmd == "start2")
 		messages.send(Message(Message::start2, filename ? strdup(filename) : 0));
-	if (cmd == "stop")
-		messages.send(Message(Message::stop, 0));
+	else
+	if (cmd == "stop" || cmd == "terminate")
+	{
+		killThreads();
+		pthread_mutex_lock(&mutex);
+		cancelBuffering = 1;
+		pthread_mutex_unlock(&mutex);
+		sendRequest2VLC("?control=stop");
+
+		status.ACTIVE = false;
+		status.STAT = STOPPED;
+		status.BUFFERFILLED = false;
+	}
 	else
 	if (cmd == "play")
 		messages.send(Message(Message::play, 0));
@@ -199,9 +214,6 @@ void eMoviePlayer::control(const char *command, const char *filename)
 	else
 	if (cmd == "jump")
 		messages.send(Message(Message::jump, filename ? strdup(filename) : 0));
-	else
-	if (cmd == "terminate")
-		messages.send(Message(Message::terminate, 0));
 }
 
 int eMoviePlayer::sendRequest2VLC(eString command)
@@ -243,11 +255,12 @@ int bufferStream(int fd, int bufferSize)
 	char tempBuffer[BLOCKSIZE];
 	fd_set rfds;
 	struct timeval tv;
+	int tsBufferSize = 0;
 	
 	eDebug("[MOVIEPLAYER] buffering stream...");
 	
 	// fill buffer and temp file
-	while (tsBuffer.size() < bufferSize && rc)
+	while ((tsBufferSize < bufferSize) && (rc > 0))
 	{
 		tv.tv_sec = 5;
 		tv.tv_usec = 0;
@@ -260,8 +273,9 @@ int bufferStream(int fd, int bufferSize)
 			if (len > 0)
 			{
 				error = 0;
-				eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, tsBuffer.size());
 				tsBuffer.write(tempBuffer, len);
+				tsBufferSize = tsBuffer.size();
+				eDebug("[MOVIEPLAYER] writing %d bytes to buffer, total: %d", len, tsBufferSize);
 			}
 			else 
 			{
@@ -269,9 +283,17 @@ int bufferStream(int fd, int bufferSize)
 					rc = 0;
 			}
 		}
+		pthread_mutex_lock(&mutex);
+		if (cancelBuffering > 0)
+		{
+			rc = 0;
+			tsBuffer.clear();
+			tsBufferSize = 0;
+		}
+		pthread_mutex_unlock(&mutex);
 	}
 	
-	return tsBuffer.size();
+	return tsBufferSize;
 }
 
 int eMoviePlayer::requestStream()
@@ -328,7 +350,10 @@ int eMoviePlayer::playStream(eString mrl)
 	{
 		eDebug("[MOVIEPLAYER] buffer is empty.");
 		close(fd);
-		return -4;
+		if (cancelBuffering > 0)
+			return 0;
+		else
+			return -4;
 	}
 	
 	status.BUFFERFILLED = true;
@@ -370,7 +395,8 @@ int eMoviePlayer::playStream(eString mrl)
 	Decoder::Set();
 
 #ifndef DISABLE_LCD
-	eZapLCD::getInstance()->lcdMain->ServiceName->setText(mrl);
+	unsigned int pos = mrl.find_last_of('/');
+	eZapLCD::getInstance()->lcdMain->ServiceName->setText(mrl.right(mrl.size() - pos - 1));
 #endif
 
 	createThreads();
@@ -475,13 +501,6 @@ void eMoviePlayer::gotMessage(const Message &msg )
 			break;
 		case Message::forward:
 			break;
-		case Message::stop:
-		case Message::terminate:
-		{
-			killThreads();
-//			leaveStreamingClient();
-			break;
-		}
 		case Message::jump:
 		{
 			int jump = atoi(eString(msg.filename).c_str());
