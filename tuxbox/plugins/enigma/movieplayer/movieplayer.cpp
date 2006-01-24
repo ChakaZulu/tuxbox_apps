@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.15 2006/01/08 21:25:57 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.16 2006/01/24 20:00:42 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -23,7 +23,7 @@
 #include <plugin.h>
 #include "movieplayer.h"
 
-#define REL "Movieplayer Plugin, Version 0.7.0"
+#define REL "Movieplayer Plugin, Version 0.8.0"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -122,6 +122,14 @@ eSCGui::~eSCGui()
 	delete timer;
 }
 
+bool eSCGui::supportedFileType(eString filename)
+{
+	unsigned int pos = filename.find_last_of('.');
+	eString extension = filename.right(filename.size() - pos - 1);
+	struct videoTypeParms videoParms = eMoviePlayer::getInstance()->mpconfig.getVideoParms("File", extension);
+	return videoParms.name == "File";
+}
+
 void eSCGui::loadList(int mode, eString pathfull)
 {
 	playList.clear();
@@ -132,22 +140,22 @@ void eSCGui::loadList(int mode, eString pathfull)
 	{
 		case DATA:
 			tmp2 = "File";
-			setText("VLC " + tmp2 + " - Path: " + pathfull);
+			setText(tmp2 + " - Path: " + pathfull);
 			tmp3 = "";
 			break;
 		case VCD:
 			tmp2 = "VCD";  
-			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
+			setText(tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "vcd:";
 			break;
 		case SVCD:
 			tmp2 = "SVCD"; 
-			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
+			setText(tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "vcd:";
 			break;
 		case DVD:
 			tmp2 = "DVD";  
-			setText("VLC " + tmp2 + " - Drive: " + cddrive); 
+			setText(tmp2 + " - Drive: " + cddrive); 
 			tmp3 = "dvdsimple:";
 			break;
 	}
@@ -158,6 +166,7 @@ void eSCGui::loadList(int mode, eString pathfull)
 		sendGetRequest("/admin/dboxfiles.html?dir=" + pathfull.strReplace(" ", "%20"), response);
 
 		std::replace(response.begin(), response.end(), '\\', '/');
+		response.strReplace("://", ":/"); // what the heck...
 
 		if (response && response != "-1")
 		{
@@ -194,11 +203,14 @@ void eSCGui::loadList(int mode, eString pathfull)
 				}
 				else
 				{
-					a.Filename = entry;
-					a.Fullname = entry;
-					a.Filetype = FILES;
-					eDebug("[MOVIEPLAYER] file: %s",a.Fullname.c_str());
-					playList.push_back(a);
+					if (supportedFileType(entry))
+					{
+						a.Filename = entry;
+						a.Fullname = entry;
+						a.Filetype = FILES;
+						eDebug("[MOVIEPLAYER] file: %s",a.Fullname.c_str());
+						playList.push_back(a);
+					}
 				}
 				start = pos + 1;
 			}
@@ -239,7 +251,7 @@ void eSCGui::viewList()
 	int current = 0;
 
 	for (PlayList::iterator p = playList.begin(); p != playList.end(); p++)
-		new eListBoxEntryText(list, (*p).Filename, (void *)current++);
+		(*p).listEntry = new eListBoxEntryText(list, (*p).Filename, (void *)current++);
 		
 	list->endAtomic();
 	setStatus(0);
@@ -247,7 +259,7 @@ void eSCGui::viewList()
 
 void eSCGui::setStatus(int val)
 {
-	if (playList.size())
+	if (playList.size() >  0)
 	{
 		switch (playList[val].Filetype)
 		{
@@ -258,7 +270,8 @@ void eSCGui::setStatus(int val)
 				list->setHelpText(_("Enter directory"));
 				break;
 			case FILES:
-				list->setHelpText(_("Press OK to play"));
+				unsigned int pos = playList[val].Filename.find_last_of('/');
+				list->setHelpText(playList[val].Filename.right(playList[val].Filename.length() - pos - 1));
 				break;
 		}
 	}
@@ -307,8 +320,8 @@ void eSCGui::timerHandler()
 		case eMoviePlayer::STREAMERROR:
 		{
 			eMessageBox msg(_("A streaming error occurred.\nPlease make sure that VLC is started on the PC and that it can play the file you selected."), _("Error"), eMessageBox::btOK|eMessageBox::iconError); 
-			msg.show(); 
-			msg.exec(); 
+			msg.show();
+			msg.exec();
 			msg.hide();
 		}
 		case eMoviePlayer::STOPPED:
@@ -318,6 +331,7 @@ void eSCGui::timerHandler()
 				if (++val >= playList.size())
 					val = 0;
 				playerStart(val);
+				list->setCurrent(playList[val].listEntry);
 			}
 			else
 				showMenu();
@@ -348,7 +362,7 @@ void eSCGui::playerStart(int val)
 
 	eDebug("\n[VLC] play %d \"%s\"", val, playList[val].Fullname.c_str());
 	if (eMoviePlayer::getInstance()->status.STAT != eMoviePlayer::STOPPED)
-		eMoviePlayer::getInstance()->control("terminate", "");
+		eMoviePlayer::getInstance()->control("stop", "");
 	
 	eMoviePlayer::getInstance()->control("start2", playList[val].Fullname.c_str());
 	timer->start(2000, true);
@@ -437,7 +451,7 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 			jump = 5; 
 		else 
 		if (e.action == &i_shortcutActions->number6) 
-			jump = 6; 	
+			jump = 6;	
 		else 
 		if (e.action == &i_shortcutActions->number7) 
 			jump = 7; 
@@ -468,13 +482,14 @@ int eSCGui::eventHandler(const eWidgetEvent &e)
 static char *NAME[] = 
 {
 	"-----------------------------",
-	"Keys (if menu is not visible)",
+	"Keys",
 	"-----------------------------",
-	"red: Start skipping reverse",
-	"green: Play/Resync",
-	"yellow: Pause",
-	"blue: Start skipping forward",
-	"1-9: Skip 1-9 minutes",
+	"exit: cancel playback",
+	"red: Start skipping reverse (n/a)",
+	"green: Play/Resync (n/a)",
+	"yellow: Pause (n/a)",
+	"blue: Start skipping forward (n/a)",
+	"1-9: Skip 1-9 minutes (n/a)",
 	" "
 };
 

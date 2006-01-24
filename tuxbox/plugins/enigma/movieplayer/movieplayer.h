@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.8 2005/12/26 11:51:22 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.9 2006/01/24 20:00:42 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -36,6 +36,7 @@ class PLAYLIST
 public:
 	int Filetype;
 	eString Filename, Fullname;
+	eListBoxEntryText *listEntry;
 };
 
 typedef std::vector<PLAYLIST> PlayList;
@@ -67,6 +68,7 @@ class eSCGui: public eWindow
 	void loadList(int mode, eString path);
 	void viewList();
 	void setStatus(int val);
+	bool supportedFileType(eString filename);
 
 	void listSelected(eListBoxEntryText *item);
 	void listSelChanged(eListBoxEntryText *item);
