@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.16 2006/01/24 20:00:42 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.17 2006/01/26 19:20:33 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -23,7 +23,7 @@
 #include <plugin.h>
 #include "movieplayer.h"
 
-#define REL "Movieplayer Plugin, Version 0.8.0"
+#define REL "Movieplayer Plugin, Version 0.8.1"
 
 extern "C" int plugin_exec(PluginParam *par);
 extern eString getWebifVersion();
@@ -102,14 +102,14 @@ eSCGui::eSCGui(): menu(true)
 	eMoviePlayer::getInstance()->mpconfig.load();
 	server = eMoviePlayer::getInstance()->mpconfig.getServerConfig();
 	
-	send_parms.IP = server.serverIP;
-	send_parms.IF_PORT = server.webifPort;
+	VLC_IP = server.serverIP;
+	VLC_IF_PORT = server.webifPort;
 	
 	startdir = server.startDir;
 	cddrive = server.CDDrive;	
 
 	if (server.vlcUser && server.vlcPass)
-		send_parms.AUTH = server.vlcUser + ":" + server.vlcPass;
+		VLC_AUTH = server.vlcUser + ":" + server.vlcPass;
 	
 	int mode = DATA;
 	eConfig::getInstance()->getKey("/enigma/plugins/movieplayer/lastmode", mode);
@@ -328,8 +328,12 @@ void eSCGui::timerHandler()
 		{
 			if (playList.size() > 1)
 			{
-				if (++val >= playList.size())
-					val = 0;
+				do
+				{
+					if (++val >= playList.size())
+			 			val = 0;
+		 		} while (playList[val].Filetype != FILES);
+			
 				playerStart(val);
 				list->setCurrent(playList[val].listEntry);
 			}
@@ -521,7 +525,7 @@ CURLcode eSCGui::sendGetRequest (const eString& url, eString& response)
 	CURL *curl;
 	CURLcode httpres;
 
-	eString tmpurl= "http://" + send_parms.IP + ":" + send_parms.IF_PORT + url;
+	eString tmpurl= "http://" + VLC_IP + ":" + VLC_IF_PORT + url;
 	response = "";
 
 	curl = curl_easy_init();
@@ -529,8 +533,8 @@ CURLcode eSCGui::sendGetRequest (const eString& url, eString& response)
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
 	curl_easy_setopt(curl, CURLOPT_FILE, (void *)&response);
 
-	if(send_parms.AUTH)
-		curl_easy_setopt (curl, CURLOPT_USERPWD, send_parms.AUTH.c_str());	
+	if (VLC_AUTH)
+		curl_easy_setopt (curl, CURLOPT_USERPWD, VLC_AUTH.c_str());	
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
 	curl_easy_setopt (curl, CURLOPT_TIMEOUT, 5);
 	httpres = curl_easy_perform (curl);
