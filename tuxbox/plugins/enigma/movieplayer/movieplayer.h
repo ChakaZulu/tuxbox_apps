@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.h,v 1.9 2006/01/24 20:00:42 digi_casi Exp $
+ * $Id: movieplayer.h,v 1.10 2006/01/27 09:48:46 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *          based on vlc plugin by mechatron
@@ -46,10 +46,7 @@ class eSCGui: public eWindow
 	enum {GOUP, DIRS, FILES};
 	enum {DATA, VCD, SVCD, DVD};
 
-	struct server_value
-	{
-		eString IP, IF_PORT, AUTH;
-	} send_parms;
+	eString VLC_IP, VLC_IF_PORT, VLC_AUTH;
 
 	PlayList playList;
 	
