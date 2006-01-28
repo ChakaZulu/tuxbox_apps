@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.42  2006/01/28 10:29:23  robspr1
+ * - bugfix: close IMAP connection in any case
+ *
  * Revision 1.41  2006/01/23 20:46:13  robspr1
  * - wait before receiving answer on SMTP commands
  *
@@ -2205,6 +2208,7 @@ int SendIMAPCommand(int command, char *param, char *param2)
 							}
 							if(!strncmp(recv_buffer, "? NO", 4))
 							{
+								close(sock);
 								return 0;
 							}
 						}
@@ -2509,6 +2513,7 @@ int SendIMAPCommand(int command, char *param, char *param2)
 			}
 
 	slog ? syslog(LOG_DAEMON | LOG_INFO, "IMAP Server (%s)", recv_buffer) : printf("TuxMailD <IMAP Server (%s)>\n", recv_buffer);
+	close(sock);
 	return 0;
 }
 
@@ -4451,7 +4456,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.41 $";
+	char cvs_revision[] = "$Revision: 1.42 $";
 	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
