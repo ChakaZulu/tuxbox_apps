@@ -50,7 +50,7 @@
 
 #define DEFAULT_FB      "/dev/fb/0"
 #define PACKAGE 	"fbshot"
-#define VERSION 	"0.3"
+#define VERSION 	"0.4"
 #define MAINTAINER_NAME "Dariusz Swiderski"
 #define MAINTAINER_ADDR "sfires@sfires.net"
 
@@ -67,6 +67,7 @@ static int waitbfg=0; /* wait before grabbing (for -C )... */
 #define GREEN1555(x) ((((x) >> (5 )) & 0x1f) << 3)
 #define BLUE1555(x)  ((((x) >> (0 )) & 0x1f) << 3)
 
+
 struct picture{
   int xres,yres;
   char *buffer;
@@ -81,7 +82,7 @@ void FatalError(char* err){
 }
 
 void Usage(char *binary){
-  printf("Usage: %s [-ghi] [-{C|c} vt] [-d dev] [-s n] filename.png\n", binary);
+  printf("Usage: %s [-ghi] [-{C|c} vt] [-d dev] [-s n] [-q] filename.png\n", binary);
 }
 
 void Help(char *binary){
@@ -100,6 +101,7 @@ void Help(char *binary){
     printf("\t-h    \tprint this usage information\n");
     printf("\t-i    \tturns OFF interlacing\n");
     printf("\t-s n  \tsleep n seconds before making screenshot\n");
+    printf("\t-q    \tquick: less compression\n");
 
     printf("\nSend feedback !!!\n");
 }
@@ -258,7 +260,7 @@ void convert565to24(struct picture *pict){
   pict->buffer=out;
 }
 
-static int Write_PNG(struct picture * pict, char *filename, int interlace, int gray){
+static int Write_PNG(struct picture * pict, char *filename, int interlace, int gray, int quick){
   png_bytep *row_pointers;
   png_structp png_ptr;
   png_infop info_ptr;
@@ -312,8 +314,11 @@ static int Write_PNG(struct picture * pict, char *filename, int interlace, int g
   png_set_text(png_ptr, info_ptr, txt_ptr, 4);
 
   png_init_io(png_ptr, OUTfd);
-    
-  png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+  
+  if(quick != 0)  
+  	png_set_compression_level(png_ptr, Z_BEST_SPEED);
+  else
+  	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
   row_pointers=(png_bytep*)malloc(sizeof(png_bytep)*pict->yres);
 
@@ -388,7 +393,7 @@ static int Write_PNG(struct picture * pict, char *filename, int interlace, int g
 
 
 
-static char optstring[] = "hiC:c:d:s:";
+static char optstring[] = "hiqC:c:d:s:";
 static struct option long_options[] = {
         {"slowcon", 1, 0, 'C'},
         {"console", 1, 0, 'c'},
@@ -396,6 +401,7 @@ static struct option long_options[] = {
         {"help", 0, 0, 'h'},
         {"noint", 0, 0, 'i'},
         {"sleep", 1, 0, 's'},
+        {"quick", 0, 0, 'q'},
         {0, 0, 0, 0}
         };
                                                                 
@@ -405,7 +411,8 @@ int main(int argc, char **argv){
   struct picture pict;
   int interlace=PNG_INTERLACE_ADAM7;
   int gray=0; /* -1 on ; 0 off ; */
-
+  int quick=0;
+  
   pict.colormap=NULL;
   
   for(;;){
@@ -435,6 +442,9 @@ int main(int argc, char **argv){
     case 'i':
       interlace=PNG_INTERLACE_NONE;
       break;
+    case 'q':
+      quick=1;
+      break;
     case 's':
       sleep (atoi(optarg));
       break;
@@ -459,7 +469,7 @@ int main(int argc, char **argv){
 
   printf("Writing %s ...",outfile);fflush(stdout);
       
-  Write_PNG(&pict, outfile, interlace, gray );
+  Write_PNG(&pict, outfile, interlace, gray, quick);
 
   if(pict.colormap){
     free(pict.colormap->red);
