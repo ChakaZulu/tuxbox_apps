@@ -1,5 +1,5 @@
 /*
- * $Id: movieplayer.cpp,v 1.41 2006/01/24 19:36:17 digi_casi Exp $
+ * $Id: movieplayer.cpp,v 1.42 2006/01/28 15:58:27 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -114,8 +114,8 @@ void killReceiverThread()
 
 void killThreads()
 {
-	killReceiverThread();
 	killPVRThread();
+	killReceiverThread();
 }
 
 eMoviePlayer::eMoviePlayer(): messages(this, 1)
@@ -149,7 +149,9 @@ void eMoviePlayer::thread()
 void eMoviePlayer::leaveStreamingClient()
 {
 	eMoviePlayer::getInstance()->sendRequest2VLC("?control=stop");
+	pthread_mutex_lock(&mutex);
 	tsBuffer.clear();
+	pthread_mutex_unlock(&mutex);
 	Decoder::Flush();
 	status.ACTIVE = false;
 	status.STAT = STOPPED;
