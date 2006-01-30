@@ -613,6 +613,14 @@ void eListBoxBase::init()
 	for (int i = 0; i < (MaxEntries*columns); ++i, ++bottom)
 		if (bottom == childs.end() )
 			break;
+
+	/* when the first item isn't a selectable item, keep scrolling down till we find one */
+	while ( !current->isSelectable() && current != --childs.end())
+	{
+		++current;
+		++currentPos;
+	}
+
 	if (!in_atomic)
 	{
 		invalidateContent();
@@ -656,10 +664,17 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 					}
 				}
 			}
-			if( !current->isSelectable() )
+			/* when we didn't find a selectable item, keep scrolling down till we find one */
+			while ( !current->isSelectable() && current != --childs.end())
 			{
 				++current;
 				++currentPos;
+			}
+			/* when we couldn't find a selectable item below, find the nearest one above */
+			while ( !current->isSelectable() && current != childs.begin())
+			{
+				--current;
+				--currentPos;
 			}
 		break;
 
@@ -685,7 +700,14 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 							++bottom;
 				}
 			}
-			if( !current->isSelectable() )
+			/* when we didn't find a selectable item, keep scrolling up till we find one */
+			while ( !current->isSelectable() && current != childs.begin())
+			{
+				--current;
+				--currentPos;
+			}
+			/* when we couldn't find a selectable item above, find the nearest one below */
+			while ( !current->isSelectable() && current != --childs.end())
 			{
 				++current;
 				++currentPos;
@@ -768,8 +790,12 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 			for (int i = 0; i < MaxEntries * columns; ++i, ++bottom)
 				if ( bottom == childs.end() )
 					break;
-			if( !current->isSelectable() )
-				current++;
+			/* when the first item isn't a selectable item, keep scrolling down till we find one */
+			while ( !current->isSelectable() && current != --childs.end())
+			{
+				++current;
+				++currentPos;
+			}
 			break;
 		case dirLast:
 		{
@@ -781,8 +807,12 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 			for (int i = 0; i < (cnt?cnt:MaxEntries*columns); ++i, --top)
 				if (top == childs.begin())
 					break;
-			if( !current->isSelectable() )
-				current--;
+			/* when the last item isn't a selectable item, keep scrolling up till we find one */
+			while ( !current->isSelectable() && current != childs.begin())
+			{
+				--current;
+				--currentPos;
+			}
 			break;
 		}
 		default:
