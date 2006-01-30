@@ -100,6 +100,14 @@ function loadBouquets(bouquet)
 	}
 	document.channelselector.bouquet.selectedIndex = bouquet;
 }
+function vlcEmpty()
+{
+	vlccmd.location = "http://127.0.0.1:8080/?control=empty";
+}
+function vlcPlay()
+{
+	vlccmd.location = "http://127.0.0.1:8080/?control=play";
+}
 function vlcStop()
 {
 	vlccmd.location = "http://127.0.0.1:8080/?control=pause";
@@ -114,8 +122,8 @@ function vlcStart()
 	{
 		if (parent.data.vlcparms.indexOf("ffffffff") == -1)
 		{
-			vlccmd.location.href = "http://127.0.0.1:8080/?control=add&mrl=" + parent.data.vlcparms;
-			setTimeout("vlcStartItem()", 200);
+			vlcEmpty();
+			setTimeout("vlcStartItem(parent.data.vlcparms)", 200);
 		}
 		else
 		{
@@ -127,11 +135,13 @@ function vlcStart()
 	else
 		setTimeout("vlcStart()", 200);
 }
-function vlcStartItem()
+function vlcStartItem(sref)
 {
-	vlccmd.location.href = "http://127.0.0.1:8080/?control=next";
-	setTimeout("vlcPause()", 100);
-	setTimeout("setStreamingServiceRef()", 200);
+	vlccmd.location.href = "http://127.0.0.1:8080/?control=add&mrl=" + sref;
+	setTimeout("vlcPlay()", 200);
+	setTimeout("vlcStop()", 400);
+	setTimeout("vlcPlay()", 600);
+	setStreamingServiceRef();
 }
 function setStreamingServiceRef()
 {
