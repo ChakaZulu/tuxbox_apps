@@ -92,6 +92,7 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb)
 
 	initCAlist();
 
+	timeSet = false;
 	transponder=0;
 	tdt=0;
 	tMHWEIT=0;
@@ -642,7 +643,7 @@ void eDVBServiceController::TDTready(int error)
 
 		int new_diff=0;
 
-		if ( dvb.time_difference )  // ref time ready?
+		if (timeSet)  // ref time ready?
 		{
 			// difference between reference time (current enigma time) 
 			// and the transponder time
@@ -739,6 +740,8 @@ void eDVBServiceController::TDTready(int error)
 		}
 		else if ( !dvb.time_difference )
 			dvb.time_difference=1;
+
+		timeSet = true;
 
 		/*emit*/ dvb.timeUpdated();
 	}

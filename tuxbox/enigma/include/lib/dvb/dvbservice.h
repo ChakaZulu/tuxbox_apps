@@ -129,6 +129,7 @@ public:
 	int spSID;
 	eTransponder *transponder;
 	TDT *tdt;
+	bool timeSet;
 
 	static pthread_mutex_t availCALock;
 
