@@ -328,7 +328,6 @@ void CPlugins::startPlugin(int number,int param)
 		return;
 	}
 
-
 	PluginExec execPlugin;
 	char depstring[129];
 	char			*argv[20];
@@ -429,30 +428,28 @@ void CPlugins::startPlugin(int number,int param)
 			break;
 		}
 	}
-	while ( i == argc )		// alles geladen
+
+	if ( i == argc )		// alles geladen
 	{
 		handle = dlopen ( plugin_list[number].pluginfile.c_str(), RTLD_NOW);
 		if (!handle)
 		{
 			fputs (dlerror(), stderr);
-			//should unload libs!
-			break;
+		} else {
+			execPlugin = (PluginExec) dlsym(handle, "plugin_exec");
+			if ((error = dlerror()) != NULL)
+			{
+				fputs(error, stderr);
+				dlclose(handle);
+			} else {
+				printf("[CPlugins] try exec...\n");
+				execPlugin(startparam);
+				dlclose(handle);
+				printf("[CPlugins] exec done...\n");
+			}
 		}
-		execPlugin = (PluginExec) dlsym(handle, "plugin_exec");
-		if ((error = dlerror()) != NULL)
-		{
-			fputs(error, stderr);
-			dlclose(handle);
-			//should unload libs!
-			break;
-		}
-		printf("[CPlugins] try exec...\n");
-		execPlugin(startparam);
-		dlclose(handle);
-		printf("[CPlugins] exec done...\n");
+
 		//restore framebuffer...
-
-
 		if (!plugin_list[number].rc)
 			g_RCInput->restartInput();
 		g_RCInput->clearRCMsg();
@@ -485,8 +482,6 @@ void CPlugins::startPlugin(int number,int param)
 			}
 		}
 #endif
-		//redraw menue...
-		break;	// break every time - never loop - run once !!!
 	}
 
 	/* unload shared libs */
