@@ -19,11 +19,12 @@ void ePMTClient::connectionLost()
 }
 
 eDVBCAHandler::eDVBCAHandler()
- : eServerSocket(PMT_SERVER_SOCKET, eApp)
+ : eServerSocket(PMT_SERVER_SOCKET, eApp), serviceLeft(eApp)
 {
 	services.setAutoDelete(true);
 	clients.setAutoDelete(true);
 	CONNECT( eDVB::getInstance()->leaveTransponder, eDVBCAHandler::leaveTransponder );
+	CONNECT(serviceLeft.timeout, eDVBCAHandler::serviceGone);
 	eDVBCaPMTClientHandler::registerCaPMTClient(this);  // static method...
 }
 
@@ -69,6 +70,7 @@ void eDVBCAHandler::enterService( const eServiceReferenceDVB &service )
 		std::find(services.begin(), services.end(), service );
 	if ( it == services.end() )
 	{
+		serviceLeft.stop();
 		services.push_back(new CAService( service ));
 	}
 
@@ -84,11 +86,20 @@ void eDVBCAHandler::leaveService( const eServiceReferenceDVB &service )
 		std::find(services.begin(), services.end(), service );
 	if ( it != services.end() )
 	{
+		serviceLeft.startLongTimer(2);
 		services.erase(it);
 	}
 
 	/* our servicelist has changed, distribute the list of CAPMT objects to all our clients */
 	distributeCAPMT();
+}
+
+void eDVBCAHandler::serviceGone()
+{
+	if (!services.size())
+	{
+		clients.clear();
+	}
 }
 
 void eDVBCAHandler::distributeCAPMT()

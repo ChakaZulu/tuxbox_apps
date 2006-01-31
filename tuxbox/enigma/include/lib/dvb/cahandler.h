@@ -116,10 +116,13 @@ class eDVBCAHandler: public eDVBCaPMTClient, public eServerSocket
 {
 	ePtrList<CAService> services;
 	ePtrList<ePMTClient> clients;
+	eTimer serviceLeft;
+
 	void enterTransponder( eTransponder* );
 	void leaveTransponder( eTransponder* );
 	void newConnection(int socket);
 	void distributeCAPMT();
+	void serviceGone();
 
 public:
 	void enterService( const eServiceReferenceDVB &service );
