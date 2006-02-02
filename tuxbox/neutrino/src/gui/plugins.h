@@ -92,7 +92,7 @@ class CPlugins
 		std::string plugin_dir;
 		std::string scriptOutput;
 
-		void parseCfg(plugin *plugin_data);
+		bool parseCfg(plugin *plugin_data);
 		void scanDir(const char *dir);
 		bool plugin_exists(const std::string & filename);
 		int find_plugin(const std::string & filename);

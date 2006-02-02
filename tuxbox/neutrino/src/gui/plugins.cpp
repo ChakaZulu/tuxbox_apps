@@ -116,26 +116,29 @@ void CPlugins::scanDir(const char *dir)
 			fname += '/';
 			new_plugin.cfgfile = fname.append(new_plugin.filename);
 			new_plugin.cfgfile.append(".cfg");
-			parseCfg(&new_plugin);
-			new_plugin.pluginfile = fname;
-			if (new_plugin.type == CPlugins::P_TYPE_SCRIPT)
+			bool plugin_ok = parseCfg(&new_plugin);
+			if (plugin_ok) 
 			{
-				new_plugin.pluginfile.append(".sh");
-			} else {
-				new_plugin.pluginfile.append(".so");
-			}
-			// We do not check if new_plugin.pluginfile exists since .cfg in
-			// PLUGINDIR_VAR can overwrite settings in read only dir
-			// PLUGINDIR. This needs PLUGINDIR_VAR to be scanned at
-			// first -> .cfg in PLUGINDIR will be skipped since plugin
-			// already exists in the list.
-			// This behavior is used to make sure plugins can be disabled
-			// by creating a .cfg in PLUGINDIR_VAR (PLUGINDIR often is read only).
+				new_plugin.pluginfile = fname;
+				if (new_plugin.type == CPlugins::P_TYPE_SCRIPT)
+				{
+					new_plugin.pluginfile.append(".sh");
+				} else {
+					new_plugin.pluginfile.append(".so");
+				}
+				// We do not check if new_plugin.pluginfile exists since .cfg in
+				// PLUGINDIR_VAR can overwrite settings in read only dir
+				// PLUGINDIR. This needs PLUGINDIR_VAR to be scanned at
+				// first -> .cfg in PLUGINDIR will be skipped since plugin
+				// already exists in the list.
+				// This behavior is used to make sure plugins can be disabled
+				// by creating a .cfg in PLUGINDIR_VAR (PLUGINDIR often is read only).
 
-			if(!plugin_exists(new_plugin.filename))
-			{
-				plugin_list.push_back(new_plugin);
-				number_of_plugins++;
+				if(!plugin_exists(new_plugin.filename))
+				{
+					plugin_list.push_back(new_plugin);
+					number_of_plugins++;
+				}
 			}
 		}
 	}
@@ -158,13 +161,14 @@ CPlugins::~CPlugins()
 	plugin_list.clear();
 }
 
-void CPlugins::parseCfg(plugin *plugin_data)
+bool CPlugins::parseCfg(plugin *plugin_data)
 {
 //	FILE *fd;
 
 	std::ifstream inFile;
 	std::string line[20];
 	int linecount = 0;
+	bool reject = false;
 
 	inFile.open(plugin_data->cfgfile.c_str());
 
@@ -236,10 +240,15 @@ void CPlugins::parseCfg(plugin *plugin_data)
 		{
 			plugin_data->hide = ((parm == "1")?true:false);
 		}
+		else if (cmd == "needenigma")
+		{
+			reject = ((parm == "1")?true:false);
+		}
 
 	}
 
 	inFile.close();
+	return !reject;
 }
 
 PluginParam * CPlugins::makeParam(const char * const id, const char * const value, PluginParam * const next)
