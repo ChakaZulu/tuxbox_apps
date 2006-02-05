@@ -1,3 +1,9 @@
+// The -i option was implemented by Barf on 2006-02-05. It creates the file
+// /etc/network/interfaces (brutally overwriting any existing
+// such). Gateway address, netmask, and broadcast address are filled
+// in using heuristics, although the latter two should be right in 99%
+// of all cases.
+
 #include <stdio.h>
 #include <errno.h>
 #include <linux/input.h>
@@ -9,9 +15,13 @@ CLCDDisplay display;
 
 int pt[3]={1, 10, 100};
 
-int main()
+int main(int argc, char *argv[])
 {
+	bool write_etc_network_interfaces = false;
 	int ip[4]={192,168,0,1};
+
+	if (argc > 1 && strcmp(argv[1], "-i") == 0)
+		write_etc_network_interfaces = true;
 
 	display.draw_string(10, 10, "IP eingeben:");
 	
@@ -161,14 +171,36 @@ int main()
 	}
 	RCClose();
 	
-	FILE* paFile=fopen("/var/ip.lcdip", "w"); 
-	if (paFile == NULL){
-		perror ("writing /var/ip.lcdip");
-		return 2;
-	}
+	if (write_etc_network_interfaces) {
+		FILE* paFile=fopen("/etc/network/interfaces", "w"); 
+		if (paFile == NULL){
+			perror ("writing /etc/network/interfaces");
+			return 2;
+		}
 
-	fprintf (paFile,"%03d.%03d.%03d.%03d\n",ip[0],ip[1],ip[2],ip[3]);
-	fclose(paFile);
+		fprintf (paFile,
+			 "auto lo\n"
+			 "iface lo inet loopback\n\n"
+			 "auto eth0\n"
+			 "iface eth0 inet static\n"
+			 "address %d.%d.%d.%d\n"
+			 "gateway %d.%d.%d.0\n"
+			 "netmask 255.255.255.0\n"
+			 "broadcast %d.%d.%d.255\n",
+			 ip[0],ip[1],ip[2],ip[3],
+			 ip[0],ip[1],ip[2],
+			 ip[0],ip[1],ip[2]);
+		fclose(paFile);
+	} else {
+	FILE* paFile=fopen("/var/ip.lcdip", "w"); 
+		if (paFile == NULL){
+			perror ("writing /var/ip.lcdip");
+			return 2;
+		}
+
+		fprintf (paFile,"%03d.%03d.%03d.%03d\n",ip[0],ip[1],ip[2],ip[3]);
+		fclose(paFile);
+	}
 
 // if needed: replace with whatever you want to do with the ip...
 /*	char exec[100];
