@@ -70,8 +70,8 @@ eString removeTags(eString in)
 			
 
 rssMain::rssMain(): eWindow(1)
-{	cmove(ePoint(140, 140));
-	cresize(eSize(440, 296));
+{	cmove(ePoint(140, 120));
+	cresize(eSize(440, 336));
 	setText("Dreambox RSS reader");
 
 	theList = new eListBox<eListBoxEntryText>(this);
@@ -320,15 +320,14 @@ int ConfigParser::parse(eString file)
 		msg.show();     msg.exec();     msg.hide();
 		return 0;
 	}
-	return 0;
 }
 
 rssDetail::rssDetail(const char *title, const char *desc) : eWindow(0)
 {
 	setText(title);
 
-	move(ePoint(100, 120));
-	resize(eSize(520, 336));	
+	move(ePoint(80, 123));
+	resize(eSize(560, 353));	
 
 	scrollbar = new eProgress(this);
         scrollbar->setStart(0);
@@ -350,7 +349,7 @@ rssDetail::rssDetail(const char *title, const char *desc) : eWindow(0)
 	float lineheight=fontRenderClass::getInstance()->getLineHeight( descrLabel->getFont() );
 	int lines = descrWidget->getSize().height() / (int)lineheight;
 	//pageHeight = (int)(lines * lineheight);
-	int newheight = lines * (int)lineheight + (int)(round(lineheight) - (int)lineheight);
+	int newheight = lines * (int)lineheight + (int)(round(lineheight + 0.5) - (int)lineheight);
 	descrWidget->resize( eSize( descrWidget->getSize().width(), newheight + (int)lineheight/6 ));
 	descrLabel->resize( 
 		eSize(
@@ -362,7 +361,7 @@ rssDetail::rssDetail(const char *title, const char *desc) : eWindow(0)
 	const eRect &cr = getClientRect();
 	eButton * ok = new eButton(this);
 	ok->setText("OK");
-	ok->move(ePoint(10, cr.height() - 30));
+	ok->move(ePoint((cr.width() - 78)/2, cr.height() - 30));
 	ok->resize(eSize(78, 20));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
