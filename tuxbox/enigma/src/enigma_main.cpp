@@ -7155,7 +7155,7 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 				if ( eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 				{
 					prev = new eListBoxEntryText(&list, _("duplicate bouquet"), (void*)8, 0, _("duplicate the complete bouquet with all content"));
-					prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+					prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 				}
 			}
 			else // add dvb service to specific bouquet
@@ -7163,14 +7163,14 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 				prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to another bouquet"));
 				if ( path.type == eServicePlaylistHandler::ID )
 					prev = new eListBoxEntryText(&list, _("add marker"), (void*)13, 0, _("create a new marker in the current bouquet"));
-				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+				prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			}
 
 			// rename bouquet
 			if ( ref.type == eServicePlaylistHandler::ID )
 			{
 				if ( prev && prev->isSelectable() )
-					prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+					prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 				prev = new eListBoxEntryText(&list, _("rename"), (void*)7, 0, _("rename the current selected bouquet"));
 			}
 
@@ -7184,14 +7184,14 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 					) )
 			{
 				if ( prev && prev->isSelectable() )
-					prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+					prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 				prev = new eListBoxEntryText(&list, _("rename"), (void*)9, 0, _("rename the current selected service/movie"));
 			}
 
 			// all what contain in a playlists is deleteable
 			prev = new eListBoxEntryText(&list, _("delete"), (void*)1, 0, _("delete the current selected service/movie"));
 
-			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		}
 
 		// move mode in playlists
@@ -7219,7 +7219,7 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 		else if ( ref.type == eServiceReference::idDVB && !ref.path )
 		{
 			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
-			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			prev = new eListBoxEntryText(&list, _("rename"), (void*)9, 0, _("rename the current selected service/movie"));
 			prev = new eListBoxEntryText(&list, _("delete"), (void*)1, 0, _("delete the current selected service/movie"));
 			b=false;
@@ -7234,11 +7234,11 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 		{// deleteable file
 			if ( ref.type != 0x2000 )
 				prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected file to a selectable bouquet"));
-			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			prev = new eListBoxEntryText(&list, _("delete file"), (void*)14, 0, _("delete the selected file (and all corresponding ts files"));
 			prev = new eListBoxEntryText(&list, _("rename file"), (void*)15, 0, _("rename the selected file (and all corresponding ts files"));
 			if ( ref.type != 0x2000 )
-				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+				prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		}
 #endif
 	}
@@ -7260,7 +7260,7 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 		if (ref)
 		{
 			if ( prev && prev->isSelectable() )
-				new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+				new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			if ( ref.isLocked() )
 				new eListBoxEntryText(&list, _("unlock"), (void*)11, 0, _("do parental-unlock the selected service or file"));
 			else
@@ -7314,7 +7314,7 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 			new eListBoxEntryText(&list, _("restart"), (void*)4, 0, _("restart your dbox-2"));
 			break;
 	}
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	new eListBoxEntryText(&list, _("goto standby"), (void*)2, 0, _("goto standby mode") );
 	new eListBoxEntryText(&list, _("set sleeptimer"), (void*)3, 0, _("set a sleep timer"));
 	CONNECT(list.selected, eSleepTimerContextMenu::entrySelected);
@@ -7443,7 +7443,7 @@ eRecordContextMenu::eRecordContextMenu( eWidget *LCDTitle, eWidget *LCDElement )
 #endif
 	move(ePoint(150, 130));
 	new eListBoxEntryText(&list, _("stop record now"), (void*)1, 0, _("immediate stop the recording"));
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	new eListBoxEntryText(&list, _("set record duration"), (void*)2, 0, _("set the recording time (in minutes)"));
 	new eListBoxEntryText(&list, _("set record stop time"), (void*)3, 0, _("set the recording end time") );
 	CONNECT(list.selected, eRecordContextMenu::entrySelected);

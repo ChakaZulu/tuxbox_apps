@@ -26,7 +26,7 @@
 tsSelectType::tsSelectType(eWidget *parent)
 	:eWidget(parent), check(NULL)
 {
-	list=new eListBox<eListBoxEntryText>(this);
+	list=new eListBox<eListBoxEntryMenu>(this);
 	list->setName("menu");
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "tsSelectType"))
@@ -36,18 +36,18 @@ tsSelectType::tsSelectType(eWidget *parent)
 
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
 	{
-		check=new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)list, _("Disable 5V"), "/elitedvb/DVB/config/disable_5V", _("disable 5V for passive terrerstrial antennas"));
+		check=new eListBoxEntryCheck(list, _("Disable 5V"), "/elitedvb/DVB/config/disable_5V", _("disable 5V for passive terrerstrial antennas"));
 		check->selected.connect( slot(*eFrontend::getInstance(), &eFrontend::setTerrestrialAntennaVoltage) );
-		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+		new eListBoxEntryMenuSeparator(list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	}
-	new eListBoxEntryText(list, _("Automatic Transponder Scan"), (void*)2, 0, _("open automatic transponder scan") );
+	new eListBoxEntryMenuItem(list, _("Automatic Transponder Scan"), (void*)2, 0, _("open automatic transponder scan") );
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
-		new eListBoxEntryText(list, _("Automatic Multisat Scan"), (void*)3, 0, _("open automatic multisat transponder scan") );
-	new eListBoxEntryText(list, _("manual scan.."), (void*)1, 0, _("open manual transponder scan") );
+		new eListBoxEntryMenuItem(list, _("Automatic Multisat Scan"), (void*)3, 0, _("open automatic multisat transponder scan") );
+	new eListBoxEntryMenuItem(list, _("manual scan.."), (void*)1, 0, _("open manual transponder scan") );
 	CONNECT(list->selected, tsSelectType::selected);
 }
 
-void tsSelectType::selected(eListBoxEntryText *entry)
+void tsSelectType::selected(eListBoxEntryMenu *entry)
 {
 	if ( entry && entry == check )
 		return;

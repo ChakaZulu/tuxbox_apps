@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.24 2005/11/04 13:50:50 ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.25 2006/02/05 23:41:01 pieterg Exp $
  */
 
 #include <enigma_scan.h>
@@ -53,11 +53,11 @@ eZapScan::eZapScan()
 	else if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
 	{
 		CONNECT((new eListBoxEntryMenu(&list, _("Signalfind"), eString().sprintf("(%d) %s", ++entry, _("open the signalfinder"))))->selected, eZapScan::sel_satfind);
-		(new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Disable 5V"), "/elitedvb/DVB/config/disable_5V", _("disable 5V for passive terrerstrial antennas")))
+		(new eListBoxEntryCheck(&list, _("Disable 5V"), "/elitedvb/DVB/config/disable_5V", _("disable 5V for passive terrerstrial antennas")))
 			->selected.connect( slot(*eFrontend::getInstance(), &eFrontend::setTerrestrialAntennaVoltage) );
 	}
 	if ( eSystemInfo::getInstance()->getFEType() != eSystemInfo::feCable )
-		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+		new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	CONNECT((new eListBoxEntryMenu(&list, _("Automatic Transponder Scan"), eString().sprintf("(%d) %s", ++entry, _("open automatic transponder scan"))))->selected, eZapScan::sel_autoScan);
 	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )  // only when a sat box is avail we shows a satellite config
 		CONNECT((new eListBoxEntryMenu(&list, _("Automatic Multisat Scan"), eString().sprintf("(%d) %s", ++entry, _("open automatic multisat transponder scan"))))->selected, eZapScan::sel_multiScan);

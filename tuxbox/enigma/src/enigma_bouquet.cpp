@@ -44,7 +44,7 @@ eZapBouquetSetup::eZapBouquetSetup()
 	CONNECT((new eListBoxEntryMenu(&list, _("Edit bouquets"), eString().sprintf("(%d) %s", ++entry, _("sort,rename,delete services/bouquets "))))->selected, eZapBouquetSetup::editSelected );
 	if ( eConfig::getInstance()->getParentalPin() )
 	{
-		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+		new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(&list, _("Lock/Unlock Services"), eString().sprintf("(%d) %s", ++entry,_("lock,unlock services (parental locking)"))))->selected, eZapBouquetSetup::lockUnlockServices );
 	}
 //	CONNECT((new eListBoxEntryMenu(&list, _("Duplicate Sat/Provider/Bouquet"), _("copy specific bouquet/provider/sat to bouquet list")))->selected, eZapBouquetSetup::editSelected );

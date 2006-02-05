@@ -32,8 +32,8 @@ struct scanEntry
 
 class tsSelectType: public eWidget
 {
-	eListBox<eListBoxEntryText> *list;
-	void selected(eListBoxEntryText *entry);
+	eListBox<eListBoxEntryMenu> *list;
+	void selected(eListBoxEntryMenu *entry);
 	int eventHandler( const eWidgetEvent &e );
 	eListBoxEntryCheck *check;
 public:

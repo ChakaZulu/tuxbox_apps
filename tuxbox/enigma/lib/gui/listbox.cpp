@@ -1241,7 +1241,7 @@ void eListBoxEntryText::SetText(const eString& txt)
 	text=txt;
 }
 
-const eString& eListBoxEntrySeparator::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state )
+const eString& eListBoxSeparator::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state )
 {
 	int x = 0;
 	if ( pm )
@@ -1263,8 +1263,8 @@ const eString& eListBoxEntrySeparator::redraw(gPainter *rc, const eRect& rect, g
 	return ret;
 }
 
-eListBoxEntryCheck::eListBoxEntryCheck( eListBox<eListBoxEntry> *lb, const char* text, const char* regkey, const eString& hlptxt )
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, text, (void*)-1, 0, hlptxt, 0 )
+eListBoxEntryCheck::eListBoxEntryCheck( eListBox<eListBoxEntryMenu> *lb, const char* text, const char* regkey, const eString& hlptxt )
+	:eListBoxEntryMenu(lb, text, hlptxt, 0 )
 	,pm(eSkin::getActive()->queryImage("eListBoxEntryCheck"))
 	,regKey(regkey), checked(0)
 {
@@ -1274,8 +1274,6 @@ eListBoxEntryCheck::eListBoxEntryCheck( eListBox<eListBoxEntry> *lb, const char*
 		if ( eConfig::getInstance()->getKey( regKey.c_str(), checked ) )
 			eConfig::getInstance()->setKey( regKey.c_str(), checked );
 	}
-	if (listbox)
-		CONNECT(listbox->selected, eListBoxEntryCheck::LBSelected);
 }
 
 void eListBoxEntryCheck::LBSelected(eListBoxEntry* t)
@@ -1317,8 +1315,8 @@ const eString& eListBoxEntryCheck::redraw(gPainter *rc, const eRect& rect, gColo
 	return text;
 }
 
-eListBoxEntryMulti::eListBoxEntryMulti( eListBox<eListBoxEntryMulti> *lb, const char *hlptext )
-	:eListBoxEntryText( (eListBox<eListBoxEntryText>*)lb, 0, 0, (int)eTextPara::dirCenter, hlptext ),
+eListBoxEntryMulti::eListBoxEntryMulti( eListBox<eListBoxEntryMenu> *lb, const char *hlptext )
+	:eListBoxEntryMenu( lb, NULL, hlptext, (int)eTextPara::dirCenter ),
 	cur(entrys.end())
 {
 	selectable=1;

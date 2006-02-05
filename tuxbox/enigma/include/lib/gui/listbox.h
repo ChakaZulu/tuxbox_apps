@@ -243,19 +243,6 @@ inline void eListBoxBase::remove(eListBoxEntry* entry, bool holdCurrent)
 	delete entry;
 }
 
-class eListBoxEntrySeparator: public eListBoxEntry
-{
-	gPixmap *pm;
-	__u8 distance;
-	bool alphatest;
-public:
-	eListBoxEntrySeparator( eListBox<eListBoxEntry> *lb, gPixmap *pm, __u8 distance, bool alphatest=false )
-		:eListBoxEntry(lb, 0, 0), pm(pm), distance(distance), alphatest(alphatest)
-	{
-	}
-	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
-};
-
 class eListBoxEntryText: public eListBoxEntry
 {
 	friend class eListBox<eListBoxEntryText>;
@@ -301,6 +288,30 @@ protected:
 	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 };
 
+class eListBoxSeparator
+{
+	gPixmap *pm;
+	__u8 distance;
+	bool alphatest;
+public:
+	eListBoxSeparator(gPixmap *pm, __u8 distance, bool alphatest=false )
+		: pm(pm), distance(distance), alphatest(alphatest)
+	{
+	}
+	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
+};
+
+class eListBoxEntryTextSeparator: public eListBoxEntryText, public eListBoxSeparator
+{
+public:
+	eListBoxEntryTextSeparator( eListBox<eListBoxEntryText> *lb, gPixmap *pm, __u8 distance, bool alphatest=false )
+		:eListBoxEntryText(lb), eListBoxSeparator(pm, distance, alphatest)
+	{
+		selectable = 0;
+	}
+	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state ) { return eListBoxSeparator::redraw(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state); }
+};
+
 class eListBoxEntryTextStream: public eListBoxEntry
 {
 	friend class eListBox<eListBoxEntryTextStream>;
@@ -324,26 +335,64 @@ protected:
 	const eString &redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 };
 
+class eListBoxEntryTextStreamSeparator: public eListBoxEntryTextStream, public eListBoxSeparator
+{
+public:
+	eListBoxEntryTextStreamSeparator( eListBox<eListBoxEntryTextStream> *lb, gPixmap *pm, __u8 distance, bool alphatest=false )
+		:eListBoxEntryTextStream(lb), eListBoxSeparator(pm, distance, alphatest)
+	{
+		selectable = 0;
+	}
+	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state ) { return eListBoxSeparator::redraw(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state); }
+};
+
 class eListBoxEntryMenu: public eListBoxEntryText
 {
 	friend class eListBox<eListBoxEntryMenu>;
 public:
 	Signal0<void> selected;
 
-	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const char* txt, const eString &hlptxt="", int align=0 )
-		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt, 0, align, hlptxt)
+	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const char* txt, const eString &hlptxt="", int align=0, void *key = NULL, int keytype = value )
+		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt, key, align, hlptxt, keytype)
 	{
 		if (listbox)
 			CONNECT(listbox->selected, eListBoxEntryMenu::LBSelected);
 	}
-	void LBSelected(eListBoxEntry* t)
+	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const eString &txt, const eString &hlptxt="", int align=0, void *key = NULL, int keytype = value )
+		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt, key, align, hlptxt, keytype)
+	{
+		if (listbox)
+			CONNECT(listbox->selected, eListBoxEntryMenu::LBSelected);
+	}
+	
+	virtual void LBSelected(eListBoxEntry* t)
 	{
 		if (t == this)
 			/* emit */ selected();
 	}
 };
 
-class eListBoxEntryCheck: public eListBoxEntryText
+class eListBoxEntryMenuItem: public eListBoxEntryMenu
+{
+public:
+	eListBoxEntryMenuItem(eListBox<eListBoxEntryMenu>* lb, const char* txt=0, void *key=0, int align=0, const eString &hlptxt="", int keytype = value)
+		:eListBoxEntryMenu((eListBox<eListBoxEntryMenu>*)lb, txt, hlptxt, align, key, keytype)
+	{
+	}
+};
+
+class eListBoxEntryMenuSeparator: public eListBoxEntryMenu, public eListBoxSeparator
+{
+public:
+	eListBoxEntryMenuSeparator( eListBox<eListBoxEntryMenu> *lb, gPixmap *pm, __u8 distance, bool alphatest=false )
+		:eListBoxEntryMenu(lb, NULL), eListBoxSeparator(pm, distance, alphatest)
+	{
+		selectable = 0;
+	}
+	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state ) { return eListBoxSeparator::redraw(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state); }
+};
+
+class eListBoxEntryCheck: public eListBoxEntryMenu
 {
 	gPixmap *pm;
 	eString regKey;
@@ -351,16 +400,16 @@ class eListBoxEntryCheck: public eListBoxEntryText
 	void LBSelected(eListBoxEntry* t);
 public:
 	Signal1<void,bool> selected;
-	eListBoxEntryCheck( eListBox<eListBoxEntry> *lb, const char* text, const char* regkey, const eString& hlptxt="" );
+	eListBoxEntryCheck( eListBox<eListBoxEntryMenu> *lb, const char* text, const char* regkey, const eString& hlptxt="" );
 	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 };
 
-class eListBoxEntryMulti: public eListBoxEntryText
+class eListBoxEntryMulti: public eListBoxEntryMenu
 {
 	std::list< std::pair< int, eString > > entrys;
 	std::list< std::pair< int, eString > >::iterator cur;
 public:
-	eListBoxEntryMulti( eListBox<eListBoxEntryMulti> *lb, const char *hlptext );
+	eListBoxEntryMulti( eListBox<eListBoxEntryMenu> *lb, const char *hlptext );
 	void add( const char *text, int key );
 	void add( const eString &text, int key );
 	int eventHandler( const eWidgetEvent &e );

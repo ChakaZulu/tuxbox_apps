@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.8 2004/06/24 16:24:59 ghostrider Exp $
+ * $Id: system_settings.cpp,v 1.9 2006/02/05 23:41:01 pieterg Exp $
  */
 
 #include <system_settings.h>
@@ -39,7 +39,7 @@ eSystemSettings::eSystemSettings()
 	move(ePoint(180, 100));
 	int entry=0;
 	CONNECT((new eListBoxEntryMenu(&list, _("Time Settings"), eString().sprintf("(%d) %s", ++entry, _("open time settings")) ))->selected, eSystemSettings::time_settings);
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	CONNECT((new eListBoxEntryMenu(&list, _("A/V Settings"), eString().sprintf("(%d) %s", ++entry, _("open A/V settings")) ))->selected, eSystemSettings::av_settings);
 #ifdef ENABLE_RFMOD
 	if ( eSystemInfo::getInstance()->hasRFMod() )
@@ -55,7 +55,7 @@ eSystemSettings::eSystemSettings()
 	if ( eSystemInfo::getInstance()->hasKeyboard() )
 		CONNECT((new eListBoxEntryMenu(&list, _("Keyboard Setup"), eString().sprintf("(%d) %s", ++entry, _("open keyboard setup")) ))->selected, eSystemSettings::keyboard_setup);
 #endif
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	CONNECT((new eListBoxEntryMenu(&list, _("OSD Settings"), eString().sprintf("(%d) %s", ++entry, _("open on screen display settings")) ))->selected, eSystemSettings::osd_settings);
 	CONNECT((new eListBoxEntryMenu(&list, _("OSD Language"), eString().sprintf("(%d) %s", ++entry, _("open language selector")) ))->selected, eSystemSettings::osd_language);
 #ifndef DISABLE_LCD

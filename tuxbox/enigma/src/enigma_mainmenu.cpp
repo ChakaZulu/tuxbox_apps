@@ -188,20 +188,20 @@ eMainMenu::eMainMenu()
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("File mode"), eString().sprintf("(%d) %s", ++entry, _("File mode")) ))->selected, eMainMenu::sel_file);
 		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500 )
 			CONNECT((new eListBoxEntryMenu(wnd.getList(), _("VCR"), eString().sprintf("(%d) %s", ++entry, _("VCR")) ))->selected, eMainMenu::sel_vcr);
-		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+		new eListBoxEntryMenuSeparator(wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Timer"), eString().sprintf("(%d) %s", ++entry, _("Timer")) ))->selected, eMainMenu::sel_timer);
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Setup"), eString().sprintf("(%d) %s", ++entry, _("Setup")) ))->selected, eMainMenu::sel_setup);
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Games"), eString().sprintf("(%d) %s", ++entry, _("Games")) ))->selected, eMainMenu::sel_plugins);
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Information"), eString().sprintf("(%d) %s", ++entry, _("Information")) ))->selected, eMainMenu::sel_info);
-		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+		new eListBoxEntryMenuSeparator(wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Shutdown"), eString().sprintf("(%d) %s", ++entry, _("Shutdown")) ))->selected, eMainMenu::sel_quit);
 #else
 		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500 )
 			CONNECT((new eListBoxEntryMenu(wnd.getList(), _("VCR"), eString().sprintf("(%d) %s", ++entry, _("VCR")) ))->selected, eMainMenu::sel_vcr);
-		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+		new eListBoxEntryMenuSeparator(wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Timer"), eString().sprintf("(%d) %s", ++entry, _("Timer")) ))->selected, eMainMenu::sel_timer);
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Setup"), eString().sprintf("(%d) %s", ++entry, _("Setup")) ))->selected, eMainMenu::sel_setup);
-		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+		new eListBoxEntryMenuSeparator(wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Information"), eString().sprintf("(%d) %s", ++entry, _("Information")) ))->selected, eMainMenu::sel_info);
 #endif
 	}
