@@ -1,5 +1,5 @@
 /*
- * $Id: dreamflash.cpp,v 1.5 2005/11/26 17:44:54 digi_casi Exp $
+ * $Id: dreamflash.cpp,v 1.6 2006/02/05 23:45:09 pieterg Exp $
  *
  * (C) 2005 by mechatron, digi_casi
  *
@@ -533,17 +533,17 @@ df_main::df_main()
 
 	setText("Functions");
 
-	menuliste = new eListBox<eListBoxEntryText>(this);
-	menuliste->move(ePoint(10, 10));
-	menuliste->resize(eSize(clientrect.width() - 20, 200));
-	menuliste->setFlags(eListBoxBase::flagNoPageMovement);
-	new eListBoxEntryText(menuliste, _("Add Image"), (void *)0);
-	new eListBoxEntryText(menuliste, _("Rename Image"), (void *)1);
-	new eListBoxEntryText(menuliste, _("Delete Image"), (void *)2);
-	new eListBoxEntrySeparator( (eListBox<eListBoxEntry> *)menuliste, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-	new eListBoxEntryText(menuliste, _("Setup"), (void *)3);
-	new eListBoxEntryText(menuliste, _("Information"), (void *)4);
-	CONNECT(menuliste->selected, df_main::Listeselected);
+	textlist = new eListBox<eListBoxEntryText>(this);
+	textlist->move(ePoint(10, 10));
+	textlist->resize(eSize(clientrect.width() - 20, 200));
+	textlist->setFlags(eListBoxBase::flagNoPageMovement);
+	new eListBoxEntryText(textlist, _("Add Image"), (void *)0);
+	new eListBoxEntryText(textlist, _("Rename Image"), (void *)1);
+	new eListBoxEntryText(textlist, _("Delete Image"), (void *)2);
+	new eListBoxEntryTextSeparator(textlist, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	new eListBoxEntryText(textlist, _("Setup"), (void *)3);
+	new eListBoxEntryText(textlist, _("Information"), (void *)4);
+	CONNECT(textlist->selected, df_main::Listeselected);
 }
 
 void df_main::Listeselected(eListBoxEntryText *item)

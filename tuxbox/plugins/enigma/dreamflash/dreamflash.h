@@ -1,5 +1,5 @@
 /*
- * $Id: dreamflash.h,v 1.2 2005/10/26 19:35:12 digi_casi Exp $
+ * $Id: dreamflash.h,v 1.3 2006/02/05 23:45:10 pieterg Exp $
  *
  * (C) 2005 by mechatron, digi_casi
  *
@@ -77,7 +77,7 @@ public:
 
 class df_main: public eWindow
 {
-	eListBox<eListBoxEntryText> *menuliste;
+	eListBox<eListBoxEntryText> *textlist;
 	void Listeselected(eListBoxEntryText *item);
 public:
 	df_main();
