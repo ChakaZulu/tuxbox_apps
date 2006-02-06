@@ -1,7 +1,7 @@
 #ifdef ENABLE_FLASHTOOL
 /**********************************************
 *
-*	$Revision: 1.9 $
+*	$Revision: 1.10 $
 *
 **********************************************/
 
@@ -520,13 +520,13 @@ eFlashtoolSource::eFlashtoolSource(int direction)
 #ifndef DISABLE_FILE
 	if (access("/hdd/images", W_OK) == 0)
 		new eListBoxEntryText(&list, "HDD", (void *)"/hdd/images");
-	if (access("/var/mnt/USB/images", W_OK) == 0)
-		new eListBoxEntryText(&list, "USB", (void *)"/var/mnt/USB/images");
+	if (access("/var/mnt/usb/images", W_OK) == 0)
+		new eListBoxEntryText(&list, "USB", (void *)"/var/mnt/usb/images");
 #endif
-	if (access("/var/mnt/NFS/images", W_OK) == 0)
-		new eListBoxEntryText(&list, "NFS", (void *)"/var/mnt/NFS/images");
-	if (access("/var/mnt/CIFS/images", W_OK) == 0)
-		new eListBoxEntryText(&list, "CIFS", (void *)"/var/mnt/CIFS/images");
+	if (access("/var/mnt/nfs/images", W_OK) == 0)
+		new eListBoxEntryText(&list, "NFS", (void *)"/var/mnt/nfs/images");
+	if (access("/var/mnt/cifs/images", W_OK) == 0)
+		new eListBoxEntryText(&list, "CIFS", (void *)"/var/mnt/cifs/images");
 	CONNECT(list.selected, eFlashtoolSource::sel_item);
 }
 
