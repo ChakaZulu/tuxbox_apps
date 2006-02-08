@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.386 2006/01/22 13:16:29 carjay Exp $
+ * $Id: zapit.cpp,v 1.387 2006/02/08 21:19:35 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -153,6 +153,7 @@ void cpy(char * from, char * to)
 	strcat(cmd, to);
 	system(cmd);
 }
+/*
 //stolen from zapitools.cpp - check how to include
 std::string UTF8_to_UTF8XML(const char * s)
 {
@@ -160,11 +161,7 @@ std::string UTF8_to_UTF8XML(const char * s)
 	
 	while ((*s) != 0)
 	{
-		/* cf.
-		 * http://www.w3.org/TR/2004/REC-xml-20040204/#syntax
-		 * and
-		 * http://www.w3.org/TR/2004/REC-xml-20040204/#sec-predefined-ent
-		 */
+		 
 		switch (*s)
 		{
 		case '<':           
@@ -189,7 +186,7 @@ std::string UTF8_to_UTF8XML(const char * s)
 	}
 	return r;
 }
-
+*/
 void write_header(FILE * tmp)
 {
 	fprintf(tmp, 
@@ -201,8 +198,7 @@ void write_header(FILE * tmp)
 		" the data will automatically be kept up to date. Please \n"
 		" do not modify this file, as your modification will be \n"
 		" erased anyway. Please check myservices.xml for adopting\n"
-		" your service list to your needs. If you want to turn off\n"
-		" automatic service list updates set scanType in scan.conf to 4\n"
+		" your service list to your needs.\n"
 		"-->\n"
 	       "<zapit>\n");
 }
@@ -334,7 +330,7 @@ void copy_transponder(FILE * tmp, xmlNodePtr transponder, const bool is_sat)
 		fprintf(tmp,
 			"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 			xmlGetNumericAttribute(node, "service_id", 16),
-			UTF8_to_UTF8XML(name.c_str()).c_str(),
+			convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
 			xmlGetNumericAttribute(node, "service_type", 16));
 			
 		node = node->xmlNextNode;
@@ -426,7 +422,7 @@ void merge_transponder(FILE * tmp, xmlNodePtr transponder, xmlNodePtr current_tr
 				fprintf(tmp,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 					csid,
-					UTF8_to_UTF8XML(name.c_str()).c_str(),
+					convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
 					xmlGetNumericAttribute(current_node, "service_type", 16));
 				current_node = getNextNode(current_transponder->xmlChildrenNode, csid);
 			} else {
@@ -435,7 +431,7 @@ void merge_transponder(FILE * tmp, xmlNodePtr transponder, xmlNodePtr current_tr
 				fprintf(tmp,
 					"\t\t\t<channel service_id=\"%04x\" name=\"%s\" service_type=\"%02x\"/>\n",
 					sid,
-					UTF8_to_UTF8XML(name.c_str()).c_str(),
+					convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
 					xmlGetNumericAttribute(node, "service_type", 16));
 				node = getNextNode(transponder->xmlChildrenNode, sid);
 			}
@@ -549,6 +545,143 @@ void mergeServices()
 	cpy(SERVICES_TMP, SERVICES_XML);
 	unlink(SERVICES_TMP);
 	unlink(CURRENTSERVICES_XML);
+}
+
+static void write_bouquet_xml_header(FILE * fd)
+{
+	fprintf(fd,
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<!--\n"
+		"  This file was modified by zapit.\n"
+		"  It contains bouquets as signalled by the providers.\n"
+		"  Those bouquets will be automatically maintained if sections scan is active.\n"
+		"  Bouquet entries channel can no longer contain name or sat.\n"
+		"  Name shall be changed by myservices.xml. What was sat for?\n"
+		"  ONID/TSID/SID SHOULD be unique.\n"
+		"  The order of services is provided as it came from the provider.\n"
+		"  Please encourage your provider to send a useful BAT! Thank you.\n"
+		"-->\n"
+	       "<zapit>\n");
+}
+
+static void write_bouquet_xml_footer(FILE *fd)
+{
+	fprintf(fd, "</zapit>\n");
+}
+
+static void write_bouquet_xml(FILE *fd, xmlNodePtr bouquet)
+{
+	std::string name;
+
+	name = xmlGetAttribute(bouquet, "name");
+	
+//	if (xmlGetNumericAttribute(bouquet, "type", 16) == 1) {
+//		fprintf(fd, "\t<Bouquet type=\"1\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"0\" locked=\"0\">\n",
+//			xmlGetNumericAttribute(bouquet, "bouquet_id", 16),
+//			name.c_str());
+//	} else {
+		fprintf(fd, "\t<Bouquet type=\"%01x\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"%01x\" locked=\"%01x\">\n",
+			xmlGetNumericAttribute(bouquet, "type", 16),
+			xmlGetNumericAttribute(bouquet, "bouquet_id", 16),
+			convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
+			xmlGetNumericAttribute(bouquet, "hidden", 16),
+			xmlGetNumericAttribute(bouquet, "locked", 16));
+//	}
+	
+	xmlNodePtr channel = bouquet->xmlChildrenNode;
+	while (xmlGetNextOccurence(channel, "channel") != NULL) {
+		if (xmlGetAttribute(channel, "name") != NULL)
+			name = xmlGetAttribute(channel, "name");
+		else
+			name = "";
+		if (xmlGetAttribute(channel, "sat") != NULL) {
+			fprintf(fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat=\"%03x\"/>\n",
+				xmlGetNumericAttribute(channel, "serviceID", 16),
+				convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
+				xmlGetNumericAttribute(channel, "tsid", 16),
+				xmlGetNumericAttribute(channel, "onid", 16),
+				xmlGetSignedNumericAttribute(channel, "sat", 16));	
+		}
+		else
+			fprintf(fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\"/>\n",
+				xmlGetNumericAttribute(channel, "serviceID", 16),
+				convert_UTF8_To_UTF8_XML(name.c_str()).c_str(),
+				xmlGetNumericAttribute(channel, "tsid", 16),
+				xmlGetNumericAttribute(channel, "onid", 16));
+				
+		channel = channel->xmlNextNode;
+	}
+	fprintf(fd, "\t</Bouquet>\n");
+}
+
+void mergeBouquets()
+{
+	FILE * tmp;
+	xmlNodePtr bouquet;
+	xmlNodePtr current_bouquet;
+	t_bouquet_id bouquet_id;
+	
+	if (!(tmp = fopen(CURRENTBOUQUETS_XML, "r")))
+		return;
+		
+	fclose(tmp);
+	
+	xmlDocPtr current_parser = parseXmlFile(CURRENTBOUQUETS_XML);
+	if (current_parser == NULL)
+		return;
+	
+	xmlDocPtr bouquet_parser = parseXmlFile(BOUQUETS_XML);
+	if (bouquet_parser == NULL)
+		return;
+	
+	if (!(tmp = fopen(BOUQUETS_TMP, "w")))
+		return;
+
+	bouquet = xmlDocGetRootElement(bouquet_parser)->xmlChildrenNode;	
+	write_bouquet_xml_header(tmp);
+		
+	while (bouquet) {
+	
+		bouquet_id = xmlGetNumericAttribute(bouquet, "bouquet_id", 16);
+		
+		if (bouquet_id) {
+		
+			current_bouquet = xmlDocGetRootElement(current_parser)->xmlChildrenNode;
+			bool found = false;
+			
+			while ((current_bouquet) && (!found)) {
+				if (bouquet_id == xmlGetNumericAttribute(current_bouquet, "bouquet_id", 16)) {
+					write_bouquet_xml(tmp, current_bouquet);
+					found = true;
+				}
+				else
+					current_bouquet = current_bouquet->xmlNextNode;
+			}
+			
+			if (!found)
+				write_bouquet_xml(tmp, bouquet);
+				
+		}
+		else
+			write_bouquet_xml(tmp, bouquet);
+		bouquet = bouquet->xmlNextNode;
+	}
+	/*
+	current_bouquet = xmlDocGetRootElement(current_parser)->xmlChildrenNode;
+	while (current_bouquet) {
+		write_bouquet_xml(tmp, current_bouquet);
+		current_bouquet = current_bouquet->xmlNextNode;
+	}
+	*/
+	write_bouquet_xml_footer(tmp);
+	fclose(tmp);
+	xmlFreeDoc(bouquet_parser);
+	xmlFreeDoc(current_parser);
+	
+//	cpy(BOUQUETS_TMP, ZAPITCONFIGDIR "/bouquets.txt");
+	cpy(BOUQUETS_TMP, BOUQUETS_XML);
+	unlink(BOUQUETS_TMP);
+	unlink(CURRENTBOUQUETS_XML);
 }
 
 void saveSettings(bool write)
@@ -1825,6 +1958,8 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo)
 				strncpy(msgBouquet.name, bouquetManager->Bouquets[i]->Name.c_str(), 30);
 				msgBouquet.locked     = bouquetManager->Bouquets[i]->bLocked;
 				msgBouquet.hidden     = bouquetManager->Bouquets[i]->bHidden;
+				msgBouquet.type       = bouquetManager->Bouquets[i]->type;
+				msgBouquet.bouquet_id = bouquetManager->Bouquets[i]->bouquet_id;
 				if (CBasicServer::send_data(connfd, &msgBouquet, sizeof(msgBouquet)) == false)
 				{
 					ERROR("could not send any return");
@@ -2094,6 +2229,7 @@ void enterStandby(void)
 	saveSettings(true);
 	stopPlayBack();
 	mergeServices();
+	mergeBouquets();
 	
 	if (audioDemux) {
 		delete audioDemux;
@@ -2243,7 +2379,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.386 2006/01/22 13:16:29 carjay Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.387 2006/02/08 21:19:35 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

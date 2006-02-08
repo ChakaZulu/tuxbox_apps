@@ -1,7 +1,7 @@
 #ifndef SINETWORKS_HPP
 #define SINETWORKS_HPP
 //
-// $Id: SInetworks.hpp,v 1.2 2005/11/21 14:57:28 metallica Exp $
+// $Id: SInetworks.hpp,v 1.3 2006/02/08 21:15:50 houdini Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -126,6 +126,7 @@ public:
 		transport_stream_id	= 0;
 		original_network_id	= 0;
 		delivery_type		= 0;
+		is_actual		= false;
 	}
 	
 	// Um einen service zum Suchen zu erstellen
@@ -142,6 +143,7 @@ public:
 		original_network_id	= s.original_network_id;
 		transport_stream_id 	= s.transport_stream_id;
 		delivery_type		= s.delivery_type;
+		is_actual		= s.is_actual;
 		memcpy(delivery_descriptor, s.delivery_descriptor, sizeof(struct satellite_delivery_descriptor));
 	}
 	
@@ -149,6 +151,7 @@ public:
 	t_original_network_id original_network_id;
 	t_transport_stream_id transport_stream_id;
 	unsigned short delivery_type;
+	bool is_actual;
 	char delivery_descriptor[sizeof(struct satellite_delivery_descriptor)];
 	
 	bool operator < (const SInetwork& s) const {

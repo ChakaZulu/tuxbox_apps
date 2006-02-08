@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.59 2005/02/01 18:16:05 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.60 2006/02/08 21:19:35 houdini Exp $
  */
 
 #ifndef __bouquets_h__
@@ -51,14 +51,16 @@ struct CmpChannelByChName: public binary_function <const CZapitChannel * const, 
 class CBouquet
 {
  public:
-	std::string Name;
-	bool        bHidden;
-	bool        bLocked;
+	std::string 	Name;
+	bool        	bHidden;
+	bool        	bLocked;
+	int		type;
+	t_bouquet_id	bouquet_id;
 
 	ChannelList radioChannels;
 	ChannelList tvChannels;
 
-	inline CBouquet(const std::string name) { Name = name; bHidden = false; bLocked = false; }
+	inline CBouquet(const std::string name) { Name = name; bHidden = false; bLocked = false; type = 0; bouquet_id = 0; }
 
 	void addService(CZapitChannel* newChannel);
 
@@ -81,6 +83,7 @@ class CBouquetManager
 
 	void makeRemainingChannelsBouquet(void);
 	void parseBouquetsXml            (const xmlNodePtr root);
+	void makeBouquetfromCurrentservices (const xmlNodePtr root);
 
  public:
 		CBouquetManager() { remainChannels = NULL; };

@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.24 2005/11/20 15:10:50 mogway Exp $
+ * $Id: zapittypes.h,v 1.25 2006/02/08 21:19:35 houdini Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -49,12 +49,15 @@ typedef uint16_t t_network_id;
 typedef uint16_t t_bouquet_id;
 //Introduced by Nirvana 11/05. Didn't check if there are similar types
 typedef uint32_t t_transponder_id;
+//Introduced by Nirvana 01/06.
+typedef uint64_t t_bouquetentry_id;
 
 /* unique channel identification */
 typedef uint64_t t_channel_id;
 #define CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id,original_network_id,transport_stream_id) ((((t_channel_id)transport_stream_id) << 32) | (((t_channel_id)original_network_id) << 16) | (t_channel_id)service_id)
 #define CREATE_CHANNEL_ID CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id, original_network_id, transport_stream_id)
 #define CREATE_TRANSPONDER_ID_FROM_ORIGINALNETWORK_TRANSPORTSTREAM_ID(original_network_id,transport_stream_id) ((((t_original_network_id) original_network_id) << 16) | (t_transport_stream_id) transport_stream_id)
+#define CREATE_BOUQUETENTRY_ID(bouquet_id,original_network_id,transport_stream_id,service_id) ((((t_bouquetentry_id) bouquet_id) << 48) | (((t_bouquetentry_id) original_network_id) << 32) | (((t_bouquetentry_id) transport_stream_id) << 16) | (t_bouquetentry_id) service_id)
 #define GET_ORIGINAL_NETWORK_ID_FROM_CHANNEL_ID(channel_id) ((t_original_network_id)((channel_id) >> 16))
 #define GET_SERVICE_ID_FROM_CHANNEL_ID(channel_id) ((t_service_id)(channel_id))
 #define PRINTF_CHANNEL_ID_TYPE "%16llx"

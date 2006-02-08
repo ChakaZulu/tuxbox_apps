@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.43 2005/12/08 18:41:40 metallica Exp $
+// $Id: SIsections.cpp,v 1.44 2006/02/08 21:15:50 houdini Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -42,6 +42,9 @@
 #include <dmxapi.h>
 #include <zapit/dvbstring.h>
 
+#define NOVA		0x3ffe
+#define CANALDIGITAAL	0x3fff
+
 //#define DEBUG
 
 struct descr_generic_header {
@@ -80,6 +83,32 @@ struct service_list_entry {
 	unsigned service_id_hi			: 8;
 	unsigned service_id_lo			: 8;
 	unsigned service_type			: 8;
+} __attribute__ ((packed)) ;
+
+struct digplus_order_entry {
+	unsigned service_id_hi			: 8;
+	unsigned service_id_lo			: 8;
+	unsigned channel_number_hi		: 8;
+	unsigned channel_number_lo		: 8;
+} __attribute__ ((packed)) ;
+
+struct bskyb_order_entry {
+	unsigned service_id_hi			: 8;
+	unsigned service_id_lo			: 8;
+	unsigned service_type			: 8;
+	unsigned unknown1			: 8;
+	unsigned unknown2			: 8;
+	unsigned channel_number_hi		: 8;
+	unsigned channel_number_lo		: 8;
+	unsigned unknown3			: 8;
+	unsigned unknown4			: 8;
+} __attribute__ ((packed)) ;
+
+struct private_data_specifier {
+	unsigned byte1				: 8;
+	unsigned byte2				: 8;
+	unsigned byte3				: 8;
+	unsigned byte4				: 8;
 } __attribute__ ((packed)) ;
 
 inline unsigned min(unsigned a, unsigned b)
@@ -434,6 +463,10 @@ void SIsectionPPT::parsePrivateContentTransmissionDescriptor(const char *buf, SI
   if (sizeof(struct descr_generic_header)+3 <= maxlen) e.original_network_id = ((*(p+2))<<8) | (*(p+3));
   if (sizeof(struct descr_generic_header)+5 <= maxlen) e.service_id = ((*(p+4))<<8) | (*(p+5));
   
+  //17.12.05 Premiere is sending wrong TSID 0011 for SID 00D3
+  if ((e.original_network_id == 0x0085) && (e.transport_stream_id == 0x0011) && (e.service_id == 0x00d3))
+  	e.transport_stream_id = 0x001;
+  
   p += 6;
   while(p+6 <= buf + evt->descriptor_length + sizeof(struct descr_generic_header)) {// at least one startdate/looplength/time entry
 	tm_buf[0] = *(p);
@@ -631,9 +664,9 @@ void SIsectionSDT::parse(void)
 }
 
 /************************************/
-
+/*
 //Within the Service List all Channels of a bouquet are specified
-void SIsectionBAT::parseServiceListDescriptor(const char *buf, SIbouquet &s)
+int SIsectionBAT::parseServiceListDescriptor(const char *buf, SIbouquet &s, int section_no, int count)
 {
   struct descr_generic_header *sv=(struct descr_generic_header *)buf;
   buf+=sizeof(struct descr_generic_header);
@@ -644,9 +677,13 @@ void SIsectionBAT::parseServiceListDescriptor(const char *buf, SIbouquet &s)
 	SIbouquet bs(s);
 	bs.service_id=(sl->service_id_hi << 8) | sl->service_id_lo;
 	bs.serviceTyp=sl->service_type;
+	bs.position = (uint16_t) (((section_no & 0x1f) << 11) + (count & 0x7ff));
+//	printf("Section Number: %d Count: %d position: %04x\n", section_no, count, bs.position);
 	bsv.insert(bs);
 	len -= sizeof(struct service_list_entry);
+	count++;
   }
+  return count;
 }
 
 void SIsectionBAT::parseBouquetNameDescriptor(const char *buf, SIbouquet &s)
@@ -654,15 +691,18 @@ void SIsectionBAT::parseBouquetNameDescriptor(const char *buf, SIbouquet &s)
   struct descr_generic_header *sv=(struct descr_generic_header *)buf;
   buf+=sizeof(struct descr_generic_header);
   if(sv->descriptor_length) {
-    if(*buf < 0x06) // other code table
-      s.bouquetName=std::string(buf+1, sv->descriptor_length-1);
-    else
-      s.bouquetName=std::string(buf, sv->descriptor_length);
+  
+//    if(*buf < 0x06) // other code table
+  //    s.bouquetName=std::string(buf+1, sv->descriptor_length-1);
+    //else
+      //s.bouquetName=std::string(buf, sv->descriptor_length);
+
+    s.bouquetName  = CDVBString((const char *)(buf), sv->descriptor_length).getContent();
   }
   //printf("Bouquet-Name: %s\n", s.bouquetName.c_str());
 }
 
-void SIsectionBAT::parseDescriptors(const char *des, unsigned len, SIbouquet &s)
+int SIsectionBAT::parseDescriptors(const char *des, unsigned len, SIbouquet &s, int section_no, int count, const char *bouquetName)
 {
   struct descr_generic_header *desc;
   while(len>=sizeof(struct descr_generic_header)) {
@@ -671,17 +711,18 @@ void SIsectionBAT::parseDescriptors(const char *des, unsigned len, SIbouquet &s)
 //    printf("Length: %hhu\n", desc->descriptor_length);
     if(desc->descriptor_tag==0x41) {
 //      printf("Found service list descriptor\n");
-      parseServiceListDescriptor((const char *)desc, s);
+      count = parseServiceListDescriptor((const char *)desc, s, section_no, count);
     }
-    else if(desc->descriptor_tag==0x47) {
+//    else if(desc->descriptor_tag==0x47) {
 //      printf("Found bouquet name descriptor\n");
-      parseBouquetNameDescriptor((const char *)desc, s);
-    }
+//      parseBouquetNameDescriptor((const char *)desc, s);
+//    }
     len-=desc->descriptor_length+2;
     des+=desc->descriptor_length+2;
   }
+  return count;
 }
-
+*/
 // Die infos aus dem Puffer holen
 void SIsectionBAT::parse(void)
 {
@@ -691,6 +732,7 @@ void SIsectionBAT::parse(void)
 	struct SI_section_BAT_header *bh;
 	unsigned short descriptors_loop_length;
 	unsigned short descriptors_length;
+	uint32_t current_private_data_specifier;
 	struct loop_len *ll;
 //	std::string bouquetName = "";
 
@@ -707,25 +749,216 @@ void SIsectionBAT::parse(void)
 
 	actPos = &buffer[0];				// We need Bouquet ID and bouquet descriptor length from header
 	bh = (struct SI_section_BAT_header *)actPos;	// Header
+	t_bouquet_id bouquet_id = (bh->bouquet_id_hi << 8) | bh->bouquet_id_lo;
 //	printf("hi: %hu lo: %hu\n", bh->bouquet_descriptors_length_hi, bh->bouquet_descriptors_length_lo);
 	descriptors_loop_length = (bh->bouquet_descriptors_length_hi << 8) | bh->bouquet_descriptors_length_lo;
-	SIbouquet s((bh->bouquet_id_hi << 8) | bh->bouquet_id_lo);	//Create a new Bouquet entry
+//	SIbouquet s((bh->bouquet_id_hi << 8) | bh->bouquet_id_lo);	//Create a new Bouquet entry
 //	printf("ident: %hu actpos: %p buf+bl: %p desclen: %hu\n", bi.bouquet_id, actPos, buffer+bufferLength, descriptors_loop_length);
-	parseDescriptors(((const char *)bh) + sizeof(SI_section_BAT_header), descriptors_loop_length, s); //Fill out Bouquet Name
+	int count = 0;
+	 //Fill out Bouquet Name
+	//count = parseDescriptors(((const char *)bh) + sizeof(SI_section_BAT_header), descriptors_loop_length, s, bh->section_number, count);
+	const char *des = ((const char *)bh) + sizeof(SI_section_BAT_header);
+	unsigned len = descriptors_loop_length;
+	struct descr_generic_header *desc;
+	struct descr_generic_header *privdesc = NULL;
+	std::string bouquetName = "";
+	current_private_data_specifier = 0;
+	while(len>=sizeof(struct descr_generic_header)) {
+		desc=(struct descr_generic_header *)des;
+		if(desc->descriptor_tag==0x47) {
+//      printf("Found bouquet name descriptor\n");
+			//parseBouquetNameDescriptor((const char *)desc, s);
+			const char *buf = (const char *) desc;
+			//struct descr_generic_header *sv=(struct descr_generic_header *)buf;
+			buf+=sizeof(struct descr_generic_header);
+			if(desc->descriptor_length) {
+  /*
+    if(*buf < 0x06) // other code table
+      s.bouquetName=std::string(buf+1, sv->descriptor_length-1);
+    else
+      s.bouquetName=std::string(buf, sv->descriptor_length);
+  */
+				//Mega stupid providers do not reserve their own bouquet_id
+				//So we do it for them... f*ck that's stupid too, but what else can we do...
+				if (bouquet_id == 0x0001) {
+					if (!strncmp((const char *) buf, "NOVA", 4))
+						bouquet_id = NOVA;
+					if (!strncmp((const char *) buf, "CanalDigitaal", 13))
+						bouquet_id = CANALDIGITAAL;
+				}
+
+				bouquetName  = CDVBString((const char *)(buf), desc->descriptor_length).getContent();
+			}
+		}
+		if (desc->descriptor_tag == 0x5f) {
+			const char *buf = (const char *) desc;
+			//struct descr_generic_header *sv=(struct descr_generic_header *)buf;
+			buf+=sizeof(struct descr_generic_header);
+			struct private_data_specifier *pds=(struct private_data_specifier *)buf;
+			buf+=sizeof(struct private_data_specifier);
+			current_private_data_specifier=(((pds->byte1 << 24) | (pds->byte2 << 16)) | (pds->byte3 << 8)) | pds->byte4; 
+					//printf("Private Data Specifier: %08x\n", current_private_data_specifier);
+		}
+		len-=desc->descriptor_length+2;
+		des+=desc->descriptor_length+2;
+	}
+	//s.bouquetName = bouquetName;
+ 	
 	actPos += sizeof(SI_section_BAT_header) + descriptors_loop_length;
 	
 	ll = (struct loop_len *)actPos;
 	descriptors_loop_length = (ll->descriptors_loop_length_hi << 8) | ll->descriptors_loop_length_lo; 	//len is not used at the moment
 //	printf("desclen: %hu\n", descriptors_loop_length);
 	actPos += sizeof(loop_len);
-	
-	while (actPos <= &buffer[bufferLength - sizeof(struct bat_service)]) {
-		sv = (struct bat_service *)actPos;
-		s.transport_stream_id = (sv->transport_stream_id_hi << 8) | sv->transport_stream_id_lo;
-		s.original_network_id = (sv->original_network_id_hi << 8) | sv->original_network_id_lo;
-		descriptors_length = (sv->descriptors_loop_length_hi << 8) | sv->descriptors_loop_length_lo;
-		parseDescriptors(((const char *)sv) + sizeof(struct bat_service), descriptors_length, s); // Transport Stream Loop
-		actPos += sizeof(struct bat_service) + descriptors_length;
+		
+	if (bouquet_id != 0x0001) {
+		while (actPos <= &buffer[bufferLength - sizeof(struct bat_service)]) {
+			sv = (struct bat_service *)actPos;
+		//s.transport_stream_id = (sv->transport_stream_id_hi << 8) | sv->transport_stream_id_lo;
+		//s.original_network_id = (sv->original_network_id_hi << 8) | sv->original_network_id_lo;
+	//	s.position = (uint16_t) (((bh->section_number & 0x1f) << 11) + (count & 0x7ff));
+	//	printf("Section Number: %d Count: %d position: %04x\n", bh->section_number, count, s.position);
+			descriptors_length = (sv->descriptors_loop_length_hi << 8) | sv->descriptors_loop_length_lo;
+		 // Transport Stream Loop
+		//count = parseDescriptors(((const char *)sv) + sizeof(struct bat_service), descriptors_length, s, bh->section_number, count,	
+		 //(const char *) bouquetName[0]);
+		 	bool found = false;
+			int loop_count = 1;
+		 	while (loop_count >= 0) {
+			
+				const char *des = ((const char *)sv) + sizeof(struct bat_service);
+				len = descriptors_length;
+			
+				while(len>=sizeof(struct descr_generic_header)) {
+    					desc=(struct descr_generic_header *)des;
+//    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
+//    printf("Length: %hhu\n", desc->descriptor_length);
+					const char *buf = (const char *) desc;
+					buf+=sizeof(struct descr_generic_header);
+					unsigned short dlen = desc->descriptor_length;
+	    				if ((desc->descriptor_tag==0x41) && (loop_count == 0) && (current_private_data_specifier != 0x00000002)) {
+//      printf("Found service list descriptor\n");
+				//count = parseServiceListDescriptor((const char *)desc, s, section_no, count);
+				//struct descr_generic_header *sv=(struct descr_generic_header *)buf;
+					
+	  					while(dlen >= sizeof(struct service_list_entry)) {
+  							struct service_list_entry *sl=(struct service_list_entry *)buf;
+							buf+=sizeof(struct service_list_entry);
+							SIbouquet bs(bouquet_id);
+							bs.bouquetName = bouquetName;
+							bs.transport_stream_id = (sv->transport_stream_id_hi << 8) | sv->transport_stream_id_lo;
+							bs.original_network_id = (sv->original_network_id_hi << 8) | sv->original_network_id_lo;
+							bs.service_id=(sl->service_id_hi << 8) | sl->service_id_lo;
+							bs.serviceTyp=sl->service_type;
+							bs.position = (uint16_t) (((bh->section_number & 0x1f) << 11) + (count & 0x7ff));
+							if (found) {
+								const char *privbuf = (const char *) privdesc;
+								privbuf+=sizeof(struct descr_generic_header);
+								unsigned short privdlen = privdesc->descriptor_length;
+								bool found_posi = false;
+								int order_entry_size;
+								order_entry_size = sizeof(struct digplus_order_entry);
+								while ((privdlen >= order_entry_size) && (!found_posi)) {
+									struct digplus_order_entry *oe = (struct digplus_order_entry *)privbuf;
+									privbuf+=order_entry_size;
+									//printf("Search: %04x Service_id: %04x Posi:%04x\n", 
+//										(sl->service_id_hi << 8) | sl->service_id_lo,
+//										(oe->service_id_hi << 8) | oe->service_id_lo,
+//										(oe->channel_number_hi << 8) | oe->channel_number_lo);
+									if (	((sl->service_id_hi << 8) | sl->service_id_lo) == 
+										((oe->service_id_hi << 8) | oe->service_id_lo)) {
+										bs.position = (oe->channel_number_hi << 8) | oe->channel_number_lo;
+										/*
+										printf("Found Search: %04x Service_id: %04x Posi:%04x\n", 
+										(sl->service_id_hi << 8) | sl->service_id_lo,
+										current_service_id,
+										current_channel_number);
+										*/
+										found_posi=true;
+									}
+									privdlen -= order_entry_size;
+								}
+								if (!found_posi)
+									bs.position = 0xffff;
+							}
+//	printf("Section Number: %d Count: %d position: %04x\n", section_no, count, bs.position);
+							//printf("Set Position: %04x\n",bs.position);
+							bsv.insert(bs);
+							dlen -= sizeof(struct service_list_entry);
+							count++;
+  						}
+					}
+					if (desc->descriptor_tag == 0x5f) {
+						struct private_data_specifier *pds=(struct private_data_specifier *)buf;
+						buf+=sizeof(struct private_data_specifier);
+						if ((pds->byte1 != 0) || (pds->byte2 != 0) || (pds->byte3 != 0) || (pds->byte4 != 0))
+							current_private_data_specifier=(((pds->byte1 << 24) | (pds->byte2 << 16)) | 
+											(pds->byte3 << 8)) | pds->byte4; 
+					//printf("Private Data Specifier: %08x\n", current_private_data_specifier);
+					}
+					if (desc->descriptor_tag == 0x81) {
+						if (current_private_data_specifier == 0x55504300) {
+							//printf("UPC Bouquet ordering descriptor found!\n");
+							privdesc = (struct descr_generic_header *)desc;
+							found = true;
+						}
+					}					
+					if (desc->descriptor_tag == 0x82) {
+						if ((current_private_data_specifier == 0x00000010) || (bouquet_id == 0x0021)) {
+							//printf("TPS Bouquet ordering descriptor found!\n");
+							privdesc = (struct descr_generic_header *)desc;
+							found = true;
+						}
+					}
+					if (desc->descriptor_tag == 0x83) {
+						if (current_private_data_specifier == 0x000000c0) {
+							//printf("Canal+ Bouquet ordering descriptor found!\n");
+							privdesc = (struct descr_generic_header *)desc;
+							found = true;
+						}
+					}
+					if (desc->descriptor_tag == 0x93) {
+						if ((current_private_data_specifier == 0x00362275) || (bouquet_id == CANALDIGITAAL)) {
+							//printf("Irdeto Bouquet ordering descriptor found!\n");
+							privdesc = (struct descr_generic_header *)desc;
+							found = true;
+						}
+					}
+					if ((desc->descriptor_tag == 0xb1) && (loop_count == 0)) {
+						if (current_private_data_specifier == 0x00000002) {
+							//printf("BSkyB Bouquet ordering descriptor found!\n");
+							const char *privbuf = (const char *) desc;
+							privbuf+=sizeof(struct descr_generic_header);
+							unsigned short privdlen = desc->descriptor_length - 2;
+							privbuf+=2; //first 2 bytes of each 0xb1 desc unknown
+							
+							while (privdlen >= sizeof(struct bskyb_order_entry)) {
+								struct bskyb_order_entry *oe = (struct bskyb_order_entry *)privbuf;
+								privbuf+=sizeof(struct bskyb_order_entry);
+								SIbouquet bs(bouquet_id);
+								bs.bouquetName = bouquetName;
+								bs.transport_stream_id = (sv->transport_stream_id_hi << 8) | 
+												sv->transport_stream_id_lo;
+								bs.original_network_id = (sv->original_network_id_hi << 8) | 
+												sv->original_network_id_lo;
+								bs.service_id = (oe->service_id_hi << 8) | oe->service_id_lo;
+								bs.serviceTyp = oe->service_type;
+								bs.position = (oe->channel_number_hi << 8) | oe->channel_number_lo;
+								bsv.insert(bs);
+								privdlen -= sizeof(struct bskyb_order_entry);
+							}
+
+						}
+					}
+	    				len-=desc->descriptor_length+2;
+    					des+=desc->descriptor_length+2;
+  				}
+				loop_count--;	
+			}
+		 
+			actPos += sizeof(struct bat_service) + descriptors_length;
+	//	count++;
+		}
 	}
 	parsed = 1;
 }

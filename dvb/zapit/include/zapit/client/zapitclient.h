@@ -143,6 +143,8 @@ class CZapitClient:public CBasicClient
 		char	 name[30];
 		bool	 locked;
 		bool	 hidden;
+		unsigned int	type;
+		t_bouquet_id	bouquet_id;
 	};
 
 	typedef std::vector<responseGetBouquets> BouquetList;

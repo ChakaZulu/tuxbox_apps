@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.107 2005/12/25 19:07:55 racker Exp $
+ * $Id: bouquets.cpp,v 1.108 2006/02/08 21:19:35 houdini Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -236,9 +236,13 @@ void CBouquetManager::saveBouquets(void)
 
 	for (BouquetList::const_iterator it = Bouquets.begin(); it != Bouquets.end(); it++)
 	{
-		if ((*it) != remainChannels)
+		// TODO: use locales
+		if (((*it) != remainChannels) && (strncmp((*it)->Name.c_str(),"Neue Sender",11) != 0))
 		{
-			fprintf(bouq_fd, "\t<Bouquet name=\"%s\" hidden=\"%d\" locked=\"%d\">\n",
+			//fprintf(bouq_fd, "\t<Bouquet name=\"%s\" hidden=\"%d\" locked=\"%d\">\n",
+			fprintf(bouq_fd, "\t<Bouquet type=\"%01x\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"%01x\" locked=\"%01x\">\n",
+				(*it)->type,
+				(*it)->bouquet_id,
 				convert_UTF8_To_UTF8_XML((*it)->Name.c_str()).c_str(),
 				(*it)->bHidden ? 1 : 0,
 				(*it)->bLocked ? 1 : 0);
@@ -369,6 +373,8 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 			CBouquet* newBouquet = addBouquet(xmlGetAttribute(search, "name"));
 			char* hidden = xmlGetAttribute(search, "hidden");
 			char* locked = xmlGetAttribute(search, "locked");
+			newBouquet->type = xmlGetNumericAttribute(search, "type", 16);
+			newBouquet->bouquet_id = xmlGetNumericAttribute(search, "bouquet_id", 16);
 			newBouquet->bHidden = hidden ? (strcmp(hidden, "1") == 0) : false;
 			newBouquet->bLocked = locked ? (strcmp(locked, "1") == 0) : false;
 			channel_node = search->xmlChildrenNode;
@@ -399,6 +405,51 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 
 }
 
+void CBouquetManager::makeBouquetfromCurrentservices(const xmlNodePtr root)
+{
+	xmlNodePtr provider = root->xmlChildrenNode;
+	
+	// TODO: use locales
+	CBouquet* newBouquet = addBouquet("Neue Sender");
+			newBouquet->bHidden = false;
+			newBouquet->bLocked = false;
+			
+	t_original_network_id original_network_id;
+	t_service_id          service_id;
+	t_transport_stream_id transport_stream_id;
+	t_satellite_position  satellitePosition;
+	
+	while (provider) {
+		
+		xmlNodePtr transponder = provider->xmlChildrenNode;
+		
+		while (xmlGetNextOccurence(transponder, "transponder") != NULL) {
+			
+			xmlNodePtr channel_node = transponder->xmlChildrenNode;
+			
+			while (xmlGetNextOccurence(channel_node, "channel") != NULL) {
+				
+				if (strncmp(xmlGetAttribute(channel_node, "action"), "remove", 6)) {
+					
+					GET_ATTR(provider, "position", SCANF_SATELLITE_POSITION_TYPE, satellitePosition);
+					GET_ATTR(transponder, "onid", SCANF_ORIGINAL_NETWORK_ID_TYPE, original_network_id);
+					GET_ATTR(transponder, "id", SCANF_TRANSPORT_STREAM_ID_TYPE, transport_stream_id);
+					GET_ATTR(channel_node, "service_id", SCANF_SERVICE_ID_TYPE, service_id);
+								
+					CZapitChannel* chan = findChannelByChannelID(CREATE_CHANNEL_ID);
+
+					if (chan != NULL)
+						newBouquet->addService(chan);
+				}
+			
+				channel_node = channel_node->xmlNextNode;
+			}
+			transponder = transponder->xmlNextNode;
+		}
+		provider = provider->xmlNextNode;
+	}
+}
+
 void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 {
 	xmlDocPtr parser;
@@ -410,6 +461,14 @@ void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 		if (parser != NULL)
 		{
 			parseBouquetsXml(xmlDocGetRootElement(parser));
+			xmlFreeDoc(parser);
+		}
+		
+		parser = parseXmlFile(CURRENTSERVICES_XML);
+		
+		if (parser != NULL)
+		{
+			makeBouquetfromCurrentservices(xmlDocGetRootElement(parser));
 			xmlFreeDoc(parser);
 		}
 	}

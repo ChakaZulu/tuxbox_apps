@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.12 2005/12/06 10:20:15 mogway Exp $
+// $Id: SIservices.hpp,v 1.13 2006/02/08 21:15:50 houdini Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -155,7 +155,7 @@ public:
 	t_original_network_id original_network_id; // Ist innerhalb einer section unnoetig
 	t_transport_stream_id transport_stream_id;
 	unsigned char serviceTyp;
-	bool is_actual;
+	int is_actual;
 	SInvodReferences nvods;
 	std::string serviceName; // Name aus dem Service-Descriptor
 	std::string providerName; // Name aus dem Service-Descriptor

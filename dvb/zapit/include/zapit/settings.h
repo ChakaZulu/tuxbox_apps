@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.16 2005/12/10 11:27:54 barf Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.17 2006/02/08 21:19:35 houdini Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -42,6 +42,8 @@
 #define BOUQUETS_TMP    	"/tmp/bouquets.tmp"
 #define CURRENTSERVICES_XML	"/tmp/currentservices.xml"
 #define CURRENTSERVICES_TMP	"/tmp/currentservices.tmp"
+#define CURRENTBOUQUETS_XML	"/tmp/currentbouquets.xml"
+#define CURRENTBOUQUETS_TMP	"/tmp/currentbouquets.tmp"
 
 #define CABLES_XML      	DATADIR "/cables.xml"
 #define SATELLITES_XML  	DATADIR "/satellites.xml"

@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.20 2005/11/21 14:57:28 metallica Exp $
+//    $Id: SIsections.hpp,v 1.21 2006/02/08 21:15:50 houdini Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -829,9 +829,9 @@ protected:
 	SIbouquets bsv;
 	int parsed;
 	void parse(void);
-	void parseDescriptors(const char *desc, unsigned len, SIbouquet &s);
-	void parseBouquetNameDescriptor(const char *buf, SIbouquet &s);
-	void parseServiceListDescriptor(const char *buf, SIbouquet &s);
+//	int parseDescriptors(const char *desc, unsigned len, SIbouquet &s, int section_no, int count, const char *bouquetName);
+//	void parseBouquetNameDescriptor(const char *buf, SIbouquet &s);
+//	int parseServiceListDescriptor(const char *buf, SIbouquet &s, int section_no, int count);
 };
 
 class SIsectionNIT : public SIsection

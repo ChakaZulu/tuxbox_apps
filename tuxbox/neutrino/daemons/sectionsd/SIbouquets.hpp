@@ -1,7 +1,7 @@
 #ifndef SIBOUQUETS_HPP
 #define SIBOUQUETS_HPP
 //
-// $Id: SIbouquets.hpp,v 1.1 2005/11/20 15:11:40 mogway Exp $
+// $Id: SIbouquets.hpp,v 1.2 2006/02/08 21:15:50 houdini Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -75,6 +75,7 @@ public:
 		original_network_id	= 0;
 		service_id		= 0;
 		serviceTyp		= 0;
+//		position 		= 0;
 		bouquetName		= "";
 	}
 	
@@ -85,6 +86,7 @@ public:
 		original_network_id	= _original_network_id;
 		transport_stream_id	= _transport_stream_id;
 		serviceTyp		= 0;
+//		position 		= 0;
 	}
 	// Std-Copy
 	SIbouquet(const SIbouquet &s) {
@@ -95,6 +97,7 @@ public:
 		bouquet_id 		= s.bouquet_id;
 		bouquetName		= s.bouquetName;
 		serviceTyp		= s.serviceTyp;
+		position		= s.position;
 	}
 	
 	t_bouquet_id bouquet_id; // This is because of wrong design of sectionsd. Normally we would parse only tables instead of sections...
@@ -102,13 +105,14 @@ public:
 	t_original_network_id original_network_id;
 	t_transport_stream_id transport_stream_id;
 	t_service_id          service_id;
+	uint16_t	position;
 	unsigned char serviceTyp;
 	bool operator < (const SIbouquet& s) const {
 		return uniqueKey() < s.uniqueKey();
 	}
 
-	t_channel_id uniqueKey(void) const {
-		return CREATE_CHANNEL_ID;
+	t_bouquetentry_id uniqueKey(void) const {
+		return CREATE_BOUQUETENTRY_ID(bouquet_id, (uint16_t) serviceTyp, position, service_id);
 	}
 
 	void dump(void) const {
