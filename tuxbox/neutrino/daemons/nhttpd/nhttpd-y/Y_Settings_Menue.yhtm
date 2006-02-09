@@ -32,13 +32,13 @@
 	<ul id="menu_sec">
 	{=if-empty:{=var-get:management=}~
 		<li class="disabled" title="organize file mounts (restricted by ManagementIP)">Mounts</li>
-		<li class="disabled" title="Parental settings">Jugendschutz</a></li>
-		<li class="disabled" title="Recording settings">Aufnahme</a></li>
-		<li class="disabled" title="Movieplayer settings">Movieplayer</a></li>
-		<li class="disabled" title="Audioplayer settings">Audioplayer</a></li>
-		<li class="disabled" title="Pictureviewer settings">Bildbetrachter</a></li>
-		<li class="disabled" title="boot settings">Bootoptionen</a></li>
-		<li class="disabled" title="rest of settings">Diverse</a></li>
+		<li class="disabled" title="Parental settings (restricted by ManagementIP)">Jugendschutz</a></li>
+		<li class="disabled" title="Recording settings (restricted by ManagementIP)">Aufnahme</a></li>
+		<li class="disabled" title="Movieplayer settings (restricted by ManagementIP)">Movieplayer</a></li>
+		<li class="disabled" title="Audioplayer settings (restricted by ManagementIP)">Audioplayer</a></li>
+		<li class="disabled" title="Pictureviewer settings (restricted by ManagementIP)">Bildbetrachter</a></li>
+		<li class="disabled" title="boot settings (restricted by ManagementIP)">Bootoptionen</a></li>
+		<li class="disabled" title="rest of settings (restricted by ManagementIP)">Diverse</a></li>
 	~
 		<li class="plain"><a class="y_menu_item" title="organize file mounts" target="Rechts_oben" href="Y_Settings_mount_liste.yhtm">Mounts</a></li>
 		<li class="plain"><a class="y_menu_item" title="Parental settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_parental">Jugendschutz</a></li>

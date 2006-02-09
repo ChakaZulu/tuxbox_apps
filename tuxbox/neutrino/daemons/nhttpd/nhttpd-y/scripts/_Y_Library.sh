@@ -1,17 +1,27 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Library (yjogol)
-# $Date: 2005/12/21 18:10:07 $
-# $Revision: 1.7 $
+# $Date: 2006/02/09 19:10:46 $
+# $Revision: 1.8 $
 # -----------------------------------------------------------
 
+# -----------------------------------------------------------
+# local call to WebServer $1=url (after http://locahost:port/<$1>)
+# -----------------------------------------------------------
+call_webserver()
+{
+	port=`sed -n /^Port=/p $y_config_nhttpd | sed -e s/^Port=//1`
+	tmp=`wget -O - -q "http://localhost:$port/$1"`
+	echo "$tmp"
+	echo "$port" >/tmp/a.txt
+}
 # ===========================================================
 # Streaming URL
 # ===========================================================
 
 buildLocalIP()
 {
-    localIP=`ifconfig eth0|sed -n '/inet addr/p'|sed -e 's/^.*inet addr://g' -e 's/ .*//g'`
+	localIP=`ifconfig eth0|sed -n '/inet addr/p'|sed -e 's/^.*inet addr://g' -e 's/ .*//g'`
 	echo "$localIP"
 }
 
@@ -21,8 +31,9 @@ buildLocalIP()
 buildStreamingURL()
 {
 	localIP=`buildLocalIP`
-	pids=`wget -O - -q "$y_url_control/yweb?video_stream_pids=0"`
-    echo "http:\/\/$localIP:31339\/0,$pids"
+	
+	pids=`call_webserver "control/yweb?video_stream_pids=0"`
+	echo "http:\/\/$localIP:31339\/0,$pids"
 }
 
 # -----------------------------------------------------------
@@ -31,8 +42,8 @@ buildStreamingURL()
 buildStreamingRawURL()
 {
 	localIP=`buildLocalIP`
-	pids=`wget -O - -q "$y_url_control/yweb?video_stream_pids=0"`
-    echo "http://$localIP:31339/0,$pids"
+	pids=`call_webserver "control/yweb?video_stream_pids=0"`
+	echo "http://$localIP:31339/0,$pids"
 }
 
 # -----------------------------------------------------------
@@ -41,8 +52,8 @@ buildStreamingRawURL()
 buildStreamingAudioURL()
 {
 	localIP=`buildLocalIP`
-	Y_APid=`wget -O - -q "$y_url_control/yweb?radio_stream_pid"`
-    echo "http:\/\/$localIP:31338\/$Y_APid"
+	Y_APid=`call_webserver "control/yweb?radio_stream_pid"`
+	echo "http:\/\/$localIP:31338\/$Y_APid"
 }
 
 # -----------------------------------------------------------
@@ -51,8 +62,8 @@ buildStreamingAudioURL()
 buildStreamingAudioRawURL()
 {
 	localIP=`buildLocalIP`
-	Y_APid=`wget -O - -q "$y_url_control/yweb?radio_stream_pid"`
-    echo "http://$localIP:31338/$Y_APid"
+	Y_APid=`call_webserver "control/yweb?radio_stream_pid"`
+	echo "http://$localIP:31338/$Y_APid"
 }
 
 # -----------------------------------
@@ -151,8 +162,8 @@ config_set_value_direct()
 # -----------------------------------------------------------
 yreboot()
 {
-	reboot
-#	wget -O - -q "$y_url_control/reboot"
+#	reboot
+	call_webserver "control/reboot"
 }
 
 # -----------------------------------------------------------
@@ -160,7 +171,7 @@ yreboot()
 # -----------------------------------------------------------
 msg_nmsg()
 {
-    wget -O - -q "$y_url_control/message?nmsg=$1"
+	call_webserver "control/message?nmsg=$1"
 }
 
 # -----------------------------------------------------------
@@ -168,7 +179,7 @@ msg_nmsg()
 # -----------------------------------------------------------
 msg_popup()
 {
-    wget -O - -q "$y_url_control/message?popup=$1"
+	call_webserver "control/message?popup=$1"
 }
 
 # -----------------------------------------------------------

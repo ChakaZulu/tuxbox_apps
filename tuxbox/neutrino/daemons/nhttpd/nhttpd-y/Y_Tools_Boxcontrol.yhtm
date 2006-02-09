@@ -24,7 +24,7 @@ function goUrl(_url)
 		<tr>
 			<td>
 			<b><font size="2">dbox</font></b><br>
-			<INPUT type=button value="Neu starten" title="reboot" onClick='goConfirmUrl("dbox wirklich neu starten?","/control/exec?Y_Tools&yreboot");'>
+			<INPUT type=button value="Neu starten" title="reboot" onClick='goConfirmUrl("dbox wirklich neu starten?","/control/reboot");'>
 			<INPUT type=button value="Ausschalten" title="shutdown" onClick='goConfirmUrl("dbox wirklich ausschalten?","/control/shutdown");'>
 			<INPUT type=button value="Standby" onClick='goConfirmUrl("dbox wirklich in Standby-Modus?","/control/standby");'>
 			</td>

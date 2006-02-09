@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Flashing Library (yjogol)
-# $Date: 2005/12/21 18:10:07 $
-# $Revision: 1.9 $
+# $Date: 2006/02/09 19:10:46 $
+# $Revision: 1.10 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -100,6 +100,8 @@ simulate="false"
 		msg="geflasht ... bitte jetzt box neu starten ..."
 		msg="$msg <script language='JavaScript' type='text/javascript'>window.setTimeout('parent.do_image_flash_ready()',1000)</script>"
 		y_format_message_html
+		
+		busybox reboot -d10
 	else
 		msg="Upload-Problem.<br>Bitte nochmal hochladen."
 		msg="$msg <script language='JavaScript' type='text/javascript'>window.setTimeout('parent.do_image_flash_ready()',1000)</script>"
@@ -321,7 +323,7 @@ wol()
 dofbshot()
 {
 	rm -r /tmp/a.png
-	fbshot /tmp/a.png >/dev/null
+	fbshot -q /tmp/a.png >/dev/null
 	msg="<img src='' name="fb" id="fb">"
 	msg="$msg <script language='JavaScript' type='text/javascript'>document.fb.src='/tmp/a.png?hash=' + Math.random();window.setTimeout('parent.do_ready()',1000)</script>"
 	y_format_message_html2
@@ -407,9 +409,26 @@ case "$1" in
 	dofbshot)
 		dofbshot
 		;;
-	
+
+	timer_get_tvinfo)
+		shift 1
+		wget -O /tmp/tvinfo.xml "http://www.tvinfo.de/share/vidac/rec_info.php?username=$1&password=$2" ;;
+
+	timer_get_klack)
+		config_open $y_config_Y_Web
+		url=`config_get_value "klack_url"`
+		klack_url=`echo "$url"|sed -e 's/;/\&/g'`
+		wget -O /tmp/klack.xml "$klack_url" ;;
+
+	restart_sectionsd)
+		killall sectionsd
+		sectionsd >/dev/null 2>&1
+		msg="sectionsd reboot. ok."
+		y_format_message_html
+		;;
+
 	*)
-		echo "Parameter falsch: $*" ;;
+		echo "[Y_Tools.sh] Parameter falsch: $*" ;;
 esac
 
 

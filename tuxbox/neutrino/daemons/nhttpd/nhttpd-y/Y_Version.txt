@@ -1,5 +1,5 @@
-version=1.4.2
-date=04.01.2006
+version=1.4.3
+date=06.02.2006
 type=Release
 info=
 

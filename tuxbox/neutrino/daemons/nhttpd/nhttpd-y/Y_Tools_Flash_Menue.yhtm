@@ -37,6 +37,15 @@ function do_image_download_ready()
 	document.f.upload.disabled = false;
 	document.all.wait.style.visibility="hidden";
 }
+function goConfirmUrl(_meld, _url) 
+{
+	if (confirm(_meld)==true) goUrl(_url);
+}
+
+function goUrl(_url)
+{
+	out.location.href = _url;
+}
 </script>
 </head>
 <body>
@@ -54,6 +63,14 @@ function do_image_download_ready()
 		<input type="button" name="download" value="Download" title="Download selected Image" onClick="do_image_download()">
 		<input type="button" name="upload" value="Flash ..." title="go to Upload Dialog" onClick="do_image_upload_dialog()">
 	</form>
+</div>
+<div style="clear:both">&nbsp;</div>
+<br>
+<div class="y_work_box" title="You should reboot the box before flashing">
+	<strong>Hinweis:</strong><br><br>
+	Es ist sinnvoll die Box vor dem flashen frish zu booten.<br>
+	<INPUT type=button value="Neu starten" title="reboot" onClick='goConfirmUrl("dbox wirklich neu starten?","/control/reboot");'>
+
 </div>
 <iframe name="out" id="out" width="100%" height="200" align="left" frameborder="0">Your Browser does not support IFrames.</iframe>
 </body>

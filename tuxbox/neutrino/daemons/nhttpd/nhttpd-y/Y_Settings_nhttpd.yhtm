@@ -50,14 +50,12 @@ function do_submit()
 					<INPUT type="radio" name="authenticate" value="true" title="authentication: on">AN
 				</td>
 			</tr>
-			<!---
 			<tr>
 				<td>Port</td>
 				<td><input type="text" name="port" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;Port;80=}" title="port">
 				<br>Änderung des Ports wird erst nach einem Neustart wirksam.
 				</td>
 			</tr>
-			--->
 		</table>
 		<br>
 		<input type="hidden" name="tmpl" value="Y_Settings_nhttpd.yhtm">

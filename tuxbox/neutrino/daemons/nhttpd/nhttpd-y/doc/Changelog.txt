@@ -1,5 +1,13 @@
 Severity	id		Headline							Build
 
+3-Average	JG200000369	Live: fixed problems switching Radio-Channels			R1.4.3
+4-Minor		JG200000355	nhttpd: change port now used in Scripts				R1.4.3
+4-Minor		JG200000365	Settings: fixed: upload cam-alpha.bin now named correctly	R1.4.3
+5-Enhancement	JG200000366	settings: add port to WebServer settings			R1.4.3
+5-Enhancement	JG200000367	gui: add remote control for Sagem				R1.4.3
+5-Enhancement	JG200000389	tools: restart sectionsd					R1.4.3
+5-Enhancement	JG200000391	flash: fixed reboot after flashing				R1.4.3
+
 4-Minor		JG200000359	tools: fix reboot after flash					R1.4.2
 5-Enhancement	JG200000332	Live: record: filepath settings at settings->yWeb		R1.4.2
 5-Enhancement	JG200000337	bouquets: start bouquetlist at actual bouquet			R1.4.2
