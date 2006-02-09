@@ -1263,6 +1263,29 @@ const eString& eListBoxSeparator::redraw(gPainter *rc, const eRect& rect, gColor
 	return ret;
 }
 
+// deprecated...
+const eString& eListBoxEntrySeparator::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state )
+{
+	int x = 0;
+	if ( pm )
+	{
+		rc->clip(rect);
+		eSize psize = pm->getSize(),
+					esize = rect.size();
+		int yOffs = rect.top()+((esize.height() - psize.height()) / 2);
+		do
+		{
+			rc->blit(*pm, ePoint(x, yOffs), eRect(x, yOffs, psize.width(), psize.height()), alphatest?gPixmap::blitAlphaTest:0 );
+			x+=distance;
+			x+=psize.width();
+		}
+		while (x<esize.width());
+		rc->clippop();
+	}
+	static eString ret="separator";
+	return ret;
+}
+
 eListBoxEntryCheck::eListBoxEntryCheck( eListBox<eListBoxEntryMenu> *lb, const char* text, const char* regkey, const eString& hlptxt )
 	:eListBoxEntryMenu(lb, text, hlptxt, 0 )
 	,pm(eSkin::getActive()->queryImage("eListBoxEntryCheck"))

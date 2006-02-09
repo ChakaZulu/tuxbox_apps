@@ -243,6 +243,21 @@ inline void eListBoxBase::remove(eListBoxEntry* entry, bool holdCurrent)
 	delete entry;
 }
 
+// eListBoxEntrySeparator is deprecated now..
+// please use eListBoxEntryTextSeparotor or MenuSeparator in new projects...
+class eListBoxEntrySeparator: public eListBoxEntry
+{
+	gPixmap *pm;
+	__u8 distance;
+	bool alphatest;
+public:
+	eListBoxEntrySeparator( eListBox<eListBoxEntry> *lb, gPixmap *pm, __u8 distance, bool alphatest=false )
+		:eListBoxEntry(lb, 0, 0), pm(pm), distance(distance), alphatest(alphatest)
+	{
+	}
+	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
+};
+
 class eListBoxEntryText: public eListBoxEntry
 {
 	friend class eListBox<eListBoxEntryText>;
