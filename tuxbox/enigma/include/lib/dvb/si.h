@@ -551,28 +551,4 @@ public:
 	ePtrList< Descriptor > bouquet_descriptors;
 	ePtrList<BATEntry> entries;
 };
-
-class MHWEITEvent
-{
-public:
-	int service_id;
-	int starttime;
-	int duration;
-	eString event_name;
-	eString short_description;
-	eString extended_description;
-	int flags;
-};
-
-class MHWEIT: public eSection
-{
-	int sectionRead(__u8 *data);
-	int available;
-	void sectionFinish(int);
-public:
-	Signal1<void, int> ready;
-	MHWEIT(int pid, int service_id);
-	std::vector<MHWEITEvent> events;
-};
-
 #endif

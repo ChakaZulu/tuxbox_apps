@@ -118,7 +118,6 @@ class eDVBServiceController
 	void freeCheckFinished();
 // for linkage handling
 	eServiceReferenceDVB parentservice,prevservice;
-	MHWEIT *tMHWEIT;
 	eTimer updateTDTTimer;
 	eTimer disableFrontendTimer;
 public:
@@ -184,7 +183,6 @@ public:
 	void EITready(int error);
 	void TDTready(int error);
 	void BATready(int error);
-	void MHWEITready(int error);
 
 	void setPID(const PMTEntry *entry);
 	void setDecoder();
