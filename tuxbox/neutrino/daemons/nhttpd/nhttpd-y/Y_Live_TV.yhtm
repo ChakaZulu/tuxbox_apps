@@ -140,7 +140,7 @@ function doRecord2()
 {=if-equal:{=browser=}~ie~
 	<OBJECT classid="clsid:E23FE9C6-778E-49D4-B537-38FCDE4887D8" 
 	        width="384" height="288" id="vlc" events="True">
-			<param name="Src" value="http://{=script:Y_Live dboxIP=}:31339/0,{=func:get_video_pids {=audiopid=}=}" />
+			<param name="Src" value="http://{=func:get_request_data host=}:31339/0,{=func:get_video_pids {=audiopid=}=}" />
 			<param name="ShowDisplay" value="True" />
 			<param name="Loop" value="False" />
 			<param name="AutoPlay" value="True" />
