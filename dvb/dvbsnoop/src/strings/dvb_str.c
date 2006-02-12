@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.74 2005/12/27 23:30:30 rasc Exp $
+$Id: dvb_str.c,v 1.75 2006/02/12 23:17:12 rasc Exp $
 
 
  DVBSNOOP
@@ -20,6 +20,9 @@ $Id: dvb_str.c,v 1.74 2005/12/27 23:30:30 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.75  2006/02/12 23:17:12  rasc
+TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
+
 Revision 1.74  2005/12/27 23:30:30  rasc
 PS MPEG-2 Extension data packets, MPEG-2 decoding
 
@@ -305,7 +308,7 @@ char *dvbstrPID_assignment (u_int id)
      {  0x0012, 0x0012,  "DVB Event Information Table (EIT)" },
      {  0x0013, 0x0013,  "DVB Running Status Table (RST)" },
      {  0x0014, 0x0014,  "DVB Time and Date Table (TDT), Time Offset Table (TOT)" },
-     {  0x0015, 0x0015,  "DVB Network Synchronization" },
+     {  0x0015, 0x0015,  "DVB Network Synchronization / Mega-Frame Initialization Packet" },
      {  0x0016, 0x0016,  "TV ANYTIME Resolution Notification Table (RNT)" },
      {  0x0017, 0x001B,  "" },
      {  0x001C, 0x001C,  "DVB Inband Signalling" },
@@ -334,6 +337,7 @@ char *dvbstrPID_assignment (u_int id)
  RE 101 202
  ISO 13818-1
  TS 102 323
+ TS 101 191
 */
 
 char *dvbstrTableID (u_int id)
@@ -1305,9 +1309,11 @@ char *dvbstrTeletext_TYPE (u_int i)
 
 
 /*
- -- Terrestrial Bandwidth descriptor (ETSI EN 300 468  6.2.12.3)
+ -- Terrestrial Bandwidth descriptor (ETSI EN 300 468)
+ -- see also: EN 300 744
 */
 
+// -- updated: EN 300 468 v1.7.1
 char *dvbstrTerrBandwidth_SCHEME (u_int i)
 
 {
@@ -1315,7 +1321,8 @@ char *dvbstrTerrBandwidth_SCHEME (u_int i)
      {  0x00, 0x00,  "8 MHz" },
      {  0x01, 0x01,  "7 MHz" },
      {  0x02, 0x02,  "6 MHz" },
-     {  0x03, 0x07,  "reserved" },
+     {  0x03, 0x03,  "5 MHz" },
+     {  0x04, 0x07,  "reserved" },
      {  0,0, NULL }
   };
 
@@ -1338,15 +1345,19 @@ char *dvbstrTerrConstellation_FLAG (u_int i)
 }
 
 
+//  -- updated: EN 300 468 v1.7.1
 char *dvbstrTerrHierarchy_FLAG (u_int i)
 
 {
   STR_TABLE  Table[] = {
-     {  0x00, 0x00,  "non-hierarchical" },
-     {  0x01, 0x01,  "alpha=1" },
-     {  0x02, 0x02,  "alpha=2" },
-     {  0x03, 0x03,  "alpha=4" },
-     {  0x04, 0x07,  "reserved" },
+     {  0x00, 0x00, "non-hierarchical (native interleaver)" },
+     {  0x01, 0x01, "alpha=1 (native interleaver)" },
+     {  0x02, 0x02, "alpha=2 (native interleaver)" },
+     {  0x03, 0x03, "alpha=4 (native interleaver)" },
+     {  0x04, 0x04, "non-hierarchical (in-depth interleaver)" },
+     {  0x05, 0x05, "alpha=1 (in-depth interleaver)" },
+     {  0x06, 0x06, "alpha=2 (in-depth interleaver)" },
+     {  0x07, 0x07, "alpha=4 (in-depth interleaver)" },
      {  0,0, NULL }
   };
 
@@ -1371,6 +1382,7 @@ char *dvbstrTerrCodeRate_FLAG (u_int i)
 }
 
 
+//  -- updated: EN 300 468 v1.7.1
 char *dvbstrTerrGuardInterval_FLAG (u_int i)
 
 {
@@ -1386,13 +1398,15 @@ char *dvbstrTerrGuardInterval_FLAG (u_int i)
 }
 
 
+// Update EN 300 468 1.6.1.
 char *dvbstrTerrTransmissionMode_FLAG (u_int i)
 
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "2k mode" },
      {  0x01, 0x01,  "8k mode" },
-     {  0x02, 0x03,  "reserved" },
+     {  0x02, 0x02,  "4k mode" },
+     {  0x03, 0x03,  "reserved" },
      {  0,0, NULL }
   };
 
@@ -1405,7 +1419,7 @@ char *dvbstrTerrPriority (u_int i)
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "LP (low priority)" },
-     {  0x01, 0x01,  "HP (high priority)" },
+     {  0x01, 0x01,  "HP (high priority) or Non-hierarch." },
      {  0,0, NULL }
   };
 
@@ -1430,6 +1444,22 @@ char *dvbstrTerrMPE_FEC_Indicator (u_int i)
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "at least one elementary stream uses MPE-FEC" },
      {  0x01, 0x01,  "MPE-FEC is not used.)" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+// EN 300 744 1.5.1   (Annex F.6.2)
+char *dvbstrTerr_DVBH_service_indication (u_int i)
+{
+  STR_TABLE  Table[] = {
+     { 0x00, 0x00, "No time slicing, no MPE-FEC" },
+     { 0x01, 0x01, "No time slicing, at least one elementary stream use MPE-FEC" },
+     { 0x02, 0x02, "Time slicing, no MPE-FEC" },
+     { 0x03, 0x03, "Time slicing, at least one elementary stream use MPE-FEC" },
      {  0,0, NULL }
   };
 
@@ -3968,6 +3998,60 @@ char *dvbstrMPEG_Original_Or_Copy (u_int i)
 
 
 
+/*
+ -- TS MIP Synchronization
+ -- TS 101 191
+*/
+
+char *dvbstrTS_MIP_Syncronization (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "SFN synchronization" },
+     {  0x01, 0xFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+ * -- MegaFrame Iniialization Packet Functions
+ * -- TS 101 191
+ */
+char *dvbstrTS_MIP_FunctionTag (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "tx_time_offset_function" },
+     {  0x01, 0x01,  "tx_frequency_offset_function" },
+     {  0x02, 0x02,  "tx_power_function" },
+     {  0x03, 0x03,  "private_data_function" },
+     {  0x04, 0x04,  "cell_id_function" },
+     {  0x05, 0x05,  "enable_function" },
+     {  0x06, 0x06,  "bandwidth_function" },
+     {  0x07, 0xFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ * -- MIP, Channel bandwidth
+ * -- TS 101 191
+ */
+char *dvbstrTS_MIP_ChannelBandwidth (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "5 MHz" },
+     {  0x01, 0xFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
 
 
 

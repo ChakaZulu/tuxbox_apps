@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.34 2005/12/27 23:30:30 rasc Exp $ 
+$Id: dvb_str.h,v 1.35 2006/02/12 23:17:12 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.34 2005/12/27 23:30:30 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.35  2006/02/12 23:17:12  rasc
+TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
+
 Revision 1.34  2005/12/27 23:30:30  rasc
 PS MPEG-2 Extension data packets, MPEG-2 decoding
 
@@ -165,6 +168,7 @@ char *dvbstrTerrTransmissionMode_FLAG(u_int id);
 char *dvbstrTerrPriority (u_int i);
 char *dvbstrTerrTimeSlicingIndicator (u_int i);
 char *dvbstrTerrMPE_FEC_Indicator (u_int i);
+char *dvbstrTerr_DVBH_service_indication (u_int i);
 char *dvbstrAspectRatioInfo_FLAG(u_int id);
 char *dvbstrHierarchy_TYPE(u_int id);
 char *dvbstrRunningStatus_FLAG (u_int id);
@@ -282,6 +286,13 @@ char *dvbstrMPEG_ScalableMode (u_int i);
 char *dvbstrMPEG_Intra_DC_Precision (u_int i);
 char *dvbstrMPEG_PictureStructure (u_int i);
 char *dvbstrMPEG_Original_Or_Copy (u_int i);
+
+
+/* TS 101 191 */
+char *dvbstrTS_MIP_Syncronization (u_int i);
+char *dvbstrTS_MIP_FunctionTag (u_int i);
+char *dvbstrTS_MIP_ChannelBandwidth (u_int i);
+
 
 
 #endif

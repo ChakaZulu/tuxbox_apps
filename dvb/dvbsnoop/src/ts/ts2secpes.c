@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.14 2006/01/02 18:24:34 rasc Exp $
+$Id: ts2secpes.c,v 1.15 2006/02/12 23:17:13 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ts2secpes.c,v 1.14 2006/01/02 18:24:34 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.15  2006/02/12 23:17:13  rasc
+TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
+
 Revision 1.14  2006/01/02 18:24:34  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -77,6 +80,7 @@ checks for continuity errors, etc. and decode in TS enclosed sections/pes packet
 
 #include "dvbsnoop.h"
 #include "ts2secpes.h"
+#include "ts_misc.h"
 #include "sections/sectables.h"
 #include "pes/pespacket.h"
 #include "misc/packet_mem.h"
@@ -254,7 +258,10 @@ void ts2SecPes_subdecode (u_char *b, int len, u_int opt_pid)
  if (opt_pid >= 0 && opt_pid <= MAX_PID) {
 	 if (opt_pid != pid)  return;
  }
- 
+
+ // -- no ts subdecode for special pids...
+ if (check_TS_PID_special (pid)) return;
+
 
  transport_error_indicator	 = getBits (b, 0, 8, 1);
  payload_unit_start_indicator	 = getBits (b, 0, 9, 1);

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.24 2006/01/02 18:23:58 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.25 2006/02/12 23:17:11 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc_carousel_descriptor.c,v 1.24 2006/01/02 18:23:58 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.25  2006/02/12 23:17:11  rasc
+TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
+
 Revision 1.24  2006/01/02 18:23:58  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -118,28 +121,25 @@ int  descriptorDSMCC_CAROUSEL (u_char *b)
 
 {
  int len;
- int id;
+ int tag;
 
 
-  id  =  (int) b[0];
-  len = ((int) b[1]) + 2;
 
   out_NL (4);
-  out_S2B_NL (4,"DSM-CC_CAROUSEL-DescriptorTag: ",id,
-		  dsmccStrDSMCC_CAROUSEL_DescriptorTAG (id));
-  out_SB_NL  (5,"Descriptor_length: ",b[1]);
+  tag = outBit_S2x_NL (4,"DSM-CC_CAROUSEL-DescriptorTag: ",	b,   0,  8,
+		(char *(*)(u_long))dsmccStrDSMCC_CAROUSEL_DescriptorTAG); 
+  len = outBit_Sx_NL  (4,"descriptor_length: ",	 		b,   8,  8);
+
 
   // empty ??
-  len = ((int)b[1]) + 2;
-  if (b[1] == 0)
-	 return len;
+  if (len == 0) return len;
 
   // print hex buf of descriptor
-  printhex_buf (9, b,len);
+  printhex_buf (9, b,len+2);
 
 
 
-  switch (b[0]) {
+  switch (tag) {
 
      case 0x01:  descriptorDSMCC_type (b); break;
      case 0x02:  descriptorDSMCC_name (b); break;
@@ -158,16 +158,15 @@ int  descriptorDSMCC_CAROUSEL (u_char *b)
      case 0x72:  descriptorDSMCC_MHP_content_type (b); break;
 
      default: 
-	if (b[0] < 0x80) {
+	if (tag < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC_CAROUSEL context), Report!");
 	}
-	// descriptor_any (b);
 	descriptor_PRIVATE (b,DSMCC_CAROUSEL);
 	break;
   } 
 
 
-  return len;   // (descriptor total length)
+  return len+2;   // (descriptor total length)
 }
 
 

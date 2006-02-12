@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.25 2006/01/02 18:24:34 rasc Exp $
+$Id: tslayer.c,v 1.26 2006/02/12 23:17:13 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.25 2006/01/02 18:24:34 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.26  2006/02/12 23:17:13  rasc
+TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
+
 Revision 1.25  2006/01/02 18:24:34  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -117,7 +120,8 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvbsnoop.h"
 #include "tslayer.h"
 #include "ts2secpes.h"
-#include "ts_cc_check.h"
+#include "ts_mip.h"
+#include "ts_misc.h"
 
 #include "strings/dvb_str.h"
 #include "misc/output.h"
@@ -141,6 +145,7 @@ void processTS_packet (u_int pid, long pkt_nr, u_char *b, int len)
 
 
        // -- subdecode prev. collected TS data
+       // -- push new data
        if (opt->printdecode && opt->ts_subdecode) {
 	       ts2SecPes_subdecode (b, len, pid);
        }
@@ -160,7 +165,7 @@ void processTS_packet (u_int pid, long pkt_nr, u_char *b, int len)
 
        // -- decode protocol (if ts packet)
        if (opt->printdecode) {
-          decodeTS_packet (b, len, opt->pid);
+          decodeTS_packet (b, len);
           out_nl (3,"==========================================================");
           out_NL (3);
           if (opt->ts_subdecode) {
@@ -175,49 +180,59 @@ void processTS_packet (u_int pid, long pkt_nr, u_char *b, int len)
 
 
 
+//
+// -- Dispatch TS packet 
+// --- Standard Transport Stream
+// --- Special Transport Streams...
+//
+
+void decodeTS_packet (u_char *b, int len)
+{
+  int  pid;
+
+
+  pid = getBits (b, 0,11,13);
+  // -- see also ts_misc.c-> special pids!!
+  switch (pid) {
+
+	case 0x15:		// MIP, TS 101 191
+		decodeTS_MIP (b, len);
+		break;
+
+	default: 		// ISO 13818-1
+		decodeTS_iso13818 (b, len);
+		break;
+  }
+
+}
+
+
+
 
 
 //
 // -- Decode TS packet content
+// -- Standard TS packet ISO 13818
 //
 
-void decodeTS_packet (u_char *b, int len, u_int opt_pid)
+void decodeTS_iso13818 (u_char *b, int len)
 {
- /* IS13818-1  2.4.3.2  */
+ /* ISO 13818-1  2.4.3.2  */
 
  int            n;
- int		tei;
- int		pusi;
- int		sc;
- int		afc;
- int		pid; 
+ TSPHD		h;
 
 
+ //
+ // -- decode packet header (32 bit)
+ //
 
-	  outBit_Sx_NL  (3,"Sync-Byte 0x47: ", 			b,  0, 8);
- tei 	= outBit_S2x_NL (3,"Transport_error_indicator: ", 	b,  8, 1,
-		 	(char *(*)(u_long))dvbstrTS_TEI ); 
- pusi	= outBit_S2x_NL (3,"Payload_unit_start_indicator: ", 	b,  9, 1,
-			(char *(*)(u_long))dvbstrTS_PUSI ); 
- 	  outBit_Sx_NL  (3,"transport_priority: ",		b, 10, 1);
- pid 	= outBit_S2x_NL (3,"PID: ",			 	b, 11,13,
-			(char *(*)(u_long))dvbstrTSpid_ID ); 
- 	  ts_cc_SetPid (pid); // set this here for ts_cc_check...
-
- sc	= outBit_S2x_NL (3,"transport_scrambling_control: ", 	b, 24, 2,
-			(char *(*)(u_long))dvbstrTS_ScramblingCtrl_TYPE ); 
- afc	= outBit_S2x_NL (3,"adaptation_field_control: ", 	b, 26, 2,
-			(char *(*)(u_long))dvbstrTS_AdaptationField_TYPE ); 
-	  outBit_S2x_NL (3,"continuity_counter: ", 		b, 28, 4,
-			  (char *(*)(u_long))ts_cc_StatusStr );
+ n =  decodeTS_PacketHeader (b, &h);
+ len -= n;
+ b   += n;
 
 
-
- len -= 4;
- b   += 4;
-
-
- if (afc & 0x2) {
+ if (h.afc & 0x2) {
     indent (+1);
     out_nl (3,"Adaptation_field: ");
     	indent (+1);
@@ -229,15 +244,14 @@ void decodeTS_packet (u_char *b, int len, u_int opt_pid)
  }
 
  
- if (afc & 0x1) {
+ if (h.afc & 0x1) {
 
     indent (+1);
     out_nl (3,"Payload: (len: %d)",len);
 
 	// -- if payload_start, check PES/SECTION
-	if (pusi && ! (sc || tei) ) {
+	if (h.pusi && ! (h.tsc || h.tei) ) {
 	    indent (+1);
-//	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
 	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01) {
 		// -- PES
 		outBit_S2x_NL (4,"==> PES-stream: ",	b+3, 0,8,
@@ -259,7 +273,7 @@ void decodeTS_packet (u_char *b, int len, u_int opt_pid)
  }
 
 
- if (afc == 0x00) {
+ if (h.afc == 0x00) {
     // -- ISO/IEC reserved...
     print_databytes (5, "Data-Bytes:", b,len); 
  }

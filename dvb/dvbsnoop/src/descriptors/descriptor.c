@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.30 2006/01/02 18:23:57 rasc Exp $
+$Id: descriptor.c,v 1.31 2006/02/12 23:17:11 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: descriptor.c,v 1.30 2006/01/02 18:23:57 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.31  2006/02/12 23:17:11  rasc
+TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
+
 Revision 1.30  2006/01/02 18:23:57  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -145,7 +148,7 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 
 
   id  =  (int)b[0];  
-  len = ((int)b[1]) + 2;
+  len = ((int)b[1]) + 2;   	// total length
 
   // nothing to print here? 
   // well, I guess all descriptors need a verbosity >=4...

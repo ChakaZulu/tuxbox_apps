@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.h,v 1.10 2006/01/02 18:24:34 rasc Exp $
+$Id: tslayer.h,v 1.11 2006/02/12 23:17:13 rasc Exp $
 
 
    
@@ -19,7 +19,9 @@ $Id: tslayer.h,v 1.10 2006/01/02 18:24:34 rasc Exp $
 
 
 void processTS_packet (u_int pid, long packet_nr, u_char *b, int len);
-void decodeTS_packet (u_char *b, int len, u_int pid);
+void decodeTS_packet (u_char *b, int len);
+
+void decodeTS_iso13818 (u_char *b, int len);
 int  ts_adaptation_field (u_char *b);
 int  ts_adaptation_field_extension (u_char *b);
 int  print_PCR_field (int v, const char *str, u_char *b, int bit_offset);

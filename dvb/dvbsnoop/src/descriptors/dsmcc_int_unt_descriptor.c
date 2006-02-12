@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.21 2006/01/02 18:23:58 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.22 2006/02/12 23:17:11 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.21 2006/01/02 18:23:58 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.22  2006/02/12 23:17:11  rasc
+TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
+
 Revision 1.21  2006/01/02 18:23:58  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -138,28 +141,25 @@ int  descriptorDSMCC_INT_UNT  (u_char *b)
 
 {
  int len;
- int id;
+ int tag;
 
 
-  id  =  (int) b[0];
-  len = ((int) b[1]) + 2;
 
   out_NL (4);
-  out_S2B_NL (4,"DSM_CC-INT-UNT-DescriptorTag: ",id,
-		  dsmccStrDSMCC_INT_UNT_DescriptorTAG(id));
-  out_SB_NL  (5,"Descriptor_length: ",b[1]);
+  tag = outBit_S2x_NL (4,"DSM_CC-INT-UNT-DescriptorTag: ",	b,   0,  8,
+		(char *(*)(u_long))dsmccStrDSMCC_INT_UNT_DescriptorTAG); 
+  len = outBit_Sx_NL  (4,"descriptor_length: ",	 		b,   8,  8);
+
 
   // empty ??
-  len = ((int)b[1]) + 2;
-  if (b[1] == 0)
-	 return len;
+  if (len == 0) return len;
 
   // print hex buf of descriptor
-  printhex_buf (9, b,len);
+  printhex_buf (9, b,len+2);
 
 
 
-  switch (b[0]) {
+  switch (tag) {
 
      case 0x01:  descriptorDSMCC_scheduling (b); break;
      case 0x02:  descriptorDSMCC_update (b); break;
@@ -186,16 +186,15 @@ int  descriptorDSMCC_INT_UNT  (u_char *b)
      case 0x5F:  descriptorDVB_PrivateDataSpecifier (b);  break;
 
      default: 
-	if (b[0] < 0x80) {
+	if (tag < 0x80) {
 	    out_nl (0,"  ----> ERROR: unimplemented descriptor (DSM-CC INT/UNT context), Report!");
 	}
-	// descriptor_any (b);
 	descriptor_PRIVATE (b,DSMCC_INT_UNT);
 	break;
   } 
 
 
-  return len;   // (descriptor total length)
+  return len+2;   // (descriptor total length)
 }
 
 
