@@ -21,7 +21,6 @@
 #include <lib/driver/streamwd.h>
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/decoder.h>
-#include <lib/gui/emessage.h>
 #include <lib/gui/eskin.h>
 #include <lib/system/info.h>
 
@@ -99,8 +98,8 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 					aneedlcd=getInfo(cfgfile, "needlcd"),
 					aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
 					aneedoffsets=getInfo(cfgfile, "needoffsets"),
-					apigon=getInfo(cfgfile, "pigon");
-
+					apigon=getInfo(cfgfile, "pigon"),
+	
 	cfgname=cfgfile;
 	requires=getInfo(cfgfile, "requires");
 	needfb=(aneedfb.isNull()?false:atoi(aneedfb.c_str()));
@@ -111,7 +110,7 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* des
 	version=(apluginVersion.isNull()?0:atoi(apluginVersion.c_str()));
 	type=(atype.isNull()?0:atoi(atype.c_str()));
 	showpig=(apigon.isNull()?false:atoi(apigon.c_str()));
-
+	
 	if (type == 3)
 		sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".sh";	// uarg
 	else 
@@ -130,11 +129,11 @@ eZapPlugins::eZapPlugins(int type, eWidget* lcdTitle, eWidget* lcdElement)
 	PluginPath[1] = PLUGINDIR "/";
 	PluginPath[2] = "";
 	setHelpText(_("select plugin and press ok"));
-	move(ePoint(150, 100));
 #ifndef DISABLE_LCD
 	setLCD(lcdTitle, lcdElement);
 #endif
 	CONNECT(list.selected, eZapPlugins::selected);
+	valign();
 }
 
 int eZapPlugins::find(bool ignore_requires)
@@ -254,28 +253,19 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	if (plugin->type == 3)
 	{
 			//The current plugin is a script
-			FILE *f_script;
-			if ((access(plugin->sopath.c_str(), X_OK) == 0) && (f_script = popen(plugin->sopath.c_str(),"r")))
+			if ((access(plugin->sopath.c_str(), X_OK) == 0))
 			{
-				char output[1024];
-				eString scriptOutput;
-				while (fgets(output,1024,f_script))
-				{
-					scriptOutput += output;
-				}
-				pclose(f_script);
-				
-				eScriptOutputWindow wnd(plugin->sopath, scriptOutput);
 				hide();
-				wnd.show();
-				wnd.exec();
-				wnd.hide();
-				show();
+ 				eScriptOutputWindow wnd(plugin);
+ 				wnd.show();
+ 				wnd.exec();
+ 				wnd.hide();
+ 				show();
 			}
 			else
 			{
 				eDebug("can't execute %s",plugin->sopath.c_str());
-				eMessageBox mbox(eString().sprintf(_("Cannot execute %s"), plugin->sopath.c_str()), (_("Error")), eMessageBox::iconError | eMessageBox::btOK, eMessageBox::btOK, 5);
+				eMessageBox mbox(eString().sprintf(_("Cannot execute %s (check rights)"), plugin->sopath.c_str()), (_("Error")), eMessageBox::iconError | eMessageBox::btOK, eMessageBox::btOK, 5);
   	 			mbox.show();
    				mbox.exec();
    				mbox.hide();
@@ -538,13 +528,12 @@ void ePluginThread::finalize_plugin()
 	delete this;
 }
 
-eScriptOutputWindow::eScriptOutputWindow(eString title, eString output):
+eScriptOutputWindow::eScriptOutputWindow(ePlugin *plugin):
 eWindow(1)
 {
-   cmove(ePoint(70, 85));
-   cresize(eSize(595, 450));
+   cresize(eSize(580, 420));
 
-   setText(title.isNull() ? _("Script Output") : title.c_str());
+   setText(eString().sprintf(_("Output from %s"), plugin->sopath.c_str()));
 
    scrollbar = new eProgress(this);
    scrollbar->setName("scrollbar");
@@ -569,9 +558,20 @@ eWindow(1)
 
    label->hide();
    label->move(ePoint(0, 0));
-   label->setText(output);
+   label->setText(eString().sprintf(_("Executing %s. Please wait..."), plugin->sopath.c_str()));
+   script = new eConsoleAppContainer(plugin->sopath);
+   if (!script->running())
+	label->setText(eString().sprintf(_("Could not execute %s"), plugin->sopath.c_str()));
+   else
+   {
+	eDebug("%s started", plugin->sopath.c_str());
+	CONNECT(script->dataAvail, eScriptOutputWindow::getData);
+	CONNECT(script->appClosed, eScriptOutputWindow::scriptClosed);
+   }
    updateScrollbar();
    label->show();
+
+   valign();
 }
 
 int eScriptOutputWindow::eventHandler(const eWidgetEvent & event)
@@ -624,6 +624,38 @@ void eScriptOutputWindow::updateScrollbar()
    scrollbar->show();
    if (pages == 1)
       total = 0;
+}
+
+
+void eScriptOutputWindow::getData(eString str)
+{
+	scriptOutput += str;
+}
+
+void eScriptOutputWindow::scriptClosed(int state)
+{
+	if (script)
+	{
+		delete script;
+		script = 0;
+	}
+	label->hide();
+	label->move(ePoint(0, 0));
+	label->setText(scriptOutput);
+	updateScrollbar();
+	label->show();
+	scriptOutput.clear();
+}
+
+eScriptOutputWindow::~eScriptOutputWindow()
+{
+	if (script)
+	{
+		if (script->running())
+			script->kill();
+		delete script;
+		script = 0;
+	}
 }
 
 

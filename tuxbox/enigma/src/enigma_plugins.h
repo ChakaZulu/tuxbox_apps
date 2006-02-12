@@ -3,7 +3,9 @@
 
 #include <lib/base/thread.h>
 #include <lib/base/message.h>
+#include <lib/base/console.h>
 #include <lib/gui/listbox.h>
+#include <lib/gui/emessage.h>
 
 class ePlugin: public eListBoxEntryText
 {
@@ -83,8 +85,13 @@ private:
 	int lines;
 	int eventHandler(const eWidgetEvent &event);
 	void updateScrollbar();
+	eConsoleAppContainer *script;
+	void getData( eString );
+	void scriptClosed(int);
+	eString scriptOutput;
 public:
-	eScriptOutputWindow(eString title, eString out);
+	eScriptOutputWindow(ePlugin *plugin);
+	~eScriptOutputWindow();
 };
 
 #endif /* __enigma_plugins_h */

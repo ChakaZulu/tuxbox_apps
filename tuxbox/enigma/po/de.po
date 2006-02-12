@@ -1,11 +1,11 @@
 # translation of de.po to 
-# $Id: de.po,v 1.79 2006/01/15 18:36:06 philippk Exp $
+# $Id: de.po,v 1.80 2006/02/12 16:05:54 micro_flyer Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-01-15 18:26+0100\n"
+"POT-Creation-Date: 2006-02-12 17:59+0100\n"
 "PO-Revision-Date: 2005-08-19 12:28+0200\n"
 "Last-Translator: Michael Setzer <michael.setzer@layline.de>\n"
 "Language-Team:  <de@li.org>\n"
@@ -1269,7 +1269,7 @@ msgstr "Ja"
 msgid "No"
 msgstr "Nein"
 
-#: lib/gui/listbox.cpp:831
+#: lib/gui/listbox.cpp:861
 msgid "no description available"
 msgstr "Keine Beschreibung verfügbar"
 
@@ -2669,7 +2669,7 @@ msgid "Setup"
 msgstr "Einstellungen"
 
 #: src/enigma_mainmenu.cpp:73 src/enigma_mainmenu.cpp:194
-#: src/enigma_plugins.cpp:126
+#: src/enigma_plugins.cpp:125
 msgid "Games"
 msgstr "Spiele"
 
@@ -2693,45 +2693,56 @@ msgstr "Hauptmenü"
 msgid "setup"
 msgstr "Einstellungen"
 
-#: src/enigma_plugins.cpp:126
+#: src/enigma_plugins.cpp:125
 msgid "Plugins"
 msgstr "Erweiterungen"
 
-#: src/enigma_plugins.cpp:132
+#: src/enigma_plugins.cpp:131
 msgid "select plugin and press ok"
 msgstr "Bitte Plugin wählen und 'OK' drücken"
 
-#: src/enigma_plugins.cpp:156
+#: src/enigma_plugins.cpp:155
 #, c-format
 msgid "Couldn't read plugin directory %s"
 msgstr "Kann Plugin-Verzeichnis %s nicht lesen"
 
-#: src/enigma_plugins.cpp:160 src/enigma_plugins.cpp:278 src/scan.cpp:1873
+#: src/enigma_plugins.cpp:159 src/enigma_plugins.cpp:268 src/scan.cpp:1873
 #: src/scan.cpp:1928 src/scan.cpp:2035
 msgid "Error"
 msgstr "Fehler"
 
-#: src/enigma_plugins.cpp:239
+#: src/enigma_plugins.cpp:238
 msgid "E: currently another plugin is running..."
 msgstr "Fehler: bereits anderes Plugin gestartet"
 
-#: src/enigma_plugins.cpp:246
+#: src/enigma_plugins.cpp:245
 #, c-format
 msgid "plugin '%s' not found"
 msgstr "Plugin '%s' nicht gefunden"
 
-#: src/enigma_plugins.cpp:249
+#: src/enigma_plugins.cpp:248
 msgid "E: no name given"
 msgstr "Fehler: kein Name definiert"
 
-#: src/enigma_plugins.cpp:278
-#, c-format
-msgid "Cannot execute %s"
-msgstr "Kann %s nicht ausführen"
+#: src/enigma_plugins.cpp:268
+#, fuzzy, c-format
+msgid "Cannot execute %s (check rights)"
+msgstr "Kann %s nicht ausführen (Dateirechte prüfen)"
 
-#: src/enigma_plugins.cpp:547
-msgid "Script Output"
-msgstr "Scriptausgabe"
+#: src/enigma_plugins.cpp:536
+#, c-format
+msgid "Output from %s"
+msgstr "Ausgabe von %s"
+
+#: src/enigma_plugins.cpp:561
+#, fuzzy, c-format
+msgid "Executing %s. Please wait..."
+msgstr "Führe %s aus. Bitte warten..."
+
+#: src/enigma_plugins.cpp:564
+#, fuzzy, c-format
+msgid "Could not execute %s"
+msgstr "Kann %s nicht ausführen"
 
 #: src/enigma_scan.cpp:40 src/enigma_setup.cpp:41
 msgid "Service Searching"
@@ -5741,6 +5752,9 @@ msgstr ""
 #: src/time_settings.cpp:72
 msgid "time correction change error"
 msgstr "Fehler beim Ändern der Zeitkorrektur"
+
+#~ msgid "Script Output"
+#~ msgstr "Scriptausgabe"
 
 #~ msgid "Receiver Time:"
 #~ msgstr "Receiver Zeit:"
