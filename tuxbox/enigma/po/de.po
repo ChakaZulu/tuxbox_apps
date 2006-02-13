@@ -1,5 +1,5 @@
 # translation of de.po to 
-# $Id: de.po,v 1.81 2006/02/13 13:38:25 timekiller Exp $
+# $Id: de.po,v 1.82 2006/02/13 13:39:27 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 msgid ""
 msgstr ""
@@ -4133,7 +4133,7 @@ msgstr "CAHandler Verbindung automatisch wiederherstellen"
 
 #: src/setup_extra.cpp:123
 msgid "try to reconnect when an external cahandler connection was lost"
-msgstr "versucht die CAHanler Verbindung automatisch wiederherzustellen, wenn verloren."
+msgstr "versucht die CAHandler Verbindung automatisch wiederherzustellen, wenn verloren."
 
 #: src/setup_extra.cpp:127
 msgid "Enable file sharing"
