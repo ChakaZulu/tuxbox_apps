@@ -1,5 +1,5 @@
 # translation of de.po to 
-# $Id: de.po,v 1.80 2006/02/12 16:05:54 micro_flyer Exp $
+# $Id: de.po,v 1.81 2006/02/13 13:38:25 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 msgid ""
 msgstr ""
@@ -4128,13 +4128,12 @@ msgstr ""
 "Ins nächste Bouquet wechseln, wenn das Ende des aktuellen erreicht ist."
 
 #: src/setup_extra.cpp:123
-#, fuzzy
 msgid "Auto reconnect cahandler"
-msgstr "Bouquet automatisch wechseln"
+msgstr "CAHandler Verbindung automatisch wiederherstellen"
 
 #: src/setup_extra.cpp:123
 msgid "try to reconnect when an external cahandler connection was lost"
-msgstr ""
+msgstr "versucht die CAHanler Verbindung automatisch wiederherzustellen, wenn verloren."
 
 #: src/setup_extra.cpp:127
 msgid "Enable file sharing"
