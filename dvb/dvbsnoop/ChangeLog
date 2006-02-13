@@ -1,3 +1,5 @@
+ - New: Mega-Frame Initialization Packet (MIP, TS 101 191) (tnx to Cedric Delfosse)
+ - Changed: News TS handling, DVB strings enhanced, code changes.
  - Fix: fix GCC warnings, man page changes
  - New: PS MPEG-2 Extension data packets, MPEG-2 decoding
  - New: Updates, new descriptors due to EN 300 468 v1.7.1

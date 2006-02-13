@@ -1,5 +1,5 @@
 /*
-$Id: ts_mip.c,v 1.1 2006/02/12 23:17:13 rasc Exp $
+$Id: ts_mip.c,v 1.2 2006/02/13 00:31:01 rasc Exp $
 
 
  DVBSNOOP
@@ -17,16 +17,16 @@ $Id: ts_mip.c,v 1.1 2006/02/12 23:17:13 rasc Exp $
 
 
 $Log: ts_mip.c,v $
+Revision 1.2  2006/02/13 00:31:01  rasc
+no message
+
 Revision 1.1  2006/02/12 23:17:13  rasc
 TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
 
+Complete implementation  (rasc)
 
-
-  Complete implementation  (rasc)
-
-  Basic code by (c)
-  Cedric Delfosse <cedric.delfosse@linbox.com> for TDF-C2R, 2006
-
+Basic code by (c)
+Cedric Delfosse <cedric.delfosse@linbox.com> for TDF-C2R, 2006
 
 */
 
