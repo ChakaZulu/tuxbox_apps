@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.18 2005/01/30 14:13:34 chakazulu Exp $
+	$Id: timerdtypes.h,v 1.19 2006/02/14 22:38:28 zwen Exp $
 
 	License: GPL
 
@@ -37,7 +37,11 @@
 #define EXEC_PLUGIN_NAME_MAXLEN 31
 #define RECORD_DIR_MAXLEN 100
 
-#define TIMERD_APIDS_MAXLEN 50
+#define TIMERD_APIDS_CONF 0x00
+#define TIMERD_APIDS_STD  0x01
+#define TIMERD_APIDS_ALT  0x02
+#define TIMERD_APIDS_AC3  0x04
+#define TIMERD_APIDS_ALL  0xFF
 
 class CTimerd
 {
@@ -78,20 +82,20 @@ class CTimerd
 
 		struct EventInfo
 		{
-			event_id_t   epgID;
-			time_t       epg_starttime;
-			t_channel_id channel_id;
-			std::string  apids;
-			bool         recordingSafety;
+			event_id_t    epgID;
+			time_t        epg_starttime;
+			t_channel_id  channel_id;
+			unsigned char apids;
+			bool          recordingSafety;
 		};
 
 		struct TransferEventInfo
 		{
-			event_id_t   epgID;
-			time_t       epg_starttime;
-			t_channel_id channel_id;
-			char         apids[TIMERD_APIDS_MAXLEN];
-			bool         recordingSafety;
+			event_id_t    epgID;
+			time_t        epg_starttime;
+			t_channel_id  channel_id;
+			unsigned char apids;
+			bool          recordingSafety;
 		};
 
 		struct TransferRecordingInfo : TransferEventInfo
@@ -105,7 +109,7 @@ class CTimerd
 				RecordingInfo(){};
 				RecordingInfo(EventInfo& e)
 					{
-						strcpy(apids, e.apids.substr(0,TIMERD_APIDS_MAXLEN-1).c_str());
+						apids = e.apids;
 						channel_id = e.channel_id;
 						epgID = e.epgID;
 						epg_starttime = e.epg_starttime;
@@ -113,14 +117,14 @@ class CTimerd
 					};
 				RecordingInfo& operator = (EventInfo& e)
 					{
-						strcpy(apids, e.apids.substr(0,TIMERD_APIDS_MAXLEN-1).c_str());
+						apids = e.apids;
 						channel_id = e.channel_id;
 						epgID = e.epgID;
 						epg_starttime = e.epg_starttime;
 						recordingSafety = e.recordingSafety;
 						return *this;
 					}
-				char apids[TIMERD_APIDS_MAXLEN];
+				unsigned char apids;
 				int eventID;
 				char recordingDir[RECORD_DIR_MAXLEN];
 			};
@@ -143,7 +147,7 @@ class CTimerd
 			t_channel_id      channel_id;                       //only filled if applicable
 			event_id_t        epgID;                            //only filled if applicable
 			time_t            epg_starttime;                    //only filled if applicable
-			char              apids[TIMERD_APIDS_MAXLEN];       //only filled if applicable
+			unsigned char     apids;                            //only filled if applicable
 			bool              standby_on;                       //only filled if applicable
 			char              message[REMINDER_MESSAGE_MAXLEN];         //only filled if applicable
 			char              pluginName[EXEC_PLUGIN_NAME_MAXLEN];      //only filled if applicable

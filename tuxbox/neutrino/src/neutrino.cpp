@@ -671,12 +671,13 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.recording_splitsize, configfile.getString( "recording_splitsize", "2048").c_str() );
 	g_settings.recording_use_o_sync            = configfile.getBool("recordingmenu.use_o_sync"           , false);
 	g_settings.recording_use_fdatasync         = configfile.getBool("recordingmenu.use_fdatasync"        , false);
-	g_settings.recording_stream_all_audio_pids = configfile.getBool("recordingmenu.stream_all_audio_pids", true );
+	g_settings.recording_audio_pids_default    = configfile.getInt32("recording_audio_pids_default", TIMERD_APIDS_STD );
 	g_settings.recording_stream_vtxt_pid       = configfile.getBool("recordingmenu.stream_vtxt_pid"      , false);
 	strcpy( g_settings.recording_ringbuffers, configfile.getString( "recordingmenu.ringbuffers", "20").c_str() );
 	g_settings.recording_choose_direct_rec_dir = configfile.getInt32( "recording_choose_direct_rec_dir", 0 );
 	g_settings.recording_epg_for_filename      = configfile.getBool("recording_epg_for_filename"         , true);
 	g_settings.recording_in_spts_mode          = configfile.getBool("recording_in_spts_mode"         , true);
+	g_settings.recording_zap_on_announce       = configfile.getBool("recording_zap_on_announce"      , false);
 	for(int i=0 ; i < REC_FILENAME_TEMPLATE_NR_OF_ENTRIES; i++)
 	{
 		sprintf(cfg_key, "recording_filename_template_%d", i);
@@ -1017,12 +1018,13 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString("recording_splitsize",                 g_settings.recording_splitsize);
 	configfile.setBool  ("recordingmenu.use_o_sync"           , g_settings.recording_use_o_sync           );
 	configfile.setBool  ("recordingmenu.use_fdatasync"        , g_settings.recording_use_fdatasync        );
-	configfile.setBool  ("recordingmenu.stream_all_audio_pids", g_settings.recording_stream_all_audio_pids);
+	configfile.setInt32 ("recording_audio_pids_default"       , g_settings.recording_audio_pids_default);
 	configfile.setBool  ("recordingmenu.stream_vtxt_pid"      , g_settings.recording_stream_vtxt_pid      );
 	configfile.setString("recordingmenu.ringbuffers"          , g_settings.recording_ringbuffers);
 	configfile.setInt32 ("recording_choose_direct_rec_dir"    , g_settings.recording_choose_direct_rec_dir);
 	configfile.setBool  ("recording_epg_for_filename"         , g_settings.recording_epg_for_filename     );
 	configfile.setBool  ("recording_in_spts_mode"             , g_settings.recording_in_spts_mode         );
+	configfile.setBool  ("recording_zap_on_announce"          , g_settings.recording_zap_on_announce      );
 	for(int i=0 ; i < REC_FILENAME_TEMPLATE_NR_OF_ENTRIES ; i++)
 	{
 		sprintf(cfg_key, "recording_filename_template_%d", i);
@@ -1049,7 +1051,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString ( "movieplayer_plugin", g_settings.movieplayer_plugin );
 
 	//rc-key configuration
-	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
+	configfile.setInt32 ( "key_tvradio_mode", g_settings.key_tvradio_mode );
 
 	configfile.setInt32( "key_channelList_pageup", g_settings.key_channelList_pageup );
 	configfile.setInt32( "key_channelList_pagedown", g_settings.key_channelList_pagedown );
@@ -2260,9 +2262,11 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	CMenuOptionChooser* oj4 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPSECTIONSD, &g_settings.recording_stopsectionsd, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER));
 
+	CMenuOptionChooser* oj4b = new CMenuOptionChooser(LOCALE_RECORDINGMENU_ZAP_ON_ANNOUNCE, &g_settings.recording_zap_on_announce, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
+
 	CMenuOptionChooser* oj5 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_NO_SCART, &g_settings.recording_vcr_no_scart, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_VCR));
 
-	CMenuOptionChooser* oj12 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORD_IN_SPTS_MODE, &g_settings.recording_in_spts_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
+	CMenuOptionChooser* oj12 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORD_IN_SPTS_MODE, &g_settings.recording_in_spts_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT,(g_settings.recording_type == RECORDING_SERVER || g_settings.recording_type == RECORDING_FILE) );
 
 	int pre,post;
 	g_Timerd->getRecordingSafety(pre,post);
@@ -2275,6 +2279,23 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput * timerSettings_record_safety_time_after = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER, g_settings.record_safety_time_after, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER_HINT_2,"0123456789 ", RecordingSafetyNotifier);
 	CMenuForwarder *mf6 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER, true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
+	// default recording audio pids
+	CMenuWidget *apidRecordingSettings = new CMenuWidget(LOCALE_RECORDINGMENU_APIDS, "audio.raw");
+	CMenuForwarder* mf13 = new CMenuForwarder(LOCALE_RECORDINGMENU_APIDS ,true, NULL, apidRecordingSettings);
+	g_settings.recording_audio_pids_std = ( g_settings.recording_audio_pids_default & TIMERD_APIDS_STD ) ? 1 : 0 ;
+	g_settings.recording_audio_pids_alt = ( g_settings.recording_audio_pids_default & TIMERD_APIDS_ALT ) ? 1 : 0 ;
+	g_settings.recording_audio_pids_ac3 = ( g_settings.recording_audio_pids_default & TIMERD_APIDS_AC3 ) ? 1 : 0 ;
+	
+	CRecAPIDSettingsNotifier * an = new CRecAPIDSettingsNotifier;
+	CMenuOptionChooser* aoj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_APIDS_STD, &g_settings.recording_audio_pids_std, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true, an);
+	CMenuOptionChooser* aoj2 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_APIDS_ALT, &g_settings.recording_audio_pids_alt, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true, an);
+	CMenuOptionChooser* aoj3 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_APIDS_AC3, &g_settings.recording_audio_pids_ac3, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true, an);
+	apidRecordingSettings->addItem(GenericMenuSeparator);
+	apidRecordingSettings->addItem(GenericMenuBack);
+	apidRecordingSettings->addItem(GenericMenuSeparatorLine);
+	apidRecordingSettings->addItem(aoj1);
+	apidRecordingSettings->addItem(aoj2);
+	apidRecordingSettings->addItem(aoj3);
 
 	// for direct recording
 	CMenuWidget *directRecordingSettings = new CMenuWidget(LOCALE_RECORDINGMENU_FILESETTINGS, NEUTRINO_ICON_RECORDING);
@@ -2288,8 +2309,6 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_O_SYNC, &g_settings.recording_use_o_sync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
 	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_FDATASYNC, &g_settings.recording_use_fdatasync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
-
-	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
 	CMenuOptionChooser* oj9 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_VTXT_PID, &g_settings.recording_stream_vtxt_pid, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
@@ -2323,6 +2342,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( mf3);
 	recordingSettings.addItem( oj3);
 	recordingSettings.addItem( oj4);
+	recordingSettings.addItem( oj4b);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj5);
 	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_TIMERSETTINGS_SEPARATOR));
@@ -2330,6 +2350,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( mf6);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem(oj12);
+	recordingSettings.addItem( mf13);
 	recordingSettings.addItem( mf7);
 
 	directRecordingSettings->addItem(GenericMenuSeparator);
@@ -2340,7 +2361,6 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	directRecordingSettings->addItem(mf10);
 	directRecordingSettings->addItem(oj6);
 	directRecordingSettings->addItem(oj7);
-	directRecordingSettings->addItem(oj8);
 	directRecordingSettings->addItem(oj9);
 	directRecordingSettings->addItem(oj10);
 	directRecordingSettings->addItem(oj11);
@@ -2998,8 +3018,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 			puts("[neutrino.cpp] executing " NEUTRINO_RECORDING_START_SCRIPT ".");
 			if (system(NEUTRINO_RECORDING_START_SCRIPT) != 0)
 				perror(NEUTRINO_RECORDING_START_SCRIPT "failed");
-			CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
-			eventinfo.channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(si.sid, si.onid, si.tsid);
+			eventinfo.channel_id = g_Zapit->getCurrentServiceID();
 			CEPGData epgData;
 			if (g_Sectionsd->getActualEPGServiceKey(g_RemoteControl->current_channel_id, &epgData ))
 			{
@@ -3011,7 +3030,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 				eventinfo.epgID = 0;
 				eventinfo.epg_starttime = 0;
 			}
-			strcpy(eventinfo.apids, "");
+			eventinfo.apids = TIMERD_APIDS_CONF;
 			bool doRecord = true;
 			if (g_settings.recording_type == RECORDING_FILE)
 			{
@@ -3086,7 +3105,9 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 			else if (addTimer)
 			{
 				time_t now = time(NULL);
-				recording_id = g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, eventinfo.epgID, eventinfo.epg_starttime);
+				recording_id = g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, 
+																						eventinfo.epgID, eventinfo.epg_starttime,
+																						eventinfo.apids);
 			}
 		}
 		else
@@ -3159,7 +3180,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
 		sscanf(g_settings.recording_ringbuffers, "%u", &ringbuffers);
 
-		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_all_audio_pids, g_settings.recording_stream_vtxt_pid, ringbuffers,true);
+		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_vtxt_pid, ringbuffers,true);
 
 		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}
@@ -3910,7 +3931,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		}
 		if (g_settings.recording_type == RECORDING_FILE)
 		{
-			char * recDir = ((CTimerdMsg::commandRecordDir*)data)->recDir;
+			char * recDir = ((CTimerd::RecordingInfo*)data)->recordingDir;
 			for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
 			{
 				if (strcmp(g_settings.network_nfs_local_dir[i],recDir) == 0)
@@ -3922,6 +3943,14 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 						perror("etherwake failed");
 					break;
 				}
+			}
+		}
+		if( g_settings.recording_zap_on_announce )
+		{
+			if(recordingstatus==0)
+			{
+				t_channel_id channel_id=((CTimerd::RecordingInfo*)data)->channel_id;
+				g_Zapit->zapTo_serviceID_NOWAIT(channel_id); 
 			}
 		}
 		delete (unsigned char*) data;

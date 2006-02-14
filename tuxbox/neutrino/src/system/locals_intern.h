@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.63 2006/01/21 15:45:50 racker Exp $
+ * $Id: locals_intern.h,v 1.64 2006/02/14 22:38:43 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -808,6 +808,10 @@ const char * locale_real_names[] =
 	"rclock.menueadd",
 	"rclock.title",
 	"rclock.unlockmsg",
+	"recordingmenu.apids",
+	"recordingmenu.apids_ac3",
+	"recordingmenu.apids_alt",
+	"recordingmenu.apids_std",
 	"recordingmenu.choose_direct_rec_dir",
 	"recordingmenu.defdir",
 	"recordingmenu.dir_permissions",
@@ -833,11 +837,11 @@ const char * locale_real_names[] =
 	"recordingmenu.splitsize",
 	"recordingmenu.stopplayback",
 	"recordingmenu.stopsectionsd",
-	"recordingmenu.stream_all_audio_pids",
 	"recordingmenu.stream_vtxt_pid",
 	"recordingmenu.use_fdatasync",
 	"recordingmenu.use_o_sync",
 	"recordingmenu.vcr",
+	"recordingmenu.zap_on_announce",
 	"recordtimer.announce",
 	"repeatblocker.hint_1",
 	"repeatblocker.hint_2",
@@ -968,6 +972,7 @@ const char * locale_real_names[] =
 	"timerbar.recordevent",
 	"timerlist.alarmtime",
 	"timerlist.apids",
+	"timerlist.apids_default",
 	"timerlist.bouquetselect",
 	"timerlist.channel",
 	"timerlist.channelselect",

@@ -643,6 +643,7 @@ movieplayer.goto Jump to ...
 movieplayer.goto.h1 = -> absolute jump
 movieplayer.goto.h2 +,- -> relative jump
 movieplayer.head Movieplayer
+movieplayer.load_alternate_fw load alternate ucode in MP
 movieplayer.nostreamingserver The streaming server could not be reached.
 movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
 movieplayer.toomanybookmarks There are too many bookmarks.\nYou need to delete one of them first.
@@ -781,6 +782,10 @@ rclock.lockmsg Your DBOX2 remote control will be locked.\nTo unlock it, press <R
 rclock.menueadd Lock RC
 rclock.title Lock Remote Control
 rclock.unlockmsg Remote control reactivated.
+recordingmenu.apids default audio streams
+recordingmenu.apids_ac3 record AC3 streams
+recordingmenu.apids_alt record alternative streams
+recordingmenu.apids_std record standard stream
 recordingmenu.choose_direct_rec_dir choose dir on imm. recording
 recordingmenu.defdir recording directory
 recordingmenu.dir_permissions directory permissions
@@ -806,11 +811,11 @@ recordingmenu.setupnow activate changes
 recordingmenu.splitsize Max. file size (MB)
 recordingmenu.stopplayback stop playback
 recordingmenu.stopsectionsd stop sectionsd
-recordingmenu.stream_all_audio_pids record all audio pids
 recordingmenu.stream_vtxt_pid record videotext
 recordingmenu.use_fdatasync write synchronous (fdatasync)
 recordingmenu.use_o_sync write synchronous (O_SYNC)
 recordingmenu.vcr vcr
+recordingmenu.zap_on_announce zap on recording announce
 recordtimer.announce Recording starts in a few minutes
 repeatblocker.hint_1 Shortest time (in ms) to recognize 2 keystrokes
 repeatblocker.hint_2 Enter 0 to switch of the blocker (red is space)
@@ -940,7 +945,8 @@ timer.eventtimed.title Schedule Event
 timerbar.channelswitch Schedule
 timerbar.recordevent Record
 timerlist.alarmtime Alarm time
-timerlist.apids Audio PIDs
+timerlist.apids Audio streams
+timerlist.apids_default record default audio streams
 timerlist.bouquetselect choose bouquet
 timerlist.channel Channel
 timerlist.channelselect choose channel

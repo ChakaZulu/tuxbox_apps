@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.64 2005/12/21 18:02:59 yjogol Exp $
+	$Id: webapi.cpp,v 1.65 2006/02/14 22:38:26 zwen Exp $
 
 	License: GPL
 
@@ -921,10 +921,27 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 				if (sAddData.empty())
 					sAddData = Parent->Zapit->isChannelTVChannel(timer->channel_id) ? "Unbekannter TV-Kanal" : "Unbekannter Radiokanal";
 
-				if(strlen(timer->apids) > 0)
+				if( timer->apids != TIMERD_APIDS_CONF)
 				{
+					std::string separator = "";
 					sAddData += '(';
-					sAddData += timer->apids;
+					if( timer->apids & TIMERD_APIDS_STD )
+					{
+						sAddData += "STD";
+						separator = "/";
+					}
+					if( timer->apids & TIMERD_APIDS_ALT )
+					{
+						sAddData += separator;
+						sAddData += "ALT";
+						separator = "/";
+					}
+					if( timer->apids & TIMERD_APIDS_AC3 )
+					{
+						sAddData += separator;
+						sAddData += "AC3";
+						separator = "/";
+					}
 					sAddData += ')';
 				}
 				if(timer->epgID!=0)
@@ -1008,6 +1025,12 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	request->printf("  if (tType == \"%d\") my_hide(\"repcountRow\"); else my_show(\"repcountRow\");\n",
 			(int)CTimerd::TIMERREPEAT_ONCE);
 	request->SocketWrite("  focusNMark();}\n");
+	request->SocketWrite("function onApidDefChange() { \n  if (document.modify.apcf.checked == true) {\n");
+   request->SocketWrite("    document.modify.apst.checked=false;\n    document.modify.apal.checked=false;\n");
+	request->SocketWrite("    document.modify.apac.checked=false;}\n}\n");
+	request->SocketWrite("function onApidChange() {\n");
+   request->SocketWrite("if (document.modify.apst.checked == true || document.modify.apal.checked == true ||");
+	request->SocketWrite("    document.modify.apac.checked == true) {\n  document.modify.apcf.checked=false;}\n}\n");
 	request->SocketWrite("</script>\n");
 	
 	request->SocketWrite("<TABLE class=\"timer\"><tr CLASS=\"a\"><TD>\n");
@@ -1042,8 +1065,25 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 			 stopTime->tm_hour );
 		request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></TD></TR>\n",
 			 stopTime->tm_min);
-		request->printf("<TR><TD align=\"center\">APIDs: <INPUT TYPE=\"text\" name=\"ap\" value=\"%s\" size=10 maxlength=%d></TD></TR>\n",
-          timer.apids, TIMERD_APIDS_MAXLEN-1);
+		request->printf("<TR><TD align=\"right\">APIDs:\n");
+		request->printf("<input type=\"checkbox\" ");
+		if(timer.apids == TIMERD_APIDS_CONF)
+			request->printf("checked ");
+		request->printf("name=\"apcf\" onchange=\"onApidDefChange();\">Default\n");
+		request->printf("<td align=\"left\">\n");
+		request->printf("<input type=\"checkbox\" ");
+		if(timer.apids & TIMERD_APIDS_STD)
+			request->printf("checked ");
+		request->printf("name=\"apst\" onchange=\"onApidChange();\">Standard\n");
+		request->printf("<input type=\"checkbox\" ");
+		if(timer.apids & TIMERD_APIDS_ALT)
+			request->printf("checked ");
+		request->printf("name=\"apal\" onchange=\"onApidChange();\">Alternative\n");
+		request->printf("<input type=\"checkbox\" ");
+		if(timer.apids & TIMERD_APIDS_AC3)
+			request->printf("checked ");
+		request->printf("name=\"apac\" onchange=\"onApidChange();\">AC3\n");
+		request->printf("</td></tr>\n");
 	}
 	request->SocketWrite("<TR><TD align=\"center\">Wiederholung\n");
 	request->SocketWrite("<select name=\"rep\" onchange=\"onEventChange();\">\n");
@@ -1172,11 +1212,33 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	else
 		Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep,repCount);
 	
-	if(request->ParameterList["ap"] != "")
+	bool changeApids=false;
+	unsigned char apids=0;
+	if(request->ParameterList["apcf"] == "on")
 	{
-		std::string apids = request->ParameterList["ap"];
-		Parent->Timerd->modifyTimerAPid(modyId,apids);
+		changeApids=true;
+		apids=0;
 	}
+	else
+	{
+		if(request->ParameterList["apst"] == "on")
+		{
+			changeApids=true;
+			apids |= TIMERD_APIDS_STD;
+		}
+		if(request->ParameterList["apal"] == "on")
+		{
+			changeApids=true;
+			apids |= TIMERD_APIDS_ALT;
+		}
+		if(request->ParameterList["apac"] == "on")
+		{
+			changeApids=true;
+			apids |= TIMERD_APIDS_AC3;
+		}
+	}
+	if(changeApids)
+		Parent->Timerd->modifyTimerAPid(modyId,apids);
 }
 
 //-------------------------------------------------------------------------
@@ -1436,7 +1498,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 	CTimerd::EventInfo eventinfo;
 	eventinfo.epgID = 0;
 	eventinfo.epg_starttime = 0;
-	eventinfo.apids = "";
+	eventinfo.apids = TIMERD_APIDS_CONF;
 	eventinfo.recordingSafety = (request->ParameterList["rs"] == "1");
 
 	sscanf(request->ParameterList["channel_id"].c_str(),

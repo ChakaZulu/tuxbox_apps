@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.82 2005/12/08 22:38:24 zwen Exp $
+   $Id: timermanager.cpp,v 1.83 2006/02/14 22:38:26 zwen Exp $
 
 	License: GPL
 
@@ -346,9 +346,9 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 	return res;
 }
 
-int CTimerManager::modifyEvent(int eventID, const std::string apids)
+int CTimerManager::modifyEvent(int eventID, unsigned char apids)
 {
-	dprintf("Modify Event %d apid %s\n",eventID,apids.c_str());
+	dprintf("Modify Event %d apid 0x%X\n",eventID,apids);
 	int res = 0;
 	pthread_mutex_lock(&tm_eventsMutex);
 	if(events.find(eventID)!=events.end())
@@ -937,10 +937,10 @@ void CTimerEvent::printEvent(void)
 		case CTimerd::TIMER_RECORD :
 			dprintf(" Record: "
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-				" epg: %llx apids: %s\n dir: %s\n",
+				" epg: %llx apids: 0x%X\n dir: %s\n",
 				static_cast<CTimerEvent_Record*>(this)->eventInfo.channel_id,
 				static_cast<CTimerEvent_Record*>(this)->eventInfo.epgID,
-				static_cast<CTimerEvent_Record*>(this)->eventInfo.apids.c_str(),
+				static_cast<CTimerEvent_Record*>(this)->eventInfo.apids,
 				static_cast<CTimerEvent_Record*>(this)->recordingDir.c_str());
 			break;
 
@@ -1076,7 +1076,7 @@ void CTimerEvent_Standby::saveToConfig(CConfigFile *config)
 CTimerEvent_Record::CTimerEvent_Record(time_t announceTime, time_t alarmTime, time_t stopTime, 
 				       t_channel_id channel_id,
 				       event_id_t epgID, 
-				       time_t epg_starttime, const std::string apids,
+				       time_t epg_starttime, unsigned char apids,
 				       CTimerd::CTimerEventRepeat evrepeat,
 				       uint repeatcount, const std::string recDir) :
 	CTimerEvent(getEventType(), announceTime, alarmTime, stopTime, evrepeat, repeatcount)
@@ -1103,8 +1103,8 @@ CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
 	eventInfo.channel_id = config->getInt64("EVENT_INFO_CHANNEL_ID_"+id);
 	dprintf("read EVENT_INFO_CHANNEL_ID_%s %ld\n",id.c_str(),(long)eventInfo.channel_id);
 
-	eventInfo.apids = config->getString("EVENT_INFO_APIDS_"+id);
-	dprintf("read EVENT_INFO_APIDS_%s %s (%p)\n",id.c_str(),eventInfo.apids.c_str(),&eventInfo.apids);
+	eventInfo.apids = config->getInt32("EVENT_INFO_APIDS_"+id);
+	dprintf("read EVENT_INFO_APIDS_%s 0x%X (%p)\n",id.c_str(),eventInfo.apids,&eventInfo.apids);
 
 	recordingDir = config->getString("REC_DIR_"+id);
 	dprintf("read REC_DIR_%s %s (%p)\n",id.c_str(),recordingDir.c_str(),&recordingDir);
@@ -1125,10 +1125,11 @@ void CTimerEvent_Record::fireEvent()
 void CTimerEvent_Record::announceEvent()
 {
 	Refresh();
-	CTimerdMsg::commandRecordDir s;
-	strcpy(s.recDir,recordingDir.c_str());
+	CTimerd::RecordingInfo ri=eventInfo;
+	ri.eventID=eventID;
+	strcpy(ri.recordingDir,recordingDir.c_str());
 	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_ANNOUNCE_RECORD, CEventServer::INITID_TIMERD,
-								  &s,sizeof(CTimerdMsg::commandRecordDir));
+								  &ri,sizeof(CTimerd::RecordingInfo));
 	dprintf("Record announcement\n"); 
 }
 //------------------------------------------------------------
@@ -1161,8 +1162,8 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
 	config->setInt64("EVENT_INFO_CHANNEL_ID_"+id, eventInfo.channel_id);
 	dprintf("set EVENT_INFO_CHANNEL_ID_%s to %ld\n",id.c_str(),(long)eventInfo.channel_id);
 
-	config->setString("EVENT_INFO_APIDS_"+id, eventInfo.apids);
-	dprintf("set EVENT_INFO_APIDS_%s to %s (%p)\n",id.c_str(),eventInfo.apids.c_str(),&eventInfo.apids);
+	config->setInt64("EVENT_INFO_APIDS_"+id, eventInfo.apids);
+	dprintf("set EVENT_INFO_APIDS_%s to 0x%X (%p)\n",id.c_str(),eventInfo.apids,&eventInfo.apids);
 
 	config->setString("REC_DIR_"+id,recordingDir);
 	dprintf("set REC_DIR_%s to %s (%p)\n",id.c_str(),recordingDir.c_str(), &recordingDir);
@@ -1263,8 +1264,9 @@ CTimerEvent(CTimerd::TIMER_NEXTPROGRAM, config, iId)
 	eventInfo.channel_id = config->getInt64("EVENT_INFO_CHANNEL_ID_"+id);
 	dprintf("read EVENT_INFO_CHANNEL_ID_%s %ld\n",id.c_str(),(long)eventInfo.channel_id);
 
-	eventInfo.apids = config->getString("EVENT_INFO_APIDS_"+id);
-	dprintf("read EVENT_INFO_APIDS_%s %s (%p)\n",id.c_str(),eventInfo.apids.c_str(),&eventInfo.apids);
+	eventInfo.apids = config->getInt32("EVENT_INFO_APIDS_"+id);
+
+	dprintf("read EVENT_INFO_APIDS_%s 0x%X (%p)\n",id.c_str(),eventInfo.apids,&eventInfo.apids);
 }
 //------------------------------------------------------------
 
@@ -1300,8 +1302,8 @@ void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
 	config->setInt64("EVENT_INFO_CHANNEL_ID_"+id,eventInfo.channel_id);
 	dprintf("set EVENT_INFO_CHANNEL_ID_%s to %ld\n",id.c_str(),(long)eventInfo.channel_id);
 
-	config->setString("EVENT_INFO_APIDS_"+id,eventInfo.apids);
-	dprintf("set EVENT_INFO_APIDS_%s to %s (%p)\n",id.c_str(),eventInfo.apids.c_str(),&eventInfo.apids);
+	config->setInt32("EVENT_INFO_APIDS_"+id,eventInfo.apids);
+	dprintf("set EVENT_INFO_APIDS_%s to 0x%X (%p)\n",id.c_str(),eventInfo.apids,&eventInfo.apids);
 }
 //------------------------------------------------------------
 void CTimerEvent_NextProgram::Reschedule()

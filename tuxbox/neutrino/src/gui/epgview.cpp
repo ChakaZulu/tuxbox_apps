@@ -702,7 +702,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 												     epgData.epg_times.startzeit + epgData.epg_times.dauer,
 												     epgData.eventID, epgData.epg_times.startzeit,
 												     epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
-												     "", true, recDir,false) == -1)
+												     TIMERD_APIDS_CONF, true, recDir,false) == -1)
 								{
 									if(askUserOnTimerConflict(epgData.epg_times.startzeit - (ANNOUNCETIME + 120),
 												  epgData.epg_times.startzeit + epgData.epg_times.dauer))
@@ -712,7 +712,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 														 epgData.epg_times.startzeit + epgData.epg_times.dauer,
 														 epgData.eventID, epgData.epg_times.startzeit,
 														 epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
-														 "", true, recDir,true);
+														 TIMERD_APIDS_CONF, true, recDir,true);
 										ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 									}
 								} else {
@@ -734,8 +734,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 						timerdclient.addZaptoTimerEvent(channel_id,
 																  epgData.epg_times.startzeit,
 																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
-																  epgData.eventID, epgData.epg_times.startzeit,
-																  "");
+																  epgData.eventID, epgData.epg_times.startzeit, 0);
 						ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					}
 					else

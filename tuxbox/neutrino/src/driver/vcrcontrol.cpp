@@ -134,6 +134,90 @@ bool CVCRControl::Record(const CTimerd::RecordingInfo * const eventinfo)
 #endif /* MOVIEBROWSER */
 }
 
+//-------------------------------------------------------------------------
+void CVCRControl::CDevice::getAPIDs(const unsigned char ap, APIDList & apid_list)
+{
+//	(strstr(g_RemoteControl->current_PIDs.APIDs[i].desc, "(AC3)") == NULL))
+	unsigned char apids=ap;
+	if (apids == TIMERD_APIDS_CONF)
+		apids = g_settings.recording_audio_pids_default;
+	apid_list.clear();
+	CZapitClient::responseGetPIDs allpids;
+	g_Zapit->getPIDS(allpids);
+	// assume smallest apid ist std apid
+	if (apids & TIMERD_APIDS_STD)
+	{
+		uint apid_min=UINT_MAX;
+		uint apid_min_idx=0;
+		for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
+		{
+			if (allpids.APIDs[i].pid < apid_min && !allpids.APIDs[i].is_ac3)
+			{
+				apid_min = allpids.APIDs[i].pid;
+				apid_min_idx = i;
+			}
+		}
+		if (apid_min != UINT_MAX)
+		{
+			APIDDesc a = {apid_min, apid_min_idx, false};
+			apid_list.push_back(a);
+		}		
+	}
+	if (apids & TIMERD_APIDS_ALT)
+	{
+		uint apid_min=UINT_MAX;
+		uint apid_min_idx=0;
+		for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
+		{
+			if (allpids.APIDs[i].pid < apid_min && !allpids.APIDs[i].is_ac3)
+			{
+				apid_min = allpids.APIDs[i].pid;
+				apid_min_idx = i;
+			}
+		}
+		for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
+		{
+			if (allpids.APIDs[i].pid != apid_min && !allpids.APIDs[i].is_ac3)
+			{
+				APIDDesc a = {allpids.APIDs[i].pid, i, false};
+				apid_list.push_back(a);
+			}
+		}		
+	}
+	if (apids & TIMERD_APIDS_AC3)
+	{
+		for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
+		{
+			if (allpids.APIDs[i].is_ac3)
+			{
+				APIDDesc a = {allpids.APIDs[i].pid, i, true};
+				apid_list.push_back(a);
+			}
+		}
+	}
+	// no apid selected use standard
+	if (apid_list.empty() && !allpids.APIDs.empty())
+	{	
+		uint apid_min=UINT_MAX;
+		uint apid_min_idx=0;
+		for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
+		{
+			if (allpids.APIDs[i].pid < apid_min && !allpids.APIDs[i].is_ac3)
+			{
+				apid_min = allpids.APIDs[i].pid;
+				apid_min_idx = i;
+			}
+		}
+		if (apid_min != UINT_MAX)
+		{
+			APIDDesc a = {apid_min, apid_min_idx, false};
+			apid_list.push_back(a);
+		}		
+		for(APIDList::iterator it = apid_list.begin(); it != apid_list.end(); it++)
+			printf("Record APID 0x%X %d\n",it->apid, it->ac3);
+
+	}
+}
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Stop()
@@ -151,17 +235,17 @@ bool CVCRControl::CVCRDevice::Stop()
 
 //-------------------------------------------------------------------------
 #ifdef MOVIEBROWSER
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids,const time_t epg_time)
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, unsigned char apids,const time_t epg_time)
 #else /* MOVIEBROWSER */
-bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids)
+bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, unsigned char apids)
 #endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-	       " epg: %llx, apids %s mode \n",
+	       " epg: %llx, apids 0x%X mode \n",
 	       channel_id,
 	       epgid,
-	       apids.c_str());
+	       apids);
 	// leave menu (if in any)
 	g_RCInput->postMsg( CRCInput::RC_timeout, 0 );
 	
@@ -178,27 +262,22 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, co
 			g_Zapit->zapTo_serviceID(channel_id);		// dann umschalten
 		}
 	}
-	if(apids != "") //selbiges für apid
+	if(! (apids & TIMERD_APIDS_STD)) // nicht std apid
 	{
-		unsigned short apid = atoi(apids.c_str()); // only user first apid
-		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
-		if(si.apid != apid)
+		APIDList apid_list;
+		getAPIDs(apids,apid_list);
+		if(!apid_list.empty())
 		{
-			CZapitClient::responseGetPIDs pids;
-			g_Zapit->getPIDS (pids);
-			unsigned int i;
-			for(i=0;i<pids.APIDs.size();i++)
-			{
-				if(pids.APIDs[i].pid==apid)
-					g_Zapit->setAudioChannel(i);
-			}
-			// nicht gefunden, dann 1.
-			if(i==pids.APIDs.size())
-				g_Zapit->setAudioChannel(0);
+			if(!apid_list.begin()->ac3)
+				g_Zapit->setAudioChannel(apid_list.begin()->index);
+			else
+				g_Zapit->setAudioChannel(0); //sonst apid 0, also auf jeden fall ac3 aus !
 		}
+		else
+			g_Zapit->setAudioChannel(0); //sonst apid 0, also auf jeden fall ac3 aus !
 	}
 	else
-		g_Zapit->setAudioChannel(0); //sonst apid 0, also auf jeden fall ac3 aus !!!
+		g_Zapit->setAudioChannel(0); //sonst apid 0, also auf jeden fall ac3 aus !
 
 	if(SwitchToScart)
 	{
@@ -306,45 +385,18 @@ void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id chann
 
 #ifdef MOVIEBROWSER  		
 				
-std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids,const time_t epg_time) const
+std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids,const time_t epg_time)
 {
 	std::string extMessage;
-	char tmp[40];
 	CMovieInfo cMovieInfo;
 	MI_MOVIE_INFO movieInfo;
-	std::string apids10;
 	std::string info1, info2;
 
 	cMovieInfo.clearMovieInfo(&movieInfo);
-//		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
 	CZapitClient::responseGetPIDs pids;
 	g_Zapit->getPIDS (pids);
 	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
 
-	if (apids.empty())
-	{
-		sprintf(tmp,"%u", si.apid);
-		apids10=tmp;
-	}
-	else
-	{
-		unsigned int index=0,pos=0;
-		apids10="";
-		while(pos!=std::string::npos)
-		{
-			pos = apids.find(' ', index);
-			if(pos!=std::string::npos)
-			{
-				sprintf(tmp, "%ld ", strtol(apids.substr(index,pos-index).c_str(),NULL,16));
-				index=pos+1;
-			}
-			else
-			{
-				sprintf(tmp, "%ld", strtol(apids.substr(index).c_str(),NULL,16));
-			}
-			apids10 += tmp;
-		}
-	}
 	std::string tmpstring = g_Zapit->getChannelName(channel_id);
 	if (tmpstring.empty())
 		movieInfo.epgChannel = "unknown";
@@ -415,14 +467,13 @@ std::string CVCRControl::CFileAndServerDevice::getMovieInfoString(const CVCRComm
 }
 #endif /* MOVIEBROWSER */
 
-std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids) const
+std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids)
 {
 	char tmp[40];
-	std::string apids10;
+	std::string apids_selected;
 	const char * extCommand;
 //		std::string extAudioPID= "error";
 	std::string info1, info2;
-
 	std::string extMessage = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<neutrino commandversion=\"1\">\n\t<record command=\"";
 	switch(command)
 	{
@@ -452,37 +503,19 @@ std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRComman
 		"\">\n"
 		"\t\t<channelname>";
 	
-//		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.PIDs.vpid );
 	CZapitClient::responseGetPIDs pids;
 	g_Zapit->getPIDS (pids);
 	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
-//		sprintf(tmp,"%u", g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
-	//Apids
-/*		for(int i=0 ; i < MAX_APIDS ; i++)
-		sApids[i]="";*/
-	if (apids.empty())
+
+	APIDList apid_list;
+	getAPIDs(apids,apid_list);
+	apids_selected="";
+	for(APIDList::iterator it = apid_list.begin(); it != apid_list.end(); it++)
 	{
-		sprintf(tmp,"%u", si.apid);
-		apids10=tmp;
-	}
-	else
-	{
-		unsigned int index=0,pos=0;
-		apids10="";
-		while(pos!=std::string::npos)
-		{
-			pos = apids.find(' ', index);
-			if(pos!=std::string::npos)
-			{
-				sprintf(tmp, "%ld ", strtol(apids.substr(index,pos-index).c_str(),NULL,16));
-				index=pos+1;
-			}
-			else
-			{
-				sprintf(tmp, "%ld", strtol(apids.substr(index).c_str(),NULL,16));
-			}
-			apids10 += tmp;
-		}
+		if(it != apid_list.begin())
+			apids_selected += " ";
+		sprintf(tmp, "%u", it->apid);
+		apids_selected += tmp; 
 	}
 	
 	std::string tmpstring = g_Zapit->getChannelName(channel_id);
@@ -528,12 +561,11 @@ std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRComman
 	sprintf(tmp, "%u", si.vpid);
 	extMessage += tmp;
 	extMessage += "</videopid>\n\t\t<audiopids selected=\"";
-	extMessage += apids10;
+	extMessage += apids_selected;
 	extMessage += "\">\n";
 	// super hack :-), der einfachste weg an die apid descriptions ranzukommen
 	g_RemoteControl->current_PIDs = pids;
 	g_RemoteControl->processAPIDnames();
-//		bool apidFound=false;
 	for(unsigned int i= 0; i< pids.APIDs.size(); i++)
 	{
 		extMessage += "\t\t\t<audio pid=\"";
@@ -542,14 +574,7 @@ std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRComman
 		extMessage += "\" name=\"";
 		extMessage += ZapitTools::UTF8_to_UTF8XML(g_RemoteControl->current_PIDs.APIDs[i].desc);
 		extMessage += "\"/>\n";
-/*			if(pids.APIDs[i].pid==apid)
-			apidFound=true;*/
 	}
-/*		if(!apidFound)
-		{
-		// add spec apid to available
-		extMessage +="            <audio pid=\"" + extAudioPID + "\" name=\"" + extAudioPID  + "\"/>\n";
-		}*/
 	extMessage += 
 		"\t\t</audiopids>\n"
 		"\t\t<vtxtpid>";
@@ -588,17 +613,17 @@ bool CVCRControl::CFileDevice::Stop()
 }
 
 #ifdef MOVIEBROWSER
-bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids,const time_t epg_time) 
+bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, unsigned char apids,const time_t epg_time) 
 #else /* MOVIEBROWSER */
-bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids) 
+bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, unsigned char apids) 
 #endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-	       " epg: %llx, apids %s mode %d\n",
+	       " epg: %llx, apids 0x%X mode %d\n",
 	       channel_id,
 	       epgid,
-	       apids.c_str(),
+	       apids,
 	       mode);
 
 	CutBackNeutrino(channel_id, mode);
@@ -646,48 +671,19 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		/* no video pid */
 		numpids = 0;
 	}
+	APIDList apid_list;
+	getAPIDs(apids,apid_list);
+	for(APIDList::iterator it = apid_list.begin(); it != apid_list.end(); it++)
+	{
+		pids[numpids++] = it->apid;
+		if(sptsmode)
+			transfer_pids(it->apid,0x01, it->ac3 ? 1 : 0);
+	}
+	if(!apid_list.empty())
+		g_Zapit->setAudioChannel(apid_list.begin()->index);
 	
-	if (StreamAllAudioPids)
-	{
-		CZapitClient::responseGetPIDs allpids;
-		g_Zapit->getPIDS(allpids);
-	    	for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
-		{
-			pids[numpids++] = allpids.APIDs[i].pid;
-			if(sptsmode)
-				transfer_pids(allpids.APIDs[i].pid,0x01,( strstr(g_RemoteControl->current_PIDs.APIDs[i].desc, "(AC3)") == NULL ) ? 0:1);
-
-		}
-	}
-	else
-	{
-		if (apids.empty())
-		{
-			pids[numpids++] = si.apid;
-			if(sptsmode)
-				transfer_pids(si.apid,0x01,0);
-
-		}
-		else
-		{
-			unsigned int index = 0;
-			pos = 0;
-			
-			while(pos != std::string::npos)
-			{
-				pos = apids.find(' ', index);
-				if(pos != std::string::npos)
-				{
-					pids[numpids++] = strtol(apids.substr(index,pos-index).c_str(),NULL,16);
-					index = pos+1;
-				}
-				else
-				{
-					pids[numpids++] = strtol(apids.substr(index).c_str(),NULL,16);
-				}
-			}
-		}
-	}
+	CZapitClient::responseGetPIDs allpids;
+	g_Zapit->getPIDS(allpids);
 	if ((StreamVTxtPid) && (si.vtxtpid != 0))
 	{
 		pids[numpids++] = si.vtxtpid;
@@ -929,7 +925,13 @@ bool CVCRControl::CServerDevice::Stop()
 
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
 	if ((actmode == 1) && (!g_settings.misc_spts)) // actual mode is SPTS and settings require PES
+	{
+		int repeatcount=0;
 		g_Zapit->PlaybackPES(); // restore PES mode
+		while ((repeatcount++ < 10) && (g_Zapit->PlaybackState() != 0)) {
+			sleep(1); 
+		}
+	}
 
 	RestoreNeutrino();
 
@@ -938,17 +940,17 @@ bool CVCRControl::CServerDevice::Stop()
 
 //-------------------------------------------------------------------------
 #ifdef MOVIEBROWSER
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids,const time_t epg_time) 
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, unsigned char apids,const time_t epg_time) 
 #else /* MOVIEBROWSER */
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids) 
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, unsigned char apids) 
 #endif /* MOVIEBROWSER */
 {
 	printf("Record channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-	       " epg: %llx, apids %s mode %d\n",
+	       " epg: %llx, apids 0x%X mode %d\n",
 	       channel_id,
 	       epgid,
-	       apids.c_str(),
+	       apids,
 	       mode);
 
 	CutBackNeutrino(channel_id, mode);
@@ -992,7 +994,7 @@ void CVCRControl::CServerDevice::serverDisconnect()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids)
+bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids)
 {
 	printf("Send command: %d channel_id: "
 	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS

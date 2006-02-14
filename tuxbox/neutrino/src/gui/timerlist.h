@@ -61,6 +61,11 @@ class CTimerList : public CMenuTarget
 		char timerNew_channel_name[30];
 		char m_weekdaysStr[8];
 		
+		int timer_apids_dflt;
+		int timer_apids_std;
+		int timer_apids_ac3;
+		int timer_apids_alt;
+
 		int 			width;
 		int 			height;
 		int 			x;

@@ -169,7 +169,10 @@ struct SNeutrinoSettings
 	char recording_splitsize[10];
 	int  recording_use_o_sync;
 	int  recording_use_fdatasync;
-	int  recording_stream_all_audio_pids;
+	unsigned char recording_audio_pids_default;
+	int recording_audio_pids_std;
+	int recording_audio_pids_alt;
+	int recording_audio_pids_ac3;
 	int  recording_stream_vtxt_pid;
 	char recording_ringbuffers[10];
 	int recording_in_spts_mode;
@@ -178,6 +181,7 @@ struct SNeutrinoSettings
 #define REC_FILENAME_TEMPLATE_NR_OF_ENTRIES 4
 	std::string recording_filename_template[REC_FILENAME_TEMPLATE_NR_OF_ENTRIES];
 	char recording_dir_permissions[REC_FILENAME_TEMPLATE_NR_OF_ENTRIES][4];
+	int  recording_zap_on_announce;
 
 	//streaming
 	int  streaming_type;

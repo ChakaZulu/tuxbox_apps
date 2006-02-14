@@ -455,6 +455,14 @@ bool CFontSizeNotifier::changeNotify(const neutrino_locale_t, void *)
 	return true;
 }
 
+bool CRecAPIDSettingsNotifier::changeNotify(const neutrino_locale_t, void *)
+{
+	g_settings.recording_audio_pids_default = ( (g_settings.recording_audio_pids_std ? TIMERD_APIDS_STD : 0) |
+															  (g_settings.recording_audio_pids_alt ? TIMERD_APIDS_ALT : 0) |
+															  (g_settings.recording_audio_pids_ac3 ? TIMERD_APIDS_AC3 : 0));
+	return true;
+}
+
 int CAPIDChangeExec::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());

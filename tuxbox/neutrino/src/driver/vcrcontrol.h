@@ -33,6 +33,7 @@
 
 #include <string>
 //#include <map>
+#include <list>
 #define MOVIEBROWSER
 
 #include <sectionsdclient/sectionsdclient.h>
@@ -70,15 +71,22 @@ class CVCRControl
 			CVCRStates  deviceState;
 			virtual bool Stop() = 0;
 #ifdef MOVIEBROWSER
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "",const time_t epg_time=0) = 0; // epg_time added for .xml (MovieBrowser)
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, unsigned char apids = 0,const time_t epg_time=0) = 0; // epg_time added for .xml (MovieBrowser)
 #else /* MOVIEBROWSER */
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "") = 0; 
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, unsigned char apids = 0) = 0; 
 #endif /* MOVIEBROWSER */
 			virtual bool Pause() = 0;
 			virtual bool Resume() = 0;
 			virtual bool IsAvailable() = 0;
 			CDevice() { deviceState = CMD_VCR_STOP; };
 			virtual ~CDevice(){};
+			typedef struct {
+				unsigned short apid;
+				unsigned int index;
+				bool ac3;
+			} APIDDesc;
+			typedef std::list<APIDDesc> APIDList;
+			virtual void getAPIDs(const unsigned char apids, APIDList & apid_list);
 		};
 
 	class CVCRDevice : public CDevice		// VCR per IR
@@ -92,9 +100,9 @@ class CVCRControl
 				};
 			virtual bool Stop(); 
 #ifdef MOVIEBROWSER
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "",const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, unsigned char apids = 0, const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
 #else /* MOVIEBROWSER */
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");	
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, unsigned char apids = 0);	
 #endif /* MOVIEBROWSER */
 			virtual bool Pause();
 			virtual bool Resume();
@@ -108,9 +116,9 @@ class CVCRControl
 		protected:
 			void RestoreNeutrino(void);
 			void CutBackNeutrino(const t_channel_id channel_id, const int mode);
-			std::string getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids) const;
+			std::string getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids);
 #ifdef MOVIEBROWSER  			
-			std::string getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids,const time_t epg_time) const;
+			std::string getMovieInfoString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, unsigned char apids, const time_t epg_time);
 #endif /* MOVIEBROWSER */
 
 		public:
@@ -142,7 +150,6 @@ class CVCRControl
 			unsigned int SplitSize;
 			bool         Use_O_Sync;
 			bool         Use_Fdatasync;
-			bool         StreamAllAudioPids;
 			bool         StreamVTxtPid;
 			unsigned int RingBuffers;
 				
@@ -153,15 +160,15 @@ class CVCRControl
 				
 			virtual bool Stop(); 
 #ifdef MOVIEBROWSER
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "",const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, unsigned char apids = 0, const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
 #else /* MOVIEBROWSER */
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");	
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, unsigned char apids = 0);	
 #endif /* MOVIEBROWSER */
 			
-			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool use_fdatasync, const bool stream_all_audio_pids, const bool stream_vtxt_pid, const unsigned int ringbuffers, bool createTemplateDirectories)
+			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool use_fdatasync, const bool stream_vtxt_pid, const unsigned int ringbuffers, bool createTemplateDirectories)
 				
 				: Directory(directory), FilenameTemplate(""), CreateTemplateDirectories(createTemplateDirectories),
-				SplitSize(splitsize), Use_O_Sync(use_o_sync), Use_Fdatasync(use_fdatasync), StreamAllAudioPids(stream_all_audio_pids),
+				SplitSize(splitsize), Use_O_Sync(use_o_sync), Use_Fdatasync(use_fdatasync),
 				StreamVTxtPid(stream_vtxt_pid), RingBuffers(ringbuffers)
 			{
 				StopPlayBack = stopplayback;
@@ -183,7 +190,7 @@ class CVCRControl
 			bool serverConnect();
 			void serverDisconnect();
 
-			bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0, const event_id_t epgid = 0, const std::string & apids = "");
+			bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0, const event_id_t epgid = 0, unsigned char apids = 0);
 
 		public:
 			std::string  ServerAddress;
@@ -196,9 +203,9 @@ class CVCRControl
 
 			virtual bool Stop();
 #ifdef MOVIEBROWSER
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "",const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, unsigned char apids = 0, const time_t epg_time=0);	// epg_time added for .xml (MovieBrowser)
 #else /* MOVIEBROWSER */
-			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, unsigned char apids = 0);
 #endif /* MOVIEBROWSER */
 
 			CServerDevice(const bool stopplayback, const bool stopsectionsd, const char * const serveraddress, const unsigned int serverport)

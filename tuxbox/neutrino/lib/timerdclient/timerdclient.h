@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.46 2005/03/26 12:06:03 chakazulu Exp $
+	$Id: timerdclient.h,v 1.47 2006/02/14 22:38:28 zwen Exp $
 
 	License: GPL
 
@@ -82,7 +82,7 @@ class CTimerdClient:private CBasicClient
 
 		bool modifyRecordTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount, const char * const recordingdir);
 
-		void modifyTimerAPid(int eventid, std::string apids);
+		void modifyTimerAPid(int eventid, unsigned char apids);
 
 		// set existing sleeptimer to new times or create new sleeptimer with these times
 		int setSleeptimer(time_t announcetime, time_t alarmtime, int timerid = 0);		
@@ -110,26 +110,26 @@ class CTimerdClient:private CBasicClient
 		// adds new record timer event
 		int addRecordTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t stoptime, 
 					unsigned long long epgID=0, time_t epg_starttime=0, time_t announcetime = 0, 
-					std::string apids="", bool safety=false,std::string recDir="", bool forceAdd=true) 
+					unsigned char apids=TIMERD_APIDS_STD, bool safety=false,std::string recDir="", bool forceAdd=true) 
 		{
 			CTimerd::RecordingInfo eventInfo;
 			eventInfo.channel_id = channel_id;
 			eventInfo.epgID = epgID;
 			eventInfo.epg_starttime = epg_starttime;
-			strncpy(eventInfo.apids,apids.c_str(), TIMERD_APIDS_MAXLEN);
+			eventInfo.apids = apids;
 			eventInfo.recordingSafety = safety;
 			strncpy(eventInfo.recordingDir, recDir.c_str(), RECORD_DIR_MAXLEN);
 			return addTimerEvent(CTimerd::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime,CTimerd::TIMERREPEAT_ONCE, 0,forceAdd);
 		};
 		
 		int addImmediateRecordTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t stoptime, 
-						 unsigned long long epgID=0, time_t epg_starttime=0)
+						 unsigned long long epgID=0, time_t epg_starttime=0,unsigned char apids=TIMERD_APIDS_STD)
 		{
 			CTimerd::EventInfo eventInfo;
 			eventInfo.channel_id = channel_id;
 			eventInfo.epgID = epgID;
 			eventInfo.epg_starttime = epg_starttime;
-			eventInfo.apids = "";
+			eventInfo.apids = apids;
 			eventInfo.recordingSafety = false;
 			return addTimerEvent(CTimerd::TIMER_IMMEDIATE_RECORD, &eventInfo, 0, alarmtime, stoptime);
 		};
@@ -141,7 +141,7 @@ class CTimerdClient:private CBasicClient
 		// adds new zapto timer event
 		int addZaptoTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t announcetime = 0, 
 				       time_t stoptime = 0, unsigned long long epgID=0, time_t epg_starttime=0,
-				       std::string apids="") 
+				       unsigned char apids=TIMERD_APIDS_STD) 
 		{
 			CTimerd::EventInfo eventInfo;
 			eventInfo.channel_id = channel_id;

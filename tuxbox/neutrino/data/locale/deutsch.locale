@@ -643,6 +643,7 @@ movieplayer.goto Springe zu ...
 movieplayer.goto.h1 = -> absoluter Sprung
 movieplayer.goto.h2 +,- -> relativer Sprung
 movieplayer.head Movieplayer
+movieplayer.load_alternate_fw Im MP alternativen Ucode laden
 movieplayer.nostreamingserver Es konnte keine Verbindung\nzum Streamingserver hergestellt werden.
 movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.
 movieplayer.toomanybookmarks Sie haben bereits zu viele Bookmarks angelegt.\nEs muß erst ein anderes gelöscht werden.
@@ -781,6 +782,10 @@ rclock.lockmsg Die Fernbedienung der dbox2 wird gesperrt.\nUm die Sperre aufzuhe
 rclock.menueadd FB sperren
 rclock.title Fernbedienung sperren
 rclock.unlockmsg Fernbedienung reaktiviert...
+recordingmenu.apids Voreinstellung für Tonspuren
+recordingmenu.apids_ac3 AC3 Tonspuren aufnehmen
+recordingmenu.apids_alt Alternative Tonspuren aufn.
+recordingmenu.apids_std Standard Tonspur aufnehmen
 recordingmenu.choose_direct_rec_dir Bei Sofortaufn. Verzeichnisauswahl
 recordingmenu.defdir Aufnahmeverzeichnis
 recordingmenu.dir_permissions Verzeichnisrechte
@@ -806,11 +811,11 @@ recordingmenu.setupnow Einstellungen jetzt übernehmen
 recordingmenu.splitsize Max. Dateigröße (MB)
 recordingmenu.stopplayback Playback anhalten
 recordingmenu.stopsectionsd Sectionsd anhalten
-recordingmenu.stream_all_audio_pids Alle Audiopids aufzeichnen
 recordingmenu.stream_vtxt_pid Videotext aufzeichnen
 recordingmenu.use_fdatasync Synchrones Schreiben (fdatasync)
 recordingmenu.use_o_sync Synchrones Schreiben (O_SYNC)
 recordingmenu.vcr Videorekorder
+recordingmenu.zap_on_announce Umschalten bei Ankündigung
 recordtimer.announce Die Aufnahme beginnt in wenigen Minuten.
 repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 Tastendrücken
 repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")
@@ -940,7 +945,8 @@ timer.eventtimed.title Sendung vormerken
 timerbar.channelswitch Umschalten
 timerbar.recordevent Aufnehmen
 timerlist.alarmtime Alarmzeit
-timerlist.apids Audio PIDs
+timerlist.apids Tonspuren
+timerlist.apids_default Voreingestellte Tonspuren aufn.
 timerlist.bouquetselect Bouquet wählen
 timerlist.channel Kanal
 timerlist.channelselect Kanal wählen

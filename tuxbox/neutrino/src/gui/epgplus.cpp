@@ -2198,7 +2198,7 @@ int EpgPlus::MenuTargetAddReminder::exec
 				, 0
 				, (*It)->channelEvent.eventID
 				, (*It)->channelEvent.startTime
-				, ""
+				, 0
 				);
 
 			ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
@@ -2268,7 +2268,7 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 				      , (*It)->channelEvent.eventID
 				      , (*It)->channelEvent.startTime
 				      , (*It)->channelEvent.startTime - (ANNOUNCETIME + 120)
-				      , ""
+				      , TIMERD_APIDS_CONF
 				      , true
 				      , recDir
 				      , false
@@ -2283,7 +2283,7 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 										 , (*It)->channelEvent.eventID
 										 , (*It)->channelEvent.startTime
 										 , (*It)->channelEvent.startTime - (ANNOUNCETIME + 120)
-										 , ""
+										 , TIMERD_APIDS_CONF
 										 , true
 										 , recDir
 										 , true);

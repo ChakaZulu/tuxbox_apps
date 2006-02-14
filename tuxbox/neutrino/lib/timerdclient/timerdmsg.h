@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.10 2005/01/12 20:28:09 chakazulu Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.11 2006/02/14 22:38:28 zwen Exp $
  *
  * types used for clientlib <-> timerd communication - d-box2 linux project
  *
@@ -105,7 +105,7 @@ class CTimerdMsg : public CBasicMessage
 	struct commandSetAPid
 	{
 		int   eventID;
-		char  apids[TIMERD_APIDS_MAXLEN];
+		unsigned char  apids;
 	};
 
 	struct commandRemoveTimer

@@ -347,7 +347,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 										     evtlist[selected].startTime + evtlist[selected].duration,
 										     evtlist[selected].eventID, evtlist[selected].startTime,
 										     evtlist[selected].startTime - (ANNOUNCETIME + 120),
-										     "", true, recDir,false) == -1)
+										     TIMERD_APIDS_CONF, true, recDir,false) == -1)
 						{
 							if(askUserOnTimerConflict(evtlist[selected].startTime - (ANNOUNCETIME + 120),
 										  evtlist[selected].startTime + evtlist[selected].duration))
@@ -358,7 +358,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 									 evtlist[selected].startTime + evtlist[selected].duration,
 									 evtlist[selected].eventID, evtlist[selected].startTime,
 									 evtlist[selected].startTime - (ANNOUNCETIME + 120),
-												 "", true, recDir,true);
+									 TIMERD_APIDS_CONF, true, recDir,true);
 								ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 							}
 						} else {
@@ -381,8 +381,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				timerdclient.addZaptoTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID),
 								evtlist[selected].startTime,
 								evtlist[selected].startTime - ANNOUNCETIME, 0,
-								evtlist[selected].eventID, evtlist[selected].startTime,
-								"");
+								evtlist[selected].eventID, evtlist[selected].startTime, 0);
 				ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 			}
 			else
