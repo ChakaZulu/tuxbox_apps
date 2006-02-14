@@ -3,7 +3,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 lib_LTLIBRARIES = libdvbsi++.la
 
 libdvbsi___la_LDFLAGS = \
-	-release $(LT_RELEASE)
+	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
 libdvbsi___la_SOURCES = \
 	aac_descriptor.cpp \
