@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.h,v 1.70 2006/01/30 22:22:04 digi_casi Exp $
+ * $Id: enigma_dyn.h,v 1.71 2006/02/15 18:57:41 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -23,9 +23,9 @@
 #define __enigma_dyn_h
 
 #ifdef ENABLE_EXPERT_WEBIF
-#define WEBIFVERSION "5.9.3-Expert"
+#define WEBIFVERSION "5.9.5-Expert"
 #else
-#define WEBIFVERSION "5.9.3"
+#define WEBIFVERSION "5.9.5"
 #endif
 
 #define ZAPMODETV 0

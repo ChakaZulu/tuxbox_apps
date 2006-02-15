@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_pda.cpp,v 1.3 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn_pda.cpp,v 1.4 2006/02/15 18:57:41 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -361,7 +361,7 @@ static eString pda_root(eString request, eString dirpath, eString opts, eHTTPCon
 
 	pdaScreen = 1;
 	screenWidth = 240;
-	eConfig::getInstance()->setKey("/ezap/webif/pdaScreen", pdaScreen);
+	eConfig::getInstance()->setKey("/ezap/webif/screenWidth", screenWidth);
 
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"] = "text/html; charset=utf-8";
