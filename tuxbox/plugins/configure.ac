@@ -57,6 +57,8 @@ fx2/vierg/Makefile
 fx2/sol/Makefile
 tuxmail/Makefile
 tuxmail/daemon/Makefile
+tuxcal/Makefile
+tuxcal/daemon/Makefile
 tuxtxt/Makefile
 tuxtxt/font/Makefile
 tuxcom/Makefile
