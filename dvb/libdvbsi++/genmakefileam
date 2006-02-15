@@ -1,0 +1,14 @@
+#!/bin/sh
+
+cd include/dvbsi++
+
+echo 'pkgincludedir = ${includedir}/dvbsi++' > Makefile.am
+echo -n 'pkginclude_HEADERS =' >> Makefile.am
+
+for file in `ls -1 *.h | sort`; do
+	echo -e " \\" >> Makefile.am
+	echo -en "\t$file" >> Makefile.am;
+done
+
+echo "" >> Makefile.am
+
