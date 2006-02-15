@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.03  2006/02/15 22:05:26  robspr1
+ * bugfix: showed today for all days
+ *
  * Revision 1.02  2006/02/15 19:17:28  robspr1
  * first version in CVS
  *
@@ -1670,9 +1673,9 @@ void NotifyUser()
 	  			{
   					strcat(tmp_buffer, http_br);
   					if (osdidx == 0)
-  						sprintf(tmp_buffer1,http_lines[0][osdidx],day,monthmsg[month-1][osdidx],year);
+  						sprintf(tmp_buffer1,http_lines[k-1][osdidx],day,monthmsg[month-1][osdidx],year);
   					else
-  						sprintf(tmp_buffer1,http_lines[0][osdidx],monthmsg[month-1][osdidx],day,year);
+  						sprintf(tmp_buffer1,http_lines[k-1][osdidx],monthmsg[month-1][osdidx],day,year);
   					strcat(tmp_buffer, tmp_buffer1);
   				
   					for (i=0;i<iCntEvents[k];i++)
@@ -1873,7 +1876,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.02 $";
+	char cvs_revision[] = "$Revision: 1.03 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
