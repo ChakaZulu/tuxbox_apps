@@ -166,6 +166,98 @@ class CRCInput
 			RC_bottom_left  = KEY_BOTTOMLEFT,   /* /include/linux/input.h: #define KEY_BOTTOMLEFT   0x1a4        */ /* in patched input.h */
 			RC_bottom_right = KEY_BOTTOMRIGHT,  /* /include/linux/input.h: #define KEY_BOTTOMRIGHT  0x1a5        */ /* in patched input.h */
 
+		        //////////////// Keys on the IR Keyboard, not the RC ////////////////
+			RC_esc		= KEY_ESC,		/* #define KEY_ESC		 	1  */
+
+			// RC_minus is (mis-)used above above volume, call it RC_hyphen instead
+			RC_hyphen	= KEY_MINUS, 		/* #define KEY_MINUS		 	12 */
+			RC_equal	= KEY_EQUAL, 		/* #define KEY_EQUAL		 	13 */
+			//RC_backspace	= KEY_BACKSPACE, 	/* #define KEY_BACKSPACE		14 */
+			RC_tab		= KEY_TAB, 		/* #define KEY_TAB			15 */
+			RC_q		= KEY_Q,		/* #define KEY_Q			16 */
+			RC_w		= KEY_W,		/* #define KEY_W			17 */
+			RC_e		= KEY_E,		/* #define KEY_E			18 */
+			RC_r		= KEY_R,		/* #define KEY_R			19 */
+			RC_t		= KEY_T,		/* #define KEY_T			20 */
+			RC_y		= KEY_Y,		/* #define KEY_Y			21 */
+			RC_u		= KEY_U,		/* #define KEY_U			22 */
+			RC_i		= KEY_I,		/* #define KEY_I			23 */
+			RC_o		= KEY_O,		/* #define KEY_O			24 */
+			RC_p		= KEY_P,		/* #define KEY_P			25 */
+			RC_leftbrace	= KEY_LEFTBRACE,	/* #define KEY_LEFTBRACE		26 */
+			RC_rightbrace	= KEY_RIGHTBRACE,	/* #define KEY_RIGHTBRACE		27 */
+			RC_enter	= KEY_ENTER,		/* #define KEY_ENTER			28 */
+			RC_leftctrl	= KEY_LEFTCTRL,		/* #define KEY_LEFTCTRL			29 */
+			RC_a		= KEY_A,		/* #define KEY_A			30 */
+			RC_s		= KEY_S,		/* #define KEY_S			31 */
+			RC_d		= KEY_D,		/* #define KEY_D			32 */
+			RC_f		= KEY_F,		/* #define KEY_F			33 */
+			RC_g		= KEY_G,		/* #define KEY_G			34 */
+			RC_h		= KEY_H,		/* #define KEY_H			35 */
+			RC_j		= KEY_J,		/* #define KEY_J			36 */
+			RC_k		= KEY_K,		/* #define KEY_K			37 */
+			RC_l		= KEY_L,		/* #define KEY_L			38 */
+			RC_semicolon	= KEY_SEMICOLON,	/* #define KEY_SEMICOLON		39 */
+			RC_apostrophe	= KEY_APOSTROPHE,	/* #define KEY_APOSTROPHE		40 */
+			RC_grave	= KEY_GRAVE,		/* #define KEY_GRAVE			41 */
+			RC_leftshift	= KEY_LEFTSHIFT,	/* #define KEY_LEFTSHIFT		42 */
+			RC_backslash	= KEY_BACKSLASH,	/* #define KEY_BACKSLASH		43 */
+			RC_z		= KEY_Z,		/* #define KEY_Z			44 */
+			RC_x		= KEY_X,		/* #define KEY_X			45 */
+			RC_c		= KEY_C,		/* #define KEY_C			46 */
+			RC_v		= KEY_V,		/* #define KEY_V			47 */
+			RC_b		= KEY_B,		/* #define KEY_B			48 */
+			RC_n		= KEY_N,		/* #define KEY_N			49 */
+			RC_m		= KEY_M,		/* #define KEY_M			50 */
+			RC_comma	= KEY_COMMA, 		/* #define KEY_COMMA		 	51 */
+			RC_dot		= KEY_DOT, 		/* #define KEY_DOT			52 */
+			RC_slash	= KEY_SLASH, 		/* #define KEY_SLASH		 	53 */
+			RC_rightshift	= KEY_RIGHTSHIFT, 	/* #define KEY_RIGHTSHIFT		54 */
+			RC_kpasterisk	= KEY_KPASTERISK, 	/* #define KEY_KPASTERISK		55 */
+			RC_leftalt	= KEY_LEFTALT, 		/* #define KEY_LEFTALT		 	56 */
+			RC_space	= KEY_SPACE, 		/* #define KEY_SPACE		 	57 */
+			RC_capslock	= KEY_CAPSLOCK, 	/* #define KEY_CAPSLOCK		 	58 */
+			RC_f1		= KEY_F1, 	 	/* #define KEY_F1			59 */
+			RC_f2		= KEY_F2, 	 	/* #define KEY_F2			60 */
+			RC_f3		= KEY_F3, 	 	/* #define KEY_F3			61 */
+			RC_f4		= KEY_F4, 	 	/* #define KEY_F4			62 */
+			RC_f5		= KEY_F5, 	 	/* #define KEY_F5			63 */
+			RC_f6		= KEY_F6, 	 	/* #define KEY_F6			64 */
+			RC_f7		= KEY_F7, 	 	/* #define KEY_F7			65 */
+			RC_f8		= KEY_F8, 	 	/* #define KEY_F8			66 */
+			RC_f9		= KEY_F9, 	 	/* #define KEY_F9			67 */
+			RC_f10		= KEY_F10, 	 	/* #define KEY_F10			68 */
+			RC_numlock	= KEY_NUMLOCK, 	 	/* #define KEY_NUMLOCK		 	69 */
+			RC_scrolllock	= KEY_SCROLLLOCK, 	/* #define KEY_SCROLLLOCK		70 */
+			RC_kp7		= KEY_KP7,		/* #define KEY_KP7			71 */
+			RC_kp8		= KEY_KP8,		/* #define KEY_KP8			72 */
+			RC_kp9		= KEY_KP9,		/* #define KEY_KP9			73 */
+			RC_kpminus	= KEY_KPMINUS,		/* #define KEY_KPMINUS			74 */
+			RC_kp4		= KEY_KP4,		/* #define KEY_KP4			75 */
+			RC_kp5		= KEY_KP5,		/* #define KEY_KP5			76 */
+			RC_kp6		= KEY_KP6,		/* #define KEY_KP6			77 */
+			RC_kpplus	= KEY_KPPLUS,		/* #define KEY_KPPLUS			78 */
+			RC_kp1		= KEY_KP1,		/* #define KEY_KP1			79 */
+			RC_kp2		= KEY_KP2,		/* #define KEY_KP2			80 */
+			RC_kp3		= KEY_KP3,		/* #define KEY_KP3			81 */
+			RC_kp0		= KEY_KP0,		/* #define KEY_KP0			82 */
+			RC_kpdot	= KEY_KPDOT,		/* #define KEY_KPDOT			83 */
+
+			RC_102nd	= KEY_102ND, 	 	/* #define KEY_102ND		 	86 */
+			RC_kpenter	= KEY_KPENTER,		/* #define KEY_KPENTER			96 */
+			RC_kpslash	= KEY_KPSLASH,		/* #define KEY_KPSLASH			98 */
+
+			RC_rightalt	= KEY_RIGHTALT, 	/* #define KEY_RIGHTALT		 	100 */
+			RC_end		= KEY_END, 	 	/* #define KEY_END			107 */
+			RC_insert	= KEY_INSERT, 	 	/* #define KEY_INSERT		 	110 */
+			RC_delete	= KEY_DELETE, 	 	/* #define KEY_DELETE		 	111 */
+
+			RC_pause	= KEY_PAUSE, 	 	/* #define KEY_PAUSE		 	119 */
+
+			RC_btn_left	= BTN_LEFT, 	 	/* #define BTN_LEFT		 	0x110 */
+			RC_btn_right	= BTN_RIGHT, 	 	/* #define BTN_RIGHT		 	0x111 */
+			//////////////// End of IR Keyboard only keys ////////////////
+
 			RC_timeout	= 0xFFFFFFFF,
 			RC_nokey	= 0xFFFFFFFE
 		};
