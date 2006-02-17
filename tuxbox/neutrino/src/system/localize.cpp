@@ -42,6 +42,8 @@
 
 static const char * iso639filename = "/share/iso-codes/iso-639.tab";
 
+static const unsigned int max_error_messages = 10;
+
 #if 1
 #include <stdlib.h>
 #include <stdio.h>
@@ -214,6 +216,7 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 	char buf[1000];
 
 	i = 1;
+	unsigned int no_missing = 0;
 
 	while(!feof(fd))
 	{
@@ -254,7 +257,12 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 				j = (i >= (sizeof(locale_real_names)/sizeof(const char *))) ? -1 : strcmp(buf, locale_real_names[i]);
 				if (j > 0)
 				{
-					printf("[%s.locale] missing entry:     %s\n", locale, locale_real_names[i]);
+					if (no_missing++ < max_error_messages) {
+						printf("[%s.locale] missing entry:     %s\n", locale, locale_real_names[i]);
+						if (no_missing == max_error_messages)
+							printf("[%s.locale] messages for further missing entries will be suppressed\n", locale);
+
+				  }
 					i++;
 				}
 				else
@@ -272,6 +280,8 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 			}
 		}
 	}
+	if (no_missing > 0) 
+		printf("[%s.locale] has %d missing entrys\n", locale, no_missing);
 	fclose(fd);
 
 #warning TODO: implement real check to determine whether we need a font with more than Basic Latin & Latin-1 Supplement characters
