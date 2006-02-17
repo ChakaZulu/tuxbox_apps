@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.c,v $
+ * Revision 1.03  2006/02/17 21:29:36  robspr1
+ * -add command to switch/hide the clock
+ *
  * Revision 1.02  2006/02/15 19:11:33  robspr1
  * first version in CVS
  *
@@ -168,7 +171,7 @@ void ReadConf()
 	}
 
 	if (!startdelay) startdelay = 30;												// default 30 seconds delay
-	if (!intervall) intervall = 10;													// default check every 10 minutes
+	if (!intervall) intervall = 1;													// default check every 1 second
 
 	// we have different skins
 	if (skin != 1 && skin != 2 && skin != 3)
@@ -285,6 +288,11 @@ int ControlDaemon(int command)
 		{
 			send(fd_sock, "R", 1, 0);
 		} break;			
+		
+		case TOGGLE_CLOCK:
+		{
+			send(fd_sock, "C", 1, 0);
+		} break;
 	}
 
 	// close connection
@@ -342,12 +350,23 @@ int GetRCCode()
   					default:						
   						// no keystroke with code > 127
   						// except POWER_ON
+  						// log keys to file
+/*  						
+							{  						
+								FILE* pipe;  	
+								if ((pipe = fopen("/tmp/keys.log", "a"))!=NULL)
+								{
+									fprintf(pipe,"key: %04x\r\n",ev.code);
+									fclose(pipe);
+								}
+							}
+*/							
   						if ( ev.code > 0x7F )
   						{
   							rccode = 0;
   							if ( ev.code == 0x110 )
   							{
-  								rccode = RC_ON;
+  								rccode = RC_STANDBY;
   							}
   						}
   						else
@@ -2590,7 +2609,7 @@ void SaveDatabase(void)
 */
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.02 $";
+	char cvs_revision[] = "$Revision: 1.03 $";
 	FILE *fd_run;
 	FT_Error error;
 
@@ -2808,6 +2827,12 @@ void plugin_exec(PluginParam *par)
 		switch ((rccode = GetRCCode()))
 		{
 			case RC_DBOX:
+			{
+				if (!ControlDaemon(TOGGLE_CLOCK))														// send hide/show clock to daemon
+					ShowMessage(CLOCKFAIL);																		// we didn't reach the daemon, show error
+				else ShowMessage(CLOCKOK);
+			} break;
+			
 			case RC_0:	
 			{
 				tShow_year = at->tm_year+1900;

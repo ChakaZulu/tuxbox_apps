@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.h,v $
+ * Revision 1.03  2006/02/17 21:29:36  robspr1
+ * -add command to switch/hide the clock
+ *
  * Revision 1.02  2006/02/15 19:12:30  robspr1
  * first version in CVS
  *
@@ -104,7 +107,7 @@ char *infohelp[][MAXOSD] = {
 	{ "markieren"     , "select" },
 	{ "einfügen"      , "insert" },
 	{ "bearbeiten"    , "edit" },
-	{ "[OK]  Einträge anzeigen        [dBox/Menü]  heute" ,  "[OK]  show entrys        [dBox/menu]  today" }
+	{ "[OK]  Einträge anzeigen    [dBox/Menü]  Uhrzeit ein/ausblenden    [0]  heute" ,  "[OK]  show entrys    [dBox/menu]  show/hide clock    [0]  today" }
 };
 
 char *szEditBoxInfo[][MAXOSD] ={
@@ -146,7 +149,7 @@ char *vdaysnames[][MAXOSD] = {
 };
 
 // ShowMessage output
-enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, DATE, INFO};
+enum {NODAEMON, STARTDONE, STARTFAIL, STOPDONE, STOPFAIL, BOOTON, BOOTOFF, DATE, CLOCKFAIL, CLOCKOK, INFO};
 char *infomsg[][MAXOSD] = {
 	{ "Daemon ist nicht geladen!" , "Daemon not running!" },
 	{ "Abfrage wurde gestartet."  , "Polling started." },
@@ -155,7 +158,9 @@ char *infomsg[][MAXOSD] = {
 	{ "Stop ist fehlgeschlagen!"  , "Stop failed!" },
 	{ "Autostart aktiviert."      , "Autostart enabled." },
 	{ "Autostart deaktiviert."    , "Autostart disabled." },
-	{ "%d.%m.%Y %H:%M:%S"         , "%m/%d/%Y %H:%M:%S" }
+	{ "%d.%m.%Y %H:%M:%S"         , "%m/%d/%Y %H:%M:%S" },
+	{ "Uhr ist fehlgeschlagen!"   , "Clock failed!" },
+	{ "Uhranzeige umgeschalten."  , "displaying clock changed" }
 };
 
 
@@ -447,7 +452,7 @@ char disp_clock = 'Y';										//! display the clock
 char disp_sec = 'Y';											//! display the second
 char disp_size = 'S';											//! display size 'S'mall, 'N'ormal, 'B'ig
 int disp_color = 1;												//! display color
-int disp_back = 1;												//! display back-color
+int disp_back = 2;												//! display back-color
 int disp_detect = 1;											//! detect color-map
 char disp_mail = 'Y';											//! display mail notification
 int cstartx = 500;												//! x position for displaying daemon-clock
@@ -584,7 +589,7 @@ typedef struct tagVariableDays
 VARIABLEDAY varaibledays[NOF_VDAYS];
 
 // daemon commands
-enum {GET_STATUS, SET_STATUS, GET_VERSION, RELOAD_DB };
+enum {GET_STATUS, SET_STATUS, GET_VERSION, RELOAD_DB, TOGGLE_CLOCK};
 
 //----------------------------------------------------
 // devs
