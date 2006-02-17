@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.04  2006/02/17 21:30:22  robspr1
+ * -add command to switch/hide the clock, move the startdelay-command
+ *
  * Revision 1.03  2006/02/15 22:05:26  robspr1
  * bugfix: showed today for all days
  *
@@ -171,7 +174,7 @@ void ReadConf()
 	}
 
 	if (!startdelay) startdelay = 30;												// default 30 seconds delay
-	if (!intervall) intervall = 10;													// default check every 10 minutes
+	if (!intervall) intervall = 1;													// default check every 1 second
 
 	// we have different skins
 	if (skin != 1 && skin != 2 && skin != 3)
@@ -1393,6 +1396,12 @@ void *InterfaceThread(void *arg)
 				online = iOnlineTmp;
 				oldyear = 0;																														// initiate no read of database
 			} break;
+
+			case 'C':																																	// toggle displaying the clock
+			{
+				if (show_clock) show_clock = 0;																					// toggle the showing of the clock
+				else show_clock = 1;
+			} break;			
 			
 			// plugin requests version
 			case 'V':
@@ -1867,7 +1876,13 @@ void SigHandler(int signal)
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);							// empty framebuffer
 			if(slog) syslog(LOG_DAEMON | LOG_INFO, "sleep");
 			else printf("TuxCalD <sleep>\n");
-			
+
+		case SIGALRM:
+			if (show_clock) show_clock = 0;																					// toggle the showing of the clock
+			else show_clock = 1;
+			if (slog) syslog(LOG_DAEMON | LOG_INFO, "show/hide the clock");
+			else printf("TuxCalD <show/hide the clock>\n");
+			break;	
 	}
 }
 
@@ -1876,7 +1891,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.03 $";
+	char cvs_revision[] = "$Revision: 1.04 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -1911,6 +1926,34 @@ int main(int argc, char **argv)
 			}
 		}
 	}
+
+	// create daemon
+
+	time(&tt);
+	strftime(timeinfo, 22, "%d.%m.%Y - %T", localtime(&tt));
+
+	switch(fork())
+	{
+		case 0:
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "%s started [%s]", versioninfo_d, timeinfo) : printf("TuxCalD %s started [%s]\n", versioninfo_d, timeinfo);
+			setsid();
+			chdir("/");
+		break;
+
+		case -1:
+			slog ? syslog(LOG_DAEMON | LOG_INFO, "%s aborted!", versioninfo_d) : printf("TuxCalD %s aborted!\n", versioninfo_d);
+			return -1;
+		default:
+
+		exit(0);
+	}
+
+	// read, update or create config
+	ReadConf();																							// read actual config
+	WriteConf();																						// write actual config back to file
+
+	// startdelay
+	if (!nodelay)	sleep(startdelay);
 
 	// framebuffer stuff
 	if ((fbdev = open("/dev/fb/0", O_RDWR))<0)
@@ -2014,33 +2057,9 @@ int main(int argc, char **argv)
 	ex=sx+var_screeninfo.xres;
 	ey=sy+var_screeninfo.yres;
 
-	// create daemon
-
-	time(&tt);
-	strftime(timeinfo, 22, "%d.%m.%Y - %T", localtime(&tt));
-
-	switch(fork())
-	{
-		case 0:
-			slog ? syslog(LOG_DAEMON | LOG_INFO, "%s started [%s]", versioninfo_d, timeinfo) : printf("TuxCalD %s started [%s]\n", versioninfo_d, timeinfo);
-			setsid();
-			chdir("/");
-		break;
-
-		case -1:
-			slog ? syslog(LOG_DAEMON | LOG_INFO, "%s aborted!", versioninfo_d) : printf("TuxCalD %s aborted!\n", versioninfo_d);
-			return -1;
-		default:
-
-		exit(0);
-	}
-
-	// read, update or create config
-	ReadConf();																							// read actual config
-	WriteConf();																						// write actual config back to file
+	// read the dates and times
 	LoadDatabase();																					// load database
 	
-
 	// check for running daemon
 	if ((fd_pid = fopen(PIDFILE, "r+")))
 	{
@@ -2092,6 +2111,12 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	if (signal(SIGALRM, SigHandler) == SIG_ERR)
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "Installation of Signalhandler for ALRM failed") : printf("TuxCalD <Installation of Signalhandler for ALRM failed>\n");
+		return -1;
+	}
+
 	// install communication interface
 	if (pthread_create(&thread_id, NULL, InterfaceThread, NULL))
 	{
@@ -2099,9 +2124,6 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-
-	// startdelay
-	if (!nodelay)	sleep(startdelay);
 
 	// find blach or white in the colormap
 	if (disp_detect) 
@@ -2118,10 +2140,9 @@ int main(int argc, char **argv)
       colormap->len=1<<bps;
       if (ioctl(fbdev, FBIOGETCMAP, colormap))
       {
-  			printf("TuxCalD <FBIOGETCMAP failed>\n");
+  			slog ? syslog(LOG_DAEMON | LOG_INFO, "Interface-Thread failed") : printf("TuxCalD <FBIOGETCMAP failed>\n");
   			return 1;
     	}
-  		printf("TuxCalD <FBIOGETCMAP read>\n");
     }
 		FindColors();	
 	}
@@ -2164,7 +2185,7 @@ int main(int argc, char **argv)
 			}
 			
 			//------------------- part for showing the clock		
-			if (disp_clock=='Y')															// should we display the clock
+			if ((disp_clock=='Y') && (show_clock))						// should we display the clock
 			{				
 				char line[10];
 				if (disp_mail=='Y')

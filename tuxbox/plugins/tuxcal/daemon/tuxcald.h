@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.h,v $
+ * Revision 1.03  2006/02/17 21:30:22  robspr1
+ * -add command to switch/hide the clock, move the startdelay-command
+ *
  * Revision 1.02  2006/02/15 19:17:50  robspr1
  * first version in CVS
  *
@@ -237,7 +240,7 @@ char disp_clock = 'Y';										//! display the clock
 char disp_sec = 'Y';											//! display the second
 char disp_size = 'S';											//! display size 'S'mall, 'N'ormal, 'B'ig
 int disp_color = 1;												//! display color
-int disp_back = 1;												//! display back-color
+int disp_back = 2;												//! display back-color
 int disp_detect = 1;											//! detect color-map
 char disp_mail = 'Y';											//! display mail notification
 int iFontSize;														//! Fontsize, converted from config
@@ -247,7 +250,8 @@ FILE *fd_pid;															//! PID file
 int slog = 0;															//! logging to sys
 int pid;																	//! the PID
 int sock;																	//! socket
-int intervall;														//! check every x minute
+int intervall;														//! check every x seconds
+int show_clock = 1;												//! show the clock
 int nodelay=0;														//! startup-delay
 char encodedstring[512], decodedstring[512];	//! for web-authentification
 
