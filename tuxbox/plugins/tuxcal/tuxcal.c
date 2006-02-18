@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.c,v $
+ * Revision 1.04  2006/02/18 14:57:13  robspr1
+ * add signaling at fixed times, some small fixes
+ *
  * Revision 1.03  2006/02/17 21:29:36  robspr1
  * -add command to switch/hide the clock
  *
@@ -91,6 +94,10 @@ void ReadConf()
 		{
 			sscanf(ptr + 8, "%d", &sigmode);
 		}
+		else if((ptr = strstr(line_buffer, "SIGTIME=")))
+		{
+			sscanf(ptr + 8, "%s", &sigtime[0]);
+		}
 		else if((ptr = strstr(line_buffer, "OSD=")))
 		{
 			sscanf(ptr + 4, "%c", &osd);
@@ -118,6 +125,10 @@ void ReadConf()
 		else if((ptr = strstr(line_buffer, "POS_Y=")))
 		{
 			sscanf(ptr + 6, "%d", &cstarty);
+		}
+		else if((ptr = strstr(line_buffer, "SHOW=")))
+		{
+			sscanf(ptr + 5, "%c", &show_clock);
 		}
 		else if((ptr = strstr(line_buffer, "DATE=")))
 		{
@@ -173,6 +184,9 @@ void ReadConf()
 	if (!startdelay) startdelay = 30;												// default 30 seconds delay
 	if (!intervall) intervall = 1;													// default check every 1 second
 
+	if ((sigtype<1) || (sigtype>3)) sigtype=1;							// default only this day
+	if ((sigmode<0) || (sigmode>3)) sigmode=0;							// default only events and birthdays
+	
 	// we have different skins
 	if (skin != 1 && skin != 2 && skin != 3)
 	{
@@ -206,14 +220,16 @@ int WriteConf()
 	fprintf(fd_conf, "AUDIO=%c\n", audio);
 	fprintf(fd_conf, "VIDEO=%d\n", video);
 	fprintf(fd_conf, "SIGNAL=%d\n", sigtype);
-	fprintf(fd_conf, "SIGMODE=%d\n\n", sigmode);
-	fprintf(fd_conf, "OSD=%c\n\n", osd);
+	fprintf(fd_conf, "SIGMODE=%d\n", sigmode);
+	fprintf(fd_conf, "SIGTIME=%s\n\n", sigtime);
+	fprintf(fd_conf, "OSD=%c\n", osd);
 	fprintf(fd_conf, "SKIN=%d\n\n", skin);
 	fprintf(fd_conf, "WEBPORT=%d\n", webport);
 	fprintf(fd_conf, "WEBUSER=%s\n", webuser);
 	fprintf(fd_conf, "WEBPASS=%s\n\n", webpass);
 	fprintf(fd_conf, "POS_X=%d\n", cstartx);
 	fprintf(fd_conf, "POS_Y=%d\n", cstarty);
+	fprintf(fd_conf, "SHOW=%c\n", show_clock);
 	fprintf(fd_conf, "DATE=%c\n", disp_date);
 	fprintf(fd_conf, "CLOCK=%c\n", disp_clock);
 	fprintf(fd_conf, "SEC=%c\n", disp_sec);
@@ -1454,6 +1470,7 @@ int Edit(EVT_DB* pEvt)
 			// this we switch on or off the times
 			case RC_YELLOW:
 			{
+				if ((pEvt->type==BIRTHDAY) || (pEvt->type==HOLIDAY)) break;
 				iEditCol=0;																									// in any case select the first char
 				if (pEvt->hour!=-1)																					// if we used the time, unselect the times
 				{
@@ -2598,6 +2615,7 @@ void SaveDatabase(void)
 		fclose(fd_evt);
 	}
 	iCntEntries=iEntry;
+	LoadDatabase();
 }
 
 /******************************************************************************
@@ -2609,7 +2627,7 @@ void SaveDatabase(void)
 */
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.03 $";
+	char cvs_revision[] = "$Revision: 1.04 $";
 	FILE *fd_run;
 	FT_Error error;
 

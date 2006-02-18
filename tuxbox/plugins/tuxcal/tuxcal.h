@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.h,v $
+ * Revision 1.04  2006/02/18 14:57:13  robspr1
+ * add signaling at fixed times, some small fixes
+ *
  * Revision 1.03  2006/02/17 21:29:36  robspr1
  * -add command to switch/hide the clock
  *
@@ -444,6 +447,7 @@ char audio = 'Y';													//! signal event per audio
 int video=1;															//! signal event per video (different types)
 int sigtype=1;														//! signal type 
 int sigmode=0;														//! signal mode
+char sigtime[80];													//! fix signal-times
 int webport=80;														//! webport for using webinterface
 char webuser[32] = "";										//! for using webinterface
 char webpass[32] = "";										//! for using webinterface
@@ -457,6 +461,7 @@ int disp_detect = 1;											//! detect color-map
 char disp_mail = 'Y';											//! display mail notification
 int cstartx = 500;												//! x position for displaying daemon-clock
 int cstarty = 30;													//! y position for displaying daemon-clock
+char show_clock = 'Y';										//! show the clock
 
 char *szFmtStr[] = {
 	"%02u" , "%04u"

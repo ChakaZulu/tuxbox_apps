@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.05  2006/02/18 14:57:46  robspr1
+ * add signaling at fixed times, some small fixes
+ *
  * Revision 1.04  2006/02/17 21:30:22  robspr1
  * -add command to switch/hide the clock, move the startdelay-command
  *
@@ -94,6 +97,10 @@ void ReadConf()
 		{
 			sscanf(ptr + 8, "%d", &sigmode);
 		}
+		else if((ptr = strstr(line_buffer, "SIGTIME=")))
+		{
+			sscanf(ptr + 8, "%s", &sigtime[0]);
+		}
 		else if((ptr = strstr(line_buffer, "OSD=")))
 		{
 			sscanf(ptr + 4, "%c", &osd);
@@ -121,6 +128,10 @@ void ReadConf()
 		else if((ptr = strstr(line_buffer, "POS_Y=")))
 		{
 			sscanf(ptr + 6, "%d", &starty);
+		}
+		else if((ptr = strstr(line_buffer, "SHOW=")))
+		{
+			sscanf(ptr + 5, "%c", &show_clockatstart);
 		}
 		else if((ptr = strstr(line_buffer, "DATE=")))
 		{
@@ -176,6 +187,9 @@ void ReadConf()
 	if (!startdelay) startdelay = 30;												// default 30 seconds delay
 	if (!intervall) intervall = 1;													// default check every 1 second
 
+	if ((sigtype<1) || (sigtype>3)) sigtype=1;							// default only this day
+	if ((sigmode<0) || (sigmode>3)) sigmode=0;							// default only events and birthdays
+	
 	// we have different skins
 	if (skin != 1 && skin != 2 && skin != 3)
 	{
@@ -217,14 +231,16 @@ int WriteConf()
 	fprintf(fd_conf, "AUDIO=%c\n", audio);
 	fprintf(fd_conf, "VIDEO=%d\n", video);
 	fprintf(fd_conf, "SIGNAL=%d\n", sigtype);
-	fprintf(fd_conf, "SIGMODE=%d\n\n", sigmode);
-	fprintf(fd_conf, "OSD=%c\n\n", osd);
+	fprintf(fd_conf, "SIGMODE=%d\n", sigmode);
+	fprintf(fd_conf, "SIGTIME=%s\n\n", sigtime);
+	fprintf(fd_conf, "OSD=%c\n", osd);
 	fprintf(fd_conf, "SKIN=%d\n\n", skin);
 	fprintf(fd_conf, "WEBPORT=%d\n", webport);
 	fprintf(fd_conf, "WEBUSER=%s\n", webuser);
 	fprintf(fd_conf, "WEBPASS=%s\n\n", webpass);
 	fprintf(fd_conf, "POS_X=%d\n", startx);
 	fprintf(fd_conf, "POS_Y=%d\n", starty);
+	fprintf(fd_conf, "SHOW=%c\n", show_clockatstart);
 	fprintf(fd_conf, "DATE=%c\n", disp_date);
 	fprintf(fd_conf, "CLOCK=%c\n", disp_clock);
 	fprintf(fd_conf, "SEC=%c\n", disp_sec);
@@ -595,6 +611,7 @@ void FindColors()
 	}
 	printf("TuxCalD <found black at %d, white at %d>\r\n",iBlack, iWhite);
 }
+
 /******************************************************************************
  * CheckEvent
  ******************************************************************************/
@@ -604,6 +621,7 @@ void FindColors()
  \param pEvt	: EVT_DB* pointer to event-object
  \return  		: 1:OK/Yes  0:Exit/No - changes made
 */
+/*  --- not used in tuxcal-daemon
 int CheckEvent(EVT_DB* pEvt)
 {
 	EVT_DB evtsic;
@@ -651,6 +669,7 @@ int CheckEvent(EVT_DB* pEvt)
 	if (memcmp(&evtsic,pEvt,sizeof(EVT_DB)-MAXINFOLEN)) return 0;
 	return 1;
 }
+*/
 
 /******************************************************************************
  * LeapYear
@@ -1310,6 +1329,38 @@ void SaveDatabase(void)
 }
 
 /******************************************************************************
+ * ReadSTimer
+ ******************************************************************************/
+/*
+ * read some times from the tuxcal.conf, at these times the daemon signals the events
+ 
+ \param	
+ \return
+*/
+void ReadSTimer()
+{
+	int i=0;
+	char *ptr;
+	
+	ptr=sigtime;
+	
+	// set all s-timers
+	for (;i<MAXSTIMER; i++)
+	{
+		if ((*ptr!=0) && (strlen(ptr)>=6))
+		{
+			sscanf(ptr,"%02d:%02d;",&tSignal[i].hour,&tSignal[i].min);
+			ptr+=6;
+		}
+		else
+		{
+			tSignal[i].hour=-1;
+			tSignal[i].min=-1;
+		}
+	}
+}
+
+/******************************************************************************
  * InterfaceThread 
  ******************************************************************************/
 /*
@@ -1399,8 +1450,8 @@ void *InterfaceThread(void *arg)
 
 			case 'C':																																	// toggle displaying the clock
 			{
-				if (show_clock) show_clock = 0;																					// toggle the showing of the clock
-				else show_clock = 1;
+				if (show_clock=='Y') show_clock = 'N';																	// toggle the showing of the clock
+				else show_clock = 'Y';
 			} break;			
 			
 			// plugin requests version
@@ -1876,10 +1927,13 @@ void SigHandler(int signal)
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);							// empty framebuffer
 			if(slog) syslog(LOG_DAEMON | LOG_INFO, "sleep");
 			else printf("TuxCalD <sleep>\n");
+			break;
 
 		case SIGALRM:
-			if (show_clock) show_clock = 0;																					// toggle the showing of the clock
-			else show_clock = 1;
+			if (show_clock=='Y') show_clock = 'N';																	// toggle the showing of the clock
+			else show_clock = 'Y';
+			memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);								// clear buffer for framebuffer-writing to transparent
+			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);							// empty framebuffer
 			if (slog) syslog(LOG_DAEMON | LOG_INFO, "show/hide the clock");
 			else printf("TuxCalD <show/hide the clock>\n");
 			break;	
@@ -1891,7 +1945,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.04 $";
+	char cvs_revision[] = "$Revision: 1.05 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -2059,6 +2113,7 @@ int main(int argc, char **argv)
 
 	// read the dates and times
 	LoadDatabase();																					// load database
+	ReadSTimer();																						// read the timers for fixed signaling
 	
 	// check for running daemon
 	if ((fd_pid = fopen(PIDFILE, "r+")))
@@ -2149,7 +2204,8 @@ int main(int argc, char **argv)
 	
 	// we are online now
 	online=1;
-	
+	show_clock=show_clockatstart;
+		
 	// definitions for some variables
 	char info[MAXCLOCKINFOLEN];														// storage for clock/date output
 	int iLen1;																						// used len for this info
@@ -2185,7 +2241,7 @@ int main(int argc, char **argv)
 			}
 			
 			//------------------- part for showing the clock		
-			if ((disp_clock=='Y') && (show_clock))						// should we display the clock
+			if ((disp_clock=='Y') && (show_clock=='Y'))					// should we display the clock
 			{				
 				char line[10];
 				if (disp_mail=='Y')
@@ -2268,6 +2324,24 @@ int main(int argc, char **argv)
 				bChanged=1;
 			}
 
+			tCheck_min = at->tm_min;
+			tCheck_hour = at->tm_hour;
+			
+			// check for signaling at s-times
+			if ((tCheck_min != oldmin) || (tCheck_hour != oldhour))
+			{
+				int i;
+				// scan all s-timers
+				for (i=0;i<MAXSTIMER; i++)
+				{
+					if ((tSignal[i].hour==tCheck_hour) && (tSignal[i].min==tCheck_min)) 
+					{
+						bChanged=1;																												// flag used to enable signal
+//						printf("TuxCalD <signal at %02d:%02d>\r\n",tCheck_hour,tCheck_min);
+					}
+				}				
+			}
+			
 			tCheck_mon = at->tm_mon+1;
 			tCheck_day = at->tm_mday;
 			
@@ -2279,14 +2353,11 @@ int main(int argc, char **argv)
 				iFoundEvent = IsEvent(tCheck_day, tCheck_mon, tCheck_year);
 			}
 			
-			tCheck_min = at->tm_min;
-			tCheck_hour = at->tm_hour;
-			
 			if ((tCheck_min != oldmin) || (tCheck_hour != oldhour) || (bChanged))
 			{
 				oldhour = tCheck_hour;
 				oldmin = tCheck_min;
-				
+
 				int i;
 				EVT_DB* pEvt;
 				// check all events on this day if the event is at exact time

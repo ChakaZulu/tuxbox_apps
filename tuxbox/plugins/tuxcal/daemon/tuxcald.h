@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.h,v $
+ * Revision 1.04  2006/02/18 14:57:46  robspr1
+ * add signaling at fixed times, some small fixes
+ *
  * Revision 1.03  2006/02/17 21:30:22  robspr1
  * -add command to switch/hide the clock, move the startdelay-command
  *
@@ -232,6 +235,7 @@ char audio = 'Y';													//! signal event per audio
 int video=1;															//! signal event per video (different types)
 int sigtype=1;														//! signal type 
 int sigmode=0;														//! signal mode
+char sigtime[80];													//! fix signal-times
 int webport=80;														//! webport for using webinterface
 char webuser[32] = "";										//! for using webinterface
 char webpass[32] = "";										//! for using webinterface
@@ -251,7 +255,8 @@ int slog = 0;															//! logging to sys
 int pid;																	//! the PID
 int sock;																	//! socket
 int intervall;														//! check every x seconds
-int show_clock = 1;												//! show the clock
+char show_clock = 'Y';										//! show the clock
+char show_clockatstart = 'Y';
 int nodelay=0;														//! startup-delay
 char encodedstring[512], decodedstring[512];	//! for web-authentification
 
@@ -293,6 +298,7 @@ struct WAVEHEADER
 #define MAXENTRYS					500
 #define MAXCHECKS					10
 #define MAXCHECKDAYS			3
+#define MAXSTIMER					5
 
 //----------------------------------------------------
 #define DAEMON_ON_NOSIGNAL		0
@@ -300,6 +306,11 @@ struct WAVEHEADER
 #define DAEMON_OFF						2
 
 enum {SIGNORMAL, SIGPERIOD, SIGHOLIDAY, SIGALL };						//! used by sigmode
+typedef struct tagTIMER
+{
+	int hour;
+	int min;
+} STIMER, *PSTIMER;
 
 //----------------------------------------------------
 // variables
@@ -321,6 +332,7 @@ int iEventType[MAXCHECKDAYS+2][MAXCHECKS];	//! structure filled with event-index
 int iCntEntries;														//! total number of entries in database
 int iCntEvents[MAXCHECKDAYS+1];							//! found events
 int iCntTmEvents;														//! found events at this minute
+STIMER tSignal[MAXSTIMER];									//! signal at certain times
 int nEditStyle = 1;													//! style for editing (RC, KB)
 char online;																//! are we connected to the daemon
 char timeinfo[22];													//! string for time
