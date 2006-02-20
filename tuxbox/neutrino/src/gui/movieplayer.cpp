@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.120 2006/01/22 08:51:24 digi_casi Exp $
+  $Id: movieplayer.cpp,v 1.121 2006/02/20 01:10:34 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -2259,7 +2259,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			if(g_playstate == CMoviePlayerGui::PLAY)
 			{
 				int play_sec = g_fileposition / (MINUTEOFFSET/60);  // get current seconds from moviestart 
-				TRACE(" %6ds\r\n",play_sec);
+				//TRACE(" %6ds\r\n",play_sec);
 
 				if(play_sec + 10 < jump_not_until || play_sec  > jump_not_until +10) jump_not_until = 0; // check if !jump is stale (e.g. if user jumped forward or backward)
 				
@@ -3284,7 +3284,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.120 $");
+	helpbox.addLine("Version: $Revision: 1.121 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -3305,7 +3305,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.120 $");
+	helpbox.addLine("Version: $Revision: 1.121 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);

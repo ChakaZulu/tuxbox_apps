@@ -3,7 +3,7 @@
  
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: moviebrowser.h,v 1.3 2005/12/18 09:23:53 metallica Exp $
+	$Id: moviebrowser.h,v 1.4 2006/02/20 01:10:34 guenther Exp $
 
 	Kommentar:
 
@@ -40,10 +40,10 @@
 	Author: Günther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
 
-	Revision History:
-	Date			Author		Change Description
-	   Nov 2005		Günther	initial implementation
 	$Log: moviebrowser.h,v $
+	Revision 1.4  2006/02/20 01:10:34  guenther
+	- temporary parental lock updated - remove 1s debug prints in movieplayer- Delete file without rescan of movies- Crash if try to scroll in list with 2 movies only- UTF8XML to UTF8 conversion in preview- Last file selection recovered- use of standard folders adjustable in config- reload and remount option in config
+	
 	Revision 1.3  2005/12/18 09:23:53  metallica
 	fix compil warnings
 	
@@ -158,7 +158,7 @@ typedef enum
 {
 	MB_PARENTAL_LOCK_OFF = 0,
 	MB_PARENTAL_LOCK_ACTIVE = 1,
-	MB_PARENTAL_LOCK_ACTIVE_TMP = 2, // use this to activate the lock temporarily until next dbox start up
+	MB_PARENTAL_LOCK_OFF_TMP = 2, // use this to activate the lock temporarily until next dbox start up
 	MB_PARENTAL_LOCK_MAX_NUMBER = 3  // MUST be allways the last item in the list
 }MB_PARENTAL_LOCK;
 
@@ -175,6 +175,11 @@ typedef struct
 	MB_PARENTAL_LOCK parentalLock;//MB_PARENTAL_LOCK
 	
 	std::string storageDir[MB_MAX_DIRS];
+	bool storageDir_rec;
+	bool storageDir_movie;
+
+	bool reload;
+	bool remount;
 
 	/* these variables are used for the listframes */	
 	int browserFrameHeight;
@@ -233,6 +238,9 @@ class CMovieBrowser
 		unsigned int m_currentRecordSelection;
 		unsigned int m_currentPlaySelection;
 		unsigned int m_currentFilterSelection;
+ 		unsigned int m_prevBrowserSelection;
+		unsigned int m_prevRecordSelection;
+		unsigned int m_prevPlaySelection;
 
 		bool m_showBrowserFiles;
 		bool m_showLastRecordFiles;
@@ -245,7 +253,8 @@ class CMovieBrowser
 		std::string m_selectedDir;
 		MB_FOCUS m_windowFocus;
 
-		bool  m_file_info_stale; // if this bit is set, MovieBrowser shall reload all movie infos from HD
+		bool m_file_info_stale; // if this bit is set, MovieBrowser shall reload all movie infos from HD
+		bool m_seriename_stale;
 
 		Font* m_pcFontFoot;
 		Font* m_pcFontTitle;
@@ -318,7 +327,7 @@ class CMovieBrowser
 		void onSetGUIWindow(MB_GUI gui);
 		void onSetGUIWindowNext(void);
 		void onSetGUIWindowPrev(void);
-		void onDeleteFile(CFile& file_ts);  // P4
+		void onDeleteFile(MI_MOVIE_INFO& movieSelectionHandler);  // P4
 		bool onSortMovieInfoHandleList(std::vector<MI_MOVIE_INFO*>& pv_handle_list, MB_INFO_ITEM sort_type, MB_DIRECTION direction);
 		
 		///// parse Storage Directories ///////////// 

@@ -4,6 +4,8 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
+	$Id: listframe.cpp,v 1.2 2006/02/20 01:10:36 guenther Exp $
+
 	Kommentar:
 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
@@ -40,9 +42,10 @@
 	Author: Günther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
 
-	Revision History:
-	Date			Author		Change Description
-	   Nov 2005		Günther	initial implementation
+	$Log: listframe.cpp,v $
+	Revision 1.2  2006/02/20 01:10:36  guenther
+	- temporary parental lock updated - remove 1s debug prints in movieplayer- Delete file without rescan of movies- Crash if try to scroll in list with 2 movies only- UTF8XML to UTF8 conversion in preview- Last file selection recovered- use of standard folders adjustable in config- reload and remount option in config
+	
 
 ****************************************************************************/
 
@@ -719,7 +722,7 @@ void CListFrame::scrollLineDown(const int lines)
 	//TRACE("[CListFrame]->scrollLineDown \r\n");
 
 	if( !(m_nMode & SCROLL)) return;
-	if( m_nNrOfLines <= 0) return;
+	if( m_nNrOfLines <= 1) return;
 	
 	if(m_nSelectedLine < m_nNrOfLines - 1 && m_nNrOfLines != 0) m_nSelectedLine++;
 	
@@ -748,7 +751,7 @@ void CListFrame::scrollLineUp(const int lines)
 {
 	//TRACE("[CListFrame]->scrollLineUp \r\n");
 	if( !(m_nMode & SCROLL)) return;
-	if( m_nNrOfLines <= 0) return;
+	if( m_nNrOfLines <= 1) return;
 
 	if(m_nSelectedLine > 0) m_nSelectedLine--;
 	// check if the cursor moves out of the window
@@ -778,7 +781,7 @@ void CListFrame::scrollPageDown(const int pages)
 	//TRACE("[CListFrame]->ScrollPageDown \r\n");
 
 	if( !(m_nMode & SCROLL)) return;
-	if( m_nNrOfLines <= 0) return;
+	if( m_nNrOfLines <= 1) return;
 	
 	if(m_nCurrentPage + pages < m_nNrOfPages)
 	{
@@ -810,7 +813,7 @@ void CListFrame::scrollPageUp(const int pages)
 	//TRACE("[CListFrame]->ScrollPageUp \r\n");
 
 	if( !(m_nMode & SCROLL)) return;
-	if( m_nNrOfLines <= 0) return;
+	if( m_nNrOfLines <= 1) return;
 
 	if(m_nCurrentPage - pages > 0)
 	{
@@ -910,6 +913,7 @@ bool CListFrame::setSelectedLine(int selection)
 		m_nCurrentPage =  selection / m_nLinesPerPage;
 		m_nCurrentLine = m_nCurrentPage * m_nLinesPerPage;
 		refreshList();
+		refreshScroll();  //NEW
 		result = true;
 		//TRACE(" selected line: %d,%d,%d \r\n",m_nSelectedLine,m_nCurrentPage,m_nCurrentLine);
 	}

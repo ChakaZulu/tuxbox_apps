@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.64 2006/02/14 22:38:43 zwen Exp $
+ * $Id: locals_intern.h,v 1.65 2006/02/20 01:10:36 guenther Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -628,7 +628,7 @@ const char * locale_real_names[] =
 	"moviebrowser.menu_parental_lock_activated",
 	"moviebrowser.menu_parental_lock_activated_no",
 	"moviebrowser.menu_parental_lock_activated_yes",
-	"moviebrowser.menu_parental_lock_activated_yes_temp",
+	"moviebrowser.menu_parental_lock_activated_no_temp",
 	"moviebrowser.menu_parental_lock_head",
 	"moviebrowser.menu_parental_lock_rate_head",
 	"moviebrowser.scan_for_movies",

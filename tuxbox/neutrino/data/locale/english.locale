@@ -601,7 +601,7 @@ moviebrowser.menu_nfs_head NFS settings
 moviebrowser.menu_parental_lock_activated activated
 moviebrowser.menu_parental_lock_activated_no no
 moviebrowser.menu_parental_lock_activated_yes yes
-moviebrowser.menu_parental_lock_activated_yes_temp yes (temporary)
+moviebrowser.menu_parental_lock_activated_no_temp no (temporary)
 moviebrowser.menu_parental_lock_head Parental Lock
 moviebrowser.menu_parental_lock_rate_head Lock movies from
 moviebrowser.scan_for_movies Scan for Movies ...

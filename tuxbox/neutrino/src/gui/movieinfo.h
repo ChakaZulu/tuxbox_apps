@@ -96,7 +96,7 @@
 #define MI_XML_TAG_DATE_OF_LAST_PLAY "dateoflastplay"
 
 
-#define MI_MAX_AUDIO_PIDS 4 // just to avoid the buffer is filled endless, might be increased later on , but 4 audio pids might be enough
+#define MI_MAX_AUDIO_PIDS 4       // just to avoid the buffer is filled endless, might be increased later on , but 4 audio pids might be enough
 #define MI_MOVIE_BOOK_USER_MAX 10 // just to avoid the buffer is filled endless, might be increased later on. Make sure to increase the bookmark menu as well
 
 typedef enum
