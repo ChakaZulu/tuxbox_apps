@@ -1476,7 +1476,7 @@ void eval_l25()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.96 $";
+	char cvs_revision[] = "$Revision: 1.97 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -1518,9 +1518,14 @@ void plugin_exec(PluginParam *par)
 	}
 
 	/* initialisations */
-	if (Init() == 0)
+	if (Init() == 0) {
+#if !TUXTXT_CFG_STANDALONE
+		if ( initialized ){
+			tuxtxt_close();
+		}
+#endif
 		return;
-
+	}
 	/* main loop */
 	do {
 		if (GetRCCode() == 1)
@@ -1696,7 +1701,7 @@ void plugin_exec(PluginParam *par)
 		tuxtxt_close();
 #endif
 
- 	printf("Tuxtxt: plugin ended\n");
+	printf("Tuxtxt: plugin ended\n");
 
 }
 
@@ -1953,6 +1958,8 @@ int Init()
 	if (ioctl(fb, FBIOGET_FSCREENINFO, &fix_screeninfo) == -1)
 	{
 		perror("TuxTxt <FBIOGET_FSCREENINFO>");
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
 		return 0;
 	}
 
@@ -1960,6 +1967,8 @@ int Init()
 	if (ioctl(fb, FBIOGET_VSCREENINFO, &var_screeninfo) == -1)
 	{
 		perror("TuxTxt <FBIOGET_VSCREENINFO>");
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
 		return 0;
 	}
 
@@ -1971,6 +1980,8 @@ int Init()
 	if (ioctl(fb, FBIOPUT_VSCREENINFO, &var_screeninfo) == -1)
 	{
 		perror("TuxTxt <FBIOPUT_VSCREENINFO>");
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
 		return 0;
 	}
 
@@ -1978,6 +1989,8 @@ int Init()
 	if (ioctl(fb, FBIOGET_VSCREENINFO, &var_screeninfo) == -1)
 	{
 		perror("TuxTxt <FBIOGET_VSCREENINFO>");
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
 		return 0;
 	}
 
@@ -1997,6 +2010,8 @@ int Init()
 	if (!lfb)
 	{
 		perror("TuxTxt <mmap>");
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
 		return 0;
 	}
 	ClearBB(transp); /* initialize backbuffer */
@@ -2010,6 +2025,7 @@ int Init()
 		page_atrb[i].doublew = 0;
 		page_atrb[i].IgnoreAtBlackBgSubst = 0;
 	}
+
 	/*  if no vtxtpid for current service, search PIDs */
 	if (tuxtxt_cache.vtxtpid == 0)
 	{
@@ -2078,9 +2094,6 @@ int Init()
 	/* setup rc */
 	fcntl(rc, F_SETFL, O_NONBLOCK);
 	ioctl(rc, RC_IOCTL_BCODES, 1);
-
-
-
 
 	gethotlist();
 	SwitchScreenMode(screenmode);
