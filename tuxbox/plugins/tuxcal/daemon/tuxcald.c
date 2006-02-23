@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.06  2006/02/23 23:08:41  robspr1
+ * - signal up to 5 days, toggle clock-display file
+ *
  * Revision 1.05  2006/02/18 14:57:46  robspr1
  * add signaling at fixed times, some small fixes
  *
@@ -187,7 +190,7 @@ void ReadConf()
 	if (!startdelay) startdelay = 30;												// default 30 seconds delay
 	if (!intervall) intervall = 1;													// default check every 1 second
 
-	if ((sigtype<1) || (sigtype>3)) sigtype=1;							// default only this day
+	if ((sigtype<1) || (sigtype>MAXCHECKDAYS)) sigtype=1;		// default only this day
 	if ((sigmode<0) || (sigmode>3)) sigmode=0;							// default only events and birthdays
 	
 	// we have different skins
@@ -276,6 +279,245 @@ FT_Error MyFaceRequester(FTC_FaceID face_id, FT_Library library, FT_Pointer requ
 	else printf("TuxCal <Font \"%s\" failed>\n", (char*)face_id);
 	
 	return result;
+}
+
+/******************************************************************************
+ * FindColors
+ ******************************************************************************/
+/*!
+ * find black and white in the colormap 
+
+ \param			: none
+ \return 		: none
+*/
+void FindColors()
+{
+	int i, l;
+	__u16 *pR, *pG, *pB, *pT;
+	__u16 iWmax=0;
+	
+	if (colormap == NULL) return;
+		
+	pR=colormap->red;
+	pG=colormap->green;
+	pB=colormap->blue;
+	pT=colormap->transp;
+	
+	iWhite=-1;
+	iBlack=-1;
+	
+	l=colormap->len;
+	for (i=0; i<l; i++)
+	{
+		// find the first black
+		if ((iBlack==-1) && (*pR==0) && (*pG==0) && (*pB==0) && (*pT==0)) iBlack=i;
+
+		// find "whitest" color
+		if ((*pR==*pG) && (*pR==*pB) && (*pT==0)) 
+		{
+			if (*pR>iWmax) iWhite=i;
+		}
+		
+//		printf("colormap idx:%d %04x %04x %04x %04x\r\n",i,*pR,*pG,*pB,*pT);
+		pR++; pG++; pB++;	pT++;
+//		if ((iBlack!=-1) && (iWhite!=-1)) break;
+	}
+	printf("TuxCalD <found black at %d, white at %d>\r\n",iBlack, iWhite);
+
+  // free colormap
+  if (colormap)
+  {
+    free(colormap->red);
+    free(colormap->green);
+    free(colormap->blue);
+    free(colormap->transp);
+    free(colormap);
+    colormap=NULL;
+	}
+}
+
+/******************************************************************************
+ * OpenFB
+ ******************************************************************************/
+/*!
+ * opens the connection to the framebuffer
+
+ \param			: none
+ \return 		: 1:OK    0:FAILED    
+*/
+int OpenFB(void)
+{
+	FT_Error error;
+
+	colormap=NULL;
+
+	// framebuffer stuff
+	if ((fbdev = open("/dev/fb/0", O_RDWR))<0)
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "open fb failed"): printf("TuxCalD <open fb failed>");
+		return 0;
+	}
+
+	// init framebuffer
+	if (ioctl(fbdev, FBIOGET_VSCREENINFO, &var_screeninfo)<0)
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "FBIOGET_VSCREENINFO"): printf("TuxCalD <FBIOGET_VSCREENINFO>");
+		close(fbdev);
+		return 0;
+	}
+
+	if (ioctl(fbdev, FBIOGET_FSCREENINFO, &fix_screeninfo)<0)
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "FBIOGET_FSCREENINFO"): printf("TuxCalD <FBIOGET_FSCREENINFO>");
+		close(fbdev);
+		return 0;
+	}
+
+	if (!(lfb = (unsigned char*)mmap(0, fix_screeninfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbdev, 0)))
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "mapping of Framebuffer failed"): printf("TuxCalD <mapping of Framebuffer failed>\n");
+		close(fbdev);
+		return 0;
+	}
+
+	// init fontlibrary
+	if ((error = FT_Init_FreeType(&library)))
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "FT_Init_FreeType failed with Errorcode 0x%.2X", error): printf("TuxCalD <FT_Init_FreeType failed with Errorcode 0x%.2X>", error);
+		munmap(lfb, fix_screeninfo.smem_len);
+		close(fbdev);
+		return 0;
+	}
+
+	if ((error = FTC_Manager_New(library, 1, 2, 0, &MyFaceRequester, NULL, &manager)))
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "FTC_Manager_New failed with Errorcode 0x%.2X", error): printf("TuxCalD <FTC_Manager_New failed with Errorcode 0x%.2X>\n", error);
+		FT_Done_FreeType(library);
+		munmap(lfb, fix_screeninfo.smem_len);
+		close(fbdev);
+		return 0;
+	}
+
+	if ((error = FTC_SBitCache_New(manager, &cache)))
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "FTC_SBitCache_New failed with Errorcode 0x%.2X", error): printf("TuxCalD <FTC_SBitCache_New failed with Errorcode 0x%.2X>\n", error);
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
+		munmap(lfb, fix_screeninfo.smem_len);
+		close(fbdev);
+		return 0;
+	}
+
+	if ((error = FTC_Manager_Lookup_Face(manager, FONT, &face)))
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "FTC_Manager_Lookup_Face failed with Errorcode 0x%.2X", error): printf("TuxCalD <FTC_Manager_Lookup_Face failed with Errorcode 0x%.2X>\n", error);
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
+		munmap(lfb, fix_screeninfo.smem_len);
+		close(fbdev);
+		return 0;
+	}
+
+	use_kerning = FT_HAS_KERNING(face);
+
+	desc.font.face_id = FONT;
+
+#ifdef OLDFT
+		desc.type = ftc_image_mono;
+#else
+		desc.flags = FT_LOAD_MONOCHROME;
+#endif
+
+	// init backbuffer
+	if (!(lbb = malloc(var_screeninfo.xres*var_screeninfo.yres)))
+	{
+		slog ? syslog(LOG_DAEMON | LOG_INFO, "allocating of Backbuffer failed"): printf("TuxCalD <allocating of Backbuffer failed>\n");
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
+		munmap(lfb, fix_screeninfo.smem_len);
+		close(fbdev);
+		return 0;
+	}
+
+	memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);
+
+	// i'm not sure if this is ok
+	sx=var_screeninfo.xoffset;
+	sy=var_screeninfo.yoffset;
+	ex=sx+var_screeninfo.xres;
+	ey=sy+var_screeninfo.yres;
+
+	// find blach or white in the colormap
+	if (disp_detect) 
+	{
+  	bps=var_screeninfo.bits_per_pixel;
+    if(fix_screeninfo.visual==FB_VISUAL_PSEUDOCOLOR)
+    {
+      colormap=(struct fb_cmap*)malloc(sizeof(struct fb_cmap));
+      colormap->red=(__u16*)malloc(sizeof(__u16)*(1<<bps));
+      colormap->green=(__u16*)malloc(sizeof(__u16)*(1<<bps));
+      colormap->blue=(__u16*)malloc(sizeof(__u16)*(1<<bps));
+      colormap->transp=(__u16*)malloc(sizeof(__u16)*(1<<bps));
+      colormap->start=0;
+      colormap->len=1<<bps;
+      if (ioctl(fbdev, FBIOGETCMAP, colormap))
+      {
+  			slog ? syslog(LOG_DAEMON | LOG_INFO, "FBIOGETCMAP failed") : printf("TuxCalD <FBIOGETCMAP failed>\n");
+				FTC_Manager_Done(manager);
+				FT_Done_FreeType(library);
+				free(lbb);
+				munmap(lfb, fix_screeninfo.smem_len);
+				close(fbdev);
+  			return 0;
+    	}
+    }
+		FindColors();	
+	}
+
+	return 1;
+}
+
+/******************************************************************************
+ * ClearScreen
+ ******************************************************************************/
+/*!
+ * clear the framebuffer
+
+ \param			: none
+ \return 		: none    
+*/
+void ClearScreen(void)
+{
+	if (iFB)
+	{
+		memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);								// clear buffer for framebuffer-writing to transparent
+		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);							// empty framebuffer
+	}
+}
+
+/******************************************************************************
+ * CloseFB
+ ******************************************************************************/
+/*!
+ * close the connection to the framebuffer
+
+ \param			: none
+ \return 		: none    
+*/
+void CloseFB(void)
+{
+	// clear the framebuffer
+	ClearScreen();
+	
+	if (iFB)
+	{
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
+		free(lbb);
+		munmap(lfb, fix_screeninfo.smem_len);
+		close(fbdev);
+	}
+	iFB=0;
 }
 
 /******************************************************************************
@@ -566,50 +808,6 @@ void RenderSObject(int sx, int sy, int color, int iType)
 				memset(lbb + startx + sx + x + var_screeninfo.xres*(starty + sy + y), color, 1);
 		}
 	}
-}
-
-/******************************************************************************
- * FindColors
- ******************************************************************************/
-/*!
- * find black and white in the colormap 
-
- \param			: none
- \return 		: none
-*/
-void FindColors()
-{
-	int i, l;
-	__u16 *pR, *pG, *pB, *pT;
-	__u16 iWmax=0;
-	
-	if (colormap == NULL) return;
-		
-	pR=colormap->red;
-	pG=colormap->green;
-	pB=colormap->blue;
-	pT=colormap->transp;
-	
-	iWhite=-1;
-	iBlack=-1;
-	
-	l=colormap->len;
-	for (i=0; i<l; i++)
-	{
-		// find the first black
-		if ((iBlack==-1) && (*pR==0) && (*pG==0) && (*pB==0) && (*pT==0)) iBlack=i;
-
-		// find "whitest" color
-		if ((*pR==*pG) && (*pR==*pB) && (*pT==0)) 
-		{
-			if (*pR>iWmax) iWhite=i;
-		}
-		
-//		printf("colormap idx:%d %04x %04x %04x %04x\r\n",i,*pR,*pG,*pB,*pT);
-		pR++; pG++; pB++;	pT++;
-//		if ((iBlack!=-1) && (iWhite!=-1)) break;
-	}
-	printf("TuxCalD <found black at %d, white at %d>\r\n",iBlack, iWhite);
 }
 
 /******************************************************************************
@@ -1450,8 +1648,8 @@ void *InterfaceThread(void *arg)
 
 			case 'C':																																	// toggle displaying the clock
 			{
-				if (show_clock=='Y') show_clock = 'N';																	// toggle the showing of the clock
-				else show_clock = 'Y';
+				if (show_clock=='Y') unlink(CLKFILE);
+				else fclose(fopen(CLKFILE, "w"));
 			} break;			
 			
 			// plugin requests version
@@ -1696,7 +1894,7 @@ void NotifyUser()
 				
 				for (i=0;i<iCntTmEvents;i++)
 				{
-					pEvt=&eventdb[iEventType[4][i]];
+					pEvt=&eventdb[iEventType[MAXCHECKDAYS+1][i]];
 					sprintf(tmp_buffer1,infotype[1][osdidx],pEvt->info);
 					strcat(tmp_buffer, tmp_buffer1);
 				}
@@ -1727,7 +1925,7 @@ void NotifyUser()
   			
 				// check events/birthdays/holidays for max. three days
   			int k;
-  			for (k=1;k<=3;k++)
+  			for (k=1;k<=MAXCHECKDAYS;k++)
   			{
   				if (iCntEvents[k])																	
 	  			{
@@ -1897,8 +2095,7 @@ void SigHandler(int signal)
 		case SIGTERM:
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "shutdown") : printf("TuxCalD <shutdown>\n");
 			online = 0;																															// no longer online
-			memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);								// clear buffer for framebuffer-writing to transparent
-			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);							// empty framebuffer
+			ClearScreen();
 			intervall = 0;																													// let the daemon end
 			break;
 
@@ -1907,8 +2104,7 @@ void SigHandler(int signal)
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "update") : printf("TuxCalD <update>\n");
 			int iOnlineTmp = online;
 			online = 0;																															// stop output now
-			memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);								// clear buffer for framebuffer-writing to transparent
-			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);							// empty framebuffer
+			ClearScreen();
 			ReadConf();																															// load configuration
 			LoadDatabase();																													// load database
 			oldyear = 0;																														// initiate no read of database
@@ -1923,17 +2119,15 @@ void SigHandler(int signal)
 			
 		case SIGUSR2:
 			online = 0;																															// no longer online
-			memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);								// clear buffer for framebuffer-writing to transparent
-			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);							// empty framebuffer
+			ClearScreen();
 			if(slog) syslog(LOG_DAEMON | LOG_INFO, "sleep");
 			else printf("TuxCalD <sleep>\n");
 			break;
 
 		case SIGALRM:
-			if (show_clock=='Y') show_clock = 'N';																	// toggle the showing of the clock
-			else show_clock = 'Y';
-			memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);								// clear buffer for framebuffer-writing to transparent
-			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);							// empty framebuffer
+			ClearScreen();
+			if (show_clock=='Y') unlink(CLKFILE);
+			else fclose(fopen(CLKFILE, "w"));
 			if (slog) syslog(LOG_DAEMON | LOG_INFO, "show/hide the clock");
 			else printf("TuxCalD <show/hide the clock>\n");
 			break;	
@@ -1945,12 +2139,11 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.05 $";
+	char cvs_revision[] = "$Revision: 1.06 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
-	FT_Error error;
-
+	
 	sscanf(cvs_revision, "%*s %s", versioninfo_d);
 
 	// check commandline parameter
@@ -2002,119 +2195,6 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
-	// read, update or create config
-	ReadConf();																							// read actual config
-	WriteConf();																						// write actual config back to file
-
-	// startdelay
-	if (!nodelay)	sleep(startdelay);
-
-	// framebuffer stuff
-	if ((fbdev = open("/dev/fb/0", O_RDWR))<0)
-	{
-		printf("TuxCalD <open fb failed>");
-		return 1;
-	}
-
-	// init framebuffer
-	if (ioctl(fbdev, FBIOGET_VSCREENINFO, &var_screeninfo)<0)
-	{
-		printf("TuxCalD <FBIOGET_VSCREENINFO>");
-		return 1;
-	}
-
-	if (ioctl(fbdev, FBIOGET_FSCREENINFO, &fix_screeninfo)<0)
-	{
-		printf("TuxCalD <FBIOGET_FSCREENINFO>");
-		return 1;
-	}
-
-/*
-	if (ioctl(fbdev, FBIOGETCMAP, cmap))
-	{
-		printf("TuxCalD <FBIOGETCMAP failed>\n");
-		return 1;
-	}
-*/
-
-	if (!(lfb = (unsigned char*)mmap(0, fix_screeninfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbdev, 0)))
-	{
-		printf("TuxCalD <mapping of Framebuffer failed>\n");
-		return 1;
-	}
-
-	// init fontlibrary
-	if ((error = FT_Init_FreeType(&library)))
-	{
-		printf("TuxCalD <FT_Init_FreeType failed with Errorcode 0x%.2X>", error);
-		munmap(lfb, fix_screeninfo.smem_len);
-		return 1;
-	}
-
-	if ((error = FTC_Manager_New(library, 1, 2, 0, &MyFaceRequester, NULL, &manager)))
-	{
-		printf("TuxCalD <FTC_Manager_New failed with Errorcode 0x%.2X>\n", error);
-		FT_Done_FreeType(library);
-		munmap(lfb, fix_screeninfo.smem_len);
-		return 1;
-	}
-
-	if ((error = FTC_SBitCache_New(manager, &cache)))
-	{
-		printf("TuxCalD <FTC_SBitCache_New failed with Errorcode 0x%.2X>\n", error);
-		FTC_Manager_Done(manager);
-		FT_Done_FreeType(library);
-		munmap(lfb, fix_screeninfo.smem_len);
-		return 1;
-	}
-
-	if ((error = FTC_Manager_Lookup_Face(manager, FONT, &face)))
-	{
-		printf("TuxCalD <FTC_Manager_Lookup_Face failed with Errorcode 0x%.2X>\n", error);
-		FTC_Manager_Done(manager);
-		FT_Done_FreeType(library);
-		munmap(lfb, fix_screeninfo.smem_len);
-		return 1;
-	}
-
-	use_kerning = FT_HAS_KERNING(face);
-
-	desc.font.face_id = FONT;
-
-#ifdef OLDFT
-		desc.type = ftc_image_mono;
-#else
-		desc.flags = FT_LOAD_MONOCHROME;
-#endif
-
-	// init backbuffer
-	if (!(lbb = malloc(var_screeninfo.xres*var_screeninfo.yres)))
-	{
-		printf("TuxCalD <allocating of Backbuffer failed>\n");
-		FTC_Manager_Done(manager);
-		FT_Done_FreeType(library);
-		munmap(lfb, fix_screeninfo.smem_len);
-		return 1;
-	}
-
-	memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);
-
-/*
-	printf("TuxCalD <screen real %d*%d, virtual %d*%d, height:%d width: %d>\n",
-	       var_screeninfo.xres, var_screeninfo.yres,
-	       var_screeninfo.xres_virtual, var_screeninfo.yres_virtual,
-	       var_screeninfo.height,var_screeninfo.width );
-*/
-	// i'm not sure if this is ok
-	sx=var_screeninfo.xoffset;
-	sy=var_screeninfo.yoffset;
-	ex=sx+var_screeninfo.xres;
-	ey=sy+var_screeninfo.yres;
-
-	// read the dates and times
-	LoadDatabase();																					// load database
-	ReadSTimer();																						// read the timers for fixed signaling
-	
 	// check for running daemon
 	if ((fd_pid = fopen(PIDFILE, "r+")))
 	{
@@ -2179,32 +2259,28 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	// read, update or create config
+	ReadConf();																							// read actual config
+	WriteConf();																						// write actual config back to file
 
-	// find blach or white in the colormap
-	if (disp_detect) 
-	{
-  	bps=var_screeninfo.bits_per_pixel;
-    if(fix_screeninfo.visual==FB_VISUAL_PSEUDOCOLOR)
-    {
-      colormap=(struct fb_cmap*)malloc(sizeof(struct fb_cmap));
-      colormap->red=(__u16*)malloc(sizeof(__u16)*(1<<bps));
-      colormap->green=(__u16*)malloc(sizeof(__u16)*(1<<bps));
-      colormap->blue=(__u16*)malloc(sizeof(__u16)*(1<<bps));
-      colormap->transp=(__u16*)malloc(sizeof(__u16)*(1<<bps));
-      colormap->start=0;
-      colormap->len=1<<bps;
-      if (ioctl(fbdev, FBIOGETCMAP, colormap))
-      {
-  			slog ? syslog(LOG_DAEMON | LOG_INFO, "Interface-Thread failed") : printf("TuxCalD <FBIOGETCMAP failed>\n");
-  			return 1;
-    	}
-    }
-		FindColors();	
-	}
+	// startdelay
+	if (!nodelay)	sleep(startdelay);
+
+	// read the dates and times
+	LoadDatabase();																					// load database
+	ReadSTimer();																						// read the timers for fixed signaling
 	
 	// we are online now
 	online=1;
 	show_clock=show_clockatstart;
+	unlink(CLKFILE);
+	if (show_clock == 'Y')
+	{
+		// open connection to framebuffer
+		iFB=OpenFB();
+		if (!iFB) show_clock = 'N';
+		else fclose(fopen(CLKFILE, "w"));
+	}
 		
 	// definitions for some variables
 	char info[MAXCLOCKINFOLEN];														// storage for clock/date output
@@ -2240,8 +2316,29 @@ int main(int argc, char **argv)
 				if (disp_back==2)  iBG=iWhite;
 			}
 			
+			//------------------- part for controlling the clock		
+			if ((iFB) && (disp_clock=='Y') && (show_clock=='Y'))					// should we display the clock
+			{
+				FILE* pipe;
+				pipe = fopen(CLKFILE,"r");
+				if (pipe == NULL) show_clock='N';
+				else fclose(pipe);
+			}
+			else if (disp_clock=='Y')
+			{
+				FILE* pipe;
+				pipe = fopen(CLKFILE,"r");
+				if (pipe != NULL)
+				{
+					if (!iFB) iFB=OpenFB();
+					if (iFB) show_clock = 'Y';
+					fclose(pipe);
+				}
+				else show_clock = 'N';
+			}
+			
 			//------------------- part for showing the clock		
-			if ((disp_clock=='Y') && (show_clock=='Y'))					// should we display the clock
+			if ((iFB) && (disp_clock=='Y') && (show_clock=='Y'))					// should we display the clock
 			{				
 				char line[10];
 				if (disp_mail=='Y')
@@ -2383,31 +2480,19 @@ int main(int argc, char **argv)
 	// cleanup
 	pthread_cancel(thread_id);
 	pthread_join(thread_id, thread_result);
-
-  // free colormap
-  if (colormap)
-  {
-    free(colormap->red);
-    free(colormap->green);
-    free(colormap->blue);
-    free(colormap->transp);
-    free(colormap);
-	}
 	
-	FTC_Manager_Done(manager);
-	FT_Done_FreeType(library);
-	free(lbb);
-	munmap(lfb, fix_screeninfo.smem_len);
-		
+	// close connection to framebuffer
+	CloseFB();	
+	
 	unlink(PIDFILE);
-
+	unlink(SCKFILE);
+	
 	time(&tt);
 	strftime(timeinfo, 22, "%d.%m.%Y - %T", localtime(&tt));
 
 	slog ? syslog(LOG_DAEMON | LOG_INFO, "%s closed [%s]", versioninfo_d, timeinfo) : printf("TuxCalD %s closed [%s]\n", versioninfo_d, timeinfo);
 
 	closelog();
-
 
 	return 0;
 }

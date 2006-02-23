@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.h,v $
+ * Revision 1.05  2006/02/23 23:08:41  robspr1
+ * - signal up to 5 days, toggle clock-display file
+ *
  * Revision 1.04  2006/02/18 14:57:46  robspr1
  * add signaling at fixed times, some small fixes
  *
@@ -81,6 +84,7 @@
 #define CFGFILE "tuxcal.conf"													//! config-file
 #define EVTFILE "tuxcal.list"													//! database-file
 #define PIDFILE "/tmp/tuxcald.pid"										//! PID file
+#define CLKFILE "/tmp/tuxcal.clk"											//! clock file
 #define NOTIFILE "/tmp/tuxmail.new"										//! notify from tuxmail
 #define SNDFILE1 "tuxcal_birthday.wav"								//! birthday sound
 #define SNDFILE2 "tuxcal_event.wav"										//! event sound
@@ -165,11 +169,21 @@ char *http_br = {"**************************************************%0A"};
 char *http_br = {"**********************************%0A"};
 #endif
 
+//----------------------------------------------------
+// defines for database
+#define MAXINFOLEN				80
+#define MAXENTRYS					500
+#define MAXCHECKS					10
+#define MAXCHECKDAYS			5
+#define MAXSTIMER					5
+
 char *http_ln = {"%0A"};
-char *http_lines[][MAXOSD] = {
+char *http_lines[MAXCHECKDAYS+1][MAXOSD] = {
 	{"*** Heute am %d. %s %d ***%%0A"					,"*** Today at %s, %d %d ***%%0A"},
 	{"*** Morgen am %d. %s %d ***%%0A"				,"*** Tomorrow at %s, %d %d ***%%0A"},
 	{"*** In zwei Tagen am %d. %s %d ***%%0A" ,"*** in two days at %s, %d %d ***%%0A"},
+	{"*** In drei Tagen am %d. %s %d ***%%0A" ,"*** in three days at %s, %d %d ***%%0A"},
+	{"*** In vier Tagen am %d. %s %d ***%%0A" ,"*** in four days at %s, %d %d ***%%0A"},
 	{"*** Jetzt um %02d:%02d ***%%0A"				,"*** Now at %02d:%02d ***%%0A"}
 };
 
@@ -293,14 +307,6 @@ struct WAVEHEADER
 
 //----------------------------------------------------
 //----------------------------------------------------
-// defines for database
-#define MAXINFOLEN				80
-#define MAXENTRYS					500
-#define MAXCHECKS					10
-#define MAXCHECKDAYS			3
-#define MAXSTIMER					5
-
-//----------------------------------------------------
 #define DAEMON_ON_NOSIGNAL		0
 #define DAEMON_ON_SIGNAL			1
 #define DAEMON_OFF						2
@@ -335,6 +341,7 @@ int iCntTmEvents;														//! found events at this minute
 STIMER tSignal[MAXSTIMER];									//! signal at certain times
 int nEditStyle = 1;													//! style for editing (RC, KB)
 char online;																//! are we connected to the daemon
+int iFB = 0;																//! is the framebuffer ok?
 char timeinfo[22];													//! string for time
 char versioninfo_d[12] = "?.??";						//! daemon version
 
