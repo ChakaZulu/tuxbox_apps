@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.cpp,v 1.7 2005/12/26 20:48:58 mws Exp $
+ * $Id: descriptor_container.cpp,v 1.8 2006/02/23 19:12:41 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -42,6 +42,7 @@
 #include <dvbsi++/descriptor_container.h>
 #include <dvbsi++/descriptor_tag.h>
 #include <dvbsi++/dii_location_descriptor.h>
+#include <dvbsi++/dsng_descriptor.h>
 #include <dvbsi++/dts_descriptor.h>
 #include <dvbsi++/dvb_html_application_boundary_descriptor.h>
 #include <dvbsi++/dvb_html_application_descriptor.h>
@@ -96,6 +97,7 @@
 #include <dvbsi++/time_shifted_service_descriptor.h>
 #include <dvbsi++/time_slice_fec_identifier_descriptor.h>
 #include <dvbsi++/transport_protocol_descriptor.h>
+#include <dvbsi++/transport_stream_descriptor.h>
 #include <dvbsi++/tva_id_descriptor.h>
 #include <dvbsi++/type_descriptor.h>
 #include <dvbsi++/unknown_descriptor.h>
@@ -374,6 +376,12 @@ void DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool back)
 		break;
 	case EXTENSION_DESCRIPTOR:
 		(descriptorList.*pushFunc)(new ExtensionDescriptor(buffer));
+		break;
+	case TRANSPORT_STREAM_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new TransportStreamDescriptor(buffer));
+		break;
+	case DSNG_DESCRIPTOR:
+		(descriptorList.*pushFunc)(new DSNGDescriptor(buffer));
 		break;
 	default:
 		(descriptorList.*pushFunc)(new UnknownDescriptor(buffer));

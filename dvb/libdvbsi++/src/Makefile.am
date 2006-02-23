@@ -46,6 +46,7 @@ libdvbsi___la_SOURCES = \
 	descriptor.cpp \
 	descriptor_container.cpp \
 	dii_location_descriptor.cpp \
+	dsng_descriptor.cpp \
 	dts_descriptor.cpp \
 	dvb_html_application_boundary_descriptor.cpp \
 	dvb_html_application_descriptor.cpp \
@@ -112,6 +113,8 @@ libdvbsi___la_SOURCES = \
 	time_shifted_service_descriptor.cpp \
 	time_slice_fec_identifier_descriptor.cpp \
 	transport_protocol_descriptor.cpp \
+	transport_stream_descriptor.cpp \
+	transport_stream_description_section.cpp \
 	tva_id_descriptor.cpp \
 	type_descriptor.cpp \
 	unknown_descriptor.cpp \

@@ -44,6 +44,7 @@ pkginclude_HEADERS = \
 	descriptor.h \
 	descriptor_tag.h \
 	dii_location_descriptor.h \
+	dsng_descriptor.h \
 	dts_descriptor.h \
 	dvb_html_application_boundary_descriptor.h \
 	dvb_html_application_descriptor.h \
@@ -114,6 +115,8 @@ pkginclude_HEADERS = \
 	time_shifted_service_descriptor.h \
 	time_slice_fec_identifier_descriptor.h \
 	transport_protocol_descriptor.h \
+	transport_stream_descriptor.h \
+	transport_stream_description_section.h \
 	tva_id_descriptor.h \
 	type_descriptor.h \
 	unknown_descriptor.h \
