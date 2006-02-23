@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.c,v $
+ * Revision 1.05  2006/02/23 23:07:25  robspr1
+ * - change SKIN2, signal up to 5 days, toggle clock-display file
+ *
  * Revision 1.04  2006/02/18 14:57:13  robspr1
  * add signaling at fixed times, some small fixes
  *
@@ -184,9 +187,6 @@ void ReadConf()
 	if (!startdelay) startdelay = 30;												// default 30 seconds delay
 	if (!intervall) intervall = 1;													// default check every 1 second
 
-	if ((sigtype<1) || (sigtype>3)) sigtype=1;							// default only this day
-	if ((sigmode<0) || (sigmode>3)) sigmode=0;							// default only events and birthdays
-	
 	// we have different skins
 	if (skin != 1 && skin != 2 && skin != 3)
 	{
@@ -1041,13 +1041,13 @@ int* PaintEdit(EVT_DB* pEvt, int iEditLine, int iEditCol)
 	int* pIEdit=NULL;
 	
 	// background (just for testing)
-	RenderBox(0, 0, MAXSCREEN_X, MAXSCREEN_Y, FILL, GREY);
+	// RenderBox(0, 0, MAXSCREEN_X, MAXSCREEN_Y, FILL, GREY);
   // sprintf(info,"%d %d %d %d %d %d",last,start,end,akt,sel,infolines);
   // RenderString(info,0,GRIDLINE-2,MAXSCREEN_X-4, LEFT, SMALL, GREY);
   // return;
 	
 	// header (paint date)
-	RenderBox(0, 0, MAXSCREEN_X,GRIDLINE, FILL, LBLUE);
+	RenderBox(0, 0, MAXSCREEN_X,GRIDLINE, FILL, SKIN3);
 	RenderBox(0, 0, MAXSCREEN_X,GRIDLINE, GRID, SKIN2);
 	RenderBox(MAXSCREEN_X/2, 0, MAXSCREEN_X/2,GRIDLINE, GRID, SKIN2);
 	if (osdidx == 0) sprintf(info,"%u. %s %u",tShow_day,monthmsg[tShow_mon-1][osdidx],tShow_year);
@@ -1184,7 +1184,7 @@ int* PaintEdit(EVT_DB* pEvt, int iEditLine, int iEditCol)
 	}
 	
 	// footer (paint buttons, function-keys)
-	RenderBox(0, EDITFOOTER_Y, MAXSCREEN_X,MAXSCREEN_Y, FILL, LBLUE);
+	RenderBox(0, EDITFOOTER_Y, MAXSCREEN_X,MAXSCREEN_Y, FILL, SKIN3);
 	RenderBox(0, EDITFOOTER_Y, MAXSCREEN_X,MAXSCREEN_Y, GRID, SKIN2);
 	for ( y = 0; y < 4; y++ )
 	{
@@ -1685,7 +1685,7 @@ void PaintGrid(int last, int start, int end, int akt, int sel, int infolines, in
   // return;
 	
 	// header (paint date and time)
-	RenderBox(0, 0, MAXSCREEN_X,GRIDLINE, FILL, LBLUE);
+	RenderBox(0, 0, MAXSCREEN_X,GRIDLINE, FILL, SKIN3);
 	RenderBox(0, 0, MAXSCREEN_X,GRIDLINE, GRID, SKIN2);
 	RenderBox(MAXSCREEN_X/2, 0, MAXSCREEN_X/2,GRIDLINE, GRID, SKIN2);
 	strftime(info,80,infomsg[DATE][osdidx],at);
@@ -1716,11 +1716,11 @@ void PaintGrid(int last, int start, int end, int akt, int sel, int infolines, in
 			t=GRIDCAL+y*cy;
 			
 			// fill background depending on type of day
-			if (iCnt==akt) 													RenderBox(l, t, r, b, FILL, LRED);		// actual day
-			else if (iCnt==sel)											RenderBox(l, t, r, b, FILL, ORANGE);	// selected day
-			else if ((iCnt<start) || (iCnt>end))		RenderBox(l, t, r, b, FILL, GREY);		// day outside month
-			else if (x>4)														RenderBox(l, t, r, b, FILL, GREEN);		// saturday or sunday
-			else 																		RenderBox(l, t, r, b, FILL, YELLOW);	// all other days
+			if (iCnt==akt) 													RenderBox(l, t, r, b, FILL, DAY1);		// actual day
+			else if (iCnt==sel)											RenderBox(l, t, r, b, FILL, DAY2);		// selected day
+			else if ((iCnt<start) || (iCnt>end))		RenderBox(l, t, r, b, FILL, DAY3);		// day outside month
+			else if (x>4)														RenderBox(l, t, r, b, FILL, DAY4);		// saturday or sunday
+			else 																		RenderBox(l, t, r, b, FILL, DAY5);	 // all other days
 
 			// draw border around the day
 			if (iCnt==sel)	RenderBox(l, t, r, b, GRID, SKIN1);
@@ -1805,7 +1805,7 @@ void PaintGrid(int last, int start, int end, int akt, int sel, int infolines, in
 	if (infolines)
 	{
 		// paint selected date and info-lines
-		RenderBox(0, GRIDCAL+GRIDBOX_CY2, MAXSCREEN_X,GRIDCAL+GRIDBOX_CY2+GRIDLINE_INFO, FILL, LBLUE);
+		RenderBox(0, GRIDCAL+GRIDBOX_CY2, MAXSCREEN_X,GRIDCAL+GRIDBOX_CY2+GRIDLINE_INFO, FILL, SKIN3);
 		RenderBox(0, GRIDCAL+GRIDBOX_CY2, MAXSCREEN_X,GRIDCAL+GRIDBOX_CY2+GRIDLINE_INFO, GRID, SKIN2);
 
 		iEvt=IsEvent(tShow_day,tShow_mon,tShow_year);
@@ -1902,7 +1902,7 @@ void PaintGrid(int last, int start, int end, int akt, int sel, int infolines, in
 	}
 		
 	// footer 
-	RenderBox(0, MAXSCREEN_Y-GRIDLINE_SMALL, MAXSCREEN_X,MAXSCREEN_Y, FILL, LBLUE);
+	RenderBox(0, MAXSCREEN_Y-GRIDLINE_SMALL, MAXSCREEN_X,MAXSCREEN_Y, FILL, SKIN3);
 	RenderBox(0, MAXSCREEN_Y-GRIDLINE_SMALL, MAXSCREEN_X,MAXSCREEN_Y, GRID, SKIN2); 
 	
 	if (infolines)
@@ -2627,7 +2627,7 @@ void SaveDatabase(void)
 */
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.04 $";
+	char cvs_revision[] = "$Revision: 1.05 $";
 	FILE *fd_run;
 	FT_Error error;
 
@@ -2808,7 +2808,7 @@ void plugin_exec(PluginParam *par)
 	int iActDayPos=0;
 	int year,mon;	
 	int oldyear=0;
-	
+	int iChanged=0;	
 	rccode = 0;
 	
 	
@@ -2920,6 +2920,7 @@ void plugin_exec(PluginParam *par)
 							{
 								memcpy(&eventdb[iEventType[iSelInfo-1]],&evt,sizeof(evt));
 								SaveDatabase();
+								iChanged=1;
 							}
 						}
 					}
@@ -2945,6 +2946,7 @@ void plugin_exec(PluginParam *par)
 						{
 							eventdb[iEventType[iSelInfo-1]].type=UNUSED;
 							SaveDatabase();
+							iChanged=1;
 						}
 					}
 				}
@@ -2974,6 +2976,7 @@ void plugin_exec(PluginParam *par)
 							eventdb[iCntEntries].hour=-1;
 							strcpy(eventdb[iCntEntries].info,infomsg1[0][osdidx]);
 							SaveDatabase();
+							iChanged=1;
 							iSelInfo=255;		
 						}
 				}
@@ -2996,6 +2999,7 @@ void plugin_exec(PluginParam *par)
 							{
 								memcpy(&eventdb[iEventType[iSelInfo-1]],&evt,sizeof(evt));
 								SaveDatabase();
+								iChanged=1;
 							}
 						}
 					}
@@ -3058,8 +3062,8 @@ void plugin_exec(PluginParam *par)
 	}
 	while (rccode != RC_HOME);
 
-	// signal daemon to reread the database
-	ControlDaemon(RELOAD_DB);														
+	// signal daemon to reread the database if something changed
+	if (iChanged) ControlDaemon(RELOAD_DB);														
 
 	// cleanup
 	FTC_Manager_Done(manager);
