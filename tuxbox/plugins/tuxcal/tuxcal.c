@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.c,v $
+ * Revision 1.06  2006/02/24 08:13:29  robspr1
+ * - bugfix Editor background
+ *
  * Revision 1.05  2006/02/23 23:07:25  robspr1
  * - change SKIN2, signal up to 5 days, toggle clock-display file
  *
@@ -29,9 +32,6 @@
  *
  * Revision 1.02  2006/02/15 19:11:33  robspr1
  * first version in CVS
- *
- * Revision 1.02  2006/02/12 23:10:00  robspr1
- * - bugfix edit event
  *
  * Revision 1.01  2006/02/12 23:10:00  robspr1
  * - bugfix reading params POS_X and POS_Y (needed by the daemon)
@@ -1041,7 +1041,7 @@ int* PaintEdit(EVT_DB* pEvt, int iEditLine, int iEditCol)
 	int* pIEdit=NULL;
 	
 	// background (just for testing)
-	// RenderBox(0, 0, MAXSCREEN_X, MAXSCREEN_Y, FILL, GREY);
+	RenderBox(0, 0, MAXSCREEN_X, MAXSCREEN_Y, FILL, GREY);
   // sprintf(info,"%d %d %d %d %d %d",last,start,end,akt,sel,infolines);
   // RenderString(info,0,GRIDLINE-2,MAXSCREEN_X-4, LEFT, SMALL, GREY);
   // return;
@@ -2627,7 +2627,7 @@ void SaveDatabase(void)
 */
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.05 $";
+	char cvs_revision[] = "$Revision: 1.06 $";
 	FILE *fd_run;
 	FT_Error error;
 
@@ -3062,8 +3062,8 @@ void plugin_exec(PluginParam *par)
 	}
 	while (rccode != RC_HOME);
 
-	// signal daemon to reread the database if something changed
-	if (iChanged) ControlDaemon(RELOAD_DB);														
+	// signal daemon to reread the database
+	ControlDaemon(RELOAD_DB);														
 
 	// cleanup
 	FTC_Manager_Done(manager);
