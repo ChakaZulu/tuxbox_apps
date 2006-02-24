@@ -1,6 +1,9 @@
 /******************************************************************************
  * definitions for plugin and lib                                             *
  ******************************************************************************/
+#ifndef TUXTXT_DEF_H
+
+#define TUXTXT_DEF_h
 #ifdef HAVE_DREAMBOX_HARDWARE
  #define TUXTXT_COMPRESS 1 // compress page data: 0 no compression, 1 with zlib, 2 with own algorithm
 #else
@@ -25,6 +28,127 @@
 
 #define PAGESIZE (40*25)
 
+/* spacing attributes */
+#define alpha_black         0x00
+#define alpha_red           0x01
+#define alpha_green         0x02
+#define alpha_yellow        0x03
+#define alpha_blue          0x04
+#define alpha_magenta       0x05
+#define alpha_cyan          0x06
+#define alpha_white         0x07
+#define flash               0x08
+#define steady              0x09
+#define end_box             0x0A
+#define start_box           0x0B
+#define normal_size         0x0C
+#define double_height       0x0D
+#define double_width        0x0E
+#define double_size         0x0F
+#define mosaic_black        0x10
+#define mosaic_red          0x11
+#define mosaic_green        0x12
+#define mosaic_yellow       0x13
+#define mosaic_blue         0x14
+#define mosaic_magenta      0x15
+#define mosaic_cyan         0x16
+#define mosaic_white        0x17
+#define conceal             0x18
+#define contiguous_mosaic   0x19
+#define separated_mosaic    0x1A
+#define esc                 0x1B
+#define black_background    0x1C
+#define new_background      0x1D
+#define hold_mosaic         0x1E
+#define release_mosaic      0x1F
+
+typedef enum /* object type */
+{
+	OBJ_PASSIVE,
+	OBJ_ACTIVE,
+	OBJ_ADAPTIVE
+} tObjType;
+
+const char *ObjectSource[] =
+{
+	"(illegal)",
+	"Local",
+	"POP",
+	"GPOP"
+};
+const char *ObjectType[] =
+{
+	"Passive",
+	"Active",
+	"Adaptive",
+	"Passive"
+};
+
+enum
+{
+	NAT_DEFAULT = 0,
+	NAT_CZ = 1,
+	NAT_UK = 2,
+	NAT_ET = 3,
+	NAT_FR = 4,
+	NAT_DE = 5,
+	NAT_IT = 6,
+	NAT_LV = 7,
+	NAT_PL = 8,
+	NAT_SP = 9,
+	NAT_RO = 10,
+	NAT_SR = 11,
+	NAT_SW = 12,
+	NAT_TR = 13,
+	NAT_MAX_FROM_HEADER = 13,
+	NAT_RU = 14,
+	NAT_GR = 15
+};
+const unsigned char countryconversiontable[] = { NAT_UK, NAT_DE, NAT_SW, NAT_IT, NAT_FR, NAT_SP, NAT_CZ, NAT_RO};
+/* tables for color table remapping, first entry (no remapping) skipped, offsets for color index */
+const unsigned char MapTblFG[] = {  0,  0,  8,  8, 16, 16, 16 };
+const unsigned char MapTblBG[] = {  8, 16,  8, 16,  8, 16, 24 };
+const unsigned short tuxtxt_defaultcolors[] =	/* 0x0bgr */
+{
+	0x000, 0x00f, 0x0f0, 0x0ff, 0xf00, 0xf0f, 0xff0, 0xfff,
+	0x000, 0x007, 0x070, 0x077, 0x700, 0x707, 0x770, 0x777,
+	0x50f, 0x07f, 0x7f0, 0xbff, 0xac0, 0x005, 0x256, 0x77c,
+	0x333, 0x77f, 0x7f7, 0x7ff, 0xf77, 0xf7f, 0xff7, 0xddd,
+	0x420, 0x210, 0x420, 0x000, 0x000
+};
+
+
+/* colortable */
+enum
+{
+	black = 0,
+	red, /* 1 */
+	green, /* 2 */
+	yellow, /* 3 */
+	blue,	/* 4 */
+	magenta,	/* 5 */
+	cyan,	/* 6 */
+	white, /* 7 */
+	menu1 = (4*8),
+	menu2,
+	menu3,
+	transp,
+	transp2,
+	SIZECOLTABLE
+};
+
+enum /* options for charset */
+{
+	C_G0P = 0, /* primary G0 */
+	C_G0S, /* secondary G0 */
+	C_G1C, /* G1 contiguous */
+	C_G1S, /* G1 separate */
+	C_G2,
+	C_G3,
+	C_OFFSET_DRCS = 32
+	/* 32..47: 32+subpage# GDRCS (offset/20 in page_char) */
+	/* 48..63: 48+subpage#  DRCS (offset/20 in page_char) */
+};
 
 enum /* page function */
 {
@@ -42,6 +166,27 @@ enum /* page function */
 	FUNC_MPTEX, /* Multi-page extension table (MPT-EX) } */
 	FUNC_TRIGGER /* Page contain trigger messages defined according to [8] */
 };
+/* struct for page attributes */
+typedef struct
+{
+	unsigned char fg      :6; /* foreground color */
+	unsigned char bg      :6; /* background color */
+	unsigned char charset :6; /* see enum above */
+	unsigned char doubleh :1; /* double height */
+	unsigned char doublew :1; /* double width */
+	/* ignore at Black Background Color Substitution */
+	/* black background set by New Background ($1d) instead of start-of-row default or Black Backgr. ($1c) */
+	/* or black background set by level 2.5 extensions */
+	unsigned char IgnoreAtBlackBgSubst:1;
+	unsigned char concealed:1; /* concealed information */
+	unsigned char inverted :1; /* colors inverted */
+	unsigned char flashing :5; /* flash mode */
+	unsigned char diacrit  :4; /* diacritical mark */
+	unsigned char underline:1; /* Text underlined */
+	unsigned char boxwin   :1; /* Text boxed/windowed */
+	unsigned char setX26   :1; /* Char is set by packet X/26 (no national subset used) */
+	unsigned char setG0G2  :7; /* G0+G2 set designation  */
+} tstPageAttr;
 
 
 /* struct for (G)POP/(G)DRCS links for level 2.5, allocated at reception of p27/4 or /5, initialized with 0 after allocation */
@@ -122,10 +267,122 @@ typedef struct
 	tstExtData *astP29[9];
 	/* cachetable */
 	tstCachedPage *astCachetable[0x900][0x80];
-
 	pthread_t thread_id;
 	void *thread_result;
+	unsigned char FullRowColor[25];
+	unsigned char FullScrColor;
+	unsigned char tAPx, tAPy;	/* temporary offset to Active Position for objects */
+	short pop, gpop, drcs, gdrcs;
+	int national_subset, national_subset_secondary;
+	unsigned short *colortable;
 } tuxtxt_cache_struct;
+
+// G2 Charset (0 = Latin, 1 = Cyrillic, 2 = Greek)
+const unsigned short int G2table[3][6*16] =
+{
+	{ ' ' ,'¡' ,'¢' ,'£' ,'$' ,'¥' ,'#' ,'§' ,'¤' ,'\'','\"','«' ,8592,8594,8595,8593,
+	  '°' ,'±' ,'²' ,'³' ,'x' ,'µ' ,'¶' ,'·' ,'÷' ,'\'','\"','»' ,'¼' ,'½' ,'¾' ,'¿' ,
+	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
+	  '­' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,' ' ,' ' ,' ' ,8539,8540,8541,8542,
+	  937 ,'Æ' ,272 ,'ª' ,294 ,' ' ,306 ,319 ,321 ,'Ø' ,338 ,'º' ,'Þ' ,358 ,330 ,329 ,
+	  1082,'æ' ,273 ,'ð' ,295 ,305 ,307 ,320 ,322 ,'ø' ,339 ,'ß' ,'þ' ,359 ,951 ,0x7F},
+	{ ' ' ,'¡' ,'¢' ,'£' ,'$' ,'¥' ,' ' ,'§' ,' ' ,'\'','\"','«' ,8592,8594,8595,8593,
+	  '°' ,'±' ,'²' ,'³' ,'x' ,'µ' ,'¶' ,'·' ,'÷' ,'\'','\"','»' ,'¼' ,'½' ,'¾' ,'¿' ,
+	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
+	  '­' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,321 ,322 ,'ß' ,8539,8540,8541,8542,
+	  'D' ,'E' ,'F' ,'G' ,'I' ,'J' ,'K' ,'L' ,'N' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Z' ,
+	  'd' ,'e' ,'f' ,'g' ,'i' ,'j' ,'k' ,'l' ,'n' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'z' },
+	{ ' ' ,'a' ,'b' ,'£' ,'e' ,'h' ,'i' ,'§' ,':' ,'\'','\"','k' ,8592,8594,8595,8593,
+	  '°' ,'±' ,'²' ,'³' ,'x' ,'m' ,'n' ,'p' ,'÷' ,'\'','\"','t' ,'¼' ,'½' ,'¾' ,'x' ,
+	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
+	  '?' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,906 ,910 ,911 ,8539,8540,8541,8542,
+	  'C' ,'D' ,'F' ,'G' ,'J' ,'L' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Y' ,'Z' ,902 ,905 ,
+	  'c' ,'d' ,'f' ,'g' ,'j' ,'l' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'y' ,'z' ,904 ,0x7F}
+};
+// cyrillic G0 Charset
+// TODO: different maps for serbian/russian/ukrainian
+const unsigned short int G0tablecyrillic[6*16] =
+{
+	  ' ' ,'!' ,'\"','#' ,'$' ,'%' ,'&' ,'\'','(' ,')' ,'*' ,'+' ,',' ,'-' ,'.' ,'/' ,
+	  '0' ,'1' ,'2' ,'3' ,'4' ,'5' ,'6' ,'7' ,'8' ,'9' ,':' ,';' ,'<' ,'=' ,'>' ,'?' ,
+	  1063,1040,1041,1062,1044,1045,1060,1043,1061,1048,1032,1050,1051,1052,1053,1054,
+	  1055,1036,1056,1057,1058,1059,1042,1027,1033,1034,1047,1035,1046,1026,1064,1119,
+	  1095,1072,1073,1094,1076,1077,1092,1075,1093,1080,1112,1082,1083,1084,1085,1086,
+	  1087,1116,1088,1089,1090,1091,1074,1107,1113,1114,1079,1115,1078,1106,1096,0x7F
+};
+
+const unsigned short int nationaltable23[14][2] =
+{
+	{ '#', '¤' }, /* 0          */
+	{ '#', 367 }, /* 1  CS/SK   */
+	{ '£', '$' }, /* 2    EN    */
+	{ '#', 'õ' }, /* 3    ET    */
+	{ 'é', 'ï' }, /* 4    FR    */
+	{ '#', '$' }, /* 5    DE    */
+	{ '£', '$' }, /* 6    IT    */
+	{ '#', '$' }, /* 7  LV/LT   */
+	{ '#', 329 }, /* 8    PL    */
+	{ 'ç', '$' }, /* 9  PT/ES   */
+	{ '#', '¤' }, /* A    RO    */
+	{ '#', 'Ë' }, /* B SR/HR/SL */
+	{ '#', '¤' }, /* C SV/FI/HU */
+	{ '£', 287 }, /* D    TR   ? */
+};
+const unsigned short int nationaltable40[14] =
+{
+	'@', /* 0          */
+	269, /* 1  CS/SK   */
+	'@', /* 2    EN    */
+	352, /* 3    ET    */
+	'à', /* 4    FR    */
+	'§', /* 5    DE    */
+	'é', /* 6    IT    */
+	352, /* 7  LV/LT   */
+	261, /* 8    PL    */
+	'¡', /* 9  PT/ES   */
+	354, /* A    RO    */
+	268, /* B SR/HR/SL */
+	'É', /* C SV/FI/HU */
+	304, /* D    TR    */
+};
+const unsigned short int nationaltable5b[14][6] =
+{
+	{ '[','\\', ']', '^', '_', '`' }, /* 0          */
+	{ 357, 382, 'ý', 'í', 345, 'é' }, /* 1  CS/SK   */
+	{8592, '½',8594,8593, '#', 173 }, /* 2    EN    */
+	{ 'Ä', 'Ö', 381, 'Ü', 'Õ', 353 }, /* 3    ET    */
+	{ 'ë', 'ê', 'ù', 'î', '#', 'è' }, /* 4    FR    */
+	{ 'Ä', 'Ö', 'Ü', '^', '_', '°' }, /* 5    DE    */
+	{ '°', 'ç',8594,8593, '#', 'ù' }, /* 6    IT    */
+	{ 'é', 553, 381, 269, 363, 353 }, /* 7  LV/LT   */
+	{ 437, 346, 321, 263, 'ó', 281 }, /* 8    PL    */
+	{ 'á', 'é', 'í', 'ó', 'ú', '¿' }, /* 9  PT/ES   */
+	{ 'Â', 350, 461, 'Î', 305, 355 }, /* A    RO    */
+	{ 262, 381, 272, 352, 'ë', 269 }, /* B SR/HR/SL */
+	{ 'Ä', 'Ö', 'Å', 'Ü', '_', 'é' }, /* C SV/FI/HU */
+	{ 350, 'Ö', 'Ç', 'Ü', 486, 305 }, /* D    TR    */
+};
+const unsigned short int nationaltable7b[14][4] =
+{
+	{ '{', '|', '}', '~' }, /* 0          */
+	{ 'á', 283, 'ú', 353 }, /* 1  CS/SK   */
+	{ '¼',8214, '¾', '÷' }, /* 2    EN    */
+	{ 'ä', 'ö', 382, 'ü' }, /* 3    ET    */
+	{ 'â', 'ô', 'û', 'ç' }, /* 4    FR    */
+	{ 'ä', 'ö', 'ü', 'ß' }, /* 5    DE    */
+	{ 'à', 'ò', 'è', 'ì' }, /* 6    IT    */
+	{ 261, 371, 382, 303 }, /* 7  LV/LT   */
+	{ 380, 347, 322, 378 }, /* 8    PL    */
+	{ 'ü', 'ñ', 'è', 'à' }, /* 9  PT/ES   */
+	{ 'â', 351, 462, 'î' }, /* A    RO    */
+	{ 263, 382, 273, 353 }, /* B SR/HR/SL */
+	{ 'ä', 'ö', 'å', 'ü' }, /* C SV/FI/HU */
+	{ 351, 'ö', 231, 'ü' }, /* D    TR    */
+};
+const unsigned short int arrowtable[] =
+{
+	8592, 8594, 8593, 8595, 'O', 'K', 8592, 8592
+};
 
 /* hamming table */
 const unsigned char dehamming[] =
@@ -384,3 +641,4 @@ signed int deh24(unsigned char *ph24)
 		((h24 & 0x7f0000) >> 5);
 }
 #endif /* table or serial */
+#endif

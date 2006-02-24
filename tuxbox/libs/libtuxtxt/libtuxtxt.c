@@ -18,7 +18,6 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#include "tuxtxt_def.h"
 #include "tuxtxt_common.h"
 
 

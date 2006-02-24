@@ -115,6 +115,10 @@
 			{
 				NewWindow("/webxtv?browser=" + browser, "tv", "780", "735", "no", "0");
 			}
+			function teletext()
+			{
+				NewWindow("/teletext", "teletext", "480", "560", "no", "0");
+			}
 		</script>
 	</head>
 	<body id="index_big" style="margin: 0px; border: 0px; padding: 0px" background="bg.png" onLoad="init()">
@@ -249,6 +253,7 @@
 						</script>
 					</td>
 					<td align="left">#CHANNAVI#</td>
+					<td width=40 align="center"><a href="javascript:teletext()">TEXT</a></td>
 				</tr>
 				</tbody>
 				</table>

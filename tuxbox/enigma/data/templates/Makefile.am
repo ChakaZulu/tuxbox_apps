@@ -12,7 +12,7 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	HTMLImageInfo.tmp image.tmp bootMgrSettings.tmp chttpdSettings.tmp instimg.tmp \
 	XMLCurrentServiceData.tmp editImageSettingsWindow.tmp addImageWindow.tmp XSLMPSettings.xsl \
 	editStreamingServerSettings.tmp editStreamingServerVLCSettings.tmp editStreamingServerVideoSettings.tmp \
-	dvrcontrols.tmp webxtvMSIE.tmp webxtvFirefox.tmp \
+	dvrcontrols.tmp webxtvMSIE.tmp webxtvFirefox.tmp teletext.tmp \
 	XMLBoxInfo.tmp  HTMLBoxInfo.tmp \
 	XMLData.tmp HTMLData.tmp \
 	XMLServiceEPG.tmp XMLEPGEntry.tmp HTMLServiceEPG.tmp HTMLEPGEntry.tmp \

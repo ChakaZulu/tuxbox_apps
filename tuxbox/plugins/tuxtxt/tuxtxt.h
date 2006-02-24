@@ -79,6 +79,11 @@ extern void tuxtxt_decode_btt();
 extern void tuxtxt_decode_adip(); /* additional information table */
 extern void tuxtxt_compress_page(int p, int sp, unsigned char* buffer);
 extern void tuxtxt_decompress_page(int p, int sp, unsigned char* buffer);
+extern void tuxtxt_hex2str(char *s, unsigned int n);
+extern tstPageinfo* tuxtxt_DecodePage(int showl25, unsigned char* page_char, tstPageAttr *page_atrb, int hintmode, int showflof);
+extern void tuxtxt_FillRect(unsigned char *lfb, int xres, int x, int y, int w, int h, int color);
+extern int tuxtxt_RenderChar(unsigned char *lfb, int xres,int Char, int *pPosX, int PosY, tstPageAttr *Attribute, int zoom, int curfontwidth, int curfontwidth2, int fontheight, int transpmode, unsigned char* axdrcs, int ascender);
+extern void tuxtxt_RenderDRCS(int xres,unsigned char *s,unsigned char *d,unsigned char *ax, unsigned char fgcolor, unsigned char bgcolor);
 #if TUXTXT_DEBUG
 extern int tuxtxt_get_zipsize(int p, int sp);
 #endif
@@ -96,7 +101,6 @@ extern int tuxtxt_get_zipsize(int p, int sp);
 
 int TTFWidthFactor16, TTFHeightFactor16, TTFShiftX, TTFShiftY; /* parameters for adapting to various TTF fonts */
 int fontheight, fontwidth, fontwidth_normal, fontwidth_small, fontwidth_topmenumain, fontwidth_topmenusmall, ascender;
-int ymosaic[4];
 int displaywidth;
 #define fontwidth_small_lcd 8
 
@@ -123,41 +127,6 @@ int displaywidth;
 #define TOPMENUSPC 0
 #define TOPMENUCHARS (TOPMENUINDENTDEF+12+TOPMENUSPC+4)
 
-#define FLOFSIZE 4
-
-/* spacing attributes */
-#define alpha_black         0x00
-#define alpha_red           0x01
-#define alpha_green         0x02
-#define alpha_yellow        0x03
-#define alpha_blue          0x04
-#define alpha_magenta       0x05
-#define alpha_cyan          0x06
-#define alpha_white         0x07
-#define flash               0x08
-#define steady              0x09
-#define end_box             0x0A
-#define start_box           0x0B
-#define normal_size         0x0C
-#define double_height       0x0D
-#define double_width        0x0E
-#define double_size         0x0F
-#define mosaic_black        0x10
-#define mosaic_red          0x11
-#define mosaic_green        0x12
-#define mosaic_yellow       0x13
-#define mosaic_blue         0x14
-#define mosaic_magenta      0x15
-#define mosaic_cyan         0x16
-#define mosaic_white        0x17
-#define conceal             0x18
-#define contiguous_mosaic   0x19
-#define separated_mosaic    0x1A
-#define esc                 0x1B
-#define black_background    0x1C
-#define new_background      0x1D
-#define hold_mosaic         0x1E
-#define release_mosaic      0x1F
 
 /* rc codes */
 #if HAVE_DVB_API_VERSION < 3
@@ -218,27 +187,6 @@ int displaywidth;
 
 
 
-typedef enum /* object type */
-{
-	OBJ_PASSIVE,
-	OBJ_ACTIVE,
-	OBJ_ADAPTIVE
-} tObjType;
-
-const unsigned char *ObjectSource[] =
-{
-	"(illegal)",
-	"Local",
-	"POP",
-	"GPOP"
-};
-const unsigned char *ObjectType[] =
-{
-	"Passive",
-	"Active",
-	"Adaptive",
-	"Passive"
-};
 
 
 /* messages */
@@ -267,113 +215,7 @@ FT_Face			face;
 FONTTYPE typettf;
 
 
-// G2 Charset (0 = Latin, 1 = Cyrillic, 2 = Greek)
-const unsigned short int G2table[3][6*16] =
-{
-	{ ' ' ,'¡' ,'¢' ,'£' ,'$' ,'¥' ,'#' ,'§' ,'¤' ,'\'','\"','«' ,8592,8594,8595,8593,
-	  '°' ,'±' ,'²' ,'³' ,'x' ,'µ' ,'¶' ,'·' ,'÷' ,'\'','\"','»' ,'¼' ,'½' ,'¾' ,'¿' ,
-	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
-	  '­' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,' ' ,' ' ,' ' ,8539,8540,8541,8542,
-	  937 ,'Æ' ,272 ,'ª' ,294 ,' ' ,306 ,319 ,321 ,'Ø' ,338 ,'º' ,'Þ' ,358 ,330 ,329 ,
-	  1082,'æ' ,273 ,'ð' ,295 ,305 ,307 ,320 ,322 ,'ø' ,339 ,'ß' ,'þ' ,359 ,951 ,0x7F},
-	{ ' ' ,'¡' ,'¢' ,'£' ,'$' ,'¥' ,' ' ,'§' ,' ' ,'\'','\"','«' ,8592,8594,8595,8593,
-	  '°' ,'±' ,'²' ,'³' ,'x' ,'µ' ,'¶' ,'·' ,'÷' ,'\'','\"','»' ,'¼' ,'½' ,'¾' ,'¿' ,
-	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
-	  '­' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,321 ,322 ,'ß' ,8539,8540,8541,8542,
-	  'D' ,'E' ,'F' ,'G' ,'I' ,'J' ,'K' ,'L' ,'N' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Z' ,
-	  'd' ,'e' ,'f' ,'g' ,'i' ,'j' ,'k' ,'l' ,'n' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'z' },
-	{ ' ' ,'a' ,'b' ,'£' ,'e' ,'h' ,'i' ,'§' ,':' ,'\'','\"','k' ,8592,8594,8595,8593,
-	  '°' ,'±' ,'²' ,'³' ,'x' ,'m' ,'n' ,'p' ,'÷' ,'\'','\"','t' ,'¼' ,'½' ,'¾' ,'x' ,
-	  ' ' ,'`' ,'´' ,710 ,732 ,'¯' ,728 ,729 ,733 ,716 ,730 ,719 ,'_' ,698 ,718 ,711 ,
-	  '?' ,'¹' ,'®' ,'©' ,8482,9834,8364,8240,945 ,906 ,910 ,911 ,8539,8540,8541,8542,
-	  'C' ,'D' ,'F' ,'G' ,'J' ,'L' ,'Q' ,'R' ,'S' ,'U' ,'V' ,'W' ,'Y' ,'Z' ,902 ,905 ,
-	  'c' ,'d' ,'f' ,'g' ,'j' ,'l' ,'q' ,'r' ,'s' ,'u' ,'v' ,'w' ,'y' ,'z' ,904 ,0x7F}
-};
-// cyrillic G0 Charset
-// TODO: different maps for serbian/russian/ukrainian
-const unsigned short int G0tablecyrillic[6*16] =
-{
-	  ' ' ,'!' ,'\"','#' ,'$' ,'%' ,'&' ,'\'','(' ,')' ,'*' ,'+' ,',' ,'-' ,'.' ,'/' ,
-	  '0' ,'1' ,'2' ,'3' ,'4' ,'5' ,'6' ,'7' ,'8' ,'9' ,':' ,';' ,'<' ,'=' ,'>' ,'?' ,
-	  1063,1040,1041,1062,1044,1045,1060,1043,1061,1048,1032,1050,1051,1052,1053,1054,
-	  1055,1036,1056,1057,1058,1059,1042,1027,1033,1034,1047,1035,1046,1026,1064,1119,
-	  1095,1072,1073,1094,1076,1077,1092,1075,1093,1080,1112,1082,1083,1084,1085,1086,
-	  1087,1116,1088,1089,1090,1091,1074,1107,1113,1114,1079,1115,1078,1106,1096,0x7F
-};
 
-const unsigned short int nationaltable23[14][2] =
-{
-	{ '#', '¤' }, /* 0          */
-	{ '#', 367 }, /* 1  CS/SK   */
-	{ '£', '$' }, /* 2    EN    */
-	{ '#', 'õ' }, /* 3    ET    */
-	{ 'é', 'ï' }, /* 4    FR    */
-	{ '#', '$' }, /* 5    DE    */
-	{ '£', '$' }, /* 6    IT    */
-	{ '#', '$' }, /* 7  LV/LT   */
-	{ '#', 329 }, /* 8    PL    */
-	{ 'ç', '$' }, /* 9  PT/ES   */
-	{ '#', '¤' }, /* A    RO    */
-	{ '#', 'Ë' }, /* B SR/HR/SL */
-	{ '#', '¤' }, /* C SV/FI/HU */
-	{ '£', 287 }, /* D    TR   ? */
-};
-const unsigned short int nationaltable40[14] =
-{
-	'@', /* 0          */
-	269, /* 1  CS/SK   */
-	'@', /* 2    EN    */
-	352, /* 3    ET    */
-	'à', /* 4    FR    */
-	'§', /* 5    DE    */
-	'é', /* 6    IT    */
-	352, /* 7  LV/LT   */
-	261, /* 8    PL    */
-	'¡', /* 9  PT/ES   */
-	354, /* A    RO    */
-	268, /* B SR/HR/SL */
-	'É', /* C SV/FI/HU */
-	304, /* D    TR    */
-};
-const unsigned short int nationaltable5b[14][6] =
-{
-	{ '[','\\', ']', '^', '_', '`' }, /* 0          */
-	{ 357, 382, 'ý', 'í', 345, 'é' }, /* 1  CS/SK   */
-	{8592, '½',8594,8593, '#', 822 }, /* 2    EN    */
-	{ 'Ä', 'Ö', 381, 'Ü', 'Õ', 353 }, /* 3    ET    */
-	{ 'ë', 'ê', 'ù', 'î', '#', 'è' }, /* 4    FR    */
-	{ 'Ä', 'Ö', 'Ü', '^', '_', '°' }, /* 5    DE    */
-	{ '°', 'ç',8594,8593, '#', 'ù' }, /* 6    IT    */
-	{ 'é', 553, 381, 269, 363, 353 }, /* 7  LV/LT   */
-	{ 437, 346, 321, 263, 'ó', 281 }, /* 8    PL    */
-	{ 'á', 'é', 'í', 'ó', 'ú', '¿' }, /* 9  PT/ES   */
-	{ 'Â', 350, 461, 'Î', 305, 355 }, /* A    RO    */
-	{ 262, 381, 272, 352, 'ë', 269 }, /* B SR/HR/SL */
-	{ 'Ä', 'Ö', 'Å', 'Ü', '_', 'é' }, /* C SV/FI/HU */
-	{ 350, 'Ö', 'Ç', 'Ü', 486, 305 }, /* D    TR    */
-};
-const unsigned short int nationaltable7b[14][4] =
-{
-	{ '{', '|', '}', '~' }, /* 0          */
-	{ 'á', 283, 'ú', 353 }, /* 1  CS/SK   */
-	{ '¼',8214, '¾', '÷' }, /* 2    EN    */
-	{ 'ä', 'ö', 382, 'ü' }, /* 3    ET    */
-	{ 'â', 'ô', 'û', 'ç' }, /* 4    FR    */
-	{ 'ä', 'ö', 'ü', 'ß' }, /* 5    DE    */
-	{ 'à', 'ò', 'è', 'ì' }, /* 6    IT    */
-	{ 261, 371, 382, 303 }, /* 7  LV/LT   */
-	{ 380, 347, 322, 378 }, /* 8    PL    */
-	{ 'ü', 'ñ', 'è', 'à' }, /* 9  PT/ES   */
-	{ 'â', 351, 462, 'î' }, /* A    RO    */
-	{ 263, 382, 273, 353 }, /* B SR/HR/SL */
-	{ 'ä', 'ö', 'å', 'ü' }, /* C SV/FI/HU */
-	{ 351, 'ö', 231, 'ü' }, /* D    TR    */
-};
-
-const unsigned short int arrowtable[] =
-{
-	8592, 8594, 8593, 8595, 'O', 'K', 8592, 8592
-};
 
 /* national subsets */
 const char countrystring[] =
@@ -397,28 +239,7 @@ const char countrystring[] =
 #define COUNTRYSTRING_WIDTH 26
 #define MAX_NATIONAL_SUBSET (sizeof(countrystring) / COUNTRYSTRING_WIDTH - 1)
 
-enum
-{
-	NAT_DEFAULT = 0,
-	NAT_CZ = 1,
-	NAT_UK = 2,
-	NAT_ET = 3,
-	NAT_FR = 4,
-	NAT_DE = 5,
-	NAT_IT = 6,
-	NAT_LV = 7,
-	NAT_PL = 8,
-	NAT_SP = 9,
-	NAT_RO = 10,
-	NAT_SR = 11,
-	NAT_SW = 12,
-	NAT_TR = 13,
-	NAT_MAX_FROM_HEADER = 13,
-	NAT_RU = 14,
-	NAT_GR = 15
-};
 
-const unsigned char countryconversiontable[] = { NAT_UK, NAT_DE, NAT_SW, NAT_IT, NAT_FR, NAT_SP, NAT_CZ, NAT_RO};
 
 
 /* some data */
@@ -435,7 +256,7 @@ int zoommode, screenmode, transpmode, hintmode, boxed, nofirst, savedscreenmode,
 char dumpl25;
 int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
-int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, trans_mode, national_subset, national_subset_secondary, auto_national, swapupdown, showhex, menulanguage;
+int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, trans_mode, auto_national, swapupdown, showhex, menulanguage;
 int pids_found, current_service, getpidsdone;
 int SDT_ready;
 int pc_old_row, pc_old_col;     /* for page catching */
@@ -443,12 +264,8 @@ int temp_page;	/* for page input */
 char saveconfig, hotlistchanged;
 signed char clearbbcolor = -1;
 int usettf;
-short pop, gpop, drcs, gdrcs;
-unsigned char tAPx, tAPy;	/* temporary offset to Active Position for objects */
 unsigned char axdrcs[12+1+10+1];
 #define aydrcs (axdrcs + 12+1)
-unsigned char FullRowColor[25];
-unsigned char FullScrColor;
 tstPageinfo *pageinfo = 0;/* pointer to cached info of last decoded page */
 const int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
 const int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
@@ -494,8 +311,8 @@ unsigned char avstable_dvb[3][7] =
 };
 
 /* language dependent texts */
-#define MAXMENULANGUAGE 8 /* 0 deutsch, 1 englisch, 2 französisch, 3 niederländisch, 4 griechisch, 5 italienisch, 6 polnisch, 7 schwedisch, 8 suomi */
-const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL    , NAT_SW, NAT_SW };
+#define MAXMENULANGUAGE 9 /* 0 deutsch, 1 englisch, 2 französisch, 3 niederländisch, 4 griechisch, 5 italienisch, 6 polnisch, 7 schwedisch, 8 suomi, 9 Portuguesa */
+const int menusubset[] =   { NAT_DE   , NAT_UK    , NAT_FR       , NAT_UK          , NAT_GR      , NAT_IT       , NAT_PL    , NAT_SW      , NAT_SW , NAT_SP};
 
 
 #define Menu_StartX (StartX + fontwidth*9/2)
@@ -527,11 +344,11 @@ enum
 
 const char hotlistpagecolumn[] =	/* last(!) column of page to show in each language */
 {
-	22, 26, 28, 27, 28, 27, 28, 21, 20
+	22, 26, 28, 27, 28, 27, 28, 21, 20, 26
 };
 const char hotlisttextcolumn[] =
 {
-	24, 14, 14, 15, 14, 15, 14, 23, 22
+	24, 14, 14, 15, 14, 15, 14, 23, 22, 14
 };
 const char hotlisttext[][2*5] =
 {
@@ -544,6 +361,7 @@ const char hotlisttext[][2*5] =
 	{ "dodajkasuj" },
 	{ "ny   bort " },
 	{ "lis{{pois " },
+	{ " adi rem. " },
 };
 
 const char configonoff[][2*3] =
@@ -557,6 +375,7 @@ const char configonoff[][2*3] =
 	{ "wy}w} " },
 	{ "p} av " },
 	{ "EI ON " },
+	{ "offon " },
 };
 const char menuatr[Menu_Height*Menu_Width] =
 {
@@ -839,6 +658,34 @@ const char configmenu[][Menu_Height*Menu_Width] =
 		"åæ   www.tuxtxt.net  x.xx   æçé"
 		"ëìììììììììììììììììììììììììììììê"
 	},
+/*     0000000000111111111122222222223 */
+/*     0123456789012345678901234567890 */
+	{
+		"àááááááááááááááááááááááááááááâè"
+		"ã    Menu de Configuracao    äé"
+		"åææææææææææææææææææææææææææææçé"
+		"ã1 Favoritos:  adi pag. 111  äé"
+		"ãíîñò                        äé"
+		"ã+-?                         äé"
+		"ã                            äé"
+		"ã2     Seleccao Teletext     äé"
+		"ãí         Procurar         îäé"
+		"ã                            äé"
+		"ã       formato ecran        äé"
+		"ã3 Standard mode 16:9        äé"
+		"ã4 Text/TV mode  16:9        äé"
+		"ã                            äé"
+		"ã5          Brilho           äé"
+		"ãí                          îäé"
+		"ã6      Transparencia        äé"
+		"ãí                          îäé"
+		"ã7  Caracteres nacionaist    äé"
+		"ãreconhecimento utomatico    äé"
+		"ãí    DE    (#$@[\\]^_`{|}~) îäé"
+		"ãí Lingua      Portuguesa   îäé"
+		"åæ   www.tuxtxt.net  x.xx   æçé"
+		"ëìììììììììììììììììììììììììììììê"
+	},
 };
 
 const char catchmenutext[][80] =
@@ -861,6 +708,8 @@ const char catchmenutext[][80] =
      "0000000011110000000000110000000000000000" },
 	{ "        íïðî valitse  ñò n{yt{          "
 	  "0000000011110000000000110000000000000000" },
+	{ "        íïðî seleccao ñò mostrar        "
+	  "0000000011110000000000110000000000000000" },
 };
 
 const char message_3[][38] =
@@ -874,6 +723,7 @@ const char message_3[][38] =
 	{ "ã  poszukiwanie sygna}u telegazety  äé" },
 	{ "ã    s|ker efter TextTV tj{nster    äé" },
 	{ "ã   etsit{{n Teksti-TV -palvelua    äé" },
+	{ "ã  Procurar servicos de teletexto   äé" },
 };
 const char message_3_blank[] = "ã                                   äé";
 const char message_7[][38] =
@@ -887,6 +737,7 @@ const char message_7[][38] =
 	{ "ã   brak sygna}u na transponderze   äé" },
 	{ "ã ingen TextTV p} denna transponder äé" },
 	{ "ã    Ei Teksti-TV:t{ l{hettimell{   äé" },
+	{ "ã  nao ha teletexto no transponder  äé" },
 };
 const char message_8[][38] =
 {
@@ -901,46 +752,14 @@ const char message_8[][38] =
 	{ "ã     oczekiwanie na stron` 100     äé" },
 	{ "ã  v{ntar p} mottagning av sida 100 äé" },
 	{ "ã        Odotetaan sivua 100        äé" },
+	{ "ã   esperando recepcao na pag 100   äé" },
 };
 const char message8pagecolumn[] = /* last(!) column of page to show in each language */
 {
-	33, 34, 34, 35, 29, 30, 30, 34, 34
+	33, 34, 34, 35, 29, 30, 30, 34, 34, 32
 };
 
-enum /* options for charset */
-{
-	C_G0P = 0, /* primary G0 */
-	C_G0S, /* secondary G0 */
-	C_G1C, /* G1 contiguous */
-	C_G1S, /* G1 separate */
-	C_G2,
-	C_G3,
-	C_OFFSET_DRCS = 32
-	/* 32..47: 32+subpage# GDRCS (offset/20 in page_char) */
-	/* 48..63: 48+subpage#  DRCS (offset/20 in page_char) */
-};
 
-/* struct for page attributes */
-typedef struct
-{
-	unsigned char fg      :6; /* foreground color */
-	unsigned char bg      :6; /* background color */
-	unsigned char charset :6; /* see enum above */
-	unsigned char doubleh :1; /* double height */
-	unsigned char doublew :1; /* double width */
-	/* ignore at Black Background Color Substitution */
-	/* black background set by New Background ($1d) instead of start-of-row default or Black Backgr. ($1c) */
-	/* or black background set by level 2.5 extensions */
-	unsigned char IgnoreAtBlackBgSubst:1;
-	unsigned char concealed:1; /* concealed information */
-	unsigned char inverted :1; /* colors inverted */
-	unsigned char flashing :5; /* flash mode */
-	unsigned char diacrit  :4; /* diacritical mark */
-	unsigned char underline:1; /* Text underlined */
-	unsigned char boxwin   :1; /* Text boxed/windowed */
-	unsigned char setX26   :1; /* Char is set by packet X/26 (no national subset used) */
-	unsigned char setG0G2  :7; /* G0+G2 set designation  */
-} tstPageAttr;
 
 enum /* indices in atrtable */
 {
@@ -976,24 +795,6 @@ enum /* indices in atrtable */
 	ATR_CATCHMENU1 /* catch menu line */
 };
 
-/* colortable */
-enum
-{
-	black = 0,
-	red, /* 1 */
-	green, /* 2 */
-	yellow, /* 3 */
-	blue,	/* 4 */
-	magenta,	/* 5 */
-	cyan,	/* 6 */
-	white, /* 7 */
-	menu1 = (4*8),
-	menu2,
-	menu3,
-	transp,
-	transp2,
-	SIZECOLTABLE
-};
 
 //const (avoid warnings :<)
 tstPageAttr atrtable[] =
@@ -1038,14 +839,6 @@ tstPageAttr page_atrb[40 * 25];
 
 
 /* colormaps */
-const unsigned short defaultcolors[] =	/* 0x0bgr */
-{
-	0x000, 0x00f, 0x0f0, 0x0ff, 0xf00, 0xf0f, 0xff0, 0xfff,
-	0x000, 0x007, 0x070, 0x077, 0x700, 0x707, 0x770, 0x777,
-	0x50f, 0x07f, 0x7f0, 0xbff, 0xac0, 0x005, 0x256, 0x77c,
-	0x333, 0x77f, 0x7f7, 0x7ff, 0xf77, 0xf7f, 0xff7, 0xddd,
-	0x420, 0x210, 0x420, 0x000, 0x000
-};
 
 unsigned short rd0[] = {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0x00<<8, 0x00<<8, 0x00<<8, 0,      0      };
 unsigned short gn0[] = {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0x20<<8, 0x10<<8, 0x20<<8, 0,      0      };
@@ -1053,149 +846,8 @@ unsigned short bl0[] = {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0
 unsigned short tr0[] = {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0x0000 , 0x0000 , 0x0A00 , 0xFFFF, 0x3000 };
 struct fb_cmap colormap_0 = {0, SIZECOLTABLE, rd0, gn0, bl0, tr0};
 
-/* tables for color table remapping, first entry (no remapping) skipped, offsets for color index */
-const unsigned char MapTblFG[] = {  0,  0,  8,  8, 16, 16, 16 };
-const unsigned char MapTblBG[] = {  8, 16,  8, 16,  8, 16, 24 };
 
 
-/* shapes */
-enum
-{
-	S_END = 0,
-	S_FHL, /* full horizontal line: y-offset */
-	S_FVL, /* full vertical line: x-offset */
-	S_BOX, /* rectangle: x-offset, y-offset, width, height */
-	S_TRA, /* trapez: x0, y0, l0, x1, y1, l1 */
-	S_BTR, /* trapez in bgcolor: x0, y0, l0, x1, y1, l1 */
-	S_INV, /* invert */
-	S_LNK, /* call other shape: shapenumber */
-	S_CHR, /* Character from freetype hibyte, lowbyte */
-	S_ADT, /* Character 2F alternating raster */
-	S_FLH, /* flip horizontal */
-	S_FLV  /* flip vertical */
-};
-
-/* shape coordinates */
-enum
-{
-	S_W13 = 5, /* width*1/3 */
-	S_W12, /* width*1/2 */
-	S_W23, /* width*2/3 */
-	S_W11, /* width */
-	S_WM3, /* width-3 */
-	S_H13, /* height*1/3 */
-	S_H12, /* height*1/2 */
-	S_H23, /* height*2/3 */
-	S_H11, /* height */
-	S_NrShCoord
-};
-
-/* G3 characters */
-unsigned char aG3_20[] = { S_TRA, 0, S_H23, 1, 0, S_H11, S_W12, S_END };
-unsigned char aG3_21[] = { S_TRA, 0, S_H23, 1, 0, S_H11, S_W11, S_END };
-unsigned char aG3_22[] = { S_TRA, 0, S_H12, 1, 0, S_H11, S_W12, S_END };
-unsigned char aG3_23[] = { S_TRA, 0, S_H12, 1, 0, S_H11, S_W11, S_END };
-unsigned char aG3_24[] = { S_TRA, 0, 0, 1, 0, S_H11, S_W12, S_END };
-unsigned char aG3_25[] = { S_TRA, 0, 0, 1, 0, S_H11, S_W11, S_END };
-unsigned char aG3_26[] = { S_INV, S_LNK, 0x66, S_END };
-unsigned char aG3_27[] = { S_INV, S_LNK, 0x67, S_END };
-unsigned char aG3_28[] = { S_INV, S_LNK, 0x68, S_END };
-unsigned char aG3_29[] = { S_INV, S_LNK, 0x69, S_END };
-unsigned char aG3_2a[] = { S_INV, S_LNK, 0x6a, S_END };
-unsigned char aG3_2b[] = { S_INV, S_LNK, 0x6b, S_END };
-unsigned char aG3_2c[] = { S_INV, S_LNK, 0x6c, S_END };
-unsigned char aG3_2d[] = { S_INV, S_LNK, 0x6d, S_END };
-unsigned char aG3_2e[] = { S_BOX, 2, 0, 3, S_H11, S_END };
-unsigned char aG3_2f[] = { S_ADT };
-unsigned char aG3_30[] = { S_LNK, 0x20, S_FLH, S_END };
-unsigned char aG3_31[] = { S_LNK, 0x21, S_FLH, S_END };
-unsigned char aG3_32[] = { S_LNK, 0x22, S_FLH, S_END };
-unsigned char aG3_33[] = { S_LNK, 0x23, S_FLH, S_END };
-unsigned char aG3_34[] = { S_LNK, 0x24, S_FLH, S_END };
-unsigned char aG3_35[] = { S_LNK, 0x25, S_FLH, S_END };
-unsigned char aG3_36[] = { S_INV, S_LNK, 0x76, S_END };
-unsigned char aG3_37[] = { S_INV, S_LNK, 0x77, S_END };
-unsigned char aG3_38[] = { S_INV, S_LNK, 0x78, S_END };
-unsigned char aG3_39[] = { S_INV, S_LNK, 0x79, S_END };
-unsigned char aG3_3a[] = { S_INV, S_LNK, 0x7a, S_END };
-unsigned char aG3_3b[] = { S_INV, S_LNK, 0x7b, S_END };
-unsigned char aG3_3c[] = { S_INV, S_LNK, 0x7c, S_END };
-unsigned char aG3_3d[] = { S_INV, S_LNK, 0x7d, S_END };
-unsigned char aG3_3e[] = { S_LNK, 0x2e, S_FLH, S_END };
-unsigned char aG3_3f[] = { S_BOX, 0, 0, S_W11, S_H11, S_END };
-unsigned char aG3_40[] = { S_BOX, 0, S_H13, S_W11, S_H13, S_LNK, 0x7e, S_END };
-unsigned char aG3_41[] = { S_BOX, 0, S_H13, S_W11, S_H13, S_LNK, 0x7e, S_FLV, S_END };
-unsigned char aG3_42[] = { S_LNK, 0x50, S_BOX, S_W12, S_H13, S_W12, S_H13, S_END };
-unsigned char aG3_43[] = { S_LNK, 0x50, S_BOX, 0, S_H13, S_W12, S_H13, S_END };
-unsigned char aG3_44[] = { S_LNK, 0x48, S_FLV, S_LNK, 0x48, S_END };
-unsigned char aG3_45[] = { S_LNK, 0x44, S_FLH, S_END };
-unsigned char aG3_46[] = { S_LNK, 0x47, S_FLV, S_END };
-unsigned char aG3_47[] = { S_LNK, 0x48, S_FLH, S_LNK, 0x48, S_END };
-unsigned char aG3_48[] = { S_TRA, 0, 0, S_W23, 0, S_H23, 0, S_BTR, 0, 0, S_W13, 0, S_H13, 0, S_END };
-unsigned char aG3_49[] = { S_LNK, 0x48, S_FLH, S_END };
-unsigned char aG3_4a[] = { S_LNK, 0x48, S_FLV, S_END };
-unsigned char aG3_4b[] = { S_LNK, 0x48, S_FLH, S_FLV, S_END };
-unsigned char aG3_4c[] = { S_LNK, 0x50, S_BOX, 0, S_H13, S_W11, S_H13, S_END };
-unsigned char aG3_4d[] = { S_CHR, 0x25, 0xE6 };
-unsigned char aG3_4e[] = { S_CHR, 0x25, 0xCF };
-unsigned char aG3_4f[] = { S_CHR, 0x25, 0xCB };
-unsigned char aG3_50[] = { S_BOX, S_W12, 0, 2, S_H11, S_FLH, S_BOX, S_W12, 0, 2, S_H11,S_END };
-unsigned char aG3_51[] = { S_BOX, 0, S_H12, S_W11, 2, S_FLV, S_BOX, 0, S_H12, S_W11, 2,S_END };
-unsigned char aG3_52[] = { S_LNK, 0x55, S_FLH, S_FLV, S_END };
-unsigned char aG3_53[] = { S_LNK, 0x55, S_FLV, S_END };
-unsigned char aG3_54[] = { S_LNK, 0x55, S_FLH, S_END };
-unsigned char aG3_55[] = { S_LNK, 0x7e, S_FLV, S_BOX, 0, S_H12, S_W12, 2, S_FLV, S_BOX, 0, S_H12, S_W12, 2, S_END };
-unsigned char aG3_56[] = { S_LNK, 0x57, S_FLH, S_END};
-unsigned char aG3_57[] = { S_LNK, 0x55, S_LNK, 0x50 , S_END};
-unsigned char aG3_58[] = { S_LNK, 0x59, S_FLV, S_END};
-unsigned char aG3_59[] = { S_LNK, 0x7e, S_LNK, 0x51 , S_END};
-unsigned char aG3_5a[] = { S_LNK, 0x50, S_LNK, 0x51 , S_END};
-unsigned char aG3_5b[] = { S_CHR, 0x21, 0x92};
-unsigned char aG3_5c[] = { S_CHR, 0x21, 0x90};
-unsigned char aG3_5d[] = { S_CHR, 0x21, 0x91};
-unsigned char aG3_5e[] = { S_CHR, 0x21, 0x93};
-unsigned char aG3_5f[] = { S_CHR, 0x00, 0x20};
-unsigned char aG3_60[] = { S_INV, S_LNK, 0x20, S_END };
-unsigned char aG3_61[] = { S_INV, S_LNK, 0x21, S_END };
-unsigned char aG3_62[] = { S_INV, S_LNK, 0x22, S_END };
-unsigned char aG3_63[] = { S_INV, S_LNK, 0x23, S_END };
-unsigned char aG3_64[] = { S_INV, S_LNK, 0x24, S_END };
-unsigned char aG3_65[] = { S_INV, S_LNK, 0x25, S_END };
-unsigned char aG3_66[] = { S_LNK, 0x20, S_FLV, S_END };
-unsigned char aG3_67[] = { S_LNK, 0x21, S_FLV, S_END };
-unsigned char aG3_68[] = { S_LNK, 0x22, S_FLV, S_END };
-unsigned char aG3_69[] = { S_LNK, 0x23, S_FLV, S_END };
-unsigned char aG3_6a[] = { S_LNK, 0x24, S_FLV, S_END };
-unsigned char aG3_6b[] = { S_BOX, 0, 0, S_W11, S_H13, S_TRA, 0, S_H13, S_W11, 0, S_H23, 1, S_END };
-unsigned char aG3_6c[] = { S_TRA, 0, 0, 1, 0, S_H12, S_W12, S_FLV, S_TRA, 0, 0, 1, 0, S_H12, S_W12, S_BOX, 0, S_H12, S_W12,1, S_END };
-unsigned char aG3_6d[] = { S_TRA, 0, 0, S_W12, S_W12, S_H12, 0, S_FLH, S_TRA, 0, 0, S_W12, S_W12, S_H12, 0, S_END };
-unsigned char aG3_6e[] = { S_CHR, 0x00, 0x20};
-unsigned char aG3_6f[] = { S_CHR, 0x00, 0x20};
-unsigned char aG3_70[] = { S_INV, S_LNK, 0x30, S_END };
-unsigned char aG3_71[] = { S_INV, S_LNK, 0x31, S_END };
-unsigned char aG3_72[] = { S_INV, S_LNK, 0x32, S_END };
-unsigned char aG3_73[] = { S_INV, S_LNK, 0x33, S_END };
-unsigned char aG3_74[] = { S_INV, S_LNK, 0x34, S_END };
-unsigned char aG3_75[] = { S_INV, S_LNK, 0x35, S_END };
-unsigned char aG3_76[] = { S_LNK, 0x66, S_FLH, S_END };
-unsigned char aG3_77[] = { S_LNK, 0x67, S_FLH, S_END };
-unsigned char aG3_78[] = { S_LNK, 0x68, S_FLH, S_END };
-unsigned char aG3_79[] = { S_LNK, 0x69, S_FLH, S_END };
-unsigned char aG3_7a[] = { S_LNK, 0x6a, S_FLH, S_END };
-unsigned char aG3_7b[] = { S_LNK, 0x6b, S_FLH, S_END };
-unsigned char aG3_7c[] = { S_LNK, 0x6c, S_FLH, S_END };
-unsigned char aG3_7d[] = { S_LNK, 0x6d, S_FLV, S_END };
-unsigned char aG3_7e[] = { S_BOX, S_W12, 0, 2, S_H12, S_FLH, S_BOX, S_W12, 0, 2, S_H12, S_END };// help char, not printed directly (only by S_LNK)
-
-unsigned char *aShapes[] =
-{
-	aG3_20, aG3_21, aG3_22, aG3_23, aG3_24, aG3_25, aG3_26, aG3_27, aG3_28, aG3_29, aG3_2a, aG3_2b, aG3_2c, aG3_2d, aG3_2e, aG3_2f,
-	aG3_30, aG3_31, aG3_32, aG3_33, aG3_34, aG3_35, aG3_36, aG3_37, aG3_38, aG3_39, aG3_3a, aG3_3b, aG3_3c, aG3_3d, aG3_3e, aG3_3f,
-	aG3_40, aG3_41, aG3_42, aG3_43, aG3_44, aG3_45, aG3_46, aG3_47, aG3_48, aG3_49, aG3_4a, aG3_4b, aG3_4c, aG3_4d, aG3_4e, aG3_4f,
-	aG3_50, aG3_51, aG3_52, aG3_53, aG3_54, aG3_55, aG3_56, aG3_57, aG3_58, aG3_59, aG3_5a, aG3_5b, aG3_5c, aG3_5d, aG3_5e, aG3_5f,
-	aG3_60, aG3_61, aG3_62, aG3_63, aG3_64, aG3_65, aG3_66, aG3_67, aG3_68, aG3_69, aG3_6a, aG3_6b, aG3_6c, aG3_6d, aG3_6e, aG3_6f,
-	aG3_70, aG3_71, aG3_72, aG3_73, aG3_74, aG3_75, aG3_76, aG3_77, aG3_78, aG3_79, aG3_7a, aG3_7b, aG3_7c, aG3_7d, aG3_7e
-};
 
 
 
