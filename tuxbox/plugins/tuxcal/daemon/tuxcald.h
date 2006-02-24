@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.h,v $
+ * Revision 1.06  2006/02/24 08:14:49  robspr1
+ * - hide clock if file-controlled
+ *
  * Revision 1.05  2006/02/23 23:08:41  robspr1
  * - signal up to 5 days, toggle clock-display file
  *
@@ -14,9 +17,6 @@
  *
  * Revision 1.02  2006/02/15 19:17:50  robspr1
  * first version in CVS
- *
- * Revision 1.02  2006/02/14 20:10:00  robspr1
- * - clock and signalisation
  *
  * Revision 1.01  2006/02/12 23:10:00  robspr1
  * - bugfix reading params POS_X and POS_Y (needed by the daemon)

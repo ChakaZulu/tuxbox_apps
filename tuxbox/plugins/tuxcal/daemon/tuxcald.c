@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.07  2006/02/24 08:14:49  robspr1
+ * - hide clock if file-controlled
+ *
  * Revision 1.06  2006/02/23 23:08:41  robspr1
  * - signal up to 5 days, toggle clock-display file
  *
@@ -32,9 +35,6 @@
  *
  * Revision 1.02  2006/02/15 19:17:28  robspr1
  * first version in CVS
- *
- * Revision 1.02  2006/02/14 20:10:00  robspr1
- * - clock and signalisation
  *
  * Revision 1.01  2006/02/12 23:10:00  robspr1
  * - bugfix reading params POS_X and POS_Y
@@ -2139,7 +2139,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.06 $";
+	char cvs_revision[] = "$Revision: 1.07 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -2321,7 +2321,11 @@ int main(int argc, char **argv)
 			{
 				FILE* pipe;
 				pipe = fopen(CLKFILE,"r");
-				if (pipe == NULL) show_clock='N';
+				if (pipe == NULL) 
+				{
+					show_clock='N';
+					ClearScreen();
+				}
 				else fclose(pipe);
 			}
 			else if (disp_clock=='Y')
