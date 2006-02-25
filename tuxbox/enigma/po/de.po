@@ -1,5 +1,5 @@
 # translation of de.po to 
-# $Id: de.po,v 1.84 2006/02/14 13:46:29 micro_flyer Exp $
+# $Id: de.po,v 1.85 2006/02/25 21:05:15 timekiller Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 msgid ""
 msgstr ""
@@ -4129,7 +4129,7 @@ msgstr ""
 
 #: src/setup_extra.cpp:123
 msgid "Auto reconnect cahandler"
-msgstr "CAHandler automatisch wiederverbinden"
+msgstr "CAHandler autom. wiederverb."
 
 #: src/setup_extra.cpp:123
 msgid "try to reconnect when an external cahandler connection was lost"
