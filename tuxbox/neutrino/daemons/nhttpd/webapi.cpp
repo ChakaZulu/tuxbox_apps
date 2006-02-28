@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.65 2006/02/14 22:38:26 zwen Exp $
+	$Id: webapi.cpp,v 1.66 2006/02/28 21:51:00 zwen Exp $
 
 	License: GPL
 
@@ -956,6 +956,10 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 							<< "\">" << epgdata.title << "</A>";
 						sAddData+=ss.str();
 					}
+					else
+					{
+						sAddData+=timer->epgTitle;
+					}
 				}
 
 			}
@@ -1289,7 +1293,10 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 		{
 			char zType[21];
 			Parent->timerEventType2Str((CTimerd::CTimerEventTypes) i, zType, sizeof(zType)-1);
-			request->printf("<option value=\"%d\">%s\n",i,zType);
+			request->printf("<option value=\"%d\"",i);
+			if(i==(int)CTimerd::TIMER_RECORD)
+				request->printf(" selected");
+			request->printf(">%s\n",zType);
 		}
 	}
 	request->SocketWrite("</select></TD></TR>\n");
@@ -1334,7 +1341,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->printf("<INPUT TYPE=\"text\" name=\"ami\" value=\"%02d\" size=2 maxlength=2></NOBR></TD>\n",
 		  now->tm_min);
 	// stop day
-	request->printf("</TR><tr id=\"StopDateRow\" style=\"visibility:hidden\"><TD align=\"center\"><NOBR>\n");
+	request->printf("</TR><tr id=\"StopDateRow\"><TD align=\"center\"><NOBR>\n");
 	request->printf("Stop-Datum <INPUT TYPE=\"text\" name=\"sd\" value=\"%02d\" size=2 maxlength=2>. \n",
 		  now->tm_mday);
 	// stop month
@@ -1350,7 +1357,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></NOBR></TD></TR>\n",
 		  now->tm_min);
 	// ONID-SID
-	request->SocketWrite("<tr id=\"ProgramRow\" style=\"visibility:hidden\"><TD>\n");
+	request->SocketWrite("<tr id=\"ProgramRow\"><TD>\n");
 	request->SocketWrite("<select name=\"channel_id\">\n");
 	CZapitClient::BouquetChannelList channellist;     
 	channellist.clear();

@@ -643,7 +643,6 @@ movieplayer.goto Springe zu ...
 movieplayer.goto.h1 = -> absoluter Sprung
 movieplayer.goto.h2 +,- -> relativer Sprung
 movieplayer.head Movieplayer
-movieplayer.load_alternate_fw Im MP alternativen Ucode laden
 movieplayer.nostreamingserver Es konnte keine Verbindung\nzum Streamingserver hergestellt werden.
 movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.
 movieplayer.toomanybookmarks Sie haben bereits zu viele Bookmarks angelegt.\nEs muß erst ein anderes gelöscht werden.

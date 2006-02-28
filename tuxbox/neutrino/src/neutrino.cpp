@@ -3024,11 +3024,14 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 			{
 				eventinfo.epgID = epgData.eventID;
 				eventinfo.epg_starttime = epgData.epg_times.startzeit;
+				strncpy(eventinfo.epgTitle, epgData.title.c_str(), EPG_TITLE_MAXLEN-1);
+				eventinfo.epgTitle[EPG_TITLE_MAXLEN-1]=0;
 			}
 			else
 			{
 				eventinfo.epgID = 0;
 				eventinfo.epg_starttime = 0;
+				strcpy(eventinfo.epgTitle, "");
 			}
 			eventinfo.apids = TIMERD_APIDS_CONF;
 			bool doRecord = true;

@@ -643,7 +643,6 @@ movieplayer.goto Jump to ...
 movieplayer.goto.h1 = -> absolute jump
 movieplayer.goto.h2 +,- -> relative jump
 movieplayer.head Movieplayer
-movieplayer.load_alternate_fw load alternate ucode in MP
 movieplayer.nostreamingserver The streaming server could not be reached.
 movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
 movieplayer.toomanybookmarks There are too many bookmarks.\nYou need to delete one of them first.

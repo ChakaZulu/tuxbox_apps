@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.45 2006/02/14 22:38:27 zwen Exp $
+	$Id: timermanager.h,v 1.46 2006/02/28 21:51:00 zwen Exp $
 
 	License: GPL
 
@@ -116,6 +116,7 @@ class CTimerEvent_Record : public CTimerEvent
  public:
 	CTimerd::EventInfo eventInfo;
 	std::string recordingDir;
+	std::string epgTitle;
 	CTimerEvent_Record(time_t announceTime, time_t alarmTime, time_t stopTime, 
 			   t_channel_id channel_id,
 			   event_id_t epgID = 0,

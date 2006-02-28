@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.83 2006/02/14 22:38:26 zwen Exp $
+   $Id: timermanager.cpp,v 1.84 2006/02/28 21:51:00 zwen Exp $
 
 	License: GPL
 
@@ -331,6 +331,7 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 			case CTimerd::TIMER_RECORD:
 			{
 				(static_cast<CTimerEvent_Record*>(event))->recordingDir = data.recordingDir;
+				(static_cast<CTimerEvent_Record*>(event))->getEpgId(); 
 				break;
 			}
 			default:
@@ -937,11 +938,12 @@ void CTimerEvent::printEvent(void)
 		case CTimerd::TIMER_RECORD :
 			dprintf(" Record: "
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-				" epg: %llx apids: 0x%X\n dir: %s\n",
-				static_cast<CTimerEvent_Record*>(this)->eventInfo.channel_id,
-				static_cast<CTimerEvent_Record*>(this)->eventInfo.epgID,
-				static_cast<CTimerEvent_Record*>(this)->eventInfo.apids,
-				static_cast<CTimerEvent_Record*>(this)->recordingDir.c_str());
+				" epg: %s(%llx) apids: 0x%X\n dir: %s\n",
+					  static_cast<CTimerEvent_Record*>(this)->eventInfo.channel_id,
+					  static_cast<CTimerEvent_Record*>(this)->epgTitle.c_str(),
+					  static_cast<CTimerEvent_Record*>(this)->eventInfo.epgID,
+					  static_cast<CTimerEvent_Record*>(this)->eventInfo.apids,
+					  static_cast<CTimerEvent_Record*>(this)->recordingDir.c_str());
 			break;
 
 		case CTimerd::TIMER_STANDBY :
@@ -1086,6 +1088,10 @@ CTimerEvent_Record::CTimerEvent_Record(time_t announceTime, time_t alarmTime, ti
 	eventInfo.channel_id = channel_id;
 	eventInfo.apids = apids;
 	recordingDir = recDir;
+	CSectionsdClient sdc;
+	CShortEPGData epgdata;
+	if (sdc.getEPGidShort(epgID, &epgdata))
+		epgTitle=epgdata.title; 
 }
 //------------------------------------------------------------
 CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
@@ -1108,13 +1114,17 @@ CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
 
 	recordingDir = config->getString("REC_DIR_"+id);
 	dprintf("read REC_DIR_%s %s (%p)\n",id.c_str(),recordingDir.c_str(),&recordingDir);
+
+	epgTitle = config->getString("EPG_TITLE_"+id);
+	dprintf("read EPG_TITLE_%s %s (%p)\n",id.c_str(),epgTitle.c_str(),&epgTitle);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::fireEvent()
 {
 	CTimerd::RecordingInfo ri=eventInfo;
 	ri.eventID=eventID;
-	strcpy(ri.recordingDir,recordingDir.c_str());
+	strcpy(ri.recordingDir, recordingDir.substr(0,sizeof(ri.recordingDir)-1).c_str());						
+	strcpy(ri.epgTitle, recordingDir.substr(0,sizeof(ri.epgTitle)-1).c_str());						
 	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_RECORD_START,
 								  CEventServer::INITID_TIMERD,
 								  &ri,
@@ -1127,7 +1137,8 @@ void CTimerEvent_Record::announceEvent()
 	Refresh();
 	CTimerd::RecordingInfo ri=eventInfo;
 	ri.eventID=eventID;
-	strcpy(ri.recordingDir,recordingDir.c_str());
+	strcpy(ri.recordingDir, recordingDir.substr(0,sizeof(ri.recordingDir)-1).c_str());						
+	strcpy(ri.epgTitle, recordingDir.substr(0,sizeof(ri.epgTitle)-1).c_str());						
 	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_ANNOUNCE_RECORD, CEventServer::INITID_TIMERD,
 								  &ri,sizeof(CTimerd::RecordingInfo));
 	dprintf("Record announcement\n"); 
@@ -1167,6 +1178,9 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
 
 	config->setString("REC_DIR_"+id,recordingDir);
 	dprintf("set REC_DIR_%s to %s (%p)\n",id.c_str(),recordingDir.c_str(), &recordingDir);
+
+	config->setString("EPG_TITLE_"+id,epgTitle);
+	dprintf("set EPG_TITLE_%s to %s (%p)\n",id.c_str(),epgTitle.c_str(), &epgTitle);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::Reschedule()
@@ -1174,7 +1188,9 @@ void CTimerEvent_Record::Reschedule()
 	// clear epgId on reschedule
 	eventInfo.epgID = 0;
 	eventInfo.epg_starttime = 0;
+	epgTitle="";
 	CTimerEvent::Reschedule();
+	getEpgId();
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::getEpgId()
@@ -1185,12 +1201,18 @@ void CTimerEvent_Record::getEpgId()
 	time_t check_time=alarmTime/2 + stopTime/2;
 	for ( CChannelEventList::iterator e= evtlist.begin(); e != evtlist.end(); ++e )
 	{
-	    	if ( e->startTime <= check_time && (e->startTime + (int)e->duration) >= check_time)
+		if ( e->startTime <= check_time && (e->startTime + (int)e->duration) >= check_time)
 		{
 			eventInfo.epgID = e->eventID;
 			eventInfo.epg_starttime = e->startTime;
 			break;
 		}
+	}
+	if(eventInfo.epgID != 0)
+	{
+		CShortEPGData epgdata;
+		if (sdc.getEPGidShort(eventInfo.epgID, &epgdata))
+			epgTitle=epgdata.title; 
 	}
 }
 //------------------------------------------------------------

@@ -675,6 +675,11 @@ void CTimerList::paintItem(int pos)
 							zAddData += " : ";
 							zAddData += Latin1_to_UTF8(epgdata.title);
 						}
+						else if(strlen(timer.epgTitle)!=0)
+						{
+							zAddData += " : ";
+							zAddData += Latin1_to_UTF8(timer.epgTitle);
+						}
 					}
 				}
 				break;
@@ -989,11 +994,11 @@ int CTimerList::newTimer()
 {
 	std::vector<CMenuWidget *> toDelete;
 	// Defaults
-	timerNew.eventType = CTimerd::TIMER_SHUTDOWN ;
+	timerNew.eventType = CTimerd::TIMER_RECORD ;
 	timerNew.eventRepeat = CTimerd::TIMERREPEAT_ONCE ;
 	timerNew.repeatCount = 0;
 	timerNew.alarmTime = (time(NULL)/60)*60;
-	timerNew.stopTime = 0;
+	timerNew.stopTime = (time(NULL)/60)*60;
 	timerNew.channel_id = 0;
 	strcpy(timerNew.message, "");
 	timerNew_standby_on =false;
@@ -1011,7 +1016,7 @@ int CTimerList::newTimer()
 	CMenuForwarder *m1 = new CMenuForwarder(LOCALE_TIMERLIST_ALARMTIME, true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
 
 	CDateInput timerSettings_stopTime(LOCALE_TIMERLIST_STOPTIME, &(timerNew.stopTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CMenuForwarder *m2 = new CMenuForwarder(LOCALE_TIMERLIST_STOPTIME, false, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
+	CMenuForwarder *m2 = new CMenuForwarder(LOCALE_TIMERLIST_STOPTIME, true, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
 
 	CStringInput timerSettings_weekdays(LOCALE_TIMERLIST_WEEKDAYS, m_weekdaysStr, 7, LOCALE_TIMERLIST_WEEKDAYS_HINT_1, LOCALE_TIMERLIST_WEEKDAYS_HINT_2, "-X");
 	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_TIMERLIST_WEEKDAYS, false,  m_weekdaysStr, &timerSettings_weekdays);
@@ -1070,14 +1075,14 @@ int CTimerList::newTimer()
 	mm.addItem(new CMenuForwarder(LOCALE_TIMERLIST_MODETV, true, NULL, &mctv));
 	mm.addItem(new CMenuForwarder(LOCALE_TIMERLIST_MODERADIO, true, NULL, &mcradio));
 	strcpy(timerNew_channel_name,"---");
-	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_CHANNEL, false, timerNew_channel_name, &mm);
+	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_CHANNEL, true, timerNew_channel_name, &mm);
 
 	CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timerNew.recordingDir,g_settings.network_nfs_recordingdir);
 	if (!recDirs.hasItem())
 	{
 		printf("[CTimerList] warning: no network devices available\n");
 	}
-	CMenuForwarder* m7 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,false,timerNew.recordingDir, &recDirs);
+	CMenuForwarder* m7 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,true,timerNew.recordingDir, &recDirs);
 
 	CMenuOptionChooser* m8 = new CMenuOptionChooser(LOCALE_TIMERLIST_STANDBY, &timerNew_standby_on, TIMERLIST_STANDBY_OPTIONS, TIMERLIST_STANDBY_OPTION_COUNT, false);
 
@@ -1107,7 +1112,6 @@ int CTimerList::newTimer()
 	timerSettings.addItem( m8);
 	timerSettings.addItem( m9);
 	timerSettings.addItem( m10);
-	strcpy(timerSettings_stopTime.getValue (), "                ");
 
 	int ret=timerSettings.exec(this,"");
 
@@ -1143,6 +1147,11 @@ bool askUserOnTimerConflict(time_t announceTime, time_t stopTime)
 #warning fixme sectionsd should deliver data in UTF-8 format
 				timerbuf += ":";
 				timerbuf += Latin1_to_UTF8(epgdata.title);
+			}
+			else if(strlen(it->epgTitle)!=0)
+			{
+				timerbuf += ":";
+				timerbuf += Latin1_to_UTF8(it->epgTitle);
 			}
 		}
 		timerbuf += ")";
