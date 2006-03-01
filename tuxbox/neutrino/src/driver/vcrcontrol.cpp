@@ -544,6 +544,10 @@ std::string CVCRControl::CFileAndServerDevice::getCommandString(const CVCRComman
 			tmpstring = epgTitle;
 		}
 	}
+	else if (!epgTitle.empty())
+	{
+		tmpstring = epgTitle;
+	}
 	extMessage += ZapitTools::UTF8_to_UTF8XML(tmpstring.c_str());
 	
 	extMessage += "</epgtitle>\n\t\t<id>";

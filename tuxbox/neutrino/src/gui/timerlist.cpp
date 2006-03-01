@@ -681,6 +681,11 @@ void CTimerList::paintItem(int pos)
 							zAddData += Latin1_to_UTF8(timer.epgTitle);
 						}
 					}
+					else if(strlen(timer.epgTitle)!=0)
+					{
+						zAddData += " : ";
+						zAddData += Latin1_to_UTF8(timer.epgTitle);
+					}
 				}
 				break;
 			case CTimerd::TIMER_STANDBY:

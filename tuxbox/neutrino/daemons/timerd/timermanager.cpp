@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.84 2006/02/28 21:51:00 zwen Exp $
+   $Id: timermanager.cpp,v 1.85 2006/03/01 21:17:59 zwen Exp $
 
 	License: GPL
 
@@ -1188,7 +1188,6 @@ void CTimerEvent_Record::Reschedule()
 	// clear epgId on reschedule
 	eventInfo.epgID = 0;
 	eventInfo.epg_starttime = 0;
-	epgTitle="";
 	CTimerEvent::Reschedule();
 	getEpgId();
 }

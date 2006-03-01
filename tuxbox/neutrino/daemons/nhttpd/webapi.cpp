@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.66 2006/02/28 21:51:00 zwen Exp $
+	$Id: webapi.cpp,v 1.67 2006/03/01 21:17:58 zwen Exp $
 
 	License: GPL
 
@@ -958,8 +958,14 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 					}
 					else
 					{
+						sAddData+="<BR>";
 						sAddData+=timer->epgTitle;
 					}
+				}
+				else
+				{
+					sAddData+="<BR>";
+					sAddData+=timer->epgTitle;
 				}
 
 			}
