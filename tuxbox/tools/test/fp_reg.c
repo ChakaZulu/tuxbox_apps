@@ -1,5 +1,5 @@
 /*
- * $Id: fp_reg.c,v 1.1 2003/03/27 09:18:00 obi Exp $
+ * $Id: fp_reg.c,v 1.2 2006/03/03 23:09:02 zwen Exp $
  *
  * (C) 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 		}
 		else {
 			val = foo;
-			printf("reg %02lx: %02lx\n", reg, val);
+			printf("reg %02lx: %02x\n", reg, ((unsigned char*)(&foo))[0]);
 		}
 	}
 
