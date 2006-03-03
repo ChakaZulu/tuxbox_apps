@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.c,v 1.9 2006/01/02 18:23:59 rasc Exp $
+$Id: fe_misc.c,v 1.10 2006/03/03 01:51:13 obi Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_misc.c,v 1.9 2006/01/02 18:23:59 rasc Exp $
 
 
 $Log: fe_misc.c,v $
+Revision 1.10  2006/03/03 01:51:13  obi
+use same unit for frequency tolerance as for min, max and stepsize
+
 Revision 1.9  2006/01/02 18:23:59  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -232,7 +235,7 @@ int  print_FE_BasicCapabilities (int v, int fd_fe)
      out_nl (v,"Frequency (min):     %d.%03d %s", fi.frequency_min / 1000, fi.frequency_min % 1000, sf);
      out_nl (v,"Frequency (max):     %d.%03d %s", fi.frequency_max / 1000, fi.frequency_max % 1000, sf);
      out_nl (v,"Frequency stepsiz:   %d.%03d %s", fi.frequency_stepsize / 1000, fi.frequency_stepsize % 1000, sf);
-     out_nl (v,"Frequency tolerance: %d", fi.frequency_tolerance);
+     out_nl (v,"Frequency tolerance: %d.%03d %s", fi.frequency_tolerance / 1000, fi.frequency_tolerance % 1000, sf);
 
    }
 
