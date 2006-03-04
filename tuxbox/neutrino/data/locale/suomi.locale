@@ -268,6 +268,8 @@ epgviewer.notfound EPG:tä ei löytynyt
 eventlistbar.channelswitch Ajasta kanavan vaihto
 eventlistbar.eventsort Lajittele
 eventlistbar.recordevent Tallenna
+experimentalsettings Kokeiluasetuksia
+experimentalsettings.head Kokeiluasetuksia
 favorites.addchannel Nykyinen kanava lisätään "Suosikit" kanavanippuun.\nOdota hetki...
 favorites.bouquetname Suosikit
 favorites.bqcreated Kanavanippu "Suosikit" luotu...\n
@@ -780,6 +782,10 @@ rclock.lockmsg Kaukosäädin on lukittu.\nAvaa painamalla ensin punaista- ja sit
 rclock.menueadd Lukitse kaukosäädin
 rclock.title Kaukosäätimen lukitus
 rclock.unlockmsg Lukitus avattu.
+recordingmenu.apids Tallennuksen äänet
+recordingmenu.apids_ac3 Tallenna AC3 ääni
+recordingmenu.apids_alt Tallenna muut äänet
+recordingmenu.apids_std Tallenna oletusääni
 recordingmenu.choose_direct_rec_dir Hakemiston valinta välittömässä tall.
 recordingmenu.defdir Tallennushakemisto
 recordingmenu.dir_permissions Hakemisto-oikeudet
@@ -805,11 +811,12 @@ recordingmenu.setupnow Ota asetukset käyttöön
 recordingmenu.splitsize Suurin tiedostokoko (MB)
 recordingmenu.stopplayback Pysäytä toisto
 recordingmenu.stopsectionsd Pysäytä sectionsd
-recordingmenu.stream_all_audio_pids Tallenna kaikki ääniraidat
+recordingmenu.stream_pmt_pid Tallenna PMT
 recordingmenu.stream_vtxt_pid Tallenna teksti-tv
 recordingmenu.use_fdatasync Tallenna synkronisesti (fdatasync)
 recordingmenu.use_o_sync Tallenna asynkronisesti (O_SYNC)
 recordingmenu.vcr Videonauhuri
+recordingmenu.zap_on_announce Ohj.vaihto etukäteen
 recordtimer.announce Tallennus alkaa muutaman minuutin kuluttua
 repeatblocker.hint_1 Pienin aikaväli (ms) 2 näppäinpainalluksen tunnistamiseen
 repeatblocker.hint_2 Syötä 0 vaihtaaksesi kursori (punainen = välilyönti)
