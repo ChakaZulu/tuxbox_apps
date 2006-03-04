@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.85 2006/03/01 21:17:59 zwen Exp $
+   $Id: timermanager.cpp,v 1.86 2006/03/04 09:51:47 zwen Exp $
 
 	License: GPL
 
@@ -1089,6 +1089,7 @@ CTimerEvent_Record::CTimerEvent_Record(time_t announceTime, time_t alarmTime, ti
 	eventInfo.apids = apids;
 	recordingDir = recDir;
 	CSectionsdClient sdc;
+	epgTitle="";
 	CShortEPGData epgdata;
 	if (sdc.getEPGidShort(epgID, &epgdata))
 		epgTitle=epgdata.title; 
@@ -1124,7 +1125,7 @@ void CTimerEvent_Record::fireEvent()
 	CTimerd::RecordingInfo ri=eventInfo;
 	ri.eventID=eventID;
 	strcpy(ri.recordingDir, recordingDir.substr(0,sizeof(ri.recordingDir)-1).c_str());						
-	strcpy(ri.epgTitle, recordingDir.substr(0,sizeof(ri.epgTitle)-1).c_str());						
+	strcpy(ri.epgTitle, epgTitle.substr(0,sizeof(ri.epgTitle)-1).c_str());						
 	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_RECORD_START,
 								  CEventServer::INITID_TIMERD,
 								  &ri,
@@ -1138,7 +1139,7 @@ void CTimerEvent_Record::announceEvent()
 	CTimerd::RecordingInfo ri=eventInfo;
 	ri.eventID=eventID;
 	strcpy(ri.recordingDir, recordingDir.substr(0,sizeof(ri.recordingDir)-1).c_str());						
-	strcpy(ri.epgTitle, recordingDir.substr(0,sizeof(ri.epgTitle)-1).c_str());						
+	strcpy(ri.epgTitle, epgTitle.substr(0,sizeof(ri.epgTitle)-1).c_str());						
 	CTimerManager::getInstance()->getEventServer()->sendEvent(CTimerdClient::EVT_ANNOUNCE_RECORD, CEventServer::INITID_TIMERD,
 								  &ri,sizeof(CTimerd::RecordingInfo));
 	dprintf("Record announcement\n"); 
