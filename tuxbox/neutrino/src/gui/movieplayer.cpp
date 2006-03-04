@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.121 2006/02/20 01:10:34 guenther Exp $
+  $Id: movieplayer.cpp,v 1.122 2006/03/04 23:14:31 carjay Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1882,7 +1882,7 @@ static void mp_tcpClose(int fd)
 
 //== mp_playFileThread ==
 //=======================
-void *mp_playFileThread (void *filename)
+void *do_mp_playFileThread (void *filename)
 {
 	std::string   fname  = (const char *)filename;
 	bool          failed = true;
@@ -1923,12 +1923,11 @@ void *mp_playFileThread (void *filename)
 	//------------------------
 	if(failed)
 	{
-		fprintf(stderr, "[mp] mp_playFileThread terminated\n");
+		fprintf(stderr, "[mp] mp_playFileThread terminated due to error\n");
 		g_playstate = CMoviePlayerGui::STOPPED;
 		mp_closeDVBDevices(ctx);
-		pthread_exit(NULL);
+		return 0;
 	}
-
 	do
 	{
 		//-- (live) stream or ... --
@@ -2065,7 +2064,6 @@ void *mp_playFileThread (void *filename)
 				rd = mp_tcpRead(ctx->pH, ctx->dvrBuf, rSize, PF_RD_TIMEOUT);
 			else
 				rd	= read(ctx->inFd, ctx->dvrBuf, rSize);
-
 			//-- update file position --
 			ctx->pos += rd;
 			g_fileposition = ctx->pos;
@@ -2154,7 +2152,13 @@ void *mp_playFileThread (void *filename)
 	}
 
 	fprintf(stderr, "[mp] mp_playFileThread terminated\n");
-	pthread_exit (NULL);
+	return 0;
+}
+
+void *mp_playFileThread (void *filename)
+{
+	void *ret = do_mp_playFileThread(filename);
+	pthread_exit(ret);
 }
 
 //=======================================
@@ -2902,7 +2906,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case NeutrinoMessages::STANDBY_ON:
 			case NeutrinoMessages::SHUTDOWN:
 			case NeutrinoMessages::SLEEPTIMER:
-				fprintf(stderr,"[mp] teminating due to high-prio event\n");
+				fprintf(stderr,"[mp] terminating due to high-prio event\n");
 				g_RCInput->postMsg (msg, data);
 				requestStop = true; // force exit
 				break;
@@ -3284,7 +3288,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.121 $");
+	helpbox.addLine("Version: $Revision: 1.122 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -3305,7 +3309,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.121 $");
+	helpbox.addLine("Version: $Revision: 1.122 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
