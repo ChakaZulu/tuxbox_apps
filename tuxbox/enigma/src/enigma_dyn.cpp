@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.554 2006/02/24 19:44:40 coronas Exp $
+ * $Id: enigma_dyn.cpp,v 1.555 2006/03/04 20:03:25 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -1994,7 +1994,7 @@ static eString getvideom3u()
 	eString pmtpid = eString().sprintf("%04x", Decoder::current.pmtpid);
 	eString pcrpid = eString().sprintf("%04x", Decoder::current.pcrpid);
 
-	eString apids;	
+	eString apids = apid;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
@@ -2002,7 +2002,9 @@ static eString getvideom3u()
 		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
 			;it != astreams.end(); ++it)
 		{
-			apids += "," + eString().sprintf("%04x", it->pmtentry->elementary_PID);
+			eString apid2 = eString().sprintf("%04x", it->pmtentry->elementary_PID);
+			if (apid2 != apid)
+				apids += "," + apid2;
 		}
 	}
 
