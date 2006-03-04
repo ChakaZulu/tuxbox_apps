@@ -697,6 +697,11 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		pids[numpids++] = si.vtxtpid;
 	}
 
+	if ((StreamPmtPid) && (si.pmtpid != 0))
+	{
+		pids[numpids++] = si.pmtpid;
+	}
+
 	char filename[512]; // UTF-8
 
 	// Create filename for recording

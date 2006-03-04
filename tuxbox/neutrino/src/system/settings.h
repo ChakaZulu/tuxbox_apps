@@ -174,6 +174,7 @@ struct SNeutrinoSettings
 	int recording_audio_pids_alt;
 	int recording_audio_pids_ac3;
 	int  recording_stream_vtxt_pid;
+	int  recording_stream_pmt_pid;
 	char recording_ringbuffers[10];
 	int recording_in_spts_mode;
 	int recording_choose_direct_rec_dir;

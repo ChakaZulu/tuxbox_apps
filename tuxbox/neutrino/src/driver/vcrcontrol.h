@@ -151,6 +151,7 @@ class CVCRControl
 			bool         Use_O_Sync;
 			bool         Use_Fdatasync;
 			bool         StreamVTxtPid;
+			bool         StreamPmtPid;
 			unsigned int RingBuffers;
 				
 			virtual CVCRDevices getDeviceType(void) const
@@ -165,11 +166,12 @@ class CVCRControl
 			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string& epgTitle = "", unsigned char apids = 0);	
 #endif /* MOVIEBROWSER */
 			
-			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool use_fdatasync, const bool stream_vtxt_pid, const unsigned int ringbuffers, bool createTemplateDirectories)
+			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool use_fdatasync, const bool stream_vtxt_pid, const bool stream_pmt_pid, const unsigned int ringbuffers, bool createTemplateDirectories)
 				
 				: Directory(directory), FilenameTemplate(""), CreateTemplateDirectories(createTemplateDirectories),
 				SplitSize(splitsize), Use_O_Sync(use_o_sync), Use_Fdatasync(use_fdatasync),
-				StreamVTxtPid(stream_vtxt_pid), RingBuffers(ringbuffers)
+				StreamVTxtPid(stream_vtxt_pid),
+				StreamPmtPid(stream_pmt_pid), RingBuffers(ringbuffers)
 			{
 				StopPlayBack = stopplayback;
 				StopSectionsd = stopsectionsd;

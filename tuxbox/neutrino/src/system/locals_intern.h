@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.65 2006/02/20 01:10:36 guenther Exp $
+ * $Id: locals_intern.h,v 1.66 2006/03/04 00:57:57 sat_turner Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -837,6 +837,7 @@ const char * locale_real_names[] =
 	"recordingmenu.splitsize",
 	"recordingmenu.stopplayback",
 	"recordingmenu.stopsectionsd",
+	"recordingmenu.stream_pmt_pid",
 	"recordingmenu.stream_vtxt_pid",
 	"recordingmenu.use_fdatasync",
 	"recordingmenu.use_o_sync",
