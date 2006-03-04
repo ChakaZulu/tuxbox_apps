@@ -810,6 +810,7 @@ recordingmenu.setupnow activate changes
 recordingmenu.splitsize Max. file size (MB)
 recordingmenu.stopplayback stop playback
 recordingmenu.stopsectionsd stop sectionsd
+recordingmenu.stream_pmt_pid record PMT
 recordingmenu.stream_vtxt_pid record videotext
 recordingmenu.use_fdatasync write synchronous (fdatasync)
 recordingmenu.use_o_sync write synchronous (O_SYNC)
