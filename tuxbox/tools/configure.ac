@@ -20,5 +20,6 @@ satfind/Makefile
 test/Makefile
 tuxinfo/Makefile
 graphics/Makefile
+kb2rcd/Makefile
 ])
 
