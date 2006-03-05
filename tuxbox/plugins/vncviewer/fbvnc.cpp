@@ -28,6 +28,8 @@
 
 #define STEP_PAN 30
 
+#define KBLCKFILE "/tmp/keyboard.lck"									//! file to lock keyboard-conversion
+
 extern "C" {
 #include "vncviewer.h"
 #include "fbgl.h"
@@ -75,6 +77,8 @@ cleanup_and_exit(char *msg, int ret) {
 	fbvnc_close();
 	list_destroy(global_framebuffer.overlays);
 	list_destroy(sched);
+	// enable keyboard-conversion again
+	unlink(KBLCKFILE);
 	terminate=1;
 }
 
@@ -1577,6 +1581,9 @@ extern "C" {
 			cleanupFT();
 			return;
 		}
+
+		// lock keyboard-conversions, this is done by the plugin itself
+		fclose(fopen(KBLCKFILE,"w"));
 
 		fbvnc_init();
 		dprintf("Overlays init\n");
