@@ -731,6 +731,9 @@ void plugin_exec(PluginParam *par)
 	memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 	printf("TuxCom init successful\n");
 
+	// lock keyboard-conversions, this is done by the plugin itself
+	fclose(fopen(KBLCKFILE,"w"));
+
 #ifdef HAVE_DREAMBOX_HARDWARE
  	fcntl(rc, F_SETFL, O_NONBLOCK);
 #else
@@ -1346,6 +1349,9 @@ void plugin_exec(PluginParam *par)
 
 	free(lbb);
 	munmap(lfb, fix_screeninfo.smem_len);
+
+	// enable keyboard-conversion again
+	unlink(KBLCKFILE);
 
 	//restore videoformat
 	ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);

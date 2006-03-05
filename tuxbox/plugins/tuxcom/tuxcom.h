@@ -77,8 +77,8 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.13\n"
-#define MSG_COPYRIGHT  "© dbluelle 2004-2005"
+#define MSG_VERSION    "Tuxbox Commander Version 1.14\n"
+#define MSG_COPYRIGHT  "© dbluelle 2004-2006"
 
 #ifdef HAVE_DREAMBOX_HARDWARE
 
@@ -248,6 +248,7 @@ int rcaltgrtable[] =
 #define KBC_RETURN	0x0D
 
 #endif
+#define KBLCKFILE "/tmp/keyboard.lck"										//! file to lock keyboard-conversion
 
 
 //freetype stuff
