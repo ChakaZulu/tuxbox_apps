@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.555 2006/03/04 20:03:25 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.556 2006/03/05 11:00:57 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -1990,11 +1990,9 @@ static eString audiopls(eString request, eString dirpath, eString opt, eHTTPConn
 static eString getvideom3u()
 {
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
-	eString apid = eString().sprintf("%04x", Decoder::current.apid);
 	eString pmtpid = eString().sprintf("%04x", Decoder::current.pmtpid);
-	eString pcrpid = eString().sprintf("%04x", Decoder::current.pcrpid);
 
-	eString apids = apid;
+	eString apids;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
@@ -2002,13 +2000,11 @@ static eString getvideom3u()
 		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
 			;it != astreams.end(); ++it)
 		{
-			eString apid2 = eString().sprintf("%04x", it->pmtentry->elementary_PID);
-			if (apid2 != apid)
-				apids += "," + apid2;
+			apids += "," + eString().sprintf("%04x", it->pmtentry->elementary_PID);
 		}
 	}
 
-	return "http://" + getIP() + ":31339/0," + pmtpid + "," + vpid  + apids + "," + pcrpid;
+	return "http://" + getIP() + ":31339/0," + pmtpid + "," + vpid + apids;
 }
 
 
