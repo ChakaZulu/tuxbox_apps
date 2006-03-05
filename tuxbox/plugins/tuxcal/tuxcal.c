@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.c,v $
+ * Revision 1.07  2006/03/05 15:59:37  robspr1
+ * - use /tmp/keyboard.lck to signal decoding of the keyboard
+ *
  * Revision 1.06  2006/02/24 08:13:29  robspr1
  * - bugfix Editor background
  *
@@ -2627,7 +2630,7 @@ void SaveDatabase(void)
 */
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.06 $";
+	char cvs_revision[] = "$Revision: 1.07 $";
 	FILE *fd_run;
 	FT_Error error;
 
@@ -2767,7 +2770,9 @@ void plugin_exec(PluginParam *par)
 	startx = sx + (((ex-sx) - MAXSCREEN_X)/2);
 	starty = sy + (((ey-sy) - MAXSCREEN_Y)/2);
 
-	
+	// lock keyboard-conversions, this is done by the plugin itself
+	fclose(fopen(KBLCKFILE,"w"));
+		
 	// get daemon status
 	if (!ControlDaemon(GET_STATUS))
 	{
@@ -3065,6 +3070,9 @@ void plugin_exec(PluginParam *par)
 	// signal daemon to reread the database
 	ControlDaemon(RELOAD_DB);														
 
+	// enable keyboard-conversion again
+	unlink(KBLCKFILE);
+	
 	// cleanup
 	FTC_Manager_Done(manager);
 	FT_Done_FreeType(library);

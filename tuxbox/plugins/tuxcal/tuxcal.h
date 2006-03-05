@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.h,v $
+ * Revision 1.06  2006/03/05 15:59:37  robspr1
+ * - use /tmp/keyboard.lck to signal decoding of the keyboard
+ *
  * Revision 1.05  2006/02/23 23:07:25  robspr1
  * - change SKIN2, signal up to 5 days, toggle clock-display file
  *
@@ -60,6 +63,7 @@
 #define CFGPATH "/var/tuxbox/config/tuxcal/"					//! config-path
 #define CFGFILE "tuxcal.conf"													//! config-file
 #define EVTFILE "tuxcal.list"													//! database-file
+#define KBLCKFILE "/tmp/keyboard.lck"									//! file to lock keyboard-conversion
 
 //----------------------------------------------------
 // OSD   different languages

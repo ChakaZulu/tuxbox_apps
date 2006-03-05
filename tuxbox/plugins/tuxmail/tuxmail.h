@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.34  2006/03/05 16:02:13  robspr1
+ * - use /tmp/keyboard.lck to signal decoding of the keyboard
+ *
  * Revision 1.33  2005/11/19 14:37:48  robspr1
  * - add different behaviour in marking mails green in the plugin
  *
@@ -155,6 +158,7 @@
 #define TEXTFILE "/var/tuxbox/config/tuxmail/mailtext"
 #define ADDRFILE "/var/tuxbox/config/tuxmail/tuxmail.addr"
 #define T9FILE   "/var/tuxbox/config/tuxmail/tuxmail.t9"
+#define KBLCKFILE "/tmp/keyboard.lck"										//! file to lock keyboard-conversion
 
 #define OE_START "/etc/rc2.d/S99tuxmail"
 #define OE_KILL0 "/etc/rc0.d/K00tuxmail"
