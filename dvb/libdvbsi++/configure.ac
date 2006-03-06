@@ -6,6 +6,12 @@ AC_PROG_LIBTOOL
 AC_CHECK_HEADERS([byteswap.h endian.h])
 AC_PATH_PROG(CXXTEST, cxxtestgen.pl, no)
 AM_CONDITIONAL(HAVE_CXXTEST, test "$CXXTEST" != "no")
+AC_PATH_PROG(CVS2CL, cvs2cl, no)
+AM_CONDITIONAL(HAVE_CVS2CL, test "$CVS2CL" != "no")
+AC_PATH_PROG(GNUPG, gpg, no)
+AM_CONDITIONAL(HAVE_GNUPG, test "$GNUPG" != "no")
+AC_PATH_PROG(MD5SUM, md5sum, no)
+AM_CONDITIONAL(HAVE_MD5SUM, test "$MD5SUM" != "no")
 
 dnl - If any interfaces have been added, removed, or changed since the last
 dnl   update, increment current, and set revision to 0.
