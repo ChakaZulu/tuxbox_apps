@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.11  2006/03/06 21:09:46  robspr1
+ * - change to kb2rcd.conf and change mouse behaviour
+ *
  * Revision 0.10  2006/03/05 22:39:03  robspr1
  * - add to cvs
  *
@@ -75,7 +78,7 @@
 
 
 #define CFGPATH "/var/tuxbox/config/"									//! config-path
-#define CFGFILE "kb2rc.conf"													//! config-file
+#define CFGFILE "kb2rcd.conf"													//! config-file
 #define PIDFILE "/tmp/kb2rcd.pid"											//! PID file
 #define ACTFILE "/tmp/kb2rcd.act"											//! file to signal active conversion
 #define LCKFILE "/tmp/keyboard.lck"										//! file to lock conversion
@@ -91,6 +94,11 @@ struct key{
 	char *name;
 	unsigned long code;
 };
+
+#define PAUSE100				0xFFFF0100
+#define PAUSE250				0xFFFF0250
+#define PAUSE500				0xFFFF0500
+#define PAUSE1000				0xFFFF1000
 
 static const struct key keyname[] = {
 	{"KEY_0", 					KEY_0},
@@ -208,6 +216,10 @@ static const struct key keyname[] = {
 	{"KEY_PAUSE",				KEY_PAUSE}, 	
 	{"KEY_BTNLEFT",			BTN_LEFT}, 
 	{"KEY_BTNRIGHT",		BTN_RIGHT},
+	{"PAUSE100",				PAUSE100},
+	{"PAUSE250",				PAUSE250},
+	{"PAUSE500",				PAUSE500},
+	{"PAUSE1000",				PAUSE1000},
 	{"",								0xFFFFFFFF}
 };
 
@@ -224,7 +236,7 @@ enum {	// not defined in input.h but used like that, at least in 2.4.22
 };
 
 #define MAX_OUT				10									//! max number of codes the represent on keyborad-key
-#define MAX_CONVERT		50									//! maximum number of keystrokes to convert
+#define MAX_CONVERT		100									//! maximum number of keystrokes to convert
 #define MAX_REL				80									//! maximum relative value that makes a key
 
 struct keyconvert{
@@ -239,7 +251,9 @@ char webuser[32] = "";										//! for using webinterface
 char webpass[32] = "";										//! for using webinterface
 struct keyconvert keyconv[MAX_CONVERT];		//! the key-convertions
 int iCount = 0;														//! number of conversions
-int iMouseCnt = MAX_REL;									//! maximum relative value that makes a key
+int iMouseCnt = 0;												//! how many mouse-counts make one key
+int iMinMouse = 1;												//! minimum relative value that is not ignored
+int iMaxMouse = MAX_REL;									//! maximum relative value, makes a key
 int iDelay = 0;														//! delay in milli-seconds between keystrokes
 	
 //----------------------------------------------------

@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.c,v $
+ * Revision 0.11  2006/03/06 21:09:46  robspr1
+ * - change to kb2rcd.conf and change mouse behaviour
+ *
  * Revision 0.10  2006/03/05 22:39:03  robspr1
  * - add to cvs
  *
@@ -147,6 +150,16 @@ void ReadConf()
 			sscanf(p1 + 9, "%d", &iMouseCnt);
 			continue;
 		}
+		else if ((p1 = strstr(linebuffer, "MINMOUSE=")))
+		{
+			sscanf(p1 + 9, "%d", &iMinMouse);
+			continue;
+		}
+		else if ((p1 = strstr(linebuffer, "MINMOUSE=")))
+		{
+			sscanf(p1 + 9, "%d", &iMaxMouse);
+			continue;
+		}
 		else if ((p1 = strstr(linebuffer, "DELAY=")))
 		{
 			sscanf(p1 + 6, "%d", &iDelay);
@@ -222,6 +235,8 @@ int WriteConf()
 	}
 
 	fprintf(fd_conf,"MOUSECNT=%d\n",iMouseCnt);
+	fprintf(fd_conf,"MINMOUSE=%d\n",iMinMouse);
+	fprintf(fd_conf,"MAXMOUSE=%d\n",iMaxMouse);
 	fprintf(fd_conf,"DELAY=%d\n\n",iDelay);
 	
 	for (i=0; i<iCount; i++)
@@ -288,36 +303,51 @@ void CloseRC(void)
 /******************************************************************************
  * SendRCCode
  ******************************************************************************/
+/*!
+ * send a code to the event-buffer
+ 
+ \param			: code: a key-code or a PAUSE
+ \param			: count: 0 : RELEASE the key, else send count key-strokes, end with release
+ \return 		: none
+*/
 int SendRCCode(unsigned int code, unsigned int count)
 {
 	struct input_event iev;
 	iev.type=EV_KEY;
 	iev.code=code;
+
 	// send release key
 	if (count == 0) 
 	{
 		iev.value=KEY_RELEASED;
 		return write(rc,&iev,sizeof(iev));
 	}
-	// send one full keystroke
+	
+	// send one full keystroke or pause
 	if (count == 1)
 	{
-		iev.value=KEY_PRESSED;
-		write(rc,&iev,sizeof(iev));
-		usleep(1000);
-		iev.value=KEY_RELEASED;
-		return write(rc,&iev,sizeof(iev));
+		if (code == PAUSE100) usleep(100*1000);
+		else if (code == PAUSE250) usleep(250*1000);
+		else if (code == PAUSE500) usleep(500*1000);
+		else if (code == PAUSE1000) sleep(1);
+		else
+		{
+			iev.value=KEY_PRESSED;
+			write(rc,&iev,sizeof(iev));
+			iev.value=KEY_RELEASED;
+			write(rc,&iev,sizeof(iev));
+		}
+		return 1;
 	}
+	
 	// send some autorepeat keys
 	iev.value=KEY_PRESSED;
 	write(rc,&iev,sizeof(iev));
 	iev.value=KEY_AUTOREPEAT;
 	while (--count)
 	{
-		usleep(1000);
 		write(rc,&iev,sizeof(iev));
 	}
-	usleep(1000);
 	iev.value=KEY_RELEASED;
 	return write(rc,&iev,sizeof(iev));
 }
@@ -331,13 +361,15 @@ int SendRCCode(unsigned int code, unsigned int count)
  \param			: none
  \return 		: none
 */
-
 void GetRCCode()
 {
 
 	static unsigned long rc_last_code = KEY_RESERVED;
 	static signed long cursor_h = 0;
 	static signed long cursor_v = 0;
+	static int cnt_h = 0;
+	static int cnt_v = 0;
+	
 	int i;
 	unsigned long	kbcode;
 	char* pName;
@@ -358,26 +390,83 @@ void GetRCCode()
 		// do we have a valid input
 		
 		// relativ-event, cursor
-		if (ev.type==EV_REL)
+		if ((ev.type==EV_REL) && (abs(ev.value)>=iMinMouse))
 		{
-			if (ev.code == 0)										// horizontal position
+			if (iMouseCnt)
 			{
-				cursor_h += ev.value;
-				if (cursor_h > iMouseCnt)
-					SendRCCode(KEY_RIGHT,cursor_h/iMouseCnt );
-				else if (cursor_h < -iMouseCnt)
-					SendRCCode(KEY_LEFT,cursor_h/(-iMouseCnt));
-				cursor_h %= iMouseCnt;
+  			if (ev.code == 0)										// horizontal axes
+  			{
+  				// change direction
+  				if (((ev.value > 0) && (cnt_h < 0)) || ((ev.value < 0) && (cnt_h > 0)))
+  				 cnt_h = 0;
+  				else
+  				{
+  					if (ev.value > 0) 
+						{
+  						if (++cnt_h >= iMouseCnt)
+  						{
+  							SendRCCode(KEY_RIGHT,1);
+  							cnt_h=0;
+  						}
+  					}
+  					else
+  					{
+  						if (--cnt_h <= -iMouseCnt)
+  						{
+  							SendRCCode(KEY_LEFT,1);
+  							cnt_h=0;
+  						}
+  					}					
+  				}
+  			}
+  			else																// vertical axes
+  			{
+  				// change direction
+  				if (((ev.value > 0) && (cnt_v < 0)) || ((ev.value < 0) && (cnt_v > 0)))
+  				 cnt_v = 0;
+  				else
+  				{
+  					if (ev.value > 0) 
+						{
+  						if (++cnt_v >= iMouseCnt)
+  						{
+  							SendRCCode(KEY_DOWN,1);
+  							cnt_v=0;
+  						}
+  					}
+  					else
+  					{
+  						if (--cnt_v <= -iMouseCnt)
+  						{
+  							SendRCCode(KEY_UP,1);
+  							cnt_v=0;
+  						}
+  					}					
+  				}
+  			}		
 			}
-			else
+			else			// not using mouse-counts, use relative value
 			{
-				cursor_v += ev.value;
-				if (cursor_v > iMouseCnt)
-					SendRCCode(KEY_DOWN,cursor_v/iMouseCnt);
-				else if (cursor_v < -iMouseCnt)
-					SendRCCode(KEY_UP,cursor_v/(-iMouseCnt));
-				cursor_v %= iMouseCnt;
+  			if (ev.code == 0)										// horizontal axes
+  			{
+  				cursor_h += ev.value;
+  				if (cursor_h > iMaxMouse)
+  					SendRCCode(KEY_RIGHT,cursor_h/iMaxMouse );
+  				else if (cursor_h < -iMaxMouse)
+  					SendRCCode(KEY_LEFT,cursor_h/(-iMaxMouse));
+  				cursor_h %= iMaxMouse;
+  			}
+  			else																// vertical axes
+  			{
+  				cursor_v += ev.value;
+  				if (cursor_v > iMaxMouse)
+  					SendRCCode(KEY_DOWN,cursor_v/iMaxMouse);
+  				else if (cursor_v < -iMaxMouse)
+  					SendRCCode(KEY_UP,cursor_v/(-iMaxMouse));
+  				cursor_v %= iMaxMouse;
+  			}
 			}
+			if (debug) printf("kb2rcd: cu_h:%ld cu_v:%ld c_h:%d c_v:%d\r\n",cursor_h,cursor_v,cnt_h,cnt_v);
 		}
 		
 		if ((ev.value) && (ev.type==EV_KEY))
@@ -486,7 +575,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 0.10 $";
+	char cvs_revision[] = "$Revision: 0.11 $";
 	int param = 0;
 	
 	sscanf(cvs_revision, "%*s %s", versioninfo_d);
