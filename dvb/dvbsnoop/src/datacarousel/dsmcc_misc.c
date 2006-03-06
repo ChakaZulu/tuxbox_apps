@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.22 2006/03/06 00:04:49 rasc Exp $
+$Id: dsmcc_misc.c,v 1.23 2006/03/06 20:25:37 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.22 2006/03/06 00:04:49 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.23  2006/03/06 20:25:37  rasc
+DSM-CC Carousell, lots of Bugfixes, BIOP::Message not yet decodable (ddb has to collect Modules)
+
 Revision 1.22  2006/03/06 00:04:49  rasc
 More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
 BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
@@ -541,52 +544,6 @@ int dsmcc_DVB_service_location (int v, u_char *b)
 
 	return 10;
 }
-
-
-
-
-
-/*
- *  DSM CosNaming::Name
- *  BIOP::Name
- *  returns : 32bit of last "kind_data" in *kind  (== type alias)
- *   if *kind != NULL
- *  return: len
- */
-
-int  dsmcc_BIOP_DSM_Name (int v, const char *str, u_char *b, u_long *kind)
-{
- u_char   *b_org = b;
- u_long   n2;
-
-
-   out_nl (v,"%s::Name",str);
-   indent (+1);
-
-   n2 = outBit_Sx_NL (v,"nameComponents_count: ",	b,   0, 32);
-   b   += 4;
-
-   for (; n2 > 0; n2--) {
-	u_long    n3,n4;
-
-	n3 = outBit_Sx_NL (v,"id_length: ",		b,   0, 32);
-	print_databytes   (v,"id_data:", 	   	b+4, n3);
-	b   += 4 + n3;
-
-	n4 = outBit_Sx_NL (v,"kind_length: ",		b,   0, 32);
-	print_databytes   (v,"kind_data:", 	   	b+4, n4);
-	if (kind) {
-		*kind =	getBits (b+4, 0, 0, 32);	// type aliases
-	}
-
-	b   += 4 + n4;
-
-   }
-
-   indent (-1);
-   return (int) (b - b_org);
-}
-
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.30 2006/03/06 00:05:03 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.31 2006/03/06 20:25:38 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_str.h,v 1.30 2006/03/06 00:05:03 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.31  2006/03/06 20:25:38  rasc
+DSM-CC Carousell, lots of Bugfixes, BIOP::Message not yet decodable (ddb has to collect Modules)
+
 Revision 1.30  2006/03/06 00:05:03  rasc
 More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
 BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
@@ -196,6 +199,7 @@ char *dsmccStrBIOP_TAP_SelectorType (u_int id);
 char *dsmccStrBIOP_EndianType (u_int id);
 char *dsmccStrBIOP_TypeID_Alias (u_int id);
 char *dsmccStrBIOP_BindingType (u_int id);
+char *dsmccStrBIOP_MAGIC (u_int id);
 
 
 #endif

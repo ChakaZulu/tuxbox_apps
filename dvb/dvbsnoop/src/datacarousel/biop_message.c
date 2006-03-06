@@ -1,5 +1,5 @@
 /*
-$Id: biop_message.c,v 1.2 2006/03/06 01:14:50 rasc Exp $
+$Id: biop_message.c,v 1.3 2006/03/06 20:25:37 rasc Exp $
 
 
  DVBSNOOP
@@ -45,6 +45,7 @@ static u_long  body_FileMessage (int v, u_char *b);
 static u_long  body_DirectoryMessage (int v, u_char *b);
 static u_long  body_StreamMessage (int v, u_char *b);
 static u_long  body_StreamEventMessage (int v, u_char *b);
+static u_long  body_basic_Message (int v, u_char *b);
 
 static u_long  do_ServiceContentList (int v, u_char *b);
 
@@ -72,8 +73,11 @@ u_long  BIOP_Message (int v, u_char *b)
   u_long   kind;
 
 
+  out_nl (v, "BIOP::Message");
+  indent (+1);
 
-	print_databytes (v,"magic:",			b,   4); 
+   	outBit_S2x_NL(v,"magic: ",			b,   0, 32,
+			(char *(*)(u_long)) dsmccStrBIOP_MAGIC);
 	outBit_Sx_NL (v,"biop_version.major: ",		b,  32,  8);
 	outBit_Sx_NL (v,"biop_version.minor: ",		b,  40,  8);
 
@@ -88,10 +92,10 @@ u_long  BIOP_Message (int v, u_char *b)
 	outBit_Sx_NL (v,"message_size: ",		b,  64, 32);
   b += 12;
 
+
   n1  = outBit_Sx_NL (v,"objectKey_length: ",		b,  0,  8);
 	print_databytes (v,"objectKey_data:",		b+1, n1); 
   b += 1 + n1;
-
 
 
   n2  = outBit_Sx_NL (v,"objectKind_length: ",		b,  0,  32);
@@ -108,6 +112,7 @@ u_long  BIOP_Message (int v, u_char *b)
 
 
 
+  out_NL (v);
 
   // -- select message processing,
   // -- due to "kind" aka type_id aliases
@@ -134,15 +139,16 @@ u_long  BIOP_Message (int v, u_char *b)
 		len = body_StreamMessage (v, b);
 		break;
 
-	  default:
-		// ..............................................................................
-		 out_nl (v, "unsopported BIOP  (abort).");  // $$$ TODO
-		 exit (1);
-		  break;
+	  default:			// unsported BIOP (????)
+		out_nl (v, "unsopported BIOP  (please report!!):");
+		len = body_basic_Message (v, b);
+		break;
   }
   b += len;
 
 
+  out_NL (v);
+  indent (-1);
   return  (u_long) (b - b_org);
 }
 
@@ -164,19 +170,26 @@ static u_long  body_FileMessage (int v, u_char *b)
 
 
    n2 = outBit_Sx_NL   (v,"objectInfo_length: ",	b,   0,  16);
-  	outBit64_Sx_NL (v,"DSM::File::ContentSize: ",	b,  16,  64);
-   b +=  10;
-   n2 -=  8;
-   out_nl (v, "Descriptor_loop:");
-   indent (+1);
-   while (n2 > 0) {
-	int    x;
+   b += 2;
+   if (n2) {	// has to be >= 8
+  	outBit64_Sx_NL (v,"DSM::File::ContentSize: ",	b,   0,  64);
+	b  += 8;
+	n2 -= 8;
+	if (n2 > 0) {
+	   	out_nl (v, "Descriptor_loop:");
+   		indent (+1);
+   		while (n2 > 0) {
+			int    x;
 
-	x   = descriptor (b,  DSMCC_CAROUSEL);
-	b  += x;
-	n2 -= x;
-   }
-   indent (-1);
+			x   = descriptor (b,  DSMCC_CAROUSEL);
+			b  += x;
+			n2 -= x;
+   			out_NL (v);
+   		}
+	} // if n2 > 0
+	   indent (-1);
+   } // if n2
+   out_NL (v);
 
 
    nx = do_ServiceContentList (v, b);
@@ -215,6 +228,7 @@ static u_long  body_DirectoryMessage (int v, u_char *b)
    n2 = outBit_Sx_NL   (v,"objectInfo_length: ",	b,   0,  16);
  	print_databytes(v,"objectInfo_data:", 		b+2, n2);
    b += 2 + n2;
+   out_NL (v);
 
 
    nx = do_ServiceContentList (v, b);
@@ -222,10 +236,9 @@ static u_long  body_DirectoryMessage (int v, u_char *b)
 
 
         outBit_Sx_NL   (v,"messageBody_length: ",	b,   0,   32);
-
-
    n5 = outBit_Sx_NL   (v,"bindings_count: ",		b,  32,   16);
    b += 6;
+
    indent (+1);
    for (i=0; i < n5; i++) {
 	int    n6;
@@ -247,27 +260,35 @@ static u_long  body_DirectoryMessage (int v, u_char *b)
 	n9 = outBit_Sx_NL   (v,"objectInfo_length: ",	b,   0,  16);
 	b += 2;
 
-	if (kinddata == 0x66696c00) {		// "fil"
-	  	outBit64_Sx_NL (v,"DSM::File::ContentSize: ",	b,  16,  64);
-		b  += 8;
-		n9 -= 2;
-	}
+	if (n9) {
+		if (kinddata == 0x66696c00) {		// "fil"
+	  		outBit64_Sx_NL (v,"DSM::File::ContentSize: ",	b,  16,  64);
+			b  += 8;
+			n9 -= 8;
+		}
 
-	print_databytes  (v,"descriptor_bytes:", 	b, n9);
-	b += n9;
 
-// $$$ TODO: to be checked...!!!
-// 	out_nl (v, "Descriptor_loop:");
-// 	indent (+1);
-//	while (n9 > 0) {
-//		int    x;
+		if (n9 > 0) {
+			print_databytes  (v,"descriptor_bytes (PLEASE REPORT!!!):", 	b, n9);
+			b += n9;
+
+// 			$$$ TODO: to be checked...!!! (instead of print_databytes)
 //
-//		x   = descriptor (b,  DSMCC_CAROUSEL);
-//		b  += x;
-//		n9 -= x;
-//	}
-// 	indent (-1);
+// 			out_nl (v, "Descriptor_loop:");
+// 			indent (+1);
+//			while (n9 > 0) {
+//				int    x;
 //
+//				x   = descriptor (b,  DSMCC_CAROUSEL);
+//				b  += x;
+//				n9 -= x;
+//				out_NL (v);
+//			}
+//	 		indent (-1);
+
+ 		}  // if n9 > 0
+
+	} // if n9
 
    } // loop n5
    indent (-1);
@@ -294,6 +315,7 @@ static u_long  body_StreamMessage (int v, u_char *b)
 
 
    n2 = outBit_Sx_NL   (v,"objectInfo_length: ",	b,   0,  16);
+   b += 2;
    nx = BIOP_DSM_Stream_Info_T (v, b);
    // $$$ Warning: Standards documents may describe wrong length calculation!
    	print_databytes  (v,"ObjectInfo_byte:",	 	b+nx, n2-nx);
@@ -338,6 +360,7 @@ static u_long  body_StreamEventMessage (int v, u_char *b)
 
 
    n2 = outBit_Sx_NL   (v,"objectInfo_length: ",	b,   0,  16);
+   b += 2;
    nx = BIOP_DSM_Stream_Info_T (v, b);
    ny = BIOP_DSM_Event_EventList_T (v, b+nx);
    	print_databytes  (v,"ObjectInfo_byte:",	 	b+nx, n2-nx-ny);
@@ -378,6 +401,37 @@ static u_long  body_StreamEventMessage (int v, u_char *b)
 
 
 
+/*
+ *  BIOP::basic_Message
+ *  decode basic message body
+ *  return: len of body
+ */
+
+static u_long  body_basic_Message (int v, u_char *b)
+{
+  u_char   *b_org = b;
+   u_int    nx,n2,n3;
+
+
+   n2 = outBit_Sx_NL   (v,"objectInfo_length: ",	b,   0,  16);
+   	print_databytes  (v,"ObjectInfo_byte:",	 	b+2, n2);
+   b += 2 + n2;
+   
+
+   nx = do_ServiceContentList (v, b);
+   b += nx;
+
+
+   n3 = outBit_Sx_NL   (v,"messageBody_length: ",	b,   0,   32);
+   print_databytes  (v,"MessageBody:",	 	b+4, n3);
+   b += 4 + n3;
+
+   return (u_long)  (b - b_org);
+}
+
+
+
+
 
 
 
@@ -401,13 +455,12 @@ static u_long  do_ServiceContentList (int v, u_char *b)
 	int    n4;
 
 	     outBit_Sx_NL (v,"context_id: ",		b,   0,  32);
-	n4 = outBit_Sx_NL (v,"context_data_length: ",	b,  32,  8);
- 	     print_databytes  (v,"context_data_byte:", 	b+5, n4);
-	b += 5 + n4;
+	n4 = outBit_Sx_NL (v,"context_data_length: ",	b,  32,  16);
+ 	     print_databytes  (v,"context_data:", 	b+6, n4);
+	b += 6 + n4;
 
    }
    indent (-1);
-	
 
    return (u_long) (b - b_org);
 }

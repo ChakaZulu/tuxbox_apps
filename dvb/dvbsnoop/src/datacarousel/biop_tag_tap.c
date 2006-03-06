@@ -1,5 +1,5 @@
 /*
-$Id: biop_tag_tap.c,v 1.1 2006/03/06 00:04:49 rasc Exp $
+$Id: biop_tag_tap.c,v 1.2 2006/03/06 20:25:37 rasc Exp $
 
 
  DVBSNOOP
@@ -21,6 +21,9 @@ $Id: biop_tag_tap.c,v 1.1 2006/03/06 00:04:49 rasc Exp $
 
 
 $Log: biop_tag_tap.c,v $
+Revision 1.2  2006/03/06 20:25:37  rasc
+DSM-CC Carousell, lots of Bugfixes, BIOP::Message not yet decodable (ddb has to collect Modules)
+
 Revision 1.1  2006/03/06 00:04:49  rasc
 More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
 BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
@@ -118,7 +121,7 @@ u_long  BIOP_TAG_dispatch (int v, u_char *b)
 
 	}
 		
-
+  out_NL (v);
   return len;
 }
 
@@ -171,6 +174,7 @@ int BIOP_TAP (int v, const char *str, u_char *b)
 	
 	stype = outBit_S2x_NL(v,"selector_type: ",	b,  0, 16,
 			(char *(*)(u_long))dsmccStrBIOP_TAP_SelectorType );
+	indent (+1);
 	switch (stype) {
 
 		case 0x0001:			// MessageSelector
@@ -192,6 +196,7 @@ int BIOP_TAP (int v, const char *str, u_char *b)
 			break;
 
 	}
+	indent (-1);
 
    } else {
 	if (n > 0) {
@@ -204,6 +209,7 @@ int BIOP_TAP (int v, const char *str, u_char *b)
 
 
    indent (-1);
+   out_NL (v);
    return (int) (b - b_org);
 }
  

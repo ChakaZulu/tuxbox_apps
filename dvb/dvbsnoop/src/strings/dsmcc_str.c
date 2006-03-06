@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.37 2006/03/06 01:14:50 rasc Exp $
+$Id: dsmcc_str.c,v 1.38 2006/03/06 20:25:38 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.37 2006/03/06 01:14:50 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.38  2006/03/06 20:25:38  rasc
+DSM-CC Carousell, lots of Bugfixes, BIOP::Message not yet decodable (ddb has to collect Modules)
+
 Revision 1.37  2006/03/06 01:14:50  rasc
 Bugfixes... DSMCC BIOPs...
 
@@ -1293,6 +1296,25 @@ char *dsmccStrBIOP_BindingType (u_int id)
 
   return findTableID (TableIDs, id);
 }
+
+
+
+
+/*
+  -- BIOP  "Magic"  ID 
+  -- e.g. TS 102 812
+*/
+
+char *dsmccStrBIOP_MAGIC (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x42494F50, 0x42494F50,   "BIOP" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
 
 
 

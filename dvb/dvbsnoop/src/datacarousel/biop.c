@@ -1,5 +1,5 @@
 /*
-$Id: biop.c,v 1.1 2006/03/06 00:04:49 rasc Exp $
+$Id: biop.c,v 1.2 2006/03/06 20:25:37 rasc Exp $
 
 
  DVBSNOOP
@@ -20,6 +20,9 @@ $Id: biop.c,v 1.1 2006/03/06 00:04:49 rasc Exp $
 
 
 $Log: biop.c,v $
+Revision 1.2  2006/03/06 20:25:37  rasc
+DSM-CC Carousell, lots of Bugfixes, BIOP::Message not yet decodable (ddb has to collect Modules)
+
 Revision 1.1  2006/03/06 00:04:49  rasc
 More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
 BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
@@ -129,15 +132,15 @@ u_long  _ProfileBody  (int v, u_char *b)
    N1        = outBit_Sx_NL (v,"lite_component_count: ",	b,  72,  8);
    b += 10;
 
-   indent (+1);
+   out_nl (v,"LiteComponents:");
    for (; N1 > 0; N1--) {
 	int   len2;
 
+   	indent (+1);
 	len2  = BIOP_LiteComponent (v,b);
 	b += len2;
-
+   	indent (-1);
    }
-   indent (-1);
 
 
    return (u_long) (b - b_org);
@@ -197,17 +200,42 @@ u_long  BIOP_ObjectLocation (int v, u_char *b)
 
 /*
   -- dsmcc BIOP::Name
+  -- Similar to CosNaming::Name  (which is 32bit)
+  -- return latest kind_data in *kind (32 bit), if kind != NULL
   -- return: len
  */
 
-int  BIOP_Name (int v, u_char *b, u_long *p_kinddata)
+int  BIOP_Name (int v, u_char *b, u_long *kind)
 {
-  int   len;
+ u_char   *b_org = b;
+ u_long   n2;
 
-  
-  len = dsmcc_BIOP_DSM_Name (v, "BIOP", b, p_kinddata);
-  return len;
+
+   out_nl (v,"BIOP::Name");
+   indent (+1);
+
+   n2 = outBit_Sx_NL (v,"nameComponents_count: ",	b++,   0, 8);
+
+   for (; n2 > 0; n2--) {
+	u_long    n3,n4;
+
+	n3 = outBit_Sx_NL (v,"id_length: ",		b++,   0,  8);
+	print_databytes   (v,"id_data:", 	   	b, n3);
+	b  += n3;
+
+	n4 = outBit_Sx_NL (v,"kind_length: ",		b++,   0,  8);
+	print_databytes   (v,"kind_data:", 	   	b, n4);
+	if (kind) {
+		*kind =	getBits (b, 0, 0, 32);	// type aliases
+	}
+	b  += n4;
+
+   }
+
+   indent (-1);
+   return (int) (b - b_org);
 }
+
 
 
 
