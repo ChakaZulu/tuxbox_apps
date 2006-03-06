@@ -816,7 +816,7 @@ recordingmenu.stream_vtxt_pid Tallenna teksti-tv
 recordingmenu.use_fdatasync Tallenna synkronisesti (fdatasync)
 recordingmenu.use_o_sync Tallenna asynkronisesti (O_SYNC)
 recordingmenu.vcr Videonauhuri
-recordingmenu.zap_on_announce Ohj.vaihto etukäteen
+recordingmenu.zap_on_announce Kanavanvaihtoennakko
 recordtimer.announce Tallennus alkaa muutaman minuutin kuluttua
 repeatblocker.hint_1 Pienin aikaväli (ms) 2 näppäinpainalluksen tunnistamiseen
 repeatblocker.hint_2 Syötä 0 vaihtaaksesi kursori (punainen = välilyönti)
