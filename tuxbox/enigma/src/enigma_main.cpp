@@ -1545,7 +1545,7 @@ void eZapMain::init_main()
 	eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", wasDeepstandby );
 	eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
 	eConfig::getInstance()->flush();
-	wasSleeping = wasDeepstandby ? 2 : 0;
+	wasSleeping = wasDeepstandby ? 3 : 0;
 	eDebug("[eZapMain]wasSleeping is %d, wasDeepStandby is %d", wasSleeping, wasDeepstandby);
 
 // get Infobar timeout
@@ -2593,6 +2593,8 @@ void eZapMain::prevService()
 	}
 }
 
+
+
 void eZapMain::playlistPrevService()
 {
 	int extZap=0;
@@ -2891,7 +2893,7 @@ standby:
 			state |= stateSleeping;
 			standbyTime.tv_sec=-1;
 			if (state&stateInTimerMode && state&stateRecording)
-				wasSleeping=3;
+				wasSleeping=2;
 			standby.exec();   // this blocks all main actions...
 /*
 	  ...... sleeeeeeeep
@@ -3646,7 +3648,7 @@ int eZapMain::handleStandby(int i)
 				if (!::stat("/var/etc/enigma_leave_idle.sh", &s))
 					system("/var/etc/enigma_leave_idle.sh");
 			}
-			wasSleeping=3;
+			wasSleeping=2;
 		}
 		return 0;
 	}
@@ -5476,20 +5478,25 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			if ( handleState() && !playlistmode && playlist->getConstList().size() > 1 )
 #endif
 			{
-				std::list<ePlaylistEntry>::iterator prev,last;
-				last = playlist->getList().end();
-				prev = --last;
-				prev--;
+				std::list<ePlaylistEntry>::iterator swap =
+					--playlist->getList().end();
+
+				if ( playlist->current == playlist->getConstList().end() )
+					playlist->current = swap;
+
+				if ( playlist->current == swap ) // end of history? 
+					--swap;  // swap with previous entry
+				else // middle of history
+				{
+					swap = playlist->current;
+					++swap;  // swap with next entry
+				}
 				eServiceReference ref = eServiceInterface::getInstance()->service;
-				if ( !ref || last->service != ref )
-					break;
-		// do not zap with the 0 to a service with another type
 				int extZap=0;
 				eConfig::getInstance()->getKey("/elitedvb/extra/extzapping", extZap);
-				if ( extZap || ModeTypeEqual( prev->service ,last->service ) )
+				if ( extZap || ModeTypeEqual( playlist->current->service, swap->service ) )
 				{
-					std::iter_swap( prev, last );
-					playlist->current=last;
+					std::iter_swap( playlist->current, swap );
 					const eServicePath &p = playlist->current->getPath();
 					playService( playlist->current->service, psDontAdd|psSeekPos|(extZap?psSetMode:0) );
 					if (p.size() > 1)
