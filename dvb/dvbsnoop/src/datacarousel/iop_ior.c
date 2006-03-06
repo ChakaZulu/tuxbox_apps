@@ -1,5 +1,5 @@
 /*
-$Id: iop_ior.c,v 1.2 2006/01/02 18:23:47 rasc Exp $
+$Id: iop_ior.c,v 1.3 2006/03/06 00:04:50 rasc Exp $
 
 
  DVBSNOOP
@@ -11,11 +11,18 @@ $Id: iop_ior.c,v 1.2 2006/01/02 18:23:47 rasc Exp $
 
  -- dsmcc  Interoperable Object Reference (IOR)
  -- TR 101 202 v1.2.1  4.7.5.2
+ -- TS 102 81
 
 
 
 
 $Log: iop_ior.c,v $
+Revision 1.3  2006/03/06 00:04:50  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.2  2006/01/02 18:23:47  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -35,13 +42,11 @@ IOP::IOR()
 
 #include "dvbsnoop.h"
 #include "iop_ior.h"
+#include "biop_tag_tap.h"
 #include "dsmcc_misc.h"
 
 #include "misc/output.h"
-#include "misc/hexprint.h"
-
 #include "strings/dsmcc_str.h"
-#include "strings/dvb_str.h"
 
 
 
@@ -57,7 +62,7 @@ int IOP_IOR (int v, u_char *b)
 {
    u_char       *b_start = b;
    int		i,x;
-   u_long 	n1,n2;
+   u_long 	n1;
 
 
 
@@ -66,7 +71,7 @@ int IOP_IOR (int v, u_char *b)
 
 
 	n1 = outBit_Sx_NL (v,"type_id_length: ",	b,  0, 32);
-	print_text_UTF8 (v, "type_id: ", b+4, n1);	// $$$ TODO
+	print_text_UTF8 (v, "type_id: ", b+4, n1);
 	b += 4+n1;
 
 
@@ -81,17 +86,12 @@ int IOP_IOR (int v, u_char *b)
 	n1 = outBit_Sx_NL (v,"taggedProfiles_count: ",	b,  0, 32);
 	b += 4;
 	for (i=0; i < n1; i++) {
+		u_long   n2;
+
 		//  IOP_taggedProfile 
+		n2 = IOP_taggedProfile (v, b);
+		b += n2;
 
-		outBit_S2x_NL (v,"profileId_tag: ",		b,   0, 32,
-				(char *(*)(u_long)) dsmccStrIOP_ProfileID );
-		n2 = outBit_Sx_NL (v,"profile_data_length: ",	b,  32, 32);
-
-		// e.g. BIOPProfileBody
-		// e.g. LiteOptionsProfileBody
-		print_databytes (v,"profile_data:", b+8, n2);   // $$$ TODO
-		
-		b += 8+n2;
 	}
 
 
@@ -103,8 +103,22 @@ int IOP_IOR (int v, u_char *b)
 
 
 
+/*
+ * TR 101 202 v 1.2.1
+ * return: len
+ */
+
+u_long IOP_taggedProfile (int v, u_char *b)
+
+{
+  u_long  len;
 
 
+	// e.g. BIOPProfileBody
+	// e.g. LiteOptionsProfileBody
 
+	len  = BIOP_TAG_dispatch (v,b);
+  	return len;
+}
 
 

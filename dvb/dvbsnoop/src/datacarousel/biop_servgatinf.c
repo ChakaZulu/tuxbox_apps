@@ -1,5 +1,5 @@
 /*
-$Id: biop_servgatinf.c,v 1.2 2006/01/02 18:23:47 rasc Exp $
+$Id: biop_servgatinf.c,v 1.3 2006/03/06 00:04:49 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: biop_servgatinf.c,v 1.2 2006/01/02 18:23:47 rasc Exp $
 
 
 $Log: biop_servgatinf.c,v $
+Revision 1.3  2006/03/06 00:04:49  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.2  2006/01/02 18:23:47  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -35,6 +41,7 @@ IOP::IOR()
 
 #include "dvbsnoop.h"
 #include "biop_servgatinf.h"
+#include "biop_tag_tap.h"
 #include "iop_ior.h"
 #include "dsmcc_misc.h"
 #include "descriptors/descriptor.h"
@@ -58,8 +65,8 @@ IOP::IOR()
 int BIOP_ServiceGatewayInfo (int v, u_char *b, u_int len)
 {
    int   	len_org = len;
-   int		i,x;
-   int 		n1,n2;
+   int		i;
+   int 		nx,n1,n2;
 
 
 
@@ -67,21 +74,21 @@ int BIOP_ServiceGatewayInfo (int v, u_char *b, u_int len)
 
 	indent (+1);
 
-	x = IOP_IOR (v,b);
-	b += x;
-	len -= x;
+	nx = IOP_IOR (v,b);
+	b   += nx;
+	len -= nx;
 
 
 	n1 = outBit_Sx_NL (v,"downloadTaps_count: ",		b,  0,  8);
 	b++;
 	len--;
-//	for (i=0; i < n1; i++) {
-//		x = DSM_Tap(v, b, len);
-//		b += x;
-//		len -= x;
-//	}
-	print_databytes (v,"DSM_TAP:", b, n1);   // $$$ TODO
-	b += n1; len -= n1;
+	for (i=0; i < n1; i++) {
+		int   n3;
+
+		n3 = BIOP_TAP (v, "DSM", b);
+		b   += n3;
+		len -= n3;
+	}
 
 
 	n1 = outBit_Sx_NL (v,"serviceContextList_count: ",	b,  0,  8);

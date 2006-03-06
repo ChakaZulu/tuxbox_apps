@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.50 2005/12/29 02:43:38 rasc Exp $
+$Id: cmdline.c,v 1.51 2006/03/06 00:04:54 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: cmdline.c,v 1.50 2005/12/29 02:43:38 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.51  2006/03/06 00:04:54  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.50  2005/12/29 02:43:38  rasc
 gcc fixes, man page update
 
@@ -269,6 +275,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->hide_copyright= 0;
   opt->help = 0;
   opt->privateProviderStr = (char *)NULL;  // decoding known private tables/descriptors, ProviderStr
+  opt->dsmcc_save = 0;
 
   opt->filterLen = 0;
   memset(opt->filter, 0, DMX_FILTER_SIZE);
@@ -317,6 +324,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-privateprovider")) opt->privateProviderStr = argv[++i];
      else if (!strcmp (argv[i],"-tssubdecode")) opt->ts_subdecode = 1;
      else if (!strcmp (argv[i],"-allsections")) opt->rd_all_sections = 1;
+     else if (!strcmp (argv[i],"-dsmccsave")) opt->dsmcc_save = 1;
      else if (!strcmp (argv[i],"-f")) {
 	 opt->filterLen = str2barray(argv[++i], opt->filter, DMX_FILTER_SIZE);
      } else if (!strcmp (argv[i],"-m")) {
@@ -540,6 +548,9 @@ static void usage (void)
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
     printf("   -t[n|d|f]:    print timestamp (no, delta, full) [-tf] \n");
     printf("   -privateprovider id: set provider <id> string for decoding private tables and descriptors\n");
+// $$$ TODO
+//    printf("   -dsmccsave:   Save of Digital Storage Media Command and Control objects, section modes only\n");
+//    printf("                 (currently only processing of BIOP Files and Directories is supported)\n");
     printf("   -hideproginfo: hide copyright and program info header at program start\n");
     printf("   -help:        this usage info...\n");
     printf("\n");

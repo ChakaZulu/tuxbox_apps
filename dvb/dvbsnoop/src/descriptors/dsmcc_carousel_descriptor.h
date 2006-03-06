@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.h,v 1.15 2006/01/02 18:23:58 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.h,v 1.16 2006/03/06 00:04:52 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: dsmcc_carousel_descriptor.h,v 1.15 2006/01/02 18:23:58 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.h,v $
+Revision 1.16  2006/03/06 00:04:52  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.15  2006/01/02 18:23:58  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -75,7 +81,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 #ifndef __DSMCC_CAROUSEL_DESCRIPTOR_H
-#define __DSMCC_CAROUSEL_DESCRIPTOR_H 1
+#define __DSMCC_CAROUSEL_DESCRIPTOR_H 
 
 
 int  descriptorDSMCC_CAROUSEL (u_char *b);

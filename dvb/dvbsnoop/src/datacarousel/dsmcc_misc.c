@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.21 2006/01/02 18:23:47 rasc Exp $
+$Id: dsmcc_misc.c,v 1.22 2006/03/06 00:04:49 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,12 @@ $Id: dsmcc_misc.c,v 1.21 2006/01/02 18:23:47 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.22  2006/03/06 00:04:49  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.21  2006/01/02 18:23:47  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -496,10 +502,10 @@ int  dsmcc_carousel_NSAP_address_B20 (int v, const char *s, u_char *b)
 		b += 6;
 
 
-		stype = outBit_S2x_NL (4,"specifier type: ", 	b, 0,  8,
+		stype = outBit_S2x_NL (v,"specifier type: ", 	b, 0,  8,
 				   (char *(*)(u_long))dsmccStr_SpecifierType );
 		if (stype == 0x01) {
-			outBit_S2x_NL (4,"OUI: ", 		b, 8, 24,
+			outBit_S2x_NL (v,"OUI: ", 		b, 8, 24,
 				   (char *(*)(u_long))dsmccStrOUI );
 		} else {
   			outBit_Sx_NL  (v,"specifier: ",		b,  8, 24);
@@ -508,18 +514,77 @@ int  dsmcc_carousel_NSAP_address_B20 (int v, const char *s, u_char *b)
 
 
 		// -- private data...
-
-		outBit_Sx_NL  (4,"transport_stream_ID: ",	b,  0, 16);
-		outBit_S2x_NL (4,"Original_network_id: ",	b, 16, 16,
-				(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
-		outBit_S2Tx_NL(4,"service_ID: ",		b, 32, 16,
-				  "--> refers to PMT program_number"); 
-		outBit_Sx_NL  (4,"reserved: ",			b, 48, 32);
+		dsmcc_DVB_service_location (v, b);
 
 	}
 
 	indent (-1);
 	return 20;
+}
+
+
+/*
+ * DVB Service Location
+ * ETSI EN 3001 192
+ * return: len (=10)
+ */
+
+int dsmcc_DVB_service_location (int v, u_char *b)
+{
+
+	outBit_Sx_NL  (v,"transport_stream_ID: ",	b,  0, 16);
+	outBit_S2x_NL (v,"Original_network_id: ",	b, 16, 16,
+			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
+	outBit_S2Tx_NL(v,"service_ID: ",		b, 32, 16,
+			  "--> refers to PMT program_number"); 
+	outBit_Sx_NL  (v,"reserved: ",			b, 48, 32);
+
+	return 10;
+}
+
+
+
+
+
+/*
+ *  DSM CosNaming::Name
+ *  BIOP::Name
+ *  returns : 32bit of last "kind_data" in *kind  (== type alias)
+ *   if *kind != NULL
+ *  return: len
+ */
+
+int  dsmcc_BIOP_DSM_Name (int v, const char *str, u_char *b, u_long *kind)
+{
+ u_char   *b_org = b;
+ u_long   n2;
+
+
+   out_nl (v,"%s::Name",str);
+   indent (+1);
+
+   n2 = outBit_Sx_NL (v,"nameComponents_count: ",	b,   0, 32);
+   b   += 4;
+
+   for (; n2 > 0; n2--) {
+	u_long    n3,n4;
+
+	n3 = outBit_Sx_NL (v,"id_length: ",		b,   0, 32);
+	print_databytes   (v,"id_data:", 	   	b+4, n3);
+	b   += 4 + n3;
+
+	n4 = outBit_Sx_NL (v,"kind_length: ",		b,   0, 32);
+	print_databytes   (v,"kind_data:", 	   	b+4, n4);
+	if (kind) {
+		*kind =	getBits (b+4, 0, 0, 32);	// type aliases
+	}
+
+	b   += 4 + n4;
+
+   }
+
+   indent (-1);
+   return (int) (b - b_org);
 }
 
 
@@ -561,27 +626,5 @@ int dsmcc_CarouselDescriptor_Loop (const char *s, u_char *b, int len)
 
 
 
-
-
-
-/* $$$ TODO
- * see also ATSC
-
-module DSM {
-typedef u_short SelectorType;
-// SelectorType 0 is ISO/IEC reserved
-const SelectorType MESSAGE = 1;
-struct MessageSelector {
-u_long transactionId;
-u_long timeout;
-};
-};
-SelectorType MESSAGE identifies a MessageSelector. It is used by the Object Carousel. It contains a transactionId
-field and a timeout field. The value of the transactionId field shall be set to the transactionId of the
-DownloadInfoIndication message that contains the module delivery parameters. The timeout field shall indicate the
-timeout period to be used to time out the acquisition of the DownloadInfoIndication message. The units of the timeout
-field are microseconds. Refer to the clause 11, U-U Object Carousel, for further information.
-
-*/
 
 

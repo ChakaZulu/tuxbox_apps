@@ -1,5 +1,5 @@
 /*
-$Id: biop_modinfo.c,v 1.6 2006/01/02 18:23:47 rasc Exp $
+$Id: biop_modinfo.c,v 1.7 2006/03/06 00:04:49 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: biop_modinfo.c,v 1.6 2006/01/02 18:23:47 rasc Exp $
 
 
 $Log: biop_modinfo.c,v $
+Revision 1.7  2006/03/06 00:04:49  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.6  2006/01/02 18:23:47  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -51,6 +57,7 @@ some minor changes...
 
 #include "dvbsnoop.h"
 #include "biop_modinfo.h"
+#include "biop_tag_tap.h"
 #include "dsmcc_misc.h"
 
 #include "misc/output.h"
@@ -104,32 +111,8 @@ int BIOP_ModuleInfo (int v, u_char *b, u_int len_org)
 	while (n1-- > 0) {
 		int n2;
 
-		out_NL (v);
-		if (len <= 0) {
-			out_nl (v, "... => strange len <= 0  and still tapcount > 0  (abort)");
-			break;
-		}
-
-		outBit_Sx_NL (v,"Id: ",				b,  0, 16);
-		outBit_S2x_NL(v,"Use: ",			b, 16, 16,
-					(char *(*)(u_long))dsmccStrBIOP_TabUse );
-
-		outBit_Sx_NL (v,"association_tag: ",		b, 32, 16);
-		n2 = outBit_Sx_NL (v,"selector_length: ",	b, 48,  8);
-		b += 7;
-		len -= 7;
-
-		if (n2 > 0) {
-			// $$$ TODO who has some info to these selectorbytes ???
-			print_databytes (v,"Selectorbytes:", b, n2);   // $$$ TODO  selector
-		}
-		// $$$ TODO  selector type ATSC
-		// 0x0001 Message selector (defined in [DSM-CC]).    a_95  (where in DSM-CC defined?)
-		// 0x109 TSFS selector (defined in this standard).   a_95
-		//
-		// ISO 13818-6:2000  5.6.1.1 Selector
-
-
+		// BIOP_OBJECT_USE
+		n2 = BIOP_TAP (v, "DSM", b);
 		b += n2;
 		len -= n2;
 

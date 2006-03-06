@@ -1,5 +1,5 @@
 /*
-$Id: iop_ior.h,v 1.2 2006/01/02 18:23:47 rasc Exp $
+$Id: iop_ior.h,v 1.3 2006/03/06 00:04:50 rasc Exp $
 
 
  DVBSNOOP
@@ -17,7 +17,8 @@ $Id: iop_ior.h,v 1.2 2006/01/02 18:23:47 rasc Exp $
 #define _IOP_IOR
 
 
-int IOP_IOR (int v, u_char *b);
+int    IOP_IOR (int v, u_char *b);
+u_long IOP_taggedProfile (int v, u_char *b);
 
 
 #endif

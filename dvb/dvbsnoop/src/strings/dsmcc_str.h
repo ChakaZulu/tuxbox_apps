@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.29 2006/01/02 18:24:32 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.30 2006/03/06 00:05:03 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: dsmcc_str.h,v 1.29 2006/01/02 18:24:32 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.30  2006/03/06 00:05:03  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.29  2006/01/02 18:24:32  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -184,8 +190,12 @@ char *dsmccStr_messageID (u_int id);
 char *dsmccStr_transactionID_originator (u_int id);
 
 
-char *dsmccStrBIOP_TabUse (u_int id);
 char *dsmccStrIOP_ProfileID (u_int id);
+char *dsmccStrBIOP_TAP_Use (u_int id);
+char *dsmccStrBIOP_TAP_SelectorType (u_int id);
+char *dsmccStrBIOP_EndianType (u_int id);
+char *dsmccStrBIOP_TypeID_Alias (u_int id);
+char *dsmccStrBIOP_BindingType (u_int id);
 
 
 #endif

@@ -170,8 +170,10 @@ Default is 0 (no limit).
 .B \-if \<file\>
 .br
 Read binary stream data from file instead of the demux device.
-Depending on the decoding mode this might be transport stream, packetized elemtary stream or sections.
   <file> \= '-' reads from standard input.
+Depending on the decoding mode this might be transport stream, packetized elemtary stream or sections.
+Please aware, that you cannot e.g. use \-s pes or \-s sec on a saved transport stream.
+The decoding/snooping mode has to match the saved stream format!
 
 
 .SH "SECTION Mode (SEC) Specific Command Line Options"

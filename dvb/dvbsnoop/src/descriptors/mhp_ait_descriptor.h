@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.h,v 1.6 2006/01/02 18:23:58 rasc Exp $ 
+$Id: mhp_ait_descriptor.h,v 1.7 2006/03/06 00:04:52 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: mhp_ait_descriptor.h,v 1.6 2006/01/02 18:23:58 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.h,v $
+Revision 1.7  2006/03/06 00:04:52  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.6  2006/01/02 18:23:58  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -45,7 +51,7 @@ some AIT descriptors
 
 
 #ifndef __MHP_AIT_DESCRIPTOR_H
-#define __MHP_AIT_DESCRIPTOR_H 1
+#define __MHP_AIT_DESCRIPTOR_H 
 
 
 int  descriptorMHP_AIT (u_char *b);

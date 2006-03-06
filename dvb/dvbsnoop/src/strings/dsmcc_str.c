@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.35 2006/01/02 18:24:32 rasc Exp $
+$Id: dsmcc_str.c,v 1.36 2006/03/06 00:05:03 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: dsmcc_str.c,v 1.35 2006/01/02 18:24:32 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.36  2006/03/06 00:05:03  rasc
+More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
+BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
+this is a preparation for a patch sent in by Richard Case (DSMCC-Save).
+Attention: Code is still untested and may considered to be buggy (some teststreams are needed)...
+
 Revision 1.35  2006/01/02 18:24:32  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -1127,11 +1133,48 @@ char *dsmccStr_transactionID_originator (u_int id)
 
 
 /*
+  -- DSM-CC  IOP ProfileID
+  -- ISO/IEC 13816-6
+  -- Profile Tags 0x49534F00 - 0x49534F0F (the first 3 octets spell ISO)
+  -- TR 101 202 
+  -- TS 102 812
+*/
+
+char *dsmccStrIOP_ProfileID (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x49534f00, 0x49534f00,   "TAG_MIN" },
+	{ 0x49534f01, 0x49534f01,   "TAG_CHILD" },
+	{ 0x49534f02, 0x49534f02,   "TAG_OPTIONS" },
+	{ 0x49534f03, 0x49534f03,   "TAG_LITE_MIN" },
+	{ 0x49534f04, 0x49534f04,   "TAG_LITE_CHILD" },
+	{ 0x49534f05, 0x49534f05,   "TAG_LITE_OPTIONS" },
+	{ 0x49534f06, 0x49534f06,   "TAG_BIOP" },
+	{ 0x49534f07, 0x49534f07,   "TAG_ONC" },
+	{ 0x49534f40, 0x49534f40,   "TAG_ConnBinder" },
+	{ 0x49534f41, 0x49534f41,   "TAG_IIOPAddr" },
+	{ 0x49534f42, 0x49534f42,   "TAG_Addr" },
+	{ 0x49534f43, 0x49534f43,   "TAG_NameId" },
+	{ 0x49534f44, 0x49534f44,   "TAG_IntfCode" },
+	{ 0x49534f45, 0x49534f45,   "TAG_ObjectKey" },
+	{ 0x49534f46, 0x49534f46,   "TAG_ServiceLocation" },
+	{ 0x49534f50, 0x49534f50,   "TAG_ObjectLocation" },
+	{ 0x49534f58, 0x49534f58,   "TAG_Intf" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
   -- DSM-CC  BIOP tap use
   -- ISO/IEC 13816-6
 */
 
-char *dsmccStrBIOP_TabUse (u_int id)
+char *dsmccStrBIOP_TAP_Use (u_int id)
 {
   STR_TABLE  TableIDs[] = {
 	{ 0x0000, 0x0000,   "UNKNOWN" },
@@ -1167,23 +1210,20 @@ char *dsmccStrBIOP_TabUse (u_int id)
 
 
 
+
+
 /*
-  -- DSM-CC  IOP ProfileID
+  -- BIOP/DSM::TAP  selector_type (MessageSelector)
   -- ISO/IEC 13816-6
-  -- Profile Tags 0x49534F00 - 0x49534F0F (the first 3 octets spell ISO)
+  -- ATSC A95, A47
 */
 
-char *dsmccStrIOP_ProfileID (u_int id)
+char *dsmccStrBIOP_TAP_SelectorType (u_int id)
 {
   STR_TABLE  TableIDs[] = {
-	{ 0x49534f00, 0x49534f00,   "TAG_MIN" },
-	{ 0x49534f01, 0x49534f01,   "TAG_CHILD" },
-	{ 0x49534f02, 0x49534f02,   "TAG_OPTIONS" },
-	{ 0x49534f03, 0x49534f03,   "TAG_LITE_MIN" },
-	{ 0x49534f04, 0x49534f04,   "TAG_LITE_CHILD" },
-	{ 0x49534f05, 0x49534f05,   "TAG_LITE_OPTIONS" },
-	{ 0x49534f06, 0x49534f06,   "TAG_BIOP" },
-	{ 0x49534f07, 0x49534f07,   "TAG_ONC" },
+	{ 0x0000, 0x0000,   "ISO/IEC reserved" },
+	{ 0x0001, 0x0001,   "MessageSelector" },
+	{ 0x0109, 0x0109,   "TSFS_Selector" },
       	{  0,0, NULL }
   };
 
@@ -1191,17 +1231,68 @@ char *dsmccStrIOP_ProfileID (u_int id)
 }
 
 
-// $$$ TODO
-// IOP::component_IDs
-//	{ 0x49534f40, 0x49534f40,   "TAG_ConnBinder" },
-//	{ 0x49534f41, 0x49534f41,   "TAG_IIOPAddr" },
-//	{ 0x49534f42, 0x49534f42,   "TAG_Addr" },
-//	{ 0x49534f43, 0x49534f43,   "TAG_NameId" },
-//	{ 0x49534f44, 0x49534f44,   "TAG_IntfCode" },
-//	{ 0x49534f45, 0x49534f45,   "TAG_ObjectKey" },
-//	{ 0x49534f46, 0x49534f46,   "TAG_ServiceLocation" },
-//	{ 0x49534f50, 0x49534f50,   "TAG_ObjectLocation" },
-//	{ 0x49534f58, 0x49534f58,   "TAG_Intf" },
+
+/*
+  -- BIOP/DSM::TAP  selector_type (MessageSelector)
+  -- ISO/IEC 13816-6
+  -- ATSC A95, A47
+*/
+
+char *dsmccStrBIOP_EndianType (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "Big Endian" },
+	{ 0x01, 0xFF,   "Little Endian" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  -- BIOP   ObjectKind  / TypeID Aliases
+  -- ISO/IEC 13816-6
+*/
+
+char *dsmccStrBIOP_TypeID_Alias (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x64697200, 0x64697200,   "dir (DSM::Directory)" },
+	{ 0x66696c00, 0x66696c00,   "fil (DSM::File)" },
+	{ 0x73746500, 0x73746500,   "ste (DSM::StreamEvent)" },
+	{ 0x73746700, 0x73746700,   "stg (DSM::ServiceGateway)" },
+	{ 0x73747200, 0x73747200,   "str (BIOP::Stream)" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+
+/*
+  -- BIOP   BindingType 
+  -- e.g. TS 102 812
+*/
+
+char *dsmccStrBIOP_BindingType (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x01, 0x01,   "nobject" },
+	{ 0x02, 0x02,   "ncontext" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
 
 
 

@@ -16,6 +16,10 @@ noinst_HEADERS = \
 	dsmcc_unm_dlcancel.h \
 	dsmcc_misc.h \
 	dsmcc_grpinfind.h \
+	biop.h \
+	biop_dsm.h \
+	biop_message.h \
+	biop_tag_tap.h \
 	biop_modinfo.h \
 	biop_servgatinf.h \
 	iop_ior.h \
@@ -37,6 +41,10 @@ libdatacarousel_a_SOURCES = \
 	dsmcc_unm_dlcancel.c \
 	dsmcc_misc.c \
 	dsmcc_grpinfind.c \
+	biop.c \
+	biop_dsm.c \
+	biop_message.c \
+	biop_tag_tap.c \
 	biop_modinfo.c \
 	biop_servgatinf.c \
 	iop_ior.c \

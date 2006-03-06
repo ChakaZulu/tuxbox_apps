@@ -1,3 +1,4 @@
+ - New: DSM-CC BIOPs (File-, Dir-, StreamMessage) and DSM-Taps 
  - New: Mega-Frame Initialization Packet (MIP, TS 101 191) (tnx to Cedric Delfosse)
  - Changed: News TS handling, DVB strings enhanced, code changes.
  - Fix: fix GCC warnings, man page changes
