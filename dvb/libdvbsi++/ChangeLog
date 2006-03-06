@@ -1,0 +1,961 @@
+2006-03-06  Andreas Oberritter <obi@saftware.de>
+
+	* configure.ac (1.7):
+
+	check for cvs2cl, gnupg and md5sum before using them
+
+2006-03-06  Andreas Oberritter <obi@saftware.de>
+
+	* Makefile.am (1.6):
+
+	added changelog target, check for cvs2cl, gnupg and md5sum before
+	using them
+
+2006-03-06  Andreas Oberritter <obi@saftware.de>
+
+	* AUTHORS (1.8):
+
+	added usernames for cvs2cl
+
+2006-02-23  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/Makefile.am (1.3),
+	include/dvbsi++/dsng_descriptor.h (1.1),
+	include/dvbsi++/transport_stream_description_section.h (1.1),
+	include/dvbsi++/transport_stream_descriptor.h (1.1),
+	src/Makefile.am (1.10), src/descriptor_container.cpp (1.8),
+	src/dsng_descriptor.cpp (1.1),
+	src/transport_stream_description_section.cpp (1.1),
+	src/transport_stream_descriptor.cpp (1.1):
+
+	added transport stream description section; added transport stream
+	descriptor; added dsng_descriptor; adapted Makefile.am's
+
+2006-02-15  Andreas Oberritter <obi@saftware.de>
+
+	* README (1.2):
+
+	an initial README file which menitions the download URL and the
+	license
+
+2006-02-15  Andreas Oberritter <obi@saftware.de>
+
+	* Makefile.am (1.5):
+
+	added new make target 'release' to be called after 'dist': -
+	creates md5 checksum files - creates gpg signature files -
+	optionally copies these files and the tarballs to
+	$LIBDVBSI_RELEASE_PATH, which can be a local or remote (ssh) path
+
+2006-02-15  Andreas Oberritter <obi@saftware.de>
+
+	* qa/Makefile.am (1.3):
+
+	added header to SOURCES variable to include it in a dist tarball,
+	fixed top_srcdir vs. top_builddir confusion, remove generated .cpp
+	file on 'make clean'
+
+2006-02-15  Andreas Oberritter <obi@saftware.de>
+
+	* include/dvbsi++/Makefile.am (1.2):
+
+	use generated Makefile.am (fixes 'make distcheck')
+
+2006-02-15  Andreas Oberritter <obi@saftware.de>
+
+	* genmakefileam (1.1):
+
+	a script to generate include/dvbsi++/Makefile.am
+
+2006-02-15  Andreas Oberritter <obi@saftware.de>
+
+	* .cvsignore (1.2), qa/.cvsignore (1.2):
+
+	updated .cvsignore files
+
+2006-02-14  Andreas Oberritter <obi@saftware.de>
+
+	* configure.ac (1.6), src/Makefile.am (1.9):
+
+	fixed .so versioning, increased package version for release 0.3.1
+
+2006-01-17  Andreas Oberritter <obi@saftware.de>
+
+	* Makefile.am (1.4), configure.ac (1.5), qa/.cvsignore (1.1),
+	qa/Makefile.am (1.2):
+
+	fixed detection of cxxtestgen.pl and conditional execution of QA
+	tests
+
+2005-12-26  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/aac_descriptor.h (1.1),
+	include/dvbsi++/ac3_descriptor.h (1.4),
+	include/dvbsi++/descriptor_tag.h (1.6),
+	include/dvbsi++/dts_descriptor.h (1.1),
+	include/dvbsi++/ecm_repetition_rate_descriptor.h (1.2),
+	include/dvbsi++/enhanced_ac3_descriptor.h (1.1),
+	include/dvbsi++/extension_descriptor.h (1.1),
+	include/dvbsi++/satellite_delivery_system_descriptor.h (1.4),
+	include/dvbsi++/scrambling_descriptor.h (1.1), src/Makefile.am
+	(1.8), src/aac_descriptor.cpp (1.1), src/ac3_descriptor.cpp (1.4),
+	src/descriptor_container.cpp (1.7), src/dts_descriptor.cpp (1.1),
+	src/ecm_repetition_rate_descriptor.cpp (1.2),
+	src/enhanced_ac3_descriptor.cpp (1.1), src/extension_descriptor.cpp
+	(1.1), src/satellite_delivery_system_descriptor.cpp (1.5),
+	src/scrambling_descriptor.cpp (1.1):
+
+	added missing ETSI EN 300468 1.7.1 descriptors; fixed a typo in
+	ECM_Repition_Rate_Descriptor; renamed getKind() method in satellite
+	delivery descriptor; changed to member names according to specs;
+	changed ac3 databytes from list to vector and use memcopy with a
+	simpler routine to calc the offsets.
+
+2005-12-07  Marcel Siegert <mws@twisted-brains.org>
+
+	* src/linkage_descriptor.cpp (1.8):
+
+	after discussion with ghostrider we chose to perform all vector
+	filling via memcpy and if a vector ctor(size) is not applicable
+	within the initializer list, we use vector.resize(size)
+
+2005-12-06  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* src/linkage_descriptor.cpp (1.7), src/mpe_fec_section.cpp (1.2):
+
+	reserve(X) and Vector(X) is not the same !!
+
+2005-11-30  Marcel Siegert <mws@twisted-brains.org>
+
+	* src/content_identifier_section.cpp (1.3):
+
+	fix some offsets
+
+2005-11-30  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/mpe_fec_section.h (1.1),
+	include/dvbsi++/table_id.h (1.5), src/Makefile.am (1.7),
+	src/mpe_fec_section.cpp (1.1):
+
+	implemented mpe_fec_section added table_id for mpe_fec
+
+2005-11-28  Marcel Siegert <mws@twisted-brains.org>
+
+	* src/carousel_identifier_descriptor.cpp (1.5),
+	src/linkage_descriptor.cpp (1.6):
+
+	speedup if more than 2 bytes are in the private part of the
+	descriptors
+
+2005-11-28  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/carousel_identifier_descriptor.h (1.5),
+	include/dvbsi++/linkage_descriptor.h (1.5):
+
+	use vector
+
+2005-11-28  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/carousel_identifier_descriptor.h (1.4),
+	include/dvbsi++/linkage_descriptor.h (1.4),
+	src/carousel_identifier_descriptor.cpp (1.4),
+	src/linkage_descriptor.cpp (1.5):
+
+	change list to vector
+
+2005-11-24  Marcel Siegert <mws@twisted-brains.org>
+
+	* src/ca_program_map_section.cpp (1.11):
+
+	bugfix: also take care of caid vector within es level
+
+2005-11-22  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* src/ca_program_map_section.cpp (1.10):
+
+	build fix
+
+2005-11-18  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/ca_program_map_section.h (1.6),
+	src/ca_program_map_section.cpp (1.9):
+
+	add ability to filter capmt for specific caid's (needed for CI
+	filtering)
+
+2005-11-13  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/content_identifier_section.h (1.2),
+	src/content_identifier_section.cpp (1.2):
+
+	return pointer instead of references to keep enigma2 compatibility;
+	added function to return the prependStringBytes also;
+
+2005-11-13  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/content_identifier_section.h (1.1),
+	include/dvbsi++/descriptor_tag.h (1.5), include/dvbsi++/table_id.h
+	(1.4), src/Makefile.am (1.6), src/content_identifier_section.cpp
+	(1.1):
+
+	added content identifier section corrected a typo in descriptor_tag
+
+2005-11-10  Marcel Siegert <mws@twisted-brains.org>
+
+	* AUTHORS (1.7), Makefile.am (1.3),
+	include/dvbsi++/content_identifier_descriptor.h (1.1),
+	include/dvbsi++/default_authority_descriptor.h (1.1),
+	include/dvbsi++/descriptor_tag.h (1.4),
+	include/dvbsi++/ecm_repetition_rate_descriptor.h (1.1),
+	include/dvbsi++/related_content_descriptor.h (1.1),
+	include/dvbsi++/s2_satellite_delivery_system_descriptor.h (1.1),
+	include/dvbsi++/satellite_delivery_system_descriptor.h (1.3),
+	include/dvbsi++/time_slice_fec_identifier_descriptor.h (1.1),
+	include/dvbsi++/tva_id_descriptor.h (1.1), src/Makefile.am (1.5),
+	src/content_identifier_descriptor.cpp (1.1),
+	src/default_authority_descriptor.cpp (1.1),
+	src/descriptor_container.cpp (1.6),
+	src/ecm_repetition_rate_descriptor.cpp (1.1),
+	src/related_content_descriptor.cpp (1.1),
+	src/s2_satellite_delivery_system_descriptor.cpp (1.1),
+	src/satellite_delivery_system_descriptor.cpp (1.4),
+	src/time_slice_fec_identifier_descriptor.cpp (1.1),
+	src/tva_id_descriptor.cpp (1.1):
+
+	added 7 new descriptors to libdvbsi++; changed the satellite
+	delivery system descriptor to support dvb-s2 (information therefore
+	taken from dvbsnoop - thanks) will be verified after final release
+	of EN 300468 v1.7.1
+
+2005-10-29  Andreas Oberritter <obi@saftware.de>
+
+	* AUTHORS (1.6), COPYING (1.2), include/dvbsi++/ac3_descriptor.h
+	(1.3), include/dvbsi++/ancillary_data_descriptor.h (1.2),
+	include/dvbsi++/announcement_support_descriptor.h (1.3),
+	include/dvbsi++/application_descriptor.h (1.3),
+	include/dvbsi++/application_icons_descriptor.h (1.2),
+	include/dvbsi++/application_identifier.h (1.3),
+	include/dvbsi++/application_information_section.h (1.4),
+	include/dvbsi++/application_name_descriptor.h (1.3),
+	include/dvbsi++/application_profile.h (1.3),
+	include/dvbsi++/application_signalling_descriptor.h (1.3),
+	include/dvbsi++/application_storage_descriptor.h (1.2),
+	include/dvbsi++/audio_stream_descriptor.h (1.2),
+	include/dvbsi++/bouquet_association_section.h (1.3),
+	include/dvbsi++/bouquet_name_descriptor.h (1.2),
+	include/dvbsi++/byte_stream.h (1.4),
+	include/dvbsi++/ca_descriptor.h (1.4),
+	include/dvbsi++/ca_identifier_descriptor.h (1.3),
+	include/dvbsi++/ca_message_section.h (1.3),
+	include/dvbsi++/ca_program_map_section.h (1.5),
+	include/dvbsi++/ca_section.h (1.3),
+	include/dvbsi++/ca_system_descriptor.h (1.2),
+	include/dvbsi++/cable_delivery_system_descriptor.h (1.2),
+	include/dvbsi++/caching_priority_descriptor.h (1.2),
+	include/dvbsi++/carousel_identifier_descriptor.h (1.3),
+	include/dvbsi++/cell_frequency_link_descriptor.h (1.3),
+	include/dvbsi++/cell_list_descriptor.h (1.3),
+	include/dvbsi++/compat.h (1.4),
+	include/dvbsi++/component_descriptor.h (1.2),
+	include/dvbsi++/compressed_module_descriptor.h (1.2),
+	include/dvbsi++/content_descriptor.h (1.3),
+	include/dvbsi++/content_type_descriptor.h (1.2),
+	include/dvbsi++/country_availability_descriptor.h (1.3),
+	include/dvbsi++/crc32_descriptor.h (1.2),
+	include/dvbsi++/data_broadcast_descriptor.h (1.3),
+	include/dvbsi++/data_broadcast_id_descriptor.h (1.3),
+	include/dvbsi++/delegated_application_descriptor.h (1.3),
+	include/dvbsi++/descriptor.h (1.6),
+	include/dvbsi++/descriptor_container.h (1.5),
+	include/dvbsi++/descriptor_tag.h (1.3),
+	include/dvbsi++/dii_location_descriptor.h (1.3),
+	include/dvbsi++/dvb_html_application_boundary_descriptor.h (1.2),
+	include/dvbsi++/dvb_html_application_descriptor.h (1.3),
+	include/dvbsi++/dvb_html_application_location_descriptor.h (1.2),
+	include/dvbsi++/dvb_j_application_descriptor.h (1.3),
+	include/dvbsi++/dvb_j_application_location_descriptor.h (1.2),
+	include/dvbsi++/est_download_time_descriptor.h (1.2),
+	include/dvbsi++/event_information_section.h (1.3),
+	include/dvbsi++/extended_event_descriptor.h (1.3),
+	include/dvbsi++/external_application_authorisation_descriptor.h
+	(1.3), include/dvbsi++/frequency_list_descriptor.h (1.3),
+	include/dvbsi++/group_link_descriptor.h (1.2),
+	include/dvbsi++/info_descriptor.h (1.2),
+	include/dvbsi++/ip_signaling_descriptor.h (1.2),
+	include/dvbsi++/iso639_language_descriptor.h (1.3),
+	include/dvbsi++/label_descriptor.h (1.2),
+	include/dvbsi++/linkage_descriptor.h (1.3),
+	include/dvbsi++/local_time_offset_descriptor.h (1.3),
+	include/dvbsi++/location_descriptor.h (1.2),
+	include/dvbsi++/long_crc_section.h (1.3),
+	include/dvbsi++/long_section.h (1.3),
+	include/dvbsi++/module_link_descriptor.h (1.2),
+	include/dvbsi++/mosaic_descriptor.h (1.3),
+	include/dvbsi++/multilingual_bouquet_name_descriptor.h (1.3),
+	include/dvbsi++/multilingual_component_descriptor.h (1.3),
+	include/dvbsi++/multilingual_network_name_descriptor.h (1.3),
+	include/dvbsi++/multilingual_service_name_descriptor.h (1.3),
+	include/dvbsi++/name_descriptor.h (1.2),
+	include/dvbsi++/network_information_section.h (1.3),
+	include/dvbsi++/network_name_descriptor.h (1.2),
+	include/dvbsi++/nvod_reference_descriptor.h (1.3),
+	include/dvbsi++/packet_id.h (1.3),
+	include/dvbsi++/parental_rating_descriptor.h (1.3),
+	include/dvbsi++/pdc_descriptor.h (1.2),
+	include/dvbsi++/plugin_descriptor.h (1.3),
+	include/dvbsi++/prefetch_descriptor.h (1.3),
+	include/dvbsi++/private_data_specifier_descriptor.h (1.2),
+	include/dvbsi++/program_association_section.h (1.3),
+	include/dvbsi++/program_map_section.h (1.5),
+	include/dvbsi++/satellite_delivery_system_descriptor.h (1.2),
+	include/dvbsi++/service_description_section.h (1.3),
+	include/dvbsi++/service_descriptor.h (1.2),
+	include/dvbsi++/service_identifier_descriptor.h (1.2),
+	include/dvbsi++/service_list_descriptor.h (1.3),
+	include/dvbsi++/service_move_descriptor.h (1.2),
+	include/dvbsi++/service_type.h (1.3),
+	include/dvbsi++/short_crc_section.h (1.3),
+	include/dvbsi++/short_event_descriptor.h (1.2),
+	include/dvbsi++/short_section.h (1.5),
+	include/dvbsi++/stream_identifier_descriptor.h (1.2),
+	include/dvbsi++/stream_type.h (1.2),
+	include/dvbsi++/stuffing_descriptor.h (1.3),
+	include/dvbsi++/subtitling_descriptor.h (1.3),
+	include/dvbsi++/table_id.h (1.3),
+	include/dvbsi++/target_background_grid_descriptor.h (1.2),
+	include/dvbsi++/telephone_descriptor.h (1.2),
+	include/dvbsi++/teletext_descriptor.h (1.2),
+	include/dvbsi++/terrestrial_delivery_system_descriptor.h (1.2),
+	include/dvbsi++/time_date_section.h (1.3),
+	include/dvbsi++/time_offset_section.h (1.3),
+	include/dvbsi++/time_shifted_service_descriptor.h (1.2),
+	include/dvbsi++/transport_protocol_descriptor.h (1.3),
+	include/dvbsi++/type_descriptor.h (1.2),
+	include/dvbsi++/unknown_descriptor.h (1.2),
+	include/dvbsi++/vbi_data_descriptor.h (1.3),
+	include/dvbsi++/vbi_teletext_descriptor.h (1.3),
+	include/dvbsi++/video_stream_descriptor.h (1.2),
+	include/dvbsi++/video_window_descriptor.h (1.2),
+	src/ac3_descriptor.cpp (1.3), src/ancillary_data_descriptor.cpp
+	(1.2), src/announcement_support_descriptor.cpp (1.4),
+	src/application_descriptor.cpp (1.3),
+	src/application_icons_descriptor.cpp (1.2),
+	src/application_identifier.cpp (1.2),
+	src/application_information_section.cpp (1.5),
+	src/application_name_descriptor.cpp (1.3),
+	src/application_profile.cpp (1.2),
+	src/application_signalling_descriptor.cpp (1.4),
+	src/application_storage_descriptor.cpp (1.2),
+	src/audio_stream_descriptor.cpp (1.2),
+	src/bouquet_association_section.cpp (1.4),
+	src/bouquet_name_descriptor.cpp (1.3), src/ca_descriptor.cpp (1.5),
+	src/ca_identifier_descriptor.cpp (1.4), src/ca_message_section.cpp
+	(1.2), src/ca_program_map_section.cpp (1.8), src/ca_section.cpp
+	(1.3), src/ca_system_descriptor.cpp (1.2),
+	src/cable_delivery_system_descriptor.cpp (1.2),
+	src/caching_priority_descriptor.cpp (1.2),
+	src/carousel_identifier_descriptor.cpp (1.3),
+	src/cell_frequency_link_descriptor.cpp (1.4),
+	src/cell_list_descriptor.cpp (1.4), src/component_descriptor.cpp
+	(1.2), src/compressed_module_descriptor.cpp (1.2),
+	src/content_descriptor.cpp (1.3), src/content_type_descriptor.cpp
+	(1.2), src/country_availability_descriptor.cpp (1.3),
+	src/crc32_descriptor.cpp (1.2), src/data_broadcast_descriptor.cpp
+	(1.4), src/data_broadcast_id_descriptor.cpp (1.4),
+	src/delegated_application_descriptor.cpp (1.3), src/descriptor.cpp
+	(1.2), src/descriptor_container.cpp (1.5),
+	src/dii_location_descriptor.cpp (1.3),
+	src/dvb_html_application_boundary_descriptor.cpp (1.2),
+	src/dvb_html_application_descriptor.cpp (1.3),
+	src/dvb_html_application_location_descriptor.cpp (1.2),
+	src/dvb_j_application_descriptor.cpp (1.3),
+	src/dvb_j_application_location_descriptor.cpp (1.2),
+	src/est_download_time_descriptor.cpp (1.2),
+	src/event_information_section.cpp (1.5),
+	src/extended_event_descriptor.cpp (1.3),
+	src/external_application_authorisation_descriptor.cpp (1.3),
+	src/frequency_list_descriptor.cpp (1.4),
+	src/group_link_descriptor.cpp (1.2), src/info_descriptor.cpp (1.2),
+	src/ip_signaling_descriptor.cpp (1.2),
+	src/iso639_language_descriptor.cpp (1.3), src/label_descriptor.cpp
+	(1.2), src/linkage_descriptor.cpp (1.4),
+	src/local_time_offset_descriptor.cpp (1.4),
+	src/location_descriptor.cpp (1.2), src/long_crc_section.cpp (1.3),
+	src/long_section.cpp (1.3), src/module_link_descriptor.cpp (1.2),
+	src/mosaic_descriptor.cpp (1.5),
+	src/multilingual_bouquet_name_descriptor.cpp (1.4),
+	src/multilingual_component_descriptor.cpp (1.4),
+	src/multilingual_network_name_descriptor.cpp (1.3),
+	src/multilingual_service_name_descriptor.cpp (1.3),
+	src/name_descriptor.cpp (1.2), src/network_information_section.cpp
+	(1.5), src/network_name_descriptor.cpp (1.2),
+	src/nvod_reference_descriptor.cpp (1.4),
+	src/parental_rating_descriptor.cpp (1.3), src/pdc_descriptor.cpp
+	(1.3), src/plugin_descriptor.cpp (1.3), src/prefetch_descriptor.cpp
+	(1.3), src/private_data_specifier_descriptor.cpp (1.3),
+	src/program_association_section.cpp (1.4),
+	src/program_map_section.cpp (1.7),
+	src/satellite_delivery_system_descriptor.cpp (1.3),
+	src/service_description_section.cpp (1.5),
+	src/service_descriptor.cpp (1.2),
+	src/service_identifier_descriptor.cpp (1.2),
+	src/service_list_descriptor.cpp (1.4),
+	src/service_move_descriptor.cpp (1.3), src/short_crc_section.cpp
+	(1.3), src/short_event_descriptor.cpp (1.2), src/short_section.cpp
+	(1.3), src/stream_identifier_descriptor.cpp (1.2),
+	src/stuffing_descriptor.cpp (1.2), src/subtitling_descriptor.cpp
+	(1.4), src/target_background_grid_descriptor.cpp (1.3),
+	src/telephone_descriptor.cpp (1.2), src/teletext_descriptor.cpp
+	(1.2), src/terrestrial_delivery_system_descriptor.cpp (1.3),
+	src/time_date_section.cpp (1.3), src/time_offset_section.cpp (1.4),
+	src/time_shifted_service_descriptor.cpp (1.3),
+	src/transport_protocol_descriptor.cpp (1.3),
+	src/type_descriptor.cpp (1.2), src/unknown_descriptor.cpp (1.3),
+	src/vbi_data_descriptor.cpp (1.4), src/vbi_teletext_descriptor.cpp
+	(1.3), src/video_stream_descriptor.cpp (1.2),
+	src/video_window_descriptor.cpp (1.3):
+
+	changed license to LGPL 2.1
+
+2005-09-30  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* src/Makefile.am (1.4):
+
+	add missing source file
+
+2005-09-30  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/descriptor.h (1.5), src/unknown_descriptor.cpp
+	(1.2):
+
+	virtual writeBuffer is needed, small performance fix
+
+2005-09-30  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* src/ca_program_map_section.cpp (1.7):
+
+	sorry.. another one fix
+
+2005-09-30  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* src/ca_program_map_section.cpp (1.6):
+
+	fix
+
+2005-09-30  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/ca_program_map_section.h (1.4),
+	src/ca_program_map_section.cpp (1.5):
+
+	re-add ability to inject descriptors to ca_pmt's at front and back
+
+2005-09-30  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/unknown_descriptor.h (1.1),
+	src/unknown_descriptor.cpp (1.1):
+
+	add new unknown descriptor
+
+2005-09-30  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/ca_descriptor.h (1.3),
+	include/dvbsi++/ca_program_map_section.h (1.3),
+	include/dvbsi++/compat.h (1.3),
+	include/dvbsi++/descriptor_container.h (1.4), src/ca_descriptor.cpp
+	(1.4), src/ca_program_map_section.cpp (1.4),
+	src/descriptor_container.cpp (1.4):
+
+	fixes, speedups
+
+2005-09-29  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* include/dvbsi++/ac3_descriptor.h (1.2),
+	include/dvbsi++/announcement_support_descriptor.h (1.2),
+	include/dvbsi++/application_descriptor.h (1.2),
+	include/dvbsi++/application_identifier.h (1.2),
+	include/dvbsi++/application_information_section.h (1.3),
+	include/dvbsi++/application_name_descriptor.h (1.2),
+	include/dvbsi++/application_profile.h (1.2),
+	include/dvbsi++/application_signalling_descriptor.h (1.2),
+	include/dvbsi++/bouquet_association_section.h (1.2),
+	include/dvbsi++/ca_descriptor.h (1.2),
+	include/dvbsi++/ca_identifier_descriptor.h (1.2),
+	include/dvbsi++/ca_message_section.h (1.2),
+	include/dvbsi++/ca_program_map_section.h (1.2),
+	include/dvbsi++/ca_section.h (1.2),
+	include/dvbsi++/carousel_identifier_descriptor.h (1.2),
+	include/dvbsi++/cell_frequency_link_descriptor.h (1.2),
+	include/dvbsi++/cell_list_descriptor.h (1.2),
+	include/dvbsi++/compat.h (1.2),
+	include/dvbsi++/content_descriptor.h (1.2),
+	include/dvbsi++/country_availability_descriptor.h (1.2),
+	include/dvbsi++/data_broadcast_descriptor.h (1.2),
+	include/dvbsi++/data_broadcast_id_descriptor.h (1.2),
+	include/dvbsi++/delegated_application_descriptor.h (1.2),
+	include/dvbsi++/descriptor.h (1.4),
+	include/dvbsi++/descriptor_container.h (1.3),
+	include/dvbsi++/dii_location_descriptor.h (1.2),
+	include/dvbsi++/dvb_html_application_descriptor.h (1.2),
+	include/dvbsi++/dvb_j_application_descriptor.h (1.2),
+	include/dvbsi++/event_information_section.h (1.2),
+	include/dvbsi++/extended_event_descriptor.h (1.2),
+	include/dvbsi++/external_application_authorisation_descriptor.h
+	(1.2), include/dvbsi++/frequency_list_descriptor.h (1.2),
+	include/dvbsi++/iso639_language_descriptor.h (1.2),
+	include/dvbsi++/linkage_descriptor.h (1.2),
+	include/dvbsi++/local_time_offset_descriptor.h (1.2),
+	include/dvbsi++/long_crc_section.h (1.2),
+	include/dvbsi++/long_section.h (1.2),
+	include/dvbsi++/mosaic_descriptor.h (1.2),
+	include/dvbsi++/multilingual_bouquet_name_descriptor.h (1.2),
+	include/dvbsi++/multilingual_component_descriptor.h (1.2),
+	include/dvbsi++/multilingual_network_name_descriptor.h (1.2),
+	include/dvbsi++/multilingual_service_name_descriptor.h (1.2),
+	include/dvbsi++/network_information_section.h (1.2),
+	include/dvbsi++/nvod_reference_descriptor.h (1.2),
+	include/dvbsi++/parental_rating_descriptor.h (1.2),
+	include/dvbsi++/plugin_descriptor.h (1.2),
+	include/dvbsi++/prefetch_descriptor.h (1.2),
+	include/dvbsi++/program_association_section.h (1.2),
+	include/dvbsi++/program_map_section.h (1.4),
+	include/dvbsi++/service_description_section.h (1.2),
+	include/dvbsi++/service_list_descriptor.h (1.2),
+	include/dvbsi++/short_crc_section.h (1.2),
+	include/dvbsi++/short_section.h (1.4),
+	include/dvbsi++/stuffing_descriptor.h (1.2),
+	include/dvbsi++/subtitling_descriptor.h (1.2),
+	include/dvbsi++/time_date_section.h (1.2),
+	include/dvbsi++/time_offset_section.h (1.2),
+	include/dvbsi++/transport_protocol_descriptor.h (1.2),
+	include/dvbsi++/vbi_data_descriptor.h (1.2),
+	include/dvbsi++/vbi_teletext_descriptor.h (1.2),
+	qa/test_si_descriptors.cxxtest (1.2), src/ac3_descriptor.cpp (1.2),
+	src/announcement_support_descriptor.cpp (1.3),
+	src/application_descriptor.cpp (1.2),
+	src/application_information_section.cpp (1.4),
+	src/application_name_descriptor.cpp (1.2),
+	src/application_signalling_descriptor.cpp (1.3),
+	src/ca_descriptor.cpp (1.3), src/ca_identifier_descriptor.cpp
+	(1.3), src/ca_program_map_section.cpp (1.3),
+	src/carousel_identifier_descriptor.cpp (1.2),
+	src/cell_frequency_link_descriptor.cpp (1.3),
+	src/cell_list_descriptor.cpp (1.3), src/content_descriptor.cpp
+	(1.2), src/country_availability_descriptor.cpp (1.2),
+	src/data_broadcast_descriptor.cpp (1.3),
+	src/data_broadcast_id_descriptor.cpp (1.3),
+	src/delegated_application_descriptor.cpp (1.2),
+	src/descriptor_container.cpp (1.3), src/dii_location_descriptor.cpp
+	(1.2), src/dvb_html_application_descriptor.cpp (1.2),
+	src/dvb_j_application_descriptor.cpp (1.2),
+	src/event_information_section.cpp (1.4),
+	src/extended_event_descriptor.cpp (1.2),
+	src/external_application_authorisation_descriptor.cpp (1.2),
+	src/frequency_list_descriptor.cpp (1.3),
+	src/iso639_language_descriptor.cpp (1.2),
+	src/linkage_descriptor.cpp (1.3),
+	src/local_time_offset_descriptor.cpp (1.3),
+	src/mosaic_descriptor.cpp (1.4),
+	src/multilingual_bouquet_name_descriptor.cpp (1.3),
+	src/multilingual_component_descriptor.cpp (1.3),
+	src/multilingual_network_name_descriptor.cpp (1.2),
+	src/multilingual_service_name_descriptor.cpp (1.2),
+	src/network_information_section.cpp (1.4),
+	src/nvod_reference_descriptor.cpp (1.3),
+	src/parental_rating_descriptor.cpp (1.2), src/plugin_descriptor.cpp
+	(1.2), src/prefetch_descriptor.cpp (1.2),
+	src/program_association_section.cpp (1.3),
+	src/program_map_section.cpp (1.6),
+	src/service_description_section.cpp (1.4),
+	src/service_list_descriptor.cpp (1.3),
+	src/subtitling_descriptor.cpp (1.3),
+	src/transport_protocol_descriptor.cpp (1.2),
+	src/vbi_data_descriptor.cpp (1.3), src/vbi_teletext_descriptor.cpp
+	(1.2):
+
+	fix capmt stuff, change all std::vector to std::list.. i think its
+	faster in this case
+
+2005-01-01  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/descriptor.h (1.3),
+	include/dvbsi++/short_section.h (1.3):
+
+	fixed a major memleak; base classes need a virtual destructor;
+
+2004-06-18  Stéphane Esté-Gracias <sestegra@free.fr>
+
+	* Makefile.am (1.2), configure.ac (1.4):
+
+	Add unit tests with CxxTest
+
+2004-06-18  Stéphane Esté-Gracias <sestegra@free.fr>
+
+	* qa/Makefile.am (1.1), qa/test_si_descriptors.cxxtest (1.1),
+	qa/test_si_descriptors.h (1.1):
+
+	Add unit tests for SI descriptors
+
+2004-06-18  Stéphane Esté-Gracias <sestegra@free.fr>
+
+	* src/multilingual_component_descriptor.cpp (1.2):
+
+	Fix offset bug
+
+2004-06-18  Stéphane Esté-Gracias <sestegra@free.fr>
+
+	* src/mosaic_descriptor.cpp (1.3):
+
+	Fix cells alignement
+
+2004-06-18  Stéphane Esté-Gracias <sestegra@free.fr>
+
+	* src/vbi_data_descriptor.cpp (1.2):
+
+	Fix typo bug : misplaced semi-colon
+
+2004-06-18  Stéphane Esté-Gracias <sestegra@free.fr>
+
+	* src/multilingual_bouquet_name_descriptor.cpp (1.2):
+
+	Fix offset bug
+
+2004-06-18  Stéphane Esté-Gracias <sestegra@free.fr>
+
+	* src/bouquet_name_descriptor.cpp (1.2):
+
+	Add destructor implementation
+
+2004-06-17  Andreas Oberritter <obi@saftware.de>
+
+	* include/dvbsi++/program_map_section.h (1.3),
+	src/program_map_section.cpp (1.5):
+
+	reverted commit by Marcel: use getTableIdExtension() instead
+
+2004-06-17  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/program_map_section.h (1.2),
+	src/program_map_section.cpp (1.4):
+
+	bugfix; if somebody is not filtering the PMT having the
+	ProgramNumber set by using the setTableIdExtension function of the
+	libdvb++ sectionFilter, he must have the ability to check the
+	programNumber within the received PMT because some stations use ONE
+	pmt pid for 10 Services. Normally you should use the
+	setTableIdExtension() function.
+
+2004-06-01  Marcel Siegert <mws@twisted-brains.org>
+
+	* AUTHORS (1.5):
+
+	hopyfully fixed the utf-8 things *g*
+
+2004-06-01  Andreas Oberritter <obi@saftware.de>
+
+	* AUTHORS (1.4):
+
+	my editor drives me mad. maybe someone who ownes a european
+	keyboard should replace the unicode(?) characters with ascii...
+
+2004-05-31  Andreas Oberritter <obi@saftware.de>
+
+	* AUTHORS (1.3):
+
+	oops
+
+2004-05-31  Andreas Oberritter <obi@saftware.de>
+
+	* AUTHORS (1.2):
+
+	added StÃ©phane EstÃ©-Graci to authors list
+
+2004-05-31  Andreas Oberritter <obi@saftware.de>
+
+	* configure.ac (1.3):
+
+	removed "no-define nostdinc", so current sid's automake doesn't
+	complain
+
+2004-05-31  Andreas Oberritter <obi@saftware.de>
+
+	* include/dvbsi++/application_descriptor.h (1.1),
+	include/dvbsi++/application_icons_descriptor.h (1.1),
+	include/dvbsi++/application_identifier.h (1.1),
+	include/dvbsi++/application_information_section.h (1.2),
+	include/dvbsi++/application_name_descriptor.h (1.1),
+	include/dvbsi++/application_profile.h (1.1),
+	include/dvbsi++/application_storage_descriptor.h (1.1),
+	include/dvbsi++/caching_priority_descriptor.h (1.1),
+	include/dvbsi++/carousel_identifier_descriptor.h (1.1),
+	include/dvbsi++/compressed_module_descriptor.h (1.1),
+	include/dvbsi++/content_type_descriptor.h (1.1),
+	include/dvbsi++/crc32_descriptor.h (1.1),
+	include/dvbsi++/delegated_application_descriptor.h (1.1),
+	include/dvbsi++/descriptor_container.h (1.2),
+	include/dvbsi++/descriptor_tag.h (1.2),
+	include/dvbsi++/dii_location_descriptor.h (1.1),
+	include/dvbsi++/dvb_html_application_boundary_descriptor.h (1.1),
+	include/dvbsi++/dvb_html_application_descriptor.h (1.1),
+	include/dvbsi++/dvb_html_application_location_descriptor.h (1.1),
+	include/dvbsi++/dvb_j_application_descriptor.h (1.1),
+	include/dvbsi++/dvb_j_application_location_descriptor.h (1.1),
+	include/dvbsi++/est_download_time_descriptor.h (1.1),
+	include/dvbsi++/external_application_authorisation_descriptor.h
+	(1.1), include/dvbsi++/group_link_descriptor.h (1.1),
+	include/dvbsi++/info_descriptor.h (1.1),
+	include/dvbsi++/ip_signaling_descriptor.h (1.1),
+	include/dvbsi++/label_descriptor.h (1.1),
+	include/dvbsi++/location_descriptor.h (1.1),
+	include/dvbsi++/module_link_descriptor.h (1.1),
+	include/dvbsi++/name_descriptor.h (1.1),
+	include/dvbsi++/packet_id.h (1.2),
+	include/dvbsi++/plugin_descriptor.h (1.1),
+	include/dvbsi++/prefetch_descriptor.h (1.1),
+	include/dvbsi++/service_identifier_descriptor.h (1.1),
+	include/dvbsi++/service_type.h (1.2), include/dvbsi++/table_id.h
+	(1.2), include/dvbsi++/transport_protocol_descriptor.h (1.1),
+	include/dvbsi++/type_descriptor.h (1.1), src/Makefile.am (1.3),
+	src/application_descriptor.cpp (1.1),
+	src/application_icons_descriptor.cpp (1.1),
+	src/application_identifier.cpp (1.1),
+	src/application_information_section.cpp (1.3),
+	src/application_name_descriptor.cpp (1.1),
+	src/application_profile.cpp (1.1),
+	src/application_storage_descriptor.cpp (1.1),
+	src/bouquet_association_section.cpp (1.3), src/ca_section.cpp
+	(1.2), src/caching_priority_descriptor.cpp (1.1),
+	src/carousel_identifier_descriptor.cpp (1.1),
+	src/compressed_module_descriptor.cpp (1.1),
+	src/content_type_descriptor.cpp (1.1), src/crc32_descriptor.cpp
+	(1.1), src/delegated_application_descriptor.cpp (1.1),
+	src/descriptor_container.cpp (1.2), src/dii_location_descriptor.cpp
+	(1.1), src/dvb_html_application_boundary_descriptor.cpp (1.1),
+	src/dvb_html_application_descriptor.cpp (1.1),
+	src/dvb_html_application_location_descriptor.cpp (1.1),
+	src/dvb_j_application_descriptor.cpp (1.1),
+	src/dvb_j_application_location_descriptor.cpp (1.1),
+	src/est_download_time_descriptor.cpp (1.1),
+	src/event_information_section.cpp (1.3),
+	src/external_application_authorisation_descriptor.cpp (1.1),
+	src/group_link_descriptor.cpp (1.1), src/info_descriptor.cpp (1.1),
+	src/ip_signaling_descriptor.cpp (1.1), src/label_descriptor.cpp
+	(1.1), src/location_descriptor.cpp (1.1),
+	src/module_link_descriptor.cpp (1.1), src/name_descriptor.cpp
+	(1.1), src/network_information_section.cpp (1.3),
+	src/plugin_descriptor.cpp (1.1), src/prefetch_descriptor.cpp (1.1),
+	src/program_map_section.cpp (1.3),
+	src/service_description_section.cpp (1.3),
+	src/service_identifier_descriptor.cpp (1.1),
+	src/time_offset_section.cpp (1.3),
+	src/transport_protocol_descriptor.cpp (1.1),
+	src/type_descriptor.cpp (1.1):
+
+	patch by StÃ©phane EstÃ©-Graas
+
+	Modifications: - Revision date of SI specifications (1.5.1 version)
+	- Revision date of MHP specifications (1.2.1 version) - Remove 0x65
+	SI descriptor tag (last ca_system_descriptor tag no more used in SI
+	1.5.1 version) - Remove 0x06 and 0x07 MHP descriptor tags (last
+	routing_descriptor_ip4 and routing_descriptor_ip6 no more used in
+	MHP 1.2.1 version) - Add 0x0E to 0x11 MHP descriptor tags (added in
+	MHP 1.2.1 version) - Remove private table identifiers and private
+	descriptor tags because they are broadcaster dependant - Extract
+	ApplicationIdentifier class from
+	application_informtion_section.[h|cpp] files to create
+	application_identifier.[h|cpp] files - Create a scope tag in
+	descriptor_container.[h|cpp] files   SCOPE_SI for (P)SI tables
+	(BAT, CAT, EIT, NIT, PMT, SDT, TOT)   SCOPE_CAROUSEL for Data and
+	Object Carousels messages (DSI, DII, DDB)   SCOPE_MHP for MHP
+	tables (AIT)
+
+	Additions: - Add implementation of MHP descriptors - Add
+	implementation of Carousel descriptors
+
+2004-02-16  Andreas Oberritter <obi@saftware.de>
+
+	* include/dvbsi++/byte_stream.h (1.3):
+
+	fixed DVB_LENGTH()
+
+2004-02-14  Andreas Oberritter <obi@saftware.de>
+
+	* include/dvbsi++/byte_stream.h (1.2):
+
+	fix
+
+2004-02-13  Andreas Oberritter <obi@saftware.de>
+
+	* configure.ac (1.2), include/dvbsi++/byte_stream.h (1.1),
+	include/dvbsi++/compat.h (1.1), include/dvbsi++/descriptor.h (1.2),
+	include/dvbsi++/short_section.h (1.2), src/Makefile.am (1.2),
+	src/announcement_support_descriptor.cpp (1.2),
+	src/application_information_section.cpp (1.2),
+	src/application_signalling_descriptor.cpp (1.2),
+	src/bouquet_association_section.cpp (1.2), src/byte_stream.h (1.2),
+	src/ca_descriptor.cpp (1.2), src/ca_identifier_descriptor.cpp
+	(1.2), src/ca_program_map_section.cpp (1.2),
+	src/cell_frequency_link_descriptor.cpp (1.2),
+	src/cell_list_descriptor.cpp (1.2),
+	src/data_broadcast_descriptor.cpp (1.2),
+	src/data_broadcast_id_descriptor.cpp (1.2),
+	src/event_information_section.cpp (1.2),
+	src/frequency_list_descriptor.cpp (1.2), src/linkage_descriptor.cpp
+	(1.2), src/local_time_offset_descriptor.cpp (1.2),
+	src/long_crc_section.cpp (1.2), src/long_section.cpp (1.2),
+	src/mosaic_descriptor.cpp (1.2),
+	src/network_information_section.cpp (1.2),
+	src/nvod_reference_descriptor.cpp (1.2), src/pdc_descriptor.cpp
+	(1.2), src/private_data_specifier_descriptor.cpp (1.2),
+	src/program_association_section.cpp (1.2),
+	src/program_map_section.cpp (1.2),
+	src/satellite_delivery_system_descriptor.cpp (1.2),
+	src/service_description_section.cpp (1.2),
+	src/service_list_descriptor.cpp (1.2),
+	src/service_move_descriptor.cpp (1.2), src/short_crc_section.cpp
+	(1.2), src/short_section.cpp (1.2), src/subtitling_descriptor.cpp
+	(1.2), src/target_background_grid_descriptor.cpp (1.2),
+	src/terrestrial_delivery_system_descriptor.cpp (1.2),
+	src/time_date_section.cpp (1.2), src/time_offset_section.cpp (1.2),
+	src/time_shifted_service_descriptor.cpp (1.2),
+	src/video_window_descriptor.cpp (1.2):
+
+	autoconf/automake/libtool tweaks
+
+2004-02-13  Andreas Oberritter <obi@saftware.de>
+
+	* .cvsignore (1.1), AUTHORS (1.1), COPYING (1.1), ChangeLog (1.1),
+	INSTALL (1.1), Makefile.am (1.1), NEWS (1.1), README (1.1),
+	autogen.sh (1.1), configure.ac (1.1), libdvbsi++.pc.in (1.1),
+	include/.cvsignore (1.1), include/Makefile.am (1.1),
+	include/dvbsi++/.cvsignore (1.1), include/dvbsi++/Makefile.am
+	(1.1), include/dvbsi++/ac3_descriptor.h (1.1),
+	include/dvbsi++/ancillary_data_descriptor.h (1.1),
+	include/dvbsi++/announcement_support_descriptor.h (1.1),
+	include/dvbsi++/application_information_section.h (1.1),
+	include/dvbsi++/application_signalling_descriptor.h (1.1),
+	include/dvbsi++/audio_stream_descriptor.h (1.1),
+	include/dvbsi++/bouquet_association_section.h (1.1),
+	include/dvbsi++/bouquet_name_descriptor.h (1.1),
+	include/dvbsi++/ca_descriptor.h (1.1),
+	include/dvbsi++/ca_identifier_descriptor.h (1.1),
+	include/dvbsi++/ca_message_section.h (1.1),
+	include/dvbsi++/ca_program_map_section.h (1.1),
+	include/dvbsi++/ca_section.h (1.1),
+	include/dvbsi++/ca_system_descriptor.h (1.1),
+	include/dvbsi++/cable_delivery_system_descriptor.h (1.1),
+	include/dvbsi++/cell_frequency_link_descriptor.h (1.1),
+	include/dvbsi++/cell_list_descriptor.h (1.1),
+	include/dvbsi++/component_descriptor.h (1.1),
+	include/dvbsi++/content_descriptor.h (1.1),
+	include/dvbsi++/country_availability_descriptor.h (1.1),
+	include/dvbsi++/data_broadcast_descriptor.h (1.1),
+	include/dvbsi++/data_broadcast_id_descriptor.h (1.1),
+	include/dvbsi++/descriptor.h (1.1),
+	include/dvbsi++/descriptor_container.h (1.1),
+	include/dvbsi++/descriptor_tag.h (1.1),
+	include/dvbsi++/event_information_section.h (1.1),
+	include/dvbsi++/extended_event_descriptor.h (1.1),
+	include/dvbsi++/frequency_list_descriptor.h (1.1),
+	include/dvbsi++/iso639_language_descriptor.h (1.1),
+	include/dvbsi++/linkage_descriptor.h (1.1),
+	include/dvbsi++/local_time_offset_descriptor.h (1.1),
+	include/dvbsi++/long_crc_section.h (1.1),
+	include/dvbsi++/long_section.h (1.1),
+	include/dvbsi++/mosaic_descriptor.h (1.1),
+	include/dvbsi++/multilingual_bouquet_name_descriptor.h (1.1),
+	include/dvbsi++/multilingual_component_descriptor.h (1.1),
+	include/dvbsi++/multilingual_network_name_descriptor.h (1.1),
+	include/dvbsi++/multilingual_service_name_descriptor.h (1.1),
+	include/dvbsi++/network_information_section.h (1.1),
+	include/dvbsi++/network_name_descriptor.h (1.1),
+	include/dvbsi++/nvod_reference_descriptor.h (1.1),
+	include/dvbsi++/packet_id.h (1.1),
+	include/dvbsi++/parental_rating_descriptor.h (1.1),
+	include/dvbsi++/pdc_descriptor.h (1.1),
+	include/dvbsi++/private_data_specifier_descriptor.h (1.1),
+	include/dvbsi++/program_association_section.h (1.1),
+	include/dvbsi++/program_map_section.h (1.1),
+	include/dvbsi++/satellite_delivery_system_descriptor.h (1.1),
+	include/dvbsi++/service_description_section.h (1.1),
+	include/dvbsi++/service_descriptor.h (1.1),
+	include/dvbsi++/service_list_descriptor.h (1.1),
+	include/dvbsi++/service_move_descriptor.h (1.1),
+	include/dvbsi++/service_type.h (1.1),
+	include/dvbsi++/short_crc_section.h (1.1),
+	include/dvbsi++/short_event_descriptor.h (1.1),
+	include/dvbsi++/short_section.h (1.1),
+	include/dvbsi++/stream_identifier_descriptor.h (1.1),
+	include/dvbsi++/stream_type.h (1.1),
+	include/dvbsi++/stuffing_descriptor.h (1.1),
+	include/dvbsi++/subtitling_descriptor.h (1.1),
+	include/dvbsi++/table_id.h (1.1),
+	include/dvbsi++/target_background_grid_descriptor.h (1.1),
+	include/dvbsi++/telephone_descriptor.h (1.1),
+	include/dvbsi++/teletext_descriptor.h (1.1),
+	include/dvbsi++/terrestrial_delivery_system_descriptor.h (1.1),
+	include/dvbsi++/time_date_section.h (1.1),
+	include/dvbsi++/time_offset_section.h (1.1),
+	include/dvbsi++/time_shifted_service_descriptor.h (1.1),
+	include/dvbsi++/vbi_data_descriptor.h (1.1),
+	include/dvbsi++/vbi_teletext_descriptor.h (1.1),
+	include/dvbsi++/video_stream_descriptor.h (1.1),
+	include/dvbsi++/video_window_descriptor.h (1.1), src/.cvsignore
+	(1.1), src/Makefile.am (1.1), src/ac3_descriptor.cpp (1.1),
+	src/ancillary_data_descriptor.cpp (1.1),
+	src/announcement_support_descriptor.cpp (1.1),
+	src/application_information_section.cpp (1.1),
+	src/application_signalling_descriptor.cpp (1.1),
+	src/audio_stream_descriptor.cpp (1.1),
+	src/bouquet_association_section.cpp (1.1),
+	src/bouquet_name_descriptor.cpp (1.1), src/byte_stream.h (1.1),
+	src/ca_descriptor.cpp (1.1), src/ca_identifier_descriptor.cpp
+	(1.1), src/ca_message_section.cpp (1.1),
+	src/ca_program_map_section.cpp (1.1), src/ca_section.cpp (1.1),
+	src/ca_system_descriptor.cpp (1.1),
+	src/cable_delivery_system_descriptor.cpp (1.1),
+	src/cell_frequency_link_descriptor.cpp (1.1),
+	src/cell_list_descriptor.cpp (1.1), src/component_descriptor.cpp
+	(1.1), src/content_descriptor.cpp (1.1),
+	src/country_availability_descriptor.cpp (1.1),
+	src/data_broadcast_descriptor.cpp (1.1),
+	src/data_broadcast_id_descriptor.cpp (1.1), src/descriptor.cpp
+	(1.1), src/descriptor_container.cpp (1.1),
+	src/event_information_section.cpp (1.1),
+	src/extended_event_descriptor.cpp (1.1),
+	src/frequency_list_descriptor.cpp (1.1),
+	src/iso639_language_descriptor.cpp (1.1),
+	src/linkage_descriptor.cpp (1.1),
+	src/local_time_offset_descriptor.cpp (1.1),
+	src/long_crc_section.cpp (1.1), src/long_section.cpp (1.1),
+	src/mosaic_descriptor.cpp (1.1),
+	src/multilingual_bouquet_name_descriptor.cpp (1.1),
+	src/multilingual_component_descriptor.cpp (1.1),
+	src/multilingual_network_name_descriptor.cpp (1.1),
+	src/multilingual_service_name_descriptor.cpp (1.1),
+	src/network_information_section.cpp (1.1),
+	src/network_name_descriptor.cpp (1.1),
+	src/nvod_reference_descriptor.cpp (1.1),
+	src/parental_rating_descriptor.cpp (1.1), src/pdc_descriptor.cpp
+	(1.1), src/private_data_specifier_descriptor.cpp (1.1),
+	src/program_association_section.cpp (1.1),
+	src/program_map_section.cpp (1.1),
+	src/satellite_delivery_system_descriptor.cpp (1.1),
+	src/service_description_section.cpp (1.1),
+	src/service_descriptor.cpp (1.1), src/service_list_descriptor.cpp
+	(1.1), src/service_move_descriptor.cpp (1.1),
+	src/short_crc_section.cpp (1.1), src/short_event_descriptor.cpp
+	(1.1), src/short_section.cpp (1.1),
+	src/stream_identifier_descriptor.cpp (1.1),
+	src/stuffing_descriptor.cpp (1.1), src/subtitling_descriptor.cpp
+	(1.1), src/target_background_grid_descriptor.cpp (1.1),
+	src/telephone_descriptor.cpp (1.1), src/teletext_descriptor.cpp
+	(1.1), src/terrestrial_delivery_system_descriptor.cpp (1.1),
+	src/time_date_section.cpp (1.1), src/time_offset_section.cpp (1.1),
+	src/time_shifted_service_descriptor.cpp (1.1),
+	src/vbi_data_descriptor.cpp (1.1), src/vbi_teletext_descriptor.cpp
+	(1.1), src/video_stream_descriptor.cpp (1.1),
+	src/video_window_descriptor.cpp (1.1):
+
+	libdvbsi++ - slightly modified former part of libdvb++ covering DVB
+	Service Information
+
