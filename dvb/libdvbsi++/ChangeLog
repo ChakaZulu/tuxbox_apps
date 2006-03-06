@@ -1,5 +1,11 @@
 2006-03-06  Andreas Oberritter <obi@saftware.de>
 
+	* ChangeLog (1.2):
+
+	added changelog for release tarballs
+
+2006-03-06  Andreas Oberritter <obi@saftware.de>
+
 	* configure.ac (1.7):
 
 	check for cvs2cl, gnupg and md5sum before using them
