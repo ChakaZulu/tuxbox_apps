@@ -1,5 +1,5 @@
 /*
-$Id: biop_message.c,v 1.1 2006/03/06 00:04:49 rasc Exp $
+$Id: biop_message.c,v 1.2 2006/03/06 01:14:50 rasc Exp $
 
 
  DVBSNOOP
@@ -94,11 +94,11 @@ u_long  BIOP_Message (int v, u_char *b)
 
 
 
-  n2  = outBit_Sx_NL (v,"objectKind_length: ",		b,  0,  8);
-  b += 1;
+  n2  = outBit_Sx_NL (v,"objectKind_length: ",		b,  0,  32);
+  b += 4;
   kind = 0x00;
   if (n2 != 4) {
-	print_databytes (v,"objectKind_data:",		b, n1); 
+	print_databytes (v,"objectKind_data:",		b, n2); 
   } else {
 	// -- ISO 13818-6: length == 4 bytes, use type_id aliases
  	kind = outBit_S2x_NL (v,"objectKind_data: ",	b, 0, 32,
@@ -126,7 +126,7 @@ u_long  BIOP_Message (int v, u_char *b)
 		len = body_StreamEventMessage (v, b);
 		break;
 
-	  case 0x73746700:		// "stg"   (DSM:ServiceGateway)
+	  case 0x73726700:		// "srg"   (DSM:ServiceGateway)
 		len = body_DirectoryMessage (v, b);
 		break;
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.36 2006/03/06 00:05:03 rasc Exp $
+$Id: dsmcc_str.c,v 1.37 2006/03/06 01:14:50 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.36 2006/03/06 00:05:03 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.37  2006/03/06 01:14:50  rasc
+Bugfixes... DSMCC BIOPs...
+
 Revision 1.36  2006/03/06 00:05:03  rasc
 More DSM-CC stuff: BIOP::FileMessage, BIOP::DirectoryMessage,
 BIOP::Stream::BIOP::StreamEvent, BIOP::ServiceGateway, DSM-TAPs, etc.
@@ -1025,7 +1028,7 @@ char *dsmccStrMHP_caching_transparency_level (u_int id)
 	{ 0x00, 0x00,   "reserved" },
 	{ 0x01, 0x01,   "transparent caching" },
 	{ 0x02, 0x02,   "semi-transparent caching" },
-	{ 0x03, 0x03,   "static chaching" },
+	{ 0x03, 0x03,   "static caching" },
 	{ 0x04, 0xFF,   "reserved" },
       	{  0,0, NULL }
   };
@@ -1262,8 +1265,8 @@ char *dsmccStrBIOP_TypeID_Alias (u_int id)
   STR_TABLE  TableIDs[] = {
 	{ 0x64697200, 0x64697200,   "dir (DSM::Directory)" },
 	{ 0x66696c00, 0x66696c00,   "fil (DSM::File)" },
+	{ 0x73726700, 0x73726700,   "srg (DSM::ServiceGateway)" },
 	{ 0x73746500, 0x73746500,   "ste (DSM::StreamEvent)" },
-	{ 0x73746700, 0x73746700,   "stg (DSM::ServiceGateway)" },
 	{ 0x73747200, 0x73747200,   "str (BIOP::Stream)" },
       	{  0,0, NULL }
   };
