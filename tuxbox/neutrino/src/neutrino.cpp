@@ -2365,6 +2365,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	directRecordingSettings->addItem(mf10);
 	directRecordingSettings->addItem(oj6);
 	directRecordingSettings->addItem(oj7);
+	directRecordingSettings->addItem(oj8);
 	directRecordingSettings->addItem(oj9);
 	directRecordingSettings->addItem(oj10);
 	directRecordingSettings->addItem(oj11);
