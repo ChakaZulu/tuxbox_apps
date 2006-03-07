@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/slotbuffer.c,v 1.1 2004/06/03 09:51:54 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/slotbuffer.c,v 1.2 2006/03/07 15:59:44 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -104,4 +104,10 @@ void slotbuffer_advance_write_pointer(slotbuffer_t * const slotbuffer, const siz
 	slotbuffer->write_pointer += delta;
 	if (slotbuffer->write_pointer >= slotbuffer->size)
 		slotbuffer->write_pointer = 0;
+}
+
+void slotbuffer_clear(slotbuffer_t * const slotbuffer)
+{
+	slotbuffer->write_pointer = 0;
+	slotbuffer->read_pointer = 0;
 }

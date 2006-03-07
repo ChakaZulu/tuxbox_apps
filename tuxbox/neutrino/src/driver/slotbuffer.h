@@ -2,7 +2,7 @@
 #define __slotbuffer_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/slotbuffer.h,v 1.1 2004/06/03 09:51:54 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/driver/slotbuffer.h,v 1.2 2006/03/07 15:59:44 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -40,5 +40,6 @@ size_t         slotbuffer_remaining_continuous_read_space (slotbuffer_t * const 
 size_t         slotbuffer_remaining_continuous_write_space(slotbuffer_t * const slotbuffer                    );
 void           slotbuffer_advance_read_pointer            (slotbuffer_t * const slotbuffer, size_t const delta);
 void           slotbuffer_advance_write_pointer           (slotbuffer_t * const slotbuffer, size_t const delta);
+void           slotbuffer_clear                           (slotbuffer_t * const slotbuffer);
 
 #endif
