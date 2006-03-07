@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.12  2006/03/07 19:58:24  robspr1
+ * - add timeout between keys
+ *
  * Revision 0.11  2006/03/06 21:09:46  robspr1
  * - change to kb2rcd.conf and change mouse behaviour
  *
@@ -216,6 +219,10 @@ static const struct key keyname[] = {
 	{"KEY_PAUSE",				KEY_PAUSE}, 	
 	{"KEY_BTNLEFT",			BTN_LEFT}, 
 	{"KEY_BTNRIGHT",		BTN_RIGHT},
+	{"PAUSE100MS",			PAUSE100},
+	{"PAUSE250MS",			PAUSE250},
+	{"PAUSE500MS",			PAUSE500},
+	{"PAUSE1000MS",			PAUSE1000},
 	{"PAUSE100",				PAUSE100},
 	{"PAUSE250",				PAUSE250},
 	{"PAUSE500",				PAUSE500},
@@ -255,6 +262,8 @@ int iMouseCnt = 0;												//! how many mouse-counts make one key
 int iMinMouse = 1;												//! minimum relative value that is not ignored
 int iMaxMouse = MAX_REL;									//! maximum relative value, makes a key
 int iDelay = 0;														//! delay in milli-seconds between keystrokes
+int iSmartDelay = 1;											//! smart delay betweet sending key commands
+int iInverse = 0;													//! detect key on release
 	
 //----------------------------------------------------
 // variables

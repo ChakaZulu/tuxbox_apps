@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.c,v $
+ * Revision 0.13  2006/03/07 19:58:24  robspr1
+ * - add timeout between keys
+ *
  * Revision 0.12  2006/03/07 15:56:53  robspr1
  * - fix copy'n'paste error for MAXMOUSE
  *
@@ -168,6 +171,16 @@ void ReadConf()
 			sscanf(p1 + 6, "%d", &iDelay);
 			continue;
 		}
+		else if ((p1 = strstr(linebuffer, "SMARTDELY=")))
+		{
+			sscanf(p1 + 10, "%d", &iSmartDelay);
+			continue;
+		}
+		else if ((p1 = strstr(linebuffer, "INVERSE=")))
+		{
+			sscanf(p1 + 8, "%d", &iInverse);
+			continue;
+		}
 		
 		p1=linebuffer;
 		rccode=0;
@@ -240,7 +253,9 @@ int WriteConf()
 	fprintf(fd_conf,"MOUSECNT=%d\n",iMouseCnt);
 	fprintf(fd_conf,"MINMOUSE=%d\n",iMinMouse);
 	fprintf(fd_conf,"MAXMOUSE=%d\n",iMaxMouse);
-	fprintf(fd_conf,"DELAY=%d\n\n",iDelay);
+	fprintf(fd_conf,"DELAY=%d\n",iDelay);
+	fprintf(fd_conf,"SMARTDELY=%d\n",iSmartDelay);
+	fprintf(fd_conf,"INVERSE=%d\n\n",iInverse);
 	
 	for (i=0; i<iCount; i++)
 	{
@@ -323,6 +338,7 @@ int SendRCCode(unsigned int code, unsigned int count)
 	if (count == 0) 
 	{
 		iev.value=KEY_RELEASED;
+		if (iSmartDelay) usleep(iSmartDelay*1000);
 		return write(rc,&iev,sizeof(iev));
 	}
 	
@@ -336,8 +352,10 @@ int SendRCCode(unsigned int code, unsigned int count)
 		else
 		{
 			iev.value=KEY_PRESSED;
+			if (iSmartDelay) usleep(iSmartDelay*1000);
 			write(rc,&iev,sizeof(iev));
 			iev.value=KEY_RELEASED;
+			if (iSmartDelay) usleep(iSmartDelay*1000);
 			write(rc,&iev,sizeof(iev));
 		}
 		return 1;
@@ -345,13 +363,16 @@ int SendRCCode(unsigned int code, unsigned int count)
 	
 	// send some autorepeat keys
 	iev.value=KEY_PRESSED;
+	if (iSmartDelay) usleep(iSmartDelay*1000);
 	write(rc,&iev,sizeof(iev));
 	iev.value=KEY_AUTOREPEAT;
 	while (--count)
 	{
+		if (iSmartDelay) usleep(iSmartDelay*1000);
 		write(rc,&iev,sizeof(iev));
 	}
 	iev.value=KEY_RELEASED;
+	if (iSmartDelay) usleep(iSmartDelay*1000);
 	return write(rc,&iev,sizeof(iev));
 }
 
@@ -389,7 +410,7 @@ void GetRCCode()
 			if (j!=-1) pName=keyname[j].name;
 		}
 		
-		if (debug) printf("kb2rcd: t:%x c:%x (%s) v:%d\r\n",ev.type, ev.code, pName, ev.value);
+		if (debug) printf("kb2rcd: s:%lu u:%lu t:%x c:%x (%s) v:%d\r\n",ev.time.tv_sec,ev.time.tv_usec,ev.type, ev.code, pName, ev.value);
 		// do we have a valid input
 		
 		// relativ-event, cursor
@@ -472,7 +493,7 @@ void GetRCCode()
 			if (debug) printf("kb2rcd: cu_h:%ld cu_v:%ld c_h:%d c_v:%d\r\n",cursor_h,cursor_v,cnt_h,cnt_v);
 		}
 		
-		if ((ev.value) && (ev.type==EV_KEY))
+		if ((((iInverse) && (ev.value==0)) || ((iInverse==0) && (ev.value))) && (ev.type==EV_KEY))
 		{
 			kbcode = ev.code;
 							
@@ -492,7 +513,7 @@ void GetRCCode()
   			{
   				if (keyconv[i].in_code == kbcode)
   				{
- 						SendRCCode(keyconv[i].in_code,KEY_RELEASED);
+ 						if (iInverse==0) SendRCCode(keyconv[i].in_code,KEY_RELEASED);
   					if (debug) printf("kb2rcd: convert %lx to",keyconv[i].in_code);
   					int j;
   					for (j=0;j<MAX_OUT;j++)
@@ -578,7 +599,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 0.12 $";
+	char cvs_revision[] = "$Revision: 0.13 $";
 	int param = 0;
 	
 	sscanf(cvs_revision, "%*s %s", versioninfo_d);
