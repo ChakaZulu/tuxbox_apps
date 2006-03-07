@@ -7368,7 +7368,7 @@ int eShutdownStandbySelWindow::getCheckboxState()
 }
 
 eSleepTimer::eSleepTimer()
-:eShutdownStandbySelWindow( this, 1, 1, 240, 3, 0, 0 )
+:eShutdownStandbySelWindow( this, 1, 1, 999, 3, 0, 0 )
 {
 	eLabel *l = new eLabel(this);
 	l->setName("l_duration");
@@ -7399,7 +7399,7 @@ void eSleepTimer::setPressed()
 
 #ifndef DISABLE_FILE
 eTimerInput::eTimerInput()
-:eShutdownStandbySelWindow( this, 1, 1, 240, 3, 0, 0 )
+:eShutdownStandbySelWindow( this, 1, 1, 999, 3, 0, 0 )
 {
 	eLabel *l = new eLabel(this);
 	l->setName("lrec_duration");
