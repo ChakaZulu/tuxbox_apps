@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.c,v $
+ * Revision 0.12  2006/03/07 15:56:53  robspr1
+ * - fix copy'n'paste error for MAXMOUSE
+ *
  * Revision 0.11  2006/03/06 21:09:46  robspr1
  * - change to kb2rcd.conf and change mouse behaviour
  *
@@ -155,7 +158,7 @@ void ReadConf()
 			sscanf(p1 + 9, "%d", &iMinMouse);
 			continue;
 		}
-		else if ((p1 = strstr(linebuffer, "MINMOUSE=")))
+		else if ((p1 = strstr(linebuffer, "MAXMOUSE=")))
 		{
 			sscanf(p1 + 9, "%d", &iMaxMouse);
 			continue;
@@ -575,7 +578,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 0.11 $";
+	char cvs_revision[] = "$Revision: 0.12 $";
 	int param = 0;
 	
 	sscanf(cvs_revision, "%*s %s", versioninfo_d);
