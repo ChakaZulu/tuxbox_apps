@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.13  2006/03/07 21:25:53  robspr1
+ * - fixme for kernel 2.6
+ *
  * Revision 0.12  2006/03/07 19:58:24  robspr1
  * - add timeout between keys
  *
@@ -78,7 +81,15 @@
 #include <zlib.h>
 #include <malloc.h>
 #include <linux/input.h>
+#if !defined(KEY_TOPLEFT)
 
+/* FIXME: these are not in kernel 2.6! */
+#define KEY_TOPLEFT      0x1a2
+#define KEY_TOPRIGHT     0x1a3
+#define KEY_BOTTOMLEFT   0x1a4
+#define KEY_BOTTOMRIGHT  0x1a5
+
+#endif  /* !defined(KEY_TOPLEFT)  */
 
 #define CFGPATH "/var/tuxbox/config/"									//! config-path
 #define CFGFILE "kb2rcd.conf"													//! config-file
