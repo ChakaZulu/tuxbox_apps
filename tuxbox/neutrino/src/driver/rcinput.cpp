@@ -1121,7 +1121,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 #ifdef OLD_RC_API
 						if (ev.code != 0x5cfe)
 #else /* OLD_RC_API */
-						if (ev.value)
+						if ((ev.value) && (ev.type==EV_KEY))
 #endif /* OLD_RC_API */
 						{
 							unsigned long long now_pressed;
