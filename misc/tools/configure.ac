@@ -13,4 +13,5 @@ fbshot/Makefile
 mtd/Makefile
 rtc/Makefile
 devinit/Makefile
+dboxshot/Makefile
 ])
