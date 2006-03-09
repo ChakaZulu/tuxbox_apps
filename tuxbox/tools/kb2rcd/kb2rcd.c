@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.c,v $
+ * Revision 0.14  2006/03/09 18:50:01  robspr1
+ * - add scripts
+ *
  * Revision 0.13  2006/03/07 19:58:24  robspr1
  * - add timeout between keys
  *
@@ -127,6 +130,7 @@ void ReadConf()
 	iCount=0;
 	
 	memset(keyconv,0,sizeof(keyconv));
+	memset(szScripts,0,sizeof(szScripts));
 	
 	// open config-file
 	if (!(fd_conf = fopen(CFGPATH CFGFILE, "r")))
@@ -181,6 +185,20 @@ void ReadConf()
 			sscanf(p1 + 8, "%d", &iInverse);
 			continue;
 		}
+		else if ((p1 = strstr(linebuffer, "SCRIPT")) && (*(p1+8) == '='))		// scan for scripts
+		{
+			int iIdx=-1;
+			char index = *(p1+7);
+			if((index >= '0') && (index <= '9')) iIdx=index-'0';
+			index = *(p1+6);
+			if((index >= '0') && (index <= '9')) iIdx+=(index-'0')*10;
+			{
+				p2=strchr(p1,'\n');					// remove carrige-return 
+				if (p2)	*p2=0;
+				sscanf(p1 + 9, "%s", szScripts[iIdx-1]);
+			}
+			continue;			
+		}
 		
 		p1=linebuffer;
 		rccode=0;
@@ -218,6 +236,7 @@ void ReadConf()
 					}
 					j = FindKeyName(p1);
 					if (j!=-1) keyconv[iCount].out_code[i++] = keyname[j].code;
+					
 				} while ((j!=0) && (p2!=NULL));
 				iCount++;
 			}
@@ -256,6 +275,15 @@ int WriteConf()
 	fprintf(fd_conf,"DELAY=%d\n",iDelay);
 	fprintf(fd_conf,"SMARTDELY=%d\n",iSmartDelay);
 	fprintf(fd_conf,"INVERSE=%d\n\n",iInverse);
+	
+	for (i=0; i<MAX_SCRIPTS; i++)
+	{
+		if (szScripts[i][0] != '\0')
+		{
+			fprintf(fd_conf,"SCRIPT%02u=%s\n",i+1,szScripts[i]);
+		}
+	}
+	fprintf(fd_conf,"\n");
 	
 	for (i=0; i<iCount; i++)
 	{
@@ -345,10 +373,17 @@ int SendRCCode(unsigned int code, unsigned int count)
 	// send one full keystroke or pause
 	if (count == 1)
 	{
-		if (code == PAUSE100) usleep(100*1000);
-		else if (code == PAUSE250) usleep(250*1000);
-		else if (code == PAUSE500) usleep(500*1000);
-		else if (code == PAUSE1000) sleep(1);
+		// do we have a code for pause
+		if ((code & 0xFFFF0000) == PAUSE0)
+		{
+			if ((code&0xFFFF) >= 1000) sleep((code&0xFFFF)/1000);
+			else usleep(1000*(code&0xFFFF));
+		}
+		// do we have a code for a script
+		else if ((code & 0xFFFF0000) == SCRIPT00)
+		{
+			if (szScripts[(code&0xFFFF)-1][0]!='\0') system(szScripts[(code&0xFFFF)-1]);
+		}
 		else
 		{
 			iev.value=KEY_PRESSED;
@@ -599,7 +634,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 0.13 $";
+	char cvs_revision[] = "$Revision: 0.14 $";
 	int param = 0;
 	
 	sscanf(cvs_revision, "%*s %s", versioninfo_d);

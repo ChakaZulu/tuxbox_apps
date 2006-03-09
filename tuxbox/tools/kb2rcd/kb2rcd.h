@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.14  2006/03/09 18:50:01  robspr1
+ * - add scripts
+ *
  * Revision 0.13  2006/03/07 21:25:53  robspr1
  * - fixme for kernel 2.6
  *
@@ -109,10 +112,8 @@ struct key{
 	unsigned long code;
 };
 
-#define PAUSE100				0xFFFF0100
-#define PAUSE250				0xFFFF0250
-#define PAUSE500				0xFFFF0500
-#define PAUSE1000				0xFFFF1000
+#define PAUSE0					0xFFFF0000
+#define SCRIPT00				0xFFF00000
 
 static const struct key keyname[] = {
 	{"KEY_0", 					KEY_0},
@@ -230,14 +231,34 @@ static const struct key keyname[] = {
 	{"KEY_PAUSE",				KEY_PAUSE}, 	
 	{"KEY_BTNLEFT",			BTN_LEFT}, 
 	{"KEY_BTNRIGHT",		BTN_RIGHT},
-	{"PAUSE100MS",			PAUSE100},
-	{"PAUSE250MS",			PAUSE250},
-	{"PAUSE500MS",			PAUSE500},
-	{"PAUSE1000MS",			PAUSE1000},
-	{"PAUSE100",				PAUSE100},
-	{"PAUSE250",				PAUSE250},
-	{"PAUSE500",				PAUSE500},
-	{"PAUSE1000",				PAUSE1000},
+	{"PAUSE100MS",			PAUSE0+100},
+	{"PAUSE250MS",			PAUSE0+250},
+	{"PAUSE500MS",			PAUSE0+500},
+	{"PAUSE1000MS",			PAUSE0+1000},
+	{"PAUSE100",				PAUSE0+100},
+	{"PAUSE250",				PAUSE0+250},
+	{"PAUSE500",				PAUSE0+500},
+	{"PAUSE1000",				PAUSE0+1000},
+	{"SCRIPT01",				SCRIPT00+1},
+	{"SCRIPT02",				SCRIPT00+2},
+	{"SCRIPT03",				SCRIPT00+3},
+	{"SCRIPT04",				SCRIPT00+4},
+	{"SCRIPT05",				SCRIPT00+5},
+	{"SCRIPT06",				SCRIPT00+6},
+	{"SCRIPT07",				SCRIPT00+7},
+	{"SCRIPT08",				SCRIPT00+8},
+	{"SCRIPT09",				SCRIPT00+9},
+	{"SCRIPT10",				SCRIPT00+10},
+	{"SCRIPT11",				SCRIPT00+11},
+	{"SCRIPT12",				SCRIPT00+12},
+	{"SCRIPT13",				SCRIPT00+13},
+	{"SCRIPT14",				SCRIPT00+14},
+	{"SCRIPT15",				SCRIPT00+15},
+	{"SCRIPT16",				SCRIPT00+16},
+	{"SCRIPT17",				SCRIPT00+17},
+	{"SCRIPT18",				SCRIPT00+18},
+	{"SCRIPT19",				SCRIPT00+19},
+	{"SCRIPT20",				SCRIPT00+20},
 	{"",								0xFFFFFFFF}
 };
 
@@ -256,6 +277,7 @@ enum {	// not defined in input.h but used like that, at least in 2.4.22
 #define MAX_OUT				10									//! max number of codes the represent on keyborad-key
 #define MAX_CONVERT		100									//! maximum number of keystrokes to convert
 #define MAX_REL				80									//! maximum relative value that makes a key
+#define MAX_SCRIPTS		20									//! maximum number of scripts !also change keyname!
 
 struct keyconvert{
 	unsigned long in_code;
@@ -268,6 +290,7 @@ int webport=80;														//! webport for using webinterface
 char webuser[32] = "";										//! for using webinterface
 char webpass[32] = "";										//! for using webinterface
 struct keyconvert keyconv[MAX_CONVERT];		//! the key-convertions
+char szScripts[MAX_SCRIPTS][80];					//! the scripts
 int iCount = 0;														//! number of conversions
 int iMouseCnt = 0;												//! how many mouse-counts make one key
 int iMinMouse = 1;												//! minimum relative value that is not ignored
