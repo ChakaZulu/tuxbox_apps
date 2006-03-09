@@ -304,6 +304,7 @@ eTimerManager::eTimerManager()
 	int deepstandbywakeup=0;
 	eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", deepstandbywakeup);
 	eDebug("[eTimerManager] deepstandbywakeup is %d", deepstandbywakeup);
+	writeToLogfile(eString().sprintf("deepstandbywakeup is %d", deepstandbywakeup));
 	if ( deepstandbywakeup )
 	{
 		if (eSystemInfo::getInstance()->hasStandbyWakeupTimer())
@@ -313,12 +314,21 @@ eTimerManager::eTimerManager()
 			if ( fd >= 0 )
 			{
 				if ( ::ioctl(fd, FP_IOCTL_IS_WAKEUP, &isWakeup) < 0 )
+				{
 					eDebug("FP_IOCTL_IS_WAKEUP failed(%m)");
+					writeToLogfile("FP_IOCTL_IS_WAKEUP failed");
+				}
+				else
+					writeToLogfile(eString().sprintf("FP_IOCTL_IS_WAKEUP returned %d", isWakeup));
 				eDebug("[eTimerManager] isWakeup is %d", isWakeup);
+				writeToLogfile(eString().sprintf("isWakeup is %d", isWakeup));
 				close(fd);
 			}
 			else
+			{
 				eDebug("couldn't open FP !!");
+				writeToLogfile("couldn't open FP !!");
+			}
 			if ( !isWakeup )
 				deepstandbywakeup=0;
 		}
@@ -327,6 +337,7 @@ eTimerManager::eTimerManager()
 	}
 
 	eDebug("[eTimerManager] now deepstandbywakeup is %d", deepstandbywakeup);
+	writeToLogfile(eString().sprintf("now deepstandbywakeup is %d", deepstandbywakeup));
 
 	if (eSystemInfo::getInstance()->hasStandbyWakeupTimer())
 	{
@@ -334,18 +345,28 @@ eTimerManager::eTimerManager()
 		if ( fd >= 0 )
 		{
 			if ( ::ioctl(fd, FP_IOCTL_CLEAR_WAKEUP_TIMER) < 0 )
+			{
 				eDebug("FP_IOCTL_CLEAR_WAKEUP failed(%m)");
+				writeToLogfile("FP_IOCTL_CLEAR_WAKEUP failed");
+			}
 			else
+			{
 				eDebug("FP_IOCTL_CLEAR_WAKEUP_TIMER okay");
+				writeToLogfile("FP_IOCTL_CLEAR_WAKEUP okay");
+			}
 			close(fd);
 		}
 		else
+		{
 			eDebug("couldn't open FP to clear wakeup timer !!");
+			writeToLogfile("couldn't open FP to clear wakeup timer !!");
+		}
 	}
 
 	if (!deepstandbywakeup)
 	{
 		eDebug("[eTimerManager] delKey deepstandbywakeup");
+		writeToLogfile("delKey deepstandbywakeup");
 		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
 		eConfig::getInstance()->flush();
 	}
@@ -1374,13 +1395,20 @@ eTimerManager::~eTimerManager()
 					if((erg=ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &min))<0)
 					{
 						if(erg==-1) // Wakeup not supported
+						{
 							eDebug("[eTimerManager] deepstandby wakeup not supported");
+							writeToLogfile("deepstandby wakeup not supported");
+						}
 						else
+						{
 							eDebug("[eTimerManager] error setting wakeup");
+							writeToLogfile("error setting wakeup");
+						}
 					}
 					else
 					{
 						eDebug("[eTimerManager] deepStandby wakeup in %d minutes programmed", min );
+						writeToLogfile(eString().sprintf("deepStandby wakeup in %d minutes programmed", min));
 						setWakeupKey=1;
 					}
 					break;
@@ -1393,12 +1421,17 @@ eTimerManager::~eTimerManager()
 						tmp=nextStartingEvent->time_begin;
 					tmp -= 5*60;
 					if(::ioctl(fd, FP_IOCTL_SET_WAKEUP_TIMER, &tmp)<0)
+					{
 						eDebug("FP_IOCTL_SET_WAKEUP_TIMER failed (%m)");
+						writeToLogfile("FP_IOCTL_SET_WAKEUP_TIMER failed");
+					}
 					else
 					{
 						tm bla = *localtime(&tmp);
 						eDebug("Deepstandby wakeup at %02d.%02d, %02d:%02d", 
 							bla.tm_mday, bla.tm_mon+1, bla.tm_hour, bla.tm_min );
+						writeToLogfile(eString().sprintf("Deepstandby wakeup at %02d.%02d, %02d:%02d",
+							bla.tm_mday, bla.tm_mon+1, bla.tm_hour, bla.tm_min));
 						setWakeupKey=1;
 					}
 					break;
@@ -1409,9 +1442,15 @@ eTimerManager::~eTimerManager()
 		}
 	}
 	if ( setWakeupKey )
+	{
 		eConfig::getInstance()->setKey("/ezap/timer/deepstandbywakeupset", 1);
+		writeToLogfile("write setWakeupKey to config");
+	}
 	else
+	{
 		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
+		writeToLogfile("remove setWakeupKey from config");
+	}
 
 	writeToLogfile("~eTimerManager()");
 #ifdef WRITE_LOGFILE
