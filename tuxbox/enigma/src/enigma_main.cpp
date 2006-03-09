@@ -1545,7 +1545,7 @@ void eZapMain::init_main()
 	eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", wasDeepstandby );
 	eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
 	eConfig::getInstance()->flush();
-	wasSleeping = wasDeepstandby ? 3 : 0;
+	wasSleeping = wasDeepstandby ? 2 : 0;
 	eDebug("[eZapMain]wasSleeping is %d, wasDeepStandby is %d", wasSleeping, wasDeepstandby);
 
 // get Infobar timeout
@@ -2893,7 +2893,7 @@ standby:
 			state |= stateSleeping;
 			standbyTime.tv_sec=-1;
 			if (state&stateInTimerMode && state&stateRecording)
-				wasSleeping=2;
+				wasSleeping=3;
 			standby.exec();   // this blocks all main actions...
 /*
 	  ...... sleeeeeeeep
@@ -3648,7 +3648,7 @@ int eZapMain::handleStandby(int i)
 				if (!::stat("/var/etc/enigma_leave_idle.sh", &s))
 					system("/var/etc/enigma_leave_idle.sh");
 			}
-			wasSleeping=2;
+			wasSleeping=3;
 		}
 		return 0;
 	}
