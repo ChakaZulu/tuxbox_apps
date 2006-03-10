@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.217 2006/02/08 21:15:50 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.218 2006/03/10 22:16:44 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1505,7 +1505,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.217 2006/02/08 21:15:50 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.218 2006/03/10 22:16:44 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2481,7 +2481,7 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 */
 static void sendEventList(int connfd, const unsigned char serviceTyp1, const unsigned char serviceTyp2 = 0, int sendServiceName = 1)
 {
-#define MAX_SIZE_BIGEVENTLIST	64*1024
+#define MAX_SIZE_BIGEVENTLIST	128*1024
 
 	char *evtList = new char[MAX_SIZE_BIGEVENTLIST]; // 128k müssen reichen... schaut euch mal das Ergebnis für loop an, jedesmal wenn die Senderliste aufgerufen wird
 	long count=0, loop=0;
@@ -5839,7 +5839,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.217 2006/02/08 21:15:50 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.218 2006/03/10 22:16:44 houdini Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {
