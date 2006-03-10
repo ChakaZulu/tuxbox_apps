@@ -88,7 +88,7 @@ CChannelList::CChannelList(const char * const Name, bool historyMode)
 	liststart = 0;
 	tuned=0xfffffff;
 	zapProtection = NULL;
-  this->historyMode = historyMode;
+	this->historyMode = historyMode;
 }
 
 CChannelList::~CChannelList()
@@ -126,16 +126,15 @@ void CChannelList::updateEvents(void)
 	/* request tv channel list if current mode is not radio mode */
 	CChannelEventList events = g_Sectionsd->getChannelEvents((CNeutrinoApp::getInstance()->getMode()) != NeutrinoMessages::mode_radio);
 
-	for (uint count=0; count<chanlist.size(); count++)
+	for (uint count=0; count<chanlist.size(); count++){
 		chanlist[count]->currentEvent= CChannelEvent();
-
-	for (uint count=0; count<chanlist.size(); count++)
 		for ( CChannelEventList::iterator e= events.begin(); e != events.end(); ++e )
 			if (chanlist[count]->channel_id == e->get_channel_id())
 			{
 				chanlist[count]->currentEvent= *e;
 				break;
 			}
+	}
 }
 
 void CChannelList::addChannel(int key, int number, const std::string& name, const t_satellite_position satellitePosition, t_channel_id ids)
@@ -864,7 +863,6 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 	fb_pixel_t col1 = COL_MENUCONTENT_PLUS_6;
 	fb_pixel_t col2 = COL_MENUCONTENT_PLUS_1;
 
-
 	// Clear
 	frameBuffer->paintBackgroundBoxRel(xpos,y, ConnectLineBox_Width, height+info_height);
 
@@ -890,10 +888,10 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2);
 
 		// -- small Frame around infobox
-                frameBuffer->paintBoxRel(x,         ypos2, 2,info_height, col1);
-                frameBuffer->paintBoxRel(x+width-2, ypos2, 2,info_height, col1);
-                frameBuffer->paintBoxRel(x        , ypos2, width-2,2,     col1);
-                frameBuffer->paintBoxRel(x        , ypos2+info_height-2, width-2,2, col1);
+                frameBuffer->paintBoxRel(x,         ypos2, 			2,		info_height, 	col1);
+                frameBuffer->paintBoxRel(x+width-2, ypos2, 			2,		info_height, 	col1);
+                frameBuffer->paintBoxRel(x        , ypos2, 			width-2,	2,     		col1);
+                frameBuffer->paintBoxRel(x        , ypos2+info_height-2, 	width-2,	2, 		col1);
 
 	}
 
@@ -927,7 +925,7 @@ void CChannelList::paintItem(int pos)
 		CChannel* chan = chanlist[liststart+pos];
 		//number
 		char tmp[10];
-		sprintf((char*) tmp, "%d", this->historyMode?pos:CNeutrinoApp::getInstance ()->recordingstatus ?liststart+pos+1: chan->number);
+		sprintf((char*) tmp, "%d", this->historyMode ? pos:CNeutrinoApp::getInstance ()->recordingstatus ? liststart+pos+1 : chan->number);
 
 		if (liststart+pos==selected)
 		{
@@ -937,15 +935,15 @@ void CChannelList::paintItem(int pos)
 
 		int numpos = x+5+numwidth- g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth(tmp);
 		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
+
+		char nameAndDescription[100];
+		if (this->historyMode)
+			snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s · ", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+		else
+			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+
 		if (!(chan->currentEvent.description.empty()))
 		{
-			char nameAndDescription[100];
-
-      if (this->historyMode)
-        snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s · ", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
-      else
-        snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
-
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(chan->currentEvent.description);
 
@@ -956,7 +954,6 @@ void CChannelList::paintItem(int pos)
 
 			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
 
-
 			// align right - auskommentiert
 			// g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 
@@ -965,7 +962,7 @@ void CChannelList::paintItem(int pos)
 		}
 		else
 			//name
-			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name, color, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color, 0, true); // UTF-8
 	}
 }
 
