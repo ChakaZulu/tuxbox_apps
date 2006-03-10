@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.122 2006/03/04 23:14:31 carjay Exp $
+  $Id: movieplayer.cpp,v 1.123 2006/03/10 20:46:25 houdini Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1187,11 +1187,9 @@ void updateLcd(const std::string & sel_filename)
 
 // GMO snip start ...
 
-//===========================
-//== PlayFile Thread Stuff ==
-//===========================
-#define PF_BUF_SIZE   (800*188)
-#define PF_DMX_SIZE   (PF_BUF_SIZE + PF_BUF_SIZE/2)
+//===============================
+//== PlayFile Thread constants ==
+//===============================
 #define PF_RD_TIMEOUT 3000
 #define PF_EMPTY      0
 #define PF_READY      1
@@ -1202,8 +1200,23 @@ void updateLcd(const std::string & sel_filename)
 #define PF_JMP_MID    5555
 #define PF_JMP_END    9999
 
-//-- live stream item --
-//----------------------
+#define SIZE_LINE_MAX 2047
+#define SIZE_REQ_MAX   512   // !!! must be shorter than SIZE_LINE_MAX !!! 
+
+//=====================
+//== Ptr-Queue Specs ==
+//=====================
+#define SIZE_QUEUE_SEG (362*188)  // never change this !!!
+#define N_SEGS_QUEUE   24         // currently count of queue segments
+#define N_SEGS_QMIN    8          // a meaningfull lower limit for N_SEGS_QUEUE
+#define N_SEGS_QMAX    36         // dito ... upper limit ...
+
+// NOTE: total buffer size can be calculated by: "N_SEGS_QUEUE * SIZE_QUEUE_SEG"
+// for more info, please look comments at TPtrQueue:: implementation in this file
+
+//====================================
+//== live stream item (MP_LST_ITEM) ==
+//====================================
 typedef struct
 {
 	std::string        pname;
@@ -1214,8 +1227,9 @@ typedef struct
 	long long          zapid;
 } MP_LST_ITEM;
 
-//-- main player context --
-//-------------------------
+//=============================
+//== player context (MP_CTX) ==
+//=============================
 typedef struct
 {
 	struct dmx_pes_filter_params p;
@@ -1236,8 +1250,8 @@ typedef struct
 	off_t pos;
 	off_t fileSize;
 
-	int   readSize;
-	char  dvrBuf[PF_BUF_SIZE];
+	int   nSegments;
+	char  tmpBuf[SIZE_LINE_MAX+1];
 	bool  refillBuffer;
 	bool  startDMX;
 
@@ -1251,6 +1265,51 @@ typedef struct
 
 } MP_CTX;
 
+//=====================
+//== class TPtrQueue ==
+//=====================
+typedef uint8_t TQueueSeg[SIZE_QUEUE_SEG];
+
+class TPtrQueue
+{
+	private:
+  		int       nSegsMax;
+  		int       nSegsOpt;
+  		TQueueSeg *queue; 
+        
+	protected:
+		int  wPtr;
+		int  rPtr;
+		int  level;
+    
+		MP_CTX    *pCtx;
+		pthread_t readerThread;
+		bool      isTerminated;
+		bool      freezed;
+    
+	public:
+		TPtrQueue(MP_CTX *ctx);
+		~TPtrQueue();
+		
+		pthread_t *startReader(void);
+		void      terminateReader(void);
+		bool      writerRun(void);
+    
+	protected:
+		uint8_t   *lockReadSeg(void);
+		void      unlockReadSeg(void);
+		uint8_t   *lockWriteSeg(void);
+		void      unlockWriteSeg(void);
+    
+		void      clear(void);
+		bool      refillBuffer(void);
+
+		void             *readerRun(void *p);
+		static TPtrQueue *currentQueue;
+		static void      *runWrapper(void *p);
+};
+
+
 //-- some bullshit global values --
 static int g_itno = 0;
 
@@ -1263,6 +1322,312 @@ static void mp_startDMX(MP_CTX *ctx);
 static void mp_checkEvent(MP_CTX *ctx);
 static bool mp_probe(const char *fname, MP_CTX *ctx);
 static void mp_analyze(MP_CTX *ctx);
+static void mp_switchBufferingBox(bool visible);
+
+//=================
+//== TPtrQueue:: ==
+//=================
+
+//-- NOTES: this is an implementation of a simple and very "fast" segmented     --
+//-- buffer, where all segments together are arranged internally as an array of --
+//-- byte blocks each of size 'SIZE_QUEUE_SEG'. The index of this array will be --
+//-- handeld as a "ring" (very similar a to bytewise organisized ringbuffer :-) --
+//-- From programmers view, this buffer will act as a level controled fifo-     --
+//-- queue with a maximum limit, where data can be loaded or extracted          --
+//-- blockwise (segmentwise). the queue contains already an independant,        --
+//-- internal "reader thread", which loads the queue with stream data received  --
+//-- over network and a routine to extract data from a segment again written    --
+//-- directly to the dvr-device. It will be called from outside the queue by an --
+//-- externally running thread (-> playFileMain()).                             -- 
+//-- The synchronisation between "reader" and "writer" is realized over a       --
+//-- single "level" variable, where no mutex based locking is needed for acces, --
+//-- because its changing sequence (increase/decrease) doesn't matter !         --                              --
+//-- But in cases, where reader have to wait for writer or vice versa, there    --
+//-- will be used "quick'n dirty" sleep-calls only ... :-(                      --
+//-- I've choosed this solution, because i couldn't get the coding run properly --
+//-- using "state of the art" thread conditions and i don't know why ?          --
+//-- But this has no impact of CPU-Load or stabilty of that coding :-)          --
+//-- Feel free to implement a proper condition based solution ...               --
+//-- At all, the buffer I/O alaong with  reading from network and writing to    --
+//-- the dvr-device are completley encapsulated to minimize the integration     --
+//-- effort into the existing code.                                             --
+//-- Anybody, who likes to experiment with the total buffer size or wishes to   --
+//-- have it configurable can to this easily -> please look at the line         --
+//-- "ctx->nSegments = N_SEGS_QUEUE;". This is the only place where the maximum --
+//-- number of queue segments will be set (actually it's 18) ...                --
+//-- be aware, that at the moment there is no check for a value to be to high   --
+//-- or to low. Therefore be carefull in choosing your own value for nSegments  --
+//-- Never use values less than 6 !                                             --
+//-- The total buffer size can be calculated by: "nSegments * SIZE_QUEUE_SEGS"  --
+TPtrQueue *TPtrQueue::currentQueue = NULL;
+
+TPtrQueue::TPtrQueue(MP_CTX *ctx)
+{
+	pCtx         = ctx;
+	freezed      = false;
+	isTerminated = true;
+	currentQueue = this;
+  
+	clear();
+	nSegsMax = pCtx->nSegments;
+	nSegsOpt = (nSegsMax*3)/4;
+	
+	if ( (queue = new TQueueSeg[nSegsMax]) != NULL )
+	{
+		fprintf
+		(
+			stderr, "[mp] buffer (%d bytes) created, using (%d) total segments, opt = (%d)\n", 
+			nSegsMax*SIZE_QUEUE_SEG, nSegsMax, nSegsOpt   
+		);
+	}
+}
+
+TPtrQueue::~TPtrQueue()
+{
+	clear();
+	delete [] queue;
+}
+
+void TPtrQueue::clear()
+{
+	level = 0;
+	wPtr  = 0;
+	rPtr  = 0;
+}
+
+uint8_t *TPtrQueue::lockReadSeg(void)
+{
+	if ( isTerminated ) return NULL;
+ 
+	//-- check high level --
+	if ( level == nSegsMax ) return NULL;
+	return queue[rPtr];
+}
+
+void TPtrQueue::unlockReadSeg(void)
+{
+	//-- check for read-Ptr to turn around --
+	if (rPtr == (nSegsMax-1) ) 
+		rPtr = 0;
+	else
+		rPtr++;
+    
+	//-- advance level --
+	level++;
+	//g_level = level;
+}
+
+uint8_t *TPtrQueue::lockWriteSeg(void)
+{
+  	if (isTerminated) return NULL;
+
+	//-- check low level --  
+	if ( level < 2 )
+	{	
+  		if (!freezed)
+  		{
+  			freezed = true;
+  			if (!pCtx->startDMX) mp_freezeAV(pCtx); // freeze playback 
+				mp_switchBufferingBox(true);
+		}
+		return NULL;
+	}
+	//-- only in freezed state ... --
+	else if (freezed)
+	{
+		//-- ... wait for buffer filled --
+		if ( level < nSegsOpt )
+			return NULL;
+		else
+		{
+			freezed = false;
+			mp_switchBufferingBox(false);
+			if (!pCtx->startDMX) mp_unfreezeAV(pCtx); // continue playback
+		}
+	}
+	
+	return queue[wPtr];
+}
+
+void TPtrQueue::unlockWriteSeg(void) 
+{
+	//-- check for write-Ptr to turn around --
+	if (wPtr == (nSegsMax-1) ) 
+  		wPtr = 0;
+	else
+		wPtr++;
+    
+	//-- decrease level --
+	level--;
+	//g_level = level;
+}
+
+bool TPtrQueue::refillBuffer(void)
+{
+	int  rd;
+	bool res = false;  // assume error
+
+	//-- user feedback: OSD-Info on --
+	mp_switchBufferingBox(true);
+	clear();
+	
+	//-- loop over all segments --
+	for (int i=0; i<nSegsOpt; i++)
+	{
+		rd = read(pCtx->inFd, queue[i], SIZE_QUEUE_SEG);
+		if (rd != SIZE_QUEUE_SEG) goto REFILL_ERR; // error
+	}
+	
+	//-- refill well done ... --
+	rPtr       = nSegsOpt;
+	level      = nSegsOpt;
+	pCtx->pos += (level * SIZE_QUEUE_SEG);
+	res        = true;
+	
+REFILL_ERR:
+	//-- user feedback: OSD-Info off --
+	mp_switchBufferingBox(false);
+	//g_level = level;
+	return res;
+}
+
+void *TPtrQueue::readerRun(void *p)
+{
+  	uint8_t *seg;
+  	int     rd;
+  
+  	fprintf(stderr, "[mp] reader thread started ...\n");
+  
+  	//-- reader thread main loop --
+  	//----------------------------- 
+  	isTerminated = false;
+  	for (;;)
+  	{
+  		if (pCtx->refillBuffer)
+  		{
+  			bool ok = refillBuffer();
+  			pCtx->refillBuffer = false;
+  			if (!ok) break;
+		}
+  	
+		//-- try to get a new locked queue segment  --
+		//-- with quick'n dirty synchronization :-) --
+		if ( (seg = lockReadSeg()) == NULL )
+		{
+			if (isTerminated) break;
+			usleep(10000);
+			continue;
+		}
+    
+		//-- read data into segment --
+		rd = read(pCtx->inFd, seg, SIZE_QUEUE_SEG);
+		pCtx->pos += rd;
+
+		if (rd != SIZE_QUEUE_SEG) break; // error
+    
+		//-- now current segment is usable for writer --
+		unlockReadSeg();
+	}
+
+	//-- leave thread now --
+	isTerminated = true;
+	fprintf(stderr, "[mp] ... reader thread terminated\n");
+  
+	return NULL;
+}
+
+bool TPtrQueue::writerRun(void)
+{
+	uint8_t *seg;
+
+  	//-- check for-refill request   --
+  	//-- use quick'n dirty sync :-) --
+  	while (pCtx->refillBuffer)
+  	{
+		if (isTerminated) return false; 
+		usleep(100000);
+		continue;
+	}
+       
+	//-- try to get segment from queue, even   --
+	//-- here same quick'n dirty sync as above --
+	while ( (seg = lockWriteSeg()) == NULL )
+	{
+		if (isTerminated) return false;
+		usleep(10000);
+		continue;
+	}
+ 
+	//-- finally transfer segment to dvr device --
+	int ofs  = 0;
+	int left = SIZE_QUEUE_SEG; 
+	do
+	{
+  		ofs = write(pCtx->dvr, seg, left);
+  		seg  += ofs;
+  		left -= ofs;
+	}
+	while (left);
+
+	//-- now segment is usable again for reader --
+  	unlockWriteSeg();
+  
+  	return true;
+}
+
+void *TPtrQueue::runWrapper(void *p)
+{
+	return TPtrQueue::currentQueue->readerRun(p);
+}
+
+pthread_t *TPtrQueue::startReader(void)
+{
+	if (queue == NULL)
+	{
+		fprintf(stderr, "[mp] cannot create queue buffer !\n");
+		return NULL;
+	}
+	
+	//-- launch reader Thread --
+	if ( !pthread_create(&readerThread, NULL, runWrapper, (void *)pCtx) )
+	{
+		isTerminated = false;
+		return &readerThread;
+	}
+	else
+		return NULL;
+}
+
+void TPtrQueue::terminateReader(void)
+{
+  	//-- set termination indicator wait for reader termination --
+  	isTerminated = true;
+  	pthread_join(readerThread, NULL);
+}
+
+//=====================
+//== other functions ==
+//=====================
+
+//== mp_switchBufferingBox ==
+//===========================
+static void mp_switchBufferingBox(bool visible)
+{
+	static CHintBox *bufferingBox = bufferingBox = new CHintBox
+	(
+		LOCALE_MESSAGEBOX_INFO, 
+		g_Locale->getText(LOCALE_MOVIEPLAYER_BUFFERING)
+	);
+		
+	if (visible)
+	{
+		fprintf(stderr, "[mp] buffering ...\n");
+		bufferingBox->paint();
+	}
+	else
+		bufferingBox->hide();
+}
+
 
 //== seek to pos with sync to next proper TS packet ==
 //== returns offset to start of TS packet or actual ==
@@ -1353,7 +1718,7 @@ static void mp_closeDVBDevices(MP_CTX *ctx)
 		ioctl (ctx->dmxv, DMX_STOP);
 		close(ctx->dmxv);
 	}
-	if(ctx->dvr!= -1)	close(ctx->dvr);
+	if(ctx->dvr!= -1) close(ctx->dvr);
 
 	ctx->dmxp = -1;
 	ctx->dmxa = -1;
@@ -1382,13 +1747,10 @@ static void mp_softReset(MP_CTX *ctx, bool refill = true)
 
 	ctx->p.pid      = ctx->pida;
 	ctx->p.pes_type = DMX_PES_AUDIO;
-
-	ioctl (ctx->dmxa, DMX_SET_BUFFER_SIZE, PF_DMX_SIZE/4);
 	ioctl (ctx->dmxa, DMX_SET_PES_FILTER, &(ctx->p));
 
 	ctx->p.pid      = ctx->pidv;
 	ctx->p.pes_type = DMX_PES_VIDEO;
-	ioctl (ctx->dmxv, DMX_SET_BUFFER_SIZE, PF_DMX_SIZE);
 	ioctl (ctx->dmxv, DMX_SET_PES_FILTER, &(ctx->p));
 
 	//-- switch audio decoder bypass depending on audio type --
@@ -1398,9 +1760,9 @@ static void mp_softReset(MP_CTX *ctx, bool refill = true)
 		ioctl(ctx->adec, AUDIO_SET_BYPASS_MODE,1UL);	// bypass off
 
 	//-- start AV devices again --
-	ioctl(ctx->adec, AUDIO_PLAY);					// audio
-	ioctl(ctx->vdec, VIDEO_PLAY);					// video
-	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);	// needs sync !
+	ioctl(ctx->adec, AUDIO_PLAY);				// audio
+	ioctl(ctx->vdec, VIDEO_PLAY);				// video
+	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);		// needs sync !
 
 	//-- refill input buffer --
 	if (refill) ctx->refillBuffer = true;
@@ -1437,10 +1799,10 @@ static void mp_unfreezeAV(MP_CTX *ctx)
 
 	ioctl (ctx->dmxa, DMX_START);
 
-	ioctl(ctx->adec, AUDIO_PLAY);					// audio
+	ioctl(ctx->adec, AUDIO_PLAY);				// audio
 
-	ioctl(ctx->vdec, VIDEO_PLAY);					// video
-	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);	// needs sync !
+	ioctl(ctx->vdec, VIDEO_PLAY);				// video
+	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);		// needs sync !
 }
 
 //== mp_startDMX ==
@@ -1634,18 +1996,8 @@ static void mp_checkEvent(MP_CTX *ctx)
 	checkAspectRatio(ctx->vdec, false);
 }
 
-//== mp_read ==
-//=============
-/*
-static ssize_t mp_read(struct pollfd *pH, char *buf, size_t count, int tio)
-{
-	if ( (poll(pH, 1, tio) > 0) && (pH->events & pH->revents) )
-		return (read(pH->fd, buf, count));
-	else
-		return -1;
-}
-*/
-
+//== mp_tcpRread ==
+//=================
 static ssize_t mp_tcpRead(struct pollfd *pH, char *buf, size_t count, int tio)
 {
 	ssize_t n, nleft = count;
@@ -1677,19 +2029,19 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 	if( (fp = fopen(fname, "r")) == NULL )
 		return false; // error
 
-	if(fgets(ctx->dvrBuf, PF_BUF_SIZE-1, fp))
+	if(fgets(ctx->tmpBuf, SIZE_LINE_MAX, fp))
 	{
 		//-- check first line for magic value --
-		if(!memcmp(ctx->dvrBuf, MP_STREAM_MAGIC, sizeof(MP_STREAM_MAGIC)-1))
+		if(!memcmp(ctx->tmpBuf, MP_STREAM_MAGIC, sizeof(MP_STREAM_MAGIC)-1))
 		{
 			char *s1, *s2;
 			int  ntokens;
 
 			//-- get all lines (quick and dirty parser) --
-			while(fgets(ctx->dvrBuf, PF_BUF_SIZE-1, fp))
+			while(fgets(ctx->tmpBuf, SIZE_LINE_MAX, fp))
 			{
-				if( (s2 = strchr(ctx->dvrBuf,'#')) != NULL )	*s2 = '\0';
-				if( strlen(ctx->dvrBuf) < 3 )	continue;
+				if( (s2 = strchr(ctx->tmpBuf,'#')) != NULL )	*s2 = '\0';
+				if( strlen(ctx->tmpBuf) < 3 )	continue;
 
 				//-------------------------------------------------------------
 				//-- line format:                                            --
@@ -1703,7 +2055,7 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 				ntokens = 0;
 
 				//-- program name --
-				s1 = ctx->dvrBuf;
+				s1 = ctx->tmpBuf;
 				if((s2 = strchr(s1, '=')) != NULL )
 				{
 					ntokens++;
@@ -1765,17 +2117,17 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 			if(ctx->lst_cnt) ctx->isStream=true;
 		}
 		//-- ... or playlist --
-		else if(!memcmp(ctx->dvrBuf, MP_PLAYLST_MAGIC, sizeof(MP_PLAYLST_MAGIC)-1))
+		else if(!memcmp(ctx->tmpBuf, MP_PLAYLST_MAGIC, sizeof(MP_PLAYLST_MAGIC)-1))
 		{
 			char *s2;
 
-			while(fgets(ctx->dvrBuf, PF_BUF_SIZE-1, fp))
+			while(fgets(ctx->tmpBuf, SIZE_LINE_MAX, fp))
 			{
-				if( (s2 = strchr(ctx->dvrBuf,'#')) != NULL )	*s2 = '\0';
-				if( strlen(ctx->dvrBuf) < 3 )	continue;
+				if( (s2 = strchr(ctx->tmpBuf,'#')) != NULL )	*s2 = '\0';
+				if( strlen(ctx->tmpBuf) < 3 )	continue;
 
-				if( (s2 = strrchr(ctx->dvrBuf,'\n')) != NULL ) *s2 = '\0';
-				ctx->lst[ctx->lst_cnt].pname = ctx->dvrBuf;
+				if( (s2 = strrchr(ctx->tmpBuf,'\n')) != NULL ) *s2 = '\0';
+				ctx->lst[ctx->lst_cnt].pname = ctx->tmpBuf;
 				ctx->lst_cnt++;
 
 				if(ctx->lst_cnt==PF_LST_ITEMS) break; // prevent overflow
@@ -1880,14 +2232,13 @@ static void mp_tcpClose(int fd)
 	if(fd != -1) close(fd);
 }
 
-//== mp_playFileThread ==
-//=======================
-void *do_mp_playFileThread (void *filename)
+//== mp_playFileMain ==
+//=====================
+void *mp_playFileMain(void *filename)
 {
 	std::string   fname  = (const char *)filename;
 	bool          failed = true;
 	struct pollfd pHandle;
-	int           rd, rSize;
 
 	MP_CTX mpCtx;
 	MP_CTX *ctx = &mpCtx;
@@ -1928,6 +2279,9 @@ void *do_mp_playFileThread (void *filename)
 		mp_closeDVBDevices(ctx);
 		return 0;
 	}
+	
+	//== (I) playlist loop ==
+	//=======================
 	do
 	{
 		//-- (live) stream or ... --
@@ -1952,13 +2306,13 @@ void *do_mp_playFileThread (void *filename)
 					//-- request zapping --
 					sprintf
 					(
-					ctx->dvrBuf,
-					"GET /control/zapto?0x%llx HTTP/1.0\r\n",
-					lstIt->zapid
+						ctx->tmpBuf,
+						"GET /control/zapto?0x%llx HTTP/1.0\r\n",
+						lstIt->zapid
 					);
 
-					fprintf(stderr, "[mp] zap: %s\n", ctx->dvrBuf);
-					mp_tcpRequest(zapFd, ctx->dvrBuf, 512);
+					fprintf(stderr, "[mp] zap: %s\n", ctx->tmpBuf);
+					mp_tcpRequest(zapFd, ctx->tmpBuf, SIZE_REQ_MAX);
 
 					mp_tcpClose(zapFd);
 				}
@@ -1971,13 +2325,13 @@ void *do_mp_playFileThread (void *filename)
 				//-- send command line (vpid/apid) --
 				sprintf
 				(
-				ctx->dvrBuf,
-				"GET /0x%03x,0x%03x HTTP/1.0\r\n",
-				lstIt->vpid, lstIt->apid
+					ctx->tmpBuf,
+					"GET /0x%03x,0x%03x HTTP/1.0\r\n",
+					lstIt->vpid, lstIt->apid
 				);
 
-				mp_tcpRequest(ctx->inFd, ctx->dvrBuf, 512);
-				if( strstr(ctx->dvrBuf, "200 OK") == NULL )
+				mp_tcpRequest(ctx->inFd, ctx->tmpBuf, SIZE_REQ_MAX);
+				if( strstr(ctx->tmpBuf, "200 OK") == NULL )
 				{
 					mp_tcpClose(ctx->inFd);
 					ctx->inFd = -1;
@@ -1987,8 +2341,6 @@ void *do_mp_playFileThread (void *filename)
 				ctx->pidv     = lstIt->vpid;
 				ctx->pida     = lstIt->apid;
 				ctx->ac3      = 0;
-
-				ctx->readSize = PF_BUF_SIZE/2;
 			}
 			else
 			{
@@ -2011,9 +2363,6 @@ void *do_mp_playFileThread (void *filename)
 
 			ctx->canPause = true;
 
-			//-- set (short) readsize --
-			ctx->readSize = PF_BUF_SIZE/4;
-
 			//-- analyze TS file (set apid/vpid/ac3 in ctx) --
 			mp_analyze(ctx);
 
@@ -2029,10 +2378,10 @@ void *do_mp_playFileThread (void *filename)
 
 		fprintf
 		(
-		stderr,
-		"[mp] %s with vpid=(0x%04X) apid=(0x%04X) ac3=(%d)\n",
-		(ctx->isStream)?"(live) stream":"plain TS file",
-		ctx->pidv, ctx->pida, ctx->ac3
+			stderr,
+			"[mp] %s with vpid=(0x%04X) apid=(0x%04X) ac3=(%d)\n",
+			(ctx->isStream)?"(live) stream":"plain TS file",
+			ctx->pidv, ctx->pida, ctx->ac3
 		);
 
 		//-- DVB devices softreset --
@@ -2047,54 +2396,71 @@ void *do_mp_playFileThread (void *filename)
 		pHandle.events = POLLIN | POLLPRI;
 		ctx->pH        = &pHandle;
 
-		//-- reader loop --
-		//-----------------
-		fprintf(stderr,"[mp] entering player loop\n");
-		//lcd
-		short prozent=0,last_prozent=1;
-		lcdSetting=g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME];
-		while( (ctx->itChanged == false) &&
-				 (g_playstate >= CMoviePlayerGui::PLAY) )
+		//-- set count of buffer segments for Ptr-Queue --
+		ctx->nSegments = N_SEGS_QUEUE;
+		
+		//-- lcd stuff --
+		int cPercent   = 0;
+		int lPercent   = -1;
+		int lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]; 
+		
+		//== (II) player loop: consists of "writer" in this thread and   ==
+		//== "reader" in an extra thread encapsulated by a queue object, ==
+		//== which also connects the reader with the  writer ... :-)     ==
+		//== therefore first to do is creating a TPtrQueue instance !    == 
+		//=================================================================
+		TPtrQueue *q;
+		if ( (q = new TPtrQueue(ctx)) != NULL ) 
 		{
-			//-- after device reset read double amount of stream data --
-			rSize = (ctx->refillBuffer)? ctx->readSize*2 : ctx->readSize;
-			ctx->refillBuffer = false;
-
-			if(ctx->isStream)
-				rd = mp_tcpRead(ctx->pH, ctx->dvrBuf, rSize, PF_RD_TIMEOUT);
-			else
-				rd	= read(ctx->inFd, ctx->dvrBuf, rSize);
-			//-- update file position --
-			ctx->pos += rd;
-			g_fileposition = ctx->pos;
-
-			//-- check break conditions and events --
-			if(rd != rSize) break;
-			mp_checkEvent(ctx);
-
-			//-- after device reset skip writing --
-			//-- to refill buffer first ...      --
-			if(ctx->refillBuffer) continue;
-
-			//-- after device reset, DMX devices --
-			//-- has to be started here ...      --
-			mp_startDMX(ctx);	// starts only if stopped !
-			//lcd
-			prozent=(ctx->pos*100)/ctx->fileSize;
-			if((last_prozent !=prozent && lcdSetting!=1) || lcdUpdateTsMode)
+			//-- launch reader thread --
+			if (q->startReader()) 
 			{
-				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
-				last_prozent=prozent;
-				lcdUpdateTsMode=false;
-				CLCD::getInstance()->showPercentOver(prozent);
-				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=1;
+				fprintf(stderr,"[mp] entering player loop\n");
+				while( (ctx->itChanged == false) &&
+				     (g_playstate >= CMoviePlayerGui::PLAY) )
+				{
+					//-- detect/process events --
+					mp_checkEvent(ctx);
+        
+					//-- lcd progress bar --
+					if ( (lcdSetting != 1) && (ctx->fileSize > 0) )
+					{
+				  		cPercent = (ctx->pos*100)/ctx->fileSize;
+				  		if (lPercent != cPercent)
+				  		{
+					  		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
+					  		lPercent = cPercent;
+					  		CLCD::getInstance()->showPercentOver(cPercent);
+					  		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=1;
+						}
+					}
+        
+					//-- write queue-segment to dvr-device --
+					if (!q->writerRun()) break;
+        
+					//-- update file position --
+					g_fileposition = ctx->pos;
+			  
+					//-- after "softreset" DMX devices has to be started here  --
+					//-- to let the demuxer continue its stream processing ... --
+					mp_startDMX(ctx);  // start is implied only, if stopped
+        
+				} 
+				//== end of player loop (II) == 
+      
+				//-- terminate reader thread --
+				q->terminateReader();
+      
+				fprintf(stderr,"[mp] leaving player loop ...\n");
+				fprintf(stderr,"[mp] ... checking for another playlist item\n");      
 			}
-			//-- write stream data now --
-			write(ctx->dvr, ctx->dvrBuf, rd);
+    
+			delete q;  /// cleanup resources !
 		}
-
-		fprintf(stderr,"[mp] leaving reader loop\n");
+        
+		//-- restore original lcd settings --			
 		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
+		
 		//-- close input stream --
 		//------------------------
 		if(ctx->inFd != -1)
@@ -2120,7 +2486,7 @@ void *do_mp_playFileThread (void *filename)
 
 		//-- Note: on any content change AV should be freezed first,   --
 		//-- to get a consitant state. restart of all DVB-devices will --
-		//-- be initiated by a SoftReset in the next turn/starts.      --
+		//-- be initiated by a SoftReset in the next turn/start.       --
 		mp_freezeAV(ctx);
 
 		//-- check for another item to play --
@@ -2136,6 +2502,7 @@ void *do_mp_playFileThread (void *filename)
 			break; // normal loop exit
 
 	} while(1);
+	//== end of playlist loop (I) ==
 
 	//-- stop and close DVB devices --
 	//--------------------------------
@@ -2147,7 +2514,6 @@ void *do_mp_playFileThread (void *filename)
 	if(g_playstate != CMoviePlayerGui::STOPPED)
 	{
 		g_playstate = CMoviePlayerGui::STOPPED;
-		//g_RCInput->postMsg (CRCInput::RC_red, 0);	// end movieplayer
 		g_RCInput->postMsg (CRCInput::RC_ok, 0); // start filebrowser
 	}
 
@@ -2155,9 +2521,11 @@ void *do_mp_playFileThread (void *filename)
 	return 0;
 }
 
+//== mp_playFileThread ==
+//=======================
 void *mp_playFileThread (void *filename)
 {
-	void *ret = do_mp_playFileThread(filename);
+	void *ret = mp_playFileMain(filename);
 	pthread_exit(ret);
 }
 
@@ -3288,8 +3656,9 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.122 $");
+	helpbox.addLine("Version: $Revision: 1.123 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
+	helpbox.addLine("wabber-edition: v0.8 (c) 2005 by gmo18t");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 }
@@ -3309,7 +3678,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.122 $");
+	helpbox.addLine("Version: $Revision: 1.123 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
