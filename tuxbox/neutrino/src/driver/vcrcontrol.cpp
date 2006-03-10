@@ -186,13 +186,34 @@ void CVCRControl::CDevice::getAPIDs(const unsigned char ap, APIDList & apid_list
 	}
 	if (apids & TIMERD_APIDS_AC3)
 	{
+		bool ac3_found=false;
 		for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
 		{
 			if (allpids.APIDs[i].is_ac3)
 			{
 				APIDDesc a = {allpids.APIDs[i].pid, i, true};
 				apid_list.push_back(a);
+				ac3_found=true;
 			}
+		}
+		// add non ac3 apid if ac3 not found
+		if (!(apids & TIMERD_APIDS_STD) && !ac3_found)
+		{
+			uint apid_min=UINT_MAX;
+			uint apid_min_idx=0;
+			for(unsigned int i = 0; i < allpids.APIDs.size(); i++)
+			{
+				if (allpids.APIDs[i].pid < apid_min && !allpids.APIDs[i].is_ac3)
+				{
+					apid_min = allpids.APIDs[i].pid;
+					apid_min_idx = i;
+				}
+			}
+			if (apid_min != UINT_MAX)
+			{
+				APIDDesc a = {apid_min, apid_min_idx, false};
+				apid_list.push_back(a);
+			}		
 		}
 	}
 	// no apid selected use standard
