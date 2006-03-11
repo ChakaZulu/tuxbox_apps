@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.15  2006/03/11 10:21:58  robspr1
+ * - remove zlib.h
+ *
  * Revision 0.14  2006/03/09 18:50:01  robspr1
  * - add scripts
  *
@@ -81,7 +84,6 @@
 #include <time.h>
 #include <syslog.h>
 #include <linux/fb.h>
-#include <zlib.h>
 #include <malloc.h>
 #include <linux/input.h>
 #if !defined(KEY_TOPLEFT)
