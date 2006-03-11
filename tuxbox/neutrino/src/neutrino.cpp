@@ -1514,7 +1514,6 @@ const CMenuOptionChooser::keyval SATSETUP_DISEQC_OPTIONS[SATSETUP_DISEQC_OPTION_
 	{ SMATV_REMOTE_TUNING, LOCALE_SATSETUP_SMATVREMOTE }
 
 };
-#define SATSETUP_SCANTP_FEC_COUNT 5
 
 #define SATSETUP_SCANTP_FEC_COUNT 5
 #if HAVE_DVB_API_VERSION < 3
@@ -3790,7 +3789,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	}
 	else if( msg == NeutrinoMessages::EVT_RECORDMODE )
 	{
-		dprintf(DEBUG_DEBUG, "neutino - recordmode %s\n", ( data ) ? "on":"off" );
+		dprintf(DEBUG_DEBUG, "neutrino - recordmode %s\n", ( data ) ? "on":"off" );
 
 		recordingstatus = data;
 
