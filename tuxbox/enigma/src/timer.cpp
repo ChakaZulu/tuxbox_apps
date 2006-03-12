@@ -301,6 +301,13 @@ eTimerManager::eTimerManager()
 		unlink(TIMER_LOGFILE);
 #endif
 
+#ifdef WRITE_LOGFILE
+	logfile = fopen(TIMER_LOGFILE, "a" );
+	writeToLogfile("Timer is comming up");
+#else
+	logfile=0;
+#endif
+
 	int deepstandbywakeup=0;
 	eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", deepstandbywakeup);
 	eDebug("[eTimerManager] deepstandbywakeup is %d", deepstandbywakeup);
@@ -370,13 +377,6 @@ eTimerManager::eTimerManager()
 		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
 		eConfig::getInstance()->flush();
 	}
-
-#ifdef WRITE_LOGFILE
-	logfile = fopen(TIMER_LOGFILE, "a" );
-	writeToLogfile("Timer is comming up");
-#else
-	logfile=0;
-#endif
 
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 	{
