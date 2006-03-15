@@ -938,12 +938,14 @@ void CChannelList::paintItem(int pos)
 
 		char nameAndDescription[100];
 		if (this->historyMode)
-			snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s · ", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+			snprintf(nameAndDescription, sizeof(nameAndDescription), ": %d %s", chan->number, ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
 		else
-			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s · ", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
+			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s", ZapitTools::UTF8_to_Latin1(chan->name.c_str()).c_str());
 
 		if (!(chan->currentEvent.description.empty()))
 		{
+			// add " · " separator between name and description
+			strncat(nameAndDescription, " · ", sizeof(nameAndDescription) - (strlen(nameAndDescription) + 1));
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
 			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(chan->currentEvent.description);
 
@@ -962,7 +964,7 @@ void CChannelList::paintItem(int pos)
 		}
 		else
 			//name
-			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
 	}
 }
 
