@@ -101,7 +101,6 @@ bool CCheckSquashfs::mountSquashfsImage(const char * squashfsimage)
 		cmd += squashfsimage;
 		cmd += " ";
 		cmd += LOCAL_MOUNT_DIR;
-		system (cmd.c_str());
 
 		if (system(cmd.c_str()) != 0)
 		{
