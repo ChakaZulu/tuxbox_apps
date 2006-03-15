@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.123 2006/03/10 20:46:25 houdini Exp $
+  $Id: movieplayer.cpp,v 1.124 2006/03/15 21:50:54 houdini Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -121,7 +121,7 @@ extern CPlugins       * g_PluginList;
 // do a VERY shitty approximation here...
 //long long minuteoffset = 557892632/2;
 //long long minuteoffset = 8807424;
-	#define MINUTEOFFSET 30898176
+#define MINUTEOFFSET 30898176
 
 
 static CMoviePlayerGui::state g_playstate;
@@ -1208,8 +1208,9 @@ void updateLcd(const std::string & sel_filename)
 //=====================
 #define SIZE_QUEUE_SEG (362*188)  // never change this !!!
 #define N_SEGS_QUEUE   24         // currently count of queue segments
-#define N_SEGS_QMIN    8          // a meaningfull lower limit for N_SEGS_QUEUE
-#define N_SEGS_QMAX    36         // dito ... upper limit ...
+#define N_SEGS_QMIN    6          // a meaningfull lower limit for N_SEGS_QUEUE
+#define N_SEGS_QMAX    128        // dito ... upper limit ...
+#define N_SEGS_OPT_MAX 24
 
 // NOTE: total buffer size can be calculated by: "N_SEGS_QUEUE * SIZE_QUEUE_SEG"
 // for more info, please look comments at TPtrQueue:: implementation in this file
@@ -1250,7 +1251,8 @@ typedef struct
 	off_t pos;
 	off_t fileSize;
 
-	int   nSegments;
+	int   nSegsMax;
+	int   nSegsOpt;                 // not used yet
 	char  tmpBuf[SIZE_LINE_MAX+1];
 	bool  refillBuffer;
 	bool  startDMX;
@@ -1268,14 +1270,12 @@ typedef struct
 //=====================
 //== class TPtrQueue ==
 //=====================
-typedef uint8_t TQueueSeg[SIZE_QUEUE_SEG];
-
 class TPtrQueue
 {
 	private:
   		int       nSegsMax;
   		int       nSegsOpt;
-  		TQueueSeg *queue; 
+  		uint8_t   **queue; 
         
 	protected:
 		int  wPtr;
@@ -1302,6 +1302,7 @@ class TPtrQueue
 		void      unlockWriteSeg(void);
     
 		void      clear(void);
+		void      releaseSegments(void);
 		bool      refillBuffer(void);
 
 		void             *readerRun(void *p);
@@ -1322,6 +1323,7 @@ static void mp_startDMX(MP_CTX *ctx);
 static void mp_checkEvent(MP_CTX *ctx);
 static bool mp_probe(const char *fname, MP_CTX *ctx);
 static void mp_analyze(MP_CTX *ctx);
+static void mp_selectAudio(MP_CTX *ctx);
 static void mp_switchBufferingBox(bool visible);
 
 //=================
@@ -1331,7 +1333,7 @@ static void mp_switchBufferingBox(bool visible);
 //-- NOTES: this is an implementation of a simple and very "fast" segmented     --
 //-- buffer, where all segments together are arranged internally as an array of --
 //-- byte blocks each of size 'SIZE_QUEUE_SEG'. The index of this array will be --
-//-- handeld as a "ring" (very similar a to bytewise organisized ringbuffer :-) --
+//-- handeld as a "ring" (very similar to a bytewise organisized ringbuffer :-) --
 //-- From programmers view, this buffer will act as a level controled fifo-     --
 //-- queue with a maximum limit, where data can be loaded or extracted          --
 //-- blockwise (segmentwise). the queue contains already an independant,        --
@@ -1340,25 +1342,31 @@ static void mp_switchBufferingBox(bool visible);
 //-- directly to the dvr-device. It will be called from outside the queue by an --
 //-- externally running thread (-> playFileMain()).                             -- 
 //-- The synchronisation between "reader" and "writer" is realized over a       --
-//-- single "level" variable, where no mutex based locking is needed for acces, --
-//-- because its changing sequence (increase/decrease) doesn't matter !         --                              --
+//-- single "level" variable, which needs no mutex based locking, because its   --
+//-- changing order (increase/decrease) doesn't matter at all !!!               --                              
 //-- But in cases, where reader have to wait for writer or vice versa, there    --
 //-- will be used "quick'n dirty" sleep-calls only ... :-(                      --
 //-- I've choosed this solution, because i couldn't get the coding run properly --
 //-- using "state of the art" thread conditions and i don't know why ?          --
 //-- But this has no impact of CPU-Load or stabilty of that coding :-)          --
 //-- Feel free to implement a proper condition based solution ...               --
-//-- At all, the buffer I/O alaong with  reading from network and writing to    --
+//-- At all, the buffer I/O along with  reading from network and writing to     --
 //-- the dvr-device are completley encapsulated to minimize the integration     --
 //-- effort into the existing code.                                             --
 //-- Anybody, who likes to experiment with the total buffer size or wishes to   --
 //-- have it configurable can to this easily -> please look at the line         --
-//-- "ctx->nSegments = N_SEGS_QUEUE;". This is the only place where the maximum --
-//-- number of queue segments will be set (actually it's 18) ...                --
-//-- be aware, that at the moment there is no check for a value to be to high   --
-//-- or to low. Therefore be carefull in choosing your own value for nSegments  --
-//-- Never use values less than 6 !                                             --
-//-- The total buffer size can be calculated by: "nSegments * SIZE_QUEUE_SEGS"  --
+//-- "ctx->nSegsMax = N_SEGS_QUEUE;". This is the only place where the maximum  --
+//-- number of queue segments will be set (actually it's 24) ...                --
+//-- valid range for 'nSegsMax-values' is 6 to 128 (limits will be checked      --
+//-- inside of TPtrQueue constructor to prevent from obscure behavior ).        --
+//-- The whole buffer space will be allocated in portions of SIZE_QUEUE_SEGS,   --
+//-- so that it should be no problem to get large buffers also in fragmented    --
+//-- memory environments. On low memory resources, the total buffer installed   --
+//-- may have less size, because only a part of the requested Segments (at      --
+//-- least 6) could be allocated -> but it's just not the optimal strategie     --
+//-- to get a useful buffer/function on low resources too ...                   -- 
+//-- The total possible buffer size can be calculated by:                       --
+//-- "nSegsMax * SIZE_QUEUE_SEGS"                                               --
 TPtrQueue *TPtrQueue::currentQueue = NULL;
 
 TPtrQueue::TPtrQueue(MP_CTX *ctx)
@@ -1367,25 +1375,85 @@ TPtrQueue::TPtrQueue(MP_CTX *ctx)
 	freezed      = false;
 	isTerminated = true;
 	currentQueue = this;
+	queue        = NULL;
   
 	clear();
-	nSegsMax = pCtx->nSegments;
-	nSegsOpt = (nSegsMax*3)/4;
+
+	//-- set opt/max segments regarding upper/lower limits --
+	nSegsMax = pCtx->nSegsMax;
 	
-	if ( (queue = new TQueueSeg[nSegsMax]) != NULL )
+	if (nSegsMax <= N_SEGS_QMIN) nSegsMax = N_SEGS_QMIN;
+	else if (nSegsMax > N_SEGS_QMAX) nSegsMax = N_SEGS_QMAX;
+	
+	
+	//-- first allocate ptr array, than ... -- 
+	if ( (queue = new uint8_t *[nSegsMax]) != NULL )
 	{
+		//-- ... try to allocate all buffer segments requested --
+		for (int i=0; i<nSegsMax; i++)
+		{
+			if ( (queue[i] = new uint8_t[SIZE_QUEUE_SEG]) == NULL )
+			{
+				nSegsMax = i+1; 
+				break;
+			}
+		}
+	}
+	else
+	{
+		ctx->nSegsMax = 0;
+		ctx->nSegsOpt = 0;
+		return;
+	}	
+	
+	//-- check what's really available --
+	if (nSegsMax < N_SEGS_QMIN)
+	{
+		releaseSegments(); // not enough to life - give up :-(
+	}
+	else
+	{
+		if (nSegsMax == N_SEGS_QMIN) 
+			nSegsOpt = N_SEGS_QMIN;
+		else
+			nSegsOpt = (nSegsMax * 3) / 4;
+		
+		//-- limit nSegsOpt to a meaningful limit --
+		if (nSegsOpt > N_SEGS_OPT_MAX) nSegsOpt = N_SEGS_OPT_MAX;
+		
 		fprintf
 		(
 			stderr, "[mp] buffer (%d bytes) created, using (%d) total segments, opt = (%d)\n", 
 			nSegsMax*SIZE_QUEUE_SEG, nSegsMax, nSegsOpt   
 		);
+
 	}
+		
+	ctx->nSegsMax = nSegsMax;  // set values really used !
+	ctx->nSegsOpt = nSegsOpt; 
 }
 
 TPtrQueue::~TPtrQueue()
 {
 	clear();
-	delete [] queue;
+	releaseSegments();
+}
+
+void TPtrQueue::releaseSegments(void)
+{
+	if (queue)
+	{
+		for (int i=0; i<nSegsMax; i++)
+		{
+			delete [] queue[i];
+			queue[i] = NULL;
+		}
+		delete [] queue;
+		queue = NULL;
+	}
+	
+	nSegsMax = 0;
+	nSegsOpt = 0;
 }
 
 void TPtrQueue::clear()
@@ -1582,7 +1650,7 @@ void *TPtrQueue::runWrapper(void *p)
 
 pthread_t *TPtrQueue::startReader(void)
 {
-	if (queue == NULL)
+	if (nSegsMax == 0)
 	{
 		fprintf(stderr, "[mp] cannot create queue buffer !\n");
 		return NULL;
@@ -1732,6 +1800,9 @@ static void mp_closeDVBDevices(MP_CTX *ctx)
 //==================
 static void mp_softReset(MP_CTX *ctx, bool refill = true)
 {
+	//-- prevent overlapped calls --
+	if (ctx->startDMX) return;
+
 	//-- stop DMX devices --
 	ioctl(ctx->dmxv, DMX_STOP);
 	ioctl(ctx->dmxa, DMX_STOP);
@@ -1975,7 +2046,7 @@ static void mp_checkEvent(MP_CTX *ctx)
 				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
 				lcdUpdateTsMode=true;
 			}
-			mp_analyze(ctx);
+			mp_selectAudio(ctx);
 			fprintf(stderr, "[mp] using pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
 					  ctx->pida, ctx->pidv, ctx->ac3);
 
@@ -2151,9 +2222,37 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 //================
 static void mp_analyze(MP_CTX *ctx)
 {
+	off_t rd;
+	#define OFS_GMO_NSEGS 19
+	#define OFS_GMO_TAG   21
+		
+	//-- get file size --
+	ctx->fileSize = lseek (ctx->inFd, 0L, SEEK_END);
+		
+	//-- read 4 TS packets starting on synced pos --
+	mp_seekSync(ctx->inFd, 0);
+	for (int i=0; i<4; i++) rd = read(ctx->inFd, ctx->tmpBuf, SIZE_TS_PKT);
+	lseek (ctx->inFd, 0L, SEEK_SET);	
+	
+	if ( rd == SIZE_TS_PKT )
+	{
+		//-- identify 4th. packet --
+		if ( !strncmp(&(ctx->tmpBuf[OFS_GMO_TAG]), "WABBER", 6) )
+		{
+			ctx->nSegsMax = (int)ctx->tmpBuf[OFS_GMO_NSEGS];
+			fprintf
+			(
+			  stderr, 
+			  "[mp] buffer description in TS-stream found, (%d) segments proposed\n",
+			  ctx->nSegsMax
+			);  
+		}	
+	}
+
 	currentapid = 0;	// global
 	numpida     = 0;	// global
 
+	//-- search for pids and seek to desired (last used) file position again -- 
 	find_all_avpids (ctx->inFd, &(ctx->pidv), apids, ac3flags, &numpida);
 	ctx->pos = mp_seekSync(ctx->inFd, ctx->pos);
 
@@ -2162,7 +2261,16 @@ static void mp_analyze(MP_CTX *ctx)
 		fprintf(stderr, "[mp] found pida[%d]: 0x%04X, ac3=%d\n",
 				  i, apids[i], ac3flags[i]);
 	}
+	
+	//-- audio track may be selected --
+	mp_selectAudio(ctx);
+}
 
+//====================
+//== mp_selectAudio ==
+//==================== 
+void mp_selectAudio(MP_CTX *ctx)
+{
 	if(numpida > 1)
 	{
 		showaudioselectdialog = true;
@@ -2284,6 +2392,9 @@ void *mp_playFileMain(void *filename)
 	//=======================
 	do
 	{
+		//-- set default count of buffer segments for Ptr-Queue --
+		ctx->nSegsMax = N_SEGS_QUEUE;
+	
 		//-- (live) stream or ... --
 		//--------------------------
 		if(ctx->isStream)
@@ -2361,19 +2472,16 @@ void *mp_playFileMain(void *filename)
 				break; // error
 			}
 
+			//-- file playback can pause, set --
+			//-- actaul pos to req. start pos --
 			ctx->canPause = true;
-
-			//-- analyze TS file (set apid/vpid/ac3 in ctx) --
-			mp_analyze(ctx);
-
-			//-- get file size --
-			ctx->fileSize = lseek (ctx->inFd, 0L, SEEK_END);
-
-			//-- set bookmark position --
 			ctx->pos = g_startposition;
-			ctx->pos = mp_seekSync(ctx->inFd, ctx->pos);
-
 			g_startposition = 0;
+
+			//-- analyze TS file (set apid/vpid/ac3, filesize, nSegsMax, ... in --
+			//-- ctx) on leave, read position of file will be set to start pos.  -- 
+			mp_analyze(ctx);
+			
 		}
 
 		fprintf
@@ -2396,8 +2504,6 @@ void *mp_playFileMain(void *filename)
 		pHandle.events = POLLIN | POLLPRI;
 		ctx->pH        = &pHandle;
 
-		//-- set count of buffer segments for Ptr-Queue --
-		ctx->nSegments = N_SEGS_QUEUE;
 		
 		//-- lcd stuff --
 		int cPercent   = 0;
@@ -3656,9 +3762,9 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.123 $");
+	helpbox.addLine("Version: $Revision: 1.124 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
-	helpbox.addLine("wabber-edition: v0.8 (c) 2005 by gmo18t");
+	helpbox.addLine("wabber-edition: v1.0 (c) 2005 by gmo18t");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 }
@@ -3678,7 +3784,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.123 $");
+	helpbox.addLine("Version: $Revision: 1.124 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
