@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.16  2006/03/15 22:09:56  robspr1
+ * - start plugins with SCRIPTxx=Plugin:myplugin
+ *
  * Revision 0.15  2006/03/11 10:21:58  robspr1
  * - remove zlib.h
  *
@@ -312,6 +315,7 @@ int active = 0;														//! conversion is active
 char timeinfo[22];												//! string for time
 char versioninfo_d[12] = "?.??";					//! daemon version
 time_t tt;																//! actual time
+char encodedstring[512], decodedstring[512];	//! for web-authentification
 
 //----------------------------------------------------
 // devs

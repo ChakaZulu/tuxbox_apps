@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.c,v $
+ * Revision 0.15  2006/03/15 22:09:56  robspr1
+ * - start plugins with SCRIPTxx=Plugin:myplugin
+ *
  * Revision 0.14  2006/03/09 18:50:01  robspr1
  * - add scripts
  *
@@ -185,6 +188,21 @@ void ReadConf()
 			sscanf(p1 + 8, "%d", &iInverse);
 			continue;
 		}
+		else if((p1 = strstr(linebuffer, "WEBPORT=")))
+		{
+			sscanf(p1 + 8, "%d", &webport);
+			continue;
+		}
+		else if((p1 = strstr(linebuffer, "WEBPASS=")))
+		{
+			sscanf(p1 + 8, "%s", &webpass[0]);
+			continue;
+		}
+		else if((p1 = strstr(linebuffer, "WEBUSER=")))
+		{
+			sscanf(p1 + 8, "%s", &webuser[0]);
+			continue;
+		}
 		else if ((p1 = strstr(linebuffer, "SCRIPT")) && (*(p1+8) == '='))		// scan for scripts
 		{
 			int iIdx=-1;
@@ -275,6 +293,10 @@ int WriteConf()
 	fprintf(fd_conf,"DELAY=%d\n",iDelay);
 	fprintf(fd_conf,"SMARTDELY=%d\n",iSmartDelay);
 	fprintf(fd_conf,"INVERSE=%d\n\n",iInverse);
+	fprintf(fd_conf,"WEBPORT=%d\n", webport);
+	fprintf(fd_conf,"WEBUSER=%s\n", webuser);
+	fprintf(fd_conf,"WEBPASS=%s\n\n", webpass);
+	
 	
 	for (i=0; i<MAX_SCRIPTS; i++)
 	{
@@ -347,6 +369,36 @@ void CloseRC(void)
 }
 
 /******************************************************************************
+ * EncodeBase64
+ ******************************************************************************/
+// from tuxmaild
+void EncodeBase64(char *decodedstring, int decodedlen)
+{
+	char encodingtable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	int src_index, dst_index;
+
+	memset(encodedstring, 0, sizeof(encodedstring));
+	for(src_index = dst_index = 0; src_index < decodedlen; src_index += 3, dst_index += 4)
+	{
+		encodedstring[0 + dst_index] = encodingtable[decodedstring[src_index] >> 2];
+		encodedstring[1 + dst_index] = encodingtable[(decodedstring[src_index] & 3) << 4 | decodedstring[1 + src_index] >> 4];
+		encodedstring[2 + dst_index] = encodingtable[(decodedstring[1 + src_index] & 15) << 2 | decodedstring[2 + src_index] >> 6];
+		encodedstring[3 + dst_index] = encodingtable[decodedstring[2 + src_index] & 63];
+	}
+
+	if(decodedlen % 3)
+	{
+		switch(3 - decodedlen%3)
+		{
+			case 2:
+				encodedstring[strlen(encodedstring) - 2] = '=';
+			case 1:
+			encodedstring[strlen(encodedstring) - 1] = '=';
+		}
+	}
+}
+
+/******************************************************************************
  * SendRCCode
  ******************************************************************************/
 /*!
@@ -359,6 +411,8 @@ void CloseRC(void)
 int SendRCCode(unsigned int code, unsigned int count)
 {
 	struct input_event iev;
+	char szScript[80];
+	
 	iev.type=EV_KEY;
 	iev.code=code;
 
@@ -382,7 +436,58 @@ int SendRCCode(unsigned int code, unsigned int count)
 		// do we have a code for a script
 		else if ((code & 0xFFFF0000) == SCRIPT00)
 		{
-			if (szScripts[(code&0xFFFF)-1][0]!='\0') system(szScripts[(code&0xFFFF)-1]);
+			if (szScripts[(code&0xFFFF)-1][0]!='\0') 
+			{
+				strcpy(szScript,szScripts[(code&0xFFFF)-1]);
+				// check if we should call a plugin
+				if (strncasecmp(szScript, "Plugin:",7)==0)
+				{
+					int sock;																	//! socket		
+					struct sockaddr_in SockAddr;
+					char http_cmd[1024];
+					char *http_cmd1 = "GET /cgi-bin/startPlugin?name=";
+					strcpy(http_cmd, http_cmd1);
+					strcat(http_cmd,&szScript[7]);
+					strcat(http_cmd, " HTTP/1.1\n");
+      		if(webuser[0])
+      		{
+      			strcat(http_cmd, "Authorization: Basic ");
+      
+      			strcpy(decodedstring, webuser);
+      			strcat(decodedstring, ":");
+      			strcat(decodedstring, webpass);
+      			EncodeBase64(decodedstring, strlen(decodedstring));
+      
+      			strcat(http_cmd, encodedstring);
+      			strcat(http_cmd, "\n\n");			
+      		}
+      		else
+      		{
+      			strcat(http_cmd, "\n");
+      		}
+					if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+        	{
+        		printf("kb2rcd <could not create Socket>\n");
+        	}
+        	else
+        	{
+        		SockAddr.sin_family = AF_INET;
+        		SockAddr.sin_port = htons(webport);
+        		inet_aton("127.0.0.1", &SockAddr.sin_addr);
+        	
+        		if (connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
+        		{
+        			printf("kb2rcd <could not connect to WebServer>\n");
+        		}
+        		else
+        		{
+        			send(sock, http_cmd, strlen(http_cmd), 0);
+        		}
+        		close(sock);
+        	}
+				}
+				else system(szScript);
+			}
 		}
 		else
 		{
@@ -634,7 +739,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 0.14 $";
+	char cvs_revision[] = "$Revision: 0.15 $";
 	int param = 0;
 	
 	sscanf(cvs_revision, "%*s %s", versioninfo_d);
