@@ -78,7 +78,9 @@ cleanup_and_exit(char *msg, int ret) {
 	list_destroy(global_framebuffer.overlays);
 	list_destroy(sched);
 	// enable keyboard-conversion again
+#ifndef HAVE_DREAMBOX_HARDWARE
 	unlink(KBLCKFILE);
+#endif
 	terminate=1;
 }
 
@@ -994,7 +996,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
             }
             else if(iev.code == KEY_OK)
             {
-               if(iev.value==1 && !keyboard_active)
+               if(iev.value==1)
                   RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
                nextev.x =global_framebuffer.mouse_x;
                nextev.y =global_framebuffer.mouse_y;  
@@ -1583,8 +1585,9 @@ extern "C" {
 		}
 
 		// lock keyboard-conversions, this is done by the plugin itself
+#ifndef HAVE_DREAMBOX_HARDWARE
 		fclose(fopen(KBLCKFILE,"w"));
-
+#endif
 		fbvnc_init();
 		dprintf("Overlays init\n");
 		overlays_init();
