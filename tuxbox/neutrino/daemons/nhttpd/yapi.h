@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: yapi.h,v 1.6 2005/12/21 18:03:38 yjogol Exp $
+        $Id: yapi.h,v 1.7 2006/03/18 16:50:07 yjogol Exp $
 
         License: GPL
 
@@ -95,7 +95,7 @@ private:
 	std::string func_unmount_get_list();
 	std::string func_do_reload_nhttpd_config(CWebserverRequest* request);
 	std::string func_get_partition_list();
-
+	std::string func_get_boxtype();
 	// helpers
 	std::string YWeb_cgi_get_ini(std::string filename, std::string varname, std::string yaccess);
 	void YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue, std::string yaccess);

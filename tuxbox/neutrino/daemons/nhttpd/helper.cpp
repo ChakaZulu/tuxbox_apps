@@ -218,4 +218,20 @@ char *b64buffer(char *s, bool f)
 }
 
 //-------------------------------------------------------------------------
-
+// Helpers
+//-------------------------------------------------------------------------
+// ySplitString: spit string "str" in two strings "left" and "right" at
+//	"delimiter" 
+//-------------------------------------------------------------------------
+bool ySplitString(std::string str, std::string delimiter, std::string& left, std::string& right)
+{
+	unsigned int pos;
+	if ((pos = str.find_first_of(delimiter)) != std::string::npos)
+	{
+		left = str.substr(0, pos);
+		right = str.substr(pos + delimiter.length(), str.length() - (pos + delimiter.length() ));
+	}
+	else
+		left = str; //default if not found
+	return (pos != std::string::npos);
+}

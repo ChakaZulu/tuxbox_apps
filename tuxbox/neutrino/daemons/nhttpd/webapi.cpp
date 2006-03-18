@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.67 2006/03/01 21:17:58 zwen Exp $
+	$Id: webapi.cpp,v 1.68 2006/03/18 16:50:07 yjogol Exp $
 
 	License: GPL
 
@@ -1426,14 +1426,39 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	                     "</TABLE></TABLE>\n");
 	request->SendHTMLFooter();
 }
+/*	---------------------------------------------------------------------------------------------------------------------------
+	Add a Timer
+	
+	Alarm Time "alDate" (Format DD.MM.YYYY) , "alTime" (Format HH:MM) - design by contract - format must be well formated
+	Stop Time "stDate" (Format DD.MM.YYYY) , "stTime" (Format HH:MM) - (stDate is optional)
+	Timer type "type" = 1: Shutdown | 3: zapto | 4: Standby | 5: Aufnahme | 6: Erinnerung | 7: Sleeptimer | 8: Plugin
+	Repeat scheme "rep" = 0: single | 1: daily | 2: weekly | 3: two-weekly | 4: four-weekly | 5: monthly | 256: weekdays
+	"repcount" number of repeats (0 = unlimited)
+	Weekdays "wd" = "xxxxxxx" Mo-So x for set: example x-x---- meens Mo and We
+	Standby on "sbon" = 1 set standy of for type=4
+	recording directory "rec_dir" path to recording directory
+	"channel_id" Channel id to be recorded or zapped
+	 	or
+	"channel_name" Channel name  to be recorded or zapped
+	Message to be displayed "msg" for type=6
+	Plugin to be started "PluginName" for type=8
+	update=1 -> Update Timer if exists (alarmTime is the same). Old Timer will be removed before adding the new timer
+	----------------------------------------------------------------------------------------------------------------------------*/
+	bool nocase_compare (char c1, char c2)
+	{
+		return toupper(c1) == toupper(c2);
+	}
 
-//-------------------------------------------------------------------------
+	
+//------------------------------------------------------------------------
 void CWebAPI::doNewTimer(CWebserverRequest *request)
 {
 	time_t	announceTimeT = 0,
 		stopTimeT = 0,
-		alarmTimeT = 0;
+		alarmTimeT = 0,
+		tnull = 0;
 	unsigned int repCount = 0;
+	int alHour=0;
 
 	if(request->ParameterList["alarm"] != "")		// wenn alarm angegeben dann parameter im time_t format
 	{
@@ -1443,7 +1468,39 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		if(request->ParameterList["announce"] != "")
 			announceTimeT = atoi(request->ParameterList["announce"].c_str());
 	}
-	else			// sonst formular-parameter parsen
+	else if(request->ParameterList["alDate"] != "") //given formatted
+	{
+		// Alarm Date - Format exact! DD.MM.YYYY
+		struct tm *alarmTime=localtime(&tnull);
+		if(sscanf(request->ParameterList["alDate"].c_str(),"%2d.%2d.%4d",&(alarmTime->tm_mday), &(alarmTime->tm_mon), &(alarmTime->tm_year)) == 3)
+		{
+			alarmTime->tm_mon -= 1;
+			alarmTime->tm_year -= 1900;
+		}
+
+		// Alarm Time - Format exact! HH:MM
+		if(request->ParameterList["alTime"] != "")
+			sscanf(request->ParameterList["alTime"].c_str(),"%2d.%2d",&(alarmTime->tm_hour), &(alarmTime->tm_min));
+	
+		alarmTimeT = mktime(alarmTime);
+		alHour = alarmTime->tm_hour;
+		struct tm *stopTime = localtime(&alarmTimeT);
+		// Stop Time - Format exact! HH:MM
+		if(request->ParameterList["stTime"] != "")
+			sscanf(request->ParameterList["stTime"].c_str(),"%2d.%2d",&(stopTime->tm_hour), &(stopTime->tm_min));
+	
+		// Stop Date - Format exact! DD.MM.YYYY
+		if(request->ParameterList["stDate"] != "")
+			if(sscanf(request->ParameterList["stDate"].c_str(),"%2d.%2d.%4d",&(stopTime->tm_mday), &(stopTime->tm_mon), &(stopTime->tm_year)) == 3)
+			{
+				stopTime->tm_mon -= 1;
+				stopTime->tm_year -= 1900;
+			}
+		stopTimeT = mktime(stopTime);
+		if(request->ParameterList["stDate"] == "" && alHour > stopTime->tm_hour)
+			stopTimeT += 24* 60 * 60; // add 1 Day
+	}
+	else	// sonst formular-parameter parsen
 	{
 		time_t now = time(NULL);
 		struct tm *alarmTime=localtime(&now);
@@ -1491,22 +1548,32 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		{
 		  stopTime->tm_min = atoi(request->ParameterList["smi"].c_str());
 		}
-		if(request->ParameterList["repcount"] != "")
-		{
-			repCount = atoi(request->ParameterList["repcount"].c_str());
-		}
 		correctTime(alarmTime);
 		stopTimeT = mktime(stopTime);
 	}
 		
-	announceTimeT = alarmTimeT-60;
-	CTimerd::CTimerEventTypes type  = 
-	(CTimerd::CTimerEventTypes) atoi(request->ParameterList["type"].c_str());
-	CTimerd::CTimerEventRepeat rep = 
-	(CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
+	if(announceTimeT != 0) 
+		announceTimeT -= 60;
+		
+	CTimerd::CTimerEventTypes type;
+	if(request->ParameterList["type"] != "")
+		type  = (CTimerd::CTimerEventTypes) atoi(request->ParameterList["type"].c_str());
+	else // default is: record
+		type = CTimerd::TIMER_RECORD;
+	
+	// repeat
+	if(request->ParameterList["repcount"] != "")
+	{
+		repCount = atoi(request->ParameterList["repcount"].c_str());
+	}
+	CTimerd::CTimerEventRepeat rep;
+	if(request->ParameterList["rep"] != "")
+		rep = (CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
+	else // default: no repeat
+		rep = (CTimerd::CTimerEventRepeat)0;
 	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && request->ParameterList["wd"] != "")
 		Parent->Timerd->getWeekdaysFromStr((int*)&rep, request->ParameterList["wd"].c_str());
-	bool standby_on = (request->ParameterList["sbon"]=="1");
+
 	CTimerd::RecordingInfo recinfo;
 	CTimerd::EventInfo eventinfo;
 	eventinfo.epgID = 0;
@@ -1514,15 +1581,37 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 	eventinfo.apids = TIMERD_APIDS_CONF;
 	eventinfo.recordingSafety = (request->ParameterList["rs"] == "1");
 
-	sscanf(request->ParameterList["channel_id"].c_str(),
-	       SCANF_CHANNEL_ID_TYPE,
-	       &eventinfo.channel_id);
-
+	// channel by Id or name
+	if(request->ParameterList["channel_id"] != "")
+		sscanf(request->ParameterList["channel_id"].c_str(),
+		SCANF_CHANNEL_ID_TYPE,
+		&eventinfo.channel_id);
+	else
+	{
+		CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
+		CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
+		for(; channel != channellist->end();channel++)
+		{
+			std::string new_channel_name = request->ParameterList["channel_name"];
+			std::string channel_name = channel->name;
+			if(new_channel_name.length() == channel_name.length() &&
+				equal(new_channel_name.begin(), new_channel_name.end(),
+				channel_name.begin(), nocase_compare)) //case insensitive  compare
+			{
+				eventinfo.channel_id = channel->channel_id;
+				break;
+			}
+		}
+	}
+	       
 	void *data=NULL;
 	if(type == CTimerd::TIMER_RECORD)
 		announceTimeT-=120;
 	if(type == CTimerd::TIMER_STANDBY)
+	{
+		bool standby_on = (request->ParameterList["sbon"]=="1");
 		data=&standby_on;
+	}
 	else if(type==CTimerd::TIMER_NEXTPROGRAM || type==CTimerd::TIMER_ZAPTO)
 		data= &eventinfo;
 	else if (type==CTimerd::TIMER_RECORD)
@@ -1544,6 +1633,22 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		memset(msg, 0, sizeof(msg));
 		strncpy(msg, request->ParameterList["PluginName"].c_str(),EXEC_PLUGIN_NAME_MAXLEN-1);
 		data=msg;
+	}
+	// update or add timer
+	if(request->ParameterList["update"]=="1")
+	{
+		CTimerd::TimerList timerlist;
+		timerlist.clear();
+		Parent->Timerd->getTimerList(timerlist);
+		CTimerd::TimerList::iterator timer = timerlist.begin();
+		for(; timer != timerlist.end();timer++)
+		{
+			if(timer->alarmTime == alarmTimeT)
+			{
+				Parent->Timerd->removeTimerEvent(timer->eventID);
+				break;
+			}
+		}
 	}
 	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep,repCount);
 }

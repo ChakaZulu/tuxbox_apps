@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: helper.h,v 1.10 2003/03/14 07:20:01 obi Exp $
+        $Id: helper.h,v 1.11 2006/03/18 16:50:07 yjogol Exp $
 
         License: GPL
 
@@ -33,5 +33,7 @@
 std::string b64decode(char *s);
 std::string itoa(unsigned int conv);
 std::string itoh(unsigned int conv);
+
+bool ySplitString(std::string str, std::string delimiter, std::string& left, std::string& right);
 
 #endif /* __nhttpd_helper_h__ */

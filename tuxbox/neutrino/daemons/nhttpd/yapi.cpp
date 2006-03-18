@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: yapi.cpp,v 1.8 2005/12/21 18:03:38 yjogol Exp $
+	$Id: yapi.cpp,v 1.9 2006/03/18 16:50:07 yjogol Exp $
 
 	License: GPL
 
@@ -133,27 +133,10 @@
 
 
 // nhttpd
+#include "helper.h"
 #include "debug.h"
 #include "yapi.h"
 
-//-------------------------------------------------------------------------
-// Helpers
-//-------------------------------------------------------------------------
-// ySplitString: spit string "str" in two strings "left" and "right" at
-//	"delimiter" 
-//-------------------------------------------------------------------------
-bool ySplitString(std::string str, std::string delimiter, std::string& left, std::string& right)
-{
-	unsigned int pos;
-	if ((pos = str.find_first_of(delimiter)) != std::string::npos)
-	{
-		left = str.substr(0, pos);
-		right = str.substr(pos + delimiter.length(), str.length() - (pos + delimiter.length() ));
-	}
-	else
-		left = str; //default if not found
-	return (pos != std::string::npos);
-}
 //-------------------------------------------------------------------------
 // trim whitespaces
 //-------------------------------------------------------------------------
@@ -663,7 +646,7 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 		"mount-get-list", "mount-set-values", 
 		"get_bouquets_as_dropdown", "get_actual_bouquet_number", "get_channels_as_dropdown", "get_actual_channel_id",
 		"get_mode", "get_video_pids", "get_audio_pid", "get_audio_pids_as_dropdown", "get_request_data",
-		"umount_get_list", "do_reload_nhttpd_config", "get_partition_list",
+		"umount_get_list", "do_reload_nhttpd_config", "get_partition_list", "get_boxtype",
 		 NULL};
 
 	ySplitString(ycmd," ",func, para);
@@ -723,6 +706,9 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 		case 13:yresult = func_get_partition_list();
 			break;
 		
+		case 14:yresult = func_get_boxtype();
+			break;
+
 		default:
 			yresult = "ycgi func not found";
 	}
@@ -1123,3 +1109,11 @@ std::string  CyAPI::func_get_partition_list()
 	}
 	return yresult;
 }
+//-------------------------------------------------------------------------
+// y-func : get boxtypetext (Nokia, Philips, Sagem)
+//-------------------------------------------------------------------------
+std::string  CyAPI::func_get_boxtype()
+{
+	return Parent->Dbox_Hersteller[Parent->Controld->getBoxType()];
+}
+
