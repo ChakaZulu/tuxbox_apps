@@ -87,6 +87,7 @@ bool CHTTPTool::downloadFile(const std::string & URL, const char * const downloa
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, this);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
+		curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 
 		if(strcmp(g_settings.softupdate_proxyserver,"")!=0)

@@ -39,10 +39,12 @@
 #endif
 #include <mtd/mtd-user.h>
 #include <libcramfs.h>
+#include <libmd5sum.h>
 
 #include <driver/encoding.h>
 #include <global.h>
 
+#define LOCAL_MOUNT_DIR   "/tmp/checkimage"
 
 CFlashTool::CFlashTool()
 {
@@ -295,6 +297,29 @@ bool CFlashTool::erase(int globalProgressEnd)
 	return true;
 }
 
+// Snarfed from checksquashfs
+bool CFlashTool::MD5Check(const std::string squashfsimage, const std::string checkmd5)
+{
+	char md5binary[17];
+	char md5result[33];
+
+	md5_file(squashfsimage.c_str(), 1, (unsigned char*) md5binary);
+
+	int i;
+	for (i=0; i<16; i++) {
+		snprintf(&md5result[i*2], 3, "%02x", md5binary[i]);
+	}
+
+	if (strcmp(md5result, checkmd5.c_str()))
+	{
+		printf("[CFlashTool] md5 check failed!\n");
+		return false;
+	}
+
+	printf("[CFlashTool] md5 check successfull\n");
+	return true;
+}
+
 bool CFlashTool::check_cramfs( const std::string & filename )
 {
 	int retVal = cramfs_crc( (char*) filename.c_str() );
@@ -309,10 +334,86 @@ void CFlashTool::reboot()
 	::exit(0);
 }
 
+bool CFlashTool::mountImage(std::string image)
+{
+  // TODO: rewrite to use mount(2)
+
+	if (mkdir(LOCAL_MOUNT_DIR, 0700) != 0)
+	{
+		printf("[CFlashTool] can't create mount directory: %s\n", LOCAL_MOUNT_DIR);
+		return false;
+
+	} else	{
+	        std::string cmd = "mount -o loop -o ro -t auto ";
+		cmd += image;
+		cmd += " ";
+		cmd += LOCAL_MOUNT_DIR;
+
+		if (system(cmd.c_str()) != 0)
+		{
+			// TODO: ShowHintUTF "can't mount squashfs image"
+			printf("[chkSquashfs] can't mount image: %s\n", image.c_str());
+			rmdir(LOCAL_MOUNT_DIR);
+			return false;
+
+		} else {
+			return true;
+		}
+	}
+}
+
+void CFlashTool::unmountImage()
+{
+	umount(LOCAL_MOUNT_DIR);
+
+	if (rmdir(LOCAL_MOUNT_DIR) != 0)
+	{
+		umount(LOCAL_MOUNT_DIR);
+		if (rmdir(LOCAL_MOUNT_DIR) != 0)
+			printf("[CFlashTool] can't remove mount directory: %s\n", LOCAL_MOUNT_DIR);
+	}
+}
+
+bool CFlashTool::GetVersionInfo(CFlashVersionInfo& versionInfo, std::string filename)
+{
+  std::string versionPath = LOCAL_MOUNT_DIR "/.version";
+  printf("[CFlashTool] check filename: %s\n", filename.c_str());
+
+  if (mountImage(filename)) {
+    CConfigFile configfile('\t');
+    bool success =configfile.loadConfig(versionPath);
+    if (success) {
+      const char * versionString = configfile.getString( "version", "????????????????").c_str();
+      printf("[CFlashTool] read version string: %s\n", versionString);
+      versionInfo.load(versionString);
+      unmountImage();
+      return true;
+    } else {
+      printf("[CFlashTool] error reading .version\n");
+      unmountImage();
+      return false;
+    }
+  } else {
+    printf("[CFlashTool] mount error\n");
+    unmountImage();
+    return false;
+  }
+}
+
 //-----------------------------------------------------------------------------------------------------------------
 
 
+CFlashVersionInfo::CFlashVersionInfo()
+{
+	load("0200200001010000");
+}
+
 CFlashVersionInfo::CFlashVersionInfo(const std::string & versionString)
+{
+	load(versionString);
+}
+
+bool CFlashVersionInfo::load(const std::string & versionString)
 {
 	//SBBBYYYYMMTTHHMM -- formatsting
 
@@ -354,6 +455,8 @@ CFlashVersionInfo::CFlashVersionInfo(const std::string & versionString)
 	time[3] = versionString[14];
 	time[4] = versionString[15];
 	time[5] = 0;
+
+	return true;
 }
 
 const char * const CFlashVersionInfo::getDate(void) const
@@ -479,6 +582,18 @@ int CMTDInfo::findMTDNumber(const std::string & filename)
 	for(int x=0;x<getMTDCount();x++)
 	{
 		if(filename == getMTDFileName(x))
+		{
+			return x;
+		}
+	}
+	return -1;
+}
+
+int CMTDInfo::findMTDNumberFromDescription(const std::string & description)
+{
+	for(int x=0;x<getMTDCount();x++)
+	{
+		if(description == getMTDName(x))
 		{
 			return x;
 		}

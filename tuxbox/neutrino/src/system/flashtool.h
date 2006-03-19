@@ -39,6 +39,8 @@
 #include <vector>
 
 
+class CFlashVersionInfo;
+
 class CFlashTool
 {
 	private:
@@ -48,6 +50,8 @@ class CFlashTool
 		std::string ErrorMessage;
 
 		bool erase(int globalProgressEnd=-1);
+		bool mountImage(std::string image);
+		void unmountImage();
 
 	public:
 		CFlashTool();
@@ -62,7 +66,8 @@ class CFlashTool
 		bool readFromMTD( const std::string & filename, int globalProgressEnd=-1 );
 
 		bool check_cramfs( const std::string & filename );
-
+		bool MD5Check(const std::string squashfsimage, const std::string checkmd5);
+		bool GetVersionInfo(CFlashVersionInfo& versionInfo, const std::string filename);
 		void reboot();
 };
 
@@ -78,7 +83,9 @@ class CFlashVersionInfo
 	
  public:
 	
+	CFlashVersionInfo();
 	CFlashVersionInfo(const std::string & versionString);
+	bool load(const std::string & versionString);
 	
 	const char * const getDate(void) const;
 	const char * const getTime(void) const;
@@ -123,6 +130,7 @@ class CMTDInfo
 		int getMTDEraseSize( const std::string & filename );
 
 		int findMTDNumber(const std::string & filename);
+		int findMTDNumberFromDescription(const std::string & description);
 
 };
 

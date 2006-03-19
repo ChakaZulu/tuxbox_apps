@@ -52,12 +52,6 @@
 #include <system/flashtool.h>
 #include <system/httptool.h>
 
-#ifdef SQUASHFS
-#include <system/checksquashfs.h>
-#else
-#include <libcramfs.h>
-#endif
-
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
@@ -70,26 +64,19 @@
 
 #include <fstream>
 
+//#define TESTING
 
-#define gTmpPath "/var/tmp/"
-#define gUserAgent "neutrino/softupdater 1.1"
+#define gTmpPath "/tmp/"
+#define gUserAgent "neutrino/softupdater 1.2"
 
-// Only Squashfs v2.1 - v2.2r2 is supported in U-Boot Bootloader
-#ifdef SQUASHFS
-#define LIST_OF_UPDATES_LOCAL_FILENAME "squashfs.list"
-#define UPDATE_LOCAL_FILENAME          "update.squashfs"
-#define RELEASE_CYCLE                  "2.0"
-#define FILEBROWSER_UPDATE_FILTER      "squashfs"
-#define MTD_OF_WHOLE_IMAGE             4
-#define MTD_DEVICE_OF_UPDATE_PART      "/dev/mtd/2"
-#else
 #define LIST_OF_UPDATES_LOCAL_FILENAME "cramfs.list"
 #define UPDATE_LOCAL_FILENAME          "update.cramfs"
 #define RELEASE_CYCLE                  "2.0"
 #define FILEBROWSER_UPDATE_FILTER      "cramfs"
-#define MTD_OF_WHOLE_IMAGE             4
+#define FILEBROWSER_UPDATE_FILTER_ALT  "squashfs"
+//#define MTD_OF_WHOLE_IMAGE             4
+#define MTD_TEXT_OF_WHOLE_IMAGE		"Flash without bootloader"
 #define MTD_DEVICE_OF_UPDATE_PART      "/dev/mtd/2"
-#endif
 
 
 CFlashUpdate::CFlashUpdate()
@@ -161,13 +148,15 @@ bool CFlashUpdate::selectHttpImage(void)
 	std::ifstream urlFile(g_settings.softupdate_url_file);
 
 	unsigned int i = 0;
+	bool update_prefix_tried = false;
 	while (urlFile >> url)
 	{
 		// add update url from .version if exists, then seek back to start
-		if (updateURL.length() > 0 && i==0)
+		if (updateURL.length() > 0 && !update_prefix_tried)
 		{
 			url = updateURL + url;
 			urlFile.seekg(0, std::ios::beg);
+			update_prefix_tried = true;
 		}
 
 		std::string::size_type startpos, endpos;
@@ -277,6 +266,7 @@ bool CFlashUpdate::checkVersion4Update()
 
 		CFileFilter UpdatesFilter;
 		UpdatesFilter.addFilter(FILEBROWSER_UPDATE_FILTER);
+		UpdatesFilter.addFilter(FILEBROWSER_UPDATE_FILTER_ALT);
 
 		UpdatesBrowser.Filter = &UpdatesFilter;
 
@@ -325,18 +315,13 @@ bool CFlashUpdate::checkVersion4Update()
 		}
 		hide();
 
-#ifdef SQUASHFS
-		CCheckSquashfs* checkSquashfs;
-		checkSquashfs = new CCheckSquashfs();
-
-		versionInfo = new CFlashVersionInfo(checkSquashfs->GetVersionInfo(filename.c_str()));
-#else
-		//bestimmung der CramfsDaten
-		char cramfsName[30];
-		cramfs_name((char *) filename.c_str(), (char *) &cramfsName);
-
-		versionInfo = new CFlashVersionInfo(cramfsName);
-#endif
+		CFlashTool ft;
+		versionInfo = new CFlashVersionInfo();
+		if (!ft.GetVersionInfo(*versionInfo, filename))
+		{
+			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_CANTOPENFILE)); // UTF-8
+			return false;			
+		}
 
 		msg_body = LOCALE_FLASHUPDATE_MSGBOX_MANUAL;
 	}
@@ -379,6 +364,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	paint();
 	showGlobalStatus(20);
 
+	bool looks_like_cramfs = filename.find(".cramfs") != unsigned(-1);
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
 		if(!getUpdateImage(newVersion))
@@ -393,40 +379,70 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	showGlobalStatus(40);
 
 	CFlashTool ft;
-	ft.setMTDDevice(MTD_DEVICE_OF_UPDATE_PART);
 	ft.setStatusViewer(this);
 
-#ifdef SQUASHFS
-#warning no squash filesystem check by manual (ftp) update implemented
-// only for i-net update. the question is: where to get the md5sum for the manual update file
+	// This check was previously used only on squashfs-images
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
 		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_MD5CHECK)); // UTF-8
 
-		CCheckSquashfs* checkSquashfs;
-		checkSquashfs = new CCheckSquashfs();
-
-		if(!checkSquashfs->MD5Check(filename, filemd5))
+		if(!ft.MD5Check(filename, filemd5))
 		{
 			hide();
 			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_MD5SUMERROR)); // UTF-8
 			return menu_return::RETURN_REPAINT;
 		}
 	}
-#else
-	//cramfs filesystem check
-	showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_MD5CHECK)); // UTF-8
-	if(!ft.check_cramfs(filename))
+
+	// If the file name contains the string ".cramfs", check that it
+	// is a valid cramfs image
+	if (looks_like_cramfs)
 	{
+		printf("Checking it for cramfs correctness\n");
+		showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_MD5CHECK)); // UTF-8
+		if(!ft.check_cramfs(filename))
+		{
+			hide();
+			ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_MD5SUMERROR)); // UTF-8
+			return menu_return::RETURN_REPAINT;
+		}
+	}
+
+	struct stat buf;
+	stat(filename.c_str(), &buf);
+	int filesize = buf.st_size;
+
+	// Is the file size that of a full image? Then flash as such.
+	unsigned int mtd_of_whole_image = CMTDInfo::getInstance()->findMTDNumberFromDescription(MTD_TEXT_OF_WHOLE_IMAGE);
+	unsigned int mtd_of_update_image = CMTDInfo::getInstance()->findMTDNumber(MTD_DEVICE_OF_UPDATE_PART);
+
+	if (filesize == CMTDInfo::getInstance()->getMTDSize(mtd_of_whole_image))
+	{
+		ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(mtd_of_whole_image));
+		printf("full image %d %d\n", filesize,mtd_of_whole_image);
+	} else 
+	// Is filesize <= root partition? Then flash as update.
+	if (filesize <= CMTDInfo::getInstance()->getMTDSize(mtd_of_update_image)) {
+	  	ft.setMTDDevice(MTD_DEVICE_OF_UPDATE_PART);
+		printf("update image %d %d\n", filesize, mtd_of_update_image);
+	} else {
+	// Otherwise reject
+		printf("NO update due to erroneous file size %d %d\n", filesize, CMTDInfo::getInstance()->getMTDSize(mtd_of_update_image));
 		hide();
 		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, g_Locale->getText(LOCALE_FLASHUPDATE_MD5SUMERROR)); // UTF-8
 		return menu_return::RETURN_REPAINT;
 	}
-#endif
 
 	CNeutrinoApp::getInstance()->exec(NULL, "savesettings");
 	sleep(2);
 	showGlobalStatus(60);
+
+#ifdef TESTING
+	printf("+++++++++++++++++++ NOT flashing, just testing\n");
+	hide();
+	unlink(filename.c_str());
+	return menu_return::RETURN_REPAINT;
+#endif
 
 	//flash it...
 	if(!ft.program(filename, 80, 100))
@@ -474,7 +490,7 @@ void CFlashExpert::readmtd(int readmtd)
 	if (readmtd == -1)
 	{
 		filename = "/tmp/flashimage.img"; // US-ASCII (subset of UTF-8 and ISO8859-1)
-		readmtd = MTD_OF_WHOLE_IMAGE;
+		readmtd = CMTDInfo::getInstance()->findMTDNumberFromDescription(MTD_TEXT_OF_WHOLE_IMAGE); //MTD_OF_WHOLE_IMAGE;
 	}
 	setTitle(LOCALE_FLASHUPDATE_TITLEREADFLASH);
 	paint();
@@ -518,6 +534,12 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 	CFlashTool ft;
 	ft.setStatusViewer( this );
 	ft.setMTDDevice( CMTDInfo::getInstance()->getMTDFileName(mtdNumber) );
+#ifdef TESTING
+	printf("+++++++++++++++++++ NOT flashing, just testing\n");
+	hide();
+	unlink(filename.c_str());
+	return;
+#endif
 	if(!ft.program( "/tmp/" + filename, 50, 100))
 	{
 		showStatusMessageUTF(ft.getErrorMessage()); // UTF-8
@@ -571,12 +593,11 @@ void CFlashExpert::showFileSelector(const std::string & actionkey)
 		{
 			std::string filen = namelist[count]->d_name;
 			if((int(filen.find(".img")) != -1) 
-#ifdef SQUASHFS
 			   || (int(filen.find(".squashfs")) != -1)
-#else
 			   || (int(filen.find(".cramfs")) != -1)
-#endif
-			   || (int(filen.find(".jffs2")) != -1))
+			   || (int(filen.find(".jffs2")) != -1)
+			   || (int(filen.find(".flfs")) != -1)
+			   )
 			{
 				fileselector->addItem(new CMenuForwarderNonLocalized(filen.c_str(), true, NULL, this, (actionkey + filen).c_str()));
 #warning TODO: make sure filen is UTF-8 encoded
@@ -632,7 +653,7 @@ int CFlashExpert::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			if(selectedMTD==-1)
 			{
-				writemtd(actionKey, MTD_OF_WHOLE_IMAGE);
+				writemtd(actionKey, CMTDInfo::getInstance()->findMTDNumberFromDescription(MTD_TEXT_OF_WHOLE_IMAGE)/*MTD_OF_WHOLE_IMAGE*/);
 			}
 			else
 			{
