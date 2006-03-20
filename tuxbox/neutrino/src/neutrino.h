@@ -130,6 +130,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 //		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 		CRCLock                         *rcLock;
+		CMenuTarget* 			moviePlayerGui;
 
 		bool ucodes_available(void);
 		void firstChannel();

@@ -1424,7 +1424,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(GenericMenuSeparator);
 	moviePlayer.addItem(GenericMenuBack);
 	moviePlayer.addItem(GenericMenuSeparatorLine);
-	CMoviePlayerGui* moviePlayerGui = new CMoviePlayerGui();
+//	CMoviePlayerGui* moviePlayerGui = new CMoviePlayerGui();
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK_PC, true, NULL, moviePlayerGui, "tsplayback_pc", CRCInput::RC_1));
 #ifdef MOVIEBROWSER
@@ -2978,13 +2978,19 @@ void CNeutrinoApp::ShowStreamFeatures()
 	sprintf(id, "%d", -1);
 
 	// -- Add Channel to favorites
-	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_FAVORITES_MENUEADD, true, NULL, new CFavorites, id, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
+//	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_FAVORITES_MENUEADD, true, NULL, new CFavorites, id, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_FAVORITES_MENUEADD, true, NULL, new CFavorites, id, CRCInput::convertDigitToKey(enabled_count), ""), false);
+
+	StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
 
 	// start/stop recording
 	if (g_settings.recording_type != RECORDING_OFF)
 	{
 		StreamFeatureSelector.addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, MAINMENU_RECORDING_OPTIONS, MAINMENU_RECORDING_OPTION_COUNT, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	}
+
+	// -- Add TS Playback to blue button
+	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, this->moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
 
 	// -- Timer-Liste
 	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_TIMERLIST_NAME, true, NULL, new CTimerList(), id, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
@@ -3281,7 +3287,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	MyIPChanger               = new CIPChangeNotifier;
 	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
 	rcLock                    = new CRCLock();
-
+	moviePlayerGui 						= new CMoviePlayerGui();
+	
 	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 
 	// setup recording device
