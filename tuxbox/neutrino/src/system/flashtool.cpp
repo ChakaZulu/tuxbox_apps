@@ -334,6 +334,23 @@ void CFlashTool::reboot()
 	::exit(0);
 }
 
+// This is NOT portable code. (But portability is not required either :-)
+bool CFlashTool::is_squashfs(const std::string & image)
+{
+	const unsigned int squashfs_magic = 0x73717368; // "sqsh"
+	FILE *f = fopen(image.c_str(), "r");
+	if (!f) 
+	{
+		printf("[CFlashTool] can't open image: %s\n", image.c_str());
+		return false;
+	}
+	unsigned int magic = 0;
+	fread(&magic, sizeof(int), 1, f);
+	fclose(f);
+	printf("[CFlashTool] %s is %sa squashfs image\n", image.c_str(), magic==squashfs_magic ? "" : "not ");
+	return magic==squashfs_magic;
+}
+
 bool CFlashTool::mountImage(std::string image)
 {
   // TODO: rewrite to use mount(2)
@@ -344,7 +361,8 @@ bool CFlashTool::mountImage(std::string image)
 		return false;
 
 	} else	{
-	        std::string cmd = "mount -o loop -o ro -t auto ";
+		std::string cmd = "mount -o loop -o ro -t "; 
+		cmd += (is_squashfs(image) ? "squashfs " : "cramfs ");
 		cmd += image;
 		cmd += " ";
 		cmd += LOCAL_MOUNT_DIR;
@@ -352,7 +370,7 @@ bool CFlashTool::mountImage(std::string image)
 		if (system(cmd.c_str()) != 0)
 		{
 			// TODO: ShowHintUTF "can't mount squashfs image"
-			printf("[chkSquashfs] can't mount image: %s\n", image.c_str());
+			printf("[CFlashTool] can't mount image: %s\n", image.c_str());
 			rmdir(LOCAL_MOUNT_DIR);
 			return false;
 
