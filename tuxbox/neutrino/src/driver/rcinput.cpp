@@ -1482,6 +1482,14 @@ const char * CRCInput::getSpecialKeyName(const unsigned int key)
 			  return "btn_left";
 			case RC_btn_right:
 			  return "btn_right";
+			case RC_top_left:
+			  return "top_left";
+			case RC_top_right:
+			  return "top_right";
+			case RC_bottom_left:
+			  return "bottom_left";
+			case RC_bottom_right:
+			  return "bottom_right";
 
 			case RC_timeout:
 			return "timeout";
