@@ -33,6 +33,16 @@
 static pthread_mutex_t PMTLock =
 	PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
+inline void lock_pmt()
+{
+	pthread_mutex_lock(&PMTLock);
+}
+
+inline void unlock_pmt(void*)
+{
+	pthread_mutex_unlock(&PMTLock);
+}
+
 static int section_length(const unsigned char *buf)
 {
 	return ((buf[1] << 8) | buf[2]) & 0x0fff;
@@ -251,9 +261,11 @@ void eDVBRecorder::PMTready(int error)
 			}
 			validatePIDs();
 
-			singleLock s(PMTLock);
+			pthread_cleanup_push( unlock_pmt, 0 );
+			lock_pmt();
 			if (PmtData) delete [] PmtData;
 			PmtData = pmt->getRAW();
+			pthread_cleanup_pop(1);
 
 			pmt->unlock();
 		}
@@ -591,9 +603,11 @@ void eDVBRecorder::PatPmtWrite()
 	if ( PatData )
 		writeSection(PatData, 0, PatCC );
 
-	singleLock s(PMTLock);
+	pthread_cleanup_push( unlock_pmt, 0 );
+	lock_pmt();
 	if ( PmtData )
 		writeSection(PmtData, pmtpid, PmtCC );
+	pthread_cleanup_pop(1);
 
 	alarm(2);  
 }
