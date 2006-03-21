@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.c,v $
+ * Revision 0.16  2006/03/21 19:08:54  robspr1
+ * - add time-delayed keys
+ *
  * Revision 0.15  2006/03/15 22:09:56  robspr1
  * - start plugins with SCRIPTxx=Plugin:myplugin
  *
@@ -221,7 +224,7 @@ void ReadConf()
 		p1=linebuffer;
 		rccode=0;
 			
-		// first check for type (ALT_, SHIFT_ or KEY_
+		// first check for type (ALT_, SHIFT_ or KEY_) or T1_ to T4_ prefix
 		if (strncmp(p1,"ALT_",4)==0)
 		{
 			rccode=RC_ALT;
@@ -231,6 +234,26 @@ void ReadConf()
 		{
 			rccode=RC_SHIFT;
 			p1+=6;	
+		}
+		else if (strncmp(p1,"T1_",3)==0)
+		{
+			rccode=RC_T1;
+			p1+=3;	
+		}
+		else if (strncmp(p1,"T2_",3)==0)
+		{
+			rccode=RC_T2;
+			p1+=3;	
+		}
+		else if (strncmp(p1,"T3_",3)==0)
+		{
+			rccode=RC_T3;
+			p1+=3;	
+		}
+		else if (strncmp(p1,"T4_",3)==0)
+		{
+			rccode=RC_T4;
+			p1+=3;	
 		}
 
 		// first we check if we know the key-name
@@ -311,6 +334,10 @@ int WriteConf()
 	{
 		if (keyconv[i].in_code & RC_ALT) fprintf(fd_conf, "ALT_");
 		if (keyconv[i].in_code & RC_SHIFT) fprintf(fd_conf, "SHIFT_");
+		if (keyconv[i].in_code & RC_T1) fprintf(fd_conf, "T1_");
+		if (keyconv[i].in_code & RC_T2) fprintf(fd_conf, "T2_");
+		if (keyconv[i].in_code & RC_T3) fprintf(fd_conf, "T3_");
+		if (keyconv[i].in_code & RC_T4) fprintf(fd_conf, "T4_");
 		j=FindKeyCode((keyconv[i].in_code & 0xFFFF));
 		if (j!=-1) 
 		{
@@ -449,6 +476,7 @@ int SendRCCode(unsigned int code, unsigned int count)
 					strcpy(http_cmd, http_cmd1);
 					strcat(http_cmd,&szScript[7]);
 					strcat(http_cmd, " HTTP/1.1\n");
+					if (debug) printf(" <Plugin:%s> ",&szScript[7]);
       		if(webuser[0])
       		{
       			strcat(http_cmd, "Authorization: Basic ");
@@ -467,7 +495,7 @@ int SendRCCode(unsigned int code, unsigned int count)
       		}
 					if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         	{
-        		printf("kb2rcd <could not create Socket>\n");
+        		printf("\r\nkb2rcd <could not create Socket>\r\n");
         	}
         	else
         	{
@@ -477,7 +505,7 @@ int SendRCCode(unsigned int code, unsigned int count)
         	
         		if (connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
         		{
-        			printf("kb2rcd <could not connect to WebServer>\n");
+        			printf("\r\nkb2rcd <could not connect to WebServer>\r\n");
         		}
         		else
         		{
@@ -486,7 +514,11 @@ int SendRCCode(unsigned int code, unsigned int count)
         		close(sock);
         	}
 				}
-				else system(szScript);
+				else 
+				{
+					if (debug) printf(" <Script:%s> ",szScript);			
+					system(szScript);
+				}
 			}
 		}
 		else
@@ -529,6 +561,7 @@ void GetRCCode()
 {
 
 	static unsigned long rc_last_code = KEY_RESERVED;
+	static unsigned long last_time = 0;								
 	static signed long cursor_h = 0;
 	static signed long cursor_v = 0;
 	static int cnt_h = 0;
@@ -537,6 +570,7 @@ void GetRCCode()
 	int i;
 	unsigned long	kbcode;
 	char* pName;
+	unsigned long act_time;								
 
 	pName=NULL;
 
@@ -551,7 +585,12 @@ void GetRCCode()
 		}
 		
 		if (debug) printf("kb2rcd: s:%lu u:%lu t:%x c:%x (%s) v:%d\r\n",ev.time.tv_sec,ev.time.tv_usec,ev.type, ev.code, pName, ev.value);
-		// do we have a valid input
+		// if key is released
+		if (ev.value==0) last_time=0;
+		act_time = ev.time.tv_usec + (ev.time.tv_sec % 10)*1000000;
+		if ((last_time) && (act_time<last_time)) act_time += 10000000;
+		
+		// do we have a valid input?
 		
 		// relativ-event, cursor
 		if ((ev.type==EV_REL) && (abs(ev.value)>=iMinMouse))
@@ -632,13 +671,28 @@ void GetRCCode()
 			}
 			if (debug) printf("kb2rcd: cu_h:%ld cu_v:%ld c_h:%d c_v:%d\r\n",cursor_h,cursor_v,cnt_h,cnt_v);
 		}
-		
+	
 		if ((((iInverse) && (ev.value==0)) || ((iInverse==0) && (ev.value))) && (ev.type==EV_KEY))
 		{
 			kbcode = ev.code;
 							
+			// remember time the key is pressed
+			if ((ev.value==1) && (last_time==0))
+			{
+				last_time = ev.time.tv_usec + (ev.time.tv_sec % 10)*1000000;
+			}
+	
 			if (rc_last_code == RC_ALT) kbcode |= RC_ALT;
 			if (rc_last_code == RC_SHIFT) kbcode |= RC_SHIFT;
+			// check for minimum_pressed_time
+			if (last_time)
+			{
+				unsigned long diff=(act_time - last_time) / 1000000;
+				if (diff == 1) kbcode |= RC_T1;
+				if (diff == 2) kbcode |= RC_T2;
+				if (diff == 3) kbcode |= RC_T3;
+				if (diff == 4) kbcode |= RC_T4;
+			}
 			
 			FILE* pipe;
 			pipe=fopen(LCKFILE,"r");
@@ -671,7 +725,8 @@ void GetRCCode()
 			
 			if ((ev.code == KEY_LEFTALT) || (ev.code == KEY_RIGHTALT)) rc_last_code = RC_ALT;
 			else if ((ev.code == KEY_LEFTSHIFT) || (ev.code == KEY_RIGHTSHIFT)) rc_last_code = RC_SHIFT;
-			else rc_last_code = 0;
+			else rc_last_code = ev.code;
+			
 /*
 			{  						
 				FILE* pipe;  	
@@ -696,7 +751,7 @@ void GetRCCode()
 		{
 			rc_last_code = KEY_RESERVED;
 		}
-		usleep(1000000/100);
+//		usleep(1000000/100);
 	}		
 }
 
@@ -739,7 +794,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 0.15 $";
+	char cvs_revision[] = "$Revision: 0.16 $";
 	int param = 0;
 	
 	sscanf(cvs_revision, "%*s %s", versioninfo_d);

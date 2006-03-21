@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: kb2rcd.h,v $
+ * Revision 0.17  2006/03/21 19:08:54  robspr1
+ * - add time-delayed keys
+ *
  * Revision 0.16  2006/03/15 22:09:56  robspr1
  * - start plugins with SCRIPTxx=Plugin:myplugin
  *
@@ -269,6 +272,10 @@ static const struct key keyname[] = {
 
 #define RC_ALT		0x01000000
 #define RC_SHIFT	0x02000000
+#define RC_T1			0x04000000
+#define RC_T2			0x08000000
+#define RC_T3			0x10000000
+#define RC_T4			0x20000000
 
 struct input_event ev;													//! input event for dBox
 unsigned short rccode;													//! remote-control code
@@ -279,7 +286,7 @@ enum {	// not defined in input.h but used like that, at least in 2.4.22
 	KEY_AUTOREPEAT
 };
 
-#define MAX_OUT				10									//! max number of codes the represent on keyborad-key
+#define MAX_OUT				10									//! max number of codes to represent one keyboard-key
 #define MAX_CONVERT		100									//! maximum number of keystrokes to convert
 #define MAX_REL				80									//! maximum relative value that makes a key
 #define MAX_SCRIPTS		20									//! maximum number of scripts !also change keyname!
