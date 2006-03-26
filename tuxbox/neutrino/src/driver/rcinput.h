@@ -246,6 +246,7 @@ class CRCInput
 			RC_102nd	= KEY_102ND, 	 	/* #define KEY_102ND		 	86 */
 			RC_kpenter	= KEY_KPENTER,		/* #define KEY_KPENTER			96 */
 			RC_kpslash	= KEY_KPSLASH,		/* #define KEY_KPSLASH			98 */
+			RC_sysrq	= KEY_SYSRQ,		/* #define KEY_SYSRQ			99 */
 
 			RC_rightalt	= KEY_RIGHTALT, 	/* #define KEY_RIGHTALT		 	100 */
 			RC_end		= KEY_END, 	 	/* #define KEY_END			107 */
@@ -253,6 +254,9 @@ class CRCInput
 			RC_delete	= KEY_DELETE, 	 	/* #define KEY_DELETE		 	111 */
 
 			RC_pause	= KEY_PAUSE, 	 	/* #define KEY_PAUSE		 	119 */
+
+			RC_leftmeta	= KEY_LEFTMETA,		/* #define KEY_LEFTMETA			125 */
+			RC_rightmeta	= KEY_RIGHTMETA,	/* #define KEY_RIGHTMETA		126 */
 
 			RC_btn_left	= BTN_LEFT, 	 	/* #define BTN_LEFT		 	0x110 */
 			RC_btn_right	= BTN_RIGHT, 	 	/* #define BTN_RIGHT		 	0x111 */

@@ -1468,6 +1468,8 @@ const char * CRCInput::getSpecialKeyName(const unsigned int key)
 			  return "kpenter";
 			case RC_kpslash:
 			  return "kpslash";
+			case RC_sysrq:
+			  return "sysrq";
 			case RC_rightalt:
 			  return "rightalt";
 			case RC_end:
@@ -1478,6 +1480,10 @@ const char * CRCInput::getSpecialKeyName(const unsigned int key)
 			  return "delete";
 			case RC_pause:
 			  return "pause";
+			case RC_leftmeta:
+			  return "leftmeta";
+			case RC_rightmeta:
+			  return "rightmeta";
 			case RC_btn_left:
 			  return "btn_left";
 			case RC_btn_right:
