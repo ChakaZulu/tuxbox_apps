@@ -1,5 +1,5 @@
 /*
- * $Id: saa.c,v 1.13 2005/05/26 19:14:43 carjay Exp $
+ * $Id: saa.c,v 1.14 2006/03/26 20:49:09 carjay Exp $
  * 
  * Test tool for the SAA 7126H/7127H-driver
  *
@@ -93,7 +93,7 @@ int read_powersave()
 		return -1;
 	}
 
-	printf("SAA7126 POWER STATE: ");
+	printf("SAA7126 POWER SAVE STATE: ");
 
 	if(arg)
 		printf("ON\n");
