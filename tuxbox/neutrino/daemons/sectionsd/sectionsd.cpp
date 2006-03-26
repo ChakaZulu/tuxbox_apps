@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.218 2006/03/10 22:16:44 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.219 2006/03/26 20:13:49 Arzka Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -78,6 +78,7 @@
 #include "SIbouquets.hpp"
 #include "SInetworks.hpp"
 #include "SIsections.hpp"
+#include "SIlanguage.hpp"
 
 /* please use the same define status as in dmx.cpp! */
 #define PAUSE_EQUALS_STOP 1
@@ -1354,12 +1355,12 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 						count += snprintf(strZeit, MAX_SIZE_STRTIME, "%012llx ", (*e)->uniqueKey());
 						count += snprintf(strZeit2, MAX_SIZE_STRTIME, "%02d.%02d %02d:%02d %u ",
 								tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
-						count += strlen((*e)->name.c_str()) + 1;
+						count += strlen((*e)->getName().c_str()) + 1;
 
 						if (count < MAX_SIZE_EVENTLIST) {
 							strcat(liste, strZeit);
 							strcat(liste, strZeit2);
-							strcat(liste, (*e)->name.c_str());
+							strcat(liste, (*e)->getName().c_str());
 							strcat(liste, "\n");
 						} else {
 							dprintf("warning: sendAllEvents eventlist cut\n")
@@ -1368,14 +1369,14 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 					}
 					else
 					{
-						count += sizeof(event_id_t) + 4 + 4 + strlen((*e)->name.c_str()) + 1;
-						if (((*e)->text).empty())
+						count += sizeof(event_id_t) + 4 + 4 + strlen((*e)->getName().c_str()) + 1;
+						if (((*e)->getText()).empty())
 						{
-							count += strlen((*e)->extendedText.substr(0, 40).c_str());
+							count += strlen((*e)->getExtendedText().substr(0, 40).c_str());
 						}
 						else
 						{
-							count += strlen((*e)->text.c_str());
+							count += strlen((*e)->getText().c_str());
 						}
 						count++;
 
@@ -1386,18 +1387,18 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 							liste += 4;
 							*((unsigned *)liste) = t->dauer;
 							liste += 4;
-							strcpy(liste, (*e)->name.c_str());
+							strcpy(liste, (*e)->getName().c_str());
 							liste += strlen(liste);
 							liste++;
 
-							if (((*e)->text).empty())
+							if (((*e)->getText()).empty())
 							{
-								strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
+								strcpy(liste, (*e)->getExtendedText().substr(0, 40).c_str());
 								liste += strlen(liste);
 							}
 							else
 							{
-								strcpy(liste, (*e)->text.c_str());
+								strcpy(liste, (*e)->getText().c_str());
 								liste += strlen(liste);
 							}
 							liste++;
@@ -1505,7 +1506,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.218 2006/03/10 22:16:44 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.219 2006/03/26 20:13:49 Arzka Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1573,12 +1574,12 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 			// und keine Lust das grossartig zu verschoenern
 			nResultDataSize =
 			    12 + 1 + 					// Unique-Key + del
-			    strlen(evt.name.c_str()) + 1 + 		//Name + del
+			    strlen(evt.getName().c_str()) + 1 + 		//Name + del
 			    3 + 2 + 1 + 					//std:min + del
 			    4 + 1 + 					//dauer (mmmm) + del
 			    3 + 1 + 					//100 + del
 			    12 + 1 + 					// Unique-Key + del
-			    strlen(nextEvt.name.c_str()) + 1 + 		//Name + del
+			    strlen(nextEvt.getName().c_str()) + 1 + 		//Name + del
 			    3 + 2 + 1 + 					//std:min + del
 			    4 + 1 + 1;					//dauer (mmmm) + del + 0
 			pResultData = new char[nResultDataSize];
@@ -1608,10 +1609,10 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 			sprintf(pResultData,
 			        "%012llx\n%s\n%02d:%02d\n%04u\n%03u\n%012llx\n%s\n%02d:%02d\n%04u\n",
 			        evt.uniqueKey(),
-			        evt.name.c_str(),
+			        evt.getName().c_str(),
 			        nSH, nSM, dauer, nProcentagePassed,
 			        nextEvt.uniqueKey(),
-			        nextEvt.name.c_str(),
+			        nextEvt.getName().c_str(),
 			        nSH2, nSM2, dauer2);
 		}
 	}
@@ -2002,7 +2003,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	unsigned flag = 0;
 
 	const SIevent &evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag);
-	if(evt.name.empty() && flag !=0)
+	if(evt.getName().empty() && flag !=0)
 	{
 		dmxEIT.change( 0 );
 	}
@@ -2080,10 +2081,10 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	nResultDataSize =
 	    sizeof(event_id_t) +                        // Unique-Key
 	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
-	    strlen(evt.name.c_str()) + 1 + 		// name + 0
+	    strlen(evt.getName().c_str()) + 1 + 		// name + 0
 	    sizeof(event_id_t) +                        // Unique-Key
 	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
-	    strlen(nextEvt.name.c_str()) + 1 +    	// name + 0
+	    strlen(nextEvt.getName().c_str()) + 1 +    	// name + 0
 	    sizeof(unsigned) + 				// flags
 	    1						// CurrentFSK
 	    ;
@@ -2106,16 +2107,16 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	zeit.dauer = zeitEvt1.dauer;
 	*((CSectionsdClient::sectionsdTime *)p) = zeit;
 	p += sizeof(CSectionsdClient::sectionsdTime);
-	strcpy(p, evt.name.c_str());
-	p += strlen(evt.name.c_str()) + 1;
+	strcpy(p, evt.getName().c_str());
+	p += strlen(evt.getName().c_str()) + 1;
 	*((event_id_t *)p) = nextEvt.uniqueKey();
 	p += sizeof(event_id_t);
 	zeit.startzeit = zeitEvt2.startzeit;
 	zeit.dauer = zeitEvt2.dauer;
 	*((CSectionsdClient::sectionsdTime *)p) = zeit;
 	p += sizeof(CSectionsdClient::sectionsdTime);
-	strcpy(p, nextEvt.name.c_str());
-	p += strlen(nextEvt.name.c_str()) + 1;
+	strcpy(p, nextEvt.getName().c_str());
+	p += strlen(nextEvt.getName().c_str()) + 1;
 	*((unsigned*)p) = flag;
 	p += sizeof(unsigned);
 	*p = evt.getFSK();
@@ -2160,9 +2161,9 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 		// new format - 0 delimiters
 		responseHeader.dataLength =
 		    sizeof(event_id_t) +                        // Unique-Key
-		    strlen(e.name.c_str()) + 1 + 		// Name + del
-		    strlen(e.text.c_str()) + 1 + 		// Text + del
-		    strlen(e.extendedText.c_str()) + 1 + 	// ext + del
+		    strlen(e.getName().c_str()) + 1 + 		// Name + del
+		    strlen(e.getText().c_str()) + 1 + 		// Text + del
+		    strlen(e.getExtendedText().c_str()) + 1 + 	// ext + del
 			// 21.07.2005 - rainerk
 			// Send extended events
 		    strlen(e.itemDescription.c_str()) + 1 + // Item Description + del
@@ -2174,9 +2175,9 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 	}
 	else
 		responseHeader.dataLength =
-		    strlen(e.name.c_str()) + 1 + 		// Name + del
-		    strlen(e.text.c_str()) + 1 + 		// Text + del
-		    strlen(e.extendedText.c_str()) + 1 + 1; // ext + del + 0
+		    strlen(e.getName().c_str()) + 1 + 		// Name + del
+		    strlen(e.getText().c_str()) + 1 + 		// Text + del
+		    strlen(e.getExtendedText().c_str()) + 1 + 1; // ext + del + 0
 
 	char* msgData = new char[responseHeader.dataLength];
 
@@ -2194,12 +2195,12 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 		*((event_id_t *)p) = e.uniqueKey();
 		p += sizeof(event_id_t);
 
-		strcpy(p, e.name.c_str());
-		p += strlen(e.name.c_str()) + 1;
-		strcpy(p, e.text.c_str());
-		p += strlen(e.text.c_str()) + 1;
-		strcpy(p, e.extendedText.c_str());
-		p += strlen(e.extendedText.c_str()) + 1;
+		strcpy(p, e.getName().c_str());
+		p += strlen(e.getName().c_str()) + 1;
+		strcpy(p, e.getText().c_str());
+		p += strlen(e.getText().c_str()) + 1;
+		strcpy(p, e.getExtendedText().c_str());
+		p += strlen(e.getExtendedText().c_str()) + 1;
 		// 21.07.2005 - rainerk
 		// Send extended events
 		strcpy(p, e.itemDescription.c_str());
@@ -2223,9 +2224,9 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 	else
 		sprintf(msgData,
 		        "%s\xFF%s\xFF%s\xFF",
-		        e.name.c_str(),
-		        e.text.c_str(),
-		        e.extendedText.c_str()
+		        e.getName().c_str(),
+		        e.getText().c_str(),
+		        e.getExtendedText().c_str()
 		       );
 
 	unlockEvents();
@@ -2417,9 +2418,9 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 		dprintf("EPG found.\n");
 		nResultDataSize =
 		    12 + 1 + 					// Unique-Key + del
-		    strlen(evt.name.c_str()) + 1 + 		//Name + del
-		    strlen(evt.text.c_str()) + 1 + 		//Text + del
-		    strlen(evt.extendedText.c_str()) + 1 + 	//ext + del
+		    strlen(evt.getName().c_str()) + 1 + 		//Name + del
+		    strlen(evt.getText().c_str()) + 1 + 		//Text + del
+		    strlen(evt.getExtendedText().c_str()) + 1 + 	//ext + del
 		    3 + 3 + 4 + 1 + 					//dd.mm.yyyy + del
 		    3 + 2 + 1 + 					//std:min + del
 		    3 + 2 + 1 + 					//std:min+ del
@@ -2449,9 +2450,9 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 
 		sprintf(pResultData, "%012llx\xFF%s\xFF%s\xFF%s\xFF%02d.%02d.%04d\xFF%02d:%02d\xFF%02d:%02d\xFF%03u\xFF",
 		        evt.uniqueKey(),
-		        evt.name.c_str(),
-		        evt.text.c_str(),
-		        evt.extendedText.c_str(), nSDay, nSMon, nSYear, nSH, nSM, nFH, nFM, nProcentagePassed );
+		        evt.getName().c_str(),
+		        evt.getText().c_str(),
+		        evt.getExtendedText().c_str(), nSDay, nSMon, nSYear, nSH, nSM, nFH, nFM, nProcentagePassed );
 	}
 	else
 		dprintf("actual EPG not found!\n");
@@ -2556,7 +2557,7 @@ loop++;
 				{
 					if (sendServiceName)
 					{
-						count += 13 + strlen(sname.c_str()) + 1 + strlen((*e)->name.c_str()) + 1;
+						count += 13 + strlen(sname.c_str()) + 1 + strlen((*e)->getName().c_str()) + 1;
 						if (count < MAX_SIZE_BIGEVENTLIST) {
 							sprintf(liste, "%012llx\n", (*e)->uniqueKey());
 							liste += 13;
@@ -2564,8 +2565,8 @@ loop++;
 							liste += strlen(sname.c_str());
 							*liste = '\n';
 							liste++;
-							strcpy(liste, (*e)->name.c_str());
-							liste += strlen((*e)->name.c_str());
+							strcpy(liste, (*e)->getName().c_str());
+							liste += strlen((*e)->getName().c_str());
 							*liste = '\n';
 							liste++;
 						} else {
@@ -2576,14 +2577,14 @@ loop++;
 					} // if sendServiceName
 					else
 					{
-						count += sizeof(event_id_t) + 4 + 4 + strlen((*e)->name.c_str()) + 1;
-						if (((*e)->text).empty())
+						count += sizeof(event_id_t) + 4 + 4 + strlen((*e)->getName().c_str()) + 1;
+						if (((*e)->getText()).empty())
 						{
-							count += strlen((*e)->extendedText.substr(0, 40).c_str());
+							count += strlen((*e)->getExtendedText().substr(0, 40).c_str());
 						}
 						else
 						{
-							count += strlen((*e)->text.c_str());
+							count += strlen((*e)->getText().c_str());
 						}
 						count++;
 
@@ -2594,18 +2595,18 @@ loop++;
 							liste += 4;
 							*((unsigned *)liste) = t->dauer;
 							liste += 4;
-							strcpy(liste, (*e)->name.c_str());
+							strcpy(liste, (*e)->getName().c_str());
 							liste += strlen(liste);
 							liste++;
 
-							if (((*e)->text).empty())
+							if (((*e)->getText()).empty())
 							{
-								strcpy(liste, (*e)->extendedText.substr(0, 40).c_str());
+								strcpy(liste, (*e)->getExtendedText().substr(0, 40).c_str());
 								liste += strlen(liste);
 							}
 							else
 							{
-								strcpy(liste, (*e)->text.c_str());
+								strcpy(liste, (*e)->getText().c_str());
 								liste += strlen(liste);
 							}
 							liste++;
@@ -2666,7 +2667,7 @@ static void sendShort(int connfd, const SIevent& e, const SItime& t)
 
 	responseHeader.dataLength =
 	    12 + 1 + 				// Unique-Key + del
-	    strlen(e.name.c_str()) + 1 + 		// name + del
+	    strlen(e.getName().c_str()) + 1 + 		// name + del
 	    8 + 1 + 				// start time + del
 	    8 + 1 + 1;				// duration + del + 0
 	char* msgData = new char[responseHeader.dataLength];
@@ -2682,7 +2683,7 @@ static void sendShort(int connfd, const SIevent& e, const SItime& t)
 	sprintf(msgData,
 	        "%012llx\n%s\n%08lx\n%08x\n",
 	        e.uniqueKey(),
-	        e.name.c_str(),
+	        e.getName().c_str(),
 	        t.startzeit,
 	        t.dauer
 	       );
@@ -3060,6 +3061,137 @@ static void commandDummy3(int connfd, char *data, const unsigned dataLength)
 	return;
 }
 
+static void commandLoadLanguages(int connfd, char* /*data*/, const unsigned /*dataLength*/)
+{
+	struct sectionsd::msgResponseHeader responseHeader;
+	bool retval = SIlanguage::loadLanguages();
+	responseHeader.dataLength = sizeof(retval);
+
+	if (writeNbytes(connfd, (const char *)&responseHeader,
+									sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true) {
+		writeNbytes(connfd, (const char *)&retval,
+								responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
+	}
+	else
+		dputs("[sectionsd] Fehler/Timeout bei write");
+}
+	
+	
+static void commandSaveLanguages(int connfd, char* /*data*/, const unsigned /*dataLength*/)
+{
+	struct sectionsd::msgResponseHeader responseHeader;
+	bool retval = SIlanguage::saveLanguages();
+	responseHeader.dataLength = sizeof(retval);
+
+	if (writeNbytes(connfd, (const char *)&responseHeader,
+									sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true) {
+		writeNbytes(connfd, (const char *)&retval,
+								responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
+	}
+	else
+		dputs("[sectionsd] Fehler/Timeout bei write");
+}
+
+
+static void commandSetLanguages(int connfd, char* data, const unsigned dataLength)
+{
+	bool retval = true;
+
+	if (dataLength % 3) {
+		retval = false;
+	} else {
+		std::vector<std::string> languages;
+		for (unsigned int i = 0 ; i < dataLength ; ) {
+			char tmp[4];
+			tmp[0] = data[i++];
+			tmp[1] = data[i++];
+			tmp[2] = data[i++];
+			tmp[3] = '\0';
+			languages.push_back(tmp);
+		}
+		SIlanguage::setLanguages(languages);
+	}
+
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = sizeof(retval);
+
+	if (writeNbytes(connfd, (const char *)&responseHeader,
+									sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true) {
+		writeNbytes(connfd, (const char *)&retval, responseHeader.dataLength,
+								WRITE_TIMEOUT_IN_SECONDS);
+	} else {
+		dputs("[sectionsd] Fehler/Timeout bei write");
+	}
+}
+
+
+static void commandGetLanguages(int connfd, char* /* data */, const unsigned /* dataLength */)
+{
+	std::string retval;
+	std::vector<std::string> languages = SIlanguage::getLanguages();
+	
+	for (std::vector<std::string>::iterator it = languages.begin() ; 
+			 it != languages.end() ; it++) {
+		retval.append(*it);
+	}
+	
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = retval.length();
+	
+	if (writeNbytes(connfd, (const char *)&responseHeader,
+									sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true) {
+		writeNbytes(connfd, (const char *)retval.c_str(),
+								responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
+	} else {
+		dputs("[sectionsd] Fehler/Timeout bei write");
+	}
+}
+
+
+static void commandSetLanguageMode(int connfd, char* data , const unsigned dataLength)
+{
+	bool retval = true;
+	CSectionsdClient::SIlanguageMode_t tmp(CSectionsdClient::ALL);
+
+	if (dataLength != sizeof(tmp)) {
+		retval = false;
+	} else {
+		tmp = *(CSectionsdClient::SIlanguageMode_t *)data;
+		SIlanguage::setMode(tmp);
+	}
+
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = sizeof(retval);
+
+	if (writeNbytes(connfd, (const char *)&responseHeader,
+									sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true) {
+		writeNbytes(connfd, (const char *)&retval,
+								responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
+	} else {
+		dputs("[sectionsd] Fehler/Timeout bei write");
+	}
+}
+
+
+static void commandGetLanguageMode(int connfd, char* /* data */, const unsigned /* dataLength */)
+{
+	CSectionsdClient::SIlanguageMode_t retval(CSectionsdClient::ALL);
+
+	retval = SIlanguage::getMode();
+
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = sizeof(retval);
+
+	if (writeNbytes(connfd, (const char *)&responseHeader,
+									sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true) {
+		writeNbytes(connfd, (const char *)&retval,
+								responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
+	} else {
+		dputs("[sectionsd] Fehler/Timeout bei write");
+	}
+}
+
+
 static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char *, const unsigned) =
     {
         //commandActualEPGchannelName,
@@ -3092,10 +3224,17 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char
         commandserviceChanged,
         commandLinkageDescriptorsUniqueKey,
         commandPauseSorting,
-	commandRegisterEventClient,
-	commandUnRegisterEventClient,
-	commandSetPrivatePid,
-	commandSetSectionsdScanMode
+	      commandRegisterEventClient,
+				commandUnRegisterEventClient,
+ 				commandSetPrivatePid,
+	      commandSetSectionsdScanMode,
+
+ 				commandLoadLanguages,
+ 				commandSaveLanguages,
+ 				commandSetLanguages,
+ 				commandGetLanguages,
+ 				commandSetLanguageMode,
+	      commandGetLanguageMode
     };
 
 //static void *connectionThread(void *conn)
@@ -5839,7 +5978,9 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.218 2006/03/10 22:16:44 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.219 2006/03/26 20:13:49 Arzka Exp $\n");
+
+	SIlanguage::loadLanguages();
 
 	try {
 		if (argc != 1 && argc != 2) {

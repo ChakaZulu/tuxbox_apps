@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.28 2005/11/20 15:11:40 mogway Exp $
+// $Id: SIevents.cpp,v 1.29 2006/03/26 20:13:49 Arzka Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <string>
 
+#include "SIlanguage.hpp"
 #include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
@@ -67,8 +68,8 @@ SIevent::SIevent(const struct eit_event *e)
 SIevent::SIevent(const SIevent &e)
 {
 	eventID=e.eventID;
-	name=e.name;
-	text=e.text;
+	langName=e.langName;
+	langText=e.langText;
 //  startzeit=e.startzeit;
 //  dauer=e.dauer;
 	times=e.times;
@@ -77,7 +78,7 @@ SIevent::SIevent(const SIevent &e)
 	transport_stream_id = e.transport_stream_id;
 	itemDescription=e.itemDescription;
 	item=e.item;
-	extendedText=e.extendedText;
+	langExtendedText=e.langExtendedText;
 	contentClassification=e.contentClassification;
 	userClassification=e.userClassification;
 	components=e.components;
@@ -131,14 +132,14 @@ int SIevent::saveXML0(FILE *file) const
 
 int SIevent::saveXML2(FILE *file) const
 {
-	if(name.length()) {
+	if(getName().length()) {
 		fprintf(file, "    <name>");
-		saveStringToXMLfile(file, name.c_str());
+		saveStringToXMLfile(file, getName().c_str());
 		fprintf(file, "</name>\n");
 	}
-	if(text.length()) {
+	if(getText().length()) {
 		fprintf(file, "    <text>");
-		saveStringToXMLfile(file, text.c_str());
+		saveStringToXMLfile(file, getText().c_str());
 		fprintf(file, "</text>\n");
 	}
 	if(item.length()) {
@@ -151,9 +152,9 @@ int SIevent::saveXML2(FILE *file) const
 		saveStringToXMLfile(file, itemDescription.c_str());
 		fprintf(file, "</item_description>\n");
 	}
-	if(extendedText.length()) {
+	if(getExtendedText().length()) {
 		fprintf(file, "    <extended_text>");
-		saveStringToXMLfile(file, extendedText.c_str());
+		saveStringToXMLfile(file, getExtendedText().c_str());
 		fprintf(file, "</extended_text>\n");
 	}
 /*
@@ -177,6 +178,36 @@ int SIevent::saveXML2(FILE *file) const
 	return 0;
 }
 
+std::string SIevent::getName() const
+{
+  return SIlanguage::filter(langName, 1);
+}
+
+void SIevent::setName(const std::string &lang, const std::string &name)
+{
+	langName[lang] = name;
+}
+
+std::string SIevent::getText() const
+{
+	return SIlanguage::filter(langText, 0);
+}
+
+void SIevent::setText(const std::string &lang, const std::string &text)
+{
+	langText[lang] = text;
+}
+
+std::string SIevent::getExtendedText() const
+{
+	return SIlanguage::filter(langExtendedText, 0);
+}
+
+void SIevent::appendExtendedText(const std::string &lang, const std::string &text)
+{
+	langExtendedText[lang] += text;
+}
+
 void SIevent::dump(void) const
 {
 	printf("Unique key: %llx\n", uniqueKey());
@@ -188,13 +219,16 @@ void SIevent::dump(void) const
 	if(item.length())
 		printf("Item: %s\n", item.c_str());
 	if(itemDescription.length())
-		printf("Item-Description: %s\n", itemDescription.c_str());
-	if(name.length())
-		printf("Name: %s\n", name.c_str());
-	if(text.length())
-		printf("Text: %s\n", text.c_str());
-	if(extendedText.length())
-		printf("Extended-Text: %s\n", extendedText.c_str());
+	        printf("Item-Description: %s\n", itemDescription.c_str());
+	for (std::map<std::string, std::string>::const_iterator it = langName.begin() ;
+	     it != langName.end() ; it++)
+	        printf("Name (%s): %s\n", it->first.c_str(), it->second.c_str());
+	for (std::map<std::string, std::string>::const_iterator it = langText.begin() ;
+	     it != langText.end() ; it++)
+		printf("Text (%s): %s\n", it->first.c_str(), it->second.c_str());
+	for (std::map<std::string, std::string>::const_iterator it = langExtendedText.begin() ;
+	     it != langExtendedText.end() ; it++)
+		printf("Extended-Text (%s): %s\n", it->first.c_str(), it->second.c_str());
 	if(contentClassification.length()) {
 		printf("Content classification:");
 		for(unsigned i=0; i<contentClassification.length(); i++)
@@ -221,12 +255,15 @@ void SIevent::dump(void) const
 
 void SIevent::dumpSmall(void) const
 {
-	if(name.length())
-		printf("Name: %s\n", name.c_str());
-	if(text.length())
-		printf("Text: %s\n", text.c_str());
-	if(extendedText.length())
-		printf("Extended-Text: %s\n", extendedText.c_str());
+	for (std::map<std::string, std::string>::const_iterator it = langName.begin() ;
+	     it != langName.end() ; it++)
+	        printf("Name (%s): %s\n", it->first.c_str(), it->second.c_str());
+	for (std::map<std::string, std::string>::const_iterator it = langText.begin() ;
+	     it != langText.end() ; it++)
+		printf("Text (%s): %s\n", it->first.c_str(), it->second.c_str());
+	for (std::map<std::string, std::string>::const_iterator it = langExtendedText.begin() ;
+	     it != langExtendedText.end() ; it++)
+		printf("Extended-Text (%s): %s\n", it->first.c_str(), it->second.c_str());
 /*
   if(startzeit)
   printf("Startzeit: %s", ctime(&startzeit));

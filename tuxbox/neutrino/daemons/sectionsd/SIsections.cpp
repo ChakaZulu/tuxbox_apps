@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.44 2006/02/08 21:15:50 houdini Exp $
+// $Id: SIsections.cpp,v 1.45 2006/03/26 20:13:49 Arzka Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -154,9 +154,9 @@ void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e, unsigned 
   const char *classification=buf+sizeof(struct descr_generic_header);
   while(classification<=buf+sizeof(struct descr_generic_header)+cont->descriptor_length-2) {
     e.contentClassification+=std::string(classification, 1);
-//    printf("Content: 0x%02hhx\n", *classification);
+    // printf("Content: 0x%02hhx\n", *classification);
     e.userClassification+=std::string(classification+1, 1);
-//    printf("User: 0x%02hhx\n", *(classification+1));
+    // printf("User: 0x%02hhx\n", *(classification+1));
     classification+=2;
   }
 }
@@ -179,27 +179,36 @@ void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
   if((evt->descriptor_length+sizeof(descr_generic_header)>maxlen) || (evt->descriptor_length<sizeof(struct descr_extended_event_header)-sizeof(descr_generic_header)))
     return; // defekt
   unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
-  while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
+
+  std::string language;
+  language += evt->iso_639_2_language_code_hi;
+  language += evt->iso_639_2_language_code_mid;
+  language += evt->iso_639_2_language_code_lo;
+
+  while(items < (unsigned char *)(buf + sizeof(struct descr_extended_event_header) + evt->length_of_items)) {
+
+		// TODO What info should be in item & itemDescription?
+		// Should I make language filter those as well?  Arzka
+
     if(*items) {
       if(*(items+1) < 0x06) { // other code table
-		  // 21.07.2005 - collect all extended events in one
-		  // string, delimit multiple entries with a newline
-		  e.itemDescription.append(std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1)));
-		  e.itemDescription.append("\n");
-	  }
-      else {
-		  // 21.07.2005 - collect all extended events in one
-		  // string, delimit multiple entries with a newline
-		  e.itemDescription.append(std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items)));
-		  e.itemDescription.append("\n");
-	  }
+	// 21.07.2005 - collect all extended events in one
+	// string, delimit multiple entries with a newline
+	e.itemDescription.append(std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1)));
+	e.itemDescription.append("\n");
+      } else {
+	// 21.07.2005 - collect all extended events in one
+	// string, delimit multiple entries with a newline
+	e.itemDescription.append(std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items)));
+	e.itemDescription.append("\n");
+      }
     }
     items+=1+*items;
     if(*items) {
-		// 21.07.2005 - collect all extended events in one
-		// string, delimit multiple entries with a newline
-        e.item.append(std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items)));
-        e.item.append("\n");
+      // 21.07.2005 - collect all extended events in one
+      // string, delimit multiple entries with a newline
+      e.item.append(std::string((const char *)(items+0), min(maxlen-((const char *)items+1-buf), *items)));
+      e.item.append("\n");
     }
     items+=1+*items;
   }
@@ -208,11 +217,12 @@ void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
 //	printf("Item: %s\n", e.item.c_str());
 //  }
   if(*items) {
-    if(*(items+1) < 0x06) // other code table
-      e.extendedText+=std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1));
-    else
-      e.extendedText+=std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items));
+    if(*(items+1) < 0x06) { // other code table
+      e.appendExtendedText(language, std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1)));
+    } else {
+      e.appendExtendedText(language, std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items)));
 //    printf("Extended Text: %s\n", e.extendedText.c_str());
+    }
   }
 }
 
@@ -221,20 +231,28 @@ void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e, unsign
   struct descr_short_event_header *evt=(struct descr_short_event_header *)buf;
   if((evt->descriptor_length+sizeof(descr_generic_header)>maxlen) || (evt->descriptor_length<sizeof(struct descr_short_event_header)-sizeof(descr_generic_header)))
     return; // defekt
+
+  std::string language;
+  language += evt->language_code_hi;
+  language += evt->language_code_mid;
+  language += evt->language_code_lo;
+
   buf+=sizeof(struct descr_short_event_header);
   if(evt->event_name_length) {
-    if(*buf < 0x06) // other code table
-      e.name=std::string(buf+1, evt->event_name_length-1);
-    else
-      e.name=std::string(buf, evt->event_name_length);
+    if(*buf < 0x06) { // other code table
+      e.setName(language, std::string(buf+1, evt->event_name_length-1));
+    } else {
+      e.setName(language, std::string(buf, evt->event_name_length));
+    }
   }
   buf+=evt->event_name_length;
   unsigned char textlength=*((unsigned char *)buf);
   if(textlength > 2) {
-    if(*(buf+1) < 0x06) // other code table
-      e.text=std::string((++buf)+1, textlength-1);
-    else
-      e.text=std::string(++buf, textlength);
+    if(*(buf+1) < 0x06) {// other code table
+      e.setText(language, std::string((++buf)+1, textlength-1));
+    } else {
+      e.setText(language, std::string(++buf, textlength));
+    }
   }
 
 //  printf("Name: %s\n", e.name.c_str());
@@ -247,7 +265,7 @@ void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
   struct descr_generic_header *desc;
   while(len>=sizeof(struct descr_generic_header)) {
     desc=(struct descr_generic_header *)des;
-//    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
+    // printf("Type: %s\n", decode_descr(desc->descriptor_tag));
     if(desc->descriptor_tag==0x4D)
       parseShortEventDescriptor((const char *)desc, e, len);
     else if(desc->descriptor_tag==0x4E)
@@ -355,6 +373,12 @@ void SIsectionPPT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
   struct descr_extended_event_header *evt=(struct descr_extended_event_header *)buf;
   if((evt->descriptor_length+sizeof(descr_generic_header)>maxlen) || (evt->descriptor_length<sizeof(struct descr_extended_event_header)-sizeof(descr_generic_header)))
     return; // defekt
+
+  std::string language;
+  language += evt->iso_639_2_language_code_hi;
+  language += evt->iso_639_2_language_code_mid;
+  language += evt->iso_639_2_language_code_lo;
+
   unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
   while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
     if(*items) {
@@ -373,9 +397,9 @@ void SIsectionPPT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
   }
   if(*items) {
     if(*(items+1) < 0x06) // other code table
-      e.extendedText+=std::string((const char *)(items+2), min(maxlen-((const char *)items+2-buf), (*items)-1));
+      e.appendExtendedText(language, std::string((const char *)(items+2),min(maxlen-((const char *)items+2-buf), (*items)-1)));
     else
-      e.extendedText+=std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items));
+      e.appendExtendedText(language, std::string((const char *)(items+1), min(maxlen-((const char *)items+1-buf), *items)));
 //    printf("Extended Text: %s\n", e.extendedText.c_str());
   }
 }
@@ -385,21 +409,27 @@ void SIsectionPPT::parseShortEventDescriptor(const char *buf, SIevent &e, unsign
   struct descr_short_event_header *evt=(struct descr_short_event_header *)buf;
   if((evt->descriptor_length+sizeof(descr_generic_header)>maxlen) || (evt->descriptor_length<sizeof(struct descr_short_event_header)-sizeof(descr_generic_header)))
     return; // defekt
+
+  std::string language;
+  language += evt->language_code_hi;
+  language += evt->language_code_mid;
+  language += evt->language_code_lo;
+
   buf+=sizeof(struct descr_short_event_header);
   if(evt->event_name_length) {
     if(*buf < 0x06) // other code table
-      e.name=std::string(buf+1, evt->event_name_length-1);
+      e.setName(language, std::string(buf+1, evt->event_name_length-1));
     else
-      e.name=std::string(buf, evt->event_name_length);
+      e.setName(language, std::string(buf, evt->event_name_length));
   }
   
   buf+=evt->event_name_length;
   unsigned char textlength=*((unsigned char *)buf);
   if(textlength > 2) {
     if(*(buf+1) < 0x06) // other code table
-      e.text=std::string((++buf)+1, textlength-1);
+      e.setText(language, std::string((++buf)+1, textlength-1));
     else
-      e.text=std::string(++buf, textlength);
+      e.setText(language, std::string(++buf, textlength));
   }
 
 //  printf("Name: %s\n", e.name.c_str());

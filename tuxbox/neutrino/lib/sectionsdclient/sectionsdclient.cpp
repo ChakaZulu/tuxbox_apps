@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.47 2005/12/18 07:49:17 metallica Exp $
+  $Id: sectionsdclient.cpp,v 1.48 2006/03/26 20:14:41 Arzka Exp $
 
   License: GPL
 
@@ -47,7 +47,7 @@ int CSectionsdClient::readResponse(char* data,unsigned int size)
 
 	if ( data != NULL )
 	{
-		if ( responseHeader.dataLength != size )
+		if ( responseHeader.dataLength != (unsigned)size )
 			return -1;
 		else
 			return receive_data(data, size);

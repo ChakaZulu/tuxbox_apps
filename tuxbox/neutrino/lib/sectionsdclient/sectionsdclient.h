@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.35 2005/12/18 07:49:17 metallica Exp $
+  $Id: sectionsdclient.h,v 1.36 2006/03/26 20:14:41 Arzka Exp $
 
   License: GPL
 
@@ -71,6 +71,14 @@ class CSectionsdClient : private CBasicClient
 	char * parseExtendedEvents(char * dp, CEPGData * epgdata);
 
  public:
+	enum SIlanguageMode_t {
+		ALL,
+		FIRST_FIRST,
+		FIRST_ALL,
+		ALL_FIRST,
+		ALL_ALL,
+	};
+
 	enum events
 		{
 			EVT_TIMESET,

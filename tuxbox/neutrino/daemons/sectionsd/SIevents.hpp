@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.24 2005/11/20 15:11:40 mogway Exp $
+// $Id: SIevents.hpp,v 1.25 2006/03/26 20:13:49 Arzka Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -26,6 +26,7 @@
 
 #include <endian.h>
 #include <vector>
+#include <map>
 
 #include <sectionsdclient/sectionsdtypes.h>
 
@@ -325,15 +326,25 @@ public:
 //      startzeit=0;
 	}
     unsigned short eventID;
-    std::string name; // Name aus dem Short-Event-Descriptor
-    std::string text; // Text aus dem Short-Event-Descriptor
-    std::string itemDescription; // Aus dem Extended Descriptor
-    std::string item; // Aus dem Extended Descriptor
-    std::string extendedText; // Aus dem Extended Descriptor
-    std::string contentClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
-    std::string userClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
-//    time_t startzeit; // lokale Zeit, 0 -> time shifted (cinedoms)
-//    unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
+	// Name aus dem Short-Event-Descriptor
+  std::string getName() const;
+	void setName(const std::string &lang, const std::string &name);
+
+	// Text aus dem Short-Event-Descriptor
+  std::string getText() const;
+	void setText(const std::string &lang, const std::string &text);
+
+	std::string itemDescription; // Aus dem Extended Descriptor
+	std::string item; // Aus dem Extended Descriptor
+
+	// Aus dem Extended Descriptor
+  std::string getExtendedText() const;
+	void appendExtendedText(const std::string &lang, const std::string &text);
+
+	std::string contentClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
+	std::string userClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
+	//    time_t startzeit; // lokale Zeit, 0 -> time shifted (cinedoms)
+	//    unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
 	
 	t_channel_id get_channel_id(void) const {
 		return CREATE_CHANNEL_ID;
@@ -365,6 +376,10 @@ public:
  protected:
     int saveXML0(FILE *f) const;
     int saveXML2(FILE *f) const;
+ private:
+    std::map<std::string, std::string> langName;
+    std::map<std::string, std::string> langText;
+    std::map<std::string, std::string> langExtendedText;
 };
 
 // Fuer for_each
