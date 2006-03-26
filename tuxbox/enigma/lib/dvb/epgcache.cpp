@@ -1693,8 +1693,8 @@ void eScheduleMhw::storeTitle(std::map<__u32, mhw_title_t>::iterator itTitle, eS
 		prog_title_length + 1;
 
 	eit_event_t *event_data = (eit_event_t *) (data + EIT_SIZE);
-	event_data->event_id_hi = itTitle->second.program_id_ml;
-	event_data->event_id_lo = itTitle->second.program_id_lo;
+	event_data->event_id_hi = (( itTitle->first ) >> 8 ) & 0xFF;
+	event_data->event_id_lo = ( itTitle->first ) & 0xFF;
 
 	timeMHW2DVB( itTitle->second.day, itTitle->second.hours, itTitle->second.minutes, 
 		(u_char *) event_data + 2 );
