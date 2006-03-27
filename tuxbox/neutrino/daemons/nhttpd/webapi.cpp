@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.68 2006/03/18 16:50:07 yjogol Exp $
+	$Id: webapi.cpp,v 1.69 2006/03/27 15:26:09 yjogol Exp $
 
 	License: GPL
 
@@ -1426,31 +1426,13 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	                     "</TABLE></TABLE>\n");
 	request->SendHTMLFooter();
 }
-/*	---------------------------------------------------------------------------------------------------------------------------
-	Add a Timer
-	
-	Alarm Time "alDate" (Format DD.MM.YYYY) , "alTime" (Format HH:MM) - design by contract - format must be well formated
-	Stop Time "stDate" (Format DD.MM.YYYY) , "stTime" (Format HH:MM) - (stDate is optional)
-	Timer type "type" = 1: Shutdown | 3: zapto | 4: Standby | 5: Aufnahme | 6: Erinnerung | 7: Sleeptimer | 8: Plugin
-	Repeat scheme "rep" = 0: single | 1: daily | 2: weekly | 3: two-weekly | 4: four-weekly | 5: monthly | 256: weekdays
-	"repcount" number of repeats (0 = unlimited)
-	Weekdays "wd" = "xxxxxxx" Mo-So x for set: example x-x---- meens Mo and We
-	Standby on "sbon" = 1 set standy of for type=4
-	recording directory "rec_dir" path to recording directory
-	"channel_id" Channel id to be recorded or zapped
-	 	or
-	"channel_name" Channel name  to be recorded or zapped
-	Message to be displayed "msg" for type=6
-	Plugin to be started "PluginName" for type=8
-	update=1 -> Update Timer if exists (alarmTime is the same). Old Timer will be removed before adding the new timer
-	----------------------------------------------------------------------------------------------------------------------------*/
+
+//------------------------------------------------------------------------
 	bool nocase_compare (char c1, char c2)
 	{
 		return toupper(c1) == toupper(c2);
 	}
 
-	
-//------------------------------------------------------------------------
 void CWebAPI::doNewTimer(CWebserverRequest *request)
 {
 	time_t	announceTimeT = 0,
@@ -1471,6 +1453,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 	else if(request->ParameterList["alDate"] != "") //given formatted
 	{
 		// Alarm Date - Format exact! DD.MM.YYYY
+		tnull = time(NULL);
 		struct tm *alarmTime=localtime(&tnull);
 		if(sscanf(request->ParameterList["alDate"].c_str(),"%2d.%2d.%4d",&(alarmTime->tm_mday), &(alarmTime->tm_mon), &(alarmTime->tm_year)) == 3)
 		{
@@ -1482,8 +1465,8 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		if(request->ParameterList["alTime"] != "")
 			sscanf(request->ParameterList["alTime"].c_str(),"%2d.%2d",&(alarmTime->tm_hour), &(alarmTime->tm_min));
 	
+		correctTime(alarmTime);
 		alarmTimeT = mktime(alarmTime);
-		alHour = alarmTime->tm_hour;
 		struct tm *stopTime = localtime(&alarmTimeT);
 		// Stop Time - Format exact! HH:MM
 		if(request->ParameterList["stTime"] != "")
@@ -1496,7 +1479,9 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 				stopTime->tm_mon -= 1;
 				stopTime->tm_year -= 1900;
 			}
+		correctTime(stopTime);
 		stopTimeT = mktime(stopTime);
+		alHour = alarmTime->tm_hour;
 		if(request->ParameterList["stDate"] == "" && alHour > stopTime->tm_hour)
 			stopTimeT += 24* 60 * 60; // add 1 Day
 	}
@@ -1548,7 +1533,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		{
 		  stopTime->tm_min = atoi(request->ParameterList["smi"].c_str());
 		}
-		correctTime(alarmTime);
+		correctTime(stopTime);
 		stopTimeT = mktime(stopTime);
 	}
 		
