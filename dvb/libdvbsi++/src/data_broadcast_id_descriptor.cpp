@@ -1,5 +1,5 @@
 /*
- * $Id: data_broadcast_id_descriptor.cpp,v 1.4 2005/10/29 00:10:16 obi Exp $
+ * $Id: data_broadcast_id_descriptor.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,6 +15,8 @@
 
 DataBroadcastIdDescriptor::DataBroadcastIdDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(2);
+
 	dataBroadcastId = UINT16(&buffer[2]);
 
 	for (size_t i = 0; i < descriptorLength - 2; ++i)

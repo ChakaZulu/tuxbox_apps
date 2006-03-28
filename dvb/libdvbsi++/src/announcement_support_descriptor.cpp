@@ -1,5 +1,5 @@
 /*
- * $Id: announcement_support_descriptor.cpp,v 1.4 2005/10/29 00:10:16 obi Exp $
+ * $Id: announcement_support_descriptor.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -59,16 +59,26 @@ uint8_t Announcement::getComponentTag(void) const
 AnnouncementSupportDescriptor::AnnouncementSupportDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
 	Announcement *a;
+	size_t headerLength = 2;
+	ASSERT_MIN_DLEN(headerLength);
 
 	announcementSupportIndicator = UINT16(&buffer[2]);
 
 	for (size_t i = 0; i < descriptorLength - 2; ++i) {
+		headerLength++;
+		ASSERT_MIN_DLEN(headerLength);
+
 		a = new Announcement(&buffer[i + 4]);
 		announcements.push_back(a);
 		switch (a->getReferenceType()) {
 		case 0x01:
 		case 0x02:
 		case 0x03:
+			// FIXME: might already have parsed beyond end
+			// of memory in Announcement()
+			headerLength += 7;
+			ASSERT_MIN_DLEN(headerLength);
+
 			i += 7;
 			break;
 		default:

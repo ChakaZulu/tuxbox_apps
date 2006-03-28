@@ -1,5 +1,5 @@
 /*
- * $Id: subtitling_descriptor.cpp,v 1.4 2005/10/29 00:10:17 obi Exp $
+ * $Id: subtitling_descriptor.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -43,8 +43,10 @@ uint16_t Subtitling::getAncillaryPageId(void) const
 
 SubtitlingDescriptor::SubtitlingDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 8)
+	for (size_t i = 0; i < descriptorLength; i += 8) {
+		ASSERT_MIN_DLEN(i + 8);
 		subtitlings.push_back(new Subtitling(&buffer[i + 2]));
+	}
 }
 
 SubtitlingDescriptor::~SubtitlingDescriptor(void)

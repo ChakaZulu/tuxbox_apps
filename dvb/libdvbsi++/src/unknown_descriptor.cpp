@@ -1,5 +1,5 @@
 /*
- * $Id: unknown_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: unknown_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Andreas Monzner <andreas.monzner@multimedia-labs.de>
  *
@@ -12,15 +12,7 @@
 
 #include <dvbsi++/unknown_descriptor.h>
 
-UnknownDescriptor::UnknownDescriptor(const uint8_t * const buffer) : Descriptor(buffer), dataBytes(descriptorLength)
+UnknownDescriptor::UnknownDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	memcpy(&dataBytes[0], buffer+2, descriptorLength);
-}
-
-size_t UnknownDescriptor::writeToBuffer(uint8_t * const buffer) const
-{
-	Descriptor::writeToBuffer(buffer);
-	memcpy(buffer+2, &dataBytes[0], descriptorLength);
-	return 2 + descriptorLength;
 }
 

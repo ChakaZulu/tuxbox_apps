@@ -1,5 +1,5 @@
 /*
- * $Id: dvb_html_application_boundary_descriptor.cpp,v 1.2 2005/10/29 00:10:16 obi Exp $
+ * $Id: dvb_html_application_boundary_descriptor.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -14,7 +14,12 @@
 
 DvbHtmlApplicationBoundaryDescriptor::DvbHtmlApplicationBoundaryDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(1);
+
 	labelLength = buffer[2];
+
+	ASSERT_MIN_DLEN(labelLength + 1);
+
 	label.assign((char *)&buffer[3], labelLength);
 	regularExpression.assign((char *)&buffer[labelLength + 3], descriptorLength - labelLength - 1);
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: application_descriptor.cpp,v 1.3 2005/10/29 00:10:16 obi Exp $
+ * $Id: application_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -15,12 +15,21 @@
 
 ApplicationDescriptor::ApplicationDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	size_t headerLength = 3;
+	ASSERT_MIN_DLEN(headerLength);
+
 	applicationProfilesLength = buffer[2];
+
+	headerLength += applicationProfilesLength;
+	ASSERT_MIN_DLEN(headerLength);
+
 	for (size_t i = 0; i < applicationProfilesLength; i += 5)
 		applicationProfiles.push_back(new ApplicationProfile(&buffer[i + 3]));
+
 	serviceBoundFlag = (buffer[applicationProfilesLength + 3] >> 7) & 0x01;
 	visibility = (buffer[applicationProfilesLength + 3] >> 5) & 0x02;
 	applicationPriority = buffer[applicationProfilesLength + 4];
+
 	for (size_t i = 0; i < descriptorLength - applicationProfilesLength - 3; i += 1)
 		transportProtocolLabels.push_back(buffer[i + applicationProfilesLength + 5]);
 }

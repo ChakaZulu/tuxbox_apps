@@ -1,5 +1,5 @@
 /*
- * $Id: local_time_offset_descriptor.cpp,v 1.4 2005/10/29 00:10:17 obi Exp $
+ * $Id: local_time_offset_descriptor.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -61,8 +61,10 @@ uint16_t LocalTimeOffset::getNextTimeOffset(void) const
 
 LocalTimeOffsetDescriptor::LocalTimeOffsetDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 13)
+	for (size_t i = 0; i < descriptorLength; i += 13) {
+		ASSERT_MIN_DLEN(i + 13);
 		localTimeOffsets.push_back(new LocalTimeOffset(&buffer[i + 2]));
+	}
 }
 
 

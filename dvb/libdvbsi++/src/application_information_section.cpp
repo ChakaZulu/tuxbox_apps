@@ -1,5 +1,5 @@
 /*
- * $Id: application_information_section.cpp,v 1.5 2005/10/29 00:10:16 obi Exp $
+ * $Id: application_information_section.cpp,v 1.6 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -40,18 +40,33 @@ uint8_t ApplicationInformation::getApplicationControlCode(void) const
 
 ApplicationInformationSection::ApplicationInformationSection(const uint8_t * const buffer) : LongCrcSection(buffer)
 {
-	commonDescriptorsLength = DVB_LENGTH(&buffer[8]);
+	commonDescriptorsLength = sectionLength > 10 ? DVB_LENGTH(&buffer[8]) : 0;
 
-	for (size_t i = 0; i < commonDescriptorsLength; i += buffer[i + 11] + 2)
-		descriptor(&buffer[i + 10], SCOPE_MHP);
+	uint16_t pos = 10;
+	uint16_t bytesLeft = sectionLength > 11 ? sectionLength - 11 : 0;
+	uint16_t loopLength = 0;
+	uint16_t bytesLeft2 = commonDescriptorsLength;
 
-	applicationLoopLength = DVB_LENGTH(&buffer[commonDescriptorsLength + 10]);
-
-	for (size_t i = 0; i < applicationLoopLength; i += 9) {
-		ApplicationInformation *a = new ApplicationInformation(&buffer[commonDescriptorsLength + 12]);
-		applicationInformation.push_back(a);
-		i += a->applicationDescriptorsLoopLength;
+	while (bytesLeft >= bytesLeft && bytesLeft2 > 1 && bytesLeft2 >= (loopLength = 2 + buffer[pos+1])) {
+		descriptor(&buffer[pos], SCOPE_MHP);
+		pos += loopLength;
+		bytesLeft -= loopLength;
+		bytesLeft2 -= loopLength;
 	}
+
+	if (!bytesLeft2 && bytesLeft > 1) {
+		bytesLeft2 = applicationLoopLength = DVB_LENGTH(&buffer[pos]);
+		pos+=2;
+		bytesLeft-=2;
+		while (bytesLeft >= bytesLeft2 && bytesLeft2 > 8 && bytesLeft2 >= (loopLength = 8 + DVB_LENGTH(&buffer[pos+7]))) {
+			applicationInformation.push_back(new ApplicationInformation(&buffer[pos]));
+			pos += loopLength;
+			bytesLeft -= loopLength;
+			bytesLeft2 -= loopLength;
+		}
+	}
+	else
+		applicationLoopLength = 0;
 }
 
 ApplicationInformationSection::~ApplicationInformationSection(void)

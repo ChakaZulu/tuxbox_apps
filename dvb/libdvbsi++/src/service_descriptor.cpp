@@ -1,5 +1,5 @@
 /*
- * $Id: service_descriptor.cpp,v 1.2 2005/10/29 00:10:17 obi Exp $
+ * $Id: service_descriptor.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -14,10 +14,21 @@
 
 ServiceDescriptor::ServiceDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	size_t headerLength = 3;
+	ASSERT_MIN_DLEN(headerLength);
+
 	serviceType = buffer[2];
 	serviceProviderNameLength = buffer[3];
+
+	headerLength += serviceProviderNameLength;
+	ASSERT_MIN_DLEN(headerLength);
+
 	serviceProviderName.assign((char *)&buffer[4], serviceProviderNameLength);
 	serviceNameLength = buffer[serviceProviderNameLength + 4];
+
+	headerLength += serviceNameLength;
+	ASSERT_MIN_DLEN(headerLength);
+
 	serviceName.assign((char *)&buffer[serviceProviderNameLength + 5], serviceNameLength);
 }
 

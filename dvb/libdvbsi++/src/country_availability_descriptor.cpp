@@ -1,5 +1,5 @@
 /*
- * $Id: country_availability_descriptor.cpp,v 1.3 2005/10/29 00:10:16 obi Exp $
+ * $Id: country_availability_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -14,10 +14,16 @@
 
 CountryAvailabilityDescriptor::CountryAvailabilityDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	size_t headerLength = 1;
+	ASSERT_MIN_DLEN(headerLength);
+
 	std::string countryCode;
 	countryAvailabilityFlag = (buffer[2] >> 7) & 0x01;
 
 	for (size_t i = 0; i < descriptorLength - 1; i += 3) {
+		headerLength += 3;
+		ASSERT_MIN_DLEN(headerLength);
+
 		countryCode.assign((char *)&buffer[i + 3], 3);
 		countryCodes.push_back(countryCode);
 	}

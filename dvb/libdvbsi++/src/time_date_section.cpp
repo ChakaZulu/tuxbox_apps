@@ -1,5 +1,5 @@
 /*
- * $Id: time_date_section.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: time_date_section.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,8 +15,14 @@
 
 TimeAndDateSection::TimeAndDateSection(const uint8_t * const buffer) : ShortSection(buffer)
 {
-	utcTimeMjd = UINT16(&buffer[3]);
-	utcTimeBcd = (buffer[5] << 16) | UINT16(&buffer[6]);
+	if (sectionLength > 8) {
+		utcTimeMjd = UINT16(&buffer[3]);
+		utcTimeBcd = (buffer[5] << 16) | UINT16(&buffer[6]);
+	}
+	else {
+		utcTimeMjd=0;
+		utcTimeBcd=0;
+	}
 }
 
 uint16_t TimeAndDateSection::getUtcTimeMjd(void) const

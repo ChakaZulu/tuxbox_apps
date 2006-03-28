@@ -1,5 +1,5 @@
 /*
- * $Id: location_descriptor.cpp,v 1.2 2005/10/29 00:10:17 obi Exp $
+ * $Id: location_descriptor.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -14,6 +14,8 @@
 
 LocationDescriptor::LocationDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(1);
+
 	locationTag = buffer[2];
 }
 

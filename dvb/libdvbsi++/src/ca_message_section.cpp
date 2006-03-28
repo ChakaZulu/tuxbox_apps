@@ -1,5 +1,5 @@
 /*
- * $Id: ca_message_section.cpp,v 1.2 2005/10/29 00:10:16 obi Exp $
+ * $Id: ca_message_section.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -14,7 +14,7 @@
 
 ConditionalAccessMessageSection::ConditionalAccessMessageSection(const uint8_t * const buffer) : ShortSection(buffer)
 {
-	for (size_t i = 8; i < sectionLength - 1; ++i)
-		caDataByte.push_back(buffer[i]);
+	if ( sectionLength > 1 )
+		for (size_t i = 8; i < sectionLength - 1; ++i)
+			caDataByte.push_back(buffer[i]);
 }
-

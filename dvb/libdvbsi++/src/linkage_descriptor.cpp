@@ -1,5 +1,5 @@
 /*
- * $Id: linkage_descriptor.cpp,v 1.8 2005/12/07 19:06:40 mws Exp $
+ * $Id: linkage_descriptor.cpp,v 1.9 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,34 +15,45 @@
 
 LinkageDescriptor::LinkageDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	size_t headerLength = 7;
+	ASSERT_MIN_DLEN(headerLength);
+
 	transportStreamId = UINT16(&buffer[2]);
 	originalNetworkId = UINT16(&buffer[4]);
 	serviceId = UINT16(&buffer[6]);
 	linkageType = buffer[8];
 
-	if (linkageType != 0x08)
-	{
-		privateDataBytes.resize(descriptorLength - 7);
-		memcpy(&privateDataBytes[0], buffer+9, descriptorLength-7);
-	}
-	else {
+	if (linkageType != 0x08) {
+		privateDataBytes.resize(descriptorLength - headerLength);
+		memcpy(&privateDataBytes[0], &buffer[9], descriptorLength - headerLength);
+	} else {
 		uint8_t offset = 0;
 		int bytes = 0;
+
+		headerLength++;
+		ASSERT_MIN_DLEN(headerLength);
+
 		handOverType = (buffer[9] >> 4) & 0x0f;
 		originType = buffer[9] & 0x01;
 
 		if ((handOverType >= 0x01) && (handOverType <= 0x03)) {
+			headerLength += 2;
+			ASSERT_MIN_DLEN(headerLength);
+
 			networkId = UINT16(&buffer[10]);
 			offset += 2;
 		}
 
 		if (originType == 0x00) {
+			headerLength += 2;
+			ASSERT_MIN_DLEN(headerLength);
+
 			initialServiceId = UINT16(&buffer[offset + 10]);
 			offset += 2;
 		}
-		bytes = descriptorLength-offset-8;
-		privateDataBytes.resize(bytes);
-		memcpy(&privateDataBytes[0], buffer+offset+10, bytes);
+
+		privateDataBytes.resize(descriptorLength - headerLength);
+		memcpy(&privateDataBytes[0], &buffer[offset + 10], descriptorLength - headerLength);
 	}
 }
 

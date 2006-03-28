@@ -1,5 +1,5 @@
 /*
- * $Id: service_description_section.cpp,v 1.5 2005/10/29 00:10:17 obi Exp $
+ * $Id: service_description_section.cpp,v 1.6 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -53,10 +53,17 @@ uint8_t ServiceDescription::getFreeCaMode(void) const
 
 ServiceDescriptionSection::ServiceDescriptionSection(const uint8_t * const buffer) : LongCrcSection (buffer)
 {
-	originalNetworkId = UINT16(&buffer[8]);
+	originalNetworkId = sectionLength > 9 ? UINT16(&buffer[8]) : 0;
 
-	for (size_t i = 11; i < sectionLength - 1; i += DVB_LENGTH(&buffer[i + 3]) + 5)
-		description.push_back(new ServiceDescription(&buffer[i]));
+	uint16_t pos = 11;
+	uint16_t bytesLeft = sectionLength > 12 ? sectionLength - 12 : 0;
+	uint16_t loopLength = 0;
+	
+	while (bytesLeft > 4 && bytesLeft >= (loopLength = 5 + DVB_LENGTH(&buffer[pos+3]))) {
+		description.push_back(new ServiceDescription(&buffer[pos]));
+		bytesLeft -= loopLength;
+		pos += loopLength;
+	}
 }
 
 ServiceDescriptionSection::~ServiceDescriptionSection(void)

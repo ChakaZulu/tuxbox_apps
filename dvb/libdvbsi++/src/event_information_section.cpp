@@ -1,5 +1,5 @@
 /*
- * $Id: event_information_section.cpp,v 1.5 2005/10/29 00:10:16 obi Exp $
+ * $Id: event_information_section.cpp,v 1.6 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -59,13 +59,20 @@ uint8_t Event::getFreeCaMode(void) const
 
 EventInformationSection::EventInformationSection(const uint8_t * const buffer) : LongCrcSection(buffer)
 {
-	transportStreamId = UINT16(&buffer[8]);
-	originalNetworkId = UINT16(&buffer[10]);
-	segmentLastSectionNumber = buffer[12];
-	lastTableId = buffer[13];
+	transportStreamId = sectionLength > 10 ? UINT16(&buffer[8]) : 0;
+	originalNetworkId = sectionLength > 12 ? UINT16(&buffer[10]) : 0;
+	segmentLastSectionNumber = sectionLength > 13 ? buffer[12] : sectionNumber;
+	lastTableId = sectionLength > 14 ? buffer[13] : buffer[0];
 
-	for (size_t i = 14; i < sectionLength - 1; i += DVB_LENGTH(&buffer[i + 10]) + 12)
-		events.push_back(new Event(&buffer[i]));
+	uint16_t pos = 14;
+	uint16_t bytesLeft = sectionLength > 15 ? sectionLength-15 : 0;
+	uint16_t loopLength=0;
+
+	while (bytesLeft > 11 && bytesLeft >= (loopLength = 12 + DVB_LENGTH(&buffer[pos+10]))) {
+		events.push_back(new Event(&buffer[pos]));	
+		bytesLeft -= loopLength;
+		pos += loopLength;
+	}
 }
 
 EventInformationSection::~EventInformationSection(void)

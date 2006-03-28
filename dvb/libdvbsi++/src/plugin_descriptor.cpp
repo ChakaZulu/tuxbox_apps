@@ -1,5 +1,5 @@
 /*
- * $Id: plugin_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: plugin_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -15,9 +15,14 @@
 
 PluginDescriptor::PluginDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(2);
+
 	applicationType = r16(&buffer[2]);
-	for (size_t i = 0; i < descriptorLength - 2; i += 5)
+
+	for (size_t i = 0; i < descriptorLength - 2; i += 5) {
+		ASSERT_MIN_DLEN(i + 7);
 		applicationProfiles.push_back(new ApplicationProfile(&buffer[i + 4]));
+	}
 }
 
 PluginDescriptor::~PluginDescriptor(void)

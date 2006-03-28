@@ -1,5 +1,5 @@
 /*
- * $Id: nvod_reference_descriptor.cpp,v 1.4 2005/10/29 00:10:17 obi Exp $
+ * $Id: nvod_reference_descriptor.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -37,8 +37,10 @@ uint16_t NvodReference::getServiceId(void) const
 
 NvodReferenceDescriptor::NvodReferenceDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 6)
+	for (size_t i = 0; i < descriptorLength; i += 6) {
+		ASSERT_MIN_DLEN(i + 6);
 		nvodReferences.push_back(new NvodReference(&buffer[i + 2]));
+	}
 }
 
 NvodReferenceDescriptor::~NvodReferenceDescriptor(void)

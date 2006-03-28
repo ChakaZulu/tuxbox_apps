@@ -1,5 +1,5 @@
 /*
- * $Id: aac_descriptor.cpp,v 1.1 2005/12/26 20:48:58 mws Exp $
+ * $Id: aac_descriptor.cpp,v 1.2 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -11,17 +11,24 @@
  */
 #include "dvbsi++/aac_descriptor.h"
 
-AACDescriptor::AACDescriptor(const uint8_t* const buffer):Descriptor(buffer)
+AACDescriptor::AACDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	size_t headerLength = 2;
+	ASSERT_MIN_DLEN(headerLength);
+
 	profileLevel = buffer[2];
 	aacTypeFlag = (buffer[3] >> 7) & 0x01;
-	size_t cnt = 0x04;
-	if ( aacTypeFlag == 0x01 )
-	{
-		aacType = buffer[cnt++];
+
+	size_t i = 4;
+	if (aacTypeFlag == 0x01) {
+		headerLength++;
+		ASSERT_MIN_DLEN(headerLength);
+
+		aacType = buffer[i++];
 	}
-	additionalInfoBytes.resize(descriptorLength - (cnt - 2));
-	memcpy(&additionalInfoBytes[0], buffer+cnt, descriptorLength - (cnt - 2));
+
+	additionalInfoBytes.resize(descriptorLength - headerLength);
+	memcpy(&additionalInfoBytes[0], &buffer[i], descriptorLength - headerLength);
 }
 
 AACDescriptor::~AACDescriptor()
@@ -43,7 +50,7 @@ uint8_t AACDescriptor::getAACType() const
 	return aacType;
 }
 
-const AdditionalInfoByteVector* AACDescriptor::getAdditionalInfoBytes() const
+const AdditionalInfoByteVector *AACDescriptor::getAdditionalInfoBytes() const
 {
 	return &additionalInfoBytes;
 }

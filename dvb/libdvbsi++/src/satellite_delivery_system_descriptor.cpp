@@ -1,5 +1,5 @@
 /*
- * $Id: satellite_delivery_system_descriptor.cpp,v 1.5 2005/12/26 20:48:58 mws Exp $
+ * $Id: satellite_delivery_system_descriptor.cpp,v 1.6 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,6 +15,8 @@
 
 SatelliteDeliverySystemDescriptor::SatelliteDeliverySystemDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(11);
+
 	frequency =
 	(
 		((buffer[2] >> 4)	* 10000000) +

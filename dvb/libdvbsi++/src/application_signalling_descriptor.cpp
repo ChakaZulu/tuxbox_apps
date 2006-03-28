@@ -1,5 +1,5 @@
 /*
- * $Id: application_signalling_descriptor.cpp,v 1.4 2005/10/29 00:10:16 obi Exp $
+ * $Id: application_signalling_descriptor.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -31,8 +31,10 @@ uint8_t ApplicationSignalling::getAitVersionNumber(void) const
 
 ApplicationSignallingDescriptor::ApplicationSignallingDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 3)
+	for (size_t i = 0; i < descriptorLength; i += 3) {
+		ASSERT_MIN_DLEN(i + 3);
 		applicationSignallings.push_back(new ApplicationSignalling(&buffer[i + 2]));
+	}
 }
 
 ApplicationSignallingDescriptor::~ApplicationSignallingDescriptor(void)

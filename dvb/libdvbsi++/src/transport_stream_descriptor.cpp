@@ -1,5 +1,5 @@
 /*
- * $Id: transport_stream_descriptor.cpp,v 1.1 2006/02/23 19:12:41 mws Exp $
+ * $Id: transport_stream_descriptor.cpp,v 1.2 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2006 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -12,16 +12,16 @@
 #include "dvbsi++/byte_stream.h"
 #include "dvbsi++/transport_stream_descriptor.h"
 
-TransportStreamDescriptor::TransportStreamDescriptor(const uint8_t* const buffer) : Descriptor(buffer), privateDataBytes(descriptorLength)
+TransportStreamDescriptor::TransportStreamDescriptor(const uint8_t * const buffer) : Descriptor(buffer), privateDataBytes(descriptorLength)
 {
-	memcpy(&privateDataBytes[0], buffer+2, descriptorLength);
+	memcpy(&privateDataBytes[0], &buffer[2], descriptorLength);
 }
 
 TransportStreamDescriptor::~TransportStreamDescriptor()
 {
 }
 
-const PrivateDataByteVector* TransportStreamDescriptor::getPrivateDataBytes(void) const
+const PrivateDataByteVector *TransportStreamDescriptor::getPrivateDataBytes(void) const
 {
 	return &privateDataBytes;
 }

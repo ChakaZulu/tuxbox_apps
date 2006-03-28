@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor.cpp,v 1.2 2005/10/29 00:10:16 obi Exp $
+ * $Id: descriptor.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -16,6 +16,11 @@ Descriptor::Descriptor(const uint8_t * const buffer)
 {
 	descriptorTag = buffer[0];
 	descriptorLength = buffer[1];
+
+	dataBytes.resize(descriptorLength);
+	memcpy(&dataBytes[0], &buffer[2], descriptorLength);
+
+	valid = true;
 }
 
 uint8_t Descriptor::getTag(void) const
@@ -30,11 +35,10 @@ uint8_t Descriptor::getLength(void) const
 
 size_t Descriptor::writeToBuffer(uint8_t * const buffer) const
 {
-	size_t total = 0;
+	buffer[0] = descriptorTag;
+	buffer[1] = descriptorLength;
+	memcpy(&buffer[2], &dataBytes[0], descriptorLength);
 
-	buffer[total++] = descriptorTag;
-	buffer[total++] = descriptorLength;
-
-	return total;
+	return descriptorLength + 2;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: application_name_descriptor.cpp,v 1.3 2005/10/29 00:10:16 obi Exp $
+ * $Id: application_name_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -31,8 +31,10 @@ const std::string &ApplicationName::getApplicationName(void) const
 
 ApplicationNameDescriptor::ApplicationNameDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += buffer[i + 3] + 2)
+	for (size_t i = 0; i < descriptorLength; i += buffer[i + 3] + 2) {
+		ASSERT_MIN_DLEN(i + buffer[i + 3] + 2);
 		applicationNames.push_back(new ApplicationName(&buffer[i + 2]));
+	}
 }
 
 ApplicationNameDescriptor::~ApplicationNameDescriptor(void)

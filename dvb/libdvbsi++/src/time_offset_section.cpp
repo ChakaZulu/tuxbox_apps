@@ -1,5 +1,5 @@
 /*
- * $Id: time_offset_section.cpp,v 1.4 2005/10/29 00:10:17 obi Exp $
+ * $Id: time_offset_section.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,12 +15,21 @@
 
 TimeOffsetSection::TimeOffsetSection(const uint8_t * const buffer) : ShortCrcSection(buffer)
 {
-	utcTimeMjd = UINT16(&buffer[3]);
-	utcTimeBcd = (buffer[5] << 16) | UINT16(&buffer[6]);
-	descriptorsLoopLength = DVB_LENGTH(&buffer[8]);
+	utcTimeMjd = sectionLength > 8 ? UINT16(&buffer[3]) : 0;
+	utcTimeBcd = sectionLength > 8 ? (buffer[5] << 16) | UINT16(&buffer[6]) : 0;
+	descriptorsLoopLength = sectionLength > 10 ? DVB_LENGTH(&buffer[8]) : 0;
 
-	for (size_t i = 0; i < descriptorsLoopLength; i += buffer[i + 11] + 2)
-		descriptor(&buffer[i + 10], SCOPE_SI);
+	uint16_t pos = 10;
+	uint16_t bytesLeft = sectionLength > 11 ? sectionLength - 11 : 0;
+	uint16_t loopLength = 0;
+	uint16_t bytesLeft2 = descriptorsLoopLength;
+
+	while (bytesLeft >= bytesLeft2 && bytesLeft2 > 1 && bytesLeft2 >= (loopLength = 2 + buffer[pos+1])) {
+		descriptor(&buffer[pos], SCOPE_SI);
+		pos += loopLength;
+		bytesLeft -= loopLength;
+		bytesLeft2 -= loopLength;
+	}
 }
 
 uint16_t TimeOffsetSection::getUtcTimeMjd(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: pdc_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: pdc_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,6 +15,8 @@
 
 PdcDescriptor::PdcDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(3);
+
 	programmeIdentificationLabel = ((buffer[2] & 0x0f) << 16) | UINT16(&buffer[3]);
 }
 

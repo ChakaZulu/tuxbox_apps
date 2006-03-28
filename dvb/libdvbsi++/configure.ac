@@ -1,4 +1,4 @@
-AC_INIT([libdvbsi++],[0.3.2],[obi@saftware.de],[libdvbsi++])
+AC_INIT([libdvbsi++],[0.3.3],[obi@saftware.de],[libdvbsi++])
 AM_INIT_AUTOMAKE([dist-bzip2])
 
 AC_PROG_CXX

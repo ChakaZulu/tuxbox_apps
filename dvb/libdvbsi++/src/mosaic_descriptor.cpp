@@ -1,5 +1,5 @@
 /*
- * $Id: mosaic_descriptor.cpp,v 1.5 2005/10/29 00:10:17 obi Exp $
+ * $Id: mosaic_descriptor.cpp,v 1.6 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -23,7 +23,7 @@ uint8_t ElementaryCellField::getElementaryCellId(void) const
 	return elementaryCellId;
 }
 
-MosaicCell::MosaicCell (const uint8_t * const buffer)
+MosaicCell::MosaicCell(const uint8_t * const buffer)
 {
 	logicalCellId = (buffer[0] >> 2) & 0x3F;
 	logicalCellPresentationInfo = buffer[1] & 0x07;

@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor.h,v 1.6 2005/10/29 00:10:08 obi Exp $
+ * $Id: descriptor.h,v 1.7 2006/03/28 17:21:59 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,11 +15,25 @@
 
 #include "compat.h"
 
+/* To be used only(!) in constructors of descendants of
+ * class Descriptor. Might be enhanced to throw an
+ * exception in the future.
+ */
+#define ASSERT_MIN_DLEN(length)			\
+do {						\
+	if (descriptorLength < (length)) {	\
+		valid = false;			\
+		return;				\
+	}					\
+} while (0)
+
 class Descriptor
 {
 	protected:
 		unsigned descriptorTag				: 8;
 		unsigned descriptorLength			: 8;
+		std::vector<uint8_t> dataBytes;
+		bool valid;
 
 	public:
 		Descriptor(const uint8_t * const buffer);
@@ -27,8 +41,9 @@ class Descriptor
 
 		uint8_t getTag(void) const;
 		uint8_t getLength(void) const;
+		bool isValid(void) const { return valid; }
 
-		virtual size_t writeToBuffer(uint8_t * const buffer) const;
+		size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
 typedef std::list<Descriptor *> DescriptorList;

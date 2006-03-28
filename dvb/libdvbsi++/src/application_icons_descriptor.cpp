@@ -1,5 +1,5 @@
 /*
- * $Id: application_icons_descriptor.cpp,v 1.2 2005/10/29 00:10:16 obi Exp $
+ * $Id: application_icons_descriptor.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -12,10 +12,15 @@
 
 #include <dvbsi++/application_icons_descriptor.h>
 #include <dvbsi++/byte_stream.h>
- 
+
 ApplicationIconsDescriptor::ApplicationIconsDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(3);
+
 	iconLocatorLength = buffer[2];
+
+	ASSERT_MIN_DLEN(iconLocatorLength + 3);
+
 	iconLocator.assign((char *)&buffer[3], iconLocatorLength);
 	iconFlags = r16(&buffer[iconLocatorLength + 3]);
 }

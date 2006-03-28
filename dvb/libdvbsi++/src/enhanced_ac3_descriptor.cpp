@@ -1,5 +1,5 @@
 /*
- * $Id: enhanced_ac3_descriptor.cpp,v 1.1 2005/12/26 20:48:58 mws Exp $
+ * $Id: enhanced_ac3_descriptor.cpp,v 1.2 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -11,8 +11,23 @@
  */
 #include "dvbsi++/enhanced_ac3_descriptor.h"
 
-EnhancedAC3Descriptor::EnhancedAC3Descriptor(const uint8_t* const buffer):Descriptor(buffer)
+EnhancedAC3Descriptor::EnhancedAC3Descriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	// EN300468 says that descriptor_length must be >= 1,
+	// but it's easy to set sane defaults in this case
+	// and some already broadcasters got it wrong.
+	if (descriptorLength == 0) {
+		componentTypeFlag = 0;
+		bsidFlag = 0;
+		mainidFlag = 0;
+		asvcFlag = 0;
+		mixInfoExistsFlag = 0;
+		substream1Flag = 0;
+		substream2Flag = 0;
+		substream3Flag = 0;
+		return;
+	}
+
 	componentTypeFlag = (buffer[2] >> 7) & 0x01;
 	bsidFlag = (buffer[2] >> 6) & 0x01;
 	mainidFlag = (buffer[2] >> 5) & 0x01;
@@ -22,38 +37,29 @@ EnhancedAC3Descriptor::EnhancedAC3Descriptor(const uint8_t* const buffer):Descri
 	substream2Flag = (buffer[2] >> 1) & 0x01;
 	substream3Flag = buffer[2] & 0x01;
 
+	size_t headerLength = 1 + componentTypeFlag + bsidFlag + mainidFlag +
+		asvcFlag + mixInfoExistsFlag + substream1Flag +
+		substream2Flag + substream3Flag;
+	ASSERT_MIN_DLEN(headerLength);
+
 	size_t i = 3;
 	if (componentTypeFlag == 0x01)
-	{
 		componentType = buffer[i++];
-	}
 	if (bsidFlag == 0x01)
-	{
 		bsid = buffer[i++];
-	}
 	if (mainidFlag == 0x01)
-	{
 		mainid = buffer[i++];
-	}
 	if (asvcFlag == 0x01)
-	{
 		avsc = buffer[i++];
-	}
 	if (substream1Flag == 0x01)
-	{
 		substream1 = buffer[i++];
-	}
 	if (substream2Flag == 0x01)
-	{
 		substream2 = buffer[i++];
-	}
 	if (substream3Flag == 0x01)
-	{
 		substream3 = buffer[i++];
-	}
 
-	additionalInfo.resize(descriptorLength - (i - 2));
-	memcpy(&additionalInfo[0], buffer + i, descriptorLength - (i - 2));
+	additionalInfo.resize(descriptorLength - headerLength);
+	memcpy(&additionalInfo[0], &buffer[i], descriptorLength - headerLength);
 }
 
 EnhancedAC3Descriptor::~EnhancedAC3Descriptor()
@@ -135,7 +141,7 @@ uint8_t EnhancedAC3Descriptor::getSubstream3() const
 	return substream3;
 }
 
-const AdditionalInfoVector* EnhancedAC3Descriptor::getAdditionalInfo() const
+const AdditionalInfoVector *EnhancedAC3Descriptor::getAdditionalInfo() const
 {
 	return &additionalInfo;
 }

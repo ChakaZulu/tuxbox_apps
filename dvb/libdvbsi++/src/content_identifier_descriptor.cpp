@@ -1,5 +1,5 @@
 /*
- * $Id: content_identifier_descriptor.cpp,v 1.1 2005/11/10 23:55:33 mws Exp $
+ * $Id: content_identifier_descriptor.cpp,v 1.2 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -13,19 +13,17 @@
 
 #include "dvbsi++/byte_stream.h"
 
-ContentReferenceIdentifier::ContentReferenceIdentifier(const uint8_t* const buffer)
+ContentReferenceIdentifier::ContentReferenceIdentifier(const uint8_t * const buffer)
 {
 	type = (buffer[0] >> 2) & 0x3f;
 	location = buffer[0] & 0x03;
-	if ( location == 0 )
-	{
+
+	if (location == 0) {
 		length = buffer[1];
 		cridBytes.reserve(length);
 		memcpy(&cridBytes[0], buffer+2, length);
 		reference = 0x0000;
-	}
-	else if ( location == 1 )
-	{
+	} else if (location == 1) {
 		length = 0;
 		reference = r16(&buffer[2]);
 	}
@@ -51,7 +49,7 @@ uint8_t ContentReferenceIdentifier::getLength() const
 	return length;
 }
 
-const ContentReferenceIdentifierByteVector* ContentReferenceIdentifier::getBytes() const
+const ContentReferenceIdentifierByteVector *ContentReferenceIdentifier::getBytes() const
 {
 	return &cridBytes;
 }
@@ -62,32 +60,27 @@ uint16_t ContentReferenceIdentifier::getReference() const
 }
 
 
-ContentIdentifierDescriptor::ContentIdentifierDescriptor(const uint8_t* const buffer) : Descriptor(buffer)
+ContentIdentifierDescriptor::ContentIdentifierDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for ( size_t i = 0; i < descriptorLength; /* inc inside loop */)
-	{
-		ContentReferenceIdentifier* crid = new ContentReferenceIdentifier(&buffer[2 + i]);
-		if ( crid->getLocation() == 0 )
-		{
+	for (size_t i = 0; i < descriptorLength; /* inc inside loop */) {
+		ContentReferenceIdentifier *crid = new ContentReferenceIdentifier(&buffer[2 + i]);
+
+		if (crid->getLocation() == 0)
 			i += crid->getLength() + 2;
-		}
 		else if (crid->getLocation() == 1)
-		{
 			i += 3;
-		}
+
 		identifier.push_back(crid);
 	}
 }
 
 ContentIdentifierDescriptor::~ContentIdentifierDescriptor()
 {
-	for( ContentReferenceIdentifierIterator it = identifier.begin(); it != identifier.end(); ++it)
-	{
+	for (ContentReferenceIdentifierIterator it = identifier.begin(); it != identifier.end(); ++it)
 		delete *it;
-	}
 }
 
-const ContentReferenceIdentifierList* ContentIdentifierDescriptor::getIdentifier() const
+const ContentReferenceIdentifierList *ContentIdentifierDescriptor::getIdentifier() const
 {
 	return &identifier;
 }

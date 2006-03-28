@@ -1,5 +1,5 @@
 /*
- * $Id: cell_frequency_link_descriptor.cpp,v 1.4 2005/10/29 00:10:16 obi Exp $
+ * $Id: cell_frequency_link_descriptor.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -62,8 +62,10 @@ const SubcellInfoList *CellFrequencyLink::getSubcells(void) const
 
 CellFrequencyLinkDescriptor::CellFrequencyLinkDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += buffer[i + 10] + 6)
+	for (size_t i = 0; i < descriptorLength; i += buffer[i + 10] + 6) {
+		ASSERT_MIN_DLEN(i + buffer[i + 10] + 6);
 		cellFrequencyLinks.push_back(new CellFrequencyLink(&buffer[i + 2]));
+	}
 }
 
 CellFrequencyLinkDescriptor::~CellFrequencyLinkDescriptor(void)

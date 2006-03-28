@@ -1,5 +1,5 @@
 /*
- * $Id: unknown_descriptor.h,v 1.2 2005/10/29 00:10:08 obi Exp $
+ * $Id: unknown_descriptor.h,v 1.3 2006/03/28 17:21:59 ghostrider Exp $
  *
  * Copyright (C) 2005 Andreas Monzner <andreas.monzner@multimedia-labs.de>
  *
@@ -17,13 +17,8 @@
 
 class UnknownDescriptor : public Descriptor
 {
-	protected:
-		std::vector<uint8_t> dataBytes;
-
 	public:
-		UnknownDescriptor(const uint8_t * const buffer);
-
-		virtual size_t writeToBuffer(uint8_t * const buffer) const;
-};
+		UnknownDescriptor(const uint8_t * const buffer) __attribute__ ((deprecated));
+} __attribute__ ((deprecated));
 
 #endif /* __unknown_descriptor_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: dvb_html_application_descriptor.cpp,v 1.3 2005/10/29 00:10:16 obi Exp $
+ * $Id: dvb_html_application_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -15,9 +15,15 @@
 
 DvbHtmlApplicationDescriptor::DvbHtmlApplicationDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(1);
+
 	appidSetLength = buffer[2];
+
+	ASSERT_MIN_DLEN(appidSetLength + 1);
+
 	for (size_t i = 0; i < appidSetLength; i += 2)
 		applicationIds.push_back(r16(&buffer[i + 3]));
+
 	parameter.assign((char *)&buffer[appidSetLength + 3], descriptorLength - appidSetLength - 1);
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: iso639_language_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: iso639_language_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -30,8 +30,10 @@ uint8_t Iso639Language::getAudioType(void) const
 
 Iso639LanguageDescriptor::Iso639LanguageDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 4)
+	for (size_t i = 0; i < descriptorLength; i += 4) {
+		ASSERT_MIN_DLEN(i + 4);
 		iso639Languages.push_back(new Iso639Language(&buffer[i + 2]));
+	}
 }
 
 Iso639LanguageDescriptor::~Iso639LanguageDescriptor(void)

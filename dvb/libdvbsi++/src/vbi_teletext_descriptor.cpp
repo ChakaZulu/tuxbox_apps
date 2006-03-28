@@ -1,5 +1,5 @@
 /*
- * $Id: vbi_teletext_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: vbi_teletext_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -42,8 +42,10 @@ uint8_t VbiTeletext::getTeletextPageNumber(void) const
 
 VbiTeletextDescriptor::VbiTeletextDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 5)
+	for (size_t i = 0; i < descriptorLength; i += 5) {
+		ASSERT_MIN_DLEN(i + 5);
 		vbiTeletexts.push_back(new VbiTeletext(&buffer[i + 2]));
+	}
 }
 
 VbiTeletextDescriptor::~VbiTeletextDescriptor(void)

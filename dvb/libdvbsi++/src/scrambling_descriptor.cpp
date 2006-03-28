@@ -1,5 +1,5 @@
 /*
- * $Id: scrambling_descriptor.cpp,v 1.1 2005/12/26 20:48:58 mws Exp $
+ * $Id: scrambling_descriptor.cpp,v 1.2 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -13,6 +13,8 @@
 
 ScramblingDescriptor::ScramblingDescriptor(const uint8_t* const buffer):Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(1);
+
 	scramblingMode = buffer[2];
 }
 

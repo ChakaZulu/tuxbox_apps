@@ -1,5 +1,5 @@
 /*
- * $Id: ecm_repetition_rate_descriptor.cpp,v 1.2 2005/12/26 20:48:58 mws Exp $
+ * $Id: ecm_repetition_rate_descriptor.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -10,14 +10,17 @@
  * See the file 'COPYING' in the top level directory for details.
  */
 #include "dvbsi++/ecm_repetition_rate_descriptor.h"
-
 #include "dvbsi++/byte_stream.h"
 
-ECMRepetitionRateDescriptor::ECMRepetitionRateDescriptor(const uint8_t* const buffer) : Descriptor(buffer), privateDataBytes(descriptorLength-4)
+ECMRepetitionRateDescriptor::ECMRepetitionRateDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(4);
+
 	caSystemId = r16(&buffer[2]);
 	repetitionRate = r16(&buffer[4]);
-	memcpy(&privateDataBytes[0], buffer+6, descriptorLength-4);
+
+	privateDataBytes.resize(descriptorLength - 4);
+	memcpy(&privateDataBytes[0], &buffer[6], descriptorLength - 4);
 }
 
 ECMRepetitionRateDescriptor::~ECMRepetitionRateDescriptor()
@@ -34,7 +37,7 @@ uint16_t ECMRepetitionRateDescriptor::getRepetitionRate(void) const
 	return repetitionRate;
 }
 
-const ECMRepetitionPrivateByteVector* ECMRepetitionRateDescriptor::getPrivateDataBytes() const
+const ECMRepetitionPrivateByteVector *ECMRepetitionRateDescriptor::getPrivateDataBytes() const
 {
 	return &privateDataBytes;
 }

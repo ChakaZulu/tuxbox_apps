@@ -1,5 +1,5 @@
 /*
- * $Id: s2_satellite_delivery_system_descriptor.cpp,v 1.1 2005/11/10 23:55:33 mws Exp $
+ * $Id: s2_satellite_delivery_system_descriptor.cpp,v 1.2 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -13,29 +13,33 @@
 
 #include "dvbsi++/byte_stream.h"
 
-S2SatelliteDeliverySystemDescriptor::S2SatelliteDeliverySystemDescriptor(const uint8_t* const buffer) : Descriptor(buffer)
+S2SatelliteDeliverySystemDescriptor::S2SatelliteDeliverySystemDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	size_t headerLength = 1;
+	ASSERT_MIN_DLEN(headerLength);
+
 	scramblingSequenceSelector = (buffer[2] >> 7) & 0x01;
 	multipleInputStreamFlag = (buffer[2] >> 6) & 0x01;
 	backwardsCompatibilityIndicator = (buffer[2] >> 5) & 0x01;
+
 	size_t i = 3;
-	if (scramblingSequenceSelector == 1)
-	{
+	if (scramblingSequenceSelector == 1) {
+		headerLength += 3;
+		ASSERT_MIN_DLEN(headerLength);
+
 		scramblingSequenceIndex = (buffer[i++] & 0x3) << 16;
 		scramblingSequenceIndex |= buffer[i++] << 8;
 		scramblingSequenceIndex |= buffer[i++];
-	}
-	else
-	{
+	} else {
 		scramblingSequenceIndex = 0;
 	}
 
-	if ( multipleInputStreamFlag == 1 )
-	{
+	if (multipleInputStreamFlag == 1) {
+		headerLength++;
+		ASSERT_MIN_DLEN(headerLength);
+
 		inputStreamIdentifier = buffer[i];
-	}
-	else
-	{
+	} else {
 		inputStreamIdentifier = 0;
 	}
 }

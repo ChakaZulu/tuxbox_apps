@@ -1,5 +1,5 @@
 /*
- * $Id: private_data_specifier_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: private_data_specifier_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,6 +15,8 @@
 
 PrivateDataSpecifierDescriptor::PrivateDataSpecifierDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(4);
+
 	privateDataSpecifier = UINT32(&buffer[2]);
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: service_move_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: service_move_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,6 +15,8 @@
 
 ServiceMoveDescriptor::ServiceMoveDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(6);
+
 	newOriginalNetworkId = UINT16(&buffer[2]);
 	newTransportStreamId = UINT16(&buffer[4]);
 	newServiceId = UINT16(&buffer[6]);

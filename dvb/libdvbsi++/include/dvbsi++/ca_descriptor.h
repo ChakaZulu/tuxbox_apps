@@ -1,5 +1,5 @@
 /*
- * $Id: ca_descriptor.h,v 1.4 2005/10/29 00:10:08 obi Exp $
+ * $Id: ca_descriptor.h,v 1.5 2006/03/28 17:21:59 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -32,8 +32,6 @@ class CaDescriptor : public Descriptor
 		uint16_t getCaSystemId(void) const;
 		uint16_t getCaPid(void) const;
 		const CaDataByteVector *getCaDataBytes(void) const;
-
-		size_t writeToBuffer(uint8_t * const buffer) const;
 };
 
 typedef std::list<CaDescriptor *> CaDescriptorList;

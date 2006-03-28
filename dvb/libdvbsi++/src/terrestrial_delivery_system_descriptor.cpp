@@ -1,5 +1,5 @@
 /*
- * $Id: terrestrial_delivery_system_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: terrestrial_delivery_system_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -15,6 +15,8 @@
 
 TerrestrialDeliverySystemDescriptor::TerrestrialDeliverySystemDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(7);
+
 	centreFrequency = UINT32(&buffer[2]);
 	bandwidth = (buffer[6] >> 5) & 0x07;
 	constellation = (buffer[7] >> 6) & 0x03;

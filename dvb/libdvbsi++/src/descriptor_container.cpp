@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor_container.cpp,v 1.8 2006/02/23 19:12:41 mws Exp $
+ * $Id: descriptor_container.cpp,v 1.9 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -100,7 +100,6 @@
 #include <dvbsi++/transport_stream_descriptor.h>
 #include <dvbsi++/tva_id_descriptor.h>
 #include <dvbsi++/type_descriptor.h>
-#include <dvbsi++/unknown_descriptor.h>
 #include <dvbsi++/vbi_data_descriptor.h>
 #include <dvbsi++/vbi_teletext_descriptor.h>
 #include <dvbsi++/video_stream_descriptor.h>
@@ -114,424 +113,334 @@ DescriptorContainer::~DescriptorContainer(void)
 
 void DescriptorContainer::descriptor(const uint8_t * const buffer, const enum DescriptorScope scope, bool back)
 {
-	void (DescriptorList::*pushFunc) (Descriptor* const &) =
-		back ? & DescriptorList::push_back
-			: & DescriptorList::push_front;
+	Descriptor *d;
 
 	switch (scope) {
 	case SCOPE_SI:
-		descriptorSi(buffer, back);
+		d = descriptorSi(buffer, back);
 		break;
 	case SCOPE_CAROUSEL:
-		descriptorCarousel(buffer, back);
+		d = descriptorCarousel(buffer, back);
 		break;
 	case SCOPE_MHP:
-		descriptorMhp(buffer, back);
+		d = descriptorMhp(buffer, back);
 		break;
 	default:
-		(descriptorList.*pushFunc)(new Descriptor(buffer));
-		break;
+		/* ignore invalid scope */
+		return;
 	}
+
+	if (!d->isValid())
+		delete d;
+	else if (back)
+		descriptorList.push_back(d);
+	else
+		descriptorList.push_front(d);
 }
 
-void DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool back)
+Descriptor *DescriptorContainer::descriptorSi(const uint8_t * const buffer, bool back)
 {
-	void (DescriptorList::*pushFunc) (Descriptor* const &) =
-		back ? & DescriptorList::push_back
-			: & DescriptorList::push_front;
-
 	switch (buffer[0]) {
 	case VIDEO_STREAM_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new VideoStreamDescriptor(buffer));
-		break;
+		return new VideoStreamDescriptor(buffer);
 
 	case AUDIO_STREAM_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new AudioStreamDescriptor(buffer));
-		break;
+		return new AudioStreamDescriptor(buffer);
 
 	case TARGET_BACKGROUND_GRID_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TargetBackgroundGridDescriptor(buffer));
-		break;
+		return new TargetBackgroundGridDescriptor(buffer);
 
 	case VIDEO_WINDOW_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new VideoWindowDescriptor(buffer));
-		break;
+		return new VideoWindowDescriptor(buffer);
 
 	case CA_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CaDescriptor(buffer));
-		break;
+		return new CaDescriptor(buffer);
 
 	case ISO_639_LANGUAGE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new Iso639LanguageDescriptor(buffer));
-		break;
+		return new Iso639LanguageDescriptor(buffer);
 
 	case CAROUSEL_IDENTIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CarouselIdentifierDescriptor(buffer));
-		break;
+		return new CarouselIdentifierDescriptor(buffer);
 
 	case NETWORK_NAME_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new NetworkNameDescriptor(buffer));
-		break;
+		return new NetworkNameDescriptor(buffer);
 
 	case SERVICE_LIST_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ServiceListDescriptor(buffer));
-		break;
+		return new ServiceListDescriptor(buffer);
 
 	case STUFFING_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new StuffingDescriptor(buffer));
-		break;
+		return new StuffingDescriptor(buffer);
 
 	case SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new SatelliteDeliverySystemDescriptor(buffer));
-		break;
+		return new SatelliteDeliverySystemDescriptor(buffer);
 
 	case CABLE_DELIVERY_SYSTEM_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CableDeliverySystemDescriptor(buffer));
-		break;
+		return new CableDeliverySystemDescriptor(buffer);
 
 	case VBI_DATA_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new VbiDataDescriptor(buffer));
-		break;
+		return new VbiDataDescriptor(buffer);
 
 	case VBI_TELETEXT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new VbiTeletextDescriptor(buffer));
-		break;
+		return new VbiTeletextDescriptor(buffer);
 
 	case BOUQUET_NAME_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new BouquetNameDescriptor(buffer));
-		break;
+		return new BouquetNameDescriptor(buffer);
 
 	case SERVICE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ServiceDescriptor(buffer));
-		break;
+		return new ServiceDescriptor(buffer);
 
 	case COUNTRY_AVAILABILITY_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CountryAvailabilityDescriptor(buffer));
-		break;
+		return new CountryAvailabilityDescriptor(buffer);
 
 	case LINKAGE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new LinkageDescriptor(buffer));
-		break;
+		return new LinkageDescriptor(buffer);
 
 	case NVOD_REFERENCE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new NvodReferenceDescriptor(buffer));
-		break;
+		return new NvodReferenceDescriptor(buffer);
 
 	case TIME_SHIFTED_SERVICE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TimeShiftedServiceDescriptor(buffer));
-		break;
+		return new TimeShiftedServiceDescriptor(buffer);
 
 	case SHORT_EVENT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ShortEventDescriptor(buffer));
-		break;
+		return new ShortEventDescriptor(buffer);
 
 	case EXTENDED_EVENT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ExtendedEventDescriptor(buffer));
-		break;
+		return new ExtendedEventDescriptor(buffer);
 
 	case COMPONENT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ComponentDescriptor(buffer));
-		break;
+		return new ComponentDescriptor(buffer);
 
 	case MOSAIC_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new MosaicDescriptor(buffer));
-		break;
+		return new MosaicDescriptor(buffer);
 
 	case STREAM_IDENTIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new StreamIdentifierDescriptor(buffer));
-		break;
+		return new StreamIdentifierDescriptor(buffer);
 
 	case CA_IDENTIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CaIdentifierDescriptor(buffer));
-		break;
+		return new CaIdentifierDescriptor(buffer);
 
 	case CONTENT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ContentDescriptor(buffer));
-		break;
+		return new ContentDescriptor(buffer);
 
 	case PARENTAL_RATING_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ParentalRatingDescriptor(buffer));
-		break;
+		return new ParentalRatingDescriptor(buffer);
 
 	case TELETEXT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TeletextDescriptor(buffer));
-		break;
+		return new TeletextDescriptor(buffer);
 
 	case TELEPHONE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TelephoneDescriptor(buffer));
-		break;
+		return new TelephoneDescriptor(buffer);
 
 	case LOCAL_TIME_OFFSET_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new LocalTimeOffsetDescriptor(buffer));
-		break;
+		return new LocalTimeOffsetDescriptor(buffer);
 
 	case SUBTITLING_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new SubtitlingDescriptor(buffer));
-		break;
+		return new SubtitlingDescriptor(buffer);
 
 	case TERRESTRIAL_DELIVERY_SYSTEM_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TerrestrialDeliverySystemDescriptor(buffer));
-		break;
+		return new TerrestrialDeliverySystemDescriptor(buffer);
 
 	case MULTILINGUAL_NETWORK_NAME_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new MultilingualNetworkNameDescriptor(buffer));
-		break;
+		return new MultilingualNetworkNameDescriptor(buffer);
 
 	case MULTILINGUAL_BOUQUET_NAME_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new MultilingualBouquetNameDescriptor(buffer));
-		break;
+		return new MultilingualBouquetNameDescriptor(buffer);
 
 	case MULTILINGUAL_SERVICE_NAME_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new MultilingualServiceNameDescriptor(buffer));
-		break;
+		return new MultilingualServiceNameDescriptor(buffer);
 
 	case MULTILINGUAL_COMPONENT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new MultilingualComponentDescriptor(buffer));
-		break;
+		return new MultilingualComponentDescriptor(buffer);
 
 	case PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new PrivateDataSpecifierDescriptor(buffer));
-		break;
+		return new PrivateDataSpecifierDescriptor(buffer);
 
 	case SERVICE_MOVE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ServiceMoveDescriptor(buffer));
-		break;
+		return new ServiceMoveDescriptor(buffer);
 
 	case FREQUENCY_LIST_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new FrequencyListDescriptor(buffer));
-		break;
+		return new FrequencyListDescriptor(buffer);
 
 	case DATA_BROADCAST_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DataBroadcastDescriptor(buffer));
-		break;
+		return new DataBroadcastDescriptor(buffer);
 
 	case SCRAMBLING_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ScramblingDescriptor(buffer));
-		break;
+		return new ScramblingDescriptor(buffer);
 
 	case DATA_BROADCAST_ID_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DataBroadcastIdDescriptor(buffer));
-		break;
+		return new DataBroadcastIdDescriptor(buffer);
 
 	case PDC_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new PdcDescriptor(buffer));
-		break;
+		return new PdcDescriptor(buffer);
 
 	case AC3_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new Ac3Descriptor(buffer));
-		break;
+		return new Ac3Descriptor(buffer);
 
 	case ANCILLARY_DATA_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new AncillaryDataDescriptor(buffer));
-		break;
+		return new AncillaryDataDescriptor(buffer);
 
 	case CELL_LIST_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CellListDescriptor(buffer));
-		break;
+		return new CellListDescriptor(buffer);
 
 	case CELL_FREQUENCY_LINK_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CellFrequencyLinkDescriptor(buffer));
-		break;
+		return new CellFrequencyLinkDescriptor(buffer);
 
 	case ANNOUNCEMENT_SUPPORT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new AnnouncementSupportDescriptor(buffer));
-		break;
+		return new AnnouncementSupportDescriptor(buffer);
 
 	case APPLICATION_SIGNALLING_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ApplicationSignallingDescriptor(buffer));
-		break;
+		return new ApplicationSignallingDescriptor(buffer);
 
 	case SERVICE_IDENTIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ServiceIdentifierDescriptor(buffer));
-		break;
+		return new ServiceIdentifierDescriptor(buffer);
+
 	case DEFAULT_AUTHORITY_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DefaultAuthorityDescriptor(buffer));
-		break;
+		return new DefaultAuthorityDescriptor(buffer);
+
 	case RELATED_CONTENT_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new RelatedContentDescriptor(buffer));
-		break;
+		return new RelatedContentDescriptor(buffer);
+
 	case TVA_ID_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TVAIdDescriptor(buffer));
-		break;
+		return new TVAIdDescriptor(buffer);
+
 	case CONTENT_IDENTIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ContentIdentifierDescriptor(buffer));
-		break;
+		return new ContentIdentifierDescriptor(buffer);
+
 	case TIME_SLICE_FEC_IDENTIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TimeSliceFecIdentifierDescriptor(buffer));
-		break;
+		return new TimeSliceFecIdentifierDescriptor(buffer);
+
 	case ECM_REPETITION_RATE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ECMRepetitionRateDescriptor(buffer));
-		break;
+		return new ECMRepetitionRateDescriptor(buffer);
+
 	case S2_SATELLITE_DELIVERY_SYSTEM_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new S2SatelliteDeliverySystemDescriptor(buffer));
-		break;
+		return new S2SatelliteDeliverySystemDescriptor(buffer);
+
 	case ENHANCED_AC3_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new EnhancedAC3Descriptor(buffer));
-		break;
+		return new EnhancedAC3Descriptor(buffer);
+
 	case DTS_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DTSDescriptor(buffer));
-		break;
+		return new DTSDescriptor(buffer);
+
 	case AAC_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new AACDescriptor(buffer));
-		break;
+		return new AACDescriptor(buffer);
+
 	case EXTENSION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ExtensionDescriptor(buffer));
-		break;
+		return new ExtensionDescriptor(buffer);
+
 	case TRANSPORT_STREAM_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TransportStreamDescriptor(buffer));
-		break;
+		return new TransportStreamDescriptor(buffer);
+
 	case DSNG_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DSNGDescriptor(buffer));
-		break;
+		return new DSNGDescriptor(buffer);
+
 	default:
-		(descriptorList.*pushFunc)(new UnknownDescriptor(buffer));
-		break;
+		return new Descriptor(buffer);
 	}
 }
 
-void DescriptorContainer::descriptorCarousel(const uint8_t * const buffer, bool back)
+Descriptor *DescriptorContainer::descriptorCarousel(const uint8_t * const buffer, bool back)
 {
-	void (DescriptorList::*pushFunc) (Descriptor* const &) =
-		back ? & DescriptorList::push_back
-			: & DescriptorList::push_front;
-
 	switch (buffer[0]) {
 	case TYPE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TypeDescriptor(buffer));
-		break;
+		return new TypeDescriptor(buffer);
 
 	case NAME_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new NameDescriptor(buffer));
-		break;
+		return new NameDescriptor(buffer);
 
 	case INFO_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new InfoDescriptor(buffer));
-		break;
+		return new InfoDescriptor(buffer);
 
 	case MODULE_LINK_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ModuleLinkDescriptor(buffer));
-		break;
+		return new ModuleLinkDescriptor(buffer);
 
 	case CRC32_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new Crc32Descriptor(buffer));
-		break;
+		return new Crc32Descriptor(buffer);
 
 	case LOCATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new LocationDescriptor(buffer));
-		break;
+		return new LocationDescriptor(buffer);
 
 	case EST_DOWNLOAD_TIME_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new EstDownloadTimeDescriptor(buffer));
-		break;
+		return new EstDownloadTimeDescriptor(buffer);
 
 	case GROUP_LINK_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new GroupLinkDescriptor(buffer));
-		break;
+		return new GroupLinkDescriptor(buffer);
 
 	case COMPRESSED_MODULE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CompressedModuleDescriptor(buffer));
-		break;
+		return new CompressedModuleDescriptor(buffer);
 
 	case LABEL_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new LabelDescriptor(buffer));
-		break;
+		return new LabelDescriptor(buffer);
 
 	case CACHING_PRIORITY_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new CachingPriorityDescriptor(buffer));
-		break;
+		return new CachingPriorityDescriptor(buffer);
 
 	case CONTENT_TYPE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ContentTypeDescriptor(buffer));
-		break;
+		return new ContentTypeDescriptor(buffer);
 
 	case PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new PrivateDataSpecifierDescriptor(buffer));
-		break;
+		return new PrivateDataSpecifierDescriptor(buffer);
 
 	default:
-		(descriptorList.*pushFunc)(new Descriptor(buffer));
-		break;
+		return new Descriptor(buffer);
 	}
 }
 
-void DescriptorContainer::descriptorMhp(const uint8_t * const buffer, bool back)
+Descriptor *DescriptorContainer::descriptorMhp(const uint8_t * const buffer, bool back)
 {
-	void (DescriptorList::*pushFunc) (Descriptor* const &) =
-		back ? & DescriptorList::push_back
-			: & DescriptorList::push_front;
-
 	switch (buffer[0]) {
 	case APPLICATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ApplicationDescriptor(buffer));
-		break;
+		return new ApplicationDescriptor(buffer);
 
 	case APPLICATION_NAME_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ApplicationNameDescriptor(buffer));
-		break;
+		return new ApplicationNameDescriptor(buffer);
 
 	case TRANSPORT_PROTOCOL_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new TransportProtocolDescriptor(buffer));
-		break;
+		return new TransportProtocolDescriptor(buffer);
 
 	case DVB_J_APPLICATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DvbJApplicationDescriptor(buffer));
-		break;
+		return new DvbJApplicationDescriptor(buffer);
 
 	case DVB_J_APPLICATION_LOCATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DvbJApplicationLocationDescriptor(buffer));
-		break;
+		return new DvbJApplicationLocationDescriptor(buffer);
 
 	case EXTERNAL_APPLICATION_AUTHORISATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ExternalApplicationAuthorisationDescriptor(buffer));
-		break;
+		return new ExternalApplicationAuthorisationDescriptor(buffer);
 
 	case DVB_HTML_APPLICATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DvbHtmlApplicationDescriptor(buffer));
-		break;
+		return new DvbHtmlApplicationDescriptor(buffer);
 
 	case DVB_HTML_APPLICATION_LOCATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DvbHtmlApplicationLocationDescriptor(buffer));
-		break;
+		return new DvbHtmlApplicationLocationDescriptor(buffer);
 
 	case DVB_HTML_APPLICATION_BOUNDARY_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DvbHtmlApplicationBoundaryDescriptor(buffer));
-		break;
+		return new DvbHtmlApplicationBoundaryDescriptor(buffer);
 
 	case APPLICATION_ICONS_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ApplicationIconsDescriptor(buffer));
-		break;
+		return new ApplicationIconsDescriptor(buffer);
 
 	case PREFETCH_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new PrefetchDescriptor(buffer));
-		break;
+		return new PrefetchDescriptor(buffer);
 
 	case DII_LOCATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DiiLocationDescriptor(buffer));
-		break;
+		return new DiiLocationDescriptor(buffer);
 
 	case DELEGATED_APPLICATION_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new DelegatedApplicationDescriptor(buffer));
-		break;
+		return new DelegatedApplicationDescriptor(buffer);
 
 	case PLUGIN_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new PluginDescriptor(buffer));
-		break;
+		return new PluginDescriptor(buffer);
 
 	case APPLICATION_STORAGE_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new ApplicationStorageDescriptor(buffer));
-		break;
+		return new ApplicationStorageDescriptor(buffer);
 
 	case IP_SIGNALING_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new IpSignalingDescriptor(buffer));
-		break;
+		return new IpSignalingDescriptor(buffer);
 
 	case PRIVATE_DATA_SPECIFIER_DESCRIPTOR:
-		(descriptorList.*pushFunc)(new PrivateDataSpecifierDescriptor(buffer));
-		break;
+		return new PrivateDataSpecifierDescriptor(buffer);
 
 	default:
-		(descriptorList.*pushFunc)(new Descriptor(buffer));
-		break;
+		return new Descriptor(buffer);
 	}
 }
 

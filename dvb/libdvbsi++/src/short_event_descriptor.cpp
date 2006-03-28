@@ -1,5 +1,5 @@
 /*
- * $Id: short_event_descriptor.cpp,v 1.2 2005/10/29 00:10:17 obi Exp $
+ * $Id: short_event_descriptor.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -14,10 +14,21 @@
 
 ShortEventDescriptor::ShortEventDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	size_t headerLength = 5;
+	ASSERT_MIN_DLEN(headerLength);
+
 	iso639LanguageCode.assign((char *)&buffer[2], 3);
 	eventNameLength = buffer[5];
+
+	headerLength += eventNameLength;
+	ASSERT_MIN_DLEN(headerLength);
+
 	eventName.assign((char *)&buffer[6], eventNameLength);
 	textLength = buffer[6 + eventNameLength];
+
+	headerLength += textLength;
+	ASSERT_MIN_DLEN(headerLength);
+
 	text.assign((char *)&buffer[7 + eventNameLength], textLength);
 }
 

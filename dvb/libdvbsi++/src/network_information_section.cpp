@@ -1,5 +1,5 @@
 /*
- * $Id: network_information_section.cpp,v 1.5 2005/10/29 00:10:17 obi Exp $
+ * $Id: network_information_section.cpp,v 1.6 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -35,15 +35,31 @@ uint16_t TransportStreamInfo::getOriginalNetworkId(void) const
 
 NetworkInformationSection::NetworkInformationSection(const uint8_t * const buffer) : LongCrcSection(buffer)
 {
-	networkDescriptorsLength = DVB_LENGTH(&buffer[8]);
+	networkDescriptorsLength = sectionLength > 9 ? DVB_LENGTH(&buffer[8]) : 0;
+	
+	uint16_t pos = 10;
+	uint16_t bytesLeft = sectionLength > 11 ? sectionLength - 11 : 0;
+	uint16_t loopLength = 0;
+	uint16_t bytesLeft2 = networkDescriptorsLength;
 
-	for (size_t i = 10; i < networkDescriptorsLength + 10; i += buffer[i + 1] + 2)
-		descriptor(&buffer[i], SCOPE_SI);
+	while ( bytesLeft >= bytesLeft2 && bytesLeft2 > 1 && bytesLeft2 >= (loopLength = 2 + buffer[pos+1])) {
+		descriptor(&buffer[pos], SCOPE_SI);
+		pos += loopLength;
+		bytesLeft -= loopLength;
+		bytesLeft2 -= loopLength;
+	}
 
-	transportStreamLoopLength = DVB_LENGTH(&buffer[networkDescriptorsLength + 10]);
-
-	for (size_t i = networkDescriptorsLength + 12; i < sectionLength + 3 - 4; i += DVB_LENGTH(&buffer[i + 4]) + 6)
-		tsInfo.push_back(new TransportStreamInfo(&buffer[i]));
+	if (!bytesLeft2 && bytesLeft > 1) {
+		bytesLeft2 = transportStreamLoopLength = DVB_LENGTH(&buffer[pos]);
+		bytesLeft -= 2;
+		pos += 2;
+		while (bytesLeft >= bytesLeft2 && bytesLeft2 > 4 && bytesLeft2 >= (loopLength = 6 + DVB_LENGTH(&buffer[pos+4]))) {
+			tsInfo.push_back(new TransportStreamInfo(&buffer[pos]));
+			bytesLeft -= loopLength;
+			bytesLeft2 -= loopLength;
+			pos += loopLength;
+		}
+	}
 }
 
 NetworkInformationSection::~NetworkInformationSection(void)

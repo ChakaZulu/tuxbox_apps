@@ -1,5 +1,5 @@
 /*
- * $Id: prefetch_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: prefetch_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -48,7 +48,7 @@ PrefetchDescriptor::PrefetchDescriptor(const uint8_t * const buffer) : Descripto
 PrefetchDescriptor::~PrefetchDescriptor(void)
 {
 	for (PrefetchLabelIterator i = prefetchLabels.begin(); i != prefetchLabels.end(); ++i)
-		delete *i;	
+		delete *i;
 }
 
 uint8_t PrefetchDescriptor::getTransportProtocolLabel(void) const

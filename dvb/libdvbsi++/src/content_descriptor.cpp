@@ -1,5 +1,5 @@
 /*
- * $Id: content_descriptor.cpp,v 1.3 2005/10/29 00:10:16 obi Exp $
+ * $Id: content_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -42,8 +42,10 @@ uint8_t ContentClassification::getUserNibble2(void) const
 
 ContentDescriptor::ContentDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 2)
+	for (size_t i = 0; i < descriptorLength; i += 2) {
+		ASSERT_MIN_DLEN(i + 2);
 		classifications.push_back(new ContentClassification(&buffer[i + 2]));
+	}
 }
 
 ContentDescriptor::~ContentDescriptor(void)

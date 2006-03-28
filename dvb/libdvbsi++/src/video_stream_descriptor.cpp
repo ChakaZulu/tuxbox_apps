@@ -1,5 +1,5 @@
 /*
- * $Id: video_stream_descriptor.cpp,v 1.2 2005/10/29 00:10:17 obi Exp $
+ * $Id: video_stream_descriptor.cpp,v 1.3 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -14,12 +14,16 @@
 
 VideoStreamDescriptor::VideoStreamDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
+	ASSERT_MIN_DLEN(1);
+
 	multipleFrameRateFlag = (buffer[2] >> 7) & 0x01;
 	frameRateCode = (buffer[2] >> 3) & 0x0F;
 	mpeg1OnlyFlag = (buffer[2] >> 2) & 0x01;
 	constrainedParameterFlag = (buffer[2] >> 1) & 0x01;
 
 	if (!mpeg1OnlyFlag) {
+		ASSERT_MIN_DLEN(3);
+
 		profileAndLevelIndication = buffer[3];
 		chromaFormat = (buffer[4] >> 6) & 0x03;
 		frameRateExtensionFlag = (buffer[4] >> 5) & 0x01;

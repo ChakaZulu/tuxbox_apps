@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.cpp,v 1.11 2005/11/24 17:57:47 mws Exp $
+ * $Id: ca_program_map_section.cpp,v 1.12 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -107,15 +107,16 @@ size_t CaElementaryStreamInfo::writeToBuffer(uint8_t * const buffer) const
 
 bool CaProgramMapSection::append(const ProgramMapSection * const pmt)
 {
-	if ( pmt->tableIdExtension != programNumber || pmt->versionNumber != versionNumber || currentNextIndicator != pmt->currentNextIndicator )
+	if (pmt->tableIdExtension != programNumber ||
+	    pmt->versionNumber != versionNumber ||
+	    currentNextIndicator != pmt->currentNextIndicator)
 		return false;
 
 	for (DescriptorConstIterator i = pmt->getDescriptors()->begin(); i != pmt->getDescriptors()->end(); ++i)
 		if ((*i)->getTag() == CA_DESCRIPTOR) {
 			uint16_t caid = ((CaDescriptor*)(*i))->getCaSystemId();
 			CaIdVectorConstIterator it = std::lower_bound(caids.begin(), caids.end(), caid);
-			if ( caids.empty() || (it != caids.end() && *it == caid) )
-			{
+			if (caids.empty() || (it != caids.end() && *it == caid)) {
 				descriptorList.push_back(new CaDescriptor(*(CaDescriptor *)*i));
 				programInfoLength += (*i)->getLength() + 2;
 				length += (*i)->getLength() + 2;
@@ -127,7 +128,7 @@ bool CaProgramMapSection::append(const ProgramMapSection * const pmt)
 		esInfo.push_back(info);
 		length += info->getLength();
 	}
-	
+
 	return true;
 }
 
@@ -156,7 +157,7 @@ CaProgramMapSection::~CaProgramMapSection(void)
 
 void CaProgramMapSection::injectDescriptor(const uint8_t *descr, bool back)
 {
-	descriptorSi(descr, back);
+	descriptor(descr, SCOPE_SI, back);
 	int len = (back ? descriptorList.back()->getLength() : descriptorList.front()->getLength()) + 2;
 	programInfoLength += len;
 	length += len;
@@ -166,12 +167,11 @@ size_t CaProgramMapSection::writeToBuffer(uint8_t * const buffer) const
 {
 	unsigned programInfoLength = this->programInfoLength;
 	uint32_t length = this->length;
-
 	size_t total = 0;
 
 	if (programInfoLength) {
-			programInfoLength++;
-			length++;
+		programInfoLength++;
+		length++;
 	}
 
 	CaLengthField lengthField(length);

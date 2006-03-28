@@ -1,5 +1,5 @@
 /*
- * $Id: content_identifier_section.cpp,v 1.3 2005/11/30 16:48:55 mws Exp $
+ * $Id: content_identifier_section.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -20,9 +20,7 @@ CridLabel::CridLabel(const uint8_t* const buffer)
 	uniqueStringLength = buffer[3];
 
 	for (size_t i = 0; i < uniqueStringLength; i++)
-	{
 		uniqueStringBytes.push_back(buffer[i+4]);
-	}
 }
 
 CridLabel::~CridLabel()
@@ -49,31 +47,30 @@ const ContentIdentifierByteVector* CridLabel::getUniqueStringBytes() const
 	return &uniqueStringBytes;
 }
 
-
 ContentIdentifierSection::ContentIdentifierSection(const uint8_t* const buffer) : LongCrcSection(buffer)
 {
-	transportStreamId = r16(&buffer[8]);
-	originalNetworkId = r16(&buffer[10]);
-	prependStringLength = buffer[12];
+	transportStreamId = sectionLength > 10 ? r16(&buffer[8]) : 0;
+	originalNetworkId = sectionLength > 12 ? r16(&buffer[10]) : 0;
+	prependStringLength = sectionLength > 13 ? buffer[12] : 0;
 
 	for (size_t i = 0; i < prependStringLength; i++)
-	{
-		// TODO Mws check for 0 as index indicator
 		prependStringsBytes.push_back(buffer[i+13]);
-	}
-	for (size_t i = 0; i < sectionLength - prependStringLength - 13; i += 4)
-	{
-		CridLabel* cridLabel = new CridLabel(&buffer[i+prependStringLength+13]);
-		i += cridLabel->getUniqueStringLength();
+
+	uint16_t pos = 13 + prependStringLength;
+	uint16_t bytesLeft = sectionLength > 14+prependStringLength ? sectionLength-14-prependStringLength : 0;
+	uint16_t loopLength = 0;
+
+	while (bytesLeft > 3 && bytesLeft >= (loopLength = 4 + buffer[pos+3])) {
+		cridLabels.push_back(new CridLabel(&buffer[pos]));
+		bytesLeft -= loopLength;
+		pos += loopLength;
 	}
 }
 
 ContentIdentifierSection::~ContentIdentifierSection(void)
 {
 	for ( CridLabelIterator it(cridLabels.begin()); it != cridLabels.end(); ++it)
-	{
 		delete *it;
-	}
 }
 
 uint16_t ContentIdentifierSection::getTransportStreamId(void) const

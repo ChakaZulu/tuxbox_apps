@@ -1,5 +1,5 @@
 /*
- * $Id: default_authority_descriptor.cpp,v 1.1 2005/11/10 23:55:33 mws Exp $
+ * $Id: default_authority_descriptor.cpp,v 1.2 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2005 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -11,18 +11,18 @@
  */
 #include "dvbsi++/default_authority_descriptor.h"
 
-DefaultAuthorityDescriptor::DefaultAuthorityDescriptor(const uint8_t* const buffer) : Descriptor(buffer),
+DefaultAuthorityDescriptor::DefaultAuthorityDescriptor(const uint8_t * const buffer) : Descriptor(buffer),
 	bytes(descriptorLength)
 {
 
-	memcpy(&bytes[0], buffer+2, descriptorLength);
+	memcpy(&bytes[0], &buffer[2], descriptorLength);
 }
 
 DefaultAuthorityDescriptor::~DefaultAuthorityDescriptor()
 {
 }
 
-const DefaultAuthorityByteVector* DefaultAuthorityDescriptor::getAuthorityBytes(void) const
+const DefaultAuthorityByteVector *DefaultAuthorityDescriptor::getAuthorityBytes(void) const
 {
 	return &bytes;
 }

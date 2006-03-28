@@ -1,5 +1,5 @@
 /*
- * $Id: external_application_authorisation_descriptor.cpp,v 1.3 2005/10/29 00:10:16 obi Exp $
+ * $Id: external_application_authorisation_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2004-2005 Stéphane Esté-Gracias <sestegra@free.fr>
  *
@@ -37,8 +37,10 @@ uint8_t ExternalApplicationAuthorisation::getApplicationPriority(void) const
 
 ExternalApplicationAuthorisationDescriptor::ExternalApplicationAuthorisationDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 7)
+	for (size_t i = 0; i < descriptorLength; i += 7) {
+		ASSERT_MIN_DLEN(i + 7);
 		externalApplicationAuthorisations.push_back(new ExternalApplicationAuthorisation(&buffer[i + 2]));
+	}
 }
 
 ExternalApplicationAuthorisationDescriptor::~ExternalApplicationAuthorisationDescriptor(void)

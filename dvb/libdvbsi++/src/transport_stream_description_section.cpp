@@ -1,5 +1,5 @@
 /*
- * $Id: transport_stream_description_section.cpp,v 1.1 2006/02/23 19:12:41 mws Exp $
+ * $Id: transport_stream_description_section.cpp,v 1.2 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2006 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -13,8 +13,13 @@
 
 TransportStreamDescriptionSection::TransportStreamDescriptionSection(const uint8_t* const buffer) : LongCrcSection(buffer)
 {
-	for (size_t i = 8; i < sectionLength - 1; i += buffer[i + 1] + 2)
-	{
-		descriptor(&buffer[i], SCOPE_SI);
+	uint16_t pos = 8;
+	uint16_t bytesLeft = sectionLength > 9 ? sectionLength - 9 : 0;
+	uint16_t loopLength = 0;
+
+	while (bytesLeft > 1 && bytesLeft >= (loopLength = 2 + buffer[pos+1])) {
+		descriptor(&buffer[pos], SCOPE_SI);
+		pos += loopLength;
+		bytesLeft -= loopLength;
 	}
 }

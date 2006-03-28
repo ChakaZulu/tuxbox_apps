@@ -1,5 +1,5 @@
 /*
- * $Id: parental_rating_descriptor.cpp,v 1.3 2005/10/29 00:10:17 obi Exp $
+ * $Id: parental_rating_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -30,8 +30,10 @@ uint8_t ParentalRating::getRating(void) const
 
 ParentalRatingDescriptor::ParentalRatingDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += 4)
+	for (size_t i = 0; i < descriptorLength; i += 4) {
+		ASSERT_MIN_DLEN(i + 4);
 		parentalRatings.push_back(new ParentalRating(&buffer[i + 2]));
+	}
 }
 
 ParentalRatingDescriptor::~ParentalRatingDescriptor(void)
