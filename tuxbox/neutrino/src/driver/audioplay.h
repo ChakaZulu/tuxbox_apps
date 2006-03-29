@@ -61,7 +61,7 @@ public:
 	bool hasMetaDataChanged();
 	bool readMetaData(CAudiofile* const, const bool);
 	time_t getTimePlayed(){return m_played_time;}
-	time_t getTimeTotal(){return m_Audiofile.MetaData.total_time;}
+	time_t getTimeTotal();
 	int getScBuffered(){return m_sc_buffered;}
 	void sc_callback(void *arg); // see comment in .cpp
 	CBaseDec::State getState(){return state;}

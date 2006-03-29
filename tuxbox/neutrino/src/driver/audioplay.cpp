@@ -219,4 +219,11 @@ bool CAudioPlayer::readMetaData(CAudiofile* const file, const bool nice)
 {
 	return CBaseDec::GetMetaDataBase(file, nice);
 }
+	
+time_t CAudioPlayer::getTimeTotal()
+{
+	if(m_Audiofile.MetaData.total_time != 0 && m_Audiofile.MetaData.total_time < m_played_time)
+		m_Audiofile.MetaData.total_time = m_played_time;
+	return m_Audiofile.MetaData.total_time;
+}
 
