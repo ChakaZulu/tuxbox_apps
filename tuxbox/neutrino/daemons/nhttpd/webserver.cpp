@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.27 2003/09/16 10:16:40 thegoodguy Exp $
+	$Id: webserver.cpp,v 1.28 2006/03/29 15:31:55 yjogol Exp $
 
 	License: GPL
 
@@ -103,10 +103,12 @@ void CWebserver::ReadConfig(void)
 	MustAuthenticate = Config->getBool("Authenticate", false);
 	PrivateDocumentRoot = Config->getString("PrivatDocRoot", PRIVATEDOCUMENTROOT);
 	PublicDocumentRoot = Config->getString("PublicDocRoot", PUBLICDOCUMENTROOT);
+	HostedDocumentRoot = Config->getString("HostedDocRoot", HOSTEDDOCUMENTROOT);
 	NewGui = Config->getBool("NewGui", true);
 	Zapit_XML_Path = Config->getString("Zapit_XML_Path", "/var/tuxbox/config/zapit");
 	AuthUser = Config->getString("AuthUser", "root");
 	AuthPassword = Config->getString("AuthPassword", "dbox2");
+	NoAuthClient = Config->getString("NoAuthClient", "");
 
 	if (Config->getUnknownKeyQueryedFlag() == true)
 		Config->saveConfig(NHTTPD_CONFIGFILE);

@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.43 2005/09/10 12:34:54 yjogol Exp $
+        $Id: webdbox.h,v 1.44 2006/03/29 15:31:55 yjogol Exp $
 
         License: GPL
 
@@ -101,6 +101,8 @@ class CWebDbox
 	// support functions
 	void ZapTo          (const char * const target);
 	void ZapToSubService(const char * const target);
+	void ZapToChannelId (t_channel_id channel_id);
+	t_channel_id ChannelNameToChannelId(std::string search_channel_name);
 
 	void UpdateBouquet(unsigned int BouquetNr);
 	void UpdateChannelList(void);

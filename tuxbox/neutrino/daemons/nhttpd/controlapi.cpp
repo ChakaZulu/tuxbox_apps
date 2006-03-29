@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.65 2005/12/10 10:49:21 barf Exp $
+	$Id: controlapi.cpp,v 1.66 2006/03/29 15:31:55 yjogol Exp $
 
 	License: GPL
 
@@ -605,10 +605,16 @@ bool CControlAPI::InfoCGI(CWebserverRequest *request)
 			request->SendFile("/",".version");
 			return true;
 		}
-		else if (request->ParameterList["1"] == "httpdversion")	// httpd version ausgeben
+		else if (request->ParameterList["1"] == "httpdversion")	// httpd version typ ausgeben
 		{
 			request->SendPlainHeader("text/plain");			// Standard httpd header senden
 			request->SocketWrite("3");
+			return true;
+		}
+		else if (request->ParameterList["1"] == "nhttpd_version")	// nhttpd version ausgeben
+		{
+			request->SendPlainHeader("text/plain");			// Standard httpd header senden
+			request->printf("%s\n", NHTTPD_VERSION);
 			return true;
 		}
 		else
@@ -618,7 +624,6 @@ bool CControlAPI::InfoCGI(CWebserverRequest *request)
 		}
 	}
 }
-
 //-------------------------------------------------------------------------
 
 bool CControlAPI::ShutdownCGI(CWebserverRequest *request)
@@ -973,6 +978,18 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 		{
 			request->SocketWrite((char *) (Parent->Sectionsd->getIsScanningActive() ? "1" : "0"));
 			return true;
+		}
+		else if (request->ParameterList["name"] != "")
+		{
+			t_channel_id channel_id;
+			channel_id = Parent->ChannelNameToChannelId(request->ParameterList["name"]);
+			if(channel_id != (t_channel_id)-1)
+			{
+				Parent->ZapToChannelId(channel_id);
+				request->SendOk();
+			}
+			else
+				request->SendError();
 		}
 		else
 		{
@@ -1416,11 +1433,7 @@ bool CControlAPI::YWebCGI(CWebserverRequest *request)
 	bool status=true;
 	int para;
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-	if (request->ParameterList["1"] == "nhttpd_version")
-	{
-		request->printf("%s\n", NHTTPD_VERSION);
-	}
-	else if (request->ParameterList["video_stream_pids"] != "")
+	if (request->ParameterList["video_stream_pids"] != "")
 	{
 		para=0;
 		sscanf( request->ParameterList["video_stream_pids"].c_str(), "%d", &para);

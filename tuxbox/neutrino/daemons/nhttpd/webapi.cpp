@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.69 2006/03/27 15:26:09 yjogol Exp $
+	$Id: webapi.cpp,v 1.70 2006/03/29 15:31:55 yjogol Exp $
 
 	License: GPL
 
@@ -1428,11 +1428,6 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 }
 
 //------------------------------------------------------------------------
-	bool nocase_compare (char c1, char c2)
-	{
-		return toupper(c1) == toupper(c2);
-	}
-
 void CWebAPI::doNewTimer(CWebserverRequest *request)
 {
 	time_t	announceTimeT = 0,
@@ -1572,22 +1567,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		SCANF_CHANNEL_ID_TYPE,
 		&eventinfo.channel_id);
 	else
-	{
-		CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
-		CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
-		for(; channel != channellist->end();channel++)
-		{
-			std::string new_channel_name = request->ParameterList["channel_name"];
-			std::string channel_name = channel->name;
-			if(new_channel_name.length() == channel_name.length() &&
-				equal(new_channel_name.begin(), new_channel_name.end(),
-				channel_name.begin(), nocase_compare)) //case insensitive  compare
-			{
-				eventinfo.channel_id = channel->channel_id;
-				break;
-			}
-		}
-	}
+		eventinfo.channel_id = Parent->ChannelNameToChannelId(request->ParameterList["channel_name"]);
 	       
 	void *data=NULL;
 	if(type == CTimerd::TIMER_RECORD)

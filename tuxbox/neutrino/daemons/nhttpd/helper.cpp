@@ -235,3 +235,10 @@ bool ySplitString(std::string str, std::string delimiter, std::string& left, std
 		left = str; //default if not found
 	return (pos != std::string::npos);
 }
+
+//-------------------------------------------------------------------------
+// equal-function for case insensitive compare
+bool nocase_compare (char c1, char c2)
+{
+	return toupper(c1) == toupper(c2);
+}

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.62 2005/09/10 12:34:54 yjogol Exp $
+	$Id: webdbox.cpp,v 1.63 2006/03/29 15:31:55 yjogol Exp $
 
 	License: GPL
 
@@ -58,6 +58,11 @@ void CWebDbox::ZapTo(const char * const target)
 	       SCANF_CHANNEL_ID_TYPE,
 	       &channel_id);
 
+	ZapToChannelId(channel_id);
+}
+//-------------------------------------------------------------------------
+void CWebDbox::ZapToChannelId(t_channel_id channel_id)
+{
 	if (channel_id == Zapit->getCurrentServiceID())
 	{
 		//printf("Kanal ist aktuell\n");
@@ -67,7 +72,6 @@ void CWebDbox::ZapTo(const char * const target)
 	if (Zapit->zapTo_serviceID(channel_id) != CZapitClient::ZAP_INVALID_PARAM)
 		Sectionsd->setServiceChanged(channel_id, false);
 }
-
 //-------------------------------------------------------------------------
 
 void CWebDbox::ZapToSubService(const char * const target)
@@ -81,7 +85,26 @@ void CWebDbox::ZapToSubService(const char * const target)
 	if (Zapit->zapTo_subServiceID(channel_id) != CZapitClient::ZAP_INVALID_PARAM)
 		Sectionsd->setServiceChanged(channel_id, false);
 }
+//-------------------------------------------------------------------------
+t_channel_id CWebDbox::ChannelNameToChannelId(std::string search_channel_name)
+{
+	t_channel_id channel_id = (t_channel_id)-1;
 
+	CZapitClient::BouquetChannelList *channellist = GetChannelList(CZapitClient::MODE_CURRENT);
+	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
+	for(; channel != channellist->end();channel++)
+	{
+		std::string channel_name = channel->name;
+		if(search_channel_name.length() == channel_name.length() &&
+			equal(search_channel_name.begin(), search_channel_name.end(),
+			channel_name.begin(), nocase_compare)) //case insensitive  compare
+		{
+			channel_id = channel->channel_id;
+			break;
+		}
+	}
+	return channel_id;
+}
 //-------------------------------------------------------------------------
 // Konstruktor und destruktor
 //-------------------------------------------------------------------------

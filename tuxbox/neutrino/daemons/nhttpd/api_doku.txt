@@ -466,6 +466,21 @@ Beispiel:
 ok  
  
 
+
+Parameter: channel_name (URI encoded)
+Rueckgabe:
+
+Zappt auf den angegebenen Kanal.
+Als Rueckgabe ist im Erfolgsfall ok zu erwarten.
+
+Rueckgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/zapto?name=Das%20Erste
+ok  
+
+
 **********************************************************************************************
 7. Radio/TV, Record Mode
 **********************************************************************************************
@@ -658,6 +673,14 @@ Beispiel:
 >>>http://dbox/control/info?httpdversion
 3
 
+
+Parameter: nhttpd_version
+Rückgabe:  Version des nhttpd (Neutrino)
+
+Beispiel:
+
+>>>http://dbox/control/info?nhttpd_version
+2.2.1
 
 **********************************************************************************************
 12. Aktuellen Kanal abfragen

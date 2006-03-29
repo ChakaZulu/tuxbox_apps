@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.48 2005/11/10 19:38:49 yjogol Exp $
+	$Id: request.cpp,v 1.49 2006/03/29 15:31:55 yjogol Exp $
 
 	License: GPL
 
@@ -631,8 +631,9 @@ void CWebserverRequest::RewriteURL()
 bool CWebserverRequest::SendResponse()
 {
 	RewriteURL();
+	std::string _hosted="/hosted/";
 
-	if( Client_Addr.find(IADDR_LOCAL)>0 ) 						// dont check local calls
+	if( Client_Addr.find(IADDR_LOCAL)>0 && Client_Addr.find(Parent->NoAuthClient)>0) // dont check local calls or calls from NoAuthClient
 	{
 		if(!Authenticate()) 							// check every call for authtication
         		return false;
@@ -646,7 +647,9 @@ bool CWebserverRequest::SendResponse()
 		return Parent->WebDbox->WebAPI->Execute(this);
 	else if(Path.compare("/y/") == 0)						// y api
 		return Parent->WebDbox->yAPI->Execute(this);
-	else if(FileExt.compare("yhtm") == 0)						// y pasrsing
+	else if(Path.compare(_hosted) == 0)						// hosted Web
+		Path=Parent->HostedDocumentRoot+Path.substr(_hosted.length()-1);
+	if(FileExt.compare("yhtm") == 0)						// y pasrsing
 		return Parent->WebDbox->yAPI->ParseAndSendFile(this);
 	else 										//normal file
 		return SendFile(Path,Filename);

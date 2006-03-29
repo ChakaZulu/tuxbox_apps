@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.26 2005/12/21 18:02:59 yjogol Exp $
+        $Id: webserver.h,v 1.27 2006/03/29 15:31:55 yjogol Exp $
 
         License: GPL
 
@@ -41,11 +41,12 @@
 #define SA	struct sockaddr
 #define SAI	struct sockaddr_in
 
-#define NHTTPD_VERSION "2.2.0"
+#define NHTTPD_VERSION "2.2.1"
 
 #define PRIVATEDOCUMENTROOT	"/share/tuxbox/neutrino/httpd-y"
 #define PUBLICDOCUMENTROOT	"/var/httpd"
 #define NEUTRINO_CONF		"/var/tuxbox/config/neutrino.conf"
+#define HOSTEDDOCUMENTROOT	"/mnt/hosted"
 
 class CWebDbox;
 class TWebserverRequest;
@@ -72,10 +73,12 @@ public:
 
 	std::string		PrivateDocumentRoot;
 	std::string		PublicDocumentRoot;
+	std::string		HostedDocumentRoot;
 	std::string		Zapit_XML_Path;
 
 	std::string		AuthUser;
 	std::string		AuthPassword;
+	std::string		NoAuthClient; // IP of Client with no Authentication check
 
 	CWebDbox		*WebDbox;
 
