@@ -32,7 +32,6 @@ libneutrino_driver_a_SOURCES = \
 	file.cpp \
 	audiometadata.cpp \
 	audiofile.cpp \
-	movieplay.cpp \
 	shutdown_count.cpp 
 libneutrino_driver_netfile_a_SOURCES = netfile.cpp
 
