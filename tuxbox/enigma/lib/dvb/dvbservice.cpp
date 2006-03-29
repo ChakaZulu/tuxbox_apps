@@ -320,7 +320,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			dvb.tSDT.start(new SDT());
 
 		PAT *pat=dvb.tPAT.getCurrent();
-		PATEntry *pe=pat->searchService(spSID);
+		PATEntry *pe=spSID ? pat->searchService(spSID) : 0;
 		if (!pe)
 		{
 #ifndef DISABLE_FILE
@@ -367,6 +367,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 								{
 									pmtpid = *it;
 									spSID = i->program_number;
+									eDebug("found pmtpid %04x for sid %d(%04x)", pmtpid, spSID, spSID);
 									break;
 								}
 						}
