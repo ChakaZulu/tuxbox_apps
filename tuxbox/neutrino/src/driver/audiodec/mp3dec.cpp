@@ -295,6 +295,7 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 								   time_t* const time_played,
 								   unsigned int* const secondsToSkip)
 {
+	printf("Decoder \n");
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
 	struct mad_synth	Synth;
