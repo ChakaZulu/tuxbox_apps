@@ -600,8 +600,8 @@ moviebrowser.menu_main_saveandback Speichern und verlassen
 moviebrowser.menu_nfs_head NFS Einstellung
 moviebrowser.menu_parental_lock_activated aktiviert
 moviebrowser.menu_parental_lock_activated_no nein
-moviebrowser.menu_parental_lock_activated_yes ja
 moviebrowser.menu_parental_lock_activated_no_temp nein (temporär)
+moviebrowser.menu_parental_lock_activated_yes ja
 moviebrowser.menu_parental_lock_head Jugendschutz
 moviebrowser.menu_parental_lock_rate_head Filme sperren ab
 moviebrowser.scan_for_movies Suche Filme ...
