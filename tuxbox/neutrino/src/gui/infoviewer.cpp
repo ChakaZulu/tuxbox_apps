@@ -315,7 +315,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 			fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
 
 		bool hideIt = true;
-		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]);
+		unsigned long long timeoutEnd = (neutrino->getMode() != 2) ?  CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]) : CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR_RADIO]);
 
 		int res = messages_return::none;
 		time_t ta=0,tb=0;
@@ -651,6 +651,8 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		else if ( data == lcdUpdateTimer )
 		{
 			showLcdPercentOver();
+			if ( is_visible )
+				show_Data( true ); 
 			return messages_return::handled;
 		}
 		else if ( data == sec_timer_id )
