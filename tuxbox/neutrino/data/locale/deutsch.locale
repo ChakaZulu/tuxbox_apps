@@ -946,7 +946,7 @@ timerbar.channelswitch Umschalten
 timerbar.recordevent Aufnehmen
 timerlist.alarmtime Alarmzeit
 timerlist.apids Tonspuren
-timerlist.apids_default Voreingestellte Tonspuren aufn.
+timerlist.apids_dflt Voreingestellte Tonspuren aufn.
 timerlist.bouquetselect Bouquet wählen
 timerlist.channel Kanal
 timerlist.channelselect Kanal wählen

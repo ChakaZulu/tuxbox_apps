@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.66 2006/03/04 00:57:57 sat_turner Exp $
+ * $Id: locals_intern.h,v 1.67 2006/04/01 10:12:29 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -627,8 +627,8 @@ const char * locale_real_names[] =
 	"moviebrowser.menu_nfs_head",
 	"moviebrowser.menu_parental_lock_activated",
 	"moviebrowser.menu_parental_lock_activated_no",
-	"moviebrowser.menu_parental_lock_activated_yes",
 	"moviebrowser.menu_parental_lock_activated_no_temp",
+	"moviebrowser.menu_parental_lock_activated_yes",
 	"moviebrowser.menu_parental_lock_head",
 	"moviebrowser.menu_parental_lock_rate_head",
 	"moviebrowser.scan_for_movies",
@@ -973,7 +973,7 @@ const char * locale_real_names[] =
 	"timerbar.recordevent",
 	"timerlist.alarmtime",
 	"timerlist.apids",
-	"timerlist.apids_default",
+	"timerlist.apids_dflt",
 	"timerlist.bouquetselect",
 	"timerlist.channel",
 	"timerlist.channelselect",
