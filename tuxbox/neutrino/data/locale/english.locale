@@ -329,7 +329,7 @@ flashupdate.mtdselector Partition-Selector
 flashupdate.programmingflash programming flash
 flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 enter the proxyserver password
-flashupdate.proxypassword_hint2
+flashupdate.proxypassword_hint2 
 flashupdate.proxyserver Hostname
 flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port
 flashupdate.proxyserver_hint2 a empty entry means no proxy
@@ -600,8 +600,8 @@ moviebrowser.menu_main_saveandback save and back
 moviebrowser.menu_nfs_head NFS settings
 moviebrowser.menu_parental_lock_activated activated
 moviebrowser.menu_parental_lock_activated_no no
-moviebrowser.menu_parental_lock_activated_yes yes
 moviebrowser.menu_parental_lock_activated_no_temp no (temporary)
+moviebrowser.menu_parental_lock_activated_yes yes
 moviebrowser.menu_parental_lock_head Parental Lock
 moviebrowser.menu_parental_lock_rate_head Lock movies from
 moviebrowser.scan_for_movies Scan for Movies ...
@@ -633,7 +633,7 @@ moviebrowser.start_record_start Movie start
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmarkname
 movieplayer.bookmarkname_hint1 Enter a name for your new bookmark
-movieplayer.bookmarkname_hint2
+movieplayer.bookmarkname_hint2 
 movieplayer.buffering Buffering...
 movieplayer.defdir start dir.
 movieplayer.defplugin Start-Plugin
@@ -946,7 +946,7 @@ timerbar.channelswitch Schedule
 timerbar.recordevent Record
 timerlist.alarmtime Alarm time
 timerlist.apids Audio streams
-timerlist.apids_default record default audio streams
+timerlist.apids_dflt record default audio streams
 timerlist.bouquetselect choose bouquet
 timerlist.channel Channel
 timerlist.channelselect choose channel
@@ -1017,6 +1017,7 @@ timing.head OSD Timeouts
 timing.hint_1 Time in sec. After this time the infobar will
 timing.hint_2 be faded out. (Use 0 to switch off fading.)
 timing.infobar Infobar
+timing.infobar_radio Infobar/Radio
 timing.menu Menu
 timing.numericzap Numeric Zap
 ucodecheck.avia500 Avia 500

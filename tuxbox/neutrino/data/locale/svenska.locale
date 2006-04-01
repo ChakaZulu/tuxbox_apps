@@ -268,6 +268,8 @@ epgviewer.notfound ingen EPG hittades
 eventlistbar.channelswitch schema
 eventlistbar.eventsort sortering
 eventlistbar.recordevent spela in
+experimentalsettings Experimentella inställningar
+experimentalsettings.head Experimentella inställningar
 favorites.addchannel Nuvarande kanal kommer att läggas\ntill i bouqueten "Mina favoriter".\nDetta tar några sekunder...
 favorites.bouquetname Mina favoriter
 favorites.bqcreated Bouquet "Mina favoriter" har skapats...\n
@@ -480,6 +482,7 @@ mainmenu.movieplayer Filmspelare
 mainmenu.pausesectionsd Läs EPG
 mainmenu.pictureviewer Bildvisare
 mainmenu.radiomode Radioläge
+mainmenu.reboot Nystart
 mainmenu.recording Inspelning
 mainmenu.recording_start start
 mainmenu.recording_stop stopp
@@ -619,6 +622,7 @@ options.fb framebuffer
 options.null noll
 options.off av
 options.on på
+options.on.without_messages (tyst) på
 options.serial seriell
 parentallock.changepin ändra PIN-kod
 parentallock.changepin_hint1 Ange PIN-kod för förädralåset!
@@ -681,8 +685,14 @@ rclock.lockmsg Din DBOX2 fjärrkontroll kommer att låsas.\nFör att låsa upp d
 rclock.menueadd Lås FK
 rclock.title Lås fjärrkontroll
 rclock.unlockmsg Fjärrkontroll aktiverad.
+recordingmenu.apids Förinställning för tonspår
+recordingmenu.apids_ac3 Spela in AC3 tonspår
+recordingmenu.apids_alt Spela in alternativt tonspår
+recordingmenu.apids_std Spela in standard tonspår
 recordingmenu.choose_direct_rec_dir välj mapp vid direkt inspel.
 recordingmenu.defdir inspelningsmapp
+recordingmenu.dir_permissions Mapprättigheter
+recordingmenu.dir_permissions_hint Rättigheter i 'chmod'-stil
 recordingmenu.epg_for_filename långa filnamn (med EPG data)
 recordingmenu.file direkt (fil)
 recordingmenu.filename_template Schablon för filnamn
@@ -704,11 +714,12 @@ recordingmenu.setupnow aktivera ändringar
 recordingmenu.splitsize Max. filstorlek (MB)
 recordingmenu.stopplayback stoppa avspelning
 recordingmenu.stopsectionsd stoppa sectionsd
-recordingmenu.stream_all_audio_pids spela in ljud PIDs
+recordingmenu.stream_pmt_pid spela in PMT
 recordingmenu.stream_vtxt_pid spela in TextTV
 recordingmenu.use_fdatasync skriv synkront (fdatasync)
 recordingmenu.use_o_sync skriv synkront (O_SYNC)
 recordingmenu.vcr vcr
+recordingmenu.zap_on_announce Slä om vid meddelande
 recordtimer.announce Inspelning startar om några minuter
 repeatblocker.hint_1 Kortast tid (i ms) att registrera 2 knapptryck
 repeatblocker.hint_2 Tryck 0 för att stänga av blockeraren (röd är mellanslag)
@@ -762,6 +773,7 @@ scants.startnow starta sökning
 scants.transponders Transpondrar:
 screensetup.lowerright grön = inställning nedre höger
 screensetup.upperleft röd = inställning övre vänster
+sectionsd.scanmode sektionsscan
 servicemenu.getplugins Läs in plugins
 servicemenu.getplugins_hint Läser in plugins,\nvar god vänta.
 servicemenu.head Service
@@ -838,6 +850,7 @@ timerbar.channelswitch Schema
 timerbar.recordevent Spela in
 timerlist.alarmtime Alarmtid
 timerlist.apids Ljud PIDs
+timerlist.apids_dflt spela in förinstÖllt tonspår
 timerlist.bouquetselect välj bouquet
 timerlist.channel Kanal
 timerlist.channelselect välj kanal
@@ -908,6 +921,7 @@ timing.head OSD Timeouter
 timing.hint_1 Tid i sek. Efter denna tid kommer
 timing.hint_2 Infobalken att försvinna sakta.
 timing.infobar Infobalk
+timing.infobar_radio Infobalk/Radio
 timing.menu Meny
 timing.numericzap Numerisk Zap
 ucodecheck.avia500 Avia 500
