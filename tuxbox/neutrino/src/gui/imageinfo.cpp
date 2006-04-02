@@ -85,10 +85,11 @@ int CImageInfo::exec(CMenuTarget* parent, const std::string &)
 	while (1)
 	{
 		neutrino_msg_data_t data;
-		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd_MS(100);
+		// Timeout after 20 seconds -- NOT user configurable ;-)
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd_MS(20000);
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-		if (msg <= CRCInput::RC_MaxRC)
+		if (msg <= CRCInput::RC_MaxRC || msg == CRCInput::RC_timeout)
 		{
 			break;
 		}
