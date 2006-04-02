@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.125 2006/03/16 21:06:35 houdini Exp $
+  $Id: movieplayer.cpp,v 1.126 2006/04/02 11:46:15 houdini Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1228,6 +1228,16 @@ typedef struct
 	long long          zapid;
 } MP_LST_ITEM;
 
+//=======================
+//== DVB device states ==
+//=======================
+enum MP_DEVICE_STATE 
+{
+	DVB_DEVICES_UNDEF   = -1,
+	DVB_DEVICES_STOPPED = 0,
+	DVB_DEVICES_RUNNING = 1
+};
+  	
 //=============================
 //== player context (MP_CTX) ==
 //=============================
@@ -1248,6 +1258,7 @@ typedef struct
 	int   vdec;
 	int   adec;
 
+	off_t jmp;
 	off_t pos;
 	off_t fileSize;
 
@@ -1255,7 +1266,6 @@ typedef struct
 	int   nSegsOpt;                 // not used yet
 	char  tmpBuf[SIZE_LINE_MAX+1];
 	bool  refillBuffer;
-	bool  startDMX;
 
 	bool  isStream;
 	bool  canPause;
@@ -1312,19 +1322,23 @@ class TPtrQueue
 
 
 //-- some bullshit global values --
-static int g_itno = 0;
+static int             g_itno       = 0;
+static MP_DEVICE_STATE gDeviceState = DVB_DEVICES_UNDEF; 
 
 static bool mp_openDVBDevices(MP_CTX *ctx);
 static void mp_closeDVBDevices(MP_CTX *ctx);
-static void mp_softReset(MP_CTX *ctx, bool refill);
+static void mp_bufferReset(MP_CTX *ctx);
+static void mp_bufferReset(MP_CTX *ctx, int jumpReq);
+static void mp_stopDVBDevices(MP_CTX *ctx);
 static void mp_freezeAV(MP_CTX *ctx);
 static void mp_unfreezeAV(MP_CTX *ctx);
-static void mp_startDMX(MP_CTX *ctx);
+static void mp_startDVBDevices(MP_CTX *ctx);
 static void mp_checkEvent(MP_CTX *ctx);
 static bool mp_probe(const char *fname, MP_CTX *ctx);
 static void mp_analyze(MP_CTX *ctx);
 static void mp_selectAudio(MP_CTX *ctx);
 static void mp_switchBufferingBox(bool visible);
+static off_t mp_seekSync(int fd, off_t pos); 
 
 //=================
 //== TPtrQueue:: ==
@@ -1431,6 +1445,8 @@ TPtrQueue::TPtrQueue(MP_CTX *ctx)
 		
 	ctx->nSegsMax = nSegsMax;  // set values really used !
 	ctx->nSegsOpt = nSegsOpt; 
+
+	ctx->jmp = (off_t)-1;      // no jump !
 }
 
 TPtrQueue::~TPtrQueue()
@@ -1487,34 +1503,56 @@ void TPtrQueue::unlockReadSeg(void)
 
 uint8_t *TPtrQueue::lockWriteSeg(void)
 {
-  	if (isTerminated) return NULL;
-
-	//-- check low level --  
+  //-- quick'n dirty synced loop :-) --
+  //-----------------------------------
+  for(;;)
+  {
+	if (isTerminated) return NULL;  // abort
+	
+	//-- check low level ... --  
 	if ( level < 2 )
 	{	
+		//-- ... and freeze playback --
   		if (!freezed)
   		{
   			freezed = true;
-  			if (!pCtx->startDMX) mp_freezeAV(pCtx); // freeze playback 
-				mp_switchBufferingBox(true);
+  			mp_freezeAV(pCtx); 
+			mp_switchBufferingBox(true);
 		}
-		return NULL;
+		
+		//-- wait for buffer filled --
+		usleep(100000);
+		continue;
 	}
-	//-- only in freezed state ... --
+	//-- in freezed state --
 	else if (freezed)
 	{
-		//-- ... wait for buffer filled --
+		//-- wait for buffer filled or ... --
 		if ( level < nSegsOpt )
-			return NULL;
+		{
+			usleep(100000);
+			continue;
+		}
+		
+		//-- ... level is ok -> continue playback --
+		//-- along with restart (AC3) or unfreeze --
+		freezed = false;
+		mp_switchBufferingBox(false);
+		
+		//-- AC3 needs "special force" !? --
+		if (pCtx->ac3==1)
+		{
+			sleep(1); 
+			mp_stopDVBDevices(pCtx); // force restart 
+		}
 		else
 		{
-			freezed = false;
-			mp_switchBufferingBox(false);
-			if (!pCtx->startDMX) mp_unfreezeAV(pCtx); // continue playback
+			mp_unfreezeAV(pCtx); 
 		}
 	}
-	
+  	
 	return queue[wPtr];
+  }
 }
 
 void TPtrQueue::unlockWriteSeg(void) 
@@ -1538,6 +1576,18 @@ bool TPtrQueue::refillBuffer(void)
 	//-- user feedback: OSD-Info on --
 	mp_switchBufferingBox(true);
 	clear();
+	
+	//-- on request jump to desired file position first --
+	if (pCtx->jmp != (off_t)-1)
+	{
+		pCtx->pos = mp_seekSync(pCtx->inFd, pCtx->jmp);
+		pCtx->jmp = (off_t)-1;
+		fprintf
+		(
+		  stderr,"[mp] jump to pos (%lld) of total (%lld)\n",
+		  pCtx->pos, pCtx->fileSize
+		);
+	}		
 	
 	//-- loop over all segments --
 	for (int i=0; i<nSegsOpt; i++)
@@ -1608,24 +1658,26 @@ bool TPtrQueue::writerRun(void)
 {
 	uint8_t *seg;
 
-  	//-- check for-refill request   --
-  	//-- use quick'n dirty sync :-) --
-  	while (pCtx->refillBuffer)
+ 	//-- B1: check for-refill request --
+  	//-- use quick'n dirty sync :-)   --
+  	if (pCtx->refillBuffer)
   	{
-		if (isTerminated) return false; 
-		usleep(100000);
-		continue;
+  		//-- playback should be already freezed here, --
+  		//-- so wait until reader has done its job.   --
+  		do
+  		{
+			if (isTerminated) return false; 
+			usleep(100000);
+			
+		} while (pCtx->refillBuffer);
+		
+		//-- B2: stop devices here to force restart ! -- 
+		mp_stopDVBDevices(pCtx);
 	}
-       
-	//-- try to get segment from queue, even   --
-	//-- here same quick'n dirty sync as above --
-	while ( (seg = lockWriteSeg()) == NULL )
-	{
-		if (isTerminated) return false;
-		usleep(10000);
-		continue;
-	}
- 
+	
+	//-- wait for new segment from queue ! --
+	if ( (seg = lockWriteSeg()) == NULL ) return false;
+
 	//-- finally transfer segment to dvr device --
 	int ofs  = 0;
 	int left = SIZE_QUEUE_SEG; 
@@ -1639,6 +1691,10 @@ bool TPtrQueue::writerRun(void)
 
 	//-- now segment is usable again for reader --
   	unlockWriteSeg();
+
+	//-- B3: may be (re)start of devices --
+	mp_startDVBDevices(pCtx);
+ 
   
   	return true;
 }
@@ -1744,12 +1800,12 @@ static bool mp_openDVBDevices(MP_CTX *ctx)
 
 	ctx->dmxa = -1;
 	ctx->dmxv = -1;
-	ctx->dmxp = -1;
+	
 	ctx->dvr  = -1;
 	ctx->adec = -1;
 	ctx->vdec = -1;
 
-	ctx->startDMX = false;
+	gDeviceState = DVB_DEVICES_UNDEF;  // initial (undef)
 
 	if((ctx->dmxa = open(DMX, O_RDWR)) < 0
 		|| (ctx->dmxv = open(DMX, O_RDWR)) < 0
@@ -1790,18 +1846,73 @@ static void mp_closeDVBDevices(MP_CTX *ctx)
 	}
 	if(ctx->dvr!= -1) close(ctx->dvr);
 
-	ctx->dmxp = -1;
 	ctx->dmxa = -1;
 	ctx->dmxv = -1;
+
 	ctx->dvr  = -1;
 	ctx->adec = -1;
 	ctx->vdec = -1;
+
+	gDeviceState = DVB_DEVICES_UNDEF; // initial (undef)
 }
 
-//== mp_softReset ==
-//==================
-static void mp_softReset(MP_CTX *ctx, bool refill = true)
+//== mp_bufferReset ('simple' and 'jump' variants) ==
+//===================================================
+void mp_bufferReset(MP_CTX *ctx)
 {
+	//-- immidiately pause playback --
+	mp_freezeAV(ctx);
+	
+	//-- refill input buffer --
+	ctx->refillBuffer = true;
+}
+
+void mp_bufferReset(MP_CTX *ctx, int jumpReq)
+{
+	//-- stream won't pause --
+	if(ctx->isStream) return;
+
+	//-- immediately pause playback -- 
+	mp_freezeAV(ctx);
+
+	//-- only calculate new file position value --
+	switch(jumpReq)
+	{
+	  case PF_JMP_START:
+		ctx->jmp = 0;
+		break;
+
+	  case PF_JMP_MID:
+		ctx->jmp = ctx->fileSize/2;
+		break;
+
+	  case PF_JMP_END:
+		ctx->jmp = ctx->fileSize - PF_SKPOS_OFFS;
+		break;
+
+	  default:
+		ctx->jmp = ctx->pos + (jumpReq * (MINUTEOFFSET/PF_JMP_DIV));
+		break;
+	}
+
+	//-- check limits --
+	if(ctx->jmp >= ctx->fileSize) ctx->jmp = ctx->fileSize - PF_SKPOS_OFFS;
+	if(ctx->jmp < ((off_t)0)) ctx->jmp = (off_t)0;
+	
+	//-- signal refill request: with a value for 'ctx->c_jmp' != -1 --
+	//-- the reader will seek to desired position first, before     --
+	//-- refilling the buffer along with reset of all DVB-devices.  --
+	ctx->refillBuffer = true;
+}
+
+//== mp_stopDVBDevices ==
+//=======================ku
+static void mp_stopDVBDevices(MP_CTX *ctx)
+{
+  if (gDeviceState != DVB_DEVICES_STOPPED)
+  {
+  	gDeviceState = DVB_DEVICES_STOPPED;
+  	
 	//-- stop DMX devices --
 	ioctl(ctx->dmxv, DMX_STOP);
 	ioctl(ctx->dmxa, DMX_STOP);
@@ -1830,22 +1941,20 @@ static void mp_softReset(MP_CTX *ctx, bool refill = true)
 		ioctl(ctx->adec, AUDIO_SET_BYPASS_MODE,1UL);	// bypass off
 
 	//-- start AV devices again --
-	ioctl(ctx->adec, AUDIO_PLAY);				// audio
-	ioctl(ctx->vdec, VIDEO_PLAY);				// video
-	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);		// needs sync !
+	//ioctl(ctx->adec, AUDIO_PLAY);				// audio
+	//ioctl(ctx->vdec, VIDEO_PLAY);				// video
+	//ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);		// needs sync !
 
-	//-- refill input buffer --
-	if (refill) ctx->refillBuffer = true;
-
-	//-- but never start demuxers here, because this will --
-	//-- be done outside (e.g. short before writing.)     --
-	ctx->startDMX = true;
+	usleep(150000);
+  }
 }
 
 //== mp_freezeAV ==
 //=================
 static void mp_freezeAV(MP_CTX *ctx)
 {
+  if (gDeviceState == DVB_DEVICES_RUNNING)
+  {
 	//-- freeze (pause) AV playback immediate --
 	ioctl(ctx->vdec, VIDEO_FREEZE);
 	ioctl(ctx->adec, AUDIO_PAUSE);
@@ -1853,12 +1962,16 @@ static void mp_freezeAV(MP_CTX *ctx)
 	//-- workaround: switch off decoder bypass for AC3 audio --
 	if(ctx->ac3 == 1)
 		ioctl(ctx->adec, AUDIO_SET_BYPASS_MODE, 1UL);
+  }
 }
 
 //== mp_unfreezeAV ==
 //===================
 static void mp_unfreezeAV(MP_CTX *ctx)
 {
+  if (gDeviceState == DVB_DEVICES_RUNNING)
+  {
+
 	//-- continue AV playback immediate --
 	ctx->p.pid      = ctx->pida;
 	ctx->p.pes_type = DMX_PES_AUDIO;
@@ -1873,17 +1986,25 @@ static void mp_unfreezeAV(MP_CTX *ctx)
 
 	ioctl(ctx->vdec, VIDEO_PLAY);				// video
 	ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);		// needs sync !
+  }
 }
 
-//== mp_startDMX ==
-//=================
-static void mp_startDMX(MP_CTX *ctx)
+//== mp_startDVBDevices ==
+//========================
+static void mp_startDVBDevices(MP_CTX *ctx)
 {
-	if(ctx->startDMX)
+	if (gDeviceState != DVB_DEVICES_RUNNING)
 	{
+		//-- start AV devices again and ... --
+		ioctl(ctx->adec, AUDIO_PLAY);             // audio
+		ioctl(ctx->vdec, VIDEO_PLAY);             // video
+		ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL); // needs sync !
+
+		//-- ... demuxers also --
 		ioctl (ctx->dmxa, DMX_START);	// audio first !
 		ioctl (ctx->dmxv, DMX_START);
-		ctx->startDMX = false;
+		
+		gDeviceState = DVB_DEVICES_RUNNING;
 	}
 }
 
@@ -1917,8 +2038,8 @@ static void mp_checkEvent(MP_CTX *ctx)
 			mp_unfreezeAV(ctx);
 			break;
 
-			//-- next item of program/play-list   --
-			//--------------------------------------
+		//-- next item of program/play-list   --
+		//--------------------------------------
 		case CMoviePlayerGui::ITEMSELECT:
 			g_playstate = CMoviePlayerGui::PLAY;
 
@@ -1962,79 +2083,41 @@ static void mp_checkEvent(MP_CTX *ctx)
 			}
 			// Note: "itChanged" event will cause exit of the main reader
 			// loop to select another ts file with full reinitialzing
-			// of the player thread (including FreezeAV/SoftReset) ...
+			// of the player thread (including FreezeAV/device-reset) ...
 			break;
 
-			//-- not used --
-			//--------------
+		//-- not used --
+		//--------------
 		case CMoviePlayerGui::FF:
 		case CMoviePlayerGui::REW:
 			g_playstate = CMoviePlayerGui::PLAY;
 			break;
 
-			//-- jump forward/back --
-			//-----------------------
+		//-- jump forward/back --
+		//-----------------------
 		case CMoviePlayerGui::JF:
 		case CMoviePlayerGui::JB:
 			g_playstate = CMoviePlayerGui::PLAY;
-
-			//-- (live) stream won't jump via seek --
-			if(ctx->isStream)	break;
-
-			//-- freeze AV --
-			mp_freezeAV(ctx);
-
-			//-- set new file position --
-			switch(g_jumpminutes)
-			{
-				case PF_JMP_START:
-					ctx->pos = 0;
-					break;
-
-				case PF_JMP_MID:
-					ctx->pos = ctx->fileSize/2;
-					break;
-
-				case PF_JMP_END:
-					ctx->pos = ctx->pos = ctx->fileSize - PF_SKPOS_OFFS;
-					break;
-
-				default:
-					ctx->pos += (g_jumpminutes * (MINUTEOFFSET/PF_JMP_DIV));
-					break;
-			}
-
-			//-- check limits --
-			if(ctx->pos >= ctx->fileSize)	ctx->pos = ctx->fileSize - PF_SKPOS_OFFS;
-			if(ctx->pos < ((off_t)0)) ctx->pos = (off_t)0;
-
-			//-- jump to desired file position --
-			ctx->pos = mp_seekSync(ctx->inFd, ctx->pos);
-			fprintf(stderr,"[mp] jump to pos (%lld) of total (%lld)\n",
-					  ctx->pos, ctx->fileSize);
-
-			//-- Note: the following "SoftReset" call will --
-			//-- initiate a restart of all DVB devices.    --
-			mp_softReset(ctx);
+			mp_bufferReset(ctx, g_jumpminutes);
 			break;
 
-			//-- soft reset --
-			//----------------
+		//-- soft reset --
+		//----------------
 		case CMoviePlayerGui::SOFTRESET:
 			g_playstate = CMoviePlayerGui::PLAY;
-			mp_softReset(ctx);
+			mp_bufferReset(ctx);
 			break;
 
-			//-- resync A/V --
-			//----------------
+		//-- resync A/V --
+		//----------------
 		case CMoviePlayerGui::RESYNC:
 			g_playstate = CMoviePlayerGui::PLAY;
 			//mp_resync(ctx);
 			break;
 
 
-			//-- select audio track --
-			//------------------------
+		//-- select audio track --
+		//------------------------
 		case CMoviePlayerGui::AUDIOSELECT:
 			g_playstate = CMoviePlayerGui::PLAY;
 
@@ -2045,16 +2128,14 @@ static void mp_checkEvent(MP_CTX *ctx)
 				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
 				lcdUpdateTsMode=true;
 			}
-			mp_selectAudio(ctx);
+			mp_selectAudio(ctx); // includes bufferReset request now !
 			fprintf(stderr, "[mp] using pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
 					  ctx->pida, ctx->pidv, ctx->ac3);
 
-			mp_softReset(ctx);
-
 			break;
 
-			//-- other --
-			//-----------
+		//-- other --
+		//-----------
 		case CMoviePlayerGui::STOPPED:
 		case CMoviePlayerGui::PREPARING:
 		case CMoviePlayerGui::STREAMERROR:
@@ -2272,6 +2353,7 @@ void mp_selectAudio(MP_CTX *ctx)
 {
 	if(numpida > 1)
 	{
+		mp_bufferReset(ctx);
 		showaudioselectdialog = true;
 		while(showaudioselectdialog) usleep(50000);
 	}
@@ -2391,6 +2473,11 @@ void *mp_playFileMain(void *filename)
 	//=======================
 	do
 	{
+		//-- force buffer refilling including immidiate freezeAV() --
+		//-- should also initiate late "stop/start" of devices ... --  
+		//-----------------------------------------------------------
+		mp_bufferReset(ctx);
+
 		//-- set default count of buffer segments for Ptr-Queue --
 		ctx->nSegsMax = N_SEGS_QUEUE;
 	
@@ -2480,7 +2567,6 @@ void *mp_playFileMain(void *filename)
 			//-- analyze TS file (set apid/vpid/ac3, filesize, nSegsMax, ... in --
 			//-- ctx) on leave, read position of file will be set to start pos.  -- 
 			mp_analyze(ctx);
-			
 		}
 
 		fprintf
@@ -2490,10 +2576,6 @@ void *mp_playFileMain(void *filename)
 			(ctx->isStream)?"(live) stream":"plain TS file",
 			ctx->pidv, ctx->pida, ctx->ac3
 		);
-
-		//-- DVB devices softreset --
-		//---------------------------
-		mp_softReset(ctx);
 
 		//-- aspect ratio init --
 		checkAspectRatio(ctx->vdec, true);
@@ -2545,10 +2627,6 @@ void *mp_playFileMain(void *filename)
         
 					//-- update file position --
 					g_fileposition = ctx->pos;
-			  
-					//-- after "softreset" DMX devices has to be started here  --
-					//-- to let the demuxer continue its stream processing ... --
-					mp_startDMX(ctx);  // start is implied only, if stopped
         
 				} 
 				//== end of player loop (II) == 
@@ -2589,11 +2667,7 @@ void *mp_playFileMain(void *filename)
 			ctx->inFd = -1;
 		}
 
-		//-- Note: on any content change AV should be freezed first,   --
-		//-- to get a consitant state. restart of all DVB-devices will --
-		//-- be initiated by a SoftReset in the next turn/start.       --
-		mp_freezeAV(ctx);
-		ctx->startDMX = false;
+		ctx->pos = 0LL;
 
 		//-- check for another item to play --
 		//------------------------------------
@@ -2612,6 +2686,7 @@ void *mp_playFileMain(void *filename)
 
 	//-- stop and close DVB devices --
 	//--------------------------------
+	ctx->inFd = -1;
 	mp_closeDVBDevices(ctx);
 
 	//-- on exit after film end this will force any --
@@ -3762,9 +3837,9 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.125 $");
+	helpbox.addLine("Version: $Revision: 1.126 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
-	helpbox.addLine("wabber-edition: v1.1 (c) 2005 by gmo18t");
+	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 }
@@ -3784,7 +3859,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.125 $");
+	helpbox.addLine("Version: $Revision: 1.126 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
