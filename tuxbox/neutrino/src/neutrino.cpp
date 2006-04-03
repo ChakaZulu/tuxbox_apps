@@ -4368,7 +4368,10 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	while (msg != CRCInput::RC_timeout);
 
 	if( (bDoPaint) && (pixbuf!= NULL) )
+	{
 		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
+		delete [] pixbuf;
+	}
 }
 
 void CNeutrinoApp::tvMode( bool rezap )
