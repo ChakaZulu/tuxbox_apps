@@ -1,3 +1,4 @@
+ - Fix: Premiere.de private descriptor name fix
  - Fix: DSM-CC Stuff, BIOP::Messages not yet decodeable
  - New: DSM-CC BIOPs (File-, Dir-, StreamMessage) and DSM-Taps 
  - New: Mega-Frame Initialization Packet (MIP, TS 101 191) (tnx to Cedric Delfosse)

@@ -1,5 +1,5 @@
 /*
-$Id: rnt.c,v 1.5 2006/01/02 18:24:46 rasc Exp $
+$Id: rnt.c,v 1.6 2006/04/04 17:27:56 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: rnt.c,v 1.5 2006/01/02 18:24:46 rasc Exp $
 
 
 $Log: rnt.c,v $
+Revision 1.6  2006/04/04 17:27:56  rasc
+no message
+
 Revision 1.5  2006/01/02 18:24:46  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -107,6 +110,7 @@ void section_TVA_RNT (u_char *b, int len)
 	 b    += i;
 	 len1 -= i;
 	 len2 -= i;
+	 out_NL (4);
   }
   indent (-1);
 
@@ -145,6 +149,7 @@ void section_TVA_RNT (u_char *b, int len)
 		len1 -= i;
 		len2 -= i;
 		len3 -= i;
+	 	out_NL (4);
 	}
 	indent (-1);
 
@@ -179,6 +184,7 @@ void section_TVA_RNT (u_char *b, int len)
 			len1 -= i;
 			len2 -= i;
 			len3 -= i;
+	 		out_NL (4);
 		}
 		indent (-1);
 
