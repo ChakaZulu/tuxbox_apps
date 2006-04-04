@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor_premiere.c,v 1.3 2006/01/02 18:24:16 rasc Exp $ 
+$Id: dvb_descriptor_premiere.c,v 1.4 2006/04/04 17:16:54 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dvb_descriptor_premiere.c,v 1.3 2006/01/02 18:24:16 rasc Exp $
 
 
 $Log: dvb_descriptor_premiere.c,v $
+Revision 1.4  2006/04/04 17:16:54  rasc
+finally fix typo in premiere descriptor name
+
 Revision 1.3  2006/01/02 18:24:16  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -125,12 +128,12 @@ void descriptor_PRIVATE_PremiereDE_ParentalInformation (u_char *b)
 
 /*
  	Premiere privat
-   0xF2  Content Transmition Descriptor
+   0xF2  Content Transmission Descriptor
    PTS 60 04 101    v 1.0.1 17.06.2004
 */
 
  
-void descriptor_PRIVATE_PremiereDE_ContentTransmition (u_char *b)
+void descriptor_PRIVATE_PremiereDE_ContentTransmission (u_char *b)
 {
   int  len, str_tim_len;
   u_int time_MJD, time_UTC;
@@ -140,7 +143,7 @@ void descriptor_PRIVATE_PremiereDE_ContentTransmition (u_char *b)
   len       	 = b[1];
 
 
-  out_nl (4,"--> Premiere Content Transmition descriptor ");
+  out_nl (4,"--> Premiere Content Transmission descriptor ");
 
 
   outBit_Sx_NL  (4,"transport_stream_ID: ",	b,  16, 16);

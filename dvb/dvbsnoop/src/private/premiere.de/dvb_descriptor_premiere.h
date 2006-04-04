@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor_premiere.h,v 1.2 2006/01/02 18:24:16 rasc Exp $ 
+$Id: dvb_descriptor_premiere.h,v 1.3 2006/04/04 17:16:54 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_descriptor_premiere.h,v 1.2 2006/01/02 18:24:16 rasc Exp $
 
 
 $Log: dvb_descriptor_premiere.h,v $
+Revision 1.3  2006/04/04 17:16:54  rasc
+finally fix typo in premiere descriptor name
+
 Revision 1.2  2006/01/02 18:24:16  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -34,7 +37,7 @@ Revision 1.1  2004/11/03 21:01:02  rasc
 
 void descriptor_PRIVATE_PremiereDE_ContentOrder (u_char *b);
 void descriptor_PRIVATE_PremiereDE_ParentalInformation (u_char *b);
-void descriptor_PRIVATE_PremiereDE_ContentTransmition (u_char *b);
+void descriptor_PRIVATE_PremiereDE_ContentTransmission (u_char *b);
 
 
 #endif

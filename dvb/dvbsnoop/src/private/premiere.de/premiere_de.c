@@ -1,5 +1,5 @@
 /*
-$Id: premiere_de.c,v 1.4 2006/01/02 18:24:16 rasc Exp $
+$Id: premiere_de.c,v 1.5 2006/04/04 17:16:54 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: premiere_de.c,v 1.4 2006/01/02 18:24:16 rasc Exp $
 
 
 $Log: premiere_de.c,v $
+Revision 1.5  2006/04/04 17:16:54  rasc
+finally fix typo in premiere descriptor name
+
 Revision 1.4  2006/01/02 18:24:16  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -60,7 +63,7 @@ Revision 1.1  2004/11/03 21:01:02  rasc
 static PRIV_DESCR_ID_FUNC pdescriptors[] = {
 	{ 0xF0, DVB_SI,   descriptor_PRIVATE_PremiereDE_ContentOrder },
 	{ 0xF1, DVB_SI,   descriptor_PRIVATE_PremiereDE_ParentalInformation },
-	{ 0xF2, DVB_SI,   descriptor_PRIVATE_PremiereDE_ContentTransmition },
+	{ 0xF2, DVB_SI,   descriptor_PRIVATE_PremiereDE_ContentTransmission },
 	{ 0x00,	0,        NULL } // end of table  (id = 0x00, funct = NULL)
 };
 
