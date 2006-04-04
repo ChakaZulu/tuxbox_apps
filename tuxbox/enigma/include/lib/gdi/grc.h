@@ -143,8 +143,7 @@ public:
 		while(1)
 		{
 			pthread_mutex_lock(&mutex);
-			int tmp=wp;
-			tmp+=1;
+			int tmp=wp+1;
 			if ( tmp == MAXSIZE )
 				tmp=0;
 			if ( tmp == rp )

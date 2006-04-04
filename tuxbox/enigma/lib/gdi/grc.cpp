@@ -46,19 +46,22 @@ void *gRC::thread()
 {
 	while (1)
 	{
-		singleLock s(mutex);
+		pthread_mutex_lock(&mutex);
 		if ( rp != wp )
 		{
-			gOpcode& o(queue[rp]);
+			gOpcode o(queue[rp++]);
+			if ( rp == MAXSIZE )
+				rp=0;
+			pthread_mutex_unlock(&mutex);
 			if (o.opcode==gOpcode::shutdown)
 				break;
 			o.dc->exec(&o);
-			rp++;
-			if ( rp == MAXSIZE )
-				rp=0;
 		}
 		else
+		{
 			pthread_cond_wait(&cond, &mutex);
+			pthread_mutex_unlock(&mutex);
+		}
 	}
 	pthread_exit(0);
 	return 0;
