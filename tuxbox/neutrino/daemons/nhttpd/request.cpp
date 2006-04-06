@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.49 2006/03/29 15:31:55 yjogol Exp $
+	$Id: request.cpp,v 1.50 2006/04/06 16:25:52 yjogol Exp $
 
 	License: GPL
 
@@ -633,7 +633,8 @@ bool CWebserverRequest::SendResponse()
 	RewriteURL();
 	std::string _hosted="/hosted/";
 
-	if( Client_Addr.find(IADDR_LOCAL)>0 && Client_Addr.find(Parent->NoAuthClient)>0) // dont check local calls or calls from NoAuthClient
+	if( Client_Addr.find(IADDR_LOCAL)>0 && 
+		(Parent->NoAuthClient == "" || Client_Addr.find(Parent->NoAuthClient)>0)) // dont check local calls or calls from NoAuthClient
 	{
 		if(!Authenticate()) 							// check every call for authtication
         		return false;
