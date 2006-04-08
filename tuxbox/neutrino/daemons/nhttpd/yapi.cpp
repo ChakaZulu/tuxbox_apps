@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: yapi.cpp,v 1.10 2006/03/29 15:31:55 yjogol Exp $
+	$Id: yapi.cpp,v 1.11 2006/04/08 16:20:42 yjogol Exp $
 
 	License: GPL
 
@@ -569,7 +569,10 @@ std::string  CyAPI::YWeb_cgi_get_ini(std::string filename, std::string varname, 
 //	aprintf("ini-get: var:%s yaccess:(%s)\n", varname.c_str(), yaccess.c_str());
 	std::string result;
 	if((yaccess == "open") || (yaccess == ""))
+	{
+		Config->clear();
 		Config->loadConfig(filename);
+	}
 	result = Config->getString(varname, "");
 	return result;	
 }
@@ -583,7 +586,10 @@ void  CyAPI::YWeb_cgi_set_ini(std::string filename, std::string varname, std::st
 //	aprintf("ini-set: var:%s yaccess:(%s)\n", varname.c_str(), yaccess.c_str());
 	std::string result;
 	if((yaccess == "open") || (yaccess == ""))
+	{
+		Config->clear();
 		Config->loadConfig(filename);
+	}
 	Config->setString(varname, varvalue);
 	if((yaccess == "save") || (yaccess == ""))
 		Config->saveConfig(filename);

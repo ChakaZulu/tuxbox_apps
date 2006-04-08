@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.26 2005/11/10 19:38:49 yjogol Exp $
+        $Id: request.h,v 1.27 2006/04/08 16:20:42 yjogol Exp $
 
         License: GPL
 
@@ -73,6 +73,7 @@ protected:
 	bool ParseFirstLine(std::string zeile);
 	bool ParseParams(std::string param_string);
 	bool ParseHeader(std::string header);
+	std::string GetRawLoopingRequest(void);
 
 
 public:

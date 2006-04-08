@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.50 2006/04/06 16:25:52 yjogol Exp $
+	$Id: request.cpp,v 1.51 2006/04/08 16:20:42 yjogol Exp $
 
 	License: GPL
 
@@ -110,22 +110,49 @@ bool CWebserverRequest::CheckAuth()
 }
 
 //-------------------------------------------------------------------------
-
+#define bufferlen 16384
 bool CWebserverRequest::GetRawRequest()
 {
-#define bufferlen 16384
 	char *buffer = new char[bufferlen+1];
-
 	if ((rawbuffer_len = read(Socket,buffer,bufferlen)) < 1)
 	{
 		delete[] buffer;
 		return false;
 	}
-
 	rawbuffer = std::string(buffer, rawbuffer_len);
 
 	delete[] buffer;
 	return true;
+}
+//-------------------------------------------------------------------------
+// Used for un-synced posts (e.g. Firefox/Mozilla)
+std::string CWebserverRequest::GetRawLoopingRequest()
+{
+	std::string _rawbuffer;
+	char *buffer = new char[bufferlen+1];
+	long t, y=0, _rawbuffer_len=0;
+	
+	fcntl(Socket, F_SETFL, fcntl(Socket,F_GETFL)|O_NONBLOCK); //Non blocking
+	while(_rawbuffer_len<bufferlen)
+	{
+		if(y > 50) // non-blocking retries
+			break;
+		t = read(Socket,&buffer[_rawbuffer_len],bufferlen-_rawbuffer_len);
+//		aprintf("raw: Bytes Read-Total:%ld Read-Now:%d\n",rawbuffer_len,t);
+		if(t!=-1)//EAGAIN =-1 = nothing read but no error
+		{
+			if(t <= 0)
+				break;
+			_rawbuffer_len += t;
+			y=0; 
+		}
+		else
+			y++;
+	}
+	_rawbuffer = std::string(buffer, _rawbuffer_len);
+
+	delete[] buffer;
+	return _rawbuffer;
 }
 
 //-------------------------------------------------------------------------
@@ -341,6 +368,13 @@ bool CWebserverRequest::ParseRequest()
 				}
 				else if(HeaderList["Content-Type"].compare("application/x-www-form-urlencoded") == 0)
 				{
+					// append Socket read for Mozilla engines
+					std::string rest = GetRawLoopingRequest();
+					rawbuffer += rest;
+					// adjust headerende
+					for(i = 0; ((rawbuffer[i] != '\n') || (rawbuffer[i+2] != '\n')) && (i < rawbuffer.length());i++);
+					headerende = i;
+					
 					if((headerende + 3) < rawbuffer_len)
 					{
 						std::string params = rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3));
