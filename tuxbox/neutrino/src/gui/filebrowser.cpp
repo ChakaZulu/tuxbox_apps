@@ -966,7 +966,7 @@ void CFileBrowser::paintItem(unsigned int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
-		paintFoot();
+// 		paintFoot();
 	}
 	else
 	{
