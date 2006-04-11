@@ -60,14 +60,10 @@ CBaseDec::RetCode CBaseDec::DecoderBase(CAudiofile* const in,
 										time_t* const t,
 										unsigned int* const secondsToSkip)
 {
-	FILE* fp=NULL;
 	RetCode Status = OK;
 
-	// a simple fopen segfaults here when file on nfs volume was deleted but tried to access
-	// open does not segfault...
-	
-	int fd = open(in->Filename.c_str(), O_RDONLY);	
-	if ( fd < 0 )
+	FILE* fp=fopen(in->Filename.c_str(), "r");	
+	if ( fp == NULL )
 	{
 		fprintf( stderr, "Error opening file %s for decoding.\n",
 				 in->Filename.c_str() );
@@ -75,20 +71,11 @@ CBaseDec::RetCode CBaseDec::DecoderBase(CAudiofile* const in,
 	}
 	else
 	{
-		fp = fdopen( fd, "r" );
-		if(fp != NULL)
+		/* jump to first audio frame; audio_start_pos is only set for FILE_MP3 */
+		if ( in->MetaData.audio_start_pos &&
+			  fseek( fp, in->MetaData.audio_start_pos, SEEK_SET ) == -1 )
 		{
-			/* jump to first audio frame; audio_start_pos is only set for FILE_MP3 */
-			if ( in->MetaData.audio_start_pos &&
-				  fseek( fp, in->MetaData.audio_start_pos, SEEK_SET ) == -1 )
-			{
-				fprintf( stderr, "fseek() failed.\n" );
-				Status = INTERNAL_ERR;
-			}
-		}
-		else
-		{
-			fprintf( stderr, "fdopen() failed.\n" );
+			fprintf( stderr, "fseek() failed.\n" );
 			Status = INTERNAL_ERR;
 		}
 	}

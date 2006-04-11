@@ -979,6 +979,8 @@ FILE *f_open(const char *filename, const char *acctype)
 	  unsigned char magic[4] = {0, 0, 0, 0};
 
 	  fd = fopen(url.file, type);
+	  if (fd == NULL)
+		return NULL;
 	  fread(&magic, 4, 1, fd);
 	  rewind(fd);
 
