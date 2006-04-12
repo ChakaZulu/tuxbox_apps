@@ -1,7 +1,7 @@
 #ifndef SILANGUAGES_HPP
 #define SILANGUAGES_HPP
 //
-// $Id: SIlanguage.hpp,v 1.1 2006/03/26 20:13:49 Arzka Exp $
+// $Id: SIlanguage.hpp,v 1.2 2006/04/12 21:23:58 Arzka Exp $
 //
 // Class for filtering preferred language
 //
@@ -22,6 +22,11 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIlanguage.hpp,v $
+// Revision 1.2  2006/04/12 21:23:58  Arzka
+// Optimization.
+// Removed unnecessary copying of std:map and
+// removed few avoidable std::string creation
+//
 // Revision 1.1  2006/03/26 20:13:49  Arzka
 // Added support for selecting EPG language
 //
@@ -38,7 +43,7 @@
 
 class SIlanguage {
 public:
-	static std::string filter(std::map<std::string, std::string> s, int max);
+	static void filter(const std::map<std::string, std::string>& s, int max, std::string& retval);
 	static bool loadLanguages();
 	static bool saveLanguages();
 	static void setLanguages(const std::vector<std::string>& newLanguages);
