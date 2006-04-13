@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.71 2006/04/13 11:10:44 yjogol Exp $
+	$Id: webapi.cpp,v 1.72 2006/04/13 13:46:17 yjogol Exp $
 
 	License: GPL
 
@@ -1444,6 +1444,8 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 			stopTimeT = atoi(request->ParameterList["stop"].c_str());
 		if(request->ParameterList["announce"] != "")
 			announceTimeT = atoi(request->ParameterList["announce"].c_str());
+		else
+			announceTimeT = alarmTimeT;
 	}
 	else if(request->ParameterList["alDate"] != "") //given formatted
 	{
@@ -1463,6 +1465,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 	
 		correctTime(alarmTime);
 		alarmTimeT = mktime(alarmTime);
+		announceTimeT = alarmTimeT;
 		struct tm *stopTime = localtime(&alarmTimeT);
 		stopTime->tm_sec = 0;
 		// Stop Time - Format exact! HH:MM
@@ -1508,6 +1511,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		}
 		correctTime(alarmTime);
 		alarmTimeT = mktime(alarmTime);
+		announceTimeT = alarmTimeT;
 
 		struct tm *stopTime = alarmTime;
 		if(request->ParameterList["sd"] != "")
