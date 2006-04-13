@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.51 2006/04/08 16:20:42 yjogol Exp $
+	$Id: request.cpp,v 1.52 2006/04/13 11:10:44 yjogol Exp $
 
 	License: GPL
 
@@ -326,7 +326,7 @@ bool CWebserverRequest::ParseRequest()
 {
 	int ende;
 
-	if(rawbuffer_len > 0 )
+	if(rawbuffer.length() > 0 )
 	{
 		if((ende = rawbuffer.find_first_of('\n')) == 0)
 		{
@@ -341,7 +341,7 @@ bool CWebserverRequest::ParseRequest()
 			unsigned int i;
 			for(i = 0; ((rawbuffer[i] != '\n') || (rawbuffer[i+2] != '\n')) && (i < rawbuffer.length());i++);
 			int headerende = i;
-//			dprintf("headerende: %d buffer_len: %d\n",headerende,rawbuffer_len);
+//			dprintf("headerende: %d buffer_len: %d\n",headerende,rawbuffer.length());
 			if(headerende == 0)
 			{
 				aprintf("ParseRequest: no headers found\n");
@@ -369,15 +369,19 @@ bool CWebserverRequest::ParseRequest()
 				else if(HeaderList["Content-Type"].compare("application/x-www-form-urlencoded") == 0)
 				{
 					// append Socket read for Mozilla engines
+					aprintf("POST: raw:%d ",rawbuffer.length());
 					std::string rest = GetRawLoopingRequest();
 					rawbuffer += rest;
+					aprintf("rest:%d\n",rest.length());
+					//aprintf("post data:\b%s\n",rawbuffer.c_str());//for debugging
+					
 					// adjust headerende
-					for(i = 0; ((rawbuffer[i] != '\n') || (rawbuffer[i+2] != '\n')) && (i < rawbuffer.length());i++);
+					for(i = 0; ((rawbuffer[i] != '\n') || (rawbuffer[i+2] != '\n')) && (i < rawbuffer.length());i++) ;
 					headerende = i;
 					
-					if((headerende + 3) < rawbuffer_len)
+					if((headerende + 3) < rawbuffer.length())
 					{
-						std::string params = rawbuffer.substr(headerende + 3,rawbuffer_len - (headerende + 3));
+						std::string params = rawbuffer.substr(headerende + 3,rawbuffer.length() - (headerende + 3));
 						if(params[params.length()-1] == '\n')
 							params.substr(0,params.length() -2);
 						ParseParams(params);
@@ -398,7 +402,7 @@ bool CWebserverRequest::ParseRequest()
 	}
 	else
 	{
-		aprintf("rawbuffer_len = %ld\n",rawbuffer_len);
+		aprintf("rawbuffer_len = %ld\n",rawbuffer.length());
 		return false;
 	}
 }
@@ -596,7 +600,7 @@ void CWebserverRequest::Send500Error(void)
 
 void CWebserverRequest::SendPlainHeader(std::string contenttype)
 {
-	SocketWrite("HTTP/1.0 200 OK\r\nContent-Type: " + contenttype + "\r\n\r\n");
+	SocketWrite("HTTP/1.0 200 OK\r\nContent-Type: " + contenttype + "; charset: utf-8\r\n\r\n");
 	HttpStatus = 200;
 }
 

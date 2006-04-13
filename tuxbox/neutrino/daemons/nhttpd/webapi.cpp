@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.70 2006/03/29 15:31:55 yjogol Exp $
+	$Id: webapi.cpp,v 1.71 2006/04/13 11:10:44 yjogol Exp $
 
 	License: GPL
 
@@ -1450,6 +1450,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		// Alarm Date - Format exact! DD.MM.YYYY
 		tnull = time(NULL);
 		struct tm *alarmTime=localtime(&tnull);
+		alarmTime->tm_sec = 0;
 		if(sscanf(request->ParameterList["alDate"].c_str(),"%2d.%2d.%4d",&(alarmTime->tm_mday), &(alarmTime->tm_mon), &(alarmTime->tm_year)) == 3)
 		{
 			alarmTime->tm_mon -= 1;
@@ -1463,6 +1464,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		correctTime(alarmTime);
 		alarmTimeT = mktime(alarmTime);
 		struct tm *stopTime = localtime(&alarmTimeT);
+		stopTime->tm_sec = 0;
 		// Stop Time - Format exact! HH:MM
 		if(request->ParameterList["stTime"] != "")
 			sscanf(request->ParameterList["stTime"].c_str(),"%2d.%2d",&(stopTime->tm_hour), &(stopTime->tm_min));
@@ -1581,8 +1583,16 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		data= &eventinfo;
 	else if (type==CTimerd::TIMER_RECORD)
 	{
+		std::string _rec_dir = request->ParameterList["rec_dir"];
+		if(_rec_dir == "")
+		{
+			// get Default Recordingdir
+			CConfigFile *Config = new CConfigFile(',');
+			Config->loadConfig(NEUTRINO_CONF);
+			_rec_dir = Config->getString("network_nfs_recordingdir", "/mnt/filme");
+		}
 		recinfo = eventinfo;
-		strncpy(recinfo.recordingDir, (request->ParameterList["rec_dir"]).c_str(), RECORD_DIR_MAXLEN-1);
+		strncpy(recinfo.recordingDir, _rec_dir.c_str(), RECORD_DIR_MAXLEN-1);
 		data = &recinfo;
 	}
 	else if(type==CTimerd::TIMER_REMIND)
@@ -1606,14 +1616,22 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		timerlist.clear();
 		Parent->Timerd->getTimerList(timerlist);
 		CTimerd::TimerList::iterator timer = timerlist.begin();
-		for(; timer != timerlist.end();timer++)
+		
+		// Look for Recording Safety Timers too
+		time_t real_alarmTimeT = alarmTimeT;
+		if(eventinfo.recordingSafety)
 		{
-			if(timer->alarmTime == alarmTimeT)
+			int pre,post;
+			Parent->Timerd->getRecordingSafety(pre,post);
+			real_alarmTimeT -= pre;
+		}
+		
+		for(; timer != timerlist.end();timer++)
+			if(timer->alarmTime == real_alarmTimeT)
 			{
 				Parent->Timerd->removeTimerEvent(timer->eventID);
 				break;
 			}
-		}
 	}
 	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep,repCount);
 }
