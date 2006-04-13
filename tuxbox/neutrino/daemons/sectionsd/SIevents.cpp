@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.30 2006/04/12 21:23:58 Arzka Exp $
+// $Id: SIevents.cpp,v 1.31 2006/04/13 19:26:08 mws Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -102,7 +102,7 @@ int SIevent::saveXML(FILE *file, const char *serviceName) const
 
 char SIevent::getFSK() const
 {
-	for (SIparentalRatings::iterator it = ratings.begin(); it != ratings.end(); it++)
+	for (SIparentalRatings::iterator it = ratings.begin(); it != ratings.end(); ++it)
 	{
 		if (it->countryCode == "DEU")
 		{
@@ -182,7 +182,7 @@ std::string SIevent::getName() const
 {
 	std::string retval;
 	SIlanguage::filter(langName, 1, retval);
-  return retval;
+	return retval;
 }
 
 void SIevent::setName(const std::string &lang, const std::string &name)
@@ -227,13 +227,13 @@ void SIevent::dump(void) const
 	if(itemDescription.length())
 	        printf("Item-Description: %s\n", itemDescription.c_str());
 	for (std::map<std::string, std::string>::const_iterator it = langName.begin() ;
-	     it != langName.end() ; it++)
+	     it != langName.end() ; ++it)
 	        printf("Name (%s): %s\n", it->first.c_str(), it->second.c_str());
 	for (std::map<std::string, std::string>::const_iterator it = langText.begin() ;
-	     it != langText.end() ; it++)
+	     it != langText.end() ; ++it)
 		printf("Text (%s): %s\n", it->first.c_str(), it->second.c_str());
 	for (std::map<std::string, std::string>::const_iterator it = langExtendedText.begin() ;
-	     it != langExtendedText.end() ; it++)
+	     it != langExtendedText.end() ; ++it)
 		printf("Extended-Text (%s): %s\n", it->first.c_str(), it->second.c_str());
 	if(contentClassification.length()) {
 		printf("Content classification:");
@@ -262,13 +262,13 @@ void SIevent::dump(void) const
 void SIevent::dumpSmall(void) const
 {
 	for (std::map<std::string, std::string>::const_iterator it = langName.begin() ;
-	     it != langName.end() ; it++)
+	     it != langName.end() ; ++it)
 	        printf("Name (%s): %s\n", it->first.c_str(), it->second.c_str());
 	for (std::map<std::string, std::string>::const_iterator it = langText.begin() ;
-	     it != langText.end() ; it++)
+	     it != langText.end() ; ++it)
 		printf("Text (%s): %s\n", it->first.c_str(), it->second.c_str());
 	for (std::map<std::string, std::string>::const_iterator it = langExtendedText.begin() ;
-	     it != langExtendedText.end() ; it++)
+	     it != langExtendedText.end() ; ++it)
 		printf("Extended-Text (%s): %s\n", it->first.c_str(), it->second.c_str());
 /*
   if(startzeit)
@@ -342,7 +342,7 @@ SIevent SIevent::readActualEvent(t_service_id serviceID, unsigned timeoutInSecon
 		perror(DEMUX_DEVICE);
 		return evt;
 	}
-	
+
 	if (!setfilter(fd, 0x12, 0x4e, 0xff, DMX_IMMEDIATE_START | DMX_CHECK_CRC)) {
 		close(fd);
 		return evt;
@@ -353,61 +353,61 @@ SIevent SIevent::readActualEvent(t_service_id serviceID, unsigned timeoutInSecon
 	// Segment mit Event fuer sid suchen
 	do {
 		int rc = readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
-		
+
 		if(!rc)
 			break; // timeout
-		
+
 		else if(rc<0) {
 			close(fd);
 			perror ("read header");
 			return evt;
 		}
-		
+
 		section_length = (header.section_length_hi << 8) | header.section_length_lo;
-		
+
 		buf = new char[sizeof(header) + section_length - 5];
-		
+
 		if (!buf) {
 			close(fd);
 			printf("Not enough memory!\n");
 			return evt;
 		}
-		
+
 		// Den Header kopieren
 		memcpy(buf, &header, sizeof(header));
 		rc = readNbytes(fd, &buf[sizeof(header)], section_length - 5, timeoutInSeconds);
-		
+
 		if(!rc) {
 			delete[] buf;
 			break; // timeout
 		}
-		
+
 		if (rc < 0) {
 			close(fd);
 			delete[] buf;
 			perror ("read section");
 			return evt;
 		}
-		
+
 		if (header.current_next_indicator) {
 			// Wir wollen nur aktuelle sections
 			SIsectionEIT e(SIsection(sizeof(header) + section_length - 5, buf));
 			time_t zeit = time(NULL);
-			for (SIevents::iterator k = e.events().begin(); k != e.events().end(); k++)
+			for (SIevents::iterator k = e.events().begin(); k != e.events().end(); ++k)
 				if (k->service_id == serviceID)
-					for (SItimes::iterator t = k->times.begin(); t != k->times.end(); t++)
+					for (SItimes::iterator t = k->times.begin(); t != k->times.end(); ++t)
 						if ((t->startzeit <= zeit) && (zeit <= (long)(t->startzeit+t->dauer))) {
 							close(fd);
 							return SIevent(*k);
 						}
 		}
-		
+
 		else {
 			delete[] buf;
 		}
-		
+
 	} while (time(NULL) < szeit + (long)timeoutInSeconds);
-	
+
 	close(fd);
 	return evt;
 }
@@ -416,7 +416,7 @@ void SIevents::removeOldEvents(long seconds)
 {
 	time_t current_time = time(NULL);
 
-	for(SIevents::iterator it = begin(); it != end(); ) 
+	for(SIevents::iterator it = begin(); it != end(); )
 	{
 		// "it->times.erase(kt);":
 		// passing `const SItimes' as `this' argument of `void set<SItime,less<SItime>,allocator<SItime> >::erase(_Rb_tree_iterator<SItime,const SItime &,const SItime *>)' discards qualifiers
@@ -430,22 +430,18 @@ void SIevents::removeOldEvents(long seconds)
 		{
 			if ((jt->startzeit) + (int)(jt->dauer) < current_time - seconds)
 			{
-				SItimes::iterator kt = jt;
-				jt++;                                 // the iterator jt points to the next element
-				copy_of_event.times.erase(kt);        // hence it is not invalidated
+				copy_of_event.times.erase(jt++);
 				copy_has_changed = true;
 			}
 			else
-				jt++;
+				++jt;
 		}
 		if (copy_has_changed)
 		{
-			SIevents::iterator lt = it;	
-			it++;             // the iterator it points to the next element
-			erase(lt);        // hence it is not invalidated
-			
+			erase(it++);
+
 			// Set has the important property that inserting a new element into a set does not
-			//  invalidate iterators that point to existing elements. 
+			//  invalidate iterators that point to existing elements.
 			if (copy_of_event.times.size() != 0)
 #ifdef DEBUG
 				assert((++insert(it, copy_of_event)) == it);
@@ -456,7 +452,7 @@ void SIevents::removeOldEvents(long seconds)
 
 		}
 		else
-			it++;
+			++it;
 	}
 }
 
@@ -471,20 +467,19 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
 	// die 'nvod-events' werden auch geloescht
 
 //  SIevents eventsToDelete; // Hier rein kommen Events die geloescht werden sollen
-	for(SIservices::iterator k=services.begin(); k!=services.end(); k++)
+	for(SIservices::iterator k=services.begin(); k!=services.end(); ++k)
 		if(k->nvods.size()) {
 			// NVOD-Referenzen gefunden
 			// Zuerst mal das Event mit dem Text holen
-//      iterator e;
 			iterator e;
-			for(e=begin(); e!=end(); e++)
+			for(e=begin(); e!=end(); ++e)
 				if(e->service_id == k->service_id)
 					break;
 			if(e!=end()) {
 				// *e == event mit dem Text
 				SIevent newEvent(*e); // Kopie des Events
 				// Jetzt die nvods druchgehen und deren Uhrzeiten in obiges Event einfuegen
-				for(SInvodReferences::iterator n=k->nvods.begin(); n!=k->nvods.end(); n++) {
+				for(SInvodReferences::iterator n=k->nvods.begin(); n!=k->nvods.end(); ++n) {
 					// Alle druchgehen und deren Events suchen
 					for(iterator en=begin(); en!=end(); en++) {
 						if(en->service_id==n->getServiceID()) {
@@ -510,14 +505,11 @@ void SIevents::mergeAndRemoveTimeShiftedEvents(const SIservices &services)
 			// Set is a Sorted Associative Container
 			// Erasing an element from a set also does not invalidate any iterators,
 			// except, of course, for iterators that actually point to the element
-			// that is being erased. 
-
-			iterator jt = it;
-			it++;             // the iterator it points to the next element
-			erase(jt);        // hence it is not invalidated
+			// that is being erased.
+			erase(it++);
 		}
 		else
-			it++;
+			++it;
 	}
 }
 #endif
