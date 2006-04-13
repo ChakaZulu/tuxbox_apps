@@ -89,7 +89,7 @@ function loadXMLDoc(url)
 	</p>
 </div>
 <br>
-<div class="y_head">Image flashen</div>
+<div class="y_head">Image flashen {=var-set:help_url=Neutrino:yWeb#Image=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<b><font size="2">Partition mtd {=mtd=}</font><br>{=mtd_text=}</b>
 	{=if-equal:{=var-get:fcp=}~true~

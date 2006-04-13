@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Flashing Library (yjogol)
-# $Date: 2006/02/09 19:10:46 $
-# $Revision: 1.10 $
+# $Date: 2006/04/13 11:22:38 $
+# $Revision: 1.11 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -412,7 +412,13 @@ case "$1" in
 
 	timer_get_tvinfo)
 		shift 1
-		wget -O /tmp/tvinfo.xml "http://www.tvinfo.de/share/vidac/rec_info.php?username=$1&password=$2" ;;
+		res=`wget -O /tmp/tvinfo.xml "http://www.tvinfo.de/share/vidac/rec_info.php?username=$1&password=$2"`
+		if  ! [ -s /tmp/tvinfo.xml ]
+		then
+			res="$res File empty!"
+		fi
+		echo "$res"
+		;;
 
 	timer_get_klack)
 		config_open $y_config_Y_Web
@@ -425,6 +431,15 @@ case "$1" in
 		sectionsd >/dev/null 2>&1
 		msg="sectionsd reboot. ok."
 		y_format_message_html
+		;;
+		
+	get_synctimer_channels)
+		if [ -e "$y_path_config/channels.txt" ]
+		then
+			cat $y_path_config/channels.txt 
+		else
+			cat $y_path_httpd/channels.txt 
+		fi
 		;;
 
 	*)

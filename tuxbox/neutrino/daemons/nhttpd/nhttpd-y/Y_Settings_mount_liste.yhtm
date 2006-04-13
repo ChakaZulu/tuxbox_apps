@@ -26,7 +26,7 @@ function do_edit()
 <body>
 {=include-block:Y_Blocks.txt;snip_wait=}
 <br>
-<div class="y_head">Mount</div>
+<div class="y_head">Mount {=var-set:help_url=Neutrino:yWeb#Mounts=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form action="/y/cgi" name="f" id="f">
 		{=func:mount-get-list=}

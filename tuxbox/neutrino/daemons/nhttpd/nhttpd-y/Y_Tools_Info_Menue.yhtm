@@ -12,7 +12,7 @@ function goUrl(_url)
 <body>
 
 <br>
-<div class="y_head">Info</div>
+<div class="y_head">Info {=var-set:help_url=Neutrino:yWeb#Info=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form>
 		<table  class="y_work_table" cellpadding="8">

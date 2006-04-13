@@ -7,7 +7,7 @@
 
 <body>
 <br>
-<span class="y_head">Live - DoubleView</span>
+<span class="y_head">Live - DoubleView {=var-set:help_url=Neutrino:yWeb#Double_View=}{=include-block:Y_Blocks.txt;wiki_help=}</span>
 (only 384x288 resolution now)
 <div class="y_work_box">
 

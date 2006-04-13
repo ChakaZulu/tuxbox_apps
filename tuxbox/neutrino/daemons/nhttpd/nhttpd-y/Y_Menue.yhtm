@@ -17,7 +17,7 @@ function go_live()
 }
 function go_rc()
 {
-	window.open("Y_Tools_Rcsim.yhtm","rc","width=270,height=650");
+	window.open("{=if-equal:Sagem~{=func:get_boxtype=}~Y_Tools_Rcsim_sagem.yhtm~Y_Tools_Rcsim.yhtm=}","rc","width=270,height=650");
 }
 </script>
 </head>
@@ -25,7 +25,7 @@ function go_rc()
 
 <table border="0" width="100%">
 <tr>
-	<td width="150" align="center" class="y_menu_logo"><a href="http://wiki.tuxbox.org" target="_blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></td>
+	<td width="150" align="center" class="y_menu_logo"><a href="http://wiki.tuxbox.org/Neutrino:yWeb" target="_blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></td>
 	<td>
 	<table border="0" width="100%" cellspacing="0" cellpadding="0">
 	<tr>

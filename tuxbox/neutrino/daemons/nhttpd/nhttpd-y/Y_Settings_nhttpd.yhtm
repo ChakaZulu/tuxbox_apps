@@ -31,17 +31,21 @@ function do_submit()
 <body onLoad="form_init()">
 {=var-set:wait_text=Werte werden übernommen (Save).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <br>
-<div class="y_head">WebServer (nhttpd)</div>
+<div class="y_head">WebServer (nhttpd) {=var-set:help_url=Neutrino:yWeb#WebServer=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form name="f" action="/y/cgi">
 		<table border="0">
 			<tr>
 				<td>Benutzer</td>
-				<td><input type="text" name="authuser" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;AuthUser;root=}" title="username"></td>
+				<td><input type="text" name="authuser" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;AuthUser;root~open=}" title="username"></td>
 			</tr>
 			<tr>
 				<td>Passwort</td>
-				<td><input type="password" name="authpassword" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;AuthPassword;dbox2=}" title="password"></td>
+				<td><input type="password" name="authpassword" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;AuthPassword;dbox2~cache=}" title="password"></td>
+			</tr>
+			<tr>
+				<td>Client ohne Authentifikation</td>
+				<td><input type="text" name="noauthclient" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;NoAuthClient~cache=}" title="Client with no authentication check. Enter IP."></td>
 			</tr>
 			<tr>
 				<td>Authentifikation</td>
@@ -52,9 +56,13 @@ function do_submit()
 			</tr>
 			<tr>
 				<td>Port</td>
-				<td><input type="text" name="port" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;Port;80=}" title="port">
+				<td><input type="text" name="port" size="20" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;Port;80~cache=}" title="port">
 				<br>Änderung des Ports wird erst nach einem Neustart wirksam.
 				</td>
+			</tr>
+			<tr>
+				<td>Hosted Web (Mount)</td>
+				<td><input type="text" name="hosteddocumentroot" size="60" value="{=ini-get:/var/tuxbox/config/nhttpd.conf;HostedDocumentRoot~cache=}" title="Root of hosted Web. Enter mount directory."></td>
 			</tr>
 		</table>
 		<br>

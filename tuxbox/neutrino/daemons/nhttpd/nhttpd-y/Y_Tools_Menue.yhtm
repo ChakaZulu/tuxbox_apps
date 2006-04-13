@@ -10,10 +10,6 @@ function go_live()
 	var _url = (is_ie) ? "Y_Tools_NetStream.yhtm?browser=ie" : "Y_Tools_NetStream.yhtm?browser=moz";
 	parent.frames[1].location.href = _url;
 }
-function restart_sectionsd()
-{
-	parent.frames[1].location.href = "/control/exec?Y_Tools&restart_sectionsd";
-}
 </script>
 </head>
 {=var-set:fbshot={=if-file-exists:/bin/fbshot~true~{=if-file-exists:/var/bin/fbshot~true~false=}=}=}
@@ -24,16 +20,17 @@ function restart_sectionsd()
 <div class="y_menu_sec" style="	margin-left: 25px;">
 	<ul id="menu_sec">
 		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="organize timer" href="/fb/timer.dbox2">Timer</a></li>
+		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="sync timer with web tv planer" href="Y_Tools_Timer_Sync.yhtm">Sync Timer</a></li>
 		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="control box functions (reboot, remote control, SPTS, ...)" href="Y_Tools_Boxcontrol.yhtm">Boxcontrol</a></li>
 		<li class="plain"><a class="y_menu_item" title="test vlc plugin" href="javascript:go_live()">NetStream</a></li>
 		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="use LiveView with 2 boxes" href="Y_Live_DoubleView.yhtm">DoubleView</a></li>
-		<li class="plain"><a class="y_menu_item" title="Restart sectionsd" href="javascript:restart_sectionsd()">Restart sectionsd</a></li>
 		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="Web-based Remote Control" href="{=if-equal:Sagem~{=func:get_boxtype=}~Y_Tools_Rcsim_sagem.yhtm~Y_Tools_Rcsim.yhtm=}">Remote</a></li>
 		{=if-equal:{=var-get:fbshot=}~true~
 		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="make osd screenshot" href="Y_Tools_fbshot.yhtm">OSD Screenshot</a></li>
 		~
 		<li class="disabled" title="fbshot not installed at /bin or /var/bin">OSD Screenshot</li>
 		=}
+		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="check Installation" href="Y_Tools_Check_Install.yhtm">Check Install</a></li>
 	</ul>
 </div>
 

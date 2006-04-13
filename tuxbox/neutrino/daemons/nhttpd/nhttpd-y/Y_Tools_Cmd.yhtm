@@ -47,7 +47,7 @@ function doUpload()
 <body>
 
 <br>
-<div class="y_head">Command Shell</div>
+<div class="y_head">Command Shell {=var-set:help_url=Neutrino:yWeb#Command_Shell=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form name="co">
 		<textarea style="display: block" name="cmds" cols="80" rows="18"  title="shell output window" style="background : white; font : 'Courier New',medium  monospace; color : #436976;"></textarea>

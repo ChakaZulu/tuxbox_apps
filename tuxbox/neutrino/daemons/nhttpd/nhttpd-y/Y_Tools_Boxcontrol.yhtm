@@ -17,7 +17,7 @@ function goUrl(_url)
 <body>
 
 <br>
-<div class="y_head">Box-Control</div>
+<div class="y_head">Box-Control {=var-set:help_url=Neutrino:yWeb#Boxcontrol=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form>
 		<table class="y_work_table" cellpadding="8">
@@ -26,7 +26,7 @@ function goUrl(_url)
 			<b><font size="2">dbox</font></b><br>
 			<INPUT type=button value="Neu starten" title="reboot" onClick='goConfirmUrl("dbox wirklich neu starten?","/control/reboot");'>
 			<INPUT type=button value="Ausschalten" title="shutdown" onClick='goConfirmUrl("dbox wirklich ausschalten?","/control/shutdown");'>
-			<INPUT type=button value="Standby" onClick='goConfirmUrl("dbox wirklich in Standby-Modus?","/control/standby");'>
+			<INPUT type=button value="Restart Sectionsd" onClick='goUrl("/control/exec?Y_Tools&restart_sectionsd");'>
 			</td>
 			<td>
 			<b><font size="2">Standby Modus</font></b><br>
@@ -59,6 +59,7 @@ function goUrl(_url)
 			<b><font size="2">Aufnahme-Modus</font></b><br>
 			<INPUT type=button value="An" onClick='goUrl("/control/setmode?record=start");'>
 			<INPUT type=button value="Aus" onClick='goUrl("/control/setmode?record=stop");'>
+			<INPUT type=button value="Status" onClick='goUrl("/control/setmode?status");'>
 			</td>
 			<td>
 			<b><font size="2">SPTS</font></b><br>

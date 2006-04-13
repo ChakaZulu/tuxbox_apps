@@ -18,7 +18,7 @@ function do_submit()
 <body onLoad="form_init()">
 {=var-set:wait_text=Werte werden übernommen (Save).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <br>
-<div class="y_head">VNC</div>
+<div class="y_head">VNC {=var-set:help_url=Neutrino:yWeb#VNC=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form name="f" action="">
 		<table border="0">

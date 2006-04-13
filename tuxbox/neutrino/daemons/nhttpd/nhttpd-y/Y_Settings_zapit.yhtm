@@ -26,7 +26,7 @@ function do_submit()
 <body>
 
 <br>
-<div class="y_head">zapit</div>
+<div class="y_head">zapit {=var-set:help_url=Neutrino:yWeb#zapit=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 
 	<table border="0" cellpadding="5">

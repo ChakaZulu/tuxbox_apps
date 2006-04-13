@@ -15,7 +15,7 @@ function do_submit()
 {=var-set:wait_text=Werte werden übernommen (Save).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <!--- Rapid Prototyping using ini-get --->
 <br>
-<div class="y_head">yWeb</div>
+<div class="y_head">yWeb {=var-set:help_url=Neutrino:yWeb#yWeb=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form name="f" action="/y/cgi">
 		<table border="0" class="y_form_table">
@@ -53,7 +53,7 @@ function do_submit()
 			</tr>
 			<tr>
 				<td>VLC Aufnahmepfad</td>
-				<td><input type="text" name="vlc_record_path" size="17" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;vlc_record_path=}" title="VLC record path"></td>
+				<td><input type="text" name="vlc_record_path" size="17" value="{=ini-get:/var/tuxbox/config/Y-Web.conf;vlc_record_path=}" title="VLC record path for LiveView direct recording."></td>
 			</tr>
 <!---			<tr>
 				<td>VLC Aufnahmetyp</td>
@@ -70,3 +70,4 @@ function do_submit()
 </body>
 </html>
 {=include-block:Y_Blocks.txt;management_check_bottom=}
+

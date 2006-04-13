@@ -12,16 +12,18 @@
 	<ul id="menu_sec">
 	{=if-empty:{=var-get:management=}~
 		<li class="disabled" title="settings for yWeb itselfs (restricted by ManagementIP)">yWeb</li>
+		<li class="disabled" title="SyncTimer Settings (restricted by ManagementIP)">Timer Settings</a></li>
 		<li class="disabled" title="settings for Web Server daemon (restricted by ManagementIP)">WebServer</li>
 		<li class="disabled" title="Wake on LAN (restricted by ManagementIP)">Wake on LAN</li>
 		<li class="disabled" title="download or upload ucodes (restricted by ManagementIP)">ucodes</li>
 		<li class="disabled" title="download or upload Bouquetlist, Channellist, ... (restricted by ManagementIP)">zapit</li>
 	~
 		<li class="plain"><a class="y_menu_item" title="settings for yWeb itselfs" target="Rechts_oben" href="Y_Settings_yWeb.yhtm">yWeb</a></li>
+		<li class="plain"><a class="y_menu_item" title="SyncTimer Settings" target="Rechts_oben" href="Y_Settings_Timer.yhtm">Timer Settings</a></li>
 		<li class="plain"><a class="y_menu_item" title="settings for Web Server daemon" target="Rechts_oben" href="Y_Settings_nhttpd.yhtm">WebServer</a></li>
 		<li class="plain"><a class="y_menu_item" title="Wake on LAN" target="Rechts_oben" href="Y_Settings_wol.yhtm">Wake on LAN</a></li>
-		<li class="plain"><a class="y_menu_item" title="download or upload ucodes" target="Rechts_oben" href="Y_Settings_ucodes.htm">ucodes</a></li>
-		<li class="plain"><a class="y_menu_item" title="download or upload Bouquetlist, Channellist, ..." target="Rechts_oben" href="Y_Settings_zapit.htm">zapit</a></li>
+		<li class="plain"><a class="y_menu_item" title="download or upload ucodes" target="Rechts_oben" href="Y_Settings_ucodes.yhtm">ucodes</a></li>
+		<li class="plain"><a class="y_menu_item" title="download or upload Bouquetlist, Channellist, ..." target="Rechts_oben" href="Y_Settings_zapit.yhtm">zapit</a></li>
 	=}	
 		<li class="plain"><a class="y_menu_item" title="change layout skin" target="Rechts_oben" href="Y_Settings_Skin.yhtm">Skins</a></li>
 	</ul>
@@ -43,6 +45,7 @@
 		<li class="plain"><a class="y_menu_item" title="organize file mounts" target="Rechts_oben" href="Y_Settings_mount_liste.yhtm">Mounts</a></li>
 		<li class="plain"><a class="y_menu_item" title="Parental settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_parental">Jugendschutz</a></li>
 		<li class="plain"><a class="y_menu_item" title="Recording settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_record">Aufnahme</a></li>
+		<li class="plain"><a class="y_menu_item" title="Direct Recording" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_direct_recording">Direktaufnahme</a></li>
 		<li class="plain"><a class="y_menu_item" title="Movieplayer settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_movieplayer">Movieplayer</a></li>
 		<li class="plain"><a class="y_menu_item" title="Audioplayer settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_audioplayer">Audioplayer</a></li>
 		<li class="plain"><a class="y_menu_item" title="Pictureviewer settings" target="Rechts_oben" href="Y_Settings_neutrino_forms.yhtm?form=neutrino_form-data_pictureviewer">Bildbetrachter</a></li>

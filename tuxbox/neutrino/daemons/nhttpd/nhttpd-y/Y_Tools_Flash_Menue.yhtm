@@ -51,7 +51,7 @@ function goUrl(_url)
 <body>
 {=var-set:wait_text=Image wird erstellt (create image).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <br>
-<div class="y_head">Image</div>
+<div class="y_head">Image {=var-set:help_url=Neutrino:yWeb#Image=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<b><font size="2">Partition</font></b><br>
 	<form action="/y/cgi" name="f" id="f">
@@ -68,7 +68,7 @@ function goUrl(_url)
 <br>
 <div class="y_work_box" title="You should reboot the box before flashing">
 	<strong>Hinweis:</strong><br><br>
-	Es ist sinnvoll die Box vor dem flashen frish zu booten.<br>
+	Es ist sinnvoll die Box vor dem flashen frisch zu booten.<br>
 	<INPUT type=button value="Neu starten" title="reboot" onClick='goConfirmUrl("dbox wirklich neu starten?","/control/reboot");'>
 
 </div>

@@ -22,7 +22,7 @@ function do_submit()
 {=var-set:wait_text=Werte werden übernommen (Save).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <!--- Rapid Prototyping using ini-get --->
 <br>
-<div class="y_head">Mount {=R1=}</div>
+<div class="y_head">Mount {=R1=}  {=var-set:help_url=Neutrino:yWeb#Mounts=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 
 <div class="y_work_box">
 	<form name="f" action="/y/cgi">

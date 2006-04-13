@@ -66,7 +66,7 @@ function yswitchto()
 			{=func:get_bouquets_as_dropdown {=if-empty:{=bouquets=}~{=func:get_actual_bouquet_number=}~{=bouquets=}=}=}
 			</select>
 			&nbsp;<button name="yswitch" class="y_live_button" type="button" title="toggle to Radio/TV" onClick="yswitchto()">
-			{=if-equal:{=func:get_mode=}~tv~Radio~TV=}</button>
+			{=if-equal:{=func:get_mode=}~tv~Radio~TV=}</button> <font size="8"><b>{=var-set:help_url=Neutrino:yWeb:Live=}{=include-block:Y_Blocks.txt;wiki_help=}</b></font>
 		</TD></TR>
 		<TR><TD>
 			<select size="1" class="y_live_channels" name="channels" title="select channel - use go to zap">

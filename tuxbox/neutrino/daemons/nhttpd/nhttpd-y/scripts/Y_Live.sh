@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Live (yjogol)
-# $Date: 2006/02/09 19:10:46 $
-# $Revision: 1.11 $
+# $Date: 2006/04/13 11:22:38 $
+# $Revision: 1.12 $
 # -----------------------------------------------------------
 
 . ./_Y_Globals.sh
@@ -75,7 +75,8 @@ case "$1" in
 
 	prepare_radio)
 		prepare_radio
-		url=`buildStreamingAudioRawURL`
+		Y_APid=`call_webserver "control/yweb?radio_stream_pid"`
+		url="http://$2:31338/$Y_APid"
 		echo "$url" > $y_tmp_m3u
 		echo "$url" > $y_tmp_pls
 		;;

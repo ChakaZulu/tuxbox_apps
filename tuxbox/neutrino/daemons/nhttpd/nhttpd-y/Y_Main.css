@@ -215,7 +215,12 @@ tr
 	color: #436976;
 
 }
+.y_live_box
+{
+	border-top: 1px solid #6D96A9;
+	font-size: 8pt;
 
+}
 .y_wait_box
 {
 	font-size: 10pt;

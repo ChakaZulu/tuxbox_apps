@@ -8,7 +8,7 @@ function do_stop()
 }
 </script>
 </head>
-{=script:Y_Live prepare_radio=}
+{=script:Y_Live prepare_radio {=func:get_request_data host=}=}
 <body>
 <br>
 	<blockquote>

@@ -52,7 +52,7 @@ function doGo()
 
 <body>
 <br>
-<span class="y_head">Net Stream</span>
+<span class="y_head">Net Stream {=var-set:help_url=Neutrino:yWeb#NetStream=}{=include-block:Y_Blocks.txt;wiki_help=}&nbsp;</span>
 <font size="1">&nbsp;&nbsp;&nbsp; VLC Plugin Test</font>
 <table border="0" cellspacing="0" cellpadding="0">
 <form name="v">

@@ -19,7 +19,7 @@ function do_submit()
 <body>
 
 <br>
-<div class="y_head">yInstaller</div>
+<div class="y_head">yInstaller {=var-set:help_url=Neutrino:yWeb#yInstaller=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form name="f" method="POST" enctype="multipart/form-data" action="/control/exec?Y_Tools&installer" target="out">
 		tar-File:&nbsp;<input type="file" name="filename" size="70">&nbsp;<br>

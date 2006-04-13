@@ -1,5 +1,35 @@
 Severity	id		Headline							Build
 
+5-Enhancement	JG200000399	Boxcontrol: view box record-status ..				R1.5.0
+3-Average	JG200000424	Bouquetedit: fixed probs with Firefox 1.5 editing problems	R1.5.0
+5-Enhancement	JG200000414	GUI: Links to Wiki						R1.5.0
+3-Average	JG200000420	Live: fixed Stream-URL problems with yadd & Firefox		R1.5.0
+5-Enhancement	JG200000432	Live: Radio works with yadds					R1.5.0
+5-Enhancement	JG200000351	LiveView: Build Stream-URL with ClientAddr (for NAT, Remapping)	R1.5.0
+4-Minor		JG200000433	Settings: WOL fixed Javascript Errors				R1.5.0
+5-Enhancement	JG200000394	Settings: add: Neutrino direct recording settings ...		R1.5.0
+5-Enhancement	JG200000417	Settings: WebServer: add HostedDocumentRoot			R1.5.0
+5-Enhancement	JG200000418	Settings: WebServer: add NoAuthClient				R1.5.0
+5-Enhancement	JG200000373	Settings: yWeb speed up using caching				R1.5.0
+5-Enhancement	JG200000434	Settings: WOL Link to yWeb-Settings				R1.5.0
+5-Enhancement	JG200000435	Settings: About: Links to Wiki					R1.5.0
+5-Enhancement	JG200000425	Timer: SyncTimer: added start and stop deplay from recording settings	R1.5.0
+5-Enhancement	JG200000405	Timer: Sync Timer: add rec_dir					R1.5.0
+5-Enhancement	JG200000231	Timer: tvinfo.de download & TimerSync				R1.5.0
+5-Enhancement	JG200000398	Timer: new timer default now: record				R1.5.0
+4-Minor		JG200000410	Tools: Sagem RC is displayed in primary menu			R1.5.0
+5-Enhancement	JG200000415	Tools: new: Check Installation					R1.5.0
+5-Enhancement	JG200000348	Tools: Info: use echo -e to advoid escaped newline output	R1.5.0
+
+5-Enhancement	JG200000438	nhttpd: add Timer: rec_dir from neutrino.conf as default	nhttpd 2.2.3
+5-Enhancement	JG200000423	nhttpd: fixed lost Data in POST-Method (Mozilla/Firefox)	nhttpd 2.2.2
+5-Enhancement	JG200000422	nhttpd: No Authentication with new NoAuthClient fixed		nhttpd 2.2.2
+5-Enhancement	JG200000428	nhttpd: ini-set caching: clear config on open			nhttpd 2.2.2
+
+5-Enhancement	JG200000294	nhttpd: Host other Webs (Root defined at HostedDocumentRoot in nhttpd.conf)	nhttpd 2.2.1
+5-Enhancement	JG200000388	nhttpd: set IP with no authentication (e.g. for JtG etc)	nhttpd 2.2.1
+5-Enhancement	JG200000416	nhttdp: zapto mit channel_name					nhttpd 2.2.1
+
 3-Average	JG200000369	Live: fixed problems switching Radio-Channels			R1.4.3
 4-Minor		JG200000355	nhttpd: change port now used in Scripts				R1.4.3
 4-Minor		JG200000365	Settings: fixed: upload cam-alpha.bin now named correctly	R1.4.3

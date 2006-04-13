@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Library (yjogol)
-# $Date: 2006/02/09 19:10:46 $
-# $Revision: 1.8 $
+# $Date: 2006/04/13 11:22:38 $
+# $Revision: 1.9 $
 # -----------------------------------------------------------
 
 # -----------------------------------------------------------
@@ -13,7 +13,6 @@ call_webserver()
 	port=`sed -n /^Port=/p $y_config_nhttpd | sed -e s/^Port=//1`
 	tmp=`wget -O - -q "http://localhost:$port/$1"`
 	echo "$tmp"
-	echo "$port" >/tmp/a.txt
 }
 # ===========================================================
 # Streaming URL
@@ -76,7 +75,7 @@ y_format_message_html()
 	tmp="<html><head><meta http-equiv='Content-Type' content='text/html; charset=windows-1252'>"
 	tmp="$tmp <link rel='stylesheet' type='text/css' href='/Y_Main.css'></head>"
 	tmp="$tmp <body><div class='y_work_box'><pre>\n$msg\n</pre></div></body></html>"
-	echo "$tmp"
+	echo -e "$tmp"
 }
 y_format_message_html2()
 {

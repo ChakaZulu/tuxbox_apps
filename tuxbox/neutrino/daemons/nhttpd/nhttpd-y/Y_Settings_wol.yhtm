@@ -9,24 +9,25 @@
 {=var-set:wol2={=ini-get:/var/tuxbox/config/Y-Web.conf;wol_mac_2=}=}
 {=var-set:wol3={=ini-get:/var/tuxbox/config/Y-Web.conf;wol_mac_3=}=}
 <br>
-<div class="y_head">Wake on LAN</div>
+<div class="y_head">Wake on LAN {=var-set:help_url=Neutrino:yWeb#Wake_on_LAN=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form name="f" action="/y/cgi">
 		<table border="0" class="y_form_table">
 			<tr>
 				<td>Wake on Lan MAC 1 ({=var-get:wol1=})</td>
-				<td><input type="button" name="wol_mac_1" value="wake up" title="wake up that MAC" onClick='{=if-empty:{=var-get:wol1=}~~window.document.location.href="/control/exec?Y_Tools&wol&{=var-get:wol1=}=}"'></td>
+				<td><input type="button" name="wol_mac_1" value="wake up" title="wake up that MAC" onClick='{=if-empty:{=var-get:wol1=}~~window.document.location.href="/control/exec?Y_Tools&wol&{=var-get:wol1=}=}'></td>
 			</tr>
 			<tr>
 				<td>Wake on Lan MAC 2 ({=var-get:wol2=})</td>
-				<td><input type="button" name="wol_mac_2" value="wake up" title="wake up that MAC" onClick='{=if-empty:{=var-get:wol2=}~~window.document.location.href="/control/exec?Y_Tools&wol&{=var-get:wol2=}=}"'></td>
+				<td><input type="button" name="wol_mac_2" value="wake up" title="wake up that MAC" onClick='{=if-empty:{=var-get:wol2=}~~window.document.location.href="/control/exec?Y_Tools&wol&{=var-get:wol2=}=}'></td>
 			</tr>
 			<tr>
 				<td>Wake on Lan MAC 3 ({=var-get:wol3=})</td>
-				<td><input type="button" name="wol_mac_3" value="wake up" title="wake up that MAC" onClick='{=if-empty:{=var-get:wol3=}~~window.document.location.href="/control/exec?Y_Tools&wol&{=var-get:wol3=}=}"'></td>
+				<td><input type="button" name="wol_mac_3" value="wake up" title="wake up that MAC" onClick='{=if-empty:{=var-get:wol3=}~~window.document.location.href="/control/exec?Y_Tools&wol&{=var-get:wol3=}=}'></td>
 			</tr>
 		</table>
 	</form>
+	<a href="Y_Settings_yWeb.yhtm" title="WOL Settings">Einstellungen</a>
 </div>
 </body>
 </html>

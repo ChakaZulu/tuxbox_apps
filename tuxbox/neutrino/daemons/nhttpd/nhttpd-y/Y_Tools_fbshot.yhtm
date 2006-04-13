@@ -17,7 +17,7 @@ function do_ready()
 <body>
 {=var-set:wait_text=Schnappschuss wird erstellt (take snapshot)=}{=include-block:Y_Blocks.txt;snip_wait=}
 <br>
-<div class="y_head">OSD Screenshot</div>
+<div class="y_head">OSD Screenshot {=var-set:help_url=Neutrino:yWeb#OSD_Screenshot=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<button name="snapshot" onClick="do_snapshot()">Snapshot</button>
 	<div name="pic" id="pic">

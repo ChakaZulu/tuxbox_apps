@@ -18,7 +18,7 @@ function do_submit()
 <body>
 {=var-set:wait_text=Logo wird hochgeladen (Upload).=}{=include-block:Y_Blocks.txt;snip_wait=}
 <br>
-<div class="y_head">Bootlogo / LCD</div>
+<div class="y_head">Bootlogo / LCD {=var-set:help_url=Neutrino:yWeb#Boot_Logo=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
 <div class="y_work_box">
 	<form name="f" method="POST" enctype="multipart/form-data" action="/control/exec?Y_Tools&bootlogo_upload">
 		<p>
