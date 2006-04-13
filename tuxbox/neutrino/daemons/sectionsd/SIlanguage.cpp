@@ -1,5 +1,5 @@
 //
-// $Id: SIlanguage.cpp,v 1.2 2006/04/12 21:23:58 Arzka Exp $
+// $Id: SIlanguage.cpp,v 1.3 2006/04/13 19:10:54 mws Exp $
 //
 // Class for filtering preferred language
 //
@@ -20,6 +20,10 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIlanguage.cpp,v $
+// Revision 1.3  2006/04/13 19:10:54  mws
+// bugfix returned wrong value for error while saving;
+// preincrement iterators;
+//
 // Revision 1.2  2006/04/12 21:23:58  Arzka
 // Optimization.
 // Removed unnecessary copying of std:map and
@@ -56,7 +60,7 @@ void SIlanguage::filter(const std::map<std::string, std::string>& s, int max, st
 
 	if (mode != CSectionsdClient::ALL) {
 		for (std::vector<std::string>::const_iterator it = languages.begin() ;
-				 it != languages.end() ; it++) {
+				 it != languages.end() ; ++it) {
 			std::map<std::string,std::string>::const_iterator text;
 			if ((text = s.find(*it)) != s.end()) {
 				if (count != max) {
@@ -71,12 +75,12 @@ void SIlanguage::filter(const std::map<std::string, std::string>& s, int max, st
 			}
 		}
 	}
-	
+
 	if (retval.length() == 0) {
 		// return all available languages
 		if (s.begin() != s.end()) {
 			for (std::map<std::string, std::string>::const_iterator it = s.begin() ;
-					 it != s.end() ; it++) {
+					 it != s.end() ; ++it) {
 				if (it != s.begin()) {
 					retval.append(" \n");
 				}
@@ -110,7 +114,7 @@ bool SIlanguage::loadLanguages()
 		tmpMode = CSectionsdClient::ALL_FIRST;
 	} else if (word == "ALL_ALL") {
 		tmpMode = CSectionsdClient::ALL_ALL;
-	} 
+	}
 
 	while (!file.eof()) {
 		if ((file >> word)) {
@@ -127,7 +131,7 @@ bool SIlanguage::loadLanguages()
  error:
 	pthread_mutex_unlock(&languages_lock);
 	return false;
-	
+
 }
 
 bool SIlanguage::saveLanguages()
@@ -151,9 +155,9 @@ bool SIlanguage::saveLanguages()
 		file << "ALL_ALL\n";
 		break;
 	}
-	
+
 	for (std::vector<std::string>::iterator it = languages.begin() ;
-			 it != languages.end() ; it++) {
+			 it != languages.end() ; ++it) {
 		file << " " << *it;
 		if (file.fail()) goto error;
 	}
@@ -166,7 +170,7 @@ bool SIlanguage::saveLanguages()
 
  error:
 	pthread_mutex_unlock(&languages_lock);
-	return true;
+	return false;
 }
 
 void SIlanguage::setLanguages(const std::vector<std::string>& newLanguages)
@@ -193,4 +197,4 @@ CSectionsdClient::SIlanguageMode_t SIlanguage::getMode()
 {
 	return mode;
 }
-	
+
