@@ -2179,7 +2179,6 @@ int eFrontend::tune_ofdm(eTransponder *trans,
 
 int eFrontend::savePower()
 {
-	eDebug("XXX savePower XXX\n");
 	transponder=0;
 	checkLockTimer.stop();
 	checkRotorLockTimer.stop();
