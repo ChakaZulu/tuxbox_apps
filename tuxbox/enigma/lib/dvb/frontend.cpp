@@ -2101,6 +2101,15 @@ int eFrontend::tune_qam(eTransponder *trans,
 	eDebug("Cable Frontend detected");
 	tune_all(trans);
 
+	if (needreset > 1)
+	{
+#if HAVE_DVB_API_VERSION < 3
+		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
+		usleep(150000);
+#endif
+		needreset=0;
+	}
+
 #if HAVE_DVB_API_VERSION < 3
 	front.Inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
@@ -2133,6 +2142,15 @@ int eFrontend::tune_ofdm(eTransponder *trans,
 	eDebug("DVB-T Frontend detected");
 	tune_all(trans);
 
+	if (needreset > 1)
+	{
+#if HAVE_DVB_API_VERSION < 3
+		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
+		usleep(150000);
+#endif
+		needreset=0;
+	}
+
 #if HAVE_DVB_API_VERSION < 3
 	front.Inversion=(inversion == 2 ? INVERSION_AUTO :
 		(inversion?INVERSION_ON:INVERSION_OFF) );
@@ -2161,6 +2179,7 @@ int eFrontend::tune_ofdm(eTransponder *trans,
 
 int eFrontend::savePower()
 {
+	eDebug("XXX savePower XXX\n");
 	transponder=0;
 	checkLockTimer.stop();
 	checkRotorLockTimer.stop();
