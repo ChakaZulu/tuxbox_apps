@@ -190,7 +190,8 @@ static void initGlobals(void)
 +                                                                                     +
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 CNeutrinoApp::CNeutrinoApp()
-: configfile('\t')
+: configfile('\t'),
+	recordingstatus(0)
 {
 	standby_pressed_at.tv_sec = 0;
 
