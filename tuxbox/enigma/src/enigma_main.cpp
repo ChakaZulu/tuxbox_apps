@@ -3009,21 +3009,27 @@ void eZapMain::pause()
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 	if (handler->getState() == eServiceHandler::statePause)
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
-	else 
+	else
 	{
 		if ( eSystemInfo::getInstance()->canTimeshift() &&
 			ref.type == eServiceReference::idDVB && !ref.path && !timeshift )
 		{
-			Decoder::Pause(2);  // freeze frame
-			Decoder::setAutoFlushScreen(0);
 			if (!eDVB::getInstance()->recorder)
 			{
 				record();
 				timeshift=1;
+				Decoder::Pause(2);  // freeze frame
+				Decoder::setAutoFlushScreen(0);
 				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, -1));
+				Decoder::setAutoFlushScreen(1);
 			}
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
-			Decoder::setAutoFlushScreen(1);
+			else
+			{
+				Decoder::Pause(2);  // freeze frame
+				Decoder::setAutoFlushScreen(0);
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
+				Decoder::setAutoFlushScreen(1);
+			}
 		}
 		else
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
