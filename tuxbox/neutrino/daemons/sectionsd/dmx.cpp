@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.26 2005/08/16 21:59:56 metallica Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.27 2006/04/21 20:41:02 houdini Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -186,12 +186,12 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		unlock();
 		if (rc == 0)
 		{
-			dprintf("dmx.read timeout - filter: %x - timeout# %d", filters[filter_index].filter, timeouts);
+			dprintf("dmx.read timeout - filter: %x - timeout# %d\n", filters[filter_index].filter, timeouts);
 			timeouts++;
 		}
 		else
 		{
-			dprintf("dmx.read rc: %d - filter: %x", rc, filters[filter_index].filter);
+			dprintf("dmx.read rc: %d - filter: %x\n", rc, filters[filter_index].filter);
 			// restart DMX
 			real_pause();
 			real_unpause();
@@ -223,11 +223,11 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		delete[] buf;
 		if (rc == 0)
 		{
-			dprintf("dmx.read timeout after header - filter: %x", filters[filter_index].filter);
+			dprintf("dmx.read timeout after header - filter: %x\n", filters[filter_index].filter);
 		}
 		else
 		{
-			dprintf("dmx.read rc: %d after header - filter: %x", rc, filters[filter_index].filter);
+			dprintf("dmx.read rc: %d after header - filter: %x\n", rc, filters[filter_index].filter);
 		}
 		// DMX restart required, since part of the header has been read
 		real_pause();
@@ -310,7 +310,7 @@ int DMX::real_pause(void)
 
 	if (real_pauseCounter == 0)
 	{
-#ifdef PAUSE_EQUALS_STOP	       
+#ifdef PAUSE_EQUALS_STOP
 		immediate_stop();
 #else
 		if (ioctl(fd, DMX_STOP, 0) == -1)
@@ -331,7 +331,7 @@ int DMX::real_pause(void)
 
 int DMX::real_unpause(void)
 {
-#ifndef PAUSE_EQUALS_STOP	       
+#ifndef PAUSE_EQUALS_STOP
 	if (!isOpen())
 		return 1;
 #endif
@@ -340,7 +340,7 @@ int DMX::real_unpause(void)
 
 	if (real_pauseCounter == 0)
 	{
-#ifdef PAUSE_EQUALS_STOP	       
+#ifdef PAUSE_EQUALS_STOP
 		immediate_start();
 #else
 		if (ioctl(fd, DMX_START, 0) == -1)
@@ -394,7 +394,7 @@ int DMX::request_unpause(void)
 
 int DMX::pause(void)
 {
-#ifndef PAUSE_EQUALS_STOP	       
+#ifndef PAUSE_EQUALS_STOP
 	if (!isOpen())
 		return 1;
 #endif
@@ -411,7 +411,7 @@ int DMX::pause(void)
 
 int DMX::unpause(void)
 {
-#ifndef PAUSE_EQUALS_STOP	       
+#ifndef PAUSE_EQUALS_STOP
 	if (!isOpen())
 		return 1;
 #endif
@@ -437,7 +437,7 @@ int DMX::change(const int new_filter_index)
 
 	if (!isOpen())
 	{
-#ifdef PAUSE_EQUALS_STOP	       
+#ifdef PAUSE_EQUALS_STOP
 		pthread_cond_signal(&change_cond);
 #endif
 		unlock();
@@ -579,7 +579,7 @@ int DMX::setPid(const unsigned short new_pid)
 
 	if (!isOpen())
 	{
-#ifdef PAUSE_EQUALS_STOP	       
+#ifdef PAUSE_EQUALS_STOP
 		pthread_cond_signal(&change_cond);
 #endif
 		unlock();
