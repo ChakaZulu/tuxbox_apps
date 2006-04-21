@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.36 2006/03/26 20:14:41 Arzka Exp $
+  $Id: sectionsdclient.h,v 1.37 2006/04/21 20:37:16 houdini Exp $
 
   License: GPL
 
@@ -77,6 +77,7 @@ class CSectionsdClient : private CBasicClient
 		FIRST_ALL,
 		ALL_FIRST,
 		ALL_ALL,
+		LANGUAGE_MODE_OFF,
 	};
 
 	enum events

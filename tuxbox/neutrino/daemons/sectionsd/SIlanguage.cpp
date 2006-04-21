@@ -1,5 +1,5 @@
 //
-// $Id: SIlanguage.cpp,v 1.3 2006/04/13 19:10:54 mws Exp $
+// $Id: SIlanguage.cpp,v 1.4 2006/04/21 20:40:13 houdini Exp $
 //
 // Class for filtering preferred language
 //
@@ -20,6 +20,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIlanguage.cpp,v $
+// Revision 1.4  2006/04/21 20:40:13  houdini
+// improvments when not using the MultiLanguageEPG feature
+//
 // Revision 1.3  2006/04/13 19:10:54  mws
 // bugfix returned wrong value for error while saving;
 // preincrement iterators;
@@ -102,7 +105,7 @@ bool SIlanguage::loadLanguages()
 	pthread_mutex_lock(&languages_lock);
 	std::ifstream file(LANGUAGEFILE);
 	std::string word;
-	CSectionsdClient::SIlanguageMode_t tmpMode = CSectionsdClient::ALL;
+	CSectionsdClient::SIlanguageMode_t tmpMode = CSectionsdClient::LANGUAGE_MODE_OFF;
 	std::vector<std::string> tmpLang;
 
 	if (!(file >> word)) goto error;
@@ -114,6 +117,8 @@ bool SIlanguage::loadLanguages()
 		tmpMode = CSectionsdClient::ALL_FIRST;
 	} else if (word == "ALL_ALL") {
 		tmpMode = CSectionsdClient::ALL_ALL;
+	} else if (word == "OFF") {
+		tmpMode = CSectionsdClient::LANGUAGE_MODE_OFF;
 	}
 
 	while (!file.eof()) {
@@ -122,16 +127,18 @@ bool SIlanguage::loadLanguages()
 		}
 	}
 
+	if (tmpLang.empty()) tmpLang.push_back("OFF");
 	languages = tmpLang;
 	mode = tmpMode;
-
 	pthread_mutex_unlock(&languages_lock);
 	return true;
 
  error:
+	tmpLang.push_back("OFF");
+	languages = tmpLang;
+	mode = tmpMode;
 	pthread_mutex_unlock(&languages_lock);
 	return false;
-
 }
 
 bool SIlanguage::saveLanguages()
@@ -153,6 +160,9 @@ bool SIlanguage::saveLanguages()
 		break;
 	case CSectionsdClient::ALL_ALL:
 		file << "ALL_ALL\n";
+		break;
+	case CSectionsdClient::LANGUAGE_MODE_OFF:
+		file << "OFF\n";
 		break;
 	}
 

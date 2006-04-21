@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.25 2006/03/26 20:13:49 Arzka Exp $
+// $Id: SIevents.hpp,v 1.26 2006/04/21 20:40:13 houdini Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -325,20 +325,20 @@ public:
 //      dauer=0;
 //      startzeit=0;
 	}
-    unsigned short eventID;
+	unsigned short eventID;
 	// Name aus dem Short-Event-Descriptor
-  std::string getName() const;
+	std::string getName() const;
 	void setName(const std::string &lang, const std::string &name);
 
 	// Text aus dem Short-Event-Descriptor
-  std::string getText() const;
+	std::string getText() const;
 	void setText(const std::string &lang, const std::string &text);
 
 	std::string itemDescription; // Aus dem Extended Descriptor
 	std::string item; // Aus dem Extended Descriptor
 
 	// Aus dem Extended Descriptor
-  std::string getExtendedText() const;
+	std::string getExtendedText() const;
 	void appendExtendedText(const std::string &lang, const std::string &text);
 
 	std::string contentClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen

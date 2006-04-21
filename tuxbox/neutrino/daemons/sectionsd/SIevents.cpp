@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.31 2006/04/13 19:26:08 mws Exp $
+// $Id: SIevents.cpp,v 1.32 2006/04/21 20:40:13 houdini Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -44,6 +44,8 @@
 #include "SInetworks.hpp"
 #include "SIsections.hpp"
 #include <dmxapi.h>
+
+const std::string languangeOFF = "OFF";
 
 SIevent::SIevent(const struct eit_event *e)
 {
@@ -180,38 +182,68 @@ int SIevent::saveXML2(FILE *file) const
 
 std::string SIevent::getName() const
 {
-	std::string retval;
-	SIlanguage::filter(langName, 1, retval);
-	return retval;
+	if (CSectionsdClient::LANGUAGE_MODE_OFF == SIlanguage::getMode()){
+		std::map<std::string, std::string>::const_iterator it = langName.begin() ;
+		if (it != langName.end()) return it->second;
+		else return("");
+	} else {
+		std::string retval;
+		SIlanguage::filter(langName, 1, retval);
+		return retval;
+	}
 }
 
 void SIevent::setName(const std::string &lang, const std::string &name)
 {
-	langName[lang] = name;
+	if (CSectionsdClient::LANGUAGE_MODE_OFF == SIlanguage::getMode()){
+		langName[languangeOFF] = name;
+	} else {
+		langName[lang] = name;
+	}
 }
 
 std::string SIevent::getText() const
 {
-	std::string retval;
-	SIlanguage::filter(langText, 0, retval);
-	return retval;
+	if (CSectionsdClient::LANGUAGE_MODE_OFF == SIlanguage::getMode()){
+		std::map<std::string, std::string>::const_iterator it = langText.begin() ;
+		if (it != langText.end()) return it->second;
+		else return("");
+	} else {
+		std::string retval;
+		SIlanguage::filter(langText, 0, retval);
+		return retval;
+	}
 }
 
 void SIevent::setText(const std::string &lang, const std::string &text)
 {
-	langText[lang] = text;
+	if (CSectionsdClient::LANGUAGE_MODE_OFF == SIlanguage::getMode()){
+		langText[languangeOFF] = text;
+	} else {
+		langText[lang] = text;
+	}
 }
 
 std::string SIevent::getExtendedText() const
 {
-	std::string retval;
-	SIlanguage::filter(langExtendedText, 0, retval);
-	return retval;
+	if (CSectionsdClient::LANGUAGE_MODE_OFF == SIlanguage::getMode()){
+		std::map<std::string, std::string>::const_iterator it = langExtendedText.begin() ;
+		if (it != langExtendedText.end()) return it->second;
+		else return("");
+	} else {
+		std::string retval;
+		SIlanguage::filter(langExtendedText, 0, retval);
+		return retval;
+	}
 }
 
 void SIevent::appendExtendedText(const std::string &lang, const std::string &text)
 {
-	langExtendedText[lang] += text;
+	if (CSectionsdClient::LANGUAGE_MODE_OFF == SIlanguage::getMode()){
+		langExtendedText[languangeOFF] += text;
+	} else {
+		langExtendedText[lang] += text;
+	}
 }
 
 void SIevent::dump(void) const
@@ -226,15 +258,17 @@ void SIevent::dump(void) const
 		printf("Item: %s\n", item.c_str());
 	if(itemDescription.length())
 	        printf("Item-Description: %s\n", itemDescription.c_str());
+
 	for (std::map<std::string, std::string>::const_iterator it = langName.begin() ;
 	     it != langName.end() ; ++it)
-	        printf("Name (%s): %s\n", it->first.c_str(), it->second.c_str());
+        	printf("Name (%s): %s\n", it->first.c_str(), it->second.c_str());
 	for (std::map<std::string, std::string>::const_iterator it = langText.begin() ;
 	     it != langText.end() ; ++it)
 		printf("Text (%s): %s\n", it->first.c_str(), it->second.c_str());
 	for (std::map<std::string, std::string>::const_iterator it = langExtendedText.begin() ;
 	     it != langExtendedText.end() ; ++it)
 		printf("Extended-Text (%s): %s\n", it->first.c_str(), it->second.c_str());
+
 	if(contentClassification.length()) {
 		printf("Content classification:");
 		for(unsigned i=0; i<contentClassification.length(); i++)
@@ -263,7 +297,7 @@ void SIevent::dumpSmall(void) const
 {
 	for (std::map<std::string, std::string>::const_iterator it = langName.begin() ;
 	     it != langName.end() ; ++it)
-	        printf("Name (%s): %s\n", it->first.c_str(), it->second.c_str());
+        	printf("Name (%s): %s\n", it->first.c_str(), it->second.c_str());
 	for (std::map<std::string, std::string>::const_iterator it = langText.begin() ;
 	     it != langText.end() ; ++it)
 		printf("Text (%s): %s\n", it->first.c_str(), it->second.c_str());
