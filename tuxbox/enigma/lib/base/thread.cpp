@@ -15,7 +15,6 @@ void eThread::thread_completed(void *ptr)
 void *eThread::wrapper(void *ptr)
 {
 	eThread *p = (eThread*)ptr;
-	p->alive=1;
 	pthread_cleanup_push( thread_completed, (void*)p );
 	p->thread();
 	pthread_exit(0);
@@ -49,17 +48,8 @@ void eThread::run( int prio, int policy )
 		eDebug("couldn't create new thread");
 		return;
 	}
-	pthread_attr_destroy(&attr);
-	usleep(1000);
-	int timeout=20;
-	while(!alive && timeout--)
-	{
-		eDebug("waiting for thread start...");
-		usleep(1000*10);
-	}
-	if ( !timeout )
-		eDebug("thread couldn't be started !!!");
-}                     
+	alive = 1;
+}
 
 eThread::~eThread()
 {
