@@ -2,6 +2,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <lib/base/eerror.h>
 #include <lib/system/elock.h>
@@ -165,17 +166,7 @@ void eMainloop::removeSocketNotifier(eSocketNotifier *sn)
 
 void eMainloop::processOneEvent()
 {
-// process pending timers...
-	long usec=0;
-
-	if ( TimerList )
-		doRecalcTimers();
-	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
-	{
-		TimerList.begin()->activate();
-		doRecalcTimers();
-	}
-
+	int ret;
 	int fdAnz = notifiers.size();
 	pollfd pfd[fdAnz];
 
@@ -188,7 +179,25 @@ void eMainloop::processOneEvent()
 	}
 
 //	eDebug("usec = %d", usec);
-	int ret=poll(pfd, fdAnz, TimerList ? usec / 1000 : -1);  // milli .. not micro seks
+	while (1)
+	{
+		/* process pending timers... */
+		long usec = 0;
+
+		if (TimerList)
+		{
+			doRecalcTimers();
+		}
+		while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
+		{
+			TimerList.begin()->activate();
+			doRecalcTimers();
+		}
+
+		ret = poll(pfd, fdAnz, TimerList ? usec / 1000 : -1);  // milli .. not micro seks
+		if (ret < 0 && errno == EINTR) continue;
+		break;
+	}
 
 	if (!ret) // timeouted leave poll .. immediate check all timers
 	{
