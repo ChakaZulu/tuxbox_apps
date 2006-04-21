@@ -274,7 +274,7 @@ void eDVRPlayerThread::readMore(int what)
 
 				if (::stat64(tfilename.c_str(), &s) < 0)
 				{
-					eDebug("no next file, stateFileEnd");
+					eDebug("no next file, stateFileEnd (previous state %d)", state);
 					flushbuffer=1;
 					if (inputsn)
 						inputsn->stop();
@@ -463,12 +463,25 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		else
 			liveupdatetimer.stop();
 		break;
+	case eDVRPlayerThreadMessage::startPaused:
+		if (!(inputsn && outputsn))
+			break;
+		pauseBufferFullness = getDriverBufferFullness();  // driver buffer
+		pauseBufferFullness += curBufferFullness;  // add fullness of enigma buffer..
+		inputsn->stop();
+		outputsn->stop();
+		state=statePause;
+		Decoder::Pause();
+		livemode=message.parm;
+		if (livemode)
+			liveupdatetimer.start(1000);
+		else
+			liveupdatetimer.stop();
+		break;
 	case eDVRPlayerThreadMessage::exit:
 		quit();
 		break;
 	case eDVRPlayerThreadMessage::setSpeed:
-	{
-		static int bufferFullness;
 		if (!(inputsn && outputsn))
 			break;
 		speed=message.parm;
@@ -476,8 +489,8 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		{
 			if ((state==stateBuffering) || (state==stateBufferFull) || (state==statePlaying))
 			{
-				bufferFullness = getDriverBufferFullness();  // driver buffer
-				bufferFullness += curBufferFullness;  // add fullness of enigma buffer..
+				pauseBufferFullness = getDriverBufferFullness();  // driver buffer
+				pauseBufferFullness += curBufferFullness;  // add fullness of enigma buffer..
 				inputsn->stop();
 				outputsn->stop();
 				state=statePause;
@@ -489,7 +502,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			off64_t offset=0;
 //			eDebug("%d bytes in buffer", buffsize);
 			offset+=position+slice*slicesize;
-			offset-=bufferFullness;	// calc buffersize ( of driver and enigma buffer )
+			offset-=pauseBufferFullness;	// calc buffersize ( of driver and enigma buffer )
 			buffer.clear();  	// clear enigma dvr buffer
 			dvrFlush();			// clear audio and video rate buffer
 			seekTo(offset);
@@ -507,7 +520,6 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			curBufferFullness=0;
 		}
 		break;
-	}
 	case eDVRPlayerThreadMessage::seekmode:
 		if (!(inputsn && outputsn))
 			break;
@@ -589,13 +601,20 @@ void eServiceHandlerDVB::handleDVBEvent( const eDVBEvent & e )
 	}
 }
 
-void eServiceHandlerDVB::startPlayback(const eString &filename, int livemode)
+void eServiceHandlerDVB::startPlayback(const eString &filename, int livemode, bool startpaused)
 {
 	stopPlayback();
 	decoder=new eDVRPlayerThread(filename.c_str(), this, livemode);
-	decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::start, livemode));
+	if (startpaused)
+	{
+		decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::startPaused, livemode));
+	}
+	else
+	{
+		decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::start, livemode));
+	}
 	flags=flagIsSeekable|flagSupportPosition;
-	state=statePlaying;
+	state= statePlaying;
 	if ( livemode )
 		flags|=flagStartTimeshift;
 	pcrpid = Decoder::current.pcrpid;
@@ -867,20 +886,9 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 		{
 			if ( parm == -1 ) // pause with must seek to begin
 			{
-				int timeout = 8;
-				while(timeout--)
-				{
-					struct stat64 s;
-					if ( !stat64(current_filename.c_str(), &s) )
-					{
-						if ( s.st_size < 512*1024 )
-							usleep(250*1000);
-						else
-							break;
-					}
-				}
-				parm=0;
-				startPlayback(current_filename, 2);
+				parm = 0;
+				/* start paused playback */
+				startPlayback(current_filename, 2, true);
 			}
 			else
 				startPlayback(current_filename, 1);
@@ -889,7 +897,7 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 		{
 			if (parm < 0 || !decoder)
 				return -1;
-			decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::setSpeed, cmd.parm));
+			decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::setSpeed, parm));
 			if (parm == 0)
 				state=statePause;
 			else if (parm == 1 || parm == 2)
@@ -934,6 +942,8 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 		if (!decoder)
 			return -1;
 		decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::seekmode, 0));
+		/* jumping to the current position after leaving seekmode avoids audio/video sync problems */
+		decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::seekreal, decoder->getPosition(1)));
 		break;
 #endif // DISABLE_FILE
 	default:

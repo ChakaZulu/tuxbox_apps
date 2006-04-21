@@ -34,6 +34,7 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 
 	int filelength, // in 1880 packets
 		curBufferFullness; // bytes in enigma buffer...
+	int pauseBufferFullness; /* buffer fullness at start of pause */
 	off64_t position;
 	bool needasyncworkaround;
 
@@ -54,7 +55,7 @@ public:
 	{
 		enum
 		{
-			start, exit,
+			start, startPaused, exit,
 			skip,
 			setSpeed, // 0..
 			seek,	// 0..65536
@@ -108,7 +109,7 @@ class eServiceHandlerDVB: public eServiceHandler
 	eString current_filename;
 
 			// (u.a.) timeshift:
-	void startPlayback(const eString &file, int livemode);
+	void startPlayback(const eString &file, int livemode, bool startpaused = false);
 	void stopPlayback(int waslivemode=0);
 
 	void gotMessage(const eDVRPlayerThreadMessage &message);
