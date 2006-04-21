@@ -1630,7 +1630,7 @@ void eZapMain::init_main()
 	fileinfos=new eLabel(fileInfoBar);
 	fileinfos->setName("fileinfos");
 
-	dvrfunctions=-1;
+	dvrfunctions=0;
 	stateOSD=0;
 
 	recstatus=new eLabel(this);
