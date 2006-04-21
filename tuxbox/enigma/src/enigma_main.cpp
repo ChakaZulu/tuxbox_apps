@@ -2777,6 +2777,8 @@ void eZapMain::showMainMenu()
 		//standby Show Menu
 		gettimeofday(&standbyTime, 0);
 		standbyTime-=1;
+		// reset nomenu flag, otherwise no shutdown menu next time
+		standby_nomenu = 0;
 		standbyRelease();
 	}
 }
