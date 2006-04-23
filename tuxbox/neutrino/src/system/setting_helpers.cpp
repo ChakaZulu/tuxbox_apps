@@ -562,7 +562,7 @@ const char * mypinghost(const char * const host)
 	return "";
 }
 
-void testNetworkSettings(const char* ip, const char* netmask, const char* broadcast, const char* gateway, const char* nameserver, bool dhcp)
+void testNetworkSettings(const char* ip, const char* netmask, const char* broadcast, const char* gateway, const char* nameserver, bool ip_static)
 {
 	char our_ip[16];
 	char our_mask[16];
@@ -571,7 +571,7 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	char our_nameserver[16];
 	std::string text;
 
-	if (!dhcp) {
+	if (ip_static) {
 		strcpy(our_ip,ip);
 		strcpy(our_mask,netmask);
 		strcpy(our_broadcast,broadcast);
