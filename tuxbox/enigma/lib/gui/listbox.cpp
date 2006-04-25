@@ -920,7 +920,7 @@ void eListBoxBase::setActiveColor(gColor back, gColor front)
 	if (front)
 		colorActiveF=front;
 
-	if (back || front && current != childs.end())
+	if ((back || front) && current != childs.end())
 	{
 		int i = 0;
 		for (ePtrList<eListBoxEntry>::iterator it(top); it != bottom; ++i, ++it)
