@@ -915,10 +915,12 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 
 void eListBoxBase::setActiveColor(gColor back, gColor front)
 {
-	colorActiveB=back;
-	colorActiveF=front;
+	if (back)
+    		colorActiveB=back;
+	if (front)
+		colorActiveF=front;
 
-	if (current != childs.end())
+	if (back || front && current != childs.end())
 	{
 		int i = 0;
 		for (ePtrList<eListBoxEntry>::iterator it(top); it != bottom; ++i, ++it)
