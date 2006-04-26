@@ -57,6 +57,11 @@ struct SNeutrinoSettings
 	int tuxtxt_cache;
 #endif
 
+	// EPG
+	char epg_cache[3];
+	char epg_old_events[3];
+	char epg_max_events[6];
+
 	//audio
 	int audio_AnalogMode;
 	int audio_DolbyDigital;
@@ -68,7 +73,7 @@ struct SNeutrinoSettings
 
 	//language
 	char language[25];
-
+	
 	//timing
 #define TIMING_SETTING_COUNT 7
 	enum TIMING_SETTINGS {
@@ -157,6 +162,9 @@ struct SNeutrinoSettings
 	char network_nfs_picturedir[100];
 	char network_nfs_moviedir[100];
 	char network_nfs_recordingdir[100];
+	char network_ntpserver[31];
+	char network_ntprefresh[4];
+	int network_ntpenable;
 
 	//recording
 	int  recording_type;

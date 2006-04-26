@@ -547,9 +547,14 @@ int CNeutrinoApp::loadSetup()
 	g_settings.video_Format = configfile.getInt32("video_Format", CControldClient::VIDEOFORMAT_4_3);
 	g_settings.video_csync = configfile.getInt32( "video_csync", 0 );
 
-	//fb-alphawerte für gtx
+	//fb-alphavalues for gtx
 	g_settings.gtx_alpha1 = configfile.getInt32( "gtx_alpha1", 0);
 	g_settings.gtx_alpha2 = configfile.getInt32( "gtx_alpha2", 1);
+
+	// EPG-Config
+	strcpy(g_settings.epg_cache , configfile.getString( "epg_cache_time", "14" ).c_str() );
+	strcpy(g_settings.epg_old_events ,configfile.getString("epg_old_events", "1" ).c_str() );
+	strcpy(g_settings.epg_max_events ,configfile.getString("epg_max_events", "6000" ).c_str() );
 
 	//misc
 	g_settings.shutdown_real            = configfile.getBool("shutdown_real"             , true );
@@ -574,7 +579,7 @@ int CNeutrinoApp::loadSetup()
 
 	//language
 	strcpy(g_settings.language, configfile.getString("language", "").c_str());
-
+	
 	//widget settings
 	g_settings.widget_fade           = configfile.getBool("widget_fade"          , true );
 
@@ -660,10 +665,15 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nfs_recordingdir, configfile.getString( "network_nfs_recordingdir", "" ).c_str() );
 	g_settings.filesystem_is_utf8              = configfile.getBool("filesystem_is_utf8"                 , true );
 
+        // NTP-Server for sectionsd
+	strcpy(g_settings.network_ntpserver, configfile.getString("network_ntpserver", "de.pool.ntp.org" ).c_str() );
+	strcpy(g_settings.network_ntprefresh, configfile.getString("network_ntprefresh", "30" ).c_str() );
+	g_settings.network_ntpenable = configfile.getBool("network_ntpenable", false);
+
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32("recording_type", RECORDING_OFF);
-	g_settings.recording_stopplayback          = configfile.getBool("recording_stopplayback"             , false);
-	g_settings.recording_stopsectionsd         = configfile.getBool("recording_stopsectionsd"            , true );
+	g_settings.recording_stopplayback = configfile.getBool("recording_stopplayback", false);
+	g_settings.recording_stopsectionsd = configfile.getBool("recording_stopsectionsd", true );
 	g_settings.recording_server_ip = configfile.getString("recording_server_ip", "10.10.10.10");
 	strcpy( g_settings.recording_server_port, configfile.getString( "recording_server_port", "4000").c_str() );
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
@@ -896,9 +906,14 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "video_Format", g_settings.video_Format );
 	configfile.setInt32( "video_csync", g_settings.video_csync );
 
-	//fb-alphawerte für gtx
+	//fb-alphavalues for gtx
 	configfile.setInt32( "gtx_alpha1", g_settings.gtx_alpha1 );
 	configfile.setInt32( "gtx_alpha2", g_settings.gtx_alpha2 );
+
+	// EPG-Config
+	configfile.setString("epg_cache_time"           ,g_settings.epg_cache );
+	configfile.setString("epg_old_events"           ,g_settings.epg_old_events );
+	configfile.setString("epg_max_events"           ,g_settings.epg_max_events );
 
 	//misc
 	configfile.setBool("shutdown_real"             , g_settings.shutdown_real);
@@ -1007,6 +1022,11 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_nfs_moviedir", g_settings.network_nfs_moviedir);
 	configfile.setString( "network_nfs_recordingdir", g_settings.network_nfs_recordingdir);
 	configfile.setBool  ("filesystem_is_utf8"                 , g_settings.filesystem_is_utf8             );
+
+	// NTP-Server for sectionsd
+	configfile.setString( "network_ntpserver", g_settings.network_ntpserver);
+	configfile.setString( "network_ntprefresh", g_settings.network_ntprefresh);
+	configfile.setBool( "network_ntpenable", g_settings.network_ntpenable);
 
 	//recording (server + vcr)
 	configfile.setInt32 ("recording_type",                      g_settings.recording_type);
@@ -1734,7 +1754,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem(GenericMenuSeparatorLine);
 
 
-		//experten-funktionen für mtd lesen/schreiben
+		// experts-functions to read/write to the mtd 
 		CMenuWidget* mtdexpert = new CMenuWidget(LOCALE_FLASHUPDATE_EXPERTFUNCTIONS, "softupdate.raw");
 		mtdexpert->addItem(GenericMenuSeparator);
 		mtdexpert->addItem(GenericMenuBack);
@@ -1926,8 +1946,15 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_TUXTXT_CACHE, &g_settings.tuxtxt_cache, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, tuxtxtcacheNotifier));
 #endif
 
-	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
+	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_EPG_HEAD));
+	CStringInput * miscSettings_epg_cache = new CStringInput(LOCALE_MISCSETTINGS_EPG_CACHE, g_settings.epg_cache, 2,LOCALE_MISCSETTINGS_EPG_CACHE_HINT1, LOCALE_MISCSETTINGS_EPG_CACHE_HINT2 , "0123456789 ");
+	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_CACHE, true, g_settings.epg_cache, miscSettings_epg_cache));
+	CStringInput * miscSettings_epg_old_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_OLD_EVENTS, g_settings.epg_old_events, 2,LOCALE_MISCSETTINGS_EPG_OLD_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_OLD_EVENTS_HINT2 , "0123456789 ");
+	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_OLD_EVENTS, true, g_settings.epg_old_events, miscSettings_epg_old_events));
+	CStringInput * miscSettings_epg_max_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, g_settings.epg_max_events, 5,LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT2 , "0123456789 ");
+	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, true, g_settings.epg_max_events, miscSettings_epg_max_events));
 
+ 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
 	CSPTSNotifier *sptsNotifier = new CSPTSNotifier;
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_SPTSMODE, &g_settings.misc_spts, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, sptsNotifier));
 
@@ -2184,6 +2211,13 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	parentallockSettings.addItem( new CMenuForwarder(LOCALE_PARENTALLOCK_CHANGEPIN, true, g_settings.parentallock_pincode, pinChangeWidget));
 }
 
+#define OPTIONS_NTPENABLE_OPTION_COUNT 2
+const CMenuOptionChooser::keyval OPTIONS_NTPENABLE_OPTIONS[OPTIONS_NTPENABLE_OPTION_COUNT] =
+{
+	{ 0, LOCALE_OPTIONS_NTP_OFF },
+	{ 1, LOCALE_OPTIONS_NTP_ON }
+};
+
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 {
 	CIPInput * networkSettings_NetworkIP  = new CIPInput(LOCALE_NETWORKMENU_IPADDRESS , networkConfig.address   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, MyIPChanger);
@@ -2191,13 +2225,16 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	CIPInput * networkSettings_Broadcast  = new CIPInput(LOCALE_NETWORKMENU_BROADCAST , networkConfig.broadcast , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CIPInput * networkSettings_Gateway    = new CIPInput(LOCALE_NETWORKMENU_GATEWAY   , networkConfig.gateway   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CIPInput * networkSettings_NameServer = new CIPInput(LOCALE_NETWORKMENU_NAMESERVER, networkConfig.nameserver, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-
+	CStringInputSMS * networkSettings_NtpServer = new CStringInputSMS(LOCALE_NETWORKMENU_NTPSERVER, g_settings.network_ntpserver, 30, LOCALE_NETWORKMENU_NTPSERVER_HINT1, LOCALE_NETWORKMENU_NTPSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-. ");
+	CStringInput * networkSettings_NtpRefresh = new CStringInput(LOCALE_NETWORKMENU_NTPREFRESH, g_settings.network_ntprefresh, 3,LOCALE_NETWORKMENU_NTPREFRESH_HINT1, LOCALE_NETWORKMENU_NTPREFRESH_HINT2 , "0123456789 ");
 	CMenuForwarder *m0 = new CMenuForwarder(LOCALE_NETWORKMENU_SETUPNOW, true, NULL, this, "network", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
 	CMenuForwarder *m1 = new CMenuForwarder(LOCALE_NETWORKMENU_IPADDRESS , networkConfig.inet_static, networkConfig.address   , networkSettings_NetworkIP );
 	CMenuForwarder *m2 = new CMenuForwarder(LOCALE_NETWORKMENU_NETMASK   , networkConfig.inet_static, networkConfig.netmask   , networkSettings_NetMask   );
 	CMenuForwarder *m3 = new CMenuForwarder(LOCALE_NETWORKMENU_BROADCAST , networkConfig.inet_static, networkConfig.broadcast , networkSettings_Broadcast );
 	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_NETWORKMENU_GATEWAY   , networkConfig.inet_static, networkConfig.gateway   , networkSettings_Gateway   );
 	CMenuForwarder *m5 = new CMenuForwarder(LOCALE_NETWORKMENU_NAMESERVER, networkConfig.inet_static, networkConfig.nameserver, networkSettings_NameServer);
+	CMenuForwarder *m6 = new CMenuForwarder( LOCALE_NETWORKMENU_NTPSERVER, true , g_settings.network_ntpserver, networkSettings_NtpServer );
+	CMenuForwarder *m7 = new CMenuForwarder( LOCALE_NETWORKMENU_NTPREFRESH, true , g_settings.network_ntprefresh, networkSettings_NtpRefresh );
 
 	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5);
 
@@ -2230,7 +2267,10 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem(GenericMenuSeparatorLine);
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
-
+	networkSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_NETWORKMENU_NTPTITLE));
+	networkSettings.addItem(new CMenuOptionChooser(LOCALE_NETWORKMENU_NTPENABLE, &g_settings.network_ntpenable, OPTIONS_NTPENABLE_OPTIONS, OPTIONS_NTPENABLE_OPTION_COUNT , true));
+	networkSettings.addItem( m6);
+	networkSettings.addItem( m7);
 	networkSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_NETWORKMENU_MOUNT));
 	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_MOUNT , true, NULL, new CNFSMountGui(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_UMOUNT, true, NULL, new CNFSUmountGui(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));

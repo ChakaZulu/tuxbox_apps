@@ -20,6 +20,7 @@ sectionsd_SOURCES = sectionsd.cpp dmxapi.cpp debug.cpp dmx.cpp SIsections.cpp SI
 
 sectionsd_LDADD = \
 	@CONNECTION_LIBS@ \
+	@CONFIGFILE_LIBS@ \
 	@EVENTSERVER_LIBS@ \
 	@XML_LIBS@ \
 	-lpthread

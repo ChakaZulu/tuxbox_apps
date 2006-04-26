@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.219 2006/03/26 20:13:49 Arzka Exp $
+//  $Id: sectionsd.cpp,v 1.220 2006/04/26 21:27:58 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -63,7 +63,7 @@
 #include <zapit/xmlinterface.h>
 #include <zapit/settings.h>
 #include <zapit/frontend.h>
-//#include <configfile.h>
+#include <configfile.h>
 
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
 #include <boost/shared_ptr.hpp>
@@ -93,7 +93,8 @@
 // Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
 #define TIME_EIT_SKIPPING 30
 
-#define MAX_EVENTS 6000
+//#define MAX_EVENTS 6000
+static unsigned int max_events = 6000;
 // sleep 5 minutes
 #define HOUSEKEEPING_SLEEP (5 * 60)
 // meta housekeeping after XX housekeepings - every 24h -
@@ -144,12 +145,20 @@
 
 // Wieviele Sekunden EPG gecached werden sollen
 //static long secondsToCache=4*24*60L*60L; // 4 Tage - weniger Prozessorlast?!
-static long secondsToCache = 21*24*60L*60L; // 21 Tage - Prozessorlast <3% (rasc)
+//static long secondsToCache = 14*24*60L*60L; // 14 Tage - Prozessorlast <3% (rasc)
+static long secondsToCache;
 // Ab wann ein Event als alt gilt (in Sekunden)
-//static long oldEventsAre = 60*60L; // 1h
-static long oldEventsAre = 180*60L; // 3h  (sometimes want to know something about current/last movie)
+//static long oldEventsAre = 60*60L; // 2h  (sometimes want to know something about current/last movie)
+static long oldEventsAre;
 static int scanning = 1;
 
+//NTP- Config
+#define CONF_FILE "/var/tuxbox/config/neutrino.conf"
+std::string ntp_system_cmd = "/sbin/rdate -s ";
+CConfigFile ntp_config(',');
+std::string ntpserver;
+int ntprefresh;
+int ntpenable;
 
 // EVENTS...
 
@@ -399,7 +408,7 @@ static void addEvent(const SIevent &evt)
 	// Mehrere Events mit gleicher ID sind, diese vorher loeschen
 	deleteEvent(e->uniqueKey());
 		
-	if (mySIeventsOrderUniqueKey.size() >= MAX_EVENTS) {
+	if (mySIeventsOrderUniqueKey.size() >= max_events) {
 		//FIXME: Set Old Events to 0 if limit is reached...
 		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent = 
 										mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end();
@@ -479,7 +488,7 @@ static void addNVODevent(const SIevent &evt)
 	// mehrere Events mit gleicher ID sind, diese vorher loeschen
 	deleteEvent(e->uniqueKey());
 		
-	if (mySIeventsOrderUniqueKey.size() >= MAX_EVENTS) {
+	if (mySIeventsOrderUniqueKey.size() >= max_events) {
 		//FIXME: Set Old Events to 0 if limit is reached...
 		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent = 
 										mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end();
@@ -1506,7 +1515,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.219 2006/03/26 20:13:49 Arzka Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.220 2006/04/26 21:27:58 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2039,6 +2048,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 		for (unsigned int i = 0; i < evt.linkage_descs.size(); i++)
 			if (evt.linkage_descs[i].linkageType == 0xB0)
 			{
+				dprintf("[sectionsd] linkage in current EPG found.\n");
 				flag |= CSectionsdClient::epgflags::current_has_linkagedescriptors;
 				break;
 			}
@@ -2623,7 +2633,7 @@ loop++;
 			}
 		}
 	}
-dprintf("sendEvetList: out of for(;;) loop= %ld \n",loop);
+dprintf("sendEventList: out of for(;;) loop= %ld \n",loop);
 	if (sendServiceName && (count+1 < MAX_SIZE_BIGEVENTLIST))
 	{
 		*liste = 0;
@@ -3191,51 +3201,54 @@ static void commandGetLanguageMode(int connfd, char* /* data */, const unsigned 
 	}
 }
 
+struct s_cmd_table
+{
+	void (*cmd)(int connfd, char *, const unsigned);
+	std::string sCmd;
+};
 
-static void (*connectionCommands[sectionsd::numberOfCommands]) (int connfd, char *, const unsigned) =
-    {
+static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
         //commandActualEPGchannelName,
-	commandDummy1,
-        commandEventListTV,
+{	commandDummy1,				"commandDummy1"				},
+{	commandEventListTV,			"commandEventListTV"			},
         //commandCurrentNextInfoChannelName,
-	commandDummy2,
-        commandDumpStatusInformation,
+{	commandDummy2,				"commandDummy2"				},
+{	commandDumpStatusInformation,		"commandDumpStatusInformation"		},
         //commandAllEventsChannelName,
-	commandDummy3,
-        commandSetHoursToCache,
-        commandSetEventsAreOldInMinutes,
-        commandDumpAllServices,
-        commandEventListRadio,
-        commandGetNextEPG,
-        commandGetNextShort,
-        commandPauseScanning,
-        commandGetIsScanningActive,
-        commandActualEPGchannelID,
-        commandEventListTVids,
-        commandEventListRadioIDs,
-        commandCurrentNextInfoChannelID,
-        commandEPGepgID,
-        commandEPGepgIDshort,
-        commandComponentTagsUniqueKey,
-        commandAllEventsChannelID,
-        commandTimesNVODservice,
-        commandGetEPGPrevNext,
-        commandGetIsTimeSet,
-        commandserviceChanged,
-        commandLinkageDescriptorsUniqueKey,
-        commandPauseSorting,
-	      commandRegisterEventClient,
-				commandUnRegisterEventClient,
- 				commandSetPrivatePid,
-	      commandSetSectionsdScanMode,
-
- 				commandLoadLanguages,
- 				commandSaveLanguages,
- 				commandSetLanguages,
- 				commandGetLanguages,
- 				commandSetLanguageMode,
-	      commandGetLanguageMode
-    };
+{	commandDummy3,				"commandDummy3"				},
+{	commandSetHoursToCache,			"commandSetHoursToCache"		},
+{	commandSetEventsAreOldInMinutes,        "commandSetEventsAreOldInMinutes"	},
+{	commandDumpAllServices,                 "commandDumpAllServices"		},
+{	commandEventListRadio,                  "commandEventListRadio"			},
+{	commandGetNextEPG,                      "commandGetNextEPG"			},
+{	commandGetNextShort,                    "commandGetNextShort"			},
+{	commandPauseScanning,                   "commandPauseScanning"			},
+{	commandGetIsScanningActive,             "commandGetIsScanningActive"		},
+{	commandActualEPGchannelID,              "commandActualEPGchannelID"		},
+{	commandEventListTVids,                  "commandEventListTVids"			},
+{	commandEventListRadioIDs,               "commandEventListRadioIDs"		},
+{	commandCurrentNextInfoChannelID,        "commandCurrentNextInfoChannelID"	},
+{	commandEPGepgID,                        "commandEPGepgID"			},
+{	commandEPGepgIDshort,                   "commandEPGepgIDshort"			},
+{	commandComponentTagsUniqueKey,          "commandComponentTagsUniqueKey"		},
+{	commandAllEventsChannelID,              "commandAllEventsChannelID"		},
+{	commandTimesNVODservice,                "commandTimesNVODservice"		},
+{	commandGetEPGPrevNext,                  "commandGetEPGPrevNext"			},
+{	commandGetIsTimeSet,                    "commandGetIsTimeSet"			},
+{	commandserviceChanged,                  "commandserviceChanged"			},
+{	commandLinkageDescriptorsUniqueKey,     "commandLinkageDescriptorsUniqueKey"	},
+{	commandPauseSorting,                    "commandPauseSorting"			},
+{	commandRegisterEventClient,             "commandRegisterEventClient"		},
+{	commandUnRegisterEventClient,           "commandUnRegisterEventClient"		},
+{	commandSetPrivatePid,                   "commandSetPrivatePid"			},
+{	commandSetSectionsdScanMode,            "commandSetSectionsdScanMode"		},
+{	commandLoadLanguages,                   "commandLoadLanguages"			},
+{	commandSaveLanguages,                   "commandSaveLanguages"			},
+{	commandSetLanguages,                    "commandSetLanguages"			},
+{	commandGetLanguages,                    "commandGetLanguages"			},
+{	commandSetLanguageMode,                 "commandSetLanguageMode"		},
+{	commandGetLanguageMode,                 "commandGetLanguageMode"		}	
+};
 
 //static void *connectionThread(void *conn)
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
@@ -3282,8 +3295,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 					if (rc == true)
 					{
-						dprintf("Starting command %hhd\n", header.command);
-						connectionCommands[header.command](connfd, data, header.dataLength);
+						dprintf("%s\n", connectionCommands[header.command].sCmd.c_str());
+						connectionCommands[header.command].cmd(connfd, data, header.dataLength);
 					}
 
 					delete[] data;
@@ -5005,47 +5018,41 @@ static void *timeThread(void *)
 	bool first_time = true; /* we don't sleep the first time (we try to get a TOT header) */
 	struct timespec restartWait;
 	struct timeval now;
+	bool time_ntp = false;
 
 	try
 	{
 		dprintf("[%sThread] pid %d start\n", "time", getpid());
 
-
-		// -- check if time is already on box (e.g. using rdate/ntpd)  (2005-05-02 rasc)
-		// -- if so skip first_time, etc. flags for better/quick EPG startup
-		{
-		  time_t actTime;
-		  struct tm *tmTime;
-		  actTime=time(NULL);
-		  tmTime = localtime(&actTime);
-
-		  // -- do we already have a valid(???) date/time?
-		  if ((tmTime->tm_year + 1900) >= 2005) {
-			first_time = false;
-			pthread_mutex_lock(&timeIsSetMutex);
-			timeset = true;
-			pthread_cond_broadcast(&timeIsSetCond);
-			pthread_mutex_unlock(&timeIsSetMutex );
-			dprintf("we already have a time set\n");
-		  }
-		}
-
-
-
 		while(1)
 		{
-			if (scanning && (getUTC(&UTC, true))) // always use TDT, a lot of transponders don't provide a TOT
+			
+			if ( ntpenable && system( ntp_system_cmd.c_str() ) == 0)
 			{
-				tim = changeUTCtoCtime((const unsigned char *) &UTC);
+				time_t actTime;
+				actTime=time(NULL);
+				first_time = false;
+				pthread_mutex_lock(&timeIsSetMutex);
+				timeset = true;
+				time_ntp = true;
+				pthread_cond_broadcast(&timeIsSetCond);
+				pthread_mutex_unlock(&timeIsSetMutex );
+				eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &actTime, sizeof(actTime) );
 
-				if (tim) {
-					if ((!messaging_neutrino_sets_time) && (geteuid() == 0)) {
-						struct timeval tv;
-						tv.tv_sec = tim;
-						tv.tv_usec = 0;
-						if (settimeofday(&tv, NULL) < 0) {
-							perror("[sectionsd] settimeofday");
-							pthread_exit(NULL);
+			}else{
+				if (scanning && (getUTC(&UTC, true))) // always use TDT, a lot of transponders don't provide a TOT
+				{
+					tim = changeUTCtoCtime((const unsigned char *) &UTC);
+				
+					if (tim) {
+						if ((!messaging_neutrino_sets_time) && (geteuid() == 0)) {
+							struct timeval tv;
+							tv.tv_sec = tim;
+							tv.tv_usec = 0;
+							if (settimeofday(&tv, NULL) < 0) {
+								perror("[sectionsd] settimeofday");
+								pthread_exit(NULL);
+							}
 						}
 					}
 
@@ -5053,58 +5060,53 @@ static void *timeThread(void *)
 					struct tm *tmTime;
 					actTime=time(NULL);
 					tmTime = localtime(&actTime);
-					printf("[%sThread] time(): %02d.%02d.%04d %02d:%02d:%02d, tim: %s", "time", tmTime->tm_mday, tmTime->tm_mon+1, tmTime->tm_year+1900, tmTime->tm_hour, tmTime->tm_min, tmTime->tm_sec, ctime(&tim));
+					printf("[%sThread] - %02d.%02d.%04d %02d:%02d:%02d, tim: %s", "time", tmTime->tm_mday, tmTime->tm_mon+1, tmTime->tm_year+1900, tmTime->tm_hour, tmTime->tm_min, tmTime->tm_sec, ctime(&tim));
+					first_time = false;
 					pthread_mutex_lock(&timeIsSetMutex);
 					timeset = true;
+					time_ntp= false;
 					pthread_cond_broadcast(&timeIsSetCond);
 					pthread_mutex_unlock(&timeIsSetMutex );
 					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim));
 				}
 			}
 
-			if (timeset && first_time)
-			{
+			if (timeset) {
 				first_time = false;
+				seconds = ntprefresh * 60;
 
-				/*
-				 * automatically restart scanning of events, because
-				 * current events were most likely ignored as they seem
-				 * to be too far in the future (cf. secondsToCache)
-				 */
-				// -- do not trash read events, cleanup will be done hopefully
-				// -- by housekeeping anyway  (rasc (2005-05-02)
-				// dmxEIT.change(0);
-				// dmxSDT.change(0);
-			}
-			else {
-				if (timeset) {
-					seconds = 60 * 30;
-					dprintf("[%sThread] - dmxTOT: going to sleep for %d seconds.\n", "time", seconds);
-				}
-				else if (!scanning){
-					seconds = 60;
+				if(time_ntp){
+					printf("[%sThread] Time set via NTP, going to sleep for %d seconds.\n", "time", seconds);
 				}
 				else {
-					seconds = 1;
+					printf("[%sThread] Time set via DVB, going to sleep for %d seconds.\n", "time", seconds);
 				}
-				gettimeofday(&now, NULL);
-				TIMEVAL_TO_TIMESPEC(&now, &restartWait);
-				restartWait.tv_sec += seconds;
-				pthread_mutex_lock( &timeThreadSleepMutex );
-				int ret = pthread_cond_timedwait( &timeThreadSleepCond, &timeThreadSleepMutex, &restartWait );
-				if (ret == ETIMEDOUT)
-				{
-					dprintf("TDT-Thread sleeping is over - no signal received\n");
-				}
-				else if (ret == EINTR)
-				{
-					dprintf("TDT-Thread sleeping interrupted\n");
-				}
-				// else if (ret == 0) //everything is fine :) e.g. timeThreadSleepCond maybe signalled @zap time to get a valid time
-				pthread_mutex_unlock( &timeThreadSleepMutex );
 			}
-		}
+			else if (!scanning){
+				seconds = 60;
+			}
+			else {
+				seconds = 1;
+			}
+
+			gettimeofday(&now, NULL);
+			TIMEVAL_TO_TIMESPEC(&now, &restartWait);
+			restartWait.tv_sec += seconds;
+			pthread_mutex_lock( &timeThreadSleepMutex );
+			int ret = pthread_cond_timedwait( &timeThreadSleepCond, &timeThreadSleepMutex, &restartWait );
+			if (ret == ETIMEDOUT)
+			{
+				dprintf("TDT-Thread sleeping is over - no signal received\n");
+			}
+			else if (ret == EINTR)
+			{
+				dprintf("TDT-Thread sleeping interrupted\n");
+			}
+			// else if (ret == 0) //everything is fine :) e.g. timeThreadSleepCond maybe signalled @zap time to get a valid time
+			pthread_mutex_unlock( &timeThreadSleepMutex );
+		}	
 	}
+
 	catch (std::exception& e)
 	{
 		fprintf(stderr, "Caught std-exception in time-thread %s!\n", e.what());
@@ -5278,11 +5280,12 @@ static void *eitThread(void *)
 					pthread_mutex_lock( &dmxEIT.start_stop_mutex );
 					dprintf("dmxEIT: going to sleep...\n");
 					
+					lockMessaging();
 					if (auto_scanning)
 						dmxNIT.change( 0 );
+					unlockMessaging();
 
 					int rs = pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
-
 					if (rs == ETIMEDOUT)
 					{
 						dprintf("dmxEIT: waking up again - looking for new events :)\n");
@@ -5378,7 +5381,6 @@ static void *eitThread(void *)
 					// == 0 -> kein event
 
 					dprintf("[eitThread] adding %d events [table 0x%x] (begin)\n", eit.events().size(), header.table_id);
-
 					zeit = time(NULL);
 					// Nicht alle Events speichern
 					for (SIevents::iterator e = eit.events().begin(); e != eit.events().end(); e++)
@@ -5483,7 +5485,7 @@ static void *eitThread(void *)
 
 						if ( change_filter > 0 )
 						{
-							if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() ) {
+							if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() ){
 								dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
 								dmxEIT.change(dmxEIT.filter_index + 1);
 								lastChanged = time(NULL);
@@ -5978,7 +5980,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.219 2006/03/26 20:13:49 Arzka Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.220 2006/04/26 21:27:58 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -6001,11 +6003,31 @@ int main(int argc, char **argv)
 			}
 		}
 
-		printf("caching %ld hours\n", secondsToCache / (60*60L));
-		printf("events are old %ldmin after their end time\n", oldEventsAre / 60);
 		tzset(); // TZ auswerten
 
 		CBasicServer sectionsd_server;
+
+		//NTP-Config laden
+                if (!ntp_config.loadConfig(CONF_FILE))
+                {
+                        /* set defaults if no configuration file exists */
+                        printf("[sectionsd] %s not found\n", CONF_FILE);
+                }
+
+                ntpserver = ntp_config.getString("network_ntpserver", "de.pool.ntp.org");
+                ntprefresh = atoi(ntp_config.getString("network_ntprefresh","30").c_str() );
+		ntpenable = ntp_config.getBool("network_ntpenable", false);
+
+		ntp_system_cmd += ntpserver;
+
+		//EPG Einstellungen laden	
+		secondsToCache = (atoi(ntp_config.getString("epg_cache_time","14").c_str() ) *24*60L*60L); //Tage
+		oldEventsAre = (atoi(ntp_config.getString("epg_old_events","1").c_str() ) *60L*60L); //Stunden
+		max_events= atoi(ntp_config.getString("epg_max_events","6000").c_str() );
+
+		printf("[sectionsd] Caching max %d events\n", max_events);
+		printf("[sectionsd] Caching %ld days\n", secondsToCache / (24*60*60L));
+		printf("[sectionsd] Events are old %ldmin after their end time\n", oldEventsAre / 60);
 
 		if (!sectionsd_server.prepare(SECTIONSD_UDS_NAME))
 			return EXIT_FAILURE;

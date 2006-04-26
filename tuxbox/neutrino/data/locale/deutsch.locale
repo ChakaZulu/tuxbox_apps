@@ -517,6 +517,16 @@ messagebox.yes Ja
 miscsettings.bootinfo Infos beim Booten anzeigen
 miscsettings.bootmenu Bootmenü anzeigen
 miscsettings.driver_boot Treiber- und Bootoptionen
+miscsettings.epg_cache EPG-Cache (Tage)
+miscsettings.epg_cache_hint1 EPG-Daten im Vorraus cachen ?
+miscsettings.epg_cache_hint2 Angabe in Tagen
+miscsettings.epg_head EPG-Einstellungen
+miscsettings.epg_max_events Max. Events
+miscsettings.epg_max_events_hint1 Wieviele Events sollen max. gespeichert werden ?
+miscsettings.epg_max_events_hint2 Standard 6000
+miscsettings.epg_old_events EPG verwerfen nach (Std.)
+miscsettings.epg_old_events_hint1 Wie lange abgelaufene EPG-Daten aufheben ?
+miscsettings.epg_old_events_hint2 Angabe in Stunden
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.general Allgemein
 miscsettings.head Diverse Einstellungen
@@ -682,6 +692,14 @@ networkmenu.ipaddress IP-Adresse
 networkmenu.mount NFS/CIFS/FTPFS
 networkmenu.nameserver Nameserver
 networkmenu.netmask Netzmaske
+networkmenu.ntpenable Syncronisation via
+networkmenu.ntprefresh NTP/DVB-Refresh
+networkmenu.ntprefresh_hint1 NTP/DVB-Zeitsyncronisierung in Minuten
+networkmenu.ntprefresh_hint2 Neustart / EPG-Reset erforderlich
+networkmenu.ntpserver NTP-Server
+networkmenu.ntpserver_hint1 NTP-Server z.b: ntp1.ptb.de
+networkmenu.ntpserver_hint2 Neustart / EPG-Reset erforderlich
+networkmenu.ntptitle Zeitsyncronisation
 networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
 networkmenu.setuponstartup Beim Starten Netzwerk setzen
 networkmenu.show aktive Netzwerkeinstellungen zeigen
@@ -715,6 +733,8 @@ nvodselector.head Anfangszeit auswählen
 nvodselector.subservice Perspektiven
 options.default Voreinstellungen benutzen
 options.fb framebuffer
+options.ntp_off DVB
+options.ntp_on NTP
 options.null null
 options.off aus
 options.on ein

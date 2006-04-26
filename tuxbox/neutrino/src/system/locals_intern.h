@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.68 2006/04/01 11:20:24 barf Exp $
+ * $Id: locals_intern.h,v 1.69 2006/04/26 21:25:12 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -544,6 +544,16 @@ const char * locale_real_names[] =
 	"miscsettings.bootinfo",
 	"miscsettings.bootmenu",
 	"miscsettings.driver_boot",
+	"miscsettings.epg_cache",
+	"miscsettings.epg_cache_hint1",
+	"miscsettings.epg_cache_hint2",
+	"miscsettings.epg_head",
+	"miscsettings.epg_max_events",
+	"miscsettings.epg_max_events_hint1",
+	"miscsettings.epg_max_events_hint2",
+	"miscsettings.epg_old_events",
+	"miscsettings.epg_old_events_hint1",
+	"miscsettings.epg_old_events_hint2",
 	"miscsettings.fb_destination",
 	"miscsettings.general",
 	"miscsettings.head",
@@ -709,6 +719,14 @@ const char * locale_real_names[] =
 	"networkmenu.mount",
 	"networkmenu.nameserver",
 	"networkmenu.netmask",
+	"networkmenu.ntpenable",
+	"networkmenu.ntprefresh",
+	"networkmenu.ntprefresh_hint1",
+	"networkmenu.ntprefresh_hint2",
+	"networkmenu.ntpserver",
+	"networkmenu.ntpserver_hint1",
+	"networkmenu.ntpserver_hint2",
+	"networkmenu.ntptitle",
 	"networkmenu.setupnow",
 	"networkmenu.setuponstartup",
 	"networkmenu.show",
@@ -742,6 +760,8 @@ const char * locale_real_names[] =
 	"nvodselector.subservice",
 	"options.default",
 	"options.fb",
+	"options.ntp_off",
+	"options.ntp_on",
 	"options.null",
 	"options.off",
 	"options.on",

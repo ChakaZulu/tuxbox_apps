@@ -517,6 +517,16 @@ messagebox.yes Yes
 miscsettings.bootinfo Show infos at start
 miscsettings.bootmenu Show boot menu
 miscsettings.driver_boot driver and boot options
+miscsettings.epg_cache EPG-Cache (Days)
+miscsettings.epg_cache_hint1 How long will EPG-Data in the future cached ?
+miscsettings.epg_cache_hint2 Set in days.
+miscsettings.epg_head EPG-Settings
+miscsettings.epg_max_events Max. Events
+miscsettings.epg_max_events_hint1 How many events should be stored ?
+miscsettings.epg_max_events_hint2 normaly 6000
+miscsettings.epg_old_events EPG remove after (std.)
+miscsettings.epg_old_events_hint1 How long will EPG-Data be stored after they timed out ?
+miscsettings.epg_old_events_hint2 Set in hours
 miscsettings.fb_destination Expert! Boot-Console
 miscsettings.general General
 miscsettings.head Misc settings
@@ -682,6 +692,14 @@ networkmenu.ipaddress IP address
 networkmenu.mount NFS/CIFS/FTPFS
 networkmenu.nameserver DNS Server
 networkmenu.netmask Subnet Mask
+networkmenu.ntpenable Syncronisation via
+networkmenu.ntprefresh NTP/DVB-Refresh
+networkmenu.ntprefresh_hint1 NTP/DVB-Time-Sync in minutes
+networkmenu.ntprefresh_hint2 need reboot or epg-reset
+networkmenu.ntpserver NTP-Server
+networkmenu.ntpserver_hint1 NTP-Server example: ntp1.ptb.de
+networkmenu.ntpserver_hint2 need reboot or epg-reset
+networkmenu.ntptitle Time-Syncronisation
 networkmenu.setupnow Start/Restart network now
 networkmenu.setuponstartup Start network on Boot
 networkmenu.show Show active network settings
@@ -715,6 +733,8 @@ nvodselector.head Select starting-time
 nvodselector.subservice Select Subservice
 options.default Reset to defaults
 options.fb framebuffer
+options.ntp_off DVB
+options.ntp_on NTP
 options.null null
 options.off off
 options.on on
