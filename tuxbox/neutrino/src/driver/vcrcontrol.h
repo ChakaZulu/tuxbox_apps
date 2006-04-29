@@ -180,7 +180,8 @@ class CVCRControl
 			{
 			};
 		private:
-			void appendEPGInfo(char *buf, unsigned int size, const event_id_t epgid, const std::string& epgTitle);
+			void appendEPGTitle(char *buf, unsigned int size, const event_id_t epgid, const std::string& epgTitle);
+			void appendEPGInfo(char *buf, unsigned int size, const event_id_t epgid);
 			void appendChannelName(char *buf, unsigned int size, const t_channel_id channel_id);
 			bool createRecordingDir(const char *filename);
 

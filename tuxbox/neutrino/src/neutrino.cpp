@@ -693,7 +693,7 @@ int CNeutrinoApp::loadSetup()
 	for(int i=0 ; i < REC_FILENAME_TEMPLATE_NR_OF_ENTRIES; i++)
 	{
 		sprintf(cfg_key, "recording_filename_template_%d", i);
-		g_settings.recording_filename_template[i] = configfile.getString(cfg_key, "%c_%i_%d_%t");
+		g_settings.recording_filename_template[i] = configfile.getString(cfg_key, "%C_%T_%d_%t");
 		sprintf(cfg_key, "recording_dir_permissions_%d", i);
 		strncpy(g_settings.recording_dir_permissions[i], configfile.getString(cfg_key,"755").c_str(),3);
 		g_settings.recording_dir_permissions[i][3] = '\0';

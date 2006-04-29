@@ -696,7 +696,7 @@ recordingmenu.dir_permissions_hint Rättigheter i 'chmod'-stil
 recordingmenu.epg_for_filename långa filnamn (med EPG data)
 recordingmenu.file direkt (fil)
 recordingmenu.filename_template Schablon för filnamn
-recordingmenu.filename_template_hint %c=Kanal, %i=Titel, %d=Datum, %t=Tid
+recordingmenu.filename_template_hint %C=Kanal, %T=Titel, %I=info, %d=Datum, %t=Tid
 recordingmenu.filesettings direktinspelning inställning
 recordingmenu.head Inspelningsinställningar
 recordingmenu.help Inspelningsenheter:\n--------------------------\nserver:\nmed en streaming programvara på en PC\n\n(analog) vcr:\nmed ett VCR uttag\n\ndirekt (fil):\ndirekt till en NFS-monterad mapp\neller till en intern hårddisk\nTS: använd spts-läge\nPES: använd inte spts-läget\n\n\nMax. filstorlek:\n---------------------\nNFS V2: 2 GB (2048 MB)\nNFS V3: så stor hårddisken är (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)

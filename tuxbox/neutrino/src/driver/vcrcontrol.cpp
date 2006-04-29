@@ -739,14 +739,14 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	
 	time_t t = time(NULL);
 	
+	// %C == channel, %T == title, %I == info1, %d == date, %t == time
 	if (FilenameTemplate.empty())
 	{
 		if (g_settings.recording_epg_for_filename)
-			FilenameTemplate = "%c_%i_";
+			FilenameTemplate = "%C_%T_";
 		FilenameTemplate += "%d_%t";
 	}
 	
-	// %c == channel, %i == info, %d == date, %t == time
 	std::string expandedTemplate;
 	if (CreateTemplateDirectories)
 	{	
@@ -765,15 +765,23 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		appendChannelName(buf,255,channel_id);
 		dataLength = strlen(buf);
 		
-		while ((searchPos = expandedTemplate.find("%c",startAt)) != std::string::npos) {
+		while ((searchPos = expandedTemplate.find("%C",startAt)) != std::string::npos) {
 			expandedTemplate.erase(searchPos,2);
 			expandedTemplate.insert(searchPos,buf);
 			startAt = searchPos + dataLength;
 		}
 		startAt = 0;
-		appendEPGInfo(buf, 255, epgid, epgTitle);
+		appendEPGTitle(buf, 255, epgid, epgTitle);
 		dataLength = strlen(buf);
-		while ((searchPos = expandedTemplate.find("%i",startAt)) != std::string::npos) {
+		while ((searchPos = expandedTemplate.find("%T",startAt)) != std::string::npos) {
+			expandedTemplate.erase(searchPos,2);
+			expandedTemplate.insert(searchPos,buf);
+			startAt = searchPos + dataLength;
+		}
+		startAt = 0;
+		appendEPGInfo(buf, 255, epgid);
+		dataLength = strlen(buf);
+		while ((searchPos = expandedTemplate.find("%I",startAt)) != std::string::npos) {
 			expandedTemplate.erase(searchPos,2);
 			expandedTemplate.insert(searchPos,buf);
 			startAt = searchPos + dataLength;
@@ -843,7 +851,45 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	}
 }
 
-void CVCRControl::CFileDevice::appendEPGInfo(char *buf, unsigned int size, const event_id_t epgid, const std::string& epgTitleTimer) {
+void CVCRControl::CFileDevice::appendEPGInfo(char *buf, unsigned int size, const event_id_t epgid) {
+	
+	CSectionsdClient sdc;
+	CShortEPGData epgdata;
+	std::string epgInfo;
+	if (size > 0)
+		buf[0] = '\0';
+	if (sdc.getEPGidShort(epgid, &epgdata))
+		epgInfo = epgdata.info1;
+	else
+		epgInfo = "";
+
+	if (!(epgInfo.empty()) && epgInfo.size() < size)
+	{
+#warning fixme sectionsd should deliver data in UTF-8 format
+//				strcpy(&(filename[pos]), Latin1_to_UTF8(epgdata.title).c_str());
+// all characters with code >= 128 will be discarded anyway
+		strcpy(buf, epgInfo.c_str());
+		char * p_act = buf;
+		do {
+			p_act +=  strcspn(p_act, "/ \"%&-\t`'~<>!,:;?^°$\\=*#@¤|");
+			if (*p_act) {
+				*p_act++ = '_';
+			}
+		} while (*p_act);
+		
+		p_act = buf;
+		do
+		{
+			if ((unsigned char) (*p_act) >= 128) {
+				*p_act = '_';
+			}
+		} while (*p_act++);
+	}
+}
+	
+
+
+void CVCRControl::CFileDevice::appendEPGTitle(char *buf, unsigned int size, const event_id_t epgid, const std::string& epgTitleTimer) {
 	
 	CSectionsdClient sdc;
 	CShortEPGData epgdata;

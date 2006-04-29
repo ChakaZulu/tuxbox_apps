@@ -793,7 +793,7 @@ recordingmenu.dir_permissions_hint Hakemiston oikeudet unix-tyyliin. Yleensä 75
 recordingmenu.epg_for_filename Pitkät tiedostonimet (sis. EPG-tiedot)
 recordingmenu.file Tiedosto
 recordingmenu.filename_template Tiedostojen nimeäminen
-recordingmenu.filename_template_hint %c=kanava, %i=ohjelman nimi,%d=päiväys, %t=aika
+recordingmenu.filename_template_hint %C=kanava, %T=ohjelman nimi,%I=info, %d=päiväys, %t=aika
 recordingmenu.filesettings Tiedostotallennuksen asetukset
 recordingmenu.head Tallennusasetukset
 recordingmenu.help Tallennustavat:\n- Palvelin:\n-- Tallennus käyttäen PC:ssä olevaa erillistä ohjelmistoa\n- Videonauhuri:\n-- Tallennus VCR-scart:iin kytketylle videonauhurille\n\n- Tiedosto:\n-- Tallennus suoraan tiedostoon\n -- verkkolevylle tai sisäiselle kiintolevylle\nTallennus spts-tilassa:\n- Päällä = TS\n- Pois = PES\n\nTiedostojärjestelmien suurimmat tiedostokoot:\n- NFS V2: 2 GB (2048 MB)\n- NFS V3: lähes rajoittamaton (0 MB)\n- FAT: 2 GB (2048 MB)\n- FAT32: 4 GB (4096 MB)
