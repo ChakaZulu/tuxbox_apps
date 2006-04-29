@@ -73,6 +73,7 @@ class CStringInput : public CMenuTarget
 		virtual void keyBackspacePressed(void);
 		virtual void keyRedPressed();
 		virtual void keyYellowPressed();
+		virtual void keyBluePressed();
 		virtual void keyUpPressed();
 		virtual void keyDownPressed();
 		virtual void keyLeftPressed();

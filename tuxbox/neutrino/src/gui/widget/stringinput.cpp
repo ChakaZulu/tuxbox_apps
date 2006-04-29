@@ -181,6 +181,20 @@ void CStringInput::keyYellowPressed()
 		paintChar(i);
 	}
 }
+
+void CStringInput::keyBluePressed()
+{
+	if (((value[selected] | 32) >= 'a') && ((value[selected] | 32) <= 'z'))
+	{
+		char newValue = value[selected] ^ 32;
+		if (index(validchars, newValue) != NULL) 
+		{
+			value[selected] = newValue;
+			paintChar(selected);
+		}
+	}
+}
+
 void CStringInput::keyUpPressed()
 {
 	int npos = 0;
@@ -323,6 +337,10 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 			}
 
 			paintChar(selected);
+		}
+		else if (msg== CRCInput::RC_blue)
+		{
+			keyBluePressed();
 		}
 		else if (msg==CRCInput::RC_up)
 		{
