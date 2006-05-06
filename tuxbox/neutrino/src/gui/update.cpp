@@ -415,6 +415,13 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	// Is the file size that of a full image? Then flash as such.
 	unsigned int mtd_of_whole_image = CMTDInfo::getInstance()->findMTDNumberFromDescription(MTD_TEXT_OF_WHOLE_IMAGE);
 	unsigned int mtd_of_update_image = CMTDInfo::getInstance()->findMTDNumber(MTD_DEVICE_OF_UPDATE_PART);
+	if (mtd_of_whole_image == (unsigned int) -1 || mtd_of_update_image == (unsigned int) -1)
+	{
+		printf("Cannot determine partition numbers, aborting flashing\n");
+		hide();
+		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, "Internal error");	// I don't care to localize...
+		return menu_return::RETURN_REPAINT;
+	}
 
 	if (filesize == CMTDInfo::getInstance()->getMTDSize(mtd_of_whole_image))
 	{
