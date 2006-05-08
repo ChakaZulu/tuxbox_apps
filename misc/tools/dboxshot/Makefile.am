@@ -1,3 +1,3 @@
 bin_PROGRAMS = dboxshot
 
-fbshot_SOURCES = dboxshot.c
+dboxshot_SOURCES = dboxshot.c
