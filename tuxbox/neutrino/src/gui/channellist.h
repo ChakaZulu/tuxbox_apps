@@ -116,6 +116,7 @@ class CChannelList
 /*		CChannel *   getChannelFromChannelID(const t_channel_id channel_id); */
 
 		void zapTo(int pos, bool forceStoreToLastChannels = false);
+		void virtual_zap_mode(bool up);
 		bool zapTo_ChannelID(const t_channel_id channel_id);
 		bool adjustToChannelID(const t_channel_id channel_id);
 		bool showInfo(int pos);

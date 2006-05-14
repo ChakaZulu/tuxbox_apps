@@ -566,6 +566,7 @@ int CNeutrinoApp::loadSetup()
 #ifndef TUXTXT_CFG_STANDALONE
 	g_settings.tuxtxt_cache                = configfile.getBool("tuxtxt_cache"                 , false );
 #endif
+	g_settings.virtual_zap_mode	    = configfile.getBool("virtual_zap_mode"          , false);
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -925,6 +926,7 @@ void CNeutrinoApp::saveSetup()
 #ifndef TUXTXT_CFG_STANDALONE
 	configfile.setBool("tuxtxt_cache"                 , g_settings.tuxtxt_cache);
 #endif
+	configfile.setBool("virtual_zap_mode"          , g_settings.virtual_zap_mode);
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -1945,6 +1947,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	CTuxtxtCacheNotifier *tuxtxtcacheNotifier = new CTuxtxtCacheNotifier;
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_TUXTXT_CACHE, &g_settings.tuxtxt_cache, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, tuxtxtcacheNotifier));
 #endif
+
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VIRTUAL_ZAP_MODE, &g_settings.virtual_zap_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_EPG_HEAD));
 	CStringInput * miscSettings_epg_cache = new CStringInput(LOCALE_MISCSETTINGS_EPG_CACHE, g_settings.epg_cache, 2,LOCALE_MISCSETTINGS_EPG_CACHE_HINT1, LOCALE_MISCSETTINGS_EPG_CACHE_HINT2 , "0123456789 ");

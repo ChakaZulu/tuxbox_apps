@@ -635,7 +635,7 @@ int CChannelList::numericZap(int key)
 				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(ox+7+ i*((sx-14)>>2), oy+sy-3, sx, &valstr[i], COL_INFOBAR);
 			}
 
-			showInfo(chn- 1);
+			showInfo(chn - 1);
 			lastchan= chn;
 		}
 
@@ -734,6 +734,104 @@ int CChannelList::numericZap(int key)
 	}
 
 	return res;
+}
+
+void CChannelList::virtual_zap_mode(bool up)
+{
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
+	if (chanlist.empty()) {
+		DisplayErrorMessage(g_Locale->getText(LOCALE_CHANNELLIST_NONEFOUND)); // UTF-8
+		return;
+	}
+
+	int chn = getActiveChannelNumber() + (up ? 1 : -1);
+	if (chn > (int)chanlist.size())
+	  chn = 1;
+	if (chn == 0)
+	  chn = (int)chanlist.size();
+	int lastchan= -1;
+	bool doZap = true;
+	bool showEPG = false;
+
+	while(1)
+	{
+		if (lastchan != chn)
+		{
+			showInfo(chn- 1);
+			lastchan= chn;
+		}
+
+		g_RCInput->getMsg( &msg, &data, 15*10 ); // 15 seconds, not user changable
+		//printf("########### %u ### %u #### %u #######\n", msg, NeutrinoMessages::EVT_TIMER, CRCInput::RC_timeout);
+
+		if ( msg == CRCInput::RC_ok )
+		{
+			if ( ( chn > (signed int) chanlist.size() ) || ( chn == 0 ) )
+			{
+				chn = tuned + 1;
+			}
+			break;
+		}
+		else if ( msg == CRCInput::RC_left )
+		{
+			if ( chn == 1 )
+				chn = chanlist.size();
+			else
+			{
+				chn--;
+
+				if (chn > (int)chanlist.size())
+					chn = (int)chanlist.size();
+			}
+		}
+		else if ( msg == CRCInput::RC_right )
+		{
+			chn++;
+
+			if (chn > (int)chanlist.size())
+				chn = 1;
+		}
+		else if ( ( msg == CRCInput::RC_home ) || ( msg == CRCInput::RC_timeout ) )
+		{
+			// Abbruch ohne Channel zu wechseln
+			doZap = false;
+			break;
+		}
+		else if ( msg == CRCInput::RC_red )
+		{
+			// Rote Taste zeigt EPG fuer gewaehlten Kanal an
+			if ( ( chn <= (signed int) chanlist.size() ) && ( chn != 0 ) )
+			{
+				doZap = false;
+				showEPG = true;
+				break;
+			}
+		}
+		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
+		{
+			doZap = false;
+			break;
+		}
+	}
+
+	chn--;
+	if (chn<0)
+		chn=0;
+	if ( doZap )
+	{
+		zapTo( chn );
+	}
+	else
+	{
+		showInfo(tuned);
+		g_InfoViewer->killTitle();
+
+		// Rote Taste zeigt EPG fuer gewaehlten Kanal an
+		if ( showEPG )
+			g_EventList->exec(chanlist[chn]->channel_id, chanlist[chn]->name);
+	}
 }
 
 void CChannelList::quickZap(int key)

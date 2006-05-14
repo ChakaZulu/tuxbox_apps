@@ -56,6 +56,7 @@ struct SNeutrinoSettings
 #ifndef TUXTXT_CFG_STANDALONE
 	int tuxtxt_cache;
 #endif
+	int virtual_zap_mode;
 
 	// EPG
 	char epg_cache[3];

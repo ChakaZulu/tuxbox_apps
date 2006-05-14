@@ -543,6 +543,7 @@ miscsettings.shutdown_real_rcdelay Delayed shutdown
 miscsettings.sptsmode use spts mode
 miscsettings.startbhdriver load BH-Mode drivers
 miscsettings.tuxtxt_cache videotext cache
+miscsettings.virtual_zap_mode Virtual zap by infobar
 motorcontrol.head Motor-Setup
 moviebrowser.book_head Bookmarks
 moviebrowser.book_lastmoviestop Last play stop:

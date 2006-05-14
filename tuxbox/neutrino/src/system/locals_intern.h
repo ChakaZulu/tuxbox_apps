@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.69 2006/04/26 21:25:12 houdini Exp $
+ * $Id: locals_intern.h,v 1.70 2006/05/14 11:26:58 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -570,6 +570,7 @@ const char * locale_real_names[] =
 	"miscsettings.sptsmode",
 	"miscsettings.startbhdriver",
 	"miscsettings.tuxtxt_cache",
+	"miscsettings.virtual_zap_mode",
 	"motorcontrol.head",
 	"moviebrowser.book_head",
 	"moviebrowser.book_lastmoviestop",

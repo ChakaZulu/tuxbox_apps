@@ -315,6 +315,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 			fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
 
 		bool hideIt = true;
+		bool virtual_zap_mode = false;
 		unsigned long long timeoutEnd = (neutrino->getMode() != 2) ?  CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]) : CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR_RADIO]);
 
 		int res = messages_return::none;
@@ -424,6 +425,12 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 				showRecordIcon(show_dot);
  				show_dot = !show_dot;
 			}
+			else if ( g_settings.virtual_zap_mode && ((msg == CRCInput::RC_right) || msg == CRCInput::RC_left ))
+			{
+				virtual_zap_mode = true;
+				res = messages_return::cancel_all;
+				hideIt = true;
+			}
 			else
 			{
 				res = neutrino->handleMsg(msg, data);
@@ -438,8 +445,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		}
 
 
-	if ( hideIt )
-		killTitle();
+		if ( hideIt )
+			killTitle();
 
 		g_RCInput->killTimer(sec_timer_id);
 
@@ -452,6 +459,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 			frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
 			frameBuffer->paletteSet();
 		}
+		if (virtual_zap_mode)
+			CNeutrinoApp::getInstance()->channelList->virtual_zap_mode(msg == CRCInput::RC_right);
 	}
 }
 

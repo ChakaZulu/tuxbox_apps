@@ -533,6 +533,7 @@ miscsettings.shutdown_real_rcdelay Fördröjd avstängning
 miscsettings.sptsmode använd spts läge
 miscsettings.startbhdriver ladda BH-Mode drivare
 miscsettings.tuxtxt_cache mellanlagring av TextTV-sidor
+miscsettings.virtual_zap_mode Virtuell zapp vid infobalk
 motorcontrol.head Motorinstallation
 movieplayer.bookmark Bokmärken
 movieplayer.bookmarkname Bokmärkesnamn
