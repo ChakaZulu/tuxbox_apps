@@ -1,7 +1,7 @@
 #ifndef SIUTILS_HPP
 #define SIUTILS_HPP
 //
-// $Id: SIutils.hpp,v 1.4 2001/07/14 16:38:46 fnbrd Exp $
+// $Id: SIutils.hpp,v 1.5 2006/05/19 21:28:08 houdini Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -24,6 +24,13 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.hpp,v $
+// Revision 1.5  2006/05/19 21:28:08  houdini
+// - Nirvanas save/restore EPG patch #g
+// - automatic update of subchannels for Premiere (disable with <sectionsd -nu>)
+// - Fix for ZDF audio option "mono/Hörfilm"
+// - improved navigation speed in bouquet/channel list
+// - zapit/pzapit new option (-sbo) save bouquets.xml including Bouquet "Andere" which saves me a lot of time :-)
+//
 // Revision 1.4  2001/07/14 16:38:46  fnbrd
 // Mit workaround fuer defektes mktime der glibc
 //
@@ -37,7 +44,6 @@
 // Alles neu macht der Mai.
 //
 //
-
 time_t changeUTCtoCtime(const unsigned char *buffer, int local_time=1);
 
 // returns the descriptor type as readable text

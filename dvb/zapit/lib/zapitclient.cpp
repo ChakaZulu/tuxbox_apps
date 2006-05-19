@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.108 2005/11/20 15:10:50 mogway Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.109 2006/05/19 21:26:42 houdini Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -799,9 +799,11 @@ void CZapitClient::renumChannellist()
 
 
 /* saves current bouquet configuration to bouquets.xml*/
-void CZapitClient::saveBouquets()
+void CZapitClient::saveBouquets(const bool includeBouquetOthers)
 {
-	send(CZapitMessages::CMD_BQ_SAVE_BOUQUETS);
+	CZapitMessages::commandBoolean msg;
+	msg.truefalse = includeBouquetOthers;
+	send(CZapitMessages::CMD_BQ_SAVE_BOUQUETS, (char*)&msg, sizeof(msg));
 
 	CZapitMessages::responseCmd response;
 	CBasicClient::receive_data((char* )&response, sizeof(response));

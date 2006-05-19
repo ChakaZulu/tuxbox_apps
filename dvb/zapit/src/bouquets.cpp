@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.108 2006/02/08 21:19:35 houdini Exp $
+ * $Id: bouquets.cpp,v 1.109 2006/05/19 21:26:42 houdini Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -223,13 +223,14 @@ void writeChannelList(FILE * const bouq_fd, const ChannelList & list, const bool
 }
 
 /**** class CBouquetManager *************************************************/
-void CBouquetManager::saveBouquets(void)
+void CBouquetManager::saveBouquets(bool includeBouquetOthers)
 {
 	FILE *       bouq_fd;
 	bool         write_names           = config.getBool("writeChannelsNames", true);
 	unsigned int string_number         = (strcmp(getFrontendName(), "sat") == 0) ? 1 : 0;
 	const char * channel_printf_string = write_names ? printf_string_with_names[string_number] : printf_string_without_names[string_number];
 	
+	if (includeBouquetOthers) makeRemainingChannelsBouquet();
 	bouq_fd = fopen(BOUQUETS_XML, "w");
 		
 	fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<zapit>\n");
@@ -237,7 +238,7 @@ void CBouquetManager::saveBouquets(void)
 	for (BouquetList::const_iterator it = Bouquets.begin(); it != Bouquets.end(); it++)
 	{
 		// TODO: use locales
-		if (((*it) != remainChannels) && (strncmp((*it)->Name.c_str(),"Neue Sender",11) != 0))
+		if (includeBouquetOthers || (((*it) != remainChannels) && (strncmp((*it)->Name.c_str(),"Neue Sender",11) != 0)))
 		{
 			//fprintf(bouq_fd, "\t<Bouquet name=\"%s\" hidden=\"%d\" locked=\"%d\">\n",
 			fprintf(bouq_fd, "\t<Bouquet type=\"%01x\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"%01x\" locked=\"%01x\">\n",
@@ -280,6 +281,7 @@ void CBouquetManager::saveBouquets(const CZapitClient::bouquetMode bouquetMode, 
 	}
 */	
 //	printf("[zapit] b mode sat \n");
+
 	if ((bouquetMode == CZapitClient::BM_UPDATEBOUQUETS) || (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET))
 	{
 		BouquetList storedBouquets;

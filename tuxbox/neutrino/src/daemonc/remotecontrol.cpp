@@ -168,10 +168,11 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 	{
 		CSectionsdClient::CurrentNextInfo* info_CN = (CSectionsdClient::CurrentNextInfo*) data;
 
-		if ( ( info_CN->current_uniqueKey >> 16) == current_channel_id )
+//		printf("Current/Next channelID: old(%llx) -> new(%llx)\n", current_channel_id, info_CN->current_uniqueKey >> 16);
+		if ( ((info_CN->current_uniqueKey >> 16) == current_channel_id ) || ((info_CN->current_uniqueKey >> 16) == current_sub_channel_id ) )
 		{
 			//CURRENT-EPG für den aktuellen Kanal bekommen!;
-
+//			printf("Current/Next EPGID: old(%llx) -> new(%llx)\n", current_EPGid, info_CN->current_uniqueKey);
 			if ( info_CN->current_uniqueKey != current_EPGid )
 			{
 			    if ( current_EPGid != 0 )
@@ -190,8 +191,10 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 				if ( has_unresolved_ctags )
 					processAPIDnames();
 
-				if ( info_CN->flags & CSectionsdClient::epgflags::current_has_linkagedescriptors )
+				if ( info_CN->flags & CSectionsdClient::epgflags::current_has_linkagedescriptors ){
+					subChannels.clear();
 					getSubChannels();
+				}
 
 				if ( needs_nvods )
 					getNVODs();
@@ -297,14 +300,19 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 
 void CRemoteControl::getSubChannels()
 {
-	if ( subChannels.size() == 0 )
+// check for updates of the subchannels
+//	if ( subChannels.size() == 0 )
 	{
 		CSectionsdClient::LinkageDescriptorList	linkedServices;
 		if ( g_Sectionsd->getLinkageDescriptorsUniqueKey( current_EPGid, linkedServices ) )
 		{
 			if ( linkedServices.size()> 1 )
 			{
+				t_channel_id searchkey;
 				are_subchannels = true;
+				if (current_sub_channel_id>0) 	searchkey = current_sub_channel_id;
+				else				searchkey = current_channel_id;
+
 				for (unsigned int i=0; i< linkedServices.size(); i++)
 				{
 					subChannels.push_back(CSubService(
@@ -312,7 +320,7 @@ void CRemoteControl::getSubChannels()
 								      linkedServices[i].serviceId,
 								      linkedServices[i].transportStreamId,
 								      linkedServices[i].name));
-					if (subChannels[i].getChannelID() == current_channel_id)
+					if (subChannels[i].getChannelID() == searchkey )
 						selected_subchannel = i;
 				}
 				copySubChannelsToZapit();
@@ -496,15 +504,12 @@ const std::string & CRemoteControl::setSubChannel(const int numSub, const bool f
 	selected_subchannel = numSub;
 	current_sub_channel_id = subChannels[numSub].getChannelID();
 	g_Zapit->zapTo_subServiceID_NOWAIT( current_sub_channel_id );
-	// Houdini: to restart reading the private EPG when switching to a new option
-	g_Sectionsd->setServiceChanged( current_sub_channel_id , true );
 
 	return subChannels[numSub].subservice_name;
 }
 
 const std::string & CRemoteControl::subChannelUp(void)
 {
-//	return setSubChannel((subChannels.size() == 0) ? -1 : (int)((selected_subchannel + 1) % subChannels.size()));
 	// if there are any NVOD/subchannels switch these else switch audio channel (if any)
 	if (subChannels.size() > 0 || !g_settings.audiochannel_up_down_enable)
 	{

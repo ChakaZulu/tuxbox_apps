@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.60 2006/02/08 21:19:35 houdini Exp $
+ * $Id: bouquets.h,v 1.61 2006/05/19 21:25:50 houdini Exp $
  */
 
 #ifndef __bouquets_h__
@@ -110,7 +110,7 @@ class CBouquetManager
 
 		BouquetList Bouquets;
 
-		void saveBouquets(void);
+		void saveBouquets(bool includeBouquetOthers = false);
 		void saveBouquets(const CZapitClient::bouquetMode bouquetMode, const char * const providerName);
 		void loadBouquets(bool ignoreBouquetFile = false);
 		void renumServices();

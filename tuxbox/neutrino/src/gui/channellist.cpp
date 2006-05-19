@@ -65,6 +65,12 @@ int info_height = 0;
 extern "C" int  tuxtxt_stop();
 #endif
 
+// time (s) after a new request for events is sent to sectionsd 
+#define UPDATE_INTERVAL	60
+time_t updatetime = 0;
+CChannelEventList events;
+
+
 CChannelList::CChannel::CChannel(const int _key, const int _number, const std::string& _name, const t_satellite_position _satellitePosition, const t_channel_id ids)
 {
 	key                 = _key;
@@ -123,8 +129,15 @@ int CChannelList::exec()
 
 void CChannelList::updateEvents(void)
 {
-	/* request tv channel list if current mode is not radio mode */
-	CChannelEventList events = g_Sectionsd->getChannelEvents((CNeutrinoApp::getInstance()->getMode()) != NeutrinoMessages::mode_radio);
+	time_t acttime = time(NULL);
+
+	// do not get all ChannelEvents on each Bouquet change -> speed up navigation
+	if (updatetime == 0 || (acttime > updatetime + UPDATE_INTERVAL)) {
+		events.clear();
+		/* request tv channel list if current mode is not radio mode */
+		events = g_Sectionsd->getChannelEvents((CNeutrinoApp::getInstance()->getMode()) != NeutrinoMessages::mode_radio);
+		updatetime = acttime;
+	}
 
 	for (uint count=0; count<chanlist.size(); count++){
 		chanlist[count]->currentEvent= CChannelEvent();
@@ -244,6 +257,7 @@ int CChannelList::show()
 		{
 			selected = oldselected;
 			loop=false;
+			updatetime = 0;
 		}
 		else if ((msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup))
 		{
@@ -395,10 +409,12 @@ int CChannelList::show()
 
 	if(zapOnExit)
 	{
+		updatetime = 0; // zap -> possible new event
 		return(selected);
 	}
 	else
 	{
+		if (res == -2) updatetime = 0; // leave menu
 		return(res);
 	}
 

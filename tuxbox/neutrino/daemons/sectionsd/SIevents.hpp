@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.26 2006/04/21 20:40:13 houdini Exp $
+// $Id: SIevents.hpp,v 1.27 2006/05/19 21:28:08 houdini Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -29,6 +29,7 @@
 #include <map>
 
 #include <sectionsdclient/sectionsdtypes.h>
+//#include "SIutils.hpp"
 
 // forward references
 class SIservice;
@@ -130,10 +131,13 @@ public:
 		printf("Original Network Id: 0x%04hhx\n", originalNetworkId);
 		printf("Service Id: 0x%04hhx\n", serviceId);
 	}
-
+	
 	int saveXML(FILE *file) const {
-		if(fprintf(file, "    <linkage type=\"0x%02hhx\" linkage descriptor=\"%s\" transport_stream_id=\"0x%04hhx\" original_network_id=\"0x%04hhx\" service_id=\"0x%04hhx\" />\n", linkageType, name.c_str(), transportStreamId, originalNetworkId, serviceId)<0)
-			return 1;
+		fprintf(file, "\t\t\t<linkage type=\"%02x\" linkage_descriptor=\"", linkageType);
+		saveStringToXMLfile(file, name.c_str());
+		fprintf(file, "\" transport_stream_id=\"%04x\" original_network_id=\"%04x\" service_id=\"%04x\" />\n", transportStreamId, originalNetworkId, serviceId);
+//		%s, , name.c_str())<0)
+//			return 1;
 		return 0;
 	}
 
@@ -177,6 +181,12 @@ class SIcomponent {
       componentTag=c.componentTag;
       component=c.component;
     }
+    
+    SIcomponent(void) {
+      streamContent=0;
+      componentType=0;
+      componentTag=0;      
+    }
     // Der Operator zum sortieren
     bool operator < (const SIcomponent& c) const {
       return streamContent < c.streamContent;
@@ -190,8 +200,13 @@ class SIcomponent {
       printf("Component tag: 0x%02hhx\n", componentTag);
     }
     int saveXML(FILE *file) const {
-      if(fprintf(file, "    <component tag=\"0x%02hhx\" type=\"0x%02hhx\" stream_content=\"0x%02hhx\" />\n", componentTag, componentType, streamContent)<0)
-        return 1;
+      fprintf(file, "\t\t\t<component tag=\"%02x\" type=\"%02x\" stream_content=\"%02x\" text=\"", componentTag, componentType, streamContent);
+      saveStringToXMLfile(file,component.c_str());
+      fprintf(file, "\"/>\n");
+//      %s
+//	return 1;
+//	saveStringToXMLfile(file, component.c_str());
+//	fprintf(file, "\"/>\n");
       return 0;
     }
     std::string component; // Text aus dem Component Descriptor
@@ -235,7 +250,7 @@ class SIparentalRating {
       printf("Rating: %s %hhu (+3)\n", countryCode.c_str(), rating);
     }
     int saveXML(FILE *file) const {
-      if(fprintf(file, "    <parental_rating country=\"%s\" rating=\"%hhu\" />\n", countryCode.c_str(), rating)<0)
+      if(fprintf(file, "\t\t\t<parental_rating country=\"%s\" rating=\"%hhu\"/>\n", countryCode.c_str(), rating)<0)
         return 1;
       return 0;
     }
@@ -282,10 +297,13 @@ class SItime {
       // Ist so noch nicht in Ordnung, das sollte untergliedert werden,
       // da sonst evtl. time,date,duration,time,date,... auftritt
       // und eine rein sequentielle Ordnung finde ich nicht ok.
+      /*
       struct tm *zeit=localtime(&startzeit);
-      fprintf(file, "    <time>%02d:%02d:%02d</time>\n", zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-      fprintf(file, "    <date>%02d.%02d.%04d</date>\n", zeit->tm_mday, zeit->tm_mon+1, zeit->tm_year+1900);
-      fprintf(file, "    <duration>%u</duration>\n", dauer);
+      fprintf(file, "\t\t\t\t\t<time>%02d:%02d:%02d</time>\n", zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
+      fprintf(file, "\t\t\t\t\t<date>%02d.%02d.%04d</date>\n", zeit->tm_mday, zeit->tm_mon+1, zeit->tm_year+1900);
+      fprintf(file, "\t\t\t\t\t<duration>%u</duration>\n", dauer);
+      */
+      fprintf(file, "\t\t\t<time start_time=\"%u\" duration=\"%u\"/>\n", startzeit, dauer);
       return 0;
     }
     time_t startzeit;  // lokale Zeit, 0 -> time shifted (cinedoms)
@@ -317,6 +335,7 @@ public:
 	SIevent(const struct eit_event *);
 	// Std-Copy
 	SIevent(const SIevent &);
+	SIevent(const t_original_network_id, const t_transport_stream_id, const t_service_id, const unsigned short);
 	SIevent(void) {
 		service_id = 0;
 		original_network_id = 0;

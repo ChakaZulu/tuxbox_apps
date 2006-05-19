@@ -155,7 +155,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void AudioMute( bool newValue, bool isEvent= false );
 
 
-		void ExitRun();
+		void ExitRun(const bool write_si);
 		void RealRun(CMenuWidget &mainSettings);
 		void InitZapper();
 		void InitKeySettings(CMenuWidget &);

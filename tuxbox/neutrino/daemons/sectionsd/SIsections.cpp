@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.45 2006/03/26 20:13:49 Arzka Exp $
+// $Id: SIsections.cpp,v 1.46 2006/05/19 21:28:08 houdini Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -102,6 +102,11 @@ struct bskyb_order_entry {
 	unsigned channel_number_lo		: 8;
 	unsigned unknown3			: 8;
 	unsigned unknown4			: 8;
+} __attribute__ ((packed)) ;
+
+struct bskyb_bid {
+	unsigned unknown1			: 8;
+	unsigned unknown2			: 8;
 } __attribute__ ((packed)) ;
 
 struct private_data_specifier {
@@ -639,6 +644,14 @@ void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
 //  printf("Service-Name: %s\n", s.serviceName.c_str());
 }
 
+void SIsectionSDT::parsePrivateDataDescriptor(const char *buf, SIservice &s)
+{
+	buf+=sizeof(struct descr_generic_header);
+	struct private_data_specifier *pds=(struct private_data_specifier *)buf;
+	if (((((pds->byte1 << 24) | (pds->byte2 << 16)) | (pds->byte3 << 8)) | pds->byte4 == 0x000000c0) && (s.serviceTyp == 0xc3))
+		s.serviceTyp = 0x01;
+}
+
 void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
 {
   struct descr_generic_header *desc;
@@ -653,6 +666,10 @@ void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
     else if(desc->descriptor_tag==0x4b) {
 //      printf("Found NVOD reference descriptor\n");
       parseNVODreferenceDescriptor((const char *)desc, s);
+    }
+    else if(desc->descriptor_tag==0x5f) {
+//      printf("Found Private Data Specifier\n");
+      parsePrivateDataDescriptor((const char *)desc, s);
     }
     len-=desc->descriptor_length+2;
     des+=desc->descriptor_length+2;
@@ -960,22 +977,28 @@ void SIsectionBAT::parse(void)
 							const char *privbuf = (const char *) desc;
 							privbuf+=sizeof(struct descr_generic_header);
 							unsigned short privdlen = desc->descriptor_length - 2;
-							privbuf+=2; //first 2 bytes of each 0xb1 desc unknown
+							//Nirvana 27.4.06: first 2 bytes still unknown: always 0xffff on sky italia?
+							//check if resulting bouquets on 28.2E look more sensible...
+							struct bskyb_bid *bid = (struct bskyb_bid *)privbuf;
+							if ((bid->unknown1 == 0xff) && (bid->unknown2 == 0xff)) {
 							
-							while (privdlen >= sizeof(struct bskyb_order_entry)) {
-								struct bskyb_order_entry *oe = (struct bskyb_order_entry *)privbuf;
-								privbuf+=sizeof(struct bskyb_order_entry);
-								SIbouquet bs(bouquet_id);
-								bs.bouquetName = bouquetName;
-								bs.transport_stream_id = (sv->transport_stream_id_hi << 8) | 
-												sv->transport_stream_id_lo;
-								bs.original_network_id = (sv->original_network_id_hi << 8) | 
-												sv->original_network_id_lo;
-								bs.service_id = (oe->service_id_hi << 8) | oe->service_id_lo;
-								bs.serviceTyp = oe->service_type;
-								bs.position = (oe->channel_number_hi << 8) | oe->channel_number_lo;
-								bsv.insert(bs);
-								privdlen -= sizeof(struct bskyb_order_entry);
+								privbuf+=2; //first 2 bytes of each 0xb1 desc unknown
+							
+								while (privdlen >= sizeof(struct bskyb_order_entry)) {
+									struct bskyb_order_entry *oe = (struct bskyb_order_entry *)privbuf;
+									privbuf+=sizeof(struct bskyb_order_entry);
+									SIbouquet bs(bouquet_id);
+									bs.bouquetName = bouquetName;
+									bs.transport_stream_id = (sv->transport_stream_id_hi << 8) | 
+													sv->transport_stream_id_lo;
+									bs.original_network_id = (sv->original_network_id_hi << 8) | 
+													sv->original_network_id_lo;
+									bs.service_id = (oe->service_id_hi << 8) | oe->service_id_lo;
+									bs.serviceTyp = oe->service_type;
+									bs.position = (oe->channel_number_hi << 8) | oe->channel_number_lo;
+									bsv.insert(bs);
+									privdlen -= sizeof(struct bskyb_order_entry);
+								}
 							}
 
 						}

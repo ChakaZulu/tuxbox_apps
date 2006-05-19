@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.37 2006/04/21 20:37:16 houdini Exp $
+  $Id: sectionsdclient.h,v 1.38 2006/05/19 21:28:09 houdini Exp $
 
   License: GPL
 
@@ -85,7 +85,8 @@ class CSectionsdClient : private CBasicClient
 			EVT_TIMESET,
 			EVT_GOT_CN_EPG,
 			EVT_SERVICES_UPDATE,
-			EVT_BOUQUETS_UPDATE
+			EVT_BOUQUETS_UPDATE,
+			EVT_WRITE_SI_FINISHED
 		};
 	
 	struct epgflags {
@@ -184,6 +185,12 @@ class CSectionsdClient : private CBasicClient
 	void setPrivatePid(const unsigned short pid);
 
 	void setSectionsdScanMode(const int scanMode);
+	
+	void freeMemory();
+	
+	void readSIfromXML(const char * epgxmlname);
+	
+	void writeSI2XML(const char * epgxmlname);
 
 	/*
 	  ein beliebiges Event anmelden

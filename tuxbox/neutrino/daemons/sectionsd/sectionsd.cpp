@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.220 2006/04/26 21:27:58 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.221 2006/05/19 21:28:08 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -160,6 +160,10 @@ std::string ntpserver;
 int ntprefresh;
 int ntpenable;
 
+static int eit_update_fd = -1;
+static bool update_eit = true;
+
+static t_channel_id    messaging_current_servicekey = 0;
 // EVENTS...
 
 CEventServer *eventServer;
@@ -413,6 +417,15 @@ static void addEvent(const SIevent &evt)
 		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent = 
 										mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end();
 		lastEvent--;
+		
+		//preserve events of current channel
+		lockMessaging();
+		while ((lastEvent != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) && 
+			((*lastEvent)->get_channel_id() == messaging_current_servicekey)) {
+		  lastEvent--;
+		}
+		unlockMessaging();
+		
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
 			
@@ -493,6 +506,15 @@ static void addNVODevent(const SIevent &evt)
 		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent = 
 										mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end();
 		lastEvent--;
+		
+		//preserve events of current channel
+		lockMessaging();
+		while ((lastEvent != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) && 
+			((*lastEvent)->get_channel_id() == messaging_current_servicekey)) {
+		  lastEvent--;
+		}
+		unlockMessaging();
+		
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
 
@@ -1322,6 +1344,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 #define MAX_SIZE_EVENTLIST	64*1024
 	char *evtList = new char[MAX_SIZE_EVENTLIST]; // 64kb should be enough and dataLength is unsigned short
 	long count=0;
+//	int laststart = 0;
 
 	if (!evtList)
 	{
@@ -1353,6 +1376,8 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 
 				for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++)
 				{
+//					if (t->startzeit > laststart) {
+//					laststart = t->startzeit;
 					if ( oldFormat )
 					{
 #define MAX_SIZE_STRTIME	50
@@ -1416,6 +1441,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 							break;
 						}
 					}
+//					}
 				}
 			} // if = serviceID
 			else if ( serviceIDfound )
@@ -1515,7 +1541,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.220 2006/04/26 21:27:58 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.221 2006/05/19 21:28:08 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1840,10 +1866,13 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 	return ;
 }
 
-static t_channel_id	messaging_current_servicekey = 0;
 std::vector<long long>	messaging_skipped_sections_ID [0x22];			// 0x4e .. 0x6f
 static long long 	messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
 static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
+
+static unsigned char 	messaging_current_version_number = 0;
+static unsigned char 	messaging_current_section_number = 0;
+static bool		EITCheckAllFilters = true;
 
 //std::vector<long long>	messaging_sdt_skipped_sections_ID [2];			// 0x42, 0x46
 //static long long 	messaging_sdt_sections_max_ID [2];			// 0x42, 0x46
@@ -1863,6 +1892,7 @@ static t_transponder_id messaging_sdt_tid[MAX_SDTs];							// 0x42,0x46
 //static bool		sdt_backoff = true;
 //static bool		new_services = false;
 static int		auto_scanning = 0;
+char 			epg_file[100] = "";
 /*
 static bool		nit_backoff = true;
 static bool 		messaging_nit_actual_sections_got_all;						// 0x40
@@ -1964,6 +1994,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	showProfiling("[sectionsd] commandserviceChanged: before wakeup");
 	messaging_last_requested = zeit;
+	messaging_current_version_number = 0;
+	EITCheckAllFilters = true;
 
 	if ( doWakeUp )
 	{
@@ -3026,7 +3058,7 @@ static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLeng
 	{
 		privatePid = pid;
 		if (pid != 0) {
-			/*d*/printf("[sectionsd] wakeup PPT Thread, pid=%x\n", pid);
+			dprintf("[sectionsd] wakeup PPT Thread, pid=%x\n", pid);
 			dmxPPT.change( 0 );
 		}
 	}
@@ -3054,6 +3086,447 @@ static void commandSetSectionsdScanMode(int connfd, char *data, const unsigned d
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 	return ;
 
+}
+
+static void commandFreeMemory(int connfd, char *data, const unsigned dataLength)
+{
+	EITThreadsPause();
+	dmxSDT.pause();
+	lockTransponders();
+	MySItranspondersOrderUniqueKey::iterator t = mySItranspondersOrderUniqueKey.begin();
+	while (t != mySItranspondersOrderUniqueKey.end()) {
+		mySItranspondersOrderUniqueKey.erase(t->first);
+		t = mySItranspondersOrderUniqueKey.begin();
+	}
+	unlockTransponders();
+	lockServices();
+	MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin();
+	while (s != mySIservicesOrderUniqueKey.end()) {
+		mySIservicesOrderUniqueKey.erase(s->first);
+		s = mySIservicesOrderUniqueKey.begin();
+	}
+	unlockServices();
+	lockBouquets();
+	MySIbouquetsOrderUniqueKey::iterator b = mySIbouquetsOrderUniqueKey.begin();
+	while (b != mySIbouquetsOrderUniqueKey.end()) {
+		mySIbouquetsOrderUniqueKey.erase(b->first);
+		b = mySIbouquetsOrderUniqueKey.begin();
+	}
+	unlockBouquets();
+	lockEvents();
+	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin();
+	while (e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end()) {
+		deleteEvent((*e)->uniqueKey());
+		e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin();
+	}
+	unlockEvents();
+	dmxSDT.unpause();
+	EITThreadsUnPause();
+
+	
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = 0;
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
+	return ;
+}
+
+std::string UTF8_to_Latin1(const char * s)
+{
+	std::string r;
+
+	while ((*s) != 0)
+	{
+		if (((*s) & 0xf0) == 0xf0)      /* skip (can't be encoded in Latin1) */
+		{
+			s++;
+			if ((*s) == 0)
+				return r;
+			s++;
+			if ((*s) == 0)
+				return r;
+			s++;
+			if ((*s) == 0)
+				return r;
+		}
+		else if (((*s) & 0xe0) == 0xe0) /* skip (can't be encoded in Latin1) */
+		{
+			s++;
+			if ((*s) == 0)
+				return r;
+			s++;
+			if ((*s) == 0)
+				return r;
+		}
+		else if (((*s) & 0xc0) == 0xc0)
+		{
+			char c = (((*s) & 3) << 6);
+			s++;
+			if ((*s) == 0)
+				return r;
+			r += (c | ((*s) & 0x3f));
+		}
+		else r += *s;
+		s++;
+	}
+	return r;
+}
+
+static void *insertEventsfromFile(void *)
+{
+	xmlDocPtr event_parser = NULL;
+	xmlNodePtr eventfile = NULL;
+	xmlNodePtr service = NULL;
+	xmlNodePtr event = NULL;
+	xmlNodePtr node = NULL;
+	t_original_network_id onid = 0;
+	t_transport_stream_id tsid = 0;
+	t_service_id sid = 0;
+	char cclass[20];
+	char cuser[20];
+	char indexname[100] = "";
+	std::string filename = "";
+//	std::string language;
+	char epgname[100] = "";
+	unsigned int dirlen = strlen(epg_file);
+
+	strncpy(indexname, epg_file, dirlen);
+	indexname[dirlen] = '\0';
+	strncat(indexname, "index.xml", 10);
+
+	xmlDocPtr index_parser = parseXmlFile(indexname);
+	
+	if (index_parser != NULL) {
+		dprintf("Reading Information from file %s:\n", indexname);
+
+		eventfile = xmlDocGetRootElement(index_parser)->xmlChildrenNode;
+
+		while (eventfile) {
+			filename = xmlGetAttribute(eventfile, "name");
+			strncpy(epgname, epg_file, dirlen);
+			epgname[dirlen] = '\0';
+			strcat(epgname, filename.c_str());
+			if (!(event_parser = parseXmlFile(epgname))) {
+				dprintf("unable to open %s for reading\n", epgname);
+			}
+			else {
+				service = xmlDocGetRootElement(event_parser)->xmlChildrenNode;
+		
+				while (service) {
+					onid = xmlGetNumericAttribute(service, "original_network_id", 16);
+					tsid = xmlGetNumericAttribute(service, "transport_stream_id", 16);
+					sid = xmlGetNumericAttribute(service, "service_id", 16);
+				
+					event = service->xmlChildrenNode;
+				
+					while (event) {
+					
+						SIevent e(onid,tsid,sid,xmlGetNumericAttribute(event, "id", 16));
+											
+						node = event->xmlChildrenNode;
+
+						while (xmlGetNextOccurence(node, "name") != NULL) {
+							e.setName(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))), 
+									std::string(UTF8_to_Latin1(xmlGetAttribute(node, "string"))));
+							node = node->xmlNextNode;
+						}
+						while (xmlGetNextOccurence(node, "text") != NULL) {
+							e.setText(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))), 
+									std::string(UTF8_to_Latin1(xmlGetAttribute(node, "string"))));
+							node = node->xmlNextNode;
+						}
+						while (xmlGetNextOccurence(node, "item") != NULL) {
+							e.item = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "string")));
+							node = node->xmlNextNode;
+						}
+						while (xmlGetNextOccurence(node, "item_description") != NULL) {
+							e.itemDescription = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "string")));
+							node = node->xmlNextNode;
+						}
+						while (xmlGetNextOccurence(node, "extended_text") != NULL) {
+							e.appendExtendedText(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))), 
+										std::string(UTF8_to_Latin1(xmlGetAttribute(node, "string"))));
+							node = node->xmlNextNode;
+						}
+						/*
+						if (xmlGetNextOccurence(node, "description") != NULL) {
+							if (xmlGetAttribute(node, "name") != NULL) {
+								e.langName = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "name")));
+							}
+							//printf("Name: %s\n", e->name);
+							if (xmlGetAttribute(node, "text") != NULL) {
+								e.langText = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "text")));
+							}
+							if (xmlGetAttribute(node, "item") != NULL) {
+								e.item = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "item")));
+							}
+							if (xmlGetAttribute(node, "item_description") != NULL) {
+								e.itemDescription = std::string(UTF8_to_Latin1(xmlGetAttribute(node,"item_description")));
+							}
+							if (xmlGetAttribute(node, "extended_text") != NULL) {
+								e.langExtendedText = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "extended_text")));
+							}
+							node = node->xmlNextNode;
+						}
+*/
+						while (xmlGetNextOccurence(node, "time") != NULL) {
+							e.times.insert(SItime(xmlGetNumericAttribute(node, "start_time", 10), 
+										xmlGetNumericAttribute(node, "duration", 10)));
+							node = node->xmlNextNode;
+						}
+						
+						int count = 0;
+						while (xmlGetNextOccurence(node, "content") != NULL) {
+							cclass[count] = xmlGetNumericAttribute(node, "class", 16);
+							cuser[count] = xmlGetNumericAttribute(node, "user", 16);
+							node = node->xmlNextNode;
+							count++;
+						}
+						e.contentClassification = std::string(cclass, count);
+						e.userClassification =  std::string(cuser, count);
+						
+						while (xmlGetNextOccurence(node, "component") != NULL) {
+							SIcomponent c;
+							c.streamContent = xmlGetNumericAttribute(node, "stream_content", 16);
+							c.componentType = xmlGetNumericAttribute(node, "type", 16);
+							c.componentTag = xmlGetNumericAttribute(node, "tag", 16);
+							c.component = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "text")));
+							e.components.insert(c);
+							node = node->xmlNextNode;
+						}
+						while (xmlGetNextOccurence(node, "parental_rating") != NULL) {
+							e.ratings.insert(SIparentalRating(std::string(UTF8_to_Latin1(xmlGetAttribute(node, "country"))), (unsigned char) xmlGetNumericAttribute(node, "rating", 10)));
+							node = node->xmlNextNode;
+						}
+						while (xmlGetNextOccurence(node, "linkage") != NULL) {
+							SIlinkage l;
+							l.linkageType = xmlGetNumericAttribute(node, "type", 16);
+							l.transportStreamId = xmlGetNumericAttribute(node, "transport_stream_id", 16);
+							l.originalNetworkId = xmlGetNumericAttribute(node, "original_network_id", 16);
+							l.serviceId = xmlGetNumericAttribute(node, "service_id", 16);
+							l.name = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "linkage_descriptor")));
+							e.linkage_descs.insert(e.linkage_descs.end(), l);
+							
+							node = node->xmlNextNode;
+						}	
+						lockEvents();
+						addEvent(e);
+						unlockEvents();
+						
+						event = event->xmlNextNode;
+					}
+			
+					service = service->xmlNextNode;
+				}
+			}
+			xmlFreeDoc(event_parser);
+		
+			eventfile = eventfile->xmlNextNode;
+		}
+		
+		dprintf("Reading Information finished\n");
+	}	
+
+	xmlFreeDoc(index_parser);
+
+	pthread_exit(NULL);
+}
+
+static void commandReadSIfromXML(int connfd, char *data, const unsigned dataLength)
+{
+	pthread_t thrInsert;
+	
+	if (dataLength > 100)
+		return ;
+	
+	lockMessaging();
+	strncpy(epg_file, data, dataLength);
+	epg_file[dataLength] = '\0';
+	unlockMessaging();
+	
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = 0;
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
+	
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+	struct sched_param param;
+	pthread_attr_setschedpolicy(&attr, SCHED_RR);
+	param.sched_priority=-10;
+	pthread_attr_setschedparam(&attr, &param);
+
+	if (pthread_create (&thrInsert, &attr, insertEventsfromFile, 0 ))
+	{
+		perror("sectionsd: pthread_create()");
+	}
+
+	pthread_attr_destroy(&attr);
+
+	return ;
+}
+
+static void write_epg_xml_header(FILE * fd, const t_original_network_id onid, const t_transport_stream_id tsid, const t_service_id sid)
+{
+	fprintf(fd,
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<!--\n"
+		"  This file was automatically generated by the sectionsd.\n"
+		"  It contains all event entries which have been cached\n"
+		"  at time the box was shut down.\n"
+		"-->\n"
+	       "<dvbepg>\n");
+	fprintf(fd,"\t<service original_network_id=\"%04x\" transport_stream_id=\"%04x\" service_id=\"%04x\">\n",onid,tsid,sid);
+}
+
+static void write_index_xml_header(FILE * fd)
+{
+	fprintf(fd,
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<!--\n"
+		"  This file was automatically generated by the sectionsd.\n"
+		"  It contains all event entries which have been cached\n"
+		"  at time the box was shut down.\n"
+		"-->\n"
+	       "<dvbepgfiles>\n");
+}
+
+static void write_epgxml_footer(FILE *fd)
+{
+	fprintf(fd, "\t</service>\n");
+	fprintf(fd, "</dvbepg>\n");
+}
+
+static void write_indexxml_footer(FILE *fd)
+{
+	fprintf(fd, "</dvbepgfiles>\n");
+}
+
+//stolen from scan.cpp
+void cp(char * from, char * to)
+{
+	char cmd[256];
+	snprintf(cmd, 256, "cp -f %s %s", from, to);
+	system(cmd);
+}
+
+static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength)
+{
+	FILE * indexfile = NULL;
+	FILE * eventfile =NULL;
+	char filename[100] = "";
+	char tmpname[100] = "";
+	char eventname[17] = "";
+	t_original_network_id onid = 0;
+	t_transport_stream_id tsid = 0;
+	t_service_id sid = 0;
+
+	struct sectionsd::msgResponseHeader responseHeader;
+	responseHeader.dataLength = 0;
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
+		
+	if (dataLength > 100)
+		return ;
+			
+	strncpy(tmpname, data, dataLength);
+	tmpname[dataLength] = '\0';
+	strncat(tmpname, "index.tmp", 10);
+
+	if (!(indexfile = fopen(tmpname, "w"))) {
+		dprintf("unable to open %s for writing\n", tmpname);
+	}
+	else {	
+		EITThreadsPause();
+		dmxSDT.pause();
+		
+		dprintf("Writing Information to file: %s\n", tmpname);
+		
+		write_index_xml_header(indexfile);
+	
+		lockEvents();
+		
+		MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = 
+					mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin();
+		if (e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end()) {
+			onid = (*e)->original_network_id;
+			tsid = (*e)->transport_stream_id;
+			sid = (*e)->service_id;
+			snprintf(eventname,17,"%04x%04x%04x.xml",onid,tsid,sid);
+			strncpy(filename, data, dataLength);
+			filename[dataLength] = '\0';
+			strncat(filename, eventname, 17);			
+			fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n",eventname);
+			if (!(eventfile = fopen(filename, "w")))
+				return;
+			write_epg_xml_header(eventfile,onid,tsid,sid);
+		
+			while (e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end()) {
+				if (onid != (*e)->original_network_id) {
+					onid = (*e)->original_network_id;
+					tsid = (*e)->transport_stream_id;
+					sid = (*e)->service_id;
+					write_epgxml_footer(eventfile);
+					fclose(eventfile);
+					snprintf(eventname,17,"%04x%04x%04x.xml",onid,tsid,sid);
+					strncpy(filename, data, dataLength);
+					filename[dataLength] = '\0';
+					strncat(filename, eventname, 17);			
+					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
+					if (!(eventfile = fopen(filename, "w")))
+						return;
+					write_epg_xml_header(eventfile,onid,tsid,sid);
+				}
+				else if (tsid != (*e)->transport_stream_id) {
+					tsid = (*e)->transport_stream_id;
+					sid = (*e)->service_id;
+					write_epgxml_footer(eventfile);
+					fclose(eventfile);
+					snprintf(eventname,17,"%04x%04x%04x.xml",onid,tsid,sid);
+					strncpy(filename, data, dataLength);
+					filename[dataLength] = '\0';
+					strncat(filename, eventname, 17);			
+					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
+					if (!(eventfile = fopen(filename, "w")))
+						return;
+					write_epg_xml_header(eventfile,onid,tsid,sid);
+				}
+				else if (sid != (*e)->service_id) {
+					sid = (*e)->service_id;
+					write_epgxml_footer(eventfile);
+					fclose(eventfile);
+					snprintf(eventname,17,"%04x%04x%04x.xml",onid,tsid,sid);
+					strncpy(filename, data, dataLength);
+					filename[dataLength] = '\0';
+					strncat(filename, eventname, 17);		
+					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
+					if (!(eventfile = fopen(filename, "w")))
+						return;
+					write_epg_xml_header(eventfile,onid,tsid,sid);
+				}			
+				(*e)->saveXML(eventfile);
+				e ++;
+			}
+			unlockEvents();
+			
+			write_epgxml_footer(eventfile);
+			fclose(eventfile);
+
+		}
+		write_indexxml_footer(indexfile);
+		fclose(indexfile);
+		
+		dprintf("Writing Information finished\n");
+		dmxSDT.unpause();		
+		EITThreadsUnPause();
+	}
+	strncpy(filename, data, dataLength);
+	filename[dataLength] = '\0';
+	strncat(filename, "index.xml", 10);
+
+	cp(tmpname, filename);
+	unlink(tmpname);
+	eventServer->sendEvent(CSectionsdClient::EVT_WRITE_SI_FINISHED, CEventServer::INITID_SECTIONSD);
+	return ;
 }
 
 static void commandDummy1(int connfd, char *data, const unsigned dataLength)
@@ -3242,6 +3715,9 @@ static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
 {	commandUnRegisterEventClient,           "commandUnRegisterEventClient"		},
 {	commandSetPrivatePid,                   "commandSetPrivatePid"			},
 {	commandSetSectionsdScanMode,            "commandSetSectionsdScanMode"		},
+{	commandFreeMemory,			"commandFreeMemory"			},
+{	commandReadSIfromXML,			"commandReadSIfromXML"			},
+{	commandWriteSI2XML,			"commandWriteSI2XML"			},
 {	commandLoadLanguages,                   "commandLoadLanguages"			},
 {	commandSaveLanguages,                   "commandSaveLanguages"			},
 {	commandSetLanguages,                    "commandSetLanguages"			},
@@ -3412,13 +3888,6 @@ std::string UTF8_to_UTF8XML(const char * s)
 		s++;
 	}
 	return r;
-}
-//stolen from scan.cpp
-void cp(char * from, char * to)
-{
-	char cmd[256];
-	snprintf(cmd, 256, "cp -f %s %s", from, to);
-	system(cmd);
 }
 
 static void write_xml_header(FILE * fd)
@@ -3909,7 +4378,7 @@ static bool updateTP(const int scanType)
 		cp(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
 		unlink(CURRENTSERVICES_TMP);
 
-		dprintf("[sectionsd] We updated Transponder ONID: %04x TSID: %04x in currentservices.xml!\n", onid, tsid);
+		dprintf("[sectionsd] We updated at least one Transponder in currentservices.xml!\n");
 
 	} else
 		dprintf("[sectionsd] No new services found!\n");
@@ -4109,6 +4578,7 @@ static bool updateNetwork()
 	int position = 0;
 	struct satellite_delivery_descriptor *sdd;
 	const char *ddp;
+	std::string frontendType;
 
 	bool need_update = false;
 	bool needs_fix = false;
@@ -4149,32 +4619,45 @@ static bool updateNetwork()
 				ddp = &s->second->delivery_descriptor[0];
 
 				//printf("Descriptor_type: %02x\n", s->second->delivery_type);
-
+				frontendType = xmlGetName(xmlDocGetRootElement(service_parser)->xmlChildrenNode);
 				switch (s->second->delivery_type) {
 					case 0x43:
-						sdd = (struct satellite_delivery_descriptor *)ddp;
-						position = (sdd->orbital_pos_hi << 8) | sdd->orbital_pos_lo;
-						if (!sdd->west_east_flag)
-							position = -position;
-						provider = getProvbyPosition(xmlDocGetRootElement(service_parser)->xmlChildrenNode, position);
+						if (!strcmp(frontendType.c_str(), "sat")) {
+							sdd = (struct satellite_delivery_descriptor *)ddp;
+							position = (sdd->orbital_pos_hi << 8) | sdd->orbital_pos_lo;
+							if (!sdd->west_east_flag)
+								position = -position;
+							provider = getProvbyPosition(xmlDocGetRootElement(service_parser)->xmlChildrenNode, position);
+						}
+						else {
+							provider = NULL;
+							position = 1000;
+						}
 						break;
 					case 0x44:
-						provider = xmlDocGetRootElement(service_parser)->xmlChildrenNode;
+						if (!strcmp(frontendType.c_str(), "cable")) {
+							provider = xmlDocGetRootElement(service_parser)->xmlChildrenNode;
+							position = 0;
+						}
+						else {
+							position = 1000;
+							provider = NULL;
+						}
 						break;
 					default:
-						position = 0;
+						position = 1000;
 						provider = NULL;
 						break;
 				}
 
 				//provider with satellite position does not exist in services.xml
-				if (!provider) {
+				if ((!provider) && (position != 1000)) {
 					provider = getProviderFromSatellitesXML(xmlDocGetRootElement(service_parser)->xmlChildrenNode, position);
 					if (provider)
 						needs_fix = true; //backward compatibility - add position node
 				}
 				//provider also not found in satellites.xml...
-				if (!provider) {
+				if ((!provider) && (position != 1000)) {
 					if (current_parser != NULL) {
 		 				provider = getProvbyPosition(xmlDocGetRootElement(current_parser)->xmlChildrenNode, position);
 					}
@@ -4529,7 +5012,6 @@ static void *nitThread(void *)
 			if ((zeit > lastData + TIME_NIT_NONEWDATA) || (startup))
 			{
 				struct timespec abs_wait;
-
 				struct timeval now;
 
 				gettimeofday(&now, NULL);
@@ -4552,8 +5034,7 @@ static void *nitThread(void *)
 					messaging_nit_nid[i] = 0;
 						
 				unlockMessaging();
-
-
+				
 				rs = pthread_cond_timedwait( &dmxNIT.change_cond, &dmxNIT.start_stop_mutex, &abs_wait );
 
 				if (rs == ETIMEDOUT)
@@ -4854,7 +5335,8 @@ static void *sdtThread(void *)
 					if (is_new) {
 						lastData = time(NULL);
 						
-						dprintf("[sdtThread] added %d services [table 0x%x]\n", sdt.services().size(), header.table_id);
+						dprintf("[sdtThread] added %d services [table 0x%x TID: %08x]\n", 
+								sdt.services().size(), header.table_id, tid);
 							
 						i = 0;
 						while ((i < MAX_SDTs) && (messaging_sdt_tid[i] != 0) && (messaging_sdt_tid[i] != tid))
@@ -5121,6 +5603,59 @@ static void *timeThread(void *)
 	pthread_exit(NULL);
 }
 
+
+int eit_set_update_filter(int *fd)
+{
+	struct dmx_sct_filter_params dsfp;
+	memset((void*)&dsfp, 0, sizeof(dsfp));
+
+	if ((*fd == -1) && ((*fd = open(DEMUX_DEVICE, O_RDWR)) < 0)) {
+		perror(DEMUX_DEVICE);
+		return -1;
+	}
+
+	dprintf("eit_set_update_filter\n");
+	bzero(&dsfp, sizeof(struct dmx_sct_filter_params));
+	dsfp.filter.filter[0] = 0x4e;	/* table_id */
+	dsfp.filter.filter[1] = (unsigned char)(messaging_current_servicekey >> 8);
+	dsfp.filter.filter[2] = (unsigned char)messaging_current_servicekey;
+	dsfp.filter.filter[3] = (messaging_current_version_number << 1) | 0x01;
+//	dsfp.filter.filter[4] = messaging_current_section_number;
+	dsfp.filter.mask[0] = 0xFF;
+	dsfp.filter.mask[1] = 0xFF;
+	dsfp.filter.mask[2] = 0xFF;
+	dsfp.filter.mask[3] = (0x1F << 1) | 0x01;
+	dsfp.filter.mode[3] = 0x1F << 1;
+//	dsfp.filter.mask[4] = 0xFF;
+	dsfp.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+	dsfp.pid = 0x12;
+	dsfp.timeout = 0;
+
+	if (ioctl(*fd, DMX_SET_FILTER, &dsfp) < 0) {
+		perror("DMX_SET_FILTER");
+		close(*fd);
+		return -1;
+	}
+
+	return 0;
+}
+
+int eit_stop_update_filter(int *fd)
+{
+	if ((*fd == -1)) {
+		fprintf(stderr,"check your code - nothing to stop\n");
+		return 0;
+	}
+	dprintf("eit_stop_update_filter\n");
+	if (ioctl(*fd, DMX_STOP) < 0) {
+		perror("DMX_STOP_FILTER");
+	}
+	close(*fd);
+	*fd = -1;
+	return 0;
+}
+
+
 //---------------------------------------------------------------------
 //			EIT-thread
 // reads EPG-datas
@@ -5146,7 +5681,13 @@ static void *eitThread(void *)
 		dmxEIT.start(); // -> unlock
 
 		for (;;)
-		{		
+		{	/*
+			lockMessaging();
+			if (strcmp(epg_file, "") != 0) {
+				insertEventsfromFile();
+				unlockMessaging();
+			} else {
+			unlockMessaging();*/
 			time_t zeit = time(NULL);
 			
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
@@ -5285,7 +5826,10 @@ static void *eitThread(void *)
 						dmxNIT.change( 0 );
 					unlockMessaging();
 
+					if (update_eit) eit_set_update_filter(&eit_update_fd);
 					int rs = pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
+					if (update_eit) eit_stop_update_filter(&eit_update_fd);
+
 					if (rs == ETIMEDOUT)
 					{
 						dprintf("dmxEIT: waking up again - looking for new events :)\n");
@@ -5380,7 +5924,7 @@ static void *eitThread(void *)
 				{
 					// == 0 -> kein event
 
-					dprintf("[eitThread] adding %d events [table 0x%x] (begin)\n", eit.events().size(), header.table_id);
+/*					dprintf("[eitThread] adding %d events [table 0x%x] (begin)\n", eit.events().size(), header.table_id);*/
 					zeit = time(NULL);
 					// Nicht alle Events speichern
 					for (SIevents::iterator e = eit.events().begin(); e != eit.events().end(); e++)
@@ -5461,13 +6005,23 @@ static void *eitThread(void *)
 							}
 						}
 
+					if (update_eit){
+						if ((header.table_id == 0x4e) && messaging_sections_got_all[0] &&
+//							(((header.table_id_extension_hi << 8) | header.table_id_extension_lo) == (messaging_current_servicekey & 0xFFFF)) &&
+							(messaging_current_version_number != header.version_number)) {
+							dprintf("[eitThread] got new C/N EPG (table_id 0x%x, ext_hi=%x, ext_lo=%x, sn=%x, vn=%x)\n", header.table_id, header.table_id_extension_hi, header.table_id_extension_lo, header.section_number, header.version_number);
+							messaging_current_version_number = header.version_number;
+							messaging_wants_current_next_Event = false;
+							eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
+						}
+					} else {
 						if ( messaging_wants_current_next_Event && messaging_sections_got_all[0] )
 						{
 							dprintf("[eitThread] got all current_next - sending event!\n");
 							messaging_wants_current_next_Event = false;
 							eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
 						}
-
+					}
 						// überprüfen, ob nächster Filter gewünscht :)
 						int	change_filter = 0;
 
@@ -5485,7 +6039,7 @@ static void *eitThread(void *)
 
 						if ( change_filter > 0 )
 						{
-							if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() ){
+							if (( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() ) && EITCheckAllFilters){
 								dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
 								dmxEIT.change(dmxEIT.filter_index + 1);
 								lastChanged = time(NULL);
@@ -5524,6 +6078,7 @@ static void *eitThread(void *)
 
 				dprintf("[eitThread] skipped sections for table 0x%x\n", header.table_id);
 			}
+			//}
 		} // for
 	} // try
 	catch (std::exception& e)
@@ -5859,8 +6414,9 @@ static void *houseKeepingThread(void *)
 			lockEvents();
 
 			unsigned anzEventsAlt = mySIeventsOrderUniqueKey.size();
+			dprintf("before removeoldevents\n");
 			removeOldEvents(oldEventsAre); // alte Events
-
+			dprintf("after removeoldevents\n");
 			if (mySIeventsOrderUniqueKey.size() != anzEventsAlt)
 			{
 				dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo1.uordblks);
@@ -5958,7 +6514,7 @@ static void *houseKeepingThread(void *)
 
 static void printHelp(void)
 {
-	printf("\nUsage: sectionsd [-d]\n\n");
+	printf("\nUsage: sectionsd [-d][-nu]\n\n");
 }
 
 // Just to get our listen socket closed cleanly
@@ -5980,22 +6536,25 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.220 2006/04/26 21:27:58 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.221 2006/05/19 21:28:08 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
 	try {
-		if (argc != 1 && argc != 2) {
+		if (argc < 1 || argc > 3) {
 			printHelp();
 			return EXIT_FAILURE;
 		}
-
-		if (argc == 2) {
-			if (!strcmp(argv[1], "-d"))
+		for (int i = 1; i < argc ; i++) {
+			if (!strcmp(argv[i], "-d"))
 				debug = 1;
-			else if (!strcmp(argv[1], "-d1")) {
+			else if (!strcmp(argv[i], "-d1")) {
 				debug = 1;
 				auto_scanning = 1;
+			}
+			else if (!strcmp(argv[i], "-nu")) {
+				update_eit = false;
+				printf("[sectionsd] EIT update disabled\n");
 			}
 			else {
 				printHelp();
@@ -6116,7 +6675,35 @@ int main(int argc, char **argv)
 		pthread_attr_init(&conn_attrs);
 		pthread_attr_setdetachstate(&conn_attrs, PTHREAD_CREATE_DETACHED);
 
-		sectionsd_server.run(parse_command, sectionsd::ACTVERSION);
+		if (update_eit) {
+			struct pollfd pfd;
+			while (sectionsd_server.run(parse_command, sectionsd::ACTVERSION, true)) {
+
+				if (eit_update_fd != -1) {
+					pfd.fd = eit_update_fd;
+					pfd.events = (POLLIN | POLLPRI);
+					if (poll(&pfd, 1, 0) > 0) {
+						if (pfd.fd == eit_update_fd){
+							dprintf("EIT Update Filter: Activate EitThread\n");
+							lockMessaging();
+							messaging_skipped_sections_ID[0].clear();
+							messaging_sections_max_ID[0] = -1;
+							messaging_sections_got_all[0] = false;
+							messaging_wants_current_next_Event = true;
+							messaging_last_requested = time(NULL);
+							dmxEIT.change( 0 );
+							EITCheckAllFilters = false;
+							unlockMessaging();
+						}
+					}
+				}
+				/* yuck, don't waste that much cpu time :) */
+				usleep(100);
+			}
+		} else {
+			sectionsd_server.run(parse_command, sectionsd::ACTVERSION);
+		}
+
 	} // try
 	catch (std::exception& e)
 	{

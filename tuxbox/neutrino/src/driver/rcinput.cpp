@@ -868,6 +868,10 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 									*msg          = NeutrinoMessages::EVT_SERVICES_UPD;
 									*data         = 0;
 								break;
+							case CSectionsdClient::EVT_WRITE_SI_FINISHED:
+									*msg          = NeutrinoMessages::EVT_SI_FINISHED;
+									*data         = 0;
+								break;
 							case CSectionsdClient::EVT_BOUQUETS_UPDATE:
 								break;
 							default:

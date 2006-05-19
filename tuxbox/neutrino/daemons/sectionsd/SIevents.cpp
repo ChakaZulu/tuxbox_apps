@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.32 2006/04/21 20:40:13 houdini Exp $
+// $Id: SIevents.cpp,v 1.33 2006/05/19 21:28:08 houdini Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -66,6 +66,20 @@ SIevent::SIevent(const struct eit_event *e)
 	transport_stream_id = 0;
 }
 
+SIevent::SIevent(const t_original_network_id _original_network_id, const t_transport_stream_id _transport_stream_id, const t_service_id _service_id,
+			const unsigned short _event_id)
+{
+	original_network_id = _original_network_id;
+	transport_stream_id = _transport_stream_id;
+	service_id          = _service_id;
+	eventID		    = _event_id;
+/*	contentClassification = "";
+	userClassification = "";
+	itemDescription = "";
+	item = "";
+	extendedText = "";*/
+}
+
 // Std-Copy
 SIevent::SIevent(const SIevent &e)
 {
@@ -127,56 +141,60 @@ char SIevent::getFSK() const
 
 int SIevent::saveXML0(FILE *file) const
 {
-	if(fprintf(file, "  <event service_id=\"%hd\" event_id=\"%hd\">\n", service_id, eventID)<0)
+	if(fprintf(file, "\t\t<event id=\"%04x\">\n", eventID)<0)
 		return 1;
 	return 0;
 }
 
 int SIevent::saveXML2(FILE *file) const
 {
-	if(getName().length()) {
-		fprintf(file, "    <name>");
-		saveStringToXMLfile(file, getName().c_str());
-		fprintf(file, "</name>\n");
+	for (std::map<std::string, std::string>::const_iterator
+		i = langName.begin() ;
+		i != langName.end() ;
+		i++) {
+		if (i->second.length()) {
+			fprintf(file, "\t\t\t<name lang=\"%s\" string=\"", i->first.c_str());
+			saveStringToXMLfile(file, i->second.c_str());
+			fprintf(file, "\"/>\n");
+		}
 	}
-	if(getText().length()) {
-		fprintf(file, "    <text>");
-		saveStringToXMLfile(file, getText().c_str());
-		fprintf(file, "</text>\n");
+	for (std::map<std::string, std::string>::const_iterator
+		i = langText.begin() ;
+		i != langText.end() ;
+		i++) {
+		if (i->second.length()) {
+			fprintf(file, "\t\t\t<text lang=\"%s\" string=\"", i->first.c_str());
+			saveStringToXMLfile(file, i->second.c_str());
+			fprintf(file, "\"/>\n");
+		}
 	}
 	if(item.length()) {
-		fprintf(file, "    <item>");
+		fprintf(file, "\t\t\t<item string=\"");
 		saveStringToXMLfile(file, item.c_str());
-		fprintf(file, "</item>\n");
+		fprintf(file, "\"/>\n");
 	}
 	if(itemDescription.length()) {
-		fprintf(file, "    <item_description>");
+		fprintf(file, "\t\t\t<item_description string=\"");
 		saveStringToXMLfile(file, itemDescription.c_str());
-		fprintf(file, "</item_description>\n");
+		fprintf(file, "\"/>\n");
 	}
-	if(getExtendedText().length()) {
-		fprintf(file, "    <extended_text>");
-		saveStringToXMLfile(file, getExtendedText().c_str());
-		fprintf(file, "</extended_text>\n");
+	for (std::map<std::string, std::string>::const_iterator
+		i = langExtendedText.begin() ;
+		i != langExtendedText.end() ;
+		i++) {
+		if (i->second.length()) {
+			fprintf(file, "\t\t\t<extended_text lang=\"%s\" string=\"", i->first.c_str());
+			saveStringToXMLfile(file, i->second.c_str());
+			fprintf(file, "\"/>\n");
+		}
 	}
-/*
-  if(startzeit) {
-  struct tm *zeit=localtime(&startzeit);
-  fprintf(file, "    <time>%02d:%02d:%02d</time>\n", zeit->tm_hour, zeit->tm_min, zeit->tm_sec);
-  fprintf(file, "    <date>%02d.%02d.%04d</date>\n", zeit->tm_mday, zeit->tm_mon+1, zeit->tm_year+1900);
-  }
-  if(dauer)
-  fprintf(file, "    <duration>%u</duration>\n", dauer);
-*/
 	for_each(times.begin(), times.end(), saveSItimeXML(file));
 	for(unsigned i=0; i<contentClassification.length(); i++)
-		fprintf(file, "    <content_classification>0x%02hhx</content_classification>\n", contentClassification[i]);
-	for(unsigned i=0; i<userClassification.length(); i++)
-		fprintf(file, "    <user_classification>0x%02hhx</user_classification>\n", userClassification[i]);
+		fprintf(file, "\t\t\t<content class=\"%02x\" user=\"%02x\"/>\n", contentClassification[i], userClassification[i]);
 	for_each(components.begin(), components.end(), saveSIcomponentXML(file));
 	for_each(ratings.begin(), ratings.end(), saveSIparentalRatingXML(file));
 	for_each(linkage_descs.begin(), linkage_descs.end(), saveSIlinkageXML(file));
-	fprintf(file, "  </event>\n");
+	fprintf(file, "\t\t</event>\n");
 	return 0;
 }
 

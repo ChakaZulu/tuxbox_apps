@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.13 2006/03/26 20:14:41 Arzka Exp $
+//  $Id: sectionsdMsg.h,v 1.14 2006/05/19 21:28:09 houdini Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -87,8 +87,12 @@ struct sectionsd
 		CMD_unregisterEvents,
 		setPrivatePid,
 		setSectionsdScanMode,
-
- 		LoadLanguages,
+		
+		freeMemory,
+		readSIfromXML,
+		writeSI2XML,
+ 		
+		LoadLanguages,
  		SaveLanguages,
  		SetLanguages,
  		GetLanguages,

@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.48 2006/03/26 20:14:41 Arzka Exp $
+  $Id: sectionsdclient.cpp,v 1.49 2006/05/19 21:28:09 houdini Exp $
 
   License: GPL
 
@@ -616,7 +616,31 @@ void CSectionsdClient::setPrivatePid(const unsigned short pid)
 
 void CSectionsdClient::setSectionsdScanMode(const int scanMode)
 {
-	 send(sectionsd::setSectionsdScanMode, (char*)&scanMode, sizeof(scanMode));
+	send(sectionsd::setSectionsdScanMode, (char*)&scanMode, sizeof(scanMode));
+
+	readResponse();
+	close_connection();
+}
+
+void CSectionsdClient::freeMemory()
+{
+	send(sectionsd::freeMemory);
+
+	readResponse();
+	close_connection();
+}
+
+void CSectionsdClient::readSIfromXML(const char * epgxmlname)
+{
+	send(sectionsd::readSIfromXML, (char*) epgxmlname, strlen(epgxmlname));
+
+	readResponse();
+	close_connection();
+}
+
+void CSectionsdClient::writeSI2XML(const char * epgxmlname)
+{
+	send(sectionsd::writeSI2XML, (char*) epgxmlname, strlen(epgxmlname));
 
 	readResponse();
 	close_connection();

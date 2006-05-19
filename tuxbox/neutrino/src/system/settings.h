@@ -75,6 +75,9 @@ struct SNeutrinoSettings
 	//language
 	char language[25];
 	
+	//epg
+	char epg_dir[100];
+
 	//timing
 #define TIMING_SETTING_COUNT 7
 	enum TIMING_SETTINGS {

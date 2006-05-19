@@ -445,7 +445,7 @@ class CZapitClient:public CBasicClient
 	void renumChannellist();
 
 	/* saves current bouquet configuration to bouquets.xml */
-	void saveBouquets();
+	void saveBouquets(bool includeBouquetOthers = false);
 
 	/****************************************/
 	/*					*/

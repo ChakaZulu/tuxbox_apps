@@ -100,6 +100,7 @@ struct NeutrinoMessages {
  		EVT_ZAP_MOTOR                            = CRCInput::RC_Events + 37,
 		/* sectionsd */
 		EVT_SERVICES_UPD                         = CRCInput::RC_Events + 38,
+		EVT_SI_FINISHED                          = CRCInput::RC_Events + 39,
 
 
 		EVT_CURRENTEPG                           = CRCInput::RC_WithData +  1,

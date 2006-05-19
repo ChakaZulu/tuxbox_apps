@@ -112,7 +112,7 @@ void CInfoViewer::start()
 	time_left_width = 2* g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(widest_number);
 	time_dot_width = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(":");
 	time_width = time_left_width* 2+ time_dot_width;
-   
+
 	lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_TV_MODE, false );
 }
 
@@ -175,6 +175,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 {
 	channel_id = new_channel_id;
 	showButtonBar = !calledFromNumZap;
+	std::string ChannelName = Channel;
 
 	bool fadeIn = ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
 		g_settings.widget_fade &&
@@ -242,12 +243,12 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	int ChanNameX = BoxStartX + ChanWidth + 10;
 	int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
 
-       	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
+	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
 
 	paintTime( false, true );
 
-		// ... with channel name
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, Channel, COL_INFOBAR, 0, true); // UTF-8
+	// ... with channel name
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, ChannelName, COL_INFOBAR, 0, true); // UTF-8
 
 	ChanInfoX = BoxStartX + (ChanWidth / 3);
 	int ChanInfoY = BoxStartY + ChanHeight+ 10;
@@ -362,7 +363,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 						frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
 				}
 				else
-       				{
+				{
 					fadeValue-= 15;
 					if ( fadeValue<= g_settings.infobar_alpha )
 					{
@@ -412,7 +413,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 				res = messages_return::cancel_info;
 			}
 			else if ( msg == NeutrinoMessages::EVT_TIMESET )
-	       		{
+			{
 				// Handle anyway!
 				neutrino->handleMsg(msg, data);
 				g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
@@ -423,7 +424,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 			{
 				paintTime( show_dot, false );
 				showRecordIcon(show_dot);
- 				show_dot = !show_dot;
+				show_dot = !show_dot;
 			}
 			else if ( g_settings.virtual_zap_mode && ((msg == CRCInput::RC_right) || msg == CRCInput::RC_left ))
 			{
@@ -471,7 +472,8 @@ void CInfoViewer::showSubchan()
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
 	std::string subChannelName; 	// holds the name of the subchannel/audio channel
-	int subchannel=0;			// holds the channel index
+	int subchannel=0;		// holds the channel index
+	bool subChannelNameIsUTF = false;
 
 	if (!(g_RemoteControl->subChannels.empty())) {
 		// get info for nvod/subchannel
@@ -484,6 +486,7 @@ void CInfoViewer::showSubchan()
 		// get info for audio channel
 		subchannel = g_RemoteControl->current_PIDs.PIDs.selected_apid;
 		subChannelName = g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].desc;
+		subChannelNameIsUTF = true;
 	}
 
 	if (!(subChannelName.empty()))
@@ -491,7 +494,7 @@ void CInfoViewer::showSubchan()
 		char text[100];
 		sprintf( text, "%d - %s", subchannel, subChannelName.c_str() );
 
-		int dx = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(text) + 20;
+		int dx = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(text, subChannelNameIsUTF) + 20;
 		int dy = 25;
 
 		if ( g_RemoteControl->director_mode )
@@ -540,14 +543,13 @@ void CInfoViewer::showSubchan()
 		frameBuffer->paintBackgroundBoxRel(x+ dx, y, borderwidth, dy);
 
 		frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT, 0, subChannelNameIsUTF); // UTF-8
 
 		if ( g_RemoteControl->director_mode )
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+ 8, y+ dy- 20 );
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE), COL_MENUCONTENT, 0, true); // UTF-8
 		}
-
 
 		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( 2 );
 		int res = messages_return::none;
@@ -711,7 +713,7 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if (msg == NeutrinoMessages::EVT_ZAP_FAILED)
 	{
 		if ((*(t_channel_id *)data) == channel_id)
-       		{
+		{
 			// show failure..!
 			CLCD::getInstance()->showServicename("(" + g_RemoteControl->getCurrentChannelName() + ')');
 			printf("zap failed!\n");
@@ -1072,5 +1074,3 @@ int CInfoViewerHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 
 	return res;
 }
-
-

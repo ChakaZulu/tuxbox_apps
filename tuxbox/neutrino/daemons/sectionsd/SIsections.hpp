@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.21 2006/02/08 21:15:50 houdini Exp $
+//    $Id: SIsections.hpp,v 1.22 2006/05/19 21:28:08 houdini Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -768,6 +768,7 @@ private:
 	void parse(void);
 	void parseDescriptors(const char *desc, unsigned len, SIservice &s);
 	void parseServiceDescriptor(const char *buf, SIservice &s);
+	void parsePrivateDataDescriptor(const char *buf, SIservice &s);
 	void parseNVODreferenceDescriptor(const char *buf, SIservice &s);
 };
 

@@ -143,6 +143,7 @@ CAudioSetupNotifier	* audioSetupNotifier;
 // I don't like globals, I would have hidden them in classes,
 // but if you wanna do it so... ;)
 static bool parentallocked = false;
+static bool waitforshutdown = false;
 
 static char **global_argv;
 
@@ -581,6 +582,9 @@ int CNeutrinoApp::loadSetup()
 	//language
 	strcpy(g_settings.language, configfile.getString("language", "").c_str());
 	
+	//epg
+	strcpy(g_settings.epg_dir, configfile.getString("epg_dir", "").c_str());
+
 	//widget settings
 	g_settings.widget_fade           = configfile.getBool("widget_fade"          , true );
 
@@ -3191,6 +3195,8 @@ void CNeutrinoApp::InitZapper()
 
 	firstChannel();
 
+	if (strcmp(g_settings.epg_dir, "") != 0)
+		g_Sectionsd->readSIfromXML(g_settings.epg_dir);
 	g_Sectionsd->setSectionsdScanMode(scanSettings.scanSectionsd);
 
 #ifndef TUXTXT_CFG_STANDALONE
@@ -3411,6 +3417,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_GOT_CN_EPG, 222, NEUTRINO_UDS_NAME);
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_SERVICES_UPDATE, 222, NEUTRINO_UDS_NAME);
 	g_Sectionsd->registerEvent(CSectionsdClient::EVT_BOUQUETS_UPDATE, 222, NEUTRINO_UDS_NAME);
+	g_Sectionsd->registerEvent(CSectionsdClient::EVT_WRITE_SI_FINISHED, 222, NEUTRINO_UDS_NAME);
 
 #ifndef SKIP_CA_STATUS
 #define ZAPIT_EVENT_COUNT 26
@@ -3526,7 +3533,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	RealRun(mainMenu);
 
-	ExitRun();
+	ExitRun(true);
 
 	return 0;
 }
@@ -3725,6 +3732,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		return( res & ( 0xFFFFFFFF - messages_return::unhandled ) );
 	}
 
+	if (!waitforshutdown) {
 	if( msg == NeutrinoMessages::EVT_VCRCHANGED )
 	{
 		if (g_settings.vcr_AutoSwitch)
@@ -4029,7 +4037,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		irs.Send();
 
 		if(g_settings.shutdown_real)
-			ExitRun();
+			ExitRun(true);
 		else
 			standbyMode( true );
 		return messages_return::handled;
@@ -4066,11 +4074,11 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			skipShutdownTimer = (ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_SHUTDOWNTIMER_ANNOUNCE, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes);
 	}
 	else if( msg == NeutrinoMessages::SHUTDOWN )
-	{
+	{		
 		// AUSSCHALTEN...
 		if(!skipShutdownTimer)
 		{
-			ExitRun();
+			ExitRun(true);
 		}
 		else
 		{
@@ -4231,44 +4239,68 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		hintBox->hide();
 		delete hintBox;
 	}
-
+	}
+	else {
+	if (msg == NeutrinoMessages::EVT_SI_FINISHED)
+	{
+		waitforshutdown = false;
+		ExitRun(false);
+	}
+	}
 	if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000))
 		delete (unsigned char*) data;
 
 	return messages_return::unhandled;
 }
 
-
-
-void CNeutrinoApp::ExitRun()
+void CNeutrinoApp::ExitRun(const bool write_si)
 {
 	  //DisplayErrorMessage(g_Locale->getText(LOCALE_SHUTDOWNERROR_RECODING));
-	if (!recordingstatus ||
-	    ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_SHUTDOWN_RECODING_QUERY, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 30, true) == CMessageBox::mbrYes)
+	if ((!recordingstatus ||
+	    ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_SHUTDOWN_RECODING_QUERY, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 30, true) == CMessageBox::mbrYes) && (!waitforshutdown))
 	{
 
-		CLCD::getInstance()->setMode(CLCD::MODE_SHUTDOWN);
+		if (write_si) {
+		
+			CLCD::getInstance()->setMode(CLCD::MODE_SHUTDOWN);
 
-		dprintf(DEBUG_INFO, "exit\n");
-		for(int x=0;x<256;x++)
-			frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
-		frameBuffer->paletteSet();
+			dprintf(DEBUG_INFO, "exit\n");
+			for(int x=0;x<256;x++)
+				frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
+			frameBuffer->paletteSet();
 
-		frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
-		frameBuffer->loadPal("shutdown.pal");
+			frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
+			frameBuffer->loadPal("shutdown.pal");
 
-		networkConfig.automatic_start = (network_automatic_start == 1);
-		networkConfig.commitConfig();
-		saveSetup();
-		g_Controld->shutdown();
+			networkConfig.automatic_start = (network_automatic_start == 1);
+			networkConfig.commitConfig();
+			saveSetup();
+			
+			if (frameBuffer != NULL)
+				delete frameBuffer;
 
-		if (g_RCInput != NULL)
-			delete g_RCInput;
+			if (strcmp(g_settings.epg_dir, "") != 0) {
+				waitforshutdown = true;
+				AudioMute(true);
+				g_Sectionsd->writeSI2XML(g_settings.epg_dir);
+			}
+			else {			
+				g_Controld->shutdown();
+				if (g_RCInput != NULL)
+					delete g_RCInput;
 
-		if (frameBuffer != NULL)
-			delete frameBuffer;
-
-		exit(0);
+				exit(0);
+			
+			}
+		} else {
+			AudioMute(false);
+			g_Controld->shutdown();
+			if (g_RCInput != NULL)
+				delete g_RCInput;
+			
+			exit(0);
+		
+		}
 	}
 }
 
@@ -4706,13 +4738,15 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey=="shutdown")
 	{
-		ExitRun();
+		ExitRun(true);
+		returnval = menu_return::RETURN_NONE;
 	}
 	else if(actionKey=="reboot")
 	{
 		FILE *f = fopen("/tmp/.reboot", "w");
 		fclose(f);
-		ExitRun();
+		ExitRun(true);
+		returnval = menu_return::RETURN_NONE;
 	}
 	else if(actionKey=="tv")
 	{
