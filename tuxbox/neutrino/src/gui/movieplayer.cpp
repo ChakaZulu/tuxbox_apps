@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.127 2006/04/03 14:03:37 saruman Exp $
+  $Id: movieplayer.cpp,v 1.128 2006/05/21 07:07:19 zwen Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -150,6 +150,7 @@ std::string skipvalue;
 
 off_t g_startposition = 0L;
 int   g_jumpminutes   = 0;
+bool  g_jumpabs = true;
 int buffer_time = 0;
 
 unsigned short apids[10];
@@ -1330,7 +1331,7 @@ static MP_DEVICE_STATE gDeviceState = DVB_DEVICES_UNDEF;
 static bool mp_openDVBDevices(MP_CTX *ctx);
 static void mp_closeDVBDevices(MP_CTX *ctx);
 static void mp_bufferReset(MP_CTX *ctx);
-static void mp_bufferReset(MP_CTX *ctx, int jumpReq);
+static void mp_bufferReset(MP_CTX *ctx, int jumpReq, bool abs);
 static void mp_stopDVBDevices(MP_CTX *ctx);
 static void mp_freezeAV(MP_CTX *ctx);
 static void mp_unfreezeAV(MP_CTX *ctx);
@@ -1869,7 +1870,7 @@ void mp_bufferReset(MP_CTX *ctx)
 	ctx->refillBuffer = true;
 }
 
-void mp_bufferReset(MP_CTX *ctx, int jumpReq)
+void mp_bufferReset(MP_CTX *ctx, int jumpReq, bool abs)
 {
 	//-- stream won't pause --
 	if(ctx->isStream) return;
@@ -1893,8 +1894,10 @@ void mp_bufferReset(MP_CTX *ctx, int jumpReq)
 		break;
 
 	  default:
-		ctx->jmp = ctx->pos + (jumpReq * (MINUTEOFFSET/PF_JMP_DIV));
-		break;
+		if(abs)
+			ctx->jmp = ctx->pos + (jumpReq * (MINUTEOFFSET/PF_JMP_DIV));
+		else
+			ctx->jmp = jumpReq * (MINUTEOFFSET/PF_JMP_DIV);
 	}
 
 	//-- check limits --
@@ -2100,7 +2103,7 @@ static void mp_checkEvent(MP_CTX *ctx)
 		case CMoviePlayerGui::JF:
 		case CMoviePlayerGui::JB:
 			g_playstate = CMoviePlayerGui::PLAY;
-			mp_bufferReset(ctx, g_jumpminutes);
+			mp_bufferReset(ctx, g_jumpminutes, g_jumpabs);
 			break;
 
 		//-- soft reset --
@@ -3322,6 +3325,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- jump 1/4 minute back --
 			case CRCInput::RC_left:
 				g_jumpminutes = -1;
+				g_jumpabs = true;
 				g_playstate   = CMoviePlayerGui::JB;
 				update_lcd    = true;
 				FileTime.hide();
@@ -3330,6 +3334,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- jump 1/4 minute forward --
 			case CRCInput::RC_right:
 				g_jumpminutes = 1;
+				g_jumpabs = true;
 				g_playstate   = CMoviePlayerGui::JF;
 				update_lcd    = true;
 				FileTime.hide();
@@ -3358,6 +3363,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- jump 1 minute back --
 			case CRCInput::RC_1:
 				g_jumpminutes = -1 * PF_JMP_DIV;
+				g_jumpabs = true;
 				g_playstate   = CMoviePlayerGui::JB;
 				update_lcd    = true;
 				FileTime.hide();
@@ -3366,6 +3372,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- jump to start --
 			case CRCInput::RC_2:
 				g_jumpminutes = PF_JMP_START;
+				g_jumpabs = false;
 				g_playstate   = CMoviePlayerGui::JB;
 				update_lcd    = true;
 				FileTime.hide();
@@ -3374,6 +3381,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- jump 1 minute forward --
 			case CRCInput::RC_3:
 				g_jumpminutes = 1 * PF_JMP_DIV;
+				g_jumpabs = true;
 				g_playstate   = CMoviePlayerGui::JF;
 				update_lcd    = true;
 				FileTime.hide();
@@ -3382,19 +3390,43 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- jump 5 minutes back --
 			case CRCInput::RC_4:
 				g_jumpminutes = -5 * PF_JMP_DIV;
+				g_jumpabs = true;
 				g_playstate = CMoviePlayerGui::JB;
 				update_lcd = true;
 				FileTime.hide();
 				break;
 
-				//-- jump to middle --
+				//-- jump via gui --
 			case CRCInput::RC_5:
-				g_jumpminutes = PF_JMP_MID;  // dirty hack 1
-				g_playstate = CMoviePlayerGui::JF;
-				update_lcd = true;
-				FileTime.hide();
-				break;
+				{	
+					char tmp[10+1];
+					bool cancel;
+					CTimeInput ti(LOCALE_MOVIEPLAYER_GOTO, tmp, LOCALE_MOVIEPLAYER_GOTO_H1, LOCALE_MOVIEPLAYER_GOTO_H2, NULL, &cancel);
+					ti.exec(NULL, "");
+					if (!cancel)
+					{
+						std::string t=tmp;
+						int jumpsecs = atoi(t.substr(1,2).c_str()) * 3600 + 
+						               atoi(t.substr(4,2).c_str()) * 60 +
+						               atoi(t.substr(7,2).c_str());
 
+						g_jumpminutes = jumpsecs * PF_JMP_DIV / 60;
+						printf("Jump %d/%d\n",g_jumpminutes,jumpsecs);
+						if(t[0]=='=')
+							g_jumpabs = false;
+						else if(t[0]=='-')
+						{
+							g_jumpabs = true;
+							g_jumpminutes *= -1;
+						}
+						else
+							g_jumpabs = true;
+						g_playstate = CMoviePlayerGui::JB;
+						update_lcd = true;
+						FileTime.hide();
+					}
+				}
+				break;
 				//-- jump 5 minutes forward --
 			case CRCInput::RC_6:
 				g_jumpminutes = 5 * PF_JMP_DIV;
@@ -3835,11 +3867,12 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_1, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP6));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_3, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP7));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_4, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP8));
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_5, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP13));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_6, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP9));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.127 $");
+	helpbox.addLine("Version: $Revision: 1.128 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -3861,7 +3894,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.127 $");
+	helpbox.addLine("Version: $Revision: 1.128 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);

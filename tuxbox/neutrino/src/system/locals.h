@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.69 2006/05/14 11:26:58 barf Exp $
+ * $Id: locals.h,v 1.70 2006/05/21 07:07:19 zwen Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -688,6 +688,7 @@ typedef enum
 	LOCALE_MOVIEPLAYER_TSHELP10,
 	LOCALE_MOVIEPLAYER_TSHELP11,
 	LOCALE_MOVIEPLAYER_TSHELP12,
+	LOCALE_MOVIEPLAYER_TSHELP13,
 	LOCALE_MOVIEPLAYER_TSHELP2,
 	LOCALE_MOVIEPLAYER_TSHELP3,
 	LOCALE_MOVIEPLAYER_TSHELP4,
