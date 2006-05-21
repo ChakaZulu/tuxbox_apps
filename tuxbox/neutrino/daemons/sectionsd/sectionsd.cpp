@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.221 2006/05/19 21:28:08 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.222 2006/05/21 11:03:16 mws Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1541,7 +1541,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.221 2006/05/19 21:28:08 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.222 2006/05/21 11:03:16 mws Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3093,27 +3093,38 @@ static void commandFreeMemory(int connfd, char *data, const unsigned dataLength)
 	EITThreadsPause();
 	dmxSDT.pause();
 	lockTransponders();
-	MySItranspondersOrderUniqueKey::iterator t = mySItranspondersOrderUniqueKey.begin();
-	while (t != mySItranspondersOrderUniqueKey.end()) {
-		mySItranspondersOrderUniqueKey.erase(t->first);
-		t = mySItranspondersOrderUniqueKey.begin();
-	}
+//	MySItranspondersOrderUniqueKey::iterator t = mySItranspondersOrderUniqueKey.begin();
+//	while (t != mySItranspondersOrderUniqueKey.end()) {
+//		mySItranspondersOrderUniqueKey.erase(t->first);
+//		t = mySItranspondersOrderUniqueKey.begin();
+//	}
+	mySItransponderOrderUniqueKey.clear();
+	
 	unlockTransponders();
 	lockServices();
-	MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin();
-	while (s != mySIservicesOrderUniqueKey.end()) {
-		mySIservicesOrderUniqueKey.erase(s->first);
-		s = mySIservicesOrderUniqueKey.begin();
-	}
+//	MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin();
+//	while (s != mySIservicesOrderUniqueKey.end()) {
+//		mySIservicesOrderUniqueKey.erase(s->first);
+//		s = mySIservicesOrderUniqueKey.begin();
+//	}
+	mySIservicesOrderUniqueKey.clear();
+		
 	unlockServices();
 	lockBouquets();
-	MySIbouquetsOrderUniqueKey::iterator b = mySIbouquetsOrderUniqueKey.begin();
-	while (b != mySIbouquetsOrderUniqueKey.end()) {
-		mySIbouquetsOrderUniqueKey.erase(b->first);
-		b = mySIbouquetsOrderUniqueKey.begin();
-	}
+//	MySIbouquetsOrderUniqueKey::iterator b = mySIbouquetsOrderUniqueKey.begin();
+//	while (b != mySIbouquetsOrderUniqueKey.end()) {
+//		mySIbouquetsOrderUniqueKey.erase(b->first);
+//		b = mySIbouquetsOrderUniqueKey.begin();
+//	}
+	mySIbouquetsOrderUniqueKey.clear();
+
 	unlockBouquets();
 	lockEvents();
+// why not just perform a mySIeventsOrderFirstEndTimeServiceIdEventUniqueKey.clear();
+//                        mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.clear();
+//			  mySIeventsOrderUniqueKey.clear();
+//			  mySIeventsNVODorderUniqueKey.clear();
+// and save a lot of iterations/checks/runtime on this topic?
 	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin();
 	while (e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end()) {
 		deleteEvent((*e)->uniqueKey());
@@ -6536,7 +6547,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.221 2006/05/19 21:28:08 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.222 2006/05/21 11:03:16 mws Exp $\n");
 
 	SIlanguage::loadLanguages();
 
