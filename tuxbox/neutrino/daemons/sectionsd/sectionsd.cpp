@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.223 2006/05/21 11:41:52 mws Exp $
+//  $Id: sectionsd.cpp,v 1.224 2006/05/21 13:31:40 mws Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1541,7 +1541,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.223 2006/05/21 11:41:52 mws Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.224 2006/05/21 13:31:40 mws Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2102,7 +2102,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 				{
 					// this is a race condition if first entry found is == mySIeventsOrderUniqueKey.begin()
 					// so perform a check
-					if (efirst != mySIeventsOrderUniqueKey.begin())
+					if (eFirst != mySIeventsOrderUniqueKey.begin())
 						--eFirst;
 
 					if (eFirst != mySIeventsOrderUniqueKey.begin())
@@ -3096,7 +3096,7 @@ static void commandFreeMemory(int connfd, char *data, const unsigned dataLength)
 	EITThreadsPause();
 	dmxSDT.pause();
 	lockTransponders();
-	mySItransponderOrderUniqueKey.clear();
+	mySItranspondersOrderUniqueKey.clear();
 	
 	unlockTransponders();
 	lockServices();
@@ -3109,10 +3109,10 @@ static void commandFreeMemory(int connfd, char *data, const unsigned dataLength)
 	unlockBouquets();
 	lockEvents();
 
-	mySIeventsOrderFirstEndTimeServiceIdEventUniqueKey.clear();
+	mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.clear();
 	mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.clear();
-	mySIeventsOrderUniqueKey.erase(uniqueKey);
-	mySIeventsNVODorderUniqueKey.erase(uniqueKey);
+	mySIeventsOrderUniqueKey.clear();
+	mySIeventsNVODorderUniqueKey.clear();
 	                                
 	unlockEvents();
 	dmxSDT.unpause();
@@ -6530,7 +6530,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.223 2006/05/21 11:41:52 mws Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.224 2006/05/21 13:31:40 mws Exp $\n");
 
 	SIlanguage::loadLanguages();
 
