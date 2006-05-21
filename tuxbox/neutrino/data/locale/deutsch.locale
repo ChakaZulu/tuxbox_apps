@@ -190,7 +190,7 @@ bookmarkmanager.select Auswählen
 bouqueteditor.add Hinzufügen
 bouqueteditor.bouquetname Name des Bouquets
 bouqueteditor.delete Löschen
-bouqueteditor.discardingchanges Änderungen werden verworfen. Bitte warten ...
+bouqueteditor.discardingchanges Änderungen werden verworfen. Bitte warten...
 bouqueteditor.hide Verstecken
 bouqueteditor.lock Sperren
 bouqueteditor.move Verschieben
@@ -199,7 +199,7 @@ bouqueteditor.newbouquetname Neuer Name des Bouquets
 bouqueteditor.rename Umbenennen
 bouqueteditor.return Fertig
 bouqueteditor.savechanges? Sollen die Änderungen gespeichert werden?
-bouqueteditor.savingchanges Änderungen werden gespeichert. Bitte warten ...
+bouqueteditor.savingchanges Änderungen werden gespeichert. Bitte warten...
 bouqueteditor.switch Kanal aufnehmen/entfernen
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
@@ -281,7 +281,7 @@ favorites.nobouquets Favoriten sind nur mit aktivierten Bouquets möglich.
 filebrowser.delete Löschen
 filebrowser.denydirectoryleave Startverzeichnis absolut
 filebrowser.dodelete1 Soll
-filebrowser.dodelete2 gelöscht werden ?
+filebrowser.dodelete2 gelöscht werden?
 filebrowser.filter.active Filter an
 filebrowser.filter.inactive Filter aus
 filebrowser.head Filebrowser
@@ -518,14 +518,14 @@ miscsettings.bootinfo Infos beim Booten anzeigen
 miscsettings.bootmenu Bootmenü anzeigen
 miscsettings.driver_boot Treiber- und Bootoptionen
 miscsettings.epg_cache EPG-Cache (Tage)
-miscsettings.epg_cache_hint1 EPG-Daten im Voraus cachen ?
+miscsettings.epg_cache_hint1 EPG-Daten im Voraus cachen?
 miscsettings.epg_cache_hint2 Angabe in Tagen
 miscsettings.epg_head EPG-Einstellungen
 miscsettings.epg_max_events Max. Events
-miscsettings.epg_max_events_hint1 Wieviele Events sollen max. gespeichert werden ?
+miscsettings.epg_max_events_hint1 Wieviele Events sollen max. gespeichert werden?
 miscsettings.epg_max_events_hint2 Standard 6000
 miscsettings.epg_old_events EPG verwerfen nach (Std.)
-miscsettings.epg_old_events_hint1 Wie lange abgelaufene EPG-Daten aufheben ?
+miscsettings.epg_old_events_hint1 Wie lange abgelaufene EPG-Daten aufheben?
 miscsettings.epg_old_events_hint2 Angabe in Stunden
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.general Allgemein
@@ -552,7 +552,7 @@ moviebrowser.book_moviestart Filmanfang:
 moviebrowser.book_name Name:
 moviebrowser.book_new Neue Markierung
 moviebrowser.book_position Position:
-moviebrowser.book_type Sprung (<0 zurück , >0 vor):
+moviebrowser.book_type Sprung (<0 zurück, >0 vor):
 moviebrowser.book_type_backward Wiederholung
 moviebrowser.book_type_forward überspringen
 moviebrowser.edit_book Bookmark ändern
@@ -561,7 +561,7 @@ moviebrowser.edit_book_name_info2
 moviebrowser.edit_book_pos_info1 Neue Position (s)
 moviebrowser.edit_book_pos_info2 
 moviebrowser.edit_book_type_info1 Neue Sprunglänge (s)
-moviebrowser.edit_book_type_info2 <0 zurück , >0 vor 0: kein
+moviebrowser.edit_book_type_info2 <0 zurück, >0 vor 0: kein
 moviebrowser.edit_serie Name der Serie
 moviebrowser.error_no_movies Keine Filme gefunden
 moviebrowser.foot_filter Filter:
@@ -615,7 +615,7 @@ moviebrowser.menu_parental_lock_activated_no_temp nein (temporär)
 moviebrowser.menu_parental_lock_activated_yes ja
 moviebrowser.menu_parental_lock_head Jugendschutz
 moviebrowser.menu_parental_lock_rate_head Filme sperren ab
-moviebrowser.scan_for_movies Suche Filme ...
+moviebrowser.scan_for_movies Suche Filme...
 moviebrowser.serie_existingname Vorhandene Serie
 moviebrowser.serie_head Serie
 moviebrowser.serie_name Name ändern
@@ -650,7 +650,7 @@ movieplayer.defdir Start-Verz.
 movieplayer.defplugin Start-Plugin
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback Datei via VLC
-movieplayer.goto Springe zu ...
+movieplayer.goto Springe zu...
 movieplayer.goto.h1 = -> absoluter Sprung
 movieplayer.goto.h2 +,- -> relativer Sprung
 movieplayer.head Movieplayer

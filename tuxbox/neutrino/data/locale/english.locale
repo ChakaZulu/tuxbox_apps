@@ -199,7 +199,7 @@ bouqueteditor.newbouquetname New name of bouquets
 bouqueteditor.rename Rename
 bouqueteditor.return ready
 bouqueteditor.savechanges? Do you want to save the changes?
-bouqueteditor.savingchanges Saving changes. Please wait ...
+bouqueteditor.savingchanges Saving changes. Please wait...
 bouqueteditor.switch add/remove
 bouqueteditor.switchmode TV/Radio
 bouquetlist.head Bouquets
@@ -518,14 +518,14 @@ miscsettings.bootinfo Show infos at start
 miscsettings.bootmenu Show boot menu
 miscsettings.driver_boot driver and boot options
 miscsettings.epg_cache EPG-Cache (Days)
-miscsettings.epg_cache_hint1 How long will EPG-Data in the future cached ?
+miscsettings.epg_cache_hint1 How long will EPG-Data in the future cached?
 miscsettings.epg_cache_hint2 Set in days.
 miscsettings.epg_head EPG-Settings
 miscsettings.epg_max_events Max. Events
-miscsettings.epg_max_events_hint1 How many events should be stored ?
+miscsettings.epg_max_events_hint1 How many events should be stored?
 miscsettings.epg_max_events_hint2 normaly 6000
 miscsettings.epg_old_events EPG remove after (std.)
-miscsettings.epg_old_events_hint1 How long will EPG-Data be stored after they timed out ?
+miscsettings.epg_old_events_hint1 How long will EPG-Data be stored after they timed out?
 miscsettings.epg_old_events_hint2 Set in hours
 miscsettings.fb_destination Expert! Boot-Console
 miscsettings.general General
@@ -552,7 +552,7 @@ moviebrowser.book_moviestart Movie start:
 moviebrowser.book_name Name:
 moviebrowser.book_new New Bookmark
 moviebrowser.book_position Position:
-moviebrowser.book_type Jump (<0 back , >0 for):
+moviebrowser.book_type Jump (<0 back, >0 for):
 moviebrowser.book_type_backward Repeat
 moviebrowser.book_type_forward jump over
 moviebrowser.edit_book Bookmark change
@@ -561,7 +561,7 @@ moviebrowser.edit_book_name_info2
 moviebrowser.edit_book_pos_info1 Enter new Position (s)
 moviebrowser.edit_book_pos_info2 
 moviebrowser.edit_book_type_info1 Enter new jump length (s)
-moviebrowser.edit_book_type_info2 <0 back , >0 for, 0: none
+moviebrowser.edit_book_type_info2 <0 back, >0 for, 0: none
 moviebrowser.edit_serie Enter name of serie
 moviebrowser.error_no_movies No movies found
 moviebrowser.foot_filter Filter:
@@ -615,7 +615,7 @@ moviebrowser.menu_parental_lock_activated_no_temp no (temporary)
 moviebrowser.menu_parental_lock_activated_yes yes
 moviebrowser.menu_parental_lock_head Parental Lock
 moviebrowser.menu_parental_lock_rate_head Lock movies from
-moviebrowser.scan_for_movies Scan for Movies ...
+moviebrowser.scan_for_movies Scan for Movies...
 moviebrowser.serie_existingname Existing series
 moviebrowser.serie_head Serie
 moviebrowser.serie_name Change name
@@ -650,7 +650,7 @@ movieplayer.defdir start dir.
 movieplayer.defplugin Start-Plugin
 movieplayer.dvdplayback DVD
 movieplayer.fileplayback File via VLC
-movieplayer.goto Jump to ...
+movieplayer.goto Jump to...
 movieplayer.goto.h1 = -> absolute jump
 movieplayer.goto.h2 +,- -> relative jump
 movieplayer.head Movieplayer
@@ -913,7 +913,7 @@ settings.pos_bottom_right bottom right
 settings.pos_top_left top left
 settings.pos_top_right top right
 shutdown.recoding_query dBox is currently recording. Really shutdown?
-shutdowntimer.announce Box will shutdown in 1 min.\nCancel Shutdown ?
+shutdowntimer.announce Box will shutdown in 1 min.\nCancel Shutdown?
 sleeptimerbox.announce Sleeptimer in 1 min
 sleeptimerbox.hint1 Shutdown time in min. (000=off)
 sleeptimerbox.hint2 The dbox2 will shutdown after this time.
