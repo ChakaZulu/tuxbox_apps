@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.46 2006/05/19 21:28:08 houdini Exp $
+// $Id: SIsections.cpp,v 1.47 2006/05/21 19:20:40 mws Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -500,7 +500,10 @@ void SIsectionPPT::parsePrivateContentTransmissionDescriptor(const char *buf, SI
   
   //17.12.05 Premiere is sending wrong TSID 0011 for SID 00D3
   if ((e.original_network_id == 0x0085) && (e.transport_stream_id == 0x0011) && (e.service_id == 0x00d3))
-  	e.transport_stream_id = 0x001;
+  	e.transport_stream_id = 0x0001;
+  //21.05.06 Premiere is sending wrong SID 00f5 for SID 00dc
+  if ((e.original_network_id == 0x0085) && (e.transport_stream_id == 0x0003) && (e.service_id == 0x00f5))
+  	e.service_id = 0x00dc;
   
   p += 6;
   while(p+6 <= buf + evt->descriptor_length + sizeof(struct descr_generic_header)) {// at least one startdate/looplength/time entry
