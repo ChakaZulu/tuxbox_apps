@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.224 2006/05/21 13:31:40 mws Exp $
+//  $Id: sectionsd.cpp,v 1.225 2006/05/21 19:27:15 mws Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -588,7 +588,7 @@ static void removeOldEvents(const long seconds)
 static void removeOldEvents(const long seconds)
 {
 	bool goodtimefound;
-//	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator etmp;
+	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator etmp;
 
 	// Alte events loeschen
 	time_t zeit = time(NULL);
@@ -604,12 +604,12 @@ static void removeOldEvents(const long seconds)
 				break;
 			}
 		}
-//		etmp = e;
-//		etmp++;
+		etmp = e;
+		etmp++;
 		if (false == goodtimefound) {
-			deleteEvent((*(e++))->uniqueKey());
+			deleteEvent((*(e))->uniqueKey());
 		}
-//		e = etmp;
+		e = etmp;
 	}
 	
 	return;
@@ -1541,7 +1541,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.224 2006/05/21 13:31:40 mws Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.225 2006/05/21 19:27:15 mws Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -6530,7 +6530,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.224 2006/05/21 13:31:40 mws Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.225 2006/05/21 19:27:15 mws Exp $\n");
 
 	SIlanguage::loadLanguages();
 
