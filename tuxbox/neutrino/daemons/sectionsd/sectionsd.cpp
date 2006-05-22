@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.225 2006/05/21 19:27:15 mws Exp $
+//  $Id: sectionsd.cpp,v 1.226 2006/05/22 17:48:55 mws Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -402,34 +402,34 @@ static void addEvent(const SIevent &evt)
 	/*
 	MySIeventsOrderUniqueKey::iterator si = mySIeventsOrderUniqueKey.find(evt.uniqueKey());
 	bool already_exists = (si != mySIeventsOrderUniqueKey.end());
-	
+
 	if (already_exists) {
-	
-	
+
+
 	}
 */
 	// Damit in den nicht nach Event-ID sortierten Mengen
 	// Mehrere Events mit gleicher ID sind, diese vorher loeschen
 	deleteEvent(e->uniqueKey());
-		
+
 	if (mySIeventsOrderUniqueKey.size() >= max_events) {
 		//FIXME: Set Old Events to 0 if limit is reached...
-		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent = 
+		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent =
 										mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end();
 		lastEvent--;
-		
+
 		//preserve events of current channel
 		lockMessaging();
-		while ((lastEvent != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) && 
+		while ((lastEvent != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) &&
 			((*lastEvent)->get_channel_id() == messaging_current_servicekey)) {
 		  lastEvent--;
 		}
 		unlockMessaging();
-		
+
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
-			
-					
+
+
 
 	// Pruefen ob es ein Meta-Event ist
 	MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i = mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(e->get_channel_id());
@@ -468,7 +468,7 @@ static void addEvent(const SIevent &evt)
 
 		// normales Event
 	mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
-		
+
 	if (e->times.size())
 	{
 		// diese beiden Mengen enthalten nur Events mit Zeiten
@@ -500,21 +500,21 @@ static void addNVODevent(const SIevent &evt)
 	// Damit in den nicht nach Event-ID sortierten Mengen
 	// mehrere Events mit gleicher ID sind, diese vorher loeschen
 	deleteEvent(e->uniqueKey());
-		
+
 	if (mySIeventsOrderUniqueKey.size() >= max_events) {
 		//FIXME: Set Old Events to 0 if limit is reached...
-		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent = 
+		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent =
 										mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end();
 		lastEvent--;
-		
+
 		//preserve events of current channel
 		lockMessaging();
-		while ((lastEvent != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) && 
+		while ((lastEvent != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) &&
 			((*lastEvent)->get_channel_id() == messaging_current_servicekey)) {
 		  lastEvent--;
 		}
 		unlockMessaging();
-		
+
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
 
@@ -588,13 +588,12 @@ static void removeOldEvents(const long seconds)
 static void removeOldEvents(const long seconds)
 {
 	bool goodtimefound;
-	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator etmp;
 
 	// Alte events loeschen
 	time_t zeit = time(NULL);
-	
+
 	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin();
-	
+
 	while (e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end()) {
 		goodtimefound = false;
 		for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++) {
@@ -604,14 +603,13 @@ static void removeOldEvents(const long seconds)
 				break;
 			}
 		}
-		etmp = e;
-		etmp++;
 		if (false == goodtimefound) {
-			deleteEvent((*(e))->uniqueKey());
+			deleteEvent((*(e++))->uniqueKey());
 		}
-		e = etmp;
+		else
+			++e;
 	}
-	
+
 	return;
 }
 
@@ -702,7 +700,7 @@ static int addBouquetEntry(const SIbouquet &s/*, int section_nr, int count*/)
 {
 	bool already_exists;
 	uint16_t bouquet_id = 0;
-	
+
 	//s.position = (uint16_t) (((section_nr & 0x1f) << 11) + (count & 0x7ff));
 
 	//if (mySIservicesNVODorderUniqueKey.find(s.uniqueKey()))
@@ -710,7 +708,7 @@ static int addBouquetEntry(const SIbouquet &s/*, int section_nr, int count*/)
 	already_exists = (si != mySIbouquetsOrderUniqueKey.end());
 
 	if (!already_exists) {
-	
+
 		SIbouquet *bp = new SIbouquet(s);
 
 		if (!bp)
@@ -718,21 +716,21 @@ static int addBouquetEntry(const SIbouquet &s/*, int section_nr, int count*/)
 			printf("[sectionsd::addBouquetEntry] new SIbouquet failed.\n");
 			throw std::bad_alloc();
 		}
-		
+
 		SIbouquetPtr bpptr(bp);
 		/*
 		bpptr->position = (uint16_t) (((section_nr & 0x1f) << 11) + (number & 0x7ff));
-		
+
 		printf("Section Number: %d Count: %d position: %04x\n", section_nr, number, bpptr->position);
 		*/
 		mySIbouquetsOrderUniqueKey.insert(std::make_pair(bpptr->uniqueKey(), bpptr));
-		
+
 		//Because of Bouquet_Id misuse. see SIsections.cpp. IDs are introduced there
 		if ((bpptr->bouquet_id == 0x3ffe) || (bpptr->bouquet_id == 0x3fff))
 			bouquet_id = bpptr->bouquet_id;
 		else
 			bouquet_id = 0;
-		
+
 	}
 
 	return bouquet_id << 1 | (int) !already_exists;
@@ -768,9 +766,9 @@ static bool addTransponder(const SInetwork &s, const bool is_actual)
 		}
 
 		SInetworkPtr tpptr(nw);
-		
+
 		tpptr->is_actual = is_actual;
-	
+
 		mySItranspondersOrderUniqueKey.insert(std::make_pair(tpptr->uniqueKey(), tpptr));
 	}
 
@@ -838,7 +836,7 @@ static const SIevent& findSIeventForEventUniqueKey(const event_id_t eventUniqueK
 static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id serviceUniqueKey, SItime& zeit, long plusminus = 0, unsigned *flag = 0)
 {
 	time_t azeit = time(NULL);
-	
+
 	if (flag != 0)
 		*flag = 0;
 
@@ -847,7 +845,7 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id se
 		{
 			if (flag != 0)
 				*flag |= CSectionsdClient::epgflags::has_anything; // überhaupt was da...
-				
+
 //			for (SItimes::reverse_iterator t = (*e)->times.rend(); t != (*e)->times.rbegin(); t--) {
 			for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); ++t) {
 				if ((long)(azeit + plusminus) < (long)(t->startzeit + t->dauer))
@@ -911,7 +909,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 	{
 		SItimes::iterator nextnvodtimes = eFirst->second->times.end();
 		SItimes::iterator nexttimes = eFirst->second->times.end();
-		
+
 		if (eFirst->second->times.size() > 1)
 		{
 			//find next nvod
@@ -923,9 +921,9 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 					++nextnvodtimes;
 			}
 		}
-		
+
 		MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator eNext;
-		
+
 		//if ((nextnvodtimes != eFirst->second->times.begin()) && (nextnvodtimes != eFirst->second->times.end())) {
 			//Startzeit not first - we can't use the ordered list...
 			for ( MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e !=
@@ -948,7 +946,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 				}
 			}
 /*		} else {
-			//find next normal	
+			//find next normal
 			eNext = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.find(eFirst->second);
 			eNext++;
 
@@ -958,7 +956,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 					nexttimes = (*eNext)->times.begin();
 			}
 		}
-*/		
+*/
 		if (nextnvodtimes != eFirst->second->times.end())
 			++nextnvodtimes;
 		//Compare
@@ -968,7 +966,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 				if (nexttimes->startzeit < nextnvodtimes->startzeit) {
 					zeit = *nexttimes;
 					return *(*eNext);
-				
+
 				} else {
 					zeit = *nextnvodtimes;
 					return *(eFirst->second);
@@ -976,7 +974,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 			} else {
 				//only nexttimes set
 				zeit = *nexttimes;
-				return *(*eNext);			
+				return *(*eNext);
 			}
 		} else if (nextnvodtimes != eFirst->second->times.end()) {
 			//only nextnvodtimes set
@@ -987,9 +985,9 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 
 	return nullEvt;
 }
-	
-	
-/*	
+
+
+/*
 
 // Sucht das naechste Event anhand unique key und Startzeit
 static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
@@ -998,9 +996,9 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 
 	if (eFirst != mySIeventsOrderUniqueKey.end())
 	{
-	
+
 		SItimes::iterator t = eFirst->second->times.end();
-		
+
 		if (eFirst->second->times.size() > 1)
 		{
 			// Wir haben ein NVOD-Event
@@ -1022,7 +1020,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 					break; // ganz normal naechstes Event suchen
 				}
 		}
-	
+
 		MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator eNext = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.find(eFirst->second);
 		eNext++;
 
@@ -1033,7 +1031,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 				if (t != eFirst->second->times.end()) {
 					if (t->startzeit < (*eNext)->times.begin()->startzeit) {
 						zeit = *t;
-						return *(eFirst->second);					
+						return *(eFirst->second);
 					}
 				}
 				MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator ePrev =
@@ -1042,7 +1040,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 					(ePrev != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end()) ) {
 					if ((*ePrev)->times.size() > 1) {
 						t = (*ePrev)->times.begin();
-						while ( (t != (*ePrev)->times.end()) && (t->startzeit < 
+						while ( (t != (*ePrev)->times.end()) && (t->startzeit <
 								(*eNext)->times.begin()->startzeit) ) {
 							if (t->startzeit > zeit.startzeit) {
 								zeit = *t;
@@ -1052,7 +1050,7 @@ static const SIevent &findNextSIevent(const event_id_t uniqueKey, SItime &zeit)
 						}
 					}
 					ePrev++;
-				}						
+				}
 				zeit = *((*eNext)->times.begin());
 				return *(*eNext);
 			}
@@ -1262,7 +1260,7 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 			        s->second->eitScheduleFlag(), s->second->eitPresentFollowingFlag(),
 		        	s->second->runningStatus(), s->second->freeCAmode(),
 		        	s->second->nvods.size());
-/**	soll es in count ? 
+/**	soll es in count ?
 			+ strlen(s->second->serviceName.c_str()) + 1
  			+ strlen(s->second->providerName.c_str()) + 1
  			+ 3;  **/
@@ -1541,7 +1539,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.225 2006/05/21 19:27:15 mws Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.226 2006/05/22 17:48:55 mws Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3097,11 +3095,11 @@ static void commandFreeMemory(int connfd, char *data, const unsigned dataLength)
 	dmxSDT.pause();
 	lockTransponders();
 	mySItranspondersOrderUniqueKey.clear();
-	
+
 	unlockTransponders();
 	lockServices();
 	mySIservicesOrderUniqueKey.clear();
-		
+
 	unlockServices();
 	lockBouquets();
 	mySIbouquetsOrderUniqueKey.clear();
@@ -3113,7 +3111,7 @@ static void commandFreeMemory(int connfd, char *data, const unsigned dataLength)
 	mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.clear();
 	mySIeventsOrderUniqueKey.clear();
 	mySIeventsNVODorderUniqueKey.clear();
-	                                
+
 	unlockEvents();
 	dmxSDT.unpause();
 	EITThreadsUnPause();
@@ -3188,7 +3186,7 @@ static void *insertEventsfromFile(void *)
 	strncat(indexname, "index.xml", 10);
 
 	xmlDocPtr index_parser = parseXmlFile(indexname);
-	
+
 	if (index_parser != NULL) {
 		dprintf("Reading Information from file %s:\n", indexname);
 
@@ -3204,27 +3202,27 @@ static void *insertEventsfromFile(void *)
 			}
 			else {
 				service = xmlDocGetRootElement(event_parser)->xmlChildrenNode;
-		
+
 				while (service) {
 					onid = xmlGetNumericAttribute(service, "original_network_id", 16);
 					tsid = xmlGetNumericAttribute(service, "transport_stream_id", 16);
 					sid = xmlGetNumericAttribute(service, "service_id", 16);
-				
+
 					event = service->xmlChildrenNode;
-				
+
 					while (event) {
-					
+
 						SIevent e(onid,tsid,sid,xmlGetNumericAttribute(event, "id", 16));
-											
+
 						node = event->xmlChildrenNode;
 
 						while (xmlGetNextOccurence(node, "name") != NULL) {
-							e.setName(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))), 
+							e.setName(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))),
 									std::string(UTF8_to_Latin1(xmlGetAttribute(node, "string"))));
 							node = node->xmlNextNode;
 						}
 						while (xmlGetNextOccurence(node, "text") != NULL) {
-							e.setText(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))), 
+							e.setText(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))),
 									std::string(UTF8_to_Latin1(xmlGetAttribute(node, "string"))));
 							node = node->xmlNextNode;
 						}
@@ -3237,7 +3235,7 @@ static void *insertEventsfromFile(void *)
 							node = node->xmlNextNode;
 						}
 						while (xmlGetNextOccurence(node, "extended_text") != NULL) {
-							e.appendExtendedText(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))), 
+							e.appendExtendedText(	std::string(UTF8_to_Latin1(xmlGetAttribute(node, "lang"))),
 										std::string(UTF8_to_Latin1(xmlGetAttribute(node, "string"))));
 							node = node->xmlNextNode;
 						}
@@ -3263,11 +3261,11 @@ static void *insertEventsfromFile(void *)
 						}
 */
 						while (xmlGetNextOccurence(node, "time") != NULL) {
-							e.times.insert(SItime(xmlGetNumericAttribute(node, "start_time", 10), 
+							e.times.insert(SItime(xmlGetNumericAttribute(node, "start_time", 10),
 										xmlGetNumericAttribute(node, "duration", 10)));
 							node = node->xmlNextNode;
 						}
-						
+
 						int count = 0;
 						while (xmlGetNextOccurence(node, "content") != NULL) {
 							cclass[count] = xmlGetNumericAttribute(node, "class", 16);
@@ -3277,7 +3275,7 @@ static void *insertEventsfromFile(void *)
 						}
 						e.contentClassification = std::string(cclass, count);
 						e.userClassification =  std::string(cuser, count);
-						
+
 						while (xmlGetNextOccurence(node, "component") != NULL) {
 							SIcomponent c;
 							c.streamContent = xmlGetNumericAttribute(node, "stream_content", 16);
@@ -3299,26 +3297,26 @@ static void *insertEventsfromFile(void *)
 							l.serviceId = xmlGetNumericAttribute(node, "service_id", 16);
 							l.name = std::string(UTF8_to_Latin1(xmlGetAttribute(node, "linkage_descriptor")));
 							e.linkage_descs.insert(e.linkage_descs.end(), l);
-							
+
 							node = node->xmlNextNode;
-						}	
+						}
 						lockEvents();
 						addEvent(e);
 						unlockEvents();
-						
+
 						event = event->xmlNextNode;
 					}
-			
+
 					service = service->xmlNextNode;
 				}
 			}
 			xmlFreeDoc(event_parser);
-		
+
 			eventfile = eventfile->xmlNextNode;
 		}
-		
+
 		dprintf("Reading Information finished\n");
-	}	
+	}
 
 	xmlFreeDoc(index_parser);
 
@@ -3328,19 +3326,19 @@ static void *insertEventsfromFile(void *)
 static void commandReadSIfromXML(int connfd, char *data, const unsigned dataLength)
 {
 	pthread_t thrInsert;
-	
+
 	if (dataLength > 100)
 		return ;
-	
+
 	lockMessaging();
 	strncpy(epg_file, data, dataLength);
 	epg_file[dataLength] = '\0';
 	unlockMessaging();
-	
+
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
-	
+
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -3418,10 +3416,10 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
-		
+
 	if (dataLength > 100)
 		return ;
-			
+
 	strncpy(tmpname, data, dataLength);
 	tmpname[dataLength] = '\0';
 	strncat(tmpname, "index.tmp", 10);
@@ -3429,17 +3427,17 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 	if (!(indexfile = fopen(tmpname, "w"))) {
 		dprintf("unable to open %s for writing\n", tmpname);
 	}
-	else {	
+	else {
 		EITThreadsPause();
 		dmxSDT.pause();
-		
+
 		dprintf("Writing Information to file: %s\n", tmpname);
-		
+
 		write_index_xml_header(indexfile);
-	
+
 		lockEvents();
-		
-		MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = 
+
+		MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e =
 					mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin();
 		if (e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end()) {
 			onid = (*e)->original_network_id;
@@ -3448,12 +3446,12 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 			snprintf(eventname,17,"%04x%04x%04x.xml",onid,tsid,sid);
 			strncpy(filename, data, dataLength);
 			filename[dataLength] = '\0';
-			strncat(filename, eventname, 17);			
+			strncat(filename, eventname, 17);
 			fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n",eventname);
 			if (!(eventfile = fopen(filename, "w")))
 				return;
 			write_epg_xml_header(eventfile,onid,tsid,sid);
-		
+
 			while (e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end()) {
 				if (onid != (*e)->original_network_id) {
 					onid = (*e)->original_network_id;
@@ -3464,7 +3462,7 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 					snprintf(eventname,17,"%04x%04x%04x.xml",onid,tsid,sid);
 					strncpy(filename, data, dataLength);
 					filename[dataLength] = '\0';
-					strncat(filename, eventname, 17);			
+					strncat(filename, eventname, 17);
 					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
 					if (!(eventfile = fopen(filename, "w")))
 						return;
@@ -3478,7 +3476,7 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 					snprintf(eventname,17,"%04x%04x%04x.xml",onid,tsid,sid);
 					strncpy(filename, data, dataLength);
 					filename[dataLength] = '\0';
-					strncat(filename, eventname, 17);			
+					strncat(filename, eventname, 17);
 					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
 					if (!(eventfile = fopen(filename, "w")))
 						return;
@@ -3491,26 +3489,26 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 					snprintf(eventname,17,"%04x%04x%04x.xml",onid,tsid,sid);
 					strncpy(filename, data, dataLength);
 					filename[dataLength] = '\0';
-					strncat(filename, eventname, 17);		
+					strncat(filename, eventname, 17);
 					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
 					if (!(eventfile = fopen(filename, "w")))
 						return;
 					write_epg_xml_header(eventfile,onid,tsid,sid);
-				}			
+				}
 				(*e)->saveXML(eventfile);
 				e ++;
 			}
 			unlockEvents();
-			
+
 			write_epgxml_footer(eventfile);
 			fclose(eventfile);
 
 		}
 		write_indexxml_footer(indexfile);
 		fclose(indexfile);
-		
+
 		dprintf("Writing Information finished\n");
-		dmxSDT.unpause();		
+		dmxSDT.unpause();
 		EITThreadsUnPause();
 	}
 	strncpy(filename, data, dataLength);
@@ -3552,8 +3550,8 @@ static void commandLoadLanguages(int connfd, char* /*data*/, const unsigned /*da
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
 }
-	
-	
+
+
 static void commandSaveLanguages(int connfd, char* /*data*/, const unsigned /*dataLength*/)
 {
 	struct sectionsd::msgResponseHeader responseHeader;
@@ -3606,15 +3604,15 @@ static void commandGetLanguages(int connfd, char* /* data */, const unsigned /* 
 {
 	std::string retval;
 	std::vector<std::string> languages = SIlanguage::getLanguages();
-	
-	for (std::vector<std::string>::iterator it = languages.begin() ; 
+
+	for (std::vector<std::string>::iterator it = languages.begin() ;
 			 it != languages.end() ; it++) {
 		retval.append(*it);
 	}
-	
+
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = retval.length();
-	
+
 	if (writeNbytes(connfd, (const char *)&responseHeader,
 									sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true) {
 		writeNbytes(connfd, (const char *)retval.c_str(),
@@ -3717,7 +3715,7 @@ static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
 {	commandSetLanguages,                    "commandSetLanguages"			},
 {	commandGetLanguages,                    "commandGetLanguages"			},
 {	commandSetLanguageMode,                 "commandSetLanguageMode"		},
-{	commandGetLanguageMode,                 "commandGetLanguageMode"		}	
+{	commandGetLanguageMode,                 "commandGetLanguageMode"		}
 };
 
 //static void *connectionThread(void *conn)
@@ -4290,13 +4288,13 @@ static bool updateTP(const int scanType)
 
 	if (service_parser == NULL)
 		return false;
-		
+
 	int i = 0;
 	while ((i < MAX_SDTs) && (messaging_sdt_tid[i] != 0)) {
-	
+
 		onid = (t_original_network_id) (messaging_sdt_tid[i] >> 16) & 0xffff;
 		tsid = (t_transport_stream_id) messaging_sdt_tid[i] & 0xffff;
-	
+
 //GET_ORIGINAL_NETWORK_ID_FROM_CHANNEL_ID(channel_id) ((t_original_network_id)((channel_id) >> 16))
 //GET_SERVICE_ID_FROM_CHANNEL_ID(channel_id) ((t_service_id)(channel_id))
 
@@ -4364,9 +4362,9 @@ static bool updateTP(const int scanType)
 
 		i++;
 	}
-	
+
 	xmlFreeDoc(service_parser);
-		
+
 	if (need_update)
 	{
 		cp(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
@@ -4556,10 +4554,10 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 		fclose(src);
 	}
 	fclose(dst);
-	
+
 	cp(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
 	unlink(CURRENTSERVICES_TMP);
-	
+
 	return;
 }
 
@@ -4596,12 +4594,12 @@ static bool updateNetwork()
 		fclose(tmp);
 		current_parser= parseXmlFile(CURRENTSERVICES_XML);
 	}
-	
+
 	int i = 0;
 	while ((i < MAX_NIDs) && (messaging_nit_nid[i] != 0)) {
-	
+
 		network_id = messaging_nit_nid[i];
-	
+
 		// go through all transpopnders currently cached by neutrino - I won't need them after this loop. They COULD be cleared.
      		for (MySItranspondersOrderUniqueKey::iterator s = mySItranspondersOrderUniqueKey.begin(); s !=
 		 mySItranspondersOrderUniqueKey.end(); s++)
@@ -4658,7 +4656,7 @@ static bool updateNetwork()
 				}
 				//and finally provider not found in currentservices.xml - we give up
 				if (!provider) {
-					dprintf("[sectionsd::updateNetwork] Provider not found for Transponder ONID: %04x TSID: %04x.\n", onid, 
+					dprintf("[sectionsd::updateNetwork] Provider not found for Transponder ONID: %04x TSID: %04x.\n", onid,
 					tsid);
 				}
 				else {
@@ -4681,7 +4679,7 @@ static bool updateNetwork()
 									break;
 							}
 							if (current_provider)
-								current_tp = findTransponderFromProv(current_provider->xmlChildrenNode, onid, 
+								current_tp = findTransponderFromProv(current_provider->xmlChildrenNode, onid,
 								tsid);
 						}
 						//write the new transponder to currentservices.xml
@@ -4733,14 +4731,14 @@ xmlNodePtr findBouquet(xmlDocPtr parser,t_bouquet_id bouquet_id)
 		if (xmlGetNumericAttribute(bouquet, "bouquet_id", 16) == bouquet_id)
 			return bouquet;
 		bouquet = bouquet->xmlNextNode;
-	}	
+	}
 	return NULL;
 }
 
 static bool compareBouquet(xmlNodePtr channel, t_bouquet_id bouquet_id)
 {
 	MySIbouquetsOrderUniqueKey::iterator s = mySIbouquetsOrderUniqueKey.begin();
-	while (s != mySIbouquetsOrderUniqueKey.end()) {	
+	while (s != mySIbouquetsOrderUniqueKey.end()) {
 		if (s->second->bouquet_id == bouquet_id) {
 			if (channel) {
 				if (	(xmlGetNumericAttribute(channel, "serviceID", 16) != s->second->service_id) ||
@@ -4805,22 +4803,22 @@ static void addBouquetToCurrentXML(xmlNodePtr bouquet, t_bouquet_id bouquet_id)
 	FILE * dst = NULL;
 	std::string name;
 	xmlNodePtr node;
-	
+
 	if (!(dst = fopen(CURRENTBOUQUETS_TMP, "w"))) {
 		dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
 		return;
 	}
-	
+
 	write_bouquet_xml_header(dst);
-	
+
 	while (bouquet) {
 		name = xmlGetAttribute(bouquet, "name");
-	
+
 		fprintf(dst, "\t<Bouquet type=\"1\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"0\" locked=\"0\">\n",
 			xmlGetNumericAttribute(bouquet, "bouquet_id", 16),
 			UTF8_to_UTF8XML(name.c_str()).c_str());
-		
-		node = bouquet->xmlChildrenNode;		
+
+		node = bouquet->xmlChildrenNode;
 		while (xmlGetNextOccurence(node, "channel") != NULL) {
 			fprintf(dst, "\t\t<channel serviceID=\"%04x\" name=\"\" tsid=\"%04x\" onid=\"%04x\"/>\n",
 				xmlGetNumericAttribute(node, "serviceID", 16),
@@ -4828,14 +4826,14 @@ static void addBouquetToCurrentXML(xmlNodePtr bouquet, t_bouquet_id bouquet_id)
 				xmlGetNumericAttribute(node, "onid", 16));
 			node = node->xmlNextNode;
 		}
-			
+
 		fprintf(dst, "\t</Bouquet>\n");
-		
+
 		bouquet = bouquet->xmlNextNode;
 	}
 
 	write_bouquet_xml_node(dst, bouquet_id);
-	for (MySIbouquetsOrderUniqueKey::iterator s = mySIbouquetsOrderUniqueKey.begin(); s != 
+	for (MySIbouquetsOrderUniqueKey::iterator s = mySIbouquetsOrderUniqueKey.begin(); s !=
  		mySIbouquetsOrderUniqueKey.end(); s++)
 	{
 		if (s->second->bouquet_id == bouquet_id) {
@@ -4847,7 +4845,7 @@ static void addBouquetToCurrentXML(xmlNodePtr bouquet, t_bouquet_id bouquet_id)
 					s->second->transport_stream_id,
 					s->second->service_id,
 					s->second->serviceTyp);
-		*/	
+		*/
 			//printf("Position: %04x Typ: %hhu\n",s->second->position, s->second->serviceTyp);
 			fprintf(dst, "\t\t<channel serviceID=\"%04x\" name=\"\" tsid=\"%04x\" onid=\"%04x\"/>\n",
 				s->second->service_id,
@@ -4866,7 +4864,7 @@ static bool updateBouquets()
 	bool at_least_one_update = false;
 	t_bouquet_id bouquet_id;
 	xmlNodePtr bouquet;
-	
+
 	FILE * tmp;
 
 	xmlDocPtr bouquet_parser = parseXmlFile(BOUQUETS_XML);
@@ -4881,11 +4879,11 @@ static bool updateBouquets()
 		fclose(tmp);
 		current_parser= parseXmlFile(CURRENTBOUQUETS_XML);
 	}
-	
+
 	int i = 0;
 	while ((i < MAX_BAT) && (messaging_bat_bouquet_id[i] != 0)) {
 		//dprintf("Bouquet ID: %04x consisting of %d sections\n", messaging_bat_bouquet_id[i], messaging_bat_last_section[i]+1);
-		
+
 		bool is_complete = true;
 		for (int j = 0; j <= messaging_bat_last_section[i]; j++) {
 			if (!messaging_bat_sections_so_far[i][j])
@@ -4895,23 +4893,23 @@ static bool updateBouquets()
 			bouquet_id = messaging_bat_bouquet_id[i];
 			bouquet = NULL;
 			need_update = false;
-			
+
 			if (current_parser != NULL)
 				bouquet = findBouquet(current_parser, bouquet_id);
-			
+
 			if (bouquet == NULL) {
 				//printf("Bouquet not found in CurrentBouquet\n");
 				bouquet = findBouquet(bouquet_parser, bouquet_id);
-			
+
 				if (bouquet != NULL)
-				{	
+				{
 					//printf("Bouquet found in Bouquet\n");
 					if (!xmlGetNumericAttribute(bouquet, "hidden", 16))
 						need_update = compareBouquet(bouquet->xmlChildrenNode, bouquet_id);
 				}
-				else 
+				else
 					need_update = true;
-			
+
 				if (need_update) {
 					//printf("We need to update\n");
 					at_least_one_update = true;
@@ -4933,7 +4931,7 @@ static bool updateBouquets()
 	if (current_parser != NULL)
 		xmlFreeDoc(current_parser);
 	xmlFreeDoc(bouquet_parser);
-	
+
 	return at_least_one_update;
 }
 
@@ -4995,8 +4993,8 @@ static void *nitThread(void *)
 			messaging_nit_nid[i] = 0;
 		unlockMessaging();
 		dmxNIT.start(); // -> unlock
-		
-		bool startup = true;		
+
+		bool startup = true;
 
 		for (;;)
 		{
@@ -5015,20 +5013,20 @@ static void *nitThread(void *)
 				dmxNIT.real_pause();
 				pthread_mutex_lock( &dmxNIT.start_stop_mutex );
 				dprintf("dmxNIT: going to sleep...\n");
-					
+
 				lockMessaging();
-										
+
 				if ((auto_scanning > 0) && (!startup)) {
 					 if (messaging_nit_nid[0] != 0)
 						updateNetwork();
 					dmxSDT.change( 0 );
 				}
-				
+
 				for ( i = 0; i < MAX_NIDs; i++)
 					messaging_nit_nid[i] = 0;
-						
+
 				unlockMessaging();
-				
+
 				rs = pthread_cond_timedwait( &dmxNIT.change_cond, &dmxNIT.start_stop_mutex, &abs_wait );
 
 				if (rs == ETIMEDOUT)
@@ -5058,7 +5056,7 @@ static void *nitThread(void *)
 				startup = false;
 				zeit = time(NULL);
 				timeoutsDMX = 0;
-				lastData = zeit; 
+				lastData = zeit;
 			}
 
 			if (timeoutsDMX >= RESTART_DMX_AFTER_TIMEOUTS && scanning)
@@ -5068,9 +5066,9 @@ static void *nitThread(void *)
 				dmxNIT.start(); // leaves unlocked
 				dputs("\n !!! dmxNIT restarted !!!\n");
 			}
-			
+
 			buf = dmxNIT.getSection(timeoutInMSeconds, timeoutsDMX);
-			
+
 			if (buf == NULL)
 				continue;
 
@@ -5087,23 +5085,23 @@ static void *nitThread(void *)
 					SIsectionNIT nit(section_length + 3, buf);
 
 					is_actual = ( header.table_id == 0x40) ? true : false;
-				
+
 					is_new = false;
-				
+
 					lockTransponders();
 
 					for (SInetworks::iterator s = nit.networks().begin(); s != nit.networks().end(); s++)
 						if (addTransponder(*s, is_actual))
 							is_new = true;
-	
+
 					unlockTransponders();
 
 					lockMessaging();
-				
+
 					if (is_new) {
 						nid = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
 						lastData = time(NULL);
-						dprintf("[nitThread] adding %d transponders [table 0x%x]\n", 
+						dprintf("[nitThread] adding %d transponders [table 0x%x]\n",
 								nit.networks().size(), header.table_id);
 						i = 0;
 						while ((i < MAX_NIDs) && (messaging_nit_nid[i] != 0) && (messaging_nit_nid[i] != nid))
@@ -5194,8 +5192,8 @@ static void *sdtThread(void *)
 		unlockMessaging();
 		scanType = getscanType();
 		dmxSDT.start(); // -> unlock
-		
-		bool startup = true;		
+
+		bool startup = true;
 
 		for (;;)
 		{
@@ -5216,9 +5214,9 @@ static void *sdtThread(void *)
 				dmxSDT.real_pause();
 				pthread_mutex_lock( &dmxSDT.start_stop_mutex );
 				dprintf("dmxSDT: going to sleep...\n");
-					
+
 				lockMessaging();
-					
+
 				if ((auto_scanning > 0) && (!startup)) {
 					if ((updateTP(scanType)) && (auto_scanning == 1))
 						eventServer->sendEvent(CSectionsdClient::EVT_SERVICES_UPDATE, CEventServer::INITID_SECTIONSD);
@@ -5237,7 +5235,7 @@ static void *sdtThread(void *)
 						eventServer->sendEvent(CSectionsdClient::EVT_BOUQUETS_UPDATE, CEventServer::INITID_SECTIONSD);
 					}
 				}
-					
+
 				for ( i = 0; i < MAX_SDTs; i++)
 					messaging_sdt_tid[i] = 0;
 				for ( i = 0; i < MAX_BAT; i++) {
@@ -5246,7 +5244,7 @@ static void *sdtThread(void *)
 					for ( j= 0; j < MAX_SECTIONS; j++)
 						messaging_bat_sections_so_far[i][j] = 0;
 				}
-						
+
 				unlockMessaging();
 
 				rs = pthread_cond_timedwait( &dmxSDT.change_cond, &dmxSDT.start_stop_mutex, &abs_wait );
@@ -5278,7 +5276,7 @@ static void *sdtThread(void *)
 				startup = false;
 				zeit = time(NULL);
 				timeoutsDMX = 0;
-				lastData = zeit; 
+				lastData = zeit;
 			}
 
 			if (timeoutsDMX >= RESTART_DMX_AFTER_TIMEOUTS && scanning)
@@ -5288,9 +5286,9 @@ static void *sdtThread(void *)
 				dmxSDT.start(); // leaves unlocked
 				dputs("\n !!! dmxSDT restarted !!!\n");
 			}
-			
+
 			buf = dmxSDT.getSection(timeoutInMSeconds, timeoutsDMX);
-			
+
 			if (buf == NULL)
 				continue;
 
@@ -5307,31 +5305,31 @@ static void *sdtThread(void *)
 					SIsectionSDT sdt(section_length + 3, buf);
 
 					is_actual = ( header.table_id == 0x42) ? 1 : 0;
-				
+
 					if ((is_actual) && (!header.last_section_number))
 						is_actual = 2;
-				
+
 					is_new = false;
-				
+
 					lockServices();
 
 					for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
 						if (addService(*s, is_actual)) {
 							is_new = true;
 							tid = CREATE_TRANSPONDER_ID_FROM_ORIGINALNETWORK_TRANSPORTSTREAM_ID(s->original_network_id,
-														 s->transport_stream_id);	
+														 s->transport_stream_id);
 						}
-	
+
 					unlockServices();
 
 					lockMessaging();
-				
+
 					if (is_new) {
 						lastData = time(NULL);
-						
-						dprintf("[sdtThread] added %d services [table 0x%x TID: %08x]\n", 
+
+						dprintf("[sdtThread] added %d services [table 0x%x TID: %08x]\n",
 								sdt.services().size(), header.table_id, tid);
-							
+
 						i = 0;
 						while ((i < MAX_SDTs) && (messaging_sdt_tid[i] != 0) && (messaging_sdt_tid[i] != tid))
 							i++;
@@ -5343,21 +5341,21 @@ static void *sdtThread(void *)
 				}
 				else if (header.table_id == 0x4a) {
 					t_bouquet_id bid = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
-						
+
 					// This is 0 .. MAX_BAT - 1 if already started or new and free or -1 if no free slot available.
 					int current_bouquet = get_bat_slot(bid, (int) header.last_section_number);
-				
+
 					if ((current_bouquet != -1) && (!messaging_bat_sections_so_far[current_bouquet][header.section_number])) {
 						SIsectionBAT bat(section_length + 3, buf);
-					
+
 						dprintf("[sdtThread] adding %d bouquet entries\n", bat.bouquets().size());
-					
+
 						is_new = false;
-						
+
 						int new_bouquet_id = 0;
-						
+
 						lockBouquets();
-					
+
 						//int count = 0;
 						for (SIbouquets::iterator s = bat.bouquets().begin(); s != bat.bouquets().end(); s++) {
 							//(*s)->position = (uint16_t) (((header.section_number & 0x1f) << 11) + (count & 0x7ff));
@@ -5371,22 +5369,22 @@ static void *sdtThread(void *)
 						if (new_bouquet_id >> 1)
 							messaging_bat_bouquet_id[current_bouquet] = new_bouquet_id >> 1;
 						//printf("Bouquet ID: %04x\n", bid);
-						
+
 						unlockBouquets();
-					
+
 						lockMessaging();
-							
+
 						if (is_new) {
 							lastData = time(NULL);
 							messaging_bat_sections_so_far[current_bouquet][header.section_number] = 1;
 						} else
 							messaging_bat_sections_so_far[current_bouquet][header.section_number] = 2;
-						
+
 						unlockMessaging();
-						
+
 						//dprintf("current bouquet: %d, current section: %d code: %d\n", current_bouquet, header.section_number, messaging_bat_sections_so_far[current_bouquet][header.section_number]);
 					}
-				
+
 				}
 				else {
 					delete[] buf;
@@ -5502,7 +5500,7 @@ static void *timeThread(void *)
 
 		while(1)
 		{
-			
+
 			if ( ntpenable && system( ntp_system_cmd.c_str() ) == 0)
 			{
 				time_t actTime;
@@ -5519,7 +5517,7 @@ static void *timeThread(void *)
 				if (scanning && (getUTC(&UTC, true))) // always use TDT, a lot of transponders don't provide a TOT
 				{
 					tim = changeUTCtoCtime((const unsigned char *) &UTC);
-				
+
 					if (tim) {
 						if ((!messaging_neutrino_sets_time) && (geteuid() == 0)) {
 							struct timeval tv;
@@ -5580,7 +5578,7 @@ static void *timeThread(void *)
 			}
 			// else if (ret == 0) //everything is fine :) e.g. timeThreadSleepCond maybe signalled @zap time to get a valid time
 			pthread_mutex_unlock( &timeThreadSleepMutex );
-		}	
+		}
 	}
 
 	catch (std::exception& e)
@@ -5683,7 +5681,7 @@ static void *eitThread(void *)
 			} else {
 			unlockMessaging();*/
 			time_t zeit = time(NULL);
-			
+
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
 			{
 				lockServices();
@@ -5793,7 +5791,7 @@ static void *eitThread(void *)
 				lastRestarted = zeit;
 				timeoutsDMX = 0;
 			}
-			
+
 			if (waitForTimeset())
 			{
 
@@ -5814,7 +5812,7 @@ static void *eitThread(void *)
 					dmxEIT.real_pause();
 					pthread_mutex_lock( &dmxEIT.start_stop_mutex );
 					dprintf("dmxEIT: going to sleep...\n");
-					
+
 					lockMessaging();
 					if (auto_scanning)
 						dmxNIT.change( 0 );
@@ -5957,7 +5955,7 @@ static void *eitThread(void *)
 					//dprintf("[eitThread] added %d events (end)\n",  eit.events().size());
 
 				} // if
-				
+
 				lockMessaging();
 
 				if ((header.table_id != 0x4e) ||
@@ -6382,7 +6380,7 @@ static void *houseKeepingThread(void *)
 				unlockBouquets();
 				count = 0;
 			}
-			
+
 			int rc = HOUSEKEEPING_SLEEP;
 
 			while (rc)
@@ -6432,7 +6430,7 @@ static void *houseKeepingThread(void *)
 				dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
 				//dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
 				dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
-				
+
 				for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s !=  mySIservicesOrderUniqueKey.end(); s++) {
 					printf("ONID: %04x TSID: %04x SID: %04x Prov: %s Name: %s actual: %d\n",
 						s->second->original_network_id,
@@ -6442,7 +6440,7 @@ static void *houseKeepingThread(void *)
 						s->second->serviceName.c_str(),
 						(int) s->second->is_actual);
 				}
-				
+
 				unlockServices();
 				/*
 				lockTransponders();
@@ -6530,7 +6528,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.225 2006/05/21 19:27:15 mws Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.226 2006/05/22 17:48:55 mws Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -6573,7 +6571,7 @@ int main(int argc, char **argv)
 
 		ntp_system_cmd += ntpserver;
 
-		//EPG Einstellungen laden	
+		//EPG Einstellungen laden
 		secondsToCache = (atoi(ntp_config.getString("epg_cache_time","14").c_str() ) *24*60L*60L); //Tage
 		oldEventsAre = (atoi(ntp_config.getString("epg_old_events","1").c_str() ) *60L*60L); //Stunden
 		max_events= atoi(ntp_config.getString("epg_max_events","6000").c_str() );
@@ -6640,7 +6638,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "[sectionsd] failed to create ppt-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
-		
+
 		// NIT-Thread starten
 		rc = pthread_create(&threadNIT, 0, nitThread, 0);
 
@@ -6648,7 +6646,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "[sectionsd] failed to create nit-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
-		
+
 		// SDT-Thread starten
 		rc = pthread_create(&threadSDT, 0, sdtThread, 0);
 
@@ -6656,7 +6654,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "[sectionsd] failed to create sdt-thread (rc=%d)\n", rc);
 			return EXIT_FAILURE;
 		}
-		
+
 		// housekeeping-Thread starten
 		rc = pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
 
