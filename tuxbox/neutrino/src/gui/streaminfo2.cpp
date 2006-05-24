@@ -256,9 +256,9 @@ void CStreamInfo2::SignalRenderStr (unsigned long value, int x, int y)
 {
 	char str[30];
 
-	frameBuffer->paintBoxRel(x, y-iheight+1, 50, iheight-1, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x, y-iheight+1, 60, iheight-1, COL_MENUHEAD_PLUS_0);
 	sprintf(str,"%6lu",value);
-	g_Font[font_small]->RenderString(x, y, 50, str, COL_MENUCONTENT, 0, true);
+	g_Font[font_small]->RenderString(x, y, 60, str, COL_MENUCONTENT, 0, true);
 }
 
 void CStreamInfo2::paint(int mode)
