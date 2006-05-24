@@ -20,9 +20,13 @@ pm(0), entries(OpenEntries), current(0)
 
 	gColor background = eSkin::getActive()->queryScheme("eComboBox.listbox.normal.background");
 	gColor foreground = eSkin::getActive()->queryScheme("eComboBox.listbox.normal.foreground");
-	if (background) listbox.setBackgroundColor(background);
-	if (foreground) listbox.setForegroundColor(foreground);
-	listbox.setActiveColor(eSkin::getActive()->queryScheme("eComboBox.listbox.selected.background"), eSkin::getActive()->queryScheme("eComboBox.listbox.selected.foreground"));
+	if (background) 
+		listbox.setBackgroundColor(background);
+	if (foreground) 
+		listbox.setForegroundColor(foreground);
+	background = eSkin::getActive()->queryScheme("eComboBox.listbox.selected.background");
+	foreground = eSkin::getActive()->queryScheme("eComboBox.listbox.selected.foreground");
+	listbox.setActiveColor(background, foreground);
 
 	CONNECT( selected, eComboBox::onOkPressed );
 	CONNECT( listbox.selected, eComboBox::onEntrySelected );
