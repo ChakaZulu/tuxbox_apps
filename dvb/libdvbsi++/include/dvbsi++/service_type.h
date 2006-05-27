@@ -1,5 +1,5 @@
 /*
- *  $Id: service_type.h,v 1.4 2006/05/27 15:29:57 mws Exp $
+ *  $Id: service_type.h,v 1.5 2006/05/27 15:55:33 mws Exp $
  * 
  *  Copyright (C) 2002-2006 Andreas Oberritter <obi@saftware.de>
  * 
@@ -21,11 +21,19 @@ enum ServiceType {
 	ST_NVOD_REFERENCE_SERVICE		= 0x04,
 	ST_NVOD_TIME_SHIFTED_SERVICE		= 0x05,
 	ST_MOSAIC_SERVICE			= 0x06,
-	ST_PAL_CODED_SIGNAL			= 0x07,
-	ST_SECAM_CODED_SIGNAL			= 0x08,
-	ST_D_D2_MAC				= 0x09,
-	ST_FM_RADIO				= 0x0A,
-	ST_NTSC_CODED_SIGNAL			= 0x0B,
+	/* 0x07 - 0x09 are reserved for future use */
+	/* old values kept as comment */
+	/* ST_PAL_CODED_SIGNAL			= 0x07, */
+	/* ST_SECAM_CODED_SIGNAL		= 0x08, */
+	/* ST_D_D2_MAC				= 0x09, */
+	
+	/* 0x0a - 0x0b redefined */
+	/* old values kept as comment */
+	/* ST_FM_RADIO				= 0x0A, */
+	/* ST_NTSC_CODED_SIGNAL			= 0x0B, */
+	ST_AVC_DIGITAL_RADIO_SOUND_SERVICE	= 0x0A,
+	ST_AVC_MOSAIC_SERVICE			= 0x0B,
+
 	ST_DATA_BROADCAST_SERVICE		= 0x0C,
 	ST_COMMON_INTERFACE_RESERVED		= 0x0D,
 	ST_RCS_MAP				= 0x0E,
