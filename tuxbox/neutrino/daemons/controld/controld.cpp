@@ -63,6 +63,8 @@
 
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
+#define FORMAT_16_9_FILE CONFIGDIR "/16:9.start"
+#define FORMAT_4_3_FILE  CONFIGDIR "/4:3.start"
 #define AVS_DEVICE	"/dev/dbox/avs0"
 #define SAA7126_DEVICE	"/dev/dbox/saa0"
 
@@ -439,6 +441,17 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings = true)
 		setRGBCsync(settings.csync);
 }
 
+void execute_start_file(const char *filename)
+{
+  struct stat statbuf;
+  if (stat(filename, &statbuf) == 0) {
+    printf("[controld] executing %s\n", filename);
+    int result = system(filename);
+    if (result)
+      printf("[controld] %s failed with return code = %d\n", filename, result);
+  }
+}
+
 void setVideoFormat(int format, bool bSaveFormat = true )
 {
         static int last_videoformat = AVS_FNCOUT_EXT43;
@@ -553,12 +566,14 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	  switch (format) {
 	  case AVS_FNCOUT_EXT169:
 	    {
+	      execute_start_file(FORMAT_16_9_FILE);
 	      CIRSend irs("16:9");
 	      irs.Send();
 	    }
 	    break;
 	  case AVS_FNCOUT_EXT43:
 	    {
+	      execute_start_file(FORMAT_4_3_FILE);
 	      CIRSend irs("4:3");
 	      irs.Send();
 	    }
@@ -1082,7 +1097,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.118 2006/05/27 10:24:34 barf Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.119 2006/05/27 12:10:24 barf Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
