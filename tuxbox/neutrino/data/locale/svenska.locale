@@ -935,6 +935,9 @@ videomenu.csync sync justering
 videomenu.head Videoinställningar
 videomenu.rgb_centering RGB centrering
 videomenu.screensetup Skärminställning
+videomenu.vcrsignal VCR-utgångssignaltyp
+videomenu.vcrsignal_composite CVBS
+videomenu.vcrsignal_svideo S-Video
 videomenu.vcrswitch Växla SCART automatiskt
 videomenu.videoformat Format
 videomenu.videoformat_169 16:9

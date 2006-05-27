@@ -126,6 +126,14 @@ class CControldClient:private CBasicClient
 		void setVideoOutput(char);
 		char getVideoOutput();
 
+                /*
+			setVCROutput(char) : Setzten des Videooutputs für VCR ( composite / svideo )
+			Parameter: VIDEOOUTPUT_COMPOSITE = cvbs
+			VIDEOOUTPUT_SVIDEO    = svideo
+		*/
+		void setVCROutput(char);
+		char getVCROutput();
+
 		/*
 			setBoxType(CControldClient::tuxbox_vendor_t) : Setzten des Boxentyps ( nokia / sagem / philips )
 		*/

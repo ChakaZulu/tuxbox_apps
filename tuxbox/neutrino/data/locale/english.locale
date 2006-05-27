@@ -1052,6 +1052,9 @@ videomenu.csync sync correction
 videomenu.head Video Settings
 videomenu.rgb_centering RGB centering
 videomenu.screensetup Screen Setup
+videomenu.vcrsignal VCR Output Signal Type
+videomenu.vcrsignal_composite CVBS
+videomenu.vcrsignal_svideo S-Video
 videomenu.vcrswitch Switch Scart automatically
 videomenu.videoformat Format
 videomenu.videoformat_169 16:9

@@ -155,6 +155,17 @@ void CControldClient::setVideoOutput(char output)
 	close_connection();
 }
 
+void CControldClient::setVCROutput(char output)
+{
+	CControldMsg::commandVCROutput msg2;
+
+	msg2.vcr_output = output;
+
+	send(CControldMsg::CMD_SETVCROUTPUT, (char*)&msg2, sizeof(msg2));
+
+	close_connection();
+}
+
 char CControldClient::getVideoOutput()
 {
 	CControldMsg::responseVideoOutput rmsg;
@@ -166,6 +177,19 @@ char CControldClient::getVideoOutput()
 	close_connection();
 
 	return success ? rmsg.output : 1; /* default value is 1 (cf. controld.cpp) */
+}
+
+char CControldClient::getVCROutput()
+{
+	CControldMsg::responseVCROutput rmsg;
+
+	send(CControldMsg::CMD_GETVCROUTPUT);
+
+	bool success = receive_data((char*)&rmsg, sizeof(rmsg));
+
+	close_connection();
+
+	return success ? rmsg.vcr_output : 1; /* default value is 1 (cf. controld.cpp) */
 }
 
 void CControldClient::Mute(const CControld::volume_type volume_type)

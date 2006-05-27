@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.71 2006/05/21 07:07:19 zwen Exp $
+ * $Id: locals_intern.h,v 1.72 2006/05/27 10:24:36 barf Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1079,6 +1079,9 @@ const char * locale_real_names[] =
 	"videomenu.head",
 	"videomenu.rgb_centering",
 	"videomenu.screensetup",
+	"videomenu.vcrsignal",
+	"videomenu.vcrsignal_composite",
+	"videomenu.vcrsignal_svideo",
 	"videomenu.vcrswitch",
 	"videomenu.videoformat",
 	"videomenu.videoformat_169",

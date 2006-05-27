@@ -57,6 +57,9 @@ class CControldMsg : public CBasicMessage
 			CMD_SETVIDEOOUTPUT,
 			CMD_GETVIDEOOUTPUT,
 
+			CMD_SETVCROUTPUT,
+			CMD_GETVCROUTPUT,
+
 			CMD_SETBOXTYPE,
 			CMD_GETBOXTYPE,
 
@@ -98,6 +101,11 @@ class CControldMsg : public CBasicMessage
 			unsigned char output;
 		};
 
+		struct commandVCROutput
+		{
+			unsigned char vcr_output;
+		};
+
 		struct commandBoxType
 		{
 			CControld::tuxbox_maker_t boxtype;
@@ -128,6 +136,11 @@ class CControldMsg : public CBasicMessage
 		struct responseVideoOutput
 		{
 			unsigned char output;
+		};
+
+		struct responseVCROutput
+		{
+			unsigned char vcr_output;
 		};
 
 		struct responseBoxType

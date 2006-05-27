@@ -2111,6 +2111,13 @@ const CMenuOptionChooser::keyval VIDEOMENU_VIDEOSIGNAL_OPTIONS[VIDEOMENU_VIDEOSI
 	{ 0, LOCALE_VIDEOMENU_VIDEOSIGNAL_COMPOSITE }
 };
 
+#define VIDEOMENU_VCRSIGNAL_OPTION_COUNT 2
+const CMenuOptionChooser::keyval VIDEOMENU_VCRSIGNAL_OPTIONS[VIDEOMENU_VCRSIGNAL_OPTION_COUNT] =
+{
+	{ 2, LOCALE_VIDEOMENU_VCRSIGNAL_SVIDEO    },
+	{ 0, LOCALE_VIDEOMENU_VCRSIGNAL_COMPOSITE }
+};
+
 #define VIDEOMENU_VIDEOFORMAT_OPTION_COUNT 4
 const CMenuOptionChooser::keyval VIDEOMENU_VIDEOFORMAT_OPTIONS[VIDEOMENU_VIDEOFORMAT_OPTION_COUNT] =
 {
@@ -2123,9 +2130,11 @@ const CMenuOptionChooser::keyval VIDEOMENU_VIDEOFORMAT_OPTIONS[VIDEOMENU_VIDEOFO
 class CVideoSettings : public CMenuWidget, CChangeObserver
 {
 	CMenuForwarder *   SyncControlerForwarder;
+	CMenuOptionChooser * VcrVideoOutSignalOptionChooser;
 	CRGBCSyncControler RGBCSyncControler;
 	CScreenSetup       ScreenSetup;
 	int                video_out_signal;
+	int                vcr_video_out_signal;
 
 public:
 	CVideoSettings() : CMenuWidget(LOCALE_VIDEOMENU_HEAD, "video.raw"), RGBCSyncControler(LOCALE_VIDEOMENU_RGB_CENTERING, &g_settings.video_csync)
@@ -2136,6 +2145,8 @@ public:
 
 			addItem(new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOSIGNAL, &video_out_signal, VIDEOMENU_VIDEOSIGNAL_OPTIONS, VIDEOMENU_VIDEOSIGNAL_OPTION_COUNT, true, this));
 
+			VcrVideoOutSignalOptionChooser = new CMenuOptionChooser(LOCALE_VIDEOMENU_VCRSIGNAL, &vcr_video_out_signal, VIDEOMENU_VCRSIGNAL_OPTIONS, VIDEOMENU_VCRSIGNAL_OPTION_COUNT, false, this);
+			addItem(VcrVideoOutSignalOptionChooser);
 			SyncControlerForwarder = new CMenuForwarder(LOCALE_VIDEOMENU_RGB_CENTERING, false, NULL, &RGBCSyncControler);
 			addItem(SyncControlerForwarder);
 
@@ -2158,9 +2169,15 @@ public:
 		{
 			if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOSIGNAL))
 			{
+				while ((vcr_video_out_signal) == CControldClient::VIDEOOUTPUT_SVIDEO && (video_out_signal != CControldClient::VIDEOOUTPUT_SVIDEO) && (video_out_signal != CControldClient::VIDEOOUTPUT_COMPOSITE) )
+					video_out_signal = (video_out_signal + 1) % 5;
 				g_Controld->setVideoOutput(video_out_signal);
-
+				VcrVideoOutSignalOptionChooser->setActive((video_out_signal == CControldClient::VIDEOOUTPUT_COMPOSITE) || (video_out_signal == CControldClient::VIDEOOUTPUT_SVIDEO));
 				SyncControlerForwarder->setActive((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_CVBS));
+			}
+			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VCRSIGNAL))
+			{
+				g_Controld->setVCROutput(vcr_video_out_signal);
 			}
 			else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT))
 			{
@@ -2173,7 +2190,9 @@ public:
 	virtual void paint()
 		{
 			video_out_signal = g_Controld->getVideoOutput();
+			vcr_video_out_signal = g_Controld->getVCROutput();
 
+			VcrVideoOutSignalOptionChooser->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_COMPOSITE) || (video_out_signal == CControldClient::VIDEOOUTPUT_SVIDEO));
 			SyncControlerForwarder->active = ((video_out_signal == CControldClient::VIDEOOUTPUT_RGB) || (video_out_signal == CControldClient::VIDEOOUTPUT_YUV_VBS) || (video_out_signal ==  CControldClient::VIDEOOUTPUT_YUV_CVBS));
 
 			g_settings.video_Format = g_Controld->getVideoFormat();

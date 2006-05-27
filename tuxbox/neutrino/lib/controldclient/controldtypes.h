@@ -40,11 +40,23 @@ public:
 	} tuxbox_maker_t;
 
 	enum volume_type
-   {  
+        {  
 		TYPE_OST=0,
 		TYPE_AVS=1,
 		TYPE_LIRC=2,
 		TYPE_UNKNOWN
 	};
+
+        const static int no_video_formats = 5;
+
+	typedef enum video_format 
+	{ 
+		FORMAT_CVBS	= 0,
+		FORMAT_RGB	= 1,
+		FORMAT_SVIDEO	= 2,
+		FORMAT_YUV_VBS	= 3,
+		FORMAT_YUV_CVBS	= 4
+	};
+
 };
 #endif

@@ -1052,6 +1052,9 @@ videomenu.csync Sync.-Korrektur
 videomenu.head Video-Einstellungen
 videomenu.rgb_centering RGB-Zentrierung
 videomenu.screensetup Bildbereich einstellen
+videomenu.vcrsignal VCR-Ausgang Signalart
+videomenu.vcrsignal_composite CVBS
+videomenu.vcrsignal_svideo S-Video
 videomenu.vcrswitch Scart-Eingang automatisch
 videomenu.videoformat Bildschirmformat
 videomenu.videoformat_169 16:9
