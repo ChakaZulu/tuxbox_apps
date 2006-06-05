@@ -90,6 +90,7 @@ bool CSatDiseqcNotifier::changeNotify(const neutrino_locale_t, void * Data)
 	}
 	return true;
 }
+
 CTP_scanNotifier::CTP_scanNotifier(CMenuOptionChooser* i1, CMenuOptionChooser* i2, CMenuForwarder* i3, CMenuForwarder* i4)
 {
 	toDisable1[0]=i1;
@@ -522,26 +523,17 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 	std::string text;
 	char res[60];
 
-	text = g_Locale->getText(LOCALE_UCODECHECK_AVIA500);
-	text += ": ";
+	text = (std::string)g_Locale->getText(LOCALE_UCODECHECK_AVIA500) += ": ";
 	checkFile(UCODEDIR "/avia500.ux", (char*) &res);
-	text += res;
-	text += '\n';
-	text += g_Locale->getText(LOCALE_UCODECHECK_AVIA600);
-	text += ": ";
+	text += (std::string)res + '\n' + g_Locale->getText(LOCALE_UCODECHECK_AVIA600) + ": ";
 	checkFile(UCODEDIR "/avia600.ux", (char*) &res);
-	text += res;
-	text += '\n';
-	text += g_Locale->getText(LOCALE_UCODECHECK_UCODE);
-	text += ": ";
+	text += (std::string)res + '\n' + g_Locale->getText(LOCALE_UCODECHECK_UCODE) + ": ";
 	checkFile(UCODEDIR "/ucode.bin", (char*) &res);
 	if (strcmp("not found", res) == 0)
 		text += "ucode_0014 (built-in)";
 	else
 		text += res;
-	text += '\n';
-	text += g_Locale->getText(LOCALE_UCODECHECK_CAM_ALPHA);
-	text += ": ";
+	text += (std::string)"\n" + g_Locale->getText(LOCALE_UCODECHECK_CAM_ALPHA) + ": ";
 	checkFile(UCODEDIR "/cam-alpha.bin", (char*) &res);
 	text += res;
 
@@ -572,14 +564,14 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	std::string text;
 
 	if (ip_static) {
-		strcpy(our_ip,ip);
-		strcpy(our_mask,netmask);
-		strcpy(our_broadcast,broadcast);
-		strcpy(our_gateway,gateway);
-		strcpy(our_nameserver,nameserver);
+		strcpy(our_ip, ip);
+		strcpy(our_mask, netmask);
+		strcpy(our_broadcast, broadcast);
+		strcpy(our_gateway, gateway);
+		strcpy(our_nameserver, nameserver);
 	}
 	else {
-		netGetIP("eth0",our_ip,our_mask,our_broadcast);
+		netGetIP("eth0", our_ip, our_mask, our_broadcast);
 		netGetDefaultRoute(our_gateway);
 		netGetNameserver(our_nameserver);
 	}
@@ -590,23 +582,18 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	printf("testNw Gateway: %s\n", our_gateway);
 	printf("testNw Nameserver: %s\n", our_nameserver);
 
-	text = our_ip;
-	text += ": ";
-	text += mypinghost(our_ip);
-	text += '\n';
-	text += g_Locale->getText(LOCALE_NETWORKMENU_GATEWAY);
-	text += ": ";
-	text += our_gateway;
-	text += ' ';
-	text += mypinghost(our_gateway);
-	text += '\n';
-	text += g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER);
-	text += ": ";
-	text += our_nameserver;
-	text += ' ';
-	text += mypinghost(our_nameserver);
-	text += "\ndboxupdate.berlios.de: ";
-	text += mypinghost("195.37.77.138");
+	text = (std::string)"dbox:\n"
+	     + "    " + our_ip + ": " + mypinghost(our_ip) + '\n'
+	     + g_Locale->getText(LOCALE_NETWORKMENU_GATEWAY) + ":\n"
+	     + "    " + our_gateway + ": " + ' ' + mypinghost(our_gateway) + '\n'
+	     + g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER) + ":\n"
+	     + "    " + our_nameserver + ": " + ' ' + mypinghost(our_nameserver) + '\n'
+	     + "dboxupdate.berlios.de:\n"
+	     + "    via IP (195.37.77.138): " + mypinghost("195.37.77.138") + '\n';
+	if (1 == pinghost(our_nameserver)) text += (std::string)
+	       "    via DNS: " + mypinghost("dboxupdate.berlios.de") + '\n'
+	     + "www.google.de:\n"
+	     + "    via DNS: " + mypinghost("www.google.de") + '\n';
 
 	ShowMsgUTF(LOCALE_NETWORKMENU_TEST, text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 }
@@ -620,32 +607,18 @@ void showCurrentNetworkSettings()
 	char nameserver[16];
 	std::string text;
 
-	netGetIP("eth0",ip,mask,broadcast);
+	netGetIP("eth0", ip, mask, broadcast);
 	if (ip[0] == 0) {
 		text = "Network inactive\n";
 	}
 	else {
 		netGetNameserver(nameserver);
 		netGetDefaultRoute(router);
-		text  = g_Locale->getText(LOCALE_NETWORKMENU_IPADDRESS );
-		text += ": ";
-		text += ip;
-		text += '\n';
-		text += g_Locale->getText(LOCALE_NETWORKMENU_NETMASK   );
-		text += ": ";
-		text += mask;
-		text += '\n';
-		text += g_Locale->getText(LOCALE_NETWORKMENU_BROADCAST );
-		text += ": ";
-		text += broadcast;
-		text += '\n';
-		text += g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER);
-		text += ": ";
-		text += nameserver;
-		text += '\n';
-		text += g_Locale->getText(LOCALE_NETWORKMENU_GATEWAY   );
-		text += ": ";
-		text += router;
+		text = (std::string)g_Locale->getText(LOCALE_NETWORKMENU_IPADDRESS ) + ": " + ip + '\n'
+				  + g_Locale->getText(LOCALE_NETWORKMENU_NETMASK   ) + ": " + mask + '\n'
+				  + g_Locale->getText(LOCALE_NETWORKMENU_BROADCAST ) + ": " + broadcast + '\n'
+				  + g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER) + ": " + nameserver + '\n'
+				  + g_Locale->getText(LOCALE_NETWORKMENU_GATEWAY   ) + ": " + router;
 	}
 	ShowMsgUTF(LOCALE_NETWORKMENU_SHOW, text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 }

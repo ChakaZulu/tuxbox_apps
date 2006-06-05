@@ -20,9 +20,8 @@
  *
  */
 
-
+#include <resolv.h>
 #include "ping.h"
-
 
 #ifndef  EXIT_SUCCESS
 # define EXIT_SUCCESS 0
@@ -59,12 +58,13 @@ in_checksum( u_short *buf, int len )
     sum += answer;
   }
   sum = ( sum >> 16 ) + ( sum & 0xffff );
-  sum += ( sum >> 16 );     
-  answer = ~sum;     
+  sum += ( sum >> 16 );
+  answer = ~sum;
 
   return ( answer );
 
-} 
+}
+
 
 int
 send_ping( const char *host, struct sockaddr_in *taddr )
@@ -79,20 +79,26 @@ send_ping( const char *host, struct sockaddr_in *taddr )
 
   len = HDRLEN + DATALEN;
 
+  // init resolver because otherwiese dns requests will be cached
+  res_init();
+
   if(( proto = getprotobyname( "icmp" )) == NULL ){
     return -1;
   }
-  
+
   if(( hp = gethostbyname( host )) != NULL ){
     memcpy( &taddr->sin_addr, hp->h_addr_list[0], sizeof( taddr->sin_addr ));
     taddr->sin_port = 0;
     taddr->sin_family = AF_INET;
   }
-  else if( inet_aton( host, &taddr->sin_addr ) == 0 ){
-    return -1;
+  else {
+    if( inet_aton( host, &taddr->sin_addr ) == 0 ){
+      return -1;
+    }
   }
 
   last = ntohl( taddr->sin_addr.s_addr ) & 0xFF;
+
   if(( last == 0x00 ) || ( last == 0xFF )){
     return -1;
   }
@@ -111,7 +117,7 @@ send_ping( const char *host, struct sockaddr_in *taddr )
   icp->icmp_id    = getpid() & 0xFFFF;
   icp->icmp_cksum = in_checksum((u_short *)icp, len );
 
-  if(( ss = sendto( sock, buf, sizeof( buf ), 0, 
+  if(( ss = sendto( sock, buf, sizeof( buf ), 0,
      (struct sockaddr*)taddr, sizeof( *taddr ))) < 0 ){
 #ifdef  DEBUG
   perror( "sock" );
@@ -153,19 +159,19 @@ recv_ping( struct sockaddr_in *taddr )
      unreachable network and we'll time out here. */
   if(( nf = select( sock + 1, &readset, &writeset, NULL, &to )) < 0 ){
 #ifdef  DEBUG
-  perror( "select" );
+    perror( "select" );
 #endif/*DEBUG*/
     exit( EXIT_FAILURE );
   }
-  if( nf == 0 ){ 
-    return -1; 
+  if( nf == 0 ){
+    return -1;
   }
 
   len = HDRLEN + DATALEN;
-  from = sizeof( faddr ); 
+  from = sizeof( faddr );
 
   cc = recvfrom( sock, buf, len, 0, (struct sockaddr*)&faddr, &from );
-  if( cc < 0 ){ 
+  if( cc < 0 ){
     exit( EXIT_FAILURE );
   }
 
@@ -176,7 +182,7 @@ recv_ping( struct sockaddr_in *taddr )
   /*****
   if( icp->icmp_id   != ( getpid() & 0xFFFF )){
     printf( "id: %d\n",  icp->icmp_id );
-    return 1; 
+    return 1;
   }
   *****/
 
@@ -215,13 +221,14 @@ myping( const char *hostname, int t )
   int err;
   struct sockaddr_in sa;
   struct timeval mytime;
- 
+
+  memset(&sa, 0, sizeof(struct sockaddr_in));
   ident = getpid() & 0xFFFF;
 
-  if( t == 0 ) timo = 2; 
+  if( t == 0 ) timo = 2;
   else         timo = t;
 
-  (void) gettimeofday( &mytime, (struct timezone *)NULL); 
+  (void) gettimeofday( &mytime, (struct timezone *)NULL);
   if(( err = send_ping( hostname, &sa )) < 0 ){
     return err;
   }
@@ -231,7 +238,7 @@ myping( const char *hostname, int t )
       return 0;
     }
   } while( recv_ping( &sa ));
-  close( sock ); 
+  close( sock );
 
   return 1;
 }
@@ -257,7 +264,7 @@ tpinghost( const char *hostname )
     return rrt;
   else
     return ret;
-} 
+}
 
 int
 tpingthost( const char *hostname, int t )
@@ -265,7 +272,7 @@ tpingthost( const char *hostname, int t )
   int ret;
 
   if(( ret = myping( hostname, t )) > 0 )
-    return rrt; 
+    return rrt;
   else
     return ret;
 }
