@@ -1,0 +1,28 @@
+graph G {
+	CWavDec -- CCdrDec;
+	CDevice -- CFileAndServerDevice;
+	CFileAndServerDevice -- CFileDevice;
+	CBaseDec -- CMP3Dec;
+	CBaseDec -- COggDec;
+	CStateHandler -- CPlayListEntries;
+	CMenu -- CPlayListEntries;
+	CStateHandler -- CPlayLocation;
+	CStateHandler -- CPlayPLRandom;
+	CStateHandler -- CSelectPlayList;
+	CMenu -- CSelectPlayList;
+	CFileAndServerDevice -- CServerDevice;
+	CDevice -- CVCRDevice;
+	CBaseDec -- CWavDec;
+	CPlayList -- CRadioBox [style=dotted];
+	CRCInput -- CRadioBox [style=dotted];
+	CPlayList -- CPlayListEntries [style=dotted];
+	CAudioPlayer -- CRadioBox [style=dotted];
+	CAudiofile -- CAudioPlayer [style=dotted];
+	CStateHandler -- CRadioBox [style=dotted];
+	CPlayList -- CPlayLocation [style=dotted];
+	CStateHandler -- CRadioBox [style=dotted];
+	FontsDef -- CLCD [style=dotted];
+	CPlayList -- CPlayPLRandom [style=dotted];
+	CAudioMetaData -- CAudiofile [style=dotted];
+}
+
