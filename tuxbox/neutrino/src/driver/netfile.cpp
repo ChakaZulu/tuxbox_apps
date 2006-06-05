@@ -199,8 +199,10 @@ void getOpts()
   int i;
   FILE *fd = NULL;
 
+#ifndef RADIOBOX //a not generic thing in a generic library
   /* options which can be set from within neutrino */
   enable_metadata = g_settings.audioplayer_enable_sc_metadata;
+#endif /* RADIOBOX */
 
   if (got_opts) /* prevent reading in options multiple times */
     return;
