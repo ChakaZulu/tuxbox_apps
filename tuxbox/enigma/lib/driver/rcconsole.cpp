@@ -37,8 +37,8 @@ eRCConsoleDriver::~eRCConsoleDriver()
 
 void eRCConsoleDriver::keyPressed(int)
 {
-	char data[16];
-	char *d = data;
+	unsigned char data[16];
+	unsigned char *d = data;
 	int num = read(handle, data, 16);
 	int code;
 	
