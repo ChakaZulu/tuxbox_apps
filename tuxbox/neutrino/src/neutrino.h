@@ -209,6 +209,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void SetupFonts();
 		~CNeutrinoApp();
 		const CScanSettings& getScanSettings(){ return scanSettings;};
+		CScanSettings& ScanSettings(){ return scanSettings;};
 
 		CChannelList			*channelList;
 		CNetworkConfig                  networkConfig;

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.109 2006/05/19 21:26:42 houdini Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.110 2006/06/08 20:17:57 houdini Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -270,8 +270,6 @@ void CZapitClient::zaptoNvodSubService(const int num)
 /* bouquets are numbered starting at 0 */
 void CZapitClient::getBouquets(BouquetList& bouquets, const bool emptyBouquetsToo, const bool utf_encoded)
 {
-	char buffer[30 + 1];
-
 	CZapitMessages::commandGetBouquets msg;
 
 	msg.emptyBouquetsToo = emptyBouquetsToo;
@@ -286,9 +284,8 @@ void CZapitClient::getBouquets(BouquetList& bouquets, const bool emptyBouquetsTo
 
 		if (!utf_encoded)
 		{
-			buffer[30] = (char) 0x00;
-			strncpy(buffer, response.name, 30);
-			strncpy(response.name, ZapitTools::UTF8_to_Latin1(buffer).c_str(), 30);
+			strncpy(response.name, ZapitTools::UTF8_to_Latin1(response.name).c_str(), 30);
+			response.name[29] = '\0';
 		}
 		bouquets.push_back(response);
 	}
@@ -301,7 +298,6 @@ bool CZapitClient::receive_channel_list(BouquetChannelList& channels, const bool
 {
 	CZapitMessages::responseGeneralInteger responseInteger;
 	responseGetBouquetChannels             response;
-	char                                   buffer[30 + 1];
 
 	channels.clear();
 
@@ -317,9 +313,8 @@ bool CZapitClient::receive_channel_list(BouquetChannelList& channels, const bool
 			response.nr++;
 			if (!utf_encoded)
 			{
-				buffer[30] = (char) 0x00;
-				strncpy(buffer, response.name, 30);
-				strncpy(response.name, ZapitTools::UTF8_to_Latin1(buffer).c_str(), 30);
+				strncpy(response.name, ZapitTools::UTF8_to_Latin1(response.name).c_str(), 30);
+				response.name[29] = '\0';
 			}
 			channels.push_back(response);
 		}

@@ -603,10 +603,14 @@ CMenuOptionStringChooser::CMenuOptionStringChooser(const neutrino_locale_t Optio
 	iconName    = "";
 }
 
+void CMenuOptionStringChooser::removeOptions()
+{
+	options.clear();
+}
 
 CMenuOptionStringChooser::~CMenuOptionStringChooser()
 {
-	options.clear();
+	removeOptions();
 }
 
 void CMenuOptionStringChooser::addOption(const char * const value)

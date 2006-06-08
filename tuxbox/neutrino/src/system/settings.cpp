@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.41 2006/04/01 11:20:24 barf Exp $
+        $Id: settings.cpp,v 1.42 2006/06/08 20:19:46 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -129,18 +129,19 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 	CZapitClient::commandSetScanSatelliteList sat;
 	if  (TP_scan)
 	{
-		strncpy(sat.satName, satNameNoDiseqc, 30);
-		sat.diseqc = 0;
 		for (int i = 0; i < MAX_SATELLITES; i++)
 		{
-			if (!strcmp(satName[i], satNameNoDiseqc))
-			{
-				if (satDiseqc[i] != -1)
-					sat.diseqc = satDiseqc[i];
-				break;
+			if (satDiseqc[i] != -1) {
+				sat.diseqc = satDiseqc[i];
+				strncpy(sat.satName, satName[i], 30);
+				satList.push_back(sat);
 			}
 		}
-		satList.push_back(sat);
+		if (satList.size() == 0) {
+			strncpy(sat.satName, satNameNoDiseqc, 30);
+			sat.diseqc = 0;
+			satList.push_back(sat);
+		}
 	}
 	else if  (diseqcMode == NO_DISEQC)
 	{
@@ -260,6 +261,8 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 	TP_pol = configfile.getInt32("TP_pol", 0);
 	strcpy(TP_freq, configfile.getString("TP_freq", "10100000").c_str());
 	strcpy(TP_rate, configfile.getString("TP_rate", "27500000").c_str());
+	strncpy(TP_satname, configfile.getString("TP_satname", "Astra 19.2E").c_str(), 30);
+	TP_diseqc = *diseqscOfSat(TP_satname);
 #if HAVE_DVB_API_VERSION >= 3
 	if(TP_fec == 4) TP_fec = 5;
 #endif
@@ -270,7 +273,9 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 
 bool CScanSettings::saveSettings(const char * const fileName)
 {
-	configfile.setInt32("delivery_system", delivery_system);
+	int satCount = 0;
+
+	configfile.setInt32( "delivery_system", delivery_system);
 	configfile.setInt32( "diseqcMode", diseqcMode );
 	configfile.setInt32( "diseqcRepeat", diseqcRepeat );
 	configfile.setInt32( "bouquetMode", bouquetMode );
@@ -281,7 +286,6 @@ bool CScanSettings::saveSettings(const char * const fileName)
 	{
 		char tmp[20];
 		int i;
-		int satCount = 0;
 
 		for (i = 0; i < MAX_SATELLITES; i++)
 			if (satName[i][0] != 0)
@@ -309,11 +313,30 @@ bool CScanSettings::saveSettings(const char * const fileName)
 	configfile.setInt32("TP_pol", TP_pol);
 	configfile.setString("TP_freq", TP_freq);
 	configfile.setString("TP_rate", TP_rate);
+	configfile.setString("TP_satname", TP_satname);
 
 	configfile.setInt32("scanSectionsd",scanSectionsd );
 
 	if(configfile.getModifiedFlag())
 		configfile.saveConfig(fileName);
+
+	std::vector<std::string> tmpsatNameList;
+	tmpsatNameList.clear();
+	for (int i = 0; i < satCount; i++)
+	{
+		if (0 <= satDiseqc[i])
+		{
+			tmpsatNameList.push_back(satName[i]);
+//			printf("settings: satName = %s, diseqscOfSat(%d) = %d\n", satName[i], i, satDiseqc[i]);
+		}
+	}
+	
+	TP_SatSelectMenu->removeOptions();
+	for (uint i=0; i < tmpsatNameList.size(); i++)
+	{
+		TP_SatSelectMenu->addOption(tmpsatNameList[i].c_str());
+//		printf("settings: got scanprovider (sat): %s\n", tmpsatNameList[i].c_str());
+	}
 
 	return true;
 }

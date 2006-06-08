@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.226 2006/05/22 17:48:55 mws Exp $
+//  $Id: sectionsd.cpp,v 1.227 2006/06/08 20:19:32 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1539,7 +1539,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.226 2006/05/22 17:48:55 mws Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.227 2006/06/08 20:19:32 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2523,12 +2523,22 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 	}
 }
 */
-static void sendEventList(int connfd, const unsigned char serviceTyp1, const unsigned char serviceTyp2 = 0, int sendServiceName = 1)
+
+bool channel_in_requested_list(std::vector <t_channel_id> *chidlist, t_channel_id chid)
+{
+	if (chidlist->empty()) return true;
+	for (std::vector <t_channel_id>::iterator i=chidlist->begin(); i!=chidlist->end(); i++) {
+		if (*i == chid) return true;
+	}
+	return false;
+}
+
+static void sendEventList(int connfd, const unsigned char serviceTyp1, const unsigned char serviceTyp2 = 0, int sendServiceName = 1, std::vector <t_channel_id> *chidlist = NULL)
 {
 #define MAX_SIZE_BIGEVENTLIST	128*1024
 
 	char *evtList = new char[MAX_SIZE_BIGEVENTLIST]; // 128k müssen reichen... schaut euch mal das Ergebnis für loop an, jedesmal wenn die Senderliste aufgerufen wird
-	long count=0, loop=0;
+	long count=0;
 
 	if (!evtList)
 	{
@@ -2565,7 +2575,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	for (MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); ++e)
 	{
 		uniqueNow = (*e)->get_channel_id();
-loop++;
+		if (!channel_in_requested_list(chidlist, uniqueNow)) continue;
 		if ( uniqueNow != uniqueOld )
 		{
 			found_already = true;
@@ -2593,14 +2603,17 @@ loop++;
 
 		if ( !found_already )
 		{
+			std::string eName = (*e)->getName();
+			std::string eText = (*e)->getText();
+			std::string eExtendedText = (*e)->getExtendedText();
+
 			for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); ++t)
 			{
-loop++;
 				if (t->startzeit <= azeit && azeit <= (long)(t->startzeit + t->dauer))
 				{
 					if (sendServiceName)
 					{
-						count += 13 + strlen(sname.c_str()) + 1 + strlen((*e)->getName().c_str()) + 1;
+						count += 13 + strlen(sname.c_str()) + 1 + strlen(eName.c_str()) + 1;
 						if (count < MAX_SIZE_BIGEVENTLIST) {
 							sprintf(liste, "%012llx\n", (*e)->uniqueKey());
 							liste += 13;
@@ -2608,8 +2621,8 @@ loop++;
 							liste += strlen(sname.c_str());
 							*liste = '\n';
 							liste++;
-							strcpy(liste, (*e)->getName().c_str());
-							liste += strlen((*e)->getName().c_str());
+							strcpy(liste, eName.c_str());
+							liste += strlen(eName.c_str());
 							*liste = '\n';
 							liste++;
 						} else {
@@ -2620,14 +2633,14 @@ loop++;
 					} // if sendServiceName
 					else
 					{
-						count += sizeof(event_id_t) + 4 + 4 + strlen((*e)->getName().c_str()) + 1;
-						if (((*e)->getText()).empty())
+						count += sizeof(event_id_t) + 4 + 4 + strlen(eName.c_str()) + 1;
+						if (eText.empty())
 						{
-							count += strlen((*e)->getExtendedText().substr(0, 40).c_str());
+							count += strlen(eExtendedText.substr(0, 40).c_str());
 						}
 						else
 						{
-							count += strlen((*e)->getText().c_str());
+							count += strlen(eText.c_str());
 						}
 						count++;
 
@@ -2638,18 +2651,18 @@ loop++;
 							liste += 4;
 							*((unsigned *)liste) = t->dauer;
 							liste += 4;
-							strcpy(liste, (*e)->getName().c_str());
+							strcpy(liste, eName.c_str());
 							liste += strlen(liste);
 							liste++;
 
-							if (((*e)->getText()).empty())
+							if (eText.empty())
 							{
-								strcpy(liste, (*e)->getExtendedText().substr(0, 40).c_str());
+								strcpy(liste, eExtendedText.substr(0, 40).c_str());
 								liste += strlen(liste);
 							}
 							else
 							{
-								strcpy(liste, (*e)->getText().c_str());
+								strcpy(liste, eText.c_str());
 								liste += strlen(liste);
 							}
 							liste++;
@@ -2666,7 +2679,7 @@ loop++;
 			}
 		}
 	}
-dprintf("sendEventList: out of for(;;) loop= %ld \n",loop);
+
 	if (sendServiceName && (count+1 < MAX_SIZE_BIGEVENTLIST))
 	{
 		*liste = 0;
@@ -2789,10 +2802,18 @@ static void commandEventListTV(int connfd, char* /*data*/, const unsigned /*data
 	sendEventList(connfd, 0x01, 0x04);
 }
 
-static void commandEventListTVids(int connfd, char* /*data*/, const unsigned /*dataLength*/)
+static void commandEventListTVids(int connfd, char* data, const unsigned dataLength)
 {
+	std::vector <t_channel_id> chidlist;
+
 	dputs("Request of TV event list (IDs).\n");
-	sendEventList(connfd, 0x01, 0x04, 0);
+	if (dataLength>0) {
+		t_channel_id *tmp = (t_channel_id*)data;
+		for (uint i=0; i<dataLength/sizeof(t_channel_id); i++){
+			chidlist.push_back(tmp[i]);
+		}
+	}
+	sendEventList(connfd, 0x01, 0x04, 0, &chidlist);
 }
 
 static void commandEventListRadio(int connfd, char* /*data*/, const unsigned /*dataLength*/)
@@ -2801,10 +2822,17 @@ static void commandEventListRadio(int connfd, char* /*data*/, const unsigned /*d
 	sendEventList(connfd, 0x02);
 }
 
-static void commandEventListRadioIDs(int connfd, char* /*data*/, const unsigned /*dataLength*/)
+static void commandEventListRadioIDs(int connfd, char* data, const unsigned dataLength)
 {
+	std::vector <t_channel_id> chidlist;
 	dputs("Request of radio event list (IDs).\n");
-	sendEventList(connfd, 0x02, 0, 0);
+	if (dataLength>0) {
+		t_channel_id *tmp = (t_channel_id*)data;
+		for (uint i=0; i<dataLength/sizeof(t_channel_id); i++){
+			chidlist.push_back(tmp[i]);
+		}
+	}
+	sendEventList(connfd, 0x02, 0, 0, &chidlist);
 }
 
 static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
@@ -6528,7 +6556,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.226 2006/05/22 17:48:55 mws Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.227 2006/06/08 20:19:32 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 

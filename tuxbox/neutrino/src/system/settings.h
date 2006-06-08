@@ -38,6 +38,9 @@
 
 #include <string>
 
+// Houdini: dirty Hack to update menu settings
+#include "gui/widget/menue.h"
+
 struct SNeutrinoSettings
 {
 	//video
@@ -408,6 +411,9 @@ class CScanSettings
 	int		TP_pol;
 	char		TP_freq[9];
 	char		TP_rate[9];
+	char		TP_satname[30];
+	int		TP_diseqc;
+	CMenuOptionStringChooser* TP_SatSelectMenu;
 
 	CScanSettings();
 

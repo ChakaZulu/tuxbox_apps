@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.388 2006/05/19 21:26:42 houdini Exp $
+ * $Id: zapit.cpp,v 1.389 2006/06/08 20:17:58 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1368,29 +1368,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_SCAN_TP:
 	{
 		TP_params TP;
+		t_channel_id save_channel;
+		
+		if (!channel) break; // otherwise zapit dies
+		// save channel info
+		save_channel = channel->getChannelID();
 		CBasicServer::receive_data(connfd, &TP, sizeof(TP));
-		transponder_list_t::iterator transponder = transponders.find(channel->getTransponderId());
-		if(!(TP.feparams.frequency > 0) && channel)
-		 {
-
-			TP.feparams.frequency = transponder->second.feparams.frequency;
-			TP.feparams.u.qpsk.symbol_rate = transponder->second.feparams.u.qpsk.symbol_rate;
-			TP.feparams.u.qpsk.fec_inner = transponder->second.feparams.u.qpsk.fec_inner;
-			TP.polarization = transponder->second.polarization;
-		}
-		if(scanProviders.size()>0)
-			scanProviders.clear();
-			
-			std::map<string, t_satellite_position>::iterator spos_it;
-			for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
-			{
-				if(spos_it->second == channel->getSatellitePosition())
-				{
-					scanProviders[transponder->second.DiSEqC] = spos_it->first.c_str();
-				}
-			}
-			channel = 0;
-		TP.diseqc=transponder->second.DiSEqC;
+// Houdini: now configured/send by neutrino!
+//		TP.diseqc=transponder->second.DiSEqC;
 		bouquetManager->clearAll();
 		allchans.clear();  // <- this invalidates all bouquets, too!
 		stopPlayBack();
@@ -1401,6 +1386,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		prepare_channels(frontend->getInfo()->type, diseqcType);
 		DBG("channels reinit ok");
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
+		// restore channel
+		// todo zap to restored channel
+//		channel = bouquetManager->findChannelByChannelID(save_channel);
+//		zapTo_ChannelID(save_channel, false);
+				
 		break;
 	}
 
@@ -2395,7 +2385,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.388 2006/05/19 21:26:42 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.389 2006/06/08 20:17:58 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

@@ -69,7 +69,7 @@ CScanTs::CScanTs()
 	xpos1 = x + 10;
 	found_transponder = 0;
 }
-#define get_set CNeutrinoApp::getInstance()->getScanSettings()
+#define get_set (CNeutrinoApp::getInstance()->getScanSettings())
 #define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
 int CScanTs::exec(CMenuTarget* parent, const std::string &)
 {
@@ -93,6 +93,7 @@ if(get_set.TP_scan)
 	TP.feparams.u.qpsk.symbol_rate = atoi(get_set.TP_rate);
 	TP.feparams.u.qpsk.fec_inner = (fe_code_rate_t) get_set.TP_fec;
 	TP.polarization = get_set.TP_pol;
+	TP.diseqc = (uint8_t)get_set.TP_diseqc;
 
 // printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.frequency, TP.feparams.u.qpsk.symbol_rate, TP.feparams.u.qpsk.fec_inner, TP.polarization);
 #endif
