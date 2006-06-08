@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.52 2006/04/13 11:10:44 yjogol Exp $
+	$Id: request.cpp,v 1.53 2006/06/08 08:28:20 barf Exp $
 
 	License: GPL
 
@@ -600,7 +600,7 @@ void CWebserverRequest::Send500Error(void)
 
 void CWebserverRequest::SendPlainHeader(std::string contenttype)
 {
-	SocketWrite("HTTP/1.0 200 OK\r\nContent-Type: " + contenttype + "; charset: utf-8\r\n\r\n");
+	SocketWrite("HTTP/1.1 200 OK\r\nContent-Type: " + contenttype + "; charset: utf-8\r\nCache-Control: no-cache\r\n\r\n");
 	HttpStatus = 200;
 }
 
