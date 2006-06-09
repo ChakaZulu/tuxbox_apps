@@ -148,6 +148,7 @@ class CControldClient:private CBasicClient
 
 		*/
 		void setScartMode(bool);
+		char getScartMode();
 
 
 		/*

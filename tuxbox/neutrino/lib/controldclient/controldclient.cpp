@@ -87,6 +87,16 @@ void CControldClient::setScartMode(bool mode)
 	close_connection();
 }
 
+char CControldClient::getScartMode()
+{
+	CControldMsg::responseScartMode rmsg;
+	send(CControldMsg::CMD_GETSCARTMODE);
+	receive_data((char*)&rmsg, sizeof(rmsg));
+	close_connection();
+
+	return rmsg.mode;
+}
+
 void CControldClient::setVolume(const char volume, const CControld::volume_type volume_type)
 {
 	CControldMsg::commandVolume msg2;
