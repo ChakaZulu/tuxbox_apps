@@ -1050,8 +1050,11 @@ ucodecheck.ucode UCode
 ucodes.failure Achtung, die µCodes wurden NICHT gefunden!\n\nBitte per FTP (oder DBox-BootManager)\nuploaden, und die DBox neu starten!
 videomenu.csync Sync.-Korrektur
 videomenu.head Video-Einstellungen
+videomenu.osd OSD
 videomenu.rgb_centering RGB-Zentrierung
-videomenu.screensetup Bildbereich einstellen
+videomenu.screensetup OSD-Bereich einstellen
+videomenu.tv-scart TV Scart
+videomenu.vcr-scart VCR Scart
 videomenu.vcrsignal VCR-Ausgang Signalart
 videomenu.vcrsignal_composite CVBS
 videomenu.vcrsignal_svideo S-Video
