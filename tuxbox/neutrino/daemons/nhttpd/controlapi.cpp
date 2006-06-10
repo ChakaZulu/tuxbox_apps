@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.66 2006/03/29 15:31:55 yjogol Exp $
+	$Id: controlapi.cpp,v 1.67 2006/06/10 11:13:56 barf Exp $
 
 	License: GPL
 
@@ -49,6 +49,13 @@
 #include "lcdapi.h"
 #include "debug.h"
 
+#define EVENTDEV "/dev/input/event0"
+enum {	// not defined in input.h but used like that, at least in 2.4.22
+	KEY_RELEASED = 0,
+	KEY_PRESSED,
+	KEY_AUTOREPEAT
+};
+
 std::map<std::string, std::string> iso639;
 
 bool initialize_iso639_map(void)
@@ -87,10 +94,40 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 	unsigned int operation = 0;
 	const char *operations[] =
 	{
-		"timer","setmode","standby","getdate","gettime","settings","getservicesxml",
-		"getbouquetsxml","getonidsid","message","info","shutdown","volume",
-		"channellist","getbouquet","getbouquets","epg","version","zapto", "startplugin",
-		"getmode","exec","system","rc","lcd","yweb","reboot",NULL
+	  "timer",   		// 0
+	  "setmode", 		// 1
+	  "standby", 		// 2
+	  "getdate", 		// 3
+	  "gettime", 		// 4
+	  "settings", 		// 5
+	  "getservicesxml", 	// 6
+	  "getbouquetsxml", 	// 7
+	  "getonidsid", 	// 8
+	  "message", 		// 9
+	  "info", 		// 10
+	  "shutdown", 		// 11
+	  "volume", 		// 12
+	  "channellist", 	// 13
+	  "getbouquet", 	// 14
+	  "getbouquets", 	// 15
+	  "epg", 		// 16
+	  "version", 		// 17
+	  "zapto", 		// 18
+	  "startplugin", 	// 19
+	  "getmode", 		// 20
+	  "exec", 		// 21
+	  "system", 		// 22
+	  "rc", 		// 23
+	  "lcd", 		// 24
+	  "yweb", 		// 25
+	  "reboot", 		// 26
+	  "rcem", 		// 27
+	  "aspectratio",	// 28
+	  "videoformat",	// 29
+	  "videooutput",	// 30
+	  "vcroutput",		// 31
+	  "scartmode",		// 32
+	  NULL
 	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
@@ -183,6 +220,18 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 	        return YWebCGI(request);
 	case 26:
 		return RebootCGI(request);
+	case 27:
+		return RCEmCGI(request);
+	case 28:
+		return AspectRatioCGI(request);
+	case 29:
+		return VideoFormatCGI(request);
+	case 30:
+		return VideoOutputCGI(request);
+	case 31:
+		return VCROutputCGI(request);
+	case 32:
+		return ScartModeCGI(request);
 	default:
 		request->SendError();
 		return false;
@@ -655,6 +704,348 @@ bool CControlAPI::RebootCGI(CWebserverRequest *request)
 
 //-------------------------------------------------------------------------
 
+int CControlAPI::rc_send(int ev, unsigned int code, unsigned int value) {
+	struct input_event iev;
+	iev.type=EV_KEY;
+	iev.code=code;
+	iev.value=value;
+	return write(ev,&iev,sizeof(iev));
+}
+
+struct key {
+	char *name;
+	int code;
+};
+
+
+#ifndef KEY_TOPLEFT
+#define KEY_TOPLEFT	0x1a2
+#endif
+
+#ifndef KEY_TOPRIGHT
+#define KEY_TOPRIGHT	0x1a3
+#endif
+
+#ifndef KEY_BOTTOMLEFT
+#define KEY_BOTTOMLEFT	0x1a4
+#endif
+
+#ifndef KEY_BOTTOMRIGHT
+#define KEY_BOTTOMRIGHT	0x1a5
+#endif
+
+static const struct key keynames[] = {
+  {"KEY_0",		KEY_0},
+  {"KEY_1",		KEY_1},
+  {"KEY_2",		KEY_2},
+  {"KEY_3",		KEY_3},
+  {"KEY_4",		KEY_4},
+  {"KEY_5",		KEY_5},
+  {"KEY_6",		KEY_6},
+  {"KEY_7",		KEY_7},
+  {"KEY_8",		KEY_8},
+  {"KEY_9",		KEY_9},
+  {"KEY_BACKSPACE",	KEY_BACKSPACE},
+  {"KEY_HOME",		KEY_HOME},
+  {"KEY_UP",		KEY_UP},
+  {"KEY_PAGEUP",	KEY_PAGEUP},
+  {"KEY_LEFT",		KEY_LEFT},
+  {"KEY_RIGHT",		KEY_RIGHT},
+  {"KEY_DOWN",		KEY_DOWN},
+  {"KEY_PAGEDOWN",	KEY_PAGEDOWN},
+  {"KEY_MUTE",		KEY_MUTE},
+  {"KEY_VOLUMEDOWN",	KEY_VOLUMEDOWN},
+  {"KEY_VOLUMEUP",	KEY_VOLUMEUP},
+  {"KEY_POWER",		KEY_POWER},
+  {"KEY_HELP",		KEY_HELP},
+  {"KEY_SETUP",		KEY_SETUP},
+  {"KEY_OK",		KEY_OK},
+  {"KEY_RED",		KEY_RED},
+  {"KEY_GREEN",		KEY_GREEN},
+  {"KEY_YELLOW",	KEY_YELLOW},
+  {"KEY_BLUE",		KEY_BLUE},
+  {"KEY_TOPLEFT",	KEY_TOPLEFT},
+  {"KEY_TOPRIGHT",	KEY_TOPRIGHT},
+  {"KEY_BOTTOMLEFT",	KEY_BOTTOMLEFT},
+  {"KEY_BOTTOMRIGHT",	KEY_BOTTOMRIGHT},
+
+  //////////////// Keys on the IR Keyboard
+  {"KEY_ESC",		KEY_ESC},
+
+  {"KEY_MINUS",		KEY_MINUS},
+  {"KEY_EQUAL",		KEY_EQUAL},
+  {"KEY_TAB",		KEY_TAB},
+  {"KEY_Q",		KEY_Q},
+  {"KEY_W",		KEY_W},
+  {"KEY_E",		KEY_E},
+  {"KEY_R",		KEY_R},
+  {"KEY_T",		KEY_T},
+  {"KEY_Y",		KEY_Y},
+  {"KEY_U",		KEY_U},
+  {"KEY_I",		KEY_I},
+  {"KEY_O",		KEY_O},
+  {"KEY_P",		KEY_P},
+  {"KEY_LEFTBRACE",	KEY_LEFTBRACE},
+  {"KEY_RIGHTBRACE",	KEY_RIGHTBRACE},
+  {"KEY_ENTER",		KEY_ENTER},
+  {"KEY_LEFTCTRL",	KEY_LEFTCTRL},
+  {"KEY_A",		KEY_A},
+  {"KEY_S",		KEY_S},
+  {"KEY_D",		KEY_D},
+  {"KEY_F",		KEY_F},
+  {"KEY_G",		KEY_G},
+  {"KEY_H",		KEY_H},
+  {"KEY_J",		KEY_J},
+  {"KEY_K",		KEY_K},
+  {"KEY_L",		KEY_L},
+  {"KEY_SEMICOLON",	KEY_SEMICOLON},
+  {"KEY_APOSTROPHE",	KEY_APOSTROPHE},
+  {"KEY_GRAVE",		KEY_GRAVE},
+  {"KEY_LEFTSHIFT",	KEY_LEFTSHIFT},
+  {"KEY_BACKSLASH",	KEY_BACKSLASH},
+  {"KEY_Z",		KEY_Z},
+  {"KEY_X",		KEY_X},
+  {"KEY_C",		KEY_C},
+  {"KEY_V",		KEY_V},
+  {"KEY_B",		KEY_B},
+  {"KEY_N",		KEY_N},
+  {"KEY_M",		KEY_M},
+  {"KEY_COMMA",		KEY_COMMA},
+  {"KEY_DOT",		KEY_DOT},
+  {"KEY_SLASH",		KEY_SLASH},
+  {"KEY_RIGHTSHIFT",	KEY_RIGHTSHIFT},
+  {"KEY_KPASTERISK",	KEY_KPASTERISK},
+  {"KEY_LEFTALT",	KEY_LEFTALT},
+  {"KEY_SPACE",		KEY_SPACE},
+  {"KEY_CAPSLOCK",	KEY_CAPSLOCK},
+  {"KEY_F1",		KEY_F1},
+  {"KEY_F2",		KEY_F2},
+  {"KEY_F3",		KEY_F3},
+  {"KEY_F4",		KEY_F4},
+  {"KEY_F5",		KEY_F5},
+  {"KEY_F6",		KEY_F6},
+  {"KEY_F7",		KEY_F7},
+  {"KEY_F8",		KEY_F8},
+  {"KEY_F9",		KEY_F9},
+  {"KEY_F10",		KEY_F10},
+  {"KEY_NUMLOCK",	KEY_NUMLOCK},
+  {"KEY_SCROLLLOCK",	KEY_SCROLLLOCK},
+  {"KEY_KP7",		KEY_KP7},
+  {"KEY_KP8",		KEY_KP8},
+  {"KEY_KP9",		KEY_KP9},
+  {"KEY_KPMINUS",	KEY_KPMINUS},
+  {"KEY_KP4",		KEY_KP4},
+  {"KEY_KP5",		KEY_KP5},
+  {"KEY_KP6",		KEY_KP6},
+  {"KEY_KPPLUS",	KEY_KPPLUS},
+  {"KEY_KP1",		KEY_KP1},
+  {"KEY_KP2",		KEY_KP2},
+  {"KEY_KP3",		KEY_KP3},
+  {"KEY_KP0",		KEY_KP0},
+  {"KEY_KPDOT",		KEY_KPDOT},
+  {"KEY_102ND",		KEY_102ND},
+  {"KEY_KPENTER",	KEY_KPENTER},
+  {"KEY_KPSLASH",	KEY_KPSLASH},
+  {"KEY_SYSRQ",		KEY_SYSRQ},
+  {"KEY_RIGHTALT",	KEY_RIGHTALT},
+  {"KEY_END",		KEY_END},
+  {"KEY_INSERT",	KEY_INSERT},
+  {"KEY_DELETE",	KEY_DELETE},
+
+  {"KEY_PAUSE",		KEY_PAUSE},
+
+  {"KEY_LEFTMETA",	KEY_LEFTMETA},
+  {"KEY_RIGHTMETA",	KEY_RIGHTMETA},
+
+  {"BTN_LEFT",		BTN_LEFT},
+  {"BTN_RIGHT",		BTN_RIGHT}
+};
+
+// The code here is based on rcsim. Thx Carjay!
+bool CControlAPI::RCEmCGI(CWebserverRequest *request)
+{
+  request->SendPlainHeader("text/plain");
+  if (request->ParameterList.empty()) {
+    request->SendError();
+    return false;
+  }
+  std::string keyname = request->ParameterList["1"];
+  int sendcode = -1;
+  for (unsigned int i = 0; sendcode == -1 && i < sizeof(keynames)/sizeof(key); i++) {
+    if (!strcmp(keyname.c_str(), keynames[i].name))
+      sendcode = keynames[i].code;
+  }
+  
+  if (sendcode == -1) {
+    printf("[nhttpd] Key %s not found\n", keyname.c_str());
+    request->SendError();
+    return false;
+  }
+  unsigned int repeat = 1;
+  unsigned int delay = 250;
+  if (request->ParameterList["delay"] != "")
+    delay = atoi(request->ParameterList["delay"].c_str());
+  if (request->ParameterList["duration"] != "")
+    repeat = atoi(request->ParameterList["duration"].c_str())*1000/delay;
+  if (request->ParameterList["repeat"] != "")
+    repeat = atoi(request->ParameterList["repeat"].c_str());
+
+  int evd = open(EVENTDEV, O_RDWR);
+  if (evd < 0) {
+    perror("opening event0 failed");
+    return false;
+  }
+  if (rc_send(evd, sendcode, KEY_PRESSED) < 0){
+    perror("writing 'KEY_PRESSED' event failed");
+    close(evd);
+    return false;
+  }
+  for (unsigned int i = 0; i < repeat - 1; i++) {
+    usleep(delay*1000);
+    if (rc_send(evd, sendcode, KEY_AUTOREPEAT) < 0){
+      perror("writing 'KEY_AUTOREPEAT' event failed");
+      close(evd);
+      return false;
+    }
+  }
+   
+  if (rc_send(evd, sendcode, KEY_RELEASED)<0){
+    perror("writing 'KEY_RELEASED' event failed");
+    close(evd);
+    return false;
+  }
+  close(evd);
+  request->SendOk();
+  return true;
+}
+
+//-------------------------------------------------------------------------
+
+bool CControlAPI::AspectRatioCGI(CWebserverRequest *request)
+{
+	request->SendPlainHeader("text/plain");
+	request->printf("%s", Parent->Controld->getAspectRatio() == '\0' ? "4:3" : "16:9");
+	return true;
+}
+
+//-------------------------------------------------------------------------
+
+bool CControlAPI::VideoFormatCGI(CWebserverRequest *request)
+{
+	request->SendPlainHeader("text/plain");
+	if (request->ParameterList.empty() || request->ParameterList["1"] == "status") {
+	  	request->SocketWriteLn(Parent->videoformat_names[(unsigned int)Parent->Controld->getVideoFormat()]);
+		return true;
+	}
+
+	int new_video_format = -1;
+	if (request->ParameterList["1"] == "automatic")
+		new_video_format = CControldClient::VIDEOFORMAT_AUTO;
+	else if (request->ParameterList["1"] == "16:9")
+		new_video_format = CControldClient::VIDEOFORMAT_16_9;
+	else if (request->ParameterList["1"] == "4:3"
+		 || request->ParameterList["1"] == "4:3-LB")
+		new_video_format = CControldClient::VIDEOFORMAT_4_3;
+	else if (request->ParameterList["1"] == "4:3-PS")
+		new_video_format = CControldClient::VIDEOFORMAT_4_3_PS;
+
+	if (new_video_format != -1) {
+		Parent->Controld->setVideoFormat(new_video_format);
+		request->SendOk();
+		return true;
+	} else {
+		request->SendError();
+		return false;
+	}
+}
+
+//-------------------------------------------------------------------------
+
+bool CControlAPI::VideoOutputCGI(CWebserverRequest *request)
+{
+	request->SendPlainHeader("text/plain");
+	unsigned int videooutput;
+	if (request->ParameterList.empty() || request->ParameterList["1"] == "status") {
+		request->SocketWriteLn(Parent->videooutput_names[(unsigned int) Parent->Controld->getVideoOutput()]);
+		return true;
+	} else if (request->ParameterList["1"] == "cvbs")
+		videooutput = CControldClient::VIDEOOUTPUT_COMPOSITE;
+	else if (request->ParameterList["1"] == "rgb")
+		videooutput = CControldClient::VIDEOOUTPUT_RGB;
+	else if (request->ParameterList["1"] == "s-video")
+		videooutput = CControldClient::VIDEOOUTPUT_SVIDEO;
+	else if (request->ParameterList["1"] == "yuv-vbs")
+		videooutput = CControldClient::VIDEOOUTPUT_YUV_VBS;
+	else if (request->ParameterList["1"] == "yuv-cvbs")
+		videooutput = CControldClient::VIDEOOUTPUT_YUV_CVBS;
+	else {
+		request->SendError();
+		return false;
+	}
+	
+	Parent->Controld->setVideoOutput(videooutput);
+	request->SendOk();
+
+	return true;
+}
+
+//-------------------------------------------------------------------------
+
+bool CControlAPI::VCROutputCGI(CWebserverRequest *request)
+{
+	request->SendPlainHeader("text/plain");
+	unsigned int vcroutput;
+	if (request->ParameterList.empty() || request->ParameterList["1"] == "status") {
+		request->SocketWriteLn(Parent->videooutput_names[(unsigned char)Parent->Controld->getVCROutput()]);
+
+		return true;
+	} else if (request->ParameterList["1"] == "cvbs")
+		vcroutput = CControldClient::VIDEOOUTPUT_COMPOSITE;
+	else if (request->ParameterList["1"] == "s-video")
+		vcroutput = CControldClient::VIDEOOUTPUT_SVIDEO;
+	else {
+		request->SendError();
+		return false;
+	}
+
+	// S-Video on VCR only possible when S-Video or CVBS on TV; enforce
+	if (vcroutput == CControldClient::VIDEOOUTPUT_SVIDEO 
+	    && (Parent->Controld->getVideoOutput() != CControldClient::VIDEOOUTPUT_COMPOSITE) 
+	    && (Parent->Controld->getVideoOutput() != CControldClient::VIDEOOUTPUT_SVIDEO)) {
+		request->SendError();
+		return false;
+	}
+	Parent->Controld->setVCROutput(vcroutput);
+	request->SendOk();
+
+	return true;
+}
+
+//-------------------------------------------------------------------------
+
+bool CControlAPI::ScartModeCGI(CWebserverRequest *request)
+{
+	request->SendPlainHeader("text/plain");
+	bool new_status;
+	if (request->ParameterList.empty() || request->ParameterList["1"] == "status") {
+		request->printf(Parent->Controld->getScartMode() ? "on" : "off");
+		return true;
+	} else if (request->ParameterList["1"] == "on")
+		new_status = true;
+	else if (request->ParameterList["1"] == "off")
+		new_status = false;
+	else {
+		request->SendError();
+		return false;
+	}
+
+	Parent->Controld->setScartMode(new_status);
+	request->SendOk();
+
+	return true;
+}
+
+//-------------------------------------------------------------------------
 bool CControlAPI::VolumeCGI(CWebserverRequest *request)
 {
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
@@ -916,7 +1307,6 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 bool CControlAPI::VersionCGI(CWebserverRequest *request)
 {
 	// aktuelle cramfs version ausgeben
-	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	request->SendFile("/",".version");
 	return true;
 }

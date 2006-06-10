@@ -2,36 +2,49 @@ nhttpd /control api doku
 ------------------------
 
 
-Der Neutrino HTTP-Server laeuft auf Port 80.
-Die Steuerfunktionen fuer externe Programme sind unter dem Context /control/ oder /cgi-bin/ zu finden. 
-Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
+Der Neutrino HTTP-Server laeuft auf Port 80.  Die Steuerfunktionen
+fuer externe Programme sind unter dem Context /control/ oder /cgi-bin/
+zu finden.  
+
+Erste Version von derdirch@web.de oder Dirch in #dbox2
 
 1. Die Kanalliste           		http://dbox/control/channellist
 2. EPG-Abfrage              		http://dbox/control/epg
 3. Die DBox herunterfahren      	http://dbox/control/shutdown
 4. Standby Mode             		http://dbox/control/standby
-5. Lautstaerke-Steuerung            http://dbox/control/volume
-6. Programm umschalten / Playback   http://dbox/control/zapto
+5. Lautstaerke-Steuerung		http://dbox/control/volume
+6. Programm umschalten / Playback	http://dbox/control/zapto
 7. Radio/TV, Record Mode        	http://dbox/control/setmode
 8. Radio/TV Mode Abfrage        	http://dbox/control/getmode
-9. Datum von der Box abfragen       http://dbox/control/getdate
-10. Uhrzeit von der Box abfragen    http://dbox/control/gettime
-11. Allgemeine Informationen        http://dbox/control/info
-12. Aktuellen Kanal abfragen        http://dbox/control/getonidsid
+9. Datum von der Box abfragen		http://dbox/control/getdate
+10. Uhrzeit von der Box abfragen	http://dbox/control/gettime
+11. Allgemeine Informationen		http://dbox/control/info
+12. Aktuellen Kanal abfragen		http://dbox/control/getonidsid
 13. services.xml lesen          	http://dbox/control/getservicesxml
 14. bouquets.xml auslesen       	http://dbox/control/getbouquetsxml
 15. Bouquetlist abfragen        	http://dbox/control/getbouquets
 16. Bouquet abfragen            	http://dbox/control/getbouquet
 17. Fenster in neutrino         	http://dbox/control/message
 18. Timerd Interface            	http://dbox/control/timer
-19. LCD-Interace					http://dbox/control/lcd
-20. Shellscript ausführen           http://dbox/cgi-bin/exec
-21. System-/Treiberfunktionen       http://dbox/control/system
-22. Fernbedienung                   http://dbox/control/rc
-23. Die DBox neu starten	    http://dbox/control/reboot
-**********************************************************************************************
+19. LCD-Interace			http://dbox/control/lcd
+20. Shellscript ausführen           	http://dbox/cgi-bin/exec
+21. System-/Treiberfunktionen       	http://dbox/control/system
+22. Fernbedienung                   	http://dbox/control/rc
+23. Die DBox neu starten	    	http://dbox/control/reboot
+24. Einige Einstellungen lesen		http://dbox/control/settings
+25. Die /.versions-File lesen		http://dbox/control/version
+26. Plugin ausführen			http://dbox/control/startplugin
+27. Support für yweb			http://dbox/control/yweb
+28. Aspektratio lesen			http://dbox/control/aspectratio
+29. Videoformat lesen/setzen		http://dbox/control/videoformat
+30. Videooutput lesen/setzen		http://dbox/control/videooutput
+31. VCR-output lesen/setzen		http://dbox/control/vcroutput
+32. Scartmode lesen/setzen		http://dbox/control/scartmode
+33. Fernbedienungstasten emulieren	http://dbox/control/rcem
+
+*****************************************************************************
 1. Die Kanalliste
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/channellist
 
 Parameter: keine
@@ -59,17 +72,18 @@ Beispiel:
 
 
 
-**********************************************************************************************
+*****************************************************************************
 2. EPG-Abfrage
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/epg
 
 Parameter: keine
 Rueckgabe:
 
-Es werden alle verfuegbaren EPG's aller Programme, zur aktuellen Zeit zurueckgegeben.
-Jede Zeile wird von einem Enter (\n) von der Naechsten getrennt.
-Eine Zeile enthaelt die Information ueber die aktuell laufende Sendung.
+Es werden alle verfuegbaren EPG's aller Programme, zur aktuellen Zeit
+zurueckgegeben.  Jede Zeile wird von einem Enter (\n) von der
+Naechsten getrennt.  Eine Zeile enthaelt die Information ueber die
+aktuell laufende Sendung.
 
 Rueckgabe-Format: channel_id EVENTID Titel der Sendung
 
@@ -90,8 +104,10 @@ Beispiel:
 Parameter: channel_id (64 bit, hexadezimal)
 Rueckgabe:
 
-Als Rueckgabe wird die Eventliste des durch die channel_id identifizierten Senders gesendet, d.h. eine Liste, welche Filme auf diesem Sender kommen.
-Jede Zeile wird von einem Enter (\n) von der Naechsten getrennt.
+Als Rueckgabe wird die Eventliste des durch die channel_id
+identifizierten Senders gesendet, d.h. eine Liste, welche Filme auf
+diesem Sender kommen.  Jede Zeile wird von einem Enter (\n) von der
+Naechsten getrennt.
 
 Rueckgabe-Format: EVENTID Startzeit Dauer Titel der Sendung
 
@@ -110,8 +126,10 @@ Beispiel:
 Parameter: id=channel_id
 Rueckgabe:
 
-Als Rueckgabe wird die Eventliste des durch die channel_id identifizierten Senders gesendet, das heisst eine Liste, was fuer Filme auf einem Sender kommen.
-Jeder Datensatz wird von einem EnterEnter (\n\n) vom  Naechsten getrennt.
+Als Rueckgabe wird die Eventliste des durch die channel_id
+identifizierten Senders gesendet, das heisst eine Liste, was fuer
+Filme auf einem Sender kommen.  Jeder Datensatz wird von einem
+EnterEnter (\n\n) vom Naechsten getrennt.
 
 Rueckgabe-Format: 
 EVENTID Startzeit DURATION
@@ -127,18 +145,28 @@ Beispiel:
 6143198520 1067754600 1800
 Daten der Woche
 Moderation: Andrea Müller
-Themen:Š* Kandidatenkür: Maas wird SpitzenkandidatŠ* Aufsteiger: Auszeichnung für ScheerŠ* Dikussion: Längere Arbeitszeiten; dazu ein Interview mit Christian Scholz, WirtschaftswissenschaftlerŠ* Ladenschluss: Öffnungszeiten am Sonntag
+Themen: Kandidatenkür: Maas wird Spitzenkandidat
+Aufsteiger: Auszeichnung für Scheer Dikussion: Längere
+Arbeitszeiten; dazu ein Interview mit Christian Scholz,
+Wirtschaftswissenschaftler Ladenschluss: Öffnungszeiten am
+Sonntag 
 
 6143198521 1067756400 1800
 Abendschau
-Themen:Š* Protestmarsch "Es reicht"Š* Vorabdruck: Harry PotterŠ* Militär-MusikfestŠAbendschauNewsŠ* Ermittlungen gegen Michael Krausz   Š* Bahnunfall am AlexanderplatzŠ* Aubis Urteil
+Themen: Protestmarsch "Es reicht" Vorabdruck: Harry
+Potter Militär-MusikfestŠAbendschauNews Ermittlungen
+gegen Michael Krausz    Bahnunfall am Alexanderplatz Aubis
+Urteil
 
 
 Parameter: eventid=EVENTID
 Rückgabe:
 
-Es wird die ausführliche Beschreibung eines Films zurückgegeben. Diese besteht aus einem Titel, einer allgemeinen Info und der Beschreibung.
-Titel Info und Beschreibung derwen mit einem Enter (\n) vonneinander getrennt. Es muss beachtet werden, dass in der Beschreibung weitere Enter vorkommen können.
+Es wird die ausführliche Beschreibung eines Films
+zurückgegeben. Diese besteht aus einem Titel, einer allgemeinen
+Info und der Beschreibung.  Titel Info und Beschreibung derwen mit
+einem Enter (\n) vonneinander getrennt. Es muss beachtet werden, dass
+in der Beschreibung weitere Enter vorkommen können.
 
 Rückgabe-Format:
        Titel
@@ -156,9 +184,10 @@ blablabla
 Parameter: ext
 Rueckgabe:
 
-Es werden alle verfuegbaren EPG's aller Programme, zur aktuellen Zeit zurueckgegeben.
-Jede Zeile wird von einem Enter (\n) von der Naechsten getrennt.
-Eine Zeile enthaelt die Information ueber die aktuell laufende Sendung.
+Es werden alle verfuegbaren EPG's aller Programme, zur aktuellen Zeit
+zurueckgegeben.  Jede Zeile wird von einem Enter (\n) von der
+Naechsten getrennt.  Eine Zeile enthaelt die Information ueber die
+aktuell laufende Sendung.
 
 Rueckgabe-Format: channel_id Startzeit Dauer EVENTID Titel der Sendung
 
@@ -172,15 +201,16 @@ Beispiel:
 
 
 
-**********************************************************************************************
+*****************************************************************************
 3. Die DBox herunterfahren
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/shutdown
 
 Parameter: keine
 Rückgabe:
 
-Es wird der Text ok bei Erfolg oder error im Fehlerfall zurückgegeben. Die Dbox schaltet sich bei ok sofort ab.
+Es wird der Text ok bei Erfolg oder error im Fehlerfall
+zurückgegeben. Die Dbox schaltet sich bei ok sofort ab.
 
 Rückgabe-Format: ok / error
 
@@ -194,9 +224,9 @@ ok
 
 
 
-**********************************************************************************************
+*****************************************************************************
 4. Standby Mode 
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/standby
 
 Parameter: on
@@ -225,15 +255,16 @@ ok
 
 
 
-**********************************************************************************************
+*****************************************************************************
 5. Lautstärke-Steuerung
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/volume
 
 Parameter: keine
 Rückgabe:
 
-Es wird die aktuell eingestellte Lautstärke zurückgegeben - die Werte bewegen sich zwischen 0 (leise) und 100 (laut).
+Es wird die aktuell eingestellte Lautstärke zurückgegeben - die
+Werte bewegen sich zwischen 0 (leise) und 100 (laut).
 
 Rückgabe-Format: Lautstärke
 
@@ -248,7 +279,9 @@ Beispiel:
 Parameter: <Lautstärke als ganze Zahl in 5er Schritten>
 Rückgabe:
 
-Es kann die Lautstärke eingestellt werden - die Werte müssen sich zwischen 0 (leise) und 100 (laut) bewegen. Es sollten nur Werte in 5er-Schritten gesetzt werden (5,10,...).
+Es kann die Lautstärke eingestellt werden - die Werte müssen
+sich zwischen 0 (leise) und 100 (laut) bewegen. Es sollten nur Werte
+in 5er-Schritten gesetzt werden (5,10,...). 
 
 Rückgabe-Format: ok / error
 
@@ -263,7 +296,8 @@ ok
 Parameter: mute
 Rückgabe:
 
-Die Audio-Ausgabe wird abgeschaltet. Es kommt als Bestätigung der String mute zurück.
+Die Audio-Ausgabe wird abgeschaltet. Es kommt als Bestätigung der
+String mute zurück.
 
 Rückgabe-Format: ok
 
@@ -278,7 +312,8 @@ mute
 Parameter: unmute
 Rückgabe:
 
-Die Audio-Ausgabe wird wieder eingeschaltet. Es kommt als Bestätigung der String unmute zurück.
+Die Audio-Ausgabe wird wieder eingeschaltet. Es kommt als
+Bestätigung der String unmute zurück.
 
 Rückgabe-Format: ok
 
@@ -309,15 +344,16 @@ Beispiel:
 
 
 
-**********************************************************************************************
+*****************************************************************************
 6. Programm umschalten
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/zapto
 
 Parameter: keine
 Rueckgabe:
 
-Es wird die channel_id (hex-value, 64 bit, kein 0x-prefix) des aktuell laufenden Senders zurueckgegeben.
+Es wird die channel_id (hex-value, 64 bit, kein 0x-prefix) des aktuell
+laufenden Senders zurueckgegeben.
 
 Beispiel:
 
@@ -330,7 +366,8 @@ Beispiel:
 Parameter: getpids
 Rückgabe:
 
-Es werden die VPID und die APID des laufenden Senders angezeigt. Die beiden Werte sind durch ein Enter voneinander getrennt.
+Es werden die VPID und die APID des laufenden Senders angezeigt. Die
+beiden Werte sind durch ein Enter voneinander getrennt.
 
 Rückgabe-Format:
        VPID
@@ -345,8 +382,10 @@ Beispiel:
 Parameter: getallpids
 Rückgabe:
 
-Es werden die VTXT PID, VPID und alle APIDs des laufenden Senders angezeigt. Die Werte sind durch ein Enter voneinander getrennt.
-Hinter jeder APID wird eine kurze Beschreibung angegeben, bei AC3 Streams zusätzlich (AC3).
+Es werden die VTXT PID, VPID und alle APIDs des laufenden Senders
+angezeigt. Die Werte sind durch ein Enter voneinander getrennt.
+Hinter jeder APID wird eine kurze Beschreibung angegeben, bei AC3
+Streams zusätzlich (AC3).
 
 Rückgabe-Format:
        VPID
@@ -374,7 +413,8 @@ oder
 
 Parameter: stopplayback
 Rückgabe:
-Stoppt die Decodierung um Graben zu können. Zusätzlich wird der Sectionsd gestoppt. Rückgabewert sollte ok für Erfolg sein.
+Stoppt die Decodierung um Graben zu können. Zusätzlich wird der
+Sectionsd gestoppt. Rückgabewert sollte ok für Erfolg sein.
 
 Rückgabe-Format: ok / error
 
@@ -388,7 +428,8 @@ ok
 
 Parameter: startplayback
 Rückgabe:
-Startet die Decodierung nach dem Graben wieder, Sectionsd wird auch wieder gestartet. Rückgabewert sollte ok für Erfolg sein.
+Startet die Decodierung nach dem Graben wieder, Sectionsd wird auch
+wieder gestartet. Rückgabewert sollte ok für Erfolg sein.
 
 Rückgabe-Format: ok
 
@@ -428,7 +469,8 @@ ok
 
 Parameter: startsectionsd
 Rückgabe:
-Startet Sectionsd nach dem Graben wieder. Rückgabewert sollte ok für Erfolg sein.
+Startet Sectionsd nach dem Graben wieder. Rückgabewert sollte ok
+für Erfolg sein.
 
 Rückgabe-Format: ok
 
@@ -481,9 +523,9 @@ Beispiel:
 ok  
 
 
-**********************************************************************************************
+*****************************************************************************
 7. Radio/TV, Record Mode
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/setmode
 
 Parameter: status
@@ -528,10 +570,9 @@ ok
 Parameter: record
 Rückgabe:
 
-Schaltet in den record mode
-Dies beinhaltet auch das stoppen, bzw, das starten des sectionsd scanning,
-das starten des playbacks(immer) und stoppen des playbacks 
-(nur bei stopplayback=true).
+Schaltet in den record mode.  Dies beinhaltet auch das stoppen, bzw,
+das starten des sectionsd scanning, das starten des playbacks(immer)
+und stoppen des playbacks (nur bei stopplayback=true).
 
 Rückgabe-Format: ok / error
 
@@ -547,9 +588,9 @@ ok
 ok
 
 
-**********************************************************************************************
+*****************************************************************************
 8. Radio/TV Mode Abfrage
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/getmode
 
 Parameter: 
@@ -563,9 +604,9 @@ Beispiel:
 tv
 
 
-**********************************************************************************************
+*****************************************************************************
 9. Datum von der Box abfragen
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/getdate
 
 Parameter: keine
@@ -582,9 +623,9 @@ Beispiel:
  
  
 
-**********************************************************************************************
+*****************************************************************************
 10. Zeit von der Box abfragen
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/gettime
 
 Parameter: keine
@@ -612,9 +653,9 @@ Beispiel:
 >>>http://dbox/control/gettime?rawtime
 1046804654
 
-**********************************************************************************************
+*****************************************************************************
 11. Allgemeine Informationen abfragen
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/info
 
 Parameter: streaminfo
@@ -638,7 +679,7 @@ joint stereo
 Parameter: version
 Rückgabe:
 
-Aktuelle cramf - Version. Es wird der Inhalt der Datei /.version zurückgegeben. 
+Es wird der Inhalt der Datei /.version zurückgegeben. 
 
 Beispiel:
 
@@ -682,9 +723,9 @@ Beispiel:
 >>>http://dbox/control/info?nhttpd_version
 2.2.1
 
-**********************************************************************************************
+*****************************************************************************
 12. Aktuellen Kanal abfragen
-*********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/getonidsid 
 
 Parameter: 
@@ -692,7 +733,8 @@ Rueckgabe:
 
 Es wird die TSIDONIDSID des aktuellen Kanals zurueckgegeben.
 
-Diese Funktion sollte NICHT mehr verwendet werden und ist durch folgenden Aufruf ersetzt:
+Diese Funktion sollte NICHT mehr verwendet werden und ist durch
+folgenden Aufruf ersetzt:
 http://dbox/control/zapto
 
 Rueckgabe-Format: TSIDONIDSID
@@ -706,15 +748,16 @@ Beispiel:
 
 
 
-**********************************************************************************************
+*****************************************************************************
 13. services.xml lesen
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/getservicesxml
 
 Parameter: 
 Rückgabe:
 
-Es wird der Inhalt der Datei /var/tuxbox/config/zapit/services.xml zurückgegeben.
+Es wird der Inhalt der Datei /var/tuxbox/config/zapit/services.xml
+zurückgegeben.
 
 
 Beispiel:
@@ -731,15 +774,16 @@ Beispiel:
 
 
 
-**********************************************************************************************
+*****************************************************************************
 14. bouquets.xml auslesen
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/getbouquetsxml
 
 Parameter: 
 Rückgabe:
 
-Es wird der Inhalt der Datei /var/tuxbox/config/zapit/bouquet.xml zurückgegeben.
+Es wird der Inhalt der Datei /var/tuxbox/config/zapit/bouquet.xml
+zurückgegeben.
 
 
 Beispiel:
@@ -754,9 +798,9 @@ Beispiel:
 
 
 
-**********************************************************************************************
+*****************************************************************************
 15. Bouquetlist abfragen
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/getbouquets
 
 Parameter: 
@@ -775,16 +819,18 @@ Beispiel:
 
 
 
-**********************************************************************************************
+*****************************************************************************
 16. Bouquet abfragen
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/getbouquet
 
-Parameter: bouquet=Bouquet Nr. und mode=TV|RADIO oder actual und und mode=TV|RADIO
+Parameter: bouquet=Bouquet Nr. und mode=TV|RADIO oder actual und
+mode=TV|RADIO
 Rueckgabe:
 
-Es werden alle Sender des Bouquets zurueckgeliefert
-Wird actual mit angegeben, dann wird das Bouquet genommen, welches den aktuellen Sender als erstes enthält.
+Es werden alle Sender des Bouquets zurueckgeliefert.  Wird actual mit
+angegeben, dann wird das Bouquet genommen, welches den aktuellen
+Sender als erstes enthält.  
 Nummer_des_Kanals channel_id Name_des_Senders
 
 Beispiel:
@@ -798,9 +844,9 @@ Beispiel:
 
 
 
-**********************************************************************************************
+*****************************************************************************
 17. Open popup window
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/message
 
 Parameter: popup=text or nmsg=text
@@ -809,8 +855,10 @@ Return value: ok
 
 Character encoding: UTF-8, spaces must be transmitted using %20
 
-Neutrino opens a pop up (popup) or message (nmsg) window in which the text part of the parameter is displayed.
-A pop up window closes itself after a few seconds whereas a message window must be closed using the remote control.
+Neutrino opens a pop up (popup) or message (nmsg) window in which the
+text part of the parameter is displayed.  A pop up window closes
+itself after a few seconds whereas a message window must be closed
+using the remote control.
 
 
 Examples:
@@ -824,14 +872,16 @@ opens a message window on the TV screen with content "Hello World"
 
 Setting up UTF-8 for KDE Konqueror users:
 -----------------------------------------
-Use "Settings -> Web Shortcuts -> Add" to add an additional search provider - for example:
+Use "Settings -> Web Shortcuts -> Add" to add an additional search
+provider - for example: 
 - Search Provider Name: DBox Popup
 - Search URI: http://dbox/control/message?popup=\{@}
 - URI shortcut: dbox
 - Charset: UTF-8
 Accept the addition.
  
-Now you can simply time your popup messages in the location bar by preceeding the text with "dbox: ", like in:
+Now you can simply time your popup messages in the location bar by
+preceeding the text with "dbox: ", like in: 
 dbox: Hello ä ö ü Ä Ö Ü ß World
 
 
@@ -840,9 +890,9 @@ UTF-8 help sponsored by google:
 http://www.google.com/search?q=%C3%A4%20%C3%B6%20%C3%BC%20%C3%84%20%C3%96%20%C3%9C%20%C3%9F&ie=UTF-8&oe=UTF-8
 
 
-**********************************************************************************************
+*****************************************************************************
 17. Popup-Fenster oeffnen
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/message
 
 Parameter: popup=Text oder nmsg=Text
@@ -851,8 +901,10 @@ Rückgabewert: ok
 
 Zeichensatz: UTF-8, Leerzeichen muessen als %20 gesendet werden
 
-Neutrino oeffnet ein Popup(popup)- oder Message(nmsg)-Fenster, in dem der Text des Parameters dargestellt wird. 
-Ein Popupfenster schliesst sich nach wenigen Sekunden selbst, wohingegen ein Message-Fenster mit der Fernbedienung geschlossen werden muss.
+Neutrino oeffnet ein Popup(popup)- oder Message(nmsg)-Fenster, in dem
+der Text des Parameters dargestellt wird.  Ein Popupfenster schliesst
+sich nach wenigen Sekunden selbst, wohingegen ein Message-Fenster mit
+der Fernbedienung geschlossen werden muss.
 
 Beispiele:
 ----------
@@ -865,13 +917,15 @@ Beispiele:
 
 KDE Konqueror Benutzer koennen folgendes Verfahren benutzen:
 ------------------------------------------------------------
-Mit Hilfe von "Settings -> Web Shortcuts -> Add" einen neuen Search Provider hinzufuegen. z.B.:
+Mit Hilfe von "Settings -> Web Shortcuts -> Add" einen neuen Search
+Provider hinzufuegen. z.B.:
 - Search Provider Name: DBox Popup
 - Search URI: http://dbox/control/message?popup=\{@}
 - URI shortcut: dbox
 - Charset: UTF-8
  
-Nun kann eine Popup Message direkt in die Location Bar eingegeben werden, wenn man ein "dbox: " davor setzt. Beispiel:
+Nun kann eine Popup Message direkt in die Location Bar eingegeben
+werden, wenn man ein "dbox: " davor setzt. Beispiel:
 dbox: Hallo ä ö ü Ä Ö Ü ß World
 
 
@@ -882,9 +936,9 @@ http://www.google.com/search?q=%C3%A4%20%C3%B6%20%C3%BC%20%C3%84%20%C3%96%20%C3%
 
 
 
-**********************************************************************************************
+*****************************************************************************
 18. Timerd Interface
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/timer
 
 Parameter: 
@@ -892,7 +946,8 @@ Rückgabe:
 
 Zeigt die Liste aller Timer
 
-Rückgabe-Format: eventID eventType eventRepeat repcount announceTime alarmTime stopTime data
+Rückgabe-Format: 
+eventID eventType eventRepeat repcount announceTime alarmTime stopTime data
 
 eventID ist der timer-Platz.
 eventType ist die Art des timers, die kann sein:
@@ -919,8 +974,10 @@ eventRepeat ist die Angabe der timerwiderholung, die kann sein:
 5 = MONTHLY (Monatlich)
 6 = BYEVENTDESCRIPTION (noch nicht implementiert)
 
-Es gibt auch noch eine Möglichkeit WEEKDAYS also auch wochentage festzulegen wo die aufname statfinden soll.
-dies wird über einen Bitschlüssel angegeben der Bit 9-15 für die Wochentage ansieht. das heist:
+Es gibt auch noch eine Möglichkeit WEEKDAYS also auch wochentage
+festzulegen wo die aufname statfinden soll.  dies wird über einen
+Bitschlüssel angegeben der Bit 9-15 für die Wochentage
+ansieht. das heist:
 
 0000000100000000 = 256    = Montag
 0000001000000000 = 512    = Dinstag
@@ -941,12 +998,14 @@ Dem zuvolge ist Montag+Mittwoch+Samstag
 Siehe dazu auch
 http://cvs.berlios.de/cgi-bin/viewcvs.cgi/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdtypes.h?rev=1.10&content-type=text/vnd.viewcvs-markup
 
-repcount bestimmt die Anzahl der Timeraufrufe, nach der der Timer automatisch gelöscht wird. 0 bedeutet, dass es keine Beschränkung gibt.
-Bei eventRepeat=ONCE hat diese Einstellung keine Auswirkungen. 
+repcount bestimmt die Anzahl der Timeraufrufe, nach der der Timer
+automatisch gelöscht wird. 0 bedeutet, dass es keine
+Beschränkung gibt.  Bei eventRepeat=ONCE hat diese Einstellung
+keine Auswirkungen.
 
-announceTime ist die Zeit an der die Warnung for den timer auf den Bildschirm erscheint. siehe auch Kapittel 16: popup.
-alarmTime ist die Zeit des Timer-Starts
-stopTime ist die Stopzeit für den Timer
+announceTime ist die Zeit an der die Warnung for den timer auf den
+Bildschirm erscheint. siehe auch Kapittel 16: popup.  alarmTime ist
+die Zeit des Timer-Starts stopTime ist die Stopzeit für den Timer
 data ist der Name des Senders.
 
 Beispiel:
@@ -954,24 +1013,29 @@ Beispiel:
 >>>http://dbox/control/timer
 1 1 1 4 1034309516 1034309576 1034284376 555089
 
-d.h. event 1, SHUTDOWN, DAILY, nach 4 Timerausführungen wird der Timer gelöscht, announcezeit, alarm/startzeit, stopzeit, kanal/daten
-die zeiten sind time_t (Unix Zeitstempel)
+d.h. event 1, SHUTDOWN, DAILY, nach 4 Timerausführungen wird der
+Timer gelöscht, announcezeit, alarm/startzeit, stopzeit,
+kanal/daten die zeiten sind time_t (Unix Zeitstempel)
 
 
 
-Parameter: action,[id],<alarm|ad,amo,ay,ah,ami|alDate,alTime>,<stop|sd,smo,sy,sh,smi|[stDate],stTime>,announce,type,rep,repcount,channel_id,msg,rs, [update]
-Rückgabe: ok / error
+Parameter:
+action,[id],<alarm|ad,amo,ay,ah,ami|alDate,alTime>,<stop|sd,smo,sy,sh,smi|[stDate],stTime>,announce,type,rep,repcount,channel_id,msg,rs,
+[update] Rückgabe: ok / error
 
 announce, type, rep und repcount analog zum oben.
 type: Default ist RECORD
 rep: Default ist 0
 repcount: Default ist 0
 
-action kann entweder new oder modify sein. Bei modify mus noch ein Parameter id angegeben werden um festzulegen welcher Timer modifizirt wird. 
+action kann entweder new oder modify sein. Bei modify mus noch ein
+Parameter id angegeben werden um festzulegen welcher Timer modifizirt
+wird.
 
 Zeitangabe:
 Variante 1)
-Angabe im time_t Format (nur für action=new): announce, alarm und stop mit einer time_t Zeit 
+Angabe im time_t Format (nur für action=new): announce, alarm und
+stop mit einer time_t Zeit
 
 Variante 2)
 Angabe in Parametern : 
@@ -991,17 +1055,19 @@ stTime = Uhrzeit Ende, Format HH.MM
 
 channel_id ist die Kennung des Senders (als Hexadezimalzahl ohne '0x'-Prefix).
 alternativ kann der Sendername direkt angegeben werden:
-channel_name = Sendername (muss URI codiert sein, also Leerzeichen mit "%20" ersetzen)
+channel_name = Sendername (muss URI codiert sein, also Leerzeichen mit
+"%20" ersetzen)
 
 msg ist die Message die bei REMIND gesendet wird
 
-Ist der Parameter "rs" auf "1" gesetzt, so wird bei Aufnahmetimern, die in Neutrino konfigurierte 
-"Aufnahmestart/stop-Korrektur" berücksichtigt
+Ist der Parameter "rs" auf "1" gesetzt, so wird bei Aufnahmetimern,
+die in Neutrino konfigurierte "Aufnahmestart/stop-Korrektur"
+berücksichtigt
 
 rec_dir kann einen Aufnahmepfad enthalten (er muss URI-codiert sein).
 
-update=1 bei action=new löscht einen ggf. vorhandenen Timer mit gleicher Startzeit vor dem Hinzufügen.
-siehe dazu auch:
+update=1 bei action=new löscht einen ggf. vorhandenen Timer mit
+gleicher Startzeit vor dem Hinzufügen.  siehe dazu auch:
 http://cvs.berlios.de/cgi-bin/viewcvs.cgi/tuxbox/apps/tuxbox/neutrino/daemons/nhttpd/webapi.cpp?rev=HEAD&content-type=text/vnd.viewcvs-markup
 
 Rueckgabe-Format: ok / error
@@ -1013,12 +1079,13 @@ ok
 >>>http://dbox/control/timer?action=new&alDate=24.01.2006&alTime=20.00&stTime=20.15&channel_name=Das%20Erste&update=1
 ok
 
-**********************************************************************************************
+*****************************************************************************
 19. LCD Interface
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/lcd
 
-Parameter: lock, clear, png, raw, line, rect, xpos, ypos, size, font, color, text, update
+Parameter: 
+lock, clear, png, raw, line, rect, xpos, ypos, size, font, color, text, update
 Rückgabe: ok /error
 
 Ansteuerung des LCD-Interfaces über das Web-Interface
@@ -1029,39 +1096,56 @@ Folgende Parameter werden dabei unterstützt:
               n=0 -> das Display wird wieder für Neutrino freigegeben
            
   clear=n   : n=1 -> das Display wird gelöscht (sollte ganz vorn stehen)
-              n=0 -> das Display wird vor der neuen Ausgabe nicht gelöscht (kann entfallen)
+              n=0 -> das Display wird vor der neuen Ausgabe nicht
+              gelöscht (kann entfallen) 
               
-  png=Dateiname : eine lokal auf der Box liegende PNG-Datei wird in's Display geladen
-                  (z.B. /share/tuxbox/lcdd/icons/setup.png als Hintergrund)
+  png=Dateiname : eine lokal auf der Box liegende PNG-Datei wird in's
+                  Display geladen
+                  (z.B. /share/tuxbox/lcdd/icons/setup.png als
+                  Hintergrund)
                               
-  raw=x,y,xs,ys,d1,..,dn : überträgt die Daten d1 bis dn an die Position (x,y) im Display mit
-                           xs Spalten und ys Zeilen. Die Daten werden dezimal übertragen. Je-
-                           der Wert repräsentiert dabei 8 Punkte innerhalb einer Zeile. Das
-                           höchstwertige Bit entspricht dem Pixel ganz links. Sollen in einer 
-                           Zeile 9 Pixel geschrieben werden, sind dafür zwei Datenwerte nötig, 
-                           auch wenn die restlichen 7 Bit des zweiten Wertes nicht verwendet 
-                           werden. Die Werte werden zeilenweise hintereinandergeschrieben.
-                           Für ein Rechteck von 8 Zeilen zu 9 Pixeln sind also 16 Werte erfor-
-                           derlich, beginnend mit dem Wert für die 8 Pixel ganz links oben, ge-
-                           folgt von dem Wert für das letzte Pixel der obersten Zeile (mit einem
-                           Wert von 128 wenn es gesetzt werden soll), dann der Wert für die ers-
-                           ten 8 Pixel der zweiten Zeile usw.
+  raw=x,y,xs,ys,d1,..,dn : überträgt die Daten d1 bis dn an die
+                           Position (x,y) im Display mit xs Spalten
+                           und ys Zeilen. Die Daten werden dezimal
+                           übertragen. Jeder Wert repräsentiert
+                           dabei 8 Punkte innerhalb einer Zeile. Das
+                           höchstwertige Bit entspricht dem Pixel
+                           ganz links. Sollen in einer Zeile 9 Pixel
+                           geschrieben werden, sind dafür zwei
+                           Datenwerte nötig, auch wenn die
+                           restlichen 7 Bit des zweiten Wertes nicht
+                           verwendet werden. Die Werte werden
+                           zeilenweise hintereinandergeschrieben. Für ein
+                           Rechteck von 8 Zeilen zu 9 Pixeln sind also
+                           16 Werte erforderlich, beginnend mit dem
+                           Wert für die 8 Pixel ganz links oben,
+                           gefolgt von dem Wert für das letzte
+                           Pixel der obersten Zeile (mit einem 
+                           Wert von 128 wenn es gesetzt werden soll),
+                           dann der Wert für die ersten 8 Pixel der
+                           zweiten Zeile usw.
                               
-  line=x1,y1,x2,y2,col : zeichnet eine Linie von (x1,y1) nach (x2,y2) mit der Farbe col
-                         col=0 -> aus, col=1 -> leuchtend, col=2 -> invertierend
+  line=x1,y1,x2,y2,col : zeichnet eine Linie von (x1,y1) nach (x2,y2)
+                         mit der Farbe col col=0 -> aus, col=1 ->
+                         leuchtend, col=2 -> invertierend
                          
-  rect=x1,y1,x2,y2,col1,col2: zeichnet ein Rechteck mit der linken oberen Ecke (x1,y1) und der
-                              rechten unteren Ecke (x2,y2), der Rahmenfarbe col1 welches mit
-                              der Farbe col2 ausgefüllt wird (Farben siehe "line")
+  rect=x1,y1,x2,y2,col1,col2: zeichnet ein Rechteck mit der linken
+                              oberen Ecke (x1,y1) und der rechten
+                              unteren Ecke (x2,y2), der Rahmenfarbe
+                              col1 welches mit der Farbe col2
+                              ausgefüllt wird (Farben siehe "line") 
                               
-  update=1  : an dieser Stelle wird das Display upgedatet. Somit kann man zunächst einige Aus-
-              gaben machen und dann erst alles zusammen updaten. Somit wird ein Flackern des
-              Displays verhindert. Sequenzen ohne diesen Parameter haben auf die Anzeige also
-              zunächst erst mal keine Auswirkung.
+  update=1  : an dieser Stelle wird das Display upgedatet. Somit kann
+              man zunächst einige Ausgaben machen und dann erst
+              alles zusammen updaten. Somit wird ein Flackern des
+              Displays verhindert. Sequenzen ohne diesen Parameter
+              haben auf die Anzeige also zunächst erst mal keine
+              Auswirkung.
 
 Die folgenden Parameter betreffen nur die Textausgabe
 
-  text=     : Auszugebender Text in UTF-8 Format (Leerzeichen = %20, Zeilenumbruch = %0A usw.)
+  text=     : Auszugebender Text in UTF-8 Format (Leerzeichen = %20,
+  Zeilenumbruch = %0A usw.)
   
   xpos=nn   : Position des ersten Zeichens horizontal (default 10)
   
@@ -1076,15 +1160,18 @@ Die folgenden Parameter betreffen nur die Textausgabe
               
 Hinweise:             
 ----------------------------------
-Innerhalb eines Aufrufes können mehrere Kommandos gleichzeitig angegeben werden. Allerdings müs-
-sen sie von unterschiedlichem Typ sein. Bei z.B. zwei rect-Parametern innerhalb eines Aufrufes
-wird der zweite Parameter ignoriert. Abgearbeitet werden die Kommandos in der Reihenfolge:
-lock, clear, png, raw, line, rect, xpos, ypos, size, color, font, text, update.
-Der Parameter lock ist erforderlich, da ohne Sperrung das Displays für Neutrino die über den 
-nhttpd gemachten Ausgaben auf dem Display spätestens nach einer Sekunde durch das zyklische 
-Update von Neutrino wieder überschrieben werden würden. Daher ist bei der ersten Ausgabe lock=1 
-zu setzen. Wird das Display nicht mehr benötigt, muß lock=0 gesetzt werden, damit Neutrino wieder 
-Zugriff auf das LCD erhält.
+Innerhalb eines Aufrufes können mehrere Kommandos gleichzeitig
+angegeben werden. Allerdings müssen sie von unterschiedlichem Typ
+sein. Bei z.B. zwei rect-Parametern innerhalb eines Aufrufes wird der
+zweite Parameter ignoriert. Abgearbeitet werden die Kommandos in der
+Reihenfolge: lock, clear, png, raw, line, rect, xpos, ypos, size,
+color, font, text, update.  Der Parameter lock ist erforderlich, da
+ohne Sperrung das Displays für Neutrino die über den nhttpd
+gemachten Ausgaben auf dem Display spätestens nach einer Sekunde
+durch das zyklische Update von Neutrino wieder überschrieben werden
+würden. Daher ist bei der ersten Ausgabe lock=1 zu setzen. Wird das
+Display nicht mehr benötigt, muß lock=0 gesetzt werden, damit
+Neutrino wieder Zugriff auf das LCD erhält.
 
 Beispiel:             
 ----------------------------------
@@ -1098,9 +1185,9 @@ um das Display wieder freizugeben, sollte zum Schluß
 
 ausgeführt werden.
 
-**********************************************************************************************
+*****************************************************************************
 20. Shellscript ausführen
-**********************************************************************************************
+*****************************************************************************
 
 Handler: http://dbox/cgi-bin/exec
 
@@ -1110,15 +1197,15 @@ Rückgabe: Ausgabe des Scripts
 Führt das Shellscript aus und liefert die Ausgabe an den Client zurück
 Beispiel:
 
-buli.sh gibt einen RSS-Feed zurück, der vom Newsticker angezeigt wird. In newsticker.list
-muss dann der Aufruf folgendermassen aussehen:
+buli.sh gibt einen RSS-Feed zurück, der vom Newsticker angezeigt
+wird. In newsticker.list muss dann der Aufruf folgendermassen aussehen:
 
 http://dbox/cgi-bin/exec?buli
 
 
-**********************************************************************************************
+*****************************************************************************
 21. System-/Treiberfunktionen
-**********************************************************************************************
+*****************************************************************************
 
 Handler: http://dbox/control/system
 
@@ -1178,9 +1265,9 @@ Aktiviert den SPTS-Modus
 http://dbox/control/system?setAViAExtPlayBack=spts
 ok
 
-**********************************************************************************************
+*****************************************************************************
 21. Fernbedienung
-**********************************************************************************************
+*****************************************************************************
 
 Handler: http://dbox/control/rc
 
@@ -1204,15 +1291,16 @@ Beispiel:
 http://dbox/control/rc?unlock
 ok
 
-**********************************************************************************************
+*****************************************************************************
 23. Die DBox neu starten
-**********************************************************************************************
+*****************************************************************************
 Handler: http://dbox/control/reboot
 
 Parameter: keine
 Rückgabe:
 
-Es wird der Text ok bei Erfolg oder error im Fehlerfall zurückgegeben. Die Dbox startet sich bei ok sofort neu.
+Es wird der Text ok bei Erfolg oder error im Fehlerfall
+zurückgegeben. Die Dbox startet sich bei ok sofort neu.
 
 Rückgabe-Format: ok / error
 
@@ -1221,3 +1309,143 @@ Beispiel:
 >>>http://dbox/control/reboot
 ok
  
+*****************************************************************************
+24. Einige Einstellungen lesen
+*****************************************************************************
+Handler: http://dbox/control/settings
+
+Parameter: keine
+Rückgabe: Text mit einer Beschreibung des Boxenherstellers,
+Videooutputs und Videoformats.
+
+
+*****************************************************************************
+25. Die /.versions-File lesen
+*****************************************************************************
+Handler: http://dbox/control/version
+
+Parameter: keine
+Rückgabe: Die Datei /.version wird ausgegeben.
+
+Die gleiche Funktionalität bietet http://dbox/control/info?version.
+
+*****************************************************************************
+26. Plugin ausführen
+*****************************************************************************
+Handler: http://dbox/control/startplugin
+
+Parameter: name=<pluginname>
+Rückgabe: ok/error
+
+Das Plugin mit dem Name <pluginname> wird gestartet.
+
+Beispiel:
+
+>>>http://dbox/control/startplugin?name=tuxtxt
+ok
+*****************************************************************************
+27. Support für yweb
+*****************************************************************************
+Handler: http://dbox/control/yweb
+
+Parameter: 
+Rückgabe:
+
+Supportfunktionen für yweb. Es wird empfohlen, diese nicht
+ausserhalb von yweb zu benutzen.
+
+*****************************************************************************
+28. Aspektratio lesen
+*****************************************************************************
+Handler: http://dbox/control/aspectratio
+
+Parameter: keine
+Rückgabe: 4:3/16:9
+
+
+*****************************************************************************
+29. Videoformat lesen/setzen
+*****************************************************************************
+Handler: http://dbox/control/videoformat
+
+Parameter: keine/status
+Rückgabe: automatic/4:3 (LB)/4:3 (PS)/16:9
+
+Parameter: automatic/4:3-LB/4:3-PS/16:9
+Rückgabe: ok
+
+Setzt aktuelles Videoformat.
+
+
+*****************************************************************************
+30. Videooutput lesen/setzen
+*****************************************************************************
+Handler: http://dbox/control/videooutput
+
+Parameter: keine/status
+Rückgabe: CVBS/RGB with CVBS/S-Video/YUV with VBS/YUV with CVBS
+
+Parameter: cvbs/rgb/s-video/yuv-vbs/yuv-cvbs
+Rückgabe: ok
+
+Setzt Videooutputtyp. 
+
+
+*****************************************************************************
+31. VCR-output lesen/setzen
+*****************************************************************************
+Handler: http://dbox/control/vcroutput
+
+Parameter: keine/status
+Rückgabe: CVBS/S-Video
+
+Parameter: cvbs/s-video
+Rückgabe: ok/error
+
+Setzt VCRoutputtyp. S-Video ist möglich nur bei Videooutput CVBS
+und S-Video.
+
+*****************************************************************************
+32. Scartmode lesen/setzen
+*****************************************************************************
+Handler: http://dbox/control/scartmode
+
+Parameter: keine/status
+Rückgabe: on/off
+
+Parameter: on/off
+Rückgabe: ok
+
+Schaltet Scartmode ein oder aus.
+
+*****************************************************************************
+33. Fernbedienungstasten emulieren
+*****************************************************************************
+Handler: http://dbox/control/rcem
+
+Parameter: <keyname>, repeat=<n> (default 1), delay=<delaytime> (default 250)
+Rückgabe: ok
+
+Die Taste mit dem Name <keyname> wird emuliert. Als <keyname> wird
+alle existierende Tasten, auch Tastaturtasten. Es wird <n>
+Tastendrucken geschickt, mit einem Verzögerung von <delaytime>
+dazwischen. In Detail: Erstmals wird ein KEY_PRESSED Event geschickt,
+danach, <n> - 1 KEY_AUTOREPEAT Events mit Delay <delaytime>
+millisekunden dazwischen, danach ein KEY_RELEASED Event.
+
+Parameter: <keyname>, duration=<time>, delay=<delaytime> (default 250)
+Rückgabe: ok
+
+Äquivalent zu der erste Form, mit repeat =
+<time>*1000/<delaytime>. Dies entspricht in wesentlichen die Taste
+<keyname> für <delaytime> sekunden zu senden. Dies ist die Semantik
+von den Argumenten des Programms rcsim. 
+
+Beispiel:
+>>>http://dbox/control/rcem?KEY_HELP
+ok
+
+>>>http://dbox/control/rcem?KEY_UP?repeat=4?delay=300
+ok
+
+

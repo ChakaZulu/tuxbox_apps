@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.15 2005/12/10 10:49:21 barf Exp $
+        $Id: controlapi.h,v 1.16 2006/06/10 11:13:56 barf Exp $
 
         License: GPL
 
@@ -36,6 +36,9 @@ const char * getISO639Description(const char * const iso);
 
 class CControlAPI
 {
+	private:
+		int rc_send(int ev, unsigned int code, unsigned int value);
+
 	protected:
 		CWebDbox * Parent;
 
@@ -81,6 +84,12 @@ class CControlAPI
 		bool LCDAction(CWebserverRequest *request);
 		bool YWebCGI(CWebserverRequest *request);
 		bool RebootCGI(CWebserverRequest *request);
+		bool RCEmCGI(CWebserverRequest *request);
+		bool AspectRatioCGI(CWebserverRequest *request);
+		bool VideoFormatCGI(CWebserverRequest *request);
+		bool VideoOutputCGI(CWebserverRequest *request);
+		bool VCROutputCGI(CWebserverRequest *request);
+		bool ScartModeCGI(CWebserverRequest *request);
 	public:
 		static const unsigned int PLUGIN_DIR_COUNT = 5;
 		std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT];
