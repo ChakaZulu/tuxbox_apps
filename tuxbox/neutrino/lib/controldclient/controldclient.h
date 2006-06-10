@@ -52,6 +52,7 @@ class CControldClient:private CBasicClient
 		static const char VIDEOFORMAT_AUTO = 0;
 		static const char VIDEOFORMAT_16_9 = 1;
 		static const char VIDEOFORMAT_4_3  = 2;
+		static const char VIDEOFORMAT_4_3_PS = 3;
 
 		//VideoOutput
 		static const char VIDEOOUTPUT_COMPOSITE = 0;
