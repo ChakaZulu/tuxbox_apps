@@ -668,7 +668,10 @@ void routeVideo() {
 
   switchvalue v2 = settings.vcroutput == CControld::FORMAT_SVIDEO ? vcr_switches.svideo : vcr_switches.cvbs;
 
-  switchvalue fblk = vcr ? f.fblk : (settings.videooutput == CControld::FORMAT_RGB) ? 1 : 0;
+  switchvalue fblk = 
+    videoOutputDisabled ? 0 
+    : vcr ? f.fblk
+    : (settings.videooutput == CControld::FORMAT_RGB) ? 1 : 0;
 
   routeVideo(v1, f.a1, v2, f.a2, v3, f.a3, fblk);
 }
@@ -1103,7 +1106,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.120 2006/06/09 18:14:47 barf Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.121 2006/06/11 12:18:17 barf Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
