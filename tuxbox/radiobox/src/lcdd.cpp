@@ -230,13 +230,13 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 
 	if ((fd = open("/dev/dbox/fp0", O_RDWR)) == -1)
 	{
-		perror("[lcdd] open '/dev/dbox/fp0' failed");
+		perror("[rb lcdd] open '/dev/dbox/fp0' failed");
 	}
 	else
 	{
 		if (ioctl(fd, FP_IOCTL_LCD_DIMM, &dimm) < 0)
 		{
-			perror("[lcdd] set dimm failed!");
+			perror("[rbx lcdd] set dimm failed!");
 		}
 
 		close(fd);
@@ -244,23 +244,23 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 	
 	if ((fd = open("/dev/dbox/lcd0", O_RDWR)) == -1)
 	{
-		perror("[lcdd] open '/dev/dbox/lcd0' failed");
+		perror("[rbx lcdd] open '/dev/dbox/lcd0' failed");
 	}
 	else
 	{
 		if (ioctl(fd, LCD_IOCTL_SRV, &contrast) < 0)
 		{
-			perror("[lcdd] set contrast failed!");
+			perror("[rbx lcdd] set contrast failed!");
 		}
 
 		if (ioctl(fd, LCD_IOCTL_ON, &power) < 0)
 		{
-			perror("[lcdd] set power failed!");
+			perror("[rbx lcdd] set power failed!");
 		}
 
 		if (ioctl(fd, LCD_IOCTL_REVERSE, &inverse) < 0)
 		{
-			perror("[lcdd] set invert failed!");
+			perror("[rbx lcdd] set invert failed!");
 		}
 
 		close(fd);
@@ -696,13 +696,13 @@ void CLCD::setAutoDimm(int autodimm)
 
 	if ((fd = open("/dev/dbox/fp0", O_RDWR)) == -1)
 	{
-		perror("[lcdd] open '/dev/dbox/fp0' failed");
+		perror("[rbx lcdd] open '/dev/dbox/fp0' failed");
 	}
 	else
 	{
 		if( ioctl(fd, FP_IOCTL_LCD_AUTODIMM, &autodimm) < 0 )
 		{
-			perror("[lcdd] set autodimm failed!");
+			perror("[rbx lcdd] set autodimm failed!");
 		}
 
 		close(fd);

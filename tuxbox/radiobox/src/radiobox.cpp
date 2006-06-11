@@ -199,12 +199,16 @@ void CRadioBox::ReadKeys()
 void CRadioBox::ReadFromLircd()
 {
 	if( -1 == lircd ) return;
+
+//	std::cout << "read from LIRCD :" << std::endl;
 		
 	fd_set		read_sock;
 	struct 		timeval	tv;
 	int 		rc = 0;
 
 	key = NOKEY;
+
+//	std::cout << "read data from lircd" << std::endl;
 
 	tv.tv_sec	= 0;
 	tv.tv_usec	= 0;
@@ -216,17 +220,22 @@ void CRadioBox::ReadFromLircd()
 
 	if( 0 == rc )
 	{
+//		std::cout << "read from LIRCD 2:" << std::endl;
 		return; // nothing  to read from lircd
 	}
+
+//	std::cout << "read from LIRCD 0:" << std::endl;
 
 	if( -1 == rc )
 	{
 		//something wrong, don't read from lircd anymore
+//		std::cout << "read from LIRCD 1:" << std::endl;
 		close( lircd );
 		lircd = -1;
 		return;
 	}
 	
+
 	std::string	instring;
 	char		buffer[128];
 
@@ -268,9 +277,6 @@ void CRadioBox::ReadFromLircd()
 
 //	Parse strings
 
-	int i = 0;
-	int cursor = 0;
-	int part = 0;
 	std::string::size_type	start = 0;
 	std::string::size_type	end = 0;
 
@@ -350,120 +356,73 @@ void CRadioBox::OpenLircd()
 
 CRadioBox::KEYS CRadioBox::TranslateKey( std::string _key )
 {
-	if( _key == "POWER" )
-		return POWER;
-	else
-	if( _key == "OPEN" )
-		return OPEN;
-	else
-	if( _key == "MENU" )
-		return MENU;
-	else
-	if( _key == "TITLE" )
-		return TITLE;
-	else
-	if( _key == "DISPLAY" )
-		return DISPLAY;
-	else
-	if( _key == "SELECT" )
-		return SELECT;
-	else
-	if( _key == "ZOOM" )
-		return ZOOM;
-	else
-	if( _key == "RETURN" )
-		return RETURN;
-	else
-	if( _key == "UP" )
-		return UP;
-	else
-	if( _key == "LEFT" )
-		return LEFT;
-	else
-	if( _key == "RIGHT" )
-		return RIGHT;
-	else
-	if( _key == "DOWN" )
-		return DOWN;
-	else
-	if( _key == "PLAY" )
-		return PLAY;
-	else
-	if( _key == "STOP" )
-		return STOP;
-	else
-	if( _key == "PREV" )
-		return PREV;
-	else
-	if( _key == "NEXT" )
-		return NEXT;
-	else
-	if( _key == "REW" )
-		return REW;
-	else
-	if( _key == "FF" )
-		return FF;
-	else
-	if( _key == "SUBTITLE" )
-		return SUBTITLE;
-	else
-	if( _key == "AUDIO" )
-		return AUDIO;
-	else
-	if( _key == "ANGLE" )
-		return ANGLE;
-	else
-	if( _key == "SEARCH" )
-		return SEARCH;
-	else
-	if( _key == "PROGRAM" )
-		return PROGRAM;
-	else
-	if( _key == "AB" )
-		return AB;
-	else
-	if( _key == "TIME" )
-		return TIME;
-	else
-	if( _key == "ONE" )
-		return ONE;
-	else
-	if( _key == "TWO" )
-		return TWO;
-	else
-	if( _key == "THREE" )
-		return THREE;
-	else
-	if( _key == "CLEAR" )
-		return CLEAR;
-	else
-	if( _key == "FOUR" )
-		return FOUR;
-	else
-	if( _key == "FIVE" )
-		return FIVE;
-	else
-	if( _key == "SIX" )
-		return SIX;
-	else
-	if( _key == "TEN" )
-		return TEN;
-	else
-	if( _key == "SEVEN" )
-		return SEVEN;
-	else
-	if( _key == "REPEAT" )
-		return REPEAT;
-	else
-	if( _key == "EIGHT" )
-		return EIGHT;
-	else
-	if( _key == "NINE" )
-		return NINE;
-	else
-	if( _key == "ZERO" )
-		return ZERO;
+	struct tr_pair 
+	{
+		const char* 		key;
+		CRadioBox::KEYS		value;
+	} defs[] = 
+	{
+		{ "POWER",POWER },
+		{ "OPEN",OPEN },
+		{ "MENU",MENU },
+		{ "TITLE",TITLE },
+		{ "DISPLAY",DISPLAY },
+		{ "SELECT",SELECT },
+		{ "ZOOM",ZOOM },
+		{ "RETURN",RETURN },
+		{ "UP",UP },
+		{ "LEFT",LEFT },
+		{ "RIGHT",RIGHT },
+		{ "DOWN",DOWN },
+		{ "PLAY",PLAY },
+		{ "STOP",STOP },
+		{ "PREV",PREV },
+		{ "NEXT",NEXT },
+		{ "REW",REW },
+		{ "FF",FF },
+		{ "SUBTITLE",SUBTITLE },
+		{ "AUDIO",AUDIO },
+		{ "ANGLE",ANGLE },
+		{ "SEARCH",SEARCH },
+		{ "PROGRAM",PROGRAM },
+		{ "AB",AB },
+		{ "TIME",TIME },
+		{ "ONE",ONE },
+		{ "TWO",TWO },
+		{ "THREE",THREE },
+		{ "CLEAR",CLEAR },
+		{ "FOUR",FOUR },
+		{ "FIVE",FIVE },
+		{ "SIX",SIX },
+		{ "TEN",TEN },
+		{ "SEVEN",SEVEN },
+		{ "REPEAT",REPEAT },
+		{ "EIGHT",EIGHT },
+		{ "NINE",NINE },
+		{ "ZERO",ZERO },
+		{ "MUTE",MUTE },
+		{ "MINUS",MINUS },
+		{ "PLUS",PLUS },
+		{ "RED",RED },
+		{ "BLUE",BLUE },
+		{ "YELLOW",YELLOW },
+		{ "GREEN",GREEN },
+		{ NULL,UNKNOWN }
+	};
+	
+	int i = 0;
 
+	std::cout << "Search for :" << _key << std::endl;
+	
+	while( defs[i].key )
+	{
+		if( 0 == strcmp( defs[i].key, _key.c_str() ) )
+		{
+			return defs[i].value;
+		}
+		i++;
+	}
+	
 	std::cout << "UNKNOWN STR! :" << _key << std::endl;
 	return UNKNOWN;
 }
@@ -473,9 +432,41 @@ CRadioBox::KEYS CRadioBox::TranslateKey( int _key )
 {
 	switch( _key )
 	{
-		case CRCInput::RC_standby:	return POWER;
-		case CRCInput::RC_up:	return UP;
-		case CRCInput::RC_down:	return DOWN;
+		case CRCInput::RC_standby:		
+			std::cout << "Power key! :" << _key << std::endl;
+			return POWER;
+		case CRCInput::RC_up:			return UP;
+		case CRCInput::RC_down:		return DOWN;
+		case CRCInput::RC_0:			return ZERO;
+		case CRCInput::RC_1:			return ONE;
+		case CRCInput::RC_2:			return TWO;
+		case CRCInput::RC_3:			return THREE;
+		case CRCInput::RC_4:			return FOUR;
+		case CRCInput::RC_5:			return FIVE;
+		case CRCInput::RC_6:			return SIX;
+		case CRCInput::RC_7:			return SEVEN;
+		case CRCInput::RC_8:			return EIGHT;
+		case CRCInput::RC_9:			return NINE;
+		case CRCInput::RC_backspace:	return CLEAR;
+		case CRCInput::RC_home:			return DISPLAY;
+		case CRCInput::RC_page_up:		return REW;
+		case CRCInput::RC_left:			return LEFT;
+		case CRCInput::RC_right:		return RIGHT;
+		case CRCInput::RC_page_down:	return FF;
+		case CRCInput::RC_spkr:			return MUTE;
+		case CRCInput::RC_minus:		return MINUS;
+		case CRCInput::RC_plus:			return PLUS;
+//		case CRCInput::RC_help:		return ;
+		case CRCInput::RC_setup:		return MENU;
+		case CRCInput::RC_ok:			return SELECT;
+		case CRCInput::RC_red:			return RED;
+		case CRCInput::RC_green:		return GREEN ;
+		case CRCInput::RC_yellow:		return YELLOW;
+		case CRCInput::RC_blue:			return BLUE;
+//		case CRCInput::RC_top_left:		return ;
+//		case CRCInput::RC_top_right:		return ;
+//		case CRCInput::RC_bottom_left:		return ;
+//		case CRCInput::RC_bottom_right:		return ;
 	}
 
 	std::cout << "UNKNOWN INT!" << std::endl;

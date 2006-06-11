@@ -9,7 +9,8 @@ INCLUDES = \
 	@FREETYPE_CFLAGS@ \
 	@LCDDISPLAY_CFLAGS@ \
 	-I$(top_srcdir)/../../../driver/include \
-	-I$(top_srcdir)/../neutrino/src/driver
+	-I$(top_srcdir)/../neutrino/src/driver \
+	-I$(top_srcdir)/../neutrino/src
 
 AM_CXXFLAGS =\
 	 -Wall \
@@ -21,7 +22,7 @@ bin_PROGRAMS = radiobox
 
 radiobox_SOURCES = \
 	main.cc\
-	audiofile.cpp\
+	audiofile.cpp \
 	audiometadata.cpp\
 	audioplay.cpp\
 	basedec.cpp\

@@ -80,7 +80,13 @@ public:
 		EIGHT,
 		NINE,
 		ZERO,
-
+		MUTE,
+		PLUS,
+		MINUS,
+		RED,
+		BLUE,
+		YELLOW,
+		GREEN,
 		UNKNOWN,
 		NOKEY
 	};

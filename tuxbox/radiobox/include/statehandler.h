@@ -123,7 +123,7 @@ class CPlayPLRandom : public CStateHandler
 {
 public:
 	CPlayPLRandom( CPlayList* _playlist );
-	~CPlayPLRandom( ) { delete playlist; };
+	virtual ~CPlayPLRandom( ) { delete playlist; };
 
 	void				Show();
 	void				HandleKeys( CRadioBox::KEYS _key, bool _pressed );
