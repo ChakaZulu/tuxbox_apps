@@ -1,0 +1,7 @@
+-F. Create and maintain a directory with playlists, maybe in /var somwhere.
+-B. Playlist entry with zero index does not appear on the screen
+-B. Segmentation fault While scanning a folder
+-F. Check all dependences needed to compile radiobox
+-F. Create replacement for neutrino's global.h.
+-F. Add http interface to the radiobox
+
