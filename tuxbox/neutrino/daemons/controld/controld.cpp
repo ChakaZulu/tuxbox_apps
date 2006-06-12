@@ -569,6 +569,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	      execute_start_file(FORMAT_16_9_FILE);
 	      CIRSend irs("16:9");
 	      irs.Send();
+	      last_videoformat = format;
 	    }
 	    break;
 	  case AVS_FNCOUT_EXT43:
@@ -576,12 +577,12 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	      execute_start_file(FORMAT_4_3_FILE);
 	      CIRSend irs("4:3");
 	      irs.Send();
+	      last_videoformat = format;
 	    }
 	    break;
 	  default:
 	    break;
 	  }
-	  last_videoformat = format;
 	}
 }
 
@@ -1106,7 +1107,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.121 2006/06/11 12:18:17 barf Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.122 2006/06/12 13:54:18 barf Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
