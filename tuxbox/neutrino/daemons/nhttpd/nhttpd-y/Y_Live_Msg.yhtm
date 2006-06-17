@@ -1,0 +1,26 @@
+{=include-block:Y_Blocks.txt;head=}
+</head>
+<body>
+<table border="0">
+<tr>
+	<td width="150" valign="top">&nbsp;</td>
+	<td >
+		<br/>
+		<div class="y_head">Live View</div>
+		<div class="y_work_box">
+			<table border="0" width="100%" cellpadding="2" cellspacing="4">
+				<tr>
+					<td>
+					W&auml;hrend des Live-View keine Kan&auml;le<br/>in der Web-Oberfl&auml;che oder an der dbox umstellen.<br/>
+					SPTS wurde TV bzw. PES f&uuml;r Radio angeschaltet.<br/>
+					<a href="Javascript:live_unlock();"><u>unlock</u></a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+	</td>
+</tr>
+</table>
+</body>
+</html>

@@ -1,34 +1,26 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="stylesheet" type="text/css" href="Y_Main.css">
+{=include-block:Y_Blocks.txt;head=}
 </head>
 <body>
-
-<table border="0" id="table4" style="font-family: Arial; font-size: 8pt">
-<tr>
-	<td >
-	<br>
-	<div class="y_head">About {=var-set:help_url=Neutrino:yWeb#About=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
-	<div class="y_work_box">
-		<table border="0" width="100%" id="table5" cellpadding="2" cellspacing="4">
+<div class="work_box">
+	<div class="work_box_head"><div class="work_box_head_h2">
+	{=var-set:help_url=Neutrino:yWeb:Info#About=}{=var-set:menu=About=}{=include-block:Y_Blocks.txt;work_menu=}</div></div>
+	<div class="work_box_body">
+		<table border="0" cellpadding="2" cellspacing="4">
 		<tr>
-			<td width="144" valign="top"><a href="http://www.yjogol.de" target="_new"><img border="0" src="images/y-smile.png"></a></td>
+			<td width="144" valign="top"><a href="http://www.yjogol.de" target="_blank"><img border="0" src="images/y.png" alt="y-logo"/></a></td>
 			<td valign="top">
 				<b>dbox yWeb</b>
-				<br><a href="http://www.yjogol.de" target="_new">www.yjogol.de</a>
+				<br/><a href="http://www.yjogol.de" target="_blank">www.yjogol.de</a>
 				<p>
-				{=ini-get:Y_Version.txt;version=}<br>
-				{=ini-get:Y_Version.txt;date=}<br>
-				{=ini-get:Y_Version.txt;type=}<br><br>
-				{=ini-get:Y_Version.txt;info=}<br>
+				{=ini-get:Y_Version.txt;version=}<br/>
+				{=ini-get:Y_Version.txt;date=}<br/>
+				{=ini-get:Y_Version.txt;type=}<br/><br/>
+				{=ini-get:Y_Version.txt;info=}<br/>
 				</p>
 			</td>
 		</tr>
-		<tr><td><a href="http://wiki.tuxbox.org/Neutrino:yWeb" title="yWeb Help from Tuxbox Wiki" target="_blank">Tuxbox-Wiki Help</a></td></tr>
 		</table>
 	</div>
-	</td>
-</tr>
-</table>
+</div>
+</body>
 </html>

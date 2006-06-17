@@ -1,9 +1,9 @@
-<html>
-<head>
+{=var-set:must_management={=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip=}~1~=}{=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip2=}~1~=}=}
+{=include-block:Y_Blocks.txt;head_no_charset=}
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta http-equiv="refresh" content="300; URL=/Y_Live_panel.yhtm">
-<link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<SCRIPT LANGUAGE="JavaScript">
+<script type="text/javascript" src="/Y_Baselib.js"></script>
+<script type="text/javascript">
+//<![CDATA[
 function enablePanel(state)
 {
 	if(state == 1)
@@ -11,34 +11,35 @@ function enablePanel(state)
 		document.x.bouquets.disabled=false;
 		document.x.channels.disabled=false;
 		document.x.go.disabled=false;
-		document.x.yswitch.disabled=false;
+		{=if-equal:{=typ=}~live~
 		document.x.epg.disabled=false;
+		=}
 	}
 	else
 	{
 		document.x.bouquets.disabled=true;
 		document.x.channels.disabled=true;
 		document.x.go.disabled=true;
-		document.x.yswitch.disabled=true;
+		{=if-equal:{=typ=}~live~
 		document.x.epg.disabled=true;
+		=}
 	}
 }
-
 function changeChannel()
 {
 	enablePanel(0);
-
 	var sel=document.x.channels.selectedIndex;
 	if(sel != -1)
 	{
 		channel = document.x.channels[sel].value;
 		parent.live.do_stop();
-		{=if-equal:{=func:get_mode=}~tv~
-		parent.live.doToggleExpertMode(1);
-		~=}
-		parent.live.location.href="Y_Live_Wait.yhtm?execute=script:Y_Live%20zapto%20"+channel/*+audio*/;
+		dbox_zapto(channel);
+		parent.live.location.href="Y_Live_Wait.yhtm?mode={=func:get_mode=}&typ={=typ=}";
 	}
 	enablePanel(1);
+	{=if-equal:{=typ=}~live~
+		view_epg();
+	=}
 }
 function view_epg()
 {
@@ -46,37 +47,45 @@ function view_epg()
 	if(sel != -1)
 	{
 		channel = document.x.channels[sel].value;
-		window.open("/fb/epg.dbox2?eventlist="+channel,"preview");
+		var f = parent.parent.col2;
+		f.location.href = "Y_Dyn_Pages.yhtm?page=frame_live_epg&channel="+channel;
 	}
 }
-function yswitchto()
-{
-	enablePanel(0);
-	parent.live.do_stop();
-	parent.live.location.href="/Y_Wait.htm";
-	parent.location.href="Y_Live_View.yhtm?execute=script:Y_Live%20switchto%20{=if-equal:{=func:get_mode=}~tv~Radio~TV=}";
-}
-</SCRIPT>
+//]]>
+</script>
 </head>
-<body style="background-color: #f0faff">
+<body>
+<div>
 <form name="x" action="/Y_Live_panel.yhtm" method="get">
-	<table class="y_live_table" cellspacing="0" bgcolor="#F0FAFF">
-		<TR><TD>
-			<select size="1" class="y_live_bouquets" name="bouquets" onChange="document.x.submit()" title="select bouquet - channels will be updated">
-			{=func:get_bouquets_as_dropdown {=if-empty:{=bouquets=}~{=func:get_actual_bouquet_number=}~{=bouquets=}=}=}
+	<table class="y_live_table" cellspacing="0" cellpadding="0" style="margin:0">
+		<tr><td>
+			<select size="1" class="y_live_bouquets" name="bouquets" onchange="document.x.submit()" title="select bouquet - channels will be updated">
+			{=func:get_bouquets_as_dropdown {=if-empty:{=bouquets=}~{=func:get_actual_bouquet_number=}~{=bouquets=}=} {=if-empty:{=var-get:must_management=}~~true=}=}
 			</select>
-			&nbsp;<button name="yswitch" class="y_live_button" type="button" title="toggle to Radio/TV" onClick="yswitchto()">
-			{=if-equal:{=func:get_mode=}~tv~Radio~TV=}</button> <font size="8"><b>{=var-set:help_url=Neutrino:yWeb:Live=}{=include-block:Y_Blocks.txt;wiki_help=}</b></font>
-		</TD></TR>
-		<TR><TD>
+			<td>&nbsp;</td>
+		</td></tr>
+		<tr><td>
 			<select size="1" class="y_live_channels" name="channels" title="select channel - use go to zap">
 			{=func:get_channels_as_dropdown {=if-empty:{=bouquets=}~{=func:get_actual_bouquet_number=}~{=bouquets=}=} {=if-empty:{=channels=}~{=func:get_actual_channel_id=}~{=channels=}=}=}
 			</select>
-			&nbsp;<button name="go" class="y_live_button" type="button" title="change channel" onClick="changeChannel()">Go</button>
-			<button name="epg" class="y_live_button" type="button" title="view epg for selected channel" onClick="view_epg()">EPG</button>
-		</TD></TR>
+			<td><button name="go" class="y_live_button" type="button" title="change channel" onclick="changeChannel()">Go</button>
+		{=if-equal:{=typ=}~live~
+			<button name="epg" class="y_live_button" type="button" title="view epg for selected channel" onclick="view_epg()">EPG</button>
+		=}
+			</td>
+		</td></tr>
 	</table>
+	<input type="hidden" name="typ" value="{=typ=}"/>
+	<input type="hidden" name="mode" value="{=mode=}"/>
 </form>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+	{=if-equal:{=typ=}~live~
+		window.setTimeout("view_epg()",1000);
+	=}
+//]]>
+</script>
 
 </body>
 </html>

@@ -1,0 +1,75 @@
+{=include-block:Y_Blocks.txt;head=}
+<script type="text/javascript" src="/Y_Baselib.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+
+function do_set()
+{
+	var agt=navigator.userAgent.toLowerCase();
+	var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
+	
+	var _var=document.v.vari.value;
+	var _val=document.v.val.value;
+	
+	var _live = parent.live.live;
+	if(is_ie)
+		_live.vlc.setVariable(_var, _val);
+	else
+		_live.vlc.set_str_variable(_var, _val);
+}
+function do_get()
+{
+	var agt=navigator.userAgent.toLowerCase();
+	var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
+	
+	var _var=document.v.vari.value;
+	
+	var _live = parent.live.live;
+	var _vlc = _live.document.getElementById("vlc");
+	if(is_ie)
+		document.v.val.value=_live.vlc.getVariable(_var);
+	else
+		document.v.val.value=_vlc.get_str_variable(_var);
+}
+function do_geti()
+{
+	var agt=navigator.userAgent.toLowerCase();
+	var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
+	
+	var _var=document.v.vari.value;
+	
+	var _live = parent.live.live;
+	var _vlc = _live.document.getElementById("vlc");
+	if(is_ie)
+		document.v.val.value=_live.vlc.getVariable(_var);
+	else
+		document.v.val.value=_vlc.get_int_variable(_var);
+}
+function do_play_options()
+{
+	var _live = parent.live.live;
+	var options = new Array(document.v.vlc_options1.value, ":input-repeat=1");/*,document.v.vlc_options2.value,document.v.vlc_options3.value,document.v.vlc_options4.value);*/
+	_live.do_play_state(0, options);
+}
+//]]>
+</script>
+</head>
+<body>
+only for testing<br/><br/>
+	<form name="v" action="" method="get">
+		var:<input type="text" name="vari" value=""><br/>
+		val:<input type="text" name="val" value="">
+		
+		
+		<input class="y_live_button" type="button" value="set" onclick="do_set()"/>
+		<input class="y_live_button" type="button" value="get" onclick="do_get()"/>
+		<input class="y_live_button" type="button" value="geti" onclick="do_geti()"/>
+		<br/><br/>
+		VLC Options 1:<input type="text" name="vlc_options1" size="20" value=""><br/>
+		VLC Options 2:<input type="text" name="vlc_options2" size="20" value=""><br/>
+		VLC Options 3:<input type="text" name="vlc_options3" size="20" value=""><br/>
+		VLC Options 4:<input type="text" name="vlc_options4" size="20" value=""><br/>
+		<input class="y_live_button" type="button" value="play" onclick="do_play_options()"/>
+	</form>
+</body>
+</html>

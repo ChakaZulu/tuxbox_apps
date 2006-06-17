@@ -1,57 +1,45 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<script language="JavaScript" type="text/javascript" >
+{=include-block:Y_Blocks.txt;head=}
+<script type="text/javascript">
+//<![CDATA[
 function goUrl(_url)
 {
 	parent.frames[1].location.href = _url;
 }
+//]]>
 </script>
 </head>
 <body>
-
-<br>
-<div class="y_head">Info {=var-set:help_url=Neutrino:yWeb#Info=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
-<div class="y_work_box">
-	<form>
-		<table  class="y_work_table" cellpadding="8">
-		<tr>
-			<td>
-			<b><font size="2">Linux</font></b><br>
-			<INPUT type=button value="Kernel Meldungen" title="show Linux kernel stack messages" onClick='goUrl("/control/exec?Y_Tools&kernel-stack");'>
-			<INPUT type=button value="Prozesse" title="show currently running processes" onClick='goUrl("/control/exec?Y_Tools&ps");'>
-			<INPUT type=button value="Speicher" title="show memory space" onClick='goUrl("/control/exec?Y_Tools&free");'>
-			</td>
-		</tr>
-		</table>
-		<br>
-		<table class="y_work_table" cellpadding="8">
-		<tr>
-			<td>
-			<b><font size="2">dbox</font></b><br>
-			<INPUT type=button value="Info" onClick='goUrl("/control/info");'>
-			<INPUT type=button value="Version" onClick='goUrl("/control/info?version");'>
-			<INPUT type=button value="Settings" onClick='goUrl("/control/info?settings");'>
-			<INPUT type=button value="dbox Zeit" onClick='goUrl("/control/gettime");'>
-			</td>
-		</tr>
-		</table>
-		<br>
-		<table class="y_work_table" cellpadding="8">
-		<tr>
-			<td>
-			<b><font size="2">proc</font></b><br>
-			<INPUT type=button value="CPU info" onClick='goUrl("/control/exec?Y_Tools&proc&cpuinfo");'>
-			<INPUT type=button value="MEM info" onClick='goUrl("/control/exec?Y_Tools&proc&meminfo");'>
-			<INPUT type=button value="Partitions" onClick='goUrl("/control/exec?Y_Tools&proc&partitions");'>
-			<INPUT type=button value="mtd" onClick='goUrl("/control/exec?Y_Tools&proc&mtd");'>
-			<INPUT type=button value="Stat" onClick='goUrl("/control/exec?Y_Tools&proc&stat");'>
-			<INPUT type=button value="version" onClick='goUrl("/control/exec?Y_Tools&proc&version");'>
-			</td>
-		</tr>
+<div class="work_box">
+	<div class="work_box_head">
+		<div class="work_box_head_h2">{=var-set:help_url=Neutrino:yWeb#Info=}{=var-set:menu=Info=}{=include-block:Y_Blocks.txt;work_menu=}</div></div>
+	<div class="work_box_body">
+	<form action="">
+		<table  class="y_invisible_table" cellpadding="5">
+		<tr><td class="y_form_header">Linux</td></tr>
+		<tr><td>
+			<input type="button" value="Kernel Meldungen" title="show Linux kernel stack messages" onclick='goUrl("/control/exec?Y_Tools&amp;kernel-stack");'/>
+			<input type="button" value="Prozesse" title="show currently running processes" onclick='goUrl("/control/exec?Y_Tools&amp;ps");'/>
+			<input type="button" value="Speicher" title="show memory space" onclick='goUrl("/control/exec?Y_Tools&amp;free");'/>
+		</td></tr>
+		<tr><td class="y_form_header">dbox</td></tr>
+		<tr><td>
+			<input type="button" value="Info" onclick='goUrl("/control/info");'/>
+			<input type="button" value="Version" onclick='goUrl("/control/info?version");'/>
+			<input type="button" value="Settings" onclick='goUrl("/control/info?settings");'/>
+			<input type="button" value="dbox Zeit" onclick='goUrl("/control/gettime");'/>
+		</td></tr>
+		<tr><td class="y_form_header">proc</td></tr>
+		<tr><td>
+			<input type="button" value="CPU info" onclick='goUrl("/control/exec?Y_Tools&amp;proc&amp;cpuinfo");'/>
+			<input type="button" value="MEM info" onclick='goUrl("/control/exec?Y_Tools&amp;proc&amp;meminfo");'/>
+			<input type="button" value="Partitions" onclick='goUrl("/control/exec?Y_Tools&amp;proc&amp;partitions");'/>
+			<input type="button" value="mtd" onclick='goUrl("/control/exec?Y_Tools&amp;proc&amp;mtd");'/>
+			<input type="button" value="Stat" onclick='goUrl("/control/exec?Y_Tools&amp;proc&amp;stat");'/>
+			<input type="button" value="version" onclick='goUrl("/control/exec?Y_Tools&amp;proc&amp;version");'/>
+		</td></tr>
 		</table>
 	</form>
+	</div>
 </div>
 </body>
 

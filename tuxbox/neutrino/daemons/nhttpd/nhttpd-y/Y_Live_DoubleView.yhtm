@@ -1,25 +1,19 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>Live - DoubleView</title>
-<link rel="stylesheet" type="text/css" href="/Y_Main.css">
+{=include-block:Y_Blocks.txt;head=}
 </head>
-
 <body>
-<br>
-<span class="y_head">Live - DoubleView {=var-set:help_url=Neutrino:yWeb#Double_View=}{=include-block:Y_Blocks.txt;wiki_help=}</span>
-(only 384x288 resolution now)
-<div class="y_work_box">
-
-<iframe name="I1" src="Y_Live_View.yhtm" target="Hauptframe" width="400" height="360" scrolling="no">
-Ihr Browser unterstützt Inlineframes nicht oder zeigt sie in der derzeitigen Konfiguration nicht an.
-</iframe>
-{=if-empty:{=ini-get:/var/tuxbox/config/Y-Web.conf;slavebox=}~<div><font color="Red">Kein IP für Slave Box angegeben!<br>Einstellen unter Settings->yWeb.</font></div>~
-<iframe name="I2" src="http://{=ini-get:/var/tuxbox/config/Y-Web.conf;slavebox=}/Y_Live_View.yhtm" width="400" height="360" scrolling="no">
-Ihr Browser unterstützt Inlineframes nicht oder zeigt sie in der derzeitigen Konfiguration nicht an.
-</iframe>
-=}
+<div class="work_box">
+	<div class="work_box_head"><div class="work_box_head_h2">
+	{=var-set:help_url=Neutrino:yWeb:Live_Timer#Double_View=}{=var-set:menu=Live - DoubleView=}{=include-block:Y_Blocks.txt;work_menu=}</div></div>
+	<div class="work_box_body">
+		<iframe name="I1" src="Y_Live_View.yhtm" target="Hauptframe" width="400" height="360" scrolling="no">
+		Ihr Browser unterst&uuml;tzt Inlineframes nicht oder zeigt sie in der derzeitigen Konfiguration nicht an.
+		</iframe>
+		{=if-empty:{=ini-get:/var/tuxbox/config/Y-Web.conf;slavebox=}~<div><font color="Red">Kein IP für Slave Box angegeben!<br>Einstellen unter Settings->yWeb.</font></div>~
+		<iframe name="I2" src="http://{=ini-get:/var/tuxbox/config/Y-Web.conf;slavebox=}/Y_Live_View.yhtm" width="400" height="360" scrolling="no">
+		Ihr Browser unterst&uuml;tzt Inlineframes nicht oder zeigt sie in der derzeitigen Konfiguration nicht an.
+		</iframe>
+		=}
+	</div>
 </div>
 </body>
-
 </html>

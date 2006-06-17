@@ -1,56 +1,48 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="STYLESHEET" type="text/css" href="Y_Main.css">
-<script language="JavaScript" type="text/javascript">
-function go_live()
-{
-	var agt=navigator.userAgent.toLowerCase();
-	var is_ie     = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
-	var _url = (is_ie) ? "Y_Tools_NetStream.yhtm?browser=ie" : "Y_Tools_NetStream.yhtm?browser=moz";
-	parent.frames[1].location.href = _url;
-}
-</script>
+{=include-block:Y_Blocks.txt;head=}
+<script type="text/javascript" src="/Y_Baselib.js"></script>
 </head>
-{=var-set:fbshot={=if-file-exists:/bin/fbshot~true~{=if-file-exists:/var/bin/fbshot~true~false=}=}=}
+{=var-set:automount={=if-file-exists:/sbin/automount~true~{=if-file-exists:/var/bin/automount~true~false=}=}=}
 {=var-set:management={=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip;{=func:get_request_data client_addr=}=}~1~=}{=if-equal:{=func:get_request_data client_addr=}~{=ini-get:/var/tuxbox/config/Y-Web.conf;management_ip2=}~1~=}=}
 <body>
-<br>
-<div class="y_head" align=center style="width:100%">Tools</div>
-<div class="y_menu_sec" style="	margin-left: 25px;">
-	<ul id="menu_sec">
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="organize timer" href="/fb/timer.dbox2">Timer</a></li>
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="sync timer with web tv planer" href="Y_Tools_Timer_Sync.yhtm">Sync Timer</a></li>
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="control box functions (reboot, remote control, SPTS, ...)" href="Y_Tools_Boxcontrol.yhtm">Boxcontrol</a></li>
-		<li class="plain"><a class="y_menu_item" title="test vlc plugin" href="javascript:go_live()">NetStream</a></li>
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="use LiveView with 2 boxes" href="Y_Live_DoubleView.yhtm">DoubleView</a></li>
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="Web-based Remote Control" href="{=if-equal:Sagem~{=func:get_boxtype=}~Y_Tools_Rcsim_sagem.yhtm~Y_Tools_Rcsim.yhtm=}">Remote</a></li>
-		{=if-equal:{=var-get:fbshot=}~true~
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="make osd screenshot" href="Y_Tools_fbshot.yhtm">OSD Screenshot</a></li>
-		~
-		<li class="disabled" title="fbshot not installed at /bin or /var/bin">OSD Screenshot</li>
-		=}
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="check Installation" href="Y_Tools_Check_Install.yhtm">Check Install</a></li>
-	</ul>
+<div class="y_menu_sec_box">
+	<div class="y_menu_sec_box_head"><h2>Tools</h2></div>
+	<div class="y_menu_sec_box_body">
+		<div class="y_menu_sec_section">Tools</div>
+		<div class="y_menu_sec">
+			<ul>
+			{=if-empty:{=var-get:automount=}~
+				<li class="disabled" title="organize file automounts (automount not installed)">AutoMounts</li>
+			~
+				<li><a target="work" title="organize file automounts" href="Y_Settings_automount_liste.yhtm">AutoMounts</a></li>
+			=}
+			{=if-empty:{=var-get:management=}~
+				<li class="disabled" title="organize file mounts (restricted by ManagementIP)">Mounts</li>
+				<li class="disabled" title="Wake on LAN (restricted by ManagementIP)">Wake on LAN</li>
+			~
+				<li><a target="work" title="organize file mounts" href="Y_Settings_mount_liste.yhtm">Mounts</a></li>
+				<li><a target="work" title="Wake on LAN" href="Y_Settings_wol.yhtm">Wake on LAN</a></li>
+			=}
+				<li><a target="work" title="check Installation" href="Y_Tools_Check_Install.yhtm">Check Install</a></li>
+			</ul>
+		</div>
+		
+		<div class="y_menu_sec_section">Expert</div>
+		<div class="y_menu_sec">
+			<ul>
+				<li><a target="work" title="get box infos" href="Y_Dyn_Pages.yhtm?page=frame_tools-info">Info</a></li>
+				{=if-empty:{=var-get:management=}~
+				<li class="disabled" title="backup or flash image. (restricted by ManagementIP)">Image</li>
+				<li class="disabled" title="command shell (restricted by ManagementIP)">Command Shell</li>
+				<li class="disabled" title="yInstaller (for files, plugins, ...) (restricted by ManagementIP)">yInstaller</li>
+				~
+				<li><a target="work" title="backup or flash image" href="Y_Tools_Flash_Menue.yhtm">Image</a></li>
+				<li><a target="work" title="command shell" href="Y_Tools_Cmd.yhtm">Command Shell</a></li>
+				<li><a target="work" title="yInstaller (for files, plugins, ...)" href="Y_Tools_Installer.yhtm">yInstaller</a></li>
+				=}
+			</ul>
+		</div>
+	</div>
 </div>
 
-<div class="y_head" align=center style="width:100%">Expert</div>
-<div class="y_menu_sec" style="	margin-left: 25px;">
-	<ul id="menu_sec">			<li class="plain"><a class="y_menu_item" target="Hauptframe" title="get box infos" href="Y_Tools_Info.htm">Info</a></li>
-		{=if-empty:{=var-get:management=}~
-		<li class="disabled" title="backup or flash image. (restricted by ManagementIP)">Image</li>
-		<li class="disabled" title="command shell (restricted by ManagementIP)">Command Shell</li>
-		<li class="disabled" title="yInstaller (for files, plugins, ...) (restricted by ManagementIP)">yInstaller</li>
-		<li class="disabled" title="backup or upload boot logos (restricted by ManagementIP)"">Boot Logo</li>
-		~
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="backup or flash image" href="Y_Tools_Flash_Menue.yhtm">Image</a></li>
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="command shell" href="Y_Tools_Cmd.yhtm">Command Shell</a></li>
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="yInstaller (for files, plugins, ...)" href="Y_Tools_Installer.yhtm">yInstaller</a></li>
-		<li class="plain"><a class="y_menu_item" target="Hauptframe" title="backup or upload boot logos" href="Y_Tools_Bootlogo.yhtm">Boot Logo</a></li>
-		=}
-	</ul>
-</div>
-<br>
 </body>
-
 </html>

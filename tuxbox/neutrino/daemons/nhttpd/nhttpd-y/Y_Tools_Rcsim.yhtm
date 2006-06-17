@@ -1,52 +1,18 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<title>RC</title>
-<script language="JavaScript" type="text/javascript" >
+{=include-block:Y_Blocks.txt;head=}
+<script type="text/javascript" src="/Y_Baselib.js"></script>
+<script type="text/javascript">
+//<![CDATA[
 function rcsim(_key)
 {
-	out.location.href = "/control/exec?Y_Tools&rcsim&"+_key;
+	if(_key == "KEY_POWER")
+		if(confirm("wirklich ausschalten? Power down?") != true)
+			return;
+	loadSyncURL("/control/rcem?"+_key);
 }
+//]]>
 </script>
 </head>
-
 <body>
-<img src="images/rc.jpg" usemap="#rc">
-<map name="rc">
-  <area shape="poly" href="javascript:rcsim('KEY_UP')" coords="77,248,135,234,187,246,187,266,132,286,77,266" />
-  <area shape="poly" href="javascript:rcsim('KEY_DOWN')" coords="76,354,134,340,186,352,186,372,131,392,76,372" />
-  <area shape="rect" href="javascript:rcsim('KEY_RIGHT')" coords="171,279,214,346" />
-  <area shape="rect" href="javascript:rcsim('KEY_LEFT')" coords="48,278,95,344" />
-  <area shape="rect" href="javascript:rcsim('KEY_OK')" coords="102,287,164,336" />
-  <area shape="circle" href="javascript:rcsim('KEY_BLUE')" coords="197,485,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_YELLOW')" coords="152,491,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_GREEN')" coords="107,490,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_RED')" coords="62,484,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_SETUP')" coords="204,428,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_HELP')" coords="56,427,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_HOME')" coords="51,371,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_SETUP')" coords="210,372,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_VOLUMENUP')" coords="218,250,22" />
-  <area shape="circle" href="javascript:rcsim('KEY_VOLUMENDOWN')" coords="47,249,22" />
-  <area shape="rect" href="javascript:rcsim('KEY_PAGEUP')" coords="170,182,226,211" />
-  <area shape="rect" href="javascript:rcsim('KEY_0')" coords="107,181,163,210" />
-  <area shape="rect" href="javascript:rcsim('KEY_PAGEDOWN')" coords="44,181,100,210" />
-  <area shape="rect" href="javascript:rcsim('KEY_9')" coords="170,144,226,173" />
-  <area shape="rect" href="javascript:rcsim('KEY_8')" coords="107,143,163,172" />
-  <area shape="rect" href="javascript:rcsim('KEY_7')" coords="44,143,100,172" />
-  <area shape="rect" href="javascript:rcsim('KEY_6')" coords="170,106,226,135" />
-  <area shape="rect" href="javascript:rcsim('KEY_5')" coords="107,106,163,135" />
-  <area shape="rect" href="javascript:rcsim('KEY_4')" coords="44,106,100,135" />
-  <area shape="rect" href="javascript:rcsim('KEY_3')" coords="170,69,226,98" />
-  <area shape="rect" href="javascript:rcsim('KEY_2')" coords="107,69,163,98" />
-  <area shape="rect" href="javascript:rcsim('KEY_1')" coords="43,69,100,98" />
-  <area shape="rect" href="javascript:rcsim('KEY_POWER')" coords="140,25,205,60" />
-  <area shape="rect" href="javascript:rcsim('KEY_MUTE')" coords="64,25,130,60" />
-</map>
-
-<iframe name="out" id="out" width="100%" height="200" align="left" frameborder="0">Your Browser does not support IFrames.</iframe>
-
+{=include-block:Y_Blocks.txt;remote=}
 </body>
-
 </html>

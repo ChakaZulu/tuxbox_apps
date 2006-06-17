@@ -1,11 +1,10 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<script language="JavaScript" type="text/javascript">
+{=include-block:Y_Blocks.txt;head=}
+<script type="text/javascript" src="/Y_Baselib.js"></script>
+<script type="text/javascript">
+//<![CDATA[
 function do_mount() 
 {
-	document.all.wait.style.visibility="visible"
+	show_waitbox(true);
 	var nr = 0;
 	for(i=0; i<8;i++)
 	{
@@ -18,31 +17,29 @@ function do_mount()
 }
 function do_edit()
 {
-	document.all.wait.style.visibility="visible"
+	show_waitbox(true);
 	document.f.submit();
 }
+//]]>
 </script>
 </head>
 <body>
 {=include-block:Y_Blocks.txt;snip_wait=}
-<br>
-<div class="y_head">Mount {=var-set:help_url=Neutrino:yWeb#Mounts=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
-<div class="y_work_box">
+<div class="work_box">
+	<div class="work_box_head">
+		<div class="work_box_head_h2">{=var-set:help_url=Neutrino:yWeb:Tools#Mounts=}{=var-set:menu=Mount=}{=include-block:Y_Blocks.txt;work_menu=}</div>
+	</div>
+	<div class="work_box_body">
 	<form action="/y/cgi" name="f" id="f">
 		{=func:mount-get-list=}
-		<input type="hidden" name="tmpl" value="Y_Settings_mount.yhtm">
-		<input type="hidden" name="execute" value="">	
-		<input type="button" value="Ändern ..." title="edit mount settings" onClick="do_edit()">
-		<input type="button" value="Mount" title="mount selected directory" onClick="do_mount()">
-		<input type="button" value="Unmount list" title="view unmount list" onClick='window.document.location.href="/Y_Settings_umount_liste.yhtm"'>
+		<input type="hidden" name="tmpl" value="Y_Settings_mount.yhtm"/>
+		<input type="hidden" name="execute" value=""/>
+		<input type="button" value="&Auml;ndern ..." title="edit mount settings" onclick="do_edit()"/>
+		<input type="button" value="Mount" title="mount selected directory" onclick="do_mount()"/>
+		<input type="button" value="Unmount list" title="view unmount list" onclick='window.document.location.href="/Y_Settings_umount_liste.yhtm"'/>
 	</form>
+	</div>
 </div>
-<div style="clear:both">&nbsp;</div>
-<br>
-<div class="y_work_box">
-	<strong>Zur Synchronisation mit Neutrino:</strong><br><br>
-	Nach dem Setzen von Mount-Einstellungen im yWeb: <br>Am TV "Hauptmenü->Service->Neutrino neu starten" wählen, um die Einstellungen nach Neutrino zu übernehmen.<br><br>
-	Nach dem Setzen von Mount-Einstellungen in Neutrino: <br>Am TV "Hauptmenü->Einstellungen->Einstellungen jetzt speichern" wählen, um die Änderung zu speichern und dann diese Seiten neu laden.
-</div>
+{=include-block:Y_neutrino_Blocks.txt;neutrino_form_helpbox=}
 </body>
 </html>

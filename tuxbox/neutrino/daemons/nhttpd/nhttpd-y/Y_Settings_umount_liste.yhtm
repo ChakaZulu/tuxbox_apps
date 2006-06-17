@@ -1,8 +1,7 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<script language="JavaScript" type="text/javascript">
+{=include-block:Y_Blocks.txt;head=}
+<script type="text/javascript" src="/Y_Baselib.js"></script>
+<script type="text/javascript">
+//<![CDATA[
 function do_unmount() 
 {
 	var local_dir="";
@@ -12,25 +11,28 @@ function do_unmount()
 				local_dir = document.f.elements[i].value;
 	if(local_dir != "")
 	{
-		document.all.wait.style.visibility="visible"
+		show_waitbox(true);
 		document.f.execute.value = "script:Y_Tools dounmount "+local_dir;
 		document.f.submit();
 	}
 }
+//]]>
 </script>
 </head>
 <body>
 {=include-block:Y_Blocks.txt;snip_wait=}
-<br>
-<div class="y_head">UnMount {=var-set:help_url=Neutrino:yWeb#Mounts=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
-<div class="y_work_box">
+<div class="work_box">
+	<div class="work_box_head">
+	<div class="work_box_head_h2">{=var-set:help_url=Neutrino:yWeb:Tools#Mounts=}{=var-set:menu=UnMount=}{=include-block:Y_Blocks.txt;work_menu=}</div></div>
+	<div class="work_box_body">
 	<form action="/y/cgi" name="f" id="f">
 		{=func:umount_get_list=}
-		<input type="hidden" name="tmpl" value="/Y_Settings_umount_liste.yhtm">
-		<input type="button" value="Unmount" title="unmount selected directory" name="B1" onClick='do_unmount()'>
-		<input type="button" value="Mount list" title="view mount list" name="B1" onClick='window.document.location.href="/Y_Settings_mount_liste.yhtm"'>
-		<input type="hidden" name="execute" value="">
+		<input type="hidden" name="tmpl" value="/Y_Settings_umount_liste.yhtm"/>
+		<input type="button" value="Unmount" title="unmount selected directory" name="B1" onClick='do_unmount()'/>
+		<input type="button" value="Mount list" title="view mount list" name="B1" onClick='window.document.location.href="/Y_Settings_mount_liste.yhtm"'/>
+		<input type="hidden" name="execute" value=""/>
 	</form>
+	</div>
 </div>
 </body>
 </html>

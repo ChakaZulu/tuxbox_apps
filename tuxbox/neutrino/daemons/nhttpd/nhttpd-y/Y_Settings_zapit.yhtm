@@ -1,64 +1,56 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="stylesheet" type="text/css" href="Y_Main.css">
-<script type="text/javascript" >
+{=include-block:Y_Blocks.txt;head=}
+<script type="text/javascript">
+//<![CDATA[
 function do_submit() 
 {
 	document.f.su.disabled=true;
-  	if (document.f.R1[0].checked == true) {
+	if (document.f.R1[0].checked == true)
 		_url="/control/exec?Y_Tools&zapit_upload&bouquets.xml";
-  	} else if (document.f.R1[1].checked == true) {
+	else if (document.f.R1[1].checked == true)
 		_url="/control/exec?Y_Tools&zapit_upload&services.xml";
-  	} else if (document.f.R1[2].checked == true) {
+	else if (document.f.R1[2].checked == true)
 		_url="/control/exec?Y_Tools&zapit_upload&myservices.xml";
-  	} else if (document.f.R1[3].checked == true) {
-		_url="/control/exec?Y_Tools&zapit_upload&antiservices.xml";
-  	} else {
-    	alert("Bitte eine Auswahl treffen");
-  	}
+	else
+		alert("Bitte eine Auswahl treffen");
 	document.f.action=_url;
 	document.f.submit();
 }
+//]]>
 </script>
-
 </head>
 <body>
-
-<br>
-<div class="y_head">zapit {=var-set:help_url=Neutrino:yWeb#zapit=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
-<div class="y_work_box">
-
+<div class="work_box">
+	<div class="work_box_head"><div class="work_box_head_h2">
+	{=var-set:help_url=Neutrino:yWeb:Settings#zapit=}{=var-set:menu=zapit=}{=include-block:Y_Blocks.txt;work_menu=}</div></div>
+	<div class="work_box_body">
 	<table border="0" cellpadding="5">
+		<tr><td class="y_form_header">Upload</td></tr>
 		<tr>
-			<td class="y_work_table" valign="top">
-				<font size="2">
-				<b>Upload</b>
-				<form name="f" method="POST" enctype="multipart/form-data" action="">
+			<td>
+				<form name="f" method="post" enctype="multipart/form-data" action="">
 					<p>
-					<input type="radio" name="R1" checked value="bouquets.xml">bouquets.xml<br>
-					<input type="radio" name="R1" value="services.xml">services.xml<br>
-					<input type="radio" name="R1" value="myservices.xml">myservices.xml<br>
-					<input type="radio" name="R1" value="antiservices.xml">antiservices.xml<br>
+					<input type="radio" name="R1" checked="checked" value="bouquets.xml"/>bouquets.xml<br/>
+					<input type="radio" name="R1" value="services.xml"/>services.xml<br/>
+					<input type="radio" name="R1" value="myservices.xml"/>myservices.xml<br/>
 				
-					<input type="file" name="F1" size="20"><br>
-					<input type="button" id="su" value="Absenden" name="B1" title="upload selected file" onclick="do_submit()">
+					<input type="file" name="F1" size="20"/>&nbsp;
+					<input type="button" id="su" value="Absenden" name="B1" title="upload selected file" onclick="do_submit()"/>
 					</p>
 				</form>
-				</font>
 			</td>
-			<td class="y_work_table" valign="top">
-			<font size="2">
-			<b>Download</b>
-			<br><br>
-			 <a type="application/octet-stream" href="/var/tuxbox/config/zapit/bouquets.xml"><u>bouquets.xml</u></a><br>
-			 <a type="application/octet-stream" href="/var/tuxbox/config/zapit/services.xml"><u>services.xml</u></a><br>
-			 <a type="application/octet-stream" href="/var/tuxbox/config/zapit/myservices.xml"><u>myservices.xml</u></a><br>
-			 <a type="application/octet-stream" href="/var/tuxbox/config/zapit/antiservices.xml"><u>antiservices.xml</u></a><br>
-			</font>
+		</tr>
+		<tr><td class="y_form_header">Download</td></tr>
+		<tr>
+			<td>
+			<ul>
+			<li><a type="application/octet-stream" href="/var/tuxbox/config/zapit/bouquets.xml"><u>bouquets.xml</u></a></li>
+			<li><a type="application/octet-stream" href="/var/tuxbox/config/zapit/services.xml"><u>services.xml</u></a></li>
+			<li><a type="application/octet-stream" href="/var/tuxbox/config/zapit/myservices.xml"><u>myservices.xml</u></a></li>
+			</ul>
 			</td>
 		</tr>
 	</table>
+	</div>
 </div>
 </body>
 </html>

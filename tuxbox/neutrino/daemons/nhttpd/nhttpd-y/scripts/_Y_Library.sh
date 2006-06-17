@@ -1,8 +1,8 @@
 #!/bin/sh
 # -----------------------------------------------------------
 # Y Library (yjogol)
-# $Date: 2006/04/13 11:22:38 $
-# $Revision: 1.9 $
+# $Date: 2006/06/17 17:21:18 $
+# $Revision: 1.10 $
 # -----------------------------------------------------------
 
 # -----------------------------------------------------------
@@ -74,10 +74,21 @@ y_format_message_html()
 {
 	tmp="<html><head><meta http-equiv='Content-Type' content='text/html; charset=windows-1252'>"
 	tmp="$tmp <link rel='stylesheet' type='text/css' href='/Y_Main.css'></head>"
-	tmp="$tmp <body><div class='y_work_box'><pre>\n$msg\n</pre></div></body></html>"
+	tmp="$tmp <body><div class='work_box'><div class='work_box_head'><div class='work_box_head_h2'>Results</div></div><div class='work_box_body' style='overflow:auto'>"
+	tmp="$tmp <pre>\n$msg\n</pre></div></div></body></html>"
+	
+#	tmp="$tmp <body><div class='y_work_box'><pre>\n$msg\n</pre></div></body></html>"
 	echo -e "$tmp"
 }
 y_format_message_html2()
+{
+	tmp="<html><head><meta http-equiv='Content-Type' content='text/html; charset=windows-1252'>"
+	tmp="$tmp <link rel='stylesheet' type='text/css' href='/Y_Main.css'></head>"
+	tmp="$tmp <body><div class='work_box'><div class='work_box_head'><div class='work_box_head_h2'>Results</div></div><div class='work_box_body'>"
+	tmp="$tmp $msg</div></div></body></html>"
+	echo "$tmp"
+}
+y_format_message_html_plain()
 {
 	tmp="<html><head><meta http-equiv='Content-Type' content='text/html; charset=windows-1252'>"
 	tmp="$tmp <link rel='stylesheet' type='text/css' href='/Y_Main.css'></head>"

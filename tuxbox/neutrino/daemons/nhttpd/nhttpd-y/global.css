@@ -4,79 +4,64 @@ body
 	font-size:10pt;
 	background-color: White;
 }
-
 img	{border:0;}
 a
 { 
-	color: black; 
+	color: #555555; 
 	font-size:10pt;
 	text-decoration:none; 
 }
 a:hover
 { 
-	color:black;
+	color:#2188e0;
 	font-size:10pt;
 	text-decoration:underline;
-	font-weight:bold;
 }
 td
 {
-	color: black; 
+	color: #555555; 
 	font-family:Arial,Sans-Serif;
 	font-size:10pt;
 }
-
 tr
 {
-	color: black; 
+	color: #555555; 
 	font-family:Arial,Sans-Serif;
 	font-size:10pt;
 }
-h1{font-family:Arial,Sans-Serif;	color:#436976;}
-h2{font-family:Arial,Sans-Serif;	color:#436976;}
-h3{font-family:Arial,Sans-Serif;	color:#436976;}
-h4{font-family:Arial,Sans-Serif;	color:#436976;}
-h5{font-family:Arial,Sans-Serif;	color:#436976;}
-input{font-family:Arial,Sans-Serif;	color:#436976;}
-select{font-family:Arial,Sans-Serif;	color:#436976;}
+h1{font-family:Arial,Sans-Serif;	color:#2188e0;}
+h2{font-family:Arial,Sans-Serif;	color:#555555; font-size:12pt}
+h3{font-family:Arial,Sans-Serif;	color:#2188e0;}
+h4{font-family:Arial,Sans-Serif;	color:#2188e0;}
+h5{font-family:Arial,Sans-Serif;	color:#2188e0;}
+input{font-family:Arial,Sans-Serif;	color:#555555;}
+select{font-family:Arial,Sans-Serif;	color:#555555;}
 /* bouquet*/
 .bouquetlist
 {
-	border: 1px solid #6D96A9;
-	background-color: #F0FAFF;
 	border-collapse: collapse;
-	border-spacing: 1px;
 	color: #436976;
 	padding: 3px;
-
 }
 tr.bouquetlist
 {
-	background-color:#88B5FF;
 }
 a:hover.blist
 { 
-	color:#436976;
+	color:#2188e0;
 	font-size:10pt;
 	text-decoration:underline;
-	font-weight:bold;
 }
-/* ------*/
 /*channels*/
 .bouquetitemlist
 {
-	border: 1px solid #6D96A9;
-	background-color: #F0FAFF;
 	border-collapse: collapse;
-	border-spacing: 0px;
 	padding: 0px;
-	color: #436976;
+	margin: 0px;
 	width: 100%;
 }
 .a
 {
-/*	border-bottom: 1px solid #6D96A9;*/
-
 	background-color: #F0FAFF;
 	font-family:Arial,Sans-Serif;
 	font-size:11pt;
@@ -84,8 +69,8 @@ a:hover.blist
 	padding: 0px;
 	padding-left: 10px;
 	padding-right: 20px;
+	margin:0px;
 }
-
 .aepg
 {
 	background-color: #F0FAFF;
@@ -93,18 +78,16 @@ a:hover.blist
 	font-size:10pt;
 	padding-left: 10px;
 }
-
 .b
 {
-/*	border-bottom: 1px solid #6D96A9;*/
 	background-color: white;
 	font-size:11pt;
 	border-spacing: 0px;
 	padding: 0px;
 	padding-left: 10px;
 	padding-right: 20px;
+	margin:0px;
 }
-
 .bepg
 {
 	background-color: white;
@@ -112,26 +95,24 @@ a:hover.blist
 	font-size:10pt;
 	padding-left: 10px;
 }
-
 a:hover.clist
 { 
 	font-size:10pt;
 	text-decoration:underline;
 }
-
 a:hover.clistsmall
 { 
 	font-size:10pt;
 	text-decoration:underline;
 }
-
 .c
 {
 	background-color:#dee7ec;
 	font-weight:bold;
 	font-size:11pt;
 	padding-left: 10px;
- 	padding-right: 20px;
+	padding-right: 20px;
+	margin:0px;
 }
 .cepg
 {
@@ -140,7 +121,6 @@ a:hover.clistsmall
 	font-size:10pt;
 	padding-left: 10px;
 }
-
 .cslider_table
 {
 	height: 10px; 
@@ -148,6 +128,7 @@ a:hover.clistsmall
 	width: 30px;
 	border-spacing: 0px;
 	padding: 0px;
+	border-collapse: collapse;
 }
 .cslider_used
 {
@@ -163,19 +144,16 @@ a:hover.clistsmall
 .epg
 {
 	font-weight: bold;
-	color: #436976;
-	font-size: 14pt;
+	color: #555555;
+	font-size: 12pt;
 	clear:both;
 
 }
 .epglist
 {
-	border: 1px solid #6D96A9;
-	background-color: #F0FAFF;
 	border-collapse: collapse;
 	border-spacing: 0px;
 	padding: 0px;
-	color: #436976;
 }
 a:hover.elist
 { 
@@ -187,20 +165,14 @@ a:hover.elist
 /*Timer*/
 .timer
 {
-	border: 1px solid #6D96A9;
-	background-color: #F0FAFF;
 	border-collapse: collapse;
-	border-spacing: 0px;
 	padding: 0px;
 	margin: 0px;
-	color: #436976;
 }
-
 a.timer
 {
 	text-decoration:underline;
 }
-
 .atimer
 {
 	background-color: #F0FAFF;
@@ -208,7 +180,6 @@ a.timer
 	padding-left: 5px;
 	padding-right: 5px;
 }
-
 .btimer
 {
 	background-color:White;
@@ -216,7 +187,6 @@ a.timer
 	padding-left: 5px;
 	padding-right: 5px;
 }
-
 .ctimer
 {
 	background-color:#dee7ec;

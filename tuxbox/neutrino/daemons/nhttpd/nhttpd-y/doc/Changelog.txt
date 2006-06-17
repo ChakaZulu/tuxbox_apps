@@ -1,5 +1,53 @@
 Severity	id		Headline							Build
 
+5-Enhancement	JG200000478	Boxcontrol: OSD Screenshot: Support for dboxshot		R2.0.0
+5-Enhancement	JG200000480	Boxcontrol: Control: Live lock / unlock	R2.0.0
+5-Enhancement	JG200000482	Boxcontrol: Control: new: Standby Status			R2.0.0
+5-Enhancement	JG200000483	EPG: Link to IMDB						R2.0.0
+5-Enhancement	JG200000498	Boxcontrol: add SPTS Status					R2.0.0
+5-Enhancement	JG200000497	Boxcontrol: New RC-Imake: Nokia-Remote				R2.0.0
+5-Enhancement	JG200000494	Boxcontrol: Control: Add optical Output on/off/status		R2.0.0
+4-Minor		JG200000392	GUI: initialize Volumen correctly ..				R2.0.0
+5-Enhancement	JG200000331	GUI: all Pages W3C XHTML 1.0 conform ..				R2.0.0
+5-Enhancement	JG200000465	GUI: new volumen control					R2.0.0
+5-Enhancement	JG200000459	GUI: new yWeb 2.0 Layout					R2.0.0
+5-Enhancement	JG200000254	GUI: Show channel-logos (if mounted)				R2.0.0
+5-Enhancement	JG200000455	GUI: Help: New Item to Wiki					R2.0.0
+5-Enhancement	JG200000449	GUI: show actual time in main menu				R2.0.0
+5-Enhancement	JG200000439	GUI: show custom text in Menue to identify box (if you have several boxes)	R2.0.0
+5-Enhancement	JG200000468	Info: add external Links for getting help			R2.0.0
+5-Enhancement	JG200000473	Live: Radio-Streaming with VLC (0.8.5) New!			R2.0.0
+5-Enhancement	JG200000500	Live: Transcode: own dialogue and more settings			R2.0.0
+5-Enhancement	JG200000464	Live: Mini EPG for actual channel				R2.0.0
+5-Enhancement	JG200000484	Live: dont show bouquet if set to hidden			R2.0.0
+5-Enhancement	JG200000408	Live: deinterlace & http-caching				R2.0.0
+5-Enhancement	JG200000492	Live: Set Timer from Mini EPG					R2.0.0
+5-Enhancement	JG200000457	Record: Transcode while recording				R2.0.0
+5-Enhancement	JG200000443	Record: new option: display off					R2.0.0
+5-Enhancement	JG200000458	Record: add Profiles for transcoding (iPodVideo, custom...)	R2.0.0
+5-Enhancement	JG200000474	Record: Radio-Recording & Transcoding (VLC) to mp3, iPod, custom	R2.0.0
+5-Enhancement	JG200000477	Record: Radio-Recording & Transcoding (mp3, iPod, custom)	R2.0.0
+5-Enhancement	JG200000456	Settings: Backup & Restore settings				R2.0.0
+5-Enhancement	JG200000475	Settings: new direct recording Filename template		R2.0.0
+5-Enhancement	JG200000496	settings: remove support antiservices.xml			R2.0.0
+5-Enhancement	JG200000479	Settings: New Menu for Live-Settings				R2.0.0
+5-Enhancement	JG200000487	Settings: WebServer: new ExtrasDocRoot/URL			R2.0.0
+5-Enhancement	JG200000134	Timer: new: EPG+						R2.0.0
+5-Enhancement	JG200000452	Timer: SyncTimer: Switch to TV only from radio-mode		R2.0.0
+5-Enhancement	JG200000490	Timer: EPG+ add set timer and zapto				R2.0.0
+4-Minor		JG200000137	Tools: Message to box displays special charachers correct	R2.0.0
+5-Enhancement	JG200000448	Tools: Wake on Lan fix Javascript Error				R2.0.0
+5-Enhancement	JG200000470	Tools: Flash image: add Demo mode				R2.0.0
+5-Enhancement	JG200000469	Tools: Flash image: new dialogs					R2.0.0
+5-Enhancement	JG200000476	Tools: AutoMount (Warmduscher Interface)			R2.0.0
+
+3-Average	JG200000485	nhttpd: fixed: yvars now in WebserverRequest (multi-threading)	nhttpd 2.2.4
+5-Enhancement	JG200000463	nhttpd: add EPG data in XML format				nhttpd 2.2.4
+5-Enhancement	JG200000486	nhttpd: add caching for blocks					nhttpd 2.2.4
+5-Enhancement	JG200000488	nhttpd: Set Timer, zapto,epg: Channel_name with multiple values ..	nhttpd 2.2.4
+5-Enhancement	JG200000491	nhttpd: new: XML-Format for bouquets				nhttpd 2.2.4
+5-Enhancement	JG200000495	nhttpd: new: zapto?getallsubchannels				nhttpd 2.2.4
+
 5-Enhancement	JG200000399	Boxcontrol: view box record-status ..				R1.5.0
 3-Average	JG200000424	Bouquetedit: fixed probs with Firefox 1.5 editing problems	R1.5.0
 5-Enhancement	JG200000414	GUI: Links to Wiki						R1.5.0
@@ -127,7 +175,7 @@ Severity	id		Headline							Build
 5-Enhancement	JG200000084	Plugins: Settings: Mount-Einstellungen				R1.3.1
 5-Enhancement	JG200000182	Live: Bouquets & Channel: Dropdown Breite begrenzen		R1.3.1
 5-Enhancement	JG200000183	Bouquets: epg und settings im yWeb_Layout			R1.3.1
-5-Enhancement	JG200000184	ycgi: execute=<script/func> wird als erstes ausgeführt		R1.3.1
+5-Enhancement	JG200000184	ycgi: execute=<script/func> wird als erstes ausgefhrt		R1.3.1
 5-Enhancement	JG200000185	ycgi: Parameter tmpl=<html-Seite> wird geparsed und ausgegeben	R1.3.1
 5-Enhancement	JG200000187	nhhtpd.conf, wenn neu erstellt dann httpd-y in Private-Path	R1.3.1
 5-Enhancement	JG200000192	Link auf Tuxbox-Wiki. Klick Logo (links oben)			R1.3.1
@@ -139,22 +187,22 @@ Severity	id		Headline							Build
 
 4-Minor		JG200000064	Live: geht nicht wenn SPTS aus-> vorher einschalten		R1.3.0
 4-Minor		JG200000099	Tools-Format-Template (sed wie mount-liste) Vereinfachung	R1.3.0
-4-Minor		JG200000149	Flash: Vor Upload *.img in tmp löschen				R1.3.0
+4-Minor		JG200000149	Flash: Vor Upload *.img in tmp lï¿½chen				R1.3.0
 5-Enhancement	JG200000062	Live: TV als PopUp						R1.3.0
 5-Enhancement	JG200000120	Live: LCD Display, FB, Playback sperren/Live View		R1.3.0
 5-Enhancement	JG200000121	Live Option Bilschirm am TV aus					R1.3.0
 5-Enhancement	JG200000133	start_neutrino raus wenn nhttpd im CVS				R1.3.0
-5-Enhancement	JG200000140	Live: Bouquet und Channel direkt auswählen			R1.3.0
+5-Enhancement	JG200000140	Live: Bouquet und Channel direkt auswï¿½len			R1.3.0
 5-Enhancement	JG200000152	Live: Play/Pause als ToggleBar					R1.3.0
 5-Enhancement	JG200000153	Live: lock/unlock als ToggleBar					R1.3.0
 5-Enhancement	JG200000155	nhttpd: Controlapi.cpp Suchreihenfolge Plugins: Var... zuerst	R1.3.0
-5-Enhancement	JG200000157	Anderer Ort für die Scripte? Ja: .../httpd/scripts		R1.3.0
+5-Enhancement	JG200000157	Anderer Ort fr die Scripte? Ja: .../httpd/scripts		R1.3.0
 5-Enhancement	JG200000158	nhttp: yweb-api: NHTTPD_VERSION via Controlapi.cpp anzeigen	R1.3.0
 5-Enhancement	JG200000159	y_reboot.sh raus Neu: yreboot in Tools				R1.3.0
 5-Enhancement	JG200000160	Tools: Alles aus info.sh nach tools.sh				R1.3.0
 5-Enhancement	JG200000161	nhttpd: scripts in Public/Private httpd Unterordner scripts	R1.3.0
-5-Enhancement	JG200000162	Global: y_url_control für wget/localhost verwenden		R1.3.0
-5-Enhancement	JG200000164	nhttps: aktuelles Bouquet ermitteln können: NEU: getbouquet?actual	R1.3.0
+5-Enhancement	JG200000162	Global: y_url_control fr wget/localhost verwenden		R1.3.0
+5-Enhancement	JG200000164	nhttps: aktuelles Bouquet ermitteln kï¿½nen: NEU: getbouquet?actual	R1.3.0
 5-Enhancement	JG200000165	nhttpd: neue yweb-API						R1.3.0
 5-Enhancement	JG200000166	nhttpd: yweb-api: video_stream_pids=<apid_idx> NEU		R1.3.0
 5-Enhancement	JG200000167	nhttpd: yweb-api : radio_stream_pid NEU				R1.3.0
@@ -164,7 +212,7 @@ Severity	id		Headline							Build
 5-Enhancement	JG200000178	Bouquest TV/Radio: "+" und "-" vertauschen			R1.3.0
 
 3-Average	JG200000122	wget 127.0.0.1 geht nicht, wenn Authentication an ist.		R1.2.0
-3-Average	JG200000123	Live: Local IP Addr via ifconfig ermitteln. Sonst keine vollständige Stream-URL	R1.2.0
+3-Average	JG200000123	Live: Local IP Addr via ifconfig ermitteln. Sonst keine vollstï¿½dige Stream-URL	R1.2.0
 4-Minor		JG200000086	Flash: MTDs sind unterschiedlich in den Images -> Menu dynamisch	R1.2.0
 5-Enhancement	JG200000080	nhttpd: Passwort-Schutz auf allen Seiten			R1.2.0
 5-Enhancement	JG200000083	nhttpd: Upload-Funktion (non blocking)				R1.2.0
@@ -177,10 +225,10 @@ Severity	id		Headline							Build
 
 4-Minor		JG200000044	Y_Live: url : Ohne Escape-Chars ausgeben			R1.1.0
 4-Minor		JG200000071	Layout: Fonts werden unter Linux nicht als Arial angezeigt	R1.1.0
-5-Enhancement	JG200000043	Y_Live: URL für Radio generieren				R1.1.0
+5-Enhancement	JG200000043	Y_Live: URL fr Radio generieren				R1.1.0
 5-Enhancement	JG200000053	Alles: harte Verzeichnis Verlinkung raus od zentral konfigurieren	R1.1.0
 5-Enhancement	JG200000065	Layout: Zentalisieren - dann besser Austauschbar		R1.1.0
-5-Enhancement	JG200000070	Live: kleine Standard-Auflösung auf ...384*288			R1.1.0
+5-Enhancement	JG200000070	Live: kleine Standard-Auflï¿½ung auf ...384*288			R1.1.0
 5-Enhancement	JG200000073	Tools:Net-Stream: Text wieder auf deutsch			R1.1.0
 5-Enhancement	JG200000076	Skripts: zentrales Include-Skript mit Pfadangaben		R1.1.0
 5-Enhancement	JG200000077	Layout: durchgehende Verwendung von Stylesheets (Y_Main.css)	R1.1.0
@@ -193,7 +241,7 @@ Severity	id		Headline							Build
 5-Enhancement	JG200000097	Y-Web Version in Y_Version.txt					R1.1.0
 5-Enhancement	JG200000098	nhttpd Einstellungen setzen (unter Settings)			R1.1.0
 
-5-Enhancement	JG200000063	Y-Web Installer auch für andere Images				R1.1.0 rc0b
+5-Enhancement	JG200000063	Y-Web Installer auch fr andere Images				R1.1.0 rc0b
 5-Enhancement	JG200000067	Reboot optional mit mmops					R1.1.0 rc0b
 6-Question	JG200000007	Live: Funktioniert 'Live' auch unter Linux mit Mozilla? JA	R1.1.0 rc0b
 
@@ -216,16 +264,16 @@ Severity	id		Headline							Build
 3-Average	JG200000009	TV/Radio: Mute/Unmute ueber das Lautsprecher-Icon geht nicht	R1.0.2
 3-Average	JG200000029	Live: Moz: Jetzt html ohne Workaround				R1.0.2
 4-Minor		JG200000019	Live NetStream nach Tools veschieben				R1.0.2
-5-Enhancement	JG200000001	Live: Standard Fenstergrösse auf 4:3 				R1.0.2
+5-Enhancement	JG200000001	Live: Standard Fenstergrï¿½se auf 4:3 				R1.0.2
 5-Enhancement	JG200000002	Live: autom. Browsererkennung / nur ein Live-Button		R1.0.2
 5-Enhancement	JG200000016	Flash Image download						R1.0.2
 5-Enhancement	JG200000020	Tools: Info: Teile aus Box-Control dorthin			R1.0.2
 5-Enhancement	JG200000021	Tools: Info: Kernel Stack ausgeben				R1.0.2
 5-Enhancement	JG200000022	Tools: Info: dbox-Prozesse anzeigen				R1.0.2
 5-Enhancement	JG200000023	Tools: Flash: Linux Partitionen anzeigen			R1.0.2
-5-Enhancement	JG200000024	nhttpd: execCGI erweitern für dyn. Webseiten			R1.0.2
-5-Enhancement	JG200000025	Test ob gepatchte WebServer läuft				R1.0.2
-5-Enhancement	JG200000026	Autom. Starten des gepatchten WebServers für JtG-Image		R1.0.2
+5-Enhancement	JG200000024	nhttpd: execCGI erweitern fr dyn. Webseiten			R1.0.2
+5-Enhancement	JG200000025	Test ob gepatchte WebServer lï¿½ft				R1.0.2
+5-Enhancement	JG200000026	Autom. Starten des gepatchten WebServers fr JtG-Image		R1.0.2
 5-Enhancement	JG200000027	Tools: Test: WebServer testen					R1.0.2
-5-Enhancement	JG200000028	Prüfung ob Y-WebServer läuft bei Parameterübergaben		R1.0.2
+5-Enhancement	JG200000028	Prfung ob Y-WebServer lï¿½ft bei Parameterbergaben		R1.0.2
 

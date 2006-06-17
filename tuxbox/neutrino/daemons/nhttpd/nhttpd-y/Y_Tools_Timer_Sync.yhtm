@@ -1,13 +1,10 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<link rel="stylesheet" type="text/css" href="/global.css">
-<link rel="stylesheet" type="text/css" href="/Y_Main.css">
-<script type="text/javascript" language="JavaScript" src="/Y_Baselib.js"></script>
-<script type="text/javascript" language="JavaScript">
+{=include-block:Y_Blocks.txt;head=}
+<script type="text/javascript" src="/Y_Baselib.js"></script>
+<script type="text/javascript">
+//<![CDATA[
 function wiki_url(_page)
 {
-	return "<a href='http://wiki.tuxbox.org/"+_page+"' target='_blank'><b>[Help]</b></a>"
+	return "<a href=\"http://wiki.tuxbox.org/"+_page+"\"' target=\"_blank\"><b>[Help]<\/b><\/a>"
 }
 /*timer_list*/
 var timer_body;
@@ -240,7 +237,7 @@ function do_get_selected()
 function doToogleCheckboxes()
 {
 	var state = document.timer.checkall.checked;
-	var _rows = timer_body.getElementsByTagName("TR");
+	var _rows = timer_body.getElementsByTagName("tr");
 	for(var i=0; i< _rows.length; i++)
 	{
 		var rowNode = _rows.item(i);
@@ -257,12 +254,15 @@ function do_set_timer()
 	else
 		sLog_addRow(sLog_body, "yellow", "Channel-Replace-List is empty", "notify");
 	var channels=0;
-	
-	loadSyncURL("/control/setmode?tv");
-	sLog_addRow(sLog_body, "green", "Switsch to TV-Mode", "ok");
 
-	
-	var _rows = timer_body.getElementsByTagName("TR");
+	var typ = "{=func:get_mode=}";
+	if(typ != "tv")
+	{
+		loadSyncURL("/control/setmode?tv");
+		sLog_addRow(sLog_body, "green", "Switsch to TV-Mode", "ok");
+	}
+
+	var _rows = timer_body.getElementsByTagName("tr");
 	for(var i=0; i< _rows.length; i++)
 	{
 		var rowNode = _rows.item(i);
@@ -303,57 +303,59 @@ function do_set_timer()
 	else
 		sLog_addRow(sLog_body, "yellow", "Sync Timer to box: No Timers to add", "finished");
 }
-
+//]]>
 </script>
 </head>
 <body>
 {=var-set:wait_text=Timer holen (get timer).=}{=include-block:Y_Blocks.txt;snip_wait=}
-<br>
-<div class="y_head">Timer Sync {=var-set:help_url=Neutrino:yWeb#Timer_Sync=}{=include-block:Y_Blocks.txt;wiki_help=}</div>
-<div class="y_work_box">
+<div class="work_box">
+	<div class="work_box_head"><div class="work_box_head_h2">
+	{=var-set:help_url=Neutrino:yWeb:Live_Timer#Timer_Sync=}{=var-set:menu=Timer Sync=}{=include-block:Y_Blocks.txt;work_menu=}</div></div>
+	<div class="work_box_body">
 	<form method="post" name="f" action="">
 		<b>Sync Timer</b>
-		<table class="y_work_table" cellpadding="4" width="400">
+		<table class="y_work_table">
 		<tr>
 		<td>
-			<INPUT type="radio" name="planer" value="TVInfo" {=if-empty:{=ini-get:/var/tuxbox/config/Y-Web.conf;tvinfo_username=}~disabled~=}>TVInfo<br>
-			<INPUT type="radio" name="planer" value="Klack" {=if-empty:{=ini-get:/var/tuxbox/config/Y-Web.conf;klack_url=}~disabled~=}>Klack
+			<input type="radio" name="planer" value="TVInfo" {=if-empty:{=ini-get:/var/tuxbox/config/Y-Web.conf;tvinfo_username=}~disabled~=}/>TVInfo<br/>
+			<input type="radio" name="planer" value="Klack" {=if-empty:{=ini-get:/var/tuxbox/config/Y-Web.conf;klack_url=}~disabled~=}/>Klack
 			
 		</td>
 		<td>
-		<input type="checkbox" name="debug" value="1">Debugging
+		<input type="checkbox" name="debug" value="1"/>Debugging
 		<!--
-			<INPUT type="radio" name="planer" value="slave" disabled>Slave box<br>
-			<INPUT type="radio" name="planer" value="slave" disabled>Test<br> -->
+			<input type="radio" name="planer" value="slave" disabled="disabled"/>Slave box<br/>
+			<input type="radio" name="planer" value="slave" disabled="disabled"/>Test<br/> -->
 		</td>
 		</tr>
-		<tr><TD colspan="2">Aufnahmeverzeichnis: <input type="text" name="rec_dir" value="{=ini-get:/var/tuxbox/config/neutrino.conf;network_nfs_recordingdir;/mnt/filme=}" title="recording dir">
-		<br>Einstellungen unter Settings-Timer</TD></tr>
+		<tr><td colspan="2">
+			Aufnahmeverzeichnis: <input type="text" name="rec_dir" value="{=ini-get:/var/tuxbox/config/neutrino.conf;network_nfs_recordingdir;/mnt/filme=}" title="recording dir"/>
+			<br/>Einstellungen unter Settings-Timer</td>
+		</tr>
 		</table>
-		<input type="button" value="get selected" title="get selected" name="get_selected" onClick="do_get_selected()">&nbsp;
-		<!--<input type="button" value="get all" title="get all" name="get_all" onClick="do_get_all()" disabled>&nbsp;-->
-		<input type="button" value="clear all" title="clear all" name="clear_all" onClick="do_clear_all()">
+		<input type="button" value="get selected" title="get selected" name="get_selected" onclick="do_get_selected()"/>&nbsp;
+		<input type="button" value="clear all" title="clear all" name="clear_all" onclick="do_clear_all()"/>
 	</form>
-
+	<br/>
 	<form method="post" name="timer" action="">
 		<b>Timer Preview List</b>
-		<table class="y_work_table" cellpadding="4">
+		<table class="y_work_table" cellpadding="2">
 		<thead align="left">
 		<tr>
-			<th><input type="checkbox" checked name="checkall" onclick="doToogleCheckboxes();" id="checkall"></th><th colspan="2">Startzeit</th><th colspan="2">Endezeit</th>
+			<th><input type="checkbox" checked="checked" name="checkall" onclick="doToogleCheckboxes();" id="checkall"/></th><th colspan="2">Startzeit</th><th colspan="2">Endezeit</th>
 			<th>Sender</th><th>Sendung</th><th>Quelle</th>
 		</tr>
 		</thead>
 		<tbody id="timer_list">
+		<tr><td></td></tr>
 		</tbody>
 		</table>
-		<input type="button" value="set timer" title="" name="set_timers" onClick="do_set_timer()">&nbsp;
-		<input type="button" value="clear log" title="" name="clear_log" onClick="sLog_clear()">
+		<input type="button" value="set timer" title="" name="set_timers" onclick="do_set_timer()"/>&nbsp;
+		<input type="button" value="clear log" title="" name="clear_log" onclick="sLog_clear()"/>
 	</form>
-	
+	<br/>
 	<form method="post" name="log" action="">
-	
-	<b>Log</b><br>
+	<b>Log</b><br/>
 		<table class="y_work_table" cellpadding="4">
 		<thead align="left">
 		<tr>
@@ -361,14 +363,15 @@ function do_set_timer()
 		</tr>
 		</thead>
 		<tbody id="slog_list">
+		<tr><td></td></tr>
 		</tbody>
 		</table>
-		<br>
+		<br/>
 	</form>
+	</div>
 </div>
-<iframe height="100" width="100" scrolling="no" align="left" frameborder="0" name="tmp" id="tmp">Your Browser does not support IFrames.</iframe>
-
-<script language="JavaScript" type="text/javascript">
+<script type="text/javascript">
+//<![CDATA[
 	timer_list_init();
 	sLog_init();
 	do_clear_all();
@@ -376,7 +379,7 @@ function do_set_timer()
 		document.f.planer[0].checked = true;
 	else if (document.f.planer[1].disabled == false)
 		document.f.planer[1].checked = true;
-
+//]]>
 </script>
 </body>
 </html>
