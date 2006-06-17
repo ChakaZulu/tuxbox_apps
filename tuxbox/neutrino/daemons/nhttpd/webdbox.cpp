@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.63 2006/03/29 15:31:55 yjogol Exp $
+	$Id: webdbox.cpp,v 1.64 2006/06/17 17:24:10 yjogol Exp $
 
 	License: GPL
 
@@ -89,18 +89,21 @@ void CWebDbox::ZapToSubService(const char * const target)
 t_channel_id CWebDbox::ChannelNameToChannelId(std::string search_channel_name)
 {
 	t_channel_id channel_id = (t_channel_id)-1;
-
+	std::vector<std::string> channel_names = ySplitStringVector(search_channel_name, ",");
 	CZapitClient::BouquetChannelList *channellist = GetChannelList(CZapitClient::MODE_CURRENT);
 	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
 	for(; channel != channellist->end();channel++)
 	{
 		std::string channel_name = channel->name;
-		if(search_channel_name.length() == channel_name.length() &&
-			equal(search_channel_name.begin(), search_channel_name.end(),
-			channel_name.begin(), nocase_compare)) //case insensitive  compare
+		for(int j=0;j<channel_names.size();j++)
 		{
-			channel_id = channel->channel_id;
-			break;
+			if(channel_names[j].length() == channel_name.length() &&
+				equal(channel_names[j].begin(), channel_names[j].end(),
+				channel_name.begin(), nocase_compare)) //case insensitive  compare
+			{
+				channel_id = channel->channel_id;
+				break;
+			}
 		}
 	}
 	return channel_id;

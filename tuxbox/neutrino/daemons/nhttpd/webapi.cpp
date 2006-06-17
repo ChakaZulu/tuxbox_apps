@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.72 2006/04/13 13:46:17 yjogol Exp $
+	$Id: webapi.cpp,v 1.73 2006/06/17 17:24:10 yjogol Exp $
 
 	License: GPL
 
@@ -533,7 +533,21 @@ bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 	int pos = 0;
 	Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 	CChannelEventList::iterator eventIterator;
-	request->SendHTMLHeader("DBOX2-Neutrino Channellist");
+	request->printf(
+		"<!DOCTYPE html\n"
+		"     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"
+		"     \"DTD/xhtml1-strict.dtd\">\n"
+		"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"de\" lang=\"de\">\n"
+		"<head>\n"
+		"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\" />\n"
+		"<meta http-equiv=\"cache-control\" content=\"no-cache\" />\n"
+		"<meta http-equiv=\"expires\" content=\"0\" />\n"
+		"<link rel=\"stylesheet\" href=\"../global.css\" type=\"text/css\" />\n"
+		"<title>DBOX2-Neutrino Kanalliste</title>\n"
+		"</head>\n"
+		"\n"
+		"<body>\n"
+		);
 
 	request->SocketWrite("<div CLASS=\"epg\">Programmvorschau: " + Parent->GetServiceName(channel_id));
 	request->SocketWrite("</div>\n"
@@ -605,22 +619,54 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 	int prozent;
 	CSectionsdClient::responseGetCurrentNextInfoChannelID currentNextInfo;
 	char timestr[6];
-
+	bool have_logos = false;
+	
+	if(Parent->Parent->ExtrasDocumentRoot == "web" || (access((Parent->Parent->ExtrasDocumentRoot+"/logos").c_str(),4)==0) )
+		have_logos = true;
 	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
 	for (; channel != channellist->end();channel++)
 	{
+		CChannelEvent *event;
+		event = Parent->ChannelListEvents[channel->channel_id];
+		
 		classname = (i++ & 1) ? 'a' : 'b';
 		if (channel->channel_id == current_channel)
 			classname = 'c';
 
 		std::string bouquetstr = (BouquetNr >= 0) ? ("&amp;bouquet=" + itoa(BouquetNr)) : "";
+		request->SocketWriteLn("<tr>");
+		if(have_logos)
+			request->printf("<td class=\"%c\" width=\"44\" rowspan=\"2\"><a href=\"switch.dbox2?zapto="
+					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+					",%s\"><img class=\"channel_logo\" src=\"%s/logos/"
+					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+					".gif\" alt=\"%s\"/></a></td>", classname, channel->channel_id, bouquetstr.c_str(),
+					(Parent->Parent->ExtrasDocumentURL).c_str(),
+					channel->channel_id, channel->name);
 		
-		request->printf("<tr><td colspan=\"2\" class=\"%c\">",classname);
-		request->printf("%s<a class=\"clist\" href=\"switch.dbox2?zapto="
+		/* timer slider */
+		if(event && event->duration > 0)
+			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
+		else
+			prozent = 100;
+		request->printf("<td class=\"%c\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"3\"><tr><td>\n"
+				"\t<table border=\"0\" rules=\"none\" class=\"cslider_table\" width=\"32\">"
+				"<tr>"
+				"<td class=\"cslider_used\" width=\"%d\"></td>"
+				"<td class=\"cslider_free\" width=\"%d\"></td>"
+				"</tr>"
+				"</table>\n</td>\n"
+				, classname
+				, (prozent / 10) * 3
+				, (10 - (prozent / 10))*3
+			);
+				
+		/* channel name and buttons */
+		request->printf("<td>\n%s<a class=\"clist\" href=\"switch.dbox2?zapto="
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-				",%s\">%d. %s%s</a>&nbsp;<a href=\"epg.dbox2?eventlist="
+				",%s\">&nbsp;%d. %s%s</a>&nbsp;<a href=\"epg.dbox2?eventlist="
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-				"\">%s</a>",
+				"\">%s</a>\n",
 				((channel->channel_id == current_channel) ? "<a name=\"akt\"></a>" : " "),
 				channel->channel_id,
 				bouquetstr.c_str(),
@@ -631,12 +677,11 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 				((Parent->ChannelListEvents[channel->channel_id]) ? "<img src=\"../images/elist.gif\" alt=\"Programmvorschau\" style=\"border: 0px\" />" : ""));
 
 		if (channel->channel_id == current_channel)
-			request->printf("&nbsp;&nbsp;<a href=\"/fb/info.dbox2\"><img src=\"/images/streaminfo.png\" alt=\"Streaminfo\" style=\"border: 0px\" /></a>");
+			request->printf("\n&nbsp;&nbsp;<a href=\"/fb/info.dbox2\"><img src=\"/images/streaminfo.png\" alt=\"Streaminfo\" style=\"border: 0px\" /></a>");
 
-		request->printf("</td></tr>");
+		request->printf("</td></tr></table>\n</td>\n</tr>\n");
 
-		CChannelEvent *event;
-		
+
 		if (channel->service_type == ST_NVOD_REFERENCE_SERVICE)
 		{
 			CSectionsdClient::NVODTimesList nvod_list;
@@ -661,7 +706,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 					Parent->Sectionsd->getActualEPGServiceKey(channel_id, &epg); // FIXME: der scheissendreck geht nit!!!
 
-					request->printf("<tr><td align=\"left\" style=\"width: 31px\" class=\"%cepg\">&nbsp;</td>", classname);
+					request->printf("<tr>\n<td align=\"left\" style=\"width: 31px\" class=\"%cepg\">&nbsp;</td>", classname);
 					request->printf("<td class=\"%cepg\">%s&nbsp;", classname, timestr);
 					request->printf("%s<a href=\"switch.dbox2?zaptosubservice="
 							PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -673,7 +718,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 							cmd.original_network_id,
 							cmd.service_id,
 							epg.title.c_str());
-					request->printf("</td></tr>");
+					request->printf("</td>\n</tr>");
 
 					subServiceList.push_back(cmd);
 				}
@@ -687,21 +732,9 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 		else if ((event = Parent->ChannelListEvents[channel->channel_id]))
 		{
 			bool has_current_next = Parent->Sectionsd->getCurrentNextServiceKey(channel->channel_id, currentNextInfo);
-			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
 			timeString(event->startTime, timestr);
-			request->printf("<tr>"
-					"<td align=\"left\" style=\"width: 32px\" class=\"%cepg\">"
-			                "<table border=\"0\" rules=\"none\" class=\"cslider_table\">"
-					"<tr>"
-					"<td class=\"cslider_used\" width=\"%d\"></td>"
-					"<td class=\"cslider_free\" width=\"%d\"></td>"
-					"</tr>"
-					"</table></td>"
-					, classname
-					, (prozent / 10) * 3
-					, (10 - (prozent / 10))*3
-				);
-			request->printf("<td class=\"%cepg\">",classname);
+
+			request->printf("<tr><td class=\"%cepg\">",classname);
 			request->printf("<a class=\"clistsmall\" href=\"epg.dbox2?epgid=%llx\">",event->eventID);
 //			request->printf("<a class=\"clistsmall\" href=\"epg.dbox2?epgid=%llx&amp;startzeit=%lx\">",event->eventID,event->startTime);
 			request->printf("%s&nbsp;%s&nbsp;"
@@ -718,6 +751,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 			request->printf("</td></tr>\n");
 		}
+		else
 		request->printf("<tr style=\"height: 2px\"><td></td></tr>\n");
 	}
 

@@ -198,8 +198,48 @@ Beispiel:
 >>>http://dbox/control/epg?ext
 8716330 1025382300 6900 571233417784 Rocky 2
 
+Parameter: xml=true&channelid=<channel_id>|channelname=<channel name>[&details=true][&max=<max items>][&stoptime=<long:stop time>]
+Rückgabe:
+Liefert zum angegebenen channel (angegeben durch channel_id oder channel_name) das EPG als XML-Liste zurück.
+channel_name=Ein oder mehrere durch Komma getrente Sendernamen.
+Wird details=true angegeben, dann werden zusätzlich info1 and info2 mit ausgegeben.
+Zur Begrenzung der Menge der Listeneinträge kann max für die Anzahl der Elemente oder 
+stoptime für die Uhrzeit bis zu der Angaben gemacht werden sollen, begrenzt werden.
 
+Beispiel:
+>>>http://192.168.0.15/control/epg?xml=true&channelid=44d00016dca&details=true&max=2
+<?xml version="1.0" encoding="iso-8859-1"?>
+<epglist>
+<channel_id>44d00016dca</channel_id>
+<channel_name><![CDATA[Das Erste]]></channel_name>
+<prog>
+	<eventid>309903955495411052</eventid>
+	<eventid_hex>44d00016dcadd6c</eventid_hex>
+	<start_sec>1148314800</start_sec>
+	<start_t>18:20</start_t>
 
+	<stop_sec>1148316600</stop_sec>
+	<stop_t>18:50</stop_t>
+	<duration_min>30</duration_min>
+	<description><![CDATA[Marienhof]]></description>
+	<info1><![CDATA[(Folge 2868)]]></info1>
+	<info2><![CDATA[Sülo verachtet Constanze wegen ihrer Intrige. Luigi plündert das Konto und haut ab. Jessy will Carlos über ihre Chats aufklären.]]></info2>
+</prog>
+<prog>
+
+	<eventid>309903955495411054</eventid>
+	<eventid_hex>44d00016dcadd6e</eventid_hex>
+	<start_sec>1148316600</start_sec>
+	<start_t>18:50</start_t>
+	<stop_sec>1148320200</stop_sec>
+	<stop_t>19:50</stop_t>
+
+	<duration_min>60</duration_min>
+	<description><![CDATA[Großstadtrevier]]></description>
+	<info1><![CDATA[239. Fenstergespenster]]></info1>
+	<info2><![CDATA[Pech für Dirk Matthies: Da steigt er auf eine Leiter, weil ihn mal der Putzfimmel überkommt, und - knacks! - bricht eine Sprosse. Das Bein ist gebrochen, mehrere Rippen geprellt. Katja Metz versorgt ihn mit dem Nötigsten.]]></info2>
+</prog>
+</epglist>
 
 *****************************************************************************
 3. Die DBox herunterfahren
@@ -218,11 +258,6 @@ Beispiel:
 
 >>>http://dbox/control/shutdown
 ok
- 
- 
-
-
-
 
 *****************************************************************************
 4. Standby Mode 
@@ -411,6 +446,31 @@ oder
 00104 vtxt
 00100 pmt
 
+Parameter: getallsubchannels
+Rückgabe:
+
+Es werden die Unterkanäle des aktuellen Senders zurückgegeben:
+
+Rückgabe-Format:
+       channel_id channel_name
+
+Beispiel:
+
+>>>http://dbox/control/zapto?getallsubchannels
+
+400850012 Direkt Portal
+1008500d4 D 1 - 11:30
+3008500f1 D 1 - 12:00
+3008500dc D 1 - 12:30
+1008500d3 D 2 - 11:30
+3008500f4 D 2 - 12:00
+3008500f0 D 2 - 12:30
+4008500d2 D 3 - 11:45
+3008500f3 D 3 - 12:45
+4008500d1 D 4 - 13:00
+4008500d0 D 5 - 12:30
+
+
 Parameter: stopplayback
 Rückgabe:
 Stoppt die Decodierung um Graben zu können. Zusätzlich wird der
@@ -509,8 +569,9 @@ ok
  
 
 
-Parameter: channel_name (URI encoded)
+Parameter: channel_name oder channel_names (Ein oder mehrere durch Komma getrente Sendernamen; URI encoded)
 Rueckgabe:
+
 
 Zappt auf den angegebenen Kanal.
 Als Rueckgabe ist im Erfolgsfall ok zu erwarten.
@@ -824,8 +885,7 @@ Beispiel:
 *****************************************************************************
 Handler: http://dbox/control/getbouquet
 
-Parameter: bouquet=Bouquet Nr. und mode=TV|RADIO oder actual und
-mode=TV|RADIO
+Parameter: bouquet=Bouquet Nr. und mode=TV|RADIO oder actual und und mode=TV|RADIO optional: xml=true
 Rueckgabe:
 
 Es werden alle Sender des Bouquets zurueckgeliefert.  Wird actual mit
@@ -841,7 +901,25 @@ Beispiel:
 23 12ef4 RTL2
 24 12f1c VOX
 
-
+Wird xml=1 angegeben, dann wird die Liste im XML-Format zurückgegeben:
+Beispiel:
+>>>http://192.168.0.15/control/getbouquet?bouquet=3&xml=true
+<?xml version="1.0" encoding="iso-8859-1"?>
+<bouquetlist>
+<bouquet>
+	<bnumber>3</bnumber>
+</bouquet>
+<channel>
+	<number>33</number>
+	<id>44d00016dca</id>
+	<name><![CDATA[Das Erste]]></name>
+</channel>
+<channel>
+	<number>34</number>
+	<id>44d00016dcd</id>
+	<name><![CDATA[arte]]></name>
+</channel>
+</bouquetlist>
 
 
 *****************************************************************************
@@ -1055,8 +1133,8 @@ stTime = Uhrzeit Ende, Format HH.MM
 
 channel_id ist die Kennung des Senders (als Hexadezimalzahl ohne '0x'-Prefix).
 alternativ kann der Sendername direkt angegeben werden:
-channel_name = Sendername (muss URI codiert sein, also Leerzeichen mit
-"%20" ersetzen)
+channel_name = Sendername (Ein oder mehrere durch Komma getrente Sendernamen;
+		muss URI codiert sein, also Leerzeichen mit "%20" ersetzen)
 
 msg ist die Message die bei REMIND gesendet wird
 

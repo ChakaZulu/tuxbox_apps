@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.53 2006/06/08 08:28:20 barf Exp $
+	$Id: request.cpp,v 1.54 2006/06/17 17:24:10 yjogol Exp $
 
 	License: GPL
 
@@ -37,7 +37,7 @@
 #include "debug.h"
 #include "webdbox.h"
 
-#define OUTBUFSIZE 10240
+#define OUTBUFSIZE 2048
 #define IADDR_LOCAL "127.0.0.1"
 #define UPLOAD_TMP_FILE "/tmp/upload.tmp"
 
@@ -58,7 +58,7 @@ CWebserverRequest::CWebserverRequest(CWebserver *server)
 	RequestCanceled = false;
 
 	outbuf = new char[OUTBUFSIZE +1];
-
+	yConfig = new CConfigFile(',');
 }
 
 //-------------------------------------------------------------------------
@@ -67,7 +67,8 @@ CWebserverRequest::~CWebserverRequest(void)
 {
 	if (outbuf)
 		delete[] outbuf;
-
+	if(yConfig != NULL)
+		delete yConfig;
 	EndRequest();
 }
 
@@ -600,7 +601,7 @@ void CWebserverRequest::Send500Error(void)
 
 void CWebserverRequest::SendPlainHeader(std::string contenttype)
 {
-	SocketWrite("HTTP/1.1 200 OK\r\nContent-Type: " + contenttype + "; charset: utf-8\r\nCache-Control: no-cache\r\n\r\n");
+	SocketWrite("HTTP/1.0 200 OK\r\nContent-Type: " + contenttype + "\r\nCache-Control: no-cache\r\n\r\n");
 	HttpStatus = 200;
 }
 
@@ -686,7 +687,7 @@ bool CWebserverRequest::SendResponse()
 		return Parent->WebDbox->WebAPI->Execute(this);
 	else if(Path.compare("/y/") == 0)						// y api
 		return Parent->WebDbox->yAPI->Execute(this);
-	else if(Path.compare(_hosted) == 0)						// hosted Web
+	else if(Path.compare(0,_hosted.length(),"/hosted/") == 0)						// hosted Web
 		Path=Parent->HostedDocumentRoot+Path.substr(_hosted.length()-1);
 	if(FileExt.compare("yhtm") == 0)						// y pasrsing
 		return Parent->WebDbox->yAPI->ParseAndSendFile(this);

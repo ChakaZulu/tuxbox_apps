@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.29 2006/04/13 11:10:44 yjogol Exp $
+        $Id: webserver.h,v 1.30 2006/06/17 17:24:10 yjogol Exp $
 
         License: GPL
 
@@ -41,13 +41,15 @@
 #define SA	struct sockaddr
 #define SAI	struct sockaddr_in
 
-#define NHTTPD_VERSION "2.2.3"
+#define NHTTPD_VERSION "2.2.4"
 
 #define PRIVATEDOCUMENTROOT	"/share/tuxbox/neutrino/httpd-y"
 #define PUBLICDOCUMENTROOT	"/var/httpd"
 #define NEUTRINO_CONF		"/var/tuxbox/config/neutrino.conf"
 #define HOSTEDDOCUMENTROOT	"/mnt/hosted"
-
+#define EXTRASDOCUMENTROOT	"/mnt/hosted/extras"
+#define EXTRASDOCUMENTURL	"/hosted/extras"
+// Logos are at EXTRASDOCUMENTROOT/logos and EXTRASDOCUMENTURL/logos
 class CWebDbox;
 class TWebserverRequest;
 
@@ -74,6 +76,8 @@ public:
 	std::string		PrivateDocumentRoot;
 	std::string		PublicDocumentRoot;
 	std::string		HostedDocumentRoot;
+	std::string		ExtrasDocumentRoot;
+	std::string		ExtrasDocumentURL;
 	std::string		Zapit_XML_Path;
 
 	std::string		AuthUser;

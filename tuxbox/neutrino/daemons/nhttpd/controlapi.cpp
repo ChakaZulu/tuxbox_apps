@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.67 2006/06/10 11:13:56 barf Exp $
+	$Id: controlapi.cpp,v 1.68 2006/06/17 17:24:10 yjogol Exp $
 
 	License: GPL
 
@@ -22,10 +22,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-
-//#ifdef HAVE_CONFIG_H
-//#include <config.h>
-//#endif
 
 // system
 #include <unistd.h>
@@ -1104,7 +1100,6 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 {
 	CZapitClient::BouquetChannelList *bouquet;
 	CZapitClient::BouquetList blist;
-	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 
 	if (!(request->ParameterList.empty()))
 	{
@@ -1121,6 +1116,7 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 		// Get Bouquet Number. First matching current channel
 		if (request->ParameterList["1"] == "actual")
 		{
+			request->SendPlainHeader("text/plain");          // Standard httpd header senden
 			int actual=0;
 			//easier?
 			for (unsigned int i = 0; i < Parent->BouquetList.size() && actual == 0;i++)
@@ -1137,8 +1133,29 @@ bool CControlAPI::GetBouquetCGI(CWebserverRequest *request)
 			request->printf("%d",actual);
 			return true;
 		}
+		else if (!(request->ParameterList["xml"].empty()))
+		{
+			request->SendPlainHeader("text/xml");          // xml httpd header senden
+			request->SocketWriteLn("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>");
+			request->SocketWriteLn("<bouquetlist>");
+			request->printf("<bouquet>\n\t<bnumber>%s</bnumber>\n</bouquet>\n",request->ParameterList["bouquet"].c_str());
+			
+			bouquet = Parent->GetBouquet(atoi(request->ParameterList["bouquet"].c_str()), mode);
+			CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
+	
+			for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
+				request->printf("<channel>\n\t<number>%u</number>\n\t<id>"
+					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+					"</id>\n\t<name><![CDATA[%s]]></name>\n</channel>\n",
+					channel->nr,
+					channel->channel_id,
+					channel->name);
+			request->SocketWriteLn("</bouquetlist>");
+			return true;
+		}
 		else
 		{
+			request->SendPlainHeader("text/plain");          // Standard httpd header senden
 			bouquet = Parent->GetBouquet(atoi(request->ParameterList["bouquet"].c_str()), mode);
 			CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
 	
@@ -1179,10 +1196,9 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 
 	Parent->GetChannelEvents();
 
-	request->SendPlainHeader("text/plain");          // Standard httpd header senden
-
 	if (request->ParameterList.empty())
 	{
+		request->SendPlainHeader("text/plain");          // Standard httpd header senden
 		CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
 
 		CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
@@ -1206,6 +1222,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 
 		if (request->ParameterList["1"] == "ext")
 		{
+			request->SendPlainHeader("text/plain");          // Standard httpd header senden
 			CZapitClient::BouquetChannelList *channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
 			CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
 
@@ -1228,6 +1245,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 		}
 		else if (request->ParameterList["eventid"] != "")
 		{
+			request->SendPlainHeader("text/plain");          // Standard httpd header senden
 			//special epg query
 			unsigned long long epgid;
 			sscanf( request->ParameterList["eventid"].c_str(), "%llu", &epgid);
@@ -1243,6 +1261,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 		}
 		else if (request->ParameterList["eventid2fsk"] != "")
 		{
+			request->SendPlainHeader("text/plain");          // Standard httpd header senden
 			if (request->ParameterList["starttime"] != "")
 			{
 				unsigned long long epgid;
@@ -1261,6 +1280,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 		}
 		else if (!(request->ParameterList["id"].empty()))
 		{
+			request->SendPlainHeader("text/plain");          // Standard httpd header senden
 			t_channel_id channel_id;
 			sscanf(request->ParameterList["id"].c_str(),
 			       SCANF_CHANNEL_ID_TYPE,
@@ -1286,6 +1306,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 		}
 		else
 		{
+			request->SendPlainHeader("text/plain");          // Standard httpd header senden
 			//eventlist for a chan
 			t_channel_id channel_id;
 			sscanf(request->ParameterList["1"].c_str(),
@@ -1297,7 +1318,89 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 			return true;
 		}
 	}
-
+	/* 
+		xml=true&channelid=<channel_id>|channelname=<channel name>[&details=true][&max=<max items>][&stoptime=<long:stop time>]
+		details=true : Show EPG Info1 and info2
+		stoptime : show only items until stoptime reached
+	*/
+	else if (!(request->ParameterList["xml"].empty()))
+	{
+		t_channel_id channel_id = (t_channel_id)-1;
+		
+		if (!(request->ParameterList["channelid"].empty()))
+		{
+			sscanf(request->ParameterList["channelid"].c_str(),
+			SCANF_CHANNEL_ID_TYPE,
+			&channel_id);
+		}
+		else if (!(request->ParameterList["channelname"].empty()))
+		{
+			channel_id = Parent->ChannelNameToChannelId( request->ParameterList["channelname"].c_str() );
+		}
+		if(channel_id != (t_channel_id)-1)
+		{
+			request->SendPlainHeader("text/xml");          // xml httpd header senden
+			request->SocketWriteLn("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>");
+			request->SocketWriteLn("<epglist>");
+			
+			Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
+			
+			request->printf("<channel_id>"
+					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+					"</channel_id>\r\n", channel_id);
+			request->printf("<channel_name><![CDATA[%s]]></channel_name>\r\n", Parent->GetServiceName(channel_id).c_str());
+			
+			/* max = maximal output items */
+			int max = -1;
+			if (!(request->ParameterList["max"].empty()))
+				max = atoi( request->ParameterList["max"].c_str() );
+			
+			/* stoptime = maximal output items until starttime >= stoptime*/
+			long stoptime = -1;
+			if (!(request->ParameterList["stoptime"].empty()))
+				stoptime = atol( request->ParameterList["stoptime"].c_str() );
+			int i=0;
+			CChannelEventList::iterator eventIterator;
+			for (eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++, i++)
+			{
+				if( (max != -1 && i >= max) || ( stoptime != -1 && eventIterator->startTime >= stoptime))
+					break;
+				request->SocketWriteLn("<prog>");
+				request->printf("\t<eventid>%llu</eventid>\r\n", eventIterator->eventID);
+				request->printf("\t<eventid_hex>%llx</eventid_hex>\r\n", eventIterator->eventID);
+				request->printf("\t<start_sec>%ld</start_sec>\r\n", eventIterator->startTime);
+				char zbuffer[25] = {0};
+				struct tm *mtime = localtime(&eventIterator->startTime);
+				strftime(zbuffer,20,"%H:%M",mtime);
+				request->printf("\t<start_t>%s</start_t>\r\n", zbuffer);
+				
+				request->printf("\t<stop_sec>%ld</stop_sec>\r\n", eventIterator->startTime+eventIterator->duration);
+				long _stoptime = eventIterator->startTime+eventIterator->duration;
+				mtime = localtime(&_stoptime);
+				strftime(zbuffer,20,"%H:%M",mtime);
+				request->printf("\t<stop_t>%s</stop_t>\r\n", zbuffer);
+				
+				request->printf("\t<duration_min>%d</duration_min>\r\n", (int)(eventIterator->duration/60));
+				
+				request->printf("\t<description><![CDATA[%s]]></description>\r\n", eventIterator->description.c_str());
+			
+				if (!(request->ParameterList["details"].empty()))
+				{
+					CShortEPGData epg;
+	
+					if (Parent->Sectionsd->getEPGidShort(eventIterator->eventID,&epg))
+					{
+						request->printf("\t<info1><![CDATA[%s]]></info1>\r\n",epg.info1.c_str());
+						request->printf("\t<info2><![CDATA[%s]]></info2>\r\n",epg.info2.c_str());
+					}
+				}
+				request->SocketWriteLn("</prog>");
+			}
+			request->SocketWriteLn("</epglist>");
+			return true;
+		}
+	}
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	request->SendError();
 	return false;
 }
@@ -1307,6 +1410,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 bool CControlAPI::VersionCGI(CWebserverRequest *request)
 {
 	// aktuelle cramfs version ausgeben
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	request->SendFile("/",".version");
 	return true;
 }
@@ -1367,6 +1471,27 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 		else if (request->ParameterList["1"] == "statussectionsd")
 		{
 			request->SocketWrite((char *) (Parent->Sectionsd->getIsScanningActive() ? "1" : "0"));
+			return true;
+		}
+		else if (request->ParameterList["1"] == "getallsubchannels")
+		{
+			t_channel_id current_channel = Parent->Zapit->getCurrentServiceID();
+			CSectionsdClient::LinkageDescriptorList desc;
+			CSectionsdClient::responseGetCurrentNextInfoChannelID currentNextInfo;
+			Parent->Sectionsd->getCurrentNextServiceKey(current_channel, currentNextInfo);
+			if (Parent->Sectionsd->getLinkageDescriptorsUniqueKey(currentNextInfo.current_uniqueKey,desc))
+			{
+				for(int i=0;i< desc.size();i++)
+				{
+					t_channel_id sub_channel_id = 
+						CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(
+						desc[i].serviceId, desc[i].originalNetworkId, desc[i].transportStreamId);
+					request->printf(PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+							" %s\n",
+							sub_channel_id,
+							(desc[i].name).c_str());
+				}
+			}
 			return true;
 		}
 		else if (request->ParameterList["name"] != "")

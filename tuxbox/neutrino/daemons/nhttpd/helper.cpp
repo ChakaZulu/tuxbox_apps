@@ -221,7 +221,7 @@ char *b64buffer(char *s, bool f)
 // Helpers
 //-------------------------------------------------------------------------
 // ySplitString: spit string "str" in two strings "left" and "right" at
-//	"delimiter" 
+//	"delimiter" returns true if delimiter found
 //-------------------------------------------------------------------------
 bool ySplitString(std::string str, std::string delimiter, std::string& left, std::string& right)
 {
@@ -235,7 +235,41 @@ bool ySplitString(std::string str, std::string delimiter, std::string& left, std
 		left = str; //default if not found
 	return (pos != std::string::npos);
 }
+//-------------------------------------------------------------------------
+// ySplitStringVector: spit string "str" and build vector of strings
+//-------------------------------------------------------------------------
+std::vector<std::string> ySplitStringVector(std::string str, std::string delimiter)
+{
+	std::string left, right, rest;
+	bool found;
+	std::vector<std::string> split;
+	rest = str;
+	do
+	{
+		found = ySplitString(rest, delimiter, left, right);
+		split.push_back(left);
+		rest = right;
+	}
+	while(found);
+	return split;
+}
+//-------------------------------------------------------------------------
+// trim whitespaces
+//-------------------------------------------------------------------------
+std::string trim(std::string const& source, char const* delims) 
+{
+	std::string result(source);
+	std::string::size_type index = result.find_last_not_of(delims);
+	if(index != std::string::npos)
+		result.erase(++index);
 
+	index = result.find_first_not_of(delims);
+	if(index != std::string::npos)
+		result.erase(0, index);
+	else
+		result.erase();
+	return result;
+}
 //-------------------------------------------------------------------------
 // equal-function for case insensitive compare
 bool nocase_compare (char c1, char c2)

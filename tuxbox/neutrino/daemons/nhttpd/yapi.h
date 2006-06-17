@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: yapi.h,v 1.7 2006/03/18 16:50:07 yjogol Exp $
+        $Id: yapi.h,v 1.8 2006/06/17 17:24:10 yjogol Exp $
 
         License: GPL
 
@@ -41,6 +41,7 @@
 
 #include <dbox/fp.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 //#include <unistd.h>
 
 // nhttpd
@@ -69,16 +70,19 @@ class CyAPI
 private:
 	CWebDbox	*Parent;
 
-	std::map<std::string, std::string> ycgi_vars;
+	// ycgi globals 
 	std::map<std::string, std::string> ycgi_global_vars;
-	CConfigFile *Config;
+	
+	// caching
+	struct stat yCached_blocks_attrib;
+	std::string yCached_blocks_filename;
+	std::string yCached_blocks_content;
 	
 	// parsing engine
 	std::string cgi_file_parsing(CWebserverRequest *request, std::string htmlfilename, bool ydebug);
 	std::string cgi_cmd_parsing(CWebserverRequest* request, std::string html_template, bool ydebug);
 	std::string YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd);
 	std::string YWeb_cgi_func(CWebserverRequest* request, std::string ycmd);
-	void reset_parsing_engine(void);
 
 	// func
 	std::string func_mount_get_list();
@@ -96,9 +100,12 @@ private:
 	std::string func_do_reload_nhttpd_config(CWebserverRequest* request);
 	std::string func_get_partition_list();
 	std::string func_get_boxtype();
+	std::string func_change_nhttpd(CWebserverRequest* request, std::string para);
+
+	
 	// helpers
-	std::string YWeb_cgi_get_ini(std::string filename, std::string varname, std::string yaccess);
-	void YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue, std::string yaccess);
+	std::string YWeb_cgi_get_ini(CWebserverRequest *request, std::string filename, std::string varname, std::string yaccess);
+	void YWeb_cgi_set_ini(CWebserverRequest *request, std::string filename, std::string varname, std::string varvalue, std::string yaccess);
 	std::string YWeb_cgi_include_block(std::string filename, std::string blockname, std::string ydefault);
 
 public:

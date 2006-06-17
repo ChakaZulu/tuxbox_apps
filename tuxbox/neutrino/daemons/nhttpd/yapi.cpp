@@ -1,9 +1,7 @@
 /*
 	nhttpd  -  DBoxII-Project
 
-	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
-
-	$Id: yapi.cpp,v 1.11 2006/04/08 16:20:42 yjogol Exp $
+	$Id: yapi.cpp,v 1.12 2006/06/17 17:24:10 yjogol Exp $
 
 	License: GPL
 
@@ -138,23 +136,6 @@
 #include "yapi.h"
 
 //-------------------------------------------------------------------------
-// trim whitespaces
-//-------------------------------------------------------------------------
-std::string trim(std::string const& source, char const* delims = " \t\r\n") 
-{
-	std::string result(source);
-	std::string::size_type index = result.find_last_not_of(delims);
-	if(index != std::string::npos)
-		result.erase(++index);
-
-	index = result.find_first_not_of(delims);
-	if(index != std::string::npos)
-		result.erase(0, index);
-	else
-		result.erase();
-	return result;
-}
-//-------------------------------------------------------------------------
 // constructor und destructor
 //-------------------------------------------------------------------------
 CyAPI::CyAPI(CWebDbox *webdbox)
@@ -167,13 +148,12 @@ CyAPI::CyAPI(CWebDbox *webdbox)
 			HTML_DIRS[1]=Parent->Parent->PrivateDocumentRoot;
 			HTML_DIRS[2]=yHTML_SEARCHFOLDER_MOUNT;
 		}
-	Config = new CConfigFile(',');
+	yCached_blocks_attrib.st_mtime = 0;
 }
 //-------------------------------------------------------------------------
 CyAPI::~CyAPI(void)
 {
-	if(Config != NULL)
-		delete Config;
+
 }
 //-------------------------------------------------------------------------
 //	Call Dispatcher (/y/<execute command>)
@@ -214,15 +194,6 @@ bool CyAPI::Execute(CWebserverRequest* request)
 }
 
 //-------------------------------------------------------------------------
-// reset state and vars of parsing engine
-//-------------------------------------------------------------------------
-
-void CyAPI::reset_parsing_engine(void)
-{
-	ycgi_vars.clear();
-}
-
-//-------------------------------------------------------------------------
 // mini cgi Engine (Entry for ycgi) 
 //-------------------------------------------------------------------------
 
@@ -232,7 +203,6 @@ bool CyAPI::cgi(CWebserverRequest *request)
 	bool ydebug = false, yexecute = false;
 	std::string htmlfilename, yresult, ycmd;
 
-	reset_parsing_engine();
 	request->SendPlainHeader("text/html");          // Standard httpd header senden MIME html
 
 	if (request->ParameterList.size() > 0)
@@ -281,7 +251,6 @@ bool CyAPI::ParseAndSendFile(CWebserverRequest *request)
 	bool ydebug = false;
 	std::string yresult, ycmd;
 
-	reset_parsing_engine();
 	request->SendPlainHeader("text/html");          // Standard httpd header senden MIME html
 	if (request->Method == M_HEAD) {
 			return true;
@@ -364,18 +333,19 @@ std::string  CyAPI::cgi_cmd_parsing(CWebserverRequest* request, std::string html
 		is_cmd=false;
 		if((end = html_template.find(YCGI_ESCAPE_END)) != std::string::npos) 				// 1. find first y-end
 		{
-			if(ydebug) request->printf("[ycgi debug]: END at:%d following:%s<br>\n", end, (html_template.substr(end, 10)).c_str() );
+			if(ydebug) request->printf("[ycgi debug]: END at:%d following:%s<br/>\n", end, (html_template.substr(end, 10)).c_str() );
 			if((start = html_template.rfind(YCGI_ESCAPE_START, end)) != std::string::npos) 		// 2. find next y-start befor
 			{
-				if(ydebug) request->printf("[ycgi debug]: START at:%d following:%s<br>\n", start, (html_template.substr(start+esc_len, 10)).c_str() );
+				if(ydebug) request->printf("[ycgi debug]: START at:%d following:%s<br/>\n", start, (html_template.substr(start+esc_len, 10)).c_str() );
 
 				ycmd = html_template.substr(start+esc_len,end - (start+esc_len)); 	//3. get cmd
-				if(ydebug) request->printf("[ycgi debug]: CMD:[%s]<br>\n", ycmd.c_str());
+				if(ydebug) request->printf("[ycgi debug]: CMD:[%s]<br/>\n", ycmd.c_str());
 				yresult = YWeb_cgi_cmd( request, ycmd ); 				// 4. execute cmd
+				if(ydebug) request->printf("[ycgi debug]: RESULT:[%s]<br/>\n", yresult.c_str());
 				html_template.replace(start,end - start + esc_len, yresult); 		// 5. replace cmd with output
 				is_cmd = true;	// one command found
 				
-				if(ydebug) request->printf("[ycgi debug]: STEP<br>\n%s<br>\n", html_template.c_str() );
+				if(ydebug) request->printf("[ycgi debug]: STEP<br/>\n%s<br/>\n", html_template.c_str() );
 			}
 		}
 	}
@@ -486,7 +456,7 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 			if (ySplitString(filename,";",filename,tmp))
 			{
 				ySplitString(tmp,";",varname, ydefault);
-				yresult = YWeb_cgi_get_ini(filename, varname, yaccess);
+				yresult = YWeb_cgi_get_ini(request, filename, varname, yaccess);
 				if(yresult == "" && ydefault != "")
 					yresult = ydefault;
 			}
@@ -500,20 +470,20 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 			if (ySplitString(filename,";",filename,tmp))
 			{
 				if(ySplitString(tmp,";",varname, varvalue))
-					YWeb_cgi_set_ini(filename, varname, varvalue, yaccess);
+					YWeb_cgi_set_ini(request, filename, varname, varvalue, yaccess);
 			}
 			else
 				yresult = "ycgi: ini-get: no ; found";
 		}
 		else if(ycmd_type == "var-get")
 		{
-			yresult = ycgi_vars[ycmd_name];
+			yresult = request->ycgi_vars[ycmd_name];
 		}
 		else if(ycmd_type == "var-set")
 		{
 			std::string varname, varvalue;
 			if (ySplitString(ycmd_name,"=",varname,varvalue))
-				ycgi_vars[varname] = varvalue;
+				request->ycgi_vars[varname] = varvalue;
 		}
 		else if(ycmd_type == "global-var-get")
 		{
@@ -564,35 +534,35 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 // Get Value from ini/conf-file (filename) for var (varname)
 // yaccess = open | cache 
 //-------------------------------------------------------------------------
-std::string  CyAPI::YWeb_cgi_get_ini(std::string filename, std::string varname, std::string yaccess)
+std::string  CyAPI::YWeb_cgi_get_ini(CWebserverRequest *request, std::string filename, std::string varname, std::string yaccess)
 {
 //	aprintf("ini-get: var:%s yaccess:(%s)\n", varname.c_str(), yaccess.c_str());
 	std::string result;
 	if((yaccess == "open") || (yaccess == ""))
 	{
-		Config->clear();
-		Config->loadConfig(filename);
+		request->yConfig->clear();
+		request->yConfig->loadConfig(filename);
 	}
-	result = Config->getString(varname, "");
-	return result;	
+	result = request->yConfig->getString(varname, "");
+	return result;
 }
 
 //-------------------------------------------------------------------------
 // set Value from ini/conf-file (filename) for var (varname)
 // yaccess = open | cache | save
 //-------------------------------------------------------------------------
-void  CyAPI::YWeb_cgi_set_ini(std::string filename, std::string varname, std::string varvalue, std::string yaccess)
+void  CyAPI::YWeb_cgi_set_ini(CWebserverRequest *request, std::string filename, std::string varname, std::string varvalue, std::string yaccess)
 {
 //	aprintf("ini-set: var:%s yaccess:(%s)\n", varname.c_str(), yaccess.c_str());
 	std::string result;
 	if((yaccess == "open") || (yaccess == ""))
 	{
-		Config->clear();
-		Config->loadConfig(filename);
+		request->yConfig->clear();
+		request->yConfig->loadConfig(filename);
 	}
-	Config->setString(varname, varvalue);
+	request->yConfig->setString(varname, varvalue);
 	if((yaccess == "save") || (yaccess == ""))
-		Config->saveConfig(filename);
+		request->yConfig->saveConfig(filename);
 }
 
 //-------------------------------------------------------------------------
@@ -603,18 +573,27 @@ void  CyAPI::YWeb_cgi_set_ini(std::string filename, std::string varname, std::st
 std::string  CyAPI::YWeb_cgi_include_block(std::string filename, std::string blockname, std::string ydefault)
 {
 	std::string ytmp, yfile, yresult;
-	
+	struct stat attrib;
 	yresult = ydefault;
 
-	std::fstream fin(filename.c_str(), std::fstream::in);
-	if(fin.good())
+	stat(filename.c_str(), &attrib);
+	if( (attrib.st_mtime == yCached_blocks_attrib.st_mtime) && (filename == yCached_blocks_filename) )
+		yfile = yCached_blocks_content;
+	else
 	{
-		while (!fin.eof()) // read whole file into yfile 
+		std::fstream fin(filename.c_str(), std::fstream::in);
+		if(fin.good())
 		{
-			getline(fin, ytmp);
-			yfile += ytmp;
+			while (!fin.eof()) // read whole file into yfile 
+			{
+				getline(fin, ytmp);
+				yfile += ytmp+"\n";
+			}
+			fin.close();
 		}
-		fin.close();
+		yCached_blocks_content = yfile;
+		yCached_blocks_attrib = attrib;
+		yCached_blocks_filename = filename;
 	}
 	if(yfile.length() != 0)
 	{
@@ -652,11 +631,11 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 		"mount-get-list", "mount-set-values", 
 		"get_bouquets_as_dropdown", "get_actual_bouquet_number", "get_channels_as_dropdown", "get_actual_channel_id",
 		"get_mode", "get_video_pids", "get_audio_pid", "get_audio_pids_as_dropdown", "get_request_data",
-		"umount_get_list", "do_reload_nhttpd_config", "get_partition_list", "get_boxtype",
+		"umount_get_list", "do_reload_nhttpd_config", "get_partition_list", "get_boxtype", "nhttpd_change",
 		 NULL};
 
 	ySplitString(ycmd," ",func, para);
-	aprintf("ycgi func dispatcher func:[%s] para:[%s]\n",func.c_str(),para.c_str());
+	aprintf("ycgi [rnr:%ld] func dispatcher func:[%s] para:[%s]",request->RequestNumber, func.c_str(),para.c_str());
 
 	while (operations[operation]) {
 		if (func.compare(operations[operation]) == 0) {
@@ -715,9 +694,13 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 		case 14:yresult = func_get_boxtype();
 			break;
 
+		case 15:yresult = func_change_nhttpd(request,para);
+			break;
+
 		default:
 			yresult = "ycgi func not found";
 	}
+	aprintf(" [rnr:%ld] result:[%s]\n",request->RequestNumber,yresult.c_str());
 	return yresult;
 }
 
@@ -735,7 +718,7 @@ std::string  CyAPI::func_mount_get_list()
 	for(unsigned int i=0; i <= 7; i++)
 	{
 		ynr=itoa(i);
-		ysel = ((i==0) ? "checked" : "");
+		ysel = ((i==0) ? "checked=\"checked\"" : "");
 		yitype = Config->getInt32("network_nfs_type_"+ynr,0);
 		ytype = ( (yitype==0) ? "NFS" :((yitype==1) ? "CIFS" : "FTPFS") ); 
 		yip = Config->getString("network_nfs_ip_"+ynr,"");
@@ -744,7 +727,7 @@ std::string  CyAPI::func_mount_get_list()
 		if(ydir != "") 
 			ydir="("+ydir+")";
 
-		sprintf(ytmp,"<input type='radio' name='R1' value='%d' %s>%d %s - %s %s %s<br>",
+		sprintf(ytmp,"<input type='radio' name='R1' value='%d' %s />%d %s - %s %s %s<br/>",
 			i,ysel.c_str(),i,ytype.c_str(),yip.c_str(),ylocal_dir.c_str(), ydir.c_str());
 
 		yresult += ytmp;
@@ -783,16 +766,22 @@ std::string  CyAPI::func_mount_set_values(CWebserverRequest* request)
 //-------------------------------------------------------------------------
 std::string  CyAPI::func_get_bouquets_as_dropdown(std::string para)
 {
-	std::string ynr, yresult, sel;
+	std::string ynr, yresult, sel, nr_str, do_show_hidden;
 	char buf[60];
 	unsigned int nr=1;
 	
-	nr = atoi(para.c_str());
+	ySplitString(para," ",nr_str, do_show_hidden);
+	if(nr_str != "")
+		nr = atoi(nr_str.c_str());
+	
 	for (unsigned int i = 0; i < Parent->BouquetList.size();i++)
 	{	
-		sel=(nr==(i+1)) ? "selected" : "";
-		sprintf(buf,"<option value=%u %s>%s</option>\n", (Parent->BouquetList[i].bouquet_nr) + 1, sel.c_str(), Parent->BouquetList[i].name);
-		yresult += buf;
+		sel=(nr==(i+1)) ? "selected=\"selected\"" : "";
+		if(!Parent->BouquetList[i].hidden || do_show_hidden == "true")
+		{
+			sprintf(buf,"<option value=%u %s>%s</option>\n", (Parent->BouquetList[i].bouquet_nr) + 1, sel.c_str(), Parent->BouquetList[i].name);
+			yresult += buf;
+		}
 	}
 /* NOT activated in R1.3.4 - still work on getPIDS for not current channel	
 	// Transponder View
@@ -854,7 +843,7 @@ std::string  CyAPI::func_get_channels_as_dropdown(std::string para)
 			sprintf(id,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,channel->channel_id);
 			sid = std::string(id);
 
-			sel = (sid == achannel_id) ? "selected" : "";
+			sel = (sid == achannel_id) ? "selected=\"selected\"" : "";
 			Parent->Sectionsd->getActualEPGServiceKey(channel->channel_id, &epg);
 			sprintf(buf,"<option value="PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS" %s>%.20s - %.30s</option>\n", channel->channel_id, sel.c_str(), channel->name,epg.title.c_str());
 			yresult += buf;
@@ -873,7 +862,7 @@ std::string  CyAPI::func_get_channels_as_dropdown(std::string para)
 			{
 				sprintf(id,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,channel->channel_id);
 				sid = std::string(id);
-				sel = (sid == achannel_id) ? "selected" : "";
+				sel = (sid == achannel_id) ? "selected=\"selected\"" : "";
 			
 				Parent->Sectionsd->getActualEPGServiceKey(channel->channel_id, &epg);
 				sprintf(buf,"<option value="PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS" %s>%.20s - %.30s</option>\n", channel->channel_id, sel.c_str(), channel->name,epg.title.c_str());
@@ -914,7 +903,7 @@ std::string  CyAPI::func_get_mode()
 //-------------------------------------------------------------------------
 std::string  CyAPI::func_get_video_pids(std::string para)
 {
-	char buf[20];
+	char buf[30];
 	CZapitClient::responseGetPIDs pids;
 	int apid=0,apid_no=0,apid_idx=0;
 	pids.PIDs.vpid=0;
@@ -944,7 +933,7 @@ std::string  CyAPI::func_get_radio_pid()
 		apid = pids.APIDs[0].pid;
 	
 	sprintf(buf,"0x%04x",apid);
-	return std::string(buf);	
+	return std::string(buf);
 }
 
 //-------------------------------------------------------------------------
@@ -1068,8 +1057,8 @@ std::string  CyAPI::func_unmount_get_list()
 		if( (yfstype == "nfs") << (yfstype == "ftp") || (yfstype == "lufsd") )
 		{
 			mounts=ylocal_dir +" on "+ ymount + " ("+yfstype+")";
-			ysel = ((j==0) ? "checked" : "");
-			sprintf(ytmp,"<input type='radio' name='R1' value='%s' %s>%d %.120s<br>",
+			ysel = ((j==0) ? "checked=\"checked\"" : "");
+			sprintf(ytmp,"<input type='radio' name='R1' value='%s' %s />%d %.120s<br/>",
 				ylocal_dir.c_str(),ysel.c_str(),j,mounts.c_str());
 
 			yresult += ytmp;
@@ -1106,8 +1095,8 @@ std::string  CyAPI::func_get_partition_list()
 		yname = ytmp;
 		if((j>0) && (ymtd != ""))// iggnore first line
 		{
-			ysel = ((j==1) ? "checked" : "");
-			sprintf(ytmp,"<input type='radio' name='R1' value='%d' %s title='%s'>%d %s<br>",
+			ysel = ((j==1) ? "checked=\"checked\"" : "");
+			sprintf(ytmp,"<input type='radio' name='R1' value='%d' %s title='%s' />%d %s<br/>",
 				j-1,ysel.c_str(),yname.c_str(),j-1,yname.c_str());
 			yresult += ytmp;
 		}
@@ -1121,5 +1110,20 @@ std::string  CyAPI::func_get_partition_list()
 std::string  CyAPI::func_get_boxtype()
 {
 	return Parent->Dbox_Hersteller[Parent->Controld->getBoxType()];
+}
+//-------------------------------------------------------------------------
+// y-func : Change nhttpd (process image) on the fly
+//-------------------------------------------------------------------------
+std::string  CyAPI::func_change_nhttpd(CWebserverRequest* request, std::string para)
+{
+	if(para != "" && access(para.c_str(), 4) == 0)
+	{
+		request->EndRequest();
+		int err = execvp(para.c_str(), NULL); // no return if successful
+		return "ERROR [change_httpd]: execvp returns error code: "+err;
+	}
+	
+	else
+	return "ERROR [change_httpd]: para has not path to a file";
 }
 

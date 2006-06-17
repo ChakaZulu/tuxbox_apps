@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.27 2006/04/08 16:20:42 yjogol Exp $
+        $Id: request.h,v 1.28 2006/06/17 17:24:10 yjogol Exp $
 
         License: GPL
 
@@ -29,6 +29,9 @@
 
 #include <string>
 #include <map>
+
+#include <config.h>
+#include <configfile.h>
 
 #include "webserver.h"
 
@@ -92,6 +95,10 @@ public:
 	std::string Param_String;
 	std::string Client_Addr;
 
+	//ycgi session vars
+	std::map<std::string, std::string> ycgi_vars;
+	CConfigFile *yConfig;
+	
 	CStringList ParameterList;
 	CStringList HeaderList;
 	

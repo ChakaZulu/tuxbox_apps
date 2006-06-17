@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.28 2006/03/29 15:31:55 yjogol Exp $
+	$Id: webserver.cpp,v 1.29 2006/06/17 17:24:10 yjogol Exp $
 
 	License: GPL
 
@@ -104,6 +104,8 @@ void CWebserver::ReadConfig(void)
 	PrivateDocumentRoot = Config->getString("PrivatDocRoot", PRIVATEDOCUMENTROOT);
 	PublicDocumentRoot = Config->getString("PublicDocRoot", PUBLICDOCUMENTROOT);
 	HostedDocumentRoot = Config->getString("HostedDocRoot", HOSTEDDOCUMENTROOT);
+	ExtrasDocumentRoot = Config->getString("ExtrasDocRoot", EXTRASDOCUMENTROOT);
+	ExtrasDocumentURL = Config->getString("ExtrasDocURL", EXTRASDOCUMENTURL);
 	NewGui = Config->getBool("NewGui", true);
 	Zapit_XML_Path = Config->getString("Zapit_XML_Path", "/var/tuxbox/config/zapit");
 	AuthUser = Config->getString("AuthUser", "root");

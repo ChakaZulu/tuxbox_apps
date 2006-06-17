@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.16 2006/06/10 11:13:56 barf Exp $
+        $Id: controlapi.h,v 1.17 2006/06/17 17:24:10 yjogol Exp $
 
         License: GPL
 
