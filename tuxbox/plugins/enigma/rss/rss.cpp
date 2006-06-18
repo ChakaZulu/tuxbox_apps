@@ -262,13 +262,26 @@ int ConfigParser::parse(eString file)
 	FILE *in = fopen(file.c_str(), "rt");
 
         if(in) 
-	{	parser = new XMLTreeParser("ISO-8859-1");
-		char buf[2048];
+	{	char buf[2048];
+ 		char encoding[256];
 
 		int done;
+		sprintf(encoding,"ISO-8859-1");
+		unsigned int len=fread(buf, 1, sizeof(buf), in);
+		char * pointer=strstr(buf, "encoding=");
+		if (pointer!=NULL) pointer=strstr(pointer, "\"");
+		if (pointer!=NULL){
+		    pointer++;
+		    int i=0;
+		    while ((*pointer)!='\"')
+		    {
+			encoding[i++]=*pointer++;
+		    }
+	    	    encoding[i]=0;	
+		}
+		parser = new XMLTreeParser(encoding);
 		do 
-		{	unsigned int len=fread(buf, 1, sizeof(buf), in);
-			done = ( len < sizeof(buf) );
+		{	done = ( len < sizeof(buf) );
 			if ( ! parser->Parse( buf, len, done ) ) 
 			{	eMessageBox msg(_("Configfile parse error"), _("User Abort"), eMessageBox::iconWarning|eMessageBox::btOK);
 		                msg.show();     msg.exec();     msg.hide();
@@ -276,6 +289,7 @@ int ConfigParser::parse(eString file)
 				parser = NULL;
 				return 0;
 			}
+			len=fread(buf, 1, sizeof(buf), in);
 		} 
 		while (!done);
 
@@ -460,13 +474,26 @@ void RSSParser::parse(eString file)
 	newsItems.clear();
 
         if(in) 
-	{	parser = new XMLTreeParser("ISO-8859-1");
-		char buf[2048];
+	{	char buf[2048];
+ 		char encoding[256];
 
 		int done;
+		sprintf(encoding,"ISO-8859-1");
+		unsigned int len=fread(buf, 1, sizeof(buf), in);
+		char * pointer=strstr(buf, "encoding=");
+		if (pointer!=NULL) pointer=strstr(pointer, "\"");
+		if (pointer!=NULL){
+		    pointer++;
+		    int i=0;
+		    while ((*pointer)!='\"')
+		    {
+			encoding[i++]=*pointer++;
+		    }
+	    	    encoding[i]=0;	
+		}
+		parser = new XMLTreeParser(encoding);
 		do 
-		{	unsigned int len=fread(buf, 1, sizeof(buf), in);
-			done = ( len < sizeof(buf) );
+		{	done = ( len < sizeof(buf) );
 			if ( ! parser->Parse( buf, len, done ) ) 
 			{	eMessageBox msg(_("XML parse error (general xml)"), _("Error"), eMessageBox::iconWarning|eMessageBox::btOK);
 		                msg.show();     msg.exec();     msg.hide();
@@ -474,6 +501,7 @@ void RSSParser::parse(eString file)
 				parser = NULL;
 				return;
 			}
+			len=fread(buf, 1, sizeof(buf), in);
 		} 
 		while (!done);
 

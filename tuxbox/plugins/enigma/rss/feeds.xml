@@ -16,8 +16,84 @@
 		<url>http://www.tagesschau.de/xml/tagesschau-meldungen</url>
 	</feed>
 	<feed>
+		<name>Spiegel</name>
+		<url>http://www.spiegel.de/schlagzeilen/rss/0,5291,,00.xml</url>
+	</feed>
+	<feed>
 		<name>Focus Online News</name>
 		<url>http://focus.msn.de/fol/XML/rss_folnews.xml</url>
+	</feed>
+	<feed>
+		<name>Heise-News</name>
+		<url>http://www.heise.de/newsticker/heise.rdf</url>
+	</feed>
+	<feed>
+		<name>Heise-Security</name>
+		<url>http://www.heise.de/security/news/news.rdf</url>
+	</feed>
+	<feed>
+		<name>Heise-Mobil</name>
+		<url>http://www.heise.de/mobil/newsticker/heise.rdf</url>
+	</feed>
+	<feed>
+		<name>Heise-Open</name>
+		<url>http://www.heise.de/open/news/news.rdf</url>
+	</feed>
+	<feed>
+		<name>Chip-Downloads</name>
+		<url>http://www.chip.de/rss/rss_downloads.xml</url>
+	</feed>
+	<feed>
+		<name>Chip-TopNews</name>
+		<url>http://www.chip.de/rss/rss_topnews.xml</url>
+	</feed>
+	<feed>
+		<name>Chip-Tests</name>
+		<url>http://www.chip.de/rss/rss_tests.xml</url>
+	</feed>
+	<feed>
+		<name>Chip-Technik</name>
+		<url>http://www.chip.de/rss/rss_technik.xml</url>
+	</feed>
+	<feed>
+		<name>Chip-Schnäppchen</name>
+		<url>http://www.chip.de/rss/rss_schnaeppchen.xml</url>
+	</feed>
+	<feed>
+		<name>PC-Welt</name>
+		<url>http://www.pcwelt.de/news/rss/news.xml</url>
+	</feed>
+	<feed>
+		<name>Tom`s Hardware Unterhaltung</name>
+		<url>http://unterhaltung.thgweb.de/headlines.rss</url>
+	</feed>
+	<feed>
+		<name>Tom`s Hardware Praxis/Software</name>
+		<url>http://praxis.thgweb.de/headlines.rss</url>
+	</feed>
+	<feed>
+		<name>Tom`s Hardware News</name>
+		<url>http://news.thgweb.de/headlines.rss</url>
+	</feed>
+	<feed>
+		<name>Lycos - News</name>
+		<url>http://www.d.lycos.de/webhosting/freecontent/xml/news.xml</url>
+	</feed>
+	<feed>
+		<name>Lycos - Kino</name>
+		<url>http://www.d.lycos.de/webhosting/freecontent/xml/kino.xml</url>
+	</feed>
+	<feed>
+		<name>Lycos - Sport</name>
+		<url>http://www.d.lycos.de/webhosting/freecontent/xml/sport.xml</url>
+	</feed>
+	<feed>
+		<name>Lycos - Auto</name>
+		<url>http://www.d.lycos.de/webhosting/freecontent/xml/auto.xml</url>
+	</feed>
+	<feed>
+		<name>Filmspiegel</name>
+		<url>http://www.filmspiegel.de/rss/rss.php</url>
 	</feed>
 	<feed>
 		<name>Volkskrant</name>
@@ -32,4 +108,3 @@
 		<url>http://www.webwereld.nl/rss/trillian.rss</url>
 	</feed>
 </feeds>
-	
