@@ -85,7 +85,7 @@ function do_check()
 	=}
 	{=var-set:dboxshot={=if-file-exists:/bin/dboxshot~/bin/dboxshot~{=if-file-exists:/var/bin/dboxshot~/var/bin/dboxshot~false=}=}=}
 	{=if-equal:{=var-get:dboxshot=}~false~
-		sLog_addRow(sLog_body, "red", "Programs: dboxshot is not installed. Remote &amp; OSD is disabled. <a href='http://www.yjogol.de/yFAQ.htm#diy' target='_blank'><b>[Download]<\/b><\/a>, "failed");
+		sLog_addRow(sLog_body, "red", "Programs: dboxshot is not installed. Remote &amp; OSD is disabled. <a href='http://www.yjogol.de/yFAQ.htm#diy' target='_blank'><b>[Download]<\/b><\/a>", "failed");
 	~
 		sLog_addRow(sLog_body, "green", "Programs: dboxshot is installed at: {=var-get:dboxshot=}. Remote &amp; OSD is enabled.", "ok");
 	=}
