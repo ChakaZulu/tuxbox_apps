@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.68 2006/06/17 17:24:10 yjogol Exp $
+	$Id: controlapi.cpp,v 1.69 2006/06/18 16:46:45 yjogol Exp $
 
 	License: GPL
 
@@ -560,7 +560,6 @@ bool CControlAPI::SettingsCGI(CWebserverRequest *request)		// sendet die setting
 
 bool CControlAPI::GetServicesxmlCGI(CWebserverRequest *request)   // sendet die datei services.xml
 {
-	request->SendPlainHeader("text/xml");
 	request->SendFile("/var/tuxbox/config/zapit","services.xml");
 	return true;
 }
@@ -569,7 +568,6 @@ bool CControlAPI::GetServicesxmlCGI(CWebserverRequest *request)   // sendet die 
 
 bool CControlAPI::GetBouquetsxmlCGI(CWebserverRequest *request)		// sendet die datei bouquets.xml
 {
-	request->SendPlainHeader("text/xml");
 	request->SendFile("/var/tuxbox/config/zapit","bouquets.xml");
 	return true;
 }
@@ -1410,7 +1408,6 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 bool CControlAPI::VersionCGI(CWebserverRequest *request)
 {
 	// aktuelle cramfs version ausgeben
-	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	request->SendFile("/",".version");
 	return true;
 }
