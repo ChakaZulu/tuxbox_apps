@@ -677,6 +677,8 @@ void routeVideo() {
   routeVideo(v1, f.a1, v2, f.a2, v3, f.a3, fblk);
 }
 
+void disableVideoOutput(bool disable);
+
 void switch_vcr( bool vcr_on)
 {
 	int activeAspectRatio;
@@ -685,6 +687,7 @@ void switch_vcr( bool vcr_on)
 	{
 		//turn to scart-input
 	        activeAspectRatio = aspectRatio_vcr;
+		disableVideoOutput(false);
 		printf("[controld]: switch to scart-input... (%d)\n", settings.boxtype);
 	}
 	else
@@ -1107,7 +1110,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.122 2006/06/12 13:54:18 barf Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.123 2006/06/18 10:39:40 barf Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
