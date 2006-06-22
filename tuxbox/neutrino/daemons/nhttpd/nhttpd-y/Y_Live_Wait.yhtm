@@ -17,6 +17,10 @@
 //<![CDATA[
 function go_live()
 {
+	{=if-empty:{=channel=}~~
+		dbox_zapto("{=channel=}");
+	=}
+
 	var browser  = (is_ie) ? "ie" : "moz";
 
 //	if("{=mode=}" == "tv")

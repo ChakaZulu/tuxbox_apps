@@ -1,3 +1,4 @@
+{=var-set:dboxshot={=if-file-exists:/bin/dboxshot~/bin/dboxshot~{=if-file-exists:/var/bin/dboxshot~/var/bin/dboxshot~/var/bin/dboxshot=}=}=}
 {=include-block:Y_Blocks.txt;head=}
 <script type="text/javascript" src="/Y_Baselib.js"></script>
 <script type="text/javascript">
@@ -9,9 +10,11 @@ function rcsim(_key)
 }
 function do_dboxshot()
 {
+	{=if-empty:{=var-get:dboxshot=}~~
 	var _shot = document.getElementById("shot");
-	dbox_exec_command("dboxshot -o /tmp/a.bmp");
+	dbox_exec_command("{=var-get:dboxshot=} -o /tmp/a.bmp");
 	_shot.src = "/tmp/a.bmp?"+Math.random();
+	=}
 }
 function do_clearshot()
 {
@@ -32,15 +35,14 @@ function do_clearshot2()
 	<div class="work_box_head"><div class="work_box_head_h2">
 	{=var-set:help_url=Neutrino:yWeb:BoxControl#Remote_OSD=}{=var-set:menu=Remote &amp; OSD=}{=include-block:Y_Blocks.txt;work_menu=}</div></div>
 	<div class="work_box_body">
-		{=var-set:dboxshot={=if-file-exists:/bin/dboxshot~true~{=if-file-exists:/var/bin/dboxshot~true~false=}=}=}
-		{=if-equal:{=var-get:dboxshot=}~true~
+		{=if-empty:{=var-get:dboxshot=}~~
 		<button name="dboxshot" onclick="do_dboxshot()">shot</button>
 		=}
 		<button name="clearshot" onclick="do_clearshot()">Delete shots</button>
 		<table cellpadding="0">
 		<tr>
-			<td><img id="shot" src="" style="width:600px"/></td>
 			<td>{=include-block:Y_Blocks.txt;remote=}</td>
+			<td><img id="shot" src="" style="width:600px"/></td>
 		</tr>
 		</table>
 		

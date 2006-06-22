@@ -33,12 +33,11 @@ function changeChannel()
 	{
 		channel = document.x.channels[sel].value;
 		parent.live.do_stop();
-		dbox_zapto(channel);
-		parent.live.location.href="Y_Live_Wait.yhtm?mode={=func:get_mode=}&typ={=typ=}";
+		parent.live.location.href="Y_Live_Wait.yhtm?mode={=func:get_mode=}&typ={=typ=}&channel="+channel;
 	}
 	enablePanel(1);
 	{=if-equal:{=typ=}~live~
-		view_epg();
+//		view_epg();
 	=}
 }
 function view_epg()
@@ -82,7 +81,7 @@ function view_epg()
 <script type="text/javascript">
 //<![CDATA[
 	{=if-equal:{=typ=}~live~
-		window.setTimeout("view_epg()",1000);
+//		window.setTimeout("view_epg()",1000);
 	=}
 //]]>
 </script>

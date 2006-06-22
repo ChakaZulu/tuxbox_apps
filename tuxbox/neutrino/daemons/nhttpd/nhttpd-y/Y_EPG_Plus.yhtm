@@ -199,7 +199,7 @@ function build_time_list(_delta)
 		<div id="epg_plus">&nbsp;</div>
 		<div id="epg_info">
 			<strong>Details</strong>
-			<input type="button" value="Aufnahmen" title="set timer for recording" onclick="epg_set_timer()"/>
+			<input type="button" value="Aufnehmen" title="set timer for recording" onclick="epg_set_timer()"/>
 			<input type="button" value="Umschalten" title="switch to channel" onclick="epg_zapto()"/>
 			<div id="d_desc" class="ep_info_desc">&nbsp;</div>
 			<div id="d_info1" class="ep_info_info1">&nbsp;</div>

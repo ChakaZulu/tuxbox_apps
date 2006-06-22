@@ -1,4 +1,7 @@
 Severity	id		Headline							Build
+3-Average	JG200000504	fix: call dboxshot correctly if installed in /var/bin (in Remote OSD)	R2.0.1
+3-Average	JG200000506	Live: fixed Problems switching channels in LiveTV/Radio		R2.0.1
+5-Enhancement	JG200000507	Live: MiniEPG only on demand					R2.0.1
 
 5-Enhancement	JG200000478	Boxcontrol: OSD Screenshot: Support for dboxshot		R2.0.0
 5-Enhancement	JG200000480	Boxcontrol: Control: Live lock / unlock	R2.0.0
