@@ -257,6 +257,113 @@ void ConfigParser::save(ConfigItem i)
 {	configItems.push_back(i);
 }
 
+// Text ersetzen
+void replace(char * pointer, char * alt, char * neu){
+char *  dummy;
+char *  start;
+char *  ziel;
+int     laenge;
+
+    if (strstr(pointer, alt)==NULL) return;
+    dummy=pointer;
+    ziel=pointer;
+    while (dummy!=NULL){
+        start=dummy;
+        dummy=strstr(dummy, alt);
+        if (dummy!=NULL){
+            laenge=dummy-start;
+            if (laenge>=0){
+                memcpy(ziel, start, laenge);
+                ziel+=laenge;
+                strcpy(ziel, neu);
+                ziel+=strlen(neu);
+            }
+            dummy+=strlen(alt);
+        }
+    }
+    strcpy(ziel, start);
+}
+
+
+// HTML in Textdateien wandeln
+void replace_sonderzeichen(char * pointer){
+
+// Sonderzeichen ersetzen
+    replace(pointer, "&nbsp;", " ");
+    replace(pointer, "&quot;", "\"");
+    replace(pointer, "&apos;", "'");
+    replace(pointer, "&gt;", ">");
+    replace(pointer, "&lt;", "<");
+    replace(pointer, "&amp;", "&");
+// Sonderzeichen ersetzen
+    replace(pointer, "&auml;", "ä");
+    replace(pointer, "&ouml;", "ö");
+    replace(pointer, "&uuml;", "ü");
+    replace(pointer, "&Auml;", "Ä");
+    replace(pointer, "&Ouml;", "Ö");
+    replace(pointer, "&Uuml;", "Ü");
+    replace(pointer, "&szlig;", "ß");
+    replace(pointer, "&copy;", "\169");
+    replace(pointer, "&shy;", "\173");
+    replace(pointer, "&Agrave;", "\192");
+    replace(pointer, "&Aacute;", "\193");
+    replace(pointer, "&Acirc;", "\194");
+    replace(pointer, "&Atilde;", "\195");
+    replace(pointer, "&Aring;", "\197");
+    replace(pointer, "&AElig;", "\198");
+    replace(pointer, "&Ccedil;", "\199");
+    replace(pointer, "&Egrave;", "\200");
+    replace(pointer, "&Eacute;", "\201");
+    replace(pointer, "&Ecirc;", "\202");
+    replace(pointer, "&Euml;", "\203");
+    replace(pointer, "&Igrave;", "\204");
+    replace(pointer, "&Iacute;", "\205");
+    replace(pointer, "&Icirc;", "\206");
+    replace(pointer, "&Iuml;", "\207");
+    replace(pointer, "&ETH;", "\208");
+    replace(pointer, "&Ntilde;", "\209");
+    replace(pointer, "&Ograve;", "\210");
+    replace(pointer, "&Oacute;", "\211");
+    replace(pointer, "&Ocirc;", "\212");
+    replace(pointer, "&Otilde;", "\213");
+    replace(pointer, "&Oslash;", "\216");
+    replace(pointer, "&Ugrave;", "\217");
+    replace(pointer, "&Uacute;", "\218");
+    replace(pointer, "&Ucirc;", "\219");
+    replace(pointer, "&Yacute;", "\221");
+    replace(pointer, "&THORN;", "\222");
+    replace(pointer, "&agrave;", "\224");
+    replace(pointer, "&aacute;", "\225");
+    replace(pointer, "&acirc;", "\226");
+    replace(pointer, "&atilde;", "\227");
+    replace(pointer, "&aring;", "\229");
+    replace(pointer, "&aelig;", "\230");
+    replace(pointer, "&ccedil;", "\231");
+    replace(pointer, "&egrave;", "\232");
+    replace(pointer, "&eacute;", "\233");
+    replace(pointer, "&ecirc;", "\234");
+    replace(pointer, "&euml;", "\235");
+    replace(pointer, "&igrave;", "\236");
+    replace(pointer, "&iacute;", "\237");
+    replace(pointer, "&icirc;", "\238");
+    replace(pointer, "&iuml;", "\239");
+    replace(pointer, "&eth;", "\240");
+    replace(pointer, "&ntilde;", "\241");
+    replace(pointer, "&ograve;", "\242");
+    replace(pointer, "&oacute;", "\243");
+    replace(pointer, "&ocirc;", "\244");
+    replace(pointer, "&otilde;", "\245");
+    replace(pointer, "&oslash;", "\248");
+    replace(pointer, "&ugrave;", "\249");
+    replace(pointer, "&uacute;", "\250");
+    replace(pointer, "&ucirc;", "\251");
+    replace(pointer, "&yacute;", "\253");
+    replace(pointer, "&thorn;", "\254");
+    replace(pointer, "&yuml;", "\255");
+    replace(pointer, "&#169;", "©");
+    replace(pointer, "&middot;", "·");
+}
+
 int ConfigParser::parse(eString file)
 {	XMLTreeParser * parser;
 	FILE *in = fopen(file.c_str(), "rt");
@@ -315,6 +422,7 @@ int ConfigParser::parse(eString file)
 			{	for(XMLTreeNode * i = node->GetChild(); i; i = i->GetNext())
 				{	if(!strcmp(i->GetType(), "name"))
 					{	thisItem.name = i->GetData();
+						replace_sonderzeichen((char *)thisItem.name.c_str());
 					}
 					if(!strcmp(i->GetType(), "url"))
 					{	thisItem.url = i->GetData();
@@ -524,11 +632,13 @@ void RSSParser::parse(eString file)
 						{	for(XMLTreeNode * i = itemNode->GetChild(); i; i = i->GetNext())
 							{	if(!strcmp(i->GetType(), "title"))
 								{	thisItem.title = i->GetData();
+									replace_sonderzeichen((char *)thisItem.title.c_str());
 									thisItem.title.removeChars('\n');
 									thisItem.title.removeChars('\r');
 								}
 								if(!strcmp(i->GetType(), "description"))
 								{	eString desc = i->GetData();
+									replace_sonderzeichen((char *)desc.c_str());
 									desc.removeChars('\n');
 									desc.removeChars('\r');
 									desc = removeTags(desc);
@@ -551,11 +661,13 @@ void RSSParser::parse(eString file)
 				{	for(XMLTreeNode * i = node->GetChild(); i; i = i->GetNext())
 					{	if(!strcmp(i->GetType(), "title"))
 						{	thisItem.title = i->GetData();
+							replace_sonderzeichen((char *)thisItem.title.c_str());
 							thisItem.title.removeChars('\n');
 							thisItem.title.removeChars('\r');
 						}
 						if(!strcmp(i->GetType(), "description"))
 						{	eString desc = i->GetData();
+							replace_sonderzeichen((char *)desc.c_str());
 							desc.removeChars('\n');
 							desc.removeChars('\r');
 							desc = removeTags(desc);

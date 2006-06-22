@@ -60,6 +60,10 @@
 		<url>http://www.chip.de/rss/rss_schnaeppchen.xml</url>
 	</feed>
 	<feed>
+		<name>Golem</name>
+		<url>http://rss.golem.de/rss.php?feed=RSS1.0</url>
+	</feed>
+	<feed>
 		<name>PC-Welt</name>
 		<url>http://www.pcwelt.de/news/rss/news.xml</url>
 	</feed>
