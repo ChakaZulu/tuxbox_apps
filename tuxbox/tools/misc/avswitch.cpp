@@ -1,7 +1,7 @@
 /*
  * Tool for manipulating the AVS Switch settings.
  *
- * $Id: avswitch.cpp,v 1.1 2006/06/17 13:47:46 barf Exp $
+ * $Id: avswitch.cpp,v 1.2 2006/06/23 15:40:21 barf Exp $
  *
  * Copyright (C) 2006 Bengt Martensson <barf@bengt-martensson.de>
  *
@@ -32,7 +32,7 @@
 #include <dbox/avs_core.h>
 #include <sys/ioctl.h>
 
-static const char *version = "avswitch version 0.5; $Id: avswitch.cpp,v 1.1 2006/06/17 13:47:46 barf Exp $";
+static const char *version = "avswitch version 0.5; $Id: avswitch.cpp,v 1.2 2006/06/23 15:40:21 barf Exp $";
 
 class parameter {
 private:
@@ -224,23 +224,26 @@ void usage(std::string argv0) {
 
 int main(int argc, char *argv[]) {
   
+  parameter::open_device();
+
   parameter v1("v1", 0, 7, AVSIOGVSW1, "AVSIOGVSW1", AVSIOSVSW1, "AVSIOSVSW1");
   parameter a1("a1", 0, 4, AVSIOGASW1, "AVSIOGASW1", AVSIOSASW1, "AVSIOSASW1");
   parameter v2("v2", 0, 7, AVSIOGVSW2, "AVSIOGVSW2", AVSIOSVSW2, "AVSIOSVSW2");
-  parameter a2("a2", 0, 3, AVSIOGASW2, "AVSIOGASW2", AVSIOSASW2, "AVSIOSASW2");
+  parameter a2("a2", 0, 4, AVSIOGASW2, "AVSIOGASW2", AVSIOSASW2, "AVSIOSASW2");
   parameter v3("v3", 0, 7, AVSIOGVSW3, "AVSIOGVSW3", AVSIOSVSW3, "AVSIOSVSW3");
   parameter a3("a3", 0, 3, AVSIOGASW3, "AVSIOGASW3", AVSIOSASW3, "AVSIOSASW3");
   parameter fblk("fblk", 0, 3, AVSIOGFBLK, "AVSIOGFBLK",
 		 AVSIOSFBLK, "AVSIOSFBLK");
   parameter fnc("fnc", 0, 3, AVSIOGFNC, "AVSIOGFNC", AVSIOSFNC, "AVSIOSFNC");
-  parameter zcd("zcd", 0, 1, AVSIOGZCD, "AVSIOGZCD", AVSIOSZCD, "AVSIOSZCD");
-  parameter ycm("ycm", 0, 1, AVSIOGYCM, "AVSIOGYCM", AVSIOSYCM, "AVSIOSYCM");
+  if (parameter::nokia()) {
+    parameter ycm("ycm", 0, 1, AVSIOGYCM, "AVSIOGYCM", AVSIOSYCM, "AVSIOSYCM");
+    parameter zcd("zcd", 0, 1, AVSIOGZCD, "AVSIOGZCD", AVSIOSZCD, "AVSIOSZCD");
+  }
   parameter volume("volume", 0, 63, AVSIOGVOL, "AVSIOGVOL",
 		   AVSIOSVOL, "AVSIOSVOL");
   parameter mute("mute", 0, 1, AVSIOGMUTE, "AVSIOGMUTE",
 		 AVSIOSMUTE, "AVSIOSMUTE");
 
-  parameter::open_device();
 
   bool success = false;
 
