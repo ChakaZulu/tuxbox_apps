@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <string.h>
 #include "rss.h"
 
 extern "C" int plugin_exec( PluginParam *par );
@@ -599,7 +600,19 @@ void RSSParser::parse(eString file)
 		    }
 	    	    encoding[i]=0;	
 		}
+		if (strcmp(encoding,"windows-1254")==0){
+		    sprintf(encoding,"ISO-8859-9");
+		}
+		for (int i=0;i<strlen(encoding);i++){
+		    encoding[i]=toupper(encoding[i]);
+		}
+		if ((strcmp(encoding,"ISO-8859-1")!=0)&&(strcmp(encoding,"UTF-8")!=0)){
+		    sprintf(encoding,"ISO-8859-1");
+		}
 		parser = new XMLTreeParser(encoding);
+		if (parser==NULL){
+		    parser = new XMLTreeParser("ISO-8859-1");
+		}
 		do 
 		{	done = ( len < sizeof(buf) );
 			if ( ! parser->Parse( buf, len, done ) ) 
