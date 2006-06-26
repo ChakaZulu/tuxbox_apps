@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.62 2006/03/18 00:50:10 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.63 2006/06/26 18:05:52 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -187,6 +187,8 @@ void eExpertSetup::init_eExpertSetup()
 		sptsMode = 1;
 	eConfig::getInstance()->setKey("/extras/spts_mode", sptsMode);
 	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Enable SPTS-Mode"), "/extras/spts_mode", _("use SPTS-Mode (enables TS-recording)")))->selected, eExpertSetup::fileToggle,"/var/etc/.spts_mode");
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips )
+	CONNECT_2_1((new eListBoxEntryCheck(&list, _("New Philips driver"), "/extras/tda80xx", _("use tda80xx driver for Philips boxes")))->selected, eExpertSetup::fileToggle,"/var/etc/.tda80xx");
 #endif
 	setHelpID(92);
 }
