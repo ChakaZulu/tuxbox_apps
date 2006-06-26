@@ -102,13 +102,9 @@ int CStreamInfo2::exec()
 
 int CStreamInfo2::doSignalStrengthLoop ()
 {
-	neutrino_msg_t  msg;
+	neutrino_msg_t      msg;
 	CZapitClient::responseFESignal s;
-	CChannelList  	*channellist;
 
-
-
-	channellist = CNeutrinoApp::getInstance()->channelList;
 
 	while (1) {
 		neutrino_msg_data_t data;
@@ -140,20 +136,6 @@ int CStreamInfo2::doSignalStrengthLoop ()
 			paint (paint_mode);
 			continue;
 		}
-
-
-		// -- zap up & down
-		if (msg <= CRCInput::RC_up) {
-			channellist->zapTo(channellist->getActiveChannelNumber()+1);
-			paint (paint_mode);
-			continue;
-		}
-		if (msg <= CRCInput::RC_down) {
-			channellist->zapTo(channellist->getActiveChannelNumber()-1);
-			paint (paint_mode);
-			continue;
-		}
-
 
 		// -- any key --> abort
 		if (msg <= CRCInput::RC_MaxRC) {
