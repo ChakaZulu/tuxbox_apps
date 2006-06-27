@@ -615,14 +615,15 @@ void routeVideo(int v1, int a1,
 		if (ioctl(fd, AVSIOSASW2, &a2) < 0)
 			perror("[controld] AVSIOSASW2");
 
-		// Sagem does not have v3 and a3, see CXA2126 data sheet
-		if (settings.boxtype != CControld::TUXBOX_MAKER_SAGEM) {
+		// Sagem does not have v3, see CXA2126 data sheet
+		if (settings.boxtype != CControld::TUXBOX_MAKER_SAGEM)
 			if (ioctl(fd, AVSIOSVSW3, &v3) < 0)
 				perror("[controld] AVSIOSVSW3");
 
+		// Only Nokia has a3
+		if (settings.boxtype == CControld::TUXBOX_MAKER_NOKIA)
 			if (ioctl(fd, AVSIOSASW3, &a3) < 0)
 				perror("[controld] AVSIOSASW3");
-		}
 	}
 
 	if (fd != -1)
@@ -1110,7 +1111,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.123 2006/06/18 10:39:40 barf Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.124 2006/06/27 10:21:59 barf Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
