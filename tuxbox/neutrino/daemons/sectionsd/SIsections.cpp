@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.47 2006/05/21 19:20:40 mws Exp $
+// $Id: SIsections.cpp,v 1.48 2006/06/29 19:26:46 houdini Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -674,6 +674,8 @@ void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
 //      printf("Found Private Data Specifier\n");
       parsePrivateDataDescriptor((const char *)desc, s);
     }
+    // hotfix for ARD crash
+    if (len<desc->descriptor_length+2) break;
     len-=desc->descriptor_length+2;
     des+=desc->descriptor_length+2;
   }
