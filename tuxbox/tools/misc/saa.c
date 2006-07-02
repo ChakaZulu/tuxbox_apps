@@ -1,5 +1,5 @@
 /*
- * $Id: saa.c,v 1.14 2006/03/26 20:49:09 carjay Exp $
+ * $Id: saa.c,v 1.15 2006/07/02 12:20:15 barf Exp $
  * 
  * Test tool for the SAA 7126H/7127H-driver
  *
@@ -46,7 +46,7 @@ void help(char *prog_name) {
 		"                      0    power save off\n"
 		"                      1    power save on\n"
 		"-r, --rgb             rgb mode\n"
-		"-f, --fbas            fbas mode\n"
+		"-c, --cvbs, -f, --fbas cvbs mode\n"
 		"-s, --svideo          svideo mode\n"
 		"-y, --yuv-cvbs        yuv+cvbs mode\n"
 		"    --yuv-vbs         yuv+vbs mode\n"
@@ -181,7 +181,7 @@ static int read_mode(void)
 		printf("RGB\n");
 		break;
 	case SAA_MODE_FBAS:
-		printf("FBAS\n");
+		printf("CVBS\n");
 		break;
 	case SAA_MODE_SVIDEO:
 		printf("SVIDEO\n");
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 	  arg = SAA_MODE_RGB;
 	  mode = SAAIOSMODE;
 	}
-	else if ((strcmp("-f",argv[count]) == 0) || (strcmp("--fbas",argv[count]) == 0)) {
+	else if ((strcmp("-c",argv[count]) == 0) || (strcmp("--cvbs",argv[count]) == 0) || (strcmp("-f",argv[count]) == 0) || (strcmp("--fbas",argv[count]) == 0)) {
 		arg = SAA_MODE_FBAS;
 		mode = SAAIOSMODE;
 	}
