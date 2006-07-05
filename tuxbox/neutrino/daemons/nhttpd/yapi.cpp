@@ -1,7 +1,7 @@
 /*
 	nhttpd  -  DBoxII-Project
 
-	$Id: yapi.cpp,v 1.12 2006/06/17 17:24:10 yjogol Exp $
+	$Id: yapi.cpp,v 1.13 2006/07/05 18:41:05 yjogol Exp $
 
 	License: GPL
 
@@ -635,7 +635,7 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 		 NULL};
 
 	ySplitString(ycmd," ",func, para);
-	aprintf("ycgi [rnr:%ld] func dispatcher func:[%s] para:[%s]",request->RequestNumber, func.c_str(),para.c_str());
+	aprintf("ycgi [rnr:%ld] func dispatcher func:[%s] para:[%s]\n",request->RequestNumber, func.c_str(),para.c_str());
 
 	while (operations[operation]) {
 		if (func.compare(operations[operation]) == 0) {
@@ -700,7 +700,7 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 		default:
 			yresult = "ycgi func not found";
 	}
-	aprintf(" [rnr:%ld] result:[%s]\n",request->RequestNumber,yresult.c_str());
+//	aprintf(" [rnr:%ld] result:[%s]\n",request->RequestNumber,yresult.c_str());
 	return yresult;
 }
 

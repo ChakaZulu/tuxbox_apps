@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.30 2006/06/17 17:24:10 yjogol Exp $
+        $Id: webserver.h,v 1.31 2006/07/05 18:41:05 yjogol Exp $
 
         License: GPL
 
@@ -41,7 +41,7 @@
 #define SA	struct sockaddr
 #define SAI	struct sockaddr_in
 
-#define NHTTPD_VERSION "2.2.4"
+#define NHTTPD_VERSION "2.2.5"
 
 #define PRIVATEDOCUMENTROOT	"/share/tuxbox/neutrino/httpd-y"
 #define PUBLICDOCUMENTROOT	"/var/httpd"
