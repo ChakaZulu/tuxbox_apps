@@ -1,7 +1,7 @@
 /*
 	nhttpd  -  DBoxII-Project
 
-	$Id: yapi.cpp,v 1.13 2006/07/05 18:41:05 yjogol Exp $
+	$Id: yapi.cpp,v 1.14 2006/07/06 11:53:27 mws Exp $
 
 	License: GPL
 
@@ -31,22 +31,22 @@
 	If the output of a command has itselfs commands, they will be recursivly replaced.
 
 	<command> can be:
-		- <http - GET Variable>  
+		- <http - GET Variable>
 			get value of a http GET argument
 			example: /y/cgi?a=hello -> replaces {=a=} with "hello"
 
 		-"var-get:<varname>"
 			get value of a ycgi variable (scope: one parsing session)
-		
+
 		-"var-set:<varname>=<value>"
 			set value of a ycgi variable (scope: one parsing session)
-		
+
 		-"global-var-get:<varname>"
 			get value of a ycgi variable (scope: nhttpd session)
-		
+
 		-"global-var-set:<varname>=<value>"
 			set value of a ycgi variable (scope: nhttpd session)
-		
+
 		- "script:<shell-script-filename without .sh>
 			get output of a shell-script
 			example: replaces {=script:Y_Live url=} Output of shell-script-call
@@ -55,11 +55,11 @@
 		-"ini-get:<ini/conf-filename>;<varname>[;<default>]"
 			get value of a ini/conf file variable
 			example: replaces {=ini-get:/var/tuxbox/config/nhttpd.conf;AuthPassword=}
-				with the password for the WebInterface from the conf-file				 
+				with the password for the WebInterface from the conf-file
 
 		-"ini-set:<ini/conf-filename>;<varname>;<value>"
 			set value for a ini/conf file variable with value
-		
+
 		-"inculde:<filename>"
 			insert file
 			example: {=include:/var/tuxbox/config/nhttpd.conf=} wile be replaced
@@ -67,21 +67,21 @@
 
 		-"shell:<shell commands>" // To Be Implemented
 			execute shell command and replace with output
-			example: {=shell:echo "hello" >\tmp\a \ncat /tmp/a=} 
+			example: {=shell:echo "hello" >\tmp\a \ncat /tmp/a=}
 
 		-"func:<func name>[ <arguments>]"
 			execute secial functions
-			example: {=func:mount-get-list=} generates html-Radio-Buttons 
+			example: {=func:mount-get-list=} generates html-Radio-Buttons
 				for a mount list
-				
+
 		-"if-empty:<value>~<then>~<else>"
-		
+
 		-"if-equal:<left_value>~<right_value>~<then>~<else>"
 			 (left_value == right_value?)
-		
+
 		-"if-not-equal:<left_value>~<right_value>~<then>~<else>"
 			 (left_value != right_value?)
-		
+
 		- "if-file-exists:<filename>~<them>~<else>"
 		- "file-action:<filename>;<action>[;<content>]
 			<action>::=none | write | append | delete
@@ -96,7 +96,7 @@
 		- /y/cgi?<html file> parses html file
 		- /y/cgi?[...&]debug=1	returns debug: STEP by STEP replacement
 
-   --------------------------------------------------------------------------------------- 
+   ---------------------------------------------------------------------------------------
 */
 
 #define NEUTRINO_CONFIGFILE CONFIGDIR "/neutrino.conf"
@@ -194,7 +194,7 @@ bool CyAPI::Execute(CWebserverRequest* request)
 }
 
 //-------------------------------------------------------------------------
-// mini cgi Engine (Entry for ycgi) 
+// mini cgi Engine (Entry for ycgi)
 //-------------------------------------------------------------------------
 
 bool CyAPI::cgi(CWebserverRequest *request)
@@ -236,13 +236,13 @@ bool CyAPI::cgi(CWebserverRequest *request)
 	if (yresult.length()<=0)
 		request->Send404Error();
 	else
-		request->SocketWrite(yresult);	
+		request->SocketWrite(yresult);
 
 	return found;
 }
 
 //-------------------------------------------------------------------------
-// Parsing and sending .yhtm Files (Entry) 
+// Parsing and sending .yhtm Files (Entry)
 //-------------------------------------------------------------------------
 
 bool CyAPI::ParseAndSendFile(CWebserverRequest *request)
@@ -268,11 +268,11 @@ bool CyAPI::ParseAndSendFile(CWebserverRequest *request)
 	}
 	// parsing given file
 	yresult += cgi_file_parsing(request, request->Filename, ydebug);
-	
+
 	if (yresult.length()<=0)
 		request->Send404Error();
 	else
-		request->SocketWrite(yresult);	
+		request->SocketWrite(yresult);
 
 	return found;
 }
@@ -289,7 +289,7 @@ std::string CyAPI::cgi_file_parsing(CWebserverRequest *request, std::string html
 	std::string htmlfullfilename, yresult, html_template;
 
 
-	for (unsigned int i=0;i<HTML_DIR_COUNT && !found;i++) 
+	for (unsigned int i=0;i<HTML_DIR_COUNT && !found;i++)
 	{
 		htmlfullfilename = HTML_DIRS[i]+"/"+htmlfilename;
 		std::fstream fin(htmlfullfilename.c_str(), std::fstream::in);
@@ -297,10 +297,10 @@ std::string CyAPI::cgi_file_parsing(CWebserverRequest *request, std::string html
 		{
 			found = true;
 			chdir(HTML_DIRS[i].c_str()); // set working dir
-			
+
 			// read whole file into html_template
 			std::string ytmp;
-			while (!fin.eof()) 
+			while (!fin.eof())
 			{
 				getline(fin, ytmp);
 				html_template = html_template + ytmp + "\r\n";
@@ -327,7 +327,7 @@ std::string  CyAPI::cgi_cmd_parsing(CWebserverRequest* request, std::string html
 	unsigned int start, end, esc_len = strlen(YCGI_ESCAPE_START);
 	bool is_cmd;
 	std::string ycmd,yresult;
-	
+
 	do // replace all {=<cmd>=} nested and recursive
 	{
 		is_cmd=false;
@@ -344,12 +344,12 @@ std::string  CyAPI::cgi_cmd_parsing(CWebserverRequest* request, std::string html
 				if(ydebug) request->printf("[ycgi debug]: RESULT:[%s]<br/>\n", yresult.c_str());
 				html_template.replace(start,end - start + esc_len, yresult); 		// 5. replace cmd with output
 				is_cmd = true;	// one command found
-				
+
 				if(ydebug) request->printf("[ycgi debug]: STEP<br/>\n%s<br/>\n", html_template.c_str() );
 			}
 		}
 	}
-	while(is_cmd);	
+	while(is_cmd);
 	return html_template;
 }
 // =============================================================================================
@@ -357,7 +357,7 @@ std::string  CyAPI::cgi_cmd_parsing(CWebserverRequest* request, std::string html
 // =============================================================================================
 
 //-------------------------------------------------------------------------
-// ycgi : cmd executing 
+// ycgi : cmd executing
 //	script:<scriptname without .sh>
 //	include:<filename>
 //	func:<funcname> (funcname to be implemented in CyAPI::YWeb_cgi_func)
@@ -532,7 +532,7 @@ std::string  CyAPI::YWeb_cgi_cmd(CWebserverRequest* request, std::string ycmd)
 
 //-------------------------------------------------------------------------
 // Get Value from ini/conf-file (filename) for var (varname)
-// yaccess = open | cache 
+// yaccess = open | cache
 //-------------------------------------------------------------------------
 std::string  CyAPI::YWeb_cgi_get_ini(CWebserverRequest *request, std::string filename, std::string varname, std::string yaccess)
 {
@@ -584,7 +584,7 @@ std::string  CyAPI::YWeb_cgi_include_block(std::string filename, std::string blo
 		std::fstream fin(filename.c_str(), std::fstream::in);
 		if(fin.good())
 		{
-			while (!fin.eof()) // read whole file into yfile 
+			while (!fin.eof()) // read whole file into yfile
 			{
 				getline(fin, ytmp);
 				yfile += ytmp+"\n";
@@ -618,7 +618,7 @@ std::string  CyAPI::YWeb_cgi_include_block(std::string filename, std::string blo
 // =============================================================================================
 
 //-------------------------------------------------------------------------
-// y-func : dispatching and executing 
+// y-func : dispatching and executing
 //-------------------------------------------------------------------------
 
 std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
@@ -628,7 +628,7 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 	int operation = 0;
 
 	const char *operations[] = {
-		"mount-get-list", "mount-set-values", 
+		"mount-get-list", "mount-set-values",
 		"get_bouquets_as_dropdown", "get_actual_bouquet_number", "get_channels_as_dropdown", "get_actual_channel_id",
 		"get_mode", "get_video_pids", "get_audio_pid", "get_audio_pids_as_dropdown", "get_request_data",
 		"umount_get_list", "do_reload_nhttpd_config", "get_partition_list", "get_boxtype", "nhttpd_change",
@@ -651,46 +651,46 @@ std::string  CyAPI::YWeb_cgi_func(CWebserverRequest* request, std::string ycmd)
 	{
 		case 0:	yresult = func_mount_get_list();
 			break;
-			
+
 		case 1:	yresult = func_mount_set_values(request);
 			break;
-			
+
 		case 2:	yresult = func_get_bouquets_as_dropdown(para);
 			break;
-			
+
 		case 3:	yresult = func_get_actual_bouquet_number();
 			break;
-			
+
 		case 4:	yresult = func_get_channels_as_dropdown(para);
 			break;
-			
+
 		case 5:	yresult = func_get_actual_channel_id();
 			break;
-			
+
 		case 6:	yresult = func_get_mode();
 			break;
-			
+
 		case 7:	yresult = func_get_video_pids(para);
 			break;
-			
+
 		case 8:	yresult = func_get_radio_pid();
 			break;
-			
+
 		case 9:	yresult = func_get_audio_pids_as_dropdown(para);
 			break;
-			
+
 		case 10:yresult = func_get_request_data(request, para);
 			break;
-		
+
 		case 11:yresult = func_unmount_get_list();
 			break;
-		
+
 		case 12:yresult = func_do_reload_nhttpd_config(request);
 			break;
-		
+
 		case 13:yresult = func_get_partition_list();
 			break;
-		
+
 		case 14:yresult = func_get_boxtype();
 			break;
 
@@ -720,11 +720,11 @@ std::string  CyAPI::func_mount_get_list()
 		ynr=itoa(i);
 		ysel = ((i==0) ? "checked=\"checked\"" : "");
 		yitype = Config->getInt32("network_nfs_type_"+ynr,0);
-		ytype = ( (yitype==0) ? "NFS" :((yitype==1) ? "CIFS" : "FTPFS") ); 
+		ytype = ( (yitype==0) ? "NFS" :((yitype==1) ? "CIFS" : "FTPFS") );
 		yip = Config->getString("network_nfs_ip_"+ynr,"");
 		ydir = Config->getString("network_nfs_dir_"+ynr,"");
 		ylocal_dir = Config->getString("network_nfs_local_dir_"+ynr,"");
-		if(ydir != "") 
+		if(ydir != "")
 			ydir="("+ydir+")";
 
 		sprintf(ytmp,"<input type='radio' name='R1' value='%d' %s />%d %s - %s %s %s<br/>",
@@ -769,13 +769,13 @@ std::string  CyAPI::func_get_bouquets_as_dropdown(std::string para)
 	std::string ynr, yresult, sel, nr_str, do_show_hidden;
 	char buf[60];
 	unsigned int nr=1;
-	
+
 	ySplitString(para," ",nr_str, do_show_hidden);
 	if(nr_str != "")
 		nr = atoi(nr_str.c_str());
-	
+
 	for (unsigned int i = 0; i < Parent->BouquetList.size();i++)
-	{	
+	{
 		sel=(nr==(i+1)) ? "selected=\"selected\"" : "";
 		if(!Parent->BouquetList[i].hidden || do_show_hidden == "true")
 		{
@@ -783,12 +783,12 @@ std::string  CyAPI::func_get_bouquets_as_dropdown(std::string para)
 			yresult += buf;
 		}
 	}
-/* NOT activated in R1.3.4 - still work on getPIDS for not current channel	
+/* NOT activated in R1.3.4 - still work on getPIDS for not current channel
 	// Transponder View
 	sel=(nr==0) ? "selected" : "";
 	sprintf(buf,"<option value=0 %s>Transponder</option>\n", sel.c_str());
 	yresult += buf;
-*/	
+*/
 	return yresult;
 }
 
@@ -823,23 +823,23 @@ std::string  CyAPI::func_get_channels_as_dropdown(std::string para)
 	CZapitClient::BouquetList blist;
 	std::string abouquet, achannel_id, yresult, sel;
 	char buf[100],id[20];
-	
+
 	int bnumber = 1;
 	int mode = CZapitClient::MODE_CURRENT;
-	
+
 	ySplitString(para," ",abouquet, achannel_id);
 	if(abouquet != "")
 		bnumber = atoi(abouquet.c_str());
-	
+
 	if(bnumber != 0) //Bouquet View
 	{
 		bouquet = Parent->GetBouquet(bnumber, mode);
 		CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
 		CEPGData epg;
 		std::string sid = id;
-		
+
 		for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
-		{	
+		{
 			sprintf(id,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,channel->channel_id);
 			sid = std::string(id);
 
@@ -849,7 +849,7 @@ std::string  CyAPI::func_get_channels_as_dropdown(std::string para)
 			yresult += buf;
 		}
 	}
-	else // Transponder View		
+	else // Transponder View
 	{
 		bouquet = Parent->GetChannelList(mode);
 		CZapitClient::BouquetChannelList::iterator channel = bouquet->begin();
@@ -857,19 +857,21 @@ std::string  CyAPI::func_get_channels_as_dropdown(std::string para)
 		std::string sid = id;
 		t_channel_id actual_channel=Parent->Zapit->getCurrentServiceID();
 		for (unsigned int i = 0; channel != bouquet->end(); channel++,i++)
-		{	
+		{
+			// what should this test cause? t_channel_id is a uint64_t and shifting both right by 64 results in 0 every time
+			// or i am braindead? :)
 			if((channel->channel_id >> 64)==(actual_channel >> 64))
 			{
 				sprintf(id,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,channel->channel_id);
 				sid = std::string(id);
 				sel = (sid == achannel_id) ? "selected=\"selected\"" : "";
-			
+
 				Parent->Sectionsd->getActualEPGServiceKey(channel->channel_id, &epg);
 				sprintf(buf,"<option value="PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS" %s>%.20s - %.30s</option>\n", channel->channel_id, sel.c_str(), channel->name,epg.title.c_str());
 				yresult += buf;
 			}
 		}
-	}		
+	}
 	return yresult;
 }
 //-------------------------------------------------------------------------
@@ -878,7 +880,7 @@ std::string  CyAPI::func_get_channels_as_dropdown(std::string para)
 std::string  CyAPI::func_get_actual_channel_id()
 {
 	char buf[100];
-	sprintf(buf,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,Parent->Zapit->getCurrentServiceID());	
+	sprintf(buf,PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,Parent->Zapit->getCurrentServiceID());
 	return std::string(buf);
 }
 //-------------------------------------------------------------------------
@@ -888,7 +890,7 @@ std::string  CyAPI::func_get_mode()
 {
 	std::string yresult;
 	int mode = Parent->Zapit->getMode();
-	
+
 	if ( mode == CZapitClient::MODE_TV)
 		yresult = "tv";
 	else if ( mode == CZapitClient::MODE_RADIO)
@@ -907,7 +909,7 @@ std::string  CyAPI::func_get_video_pids(std::string para)
 	CZapitClient::responseGetPIDs pids;
 	int apid=0,apid_no=0,apid_idx=0;
 	pids.PIDs.vpid=0;
-	
+
 	if(para != "")
 		apid_no = atoi(para.c_str());
 	Parent->Zapit->getPIDS(pids);
@@ -927,11 +929,11 @@ std::string  CyAPI::func_get_radio_pid()
 	char buf[20];
 	CZapitClient::responseGetPIDs pids;
 	int apid=0;
-	
+
 	Parent->Zapit->getPIDS(pids);
 	if(!pids.APIDs.empty())
 		apid = pids.APIDs[0].pid;
-	
+
 	sprintf(buf,"0x%04x",apid);
 	return std::string(buf);
 }
@@ -946,8 +948,8 @@ std::string  CyAPI::func_get_audio_pids_as_dropdown(std::string para)
 	char buf[60];
 	static bool init_iso=true;
 	bool idx_as_id=true;
-	
-	if(para == "apid") 
+
+	if(para == "apid")
 		idx_as_id=false;
 	if(init_iso)
 	{
@@ -1044,7 +1046,7 @@ std::string  CyAPI::func_unmount_get_list()
 {
 	std::string ysel, ymount, ylocal_dir, yfstype, ynr, yresult, mounts;
 	char ytmp[200];
-	
+
 	std::ifstream in;
 	in.open("/proc/mounts", std::ifstream::in);
 	int j=0;
@@ -1083,7 +1085,7 @@ std::string  CyAPI::func_get_partition_list()
 {
 	std::string ysel, ymtd, yname, dummy, yresult;
 	char ytmp[200];
-	
+
 	std::ifstream in;
 	in.open("/proc/mtd", std::ifstream::in);
 	int j=0;
@@ -1122,7 +1124,7 @@ std::string  CyAPI::func_change_nhttpd(CWebserverRequest* request, std::string p
 		int err = execvp(para.c_str(), NULL); // no return if successful
 		return "ERROR [change_httpd]: execvp returns error code: "+err;
 	}
-	
+
 	else
 	return "ERROR [change_httpd]: para has not path to a file";
 }
