@@ -1,7 +1,7 @@
 /*
  * Tool for printing some image information during bootup.
  *
- * $Id: cdkVcInfo.cpp,v 1.1 2006/07/01 19:59:59 barf Exp $
+ * $Id: cdkVcInfo.cpp,v 1.2 2006/07/06 17:38:31 barf Exp $
  *
  * Copyright (C) 2006 the Tuxbox project http://www.tuxbox.org.
  *
@@ -27,6 +27,8 @@
 #define CONSOLE "/dev/vc/0"
 #define VERSION_FILE "/.version"
 #define char_delay_usec 500
+#define BUFFERSIZE 255
+#define BIGBUFFERSIZE 2000
 
 int main() 
 {  
@@ -47,7 +49,7 @@ int main()
     return 1;
   }
 		
-  char buf[120] = "";
+  char buf[BUFFERSIZE] = "";
   int release_type = -1;
   int imageversion = 0;
   int imagesubver = 0;
@@ -56,12 +58,12 @@ int main()
   int day = 99;
   int hour = 99;
   int minute = 99;
-  char creator[20] = "-- unknown --";
-  char imagename[50] = "-- unknown --";
+  char creator[BUFFERSIZE] = "-- unknown --";
+  char imagename[BUFFERSIZE] = "-- unknown --";
 	
   FILE* fv = fopen(VERSION_FILE, "r");
   if (fv) {
-    while (fgets(buf, 120, fv)) {
+    while (fgets(buf, BUFFERSIZE, fv)) {
       sscanf(buf, "version=%1d%1d%2d%4d%2d%2d%2d%2d", 
 	     &release_type, &imageversion, &imagesubver,
 	     &year, &month, &day, &hour, &minute);
@@ -71,23 +73,23 @@ int main()
     fclose(fv);
   }
 
-  char message[1000];
+  char message[BIGBUFFERSIZE];
   strcpy(message, "");
   sprintf(message,
 	  "\n\n\n\n\n\n\n\t\t\t-------- Image Info --------\n\n"
-	  "\t\t\t  Image Version     : %d.%s%d\n"
+	  "\t\t\t  Image Version     : %d.%02d\n"
 	  "\t\t\t  Image Type        : %s\n"
-	  "\t\t\t  Creation Date     : %d-%s%d-%s%d\n"
-	  "\t\t\t  Creation Time     : %d:%d\n"
+	  "\t\t\t  Creation Date     : %d-%02d-%02d\n"
+	  "\t\t\t  Creation Time     : %d:%02d\n"
 	  "\t\t\t  Creator           : %s\n"
 	  "\t\t\t  Image name        : %s\n"
 	  "\n\n\t\t\t\tLoading....\n",
-	  imageversion, imagesubver == 0 ? "0" : "", imagesubver, 
-	  release_type == 0 ? "Release" 
-	  : release_type == 1 ? "Snapshot" 
+	  imageversion, imagesubver, 
+	  release_type == 0    ? "Release" 
+	  : release_type == 1  ? "Snapshot" 
 	  :  release_type == 2 ? "Internal"
-	  : "Unknown",
-	  year, month < 10 ? "0" : "", month, day < 10 ? "0" : "", day,
+	  : 			 "Unknown",
+	  year, month, day,
 	  hour, minute, creator, imagename);
   //printf("%s", message);
 
