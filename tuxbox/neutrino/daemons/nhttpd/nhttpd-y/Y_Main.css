@@ -443,7 +443,7 @@ tr {
 	width:114px;
 	height: 22px;
 	background : url('/images/audiobar.gif') no-repeat 1px 0px;
-	padding : 1;
+	padding : 1px;
 	border : #FF8e42 solid 1px;
 }
 .y_epg_info {

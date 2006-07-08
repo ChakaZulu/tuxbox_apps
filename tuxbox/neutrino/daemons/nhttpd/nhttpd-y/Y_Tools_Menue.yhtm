@@ -10,22 +10,22 @@
 		<div class="y_menu_sec_section">Tools</div>
 		<div class="y_menu_sec">
 			<ul>
-			{=if-empty:{=var-get:automount=}~
-				<li class="disabled" title="organize file automounts (automount not installed)">AutoMounts</li>
-			~
-				<li><a target="work" title="organize file automounts" href="Y_Settings_automount_liste.yhtm">AutoMounts</a></li>
-			=}
 			{=if-empty:{=var-get:management=}~
+				<li class="disabled" title="organize file automounts (automount not installed)">AutoMounts</li>
 				<li class="disabled" title="organize file mounts (restricted by ManagementIP)">Mounts</li>
 				<li class="disabled" title="Wake on LAN (restricted by ManagementIP)">Wake on LAN</li>
 			~
+				{=if-empty:{=var-get:automount=}~
+					<li class="disabled" title="organize file automounts (automount not installed)">AutoMounts</li>
+				~
+					<li><a target="work" title="organize file automounts" href="Y_Settings_automount_liste.yhtm">AutoMounts</a></li>
+				=}
 				<li><a target="work" title="organize file mounts" href="Y_Settings_mount_liste.yhtm">Mounts</a></li>
 				<li><a target="work" title="Wake on LAN" href="Y_Settings_wol.yhtm">Wake on LAN</a></li>
 			=}
 				<li><a target="work" title="check Installation" href="Y_Tools_Check_Install.yhtm">Check Install</a></li>
 			</ul>
 		</div>
-		
 		<div class="y_menu_sec_section">Expert</div>
 		<div class="y_menu_sec">
 			<ul>

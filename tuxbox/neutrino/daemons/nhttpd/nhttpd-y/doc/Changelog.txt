@@ -1,4 +1,12 @@
 Severity	id		Headline							Build
+5-Enhancement	JG200000511	GUI: disable AutoMount if ManagementIP does not match		R2.0.2
+4-Minor		JG200000519	Live: VLC Snapshot with IE works again				R2.0.2
+5-Enhancement	JG200000512	Live: fix: Fullscreen-Button (IE) does not  work		R2.0.2
+5-Enhancement	JG200000518	Live: add EPG-Button for Popup					R2.0.2
+3-Average	JG200000517	Record: fixed: Record without transcoding works again		R2.0.2
+5-Enhancement	JG200000514	Settings: Diverse: add EPG-Settings				R2.0.2
+5-Enhancement	JG200000513	Settings: Diverse: add Virtual zap				R2.0.2
+
 3-Average	JG200000504	fix: call dboxshot correctly if installed in /var/bin (in Remote OSD)	R2.0.1
 3-Average	JG200000506	Live: fixed Problems switching channels in LiveTV/Radio		R2.0.1
 5-Enhancement	JG200000507	Live: MiniEPG only on demand					R2.0.1

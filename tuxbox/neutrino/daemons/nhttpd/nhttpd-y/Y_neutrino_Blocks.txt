@@ -523,6 +523,31 @@ start-block~neutrino_form-data_diverse
 				</td>
 			</tr>
 			<tr>
+				<td>Virtual zap bei Infobar</td>
+				<td>
+					<input type="radio" name="virtual_zap_mode" value="false" title="virtual zap: off"/>AUS&nbsp;
+					<input type="radio" name="virtual_zap_mode" value="true" title="virtual zap: on"/>AN
+				</td>
+			</tr>
+			<tr>
+				<td style="border-top: 1px solid #6D96A9;"><strong>EPG-Einstellungen</strong></td>
+				<td style="border-top: 1px solid #6D96A9;">&nbsp;</td>
+			</tr>
+
+			<tr>
+				<td>EPG-Cache (Tage)</td>
+				<td><input type="text" name="epg_cache_time" size="5" value="{=ini-get:/var/tuxbox/config/neutrino.conf;epg_cache_time~cache=}" title="EPG cache"/></td>
+			</tr>
+			<tr>
+				<td>EPG verwerfen nach (Std.)</td>
+				<td><input type="text" name="epg_old_events" size="5" value="{=ini-get:/var/tuxbox/config/neutrino.conf;epg_old_events~cache=}" title=""/></td>
+			</tr>
+			<tr>
+				<td>Max. Events</td>
+				<td><input type="text" name="epg_max_events" size="5" value="{=ini-get:/var/tuxbox/config/neutrino.conf;epg_max_events~cache=}" title=""/></td>
+				</td>
+			</tr>
+			<tr>
 				<td style="border-top: 1px solid #6D96A9;"><strong>Fernbedienung</strong></td>
 				<td style="border-top: 1px solid #6D96A9;">&nbsp;</td>
 			</tr>
@@ -601,6 +626,12 @@ function form_init()
 	else
 		document.f.tuxtxt_cache[0].checked = true;
 
+	val = "{=ini-get:/var/tuxbox/config/neutrino.conf;virtual_zap_mode~cache=}";
+	if(val == "true")
+		document.f.virtual_zap_mode[1].checked = true;
+	else
+		document.f.virtual_zap_mode[0].checked = true;
+
 	val = "{=ini-get:/var/tuxbox/config/neutrino.conf;shutdown_real_rcdelay~cache=}";
 	if(val == "true")
 		document.f.shutdown_real_rcdelay[1].checked = true;
@@ -657,13 +688,17 @@ form_init();
 </script>
 end-block~neutrino_form-data_diverse
 
-# ------- yWeb save Settings
+# ------- yWeb save Settings 
 start-block~neutrino_diverse_save_settings
 {=ini-set:/var/tuxbox/config/neutrino.conf;shutdown_real;{=shutdown_real=}~open=}
 {=ini-set:/var/tuxbox/config/neutrino.conf;shutdown_count;{=shutdown_count=}~cache=}
 {=ini-set:/var/tuxbox/config/neutrino.conf;infobar_sat_display;{=infobar_sat_display=}~cache=}
 {=ini-set:/var/tuxbox/config/neutrino.conf;infobar_subchan_disp_pos;{=infobar_subchan_disp_pos=}~cache=}
 {=ini-set:/var/tuxbox/config/neutrino.conf;tuxtxt_cache;{=tuxtxt_cache=}~cache=}
+{=ini-set:/var/tuxbox/config/neutrino.conf;virtual_zap_mode;{=virtual_zap_mode=}~cache=}
+{=ini-set:/var/tuxbox/config/neutrino.conf;epg_cache_time;{=epg_cache_time=}~cache=}
+{=ini-set:/var/tuxbox/config/neutrino.conf;epg_old_events;{=epg_old_events=}~cache=}
+{=ini-set:/var/tuxbox/config/neutrino.conf;epg_max_events;{=epg_max_events=}~cache=}
 {=ini-set:/var/tuxbox/config/neutrino.conf;repeat_blocker;{=repeat_blocker=}~cache=}
 {=ini-set:/var/tuxbox/config/neutrino.conf;repeat_genericblocker;{=repeat_genericblocker=}~cache=}
 {=ini-set:/var/tuxbox/config/neutrino.conf;shutdown_real_rcdelay;{=shutdown_real_rcdelay=}~cache=}

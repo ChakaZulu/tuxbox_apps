@@ -161,7 +161,7 @@ function view_record_mode()
 <tr><td>
 {=if-equal:{=browser=}~ie~
 	<object classid="clsid:E23FE9C6-778E-49D4-B537-38FCDE4887D8" 
-	        width="384" height="288" id="vlc" events="True">
+	        width="384" height="288" id="vlc" name="vlc" events="True">
 			<param name="Src" value="" />
 			<param name="ShowDisplay" value="True" />
 			<param name="Loop" value="False" />
@@ -196,9 +196,9 @@ function view_record_mode()
 		{=if-equal:{=typ=}~popup~~
 		{=if-equal:{=typ=}~transcode~~
 		{=if-equal:{=browser=}~ie~
-		<!--<input class="y_live_button" type="button" value="E+" title="expert mode" name="expert_mode" onclick="view_expert_mode()"/>-->
 		<input class="y_live_button" type="button" value="Rec" title="record mode" name="record_mode" onclick="view_record_mode()"/>
 		=}
+		<!--<input class="y_live_button" type="button" value="E+" title="expert mode" name="expert_mode" onclick="view_expert_mode()"/>-->
 		=}
 		=}
 		<input type="hidden" name="browser" value="{=browser=}"/>

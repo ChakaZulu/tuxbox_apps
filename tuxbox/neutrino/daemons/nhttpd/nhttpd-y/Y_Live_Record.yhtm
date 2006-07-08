@@ -38,7 +38,7 @@ function setControlsCustom(state)
 			document.v.channels.disabled=true;
 			document.v.tmux.disabled=true;
 			break;
-	
+
 		default:
 		{=if-equal:{=mode=}~tv~
 			document.v.twidth.disabled=false;
@@ -79,7 +79,7 @@ function doRecord()
 	var _live = parent.live.live;
 	if(document.v.record.value == "Record")
 	{
-		var transcode = "transcode{}:";
+		var transcode = "";
 		var stream = "";
 		if(document.v.transon.checked)
 		{
@@ -100,15 +100,15 @@ function doRecord()
 					",channels="	+document.v.channels.value+
 					",deinterlace}:";
 					break;
-					
+
 				case "ipod":
 					transcode = "transcode{width=320,height=240,vcodec=mp4v,vb=768,acodec=mp4a,ab=128}:";
 					break;
-					
+
 				case "mp3":
 					transcode = "transcode{acodec=mp3,ab=192}:";
 					break;
-				
+
 				case "ipoda":
 					transcode = "transcode{acodec=mp4a,ab=192}:";
 					break;
@@ -123,7 +123,7 @@ function doRecord()
 				",url="+document.v.record_filename.value+
 				"}";
 				break;
-			
+
 			case "mp4":
 				stream = "dst=std{"+
 				"access=file"+
@@ -131,7 +131,7 @@ function doRecord()
 				",url="+document.v.record_filename.value+
 				"}";
 				break;
-			
+
 			default:
 				stream = "dst=std{"+
 				"access=file"+
@@ -142,9 +142,8 @@ function doRecord()
 		}
 		if(document.v.tdisplay.checked)
 			stream = stream+",dst=display";
-		
+
 		var __vlc_cmd = ":sout=#"+transcode+"duplicate{"+stream+"}";
-			
 /*		var sel = document.v.tmux.selectedIndex;
 		var ymux = (sel != -1) ? document.v.tmux[sel].value : "ts";
 		var __vlc_cmd = ":sout=#duplicate{dst=display,dst=std{access=file,mux="+ymux+",url="+document.v.record_filename.value+"}}";
