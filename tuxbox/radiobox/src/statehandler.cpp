@@ -312,9 +312,9 @@ CPlayPLRandom::CPlayPLRandom( CPlayList* _playlist )
 
 	frame = 0;
 	
-	if( globals.play_order == PO_Random )
+	if( g_settings.playorder == CRadioboxSettings::PO_Random )
 		playlist->PlayRandom( ); 
-	if( globals.play_order == PO_Normal )
+	if( g_settings.playorder  == CRadioboxSettings::PO_Normal )
 		playlist->Play( ); 
 	
 }
@@ -505,6 +505,7 @@ void CSelectLocation::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
 			this->subhandler = new CPlayPLRandom( GetPlayList( locations[menu_top + menu_selected] ) );
 			break;
 		case CRadioBox::SELECT:
+			std::cout << "get locations[menu_top + menu_selected] " << locations[menu_top + menu_selected] << std::endl;
 			this->subhandler = new CPlayListEntries( GetPlayList( locations[menu_top + menu_selected] ) );
 			break;
 		case CRadioBox::UP:
@@ -559,12 +560,16 @@ CPlayList* CSelectLocation::GetPlayList( std::string _location )
 	
 	plname = "/var/" + plname + ".playlist";
 		
+	std::cout << "Get playlist " << __LINE__ << std::endl;
+
 	CPlayList* pl = new	CPlayList( plname, !CPlayList::IsFileExists( plname ) );
 		
+	std::cout << "Get playlist " << __LINE__ << std::endl;
 	if( 0 == pl->GetSize() )
 	{
 		pl->AddDir( _location );
 	}
+	std::cout << "Get playlist " << __LINE__ << std::endl;
 
 	return pl;	
 }
@@ -714,10 +719,13 @@ CSetupPlayOrder::CSetupPlayOrder()
 void CSetupPlayOrder::DoAction( std::string _action )
 {
 	if( _action == "Normal" )
-		globals.play_order = PO_Normal;
+		g_settings.playorder = CRadioboxSettings::PO_Normal;
 	if( _action == "Random" )
-		globals.play_order = PO_Random;
-	//here setup playy order
+		g_settings.playorder = CRadioboxSettings::PO_Random;
+
+	g_settings.Save();
+
+	//here setup play order
 	remove = true;
 }
 
@@ -904,6 +912,14 @@ void CPlayListOptions::DoAction( std::string _action )
 		pl.AddDir( location );
 	}
 	remove = true;
+}
+
+/**************************************************************/
+
+CPlayListEntries::CPlayListEntries( CPlayList* _playlist )
+: playlist( _playlist )
+{  
+	std::cout << "CPlayListEntries" << std::endl;
 }
 
 /**************************************************************/

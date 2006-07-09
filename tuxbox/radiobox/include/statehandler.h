@@ -87,7 +87,7 @@ public:
 class CPlayListEntries : public CStateHandler, CMenu
 {
 public:
-	CPlayListEntries( CPlayList* _playlist ): playlist( _playlist ) {  };
+	CPlayListEntries( CPlayList* _playlist );
 
 	void				Show();
 	void				HandleKeys( CRadioBox::KEYS _key, bool _pressed );

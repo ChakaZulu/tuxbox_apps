@@ -79,6 +79,7 @@ public:
 	time_t Time;
 };
 
-typedef std::vector<CFile> CFileList;
+
+//typedef std::vector<CFile> CFileList;
 
 #endif /* __FILE_H__ */

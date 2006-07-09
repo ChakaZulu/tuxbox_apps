@@ -8,15 +8,15 @@ INCLUDES = \
 	 -I../include \
 	@FREETYPE_CFLAGS@ \
 	@LCDDISPLAY_CFLAGS@ \
+	@CONFIGFILE_CFLAGS@ \
 	-I$(top_srcdir)/../../../driver/include \
 	-I$(top_srcdir)/../neutrino/src/driver \
 	-I$(top_srcdir)/../neutrino/src
 
 AM_CXXFLAGS =\
 	 -Wall \
-	-O2 -DRADIOBOX
-#\
-#	 -g
+	-O2 -DRADIOBOX \
+	 -g
 
 bin_PROGRAMS = radiobox
 
@@ -37,10 +37,19 @@ radiobox_SOURCES = \
 	statehandler.cpp \
 	lcdd.cpp \
 	rcinput.cpp \
-	flashtool.cpp
+	flashtool.cpp \
+	settings.cpp
 
 radiobox_LDFLAGS = 
 
 radiobox_LDADD = \
-	 -lpthread -lmad -lid3tag -llcddisplay -lfreetype -lpng12 -ltuxbox-cramfs
+	-lpthread\
+	@CONFIGFILE_LIBS@ \
+	@LCDDISPLAY_LIBS@ \
+	@ID3TAG_LIBS@ \
+	@MAD_LIBS@ \
+	@FREETYPE_LIBS@ \
+	@CRAMFS_LIBS@ \
+	@PNG_LIBS@
+
 

@@ -30,8 +30,12 @@
 #include <statehandler.h>
 
 #define DEFGLOB
+
+#define RADIOBOX_CPP
+
 #include <global.h>
-__setup globals;
+
+
 
 
 #define FONTDIR "/share/fonts"
@@ -192,6 +196,7 @@ void CRadioBox::ReadKeys()
 	if( msg != CRCInput::RC_nokey && msg != CRCInput::RC_timeout )
 	{
 		this->key = TranslateKey( (int)msg );
+		std::cout << "DATA:" << data << std::endl;
 		this->keypressed = !data;
 	}
 }
@@ -430,13 +435,18 @@ CRadioBox::KEYS CRadioBox::TranslateKey( std::string _key )
 
 CRadioBox::KEYS CRadioBox::TranslateKey( int _key )
 {
+	std::cout << "INT Key! :" << _key << std::endl;
 	switch( _key )
 	{
 		case CRCInput::RC_standby:		
 			std::cout << "Power key! :" << _key << std::endl;
 			return POWER;
-		case CRCInput::RC_up:			return UP;
-		case CRCInput::RC_down:		return DOWN;
+		case CRCInput::RC_up:			
+			std::cout << "Up key! :" << _key << std::endl;
+			return UP;
+		case CRCInput::RC_down:			
+			std::cout << "Down key! :" << _key << std::endl;
+			return DOWN;
 		case CRCInput::RC_0:			return ZERO;
 		case CRCInput::RC_1:			return ONE;
 		case CRCInput::RC_2:			return TWO;

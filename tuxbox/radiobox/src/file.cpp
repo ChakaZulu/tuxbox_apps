@@ -84,7 +84,7 @@ CFile::FileType CFile::getType(void) const
 	if(S_ISDIR(Mode))
 		return FILE_DIR;
 
-// 	std::cout << "CFile::getType for " << Name << std::endl;
+ 	std::cout << "CFile::getType for " << Name << std::endl;
 	
 	std::string::size_type ext_pos = Name.rfind('.');
 
@@ -92,11 +92,18 @@ CFile::FileType CFile::getType(void) const
 	{
 		const char * key = &(Name.c_str()[ext_pos + 1]);
 
+		std::cout << "getType " << __LINE__ << std::endl;
 		void * result = ::bsearch(&key, file_extension_list, sizeof(file_extension_list) / sizeof(const char *), sizeof(const char *), mycasecmp);
+
+		std::cout << "getType " << __LINE__ << std::endl;
 		
 		if (result != NULL)
+		{
+			std::cout << "getType " << __LINE__ << std::endl;
 			return file_type_list[(const char * *)result - (const char * *)&file_extension_list];
+		}
 	}
+	std::cout << "getType " << __LINE__ << std::endl;
 	return FILE_UNKNOWN;
 }
 
