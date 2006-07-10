@@ -17,6 +17,7 @@
 
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <pthread.h>
 
 #include "tuxtxt_common.h"
 
@@ -30,12 +31,14 @@
  ******************************************************************************/
 
 static int tuxtxt_initialized=0;
+static pthread_mutex_t tuxtxt_control_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int tuxtxt_init()
 {
 	if ( tuxtxt_initialized )
 		return 0;
 
+	pthread_mutex_lock(&tuxtxt_control_lock);
 	tuxtxt_initialized=1;
 
 	/* init data */
@@ -48,6 +51,7 @@ int tuxtxt_init()
 	tuxtxt_cache.vtxtpid = -1;
 	tuxtxt_cache.thread_id = 0;
 	tuxtxt_cache.dmx = -1;
+	pthread_mutex_unlock(&tuxtxt_control_lock);
 	return 1;//tuxtxt_init_demuxer();
 }
 
@@ -60,10 +64,14 @@ int tuxtxt_stop()
 	if (!tuxtxt_cache.receiving) return 1;
 	tuxtxt_cache.receiving = 0;
 
-	return tuxtxt_stop_thread();
+	pthread_mutex_lock(&tuxtxt_control_lock);
+	int res = tuxtxt_stop_thread();
+	pthread_mutex_unlock(&tuxtxt_control_lock);
+	return res;
 }
 void tuxtxt_start(int tpid)
 {
+	pthread_mutex_lock(&tuxtxt_control_lock);
 	if (tuxtxt_cache.vtxtpid != tpid)
 	{
 		tuxtxt_stop();
@@ -76,10 +84,12 @@ void tuxtxt_start(int tpid)
 	{
 		tuxtxt_start_thread();
 	}
+	pthread_mutex_unlock(&tuxtxt_control_lock);
 }
 
 void tuxtxt_close()
 {
+	pthread_mutex_lock(&tuxtxt_control_lock);
 #if DEBUG
 	printf ("cleaning up\n");
 #endif
@@ -89,6 +99,7 @@ void tuxtxt_close()
 	tuxtxt_cache.dmx = -1;
 	tuxtxt_clear_cache();
 	tuxtxt_initialized=0;
+	pthread_mutex_unlock(&tuxtxt_control_lock);
 }
 
 /* Local Variables: */

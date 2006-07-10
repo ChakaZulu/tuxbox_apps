@@ -1196,6 +1196,7 @@ int tuxtxt_start_thread()
 	{
 		perror("TuxTxt <pthread_create>");
 		tuxtxt_cache.thread_starting = 0;
+		tuxtxt_cache.thread_id = 0;
 		return 0;
 	}
 #if 1//DEBUG
@@ -1226,6 +1227,7 @@ int tuxtxt_stop_thread()
 			perror("TuxTxt <pthread_join>");
 			return 0;
 		}
+		tuxtxt_cache.thread_id = 0;
 	}
 	if (tuxtxt_cache.dmx != -1)
 	{
