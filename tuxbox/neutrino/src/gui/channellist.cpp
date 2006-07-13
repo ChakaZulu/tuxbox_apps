@@ -125,12 +125,11 @@ void CChannelList::updateEvents(void)
 {
 	t_channel_id *p_requested_channels = NULL;
 	int size_requested_channels = 0;
-
-	if (chanlist.size()) {
-		size_requested_channels = chanlist.size()*sizeof(t_channel_id);
+	if (listmaxshow) {
+		size_requested_channels = listmaxshow*sizeof(t_channel_id);
 		p_requested_channels 	= (t_channel_id*)malloc(size_requested_channels);
-		for (uint count=0; count<chanlist.size(); count++){
-			p_requested_channels[count] = chanlist[count]->channel_id;
+		for (uint count=0; count<listmaxshow; count++){
+			if (liststart+count<chanlist.size()) p_requested_channels[count] = chanlist[liststart+count]->channel_id;
 		}
 	}
 
@@ -234,7 +233,7 @@ int CChannelList::show()
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 
 	paintHead();
-	updateEvents();
+//	updateEvents();
 	paint();
 
 	int oldselected = selected;
@@ -534,7 +533,7 @@ void CChannelList::zapTo(int pos, bool forceStoreToLastChannels)
 
 	selected= pos;
 	CChannel* chan = chanlist[selected];
-  lastChList.store (selected, chan->channel_id, forceStoreToLastChannels);
+	lastChList.store (selected, chan->channel_id, forceStoreToLastChannels);
 
 	if ( pos!=(int)tuned )
 	{
@@ -1105,6 +1104,7 @@ void CChannelList::paint()
 
 	liststart = (selected/listmaxshow)*listmaxshow;
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
+	updateEvents();
 
 	if(lastnum<10)
 		numwidth = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth("0");
