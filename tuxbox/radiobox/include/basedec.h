@@ -29,9 +29,11 @@
 #ifndef __BASE_DEC__
 #define __BASE_DEC__
 
-#include <stdio.h>
 #include "audiofile.h"
 #include "audiometadata.h"
+
+#include <stdio.h>
+
 
 class CBaseDec
 {

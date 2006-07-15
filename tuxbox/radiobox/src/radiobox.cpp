@@ -13,10 +13,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#define RADIOBOX_CPP
+
+#include <file.h>
+#include <global.h>
+#include <radiobox.h>
+#include <playlist.h>
+#include <statehandler.h>
+#include <lcdd.h>
+
 
 #include <iostream> 
-#include <lcdd.h>
-#include <file.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -25,15 +32,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include <radiobox.h>
-#include <playlist.h>
-#include <statehandler.h>
 
 #define DEFGLOB
 
-#define RADIOBOX_CPP
 
-#include <global.h>
 
 
 

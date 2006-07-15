@@ -34,8 +34,8 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <file.h>
 #include <sys/stat.h>
-#include "file.h"
 #include <cstring>
 #include <iostream>
 

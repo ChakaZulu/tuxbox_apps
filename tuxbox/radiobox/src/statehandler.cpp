@@ -17,6 +17,10 @@
 #include <statehandler.h>
 #include <global.h>
 #include <flashtool.h>
+
+#define PLAYLISTDIR g_settings.playlist_root
+
+
 /**************************************************************/
 
 CSelectPlayList::CSelectPlayList() 	
@@ -385,14 +389,14 @@ void CPlayPLRandom::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
 
 CSelectLocation::CSelectLocation()
 {
-	LoadLocations( "/var/locs.conf" );
+	LoadLocations();
 }
 
 /**************************************************************/
 
-void CSelectLocation::LoadLocations( std::string _locs_conf )
+void CSelectLocation::LoadLocations( )
 {
-	std::string dirname = "/media/";
+	std::string dirname = g_settings.library_root;
 	struct dirent* entry = NULL;
 	size_t	files = 0;
 	
@@ -558,7 +562,7 @@ CPlayList* CSelectLocation::GetPlayList( std::string _location )
 		if( plname[i] == '/' )
 			plname[i] = '_';
 	
-	plname = "/var/" + plname + ".playlist";
+	plname = PLAYLISTDIR + plname + ".playlist";
 		
 	std::cout << "Get playlist " << __LINE__ << std::endl;
 
@@ -906,7 +910,7 @@ void CPlayListOptions::DoAction( std::string _action )
 			if( plname[i] == '/' )
 				plname[i] = '_';
 	
-		plname = "/var/" + plname + ".playlist";
+		plname = PLAYLISTDIR + plname + ".playlist";
 
 		CPlayList pl( plname, true );
 		pl.AddDir( location );

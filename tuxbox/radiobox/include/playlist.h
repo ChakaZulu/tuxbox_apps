@@ -26,11 +26,11 @@
  */
 
 
+#include <basedec.h>
 
 #include <stdio.h>
 #include <string>
 
-#include <basedec.h>
 
 #define MAXLOCATION	51200 00 00 0c
 #define STRHEADER "radiobox"

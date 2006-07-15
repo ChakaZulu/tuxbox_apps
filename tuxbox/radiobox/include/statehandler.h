@@ -3,7 +3,7 @@
 
 #include <radiobox.h>
 
-#define PLAYLISTDIR "/var/"
+
 
 /*********************************************************/
 
@@ -71,7 +71,7 @@ private:
 
 	strarray locations;
 	
-	void LoadLocations( std::string _locs_conf );
+	void LoadLocations();
 	static CPlayList* GetPlayList( std::string _location );
 
 public:

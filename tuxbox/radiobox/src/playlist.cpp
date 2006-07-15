@@ -14,15 +14,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include <playlist.h>
 #include <file.h>
 #include <audioplay.h>
 #include <audiofile.h>
+
+#include <iostream>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <sstream>
 #include <iomanip>
@@ -343,7 +344,7 @@ void CPlayList::AddDir( const std::string& _dirname )
 
 std::string	CPlayList::GetLocation( size_t _idx )
 {
-	if( _idx > 0 && _idx < nofiles )
+	if( _idx >= 0 && _idx < nofiles )
 		return SearchDirectoryEntry( _idx );
 	else
 		return "";

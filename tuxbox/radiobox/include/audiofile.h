@@ -32,10 +32,11 @@
 #ifndef __AUDIOFILE_H__
 #define __AUDIOFILE_H__
 
+#include "file.h"
+#include "audiometadata.h"
+
 #include <string>
 #include <vector>
-#include "audiometadata.h"
-#include "file.h"
 
 class CAudiofile
 {

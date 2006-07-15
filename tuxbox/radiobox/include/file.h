@@ -33,11 +33,17 @@
 #ifndef __FILE_H__
 #define __FILE_H__
 
+#include <config.h>
+
+#ifndef _FILE_OFFSET_BITS
+#error rfgergerger
+#endif
+
 #include <features.h> /* make sure off_t has size 8
 						 in __USE_FILE_OFFSET64 mode */
 
 #ifndef __USE_FILE_OFFSET64
-//#error not using 64 bit file offsets
+#error not using 64 bit file offsets
 #endif /* __USE_FILE__OFFSET64 */
 
 #include <unistd.h> /* off_t */

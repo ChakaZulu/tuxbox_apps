@@ -24,12 +24,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <playlist.h>
 #include "audioplay.h"
+#include <rcinput.h>
+
 #include <vector>
 #include <string>
 #include <list>
-#include <rcinput.h>
-#include <playlist.h>
 
 typedef std::vector<std::string> strarray;
 

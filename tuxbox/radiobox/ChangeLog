@@ -1,0 +1,5 @@
+Fixed zero indexed entries
+Eleminated crash whicle dir scaning
+Now location with files is configurable via radiobox.conf
+
+

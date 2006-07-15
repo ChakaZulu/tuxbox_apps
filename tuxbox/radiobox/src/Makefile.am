@@ -6,12 +6,19 @@
 
 INCLUDES = \
 	 -I../include \
+	@CONNECTION_CFLAGS@ \
+	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	@LCDDISPLAY_CFLAGS@ \
 	@CONFIGFILE_CFLAGS@ \
+	@NET_CFLAGS@ \
+	@ZAPIT_CFLAGS@ \
+	@TUXTXT_CFLAGS@ \
+	@FREETYPE_CFLAGS@ \
 	-I$(top_srcdir)/../../../driver/include \
 	-I$(top_srcdir)/../neutrino/src/driver \
 	-I$(top_srcdir)/../neutrino/src
+
 
 AM_CXXFLAGS =\
 	 -Wall \
