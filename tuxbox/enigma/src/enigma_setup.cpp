@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.42 2006/02/05 23:41:01 pieterg Exp $
+ * $Id: enigma_setup.cpp,v 1.43 2006/07/15 13:22:49 ghostrider Exp $
  */
 
 #include <enigma_setup.h>
@@ -38,7 +38,8 @@ eZapSetup::eZapSetup()
 	move(ePoint(160, 100));
 	int entry=0;
 	CONNECT((new eListBoxEntryMenu(&list, _("Service Organising"), eString().sprintf("(%d) %s", ++entry, _("open service organising")) ))->selected, eZapSetup::service_organising);
-	CONNECT((new eListBoxEntryMenu(&list, _("Service Searching"), eString().sprintf("(%d) %s", ++entry, _("open service searching")) ))->selected, eZapSetup::service_searching);
+	if (eSystemInfo::getInstance()->getFEType() != eSystemInfo::feUnknown)
+		CONNECT((new eListBoxEntryMenu(&list, _("Service Searching"), eString().sprintf("(%d) %s", ++entry, _("open service searching")) ))->selected, eZapSetup::service_searching);
 	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	CONNECT((new eListBoxEntryMenu(&list, _("System Settings"), eString().sprintf("(%d) %s", ++entry, _("open system settings")) ))->selected, eZapSetup::system_settings);
 #ifndef DISABLE_CI

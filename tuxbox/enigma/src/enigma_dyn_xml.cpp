@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_xml.cpp,v 1.34 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn_xml.cpp,v 1.35 2006/07/15 13:22:48 ghostrider Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -356,6 +356,8 @@ static eString getXSLStreamInfo(eString request, eString dirpath, eString opt, e
 		case eSystemInfo::feTerrestrial:
 			result = readFile(TEMPLATE_DIR + "streaminfo_terrestrial.xsl");
 			break;
+		default:
+			result = readFile(TEMPLATE_DIR + "streaminfo_unknown.xsl");
 	}
 	
 	return result;
@@ -652,7 +654,8 @@ static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, e
 				break;
 			}
 			default:
-				result.strReplace("#FRONTEND#", "NONE");
+				result.strReplace("#FRONTEND#", "Unknown");
+				break;
 		}
 	}
 	

@@ -51,6 +51,11 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 	fd=::open(demod, O_RDWR|O_NONBLOCK);
 	if (fd<0)
 	{
+		type=eSystemInfo::feUnknown;
+		fd=-1;
+#if HAVE_DVB_API_VERSION < 3
+		secfd=-1;
+#endif
 		perror(demod);
 		return;
 	}
@@ -156,6 +161,8 @@ void eFrontend::checkRotorLock()
 
 int eFrontend::setFrontend()
 {
+	if (type == eSystemInfo::feUnknown)
+		return -1;
 	if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
 	{
 		eDebug("FE_SET_FRONTEND failed (%m)");
@@ -175,7 +182,7 @@ void eFrontend::tuneOK()
 	// stop userspace lock timeout
 	timeout.stop();  
 #endif
-	if (!transponder)
+	if (!transponder || type == eSystemInfo::feUnknown)
 		return;
 	if (type==eSystemInfo::feSatellite)
 	{
@@ -213,7 +220,7 @@ void eFrontend::tuneOK()
 
 void eFrontend::tuneFailed()
 {
-	if (!transponder)
+	if (!transponder || type == eSystemInfo::feUnknown)
 		return;
 	if (type==eSystemInfo::feSatellite)
 	{
@@ -348,7 +355,7 @@ eFrontend::~eFrontend()
 
 int eFrontend::Status()
 {
-	if (!transponder)
+	if (!transponder || type == eSystemInfo::feUnknown)
 		return 0;
 #if HAVE_DVB_API_VERSION < 3
 	FrontendStatus status=0;
@@ -362,7 +369,7 @@ int eFrontend::Status()
  
 uint32_t eFrontend::BER()
 {
-	if (!transponder)
+	if (!transponder || type == eSystemInfo::feUnknown)
 		return 0;
 	uint32_t ber=0;
 	if (ioctl(fd, FE_READ_BER, &ber) < 0 && errno != ERANGE)
@@ -372,7 +379,7 @@ uint32_t eFrontend::BER()
 
 int eFrontend::SignalStrength()
 {
-	if (!transponder)
+	if (!transponder || type == eSystemInfo::feUnknown)
 		return 0;
 	uint16_t strength=0;
 	if (ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength) < 0 && errno != ERANGE)
@@ -389,12 +396,12 @@ int eFrontend::SignalStrength()
 
 int eFrontend::SNR()
 {
-	if (!transponder)
+	if (!transponder || type == eSystemInfo::feUnknown)
 		return 0;
 	uint16_t snr=0;
 	if (ioctl(fd, FE_READ_SNR, &snr) < 0 && errno != ERANGE)
 		eDebug("FE_READ_SNR failed (%m)");
-	#if 0
+#if 0
 	if ((snr<0) || (snr>65535))
 	{
 		eWarning("buggy SNR driver (or old version) (%08x)", snr);
@@ -406,7 +413,7 @@ int eFrontend::SNR()
 
 uint32_t eFrontend::UncorrectedBlocks()
 {
-	if (!transponder)
+	if (!transponder || type == eSystemInfo::feUnknown)
 		return 0;
 	uint32_t ublocks=0;
 	if (ioctl(fd, FE_READ_UNCORRECTED_BLOCKS, &ublocks) < 0 && errno != ERANGE)
@@ -702,6 +709,9 @@ int eFrontend::readInputPower()
 #if HAVE_DVB_API_VERSION < 3
 int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 {
+	if (type != eSystemInfo::feSatellite)
+		return -1;
+
 	secCmdSequence seq;
 	secCommand cmd;
 
@@ -763,6 +773,8 @@ int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 #else
 int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 {
+	if (type != eSystemInfo::feSatellite)
+		return -1;
 	struct dvb_diseqc_master_cmd cmd;
 
 	cmd.msg[0]=frame;
@@ -798,6 +810,8 @@ int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 #if HAVE_DVB_API_VERSION < 3
 int eFrontend::SendSequence( const eSecCmdSequence &s )
 {
+	if (type != eSystemInfo::feSatellite)
+		return -1;
 	secCmdSequence seq;
 	memset( &seq, 0, sizeof(seq) );
 	seq.commands = s.commands;
@@ -822,6 +836,9 @@ int eFrontend::SendSequence( const eSecCmdSequence &s )
 #else
 int eFrontend::SendSequence( const eSecCmdSequence &seq )
 {
+	if (type != eSystemInfo::feSatellite)
+		return -1;
+
 	int i=0, ret=0, wait=0;
 	dvb_diseqc_master_cmd *scommands;
 
@@ -1196,6 +1213,8 @@ void eFrontend::RotorRunningLoop()
 
 void eFrontend::RotorFinish(bool tune)
 {
+	if (type != eSystemInfo::feSatellite)
+		return;
 	if ( eSystemInfo::getInstance()->canMeasureLNBCurrent() == 1 )
 	{
 		if ( voltage != eSecCmdSequence::VOLTAGE_18 )
@@ -1484,6 +1503,8 @@ double calcSatHourangle( double Azimuth, double Elevation, double Declination, d
 
 void eFrontend::updateTransponder()
 {
+	if (type == eSystemInfo::feUnknown)
+		return;
 	if (!transponder)
 		return;
 	if (!eSystemInfo::getInstance()->canUpdateTransponder())
@@ -1573,6 +1594,8 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 		int Inversion,				// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
 		eSatellite &sat)			// Satellite Data.. LNB, DiSEqC, switch..
 {
+	if (type != eSystemInfo::feSatellite)
+		return -1;
 	tune_all(trans);
 	int finalTune=1;
 //	eDebug("op = %d", trans->satellite.orbital_position );
@@ -2179,6 +2202,8 @@ int eFrontend::tune_ofdm(eTransponder *trans,
 
 int eFrontend::savePower()
 {
+	if (type == eSystemInfo::feUnknown)
+		return -1;
 	transponder=0;
 	checkLockTimer.stop();
 	checkRotorLockTimer.stop();
@@ -2215,6 +2240,8 @@ int eFrontend::savePower()
 
 void eFrontend::setTerrestrialAntennaVoltage(bool state)
 {
+	if (type != eSystemInfo::feTerrestrial)
+		return;
 #if HAVE_DVB_API_VERSION < 3
 	int secfd=::open(SEC_DEV, O_RDWR);
 	if (secfd<0)

@@ -603,7 +603,6 @@ eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParamete
 		eTransponderWidget *t = 0;
 		switch ( eSystemInfo::getInstance()->getFEType() )
 		{
-			default:
 			case eSystemInfo::feSatellite:
 				t = new eTransponderWidget(w, 0, eTransponderWidget::deliverySatellite);
 				break;
@@ -613,13 +612,18 @@ eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParamete
 			case eSystemInfo::feTerrestrial:
 				t = new eTransponderWidget(w, 0, eTransponderWidget::deliveryTerrestrial);
 				break;
+			default:
+				break;
 		}
-		t->move(ePoint(0, 0));
-		t->resize(eSize(clientrect.width(), 200));
-		t->load();
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-		if (sapi)
-			t->setTransponder(sapi->transponder);
+		if (t)
+		{
+			t->move(ePoint(0, 0));
+			t->resize(eSize(clientrect.width(), 200));
+			t->load();
+			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+			if (sapi)
+				t->setTransponder(sapi->transponder);
+		}
 
 		eWidget *fe=new eFEStatusWidget(w, eFrontend::getInstance());
 		fe->move(ePoint(0, 200));

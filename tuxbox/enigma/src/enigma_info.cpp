@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.32 2004/12/12 22:17:12 tmbinc Exp $
+ * $Id: enigma_info.cpp,v 1.33 2006/07/15 13:22:48 ghostrider Exp $
  */
 
 #include <enigma_info.h>
@@ -155,6 +155,8 @@ public:
 			case eSystemInfo::feTerrestrial:
 				frontend->setText(_("Frontend: Terrestrial"));
 				break;
+			default:
+				frontend->setText(_("Frontend: Unknown"));
 		}
 
 		eString sharddisks;

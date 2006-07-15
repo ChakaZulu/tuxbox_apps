@@ -26,6 +26,7 @@ eSystemInfo::eSystemInfo()
 	instance=this;
 #if HAVE_DVB_API_VERSION == 3
 	int fd=::open(DEMOD_DEV, O_RDONLY);
+	fetype = feUnknown;
 	if (fd>=0)
 	{
 		dvb_frontend_info info;
@@ -267,6 +268,7 @@ eSystemInfo::eSystemInfo()
 	}
 	else
 	{
+		fetype = feUnknown;
 		int fd=::open(DEMOD_DEV, O_RDONLY);
 		if (fd>=0)
 		{

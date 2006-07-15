@@ -187,7 +187,7 @@ again_wizard:
 
 			}
 		}
-		else // cable or dvb-t
+		else if ( eSystemInfo::getInstance()->getFEType() != eSystemInfo::feUnknown )
 		{
 			TransponderScan scan(0, 0, TransponderScan::stateMenu);
 			res=scan.exec();
