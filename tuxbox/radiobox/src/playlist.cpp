@@ -276,12 +276,12 @@ void CPlayList::AddDir( const std::string& _dirname )
 	
 	DIR* dir = opendir( _dirname.c_str() );
 	
- 	std::cout << "Open direcory" << std::endl;
+// 	std::cout << "Open direcory" << std::endl;
 	
 	if( NULL == dir )
 		throw EPlayList( EPlayList::noaccess );
 	
- 	std::cout << "Read direcory" << std::endl;
+// 	std::cout << "Read direcory" << std::endl;
 
 	if( NULL == ( entry = readdir( dir ) ) )
 	{
@@ -298,47 +298,39 @@ void CPlayList::AddDir( const std::string& _dirname )
 		
 		fullname += _dirname + "/" + entry->d_name; 
 		
- 		std::cout << "get entry status " << fullname << std::endl;
+// 		std::cout << "get entry status " << fullname << std::endl;
 		
 		if( 0 == stat( fullname.c_str(), &status ) )
 		{
-			std::cout << "AddDir " << __LINE__ << std::endl;
 			if( S_ISREG( status.st_mode ) )
 			{
 				/* regular file, add it to playlist */
 				
 				/* check filename extension, has to be mp3  */
 				
-				std::cout << "AddDir " << __LINE__ << std::endl;
-		
 				switch( CFile( fullname ).getType() )
 				{ 
 					case CFile::FILE_MP3 :
 					case CFile::STREAM_AUDIO :
-						std::cout << "AddDir " << __LINE__ << std::endl;
 						files++;
 					default:
-						std::cout << "AddDir " << __LINE__ << std::endl;
+						break;
+//						std::cout << "AddDir " << __LINE__ << std::endl;
 				}
 			}
 			else if( S_ISDIR( status.st_mode ) )
 			{
-				std::cout << "AddDir " << __LINE__ << std::endl;
 				if( strcmp( ".", entry->d_name ) && strcmp( "..", entry->d_name ) )
 				{
 					/* recursive add subfolders */
-					std::cout << "AddDir " << __LINE__ << std::endl;
 					AddDir( fullname );	
 				}
 			}
 		}
-		std::cout << "AddDir " << __LINE__ << std::endl;
 		entry = readdir( dir );
 	}
-	std::cout << "AddDir " << __LINE__ << std::endl;
 	closedir( dir );
 	this->nofiles += files;
-		std::cout << "AddDir " << __LINE__ << std::endl;
 	AppendRecord( _dirname, files );
 }
 
@@ -795,8 +787,8 @@ std::string CPlayList::GetDirectoryEntry( size_t _pos, size_t _count, size_t _id
 				{
 					if( _count + files == _idx )
 					{
-						std::cout << "File " << fullname << "\n";
-						std::cout << "DName " << entry->d_name << std::endl;
+//						std::cout << "File " << fullname << "\n";
+//						std::cout << "DName " << entry->d_name << std::endl;
 						return fullname;
 					}						
 					

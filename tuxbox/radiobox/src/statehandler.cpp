@@ -131,12 +131,12 @@ void CSelectPlayList::LoadPlaylists( std::string _dirname )
 	
 	DIR* dir = opendir( _dirname.c_str() );
 	
-	std::cout << "Open direcory" << std::endl;
+//	std::cout << "Open direcory" << std::endl;
 	
 	if( NULL == dir )
 		return;
 	
-	std::cout << "Read direcory" << std::endl;
+//	std::cout << "Read direcory" << std::endl;
 
 	if( NULL == ( entry = readdir( dir ) ) )
 	{
@@ -270,8 +270,7 @@ CPlayLocation::CPlayLocation( CPlayList* _playlist, size_t _idx )
 void CPlayLocation::Show()
 {
 //	sleep( 1 );
-
-	frame = CLCD::getInstance()->ShowPlayingFile( playlist->GetCurrentLocation(),  playlist->GetPositionPercents(), playlist->GetTimePlayed(), frame );
+	frame = CLCD::getInstance()->ShowPlayingFile( CFile( playlist->GetCurrentLocation() ).getFileName(),  playlist->GetPositionPercents(), playlist->GetTimePlayed(), frame );
 
 	if( CBaseDec::STOP == playlist->GetState() )
 		remove = true;
@@ -336,7 +335,7 @@ void CPlayPLRandom::Show()
 		lastplayed = playlist->GetCurrent();
 	}
 
-	frame = CLCD::getInstance()->ShowPlayingFile( playlist->GetCurrentLocation(),  playlist->GetPositionPercents(), playlist->GetTimePlayed(), frame );
+	frame = CLCD::getInstance()->ShowPlayingFile( CFile( playlist->GetCurrentLocation() ).getFileName(),  playlist->GetPositionPercents(), playlist->GetTimePlayed(), frame );
 
 	playlist->DoAction();	
 

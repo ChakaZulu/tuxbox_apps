@@ -2,4 +2,9 @@ Fixed zero indexed entries
 Eleminated crash whicle dir scaning
 Now location with files is configurable via radiobox.conf
 
+06.07.16 
+Removed some unnessesary trace outputs
+Only file name shown while playing, instead of full path
+
+
 
