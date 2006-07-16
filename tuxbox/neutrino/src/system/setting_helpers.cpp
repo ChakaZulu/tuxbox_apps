@@ -115,7 +115,7 @@ bool CTP_scanNotifier::changeNotify(const neutrino_locale_t, void *)
 
 bool CScanSettingsSatManNotifier::changeNotify(const neutrino_locale_t, void *Data)
 {
-	(CNeutrinoApp::getInstance()->ScanSettings()).TP_diseqc = 
+	(CNeutrinoApp::getInstance()->ScanSettings()).TP_diseqc =
 		 *((CNeutrinoApp::getInstance()->ScanSettings()).diseqscOfSat((char*)Data));
 	return true;
 }
@@ -598,10 +598,10 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	     + "    " + our_gateway + ": " + ' ' + mypinghost(our_gateway) + '\n'
 	     + g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER) + ":\n"
 	     + "    " + our_nameserver + ": " + ' ' + mypinghost(our_nameserver) + '\n'
-	     + "dboxupdate.berlios.de:\n"
-	     + "    via IP (195.37.77.138): " + mypinghost("195.37.77.138") + '\n';
+	     + "wiki.tuxbox.org:\n"
+	     + "    via IP (217.172.187.46): " + mypinghost("217.172.187.46") + '\n';
 	if (1 == pinghost(our_nameserver)) text += (std::string)
-	       "    via DNS: " + mypinghost("dboxupdate.berlios.de") + '\n'
+	       "    via DNS: " + mypinghost("wiki.tuxbox.org") + '\n'
 	     + "www.google.de:\n"
 	     + "    via DNS: " + mypinghost("www.google.de") + '\n';
 
