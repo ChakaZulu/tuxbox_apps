@@ -193,7 +193,7 @@ void CRadioBox::ReadKeys()
 		lastkey = NOKEY;
 	}
 
-	rcinput.getMsg(&msg, &data, 1 );
+	rcinput.getMsg_ms(&msg, &data, 100 );
 		
 	if( msg != CRCInput::RC_nokey && msg != CRCInput::RC_timeout )
 	{
@@ -474,7 +474,7 @@ CRadioBox::KEYS CRadioBox::TranslateKey( int _key )
 		case CRCInput::RC_red:			return RED;
 		case CRCInput::RC_green:		return GREEN ;
 		case CRCInput::RC_yellow:		return YELLOW;
-		case CRCInput::RC_blue:			return BLUE;
+		case CRCInput::RC_blue:			return PLAY; //return BLUE;
 //		case CRCInput::RC_top_left:		return ;
 //		case CRCInput::RC_top_right:		return ;
 //		case CRCInput::RC_bottom_left:		return ;

@@ -1,3 +1,5 @@
 -F. Check all dependences needed to compile radiobox
 -F. Add http interface to the radiobox
+-F. Make it possible to configure RC Interface with native RC
+-F. Add scaning and mounting network shares
 

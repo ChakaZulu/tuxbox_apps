@@ -1144,7 +1144,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 #endif /* OLD_RC_API */
 							now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 #ifdef OLD_RC_API
-							//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
+							//alter nokia-rc-code - lastkey lï¿½chen weil sonst z.b. nicht zweimal nacheinander ok gedrckt werden kann
 							if ((ev.code & 0xff00) == 0x5c00)
 								rc_last_key = 0;
 #endif /* OLD_RC_API */
@@ -1201,6 +1201,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 #ifndef OLD_RC_API
 						else
 						{
+#ifndef RADIOBOX
 							// clear rc_last_key on keyup event
 							//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
 							rc_last_key = 0;
@@ -1210,6 +1211,11 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 								*data = 1; /* <- button released */
 								return;
 							}
+#else /* RADIOBOX */
+							*msg = trkey;
+							*data = 1; /* <- button released */
+							return;
+#endif /* RADIOBOX */
 						}
 #endif /* OLD_RC_API */
 					}
