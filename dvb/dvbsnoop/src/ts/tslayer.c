@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.27 2006/07/19 20:05:46 rasc Exp $
+$Id: tslayer.c,v 1.28 2006/07/19 22:49:24 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.27 2006/07/19 20:05:46 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.28  2006/07/19 22:49:24  rasc
+no message
+
 Revision 1.27  2006/07/19 20:05:46  rasc
 Special handling for null packets
 
@@ -203,7 +206,7 @@ void decodeTS_packet (u_char *b, int len)
 		break;
 
 	case 0x1FFF:		// NULL PACKET (ISO 13818-1)
-		decodeTS_NULL (b, len);
+		decodeTS_NullPacket (b, len);
 		break;
 
 
