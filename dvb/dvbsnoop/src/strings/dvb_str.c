@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.75 2006/02/12 23:17:12 rasc Exp $
+$Id: dvb_str.c,v 1.76 2006/07/19 20:05:45 rasc Exp $
 
 
  DVBSNOOP
@@ -20,6 +20,9 @@ $Id: dvb_str.c,v 1.75 2006/02/12 23:17:12 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.76  2006/07/19 20:05:45  rasc
+Special handling for null packets
+
 Revision 1.75  2006/02/12 23:17:12  rasc
 TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
 
@@ -718,7 +721,7 @@ char *dvbstrLinkage_TYPE (u_int flag)
 
 {
   STR_TABLE  Table[] = {
-	  /* -- updated 2003-10-19 */
+	  /* -- updated 2006-05-28 */
      {  0x00, 0x00,  "reserved" },
      {  0x01, 0x01,  "information service" },
      {  0x02, 0x02,  "EPG service" },
@@ -730,10 +733,8 @@ char *dvbstrLinkage_TYPE (u_int flag)
      {  0x08, 0x08,  "mobile handover service" },
      {  0x09, 0x09,  "system software update service" },
      {  0x0A, 0x0A,  "TS containing SSU BAT or NIT" },
-//     {  0x0B, 0x7F,  "reserved" },   // own def...
-
      {  0x0B, 0x0B,  "IP/MAC Notification Table" },
-     {  0x0C, 0x0C,  "Deferred IP/MAC Notification Table" },
+     {  0x0C, 0x0C,  "TS containing INT BAT or NIT" },
      {  0x0D, 0x7F,  "reserved" },
 
      {  0x80, 0xFE,  "user defined" },
@@ -790,8 +791,9 @@ char *dvbstrService_TYPE (u_int flag)
      {  0x03, 0x03,  "Teletext service" },
      {  0x04, 0x04,  "NVOD reference service" },
      {  0x05, 0x05,  "NVOD time-shifted service" },
-     	// -- 0x06 - 0x0B has been changed in EN 300 468 v1.7.1
-     {  0x06, 0x09,  "reserved" },
+     {  0x06, 0x06,  "mosaic service" },
+     	// -- 0x07 - 0x0B has been changed in EN 300 468 v1.7.1
+     {  0x07, 0x08,  "reserved" },
      {  0x0A, 0x0A,  "advanced codec digital radio sound service" },
      {  0x0B, 0x0B,  "advanced codec mosaic service" },
      {  0x0C, 0x0C,  "data broadcast service" },

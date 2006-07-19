@@ -1,5 +1,5 @@
 /*
-$Id: ts_misc.c,v 1.1 2006/02/12 23:17:13 rasc Exp $
+$Id: ts_misc.c,v 1.2 2006/07/19 20:05:46 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ts_misc.c,v 1.1 2006/02/12 23:17:13 rasc Exp $
 
 
 $Log: ts_misc.c,v $
+Revision 1.2  2006/07/19 20:05:46  rasc
+Special handling for null packets
+
 Revision 1.1  2006/02/12 23:17:13  rasc
 TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
 
@@ -85,7 +88,8 @@ int check_TS_PID_special (u_int pid)
 {
   // see also TS pid dispatch
   switch (pid) {
-	  case 0x15: return 1;
+	  case 0x15:   return 1;	// MIP
+	  case 0x1FFF: return 1;	// NULL PACKET
   }
 
   return  0;

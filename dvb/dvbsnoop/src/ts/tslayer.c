@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.26 2006/02/12 23:17:13 rasc Exp $
+$Id: tslayer.c,v 1.27 2006/07/19 20:05:46 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.26 2006/02/12 23:17:13 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.27  2006/07/19 20:05:46  rasc
+Special handling for null packets
+
 Revision 1.26  2006/02/12 23:17:13  rasc
 TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
 
@@ -199,6 +202,11 @@ void decodeTS_packet (u_char *b, int len)
 		decodeTS_MIP (b, len);
 		break;
 
+	case 0x1FFF:		// NULL PACKET (ISO 13818-1)
+		decodeTS_NULL (b, len);
+		break;
+
+
 	default: 		// ISO 13818-1
 		decodeTS_iso13818 (b, len);
 		break;
@@ -279,6 +287,39 @@ void decodeTS_iso13818 (u_char *b, int len)
  }
 
 }
+
+
+
+
+
+//
+// -- Decode TS packet content
+// -- Standard TS Null Packet 0x1FFF
+//
+
+void decodeTS_NullPacket (u_char *b, int len)
+{
+ /* ISO 13818-1  2.4.3.2  */
+
+ int            n;
+ TSPHD		h;
+
+
+ //
+ // -- decode packet header (32 bit)
+ //
+
+ n =  decodeTS_PacketHeader (b, &h);
+ len -= n;
+ b   += n;
+
+
+ // Null Packet may contain any data
+ print_databytes (5, "Data-Bytes:", b,len); 
+
+}
+
+
 
 
 
