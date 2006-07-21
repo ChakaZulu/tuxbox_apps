@@ -37,6 +37,7 @@ radiobox_SOURCES = \
 	file.cpp\
 	mp3dec.cpp\
 	$(top_srcdir)/../neutrino/src/driver/netfile.cpp \
+	$(top_srcdir)/../neutrino/src/system/fsmounter.cpp \
 	playlist.cpp\
 	radiobox.cpp\
 	wavdec.cpp\
