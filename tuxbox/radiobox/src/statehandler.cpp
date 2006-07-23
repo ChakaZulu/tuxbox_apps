@@ -654,7 +654,7 @@ void CStaticMenu::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
 	{
 		case CRadioBox::SELECT:
 			{
-				const int sel = menu_top + menu_selected;
+				sel = menu_top + menu_selected;
 				DoAction( entries[sel] );
 			}	
 			break;
@@ -699,6 +699,7 @@ CSetupMenu::CSetupMenu()
 {
 	title = "Setup";
 	entries.push_back( "Play Order" );
+	entries.push_back( "Mounts" );
 	entries.push_back( "Update Software" );
 }
 
@@ -706,6 +707,8 @@ void CSetupMenu::DoAction( std::string _action )
 {
 	if( _action == "Play Order" )
 		this->subhandler = new CSetupPlayOrder();
+	if( _action == "Mounts" )
+		this->subhandler = new CMountSetup();
 	if( _action == "Update Software" )
 		this->subhandler = new CSetupSoftware();
 }

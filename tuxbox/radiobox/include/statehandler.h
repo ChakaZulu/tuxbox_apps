@@ -2,6 +2,7 @@
 #define __STATEHANDLER_H__
 
 #include <radiobox.h>
+#include <mounter.h>
 
 
 
@@ -145,6 +146,8 @@ protected:
 	bool			CanBeRemoved;
 	std::string 	title;
 
+	int				sel;
+
 	virtual void DoAction( std::string _action ) = 0;
 
 public:
@@ -239,6 +242,16 @@ public:
 	virtual ~CPlayListOptions() { };
 };
 
+/*********************************************************/
+
+class CMountSetup : public CStaticMenu, CMounter
+{
+private:
+	void DoAction( std::string _action );
+public:
+	CMountSetup( );
+	virtual ~CMountSetup() { };
+};
 
 /*********************************************************/
 

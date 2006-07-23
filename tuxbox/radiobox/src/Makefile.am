@@ -46,7 +46,8 @@ radiobox_SOURCES = \
 	lcdd.cpp \
 	rcinput.cpp \
 	flashtool.cpp \
-	settings.cpp
+	settings.cpp \
+	mounter.cpp
 
 radiobox_LDFLAGS = 
 
