@@ -565,27 +565,6 @@ void CLCD::setMode(const MODES m, const char * const title)
 	switch (m)
 	{
 	case MODE_TVRADIO: 
-/*		switch (LCD_SHOW_VOLUME)
-		{
-		case 0:
-			display.load_screen(&(background[BACKGROUND_LCD2]));
-			showPercentOver(percentOver, false);
-			break;
-		case 1:
-			display.load_screen(&(background[BACKGROUND_LCD]));
-			showVolume(volume, false);
-			break;
-		case 2:
-			display.load_screen(&(background[BACKGROUND_LCD3]));
-			showVolume(volume, false);
-			showPercentOver(percentOver, false);
-			break;
-		}
-		showServicename(servicename);
-		showclock = true;
-*/
-//		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
-	
 		break;
 	case MODE_AUDIO:
 	{
@@ -966,103 +945,45 @@ unsigned long CLCD::ShowPlayingFile( const std::string _filename, const char _pe
 
 }
 
-#if 0
-// PLAYING LOCATION SCREEN //////////////////////////////////////////////////////////////////
-
-unsigned long CLCD::ShowPlayingFile( const std::string _filename, const char _percentover, std::string _tplayed, unsigned long _frame )
+void CLCD::showEditBox( std::string _ip, int _line, int _selected )
 {
-	static int x = 0;
-	static int y = 0;
-	static std::vector<int>	sizes;
-	static int title_width = 0;
-	int i = 0;
-
-	if( 0 == _frame )
-	{
-
-		
-		x = 0;
-		y = 0;
+	static int flag = 0;	
+	LcdFont* font = fonts.menu;
+	int font_size = fonts.menu_size;
+	const int swidth = 7;
+	const int wwidth = 15;
 	
-		//prepare sizes
+	int x = 2;
+	int y = 2 + font_size + font_size * _line;
 
-		sizes.erase(sizes.begin(),sizes.end());
+	int start = (_selected < wwidth)?0:_selected-wwidth;
+	std::string text = _ip.substr( start, wwidth );	
+	int selected = (_selected < wwidth)?_selected:wwidth-1;
 
-		for( i = 0; i < _filename.size(); i++ )
-		{
-			int s = fonts.channelname->getRenderWidth( ( _filename.substr( 0, i ) ).c_str(), false );
-			sizes.push_back( s );
-		}		
 
-		title_width = fonts.channelname->getRenderWidth( _filename.c_str(), false );
+	DrawString( x, y, 122, text, font, font_size, false, 0 );
 
-		// clear screen
-		display.draw_fill_rect ( -1, -1 , 122, 70, CLCDDisplay::PIXEL_OFF );
-		display.draw_fill_rect (9,51,75,63, CLCDDisplay::PIXEL_ON);
-		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
+	x += ( swidth * selected ) - 2;
+
+	if( flag  < 5 )
+	{
+		std::cout << "x = " << x << " y = " << y << " font_size = " << font_size << "x = " << text << std::endl;
 	}
 
-	display.draw_fill_rect ( 78, 50 , 120, 64, CLCDDisplay::PIXEL_OFF );
-	fonts.time->RenderString( 78, 62, 52, _tplayed.c_str() , CLCDDisplay::PIXEL_ON, 0, false ); // UTF-8
-	
+	display.draw_fill_rect ( x, y - font_size , x + 8, y, CLCDDisplay::PIXEL_INV );	
 
-	if( _frame >= title_width + 5)
-	{
-		_frame = 1;
-	} 
-
-	if( 120 < title_width )
-	{
-		int diff;
-
-		display.draw_fill_rect ( 00, 27 , 121, 44, CLCDDisplay::PIXEL_OFF );
-			
-//		std::cout << "***************" << std::endl;
-				
-		for( i = 0; i < _filename.size(); i++ )
-		{
-/*			std::cout << 
-							"[" << i << "] " << 
-							"size = " << sizes[i] << 
-							" _frame = " << _frame << 
-							" strlen = " << _filename.size() << 
-							" n of sizes = " << sizes.size() << 
-							" " << _filename.substr( i, _filename.size() - i ) <<  std::endl;
-*/
-			if( sizes[i] > _frame )
-			{
-				diff = sizes[i] - _frame;
-				break;
-			}
-		}
-
-		fonts.channelname->RenderString( 1 + diff , 40, 120, _filename.substr( i, _filename.size() - i ).c_str() , CLCDDisplay::PIXEL_ON, 0, false ); // UTF-8
-	
-		if( title_width - _frame < 120 )
-		{
-		fonts.channelname->RenderString( title_width - _frame + 5 , 40, 120 - ( title_width - _frame ) , _filename.c_str(), CLCDDisplay::PIXEL_ON, 0, false ); // UTF-8
-		}
-
-		if( _frame > title_width )
-		{
-		fonts.channelname->RenderString( 5 - (title_width - _frame) * -1, 40, 120, _filename.c_str(), CLCDDisplay::PIXEL_ON, 0, false ); // UTF-8
-		}
-
-
-
-	}
-	else
-		fonts.channelname->RenderString( 0, 40, 120, _filename.c_str() , CLCDDisplay::PIXEL_ON, 0, true ); // UTF-8
-	
-	if( 0 == _frame%5 )
-		showPercentOver( _percentover, false );
-
+	flag++;
 	displayUpdate();
-	return _frame+1;
-
 }
 
-#endif
+void CLCD::clear( bool _commit )
+{
+	display.draw_fill_rect ( -1, -1 , 122, 70, CLCDDisplay::PIXEL_OFF );
+	if( _commit )
+	{
+		displayUpdate();
+	}	
+}
 
 
 

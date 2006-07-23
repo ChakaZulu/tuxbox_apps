@@ -255,4 +255,36 @@ public:
 
 /*********************************************************/
 
+class CMountEdit : public CStateHandler
+{
+private:
+	int		idx;
+	int 	cursor;
+
+	enum	entry
+	{
+		me_ip,
+		me_dir,
+		me_ldir,
+		me_username,
+		me_password,
+		me_opts1,
+		me_opts2
+	} current;
+
+	void	MoveCursor( int _d );
+	void	ChangeLetter( int _d );
+	void	Next( int _d );
+	
+public:
+	CMountEdit( int _idx ) : idx( _idx ), current(me_ip), cursor(1) {};
+	
+	void		Show();
+	void		HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+
+};
+
+
+/*********************************************************/
+
 #endif //__STATEHANDLER_H__

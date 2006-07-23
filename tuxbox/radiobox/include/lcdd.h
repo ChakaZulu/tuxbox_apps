@@ -163,9 +163,14 @@ class CLCD
 
 		void setMode(const MODES m, const char * const title = "");
 
+////////////////////////////////////////////////
+		void showEditBox( std::string _ip, int _line, int _selected );
+		void clear( bool _commit = false );
+
 		void showServicename(const std::string & name); // UTF-8
 		void showTime();
 		/** blocks for duration seconds */
+
 		void showRCLock(int duration = 2);
 		void showVolume(const char vol, const bool perform_update = true);
 		void showPercentOver(const unsigned char perc, const bool perform_update = true);
@@ -173,8 +178,12 @@ class CLCD
 		void showAudioTrack(const std::string & artist, const std::string & title, const std::string & album);
 		void showAudioPlayMode(AUDIOMODES m=AUDIO_MODE_PLAY);
 		void showAudioProgress(const char perc, bool isMuted);
+////////////////////////////////////////////////
+
+
 		void setBrightness(int);
 		int getBrightness();
+
 
 		void setBrightnessStandby(int);
 		int getBrightnessStandby();

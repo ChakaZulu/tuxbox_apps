@@ -56,24 +56,7 @@ void CSelectPlayList::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
 			break;
 		case CRadioBox::MENU:
 			break;
-		default:class CSelectPlayList : public CStateHandler, CMenu
-{
-private:
-
-	strarray playlists;
-	
-	void LoadPlaylists( std::string _dirname );	
-
-public:
-	CSelectPlayList();
-	virtual ~CSelectPlayList() { };
-	void	Show();
-	void	HandleKeys( CRadioBox::KEYS _key, bool _pressed );
-
-};
-
-/*********************************************************/
-
+		default:
 			break;
 	}
 
