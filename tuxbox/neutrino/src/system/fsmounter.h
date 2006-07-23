@@ -33,7 +33,11 @@
 #ifndef __neutrino_fs_mounter__
 #define __neutrino_fs_mounter__
 
+#ifndef RADIOBOX
 #include <system/settings.h>
+#else /* RADIOBOX */
+#include <settings.h>
+#endif /* RADIOBOX */
 
 #include <vector>
 
