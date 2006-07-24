@@ -1,5 +1,5 @@
 # translation of de.po to 
-# $Id: de.po,v 1.86 2006/07/24 15:25:32 ghostrider Exp $
+# $Id: de.po,v 1.87 2006/07/24 15:28:21 ghostrider Exp $
 # $Source: /cvs/tuxbox/apps/tuxbox/enigma/po/de.po,v $
 msgid ""
 msgstr ""
@@ -4048,7 +4048,7 @@ msgstr "Timeout der Infobar (links,rechts)"
 #: src/setup_extra.cpp:105 src/setup_extra.cpp:106
 #, c-format
 msgid "Infobar timeout %d sec"
-msgstr "Timeout der Infobar (links,rechts)"
+msgstr "Timeout der Infobar %d sek.(links,rechts)"
 
 #: src/setup_extra.cpp:112
 msgid "Serviceselector help buttons"
