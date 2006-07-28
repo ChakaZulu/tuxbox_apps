@@ -399,7 +399,6 @@ int CRCInput::checkTimers()
 	gettimeofday( &tv, NULL );
 	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
-
 	std::vector<timer>::iterator e;
 	for ( e= timers.begin(); e!= timers.end(); ++e )
 		if ( e->times_out< timeNow+ 2000 )
@@ -409,12 +408,15 @@ int CRCInput::checkTimers()
 			if ( e->interval != 0 )
 			{
 				timer _newtimer;
-				_newtimer.id= e->id;
-				_newtimer.interval= e->interval;
-				_newtimer.times_out= e->times_out+ e->interval;
-				_newtimer.correct_time= e->correct_time;
+				_newtimer.id = e->id;
+				_newtimer.interval = e->interval;
+				_newtimer.correct_time = e->correct_time;
+				if ( _newtimer.correct_time )
+					_newtimer.times_out = timeNow + e->interval;
+				else
+					_newtimer.times_out = e->times_out + e->interval;
 
-            	timers.erase(e);
+				timers.erase(e);
 				for ( e= timers.begin(); e!= timers.end(); ++e )
 					if ( e->times_out> _newtimer.times_out )
 						break;
@@ -523,13 +525,13 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 			if ( timers[0].times_out< t_n )
 			{
 				timer_id = checkTimers();
-       			*msg = NeutrinoMessages::EVT_TIMER;
+			*msg = NeutrinoMessages::EVT_TIMER;
 				*data = timer_id;
 				return;
 			}
 			else
 			{
-             	targetTimeout = timers[0].times_out - t_n;
+				targetTimeout = timers[0].times_out - t_n;
 				if ( (unsigned long long) targetTimeout> Timeout)
 					targetTimeout= Timeout;
 				else
@@ -539,10 +541,10 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 		else
 			targetTimeout= Timeout;
 
-	    tvselect.tv_sec = targetTimeout/1000000;
+		tvselect.tv_sec = targetTimeout/1000000;
 		tvselect.tv_usec = targetTimeout%1000000;
 		//printf("InitialTimeout= %lld:%lld\n", Timeout/1000000,Timeout%1000000);
-        //printf("targetTimeout= %d:%d\n", tvselect.tv_sec,tvselect.tv_usec);
+	        //printf("targetTimeout= %d:%d\n", tvselect.tv_sec,tvselect.tv_usec);
 
 		FD_ZERO(&rfds);
 		for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)

@@ -113,7 +113,7 @@ void CInfoViewer::start()
 	time_dot_width = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(":");
 	time_width = time_left_width* 2+ time_dot_width;
 
-	lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_TV_MODE, false );
+	lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_TV_MODE, false, true );
 }
 
 void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
@@ -277,6 +277,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		showIcon_16_9();
 		showIcon_VTXT();
 	}
+
 	info_CurrentNext = getEPG(channel_id);
 
 	if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_later | CSectionsdClient::epgflags::has_current |  CSectionsdClient::epgflags::not_broadcast ) ) )
@@ -663,7 +664,7 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		{
 			showLcdPercentOver();
 			if ( is_visible )
-				show_Data( true ); 
+				show_Data( true );
 			return messages_return::handled;
 		}
 		else if ( data == sec_timer_id )
