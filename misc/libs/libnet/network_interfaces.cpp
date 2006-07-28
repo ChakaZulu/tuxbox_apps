@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.cpp,v 1.6 2003/03/20 15:32:52 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libnet/network_interfaces.cpp,v 1.7 2006/07/28 21:27:57 houdini Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -368,6 +368,12 @@ bool setStaticAttributes(const std::string name, const bool automatic_start, con
 bool setDhcpAttributes(const std::string name, const bool automatic_start)
 {
 	std::map<std::string, std::string> attribute;
+	const size_t max_hostname_len = 128;
+	char hostname[max_hostname_len];
+
+	if (gethostname(hostname, max_hostname_len) == 0) {
+		attribute["hostname"] = (std::string)hostname;
+	}
 
 	return write_interface("/etc/network/interfaces", name, automatic_start, "inet", "dhcp", attribute);
 }
