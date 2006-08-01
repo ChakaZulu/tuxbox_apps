@@ -254,6 +254,17 @@ date.Sun  Sun
 date.Thu  Thu
 date.Tue  Tue
 date.Wed  Wed
+driversettings.bootinfo Show infos at start
+driversettings.driver_boot driver and boot options
+driversettings.fb_destination Expert! Boot-Console
+driversettings.head driver and boot options
+driversettings.hwsections use hardware sections
+driversettings.noaviawatchdog enable AVIA watchdog
+driversettings.noenxwatchdog enable eNX watchdog
+driversettings.pmtupdate enable pmt update
+driversettings.sptsfix use spts mode fix AVIA500
+driversettings.sptsmode use spts mode
+driversettings.startbhdriver load BH-Mode drivers
 epgextended.actors Actors
 epgextended.director Director
 epgextended.guests Guests
@@ -329,7 +340,7 @@ flashupdate.mtdselector Partition-Selector
 flashupdate.programmingflash programming flash
 flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 enter the proxyserver password
-flashupdate.proxypassword_hint2 
+flashupdate.proxypassword_hint2
 flashupdate.proxyserver Hostname
 flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port
 flashupdate.proxyserver_hint2 a empty entry means no proxy
@@ -495,6 +506,7 @@ mainmenu.sleeptimer SleepTimer
 mainmenu.tvmode TV-Mode
 mainsettings.audio Audio
 mainsettings.colors Colors / themes / font
+mainsettings.driver driver and boot options
 mainsettings.head Settings
 mainsettings.keybinding Key Setup
 mainsettings.language Language
@@ -514,12 +526,10 @@ messagebox.error Error
 messagebox.info Information
 messagebox.no No
 messagebox.yes Yes
-miscsettings.bootinfo Show infos at start
-miscsettings.bootmenu Show boot menu
-miscsettings.driver_boot driver and boot options
 miscsettings.epg_cache EPG-Cache (Days)
 miscsettings.epg_cache_hint1 How long will EPG-Data in the future cached?
 miscsettings.epg_cache_hint2 Set in days.
+miscsettings.epg_dir EPG save path
 miscsettings.epg_head EPG-Settings
 miscsettings.epg_max_events Max. Events
 miscsettings.epg_max_events_hint1 How many events should be stored?
@@ -527,21 +537,14 @@ miscsettings.epg_max_events_hint2 normaly 6000
 miscsettings.epg_old_events EPG remove after (std.)
 miscsettings.epg_old_events_hint1 How long will EPG-Data be stored after they timed out?
 miscsettings.epg_old_events_hint2 Set in hours
-miscsettings.fb_destination Expert! Boot-Console
 miscsettings.general General
 miscsettings.head Misc settings
-miscsettings.hwsections use hardware sections
 miscsettings.infobar_sat_display Satellite display on infobar
-miscsettings.noaviawatchdog enable AVIA watchdog
-miscsettings.noenxwatchdog enable eNX watchdog
-miscsettings.pmtupdate enable pmt update
 miscsettings.shutdown_count switch off after
 miscsettings.shutdown_count_hint1 time (in minutes) to switch from standby
 miscsettings.shutdown_count_hint2 to deep standby (0 = off).
 miscsettings.shutdown_real Enable standby
 miscsettings.shutdown_real_rcdelay Delayed shutdown
-miscsettings.sptsmode use spts mode
-miscsettings.startbhdriver load BH-Mode drivers
 miscsettings.tuxtxt_cache videotext cache
 miscsettings.virtual_zap_mode Virtual zap by infobar
 motorcontrol.head Motor-Setup
@@ -557,9 +560,9 @@ moviebrowser.book_type_backward Repeat
 moviebrowser.book_type_forward jump over
 moviebrowser.edit_book Bookmark change
 moviebrowser.edit_book_name_info1 Enter new Bookmark name
-moviebrowser.edit_book_name_info2 
+moviebrowser.edit_book_name_info2
 moviebrowser.edit_book_pos_info1 Enter new Position (s)
-moviebrowser.edit_book_pos_info2 
+moviebrowser.edit_book_pos_info2
 moviebrowser.edit_book_type_info1 Enter new jump length (s)
 moviebrowser.edit_book_type_info2 <0 back, >0 for, 0: none
 moviebrowser.edit_serie Enter name of serie
@@ -571,11 +574,11 @@ moviebrowser.head TS MovieBrowser
 moviebrowser.head_filter Filter movies by category:
 moviebrowser.head_playlist Last played:
 moviebrowser.head_recordlist Last recorded:
-moviebrowser.hint_jumpbackward Jump back in 5 s\n '0' to cancel 
-moviebrowser.hint_jumpforward Jump forward in 5 s\n '0' to cancel 
-moviebrowser.hint_movieend Filmende in 5 s\n '0' zum weitersehen 
-moviebrowser.hint_newbook_backward New jump back\n 'blue' for endposition 
-moviebrowser.hint_newbook_forward New jump forward\n 'blue' for endposition 
+moviebrowser.hint_jumpbackward Jump back in 5 s\n '0' to cancel
+moviebrowser.hint_jumpforward Jump forward in 5 s\n '0' to cancel
+moviebrowser.hint_movieend Filmende in 5 s\n '0' zum weitersehen
+moviebrowser.hint_newbook_backward New jump back\n 'blue' for endposition
+moviebrowser.hint_newbook_forward New jump forward\n 'blue' for endposition
 moviebrowser.info_audio Audio
 moviebrowser.info_channel Channel
 moviebrowser.info_filename Name
@@ -591,7 +594,7 @@ moviebrowser.info_parental_lockage_12year 12 years
 moviebrowser.info_parental_lockage_16year 16 years
 moviebrowser.info_parental_lockage_18year 18 years
 moviebrowser.info_parental_lockage_6year 6 years
-moviebrowser.info_parental_lockage_always never 
+moviebrowser.info_parental_lockage_always never
 moviebrowser.info_path Path
 moviebrowser.info_prevplaydate Last play date
 moviebrowser.info_prodcountry Country
@@ -644,7 +647,7 @@ moviebrowser.start_record_start Movie start
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmarkname
 movieplayer.bookmarkname_hint1 Enter a name for your new bookmark
-movieplayer.bookmarkname_hint2 
+movieplayer.bookmarkname_hint2
 movieplayer.buffering Buffering...
 movieplayer.defdir start dir.
 movieplayer.defplugin Start-Plugin

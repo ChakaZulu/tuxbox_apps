@@ -254,6 +254,17 @@ date.Sun  So
 date.Thu  Do
 date.Tue  Di
 date.Wed  Mi
+driversettings.bootinfo Infos beim Booten anzeigen
+driversettings.driver_boot Treiber- und Bootoptionen
+driversettings.fb_destination EXPERT! Boot-Konsole
+driversettings.head Treiber- und Bootoptionen
+driversettings.hwsections HW-Sections verwenden
+driversettings.noaviawatchdog AVIA-Watchdog aktivieren
+driversettings.noenxwatchdog eNX-Watchdog aktivieren
+driversettings.pmtupdate PMT Update verwenden
+driversettings.sptsfix SPTS-Fix AVIA500 aktivieren
+driversettings.sptsmode SPTS-Mode Treiber laden
+driversettings.startbhdriver BH-Mode Treiber laden
 epgextended.actors Darsteller
 epgextended.director Regisseur
 epgextended.guests Gäste
@@ -495,6 +506,7 @@ mainmenu.sleeptimer SleepTimer
 mainmenu.tvmode TV-Modus
 mainsettings.audio Audio
 mainsettings.colors Farben / Themes / Schrift
+mainsettings.driver Treiber- und Bootoptionen
 mainsettings.head Einstellungen
 mainsettings.keybinding Tasten Einstellungen
 mainsettings.language Sprache
@@ -514,12 +526,10 @@ messagebox.error Fehler
 messagebox.info Information
 messagebox.no Nein
 messagebox.yes Ja
-miscsettings.bootinfo Infos beim Booten anzeigen
-miscsettings.bootmenu Bootmenü anzeigen
-miscsettings.driver_boot Treiber- und Bootoptionen
 miscsettings.epg_cache EPG-Cache (Tage)
 miscsettings.epg_cache_hint1 EPG-Daten im Voraus cachen?
 miscsettings.epg_cache_hint2 Angabe in Tagen
+miscsettings.epg_dir EPG Speicherverzeichnis
 miscsettings.epg_head EPG-Einstellungen
 miscsettings.epg_max_events Max. Events
 miscsettings.epg_max_events_hint1 Wieviele Events sollen max. gespeichert werden?
@@ -527,21 +537,14 @@ miscsettings.epg_max_events_hint2 Standard 6000
 miscsettings.epg_old_events EPG verwerfen nach (Std.)
 miscsettings.epg_old_events_hint1 Wie lange abgelaufene EPG-Daten aufheben?
 miscsettings.epg_old_events_hint2 Angabe in Stunden
-miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.general Allgemein
 miscsettings.head Diverse Einstellungen
-miscsettings.hwsections HW-Sections verwenden
 miscsettings.infobar_sat_display Infobar Satellitenanzeige
-miscsettings.noaviawatchdog AVIA-Watchdog aktivieren
-miscsettings.noenxwatchdog eNX-Watchdog aktivieren
-miscsettings.pmtupdate PMT Update verwenden
 miscsettings.shutdown_count Komplett ausschalten nach
 miscsettings.shutdown_count_hint1 Zeit (in Minuten) nach dem vom Standbymodus
 miscsettings.shutdown_count_hint2 komplett ausgeschaltet wird (0 = aus).
 miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
-miscsettings.sptsmode SPTS-Mode Treiber laden
-miscsettings.startbhdriver BH-Mode Treiber laden
 miscsettings.tuxtxt_cache Videotext zwischenspeichern
 miscsettings.virtual_zap_mode Virtual zap bei Infobar
 motorcontrol.head Motor-Setup
@@ -557,9 +560,9 @@ moviebrowser.book_type_backward Wiederholung
 moviebrowser.book_type_forward überspringen
 moviebrowser.edit_book Bookmark ändern
 moviebrowser.edit_book_name_info1 Neuer Markierungsname
-moviebrowser.edit_book_name_info2 
+moviebrowser.edit_book_name_info2
 moviebrowser.edit_book_pos_info1 Neue Position (s)
-moviebrowser.edit_book_pos_info2 
+moviebrowser.edit_book_pos_info2
 moviebrowser.edit_book_type_info1 Neue Sprunglänge (s)
 moviebrowser.edit_book_type_info2 <0 zurück, >0 vor 0: kein
 moviebrowser.edit_serie Name der Serie
@@ -571,11 +574,11 @@ moviebrowser.head TS Filmarchiv
 moviebrowser.head_filter Filme nach Kategorie filtern:
 moviebrowser.head_playlist Zuletzt gesehen:
 moviebrowser.head_recordlist Zuletzt aufgenommen:
-moviebrowser.hint_jumpbackward Rücksprung in 5 s\n '0' zum weitersehen 
-moviebrowser.hint_jumpforward Werbung überspringen in 5 s\n '0' zum ansehen 
-moviebrowser.hint_movieend Filmende in 5 s\n '0' zum weitersehen 
-moviebrowser.hint_newbook_backward Neue Wiederholung\n 'blau' für Endposition 
-moviebrowser.hint_newbook_forward Neuer Werbesprung\n 'blau' für Endposition 
+moviebrowser.hint_jumpbackward Rücksprung in 5 s\n '0' zum weitersehen
+moviebrowser.hint_jumpforward Werbung überspringen in 5 s\n '0' zum ansehen
+moviebrowser.hint_movieend Filmende in 5 s\n '0' zum weitersehen
+moviebrowser.hint_newbook_backward Neue Wiederholung\n 'blau' für Endposition
+moviebrowser.hint_newbook_forward Neuer Werbesprung\n 'blau' für Endposition
 moviebrowser.info_audio Audio
 moviebrowser.info_channel Kanal
 moviebrowser.info_filename Name
@@ -591,7 +594,7 @@ moviebrowser.info_parental_lockage_12year 12 Jahre
 moviebrowser.info_parental_lockage_16year 16 Jahre
 moviebrowser.info_parental_lockage_18year 18 Jahre
 moviebrowser.info_parental_lockage_6year 6 Jahre
-moviebrowser.info_parental_lockage_always nie 
+moviebrowser.info_parental_lockage_always nie
 moviebrowser.info_path Verzeichnis
 moviebrowser.info_prevplaydate Letzte Wiedergabe
 moviebrowser.info_prodcountry Land
@@ -1037,7 +1040,7 @@ timing.epg Epg
 timing.filebrowser Filebrowser
 timing.head OSD Timeouts
 timing.hint_1 Einblendzeit in Sek., die das OSD auf dem TV
-timing.hint_2 angezeigt wird (permanentes Einblenden mit 0.) 
+timing.hint_2 angezeigt wird (permanentes Einblenden mit 0.)
 timing.infobar Infobar
 timing.infobar_radio Infobar/Radio
 timing.menu Menu

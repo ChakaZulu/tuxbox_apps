@@ -77,7 +77,7 @@ struct SNeutrinoSettings
 
 	//language
 	char language[25];
-	
+
 	//epg
 	char epg_dir[100];
 
@@ -315,14 +315,14 @@ struct SNeutrinoSettings
 
 
 #if HAVE_DVB_API_VERSION == 1
-#define MISC_SETTING_FILES_COUNT 7
+#define DRIVER_SETTING_FILES_COUNT 7
 #else
-#define MISC_SETTING_FILES_COUNT 6
+#define DRIVER_SETTING_FILES_COUNT 6
 #endif
 
 // #define MISC_SETTING_SPTS_MODE 0
 
-	int misc_option[MISC_SETTING_FILES_COUNT];
+	int misc_option[DRIVER_SETTING_FILES_COUNT];
 
 
 	// pictureviewer

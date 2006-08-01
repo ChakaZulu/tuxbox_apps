@@ -175,6 +175,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void InitStreamingSettings(CMenuWidget &streamingSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitAudioplPicSettings(CMenuWidget &);
+		void InitDriverSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);
 		void InitScanSettings(CMenuWidget &);
 		void InitParentalLockSettings(CMenuWidget &);
@@ -190,6 +191,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 								CMenuWidget &videoSettings,
 								CMenuWidget &languageSettings,
 								CMenuWidget &miscSettings,
+								CMenuWidget &driverSettings,
 								CMenuWidget &service,
 								CMenuWidget &fontSettings,
 								CMenuWidget &audiopl_picSettings,

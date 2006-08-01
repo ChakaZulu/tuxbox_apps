@@ -593,7 +593,7 @@ int CNeutrinoApp::loadSetup()
 
 	//language
 	strcpy(g_settings.language, configfile.getString("language", "").c_str());
-	
+
 	//epg
 	strcpy(g_settings.epg_dir, configfile.getString("epg_dir", "").c_str());
 
@@ -931,6 +931,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString("epg_cache_time"           ,g_settings.epg_cache );
 	configfile.setString("epg_old_events"           ,g_settings.epg_old_events );
 	configfile.setString("epg_max_events"           ,g_settings.epg_max_events );
+	configfile.setString("epg_dir"                  ,g_settings.epg_dir);
 
 	//misc
 	configfile.setBool("shutdown_real"             , g_settings.shutdown_real);
@@ -1440,6 +1441,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &videoSettings,
 								CMenuWidget &languageSettings,
 								CMenuWidget &miscSettings,
+								CMenuWidget &driverSettings,
 								CMenuWidget &service,
 								CMenuWidget &fontSettings,
 								CMenuWidget &audiopl_picSettings,
@@ -1519,6 +1521,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD       , true, NULL, &lcdSettings      , NULL, CRCInput::RC_9));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, CRCInput::RC_0));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_DRIVER , true, NULL, &driverSettings   , NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW ));
 }
 
@@ -1721,7 +1724,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	CMenuOptionChooser* onoffscanSectionsd = ( new CMenuOptionChooser(LOCALE_SECTIONSD_SCANMODE, (int *)&scanSettings.scanSectionsd, SECTIONSD_SCAN_OPTIONS, SECTIONSD_SCAN_OPTIONS_COUNT, true,new CScanModeSectionsdNotifier));
 	CMenuForwarder *Rate =new CMenuForwarder(LOCALE_SCANTP_RATE, scanSettings.TP_scan, scanSettings.TP_rate, rate);
 	CMenuForwarder *Freq = new CMenuForwarder(LOCALE_SCANTP_FREQ, scanSettings.TP_scan, scanSettings.TP_freq, freq);
-	
+
 	scanSettings.TP_SatSelectMenu = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.TP_satname, ((scanSettings.diseqcMode != NO_DISEQC) && scanSettings.TP_scan), new CScanSettingsSatManNotifier);
 	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
@@ -1736,14 +1739,14 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 				dprintf(DEBUG_DEBUG, "satName = %s, diseqscOfSat(%d) = %d\n", satList[i].satName, i, *scanSettings.diseqscOfSat(satList[i].satName));
 			}
 		}
-		
+
 		for (uint i=0; i < tmpsatNameList.size(); i++)
 		{
 			scanSettings.TP_SatSelectMenu->addOption(tmpsatNameList[i].c_str());
 			dprintf(DEBUG_DEBUG, "got scanprovider (sat): %s\n", tmpsatNameList[i].c_str());
 		}
 	}
-	
+
 	CTP_scanNotifier *TP_scanNotifier = new CTP_scanNotifier(fec,pol,Freq,Rate,scanSettings.TP_SatSelectMenu);
 	CMenuOptionChooser* onoff = ( new CMenuOptionChooser(LOCALE_SCANTP_SCAN, (int *)&scanSettings.TP_scan, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_info.delivery_system == DVB_S), TP_scanNotifier));
 
@@ -1794,7 +1797,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem(GenericMenuSeparatorLine);
 
 
-		// experts-functions to read/write to the mtd 
+		// experts-functions to read/write to the mtd
 		CMenuWidget* mtdexpert = new CMenuWidget(LOCALE_FLASHUPDATE_EXPERTFUNCTIONS, "softupdate.raw");
 		mtdexpert->addItem(GenericMenuSeparator);
 		mtdexpert->addItem(GenericMenuBack);
@@ -1914,39 +1917,11 @@ const CMenuOptionChooser::keyval OPTIONS_OFF1_ON0_OPTIONS[OPTIONS_OFF1_ON0_OPTIO
 	{ 0, LOCALE_OPTIONS_ON  }
 };
 
-#define MISCSETTINGS_FB_DESTINATION_OPTION_COUNT 3
-const CMenuOptionChooser::keyval MISCSETTINGS_FB_DESTINATION_OPTIONS[MISCSETTINGS_FB_DESTINATION_OPTION_COUNT] =
-{
-	{ 0, LOCALE_OPTIONS_NULL   },
-	{ 1, LOCALE_OPTIONS_SERIAL },
-	{ 2, LOCALE_OPTIONS_FB     }
-};
-
 #define MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTION_COUNT 2
 const CMenuOptionChooser::keyval MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTIONS[MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTION_COUNT] =
 {
 	{ 0, LOCALE_FILESYSTEM_IS_UTF8_OPTION_ISO8859_1 },
 	{ 1, LOCALE_FILESYSTEM_IS_UTF8_OPTION_UTF8      }
-};
-
-typedef struct misc_setting_files_t
-{
-	const neutrino_locale_t                  name;
-	const char * const                       filename;
-	const CMenuOptionChooser::keyval * const options;
-} misc_setting_files_struct_t;
-
-const misc_setting_files_struct_t misc_setting_files[MISC_SETTING_FILES_COUNT] =
-{
-	{LOCALE_MISCSETTINGS_BOOTMENU      , "/var/etc/.neutrino"      , OPTIONS_OFF1_ON0_OPTIONS },
-	{LOCALE_MISCSETTINGS_BOOTINFO      , "/var/etc/.boot_info"     , OPTIONS_OFF0_ON1_OPTIONS },
-#if HAVE_DVB_API_VERSION == 1
-	{LOCALE_MISCSETTINGS_STARTBHDRIVER , "/var/etc/.bh"            , OPTIONS_OFF0_ON1_OPTIONS },
-#endif
-	{LOCALE_MISCSETTINGS_HWSECTIONS    , "/var/etc/.hw_sections"   , OPTIONS_OFF1_ON0_OPTIONS },
-	{LOCALE_MISCSETTINGS_NOAVIAWATCHDOG, "/var/etc/.no_watchdog"   , OPTIONS_OFF1_ON0_OPTIONS },
-	{LOCALE_MISCSETTINGS_NOENXWATCHDOG , "/var/etc/.no_enxwatchdog", OPTIONS_OFF1_ON0_OPTIONS },
-	{LOCALE_MISCSETTINGS_PMTUPDATE     , "/var/etc/.pmt_update"    , OPTIONS_OFF0_ON1_OPTIONS }
 };
 
 #define INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT 4
@@ -1995,26 +1970,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_OLD_EVENTS, true, g_settings.epg_old_events, miscSettings_epg_old_events));
 	CStringInput * miscSettings_epg_max_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, g_settings.epg_max_events, 5,LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT2 , "0123456789 ");
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, true, g_settings.epg_max_events, miscSettings_epg_max_events));
+	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_DIR, true, g_settings.epg_dir,this,"epgdir"));
 
-	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
-	CSPTSNotifier *sptsNotifier = new CSPTSNotifier;
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_SPTSMODE, &g_settings.misc_spts, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, sptsNotifier));
-
-	for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
-	{
-		FILE * fd = fopen(misc_setting_files[i].filename, "r");
-		if (fd)
-		{
-			fclose(fd);
-			g_settings.misc_option[i] = 1;
-		}
-		else
-			g_settings.misc_option[i] = 0;
-
-		miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CTouchFileNotifier(misc_setting_files[i].filename)));
-	}
-
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_FB_DESTINATION, &g_settings.uboot_console, MISCSETTINGS_FB_DESTINATION_OPTIONS, MISCSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
 
 	keySetupNotifier = new CKeySetupNotifier;
 	CStringInput * keySettings_repeat_genericblocker = new CStringInput(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, g_settings.repeat_genericblocker, 3, LOCALE_REPEATBLOCKER_HINT_1, LOCALE_REPEATBLOCKER_HINT_2, "0123456789 ", keySetupNotifier);
@@ -2030,6 +1987,61 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILESYSTEM_IS_UTF8            , &g_settings.filesystem_is_utf8            , MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTIONS, MISCSETTINGS_FILESYSTEM_IS_UTF8_OPTION_COUNT, true ));
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS        , &g_settings.filebrowser_showrights        , MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE, &g_settings.filebrowser_denydirectoryleave, MESSAGEBOX_NO_YES_OPTIONS              , MESSAGEBOX_NO_YES_OPTION_COUNT              , true ));
+}
+
+#define DRIVERSETTINGS_FB_DESTINATION_OPTION_COUNT 3
+const CMenuOptionChooser::keyval DRIVERSETTINGS_FB_DESTINATION_OPTIONS[DRIVERSETTINGS_FB_DESTINATION_OPTION_COUNT] =
+{
+	{ 0, LOCALE_OPTIONS_NULL   },
+	{ 1, LOCALE_OPTIONS_SERIAL },
+	{ 2, LOCALE_OPTIONS_FB     }
+};
+
+typedef struct driver_setting_files_t
+{
+	const neutrino_locale_t                  name;
+	const char * const                       filename;
+	const CMenuOptionChooser::keyval * const options;
+} driver_setting_files_struct_t;
+
+const driver_setting_files_struct_t driver_setting_files[DRIVER_SETTING_FILES_COUNT] =
+{
+	{LOCALE_DRIVERSETTINGS_SPTSFIX       , "/var/etc/.sptsfix"       , OPTIONS_OFF0_ON1_OPTIONS },
+	{LOCALE_DRIVERSETTINGS_BOOTINFO      , "/var/etc/.boot_info"     , OPTIONS_OFF0_ON1_OPTIONS },
+#if HAVE_DVB_API_VERSION == 1
+	{LOCALE_DRIVERSETTINGS_STARTBHDRIVER , "/var/etc/.bh"            , OPTIONS_OFF0_ON1_OPTIONS },
+#endif
+	{LOCALE_DRIVERSETTINGS_HWSECTIONS    , "/var/etc/.hw_sections"   , OPTIONS_OFF1_ON0_OPTIONS },
+	{LOCALE_DRIVERSETTINGS_NOAVIAWATCHDOG, "/var/etc/.no_watchdog"   , OPTIONS_OFF1_ON0_OPTIONS },
+	{LOCALE_DRIVERSETTINGS_NOENXWATCHDOG , "/var/etc/.no_enxwatchdog", OPTIONS_OFF1_ON0_OPTIONS },
+	{LOCALE_DRIVERSETTINGS_PMTUPDATE     , "/var/etc/.pmt_update"    , OPTIONS_OFF0_ON1_OPTIONS }
+};
+
+void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
+{
+	dprintf(DEBUG_DEBUG, "init driversettings\n");
+	driverSettings.addItem(GenericMenuSeparator);
+	driverSettings.addItem(GenericMenuBack);
+	driverSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_DRIVERSETTINGS_DRIVER_BOOT));
+
+	CSPTSNotifier *sptsNotifier = new CSPTSNotifier;
+	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_SPTSMODE, &g_settings.misc_spts, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, sptsNotifier));
+
+	for (int i = 0; i < DRIVER_SETTING_FILES_COUNT; i++)
+	{
+		FILE * fd = fopen(driver_setting_files[i].filename, "r");
+		if (fd)
+		{
+			fclose(fd);
+			g_settings.misc_option[i] = 1;
+		}
+		else
+			g_settings.misc_option[i] = 0;
+
+		driverSettings.addItem(new CMenuOptionChooser(driver_setting_files[i].name, &(g_settings.misc_option[i]), driver_setting_files[i].options, 2, true, new CTouchFileNotifier(driver_setting_files[i].filename)));
+	}
+
+	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_FB_DESTINATION, &g_settings.uboot_console, DRIVERSETTINGS_FB_DESTINATION_OPTIONS, DRIVERSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
 }
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
@@ -2396,7 +2408,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	g_settings.recording_audio_pids_std = ( g_settings.recording_audio_pids_default & TIMERD_APIDS_STD ) ? 1 : 0 ;
 	g_settings.recording_audio_pids_alt = ( g_settings.recording_audio_pids_default & TIMERD_APIDS_ALT ) ? 1 : 0 ;
 	g_settings.recording_audio_pids_ac3 = ( g_settings.recording_audio_pids_default & TIMERD_APIDS_AC3 ) ? 1 : 0 ;
-	
+
 	CRecAPIDSettingsNotifier * an = new CRecAPIDSettingsNotifier;
 	CMenuOptionChooser* aoj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_APIDS_STD, &g_settings.recording_audio_pids_std, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true, an);
 	CMenuOptionChooser* aoj2 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_APIDS_ALT, &g_settings.recording_audio_pids_alt, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true, an);
@@ -3118,7 +3130,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 #ifdef _EXPERIMENTAL_SETTINGS_
 	//Experimental Settings
 	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_EXPERIMENTALSETTINGS, true, NULL, new CExperimentalSettingsMenuHandler(), id, CRCInput::RC_nokey, ""), false);
-#endif	
+#endif
 
 	StreamFeatureSelector.exec(NULL,"");
 
@@ -3227,7 +3239,7 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 			else if (addTimer)
 			{
 				time_t now = time(NULL);
-				recording_id = g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, 
+				recording_id = g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60,
 																						eventinfo.epgID, eventinfo.epg_starttime,
 																						eventinfo.apids);
 			}
@@ -3399,7 +3411,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
 	rcLock                    = new CRCLock();
 	moviePlayerGui 						= new CMoviePlayerGui();
-	
+
 	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 
 	// setup recording device
@@ -3421,7 +3433,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 420);
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 400);
-	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 420);
+	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
@@ -3439,6 +3452,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 					videoSettings,
 					languageSettings,
 					miscSettings,
+					driverSettings,
 					service,
 					fontSettings,
 					audioplPicSettings,
@@ -3453,6 +3467,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//audioplayer/picviewer Setup
 	InitAudioplPicSettings(audioplPicSettings);
+
+	//driver Setup
+	InitDriverSettings(driverSettings);
 
 	//misc Setup
 	InitMiscSettings(miscSettings);
@@ -4070,7 +4087,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			if(recordingstatus==0)
 			{
 				t_channel_id channel_id=((CTimerd::RecordingInfo*)data)->channel_id;
-				g_Zapit->zapTo_serviceID_NOWAIT(channel_id); 
+				g_Zapit->zapTo_serviceID_NOWAIT(channel_id);
 			}
 		}
 		delete (unsigned char*) data;
@@ -4127,7 +4144,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			skipShutdownTimer = (ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_SHUTDOWNTIMER_ANNOUNCE, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes);
 	}
 	else if( msg == NeutrinoMessages::SHUTDOWN )
-	{		
+	{
 		// AUSSCHALTEN...
 		if(!skipShutdownTimer)
 		{
@@ -4314,7 +4331,7 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 	{
 
 		if (write_si) {
-		
+
 			CLCD::getInstance()->setMode(CLCD::MODE_SHUTDOWN);
 
 			dprintf(DEBUG_INFO, "exit\n");
@@ -4328,7 +4345,7 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 			networkConfig.automatic_start = (network_automatic_start == 1);
 			networkConfig.commitConfig();
 			saveSetup();
-			
+
 			if (frameBuffer != NULL)
 				delete frameBuffer;
 
@@ -4337,22 +4354,22 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 				AudioMute(true);
 				g_Sectionsd->writeSI2XML(g_settings.epg_dir);
 			}
-			else {			
+			else {
 				g_Controld->shutdown();
 				if (g_RCInput != NULL)
 					delete g_RCInput;
 
 				exit(0);
-			
+
 			}
 		} else {
 			AudioMute(false);
 			g_Controld->shutdown();
 			if (g_RCInput != NULL)
 				delete g_RCInput;
-			
+
 			exit(0);
-		
+
 		}
 	}
 }
@@ -4974,6 +4991,18 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		b.Dir_Mode=true;
 		if (b.exec(g_settings.network_nfs_recordingdir))
 			strncpy(g_settings.network_nfs_recordingdir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_recordingdir)-1);
+		return menu_return::RETURN_REPAINT;
+	}
+	else if(actionKey == "epgdir")
+	{
+		parent->hide();
+		CFileBrowser b;
+		b.Dir_Mode=true;
+		if (b.exec(g_settings.epg_dir))
+		{
+			std::string newepgdir = b.getSelectedFile()->Name + "/";
+			strncpy(g_settings.epg_dir, newepgdir.c_str(), sizeof(g_settings.epg_dir)-1);
+		}
 		return menu_return::RETURN_REPAINT;
 	}
 	else if(actionKey == "movieplugin")
