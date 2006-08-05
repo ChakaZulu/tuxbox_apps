@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.48 2006/06/29 19:26:46 houdini Exp $
+// $Id: SIsections.cpp,v 1.49 2006/08/05 22:32:10 houdini Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -470,109 +470,127 @@ void SIsectionPPT::parsePrivateParentalInformationDescriptor(const char *buf, SI
     return; // defekt
 
   buf+=sizeof(struct descr_generic_header);
-    
+
   if (sizeof(struct descr_generic_header)+1 < evt->descriptor_length) {
     e.ratings.insert(SIparentalRating(std::string("", 0), *(buf+1)));
   }
-#if 0    
+#if 0
     unsigned char rating;
     unsigned char Controll_time_t1[3]; // BCD coded
     unsigned char Controll_time_t2[3]; // BCD coded
     unsigned char Parental_information_length;
     unsigned char Parental_information[Parental_information_length];
-#endif    
+#endif
 }
+
 void SIsectionPPT::parsePrivateContentTransmissionDescriptor(const char *buf, SIevent &e, unsigned maxlen)
 {
-  unsigned short starttime_loop_length = 0;
-  unsigned char tm_buf[6];
-  int i;  
-  
-  struct descr_short_event_header *evt=(struct descr_short_event_header *)buf;
-  if((evt->descriptor_length+sizeof(descr_generic_header)>maxlen) || (evt->descriptor_length<sizeof(struct descr_short_event_header)-sizeof(descr_generic_header)))
-    return; // defekt
+	unsigned short starttime_loop_length = 0;
+	unsigned char tm_buf[6];
+	int i;
 
-//printf("parsePrivateContentTransmissionDescriptor\n");
-  const char *p=buf+sizeof(struct descr_generic_header);
-  if (sizeof(struct descr_generic_header)+1 <= maxlen) e.transport_stream_id = ((*p)<<8) | (*(p+1));
-  if (sizeof(struct descr_generic_header)+3 <= maxlen) e.original_network_id = ((*(p+2))<<8) | (*(p+3));
-  if (sizeof(struct descr_generic_header)+5 <= maxlen) e.service_id = ((*(p+4))<<8) | (*(p+5));
-  
-  //17.12.05 Premiere is sending wrong TSID 0011 for SID 00D3
-  if ((e.original_network_id == 0x0085) && (e.transport_stream_id == 0x0011) && (e.service_id == 0x00d3))
-  	e.transport_stream_id = 0x0001;
-  //21.05.06 Premiere is sending wrong SID 00f5 for SID 00dc
-  if ((e.original_network_id == 0x0085) && (e.transport_stream_id == 0x0003) && (e.service_id == 0x00f5))
-  	e.service_id = 0x00dc;
-  
-  p += 6;
-  while(p+6 <= buf + evt->descriptor_length + sizeof(struct descr_generic_header)) {// at least one startdate/looplength/time entry
-	tm_buf[0] = *(p);
-	tm_buf[1] = *(p+1);
-	starttime_loop_length = (*(p+2))/3;
-	for (i=0;i<starttime_loop_length; i++) {
-  		tm_buf[2] = *(p+3*i+3);
-  		tm_buf[3] = *(p+3*i+4);
-  		tm_buf[4] = *(p+3*i+5);
-		e.times.insert(SItime(changeUTCtoCtime(tm_buf), duration()));
+	struct descr_short_event_header *evt=(struct descr_short_event_header *)buf;
+	if((evt->descriptor_length+sizeof(descr_generic_header)>maxlen) || (evt->descriptor_length<sizeof(struct descr_short_event_header)-sizeof(descr_generic_header)))
+		return; // defekt
+
+	//printf("parsePrivateContentTransmissionDescriptor\n");
+	const char *p=buf+sizeof(struct descr_generic_header);
+	if (sizeof(struct descr_generic_header)+1 <= maxlen) e.transport_stream_id = ((*p)<<8) | (*(p+1));
+	if (sizeof(struct descr_generic_header)+3 <= maxlen) e.original_network_id = ((*(p+2))<<8) | (*(p+3));
+	if (sizeof(struct descr_generic_header)+5 <= maxlen) e.service_id = ((*(p+4))<<8) | (*(p+5));
+
+	// 1.8.2006 Premiere is still sending wrong epg data
+	if (e.original_network_id == 0x0085) {
+		if ((e.transport_stream_id == 0x0003) && (e.service_id == 0x00f0)) {
+			e.transport_stream_id = 0x0002;
+			e.service_id = 0x00e0;
+		}
+		if ((e.transport_stream_id == 0x0003) && (e.service_id == 0x00f1)) {
+			e.transport_stream_id = 0x0002;
+			e.service_id = 0x00e1;
+		}
+		if ((e.transport_stream_id == 0x0003) && (e.service_id == 0x00f5)) {
+			e.transport_stream_id = 0x0003;
+			e.service_id = 0x00dc;
+		}
+		if ((e.transport_stream_id == 0x0004) && (e.service_id == 0x00d2)) {
+			e.transport_stream_id = 0x0011;
+			e.service_id = 0x00e2;
+		}
+		if ((e.transport_stream_id == 0x0011) && (e.service_id == 0x00d3)) {
+			e.transport_stream_id = 0x0011;
+			e.service_id = 0x00e3;
+		}
 	}
-	p+=3 + 3*starttime_loop_length; // goto next starttime entry
-  }
-  
-  // fake linkage !?
-  SIlinkage l;
-  l.linkageType = 0; // no linkage descriptor
-  l.transportStreamId = e.transport_stream_id;
-  l.originalNetworkId = e.original_network_id;
-  l.serviceId = e.service_id;
-  e.linkage_descs.insert(e.linkage_descs.end(), l);
+
+	p += 6;
+	while(p+6 <= buf + evt->descriptor_length + sizeof(struct descr_generic_header)) {// at least one startdate/looplength/time entry
+		tm_buf[0] = *(p);
+		tm_buf[1] = *(p+1);
+		starttime_loop_length = (*(p+2))/3;
+		for (i=0;i<starttime_loop_length; i++) {
+			tm_buf[2] = *(p+3*i+3);
+			tm_buf[3] = *(p+3*i+4);
+			tm_buf[4] = *(p+3*i+5);
+			e.times.insert(SItime(changeUTCtoCtime(tm_buf), duration()));
+		}
+		p+=3 + 3*starttime_loop_length; // goto next starttime entry
+	}
+
+	// fake linkage !?
+	SIlinkage l;
+	l.linkageType = 0; // no linkage descriptor
+	l.transportStreamId = e.transport_stream_id;
+	l.originalNetworkId = e.original_network_id;
+	l.serviceId = e.service_id;
+	e.linkage_descs.insert(e.linkage_descs.end(), l);
 }
 
 void SIsectionPPT::parseDescriptors(const char *des, unsigned len, SIevent &e)
 {
-  struct descr_generic_header *desc;
-  bool linkage_alreadyseen = false;
-  
-  while(len>=sizeof(struct descr_generic_header)) {
-    desc=(struct descr_generic_header *)des;
- 
+	struct descr_generic_header *desc;
+	bool linkage_alreadyseen = false;
+
+	while(len>=sizeof(struct descr_generic_header)) {
+		desc=(struct descr_generic_header *)des;
+
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
-    if(desc->descriptor_tag==0x4D)
-      parseShortEventDescriptor((const char *)desc, e, len);
-    else if(desc->descriptor_tag==0x4E)
-      parseExtendedEventDescriptor((const char *)desc, e, len);
-    else if(desc->descriptor_tag==0x54)
-      parseContentDescriptor((const char *)desc, e, len);
-    else if(desc->descriptor_tag==0x50)
-      parseComponentDescriptor((const char *)desc, e, len);
-    else if(desc->descriptor_tag==0x55)
-      parseParentalRatingDescriptor((const char *)desc, e, len);
-    else if(desc->descriptor_tag==0x4A)
-      parseLinkageDescriptor((const char *)desc, e, len);
-    else if(desc->descriptor_tag==0xF0)
-      parsePrivateContentOrderDescriptor((const char *)desc, e, len);
-    else if(desc->descriptor_tag==0xF1)
-      parsePrivateParentalInformationDescriptor((const char *)desc, e, len);
-    else if(desc->descriptor_tag==0xF2) {
-      if (linkage_alreadyseen) {
-      	// Private EPG can have two linkage descriptors with their own date/time parameters for one event
-	// not sure if current event system supports it therefore:
-	// Generate additional Event(s) if there are more than one linkage descriptor (for repeated transmission)
-	SIevent e2(e);
-	e2.linkage_descs.clear();
-	e2.times.clear();
-	parsePrivateContentTransmissionDescriptor((const char *)desc, e2, len);
-	evts.insert(e2);
-      } else {
-	parsePrivateContentTransmissionDescriptor((const char *)desc, e, len);
-	linkage_alreadyseen = true;
-      }
-    }
-    if((unsigned)(desc->descriptor_length+2)>len)
-      break;
-    len-=desc->descriptor_length+2;
-    des+=desc->descriptor_length+2;
-  }
+		if(desc->descriptor_tag==0x4D)
+			parseShortEventDescriptor((const char *)desc, e, len);
+		else if(desc->descriptor_tag==0x4E)
+			parseExtendedEventDescriptor((const char *)desc, e, len);
+		else if(desc->descriptor_tag==0x54)
+			parseContentDescriptor((const char *)desc, e, len);
+		else if(desc->descriptor_tag==0x50)
+			parseComponentDescriptor((const char *)desc, e, len);
+		else if(desc->descriptor_tag==0x55)
+			parseParentalRatingDescriptor((const char *)desc, e, len);
+		else if(desc->descriptor_tag==0x4A)
+			parseLinkageDescriptor((const char *)desc, e, len);
+		else if(desc->descriptor_tag==0xF0)
+			parsePrivateContentOrderDescriptor((const char *)desc, e, len);
+		else if(desc->descriptor_tag==0xF1)
+			parsePrivateParentalInformationDescriptor((const char *)desc, e, len);
+		else if(desc->descriptor_tag==0xF2) {
+			if (linkage_alreadyseen) {
+				// Private EPG can have two linkage descriptors with their own date/time parameters for one event
+				// not sure if current event system supports it therefore:
+				// Generate additional Event(s) if there are more than one linkage descriptor (for repeated transmission)
+				SIevent e2(e);
+				e2.linkage_descs.clear();
+				e2.times.clear();
+				parsePrivateContentTransmissionDescriptor((const char *)desc, e2, len);
+				evts.insert(e2);
+			} else {
+				parsePrivateContentTransmissionDescriptor((const char *)desc, e, len);
+				linkage_alreadyseen = true;
+			}
+		}
+		if((unsigned)(desc->descriptor_length+2)>len)
+			break;
+		len-=desc->descriptor_length+2;
+		des+=desc->descriptor_length+2;
+	}
 }
 
 // Die infos aus dem Puffer holen
