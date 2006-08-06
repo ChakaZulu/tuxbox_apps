@@ -262,7 +262,6 @@ driversettings.hwsections use hardware sections
 driversettings.noaviawatchdog enable AVIA watchdog
 driversettings.noenxwatchdog enable eNX watchdog
 driversettings.pmtupdate enable pmt update
-driversettings.sptsfix use spts mode fix AVIA500
 driversettings.sptsmode use spts mode
 driversettings.startbhdriver load BH-Mode drivers
 epgextended.actors Actors

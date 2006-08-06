@@ -2006,7 +2006,6 @@ typedef struct driver_setting_files_t
 
 const driver_setting_files_struct_t driver_setting_files[DRIVER_SETTING_FILES_COUNT] =
 {
-	{LOCALE_DRIVERSETTINGS_SPTSFIX       , "/var/etc/.sptsfix"       , OPTIONS_OFF0_ON1_OPTIONS },
 	{LOCALE_DRIVERSETTINGS_BOOTINFO      , "/var/etc/.boot_info"     , OPTIONS_OFF0_ON1_OPTIONS },
 #if HAVE_DVB_API_VERSION == 1
 	{LOCALE_DRIVERSETTINGS_STARTBHDRIVER , "/var/etc/.bh"            , OPTIONS_OFF0_ON1_OPTIONS },

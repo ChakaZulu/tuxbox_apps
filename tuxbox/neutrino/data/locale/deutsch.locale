@@ -262,7 +262,6 @@ driversettings.hwsections HW-Sections verwenden
 driversettings.noaviawatchdog AVIA-Watchdog aktivieren
 driversettings.noenxwatchdog eNX-Watchdog aktivieren
 driversettings.pmtupdate PMT Update verwenden
-driversettings.sptsfix SPTS-Fix AVIA500 aktivieren
 driversettings.sptsmode SPTS-Mode Treiber laden
 driversettings.startbhdriver BH-Mode Treiber laden
 epgextended.actors Darsteller
