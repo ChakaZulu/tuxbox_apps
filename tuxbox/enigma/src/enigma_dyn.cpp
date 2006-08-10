@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.557 2006/04/15 18:04:19 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.558 2006/08/10 13:42:00 digi_casi Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2380,6 +2380,8 @@ static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConne
 	result.strReplace("#CHANNAVI#", getChanNavi(false));
 	return result;
 }
+
+#ifndef TUXTXT_CFG_STANDALONE
 // methods from libtuxtxt
 #include <tuxtxt/tuxtxt_def.h>
 extern "C" tuxtxt_cache_struct tuxtxt_cache;
@@ -2629,6 +2631,7 @@ static eString teletext(eString request, eString dirpath, eString opts, eHTTPCon
 	result.strReplace("#SUBPAGES#", subpages);
 	return result;
 }
+#endif
 
 #ifndef DISABLE_FILE
 extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
@@ -2876,7 +2879,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
 	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/webxtv", webxtv, lockWeb);
+#ifndef TUXTXT_CFG_STANDALONE
 	dyn_resolver->addDyn("GET", "/teletext", teletext, lockWeb);
+#endif
 	dyn_resolver->addDyn("GET", "/cgi-bin/setStreamingServiceRef", setStreamingServiceRef, lockWeb);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/recoverRecordings", recoverRecordings, lockWeb);
