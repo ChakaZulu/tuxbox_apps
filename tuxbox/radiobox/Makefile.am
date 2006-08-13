@@ -25,3 +25,21 @@ dist-hook:
 		fi \
 	done
 
+install-data-local:
+	mkdir -p ${prefix}/share/fonts
+	cp ${top_srcdir}/../enigma/data/fonts/bluebold.ttf ${prefix}/share/fonts
+	cp ${top_srcdir}/../enigma/data/fonts/bluehigh.ttf ${prefix}/share/fonts
+	cp ${top_srcdir}/../enigma/data/fonts/pakenham.ttf ${prefix}/share/fonts
+	cp ${top_srcdir}/../enigma/data/fonts/unmrs.pfa    ${prefix}/share/fonts
+	cp ${top_srcdir}/../neutrino/data/fonts/*.ttf      ${prefix}/share/fonts
+	cp ${top_srcdir}/../neutrino/data/fonts/*.gz       ${prefix}/share/fonts
+	cp ${top_srcdir}/../neutrino/data/fonts/*.pcf      ${prefix}/share/fonts
+	for d in $$( find ${top_srcdir}/root -type d -printf "%P\n" | grep -v CVS ); \
+	do \
+		echo "making $(prefix)/$$d"; \
+		mkdir -p $(prefix)/$$d; \
+	done
+	for f in $$( find ${top_srcdir}/root -type f -printf "%P\n" | grep -v CVS ); \
+	do \
+		cp ${top_srcdir}/root/$$f  $(prefix)/$$( dirname $$f ); \
+	done
