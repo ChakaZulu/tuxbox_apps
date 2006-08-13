@@ -15,5 +15,4 @@ lcdmenu_LDADD = \
 
 install-data-local:
 	install -d $(CONFIGDIR)
-	test -e $(CONFIGDIR)/lcdmenu.conf || install -m 644 lcdmenu.conf.example $(CONFIGDIR)/lcdmenu.conf
-
+	install -m 644 lcdmenu.conf.example $(CONFIGDIR)/lcdmenu.conf

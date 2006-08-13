@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.27 2003/09/02 00:49:49 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.28 2006/08/13 11:02:36 barf Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -25,9 +25,9 @@
 
 #include "lcdmenu.h"
 
-#ifdef DEBUG
+//#define DEBUG
+
 #include <iostream>
-#endif
 
 CLCDMenu *CLCDMenu::instance;
 
@@ -44,6 +44,10 @@ CLCDMenu::CLCDMenu (std::string configFilename)
 	config = new CConfigFile(',');
 	if (!config->loadConfig(configFilename))
 	{
+#if 0
+		// With some effort, this code can be made to work in the
+		// new setting.  I simpy do not think it is worth it.
+
 		/* defaults */
 		config->setInt32("font_size", 12);
 		config->setInt32("line_spacing", 3);
@@ -60,6 +64,11 @@ CLCDMenu::CLCDMenu (std::string configFilename)
 		config->setInt32("visible_entries", 4);
 		//addPinProtection(3);
 		config->setInt32Vector("pin_protect", pinEntries);
+#else
+		  std::cerr << "[lcdmenu] " << configFilename
+			    << " not found, exiting\n";
+		  exit(255);
+#endif
 	}
 
 	/* user defineable settings */
@@ -71,9 +80,53 @@ CLCDMenu::CLCDMenu (std::string configFilename)
 	timeoutValue = config->getInt32("timeout");
 	cryptedPin = config->getString("pin");
 	entries = config->getStringVector("menu_items");
+	entries_files = config->getStringVector("item_files");
+	entries_execfiles = config->getStringVector("item_execfiles");
+	entries_isGUI = config->getStringVector("item_isGUI");
 	pinEntries = config->getInt32Vector("pin_protect");
 	visibleEntries = config->getInt32("visible_entries");
+
+	struct stat *buf = new(struct stat);
+	noGUIs = 0;
+	int one_GUI = -1;
+	std::vector <std::string> real_entries;
+        std::vector <std::string> real_entries_execfiles;
+
+	if (entries.size() != entries_files.size() 
+	    || entries.size() != entries_execfiles.size()
+	    || entries.size() != entries_isGUI.size() ) {
+	  std::cerr << "[lcdmenu] Sizes of menu_items, item_isGUI, item_files, and item_execfiles differ!\n";
+	  noGUIs = 999;
+
+	} else {
+	  for (unsigned int i = 0; i < entries.size(); i++) {
+	    if (stat(entries_files[i].c_str(), buf)) {
+	      std::cout << "[lcdmenu] " << entries_files[i] << " was not found, entry " << entries[i] << " discarded\n";
+	    } else {
+	      real_entries.push_back(entries[i]);
+	      real_entries_execfiles.push_back(entries_execfiles[i]);
+	      if (entries_isGUI[i] == "true") {
+		noGUIs++;
+		one_GUI = entries.size();
+	      }
+	    }
+	  }
+	  entries = real_entries;
+	  entries_execfiles = real_entries_execfiles;
+	}
+
+#ifdef DEBUG
+	for (std::vector<std::string>::iterator i1 = entries.begin();
+	     i1 != entries.end();
+	     i1++)
+	  std::cout << *i1 << "\n";
+
+	std::cout << noGUIs << " GUIs were found\n";
+#endif
+
 	entryCount = entries.size();
+	if (noGUIs == 1)
+		defaultEntry = one_GUI;
 
 	if (entryCount < visibleEntries)
 		visibleEntries = entryCount;
@@ -235,6 +288,7 @@ void CLCDMenu::timeout (int signal)
 	{
 		menu->draw_fill_rect (0, 0, 119, 63, CLCDDisplay::PIXEL_OFF);
 		menu->update();
+		menu->exec();
 		exit(menu->selectedEntry);
 	}
 }
@@ -467,3 +521,19 @@ void CLCDMenu::poweroff ()
 	exit(0);
 }
 
+void CLCDMenu::exec()
+{
+  if (entries_execfiles.size() >= (unsigned) selectedEntry + 1) {
+    std::string execfilename = entries_execfiles[selectedEntry];
+    struct stat *buf = new(struct stat);
+    if (stat(execfilename.c_str(), buf)) {
+      std::cout << "[lcdmenu] " << execfilename
+		<< " was not found, not exec-ing\n";
+    }
+#ifdef DEBUG
+    std::cout << "Now I would have exec-ed " << execfilename << "\n";
+#else
+    execl(execfilename.c_str(), execfilename.c_str(), NULL);
+#endif
+  }
+}

@@ -45,7 +45,7 @@ text_align=0
 #
 # enables display of remote control number key before each menu item.
 #
-show_numbers=false
+show_numbers=true
 
 #
 # option: pin (string)
@@ -55,9 +55,32 @@ pin=__lUISdFwUYjg
 
 #
 # option: menu_items (string, ...)
-# default: EliteDVB,Neutrino,Lcars,Maintenance
 #
-menu_items=Enigma,Neutrino,Lcars,Maintenance,Put,Your,Start,Items,Here
+# This contains the names of the entries on the display
+
+menu_items=Neutrino,Enigma,Radiobox,Lcars,Initialize,None,Halt 
+
+#
+# option: item_files (string, ...)
+#
+# This is a list of files to check for existence, corresponding to menu_item.
+# For the i-th entry in menu_items, the entry will be displayed if and only
+# if the i-th entry in this list denotes an existing file.
+item_files=/bin/neutrino,/bin/enigma,/bin/radiobox,/bin/lcars,/etc/init.d/initialize,/bin/true,/sbin/halt
+
+#
+# option: item_execfiles (string, ...)
+#
+# This list contains files to be exec-ed when the corresponding entry is
+# selected.
+item_execfiles=/etc/init.d/start_neutrino,/etc/init.d/start_enigma,/bin/radiobox,/etc/init.d/start_lcars,/etc/init.d/initialize,/bin/true,/sbin/halt
+
+#
+# option: item_isGUI (true|false, ...)
+#
+# If only one GUI is found, the menu is not invoked; instead the (single)
+# GUI is started. This list defines which entries are to be considered GUIs.
+item_isGUI=true,true,true,true,false,false,false
 
 #
 # option: pin_protect (number, ...)

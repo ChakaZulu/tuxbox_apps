@@ -1,5 +1,5 @@
 /*
- * $Id: main.h,v 1.2 2002/04/14 23:20:38 obi Exp $
+ * $Id: main.h,v 1.3 2006/08/13 11:02:36 barf Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -24,6 +24,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "configfile.h"
 #include "lcdmenu.h"
