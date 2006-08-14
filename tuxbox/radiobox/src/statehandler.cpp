@@ -87,7 +87,7 @@ void CSelectPlayList::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
 
 void CSelectPlayList::Show()
 {
-	int i;
+	unsigned int i;
 	
 	CLCD::getInstance()->ClearMenu();
 	CLCD::getInstance()->setMenuTitle( "Playlists" );
@@ -170,7 +170,7 @@ void CSelectPlayList::LoadPlaylists( std::string _dirname )
 
 void CPlayListEntries::Show()
 {
-	int i;
+	unsigned int i;
 
 	CLCD::getInstance()->ClearMenu();
 	CLCD::getInstance()->setMenuTitle( playlist->GetName() );
@@ -371,7 +371,17 @@ void CPlayPLRandom::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
 
 CSelectLocation::CSelectLocation()
 {
-	LoadLocations();
+	try
+	{
+		LoadLocations();
+	}
+	catch( EPlayList e )
+	{
+		if( e.code == EPlayList::noaccess )
+		{
+			this->subhandler = new CMessageBox( "Cannot access media!" );
+		}
+	}
 }
 
 /**************************************************************/
@@ -380,7 +390,6 @@ void CSelectLocation::LoadLocations( )
 {
 	std::string dirname = g_settings.library_root;
 	struct dirent* entry = NULL;
-	size_t	files = 0;
 	
 	DIR* dir = opendir( dirname.c_str() );
 	
@@ -538,7 +547,7 @@ CPlayList* CSelectLocation::GetPlayList( std::string _location )
 {
 	std::string plname = _location;
 
-	int i;
+	unsigned int i;
 
 	for( i = 0; i < plname.size(); i++ )
 		if( plname[i] == '/' )
@@ -573,7 +582,7 @@ void CMenu::ResetMenu()
 
 void CSelectLocation::Show()
 {
-	int i;
+	unsigned int i;
 	
 	CLCD::getInstance()->ClearMenu();
 	CLCD::getInstance()->setMenuTitle( "Locations" );
@@ -602,16 +611,17 @@ CMainMenu::CMainMenu()
 
 void CMainMenu::DoAction( std::string _action )
 {
-	if( _action == "Media" )
-		this->subhandler = new CSelectLocation();
-	else if ( _action == "Setup" )
-			this->subhandler = new CSetupMenu();
+	switch( sel )
+	{
+	case 0: this->subhandler = new CSelectLocation(); break;
+	case 1: this->subhandler = new CSetupMenu(); break;
+	}
 }
 
 /**************************************************************/
 void CStaticMenu::Show()
 {
-	int i;
+	unsigned int i;
 	
 	CLCD::getInstance()->ClearMenu();
 	CLCD::getInstance()->setMenuTitle( this->title );
@@ -759,7 +769,7 @@ void CSetupReadFlash::DoAction( std::string _action )
 	file += _action;
 	file += ".img";
 
-	int i = 0;
+	unsigned int i = 0;
 	for ( i = 0; i < file.size(); i++ )
 	{
 		if( 
@@ -889,7 +899,7 @@ void CPlayListOptions::DoAction( std::string _action )
 		//TODO Show here "Please Wait" Screen
 		std::string plname = location;
 
-		int i;
+		unsigned int i;
 
 		for( i = 0; i < plname.size(); i++ )
 			if( plname[i] == '/' )
@@ -912,4 +922,32 @@ CPlayListEntries::CPlayListEntries( CPlayList* _playlist )
 }
 
 /**************************************************************/
+
+CMessageBox::CMessageBox( std::string _msg, int _type, int _timeout )
+{
+	this->frame = 0;
+	this->msg = _msg;
+	this->type = _type;
+	this->endtime = time( NULL ) + _timeout ;
+	CLCD::getInstance()->showMessageBox( msg, type, frame );
+}
+
+
+void	CMessageBox::Show()
+{
+	CLCD::getInstance()->showMessageBox( msg, type, frame++ );
+	if( time( NULL ) > this->endtime )
+	{
+		remove = true;
+	}
+	return;
+}
+
+void	CMessageBox::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+{
+	if( _pressed ) return; /* handle it only if key released is */
+
+	if( _key != CRadioBox::NOKEY )
+		remove = true;
+}
 

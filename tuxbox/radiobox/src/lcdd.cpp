@@ -985,5 +985,13 @@ void CLCD::clear( bool _commit )
 	}	
 }
 
+void CLCD::showMessageBox( std::string _msg, int _type, const unsigned long	_frame )
+{
+	clear();	
+
+	DrawString( 0, 40, 120, _msg, fonts.menu, 12, false, _frame );
+	
+	displayUpdate();
+}
 
 

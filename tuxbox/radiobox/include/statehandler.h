@@ -37,7 +37,7 @@ class CMenu
 {
 protected:
 
-	int menu_selected;
+	unsigned int menu_selected;
 	int menu_top; //first element shown in menu
 
 	void ResetMenu(); 
@@ -277,13 +277,30 @@ private:
 	void	Next( int _d );
 	
 public:
-	CMountEdit( int _idx ) : idx( _idx ), current(me_ip), cursor(1) {};
+	CMountEdit( int _idx ) : idx( _idx ), cursor(1), current(me_ip) {};
 	
 	void		Show();
 	void		HandleKeys( CRadioBox::KEYS _key, bool _pressed );
 
 };
 
+
+/*********************************************************/
+
+class CMessageBox : public CStateHandler
+{
+protected:
+	time_t endtime;
+	unsigned long frame;
+	std::string msg;
+	int type;
+public:
+	CMessageBox( std::string _msg, int _type = 0, int _timeout = 18 );
+	virtual ~CMessageBox() { };
+
+	void	Show();
+	void	HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+};
 
 /*********************************************************/
 

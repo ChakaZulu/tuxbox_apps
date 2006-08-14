@@ -171,6 +171,8 @@ class CLCD
 		void showTime();
 		/** blocks for duration seconds */
 
+		void showMessageBox( std::string _msg, int _type, const unsigned long _frame = 0 );
+
 		void showRCLock(int duration = 2);
 		void showVolume(const char vol, const bool perform_update = true);
 		void showPercentOver(const unsigned char perc, const bool perform_update = true);
