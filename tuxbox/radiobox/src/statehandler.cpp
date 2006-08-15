@@ -178,7 +178,7 @@ void CPlayListEntries::Show()
 
 	for( i = 0; i < playlist->GetSize() && i < NUM_MENU_LINES; i++ )
 	{
-		CLCD::getInstance()->setMenuLine( playlist->GetLocation( i + menu_top ) );
+		CLCD::getInstance()->setMenuLine( basename( playlist->GetLocation( i + menu_top ).c_str() ) );
 	}
 
 	CLCD::getInstance()->setMenuCursors( ( menu_top > 0 ), ( NUM_MENU_LINES < playlist->GetSize() - menu_top ) );
@@ -423,7 +423,7 @@ void CSelectLocation::LoadLocations( )
 			if( S_ISDIR( status.st_mode ) )
 			{
 				if( strcmp( ".", entry->d_name ) && strcmp( "..", entry->d_name ) )
-					locations.push_back( fullname );
+					locations.push_back( entry->d_name );
 			}
 		}
 
@@ -497,11 +497,11 @@ void CSelectLocation::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
 		case CRadioBox::POWER:
 			break;
 		case CRadioBox::PLAY:
-			this->subhandler = new CPlayPLRandom( GetPlayList( locations[menu_top + menu_selected] ) );
+			this->subhandler = new CPlayPLRandom( GetPlayList( g_settings.library_root + "/" + locations[menu_top + menu_selected] ) );
 			break;
 		case CRadioBox::SELECT:
-			std::cout << "get locations[menu_top + menu_selected] " << locations[menu_top + menu_selected] << std::endl;
-			this->subhandler = new CPlayListEntries( GetPlayList( locations[menu_top + menu_selected] ) );
+			std::cout << "get locations[menu_top + menu_selected] " << g_settings.library_root + "/" + locations[menu_top + menu_selected] << std::endl;
+			this->subhandler = new CPlayListEntries( GetPlayList( g_settings.library_root + "/" + locations[menu_top + menu_selected] ) );
 			break;
 		case CRadioBox::UP:
 			menu_selected --;
