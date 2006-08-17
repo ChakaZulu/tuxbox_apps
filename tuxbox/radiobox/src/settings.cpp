@@ -10,7 +10,7 @@
 
 #define RADIOBOX_CONFIG			CONFIGDIR "/radiobox/radiobox.conf"
 #define RADIOBOX_PLAYLISTROOT	CONFIGDIR "/radiobox/playlists"
-#define RADIOBOX_LIBRARYROOT	DATADIR "/radiobox/library"
+#define RADIOBOX_LIBRARYROOT	CONFIGDIR "/radiobox/library"
 
 void CRadioboxSettings::Load( )
 {
