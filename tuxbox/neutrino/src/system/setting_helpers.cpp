@@ -192,6 +192,8 @@ bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 
 	   if (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE)
 	   {
+		   toDisable[4]->setActive(true);
+		   toDisable[5]->setActive(true);
 		   toDisable[7]->setActive(true);
 		   toDisable[8]->setActive(true);
 	   }
@@ -227,28 +229,29 @@ bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 
 CRecordingNotifier2::CRecordingNotifier2( CMenuItem* i)
 {
-   toDisable[0]=i;
+	toDisable[0]=i;
 }
 bool CRecordingNotifier2::changeNotify(const neutrino_locale_t, void *)
 {
-   toDisable[0]->setActive(g_settings.recording_server_wakeup==1);
-   return true;
+	toDisable[0]->setActive(g_settings.recording_server_wakeup==1);
+	return true;
 }
 
 bool CRecordingSafetyNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	g_Timerd->setRecordingSafety(atoi(g_settings.record_safety_time_before)*60, atoi(g_settings.record_safety_time_after)*60);
-   return true;
+	return true;
 }
 
 CMiscNotifier::CMiscNotifier( CMenuItem* i1)
 {
-   toDisable[0]=i1;
+	toDisable[0]=i1;
 }
+
 bool CMiscNotifier::changeNotify(const neutrino_locale_t, void *)
 {
-   toDisable[0]->setActive(!g_settings.shutdown_real);
-   return true;
+	toDisable[0]->setActive(!g_settings.shutdown_real);
+	return true;
 }
 
 bool CLcdNotifier::changeNotify(const neutrino_locale_t, void *)
@@ -392,7 +395,7 @@ bool CAudioSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void 
 
 CAudioSetupNotifier2::CAudioSetupNotifier2( CMenuItem* i1)
 {
-   toDisable[0]=i1;
+	toDisable[0]=i1;
 }
 
 bool CAudioSetupNotifier2::changeNotify(const neutrino_locale_t, void *)
@@ -416,7 +419,7 @@ bool CKeySetupNotifier::changeNotify(const neutrino_locale_t, void *)
 
 bool CShutdownCountNotifier::changeNotify(const neutrino_locale_t, void *)
 {
- 	printf("[neutrino] shutdown counter changed to %d minutes\n", atoi(g_settings.shutdown_count));
+	printf("[neutrino] shutdown counter changed to %d minutes\n", atoi(g_settings.shutdown_count));
 	return true;
 }
 
@@ -447,7 +450,7 @@ bool CTimingSettingsNotifier::changeNotify(const neutrino_locale_t OptionName, v
 	{
 		if (ARE_LOCALES_EQUAL(OptionName, timing_setting_name[i]))
 		{
-			g_settings.timing[i] = 	atoi(g_settings.timing_string[i]);
+			g_settings.timing[i] = atoi(g_settings.timing_string[i]);
 			return true;
 		}
 	}
@@ -523,7 +526,7 @@ int CMoviePluginChangeExec::exec(CMenuTarget* parent, const std::string & action
 	parent->hide();
 	if (sel>=0)
 	{
-			g_settings.movieplayer_plugin=g_PluginList->getName(sel);
+		g_settings.movieplayer_plugin=g_PluginList->getName(sel);
 	}
 	return menu_return::RETURN_EXIT;
 }
