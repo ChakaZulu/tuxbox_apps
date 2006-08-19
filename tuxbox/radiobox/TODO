@@ -1,5 +1,12 @@
+-B- Single file in a playlist is not shown
+-B- "Acces denied" exception should be catched
+-B- eleminate scrolling text jumps
+-F. Make it possible to configure RC Interface to native RC
+-F- rework statehandler (menu) to something like configurable plugins
+-F- add possibility to save last playing song/station and start playback after radiobox is started again
+-F- Mountpoints configuration
+-F- Network configuration
 -F. Check all dependences needed to compile radiobox
 -F. Add http interface to the radiobox
--F. Make it possible to configure RC Interface with native RC
 -F. Add scaning and mounting network shares
-
+-F- Add "screensaver" feature (while playing, sometime show clock, wheater and so on)
