@@ -94,6 +94,7 @@ CInfoViewer::CInfoViewer()
 #ifndef SKIP_CA_STATUS
 	CA_Status        = false;
 #endif
+	virtual_zap_mode = false;
 }
 
 void CInfoViewer::start()
@@ -212,9 +213,19 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	// kill progressbar
 	frameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
 
+	int col_NumBoxText;
+	int col_NumBox;
+	if (virtual_zap_mode) {
+		col_NumBoxText = COL_MENUHEAD;
+		col_NumBox = COL_MENUHEAD_PLUS_0;
+	} else {
+		col_NumBoxText = COL_INFOBAR;
+		col_NumBox = COL_INFOBAR_PLUS_0;
+	}
+
 	//number box
 	frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
-	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR_PLUS_0);
+	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, col_NumBox);
 
 	int ChanNumYPos = BoxStartY + ChanHeight;
 
@@ -227,7 +238,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 				if (satNameWidth > ChanWidth)
 					satNameWidth = ChanWidth;
 
-				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxStartX + ((ChanWidth - satNameWidth)>>1), BoxStartY + 22, ChanWidth, satList_it->satName, COL_INFOBAR);
+				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxStartX + ((ChanWidth - satNameWidth)>>1), BoxStartY + 22, ChanWidth, satList_it->satName, col_NumBoxText);
 
 				ChanNumYPos += 10;
 
@@ -237,7 +248,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 
 	char strChanNum[10];
 	sprintf( (char*) strChanNum, "%d", ChanNum);
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, COL_INFOBAR);
+
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->RenderString(BoxStartX + ((ChanWidth - g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getRenderWidth(strChanNum))>>1), ChanNumYPos, ChanWidth, strChanNum, col_NumBoxText);
 
 	//infobox
 	int ChanNameX = BoxStartX + ChanWidth + 10;
@@ -317,7 +329,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 			fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
 
 		bool hideIt = true;
-		bool virtual_zap_mode = false;
 		unsigned long long timeoutEnd = (neutrino->getMode() != 2) ?  CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR]) : CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR_RADIO]);
 
 		int res = messages_return::none;

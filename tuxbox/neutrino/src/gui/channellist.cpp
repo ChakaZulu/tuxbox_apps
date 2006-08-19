@@ -826,6 +826,7 @@ void CChannelList::virtual_zap_mode(bool up)
 			break;
 		}
 	}
+	g_InfoViewer->clearVirtualZapMode();
 
 	chn--;
 	if (chn<0)
