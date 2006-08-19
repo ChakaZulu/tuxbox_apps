@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id: tag.c,v 1.1 2006/06/05 18:15:19 the_moon Exp $
+ * $Id: tag.c,v 1.1 2006/08/19 20:18:42 the_moon Exp $
  */
 
 # ifdef HAVE_CONFIG_H

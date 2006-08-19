@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/radiobox/src/Attic/encoding.cpp,v 1.1 2006/06/05 18:15:19 the_moon Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/radiobox/src/engine/encoding.h,v 1.1 2006/08/19 20:18:48 the_moon Exp $
  *
  * conversion of character encodings - d-box2 linux project
  *
@@ -21,24 +21,11 @@
  *
  */
 
-#include <driver/encoding.h>
+#ifndef __neutrino__encoding_h__
+#define __neutrino__encoding_h__
 
-std::string Latin1_to_UTF8(const std::string & s)
-{
-	std::string r;
-	
-	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
-	{
-		unsigned char c = *it;
-		if (c < 0x80)
-			r += c;
-		else
-		{
-			unsigned char d = 0xc0 | (c >> 6);
-			r += d;
-			d = 0x80 | (c & 0x3f);
-			r += d;
-		}
-	}		
-	return r;
-}
+#include <string>
+
+std::string Latin1_to_UTF8(const std::string & s);
+
+#endif /* __neutrino__encoding_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/radiobox/src/Attic/fb_window.cpp,v 1.1 2006/06/05 18:15:19 the_moon Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/radiobox/src/gui/fb_window.cpp,v 1.1 2006/08/19 20:18:51 the_moon Exp $
  *
  * abstract fb_window class - d-box2 linux project
  *

@@ -5,7 +5,11 @@
 ## 	Please disable it in the Anjuta project configuration
 
 INCLUDES = \
-	 -I../include \
+	 -I. \
+	 -I./engine \
+	 -I./gui \
+	 -I./audio \
+	 -I./menus \
 	@CONNECTION_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
@@ -26,31 +30,31 @@ AM_CXXFLAGS =\
 bin_PROGRAMS = radiobox
 
 radiobox_SOURCES = \
-	main.cc\
-	audiofile.cpp \
-	audiometadata.cpp\
-	audioplay.cpp\
-	basedec.cpp\
-	cdrdec.cpp\
-	file.cpp\
-	mp3dec.cpp\
+	main.cc \
 	$(top_srcdir)/../neutrino/src/driver/netfile.cpp \
 	$(top_srcdir)/../neutrino/src/system/fsmounter.cpp \
-	playlist.cpp\
-	radiobox.cpp\
-	wavdec.cpp\
-	tag.c\
-	statehandler.cpp \
-	lcdd.cpp \
-	rcinput.cpp \
-	flashtool.cpp \
-	settings.cpp \
-	mounter.cpp
+	$(top_srcdir)/src/engine/playlist.cpp \
+	engine/radiobox.cpp \
+	engine/settings.cpp \
+	engine/flashtool.cpp \
+	engine/rcinput.cpp \
+	engine/file.cpp \
+	menus/statehandler.cpp \
+	menus/mounter.cpp \
+	audio/mp3dec.cpp \
+	audio/wavdec.cpp \
+	audio/cdrdec.cpp \
+	audio/basedec.cpp \
+	audio/audiofile.cpp \
+	audio/audiometadata.cpp \
+	audio/audioplay.cpp \
+	audio/tag.c \
+	gui/lcdd.cpp
 
 radiobox_LDFLAGS = 
 
 radiobox_LDADD = \
-	-lpthread\
+	-lpthread \
 	@CONFIGFILE_LIBS@ \
 	@LCDDISPLAY_LIBS@ \
 	@ID3TAG_LIBS@ \

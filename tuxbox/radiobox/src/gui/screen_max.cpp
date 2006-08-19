@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/radiobox/src/Attic/screen_max.cpp,v 1.1 2006/06/05 18:15:19 the_moon Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/radiobox/src/gui/screen_max.cpp,v 1.1 2006/08/19 20:18:51 the_moon Exp $
  *
  * -- some odd module to calc max. screen usage of an menue
  * -- this should be somewhere else (neutrino needs redesign)

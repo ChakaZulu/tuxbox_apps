@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.1 2006/06/05 18:15:19 the_moon Exp $
+ * $Id: stream2file.cpp,v 1.1 2006/08/19 20:18:48 the_moon Exp $
  * 
  * streaming to file/disc
  * 

@@ -20,60 +20,58 @@
 */
 
 
-#ifndef __CAPTURE_CONTROL__
-#define __CAPTURE_CONTROL__
-
-
-#define __v4l_capture
-
+#ifndef __PIG_CONTROL__
+#define __PIG_CONTROL__
 
 using namespace std;
 
 
 //
-//  -- Picture Capture  Control
-//  --  2003-12  rasc
+//  -- Picture in Graphics  Control
+//  --  2002-11  rasc
+//  --  2003-06  rasc   V4L API
 //
 
-#ifdef __v4l_capture
+
 
 #include <linux/videodev.h>
-#define CAPTURE_DEV "/dev/v4l/video"		// CaptureNr will be appended!
 
-#else
-
-#include <dbox/avia_gt_capture.h>
-#define CAPTURE_DEV "/dev/dbox/capture"		// CaptureNr will be appended!
-
-#endif
+#define PIG_DEV "/dev/v4l/video"		// PigNr will be appended!
 
 
-class CCAPTURE
+
+class CPIG
 {
 	public:
-		CCAPTURE ();
-		CCAPTURE (int capture_nr);		// incl. open
-		CCAPTURE (int capture_nr, int x, int y, int w, int h); // open + set_coord
-		~CCAPTURE ();
+		CPIG ();
+		CPIG (int pig_nr);		// incl. open
+		CPIG (int pig_nr, int x, int y, int w, int h); // open + set_coord
+		~CPIG ();
 
-		int  captureopen  (int capture_nr);
-		void captureclose (void);
+		int  pigopen  (int pig_nr);
+		void pigclose (void);
 		void set_coord (int x, int y, int w, int h);
 		void set_xy    (int x, int y);
 		void set_size  (int w, int h);
-		void set_output_size (int w, int h);
-		u_char *readframe (u_char *buf);
+//		void set_source(int x, int y);
+//		void set_stackpos  (int pos);
+		void show (void);
+		void show (int x, int y, int w, int h);
+		void hide (void);
+
+		enum PigStatus { CLOSED, HIDE, SHOW };
+		PigStatus getStatus(void);
 
 	private:
 		void _set_window  (int x, int y, int w, int h);
 
 		int	fd;			// io descriptor
-		int	cx, cy, cw, ch;		// capture size
-		int	out_w, out_h;		// capture output size
-		int	stride;
+		int	px, py, pw, ph;		// pig frame
+		int	stackpos;		// Order (Framebuffer, PIGs)
+		PigStatus  status;		// on display?
+
 
 };
-
 
 
 #endif
