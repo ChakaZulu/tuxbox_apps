@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.49 2006/08/05 22:32:10 houdini Exp $
+// $Id: SIsections.cpp,v 1.50 2006/08/19 20:13:34 houdini Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -931,10 +931,12 @@ void SIsectionBAT::parse(void)
 								while ((privdlen >= order_entry_size) && (!found_posi)) {
 									struct digplus_order_entry *oe = (struct digplus_order_entry *)privbuf;
 									privbuf+=order_entry_size;
-									//printf("Search: %04x Service_id: %04x Posi:%04x\n", 
-//										(sl->service_id_hi << 8) | sl->service_id_lo,
-//										(oe->service_id_hi << 8) | oe->service_id_lo,
-//										(oe->channel_number_hi << 8) | oe->channel_number_lo);
+									/*
+									printf("Search: %04x Service_id: %04x Posi:%04x\n", 
+										(sl->service_id_hi << 8) | sl->service_id_lo,
+										(oe->service_id_hi << 8) | oe->service_id_lo,
+										(oe->channel_number_hi << 8) | oe->channel_number_lo);
+									*/
 									if (	((sl->service_id_hi << 8) | sl->service_id_lo) == 
 										((oe->service_id_hi << 8) | oe->service_id_lo)) {
 										bs.position = (oe->channel_number_hi << 8) | oe->channel_number_lo;
@@ -981,7 +983,7 @@ void SIsectionBAT::parse(void)
 						}
 					}
 					if (desc->descriptor_tag == 0x83) {
-						if (current_private_data_specifier == 0x000000c0) {
+						if ((current_private_data_specifier == 0x000000c0) || (current_private_data_specifier == 0x0000003a)) {
 							//printf("Canal+ Bouquet ordering descriptor found!\n");
 							privdesc = (struct descr_generic_header *)desc;
 							found = true;
