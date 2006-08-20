@@ -254,6 +254,16 @@ date.Sun  Su
 date.Thu  To
 date.Tue  Ti
 date.Wed  Ke
+driversettings.bootinfo Näytä tiedot käynnistyksessä
+driversettings.driver_boot Ajurit ja käynnistys
+driversettings.fb_destination Konsoli
+driversettings.head Ajurit ja käynnistys
+driversettings.hwsections Käytä hwsections:ia
+driversettings.noaviawatchdog Käytä AVIA valvontaa
+driversettings.noenxwatchdog Käytä eNX valvontaa
+driversettings.pmtupdate Käytä PMT päivitystä
+driversettings.sptsmode Käytä spts-tilaa
+driversettings.startbhdriver Lataa BH-tilan ajurit
 epgextended.actors Näyttelijät
 epgextended.director Ohjaaja
 epgextended.guests Vieraat
@@ -495,6 +505,7 @@ mainmenu.sleeptimer Uniajastin
 mainmenu.tvmode TV
 mainsettings.audio Ääni
 mainsettings.colors Käyttöliittymän ulkoasu
+mainsettings.driver Ajurit ja käynnistys
 mainsettings.head Asetukset
 mainsettings.keybinding Näppäinasetukset
 mainsettings.language Kieli
@@ -514,26 +525,28 @@ messagebox.error Virhe
 messagebox.info Info
 messagebox.no Ei
 messagebox.yes Kyllä
-miscsettings.bootinfo Näytä tiedot käynnistyksessä
-miscsettings.bootmenu Näytä käynnistysvalikko
 miscsettings.cabledriver Lataa Nokian kaapeliajuri
-miscsettings.driver_boot Ajurit ja käynnistys
-miscsettings.fb_destination Konsoli
+miscsettings.epg_cache Päiviä ohjelmaoppaassa
+miscsettings.epg_cache_hint1 Monenko päivän ohjelmatiedot ohjelmaoppaaseen
+miscsettings.epg_cache_hint2 korkeintaan kerätään.
+miscsettings.epg_dir EPG tallennuspolku
+miscsettings.epg_head EPG Ohjelmaoppaan asetukset
+miscsettings.epg_max_events Ohjelmia ohjelmaoppaassa
+miscsettings.epg_max_events_hint1 Montako ohjelmatietoa ohjelmaoppaaseen
+miscsettings.epg_max_events_hint2 korkeintaan kerätään. (Oletus: 6000)
+miscsettings.epg_old_events Menneiden ohjelmien tiedot
+miscsettings.epg_old_events_hint1 Montako tuntia menneiden ohjelmien 
+miscsettings.epg_old_events_hint2 ohjelmatietoja säilytetään?
 miscsettings.general Yleiset
 miscsettings.head Sekalaiset asetukset
-miscsettings.hwsections Käytä hwsections:ia
 miscsettings.infobar_sat_display Näytä satelliitin nimi
-miscsettings.noaviawatchdog Käytä AVIA valvontaa
-miscsettings.noenxwatchdog Käytä eNX valvontaa
-miscsettings.pmtupdate Käytä PMT päivitystä
 miscsettings.shutdown_count Automaattinen sammutus
 miscsettings.shutdown_count_hint1 Aika minuutteina jonka jälkeen laite sammuu
 miscsettings.shutdown_count_hint2 automaattisesti valmiustilasta (0 = pois).
 miscsettings.shutdown_real Käytä valmiustilaa
 miscsettings.shutdown_real_rcdelay Sammutusviive
-miscsettings.sptsmode Käytä spts-tilaa
-miscsettings.startbhdriver Lataa BH-tilan ajurit
 miscsettings.tuxtxt_cache Teksti-tv:n välimuisti
+miscsettings.virtual_zap_mode Kanavien selaus vaihtamatta
 motorcontrol.head Kääntömoottorin asetukset
 moviebrowser.book_head Bookmarks
 moviebrowser.book_lastmoviestop Last play stop:
@@ -601,8 +614,8 @@ moviebrowser.menu_main_saveandback save and back
 moviebrowser.menu_nfs_head NFS settings
 moviebrowser.menu_parental_lock_activated activated
 moviebrowser.menu_parental_lock_activated_no no
+moviebrowser.menu_parental_lock_activated_no_temp no (temporary)
 moviebrowser.menu_parental_lock_activated_yes yes
-moviebrowser.menu_parental_lock_activated_yes_temp yes (temporary)
 moviebrowser.menu_parental_lock_head Parental Lock
 moviebrowser.menu_parental_lock_rate_head Lock movies from
 moviebrowser.scan_for_movies Scan for Movies ...
@@ -651,6 +664,7 @@ movieplayer.tshelp1 Ohjeet: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tshelp10 n. 10 minuuttia taaksepäin
 movieplayer.tshelp11 n. 10 minuuttia eteenpäin
 movieplayer.tshelp12 Ohjeet: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.tshelp13 Siirry ...
 movieplayer.tshelp2 Valitse ääniraita
 movieplayer.tshelp3 Tauko/Jatka
 movieplayer.tshelp4 Luo kirjanmerkki
@@ -683,6 +697,14 @@ networkmenu.ipaddress IP-osoite
 networkmenu.mount Verkkolevyt
 networkmenu.nameserver Nimipalvelin
 networkmenu.netmask Aliverkon peite
+networkmenu.ntpenable Aikalähde
+networkmenu.ntprefresh Päivitystiheys
+networkmenu.ntprefresh_hint1 Ajan päivitystiheys minuutteina.
+networkmenu.ntprefresh_hint2 Muutos astuu voimaan uudelleenkäynnistyksessä.
+networkmenu.ntpserver NTP-palvelin
+networkmenu.ntpserver_hint1 NTP-palvelin, esim. pool.ntp.org
+networkmenu.ntpserver_hint2 Muutos astuu voimaan uudelleenkäynnistyksen jälkeen.
+networkmenu.ntptitle Aika-asetukset
 networkmenu.setupnow Ota asetukset käyttöön
 networkmenu.setuponstartup Verkko käynnistyksessä
 networkmenu.show Näytä nykyiset asetukset
@@ -716,6 +738,8 @@ nvodselector.head Valitse aloitusajankohta
 nvodselector.subservice Valitse palvelu
 options.default Palauta oletukset
 options.fb Framebuffer
+options.ntp_off DVB
+options.ntp_on NTP
 options.null (null)
 options.off Pois
 options.on Päällä
@@ -947,6 +971,7 @@ timerbar.channelswitch Ajasta
 timerbar.recordevent Tallenna
 timerlist.alarmtime Alkuaika
 timerlist.apids Audio PIDit
+timerlist.apids_dflt Tallenna oletusäänet
 timerlist.bouquetselect Valitse kanavanippu
 timerlist.channel Valitse kanava
 timerlist.channelselect Valitse kanava
@@ -989,7 +1014,7 @@ timerlist.save Tallenna ajastus
 timerlist.standby Tila
 timerlist.standby.off Poistu valmiustilasta
 timerlist.standby.on Siirry valmiustilaan
-timerlist.stoptime Päättymisaika
+timerlist.stoptime Loppumisaika
 timerlist.type Toiminne
 timerlist.type.execplugin Suorita laajennos
 timerlist.type.nextprogram Seuraava ohjelma
@@ -1017,6 +1042,7 @@ timing.head OSD-ajoitukset
 timing.hint_1 Aika sekunteina. Infopalkkia/valikkoa
 timing.hint_2 näytetään tämä aika.
 timing.infobar Infopalkki
+timing.infobar_radio Radion infopalkki
 timing.menu Valikko
 timing.numericzap Kanavan valinta numerolla
 ucodecheck.avia500 Avia 500
@@ -1024,11 +1050,17 @@ ucodecheck.avia600 Avia 600
 ucodecheck.cam-alpha Cam-Alpha
 ucodecheck.head µCodejen tiedot
 ucodecheck.ucode µCode
-ucodes.failure VAROITUS: µCodeja ei löytynyt!\n\nOle hyvä ja siirrä ne FTP:llä (tai DBox-BootManagerilla) laitteeseen,\nja käynnistä se uudelleen!
+ucodes.failure VAROITUS: µCodeja ei löytynyt!\n\nOle hyvä ja siirrä ne FTP:llä (tai DBox-BootManagerilla)\nlaitteeseen ja käynnistä se uudelleen!
 videomenu.csync Tahdistuskorjaus
 videomenu.head Kuva-asetukset
+videomenu.osd OSD
 videomenu.rgb_centering RGB keskitys
 videomenu.screensetup OSD-näytön kohdistus
+videomenu.tv-scart TV Scart
+videomenu.vcr-scart VCR Scart
+videomenu.vcrsignal Videolähtö
+videomenu.vcrsignal_composite CVBS
+videomenu.vcrsignal_svideo S-Video
 videomenu.vcrswitch SCART:in automaattiohjaus
 videomenu.videoformat Kuvasuhde
 videomenu.videoformat_169 16:9
