@@ -817,6 +817,28 @@ const char * CRCInput::getSpecialKeyName(const unsigned int key)
 			return "mute";
 			case RC_help:
 			return "help";
+#
+			case RC_0:
+			return "zero";
+			case RC_1:
+			return "one";
+			case RC_2:
+			return "two";
+			case RC_3:
+			return "three";
+			case RC_4:
+			return "four";
+			case RC_5:
+			return "five";
+			case RC_6:
+			return "six";
+			case RC_7:
+			return "seven";
+			case RC_8:
+			return "eight";
+			case RC_9:
+			return "nine";
+#
 			case RC_timeout:
 			return "timeout";
 			case RC_nokey:

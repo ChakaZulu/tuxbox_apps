@@ -39,6 +39,7 @@ radiobox_SOURCES = \
 	engine/flashtool.cpp \
 	engine/rcinput.cpp \
 	engine/file.cpp \
+	engine/rbxinput.cpp \
 	menus/statehandler.cpp \
 	menus/mounter.cpp \
 	audio/mp3dec.cpp \

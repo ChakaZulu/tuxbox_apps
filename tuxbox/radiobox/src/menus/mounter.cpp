@@ -63,27 +63,27 @@ void CMountEdit::Show()
 }
 
 
-void CMountEdit::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+void CMountEdit::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
 	switch( _key )
 	{
-		case CRadioBox::SELECT:
+		case CRBXInput::SELECT:
 			break;
-		case CRadioBox::LEFT:
+		case CRBXInput::LEFT:
 			MoveCursor( -1 );
 			break;
-		case CRadioBox::RIGHT:
+		case CRBXInput::RIGHT:
 			MoveCursor( 1 );
 			break;
-		case CRadioBox::UP:
+		case CRBXInput::UP:
 			Next( -1 );
 			break;
-		case CRadioBox::DOWN:
+		case CRBXInput::DOWN:
 			Next( 1 );
 			break;
-		case CRadioBox::MENU:
+		case CRBXInput::MENU:
 			remove = true;
 			break;
 		default:

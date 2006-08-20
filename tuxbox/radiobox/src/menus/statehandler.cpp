@@ -34,27 +34,27 @@ CSelectPlayList::CSelectPlayList()
 
 /**************************************************************/
 
-void CSelectPlayList::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+void CSelectPlayList::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
 	switch( _key )
 	{
-		case CRadioBox::POWER:
+		case CRBXInput::POWER:
 			break;
-		case CRadioBox::PLAY:
+		case CRBXInput::PLAY:
 			this->subhandler = new CPlayPLRandom( new CPlayList( std::string( PLAYLISTDIR ) + playlists[menu_top + menu_selected], false ) );
 			break;
-		case CRadioBox::SELECT:
+		case CRBXInput::SELECT:
 //			this->subhandler = new CPlayListEntries( std::string( PLAYLISTDIR ) + playlists[menu_top + menu_selected] );
 			break;
-		case CRadioBox::UP:
+		case CRBXInput::UP:
 			menu_selected --;
 			break;
-		case CRadioBox::DOWN:
+		case CRBXInput::DOWN:
 			menu_selected ++;
 			break;
-		case CRadioBox::MENU:
+		case CRBXInput::MENU:
 			break;
 		default:
 			break;
@@ -188,26 +188,26 @@ void CPlayListEntries::Show()
 
 /**************************************************************/
 
-void CPlayListEntries::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+void CPlayListEntries::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
 	switch( _key )
 	{
-		case CRadioBox::POWER:
+		case CRBXInput::POWER:
 			break;
-		case CRadioBox::PLAY:
+		case CRBXInput::PLAY:
 			this->subhandler = new CPlayLocation( playlist, menu_top + menu_selected );
 			break;
-		case CRadioBox::UP:
+		case CRBXInput::UP:
 			menu_selected --;
 			break;
-		case CRadioBox::DOWN:
+		case CRBXInput::DOWN:
 			menu_selected ++;
 			break;
-		case CRadioBox::DISPLAY:
+		case CRBXInput::DISPLAY:
 			break;
-		case CRadioBox::MENU:
+		case CRBXInput::MENU:
 			remove = true;;
 			break;
 		default:
@@ -261,26 +261,26 @@ void CPlayLocation::Show()
 
 /**************************************************************/
 
-void CPlayLocation::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+void CPlayLocation::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
 	switch( _key )
 	{
-		case CRadioBox::POWER:
+		case CRBXInput::POWER:
 			break;
-		case CRadioBox::PLAY:
+		case CRBXInput::PLAY:
 			playlist->Pause();			
 			break;
-		case CRadioBox::UP:
+		case CRBXInput::UP:
 			break;
-		case CRadioBox::STOP:
+		case CRBXInput::STOP:
 			playlist->Stop();
 			remove = true;
 			break;
-		case CRadioBox::DOWN:
+		case CRBXInput::DOWN:
 			break;
-		case CRadioBox::MENU:
+		case CRBXInput::MENU:
 			break;
 		default:
 			break;
@@ -333,33 +333,33 @@ void CPlayPLRandom::Show()
 
 /**************************************************************/
 
-void CPlayPLRandom::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+void CPlayPLRandom::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
 	switch( _key )
 	{
-		case CRadioBox::POWER:
+		case CRBXInput::POWER:
 			break;
-		case CRadioBox::PLAY:
+		case CRBXInput::PLAY:
 			playlist->Pause();
 			break;
-		case CRadioBox::UP:
+		case CRBXInput::UP:
 			break;
-		case CRadioBox::STOP:
+		case CRBXInput::STOP:
 			playlist->Stop();
 			remove = true;
 			break;
-		case CRadioBox::NEXT:
+		case CRBXInput::NEXT:
 			playlist->Next();
 			break;
-		case CRadioBox::PREV:
+		case CRBXInput::PREV:
 			std::cout << "random handler: prev" << std::endl;
 			playlist->Prev();
 			break;
-		case CRadioBox::DOWN:
+		case CRBXInput::DOWN:
 			break;
-		case CRadioBox::MENU:
+		case CRBXInput::MENU:
 			break;
 		default:
 			break;
@@ -488,31 +488,31 @@ void CSelectLocation::LoadLocations( )
 
 /**************************************************************/
 
-void CSelectLocation::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+void CSelectLocation::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
 	switch( _key )
 	{
-		case CRadioBox::POWER:
+		case CRBXInput::POWER:
 			break;
-		case CRadioBox::PLAY:
+		case CRBXInput::PLAY:
 			this->subhandler = new CPlayPLRandom( GetPlayList( g_settings.library_root + "/" + locations[menu_top + menu_selected] ) );
 			break;
-		case CRadioBox::SELECT:
+		case CRBXInput::SELECT:
 			std::cout << "get locations[menu_top + menu_selected] " << g_settings.library_root + "/" + locations[menu_top + menu_selected] << std::endl;
 			this->subhandler = new CPlayListEntries( GetPlayList( g_settings.library_root + "/" + locations[menu_top + menu_selected] ) );
 			break;
-		case CRadioBox::UP:
+		case CRBXInput::UP:
 			menu_selected --;
 			break;
-		case CRadioBox::DOWN:
+		case CRBXInput::DOWN:
 			menu_selected ++;
 			break;
-		case CRadioBox::MENU:
+		case CRBXInput::MENU:
 			remove = true;
 			break;
-		case CRadioBox::DISPLAY:
+		case CRBXInput::DISPLAY:
 			this->subhandler = new CPlayListOptions( locations[menu_top + menu_selected] );
 			break;
 		default:
@@ -639,25 +639,25 @@ void CStaticMenu::Show()
 
 /**************************************************************/
 
-void CStaticMenu::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+void CStaticMenu::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
 	switch( _key )
 	{
-		case CRadioBox::SELECT:
+		case CRBXInput::SELECT:
 			{
 				sel = menu_top + menu_selected;
 				DoAction( entries[sel] );
 			}	
 			break;
-		case CRadioBox::UP:
+		case CRBXInput::UP:
 			menu_selected --;
 			break;
-		case CRadioBox::DOWN:
+		case CRBXInput::DOWN:
 			menu_selected ++;
 			break;
-		case CRadioBox::MENU:
+		case CRBXInput::MENU:
 			remove = CanBeRemoved;
 			break;
 		default:
@@ -943,11 +943,11 @@ void	CMessageBox::Show()
 	return;
 }
 
-void	CMessageBox::HandleKeys( CRadioBox::KEYS _key, bool _pressed )
+void	CMessageBox::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
-	if( _key != CRadioBox::NOKEY )
+	if( _key != CRBXInput::NOKEY )
 		remove = true;
 }
 

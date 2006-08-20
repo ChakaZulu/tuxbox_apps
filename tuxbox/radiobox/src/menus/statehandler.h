@@ -3,6 +3,7 @@
 
 #include <radiobox.h>
 #include <mounter.h>
+#include <rbxinput.h>
 
 
 
@@ -23,7 +24,7 @@ public:
 						};
 
 	virtual void		Show() = 0;
-	virtual void		HandleKeys( CRadioBox::KEYS _key, bool _pressed ) = 0;
+	virtual void		HandleKeys( CRBXInput::KEYS _key, bool _pressed ) = 0;
 
 	CStateHandler*		GetSubHandler() { CStateHandler* tmp = subhandler; subhandler = 0; return tmp; }
 	bool				HasToBeRemoved() { return remove; }
@@ -60,7 +61,7 @@ public:
 	CSelectPlayList();
 	virtual ~CSelectPlayList() { };
 	void	Show();
-	void	HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+	void	HandleKeys( CRBXInput::KEYS _key, bool _pressed );
 
 };
 
@@ -79,7 +80,7 @@ public:
 	CSelectLocation();
 	virtual ~CSelectLocation() {};
 	void	Show();
-	void	HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+	void	HandleKeys( CRBXInput::KEYS _key, bool _pressed );
 
 };
 
@@ -91,7 +92,7 @@ public:
 	CPlayListEntries( CPlayList* _playlist );
 
 	void				Show();
-	void				HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+	void				HandleKeys( CRBXInput::KEYS _key, bool _pressed );
 
 
 private:
@@ -108,7 +109,7 @@ public:
 	CPlayLocation( CPlayList* _playlist, size_t _idx );
 
 	void				Show();
-	void				HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+	void				HandleKeys( CRBXInput::KEYS _key, bool _pressed );
 
 
 private:
@@ -127,7 +128,7 @@ public:
 	virtual ~CPlayPLRandom( ) { delete playlist; };
 
 	void				Show();
-	void				HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+	void				HandleKeys( CRBXInput::KEYS _key, bool _pressed );
 
 
 private:
@@ -155,7 +156,7 @@ public:
 	virtual ~CStaticMenu() { };
 
 	void	Show();
-	void	HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+	void	HandleKeys( CRBXInput::KEYS _key, bool _pressed );
 };
 
 /*********************************************************/
@@ -280,7 +281,7 @@ public:
 	CMountEdit( int _idx ) : idx( _idx ), cursor(1), current(me_ip) {};
 	
 	void		Show();
-	void		HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+	void		HandleKeys( CRBXInput::KEYS _key, bool _pressed );
 
 };
 
@@ -299,7 +300,7 @@ public:
 	virtual ~CMessageBox() { };
 
 	void	Show();
-	void	HandleKeys( CRadioBox::KEYS _key, bool _pressed );
+	void	HandleKeys( CRBXInput::KEYS _key, bool _pressed );
 };
 
 /*********************************************************/

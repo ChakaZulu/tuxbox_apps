@@ -283,8 +283,6 @@ CRBXInput::KEYS CRBXInput::TranslateKey( std::string _key )
 	
 	int i = 0;
 
-	std::cout << "Search for :" << _key << std::endl;
-	
 	while( defs[i].key )
 	{
 		if( 0 == strcmp( defs[i].key, _key.c_str() ) )
@@ -294,7 +292,6 @@ CRBXInput::KEYS CRBXInput::TranslateKey( std::string _key )
 		i++;
 	}
 	
-	std::cout << "UNKNOWN STR! :" << _key << std::endl;
 	return UNKNOWN;
 }
 
@@ -313,21 +310,27 @@ void CRBXInput::LoadNativeTranslations()
 		tr.key = (KEYS)i;
 		tr.rc = configfile.getInt32( GetKeyName( (KEYS)i ) );
 
+
 		if( strcmp( "unknown", CRCInput::getSpecialKeyName( tr.rc ) ) )
 		{
 			bool flag = true;
+
 			std::list<_trpair>::iterator t;
 			for( t = translations.begin(); t != translations.end(); t++ )
 			{
 				if( t->key == (KEYS)i )
 				{
 					flag = false;
+
 					t->rc = tr.rc;
+					break;
 				}
 			}
 
 			if( flag )
+			{
 				translations.push_back( tr );
+			}
 		}
 	}
 }
@@ -385,6 +388,8 @@ void CRBXInput::SetDefaultTranslations()
 		{ UNKNOWN, 0 } };
 
 	int i = 0;
+	
+
 	for( i = 0; defs[i].key != UNKNOWN; i++ )
 	{
 		translations.push_back( defs[i] );
@@ -398,7 +403,10 @@ CRBXInput::KEYS CRBXInput::TranslateKey( int _key )
 
 	for( t = translations.begin(); t != translations.end(); t++ )
 	{
-		if( t->rc == _key ) return t->key;
+		if( t->rc == _key ) 
+		{
+			return t->key;
+		}
 	}
 
 	return UNKNOWN;
