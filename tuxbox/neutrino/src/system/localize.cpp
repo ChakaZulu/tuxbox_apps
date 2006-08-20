@@ -235,10 +235,7 @@ CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const l
 			}
 			*tmpptr = 0;
 
-			if (val == NULL)
-				continue;
-
-			std::string text = val;
+			std::string text = val ? val : "";
 
 			int pos;
 			do
