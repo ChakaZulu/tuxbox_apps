@@ -26,7 +26,6 @@
 
 #include <playlist.h>
 #include "audioplay.h"
-#include <rcinput.h>
 
 #include <vector>
 #include <string>
@@ -41,59 +40,10 @@ class CRadioBox
 {
 public:
 	
-	enum KEYS
-	{
-		POWER = 0,
-		OPEN,
-		TITLE,
-		DISPLAY,
-		SELECT,
-		MENU,
-		ZOOM,
-		RETURN,
-		UP,
-		LEFT,
-		RIGHT,
-		DOWN,
-		PLAY,
-		STOP,
-		PREV,
-		NEXT,
-		REW,
-		FF,
-		SUBTITLE,
-		AUDIO,
-		ANGLE,
-		SEARCH,
-		PROGRAM,
-		REPEAT,
-		AB,
-		TIME,
-		ONE,
-		TWO,
-		THREE,
-		CLEAR,
-		FOUR,
-		FIVE,
-		SIX,
-		TEN,
-		SEVEN,
-		EIGHT,
-		NINE,
-		ZERO,
-		MUTE,
-		PLUS,
-		MINUS,
-		RED,
-		BLUE,
-		YELLOW,
-		GREEN,
-		UNKNOWN,
-		NOKEY
-	};
 
 private:
-	
+	bool working;	
+
 	CStateHandler* statehandler;
 	std::list<CStateHandler*> handlers;
 
@@ -104,24 +54,9 @@ private:
 
 	CAudioPlayer* audioplayer;
 
-
-/// RC INput interface for event comm channel
-	CRCInput	rcinput;
-
-/// Lircd interface 
-	int lircd;
-	void ReadFromLircd();
-	void OpenLircd();
-
+	//////////////////////////
 	void HandleKeys();
-	void ReadKeys();
-	KEYS TranslateKey( std::string _key );
-	KEYS TranslateKey( int _key );
-
-	KEYS	key;
-	bool	keypressed; // pressed or not
-
-/*****************************/
+	//////////////////////////
 
 	CPlayList* playlist;
 

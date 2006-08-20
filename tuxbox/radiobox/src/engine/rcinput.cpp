@@ -57,9 +57,6 @@
 
 #include <eventserver.h>
 
-//#include <global.h>
-//#include <neutrino.h>
-
 #ifdef OLD_RC_API
 const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/dbox/rc0"};
 #define RC_standby_release (KEY_MAX + 1)
@@ -155,49 +152,12 @@ void CRCInput::open()
 			perror(RC_EVENT_DEVICE[i]);
 		else
 		{
-#ifdef OLD_RC_API
-			ioctl(fd_rc[i], RC_IOCTL_BCODES, 1);
-#endif /* OLD_RC_API */
 			fcntl(fd_rc[i], F_SETFL, O_NONBLOCK);
 		}
 	}
 
 	//+++++++++++++++++++++++++++++++++++++++
-#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
-	fd_keyb = STDIN_FILENO;
-#else
 	fd_keyb = 0;
-#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
-	/*
-	::open("/dev/dbox/rc0", O_RDONLY);
-	if (fd_keyb<0)
-	{
-		perror("/dev/stdin");
-		exit(-1);
-	}
-	*/
-#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
-	::fcntl(fd_keyb, F_SETFL, O_NONBLOCK);
-
-	struct termio new_termio;
-
-	::ioctl(STDIN_FILENO, TCGETA, &orig_termio);
-
-	saved_orig_termio      = true;
-
-	new_termio             = orig_termio;
-	new_termio.c_lflag    &= ~ICANON;
-	//	new_termio.c_lflag    &= ~(ICANON|ECHO);
-	new_termio.c_cc[VMIN ] = 1;
-	new_termio.c_cc[VTIME] = 0;
-
-	::ioctl(STDIN_FILENO, TCSETA, &new_termio);
-
-#else
-	//fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
-
-	//+++++++++++++++++++++++++++++++++++++++
-#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 
 	calculateMaxFd();
 }
@@ -212,20 +172,6 @@ void CRCInput::close()
 			fd_rc[i] = -1;
 		}
 	}
-#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
-	if (saved_orig_termio)
-	{
-		::ioctl(STDIN_FILENO, TCSETA, &orig_termio);
-		printf("Original terminal settings restored.\n");
-	}
-#else
-/*
-	if(fd_keyb)
-	{
-		::close(fd_keyb);
-	}
-*/
-#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 
 	calculateMaxFd();
 }
@@ -288,55 +234,7 @@ void CRCInput::restartInput()
 
 int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
 {
-#if 0 // radiobox
-	neutrino_msg_t      msg;
-	neutrino_msg_data_t data;
-
-	int res = menu_return::RETURN_REPAINT;
-
-	bool doLoop = true;
-
-	if ( timeout == -1 )
-		timeout = g_settings.timing[SNeutrinoSettings::TIMING_MENU];
-
-	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
-
-	while (doLoop)
-	{
-		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
-
-	if ( ( msg == CRCInput::RC_timeout ) ||
-		( msg == CRCInput::RC_home ) ||
-		( msg == CRCInput::RC_ok ) )
-			doLoop = false;
-		else
-		{
-			int mr = CNeutrinoApp::getInstance()->handleMsg( msg, data );
-
-			if ( mr & messages_return::cancel_all )
-			{
-				res = menu_return::RETURN_EXIT_ALL;
-				doLoop = false;
-			}
-			else if ( mr & messages_return::unhandled )
-			{
-				if ((msg <= CRCInput::RC_MaxRC) &&
-				    (data == 0))                     /* <- button pressed */
-				{
-					if ( anyKeyCancels )
-						doLoop = false;
-					else
-						timeoutEnd = CRCInput::calcTimeoutEnd( timeout );
-				}
-			}
-		}
-
-
-	}
-	return res;
-#else
 	return 0;
-#endif
 }
 
 
@@ -545,8 +443,6 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 
 	    tvselect.tv_sec = targetTimeout/1000000;
 		tvselect.tv_usec = targetTimeout%1000000;
-		//printf("InitialTimeout= %lld:%lld\n", Timeout/1000000,Timeout%1000000);
-        //printf("targetTimeout= %d:%d\n", tvselect.tv_sec,tvselect.tv_usec);
 
 		FD_ZERO(&rfds);
 		for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
@@ -554,11 +450,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 			if (fd_rc[i] != -1)
 				FD_SET(fd_rc[i], &rfds);
 		}
-#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
-		if (true)
-#else
 		if (fd_keyb> 0)
-#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 			FD_SET(fd_keyb, &rfds);
 
 		FD_SET(fd_event, &rfds);
@@ -611,125 +503,6 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 			return;
 		}
 
-
-#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
-		if (FD_ISSET(fd_keyb, &rfds))
-		{
-			int trkey;
-			char key = 0;
-			read(fd_keyb, &key, sizeof(key));
-
-			switch(key)
-			{
-			case 27: // <- Esc
-				trkey = KEY_HOME;
-				break;
-			case 10: // <- Return
-			case 'o':
-				trkey = KEY_OK;
-				break;
-			case 'p':
-				trkey = KEY_POWER;
-				break;
-			case 's':
-				trkey = KEY_SETUP;
-				break;
-			case 'h':
-				trkey = KEY_HELP;
-				break;
-			case 'i':
-				trkey = KEY_UP;
-				break;
-			case 'm':
-				trkey = KEY_DOWN;
-				break;
-			case 'j':
-				trkey = KEY_LEFT;
-				break;
-			case 'k':
-				trkey = KEY_RIGHT;
-				break;
-			case 'r':
-				trkey = KEY_RED;
-				break;
-			case 'g':
-				trkey = KEY_GREEN;
-				break;
-			case 'y':
-				trkey = KEY_YELLOW;
-				break;
-			case 'b':
-				trkey = KEY_BLUE;
-				break;
-			case '0':
-				trkey = RC_0;
-				break;
-			case '1':
-				trkey = RC_1;
-				break;
-			case '2':
-				trkey = RC_2;
-				break;
-			case '3':
-				trkey = RC_3;
-				break;
-			case '4':
-				trkey = RC_4;
-				break;
-			case '5':
-				trkey = RC_5;
-				break;
-			case '6':
-				trkey = RC_6;
-				break;
-			case '7':
-				trkey = RC_7;
-				break;
-			case '8':
-				trkey = RC_8;
-				break;
-			case '9':
-				trkey = RC_9;
-				break;
-			case '+':
-				trkey = RC_plus;
-				break;
-			case '-':
-				trkey = RC_minus;
-				break;
-			case 'a':
-				trkey = KEY_A;
-				break;
-			case 'u':
-				trkey = KEY_U;
-				break;
-			case '/':
-				trkey = KEY_SLASH;
-				break;
-			case '\\':
-				trkey = KEY_BACKSLASH;
-				break;
-			default:
-				trkey = RC_nokey;
-			}
-			if (trkey != RC_nokey)
-			{
-				*msg = trkey;
-				*data = 0; /* <- button pressed */
-				return;
-			}
-		}
-#else
-/*
-                if(FD_ISSET(fd_keyb, &rfds))
-                {
-                        char key = 0;
-                        read(fd_keyb, &key, sizeof(key));
-                        printf("keyboard: %d\n", rc_key);
-                }
-*/
-#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
-
 		if(FD_ISSET(fd_event, &rfds))
 		{
 			//printf("[neutrino] event - accept!\n");
@@ -739,10 +512,10 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 			int fd_eventclient = accept(fd_event, (struct sockaddr *) &cliaddr, &clilen);
 
 			*msg = RC_nokey;
-			//printf("[neutrino] network event - read!\n");
+
 			CEventServer::eventHead emsg;
 			int read_bytes= recv(fd_eventclient, &emsg, sizeof(emsg), MSG_WAITALL);
-			//printf("[neutrino] event read %d bytes - following %d bytes\n", read_bytes, emsg.dataSize );
+
 			if ( read_bytes == sizeof(emsg) )
 			{
 				bool dont_delete_p = false;
@@ -752,340 +525,33 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 				if ( p!=NULL )
 			 	{
 			 		read_bytes= recv(fd_eventclient, p, emsg.dataSize, MSG_WAITALL);
-			 		//printf("[neutrino] eventbody read %d bytes - initiator %x\n", read_bytes, emsg.initiatorID );
 
 					if ( emsg.initiatorID == CEventServer::INITID_CONTROLD )
 					{
-#if 0 // radiobox
-						switch(emsg.eventID)
-						{
-							case CControldClient::EVT_VOLUMECHANGED :
-									*msg = NeutrinoMessages::EVT_VOLCHANGED;
-									*data = 0;
-								break;
-							case CControldClient::EVT_MUTECHANGED :
-									*msg = NeutrinoMessages::EVT_MUTECHANGED;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case CControldClient::EVT_VCRCHANGED :
-									*msg = NeutrinoMessages::EVT_VCRCHANGED;
-									*data = *(int*) p;
-								break;
-							case CControldClient::EVT_MODECHANGED :
-									*msg = NeutrinoMessages::EVT_MODECHANGED;
-									*data = *(int*) p;
-								break;
-							default:
-								printf("[neutrino] event INITID_CONTROLD - unknown eventID 0x%x\n",  emsg.eventID );
-						}
-#endif
+
 					}
 					else if ( emsg.initiatorID == CEventServer::INITID_HTTPD )
 					{
-#if 0 //radiobox
-						switch(emsg.eventID)
-						{
-							case NeutrinoMessages::SHUTDOWN :
-									*msg = NeutrinoMessages::SHUTDOWN;
-									*data = 0;
-								break;
-							case NeutrinoMessages::EVT_POPUP :
-									*msg = NeutrinoMessages::EVT_POPUP;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case NeutrinoMessages::EVT_EXTMSG :
-									*msg = NeutrinoMessages::EVT_EXTMSG;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case NeutrinoMessages::CHANGEMODE :	// Change
-									*msg = NeutrinoMessages::CHANGEMODE;
-									*data = *(unsigned*) p;
-								break;
-							case NeutrinoMessages::STANDBY_TOGGLE :
-									*msg = NeutrinoMessages::STANDBY_TOGGLE;
-									*data = 0;
-								break;
-							case NeutrinoMessages::STANDBY_ON :
-									*msg = NeutrinoMessages::STANDBY_ON;
-									*data = 0;
-								break;
-							case NeutrinoMessages::STANDBY_OFF :
-									*msg = NeutrinoMessages::STANDBY_OFF;
-									*data = 0;
-								break;
-							case NeutrinoMessages::EVT_START_PLUGIN :
-									*msg = NeutrinoMessages::EVT_START_PLUGIN;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case NeutrinoMessages::LOCK_RC :
-									*msg = NeutrinoMessages::LOCK_RC;
-									*data = 0;
-								break;
-							case NeutrinoMessages::UNLOCK_RC :
-									*msg = NeutrinoMessages::UNLOCK_RC;
-									*data = 0;
-								break;
-							default:
-								printf("[neutrino] event INITID_HTTPD - unknown eventID 0x%x\n",  emsg.eventID );
-						}
-#endif
+
 					}
 					else if ( emsg.initiatorID == CEventServer::INITID_SECTIONSD )
 			 		{
-#if 0 //radiobox
-			 			//printf("[neutrino] event - from SECTIONSD %x %x\n", emsg.eventID, *(unsigned*) p);
-						switch(emsg.eventID)
-						{
-							case CSectionsdClient::EVT_TIMESET:
-								{
-									struct timeval tv;
-									gettimeofday( &tv, NULL );
-									long long timeOld = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 
-									stime((time_t*) p);
-
-									gettimeofday( &tv, NULL );
-									long long timeNew = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-
-									delete p;
-									p= new unsigned char[ sizeof(long long) ];
-									*(long long*) p = timeNew - timeOld;
-
-									if ((long long)last_keypress > *(long long*)p)
-										last_keypress += *(long long *)p;
-
-									// Timer anpassen
-									for(std::vector<timer>::iterator e = timers.begin(); e != timers.end(); ++e)
-										if (e->correct_time)
-											e->times_out+= *(long long*) p;
-
-									*msg          = NeutrinoMessages::EVT_TIMESET;
-									*data         = (neutrino_msg_data_t) p;
-									dont_delete_p = true;
-								}
-								break;
-							case CSectionsdClient::EVT_GOT_CN_EPG:
-									*msg          = NeutrinoMessages::EVT_CURRENTNEXT_EPG;
-									*data         = (neutrino_msg_data_t) p;
-									dont_delete_p = true;
-								break;
-							default:
-								printf("[neutrino] event INITID_SECTIONSD - unknown eventID 0x%x\n",  emsg.eventID );
-						}
-#endif
 			 		}
 			 		else if ( emsg.initiatorID == CEventServer::INITID_ZAPIT )
 			 		{
-#if 0 //radiobox
-			 			//printf("[neutrino] event - from ZAPIT %x %x\n", emsg.eventID, *(unsigned*) p);
-						switch(emsg.eventID)
-						{
-						case CZapitClient::EVT_RECORDMODE_ACTIVATED:
-							*msg  = NeutrinoMessages::EVT_RECORDMODE;
-							*data = true;
-							break;
-						case CZapitClient::EVT_RECORDMODE_DEACTIVATED:
-							*msg  = NeutrinoMessages::EVT_RECORDMODE;
-							*data = false;
-							break;
-						case CZapitClient::EVT_ZAP_COMPLETE:
-							*msg = NeutrinoMessages::EVT_ZAP_COMPLETE;
-							break;
-						case CZapitClient::EVT_ZAP_FAILED:
-							*msg = NeutrinoMessages::EVT_ZAP_FAILED;
-							break;
-						case CZapitClient::EVT_ZAP_SUB_FAILED:
-							*msg = NeutrinoMessages::EVT_ZAP_SUB_FAILED;
-							break;
-						case CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD:
-							*msg = NeutrinoMessages::EVT_ZAP_ISNVOD;
-							break;
-						case CZapitClient::EVT_ZAP_SUB_COMPLETE:
-							*msg = NeutrinoMessages::EVT_ZAP_SUB_COMPLETE;
-							break;
-						case CZapitClient::EVT_SCAN_COMPLETE:
-							*msg  = NeutrinoMessages::EVT_SCAN_COMPLETE;
-							*data = 0;
-							break;
-						case CZapitClient::EVT_SCAN_NUM_TRANSPONDERS:
-							*msg  = NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS:
-							*msg  = NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_SCAN_REPORT_FREQUENCY:
-							*msg = NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_SCAN_FOUND_A_CHAN:
-							*msg = NeutrinoMessages::EVT_SCAN_FOUND_A_CHAN;
-							break;
-						case CZapitClient::EVT_SCAN_SERVICENAME:
-							*msg = NeutrinoMessages::EVT_SCAN_SERVICENAME;
-							break;
-						case CZapitClient::EVT_SCAN_FOUND_TV_CHAN:
-							*msg  = NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_SCAN_FOUND_RADIO_CHAN:
-							*msg  = NeutrinoMessages::EVT_SCAN_FOUND_RADIO_CHAN;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_SCAN_FOUND_DATA_CHAN:
-							*msg  = NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_SCAN_REPORT_FREQUENCYP:
-							*msg  = NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_SCAN_NUM_CHANNELS:
-							*msg = NeutrinoMessages::EVT_SCAN_NUM_CHANNELS;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_SCAN_PROVIDER:
-							*msg = NeutrinoMessages::EVT_SCAN_PROVIDER;
-							break;
-						case CZapitClient::EVT_SCAN_SATELLITE:
-							*msg = NeutrinoMessages::EVT_SCAN_SATELLITE;
-							break;
-						case CZapitClient::EVT_BOUQUETS_CHANGED:
-							*msg  = NeutrinoMessages::EVT_BOUQUETSCHANGED;
-							*data = 0;
-							break;
-#ifndef SKIP_CA_STATUS
-						case CZapitClient::EVT_ZAP_CA_CLEAR:
-							*msg  = NeutrinoMessages::EVT_ZAP_CA_CLEAR;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_ZAP_CA_LOCK:
-							*msg  = NeutrinoMessages::EVT_ZAP_CA_LOCK;
-							*data = *(unsigned*) p;
-							break;
-						case CZapitClient::EVT_ZAP_CA_FTA:
-							*msg  = NeutrinoMessages::EVT_ZAP_CA_FTA;
-							*data = *(unsigned*) p;
-							break;
-#endif
-						case CZapitClient::EVT_SCAN_FAILED:
-							*msg  = NeutrinoMessages::EVT_SCAN_FAILED;
-							*data = 0;
-							break;
-						case CZapitClient::EVT_ZAP_MOTOR:
-							*msg  = NeutrinoMessages::EVT_ZAP_MOTOR;
-							*data = *(unsigned*) p;
-							break;
-						default:
-							printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
-						}
-						if (((*msg) >= CRCInput::RC_WithData) && ((*msg) < CRCInput::RC_WithData + 0x10000000))
-						{
-							*data         = (neutrino_msg_data_t) p;
-							dont_delete_p = true;
-						}
-#endif
+
 			 		}
 			 		else if ( emsg.initiatorID == CEventServer::INITID_TIMERD )
 			 		{
-/*
-						if (emsg.eventID==CTimerdClient::EVT_ANNOUNCE_NEXTPROGRAM)
-			 			{
-						}
 
-						if (emsg.eventID==CTimerdClient::EVT_NEXTPROGRAM)
-			 			{
-			 				*msg = NeutrinoMessages::EVT_NEXTPROGRAM;
-			 				*data = (neutrino_msg_data_t) p;
-			 				dont_delete_p = true;
-			 			}
-*/
-#if 0 //radiobox
-						switch(emsg.eventID)
-						{
-							case CTimerdClient::EVT_ANNOUNCE_RECORD :
-									*msg = NeutrinoMessages::ANNOUNCE_RECORD;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case CTimerdClient::EVT_ANNOUNCE_ZAPTO :
-									*msg = NeutrinoMessages::ANNOUNCE_ZAPTO;
-									*data = 0;
-								break;
-							case CTimerdClient::EVT_ANNOUNCE_SHUTDOWN :
-									*msg = NeutrinoMessages::ANNOUNCE_SHUTDOWN;
-									*data = 0;
-								break;
-							case CTimerdClient::EVT_ANNOUNCE_SLEEPTIMER :
-									*msg = NeutrinoMessages::ANNOUNCE_SLEEPTIMER;
-									*data = 0;
-								break;
-							case CTimerdClient::EVT_SLEEPTIMER :
-									*msg = NeutrinoMessages::SLEEPTIMER;
-									*data = 0;
-								break;
-							case CTimerdClient::EVT_RECORD_START :
-									*msg = NeutrinoMessages::RECORD_START;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case CTimerdClient::EVT_RECORD_STOP :
-									*msg = NeutrinoMessages::RECORD_STOP;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case CTimerdClient::EVT_ZAPTO :
-									*msg = NeutrinoMessages::ZAPTO;
-									*data = (unsigned)  p;
-									dont_delete_p = true;
-								break;
-							case CTimerdClient::EVT_SHUTDOWN :
-									*msg = NeutrinoMessages::SHUTDOWN;
-									*data = 0;
-								break;
-							case CTimerdClient::EVT_STANDBY_ON :
-									*msg = NeutrinoMessages::STANDBY_ON;
-									*data = 0;
-								break;
-							case CTimerdClient::EVT_STANDBY_OFF :
-									*msg = NeutrinoMessages::STANDBY_OFF;
-									*data = 0;
-								break;
-							case CTimerdClient::EVT_REMIND :
-									*msg = NeutrinoMessages::REMIND;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case CTimerdClient::EVT_EXEC_PLUGIN :
-									*msg = NeutrinoMessages::EVT_START_PLUGIN;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-
-							default :
-								printf("[neutrino] event INITID_TIMERD - unknown eventID 0x%x\n",  emsg.eventID );
-
-						}
-#endif
 					}
 					else if (emsg.initiatorID == CEventServer::INITID_NEUTRINO)
 					{
-#if 0 //radiobox
-						if ((emsg.eventID == NeutrinoMessages::EVT_RECORDING_ENDED) &&
-						    (read_bytes == sizeof(stream2file_status2_t)))
-						{
-							*msg  = NeutrinoMessages::EVT_RECORDING_ENDED;
-							*data = (neutrino_msg_data_t) p;
-							dont_delete_p = true;
-						}
-#endif
+
 					}
-					else if (emsg.initiatorID == CEventServer::INITID_GENERIC_INPUT_EVENT_PROVIDER)
+					else if (emsg.initiatorID ==
+						CEventServer::INITID_GENERIC_INPUT_EVENT_PROVIDER)
 					{
 						if (read_bytes == sizeof(int))
 						{
@@ -1094,7 +560,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 						}
 					}
 					else
-						printf("[neutrino] event - unknown initiatorID 0x%x\n",  emsg.initiatorID);
+						printf("[radiobox] event - unknown initiatorID 0x%x\n",  emsg.initiatorID);
 			 		if ( !dont_delete_p )
 			 		{
 			 			delete p;
@@ -1104,7 +570,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 			}
 			else
 			{
-				printf("[neutrino] event - read failed!\n");
+				printf("[radiobox] event - read failed!\n");
 			}
 
 			::close(fd_eventclient);
@@ -1112,7 +578,6 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 			if ( *msg != RC_nokey )
 			{
 				// raus hier :)
-				//printf("[neutrino] event 0x%x\n", *msg);
 				return;
 			}
 		}
@@ -1128,26 +593,14 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 
 					if (trkey != RC_nokey)
 					{
-#ifdef OLD_RC_API
-						if (ev.code != 0x5cfe)
-#else /* OLD_RC_API */
 						if (ev.value)
-#endif /* OLD_RC_API */
 						{
 							unsigned long long now_pressed;
 							bool keyok = true;
 
-#ifdef OLD_RC_API
-							gettimeofday( &tv, NULL );
-#else /* OLD_RC_API */
 							tv = ev.time;
-#endif /* OLD_RC_API */
+
 							now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
-#ifdef OLD_RC_API
-							//alter nokia-rc-code - lastkey l�chen weil sonst z.b. nicht zweimal nacheinander ok gedrckt werden kann
-							if ((ev.code & 0xff00) == 0x5c00)
-								rc_last_key = 0;
-#endif /* OLD_RC_API */
 
 							if (ev.code == rc_last_key)
 							{
@@ -1187,37 +640,19 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 								{
 									last_keypress = now_pressed;
 
-#ifdef OLD_RC_API
-									*msg  = (trkey == RC_standby_release) ? RC_standby : trkey;
-									*data = (trkey == RC_standby_release) ? 1 : 0; /* <- button released / pressed */
-#else /* OLD_RC_API */
 									*msg = trkey;
 									*data = 0; /* <- button pressed */
-#endif /* OLD_RC_API */
+
 									return;
 								}
 							}
 						}
-#ifndef OLD_RC_API
 						else
 						{
-#ifndef RADIOBOX
-							// clear rc_last_key on keyup event
-							//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
-							rc_last_key = 0;
-							if (trkey == RC_standby)
-							{
-								*msg = RC_standby;
-								*data = 1; /* <- button released */
-								return;
-							}
-#else /* RADIOBOX */
 							*msg = trkey;
 							*data = 1; /* <- button released */
 							return;
-#endif /* RADIOBOX */
 						}
-#endif /* OLD_RC_API */
 					}
 				}
 			}
@@ -1412,112 +847,11 @@ std::string CRCInput::getKeyName(const unsigned int key)
 **************************************************************************/
 int CRCInput::translate(int code)
 {
-#ifdef OLD_RC_API
-	if ((code&0xFF00)==0x5C00)
-	{
-		switch (code&0xFF)
-		{
-		case 0x0C:
-			return RC_standby;
-		case 0x20:
-			return RC_home;
-		case 0x27:
-			return RC_setup;
-		case 0x00:
-			return RC_0;
-		case 0x01:
-			return RC_1;
-		case 0x02:
-			return RC_2;
-		case 0x03:
-			return RC_3;
-		case 0x04:
-			return RC_4;
-		case 0x05:
-			return RC_5;
-		case 0x06:
-			return RC_6;
-		case 0x07:
-			return RC_7;
-		case 0x08:
-			return RC_8;
-		case 0x09:
-			return RC_9;
-		case 0x3B:
-			return RC_blue;
-		case 0x52:
-			return RC_yellow;
-		case 0x55:
-			return RC_green;
-		case 0x2D:
-			return RC_red;
-		case 0x54:
-			return RC_page_up;
-		case 0x53:
-			return RC_page_down;
-		case 0x0E:
-			return RC_up;
-		case 0x0F:
-			return RC_down;
-		case 0x2F:
-			return RC_left;
-		case 0x2E:
-			return RC_right;
-		case 0x30:
-			return RC_ok;
-		case 0x16:
-			return RC_plus;
-		case 0x17:
-			return RC_minus;
-		case 0x28:
-			return RC_spkr;
-		case 0x82:
-			return RC_help;
-		default:
-			return RC_nokey;
-		}
-	}
-	else if ((code & 0xFF00) == 0xFF00)
-	{
-		switch (code & 0xFF)
-		{
-		case 0x12:
-		case 0x9d:
-			return RC_standby;
-		case 0x48:
-		case 0xab:
-			return RC_down;
-		case 0x24:
-		case 0xc7:
-			return RC_up;
-		case 0x20:
-		case 0x40:
-		case 0xaf:
-		case 0xcf:
-			return RC_nokey;
-		case 0x10:
-		case 0x9f:
-			return RC_standby_release;
-		}
-	}
-	else if (!(code&0x00))
-	{
-		static const uint translation[0x21 + 1] = 
-			{ RC_0           , RC_1   , RC_2      , RC_3        , RC_4    , RC_5    , RC_6      , RC_7       , RC_8        , RC_9          ,
-			  RC_right       , RC_left, RC_up     , RC_down     , RC_ok   , RC_spkr , RC_standby, RC_green   , RC_yellow   , RC_red        ,
-			  RC_blue        , RC_plus, RC_minus  , RC_help     , RC_setup, RC_nokey, RC_nokey  , RC_top_left, RC_top_right, RC_bottom_left,
-			  RC_bottom_right, RC_home, RC_page_up, RC_page_down};
-		if ((code & 0x3F) <= 0x21)
-			return translation[code & 0x3F];
-		else
-			return RC_nokey;
-	}
-	
-	return RC_nokey;
-#else /* OLD_RC_API */
 	if ((code >= 0) && (code <= KEY_MAX))
 		return code;
 	else
 		return RC_nokey;
-#endif /* OLD_RC_API */
 }
+
+////////////////////////////////////////////////
+

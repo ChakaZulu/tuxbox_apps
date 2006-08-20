@@ -35,6 +35,7 @@
 #include <linux/input.h>
 #include <string>
 #include <vector>
+#include <list>
 
 #ifndef KEY_OK
 #define KEY_OK           0x160
@@ -104,12 +105,10 @@ class CRCInput
 
 		int 		fd_pipe_high_priority[2];
 		int 		fd_pipe_low_priority[2];
-#ifdef OLD_RC_API
-#define NUMBER_OF_EVENT_DEVICES 1
-#else /* OLD_RC_API */
+
 #define NUMBER_OF_EVENT_DEVICES 2
-#endif /* OLD_RC_API */
-		int         	fd_rc[NUMBER_OF_EVENT_DEVICES];
+
+		int		fd_rc[NUMBER_OF_EVENT_DEVICES];
 		int		fd_keyb;
 		int		fd_event;
 
@@ -203,12 +202,14 @@ class CRCInput
 		void getMsgAbsoluteTimeout(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long *TimeoutEnd, bool bAllowRepeatLR= false);
 		void getMsg(neutrino_msg_t * msg, neutrino_msg_data_t * data, int Timeout, bool bAllowRepeatLR= false);                  //get message, timeout in 1/10 secs :)
 		void getMsg_ms(neutrino_msg_t * msg, neutrino_msg_data_t * data, int Timeout, bool bAllowRepeatLR= false);               //get message, timeout in msecs :)
-		void getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long Timeout, bool bAllowRepeatLR= false);//get message, timeout in µsecs :)
+		void getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsigned long long Timeout, bool bAllowRepeatLR= false);//get message, timeout in secs :)
 		void postMsg(const neutrino_msg_t msg, const neutrino_msg_data_t data, const bool Priority = true);  // push message back into buffer
 		void clearRCMsg();
 
 		int messageLoop( bool anyKeyCancels = false, int timeout= -1 );
 };
+
+/////////////////////////////////////////////////////////////////////////
 
 
 #endif
