@@ -52,7 +52,7 @@ class EventList
 {
 	private:
 		CFrameBuffer	*frameBuffer;
-        CChannelEventList	evtlist;
+		CChannelEventList evtlist;
 		void readEvents(const t_channel_id channel_id);
 		unsigned int	selected;
 		unsigned int	current_event;

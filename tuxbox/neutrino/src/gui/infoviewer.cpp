@@ -40,6 +40,7 @@
 
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
+#include <zapit/client/zapittools.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -81,6 +82,11 @@ int time_height;
 char old_timestr[10];
 
 extern CZapitClient::SatelliteList satList;
+
+static bool sortByDateTime (const CChannelEvent& a, const CChannelEvent& b)
+{
+	return a.startTime < b.startTime;
+}
 
 CInfoViewer::CInfoViewer()
 {
@@ -172,11 +178,11 @@ void CInfoViewer::showRecordIcon(const bool show)
 	}
 }
 
-void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap)
+void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap, int epgpos)
 {
-	channel_id = new_channel_id;
 	showButtonBar = !calledFromNumZap;
 	std::string ChannelName = Channel;
+	bool new_chan = false;
 
 	bool fadeIn = ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
 		g_settings.widget_fade &&
@@ -218,10 +224,18 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	if (virtual_zap_mode) {
 		col_NumBoxText = COL_MENUHEAD;
 		col_NumBox = COL_MENUHEAD_PLUS_0;
+		if ((channel_id != new_channel_id) || (evtlist.empty())) {
+			evtlist.clear();
+			evtlist = g_Sectionsd->getEventsServiceKey(new_channel_id);
+			if (!evtlist.empty())
+				sort(evtlist.begin(),evtlist.end(), sortByDateTime);
+			new_chan = true;
+		}
 	} else {
 		col_NumBoxText = COL_INFOBAR;
 		col_NumBox = COL_INFOBAR_PLUS_0;
 	}
+	channel_id = new_channel_id;
 
 	//number box
 	frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
@@ -292,6 +306,46 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 
 	info_CurrentNext = getEPG(channel_id);
 
+	if (!evtlist.empty()) {
+		if (new_chan) {
+			for ( eli=evtlist.begin(); eli!=evtlist.end(); ++eli ) {
+				if ((uint)eli->startTime >= info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer)
+					break;
+			}
+		}
+		if (epgpos != 0) {
+			info_CurrentNext.flags = 0;
+			if ((epgpos > 0) && (eli != evtlist.end())) {
+				++eli; // next epg
+			}
+			else if ((epgpos < 0) && (eli != evtlist.begin())) {
+				--eli; // last epg
+			}
+			info_CurrentNext.flags = CSectionsdClient::epgflags::has_current;
+			info_CurrentNext.current_uniqueKey	= eli->eventID;
+			info_CurrentNext.current_zeit.startzeit	= eli->startTime;
+			info_CurrentNext.current_zeit.dauer	= eli->duration;
+			if (eli->description.empty())
+				info_CurrentNext.current_name	= ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_INFOVIEWER_NOEPG));
+			else
+				info_CurrentNext.current_name	= eli->description;
+			info_CurrentNext.current_fsk		= '\0';
+
+			if (eli != evtlist.end()) {
+				eli++;
+				info_CurrentNext.flags 			= CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_next;
+				info_CurrentNext.next_uniqueKey		= eli->eventID;
+				info_CurrentNext.next_zeit.startzeit 	= eli->startTime;
+				info_CurrentNext.next_zeit.dauer	= eli->duration;
+				if (eli->description.empty())
+					info_CurrentNext.next_name	= ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_INFOVIEWER_NOEPG));
+				else
+					info_CurrentNext.next_name	= eli->description;
+				eli--;
+			}
+		}
+	}
+	
 	if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_later | CSectionsdClient::epgflags::has_current |  CSectionsdClient::epgflags::not_broadcast ) ) )
 	{
 		// nicht gefunden / noch nicht geladen
@@ -338,7 +392,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		{
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 			//printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
-
 			if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_current ) ) )
 			{
 				if(difftime(time(&tb),ta) > 1.1)

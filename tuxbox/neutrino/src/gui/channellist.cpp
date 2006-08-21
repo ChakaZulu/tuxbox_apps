@@ -421,7 +421,7 @@ void CChannelList::hide()
         clearItem2DetailsLine ();
 }
 
-bool CChannelList::showInfo(int pos)
+bool CChannelList::showInfo(int pos, int epgpos)
 {
 	if((pos >= (signed int) chanlist.size()) || (pos<0))
 	{
@@ -429,7 +429,7 @@ bool CChannelList::showInfo(int pos)
 	}
 
 	CChannel* chan = chanlist[pos];
-	g_InfoViewer->showTitle(pos+1, chan->name, chan->satellitePosition, chan->channel_id, true); // UTF-8
+	g_InfoViewer->showTitle(pos+1, chan->name, chan->satellitePosition, chan->channel_id, true, epgpos); // UTF-8
 	return true;
 }
 
@@ -765,15 +765,16 @@ void CChannelList::virtual_zap_mode(bool up)
 	int lastchan= -1;
 	bool doZap = true;
 	bool showEPG = false;
+	int epgpos = 0;
 
 	while(1)
 	{
-		if (lastchan != chn)
+		if ((lastchan != chn) || (epgpos != 0))
 		{
-			showInfo(chn- 1);
+			showInfo(chn- 1, epgpos);
 			lastchan= chn;
 		}
-
+		epgpos = 0;
 		g_RCInput->getMsg( &msg, &data, 15*10 ); // 15 seconds, not user changable
 		//printf("########### %u ### %u #### %u #######\n", msg, NeutrinoMessages::EVT_TIMER, CRCInput::RC_timeout);
 
@@ -803,6 +804,14 @@ void CChannelList::virtual_zap_mode(bool up)
 
 			if (chn > (int)chanlist.size())
 				chn = 1;
+		}
+		else if ( msg == CRCInput::RC_up )
+		{
+			epgpos = -1;
+		}
+		else if ( msg == CRCInput::RC_down )
+		{
+			epgpos = 1;
 		}
 		else if ( ( msg == CRCInput::RC_home ) || ( msg == CRCInput::RC_timeout ) )
 		{

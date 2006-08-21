@@ -119,7 +119,7 @@ class CChannelList
 		void virtual_zap_mode(bool up);
 		bool zapTo_ChannelID(const t_channel_id channel_id);
 		bool adjustToChannelID(const t_channel_id channel_id);
-		bool showInfo(int pos);
+		bool showInfo(int pos, int epgpos = 0);
 		void updateEvents(void);
 		int 	numericZap(int key);
 		int  	show();
