@@ -60,14 +60,14 @@ void CSelectPlayList::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 			break;
 	}
 
-	if( menu_selected == playlists.size() || menu_selected == NUM_MENU_LINES )
+	if( menu_selected == (long)playlists.size() || menu_selected == NUM_MENU_LINES )
 	{
 		if( NUM_MENU_LINES < playlists.size() - menu_top )
 		{
 			menu_top++;
 		}
 	
-		menu_selected = (playlists.size() > NUM_MENU_LINES )?NUM_MENU_LINES-1:playlists.size()-1;
+		menu_selected = (playlists.size() > NUM_MENU_LINES )?NUM_MENU_LINES-1:(long)playlists.size()-1;
 	}
 	else
 	if( menu_selected < 0 )
@@ -214,7 +214,7 @@ void CPlayListEntries::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 			break;
 	}
 
-	if( menu_selected == playlist->GetSize() || menu_selected == NUM_MENU_LINES )
+	if( menu_selected == (long)playlist->GetSize() || menu_selected == NUM_MENU_LINES )
 	{
 		if( NUM_MENU_LINES < playlist->GetSize() - menu_top )
 		{
@@ -513,13 +513,13 @@ void CSelectLocation::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 			remove = true;
 			break;
 		case CRBXInput::DISPLAY:
-			this->subhandler = new CPlayListOptions( locations[menu_top + menu_selected] );
+			this->subhandler = new CPlayListOptions( g_settings.library_root + "/" + locations[menu_top + menu_selected] );
 			break;
 		default:
 			break;
 	}
 
-	if( menu_selected == locations.size() || menu_selected == NUM_MENU_LINES )
+	if( menu_selected == (long)locations.size() || menu_selected == NUM_MENU_LINES )
 	{
 		if( NUM_MENU_LINES < locations.size() - menu_top )
 		{
@@ -664,7 +664,7 @@ void CStaticMenu::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 			break;
 	}
 
-	if( menu_selected == entries.size() || menu_selected == NUM_MENU_LINES )
+	if( menu_selected == (long)entries.size() || menu_selected == NUM_MENU_LINES )
 	{
 		if( NUM_MENU_LINES < entries.size() - menu_top )
 		{

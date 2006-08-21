@@ -38,7 +38,7 @@ class CMenu
 {
 protected:
 
-	unsigned int menu_selected;
+	int menu_selected;
 	int menu_top; //first element shown in menu
 
 	void ResetMenu(); 

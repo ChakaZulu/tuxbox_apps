@@ -1,7 +1,6 @@
--B- Single file in a playlist is not shown
 -B- "Acces denied" exception should be catched
 -B- eleminate scrolling text jumps
--F. Make it possible to configure RC Interface to native RC
+-F- add volume control
 -F- rework statehandler (menu) to something like configurable plugins
 -F- add possibility to save last playing song/station and start playback after radiobox is started again
 -F- Mountpoints configuration
