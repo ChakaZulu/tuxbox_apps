@@ -312,14 +312,19 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 				if ((uint)eli->startTime >= info_CurrentNext.current_zeit.startzeit + info_CurrentNext.current_zeit.dauer)
 					break;
 			}
+			if (eli == evtlist.end()) // the end is not valid, so go back
+				--eli;
 		}
+
 		if (epgpos != 0) {
 			info_CurrentNext.flags = 0;
 			if ((epgpos > 0) && (eli != evtlist.end())) {
 				++eli; // next epg
+				if (eli == evtlist.end()) // the end is not valid, so go back
+					--eli;
 			}
 			else if ((epgpos < 0) && (eli != evtlist.begin())) {
-				--eli; // last epg
+				--eli; // prev epg
 			}
 			info_CurrentNext.flags = CSectionsdClient::epgflags::has_current;
 			info_CurrentNext.current_uniqueKey	= eli->eventID;
@@ -332,16 +337,18 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 			info_CurrentNext.current_fsk		= '\0';
 
 			if (eli != evtlist.end()) {
-				eli++;
-				info_CurrentNext.flags 			= CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_next;
-				info_CurrentNext.next_uniqueKey		= eli->eventID;
-				info_CurrentNext.next_zeit.startzeit 	= eli->startTime;
-				info_CurrentNext.next_zeit.dauer	= eli->duration;
-				if (eli->description.empty())
-					info_CurrentNext.next_name	= ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_INFOVIEWER_NOEPG));
-				else
-					info_CurrentNext.next_name	= eli->description;
-				eli--;
+				++eli;
+				if (eli != evtlist.end()) {
+					info_CurrentNext.flags 			= CSectionsdClient::epgflags::has_current | CSectionsdClient::epgflags::has_next;
+					info_CurrentNext.next_uniqueKey		= eli->eventID;
+					info_CurrentNext.next_zeit.startzeit 	= eli->startTime;
+					info_CurrentNext.next_zeit.dauer	= eli->duration;
+					if (eli->description.empty())
+						info_CurrentNext.next_name	= ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_INFOVIEWER_NOEPG));
+					else
+						info_CurrentNext.next_name	= eli->description;
+				}
+				--eli;
 			}
 		}
 	}
