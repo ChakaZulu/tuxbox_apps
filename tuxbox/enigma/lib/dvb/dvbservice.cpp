@@ -214,7 +214,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 					Decoder::parms.audio_type=DECODE_AUDIO_AC3;
 					Decoder::parms.apid=tmp;
 				}
-/* APID*/ else
+/* APID*/		else
 				{
 					tmp = sp->dvb->get(eServiceDVB::cAPID);
 					if ( tmp != -1)
@@ -990,6 +990,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 	{
 		Decoder::parms.apid = -1;
 		sp->dvb->set(eServiceDVB::cAPID, -1);
+		sp->dvb->set(eServiceDVB::cAC3PID, -1);
 	}
 
 	if ( teletext )
