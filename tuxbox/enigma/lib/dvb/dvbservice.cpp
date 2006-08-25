@@ -970,14 +970,38 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 		audio = ac3_audio;
 	}
 
-	if ( video && video->elementary_PID != videopid )
-		setPID(video);
+	if ( video )
+	{
+		if ( video->elementary_PID != videopid )
+			setPID(video);
+	}
+	else if (sp && sp->dvb) // handle no more existing vpid
+	{
+		Decoder::parms.vpid = -1;
+		sp->dvb->set(eServiceDVB::cVPID, -1);
+	}
 
-	if ( audio && audiopid != audio->elementary_PID )
-		setPID(audio);
+	if ( audio )
+	{
+		if ( audiopid != audio->elementary_PID )
+			setPID(audio);
+	}
+	else if (sp && sp->dvb)  // handle no more existing apid
+	{
+		Decoder::parms.apid = -1;
+		sp->dvb->set(eServiceDVB::cAPID, -1);
+	}
 
-	if ( teletext && tpid != teletext->elementary_PID )
-		setPID(teletext);
+	if ( teletext )
+	{
+		if ( tpid != teletext->elementary_PID )
+			setPID(teletext);
+	}
+	else if (sp && sp->dvb)  // handle no more existing tpid
+	{
+		Decoder::parms.tpid = -1;
+		sp->dvb->set(eServiceDVB::cTPID, -1);
+	}
 
 	/*emit*/ dvb.scrambled(isca);
 
