@@ -168,6 +168,31 @@ bool CStreamingNotifier::changeNotify(const neutrino_locale_t, void *)
    return true;
 }
 
+COnOffNotifier::COnOffNotifier( CMenuItem* a1,CMenuItem* a2,CMenuItem* a3,CMenuItem* a4,CMenuItem* a5)
+{
+	number = 0;
+	if(a1 != NULL){ toDisable[0] =a1;number++;};
+	if(a2 != NULL){ toDisable[1] =a2;number++;};
+	if(a3 != NULL){ toDisable[2] =a3;number++;};
+	if(a4 != NULL){ toDisable[3] =a4;number++;};
+	if(a5 != NULL){ toDisable[4] =a5;number++;};
+}
+
+bool COnOffNotifier::changeNotify(const neutrino_locale_t, void *Data)
+{
+   if(*(int*)(Data) == 0)
+   {
+      for (int i=0; i<number ; i++)
+        toDisable[i]->setActive(false);
+   }
+   else
+   {
+      for (int i=0; i<number ; i++)
+        toDisable[i]->setActive(true);
+   }
+   return true;
+}
+
 CRecordingNotifier::CRecordingNotifier(CMenuItem* i1 , CMenuItem* i2 , CMenuItem* i3 ,
                                        CMenuItem* i4 , CMenuItem* i5 , CMenuItem* i6 ,
                                        CMenuItem* i7 , CMenuItem* i8 , CMenuItem* i9)

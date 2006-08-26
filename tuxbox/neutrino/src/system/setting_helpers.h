@@ -89,6 +89,16 @@ class CStreamingNotifier : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void *);
 };
 
+class COnOffNotifier : public CChangeObserver
+{
+	private:
+		int number;
+		CMenuItem* toDisable[5];
+	public:
+		COnOffNotifier (CMenuItem* a1,CMenuItem* a2 = NULL,CMenuItem* a3 = NULL,CMenuItem* a4 = NULL,CMenuItem* a5 = NULL);
+		bool changeNotify(const neutrino_locale_t, void *Data);
+};
+
 class CRecordingNotifier : public CChangeObserver
 {
 	private:

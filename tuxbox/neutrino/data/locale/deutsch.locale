@@ -950,6 +950,9 @@ streamingmenu.on Aktiviert
 streamingmenu.server_ip Streamingserver IP
 streamingmenu.server_port Streamingserver Port
 streamingmenu.streaming_audiorate Datenrate Audio
+streamingmenu.streaming_buffer_segment_size Anzahl Buffersegmente
+streamingmenu.streaming_buffer_segment_size_hint1 Min: 6, Max: 124, optimal: 24
+streamingmenu.streaming_buffer_segment_size_hint2
 streamingmenu.streaming_force_avi_rawaudio Erzwinge AC3 bei avi
 streamingmenu.streaming_force_transcode_video Transcod. auch mpg/vcd Video
 streamingmenu.streaming_resolution Auflösung
@@ -958,6 +961,7 @@ streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
 streamingmenu.streaming_transcode_video_codec MPEG Video Codec
 streamingmenu.streaming_type Streamingserver
+streamingmenu.streaming_use_buffer Verwende Buffer (WabberQueue)
 streamingmenu.streaming_videorate Datenrate Video
 streamingserver.noconnect Keine Verbindung zum Streamingserver.\nAufnahme wird abgebrochen.
 stringinput.caps Groß-/Kleinbuchstaben

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.75 2006/08/06 19:28:36 mogway Exp $
+ * $Id: locals_intern.h,v 1.76 2006/08/26 19:50:09 guenther Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -977,6 +977,9 @@ const char * locale_real_names[] =
 	"streamingmenu.server_ip",
 	"streamingmenu.server_port",
 	"streamingmenu.streaming_audiorate",
+	"streamingmenu.streaming_buffer_segment_size",
+	"streamingmenu.streaming_buffer_segment_size_hint1",
+	"streamingmenu.streaming_buffer_segment_size_hint2",
 	"streamingmenu.streaming_force_avi_rawaudio",
 	"streamingmenu.streaming_force_transcode_video",
 	"streamingmenu.streaming_resolution",
@@ -985,6 +988,7 @@ const char * locale_real_names[] =
 	"streamingmenu.streaming_transcode_audio",
 	"streamingmenu.streaming_transcode_video_codec",
 	"streamingmenu.streaming_type",
+	"streamingmenu.streaming_use_buffer",
 	"streamingmenu.streaming_videorate",
 	"streamingserver.noconnect",
 	"stringinput.caps",

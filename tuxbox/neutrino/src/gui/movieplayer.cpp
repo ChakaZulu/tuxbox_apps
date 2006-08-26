@@ -1,10 +1,10 @@
 /*
-  Neutrino-GUI  -   DBoxII-Project
+  Neutrino-GUI  -   DBoxII-Project 
 
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.129 2006/06/01 06:34:45 zwen Exp $
+  $Id: movieplayer.cpp,v 1.130 2006/08/26 19:50:10 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1197,6 +1197,8 @@ void updateLcd(const std::string & sel_filename)
 //===============================
 //== PlayFile Thread constants ==
 //===============================
+#define PF_BUF_SIZE   (800*188)
+#define PF_DMX_SIZE   (PF_BUF_SIZE + PF_BUF_SIZE/2)
 #define PF_RD_TIMEOUT 3000
 #define PF_EMPTY      0
 #define PF_READY      1
@@ -1214,7 +1216,7 @@ void updateLcd(const std::string & sel_filename)
 //== Ptr-Queue Specs ==
 //=====================
 #define SIZE_QUEUE_SEG (362*188)  // never change this !!!
-#define N_SEGS_QUEUE   24         // currently count of queue segments
+#define N_SEGS_QUEUE   g_settings.streaming_buffer_segment_size //24         // currently count of queue segments
 #define N_SEGS_QMIN    6          // a meaningfull lower limit for N_SEGS_QUEUE
 #define N_SEGS_QMAX    128        // dito ... upper limit ...
 #define N_SEGS_OPT_MAX 24
@@ -1269,10 +1271,16 @@ typedef struct
 	off_t pos;
 	off_t fileSize;
 
+	int   readSize;
 	int   nSegsMax;
 	int   nSegsOpt;                 // not used yet
+#if(SIZE_LINE_MAX >= PF_BUF_SIZE)
 	char  tmpBuf[SIZE_LINE_MAX+1];
+#else
+	char  tmpBuf[PF_BUF_SIZE];
+#endif
 	bool  refillBuffer;
+	bool  startDMX;
 
 	bool  isStream;
 	bool  canPause;
@@ -1339,6 +1347,7 @@ static void mp_bufferReset(MP_CTX *ctx, int jumpReq, bool abs);
 static void mp_stopDVBDevices(MP_CTX *ctx);
 static void mp_freezeAV(MP_CTX *ctx);
 static void mp_unfreezeAV(MP_CTX *ctx);
+static void mp_startDMX(MP_CTX *ctx);
 static void mp_startDVBDevices(MP_CTX *ctx);
 static void mp_checkEvent(MP_CTX *ctx);
 static bool mp_probe(const char *fname, MP_CTX *ctx);
@@ -1807,7 +1816,10 @@ static bool mp_openDVBDevices(MP_CTX *ctx)
 
 	ctx->dmxa = -1;
 	ctx->dmxv = -1;
-	
+if(!g_settings.streaming_use_buffer)
+{
+	ctx->dmxp = -1;
+}
 	ctx->dvr  = -1;
 	ctx->adec = -1;
 	ctx->vdec = -1;
@@ -1855,7 +1867,10 @@ static void mp_closeDVBDevices(MP_CTX *ctx)
 
 	ctx->dmxa = -1;
 	ctx->dmxv = -1;
-
+if(!g_settings.streaming_use_buffer)
+{
+	ctx->dmxp = -1;
+}
 	ctx->dvr  = -1;
 	ctx->adec = -1;
 	ctx->vdec = -1;
@@ -1868,8 +1883,16 @@ static void mp_closeDVBDevices(MP_CTX *ctx)
 void mp_bufferReset(MP_CTX *ctx)
 {
 	//-- immidiately pause playback --
+if(g_settings.streaming_use_buffer)
+{
 	mp_freezeAV(ctx);
 	
+}
+else
+{
+    mp_stopDVBDevices(ctx);
+    mp_startDVBDevices(ctx);
+}	
 	//-- refill input buffer --
 	ctx->refillBuffer = true;
 }
@@ -1907,11 +1930,22 @@ void mp_bufferReset(MP_CTX *ctx, int jumpReq, bool abs)
 	//-- check limits --
 	if(ctx->jmp >= ctx->fileSize) ctx->jmp = ctx->fileSize - PF_SKPOS_OFFS;
 	if(ctx->jmp < ((off_t)0)) ctx->jmp = (off_t)0;
-	
+
+if(g_settings.streaming_use_buffer)
+{	
 	//-- signal refill request: with a value for 'ctx->c_jmp' != -1 --
 	//-- the reader will seek to desired position first, before     --
 	//-- refilling the buffer along with reset of all DVB-devices.  --
 	ctx->refillBuffer = true;
+}
+else
+{
+	//-- jump to desired file position --
+	ctx->pos = mp_seekSync(ctx->inFd, ctx->jmp);
+	fprintf(stderr,"[mp] jump to pos (%lld) of total (%lld)\n",
+			  ctx->pos, ctx->fileSize);
+	mp_bufferReset(ctx);
+}
 }
 
 //== mp_stopDVBDevices ==
@@ -1937,10 +1971,18 @@ static void mp_stopDVBDevices(MP_CTX *ctx)
 
 	ctx->p.pid      = ctx->pida;
 	ctx->p.pes_type = DMX_PES_AUDIO;
+if(!g_settings.streaming_use_buffer)
+{
+	ioctl (ctx->dmxa, DMX_SET_BUFFER_SIZE, PF_DMX_SIZE/4);
+}
 	ioctl (ctx->dmxa, DMX_SET_PES_FILTER, &(ctx->p));
 
 	ctx->p.pid      = ctx->pidv;
 	ctx->p.pes_type = DMX_PES_VIDEO;
+if(!g_settings.streaming_use_buffer)
+{
+	ioctl (ctx->dmxv, DMX_SET_BUFFER_SIZE, PF_DMX_SIZE);
+}	
 	ioctl (ctx->dmxv, DMX_SET_PES_FILTER, &(ctx->p));
 
 	//-- switch audio decoder bypass depending on audio type --
@@ -1954,7 +1996,10 @@ static void mp_stopDVBDevices(MP_CTX *ctx)
 	//ioctl(ctx->vdec, VIDEO_PLAY);				// video
 	//ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL);		// needs sync !
 
+if(g_settings.streaming_use_buffer)
+{
 	usleep(150000);
+}	
   }
 }
 
@@ -2009,11 +2054,29 @@ static void mp_startDVBDevices(MP_CTX *ctx)
 		ioctl(ctx->vdec, VIDEO_PLAY);             // video
 		ioctl(ctx->adec, AUDIO_SET_AV_SYNC, 1UL); // needs sync !
 
+if(g_settings.streaming_use_buffer)
+{
 		//-- ... demuxers also --
 		ioctl (ctx->dmxa, DMX_START);	// audio first !
 		ioctl (ctx->dmxv, DMX_START);
-		
+}
+else
+{
+	    ctx->startDMX = true;
+}		
 		gDeviceState = DVB_DEVICES_RUNNING;
+	}
+}
+
+//== mp_startDMX ==
+//=================
+static void mp_startDMX(MP_CTX *ctx)
+{
+	if(ctx->startDMX)
+	{
+		ioctl (ctx->dmxa, DMX_START);	// audio first !
+		ioctl (ctx->dmxv, DMX_START);
+		ctx->startDMX = false;
 	}
 }
 
@@ -2137,7 +2200,16 @@ static void mp_checkEvent(MP_CTX *ctx)
 				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
 				lcdUpdateTsMode=true;
 			}
+if(g_settings.streaming_use_buffer)
+{
 			mp_selectAudio(ctx); // includes bufferReset request now !
+}
+else
+{
+			mp_analyze(ctx);
+        	mp_selectAudio(ctx);
+			mp_bufferReset(ctx);
+}
 			fprintf(stderr, "[mp] using pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
 					  ctx->pida, ctx->pidv, ctx->ac3);
 
@@ -2189,7 +2261,17 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 	if( (fp = fopen(fname, "r")) == NULL )
 		return false; // error
 
-	if(fgets(ctx->tmpBuf, SIZE_LINE_MAX, fp))
+	int buffer_size;
+if(g_settings.streaming_use_buffer)
+{
+	buffer_size = SIZE_LINE_MAX;
+}
+else
+{
+	buffer_size = PF_BUF_SIZE-1;
+}
+
+	if(fgets(ctx->tmpBuf, buffer_size, fp))
 	{
 		//-- check first line for magic value --
 		if(!memcmp(ctx->tmpBuf, MP_STREAM_MAGIC, sizeof(MP_STREAM_MAGIC)-1))
@@ -2198,7 +2280,7 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 			int  ntokens;
 
 			//-- get all lines (quick and dirty parser) --
-			while(fgets(ctx->tmpBuf, SIZE_LINE_MAX, fp))
+			while(fgets(ctx->tmpBuf, buffer_size, fp))
 			{
 				if( (s2 = strchr(ctx->tmpBuf,'#')) != NULL )	*s2 = '\0';
 				if( strlen(ctx->tmpBuf) < 3 )	continue;
@@ -2280,8 +2362,8 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 		else if(!memcmp(ctx->tmpBuf, MP_PLAYLST_MAGIC, sizeof(MP_PLAYLST_MAGIC)-1))
 		{
 			char *s2;
-
-			while(fgets(ctx->tmpBuf, SIZE_LINE_MAX, fp))
+			
+			while(fgets(ctx->tmpBuf, buffer_size, fp))
 			{
 				if( (s2 = strchr(ctx->tmpBuf,'#')) != NULL )	*s2 = '\0';
 				if( strlen(ctx->tmpBuf) < 3 )	continue;
@@ -2311,6 +2393,8 @@ static bool mp_probe(const char *fname, MP_CTX *ctx)
 //================
 static void mp_analyze(MP_CTX *ctx)
 {
+if(g_settings.streaming_use_buffer)
+{
 	off_t rd;
 	#define OFS_GMO_NSEGS 19
 	#define OFS_GMO_TAG   21
@@ -2337,6 +2421,7 @@ static void mp_analyze(MP_CTX *ctx)
 			);  
 		}	
 	}
+}
 
 	currentapid = 0;	// global
 	numpida     = 0;	// global
@@ -2350,9 +2435,6 @@ static void mp_analyze(MP_CTX *ctx)
 		fprintf(stderr, "[mp] found pida[%d]: 0x%04X, ac3=%d\n",
 				  i, apids[i], ac3flags[i]);
 	}
-	
-	//-- audio track may be selected --
-	mp_selectAudio(ctx);
 }
 
 //====================
@@ -2362,7 +2444,10 @@ void mp_selectAudio(MP_CTX *ctx)
 {
 	if(numpida > 1)
 	{
+if(g_settings.streaming_use_buffer)
+{
 		mp_bufferReset(ctx);
+}
 		showaudioselectdialog = true;
 		while(showaudioselectdialog) usleep(50000);
 	}
@@ -2437,6 +2522,7 @@ void *mp_playFileMain(void *filename)
 	std::string   fname  = (const char *)filename;
 	bool          failed = true;
 	struct pollfd pHandle;
+	int           rd, rSize;
 
 	MP_CTX mpCtx;
 	MP_CTX *ctx = &mpCtx;
@@ -2485,10 +2571,13 @@ void *mp_playFileMain(void *filename)
 		//-- force buffer refilling including immidiate freezeAV() --
 		//-- should also initiate late "stop/start" of devices ... --  
 		//-----------------------------------------------------------
+if(g_settings.streaming_use_buffer)
+{
 		mp_bufferReset(ctx);
 
 		//-- set default count of buffer segments for Ptr-Queue --
 		ctx->nSegsMax = N_SEGS_QUEUE;
+}
 	
 		//-- (live) stream or ... --
 		//--------------------------
@@ -2547,6 +2636,10 @@ void *mp_playFileMain(void *filename)
 				ctx->pidv     = lstIt->vpid;
 				ctx->pida     = lstIt->apid;
 				ctx->ac3      = 0;
+if(!g_settings.streaming_use_buffer)
+{
+				ctx->readSize = PF_BUF_SIZE/2;
+}
 			}
 			else
 			{
@@ -2570,12 +2663,36 @@ void *mp_playFileMain(void *filename)
 			//-- file playback can pause, set --
 			//-- actaul pos to req. start pos --
 			ctx->canPause = true;
+if(g_settings.streaming_use_buffer)
+{
 			ctx->pos = g_startposition;
 			g_startposition = 0;
 
 			//-- analyze TS file (set apid/vpid/ac3, filesize, nSegsMax, ... in --
 			//-- ctx) on leave, read position of file will be set to start pos.  -- 
 			mp_analyze(ctx);
+        	//-- audio track may be selected --
+        	mp_selectAudio(ctx);
+}
+else
+{
+			//-- set (short) readsize --
+			ctx->readSize = PF_BUF_SIZE/4;
+
+			//-- analyze TS file (set apid/vpid/ac3 in ctx) --
+			mp_analyze(ctx);
+        	//-- audio track may be selected --
+        	mp_selectAudio(ctx);
+
+			//-- get file size --
+			ctx->fileSize = lseek (ctx->inFd, 0L, SEEK_END);
+
+			//-- set bookmark position --
+			ctx->pos = g_startposition;
+			ctx->pos = mp_seekSync(ctx->inFd, ctx->pos);
+
+			g_startposition = 0;
+}
 		}
 
 		fprintf
@@ -2585,6 +2702,11 @@ void *mp_playFileMain(void *filename)
 			(ctx->isStream)?"(live) stream":"plain TS file",
 			ctx->pidv, ctx->pida, ctx->ac3
 		);
+		
+if(!g_settings.streaming_use_buffer)
+{
+mp_bufferReset(ctx);
+}
 
 		//-- aspect ratio init --
 		checkAspectRatio(ctx->vdec, true);
@@ -2594,7 +2716,8 @@ void *mp_playFileMain(void *filename)
 		pHandle.events = POLLIN | POLLPRI;
 		ctx->pH        = &pHandle;
 
-		
+if(g_settings.streaming_use_buffer)
+{
 		//-- lcd stuff --
 		int cPercent   = 0;
 		int lPercent   = -1;
@@ -2649,6 +2772,56 @@ void *mp_playFileMain(void *filename)
     
 			delete q;  /// cleanup resources !
 		}
+}
+else
+{
+		//-- reader loop --
+		//-----------------
+		fprintf(stderr,"[mp] entering player loop\n");
+		//lcd
+		short prozent=0,last_prozent=1;
+		lcdSetting=g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME];
+		while( (ctx->itChanged == false) &&
+				 (g_playstate >= CMoviePlayerGui::PLAY) )
+		{
+			//-- after device reset read double amount of stream data --
+			rSize = (ctx->refillBuffer)? ctx->readSize*2 : ctx->readSize;
+			ctx->refillBuffer = false;
+
+			if(ctx->isStream)
+				rd = mp_tcpRead(ctx->pH, ctx->tmpBuf, rSize, PF_RD_TIMEOUT);
+			else
+				rd	= read(ctx->inFd, ctx->tmpBuf, rSize);
+
+			//-- update file position --
+			ctx->pos += rd;
+			g_fileposition = ctx->pos;
+
+			//-- check break conditions and events --
+			if(rd != rSize) break;
+			mp_checkEvent(ctx);
+
+			//-- after device reset skip writing --
+			//-- to refill buffer first ...      --
+			if(ctx->refillBuffer) continue;
+
+			//-- after device reset, DMX devices --
+			//-- has to be started here ...      --
+			mp_startDMX(ctx);	// starts only if stopped !
+			//lcd
+			prozent=(ctx->pos*100)/ctx->fileSize;
+			if((last_prozent !=prozent && lcdSetting!=1) || lcdUpdateTsMode)
+			{
+				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
+				last_prozent=prozent;
+				lcdUpdateTsMode=false;
+				CLCD::getInstance()->showPercentOver(prozent);
+				g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=1;
+			}
+			//-- write stream data now --
+			write(ctx->dvr, ctx->tmpBuf, rd);
+		}
+}
         
 		//-- restore original lcd settings --			
 		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
@@ -2676,7 +2849,18 @@ void *mp_playFileMain(void *filename)
 			ctx->inFd = -1;
 		}
 
+if(g_settings.streaming_use_buffer)
+{
 		ctx->pos = 0LL;
+}
+else
+{
+
+		//-- Note: on any content change AV should be freezed first,   --
+		//-- to get a consitant state. restart of all DVB-devices will --
+		//-- be initiated by a SoftReset in the next turn/starts.      --
+		mp_freezeAV(ctx); //needed???????????
+}
 
 		//-- check for another item to play --
 		//------------------------------------
@@ -3876,7 +4060,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.129 $");
+	helpbox.addLine("Version: $Revision: 1.130 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -3898,7 +4082,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.129 $");
+	helpbox.addLine("Version: $Revision: 1.130 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);

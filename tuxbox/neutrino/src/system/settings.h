@@ -213,6 +213,8 @@ struct SNeutrinoSettings
 	int streaming_force_transcode_video;
 	int streaming_transcode_video_codec;
 	int streaming_resolution;
+	int streaming_use_buffer;
+	int streaming_buffer_segment_size;
 
 	int filesystem_is_utf8;
 	// default plugin for ts-movieplayer (red button)
