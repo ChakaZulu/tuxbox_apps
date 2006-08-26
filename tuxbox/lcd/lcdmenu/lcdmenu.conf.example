@@ -73,7 +73,7 @@ item_files=/bin/neutrino,/bin/enigma,/bin/radiobox,/bin/lcars,/etc/init.d/initia
 #
 # This list contains files to be exec-ed when the corresponding entry is
 # selected.
-item_execfiles=/etc/init.d/start_neutrino,/etc/init.d/start_enigma,/bin/radiobox,/etc/init.d/start_lcars,/etc/init.d/initialize,/bin/true,/sbin/halt
+item_execfiles=/etc/init.d/start_neutrino,/etc/init.d/start_enigma,/etc/init.d/start_radiobox,/etc/init.d/start_lcars,/etc/init.d/initialize,/bin/true,/sbin/halt
 
 #
 # option: item_isGUI (true|false, ...)
