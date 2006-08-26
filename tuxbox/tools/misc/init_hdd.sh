@@ -36,6 +36,9 @@ if [ $? -ne 0 ] ; then
     exit 1
 fi
 
+# Let the disc power down after 5 minutes of inactivity
+hdparm -S60 $HDD/disc
+
 # Initialize the swap partition
 # mkswap /dev/ide/host0/bus0/target0/lun0/part1
 
