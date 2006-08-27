@@ -114,3 +114,36 @@ void CMountEdit::Next( int _d )
 	}
 }
 
+	std::string CMount::getIP() { return g_settings.network_nfs_ip[ idx ]; }
+	void CMount::setIP( std::string _IP ) { g_settings.network_nfs_ip[ idx ] = _IP; }
+	//remote dir
+	std::string CMount::getDir() { return g_settings.network_nfs_dir[ idx ]; }
+	void CMount::setDir( std::string _dir ) { strncpy( g_settings.network_nfs_dir[ idx ], _dir.c_str(), 99 ); }
+	//local dir
+	std::string CMount::getLocalDir() { return g_settings.network_nfs_local_dir[ idx ]; }
+	void CMount::setLocalDir( std::string _dir ) { strncpy( g_settings.network_nfs_local_dir[ idx ], _dir.c_str(), 99 ); }
+	//type
+	int CMount::getType() { return g_settings.network_nfs_type[ idx ]; }
+	void CMount::setType( int _type ) { g_settings.network_nfs_type[ idx ] = _type; }
+	//username
+	std::string CMount::getUsername() { return g_settings.network_nfs_username[ idx ]; }
+	void CMount::setUsername( std::string _username ) { strncpy( g_settings.network_nfs_username[ idx ], _username.c_str(), 30 ); }
+	//password
+	std::string CMount::getPassword() { return g_settings.network_nfs_password[ idx ]; }
+	void CMount::setPassword( std::string _password ) { strncpy( g_settings.network_nfs_password[ idx ], _password.c_str(), 30 ); }
+	//options1
+	std::string CMount::getOptions1() { return g_settings.network_nfs_mount_options1[ idx ]; }
+	void CMount::setOptions1( std::string _opts ) { strncpy( g_settings.network_nfs_mount_options1[ idx ], _opts.c_str(), 30 ); }
+	//options2
+	std::string CMount::getOptions2() { return g_settings.network_nfs_mount_options2[ idx ]; }
+	void CMount::setOptions2( std::string _opts ) { strncpy( g_settings.network_nfs_mount_options2[ idx ], _opts.c_str(), 30 ); }
+
+
+	CMounter::CMounter() { g_settings.Load(); };
+	
+	unsigned int CMounter::getCount() { return g_settings.network_nfs_count; }
+
+	void CMounter::Commit() { g_settings.Save(); };
+	void CMounter::Rollback() { g_settings.Load(); };;
+
+

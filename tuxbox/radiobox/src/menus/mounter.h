@@ -20,9 +20,6 @@
 #define __MOUNTER_H__
 
 
-#include <global.h>
-
-
 #include <string>
 
 
@@ -41,29 +38,29 @@ protected:
 public:
 	CMount( unsigned int _idx ) { this->idx = _idx; }
 	//remote ip
-	std::string getIP() { return g_settings.network_nfs_ip[ idx ]; }
-	void setIP( std::string _IP ) { g_settings.network_nfs_ip[ idx ] = _IP; }
+	std::string getIP();
+	void setIP( std::string _IP );
 	//remote dir
-	std::string getDir() { return g_settings.network_nfs_dir[ idx ]; }
-	void setDir( std::string _dir ) { strncpy( g_settings.network_nfs_dir[ idx ], _dir.c_str(), 99 ); }
+	std::string getDir();
+	void setDir( std::string _dir );
 	//local dir
-	std::string getLocalDir() { return g_settings.network_nfs_local_dir[ idx ]; }
-	void setLocalDir( std::string _dir ) { strncpy( g_settings.network_nfs_local_dir[ idx ], _dir.c_str(), 99 ); }
+	std::string getLocalDir();
+	void setLocalDir( std::string _dir );
 	//type
-	int getType() { return g_settings.network_nfs_type[ idx ]; }
-	void setType( int _type ) { g_settings.network_nfs_type[ idx ] = _type; }
+	int getType();
+	void setType( int _type );
 	//username
-	std::string getUsername() { return g_settings.network_nfs_username[ idx ]; }
-	void setUsername( std::string _username ) { strncpy( g_settings.network_nfs_username[ idx ], _username.c_str(), 30 ); }
+	std::string getUsername();
+	void setUsername( std::string _username );
 	//password
-	std::string getPassword() { return g_settings.network_nfs_password[ idx ]; }
-	void setPassword( std::string _password ) { strncpy( g_settings.network_nfs_password[ idx ], _password.c_str(), 30 ); }
+	std::string getPassword();
+	void setPassword( std::string _password );
 	//options1
-	std::string getOptions1() { return g_settings.network_nfs_mount_options1[ idx ]; }
-	void setOptions1( std::string _opts ) { strncpy( g_settings.network_nfs_mount_options1[ idx ], _opts.c_str(), 30 ); }
+	std::string getOptions1();
+	void setOptions1( std::string _opts );
 	//options2
-	std::string getOptions2() { return g_settings.network_nfs_mount_options2[ idx ]; }
-	void setOptions2( std::string _opts ) { strncpy( g_settings.network_nfs_mount_options2[ idx ], _opts.c_str(), 30 ); }
+	std::string getOptions2();
+	void setOptions2( std::string _opts );
 
 };
 
@@ -73,14 +70,14 @@ protected:
 	unsigned int count;
 
 public:
-	CMounter() { g_settings.Load(); };
+	CMounter();
 	
-	unsigned int getCount() { return g_settings.network_nfs_count; }
+	unsigned int getCount();
 
 	CMount getMount( unsigned int _idx ) { return CMount( _idx ); }
 
-	void Commit() { g_settings.Save(); };
-	void Rollback() { g_settings.Load(); };;
+	void Commit();
+	void Rollback();
 };
 
 

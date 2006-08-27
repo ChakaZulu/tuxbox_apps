@@ -17,7 +17,7 @@ int main()
 	catch( EPlayList _e )
 	{
 		std::cout << _e.GetText() << std::endl;
-		return 0;
+		return 3;
 	}
 	
 	

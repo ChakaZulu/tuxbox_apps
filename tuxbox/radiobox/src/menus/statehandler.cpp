@@ -1,5 +1,6 @@
 #include <statehandler.h>
 
+
 #include <iostream> 
 #include <fstream> 
 #include <lcdd.h>
@@ -12,13 +13,73 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#define RADIOBOX_CPP
+#include <global.h>
+#include <statehandler.h>
+
 #include <radiobox.h>
 #include <playlist.h>
 #include <statehandler.h>
-#include <global.h>
 #include <flashtool.h>
 
+
+
 #define PLAYLISTDIR g_settings.playlist_root
+std::list<CStateHandler*> CStateHandler::handlers;
+
+/// register all handlers here 
+
+struct __sthinit
+{
+	__sthinit()
+	{
+		CStateHandler* _tmp;
+		_tmp = new CSelectLocation();     CStateHandler::RegisterSTH( _tmp );
+		_tmp = new CSetupMenu();          CStateHandler::RegisterSTH( _tmp );
+		_tmp = new CMainMenu();           CStateHandler::RegisterSTH( _tmp );
+		_tmp = new CSetupPlayOrder();     CStateHandler::RegisterSTH( _tmp );
+		_tmp = new CSetupSoftware();      CStateHandler::RegisterSTH( _tmp );
+		_tmp = new CSetupReadFlash();     CStateHandler::RegisterSTH( _tmp );
+		_tmp = new CSetupWriteFlash();    CStateHandler::RegisterSTH( _tmp );
+		_tmp = new CMountSetup();         CStateHandler::RegisterSTH( _tmp );
+	}
+} sthinit;
+
+void CStateHandler::RegisterSTH( CStateHandler* _handler )
+{
+	if( NULL != _handler )
+	{
+		handlers.push_back( _handler );
+	}
+}
+
+CStateHandler*	CStateHandler::GetHandlerByName( std::string _name )
+{
+	std::list<CStateHandler*>::iterator	i = handlers.begin();
+
+	for( ; i != handlers.end(); i++ )
+	{
+		if( _name == (*i)->GetName() )
+		{
+			return (*i);
+		}
+
+	}
+
+	return NULL;
+}
+
+void CStateHandler::DumpAllSTHNames()
+{
+	std::list<CStateHandler*>::iterator	i = handlers.begin();
+
+	std::cout << "Implemented state handlers:" << std::endl;
+
+	for( ; i != handlers.end(); i++ )
+	{
+		std::cout << "\t[" << (*i)->GetName() << "]" << std::endl;
+	}
+}
 
 
 /**************************************************************/
@@ -373,6 +434,7 @@ CSelectLocation::CSelectLocation()
 {
 	try
 	{
+		std::cout << "Load Locations" << std::endl;
 		LoadLocations();
 	}
 	catch( EPlayList e )
@@ -382,6 +444,7 @@ CSelectLocation::CSelectLocation()
 			this->subhandler = new CMessageBox( "Cannot access media!" );
 		}
 	}
+	std::cout << "Leave constructor" << std::endl;
 }
 
 /**************************************************************/
@@ -432,58 +495,6 @@ void CSelectLocation::LoadLocations( )
 
 	closedir( dir );
 
-#if 0
-	bool exists = CPlayList::IsFileExists( _locs_conf );
-	std::string	loc;
-	
-	if( false == exists )
-		throw "no locs.conf found!";
-
-	std::fstream locs_conf;
-	
-	locs_conf.open( _locs_conf.c_str(), 
-			std::fstream::in | 
-			std::fstream::binary );
-	
-	if( false == locs_conf.is_open() )
-		throw "Couldn't open loc.conf";
-	
-	/* read locations */
-	while(1)
-	{
-		char buff;
-		
-		locs_conf >> std::noskipws >> buff;
-//		std::cout << buff;
-		if( buff == 0 || locs_conf.eof() ) 
-		{
-//			std::cout << " done ";
-//			if( playlist.eof() )
-//				std::cout << "by eof ";
-			if( loc.size() )
-				locations.push_back( loc );
-			
-			break;
-		}
-
-		if( locs_conf.fail() )
-			throw EPlayList( EPlayList::unknown );
-
-		if( 0x0a == buff )
-		{
-			std::cout << "\nAdd location: " << loc << std::endl;
-			this->locations.push_back( loc );
-			loc = "";			
-		}
-		else
-		{
-			std::cout << buff;	
-			loc += buff;
-		}	
-	}
-	
-	locs_conf.close();	
-#endif
 }
 
 /**************************************************************/

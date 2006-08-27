@@ -5,12 +5,22 @@
 #include <mounter.h>
 #include <rbxinput.h>
 
+#include <list>
+#include <string>
 
 
 /*********************************************************/
 
 class CStateHandler
 {
+private:
+	static	std::list<CStateHandler*>	handlers;
+
+public:
+	
+	static	void RegisterSTH( CStateHandler* _handler );
+	static	CStateHandler*	GetHandlerByName( std::string _name );
+	static	void DumpAllSTHNames();
 protected:
 
 	CStateHandler*		subhandler;
@@ -25,6 +35,7 @@ public:
 
 	virtual void		Show() = 0;
 	virtual void		HandleKeys( CRBXInput::KEYS _key, bool _pressed ) = 0;
+	virtual std::string	GetName( ) = 0;
 
 	CStateHandler*		GetSubHandler() { CStateHandler* tmp = subhandler; subhandler = 0; return tmp; }
 	bool				HasToBeRemoved() { return remove; }
@@ -60,9 +71,9 @@ private:
 public:
 	CSelectPlayList();
 	virtual ~CSelectPlayList() { };
-	void	Show();
-	void	HandleKeys( CRBXInput::KEYS _key, bool _pressed );
-
+	void		Show();
+	void		HandleKeys( CRBXInput::KEYS _key, bool _pressed );
+	std::string GetName() { return "CSelectPlayList"; }
 };
 
 /*********************************************************/
@@ -81,6 +92,7 @@ public:
 	virtual ~CSelectLocation() {};
 	void	Show();
 	void	HandleKeys( CRBXInput::KEYS _key, bool _pressed );
+	std::string GetName() { return "CSelectLocation"; }
 
 };
 
@@ -93,6 +105,7 @@ public:
 
 	void				Show();
 	void				HandleKeys( CRBXInput::KEYS _key, bool _pressed );
+	std::string GetName() { return "CPlayListEntries"; }
 
 
 private:
@@ -110,6 +123,7 @@ public:
 
 	void				Show();
 	void				HandleKeys( CRBXInput::KEYS _key, bool _pressed );
+	std::string GetName() { return "CPlayLocation"; }
 
 
 private:
@@ -125,10 +139,11 @@ class CPlayPLRandom : public CStateHandler
 {
 public:
 	CPlayPLRandom( CPlayList* _playlist );
-	virtual ~CPlayPLRandom( ) { delete playlist; };
+	virtual ~CPlayPLRandom( ) { if( playlist ) delete playlist; };
 
 	void				Show();
 	void				HandleKeys( CRBXInput::KEYS _key, bool _pressed );
+	std::string GetName() { return "CPlayPLRandom"; }
 
 
 private:
@@ -157,6 +172,7 @@ public:
 
 	void	Show();
 	void	HandleKeys( CRBXInput::KEYS _key, bool _pressed );
+	virtual std::string GetName() { return "CStaticMenu"; }
 };
 
 /*********************************************************/
@@ -168,6 +184,7 @@ private:
 public:
 	CSetupMenu();
 	virtual ~CSetupMenu() { };
+	std::string GetName() { return "CSetupMenu"; }
 };
 
 /*********************************************************/
@@ -179,6 +196,7 @@ private:
 public:
 	CMainMenu();
 	virtual ~CMainMenu() { };
+	std::string GetName() { return "CMainMenu"; }
 };
 
 /*********************************************************/
@@ -190,6 +208,7 @@ private:
 public:
 	CSetupPlayOrder();
 	virtual ~CSetupPlayOrder() { };
+	std::string GetName() { return "CSetupPlayOrder"; }
 };
 
 /*********************************************************/
@@ -201,6 +220,7 @@ private:
 public:
 	CSetupSoftware();
 	virtual ~CSetupSoftware() { };
+	std::string GetName() { return "CSetupSoftware"; }
 };
 
 
@@ -214,6 +234,7 @@ private:
 public:
 	CSetupReadFlash( );
 	virtual ~CSetupReadFlash() { };
+	std::string GetName() { return "CSetupReadFlash"; }
 };
 
 
@@ -228,6 +249,7 @@ public:
 	std::string	file;
 	CSetupWriteFlash( );
 	virtual ~CSetupWriteFlash() { };
+	std::string GetName() { return "CSetupWriteFlash"; }
 };
 
 
@@ -252,6 +274,7 @@ private:
 public:
 	CMountSetup( );
 	virtual ~CMountSetup() { };
+	std::string GetName() { return "CMountSetup"; }
 };
 
 /*********************************************************/
@@ -282,6 +305,7 @@ public:
 	
 	void		Show();
 	void		HandleKeys( CRBXInput::KEYS _key, bool _pressed );
+	std::string GetName() { return "CMountEdit"; }
 
 };
 
@@ -301,6 +325,7 @@ public:
 
 	void	Show();
 	void	HandleKeys( CRBXInput::KEYS _key, bool _pressed );
+	std::string GetName() { return "CMessageBox"; }
 };
 
 /*********************************************************/

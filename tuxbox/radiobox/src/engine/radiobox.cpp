@@ -13,7 +13,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#define RADIOBOX_CPP
+//#define RADIOBOX_CPP
 
 #include <file.h>
 #include <global.h>
@@ -106,6 +106,8 @@ void CRadioBox::Run()
 					predefined_lcd_font[0][3],
 					predefined_lcd_font[0][4],
 					predefined_lcd_font[0][5] );	
+
+	CStateHandler::DumpAllSTHNames();
 
 	std::cout << "run" << std::endl;
 
