@@ -958,6 +958,7 @@ streamingmenu.streaming_force_transcode_video Transcod. auch mpg/vcd Video
 streamingmenu.streaming_resolution Auflösung
 streamingmenu.streaming_server_cddrive DVD Laufwerk
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
+streamingmenu.streaming_show_tv_in_browser TV Bild im Browser
 streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
 streamingmenu.streaming_transcode_video_codec MPEG Video Codec
 streamingmenu.streaming_type Streamingserver

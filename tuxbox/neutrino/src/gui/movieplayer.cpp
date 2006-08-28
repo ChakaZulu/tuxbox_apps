@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.130 2006/08/26 19:50:10 guenther Exp $
+  $Id: movieplayer.cpp,v 1.131 2006/08/28 00:27:58 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -116,6 +116,10 @@ extern CPlugins       * g_PluginList;
 #define MOVIEPLAYER_START_SCRIPT CONFIGDIR "/movieplayer.start" 
 #define MOVIEPLAYER_END_SCRIPT CONFIGDIR "/movieplayer.end"
 
+#define ZAPIT_STAND_BY_WAIT_US 300000  // time in us 
+bool g_ZapitsetStandbyState = false;
+
+
 //TODO: calculate offset for jumping 1 minute forward/backwards in stream
 // needs to be a multiplier of 188
 // do a VERY shitty approximation here...
@@ -160,6 +164,7 @@ unsigned int currentapid = 0, currentac3 = 0, apidchanged=0;
 bool showaudioselectdialog = false;
 short lcdSetting=-1;
 bool lcdUpdateTsMode =false;
+
 
 
 //------------------------------------------------------------------------
@@ -285,8 +290,14 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 
 	// set zapit in standby mode
-	g_Zapit->setStandby (true);
-	
+    g_ZapitsetStandbyState = false; // 'Init State
+    if (g_settings.streaming_show_tv_in_browser == false)
+    {
+        g_ZapitsetStandbyState = true; // 'Init State
+    	g_Zapit->setStandby (true);
+    }
+
+
 	puts("[movieplayer.cpp] executing " MOVIEPLAYER_START_SCRIPT ".");
 	if (system(MOVIEPLAYER_START_SCRIPT) != 0)
 	perror("Datei " MOVIEPLAYER_START_SCRIPT " fehlt. Bitte erstellen, wenn gebraucht.\nFile " MOVIEPLAYER_START_SCRIPT " not found. Please create if needed.\n");
@@ -390,7 +401,11 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 
 	// Restore last mode
-	g_Zapit->setStandby (false);
+    if (true == g_ZapitsetStandbyState)
+    {
+        usleep(ZAPIT_STAND_BY_WAIT_US);
+        g_Zapit->setStandby (false);
+     }
 	
 	puts("[movieplayer.cpp] executing " MOVIEPLAYER_END_SCRIPT ".");
 	if (system(MOVIEPLAYER_END_SCRIPT) != 0)
@@ -3133,6 +3148,12 @@ void CMoviePlayerGui::PlayFile (int parental)
 #ifdef MOVIEBROWSER  			
 			if(isMovieBrowser == true)
 			{
+                if (g_settings.streaming_show_tv_in_browser == true && true == g_ZapitsetStandbyState)
+                {
+                    usleep(ZAPIT_STAND_BY_WAIT_US);
+                    g_Zapit->setStandby (false);
+                    g_ZapitsetStandbyState = false;
+                }
 				// start the moviebrowser instead of the filebrowser
 				if(moviebrowser->exec(Path_local.c_str()))
 				{
@@ -3142,6 +3163,16 @@ void CMoviePlayerGui::PlayFile (int parental)
 	
 					if((file = moviebrowser->getSelectedFile()) != NULL)
 					{
+                        if (g_settings.streaming_show_tv_in_browser == true)
+                        {
+                            if (false == g_ZapitsetStandbyState)
+                            {
+                                g_Zapit->setStandby (true);
+                                g_ZapitsetStandbyState = true;
+                                usleep(ZAPIT_STAND_BY_WAIT_US);
+                            }
+                        }
+                        
 						filename     = file->Name.c_str();
 						sel_filename = file->getFileName();
 						// get the start position for the movie
@@ -3530,6 +3561,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- Resync A/V --
 			case CRCInput::RC_0:
+            
 #ifdef MOVIEBROWSER  		
 				if(isMovieBrowser == true)
 				{
@@ -4060,7 +4092,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.130 $");
+	helpbox.addLine("Version: $Revision: 1.131 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4082,7 +4114,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.130 $");
+	helpbox.addLine("Version: $Revision: 1.131 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
