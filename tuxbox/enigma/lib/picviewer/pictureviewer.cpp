@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.cpp,v 1.42 2005/11/05 09:54:40 digi_casi Exp $
+ * $Id: pictureviewer.cpp,v 1.43 2006/08/28 20:02:42 ghostrider Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -118,8 +118,10 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	l->setFont(eSkin::getActive()->queryFont("epg.title"));
 	l->resize(eSize(clientrect.width() - 100, 30));
 	l->setText(_("Loading slide... please wait."));
-	
+
+#ifndef DISABLE_LCD
 	pLCD = eZapLCD::getInstance();
+#endif
 
 	fh_root = NULL;
 	m_scaling = COLOR;

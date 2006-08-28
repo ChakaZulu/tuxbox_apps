@@ -4792,9 +4792,13 @@ void eZapMain::showAudioMenu()
 		}
 		else
 		{
-			audiosel.show();
-			audiosel.exec();
-			audiosel.hide();
+			if ( !(eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR &&
+				eDVB::getInstance()->recorder) )
+			{
+				audiosel.show();
+				audiosel.exec();
+				audiosel.hide();
+			}
 		}
 #ifndef DISABLE_LCD
 		pLCD->lcdMenu->hide();

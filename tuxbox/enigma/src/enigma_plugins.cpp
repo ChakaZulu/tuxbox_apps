@@ -22,6 +22,7 @@
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/decoder.h>
 #include <lib/gui/eskin.h>
+#include <lib/gui/eprogress.h>
 #include <lib/system/info.h>
 
 ePluginThread *ePluginThread::instance=0;
