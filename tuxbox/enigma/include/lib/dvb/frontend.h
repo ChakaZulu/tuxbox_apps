@@ -147,15 +147,10 @@ public:
 	{
 		if (!frontend)
 			frontend=new eFrontend(type);
-		if (frontend->fd<0)
-		{
-			close();
-			return frontend->fd;
-		}
 		return 0;
 	}
 
-	static void close()	{		delete frontend;	}
+	static void close() { delete frontend; }
 
 	static eFrontend *getInstance() { return frontend; }
 
