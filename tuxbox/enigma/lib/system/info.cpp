@@ -167,7 +167,7 @@ eSystemInfo::eSystemInfo()
 					alphaincrement=25;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 					canshutdown=0;
-					canrecordts = 1;
+					canrecordts=0;
 					hwtype = DM500;
 					break;
 				case 9:
