@@ -174,6 +174,7 @@ void eZap::init_eZap(int argc, char **argv)
 #ifndef DISABLE_DREAMBOX_RC
 	switch( eSystemInfo::getInstance()->getHwType() )
 	{
+		case eSystemInfo::DM600PVR:
 		case eSystemInfo::DM7000:
 		case eSystemInfo::DM7020:
 			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdm7000.xml") )

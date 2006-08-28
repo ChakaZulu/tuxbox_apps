@@ -109,6 +109,7 @@ eSystemInfo::eSystemInfo()
 	{
 		case 5 ... 7:
 		case 9:
+		case 11:
 			manufactstr="Dream-Multimedia-TV";
 			helpstr="dreambox";
 			canupdateTransponder=haskeyboard=1;
@@ -166,6 +167,7 @@ eSystemInfo::eSystemInfo()
 					alphaincrement=25;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 					canshutdown=0;
+					canrecordts = 1;
 					hwtype = DM500;
 					break;
 				case 9:
@@ -187,6 +189,16 @@ eSystemInfo::eSystemInfo()
 						close(fd);
 					}
 					hwtype = DM7020;
+					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
+					break;
+				}
+				case 11:
+				{
+					midstr="11";
+					modelstr="DM600PVR";
+					cpustr="STBx25xx, 252MHz";
+					hashdd = canrecordts = 1;
+					hwtype = DM600PVR;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 					break;
 				}
