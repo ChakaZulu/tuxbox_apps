@@ -9,13 +9,12 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 
 AC_ARG_WITH(boxtype,
-	[  --with-boxtype=NAME box type [[dbox2,dm7000,dm500,dm56x0,...]]],
+	[  --with-boxtype=NAME box type [[dbox2,dm7000,dm500,dm56x0,dm600pvr...]]],
 	[BOXTYPE="$withval"],[BOXTYPE="dbox2"])
 	
 AC_SUBST(BOXTYPE)
 AM_CONDITIONAL(BOXTYPE_DBOX2, test "$BOXTYPE" = "dbox2")
 AM_CONDITIONAL(BOXTYPE_DREAMBOX, test "$BOXTYPE" != "dbox2")
-
 
 AC_ARG_WITH(webif,
 	[  --with-webif=NAME webif type [[standard,expert,...]]],
@@ -92,7 +91,7 @@ else
 fi
 
 if test "$BOXTYPE" = "dbox2" ; then
-	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DENABLE_FLASHTOOL -DENABLE_PRIVATE_EPG"
+	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DDISABLE_DREAMBOX_RC -DDISABLE_CI -DENABLE_FLASHTOOL -DENABLE_PRIVATE_EPG"
 else
 	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DDISABLE_LIRC -DENABLE_KEYBOARD"
 fi
@@ -127,6 +126,11 @@ fi
 
 if test "$BOXTYPE" = "dm56x0" ; then
 	CPPFLAGS="$CPPFLAGS -DENABLE_RFMOD"
+elif test "$BOXTYPE" = "dm500" ; then
+	CPPFLAGS="$CPPFLAGS -DDISABLE_CI -DDISABLE_LCD"
+elif test "$BOXTYPE" = "dm600pvr" ; then
+	TUXBOX_APPS_LIB_PKGCONFIG(NET,tuxbox-net)
+	CPPFLAGS="$CPPFLAGS -DDISABLE_LCD -DDISABLE_CI -DUSE_IFUPDOWN $NET_CFLAGS"	
 elif test "$BOXTYPE" = "dm7020" ; then
 	TUXBOX_APPS_LIB_PKGCONFIG(NET,tuxbox-net)
 	CPPFLAGS="$CPPFLAGS -DENABLE_RFMOD -DUSE_IFUPDOWN $NET_CFLAGS"

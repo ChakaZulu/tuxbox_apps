@@ -1,3 +1,4 @@
+#ifndef DISABLE_CI
 #include <lib/dvb/dvbci.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/si.h>
@@ -1393,3 +1394,4 @@ void eDVBCI::poll()
 		sendTPDU(0xA0,0,1,0);
 }
 
+#endif
