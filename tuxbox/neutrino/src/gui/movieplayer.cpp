@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.131 2006/08/28 00:27:58 guenther Exp $
+  $Id: movieplayer.cpp,v 1.132 2006/08/29 19:34:42 houdini Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -2686,8 +2686,8 @@ if(g_settings.streaming_use_buffer)
 			//-- analyze TS file (set apid/vpid/ac3, filesize, nSegsMax, ... in --
 			//-- ctx) on leave, read position of file will be set to start pos.  -- 
 			mp_analyze(ctx);
-        	//-- audio track may be selected --
-        	mp_selectAudio(ctx);
+			//-- audio track may be selected --
+			mp_selectAudio(ctx);
 }
 else
 {
@@ -2696,8 +2696,8 @@ else
 
 			//-- analyze TS file (set apid/vpid/ac3 in ctx) --
 			mp_analyze(ctx);
-        	//-- audio track may be selected --
-        	mp_selectAudio(ctx);
+			//-- audio track may be selected --
+			mp_selectAudio(ctx);
 
 			//-- get file size --
 			ctx->fileSize = lseek (ctx->inFd, 0L, SEEK_END);
@@ -2720,7 +2720,7 @@ else
 		
 if(!g_settings.streaming_use_buffer)
 {
-mp_bufferReset(ctx);
+	mp_bufferReset(ctx);
 }
 
 		//-- aspect ratio init --
@@ -2736,7 +2736,7 @@ if(g_settings.streaming_use_buffer)
 		//-- lcd stuff --
 		int cPercent   = 0;
 		int lPercent   = -1;
-		int lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]; 
+		lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME];
 		
 		//== (II) player loop: consists of "writer" in this thread and   ==
 		//== "reader" in an extra thread encapsulated by a queue object, ==
@@ -2837,7 +2837,7 @@ else
 			write(ctx->dvr, ctx->tmpBuf, rd);
 		}
 }
-        
+
 		//-- restore original lcd settings --			
 		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=lcdSetting;
 		
@@ -4092,7 +4092,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.131 $");
+	helpbox.addLine("Version: $Revision: 1.132 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4114,7 +4114,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.131 $");
+	helpbox.addLine("Version: $Revision: 1.132 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
