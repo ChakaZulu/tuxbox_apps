@@ -10,7 +10,7 @@ AC_PROG_RANLIB
 
 AC_ARG_WITH(boxtype,
 	[  --with-boxtype=NAME box type [[dbox2,dm7000,dm500,dm56x0,dm600pvr...]]],
-	[BOXTYPE="dm600pvr"],[BOXTYPE="dbox2"])
+	[BOXTYPE="$withval"],[BOXTYPE="dbox2"])
 	
 AC_SUBST(BOXTYPE)
 AM_CONDITIONAL(BOXTYPE_DBOX2, test "$BOXTYPE" = "dbox2")
