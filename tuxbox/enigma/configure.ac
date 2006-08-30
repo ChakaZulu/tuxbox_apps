@@ -10,7 +10,7 @@ AC_PROG_RANLIB
 
 AC_ARG_WITH(boxtype,
 	[  --with-boxtype=NAME box type [[dbox2,dm7000,dm500,dm56x0,dm600pvr...]]],
-	[BOXTYPE="$withval"],[BOXTYPE="dbox2"])
+	[BOXTYPE="dm600pvr"],[BOXTYPE="dbox2"])
 	
 AC_SUBST(BOXTYPE)
 AM_CONDITIONAL(BOXTYPE_DBOX2, test "$BOXTYPE" = "dbox2")
@@ -93,7 +93,7 @@ fi
 if test "$BOXTYPE" = "dbox2" ; then
 	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DDISABLE_DREAMBOX_RC -DDISABLE_CI -DENABLE_FLASHTOOL -DENABLE_PRIVATE_EPG"
 else
-	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DDISABLE_LIRC -DENABLE_KEYBOARD"
+	CPPFLAGS="$CPPFLAGS -fno-exceptions -fno-rtti -D_REENTRANT -DHAVE_DREAMBOX_HARDWARE -DDISABLE_LIRC -DENABLE_KEYBOARD"
 fi
 
 if test "$WEBIF" = "expert" ; then

@@ -37,7 +37,7 @@ eAutoInitP0<enigmaMainmenuActions> i_mainmenuActions(eAutoInitNumbers::actions, 
 void eMainMenu::setActive(int i)
 {
 	int count = MENU_ENTRIES;
-	if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
+	if (!eSystemInfo::getInstance()->hasScartSwitch())
 		--count;
 	for (int a=0; a<7; a++)
 	{
@@ -105,9 +105,9 @@ eMainMenu::eMainMenu()
 	: eWidget(0, 1),
 	wnd(_("Mainmenu"),
 #ifndef DISABLE_FILE	
-	11,
+	eSystemInfo::getInstance()->hasScartSwitch()?11:10,
 #else
-	eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500?7:8,
+	eSystemInfo::getInstance()->hasScartSwitch()?8:7,
 #endif
 	350),
 	wndShowTimer(eApp)
@@ -163,7 +163,7 @@ eMainMenu::eMainMenu()
 		};
 
 		int count = MENU_ENTRIES;
-		if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
+		if (!eSystemInfo::getInstance()->hasScartSwitch())
 			--count;
 		for (int i=0; i<count; i++)
 		{
@@ -186,7 +186,7 @@ eMainMenu::eMainMenu()
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Radio mode"), eString().sprintf("(%d) %s", ++entry, _("Radio mode")) ))->selected, eMainMenu::sel_radio);
 #ifndef DISABLE_FILE
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("File mode"), eString().sprintf("(%d) %s", ++entry, _("File mode")) ))->selected, eMainMenu::sel_file);
-		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500 )
+		if ( eSystemInfo::getInstance()->hasScartSwitch() )
 			CONNECT((new eListBoxEntryMenu(wnd.getList(), _("VCR"), eString().sprintf("(%d) %s", ++entry, _("VCR")) ))->selected, eMainMenu::sel_vcr);
 		new eListBoxEntryMenuSeparator(wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Timer"), eString().sprintf("(%d) %s", ++entry, _("Timer")) ))->selected, eMainMenu::sel_timer);
@@ -196,7 +196,7 @@ eMainMenu::eMainMenu()
 		new eListBoxEntryMenuSeparator(wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Shutdown"), eString().sprintf("(%d) %s", ++entry, _("Shutdown")) ))->selected, eMainMenu::sel_quit);
 #else
-		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500 )
+		if ( eSystemInfo::getInstance()->hasScartSwitch() )
 			CONNECT((new eListBoxEntryMenu(wnd.getList(), _("VCR"), eString().sprintf("(%d) %s", ++entry, _("VCR")) ))->selected, eMainMenu::sel_vcr);
 		new eListBoxEntryMenuSeparator(wnd.getList(), eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		CONNECT((new eListBoxEntryMenu(wnd.getList(), _("Timer"), eString().sprintf("(%d) %s", ++entry, _("Timer")) ))->selected, eMainMenu::sel_timer);
@@ -344,7 +344,7 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 		case eWidgetEvent::evtAction:
 		{
 			int count = MENU_ENTRIES;
-			if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
+			if (!eSystemInfo::getInstance()->hasScartSwitch())
 				--count;
 			if (event.action == &i_mainmenuActions->close)
 				close(0);

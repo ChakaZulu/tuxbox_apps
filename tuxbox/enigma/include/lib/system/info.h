@@ -21,7 +21,7 @@ class eSystemInfo
 	int hashdd, hasci, hasrfmod, haslcd, hasnetwork, haskeyboard, 
 		canmeasurelnbcurrent, hwtype, fetype, hasnegfilter, 
 		canupdateTransponder, canshutdown, canrecordts, defaulttimertype, 
-		alphaincrement, hasstandbywakeuptimer, cantimeshift;
+		alphaincrement, hasstandbywakeuptimer, cantimeshift, hasscartswitch;
 	std::set<int> caids;
 	const char *helpstr, *midstr, *modelstr, *manufactstr, *cpustr;
 	eString getInfo(const char *info, bool dreambox=false);
@@ -53,6 +53,7 @@ public:
 	int getFEType() { return fetype; }
 	int hasStandbyWakeupTimer() { return hasstandbywakeuptimer; }
 	int canTimeshift() { return cantimeshift; }
+	int hasScartSwitch() { return hasscartswitch; }
 	const std::set<int> &getCAIDs() { return caids; }
 };
 

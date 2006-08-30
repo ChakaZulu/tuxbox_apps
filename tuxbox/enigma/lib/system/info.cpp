@@ -22,6 +22,7 @@ eSystemInfo::eSystemInfo()
 	,haskeyboard(0) ,canmeasurelnbcurrent(0), hasnegfilter(0)
 	,canupdateTransponder(0), canshutdown(1), canrecordts(0)
 	,alphaincrement(10), hasstandbywakeuptimer(0), cantimeshift(0)
+	,hasscartswitch(1)
 {
 	instance=this;
 #if HAVE_DVB_API_VERSION == 3
@@ -105,6 +106,8 @@ eSystemInfo::eSystemInfo()
 	}
 #else
 	int mid = atoi(getInfo("mID").c_str());
+	if (mid == 7)
+		mid = 11;
 	switch (mid)
 	{
 		case 5 ... 7:
@@ -166,8 +169,7 @@ eSystemInfo::eSystemInfo()
 					modelstr="DM500";
 					alphaincrement=25;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
-					canshutdown=0;
-					canrecordts=0;
+					canshutdown=canrecordts=hasscartswitch=0;
 					hwtype = DM500;
 					break;
 				case 9:
@@ -198,6 +200,7 @@ eSystemInfo::eSystemInfo()
 					modelstr="DM600PVR";
 					cpustr="STBx25xx, 252MHz";
 					hashdd = canrecordts = 1;
+					hasscartswitch = 0;
 					hwtype = DM600PVR;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 					break;
