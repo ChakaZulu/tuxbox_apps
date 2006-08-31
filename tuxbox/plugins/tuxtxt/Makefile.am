@@ -4,7 +4,7 @@ if BOXTYPE_DREAMBOX
 AM_CPPFLAGS = \
 	@FREETYPE_CFLAGS@ \
 	-I$(top_srcdir)/include \
-	-I$(prefix)$(includedir)/tuxbox/tuxtxt 
+	-I$(includedir)/tuxbox/tuxtxt 
 
 tuxtxt_la_LIBADD = \
 	@FREETYPE_LIBS@ \
@@ -14,7 +14,7 @@ AM_CPPFLAGS = \
 	@TUXBOX_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
 	-I$(top_srcdir)/include \
-	-I$(prefix)$(includedir)/tuxbox/tuxtxt 
+	-I$(includedir)/tuxbox/tuxtxt 
 
 tuxtxt_la_LIBADD = \
 	@TUXBOX_LIBS@  \
