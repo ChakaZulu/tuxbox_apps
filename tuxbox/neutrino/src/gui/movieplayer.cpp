@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.132 2006/08/29 19:34:42 houdini Exp $
+  $Id: movieplayer.cpp,v 1.133 2006/09/01 21:33:45 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -289,11 +289,16 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		}
 	}
 
-	// set zapit in standby mode
     g_ZapitsetStandbyState = false; // 'Init State
-    if (g_settings.streaming_show_tv_in_browser == false)
-    {
-        g_ZapitsetStandbyState = true; // 'Init State
+    
+	// if filebrowser or moviebrowser playback we check if we should disable the tv (other modes might be added later)
+	if (g_settings.streaming_show_tv_in_browser == false ||
+    	    (actionKey != "tsmoviebrowser"   && 
+    	     actionKey != "tsplayback"       && 
+    	     actionKey != "tsplayback_pc"    ) ) 
+	{
+	    // set zapit in standby mode
+        g_ZapitsetStandbyState = true; 
     	g_Zapit->setStandby (true);
     }
 
@@ -2193,7 +2198,7 @@ static void mp_checkEvent(MP_CTX *ctx)
 		case CMoviePlayerGui::SOFTRESET:
 			g_playstate = CMoviePlayerGui::PLAY;
 			mp_bufferReset(ctx);
-			break;
+ 			break;
 
 		//-- resync A/V --
 		//----------------
@@ -2736,7 +2741,7 @@ if(g_settings.streaming_use_buffer)
 		//-- lcd stuff --
 		int cPercent   = 0;
 		int lPercent   = -1;
-		lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME];
+		lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]; 
 		
 		//== (II) player loop: consists of "writer" in this thread and   ==
 		//== "reader" in an extra thread encapsulated by a queue object, ==
@@ -3148,7 +3153,8 @@ void CMoviePlayerGui::PlayFile (int parental)
 #ifdef MOVIEBROWSER  			
 			if(isMovieBrowser == true)
 			{
-                if (g_settings.streaming_show_tv_in_browser == true && true == g_ZapitsetStandbyState)
+                if (g_settings.streaming_show_tv_in_browser == true && 
+                    g_ZapitsetStandbyState == true)
                 {
                     usleep(ZAPIT_STAND_BY_WAIT_US);
                     g_Zapit->setStandby (false);
@@ -3163,14 +3169,12 @@ void CMoviePlayerGui::PlayFile (int parental)
 	
 					if((file = moviebrowser->getSelectedFile()) != NULL)
 					{
-                        if (g_settings.streaming_show_tv_in_browser == true)
+                        if (g_settings.streaming_show_tv_in_browser == true &&
+                            g_ZapitsetStandbyState == false)
                         {
-                            if (false == g_ZapitsetStandbyState)
-                            {
                                 g_Zapit->setStandby (true);
                                 g_ZapitsetStandbyState = true;
                                 usleep(ZAPIT_STAND_BY_WAIT_US);
-                            }
                         }
                         
 						filename     = file->Name.c_str();
@@ -3189,8 +3193,15 @@ void CMoviePlayerGui::PlayFile (int parental)
 			else
 #endif /* MOVIEBROWSER */
 			{ // MOVIEBROWSER added
+                if (g_settings.streaming_show_tv_in_browser == true && 
+                    g_ZapitsetStandbyState == true)
+                {
+                    usleep(ZAPIT_STAND_BY_WAIT_US);
+                    g_Zapit->setStandby (false);
+                    g_ZapitsetStandbyState = false;
+                }
+
 				filebrowser->Filter = &tsfilefilter;
-	
 				//-- play selected file or ... --
 				if(filebrowser->exec(Path_local.c_str()))
 				{
@@ -3199,6 +3210,14 @@ void CMoviePlayerGui::PlayFile (int parental)
 	
 					if((file = filebrowser->getSelectedFile()) != NULL)
 					{
+                        if (g_settings.streaming_show_tv_in_browser == true &&
+                            g_ZapitsetStandbyState == false)
+                        {
+                                g_Zapit->setStandby (true);
+                                g_ZapitsetStandbyState = true;
+                                usleep(ZAPIT_STAND_BY_WAIT_US);
+                        }
+
 						filename     = file->Name.c_str();
 						sel_filename = file->getFileName();
 	
@@ -4035,7 +4054,6 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	pthread_join (rct, NULL);
 }
 
-
 // checks if AR has changed an sets cropping mode accordingly (only video mode auto)
 void checkAspectRatio (int vdec, bool init)
 {
@@ -4045,7 +4063,7 @@ void checkAspectRatio (int vdec, bool init)
 
 	// only necessary for auto mode, check each 5 sec. max
 	if(g_settings.video_Format != 0 || (!init && time(NULL) <= last_check+5))
-		return;
+        return;
 
 	if(init)
 	{
@@ -4092,7 +4110,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.132 $");
+	helpbox.addLine("Version: $Revision: 1.133 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4114,7 +4132,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.132 $");
+	helpbox.addLine("Version: $Revision: 1.133 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
