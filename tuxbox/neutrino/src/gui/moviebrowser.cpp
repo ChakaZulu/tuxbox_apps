@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: moviebrowser.cpp,v 1.8 2006/02/20 01:10:34 guenther Exp $
+	$Id: moviebrowser.cpp,v 1.9 2006/09/02 21:34:27 guenther Exp $
 
 	Kommentar:
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.9  2006/09/02 21:34:27  guenther
+	Movie info is now updated after movie is erased
+	
 	Revision 1.8  2006/02/20 01:10:34  guenther
 	- temporary parental lock updated - remove 1s debug prints in movieplayer- Delete file without rescan of movies- Crash if try to scroll in list with 2 movies only- UTF8XML to UTF8 conversion in preview- Last file selection recovered- use of standard folders adjustable in config- reload and remount option in config
 	
@@ -342,7 +345,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.8 2006/02/20 01:10:34 guenther Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.9 2006/09/02 21:34:27 guenther Exp $\r\n");
 	init();
 }
 
@@ -1889,8 +1892,8 @@ void CMovieBrowser::onDeleteFile(MI_MOVIE_INFO& movieSelectionHandler)
 			refreshBrowserList();
 			refreshLastPlayList();	
 			refreshLastRecordList();	
+            refreshMovieInfo();
 	    		
-			//loadMovies(); // //TODO we might remove the handle from the handle list only, to avoid reload .....
 			refresh();
 		}
     } 
@@ -3286,7 +3289,7 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, " Markierungsmenu ");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.8 $");
+	helpbox.addLine("MovieBrowser $Revision: 1.9 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
