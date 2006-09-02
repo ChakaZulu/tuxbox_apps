@@ -834,7 +834,7 @@ int ShowMsg2UTF(	const char * const Title,
 	
 	//TRACE("\r\n->ShowTextUTF %s\r\n",Text);
    	CMsgBox* msgBox = new CMsgBox(		Text, 
-   										g_Font[SNeutrinoSettings::FONT_TYPE_MENU], 
+                                           g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2],
    										mode, 
    										&position, 
    										Title,
