@@ -879,6 +879,10 @@ CMenuForwarderNonLocalized::CMenuForwarderNonLocalized(const char * const Text, 
 	the_text = Text;
 }
 
+CMenuForwarderNonLocalized::CMenuForwarderNonLocalized(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, const char * const ActionKey, neutrino_msg_t DirectKey, const char * const IconName) : CMenuForwarder(NONEXISTANT_LOCALE, Active, Option, Target, ActionKey, DirectKey, IconName)
+{
+    the_text = Text;
+}
 
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(const int Type, const neutrino_locale_t Text)
