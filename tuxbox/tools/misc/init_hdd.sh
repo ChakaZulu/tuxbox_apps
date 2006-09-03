@@ -7,6 +7,20 @@
 
 # Needless to say, this script will nuke all data on the disc.
 
+echo "This command will initialize you hard disk. It will irrevocably"
+echo "ERASE ALL DATA on the disk!! If this is what you want to do,"
+echo "enter 3.1415926 to continue."
+
+read ans
+if [ $ans = "3.1415926" ] ; then
+    echo Continuing...
+else
+    echo "Bye!"
+    exit 1
+fi
+
+umount /hdd
+
 HDD=/dev/ide/host0/bus0/target0/lun0
 
 # Create the partition label
@@ -35,9 +49,6 @@ if [ $? -ne 0 ] ; then
     echo "Partitioning failed, aborting"
     exit 1
 fi
-
-# Let the disc power down after 5 minutes of inactivity
-hdparm -S60 $HDD/disc
 
 # Initialize the swap partition
 # mkswap /dev/ide/host0/bus0/target0/lun0/part1
