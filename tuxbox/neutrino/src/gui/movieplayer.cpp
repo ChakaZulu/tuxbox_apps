@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.133 2006/09/01 21:33:45 guenther Exp $
+  $Id: movieplayer.cpp,v 1.134 2006/09/03 11:53:43 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -4054,43 +4054,53 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	pthread_join (rct, NULL);
 }
 
-// checks if AR has changed an sets cropping mode accordingly (only video mode auto)
 void checkAspectRatio (int vdec, bool init)
 {
 
-	static video_size_t size;
-	static time_t last_check=0;
+    static video_size_t size;
+    static time_t last_check=0;
 
-	// only necessary for auto mode, check each 5 sec. max
-	if(g_settings.video_Format != 0 || (!init && time(NULL) <= last_check+5))
+    // only necessary for auto mode, check each 5 sec. max
+    if(!init && time(NULL) <= last_check+5)
         return;
 
-	if(init)
-	{
-		if(ioctl(vdec, VIDEO_GET_SIZE, &size) < 0)
-			perror("[movieplayer.cpp] VIDEO_GET_SIZE");
-		last_check=0;
-		return;
-	}
-	else
-	{
-		video_size_t new_size;
-		if(ioctl(vdec, VIDEO_GET_SIZE, &new_size) < 0)
-			perror("[movieplayer.cpp] VIDEO_GET_SIZE");
-		if(size.aspect_ratio != new_size.aspect_ratio)
-		{
-			printf("[movieplayer.cpp] AR change detected in auto mode, adjusting display format\n");
-			video_displayformat_t vdt;
-			if(new_size.aspect_ratio == VIDEO_FORMAT_4_3)
-				vdt = VIDEO_LETTER_BOX;
-			else
-				vdt = VIDEO_CENTER_CUT_OUT;
-			if(ioctl(vdec, VIDEO_SET_DISPLAY_FORMAT, vdt))
-				perror("[movieplayer.cpp] VIDEO_SET_DISPLAY_FORMAT");
-			memcpy(&size, &new_size, sizeof(size));
-		}
-		last_check=time(NULL);
-	}
+    if(g_settings.video_Format == 1 && currentac3 == true) // Display format 16:9
+    {
+        // Workaround for 16:9/AC3/PAUSE/PLAY problem
+        // AVIA does reset on Jump/pause with Ac3 and 16:9 Display.It loose the display format information, which is set to default (4:3)
+        // We set the display format to the correct value cyclic
+        // This issue might be better fixed in the AVIA itself ... sometime   ... if somebody knows how ...
+        ioctl(vdec, VIDEO_SET_DISPLAY_FORMAT, VIDEO_CENTER_CUT_OUT);
+        last_check=time(NULL);
+    }
+    else if(g_settings.video_Format == 0 )//Display format auto
+    {
+        if(init)
+        {
+            if(ioctl(vdec, VIDEO_GET_SIZE, &size) < 0)
+                perror("[movieplayer.cpp] VIDEO_GET_SIZE");
+            last_check=0;
+        }
+        else
+        {
+            video_size_t new_size;
+            if(ioctl(vdec, VIDEO_GET_SIZE, &new_size) < 0)
+                perror("[movieplayer.cpp] VIDEO_GET_SIZE");
+            if(size.aspect_ratio != new_size.aspect_ratio)
+            {
+                printf("[movieplayer.cpp] AR change detected in auto mode, adjusting display format\n");
+                video_displayformat_t vdt;
+                if(new_size.aspect_ratio == VIDEO_FORMAT_4_3)
+                    vdt = VIDEO_LETTER_BOX;
+                else
+                    vdt = VIDEO_CENTER_CUT_OUT;
+                if(ioctl(vdec, VIDEO_SET_DISPLAY_FORMAT, vdt))
+                    perror("[movieplayer.cpp] VIDEO_SET_DISPLAY_FORMAT");
+                memcpy(&size, &new_size, sizeof(size));
+            }
+            last_check=time(NULL);
+        }
+    }
 }
 #endif
 
@@ -4110,7 +4120,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.133 $");
+	helpbox.addLine("Version: $Revision: 1.134 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4132,7 +4142,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.133 $");
+	helpbox.addLine("Version: $Revision: 1.134 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
