@@ -45,6 +45,11 @@ CStateHandler*	CStateHandler::CreateHandlerByName( std::string _name )
 	return NULL;
 }
 
+CStateHandler::CStateHandler() : subhandler( 0 ), remove( false )
+{
+};
+
+
 void CStateHandler::FreeHandler( CStateHandler* _handler )
 {
 // 	std::list<CStateHandler*>::iterator	i = handlers.begin();

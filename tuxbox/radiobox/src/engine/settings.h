@@ -44,6 +44,7 @@ public:
 
 	std::string	playlist_root;
 	std::string library_root;
+	std::string handler;
 
 	enum PLAYORDER 
 	{

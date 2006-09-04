@@ -30,10 +30,7 @@ protected:
 public:
 	virtual std::string		GetName( ) = 0;
 
-						CStateHandler() : subhandler( 0 ), remove( false )
-						{
-							
-						};
+						CStateHandler();
 
 	virtual 	 		~CStateHandler() {};
 	virtual void		Show() = 0;

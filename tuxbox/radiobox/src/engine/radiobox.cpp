@@ -134,20 +134,25 @@ void CRadioBox::Run()
 
 		if( tmp )
 		{
-			std::cout << "push to stack handler [" << statehandler << "]" << std::endl;
+			std::cout << "push to stack handler [" << statehandler->GetName() << "]" << std::endl;
 			PushHandler( statehandler );
 			statehandler = tmp;
-			std::cout << "new handler [" << statehandler << "]" << std::endl;
+			g_settings.handler = statehandler->GetName();
+			g_settings.Save();
+			std::cout << "new handler [" << statehandler->GetName() << "]" << std::endl;
 		}
 
 		if( statehandler != menu && statehandler->HasToBeRemoved() )
 		{
-			std::cout << "remove handler [" << statehandler << "]" << std::endl;
+			std::cout << "remove handler [" << statehandler->GetName() << "]" << std::endl;
 			CStateHandler::FreeHandler( statehandler );
 
 			statehandler = PopHandler();
 
-			std::cout << "get last handler handler [" << statehandler << "]" << std::endl;
+			g_settings.handler = statehandler->GetName();
+			g_settings.Save();
+
+			std::cout << "get last handler handler [" << statehandler->GetName() << "]" << std::endl;
 
 			if( NULL == statehandler )
 			{

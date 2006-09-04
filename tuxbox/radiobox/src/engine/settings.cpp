@@ -30,6 +30,7 @@ void CRadioboxSettings::Load( )
 
 	playlist_root = configfile.getString( "playlist_root", RADIOBOX_PLAYLISTROOT );
 	library_root = configfile.getString( "library_root", RADIOBOX_LIBRARYROOT );
+	handler = configfile.getString( "handler", RADIOBOX_LIBRARYROOT );
 
 }
 
@@ -40,6 +41,7 @@ void CRadioboxSettings::Save(  )
 	configfile.setInt32( "playorder", int( playorder ) );
 	configfile.setString( "playlist_root", playlist_root );
 	configfile.setString( "library_root", library_root );
+	configfile.setString( "handler", handler );
 
 	configfile.saveConfig( RADIOBOX_CONFIG );
 }
