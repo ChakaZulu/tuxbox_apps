@@ -19,7 +19,7 @@
 #include <global.h>
 #include <radiobox.h>
 #include <playlist.h>
-#include <statehandler.h>
+#include <menu.h>
 #include <lcdd.h>
 #include <rbxinput.h>
 
@@ -90,9 +90,6 @@ CRadioBox::CRadioBox() : working( true )
 {
 	this->audioplayer = CAudioPlayer::getInstance();
 	this->audioplayer->init();
-	
-	statehandler = new CMainMenu();
-
 }
 
 void CRadioBox::Run()
@@ -112,6 +109,10 @@ void CRadioBox::Run()
 	std::cout << "run" << std::endl;
 
 	int divider = 0;
+
+	CMenu* menu = new CMenu();
+	menu->LoadMenu();
+	statehandler = (CStateHandler*)menu;
 
 	while( working )
 	{
@@ -139,10 +140,10 @@ void CRadioBox::Run()
 			std::cout << "new handler [" << statehandler << "]" << std::endl;
 		}
 
-		if( statehandler->HasToBeRemoved() )
+		if( statehandler != menu && statehandler->HasToBeRemoved() )
 		{
 			std::cout << "remove handler [" << statehandler << "]" << std::endl;
-			delete statehandler;
+			CStateHandler::FreeHandler( statehandler );
 
 			statehandler = PopHandler();
 
@@ -171,7 +172,8 @@ void CRadioBox::HandleKeys()
 		working = false;
 	}
 
-	statehandler->HandleKeys( key, keypressed );
+	if( key != CRBXInput::NOKEY )
+		statehandler->HandleKeys( key, keypressed );
 
 }
 

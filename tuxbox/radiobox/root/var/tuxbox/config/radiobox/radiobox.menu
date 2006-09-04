@@ -1,0 +1,7 @@
+CSelectLocation	Media
+CMenu	Setup
+	CSetupPlayOrder	Play order
+	CMenu	Updates
+		CSetupReadFlash	Read flash
+		CSetupWriteFlash	Write Flash
+	

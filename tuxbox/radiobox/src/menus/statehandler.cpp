@@ -16,7 +16,7 @@
 #define RADIOBOX_CPP
 #include <global.h>
 #include <statehandler.h>
-
+#include <menu.h>
 #include <radiobox.h>
 #include <playlist.h>
 #include <statehandler.h>
@@ -29,56 +29,50 @@ std::list<CStateHandler*> CStateHandler::handlers;
 
 /// register all handlers here 
 
-struct __sthinit
+CStateHandler*	CStateHandler::CreateHandlerByName( std::string _name )
 {
-	__sthinit()
-	{
-		CStateHandler* _tmp;
-		_tmp = new CSelectLocation();     CStateHandler::RegisterSTH( _tmp );
-		_tmp = new CSetupMenu();          CStateHandler::RegisterSTH( _tmp );
-		_tmp = new CMainMenu();           CStateHandler::RegisterSTH( _tmp );
-		_tmp = new CSetupPlayOrder();     CStateHandler::RegisterSTH( _tmp );
-		_tmp = new CSetupSoftware();      CStateHandler::RegisterSTH( _tmp );
-		_tmp = new CSetupReadFlash();     CStateHandler::RegisterSTH( _tmp );
-		_tmp = new CSetupWriteFlash();    CStateHandler::RegisterSTH( _tmp );
-		_tmp = new CMountSetup();         CStateHandler::RegisterSTH( _tmp );
-	}
-} sthinit;
+	std::cout << DBGINFO << _name << std::endl;
 
-void CStateHandler::RegisterSTH( CStateHandler* _handler )
-{
-	if( NULL != _handler )
-	{
-		handlers.push_back( _handler );
-	}
-}
-
-CStateHandler*	CStateHandler::GetHandlerByName( std::string _name )
-{
-	std::list<CStateHandler*>::iterator	i = handlers.begin();
-
-	for( ; i != handlers.end(); i++ )
-	{
-		if( _name == (*i)->GetName() )
-		{
-			return (*i);
-		}
-
-	}
+	if( _name == "CSelectLocation" ) return new CSelectLocation();
+	if( _name == "CSetupMenu" ) return new CSetupMenu();
+	if( _name == CMENU ) return new CMenu();
+	if( _name == "CSetupPlayOrder" ) return new CSetupPlayOrder();
+	if( _name == "CSetupSoftware" ) return new CSetupSoftware();
+	if( _name == "CSetupReadFlash" ) return new CSetupReadFlash();
+	if( _name == "CSetupWriteFlash" ) return new CSetupWriteFlash();
+	if( _name == "CMountSetup" ) return new CMountSetup();
 
 	return NULL;
 }
 
+void CStateHandler::FreeHandler( CStateHandler* _handler )
+{
+// 	std::list<CStateHandler*>::iterator	i = handlers.begin();
+// 
+// 	for( ; i != handlers.end(); i++ )
+// 	{
+// 		std::cout << DBGINFO << "\t" << _handler << "," << (*i) << std::endl;
+// 
+// 		if( _handler == (*i) )
+// 		{
+// 			return ;
+// 		}
+// 	}
+	std::cout << DBGINFO << _handler << std::endl;
+	delete _handler;
+}
+
+
 void CStateHandler::DumpAllSTHNames()
 {
-	std::list<CStateHandler*>::iterator	i = handlers.begin();
-
-	std::cout << "Implemented state handlers:" << std::endl;
-
-	for( ; i != handlers.end(); i++ )
-	{
-		std::cout << "\t[" << (*i)->GetName() << "]" << std::endl;
-	}
+	std::cout << "[" << "CSelectLocation" << "]" << std::endl;
+	std::cout << "[" << "CSetupMenu" << "]" << std::endl;
+	std::cout << "[" << CMENU << "]" << std::endl;
+	std::cout << "[" << "CSetupPlayOrder" << "]" << std::endl;
+	std::cout << "[" << "CSetupSoftware" << "]" << std::endl;
+	std::cout << "[" << "CSetupReadFlash" << "]" << std::endl;
+	std::cout << "[" << "CSetupWriteFlash" << "]" << std::endl;
+	std::cout << "[" << "CMountSetup" << "]" << std::endl;
 }
 
 
@@ -430,8 +424,9 @@ void CPlayPLRandom::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 
 /**************************************************************/
 
-CSelectLocation::CSelectLocation()
+		CSelectLocation::CSelectLocation()
 {
+	
 	try
 	{
 		std::cout << "Load Locations" << std::endl;
@@ -582,7 +577,7 @@ CPlayList* CSelectLocation::GetPlayList( std::string _location )
 
 /**************************************************************/
 
-void CMenu::ResetMenu() 
+void CGenericMenu::ResetMenu() 
 { 
 	menu_top = 0; menu_selected = 0; 
 	CLCD::getInstance()->ClearMenu();
@@ -612,24 +607,6 @@ void CSelectLocation::Show()
 
 /**************************************************************/
 
-CMainMenu::CMainMenu()
-{
-	this->CanBeRemoved = false;
-	this->title = "Main Menu";
-	entries.push_back( "Media" );
-	entries.push_back( "Setup" );
-}
-
-void CMainMenu::DoAction( std::string _action )
-{
-	switch( sel )
-	{
-	case 0: this->subhandler = new CSelectLocation(); break;
-	case 1: this->subhandler = new CSetupMenu(); break;
-	}
-}
-
-/**************************************************************/
 void CStaticMenu::Show()
 {
 	unsigned int i;
@@ -654,11 +631,14 @@ void CStaticMenu::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 {
 	if( _pressed ) return; /* handle it only if key released is */
 
+	std::cout << DBGINFO << std::endl;
+
 	switch( _key )
 	{
 		case CRBXInput::SELECT:
 			{
 				sel = menu_top + menu_selected;
+				std::cout << DBGINFO << sel << "," << entries.size() << std::endl;
 				DoAction( entries[sel] );
 			}	
 			break;
@@ -669,6 +649,7 @@ void CStaticMenu::HandleKeys( CRBXInput::KEYS _key, bool _pressed )
 			menu_selected ++;
 			break;
 		case CRBXInput::MENU:
+//			Cleanup();
 			remove = CanBeRemoved;
 			break;
 		default:

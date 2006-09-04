@@ -26,7 +26,6 @@
 
 #include <playlist.h>
 #include "audioplay.h"
-
 #include <vector>
 #include <string>
 #include <list>
@@ -43,7 +42,6 @@ public:
 
 private:
 	bool working;	
-
 	CStateHandler* statehandler;
 	std::list<CStateHandler*> handlers;
 

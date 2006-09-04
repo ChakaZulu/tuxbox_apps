@@ -42,6 +42,7 @@ radiobox_SOURCES = \
 	engine/rbxinput.cpp \
 	menus/statehandler.cpp \
 	menus/mounter.cpp \
+	menus/menu.cpp \
 	audio/mp3dec.cpp \
 	audio/wavdec.cpp \
 	audio/cdrdec.cpp \

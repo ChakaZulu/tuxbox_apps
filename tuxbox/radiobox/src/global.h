@@ -9,4 +9,7 @@
 
 RADIOBOX_CPP  CRadioboxSettings	g_settings;
 
+#define DBGINFO "[" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << "]: "
+
+
 #endif /* __global_h__ */

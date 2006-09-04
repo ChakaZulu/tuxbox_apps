@@ -18,24 +18,26 @@ private:
 
 public:
 	
-	static	void RegisterSTH( CStateHandler* _handler );
-	static	CStateHandler*	GetHandlerByName( std::string _name );
+//	static	void RegisterSTH( CStateHandler* _handler );
+	static	CStateHandler*	CreateHandlerByName( std::string _name );
 	static	void DumpAllSTHNames();
+	static	void FreeHandler( CStateHandler* _handler );
 protected:
 
 	CStateHandler*		subhandler;
 	bool				remove;
 
 public:
+	virtual std::string		GetName( ) = 0;
 
-						CStateHandler() : subhandler( 0 ), remove( false ) 
+						CStateHandler() : subhandler( 0 ), remove( false )
 						{
 							
 						};
 
+	virtual 	 		~CStateHandler() {};
 	virtual void		Show() = 0;
 	virtual void		HandleKeys( CRBXInput::KEYS _key, bool _pressed ) = 0;
-	virtual std::string	GetName( ) = 0;
 
 	CStateHandler*		GetSubHandler() { CStateHandler* tmp = subhandler; subhandler = 0; return tmp; }
 	bool				HasToBeRemoved() { return remove; }
@@ -45,7 +47,7 @@ public:
 
 /*********************************************************/
 
-class CMenu
+class CGenericMenu
 {
 protected:
 
@@ -54,13 +56,13 @@ protected:
 
 	void ResetMenu(); 
 
-	CMenu() { ResetMenu(); }
+	CGenericMenu() { ResetMenu(); }
 };
 
 
 /*********************************************************/
 
-class CSelectPlayList : public CStateHandler, CMenu
+class CSelectPlayList : public CStateHandler, CGenericMenu
 {
 private:
 
@@ -78,7 +80,7 @@ public:
 
 /*********************************************************/
 
-class CSelectLocation : public CStateHandler, CMenu
+class CSelectLocation : public CStateHandler, CGenericMenu
 {
 private:
 
@@ -98,7 +100,7 @@ public:
 
 /*********************************************************/
 
-class CPlayListEntries : public CStateHandler, CMenu
+class CPlayListEntries : public CStateHandler, CGenericMenu
 {
 public:
 	CPlayListEntries( CPlayList* _playlist );
@@ -153,7 +155,7 @@ private:
 
 /*********************************************************/
 
-class CStaticMenu : public CStateHandler, CMenu
+class CStaticMenu : public CStateHandler, CGenericMenu
 {
 protected:
 
@@ -165,6 +167,7 @@ protected:
 	int				sel;
 
 	virtual void DoAction( std::string _action ) = 0;
+	virtual void Cleanup() {};
 
 public:
 	CStaticMenu() { CanBeRemoved = true; };
