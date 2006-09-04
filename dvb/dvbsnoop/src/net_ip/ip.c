@@ -1,5 +1,5 @@
 /*
-$Id: ip.c,v 1.1 2006/09/04 15:26:48 rasc Exp $
+$Id: ip.c,v 1.2 2006/09/04 20:25:18 rasc Exp $
 
 
  DVBSNOOP
@@ -21,6 +21,9 @@ $Id: ip.c,v 1.1 2006/09/04 15:26:48 rasc Exp $
 
 
 $Log: ip.c,v $
+Revision 1.2  2006/09/04 20:25:18  rasc
+no message
+
 Revision 1.1  2006/09/04 15:26:48  rasc
 New: DVB-Net  IP, UDP decoding (RFC791, RFC2460)  (Stéphane Esté-Gracias)
 
@@ -130,12 +133,12 @@ void   net_IP_data (int v, u_char *b, int len)
 
 	 // -- ICMP,  RFC 792
 	 if (protocol == 1) {
-		 // -- TODO
+		 // -- not needed via sat / dvb
 	 }
 
 	 // -- TCP,  RFC 793
 	 if (protocol == 6) {
-		 // -- TODO
+		 // -- not needed via sat / dvb
 	 }
 
 	 // -- UDP datagram,  RFC 768
@@ -163,7 +166,7 @@ void   net_IP_data (int v, u_char *b, int len)
 
 
 	 if (len > 0) {
-	 	 print_databytes (v, "Unknown Data (todo...)", b, len);
+	 	 print_databytes (v, "Unknown Data", b, len);
 		 b   += len;
 		 len -= len;
 	 }
