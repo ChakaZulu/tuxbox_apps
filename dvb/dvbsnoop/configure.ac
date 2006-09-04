@@ -1,4 +1,4 @@
-AC_INIT([dvbsnoop],[1.4.42],[rasc@users.sourceforge.net])
+AC_INIT([dvbsnoop],[1.4.46],[rasc@users.sourceforge.net])
 AM_INIT_AUTOMAKE([dist-bzip2 no-define])
 
 AC_PROG_CC
@@ -32,5 +32,6 @@ src/tvanytime/Makefile
 src/private/Makefile
 src/private/default/Makefile
 src/private/premiere.de/Makefile
+src/net_ip/Makefile
 ])
 

@@ -1,3 +1,4 @@
+ - New: IP datagramm decoding (RFC791, RFC2460) (Stéphane Esté-Gracias)
  - Fix: Special handling for TS null packets 
  - Fix: Premiere.de private descriptor name fix
  - Fix: DSM-CC Stuff, BIOP::Messages not yet decodeable

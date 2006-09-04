@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.19 2006/01/02 18:23:47 rasc Exp $
+$Id: datagram.c,v 1.20 2006/09/04 15:26:47 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: datagram.c,v 1.19 2006/01/02 18:23:47 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.20  2006/09/04 15:26:47  rasc
+New: DVB-Net  IP, UDP decoding (RFC791, RFC2460)  (Stéphane Esté-Gracias)
+
 Revision 1.19  2006/01/02 18:23:47  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -79,11 +82,11 @@ Revision 1.1  2003/10/19 22:22:58  rasc
 #include "dvbsnoop.h"
 #include "datagram.h"
 #include "llc_snap.h"
+#include "net_ip/ip.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
-
 
 
 
@@ -202,17 +205,18 @@ void section_DSMCC_DATAGRAM (u_char *b, int len)
  if (d.LLC_SNAP_flag == 0x01) {
 	 /*  ISO/IEC 8802-2   */
 	 int k;
-	 k = llc_snap (4,b);
+	 k = llc_snap (4, b);
  } else {
- 	 print_databytes (4, "IP_datagram_bytes", b, len1-4);
+ 	 net_IP_data (4, b, len1-4);
  }
+
  b += (len1 - 4);
-
-
-
  outBit_Sx_NL (5, (d.section_syntax_indicator)
 		   ?"CRC: " :"Checksum: ",	b,0,32);
 }
+
+
+
 
 
 
