@@ -106,8 +106,7 @@ eSystemInfo::eSystemInfo()
 	}
 #else
 	int mid = atoi(getInfo("mID").c_str());
-	if (mid == 7)
-		mid = 11;
+
 	switch (mid)
 	{
 		case 5 ... 7:
