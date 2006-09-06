@@ -163,6 +163,7 @@ CVCRControl::CDevice * recordingdevice = NULL;
 #define NEUTRINO_ENTER_STANDBY_SCRIPT   CONFIGDIR "/standby.on"
 #define NEUTRINO_LEAVE_STANDBY_SCRIPT   CONFIGDIR "/standby.off"
 #define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
+#define NEUTRINO_DEFAULTLOCALE_FILE     CONFIGDIR "/defaultlocale"
 #define NEUTRINO_PARENTALLOCKED_FILE    DATADIR   "/neutrino/.plocked"
 
 static void initGlobals(void)
@@ -3360,7 +3361,16 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CLocaleManager::loadLocale_ret_t loadLocale_ret = g_Locale->loadLocale(g_settings.language);
 	if (loadLocale_ret == CLocaleManager::NO_SUCH_LOCALE)
 	{
-		strcpy(g_settings.language, "deutsch");
+		strcpy(g_settings.language, "deutsch");	// Fallback if rest fails
+		FILE *f = fopen(NEUTRINO_DEFAULTLOCALE_FILE, "r");
+		if (f)
+		{
+			char loc[100];
+			int res = fscanf(f, "%s", loc);
+			if (res > 0)
+				strcpy(g_settings.language, loc);
+			fclose(f);		     
+		}
 		loadLocale_ret = g_Locale->loadLocale(g_settings.language);
 		display_language_selection = true;
 	}
