@@ -1,5 +1,5 @@
 /*
-$Id: ip.c,v 1.2 2006/09/04 20:25:18 rasc Exp $
+$Id: ip.c,v 1.3 2006/09/07 13:39:12 rasc Exp $
 
 
  DVBSNOOP
@@ -21,6 +21,9 @@ $Id: ip.c,v 1.2 2006/09/04 20:25:18 rasc Exp $
 
 
 $Log: ip.c,v $
+Revision 1.3  2006/09/07 13:39:12  rasc
+net string module
+
 Revision 1.2  2006/09/04 20:25:18  rasc
 no message
 
@@ -34,6 +37,7 @@ New: DVB-Net  IP, UDP decoding (RFC791, RFC2460)  (Stéphane Esté-Gracias)
 
 
 #include "dvbsnoop.h"
+#include "strings/net_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
@@ -75,7 +79,9 @@ void   net_IP_data (int v, u_char *b, int len)
 		 outBit_Sx_NL (v, "MF: ", b, 50, 1);
 		 outBit_Sx_NL (v, "Fragment offset: ", b, 51, 13);
 		 outBit_Sx_NL (v, "Time to live: ", b, 64, 8);
-		 protocol = outBit_Sx_NL (v, "Protocol: ", b, 72, 8);
+		 protocol = outBit_S2x_NL(v, "Protocol: ", b, 72, 8,
+			(char *(*)(u_long))netStr_RFC790_protocol_nr );
+
 		 outBit_Sx_NL (v, "Header checksum: ", b, 80, 16);
 
 		 ip = getBits (b, 0, 96, 32);
@@ -133,12 +139,30 @@ void   net_IP_data (int v, u_char *b, int len)
 
 	 // -- ICMP,  RFC 792
 	 if (protocol == 1) {
-		 // -- not needed via sat / dvb
+		 out_NL (v);
+		 out_nl (v,"ICMP_data: ");
+
+ 		 indent (+1);
+
+		 print_databytes (v, "Data", b, len);	// $$$ TODO
+		 b   += len
+		 len  = 0;
+
+		 indent (-1);
 	 }
 
 	 // -- TCP,  RFC 793
 	 if (protocol == 6) {
-		 // -- not needed via sat / dvb
+		 out_NL (v);
+		 out_nl (v,"TCP_data: ");
+
+ 		 indent (+1);
+
+		 print_databytes (v, "Data", b, len);	// $$$ TODO
+		 b   += len
+		 len  = 0;
+
+		 indent (-1);
 	 }
 
 	 // -- UDP datagram,  RFC 768
@@ -146,7 +170,7 @@ void   net_IP_data (int v, u_char *b, int len)
 		 int udp_header_len;
 
 		 out_NL (v);
-		 out_nl (v,"UDP_datagram_bytes: ");
+		 out_nl (v,"UDP_datagram: ");
 
  		 indent (+1);
 
@@ -166,7 +190,7 @@ void   net_IP_data (int v, u_char *b, int len)
 
 
 	 if (len > 0) {
-	 	 print_databytes (v, "Unknown Data", b, len);
+	 	 print_databytes (v, "Unknown Data / Padding", b, len);
 		 b   += len;
 		 len -= len;
 	 }
@@ -175,6 +199,13 @@ void   net_IP_data (int v, u_char *b, int len)
 	 indent (-1);
 
 }
+
+
+
+----
+
+outBit_S2x_NL(v,"use: ",			b, 16, 16,
+			(char *(*)(u_long))dsmccStrBIOP_TAP_Use );
 
 
 
