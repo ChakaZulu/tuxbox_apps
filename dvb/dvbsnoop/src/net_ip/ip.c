@@ -1,5 +1,5 @@
 /*
-$Id: ip.c,v 1.3 2006/09/07 13:39:12 rasc Exp $
+$Id: ip.c,v 1.4 2006/09/08 16:04:04 rasc Exp $
 
 
  DVBSNOOP
@@ -21,6 +21,9 @@ $Id: ip.c,v 1.3 2006/09/07 13:39:12 rasc Exp $
 
 
 $Log: ip.c,v $
+Revision 1.4  2006/09/08 16:04:04  rasc
+remember for next time: do commit last version.
+
 Revision 1.3  2006/09/07 13:39:12  rasc
 net string module
 
@@ -145,7 +148,7 @@ void   net_IP_data (int v, u_char *b, int len)
  		 indent (+1);
 
 		 print_databytes (v, "Data", b, len);	// $$$ TODO
-		 b   += len
+		 b   += len;
 		 len  = 0;
 
 		 indent (-1);
@@ -159,7 +162,7 @@ void   net_IP_data (int v, u_char *b, int len)
  		 indent (+1);
 
 		 print_databytes (v, "Data", b, len);	// $$$ TODO
-		 b   += len
+		 b   += len;
 		 len  = 0;
 
 		 indent (-1);
@@ -199,14 +202,6 @@ void   net_IP_data (int v, u_char *b, int len)
 	 indent (-1);
 
 }
-
-
-
-----
-
-outBit_S2x_NL(v,"use: ",			b, 16, 16,
-			(char *(*)(u_long))dsmccStrBIOP_TAP_Use );
-
 
 
 
