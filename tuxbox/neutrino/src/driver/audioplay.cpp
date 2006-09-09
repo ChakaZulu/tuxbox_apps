@@ -115,7 +115,9 @@ void* CAudioPlayer::PlayThread( void* dummy )
 
 bool CAudioPlayer::play(const CAudiofile* file, const bool highPrio)
 {
-	stop();
+	if (state != CBaseDec::STOP)
+		stop();
+
 	getInstance()->clearFileData();
 
 	/* + transfer information from CAudiofile to member variable,
