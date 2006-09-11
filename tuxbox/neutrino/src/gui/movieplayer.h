@@ -47,8 +47,8 @@
 #endif /* MOVIEBROWSER */
 
 extern "C" {
-           	#include <driver/ringbuffer.h>
-}           	
+               #include <driver/ringbuffer.h>
+}
 #include <stdio.h>
 
 #include <string>
@@ -57,63 +57,64 @@ extern "C" {
 class CMoviePlayerGui : public CMenuTarget
 {
  public:
-	enum state
-		{
-		    STOPPED     =  0,
-		    PREPARING   =  1,
-		    STREAMERROR =  2,
-		    PLAY        =  3,
-		    PAUSE       =  4,
-		    FF          =  5,
-		    REW         =  6,
-		    RESYNC      =  7,
-		    JF          =  9,
-		    JB          = 10,
-			SKIP        = 11,
-			AUDIOSELECT = 12,
-		    ITEMSELECT  = 13,
-		    SOFTRESET   = 99
-		};
+    enum state
+        {
+            STOPPED     =  0,
+            PREPARING   =  1,
+            STREAMERROR =  2,
+            PLAY        =  3,
+            PAUSE       =  4,
+            FF          =  5,
+            REW         =  6,
+            RESYNC      =  7,
+            JPOS        =  8, // jump to absolute position
+            JF          =  9,
+            JB          = 10,
+            SKIP        = 11,
+            AUDIOSELECT = 12,
+            ITEMSELECT  = 13,
+            SOFTRESET   = 99
+        };
 
  private:
         static int     lastParental;
-        
-	pthread_t      rct;
-	CFrameBuffer * frameBuffer;
-	int            m_LastMode;	
-	const char     *filename;
 
-	std::string Path_local;
-	std::string Path_vlc;
-	std::string Path_vlc_settings;
+    pthread_t      rct;
+    CFrameBuffer * frameBuffer;
+    int            m_LastMode;
+    const char     *filename;
 
-	CFileBrowser * filebrowser;
-#ifdef MOVIEBROWSER  			
-	CMovieBrowser* moviebrowser;
+    std::string Path_local;
+    std::string Path_vlc;
+    std::string Path_vlc_settings;
+
+    CFileBrowser * filebrowser;
+#ifdef MOVIEBROWSER
+    CMovieBrowser* moviebrowser;
 #endif /* MOVIEBROWSER */
-	
-	CBookmarkManager * bookmarkmanager;
 
-	void PlayStream(int streamtype);
-	void PlayFile(int parental=0);
-	void ParentalEntrance(void);
+    CBookmarkManager * bookmarkmanager;
 
-	CFileFilter tsfilefilter;
-	CFileFilter vlcfilefilter;
-	void showHelpTS(void);
-	void showHelpVLC(void);
+    void PlayStream(int streamtype);
+    void PlayFile(int parental=0);
+    void ParentalEntrance(void);
+
+    CFileFilter tsfilefilter;
+    CFileFilter vlcfilefilter;
+    void showHelpTS(void);
+    void showHelpVLC(void);
 
  public:
-	CMoviePlayerGui();
-	~CMoviePlayerGui();
-	int exec(CMenuTarget* parent, const std::string & actionKey);
+    CMoviePlayerGui();
+    ~CMoviePlayerGui();
+    int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 
 class CAPIDSelectExec : public CMenuTarget
 {
-	public:
-		int exec(CMenuTarget* parent, const std::string & actionKey);
+    public:
+        int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
 #endif
