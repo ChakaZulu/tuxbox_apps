@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.6 2006/02/20 01:10:35 guenther Exp $
+	$Id: movieinfo.cpp,v 1.7 2006/09/11 21:11:35 guenther Exp $
 
 	Kommentar:
 
@@ -305,6 +305,9 @@ bool CMovieInfo::loadMovieInfo( MI_MOVIE_INFO* movie_info, CFile* file )
 #endif /* XMLTREE_LIB */
 	    } 
 	}
+    if(movie_info->productionDate >50 && movie_info->productionDate <200)// backwardcompaibility
+        movie_info->productionDate += 1900;
+
 	return (result);
 }	
 
@@ -492,10 +495,6 @@ void CMovieInfo::showMovieInfo(MI_MOVIE_INFO& movie_info)
  		date_tm = localtime(&movie_info.file.Time);
 		snprintf(date_char, 12,"%02d.%02d.%04d",date_tm->tm_mday,date_tm->tm_mon+1,date_tm->tm_year +1900);
     	print_buffer += date_char; 
-    print_buffer += "\n" ; 
-   	print_buffer += g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_PATH);
-      	print_buffer += ": "; 
-    	print_buffer += movie_info.file.Name; 
       if(movie_info.file.Size != 0 )
     {
  		print_buffer += "\n"; 
@@ -504,6 +503,10 @@ void CMovieInfo::showMovieInfo(MI_MOVIE_INFO& movie_info)
  	 	snprintf(date_char, 12,"%4llu",movie_info.file.Size>>20);
 		print_buffer += date_char; 
    }
+    print_buffer += "\n" ;
+        print_buffer += g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_PATH);
+          print_buffer += ": ";
+        print_buffer += movie_info.file.Name;
  
      ShowMsg2UTF( 	movie_info.epgTitle.empty()? movie_info.file.getFileName().c_str() : movie_info.epgTitle.c_str() , 
 					print_buffer.c_str(), 

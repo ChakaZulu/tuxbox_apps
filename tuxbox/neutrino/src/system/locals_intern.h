@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.77 2006/08/28 00:27:57 guenther Exp $
+ * $Id: locals_intern.h,v 1.78 2006/09/11 21:11:35 guenther Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -574,6 +574,29 @@ const char * locale_real_names[] =
 	"miscsettings.tuxtxt_cache",
 	"miscsettings.virtual_zap_mode",
 	"motorcontrol.head",
+    "moviebrowser.option_browser",
+    "moviebrowser.book_clear_all",
+    "moviebrowser.menu_save",
+    "moviebrowser.menu_save_all",
+    "moviebrowser.info_head_update" ,
+    "moviebrowser.update_if_dest_empty_only",
+    "moviebrowser.serie_auto_create",
+    "moviebrowser.load_default",
+    "moviebrowser.browser_row_head",
+    "moviebrowser.browser_row_nr",
+    "moviebrowser.browser_row_item",
+    "moviebrowser.browser_row_width",
+    "moviebrowser.reload_at_start",
+    "moviebrowser.remount_at_start",
+    "moviebrowser.dir_head",
+    "moviebrowser.dir",
+    "moviebrowser.use_dir",
+    "moviebrowser.use_rec_dir",
+    "moviebrowser.use_movie_dir",
+    "moviebrowser.hide_series",
+    "moviebrowser.last_record_max_items",
+    "moviebrowser.last_play_max_items",
+    "moviebrowser.browser_frame_high",
 	"moviebrowser.book_head",
 	"moviebrowser.book_lastmoviestop",
 	"moviebrowser.book_movieend",

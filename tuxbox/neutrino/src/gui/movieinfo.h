@@ -146,12 +146,12 @@ typedef struct
 
 	time_t dateOfLastPlay; 		// last play date of movie in seconds since 1970
 	char dirItNr;  				// handle for quick directory path access only, this is not saved in xml, might be used by the owner of the movie info struct
-    char genreMajor;			// see showEPG class for more info, usually filled by EPG			
+    int  genreMajor;            // see showEPG class for more info, usually filled by EPG
     char genreMinor;			// genreMinor not used so far			
-	char length;				// movie length in minutes, usually filled by EPG
-	char quality; 				// user classification (3 stars: classics, 2 stars: very good, 1 star: good, 0 stars: OK)
-	char productionDate; 		// user defined Country (not from EPG yet, but might be possible)
-	char parentalLockAge;		// used for age rating(0:never,6,12,16,18 years,99:always), usually filled by EPG (if available)
+    int  length;                // movie length in minutes, usually filled by EPG
+    int  quality;                 // user classification (3 stars: classics, 2 stars: very good, 1 star: good, 0 stars: OK)
+    int  productionDate;         // user defined Country (not from EPG yet, but might be possible)
+    int  parentalLockAge;        // used for age rating(0:never,6,12,16,18 years,99:always), usually filled by EPG (if available)
 	char format;				// currently not used
 	char audio;					// currently not used
 	MI_MOVIE_BOOKMARKS bookmarks;	// bookmark collecton  for this movie

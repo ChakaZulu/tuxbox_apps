@@ -547,6 +547,29 @@ miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.tuxtxt_cache Videotext zwischenspeichern
 miscsettings.virtual_zap_mode Virtual zap bei Infobar
 motorcontrol.head Motor-Setup
+moviebrowser.option_browser Anzeigeoptionen
+moviebrowser.book_clear_all Lösche alle
+moviebrowser.menu_save Veränderungen speichern
+moviebrowser.menu_save_all Starte Übernahme in allen sichtbaren Filminfos
+moviebrowser.info_head_update Starte Inhalte in allen sichtbaren Filminfos speichern
+moviebrowser.update_if_dest_empty_only Übernehme nur wenn Ziel leer
+moviebrowser.serie_auto_create Serien automatisch zuordnen
+moviebrowser.load_default Lade Voreinstellung
+moviebrowser.browser_row_head Spalten Einstellungen
+moviebrowser.browser_row_nr Anzahl Spalten
+moviebrowser.browser_row_item Spalteninfo
+moviebrowser.browser_row_width Spaltenbreite [Punkte]
+moviebrowser.reload_at_start Filminfos neu laden bei Start
+moviebrowser.remount_at_start Filmdepot verbinden bei Start
+moviebrowser.dir_head Zusätzliche Verzeichnisse
+moviebrowser.dir Pfad
+moviebrowser.use_dir Verzeichnis verwenden
+moviebrowser.use_rec_dir Aufnahmeverzeichnis verwenden
+moviebrowser.use_movie_dir Wiedergabeverzeichnis verwenden
+moviebrowser.hide_series Verstecke Serien
+moviebrowser.last_record_max_items Zeilen 'zuletzt gesehen'
+moviebrowser.last_play_max_items Zeilen 'zuletzt aufgenommen'
+moviebrowser.browser_frame_high Anzeigehöhe oberes Fenster [Punkte]
 moviebrowser.book_head Markierungen
 moviebrowser.book_lastmoviestop letzter Wiedergabestop:
 moviebrowser.book_movieend Filmende:
@@ -608,7 +631,7 @@ moviebrowser.menu_directories_head Verzeichnisse
 moviebrowser.menu_help_head Hilfe
 moviebrowser.menu_main_bookmarks Markierungen
 moviebrowser.menu_main_head Einstellungen
-moviebrowser.menu_main_movieinfo Film-Info
+moviebrowser.menu_main_movieinfo Filminfo
 moviebrowser.menu_main_saveandback Speichern und verlassen
 moviebrowser.menu_nfs_head NFS Einstellung
 moviebrowser.menu_parental_lock_activated aktiviert

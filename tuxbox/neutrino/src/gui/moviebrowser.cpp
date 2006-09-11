@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: moviebrowser.cpp,v 1.9 2006/09/02 21:34:27 guenther Exp $
+	$Id: moviebrowser.cpp,v 1.10 2006/09/11 21:11:35 guenther Exp $
 
 	Kommentar:
 
@@ -43,6 +43,16 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.10  2006/09/11 21:11:35  guenther
+	General menu clean up
+	Dir menu updated
+	Add options menu
+	In movie info menu  "update all" added
+	Serie option added (hide serie, auto serie)
+	Update movie info on delete movie
+	Delete Background when menu is entered
+	Timeout updated (MB does not exit after options menu is left)
+	
 	Revision 1.9  2006/09/02 21:34:27  guenther
 	Movie info is now updated after movie is erased
 	
@@ -81,9 +91,11 @@
 
 #include "stdlib.h"
 #include "moviebrowser.h"
+#include "filebrowser.h"
 #include "widget/hintbox.h"
 #include "widget/helpbox.h"
 #include "widget/messagebox.h"
+#include "widget/stringinput_ext.h"
 #include <dirent.h>
 #include <sys/stat.h>
 #include <gui/nfs.h>
@@ -106,6 +118,38 @@ typedef struct dirent64 dirent_struct;
 
 #define NUMBER_OF_MOVIES_LAST 40 // This is the number of movies shown in last recored and last played list
  
+#define MESSAGEBOX_BROWSER_ROW_ITEM_COUNT 20
+const CMenuOptionChooser::keyval MESSAGEBOX_BROWSER_ROW_ITEM[MESSAGEBOX_BROWSER_ROW_ITEM_COUNT] =
+{
+    { MB_INFO_FILENAME, LOCALE_MOVIEBROWSER_INFO_FILENAME        },
+    { MB_INFO_FILEPATH, LOCALE_MOVIEBROWSER_INFO_PATH        },
+    { MB_INFO_TITLE, LOCALE_MOVIEBROWSER_INFO_TITLE        },
+    { MB_INFO_SERIE, LOCALE_MOVIEBROWSER_INFO_SERIE        },
+    { MB_INFO_INFO1, LOCALE_MOVIEBROWSER_INFO_INFO1        },
+    { MB_INFO_MAJOR_GENRE, LOCALE_MOVIEBROWSER_INFO_GENRE_MAJOR        },
+    { MB_INFO_MINOR_GENRE, LOCALE_MOVIEBROWSER_INFO_GENRE_MINOR        },
+    { MB_INFO_PARENTAL_LOCKAGE, LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE        },
+    { MB_INFO_CHANNEL, LOCALE_MOVIEBROWSER_INFO_CHANNEL        },
+    { MB_INFO_QUALITY, LOCALE_MOVIEBROWSER_INFO_QUALITY        },
+    { MB_INFO_PREVPLAYDATE, LOCALE_MOVIEBROWSER_INFO_PREVPLAYDATE        },
+    { MB_INFO_RECORDDATE, LOCALE_MOVIEBROWSER_INFO_RECORDDATE        },
+    { MB_INFO_PRODDATE, LOCALE_MOVIEBROWSER_INFO_PRODYEAR        },
+    { MB_INFO_COUNTRY, LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY        },
+    { MB_INFO_GEOMETRIE, LOCALE_MOVIEBROWSER_INFO_VIDEOFORMAT        },
+    { MB_INFO_AUDIO, LOCALE_MOVIEBROWSER_INFO_AUDIO        },
+    { MB_INFO_LENGTH, LOCALE_MOVIEBROWSER_INFO_LENGTH        },
+    { MB_INFO_SIZE, LOCALE_MOVIEBROWSER_INFO_SIZE        },
+    { MB_INFO_BOOKMARK, LOCALE_MOVIEBROWSER_MENU_MAIN_BOOKMARKS        },
+    { MB_INFO_FILENAME, LOCALE_MOVIEBROWSER_INFO_FILENAME        }
+ };
+
+#define MESSAGEBOX_YES_NO_OPTIONS_COUNT 2
+const CMenuOptionChooser::keyval MESSAGEBOX_YES_NO_OPTIONS[MESSAGEBOX_YES_NO_OPTIONS_COUNT] =
+{
+    { 0, LOCALE_MESSAGEBOX_NO        },
+    { 1, LOCALE_MESSAGEBOX_YES       }
+};
+
 #define MESSAGEBOX_PARENTAL_LOCK_OPTIONS_COUNT 3
 const CMenuOptionChooser::keyval MESSAGEBOX_PARENTAL_LOCK_OPTIONS[MESSAGEBOX_PARENTAL_LOCK_OPTIONS_COUNT] =
 {
@@ -337,7 +381,7 @@ bool (* const sortBy[MB_INFO_MAX_NUMBER+1])(const MI_MOVIE_INFO* a, const MI_MOV
 CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 {
 	m_selectedDir = path; 
-	addRepositoryDir(m_selectedDir);
+    //addDir(m_selectedDir);
 	CMovieBrowser();
 }
 /************************************************************************
@@ -345,7 +389,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.9 2006/09/02 21:34:27 guenther Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.10 2006/09/11 21:11:35 guenther Exp $\r\n");
 	init();
 }
 
@@ -357,7 +401,7 @@ CMovieBrowser::~CMovieBrowser()
 	//TRACE("[mb] del\r\n");
 	//saveSettings(&m_settings);		
 	hide();
-	m_repositoryDir.clear();
+    m_dir.clear();
 
 	m_dirNames.clear();
 	for(unsigned int i=0; i < m_vMovieInfo.size(); i++)
@@ -368,7 +412,7 @@ CMovieBrowser::~CMovieBrowser()
 	m_vHandleBrowserList.clear();
 	m_vHandleRecordList.clear();
 	m_vHandlePlayList.clear();
-	m_serienames.clear();
+    m_vHandleSerienames.clear();
 
 	for(int i = 0; i < LF_MAX_ROWS; i++)
 	{
@@ -400,7 +444,7 @@ void CMovieBrowser::fileInfoStale(void)
 	m_vHandleBrowserList.clear();
 	m_vHandleRecordList.clear();
 	m_vHandlePlayList.clear();
-	m_serienames.clear();
+    m_vHandleSerienames.clear();
 	
 	for(int i = 0; i < LF_MAX_ROWS; i++)
 	{
@@ -422,6 +466,7 @@ void CMovieBrowser::init(void)
 	initGlobalSettings();
 	loadSettings(&m_settings);
 		
+    //restart_mb_timeout = 0;
 	m_file_info_stale = true;
 	m_seriename_stale = true;
 
@@ -449,22 +494,7 @@ void CMovieBrowser::init(void)
 	m_prevPlaySelection = 0;
 	
 	m_storageType = MB_STORAGE_TYPE_NFS;
-	m_repositoryDir.clear();
-	for(int i = 0; i < MB_MAX_DIRS; i++)
-	{
-		if(!m_settings.storageDir[i].empty())
-			addRepositoryDir(m_settings.storageDir[i]);
-	}
-	if(g_settings.network_nfs_moviedir[0] != 0)
-	{
-		std::string name = g_settings.network_nfs_moviedir;
-		addRepositoryDir(name);
-	}
-	if(g_settings.network_nfs_recordingdir[0] != 0)
-	{
-		std::string name = g_settings.network_nfs_recordingdir;
-		addRepositoryDir(name);
-	}
+    
 	m_parentalLock = m_settings.parentalLock;
 	
 	// check g_setting values 
@@ -484,8 +514,10 @@ void CMovieBrowser::init(void)
 	if(m_settings.parentalLock >= MB_PARENTAL_LOCK_MAX_NUMBER)
 		m_settings.parentalLock = MB_PARENTAL_LOCK_OFF;
 	
-	if(m_settings.browserFrameHeight < 100 || m_settings.browserFrameHeight > 400)
-		m_settings.browserFrameHeight = 250;
+    if(m_settings.browserFrameHeight < MIN_BROWSER_FRAME_HEIGHT )
+        m_settings.browserFrameHeight = MIN_BROWSER_FRAME_HEIGHT;
+    if(m_settings.browserFrameHeight > MAX_BROWSER_FRAME_HEIGHT)
+        m_settings.browserFrameHeight = MAX_BROWSER_FRAME_HEIGHT;
 	/***** Browser List **************/
 	if(m_settings.browserRowNr == 0)
 	{
@@ -564,7 +596,10 @@ void CMovieBrowser::initGlobalSettings(void)
 	m_settings.parentalLock = MB_PARENTAL_LOCK_OFF;
 	
 	for(int i = 0; i < MB_MAX_DIRS; i++)
+    {
 		m_settings.storageDir[i] = "";
+        m_settings.storageDirUsed[i] = 0;
+    }
 
 	/***** Browser List **************/
 	m_settings.browserFrameHeight = g_settings.screen_EndY - g_settings.screen_StartY - 20 - ((g_settings.screen_EndY - g_settings.screen_StartY - 20)>>1) - (INTER_FRAME_SPACE>>1);
@@ -585,8 +620,8 @@ void CMovieBrowser::initGlobalSettings(void)
 	m_settings.browserRowWidth[4] = m_defaultRowWidth[m_settings.browserRowItem[4]]; 		//30;
 	m_settings.browserRowWidth[5] = m_defaultRowWidth[m_settings.browserRowItem[5]]; 		//30;
 
-	m_settings.storageDir_movie = true;
-	m_settings.storageDir_rec = true;
+    m_settings.storageDirMovieUsed = true;
+    m_settings.storageDirRecUsed = true;
 	m_settings.reload = false;
 	m_settings.remount = false;
 }
@@ -686,12 +721,20 @@ void CMovieBrowser::initDevelopment(void)
 	TRACE("[mb]->initDevelopment\r\n");
 	std::string name;
 	name = "/mnt/movies/";
-	//addRepositoryDir(name);
+    //addDir(name);
 	name = "/mnt/record/";
-	//addRepositoryDir(name);
+    //addDir(name);
 	name = "/mnt/nfs/";
-	//addRepositoryDir(name);
+    //addDir(name);
 	
+}
+
+void CMovieBrowser::defaultSettings(MB_SETTINGS* settings)
+{
+    CFile file;
+    file.Name = MOVIEBROWSER_SETTINGS_FILE;
+    delFile(file);
+    loadSettings(settings);
 }
 
 /************************************************************************
@@ -703,6 +746,11 @@ bool CMovieBrowser::loadSettings(MB_SETTINGS* settings)
 	//TRACE("CMovieBrowser::loadSettings\r\n"); 
 	if(configfile.loadConfig(MOVIEBROWSER_SETTINGS_FILE))
 	{
+        settings->lastPlayMaxItems = configfile.getInt32("mb_lastPlayMaxItems", NUMBER_OF_MOVIES_LAST);
+        settings->lastRecordMaxItems = configfile.getInt32("mb_lastRecordMaxItems", NUMBER_OF_MOVIES_LAST);
+        settings->browser_serie_mode = configfile.getInt32("mb_browser_serie_mode", 0);
+        settings->serie_auto_create = configfile.getInt32("mb_serie_auto_create", 0);
+
 		settings->gui = (MB_GUI)configfile.getInt32("mb_gui", MB_GUI_MOVIE_INFO);
 		
 		settings->sorting.item = (MB_INFO_ITEM)configfile.getInt32("mb_sorting_item", MB_INFO_TITLE);
@@ -715,8 +763,8 @@ bool CMovieBrowser::loadSettings(MB_SETTINGS* settings)
 		settings->parentalLockAge = (MI_PARENTAL_LOCKAGE)configfile.getInt32("mb_parentalLockAge", MI_PARENTAL_OVER18);
 		settings->parentalLock = (MB_PARENTAL_LOCK)configfile.getInt32("mb_parentalLock", MB_PARENTAL_LOCK_ACTIVE);
 	
-		settings->storageDir_rec = (bool)configfile.getInt32("mb_storageDir_rec", true );
-		settings->storageDir_movie = (bool)configfile.getInt32("mb_storageDir_movie", true );
+        settings->storageDirRecUsed = (bool)configfile.getInt32("mb_storageDir_rec", true );
+        settings->storageDirMovieUsed = (bool)configfile.getInt32("mb_storageDir_movie", true );
 
 		settings->reload = (bool)configfile.getInt32("mb_reload", false );
 		settings->remount = (bool)configfile.getInt32("mb_remount", false );
@@ -726,6 +774,8 @@ bool CMovieBrowser::loadSettings(MB_SETTINGS* settings)
 		{
 			sprintf(cfg_key, "mb_dir_%d", i);
 			settings->storageDir[i] = configfile.getString( cfg_key, "" );
+            sprintf(cfg_key, "mb_dir_used%d", i);
+            settings->storageDirUsed[i] = configfile.getInt32( cfg_key,false );
 		}
 		/* these variables are used for the listframes */	
 		settings->browserFrameHeight  = configfile.getInt32("mb_browserFrameHeight", 250);
@@ -754,6 +804,12 @@ bool CMovieBrowser::saveSettings(MB_SETTINGS* settings)
 {
 	bool result = true;
 	TRACE("[mb] saveSettings\r\n"); 
+
+    configfile.setInt32("mb_lastPlayMaxItems", settings->lastPlayMaxItems);
+    configfile.setInt32("mb_lastRecordMaxItems", settings->lastRecordMaxItems);
+    configfile.setInt32("mb_browser_serie_mode", settings->browser_serie_mode);
+    configfile.setInt32("mb_serie_auto_create", settings->serie_auto_create);
+
 	configfile.setInt32("mb_gui", settings->gui);
 	
 	configfile.setInt32("mb_sorting_item", settings->sorting.item);
@@ -763,8 +819,8 @@ bool CMovieBrowser::saveSettings(MB_SETTINGS* settings)
 	configfile.setString("mb_filter_optionString", settings->filter.optionString);
 	configfile.setInt32("mb_filter_optionVar", settings->filter.optionVar);
 	
-	configfile.setInt32("mb_storageDir_rec", settings->storageDir_rec );
-	configfile.setInt32("mb_storageDir_movie", settings->storageDir_movie );
+    configfile.setInt32("mb_storageDir_rec", settings->storageDirRecUsed );
+    configfile.setInt32("mb_storageDir_movie", settings->storageDirMovieUsed );
 
 	configfile.setInt32("mb_parentalLockAge", settings->parentalLockAge);
 	configfile.setInt32("mb_parentalLock", settings->parentalLock);
@@ -777,6 +833,8 @@ bool CMovieBrowser::saveSettings(MB_SETTINGS* settings)
 	{
 		sprintf(cfg_key, "mb_dir_%d", i);
 		configfile.setString( cfg_key, settings->storageDir[i] );
+        sprintf(cfg_key, "mb_dir_used%d", i);
+        configfile.setInt32( cfg_key, settings->storageDirUsed[i] ); // do not save this so far
 	}
 	/* these variables are used for the listframes */	
 	configfile.setInt32("mb_browserFrameHeight", settings->browserFrameHeight);
@@ -795,13 +853,104 @@ bool CMovieBrowser::saveSettings(MB_SETTINGS* settings)
 /************************************************************************
 
 ************************************************************************/
+int CMovieBrowser::exec(CMenuTarget* parent, const std::string & actionKey)
+{
+    int returnval = menu_return::RETURN_REPAINT;
+
+    if(actionKey == "loaddefault")
+    {
+        defaultSettings(&m_settings);
+    }
+    else if(actionKey == "save_options")
+    {
+    }
+    else if(actionKey == "show_movie_info_menu")
+    {
+        if(m_movieSelectionHandler != NULL)
+            showMovieInfoMenu(m_movieSelectionHandler);
+    }
+    else if(actionKey == "save_movie_info")
+    {
+        if(m_movieSelectionHandler != NULL)
+            m_movieInfo.saveMovieInfo( *m_movieSelectionHandler);
+    }
+    else if(actionKey == "save_movie_info_all")
+    {
+        std::vector<MI_MOVIE_INFO*> * current_list=NULL;
+
+        if(m_movieSelectionHandler != NULL)
+        {
+            if(m_windowFocus == MB_FOCUS_BROWSER)          current_list = &m_vHandleBrowserList;
+            else if(m_windowFocus == MB_FOCUS_LAST_PLAY)   current_list = &m_vHandlePlayList;
+            else if(m_windowFocus == MB_FOCUS_LAST_RECORD) current_list = &m_vHandleRecordList ;
+
+            if(current_list != NULL)
+            {
+                CHintBox loadBox(LOCALE_MOVIEBROWSER_HEAD,g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_HEAD_UPDATE));
+                loadBox.paint();
+                for(unsigned int i = 0; i< current_list->size();i++)
+                {
+                    if( !((*current_list)[i]->parentalLockAge != 0 && movieInfoUpdateAllIfDestEmptyOnly == true) &&
+                        movieInfoUpdateAll[MB_INFO_TITLE] )
+                            (*current_list)[i]->parentalLockAge = m_movieSelectionHandler->parentalLockAge;
+
+                    if( !(!(*current_list)[i]->serieName.empty() && movieInfoUpdateAllIfDestEmptyOnly == true) &&
+                        movieInfoUpdateAll[MB_INFO_SERIE] )
+                        (*current_list)[i]->serieName = m_movieSelectionHandler->serieName;
+
+                    if( !(!(*current_list)[i]->productionCountry.empty() && movieInfoUpdateAllIfDestEmptyOnly == true) &&
+                        movieInfoUpdateAll[MB_INFO_COUNTRY] )
+                         (*current_list)[i]->productionCountry = m_movieSelectionHandler->productionCountry;
+
+                     if( !((*current_list)[i]->genreMajor!=0 && movieInfoUpdateAllIfDestEmptyOnly == true) &&
+                        movieInfoUpdateAll[MB_INFO_MAJOR_GENRE] )
+                        (*current_list)[i]->genreMajor = m_movieSelectionHandler->genreMajor;
+
+                     if( !((*current_list)[i]->quality!=0 && movieInfoUpdateAllIfDestEmptyOnly == true) &&
+                        movieInfoUpdateAll[MB_INFO_QUALITY] )
+                        (*current_list)[i]->quality = m_movieSelectionHandler->quality;
+
+                    m_movieInfo.saveMovieInfo( *((*current_list)[i]) );
+                }
+                loadBox.hide();
+            }
+        }
+    }
+    else if(actionKey == "reload_movie_info")
+    {
+        loadMovies();
+        refresh();
+    }
+    else if(actionKey == "run")
+    {
+        if(parent) parent->hide ();
+        exec(NULL);
+    }
+    else if(actionKey == "book_clear_all")
+    {
+       if(m_movieSelectionHandler != NULL)
+       {
+            m_movieSelectionHandler->bookmarks.start =0;
+            m_movieSelectionHandler->bookmarks.end =0;
+            m_movieSelectionHandler->bookmarks.lastPlayStop =0;
+            for(int i=0; i<MI_MOVIE_BOOK_USER_MAX;i++)
+            {
+                m_movieSelectionHandler->bookmarks.user[i].name.empty();
+                m_movieSelectionHandler->bookmarks.user[i].length =0;
+                m_movieSelectionHandler->bookmarks.user[i].pos =0;
+            }
+       }
+    }
+     return returnval;
+}
+
 int CMovieBrowser::exec(const char* path)
 {
 	bool res = false;
 
 	TRACE("[mb] start MovieBrowser\r\n");
 	int timeout = -1;
-	int returnDefaultOnTimeout = false;
+	int returnDefaultOnTimeout = true;
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
 
@@ -821,7 +970,6 @@ int CMovieBrowser::exec(const char* path)
 	}
 
 	m_selectedDir = path; 
-	//addRepositoryDir(m_selectedDir);
 	
 	if(paint() == false)
 		return res;// paint failed due to less memory , exit 
@@ -868,6 +1016,7 @@ int CMovieBrowser::exec(const char* path)
 	updateMovieSelection();
 	//refreshMovieInfo();
  
+    refreshTitle();
  	onSetGUIWindow(m_settings.gui);
  
  	bool loop = true;
@@ -876,24 +1025,17 @@ int CMovieBrowser::exec(const char* path)
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 		
-		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = CRCInput::calcTimeoutEnd(timeout);
-		
 		result = onButtonPress(msg);
-		
 		if(result == false)
 		{
 			if (msg == CRCInput::RC_timeout && returnDefaultOnTimeout)
 			{
-				TRACE("[mb]->exec: RC_timeout\r\n");
+                TRACE("[mb] Timerevent\n");
+                //if( restart_mb_timeout == 1)
+                //    restart_mb_timeout = 0;
+                //else
 				loop = false;
 			}
-			else if (msg == CRCInput::RC_timeout) 
-			{
-				TRACE("[mb]->exec: RC_timeout\r\n");
-				loop = false;
-			}
-
 			else if(msg == CRCInput::RC_ok)
 			{
 				m_currentStartPos = 0; 
@@ -923,6 +1065,9 @@ int CMovieBrowser::exec(const char* path)
 				loop = false;
 			}
 		}
+        
+        if ( msg <= CRCInput::RC_MaxRC )
+            timeoutEnd = CRCInput::calcTimeoutEnd(timeout); // calcualate next timeout
 	}
 	hide();
 	//TRACE(" return %d\r\n",res);
@@ -946,7 +1091,7 @@ int CMovieBrowser::exec(const char* path)
 /************************************************************************
 
 ************************************************************************/
-bool CMovieBrowser::hide(void)
+void CMovieBrowser::hide(void)
 {
 	//TRACE("[mb]->Hide\r\n");
 
@@ -980,7 +1125,6 @@ bool CMovieBrowser::hide(void)
 	m_pcWindow = NULL;
 	m_pcInfo = NULL;
 	
-	return (true);
 }
 
 /************************************************************************
@@ -1060,8 +1204,8 @@ int CMovieBrowser::paint(void)
 	}  
 	//onSetGUIWindow(m_settings.gui);	
 							
-	refreshTitle();
-	refreshFoot();
+	//refreshTitle();
+	//refreshFoot();
 	refreshLCD();
 	//refresh();
 	return (true);
@@ -1217,9 +1361,9 @@ void CMovieBrowser::refreshFilterList(void)
 		else if(m_settings.filter.item == MB_INFO_SERIE)
 		{
 			updateSerienames();
-			for(unsigned int i = 0; i < m_serienames.size(); i++)
+            for(unsigned int i = 0; i < m_vHandleSerienames.size(); i++)
 			{
-				m_FilterLines.lineArray[0].push_back(m_serienames[i]);
+                m_FilterLines.lineArray[0].push_back(m_vHandleSerienames[i]->serieName);
 			}
 		}
 	}
@@ -1261,7 +1405,7 @@ void CMovieBrowser::refreshLastPlayList(void) //P2
 	// sort the not filtered files
 	onSortMovieInfoHandleList(m_vHandlePlayList,MB_INFO_PREVPLAYDATE,MB_DIRECTION_DOWN);
 
-	for(unsigned int handle=0; handle < m_vHandlePlayList.size() && handle < NUMBER_OF_MOVIES_LAST ;handle++)
+    for(unsigned int handle=0; handle < m_vHandlePlayList.size() && handle < m_settings.lastPlayMaxItems ;handle++)
 	{
 		for(int row = 0; row < m_settings.lastPlayRowNr ;row++)
 		{
@@ -1319,7 +1463,7 @@ void CMovieBrowser::refreshLastRecordList(void) //P2
 	// sort the not filtered files
 	onSortMovieInfoHandleList(m_vHandleRecordList,MB_INFO_RECORDDATE,MB_DIRECTION_DOWN);
 
-	for(unsigned int handle=0; handle < m_vHandleRecordList.size() && handle < NUMBER_OF_MOVIES_LAST ;handle++)
+    for(unsigned int handle=0; handle < m_vHandleRecordList.size() && handle < m_settings.lastRecordMaxItems ;handle++)
 	{
 		for(int row = 0; row < m_settings.lastRecordRowNr ;row++)
 		{
@@ -1362,14 +1506,20 @@ void CMovieBrowser::refreshBrowserList(void) //P1
 	m_vHandleBrowserList.clear();
 	
 	if(m_vMovieInfo.size() <= 0) 
+    {
+        m_currentBrowserSelection = 0;
+        m_movieSelectionHandler = NULL;
+        //m_pcBrowser->setLines(&m_browserListLines);
 		return; // exit here if nothing else is to do
+    }
 	
 	MI_MOVIE_INFO* movie_handle;
 	// prepare Browser list for sorting and filtering
 	for(unsigned int file=0; file < m_vMovieInfo.size(); file++)
 	{
 		if(	isFiltered(m_vMovieInfo[file]) 	   == false &&
-			isParentalLock(m_vMovieInfo[file]) == false) 
+            isParentalLock(m_vMovieInfo[file]) == false  &&
+            (m_settings.browser_serie_mode == 0 || m_vMovieInfo[file].serieName.empty() || m_settings.filter.item == MB_INFO_SERIE) )
 		{
 			movie_handle = &(m_vMovieInfo[file]);
 			m_vHandleBrowserList.push_back(movie_handle);
@@ -2169,7 +2319,28 @@ bool CMovieBrowser::onSortMovieInfoHandleList(std::vector<MI_MOVIE_INFO*>& handl
 	return (true);
 }
 
+void CMovieBrowser::updateDir(void)
+{
+    m_dir.clear();
+    // check if there is a movie dir and if we should use it
+    if(g_settings.network_nfs_moviedir[0] != 0 )
+    {
+        std::string name = g_settings.network_nfs_moviedir;
+        addDir(name,&m_settings.storageDirMovieUsed);
+    }
+    // check if there is a record dir and if we should use it
+    if(g_settings.network_nfs_recordingdir[0] != 0 )
+    {
+        std::string name = g_settings.network_nfs_recordingdir;
+        addDir(name,&m_settings.storageDirRecUsed);
+    }
 
+    for(int i = 0; i < MB_MAX_DIRS; i++)
+    {
+        if(!m_settings.storageDir[i].empty())
+            addDir(m_settings.storageDir[i],&m_settings.storageDirUsed[i]);
+    }
+}
 /************************************************************************
 
 ************************************************************************/
@@ -2183,30 +2354,13 @@ void CMovieBrowser::loadAllTsFileNamesFromStorage(void)
 	m_dirNames.clear();
 	m_vMovieInfo.clear();
 	
-	m_repositoryDir.clear();
-	//addRepositoryDir(m_selectedDir);
-	for(int i = 0; i < MB_MAX_DIRS; i++)
-	{
-		if(!m_settings.storageDir[i].empty())
-			addRepositoryDir(m_settings.storageDir[i]);
-	}
-	// check if there is a movie dir and if we should use it
-	if(g_settings.network_nfs_moviedir[0] != 0 && m_settings.storageDir_movie == true)
-	{
-		std::string name = g_settings.network_nfs_moviedir;
-		addRepositoryDir(name);
-	}
-	// check if there is a record dir and if we should use it 
-	if(g_settings.network_nfs_recordingdir[0] != 0 && m_settings.storageDir_rec == true)
-	{
-		std::string name = g_settings.network_nfs_recordingdir;
-		addRepositoryDir(name);
-	}
+    updateDir();
 
-	size = m_repositoryDir.size();
+    size = m_dir.size();
 	for(i=0; i < size;i++)
 	{
-		result = loadTsFileNamesFromDir(m_repositoryDir[i]);
+        if(*m_dir[i].used == true )
+            result = loadTsFileNamesFromDir(m_dir[i].name);
 	}
 	
 	TRACE("[mb] Dir%d, Files:%d \r\n",m_dirNames.size(),m_vMovieInfo.size());
@@ -2404,7 +2558,7 @@ bool CMovieBrowser::delFile_std(CFile& file)
 ************************************************************************/
 void CMovieBrowser::updateMovieSelection(void)
 {
-	TRACE("[mb]->updateMovieSelection %d\r\n",m_windowFocus);
+    //TRACE("[mb]->updateMovieSelection %d\r\n",m_windowFocus);
 	if (m_vMovieInfo.size() == 0) return;
 	bool new_selection = false;
 	 
@@ -2530,34 +2684,39 @@ void CMovieBrowser::updateFilterSelection(void)
 
 ************************************************************************/
 
-bool CMovieBrowser::addRepositoryDir(std::string& dirname)
+bool CMovieBrowser::addDir(std::string& dirname, int* used)
 {
 	if(dirname.empty()) return false;
 	if(dirname == "/") return false;
 	
-	std::string newpath = dirname;
+    MB_DIR newdir;
+    newdir.name = dirname;
 
-	if(newpath.rfind('/') != newpath.length()-1 ||
-      newpath.length() == 0 ||
-		newpath == VLC_URI)
+    if(newdir.name.rfind('/') != newdir.name.length()-1 ||
+      newdir.name.length() == 0 ||
+        newdir.name == VLC_URI)
 	{
-		newpath += '/';
+        newdir.name += '/';
 	}
 
-	int size = m_repositoryDir.size();
+    int size = m_dir.size();
 	for(int i = 0; i < size; i++)
 	{
-		if(strcmp(m_repositoryDir[i].c_str(),newpath.c_str()) == 0)	
+        if(strcmp(m_dir[i].name.c_str(),newdir.name.c_str()) == 0)
 		{
 			// string is identical to previous one
-			TRACE("[mb] Dir already in list: %s\r\n",newpath.c_str()); 
+            TRACE("[mb] Dir already in list: %s\r\n",newdir.name.c_str());
 			return (false); 
 		}
 	}
-	TRACE("[mb] new Dir: %s\r\n",newpath.c_str()); 
-	m_repositoryDir.push_back(newpath);
+    TRACE("[mb] new Dir: %s\r\n",newdir.name.c_str());
+    newdir.used = used;
+    m_dir.push_back(newdir);
+    if(*used == true)
+    {
 	m_file_info_stale = true; // we got a new Dir, search again for all movies next time
 	m_seriename_stale = true;
+    }
 	return (true);
 }
 /************************************************************************
@@ -2570,29 +2729,36 @@ void CMovieBrowser::loadMovies(void)
 		clock_t clock_prev = clock_start;
 		clock_t clock_act = clock_start;
 
-		TRACE("[mb] loadMovies:  %ld,%ld\r\n",(long)clock(),(long)time_start);
+		TRACE("[mb] loadMovies: \n");
 		
 		CHintBox loadBox(LOCALE_MOVIEBROWSER_HEAD,g_Locale->getText(LOCALE_MOVIEBROWSER_SCAN_FOR_MOVIES));
 		loadBox.paint();
 
+        clock_act = clock()/10000;TRACE("[mb] *1: time %9ld  clock %6ld  dclock %6ld*\n",(long)time(NULL),clock_act,clock_act - clock_prev);clock_prev = clock_act; 
 		loadAllTsFileNamesFromStorage(); // P1
-		clock_act = clock()/10000;TRACE("[mb] *1:%3ld,%3ld*\r\n",clock_act - clock_prev, (long)time(NULL));clock_prev = clock_act;	
+		clock_act = clock()/10000;TRACE("[mb] *2: time %9ld  clock %6ld  dclock %6ld*\n",(long)time(NULL),clock_act,clock_act - clock_prev);clock_prev = clock_act;	
 		loadAllMovieInfo(); // P1
-		clock_act = clock()/10000;TRACE("[mb] *2:%3ld,%3ld*\r\n",clock_act - clock_prev, (long)time(NULL));clock_prev = clock_act;
-		updateSerienames();
+        clock_act = clock()/10000;TRACE("[mb] *3: time %9ld  clock %6ld  dclock %6ld*\n",(long)time(NULL),clock_act,clock_act - clock_prev);clock_prev = clock_act; 
 		m_file_info_stale = false;
 		m_seriename_stale = true; // we reloded the movie info, so make sure the other list are  updated later on as well
+        updateSerienames();
+        clock_act = clock()/10000;TRACE("[mb] *4: time %9ld  clock %6ld  dclock %6ld*\n",(long)time(NULL),clock_act,clock_act - clock_prev);clock_prev = clock_act; 
+        if(m_settings.serie_auto_create == 1)
+        {
+            autoFindSerie();
+        }
 
 		loadBox.hide();
 
-		clock_act = clock()/10000;TRACE("[mb] *3:%3ld,%3ld*\r\n",clock_act - clock_prev, (long)time(NULL));clock_prev = clock_act;
+        clock_act = clock()/10000;TRACE("[mb] *5: time %9ld  clock %6ld  dclock %6ld*\n",(long)time(NULL),clock_act,clock_act - clock_prev);clock_prev = clock_act; 
 		refreshBrowserList();	
-		clock_act = clock()/10000;TRACE("[mb] *4:%3ld,%3ld*\r\n",clock_act - clock_prev, (long)time(NULL));clock_prev = clock_act;
+        clock_act = clock()/10000;TRACE("[mb] *6: time %9ld  clock %6ld  dclock %6ld*\n",(long)time(NULL),clock_act,clock_act - clock_prev);clock_prev = clock_act; 
 		refreshLastPlayList();	
 		refreshLastRecordList();
 		refreshFilterList();
 		refreshMovieInfo();	// is done by refreshBrowserList if needed
-		TRACE("[mb] ***Total:%ld,%ld***\r\n",(time(NULL)-time_start), ((clock()/10000)-clock_start));
+        clock_act = clock()/10000;TRACE("[mb] *7: time %9ld  clock %6ld  dclock %6ld*\n",(long)time(NULL),clock_act,clock_act - clock_prev);clock_prev = clock_act; 
+		TRACE("[mb] ***Total:time %ld clock %ld***\n",(time(NULL)-time_start), clock_act-clock_start);
 }
 /************************************************************************
 
@@ -2621,272 +2787,303 @@ void CMovieBrowser::showHelp(void)
 /************************************************************************
 
 ************************************************************************/
+void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
+{
+    unsigned int i = 0;
+
+     /********************************************************************/
+    /**  MovieInfo menu ******************************************************/
+
+    /********************************************************************/
+    /**  bookmark ******************************************************/
+    CStringInput*       pBookNameInput[MAX_NUMBER_OF_BOOKMARK_ITEMS];
+    CIntInput*          pBookPosIntInput[MAX_NUMBER_OF_BOOKMARK_ITEMS];
+    CIntInput*          pBookTypeIntInput[MAX_NUMBER_OF_BOOKMARK_ITEMS];
+    CMenuWidget*        pBookItemMenu[MAX_NUMBER_OF_BOOKMARK_ITEMS];
+
+    CIntInput bookStartIntInput (LOCALE_MOVIEBROWSER_EDIT_BOOK, (long&)movie_info->bookmarks.start,        5, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2);
+    CIntInput bookLastIntInput (LOCALE_MOVIEBROWSER_EDIT_BOOK,  (long&)movie_info->bookmarks.lastPlayStop, 5, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2);
+    CIntInput bookEndIntInput (LOCALE_MOVIEBROWSER_EDIT_BOOK,   (long&)movie_info->bookmarks.end,          5, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2);
+
+    CMenuWidget bookmarkMenu (LOCALE_MOVIEBROWSER_BOOK_HEAD , "streaming.raw");
+
+    bookmarkMenu.addItem(GenericMenuSeparator);
+    bookmarkMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_CLEAR_ALL, true, NULL, this, "book_clear_all",CRCInput::RC_blue,   NEUTRINO_ICON_BUTTON_BLUE));
+    bookmarkMenu.addItem(GenericMenuSeparatorLine);
+    bookmarkMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_MOVIESTART,    true, bookStartIntInput.getValue(), &bookStartIntInput));
+    bookmarkMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_MOVIEEND,      true, bookLastIntInput.getValue(),  &bookLastIntInput));
+    bookmarkMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_LASTMOVIESTOP, true, bookEndIntInput.getValue(),   &bookEndIntInput));
+    bookmarkMenu.addItem(GenericMenuSeparatorLine);
+
+    for(int i =0 ; i < MI_MOVIE_BOOK_USER_MAX && i < MAX_NUMBER_OF_BOOKMARK_ITEMS; i++ )
+    {
+        pBookNameInput[i] =    new CStringInput (LOCALE_MOVIEBROWSER_EDIT_BOOK, &movie_info->bookmarks.user[i].name, 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_NAME_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_NAME_INFO2, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+        pBookPosIntInput[i] =  new CIntInput (LOCALE_MOVIEBROWSER_EDIT_BOOK, (long&) movie_info->bookmarks.user[i].pos, 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2);
+        pBookTypeIntInput[i] = new CIntInput (LOCALE_MOVIEBROWSER_EDIT_BOOK, (long&) movie_info->bookmarks.user[i].length, 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_TYPE_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_TYPE_INFO2);
+
+        pBookItemMenu[i] = new CMenuWidget(LOCALE_MOVIEBROWSER_BOOK_HEAD, "streaming.raw");
+        pBookItemMenu[i]->addItem(GenericMenuSeparator);
+        pBookItemMenu[i]->addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_NAME,     true,  movie_info->bookmarks.user[i].name,pBookNameInput[i]));
+        pBookItemMenu[i]->addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_POSITION, true,  pBookPosIntInput[i]->getValue(), pBookPosIntInput[i]));
+        pBookItemMenu[i]->addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_TYPE,     true,  pBookTypeIntInput[i]->getValue(),pBookTypeIntInput[i]));
+
+        bookmarkMenu.addItem( new CMenuForwarderNonLocalized (movie_info->bookmarks.user[i].name.c_str(),   true, pBookPosIntInput[i]->getValue(),pBookItemMenu[i]));
+    }
+
+/********************************************************************/
+/**  serie******************************************************/
+    CStringInput serieUserInput(LOCALE_MOVIEBROWSER_EDIT_SERIE, &movie_info->serieName, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+
+    CMenuWidget serieMenu (LOCALE_MOVIEBROWSER_SERIE_HEAD, "streaming.raw");
+    serieMenu.addItem(GenericMenuSeparator);
+    serieMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_SERIE_NAME,   true, movie_info->serieName,&serieUserInput));
+    serieMenu.addItem(GenericMenuSeparatorLine);
+    for(unsigned int i=0; i < m_vHandleSerienames.size(); i++)
+       serieMenu.addItem( new CMenuSelector(m_vHandleSerienames[i]->serieName.c_str(), true,  movie_info->serieName));
+
+    /********************************************************************/
+    /**  update movie info  ******************************************************/
+        for(i=0; i<MB_INFO_MAX_NUMBER; i++)
+            movieInfoUpdateAll[i]=0;
+        movieInfoUpdateAllIfDestEmptyOnly=true;
+
+        CMenuWidget movieInfoMenuUpdate (LOCALE_MOVIEBROWSER_INFO_HEAD_UPDATE, "streaming.raw",450);
+        movieInfoMenuUpdate.addItem(GenericMenuSeparator);
+        movieInfoMenuUpdate.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_SAVE_ALL, true, NULL, this, "save_movie_info_all",CRCInput::RC_red,   NEUTRINO_ICON_BUTTON_RED));
+        movieInfoMenuUpdate.addItem(GenericMenuSeparatorLine);
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_UPDATE_IF_DEST_EMPTY_ONLY, (&movieInfoUpdateAllIfDestEmptyOnly), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL,CRCInput::RC_blue,   NEUTRINO_ICON_BUTTON_BLUE ));
+        movieInfoMenuUpdate.addItem(GenericMenuSeparatorLine);
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_TITLE,             &movieInfoUpdateAll[MB_INFO_TITLE], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL, CRCInput::RC_1, NEUTRINO_ICON_BUTTON_1));
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_INFO1,             &movieInfoUpdateAll[MB_INFO_INFO1], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL, CRCInput::RC_2, NEUTRINO_ICON_BUTTON_2));
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_SERIE,             &movieInfoUpdateAll[MB_INFO_SERIE], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL, CRCInput::RC_3, NEUTRINO_ICON_BUTTON_3));
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_QUALITY,           &movieInfoUpdateAll[MB_INFO_QUALITY], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ,NULL, CRCInput::RC_4, NEUTRINO_ICON_BUTTON_4));
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE,  &movieInfoUpdateAll[MB_INFO_PARENTAL_LOCKAGE], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL, CRCInput::RC_5, NEUTRINO_ICON_BUTTON_5 ));
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_GENRE_MAJOR,       &movieInfoUpdateAll[MB_INFO_MAJOR_GENRE], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL, CRCInput::RC_6, NEUTRINO_ICON_BUTTON_6));
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_PRODYEAR,          &movieInfoUpdateAll[MB_INFO_PRODDATE], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL, CRCInput::RC_7, NEUTRINO_ICON_BUTTON_7));
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY,       &movieInfoUpdateAll[MB_INFO_COUNTRY], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL, CRCInput::RC_8, NEUTRINO_ICON_BUTTON_8));
+        movieInfoMenuUpdate.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_LENGTH,            &movieInfoUpdateAll[MB_INFO_LENGTH], MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,NULL, CRCInput::RC_9, NEUTRINO_ICON_BUTTON_9));
+
+/********************************************************************/
+/**  movieInfo  ******************************************************/
+#define BUFFER_SIZE 100
+    char dirItNr[BUFFER_SIZE];
+    char size[BUFFER_SIZE];
+
+    if(movie_info != NULL)
+    {
+        strncpy(dirItNr, m_dirNames[movie_info->dirItNr].c_str(),BUFFER_SIZE);
+        snprintf(size,BUFFER_SIZE,"%5llu",movie_info->file.Size>>20);
+    }
+
+    CStringInput titelUserInput(LOCALE_MOVIEBROWSER_INFO_TITLE,            &movie_info->epgTitle, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInput channelUserInput(LOCALE_MOVIEBROWSER_INFO_CHANNEL,        &movie_info->epgChannel, 15, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInput epgUserInput(LOCALE_MOVIEBROWSER_INFO_INFO1,              &movie_info->epgInfo1, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CDateInput   dateUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,        &movie_info->dateOfLastPlay, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CDateInput   recUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,         &movie_info->file.Time, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CIntInput    lengthUserIntInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,       (long&)movie_info->length, 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CStringInput countryUserInput(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY,    &movie_info->productionCountry, 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
+    CIntInput    yearUserIntInput(LOCALE_MOVIEBROWSER_INFO_PRODYEAR,       (long&)movie_info->productionDate, 4, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+
+    CMenuWidget movieInfoMenu (LOCALE_MOVIEBROWSER_INFO_HEAD, "streaming.raw",m_cBoxFrame.iWidth);
+
+    movieInfoMenu.addItem(GenericMenuSeparator);
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_SAVE,     true, NULL, this, "save_movie_info",                                           CRCInput::RC_red,   NEUTRINO_ICON_BUTTON_RED));
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_HEAD_UPDATE, true, NULL,      &movieInfoMenuUpdate, NULL,                                CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_HEAD,           true, NULL,      &bookmarkMenu, NULL,                                    CRCInput::RC_blue,  NEUTRINO_ICON_BUTTON_BLUE));
+    movieInfoMenu.addItem(GenericMenuSeparatorLine);
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_TITLE,          true, movie_info->epgTitle,  &titelUserInput,NULL,                       CRCInput::RC_1, NEUTRINO_ICON_BUTTON_1));
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_SERIE,          true, movie_info->serieName, &serieMenu,NULL,                            CRCInput::RC_2, NEUTRINO_ICON_BUTTON_2));
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_INFO1,          true, movie_info->epgInfo1,      &epgUserInput,NULL,                     CRCInput::RC_3, NEUTRINO_ICON_BUTTON_3));
+    movieInfoMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_GENRE_MAJOR, &movie_info->genreMajor, GENRE_ALL, GENRE_ALL_COUNT, true,NULL,         CRCInput::RC_4, NEUTRINO_ICON_BUTTON_4));
+    movieInfoMenu.addItem(GenericMenuSeparatorLine);
+    movieInfoMenu.addItem( new CMenuOptionNumberChooser(LOCALE_MOVIEBROWSER_INFO_QUALITY,&movie_info->quality,true,0,3));
+    movieInfoMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE, &movie_info->parentalLockAge, MESSAGEBOX_PARENTAL_LOCKAGE_OPTIONS, MESSAGEBOX_PARENTAL_LOCKAGE_OPTION_COUNT, true,NULL,         CRCInput::RC_6, NEUTRINO_ICON_BUTTON_6 ));
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_PRODYEAR,       true, yearUserIntInput.getValue(),      &yearUserIntInput,NULL,           CRCInput::RC_7, NEUTRINO_ICON_BUTTON_7));
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY,    true, movie_info->productionCountry,         &countryUserInput,NULL,      CRCInput::RC_8, NEUTRINO_ICON_BUTTON_8));
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_LENGTH,         true, lengthUserIntInput.getValue(),        &lengthUserIntInput,NULL,     CRCInput::RC_9, NEUTRINO_ICON_BUTTON_9));
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_CHANNEL,        true, movie_info->epgChannel,    &channelUserInput,NULL,                  CRCInput::RC_0, NEUTRINO_ICON_BUTTON_0));//LOCALE_TIMERLIST_CHANNEL
+    movieInfoMenu.addItem(GenericMenuSeparatorLine);
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_PATH,           false, dirItNr)); //LOCALE_TIMERLIST_RECORDING_DIR
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_PREVPLAYDATE,   false, dateUserDateInput.getValue()));//LOCALE_FLASHUPDATE_CURRENTVERSIONDATE
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_RECORDDATE,     false, recUserDateInput.getValue()));//LOCALE_FLASHUPDATE_CURRENTVERSIONDATE
+    movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_SIZE,           false, size,     NULL));
+
+    movieInfoMenu.exec(NULL,"");
+
+    for(int i =0 ; i < MI_MOVIE_BOOK_USER_MAX && i < MAX_NUMBER_OF_BOOKMARK_ITEMS; i++ )
+    {
+        delete pBookNameInput[i] ;
+        delete pBookPosIntInput[i] ;
+        delete pBookTypeIntInput[i];
+        delete pBookItemMenu[i];
+    }
+}
+
+extern "C" int pinghost( const char *hostname );
+
+/************************************************************************
+
+************************************************************************/
 bool CMovieBrowser::showMenu(MI_MOVIE_INFO* movie_info)
 {
-	// very dirty usage of the menues, but it works and I already spent to much time with it, feel free to make it better ;-)
-
-/********************************************************************/
-/**  bookmark menu ******************************************************/
-	CStringInputSMS* pBookNameInputSMS[MAX_NUMBER_OF_BOOKMARK_ITEMS];
-	CStringInputSMS* pBookPosInputSMS[MAX_NUMBER_OF_BOOKMARK_ITEMS];
-	CStringInputSMS* pBookTypeInputSMS[MAX_NUMBER_OF_BOOKMARK_ITEMS];
-	CMenuWidget* pBookItemMenu[MAX_NUMBER_OF_BOOKMARK_ITEMS];
-
-	char bookStart[100];
-	char bookLast[100];
-	char bookEnd[100];
-
-	if(movie_info != NULL)
-	{
-		snprintf(bookStart, 20,"%5d", movie_info->bookmarks.start); 
-		snprintf(bookLast, 20,"%5d", movie_info->bookmarks.lastPlayStop); 
-		snprintf(bookEnd, 20,"%5d", movie_info->bookmarks.end); 
-	}
-
-	char bookName[MAX_NUMBER_OF_BOOKMARK_ITEMS][100];
-	char bookPos[MAX_NUMBER_OF_BOOKMARK_ITEMS][100];
-	char bookType[MAX_NUMBER_OF_BOOKMARK_ITEMS][100];
-
-	if(movie_info != NULL)
-	{
-		for(int i =0 ; i < MI_MOVIE_BOOK_USER_MAX && i < MAX_NUMBER_OF_BOOKMARK_ITEMS; i++ )
-		{
-			strncpy(bookName[i], movie_info->bookmarks.user[i].name.c_str(),20);
-			snprintf(bookPos[i], 20,"%5d", movie_info->bookmarks.user[i].pos);
-			snprintf(bookType[i], 20,"%5d", movie_info->bookmarks.user[i].length);
-		}	
-	}
-	
-	CStringInputSMS bookStartInputSMS (LOCALE_MOVIEBROWSER_EDIT_BOOK, 	bookStart, 5, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2, "0123456789 ");
-	CStringInputSMS bookLastInputSMS (LOCALE_MOVIEBROWSER_EDIT_BOOK, 	bookLast, 5, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2, "0123456789 ");
-	CStringInputSMS bookEndInputSMS (LOCALE_MOVIEBROWSER_EDIT_BOOK, 	bookEnd, 5, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2, "0123456789 ");
-
-	CMenuWidget bookmarkMenu (LOCALE_MOVIEBROWSER_BOOK_HEAD , "streaming.raw");
-			
-	bookmarkMenu.addItem(GenericMenuSeparator);
-	bookmarkMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_MOVIESTART, 	true, bookStart,&bookStartInputSMS));
-	bookmarkMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_MOVIEEND, 	true, bookEnd,	&bookEndInputSMS));
-	bookmarkMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_LASTMOVIESTOP, true, bookLast,	&bookLastInputSMS));
-	bookmarkMenu.addItem(GenericMenuSeparatorLine);
-
-	for(int i =0 ; i < MI_MOVIE_BOOK_USER_MAX && i < MAX_NUMBER_OF_BOOKMARK_ITEMS; i++ )
-	{
-		pBookNameInputSMS[i] = new CStringInputSMS (LOCALE_MOVIEBROWSER_EDIT_BOOK, bookName[i], 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_NAME_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_NAME_INFO2, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-		pBookPosInputSMS[i] =  new CStringInputSMS (LOCALE_MOVIEBROWSER_EDIT_BOOK, bookPos[i], 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2, "0123456789 ");
-		pBookTypeInputSMS[i] = new CStringInputSMS (LOCALE_MOVIEBROWSER_EDIT_BOOK, bookType[i], 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_TYPE_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_TYPE_INFO2, "0123456789 ");
-
-		pBookItemMenu[i] = new CMenuWidget(LOCALE_MOVIEBROWSER_BOOK_HEAD, "streaming.raw");
-		pBookItemMenu[i]->addItem(GenericMenuSeparator);
-		pBookItemMenu[i]->addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_NAME, true, 		bookName[i],pBookNameInputSMS[i]));
-		pBookItemMenu[i]->addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_POSITION, true, 	bookPos[i], pBookPosInputSMS[i]));
-		pBookItemMenu[i]->addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_TYPE, true, bookType[i],pBookTypeInputSMS[i]));
-
-		bookmarkMenu.addItem( new CMenuForwarderNonLocalized (bookName[i], 	true, bookPos[i],pBookItemMenu[i]));
-	}
-
-/********************************************************************/
-/**  serie menu ******************************************************/
-	char serieName[100];
-	if(movie_info != NULL)
-	{
-		strncpy(serieName,movie_info->serieName.c_str(),100);
-	}
-	CStringInputSMS serieUserInputSMS(LOCALE_MOVIEBROWSER_EDIT_SERIE, serieName, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-
-	CMenuWidget serieMenu (LOCALE_MOVIEBROWSER_SERIE_HEAD, "streaming.raw");
-	serieMenu.addItem(GenericMenuSeparator);
-	serieMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_SERIE_NAME, 	true, serieName, 		&serieUserInputSMS));
-	serieMenu.addItem(GenericMenuSeparatorLine);
-	for(unsigned int i=0; i < m_serienames.size(); i++)
-		serieMenu.addItem( new CMenuSelector(m_serienames[i].c_str(), true,  serieName));
-
-/********************************************************************/
-/**  movieInfo menu ******************************************************/
-#define BUFFER_SIZE 100
-	char epgTitle[BUFFER_SIZE];			
-	char epgInfo1[BUFFER_SIZE]; 		
-	char length[BUFFER_SIZE]; 			
-	char country[BUFFER_SIZE]; 			
-	char year[BUFFER_SIZE]; 			
-	char epgChannel[BUFFER_SIZE]; 		
-	char fileName[BUFFER_SIZE]; 		
-	char dirItNr[BUFFER_SIZE]; 			
-	char playDate[BUFFER_SIZE];			
-	char recordDate[BUFFER_SIZE];		
-	char size[BUFFER_SIZE];				
-	int quality = 0;
-	int parental_lockage_option  = 0;
-	int genre = 0; 
-
-	if(movie_info != NULL)
-	{
-		strncpy(epgTitle, movie_info->epgTitle.c_str(),BUFFER_SIZE);
-		strncpy(epgInfo1,movie_info->epgInfo1.c_str(),BUFFER_SIZE);
-		snprintf(length, BUFFER_SIZE,"%3d",movie_info->length); 
-		strncpy(country,movie_info->productionCountry.c_str(),BUFFER_SIZE);
-		snprintf(year, BUFFER_SIZE,"%4d",movie_info->productionDate + 1900); 
-		strncpy(epgChannel,movie_info->epgChannel.c_str(),BUFFER_SIZE);
-		strncpy(fileName, movie_info->file.getFileName().c_str(),BUFFER_SIZE);
-		strncpy(dirItNr, m_dirNames[movie_info->dirItNr].c_str(),BUFFER_SIZE);
-			tm* date = localtime(&movie_info->dateOfLastPlay);
-		snprintf(playDate, BUFFER_SIZE,"%02d.%02d.%02d",date->tm_mday,date->tm_mon+1,date->tm_year >= 100 ? date->tm_year-100 : date->tm_year);
-			date = localtime(&movie_info->file.Time);
-		snprintf(recordDate, BUFFER_SIZE,"%02d.%02d.%02d",date->tm_mday,date->tm_mon+1,date->tm_year >= 100 ? date->tm_year-100 : date->tm_year);
-		snprintf(size,BUFFER_SIZE,"%5llu",movie_info->file.Size>>20);
-		quality = movie_info->quality;
-		parental_lockage_option  = movie_info->parentalLockAge;
-		genre = movie_info->genreMajor; 
-	}
-
-	CStringInputSMS titelUserInputSMS(LOCALE_MOVIEBROWSER_INFO_TITLE, epgTitle, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-	CStringInputSMS channelUserInputSMS(LOCALE_MOVIEBROWSER_INFO_CHANNEL, epgChannel, 15, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-	CStringInputSMS epgUserInputSMS(LOCALE_MOVIEBROWSER_INFO_INFO1, epgInfo1, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-	CStringInput lengthUserInput(LOCALE_MOVIEBROWSER_INFO_LENGTH, length, 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-	CStringInput countryUserInput(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY, country, 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
-	CStringInput yearUserInput(LOCALE_MOVIEBROWSER_INFO_PRODYEAR, year, 4, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ");
-
-	CMenuWidget movieInfoMenu (LOCALE_MOVIEBROWSER_INFO_HEAD, "streaming.raw",m_cBoxFrame.iWidth);
-
-	movieInfoMenu.addItem(GenericMenuSeparator);
-	movieInfoMenu.addItem(GenericMenuSeparatorLine);
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_TITLE, 	true, epgTitle, 	&titelUserInputSMS));
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_SERIE, 		true, serieName,	&serieMenu));
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_INFO1, 	true, epgInfo1,		&epgUserInputSMS));
-	movieInfoMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_GENRE_MAJOR, &genre, GENRE_ALL, GENRE_ALL_COUNT, true ));
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_CHANNEL, 		true, epgChannel,	&channelUserInputSMS));//LOCALE_TIMERLIST_CHANNEL
-	movieInfoMenu.addItem(GenericMenuSeparatorLine);
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_PRODYEAR, 	true, year, 		&yearUserInput));
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY, 		true, country, 		&countryUserInput));
-	movieInfoMenu.addItem( new CMenuOptionNumberChooser(LOCALE_MOVIEBROWSER_INFO_QUALITY,&quality,true,0,3));
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_LENGTH, 		true, length, 		&lengthUserInput));
-	movieInfoMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE, &parental_lockage_option, MESSAGEBOX_PARENTAL_LOCKAGE_OPTIONS, MESSAGEBOX_PARENTAL_LOCKAGE_OPTION_COUNT, true ));
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_PREVPLAYDATE, 	false, playDate));//LOCALE_FLASHUPDATE_CURRENTVERSIONDATE
-	movieInfoMenu.addItem(GenericMenuSeparatorLine);
-	//movieInfoMenu.addItem( new CMenuOptionChooser(LOCALE_VIDEOMENU_VIDEOFORMAT, &video_format_option, VIDEOMENU_VIDEOFORMAT_OPTIONS, VIDEOMENU_VIDEOFORMAT_OPTION_COUNT, true ));
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_PATH, 	false, dirItNr)); //LOCALE_TIMERLIST_RECORDING_DIR
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_RECORDDATE, 	false, recordDate));//LOCALE_FLASHUPDATE_CURRENTVERSIONDATE
-	movieInfoMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_SIZE, 		false, size,		NULL));
-
+    /* first clear screen */
+    m_pcWindow->paintBoxRel(    0,
+                                0,
+                                m_cBoxFrame.iWidth,
+                                m_cBoxFrame.iHeight,
+                                (CFBWindow::color_t)COL_BACKGROUND);
+  int i;
 /********************************************************************/
 /**  directory menu ******************************************************/
-	unsigned int drivefree = 0;
-	struct statfs s;
+    CDirMenu dirMenu(&m_dir);
 
-	CMenuWidget dirMenu (LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD , "streaming.raw");
-	dirMenu.addItem(GenericMenuSeparatorLine);
-	char storage[10][20];
-	if( m_repositoryDir.size() > 0 )
-	{
-		for(unsigned int i = 0; i < m_repositoryDir.size() && i < 10; i++)
-		{
-			if (statfs(m_repositoryDir[i].c_str(), &s) >= 0 )
-			{
-				drivefree = (s.f_bfree * s.f_bsize)>>30;
-			}
-			snprintf(storage[i], 19,"%3d GB free",drivefree);
-			dirMenu.addItem( new CMenuForwarderNonLocalized	( m_repositoryDir[i].c_str(),  false, storage[i], 		NULL));
-		}
-	}
+/********************************************************************/
+/**  options menu **************************************************/
+
 /********************************************************************/
 /**  parental lock **************************************************/
-	CMenuWidget parentalMenu (LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_HEAD , "streaming.raw");
-	parentalMenu.addItem(GenericMenuSeparator);
-	parentalMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_ACTIVATED, (int*)(&m_parentalLock), MESSAGEBOX_PARENTAL_LOCK_OPTIONS, MESSAGEBOX_PARENTAL_LOCK_OPTIONS_COUNT, true ));
-	parentalMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_RATE_HEAD, (int*)(&m_settings.parentalLockAge), MESSAGEBOX_PARENTAL_LOCKAGE_OPTIONS, MESSAGEBOX_PARENTAL_LOCKAGE_OPTION_COUNT, true ));
+    CMenuWidget parentalMenu (LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_HEAD , "streaming.raw",450);
+    parentalMenu.addItem(GenericMenuSeparator);
+    parentalMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_ACTIVATED, (int*)(&m_parentalLock), MESSAGEBOX_PARENTAL_LOCK_OPTIONS, MESSAGEBOX_PARENTAL_LOCK_OPTIONS_COUNT, true ));
+    parentalMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_RATE_HEAD, (int*)(&m_settings.parentalLockAge), MESSAGEBOX_PARENTAL_LOCKAGE_OPTIONS, MESSAGEBOX_PARENTAL_LOCKAGE_OPTION_COUNT, true ));
+
 
 /********************************************************************/
+/**  optionsVerzeichnisse  **************************************************/
+    CMenuWidget optionsMenuDir (LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD , "streaming.raw",450);
+    optionsMenuDir.addItem(GenericMenuSeparator);
+    optionsMenuDir.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_USE_REC_DIR,       (int*)(&m_settings.storageDirRecUsed), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
+    optionsMenuDir.addItem( new CMenuForwarder( LOCALE_MOVIEBROWSER_DIR , false ,g_settings.network_nfs_recordingdir));
+
+    optionsMenuDir.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_USE_MOVIE_DIR,     (int*)(&m_settings.storageDirMovieUsed), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
+    optionsMenuDir.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_DIR, false , g_settings.network_nfs_moviedir));
+    optionsMenuDir.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MOVIEBROWSER_DIR_HEAD));
+    
+    CFileChooser*       dirInput[MB_MAX_DIRS];
+    CMenuOptionChooser* chooser[MB_MAX_DIRS];
+    COnOffNotifier*     notifier[MB_MAX_DIRS];
+    CMenuForwarder*     forwarder[MB_MAX_DIRS];
+    for(i=0; i<MB_MAX_DIRS ;i++)
+    {
+        dirInput[i] =  new CFileChooser(&m_settings.storageDir[i]);
+        forwarder[i] = new CMenuForwarder(LOCALE_MOVIEBROWSER_DIR,        m_settings.storageDirUsed[i], m_settings.storageDir[i],      dirInput[i]);
+        notifier[i] =  new COnOffNotifier(forwarder[i]);
+        chooser[i] =   new CMenuOptionChooser(LOCALE_MOVIEBROWSER_USE_DIR , &m_settings.storageDirUsed[i]  , MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,notifier[i]);
+        optionsMenuDir.addItem(chooser[i] );
+        optionsMenuDir.addItem(forwarder[i] );
+        optionsMenuDir.addItem(GenericMenuSeparator);
+    }
+
+/********************************************************************/
+/**  optionsMenuBrowser  **************************************************/
+    CIntInput playMaxUserIntInput(LOCALE_MOVIEBROWSER_LAST_PLAY_MAX_ITEMS,      (long&) m_settings.lastPlayMaxItems,    3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CIntInput recMaxUserIntInput(LOCALE_MOVIEBROWSER_LAST_RECORD_MAX_ITEMS,     (long&) m_settings.lastRecordMaxItems,  3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CIntInput browserFrameUserIntInput(LOCALE_MOVIEBROWSER_BROWSER_FRAME_HIGH,  (long&) m_settings.browserFrameHeight,  4, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CIntInput browserRowNrIntInput(LOCALE_MOVIEBROWSER_BROWSER_ROW_NR,          (long&) m_settings.browserRowNr,        1, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CIntInput* browserRowWidthIntInput[MB_MAX_ROWS];
+    for(i=0; i<MB_MAX_ROWS ;i++)
+        browserRowWidthIntInput[i] = new CIntInput(LOCALE_MOVIEBROWSER_BROWSER_ROW_WIDTH,(long&) m_settings.browserRowWidth[i], 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+
+    CMenuWidget optionsMenuBrowser (LOCALE_MOVIEBROWSER_OPTION_BROWSER , "streaming.raw",480);
+    optionsMenuBrowser.addItem(GenericMenuSeparator);
+    optionsMenuBrowser.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_LAST_PLAY_MAX_ITEMS,    true, playMaxUserIntInput.getValue(),   &playMaxUserIntInput));
+    optionsMenuBrowser.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_LAST_RECORD_MAX_ITEMS,  true, recMaxUserIntInput.getValue(), &recMaxUserIntInput));
+    optionsMenuBrowser.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BROWSER_FRAME_HIGH,     true, browserFrameUserIntInput.getValue(), &browserFrameUserIntInput));
+    optionsMenuBrowser.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MOVIEBROWSER_BROWSER_ROW_HEAD));
+    optionsMenuBrowser.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BROWSER_ROW_NR,     true, browserRowNrIntInput.getValue(), &browserRowNrIntInput));
+    optionsMenuBrowser.addItem(GenericMenuSeparator);
+    for(i=0; i<MB_MAX_ROWS; i++)
+    {
+        optionsMenuBrowser.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_BROWSER_ROW_ITEM, (int*)(&m_settings.browserRowItem[i]), MESSAGEBOX_BROWSER_ROW_ITEM, MESSAGEBOX_BROWSER_ROW_ITEM_COUNT, true ));
+        optionsMenuBrowser.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BROWSER_ROW_WIDTH,    true, browserRowWidthIntInput[i]->getValue(),      browserRowWidthIntInput[i]));
+        if(i<MB_MAX_ROWS-1)
+            optionsMenuBrowser.addItem(GenericMenuSeparator);
+    }
+
+/********************************************************************/
+/**  options  **************************************************/
+
+    CMenuWidget optionsMenu (LOCALE_EPGPLUS_OPTIONS , "streaming.raw",450);
+
+    optionsMenu.addItem(GenericMenuSeparator);
+    optionsMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_LOAD_DEFAULT, true, NULL, this, "loaddefault",              CRCInput::RC_blue,  NEUTRINO_ICON_BUTTON_BLUE));
+    optionsMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_OPTION_BROWSER, true, NULL, &optionsMenuBrowser,NULL,       CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+    optionsMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD, true, NULL, &optionsMenuDir,NULL,    CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+    if(m_parentalLock != MB_PARENTAL_LOCK_OFF)
+        optionsMenu.addItem( new CLockedMenuForwarder(LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_HEAD, g_settings.parentallock_pincode, true,  true, NULL, &parentalMenu,NULL,CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+    else
+        optionsMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_HEAD,   true, NULL, &parentalMenu,NULL,CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+    optionsMenu.addItem(GenericMenuSeparatorLine);
+    optionsMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_RELOAD_AT_START,   (int*)(&m_settings.reload), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
+    optionsMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_REMOUNT_AT_START,  (int*)(&m_settings.remount), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
+    optionsMenu.addItem(GenericMenuSeparatorLine);
+    optionsMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_HIDE_SERIES,       (int*)(&m_settings.browser_serie_mode), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
+    optionsMenu.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_SERIE_AUTO_CREATE, (int*)(&m_settings.serie_auto_create), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
+    optionsMenu.addItem(GenericMenuSeparator);
+ 
+/********************************************************************/
 /**  main menu ******************************************************/
-	CMenuWidget mainMenu(LOCALE_MOVIEBROWSER_MENU_MAIN_HEAD, "streaming.raw");
-	mainMenu.addItem(GenericMenuSeparator);
-	
-	CSelectedMenu* cSelectedMenuSave = new CSelectedMenu();
-	CSelectedMenu* cSelectedMenuReload = new CSelectedMenu();
-	mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_MAIN_SAVEANDBACK, 	true,NULL,cSelectedMenuSave));
-	mainMenu.addItem(GenericMenuSeparatorLine);
-	mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_HEAD, (movie_info != NULL), NULL,		 &movieInfoMenu));
-	mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_HEAD, (movie_info != NULL), NULL,		 &bookmarkMenu));
-	mainMenu.addItem(GenericMenuSeparatorLine);
-	mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD, 	true, NULL,		&dirMenu));
-	mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_SCAN_FOR_MOVIES, 	true,NULL,cSelectedMenuReload));
-	mainMenu.addItem(GenericMenuSeparatorLine);
-	if(m_parentalLock != MB_PARENTAL_LOCK_OFF)
-		mainMenu.addItem( new CLockedMenuForwarder(LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_HEAD, g_settings.parentallock_pincode, true, 	true, NULL,	&parentalMenu));
-	else
-		mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_HEAD, 	true, NULL,	&parentalMenu));
-	CMovieHelp* movieHelp;
-	CNFSSmallMenu* nfs;
-	mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_NFS_HEAD, 		true, NULL,		nfs = new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
-	mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_HELP_HEAD,	true, NULL,		movieHelp = new CMovieHelp(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
+    CMovieHelp* movieHelp = new CMovieHelp();
+    CNFSSmallMenu* nfs =    new CNFSSmallMenu();
 
-	mainMenu.exec(NULL, "aabb");
-	if(cSelectedMenuReload->selected)
-	{
-		loadMovies();
-		refresh();
-	}	
-	
-	if(cSelectedMenuSave->selected )
-	{
-		if(movie_info != NULL)
-		{
-			//TRACE(" save...\r\n");
-			movie_info->epgTitle = epgTitle;			
-			movie_info->epgInfo1 = epgInfo1; 		
-			movie_info->genreMajor = genre; 			
-			movie_info->serieName = serieName; 		
-			movie_info->parentalLockAge = (MI_PARENTAL_LOCKAGE)parental_lockage_option; 			
-			movie_info->length = atoi(length); 			
-			movie_info->productionCountry = country; 			
-			movie_info->productionDate = atoi(year )-1900; 			
-			movie_info->epgChannel = epgChannel; 		
-			movie_info->quality =  quality;	
-			movie_info->bookmarks.end = atoi(bookEnd);
-			movie_info->bookmarks.start = atoi(bookStart);
-			movie_info->bookmarks.lastPlayStop = atoi(bookLast);
-	
-			for(int i =0 ; i < MI_MOVIE_BOOK_USER_MAX && i < MAX_NUMBER_OF_BOOKMARK_ITEMS; i++ )
-			{
-				movie_info->bookmarks.user[i].pos = 	atoi(bookPos[i]);
-				if(movie_info->bookmarks.user[i].pos == 0)
-				{
-					// Bookmark cleared, clear other infos as well
-					movie_info->bookmarks.user[i].length = 	0;
-					movie_info->bookmarks.user[i].name = 	"";
-				}
-				else
-				{
-					movie_info->bookmarks.user[i].length = 	atoi(bookType[i]);
-					movie_info->bookmarks.user[i].name = 	bookName[i];
-				}
-			}
-			m_movieInfo.saveMovieInfo( *movie_info);
-		}
-		
-		//save parental lock if not temporary 
-		if (m_parentalLock != MB_PARENTAL_LOCK_OFF_TMP)
-			m_settings.parentalLock = m_parentalLock;
-	}
+    CMenuWidget mainMenu(LOCALE_MOVIEBROWSER_MENU_MAIN_HEAD, "streaming.raw");
+    mainMenu.addItem(GenericMenuSeparator);
+    mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_INFO_HEAD, (m_movieSelectionHandler != NULL), NULL, this,   "show_movie_info_menu",    CRCInput::RC_red,    NEUTRINO_ICON_BUTTON_RED));
+    mainMenu.addItem(GenericMenuSeparatorLine);
+    mainMenu.addItem( new CMenuForwarder(LOCALE_EPGPLUS_OPTIONS,                    true, NULL, &optionsMenu,NULL,                                  CRCInput::RC_green,  NEUTRINO_ICON_BUTTON_GREEN));
+    mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD, true, NULL, &dirMenu,    NULL,                                  CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+    mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_SCAN_FOR_MOVIES,       true, NULL, this,        "reload_movie_info",                   CRCInput::RC_blue,   NEUTRINO_ICON_BUTTON_BLUE));
+    //mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_NFS_HEAD,       true, NULL, nfs,         NULL,                                  CRCInput::RC_setup,  NEUTRINO_ICON_BUTTON_DBOX_SMALL));
+    mainMenu.addItem(GenericMenuSeparatorLine);
+    mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_HELP_HEAD,        true, NULL, movieHelp,   NULL,                                  CRCInput::RC_help,   NEUTRINO_ICON_BUTTON_HELP_SMALL));
+    mainMenu.addItem(GenericMenuSeparator);
+ 
+    mainMenu.exec(NULL, " ");
 
-	updateSerienames();
-	refreshBrowserList();
-	refreshLastPlayList();	
-	refreshLastRecordList();	
-	refreshFilterList();	
-	refresh();
-	
-	for(int i =0 ; i < MI_MOVIE_BOOK_USER_MAX && i < MAX_NUMBER_OF_BOOKMARK_ITEMS; i++ )
-	{
-		delete pBookNameInputSMS[i] ;
-		delete pBookPosInputSMS[i] ;
-		delete pBookTypeInputSMS[i];
-		delete pBookItemMenu[i];
-	}
-	delete movieHelp;
-	delete nfs;
-	delete cSelectedMenuSave;
-	delete cSelectedMenuReload;
+    // post menu handling
+    if (m_parentalLock != MB_PARENTAL_LOCK_OFF_TMP)
+        m_settings.parentalLock = m_parentalLock;
+    if(m_settings.browserFrameHeight < MIN_BROWSER_FRAME_HEIGHT )
+        m_settings.browserFrameHeight = MIN_BROWSER_FRAME_HEIGHT;
+    if(m_settings.browserFrameHeight > MAX_BROWSER_FRAME_HEIGHT)
+        m_settings.browserFrameHeight = MAX_BROWSER_FRAME_HEIGHT;
+    if (m_settings.browserRowNr > MB_MAX_ROWS ) 
+        m_settings.browserRowNr = MB_MAX_ROWS;
+    if (m_settings.browserRowNr < 1 ) 
+        m_settings.browserRowNr = 1;
+    for(i = 0; i < m_settings.browserRowNr; i++)
+    {
+        if( m_settings.browserRowWidth[i] >500)
+            m_settings.browserRowWidth[i] = 500;
+        if( m_settings.browserRowWidth[i] < 10)
+            m_settings.browserRowWidth[i] = 10;
+    }
 
-	return(true);
+    if(dirMenu.isChanged())
+        loadMovies();
+
+    updateSerienames();
+    refreshBrowserList();
+    refreshLastPlayList();
+    refreshLastRecordList();
+    refreshFilterList();
+    refresh();
+
+   for(i=0; i<MB_MAX_DIRS ;i++)
+   {
+        delete dirInput[i];
+        delete notifier[i];
+   }
+
+   for(i=0; i<MB_MAX_ROWS ;i++)
+        delete browserRowWidthIntInput[i];
+
+    delete movieHelp;
+    delete nfs;
+    
+    //restart_mb_timeout = 1;
+
+    return(true);
 }
 
 /************************************************************************
@@ -3016,7 +3213,6 @@ bool CMovieBrowser::getMovieInfoItem(MI_MOVIE_INFO& movie_info, MB_INFO_ITEM ite
 	char text[20];
 	int i=0;
 	int counter=0;
-	int ac3_found = false;
 
 	switch(item)
 	{
@@ -3062,7 +3258,7 @@ bool CMovieBrowser::getMovieInfoItem(MI_MOVIE_INFO& movie_info, MB_INFO_ITEM ite
 			// we just return the number of bookmarks
 			for(i = 0; i < MI_MOVIE_BOOK_USER_MAX; i++)
 			{
-				if(movie_info.bookmarks.user[0].pos != 0) 
+				if(movie_info.bookmarks.user[i].pos != 0) 
 					counter++;
 			}
 			snprintf(text, 8,"%d",counter);
@@ -3195,27 +3391,54 @@ void CMovieBrowser::updateSerienames(void)
 	if(m_seriename_stale == false) 
 		return;
 		
-	m_serienames.clear();
+    m_vHandleSerienames.clear();
 	for(unsigned int i = 0; i < m_vMovieInfo.size(); i++)
 	{
 		if(!m_vMovieInfo[i].serieName.empty())
 		{
 			// current series name is not empty, lets see if we already have it in the list, and if not save it to the list.
 			bool found = false;
-			for(unsigned int t = 0; t < m_serienames.size() && found == false; t++)
+            for(unsigned int t = 0; t < m_vHandleSerienames.size() && found == false; t++)
 			{
-				if(strcmp(m_serienames[t].c_str(),m_vMovieInfo[i].serieName.c_str()) == 0)
+                if(strcmp(m_vHandleSerienames[t]->serieName.c_str(),m_vMovieInfo[i].serieName.c_str()) == 0)
 					found = true;
 			}
 			if(found == false)
-				m_serienames.push_back(m_vMovieInfo[i].serieName);
+                m_vHandleSerienames.push_back(&m_vMovieInfo[i]);
 		}
 	}
-	TRACE("[mb]->updateSerienames: %d\r\n",m_serienames.size());
+    TRACE("[mb]->updateSerienames: %d\r\n",m_vHandleSerienames.size());
 	// TODO sort(m_serienames.begin(), m_serienames.end(), my_alphasort);
 	m_seriename_stale = false;
 }	
 
+void CMovieBrowser::autoFindSerie(void)
+{
+    TRACE("autoFindSerie\n");
+    updateSerienames(); // we have to make sure that the seriename array is up to date, otherwise this does not work
+                        // if the array is not stale, the function is left immediately
+    for(unsigned int i = 0; i < m_vMovieInfo.size(); i++)
+    {
+        // For all movie infos, which do not have a seriename, we try to find one.
+        // We search for a movieinfo with seriename, and than we do check if the title is the same
+        // in case of same title, we assume both belongs to the same serie
+        //TRACE("%s ",m_vMovieInfo[i].serieName);
+        if( m_vMovieInfo[i].serieName.empty())
+        {
+            for(unsigned int t=0; t < m_vHandleSerienames.size();t++)
+            {
+                //TRACE("%s ",m_vHandleSerienames[i].serieName);
+                if(m_vMovieInfo[i].epgTitle == m_vHandleSerienames[t]->epgTitle )
+                {
+                    //TRACE("x");
+                    m_vMovieInfo[i].serieName = m_vHandleSerienames[t]->serieName;
+                    break; // we  found a maching serie, nothing to do else, leave for(t=0)
+                }
+            }
+         //TRACE("\n");
+        }
+    }
+}
 
 /************************************************************************
 
@@ -3224,11 +3447,25 @@ void CMovieBrowser::updateSerienames(void)
 CMenuSelector::CMenuSelector(const char * OptionName, const bool Active , char * OptionValue, int* ReturnInt ,int ReturnIntValue ) : CMenuItem()
 {
 	height     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+    optionValueString = NULL;
 	optionName = 		OptionName;
 	optionValue = 		OptionValue;
 	active = 			Active;
 	returnIntValue =	ReturnIntValue;
 	returnInt = 		ReturnInt;
+};
+
+CMenuSelector::CMenuSelector(const char * OptionName, const bool Active , std::string& OptionValue, int* ReturnInt ,int ReturnIntValue ) : CMenuItem()
+{
+    height     = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+    optionValueString = &OptionValue;
+    optionName =        OptionName;
+    strncpy(buffer,OptionValue.c_str(),BUFFER_MAX);
+    buffer[BUFFER_MAX-1] = 0;// terminate string
+    optionValue =       buffer;
+    active =            Active;
+    returnIntValue =    ReturnIntValue;
+    returnInt =         ReturnInt;
 };
 
 int CMenuSelector::exec(CMenuTarget* parent)
@@ -3238,7 +3475,10 @@ int CMenuSelector::exec(CMenuTarget* parent)
 		
 	if(optionValue != NULL && optionName != NULL) 
 	{
+        if(optionValueString == NULL)
 		strcpy(optionValue,optionName); 
+        else
+            *optionValueString = optionName;
 	}
 	return menu_return::RETURN_EXIT;
 };
@@ -3289,11 +3529,210 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, " Markierungsmenu ");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.9 $");
+	helpbox.addLine("MovieBrowser $Revision: 1.10 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
 }
 
 
+/////////////////////////////////////////////////
+// MenuTargets
+////////////////////////////////////////////////
+int CFileChooser::exec(CMenuTarget* parent, const std::string & actionKey)
+{
+    if(parent != NULL)
+    	parent->hide();
+    CFileBrowser browser;
+    browser.Dir_Mode=true;
+    if (browser.exec(dirPath->c_str()))
+    {
+        *dirPath = browser.getSelectedFile()->Name;
+        short a = dirPath->compare(0,5,"/mnt/");
+        short b = dirPath->compare(0,4,"/hdd");
+        if(a != 0 && b != 0)
+            *dirPath ="";   // We clear the  string if the selected folder is not at leaset /mnt/ or /hdd (There is no other possibility to clear this) 
+    }
+        
+    return menu_return::RETURN_REPAINT;
+}
 
+CDirMenu::CDirMenu(std::vector<MB_DIR>* dir_list)
+{
+    int i;
+    changed = false;
+    dirList = dir_list;
+
+    if( dirList->empty())
+        return;
+
+    for(i = 0; i < MAX_DIR; i++)
+        dirNfsMountNr[i]=-1;
+
+    for(i = 0; i < dirList->size() && i < MAX_DIR; i++)
+    {
+        for(int nfs = 0; nfs < NETWORK_NFS_NR_OF_ENTRIES; nfs++)
+        {
+            std::string tmp = g_settings.network_nfs_local_dir[nfs];
+            int result = (*dirList)[i].name.compare( 0,tmp.size(),tmp) ;
+            //printf("[CDirMenu] (nfs%d) %s == (mb%d) %s (%d)\n",nfs,g_settings.network_nfs_local_dir[nfs],i,(*dirList)[i].name.c_str(),result);
+            
+            if(result == 0)
+            {
+                dirNfsMountNr[i] = nfs;
+                break;
+            }
+         }
+    }
+};
+
+int CDirMenu::exec(CMenuTarget* parent, const std::string & actionKey)
+{
+    int returnval = menu_return::RETURN_REPAINT;
+
+    if(actionKey == "")
+    {
+        if(parent)
+            parent->hide();
+
+        changed = false;
+        show();
+    }
+    else if(actionKey.size() == 1)
+    {
+        printf("[CDirMenu].exec %s\n",actionKey.c_str());
+        int number = atoi(actionKey.c_str());
+        if(number < MAX_DIR)
+        {
+            if(dirState[number] == DIR_STATE_SERVER_DOWN)
+            {
+                std::string command = "etherwake ";
+                command += g_settings.network_nfs_mac[dirNfsMountNr[number]];
+                printf("try to start server: %s\n",command.c_str());
+                if(system(command.c_str()) != 0)
+                    perror("etherwake failed");
+
+                dirOptionText[number]="STARTE SERVER";
+            }
+            else if(dirState[number] == DIR_STATE_NOT_MOUNTED)
+            {
+                printf("[CDirMenu] try to mount %d,%d\n",number,dirNfsMountNr[number]);
+                CFSMounter::MountRes res;
+                res = CFSMounter::mount(  g_settings.network_nfs_ip[dirNfsMountNr[number]].c_str(),
+                                    g_settings.network_nfs_dir[dirNfsMountNr[number]] ,
+                                    g_settings.network_nfs_local_dir[dirNfsMountNr[number]] ,
+                                    (CFSMounter::FSType)g_settings.network_nfs_type[dirNfsMountNr[number]] ,
+                                    g_settings.network_nfs_username[dirNfsMountNr[number]] ,
+                                    g_settings.network_nfs_password[dirNfsMountNr[number]] ,
+                                    g_settings.network_nfs_mount_options1[dirNfsMountNr[number]] ,
+                                    g_settings.network_nfs_mount_options2[dirNfsMountNr[number]] );
+                if(res ==  CFSMounter::MRES_OK) // if mount is successful we set the state to active in any case
+                {
+                    *(*dirList)[number].used = true;
+                }
+                // try to mount
+                updateDirState();
+                changed = true;
+            }
+            else if(dirState[number] == DIR_STATE_MOUNTED)
+            {
+                if(*(*dirList)[number].used == true)
+                {
+                    *(*dirList)[number].used = false;
+                }
+                else
+                {
+                    *(*dirList)[number].used = true;
+                }
+                //CFSMounter::umount(g_settings.network_nfs_local_dir[dirNfsMountNr[number]]);
+                updateDirState();
+                changed = true;
+            }
+        }
+    }
+    return returnval;
+}
+
+void CDirMenu::updateDirState(void)
+{
+    unsigned int drivefree = 0;
+    struct statfs s;
+
+    for(unsigned int i = 0; i < dirList->size() && i < MAX_DIR; i++)
+    {
+         dirOptionText[i]="UNBEKANNT";
+         dirState[i]=DIR_STATE_UNKNOWN;
+        // 1st ping server
+        if(dirNfsMountNr[i] != -1)
+        {
+            int retvalue = pinghost(g_settings.network_nfs_ip[dirNfsMountNr[i]].c_str());
+            if (retvalue == 0)//LOCALE_PING_UNREACHABLE
+            {
+                dirOptionText[i]="SERVER AUS";
+                dirState[i]=DIR_STATE_SERVER_DOWN;
+            }
+            else if (retvalue == 1)//LOCALE_PING_OK
+            {
+                if(CFSMounter::isMounted (g_settings.network_nfs_local_dir[dirNfsMountNr[i]]) == 0)
+                {
+                    dirOptionText[i]="NICHT VERB.";
+                    dirState[i]=DIR_STATE_NOT_MOUNTED;
+               }
+                else
+                {
+                      dirState[i]=DIR_STATE_MOUNTED;
+                }
+            }
+        }
+        else
+        {
+            // not a nfs dir, probably IDE? we accept this so far
+            dirState[i]=DIR_STATE_MOUNTED;
+        }
+        if(dirState[i] == DIR_STATE_MOUNTED)
+        {
+            if(*(*dirList)[i].used == true)
+            {
+                if (statfs((*dirList)[i].name.c_str(), &s) >= 0 )
+                {
+                drivefree = (s.f_bfree * s.f_bsize)>>30;
+                char tmp[20];
+                snprintf(tmp, 19,"%3d GB frei",drivefree);
+                tmp[19]=0;
+                dirOptionText[i]=tmp;
+                }
+                else
+                {
+                    dirOptionText[i]="? GB frei";
+                }
+            }
+            else
+            {
+                dirOptionText[i] = "INAKTIV";
+            }
+        }
+    }
+}
+
+
+void CDirMenu::show(void)
+{
+    if(dirList->empty())
+        return;
+
+    char tmp[20];
+
+    CMenuWidget dirMenu (LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD , "streaming.raw",440);
+    dirMenu.addItem(GenericMenuSeparator);
+
+    updateDirState();
+    for(unsigned int i = 0; i < dirList->size() && i < MAX_DIR; i++)
+    {
+        sprintf(tmp,"%d",i);
+        tmp[1]=0;
+        dirMenu.addItem( new CMenuForwarderNonLocalized ( (*dirList)[i].name.c_str(),       (dirState[i] != DIR_STATE_UNKNOWN), dirOptionText[i],       this,tmp));
+    }
+    dirMenu.exec(NULL," ");
+  return;
+
+}
