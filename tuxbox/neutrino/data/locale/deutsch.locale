@@ -551,7 +551,7 @@ moviebrowser.option_browser Anzeigeoptionen
 moviebrowser.book_clear_all Lösche alle
 moviebrowser.menu_save Veränderungen speichern
 moviebrowser.menu_save_all Starte Übernahme in allen sichtbaren Filminfos
-moviebrowser.info_head_update Starte Inhalte in allen sichtbaren Filminfos speichern
+moviebrowser.info_head_update Inhalte in allen sichtbaren Filminfos speichern
 moviebrowser.update_if_dest_empty_only Übernehme nur wenn Ziel leer
 moviebrowser.serie_auto_create Serien automatisch zuordnen
 moviebrowser.load_default Lade Voreinstellung
