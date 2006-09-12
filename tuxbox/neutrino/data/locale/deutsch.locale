@@ -333,8 +333,8 @@ flashupdate.globalprogress Gesamtstatus:
 flashupdate.head Aktualisierung
 flashupdate.md5check Imageprüfung
 flashupdate.md5sumerror Das Image ist fehlerhaft
-flashupdate.msgbox Es wurde folgendes neues Image gefunden:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWollen Sie diese Version jetzt herunterladen\nund installieren?
-flashupdate.msgbox_manual Es wurde ein neues Image gefunden:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWollen Sie diese Version jetzt installieren?
+flashupdate.msgbox Es wurde folgendes neues Update gefunden:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWollen Sie diese Version jetzt herunterladen\nund installieren?
+flashupdate.msgbox_manual Es wurde ein neues Update gefunden:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWollen Sie diese Version jetzt installieren?
 flashupdate.mtdselector Partitions-Auswahl
 flashupdate.programmingflash programmiere Flash
 flashupdate.proxypassword Passwort
@@ -352,7 +352,7 @@ flashupdate.readflashmtd einzelne Partition auslesen
 flashupdate.ready fertig
 flashupdate.reallyflashmtd Wollen Sie den Flashvorgang wirklich durchführen?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionfähig ist, wird Ihre DBox nicht mehr booten.\n\nImagename: %s\nZiel: %s
 flashupdate.savesuccess Das Image wurde erfolgreich unter dem\nDateinamen %s gespeichert.
-flashupdate.selectimage Verfügbare Images
+flashupdate.selectimage Verfügbare Updates
 flashupdate.squashfs.noversion Bei SquashFS Updates werden Versionsüberprüfungen\nderzeit nur bei Web-Updates unterstützt.\nWollen Sie das ausgewählt Image wirklich installieren?
 flashupdate.titlereadflash Flash auslesen
 flashupdate.titlewriteflash Flash schreiben
