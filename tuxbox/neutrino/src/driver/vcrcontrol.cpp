@@ -682,6 +682,10 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		sptsmode = false;
 	}
 
+	if (actmode == 1 && g_settings.recording_in_spts_mode && !sptsmode && mode == 1) {
+		sptsmode = true;
+	}
+
 #define MAXPIDS		64
 	unsigned short pids[MAXPIDS];
 	unsigned int numpids;
