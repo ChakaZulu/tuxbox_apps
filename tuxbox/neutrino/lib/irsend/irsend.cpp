@@ -5,6 +5,10 @@
 	License: GPL
 
 	Aenderungen: $Log: irsend.cpp,v $
+	Aenderungen: Revision 1.4  2006/09/13 19:30:16  houdini
+	Aenderungen: fixed SEND_ONCE in lirc
+	Aenderungen: see http://forum.tuxbox.org/forum/viewtopic.php?p=312244#312244
+	Aenderungen:
 	Aenderungen: Revision 1.3  2004/02/19 23:07:29  zwen
 	Aenderungen: removed debug printf
 	Aenderungen:
@@ -98,7 +102,7 @@ bool CIRSend::Send()
 							if(duration > 0)
 								status+=lirc.SendUsecs(deviceName, line.substr(space_pos1+1,space_pos2-space_pos1-1).c_str(),duration*1000);
 							else
-								status+=lirc.SendOnce(deviceName, buffer);
+								status+=lirc.SendOnce(deviceName, line.substr(space_pos1+1,space_pos2-space_pos1-1).c_str());
 						}
 					}
 				}
