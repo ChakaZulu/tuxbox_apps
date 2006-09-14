@@ -333,8 +333,8 @@ flashupdate.globalprogress Global Progress:
 flashupdate.head Software Update
 flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors
-flashupdate.msgbox Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to download and install this version now?
-flashupdate.msgbox_manual Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to install this version now?
+flashupdate.msgbox Found the following new update:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to download and install this version now?
+flashupdate.msgbox_manual Found the following new update:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to install this version now?
 flashupdate.mtdselector Partition-Selector
 flashupdate.programmingflash programming flash
 flashupdate.proxypassword Password
@@ -352,7 +352,7 @@ flashupdate.readflashmtd Read one partition
 flashupdate.ready ready
 flashupdate.reallyflashmtd Do you really want to flash?\n\nIf a error occurs or the image is not\nvalid, the box will not boot after flashing.\n\nImagename: %s\nTarget: %s
 flashupdate.savesuccess The image was successfully saved \nunder %s.
-flashupdate.selectimage Available Images
+flashupdate.selectimage Available updates
 flashupdate.squashfs.noversion SquashFS version checks are currently only supported when updating over the web.\nAre you sure that you wish to install this image?
 flashupdate.titlereadflash Reading Flash
 flashupdate.titlewriteflash Writing Flash
