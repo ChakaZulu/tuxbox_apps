@@ -17,6 +17,8 @@
 // system
 #include <netinet/in.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
+
 // yhttpd
 #include "yconfig.h"
 #include "ytypes_globals.h"
@@ -67,6 +69,7 @@ public:
 	void 		clear_Thread_List_Number(int number)// Set Entry(number)to NULL in Threadlist 
 				{if(number <HTTPD_MAX_CONNECTIONS)Connection_Thread_List[number]=(pthread_t)NULL;}
 	void		close_socket(SOCKET thisSocket);	// closes socket by application
+	void		addSocketToMasterSet(SOCKET fd) {FD_SET(fd, &master);} 
 };
 
 #endif // __yhttpd_ywebserver_h__

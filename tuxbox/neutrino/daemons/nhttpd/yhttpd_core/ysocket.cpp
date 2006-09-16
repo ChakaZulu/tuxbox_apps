@@ -144,7 +144,7 @@ void CySocket::close(void)
 {
 	if(sock != 0 && sock != INVALID_SOCKET)
 		::close(sock);
-//	sock = 0;
+	sock = 0;
 	isOpened = false;
 }
 //-----------------------------------------------------------------------------
@@ -375,6 +375,7 @@ std::string CySocket::ReceiveBlock()
 		tmp.assign(buffer, bytes_gotten);
 		result += tmp;				//TODO: use append?
 	}
+	//TODO:raus:aprintf("rblock:(%s)\n",result.c_str());
 	return result;
 }
 
@@ -385,7 +386,7 @@ std::string CySocket::ReceiveLine()
 {
 	char buffer[MAX_LINE_BUFFER];
 	int bytes_gotten = 0;
-	std::string result;
+	std::string result="";
 	while(true)
 	{
 		// read one char		

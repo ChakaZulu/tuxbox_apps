@@ -28,8 +28,8 @@
 //-----------------------------------------------------------------------------
 // General central Definitions <configure!>
 //-----------------------------------------------------------------------------
-#define HTTPD_VERSION 		"3.0.0"				// Webserver version  (can be overloaded)
-#define YHTTPD_VERSION 		"1.0.0"				// Webserver version  (Version of yhttpd-core!)
+#define HTTPD_VERSION 		"3.0.0pre5"			// Webserver version  (can be overloaded)
+#define YHTTPD_VERSION 		"1.0.0pre3"			// Webserver version  (Version of yhttpd-core!)
 #define IADDR_LOCAL 		"127.0.0.1"			// local IP
 #define HTTPD_NAME 		"yhttpd"			// Webserver name (can be overloaded)
 #define YHTTPD_NAME 		"yhttpd_core"			// Webserver name (Name of yhttpd-core!)
@@ -49,6 +49,8 @@
 //#define Y_CONFIG_HAVE_HTTPD_ERRORPAGE y			// Have an HTTPD Error Page
 #define Y_CONFIG_FEATURE_SHOW_SERVER_CONFIG y			// Add Feature (in yParser): add /y/server-config
 //#define Y_CONFIG_USE_OPEN_SSL y					// Add Feature: use openSSL
+//#define Y_CONFIG_FEATURE_KEEP_ALIVE y				// Add Feature: Keep-alive
+
 //-----------------------------------------------------------------------------
 // Define/Undefine Features forced by CONFIG_SYSTEM_xxx
 // Dependencies

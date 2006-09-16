@@ -41,7 +41,7 @@ CWebserverRequest::CWebserverRequest(CWebserver *pWebserver)
 //-----------------------------------------------------------------------------
 bool CWebserverRequest::HandleRequest(void)
 {
-	std::string tmp_line;
+	std::string tmp_line="";
 	// read first line
 	do
 	{
@@ -85,8 +85,10 @@ bool CWebserverRequest::HandleRequest(void)
 		Connection->Response.SendHeader(HTTP_CONTINUE); // POST Requests requires CONTINUE in HTTP/1.1
 		return HandlePost();
 	}
+#ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
 	if(Connection->Request.HeaderList["Keep_Alive"] == "close")
 		Connection->keep_alive = false;
+#endif
 	return true;
 }
 
@@ -102,7 +104,7 @@ bool CWebserverRequest::ParseStartLine(std::string start_line)
 {
 	std::string method,url,http,tmp;
 
-	log_level_printf(8,"<ParseStartLine>: line: %s\n", start_line.c_str() );
+	log_level_printf(1,"<ParseStartLine>: line: %s\n", start_line.c_str() );//TPDO:level back to 8
 	if(ySplitString(start_line," ",method,tmp))
 	{
 		if(ySplitString(tmp," ",url,Connection->httprotocol))

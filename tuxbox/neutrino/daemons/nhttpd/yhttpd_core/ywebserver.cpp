@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-
+#include <fcntl.h>
 // tuxbox
 #include <configfile.h>
 
@@ -111,7 +111,7 @@ bool CWebserver::run(void)
 		dperror("Socket cannot bind and listen. Abort.\n");
 		return false;
 	}
-
+#ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
 	// initialize values for select
 	int listener = ySock.get_socket();
 	int fdmax;        		// maximum file descriptor number
@@ -119,7 +119,7 @@ bool CWebserver::run(void)
     	struct timeval tv;		// timeout struct
 	FD_SET(listener, &master);	// add the listener to the master set
 	fdmax = listener;		// init max fd
-
+	fcntl(listener, F_SETFD , O_NONBLOCK); // listener master socket non-blocking
 	// main Webserver Loop
 	while(!terminate)
 	{
@@ -156,7 +156,7 @@ bool CWebserver::run(void)
 			{ // we got one!!
 				if (i == listener)	// handle new connections
 				{
-					log_level_printf(6,"FD: new con fd:%d\n",i);
+					log_level_printf(2,"FD: new con fd:%d\n",i);
 			 		if(!(connectionSock = ySock.accept() ))	//Blocking wait
 					{
 						dperror("Socket accept error. Continue.\n");
@@ -165,29 +165,48 @@ bool CWebserver::run(void)
 					}
 					else
 					{	// Add Socket to List
-						newfd = connectionSock->get_socket();
-						FD_SET(newfd, &master); 	// add to master set
-						if (newfd > fdmax)    		// keep track of the maximum
-							fdmax = newfd;
+						bool free_slot_found = false;
 						for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
 							if(SocketList[j] == NULL)
 							{
 								SocketList[j]=connectionSock; // put it to list
+								free_slot_found = true;
 								break;
 							}
+						if(!free_slot_found)
+						{
+							connectionSock->close();
+							aprintf("No free Slot in SocketList found\n");
+						}
+						else
+						{
+							newfd = connectionSock->get_socket();
+//							FD_SET(newfd, &master); 	// add to master set
+							if (newfd > fdmax)    		// keep track of the maximum
+								fdmax = newfd;
+						}
 					}
 				}
 				else // Connection on an existing open Socket
 				{
+					bool slot_found = false;
 					for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
 						if(SocketList[j] != NULL 			// here is a socket
-							&& SocketList[j]->get_socket() == i 	// we know that socket
-							&& !SocketList[j]->handling) 		// it is not handled (else a connection-thread is handing this socket)
+							&& SocketList[j]->get_socket() == i) 	// we know that socket
 						{
-							connectionSock = SocketList[j];		// get socket to re-use
-							log_level_printf(6,"FD: find con fd:%d\n",i);
+							if(!SocketList[j]->handling)		// it is not handled (else a connection-thread is handing this socket)
+							{
+								connectionSock = SocketList[j];		// get socket to re-use
+								log_level_printf(2,"FD: find con fd:%d\n",i);
+							}
+							slot_found = true;
 							break;
 						}
+					if(!slot_found)
+					{
+						connectionSock->close();
+						aprintf("Socket exists in FD_SET: No Slot in SocketList found\n");
+					}
 				}
 			}
 		}
@@ -200,6 +219,19 @@ bool CWebserver::run(void)
 			handle_connection(connectionSock);	// handle this activity
 		}
 	}
+#else
+	while(!terminate)
+	{
+		CySocket *newConnectionSock;
+		if(!(newConnectionSock = ySock.accept() ))	//Now: Blocking wait
+		{
+			dperror("Socket accept error. Continue.\n");
+			continue;
+		}
+		log_level_printf(3,"Socket connect from %s\n", (ySock.get_client_ip()).c_str() );
+		handle_connection(newConnectionSock);
+	}
+#endif
 	return true;
 }
 //-----------------------------------------------------------------------------
@@ -292,11 +324,16 @@ void *WebThread(void *args)
 
 	// (3) end connection handling
 	con->sock->handling = false; 	// socket can be handled by webserver main loop (select) again
-	if(!con->keep_alive)
+#ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
+	if(!con->keep_alive)//TODO
 		ws->close_socket(con->sock->get_socket());
+	else
+		ws->addSocketToMasterSet(con->sock->get_socket()); 	// add to master set
 	if(is_threaded)
 		dprintf("-- Thread 0x06%X beendet\n",(int)pthread_self());
-
+#else
+	delete newConn->ySock;
+#endif
 	// end thread
 	if(is_threaded)
 		ws->clear_Thread_List_Number(newConn->thread_number);

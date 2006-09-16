@@ -28,7 +28,9 @@ CWebserverConnection::CWebserverConnection(CWebserver *pWebserver)
 	Method 			= M_UNKNOWN;
 	HttpStatus 		= 0;
 	RequestCanceled 	= false;
+#ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
 	keep_alive 		= true;
+#endif
 }
 //-------------------------------------------------------------------------
 CWebserverConnection::CWebserverConnection()
@@ -50,6 +52,9 @@ void CWebserverConnection::EndConnection()
 {
 	HookHandler.Hooks_EndConnection();	// Handle Hooks
 	RequestCanceled = true;
+#ifndef Y_CONFIG_FEATURE_KEEP_ALIVE
+	sock->close();
+#endif
 }
 //-------------------------------------------------------------------------
 // Main
@@ -79,10 +84,13 @@ void CWebserverConnection::HandleConnection()
 		log_level_printf(1,"enlapsed time request:%ld response:%ld url:%s\n",
 			enlapsed_request, enlapsed_response, (Request.UrlData["fullurl"]).c_str());
 
-		EndConnection();
 	}
 	else
+	{
+		keep_alive = false;		// close this connection socket
 		dperror("Error while parsing request\n");
+	}
+	EndConnection();
 }
 //-------------------------------------------------------------------------
 void CWebserverConnection::ShowEnlapsedRequest(char *text)

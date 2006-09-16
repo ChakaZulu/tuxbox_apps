@@ -209,10 +209,13 @@ void CWebserverResponse::SendHeader(HttpResponseType responseType, bool cache, s
 			strftime(timeStr, sizeof(timeStr), RFC1123FMT, gmtime(&timer));
 			printf("Date: %s\r\n", timeStr);
 			// connection type
+#ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
 			WriteLn("Connection: keep-alive");
-			//TODO: Content_length at errors
-			//TODO:FD WriteLn("Connection: close");
+#else
+			WriteLn("Connection: close");
+#endif
 			// content-len, last-modified
+			//TODO: Content_length at errors
 			if(responseType == HTTP_NOT_MODIFIED ||responseType == HTTP_NOT_FOUND)
 				WriteLn("Content-Length: 0");
 			else if(obj_content_len >0)
@@ -234,6 +237,9 @@ void CWebserverResponse::SendHeader(HttpResponseType responseType, bool cache, s
 		case HTTP_ACCEPTED:
 		case HTTP_NO_CONTENT:
 		case HTTP_NOT_FOUND:
+			break;
+			
+		case HTTP_INTERNAL_SERVER_ERROR:
 			break;
 
 		case HTTP_MOVED_TEMPORARILY:
