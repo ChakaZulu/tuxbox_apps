@@ -1,6 +1,0 @@
-version=2.0.2
-date=08.07.2006
-type=Release
-info=
-
-
