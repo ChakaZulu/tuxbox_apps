@@ -115,6 +115,7 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 	}
+	yhttpd->flag_threading_off = true; //FIXME: Problem with multplexing socket to Threads
 	// setup signal catching (subscribing)
 	signal(SIGPIPE, sig_catch);
 	signal(SIGINT, sig_catch);
