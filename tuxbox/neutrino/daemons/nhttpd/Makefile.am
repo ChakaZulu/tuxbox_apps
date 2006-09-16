@@ -1,8 +1,11 @@
-SUBDIRS = data data-alt2 nhttpd-y
+SUBDIRS = yhttpd_core yhttpd_mods tuxboxapi web
 
 INCLUDES = \
 	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/daemons/nhttpd30/yhttpd_core \
+	-I$(top_srcdir)/daemons/nhttpd30/yhttpd_mods \
+	-I$(top_srcdir)/daemons/nhttpd30/tuxboxapi \
 	@FREETYPE_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
 	@CONNECTION_CFLAGS@ \
@@ -10,14 +13,17 @@ INCLUDES = \
 
 bin_PROGRAMS = nhttpd
 
-nhttpd_SOURCES = \
-	controlapi.cpp bouqueteditapi.cpp debug.cpp helper.cpp \
-	nhttpd.cpp request.cpp webapi.cpp webdbox.cpp webserver.cpp lcdapi.cpp yapi.cpp
+nhttpd_SOURCES = yhttpd.cpp
 
 nhttpd_LDADD = \
+	tuxboxapi/libnhttpd_tuxboxapi.a \
+	yhttpd_mods/libyhttpdmods.a \
+	yhttpd_core/libyhttpd.a \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
+##	$(top_builddir)/lib/libcrypto.so \
+##	$(top_builddir)/lib/libssl.so \
 	@LCDDISPLAY_LIBS@ \
 	@FREETYPE_LIBS@ \
 	@CONFIGFILE_LIBS@ \
