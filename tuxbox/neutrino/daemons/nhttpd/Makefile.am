@@ -3,9 +3,9 @@ SUBDIRS = yhttpd_core yhttpd_mods tuxboxapi web
 INCLUDES = \
 	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/daemons/nhttpd30/yhttpd_core \
-	-I$(top_srcdir)/daemons/nhttpd30/yhttpd_mods \
-	-I$(top_srcdir)/daemons/nhttpd30/tuxboxapi \
+	-I$(top_srcdir)/daemons/nhttpd/yhttpd_core \
+	-I$(top_srcdir)/daemons/nhttpd/yhttpd_mods \
+	-I$(top_srcdir)/daemons/nhttpd/tuxboxapi \
 	@FREETYPE_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
 	@CONNECTION_CFLAGS@ \

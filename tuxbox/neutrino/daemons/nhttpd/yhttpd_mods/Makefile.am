@@ -3,8 +3,8 @@
 INCLUDES = \
 	-I$(top_srcdir)/lib \
 	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/daemons/nhttpd30 \
-	-I$(top_srcdir)/daemons/nhttpd30/yhttpd_core \
+	-I$(top_srcdir)/daemons/nhttpd \
+	-I$(top_srcdir)/daemons/nhttpd/yhttpd_core \
 	@FREETYPE_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
 	@CONNECTION_CFLAGS@ \
