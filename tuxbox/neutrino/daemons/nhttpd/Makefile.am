@@ -22,8 +22,6 @@ nhttpd_LDADD = \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
-##	$(top_builddir)/lib/libcrypto.so \
-##	$(top_builddir)/lib/libssl.so \
 	@LCDDISPLAY_LIBS@ \
 	@FREETYPE_LIBS@ \
 	@CONFIGFILE_LIBS@ \
