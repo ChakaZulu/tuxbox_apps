@@ -16,9 +16,9 @@ bin_PROGRAMS = nhttpd
 nhttpd_SOURCES = yhttpd.cpp
 
 nhttpd_LDADD = \
-	tuxboxapi/libnhttpd_tuxboxapi.a \
-	yhttpd_mods/libyhttpdmods.a \
-	yhttpd_core/libyhttpd.a \
+	$(top_srcdir)/daemons/nhttpd/tuxboxapi/libnhttpd_tuxboxapi.a \
+	$(top_srcdir)/daemons/nhttpd/yhttpd_mods/libyhttpdmods.a \
+	$(top_srcdir)/daemons/nhttpd/yhttpd_core/libyhttpd.a \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
