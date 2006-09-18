@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.135 2006/09/11 21:42:05 guenther Exp $
+  $Id: movieplayer.cpp,v 1.136 2006/09/18 18:02:12 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -3761,7 +3761,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- jump to end --
 			case CRCInput::RC_8:
 				g_jumpseconds = PF_JMP_END;  // dirty hack 2
-				g_playstate = CMoviePlayerGui::JF;
+				g_playstate = CMoviePlayerGui::JPOS;
 				update_lcd = true;
 				FileTime.hide();
 				break;
@@ -4221,7 +4221,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.135 $");
+	helpbox.addLine("Version: $Revision: 1.136 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4243,7 +4243,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.135 $");
+	helpbox.addLine("Version: $Revision: 1.136 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
