@@ -352,7 +352,7 @@ void CControlAPI::ExecCGI(CyhookHandler *hh)
 //-----------------------------------------------------------------------------
 void CControlAPI::SystemCGI(CyhookHandler *hh)
 {
-	if (hh->ParamList.size() >= 1)
+	if (!(hh->ParamList.empty()))
 	{
 
 		if (hh->ParamList["1"] == "getAViAExtIec")
@@ -389,7 +389,7 @@ void CControlAPI::SystemCGI(CyhookHandler *hh)
 //-----------------------------------------------------------------------------
 void CControlAPI::StandbyCGI(CyhookHandler *hh)
 {
-	if (hh->ParamList.size() == 1)
+	if (!(hh->ParamList.empty()))
 	{
 		if (hh->ParamList["1"] == "on")	// standby mode on
 			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_HTTPD);
@@ -404,7 +404,7 @@ void CControlAPI::StandbyCGI(CyhookHandler *hh)
 //-----------------------------------------------------------------------------
 void CControlAPI::RCCGI(CyhookHandler *hh)
 {
-	if (hh->ParamList.size() == 1)
+	if (!(hh->ParamList.empty()))
 	{
 		if (hh->ParamList["1"] == "lock")	// lock remote control
 			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::LOCK_RC, CEventServer::INITID_HTTPD);
@@ -893,28 +893,25 @@ void CControlAPI::VolumeCGI(CyhookHandler *hh)
 {
 	if (hh->ParamList.empty()) //without param: show actual volumen
 		hh->printf("%d", NeutrinoAPI->Controld->getVolume()); 
-	else if (hh->ParamList.size() == 1)
+	else if (hh->ParamList["1"].compare("mute") == 0)
 	{
-		if (hh->ParamList["1"].compare("mute") == 0)
-		{
-			NeutrinoAPI->Controld->setMute(true);
-			hh->SendOk();
-		}
-		else if (hh->ParamList["1"].compare("unmute") == 0)
-		{
-			NeutrinoAPI->Controld->setMute(false);
-			hh->SendOk();
-		}
-		else if (hh->ParamList["1"].compare("status") == 0)
-		{
-			hh->Write((char *) (NeutrinoAPI->Controld->getMute() ? "1" : "0"));	//  mute
-		}
-		else
-		{	//set volume
-			char vol = atol( hh->ParamList["1"].c_str() );
-			NeutrinoAPI->Controld->setVolume(vol);
-			hh->SendOk();
-		}
+		NeutrinoAPI->Controld->setMute(true);
+		hh->SendOk();
+	}
+	else if (hh->ParamList["1"].compare("unmute") == 0)
+	{
+		NeutrinoAPI->Controld->setMute(false);
+		hh->SendOk();
+	}
+	else if (hh->ParamList["1"].compare("status") == 0)
+	{
+		hh->Write((char *) (NeutrinoAPI->Controld->getMute() ? "1" : "0"));	//  mute
+	}
+	else if(hh->ParamList["1"]!="")
+	{	//set volume
+		char vol = atol( hh->ParamList["1"].c_str() );
+		NeutrinoAPI->Controld->setVolume(vol);
+		hh->SendOk();
 	}
 	else
 		hh->SendError();
@@ -1026,7 +1023,7 @@ void CControlAPI::EpgCGI(CyhookHandler *hh)
 						event->description.c_str());
 		}
 	}
-	else if (hh->ParamList.size() == 1)
+	else if (hh->ParamList["xml"].empty())
 	{
 		if (hh->ParamList["1"] == "ext")
 		{
@@ -1199,7 +1196,7 @@ void CControlAPI::ZaptoCGI(CyhookHandler *hh)
 				NeutrinoAPI->Zapit->getCurrentServiceID());
 		return;
 	}
-	else if (hh->ParamList.size() == 1)
+	else
 	{
 		if (hh->ParamList["1"] == "getpids")		// getpids !
 			SendcurrentVAPid(hh);
@@ -1280,7 +1277,7 @@ void CControlAPI::ZaptoCGI(CyhookHandler *hh)
 void CControlAPI::StartPluginCGI(CyhookHandler *hh)
 {
 	std::string pluginname;
-	if (hh->ParamList.size() == 1)
+	if (!(hh->ParamList.empty()))
 	{
 		if (hh->ParamList["name"] != "")
 		{
@@ -1965,10 +1962,8 @@ void CControlAPI::doNewTimer(CyhookHandler *hh)
 	// update or add timer
 	if(hh->ParamList["update"]=="1")
 	{
-log_level_printf(1,"new timer update");
 		if(hh->ParamList["id"] != "")
 		{
-log_level_printf(1,"new timer update with id");
 			unsigned modyId = atoi(hh->ParamList["id"].c_str());
 			NeutrinoAPI->Timerd->removeTimerEvent(modyId);
 		}
