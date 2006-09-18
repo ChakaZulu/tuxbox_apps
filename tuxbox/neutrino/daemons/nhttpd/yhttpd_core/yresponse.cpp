@@ -73,11 +73,11 @@ bool CWebserverResponse::SendResponse()
 		{
 			log_level_printf(1,"Response Hook Output. Status:d\n", Connection->HookHandler.status);
 			// Add production data to HTML-Output
-			if(Connection->HookHandler.ResponseMimeType == "text/html")
-			{
-				Connection->HookHandler.printf("<!-- request time: 0,%ld sec production time: 0,%ld -->\n",
-					Connection->enlapsed_request, Connection->GetEnlapsedResponseTime());
-			}
+//			if(Connection->HookHandler.ResponseMimeType == "text/html")
+//			{
+//				Connection->HookHandler.printf("<!-- request time: 0,%ld sec production time: 0,%ld -->\n",
+//					Connection->enlapsed_request, Connection->GetEnlapsedResponseTime());
+//			}
 			obj_content_len = Connection->HookHandler.yresult.length(); 
 			SendHeader(Connection->HookHandler.httpStatus, false, Connection->HookHandler.ResponseMimeType);
 			Write(Connection->HookHandler.yresult);
