@@ -53,6 +53,7 @@ public:
 	// Socket handling
 	bool		handling;					// true: Socket yet is handled by a Connection Thread
 	bool		isOpened;					// is this socket open?
+	bool		isValid;					// false on Socket Errors. Must close.
 
 	void 		close(void);					// Close Socket
 	void 		shutdown(void);					// Shutdown Socket
@@ -62,9 +63,12 @@ public:
 	std::string 	get_client_ip(void);				// Get IP from Client
 	SOCKET 		get_socket(){return sock;}			// Return "C" Socket-ID
 
-	// send & receive
+	// send & receive (basic)
 	int 		Read(char *buffer, unsigned int length);	// Read a buffer (normal or SSL)
 	int 		Send(char const *buffer, unsigned int length);	// Send a buffer (normal or SSL)
+	bool 		CheckSocketOpen();				// check if socket was closed by client
+
+	// send & receive
 	int 		SendFile(int filed);				// Send a File
 	std::string 	ReceiveBlock();					// receive a Block. Look at length
 	unsigned int 	CySocket::ReceiveFileGivenLength(int filed, unsigned int _length); // Receive File of given length

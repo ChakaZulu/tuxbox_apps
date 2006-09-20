@@ -44,15 +44,21 @@ typedef struct
 class CWebserver
 {
 private:
+	static pthread_mutex_t	mutex;
 	pthread_t 	Connection_Thread_List[HTTPD_MAX_CONNECTIONS]; //Thread-List per webserver
 	fd_set 		master;   		// master file descriptor list for select()
 	fd_set 		read_fds; 		// read file descriptor list for select()
+	fd_set 		write_fds; 		// read file descriptor list for select()
+	int 		fdmax;        		// maximum file descriptor number
 	CySocket 	*SocketList[HTTPD_MAX_CONNECTIONS];	// List of concurrent hadled connections
 protected:
 	bool 		terminate;		// flag: indicate to terminate the Webserver
-	CySocket 	ySock;			// Master Socket for listening
+	CySocket 	listenSocket;		// Master Socket for listening
 	unsigned int 	port;			// Port to listen on
 	void 		handle_connection(CySocket *newSock);// Create a new Connection Instance and handle Connection
+	int 		AcceptNewConnectionSocket();
+	int 		GetExistingConnectionSocket(SOCKET sock);
+	void 		CloseConnectionSocketsByTimeout();
 public:
 	static bool 	is_threading;		// Use Threading for new Connections
 

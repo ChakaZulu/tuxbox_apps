@@ -7,7 +7,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <string.h>
-
+#include <errno.h>
 // system
 #include <fcntl.h>
 //#include <sys/sendfile.h>
@@ -41,28 +41,33 @@ CWebserverRequest::CWebserverRequest(CWebserver *pWebserver)
 //-----------------------------------------------------------------------------
 bool CWebserverRequest::HandleRequest(void)
 {
-	std::string tmp_line="";
+	std::string start_line = "";
 	// read first line
 	do
 	{
-		tmp_line = Connection->sock->ReceiveLine();
-		if(tmp_line == "")	// Socket empty
+		start_line = Connection->sock->ReceiveLine();
+		if(start_line == "")	// Socket empty
 		{
-			aprintf("HandleRequest: End of line not found\n");
+			log_level_printf(1,"HandleRequest: End of line not found\n");
 			Connection->Response.SendError(HTTP_INTERNAL_SERVER_ERROR);
+			Connection->RequestCanceled = true;
 			return false;
 		}
 	}
-	while(tmp_line == "\r\n"); // ignore empty lines at begin on start-line
+	while(start_line == "\r\n"); // ignore empty lines at begin on start-line
 
-	std::string start_line = tmp_line;
+	start_line = trim(start_line);
+	log_level_printf(1,"Request: %s\n", start_line.c_str() );
+	UrlData["startline"] = start_line;
 	if(!ParseStartLine(start_line))
 		return false;
 
 	if(Connection->Method == M_GET || Connection->Method == M_HEAD || Connection->Method == M_DELETE)
 	{
 		//read header (speed up: read rest of request in blockmode) 
-		tmp_line = Connection->sock->ReceiveBlock();
+		std::string tmp_line = Connection->sock->ReceiveBlock();
+		if(tmp_line == "")
+			return false;
 		ParseHeader(tmp_line);
 	}
 	// Handle Delete
@@ -104,10 +109,10 @@ bool CWebserverRequest::ParseStartLine(std::string start_line)
 {
 	std::string method,url,http,tmp;
 
-	log_level_printf(1,"<ParseStartLine>: line: %s\n", start_line.c_str() );//TPDO:level back to 8
+	log_level_printf(8,"<ParseStartLine>: line: %s\n", start_line.c_str() );
 	if(ySplitString(start_line," ",method,tmp))
 	{
-		if(ySplitString(tmp," ",url,Connection->httprotocol))
+		if(ySplitStringLast(tmp," ",url,Connection->httprotocol))
 		{
 			analyzeURL(url);
 	
@@ -121,12 +126,12 @@ bool CWebserverRequest::ParseStartLine(std::string start_line)
 			else if(method.compare("TRACE") == 0)	Connection->Method = M_TRACE;
 			else
 			{
-				aprintf("Unknown Method or invalid request");
+				log_level_printf(1,"Unknown Method or invalid request\n");
 				Connection->Response.SendError(HTTP_INTERNAL_SERVER_ERROR);
 				log_level_printf(3,"Request: '%s'\n",rawbuffer.c_str());
 				return false;
 			}
-			log_level_printf(1,"Request: FullURL: %s\n",UrlData["fullurl"].c_str());
+			log_level_printf(3,"Request: FullURL: %s\n",UrlData["fullurl"].c_str());
 			return true;
 		}
 	}
@@ -145,8 +150,7 @@ bool CWebserverRequest::ParseStartLine(std::string start_line)
 bool CWebserverRequest::ParseParams(std::string param_string)
 {
 	bool ende = false;
-	std::string param, name, value, number;
-	ParameterList.clear();
+	std::string param, name="", value, number;
 
 	while(!ende)
 	{
@@ -206,9 +210,9 @@ bool CWebserverRequest::ParseHeader(std::string header)
 //-----------------------------------------------------------------------------
 void CWebserverRequest::analyzeURL(std::string url)
 {
+	ParameterList.clear();
 	// URI decode	
-	decodeString(url);
-	
+	url = decodeString(url);
 	UrlData["fullurl"] = url;
 	// split Params
 	if(ySplitString(url,"?",UrlData["url"],UrlData["paramstring"]))	// split pure URL and all Params
@@ -242,7 +246,7 @@ bool CWebserverRequest::HandlePost()
 		tmp_line = Connection->sock->ReceiveLine();
 		if(tmp_line == "")	// Socket empty
 		{
-			aprintf("HandleRequest: (Header) End of line not found\n");
+			log_level_printf(1,"HandleRequest: (Header) End of line not found: %s\n", strerror(errno));
 			Connection->Response.SendError(HTTP_INTERNAL_SERVER_ERROR);
 			return false;
 		}
@@ -539,7 +543,6 @@ unsigned int CWebserverRequest::HandlePostBoundary(std::string boundary, unsigne
 				Connection->HookHandler.Hooks_UploadReady(upload_filename);
 				return 0;
 			}
-			// TODO: File uploaded
 #endif // Y_CONFIG_FEATURE_UPLOAD
 		}
 		else

@@ -41,8 +41,8 @@
 // - Hook_ReadConfig: Every Hook can read OWN Variables from the yhttpd-Configfile
 // - Hook_EndConnection: After Response is sent and before Connection Instance
 //   is deleted
-// - Hook_UploadSetFilename: this hook can set the filename for an file to upload
-//   via POST (befor upload)
+// - Hook_UploadSetFilename: this hook can set the filename for a file to upload
+//   via POST (before upload)
 // - Hook_UploadReady: this Hook is called after uploading a file
 //=============================================================================
 #ifndef __yhttpd_yhook_h__
@@ -159,20 +159,21 @@ public:
 		{SetError(responseType); status = _status;}
 	
 	// output methods
-	void addResult(std::string result) {yresult += result;}
-	void addResult(std::string result, THandleStatus _status) {yresult += result; status = _status;}
+	void addResult(std::string result) 	{yresult += result;}
+	void addResult(std::string result, THandleStatus _status) 
+						{yresult += result; status = _status;}
 	void printf(const char *fmt, ...);
-	void Write(const std::string text) { addResult(text); }
-	void WriteLn(const std::string text) { addResult(text+"\r\n"); }	
-	void Write(char const *text){Write(std::string(text));}
-	void WriteLn(char const *text){WriteLn(std::string(text));}
+	void Write(const std::string text) 	{ addResult(text); }
+	void WriteLn(const std::string text) 	{ addResult(text+"\r\n"); }	
+	void Write(char const *text)		{Write(std::string(text));}
+	void WriteLn(char const *text)		{WriteLn(std::string(text));}
 	void SendHTMLHeader(std::string Titel);
 	void SendHTMLFooter(void);
-	void SendOk(void) {WriteLn("Ok");}
-	void SendError(void) {WriteLn("Error");}
-	void SendFile(std::string url) {NewURL = url; status = HANDLED_SENDFILE;}
-	void SendRedirect(std::string url) {NewURL = url; status = HANDLED_REDIRECTION;}
-	void SendRewrite(std::string url) {NewURL = url; status = HANDLED_REWRITE;}
+	void SendOk(void) 			{WriteLn("ok");}
+	void SendError(void) 			{WriteLn("error");}
+	void SendFile(std::string url) 		{NewURL = url; status = HANDLED_SENDFILE;}
+	void SendRedirect(std::string url) 	{NewURL = url; status = HANDLED_REDIRECTION;}
+	void SendRewrite(std::string url) 	{NewURL = url; status = HANDLED_REWRITE;}
 };
 
 #endif /*__yhttpd_yhook_h__*/

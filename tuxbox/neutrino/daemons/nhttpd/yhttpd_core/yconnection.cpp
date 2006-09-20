@@ -5,6 +5,7 @@
 
 // system
 #include <sys/time.h>
+#include <errno.h>
 // yhttpd
 #include "yconfig.h"
 #include "ytypes_globals.h"
@@ -35,13 +36,12 @@ CWebserverConnection::CWebserverConnection(CWebserver *pWebserver)
 //-------------------------------------------------------------------------
 CWebserverConnection::CWebserverConnection()
 {
-	aprintf("test CWebserverConnection::CWebserverConnection()\n");
+//	aprintf("test CWebserverConnection::CWebserverConnection()\n");
 	ConnectionNumber = ++GConnectionNumber;
 }
 //-------------------------------------------------------------------------
 CWebserverConnection::~CWebserverConnection(void)
 {
-	EndConnection();
 }
 //-------------------------------------------------------------------------
 // End The Connection. Request and Response allready handled.
@@ -51,6 +51,8 @@ CWebserverConnection::~CWebserverConnection(void)
 void CWebserverConnection::EndConnection()
 {
 	HookHandler.Hooks_EndConnection();	// Handle Hooks
+	if(RequestCanceled)			// Canceled
+		keep_alive = false;
 	RequestCanceled = true;
 #ifndef Y_CONFIG_FEATURE_KEEP_ALIVE
 	sock->close();
@@ -87,8 +89,10 @@ void CWebserverConnection::HandleConnection()
 	}
 	else
 	{
+		RequestCanceled = true;
 		keep_alive = false;		// close this connection socket
-		dperror("Error while parsing request\n");
+//		dperror("Error while parsing request\n");
+		log_level_printf(1,"request canceled: %s\n", strerror(errno));
 	}
 	EndConnection();
 }

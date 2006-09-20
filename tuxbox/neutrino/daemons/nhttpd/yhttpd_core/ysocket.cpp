@@ -62,6 +62,7 @@ void CySocket::init(void)
 {
 	handling 	= false;
 	isOpened	= false;
+	isValid		= true;
 	addr_len 	= sizeof(addr);
 	memset(&addr, 0, addr_len);
 #ifdef Y_CONFIG_USE_OPEN_SSL
@@ -144,7 +145,9 @@ void CySocket::close(void)
 {
 	if(sock != 0 && sock != INVALID_SOCKET)
 		::close(sock);
+#ifndef Y_CONFIG_FEATURE_KEEP_ALIVE
 	sock = 0;
+#endif
 	isOpened = false;
 }
 //-----------------------------------------------------------------------------
@@ -269,6 +272,14 @@ int CySocket::Send(char const *buffer, unsigned int length)
 	return len;
 }
 //-----------------------------------------------------------------------------
+// Check if Socket was closed by client
+//-----------------------------------------------------------------------------
+bool CySocket::CheckSocketOpen()
+{
+	char buffer[32];
+	return !(recv(sock, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == 0);
+}
+//-----------------------------------------------------------------------------
 // BASIC Send File over Socket for FILE*
 // fd is an opened FILE-Descriptor
 //-----------------------------------------------------------------------------
@@ -375,7 +386,6 @@ std::string CySocket::ReceiveBlock()
 		tmp.assign(buffer, bytes_gotten);
 		result += tmp;				//TODO: use append?
 	}
-	//TODO:raus:aprintf("rblock:(%s)\n",result.c_str());
 	return result;
 }
 

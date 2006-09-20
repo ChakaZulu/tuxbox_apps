@@ -15,6 +15,11 @@
 //-----------------------------------------------------------------------------
 // TODO: comment it, if CVS checkin
 //#define Y_UPDATE_BETA y
+#ifdef Y_UPDATE_BETA
+#warning "!!!! THIS IS BETA COMPILING. SWITCH OF (Y_UPDATE_BETA) FOR CVS"
+#define Y_CONFIG_USE_WEBLOG y
+#define Y_CONFIG_FEATURE_KEEP_ALIVE y
+#endif
 //-----------------------------------------------------------------------------
 // System Choice <configure!> ONE choice
 //-----------------------------------------------------------------------------
@@ -28,8 +33,8 @@
 //-----------------------------------------------------------------------------
 // General central Definitions <configure!>
 //-----------------------------------------------------------------------------
-#define HTTPD_VERSION 		"3.0.0pre5"			// Webserver version  (can be overloaded)
-#define YHTTPD_VERSION 		"1.0.0pre3"			// Webserver version  (Version of yhttpd-core!)
+#define HTTPD_VERSION 		"3.0.1"				// Webserver version  (can be overloaded)
+#define YHTTPD_VERSION 		"1.0.2"				// Webserver version  (Version of yhttpd-core!)
 #define IADDR_LOCAL 		"127.0.0.1"			// local IP
 #define HTTPD_NAME 		"yhttpd"			// Webserver name (can be overloaded)
 #define YHTTPD_NAME 		"yhttpd_core"			// Webserver name (Name of yhttpd-core!)
@@ -45,11 +50,12 @@
 #define Y_CONFIG_USE_YPARSER y					// Add mod: "y-Parsing"
 //#define Y_CONFIG_USE_TESTHOOK y				// Add mod: "Test-Hook" (hook example)
 #define Y_CONFIG_USE_AUTHHOOK y					// Add mod: "Authentication"
+//#define Y_CONFIG_USE_WEBLOG y					// Add mod: "WebLogging"
 // TODO build error page function
 //#define Y_CONFIG_HAVE_HTTPD_ERRORPAGE y			// Have an HTTPD Error Page
 #define Y_CONFIG_FEATURE_SHOW_SERVER_CONFIG y			// Add Feature (in yParser): add /y/server-config
 //#define Y_CONFIG_USE_OPEN_SSL y					// Add Feature: use openSSL
-//#define Y_CONFIG_FEATURE_KEEP_ALIVE y				// Add Feature: Keep-alive
+#define Y_CONFIG_FEATURE_KEEP_ALIVE y				// Add Feature: Keep-alive //FIXME: does not work correctly now
 
 //-----------------------------------------------------------------------------
 // Define/Undefine Features forced by CONFIG_SYSTEM_xxx
@@ -79,7 +85,7 @@
 #define HTTPD_MAX_CONNECTIONS		3
 #define HTTPD_CONFIGDIR 		"/home/y"
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
-#define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
+#define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"	//TODO: delete every occurence
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
 
 #define AUTHUSER			"test"
@@ -113,6 +119,9 @@
 #define SSL_PEMFILE			HTTPD_CONFIGDIR "/server.pem"
 #define SSL_CA_FILE			HTTPD_CONFIGDIR "/cacert.pem"
 
+#define LOG_FILE			"./yhhtpd.log"
+#define LOG_FORMAT			"CLF"
+
 #define UPLOAD_TMP_FILE 		"/tmp/upload.tmp"
 #endif
 //-----------------------------------------------------------------------------
@@ -122,7 +131,7 @@
 #undef HTTPD_NAME
 #define HTTPD_NAME 			"nhttpd"
 #undef HTTPD_VERSION
-#define HTTPD_VERSION 			"3.0.0"
+#define HTTPD_VERSION 			"3.0.1"
 #define HTTPD_STANDARD_PORT		80
 #define HTTPD_MAX_CONNECTIONS		10
 #define HTTPD_CONFIGDIR 		"/var/tuxbox/config"
@@ -142,6 +151,9 @@
 
 #define SSL_PEMFILE			HTTPD_CONFIGDIR "/server.pem"
 #define SSL_CA_FILE			HTTPD_CONFIGDIR "/cacert.pem"
+
+#define LOG_FILE			"/tmp/yhhtpd.log"
+#define LOG_FORMAT			"CLF"
 
 #define UPLOAD_TMP_FILE 		"/tmp/upload.tmp"
 #endif

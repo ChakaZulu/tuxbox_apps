@@ -52,9 +52,6 @@ class CLogging
 
 		// Logging
 		void printf(const char *fmt, ...);
-
-		// Web Logging
-//TODO:move to mod_web_log 		void LogRequest(CWebserverConnection *con);
 };
 
 //-----------------------------------------------------------------------------

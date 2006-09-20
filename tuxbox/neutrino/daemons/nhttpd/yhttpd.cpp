@@ -37,6 +37,11 @@ static CmAuth *auth = NULL;
 static CTesthook *testhook = NULL;
 #endif
 
+#ifdef Y_CONFIG_USE_WEBLOG
+#include "mod_weblog.h"
+static CmWebLog *weblog = NULL;
+#endif
+
 //-----------------------------------------------------------------------------
 #ifdef CONFIG_SYSTEM_TUXBOX
 #include "neutrinoapi.h"
@@ -243,6 +248,11 @@ void Cyhttpd::hooks_attach()
 	CyhookHandler::attach(&yParser);
 #endif
 #endif
+
+#ifdef Y_CONFIG_USE_WEBLOG	
+	weblog = new CmWebLog();
+	CyhookHandler::attach(weblog);
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -266,6 +276,10 @@ void Cyhttpd::hooks_detach()
 #ifdef Y_CONFIG_USE_YPARSER	
 	CyhookHandler::detach(&yParser);
 #endif
+#endif
+
+#ifdef Y_CONFIG_USE_WEBLOG	
+	CyhookHandler::detach(weblog);
 #endif
 }
 

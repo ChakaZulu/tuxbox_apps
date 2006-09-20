@@ -6,6 +6,7 @@
 // c
 #include <cstdarg>
 #include <cstdio>
+#include <errno.h>
 // c++
 #include <string.h>
 // system
@@ -71,7 +72,7 @@ bool CWebserverResponse::SendResponse()
 		Connection->HookHandler.Hooks_SendResponse();
 		if((Connection->HookHandler.status == HANDLED_READY)||(Connection->HookHandler.status == HANDLED_CONTINUE))
 		{
-			log_level_printf(1,"Response Hook Output. Status:d\n", Connection->HookHandler.status);
+			log_level_printf(2,"Response Hook Output. Status:%d\n", Connection->HookHandler.status);
 			// Add production data to HTML-Output
 //			if(Connection->HookHandler.ResponseMimeType == "text/html")
 //			{
@@ -86,7 +87,7 @@ bool CWebserverResponse::SendResponse()
 		}
 		else if(Connection->HookHandler.status == HANDLED_ERROR)
 		{
-			log_level_printf(1,"Response Hook found but Error\n");
+			log_level_printf(2,"Response Hook found but Error\n");
 			SendHeader(Connection->HookHandler.httpStatus, false, Connection->HookHandler.ResponseMimeType);
 			Write(Connection->HookHandler.yresult);
 			return false;
@@ -173,6 +174,10 @@ bool CWebserverResponse::SendResponse()
 //=============================================================================
 void CWebserverResponse::SendHeader(HttpResponseType responseType, bool cache, std::string ContentType)
 {
+	if(Connection->RequestCanceled)
+		return;
+
+
 	const char *responseString = "";
 	const char *infoString = 0;
 
@@ -277,7 +282,7 @@ bool CWebserverResponse::WriteData(char const * data, long length)
 		return false;
 	if(Connection->sock->Send(data, length) == -1)
 	{
-		perror("request canceled\n");
+		log_level_printf(1,"response canceled: %s\n", strerror(errno));
 		Connection->RequestCanceled = true;
 		return false;
 	}
@@ -381,7 +386,6 @@ bool CWebserverResponse::SendFile(const std::string path,const std::string filen
 	{
 		// check If-Modified-Since
 		time_t if_modified_since = (time_t)-1;
-#ifndef Y_UPDATE_BETA		
 		if(Connection->Request.HeaderList["If-Modified-Since"] != "")
 		{
 			struct tm mod;
@@ -391,7 +395,7 @@ bool CWebserverResponse::SendFile(const std::string path,const std::string filen
 				if_modified_since = mktime(&mod);
 			}
 		}
-#endif
+
 		// normalize obj_last_modified to GMT
 		struct tm *tmp = gmtime(&obj_last_modified);
 		time_t obj_last_modified_gmt = mktime(tmp);
@@ -404,14 +408,15 @@ bool CWebserverResponse::SendFile(const std::string path,const std::string filen
 			SendHeader(HTTP_NOT_MODIFIED, true, GetContentType(Connection->Request.UrlData["fileext"]));
 
 		// senf file if modified
-		if((Connection->Method != M_HEAD) && modified)
-			Connection->sock->SendFile(filed);
+		if((Connection->Method != M_HEAD) && modified && !Connection->RequestCanceled)
+			if(!Connection->sock->SendFile(filed))
+				Connection->RequestCanceled = true;
 		close(filed);
 		return true;
 	}
 	else
 	{
-		aprintf("<SendFile>: File not found\n");
+		aprintf("SendFile: File not found. Path:(%s) Filename:(%s)\n", path.c_str(), filename.c_str());
 		SendError(HTTP_NOT_FOUND);
 		return false;
 	}

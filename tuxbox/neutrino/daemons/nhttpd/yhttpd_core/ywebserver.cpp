@@ -29,7 +29,8 @@
 //=============================================================================
 // Initialization of static variables
 //=============================================================================
-bool CWebserver::is_threading = true;
+	bool CWebserver::is_threading = true;
+	pthread_mutex_t CWebserver::mutex = PTHREAD_MUTEX_INITIALIZER;;
 
 //=============================================================================
 // Constructor & Destructor & Initialization
@@ -47,7 +48,7 @@ CWebserver::CWebserver()
 //-----------------------------------------------------------------------------
 CWebserver::~CWebserver()
 {
-	ySock.close();
+	listenSocket.close();
 }
 //=============================================================================
 // Start Webserver. Main-Loop. 
@@ -104,30 +105,31 @@ CWebserver::~CWebserver()
 //	
 //	   HTTP implementations SHOULD implement persistent connections.
 //=============================================================================
+#define MAX_TIMEOUTS_TO_CLOSE 1
 bool CWebserver::run(void)
 {
-	if(!ySock.listen(port, HTTPD_MAX_CONNECTIONS))
+	if(!listenSocket.listen(port, HTTPD_MAX_CONNECTIONS))
 	{
 		dperror("Socket cannot bind and listen. Abort.\n");
 		return false;
 	}
 #ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
 	// initialize values for select
-	int listener = ySock.get_socket();
-	int fdmax;        		// maximum file descriptor number
-	int newfd;        		// newly accept()ed socket descriptor
+	int listener = listenSocket.get_socket();
+
     	struct timeval tv;		// timeout struct
 	FD_SET(listener, &master);	// add the listener to the master set
 	fdmax = listener;		// init max fd
 	fcntl(listener, F_SETFD , O_NONBLOCK); // listener master socket non-blocking
+	int timeout_counter = 0;
 	// main Webserver Loop
 	while(!terminate)
 	{
-		CySocket *connectionSock = NULL;
 		read_fds = master; 	// copy it
-		tv.tv_sec = 5;		// Set timeout var for every call of select (it might be modified by select)
-		tv.tv_usec=0;
-		
+		write_fds = master; 	// copy it //TODO anders
+		tv.tv_sec = 0;		// Set timeout var for every call of select (it might be modified by select)
+		tv.tv_usec=500000;
+
 		int fd=select(fdmax+1, &read_fds, NULL, NULL, &tv);	// wait for socket activity
 		if(fd == -1)		// we got an error
 		{
@@ -136,104 +138,139 @@ bool CWebserver::run(void)
 		}
 		if(fd == 0)		// we got a timeout
 		{
-			for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
-				if(SocketList[j] != NULL 			// here is a socket
-					&& !SocketList[j]->handling) 		// it is not handled
-				{	//TODO: check how long the Socket should be keept alive
-					connectionSock = SocketList[j];
-					int thisSocket = connectionSock->get_socket();
-					connectionSock->close();
-					FD_CLR(thisSocket, &master); // remove from master set
-					delete SocketList[j]; 
-					SocketList[j] = NULL;
-					
-				}
+			if(++timeout_counter >= MAX_TIMEOUTS_TO_CLOSE)
+			{
+				CloseConnectionSocketsByTimeout();
+				timeout_counter=0;
+			}
 			continue;	// mail loop again	
 		}
-		for(int i = 0; i <= fdmax; i++)
+
+		//----------------------------------------------------------------------------------------
+		for(int i = listener; i <= fdmax; i++)
 		{
-			if (FD_ISSET(i, &read_fds)) 	// here activity?
+			int slot = -1;
+			if(FD_ISSET(i, &read_fds)) 	// here read activity? ONLY unhandled sockets
 			{ // we got one!!
 				if (i == listener)	// handle new connections
 				{
-					log_level_printf(2,"FD: new con fd:%d\n",i);
-			 		if(!(connectionSock = ySock.accept() ))	//Blocking wait
-					{
-						dperror("Socket accept error. Continue.\n");
-						delete connectionSock;
-						continue;
-					}
-					else
-					{	// Add Socket to List
-						bool free_slot_found = false;
-						for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
-							if(SocketList[j] == NULL)
-							{
-								SocketList[j]=connectionSock; // put it to list
-								free_slot_found = true;
-								break;
-							}
-						if(!free_slot_found)
-						{
-							connectionSock->close();
-							aprintf("No free Slot in SocketList found\n");
-						}
-						else
-						{
-							newfd = connectionSock->get_socket();
-//							FD_SET(newfd, &master); 	// add to master set
-							if (newfd > fdmax)    		// keep track of the maximum
-								fdmax = newfd;
-						}
-					}
+					slot = AcceptNewConnectionSocket();
+					fcntl((SocketList[slot])->get_socket() , F_SETFD , O_NONBLOCK);
 				}
-				else // Connection on an existing open Socket
+				else // Connection on an existing open Socket = reuse (keep-alive)
 				{
-					bool slot_found = false;
-					for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
-						if(SocketList[j] != NULL 			// here is a socket
-							&& SocketList[j]->get_socket() == i) 	// we know that socket
-						{
-							if(!SocketList[j]->handling)		// it is not handled (else a connection-thread is handing this socket)
-							{
-								connectionSock = SocketList[j];		// get socket to re-use
-								log_level_printf(2,"FD: find con fd:%d\n",i);
-							}
-							slot_found = true;
-							break;
-						}
-					if(!slot_found)
+					slot = GetExistingConnectionSocket(i);
+					if(slot>0)
+					log_level_printf(2,"FD: reuse con fd:%d\n",SocketList[slot]->get_socket());
+				}
+				// READ
+				if(slot>=0)
+				{
+					if(SocketList[slot] != NULL && !SocketList[slot]->handling)
 					{
-						connectionSock->close();
-						aprintf("Socket exists in FD_SET: No Slot in SocketList found\n");
+						FD_CLR(SocketList[slot]->get_socket(), &master); // remove from master set
+						SocketList[slot]->handling = true;
+						handle_connection(SocketList[slot]);	// handle this activity
 					}
 				}
 			}
-		}
-		if(connectionSock != NULL)
-		{
-#ifdef Y_CONFIG_USE_OPEN_SSL
-			if(Cyhttpd::ConfigList["SSL"]=="true")
-				connectionSock->initAsSSL();	// make it a SSL-socket
-#endif
-			handle_connection(connectionSock);	// handle this activity
-		}
-	}
+		}// for
+
+	}//while
 #else
 	while(!terminate)
 	{
 		CySocket *newConnectionSock;
-		if(!(newConnectionSock = ySock.accept() ))	//Now: Blocking wait
+		if(!(newConnectionSock = listenSocket.accept() ))	//Now: Blocking wait
 		{
 			dperror("Socket accept error. Continue.\n");
 			continue;
 		}
-		log_level_printf(3,"Socket connect from %s\n", (ySock.get_client_ip()).c_str() );
+		log_level_printf(3,"Socket connect from %s\n", (listenSocket.get_client_ip()).c_str() );
+#ifdef Y_CONFIG_USE_OPEN_SSL
+			if(Cyhttpd::ConfigList["SSL"]=="true")
+				connectionSock->initAsSSL();	// make it a SSL-socket
+#endif
 		handle_connection(newConnectionSock);
 	}
 #endif
 	return true;
 }
+//=============================================================================
+//=============================================================================
+//=============================================================================
+int CWebserver::AcceptNewConnectionSocket()
+{
+	int slot = -1;
+	CySocket *connectionSock = NULL;
+	int newfd;        		// newly accept()ed socket descriptor
+	
+	if(!(connectionSock = listenSocket.accept() ))	//Blocking wait
+	{
+		dperror("Socket accept error. Continue.\n");
+		delete connectionSock;
+	}
+	else
+	{
+#ifdef Y_CONFIG_USE_OPEN_SSL
+		if(Cyhttpd::ConfigList["SSL"]=="true")
+			connectionSock->initAsSSL();	// make it a SSL-socket
+#endif		
+		log_level_printf(2,"FD: new con fd:%d\n",connectionSock->get_socket());
+		// Add Socket to List
+		for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
+			if(SocketList[j] == NULL)
+			{
+				SocketList[j]=connectionSock; // put it to list
+				slot = j;
+				break;
+			}
+		if(slot < 0)
+		{
+			connectionSock->close();
+			aprintf("No free Slot in SocketList found\n");
+		}
+		else
+		{
+			newfd = connectionSock->get_socket();
+			if (newfd > fdmax)    		// keep track of the maximum
+				fdmax = newfd;
+		}
+	}
+	return slot;
+}
+//-----------------------------------------------------------------------------
+
+int CWebserver::GetExistingConnectionSocket(SOCKET sock)
+{
+	int slot = -1;
+	for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
+		if(SocketList[j] != NULL 			// here is a socket
+			&& SocketList[j]->get_socket() == sock)	// we know that socket
+		{
+			slot = j;
+			break;
+		}
+	return slot;
+}
+//-----------------------------------------------------------------------------
+void CWebserver::CloseConnectionSocketsByTimeout()
+{
+	CySocket *connectionSock = NULL;
+	for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
+	if(SocketList[j] != NULL 			// here is a socket
+		&& !SocketList[j]->handling) 		// it is not handled
+	{	//TODO: check how long the Socket should be keept alive
+		connectionSock = SocketList[j];
+		SOCKET thisSocket = connectionSock->get_socket();
+		log_level_printf(2,"FD: close con Timeout fd:%d\n",thisSocket);
+		connectionSock->close();
+		FD_CLR(thisSocket, &master); // remove from master set
+		delete SocketList[j]; 
+		SocketList[j] = NULL;
+		
+	}
+}					
 //-----------------------------------------------------------------------------
 // Close (FD_SET handled) Socket
 // Clear it from SocketList 
@@ -245,8 +282,9 @@ void CWebserver::close_socket(SOCKET thisSocket)
 			&& SocketList[j]->get_socket() == thisSocket) 	// it is not handled
 		{
 			SocketList[j]->handling = false;
-			SocketList[j]->close();				// close the socket
 			FD_CLR(thisSocket, &master); 			// remove from master set
+			log_level_printf(2,"FD: close con Normal fd:%d\n",thisSocket);
+			SocketList[j]->close();				// close the socket
 			delete SocketList[j]; 				// destroy ySocket
 			SocketList[j] = NULL;				// free in list
 		}
@@ -257,6 +295,7 @@ void CWebserver::close_socket(SOCKET thisSocket)
 //-----------------------------------------------------------------------------
 void CWebserver::handle_connection(CySocket *newSock)
 {
+	
 	void *WebThread(void *args); //forward declaration
 	// create arguments
 	pthread_attr_t attr;
@@ -323,23 +362,37 @@ void *WebThread(void *args)
 	con->HandleConnection();
 
 	// (3) end connection handling
-	con->sock->handling = false; 	// socket can be handled by webserver main loop (select) again
 #ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
-	if(!con->keep_alive)//TODO
+	if (!con->sock->CheckSocketOpen())
+	{
+		log_level_printf(2,"FD detect closed socket!!!\n");//TODO
+		con->keep_alive = false;
+	}	
+
+	if(!con->keep_alive)
+	{
 		ws->close_socket(con->sock->get_socket());
+	}
 	else
+	{
 		ws->addSocketToMasterSet(con->sock->get_socket()); 	// add to master set
-	if(is_threaded)
-		dprintf("-- Thread 0x06%X beendet\n",(int)pthread_self());
+	}
+
 #else
 	delete newConn->ySock;
 #endif
+	if(!con->keep_alive)
+		con->sock->isValid = false;
+
+	con->sock->handling = false; 	// socket can be handled by webserver main loop (select) again
 	// end thread
 	if(is_threaded)
 		ws->clear_Thread_List_Number(newConn->thread_number);
 
 	delete con;
 	delete newConn;
+	if(is_threaded)
+		dprintf("-- Thread 0x06%X beendet\n",(int)pthread_self());
 	if(is_threaded)
 		pthread_exit(NULL);
 	return NULL;

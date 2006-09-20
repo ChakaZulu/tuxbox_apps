@@ -13,6 +13,7 @@
 #include "yconfig.h"
 #include "ytypes_globals.h"
 #include "helper.h"
+#include "ylogging.h"
 
 //=============================================================================
 // Integers
@@ -188,47 +189,38 @@ bool nocase_compare (char c1, char c2)
 //-----------------------------------------------------------------------------
 // Decode URLEncoded std::string
 //-----------------------------------------------------------------------------
-void decodeString(std::string &encodedString)
+std::string decodeString(std::string encodedString)
 {
-	char *newString=NULL;
 	const char *string = encodedString.c_str();
-	int count=0;
+	unsigned int count=0;
 	char hex[3]={'\0'};
 	unsigned long iStr;
-
+	std::string result = "";
 	count = 0;
-	if((newString = (char *)malloc(sizeof(char) * strlen(string) + 1) ) != NULL)
-	{
-		while(string[count]) /* use the null character as a loop terminator */
-		{
-			if (string[count] == '%')
-			{
-				hex[0]=string[count+1];
-				hex[1]=string[count+2];
-				hex[2]='\0';
-				iStr = strtoul(hex,NULL,16); /* convert to Hex char */
-				newString[count]=(char)iStr;
-				count++;
-				string = string + 2; /* need to reset the pointer so that we don't write hex out */
-			}
-			else
-			{
-				if (string[count] == '+')
-					newString[count] = ' ';
-				else
-					newString[count] = string[count];
-				count++;
-			}
-		} /* end of while loop */
 
-		newString[count]='\0'; /* when done copying the string,need to terminate w/ null char */
-		encodedString = newString;
-		free(newString);
-	}
-	else
+	while(count<encodedString.length()) /* use the null character as a loop terminator */
 	{
-		return;
-	}
+		if(string[count] == '%' && count+3 <encodedString.length())
+		{
+			hex[0]=string[count+1];
+			hex[1]=string[count+2];
+			hex[2]='\0';
+			iStr = strtoul(hex,NULL,16); /* convert to Hex char */
+			result += (char)iStr;
+			count += 3;
+		}
+		else if(string[count] == '+')
+		{
+			result += ' ';
+			count++;
+		}
+		else
+		{
+			result += string[count];
+			count++;
+		}
+	} /* end of while loop */
+	return result;
 }
 //-----------------------------------------------------------------------------
 // Encode URLEncoded std::string
