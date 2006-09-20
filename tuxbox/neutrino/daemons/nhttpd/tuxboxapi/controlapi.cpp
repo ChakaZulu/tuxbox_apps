@@ -124,7 +124,7 @@ const CControlAPI::TyCgiCall CControlAPI::yCgiCallList[]=
 	{"getbouquets", 	&CControlAPI::GetBouquetsCGI,	"text/plain"},
 	{"getmode", 		&CControlAPI::GetModeCGI,	"text/plain"},
 	{"setmode", 		&CControlAPI::SetModeCGI,	"text/plain"},
-	{"epg", 		&CControlAPI::EpgCGI,		"+xml"},
+	{"epg", 		&CControlAPI::EpgCGI,		""},
 	{"zapto", 		&CControlAPI::ZaptoCGI,		"text/plain"},
 	{"getonidsid", 		&CControlAPI::GetChannel_IDCGI,	"text/plain"},
 	// boxcontrol - system
@@ -204,12 +204,6 @@ void CControlAPI::Execute(CyhookHandler *hh)
 	// send header
 	else if(std::string(yCgiCallList[index].mime_type) == "")	// decide in function
 		;
-/* TODO:raus	else if(std::string(yCgiCallList[index].mime_type) == "+1")
-		if (hh->ParamList.size() > 1)
-			hh->SetHeader(HTTP_OK, "text/xml");
-		else
-			hh->SetHeader(HTTP_OK, "text/plain");
-*/
 	else if(std::string(yCgiCallList[index].mime_type) == "+xml")		// Parameter xml?
 		if (hh->ParamList["xml"] != "")
 			hh->SetHeader(HTTP_OK, "text/xml");
@@ -247,10 +241,21 @@ void CControlAPI::TimerCGI(CyhookHandler *hh)
 				unsigned removeId = atoi(hh->ParamList["id"].c_str());
 				NeutrinoAPI->Timerd->removeTimerEvent(removeId);
 			}
+			else if(hh->ParamList["get"] != "")
+			{
+				int pre=0,post=0;
+				NeutrinoAPI->Timerd->getRecordingSafety(pre,post);
+				if(hh->ParamList["get"] == "pre")
+					hh->printf("%d\n", pre);
+				else if(hh->ParamList["get"] == "post")
+					hh->printf("%d\n", post);
+				else
+					hh->SendError();
+			}
+			
 		}
 		else
 			SendTimers(hh);
-		hh->SendOk();
 	}
 	else
 		hh->SendError();
@@ -512,7 +517,7 @@ void CControlAPI::MessageCGI(CyhookHandler *hh)
 
 	if (event != 0)
 	{
-		decodeString(message);
+		message=decodeString(message);
 		NeutrinoAPI->EventServer->sendEvent(event, CEventServer::INITID_HTTPD, (void *) message.c_str(), message.length() + 1);
 		hh->SendOk();
 	}
@@ -1010,6 +1015,7 @@ void CControlAPI::EpgCGI(CyhookHandler *hh)
 
 	if (hh->ParamList.empty())
 	{
+		hh->SetHeader(HTTP_OK, "text/plain");
 		CZapitClient::BouquetChannelList *channellist = NeutrinoAPI->GetChannelList(CZapitClient::MODE_CURRENT);
 		CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
 		for(; channel != channellist->end();channel++)
@@ -1025,6 +1031,7 @@ void CControlAPI::EpgCGI(CyhookHandler *hh)
 	}
 	else if (hh->ParamList["xml"].empty())
 	{
+		hh->SetHeader(HTTP_OK, "text/plain");
 		if (hh->ParamList["1"] == "ext")
 		{
 			CZapitClient::BouquetChannelList *channellist = NeutrinoAPI->GetChannelList(CZapitClient::MODE_CURRENT);
@@ -1109,6 +1116,8 @@ void CControlAPI::EpgCGI(CyhookHandler *hh)
 	//	stoptime : show only items until stoptime reached
 	else if (!(hh->ParamList["xml"].empty()))
 	{
+		hh->SetHeader(HTTP_OK, "text/xml");
+
 		t_channel_id channel_id = (t_channel_id)-1;
 		
 		if (!(hh->ParamList["channelid"].empty()))
@@ -1282,7 +1291,7 @@ void CControlAPI::StartPluginCGI(CyhookHandler *hh)
 		if (hh->ParamList["name"] != "")
 		{
 			pluginname = hh->ParamList["name"];
-			decodeString(pluginname);
+			pluginname=decodeString(pluginname);
 			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::EVT_START_PLUGIN,
 				CEventServer::INITID_HTTPD,
 				(void *) pluginname.c_str(),
