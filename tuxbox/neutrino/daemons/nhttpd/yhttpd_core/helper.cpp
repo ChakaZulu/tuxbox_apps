@@ -200,7 +200,7 @@ std::string decodeString(std::string encodedString)
 
 	while(count<encodedString.length()) /* use the null character as a loop terminator */
 	{
-		if(string[count] == '%' && count+3 <encodedString.length())
+		if(string[count] == '%' && count+2 <encodedString.length())
 		{
 			hex[0]=string[count+1];
 			hex[1]=string[count+2];

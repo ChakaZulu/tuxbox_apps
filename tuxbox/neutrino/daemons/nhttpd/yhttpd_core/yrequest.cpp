@@ -213,6 +213,7 @@ void CWebserverRequest::analyzeURL(std::string url)
 	ParameterList.clear();
 	// URI decode	
 	url = decodeString(url);
+	url = trim(url, "\r\n"); // non-HTTP-Standard: allow \r or \n in URL. Delete it.
 	UrlData["fullurl"] = url;
 	// split Params
 	if(ySplitString(url,"?",UrlData["url"],UrlData["paramstring"]))	// split pure URL and all Params
