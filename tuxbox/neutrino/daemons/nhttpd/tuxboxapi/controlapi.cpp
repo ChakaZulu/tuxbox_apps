@@ -230,7 +230,7 @@ void CControlAPI::TimerCGI(CyhookHandler *hh)
 {
 	if (NeutrinoAPI->Timerd->isTimerdAvailable())
 	{
-		if (!(hh->ParamList.empty()))
+		if (!hh->ParamList.empty() && hh->ParamList["format"].empty())
 		{
 			if (hh->ParamList["action"] == "new")
 				doNewTimer(hh);
@@ -1559,6 +1559,10 @@ void CControlAPI::SendSettings(CyhookHandler *hh)
 void CControlAPI::SendTimers(CyhookHandler *hh)
 {
 	CTimerd::TimerList timerlist;			// List of bouquets
+	bool send_id = false;
+
+	if (hh->ParamList["format"] == "id")
+		send_id = true;
 
 	timerlist.clear();
 	NeutrinoAPI->Timerd->getTimerList(timerlist);
@@ -1569,24 +1573,38 @@ void CControlAPI::SendTimers(CyhookHandler *hh)
 	{
 		// Add Data
 		char zAddData[22+1] = { 0 };
+		if (send_id)
+		{
+			zAddData[0] = '0';
+			zAddData[1] = 0;
+		}
 
 		switch(timer->eventType) {
 		case CTimerd::TIMER_NEXTPROGRAM:
 		case CTimerd::TIMER_ZAPTO:
 		case CTimerd::TIMER_RECORD:
-			strncpy(zAddData, NeutrinoAPI->Zapit->getChannelName(timer->channel_id).c_str(), 22);
+			if (!send_id)
+			{
+				strncpy(zAddData, NeutrinoAPI->Zapit->getChannelName(timer->channel_id).c_str(), 22);
+
+				if (zAddData[0] == 0)
+					strcpy(zAddData, NeutrinoAPI->Zapit->isChannelTVChannel(timer->channel_id) ? "Unbekannter TV-Kanal" : "Unbekannter Radiokanal");
+			}
+			else
+				sprintf(zAddData, PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS, timer->channel_id);
+
 			zAddData[22]=0;
 
-			if (zAddData[0] == 0)
-				strcpy(zAddData, NeutrinoAPI->Zapit->isChannelTVChannel(timer->channel_id) ? "Unbekannter TV-Kanal" : "Unbekannter Radiokanal");
 			break;
 
 		case CTimerd::TIMER_STANDBY:
-			sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
+			if (!send_id)
+				sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
 			break;
 
 		case CTimerd::TIMER_REMIND :
-			strncpy(zAddData, timer->message, 22);
+			if (!send_id)
+				strncpy(zAddData, timer->message, 22);
 			zAddData[22]=0;
 			break;
 
