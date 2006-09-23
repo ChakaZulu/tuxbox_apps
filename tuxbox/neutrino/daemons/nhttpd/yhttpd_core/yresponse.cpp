@@ -191,6 +191,7 @@ void CWebserverResponse::SendHeader(HttpResponseType responseType, bool cache, s
 		}
 	// print Status-line
 	printf("HTTP/1.1 %d %s\r\nContent-Type: %s\r\n",responseType, responseString, ContentType.c_str());
+	log_level_printf(2,"Respose: HTTP/1.1 %d %s\r\nContent-Type: %s\r\n",responseType, responseString, ContentType.c_str());
 
 	switch (responseType)
 	{

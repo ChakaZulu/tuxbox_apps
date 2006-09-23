@@ -106,6 +106,7 @@ CWebserver::~CWebserver()
 //	   HTTP implementations SHOULD implement persistent connections.
 //=============================================================================
 #define MAX_TIMEOUTS_TO_CLOSE 1
+#define MAX_TIMEOUTS_TO_TEST 30
 bool CWebserver::run(void)
 {
 	if(!listenSocket.listen(port, HTTPD_MAX_CONNECTIONS))
@@ -122,15 +123,18 @@ bool CWebserver::run(void)
 	fdmax = listener;		// init max fd
 	fcntl(listener, F_SETFD , O_NONBLOCK); // listener master socket non-blocking
 	int timeout_counter = 0;
+	int test_counter = 0;//TODO
 	// main Webserver Loop
 	while(!terminate)
 	{
 		read_fds = master; 	// copy it
 		write_fds = master; 	// copy it //TODO anders
-		tv.tv_sec = 0;		// Set timeout var for every call of select (it might be modified by select)
-		tv.tv_usec=500000;
+		tv.tv_usec=330000;
+		tv.tv_sec=0;
 
+//log_level_printf(2,"FD: vor select\n");
 		int fd=select(fdmax+1, &read_fds, NULL, NULL, &tv);	// wait for socket activity
+//log_level_printf(2,"FD: nach select\n");
 		if(fd == -1)		// we got an error
 		{
             		perror("select");
@@ -142,6 +146,15 @@ bool CWebserver::run(void)
 			{
 				CloseConnectionSocketsByTimeout();
 				timeout_counter=0;
+			}
+			if(++test_counter >= MAX_TIMEOUTS_TO_TEST)
+			{
+				for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
+					if(SocketList[j] != NULL) 			// here is a socket
+					{
+						log_level_printf(2,"FD-TEST sock:%d handle:%d open:%d\n",SocketList[j]->get_socket(),SocketList[j]->handling,SocketList[j]->isOpened);
+					}
+				test_counter=0;
 			}
 			continue;	// mail loop again	
 		}
@@ -175,6 +188,7 @@ bool CWebserver::run(void)
 				}
 			}
 		}// for
+		CloseConnectionSocketsByTimeout();
 
 	}//while
 #else
@@ -216,7 +230,7 @@ int CWebserver::AcceptNewConnectionSocket()
 		if(Cyhttpd::ConfigList["SSL"]=="true")
 			connectionSock->initAsSSL();	// make it a SSL-socket
 #endif		
-		log_level_printf(2,"FD: new con fd:%d\n",connectionSock->get_socket());
+		log_level_printf(2,"FD: new con fd:%d on port:%d\n",connectionSock->get_socket(), connectionSock->get_accept_port());
 		// Add Socket to List
 		for(int j=0;j < HTTPD_MAX_CONNECTIONS;j++) 
 			if(SocketList[j] == NULL)
@@ -263,14 +277,43 @@ void CWebserver::CloseConnectionSocketsByTimeout()
 	{	//TODO: check how long the Socket should be keept alive
 		connectionSock = SocketList[j];
 		SOCKET thisSocket = connectionSock->get_socket();
-		log_level_printf(2,"FD: close con Timeout fd:%d\n",thisSocket);
-		connectionSock->close();
-		FD_CLR(thisSocket, &master); // remove from master set
-		delete SocketList[j]; 
-		SocketList[j] = NULL;
+		bool shouldClose = true;
+		if(SocketList[j]->tv_start_waiting.tv_sec != 0 || SocketList[j]->tv_start_waiting.tv_usec != 0)
+		{
+			struct 	timeval 	tv_now;
+			struct	timezone 	tz_now;
+			gettimeofday(&tv_now, &tz_now);
+			long tdiff = ((tv_now.tv_sec - SocketList[j]->tv_start_waiting.tv_sec) * 1000000
+			+ (tv_now.tv_usec - SocketList[j]->tv_start_waiting.tv_usec));
+			if(tdiff < 1000000) //TODO define val
+				shouldClose = false;
+		}
+		if(shouldClose)
+		{
+			log_level_printf(2,"FD: close con Timeout fd:%d\n",thisSocket);
+			connectionSock->close();
+			FD_CLR(thisSocket, &master); // remove from master set
+			delete SocketList[j]; 
+			SocketList[j] = NULL;
+		}
 		
 	}
-}					
+}
+//-----------------------------------------------------------------------------
+// Set Entry(number)to NULL in Threadlist
+void CWebserver::addSocketToMasterSet(SOCKET fd)
+{
+	int slot = GetExistingConnectionSocket(fd);
+	if(slot>=0)
+	{
+		struct 	timeval 	tv_now;
+		struct	timezone 	tz_now;
+		gettimeofday(&tv_now, &tz_now);
+		SocketList[slot]->tv_start_waiting = tv_now;
+	}	
+	FD_SET(fd, &master);
+}	 
+				
 //-----------------------------------------------------------------------------
 // Close (FD_SET handled) Socket
 // Clear it from SocketList 
@@ -363,19 +406,21 @@ void *WebThread(void *args)
 
 	// (3) end connection handling
 #ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
-	if (!con->sock->CheckSocketOpen())
-	{
-		log_level_printf(2,"FD detect closed socket!!!\n");//TODO
-		con->keep_alive = false;
-	}	
+//	if (!con->sock->CheckSocketOpen())
+//	{
+//		log_level_printf(2,"FD detect closed socket sock:%d!!!\n",con->sock->get_socket());//TODO
+//		con->keep_alive = false;
+//	}	
 
 	if(!con->keep_alive)
 	{
-		ws->close_socket(con->sock->get_socket());
+//		log_level_printf(2,"FD SHOULD CLOSE sock:%d!!!\n",con->sock->get_socket());//TODO
+//		ws->close_socket(con->sock->get_socket());
 	}
 	else
 	{
 		ws->addSocketToMasterSet(con->sock->get_socket()); 	// add to master set
+//		log_level_printf(2,"FD add to master sock:%d!!!\n",con->sock->get_socket());//TODO
 	}
 
 #else

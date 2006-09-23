@@ -262,7 +262,7 @@ bool CWebserverRequest::HandlePost()
 		content_len = atoi( HeaderList["Content-Length"].c_str() );
 
 	// Get Rest of Request from Socket
-	log_level_printf(8,"Connection->Method Post !\n");
+	log_level_printf(2,"Connection->Method Post !\n");
 	log_level_printf(9,"Conntent Type:%s\n",(HeaderList["Content-Type"]).c_str());
 	log_level_printf(8,"Post Content-Length:%d as string:(%s)\n", content_len, HeaderList["Content-Length"].c_str());
 
@@ -391,7 +391,7 @@ unsigned int CWebserverRequest::HandlePostBoundary(std::string boundary, unsigne
 	tmp_line = Connection->sock->ReceiveLine();
 	content_len -= tmp_line.length();
 
-	log_level_printf(7,"<POST Boundary> Start\n");
+	log_level_printf(2,"<POST Boundary> Start\n");
 	if(tmp_line.find(boundary) != std::string::npos)
 	{
 		// is it the boudary end?
@@ -414,7 +414,7 @@ unsigned int CWebserverRequest::HandlePostBoundary(std::string boundary, unsigne
 		{
 #ifdef Y_CONFIG_FEATURE_UPLOAD
 			// this part is a file
-			log_level_printf(7,"<POST Boundary> disposition !!this is a file!! found. line:(%s)\n", tmp_line.c_str());
+			log_level_printf(2,"<POST Boundary> disposition !!this is a file!! found. line:(%s)\n", tmp_line.c_str());
 			// get para from 'content-disposition: form-data; name="pics"; filename="file1.txt"'
 			// set to ParameterList["<name>"]="<filename>"
 			std::string left, right, var_name, var_value;
@@ -532,12 +532,12 @@ unsigned int CWebserverRequest::HandlePostBoundary(std::string boundary, unsigne
 					perror("write file failed\n");
 		      			return 0;
 		      		}
-				log_level_printf(8,"<POST Boundary> read file (already:%d all:%d)\n", _readbytes, content_len);
+				log_level_printf(2,"<POST Boundary> read file (already:%d all:%d)\n", _readbytes, content_len);
 			}
 			while((_readbytes < content_len) && (tmp_line.length() != 0));
 			content_len -= _readbytes;
 			close(fd);
-			log_level_printf(7,"<POST Boundary> read file End\n");
+			log_level_printf(2,"<POST Boundary> read file End\n");
 			if(found_end_boundary) // upload ok?
 			{
 				

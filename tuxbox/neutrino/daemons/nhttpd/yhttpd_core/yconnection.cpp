@@ -54,6 +54,7 @@ void CWebserverConnection::EndConnection()
 	if(RequestCanceled)			// Canceled
 		keep_alive = false;
 	RequestCanceled = true;
+//	sock->Flush();
 #ifndef Y_CONFIG_FEATURE_KEEP_ALIVE
 	sock->close();
 #endif

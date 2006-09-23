@@ -75,7 +75,7 @@ public:
 	void 		clear_Thread_List_Number(int number)// Set Entry(number)to NULL in Threadlist 
 				{if(number <HTTPD_MAX_CONNECTIONS)Connection_Thread_List[number]=(pthread_t)NULL;}
 	void		close_socket(SOCKET thisSocket);	// closes socket by application
-	void		addSocketToMasterSet(SOCKET fd) {FD_SET(fd, &master);} 
+	void		addSocketToMasterSet(SOCKET fd); 
 };
 
 #endif // __yhttpd_ywebserver_h__

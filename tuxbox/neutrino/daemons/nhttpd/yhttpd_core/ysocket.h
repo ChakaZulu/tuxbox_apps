@@ -54,6 +54,7 @@ public:
 	bool		handling;					// true: Socket yet is handled by a Connection Thread
 	bool		isOpened;					// is this socket open?
 	bool		isValid;					// false on Socket Errors. Must close.
+	struct timeval 	tv_start_waiting;				// Put keep-alive Socket to Wait-Queue
 
 	void 		close(void);					// Close Socket
 	void 		shutdown(void);					// Shutdown Socket
@@ -62,12 +63,14 @@ public:
 	void 		setAddr(sockaddr_in _clientaddr);
 	std::string 	get_client_ip(void);				// Get IP from Client
 	SOCKET 		get_socket(){return sock;}			// Return "C" Socket-ID
+	int		get_accept_port(void);				// Get Port for accepted connection
 
 	// send & receive (basic)
 	int 		Read(char *buffer, unsigned int length);	// Read a buffer (normal or SSL)
 	int 		Send(char const *buffer, unsigned int length);	// Send a buffer (normal or SSL)
 	bool 		CheckSocketOpen();				// check if socket was closed by client
-
+//	void 		Flush();					// Flush socket Data
+	
 	// send & receive
 	int 		SendFile(int filed);				// Send a File
 	std::string 	ReceiveBlock();					// receive a Block. Look at length

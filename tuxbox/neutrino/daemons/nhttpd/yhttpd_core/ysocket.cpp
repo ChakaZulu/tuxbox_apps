@@ -43,6 +43,8 @@ CySocket::CySocket()
 #ifdef Y_CONFIG_USE_OPEN_SSL
 	ssl = NULL;
 #endif
+	tv_start_waiting.tv_sec = 0;
+	tv_start_waiting.tv_usec = 0;
 	BytesSend =0;
 	sock = socket(AF_INET,SOCK_STREAM,0);
 	init();
@@ -203,7 +205,11 @@ std::string CySocket::get_client_ip(void)
 {
 	return inet_ntoa(addr.sin_addr);
 }
-
+//-----------------------------------------------------------------------------
+int CySocket::get_accept_port(void)
+{
+	return (int)ntohs(addr.sin_port);
+}
 //-----------------------------------------------------------------------------
 void CySocket::setAddr(sockaddr_in _addr)
 {
@@ -277,8 +283,18 @@ int CySocket::Send(char const *buffer, unsigned int length)
 bool CySocket::CheckSocketOpen()
 {
 	char buffer[32];
+
+#ifdef CONFIG_SYSTEM_CYGWIN
+	return !(recv(sock, buffer, sizeof(buffer), MSG_PEEK | MSG_NOSIGNAL) == 0);
+#else
 	return !(recv(sock, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == 0);
+#endif
 }
+//-----------------------------------------------------------------------------
+//void CySocket::Flush()
+//{
+//	flush(sock);
+//}//TODO
 //-----------------------------------------------------------------------------
 // BASIC Send File over Socket for FILE*
 // fd is an opened FILE-Descriptor
