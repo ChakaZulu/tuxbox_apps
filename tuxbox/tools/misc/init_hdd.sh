@@ -51,7 +51,8 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Initialize the swap partition
-# mkswap /dev/ide/host0/bus0/target0/lun0/part1
+echo "Now initializing the swap partition."
+mkswap $HDD/part1
 
 # Create the files system (often incorrectly called "formatting").
 echo "Now creating the file system. This may take a few minutes."
