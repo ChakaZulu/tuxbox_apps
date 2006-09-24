@@ -267,6 +267,15 @@ void CControldClient::videoPowerDown(bool powerdown)
         close_connection();
 }
 
+bool CControldClient::getVideoPowerDown()
+{
+	CControldMsg::responseVideoPowerSave msg;
+	send(CControldMsg::CMD_GETVIDEOPOWERDOWN);
+	receive_data((char*) &msg, sizeof(msg));
+	close_connection();
+	return msg.videoPowerSave;
+}
+
 void CControldClient::saveSettings()
 {
         send(CControldMsg::CMD_SAVECONFIG);

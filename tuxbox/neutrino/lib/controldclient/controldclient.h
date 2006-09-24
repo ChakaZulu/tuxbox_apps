@@ -153,9 +153,14 @@ class CControldClient:private CBasicClient
 
 
 		/*
-			die Dbox herunterfahren
+			die dBox in standby bringen
 		*/
 		void videoPowerDown(bool);
+
+		/*
+			standby abfragen
+		*/
+		bool getVideoPowerDown();
 
 		/*
 			die Dbox herunterfahren

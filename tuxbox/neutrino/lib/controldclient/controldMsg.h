@@ -69,6 +69,7 @@ class CControldMsg : public CBasicMessage
 			CMD_GETASPECTRATIO,
 
 			CMD_SETVIDEOPOWERDOWN,
+			CMD_GETVIDEOPOWERDOWN,
 
 			CMD_REGISTEREVENT,
 			CMD_UNREGISTEREVENT,
@@ -156,6 +157,11 @@ class CControldMsg : public CBasicMessage
 		struct commandCsync
 		{
 			unsigned char csync;
+		};
+
+		struct responseVideoPowerSave
+		{
+			bool videoPowerSave;
 		};
 
 };
