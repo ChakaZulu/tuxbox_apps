@@ -403,7 +403,11 @@ void CControlAPI::StandbyCGI(CyhookHandler *hh)
 		else
 			hh->SendError();
 	}
-	hh->SendOk();
+	else
+		if(NeutrinoAPI->Controld->getVideoPowerDown())
+			hh->WriteLn("on");
+		else
+			hh->WriteLn("off");
 }
 
 //-----------------------------------------------------------------------------
