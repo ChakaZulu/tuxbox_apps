@@ -25,7 +25,6 @@ pkginclude_HEADERS = \
 	ca_program_map_section.h \
 	carousel_identifier_descriptor.h \
 	ca_section.h \
-	ca_system_descriptor.h \
 	cell_frequency_link_descriptor.h \
 	cell_list_descriptor.h \
 	compat.h \
