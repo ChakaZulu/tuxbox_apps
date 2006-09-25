@@ -8,6 +8,7 @@ libdvbsi___la_LDFLAGS = \
 libdvbsi___la_SOURCES = \
 	aac_descriptor.cpp \
 	ac3_descriptor.cpp \
+	adaptation_field_data_descriptor.cpp \
 	ancillary_data_descriptor.cpp \
 	announcement_support_descriptor.cpp \
 	audio_stream_descriptor.cpp \

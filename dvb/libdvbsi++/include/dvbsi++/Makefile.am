@@ -2,6 +2,7 @@ pkgincludedir = ${includedir}/dvbsi++
 pkginclude_HEADERS = \
 	aac_descriptor.h \
 	ac3_descriptor.h \
+	adaptation_field_data_descriptor.h \
 	ancillary_data_descriptor.h \
 	announcement_support_descriptor.h \
 	application_descriptor.h \
