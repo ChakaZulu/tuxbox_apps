@@ -1,5 +1,5 @@
 /*
- * $Id: adaptation_field_data_descriptor.cpp,v 1.1 2006/09/25 18:58:48 mws Exp $
+ * $Id: adaptation_field_data_descriptor.cpp,v 1.2 2006/09/26 07:29:23 mws Exp $
  *
  * Copyright (C) 2006 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -16,6 +16,10 @@ AdaptationFieldDataDescriptor::AdaptationFieldDataDescriptor(const uint8_t* cons
 	ASSERT_MIN_DLEN(1);
 
 	adaptationFieldDataIdentifier = buffer[2];
+}
+
+AdaptationFieldDataDescriptor::~AdaptationFieldDataDescriptor()
+{
 }
 
 uint8_t AdaptationFieldDataDescriptor::getAdaptationFieldDataIdentifier(void) const
