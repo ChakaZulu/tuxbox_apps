@@ -1,5 +1,5 @@
 /*
- * $Id: bouquet_association_section.cpp,v 1.5 2006/03/28 17:22:00 ghostrider Exp $
+ * $Id: bouquet_association_section.cpp,v 1.6 2006/09/26 20:13:58 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -31,7 +31,7 @@ BouquetAssociationSection::BouquetAssociationSection(const uint8_t * const buffe
 	uint16_t bytesLeft = sectionLength > 11 ? sectionLength - 11 : 0;
 	uint16_t loopLength = 0;
 	uint16_t bytesLeft2 = bouquetDescriptorsLength;
-	
+
 	while (bytesLeft >= bytesLeft2 && bytesLeft2 > 1 && bytesLeft2 >= (loopLength = 2 + buffer[pos+1])) {
 		descriptor(&buffer[pos], SCOPE_SI);
 		pos += loopLength;
@@ -39,7 +39,7 @@ BouquetAssociationSection::BouquetAssociationSection(const uint8_t * const buffe
 		bytesLeft2 -= loopLength;
 	}
 
-	if (!bytesLeft2 && bytesLeft > 1) { 
+	if (!bytesLeft2 && bytesLeft > 1) {
 		bytesLeft2 = transportStreamLoopLength = DVB_LENGTH(&buffer[pos]);
 		bytesLeft -= 2;
 		pos += 2;
@@ -58,3 +58,7 @@ BouquetAssociationSection::~BouquetAssociationSection(void)
 		delete *i;
 }
 
+const BouquetAssociationList* BouquetAssociationSection::getBouquets(void) const
+{
+	return &bouquet;
+}

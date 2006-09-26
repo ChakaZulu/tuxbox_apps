@@ -1,5 +1,5 @@
 /*
- * $Id: service_description_section.cpp,v 1.6 2006/03/28 17:22:00 ghostrider Exp $
+ * $Id: service_description_section.cpp,v 1.7 2006/09/26 20:13:58 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -58,7 +58,7 @@ ServiceDescriptionSection::ServiceDescriptionSection(const uint8_t * const buffe
 	uint16_t pos = 11;
 	uint16_t bytesLeft = sectionLength > 12 ? sectionLength - 12 : 0;
 	uint16_t loopLength = 0;
-	
+
 	while (bytesLeft > 4 && bytesLeft >= (loopLength = 5 + DVB_LENGTH(&buffer[pos+3]))) {
 		description.push_back(new ServiceDescription(&buffer[pos]));
 		bytesLeft -= loopLength;
