@@ -1,5 +1,5 @@
 /*
- * $Id: running_status_section.cpp,v 1.1 2006/09/26 20:52:09 mws Exp $
+ * $Id: running_status_section.cpp,v 1.2 2006/09/26 20:54:04 mws Exp $
  *
  * Copyright (C) 2006 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -62,7 +62,7 @@ RunningStatusSection::~RunningStatusSection(void)
 	}
 }
 
-const RunningStatusList& RunningStatusSection::getRunningStatus() const
+const RunningStatusList* RunningStatusSection::getRunningStatus() const
 {
-	return runningStatus;
+	return &runningStatus;
 }

@@ -1,5 +1,5 @@
 /*
- *  $Id: running_status_section.h,v 1.1 2006/09/26 20:52:09 mws Exp $
+ *  $Id: running_status_section.h,v 1.2 2006/09/26 20:54:04 mws Exp $
  *
  *  Copyright (C) 2006 Marcel Siegert <mws@twisted-brains.org>
  *
@@ -50,7 +50,7 @@ class RunningStatusSection : public ShortSection
 		static const enum TableId TID = TID_RST;
 		static const uint32_t TIMEOUT = 36000;
 
-		const RunningStatusList& getRunningStatus(void) const;
+		const RunningStatusList* getRunningStatus(void) const;
 };
 
 typedef std::list<RunningStatusSection*> RunningStatusSectionList;
