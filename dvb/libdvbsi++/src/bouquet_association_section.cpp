@@ -1,5 +1,5 @@
 /*
- * $Id: bouquet_association_section.cpp,v 1.6 2006/09/26 20:13:58 mws Exp $
+ * $Id: bouquet_association_section.cpp,v 1.7 2006/09/26 20:34:33 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -21,6 +21,16 @@ BouquetAssociation::BouquetAssociation(const uint8_t * const buffer)
 
 	for (size_t i = 6; i < transportStreamLoopLength + 6; i += buffer[i + 1] + 2)
 		descriptor(&buffer[i], SCOPE_SI);
+}
+
+uint16_t BouquetAssociation::getTransportStreamId(void) const
+{
+	return transportStreamId;
+}
+
+uint16_t BouquetAssociation::getOriginalNetworkId(void) const
+{
+	return originalNetworkId;
 }
 
 BouquetAssociationSection::BouquetAssociationSection(const uint8_t * const buffer) : LongCrcSection(buffer)

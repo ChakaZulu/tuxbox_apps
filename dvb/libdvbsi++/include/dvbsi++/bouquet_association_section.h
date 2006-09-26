@@ -1,5 +1,5 @@
 /*
- * $Id: bouquet_association_section.h,v 1.4 2006/09/26 20:13:57 mws Exp $
+ * $Id: bouquet_association_section.h,v 1.5 2006/09/26 20:34:32 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -25,6 +25,9 @@ class BouquetAssociation : public DescriptorContainer
 
 	public:
 		BouquetAssociation(const uint8_t * const buffer);
+
+		uint16_t getTransportStreamId(void) const;
+		uint16_t getOriginalNetworkId(void) const;
 };
 
 typedef std::list<BouquetAssociation *> BouquetAssociationList;
