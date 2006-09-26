@@ -91,6 +91,7 @@ libdvbsi___la_SOURCES = \
 	program_association_section.cpp \
 	program_map_section.cpp \
 	related_content_descriptor.cpp \
+	running_status_section.cpp \
 	satellite_delivery_system_descriptor.cpp \
 	s2_satellite_delivery_system_descriptor.cpp \
 	scrambling_descriptor.cpp \
