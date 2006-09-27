@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.44  2006/09/27 18:59:00  robspr1
+ * -faster switching between viewed emails using + and -
+ *
  * Revision 1.43  2006/03/05 16:02:13  robspr1
  * - use /tmp/keyboard.lck to signal decoding of the keyboard
  *
@@ -1343,7 +1346,11 @@ void ShowMailFile(char* filename, char* szAction)
 			while(1)
 			{
 				GetRCCode();
-				if( rccode == RC_HOME || rccode == RC_OK || rccode == RC_DOWN )
+				if((rccode == RC_HOME) || (rccode == RC_PLUS) || (rccode == RC_MINUS)) 
+				{
+					break;
+				}
+				else if( rccode == RC_OK || rccode == RC_DOWN )
 				{
 					if((iPage < 99) && ((iPage +1) < iMaxPages) && (!feof(pipe)))
 					{
@@ -1407,7 +1414,7 @@ void ShowMailFile(char* filename, char* szAction)
 					iPagePos[iPage] = 0;
 				}
 			}
-			if(rccode == RC_HOME) 
+			if((rccode == RC_HOME) || (rccode == RC_PLUS) || (rccode == RC_MINUS)) 
 			{
 				break;
 			}
@@ -1415,7 +1422,7 @@ void ShowMailFile(char* filename, char* szAction)
 			PaintMailHeader();
 		}
 	}
-	rccode = 0;
+	if (rccode==RC_HOME) rccode=0;
 	fclose(pipe);
 }
 
@@ -3157,6 +3164,75 @@ void ShowMailInfo(int account, int mailindex)
 }
 
 /******************************************************************************
+ * ViewMail
+ ******************************************************************************/
+
+void ViewMail(int account, int mailindex)
+{
+	if(maildb[account].mails)
+	{				
+		if( mailcache )
+		{
+			char *stored_uids = 0, *ptr = 0;
+			int idx1 = 0;
+			int filesize = 0;
+			char idxfile[256];
+			char mailfile[256];
+			FILE *fd_mailidx;
+
+			sprintf(idxfile,"%stuxmail.idx%u",maildir,account);
+	
+			if((fd_mailidx = fopen(idxfile,"r")))
+			{
+				fseek(fd_mailidx, 0, SEEK_END);
+
+				if((filesize = ftell(fd_mailidx)))
+				{
+					stored_uids = malloc(filesize + 1);
+					memset(stored_uids, 0, filesize + 1);
+	
+					rewind(fd_mailidx);
+					fread(stored_uids, filesize, 1, fd_mailidx);
+				}
+							
+				if((filesize) && (ptr = strstr(stored_uids, maildb[account].mailinfo[mailindex].uid)))
+				{
+					// we already have this mail read
+					sscanf(ptr-3,"%02u",&idx1);
+					if( idx1 )
+					{
+						char szInfo[256];
+						sprintf(mailfile,"%stuxmail.idx%u.%u",maildir,account,idx1);
+						sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
+//						printf("cached file: %s",mailfile);
+						ShowMailFile(mailfile, szInfo);
+						free(stored_uids);
+						fclose(fd_mailidx);
+						SaveAndReloadDB(0);
+						return;
+					}
+				}
+				free(stored_uids);
+				fclose(fd_mailidx);
+			}
+		}
+		ControlDaemon(GET_MAIL, account, mailindex);
+
+		if(!mailfile)
+		{
+			ShowMessage(GETMAILFAIL);
+		}
+		else
+		{
+			char szInfo[256];
+			sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
+			ShowMailFile(POP3FILE, szInfo);
+		}
+		SaveAndReloadDB(0);
+	}
+}
+
+/******************************************************************************
  * FillDB
  ******************************************************************************/
 
@@ -3649,7 +3725,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.43 $";
+	char cvs_revision[] = "$Revision: 1.44 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -4091,68 +4167,29 @@ void plugin_exec(PluginParam *par)
 
 				case RC_YELLOW:
 
-					if(maildb[account].mails)
-					{				
-						if( mailcache )
+					do
+					{
+						
+						ViewMail(account, mailindex);
+					
+						if( rccode == RC_MINUS )
 						{
-							char *stored_uids = 0, *ptr = 0;
-							int idx1 = 0;
-							int filesize = 0;
-							char idxfile[256];
-							char mailfile[256];
-							FILE *fd_mailidx;
-
-							sprintf(idxfile,"%stuxmail.idx%u",maildir,account);
-	
-							if((fd_mailidx = fopen(idxfile,"r")))
+							if(mailindex > 0)
 							{
-								fseek(fd_mailidx, 0, SEEK_END);
-
-								if((filesize = ftell(fd_mailidx)))
-								{
-									stored_uids = malloc(filesize + 1);
-									memset(stored_uids, 0, filesize + 1);
-				
-									rewind(fd_mailidx);
-									fread(stored_uids, filesize, 1, fd_mailidx);
-								}
-							
-								if((filesize) && (ptr = strstr(stored_uids, maildb[account].mailinfo[mailindex].uid)))
-								{
-									// we already have this mail read
-									sscanf(ptr-3,"%02u",&idx1);
-									if( idx1 )
-									{
-										char szInfo[256];
-										sprintf(mailfile,"%stuxmail.idx%u.%u",maildir,account,idx1);
-										sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
-//										printf("cached file: %s",mailfile);
-										ShowMailFile(mailfile, szInfo);
-										free(stored_uids);
-										fclose(fd_mailidx);
-										SaveAndReloadDB(0);
-										break;
-									}
-								}
-								free(stored_uids);
-								fclose(fd_mailidx);
+								mailindex--;
+								rccode = RC_YELLOW;
 							}
 						}
-						ControlDaemon(GET_MAIL, account, mailindex);
-
-						if(!mailfile)
+						if( rccode == RC_PLUS)
 						{
-							ShowMessage(GETMAILFAIL);
+							if(mailindex < maildb[account].mails-1)
+							{
+								mailindex++;
+								rccode = RC_YELLOW;
+							}
 						}
-						else
-						{
-							char szInfo[256];
-							sprintf(szInfo, "%s\n%s\n%s %s\n", maildb[account].mailinfo[mailindex].from, maildb[account].mailinfo[mailindex].subj, maildb[account].mailinfo[mailindex].date, maildb[account].mailinfo[mailindex].time);
-							ShowMailFile(POP3FILE, szInfo);
-						}
-						SaveAndReloadDB(0);
-					}
-
+					} while( rccode == RC_YELLOW );
+						
 					break;
 
 				case RC_BLUE:
@@ -4239,7 +4276,7 @@ void plugin_exec(PluginParam *par)
 					{
 						fclose(fopen(RUNFILE, "w"));
 #ifdef OE
-					        symlink("../init.d/tuxmail", OE_START);
+		        symlink("../init.d/tuxmail", OE_START);
 						symlink("../init.d/tuxmail", OE_KILL0);
 						symlink("../init.d/tuxmail", OE_KILL6);
 #endif
