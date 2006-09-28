@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.44  2006/09/28 18:05:10  robspr1
+ * -bugfix and add subject-scanning for spamfilter
+ *
  * Revision 1.43  2006/06/20 21:25:36  robspr1
  * -bugfix for param -send
  *
@@ -1934,6 +1937,8 @@ int SendPOPCommand(int command, char *param)
 							ptr++;
 						}
 
+						ptr1 = &header[stringindex];
+
 						while(*ptr != '\r')
 						{
 							if(*ptr == '=' && *(ptr + 1) == '?')
@@ -1960,6 +1965,23 @@ int SendPOPCommand(int command, char *param)
 							}
 						}
 
+						if(use_spamfilter)
+						{
+							for(loop = 0; loop < spam_entries; loop++)
+							{
+								// check if we should look for a subject
+								if(((spamfilter[loop].address[0]=='#')	&& (strstr(ptr1, &spamfilter[loop].address[1]))) ||
+									 ((spamfilter[loop].address[0]=='!')	&& (!strcmp(ptr1, &spamfilter[loop].address[1]))))
+								{									
+									slog ? syslog(LOG_DAEMON | LOG_INFO, "Spamfilter active, delete Mail with Subj. \"%s\"", ptr1) : printf("TuxMailD <Spamfilter active, delete Mail with Subj. \"%s\">\n", ptr1);
+
+									spam_detected = 1;
+
+									break;
+								}
+							}						
+						}
+
 						header[stringindex++] = '|';
 					}
 					else
@@ -1972,6 +1994,7 @@ int SendPOPCommand(int command, char *param)
 
 					break;
 					
+				case DELE:
 				case RETR:
 					break;
 
@@ -2463,6 +2486,8 @@ int SendIMAPCommand(int command, char *param, char *param2)
 							ptr++;
 						}
 
+						ptr1 = &header[stringindex];
+
 						while(*ptr != '\r')
 						{
 							if(*ptr == '=' && *(ptr + 1) == '?')
@@ -2487,6 +2512,23 @@ int SendIMAPCommand(int command, char *param, char *param2)
 							{
 								memcpy(&header[stringindex++], ptr++, 1);
 							}
+						}
+						
+						if(use_spamfilter)
+						{
+							for(loop = 0; loop < spam_entries; loop++)
+							{
+								// check if we should look for a subject
+								if(((spamfilter[loop].address[0]=='#')	&& (strstr(ptr1, &spamfilter[loop].address[1]))) ||
+									 ((spamfilter[loop].address[0]=='!')	&& (!strcmp(ptr1, &spamfilter[loop].address[1]))))
+								{									
+									slog ? syslog(LOG_DAEMON | LOG_INFO, "Spamfilter active, delete Mail with Subj. \"%s\"", ptr1) : printf("TuxMailD <Spamfilter active, delete Mail with Subj. \"%s\">\n", ptr1);
+
+									spam_detected = 1;
+
+									break;
+								}
+							}						
 						}
 
 						header[stringindex++] = '|';
@@ -3602,6 +3644,7 @@ int CheckAccount(int account)
 						{
 							if( !imap )
 							{
+								
 								if(!SendPOPCommand(DELE, mailnumber))
 								{
 									free(known_uids);
@@ -3628,6 +3671,7 @@ int CheckAccount(int account)
 									return 0;
 								}
 							}
+							deleted_messages++;
 						}
 						else
 						{
@@ -3807,6 +3851,7 @@ int CheckAccount(int account)
 										return 0;
 									}
 								}
+								deleted_messages++;
 							}
 							else
 							{
@@ -4459,7 +4504,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.43 $";
+	char cvs_revision[] = "$Revision: 1.44 $";
 	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
