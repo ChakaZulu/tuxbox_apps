@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.136 2006/09/18 18:02:12 guenther Exp $
+  $Id: movieplayer.cpp,v 1.137 2006/09/28 16:35:33 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -3414,7 +3414,7 @@ void CMoviePlayerGui::PlayFile (int parental)
     			if(g_ac3flags[count] == 1)
     			{
                     get_movie_info_apid_name(g_apids[count],p_movie_info,&apidtitle);
-    				if(apidtitle.find("AC3") < 0) //std::nopos)
+     				if((int)apidtitle.find("AC3") < 0) //std::nopos)
                         apidtitle.append(" (AC3)");
                     APIDSelector.addItem(new CMenuForwarderNonLocalized(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber,CRCInput::convertDigitToKey(count+1)),
                                                (count == 0));
@@ -3750,7 +3750,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				FileTime.hide();
 				break;
 
-				//-- jump 10 minutes back --
+				//-- jump 10 minutes back -- 
 			case CRCInput::RC_7:
 				g_jumpseconds = -10 * 60;
 				g_playstate   = CMoviePlayerGui::JB;
@@ -4221,7 +4221,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.136 $");
+	helpbox.addLine("Version: $Revision: 1.137 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4243,7 +4243,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.136 $");
+	helpbox.addLine("Version: $Revision: 1.137 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
