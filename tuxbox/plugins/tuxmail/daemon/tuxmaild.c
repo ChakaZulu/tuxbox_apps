@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.45  2006/09/28 19:06:33  robspr1
+ * -subject-scanning of spamfiler also for a sentence, not only for one word
+ *
  * Revision 1.44  2006/09/28 18:05:10  robspr1
  * -bugfix and add subject-scanning for spamfilter
  *
@@ -668,7 +671,8 @@ void ReadSpamList()
 {
 	FILE *fd_spam;
 	char line_buffer[64];
-
+  char *ptr;
+  
 	spam_entries = use_spamfilter = 0;
 
 	if(!(fd_spam = fopen(CFGPATH SPMFILE, "r")))
@@ -685,7 +689,19 @@ void ReadSpamList()
 		{
 			if(sscanf(line_buffer, "%s", spamfilter[spam_entries].address) == 1)
 			{
-				spam_entries++;
+				// for prefix ! or # take the whole line, not just the first string
+				if((line_buffer[0] == '!') || (line_buffer[0] == '#'))
+				{
+					strcpy(spamfilter[spam_entries].address,line_buffer);
+					if((ptr = strchr(spamfilter[spam_entries].address, '\r')) || (ptr = strchr(spamfilter[spam_entries].address, '\n')))
+					{
+						*ptr = 0;
+					}						
+				}
+
+				slog ? syslog(LOG_DAEMON | LOG_INFO, "Spamlist Filter <%s>>", spamfilter[spam_entries].address) : printf("TuxMailD <Spamlist Filter <%s>>\n", spamfilter[spam_entries].address);
+
+				spam_entries++;				
 			}
 		}
 
@@ -4504,7 +4520,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.44 $";
+	char cvs_revision[] = "$Revision: 1.45 $";
 	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
