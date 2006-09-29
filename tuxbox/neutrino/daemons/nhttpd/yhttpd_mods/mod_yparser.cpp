@@ -199,7 +199,7 @@ void CyParser::cgi_server_config(CyhookHandler *hh)
 
 	hh->SendHTMLHeader("Webserver Configuration");
 	yresult += string_printf("<b>Webserver Config</b><br/>\n");
-	yresult += string_printf("Webserver \"%s\" Version: %s<br/>\n",HTTPD_NAME,HTTPD_VERSION);
+	yresult += string_printf("Webserver \"%s\"<br/>\n",WEBSERVERNAME);
 	yresult += string_printf("<br/><b>CONFIG (compiled)</b><br/>\n");
 	yresult += string_printf("Config File: %s<br/>\n", HTTPD_CONFIGFILE);
 	yresult += string_printf("Upload File: %s<br/>\n", UPLOAD_TMP_FILE);
@@ -208,7 +208,7 @@ void CyParser::cgi_server_config(CyhookHandler *hh)
 	for ( ; i!= (hh->WebserverConfigList).end(); i++ )
 	{
 		if( ((*i).first) != "AuthUser" && ((*i).first) != "AuthPassword")
-		yresult += string_printf("Name: %s Value: %s<br/>\n", ((*i).first).c_str(), ((*i).second).c_str());
+			yresult += string_printf("Name: %s Value: %s<br/>\n", ((*i).first).c_str(), ((*i).second).c_str());
 	}
 	hh->addResult(yresult, HANDLED_READY);
 	hh->SendHTMLFooter();

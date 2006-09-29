@@ -33,8 +33,8 @@
 //-----------------------------------------------------------------------------
 // General central Definitions <configure!>
 //-----------------------------------------------------------------------------
-#define HTTPD_VERSION 		"3.0.1"				// Webserver version  (can be overloaded)
-#define YHTTPD_VERSION 		"1.0.3"				// Webserver version  (Version of yhttpd-core!)
+#define HTTPD_VERSION 		"3.0.2"				// Webserver version  (can be overloaded)
+#define YHTTPD_VERSION 		"1.0.4"				// Webserver version  (Version of yhttpd-core!)
 #define IADDR_LOCAL 		"127.0.0.1"			// local IP
 #define HTTPD_NAME 		"yhttpd"			// Webserver name (can be overloaded)
 #define YHTTPD_NAME 		"yhttpd_core"			// Webserver name (Name of yhttpd-core!)
@@ -130,8 +130,6 @@
 #ifdef CONFIG_SYSTEM_TUXBOX
 #undef HTTPD_NAME
 #define HTTPD_NAME 			"nhttpd"
-#undef HTTPD_VERSION
-#define HTTPD_VERSION 			"3.0.1"
 #define HTTPD_STANDARD_PORT		80
 #define HTTPD_MAX_CONNECTIONS		10
 #define HTTPD_CONFIGDIR 		"/var/tuxbox/config"

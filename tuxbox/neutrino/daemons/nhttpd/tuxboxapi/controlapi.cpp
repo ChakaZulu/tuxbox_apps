@@ -338,10 +338,11 @@ void CControlAPI::ExecCGI(CyhookHandler *hh)
 		script = hh->ParamList["1"];
 		unsigned int len = hh->ParamList.size();
 		for(unsigned int y=2;y<=len;y++)
-		{
-			script += " ";
-			script += (hh->ParamList[itoa(y)]).c_str();
-		}
+			if(!hh->ParamList[itoa(y)].empty())
+			{
+				script += " ";
+				script += hh->ParamList[itoa(y)];
+			}
 		result = YexecuteScript(hh, script);
 	}
 	else

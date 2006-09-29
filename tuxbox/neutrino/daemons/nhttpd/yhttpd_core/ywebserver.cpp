@@ -168,7 +168,8 @@ bool CWebserver::run(void)
 				if (i == listener)	// handle new connections
 				{
 					slot = AcceptNewConnectionSocket();
-					fcntl((SocketList[slot])->get_socket() , F_SETFD , O_NONBLOCK);
+					if(slot>=0)
+						fcntl((SocketList[slot])->get_socket() , F_SETFD , O_NONBLOCK);
 				}
 				else // Connection on an existing open Socket = reuse (keep-alive)
 				{

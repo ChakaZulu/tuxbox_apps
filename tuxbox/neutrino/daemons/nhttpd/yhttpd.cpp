@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 	signal(SIGTERM, sig_catch);
 
 	// Start Webserver: fork ist if not in debug mode
-	aprintf("Webserver (%s) Version %s\n", HTTPD_NAME, HTTPD_VERSION);
+	aprintf("Webserver %s\n", WEBSERVERNAME);
 	aprintf("Webserver starting...\n");
 	if (do_fork)
 	{

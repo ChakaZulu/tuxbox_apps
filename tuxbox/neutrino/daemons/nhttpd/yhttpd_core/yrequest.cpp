@@ -270,7 +270,6 @@ bool CWebserverRequest::HandlePost()
 	if(HeaderList["Content-Type"].compare(0,t.length(),t) == 0)	// this a a multpart POST, normallly: file upload
 	{
 #ifdef Y_CONFIG_FEATURE_UPLOAD
-		ParameterList.clear();
 		std::string boundary = "--" + HeaderList["Content-Type"].substr(t.length(),HeaderList["Content-Type"].length() - t.length());
 		std::string post_header;
 		do
