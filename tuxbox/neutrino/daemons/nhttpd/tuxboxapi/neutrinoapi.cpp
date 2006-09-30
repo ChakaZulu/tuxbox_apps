@@ -68,10 +68,10 @@ const char * getISO639Description(const char * const iso)
 //=============================================================================
 // Initialization of static variables
 //=============================================================================
-std::string CNeutrinoAPI::Dbox_Hersteller[4]	= {"Nokia", "Philips", "Sagem"};
+std::string CNeutrinoAPI::Dbox_Hersteller[4]	= {"none", "Nokia", "Philips", "Sagem"};
 std::string CNeutrinoAPI::videooutput_names[5]	= {"CVBS", "RGB with CVBS", "S-Video", "YUV with VBS", "YUV with CVBS"};
 std::string CNeutrinoAPI::videoformat_names[4]	= {"automatic", "16:9", "4:3 (LB)", "4:3 (PS)"};
-std::string CNeutrinoAPI::audiotype_names[5] 	= {"single channel","dual channel","joint stereo","stereo"};
+std::string CNeutrinoAPI::audiotype_names[5] 	= {"none", "single channel","dual channel","joint stereo","stereo"};
 
 //=============================================================================
 // Constructor & Destructor
