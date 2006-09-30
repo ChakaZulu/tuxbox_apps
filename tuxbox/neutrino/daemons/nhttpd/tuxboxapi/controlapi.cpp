@@ -1168,7 +1168,9 @@ void CControlAPI::EpgCGI(CyhookHandler *hh)
 				struct tm *mtime = localtime(&eventIterator->startTime);
 				strftime(zbuffer,20,"%H:%M",mtime);
 				hh->printf("\t<start_t>%s</start_t>\r\n", zbuffer);
-				
+				bzero(zbuffer,25);
+				strftime(zbuffer,20,"%d.%m.%Y",mtime);
+				hh->printf("\t<date>%s</date>\r\n", zbuffer);
 				hh->printf("\t<stop_sec>%ld</stop_sec>\r\n", eventIterator->startTime+eventIterator->duration);
 				long _stoptime = eventIterator->startTime+eventIterator->duration;
 				mtime = localtime(&_stoptime);
