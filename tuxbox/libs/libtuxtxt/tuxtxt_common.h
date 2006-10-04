@@ -1040,7 +1040,7 @@ void *tuxtxt_CacheThread(void *arg)
 								{
 									// workaround for crash on RTL Shop ...
 									// sorry.. i dont understand whats going wrong here :)
-									printf("[TuxTxt] page > 0x900 ... ignore!!!!!!\n");
+									printf("[TuxTxt] page > 0x899 ... ignore!!!!!!\n");
 									continue;
 								}
 								else if (tuxtxt_cache.astCachetable[p->page][0])	/* link valid && linked page cached */
