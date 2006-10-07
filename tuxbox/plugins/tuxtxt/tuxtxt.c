@@ -308,7 +308,7 @@ void dump_page()
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.98 $";
+	char cvs_revision[] = "$Revision: 1.99 $";
 
 #if !TUXTXT_CFG_STANDALONE
 	int initialized = tuxtxt_init();
@@ -587,6 +587,7 @@ int Init()
 	memset(&tuxtxt_cache.basictop, 0, sizeof(tuxtxt_cache.basictop));
 	memset(&tuxtxt_cache.adip, 0, sizeof(tuxtxt_cache.adip));
 	memset(&tuxtxt_cache.flofpages, 0 , sizeof(tuxtxt_cache.flofpages));
+	memset(subtitlecache,0,sizeof(subtitlecache));
 	tuxtxt_cache.maxadippg  = -1;
 	tuxtxt_cache.bttok      = 0;
 	maxhotlist = -1;
@@ -987,6 +988,12 @@ void CleanUp()
 					perror("TuxTxt <ioctl(avs)>");
 			}
 		}
+	}
+	/* clear subtitlecache */
+	for (i = 0; i < SUBTITLE_CACHESIZE; i++)
+	{
+		if (subtitlecache[i])
+			free(subtitlecache[i]);
 	}
 
 	if (var_screeninfo.yoffset)
@@ -3346,63 +3353,9 @@ void DoFlashing(int startrow)
 	}
 
 }
-void RenderPage()
+void DoRender(int startrow, int national_subset_bak)
 {
-	int row, col, byte, startrow = 0;;
-	int national_subset_bak = tuxtxt_cache.national_subset;
-
-
-	/* update lcd */
-	UpdateLCD();
-
-	if (transpmode != 2 && delaystarted)
-	{
-	    struct timeval tv;
-    	    gettimeofday(&tv,NULL);
-	    if (tv.tv_sec - tv_delay.tv_sec < subtitledelay)
-		return;
-	}
-	
-
-	/* update page or timestring */
-	if (transpmode != 2 && tuxtxt_cache.pageupdate && tuxtxt_cache.page_receiving != tuxtxt_cache.page && inputcounter == 2)
-	{
-	    if (boxed && subtitledelay) 
-	    {
-		if (!delaystarted)
-		{
-		    gettimeofday(&tv_delay,NULL);
-		    delaystarted = 1;
-		    return;
-		}
-		else
-		    delaystarted = 0;
-
-	    }
-
-		/* reset update flag */
-		tuxtxt_cache.pageupdate = 0;
-
-
-		/* decode page */
-		if (tuxtxt_cache.subpagetable[tuxtxt_cache.page] != 0xFF)
-		{
-			tstPageinfo * p = tuxtxt_DecodePage(showl25,page_char,page_atrb,hintmode, showflof);
-			if (p) 
-			{
-				pageinfo = p;
-				boxed = p->boxed;
-			}
-			if (boxed || transpmode)
-//				tuxtxt_cache.FullScrColor = transp;
-				FillBorder(transp);
-			else
-				FillBorder(tuxtxt_cache.FullScrColor);
-			if (tuxtxt_cache.colortable) /* as late as possible to shorten the time the old page is displayed with the new colors */
-				setcolors(tuxtxt_cache.colortable, 16, 16); /* set colors for CLUTs 2+3 */
-		}
-		else
-			startrow = 1;
+	int row, col, byte;
 		if (boxed)
 		{ 
 			if (screenmode != 0) 
@@ -3414,13 +3367,13 @@ void RenderPage()
 				SwitchScreenMode(prevscreenmode);
 		}
 
- 		/* display first column?  */
+		/* display first column?  */
 		nofirst = show39;
 		for (row = 1; row < 24; row++)
 		{
 			byte = page_char[row*40];
 			if (byte != ' '  && byte != 0x00 && byte != 0xFF &&
-				 page_atrb[row*40].fg != page_atrb[row*40].bg)
+				page_atrb[row*40].fg != page_atrb[row*40].bg)
 			{
 				nofirst = 0;
 				break;
@@ -3449,8 +3402,8 @@ void RenderPage()
 
 		/* get national subset */
 		if (auto_national &&
-			 tuxtxt_cache.national_subset <= NAT_MAX_FROM_HEADER && /* not for GR/RU as long as line28 is not evaluated */
-			 pageinfo && pageinfo->nationalvalid) /* individual subset according to page header */
+			tuxtxt_cache.national_subset <= NAT_MAX_FROM_HEADER && /* not for GR/RU as long as line28 is not evaluated */
+			pageinfo && pageinfo->nationalvalid) /* individual subset according to page header */
 		{
 			tuxtxt_cache.national_subset = countryconversiontable[pageinfo->national];
 #if TUXTXT_DEBUG
@@ -3533,13 +3486,103 @@ void RenderPage()
 			PosY += fontheight;
 		}
 		DoFlashing(startrow);
-		tuxtxt_cache.national_subset = national_subset_bak;
 
 		/* update framebuffer */
 		CopyBB2FB();
+		tuxtxt_cache.national_subset = national_subset_bak;
+}
+void RenderPage()
+{
+	int i, col, byte, startrow = 0;;
+	int national_subset_bak = tuxtxt_cache.national_subset;
+
+
+	/* update lcd */
+	UpdateLCD();
+
+	/* update page or timestring */
+	if (transpmode != 2 && tuxtxt_cache.pageupdate && tuxtxt_cache.page_receiving != tuxtxt_cache.page && inputcounter == 2)
+	{
+		/* reset update flag */
+		tuxtxt_cache.pageupdate = 0;
+		if (boxed && subtitledelay) 
+		{
+			subtitle_cache* c = NULL;
+			int j = -1;
+			for (i = 0; i < SUBTITLE_CACHESIZE; i++)
+			{
+				if (j == -1 && !subtitlecache[i])
+					j = i;
+				if (subtitlecache[i] && !subtitlecache[i]->valid)
+				{
+					c = subtitlecache[i];
+					break;
+				}
+			}
+			if (c == NULL)
+			{
+				if (j == -1) // no more space in subtitlecache
+					return;
+				c= malloc(sizeof(subtitle_cache));
+				if (c == NULL)
+					return;
+				memset(c, 0x00, sizeof(subtitle_cache));
+				subtitlecache[j] = c;
+			}
+			c->valid = 0x01;
+			gettimeofday(&c->tv_timestamp,NULL);
+			if (tuxtxt_cache.subpagetable[tuxtxt_cache.page] != 0xFF)
+			{
+				tstPageinfo * p = tuxtxt_DecodePage(showl25,c->page_char,c->page_atrb,hintmode, showflof);
+				if (p) 
+				{
+					boxed = p->boxed;
+				}
+			}
+			delaystarted = 1;
+			return;
+		}
+		delaystarted=0;
+		/* decode page */
+		if (tuxtxt_cache.subpagetable[tuxtxt_cache.page] != 0xFF)
+		{
+			tstPageinfo * p = tuxtxt_DecodePage(showl25,page_char,page_atrb,hintmode, showflof);
+			if (p) 
+			{
+				pageinfo = p;
+				boxed = p->boxed;
+			}
+			if (boxed || transpmode)
+//				tuxtxt_cache.FullScrColor = transp;
+				FillBorder(transp);
+			else
+				FillBorder(tuxtxt_cache.FullScrColor);
+			if (tuxtxt_cache.colortable) /* as late as possible to shorten the time the old page is displayed with the new colors */
+				setcolors(tuxtxt_cache.colortable, 16, 16); /* set colors for CLUTs 2+3 */
+		}
+		else
+			startrow = 1;
+		DoRender(startrow,national_subset_bak);
 	}
 	else if (transpmode != 2)
 	{
+		if (delaystarted)
+		{
+			struct timeval tv;
+			gettimeofday(&tv,NULL);
+			for (i = 0; i < SUBTITLE_CACHESIZE ; i++)
+			{
+				if (subtitlecache[i] && subtitlecache[i]->valid && tv.tv_sec - subtitlecache[i]->tv_timestamp.tv_sec >= subtitledelay)
+				{
+					memcpy(page_char, subtitlecache[i]->page_char,40 * 25);
+					memcpy(page_atrb, subtitlecache[i]->page_atrb,40 * 25 * sizeof(tstPageAttr));
+					DoRender(startrow,national_subset_bak);
+					subtitlecache[i]->valid = 0;
+					//memset(subtitlecache[i], 0x00, sizeof(subtitle_cache));
+					return;
+				}
+			}
+		}	
 		if (zoommode != 2)
 		{
 			PosY = StartY;

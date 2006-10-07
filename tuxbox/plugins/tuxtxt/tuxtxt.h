@@ -273,6 +273,15 @@ const int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
 struct timeval tv_delay;
 int  subtitledelay, delaystarted;
 FILE *conf;
+#define SUBTITLE_CACHESIZE 50 
+typedef struct 
+{
+	unsigned char valid;
+	struct timeval tv_timestamp;
+	unsigned char  page_char[40 * 25];
+	tstPageAttr page_atrb[40 * 25];
+} subtitle_cache;
+subtitle_cache *subtitlecache[SUBTITLE_CACHESIZE];
 
 
 unsigned short RCCode;
