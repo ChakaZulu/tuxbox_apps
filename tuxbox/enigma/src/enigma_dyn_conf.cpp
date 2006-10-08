@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_conf.cpp,v 1.20 2005/10/30 15:45:16 digi_casi Exp $
+ * $Id: enigma_dyn_conf.cpp,v 1.21 2006/10/08 14:52:20 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -221,6 +221,15 @@ eString getConfigSettings(void)
 		free(audiochannelspriority);
 	}
 	result.strReplace("#AUDIOCHANNELSPRIORITY#", rpl);
+	char *trustedhosts=NULL;
+	eConfig::getInstance()->getKey("/ezap/webif/trustedhosts", trustedhosts);
+	rpl = "";
+	if ( trustedhosts )
+	{
+		rpl = trustedhosts;
+		free(trustedhosts);
+	}
+	result.strReplace("#TRUSTEDHOSTS#", rpl);
 	return result;
 }
 
@@ -235,6 +244,8 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 	eString showsatpos = opt["showsatpos"];
 	eString webiflock = opt["webiflock"];
 	eString audiochannelspriority = opt["audiochannelspriority"];
+	eString trustedhosts = opt["trustedhosts"];
+	eConfig::getInstance()->setKey("/ezap/webif/trustedhosts", trustedhosts.c_str());
 
 	int oldti = 0;
 	eConfig::getInstance()->getKey("/extras/hdparm-s", oldti);

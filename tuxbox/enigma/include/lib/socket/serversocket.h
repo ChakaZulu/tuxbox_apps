@@ -7,6 +7,7 @@ class eServerSocket: public eSocket
 {
 	void notifier(int handle);
 	int okflag;
+	eString strRemoteHost;
 protected:
 	virtual void newConnection(int socket)=0;
 	int bind(int sockfd, struct sockaddr *addr, socklen_t addrlen);
@@ -19,6 +20,7 @@ public:
 	eServerSocket(eString path, eMainloop *ml);
 	virtual ~eServerSocket();
 	bool ok();
+	eString RemoteHost() { return strRemoteHost;}
 };
 
 #endif /* __serversocket_h */

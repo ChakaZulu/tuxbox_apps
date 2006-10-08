@@ -1,4 +1,6 @@
 #include <lib/system/http_dyn.h>
+#include <arpa/inet.h>
+#include <lib/system/econfig.h>
 
 eHTTPDyn::eHTTPDyn(eHTTPConnection *c, eString result): eHTTPDataSource(c), result(result)
 {
@@ -57,13 +59,39 @@ eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString pa
 	{
 		if ((i->path==p) && (i->request==request))
 		{
-			if (i->mustAuth)
+			if (i->mustAuth )
 			{
-				std::map<eString, eString>::iterator i=conn->remote_header.find("Authorization");
-				if ((i == conn->remote_header.end()) || checkAuth(i->second))
+				eString hosts = ";";
+				eString host;
+				host.sprintf(";%s;",conn->RemoteHost().c_str());
+				char* h = NULL;
+				eConfig::getInstance()->getKey("/ezap/webif/trustedhosts", h);
+				if (h)
 				{
-					conn->local_header["WWW-Authenticate"]="Basic realm=\"dreambox\"";
-					return new eHTTPError(conn, 401); // auth req'ed
+					char* h1 = strtok(h,";");
+					struct hostent* he;
+					while (h1)
+					{
+						he = gethostbyname(h1);
+						if (he)
+						{
+							for (int i = 0; he->h_addr_list[i]; i++)
+							{
+								hosts += eString(inet_ntoa(*(in_addr*)he->h_addr_list[i]));
+								hosts += ";";
+							}
+						}
+						h1 = strtok(NULL,";");
+					}
+				}
+				if (hosts.find(host) == eString::npos )
+				{
+					std::map<eString, eString>::iterator i=conn->remote_header.find("Authorization");
+					if ((i == conn->remote_header.end()) || checkAuth(i->second))
+					{
+						conn->local_header["WWW-Authenticate"]="Basic realm=\"dreambox\"";
+						return new eHTTPError(conn, 401); // auth req'ed
+					}
 				}
 			}
 

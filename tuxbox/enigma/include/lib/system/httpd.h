@@ -50,6 +50,20 @@ public:
 	int doWrite(int bytes);
 };
 
+class eHTTPD: public eServerSocket
+{
+	friend class eHTTPConnection;
+	ePtrList<eHTTPPathResolver> resolver;
+	eMainloop *ml;
+public:
+	eHTTPD(int port, eMainloop *ml);
+	void newConnection(int socket);
+
+	void addResolver(eHTTPPathResolver *r) { resolver.push_back(r); }
+	void removeResolver(eHTTPPathResolver *r) { resolver.remove(r); }
+};
+
+
 class eHTTPConnection: public eSocket
 {
 	void doError(int error);
@@ -112,19 +126,8 @@ public:
 	
 		// stateData
 	int content_length, content_length_remaining;
-};
 
-class eHTTPD: public eServerSocket
-{
-	friend class eHTTPConnection;
-	ePtrList<eHTTPPathResolver> resolver;
-	eMainloop *ml;
-public:
-	eHTTPD(int port, eMainloop *ml);
-	void newConnection(int socket);
-
-	void addResolver(eHTTPPathResolver *r) { resolver.push_back(r); }
-	void removeResolver(eHTTPPathResolver *r) { resolver.remove(r); }
+	eString RemoteHost() { return parent->RemoteHost(); }
 };
 
 #endif

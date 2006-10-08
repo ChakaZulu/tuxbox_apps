@@ -64,6 +64,17 @@ Specifies the priority of audio channels (e.g. german#audio 1#english... use # a
 	</td>
 </tr>
 </table>
+<h2>Trusted hosts</h2>
+Specifies the hosts in the network who don't have to authenticate<br>
+when connecting to the Box by Web-Interface,<br>
+seperated by semicolon (e.g "localhost;192.168.1.10")
+<table border=0 cellspacing=5 cellpadding=0>
+<tr>
+	<td>
+		<input style="color:#000000" name="trustedhosts" type="text" size="90" maxlength="256" value="#TRUSTEDHOSTS#">
+	</td>	
+</tr>
+</table>
 <br><br>
 <input style="color: #000000; width: 100px" type="submit" size="100px" value="Save">
 </form>

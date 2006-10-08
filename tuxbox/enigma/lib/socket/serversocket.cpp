@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <lib/socket/serversocket.h>
+#include <arpa/inet.h>
 
 bool eServerSocket::ok()
 {
@@ -22,12 +23,14 @@ void eServerSocket::notifier(int)
 	if(clientfd<0)
 		eDebug("[SERVERSOCKET] error on accept()");
 
+	strRemoteHost = inet_ntoa(client_addr.sin_addr);
 	newConnection(clientfd);
 }
 
 eServerSocket::eServerSocket(int port, eMainloop *ml): eSocket(ml)
 {
 	struct sockaddr_in serv_addr;
+	strRemoteHost = "";
 
 	bzero(&serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family=AF_INET;
@@ -54,6 +57,7 @@ eServerSocket::eServerSocket(int port, eMainloop *ml): eSocket(ml)
 eServerSocket::eServerSocket(eString path, eMainloop *ml) : eSocket(ml, AF_LOCAL)
 {
 	struct sockaddr_un serv_addr;
+	strRemoteHost = "";
 
 	bzero(&serv_addr, sizeof(serv_addr));
 	serv_addr.sun_family = AF_LOCAL;
