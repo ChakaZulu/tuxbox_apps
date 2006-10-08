@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.559 2006/08/28 20:02:43 ghostrider Exp $
+ * $Id: enigma_dyn.cpp,v 1.560 2006/10/08 14:41:30 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2387,41 +2387,23 @@ static eString webxtv(eString request, eString dirpath, eString opts, eHTTPConne
 #ifndef TUXTXT_CFG_STANDALONE
 // methods from libtuxtxt
 #include <tuxtxt/tuxtxt_def.h>
-extern "C" tuxtxt_cache_struct tuxtxt_cache;
-extern "C" tstPageinfo* tuxtxt_DecodePage(int showl25, unsigned char* page_char, tstPageAttr *page_atrb, int hintmode, int showflof);
-extern "C" int tuxtxt_RenderChar(unsigned char *lfb, int xres,int Char, int *pPosX, int PosY, tstPageAttr *Attribute, int zoom, int curfontwidth, int curfontwidth2, int fontheight, int transpmode,unsigned char *axdrcs, int ascender);
-
-eString color2string(const unsigned short * pcolormap, int color)
-{
-	if (!pcolormap)
-		pcolormap = tuxtxt_defaultcolors;
-	else
-	{
-		if (color < 16)
-			pcolormap = tuxtxt_defaultcolors;
-		else
-			color %= 16;
-	}
-	eString result;
-	int cval = (((int)(pcolormap[color]) & 0xf00))>> 4 | 
-		   (((int)(pcolormap[color]) & 0x0f0))<< 8 | 
-		   (((int)(pcolormap[color]) & 0x00f))<<20;
-	result.sprintf("#%06X",cval);
-	return result;
+extern "C" {
+	tuxtxt_cache_struct tuxtxt_cache;
+	tstHTML* tuxtxt_InitHTML();
+	void tuxtxt_RenderStylesHTML(tstHTML* pHTML,char* styles);
+	void tuxtxt_RenderHTML(tstHTML* pHTML,char* result );
+	void tuxtxt_EndHTML(tstHTML* pHTML);
 }
+
 static eString teletext(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result = readFile(TEMPLATE_DIR + "teletext.tmp");
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString colors, colorstyle, revcolorstyle;
-	eString tmpString;
+	eString colors = "";
+	eString result1 = "";
+	eString subpages = "";
 	eString page = opt["page"];
-	eString bcolor;
-	eString fcolor;
-	unsigned char axdrcs[12+1+10+1] = {};
-	int i;
-	for (i = 0; i <= 12+1+10; i++)
-		axdrcs[i] = i;
 
 	if (page)
 		sscanf(page.c_str(),"%x",&tuxtxt_cache.page);
@@ -2430,208 +2412,36 @@ static eString teletext(eString request, eString dirpath, eString opts, eHTTPCon
 		sscanf(subpage.c_str(),"%x",&tuxtxt_cache.subpage);
 	else 
 		tuxtxt_cache.subpage=tuxtxt_cache.subpagetable[tuxtxt_cache.page];
-	eString result1 = "<table border=0 cellspacing=0 cellpadding=0 width=480><colgroup><col width=12 span=40 /></colgroup>";
-	eString nonumberlink;
-	eString numberlink;
-	eString linkcolorstyle;
-	int linkcount;
-	unsigned char  page_char[40 * 25];
-	unsigned char  charbuffer[24*20]; 
-	unsigned char *p,*p1;
-	int Char, PosX;
-	tstPageAttr page_atrb[40 * 25];
-	tstPageAttr* pAttr; 
-	if (!tuxtxt_DecodePage(1, page_char, page_atrb, 0, 0))
-	{
-		result1 =  "Page not available";
-	}
-	else
-	{
-		for (int row = 0; row < 24; row++)
-		{
-			result1 += "<tr>";
-			nonumberlink = "";
-			numberlink = "";
-			linkcount = 0;
-			for (int col = 0; col < 40; col++)
-			{
-				pAttr = &page_atrb[row*40+col];
-				PosX = 0;
-				Char = tuxtxt_RenderChar(charbuffer, 24, page_char[row*40+col], &PosX, 0, pAttr, 0, 12, 12, 10, 0, axdrcs,2);
-				fcolor = color2string(tuxtxt_cache.colortable,pAttr->fg);
-				bcolor = color2string(tuxtxt_cache.colortable,pAttr->bg);
-				colorstyle.sprintf("c%d_%d",pAttr->fg,pAttr->bg);
-				if (colors.find(colorstyle) == eString::npos)
-				{
-					colors += "."+colorstyle+" { font-family:'Courier New',Courier,monospace; font-weight:bold; font-size:16; color:"+fcolor+"; background-color:"+bcolor+"; text-align:center }\n";
-				}
-				if (pAttr->doublew && pAttr->doubleh && colors.find(colorstyle+"_d") == eString::npos)
-				{
-					colors += "."+colorstyle+"_d { font-family:'Courier New',Courier,monospace; font-weight:bold; font-size:32; color:"+fcolor+"; background-color:"+bcolor+"; text-align:center; }\n";
-				}
-				revcolorstyle.sprintf("c%d_%d",pAttr->bg,pAttr->fg);
-				if (colors.find(revcolorstyle) == eString::npos)
-				{
-					colors += "."+revcolorstyle+" { font-family:'Courier New',Courier,monospace; font-weight:bold; font-size:16; color:"+bcolor+"; background-color:"+fcolor+"; text-align:center; }\n";
-				}
-				if (pAttr->doublew && pAttr->doubleh && colors.find(revcolorstyle+"_d") == eString::npos)
-				{
-					colors += "."+revcolorstyle+"_d { font-family:'Courier New',Courier,monospace; font-weight:bold; font-size:32; color:"+bcolor+"; background-color:"+fcolor+"; text-align:center; }\n";
-				}
-				if (col < 39 && pAttr->doublew)
-				{
-					page_char[40*row+col+1] = 0xff;
-					page_atrb[40*row+col+1].doubleh = 0;
-					page_atrb[40*row+col+1].doublew = 0;
-				}
-
-				if (row < 23 && pAttr->doubleh)
-				{
-					page_char[40*(row+1)+col] = 0xff;
-					page_atrb[40*(row+1)+col].doubleh = 0;
-					page_atrb[40*(row+1)+col].doublew = 0;
-					if (pAttr->doublew && col < 39)
-					{
-						page_char[40*(row+1)+col+1] = 0xff;
-						page_atrb[40*(row+1)+col+1].doubleh = 0;
-						page_atrb[40*(row+1)+col+1].doublew = 0;
-					}
-					
-				}
-				if (row > 0 && Char>= 0x30 && Char <= 0x39) //Digits
-				{
-					if (linkcount == 0)
-					{
-						result1 += nonumberlink;
-						nonumberlink="";
-						linkcolorstyle = colorstyle;
-					}
-					numberlink+= (char)Char;
-					linkcount++;
-				}
-				else
-				{
-					if (linkcount == 3 && atoi(numberlink.c_str()) >= 100 && atoi(numberlink.c_str()) < 900)
-						result1 += "<td class="+linkcolorstyle+(pAttr->doublew && pAttr->doubleh ? "_d":"")+(col == linkcount+1 ? " height=20":"")+" COLSPAN="+(pAttr->doublew ? "6" : "3")+(pAttr->doubleh ? " ROWSPAN=2" : "")+">"+(pAttr->underline ? "<u>" : "")+"<a href=\"javascript:setpage("+numberlink+",0)\" class="+linkcolorstyle+">"+numberlink+"</a>"+(pAttr->underline ? "</u>" : "")+"</td>";
-					else
-						result1 += nonumberlink;
-					linkcount=0;
-					nonumberlink = "";
-					numberlink = "";
-				}
-				
-//				if (Char==-1 || (row > 0 && page_atrb[(row-1)*40+col].doubleh) || ( col > 0 && page_atrb[row*40+col-1].doublew))
-				if (Char==-1)
-					continue;
-				nonumberlink += "<td class="+colorstyle+(pAttr->doublew && pAttr->doubleh ? "_d":"")+(pAttr->doublew ? " COLSPAN=2" : "")+(pAttr->doubleh ? " ROWSPAN=2" : "")+(col== 0?"  height=20":"")+">"+(pAttr->underline ? "<u>" : "")+(pAttr->flashing ? "<blink>":"");
-				if (Char != 0)
-				{
-					if (Char < 0)
-						nonumberlink+= "&nbsp;";
-					else
-					{
-						if (Char > 0x20 && Char <= 0x7f)
-							nonumberlink += (char)Char;
-						else
-						{
-							tmpString.setNum(Char,10);
-							nonumberlink += "&#"+tmpString+";";
-						}
-						if (pAttr->diacrit)
-						{
-							int dia[] ={0x20,0x300,0x301,0x302,0x303,0x304,0x306,0x307,0x308,0x323,0x30a,0x317,0x331,0x30b,0x316,0x30c};
-							if (pAttr->diacrit <16)
-							{
-								tmpString.setNum(dia[pAttr->diacrit],10);
-								nonumberlink += "&#"+tmpString+";";
-							}
-						}
-					}
-				}
-				else 
-				{
-					int found = 0;
-					for (int c = 0; c < 12*10; c++)
-					{
-						if (charbuffer[c] != pAttr->bg)
-						{
-							found = 1;
-							break;
-						}
-					}
-					if (found)
-					{
-						nonumberlink+="<table border=0 cellspacing=0 cellpadding=0 class="+colorstyle+" width=100%><colspan><col width=1 span=12></colspan>";
-						for (int srow = 0; srow < 10; srow++)
-						{
-							nonumberlink += "<tr>";
-							p = NULL;
-							int pcount = 0;
-							for (int scol = 0; scol < 12; scol++)
-							{
-								p1 = &charbuffer[srow*24+scol];
-								if (p)
-								{
-									if (*p1 == *p) 
-										pcount++;
-									else
-									{
-										tmpString.setNum(pcount+1,10);
-										nonumberlink += "<td"+(*p == pAttr->fg ? " class="+revcolorstyle : " class="+colorstyle )+(pcount > 0 ? "  colspan="+tmpString : "")+(pcount==scol-1 ?" height=2":"")+"></td>";
-										pcount = 0;
-										p = p1;
-										
-									}
-								}
-								else 
-									p = p1;
-									
-							
-							}
-							tmpString.setNum(pcount+1,10);
-							nonumberlink += "<td"+(*p == pAttr->fg ? " class=\""+revcolorstyle+"\"" : " class="+colorstyle )+(pcount > 0 ? " colspan="+tmpString : "")+(pcount==11 ?" height=2":"")+"></td>";
-							nonumberlink += "</tr>\n";
-						}
-						nonumberlink += "</table>";
-					}
-				}
-				nonumberlink += (pAttr->underline ? "</u>" : "");
-				nonumberlink += (pAttr->flashing ? "</blink>":"");
-				nonumberlink += "</td>";
-				if (pAttr->doublew)
-				{
-					col++;
-					if (pAttr->doubleh && row <23) // Hack für doubleheight, muss eigentlich in libtuxtxt
-					{
-						page_char[(row+1)*40+col] =0xff;
-						page_atrb[(row+1)*40+col].doubleh = 0;
-					}
-				}	
-			}						
-			if (linkcount == 3)
-				result1 += "<td class="+colorstyle+(pAttr->doublew && pAttr->doubleh ? "_d":"")+" COLSPAN=\""+(pAttr->doublew ? "6" : "3")+"\""+(pAttr->doubleh ? " ROWSPAN=\"2\"" : "")+">"+(pAttr->underline ? "<u>" : "")+"<a href=\"javascript:setpage("+numberlink+",0)\" class="+colorstyle+">"+numberlink+"</a>"+(pAttr->underline ? "</u>" : "")+"</td>";
-			else
-				result1 += nonumberlink;
-			result1 += "</tr>\n";
-		}
-	}
-	result1 +="</table>";
-	result.strReplace("#TELETEXT#", result1);
-	result.strReplace("#COLORTABLE#", colors);
 	result.strReplace("#CURPAGE#", eString().sprintf("%x",tuxtxt_cache.page));
-
-		
-	eString subpages = "";
-	for (int loop = 0; loop < 0x80; loop++)
+	tstHTML* pHTML = tuxtxt_InitHTML();
+	if (pHTML)
 	{
-		if (tuxtxt_cache.astCachetable[tuxtxt_cache.page][loop])
+		char tmpresult[4000];
+		char tmpstyle[1000];
+		while (pHTML->row < 24)
 		{
-			tmpString.sprintf("%2x",loop);
-			subpages = subpages+"<input type=button value=\""+tmpString+"\" style=\"width:20px;height:22px; background-image:url(/"+(loop == tuxtxt_cache.subpage ? "yellow":"green")+".png);background-repeat:repeat-x\"  onclick=\"setpage(0,"+tmpString+")\">"; 
+			tuxtxt_RenderStylesHTML(pHTML,tmpstyle);
+			colors+= eString(tmpstyle);
+		}
+		pHTML->row = 0;
+		pHTML->col = 0;
+		while (pHTML->row < 24)
+		{
+			tuxtxt_RenderHTML(pHTML,tmpresult);
+			result1+= eString(tmpresult);
+		}
+		for (int loop = 0; loop < 0x80; loop++)
+		{
+			if (tuxtxt_cache.astCachetable[tuxtxt_cache.page][loop])
+			{
+				subpages += eString().sprintf("<input type=button value=\"%2x\" style=\"width:20px;height:22px; background-image:url(/%s.png);background-repeat:repeat-x\"  onclick=\"setpage(0,%2x)\">",loop,(loop == tuxtxt_cache.subpage ? "yellow":"green"),loop); 
+			}
 		}
 	}
-	if (subpages == " 0 ") subpages = "";
 	result.strReplace("#SUBPAGES#", subpages);
+	result.strReplace("#COLORTABLE#", colors);
+	result.strReplace("#TELETEXT#", result1);
+	tuxtxt_EndHTML(pHTML);
 	return result;
 }
 #endif

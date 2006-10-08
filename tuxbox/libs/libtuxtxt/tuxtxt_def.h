@@ -3,7 +3,7 @@
  ******************************************************************************/
 #ifndef TUXTXT_DEF_H
 
-#define TUXTXT_DEF_h
+#define TUXTXT_DEF_H
 #ifdef HAVE_DREAMBOX_HARDWARE
  #define TUXTXT_COMPRESS 1 // compress page data: 0 no compression, 1 with zlib, 2 with own algorithm
 #else
@@ -276,6 +276,23 @@ typedef struct
 	int national_subset, national_subset_secondary;
 	unsigned short *colortable;
 } tuxtxt_cache_struct;
+
+typedef struct
+{
+	unsigned char* page_char; // Character array (25*40) of decoded page
+	tstPageAttr* page_atrb;   // Attributes Array (25*40) of decoded page
+	int col;                  // current column (0..39 )
+	int row;                  // current row (0..23)
+	tstPageinfo* pageinfo;    // pageinfo of decoded page
+	unsigned short cstyles_n[1024];
+	unsigned short cstyles_d[1024];
+	unsigned short cstyles_g[32];
+	unsigned short cstyles_b[32];
+	unsigned short stylecount_n;
+	unsigned short stylecount_d;
+	unsigned short stylecount_g;
+	unsigned short stylecount_b;	
+} tstHTML;
 
 // G2 Charset (0 = Latin, 1 = Cyrillic, 2 = Greek)
 const unsigned short int G2table[3][6*16] =

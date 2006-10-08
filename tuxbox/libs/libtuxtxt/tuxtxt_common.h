@@ -177,21 +177,23 @@ int tuxtxt_get_zipsize(int p,int sp)
 void tuxtxt_compress_page(int p, int sp, unsigned char* buffer)
 {
 	pthread_mutex_lock(&tuxtxt_cache_lock);
-    tstCachedPage* pg = tuxtxt_cache.astCachetable[p][sp];
-    if (!pg)
-    {
+	tstCachedPage* pg = tuxtxt_cache.astCachetable[p][sp];
+	if (!pg)
+	{
 		printf("tuxtxt: trying to compress a not allocated page!!\n");
 		pthread_mutex_unlock(&tuxtxt_cache_lock);
 		return;
-    }
+	}
 
 #if TUXTXT_COMPRESS == 1
-    unsigned char pagecompressed[23*40];
+	unsigned char pagecompressed[23*40];
 	uLongf comprlen = 23*40;
 	if (compress2(pagecompressed,&comprlen,buffer,23*40,Z_BEST_SPEED) == Z_OK)
 	{
-		if (pg->pData) free(pg->pData);//realloc(pg->pData,j); realloc scheint nicht richtig zu funktionieren?
-		pg->pData = malloc(comprlen);
+		if (pg->pData)
+			pg->pData = realloc(pg->pData,comprlen); 
+		else
+			pg->pData = malloc(comprlen);
 		pg->ziplen = 0;
 		if (pg->pData)
 		{
@@ -200,24 +202,26 @@ void tuxtxt_compress_page(int p, int sp, unsigned char* buffer)
 		}
 	}
 #elif TUXTXT_COMPRESS == 2
-    int i,j=0;
-    unsigned char cbuf[23*40];
-    memset(pg->bitmask,0,sizeof(pg->bitmask));
-    for (i = 0; i < 23*40; i++)
-    {
+	int i,j=0;
+	unsigned char cbuf[23*40];
+	memset(pg->bitmask,0,sizeof(pg->bitmask));
+	for (i = 0; i < 23*40; i++)
+	{
 		if (i && buffer[i] == buffer[i-1])
 		    continue;
 		pg->bitmask[i>>3] |= 0x80>>(i&0x07);
 		cbuf[j++]=buffer[i];
-    }
-    if (pg->pData) free(pg->pData);//realloc(pg->pData,j); realloc scheint nicht richtig zu funktionieren?
-    pg->pData = malloc(j);
+	}
+	if (pg->pData)
+		pg->pData = realloc(pg->pData,j); 
+	else
+		pg->pData = malloc(j);
 	if (pg->pData)
 	{
-	    memcpy(pg->pData,cbuf,j);
-  	}
-  	else
-  	    memset(pg->bitmask,0,sizeof(pg->bitmask));
+		memcpy(pg->pData,cbuf,j);
+	}
+	else
+		memset(pg->bitmask,0,sizeof(pg->bitmask));
 
 #else
 	memcpy(pg->data,buffer,23*40);
@@ -2308,8 +2312,8 @@ void tuxtxt_eval_l25(unsigned char* page_char, tstPageAttr *page_atrb, int hintm
  ******************************************************************************/
 
 tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
-				 unsigned char* page_char, // page buffer, min. 24*40 
-				 tstPageAttr *page_atrb, // attribut buffer, min 24*40
+				 unsigned char* page_char, // page buffer, min. 25*40 
+				 tstPageAttr *page_atrb, // attribut buffer, min 25*40
 				 int hintmode,// 1=show hidden information
 				 int showflof // 1=decode FLOF-line
 				 )
@@ -2777,6 +2781,7 @@ tstPageinfo* tuxtxt_DecodePage(int showl25, // 1=decode Level2.5-graphics
 }
 void tuxtxt_FillRect(unsigned char *lfb, int xres, int x, int y, int w, int h, int color)
 {
+	if (!lfb) return;
 	unsigned char *p = lfb + x + y * xres;
 
 	if (w > 0)
@@ -2793,6 +2798,7 @@ void tuxtxt_RenderDRCS(int xres,
 	unsigned char *ax, /* array[0..12] of x-offsets, array[0..10] of y-offsets for each pixel */
 	unsigned char fgcolor, unsigned char bgcolor)
 {
+	if (d == NULL) return;
 	int bit, x, y;
 	unsigned char *ay = ax + 13; /* array[0..10] of y-offsets for each pixel */
 
@@ -2831,6 +2837,7 @@ void tuxtxt_RenderDRCS(int xres,
 
 void tuxtxt_DrawVLine(unsigned char *lfb, int xres, int x, int y, int l, int color)
 {
+	if (!lfb) return;
 	unsigned char *p = lfb + x + y * xres;
 
 	for ( ; l > 0 ; l--)
@@ -2842,12 +2849,14 @@ void tuxtxt_DrawVLine(unsigned char *lfb, int xres, int x, int y, int l, int col
 
 void tuxtxt_DrawHLine(unsigned char* lfb,int xres,int x, int y, int l, int color)
 {
+	if (!lfb) return;
 	if (l > 0)
 		memset(lfb + x + y * xres, color, l);
 }
 
 void tuxtxt_FillRectMosaicSeparated(unsigned char *lfb, int xres,int x, int y, int w, int h, int fgcolor, int bgcolor, int set)
 {
+	if (!lfb) return;
 	tuxtxt_FillRect(lfb,xres,x, y, w, h, bgcolor);
 	if (set)
 	{
@@ -2931,7 +2940,7 @@ int tuxtxt_ShapeCoord(int param, int curfontwidth, int curfontheight)
 
 void tuxtxt_DrawShape(unsigned char *lfb, int xres,int x, int y, int shapenumber, int curfontwidth, int fontheight, int curfontheight, int fgcolor, int bgcolor, int clear)
 {
-	if (shapenumber < 0x20 || shapenumber > 0x7e || (shapenumber == 0x7e && clear))
+	if (!lfb || shapenumber < 0x20 || shapenumber > 0x7e || (shapenumber == 0x7e && clear))
 		return;
 
 	unsigned char *p = aShapes[shapenumber - 0x20];
@@ -3151,18 +3160,21 @@ int tuxtxt_RenderChar(unsigned char *lfb, // pointer to render buffer, min. font
 			}
 			else if (*aShapes[Char - 0x20] == S_ADT)
 			{
-				int x,y,f,c;
-				unsigned char* p = lfb + *pPosX + PosY* xres;
-				for (y=0; y<fontheight;y++)
+				if (lfb) 
 				{
-					for (f=0; f<factor; f++)
+					int x,y,f,c;
+					unsigned char* p = lfb + *pPosX + PosY* xres;
+					for (y=0; y<fontheight;y++)
 					{
-						for (x=0; x<curfontwidth*xfactor;x++)
+						for (f=0; f<factor; f++)
 						{
-							c = (y&4 ? (x/3)&1 :((x+3)/3)&1);
-							*(p+x) = (c ? fgcolor : bgcolor);
+							for (x=0; x<curfontwidth*xfactor;x++)
+							{
+								c = (y&4 ? (x/3)&1 :((x+3)/3)&1);
+								*(p+x) = (c ? fgcolor : bgcolor);
+							}
+							p += xres;
 						}
-						p += xres;
 					}
 				}
 				*pPosX += curfontwidth;
