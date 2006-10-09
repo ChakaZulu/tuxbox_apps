@@ -749,6 +749,7 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr, int tsidonid)
 	event_name=convertDVBUTF8((unsigned char*)data+ptr, len, table, tsidonid);
 	// filter newlines in ARD ShortEventDescriptor event_name
 	event_name.strReplace("\xc2\x8a",": ");
+	event_name.strReplace("          ", "intermission");
 	ptr+=len;
 
 	len=data[ptr++];

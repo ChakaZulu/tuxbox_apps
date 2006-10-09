@@ -477,7 +477,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 		time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5);
 		time_t now = time(0)+eDVB::getInstance()->time_difference;
 
-		if ( TM != 3599 && TM > -1)
+		if ( TM != 3599 /*&& TM > -1*/ )
 		{
 			switch(source)
 			{
@@ -529,10 +529,10 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 				goto next;
 #endif
 	
-			if ( TM != 3599 && (TM+duration < now || TM > now+14*24*60*60) )
+			if ( TM != 3599 && (TM+duration < now || TM > now+14*24*60*60) && TM != -1 )
 				goto next;
 
-			if ( now <= (TM+duration) || TM == 3599 /*NVOD Service*/ )  // old events should not be cached
+			if ( now <= (TM+duration) || TM == 3599 || TM == -1 /*NVOD Service*/ )  // old events should not be cached
 			{
 #ifdef NVOD
 				// look in 1st descriptor tag.. i hope all time shifted events have the
@@ -553,6 +553,8 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 #endif
 				__u16 event_id = HILO(eit_event->event_id);
 //				eDebug("event_id is %d sid is %04x", event_id, service.sid);
+				if (TM == -1)
+					eDebug("event_id is %04x  sid is %04x  tsid is %04x", event_id, service.sid, service.tsid);
 
 				eventData *evt = 0;
 				int ev_erase_count = 0;
@@ -585,6 +587,8 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 						else
 						{
 							tm_erase_count++;
+							if (TM == -1)
+								eDebug("tm_erase_count: %d", tm_erase_count);
 							// delete the found record from timemap
 							servicemap.second.erase(tm_it_tmp);
 							prevTimeIt=servicemap.second.end();
@@ -606,9 +610,11 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					eventMap::iterator ev_it_tmp =
 						servicemap.first.find(tm_it->second->getEventID());
 	
-					if ( ev_it_tmp != servicemap.first.end() )
+					if ( (ev_it_tmp != servicemap.first.end()) && (TM != -1) )
 					{
 						ev_erase_count++;
+						if (TM == -1)
+							eDebug("ev_erase_count: %d", ev_erase_count);
 						// delete the found record from eventmap
 						servicemap.first.erase(ev_it_tmp);
 						prevEventIt=servicemap.first.end();
@@ -633,6 +639,8 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					delete ev_it->second;
 					tm_it=prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
 					ev_it->second=evt;
+					if (TM == -1)
+						eDebug("Removed Event Data from TMmap");
 				}
 				else if (ev_erase_count > 0 && tm_erase_count == 0)
 				{
@@ -640,6 +648,8 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					delete tm_it->second;
 					ev_it=prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 					tm_it->second=evt;
+					if (TM == -1)
+						eDebug("Removed Event Data from EVmap");
 				}
 				else // added new eventData
 				{
@@ -648,6 +658,8 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 #endif
 					prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 					prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
+					if (TM == -1)
+						eDebug("Added Event Data");
 				}
 #if EPG_DEBUG
 				if ( consistencyCheck )
@@ -841,7 +853,8 @@ void eEPGCache::cleanLoop()
 			bool updated=false;
 			for (timeMap::iterator It = DBIt->second.second.begin(); It != DBIt->second.second.end() && It->first < now;)
 			{
-				if ( now > (It->first+It->second->getDuration()) )  // outdated normal entry (nvod references to)
+				//if ( now > (It->first+It->second->getDuration()) )  // outdated normal entry (nvod references to)
+				if ( (now > (It->first+It->second->getDuration())) && (It->second->getStartTime() != -1) )
 				{
 					// remove entry from eventMap
 					eventMap::iterator b(DBIt->second.first.find(It->second->getEventID()));
@@ -896,8 +909,8 @@ void eEPGCache::cleanLoop()
 			}
 #endif
 
-			if ( DBIt->second.second.size() == 1 )
-			// less than two events for this service in cache..
+			if ( DBIt->second.second.size() < 3 )
+			// less than three events for this service in cache..
 			{
 				updateMap::iterator u = serviceLastUpdated.find(DBIt->first);
 				if ( u != serviceLastUpdated.end() )

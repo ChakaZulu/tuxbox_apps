@@ -330,6 +330,32 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 					eString descr;
 					LocalEventData led;
 					led.getLocalData(e, &descr);
+
+					if (!descr)
+						for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+						{
+							Descriptor *descriptor=*d;
+							if (descriptor->Tag()==DESCR_TIME_SHIFTED_EVENT)
+							{
+								eServiceReferenceDVB nvodService(
+									((eServiceReferenceDVB&)service).getDVBNamespace().get(),
+									((eServiceReferenceDVB&)service).getTransportStreamID().get(),
+									((eServiceReferenceDVB&)service).getOriginalNetworkID().get(),
+									((TimeShiftedEventDescriptor*)descriptor)->reference_service_id,
+									((eServiceReferenceDVB&)service).getServiceType() );
+	
+								EITEvent *evtmp = eEPGCache::getInstance()->lookupEvent(nvodService, ((TimeShiftedEventDescriptor*)descriptor)->reference_event_id );
+
+								if (evtmp)
+								{
+									led.getLocalData(evtmp, &descr);
+									delete evtmp;
+									break;
+								}
+							}
+						}
+
+
 					if (descr.length())
 					{
 						sdescr='('+descr+')';
