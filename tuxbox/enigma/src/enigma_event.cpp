@@ -253,25 +253,6 @@ void eEventDisplay::setEvent(EITEvent *event)
 		else if (led.language_exists(event,"eng"))
 			lang="eng";
 
-		EITEvent *orig = event;
-		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
-		{
-			if (d->Tag()==DESCR_TIME_SHIFTED_EVENT)
-			{
-				eServiceReferenceDVB nvodService(
-					ref.getDVBNamespace().get(),
-					ref.getTransportStreamID().get(),
-					ref.getOriginalNetworkID().get(),
-					((TimeShiftedEventDescriptor*)*d)->reference_service_id,
-					ref.getServiceType() );
-
-				event = eEPGCache::getInstance()->lookupEvent(nvodService, ((TimeShiftedEventDescriptor*)*d)->reference_event_id );
-				if (!event)
-					event = orig;
-				break;
-			}
-		}
-
 		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 		{
 			if (d->Tag()==DESCR_SHORT_EVENT)
@@ -303,10 +284,6 @@ void eEventDisplay::setEvent(EITEvent *event)
 					_long_description+=ss->text;
 			}
 		}
-
-		if (event != orig)
-			event = orig;
-
 		if (!_title)
 			_title = _("no information is available");
 		if ( !ref.path )

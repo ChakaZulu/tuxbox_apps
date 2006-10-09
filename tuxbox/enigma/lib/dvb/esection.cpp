@@ -296,13 +296,13 @@ void eSection::data(int socket)
 		if ( ret != -2 && timer && section == -1 )
 		{
 			section=0;
-			timer->start(30000, true);
+			timer->start(10000, true);
 		}
 
 		if (ret)
 		{
 			if ( ret == -2 && timer && timer->isActive() )
-				timer->start(30000, true);
+				timer->start(10000, true);
 			return;
 		}
 
@@ -338,7 +338,7 @@ void eSection::data(int socket)
 		}
 		// when more data to read.. restart timeout..
 		if ( timer )
-			timer->start(30000,true);
+			timer->start(10000,true);
 	}
 }
 

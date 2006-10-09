@@ -432,7 +432,6 @@ private:
 #endif
 	void eraseBackground(gPainter *, const eRect &where);
 	void setEIT(EIT *);
-	int setEITcache();
 	void handleNVODService(SDTEntry *sdtentry);
 
 	// actions

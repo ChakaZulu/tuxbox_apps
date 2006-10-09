@@ -340,31 +340,6 @@ void eZapEPG::buildService(serviceentry &service)
 
 			LocalEventData led;
 			led.getLocalData(ev, &e->title, &description);
-
-			if (!e->title)
-				for (ePtrList<Descriptor>::iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
-				{
-					Descriptor *descriptor=*d;
-					if (descriptor->Tag()==DESCR_TIME_SHIFTED_EVENT)
-					{
-						eServiceReferenceDVB nvodService(
-							service.service.getDVBNamespace().get(),
-							service.service.getTransportStreamID().get(),
-							service.service.getOriginalNetworkID().get(),
-							((TimeShiftedEventDescriptor*)descriptor)->reference_service_id,
-							service.service.getServiceType() );
-
-						EITEvent *evtmp = eEPGCache::getInstance()->lookupEvent(nvodService, ((TimeShiftedEventDescriptor*)descriptor)->reference_event_id );
-
-						if (evtmp)
-						{
-							led.getLocalData(evtmp, &e->title, &description);
-							delete evtmp;
-							break;
-						}
-					}
-				}
-
 			tm *begin=localtime(&ev->start_time);
 			while ( description[0] == ' ' )
 				description.erase(0);

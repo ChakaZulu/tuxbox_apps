@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.64 2006/10/09 18:05:43 timekiller Exp $
+ * $Id: setup_extra.cpp,v 1.65 2006/10/09 19:08:01 timekiller Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -139,7 +139,6 @@ void eExpertSetup::init_eExpertSetup()
 		eConfig::getInstance()->setKey("/extras/mhwepg", mhwepg);
 	new eListBoxEntryCheck(&list, _("Enable MHW EPG"), "/extras/mhwepg", _("Mediahighway EPG, activate swap space when using with multiple operators"));
 #endif
-	new eListBoxEntryCheck(&list, _("Use EPG cache for Infobar"), "/ezap/osd/useEPGCache", _("use the 'EPG cache' for the infobar if the EIT is unavailable"));	
 #ifdef HAVE_DREAMBOX_HARDWARE
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
