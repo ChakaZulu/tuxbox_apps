@@ -1000,7 +1000,7 @@ void eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOr
 				(i->first.getOriginalNetworkID() == onid)	&& // if service on this on
 				(i->first.getTransportStreamID() == tsid) && 	// and on this transponder (war das "first" hier wichtig?)
 				(i->first.getDVBNamespace() == dvbnamespace) && // and in this namespace
-				(checkedServiceIds.find(i->first.getServiceID())==checkedServiceIds.end())) // but does not exist
+				(newServiceIds.find(i->first.getServiceID())==newServiceIds.end())) // but does not exist
 		{
 				for (std::map<int,eServiceReferenceDVB>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
 					if (i->first == m->second)
