@@ -9,15 +9,15 @@
 //-----------------------------------------------------------------------------
 // HOOK: response_hook
 //-----------------------------------------------------------------------------
-THandleStatus CmAuth::Hook_SendResponse(CyhookHandler *hh)
+THandleStatus CmAuth::Hook_PrepareResponse(CyhookHandler *hh)
 {
 	THandleStatus status = HANDLED_CONTINUE;
 
-	if(hh->WebserverConfigList["MustAuthenticate"] == "true")
+	if(authenticate)
 	{
 		if( (hh->UrlData["clientaddr"]).find(IADDR_LOCAL)>0 &&
-		(hh->WebserverConfigList["NoAuthClient"] == "" || 
-		(hh->UrlData["clientaddr"]).find(hh->WebserverConfigList["NoAuthClient"])>0)) 		// dont check local calls or calls from NoAuthClient
+		(no_auth_client == "" || 
+		(hh->UrlData["clientaddr"]).find(no_auth_client)>0)) 		// dont check local calls or calls from NoAuthClient
 		{
 			if (!CheckAuth(hh))
 			{
@@ -35,10 +35,14 @@ THandleStatus CmAuth::Hook_SendResponse(CyhookHandler *hh)
 //-----------------------------------------------------------------------------
 THandleStatus CmAuth::Hook_ReadConfig(CConfigFile *Config, CStringList &ConfigList)
 {
-	ConfigList["AuthUser"]		= Config->getString("AuthUser", AUTHUSER);
-	ConfigList["AuthPassword"]	= Config->getString("AuthPassword", AUTHPASSWORD);
-	ConfigList["NoAuthClient"]	= Config->getString("NoAuthClient", "");
-	ConfigList["MustAuthenticate"]	= Config->getString("Authenticate", "false");
+	username	= Config->getString("mod_auth.username", AUTHUSER);
+	password	= Config->getString("mod_auth.password", AUTHPASSWORD);
+	no_auth_client	= Config->getString("mod_auth.no_auth_client", "");
+	authenticate	= Config->getBool("mod_auth.authenticate", false);
+	ConfigList["mod_auth.username"] = username;
+	ConfigList["mod_auth.password"] = password;
+	ConfigList["mod_auth.no_auth_client"] = no_auth_client;
+	ConfigList["mod_auth.authenticate"] = Config->getString("mod_auth.authenticate", "false");
 	return HANDLED_CONTINUE;
 }
 
@@ -54,8 +58,8 @@ bool CmAuth::CheckAuth(CyhookHandler *hh)
 	int pos = decodet.find_first_of(':');
 	std::string user = decodet.substr(0,pos);
 	std::string passwd = decodet.substr(pos + 1, decodet.length() - pos - 1);
-	return (user.compare(hh->WebserverConfigList["AuthUser"]) == 0 &&
-	        passwd.compare(hh->WebserverConfigList["AuthPassword"]) == 0);
+	return (user.compare(username) == 0 &&
+	        passwd.compare(password) == 0);
 }	
 
 //-----------------------------------------------------------------------------

@@ -40,9 +40,6 @@ class CLogging
 	public:
 		int LogLevel;
 
-		bool Log;
-		bool Verbose;
-
 		// Instance Handling
 		static CLogging *getInstance(void);
 		static void deleteInstance(void);

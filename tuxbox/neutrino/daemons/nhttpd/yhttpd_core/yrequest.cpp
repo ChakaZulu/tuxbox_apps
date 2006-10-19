@@ -1,6 +1,18 @@
 //=============================================================================
 // YHTTPD
 // Request
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Request-Data
+//	UrlData (CStringList)
+//		startline	First line of http-request (GET <fullurl> HTTP/1.x)
+//		fullurl		::= <url>?<paramstring>
+//		paramstring	Is provided by String-Array ParameterList
+//		url		::= <path>/<filename> "/" is last "/" in string
+//		path		begin with /...
+//		filename	::= <filenamepure>.<fileext>
+//		filenamepure
+//		fileext		Extension like html, jpg, ...
 //=============================================================================
 
 // c++
@@ -10,7 +22,6 @@
 #include <errno.h>
 // system
 #include <fcntl.h>
-//#include <sys/sendfile.h>
 #include <sys/socket.h>
 
 // yhttpd
@@ -46,6 +57,8 @@ bool CWebserverRequest::HandleRequest(void)
 	do
 	{
 		start_line = Connection->sock->ReceiveLine();
+		if(!Connection->sock->isValid)
+			return false;
 		if(start_line == "")	// Socket empty
 		{
 			log_level_printf(1,"HandleRequest: End of line not found\n");
@@ -62,34 +75,39 @@ bool CWebserverRequest::HandleRequest(void)
 	if(!ParseStartLine(start_line))
 		return false;
 
-	if(Connection->Method == M_GET || Connection->Method == M_HEAD || Connection->Method == M_DELETE)
+	if(Connection->Method == M_GET || Connection->Method == M_HEAD)
 	{
+		std::string tmp_line;
 		//read header (speed up: read rest of request in blockmode) 
-		std::string tmp_line = Connection->sock->ReceiveBlock();
-		if(tmp_line == "")
+		tmp_line = Connection->sock->ReceiveBlock();
+		if(!Connection->sock->isValid)
+		{
+			Connection->Response.SendError(HTTP_INTERNAL_SERVER_ERROR);
 			return false;
+		}
+	
+		if(tmp_line == "")
+		{
+			Connection->Response.SendError(HTTP_INTERNAL_SERVER_ERROR);
+			return false;
+		}
 		ParseHeader(tmp_line);
 	}
-	// Handle Delete
-	if(Connection->Method == M_DELETE)
+	// Other Methods
+	if(Connection->Method == M_DELETE || Connection->Method == M_PUT || Connection->Method == M_TRACE)
 	{	
-		//HandleDelete(); //TODO: implement
-		Connection->Response.SendError(HTTP_INTERNAL_SERVER_ERROR);
+		//todo: implement
+		aprintf("HTTP Method not implemented :%d\n",Connection->Method);
+		Connection->Response.SendError(HTTP_NOT_IMPLEMENTED);
 		return false;
 	}	
-	if(Connection->Method == M_PUT)
-	{	
-		//HandlePut(); //TODO: implement
-		Connection->Response.SendError(HTTP_INTERNAL_SERVER_ERROR);
-		return false;
-	}	
-
 	// handle POST (read header & body)
 	if(Connection->Method == M_POST)
 	{
-		Connection->Response.SendHeader(HTTP_CONTINUE); // POST Requests requires CONTINUE in HTTP/1.1
+		Connection->Response.Write("HTTP/1.1 100 Continue\r\n\r\n"); // POST Requests requires CONTINUE in HTTP/1.1
 		return HandlePost();
 	}
+	// if you are here, something went wrong
 #ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
 	if(Connection->Request.HeaderList["Keep_Alive"] == "close")
 		Connection->keep_alive = false;
@@ -127,7 +145,7 @@ bool CWebserverRequest::ParseStartLine(std::string start_line)
 			else
 			{
 				log_level_printf(1,"Unknown Method or invalid request\n");
-				Connection->Response.SendError(HTTP_INTERNAL_SERVER_ERROR);
+				Connection->Response.SendError(HTTP_NOT_IMPLEMENTED);
 				log_level_printf(3,"Request: '%s'\n",rawbuffer.c_str());
 				return false;
 			}
@@ -482,7 +500,7 @@ unsigned int CWebserverRequest::HandlePostBoundary(std::string boundary, unsigne
 				return 0;
 			}
 
-			// ASSUMPTION: the complete multipart has after the file not more then SEARCH_BOUNDARY_LEN bytes.
+			// ASSUMPTION: the complete multipart has no more then SEARCH_BOUNDARY_LEN bytes after the file.
 			// It only works, if no multipart/mixed is used (e.g. in file attachments). Not nessesary in embedded systems. 
 			// To speed up uploading, read content_len - SEARCH_BOUNDARY_LEN bytes in blockmode.
 			// To save memory, write them direct into the file.

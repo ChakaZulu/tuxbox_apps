@@ -55,7 +55,7 @@ public:
 	bool		isOpened;					// is this socket open?
 	bool		isValid;					// false on Socket Errors. Must close.
 	struct timeval 	tv_start_waiting;				// Put keep-alive Socket to Wait-Queue
-
+	
 	void 		close(void);					// Close Socket
 	void 		shutdown(void);					// Shutdown Socket
 	bool 		listen(int port, int max_connections);		// Listen on Port for max Slave Connections
@@ -69,7 +69,6 @@ public:
 	int 		Read(char *buffer, unsigned int length);	// Read a buffer (normal or SSL)
 	int 		Send(char const *buffer, unsigned int length);	// Send a buffer (normal or SSL)
 	bool 		CheckSocketOpen();				// check if socket was closed by client
-//	void 		Flush();					// Flush socket Data
 	
 	// send & receive
 	int 		SendFile(int filed);				// Send a File
@@ -82,6 +81,9 @@ protected:
 	bool 		set_option(int typ, int option);		// Set Socket Options
 	void 		set_reuse_port();				// Set Reuse Port Option for Socket
 	void 		set_reuse_addr();				// Set Reuse Address Option for Socket
+	void		set_keep_alive();				// Set Keep-Alive Option for Socket
+	void		set_tcp_nodelay();
+
 #ifdef Y_CONFIG_USE_OPEN_SSL
 	bool		isSSLSocket;					// This is a SSL based Socket
 	static SSL_CTX 	*SSL_ctx;					// Global SSL ctx object
@@ -92,6 +94,5 @@ private:
 	sockaddr_in	addr;						// "slave" Client Socket Data
 	socklen_t	addr_len;					// Length of addr struct
 	SOCKET		sock;						// "C" Socket-ID
-//	unsigned int counter;
 };
 #endif // __yhttpd_ysocket_h__

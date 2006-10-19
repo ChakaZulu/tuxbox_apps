@@ -45,11 +45,9 @@ void CLogging::deleteInstance(void)
 CLogging::CLogging(void)
 {
 	Debug 		= false;
-	LogToFile 	= false;
+	LogToFile 	= false; //not implemented
 	LogLevel	= 0;
 	Logfile 	= NULL;
-	Log		= false;
-	Verbose 	= false;
 	pthread_mutex_init(&Log_mutex, NULL);
 }
 
@@ -80,7 +78,6 @@ void CLogging::printf ( const char *fmt, ... )
 {
 	char buffer[bufferlen];
 
-	pthread_mutex_lock( &Log_mutex );
 
 	va_list arglist;
 	va_start( arglist, fmt );
@@ -88,6 +85,7 @@ void CLogging::printf ( const char *fmt, ... )
 		vsnprintf( buffer, bufferlen, fmt, arglist );
 	va_end(arglist);
 
+	pthread_mutex_lock( &Log_mutex );
 	::printf(buffer);
 	if(LogToFile)
 		;	//FIXME Logging to File

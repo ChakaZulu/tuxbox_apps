@@ -33,29 +33,42 @@
 //-----------------------------------------------------------------------------
 // General central Definitions <configure!>
 //-----------------------------------------------------------------------------
-#define HTTPD_VERSION 		"3.0.2"				// Webserver version  (can be overloaded)
-#define YHTTPD_VERSION 		"1.0.4"				// Webserver version  (Version of yhttpd-core!)
+#define HTTPD_VERSION 		"3.0.5"				// Webserver version  (can be overloaded)
+#define YHTTPD_VERSION 		"1.1.0"				// Webserver version  (Version of yhttpd-core!)
 #define IADDR_LOCAL 		"127.0.0.1"			// local IP
 #define HTTPD_NAME 		"yhttpd"			// Webserver name (can be overloaded)
 #define YHTTPD_NAME 		"yhttpd_core"			// Webserver name (Name of yhttpd-core!)
 #define AUTH_NAME_MSG		"yhhtpd"			// Name in Authentication Dialogue
 
+#define HTTPD_KEEPALIVE_TIMEOUT	500000				// Timeout for Keep-Alive in mircoseconds
 //=============================================================================
 // Features wanted <configure!>
 //=============================================================================
+//-----------------------------------------------------------------------------
+// modules
+//-----------------------------------------------------------------------------
+//#define Y_CONFIG_USE_TESTHOOK y				// Add mod: "Test-Hook" (hook example)
+#define Y_CONFIG_USE_YPARSER y					// Add mod: "y-Parsing"
+#define Y_CONFIG_USE_AUTHHOOK y					// Add mod: "Authentication"
+#define Y_CONFIG_USE_WEBLOG y					// Add mod: "WebLogging"
+#define Y_CONFIG_USE_CACHE y					// Add mod: Can cache production pages
+#define Y_CONFIG_USE_SENDFILE y					// Add mod: can send static files (mandantory)
+//-----------------------------------------------------------------------------
+// modules
+//-----------------------------------------------------------------------------
 #define Y_CONFIG_FEATURE_CHECK_PORT_AUTORITY y			// System: Port < 1024 need Admin-Privileges-Check
 #define Y_CONFIG_HAVE_SENDFILE y				// System: Have *IX SendFile
 #define Y_CONFIG_FEATURE_UPLOAD y				// Add Feature: File Upload POST Command
 #define Y_CONFIG_USE_HOSTEDWEB y				// Add Feature: Use HOSTED Web
-#define Y_CONFIG_USE_YPARSER y					// Add mod: "y-Parsing"
-//#define Y_CONFIG_USE_TESTHOOK y				// Add mod: "Test-Hook" (hook example)
-#define Y_CONFIG_USE_AUTHHOOK y					// Add mod: "Authentication"
-//#define Y_CONFIG_USE_WEBLOG y					// Add mod: "WebLogging"
-// TODO build error page function
-//#define Y_CONFIG_HAVE_HTTPD_ERRORPAGE y			// Have an HTTPD Error Page
 #define Y_CONFIG_FEATURE_SHOW_SERVER_CONFIG y			// Add Feature (in yParser): add /y/server-config
 //#define Y_CONFIG_USE_OPEN_SSL y					// Add Feature: use openSSL
 #define Y_CONFIG_FEATURE_KEEP_ALIVE y				// Add Feature: Keep-alive //FIXME: does not work correctly now
+#define Y_CONFIG_FEATUE_SENDFILE_CAN_ACCESS_ALL y		// Add Feature: every file can be accessed (use carefully: security!!)
+//#define Y_CONFIG_FEATURE_CHROOT y				// Add Feature: Use Change Root for Security
+//#define Y_CONFIG_FEATURE_HTTPD_USER y				// Add Feature: Set User for yhttpd-Process
+
+// TODO build error page function
+//#define Y_CONFIG_HAVE_HTTPD_ERRORPAGE y			// Have an HTTPD Error Page
 
 //-----------------------------------------------------------------------------
 // Define/Undefine Features forced by CONFIG_SYSTEM_xxx
@@ -87,7 +100,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"	//TODO: delete every occurence
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
-
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
 #define AUTHUSER			"test"
 #define AUTHPASSWORD			"test1"
 #define PRIVATEDOCUMENTROOT		"/home/y/nhttpd-y"
@@ -98,17 +111,19 @@
 #define SSL_CA_FILE			HTTPD_CONFIGDIR "/cacert.pem"
 
 #define UPLOAD_TMP_FILE 		"/tmp/upload.tmp"
+#define CACHE_DIR			"/tmp/.cache"
 #endif
 //-----------------------------------------------------------------------------
 // Configurations for WINDOWS (Cygwin)
 //-----------------------------------------------------------------------------
 #ifdef CONFIG_SYSTEM_CYGWIN
 #define HTTPD_STANDARD_PORT		80
-#define HTTPD_MAX_CONNECTIONS		30
+#define HTTPD_MAX_CONNECTIONS		32
 #define HTTPD_CONFIGDIR 		"/usr/local/yweb"
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
 
 #define AUTHUSER			"test"
 #define AUTHPASSWORD			"test1"
@@ -123,6 +138,7 @@
 #define LOG_FORMAT			"CLF"
 
 #define UPLOAD_TMP_FILE 		"/tmp/upload.tmp"
+#define CACHE_DIR			"/tmp/.cache"
 #endif
 //-----------------------------------------------------------------------------
 // Configurations for LINUX (Tuxbox dbox2)
@@ -136,6 +152,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/nhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
 
 #define AUTHUSER			"root"
 #define AUTHPASSWORD			"dbox2"
@@ -151,9 +168,10 @@
 #define SSL_CA_FILE			HTTPD_CONFIGDIR "/cacert.pem"
 
 #define LOG_FILE			"/tmp/yhhtpd.log"
-#define LOG_FORMAT			"CLF"
+#define LOG_FORMAT			""
 
 #define UPLOAD_TMP_FILE 		"/tmp/upload.tmp"
+#define CACHE_DIR			"/tmp/.cache"
 #endif
 //-----------------------------------------------------------------------------
 // Configurations for AVM FritzBox
@@ -165,6 +183,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
 
 #define AUTHUSER			"root"
 #define AUTHPASSWORD			"oxmox"
@@ -176,6 +195,7 @@
 #define SSL_CA_FILE			HTTPD_CONFIGDIR "/cacert.pem"
 
 #define UPLOAD_TMP_FILE 		"/tmp/upload.tmp"
+#define CACHE_DIR			"/tmp/.cache"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -188,6 +208,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
 
 #define AUTHUSER			"root"
 #define AUTHPASSWORD			"oxmox"
@@ -199,12 +220,13 @@
 #define SSL_CA_FILE			HTTPD_CONFIGDIR "/cacert.pem"
 
 #define UPLOAD_TMP_FILE 		"/tmp/upload.tmp"
+#define CACHE_DIR			"/tmp/.cache"
 #endif
 
 
 //-----------------------------------------------------------------------------
 // Aggregated definitions
 //-----------------------------------------------------------------------------
-#define WEBSERVERNAME HTTPD_NAME "/" HTTPD_VERSION "(" YHTTPD_NAME "/" YHTTPD_VERSION ")"
+#define WEBSERVERNAME HTTPD_NAME "/" HTTPD_VERSION " (" YHTTPD_NAME "/" YHTTPD_VERSION ")"
 
 #endif // __yconfig_h__

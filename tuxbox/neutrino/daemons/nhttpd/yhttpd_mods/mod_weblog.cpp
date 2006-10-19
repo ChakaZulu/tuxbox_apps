@@ -12,10 +12,11 @@
 //=============================================================================
 // Initialization of static variables
 //=============================================================================
-	pthread_mutex_t CmWebLog::WebLog_mutex = PTHREAD_MUTEX_INITIALIZER;;
+	pthread_mutex_t CmWebLog::WebLog_mutex = PTHREAD_MUTEX_INITIALIZER;
 	FILE *CmWebLog::WebLogFile = NULL;
 	int CmWebLog::RefCounter = 0;
-	std::string CmWebLog::WebLogFilename="";
+	std::string CmWebLog::WebLogFilename=LOG_FILE;
+	std::string CmWebLog::LogFormat =LOG_FORMAT;
 //=============================================================================
 // Constructor & Destructor
 //=============================================================================
@@ -42,10 +43,10 @@ CmWebLog::~CmWebLog(void)
 //-----------------------------------------------------------------------------
 THandleStatus CmWebLog::Hook_EndConnection(CyhookHandler *hh)
 {
-	if(hh->WebserverConfigList["LogFormat"] == "CLF")
-	{
+	if(LogFormat == "CLF")
 		AddLogEntry_CLF(hh);
-	}
+	else if(LogFormat == "ELF")
+		AddLogEntry_ELF(hh);
 	return HANDLED_CONTINUE; // even on Log-Error: continue
 }
 
@@ -55,9 +56,8 @@ THandleStatus CmWebLog::Hook_EndConnection(CyhookHandler *hh)
 //-----------------------------------------------------------------------------
 THandleStatus CmWebLog::Hook_ReadConfig(CConfigFile *Config, CStringList &ConfigList)
 {
-	ConfigList["LogFormat"]		= Config->getString("LogFormat", LOG_FORMAT);
-	ConfigList["LogFile"]		= Config->getString("LogFile", LOG_FILE);
-	WebLogFilename 			= ConfigList["LogFile"];
+	LogFormat	= Config->getString("mod_weblog.log_format", LOG_FORMAT);
+	WebLogFilename	= Config->getString("mod_weblog.logfile", LOG_FILE);
 	return HANDLED_CONTINUE;
 }
 //-----------------------------------------------------------------------------
@@ -67,8 +67,20 @@ bool CmWebLog::OpenLogFile()
 		return false;
 	if(WebLogFile == NULL)
 	{
+		bool isNew = false;
 		pthread_mutex_lock(&WebLog_mutex); // yeah, its mine
+		if(access(WebLogFilename.c_str(), 4) != 0)
+			isNew = true;
 		WebLogFile = fopen(WebLogFilename.c_str(),"a");
+		if(isNew)
+		{
+			if(LogFormat == "ELF")
+			{
+				printf("#Version: 1.0\n");
+				printf("#Remarks: yhttpd" WEBSERVERNAME "\n");
+				printf("#Fields: c-ip username date time x-request cs-uri sc-status cs-method bytes time-taken x-time-request x-time-response cached\n");
+			}
+		}
 		pthread_mutex_unlock(&WebLog_mutex);
 	}
 	return (WebLogFile != NULL);
@@ -109,24 +121,21 @@ bool CmWebLog::printf(const char *fmt, ...)
 }
 
 //-----------------------------------------------------------------------------
-// CLF - Common: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326 
+//	CLF - Common Logfile Format
+//
+//	Example: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326 
+//
 //	The common logfile format is as follows: 
 //	    remotehost rfc931 authuser [date] "request" status bytes
-//	remotehost
-//	Remote hostname (or IP number if DNS hostname is not available, or if DNSLookup is Off. 
-//	rfc931
-//	The remote logname of the user. 
-//	authuser
-//	The username as which the user has authenticated himself. 
-//	[date]
-//	Date and time of the request. 
-//	"request"
-//	The request line exactly as it came from the client. 
-//	status
-//	The HTTP status code returned to the client. 
-//	bytes
-//	The content-length of the document transferred. 
-
+//
+//	remotehost:	Remote hostname (or IP number if DNS hostname is not available, or if DNSLookup is Off. 
+//	rfc931:		The remote logname of the user. 
+//	authuser:	The username as which the user has authenticated himself. 
+//	[date]:		Date and time of the request. 
+//	"request":	The request line exactly as it came from the client. 
+//	status:		The HTTP status code returned to the client. 
+//	bytes:		The content-length of the document transferred. 
+//-----------------------------------------------------------------------------
 void CmWebLog::AddLogEntry_CLF(CyhookHandler *hh)
 {
 	std::string cs_method;
@@ -143,7 +152,7 @@ void CmWebLog::AddLogEntry_CLF(CyhookHandler *hh)
 	std::string c_ip = 			hh->UrlData["clientaddr"].c_str();
 	std::string request_startline = 	hh->UrlData["startline"].c_str();
 	int s_status = hh->httpStatus;
-	int bytes	= hh->yresult.length(); //TODO: not rigth for Sendfile
+	int bytes	= hh->GetContentLength();
 	
 	struct tm *time_now;
 	time_t now = time(NULL);
@@ -281,8 +290,73 @@ void CmWebLog::AddLogEntry_CLF(CyhookHandler *hh)
 	Time at which sampling ended, field has type <time> 
 	interval 
 	Time over which sampling occurred in seconds, field has type <integer> 
+	-----------------------------------------------------------------------------
+	actual Implementation:
+
+		c-ip
+		date
+		tile
+		request
+		cs-uri
+		sc-status
+		cs-method
+		bytes
+		time-taken
+		x-time-request
+		x-time-response
+		cached	
 */
 
-// TODO: write implementation
+void CmWebLog::AddLogEntry_ELF(CyhookHandler *hh)
+{
+	std::string cs_method;
+	switch (hh->Method)
+	{
+		case M_GET:	cs_method = "GET";	break;
+		case M_POST:	cs_method = "POST";	break;
+		case M_HEAD:	cs_method = "HEAD";	break;
 
+		default:
+			cs_method = "unknown";
+			break;
+	}
+	std::string c_ip = 			hh->UrlData["clientaddr"].c_str();
+	std::string request_startline = 	hh->UrlData["startline"].c_str();
+	std::string cs_uri			= hh->UrlData["fullurl"];
+	std::string cs_uri_stem			= hh->UrlData["url"];
+	int sc_status = hh->httpStatus;
+	int bytes	= hh->GetContentLength();
+	int cached = (hh->HookVarList["CacheCategory"].empty()) ? 0 : 1;
+	
+	struct tm *time_now;
+	time_t now = time(NULL);
+	time_now = localtime(&now);
 
+	char request_time[80];
+	strftime(request_time, 80, "[%d/%b/%Y:%H:%M:%S]", time_now);
+
+	char _date[11];
+	strftime(_date, 11, "%Y-%m-%d", time_now);
+
+	char _time[11];
+	strftime(_time, 11, "%H:%M:%S", time_now);
+
+	std::string time_taken_request = hh->HookVarList["enlapsed_request"]; 
+	std::string time_taken_response = hh->HookVarList["enlapsed_response"];
+	long time_taken = atoi(time_taken_request.c_str()) + atoi(time_taken_response.c_str());
+
+	printf("%s %s %s \"%s\" %s %d %s %d %ld %s %s %d\n", 
+		c_ip.c_str(),
+		_date,
+		_time,
+		request_startline.c_str(),
+		cs_uri.c_str(),
+		sc_status,
+		cs_method.c_str(),
+		bytes,
+		time_taken,
+		time_taken_request.c_str(),
+		time_taken_response.c_str(),
+		cached
+		);
+}	

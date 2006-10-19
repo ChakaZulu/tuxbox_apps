@@ -78,7 +78,7 @@ public:
 	CNeutrinoAPI();
 	~CNeutrinoAPI(void);
 
-	CChannelEventList	eList;// TODO whats this? thread safe?
+	CChannelEventList	eList;
 	CNeutrinoYParser	*NeutrinoYParser;
 	CControlAPI		*ControlAPI;
 

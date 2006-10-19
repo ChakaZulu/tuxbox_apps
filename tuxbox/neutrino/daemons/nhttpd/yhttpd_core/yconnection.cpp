@@ -11,7 +11,7 @@
 #include "ytypes_globals.h"
 #include "ywebserver.h"
 #include "yconnection.h"
-
+#include "helper.h"
 //=============================================================================
 // Initialization of static variables
 //=============================================================================
@@ -50,6 +50,8 @@ CWebserverConnection::~CWebserverConnection(void)
 //-------------------------------------------------------------------------
 void CWebserverConnection::EndConnection()
 {
+	HookHandler.HookVarList["enlapsed_request"] = itoa(enlapsed_request/1000);
+	HookHandler.HookVarList["enlapsed_response"] = itoa(enlapsed_response/1000);
 	HookHandler.Hooks_EndConnection();	// Handle Hooks
 	if(RequestCanceled)			// Canceled
 		keep_alive = false;

@@ -11,6 +11,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <errno.h>
+#include <signal.h>
 // yhttpd
 #include "yhttpd.h"
 #include "ysocket.h"
@@ -71,10 +73,11 @@ void CySocket::init(void)
 	isSSLSocket 	= false;
 #endif
 }
-#ifdef Y_CONFIG_USE_OPEN_SSL
 //-----------------------------------------------------------------------------
 // Initialize this socket as a SSL-socket
 //-----------------------------------------------------------------------------
+#ifdef Y_CONFIG_USE_OPEN_SSL
+
 bool CySocket::initAsSSL(void)
 {
 	isSSLSocket = true;
@@ -193,11 +196,13 @@ CySocket* CySocket::accept()
 	{
 		new_ySocket->setAddr(addr);
 #ifdef TCP_CORK
-		new_ySocket->set_option(SOL_TCP, TCP_CORK);
+		new_ySocket->set_option(IPPROTO_TCP, TCP_CORK);
+#else
+		set_tcp_nodelay();
 #endif	
 	}
-	isOpened = true;
-	handling = true;
+	new_ySocket->isOpened = true;
+//	handling = true;
 	return new_ySocket;
 }
 //-----------------------------------------------------------------------------
@@ -246,6 +251,28 @@ void CySocket::set_reuse_addr()
 		dperror("setsockopt(SO_REUSEADDR)\n");
 #endif
 }
+
+//-----------------------------------------------------------------------------
+// Set Keep-Alive Option for Socket.
+//-----------------------------------------------------------------------------
+void CySocket::set_keep_alive()
+{
+#ifdef SO_KEEPALIVE
+	if(!set_option(SOL_SOCKET, SO_KEEPALIVE))
+		dperror("setsockopt(SO_KEEPALIVE)\n");
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Set Keep-Alive Option for Socket.
+//-----------------------------------------------------------------------------
+void CySocket::set_tcp_nodelay()
+{
+#ifdef TCP_NODELAY
+	if(!set_option(IPPROTO_TCP, TCP_NODELAY))
+		dperror("setsockopt(SO_KEEPALIVE)\n");
+#endif
+}
 //=============================================================================
 // Send and receive
 //=============================================================================
@@ -290,17 +317,19 @@ bool CySocket::CheckSocketOpen()
 	return !(recv(sock, buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT) == 0);
 #endif
 }
-//-----------------------------------------------------------------------------
-//void CySocket::Flush()
-//{
-//	flush(sock);
-//}//TODO
+
+//=============================================================================
+// Aggregated Send- and Receive- Operations
+//=============================================================================
+
 //-----------------------------------------------------------------------------
 // BASIC Send File over Socket for FILE*
 // fd is an opened FILE-Descriptor
 //-----------------------------------------------------------------------------
 int CySocket::SendFile(int filed)
 {
+	if(!isValid)
+		return false;
 #ifdef Y_CONFIG_HAVE_SENDFILE
 	// does not work with SSL !!!
 	off_t start = 0;
@@ -345,11 +374,17 @@ unsigned int CySocket::ReceiveFileGivenLength(int filed, unsigned int _length)
 	{
 		// check bytes in Socket buffer
 		u_long readarg = 0;
-		if(ioctl(sock, FIONREAD, &readarg) != 0)
+#ifdef Y_CONFIG_USE_OPEN_SSL
+		if(isSSLSocket)
+			readarg = RECEIVE_BLOCK_LEN;
+		else
+#endif
+		{
+		if(ioctl(sock, FIONREAD, &readarg) != 0)// How many bytes avaiable on socket?
 			break;
 		if(readarg > RECEIVE_BLOCK_LEN)		// enough bytes to read
 			readarg = RECEIVE_BLOCK_LEN;	// read only given length
-
+		}
       		if(readarg == 0) 			// nothing to read: sleep
       		{
       			retries++;
@@ -360,8 +395,14 @@ unsigned int CySocket::ReceiveFileGivenLength(int filed, unsigned int _length)
       		else
       		{
 			int bytes_gotten = Read(buffer, readarg);
-			if(bytes_gotten <= 0)		// ERROR Code gotten
-				break;		
+
+	        	if(bytes_gotten == -1 && errno == EINTR)// non-blocking
+	        		continue;
+			if(bytes_gotten <= 0)			// ERROR Code gotten or Conection closed by peer
+			{
+				isValid = false;
+				break;
+			}	
 			_readbytes += bytes_gotten;
 	    		if (write(filed, buffer, bytes_gotten) != bytes_gotten)
 	    		{
@@ -382,43 +423,75 @@ unsigned int CySocket::ReceiveFileGivenLength(int filed, unsigned int _length)
 //-----------------------------------------------------------------------------
 std::string CySocket::ReceiveBlock()
 {
-	std::string result;
+	std::string result = "";
 	char buffer[RECEIVE_BLOCK_LEN];
+
+	if(!isValid || !isOpened)
+		return "";
+//	signal(SIGALRM, ytimeout);
+	alarm(1);
  
 	while(true)
 	{
 		// check bytes in Socket buffer
 		u_long readarg = 0;
+#ifdef Y_CONFIG_USE_OPEN_SSL
+		if(isSSLSocket)
+			readarg = RECEIVE_BLOCK_LEN;
+		else
+#endif
+		// determine bytes that can be read
+		{
 		if(ioctl(sock, FIONREAD, &readarg) != 0)
 			break;
 		if(readarg == 0) 			// nothing to read
 			break;
 		if(readarg > RECEIVE_BLOCK_LEN)		// need more loops
 			readarg = RECEIVE_BLOCK_LEN;
+		}
+		// Read data
 		int bytes_gotten = Read(buffer, readarg);
-		if(bytes_gotten <= 0)			// ERROR Code gotten
+		
+	        if(bytes_gotten == -1 && errno == EINTR)// non-blocking
+	        	continue;
+		if(bytes_gotten <= 0)			// ERROR Code gotten or Conection closed by peer
+		{
+			isValid = false;
 			break;
-		std::string tmp;
-		tmp.assign(buffer, bytes_gotten);
-		result += tmp;				//TODO: use append?
+		}
+		result.append(buffer, bytes_gotten);
+		if((u_long)bytes_gotten < readarg)		// no more bytes
+			break;
 	}
+	alarm(0); 
+	signal(SIGALRM,SIG_IGN);
 	return result;
 }
 
 //-----------------------------------------------------------------------------
-// Read on line (Ends with CRLF) or maximum MAX_LINE_BUFFER chars
+// Read on line (Ends with LF) or maximum MAX_LINE_BUFFER chars
+// Result Contains [CR]LF!
 //-----------------------------------------------------------------------------
 std::string CySocket::ReceiveLine()
 {
 	char buffer[MAX_LINE_BUFFER];
 	int bytes_gotten = 0;
 	std::string result="";
+
 	while(true)
 	{
 		// read one char		
 		if(Read(buffer+bytes_gotten, 1) == 1)
+		{
 			if(buffer[bytes_gotten] == '\n')
 				break;
+		}
+		else
+		{
+			isValid = false;
+			break;
+		}
+
 		if(bytes_gotten < MAX_LINE_BUFFER-1)
 			bytes_gotten ++;
 		else
@@ -426,5 +499,6 @@ std::string CySocket::ReceiveLine()
 	}
 	buffer[++bytes_gotten] = '\0';
 	result.assign(buffer, bytes_gotten);
+	
 	return result;
 }

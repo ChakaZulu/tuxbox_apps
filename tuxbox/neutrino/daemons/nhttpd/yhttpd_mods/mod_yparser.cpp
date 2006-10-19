@@ -87,7 +87,11 @@ THandleStatus CyParser::Hook_SendResponse(CyhookHandler *hh)
 	if(hh->UrlData["fileext"] == "yhtm")	// yParser for yhtm-File
 		yP->ParseAndSendFile(hh);
 	else if(hh->UrlData["path"] == "/y/")	// /y/<cgi> commands
+	{
 		yP->Execute(hh);
+		if(hh->status == HANDLED_NOT_IMPLEMENTED)
+			hh->status = HANDLED_NONE;	// y-calls can be implemented anywhere
+	}
 	delete yP;
 
 //	log_level_printf(4,"yparser hook end status:%d\n",(int)hh->status);	
@@ -190,7 +194,6 @@ void CyParser::cgi(CyhookHandler *hh)
 }
 //-----------------------------------------------------------------------------
 // URL: server-config
-// TODO more parameter and better layout
 //-----------------------------------------------------------------------------
 #ifdef Y_CONFIG_FEATURE_SHOW_SERVER_CONFIG
 void CyParser::cgi_server_config(CyhookHandler *hh)
@@ -204,12 +207,26 @@ void CyParser::cgi_server_config(CyhookHandler *hh)
 	yresult += string_printf("Config File: %s<br/>\n", HTTPD_CONFIGFILE);
 	yresult += string_printf("Upload File: %s<br/>\n", UPLOAD_TMP_FILE);
 	yresult += string_printf("<br/><b>CONFIG (Config File)</b><br/>\n");
+
+	// Cofig file
+	yresult += string_printf("<table border=\"1\">\n");
 	CStringList::iterator i = (hh->WebserverConfigList).begin();
 	for ( ; i!= (hh->WebserverConfigList).end(); i++ )
 	{
-		if( ((*i).first) != "AuthUser" && ((*i).first) != "AuthPassword")
-			yresult += string_printf("Name: %s Value: %s<br/>\n", ((*i).first).c_str(), ((*i).second).c_str());
+		if( ((*i).first) != "mod_auth.username" && ((*i).first) != "mod_auth.password")
+			yresult += string_printf("<tr><td>%s</td><td>%s</td></tr>\n", ((*i).first).c_str(), ((*i).second).c_str());
 	}
+	yresult += string_printf("</table>\n");
+	// hook list
+	yresult += string_printf("<br/><b>Hooks (Compiled)</b><br/>\n");
+	yresult += string_printf("<table border=\"1\">\n");
+	THookList::iterator j = hh->HookList.begin();
+	for ( ; j!= hh->HookList.end(); j++ )
+	{
+		yresult += string_printf("<tr><td>%s</td><td>%s</td></tr>\n", ((*j)->getHookName()).c_str(), ((*j)->getHookVersion()).c_str());
+	}
+	yresult += string_printf("</table>\n");
+
 	hh->addResult(yresult, HANDLED_READY);
 	hh->SendHTMLFooter();
 }
@@ -240,7 +257,15 @@ void CyParser::ParseAndSendFile(CyhookHandler *hh)
 	if (yresult.length()<=0)
 		hh->SetError(HTTP_NOT_IMPLEMENTED, HANDLED_NOT_IMPLEMENTED);
 	else
+	{
 		hh->addResult(yresult,HANDLED_READY);
+		if(!ycgi_vars["cancache"].empty())
+		{
+			hh->HookVarList["CacheCategory"]=ycgi_vars["cancache"];
+			hh->HookVarList["CacheMimeType"]= hh->ResponseMimeType;
+			hh->status = HANDLED_CONTINUE;
+		}
+	}
 }
 
 //=============================================================================
@@ -708,7 +733,7 @@ std::string  CyParser::func_get_header_data(CyhookHandler *hh, std::string para)
 //-------------------------------------------------------------------------
 std::string  CyParser::func_get_config_data(CyhookHandler *hh, std::string para)
 {
-	if(para != "AuthUser" && para != "AuthPassword")
+	if(para != "mod_auth.username" && para != "mod_auth.password")
 		return hh->WebserverConfigList[para];
 	else
 		return "empty";
@@ -718,7 +743,8 @@ std::string  CyParser::func_get_config_data(CyhookHandler *hh, std::string para)
 //-------------------------------------------------------------------------
 std::string  CyParser::func_do_reload_httpd_config(CyhookHandler *hh, std::string para)
 {
-	raise(SIGHUP); // Send HUP-Signal to Reload Settings
+	log_level_printf(1,"func_do_reload_httpd_config: raise USR1 !!!\n");
+	raise(SIGUSR1); // Send HUP-Signal to Reload Settings
 	return "";
 }
 

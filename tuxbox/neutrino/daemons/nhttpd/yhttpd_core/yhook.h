@@ -94,6 +94,7 @@ public:
 	virtual std::string 	getHookVersion(void) {return std::string("0.0.0");}
 	virtual std::string 	getHookName(void) {return std::string("Abstract Hook Class");}
 	// CWebserverConnection based hooks
+	virtual THandleStatus 	Hook_PrepareResponse(CyhookHandler *hh){return HANDLED_NONE;};
 	virtual THandleStatus 	Hook_SendResponse(CyhookHandler *hh){return HANDLED_NONE;};
 	virtual THandleStatus	Hook_EndConnection(CyhookHandler *hh){return HANDLED_NONE;}
 	virtual THandleStatus	Hook_UploadSetFilename(CyhookHandler *hh, std::string &Filename){return HANDLED_NONE;}
@@ -116,7 +117,10 @@ public:
 	HttpResponseType httpStatus;		// http-status code for response
 	std::string 	ResponseMimeType;	// mime-type for response
 	std::string 	NewURL;			// new URL for Redirection
-	
+	long		ContentLength;		// Length of Response Body
+	time_t 		LastModified;		// Last Modified Time of Item to send / -1 dynamic content
+	std::string	Sendfile;		// Path & Name (local os style) of file to send
+		
 	// Input
 	CStringList 	ParamList; 		// local copy of ParamList (Request)
 	CStringList 	UrlData;		// local copy of UrlData (Request)
@@ -124,7 +128,6 @@ public:
 	CStringList 	WebserverConfigList;	// Reference (writable) to ConfigList
 	CStringList 	HookVarList;		// Variables in Hook-Handling passing to other Hooks
 	THttp_Method 	Method;			// HTTP Method (requested)
-	
 	// constructor & deconstructor
 	CyhookHandler(){};
 	virtual ~CyhookHandler(){};
@@ -136,44 +139,48 @@ public:
 		{HookList.remove(yh);};
 	
 	// session handling
-	void 		session_init(CStringList _ParamList, CStringList _UrlData, CStringList _HeaderList, CStringList _ConfigList, THttp_Method _Method)
-				{ParamList = _ParamList; UrlData = _UrlData; 
-					HeaderList = _HeaderList; WebserverConfigList = _ConfigList; Method = _Method;}
+	void 		session_init(CStringList _ParamList, CStringList _UrlData, CStringList _HeaderList, 
+					CStringList& _ConfigList, THttp_Method _Method);
 	
 	// Cyhttpd based hooks
 	static THandleStatus	Hooks_ReadConfig(CConfigFile *Config, CStringList &ConfigList);
 	// CWebserverConnection based hooks
+	THandleStatus 		Hooks_PrepareResponse();	// Hook for Response.SendResonse Dispatching
 	THandleStatus 		Hooks_SendResponse();	// Hook for Response.SendResonse Dispatching
 	THandleStatus 		Hooks_EndConnection();
 	THandleStatus		Hooks_UploadSetFilename(std::string &Filename);
-	THandleStatus		Hooks_UploadReady(std::string Filename);
+	THandleStatus		Hooks_UploadReady(const std::string& Filename);
 
 	// status handling	
 	void SetHeader(HttpResponseType _httpStatus, std::string _ResponseMimeType)
 		{httpStatus = _httpStatus; ResponseMimeType = _ResponseMimeType;}
 	void SetHeader(HttpResponseType _httpStatus, std::string _ResponseMimeType, THandleStatus _status)
-		{SetHeader(httpStatus, _ResponseMimeType); status = _status;}
+		{httpStatus = _httpStatus; ResponseMimeType = _ResponseMimeType; status = _status;}
 	void SetError(HttpResponseType responseType)
 		{SetHeader(responseType, "text/html");}
 	void SetError(HttpResponseType responseType, THandleStatus _status)
 		{SetError(responseType); status = _status;}
-	
+	// others
+	long GetContentLength()
+		{return (status==HANDLED_SENDFILE)?ContentLength : (long)yresult.length();}
 	// output methods
-	void addResult(std::string result) 	{yresult += result;}
-	void addResult(std::string result, THandleStatus _status) 
+	std::string BuildHeader(bool cache = false);
+	void addResult(const std::string& result) 	{yresult += result;}
+	void addResult(const std::string& result, THandleStatus _status) 
 						{yresult += result; status = _status;}
 	void printf(const char *fmt, ...);
-	void Write(const std::string text) 	{ addResult(text); }
-	void WriteLn(const std::string text) 	{ addResult(text+"\r\n"); }	
+	void Write(const std::string& text) 	{ addResult(text); }
+	void WriteLn(const std::string& text) 	{ addResult(text+"\r\n"); }	
 	void Write(char const *text)		{Write(std::string(text));}
 	void WriteLn(char const *text)		{WriteLn(std::string(text));}
-	void SendHTMLHeader(std::string Titel);
+	void SendHTMLHeader(const std::string& Titel);
 	void SendHTMLFooter(void);
 	void SendOk(void) 			{WriteLn("ok");}
 	void SendError(void) 			{WriteLn("error");}
-	void SendFile(std::string url) 		{NewURL = url; status = HANDLED_SENDFILE;}
-	void SendRedirect(std::string url) 	{NewURL = url; status = HANDLED_REDIRECTION;}
-	void SendRewrite(std::string url) 	{NewURL = url; status = HANDLED_REWRITE;}
+	void SendFile(const std::string& url) 		{NewURL = url; status = HANDLED_SENDFILE;}
+	void SendRedirect(const std::string& url) 	{NewURL = url; status = HANDLED_REDIRECTION;}
+	void SendRewrite(const std::string& url){NewURL = url; status = HANDLED_REWRITE;}
+	friend class CyParser;
 };
 
 #endif /*__yhttpd_yhook_h__*/

@@ -49,7 +49,12 @@ THandleStatus CNeutrinoYParser::Hook_SendResponse(CyhookHandler *hh)
 	if(hh->UrlData["fileext"] == "yhtm")	// yParser for yhtm-File
 		yP->ParseAndSendFile(hh);
 	else if(hh->UrlData["path"] == "/y/")	// /y/<cgi> commands
+	{
 		yP->Execute(hh);
+		if(hh->status == HANDLED_NOT_IMPLEMENTED)
+			hh->status = HANDLED_NONE;	// y-calls can be implemented anywhere
+	}	
+		
 	delete yP;
 
 //	log_level_printf(4,"Neutrinoparser Hook Ende status:%d\n",(int)hh->status);	
@@ -65,9 +70,9 @@ THandleStatus CNeutrinoYParser::Hook_ReadConfig(CConfigFile *Config, CStringList
 {
 	ConfigList["ExtrasDocumentRoot"]= Config->getString("ExtrasDocRoot", EXTRASDOCUMENTROOT);
 	ConfigList["ExtrasDocumentURL"]	= Config->getString("ExtrasDocURL", EXTRASDOCUMENTURL);
-	ConfigList["NewGui"]		= Config->getString("NewGui", "true");
+//	ConfigList["NewGui"]		= Config->getString("NewGui", "true");
 	ConfigList["Zapit_XML_Path"]	= Config->getString("Zapit_XML_Path", ZAPITXMLPATH);
-	return HANDLED_READY;
+	return HANDLED_CONTINUE;
 }
 
 //=============================================================================

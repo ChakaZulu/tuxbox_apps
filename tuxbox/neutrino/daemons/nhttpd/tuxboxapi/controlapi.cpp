@@ -240,6 +240,7 @@ void CControlAPI::TimerCGI(CyhookHandler *hh)
 			{
 				unsigned removeId = atoi(hh->ParamList["id"].c_str());
 				NeutrinoAPI->Timerd->removeTimerEvent(removeId);
+				hh->SendOk();
 			}
 			else if(hh->ParamList["get"] != "")
 			{
@@ -398,9 +399,15 @@ void CControlAPI::StandbyCGI(CyhookHandler *hh)
 	if (!(hh->ParamList.empty()))
 	{
 		if (hh->ParamList["1"] == "on")	// standby mode on
+		{
 			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_HTTPD);
+			hh->SendOk();
+		}
 		else if (hh->ParamList["1"] == "off")// standby mode off
+		{
 			NeutrinoAPI->EventServer->sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_HTTPD);
+			hh->SendOk();
+		}
 		else
 			hh->SendError();
 	}
@@ -1737,92 +1744,10 @@ std::string CControlAPI::YexecuteScript(CyhookHandler *hh, std::string cmd)
 	return result;
 }
 //-------------------------------------------------------------------------
-//TODO consolidate modify and new
 void CControlAPI::doModifyTimer(CyhookHandler *hh)
 {
-//	unsigned modyId = atoi(hh->ParamList["id"].c_str());
 	hh->ParamList["update"]="1";
 	doNewTimer(hh);
-/*
-	CTimerd::responseGetTimer timer;
-	NeutrinoAPI->Timerd->getTimer(timer, modyId);
-
-	// alarm time
-	struct tm *alarmTime = localtime(&(timer.alarmTime));
-	if(hh->ParamList["ad"] != "")
-		alarmTime->tm_mday = atoi(hh->ParamList["ad"].c_str());
-	if(hh->ParamList["amo"] != "")
-		alarmTime->tm_mon = atoi(hh->ParamList["amo"].c_str())-1;
-	if(hh->ParamList["ay"] != "")
-		alarmTime->tm_year = atoi(hh->ParamList["ay"].c_str())-1900;
-	if(hh->ParamList["ah"] != "")
-		alarmTime->tm_hour = atoi(hh->ParamList["ah"].c_str());
-	if(hh->ParamList["ami"] != "")
-		alarmTime->tm_min = atoi(hh->ParamList["ami"].c_str());
-	correctTime(alarmTime);
-	time_t alarmTimeT = mktime(alarmTime);
-
-	// stop time
-	struct tm *stopTime = localtime(&(timer.stopTime));
-	if(hh->ParamList["sd"] != "")
-		stopTime->tm_mday = atoi(hh->ParamList["sd"].c_str());
-	if(hh->ParamList["smo"] != "")
-		stopTime->tm_mon = atoi(hh->ParamList["smo"].c_str())-1;
-	if(hh->ParamList["sy"] != "")
-		stopTime->tm_year = atoi(hh->ParamList["sy"].c_str())-1900;
-	if(hh->ParamList["sh"] != "")
-		stopTime->tm_hour = atoi(hh->ParamList["sh"].c_str());
-	if(hh->ParamList["smi"] != "")
-		stopTime->tm_min = atoi(hh->ParamList["smi"].c_str());
-	correctTime(stopTime);
-	time_t stopTimeT = mktime(stopTime);
-	time_t announceTimeT = alarmTimeT-60;
-	if(timer.eventType == CTimerd::TIMER_RECORD)
-		announceTimeT-=120;
-
-	// repeat
-	unsigned int repCount = timer.repeatCount;
-	if(hh->ParamList["repcount"] != "")
-		repCount = atoi(hh->ParamList["repcount"].c_str());
-	CTimerd::CTimerEventRepeat rep = (CTimerd::CTimerEventRepeat) atoi(hh->ParamList["rep"].c_str());
-	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && hh->ParamList["wd"] != "")
-		NeutrinoAPI->Timerd->getWeekdaysFromStr((int*)&rep, hh->ParamList["wd"].c_str());
-
-	// modify (do it)
-	if(timer.eventType == CTimerd::TIMER_RECORD)
-		NeutrinoAPI->Timerd->modifyRecordTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep,repCount,hh->ParamList["rec_dir"].c_str());
-	else
-		NeutrinoAPI->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep,repCount);
-	
-	// apid settings
-	bool changeApids=false;
-	unsigned char apids=0;
-	if(hh->ParamList["apcf"] == "on")
-	{
-		changeApids=true;
-		apids=0;
-	}
-	else
-	{
-		if(hh->ParamList["apst"] == "on")
-		{
-			changeApids=true;
-			apids |= TIMERD_APIDS_STD;
-		}
-		if(hh->ParamList["apal"] == "on")
-		{
-			changeApids=true;
-			apids |= TIMERD_APIDS_ALT;
-		}
-		if(hh->ParamList["apac"] == "on")
-		{
-			changeApids=true;
-			apids |= TIMERD_APIDS_AC3;
-		}
-	}
-	if(changeApids)
-		NeutrinoAPI->Timerd->modifyTimerAPid(modyId,apids);
-*/
 }
 //-------------------------------------------------------------------------
 void CControlAPI::doNewTimer(CyhookHandler *hh)
@@ -2155,4 +2080,3 @@ void CControlAPI::changeBouquetCGI(CyhookHandler *hh)
 	else
 		hh->SendError();
 }
-

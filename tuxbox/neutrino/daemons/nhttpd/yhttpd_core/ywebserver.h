@@ -46,21 +46,30 @@ class CWebserver
 private:
 	static pthread_mutex_t	mutex;
 	pthread_t 	Connection_Thread_List[HTTPD_MAX_CONNECTIONS]; //Thread-List per webserver
-	fd_set 		master;   		// master file descriptor list for select()
-	fd_set 		read_fds; 		// read file descriptor list for select()
-	fd_set 		write_fds; 		// read file descriptor list for select()
-	int 		fdmax;        		// maximum file descriptor number
+	fd_set 		master;   				// master file descriptor list for select()
+	fd_set 		read_fds; 				// read file descriptor list for select()
+	int 		fdmax;        				// maximum file descriptor number
 	CySocket 	*SocketList[HTTPD_MAX_CONNECTIONS];	// List of concurrent hadled connections
+	int		open_connections;			// Number of opened connections
+	pthread_attr_t 	attr;					// pthread Attributes for deattach
+	CStringVector 	conf_no_keep_alive_ips;			// List of IP for NO keep-alive
 protected:
-	bool 		terminate;		// flag: indicate to terminate the Webserver
-	CySocket 	listenSocket;		// Master Socket for listening
-	unsigned int 	port;			// Port to listen on
-	void 		handle_connection(CySocket *newSock);// Create a new Connection Instance and handle Connection
-	int 		AcceptNewConnectionSocket();
-	int 		GetExistingConnectionSocket(SOCKET sock);
-	void 		CloseConnectionSocketsByTimeout();
+	bool 		terminate;				// flag: indicate to terminate the Webserver
+	CySocket 	listenSocket;				// Master Socket for listening
+	unsigned int 	port;					// Port to listen on
+	bool 		handle_connection(CySocket *newSock);	// Create a new Connection Instance and handle Connection
+
+	// Connection Socket handling
+	int 		AcceptNewConnectionSocket();		// Start new Socket connection
+	void 		CloseConnectionSocketsByTimeout();	// Check Sockets to close
+	void 		SL_CloseSocketBySlot(int slot);		// Close socket by slot index
+	int 		SL_GetExistingSocket(SOCKET sock);	// look for socket reuse
+	int 		SL_GetFreeSlot();			// get free slot
+	bool 		CheckKeepAliveAllowedByIP(CySocket *connectionSock);// check if Socket connection is from NO kee-alive
+	
+
 public:
-	static bool 	is_threading;		// Use Threading for new Connections
+	static bool 	is_threading;				// Use Threading for new Connections
 
 	// constructor & destructor
 	CWebserver();
@@ -68,14 +77,15 @@ public:
 
 	void 		init(unsigned int _port, bool _is_threading) // Initialize Webserver Settings
 				{port=_port; is_threading=_is_threading;}
-	bool 		run(void);		// Start the Webserver
-	void 		stop(void)		// Stop the Webserver
+	void		set_conf_no_keep_alive_ips(CStringVector _conf_no_keep_alive_ips)
+				{conf_no_keep_alive_ips=_conf_no_keep_alive_ips;}
+	bool 		run(void);				// Start the Webserver
+	void 		stop(void)				// Stop the Webserver
 				{terminate=true;}; 
 
-	void 		clear_Thread_List_Number(int number)// Set Entry(number)to NULL in Threadlist 
-				{if(number <HTTPD_MAX_CONNECTIONS)Connection_Thread_List[number]=(pthread_t)NULL;}
-	void		close_socket(SOCKET thisSocket);	// closes socket by application
-	void		addSocketToMasterSet(SOCKET fd); 
+	// public for WebTread
+	void 		clear_Thread_List_Number(int number);	// Set Entry(number)to NULL in Threadlist 
+	void		addSocketToMasterSet(SOCKET fd); 	// add Socket to select master set
 };
 
 #endif // __yhttpd_ywebserver_h__

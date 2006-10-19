@@ -6,6 +6,8 @@
 // system
 #include <csignal>
 #include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
 
 // yhttpd
 #include "yconfig.h"
@@ -42,6 +44,16 @@ static CTesthook *testhook = NULL;
 static CmWebLog *weblog = NULL;
 #endif
 
+#ifdef Y_CONFIG_USE_SENDFILE	
+#include "mod_sendfile.h"
+static CmodSendfile *mod_sendfile = NULL;
+#endif
+
+#ifdef Y_CONFIG_USE_CACHE	
+#include "mod_cache.h"
+static CmodCache mod_cache; // static instance
+#endif
+
 //-----------------------------------------------------------------------------
 #ifdef CONFIG_SYSTEM_TUXBOX
 #include "neutrinoapi.h"
@@ -51,24 +63,35 @@ static CNeutrinoAPI *NeutrinoAPI;
 //=============================================================================
 // Main: Main Entry, Command line passing, Webserver Instance creation & Loop
 //=============================================================================
+volatile sig_atomic_t Cyhttpd::sig_do_shutdown = 0;
 //-----------------------------------------------------------------------------
 // Signal Handling
 //-----------------------------------------------------------------------------
 static void sig_catch(int msignal)
 {
+	aprintf("!!! SIGNAL !!! :%d!\n",msignal);
 	switch (msignal) {
+//	case SIGTERM:
+//	case SIGINT:
+		
 	case SIGPIPE:
 		aprintf("got signal PIPE, nice!\n");
 		break;
 	case SIGHUP:
-		aprintf("got signal HUP, reading config\n");
+	case SIGUSR1:
+		aprintf("got signal HUP/USR1, reading config\n");
 		if (yhttpd)
 			yhttpd->ReadConfig();
 		break;
 	default:
+		aprintf("No special SIGNAL-Handler:%d!\n",msignal);
+//		log_level_printf(1, "Got SIGTERM\n");
+		Cyhttpd::sig_do_shutdown = 1;
 		yhttpd->stop_webserver();
 		delete yhttpd;
 		exit(EXIT_SUCCESS); //FIXME: return to main() some way...
+		break;
+
 	}
 }
 
@@ -77,6 +100,7 @@ static void sig_catch(int msignal)
 //-----------------------------------------------------------------------------
 int main(int argc, char **argv)
 {
+	aprintf("Webserver %s\n", WEBSERVERNAME);
 	bool do_fork = true;
 	yhttpd = new Cyhttpd();
 	if(!yhttpd)
@@ -124,33 +148,40 @@ int main(int argc, char **argv)
 	signal(SIGPIPE, sig_catch);
 	signal(SIGINT, sig_catch);
 	signal(SIGHUP, sig_catch);
+	signal(SIGUSR1, sig_catch);
 	signal(SIGTERM, sig_catch);
+    	signal(SIGCLD, SIG_IGN);
+//	signal(SIGALRM, sig_catch);
 
-	// Start Webserver: fork ist if not in debug mode
-	aprintf("Webserver %s\n", WEBSERVERNAME);
-	aprintf("Webserver starting...\n");
-	if (do_fork)
+	yhttpd->hooks_attach();
+	yhttpd->ReadConfig();
+	if(yhttpd->Configure())
 	{
-		log_level_printf(9,"do fork\n");
-		switch (fork()) {
-		case -1:
-			dperror("fork");
-			return -1;
-		case 0:
-			break;
-		default:
-			return EXIT_SUCCESS;
-		}
-
-		if (setsid() == -1)
+		// Start Webserver: fork ist if not in debug mode
+		aprintf("Webserver starting...\n");
+		if (do_fork)
 		{
-			dperror("Error setsid");
-			return EXIT_FAILURE;
-		}
-	}
-	dprintf("Start in Debug-Mode\n"); // non forked debugging loop
+			log_level_printf(9,"do fork\n");
+			switch (fork()) {
+			case -1:
+				dperror("fork");
+				return -1;
+			case 0:
+				break;
+			default:
+				return EXIT_SUCCESS;
+			}
 	
-	yhttpd->run();
+			if (setsid() == -1)
+			{
+				dperror("Error setsid");
+				return EXIT_FAILURE;
+			}
+		}
+		dprintf("Start in Debug-Mode\n"); // non forked debugging loop
+		
+		yhttpd->run();
+	}
 	delete yhttpd;
 	
 	aprintf("Main end\n");
@@ -174,12 +205,87 @@ Cyhttpd::~Cyhttpd()
 }
 
 //-----------------------------------------------------------------------------
+// Change to Root
+//-----------------------------------------------------------------------------
+bool Cyhttpd::Configure()
+{
+
+	if(!getuid())	// you must be root to do that!
+	{
+		// Get user and group data
+#ifdef Y_CONFIG_FEATURE_HTTPD_USER
+		struct passwd *pwd = NULL;
+		struct group *grp = NULL;
+		std::string username = ConfigList["server.user_name"];
+		std::string groupname= ConfigList["server.group_name"];
+		
+		// get user data
+		if(username != "")
+		{
+			if((pwd = getpwnam(username.c_str())) == NULL)
+			{
+				dperror("Dont know user to set uid\n");
+				return false;
+			}
+		}
+		// get group data
+		if(groupname != "")
+		{
+			if((grp = getgrnam(groupname.c_str())) == NULL)
+			{
+				aprintf("Can not get Group-Information. Group: %s\n", groupname.c_str());
+				return false;
+			}
+		}
+#endif		
+// change root directory
+#ifdef Y_CONFIG_FEATURE_CHROOT
+		if(!ConfigList["server.chroot"].empty())
+		{
+			log_level_printf(2, "do chroot to dir:%s\n", ConfigList["server.chroot"].c_str() );
+			// do change Root
+			if(chroot(ConfigList["server.chroot"].c_str()) == -1)
+			{
+				dperror("Change Root failed\n");
+				return false;
+			}
+			// Set Working Dir
+			if(chdir("/") == -1)
+			{
+				dperror("Change Directory to Root failed\n");
+				return false;
+			}
+		}
+#endif		
+#ifdef Y_CONFIG_FEATURE_HTTPD_USER
+		if(username != "" && pwd != NULL && grp != NULL)
+		{
+			log_level_printf(2, "set user and groups\n");
+	
+			// drop root privileges
+			setgid(grp->gr_gid);
+			setgroups(0, NULL);
+			// set user group
+			if(groupname != "")
+				initgroups(username.c_str(), grp->gr_gid);
+			// set user
+			if(setuid(pwd->pw_uid) == -1)
+			{
+				dperror("Change User Context failed\n");
+				return false;
+			}
+		}
+#endif
+	}
+	return true;
+}
+//-----------------------------------------------------------------------------
+// Main Webserver call
+//-----------------------------------------------------------------------------
 void Cyhttpd::run()
 {
 	if(webserver)
 	{
-		hooks_attach();
-		ReadConfig();
 		if(flag_threading_off)
 			webserver->is_threading = false;
 		webserver->run();
@@ -249,6 +355,14 @@ void Cyhttpd::hooks_attach()
 #endif
 #endif
 
+#ifdef Y_CONFIG_USE_CACHE	
+	CyhookHandler::attach(&mod_cache);
+#endif
+
+#ifdef Y_CONFIG_USE_SENDFILE
+	mod_sendfile = new CmodSendfile();
+	CyhookHandler::attach(mod_sendfile);
+#endif
 #ifdef Y_CONFIG_USE_WEBLOG	
 	weblog = new CmWebLog();
 	CyhookHandler::attach(weblog);
@@ -278,8 +392,17 @@ void Cyhttpd::hooks_detach()
 #endif
 #endif
 
+#ifdef Y_CONFIG_USE_CACHE	
+	CyhookHandler::detach(&mod_cache);
+#endif
+
+#ifdef Y_CONFIG_USE_SENDFILE
+	CyhookHandler::detach(mod_sendfile);
+#endif
+
 #ifdef Y_CONFIG_USE_WEBLOG	
 	CyhookHandler::detach(weblog);
+	delete weblog;
 #endif
 }
 
@@ -291,35 +414,78 @@ void Cyhttpd::ReadConfig(void)
 {
 	log_level_printf(3,"ReadConfig Start\n");	
 	CConfigFile *Config = new CConfigFile(',');
-
+	bool have_config = false;
+	if(access(HTTPD_CONFIGFILE,4) == 0)
+		have_config = true;
 	Config->loadConfig(HTTPD_CONFIGFILE);
+	// convert old config files
+	if(have_config)
+		if(Config->getInt32("Port", 0) != 0)
+		{
+			CConfigFile OrgConfig = *Config;
+			Config->clear();
+			
+			Config->setInt32("server.log.loglevel", OrgConfig.getInt32("LogLevel", 0));
+			Config->setString("configfile.version", "1");
+			Config->setString("webserver.websites", "WebsiteMain");
+			Config->setBool("webserver.threading", OrgConfig.getBool("THREADS", true));
+			Config->setInt32("WebsiteMain.port",OrgConfig.getInt32("Port", HTTPD_STANDARD_PORT));
+			Config->setString("WebsiteMain.directory", OrgConfig.getString("PrivatDocRoot", PRIVATEDOCUMENTROOT));
+			if(OrgConfig.getString("PublicDocRoot", "") != "")
+				Config->setString("WebsiteMain.override_directory", OrgConfig.getString("PublicDocRoot", PRIVATEDOCUMENTROOT));
+			if(OrgConfig.getString("HostedDocRoot", "") != "")
+				Config->setString("WebsiteMain.special_locations", "/hosted/="+OrgConfig.getString("HostedDocRoot", PRIVATEDOCUMENTROOT));
+			if(OrgConfig.getString("HostedDocRoot", "") != "")
+				Config->setString("Tuxbox.HostedDocumentRoot", OrgConfig.getString("HostedDocRoot", PRIVATEDOCUMENTROOT));
+			// mod_auth
+			Config->setString("mod_auth.username", OrgConfig.getString("AuthUser", AUTHUSER));
+			Config->setString("mod_auth.password", OrgConfig.getString("AuthPassword", AUTHPASSWORD));
+			Config->setString("mod_auth.no_auth_client", OrgConfig.getString("NoAuthClient", ""));
+			Config->setString("mod_auth.authenticate", OrgConfig.getString("Authenticate", "false"));
 	
+			Config->setString("mod_sendfile.mime_types", HTTPD_SENDFILE_EXT);
+	
+			Config->saveConfig(HTTPD_CONFIGFILE);
+				
+		}
 	// configure debugging & logging
-	CLogging::getInstance()->Verbose 	= Config->getBool("VERBOSE", false);
-	CLogging::getInstance()->Log 		= Config->getBool("LOG", false);
 	if(CLogging::getInstance()->LogLevel == 0)
-		CLogging::getInstance()->LogLevel = Config->getInt32("LogLevel", 0);
+		CLogging::getInstance()->LogLevel = Config->getInt32("server.log.loglevel", 0);
 
 	// get variables
-	webserver->init(Config->getInt32("Port", HTTPD_STANDARD_PORT), Config->getBool("THREADS", true));
-	ConfigList["PrivatDocumentRoot"]= Config->getString("PrivatDocRoot", PRIVATEDOCUMENTROOT);
-	ConfigList["PublicDocumentRoot"]= Config->getString("PublicDocRoot", PUBLICDOCUMENTROOT);
-	ConfigList["HostedDocumentRoot"]= Config->getString("HostedDocRoot", HOSTEDDOCUMENTROOT);
+	webserver->init(Config->getInt32("WebsiteMain.port", HTTPD_STANDARD_PORT), Config->getBool("webserver.threading", true));
+	// informational use
+	ConfigList["WebsiteMain.port"]= itoa(Config->getInt32("WebsiteMain.port", HTTPD_STANDARD_PORT));
+	ConfigList["webserver.threading"]= Config->getString("webserver.threading", "true");
+	ConfigList["configfile.version"]= Config->getString("configfile.version", "1");
+	ConfigList["server.log.loglevel"]= itoa(Config->getInt32("server.log.loglevel", 0));
+	ConfigList["server.no_keep-alive_ips"]= Config->getString("server.no_keep-alive_ips", "");
+	webserver->set_conf_no_keep_alive_ips(Config->getStringVector("server.no_keep-alive_ips"));
+
+	// MainSite
+	ConfigList["PrivatDocumentRoot"]= Config->getString("WebsiteMain.directory", PRIVATEDOCUMENTROOT);
+	ConfigList["PublicDocumentRoot"]= Config->getString("WebsiteMain.override_directory", PUBLICDOCUMENTROOT);
+	ConfigList["HostedDocumentRoot"]= Config->getString("Tuxbox.HostedDocumentRoot", HOSTEDDOCUMENTROOT);
 #ifdef Y_CONFIG_USE_OPEN_SSL
-	ConfigList["SSL"]		= Config->getString("SSL", "false");
-	ConfigList["SSL_pemfile"]	= Config->getString("SSL_pemfile", SSL_PEMFILE);
-	ConfigList["SSL_CA_file"]	= Config->getString("SSL_CA_file", SSL_CA_FILE);
+	ConfigList["SSL"]		= Config->getString("WebsiteMain.ssl", "false");
+	ConfigList["SSL_pemfile"]	= Config->getString("WebsiteMain.ssl_pemfile", SSL_PEMFILE);
+	ConfigList["SSL_CA_file"]	= Config->getString("WebsiteMain.ssl_ca_file", SSL_CA_FILE);
 	
 	CySocket::SSL_pemfile 		= ConfigList["SSL_pemfile"];
 	CySocket::SSL_CA_file 		= ConfigList["SSL_CA_file"];
 	if(ConfigList["SSL"] == "true")
 		CySocket::initSSL();
 #endif
+	ConfigList["server.user_name"]= Config->getString("server.user_name", "");
+	ConfigList["server.group_name"]= Config->getString("server.group_name", "");
+	ConfigList["server.chroot"]= Config->getString("server.chroot", "");
+
+
 	// Read App specifig settings by Hook
 	CyhookHandler::Hooks_ReadConfig(Config, ConfigList);
 	
 	// Save if new defaults are set
-	if (Config->getUnknownKeyQueryedFlag() == true)
+	if (!have_config)
 		Config->saveConfig(HTTPD_CONFIGFILE);
 	log_level_printf(3,"ReadConfig End\n");	
 	delete Config;

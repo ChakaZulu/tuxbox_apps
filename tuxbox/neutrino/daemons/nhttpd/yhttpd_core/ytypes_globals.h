@@ -17,6 +17,7 @@
 //=============================================================================
 typedef std::map<std::string, std::string> CStringList;
 typedef std::vector<std::string> CStringArray;
+typedef std::vector<std::string> CStringVector;
 
 //=============================================================================
 // HTTP Protocol Definitions

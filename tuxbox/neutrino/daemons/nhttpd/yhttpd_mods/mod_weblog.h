@@ -8,9 +8,10 @@
 #include "yconfig.h"
 #include "yhook.h"
 //-----------------------------------------------------------------------------
+// Defaults
 #ifndef LOG_FILE
-#define LOG_FILE			"/tmp/yhhtpd.log"
-#define LOG_FORMAT			"CLF"
+#define LOG_FILE			"/tmp/yhttpd.log"
+#define LOG_FORMAT			"off"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -20,23 +21,23 @@ class CmWebLog : public Cyhook
 	static FILE 		*WebLogFile;
 	static std::string	WebLogFilename;
 	static int 		RefCounter;	// Count Instances
+	static std::string	LogFormat;
 	
 public:
 	CmWebLog();
 	~CmWebLog();
 
-	static bool 	OpenLogFile();
-	static void 	CloseLogFile();
+	bool 		OpenLogFile();
+	void 		CloseLogFile();
 	void 		AddLogEntry_CLF(CyhookHandler *hh);
+	void 		AddLogEntry_ELF(CyhookHandler *hh);
 	bool 		printf(const char *fmt, ...);
 	
 	// Hooks
 	virtual THandleStatus 	Hook_EndConnection(CyhookHandler *hh); 
-	virtual std::string 	getHookName(void) {return std::string("WebLogging");}
+	virtual std::string 	getHookName(void) {return std::string("mod_weblog");}
+	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.2 $");}
 	virtual THandleStatus 	Hook_ReadConfig(CConfigFile *Config, CStringList &ConfigList); 
-protected:
-//	bool CheckAuth(CyhookHandler *hh);
-//	std::string decodeBase64(const char *b64buffer);
 };
 #endif // __yhttpd_mod_weblog_h__
 
