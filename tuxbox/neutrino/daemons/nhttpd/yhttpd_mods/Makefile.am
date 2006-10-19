@@ -14,5 +14,5 @@ INCLUDES = \
 noinst_LIBRARIES = libyhttpdmods.a
 
 libyhttpdmods_a_SOURCES = \
-	mod_yparser.cpp mod_testhook.cpp mod_auth.cpp
+	mod_yparser.cpp mod_testhook.cpp mod_auth.cpp mod_cache.cpp mod_sendfile.cpp mod_weblog.cpp
 
