@@ -1,4 +1,34 @@
 Severity	id		Headline							Build
+
+5-Enhancement	JG200000540	nhttpd: new: /y/cache-info view and clear cache			nhttpd 3.0.5
+5-Enhancement	JG200000553	Live: Support for Non-compatible HTTP1.1-Clients like JtG-Servernhttpd 3.0.5
+5-Enhancement	JG200000548	nhttpd: new hooks for Upload handling	n			httpd 3.0.5
+5-Enhancement	JG200000549	nhttpd: mod_auth new Base64 algorism				nhttpd 3.0.5
+5-Enhancement	JG200000545	nhttpd: upload POST works with SSL now				nhttpd 3.0.5
+5-Enhancement	JG200000528	nhttpd: Autentication: new implemented				nhttpd 3.0.5
+5-Enhancement	JG200000538	nhttpd: yParser Cache						nhttpd 3.0.5
+5-Enhancement	JG200000544	nhttpd: new format of nhttpd.conf				nhttpd 3.0.5
+5-Enhancement	JG200000541	nhttpd: new /y/server-config					nhttpd 3.0.5
+5-Enhancement	JG200000550	nhttpd: add SSL support						nhttpd 3.0.5
+5-Enhancement	JG200000542	nhttpd: new module mod_cache for caching dynamic content	nhttpd 3.0.5
+5-Enhancement	JG200000543	nhttpd: new module mod_weblog CLF and ELF logging		nhttpd 3.0.5
+5-Enhancement	JG200000547	nhttpd: more Features for HTTP1.1 support			nhttpd 3.0.5
+5-Enhancement	JG200000546	nhttpd: new Socket multiplexing for multi-threading		nhttpd 3.0.5
+5-Enhancement	JG200000536	nhttpd: Upload Progress ..					nhttpd 3.0.5
+
+5-Enhancement	JG200000552	Settings: Support for new nhttpd.conf Format			R2.2.0
+5-Enhancement	JG200000530	nhttpd: Webserver (yhhtpd) rewritten				nhttpd 3.0.0
+5-Enhancement	JG200000529	nhttpd: split nhttpd in yhttpd_core, yhttpd_mods, neutrinoAPI	nhttpd 3.0.0
+5-Enhancement	JG200000527	Bouquet: Bouquet-Editor moved to tools				R2.1.0
+5-Enhancement	JG200000523	Bouquet-Editor: new implemented					R2.1.0
+5-Enhancement	JG200000526	Bouquet: EPG-List: new implemented				R2.1.0
+5-Enhancement	JG200000534	Boxcontrol: Use /control/standby to determine standby status	R2.1.0
+5-Enhancement	JG200000440	Timer: ANNOUNCE_TIME_1=-120 at Rec from EPG ..			R2.1.0
+5-Enhancement	JG200000524	Timer: TimerList new implemented				R2.1.0
+5-Enhancement	JG200000531	Timer: use RecordingSafty in Timer-Prog				R2.1.0
+5-Enhancement	JG200000525	Timer: add/modify Timer: new implemented			R2.1.0
+4-Minor		JG200000522	Tools: Flash fix reboot button					R2.1.0
+
 5-Enhancement	JG200000511	GUI: disable AutoMount if ManagementIP does not match		R2.0.2
 4-Minor		JG200000519	Live: VLC Snapshot with IE works again				R2.0.2
 5-Enhancement	JG200000512	Live: fix: Fullscreen-Button (IE) does not  work		R2.0.2
