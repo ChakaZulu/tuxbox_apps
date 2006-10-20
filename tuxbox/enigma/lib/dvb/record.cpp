@@ -175,18 +175,22 @@ void eDVBRecorder::thread()
 		int r = ::read(dvrfd, buf+bufptr, rd);
 		if ( r < 0 )
 		{
-			int error = errno;
-			switch(error)
+#if HAVE_DVB_API_VERSION < 3
+			// workaround for driver bug....
+			if (r == -EBUFFEROVERFLOW)
+				continue;
+#endif
+			switch(errno)
 			{
 				case EINTR:
-				case EBUFFEROVERFLOW:
+				case EOVERFLOW:
 					continue;
 				default:
 					/*
 					 * any other error will immediately cause the same error
 					 * when we would call 'read' again with the same arguments
 					 */
-					eDebug("recording read error %d", error);
+					eDebug("recording read error %d", errno);
 					state = stateError;
 					rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
 					break;
