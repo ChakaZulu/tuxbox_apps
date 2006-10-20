@@ -175,14 +175,21 @@ void eDVBRecorder::thread()
 		int r = ::read(dvrfd, buf+bufptr, rd);
 		if ( r < 0 )
 		{
-			if (errno == EINTR || errno == EBUFFEROVERFLOW) continue;
-			/*
-			 * any other error will immediately cause the same error
-			 * when we would call 'read' again with the same arguments
-			 */
-			eDebug("recording read error %i", errno);
-			state = stateError;
-			rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+			switch(errno)
+			{
+				case EINTR:
+				case EBUFFEROVERFLOW:
+					continue;
+				default:
+					/*
+					 * any other error will immediately cause the same error
+					 * when we would call 'read' again with the same arguments
+					 */
+					eDebug("recording read error %i", errno);
+					state = stateError;
+					rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
+					break;
+			}
 			break;
 		}
 		/* note that some dvr devices occasionally return EOF, we should ignore that */
