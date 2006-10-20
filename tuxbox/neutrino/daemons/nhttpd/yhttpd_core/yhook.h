@@ -175,8 +175,8 @@ public:
 	void WriteLn(char const *text)		{WriteLn(std::string(text));}
 	void SendHTMLHeader(const std::string& Titel);
 	void SendHTMLFooter(void);
-	void SendOk(void) 			{WriteLn("ok");}
-	void SendError(void) 			{WriteLn("error");}
+	void SendOk(void) 			{Write("ok");}
+	void SendError(void) 			{Write("error");}
 	void SendFile(const std::string& url) 		{NewURL = url; status = HANDLED_SENDFILE;}
 	void SendRedirect(const std::string& url) 	{NewURL = url; status = HANDLED_REDIRECTION;}
 	void SendRewrite(const std::string& url){NewURL = url; status = HANDLED_REWRITE;}
