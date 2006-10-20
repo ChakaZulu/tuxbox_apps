@@ -158,6 +158,11 @@ void SAHandler(int ptr)
 		eDVB::getInstance()->recorder->setWritePatPmtFlag();
 }
 
+
+#ifndef EBUFFEROVERFLOW
+#define EBUFFEROVERFLOW  769
+#endif
+
 void eDVBRecorder::thread()
 {
 	signal(SIGALRM, SAHandler);
@@ -170,7 +175,7 @@ void eDVBRecorder::thread()
 		int r = ::read(dvrfd, buf+bufptr, rd);
 		if ( r < 0 )
 		{
-			if (errno == EINTR) continue;
+			if (errno == EINTR || errno == EBUFFEROVERFLOW) continue;
 			/*
 			 * any other error will immediately cause the same error
 			 * when we would call 'read' again with the same arguments
