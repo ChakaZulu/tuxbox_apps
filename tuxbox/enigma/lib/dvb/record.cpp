@@ -175,7 +175,8 @@ void eDVBRecorder::thread()
 		int r = ::read(dvrfd, buf+bufptr, rd);
 		if ( r < 0 )
 		{
-			switch(errno)
+			int error = errno;
+			switch(error)
 			{
 				case EINTR:
 				case EBUFFEROVERFLOW:
@@ -185,7 +186,7 @@ void eDVBRecorder::thread()
 					 * any other error will immediately cause the same error
 					 * when we would call 'read' again with the same arguments
 					 */
-					eDebug("recording read error %i", errno);
+					eDebug("recording read error %d", error);
 					state = stateError;
 					rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
 					break;
