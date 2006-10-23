@@ -52,7 +52,6 @@ private:
 	CySocket 	*SocketList[HTTPD_MAX_CONNECTIONS];	// List of concurrent hadled connections
 	int		open_connections;			// Number of opened connections
 	pthread_attr_t 	attr;					// pthread Attributes for deattach
-	CStringVector 	conf_no_keep_alive_ips;			// List of IP for NO keep-alive
 protected:
 	bool 		terminate;				// flag: indicate to terminate the Webserver
 	CySocket 	listenSocket;				// Master Socket for listening
@@ -65,11 +64,11 @@ protected:
 	void 		SL_CloseSocketBySlot(int slot);		// Close socket by slot index
 	int 		SL_GetExistingSocket(SOCKET sock);	// look for socket reuse
 	int 		SL_GetFreeSlot();			// get free slot
-	bool 		CheckKeepAliveAllowedByIP(CySocket *connectionSock);// check if Socket connection is from NO kee-alive
 	
 
 public:
 	static bool 	is_threading;				// Use Threading for new Connections
+	CStringVector 	conf_no_keep_alive_ips;			// List of IP for NO keep-alive
 
 	// constructor & destructor
 	CWebserver();
@@ -86,6 +85,7 @@ public:
 	// public for WebTread
 	void 		clear_Thread_List_Number(int number);	// Set Entry(number)to NULL in Threadlist 
 	void		addSocketToMasterSet(SOCKET fd); 	// add Socket to select master set
+	bool		CheckKeepAliveAllowedByIP(std::string client_ip); // Check if IP is allowed for keep-alive
 };
 
 #endif // __yhttpd_ywebserver_h__

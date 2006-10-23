@@ -22,6 +22,7 @@ long CWebserverConnection::GConnectionNumber = 0;
 //=============================================================================
 CWebserverConnection::CWebserverConnection(CWebserver *pWebserver)
 {
+	Webserver		= pWebserver;
 	Request.Webserver	= pWebserver;
 	Request.Connection	= this;
 	Response.Webserver	= pWebserver;
@@ -77,6 +78,15 @@ void CWebserverConnection::HandleConnection()
 		enlapsed_request = ((tv_connection_Response_start.tv_sec - tv_connection_start.tv_sec) * 1000000
 			+ (tv_connection_Response_start.tv_usec - tv_connection_start.tv_usec));
 
+		// Keep-Alive checking
+#ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
+		if(string_tolower(Request.HeaderList["Connection"]) == "close" 
+			|| (httprotocol != "HTTP/1.1" && string_tolower(Request.HeaderList["Connection"]) != "keep-alive")
+			|| !Webserver->CheckKeepAliveAllowedByIP(sock->get_client_ip()))
+			keep_alive = false;
+#else
+		keep_alive = false;
+#endif
 		// Send a response
 		Response.SendResponse();
 
@@ -99,6 +109,7 @@ void CWebserverConnection::HandleConnection()
 	}
 	EndConnection();
 }
+
 //-------------------------------------------------------------------------
 void CWebserverConnection::ShowEnlapsedRequest(char *text)
 {

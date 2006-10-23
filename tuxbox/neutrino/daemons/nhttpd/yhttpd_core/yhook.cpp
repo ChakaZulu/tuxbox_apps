@@ -155,7 +155,8 @@ THandleStatus CyhookHandler::Hooks_UploadReady(const std::string& Filename)
 //=============================================================================
 // Output helpers
 //=============================================================================
-void CyhookHandler::session_init(CStringList _ParamList, CStringList _UrlData, CStringList _HeaderList, CStringList& _ConfigList, THttp_Method _Method)
+void CyhookHandler::session_init(CStringList _ParamList, CStringList _UrlData, CStringList _HeaderList, 
+		CStringList& _ConfigList, THttp_Method _Method, bool _keep_alive)
 {
 	ParamList 		= _ParamList;
 	UrlData 		= _UrlData;
@@ -166,6 +167,7 @@ void CyhookHandler::session_init(CStringList _ParamList, CStringList _UrlData, C
 	httpStatus		= HTTP_OK;
 	ContentLength		= 0;
 	LastModified 		= (time_t)-1;
+	keep_alive		= _keep_alive;
 	HookVarList.clear();
 }
 
@@ -275,7 +277,10 @@ std::string CyhookHandler::BuildHeader(bool cache)
 			result += string_printf("Date: %s\r\n", timeStr);
 			// connection type
 #ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
-			result += "Connection: keep-alive\r\n";
+			if(keep_alive)
+				result += "Connection: keep-alive\r\n";
+			else
+				result += "Connection: close\r\n";
 #else
 			result += "Connection: close\r\n";
 #endif

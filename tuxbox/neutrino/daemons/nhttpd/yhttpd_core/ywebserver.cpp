@@ -306,16 +306,7 @@ int CWebserver::SL_GetFreeSlot()
 		}
 	return slot;
 }
-//-----------------------------------------------------------------------------
-bool CWebserver::CheckKeepAliveAllowedByIP(CySocket *connectionSock)
-{
-	std::string client_ip =connectionSock->get_client_ip();
-	CStringVector::const_iterator it = conf_no_keep_alive_ips.begin();
-	for(; it != conf_no_keep_alive_ips.end(); it++ )
-		if(trim(*it) == client_ip)
-			return false;
-	return true;
-}
+
 //-----------------------------------------------------------------------------
 // Look for Sockets to close
 //-----------------------------------------------------------------------------
@@ -329,10 +320,6 @@ void CWebserver::CloseConnectionSocketsByTimeout()
 		connectionSock = SocketList[j];
 		SOCKET thisSocket = connectionSock->get_socket();
 		bool shouldClose = true;
-
-		// check for no_keep-alive_ips
-		if(connectionSock->isValid && !CheckKeepAliveAllowedByIP(connectionSock))
-			connectionSock->isValid = false;// to close
 
 		if(!connectionSock->isValid)		// If not valid -> close
 			; // close
@@ -389,6 +376,23 @@ void CWebserver::SL_CloseSocketBySlot(int slot)
 //=============================================================================
 // Thread Handling
 //=============================================================================
+//-----------------------------------------------------------------------------
+// Check if IP is allowed for keep-alive
+//-----------------------------------------------------------------------------
+bool CWebserver::CheckKeepAliveAllowedByIP(std::string client_ip)
+{
+	pthread_mutex_lock( &mutex );
+	bool do_keep_alive = true;
+	CStringVector::const_iterator it = conf_no_keep_alive_ips.begin();
+	while(it != conf_no_keep_alive_ips.end())
+	{
+		if(trim(*it) == client_ip)
+			do_keep_alive = false;
+		it++;
+	}
+	pthread_mutex_unlock( &mutex );
+	return do_keep_alive;
+}
 //-----------------------------------------------------------------------------
 // Set Entry(number)to NULL in Threadlist
 //-----------------------------------------------------------------------------

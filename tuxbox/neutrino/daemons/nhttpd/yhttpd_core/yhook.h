@@ -120,6 +120,7 @@ public:
 	long		ContentLength;		// Length of Response Body
 	time_t 		LastModified;		// Last Modified Time of Item to send / -1 dynamic content
 	std::string	Sendfile;		// Path & Name (local os style) of file to send
+	bool		keep_alive;
 		
 	// Input
 	CStringList 	ParamList; 		// local copy of ParamList (Request)
@@ -140,7 +141,7 @@ public:
 	
 	// session handling
 	void 		session_init(CStringList _ParamList, CStringList _UrlData, CStringList _HeaderList, 
-					CStringList& _ConfigList, THttp_Method _Method);
+					CStringList& _ConfigList, THttp_Method _Method, bool _keep_alive);
 	
 	// Cyhttpd based hooks
 	static THandleStatus	Hooks_ReadConfig(CConfigFile *Config, CStringList &ConfigList);

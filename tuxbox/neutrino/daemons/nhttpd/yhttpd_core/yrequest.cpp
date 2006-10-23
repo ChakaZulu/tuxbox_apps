@@ -75,6 +75,7 @@ bool CWebserverRequest::HandleRequest(void)
 	if(!ParseStartLine(start_line))
 		return false;
 
+
 	if(Connection->Method == M_GET || Connection->Method == M_HEAD)
 	{
 		std::string tmp_line;
@@ -108,10 +109,7 @@ bool CWebserverRequest::HandleRequest(void)
 		return HandlePost();
 	}
 	// if you are here, something went wrong
-#ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
-	if(Connection->Request.HeaderList["Keep_Alive"] == "close")
-		Connection->keep_alive = false;
-#endif
+
 	return true;
 }
 
@@ -133,7 +131,7 @@ bool CWebserverRequest::ParseStartLine(std::string start_line)
 		if(ySplitStringLast(tmp," ",url,Connection->httprotocol))
 		{
 			analyzeURL(url);
-	
+			UrlData["httprotocol"] = Connection->httprotocol;
 			// determine http Method
 			if(method.compare("POST") == 0)		Connection->Method = M_POST;
 			else if(method.compare("GET") == 0)	Connection->Method = M_GET;

@@ -460,7 +460,7 @@ void Cyhttpd::ReadConfig(void)
 	ConfigList["configfile.version"]= Config->getString("configfile.version", "1");
 	ConfigList["server.log.loglevel"]= itoa(Config->getInt32("server.log.loglevel", 0));
 	ConfigList["server.no_keep-alive_ips"]= Config->getString("server.no_keep-alive_ips", "");
-	webserver->set_conf_no_keep_alive_ips(Config->getStringVector("server.no_keep-alive_ips"));
+	webserver->conf_no_keep_alive_ips = Config->getStringVector("server.no_keep-alive_ips");
 
 	// MainSite
 	ConfigList["PrivatDocumentRoot"]= Config->getString("WebsiteMain.directory", PRIVATEDOCUMENTROOT);
