@@ -34,7 +34,7 @@
 // General central Definitions <configure!>
 //-----------------------------------------------------------------------------
 #define HTTPD_VERSION 		"3.0.5"				// Webserver version  (can be overloaded)
-#define YHTTPD_VERSION 		"1.1.1"				// Webserver version  (Version of yhttpd-core!)
+#define YHTTPD_VERSION 		"1.1.2"				// Webserver version  (Version of yhttpd-core!)
 #define IADDR_LOCAL 		"127.0.0.1"			// local IP
 #define HTTPD_NAME 		"yhttpd"			// Webserver name (can be overloaded)
 #define YHTTPD_NAME 		"yhttpd_core"			// Webserver name (Name of yhttpd-core!)
@@ -152,7 +152,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/nhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
-#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain,img:application/octet-stream,ico:image/x-icon"
 
 #define AUTHUSER			"root"
 #define AUTHPASSWORD			"dbox2"
