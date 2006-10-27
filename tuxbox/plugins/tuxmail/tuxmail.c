@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.45  2006/10/27 19:36:32  robspr1
+ * - bugfix viewing mails in emtpy mailbox
+ *
  * Revision 1.44  2006/09/27 18:59:00  robspr1
  * -faster switching between viewed emails using + and -
  *
@@ -3049,7 +3052,7 @@ void ShowMessage(int message)
 
 				RenderString(info, 157, 213, 306, CENTER, BIG, ORANGE);
 				RenderString("(c) 2003-2005 Thomas \"LazyT\" Loewe", 157, 247, 306, CENTER, SMALL, WHITE);
-				RenderString("(c) 2005 Robert \"robspr1\" Spreitzer", 157, 273, 306, CENTER, SMALL, WHITE);
+				RenderString("(c) 2005-2006 Robert \"robspr1\" Spreitzer", 157, 273, 306, CENTER, SMALL, WHITE);
 		}
 
 		if(message != GETMAIL)
@@ -3169,6 +3172,8 @@ void ShowMailInfo(int account, int mailindex)
 
 void ViewMail(int account, int mailindex)
 {
+	rccode = 0;
+	
 	if(maildb[account].mails)
 	{				
 		if( mailcache )
@@ -3725,7 +3730,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.44 $";
+	char cvs_revision[] = "$Revision: 1.45 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
