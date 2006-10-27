@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.560 2006/10/08 14:41:30 dbluelle Exp $
+ * $Id: enigma_dyn.cpp,v 1.561 2006/10/27 23:54:28 ghostrider Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2241,6 +2241,8 @@ int translateKey(int key)
 	return key;
 }
 
+static int keyb_evt_dev_num = -1;
+
 static eString remoteControl(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	enum
@@ -2308,8 +2310,53 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 
 		int key = atoi(keyS.c_str());
 		key = translateKey(key);
-		int evd = open("/dev/input/event0", O_RDWR);
-		if (evd)
+
+		int evd=-1;
+		if (keyb_evt_dev_num == -1)
+		{
+			int cnt=0;
+			while (true)
+			{
+				struct stat s;
+				int fd;
+				char tmp[128];
+				sprintf(tmp, "/dev/input/event%d", cnt);
+				if (stat(tmp, &s))
+					break;
+				if ((fd=open(tmp, O_RDONLY)) == -1)
+					eDebug("open %s failed(%m)", tmp);
+				else 
+				{
+					if (ioctl(fd, EVIOCGNAME(128), tmp) < 0)
+						eDebug("EVIOCGNAME failed(%m)");
+					else
+					{
+						int idx=0;
+						int len = strlen(tmp);
+						while(idx <= len-8)
+						{
+							if (!strncasecmp(&tmp[idx++], "KEYBOARD", 8))
+							{
+								keyb_evt_dev_num = cnt;
+								evd = fd;
+								break;
+							}
+						}
+					}
+					close(fd);
+				}
+				++cnt;
+			}
+		}
+		else
+		{
+			char tmp[128];
+			sprintf(tmp, "/dev/input/event%d", keyb_evt_dev_num);
+			if ((evd=open(tmp, O_RDONLY)) < 0)
+				eDebug("open %s failed(%m)", tmp);
+		}
+
+		if (evd > -1)
 		{
 			sendKey(evd, key, KEY_PRESSED);
 			while (time--)
