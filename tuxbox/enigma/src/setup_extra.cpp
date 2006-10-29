@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.65 2006/10/09 19:08:01 timekiller Exp $
+ * $Id: setup_extra.cpp,v 1.66 2006/10/29 05:36:16 coronas Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -159,21 +159,25 @@ void eExpertSetup::init_eExpertSetup()
 #endif
 #ifndef HAVE_DREAMBOX_HARDWARE
 	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+//Boot-info
 	int bootInfo = 0;
 	if (access("/var/etc/.boot_info", R_OK) == 0)
 		bootInfo = 1;
 	eConfig::getInstance()->setKey("/extras/bootinfo", bootInfo);
 	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Show Boot-Info"), "/extras/bootinfo", _("Show Boot-Infos (IP, etc.)")))->selected, eExpertSetup::fileToggle,"/var/etc/.boot_info");
+//HW-Sections
 	int hwSectionsDisable = 0;
 	if (access("/var/etc/.hw_sections", R_OK) == 0)
 		hwSectionsDisable = 1;
 	eConfig::getInstance()->setKey("/extras/hw_sections_disable", hwSectionsDisable);
 	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Disable HW_Sections"), "/extras/hw_sections_disable", _("don't use hardware section filtering")))->selected, eExpertSetup::fileToggle,"/var/etc/.hw_sections");
+//Watchdog
 	int watchdogDisable = 0;
 	if (access("/var/etc/.no_watchdog", R_OK) == 0)
 		watchdogDisable = 1;
 	eConfig::getInstance()->setKey("/extras/watchdog_disable", watchdogDisable);
 	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Disable Watchdog"), "/extras/watchdog_disable", _("don't use the Watchdog")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_watchdog");
+//ENX-Watchdog - Philips and Sagem
 	if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::dbox2Nokia )
 	{
 		int enxWatchdogDisable = 0;
@@ -182,13 +186,27 @@ void eExpertSetup::init_eExpertSetup()
 		eConfig::getInstance()->setKey("/extras/enxwatchdog_disable", enxWatchdogDisable);
 		CONNECT_2_1((new eListBoxEntryCheck(&list, _("Disable ENX-Watchdog"), "/extras/enxwatchdog_disable", _("don't use the ENX-Watchdog")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_enxwatchdog");
 	}
+//SPTS-Recording
 	int sptsMode = 0;
 	if (access("/var/etc/.spts_mode", R_OK) == 0)
 		sptsMode = 1;
 	eConfig::getInstance()->setKey("/extras/spts_mode", sptsMode);
 	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Enable SPTS-Mode"), "/extras/spts_mode", _("use SPTS-Mode (enables TS-recording)")))->selected, eExpertSetup::fileToggle,"/var/etc/.spts_mode");
+//File I/O-Options
+	int hdd_O_SYNC = 0;
+	if (access("/var/etc/.o_sync", R_OK) == 0)
+		hdd_O_SYNC = 1;
+	eConfig::getInstance()->setKey("/extras/hdd_O_SYNC", hdd_O_SYNC);
+	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Use O_SYNC"), "/extras/hdd_O_SYNC", _("Write file using the O_SYNC-Option")))->selected, eExpertSetup::fileToggle,"/var/etc/.o_sync");
+//Alternative Frontenddriver for Philips
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips )
-	CONNECT_2_1((new eListBoxEntryCheck(&list, _("New Philips driver"), "/extras/tda80xx", _("use tda80xx driver for Philips boxes")))->selected, eExpertSetup::fileToggle,"/var/etc/.tda80xx");
+	{
+		int tda80xx = 0;
+		if (access("/var/etc/.tda80xx", R_OK) == 0)
+			tda80xx = 1;
+		eConfig::getInstance()->setKey("/extras/tda80xx", tda80xx);
+		CONNECT_2_1((new eListBoxEntryCheck(&list, _("New Philips driver"), "/extras/tda80xx", _("use tda80xx driver for Philips boxes")))->selected, eExpertSetup::fileToggle,"/var/etc/.tda80xx");
+	}
 #endif
 	setHelpID(92);
 }

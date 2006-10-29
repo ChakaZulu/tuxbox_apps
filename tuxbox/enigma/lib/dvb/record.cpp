@@ -319,7 +319,15 @@ int eDVBRecorder::openFile(int suffix)
 		if (eBackgroundFileEraser::getInstance())
 			eBackgroundFileEraser::getInstance()->erase((tfilename+".$$$").c_str());
 	}
-	outfd=::open(tfilename.c_str(), O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
+
+	if (access("/var/etc/.o_sync", R_OK) == 0)
+	{
+		outfd=::open(tfilename.c_str(),O_SYNC|O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
+	}
+	else
+	{
+		outfd=::open(tfilename.c_str(), O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
+	}
 
 	if (outfd < 0)
 	{
