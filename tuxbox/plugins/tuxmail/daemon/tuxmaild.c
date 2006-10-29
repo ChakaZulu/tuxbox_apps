@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.46  2006/10/29 20:10:15  robspr1
+ * - bugfix viewing deleted mails from IMAP box; - add body-scanning to spamfilter
+ *
  * Revision 1.45  2006/09/28 19:06:33  robspr1
  * -subject-scanning of spamfiler also for a sentence, not only for one word
  *
@@ -689,8 +692,8 @@ void ReadSpamList()
 		{
 			if(sscanf(line_buffer, "%s", spamfilter[spam_entries].address) == 1)
 			{
-				// for prefix ! or # take the whole line, not just the first string
-				if((line_buffer[0] == '!') || (line_buffer[0] == '#'))
+				// for prefix ! or # or & take the whole line, not just the first string
+				if((line_buffer[0] == '!') || (line_buffer[0] == '#') || (line_buffer[0] == '&'))
 				{
 					strcpy(spamfilter[spam_entries].address,line_buffer);
 					if((ptr = strchr(spamfilter[spam_entries].address, '\r')) || (ptr = strchr(spamfilter[spam_entries].address, '\n')))
@@ -2391,6 +2394,10 @@ int SendIMAPCommand(int command, char *param, char *param2)
 					{
 						*param2='U';
 					}					
+					if( strstr(recv_buffer, "\\Deleted") != NULL )
+					{
+						*param2=0;
+					}
 					
 					if(!strncmp(&recv_buffer[nRead], "? OK", 4))
 					{
@@ -3149,7 +3156,7 @@ int SaveMail(int account, char* mailuid)
 				}
 				else
 				{
-					char seen;
+					char seen = 0;
 					if(!SendIMAPCommand(FLAGS, mailnumber, &seen))
 					{
 						if(fd_mail)
@@ -3160,7 +3167,7 @@ int SaveMail(int account, char* mailuid)
 						return 0;
 					}
 					
-					if(!SendIMAPCommand(RETR, mailnumber, ""))
+					if((!seen) || (!SendIMAPCommand(RETR, mailnumber, "")))
 					{
 						if(fd_mail)
 						{
@@ -3289,10 +3296,108 @@ int ExecuteMail(char* mailfile)
 }
 
 /******************************************************************************
+ * int ScanMail(char* mailfile,int account,char* mailnumber, FILE* fd_status) (0=ok, 1=marked as SPAM)
+ ******************************************************************************/
+
+int ScanMail(char* mailfile,int account,char* mailnumber, FILE* fd_status)
+{
+	if(!use_spamfilter)
+	{
+		return 0;
+	}
+	
+  int loop;
+	char spamcheck = 0;
+
+	// check the spamfilter fpr mail-text scanning
+	for(loop = 0; loop < spam_entries; loop++)
+	{
+		// check if we should look for inside the mailtext
+		if(spamfilter[loop].address[0]=='&')	
+		{
+			spamcheck=1;
+			break;
+		}
+	}		
+
+	if(!spamcheck)
+	{
+		return 0;
+	}
+	
+	int scancnt = 20;
+	char spam = 0;
+	FILE* fd_mail;
+	fd_mail = fopen(mailfile, "r");
+	char linebuffer[256];
+  int filesize;
+  char *known_uids = 0;
+	char *pointer;
+  	
+	// scan the first x lines of th file for a spam-tag
+	do
+	{	
+		while((fgets(linebuffer,sizeof(linebuffer),fd_mail)) && (!spam))
+		{
+			for(loop = 0; loop < spam_entries; loop++)
+			{
+				// check if we should look for inside the mailtext
+				if((spamfilter[loop].address[0]=='&')	&& (strstr(linebuffer, &spamfilter[loop].address[1])))
+				{
+					while(( linebuffer[strlen(linebuffer)-1] == '\n' ) || ( linebuffer[strlen(linebuffer)-1] == '\r') )
+					{
+						linebuffer[strlen(linebuffer)-1] = '\0';
+					}
+												
+					slog ? syslog(LOG_DAEMON | LOG_INFO, "Spamfilter active, delete Mail with line \"%s\"", linebuffer) : printf("TuxMailD <Spamfilter active, delete Mail with line \"%s\" box:%d mail:<%s>>\n", linebuffer,account,mailnumber);
+
+					spam = 1;
+
+					break;
+				}
+			}						
+		}
+	}
+	while((--scancnt) && (!spam));
+	
+	fclose(fd_mail);
+	
+	// if we found a spam-tag, mark the state of the mail
+	if(spam)
+	{
+		// uid
+		if(fd_status)
+		{
+			fseek(fd_status, 0, SEEK_END);
+
+			if((filesize = ftell(fd_status)))
+			{
+				known_uids = malloc(filesize + 1);
+				memset(known_uids, 0, filesize + 1);
+
+				rewind(fd_status);
+				fread(known_uids, filesize, 1, fd_status);
+				
+        pointer = strstr(known_uids, uid);
+        if(pointer != 0)
+        {
+        	*(pointer-2)='D';
+        }
+        
+				rewind(fd_status);
+				fwrite(known_uids, filesize, 1, fd_status);		
+			}
+		}
+	}
+	
+	return spam;
+}
+
+/******************************************************************************
  * AddNewMailFile (0=fail, 1=done)
  ******************************************************************************/
 
-int AddNewMailFile(int account, char *mailnumber)
+int AddNewMailFile(int account, char *mailnumber, FILE *fd_status)
 {
 	char *stored_uids = 0, *ptr = 0;
 	int filesize = 0;
@@ -3367,9 +3472,10 @@ int AddNewMailFile(int account, char *mailnumber)
 				}
 				else
 				{
-//				printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
+					// printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
 					fclose(fd_mail);
 					ExecuteMail(mailfile);
+					ScanMail(mailfile,account,mailnumber,fd_status);
 				}
 			}
 			else
@@ -3383,12 +3489,13 @@ int AddNewMailFile(int account, char *mailnumber)
 									
 				if((!seen) || (!SendIMAPCommand(RETR, mailnumber, "")))
 				{
+					// printf("error write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
 					idx1 = 0;
 					fclose(fd_mail);
 				}
 				else
 				{
-//					printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
+					// printf("write email nr: %s at %stuxmail.idx%u.%u\n",mailnumber,maildir,account,idx1);
 					if( seen == 'U' )
 					{
 						SendIMAPCommand(UNSEEN, mailnumber, "");
@@ -3396,6 +3503,7 @@ int AddNewMailFile(int account, char *mailnumber)
 
 					fclose(fd_mail);
 					ExecuteMail(mailfile);
+					ScanMail(mailfile,account,mailnumber,fd_status);
 				}
 			}
 		}
@@ -3545,7 +3653,7 @@ int CheckAccount(int account)
 
 			// clear status
 
-				if(!(fd_status = fopen(statusfile, "w")))
+				if(!(fd_status = fopen(statusfile, "w+")))
 				{
 					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not create Status for Account %d", account) : printf("TuxMailD <could not create Status for Account %d>\n", account);
 				}
@@ -3911,6 +4019,24 @@ int CheckAccount(int account)
 				{
 					char linebuffer[256];
 					int i, j;
+
+					// reopen status-file and read content to known_uids
+/*
+					free(known_uids);
+					fclose(fd_status);
+					if((fd_status = fopen(statusfile, "r+")))
+					{
+						fseek(fd_status, 0, SEEK_END);
+
+						if((filesize = ftell(fd_status)))
+						{
+							known_uids = malloc(filesize + 1);
+							memset(known_uids, 0, filesize + 1);
+							rewind(fd_status);
+							fread(known_uids, filesize, 1, fd_status);
+						}
+					}
+*/
 					
 					for( i=0; i<readmails; i++)
 					{
@@ -3926,10 +4052,10 @@ int CheckAccount(int account)
 						linebuffer[5]='\0';
 						sscanf(&linebuffer[1],"%s",&mailnumber[0]);
 						sscanf(&linebuffer[6],"%s",&uid[0]);
-//						printf("mail: %d  number: %s  uid: %s \n",i,mailnumber,uid);
-						if( !AddNewMailFile(account, mailnumber) )
+						// printf("mail: %d  number: %s  uid: %s \n",i,mailnumber,uid);
+						if( !AddNewMailFile(account, mailnumber,fd_status) )
 						{
-//							printf("not found\n");
+						// printf("not found\n");
 						}
 					}
 				}
@@ -4520,7 +4646,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.45 $";
+	char cvs_revision[] = "$Revision: 1.46 $";
 	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
