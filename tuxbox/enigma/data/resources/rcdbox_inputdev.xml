@@ -140,6 +140,7 @@
 		<actionmap name="serviceSelector" style="default" descr="Default (Enigma)" >
 			<action name="nextBouquet" key="+" flags="mr" />
 			<action name="prevBouquet" key="-" flags="mr" />
+			<action name="pathUp" key="0" flags="m" />
 		</actionmap>
 
 		<actionmap name="serviceSelector" style="classic" descr="Classic (Neutrino)" >
