@@ -815,8 +815,9 @@ void plugin_exec(PluginParam *par)
 							ClearMarker(curframe);
 							FillDir(curframe,SELECT_NOCHANGE);
 						}
+						break;
 					}
-					else if (pfe && S_ISLNK(pfe->fentry.st_mode))
+					if (pfe && S_ISLNK(pfe->fentry.st_mode))
 					{
 						struct stat fs;
 						char fullfile[FILENAME_MAX];
@@ -853,21 +854,43 @@ void plugin_exec(PluginParam *par)
 								}
 							}
 						}
-
+						break;
 					}
-					else if (pfe && ((pfe->fentry.st_mode & S_IRUSR) == S_IRUSR) && ((check = CheckZip(pfe->name))>= GZIP) && (finfo[curframe].zipfile[0] == 0x00))
+					if (pfe && ((pfe->fentry.st_mode & S_IRUSR) == S_IRUSR))
 					{
-						ReadZip(check);
-						FillDir(curframe,SELECT_NOCHANGE);
-						SetSelected(curframe,"..");
-
+						if (((check = CheckZip(pfe->name))>= GZIP) && (finfo[curframe].zipfile[0] == 0x00))
+						{
+							ReadZip(check);
+							FillDir(curframe,SELECT_NOCHANGE);
+							SetSelected(curframe,"..");
+							break;
+						}
+						else
+						{							
+							char scriptfile[FILENAME_MAX];
+							char* expos = strrchr(pfe->name,'.');
+							if (expos && strlen(expos) > 0)
+							{
+								struct stat st;
+								sprintf(scriptfile,"%s%s%s",CONFIGDIR, "/tuxcom/",expos+1);
+								if (lstat(scriptfile,&st) != -1)
+								{
+									char szCmd[4000];
+									sprintf(szCmd,"%s \"%s\" \"%s\" &", scriptfile,finfo[curframe].path, pfe->name);
+									DoExecute(szCmd,SHOW_NO_OUTPUT);
+									break;
+								}
+							}
+						}
+						
 					}
-					else if (pfe && ((pfe->fentry.st_mode & S_IXUSR) == 0) && finfo[curframe].zipfile[0] == 0x00)
+					if (pfe && ((pfe->fentry.st_mode & S_IXUSR) == 0) && finfo[curframe].zipfile[0] == 0x00)
 					{
 						RenderMenuLine(ACTION_VIEW-1, YES);
 						DoViewFile();
+						break;
 					}
-					else if (pfe && ((pfe->fentry.st_mode & S_IXUSR) == S_IXUSR) && finfo[curframe].zipfile[0] == 0x00)
+					if (pfe && ((pfe->fentry.st_mode & S_IXUSR) == S_IXUSR) && finfo[curframe].zipfile[0] == 0x00)
 					{
 						sprintf(szMessage,msg[MSG_EXEC*NUM_LANG+language], pfe->name);
 						switch (MessageBox(szMessage,info[INFO_EXEC*NUM_LANG+language],OKHIDDENCANCEL))
@@ -885,6 +908,7 @@ void plugin_exec(PluginParam *par)
 							default:
 								rccode = 0;
 						}
+						break;
 					}
 					break;
 				case RC_LEFT:
@@ -3251,7 +3275,7 @@ int DoCopy(struct fileentry* pfe, int typ, int checktype, char* szZipCommand)
 				case YES:
 					{
 						char szsize[50];
-						sprintf(szsize, "%ld", st.st_size);
+						sprintf(szsize, "%lld", st.st_size);
 						if (FTPcmd(curframe,"REST", szsize, buf) == 350) {
 							size -= st.st_size;
 							fnewFile = fopen(szFullFile,"a");
@@ -4257,7 +4281,7 @@ void DoExecute(char* szAction, int showoutput)
 		printf("result %d \n",x);
 
 		if (x != 0)
-			MessageBox("Error",strerror(x),OK);
+			MessageBox("Error",strerror(errno),OK);
 	}
 	else
 	{

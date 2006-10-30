@@ -2,6 +2,13 @@ TuxCom:
 
 History:
 ---------
+30.10.2006 Version 1.15
+ - possibility to execute scripts depending on file extension
+ - two small fixes (thanks to murks)
+
+06.03.2006 Version 1.14
+ - use /tmp/keyboard.lck to signal decoding of the keyboard (by robspr1)
+
 22.01.2006 Version 1.13
  - overwrite directory corrected
 
@@ -315,3 +322,11 @@ if you have entered a password (in main menu),
 you will be asked for the password after starting the plugin.
 you can remove the password protection by simply setting an empty password.
 if you have forgotten your password, you can reset it by deleting /var/tuxbox/config/tuxcom.conf.
+
+Connect scripts to file extension:
+----------------------------------
+In order to connect a script to a specific file extension, the script has to be copied to /var/tuxbox/config/tuxcom/,
+has to have the same name as the extension (extension ".mp3" -> "mp3") and has to be executable.
+When you press the OK-Button, tuxcom searches for a matching script and, if found,
+executes it in background with the path and the filename as parameters $1 and $2.
+(look at demo script for starting mp3 files).

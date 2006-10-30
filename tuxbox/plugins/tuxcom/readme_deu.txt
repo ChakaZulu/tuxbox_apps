@@ -2,6 +2,14 @@ TuxCom:
 
 Historie:
 ---------
+30.10.2006 Version 1.15
+ - Möglichkeit, Skripte in Abhängigkeit von der Dateiendung auszuführen
+ - zwei kleine Korrekturen (Dank an murks)
+
+06.03.2006 Version 1.14
+- Beim Starten des Plugins wird die Datei /tmp/keyboard.lck angelegt und nach dem Beenden wieder
+  gelöscht, dies dient zur Unterstützung des kb2rcd (von robspr1)
+
 22.01.2006 Version 1.13
  - Überschreiben von Verzeichnissen korrigiert
  
@@ -312,3 +320,13 @@ Wenn man ein Passwort vergeben hat (im Hauptmenü),
 dann wird beim Starten des Plugins dieses Passwort abgefragt.
 Die Passwortabfrage kann wieder gelöscht werden, indem einfach ein leeres Passwort gesetzt wird.
 Wenn man das Passwort vergessen hat, kann man durch Löschen der Datei /var/tuxbox/config/tuxcom.conf das Passwort wieder löschen.
+
+Skripte mit Dateiendungen verknüpfen:
+-------------------------------------
+Um ein Skript mit einer bestimmten Dateiendung zu verknüpfen, muss das Skript in /var/tuxbox/config/tuxcom/ liegen,
+den Namen der Dateiendung haben (Endung ".mp3" -> "mp3") und ausführbar sein.
+Bei Druck auf OK wird überprüft, ob es ein entsprechendes Skript gibt und, falls ja, 
+das Skript im Hintergrund ausgeführt. 
+Dabei werden dem Skript der Pfad zur Datei und der Dateiname als Parameter $1 und $2 übergeben
+(siehe Beispielskript zum Start von mp3-Dateien).
+
