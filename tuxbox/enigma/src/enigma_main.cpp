@@ -5233,21 +5233,36 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		stopMessages();
 
 #ifndef DISABLE_FILE
-		if (	skipping &&
-			event.action != &i_enigmaMainActions->discrete_startSkipForward
-				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipForward && 
-			event.action != &i_enigmaMainActions->discrete_repeatSkipForward
-				&& dvrfunctions && event.action != &i_enigmaMainActions->repeatSkipForward &&
-			event.action != &i_enigmaMainActions->discrete_stopSkipForward
-				&& dvrfunctions && event.action != &i_enigmaMainActions->stopSkipForward &&
-			event.action != &i_enigmaMainActions->discrete_startSkipReverse
-				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipReverse &&
-			event.action != &i_enigmaMainActions->discrete_repeatSkipReverse
-				&& dvrfunctions && event.action != &i_enigmaMainActions->repeatSkipReverse &&
-			event.action != &i_enigmaMainActions->discrete_stopSkipReverse
-				&& dvrfunctions && event.action != &i_enigmaMainActions->stopSkipReverse )
+		if (	skipping )
 		{
-			endSkip();
+			// workaround because no action "hideInfobar" is sended
+			// when pressing OK-Button
+			if (strcmp(event.action->getIdentifier(),"ok") == 0)
+			{
+				// Toggle Infobar while skipping
+				if (isVisible()) 
+					hideInfobar(); 
+				else 
+					showInfobar();
+				startMessages();
+				return 1;
+			}			
+			else if(
+				event.action != &i_enigmaMainActions->discrete_startSkipForward
+				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipForward && 
+				event.action != &i_enigmaMainActions->discrete_repeatSkipForward
+				&& dvrfunctions && event.action != &i_enigmaMainActions->repeatSkipForward &&
+				event.action != &i_enigmaMainActions->discrete_stopSkipForward
+				&& dvrfunctions && event.action != &i_enigmaMainActions->stopSkipForward &&
+				event.action != &i_enigmaMainActions->discrete_startSkipReverse
+				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipReverse &&
+				event.action != &i_enigmaMainActions->discrete_repeatSkipReverse
+				&& dvrfunctions && event.action != &i_enigmaMainActions->repeatSkipReverse &&
+				event.action != &i_enigmaMainActions->discrete_stopSkipReverse
+				&& dvrfunctions && event.action != &i_enigmaMainActions->stopSkipReverse )
+			{
+				endSkip();
+			}
 		}
 #endif
 
