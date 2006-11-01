@@ -320,14 +320,14 @@ int eDVBRecorder::openFile(int suffix)
 			eBackgroundFileEraser::getInstance()->erase((tfilename+".$$$").c_str());
 	}
 
-	if (access("/var/etc/.o_sync", R_OK) == 0)
-	{
-		outfd=::open(tfilename.c_str(),O_SYNC|O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
-	}
+#ifdef HAVE_DREAMBOX_HARDWARE
+	outfd=::open(tfilename.c_str(), O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
+#else
+	if (access("/var/etc/.no_o_sync", R_OK) == 0)
+		outfd=::open(tfilename.c_str(),O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
 	else
-	{
-		outfd=::open(tfilename.c_str(), O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
-	}
+		outfd=::open(tfilename.c_str(),O_SYNC|O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
+#endif
 
 	if (outfd < 0)
 	{
