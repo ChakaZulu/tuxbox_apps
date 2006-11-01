@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.68 2006/11/01 13:23:19 coronas Exp $
+ * $Id: setup_extra.cpp,v 1.69 2006/11/01 15:12:58 coronas Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -197,7 +197,7 @@ void eExpertSetup::init_eExpertSetup()
 	if (access("/var/etc/.no_o_sync", R_OK) == 0)
 		OSyncDisable = 1;
 	eConfig::getInstance()->setKey("/extras/O_SYNC_disable", OSyncDisable);
-	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Disable O_SYNC"), "/extras/O_SYNC_disable", _("Don't use O_SYNC when writing to a file")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_o_sync");
+	CONNECT_2_1((new eListBoxEntryCheck(&list, _("Disable O_SYNC"), "/extras/O_SYNC_disable", _("The file/recording is not opened for synchronous I/O")))->selected, eExpertSetup::fileToggle,"/var/etc/.no_o_sync");
 //Alternative Frontenddriver for Philips
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips )
 	{
