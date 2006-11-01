@@ -18,5 +18,7 @@ tuxcom_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
 	install -d $(DESTDIR)$(CONFIGDIR)
+	install -d $(DESTDIR)$(CONFIGDIR)/tuxcom
 	$(LIBTOOL) --mode=install install tuxcom.la $(DESTDIR)$(PLUGINDIR) 
 	install -m 0644 $(srcdir)/tuxcom.cfg $(DESTDIR)$(PLUGINDIR)
+	install -m 0755 $(srcdir)/mp3 $(DESTDIR)$(CONFIGDIR)/tuxcom
