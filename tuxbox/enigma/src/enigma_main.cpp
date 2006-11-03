@@ -2765,10 +2765,6 @@ void eZapMain::showMainMenu()
 	int res = mm.exec();
 	mm.hide();
 
-#ifndef DISABLE_LCD
-	pLCD->lcdMenu->hide();
-	pLCD->lcdMain->show();
-#endif
 	if (!doHideInfobar())
 		showInfobar();
 
@@ -2781,6 +2777,10 @@ void eZapMain::showMainMenu()
 		standby_nomenu = 0;
 		standbyRelease();
 	}
+#ifndef DISABLE_LCD
+	pLCD->lcdMenu->hide();
+	pLCD->lcdMain->show();
+#endif
 }
 
 void eZapMain::toggleTimerMode(int newstate)
@@ -2834,7 +2834,8 @@ void eZapMain::standbyRelease()
 	{
 		hide();
 #ifndef DISABLE_LCD
-		eSleepTimerContextMenu m( LCDTitle, LCDElement );
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		eSleepTimerContextMenu m(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 #else
 		eSleepTimerContextMenu m;
 #endif
