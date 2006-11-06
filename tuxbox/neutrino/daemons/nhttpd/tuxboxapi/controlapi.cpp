@@ -163,7 +163,10 @@ const CControlAPI::TyCgiCall CControlAPI::yCgiCallList[]=
 	{"addbouquet",		&CControlAPI::addBouquetCGI,	"text/plain"},
 	{"renamebouquet",	&CControlAPI::renameBouquetCGI,	"text/plain"},
 	{"changebouquet",	&CControlAPI::changeBouquetCGI,	"text/plain"},
-	
+	// utils
+	{"build_live_url",	&CControlAPI::build_live_url,	""},
+
+
 };
 //-----------------------------------------------------------------------------
 // Main Dispatcher
@@ -1676,7 +1679,10 @@ void CControlAPI::YWeb_SendVideoStreamingPids(CyhookHandler *hh, int apid_no)
 		apid_idx=apid_no;
 	if(!pids.APIDs.empty())
 		apid = pids.APIDs[apid_idx].pid;
-	hh->printf("0x%04x,0x%04x,0x%04x",pids.PIDs.pmtpid,pids.PIDs.vpid,apid);
+	if(hh->ParamList["no_commas"] != "")
+		hh->printf("0x%04x 0x%04x 0x%04x",pids.PIDs.pmtpid,pids.PIDs.vpid,apid);
+	else
+		hh->printf("0x%04x,0x%04x,0x%04x",pids.PIDs.pmtpid,pids.PIDs.vpid,apid);
 }
 
 //-----------------------------------------------------------------------------
@@ -2079,4 +2085,61 @@ void CControlAPI::changeBouquetCGI(CyhookHandler *hh)
 	}
 	else
 		hh->SendError();
+}
+//-------------------------------------------------------------------------
+// audio_no : (optional) audio channel
+// host : (optional) ip of dbox
+void CControlAPI::build_live_url(CyhookHandler *hh)
+{
+	std::string xpids,port,yresult;
+	int mode = NeutrinoAPI->Zapit->getMode();
+	
+	if ( mode == CZapitClient::MODE_TV)
+	{
+		CZapitClient::responseGetPIDs pids;
+		int apid=0,apid_no=0,apid_idx=0;
+		pids.PIDs.vpid=0;
+		
+		if(hh->ParamList["audio_no"] !="")
+			apid_no = atoi(hh->ParamList["audio_no"].c_str());
+		NeutrinoAPI->Zapit->getPIDS(pids);
+	
+		if( apid_no < (int)pids.APIDs.size())
+			apid_idx=apid_no;
+		if(!pids.APIDs.empty())
+			apid = pids.APIDs[apid_idx].pid;
+		xpids = string_printf("0x%04x,0x%04x,0x%04x",pids.PIDs.pmtpid,pids.PIDs.vpid,apid);
+	}
+	else if ( mode == CZapitClient::MODE_RADIO)
+	{
+		CZapitClient::responseGetPIDs pids;
+		int apid=0;
+		
+		NeutrinoAPI->Zapit->getPIDS(pids);
+		if(!pids.APIDs.empty())
+			apid = pids.APIDs[0].pid;
+		
+		xpids = string_printf("0x%04x",apid);		
+	}
+	else
+		hh->SendError();
+	// build url
+	std::string url = "";
+	if(hh->ParamList["host"] !="")
+		url = "http://"+hh->ParamList["host"];
+	else
+		url = "http://"+hh->HeaderList["Host"];
+	url += (mode == CZapitClient::MODE_TV) ? ":31339/0," : ":31338/";
+	url += xpids;
+	// response url
+	if(hh->ParamList["vlc_link"] !="")
+	{
+		write_to_file("/tmp/vlc.m3u", url);
+		hh->SendRedirect("/tmp/vlc.m3u");
+	}
+	else
+	{
+		hh->SetHeader(HTTP_OK, "text/html");
+		hh->Write(url);
+	}
 }
