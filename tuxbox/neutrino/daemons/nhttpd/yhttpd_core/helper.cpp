@@ -263,3 +263,19 @@ std::string string_tolower(std::string str)
 	return str;
 }
 
+//-----------------------------------------------------------------------------
+// write string to a file
+//-----------------------------------------------------------------------------
+bool write_to_file(std::string filename, std::string content)
+{
+	FILE *fd = NULL;
+	if((fd = fopen(filename.c_str(),"w")) != NULL)				// open file
+	{
+		fwrite(content.c_str(), content.length(), 1, fd);
+		fflush(fd);							// flush and close file
+		fclose(fd);
+		return true;
+	}
+	else
+		return false;
+}

@@ -179,7 +179,7 @@ public:
 	void SendOk(void) 			{Write("ok");}
 	void SendError(void) 			{Write("error");}
 	void SendFile(const std::string& url) 		{NewURL = url; status = HANDLED_SENDFILE;}
-	void SendRedirect(const std::string& url) 	{NewURL = url; status = HANDLED_REDIRECTION;}
+	void SendRedirect(const std::string& url) 	{httpStatus=HTTP_MOVED_TEMPORARILY; NewURL = url; status = HANDLED_REDIRECTION;}
 	void SendRewrite(const std::string& url){NewURL = url; status = HANDLED_REWRITE;}
 	friend class CyParser;
 };

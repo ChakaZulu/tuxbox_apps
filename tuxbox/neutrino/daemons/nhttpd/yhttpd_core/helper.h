@@ -37,5 +37,6 @@ bool ySplitStringLast(std::string str, std::string delimiter, std::string& left,
 CStringArray ySplitStringVector(std::string str, std::string delimiter);
 bool nocase_compare (char c1, char c2);
 std::string timeString(time_t time);
+bool write_to_file(std::string filename, std::string content);
 
 #endif /* __yhttpd_helper_h__ */

@@ -89,7 +89,10 @@ bool CWebserverResponse::SendResponse()
 		// URL has new value. Analyze new URL for SendFile
 		else if(Connection->HookHandler.status == HANDLED_SENDFILE ||
 			Connection->HookHandler.status == HANDLED_REWRITE)
-				Connection->Request.analyzeURL(Connection->HookHandler.NewURL);
+		{
+			Connection->Request.analyzeURL(Connection->HookHandler.NewURL);
+			Connection->HookHandler.UrlData = Connection->Request.UrlData;
+		}
 		if(Connection->HookHandler.status == HANDLED_REDIRECTION)
 		{
 			Write(Connection->HookHandler.BuildHeader());
@@ -138,7 +141,10 @@ bool CWebserverResponse::SendResponse()
 		// URL has new value. Analyze new URL for SendFile
 		else if(Connection->HookHandler.status == HANDLED_SENDFILE ||
 			Connection->HookHandler.status == HANDLED_REWRITE)
-				Connection->Request.analyzeURL(Connection->HookHandler.NewURL);
+		{
+			Connection->Request.analyzeURL(Connection->HookHandler.NewURL);
+			Connection->HookHandler.UrlData = Connection->Request.UrlData;
+		}
 		if(Connection->HookHandler.status == HANDLED_REDIRECTION)
 		{
 			Write(Connection->HookHandler.BuildHeader());
