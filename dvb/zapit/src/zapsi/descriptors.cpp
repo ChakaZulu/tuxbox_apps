@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.73 2005/12/25 19:07:55 racker Exp $
+ * $Id: descriptors.cpp,v 1.74 2006/11/10 22:29:29 houdini Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -433,6 +433,10 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
 	else if((check_blacklisted_digital_plus(original_network_id, transport_stream_id)))
 	{
 		providerName = "Digital+"; 
+		in_blacklist = true;
+	}
+	else if (providerName == "BetaDigital")
+	{
 		in_blacklist = true;
 	}
 
