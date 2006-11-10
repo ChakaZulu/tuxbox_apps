@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.227 2006/06/08 20:19:32 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.228 2006/11/10 21:47:07 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -474,6 +474,36 @@ static void addEvent(const SIevent &evt)
 		// diese beiden Mengen enthalten nur Events mit Zeiten
 		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
 		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
+	}
+}
+
+// Fuegt zusaetzliche Zeiten in ein Event ein
+static void addEventTimes(const SIevent &evt)
+{
+	if (evt.times.size())
+	{
+		// D.h. wir fuegen die Zeiten in das richtige Event ein
+		MySIeventsOrderUniqueKey::iterator e = mySIeventsOrderUniqueKey.find(evt.uniqueKey());
+
+		if (e != mySIeventsOrderUniqueKey.end())
+		{
+			// Event vorhanden
+			// Falls das Event in den beiden Mengen mit Zeiten vorhanden ist, dieses dort loeschen
+			if (e->second->times.size())
+			{
+				mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.erase(e->second);
+				mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.erase(e->second);
+			}
+
+			// Und die Zeiten im Event updaten
+			e->second->times.insert(evt.times.begin(), evt.times.end());
+
+			// Und das Event in die beiden Mengen mit Zeiten (wieder) einfuegen
+			mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e->second);
+			mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e->second);
+
+//			printf("Updating: %04x times.size() = %d\n", (int) evt.uniqueKey(), e->second->times.size());
+		}
 	}
 }
 
@@ -1539,7 +1569,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.227 2006/06/08 20:19:32 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.228 2006/11/10 21:47:07 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -6129,6 +6159,10 @@ static void *pptThread(void *)
 	bool sendToSleepNow = false;
 	unsigned short start_section = 0;
 	unsigned short pptpid=0;
+	long first_content_id = 0;
+	long previous_content_id = 0;
+	long current_content_id = 0;
+	bool already_exists = false;
 
 //	dmxPPT.addfilter( 0xa0, (0xff - 0x01) );
 	dmxPPT.addfilter( 0xa0, (0xff));
@@ -6238,7 +6272,9 @@ static void *pptThread(void *)
 					zeit = time(NULL);
 					start_section = 0; // fetch new? events
 					lastData = zeit; // restart timer
-
+					first_content_id = 0;
+					previous_content_id = 0;
+					current_content_id = 0;
 				}
 			}
 
@@ -6296,6 +6332,27 @@ static void *pptThread(void *)
 //					dprintf("[pptThread] adding %d events [table 0x%x] (begin)\n", ppt.events().size(), header.table_id);
 //					dprintf("got %d: ", header.section_number);
 					zeit = time(NULL);
+
+					// Hintereinander vorkommende sections mit gleicher contentID herausfinden
+					current_content_id = ppt.content_id();
+					if (first_content_id == 0)
+					{
+						// aktuelle section ist die erste
+						already_exists = false;
+						first_content_id = current_content_id;
+					}
+					else if ((first_content_id == current_content_id) || (previous_content_id == current_content_id))
+					{
+						// erste und aktuelle bzw. vorherige und aktuelle section sind gleich
+						already_exists = true;
+					}
+					else
+					{
+						// erste und aktuelle bzw. vorherige und aktuelle section sind nicht gleich
+						already_exists = false;
+						previous_content_id = current_content_id;
+					}
+
 					// Nicht alle Events speichern
 					for (SIevents::iterator e = ppt.events().begin(); e != ppt.events().end(); e++)
 					{
@@ -6310,7 +6367,18 @@ static void *pptThread(void *)
 								{
 //									dprintf("chId: " PRINTF_CHANNEL_ID_TYPE " Dauer: %ld, Startzeit: %s", e->get_channel_id(),  (long)e->times.begin()->dauer, ctime(&e->times.begin()->startzeit));
 									lockEvents();
-									addEvent(*e);
+
+									if (already_exists)
+									{
+										// Zusaetzliche Zeiten in ein Event einfuegen
+										addEventTimes(*e);
+									}
+									else
+									{
+										// Ein Event in alle Mengen einfuegen
+										addEvent(*e);
+									}
+
 									unlockEvents();
 									break; // only add the event once
 								}
@@ -6345,7 +6413,7 @@ static void *pptThread(void *)
 							unlockServices();
 						}
 					} // for
-					//dprintf("[eitThread] added %d events (end)\n",  ppt.events().size());
+					//dprintf("[pptThread] added %d events (end)\n",  ppt.events().size());
 				} // if
 			} // if
 			else
@@ -6556,7 +6624,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.227 2006/06/08 20:19:32 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.228 2006/11/10 21:47:07 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
