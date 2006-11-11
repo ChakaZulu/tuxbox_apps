@@ -810,7 +810,6 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 			ac3pid=sp->dvb->get(eServiceDVB::cAC3PID);
 			sp->dvb->set(eServiceDVB::cPCRPID, Decoder::parms.pcrpid);
 		}
-		eServiceInterface::getInstance()->removeRef(service);
 	}
 
 	int isca=checkCA(calist, pmt->program_info, pmt->program_number);
@@ -1030,6 +1029,9 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 		setPID(ac3_audio);
 		setDecoder();
 	}
+
+	if (sp)
+		eServiceInterface::getInstance()->removeRef(service);
 }
 
 int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
