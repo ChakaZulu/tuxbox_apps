@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.228 2006/11/10 21:47:07 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.229 2006/11/11 22:14:03 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1569,7 +1569,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.228 2006/11/10 21:47:07 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.229 2006/11/11 22:14:03 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4863,7 +4863,7 @@ static void addBouquetToCurrentXML(xmlNodePtr bouquet, t_bouquet_id bouquet_id)
 	xmlNodePtr node;
 
 	if (!(dst = fopen(CURRENTBOUQUETS_TMP, "w"))) {
-		dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
+		dprintf("unable to open %s for writing", CURRENTBOUQUETS_TMP);
 		return;
 	}
 
@@ -6624,7 +6624,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.228 2006/11/10 21:47:07 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.229 2006/11/11 22:14:03 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
