@@ -663,7 +663,7 @@ int Decoder::Set()
 			pes_filter.input=DMX_IN_FRONTEND;
 			pes_filter.output=DMX_OUT_DECODER;
 			pes_filter.pesType=DMX_PES_TELETEXT;
-			pes_filter.flags=DMX_IMMEDIATE_START;
+			pes_filter.flags=0;
 			eDebugNoNewLine("DMX_SET_PES_FILTER(0x%02x) - vtxt - ", parms.tpid);
 			if (::ioctl(fd.demux_vtxt, DMX_SET_PES_FILTER, &pes_filter)<0)
 				eDebug("failed (%m)");
