@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.23 2005/06/08 17:11:08 Timekiller Exp $
+ * $Id: setup_harddisk.cpp,v 1.24 2006/11/13 22:38:48 coronas Exp $
  */
 
 #include <setup_harddisk.h>
@@ -327,13 +327,21 @@ void eHarddiskMenu::s_format()
 		int target=!!(dev&1);
 
 // kill samba server... (exporting /hdd)
+#ifdef HAVE_DREAMBOX_HARDWARE
 		system("killall -9 smbd");
+#else
+		system("killall -9 smbd nmbd");
+		system("/bin/umount /hdd");
+#endif
 		restartNet=true;
 
 		system(
 				eString().sprintf(
+#ifdef HAVE_DREAMBOX_HARDWARE
 				"/bin/umount /dev/ide/host%d/bus%d/target%d/lun0/part*", host, bus, target).c_str());
-
+#else
+				"/sbin/swapoff /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str());
+#endif
 		eMessageBox msg(
 			_("please wait while initializing harddisk.\nThis might take some minutes.\n"),
 			_("formatting harddisk..."), 0);
@@ -341,7 +349,7 @@ void eHarddiskMenu::s_format()
 
 		FILE *f=popen(
 				eString().sprintf(
-				"/sbin/sfdisk -f /dev/ide/host%d/bus%d/target%d/lun0/disc", host, bus, target).c_str(), "w");
+				"/sbin/sfdisk -f -uM /dev/ide/host%d/bus%d/target%d/lun0/disc", host, bus, target).c_str(), "w");
 		if (!f)
 		{
 			eMessageBox msg(
@@ -353,18 +361,35 @@ void eHarddiskMenu::s_format()
 			msg.hide();
 			break;
 		}
+#ifdef HAVE_DREAMBOX_HARDWARE
 		fprintf(f, "0,\n;\n;\n;\ny\n");
+#else
+		fprintf(f, "0,100,82\n,,,*\n;\n;\ny\n");
+#endif
 		fclose(f);
+/*Set up Swapspace*/
+#ifndef HAVE_DREAMBOX_HARDWARE
+		system(eString().sprintf("/sbin/mkswap /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str());
+#endif
+
 #if ENABLE_REISERFS
 		if ( !fs->getCurrent()->getKey() )  // reiserfs
 		{
 			::sync();
 			if ( system( eString().sprintf(
+#ifdef HAVE_DREAMBOX_HARDWARE
 					"/sbin/mkreiserfs -f -f /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8)
+#else
+					"/sbin/mkreiserfs -f -f /dev/ide/host%d/bus%d/target%d/lun0/part2", host, bus, target).c_str())>>8)
+#endif
 				goto err;
 			::sync();
 			if ( system( eString().sprintf(
+#ifdef HAVE_DREAMBOX_HARDWARE
 					"/bin/mount -t reiserfs /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8)
+#else
+					"/bin/mount -t reiserfs /dev/ide/host%d/bus%d/target%d/lun0/part2 /hdd", host, bus, target).c_str())>>8)
+#endif
 				goto err;
 			::sync();
 			if ( system("mkdir /hdd/movie")>>8 )
@@ -377,11 +402,19 @@ void eHarddiskMenu::s_format()
 		{
 			::sync();
 			if ( system( eString().sprintf(
+#ifdef HAVE_DREAMBOX_HARDWARE
 					"/sbin/mkfs.ext3 -T largefile -m0 /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8)
+#else
+					"/sbin/mkfs.ext3 -T largefile -m0 /dev/ide/host%d/bus%d/target%d/lun0/part2", host, bus, target).c_str())>>8)
+#endif
 				goto err;
 			::sync();
 			if ( system(eString().sprintf(
-				"/bin/mount -t ext3 /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8)
+#ifdef HAVE_DREAMBOX_HARDWARE
+					"/bin/mount -t ext3 /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8)
+#else
+					"/bin/mount -t ext3 /dev/ide/host%d/bus%d/target%d/lun0/part2 /hdd", host, bus, target).c_str())>>8)
+#endif
 				goto err;
 			::sync();
 			if ( system("mkdir /hdd/movie")>>8 )
@@ -638,8 +671,13 @@ void ePartitionCheck::fsckClosed(int state)
 	int bus=!!(dev&2);
 	int target=!!(dev&1);
 
+#ifdef HAVE_DREAMBOX_HARDWARE
 	if ( system( eString().sprintf("/bin/mount /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str() ) >> 8 )
 		eDebug("mount hdd after check failed");
+#else
+	if ( system( eString().sprintf("/bin/mount /dev/ide/host%d/bus%d/target%d/lun0/part2 /hdd", host, bus, target).c_str() ) >> 8 )
+		eDebug("mount hdd after check failed");
+#endif
 
 	if (fsck)
 	{
