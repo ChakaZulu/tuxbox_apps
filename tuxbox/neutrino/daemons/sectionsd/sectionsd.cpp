@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.229 2006/11/11 22:14:03 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.230 2006/11/14 20:36:30 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -503,6 +503,11 @@ static void addEventTimes(const SIevent &evt)
 			mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e->second);
 
 //			printf("Updating: %04x times.size() = %d\n", (int) evt.uniqueKey(), e->second->times.size());
+		}
+		else
+		{
+			// Event nicht vorhanden -> einfuegen
+			addEvent(evt);
 		}
 	}
 }
@@ -1569,7 +1574,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.229 2006/11/11 22:14:03 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.230 2006/11/14 20:36:30 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -6624,7 +6629,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.229 2006/11/11 22:14:03 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.230 2006/11/14 20:36:30 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
