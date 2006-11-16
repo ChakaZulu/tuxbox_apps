@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.60 2006/02/28 21:51:00 zwen Exp $
+	$Id: timerd.cpp,v 1.61 2006/11/16 22:52:28 houdini Exp $
 
 	License: GPL
 
@@ -177,7 +177,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.channel_id = ev->eventInfo.channel_id;
 						resp.apids = ev->eventInfo.apids;
 						strcpy(resp.recordingDir, ev->recordingDir.substr(0,sizeof(resp.recordingDir)-1).c_str());
-						strcpy(resp.epgTitle, ev->epgTitle.substr(0,sizeof(resp.epgTitle)-1).c_str());						
+						strcpy(resp.epgTitle, ev->epgTitle.substr(0,sizeof(resp.epgTitle)-1).c_str());
 					}
 					else if(event->eventType == CTimerd::TIMER_ZAPTO)
 					{
@@ -186,6 +186,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.epg_starttime = ev->eventInfo.epg_starttime;
 						resp.channel_id = ev->eventInfo.channel_id;
 						resp.apids = ev->eventInfo.apids;
+						strcpy(resp.epgTitle, ev->epgTitle.substr(0,sizeof(resp.epgTitle)-1).c_str());
 					}
 					else if(event->eventType == CTimerd::TIMER_REMIND)
 					{
