@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.h,v 1.6 2005/11/18 17:57:56 ghostrider Exp $
+ * $Id: ca_program_map_section.h,v 1.7 2006/11/17 11:17:57 pieterg Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -77,6 +77,7 @@ class CaProgramMapSection : public DescriptorContainer
 
 		bool append(const ProgramMapSection * const pmt);
 		void injectDescriptor(const uint8_t *descriptor, bool back=true);
+		void setListManagement(const uint8_t listmanagement);
 		size_t writeToBuffer(uint8_t * const buffer) const;
 		ssize_t writeToFile(int fd) const;
 };

@@ -1,5 +1,5 @@
 /*
- * $Id: ca_program_map_section.cpp,v 1.12 2006/03/28 17:22:00 ghostrider Exp $
+ * $Id: ca_program_map_section.cpp,v 1.13 2006/11/17 11:17:58 pieterg Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -161,6 +161,11 @@ void CaProgramMapSection::injectDescriptor(const uint8_t *descr, bool back)
 	int len = (back ? descriptorList.back()->getLength() : descriptorList.front()->getLength()) + 2;
 	programInfoLength += len;
 	length += len;
+}
+
+void CaProgramMapSection::setListManagement(const uint8_t listmanagement)
+{
+	caPmtListManagement = listmanagement;
 }
 
 size_t CaProgramMapSection::writeToBuffer(uint8_t * const buffer) const
