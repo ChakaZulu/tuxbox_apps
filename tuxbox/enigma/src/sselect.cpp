@@ -808,6 +808,24 @@ void eServiceSelector::pathUp()
 			setFocus(bouquets);
 	}
 }
+struct moveServicePath
+{
+	eString path;
+
+	moveServicePath(eString path): path(path)
+	{
+	}
+
+	bool operator()(const eListBoxEntryService& s)
+	{
+		if (s.service.path == path)
+		{
+			( (eListBox<eListBoxEntryService>*) s.listbox)->setCurrent(&s);
+			return 1;
+		}
+		return 0;
+	}
+};
 
 void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 {
@@ -840,6 +858,8 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 			e.show();
 			e.exec();
 			e.hide();
+			eString path = e.GetCurrentFile();
+			services->forEachEntry( moveServicePath( path ) ); 
 			show();
 			return;
 		}

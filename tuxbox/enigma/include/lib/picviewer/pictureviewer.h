@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.h,v 1.18 2005/10/12 20:46:09 digi_casi Exp $
+ * $Id: pictureviewer.h,v 1.19 2006/12/02 14:34:07 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -80,6 +80,7 @@ public:
 //	void Zoom(float factor);
 //	void Move(int dx, int dy);
 	void slideshowTimeout();
+	eString GetCurrentFile() { return *myIt; }
 private:
 	CFormathandler *fh_root;
 	ScalingMode m_scaling;

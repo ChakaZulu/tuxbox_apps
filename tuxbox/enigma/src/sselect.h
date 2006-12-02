@@ -27,6 +27,7 @@ class eListBoxEntryService: public eListBoxEntry
 	friend class eListBoxExt<eListBoxEntryService>;
 	friend struct moveFirstChar;
 	friend struct moveServiceNum;
+	friend struct moveServicePath;
 	friend struct _selectService;
 	friend struct updateEPGChangedService;
 	friend struct renumber;
