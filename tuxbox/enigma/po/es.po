@@ -2013,7 +2013,7 @@ msgstr "Cambiar al modo radio"
 
 #: src/enigma_main.cpp:150 src/sselect.cpp:134
 msgid "switch to File mode"
-msgstr "Cambiar al modo ficheros"
+msgstr "Cambiar al modo fichero"
 
 #: src/enigma_main.cpp:152
 msgid "toggle DVR panel"
@@ -2449,22 +2449,19 @@ msgstr "Borrar servicio/fichero elegido"
 
 #: src/enigma_main.cpp:7281
 msgid "set as startup service"
-msgstr ""
+msgstr "Definir como servicio autoinicio"
 
 #: src/enigma_main.cpp:7281
-#, fuzzy
 msgid "currently selected service will be selected on startup"
-msgstr "Añadir canal elegido a un bouquete determinado"
+msgstr "El receptor se enciende con este sercivio"
 
 #: src/enigma_main.cpp:7282 src/enigma_main.cpp:7317
-#, fuzzy
 msgid "reset startup service"
-msgstr "Borrar servicio"
+msgstr "Resetear servicio autoinicio"
 
 #: src/enigma_main.cpp:7282
-#, fuzzy
 msgid "last selected service will be selected on startup"
-msgstr "Añadir canal elegido a un bouquete determinado"
+msgstr "El receptor se enciende con el servicio visto previamente"
 
 #: src/enigma_main.cpp:7289
 msgid "disable move mode"
@@ -2495,19 +2492,16 @@ msgid "add the selected service to a selectable bouquet"
 msgstr "Añadir canal elegido a un bouquete determinado"
 
 #: src/enigma_main.cpp:7316
-#, fuzzy
 msgid "set as startup"
-msgstr "Memorizar límite este software"
+msgstr "Definir como autoinicio"
 
 #: src/enigma_main.cpp:7316
-#, fuzzy
 msgid "set the current selected service/movie as startup service"
-msgstr "Borrar servicio/fichero elegido"
+msgstr "Definir servicio/película como servicio autoinicio"
 
 #: src/enigma_main.cpp:7317
-#, fuzzy
 msgid "reset startup"
-msgstr "Reiniciar"
+msgstr "Borrar autoinicio"
 
 #: src/enigma_main.cpp:7329
 msgid "add the selected file to a selectable bouquet"
@@ -4216,11 +4210,11 @@ msgstr "No montar el disco duro por 'rcS'"
 
 #: src/setup_extra.cpp:164
 msgid "Enable Filemode Autoplay"
-msgstr ""
+msgstr "Activar autoreproducción"
 
 #: src/setup_extra.cpp:164
 msgid "continue playing last selected movie when entering Filemode"
-msgstr ""
+msgstr "Seguir con la pelicula vista previamente al entrar en el modo fichero"
 
 #: src/setup_extra.cpp:173
 msgid "Show Boot-Info"
