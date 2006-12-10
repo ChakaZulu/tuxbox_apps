@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-12-27 13:16+0100\n"
+"POT-Creation-Date: 2006-12-04 22:18+0100\n"
 "PO-Revision-Date: Thu Aug 11 13:47:26 CEST 2005\n"
 "Last-Translator: unknown\n"
 "Language-Team: Srpski / arrow@verat.net\n"
@@ -74,7 +74,7 @@ msgstr "Prethodna Stranica"
 msgid "LOF/L:"
 msgstr "LOF/L :"
 
-#: default.esml:753 src/timer.cpp:2651
+#: default.esml:753 src/timer.cpp:2692
 msgid "Wednesday"
 msgstr "Sreda"
 
@@ -429,7 +429,7 @@ msgstr "Modulacija :"
 msgid "Fast DiSEqC"
 msgstr "DISEqC desaktiviran"
 
-#: default.esml:753 src/epgwindow.cpp:113 src/timer.cpp:222
+#: default.esml:753 src/epgwindow.cpp:113 src/timer.cpp:224
 msgid "Wed"
 msgstr "Sre."
 
@@ -458,7 +458,7 @@ msgstr "calc param 1 (Pogledajte u knjigu vaseg rotora ili ga ostavite na 00)"
 msgid "prev page"
 msgstr "Prethodna strana"
 
-#: default.esml:754 src/epgwindow.cpp:113 src/timer.cpp:222
+#: default.esml:754 src/epgwindow.cpp:113 src/timer.cpp:224
 msgid "Thu"
 msgstr "Cet."
 
@@ -480,7 +480,7 @@ msgstr " Ugasiti DreamBox posle snimanja (ok)"
 msgid "edit the end time (0..9, left, right)"
 msgstr "Editiranje casa za kraj(0..9, levo, Desno)"
 
-#: default.esml:752 src/timer.cpp:2651
+#: default.esml:752 src/timer.cpp:2692
 msgid "Tuesday"
 msgstr "Utorak"
 
@@ -501,7 +501,7 @@ msgstr "Izabrati transponder koji zelite naci"
 msgid "add new Transponder to selected sat (ok)"
 msgstr ""
 
-#: default.esml:754 src/timer.cpp:2652
+#: default.esml:754 src/timer.cpp:2693
 msgid "Thursday"
 msgstr "Cetvrtak"
 
@@ -530,7 +530,7 @@ msgstr "mA"
 msgid "goto advanced motor setup"
 msgstr "Otvoriti dodatno podesavanje rotora"
 
-#: default.esml:750 src/timer.cpp:2651
+#: default.esml:750 src/timer.cpp:2692
 msgid "Monday"
 msgstr "Ponedeljak"
 
@@ -579,7 +579,7 @@ msgstr ""
 msgid "save"
 msgstr "Zadrzati"
 
-#: default.esml:752 src/epgwindow.cpp:113 src/timer.cpp:222
+#: default.esml:752 src/epgwindow.cpp:113 src/timer.cpp:224
 msgid "Tue"
 msgstr "Uto."
 
@@ -687,7 +687,7 @@ msgstr "Snimanje"
 msgid "choose modulation (left, right)"
 msgstr "Izaberi polarizaciju"
 
-#: default.esml:755 src/timer.cpp:2652
+#: default.esml:755 src/timer.cpp:2693
 msgid "Friday"
 msgstr "Petak"
 
@@ -867,7 +867,7 @@ msgstr "Prikazati dodatno podesavanje"
 msgid "choose what you want to do"
 msgstr "Izabrati sta hocete uciniti (ok)"
 
-#: default.esml:757 src/timer.cpp:2651
+#: default.esml:757 src/timer.cpp:2692
 msgid "Sunday"
 msgstr "Nedelja"
 
@@ -1145,7 +1145,7 @@ msgstr ""
 msgid "Constellation:"
 msgstr "Mracnost:"
 
-#: default.esml:756 src/timer.cpp:2652
+#: default.esml:756 src/timer.cpp:2693
 msgid "Saturday"
 msgstr "Subota"
 
@@ -1173,8 +1173,8 @@ msgstr "Trazi network"
 msgid "add only not scrambled services"
 msgstr "Izbrisati servis"
 
-#: lib/dvb/dvbci.cpp:60 lib/dvb/dvbci.cpp:109 lib/dvb/dvbci.cpp:127
-#: lib/dvb/dvbci.cpp:1279
+#: lib/dvb/dvbci.cpp:61 lib/dvb/dvbci.cpp:110 lib/dvb/dvbci.cpp:128
+#: lib/dvb/dvbci.cpp:1280
 #, fuzzy
 msgid "no module"
 msgstr "Pricekaj odgovor modula"
@@ -1218,67 +1218,67 @@ msgid "QPSK"
 msgstr ""
 
 #: lib/dvb/service.cpp:202 lib/dvb/service.cpp:230 src/enigma_bouquet.cpp:212
-#: src/enigma_main.cpp:4343 src/enigma_main.cpp:4355 src/parentallock.cpp:123
-#: src/parentallock.cpp:155 src/timer.cpp:2362
+#: src/enigma_main.cpp:4381 src/enigma_main.cpp:4393 src/parentallock.cpp:123
+#: src/parentallock.cpp:155 src/timer.cpp:2403
 msgid "parental"
 msgstr ""
 
-#: lib/dvb/servicedvb.cpp:723
+#: lib/dvb/servicedvb.cpp:742
 #, fuzzy
 msgid "Providers (TV)"
 msgstr "Videti provajdere"
 
-#: lib/dvb/servicedvb.cpp:727
+#: lib/dvb/servicedvb.cpp:746
 #, fuzzy
 msgid "Providers (Radio)"
 msgstr "Favoriti (Radio)"
 
-#: lib/dvb/servicedvb.cpp:731
+#: lib/dvb/servicedvb.cpp:750
 #, fuzzy
 msgid "Providers (Data)"
 msgstr "Videti provajdere"
 
-#: lib/dvb/servicedvb.cpp:736
+#: lib/dvb/servicedvb.cpp:755
 #, fuzzy
 msgid "All services (TV)"
 msgstr "Servisis"
 
-#: lib/dvb/servicedvb.cpp:740
+#: lib/dvb/servicedvb.cpp:759
 #, fuzzy
 msgid "All services (Radio)"
 msgstr "Servisis"
 
-#: lib/dvb/servicedvb.cpp:744
+#: lib/dvb/servicedvb.cpp:763
 #, fuzzy
 msgid "All services (Data)"
 msgstr "Servisis"
 
-#: lib/dvb/servicedvb.cpp:751
+#: lib/dvb/servicedvb.cpp:770
 #, fuzzy
 msgid "Satellites (TV)"
 msgstr "Satelit"
 
-#: lib/dvb/servicedvb.cpp:755
+#: lib/dvb/servicedvb.cpp:774
 #, fuzzy
 msgid "Satellites (Radio)"
 msgstr "Satelit"
 
-#: lib/dvb/servicedvb.cpp:759
+#: lib/dvb/servicedvb.cpp:778
 #, fuzzy
 msgid "Satellites (Data)"
 msgstr "Satelit"
 
-#: lib/dvb/servicedvb.cpp:1151
+#: lib/dvb/servicedvb.cpp:1161
 #, fuzzy
 msgid " - provider"
 msgstr "Videti provajdere"
 
-#: lib/dvb/servicedvb.cpp:1159
+#: lib/dvb/servicedvb.cpp:1169
 #, fuzzy
 msgid " - services"
 msgstr "Servisis"
 
-#: lib/dvb/servicedvb.cpp:1167
+#: lib/dvb/servicedvb.cpp:1177
 msgid " - new found"
 msgstr ""
 
@@ -1322,7 +1322,7 @@ msgstr "Mod fajl"
 msgid "TV/Radio"
 msgstr "TV/Radio"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7559
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:7672
 #: src/sselect.cpp:388 src/sselect.cpp:395
 #, fuzzy
 msgid "Bouquets"
@@ -1344,7 +1344,7 @@ msgstr "Da"
 msgid "No"
 msgstr "Ne"
 
-#: lib/gui/listbox.cpp:831
+#: lib/gui/listbox.cpp:861
 #, fuzzy
 msgid "no description available"
 msgstr "Nema deskripcije"
@@ -1729,11 +1729,11 @@ msgid "Filename: "
 msgstr "Ime fajla :"
 
 #: src/engrab.cpp:37 src/enigma_event.cpp:298 src/enigma_event.cpp:307
-#: src/timer.cpp:2299
+#: src/timer.cpp:2340
 msgid "no description is available"
 msgstr "Nema podataka"
 
-#: src/enigma.cpp:274
+#: src/enigma.cpp:275
 msgid ""
 "Welcome to enigma.\n"
 "\n"
@@ -1745,7 +1745,7 @@ msgstr ""
 " Startovati pretrazivanje kanala. \n"
 "(Glavni meni > Podesavanje > Kanali > Pretrazivanje kanala) "
 
-#: src/enigma.cpp:276
+#: src/enigma.cpp:277
 msgid "First start of enigma"
 msgstr "Prvi start Enigme"
 
@@ -1865,7 +1865,7 @@ msgstr "Common interface Modul-pcmcia"
 msgid "waiting for CI answer..."
 msgstr "Pricekaj odgovor modula"
 
-#: src/enigma_dyn.cpp:2159
+#: src/enigma_dyn.cpp:2119
 #, fuzzy
 msgid "External Message"
 msgstr "Poruka"
@@ -1887,7 +1887,7 @@ msgstr "Zatvoriti knjigu dogadjaja"
 msgid "Original duration: %d min"
 msgstr ""
 
-#: src/enigma_event.cpp:288 src/streaminfo.cpp:580 src/streaminfo.cpp:634
+#: src/enigma_event.cpp:288 src/streaminfo.cpp:580 src/streaminfo.cpp:638
 msgid "no information is available"
 msgstr "Nema informacija"
 
@@ -1919,26 +1919,31 @@ msgstr "Tuner: Kablovska"
 msgid "Frontend: Terrestrial"
 msgstr "Tuner: Zemaljska"
 
-#: src/enigma_info.cpp:205 src/streaminfo.cpp:278 src/streaminfo.cpp:289
+#: src/enigma_info.cpp:159
+#, fuzzy
+msgid "Frontend: Unknown"
+msgstr "Pocetak kraja"
+
+#: src/enigma_info.cpp:207 src/streaminfo.cpp:278 src/streaminfo.cpp:289
 #: src/streaminfo.cpp:301 src/streaminfo.cpp:313 src/streaminfo.cpp:325
 #: src/streaminfo.cpp:477 src/streaminfo.cpp:516
 #, fuzzy
 msgid "none"
 msgstr "Bez"
 
-#: src/enigma_info.cpp:211 src/timer.cpp:2716 src/upgrade.cpp:274
+#: src/enigma_info.cpp:213 src/timer.cpp:2757 src/upgrade.cpp:274
 msgid "unknown"
 msgstr "Nepoznato"
 
-#: src/enigma_info.cpp:216
+#: src/enigma_info.cpp:218
 msgid "release"
 msgstr "Verzija"
 
-#: src/enigma_info.cpp:217
+#: src/enigma_info.cpp:219
 msgid "beta"
 msgstr "BETA"
 
-#: src/enigma_info.cpp:218
+#: src/enigma_info.cpp:220
 msgid "internal"
 msgstr "Unutrasnje"
 
@@ -2068,7 +2073,7 @@ msgstr "Pauza"
 msgid "resume playback"
 msgstr "Preuseti citanje"
 
-#: src/enigma_main.cpp:120 src/enigma_main.cpp:133 src/enigma_main.cpp:3108
+#: src/enigma_main.cpp:120 src/enigma_main.cpp:133 src/enigma_main.cpp:3126
 msgid "record"
 msgstr "Snimanje"
 
@@ -2263,82 +2268,82 @@ msgstr "Favoriti (Radio)"
 msgid "Favourites (File)"
 msgstr "Favoriti (TV)"
 
-#: src/enigma_main.cpp:1893
+#: src/enigma_main.cpp:1895
 #, fuzzy
 msgid "please wait while initializing Common Interface ..."
 msgstr ""
 "Sacekati, inisializacija hard diska. \n"
 " To moze trajati nekoliko minuta. \n"
 
-#: src/enigma_main.cpp:2195
+#: src/enigma_main.cpp:2202
 msgid "no EPG available"
 msgstr "Nije dostupan EPG"
 
-#: src/enigma_main.cpp:2859
+#: src/enigma_main.cpp:2871
 #, fuzzy
 msgid "ShutdownTimer"
 msgstr "Ugasiti"
 
-#: src/enigma_main.cpp:2859
+#: src/enigma_main.cpp:2871
 #, fuzzy
 msgid "SleepTimer"
 msgstr "Sat"
 
-#: src/enigma_main.cpp:3108
+#: src/enigma_main.cpp:3126
 msgid "Sorry, you cannot record this service."
 msgstr "Izvinite,taj servis se ne moze snimiti"
 
-#: src/enigma_main.cpp:3315
+#: src/enigma_main.cpp:3333
 msgid "Show recorded movies?"
 msgstr "Videti snimljene kanale"
 
-#: src/enigma_main.cpp:3315
+#: src/enigma_main.cpp:3333
 msgid "recording finished"
 msgstr "Kraj snimanja"
 
-#: src/enigma_main.cpp:3669
+#: src/enigma_main.cpp:3687
 #, fuzzy
 msgid "Shutdown your Receiver now?"
 msgstr "Staviti u dremanje"
 
-#: src/enigma_main.cpp:3669 src/enigma_main.cpp:3689
+#: src/enigma_main.cpp:3687 src/enigma_main.cpp:3707
 #, fuzzy
 msgid "Timer Message"
 msgstr "Poruka"
 
-#: src/enigma_main.cpp:3689
+#: src/enigma_main.cpp:3707
 #, fuzzy
 msgid "Go to Standby now?"
 msgstr "Preci u pauzu mode (stisnuti)"
 
-#: src/enigma_main.cpp:3746 src/enigma_main.cpp:3808
+#: src/enigma_main.cpp:3764 src/enigma_main.cpp:3826
 msgid "Enter new name:"
 msgstr "Ubaci novo ime"
 
-#: src/enigma_main.cpp:3747 src/enigma_main.cpp:3809
+#: src/enigma_main.cpp:3765 src/enigma_main.cpp:3827
 msgid "Rename entry"
 msgstr "Novo ime ubaci"
 
-#: src/enigma_main.cpp:3871
+#: src/enigma_main.cpp:3889
 msgid "Sorry, you cannot delete this service."
 msgstr "Izvinite, ne moze te izbrisati taj servis"
 
-#: src/enigma_main.cpp:3871
+#: src/enigma_main.cpp:3889
 msgid "delete service"
 msgstr "Izbrisati servis"
 
-#: src/enigma_main.cpp:3898 src/enigma_main.cpp:3984
+#: src/enigma_main.cpp:3916 src/enigma_main.cpp:4040
 #, c-format
 msgid ""
 "You are trying to delete '%s'.\n"
 "Really do this?"
 msgstr ""
 
-#: src/enigma_main.cpp:3899
+#: src/enigma_main.cpp:3917
 msgid "Delete recorded stream"
 msgstr "Izbrisati snimljeni kanal"
 
-#: src/enigma_main.cpp:3930
+#: src/enigma_main.cpp:3948
 #, fuzzy
 msgid ""
 "This is a complete Bouquet!\n"
@@ -2347,72 +2352,72 @@ msgstr ""
 "To je snimak kanala! \n"
 " Izbrisati ga definitivno?"
 
-#: src/enigma_main.cpp:3931
+#: src/enigma_main.cpp:3949
 #, fuzzy
 msgid "Delete bouquet"
 msgstr "Novi naziv za licni buket"
 
-#: src/enigma_main.cpp:3985
+#: src/enigma_main.cpp:4041
 #, fuzzy
 msgid "Delete File"
 msgstr "Izbrisi me"
 
-#: src/enigma_main.cpp:4043
+#: src/enigma_main.cpp:4113
 #, fuzzy
 msgid "Enter new Filename:"
 msgstr "Ubaci novo ime"
 
-#: src/enigma_main.cpp:4044
+#: src/enigma_main.cpp:4114
 #, fuzzy
 msgid "Rename File"
 msgstr "Zameniime"
 
-#: src/enigma_main.cpp:4108
+#: src/enigma_main.cpp:4146
 #, fuzzy
 msgid "Enter new name for the bouquet:"
 msgstr "Ubaciti novo ime licnog buketa"
 
-#: src/enigma_main.cpp:4109
+#: src/enigma_main.cpp:4147
 #, fuzzy
 msgid "Rename bouquet"
 msgstr "Novi naziv za licni buket"
 
-#: src/enigma_main.cpp:4134
+#: src/enigma_main.cpp:4172
 msgid "Enter name for the new bouquet:"
 msgstr "Ubaciti ime buketa"
 
-#: src/enigma_main.cpp:4135
+#: src/enigma_main.cpp:4173
 #, fuzzy
 msgid "Add new bouquet"
 msgstr "Dodavanje novog buketa"
 
-#: src/enigma_main.cpp:4190
+#: src/enigma_main.cpp:4228
 #, fuzzy
 msgid "unnamed"
 msgstr "Buket bez imena"
 
-#: src/enigma_main.cpp:4191
+#: src/enigma_main.cpp:4229
 #, fuzzy
 msgid "Enter marker name:"
 msgstr "Ubaci novo ime"
 
-#: src/enigma_main.cpp:4192
+#: src/enigma_main.cpp:4230
 msgid "create marker"
 msgstr ""
 
-#: src/enigma_main.cpp:4233
+#: src/enigma_main.cpp:4271
 msgid "unnamed bouquet"
 msgstr "Buket bez imena"
 
-#: src/enigma_main.cpp:4564 src/enigma_main.cpp:4565
+#: src/enigma_main.cpp:4635 src/enigma_main.cpp:4636
 msgid "This directory doesn't contain anything playable!"
 msgstr "Taj dosije nema vizualni fajl!"
 
-#: src/enigma_main.cpp:4565
+#: src/enigma_main.cpp:4636
 msgid "Play"
 msgstr "Citanje"
 
-#: src/enigma_main.cpp:5055
+#: src/enigma_main.cpp:5130
 #, fuzzy
 msgid ""
 "A timer based recording is currently in progress!\n"
@@ -2421,7 +2426,7 @@ msgstr ""
 "Snimanje je u radu ! \n"
 " To ce zaustaviti brojac za digitalno snimanje ! "
 
-#: src/enigma_main.cpp:5065
+#: src/enigma_main.cpp:5140
 #, fuzzy
 msgid ""
 "A recording is currently in progress!\n"
@@ -2430,7 +2435,7 @@ msgstr ""
 "Snimanje je u radu! \n"
 " To ce zaustaviti digitalno snimanje ! "
 
-#: src/enigma_main.cpp:5077
+#: src/enigma_main.cpp:5152
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2438,368 +2443,402 @@ msgstr ""
 "Jedan dogadjaj je u radu \n"
 " To zaustavlja Sat ! "
 
-#: src/enigma_main.cpp:5085
+#: src/enigma_main.cpp:5160
 msgid "Really do this?"
 msgstr "Hocete li zaista to uciniti?"
 
-#: src/enigma_main.cpp:5184
+#: src/enigma_main.cpp:5259
 msgid "please wait until the timer has started the recording (max 10 seconds)"
 msgstr ""
 
-#: src/enigma_main.cpp:5185
+#: src/enigma_main.cpp:5260
 #, fuzzy
 msgid "information"
 msgstr "Informacije"
 
-#: src/enigma_main.cpp:5841
+#: src/enigma_main.cpp:5936
 msgid "Record failed due to inaccessable storage."
 msgstr ""
 
-#: src/enigma_main.cpp:5843
+#: src/enigma_main.cpp:5938
 msgid ""
 "Record stopped due to full harddisk. Delete some recordings and try again."
 msgstr ""
 
-#: src/enigma_main.cpp:5845
+#: src/enigma_main.cpp:5940
 msgid ""
 "Record failed due to an write error during recording. Check for filesystem "
 "corruption."
 msgstr ""
 
-#: src/enigma_main.cpp:5847
+#: src/enigma_main.cpp:5942
 #, fuzzy
 msgid "record failed"
 msgstr "Kraj snimanja"
 
-#: src/enigma_main.cpp:6086 src/enigma_main.cpp:6087
+#: src/enigma_main.cpp:6181 src/enigma_main.cpp:6182
 msgid "One moment please..."
 msgstr "Sacekajte..."
 
-#: src/enigma_main.cpp:6087 src/enigma_main.cpp:6091 src/enigma_main.cpp:6099
-#: src/enigma_main.cpp:6106 src/enigma_main.cpp:6112 src/enigma_main.cpp:6117
-#: src/enigma_main.cpp:6122 src/timer.cpp:2243
+#: src/enigma_main.cpp:6182 src/enigma_main.cpp:6186 src/enigma_main.cpp:6194
+#: src/enigma_main.cpp:6201 src/enigma_main.cpp:6207 src/enigma_main.cpp:6212
+#: src/enigma_main.cpp:6217 src/timer.cpp:2284
 msgid "switch"
 msgstr "Poruka"
 
-#: src/enigma_main.cpp:6090 src/enigma_main.cpp:6091
+#: src/enigma_main.cpp:6185 src/enigma_main.cpp:6186
 msgid "Service could not be found !"
 msgstr "Nema servisa! "
 
-#: src/enigma_main.cpp:6098 src/enigma_main.cpp:6099
+#: src/enigma_main.cpp:6193 src/enigma_main.cpp:6194
 msgid "This service could not be descrambled"
 msgstr "Taj servis se ne moze dekodirati"
 
-#: src/enigma_main.cpp:6105 src/enigma_main.cpp:6106
+#: src/enigma_main.cpp:6200 src/enigma_main.cpp:6201
 msgid "This service doesn't currently send a signal"
 msgstr "Nema signala"
 
-#: src/enigma_main.cpp:6110 src/enigma_main.cpp:6112
+#: src/enigma_main.cpp:6205 src/enigma_main.cpp:6207
 msgid "This content could not be displayed"
 msgstr "Taj sadrzaj se ne moze prikazati"
 
-#: src/enigma_main.cpp:6115 src/enigma_main.cpp:6117
+#: src/enigma_main.cpp:6210 src/enigma_main.cpp:6212
 msgid "NVOD Service - please select a starttime"
 msgstr "Servis NVOD - Izaberi cas pocetka"
 
-#: src/enigma_main.cpp:6120 src/enigma_main.cpp:6122
+#: src/enigma_main.cpp:6215 src/enigma_main.cpp:6217
 msgid "Unknown error!!"
 msgstr "Nepoznata greska!"
 
-#: src/enigma_main.cpp:6648 src/sselect.cpp:394
+#: src/enigma_main.cpp:6743 src/sselect.cpp:394
 msgid "Playlist"
 msgstr "Playlista"
 
-#: src/enigma_main.cpp:6650
+#: src/enigma_main.cpp:6745
 msgid "History"
 msgstr "Istorija"
 
-#: src/enigma_main.cpp:7094
+#: src/enigma_main.cpp:7197
 msgid "Service Menu"
 msgstr "meni servisi"
 
-#: src/enigma_main.cpp:7111 src/sselect.cpp:130
+#: src/enigma_main.cpp:7214 src/sselect.cpp:130
 msgid "add service to playlist"
 msgstr "Dodavanje servisa u playlistu"
 
-#: src/enigma_main.cpp:7111
+#: src/enigma_main.cpp:7214
 #, fuzzy
 msgid "add selected service to the playlist"
 msgstr "Dodavanje servisa u playlistu"
 
-#: src/enigma_main.cpp:7122
+#: src/enigma_main.cpp:7225
 msgid "remove 'new found flag'"
 msgstr ""
 
-#: src/enigma_main.cpp:7122
+#: src/enigma_main.cpp:7225
 #, fuzzy
 msgid "select to remove the 'new found flag'"
 msgstr "Kreiranje novog licnog buketa"
 
-#: src/enigma_main.cpp:7125
+#: src/enigma_main.cpp:7228
 #, fuzzy
 msgid "create new bouquet"
 msgstr "Kreiranje novog licnog buketa"
 
-#: src/enigma_main.cpp:7125
+#: src/enigma_main.cpp:7228
 #, fuzzy
 msgid "select to create a new bouquet"
 msgstr "Kreiranje novog licnog buketa"
 
-#: src/enigma_main.cpp:7137
+#: src/enigma_main.cpp:7240
 #, fuzzy
 msgid "duplicate bouquet"
 msgstr "Buket bez imena"
 
-#: src/enigma_main.cpp:7137
+#: src/enigma_main.cpp:7240
 msgid "duplicate the complete bouquet with all content"
 msgstr ""
 
-#: src/enigma_main.cpp:7143 src/enigma_main.cpp:7196 src/enigma_main.cpp:7201
-#: src/enigma_main.cpp:7216
+#: src/enigma_main.cpp:7246 src/enigma_main.cpp:7306 src/enigma_main.cpp:7311
+#: src/enigma_main.cpp:7329
 #, fuzzy
 msgid "add to specific bouquet"
 msgstr "Dodavanje licni buketa"
 
-#: src/enigma_main.cpp:7143
+#: src/enigma_main.cpp:7246
 #, fuzzy
 msgid "add the selected service to another bouquet"
 msgstr "Dodati specifican favorit "
 
-#: src/enigma_main.cpp:7145
+#: src/enigma_main.cpp:7248
 msgid "add marker"
 msgstr ""
 
-#: src/enigma_main.cpp:7145
+#: src/enigma_main.cpp:7248
 #, fuzzy
 msgid "create a new marker in the current bouquet"
 msgstr "Kreiranje novog licnog buketa"
 
-#: src/enigma_main.cpp:7154 src/enigma_main.cpp:7168 src/enigma_main.cpp:7203
+#: src/enigma_main.cpp:7257 src/enigma_main.cpp:7271 src/enigma_main.cpp:7313
 #: src/sselect.cpp:373
 msgid "rename"
 msgstr "Zameniime"
 
-#: src/enigma_main.cpp:7154
+#: src/enigma_main.cpp:7257
 #, fuzzy
 msgid "rename the current selected bouquet"
 msgstr "Izbrisati timer ubacen (ok)"
 
-#: src/enigma_main.cpp:7168 src/enigma_main.cpp:7203
+#: src/enigma_main.cpp:7271 src/enigma_main.cpp:7313
 #, fuzzy
 msgid "rename the current selected service/movie"
 msgstr "Izbrisati timer ubacen (ok)"
 
-#: src/enigma_main.cpp:7172 src/enigma_main.cpp:7204 src/sselect.cpp:371
+#: src/enigma_main.cpp:7275 src/enigma_main.cpp:7314 src/sselect.cpp:371
 msgid "delete"
 msgstr "Izbrisati"
 
-#: src/enigma_main.cpp:7172 src/enigma_main.cpp:7204
+#: src/enigma_main.cpp:7275 src/enigma_main.cpp:7314
 #, fuzzy
 msgid "delete the current selected service/movie"
 msgstr "Izbrisati timer ubacen (ok)"
 
-#: src/enigma_main.cpp:7179
+#: src/enigma_main.cpp:7281
+msgid "set as startup service"
+msgstr ""
+
+#: src/enigma_main.cpp:7281
+#, fuzzy
+msgid "currently selected service will be selected on startup"
+msgstr "Dodati specifican favorit "
+
+#: src/enigma_main.cpp:7282 src/enigma_main.cpp:7317
+#, fuzzy
+msgid "reset startup service"
+msgstr "Izbrisati servis"
+
+#: src/enigma_main.cpp:7282
+#, fuzzy
+msgid "last selected service will be selected on startup"
+msgstr "Dodati specifican favorit "
+
+#: src/enigma_main.cpp:7289
 msgid "disable move mode"
 msgstr "Desaktiviraj pokretajuci mod"
 
-#: src/enigma_main.cpp:7179
+#: src/enigma_main.cpp:7289
 #, fuzzy
 msgid "switch move mode off"
 msgstr "Preci u fajl mod"
 
-#: src/enigma_main.cpp:7181
+#: src/enigma_main.cpp:7291
 msgid "enable move mode"
 msgstr "Aktiviraj pokretajuci mod"
 
-#: src/enigma_main.cpp:7181
+#: src/enigma_main.cpp:7291
 msgid "activate mode to simply change the entry order"
 msgstr ""
 
-#: src/enigma_main.cpp:7190
+#: src/enigma_main.cpp:7300
 #, fuzzy
 msgid "copy to bouquet list"
 msgstr "Kopiraj u licni buket"
 
-#: src/enigma_main.cpp:7190
+#: src/enigma_main.cpp:7300
 #, fuzzy
 msgid "copy the selected provider to the bouquet list"
 msgstr "Dodati specifican favorit "
 
-#: src/enigma_main.cpp:7196 src/enigma_main.cpp:7201
+#: src/enigma_main.cpp:7306 src/enigma_main.cpp:7311
 #, fuzzy
 msgid "add the selected service to a selectable bouquet"
 msgstr "Dodati specifican favorit "
 
-#: src/enigma_main.cpp:7216
+#: src/enigma_main.cpp:7316
+#, fuzzy
+msgid "set as startup"
+msgstr "Snimiti soft mogucnosti istok"
+
+#: src/enigma_main.cpp:7316
+#, fuzzy
+msgid "set the current selected service/movie as startup service"
+msgstr "Izbrisati timer ubacen (ok)"
+
+#: src/enigma_main.cpp:7317
+#, fuzzy
+msgid "reset startup"
+msgstr "Fixirati"
+
+#: src/enigma_main.cpp:7329
 #, fuzzy
 msgid "add the selected file to a selectable bouquet"
 msgstr "Dodati specifican favorit "
 
-#: src/enigma_main.cpp:7218
+#: src/enigma_main.cpp:7331
 #, fuzzy
 msgid "delete file"
 msgstr "Izbrisi me"
 
-#: src/enigma_main.cpp:7218
+#: src/enigma_main.cpp:7331
 msgid "delete the selected file (and all corresponding ts files"
 msgstr ""
 
-#: src/enigma_main.cpp:7219
+#: src/enigma_main.cpp:7332
 #, fuzzy
 msgid "rename file"
 msgstr "Zameniime"
 
-#: src/enigma_main.cpp:7219
+#: src/enigma_main.cpp:7332
 msgid "rename the selected file (and all corresponding ts files"
 msgstr ""
 
-#: src/enigma_main.cpp:7233
+#: src/enigma_main.cpp:7346
 msgid "disable edit mode"
 msgstr "Desaktiviraj mod za editiranje"
 
-#: src/enigma_main.cpp:7233
+#: src/enigma_main.cpp:7346
 #, fuzzy
 msgid "disable the edit mode"
 msgstr "Desaktiviraj mod za editiranje"
 
-#: src/enigma_main.cpp:7235
+#: src/enigma_main.cpp:7348
 msgid "enable edit mode"
 msgstr "Aktivirati mod za editiranje"
 
-#: src/enigma_main.cpp:7235
+#: src/enigma_main.cpp:7348
 #, fuzzy
 msgid "activate mode to simply add many services to a selectable bouquet"
 msgstr "Dodati specifican favorit "
 
-#: src/enigma_main.cpp:7245
+#: src/enigma_main.cpp:7358
 #, fuzzy
 msgid "unlock"
 msgstr "Cas"
 
-#: src/enigma_main.cpp:7245
+#: src/enigma_main.cpp:7358
 msgid "do parental-unlock the selected service or file"
 msgstr ""
 
-#: src/enigma_main.cpp:7247
+#: src/enigma_main.cpp:7360
 #, fuzzy
 msgid "lock"
 msgstr "Cas"
 
-#: src/enigma_main.cpp:7247
+#: src/enigma_main.cpp:7360
 msgid "do parentallock the selected service or file"
 msgstr ""
 
-#: src/enigma_main.cpp:7251
+#: src/enigma_main.cpp:7364
 #, fuzzy
 msgid "disable parental lock"
 msgstr "Desaktiviraj mod za editiranje"
 
-#: src/enigma_main.cpp:7251
+#: src/enigma_main.cpp:7364
 #, fuzzy
 msgid "temporary disable the parental locking"
 msgstr "Desaktiviraj mod za editiranje"
 
-#: src/enigma_main.cpp:7253
+#: src/enigma_main.cpp:7366
 #, fuzzy
 msgid "enable parental lock"
 msgstr "Otvoriti podesavanje kanala"
 
-#: src/enigma_main.cpp:7253
+#: src/enigma_main.cpp:7366
 #, fuzzy
 msgid "re-enable the parental locking"
 msgstr "Otvoriti podesavanje kanala"
 
-#: src/enigma_main.cpp:7271
+#: src/enigma_main.cpp:7384
 msgid "Shutdown/Standby Menu"
 msgstr ""
 
-#: src/enigma_main.cpp:7282 src/enigma_main.cpp:7285
+#: src/enigma_main.cpp:7395 src/enigma_main.cpp:7398
 #, fuzzy
 msgid "reboot now"
 msgstr "Tacka za root"
 
-#: src/enigma_main.cpp:7282 src/enigma_main.cpp:7290
+#: src/enigma_main.cpp:7395 src/enigma_main.cpp:7403
 msgid "restart your dreambox"
 msgstr ""
 
-#: src/enigma_main.cpp:7285
+#: src/enigma_main.cpp:7398
 msgid "restart your receiver"
 msgstr ""
 
-#: src/enigma_main.cpp:7289 src/enigma_main.cpp:7293
+#: src/enigma_main.cpp:7402 src/enigma_main.cpp:7406
 #, fuzzy
 msgid "shutdown now"
 msgstr "Staviti u dremanje"
 
-#: src/enigma_main.cpp:7289
+#: src/enigma_main.cpp:7402
 #, fuzzy
 msgid "shutdown your dreambox"
 msgstr "Staviti u dremanje"
 
-#: src/enigma_main.cpp:7290 src/enigma_main.cpp:7294
+#: src/enigma_main.cpp:7403 src/enigma_main.cpp:7407
 #, fuzzy
 msgid "restart"
 msgstr "Fixirati"
 
-#: src/enigma_main.cpp:7293
+#: src/enigma_main.cpp:7406
 #, fuzzy
 msgid "shutdown your dbox-2"
 msgstr "Staviti u dremanje"
 
-#: src/enigma_main.cpp:7294
+#: src/enigma_main.cpp:7407
 msgid "restart your dbox-2"
 msgstr ""
 
-#: src/enigma_main.cpp:7298
+#: src/enigma_main.cpp:7411
 #, fuzzy
 msgid "goto standby"
 msgstr "Preci u pauzu mode (stisnuti)"
 
-#: src/enigma_main.cpp:7298
+#: src/enigma_main.cpp:7411
 #, fuzzy
 msgid "goto standby mode"
 msgstr "Preci u pauzu mode (stisnuti)"
 
-#: src/enigma_main.cpp:7299
+#: src/enigma_main.cpp:7412
 msgid "set sleeptimer"
 msgstr ""
 
-#: src/enigma_main.cpp:7299
+#: src/enigma_main.cpp:7412
 #, fuzzy
 msgid "set a sleep timer"
 msgstr "Ubaciti cas za kraj"
 
-#: src/enigma_main.cpp:7419
+#: src/enigma_main.cpp:7532
 msgid "Record Menu"
 msgstr "Meni za snimanje"
 
-#: src/enigma_main.cpp:7425
+#: src/enigma_main.cpp:7538
 msgid "stop record now"
 msgstr "Zaustaviti snimanje"
 
-#: src/enigma_main.cpp:7425
+#: src/enigma_main.cpp:7538
 msgid "immediate stop the recording"
 msgstr ""
 
-#: src/enigma_main.cpp:7427
+#: src/enigma_main.cpp:7540
 msgid "set record duration"
 msgstr "Podesavanje trajanje snimanja"
 
-#: src/enigma_main.cpp:7427
+#: src/enigma_main.cpp:7540
 #, fuzzy
 msgid "set the recording time (in minutes)"
 msgstr "Podesiti cas kraja snimanja i zatvoriti prozor (OK)"
 
-#: src/enigma_main.cpp:7428
+#: src/enigma_main.cpp:7541
 msgid "set record stop time"
 msgstr "Nastelovati cas kraja snimanja"
 
-#: src/enigma_main.cpp:7428
+#: src/enigma_main.cpp:7541
 #, fuzzy
 msgid "set the recording end time"
 msgstr "Cas kraja snimanja :"
 
-#: src/enigma_main.cpp:7523
+#: src/enigma_main.cpp:7636
 msgid "press ok to start edit mode"
 msgstr "Stisnuti OK da startujete mod editiranja"
 
@@ -2831,11 +2870,11 @@ msgstr "Mod fajl"
 
 #: src/enigma_mainmenu.cpp:64 src/enigma_mainmenu.cpp:83
 #: src/enigma_mainmenu.cpp:195 src/enigma_mainmenu.cpp:205
-#: src/rotorconfig.cpp:917 src/timer.cpp:2695
+#: src/rotorconfig.cpp:917 src/timer.cpp:2736
 msgid "Information"
 msgstr "Informacije"
 
-#: src/enigma_mainmenu.cpp:67 src/enigma_mainmenu.cpp:197 src/timer.cpp:2147
+#: src/enigma_mainmenu.cpp:67 src/enigma_mainmenu.cpp:197 src/timer.cpp:2188
 msgid "Shutdown"
 msgstr "Ugasiti"
 
@@ -2847,7 +2886,7 @@ msgid "Setup"
 msgstr "Stelovanje"
 
 #: src/enigma_mainmenu.cpp:73 src/enigma_mainmenu.cpp:194
-#: src/enigma_plugins.cpp:122
+#: src/enigma_plugins.cpp:126
 msgid "Games"
 msgstr "Igrice"
 
@@ -2872,38 +2911,58 @@ msgstr "Glavni meni"
 msgid "setup"
 msgstr "Stelovanje"
 
-#: src/enigma_plugins.cpp:122
+#: src/enigma_plugins.cpp:126
 msgid "Plugins"
 msgstr "Pluginsi"
 
-#: src/enigma_plugins.cpp:128
+#: src/enigma_plugins.cpp:132
 msgid "select plugin and press ok"
 msgstr "Izaberite plugin i kliknite na OK"
 
-#: src/enigma_plugins.cpp:152
+#: src/enigma_plugins.cpp:156
 #, fuzzy, c-format
 msgid "Couldn't read plugin directory %s"
 msgstr "Nemoguce citati repertoar plugina"
 
-#: src/enigma_plugins.cpp:156 src/scan.cpp:1873 src/scan.cpp:1928
-#: src/scan.cpp:2035
+#: src/enigma_plugins.cpp:160 src/enigma_plugins.cpp:269 src/scan.cpp:1873
+#: src/scan.cpp:1928 src/scan.cpp:2035
 msgid "Error"
 msgstr "Greska"
 
-#: src/enigma_plugins.cpp:230
+#: src/enigma_plugins.cpp:239
 msgid "E: currently another plugin is running..."
 msgstr ""
 
-#: src/enigma_plugins.cpp:237
+#: src/enigma_plugins.cpp:246
 #, c-format
 msgid "plugin '%s' not found"
 msgstr ""
 
-#: src/enigma_plugins.cpp:240
+#: src/enigma_plugins.cpp:249
 msgid "E: no name given"
 msgstr ""
 
-#: src/enigma_scan.cpp:40 src/enigma_setup.cpp:41
+#: src/enigma_plugins.cpp:269
+#, c-format
+msgid "Cannot execute %s (check rights)"
+msgstr ""
+
+#: src/enigma_plugins.cpp:537
+#, c-format
+msgid "Output from %s"
+msgstr ""
+
+#: src/enigma_plugins.cpp:562
+#, fuzzy, c-format
+msgid "Executing %s. Please wait..."
+msgstr "Sacekajte sa Sandbox timom "
+
+#: src/enigma_plugins.cpp:565
+#, c-format
+msgid "Could not execute %s"
+msgstr ""
+
+#: src/enigma_scan.cpp:40 src/enigma_setup.cpp:42
 #, fuzzy
 msgid "Service Searching"
 msgstr "meni servisi"
@@ -3023,46 +3082,46 @@ msgstr "Upotrebi LNB %d za rotor"
 msgid "open service organising"
 msgstr "Otvoriti podesavanje Ngraba"
 
-#: src/enigma_setup.cpp:41
+#: src/enigma_setup.cpp:42
 #, fuzzy
 msgid "open service searching"
 msgstr "Prikazi selector servisa"
 
-#: src/enigma_setup.cpp:43 src/system_settings.cpp:37
+#: src/enigma_setup.cpp:44 src/system_settings.cpp:37
 msgid "System Settings"
 msgstr ""
 
-#: src/enigma_setup.cpp:43
+#: src/enigma_setup.cpp:44
 #, fuzzy
 msgid "open system settings"
 msgstr "Super podesavanje"
 
-#: src/enigma_setup.cpp:46
+#: src/enigma_setup.cpp:47
 #, fuzzy
 msgid "Common Interface"
 msgstr "Common interface..."
 
-#: src/enigma_setup.cpp:46
+#: src/enigma_setup.cpp:47
 #, fuzzy
 msgid "open common interface menu"
 msgstr "Izadi iz Common interface Meni"
 
-#: src/enigma_setup.cpp:48
+#: src/enigma_setup.cpp:49
 #, fuzzy
 msgid "Parental Lock"
 msgstr "Otvoriti podesavanje kanala"
 
-#: src/enigma_setup.cpp:48
+#: src/enigma_setup.cpp:49
 #, fuzzy
 msgid "open parental setup"
 msgstr "Otvoriti podesavanje kanala"
 
-#: src/enigma_setup.cpp:50 src/setup_extra.cpp:40
+#: src/enigma_setup.cpp:51 src/setup_extra.cpp:40
 #, fuzzy
 msgid "Expert Setup"
 msgstr "Spremanje Motora"
 
-#: src/enigma_setup.cpp:50
+#: src/enigma_setup.cpp:51
 #, fuzzy
 msgid "open expert setup"
 msgstr "Otvoriti podesavanje kanala"
@@ -3097,19 +3156,19 @@ msgstr "Izbrisati to iz sata"
 msgid "show extended event information"
 msgstr "Prikazati dodatno podesavanje"
 
-#: src/epgwindow.cpp:113 src/timer.cpp:222
+#: src/epgwindow.cpp:113 src/timer.cpp:224
 msgid "Sun"
 msgstr "Ned."
 
-#: src/epgwindow.cpp:113 src/timer.cpp:222
+#: src/epgwindow.cpp:113 src/timer.cpp:224
 msgid "Mon"
 msgstr "Pon."
 
-#: src/epgwindow.cpp:113 src/timer.cpp:222
+#: src/epgwindow.cpp:113 src/timer.cpp:224
 msgid "Fri"
 msgstr "Pet."
 
-#: src/epgwindow.cpp:113 src/timer.cpp:222
+#: src/epgwindow.cpp:113 src/timer.cpp:224
 msgid "Sat"
 msgstr "Sub."
 
@@ -4228,7 +4287,7 @@ msgstr "Daljinski upravljac..."
 msgid "open remote control setup"
 msgstr "Otvoriti podesavanje upravljaca"
 
-#: src/setup_extra.cpp:72 src/setup_extra.cpp:325
+#: src/setup_extra.cpp:72 src/setup_extra.cpp:352
 msgid "Factory reset"
 msgstr ""
 
@@ -4264,196 +4323,221 @@ msgstr "Selector servisa"
 msgid "show colored help buttons in service selector"
 msgstr "Prikazi selector servisa"
 
-#: src/setup_extra.cpp:113
+#: src/setup_extra.cpp:114
 #, fuzzy
 msgid "Show Sat position"
 msgstr "Snimiti novu poziciju satelita"
 
-#: src/setup_extra.cpp:113
+#: src/setup_extra.cpp:114
 msgid "show sat position in the infobar"
 msgstr ""
 
-#: src/setup_extra.cpp:115
+#: src/setup_extra.cpp:116
 msgid "Enable fast zapping"
 msgstr ""
 
-#: src/setup_extra.cpp:115
+#: src/setup_extra.cpp:116
 msgid "enables faster zapping.. but with visible sync"
 msgstr ""
 
-#: src/setup_extra.cpp:116
+#: src/setup_extra.cpp:117
 #, fuzzy
 msgid "Skip confirmations"
 msgstr "Podesavanje satelita"
 
-#: src/setup_extra.cpp:116
+#: src/setup_extra.cpp:117
 #, fuzzy
 msgid "enable/disable confirmations"
 msgstr "Aktiviranje/desaktiviranje razmenu ? (ok)"
 
-#: src/setup_extra.cpp:117
+#: src/setup_extra.cpp:118
 msgid "Hide error windows"
 msgstr ""
 
-#: src/setup_extra.cpp:117
+#: src/setup_extra.cpp:118
 msgid "don't show zap error messages"
 msgstr ""
 
-#: src/setup_extra.cpp:118
+#: src/setup_extra.cpp:119
 #, fuzzy
 msgid "Auto show Infobar"
 msgstr "Prikazi info bar"
 
-#: src/setup_extra.cpp:118
+#: src/setup_extra.cpp:119
 #, fuzzy
 msgid "always show infobar when new event info is avail"
 msgstr "Videti OSD ako ima novih informacija"
 
-#: src/setup_extra.cpp:119
+#: src/setup_extra.cpp:120
 #, fuzzy
 msgid "Show remaining Time"
 msgstr "Videti glavni meni"
 
-#: src/setup_extra.cpp:119
+#: src/setup_extra.cpp:120
 msgid "show event remaining time in the infobar"
 msgstr ""
 
-#: src/setup_extra.cpp:120
+#: src/setup_extra.cpp:121
 msgid "Use http authentification"
 msgstr ""
 
-#: src/setup_extra.cpp:120
+#: src/setup_extra.cpp:121
 msgid "enables the http (user/password) authentification"
 msgstr ""
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:122
 msgid "Don't open serial port"
 msgstr ""
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:122
 msgid "don't write debug messages to /dev/tts/0"
 msgstr ""
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:123
 #, fuzzy
 msgid "Auto bouquet change"
 msgstr "Dodavanje licni buketa"
 
-#: src/setup_extra.cpp:122
+#: src/setup_extra.cpp:123
 msgid "change into next bouquet when end of current bouquet is reached"
 msgstr ""
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:124
 #, fuzzy
 msgid "Auto reconnect cahandler"
 msgstr "Dodavanje licni buketa"
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:124
 msgid "try to reconnect when an external cahandler connection was lost"
 msgstr ""
 
-#: src/setup_extra.cpp:127
+#: src/setup_extra.cpp:128
 msgid "Enable file sharing"
 msgstr ""
 
-#: src/setup_extra.cpp:127
+#: src/setup_extra.cpp:128
 msgid "start file sharing(samba) on startup"
 msgstr ""
 
-#: src/setup_extra.cpp:130
+#: src/setup_extra.cpp:131
 msgid "Disable teletext caching"
 msgstr ""
 
-#: src/setup_extra.cpp:130
+#: src/setup_extra.cpp:131
 msgid "don't cache teletext pages in background"
 msgstr ""
 
-#: src/setup_extra.cpp:132
+#: src/setup_extra.cpp:133
 msgid "Enable Zapping History"
 msgstr ""
 
-#: src/setup_extra.cpp:132
+#: src/setup_extra.cpp:133
 msgid "don't care about actual mode when zapping in history list"
 msgstr ""
 
-#: src/setup_extra.cpp:134
+#: src/setup_extra.cpp:135
 #, fuzzy
 msgid "Disable Standby"
 msgstr "DISEqC desaktiviran"
 
-#: src/setup_extra.cpp:134
+#: src/setup_extra.cpp:135
 msgid "Box goes directly into Deep-Standby"
 msgstr ""
 
-#: src/setup_extra.cpp:139
+#: src/setup_extra.cpp:140
 #, fuzzy
 msgid "Enable MHW EPG"
 msgstr "Unutrasnje"
 
-#: src/setup_extra.cpp:139
+#: src/setup_extra.cpp:140
 msgid ""
 "Mediahighway EPG, activate swap space when using with multiple operators"
 msgstr ""
 
-#: src/setup_extra.cpp:149
+#: src/setup_extra.cpp:150
 msgid "Disable CoreFiles"
 msgstr ""
 
-#: src/setup_extra.cpp:149
+#: src/setup_extra.cpp:150
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr ""
 
-#: src/setup_extra.cpp:155
+#: src/setup_extra.cpp:156
 msgid "Disable HDD mount"
 msgstr ""
 
-#: src/setup_extra.cpp:155
+#: src/setup_extra.cpp:156
 msgid "don't mount the HDD via 'rcS'"
 msgstr ""
 
-#: src/setup_extra.cpp:165
+#: src/setup_extra.cpp:164
+msgid "Enable Filemode Autoplay"
+msgstr ""
+
+#: src/setup_extra.cpp:164
+msgid "continue playing last selected movie when entering Filemode"
+msgstr ""
+
+#: src/setup_extra.cpp:173
 msgid "Show Boot-Info"
 msgstr ""
 
-#: src/setup_extra.cpp:165
+#: src/setup_extra.cpp:173
 msgid "Show Boot-Infos (IP, etc.)"
 msgstr ""
 
-#: src/setup_extra.cpp:170
+#: src/setup_extra.cpp:179
 msgid "Disable HW_Sections"
 msgstr ""
 
-#: src/setup_extra.cpp:170
+#: src/setup_extra.cpp:179
 msgid "don't use hardware section filtering"
 msgstr ""
 
-#: src/setup_extra.cpp:175
+#: src/setup_extra.cpp:185
 #, fuzzy
 msgid "Disable Watchdog"
 msgstr "DISEqC desaktiviran"
 
-#: src/setup_extra.cpp:175
+#: src/setup_extra.cpp:185
 msgid "don't use the Watchdog"
 msgstr ""
 
-#: src/setup_extra.cpp:182
+#: src/setup_extra.cpp:193
 msgid "Disable ENX-Watchdog"
 msgstr ""
 
-#: src/setup_extra.cpp:182
+#: src/setup_extra.cpp:193
 msgid "don't use the ENX-Watchdog"
 msgstr ""
 
-#: src/setup_extra.cpp:188
+#: src/setup_extra.cpp:200
 #, fuzzy
 msgid "Enable SPTS-Mode"
 msgstr "Zvuk aktivan"
 
-#: src/setup_extra.cpp:188
+#: src/setup_extra.cpp:200
 msgid "use SPTS-Mode (enables TS-recording)"
 msgstr ""
 
-#: src/setup_extra.cpp:321
+#: src/setup_extra.cpp:206
+#, fuzzy
+msgid "Disable O_SYNC"
+msgstr "DISEqC desaktiviran"
+
+#: src/setup_extra.cpp:206
+msgid "The file/recording is not opened for synchronous I/O"
+msgstr ""
+
+#: src/setup_extra.cpp:214
+msgid "New Philips driver"
+msgstr ""
+
+#: src/setup_extra.cpp:214
+msgid "use tda80xx driver for Philips boxes"
+msgstr ""
+
+#: src/setup_extra.cpp:348
 msgid ""
 "When you do a factory reset, you will lose ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4463,7 +4547,7 @@ msgid ""
 "Really do a factory reset?"
 msgstr ""
 
-#: src/setup_extra.cpp:343
+#: src/setup_extra.cpp:370
 msgid "Factory reset..."
 msgstr ""
 
@@ -4477,8 +4561,8 @@ msgid "Are you SURE that you want to format this disk?\n"
 msgstr "Zelite li zaista formatirati taj Hard disk?\n"
 
 #: src/setup_harddisk.cpp:304 src/setup_harddisk.cpp:317
-#: src/setup_harddisk.cpp:339 src/setup_harddisk.cpp:349
-#: src/setup_harddisk.cpp:396 src/setup_harddisk.cpp:408
+#: src/setup_harddisk.cpp:347 src/setup_harddisk.cpp:357
+#: src/setup_harddisk.cpp:429 src/setup_harddisk.cpp:441
 msgid "formatting harddisk..."
 msgstr "Formatiranje u toku... "
 
@@ -4490,7 +4574,7 @@ msgstr ""
 "Imate nesto u hard disku\n"
 " Izgubicete to. Nastaviti?"
 
-#: src/setup_harddisk.cpp:338
+#: src/setup_harddisk.cpp:346
 msgid ""
 "please wait while initializing harddisk.\n"
 "This might take some minutes.\n"
@@ -4498,60 +4582,60 @@ msgstr ""
 "Sacekati, inisializacija hard diska. \n"
 " To moze trajati nekoliko minuta. \n"
 
-#: src/setup_harddisk.cpp:348
+#: src/setup_harddisk.cpp:356
 msgid "sorry, couldn't find sfdisk utility to partition harddisk."
 msgstr "Nazalost, nisam nasao SFDISK na particiju Hard diska"
 
-#: src/setup_harddisk.cpp:395
+#: src/setup_harddisk.cpp:428
 msgid "creating filesystem failed."
 msgstr "Greska u kreiranju sistem faljova !"
 
-#: src/setup_harddisk.cpp:407
+#: src/setup_harddisk.cpp:440
 msgid "successfully formatted your disk!"
 msgstr "Formatiranje uspelo! "
 
-#: src/setup_harddisk.cpp:438
+#: src/setup_harddisk.cpp:471
 msgid "(error reading information)"
 msgstr "(Greska u citanju informacija) "
 
-#: src/setup_harddisk.cpp:440
+#: src/setup_harddisk.cpp:473
 msgid "uninitialized - format it to use!"
 msgstr "Inisializirano, Treba biti formatiran pre upotrebe !"
 
-#: src/setup_harddisk.cpp:442
+#: src/setup_harddisk.cpp:475
 #, c-format
 msgid "in use, %d.%03d GB (~%d minutes) free"
 msgstr "Upotrebljeno, %d. %03d Go (~%d minuta) Slobodno"
 
-#: src/setup_harddisk.cpp:444
+#: src/setup_harddisk.cpp:477
 msgid "initialized, but unknown filesystem"
 msgstr "Inisializirano, ali sistem fajl nepoznat"
 
-#: src/setup_harddisk.cpp:526
+#: src/setup_harddisk.cpp:559
 msgid "could not unmount the filesystem... "
 msgstr "Ne moze instalirati sistem fajl..."
 
-#: src/setup_harddisk.cpp:527 src/setup_harddisk.cpp:540
-#: src/setup_harddisk.cpp:563 src/setup_harddisk.cpp:586
-#: src/setup_harddisk.cpp:605
+#: src/setup_harddisk.cpp:560 src/setup_harddisk.cpp:573
+#: src/setup_harddisk.cpp:596 src/setup_harddisk.cpp:619
+#: src/setup_harddisk.cpp:638
 msgid "check filesystem..."
 msgstr "Proveravanje sistem fajla!"
 
-#: src/setup_harddisk.cpp:539
+#: src/setup_harddisk.cpp:572
 msgid "sorry, couldn't find fsck.ext3 utility to check the ext3 filesystem."
 msgstr "Izvinite, nisam nasao fsck.ext3 za proveravanje sistemfajla ext3"
 
-#: src/setup_harddisk.cpp:562
+#: src/setup_harddisk.cpp:595
 #, fuzzy
 msgid "sorry, couldn't find fsck.ext2 utility to check the ext2 filesystem."
 msgstr "Izvinite, nisam nasao fsck.ext3 za proveravanje sistemfajla ext3"
 
-#: src/setup_harddisk.cpp:585
+#: src/setup_harddisk.cpp:618
 msgid ""
 "sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
 msgstr "Izvinite, nisam nasao fsck.ext3 za proveravanje sistemfajla ext3"
 
-#: src/setup_harddisk.cpp:604
+#: src/setup_harddisk.cpp:637
 msgid "not supported filesystem for check."
 msgstr "Sistem fajl ne podnesen."
 
@@ -5379,11 +5463,11 @@ msgstr ""
 msgid "Movies"
 msgstr "Filmovi"
 
-#: src/sselect.cpp:854
+#: src/sselect.cpp:874
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr ""
 
-#: src/sselect.cpp:854
+#: src/sselect.cpp:874
 msgid "Enter Directory"
 msgstr ""
 
@@ -5437,23 +5521,23 @@ msgstr "Sistem servis upotrebljen:"
 msgid "Record mode - read manual"
 msgstr ""
 
-#: src/streaminfo.cpp:655
+#: src/streaminfo.cpp:659
 msgid "Service information (right)"
 msgstr "Servis informacije ( desno )"
 
-#: src/streaminfo.cpp:656
+#: src/streaminfo.cpp:660
 msgid "Scrambled system information (left, right)"
 msgstr "Kodiraj informacije sistema (Levo, desno)"
 
-#: src/streaminfo.cpp:657
+#: src/streaminfo.cpp:661
 msgid "Transponder information (left)"
 msgstr "Informacije o transponderu (Levo)"
 
-#: src/timer.cpp:284
+#: src/timer.cpp:286
 msgid "Timerlist"
 msgstr "Lista sata"
 
-#: src/timer.cpp:1544
+#: src/timer.cpp:1585
 #, fuzzy
 msgid ""
 "You would delete the running event..\n"
@@ -5462,16 +5546,16 @@ msgstr ""
 "Hocete li izbrisati dogadjaj u toku... \n"
 "To ce zaustaviti sat mod (snimanje)!"
 
-#: src/timer.cpp:1545
+#: src/timer.cpp:1586
 #, fuzzy
 msgid "Delete the event from the timer list"
 msgstr "Izbrisati dogadjaj iz liste"
 
-#: src/timer.cpp:1546
+#: src/timer.cpp:1587
 msgid "Really delete this event?"
 msgstr "Hocete li zaista izbrisati ?"
 
-#: src/timer.cpp:1550
+#: src/timer.cpp:1591
 #, fuzzy
 msgid ""
 "You would update the running event.. \n"
@@ -5480,32 +5564,32 @@ msgstr ""
 "Da li ste sigurni da hocete promeniti to? \n"
 "To ce zaustaviti snimanje u modu sat!"
 
-#: src/timer.cpp:1551
+#: src/timer.cpp:1592
 #, fuzzy
 msgid "Update event in timer list"
 msgstr "Aktualizacija dogadjaja u sat?"
 
-#: src/timer.cpp:1552 src/timer.cpp:2470
+#: src/timer.cpp:1593 src/timer.cpp:2511
 msgid "Really update this event?"
 msgstr "Aktualizacija tog dogadjaja?"
 
-#: src/timer.cpp:1702
+#: src/timer.cpp:1743
 msgid "This event is already in the timerlist."
 msgstr "Taj dogadjaj je vec dodat u sat"
 
-#: src/timer.cpp:1703 src/timer.cpp:1754
+#: src/timer.cpp:1744 src/timer.cpp:1795
 msgid "Add event to timerlist"
 msgstr "Dodati dogadjaj u sat"
 
-#: src/timer.cpp:1743
+#: src/timer.cpp:1784
 msgid "The Endtime overlaps with another event in the timerlist"
 msgstr "Sat kraja je pre sata za pocetak."
 
-#: src/timer.cpp:1743
+#: src/timer.cpp:1784
 msgid "Set Stop Time"
 msgstr "Ubaciti cas za kraj"
 
-#: src/timer.cpp:1752
+#: src/timer.cpp:1793
 msgid ""
 "This event cannot added to the timerlist.\n"
 "The event overlaps with another event in the timerlist\n"
@@ -5515,154 +5599,154 @@ msgstr ""
 "On se poklapa sa dogadjajom vec programiranim \n"
 "  Proverite rucno casove."
 
-#: src/timer.cpp:1833
+#: src/timer.cpp:1874
 msgid "timerView"
 msgstr "Vid Sata"
 
-#: src/timer.cpp:1834
+#: src/timer.cpp:1875
 #, fuzzy
 msgid "add new event to Timerlist"
 msgstr "Dodati dogadjaj u sat"
 
-#: src/timer.cpp:1835
+#: src/timer.cpp:1876
 msgid "remove this entry from timer list"
 msgstr "Izbrisati to iz sata"
 
-#: src/timer.cpp:2034
+#: src/timer.cpp:2075
 msgid "Timer list"
 msgstr "Lista satova"
 
-#: src/timer.cpp:2112
+#: src/timer.cpp:2153
 #, fuzzy
 msgid "Timer Edit View"
 msgstr "Lista satova"
 
-#: src/timer.cpp:2113
+#: src/timer.cpp:2154
 msgid "increase the event begin time in 1 minute steps"
 msgstr ""
 
-#: src/timer.cpp:2114
+#: src/timer.cpp:2155
 msgid "decrease the event begin time in 1 minute steps"
 msgstr ""
 
-#: src/timer.cpp:2115
+#: src/timer.cpp:2156
 msgid "increase the event end time in 1 minute steps"
 msgstr ""
 
-#: src/timer.cpp:2116
+#: src/timer.cpp:2157
 msgid "decrease the event end time in 1 minute steps"
 msgstr ""
 
-#: src/timer.cpp:2125
+#: src/timer.cpp:2166
 msgid "January"
 msgstr "Januar"
 
-#: src/timer.cpp:2125
+#: src/timer.cpp:2166
 msgid "February"
 msgstr "Februar"
 
-#: src/timer.cpp:2125
+#: src/timer.cpp:2166
 msgid "March"
 msgstr "Mart"
 
-#: src/timer.cpp:2126
+#: src/timer.cpp:2167
 msgid "April"
 msgstr "April"
 
-#: src/timer.cpp:2126
+#: src/timer.cpp:2167
 msgid "May"
 msgstr "Maj"
 
-#: src/timer.cpp:2126
+#: src/timer.cpp:2167
 msgid "June"
 msgstr "Jun"
 
-#: src/timer.cpp:2126
+#: src/timer.cpp:2167
 msgid "July"
 msgstr "Juli"
 
-#: src/timer.cpp:2127
+#: src/timer.cpp:2168
 msgid "August"
 msgstr "Avgust"
 
-#: src/timer.cpp:2127
+#: src/timer.cpp:2168
 msgid "September"
 msgstr "Septembar"
 
-#: src/timer.cpp:2127
+#: src/timer.cpp:2168
 msgid "October"
 msgstr "Octobar"
 
-#: src/timer.cpp:2128
+#: src/timer.cpp:2169
 msgid "November"
 msgstr "Novembar"
 
-#: src/timer.cpp:2128
+#: src/timer.cpp:2169
 msgid "December"
 msgstr "Decembar"
 
-#: src/timer.cpp:2144
+#: src/timer.cpp:2185
 #, fuzzy
 msgid "Nothing"
 msgstr "Sever"
 
-#: src/timer.cpp:2144
+#: src/timer.cpp:2185
 msgid "do nothing"
 msgstr ""
 
-#: src/timer.cpp:2145
+#: src/timer.cpp:2186
 #, fuzzy
 msgid "Standby"
 msgstr "Pauza"
 
-#: src/timer.cpp:2145
+#: src/timer.cpp:2186
 #, fuzzy
 msgid "put box into standby"
 msgstr "Preci u pauzu mode (stisnuti)"
 
-#: src/timer.cpp:2147
+#: src/timer.cpp:2188
 #, fuzzy
 msgid "put box into deep standby"
 msgstr " Ugasiti DreamBox posle snimanja (ok)"
 
-#: src/timer.cpp:2246
+#: src/timer.cpp:2287
 msgid "record DVR"
 msgstr "Snimanje DVRa"
 
-#: src/timer.cpp:2250
+#: src/timer.cpp:2291
 msgid "Ngrab"
 msgstr "Ngrab"
 
-#: src/timer.cpp:2256
+#: src/timer.cpp:2297
 #, fuzzy
 msgid "Record VCR"
 msgstr "Snimanje"
 
-#: src/timer.cpp:2326
+#: src/timer.cpp:2367
 #, fuzzy
 msgid "unknown service"
 msgstr "Nepoznato"
 
-#: src/timer.cpp:2468
+#: src/timer.cpp:2509
 msgid ""
 "The new endtime is before now time!\n"
 "This stops the running timer(recording)\n"
 msgstr ""
 
-#: src/timer.cpp:2474 src/timer.cpp:2489 src/timer.cpp:2502 src/timer.cpp:2523
+#: src/timer.cpp:2515 src/timer.cpp:2530 src/timer.cpp:2543 src/timer.cpp:2564
 msgid "Update event in timerlist"
 msgstr "Aktualizacija dogadjaja u sat?"
 
-#: src/timer.cpp:2488
+#: src/timer.cpp:2529
 msgid "New endtime are now adjusted"
 msgstr ""
 
-#: src/timer.cpp:2501
+#: src/timer.cpp:2542
 #, fuzzy
 msgid "The event has already finished... you can not change endtime!"
 msgstr "Taj dogadjaj je vec dodat u sat"
 
-#: src/timer.cpp:2523
+#: src/timer.cpp:2564
 msgid ""
 "Invalid begin or end time.!\n"
 "Please check time and date"
@@ -5670,7 +5754,7 @@ msgstr ""
 "Cas za pocetak ili kraj nisu u redu\n"
 " Proverite stelovanja"
 
-#: src/timer.cpp:2695
+#: src/timer.cpp:2736
 msgid ""
 "Sorry, you can not add a time shifted service manually to the timer.\n"
 "Please close the Timer and use the EPG of the service you wish to add!"
@@ -5678,7 +5762,7 @@ msgstr ""
 "Izvinite, ne mozete dodati rucno snimanje.\n"
 " Molim vas zatvorite meni i upotrebite EPG za dodavanje servisa!"
 
-#: src/timer.cpp:2756
+#: src/timer.cpp:2797
 #, fuzzy
 msgid "no description found"
 msgstr "Nema deskripcije"

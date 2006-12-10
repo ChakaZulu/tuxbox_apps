@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.69 2006/11/01 15:12:58 coronas Exp $
+ * $Id: setup_extra.cpp,v 1.70 2006/12/10 10:58:36 dbluelle Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -156,6 +156,12 @@ void eExpertSetup::init_eExpertSetup()
 		CONNECT_2_1((new eListBoxEntryCheck(&list, _("Disable HDD mount"), "/extras/dont_mount_hdd", _("don't mount the HDD via 'rcS'")))->selected, eExpertSetup::fileToggle,"/var/etc/.dont_mount_hdd");
 #endif
 	}
+#endif
+#ifndef DISABLE_FILE
+	int autoplay=1;
+	if ( eConfig::getInstance()->getKey("/ezap/extra/autoplay", autoplay) )
+		eConfig::getInstance()->setKey("/ezap/extra/autoplay", autoplay);
+	new eListBoxEntryCheck(&list, _("Enable Filemode Autoplay"), "/ezap/extra/autoplay", _("continue playing last selected movie when entering Filemode"));
 #endif
 #ifndef HAVE_DREAMBOX_HARDWARE
 	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );

@@ -1846,7 +1846,9 @@ void eZapMain::init_main()
 	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
 	if ( bootcount > 1 )
 	{
-		if ( playlist->current != playlist->getConstList().end() )
+		int startup=0;
+		eConfig::getInstance()->getKey(eString().sprintf("/ezap/ui/startup/%d",mode).c_str(), startup );
+		if ( startup == 0 && playlist->current != playlist->getConstList().end() )
 			playService( playlist->current->service, psDontAdd|psSeekPos);  // then play the last service
 		else if ( modeLast[mode].current() )
 			playService( modeLast[mode].current() ,0 );  // then play the last service
@@ -1935,8 +1937,13 @@ void eZapMain::exit_main()
 	// save for all modes the servicePath to registry
 	for (mode=modeTV; mode < modeEnd; mode++ )
 	{
-		eString str = modeLast[mode].toString();
-		eConfig::getInstance()->setKey( eString().sprintf("/ezap/ui/modes/%d/path0", mode).c_str(), str.c_str() );
+		int startup = 0;
+		eConfig::getInstance()->getKey( eString().sprintf("/ezap/ui/startup/%d",mode).c_str(), startup );
+		if (!startup)
+		{
+			eString str = modeLast[mode].toString();
+			eConfig::getInstance()->setKey( eString().sprintf("/ezap/ui/modes/%d/path0", mode).c_str(), str.c_str() );
+		}
 	}
 	if (instance == this)
 		instance = 0;
@@ -4411,6 +4418,39 @@ void eZapMain::showServiceMenu(eServiceSelector *sel)
 			s->dxflags &= ~eServiceDVB::dxNewFound;
 		break;
 	}
+	case 17:
+	{
+		eServicePath p;
+		switch(mode)
+		{
+			case modeTV:
+				if ( userTVBouquets->getList().size() )
+					p.down(userTVBouquetsRef);
+				break;
+			case modeRadio:
+				if ( userRadioBouquets->getList().size() )
+					p.down(userRadioBouquetsRef);
+				break;
+			case modeFile:
+				if ( userFileBouquets->getList().size() )
+					p.down(userFileBouquetsRef);
+				break;
+		}
+		p.down(path);
+		p.down(ref);
+		int startup = 1;
+		eConfig::getInstance()->setKey( eString().sprintf("/ezap/ui/startup/%d",mode).c_str(), startup );
+		eString str = p.toString();
+eDebug(str.c_str());
+		eConfig::getInstance()->setKey( eString().sprintf("/ezap/ui/modes/%d/path0", mode).c_str(), str.c_str() );
+		break;
+	}
+	case 18:
+	{
+		int startup = 0;
+		eConfig::getInstance()->setKey( eString().sprintf("/ezap/ui/startup/%d",mode).c_str(), startup );
+		break;
+	}
 	default:
 		break;
 	}
@@ -6727,7 +6767,15 @@ void eZapMain::setMode(int newmode, int user)
 		if (user)
 		{
 //			eDebug("playservice");
-			playService(modeLast[mode].current(), psDontAdd|psSeekPos);
+#ifndef DISABLE_FILE
+			int play=1;
+			if ( newmode == modeFile )
+			{
+				eConfig::getInstance()->getKey("/ezap/extra/autoplay", play);
+			}
+			if (play)
+#endif
+				playService(modeLast[mode].current(), psDontAdd|psSeekPos);
 		}
 
 		if (mode != -1)
@@ -7227,6 +7275,13 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 			prev = new eListBoxEntryText(&list, _("delete"), (void*)1, 0, _("delete the current selected service/movie"));
 
 			prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			
+			if ( ref.type == eServiceReference::idDVB )
+			{
+				prev = new eListBoxEntryText(&list, _("set as startup service"), (void*)17, 0, _("currently selected service will be selected on startup"));
+				prev = new eListBoxEntryText(&list, _("reset startup service"), (void*)18, 0, _("last selected service will be selected on startup"));
+				prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			}
 		}
 
 		// move mode in playlists
@@ -7257,6 +7312,9 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 			prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			prev = new eListBoxEntryText(&list, _("rename"), (void*)9, 0, _("rename the current selected service/movie"));
 			prev = new eListBoxEntryText(&list, _("delete"), (void*)1, 0, _("delete the current selected service/movie"));
+			prev = new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			prev = new eListBoxEntryText(&list, _("set as startup"), (void*)17, 0, _("set the current selected service/movie as startup service"));
+			prev = new eListBoxEntryText(&list, _("reset startup"), (void*)18, 0, _("reset startup service"));
 			b=false;
 		}
 #ifndef DISABLE_FILE
