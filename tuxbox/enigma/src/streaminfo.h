@@ -36,4 +36,6 @@ struct caids_t
 
 #define clearCA() for (unsigned int i=0; i < caids_cnt; ++i) caids[i].flag=0
 
+extern eString getVidFormat();
+
 #endif

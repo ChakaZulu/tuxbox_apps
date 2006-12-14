@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_xml.cpp,v 1.35 2006/07/15 13:22:48 ghostrider Exp $
+ * $Id: enigma_dyn_xml.cpp,v 1.36 2006/12/14 18:56:41 mirakels Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -392,66 +392,12 @@ static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, e
 	result.strReplace("#PMT#", eString().sprintf("%04xh", Decoder::current.pmtpid));
 	result.strReplace("#NAMESPACE#", eString().sprintf("%04xh", sapi->service.getDVBNamespace().get()));
 
-	FILE *bitstream = 0;
-
-	eString vidform;
-	if (Decoder::current.vpid != -1)
-		bitstream = fopen("/proc/bus/bitstream", "rt");
-	if (bitstream)
-	{
-		char buffer[100];
-		int xres = 0, yres = 0, aspect = 0, framerate = 0;
-		while (fgets(buffer, 100, bitstream))
-		{
-			if (!strncmp(buffer, "H_SIZE:  ", 9))
-				xres=atoi(buffer+9);
-			if (!strncmp(buffer, "V_SIZE:  ", 9))
-				yres=atoi(buffer+9);
-			if (!strncmp(buffer, "A_RATIO: ", 9))
-				aspect=atoi(buffer+9);
-			if (!strncmp(buffer, "F_RATE: ", 8))
-				framerate=atoi(buffer+8);
-		}
-		fclose(bitstream);
-		
-		vidform.sprintf("%dx%d ", xres, yres);
-		switch (aspect)
-		{
-			case 1:
-				vidform += "(square)"; break;
-			case 2:
-				vidform += "(4:3)"; break;
-			case 3:
-				vidform += "(16:9)"; break;
-			case 4:
-				vidform += "(20:9)"; break;
-		}
-		switch (framerate)
-		{
-			case 1:
-				vidform += ", 23.976 fps"; break;
-			case 2:
-				vidform += ", 24 fps"; break;
-			case 3:
-				vidform += ", 25 fps"; break;
-			case 4:
-				vidform += ", 29.97 fps"; break;
-			case 5:
-				vidform += ", 30 fps"; break;
-			case 6:
-				vidform += ", 50 fps"; break;
-			case 7:
-				vidform += ", 59.94 fps"; break;
-			case 8:
-				vidform += ", 80 fps"; break;
-		}
-	}
-
 	eString sRef;
+
 	if (eServiceInterface::getInstance()->service)
 		sRef = eServiceInterface::getInstance()->service.toString();
 	result.strReplace("#SERVICEREFERENCE#", sRef);
-	result.strReplace("#VIDEOFORMAT#", vidform);
+	result.strReplace("#VIDEOFORMAT#", getVidFormat());
 	
 	extern struct caids_t caids[];
 	extern unsigned int caids_cnt;

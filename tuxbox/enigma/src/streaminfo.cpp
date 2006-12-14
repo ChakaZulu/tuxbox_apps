@@ -234,6 +234,72 @@ siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 	init_siPID(parms, cservice, parent);
 }
 
+
+
+eString getVidFormat()
+{
+	eString vformat="n/a";
+	FILE *bitstream=0;
+	
+	if (Decoder::current.vpid!=-1)
+		bitstream=fopen("/proc/bus/bitstream", "rt");
+	if (bitstream)
+	{
+		char buffer[100];
+		int xres=0, yres=0, aspect=0, framerate=0;
+		while (fgets(buffer, 100, bitstream))
+		{
+			if (!strncmp(buffer, "H_SIZE:  ", 9))
+				xres=atoi(buffer+9);
+			if (!strncmp(buffer, "V_SIZE:  ", 9))
+				yres=atoi(buffer+9);
+			if (!strncmp(buffer, "A_RATIO: ", 9))
+				aspect=atoi(buffer+9);
+			if (!strncmp(buffer, "F_RATE: ", 8))
+				framerate=atoi(buffer+8);
+		}
+		fclose(bitstream);
+		vformat.sprintf("%dx%d ", xres, yres);
+		switch (aspect)
+		{
+			case 1:
+				vformat+="square"; break;
+			case 2:
+				vformat+="4:3"; break;
+			case 3:
+				vformat+="16:9"; break;
+			case 4:
+				vformat+="20:9"; break;
+			default:
+				vformat+="Unk"; break;
+		}
+		switch(framerate)
+		{
+			case 1:
+				vformat+=" 23.976 fps"; break;
+			case 2:
+				vformat+=" 24 fps"; break;
+			case 3:
+				vformat+=" 25 fps"; break;
+			case 4:
+				vformat+=" 29.97 fps"; break;
+			case 5:
+				vformat+=" 30 fps"; break;
+			case 6:
+				vformat+=" 50 fps"; break;
+			case 7:
+				vformat+=" 59.94 fps"; break;
+			case 8:
+				vformat+=" 80 fps"; break;
+			default:
+				vformat+="Unk"; break;
+		}
+	}
+	return vformat;
+}
+
+
+	
 void siPID::init_siPID(decoderParameters parms, const eService *cservice, eWidget *parent)
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
@@ -328,74 +394,13 @@ void siPID::init_siPID(decoderParameters parms, const eService *cservice, eWidge
 	tpid[1]->setFont(fontfixed);
 	yOffs+=fs+5;
 	
-	eString vformat="n/a";
-	FILE *bitstream=0;
-	
-	if (Decoder::current.vpid!=-1)
-		bitstream=fopen("/proc/bus/bitstream", "rt");
-	if (bitstream)
-	{
-		char buffer[100];
-		int xres=0, yres=0, aspect=0, framerate=0;
-		while (fgets(buffer, 100, bitstream))
-		{
-			if (!strncmp(buffer, "H_SIZE:  ", 9))
-				xres=atoi(buffer+9);
-			if (!strncmp(buffer, "V_SIZE:  ", 9))
-				yres=atoi(buffer+9);
-			if (!strncmp(buffer, "A_RATIO: ", 9))
-				aspect=atoi(buffer+9);
-			if (!strncmp(buffer, "F_RATE: ", 8))
-				framerate=atoi(buffer+8);
-		}
-		fclose(bitstream);
-		vformat.sprintf("%dx%d ", xres, yres);
-		switch (aspect)
-		{
-		case 1:
-			vformat+="square"; break;
-		case 2:
-			vformat+="4:3"; break;
-		case 3:
-			vformat+="16:9"; break;
-		case 4:
-			vformat+="20:9"; break;
-		}
-		switch(framerate)
-		{
-		case 1:
-			vformat+=", 23.976 fps";
-			break;
-		case 2:
-			vformat+=", 24 fps";
-			break;
-		case 3:
-			vformat+=", 25 fps";
-			break;
-		case 4:
-			vformat+=", 29.97 fps";
-			break;
-		case 5:
-			vformat+=", 30 fps";
-			break;
-		case 6:
-			vformat+=", 50 fps";
-			break;
-		case 7:
-			vformat+=", 59.94 fps";
-			break;
-		case 8:
-			vformat+=", 80 fps";
-		}
-	}
-	
 	vform[0]=new eLabel(this);
 	vform[0]->setText(_("Video format:"));
 	vform[0]->move(ePoint(10, yOffs));
 	vform[0]->resize(eSize(150, fs+5));
 	
 	vform[1]=new eLabel(this);
-	vform[1]->setText(vformat);
+	vform[1]->setText(getVidFormat());
 	vform[1]->move(ePoint(240, yOffs));
 	vform[1]->resize(eSize(260, fs));
 	vform[1]->setFont(fontfixed);

@@ -123,37 +123,8 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
 	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
 
-	FILE *bitstream = 0;
-
-	if (Decoder::current.vpid != -1)
-		bitstream = fopen("/proc/bus/bitstream", "rt");
-	if (bitstream)
-	{
-		char buffer[100];
-		int xres = 0, yres = 0, aspect = 0;
-		while (fgets(buffer, 100, bitstream))
-		{
-			if (!strncmp(buffer, "H_SIZE:  ", 9))
-				xres=atoi(buffer+9);
-			if (!strncmp(buffer, "V_SIZE:  ", 9))
-				yres=atoi(buffer+9);
-			if (!strncmp(buffer, "A_RATIO: ", 9))
-				aspect=atoi(buffer+9);
-		}
-		fclose(bitstream);
-		vidform.sprintf("%dx%d ", xres, yres);
-		switch (aspect)
-		{
-			case 1:
-				vidform += "(square)"; break;
-			case 2:
-				vidform += "(4:3)"; break;
-			case 3:
-				vidform += "(16:9)"; break;
-			case 4:
-				vidform += "(20:9)"; break;
-		}
-	}
+	vidform = getVidFormat();
+	
 	result += "<tr><td>name:</td><td>" + name + "</td></tr>\n";
 	result += "<tr><td>provider:</td><td>" + provider + "</td></tr>\n";
 	result += "<tr><td>vpid:</td><td>" + vpid + "</td></tr>\n";
@@ -806,37 +777,7 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
 	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
 
-	FILE *bitstream = 0;
-
-	if (Decoder::current.vpid != -1)
-		bitstream = fopen("/proc/bus/bitstream", "rt");
-	if (bitstream)
-	{
-		char buffer[100];
-		int xres = 0, yres = 0, aspect = 0;
-		while (fgets(buffer, 100, bitstream))
-		{
-			if (!strncmp(buffer, "H_SIZE:  ", 9))
-				xres=atoi(buffer+9);
-			if (!strncmp(buffer, "V_SIZE:  ", 9))
-				yres=atoi(buffer+9);
-			if (!strncmp(buffer, "A_RATIO: ", 9))
-				aspect=atoi(buffer+9);
-		}
-		fclose(bitstream);
-		vidform.sprintf("%dx%d ", xres, yres);
-		switch (aspect)
-		{
-			case 1:
-				vidform += "(square)"; break;
-			case 2:
-				vidform += "(4:3)"; break;
-			case 3:
-				vidform += "(16:9)"; break;
-			case 4:
-				vidform += "(20:9)"; break;
-		}
-	}
+	vidform = getVidFormat();
 
 	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
 		"<!-- " << sapi->service.toString() << "-->" << std::endl <<
