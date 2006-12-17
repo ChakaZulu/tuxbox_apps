@@ -31,6 +31,7 @@ eServiceFileHandler::eServiceFileHandler(): eServiceHandler(eServiceReference::i
 	instance=this;
 	cache.addPersistentService(eServiceReference(eServiceReference::idFile, dirflags, "/"), new eService("root"));
 	cache.addPersistentService(eServiceReference(eServiceReference::idFile, dirflags, "/hdd/"), new eService("harddisk"));
+	
 }
 
 eServiceFileHandler::~eServiceFileHandler()
@@ -45,11 +46,36 @@ void eServiceFileHandler::loadNode(eServiceCache<eServiceFileHandler>::eNode &no
 	case eServiceReference::idStructure:
 		switch (ref.data[0])
 		{
-		case eServiceStructureHandler::modeRoot:
-		case eServiceStructureHandler::modeFile:
-			cache.addToNode(node, eServiceReference(eServiceReference::idFile, dirflags, "/"));
-			cache.addToNode(node, eServiceReference(eServiceReference::idFile, dirflags, "/hdd/"));
-			break;
+			case eServiceStructureHandler::modeRoot:
+			case eServiceStructureHandler::modeFile:
+			{
+				cache.addToNode(node, eServiceReference(eServiceReference::idFile, dirflags, "/"));
+				cache.addToNode(node, eServiceReference(eServiceReference::idFile, dirflags, "/hdd/"));
+				// Add all links present in $CONFIGDIR/enigma/root/ to root-menu
+				DIR *d=opendir(CONFIGDIR "/enigma/root/");
+				if (d)
+				{
+					while (struct dirent64 *e=readdir64(d))
+					{
+						if (!(strcmp(e->d_name, ".") && strcmp(e->d_name, "..")))
+							continue;
+						eString filename;
+						filename.sprintf("%s/enigma/root/%s", CONFIGDIR,e->d_name);
+						struct stat64	 s;
+						if (stat64(filename.c_str(), &s)<0)
+							continue;
+						if (S_ISDIR(s.st_mode))
+						{
+							filename+="/";
+							eServiceReference service(eServiceReference::idFile, dirflags, filename);
+							service.data[0]=!!S_ISDIR(s.st_mode);
+							cache.addToNode(node, service);
+						}	
+					}
+					closedir(d);
+				}
+				break;
+			}
 		}
 		break;
 	case eServiceReference::idFile:
