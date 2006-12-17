@@ -1212,9 +1212,8 @@ msgid " - new found"
 msgstr " - Nuevos"
 
 #: lib/dvb/servicedvb.cpp:1181
-#, fuzzy
 msgid "current transponder"
-msgstr "Abrir búsqueda de canales"
+msgstr "Transpondedor actual"
 
 #: lib/dvb/servicemp3.cpp:186
 msgid "Connecting..."
