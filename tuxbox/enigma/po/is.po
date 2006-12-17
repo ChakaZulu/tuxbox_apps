@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-12-04 22:18+0100\n"
+"POT-Creation-Date: 2006-12-16 21:07+0100\n"
 "PO-Revision-Date: 2006-03-21 09:51-0000\n"
 "Last-Translator: Baldur Sveinsson <baldur@oreind.is>\n"
 "Language-Team: Icelandic / Baldur Sveinsson <baldur@oreind.is>\n"
@@ -1207,6 +1207,11 @@ msgstr "- rásir"
 msgid " - new found"
 msgstr "- ný fundin"
 
+#: lib/dvb/servicedvb.cpp:1181
+#, fuzzy
+msgid "current transponder"
+msgstr "opna senda leitun"
+
 #: lib/dvb/servicemp3.cpp:186
 msgid "Connecting..."
 msgstr "Tengi..."
@@ -1777,7 +1782,7 @@ msgstr "loka atriða skoðun"
 msgid "Original duration: %d min"
 msgstr "Upprunalegur tími: %d mín"
 
-#: src/enigma_event.cpp:288 src/streaminfo.cpp:580 src/streaminfo.cpp:638
+#: src/enigma_event.cpp:288 src/streaminfo.cpp:585 src/streaminfo.cpp:643
 msgid "no information is available"
 msgstr "engar upplýsingar eru til"
 
@@ -1785,7 +1790,7 @@ msgstr "engar upplýsingar eru til"
 msgid "Infos"
 msgstr "Upplýsingar"
 
-#: src/enigma_info.cpp:42 src/streaminfo.cpp:549
+#: src/enigma_info.cpp:42 src/streaminfo.cpp:554
 msgid "Streaminfo"
 msgstr "Uppl. um straum"
 
@@ -1814,9 +1819,9 @@ msgstr "Móttakari: Loftnet"
 msgid "Frontend: Unknown"
 msgstr "inngangur:"
 
-#: src/enigma_info.cpp:207 src/streaminfo.cpp:278 src/streaminfo.cpp:289
-#: src/streaminfo.cpp:301 src/streaminfo.cpp:313 src/streaminfo.cpp:325
-#: src/streaminfo.cpp:477 src/streaminfo.cpp:516
+#: src/enigma_info.cpp:207 src/streaminfo.cpp:344 src/streaminfo.cpp:355
+#: src/streaminfo.cpp:367 src/streaminfo.cpp:379 src/streaminfo.cpp:391
+#: src/streaminfo.cpp:482 src/streaminfo.cpp:521
 msgid "none"
 msgstr "enginn"
 
@@ -5150,11 +5155,11 @@ msgstr "Rótin"
 msgid "Movies"
 msgstr "Myndir"
 
-#: src/sselect.cpp:874
+#: src/sselect.cpp:887
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr "Veldu Nei eða ýttu á Hætta við til að læsa/opna alla möppuna"
 
-#: src/sselect.cpp:874
+#: src/sselect.cpp:887
 msgid "Enter Directory"
 msgstr "Fara í möppu"
 
@@ -5190,31 +5195,31 @@ msgstr "lag"
 msgid "length"
 msgstr "lengd"
 
-#: src/streaminfo.cpp:393
+#: src/streaminfo.cpp:398
 msgid "Video format:"
 msgstr "Mynd form:"
 
-#: src/streaminfo.cpp:472
+#: src/streaminfo.cpp:477
 msgid "supported coding systems:"
 msgstr "stuðningur við kóðunar kerfi:"
 
-#: src/streaminfo.cpp:512
+#: src/streaminfo.cpp:517
 msgid "Systems used in service:"
 msgstr "Kerfi notuð í rás:"
 
-#: src/streaminfo.cpp:549
+#: src/streaminfo.cpp:554
 msgid "Record mode - read manual"
 msgstr "Upptaka - lestu leiðbeiningarnar"
 
-#: src/streaminfo.cpp:659
+#: src/streaminfo.cpp:664
 msgid "Service information (right)"
 msgstr "Rása upplýsingar (hægri)"
 
-#: src/streaminfo.cpp:660
+#: src/streaminfo.cpp:665
 msgid "Scrambled system information (left, right)"
 msgstr "Ruglunar kerfis upplýsingar (vinstri, hægri)"
 
-#: src/streaminfo.cpp:661
+#: src/streaminfo.cpp:666
 msgid "Transponder information (left)"
 msgstr "Senda upplýsingar (vinstri)"
 

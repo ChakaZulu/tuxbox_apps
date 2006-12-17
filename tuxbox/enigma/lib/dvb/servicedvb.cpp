@@ -1176,6 +1176,10 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 		else
 			return new eService( it->second.name+ _(" - new found"));
 	}
+	case -6: 
+	{
+		return new eService( _("current transponder"));
+	}
 	case -3:
 	{
 		eBouquet *b=eDVB::getInstance()->settings->getBouquet(node.data[2]);
@@ -1297,6 +1301,7 @@ void eServiceHandlerDVB::loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node
 				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -2, ref.data[1], *it<<16, *it ));
 				cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -5, ref.data[1], *it<<16, *it ));
 			}
+			cache.addToNode(node, eServiceReference(eServiceReference::idDVB, flags, -6, ref.data[1], 0, 0 ));
 			break;
 		}
 	}

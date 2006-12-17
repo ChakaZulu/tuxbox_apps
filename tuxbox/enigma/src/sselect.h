@@ -49,7 +49,7 @@ public:
 	void invalidateDescr();
 	static int getEntryHeight();
 	eServiceReference service;
-	enum { flagShowNumber=1, flagOwnNumber=2, flagIsReturn=4 };
+	enum { flagShowNumber=1, flagOwnNumber=2, flagIsReturn=4, flagSameTransponder=8 };
 	eListBoxEntryService(eListBoxExt<eListBoxEntryService> *lb, const eServiceReference &service, int flags, int num=-1);
 	~eListBoxEntryService();
 

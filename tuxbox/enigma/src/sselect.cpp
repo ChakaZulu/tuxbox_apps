@@ -416,10 +416,20 @@ void eServiceSelector::addService(const eServiceReference &ref)
 			return;
 	}
 #endif
+	if (serviceentryflags & eListBoxEntryService::flagSameTransponder)
+	{
+		// only add Services on current transponder
+		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
+		eServiceReferenceDVB &cur = (eServiceReferenceDVB&) eServiceInterface::getInstance()->service;
+
+		if ( !onSameTP(Ref,cur) )
+			return;
+	}
+
 	if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
 		return;
 
-	int flags=serviceentryflags;
+	int flags=serviceentryflags & ~eListBoxEntryService::flagSameTransponder;
 
 	if ( ref.flags & eServiceReference::isDirectory)
 		flags &= ~ eListBoxEntryService::flagShowNumber;
@@ -509,9 +519,12 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	CONNECT(signal, eServiceSelector::addService);
 
 	serviceentryflags=eListBoxEntryService::flagShowNumber;
-
+	if (ref.data[0] == -6 && eZapMain::getInstance()->getMode() != eZapMain::modeFile)
+	{
+		serviceentryflags|=eListBoxEntryService::flagSameTransponder;
+	}
 	if ( eZap::getInstance()->getServiceSelector() == this
-		&& eDVB::getInstance()->recorder
+		&& (eDVB::getInstance()->recorder || ref.data[0] == -6) 
 		&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 	{
 		int mask = eZapMain::getInstance()->getMode() == eZapMain::modeTV ? (1<<4)|(1<<1) : ( 1<<2 );

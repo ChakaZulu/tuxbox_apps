@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-12-04 22:18+0100\n"
+"POT-Creation-Date: 2006-12-16 21:07+0100\n"
 "PO-Revision-Date: Thu Aug 11 13:47:24 CEST 2005\n"
 "Last-Translator: unknown\n"
 "Language-Team: Hungarian / lbalogh@mediavox.hu\n"
@@ -1221,6 +1221,11 @@ msgstr "- csatornák"
 msgid " - new found"
 msgstr ""
 
+#: lib/dvb/servicedvb.cpp:1181
+#, fuzzy
+msgid "current transponder"
+msgstr "transzponder keresés megnyitása"
+
 #: lib/dvb/servicemp3.cpp:186
 msgid "Connecting..."
 msgstr "Kapcsolódás..."
@@ -1795,7 +1800,7 @@ msgstr "program nézöke bezárása"
 msgid "Original duration: %d min"
 msgstr "Eredeti hossz: %d perc"
 
-#: src/enigma_event.cpp:288 src/streaminfo.cpp:580 src/streaminfo.cpp:638
+#: src/enigma_event.cpp:288 src/streaminfo.cpp:585 src/streaminfo.cpp:643
 msgid "no information is available"
 msgstr "nincs elérhetõ információ"
 
@@ -1803,7 +1808,7 @@ msgstr "nincs elérhetõ információ"
 msgid "Infos"
 msgstr "Információk"
 
-#: src/enigma_info.cpp:42 src/streaminfo.cpp:549
+#: src/enigma_info.cpp:42 src/streaminfo.cpp:554
 msgid "Streaminfo"
 msgstr "Adatfolyam információk"
 
@@ -1832,9 +1837,9 @@ msgstr "Tuner: Földi (DVB-T)"
 msgid "Frontend: Unknown"
 msgstr "Tuner:"
 
-#: src/enigma_info.cpp:207 src/streaminfo.cpp:278 src/streaminfo.cpp:289
-#: src/streaminfo.cpp:301 src/streaminfo.cpp:313 src/streaminfo.cpp:325
-#: src/streaminfo.cpp:477 src/streaminfo.cpp:516
+#: src/enigma_info.cpp:207 src/streaminfo.cpp:344 src/streaminfo.cpp:355
+#: src/streaminfo.cpp:367 src/streaminfo.cpp:379 src/streaminfo.cpp:391
+#: src/streaminfo.cpp:482 src/streaminfo.cpp:521
 #, fuzzy
 msgid "none"
 msgstr "Nincs"
@@ -5196,12 +5201,12 @@ msgstr "Gyökér"
 msgid "Movies"
 msgstr "Filmek"
 
-#: src/sselect.cpp:874
+#: src/sselect.cpp:887
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr ""
 "A Mégsem vagy Megszakítás választásával zárolható/nyitható a teljes könyvtár"
 
-#: src/sselect.cpp:874
+#: src/sselect.cpp:887
 msgid "Enter Directory"
 msgstr "Adja meg a könyvtárat"
 
@@ -5237,31 +5242,31 @@ msgstr "sáv"
 msgid "length"
 msgstr "hossz"
 
-#: src/streaminfo.cpp:393
+#: src/streaminfo.cpp:398
 msgid "Video format:"
 msgstr "Kép-formátum:"
 
-#: src/streaminfo.cpp:472
+#: src/streaminfo.cpp:477
 msgid "supported coding systems:"
 msgstr "támogatott kódolási rendszerek:"
 
-#: src/streaminfo.cpp:512
+#: src/streaminfo.cpp:517
 msgid "Systems used in service:"
 msgstr "A szolgáltatásban használt rendszerek:"
 
-#: src/streaminfo.cpp:549
+#: src/streaminfo.cpp:554
 msgid "Record mode - read manual"
 msgstr "Felvételi mód - olvassa el a kézikönyvet"
 
-#: src/streaminfo.cpp:659
+#: src/streaminfo.cpp:664
 msgid "Service information (right)"
 msgstr "Csatorna információk (>)"
 
-#: src/streaminfo.cpp:660
+#: src/streaminfo.cpp:665
 msgid "Scrambled system information (left, right)"
 msgstr "Kódolási rendszer-információk (</>)"
 
-#: src/streaminfo.cpp:661
+#: src/streaminfo.cpp:666
 msgid "Transponder information (left)"
 msgstr "Transzponder információk (<)"
 
