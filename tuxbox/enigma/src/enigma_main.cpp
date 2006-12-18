@@ -637,7 +637,18 @@ void ePSAudioSelector::selected(eListBoxEntryText*l)
 void AudioChannelSelectionChanged( eListBoxEntryText *e )
 {
 	if ( e )
+	{
+		eService *sp=eServiceInterface::getInstance()->addRef(eServiceInterface::getInstance()->service);
+		if (sp)
+		{
+			if (sp->dvb)
+			{
+				sp->dvb->set(eServiceDVB::cStereoMono,(int)e->getKey());
+			}
+			eServiceInterface::getInstance()->removeRef(eServiceInterface::getInstance()->service);
+		}
 		eAVSwitch::getInstance()->selectAudioChannel((int)e->getKey());
+	}
 }
 
 ePSAudioSelector::ePSAudioSelector()
@@ -680,8 +691,8 @@ ePSAudioSelector::ePSAudioSelector()
 void ePSAudioSelector::clear()
 {
 	list.clearList();
-	m_stereo_mono->moveSelection(eListBoxBase::dirFirst,false);
-	m_stereo_mono->goNext();
+//	m_stereo_mono->moveSelection(eListBoxBase::dirFirst,false);
+//	m_stereo_mono->goNext();
 }
 
 void ePSAudioSelector::add(unsigned int id)
@@ -876,8 +887,8 @@ eAudioSelector::eAudioSelector()
 void eAudioSelector::clear()
 {
 	list.clearList();
-	m_stereo_mono->moveSelection(eListBoxBase::dirFirst,false);
-	m_stereo_mono->goNext();
+//	m_stereo_mono->moveSelection(eListBoxBase::dirFirst,false);
+//	m_stereo_mono->goNext();
 	m_subtitles->clearList();
 	m_subtitles->hide();
 	list.removeFlags( eListBoxBase::flagLostFocusOnLast );
@@ -6058,10 +6069,25 @@ void eZapMain::showEPG_Streaminfo()
 
 void eZapMain::startService(const eServiceReference &_serviceref, int err)
 {
-	subtitle->stop();
-	eAVSwitch::getInstance()->selectAudioChannel(0);
 
+	subtitle->stop();
 	audioselps.clear();
+
+	int tmp = -1;
+	eService *sp=eServiceInterface::getInstance()->addRef(_serviceref);
+	if (sp)
+	{
+		if (sp->dvb)
+		{
+			tmp = sp->dvb->get(eServiceDVB::cStereoMono);
+			if ( tmp != -1)
+				eAVSwitch::getInstance()->selectAudioChannel(tmp);
+		}
+		eServiceInterface::getInstance()->removeRef(_serviceref);
+	}
+	if (tmp == -1)
+		eAVSwitch::getInstance()->selectAudioChannel(0);
+
 #ifndef DISABLE_FILE
 	skipcounter=0;
 #endif
