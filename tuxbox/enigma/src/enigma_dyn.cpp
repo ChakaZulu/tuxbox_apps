@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.561 2006/10/27 23:54:28 ghostrider Exp $
+ * $Id: enigma_dyn.cpp,v 1.562 2006/12/19 16:14:25 ghostrider Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2311,6 +2311,9 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 		int key = atoi(keyS.c_str());
 		key = translateKey(key);
 
+		if (eSystemInfo::getInstance()->getHwType() < 3) // dbox2
+			keyb_evt_dev_num = 0;
+
 		int evd=-1;
 		if (keyb_evt_dev_num == -1)
 		{
@@ -2339,7 +2342,7 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 							{
 								keyb_evt_dev_num = cnt;
 								evd = fd;
-								break;
+								goto InputDevFound;
 							}
 						}
 					}
@@ -2355,7 +2358,7 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 			if ((evd=open(tmp, O_RDONLY)) < 0)
 				eDebug("open %s failed(%m)", tmp);
 		}
-
+InputDevFound:
 		if (evd > -1)
 		{
 			sendKey(evd, key, KEY_PRESSED);
