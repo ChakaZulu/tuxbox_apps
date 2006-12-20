@@ -6086,7 +6086,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 		eServiceInterface::getInstance()->removeRef(_serviceref);
 	}
 	if (tmp == -1)
-		eAVSwitch::getInstance()->selectAudioChannel(0);
+		eAVSwitch::getInstance()->selectAudioChannel(1);
 
 #ifndef DISABLE_FILE
 	skipcounter=0;
