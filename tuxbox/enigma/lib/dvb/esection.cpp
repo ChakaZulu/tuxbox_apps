@@ -138,7 +138,7 @@ int eSectionReader::read(__u8 *buf)
 		eDebug("section read(%m)");
 		return errno;
 	}
-	if( (buf[0] & tableid_mask) != tableid )
+	if( (buf[0] & tableid_mask) != (tableid & tableid_mask) )
 	{
 		eDebug("skip section data.. table_id isn't valid");
 		return -2;
