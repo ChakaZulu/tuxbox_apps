@@ -128,8 +128,10 @@ void CChannelList::updateEvents(void)
 	if (listmaxshow) {
 		size_requested_channels = listmaxshow*sizeof(t_channel_id);
 		p_requested_channels 	= (t_channel_id*)malloc(size_requested_channels);
-		for (uint count=0; count<listmaxshow; count++){
-			if (liststart+count<chanlist.size()) p_requested_channels[count] = chanlist[liststart+count]->channel_id;
+		if (p_requested_channels != NULL) {
+			for (uint count=0; count<listmaxshow; count++){
+				if (liststart+count<chanlist.size()) p_requested_channels[count] = chanlist[liststart+count]->channel_id;
+			}
 		}
 	}
 
@@ -146,6 +148,7 @@ void CChannelList::updateEvents(void)
 				break;
 			}
 	}
+	if (p_requested_channels != NULL) free(p_requested_channels);
 }
 
 void CChannelList::addChannel(int key, int number, const std::string& name, const t_satellite_position satellitePosition, t_channel_id ids)
