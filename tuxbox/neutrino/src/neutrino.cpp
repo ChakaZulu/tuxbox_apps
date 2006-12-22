@@ -569,6 +569,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy(g_settings.epg_cache , configfile.getString( "epg_cache_time", "14" ).c_str() );
 	strcpy(g_settings.epg_old_events ,configfile.getString("epg_old_events", "1" ).c_str() );
 	strcpy(g_settings.epg_max_events ,configfile.getString("epg_max_events", "6000" ).c_str() );
+	strcpy(g_settings.epg_dir, configfile.getString("epg_dir", "").c_str());
 
 	//misc
 	g_settings.shutdown_real            = configfile.getBool("shutdown_real"             , true );
@@ -588,15 +589,11 @@ int CNeutrinoApp::loadSetup()
 	g_settings.audio_avs_Control = configfile.getInt32( "audio_avs_Control", CControld::TYPE_AVS );
 	strcpy( g_settings.audio_PCMOffset, configfile.getString( "audio_PCMOffset", "0" ).c_str() );
 
-
 	//vcr
 	g_settings.vcr_AutoSwitch        = configfile.getBool("vcr_AutoSwitch"       , true );
 
 	//language
 	strcpy(g_settings.language, configfile.getString("language", "").c_str());
-
-	//epg
-	strcpy(g_settings.epg_dir, configfile.getString("epg_dir", "").c_str());
 
 	//widget settings
 	g_settings.widget_fade           = configfile.getBool("widget_fade"          , true );
@@ -731,8 +728,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.streaming_force_avi_rawaudio = configfile.getInt32( "streaming_force_avi_rawaudio", 0 );
 	g_settings.streaming_resolution = configfile.getInt32( "streaming_resolution", 0 );
 	g_settings.streaming_use_buffer = configfile.getInt32("streaming_use_buffer", 1);
-    g_settings.streaming_buffer_segment_size = configfile.getInt32("streaming_buffer_segment_size", 24);
-    g_settings.streaming_show_tv_in_browser = configfile.getInt32("streaming_show_tv_in_browser", 0);
+	g_settings.streaming_buffer_segment_size = configfile.getInt32("streaming_buffer_segment_size", 24);
+	g_settings.streaming_show_tv_in_browser = configfile.getInt32("streaming_show_tv_in_browser", 0);
 
 	// default plugin for movieplayer
 	g_settings.movieplayer_plugin = configfile.getString( "movieplayer_plugin", "Teletext" );
@@ -3088,11 +3085,13 @@ const CMenuOptionChooser::keyval MAINMENU_RECORDING_OPTIONS[MAINMENU_RECORDING_O
 
 void CNeutrinoApp::ShowStreamFeatures()
 {
-	CMenuWidget StreamFeatureSelector(LOCALE_STREAMFEATURES_HEAD, "features.raw", 350);
-	StreamFeatureSelector.addItem(GenericMenuSeparator);
 	char id[5];
 	int cnt = 0;
 	int enabled_count = 0;
+	CMenuWidget *StreamFeatureSelector = new CMenuWidget(LOCALE_STREAMFEATURES_HEAD, "features.raw", 350);
+	if (StreamFeatureSelector == NULL) return;
+
+	StreamFeatureSelector->addItem(GenericMenuSeparator);
 
 	for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
 	{
@@ -3104,56 +3103,60 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 			enabled_count++;
 
-			StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, (cnt== 0) ? CRCInput::RC_blue : CRCInput::convertDigitToKey(enabled_count-1), (cnt == 0) ? NEUTRINO_ICON_BUTTON_BLUE : ""), (cnt == 0));
+			StreamFeatureSelector->addItem(new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, (cnt== 0) ? CRCInput::RC_blue : CRCInput::convertDigitToKey(enabled_count-1), (cnt == 0) ? NEUTRINO_ICON_BUTTON_BLUE : ""), (cnt == 0));
 			cnt++;
 		}
 	}
 
 	if(cnt>0)
 	{
-		StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
+		StreamFeatureSelector->addItem(GenericMenuSeparatorLine);
 	}
 
 	sprintf(id, "%d", -1);
 
 	// -- Add Channel to favorites
 //	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_FAVORITES_MENUEADD, true, NULL, new CFavorites, id, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
-	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_FAVORITES_MENUEADD, true, NULL, new CFavorites, id, CRCInput::convertDigitToKey(enabled_count), ""), false);
+	CFavorites *tmpFavorites = new CFavorites;
+	StreamFeatureSelector->addItem(new CMenuForwarder(LOCALE_FAVORITES_MENUEADD, true, NULL, tmpFavorites, id, CRCInput::convertDigitToKey(enabled_count), ""), false);
 
-	StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
+	StreamFeatureSelector->addItem(GenericMenuSeparatorLine);
 
 	// start/stop recording
 	if (g_settings.recording_type != RECORDING_OFF)
 	{
-		StreamFeatureSelector.addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, MAINMENU_RECORDING_OPTIONS, MAINMENU_RECORDING_OPTION_COUNT, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+		StreamFeatureSelector->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, MAINMENU_RECORDING_OPTIONS, MAINMENU_RECORDING_OPTION_COUNT, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	}
 
 	// -- Add TS Playback to blue button
-	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, this->moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
+	StreamFeatureSelector->addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, this->moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
 
 	// -- Timer-Liste
-	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_TIMERLIST_NAME, true, NULL, new CTimerList(), id, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
+	CTimerList *tmpTimerlist = new CTimerList;
+	StreamFeatureSelector->addItem(new CMenuForwarder(LOCALE_TIMERLIST_NAME, true, NULL, tmpTimerlist, id, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
-	StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
+	StreamFeatureSelector->addItem(GenericMenuSeparatorLine);
 
 	// --  Lock remote control
-	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_RCLOCK_MENUEADD, true, NULL, this->rcLock, id, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector->addItem(new CMenuForwarder(LOCALE_RCLOCK_MENUEADD, true, NULL, this->rcLock, id, CRCInput::RC_nokey, ""), false);
 
 	// -- Sectionsd pause
 	int dummy = g_Sectionsd->getIsScanningActive();
 	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_PAUSESECTIONSD, &dummy, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, new CPauseSectionsdNotifier );
-	StreamFeatureSelector.addItem(oj);
+	StreamFeatureSelector->addItem(oj);
 
 #ifdef _EXPERIMENTAL_SETTINGS_
 	//Experimental Settings
-	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_EXPERIMENTALSETTINGS, true, NULL, new CExperimentalSettingsMenuHandler(), id, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector->addItem(new CMenuForwarder(LOCALE_EXPERIMENTALSETTINGS, true, NULL, new CExperimentalSettingsMenuHandler(), id, CRCInput::RC_nokey, ""), false);
 #endif
 
-	StreamFeatureSelector.exec(NULL,"");
+	StreamFeatureSelector->exec(NULL,"");
 
 	// restore mute symbol
 	AudioMute(current_muted, true);
-
+	delete StreamFeatureSelector;
+	delete tmpFavorites;
+	delete tmpTimerlist;
 }
 
 bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
