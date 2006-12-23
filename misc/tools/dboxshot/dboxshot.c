@@ -1,4 +1,4 @@
-/* $Id: dboxshot.c,v 1.2 2006/12/05 08:25:15 munderl Exp $ */
+/* $Id: dboxshot.c,v 1.3 2006/12/23 16:19:36 stdin Exp $ */
 
 /* DBoxshot - This is a simple program that generates a screenshot of the
  * specified framebuffer device and terminal and writes it to a specified file
@@ -29,7 +29,7 @@
 #include <linux/fb.h>
 #include <fcntl.h>
 
-#define VER  "$Id: dboxshot.c,v 1.2 2006/12/05 08:25:15 munderl Exp $"
+#define VER  "$Id: dboxshot.c,v 1.3 2006/12/23 16:19:36 stdin Exp $"
 #define DEVICE "/dev/fb0"
 
 #define true 1
@@ -340,7 +340,7 @@ static void Usage ()
 	printf(
 	"DBoxShot (c) by Daniel Scheack <dscheack@t-online.de>\n"
 	"%s\n"
-	"Usage: dboxshot [-d] [-h] [-c hex] [-t n] [-o filename]\n"
+	"Usage: dboxshot [-d] [-h] [-r] [-c hex] [-t n] [-o filename]\n"
 	"  Options\n"
 	"  -d\tDebugmodus enabled\n"
 	"  -h\tprint out this message\n"
@@ -354,7 +354,7 @@ static void Usage ()
 int main (int argc, char* argv[])
 {
 	int opt;
-	char *filename = "fbout.bmp";
+	char *filename = "/tmp/fbout.bmp";
 	bgcolor bg;
 	int comp = false;
 	int bgflag = false;
