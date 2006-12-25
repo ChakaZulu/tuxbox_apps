@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dvbstring.cpp,v 1.1 2005/11/20 15:11:40 mogway Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dvbstring.cpp,v 1.2 2006/12/25 20:13:33 houdini Exp $
  *
  * Strings conforming to the DVB Standard - d-box2 linux project
  *
@@ -224,7 +224,6 @@ CDVBString::CDVBString(const char * the_content, const int size)
 		content = "";
 	else
 	{
-		std::string s;
 		while(i < size)
 		{
 			// skip characters 0x00 - 0x1F & 0x80 - 0x9F

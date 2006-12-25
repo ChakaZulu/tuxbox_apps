@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.50 2006/08/19 20:13:34 houdini Exp $
+// $Id: SIsections.cpp,v 1.51 2006/12/25 20:13:33 houdini Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -125,7 +125,7 @@ bool check_blacklisted(const t_original_network_id onid, const t_transport_strea
 {
 	if ( (onid == 0x0001) &&
 		((tsid == 0x03F0) || (tsid == 0x0408) || (tsid == 0x040E) || (tsid == 0x0412) || (tsid == 0x0416) || (tsid == 0x041E) ||
-		 (tsid == 0x0420) || (tsid == 0x0422) || (tsid == 0x0424)) )
+		 (tsid == 0x0420) || (tsid == 0x0422) || (tsid == 0x0424)) || (tsid == 0x0444) )
 		return true;
 	else
 		return false;
