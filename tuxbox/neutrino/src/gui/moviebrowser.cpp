@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: moviebrowser.cpp,v 1.10 2006/09/11 21:11:35 guenther Exp $
+	$Id: moviebrowser.cpp,v 1.11 2006/12/28 21:40:32 houdini Exp $
 
 	Kommentar:
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.11  2006/12/28 21:40:32  houdini
+	whitespace cleanup, removed warnings
+	
 	Revision 1.10  2006/09/11 21:11:35  guenther
 	General menu clean up
 	Dir menu updated
@@ -389,7 +392,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.10 2006/09/11 21:11:35 guenther Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.11 2006/12/28 21:40:32 houdini Exp $\r\n");
 	init();
 }
 
@@ -1405,7 +1408,7 @@ void CMovieBrowser::refreshLastPlayList(void) //P2
 	// sort the not filtered files
 	onSortMovieInfoHandleList(m_vHandlePlayList,MB_INFO_PREVPLAYDATE,MB_DIRECTION_DOWN);
 
-    for(unsigned int handle=0; handle < m_vHandlePlayList.size() && handle < m_settings.lastPlayMaxItems ;handle++)
+	for(unsigned int handle=0; handle < m_vHandlePlayList.size() && handle < (unsigned int )m_settings.lastPlayMaxItems ;handle++)
 	{
 		for(int row = 0; row < m_settings.lastPlayRowNr ;row++)
 		{
@@ -1463,7 +1466,7 @@ void CMovieBrowser::refreshLastRecordList(void) //P2
 	// sort the not filtered files
 	onSortMovieInfoHandleList(m_vHandleRecordList,MB_INFO_RECORDDATE,MB_DIRECTION_DOWN);
 
-    for(unsigned int handle=0; handle < m_vHandleRecordList.size() && handle < m_settings.lastRecordMaxItems ;handle++)
+	for(unsigned int handle=0; handle < m_vHandleRecordList.size() && handle < (unsigned int )m_settings.lastRecordMaxItems ;handle++)
 	{
 		for(int row = 0; row < m_settings.lastRecordRowNr ;row++)
 		{
@@ -1506,20 +1509,20 @@ void CMovieBrowser::refreshBrowserList(void) //P1
 	m_vHandleBrowserList.clear();
 	
 	if(m_vMovieInfo.size() <= 0) 
-    {
-        m_currentBrowserSelection = 0;
-        m_movieSelectionHandler = NULL;
-        //m_pcBrowser->setLines(&m_browserListLines);
+	{
+		m_currentBrowserSelection = 0;
+		m_movieSelectionHandler = NULL;
+		//m_pcBrowser->setLines(&m_browserListLines);
 		return; // exit here if nothing else is to do
-    }
+	}
 	
 	MI_MOVIE_INFO* movie_handle;
 	// prepare Browser list for sorting and filtering
 	for(unsigned int file=0; file < m_vMovieInfo.size(); file++)
 	{
 		if(	isFiltered(m_vMovieInfo[file]) 	   == false &&
-            isParentalLock(m_vMovieInfo[file]) == false  &&
-            (m_settings.browser_serie_mode == 0 || m_vMovieInfo[file].serieName.empty() || m_settings.filter.item == MB_INFO_SERIE) )
+			isParentalLock(m_vMovieInfo[file]) == false  &&
+			(m_settings.browser_serie_mode == 0 || m_vMovieInfo[file].serieName.empty() || m_settings.filter.item == MB_INFO_SERIE) )
 		{
 			movie_handle = &(m_vMovieInfo[file]);
 			m_vHandleBrowserList.push_back(movie_handle);
@@ -2296,7 +2299,7 @@ bool CMovieBrowser::onSortMovieInfoHandleList(std::vector<MI_MOVIE_INFO*>& handl
 			sort_item == MB_INFO_RECORDDATE || 
 			sort_item == MB_INFO_PRODDATE ||
 			sort_item == MB_INFO_SIZE)
-	 	{
+		{
 			sortDirection = 1;
 		}
 		else
@@ -2354,9 +2357,9 @@ void CMovieBrowser::loadAllTsFileNamesFromStorage(void)
 	m_dirNames.clear();
 	m_vMovieInfo.clear();
 	
-    updateDir();
+	updateDir();
 
-    size = m_dir.size();
+	size = m_dir.size();
 	for(i=0; i < size;i++)
 	{
         if(*m_dir[i].used == true )
@@ -3529,7 +3532,7 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, " Markierungsmenu ");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.10 $");
+	helpbox.addLine("MovieBrowser $Revision: 1.11 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
@@ -3553,13 +3556,13 @@ int CFileChooser::exec(CMenuTarget* parent, const std::string & actionKey)
         if(a != 0 && b != 0)
             *dirPath ="";   // We clear the  string if the selected folder is not at leaset /mnt/ or /hdd (There is no other possibility to clear this) 
     }
-        
+
     return menu_return::RETURN_REPAINT;
 }
 
 CDirMenu::CDirMenu(std::vector<MB_DIR>* dir_list)
 {
-    int i;
+    unsigned int i;
     changed = false;
     dirList = dir_list;
 
@@ -3576,7 +3579,7 @@ CDirMenu::CDirMenu(std::vector<MB_DIR>* dir_list)
             std::string tmp = g_settings.network_nfs_local_dir[nfs];
             int result = (*dirList)[i].name.compare( 0,tmp.size(),tmp) ;
             //printf("[CDirMenu] (nfs%d) %s == (mb%d) %s (%d)\n",nfs,g_settings.network_nfs_local_dir[nfs],i,(*dirList)[i].name.c_str(),result);
-            
+
             if(result == 0)
             {
                 dirNfsMountNr[i] = nfs;
