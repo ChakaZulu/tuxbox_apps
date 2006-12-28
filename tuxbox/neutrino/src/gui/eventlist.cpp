@@ -586,7 +586,7 @@ void  EventList::showFunctionBar (bool show)
 
     // -- Button: Timer Record & Channelswitch
     if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-	(g_settings.key_channelList_addrecord != CRCInput::RC_nokey))
+	(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
     {
 	    pos = 0;
 #warning FIXME: display other icons depending on g_settings.key_channelList_addrecord
@@ -596,7 +596,7 @@ void  EventList::showFunctionBar (bool show)
     }
 
     // Button: Timer Channelswitch
-    if (g_settings.key_channelList_addremind != CRCInput::RC_nokey)
+    if (g_settings.key_channelList_addremind != (int)CRCInput::RC_nokey)
     {
 	    pos = 2;
 #warning FIXME: display other icons depending on g_settings.key_channelList_addremind
@@ -606,7 +606,7 @@ void  EventList::showFunctionBar (bool show)
     }
 
     // Button: Event Re-Sort
-    if (g_settings.key_channelList_sort != CRCInput::RC_nokey)
+    if (g_settings.key_channelList_sort != (int)CRCInput::RC_nokey)
     {
 	    pos = 3;
 #warning FIXME: display other icons depending on g_settings.key_channelList_sort value
