@@ -240,7 +240,7 @@ std::string CyhookHandler::BuildHeader(bool cache)
 			break;
 		}
 	// print Status-line
-	result = string_printf("HTTP/1.1 %d %s\r\nContent-Type: %s\r\n",httpStatus, responseString, ResponseMimeType.c_str());
+	result = string_printf(HTTP_PROTOCOL " %d %s\r\nContent-Type: %s\r\n",httpStatus, responseString, ResponseMimeType.c_str());
 	log_level_printf(2,"Respose: HTTP/1.1 %d %s\r\nContent-Type: %s\r\n",httpStatus, responseString, ResponseMimeType.c_str());
 
 	switch (httpStatus)

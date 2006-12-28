@@ -32,6 +32,8 @@ CWebserverConnection::CWebserverConnection(CWebserver *pWebserver)
 	RequestCanceled 	= false;
 #ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
 	keep_alive 		= true;
+#else
+	keep_alive		= false;
 #endif
 }
 //-------------------------------------------------------------------------

@@ -197,7 +197,7 @@ std::string  CNeutrinoYParser::func_get_bouquets_as_dropdown(CyhookHandler *hh, 
 	{	
 		sel=(nr==(i+1)) ? "selected=\"selected\"" : "";
 		if(!NeutrinoAPI->BouquetList[i].hidden || do_show_hidden == "true")
-			yresult += string_printf("<option value=%u %s>%s</option>\n", (NeutrinoAPI->BouquetList[i].bouquet_nr) + 1, sel.c_str(), NeutrinoAPI->BouquetList[i].name);
+			yresult += string_printf("<option value=%u %s>%s</option>\n", (NeutrinoAPI->BouquetList[i].bouquet_nr) + 1, sel.c_str(), (encodeString(std::string(NeutrinoAPI->BouquetList[i].name))).c_str());
 	}
 	return yresult;
 }
@@ -271,7 +271,9 @@ std::string  CNeutrinoYParser::func_get_channels_as_dropdown(CyhookHandler *hh, 
 			sid = string_printf(PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS,channel->channel_id);
 			sel = (sid == achannel_id) ? "selected=\"selected\"" : "";
 			NeutrinoAPI->Sectionsd->getActualEPGServiceKey(channel->channel_id, &epg);
-			yresult += string_printf("<option value="PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS" %s>%.20s - %.30s</option>\n", channel->channel_id, sel.c_str(), channel->name,epg.title.c_str());
+			std::string encoded_channel_name = encodeString(std::string(channel->name).substr(0,19));
+			std::string encoded_title = encodeString((epg.title).substr(0,29));
+			yresult += string_printf("<option value="PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS" %s>%s - %s</option>\n", channel->channel_id, sel.c_str(), encoded_channel_name.c_str(),encoded_title.c_str());
 		}
 	}
 	return yresult;
@@ -533,7 +535,7 @@ std::string  CNeutrinoYParser::func_get_audio_pids_as_dropdown(CyhookHandler *hh
 					{
 						if(!(isalnum(tags[i].component[0])))
 							tags[i].component=tags[i].component.substr(1,tags[i].component.length()-1);
-						yresult += string_printf("<option value=%05u>%s</option>\r\n",idx_as_id ? j : pids.APIDs[j].pid,tags[i].component.c_str());
+						yresult += string_printf("<option value=%05u>%s</option>\r\n",idx_as_id ? j : pids.APIDs[j].pid,encodeString(tags[i].component).c_str());
 					}
 					else
 					{
@@ -541,7 +543,7 @@ std::string  CNeutrinoYParser::func_get_audio_pids_as_dropdown(CyhookHandler *hh
 						{
 							strcpy( pids.APIDs[j].desc, getISO639Description( pids.APIDs[j].desc ) );
 						}
-			 			yresult += string_printf("<option value=%05u>%s %s</option>\r\n",idx_as_id ? j : pids.APIDs[j].pid,pids.APIDs[j].desc,pids.APIDs[j].is_ac3 ? " (AC3)": " ");
+			 			yresult += string_printf("<option value=%05u>%s %s</option>\r\n",idx_as_id ? j : pids.APIDs[j].pid,encodeString(std::string(pids.APIDs[j].desc)).c_str(),pids.APIDs[j].is_ac3 ? " (AC3)": " ");
 					}
 					eit_not_ok=false;
 					break;

@@ -18,7 +18,6 @@
 #ifdef Y_UPDATE_BETA
 #warning "!!!! THIS IS BETA COMPILING. SWITCH OF (Y_UPDATE_BETA) FOR CVS"
 #define Y_CONFIG_USE_WEBLOG y
-#define Y_CONFIG_FEATURE_KEEP_ALIVE y
 #endif
 //-----------------------------------------------------------------------------
 // System Choice <configure!> ONE choice
@@ -33,8 +32,8 @@
 //-----------------------------------------------------------------------------
 // General central Definitions <configure!>
 //-----------------------------------------------------------------------------
-#define HTTPD_VERSION 		"3.0.6"				// Webserver version  (can be overloaded)
-#define YHTTPD_VERSION 		"1.1.2"				// Webserver version  (Version of yhttpd-core!)
+#define HTTPD_VERSION 		"3.1.0"				// Webserver version  (can be overloaded)
+#define YHTTPD_VERSION 		"1.2.0"				// Webserver version  (Version of yhttpd-core!)
 #define IADDR_LOCAL 		"127.0.0.1"			// local IP
 #define HTTPD_NAME 		"yhttpd"			// Webserver name (can be overloaded)
 #define YHTTPD_NAME 		"yhttpd_core"			// Webserver name (Name of yhttpd-core!)
@@ -62,7 +61,7 @@
 #define Y_CONFIG_USE_HOSTEDWEB y				// Add Feature: Use HOSTED Web
 #define Y_CONFIG_FEATURE_SHOW_SERVER_CONFIG y			// Add Feature (in yParser): add /y/server-config
 //#define Y_CONFIG_USE_OPEN_SSL y					// Add Feature: use openSSL
-#define Y_CONFIG_FEATURE_KEEP_ALIVE y				// Add Feature: Keep-alive //FIXME: does not work correctly now
+//#define Y_CONFIG_FEATURE_KEEP_ALIVE y				// Add Feature: Keep-alive //FIXME: does not work correctly now
 #define Y_CONFIG_FEATUE_SENDFILE_CAN_ACCESS_ALL y		// Add Feature: every file can be accessed (use carefully: security!!)
 //#define Y_CONFIG_FEATURE_CHROOT y				// Add Feature: Use Change Root for Security
 //#define Y_CONFIG_FEATURE_HTTPD_USER y				// Add Feature: Set User for yhttpd-Process
@@ -86,6 +85,11 @@
 #define Y_CONFIG_FEATURE_UPLOAD y
 #define Y_CONFIG_USE_YPARSER y
 #define Y_CONFIG_USE_AUTHHOOK y
+#endif
+#ifdef Y_CONFIG_FEATURE_KEEP_ALIVE
+#define HTTP_PROTOCOL "HTTP/1.1"
+#else
+#define HTTP_PROTOCOL "HTTP/1.0"
 #endif
 //=============================================================================
 // Configurations for systems/OSs <configure!>

@@ -205,7 +205,7 @@ bool CWebserver::run(void)
 						SocketList[slot]->handling = true;	// prepares for thread-handling
 						if(!handle_connection(SocketList[slot]))// handle this activity
 						{	// Can not handle more threads
-							char httpstr[]="HTTP/1.1 503 Service Unavailable\r\n\r\n";
+							char httpstr[]=HTTP_PROTOCOL " 503 Service Unavailable\r\n\r\n";
 							SocketList[slot]->Send(httpstr, strlen(httpstr));
 							SL_CloseSocketBySlot(slot);
 						}	

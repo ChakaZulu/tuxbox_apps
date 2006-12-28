@@ -232,7 +232,6 @@ std::string encodeString(std::string decodedString)
 	char *newString = (char *)result.c_str();
 	char *dstring = (char *)decodedString.c_str();
 	char one_char;
-
 	if(len == result.length()) // got memory needed
 	{
 		while(one_char = *dstring++) /* use the null character as a loop terminator */
@@ -240,7 +239,7 @@ std::string encodeString(std::string decodedString)
 			if(isalnum(one_char)) 
 				*newString++ = one_char;
 			else 
-				newString += sprintf(newString, "&#%d", (unsigned char) one_char);
+				newString += sprintf(newString, "&#%d;", (unsigned char) one_char);
 		}
 
 		*newString='\0'; /* when done copying the string,need to terminate w/ null char */
