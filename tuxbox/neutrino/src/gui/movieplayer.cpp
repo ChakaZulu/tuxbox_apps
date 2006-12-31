@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.137 2006/09/28 16:35:33 guenther Exp $
+  $Id: movieplayer.cpp,v 1.138 2006/12/31 13:51:16 houdini Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -186,8 +186,8 @@ bool get_movie_info_apid_name(int apid,MI_MOVIE_INFO* movie_info,std::string* ap
 {
     if(movie_info == NULL || apidtitle == NULL)
         return false;
-        
-    for(int i=0; i < movie_info->audioPids.size(); i++)
+
+    for(unsigned int i=0; i < movie_info->audioPids.size(); i++)
     {
        //printf("check pid MovieInfo %d Stream%d\n",p_movie_info->audioPids[i].epgAudioPid,g_apids[count]);
        if( movie_info->audioPids[i].epgAudioPid == apid && 
@@ -205,7 +205,7 @@ int get_next_movie_info_bookmark_pos_sec(MI_MOVIE_INFO* movie_info, int pos_sec,
 {
     if(movie_info == NULL)    
         return -1;
-        
+
     int new_pos_sec ; // init below
 
     if(direction == true)
@@ -250,7 +250,7 @@ int get_next_movie_info_bookmark_pos_sec(MI_MOVIE_INFO* movie_info, int pos_sec,
     }
     if(found == false) // if we did not found any, set return to invalid
         new_pos_sec = -1;
-        
+
     printf("current %ds,new %ds\n",pos_sec,new_pos_sec);
     return new_pos_sec;
 }
@@ -4221,7 +4221,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.137 $");
+	helpbox.addLine("Version: $Revision: 1.138 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4243,7 +4243,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.137 $");
+	helpbox.addLine("Version: $Revision: 1.138 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
