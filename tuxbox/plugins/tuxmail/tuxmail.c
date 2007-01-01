@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.46  2007/01/01 21:22:20  robspr1
+ * -delete tuxmail.new before leaving plugin, not when entering
+ *
  * Revision 1.45  2006/10/27 19:36:32  robspr1
  * - bugfix viewing mails in emtpy mailbox
  *
@@ -376,7 +379,7 @@ void ReadConf()
 			skin = 1;
 		}
 		
-		if(typeflag < 1 || typeflag > 3)
+		if(typeflag < 1 || typeflag > 4)
 		{
 			printf("TuxMail <TYPEFLAG=%d invalid, set to \"1\">\n", typeflag);
 
@@ -1867,9 +1870,9 @@ void SaveConfigMailBox(int nConfigPage)
 					{
 						typeflag = 1;
 					}
-					if( typeflag > 3 )
+					if( typeflag > 4 )
 					{
-						typeflag = 3;
+						typeflag = 4;
 					}
 					break; 
 			}
@@ -3730,7 +3733,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.45 $";
+	char cvs_revision[] = "$Revision: 1.46 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -3906,10 +3909,6 @@ void plugin_exec(PluginParam *par)
 		startx = sx + (((ex-sx) - 620)/2);
 		starty = sy + (((ey-sy) - 505)/2);
 
-	// remove notify file
-	
-		unlink(NOTIFILE);
-	
 	// lock keyboard-conversions, this is done by the plugin itself
 		fclose(fopen(KBLCKFILE,"w"));
 	
@@ -4340,7 +4339,7 @@ void plugin_exec(PluginParam *par)
 							}
 						}
 					}
-					if( typeflag == 3 )
+					if( typeflag >= 3 )
 					{
 						maildb[loop].status[0] = '0';
 						maildb[loop].status[1] = '0';
@@ -4353,6 +4352,9 @@ void plugin_exec(PluginParam *par)
 
 	// enable keyboard-conversion again
 		unlink(KBLCKFILE);
+
+	// remove notify file
+		unlink(NOTIFILE);
 
 	// cleanup
 
