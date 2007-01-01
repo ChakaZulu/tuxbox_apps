@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.28  2007/01/01 19:54:03  robspr1
+ * -execute tuxmail.onreadmail in cfg-dir before new mail is read to cache
+ *
  * Revision 1.27  2005/11/19 14:38:12  robspr1
  * - add different behaviour in marking mails green in the plugin
  *
@@ -136,6 +139,7 @@
 #define POP3FILE "/tmp/tuxmail.pop3"
 #define SMTPFILE "/tmp/tuxmail.smtp"
 #define NOTIFILE "/tmp/tuxmail.new"
+#define WAKEFILE "tuxmail.onreadmail"
 
 #define bool char
 #define true 1

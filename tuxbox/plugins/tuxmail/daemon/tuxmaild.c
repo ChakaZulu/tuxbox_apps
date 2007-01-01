@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.47  2007/01/01 19:54:03  robspr1
+ * -execute tuxmail.onreadmail in cfg-dir before new mail is read to cache
+ *
  * Revision 1.46  2006/10/29 20:10:15  robspr1
  * - bugfix viewing deleted mails from IMAP box; - add body-scanning to spamfilter
  *
@@ -596,7 +599,7 @@ int ReadConf()
 			skin = 1;
 		}
 
-		if(typeflag < 1 || typeflag > 3)
+		if(typeflag < 1 || typeflag > 4)
 		{
 			slog ? syslog(LOG_DAEMON | LOG_INFO, "TYPEFLAG=%d invalid, set to \"1\"", typeflag) : printf("TuxMailD <TYPEFLAG=%d invalid, set to \"1\">\n", typeflag);
 
@@ -4038,6 +4041,12 @@ int CheckAccount(int account)
 					}
 */
 					
+					// if we have a hard-disk, we have to wake-up the disk and to wait until the disk is awaken
+					if( readmails )
+					{
+						system(CFGPATH WAKEFILE);
+					}
+					
 					for( i=0; i<readmails; i++)
 					{
 						rewind(fd_idx);
@@ -4646,7 +4655,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.46 $";
+	char cvs_revision[] = "$Revision: 1.47 $";
 	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
