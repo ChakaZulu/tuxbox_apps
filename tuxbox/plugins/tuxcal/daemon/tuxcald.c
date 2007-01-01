@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.08  2007/01/01 19:28:06  robspr1
+ * -bugfix showing actual event, hiding mail-clock
+ *
  * Revision 1.07  2006/02/24 08:14:49  robspr1
  * - hide clock if file-controlled
  *
@@ -1888,7 +1891,7 @@ void NotifyUser()
 			if (iCntTmEvents)																	
 			{
 				strcat(tmp_buffer, http_br);
-				sprintf(tmp_buffer1,http_lines[3][osdidx],tCheck_hour,tCheck_min);
+				sprintf(tmp_buffer1,http_lines[MAXCHECKDAYS][osdidx],tCheck_hour,tCheck_min);
 				strcat(tmp_buffer, tmp_buffer1);
 //				printf("TuxCald <%s>\r\n",tmp_buffer);
 				
@@ -1899,7 +1902,7 @@ void NotifyUser()
 					strcat(tmp_buffer, tmp_buffer1);
 				}
 				strcat(tmp_buffer, http_ln);
-	//			printf("TuxCald <%s>\r\n",tmp_buffer);
+//				printf("TuxCald <%s>\r\n",tmp_buffer);
 			}
 			else
 			{			
@@ -2139,7 +2142,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.07 $";
+	char cvs_revision[] = "$Revision: 1.08 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -2338,7 +2341,11 @@ int main(int argc, char **argv)
 					if (iFB) show_clock = 'Y';
 					fclose(pipe);
 				}
-				else show_clock = 'N';
+				else 
+				{
+					show_clock = 'N';
+					ClearScreen();
+				}
 			}
 			
 			//------------------- part for showing the clock		
@@ -2358,13 +2365,19 @@ int main(int argc, char **argv)
 					}
 					else
 					{
-						if (iNewMails)	memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);
+						if (iNewMails)	
+						{
+							ClearScreen();
+						}
 						iNewMails=0;
 					}
 				}
 				else
 				{
-					if (iNewMails)	memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);
+					if (iNewMails)	
+					{
+						ClearScreen();
+					}
 					iNewMails=0;
 				}
 				
