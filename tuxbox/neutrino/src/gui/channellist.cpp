@@ -595,7 +595,7 @@ int CChannelList::numericZap(int key)
 	if (key == g_settings.key_zaphistory) {
 
 	    if (this->lastChList.size() > 1) {
-		CChannelList channelList("Zapping history", true);
+		CChannelList channelList("Channel history", true);
 
 		for ( unsigned int i = 1 ; i < this->lastChList.size() ; ++i) {
 		        int channelnr = this->lastChList.getlast(i);
