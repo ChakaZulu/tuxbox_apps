@@ -460,8 +460,8 @@ keybindingmenu.subchannelup subchannel up
 keybindingmenu.subchannelup_head key subchannel up
 keybindingmenu.tvradiomode TV/Radio-mode
 keybindingmenu.tvradiomode_head TV/Radio-mode
-keybindingmenu.zaphistory Zapping History Bouquet
-keybindingmenu.zaphistory_head Zapping History Bouquet
+keybindingmenu.zaphistory Channel History Bouquet
+keybindingmenu.zaphistory_head Channel History Bouquet
 keychooser.head Setup new Key
 keychooser.text1 Please press the new key
 keychooser.text2 wait a few seconds for abort
