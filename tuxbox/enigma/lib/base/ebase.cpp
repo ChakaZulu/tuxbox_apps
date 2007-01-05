@@ -156,34 +156,17 @@ void eMainloop::setTimerOffset( int difference )
 
 void eMainloop::addSocketNotifier(eSocketNotifier *sn)
 {
-	int fd=sn->getFD();
-	ASSERT(notifiers.find(fd) == notifiers.end());
-	ASSERT(new_notifiers.find(fd) == new_notifiers.end());
-	new_notifiers[fd]=sn;
+	notifiers.insert(std::pair<int,eSocketNotifier*> (sn->getFD(), sn));
 }
 
 void eMainloop::removeSocketNotifier(eSocketNotifier *sn)
 {
-	int fd=sn->getFD();
-	std::map<int, eSocketNotifier*>::iterator it(notifiers.find(fd));
-	if (it != notifiers.end())
-		return notifiers.erase(it);
-	it = new_notifiers.find(fd);
-	if (it != new_notifiers.end())
-		return new_notifiers.erase(it);
-	eFatal("removed socket notifier which is not present");
+	notifiers.erase(sn->getFD());
 }
 
 void eMainloop::processOneEvent()
 {
 	int ret;
-
-	for (std::map<int, eSocketNotifier*>::iterator it(new_notifiers.begin()); it != new_notifiers.end();)
-	{
-		notifiers[it->first]=it->second;
-		new_notifiers.erase(it++);
-	}
-
 	int fdAnz = notifiers.size();
 	pollfd pfd[fdAnz];
 
