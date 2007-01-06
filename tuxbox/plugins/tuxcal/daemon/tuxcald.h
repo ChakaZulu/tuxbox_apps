@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.h,v $
+ * Revision 1.07  2007/01/06 16:38:59  robspr1
+ * - accept unknown chunks in wave header
+ *
  * Revision 1.06  2006/02/24 08:14:49  robspr1
  * - hide clock if file-controlled
  *
@@ -172,7 +175,7 @@ char *http_br = {"**********************************%0A"};
 //----------------------------------------------------
 // defines for database
 #define MAXINFOLEN				80
-#define MAXENTRYS					500
+#define MAXENTRYS					200
 #define MAXCHECKS					10
 #define MAXCHECKDAYS			5
 #define MAXSTIMER					5
@@ -295,6 +298,12 @@ struct WAVEHEADER
 	unsigned short	BitsPerSample;
 	unsigned long		ChunkID3;
 	unsigned long		ChunkSize3;
+};
+
+struct CHUNK
+{
+	unsigned long	ChunkID;
+	unsigned long	ChunkSize;
 };
 
 //----------------------------------------------------
