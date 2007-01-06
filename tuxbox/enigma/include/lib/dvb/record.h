@@ -73,6 +73,7 @@ class eDVBRecorder: private eThread, public Object
 	char buf[524144]; 
 	int bufptr;
 
+	int written_since_last_sync;
 	void thread();
 	void gotBackMessage(const eDVBRecorderMessage &msg);
 	inline int flushBuffer();
