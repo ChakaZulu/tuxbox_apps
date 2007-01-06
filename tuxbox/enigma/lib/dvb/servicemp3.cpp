@@ -908,7 +908,7 @@ int eMP3Decoder::getPosition(int real)
 	if (real)
 	{
 			// our file pos
-		off_t real = ::lseek(sourcefd, 0, SEEK_CUR);
+		off64_t real = ::lseek64(sourcefd, 0, SEEK_CUR);
 			// minus bytes still in input buffer
 		real -= input.size();
 			// minus not yet played data in a.) output buffers and b.) dsp buffer
