@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.562 2006/12/19 16:14:25 ghostrider Exp $
+ * $Id: enigma_dyn.cpp,v 1.563 2007/01/06 14:03:20 ghostrider Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2326,7 +2326,7 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 				sprintf(tmp, "/dev/input/event%d", cnt);
 				if (stat(tmp, &s))
 					break;
-				if ((fd=open(tmp, O_RDONLY)) == -1)
+				if ((fd=open(tmp, O_RDWR|O_NONBLOCK)) == -1)
 					eDebug("open %s failed(%m)", tmp);
 				else 
 				{
@@ -2355,7 +2355,7 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 		{
 			char tmp[128];
 			sprintf(tmp, "/dev/input/event%d", keyb_evt_dev_num);
-			if ((evd=open(tmp, O_RDONLY)) < 0)
+			if ((evd=open(tmp, O_RDWR|O_NONBLOCK)) < 0)
 				eDebug("open %s failed(%m)", tmp);
 		}
 InputDevFound:
