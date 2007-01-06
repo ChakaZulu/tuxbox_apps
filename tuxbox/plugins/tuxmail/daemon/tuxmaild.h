@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.29  2007/01/06 16:27:03  robspr1
+ * - accept unknown chunks in wave header
+ *
  * Revision 1.28  2007/01/01 19:54:03  robspr1
  * -execute tuxmail.onreadmail in cfg-dir before new mail is read to cache
  *
@@ -283,6 +286,12 @@ struct WAVEHEADER
 
 	unsigned long	ChunkID3;
 	unsigned long	ChunkSize3;
+};
+
+struct CHUNK
+{
+	unsigned long	ChunkID;
+	unsigned long	ChunkSize;
 };
 
 // some data

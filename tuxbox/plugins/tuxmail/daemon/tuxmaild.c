@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.48  2007/01/06 16:27:03  robspr1
+ * - accept unknown chunks in wave header
+ *
  * Revision 1.47  2007/01/01 19:54:03  robspr1
  * -execute tuxmail.onreadmail in cfg-dir before new mail is read to cache
  *
@@ -4155,7 +4158,7 @@ void SwapEndian(unsigned char *header)
 	wave->ChunkType = (wave->ChunkType << 24) | ((wave->ChunkType & 0x0000ff00) << 8) | ((wave->ChunkType & 0x00ff0000) >> 8) | (wave->ChunkType >> 24);
 
 	wave->ChunkID2 = (wave->ChunkID2 << 24) | ((wave->ChunkID2 & 0x0000ff00) << 8) | ((wave->ChunkID2 & 0x00ff0000) >> 8) | (wave->ChunkID2 >> 24);
-//	wave->ChunkSize2 = (wave->ChunkSize2 << 24) | ((wave->ChunkSize2 & 0x0000ff00) << 8) | ((wave->ChunkSize2 & 0x00ff0000) >> 8) | (wave->ChunkSize2 >> 24);
+	wave->ChunkSize2 = (wave->ChunkSize2 << 24) | ((wave->ChunkSize2 & 0x0000ff00) << 8) | ((wave->ChunkSize2 & 0x00ff0000) >> 8) | (wave->ChunkSize2 >> 24);
 	wave->Format = (wave->Format >> 8) | (wave->Format << 8);
 	wave->Channels = (wave->Channels >> 8) | (wave->Channels << 8);
 	wave->SampleRate = (wave->SampleRate << 24) | ((wave->SampleRate & 0x0000ff00) << 8) | ((wave->SampleRate & 0x00ff0000) >> 8) | (wave->SampleRate >> 24);
@@ -4168,6 +4171,20 @@ void SwapEndian(unsigned char *header)
 }
 
 /******************************************************************************
+ * SwapEndianChunk
+ ******************************************************************************/
+
+void SwapEndianChunk(unsigned char *chunk)
+{
+	/* wrote the PlaySound() on my pc not in mind that dbox is big endian. so this was the lazy way to make it work, sorry... */
+
+	struct CHUNK *wave = (struct CHUNK*)chunk;
+
+	wave->ChunkID = (wave->ChunkID << 24) | ((wave->ChunkID & 0x0000ff00) << 8) | ((wave->ChunkID & 0x00ff0000) >> 8) | (wave->ChunkID >> 24);
+	wave->ChunkSize = (wave->ChunkSize << 24) | ((wave->ChunkSize & 0x0000ff00) << 8) | ((wave->ChunkSize & 0x00ff0000) >> 8) | (wave->ChunkSize >> 24);
+}
+
+/******************************************************************************
  * PlaySound
  ******************************************************************************/
 
@@ -4175,7 +4192,8 @@ void PlaySound(unsigned char *file)
 {
 	FILE *fd_wav;
 	unsigned char header[sizeof(struct WAVEHEADER)];
-	int dsp, format, channels, speed, blocksize, count = 0;
+	int dsp, format, channels, speed, blocksize, readcount, count = 0;
+	unsigned char tmp;
 	unsigned char *samples;
 	struct WAVEHEADER *wave = (struct WAVEHEADER*)header;
 
@@ -4193,7 +4211,7 @@ void PlaySound(unsigned char *file)
 		{
 			// read header and detect format
 
-				fread(header, 1, sizeof(header), fd_wav);
+				fread(header, 1, sizeof(header)-8, fd_wav);
 
 				SwapEndian(header);
 
@@ -4224,19 +4242,42 @@ void PlaySound(unsigned char *file)
 					return;
 				}
 
-				if(wave->ChunkID3 != DATA)
-				{
-					slog ? syslog(LOG_DAEMON | LOG_INFO, "could not find Sounddata") : printf("TuxMailD <could not find Sounddata>\n");
-
-					fclose(fd_wav);
-
-					return;
-				}
-
 				format = (wave->BitsPerSample == 8) ? AFMT_U8 : AFMT_S16_LE;
 				channels = wave->Channels;
 				speed = wave->SampleRate;
 
+				// step over unsed bytes in fmt-chunk
+				count = wave->ChunkSize2 - 16;
+				while(count)
+				{
+					fread(&tmp, 1, 1, fd_wav);
+					count--;	
+				}
+				
+				// find data-chunk
+				do
+				{
+				  readcount=fread(&wave->ChunkID3, 1, 8, fd_wav);
+				  SwapEndianChunk((char *)&wave->ChunkID3);
+					if(readcount < 8)
+					{
+						slog ? syslog(LOG_DAEMON | LOG_INFO, "could not find Sounddata") : printf("TuxMailD <could not find Sounddata>\n");
+	
+						fclose(fd_wav);
+	
+						return;
+					}
+				  if(wave->ChunkID3 != DATA)
+				  {
+						count = wave->ChunkSize3;
+						while(count)
+						{
+							fread(&tmp, 1, 1, fd_wav);
+							count--;	
+						}				  	
+				  }
+				}while(wave->ChunkID3 != DATA);
+				
 			// get samples
 
 				if(!(samples = (unsigned char*)malloc(wave->ChunkSize3)))
@@ -4655,7 +4696,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.47 $";
+	char cvs_revision[] = "$Revision: 1.48 $";
 	int param, nodelay = 0, account, mailstatus, unread_mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
