@@ -24,7 +24,7 @@ void eSocketNotifier::start()
 		stop();
 
 	context.addSocketNotifier(this);
-	state=1;
+	state=2;  // running but not in poll yet
 }
 
 void eSocketNotifier::stop()
@@ -174,6 +174,7 @@ void eMainloop::processOneEvent()
 	std::map<int,eSocketNotifier*>::iterator it(notifiers.begin());
 	for (int i=0; i < fdAnz; i++, it++)
 	{
+		it->second->state = 1; // set state to in poll (2 is running but not in poll)
 		pfd[i].fd = it->first;
 		pfd[i].events = it->second->getRequested();
 	}
@@ -212,31 +213,35 @@ void eMainloop::processOneEvent()
 	else if (ret>0)
 	{
 	//		eDebug("bin aussem poll raus und da war was");
-		for (int i=0; i < fdAnz ; i++)
+		for (int i=0; i < fdAnz && ret; i++)
 		{
-			if( notifiers.find(pfd[i].fd) == notifiers.end())
-				continue;
-
-			int req = notifiers[pfd[i].fd]->getRequested();
-
-			if ( pfd[i].revents & req )
+			if (pfd[i].revents)
 			{
-				notifiers[pfd[i].fd]->activate(pfd[i].revents);
-				if (!--ret)
-					break;
-				else
+				it = notifiers.find(pfd[i].fd);
+				--ret;
+				if (it != notifiers.end()
+					&& it->second->state == 1) // added and in poll
 				{
-					if ( TimerList )
-						doRecalcTimers();
-					while (TimerList && timeout_usec(TimerList.begin()->getNextActivation()) <= 0 )
+					int req = it->second->getRequested();
+					if (pfd[i].revents & req)
 					{
-						TimerList.begin()->activate();
-						doRecalcTimers();
+						it->second->activate(pfd[i].revents & req);
+						if (ret)
+						{
+							if ( TimerList )
+								doRecalcTimers();
+							while(TimerList && timeout_usec(TimerList.begin()->getNextActivation()) <= 0)
+							{
+								TimerList.begin()->activate();
+								doRecalcTimers();
+							}
+						}
 					}
+					pfd[i].revents &= ~req;
 				}
+				if (pfd[i].revents & (POLLERR|POLLHUP|POLLNVAL))
+					eDebug("poll: unhandled POLLERR/HUP/NVAL for fd %d(%d)", pfd[i].fd, pfd[i].revents);
 			}
-			else if (pfd[i].revents & (POLLERR|POLLHUP|POLLNVAL))
-				eDebug("poll: unhandled POLLERR/HUP/NVAL for fd %d(%d)", pfd[i].fd,pfd[i].revents);
 		}
 	}
 	else if (ret<0)
