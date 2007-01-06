@@ -116,6 +116,7 @@ int eDVBRecorder::flushBuffer()
 		}
 		written += wr;
 		size += wr;
+		written_since_last_sync += wr;
 	}
 
 	if (size >= splitsize)
@@ -139,7 +140,20 @@ int eDVBRecorder::flushBuffer()
 					goto Error;
 			}
 			written += wr;
+			written_since_last_sync += wr;
 			size += wr;
+		}
+	}
+	else
+	{
+		if (written_since_last_sync >= 1024*1024) // 1M
+		{
+			int toflush = written_since_last_sync > 1024*1024 ? 1024*1024 :
+				written_since_last_sync & ~4095;
+			off64_t dest_pos = lseek64(outfd, 0, SEEK_CUR);
+			dest_pos -= toflush;
+			posix_fadvise64(outfd, dest_pos, toflush, POSIX_FADV_DONTNEED);
+			written_since_last_sync -= toflush;
 		}
 	}
 	bufptr=0;
@@ -308,6 +322,7 @@ int eDVBRecorder::openFile(int suffix)
 		tfilename+=eString().sprintf(".%03d", suffix);
 
 	size=0;
+	written_since_last_sync=0;
 
 	if (outfd >= 0)
 		::close(outfd);
@@ -334,6 +349,10 @@ int eDVBRecorder::openFile(int suffix)
 		eDebug("failed to open DVR file: %s (%m)", tfilename.c_str());	
 		return -1;
 	}
+
+	/* turn off kernel caching strategies */
+	posix_fadvise64(outfd, 0, 0, POSIX_FADV_RANDOM);
+
 	return 0;
 }
 
