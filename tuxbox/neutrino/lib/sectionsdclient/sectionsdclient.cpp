@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.50 2006/06/08 20:19:33 houdini Exp $
+  $Id: sectionsdclient.cpp,v 1.51 2007/01/06 20:05:54 houdini Exp $
 
   License: GPL
 
@@ -472,11 +472,9 @@ bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEP
 		{
 			char* pData = new char[nBufSize];
 			receive_data(pData, nBufSize);
-
 			close_connection();
 
 			char* dp = pData;
-
 
 			epgdata->eventID = *((event_id_t *)dp);
 			dp+= sizeof(epgdata->eventID);
@@ -490,10 +488,13 @@ bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEP
 			// 21.07.2005 - rainerk
 			// Convert line-terminated extended events to vector of strings
 			dp = parseExtendedEvents(dp, epgdata);
-			epgdata->contentClassification = dp;
-			dp+=strlen(dp)+1;
-			epgdata->userClassification = dp;
-			dp+=strlen(dp)+1;
+
+			// *dp is the length, dp+1 is the chararray[]
+			epgdata->contentClassification = std::string(dp+1, *dp);
+			dp+=*dp+1;
+			epgdata->userClassification = std::string(dp+1, *dp);
+			dp+=*dp+1;
+
 			epgdata->fsk = *dp++;
 
 			epgdata->epg_times.startzeit = ((CSectionsdClient::sectionsdTime *) dp)->startzeit;
@@ -531,7 +532,6 @@ bool CSectionsdClient::getEPGid(const event_id_t eventid, const time_t starttime
 
 			char* dp = pData;
 
-
 			epgdata->eventID = *((event_id_t *)dp);
 			dp+= sizeof(epgdata->eventID);
 
@@ -544,10 +544,13 @@ bool CSectionsdClient::getEPGid(const event_id_t eventid, const time_t starttime
 			// 21.07.2005 - rainerk
 			// Convert line-terminated extended events to vector of strings
 			dp = parseExtendedEvents(dp, epgdata);
-			epgdata->contentClassification = dp;
-			dp+=strlen(dp)+1;
-			epgdata->userClassification = dp;
-			dp+=strlen(dp)+1;
+
+			// *dp is the length, dp+1 is the chararray[]
+			epgdata->contentClassification = std::string(dp+1, *dp);
+			dp+=*dp+1;
+			epgdata->userClassification = std::string(dp+1, *dp);
+			dp+=*dp+1;
+
 			epgdata->fsk = *dp++;
 
 			epgdata->epg_times.startzeit = ((CSectionsdClient::sectionsdTime *) dp)->startzeit;
@@ -645,3 +648,27 @@ void CSectionsdClient::writeSI2XML(const char * epgxmlname)
 	readResponse();
 	close_connection();
 }
+
+void CSectionsdClient::setConfig(const epg_config config)
+{
+	sectionsd::commandSetConfig *msg;
+	char* pData = new char[sizeof(sectionsd::commandSetConfig) + config.network_ntpserver.length() + 1 + config.epg_dir.length() + 1];
+	msg = (sectionsd::commandSetConfig *)pData;
+
+	msg->scanMode		= config.scanMode;
+	msg->epg_cache		= config.epg_cache;
+	msg->epg_old_events	= config.epg_old_events;
+	msg->epg_max_events	= config.epg_max_events;
+	msg->network_ntprefresh	= config.network_ntprefresh;
+	msg->network_ntpenable	= config.network_ntpenable;
+//	config.network_ntpserver:
+	strcpy(&pData[sizeof(sectionsd::commandSetConfig)], config.network_ntpserver.c_str());
+//	config.epg_dir:
+	strcpy(&pData[sizeof(sectionsd::commandSetConfig) + config.network_ntpserver.length() + 1], config.epg_dir.c_str());
+
+	send(sectionsd::setConfig, (char*)pData, sizeof(sectionsd::commandSetConfig) + config.network_ntpserver.length() + 1 + config.epg_dir.length() + 1);
+	readResponse();
+	close_connection();
+	delete[] pData;
+}
+

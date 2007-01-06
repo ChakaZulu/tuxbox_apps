@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.14 2006/05/19 21:28:09 houdini Exp $
+//  $Id: sectionsdMsg.h,v 1.15 2007/01/06 20:05:54 houdini Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -93,11 +93,12 @@ struct sectionsd
 		writeSI2XML,
  		
 		LoadLanguages,
- 		SaveLanguages,
- 		SetLanguages,
- 		GetLanguages,
- 		SetLanguageMode,
- 		GetLanguageMode,
+		SaveLanguages,
+		SetLanguages,
+		GetLanguages,
+		SetLanguageMode,
+		GetLanguageMode,
+		setConfig,
 
 		numberOfCommands        // <- no actual command, end of command marker
 	};
@@ -117,6 +118,18 @@ struct sectionsd
 	struct responseIsTimeSet
 	{
 		bool IsTimeSet;
+	};
+
+	struct commandSetConfig
+	{
+		int scanMode;
+		int epg_cache;
+		int epg_old_events;
+		unsigned int epg_max_events;
+		int network_ntprefresh;
+		int network_ntpenable;
+//		std::string network_ntpserver;
+//		std::string epg_dir;
 	};
 
 };
@@ -339,5 +352,17 @@ struct sectionsd
 //   data of response:
 //     mode (see above)
 //
+//	setConfig
+//   data of request:
+//	int scanMode; 			-> updating of services and bouquets -> saved in auto_scanning
+//	int epg_cache;			-> in days -> saved in secondsToCache
+//	int epg_old_events;		-> in hours -> saved in oldEventsAre
+//	unsigned int epg_max_events;	-> #of saved events -> saved in max_events
+//	int network_ntprefresh;		-> time refresh intervall -> saved in ntprefresh
+//	int network_ntpenable;		-> time refresh via ntp server -> saved in ntpenable
+//	std::string network_ntpserver;	-> ntpserver -> saved in ntpserver
+//	std::string epg_dir;		-> epg_dir to im/export the epg xml files -> saved in epg_file
+//   data of response:
+//     -
 
 #endif // SECTIONSDMSG_H

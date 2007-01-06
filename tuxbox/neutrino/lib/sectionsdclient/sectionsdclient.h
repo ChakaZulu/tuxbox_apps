@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.39 2006/06/08 20:19:33 houdini Exp $
+  $Id: sectionsdclient.h,v 1.40 2007/01/06 20:05:54 houdini Exp $
 
   License: GPL
 
@@ -150,7 +150,17 @@ class CSectionsdClient : private CBasicClient
 	struct CurrentNextInfo : public responseGetCurrentNextInfoChannelID
 	{};
 
-
+	typedef struct 
+	{
+		int scanMode;
+		int epg_cache;
+		int epg_old_events;
+		int epg_max_events;
+		int network_ntprefresh;
+		int network_ntpenable;
+		std::string network_ntpserver;
+		std::string epg_dir;
+	} epg_config;
 
 	bool getComponentTagsUniqueKey(const event_id_t uniqueKey, CSectionsdClient::ComponentTagList& tags);
 
@@ -202,6 +212,8 @@ class CSectionsdClient : private CBasicClient
 	*/
 	void unRegisterEvent(const unsigned int eventID, const unsigned int clientID);
 
+	void setConfig(const epg_config config);
+	
 };
 
 class CEPGData
