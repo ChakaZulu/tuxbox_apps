@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.230 2006/11/14 20:36:30 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.231 2007/01/06 20:19:44 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -151,10 +151,13 @@ static long secondsToCache;
 //static long oldEventsAre = 60*60L; // 2h  (sometimes want to know something about current/last movie)
 static long oldEventsAre;
 static int scanning = 1;
+static bool epg_filter_is_whitelist = false;
+static bool epg_filter_except_current_next = false;
 
 //NTP- Config
 #define CONF_FILE "/var/tuxbox/config/neutrino.conf"
-std::string ntp_system_cmd = "/sbin/rdate -s ";
+const std::string ntp_system_cmd_prefix = "/sbin/rdate -s ";
+std::string ntp_system_cmd;
 CConfigFile ntp_config(',');
 std::string ntpserver;
 int ntprefresh;
@@ -175,6 +178,9 @@ static pthread_mutex_t servicesLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast
 static pthread_mutex_t transpondersLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge transponders geschrieben und gelesen wird
 static pthread_mutex_t bouquetsLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge bouquets geschrieben und gelesen wird
 static pthread_mutex_t messagingLock = PTHREAD_MUTEX_INITIALIZER;
+
+static pthread_cond_t timeThreadSleepCond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t timeThreadSleepMutex = PTHREAD_MUTEX_INITIALIZER;
 
 // k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
 // falsch ist es zumindest nicht
@@ -256,6 +262,7 @@ inline int EITThreadsUnPause(void)
 }
 
 bool timeset = false;
+bool bTimeCorrect = false;
 pthread_cond_t timeIsSetCond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t timeIsSetMutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -358,6 +365,49 @@ class NvodSubEvent {
 typedef std::multimap<t_channel_id, class NvodSubEvent *, std::less<t_channel_id> > nvodSubEvents;
 */
 
+struct EPGFilter
+{
+	t_original_network_id onid;
+	t_transport_stream_id tsid;
+	t_service_id sid;
+	EPGFilter *next;
+};
+
+EPGFilter *CurrentEPGFilter = NULL;
+
+static bool checkEPGFilter(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
+{
+	EPGFilter *filterptr = CurrentEPGFilter;
+	while (filterptr)
+	{
+		if (((filterptr->onid == onid) || (filterptr->onid == 0)) &&
+			((filterptr->tsid == tsid) || (filterptr->tsid == 0)) &&
+			((filterptr->sid == sid) || (filterptr->sid == 0)))
+			return true;
+		filterptr = filterptr->next;
+	}
+	return false;
+}
+
+static void addEPGFilter(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
+{
+	if (!checkEPGFilter(onid, tsid, sid))
+	{
+		dprintf("Add EPGFilter for onid=\"%04x\" tsid=\"%04x\" service_id=\"%04x\"\n", onid, tsid, sid);
+        	EPGFilter *node = new EPGFilter;
+	        node->onid = onid;
+		node->tsid = tsid;
+		node->sid = sid;
+        	node->next = CurrentEPGFilter;
+        	CurrentEPGFilter = node;
+	}
+}
+
+static void removeEPGFilter(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
+{
+
+}
+
 // Loescht ein Event aus allen Mengen
 static bool deleteEvent(const event_id_t uniqueKey)
 {
@@ -388,8 +438,15 @@ static bool deleteEvent(const event_id_t uniqueKey)
 }
 
 // Fuegt ein Event in alle Mengen ein
-static void addEvent(const SIevent &evt)
+static void addEvent(const SIevent &evt, const unsigned table_id)
 {
+	bool EPG_filtered = checkEPGFilter(evt.original_network_id, evt.transport_stream_id, evt.service_id);
+
+	if (((!EPG_filtered) && (!epg_filter_is_whitelist)) || 
+		((EPG_filtered) && (epg_filter_is_whitelist)) || 
+		(table_id == 0) || 
+		((epg_filter_except_current_next) && ((table_id == 0x4e) || (table_id == 0x4f)))) {
+
 	SIevent *eptr = new SIevent(evt);
 
 	if (!eptr)
@@ -475,10 +532,11 @@ static void addEvent(const SIevent &evt)
 		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
 		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
 	}
+	}
 }
 
 // Fuegt zusaetzliche Zeiten in ein Event ein
-static void addEventTimes(const SIevent &evt)
+static void addEventTimes(const SIevent &evt, const unsigned table_id)
 {
 	if (evt.times.size())
 	{
@@ -507,7 +565,7 @@ static void addEventTimes(const SIevent &evt)
 		else
 		{
 			// Event nicht vorhanden -> einfuegen
-			addEvent(evt);
+			addEvent(evt, table_id);
 		}
 	}
 }
@@ -1207,12 +1265,14 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 	if (scanning && pause)
 	{
 		dmxEIT.request_pause();
+		dmxNIT.request_pause();
 		dmxSDT.request_pause();
 		dmxPPT.request_pause();
 		scanning = 0;
 	}
 	else if (!pause && !scanning)
 	{
+		dmxNIT.request_unpause();
 		dmxSDT.request_unpause();
 		dmxEIT.request_unpause();
 		dmxPPT.request_unpause();
@@ -1336,6 +1396,7 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 	return ;
 }
 
+
 static void commandSetEventsAreOldInMinutes(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 2)
@@ -1422,7 +1483,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 						count += snprintf(strZeit, MAX_SIZE_STRTIME, "%012llx ", (*e)->uniqueKey());
 						count += snprintf(strZeit2, MAX_SIZE_STRTIME, "%02d.%02d %02d:%02d %u ",
 								tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
-						count += strlen((*e)->getName().c_str()) + 1;
+						count += (*e)->getName().length() + 1;
 
 						if (count < MAX_SIZE_EVENTLIST) {
 							strcat(liste, strZeit);
@@ -1436,14 +1497,14 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 					}
 					else
 					{
-						count += sizeof(event_id_t) + 4 + 4 + strlen((*e)->getName().c_str()) + 1;
+						count += sizeof(event_id_t) + 4 + 4 + (*e)->getName().length() + 1;
 						if (((*e)->getText()).empty())
 						{
-							count += strlen((*e)->getExtendedText().substr(0, 40).c_str());
+							count += (*e)->getExtendedText().substr(0, 40).length();
 						}
 						else
 						{
-							count += strlen((*e)->getText().c_str());
+							count += (*e)->getText().length();
 						}
 						count++;
 
@@ -1574,7 +1635,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.230 2006/11/14 20:36:30 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.231 2007/01/06 20:19:44 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1741,10 +1802,10 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 		for (SIcomponents::iterator cmp = eFirst->second->components.begin(); cmp != eFirst->second->components.end(); ++cmp)
 		{
 			dprintf(" %s \n", cmp->component.c_str());
-			nResultDataSize += strlen(cmp->component.c_str()) + 1 +  	// name
-			                   sizeof(unsigned char) +  //componentType
-			                   sizeof(unsigned char) +  //componentTag
-			                   sizeof(unsigned char); //streamContent
+			nResultDataSize += cmp->component.length() + 1 +	// name
+			                   sizeof(unsigned char) +		// componentType
+			                   sizeof(unsigned char) +		// componentTag
+			                   sizeof(unsigned char);		// streamContent
 		}
 	}
 
@@ -1769,7 +1830,7 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 		{
 
 			strcpy(p, cmp->component.c_str());
-			p += strlen(cmp->component.c_str()) + 1;
+			p += cmp->component.length() + 1;
 			*((unsigned char *)p) = cmp->componentType;
 			p += sizeof(unsigned char);
 			*((unsigned char *)p) = cmp->componentTag;
@@ -1839,10 +1900,10 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 			{
 				countDescs++;
 				dprintf(" %s \n", linkage_desc->name.c_str());
-				nResultDataSize += strlen(linkage_desc->name.c_str()) + 1 +  	// name
-				                   sizeof(t_transport_stream_id) +  //transportStreamId
-				                   sizeof(t_original_network_id) +  //originalNetworkId
-				                   sizeof(t_service_id); //serviceId
+				nResultDataSize += linkage_desc->name.length() + 1 +	// name
+				                   sizeof(t_transport_stream_id) +	//transportStreamId
+				                   sizeof(t_original_network_id) +	//originalNetworkId
+				                   sizeof(t_service_id);		//serviceId
 			}
 		}
 	}
@@ -1869,7 +1930,7 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 			if (linkage_desc->linkageType == 0xB0)
 			{
 				strcpy(p, linkage_desc->name.c_str());
-				p += strlen(linkage_desc->name.c_str()) + 1;
+				p += linkage_desc->name.length() + 1;
 				*((t_transport_stream_id *)p) = linkage_desc->transportStreamId;
 				p += sizeof(t_transport_stream_id);
 				*((t_original_network_id *)p) = linkage_desc->originalNetworkId;
@@ -1925,7 +1986,7 @@ static t_transponder_id messaging_sdt_tid[MAX_SDTs];							// 0x42,0x46
 //static bool		sdt_backoff = true;
 //static bool		new_services = false;
 static int		auto_scanning = 0;
-char 			epg_file[100] = "";
+std::string		epg_dir("");
 /*
 static bool		nit_backoff = true;
 static bool 		messaging_nit_actual_sections_got_all;						// 0x40
@@ -2159,10 +2220,10 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	nResultDataSize =
 	    sizeof(event_id_t) +                        // Unique-Key
 	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
-	    strlen(evt.getName().c_str()) + 1 + 		// name + 0
+	    evt.getName().length() + 1 + 		// name + 0
 	    sizeof(event_id_t) +                        // Unique-Key
 	    sizeof(CSectionsdClient::sectionsdTime) +  	// zeit
-	    strlen(nextEvt.getName().c_str()) + 1 +    	// name + 0
+	    nextEvt.getName().length() + 1 +    	// name + 0
 	    sizeof(unsigned) + 				// flags
 	    1						// CurrentFSK
 	    ;
@@ -2186,7 +2247,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	*((CSectionsdClient::sectionsdTime *)p) = zeit;
 	p += sizeof(CSectionsdClient::sectionsdTime);
 	strcpy(p, evt.getName().c_str());
-	p += strlen(evt.getName().c_str()) + 1;
+	p += evt.getName().length() + 1;
 	*((event_id_t *)p) = nextEvt.uniqueKey();
 	p += sizeof(event_id_t);
 	zeit.startzeit = zeitEvt2.startzeit;
@@ -2194,7 +2255,7 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	*((CSectionsdClient::sectionsdTime *)p) = zeit;
 	p += sizeof(CSectionsdClient::sectionsdTime);
 	strcpy(p, nextEvt.getName().c_str());
-	p += strlen(nextEvt.getName().c_str()) + 1;
+	p += nextEvt.getName().length() + 1;
 	*((unsigned*)p) = flag;
 	p += sizeof(unsigned);
 	*p = evt.getFSK();
@@ -2239,23 +2300,23 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 		// new format - 0 delimiters
 		responseHeader.dataLength =
 		    sizeof(event_id_t) +                        // Unique-Key
-		    strlen(e.getName().c_str()) + 1 + 		// Name + del
-		    strlen(e.getText().c_str()) + 1 + 		// Text + del
-		    strlen(e.getExtendedText().c_str()) + 1 + 	// ext + del
+		    e.getName().length() + 1 + 			// Name + del
+		    e.getText().length() + 1 + 			// Text + del
+		    e.getExtendedText().length() + 1 +		// ext + del
 			// 21.07.2005 - rainerk
 			// Send extended events
-		    strlen(e.itemDescription.c_str()) + 1 + // Item Description + del
-		    strlen(e.item.c_str()) + 1 + // Item + del
-		    strlen(e.contentClassification.c_str()) + 1 + 		// Text + del
-		    strlen(e.userClassification.c_str()) + 1 + 	// ext + del
-		    1 +                                   // fsk
-		    sizeof(CSectionsdClient::sectionsdTime); // zeit
+		    e.itemDescription.length() + 1 +		// Item Description + del
+		    e.item.length() + 1 +			// Item + del
+		    e.contentClassification.length() + 1 + 	// Text + del
+		    e.userClassification.length() + 1 + 	// ext + del
+		    1 +                                   	// fsk
+		    sizeof(CSectionsdClient::sectionsdTime); 	// zeit
 	}
 	else
 		responseHeader.dataLength =
-		    strlen(e.getName().c_str()) + 1 + 		// Name + del
-		    strlen(e.getText().c_str()) + 1 + 		// Text + del
-		    strlen(e.getExtendedText().c_str()) + 1 + 1; // ext + del + 0
+		    e.getName().length() + 1 + 			// Name + del
+		    e.getText().length() + 1 + 			// Text + del
+		    e.getExtendedText().length() + 1 + 1;	// ext + del + 0
 
 	char* msgData = new char[responseHeader.dataLength];
 
@@ -2274,21 +2335,31 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 		p += sizeof(event_id_t);
 
 		strcpy(p, e.getName().c_str());
-		p += strlen(e.getName().c_str()) + 1;
+		p += e.getName().length() + 1;
 		strcpy(p, e.getText().c_str());
-		p += strlen(e.getText().c_str()) + 1;
+		p += e.getText().length() + 1;
 		strcpy(p, e.getExtendedText().c_str());
-		p += strlen(e.getExtendedText().c_str()) + 1;
+		p += e.getExtendedText().length() + 1;
 		// 21.07.2005 - rainerk
 		// Send extended events
 		strcpy(p, e.itemDescription.c_str());
-		p += strlen(e.itemDescription.c_str()) + 1;
+		p += e.itemDescription.length() + 1;
 		strcpy(p, e.item.c_str());
-		p += strlen(e.item.c_str()) + 1;
-		strcpy(p, e.contentClassification.c_str());
-		p += strlen(e.contentClassification.c_str()) + 1;
-		strcpy(p, e.userClassification.c_str());
-		p += strlen(e.userClassification.c_str()) + 1;
+		p += e.item.length() + 1;
+
+//		strlen(userClassification.c_str()) is not equal to e.userClassification.length() 
+//		because of binary data same is with contentClassification
+		// add length
+		*p = (unsigned char)e.contentClassification.length();
+		p++;
+		memcpy(p, e.contentClassification.data(), e.contentClassification.length());
+		p += e.contentClassification.length();
+
+		*p = (unsigned char)e.userClassification.length();
+		p++;
+		memcpy(p, e.userClassification.data(), e.userClassification.length());
+		p += e.userClassification.length();
+
 		*p = e.getFSK();
 		p++;
 
@@ -2648,16 +2719,16 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 				{
 					if (sendServiceName)
 					{
-						count += 13 + strlen(sname.c_str()) + 1 + strlen(eName.c_str()) + 1;
+						count += 13 + sname.length() + 1 + eName.length() + 1;
 						if (count < MAX_SIZE_BIGEVENTLIST) {
 							sprintf(liste, "%012llx\n", (*e)->uniqueKey());
 							liste += 13;
 							strcpy(liste, sname.c_str());
-							liste += strlen(sname.c_str());
+							liste += sname.length();
 							*liste = '\n';
 							liste++;
 							strcpy(liste, eName.c_str());
-							liste += strlen(eName.c_str());
+							liste += eName.length();
 							*liste = '\n';
 							liste++;
 						} else {
@@ -2668,14 +2739,14 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 					} // if sendServiceName
 					else
 					{
-						count += sizeof(event_id_t) + 4 + 4 + strlen(eName.c_str()) + 1;
+						count += sizeof(event_id_t) + 4 + 4 + eName.length() + 1;
 						if (eText.empty())
 						{
-							count += strlen(eExtendedText.substr(0, 40).c_str());
+							count += eExtendedText.substr(0, 40).length();
 						}
 						else
 						{
-							count += strlen(eText.c_str());
+							count += eText.length();
 						}
 						count++;
 
@@ -2758,7 +2829,7 @@ static void sendShort(int connfd, const SIevent& e, const SItime& t)
 
 	responseHeader.dataLength =
 	    12 + 1 + 				// Unique-Key + del
-	    strlen(e.getName().c_str()) + 1 + 		// name + del
+	    e.getName().length() + 1 + 		// name + del
 	    8 + 1 + 				// start time + del
 	    8 + 1 + 1;				// duration + del + 0
 	char* msgData = new char[responseHeader.dataLength];
@@ -3152,6 +3223,79 @@ static void commandSetSectionsdScanMode(int connfd, char *data, const unsigned d
 
 }
 
+static void commandSetConfig(int connfd, char *data, const unsigned dataLength)
+{
+	struct sectionsd::msgResponseHeader responseHeader;
+	struct sectionsd::commandSetConfig *pmsg;
+
+	pmsg = (struct sectionsd::commandSetConfig *)data;
+	if (pmsg->scanMode != auto_scanning) {
+		dprintf("new scanMode = %d\n", pmsg->scanMode);
+		lockMessaging();
+		auto_scanning = pmsg->scanMode;
+		unlockMessaging();
+	}
+
+	if (secondsToCache != (long)(pmsg->epg_cache)*24*60L*60L) {
+		dprintf("new epg_cache = %d\n", pmsg->epg_cache);
+		lockEvents();
+		secondsToCache = (long)(pmsg->epg_cache)*24*60L*60L;
+		unlockEvents();
+	}
+
+	if (oldEventsAre != (long)(pmsg->epg_old_events)*60L*60L) {
+		dprintf("new epg_old_events = %d\n", pmsg->epg_old_events);
+		lockEvents();
+		oldEventsAre = (long)(pmsg->epg_old_events)*60L*60L;
+		unlockEvents();
+	}
+
+	if (max_events != pmsg->epg_max_events) {
+		dprintf("new epg_max_events = %d\n", pmsg->epg_max_events);
+		lockEvents();
+		max_events = pmsg->epg_max_events;
+		unlockEvents();
+	}
+
+	if (ntprefresh != pmsg->network_ntprefresh) {
+		dprintf("new network_ntprefresh = %d\n", pmsg->network_ntprefresh);
+		pthread_mutex_lock(&timeThreadSleepMutex);
+		ntprefresh = pmsg->network_ntprefresh;
+		if (timeset) {
+			// wake up time thread
+			pthread_cond_broadcast(&timeThreadSleepCond);
+		}
+		pthread_mutex_unlock(&timeThreadSleepMutex);
+	}
+
+	if (ntpenable ^ (pmsg->network_ntpenable == 1))	{
+		dprintf("new network_ntpenable = %d\n", pmsg->network_ntpenable);
+		pthread_mutex_lock(&timeThreadSleepMutex);
+		ntpenable = (pmsg->network_ntpenable == 1);
+		if (timeset) {
+			// wake up time thread
+			pthread_cond_broadcast(&timeThreadSleepCond);
+		}
+		pthread_mutex_unlock(&timeThreadSleepMutex);
+	}
+
+	if (ntpserver.compare((std::string)&data[sizeof(struct sectionsd::commandSetConfig)])) {
+		ntpserver = (std::string)&data[sizeof(struct sectionsd::commandSetConfig)];
+		dprintf("new network_ntpserver = %s\n", ntpserver.c_str());
+		ntp_system_cmd = ntp_system_cmd_prefix + ntpserver;
+	}
+	
+	if (epg_dir.compare((std::string)&data[sizeof(struct sectionsd::commandSetConfig) + strlen(&data[sizeof(struct sectionsd::commandSetConfig)]) + 1])) {
+		epg_dir= (std::string)&data[sizeof(struct sectionsd::commandSetConfig) + strlen(&data[sizeof(struct sectionsd::commandSetConfig)]) + 1];
+		dprintf("new epg_dir = %s\n", epg_dir.c_str());
+	}
+
+	responseHeader.dataLength = 0;
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
+	return ;
+}
+
+
 static void commandFreeMemory(int connfd, char *data, const unsigned dataLength)
 {
 	EITThreadsPause();
@@ -3238,30 +3382,24 @@ static void *insertEventsfromFile(void *)
 	t_service_id sid = 0;
 	char cclass[20];
 	char cuser[20];
-	char indexname[100] = "";
-	std::string filename = "";
-//	std::string language;
-	char epgname[100] = "";
-	unsigned int dirlen = strlen(epg_file);
+	std::string indexname;
+	std::string filename;
+	std::string epgname;
 
-	strncpy(indexname, epg_file, dirlen);
-	indexname[dirlen] = '\0';
-	strncat(indexname, "index.xml", 10);
+	indexname = epg_dir + "index.xml";
 
-	xmlDocPtr index_parser = parseXmlFile(indexname);
+	xmlDocPtr index_parser = parseXmlFile(indexname.c_str());
 
 	if (index_parser != NULL) {
-		dprintf("Reading Information from file %s:\n", indexname);
+		dprintf("Reading Information from file %s:\n", indexname.c_str());
 
 		eventfile = xmlDocGetRootElement(index_parser)->xmlChildrenNode;
 
 		while (eventfile) {
 			filename = xmlGetAttribute(eventfile, "name");
-			strncpy(epgname, epg_file, dirlen);
-			epgname[dirlen] = '\0';
-			strcat(epgname, filename.c_str());
-			if (!(event_parser = parseXmlFile(epgname))) {
-				dprintf("unable to open %s for reading\n", epgname);
+			epgname = epg_dir + filename;
+			if (!(event_parser = parseXmlFile(epgname.c_str()))) {
+				dprintf("unable to open %s for reading\n", epgname.c_str());
 			}
 			else {
 				service = xmlDocGetRootElement(event_parser)->xmlChildrenNode;
@@ -3337,7 +3475,7 @@ static void *insertEventsfromFile(void *)
 							count++;
 						}
 						e.contentClassification = std::string(cclass, count);
-						e.userClassification =  std::string(cuser, count);
+						e.userClassification = std::string(cuser, count);
 
 						while (xmlGetNextOccurence(node, "component") != NULL) {
 							SIcomponent c;
@@ -3364,7 +3502,7 @@ static void *insertEventsfromFile(void *)
 							node = node->xmlNextNode;
 						}
 						lockEvents();
-						addEvent(e);
+						addEvent(e, 0);
 						unlockEvents();
 
 						event = event->xmlNextNode;
@@ -3394,8 +3532,7 @@ static void commandReadSIfromXML(int connfd, char *data, const unsigned dataLeng
 		return ;
 
 	lockMessaging();
-	strncpy(epg_file, data, dataLength);
-	epg_file[dataLength] = '\0';
+	epg_dir = (std::string)data;
 	unlockMessaging();
 
 	struct sectionsd::msgResponseHeader responseHeader;
@@ -3584,17 +3721,7 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 	return ;
 }
 
-static void commandDummy1(int connfd, char *data, const unsigned dataLength)
-{
-	return;
-}
-
-static void commandDummy2(int connfd, char *data, const unsigned dataLength)
-{
-	return;
-}
-
-static void commandDummy3(int connfd, char *data, const unsigned dataLength)
+static void commandDummy(int connfd, char *data, const unsigned dataLength)
 {
 	return;
 }
@@ -3737,13 +3864,13 @@ struct s_cmd_table
 
 static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
         //commandActualEPGchannelName,
-{	commandDummy1,				"commandDummy1"				},
+{	commandDummy,				"commandDummy1"				},
 {	commandEventListTV,			"commandEventListTV"			},
         //commandCurrentNextInfoChannelName,
-{	commandDummy2,				"commandDummy2"				},
+{	commandDummy,				"commandDummy2"				},
 {	commandDumpStatusInformation,		"commandDumpStatusInformation"		},
         //commandAllEventsChannelName,
-{	commandDummy3,				"commandDummy3"				},
+{	commandDummy,				"commandDummy3"				},
 {	commandSetHoursToCache,			"commandSetHoursToCache"		},
 {	commandSetEventsAreOldInMinutes,        "commandSetEventsAreOldInMinutes"	},
 {	commandDumpAllServices,                 "commandDumpAllServices"		},
@@ -3778,7 +3905,8 @@ static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
 {	commandSetLanguages,                    "commandSetLanguages"			},
 {	commandGetLanguages,                    "commandGetLanguages"			},
 {	commandSetLanguageMode,                 "commandSetLanguageMode"		},
-{	commandGetLanguageMode,                 "commandGetLanguageMode"		}
+{	commandGetLanguageMode,                 "commandGetLanguageMode"		},
+{	commandSetConfig,			"commandSetConfig"			}
 };
 
 //static void *connectionThread(void *conn)
@@ -4846,7 +4974,7 @@ static void write_bouquet_xml_node(FILE *fd, t_bouquet_id bouquet_id)
 
 	MySIbouquetsOrderUniqueKey::iterator s = mySIbouquetsOrderUniqueKey.begin();
 	while ((!found) && (s != mySIbouquetsOrderUniqueKey.end())) {
-		if ((s->second->bouquet_id == bouquet_id) && (strlen(s->second->bouquetName.c_str()) != 0))
+		if ((s->second->bouquet_id == bouquet_id) && (s->second->bouquetName.length() != 0))
 			found = true;
 		else
 			s++;
@@ -5281,9 +5409,11 @@ static void *sdtThread(void *)
 				lockMessaging();
 
 				if ((auto_scanning > 0) && (!startup)) {
-					if ((updateTP(scanType)) && (auto_scanning == 1))
-						eventServer->sendEvent(CSectionsdClient::EVT_SERVICES_UPDATE, CEventServer::INITID_SECTIONSD);
-
+					if ((auto_scanning == 1) || (auto_scanning == 3)) {
+						if (updateTP(scanType)) {
+							eventServer->sendEvent(CSectionsdClient::EVT_SERVICES_UPDATE, CEventServer::INITID_SECTIONSD);
+						}
+					}
 					is_new = false;
 					i = 0;
 					while ((i < MAX_BAT) && (messaging_bat_bouquet_id[i] != 0)) {
@@ -5294,8 +5424,11 @@ static void *sdtThread(void *)
 						i++;
 					}
 					if (is_new) {
-						if ((updateBouquets()) && (auto_scanning == 1))
-						eventServer->sendEvent(CSectionsdClient::EVT_BOUQUETS_UPDATE, CEventServer::INITID_SECTIONSD);
+						if (auto_scanning == 1) {
+							if (updateBouquets()) {
+								eventServer->sendEvent(CSectionsdClient::EVT_BOUQUETS_UPDATE, CEventServer::INITID_SECTIONSD);
+							}
+						}
 					}
 				}
 
@@ -5544,8 +5677,6 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
 }
 
 */
-pthread_cond_t timeThreadSleepCond = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t timeThreadSleepMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void *timeThread(void *)
 {
@@ -5563,8 +5694,21 @@ static void *timeThread(void *)
 
 		while(1)
 		{
+			if (bTimeCorrect == true){		// sectionsd started with parameter "-tc"
+				if (first_time == true) {	// only do this once!
+					time_t actTime;
+					actTime=time(NULL);
+					pthread_mutex_lock(&timeIsSetMutex);
+					timeset = true;
+					pthread_cond_broadcast(&timeIsSetCond);
+					pthread_mutex_unlock(&timeIsSetMutex );
+					eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &actTime, sizeof(actTime) );
+					printf("[timeThread] Time is already set by system, no further timeThread work!\n");
+					break;
+				}
+			}
 
-			if ( ntpenable && system( ntp_system_cmd.c_str() ) == 0)
+			else if ( ntpenable && system( ntp_system_cmd.c_str() ) == 0)
 			{
 				time_t actTime;
 				actTime=time(NULL);
@@ -5575,8 +5719,7 @@ static void *timeThread(void *)
 				pthread_cond_broadcast(&timeIsSetCond);
 				pthread_mutex_unlock(&timeIsSetMutex );
 				eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &actTime, sizeof(actTime) );
-
-			}else{
+			} else {
 				if (scanning && (getUTC(&UTC, true))) // always use TDT, a lot of transponders don't provide a TOT
 				{
 					tim = changeUTCtoCtime((const unsigned char *) &UTC);
@@ -5738,7 +5881,7 @@ static void *eitThread(void *)
 		for (;;)
 		{	/*
 			lockMessaging();
-			if (strcmp(epg_file, "") != 0) {
+			if (strcmp(epg_dir, "") != 0) {
 				insertEventsfromFile();
 				unlockMessaging();
 			} else {
@@ -5990,7 +6133,7 @@ static void *eitThread(void *)
 							        ( ( e->times.begin()->startzeit + (long)e->times.begin()->dauer ) > zeit - oldEventsAre ) )
 							{
 								lockEvents();
-								addEvent(*e);
+								addEvent(*e, header.table_id);
 								unlockEvents();
 							}
 						}
@@ -6376,12 +6519,12 @@ static void *pptThread(void *)
 									if (already_exists)
 									{
 										// Zusaetzliche Zeiten in ein Event einfuegen
-										addEventTimes(*e);
+										addEventTimes(*e, header.table_id);
 									}
 									else
 									{
 										// Ein Event in alle Mengen einfuegen
-										addEvent(*e);
+										addEvent(*e, header.table_id);
 									}
 
 									unlockEvents();
@@ -6605,6 +6748,39 @@ static void *houseKeepingThread(void *)
 	pthread_exit(NULL);
 }
 
+static void readEPGFilter(void)
+{
+	xmlDocPtr filter_parser = parseXmlFile("/var/tuxbox/config/epgfilter.xml");
+
+	t_original_network_id onid = 0;
+	t_transport_stream_id tsid = 0;
+	t_service_id sid = 0;
+
+	if (filter_parser != NULL)
+	{
+		dprintf("Reading EPGFilters\n");
+		
+		xmlNodePtr filter = xmlDocGetRootElement(filter_parser);
+		if (xmlGetNumericAttribute(filter, "is_whitelist", 10) == 1)
+			epg_filter_is_whitelist = true;
+		if (xmlGetNumericAttribute(filter, "except_current_next", 10) == 1)
+			epg_filter_except_current_next = true;
+		filter = filter->xmlChildrenNode;
+
+		while (filter) {
+
+			onid = xmlGetNumericAttribute(filter, "original_network_id", 16);
+			tsid = xmlGetNumericAttribute(filter, "transport_stream_id", 16);
+			sid  = xmlGetNumericAttribute(filter, "service_id", 16);
+
+			addEPGFilter(onid, tsid, sid);
+
+			filter = filter->xmlNextNode;
+		}
+	}
+	xmlFreeDoc(filter_parser);
+}
+
 static void printHelp(void)
 {
 	printf("\nUsage: sectionsd [-d][-nu]\n\n");
@@ -6629,12 +6805,12 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.230 2006/11/14 20:36:30 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.231 2007/01/06 20:19:44 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
 	try {
-		if (argc < 1 || argc > 3) {
+		if (argc < 1 || argc > 4) {
 			printHelp();
 			return EXIT_FAILURE;
 		}
@@ -6649,6 +6825,10 @@ int main(int argc, char **argv)
 				update_eit = false;
 				printf("[sectionsd] EIT update disabled\n");
 			}
+			else if (!strcmp(argv[i], "-tc")) {
+				bTimeCorrect = true;
+				printf("[sectionsd] Started with correct system time\n");
+			}
 			else {
 				printHelp();
 				return EXIT_FAILURE;
@@ -6660,17 +6840,16 @@ int main(int argc, char **argv)
 		CBasicServer sectionsd_server;
 
 		//NTP-Config laden
-                if (!ntp_config.loadConfig(CONF_FILE))
-                {
-                        /* set defaults if no configuration file exists */
-                        printf("[sectionsd] %s not found\n", CONF_FILE);
-                }
+		if (!ntp_config.loadConfig(CONF_FILE))
+		{
+			/* set defaults if no configuration file exists */
+			printf("[sectionsd] %s not found\n", CONF_FILE);
+		}
 
-                ntpserver = ntp_config.getString("network_ntpserver", "de.pool.ntp.org");
-                ntprefresh = atoi(ntp_config.getString("network_ntprefresh","30").c_str() );
+		ntpserver = ntp_config.getString("network_ntpserver", "de.pool.ntp.org");
+		ntprefresh = atoi(ntp_config.getString("network_ntprefresh","30").c_str() );
 		ntpenable = ntp_config.getBool("network_ntpenable", false);
-
-		ntp_system_cmd += ntpserver;
+		ntp_system_cmd = ntp_system_cmd_prefix + ntpserver;
 
 		//EPG Einstellungen laden
 		secondsToCache = (atoi(ntp_config.getString("epg_cache_time","14").c_str() ) *24*60L*60L); //Tage
@@ -6680,6 +6859,8 @@ int main(int argc, char **argv)
 		printf("[sectionsd] Caching max %d events\n", max_events);
 		printf("[sectionsd] Caching %ld days\n", secondsToCache / (24*60*60L));
 		printf("[sectionsd] Events are old %ldmin after their end time\n", oldEventsAre / 60);
+
+		readEPGFilter();
 
 		if (!sectionsd_server.prepare(SECTIONSD_UDS_NAME))
 			return EXIT_FAILURE;
