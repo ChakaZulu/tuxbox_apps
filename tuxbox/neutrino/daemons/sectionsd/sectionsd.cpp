@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.232 2007/01/07 23:34:18 guenther Exp $
+//  $Id: sectionsd.cpp,v 1.233 2007/01/07 23:47:49 guenther Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1660,7 +1660,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.232 2007/01/07 23:34:18 guenther Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.233 2007/01/07 23:47:49 guenther Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -6819,9 +6819,9 @@ static void readEPGFilter(void)
 
 		while (filter) {
 
-			onid = xmlGetNumericAttribute(filter, "original_network_id", 16);
-			tsid = xmlGetNumericAttribute(filter, "transport_stream_id", 16);
-			sid  = xmlGetNumericAttribute(filter, "service_id", 16);
+			onid = xmlGetNumericAttribute(filter, "onid", 16);
+			tsid = xmlGetNumericAttribute(filter, "tsid", 16);
+			sid  = xmlGetNumericAttribute(filter, "serviceID", 16);
 
 			addEPGFilter(onid, tsid, sid);
 
@@ -6855,7 +6855,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.232 2007/01/07 23:34:18 guenther Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.233 2007/01/07 23:47:49 guenther Exp $\n");
 
 	SIlanguage::loadLanguages();
 
