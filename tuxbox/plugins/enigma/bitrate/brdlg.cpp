@@ -17,11 +17,15 @@
 #define TS_SYNC_BYTE 0x47
 #define TS_BUF_SIZE  (TS_LEN * 2048)
 
-#define DVB_API_VERSION 1
-
+#if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
 #define DEMUX_DEVICE "/dev/dvb/card0/demux1"
 #define DVR_DEVICE   "/dev/dvb/card0/dvr1"
+#else
+#include <linux/dvb/dmx.h>
+#define DEMUX_DEVICE "/dev/dvb/adapter0/demux0"
+#define DVR_DEVICE   "/dev/dvb/adapter0/dvr0"
+#endif
 
 BitrateDialog::BitrateDialog(): eWindow(1), startTimer(eApp)
 {
@@ -127,7 +131,11 @@ void BitrateDialog::Run()
 {
    unsigned char buf[TS_BUF_SIZE];
    struct pollfd pfd;
+#if HAVE_DVB_API_VERSION < 3
    struct dmxPesFilterParams flt;
+#else
+   struct dmx_pes_filter_params flt;
+#endif
    int dmxfd;
    struct timeval tv, first_tv, last_print_tv;
    long d_tim_ms, d_print_ms;
@@ -205,7 +213,11 @@ void BitrateDialog::Run()
       flt.pid = apid;
       flt.input = DMX_IN_FRONTEND;
       flt.output = DMX_OUT_TS_TAP;
-      flt.pesType = DMX_PES_OTHER;
+#if HAVE_DVB_API_VERSION < 3
+      flt.pesType=DMX_PES_OTHER;
+#else
+      flt.pes_type=DMX_PES_OTHER;
+#endif
       flt.flags = DMX_IMMEDIATE_START;
       if (ioctl(dmxfd, DMX_SET_PES_FILTER, &flt) < 0)
       {
@@ -303,7 +315,11 @@ void BitrateDialog::Run()
       flt.pid = vpid;
       flt.input = DMX_IN_FRONTEND;
       flt.output = DMX_OUT_TS_TAP;
-      flt.pesType = DMX_PES_OTHER;
+#if HAVE_DVB_API_VERSION < 3
+      flt.pesType=DMX_PES_OTHER;
+#else
+      flt.pes_type=DMX_PES_OTHER;
+#endif
       flt.flags = DMX_IMMEDIATE_START;
       if (ioctl(dmxfd, DMX_SET_PES_FILTER, &flt) < 0)
       {
