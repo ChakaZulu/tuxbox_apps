@@ -1,4 +1,5 @@
 /*
+	$Id: eventlist.cpp,v 1.100 2007/01/07 23:42:45 guenther Exp $
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -44,6 +45,12 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include "widget/hintbox.h"
+#include "gui/bouquetlist.h"
+#include <gui/widget/stringinput.h>
+extern CBouquetList        * bouquetList;
+
+
 #include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
 #include <driver/screen_max.h>
 
@@ -73,6 +80,12 @@ EventList::EventList()
 	frameBuffer = CFrameBuffer::getInstance();
 	selected = 0;
 	current_event = 0;
+	
+	m_search_list = SEARCH_LIST_NONE;
+    m_search_epg_item = SEARCH_LIST_NONE;
+    m_search_epg_item = SEARCH_EPG_TITLE;
+	m_search_channel_id = 1;
+	m_search_bouquet_id= 1;
 
 	//width  = 580;
 	// //height = 440;
@@ -213,6 +226,17 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 	neutrino_msg_data_t data;
 
 	int res = menu_return::RETURN_REPAINT;
+
+    if(m_search_list == SEARCH_LIST_NONE) // init globals once only
+    {
+        m_search_epg_item = SEARCH_EPG_TITLE;
+        //m_search_keyword = "";
+    	m_search_list = SEARCH_LIST_CHANNEL;
+    	m_search_channel_id = channel_id;
+    	m_search_bouquet_id= bouquetList->getActiveBouquetNumber();
+    	//m_search_source_text = "";
+    }
+    m_showChannel = false; // do not show the channel in normal mode, we just need it in search mode
 
 	name = channelname;
 	sort_mode=0;
@@ -428,6 +452,11 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				}
 			}
 		}
+		else if ( msg==CRCInput::RC_green )
+		{
+			findEvents();
+            timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
+		}
 		else
 		{
 			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
@@ -494,6 +523,13 @@ void EventList::paintItem(unsigned int pos)
 			datetime2_str += g_Locale->getText(CLocaleManager::getMonth(tmStartZeit));
 
 			datetime2_str += '.';
+
+            if ( m_showChannel ) // show the channel if we made a event search only (which could be made through all channels ).
+            {
+                t_channel_id channel = evtlist[liststart+pos].get_channel_id();
+                datetime2_str += "      ";
+                datetime2_str += g_Zapit->getChannelName(channel);
+            }
 
 			sprintf(tmpstr, "[%d min]", evtlist[liststart+pos].duration / 60 );
 			duration_str = tmpstr;
@@ -595,6 +631,13 @@ void  EventList::showFunctionBar (bool show)
 	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_RECORDEVENT), COL_INFOBAR, 0, true); // UTF-8
     }
 
+	if (1)
+	{
+		pos = 1;
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, bx+8+cellwidth*pos, by+h_offset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTFINDER_SEARCH), COL_INFOBAR, 0, true); // UTF-8
+	}
+
     // Button: Timer Channelswitch
     if (g_settings.key_channelList_addremind != (int)CRCInput::RC_nokey)
     {
@@ -648,4 +691,284 @@ int CEventListHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 	return res;
 }
 
+
+/************************************************************************************************/
+int EventList::findEvents(void) 
+/************************************************************************************************/
+{
+	int res = 0;
+	int event = 0;
+	t_channel_id channel_id;  //g_Zapit->getCurrentServiceID()
+	
+	CEventFinderMenu menu(	&event,
+							&m_search_epg_item,
+							&m_search_keyword,
+							&m_search_list,
+							&m_search_channel_id,
+							&m_search_bouquet_id
+						  );
+	hide();
+	menu.exec(NULL,"");
+	
+	if(event == 1)
+	{
+		m_showChannel = true;   // force the event list to paint the channel name
+		evtlist.clear();
+		if(m_search_list == SEARCH_LIST_CHANNEL)
+		{
+			g_Sectionsd->getEventsServiceKeySearchAdd(evtlist,m_search_channel_id,m_search_epg_item,m_search_keyword);
+		}
+		else if(m_search_list == SEARCH_LIST_BOUQUET)
+		{
+			int channel_nr = bouquetList->Bouquets[m_search_bouquet_id]->channelList->getSize();
+			for(int channel = 0; channel < channel_nr; channel++)
+			{
+				channel_id = bouquetList->Bouquets[m_search_bouquet_id]->channelList->getChannelFromIndex(channel)->channel_id;
+				g_Sectionsd->getEventsServiceKeySearchAdd(evtlist,channel_id,m_search_epg_item,m_search_keyword);
+			}
+		}
+		else if(m_search_list == SEARCH_LIST_ALL)
+		{
+			CHintBox box(LOCALE_TIMING_EPG,g_Locale->getText(LOCALE_EVENTFINDER_SEARCHING));
+			box.paint();
+			int bouquet_nr = bouquetList->Bouquets.size();
+			for(int bouquet = 0; bouquet < bouquet_nr; bouquet++)
+			{
+				int channel_nr = bouquetList->Bouquets[bouquet]->channelList->getSize();
+				for(int channel = 0; channel < channel_nr; channel++)
+				{
+				    channel_id = bouquetList->Bouquets[bouquet]->channelList->getChannelFromIndex(channel)->channel_id;
+					g_Sectionsd->getEventsServiceKeySearchAdd(evtlist,channel_id,m_search_epg_item,m_search_keyword);
+				}
+			}
+			box.hide();
+		}
+		sort(evtlist.begin(),evtlist.end(),sortByDateTime);
+		current_event = (unsigned int)-1;
+		time_t azeit=time(NULL);
+		
+		CChannelEventList::iterator e;
+		for ( e=evtlist.begin(); e!=evtlist.end(); ++e )
+		{
+			if ( e->startTime > azeit ) {
+				break;
+			}
+			current_event++;
+		}
+		if(evtlist.empty())
+		{
+			if ( evtlist.size() == 0 )
+			{
+				CChannelEvent evt;
+				evt.description = ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_EPGLIST_NOEVENTS));
+				evt.eventID = 0;
+				evtlist.push_back(evt);
+			}
+		}            
+		if (current_event == (unsigned int)-1)
+			current_event = 0;
+		selected= current_event;
+		
+		name = g_Locale->getText(LOCALE_EVENTFINDER_SEARCH);
+		name += ": '";
+		name += m_search_keyword;
+		name += "'";
+	}
+	paintHead();
+	paint();
+	showFunctionBar(true);
+	return(res);
+}
+
+/************************************************************************************************/
+/*
+class CSearchNotifier : public CChangeObserver
+{
+    private:
+        CMenuItem* menuItem;
+    public:
+        CSearchNotifier( CMenuItem* i){menuItem=i};
+        bool changeNotify(const neutrino_locale_t t, void * data)
+        {
+            int selected = *(int*)data;
+            menuItem->setActive(1);
+            menuItem
+		}
+};
+*/
+/************************************************************************************************
+bool CEventFinderMenuHandler::changeNotify(const neutrino_locale_t OptionName, void *Data)
+{
+	if(OptionName == )
+	{
+	}
+
+	return true;
+}
+*/
+  
+#define SEARCH_LIST_OPTION_COUNT 3
+const CMenuOptionChooser::keyval SEARCH_LIST_OPTIONS[SEARCH_LIST_OPTION_COUNT] =
+{
+//	{ EventList::SEARCH_LIST_NONE        , LOCALE_PICTUREVIEWER_RESIZE_NONE     },
+	{ EventList::SEARCH_LIST_CHANNEL     , LOCALE_TIMERLIST_CHANNEL    },
+	{ EventList::SEARCH_LIST_BOUQUET     , LOCALE_BOUQUETLIST_HEAD     },
+	{ EventList::SEARCH_LIST_ALL         , LOCALE_CHANNELLIST_HEAD    }
+};
+
+
+#define SEARCH_EPG_OPTION_COUNT 3
+const CMenuOptionChooser::keyval SEARCH_EPG_OPTIONS[SEARCH_EPG_OPTION_COUNT] =
+{
+//	{ EventList::SEARCH_EPG_NONE     	, LOCALE_PICTUREVIEWER_RESIZE_NONE     },
+	{ EventList::SEARCH_EPG_TITLE       , LOCALE_FONTSIZE_EPG_TITLE    },
+	{ EventList::SEARCH_EPG_INFO1     	, LOCALE_FONTSIZE_EPG_INFO1     },
+	{ EventList::SEARCH_EPG_INFO2       , LOCALE_FONTSIZE_EPG_INFO2    }
+//	,{ EventList::SEARCH_EPG_GENRE  	, LOCALE_MOVIEBROWSER_INFO_GENRE_MAJOR }
+};
+
+
+
+/************************************************************************************************/
+CEventFinderMenu::CEventFinderMenu(	int* 			event,
+									int* 			search_epg_item,
+									std::string* 	search_keyword,
+									int* 			search_list,		
+									t_channel_id*	search_channel_id,
+									t_bouquet_id*	search_bouquet_id)
+/************************************************************************************************/
+{
+	m_event = event;
+	m_search_epg_item   = search_epg_item;
+	m_search_keyword	= search_keyword;
+	m_search_list       = search_list;
+	m_search_channel_id = search_channel_id;
+	m_search_bouquet_id = search_bouquet_id;
+}
+
+
+/************************************************************************************************/
+int CEventFinderMenu::exec(CMenuTarget* parent, const std::string &actionkey)
+/************************************************************************************************/
+{
+	int res = menu_return::RETURN_REPAINT;
+	
+	
+	if(actionkey =="")
+	{
+		if(parent != NULL)
+			parent->hide();
+		//printf("0\n");
+		showMenu();
+	}
+	else if(actionkey =="1")
+	{
+		//printf("1\n");
+		*m_event = true;
+		res = menu_return::RETURN_EXIT_ALL;
+	}	
+	else if(actionkey =="2")
+	{
+		//printf("2\n");
+		/*
+		if(*m_search_list == EventList::SEARCH_LIST_CHANNEL)
+		{
+			mf[1]->setActive(true);
+			m_search_channelname = g_Zapit->getChannelName(*m_search_channel_id);;
+		}
+		else if(*m_search_list == EventList::SEARCH_LIST_BOUQUET)
+		{
+			mf[1]->setActive(true);
+			m_search_channelname = bouquetList->Bouquets[*m_search_bouquet_id]->channelList->getName();
+		}
+		else if(*m_search_list == EventList::SEARCH_LIST_ALL)
+		{
+			mf[1]->setActive(false);
+			m_search_channelname = "";
+		}
+		*/
+	}	
+	else if(actionkey =="3")
+	{
+		//printf("3\n");
+		// get channel id / bouquet id
+		if(*m_search_list == EventList::SEARCH_LIST_CHANNEL)
+		{
+			int nNewChannel;
+			int nNewBouquet;
+			nNewBouquet = bouquetList->show();
+			//printf("new_bouquet_id %d\n",nNewBouquet);
+			if (nNewBouquet > -1)
+			{
+				nNewChannel = bouquetList->Bouquets[nNewBouquet]->channelList->show();
+				//printf("nNewChannel %d\n",nNewChannel);
+				if (nNewChannel > -1)
+				{
+					*m_search_bouquet_id = nNewBouquet;
+					*m_search_channel_id = bouquetList->Bouquets[nNewBouquet]->channelList->getActiveChannel_ChannelID();
+					m_search_channelname = g_Zapit->getChannelName(*m_search_channel_id);
+				}
+			}
+		}
+		else if(*m_search_list == EventList::SEARCH_LIST_BOUQUET)
+		{
+			int nNewBouquet;
+			nNewBouquet = bouquetList->show();
+			//printf("new_bouquet_id %d\n",nNewBouquet);
+			if (nNewBouquet > -1)
+			{
+				*m_search_bouquet_id = nNewBouquet;
+				m_search_channelname = bouquetList->Bouquets[nNewBouquet]->channelList->getName();
+			}
+		}
+	}	
+	else if(actionkey =="4")
+	{
+		//printf("4\n");
+	}	
+	
+	return res;
+}
+
+/************************************************************************************************/
+int CEventFinderMenu::showMenu(void)
+/************************************************************************************************/
+{
+	int res = menu_return::RETURN_REPAINT;
+	*m_event = false;
+	
+	if(*m_search_list == EventList::SEARCH_LIST_CHANNEL)
+	{
+		m_search_channelname = g_Zapit->getChannelName(*m_search_channel_id);
+	}
+	else if(*m_search_list == EventList::SEARCH_LIST_BOUQUET)
+	{
+		m_search_channelname = bouquetList->Bouquets[*m_search_bouquet_id]->channelList->getName();
+	}
+	else if(*m_search_list == EventList::SEARCH_LIST_ALL)
+	{
+		m_search_channelname =="";
+	}
+	
+	CStringInputSMS stringInput(LOCALE_EVENTFINDER_KEYWORD,m_search_keyword, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+	
+	CMenuForwarder* mf0 =				new CMenuForwarder(LOCALE_EVENTFINDER_START_SEARCH, true, NULL, 				this, "1", CRCInput::RC_1 );
+	CMenuOptionChooser* mo0 =			new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WIHTIN_LIST , m_search_list, 	SEARCH_LIST_OPTIONS, SEARCH_LIST_OPTION_COUNT, true, NULL, CRCInput::RC_2);
+	CMenuForwarderNonLocalized* mf1=	new CMenuForwarderNonLocalized("", 	*m_search_list != EventList::SEARCH_LIST_ALL , m_search_channelname, 	this, "3", CRCInput::RC_3 );
+	CMenuOptionChooser* mo1 =			new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WIHTIN_EPG, m_search_epg_item, 			SEARCH_EPG_OPTIONS, SEARCH_EPG_OPTION_COUNT, true, NULL, CRCInput::RC_4);
+	CMenuForwarderNonLocalized* mf2=	new CMenuForwarderNonLocalized("",true, *m_search_keyword,			&stringInput, NULL, CRCInput::RC_5 );
+	
+	CMenuWidget searchMenu(LOCALE_EVENTFINDER_HEAD, "features.raw", 450);
+	searchMenu.addItem(GenericMenuSeparator);
+	searchMenu.addItem(mf0, false);
+	searchMenu.addItem(GenericMenuSeparatorLine);
+	searchMenu.addItem(mo0, false);
+	searchMenu.addItem(mf1, false);
+	searchMenu.addItem(GenericMenuSeparatorLine);
+	searchMenu.addItem(mo1, false);
+	searchMenu.addItem(mf2, false);
+	
+	res = searchMenu.exec(NULL,"");
+	return(res);
+}
 
