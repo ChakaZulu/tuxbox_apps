@@ -484,6 +484,7 @@ int CMenuOptionNumberChooser::paint(bool selected)
 CMenuOptionChooser::CMenuOptionChooser(const neutrino_locale_t OptionName, int * const OptionValue, const struct keyval * const Options, const unsigned Number_Of_Options, const bool Active, CChangeObserver * const Observ, const neutrino_msg_t DirectKey, const std::string & IconName)
 {
 	height            = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	optionNameString  = g_Locale->getText(OptionName);
 	optionName        = OptionName;
 	options           = Options;
 	active            = Active;
@@ -494,6 +495,19 @@ CMenuOptionChooser::CMenuOptionChooser(const neutrino_locale_t OptionName, int *
 	iconName          = IconName;
 }
 
+CMenuOptionChooser::CMenuOptionChooser(const char* OptionName, int * const OptionValue, const struct keyval * const Options, const unsigned Number_Of_Options, const bool Active, CChangeObserver * const Observ, const neutrino_msg_t DirectKey, const std::string & IconName)
+{
+	height            = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+	optionNameString  = OptionName;
+	optionName        = NONEXISTANT_LOCALE;
+	options           = Options;
+	active            = Active;
+	optionValue       = OptionValue;
+	number_of_options = Number_Of_Options;
+	observ            = Observ;
+	directKey         = DirectKey;
+	iconName          = IconName;
+}
 
 void CMenuOptionChooser::setOptionValue(const int newvalue)
 {
@@ -575,13 +589,12 @@ int CMenuOptionChooser::paint( bool selected )
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
-	const char * l_optionName = g_Locale->getText(optionName);
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), optionNameString.c_str(), color, 0, true); // UTF-8
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color, 0, true); // UTF-8
 
 	if (selected)
 	{
-		CLCD::getInstance()->showMenuText(0, l_optionName, -1, true); // UTF-8
+		CLCD::getInstance()->showMenuText(0, optionNameString.c_str(), -1, true); // UTF-8
 		CLCD::getInstance()->showMenuText(1, l_option, -1, true); // UTF-8
 	}
 

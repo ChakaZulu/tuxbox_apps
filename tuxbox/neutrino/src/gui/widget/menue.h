@@ -224,9 +224,11 @@ class CMenuOptionChooser : public CAbstractMenuOptionChooser
 	const struct keyval * options;
 	unsigned              number_of_options;
 	CChangeObserver *     observ;
+	std::string optionNameString;
 
  public:
 	CMenuOptionChooser(const neutrino_locale_t OptionName, int * const OptionValue, const struct keyval * const Options, const unsigned Number_Of_Options, const bool Active = false, CChangeObserver * const Observ = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const std::string & IconName= ""); // UTF-8
+	CMenuOptionChooser(const char* OptionName, int * const OptionValue, const struct keyval * const Options, const unsigned Number_Of_Options, const bool Active = false, CChangeObserver * const Observ = NULL, const neutrino_msg_t DirectKey = CRCInput::RC_nokey, const std::string & IconName= ""); // UTF-8
 
 	void setOptionValue(const int newvalue);
 	int getOptionValue(void) const;

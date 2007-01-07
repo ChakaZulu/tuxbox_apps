@@ -113,9 +113,11 @@ class CStringInputSMS : public CStringInput
 		virtual void keyRightPressed();
 
 		virtual void paint();
+		void initSMS(const char * const Valid_Chars);
 
 	public:
 		CStringInputSMS(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ = NULL, const char * const Icon = NULL);
+		CStringInputSMS(const neutrino_locale_t Name, std::string* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 };
 
 class CPINInput : public CStringInput
