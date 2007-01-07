@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.40 2007/01/06 20:05:54 houdini Exp $
+  $Id: sectionsdclient.h,v 1.41 2007/01/07 23:34:55 guenther Exp $
 
   License: GPL
 
@@ -185,6 +185,8 @@ class CSectionsdClient : private CBasicClient
 	CChannelEventList getChannelEvents(const bool tv_mode = true, t_channel_id* = NULL, int size = 0);
 
 	CChannelEventList getEventsServiceKey(const t_channel_id channel_id);
+
+    bool getEventsServiceKeySearchAdd(CChannelEventList& evtlist,const t_channel_id channel_id,char m_search_typ,std::string& m_search_text);
 
 	bool getEPGid(const event_id_t eventid, const time_t starttime, CEPGData * epgdata);
 

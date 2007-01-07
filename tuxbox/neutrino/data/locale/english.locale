@@ -275,6 +275,13 @@ epglist.noevents EPG is not available...
 epgviewer.More_Screenings More Screenings on this Channel
 epgviewer.nodetailed No detailed informations available
 epgviewer.notfound no epg found
+eventfinder.head Search in EPG
+eventfinder.keyword Keyword
+eventfinder.start_search  Start Search
+eventfinder.search_wihtin_list Search within
+eventfinder.search_wihtin_epg Search within
+eventfinder.search Search
+eventfinder.searching Search for keyword in EPG...
 eventlistbar.channelswitch schedule
 eventlistbar.eventsort sorting
 eventlistbar.recordevent record

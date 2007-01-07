@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.51 2007/01/06 20:05:54 houdini Exp $
+  $Id: sectionsdclient.cpp,v 1.52 2007/01/07 23:34:55 guenther Exp $
 
   License: GPL
 
@@ -383,6 +383,76 @@ CChannelEventList CSectionsdClient::getChannelEvents(const bool tv_mode, t_chann
 	}
 	close_connection();
 	return eList;
+}
+
+//GU:EPG
+/* This function does initiate a search for a keyword in all EPG Event of the Channel channel_id in sectionsd. 
+   The parameter search_typ does specify the search mode 
+	 0: none 			-> all EPG events of the channel are returned  
+	 1: keyword search in EPG Title 			 
+	 2: keyword search in EPG short description (INFO1)			
+	 3: keyword search in EPG description (INFO2)			 
+  In case of a match, the EPG event is added to the Eventlist eList.
+  */
+bool CSectionsdClient::getEventsServiceKeySearchAdd(CChannelEventList& eList,const t_channel_id channel_id,char search_typ,std::string& search_text)
+{
+	int nBufSize=0;
+	
+	nBufSize += sizeof(t_channel_id);
+	nBufSize += sizeof(char);
+	nBufSize += search_text.size()+1;
+	
+	char* pSData = new char[nBufSize];
+	char* pSData_ptr = pSData;
+        
+	*(t_channel_id*)pSData_ptr = channel_id;   
+	pSData_ptr += sizeof(t_channel_id);
+	*pSData_ptr = search_typ;   
+	pSData_ptr += sizeof(char);
+	strcpy(pSData_ptr,search_text.c_str());
+	
+	if (send(sectionsd::allEventsChannelIDSearch, pSData, nBufSize))
+	{
+		int nBufSize = readResponse();
+		
+		if( nBufSize > 0)
+		{
+			char* pData = new char[nBufSize];
+			receive_data(pData, nBufSize);
+			
+			char* dp = pData;
+			
+			int a = eList.size();
+			
+			while(dp < pData + nBufSize)
+			{
+				CChannelEvent aEvent;
+				
+				aEvent.eventID = *((event_id_t *) dp);
+				dp+=sizeof(aEvent.eventID);
+				
+				aEvent.startTime = *((time_t *) dp);
+				dp+=sizeof(aEvent.startTime);
+				
+				aEvent.duration = *((unsigned *) dp);
+				dp+=sizeof(aEvent.duration);
+				
+				aEvent.description= dp;
+				dp+=strlen(dp)+1;
+				
+				aEvent.text= dp;
+				dp+=strlen(dp)+1;
+				
+				eList.push_back(aEvent);
+			}
+			int b = eList.size() -a;
+			delete[] pData;
+		}
+	}
+	delete[] pSData;
+	
+	close_connection();
+	return true;
 }
 
 CChannelEventList CSectionsdClient::getEventsServiceKey(const t_channel_id channel_id)

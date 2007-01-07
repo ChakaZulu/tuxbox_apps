@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.78 2006/09/11 21:11:35 guenther Exp $
+ * $Id: locals_intern.h,v 1.79 2007/01/07 23:33:38 guenther Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -302,6 +302,13 @@ const char * locale_real_names[] =
 	"epgviewer.More_Screenings",
 	"epgviewer.nodetailed",
 	"epgviewer.notfound",
+	"eventfinder.head",
+	"eventfinder.keyword",
+	"eventfinder.start_search",
+	"eventfinder.search_wihtin_list",
+	"eventfinder.search_wihtin_epg",
+	"eventfinder.search",
+	"eventfinder.searching",
 	"eventlistbar.channelswitch",
 	"eventlistbar.eventsort",
 	"eventlistbar.recordevent",

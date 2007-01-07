@@ -275,6 +275,13 @@ epglist.noevents Keine EPG-Information verfügbar.
 epgviewer.More_Screenings Weitere Termine auf diesem Kanal
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
 epgviewer.notfound keine Programminformationen (EPG) gefunden
+eventfinder.head Stichwortsuche im EPG
+eventfinder.keyword Stichwort
+eventfinder.start_search  Starte Suche
+eventfinder.search_wihtin_list Suche in
+eventfinder.search_wihtin_epg Suche in
+eventfinder.search Suche
+eventfinder.searching Suche Stichwort in EPG ...
 eventlistbar.channelswitch Umschalten
 eventlistbar.eventsort Sortieren
 eventlistbar.recordevent Aufnehmen

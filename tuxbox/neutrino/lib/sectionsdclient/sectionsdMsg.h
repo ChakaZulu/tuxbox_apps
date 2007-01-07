@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.15 2007/01/06 20:05:54 houdini Exp $
+//  $Id: sectionsdMsg.h,v 1.16 2007/01/07 23:34:55 guenther Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -60,7 +60,7 @@ struct sectionsd
 		dummy2,
 		dumpStatusinformation,
 		//allEventsChannelName,
-		dummy3,
+		allEventsChannelIDSearch,
 		setHoursToCache,
 		setEventsAreOldInMinutes,
 		dumpAllServices,

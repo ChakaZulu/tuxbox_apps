@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.231 2007/01/06 20:19:44 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.232 2007/01/07 23:34:18 guenther Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1433,7 +1433,7 @@ static void commandSetHoursToCache(int connfd, char *data, const unsigned dataLe
 	return ;
 }
 
-static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true )
+static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true,char search = 0,std::string* search_text = NULL )
 {
 #define MAX_SIZE_EVENTLIST	64*1024
 	char *evtList = new char[MAX_SIZE_EVENTLIST]; // 64kb should be enough and dataLength is unsigned short
@@ -1467,77 +1467,102 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 			if ((*e)->get_channel_id() == serviceUniqueKey)
 			{
 				serviceIDfound = 1;
-
-				for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); ++t)
+				
+				std::string eName = (*e)->getName();
+				std::string eText = (*e)->getText();
+				std::string eExtendedText = (*e)->getExtendedText();
+				
+				bool copy = true;
+				if(search == 0); // nothing to do here
+				else if(search == 1)
 				{
-//					if (t->startzeit > laststart) {
-//					laststart = t->startzeit;
-					if ( oldFormat )
+				    if(eName.find(*search_text) == std::string::npos)
+				        copy = false;
+				}
+				else if(search == 2)
+				{
+				    if(eText.find(*search_text) == std::string::npos)
+				        copy = false;
+				}
+				else if(search == 3)
+				{
+				    if(eExtendedText.find(*search_text) == std::string::npos)
+				        copy = false;
+				}
+				
+				if(copy)
+				{
+					for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); ++t)
 					{
-#define MAX_SIZE_STRTIME	50
-						char strZeit[MAX_SIZE_STRTIME];
-						char strZeit2[MAX_SIZE_STRTIME];
-						struct tm *tmZeit;
-
-						tmZeit = localtime(&(t->startzeit));
-						count += snprintf(strZeit, MAX_SIZE_STRTIME, "%012llx ", (*e)->uniqueKey());
-						count += snprintf(strZeit2, MAX_SIZE_STRTIME, "%02d.%02d %02d:%02d %u ",
-								tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
-						count += (*e)->getName().length() + 1;
-
-						if (count < MAX_SIZE_EVENTLIST) {
-							strcat(liste, strZeit);
-							strcat(liste, strZeit2);
-							strcat(liste, (*e)->getName().c_str());
-							strcat(liste, "\n");
-						} else {
-							dprintf("warning: sendAllEvents eventlist cut\n")
-							break;
-						}
-					}
-					else
-					{
-						count += sizeof(event_id_t) + 4 + 4 + (*e)->getName().length() + 1;
-						if (((*e)->getText()).empty())
+	//					if (t->startzeit > laststart) {
+	//					laststart = t->startzeit;
+						if ( oldFormat )
 						{
-							count += (*e)->getExtendedText().substr(0, 40).length();
+	#define MAX_SIZE_STRTIME	50
+							char strZeit[MAX_SIZE_STRTIME];
+							char strZeit2[MAX_SIZE_STRTIME];
+							struct tm *tmZeit;
+	
+							tmZeit = localtime(&(t->startzeit));
+							count += snprintf(strZeit, MAX_SIZE_STRTIME, "%012llx ", (*e)->uniqueKey());
+							count += snprintf(strZeit2, MAX_SIZE_STRTIME, "%02d.%02d %02d:%02d %u ",
+									tmZeit->tm_mday, tmZeit->tm_mon + 1, tmZeit->tm_hour, tmZeit->tm_min, (*e)->times.begin()->dauer / 60);
+							count += (*e)->getName().length() + 1;
+	
+							if (count < MAX_SIZE_EVENTLIST) {
+								strcat(liste, strZeit);
+								strcat(liste, strZeit2);
+								strcat(liste, (*e)->getName().c_str());
+								strcat(liste, "\n");
+							} else {
+								dprintf("warning: sendAllEvents eventlist cut\n")
+								break;
+							}
 						}
 						else
 						{
-							count += (*e)->getText().length();
-						}
-						count++;
-
-						if (count < MAX_SIZE_EVENTLIST) {
-							*((event_id_t *)liste) = (*e)->uniqueKey();
-							liste += sizeof(event_id_t);
-							*((unsigned *)liste) = t->startzeit;
-							liste += 4;
-							*((unsigned *)liste) = t->dauer;
-							liste += 4;
-							strcpy(liste, (*e)->getName().c_str());
-							liste += strlen(liste);
-							liste++;
-
+							count += sizeof(event_id_t) + 4 + 4 + (*e)->getName().length() + 1;
 							if (((*e)->getText()).empty())
 							{
-								strcpy(liste, (*e)->getExtendedText().substr(0, 40).c_str());
-								liste += strlen(liste);
+								count += (*e)->getExtendedText().substr(0, 40).length();
 							}
 							else
 							{
-								strcpy(liste, (*e)->getText().c_str());
-								liste += strlen(liste);
+								count += (*e)->getText().length();
 							}
-							liste++;
-						} else {
-							dprintf("warning: sendAllEvents eventlist cut\n")
-							break;
+							count++;
+	
+							if (count < MAX_SIZE_EVENTLIST) {
+								*((event_id_t *)liste) = (*e)->uniqueKey();
+								liste += sizeof(event_id_t);
+								*((unsigned *)liste) = t->startzeit;
+								liste += 4;
+								*((unsigned *)liste) = t->dauer;
+								liste += 4;
+								strcpy(liste, (*e)->getName().c_str());
+								liste += strlen(liste);
+								liste++;
+	
+								if (((*e)->getText()).empty())
+								{
+									strcpy(liste, (*e)->getExtendedText().substr(0, 40).c_str());
+									liste += strlen(liste);
+								}
+								else
+								{
+									strcpy(liste, (*e)->getText().c_str());
+									liste += strlen(liste);
+								}
+								liste++;
+							} else {
+								dprintf("warning: sendAllEvents eventlist cut\n")
+								break;
+							}
 						}
+	//					}
 					}
-//					}
-				}
-			} // if = serviceID
+				} // if = serviceID
+			}
 			else if ( serviceIDfound )
 				break; // sind nach serviceID und startzeit sortiert -> nicht weiter suchen
 		}
@@ -1635,7 +1660,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.231 2007/01/06 20:19:44 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.232 2007/01/07 23:34:18 guenther Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3721,8 +3746,33 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 	return ;
 }
 
-static void commandDummy(int connfd, char *data, const unsigned dataLength)
+static void commandDummy1(int connfd, char *data, const unsigned dataLength)
 {
+	return;
+}
+
+static void commandDummy2(int connfd, char *data, const unsigned dataLength)
+{
+	return;
+}
+
+static void commandAllEventsChannelIDSearch(int connfd, char *data, const unsigned dataLength)
+{
+	//dprintf("Request of commandAllEventsChannelIDSearch, %d\n",dataLength);
+	if (dataLength > 5)
+	{
+		char *data_ptr = data;
+		char search = 0;
+		std::string search_text;
+		
+		t_channel_id channel_id = *(t_channel_id*)data_ptr;
+		data_ptr += sizeof(t_channel_id);
+		search = *data_ptr;
+		data_ptr += sizeof(char);
+		if(search != 0)
+			search_text = data_ptr;
+		sendAllEvents(connfd, channel_id, false,search,&search_text);
+	}
 	return;
 }
 
@@ -3864,13 +3914,13 @@ struct s_cmd_table
 
 static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
         //commandActualEPGchannelName,
-{	commandDummy,				"commandDummy1"				},
+{	commandDummy1,				"commandDummy1"				},
 {	commandEventListTV,			"commandEventListTV"			},
         //commandCurrentNextInfoChannelName,
-{	commandDummy,				"commandDummy2"				},
+{	commandDummy2,				"commandDummy2"				},
 {	commandDumpStatusInformation,		"commandDumpStatusInformation"		},
         //commandAllEventsChannelName,
-{	commandDummy,				"commandDummy3"				},
+{	commandAllEventsChannelIDSearch,        "commandAllEventsChannelIDSearch"				},
 {	commandSetHoursToCache,			"commandSetHoursToCache"		},
 {	commandSetEventsAreOldInMinutes,        "commandSetEventsAreOldInMinutes"	},
 {	commandDumpAllServices,                 "commandDumpAllServices"		},
@@ -6805,7 +6855,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.231 2007/01/06 20:19:44 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.232 2007/01/07 23:34:18 guenther Exp $\n");
 
 	SIlanguage::loadLanguages();
 

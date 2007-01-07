@@ -50,6 +50,36 @@
 
 class EventList
 {
+    // Eventfinder start
+	public: 
+		typedef enum
+		{
+			SEARCH_EPG_NONE,
+			SEARCH_EPG_TITLE,
+			SEARCH_EPG_INFO1,
+			SEARCH_EPG_INFO2,
+			SEARCH_EPG_GENRE,
+			SEARCH_EPG_ALL
+		}SEARCH_EPG;
+		typedef enum
+		{
+			SEARCH_LIST_NONE,
+			SEARCH_LIST_CHANNEL,
+			SEARCH_LIST_BOUQUET,
+			SEARCH_LIST_ALL
+		}SEARCH_LIST;
+	private: 
+        int             m_search_epg_item;
+        std::string     m_search_keyword;
+        int             m_search_list;
+        t_channel_id    m_search_channel_id;
+        t_bouquet_id    m_search_bouquet_id;
+        bool m_showChannel;
+
+	private: 	
+		int findEvents(void);
+    // Eventfinder end
+
 	private:
 		CFrameBuffer	*frameBuffer;
 		CChannelEventList evtlist;
@@ -95,6 +125,27 @@ class CEventListHandler : public CMenuTarget
 
 };
 
+class CEventFinderMenu : public CMenuTarget
+{
+	private:
+		int* 			m_event;
+		int*			m_search_epg_item;
+		std::string* 	m_search_keyword;
+		int* 			m_search_list;
+		std::string     m_search_channelname;
+		t_channel_id*	m_search_channel_id;
+		t_bouquet_id*	m_search_bouquet_id;
+        int showMenu(void);
+	public:
+		CEventFinderMenu(	int* 			event,
+							int* 			search_epg_item,
+							std::string* 	search_keyword,
+							int* 			search_list,		
+									t_channel_id* search_channel_id,
+									t_bouquet_id* search_bouquet_id);
+		int  exec( CMenuTarget* parent,  const std::string &actionkey);
+
+};
 
 #endif
 
