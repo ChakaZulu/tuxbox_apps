@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.h,v $
+ * Revision 1.08  2007/01/07 11:51:22  robspr1
+ * - execute tuxcal.notify on new events
+ *
  * Revision 1.07  2007/01/06 16:38:59  robspr1
  * - accept unknown chunks in wave header
  *
@@ -92,8 +95,7 @@
 #define SNDFILE1 "tuxcal_birthday.wav"								//! birthday sound
 #define SNDFILE2 "tuxcal_event.wav"										//! event sound
 #define SNDFILE3 "tuxcal_timer.wav"										//! timer sound
-#define SNDPACK  "tuxcal.tar.gz"											//! sound pack
-#define SNDFILES "tuxcal.tar"													//! sound pack
+#define SHELLFILE	"tuxcal.notify"											//! notify shell file
 
 #define bool char
 #define true 1

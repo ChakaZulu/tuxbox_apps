@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.10  2007/01/07 11:51:22  robspr1
+ * - execute tuxcal.notify on new events
+ *
  * Revision 1.09  2007/01/06 16:38:59  robspr1
  * - accept unknown chunks in wave header
  *
@@ -2075,57 +2078,13 @@ void NotifyUser()
 	// audio notify
 	if (audio == 'Y')
 	{
-/*		
-		FILE* pipe;
-		pipe = fopen(TMPPATH SNDPACK,"r");
-		printf("TuxCalD <opening tar.Z>\r\n");
-		if ( pipe != NULL)
-		{
-			struct stat st;
-			unsigned char *src;
-			unsigned char *dest;
-			unsigned long iLen;
-			stat(TMPPATH SNDPACK,&st);
-			src=malloc(st.st_size);
-			dest=malloc(st.st_size*2);
-			iLen=st.st_size*2;
-			if (fread( src, st.st_size, 1, pipe )==0)
-			{
-				printf("TuxCalD <error reading tar.Z>\r\n");
-			}
-			else
-				printf("TuxCalD <reading tar.Z size:%ld>\r\n",st.st_size);
-			fclose(pipe);			
-			if (dest==NULL) printf("TuxCalD <error destination buffer>\r\n");
-			if (src==NULL) printf("TuxCalD <error source buffer>\r\n");
-			int iRet;
-			iRet=uncompress(dest,&iLen,src,st.st_size);
-			printf("TuxCald <uncompress: %d>\r\n",iRet);
-			if ( iRet == Z_OK )
-			{
-				printf("TuxCalD <uncompressing tar.Z OK>\r\n");
-				pipe = fopen(TMPPATH SNDFILES,"w");
-				if (pipe != NULL)
-				{
-					printf("TuxCalD <write tar OK>\r\n");
-					fwrite(dest,iLen,1,pipe);
-					fclose(pipe);
-				}
-			}
-			free(dest);
-			free(src);
-			
-		}
-		else
-	*/
-		{
-			if (iCntTmEvents) PlaySound(CFGPATH SNDFILE3);
-			else if (iBirthday) PlaySound(CFGPATH SNDFILE1);
-			else PlaySound(CFGPATH SNDFILE2);
-		}
+		if (iCntTmEvents) PlaySound(CFGPATH SNDFILE3);
+		else if (iBirthday) PlaySound(CFGPATH SNDFILE1);
+		else PlaySound(CFGPATH SNDFILE2);
 	}
 			
-	
+	sprintf(tmp_buffer,"%s %d %d",CFGPATH SHELLFILE,iCntTmEvents,iBirthday);
+	system(tmp_buffer);
 }		
 
 
@@ -2183,7 +2142,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.09 $";
+	char cvs_revision[] = "$Revision: 1.10 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
