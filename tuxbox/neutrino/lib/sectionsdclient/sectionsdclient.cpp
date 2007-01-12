@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.52 2007/01/07 23:34:55 guenther Exp $
+  $Id: sectionsdclient.cpp,v 1.53 2007/01/12 22:57:57 houdini Exp $
 
   License: GPL
 
@@ -121,6 +121,7 @@ bool CSectionsdClient::getIsTimeSet()
 }
 
 
+#if 0
 void CSectionsdClient::setEventsAreOldInMinutes(const unsigned short minutes)
 {
 	send(sectionsd::setEventsAreOldInMinutes, (char*)&minutes, sizeof(minutes));
@@ -128,6 +129,7 @@ void CSectionsdClient::setEventsAreOldInMinutes(const unsigned short minutes)
 	readResponse();
 	close_connection();
 }
+#endif
 
 void CSectionsdClient::setPauseSorting(const bool doPause)
 {
@@ -397,14 +399,14 @@ CChannelEventList CSectionsdClient::getChannelEvents(const bool tv_mode, t_chann
 bool CSectionsdClient::getEventsServiceKeySearchAdd(CChannelEventList& eList,const t_channel_id channel_id,char search_typ,std::string& search_text)
 {
 	int nBufSize=0;
-	
+
 	nBufSize += sizeof(t_channel_id);
 	nBufSize += sizeof(char);
 	nBufSize += search_text.size()+1;
-	
+
 	char* pSData = new char[nBufSize];
 	char* pSData_ptr = pSData;
-        
+
 	*(t_channel_id*)pSData_ptr = channel_id;   
 	pSData_ptr += sizeof(t_channel_id);
 	*pSData_ptr = search_typ;   
@@ -414,43 +416,43 @@ bool CSectionsdClient::getEventsServiceKeySearchAdd(CChannelEventList& eList,con
 	if (send(sectionsd::allEventsChannelIDSearch, pSData, nBufSize))
 	{
 		int nBufSize = readResponse();
-		
+
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
 			receive_data(pData, nBufSize);
-			
+
 			char* dp = pData;
-			
-			int a = eList.size();
-			
+
+//			int a = eList.size();
+
 			while(dp < pData + nBufSize)
 			{
 				CChannelEvent aEvent;
-				
+
 				aEvent.eventID = *((event_id_t *) dp);
 				dp+=sizeof(aEvent.eventID);
-				
+
 				aEvent.startTime = *((time_t *) dp);
 				dp+=sizeof(aEvent.startTime);
-				
+
 				aEvent.duration = *((unsigned *) dp);
 				dp+=sizeof(aEvent.duration);
-				
+
 				aEvent.description= dp;
-				dp+=strlen(dp)+1;
-				
+				dp+=aEvent.description.length()+1;
+
 				aEvent.text= dp;
-				dp+=strlen(dp)+1;
-				
+				dp+=aEvent.text.length()+1;
+
 				eList.push_back(aEvent);
 			}
-			int b = eList.size() -a;
+//			int b = eList.size() -a;
 			delete[] pData;
 		}
 	}
 	delete[] pSData;
-	
+
 	close_connection();
 	return true;
 }
@@ -687,6 +689,7 @@ void CSectionsdClient::setPrivatePid(const unsigned short pid)
 	close_connection();
 }
 
+#if 0
 void CSectionsdClient::setSectionsdScanMode(const int scanMode)
 {
 	send(sectionsd::setSectionsdScanMode, (char*)&scanMode, sizeof(scanMode));
@@ -694,6 +697,7 @@ void CSectionsdClient::setSectionsdScanMode(const int scanMode)
 	readResponse();
 	close_connection();
 }
+#endif
 
 void CSectionsdClient::freeMemory()
 {

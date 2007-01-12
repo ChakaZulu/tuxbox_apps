@@ -232,6 +232,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		int getLastMode() {return lastMode;}
 		bool isMuted() {return current_muted;}
 		int recordingstatus;
+		void SendSectionsdConfig(void);
 };
 
 

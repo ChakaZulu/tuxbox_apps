@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.233 2007/01/07 23:47:49 guenther Exp $
+//  $Id: sectionsd.cpp,v 1.234 2007/01/12 22:57:56 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1396,7 +1396,7 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 	return ;
 }
 
-
+#if 0
 static void commandSetEventsAreOldInMinutes(int connfd, char *data, const unsigned dataLength)
 {
 	if (dataLength != 2)
@@ -1432,6 +1432,7 @@ static void commandSetHoursToCache(int connfd, char *data, const unsigned dataLe
 
 	return ;
 }
+#endif
 
 static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true,char search = 0,std::string* search_text = NULL )
 {
@@ -1660,7 +1661,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.233 2007/01/07 23:47:49 guenther Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.234 2007/01/12 22:57:56 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3920,9 +3921,9 @@ static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
 {	commandDummy2,				"commandDummy2"				},
 {	commandDumpStatusInformation,		"commandDumpStatusInformation"		},
         //commandAllEventsChannelName,
-{	commandAllEventsChannelIDSearch,        "commandAllEventsChannelIDSearch"				},
-{	commandSetHoursToCache,			"commandSetHoursToCache"		},
-{	commandSetEventsAreOldInMinutes,        "commandSetEventsAreOldInMinutes"	},
+{	commandAllEventsChannelIDSearch,        "commandAllEventsChannelIDSearch"	},
+{	commandDummy2,				"commandSetHoursToCache"		},
+{	commandDummy2,				"commandSetEventsAreOldInMinutes"	},
 {	commandDumpAllServices,                 "commandDumpAllServices"		},
 {	commandEventListRadio,                  "commandEventListRadio"			},
 {	commandGetNextEPG,                      "commandGetNextEPG"			},
@@ -6855,7 +6856,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.233 2007/01/07 23:47:49 guenther Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.234 2007/01/12 22:57:56 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 

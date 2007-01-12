@@ -62,9 +62,13 @@ struct SNeutrinoSettings
 	int virtual_zap_mode;
 
 	// EPG
-	char epg_cache[3];
-	char epg_old_events[3];
-	char epg_max_events[6];
+	std::string epg_cache;
+	std::string epg_old_events;
+	std::string epg_max_events;
+	std::string epg_dir;
+	std::string network_ntpserver;
+	std::string network_ntprefresh;
+	int network_ntpenable;
 
 	//audio
 	int audio_AnalogMode;
@@ -77,9 +81,6 @@ struct SNeutrinoSettings
 
 	//language
 	char language[25];
-
-	//epg
-	char epg_dir[100];
 
 	//timing
 #define TIMING_SETTING_COUNT 7
@@ -169,9 +170,6 @@ struct SNeutrinoSettings
 	char network_nfs_picturedir[100];
 	char network_nfs_moviedir[100];
 	char network_nfs_recordingdir[100];
-	char network_ntpserver[31];
-	char network_ntprefresh[4];
-	int network_ntpenable;
 
 	//recording
 	int  recording_type;
@@ -215,8 +213,8 @@ struct SNeutrinoSettings
 	int streaming_resolution;
 	int streaming_use_buffer;
 	int streaming_buffer_segment_size;
-    int streaming_show_tv_in_browser;
-    
+	int streaming_show_tv_in_browser;
+
 	int filesystem_is_utf8;
 	// default plugin for ts-movieplayer (red button)
 	std::string movieplayer_plugin;

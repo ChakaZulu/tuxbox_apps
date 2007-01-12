@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.100 2007/01/07 23:42:45 guenther Exp $
+	$Id: eventlist.cpp,v 1.101 2007/01/12 22:57:58 houdini Exp $
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -952,11 +952,11 @@ int CEventFinderMenu::showMenu(void)
 	
 	CStringInputSMS stringInput(LOCALE_EVENTFINDER_KEYWORD,m_search_keyword, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
 	
-	CMenuForwarder* mf0 =				new CMenuForwarder(LOCALE_EVENTFINDER_START_SEARCH, true, NULL, 				this, "1", CRCInput::RC_1 );
-	CMenuOptionChooser* mo0 =			new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WIHTIN_LIST , m_search_list, 	SEARCH_LIST_OPTIONS, SEARCH_LIST_OPTION_COUNT, true, NULL, CRCInput::RC_2);
-	CMenuForwarderNonLocalized* mf1=	new CMenuForwarderNonLocalized("", 	*m_search_list != EventList::SEARCH_LIST_ALL , m_search_channelname, 	this, "3", CRCInput::RC_3 );
-	CMenuOptionChooser* mo1 =			new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WIHTIN_EPG, m_search_epg_item, 			SEARCH_EPG_OPTIONS, SEARCH_EPG_OPTION_COUNT, true, NULL, CRCInput::RC_4);
-	CMenuForwarderNonLocalized* mf2=	new CMenuForwarderNonLocalized("",true, *m_search_keyword,			&stringInput, NULL, CRCInput::RC_5 );
+	CMenuForwarder* mf0 		= new CMenuForwarder(LOCALE_EVENTFINDER_START_SEARCH, true, NULL, this, "1", CRCInput::RC_1 );
+	CMenuOptionChooser* mo0 	= new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WITHIN_LIST , m_search_list, SEARCH_LIST_OPTIONS, SEARCH_LIST_OPTION_COUNT, true, NULL, CRCInput::RC_2);
+	CMenuForwarderNonLocalized* mf1	= new CMenuForwarderNonLocalized("", *m_search_list != EventList::SEARCH_LIST_ALL, m_search_channelname, this, "3", CRCInput::RC_3 );
+	CMenuOptionChooser* mo1 	= new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WITHIN_EPG, m_search_epg_item, SEARCH_EPG_OPTIONS, SEARCH_EPG_OPTION_COUNT, true, NULL, CRCInput::RC_4);
+	CMenuForwarderNonLocalized* mf2	= new CMenuForwarderNonLocalized("",true, *m_search_keyword, &stringInput, NULL, CRCInput::RC_5 );
 	
 	CMenuWidget searchMenu(LOCALE_EVENTFINDER_HEAD, "features.raw", 450);
 	searchMenu.addItem(GenericMenuSeparator);

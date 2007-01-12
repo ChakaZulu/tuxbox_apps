@@ -622,11 +622,8 @@ bool CFileBrowser::exec(const char * const dirname)
 
 	bool res = false;
 
-	m_baseurl = "http://";
-	m_baseurl += g_settings.streaming_server_ip;
-	m_baseurl += ':';
-	m_baseurl += g_settings.streaming_server_port;
-	m_baseurl += "/admin/dboxfiles.html?dir=";
+	m_baseurl = "http://" + g_settings.streaming_server_ip + ':'
+		  + g_settings.streaming_server_port + "/admin/dboxfiles.html?dir=";
 
 	name = dirname;
 	std::replace(name.begin(), name.end(), '\\', '/');
@@ -800,7 +797,15 @@ bool CFileBrowser::exec(const char * const dirname)
 						selections.pop_back();
 					} else
 					{
-						ChangeDir("..");
+						std::string::size_type pos = Path.substr(0,Path.length()-1).rfind('/');
+						if (pos != std::string::npos) {
+							ChangeDir("..");
+						}
+						else {
+							loop = false;
+							res = true;
+							filelist[selected].Name = "/";
+						}
 					}
 				}
 				else
@@ -839,7 +844,7 @@ bool CFileBrowser::exec(const char * const dirname)
 				SMSInput(msg);
 		}
 		else
-	  	{
+		{
 			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;

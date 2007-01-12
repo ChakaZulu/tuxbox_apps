@@ -326,10 +326,9 @@ bool CTuxtxtCacheNotifier::changeNotify(const neutrino_locale_t, void *)
 }
 #endif
 
-bool CScanModeSectionsdNotifier::changeNotify(const neutrino_locale_t, void * Data)
+bool CSectionsdConfigNotifier::changeNotify(const neutrino_locale_t, void *)
 {
-	g_Sectionsd->setSectionsdScanMode(CNeutrinoApp::getInstance()->getScanSettings().scanSectionsd);
-
+	CNeutrinoApp::getInstance()->SendSectionsdConfig();
 	return true;
 }
 

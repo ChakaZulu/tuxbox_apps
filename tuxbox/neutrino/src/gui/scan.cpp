@@ -53,7 +53,6 @@
 #include <ost/sec.h>
 #endif
 
-TP_params TP;
 CScanTs::CScanTs()
 {
 	frameBuffer = CFrameBuffer::getInstance();
@@ -73,9 +72,10 @@ CScanTs::CScanTs()
 #define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
 int CScanTs::exec(CMenuTarget* parent, const std::string &)
 {
-	diseqc_t            diseqcType = NO_DISEQC;
-	neutrino_msg_t      msg;
-	neutrino_msg_data_t data;
+	diseqc_t		diseqcType = NO_DISEQC;
+	neutrino_msg_t		msg;
+	neutrino_msg_data_t	data;
+	TP_params		TP;
 
 // printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d\n", get_set.TP_scan, get_set.TP_freq, get_set.TP_rate, get_set.TP_fec, get_set.TP_pol);
 
@@ -124,11 +124,11 @@ if(get_set.TP_scan)
 
 	/* send satellite list to zapit */
 	CZapitClient::ScanSatelliteList satList;
-	CNeutrinoApp::getInstance()->getScanSettings().toSatList( satList);
-	g_Zapit->setScanSatelliteList( satList);
+	CNeutrinoApp::getInstance()->getScanSettings().toSatList(satList);
+	g_Zapit->setScanSatelliteList(satList);
 
-        /* send scantype to zapit */
-        g_Zapit->setScanType( CNeutrinoApp::getInstance()->getScanSettings().scanType );
+	/* send scantype to zapit */
+	g_Zapit->setScanType( CNeutrinoApp::getInstance()->getScanSettings().scanType );
 
 	/* send motor position list to zapit */
 	if (diseqcType == DISEQC_1_2)

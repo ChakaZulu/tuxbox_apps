@@ -566,10 +566,14 @@ int CNeutrinoApp::loadSetup()
 	g_settings.gtx_alpha2 = configfile.getInt32( "gtx_alpha2", 1);
 
 	// EPG-Config
-	strcpy(g_settings.epg_cache , configfile.getString( "epg_cache_time", "14" ).c_str() );
-	strcpy(g_settings.epg_old_events ,configfile.getString("epg_old_events", "1" ).c_str() );
-	strcpy(g_settings.epg_max_events ,configfile.getString("epg_max_events", "6000" ).c_str() );
-	strcpy(g_settings.epg_dir, configfile.getString("epg_dir", "").c_str());
+	g_settings.epg_cache 		= configfile.getString("epg_cache_time", "14");
+	g_settings.epg_old_events 	= configfile.getString("epg_old_events", "1");
+	g_settings.epg_max_events 	= configfile.getString("epg_max_events", "6000");
+	g_settings.epg_dir 		= configfile.getString("epg_dir", "");
+        // NTP-Server for sectionsd
+	g_settings.network_ntpserver	= configfile.getString("network_ntpserver", "de.pool.ntp.org");
+	g_settings.network_ntprefresh	= configfile.getString("network_ntprefresh", "30" );
+	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", false);
 
 	//misc
 	g_settings.shutdown_real            = configfile.getBool("shutdown_real"             , true );
@@ -679,11 +683,6 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nfs_moviedir, configfile.getString( "network_nfs_moviedir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_recordingdir, configfile.getString( "network_nfs_recordingdir", "" ).c_str() );
 	g_settings.filesystem_is_utf8              = configfile.getBool("filesystem_is_utf8"                 , true );
-
-        // NTP-Server for sectionsd
-	strcpy(g_settings.network_ntpserver, configfile.getString("network_ntpserver", "de.pool.ntp.org" ).c_str() );
-	strcpy(g_settings.network_ntprefresh, configfile.getString("network_ntprefresh", "30" ).c_str() );
-	g_settings.network_ntpenable = configfile.getBool("network_ntpenable", false);
 
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32("recording_type", RECORDING_OFF);
@@ -1455,8 +1454,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem(GenericMenuSeparator);
 
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true);
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), firstchannel.mode != 'r');
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), firstchannel.mode == 'r');
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,CPlugins::P_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainMenu.addItem(GenericMenuSeparatorLine);
@@ -1491,13 +1490,13 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	int shortcut = 4;
 	if (g_PluginList->hasPlugin(CPlugins::P_TYPE_SCRIPT))
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "",
-											CRCInput::convertDigitToKey(shortcut++)));
+										CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL,
 										CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.parentallock_pincode, false, true, NULL, &service, NULL,
-											  CRCInput::convertDigitToKey(shortcut++)));
+										CRCInput::convertDigitToKey(shortcut++)));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL,
@@ -1525,7 +1524,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD       , true, NULL, &lcdSettings      , NULL, CRCInput::RC_9));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, CRCInput::RC_0));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_DRIVER , true, NULL, &driverSettings   , NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_DRIVER    , true, NULL, &driverSettings   , NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW ));
 }
 
@@ -1608,7 +1607,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	dprintf(DEBUG_DEBUG, "init scansettings\n");
 
 	CMenuOptionChooser* ojScantype = new CMenuOptionChooser(LOCALE_ZAPIT_SCANTYPE, (int *)&scanSettings.scanType, SCANTS_ZAPIT_SCANTYPE, SCANTS_ZAPIT_SCANTYPE_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN);
-
 	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser(LOCALE_SCANTS_BOUQUET, (int *)&scanSettings.bouquetMode, SCANTS_BOUQUET_OPTIONS, SCANTS_BOUQUET_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
 
 	settings.addItem(GenericMenuSeparator);
@@ -1725,7 +1723,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 	CMenuOptionChooser* fec = new CMenuOptionChooser(LOCALE_SCANTP_FEC, (int *)&scanSettings.TP_fec, SATSETUP_SCANTP_FEC, SATSETUP_SCANTP_FEC_COUNT, scanSettings.TP_scan);
 	CMenuOptionChooser* pol = new CMenuOptionChooser(LOCALE_SCANTP_POL, (int *)&scanSettings.TP_pol, SATSETUP_SCANTP_POL, SATSETUP_SCANTP_POL_COUNT, scanSettings.TP_scan);
-	CMenuOptionChooser* onoffscanSectionsd = ( new CMenuOptionChooser(LOCALE_SECTIONSD_SCANMODE, (int *)&scanSettings.scanSectionsd, SECTIONSD_SCAN_OPTIONS, SECTIONSD_SCAN_OPTIONS_COUNT, true,new CScanModeSectionsdNotifier));
+	CMenuOptionChooser* onoffscanSectionsd = ( new CMenuOptionChooser(LOCALE_SECTIONSD_SCANMODE, (int *)&scanSettings.scanSectionsd, SECTIONSD_SCAN_OPTIONS, SECTIONSD_SCAN_OPTIONS_COUNT, true, new CSectionsdConfigNotifier));
 	CMenuForwarder *Rate =new CMenuForwarder(LOCALE_SCANTP_RATE, scanSettings.TP_scan, scanSettings.TP_rate, rate);
 	CMenuForwarder *Freq = new CMenuForwarder(LOCALE_SCANTP_FREQ, scanSettings.TP_scan, scanSettings.TP_freq, freq);
 
@@ -1967,15 +1965,15 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VIRTUAL_ZAP_MODE, &g_settings.virtual_zap_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
+	CSectionsdConfigNotifier* sectionsdConfigNotifier = new CSectionsdConfigNotifier;
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_EPG_HEAD));
-	CStringInput * miscSettings_epg_cache = new CStringInput(LOCALE_MISCSETTINGS_EPG_CACHE, g_settings.epg_cache, 2,LOCALE_MISCSETTINGS_EPG_CACHE_HINT1, LOCALE_MISCSETTINGS_EPG_CACHE_HINT2 , "0123456789 ");
+	CStringInput * miscSettings_epg_cache = new CStringInput(LOCALE_MISCSETTINGS_EPG_CACHE, &g_settings.epg_cache, 2,LOCALE_MISCSETTINGS_EPG_CACHE_HINT1, LOCALE_MISCSETTINGS_EPG_CACHE_HINT2 , "0123456789 ", sectionsdConfigNotifier);
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_CACHE, true, g_settings.epg_cache, miscSettings_epg_cache));
-	CStringInput * miscSettings_epg_old_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_OLD_EVENTS, g_settings.epg_old_events, 2,LOCALE_MISCSETTINGS_EPG_OLD_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_OLD_EVENTS_HINT2 , "0123456789 ");
+	CStringInput * miscSettings_epg_old_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_OLD_EVENTS, &g_settings.epg_old_events, 2,LOCALE_MISCSETTINGS_EPG_OLD_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_OLD_EVENTS_HINT2 , "0123456789 ", sectionsdConfigNotifier);
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_OLD_EVENTS, true, g_settings.epg_old_events, miscSettings_epg_old_events));
-	CStringInput * miscSettings_epg_max_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, g_settings.epg_max_events, 5,LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT2 , "0123456789 ");
+	CStringInput * miscSettings_epg_max_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, &g_settings.epg_max_events, 5,LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT2 , "0123456789 ", sectionsdConfigNotifier);
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, true, g_settings.epg_max_events, miscSettings_epg_max_events));
-	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_DIR, true, g_settings.epg_dir,this,"epgdir"));
-
+	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_DIR, true, g_settings.epg_dir, this, "epgdir"));
 
 	keySetupNotifier = new CKeySetupNotifier;
 	CStringInput * keySettings_repeat_genericblocker = new CStringInput(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, g_settings.repeat_genericblocker, 3, LOCALE_REPEATBLOCKER_HINT_1, LOCALE_REPEATBLOCKER_HINT_2, "0123456789 ", keySetupNotifier);
@@ -2309,8 +2307,11 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	CIPInput * networkSettings_Broadcast  = new CIPInput(LOCALE_NETWORKMENU_BROADCAST , networkConfig.broadcast , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CIPInput * networkSettings_Gateway    = new CIPInput(LOCALE_NETWORKMENU_GATEWAY   , networkConfig.gateway   , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CIPInput * networkSettings_NameServer = new CIPInput(LOCALE_NETWORKMENU_NAMESERVER, networkConfig.nameserver, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
-	CStringInputSMS * networkSettings_NtpServer = new CStringInputSMS(LOCALE_NETWORKMENU_NTPSERVER, g_settings.network_ntpserver, 30, LOCALE_NETWORKMENU_NTPSERVER_HINT1, LOCALE_NETWORKMENU_NTPSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-. ");
-	CStringInput * networkSettings_NtpRefresh = new CStringInput(LOCALE_NETWORKMENU_NTPREFRESH, g_settings.network_ntprefresh, 3,LOCALE_NETWORKMENU_NTPREFRESH_HINT1, LOCALE_NETWORKMENU_NTPREFRESH_HINT2 , "0123456789 ");
+
+	CSectionsdConfigNotifier* sectionsdConfigNotifier = new CSectionsdConfigNotifier;
+	CStringInputSMS * networkSettings_NtpServer = new CStringInputSMS(LOCALE_NETWORKMENU_NTPSERVER, &g_settings.network_ntpserver, 30, LOCALE_NETWORKMENU_NTPSERVER_HINT1, LOCALE_NETWORKMENU_NTPSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-. ", sectionsdConfigNotifier);
+	CStringInput * networkSettings_NtpRefresh = new CStringInput(LOCALE_NETWORKMENU_NTPREFRESH, &g_settings.network_ntprefresh, 3,LOCALE_NETWORKMENU_NTPREFRESH_HINT1, LOCALE_NETWORKMENU_NTPREFRESH_HINT2 , "0123456789 ", sectionsdConfigNotifier);
+
 	CMenuForwarder *m0 = new CMenuForwarder(LOCALE_NETWORKMENU_SETUPNOW, true, NULL, this, "network", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
 	CMenuForwarder *m1 = new CMenuForwarder(LOCALE_NETWORKMENU_IPADDRESS , networkConfig.inet_static, networkConfig.address   , networkSettings_NetworkIP );
 	CMenuForwarder *m2 = new CMenuForwarder(LOCALE_NETWORKMENU_NETMASK   , networkConfig.inet_static, networkConfig.netmask   , networkSettings_NetMask   );
@@ -2352,7 +2353,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
 	networkSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_NETWORKMENU_NTPTITLE));
-	networkSettings.addItem(new CMenuOptionChooser(LOCALE_NETWORKMENU_NTPENABLE, &g_settings.network_ntpenable, OPTIONS_NTPENABLE_OPTIONS, OPTIONS_NTPENABLE_OPTION_COUNT , true));
+	networkSettings.addItem(new CMenuOptionChooser(LOCALE_NETWORKMENU_NTPENABLE, &g_settings.network_ntpenable, OPTIONS_NTPENABLE_OPTIONS, OPTIONS_NTPENABLE_OPTION_COUNT, true, sectionsdConfigNotifier));
 	networkSettings.addItem( m6);
 	networkSettings.addItem( m7);
 	networkSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_NETWORKMENU_MOUNT));
@@ -2559,8 +2560,8 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CIntInput * streamingSettings_buffer_size = new CIntInput(LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE, (long&)g_settings.streaming_buffer_segment_size,3, LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE_HINT1, LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE_HINT2);
 	CMenuForwarder* mf9 = new CMenuForwarder(LOCALE_STREAMINGMENU_STREAMING_BUFFER_SEGMENT_SIZE , g_settings.streaming_use_buffer, streamingSettings_buffer_size->getValue()      , streamingSettings_buffer_size);
 	COnOffNotifier *bufferNotifier = new COnOffNotifier(mf9);
-    CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_USE_BUFFER , &g_settings.streaming_use_buffer  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true,bufferNotifier);
-    CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_SHOW_TV_IN_BROWSER , &g_settings.streaming_show_tv_in_browser  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
+	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_USE_BUFFER , &g_settings.streaming_use_buffer  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true,bufferNotifier);
+	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_SHOW_TV_IN_BROWSER , &g_settings.streaming_show_tv_in_browser  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
 
 
 	streamingSettings.addItem(new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TYPE                  , &g_settings.streaming_type                 , STREAMINGMENU_STREAMING_TYPE_OPTIONS, STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT, true, StreamingNotifier));
@@ -2581,10 +2582,10 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( mf7);                          //default dir
 	streamingSettings.addItem( mf8);				//default movieplugin
-    streamingSettings.addItem(GenericMenuSeparatorLine);
+	streamingSettings.addItem(GenericMenuSeparatorLine);
 	streamingSettings.addItem( oj6 );
-    streamingSettings.addItem( mf9 );
-    streamingSettings.addItem( oj7 );
+	streamingSettings.addItem( mf9 );
+	streamingSettings.addItem( oj7 );
 }
 
 
@@ -2879,11 +2880,11 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	}
 
 	CStringInput * dim_time = new CStringInput(LOCALE_LCDMENU_DIM_TIME, g_settings.lcd_setting_dim_time, 3,
-						    NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"0123456789 ");
+							NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"0123456789 ");
 	lcdSettings.addItem(new CMenuForwarder(LOCALE_LCDMENU_DIM_TIME,true, g_settings.lcd_setting_dim_time,dim_time));
 
 	CStringInput * dim_brightness = new CStringInput(LOCALE_LCDMENU_DIM_BRIGHTNESS, g_settings.lcd_setting_dim_brightness, 3,
-							  NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"0123456789 ");
+							NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"0123456789 ");
 	lcdSettings.addItem(new CMenuForwarder(LOCALE_LCDMENU_DIM_BRIGHTNESS,true, g_settings.lcd_setting_dim_brightness,dim_brightness));
 
 	lcdSettings.addItem(GenericMenuSeparatorLine);
@@ -3030,7 +3031,7 @@ void CNeutrinoApp::SelectNVOD()
 				char nvod_s[100];
 				struct  tm *tmZeit;
 
-				tmZeit= localtime(&e->startzeit );
+				tmZeit= localtime(&e->startzeit);
 				sprintf(nvod_time_a, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
 
 				time_t endtime = e->startzeit+ e->dauer;
@@ -3276,6 +3277,20 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 	return false;
 }
 
+void CNeutrinoApp::SendSectionsdConfig(void)
+{
+	CSectionsdClient::epg_config config;
+	config.scanMode 		= scanSettings.scanSectionsd;
+	config.epg_cache 		= atoi(g_settings.epg_cache.c_str());
+	config.epg_old_events 		= atoi(g_settings.epg_old_events.c_str());
+	config.epg_max_events		= atoi(g_settings.epg_max_events.c_str());
+	config.epg_dir			= g_settings.epg_dir;
+	config.network_ntpserver	= g_settings.network_ntpserver;
+	config.network_ntprefresh	= atoi(g_settings.network_ntprefresh.c_str());
+	config.network_ntpenable	= g_settings.network_ntpenable;
+	g_Sectionsd->setConfig(config);
+}
+
 #define LCD_UPDATE_TIME_RADIO_MODE (6 * 1000 * 1000)
 #define LCD_UPDATE_TIME_TV_MODE (60 * 1000 * 1000)
 
@@ -3287,9 +3302,11 @@ void CNeutrinoApp::InitZapper()
 
 	firstChannel();
 
-	if (strcmp(g_settings.epg_dir, "") != 0)
-		g_Sectionsd->readSIfromXML(g_settings.epg_dir);
-	g_Sectionsd->setSectionsdScanMode(scanSettings.scanSectionsd);
+	// EPG-Config
+	SendSectionsdConfig();
+
+	if (g_settings.epg_dir.length() != 0)
+		g_Sectionsd->readSIfromXML(g_settings.epg_dir.c_str());
 
 #ifndef TUXTXT_CFG_STANDALONE
 	if(g_settings.tuxtxt_cache)
@@ -3372,7 +3389,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 			int res = fscanf(f, "%s", loc);
 			if (res > 0)
 				strcpy(g_settings.language, loc);
-			fclose(f);		     
+			fclose(f);
 		}
 		loadLocale_ret = g_Locale->loadLocale(g_settings.language);
 		display_language_selection = true;
@@ -4378,10 +4395,10 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 			if (frameBuffer != NULL)
 				delete frameBuffer;
 
-			if (strcmp(g_settings.epg_dir, "") != 0) {
+			if (g_settings.epg_dir.length() != 0) {
 				waitforshutdown = true;
 				AudioMute(true);
-				g_Sectionsd->writeSI2XML(g_settings.epg_dir);
+				g_Sectionsd->writeSI2XML(g_settings.epg_dir.c_str());
 			}
 			else {
 				g_Controld->shutdown();
@@ -5027,22 +5044,28 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		parent->hide();
 		CFileBrowser b;
 		b.Dir_Mode=true;
-		if (b.exec(g_settings.epg_dir))
+		if (b.exec(g_settings.epg_dir.c_str()))
 		{
-			std::string newepgdir = b.getSelectedFile()->Name + "/";
-			strncpy(g_settings.epg_dir, newepgdir.c_str(), sizeof(g_settings.epg_dir)-1);
+			if((b.getSelectedFile()->Name) == "/")
+			{
+				// if selected dir is root -> clear epg_dir
+				g_settings.epg_dir = "";
+			} else {
+				g_settings.epg_dir = b.getSelectedFile()->Name;
+			}
+			SendSectionsdConfig(); // update notifier
 		}
 		return menu_return::RETURN_REPAINT;
 	}
 	else if(actionKey == "movieplugin")
 	{
-	parent->hide();
-	CMenuWidget MoviePluginSelector(LOCALE_MOVIEPLAYER_DEFPLUGIN, "features.raw", 350);
-	MoviePluginSelector.addItem(GenericMenuSeparator);
+		parent->hide();
+		CMenuWidget MoviePluginSelector(LOCALE_MOVIEPLAYER_DEFPLUGIN, "features.raw", 350);
+		MoviePluginSelector.addItem(GenericMenuSeparator);
 
-	char id[5];
-	int cnt = 0;
-	int enabled_count = 0;
+		char id[5];
+		int cnt = 0;
+		int enabled_count = 0;
 		for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
 		{
 			if (g_PluginList->getType(count)== CPlugins::P_TYPE_TOOL && !g_PluginList->isHidden(count))

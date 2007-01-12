@@ -277,11 +277,11 @@ epgviewer.nodetailed No detailed informations available
 epgviewer.notfound no epg found
 eventfinder.head Search in EPG
 eventfinder.keyword Keyword
-eventfinder.start_search  Start Search
-eventfinder.search_wihtin_list Search within
-eventfinder.search_wihtin_epg Search within
 eventfinder.search Search
+eventfinder.search_within_epg Search within
+eventfinder.search_within_list Search within
 eventfinder.searching Search for keyword in EPG...
+eventfinder.start_search  Start Search
 eventlistbar.channelswitch schedule
 eventlistbar.eventsort sorting
 eventlistbar.recordevent record
@@ -554,29 +554,7 @@ miscsettings.shutdown_real_rcdelay Delayed shutdown
 miscsettings.tuxtxt_cache videotext cache
 miscsettings.virtual_zap_mode Virtual zap by infobar
 motorcontrol.head Motor-Setup
-moviebrowser.option_browser Browser Options
 moviebrowser.book_clear_all Clear all
-moviebrowser.menu_save Save changes
-moviebrowser.menu_save_all Start update of movie info files
-moviebrowser.info_head_update Save changes in all movie info files
-moviebrowser.update_if_dest_empty_only Copy if destination is empty only
-moviebrowser.serie_auto_create Serie auto create
-moviebrowser.load_default Load default settings
-moviebrowser.browser_row_head Row settings
-moviebrowser.browser_row_nr Number of rows
-moviebrowser.browser_row_item Row item
-moviebrowser.browser_row_width Row width
-moviebrowser.reload_at_start Reload movie info at start
-moviebrowser.remount_at_start Remount at start
-moviebrowser.dir_head Additional paths
-moviebrowser.dir Path
-moviebrowser.use_dir Use directory
-moviebrowser.use_rec_dir Use record directory
-moviebrowser.use_movie_dir Use movie directory
-moviebrowser.hide_series Hide series
-moviebrowser.last_record_max_items Number of lines last record
-moviebrowser.last_play_max_items Number of lines last play
-moviebrowser.browser_frame_high Browser hight [Pixel]
 moviebrowser.book_head Bookmarks
 moviebrowser.book_lastmoviestop Last play stop:
 moviebrowser.book_movieend Movie end:
@@ -587,6 +565,13 @@ moviebrowser.book_position Position:
 moviebrowser.book_type Jump (<0 back, >0 for):
 moviebrowser.book_type_backward Repeat
 moviebrowser.book_type_forward jump over
+moviebrowser.browser_frame_high Browser hight [Pixel]
+moviebrowser.browser_row_head Row settings
+moviebrowser.browser_row_item Row item
+moviebrowser.browser_row_nr Number of rows
+moviebrowser.browser_row_width Row width
+moviebrowser.dir Path
+moviebrowser.dir_head Additional paths
 moviebrowser.edit_book Bookmark change
 moviebrowser.edit_book_name_info1 Enter new Bookmark name
 moviebrowser.edit_book_name_info2
@@ -603,6 +588,7 @@ moviebrowser.head TS MovieBrowser
 moviebrowser.head_filter Filter movies by category:
 moviebrowser.head_playlist Last played:
 moviebrowser.head_recordlist Last recorded:
+moviebrowser.hide_series Hide series
 moviebrowser.hint_jumpbackward Jump back in 5 s\n '0' to cancel
 moviebrowser.hint_jumpforward Jump forward in 5 s\n '0' to cancel
 moviebrowser.hint_movieend Filmende in 5 s\n '0' zum weitersehen
@@ -614,6 +600,7 @@ moviebrowser.info_filename Name
 moviebrowser.info_genre_major Genre
 moviebrowser.info_genre_minor Genre
 moviebrowser.info_head Film Informationen
+moviebrowser.info_head_update Save changes in all movie info files
 moviebrowser.info_info1 Info 1
 moviebrowser.info_info2 Info 2
 moviebrowser.info_length Length (Min)
@@ -634,6 +621,9 @@ moviebrowser.info_serie Serie
 moviebrowser.info_size File size (MB)
 moviebrowser.info_title Titel
 moviebrowser.info_videoformat Picture
+moviebrowser.last_play_max_items Number of lines last play
+moviebrowser.last_record_max_items Number of lines last record
+moviebrowser.load_default Load default settings
 moviebrowser.menu_directories_head Paths
 moviebrowser.menu_help_head Help
 moviebrowser.menu_main_bookmarks Bookmarks
@@ -647,7 +637,13 @@ moviebrowser.menu_parental_lock_activated_no_temp no (temporary)
 moviebrowser.menu_parental_lock_activated_yes yes
 moviebrowser.menu_parental_lock_head Parental Lock
 moviebrowser.menu_parental_lock_rate_head Lock movies from
+moviebrowser.menu_save Save changes
+moviebrowser.menu_save_all Start update of movie info files
+moviebrowser.option_browser Browser Options
+moviebrowser.reload_at_start Reload movie info at start
+moviebrowser.remount_at_start Remount at start
 moviebrowser.scan_for_movies Scan for Movies...
+moviebrowser.serie_auto_create Serie auto create
 moviebrowser.serie_existingname Existing series
 moviebrowser.serie_head Serie
 moviebrowser.serie_name Change name
@@ -673,6 +669,10 @@ moviebrowser.short_size MB
 moviebrowser.short_title Title
 moviebrowser.start_head Start movie from:
 moviebrowser.start_record_start Movie start
+moviebrowser.update_if_dest_empty_only Copy if destination is empty only
+moviebrowser.use_dir Use directory
+moviebrowser.use_movie_dir Use movie directory
+moviebrowser.use_rec_dir Use record directory
 movieplayer.bookmark Bookmarks
 movieplayer.bookmarkname Bookmarkname
 movieplayer.bookmarkname_hint1 Enter a name for your new bookmark

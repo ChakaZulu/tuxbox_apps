@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.41 2007/01/07 23:34:55 guenther Exp $
+  $Id: sectionsdclient.h,v 1.42 2007/01/12 22:57:57 houdini Exp $
 
   License: GPL
 
@@ -172,7 +172,7 @@ class CSectionsdClient : private CBasicClient
 
 	bool getIsTimeSet();
 
-	void setEventsAreOldInMinutes(const unsigned short minutes);
+//	void setEventsAreOldInMinutes(const unsigned short minutes);
 	
 	void setPauseScanning(const bool doPause);
 
@@ -186,7 +186,7 @@ class CSectionsdClient : private CBasicClient
 
 	CChannelEventList getEventsServiceKey(const t_channel_id channel_id);
 
-    bool getEventsServiceKeySearchAdd(CChannelEventList& evtlist,const t_channel_id channel_id,char m_search_typ,std::string& m_search_text);
+	bool getEventsServiceKeySearchAdd(CChannelEventList& evtlist,const t_channel_id channel_id,char m_search_typ,std::string& m_search_text);
 
 	bool getEPGid(const event_id_t eventid, const time_t starttime, CEPGData * epgdata);
 
@@ -196,7 +196,7 @@ class CSectionsdClient : private CBasicClient
 
 	void setPrivatePid(const unsigned short pid);
 
-	void setSectionsdScanMode(const int scanMode);
+//	void setSectionsdScanMode(const int scanMode);
 	
 	void freeMemory();
 	

@@ -401,15 +401,16 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 	}
 	value[size]=0;
 
+	if (valueString != NULL)
+	{
+		*valueString = value;
+	}
+
 	if ( (observ) && (msg==CRCInput::RC_ok) )
 	{
 		observ->changeNotify(name, value);
 	}
 
-	if (valueString != NULL)
-	{
-		*valueString = value;
-	}
 	return res;
 }
 
@@ -500,7 +501,6 @@ CStringInputSMS::CStringInputSMS(const neutrino_locale_t Name, std::string* Valu
 	initSMS(Valid_Chars);
 }
 
-
 CStringInputSMS::CStringInputSMS(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, const char * const Valid_Chars, CChangeObserver* Observ, const char * const Icon)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
@@ -535,7 +535,6 @@ void CStringInputSMS::initSMS(const char * const Valid_Chars)
 	height+=260;
 	y = ((500-height)>>1);
 }
-
 
 void CStringInputSMS::NormalKeyPressed(const neutrino_msg_t key)
 {

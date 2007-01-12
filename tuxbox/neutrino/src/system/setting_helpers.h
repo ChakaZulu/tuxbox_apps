@@ -158,7 +158,7 @@ class CSPTSNotifier : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void *);
 };
 		
-class CScanModeSectionsdNotifier : public CChangeObserver
+class CSectionsdConfigNotifier : public CChangeObserver
 {
 	public:
 		bool changeNotify(const neutrino_locale_t, void * );
