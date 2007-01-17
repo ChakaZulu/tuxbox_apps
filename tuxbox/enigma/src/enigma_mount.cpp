@@ -1,7 +1,7 @@
 /*
- * $Id: enigma_mount.cpp,v 1.58 2005/12/22 08:48:48 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.59 2007/01/17 07:01:44 digi_casi Exp $
  *
- * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ * (C) 2005, 2007 by digi_casi <digi_casi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,6 @@ bool eMountPoint::isMounted()
 bool eMountPoint::isIdentical(eString mountOn, eString mountDev)
 {
 	bool found = false;
-	eString dir;
 	
 	switch (mp.fstype)
 	{
@@ -121,7 +120,7 @@ bool eMountPoint::isIdentical(eString mountOn, eString mountDev)
 			break;
 		case 1: //CIFS
 		case 3: //SMBFS
-			found = (eString().sprintf("//%d.%d.%d.%d/%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()) == mountDev);
+			found = (eString().sprintf("//%d.%d.%d.%d/%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()).upper() == mountDev.upper());
 			break;
 		case 2: //DEVICE
 			found = ((mountOn == mp.localDir) && (mountDev == mp.mountDir) && (mp.ip[0] == 0) && (mp.ip[1] == 0) && (mp.ip[2] == 0) && (mp.ip[3] == 0));
@@ -391,6 +390,7 @@ int eMountMgr::selectMovieSource(int id)
 			eDebug("[ENIGMA_MOUNT] selectMovieSource mounting: %s", mp_it->mp.mountDir.c_str());
 			mp_it->mp.localDir = "/hdd"; // force /hdd 
 			rc = mp_it->mount();
+			save();
 			break;
 		}
 	}
