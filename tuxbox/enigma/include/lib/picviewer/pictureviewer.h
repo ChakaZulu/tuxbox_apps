@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.h,v 1.19 2006/12/02 14:34:07 dbluelle Exp $
+ * $Id: pictureviewer.h,v 1.20 2007/01/17 19:25:24 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -77,8 +77,8 @@ public:
 	void SetAspectRatio(float aspect_ratio) {m_aspect = aspect_ratio;}
 	void showBusy(int sx, int sy, int width, char r, char g, char b);
 	void hideBusy();
-//	void Zoom(float factor);
-//	void Move(int dx, int dy);
+	void Zoom(float factor);
+	void Move(int dx, int dy);
 	void slideshowTimeout();
 	eString GetCurrentFile() { return *myIt; }
 private:
@@ -108,5 +108,7 @@ private:
 	CFormathandler * fh_getsize(const char *name, int *x, int *y, int width_wanted, int height_wanted);
 	void init_handlers(void);
 	void add_format(int (*picsize)(const char *, int *, int *, int, int), int (*picread)(const char *, unsigned char *, int , int), int (*id)(const char *));
+
+	bool m_bFitScreen;
 };
 #endif

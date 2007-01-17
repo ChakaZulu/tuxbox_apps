@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.cpp,v 1.43 2006/08/28 20:02:42 ghostrider Exp $
+ * $Id: pictureviewer.cpp,v 1.44 2007/01/17 19:25:24 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -134,6 +134,7 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	m_NextPic_YPos = 0;
 	m_NextPic_XPan = 0;
 	m_NextPic_YPan = 0;
+	m_bFitScreen = false;
 
 	m_startx = 20, m_starty = 20, m_endx = 699, m_endy = 555;
 	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/left", m_startx); // left
@@ -251,8 +252,8 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 		showBusy(m_startx + 3, m_starty + 3, 10, 0xff, 0, 0);
 
 	CFormathandler *fh;
-	if (unscaled)
-		fh = fh_getsize(name.c_str(), &x, &y, INT_MAX, INT_MAX);
+	if (unscaled || m_bFitScreen)
+		fh = fh_getsize(name.c_str(), &x, &y, m_endx - m_startx, INT_MAX);
 	else
 		fh = fh_getsize(name.c_str(), &x, &y, m_endx - m_startx, m_endy - m_starty);
 	if (fh)
@@ -272,10 +273,10 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 		if (fh->get_pic(name.c_str(), m_NextPic_Buffer, x, y) == FH_ERROR_OK)
 		{
 //			eDebug("---Decoding done");
-			if ((x > (m_endx - m_startx) || y > (m_endy - m_starty)) && m_scaling != NONE && !unscaled)
+			if (m_bFitScreen || (((x > (m_endx - m_startx)) || y > (m_endy - m_starty)) && m_scaling != NONE && !unscaled))
 			{
 				double aspect_ratio_correction = m_aspect / ((double)xs / ys);
-				if ((aspect_ratio_correction * y * (m_endx - m_startx) / x) <= (m_endy - m_starty))
+				if (m_bFitScreen || (aspect_ratio_correction * y * (m_endx - m_startx) / x) <= (m_endy - m_starty))
 				{
 					imx = (m_endx - m_startx);
 					imy = (int)(aspect_ratio_correction * y * (m_endx - m_startx) / x);
@@ -293,22 +294,32 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 			}
 			m_NextPic_X = x;
 			m_NextPic_Y = y;
-			if (x < (m_endx - m_startx))
-				m_NextPic_XPos = (m_endx - m_startx - x) / 2 + m_startx;
-			else
+			if (m_bFitScreen)
+			{
 				m_NextPic_XPos = m_startx;
-			if (y < (m_endy - m_starty))
-				m_NextPic_YPos = (m_endy - m_starty-y) / 2 + m_starty;
-			else
 				m_NextPic_YPos = m_starty;
-			if (x > (m_endx - m_startx))
-				m_NextPic_XPan = (x - (m_endx - m_startx)) / 2;
-			else
 				m_NextPic_XPan = 0;
-			if (y > (m_endy - m_starty))
-				m_NextPic_YPan = (y - (m_endy - m_starty)) / 2;
-			else
 				m_NextPic_YPan = 0;
+			}
+			else
+			{
+				if (x < (m_endx - m_startx))
+					m_NextPic_XPos = (m_endx - m_startx - x) / 2 + m_startx;
+				else
+					m_NextPic_XPos = m_startx;
+				if (y < (m_endy - m_starty))
+					m_NextPic_YPos = (m_endy - m_starty-y) / 2 + m_starty;
+				else
+					m_NextPic_YPos = m_starty;
+				if (x > (m_endx - m_startx))
+					m_NextPic_XPan = (x - (m_endx - m_startx)) / 2;
+				else
+					m_NextPic_XPan = 0;
+				if (y > (m_endy - m_starty))
+					m_NextPic_YPan = (y - (m_endy - m_starty)) / 2;
+				else
+					m_NextPic_YPan = 0;
+			}
 		}
 		else
 		{
@@ -427,6 +438,45 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			{
 				nextPicture();
 				slideshowTimeout();
+			}
+			else
+			if (evt.action == &i_shortcutActions->number0)
+			{
+				// Toggle FitToScreenWidth mode
+				m_bFitScreen = !m_bFitScreen;
+				DecodeImage(*myIt, false);
+				DisplayNextImage();
+			}
+			else
+			if (evt.action == &i_shortcutActions->number1)
+			{
+				m_bFitScreen=false;
+				Zoom(2.0/3);
+			}
+			else
+			if (evt.action == &i_shortcutActions->number2)
+			{
+				Move(0,-50);
+			}
+			else
+			if (evt.action == &i_shortcutActions->number3)
+			{
+				Zoom(1.5);
+			}
+			else
+			if (evt.action == &i_shortcutActions->number4)
+			{
+				Move(-50,0);
+			}
+			else
+			if (evt.action == &i_shortcutActions->number6)
+			{
+				Move(50,0);
+			}
+			else
+			if (evt.action == &i_shortcutActions->number8)
+			{
+				Move(0,50);
 			}
 			else
 			if (evt.action == &i_cursorActions->down ||
@@ -556,7 +606,6 @@ bool ePictureViewer::DisplayNextImage()
 	return true;
 }
 
-#if 0
 void ePictureViewer::Zoom(float factor)
 {
 //	eDebug("Zoom %f {",factor);
@@ -599,7 +648,6 @@ void ePictureViewer::Zoom(float factor)
 	fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 //	eDebug("Zoom }");
 }
-
 void ePictureViewer::Move(int dx, int dy)
 {
 //	eDebug("Move %d %d {", dx, dy);
@@ -633,7 +681,7 @@ void ePictureViewer::Move(int dx, int dy)
 	fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 //	eDebug("Move }");
 }
-#endif
+
 
 void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 {
