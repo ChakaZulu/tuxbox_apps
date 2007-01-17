@@ -320,6 +320,10 @@ int CPictureViewerGui::show()
 					update = true;
 				}
 			}
+			else if(m_state == SLIDESHOW)
+			{
+				m_state = VIEW;
+			}
 		}
 		else if(msg==CRCInput::RC_green)
 		{
@@ -374,7 +378,7 @@ int CPictureViewerGui::show()
 		}
 		else if(msg==CRCInput::RC_blue)
 		{
-			if ((m_state == MENU) && (!playlist.empty()))
+			if ((m_state == MENU || m_state == VIEW) && (!playlist.empty()))
 			{
 				m_time=(long)time(NULL);
 				view(selected);
@@ -725,7 +729,7 @@ void CPictureViewerGui::showHelp()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP22));
 
-	helpbox.addLine("Version: $Revision: 1.57 $");
+	helpbox.addLine("Version: $Revision: 1.58 $");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 }
