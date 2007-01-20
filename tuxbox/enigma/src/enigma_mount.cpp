@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.59 2007/01/17 07:01:44 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.60 2007/01/20 18:13:59 digi_casi Exp $
  *
  * (C) 2005, 2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -206,18 +206,7 @@ int eMountPoint::mount()
 
 							rc = system(cmd.c_str());
 							if (mp.localDir == "/hdd")
-							{
-								int time;
-								rc = 15;
-								do
-								{
-									time = rc;
-									rc = sleep(time);
-								}
-								while ((rc > 0) && (rc < time));
-								system("cd /tmp && wget http://127.0.0.1/cgi-bin/reloadRecordings");
-								remove("/tmp/reloadRecordings");
-							}
+								system("sleep 5 && wget -O /dev/null http://127.0.0.1/cgi-bin/reloadRecordings&");
 							_exit(0);
 							break;
 						}
@@ -382,7 +371,7 @@ int eMountMgr::selectMovieSource(int id)
 			rc = mp_it->unmount();
 		}
 	}
-	sleep(3);
+
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 	{
 		if (mp_it->mp.id == id)
@@ -394,15 +383,6 @@ int eMountMgr::selectMovieSource(int id)
 			break;
 		}
 	}
-	
-	int time;
-	rc = 12;
-	do
-	{
-		time = rc;
-		rc = sleep(time);
-	}
-	while ((rc > 0) && (rc < time));
 	
 	eDebug("[ENIGMA_MOUNT] selectMovieSource rc: %d", rc);
 	return rc;
