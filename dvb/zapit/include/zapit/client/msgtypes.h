@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.28 2005/11/20 15:10:50 mogway Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.29 2007/01/20 20:12:37 houdini Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -179,6 +179,7 @@ class CZapitMessages
 	struct commandGetBouquets
 	{
 		bool emptyBouquetsToo;
+		CZapitClient::channelsMode mode;
 	};
 
 	struct commandSetMode

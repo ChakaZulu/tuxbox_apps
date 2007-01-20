@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.69 2005/01/18 07:53:05 diemade Exp $
+ * $Id: zapit.h,v 1.70 2007/01/20 20:12:37 houdini Exp $
  */
 
 #ifndef __zapit_h__
@@ -19,7 +19,7 @@ int start_scan(bool scan_mode);
 /**************************************************************/
 
 void addChannelToBouquet (const unsigned int bouquet, const t_channel_id channel_id);
-void sendBouquets        (int connfd, const bool emptyBouquetsToo);
+void sendBouquets        (int connfd, const bool emptyBouquetsToo, const CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT);
 void internalSendChannels(int connfd, ChannelList* channels);
 void sendBouquetChannels (int connfd, const unsigned int bouquet, CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT);
 void sendChannels        (int connfd, const CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT, const CZapitClient::channelsOrder order = CZapitClient::SORT_BOUQUET);

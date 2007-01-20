@@ -277,7 +277,7 @@ class CZapitClient:public CBasicClient
 
 	/* gets all bouquets */
 	/* bouquets are numbered starting at 0 */
-	void getBouquets( BouquetList& bouquets, const bool emptyBouquetsToo = false, const bool utf_encoded = false);
+	void getBouquets( BouquetList& bouquets, const bool emptyBouquetsToo = false, const bool utf_encoded = false, const channelsMode mode = MODE_CURRENT);
 
  private:
 	bool receive_channel_list(BouquetChannelList& channels, const bool utf_encoded);

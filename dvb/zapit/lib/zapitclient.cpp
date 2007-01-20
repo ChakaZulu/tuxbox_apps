@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.110 2006/06/08 20:17:57 houdini Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.111 2007/01/20 20:14:16 houdini Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -268,11 +268,12 @@ void CZapitClient::zaptoNvodSubService(const int num)
 
 /* gets all bouquets */
 /* bouquets are numbered starting at 0 */
-void CZapitClient::getBouquets(BouquetList& bouquets, const bool emptyBouquetsToo, const bool utf_encoded)
+void CZapitClient::getBouquets(BouquetList& bouquets, const bool emptyBouquetsToo, const bool utf_encoded, const channelsMode mode)
 {
 	CZapitMessages::commandGetBouquets msg;
 
 	msg.emptyBouquetsToo = emptyBouquetsToo;
+	msg.mode = mode;
 
 	send(CZapitMessages::CMD_GET_BOUQUETS, (char*)&msg, sizeof(msg));
 

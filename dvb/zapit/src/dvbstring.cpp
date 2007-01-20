@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/dvbstring.cpp,v 1.1 2002/10/29 22:46:50 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/dvbstring.cpp,v 1.2 2007/01/20 20:14:16 houdini Exp $
  *
  * Strings conforming to the DVB Standard - d-box2 linux project
  *
@@ -223,7 +223,6 @@ CDVBString::CDVBString(const char * the_content, const int size)
 		content = "";
 	else
 	{
-		std::string s;
 		while(i < size)
 		{
 			// skip characters 0x00 - 0x1F & 0x80 - 0x9F

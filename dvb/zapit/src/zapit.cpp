@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.389 2006/06/08 20:17:58 houdini Exp $
+ * $Id: zapit.cpp,v 1.390 2007/01/20 20:14:16 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -164,7 +164,7 @@ std::string UTF8_to_UTF8XML(const char * s)
 		 
 		switch (*s)
 		{
-		case '<':           
+		case '<':
 			r += "&lt;";
 			break;
 		case '>':
@@ -205,8 +205,6 @@ void write_header(FILE * tmp)
 
 bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 {
-	char prov_str[256] = "";
-
 	std::string frontendType; 
 	std::string provider_name;
 	std::string diseqc;
@@ -225,21 +223,20 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 			diseqc = xmlGetAttribute(provider, "diseqc");
 			position = xmlGetSignedNumericAttribute(provider, "position", 16);
 			if (position == 0)
-				sprintf(prov_str,"\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
+				fprintf(tmp, "\t<%s name=\"%s\" diseqc=\"%s\">\n", frontendType.c_str(), provider_name.c_str(), diseqc.c_str());
 			else {
 				//east_west = xmlGetNumericAttribute(provider, "east_west", 16);
-				sprintf(prov_str,"\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", 
+				fprintf(tmp, "\t<%s name=\"%s\" position=\"%04x\" diseqc=\"%s\">\n", 
 					frontendType.c_str(), 
 					provider_name.c_str(),
 					position,
-					diseqc.c_str());			
+					diseqc.c_str());
 			}
 			is_sat = true;
 		}
 		else
-			sprintf(prov_str,"\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
-		
-		fprintf(tmp, prov_str);
+			fprintf(tmp, "\t<%s name=\"%s\">\n", frontendType.c_str(), provider_name.c_str());
+	
 	} else {
 		if (!strcmp(frontendType.c_str(), "sat")) {
 			fprintf(tmp, "\t</sat>\n");
@@ -253,8 +250,8 @@ bool write_provider(FILE * tmp, xmlNodePtr provider, const bool start)
 
 void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sat)
 {
-	char tp_str[256] = "";
 	/*
+	char tp_str[256] = "";
 	std::string tsid_str;
 	std::string onid_str;	
 	std::string frequency;
@@ -281,7 +278,7 @@ void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sa
 				fec_inner.c_str(),
 				modulation.c_str());
 	*/
-		sprintf(tp_str,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n", 
+		fprintf(tmp, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n", 
 				(t_transport_stream_id) xmlGetNumericAttribute(transponder, "id", 16),
 				(t_original_network_id) xmlGetNumericAttribute(transponder, "onid", 16),
 				(uint32_t) xmlGetNumericAttribute(transponder, "frequency", 0),
@@ -301,7 +298,7 @@ void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sa
 				fec_inner.c_str(),
 				modulation.c_str());
 	*/
-		sprintf(tp_str,"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n", 
+		fprintf(tmp, "\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n", 
 				(t_transport_stream_id) xmlGetNumericAttribute(transponder, "id", 16),
 				(t_original_network_id) xmlGetNumericAttribute(transponder, "onid", 16),
 				(uint32_t) xmlGetNumericAttribute(transponder, "frequency", 0),
@@ -310,8 +307,6 @@ void write_transponder_node(FILE * tmp, xmlNodePtr transponder, const bool is_sa
 				(fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0),
 				(fe_modulation_t) xmlGetNumericAttribute(transponder, "modulation", 0));
 	}
-
-	fprintf(tmp, tp_str);
 }
 
 void copy_transponder(FILE * tmp, xmlNodePtr transponder, const bool is_sat)
@@ -897,7 +892,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 #endif
 	{
 		bool failed = false;
-      unsigned char audioChannel = thisChannel->getAudioChannelIndex();
+		unsigned char audioChannel = thisChannel->getAudioChannelIndex();
 
 		thisChannel->resetPids();
 
@@ -916,7 +911,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 			failed = true;
 		}
 
-      thisChannel->setAudioChannel(audioChannel);
+		thisChannel->setAudioChannel(audioChannel);
 
 		if ((!failed) && (thisChannel->getAudioPid() == NONE) && (thisChannel->getVideoPid() == NONE)) {
 			WARN("neither audio nor video pid found");
@@ -1271,7 +1266,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::commandGetBouquets msgGetBouquets;
 		CBasicServer::receive_data(connfd, &msgGetBouquets, sizeof(msgGetBouquets));
-		sendBouquets(connfd, msgGetBouquets.emptyBouquetsToo); // bouquet & channel number are already starting at 0!
+		sendBouquets(connfd, msgGetBouquets.emptyBouquetsToo, msgGetBouquets.mode); // bouquet & channel number are already starting at 0!
 		break;
 	}
 
@@ -1358,6 +1353,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			eventServer->sendEvent(CZapitClient::EVT_SCAN_FAILED, CEventServer::INITID_ZAPIT);
 		break;
 	}
+
 	case CZapitMessages::CMD_SCANSTOP:
 		if (scan_runs)
 		{
@@ -1943,25 +1939,34 @@ void addChannelToBouquet(const unsigned int bouquet, const t_channel_id channel_
 		WARN("channel_id not found in channellist");
 }
 
-void sendBouquets(int connfd, const bool emptyBouquetsToo)
+void sendBouquets(int connfd, const bool emptyBouquetsToo, const CZapitClient::channelsMode mode)
 {
 	CZapitClient::responseGetBouquets msgBouquet;
+	int wantedMode = TV_MODE;
+
+	if (mode == CZapitClient::MODE_CURRENT) {
+		if (currentMode & RADIO_MODE) 		wantedMode = RADIO_MODE;
+		else if (currentMode & TV_MODE)		wantedMode = TV_MODE;
+	} 
+	else if (mode == CZapitClient::MODE_RADIO) 	wantedMode = RADIO_MODE;
+	else if (mode == CZapitClient::MODE_TV) 	wantedMode = TV_MODE;
 
 	for (uint i = 0; i < bouquetManager->Bouquets.size(); i++)
 	{
 		if (emptyBouquetsToo ||
-		    ((!bouquetManager->Bouquets[i]->bHidden) &&
-		     (((currentMode & RADIO_MODE) && !bouquetManager->Bouquets[i]->radioChannels.empty()) ||
-		      ((currentMode & TV_MODE) && !bouquetManager->Bouquets[i]->tvChannels.empty()))))
+			((!bouquetManager->Bouquets[i]->bHidden) &&
+			((wantedMode & RADIO_MODE) && !bouquetManager->Bouquets[i]->radioChannels.empty()) ||
+			((wantedMode & TV_MODE) && !bouquetManager->Bouquets[i]->tvChannels.empty())))
 		{
 // ATTENTION: in RECORD_MODE empty bouquets are not send!
 			if ((!(currentMode & RECORD_MODE)) ||
 			    ((channel != NULL) &&
-			     (((currentMode & RADIO_MODE) && (bouquetManager->Bouquets[i]->recModeRadioSize(channel->getTransponderId()) > 0)) ||
-			      ((currentMode & TV_MODE)    && (bouquetManager->Bouquets[i]->recModeTVSize   (channel->getTransponderId()) > 0)))))
+			     (((wantedMode & RADIO_MODE) && (bouquetManager->Bouquets[i]->recModeRadioSize(channel->getTransponderId()) > 0)) ||
+			      ((wantedMode & TV_MODE)    && (bouquetManager->Bouquets[i]->recModeTVSize   (channel->getTransponderId()) > 0)))))
 			{
 				msgBouquet.bouquet_nr = i;
 				strncpy(msgBouquet.name, bouquetManager->Bouquets[i]->Name.c_str(), 30);
+				msgBouquet.name[29]   = '\0'; // so string is zero terminated -> no need to strncopy in neutrino
 				msgBouquet.locked     = bouquetManager->Bouquets[i]->bLocked;
 				msgBouquet.hidden     = bouquetManager->Bouquets[i]->bHidden;
 				msgBouquet.type       = bouquetManager->Bouquets[i]->type;
@@ -2385,7 +2390,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.389 2006/06/08 20:17:58 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.390 2007/01/20 20:14:16 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
