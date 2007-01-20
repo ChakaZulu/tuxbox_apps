@@ -133,6 +133,9 @@ extern "C" int  tuxtxt_init();
 
 
 CBouquetList    	* bouquetList;
+CBouquetList    	* bouquetListTV;
+CBouquetList    	* bouquetListRADIO;
+CBouquetList    	* bouquetListRecord;
 CPlugins        	* g_PluginList;
 CRemoteControl  	* g_RemoteControl;
 CAPIDChangeExec		* APIDChanger;
@@ -217,8 +220,14 @@ CNeutrinoApp::CNeutrinoApp()
 	mode = mode_unknown;
 	channelList       = NULL;
 	bouquetList       = NULL;
+	channelListTV     = NULL;
+	bouquetListTV     = NULL;
+	channelListRADIO  = NULL;
+	bouquetListRADIO  = NULL;
+	channelListRecord = NULL;
+	bouquetListRecord = NULL;
 	nextRecordingInfo = NULL;
-	skipShutdownTimer=false;
+	skipShutdownTimer = false;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -228,8 +237,18 @@ CNeutrinoApp::CNeutrinoApp()
 -------------------------------------------------------------------------------------*/
 CNeutrinoApp::~CNeutrinoApp()
 {
-	if (channelList)
-		delete channelList;
+	if (channelListTV)
+		delete channelListTV;
+	if (channelListRADIO)
+		delete channelListRADIO;
+	if (channelListRecord)
+		delete channelListRecord;
+	if (bouquetListTV)
+		delete bouquetListTV;
+	if (bouquetListRADIO)
+		delete bouquetListRADIO;
+	if (bouquetListRecord)
+		delete bouquetListRecord;
 }
 
 CNeutrinoApp* CNeutrinoApp::getInstance()
@@ -1223,49 +1242,72 @@ bool CNeutrinoApp::ucodes_available(void)
 *          CNeutrinoApp -  channelsInit, get the Channellist from daemon              *
 *                                                                                     *
 **************************************************************************************/
-void CNeutrinoApp::channelsInit()
+void CNeutrinoApp::channelsInit(int mode)
 {
 	dprintf(DEBUG_DEBUG, "doing channelsInit\n");
-	//deleting old channelList for mode-switching.
 
-	if (channelList)
-		delete channelList;
-
-	channelList = new CChannelList(g_Locale->getText(LOCALE_CHANNELLIST_HEAD));
-	CZapitClient::BouquetChannelList zapitChannels;
-	g_Zapit->getChannels(zapitChannels, CZapitClient::MODE_CURRENT, CZapitClient::SORT_BOUQUET, true); // UTF-8
-	for(uint i=0; i<zapitChannels.size(); i++)
-	{
-		channelList->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].satellitePosition, zapitChannels[i].channel_id); // UTF-8
+	if (mode == mode_radio) {
+		if (channelListRADIO && bouquetListRADIO) {
+			channelList = channelListRADIO;
+			bouquetList = bouquetListRADIO;
+			// otherwise zapit will not tune to the new TP
+			channelList->clearTuned();
+			return;
+		} // else load
+	} 
+	else if (mode == mode_tv) {
+		if (channelListTV && bouquetListTV) {
+			channelList = channelListTV;
+			bouquetList = bouquetListTV;
+			// otherwise zapit will not tune to the new TP
+			channelList->clearTuned();
+			return;
+		} // else load
 	}
 
-	delete bouquetList;
-	bouquetList = new CBouquetList();
-	bouquetList->orgChannelList = channelList;
+	CZapitClient::BouquetChannelList zapitChannels;
 	CZapitClient::BouquetList zapitBouquets;
 
+	//deleting old channelList for mode-switching.
+	if (channelListTV)
+		delete channelListTV;
+
+	channelListTV = new CChannelList(g_Locale->getText(LOCALE_CHANNELLIST_HEAD));
+	g_Zapit->getChannels(zapitChannels, CZapitClient::MODE_TV, CZapitClient::SORT_BOUQUET, true); // UTF-8
+	for(uint i=0; i<zapitChannels.size(); i++)
+	{
+		channelListTV->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].satellitePosition, zapitChannels[i].channel_id); // UTF-8
+	}
+
+	if (bouquetListTV)
+		delete bouquetListTV;
+	bouquetListTV = new CBouquetList();
+	bouquetListTV->orgChannelList = channelListTV;
+
 	/* load non-empty bouquets only */
-	g_Zapit->getBouquets(zapitBouquets, false, true); // UTF-8
+	g_Zapit->getBouquets(zapitBouquets, false, true, CZapitClient::MODE_TV); // UTF-8
 	for(uint i = 0; i < zapitBouquets.size(); i++)
 	{
 		CZapitClient::BouquetChannelList zapitChannels;
 
+#if 0
+// removed because '\0' always added in zapit
 		/* add terminating 0 to zapitBouquets[i].name */
 		char bouquetname[sizeof(zapitBouquets[i].name) + 1];
 		strncpy(bouquetname, zapitBouquets[i].name, sizeof(zapitBouquets[i].name));
 		bouquetname[sizeof(zapitBouquets[i].name)] = 0;
 
-		bouquetList->addBouquet(bouquetname, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
-
-
-		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_CURRENT, true); // UTF-8
+		bouquetListTV->addBouquet(bouquetname, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
+#endif
+		bouquetListTV->addBouquet(zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
+		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_TV, true); // UTF-8
 
 		for (uint j = 0; j < zapitChannels.size(); j++)
 		{
-			CChannelList::CChannel* channel = channelList->getChannel(zapitChannels[j].nr);
+			CChannelList::CChannel* channel = channelListTV->getChannel(zapitChannels[j].nr);
 
 			/* observe that "bouquetList->Bouquets[i]" refers to the bouquet we just created using bouquetList->addBouquet */
-			bouquetList->Bouquets[i]->channelList->addChannel(channel);
+			bouquetListTV->Bouquets[i]->channelList->addChannel(channel);
 
 			if (zapitBouquets[i].locked)
 			{
@@ -1273,9 +1315,118 @@ void CNeutrinoApp::channelsInit()
 			}
 		}
 	}
+
+	// same for the RADIO channels
+	if (channelListRADIO)
+		delete channelListRADIO;
+
+	channelListRADIO = new CChannelList(g_Locale->getText(LOCALE_CHANNELLIST_HEAD));
+	g_Zapit->getChannels(zapitChannels, CZapitClient::MODE_RADIO, CZapitClient::SORT_BOUQUET, true); // UTF-8
+	for(uint i=0; i<zapitChannels.size(); i++)
+	{
+		channelListRADIO->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].satellitePosition, zapitChannels[i].channel_id); // UTF-8
+	}
+
+	if (bouquetListRADIO)
+		delete bouquetListRADIO;
+	bouquetListRADIO = new CBouquetList();
+	bouquetListRADIO->orgChannelList = channelListRADIO;
+
+	/* load non-empty bouquets only */
+	g_Zapit->getBouquets(zapitBouquets, false, true, CZapitClient::MODE_RADIO); // UTF-8
+	for(uint i = 0; i < zapitBouquets.size(); i++)
+	{
+		CZapitClient::BouquetChannelList zapitChannels;
+
+#if 0
+// removed because '\0' always added in zapit
+		/* add terminating 0 to zapitBouquets[i].name */
+		char bouquetname[sizeof(zapitBouquets[i].name) + 1];
+		strncpy(bouquetname, zapitBouquets[i].name, sizeof(zapitBouquets[i].name));
+		bouquetname[sizeof(zapitBouquets[i].name)] = 0;
+
+		bouquetListRADIO->addBouquet(bouquetname, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
+#endif
+		bouquetListRADIO->addBouquet(zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
+		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_RADIO, true); // UTF-8
+
+		for (uint j = 0; j < zapitChannels.size(); j++)
+		{
+			CChannelList::CChannel* channel = channelListRADIO->getChannel(zapitChannels[j].nr);
+
+			/* observe that "bouquetList->Bouquets[i]" refers to the bouquet we just created using bouquetList->addBouquet */
+			bouquetListRADIO->Bouquets[i]->channelList->addChannel(channel);
+
+			if (zapitBouquets[i].locked)
+			{
+				channel->bAlwaysLocked = true;
+			}
+		}
+	}
+
 	dprintf(DEBUG_DEBUG, "\nAll bouquets-channels received\n");
 }
 
+
+void CNeutrinoApp::channelsInit4Record(void)
+{
+	dprintf(DEBUG_DEBUG, "doing channelsInit\n");
+
+	CZapitClient::BouquetChannelList zapitChannels;
+	CZapitClient::BouquetList zapitBouquets;
+
+	//deleting old channelList for mode-switching.
+	if (channelListRecord)
+		delete channelListRecord;
+
+	channelListRecord = new CChannelList(g_Locale->getText(LOCALE_CHANNELLIST_HEAD));
+	g_Zapit->getChannels(zapitChannels, CZapitClient::MODE_CURRENT, CZapitClient::SORT_BOUQUET, true); // UTF-8
+	for(uint i=0; i<zapitChannels.size(); i++)
+	{
+		channelListRecord->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].satellitePosition, zapitChannels[i].channel_id); // UTF-8
+	}
+
+	if (bouquetListRecord)
+		delete bouquetListRecord;
+	bouquetListRecord = new CBouquetList();
+	bouquetListRecord ->orgChannelList = channelListRecord;
+
+	/* load non-empty bouquets only */
+	g_Zapit->getBouquets(zapitBouquets, false, true); // UTF-8
+	for(uint i = 0; i < zapitBouquets.size(); i++)
+	{
+		CZapitClient::BouquetChannelList zapitChannels;
+
+#if 0
+// removed because '\0' always added in zapit
+		/* add terminating 0 to zapitBouquets[i].name */
+		char bouquetname[sizeof(zapitBouquets[i].name) + 1];
+		strncpy(bouquetname, zapitBouquets[i].name, sizeof(zapitBouquets[i].name));
+		bouquetname[sizeof(zapitBouquets[i].name)] = 0;
+
+		bouquetListRecord->addBouquet(bouquetname, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
+#endif
+		bouquetListRecord->addBouquet(zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
+		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_CURRENT, true); // UTF-8
+
+		for (uint j = 0; j < zapitChannels.size(); j++)
+		{
+			CChannelList::CChannel* channel = channelListRecord->getChannel(zapitChannels[j].nr);
+
+			/* observe that "bouquetList->Bouquets[i]" refers to the bouquet we just created using bouquetList->addBouquet */
+			bouquetListRecord->Bouquets[i]->channelList->addChannel(channel);
+
+			if (zapitBouquets[i].locked)
+			{
+				channel->bAlwaysLocked = true;
+			}
+		}
+	}
+
+	channelList = channelListRecord;
+	bouquetList = bouquetListRecord;
+//	channelList->clearTuned();
+}
 
 /**************************************************************************************
 *                                                                                     *
@@ -1286,9 +1437,9 @@ void CNeutrinoApp::channelsInit()
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
 	global_argv = new char *[argc+1];
-  	for (int i = 0; i < argc; i++)
-    		global_argv[i] = argv[i];
-  	global_argv[argc] = NULL;
+	for (int i = 0; i < argc; i++)
+		global_argv[i] = argv[i];
+	global_argv[argc] = NULL;
 
 	softupdate = false;
 	fromflash = false;
@@ -3215,14 +3366,8 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 								if (mres != CFSMounter::MRES_OK)
 								{
 									doRecord = false;
-									const char * merr = mntRes2Str(mres);
-									int msglen = strlen(merr) + strlen(g_settings.network_nfs_local_dir[userDecision]) + 7;
-									char msg[msglen];
-									strcpy(msg,merr);
-									strcat(msg,"\nDir: ");
-									strcat(msg,g_settings.network_nfs_local_dir[userDecision]);
-
-									ShowMsgUTF(LOCALE_MESSAGEBOX_ERROR, msg,
+									std::string msg = mntRes2Str(mres) + "\nDir: " + g_settings.network_nfs_local_dir[userDecision];
+									ShowMsgUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str(),
 										   CMessageBox::mbrBack, CMessageBox::mbBack,NEUTRINO_ICON_ERROR, 450, 10); // UTF-8
 								}
 							}
@@ -3324,6 +3469,7 @@ void CNeutrinoApp::InitZapper()
 			g_Zapit->PlaybackPES();
 	}
 
+	channelsInit();
 	if(firstchannel.mode == 't')
 	{
 		tvMode();
@@ -4078,12 +4224,12 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			if ((!isTVMode) && (mode != mode_radio))
 			{
 				radioMode(false);
-				channelsInit();
+				channelsInit(mode_tv);
 			}
 			else if (isTVMode && (mode != mode_tv))
 			{
 				tvMode(false);
-				channelsInit();
+				channelsInit(mode_radio);
 			}
 			channelList->zapTo_ChannelID(eventinfo->channel_id);
 		}
@@ -4607,7 +4753,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 	if( rezap )
 	{
 		firstChannel();
-		channelsInit();
+		channelsInit(mode_tv);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
 }
@@ -4744,7 +4890,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 	if( rezap )
 	{
 		firstChannel();
-		channelsInit();
+		channelsInit(mode_radio);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
 }
@@ -4780,14 +4926,8 @@ void CNeutrinoApp::startNextRecording()
 								printf("[neutrino.cpp] mount successful\n");
 								doRecord = true;
 							} else {
-								const char * merr = mntRes2Str(mres);
-								int msglen = strlen(merr) + strlen(nextRecordingInfo->recordingDir) + 7;
-								char msg[msglen];
-								strcpy(msg,merr);
-								strcat(msg,"\nDir: ");
-								strcat(msg,nextRecordingInfo->recordingDir);
-
-								ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg); // UTF-8
+								std::string msg = mntRes2Str(mres) + "\nDir: " + nextRecordingInfo->recordingDir;
+								ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str()); // UTF-8
 								doRecord = false;
 							}
 							break;
@@ -5051,7 +5191,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 				// if selected dir is root -> clear epg_dir
 				g_settings.epg_dir = "";
 			} else {
-				g_settings.epg_dir = b.getSelectedFile()->Name;
+				g_settings.epg_dir = b.getSelectedFile()->Name + "/";
 			}
 			SendSectionsdConfig(); // update notifier
 		}

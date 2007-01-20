@@ -214,11 +214,15 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CScanSettings& ScanSettings(){ return scanSettings;};
 
 		CChannelList			*channelList;
+		CChannelList			*channelListTV;
+		CChannelList			*channelListRADIO;
+		CChannelList			*channelListRecord;
 		CNetworkConfig                  networkConfig;
 
 		static CNeutrinoApp* getInstance();
 
-		void channelsInit();
+		void channelsInit(int mode = -1);
+		void channelsInit4Record();
 		int run(int argc, char **argv);
 		//callback stuff only....
 		int exec(CMenuTarget* parent, const std::string & actionKey);

@@ -364,7 +364,7 @@ int CNFSSmallMenu::exec( CMenuTarget* parent, const std::string & actionKey )
 	return menu_return::RETURN_REPAINT;
 }
 
-const char * mntRes2Str(CFSMounter::MountRes res)
+const std::string mntRes2Str(CFSMounter::MountRes res)
 {
 	switch(res)
 	{
@@ -389,7 +389,7 @@ const char * mntRes2Str(CFSMounter::MountRes res)
 	}
 }
 
-const char * mntRes2Str(CFSMounter::UMountRes res)
+const std::string mntRes2Str(CFSMounter::UMountRes res)
 {
 	switch(res)
 	{

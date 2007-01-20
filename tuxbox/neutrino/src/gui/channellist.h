@@ -128,6 +128,7 @@ class CChannelList
 		void quickZap(int key);
 		int  hasChannel(int nChannelNr);
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
+		void clearTuned(void) { tuned = 0xfffffff; }
 
 		int handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
 
