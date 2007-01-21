@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.390 2007/01/20 20:14:16 houdini Exp $
+ * $Id: zapit.cpp,v 1.391 2007/01/21 19:07:17 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1953,10 +1953,10 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo, const CZapitClient::c
 
 	for (uint i = 0; i < bouquetManager->Bouquets.size(); i++)
 	{
-		if (emptyBouquetsToo ||
-			((!bouquetManager->Bouquets[i]->bHidden) &&
-			((wantedMode & RADIO_MODE) && !bouquetManager->Bouquets[i]->radioChannels.empty()) ||
-			((wantedMode & TV_MODE) && !bouquetManager->Bouquets[i]->tvChannels.empty())))
+		if ((!bouquetManager->Bouquets[i]->bHidden) &&
+			(emptyBouquetsToo ||
+			(((wantedMode & RADIO_MODE) && !bouquetManager->Bouquets[i]->radioChannels.empty()) ||
+			((wantedMode & TV_MODE) && !bouquetManager->Bouquets[i]->tvChannels.empty()))))
 		{
 // ATTENTION: in RECORD_MODE empty bouquets are not send!
 			if ((!(currentMode & RECORD_MODE)) ||
@@ -2390,7 +2390,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.390 2007/01/20 20:14:16 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.391 2007/01/21 19:07:17 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
