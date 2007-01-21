@@ -1316,6 +1316,9 @@ void CNeutrinoApp::channelsInit(int mode)
 		}
 	}
 
+	zapitBouquets.clear();
+	zapitChannels.clear();
+
 	// same for the RADIO channels
 	if (channelListRADIO)
 		delete channelListRADIO;
