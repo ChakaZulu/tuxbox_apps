@@ -1,3 +1,23 @@
+/*
+ * $Id: enigma_dyn_misc.cpp,v 1.10 2007/01/21 21:34:31 digi_casi Exp $
+ *
+ * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -590,8 +610,9 @@ struct listContent: public Object
 	eString &result;
 	eServiceInterface *iface;
 	bool listCont;
-	listContent(const eServiceReference &service, eString &result, bool listCont)
-		:result(result), iface(eServiceInterface::getInstance()), listCont(listCont)
+	eServiceReference &bouquet;
+	listContent(const eServiceReference &service, eServiceReference &bouquet, eString &result, bool listCont)
+		:result(result), iface(eServiceInterface::getInstance()), listCont(listCont), bouquet(bouquet)
 	{
 		Signal1<void, const eServiceReference&> cbSignal;
 		CONNECT(cbSignal, listContent::addToString);
@@ -605,24 +626,33 @@ struct listContent: public Object
 			return;
 
 		eService *service = iface ? iface->addRef(ref) : 0;
+
+		if (ref.toString() == bouquet.toString())
+			result += "#";
+		else
+			result += " ";
+
 		result += ref.toString();
 		result += ";";
 		if (ref.descr)
 			result += filter_string(ref.descr);
-		else if (service)
-		{
-			result += filter_string(service->service_name);
-			if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
-			{
-				result += ';';
-				result += filter_string(((eServiceDVB*)service)->service_provider);
-			}
-		}
 		else
-		{
-			result += "unnamed service";
-			if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
-				result += ";unnamed provider";
+		{ 
+			if (service)
+			{
+				result += filter_string(service->service_name);
+				if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
+				{
+					result += ';';
+					result += filter_string(((eServiceDVB*)service)->service_provider);
+				}
+			}
+			else
+			{
+				result += "unnamed service";
+				if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
+					result += ";unnamed provider";
+			}
 		}
 		if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
 		{
@@ -641,28 +671,28 @@ struct listContent: public Object
 		if (service)
 			iface->removeRef(ref);
 		if (listCont && ref.flags & eServiceReference::isDirectory)
-			listContent(ref, result, false);
+			listContent(ref, bouquet, result, false);
 	}
 };
 
 static eString getServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+	eString result;
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
 	std::map<eString,eString> opts=getRequestOptions(opt, '&');
+	eServiceReference currentBouquetRef = eZap::getInstance()->getServiceSelector()->getPath().current();
 
 	if (!opts["ref"])
-		return "E: no ref given";
-
-	bool listCont = opts["listContent"] == "true";
-
-	eString result;
-	eServiceReference ref(opts["ref"]);
-	listContent t(ref, result, listCont);
-
-	if (result)
-		return result;
-
-	return "E: error during list services";
+		result = "E: no ref given";
+	else
+	{
+		bool listCont = opts["listContent"] == "true";
+		eServiceReference ref(opts["ref"]);
+		listContent t(ref, currentBouquetRef, result, listCont);
+		if (result == "")
+			result = "E: error during list services";
+	}	
+	return result;
 }
 
 struct appendonidsidnamestr
