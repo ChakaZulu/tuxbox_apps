@@ -1,7 +1,7 @@
 /*
- * $Id: enigma_dyn_timer.cpp,v 1.18 2005/12/27 17:40:30 digi_casi Exp $
+ * $Id: enigma_dyn_timer.cpp,v 1.19 2007/01/22 17:51:19 digi_casi Exp $
  *
- * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -528,6 +528,8 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 
+	eString user = opt["user"];
+
 	// to find old event in timerlist..
 	eString serviceRef = opt["ref"];
 	eString oldEventType = opt["old_type"];
@@ -682,15 +684,23 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	{
 		// ask user if he wants to update only after_event action and duration
 		// then call modifyEvent again.. with true as third parameter..
-		result = readFile(TEMPLATE_DIR + "queryEditTimer.tmp");
-		opts.strReplace("force=no", "force=yes");
-		if (opts.find("?") != 0)
-			opts = "?" + opts;
-		result.strReplace("#URL#", "/changeTimerEvent" + opts);
+		if (user == "")
+		{
+			result = readFile(TEMPLATE_DIR + "queryEditTimer.tmp");
+			opts.strReplace("force=no", "force=yes");
+			if (opts.find("?") != 0)
+				opts = "?" + opts;
+			result.strReplace("#URL#", "/changeTimerEvent" + opts);
+		}
+		else
+			result = "Timer event is already active!";
 	}
 	else
 	{
-		result = "<script language=\"javascript\">window.close();</script>";
+		if (user == "")
+			result = "<script language=\"javascript\">window.close();</script>";
+		else
+			result = "Timer event changed successfully.";
 		eTimerManager::getInstance()->saveTimerList();
 	}
 	return result;
