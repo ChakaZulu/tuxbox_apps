@@ -1,7 +1,7 @@
 /*
- * $Id: enigma_dyn_misc.cpp,v 1.10 2007/01/21 21:34:31 digi_casi Exp $
+ * $Id: enigma_dyn_misc.cpp,v 1.11 2007/01/22 14:18:17 digi_casi Exp $
  *
- * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -523,28 +523,38 @@ static eString createSymlink(eString request, eString dirpath, eString opt, eHTT
 
 static eString getCurrentVpidApid(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
+	eString result;
 	if (opt == "getpids")
-		return eString().sprintf("%d\n%d\n", Decoder::current.vpid, Decoder::current.apid);
-	else if (opt == "getallpids")
-	{
-		std::stringstream str;
-		str << std::setfill('0');
-		if ( Decoder::current.vpid != -1 )
-			str << std::setw(5) << Decoder::current.vpid << std::endl;
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-		if (!sapi || !sapi->service)
-			return "error\n";
-		std::list<eDVBServiceController::audioStream> &audioStreams = sapi->audioStreams;
-		for (std::list<eDVBServiceController::audioStream>::iterator it=audioStreams.begin(); it != audioStreams.end(); ++it)
-			str << std::setw(5) << it->pmtentry->elementary_PID << ' ' << it->text << std::endl;
-		if ( Decoder::current.tpid != -1 )
-			str << std::setw(5) << Decoder::current.tpid << " vtxt\n";
-		if ( Decoder::current.pmtpid != -1 )
-			str << std::setw(5) << Decoder::current.pmtpid << " pmt\n";
-		return str.str();
-	}
+		result = eString().sprintf("%d\n%d\n", Decoder::current.vpid, Decoder::current.apid);
 	else
-		return "ok\n";
+	{
+		if (opt == "getallpids")
+		{
+			std::stringstream str;
+			str << std::setfill('0');
+			if ( Decoder::current.vpid != -1 )
+				str << std::setw(5) << Decoder::current.vpid << std::endl;
+			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+			if (!sapi || !sapi->service)
+				result = "error\n";
+			else
+			{
+				std::list<eDVBServiceController::audioStream> &audioStreams = sapi->audioStreams;
+				for (std::list<eDVBServiceController::audioStream>::iterator it=audioStreams.begin(); it != audioStreams.end(); ++it)
+					str << std::setw(5) << it->pmtentry->elementary_PID << ' ' << it->text << std::endl;
+				if ( Decoder::current.tpid != -1 )
+					str << std::setw(5) << Decoder::current.tpid << " vtxt\n";
+				if ( Decoder::current.pmtpid != -1 )
+					str << std::setw(5) << Decoder::current.pmtpid << " pmt\n";
+				if ( Decoder::current.pcrpid != -1 )
+					str << std::setw(5) << Decoder::current.pcrpid << " pcr\n";
+				result = str.str();
+			}
+		}
+		else
+			result = "ok\n";
+	}
+	return result;
 }
 
 static eString neutrino_getonidsid(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -627,11 +637,6 @@ struct listContent: public Object
 
 		eService *service = iface ? iface->addRef(ref) : 0;
 
-		if (ref.toString() == bouquet.toString())
-			result += "#";
-		else
-			result += " ";
-
 		result += ref.toString();
 		result += ";";
 		if (ref.descr)
@@ -667,6 +672,8 @@ struct listContent: public Object
 				result += eString().setNum(tp->satellite.orbital_position);
 			}
 		}
+		if (ref.toString() == bouquet.toString())
+			result += ";selected";
 		result += "\n";
 		if (service)
 			iface->removeRef(ref);
