@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.60 2007/01/20 18:13:59 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.61 2007/01/22 21:35:50 digi_casi Exp $
  *
  * (C) 2005, 2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -277,11 +277,20 @@ t_mount eMountMgr::getMountPointData(int pid)
 
 void eMountMgr::changeMountPoint(int pid, t_mount pmp)
 {
+	int rc = 0;
 	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 	{
 		if (mp_it->mp.id == pid)
 		{
-			mp_it->mp = pmp;
+			if (mp_it->mp.mounted)
+			{
+				rc = mp_it->unmount();
+				mp_it->mp = pmp;
+				rc = mp_it->mount();
+			}
+			else
+				mp_it->mp = pmp;
+			save();
 			break;
 		}
 	}
