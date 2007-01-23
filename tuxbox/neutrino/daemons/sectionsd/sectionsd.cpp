@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.234 2007/01/12 22:57:56 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.235 2007/01/23 20:23:47 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1434,7 +1434,7 @@ static void commandSetHoursToCache(int connfd, char *data, const unsigned dataLe
 }
 #endif
 
-static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true,char search = 0,std::string* search_text = NULL )
+static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true, char search = 0, std::string search_text = "")
 {
 #define MAX_SIZE_EVENTLIST	64*1024
 	char *evtList = new char[MAX_SIZE_EVENTLIST]; // 64kb should be enough and dataLength is unsigned short
@@ -1463,43 +1463,46 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 		lockEvents();
 		int serviceIDfound = 0;
 
+		if (search_text.length()) std::transform(search_text.begin(), search_text.end(), search_text.begin(), tolower);
 		for (MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); ++e)
 		{
 			if ((*e)->get_channel_id() == serviceUniqueKey)
 			{
 				serviceIDfound = 1;
 				
-				std::string eName = (*e)->getName();
-				std::string eText = (*e)->getText();
-				std::string eExtendedText = (*e)->getExtendedText();
-				
 				bool copy = true;
 				if(search == 0); // nothing to do here
 				else if(search == 1)
 				{
-				    if(eName.find(*search_text) == std::string::npos)
-				        copy = false;
+					std::string eName = (*e)->getName();
+					std::transform(eName.begin(), eName.end(), eName.begin(), tolower);
+					if(eName.find(search_text) == std::string::npos)
+						copy = false;
 				}
 				else if(search == 2)
 				{
-				    if(eText.find(*search_text) == std::string::npos)
-				        copy = false;
+					std::string eText = (*e)->getText();
+					std::transform(eText.begin(), eText.end(), eText.begin(), tolower);
+					if(eText.find(search_text) == std::string::npos)
+						copy = false;
 				}
 				else if(search == 3)
 				{
-				    if(eExtendedText.find(*search_text) == std::string::npos)
-				        copy = false;
+					std::string eExtendedText = (*e)->getExtendedText();
+					std::transform(eExtendedText.begin(), eExtendedText.end(), eExtendedText.begin(), tolower);
+					if(eExtendedText.find(search_text) == std::string::npos)
+						copy = false;
 				}
 				
 				if(copy)
 				{
 					for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); ++t)
 					{
-	//					if (t->startzeit > laststart) {
-	//					laststart = t->startzeit;
+//						if (t->startzeit > laststart) {
+//						laststart = t->startzeit;
 						if ( oldFormat )
 						{
-	#define MAX_SIZE_STRTIME	50
+#define MAX_SIZE_STRTIME	50
 							char strZeit[MAX_SIZE_STRTIME];
 							char strZeit2[MAX_SIZE_STRTIME];
 							struct tm *tmZeit;
@@ -1661,7 +1664,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.234 2007/01/12 22:57:56 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.235 2007/01/23 20:23:47 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3772,7 +3775,7 @@ static void commandAllEventsChannelIDSearch(int connfd, char *data, const unsign
 		data_ptr += sizeof(char);
 		if(search != 0)
 			search_text = data_ptr;
-		sendAllEvents(connfd, channel_id, false,search,&search_text);
+		sendAllEvents(connfd, channel_id, false, search, search_text);
 	}
 	return;
 }
@@ -6856,7 +6859,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.234 2007/01/12 22:57:56 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.235 2007/01/23 20:23:47 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
