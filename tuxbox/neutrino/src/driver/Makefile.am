@@ -32,7 +32,9 @@ libneutrino_driver_a_SOURCES = \
 	file.cpp \
 	audiometadata.cpp \
 	audiofile.cpp \
-	shutdown_count.cpp 
+	shutdown_count.cpp \
+	BitrateCalculator.cpp
+
 libneutrino_driver_netfile_a_SOURCES = netfile.cpp
 
 #AM_CPPFLAGS = -DSKIP_CA_STATUS
