@@ -27,8 +27,7 @@
 
 #include <driver/framebuffer.h>
 #include <driver/pig.h>
-
-#include <zapit/client/zapitclient.h>
+#include <driver/BitrateCalculator.h>
 
 class BitrateCalculator;
 
@@ -85,9 +84,9 @@ class CStreamInfo2
 		void paint(int mode);
 		void paint_pig(int x, int y, int w, int h);
 		void paint_techinfo(int x, int y);
-		void paint_bitrate(unsigned long long bitrate);
+		void paint_bitrate(unsigned long bitrate);
 		void paint_signal_fe_box(int x, int y, int w, int h);
-		void paint_signal_fe(unsigned long long bitrate, struct feSignal s);
+		void paint_signal_fe(unsigned long bitrate, struct feSignal s);
 		int  y_signal_fe(unsigned long value, unsigned long max_range, int max_y);
 		void SignalRenderStr (unsigned long value, int x, int y);
 		void hide();

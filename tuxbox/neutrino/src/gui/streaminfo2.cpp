@@ -48,247 +48,6 @@
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 
-
-
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
-#include <linux/dvb/dmx.h>
-
-/*
- * some definition
- */
-
-
-#define TS_LEN			188
-#define TS_SYNC_BYTE		0x47
-#define TS_BUF_SIZE		(TS_LEN * 2048)		/* fix dmx buffer size */
-
-#define DMXDEV	"/dev/dvb/adapter0/demux0"
-#define DVRDEV	"/dev/dvb/adapter0/dvr0"
-
-#define dprintf(fmt, args...) { if (0) { printf(fmt, ## args); fflush(stdout); } }
-
-/*
-  -- Print receive time of Packet
-
-*/
-
-static unsigned long timeval_to_ms(const struct timeval *tv)
-{
-	return (tv->tv_sec * 1000) + ((tv->tv_usec + 500) / 1000);
-}
-
-long delta_time_ms (struct timeval *tv, struct timeval *last_tv)
-{
-	return timeval_to_ms(tv) - timeval_to_ms(last_tv);
-}
-
-class BitrateCalculator
-{
-	private:
-
-		int 				pid;
-		struct pollfd			pfd;
-		struct dmx_pes_filter_params	flt;
-		int 				dmxfd;
-		struct timeval 			tv,last_tv, first_tv;
-		unsigned long long		b_total;
-		long				b;
-		long				packets_bad;
-		long				packets_total;
-		u_char 	 			buf[TS_BUF_SIZE];
-
-		struct {				// simple struct for storing last average bandwidth
-			unsigned long  kb_sec;
-			unsigned long  b_sec;
-		} last_avg;
-
-	public:
-		BitrateCalculator(int inPid);
-		unsigned long long calc(void);
-		int sync_ts (u_char *buf, int len);
-		int ts_error_count (u_char *buf, int len);
-		~BitrateCalculator();
-};
-
-BitrateCalculator::BitrateCalculator(int inPid)
-{
-	pid = inPid;
-	printf("PID: %u (0x%04x)\n", pid, pid);
-
-	// -- open DVR device for reading
-	pfd.events = POLLIN | POLLPRI;
-	if((pfd.fd = open(DVRDEV, O_RDONLY|O_NONBLOCK)) < 0){
-		printf("error on %s\n", DVRDEV);
-		return;
-	}
-
-	if ((dmxfd=open(DMXDEV, O_RDWR)) < 0) {
-		printf("error on %s\n", DMXDEV);
-		close(pfd.fd);
-		return;
-	}
-
-	ioctl (dmxfd,DMX_SET_BUFFER_SIZE, sizeof(buf));
-	flt.pid = pid;
-	flt.input = DMX_IN_FRONTEND;
-	flt.output = DMX_OUT_TS_TAP;
-	flt.pes_type = DMX_PES_OTHER;
-	flt.flags = DMX_IMMEDIATE_START;
-	if (ioctl(dmxfd, DMX_SET_PES_FILTER, &flt) < 0) {
-		printf("error on DMX_SET_PES_FILTER");
-		close(pfd.fd);
-		close(dmxfd);
-		return;
-	}
-
-	gettimeofday (&first_tv, NULL);
-	last_tv.tv_sec	=  first_tv.tv_sec;
-	last_tv.tv_usec	=  first_tv.tv_usec;
-	b_total		= 0;
-	packets_total	= 0;
- 	packets_bad	= 0;
-}
-
-BitrateCalculator::~BitrateCalculator(void)
-{
-	// -- packets stats
-	printf("PID: %u (0x%04x)\n", pid, pid);
-	printf("   bad/total packets: %ld/%ld (= %1.1Lf%%)\n",
-		packets_bad, packets_total,
-                (((long double) packets_bad)*100)/packets_total );
-	printf("   Avrg: %5lu.%03lu kbit/s\n",
-		last_avg.kb_sec, last_avg.b_sec);
-
-	if (ioctl(dmxfd, DMX_STOP) < 0) {
-		printf("error at DMX_STOP");
-	}
-	close(dmxfd);
-	close(pfd.fd);
-}
-
-unsigned long long BitrateCalculator::calc(void)
-{
-	int b_len, b_start;
-	unsigned long long avgbit_s;
-	long  d_tim_ms;
-	int   packets;
-
-	// -- we will poll the PID in 2 secs intervall
-	int timeout = 100;
-
-	b_len = 0;
-	b_start = 0;
-	if (poll(&pfd, 1, timeout) > 0) {
-		if (pfd.revents & POLLIN) {
-
-			b_len = read(pfd.fd, buf, sizeof(buf));
-			gettimeofday (&tv, NULL);
-			
-			if (b_len >= TS_LEN) {
-				b_start = sync_ts (buf, b_len);
-			} else {
-				b_len = 0;
-			}
-
-			b = b_len - b_start;
-			if (b == 0) return 0;
-			if (b < 0) {
-			   printf("error on read");
-			   return 0;
-			}
-
-			b_total += b;
-
-			packets = b/TS_LEN;
-			packets_total += packets;
-
-			// -- average bandwidth
-			d_tim_ms = delta_time_ms (&tv, &first_tv);
-			if (d_tim_ms <= 0) d_tim_ms = 1;   //  ignore usecs 
-		
-			avgbit_s = ((b_total * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL))
-				   / (unsigned long long)d_tim_ms;
-		
-			last_avg.kb_sec = (unsigned long) (avgbit_s / 1000ULL);
-			last_avg.b_sec  = (unsigned long) (avgbit_s % 1000ULL);
-		
-			dprintf("   (Avrg: %5lu.%03lu kbit/s)\n", last_avg.kb_sec, last_avg.b_sec);
-	
-			// -- bad packet(s) check in buffer
-			{
-			  int bp;
-
-			  bp = ts_error_count (buf+b_start, b);
-			  packets_bad += bp;
-			  dprintf(" [bad: %d]\n", bp);
-			}
-
-			last_tv.tv_sec  =  tv.tv_sec;
-			last_tv.tv_usec =  tv.tv_usec;
-		}
-	}
-	return avgbit_s;
-}
-
-
-
-//
-// -- sync TS stream (if not already done by firmware)
-//
-
-int BitrateCalculator::sync_ts (u_char *buf, int len)
-{
-	int  i;
-
-	// find TS sync byte...
-	// SYNC ...[188 len] ...SYNC...
-	
-	for (i=0; i < len; i++) {
-		if (buf[i] == TS_SYNC_BYTE) {
-		   if ((i+TS_LEN) < len) {
-		      if (buf[i+TS_LEN] != TS_SYNC_BYTE) continue;
-		   }
-		   break;
-		}
-	}
-	return i;
-}
-
-
-
-
-// 
-//  count error packets (ts error bit set, if passed thru by firmware)
-//  we are checking a synced buffer with 1..n TS packets
-//  so, we have to check every TS_LEN the error bit
-//  return: error count
-//
-
-int BitrateCalculator::ts_error_count (u_char *buf, int len) 
-{
-	int error_count = 0;
-
-	while (len > 0) {
-
-		// check  = getBits(buf, 0, 8, 1);
-		if (*(buf+1) & 0x80) error_count++;
-
-		len -= TS_LEN;
-		buf += TS_LEN;
-
-	}
-	return error_count;
-}
-
-
-
-
-
-
-
-
 CStreamInfo2::CStreamInfo2()
 {
 	pig = new CPIG (0);
@@ -377,17 +136,17 @@ int CStreamInfo2::exec()
 	return res;
 }
 
-void CStreamInfo2::paint_bitrate(unsigned long long bitrate) {
+void CStreamInfo2::paint_bitrate(unsigned long bitrate) {
 	char buf[100];
 	int ypos = y+5;
 	int xpos = x+10;
 	int width  = w_max (710, 5);
 
-	ypos+= hheight;
+	ypos += hheight;
 	ypos += (iheight >>1);
 	ypos += iheight;
 	ypos += iheight;
-	sprintf((char*) buf, "%s: %5llu.%03llu kbit/s", g_Locale->getText(LOCALE_STREAMINFO_BITRATE), bitrate / 1000ULL, bitrate % 1000ULL);
+	sprintf((char*) buf, "%s: %5lu kbit/s", g_Locale->getText(LOCALE_STREAMINFO_BITRATE), bitrate);
 	frameBuffer->paintBoxRel(xpos, ypos-iheight+1, 350, iheight-1, COL_MENUHEAD_PLUS_0);
 	g_Font[font_info]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
@@ -396,7 +155,7 @@ int CStreamInfo2::doSignalStrengthLoop ()
 {
 	neutrino_msg_t      msg;
 	CZapitClient::responseFESignal s;
-	unsigned long long bitrate = 0;
+	int i = 0;
 
 	while (1) {
 		neutrino_msg_data_t data;
@@ -412,12 +171,14 @@ int CStreamInfo2::doSignalStrengthLoop ()
 		signal.ber = (s.ber < 0x3FFFF) ? s.ber : 0x3FFFF;  // max. Limit
 
 		if (brc) { 
-			bitrate = brc->calc();
 			if (paint_mode == 0) {
-				paint_bitrate(bitrate);
+				if (i++>=9) {
+					paint_bitrate(brc->getAverage());
+					i=0;
+				}
 			}
 		}
-		paint_signal_fe(bitrate, signal);
+		paint_signal_fe(brc->calc(), signal);
 
 		signal.old_sig = signal.sig;
 		signal.old_snr = signal.snr;
@@ -440,7 +201,7 @@ int CStreamInfo2::doSignalStrengthLoop ()
 
 		// -- push other events
 		if ( msg >  CRCInput::RC_MaxRC && msg != CRCInput::RC_timeout) {
-			CNeutrinoApp::getInstance()->handleMsg( msg, data ); 
+			CNeutrinoApp::getInstance()->handleMsg( msg, data );
 		}
 	}
 	return msg;
@@ -474,16 +235,16 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	y1  = y + h;
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+2+xd*0 , y1- 20 );
-	g_Font[font_small]->RenderString(x+25+xd*0 , y1, 50, "BER", COL_MENUCONTENT, 0, true);
+	g_Font[font_small]->RenderString(x+25+xd*0, y1, 50, "BER", COL_MENUCONTENT, 0, true);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, x+2+xd*1  , y1- 20 );
 	g_Font[font_small]->RenderString(x+25+xd*1, y1, 50, "SNR", COL_MENUCONTENT, 0, true);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+2+xd*2  , y1- 20 );
-	g_Font[font_small]->RenderString(x+25+xd*2,y1, 50, "SIG", COL_MENUCONTENT, 0, true);
+	g_Font[font_small]->RenderString(x+25+xd*2, y1, 50, "SIG", COL_MENUCONTENT, 0, true);
 	
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+2+xd*3  , y1- 20 );
-	g_Font[font_small]->RenderString(x+25+xd*3,y1, 50, "Bitrate", COL_MENUCONTENT, 0, true);
+	g_Font[font_small]->RenderString(x+25+xd*3, y1, 50, "Bitrate", COL_MENUCONTENT, 0, true);
 
 	sig_text_y = y1 - iheight;
 	sig_text_ber_x = x+05+xd*0;
@@ -505,7 +266,7 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	}
 }
 
-void CStreamInfo2::paint_signal_fe(unsigned long long bitrate, struct feSignal  s)
+void CStreamInfo2::paint_signal_fe(unsigned long bitrate, struct feSignal  s)
 {
 	int   x_now = sigBox_pos;
 	int   y = sig_text_y;
@@ -513,34 +274,33 @@ void CStreamInfo2::paint_signal_fe(unsigned long long bitrate, struct feSignal  
 
 	sigBox_pos = (++sigBox_pos) % sigBox_w;
 
-	frameBuffer->paintVLine(sigBox_x+sigBox_pos,sigBox_y,sigBox_y+sigBox_h,COL_WHITE);
-	frameBuffer->paintVLine(sigBox_x+x_now,sigBox_y,sigBox_y+sigBox_h+1,COL_BLACK);
+	frameBuffer->paintVLine(sigBox_x+sigBox_pos, sigBox_y, sigBox_y+sigBox_h, COL_WHITE);
+	frameBuffer->paintVLine(sigBox_x+x_now, sigBox_y, sigBox_y+sigBox_h+1, COL_BLACK);
 
-	long value = (long) (bitrate / 1000ULL);
-	SignalRenderStr (value,sig_text_rate_x,y);
-	yd = y_signal_fe (value, 10000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_YELLOW);
+	SignalRenderStr (bitrate,sig_text_rate_x,y);
+	yd = y_signal_fe (bitrate, 10000, sigBox_h);
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_YELLOW);
 	
 	
 	if (s.ber != s.old_ber) {
-		SignalRenderStr (s.ber,sig_text_ber_x,y);
+		SignalRenderStr (s.ber, sig_text_ber_x,y);
 	}
 	yd = y_signal_fe (s.ber, 4000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_RED);
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_RED);
 
 
 	if (s.sig != s.old_sig) {
-		SignalRenderStr (s.sig,sig_text_sig_x,y);
+		SignalRenderStr (s.sig, sig_text_sig_x,y);
 	}
 	yd = y_signal_fe (s.sig, 65000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_GREEN);
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_GREEN);
 
 
 	if (s.snr != s.old_snr) {
-		SignalRenderStr (s.snr,sig_text_snr_x,y);
+		SignalRenderStr (s.snr, sig_text_snr_x,y);
 	}
 	yd = y_signal_fe (s.snr, 65000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now,sigBox_y+sigBox_h-yd,COL_BLUE);
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_BLUE);
 }
 
 
@@ -684,22 +444,22 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 
 	if (!bitInfo[7]) strncpy(buf, g_Locale->getText(LOCALE_STREAMINFO_AUDIOTYPE_UNKNOWN), sizeof(buf));
 	else {
-		const char* layernames[4]={"res","III","II","I"};
-		const char* sampfreqnames[4]={"44,1k","48k","32k","res"};
-		const char* modenames[4]={"stereo","joint_st","dual_ch","single_ch"};
+		const char* layernames[4]	={"res", "III", "II", "I"};
+		const char* sampfreqnames[4]	={"44,1k", "48k", "32k", "res"};
+		const char* modenames[4]	={"stereo","joint_st", "dual_ch", "single_ch"};
 
 		long header = bitInfo[7];
 
-		unsigned char layer =	(header>>17)&3;
-		unsigned char sampfreq = (header>>10)&3;
-		unsigned char mode =	(header>> 6)&3;
-		unsigned char copy =	(header>> 3)&1;
+		unsigned char layer 	= (header>>17) & 3;
+		unsigned char sampfreq 	= (header>>10) & 3;
+		unsigned char mode 	= (header>> 6) & 3;
+		unsigned char copy 	= (header>> 3) & 1;
 
-		sprintf((char*) buf, "%s: %s (%s/%s) %s", g_Locale->getText(LOCALE_STREAMINFO_AUDIOTYPE),
+		sprintf((char*) buf, "%s: %s (%s/%s) %s", 	g_Locale->getText(LOCALE_STREAMINFO_AUDIOTYPE),
 								modenames[mode],
 								sampfreqnames[sampfreq],
 								layernames[layer],
-								copy?"c":"");
+								copy ? "c" : "");
 	}
 	g_Font[font_info]->RenderString(xpos, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= iheight+ 10;
@@ -708,46 +468,46 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 
 	//onid
 	ypos+= iheight;
-	sprintf((char*) buf, "%s: 0x%04x", "ONid", si.onid);
+	sprintf((char*) buf, "ONid: 0x%04x", si.onid);
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//sid
 	ypos+= sheight;
-	sprintf((char*) buf, "%s: 0x%04x", "Sid", si.sid);
+	sprintf((char*) buf, "Sid: 0x%04x", si.sid);
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//tsid
 	ypos+= sheight;
-	sprintf((char*) buf, "%s: 0x%04x", "TSid", si.tsid);
+	sprintf((char*) buf, "TSid: 0x%04x", si.tsid);
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//tsfrequenz
 	ypos+= sheight;
-	int written = sprintf((char*) buf, "%s: %d.%d MHz", "Freq", si.tsfrequency/1000, si.tsfrequency%1000);
+	int written = sprintf((char*) buf, "Freq: %d.%d MHz", si.tsfrequency/1000, si.tsfrequency%1000);
 	if (si.polarisation != 2) /* only satellite has polarisation */
 		sprintf((char*) buf+written, " (%c)", (si.polarisation == HORIZONTAL) ? 'h' : 'v');
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//pmtpid
 	ypos+= sheight;
-	sprintf((char*) buf, "%s: 0x%04x", "PMTpid", si.pmtpid);
+	sprintf((char*) buf, "PMTpid: 0x%04x", si.pmtpid);
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8 
 
 	//vpid
 	ypos+= sheight;
 	if ( g_RemoteControl->current_PIDs.PIDs.vpid == 0 )
-		sprintf((char*) buf, "%s: %s", "Vpid", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
+		sprintf((char*) buf, "Vpid: %s", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
 	else
-		sprintf((char*) buf, "%s: 0x%04x", "Vpid", g_RemoteControl->current_PIDs.PIDs.vpid );
+		sprintf((char*) buf, "Vpid: 0x%04x", g_RemoteControl->current_PIDs.PIDs.vpid );
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//apid	
 	ypos+= sheight;
 	if (g_RemoteControl->current_PIDs.APIDs.empty())
-		sprintf((char*) buf, "%s: %s", "Apid(s)", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
+		sprintf((char*) buf, "Apid(s): %s", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
 	else
 	{
-		sprintf((char*) buf, "%s: ", "Apid(s)" );
+		sprintf((char*) buf, "Apid(s)" );
 		for (unsigned int i= 0; i< g_RemoteControl->current_PIDs.APIDs.size(); i++)
 		{
 			sprintf((char*) buf2, " 0x%04x",  g_RemoteControl->current_PIDs.APIDs[i].pid );
@@ -755,19 +515,17 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 			if (i > 0)
 			{
 				strcat((char*) buf, ",");
-				strcat((char*) buf, buf2+4);
 			}
-			else
-				strcat((char*) buf, buf2);
+			strcat((char*) buf, buf2);
 		}
 	}
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//vtxtpid
 	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid == 0 )
-        	sprintf((char*) buf, "%s: %s", "VTXTpid", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
+        	sprintf((char*) buf, "VTXTpid: %s", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
 	else
-        	sprintf((char*) buf, "%s: 0x%04x", "VTXTpid", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
+        	sprintf((char*) buf, "VTXTpid: 0x%04x", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 	g_Font[font_small]->RenderString(xpos, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= sheight+ 10;
 	
@@ -784,8 +542,7 @@ int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
 		parent->hide();
 	}
 	CStreamInfo2 *e = new CStreamInfo2;
-	e->exec(); 
+	e->exec();
 	delete e;
 	return res;
 }
-
