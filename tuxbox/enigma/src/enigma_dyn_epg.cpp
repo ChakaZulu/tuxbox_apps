@@ -1,7 +1,7 @@
 /*
- * $Id: enigma_dyn_epg.cpp,v 1.7 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn_epg.cpp,v 1.8 2007/01/23 17:16:58 digi_casi Exp $
  *
- * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,6 +84,10 @@ eString getServiceEPG(eString format, eString opts)
 {
 	eString result, result1, events;
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+
+	unsigned int entries = 0xFFFFFFFF;
+	if (opt["entries"] != "")
+		entries = atoi(opt["entries"].c_str());
 	
 	result1 = readFile(TEMPLATE_DIR + format + "ServiceEPG.tmp");
 		
@@ -113,8 +117,8 @@ eString getServiceEPG(eString format, eString opts)
 				timeMap::const_iterator It;
 				int tsidonid = (rref.getTransportStreamID().get() << 16) | rref.getOriginalNetworkID().get();
 			
-				int i = 0;
-				for (It = evt->begin(); It != evt->end(); ++It)
+				unsigned int i = 0;
+				for (It = evt->begin(); It != evt->end() && i < entries; ++It)
 				{
 					ext_description = "";
 					EITEvent event(*It->second, tsidonid);
