@@ -1,4 +1,6 @@
 /*
+	$Id: neutrino.cpp,v 1.838 2007/01/24 02:23:36 guenther Exp $
+	
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -81,6 +83,7 @@
 #include "gui/widget/stringinput.h"
 #include "gui/widget/stringinput_ext.h"
 #include "gui/widget/mountchooser.h"
+#include "gui/widget/dirchooser.h"
 
 #include "gui/color.h"
 
@@ -700,7 +703,6 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nfs_audioplayerdir, configfile.getString( "network_nfs_audioplayerdir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_picturedir, configfile.getString( "network_nfs_picturedir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_moviedir, configfile.getString( "network_nfs_moviedir", "" ).c_str() );
-	strcpy( g_settings.network_nfs_recordingdir, configfile.getString( "network_nfs_recordingdir", "" ).c_str() );
 	g_settings.filesystem_is_utf8              = configfile.getBool("filesystem_is_utf8"                 , true );
 
 	//recording (server + vcr)
@@ -732,6 +734,11 @@ int CNeutrinoApp::loadSetup()
 		g_settings.recording_dir_permissions[i][3] = '\0';
 	}
 
+	for(int i=0 ; i < MAX_RECORDING_DIR ; i++)
+	{
+		sprintf(cfg_key, "recording_dir_%d", i);
+		g_settings.recording_dir[i] = configfile.getString( cfg_key, "" );
+	}
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
 	g_settings.streaming_server_ip = configfile.getString("streaming_server_ip", "10.10.10.10");
@@ -1058,7 +1065,6 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_nfs_audioplayerdir", g_settings.network_nfs_audioplayerdir);
 	configfile.setString( "network_nfs_picturedir", g_settings.network_nfs_picturedir);
 	configfile.setString( "network_nfs_moviedir", g_settings.network_nfs_moviedir);
-	configfile.setString( "network_nfs_recordingdir", g_settings.network_nfs_recordingdir);
 	configfile.setBool  ("filesystem_is_utf8"                 , g_settings.filesystem_is_utf8             );
 
 	// NTP-Server for sectionsd
@@ -1094,6 +1100,11 @@ void CNeutrinoApp::saveSetup()
 		configfile.setString( cfg_key, g_settings.recording_dir_permissions[i] );
 	}
 
+	for(int i=0 ; i < MAX_RECORDING_DIR ; i++)
+	{
+		sprintf(cfg_key, "recording_dir_%d", i);
+		configfile.setString( cfg_key, g_settings.recording_dir[i] );
+	}
 	//streaming
 	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
 	configfile.setString( "streaming_server_ip", g_settings.streaming_server_ip );
@@ -2578,12 +2589,29 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	apidRecordingSettings->addItem(aoj2);
 	apidRecordingSettings->addItem(aoj3);
 
+	// Directory menu for direct recording
+	CMenuWidget *dirMenu = new CMenuWidget(LOCALE_RECORDINGMENU_DEFDIR, NEUTRINO_ICON_RECORDING);
+	dirMenu->addItem(GenericMenuSeparator);
+	CDirChooser* fc1[MAX_RECORDING_DIR];
+	CMenuForwarder* mffc[MAX_RECORDING_DIR];
+	char temp[10];
+	for(int i=0 ; i < MAX_RECORDING_DIR ; i++)
+	{
+		fc1[i] = new CDirChooser(&g_settings.recording_dir[i],"/mnt/","/hdd");
+		snprintf(temp,10,"%d:",i);
+		temp[9]=0;// terminate for sure
+		mffc[i] = new CMenuForwarderNonLocalized(temp, true, g_settings.recording_dir[i],fc1[i]);
+	}
+	for(int i=0 ; i < MAX_RECORDING_DIR ; i++)
+	{
+		dirMenu->addItem(mffc[i]);
+	}
+	dirMenu->addItem(GenericMenuSeparator);
 	// for direct recording
 	CMenuWidget *directRecordingSettings = new CMenuWidget(LOCALE_RECORDINGMENU_FILESETTINGS, NEUTRINO_ICON_RECORDING);
-
+	
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_RECORDINGMENU_FILESETTINGS,(g_settings.recording_type == RECORDING_FILE),NULL,directRecordingSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN);
 
-	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, true, g_settings.network_nfs_recordingdir,this,"recordingdir");
 	CStringInput * recordingSettings_splitsize = new CStringInput(LOCALE_RECORDINGMENU_SPLITSIZE, g_settings.recording_splitsize, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
 	CMenuForwarder* mf9 = new CMenuForwarder(LOCALE_RECORDINGMENU_SPLITSIZE, true, g_settings.recording_splitsize,recordingSettings_splitsize);
 
@@ -2639,7 +2667,8 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	directRecordingSettings->addItem(GenericMenuSeparator);
 	directRecordingSettings->addItem(GenericMenuBack);
 	directRecordingSettings->addItem(GenericMenuSeparatorLine);
-	directRecordingSettings->addItem(mf8);
+	directRecordingSettings->addItem(new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, true, NULL, dirMenu));
+	directRecordingSettings->addItem(GenericMenuSeparatorLine);
 	directRecordingSettings->addItem(mf9);
 	directRecordingSettings->addItem(mf10);
 	directRecordingSettings->addItem(oj6);
@@ -3343,44 +3372,44 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 			bool doRecord = true;
 			if (g_settings.recording_type == RECORDING_FILE)
 			{
-				char *recDir = (preselectedDir != NULL) ? preselectedDir : g_settings.network_nfs_recordingdir;
-				// preselectedDir != NULL -> called after stream problem so do not show a dialog again
-				if(preselectedDir == NULL && g_settings.recording_choose_direct_rec_dir) {
-					int userDecision = -1;
-
-					CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&userDecision,NULL,g_settings.network_nfs_recordingdir);
-					if (recDirs.hasItem()) {
-						recDirs.exec(NULL,"");
-						refreshGui = true;
-						if (userDecision != -1)
+				std::string recDir = (preselectedDir != NULL) ? preselectedDir : g_settings.recording_dir[0];
+				if( preselectedDir == NULL && g_settings.recording_choose_direct_rec_dir)
+				{
+					CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,&recDir);
+					recDirs.exec(NULL,"");
+					refreshGui = true;
+					recDir = recDirs.get_selected_dir();
+                    //printf("dir : %s\n",recDir.c_str());
+					if( recDir != "")
+					{
+						int nfs_nr = getNFSIDOfDir(recDir.c_str());
+				        if(nfs_nr != -1)
 						{
-							recDir = g_settings.network_nfs_local_dir[userDecision];
-							if (!CFSMounter::isMounted(g_settings.network_nfs_local_dir[userDecision]))
+							recDir = g_settings.network_nfs_local_dir[nfs_nr];
+							if (!CFSMounter::isMounted(g_settings.network_nfs_local_dir[nfs_nr]))
 							{
+				         		printf("not mounted, try to mount: %d\n",nfs_nr);
 								CFSMounter::MountRes mres =
-									CFSMounter::mount(g_settings.network_nfs_ip[userDecision].c_str(),
-											  g_settings.network_nfs_dir[userDecision],
-											  g_settings.network_nfs_local_dir[userDecision],
-											  (CFSMounter::FSType) g_settings.network_nfs_type[userDecision],
-											  g_settings.network_nfs_username[userDecision],
-											  g_settings.network_nfs_password[userDecision],
-											  g_settings.network_nfs_mount_options1[userDecision],
-											  g_settings.network_nfs_mount_options2[userDecision]);
+									CFSMounter::mount(g_settings.network_nfs_ip[nfs_nr].c_str(),
+											  g_settings.network_nfs_dir[nfs_nr],
+											  g_settings.network_nfs_local_dir[nfs_nr],
+											  (CFSMounter::FSType) g_settings.network_nfs_type[nfs_nr],
+											  g_settings.network_nfs_username[nfs_nr],
+											  g_settings.network_nfs_password[nfs_nr],
+											  g_settings.network_nfs_mount_options1[nfs_nr],
+											  g_settings.network_nfs_mount_options2[nfs_nr]);
 								if (mres != CFSMounter::MRES_OK)
 								{
 									doRecord = false;
-									std::string msg = mntRes2Str(mres) + "\nDir: " + g_settings.network_nfs_local_dir[userDecision];
+									std::string msg = mntRes2Str(mres) + "\nDir: " + g_settings.network_nfs_local_dir[nfs_nr];
 									ShowMsgUTF(LOCALE_MESSAGEBOX_ERROR, msg.c_str(),
-										   CMessageBox::mbrBack, CMessageBox::mbBack,NEUTRINO_ICON_ERROR, 450, 10); // UTF-8
+											CMessageBox::mbrBack, CMessageBox::mbBack,NEUTRINO_ICON_ERROR, 450, 10); // UTF-8
 								}
 							}
-						} else
-						{
-							doRecord = false;
 						}
-					} else
+      				}
+      				else
 					{
-						printf("[neutrino.cpp] no network devices available\n");
 						doRecord = false;
 					}
 				}
@@ -3502,7 +3531,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
 		sscanf(g_settings.recording_ringbuffers, "%u", &ringbuffers);
 
-		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_vtxt_pid, g_settings.recording_stream_pmt_pid, ringbuffers,true);
+		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.recording_dir[0].c_str(), splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_vtxt_pid, g_settings.recording_stream_pmt_pid, ringbuffers,true);
 
 		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}
@@ -4909,8 +4938,18 @@ void CNeutrinoApp::startNextRecording()
 			recording_id = nextRecordingInfo->eventID;
 			if (g_settings.recording_type == RECORDING_FILE)
 			{
-				char *recDir = strlen(nextRecordingInfo->recordingDir) > 0 ?
-					nextRecordingInfo->recordingDir : g_settings.network_nfs_recordingdir;
+				const char *recDir = strlen(nextRecordingInfo->recordingDir) > 0 ?
+					nextRecordingInfo->recordingDir : g_settings.recording_dir[0].c_str();
+
+               int free = getFreeDiscSpaceGB(recDir);
+				printf("[neutrino.cpp] getFreeDiscSpaceGB %d\n",free);
+				if (free < 2)
+				{
+					int dirid = getFirstFreeRecDirNr(2);
+					if (dirid != -1)
+						recDir = g_settings.recording_dir[dirid].c_str();
+					printf("[neutrino.cpp] getFirstFreeRecDirNr %d\n",dirid);
+				}
 				if (!CFSMounter::isMounted(recDir))
 				{
 					printf("[neutrino.cpp] trying to mount %s\n",recDir);
@@ -4941,7 +4980,7 @@ void CNeutrinoApp::startNextRecording()
 						// recording dir does not seem to exist in config anymore
 						// or an error occured while mounting
 						// -> try default dir
-						recDir = g_settings.network_nfs_recordingdir;
+						recDir = g_settings.recording_dir[0].c_str();
 						doRecord = true;
 					}
 				}
@@ -5171,15 +5210,6 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		b.Dir_Mode=true;
 		if (b.exec(g_settings.network_nfs_moviedir))
 			strncpy(g_settings.network_nfs_moviedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_moviedir)-1);
-		return menu_return::RETURN_REPAINT;
-	}
-	else if(actionKey == "recordingdir")
-	{
-		parent->hide();
-		CFileBrowser b;
-		b.Dir_Mode=true;
-		if (b.exec(g_settings.network_nfs_recordingdir))
-			strncpy(g_settings.network_nfs_recordingdir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_recordingdir)-1);
 		return menu_return::RETURN_REPAINT;
 	}
 	else if(actionKey == "epgdir")

@@ -1,4 +1,6 @@
 /*
+	$Id: epgview.cpp,v 1.135 2007/01/24 02:21:16 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -39,6 +41,7 @@
 #include <gui/widget/icons.h>
 #include <gui/widget/messagebox.h>
 #include <gui/widget/mountchooser.h>
+#include <gui/widget/dirchooser.h>
 #include <gui/timerlist.h>
 
 #include <global.h>
@@ -64,7 +67,7 @@ int findItem(std::string strItem, std::vector<std::string> & vecItems) {
 //   Actor1-ActorX      -> Darsteller 1, 2, 3
 //   Year of production -> Produktionsjahr
 //   Director           -> Regisseur
-//   Guests             -> Gäste
+//   Guests             -> Gaeste
 void reformatExtendedEvents(std::string strItem, std::string strLabel, bool bUseRange, CEPGData & epgdata) {
 	std::vector<std::string> & vecDescriptions = epgdata.itemDescriptions;
 	std::vector<std::string> & vecItems = epgdata.items;
@@ -675,27 +678,17 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 						CTimerdClient timerdclient;
 						if(timerdclient.isTimerdAvailable())
 						{
-
-							char *recDir = g_settings.network_nfs_recordingdir;
+							std::string recDir = g_settings.recording_dir[0];
 							if (g_settings.recording_choose_direct_rec_dir)
 							{
-								int id = -1;
-								CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
-								if (recDirs.hasItem())
-								{
-									hide();
-									recDirs.exec(NULL,"");
-									show(channel_id,epgData.eventID,&epgData.epg_times.startzeit,false);
-								} else
-								{
-									printf("no network devices available\n");
-								}
-								if (id != -1)
-									recDir = g_settings.network_nfs_local_dir[id];
-								else
-									recDir = NULL;
+							    CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,&recDir);
+								hide();
+								recDirs.exec(NULL,"");
+								show(channel_id,epgData.eventID,&epgData.epg_times.startzeit,false);
+							    recDir = recDirs.get_selected_dir();
 							}
-							if (recDir != NULL)
+						
+							if (recDir != "")
 							{
 								if (timerdclient.addRecordTimerEvent(channel_id,
 												     epgData.epg_times.startzeit,

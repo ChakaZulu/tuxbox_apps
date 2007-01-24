@@ -1,9 +1,10 @@
 /***************************************************************************
+	$Id: moviebrowser.h,v 1.7 2007/01/24 02:22:22 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
  
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: moviebrowser.h,v 1.6 2006/12/28 21:40:32 houdini Exp $
 
 	Kommentar:
 
@@ -41,6 +42,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.h,v $
+	Revision 1.7  2007/01/24 02:22:22  guenther
+	update recording directory menu to support IDE and NFS
+	
 	Revision 1.6  2006/12/28 21:40:32  houdini
 	whitespace cleanup, removed warnings
 	
@@ -195,7 +199,7 @@ typedef struct
 	
 	std::string storageDir[MB_MAX_DIRS];
 	int storageDirUsed[MB_MAX_DIRS];
-	int storageDirRecUsed;
+    int storageDirRecUsed[MAX_RECORDING_DIR];
 	int storageDirMovieUsed;
 
 	int reload;
@@ -450,15 +454,6 @@ class CMenuWidgetSelection : public CMenuWidget
 };
 
 
-class CFileChooser : public CMenuWidget
-{
-	private:
-		std::string* dirPath;
-
-	public:
-		CFileChooser(std::string* path){dirPath= path;};
-		int exec(CMenuTarget* parent, const std::string & actionKey);
-};
 
 typedef enum
 {
@@ -487,6 +482,7 @@ class CDirMenu : public CMenuWidget
 		void show(void);
 		bool isChanged(){return changed;};
 };
+
 
 
 // EPG Genre , taken from epgview, TODO: migth be splitted in major/minor to increase handling, might be moved to CMovieInfo

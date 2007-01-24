@@ -1,4 +1,6 @@
 /*
+	$Id: timerlist.cpp,v 1.91 2007/01/24 02:20:56 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Timerliste by Zwen
@@ -57,6 +59,7 @@
 #include <gui/widget/stringinput.h>
 #include <gui/widget/stringinput_ext.h>
 #include <gui/widget/mountchooser.h>
+#include <gui/widget/dirchooser.h>
 
 #include <system/settings.h>
 #include <system/fsmounter.h>
@@ -954,11 +957,7 @@ int CTimerList::modifyTimer()
 	CTimerListRepeatNotifier notifier((int *)&timer->eventRepeat,m4,m5);
 	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timer->eventRepeat, TIMERLIST_REPEAT_OPTIONS, TIMERLIST_REPEAT_OPTION_COUNT, true, &notifier);
 
-	CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timer->recordingDir,g_settings.network_nfs_recordingdir);
-	if (!recDirs.hasItem())
-	{
-		printf("[CTimerList] warning: no network devices available\n");
-	}
+	CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timer->recordingDir);
 	bool recDirEnabled = (timer->eventType == CTimerd::TIMER_RECORD) && (g_settings.recording_type == RECORDING_FILE);
 	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,recDirEnabled,timer->recordingDir, &recDirs);
 
@@ -1007,7 +1006,7 @@ int CTimerList::newTimer()
 	timerNew.channel_id = 0;
 	strcpy(timerNew.message, "");
 	timerNew_standby_on =false;
-	strncpy(timerNew.recordingDir,g_settings.network_nfs_recordingdir,sizeof(timerNew.recordingDir));
+	strncpy(timerNew.recordingDir,g_settings.recording_dir[0].c_str(),sizeof(timerNew.recordingDir));
 
 
 	CMenuWidget timerSettings(LOCALE_TIMERLIST_MENUNEW, NEUTRINO_ICON_SETTINGS);
@@ -1082,11 +1081,7 @@ int CTimerList::newTimer()
 	strcpy(timerNew_channel_name,"---");
 	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_CHANNEL, true, timerNew_channel_name, &mm);
 
-	CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timerNew.recordingDir,g_settings.network_nfs_recordingdir);
-	if (!recDirs.hasItem())
-	{
-		printf("[CTimerList] warning: no network devices available\n");
-	}
+	CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timerNew.recordingDir);
 	CMenuForwarder* m7 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,true,timerNew.recordingDir, &recDirs);
 
 	CMenuOptionChooser* m8 = new CMenuOptionChooser(LOCALE_TIMERLIST_STANDBY, &timerNew_standby_on, TIMERLIST_STANDBY_OPTIONS, TIMERLIST_STANDBY_OPTION_COUNT, false);

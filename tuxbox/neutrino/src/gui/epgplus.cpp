@@ -1,4 +1,6 @@
 /*
+	$Id: epgplus.cpp,v 1.33 2007/01/24 02:21:16 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -40,6 +42,7 @@
 #include <gui/widget/messagebox.h>
 #include <gui/widget/stringinput.h>
 #include <gui/widget/mountchooser.h>
+#include <gui/widget/dirchooser.h>
 #include "bouquetlist.h"
 
 #include <zapit/client/zapittools.h> /* ZapitTools::UTF8_to_Latin1 */
@@ -2239,28 +2242,17 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 #ifdef DEBUG_
 			std::cout << "add record timer 3" << std::endl;
 #endif
-			char *recDir = g_settings.network_nfs_recordingdir;
+			std::string recDir = g_settings.recording_dir[0];
 			if (g_settings.recording_choose_direct_rec_dir)
 			{
-				int id = -1;
-				CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
-				if (recDirs.hasItem())
-				{
-					epgPlus->hide();
-					recDirs.exec(NULL,"");
-					epgPlus->paint();
-				} else
-				{
-					printf("[CEventList] no network devices available\n");
-				}
-				if (id != -1)
-					recDir = g_settings.network_nfs_local_dir[id];
-				else
-					recDir = NULL;
+				CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,&recDir);
+				epgPlus->hide();
+				recDirs.exec(NULL,"");
+				epgPlus->paint();
+				recDir = recDirs.get_selected_dir();
 			}
-			if (recDir != NULL)
+			if (recDir != "")
 			{
-
 				if (timerdclient.addRecordTimerEvent
 				    ( this->epgPlus->selectedChannelEntry->channel->channel_id
 				      , (*It)->channelEvent.startTime

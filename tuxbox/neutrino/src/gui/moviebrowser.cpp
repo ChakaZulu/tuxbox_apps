@@ -1,9 +1,9 @@
 /***************************************************************************
+	$Id: moviebrowser.cpp,v 1.12 2007/01/24 02:20:56 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
  	Homepage: http://dbox.cyberphoria.org/
-
-	$Id: moviebrowser.cpp,v 1.11 2006/12/28 21:40:32 houdini Exp $
 
 	Kommentar:
 
@@ -39,10 +39,13 @@
 
 	Date:	   Nov 2005
 
-	Author: Günther@tuxbox.berlios.org
+	Author: Guenther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.12  2007/01/24 02:20:56  guenther
+	update recording directory menu to support IDE and NFS
+	
 	Revision 1.11  2006/12/28 21:40:32  houdini
 	whitespace cleanup, removed warnings
 	
@@ -88,25 +91,32 @@
 #include <config.h>
 #endif
 
-#ifdef MOVIEBROWSER  			
-#endif /* MOVIEBROWSER */
-
+// experimental stuff 8)
+//#define MB_SEARCH_INFO2
+//#define MOVEMANAGER 1
+#ifdef MOVEMANAGER
+#include <gui/movemanager.h>
+#endif // MOVEMANAGER
 
 #include "stdlib.h"
-#include "moviebrowser.h"
-#include "filebrowser.h"
-#include "widget/hintbox.h"
-#include "widget/helpbox.h"
-#include "widget/messagebox.h"
-#include "widget/stringinput_ext.h"
+#include <gui/moviebrowser.h>
+#include <gui/filebrowser.h>
+#include <gui/widget/hintbox.h>
+#include <gui/widget/helpbox.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/stringinput_ext.h>
+#include <gui/widget/mountchooser.h>
+#include <gui/widget/dirchooser.h>
+#include <gui/widget/stringinput.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <gui/nfs.h>
-#include "neutrino.h"
-#include <gui/widget/stringinput.h>
+#include <neutrino.h>
 #include <sys/vfs.h> // for statfs
 #include <gui/widget/icons.h>
 #include <sys/mount.h>
+//#include <system/ping.h>
+extern "C" int pingthost ( const char *hostname, int t );
 
 #define my_scandir scandir64
 #define my_alphasort alphasort64
@@ -392,7 +402,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.11 2006/12/28 21:40:32 houdini Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.12 2007/01/24 02:20:56 guenther Exp $\r\n");
 	init();
 }
 
@@ -588,6 +598,9 @@ void CMovieBrowser::initGlobalSettings(void)
 	
 	m_settings.gui = MB_GUI_MOVIE_INFO;
 	
+	m_settings.browser_serie_mode = 0;
+	m_settings.serie_auto_create = 0;
+
 	m_settings.sorting.direction = MB_DIRECTION_DOWN;
 	m_settings.sorting.item 	=  MB_INFO_TITLE;
 
@@ -623,8 +636,11 @@ void CMovieBrowser::initGlobalSettings(void)
 	m_settings.browserRowWidth[4] = m_defaultRowWidth[m_settings.browserRowItem[4]]; 		//30;
 	m_settings.browserRowWidth[5] = m_defaultRowWidth[m_settings.browserRowItem[5]]; 		//30;
 
-    m_settings.storageDirMovieUsed = true;
-    m_settings.storageDirRecUsed = true;
+	m_settings.storageDirMovieUsed = true;
+	for(int i = 0; i < MAX_RECORDING_DIR ; i++)
+	{
+		m_settings.storageDirRecUsed[i] = true;
+	}
 	m_settings.reload = false;
 	m_settings.remount = false;
 }
@@ -766,13 +782,17 @@ bool CMovieBrowser::loadSettings(MB_SETTINGS* settings)
 		settings->parentalLockAge = (MI_PARENTAL_LOCKAGE)configfile.getInt32("mb_parentalLockAge", MI_PARENTAL_OVER18);
 		settings->parentalLock = (MB_PARENTAL_LOCK)configfile.getInt32("mb_parentalLock", MB_PARENTAL_LOCK_ACTIVE);
 	
-        settings->storageDirRecUsed = (bool)configfile.getInt32("mb_storageDir_rec", true );
-        settings->storageDirMovieUsed = (bool)configfile.getInt32("mb_storageDir_movie", true );
-
+        char cfg_key[81];
+		for(int i = 0; i < MAX_RECORDING_DIR ; i++)
+		{
+			sprintf(cfg_key, "mb_storageDir_rec_%d", i);
+			settings->storageDirRecUsed[i] = (bool)configfile.getInt32(cfg_key, true );
+		}
+		settings->storageDirMovieUsed = (bool)configfile.getInt32("mb_storageDir_movie", true );
+		
 		settings->reload = (bool)configfile.getInt32("mb_reload", false );
 		settings->remount = (bool)configfile.getInt32("mb_remount", false );
 
-		char cfg_key[81];
 		for(int i = 0; i < MB_MAX_DIRS; i++)
 		{
 			sprintf(cfg_key, "mb_dir_%d", i);
@@ -822,16 +842,20 @@ bool CMovieBrowser::saveSettings(MB_SETTINGS* settings)
 	configfile.setString("mb_filter_optionString", settings->filter.optionString);
 	configfile.setInt32("mb_filter_optionVar", settings->filter.optionVar);
 	
-    configfile.setInt32("mb_storageDir_rec", settings->storageDirRecUsed );
-    configfile.setInt32("mb_storageDir_movie", settings->storageDirMovieUsed );
-
+	char cfg_key[81];
+	for(int i = 0; i < MAX_RECORDING_DIR ; i++)
+	{
+		sprintf(cfg_key, "mb_storageDir_rec_%d", i);
+		configfile.setInt32(cfg_key, settings->storageDirRecUsed[i] );
+	}
+	configfile.setInt32("mb_storageDir_movie", settings->storageDirMovieUsed );
+	
 	configfile.setInt32("mb_parentalLockAge", settings->parentalLockAge);
 	configfile.setInt32("mb_parentalLock", settings->parentalLock);
 
 	configfile.setInt32("mb_reload", settings->reload);
 	configfile.setInt32("mb_remount", settings->remount);
 
-	char cfg_key[81];
 	for(int i = 0; i < MB_MAX_DIRS; i++)
 	{
 		sprintf(cfg_key, "mb_dir_%d", i);
@@ -1048,15 +1072,15 @@ int CMovieBrowser::exec(const char* path)
 					// If there is any available bookmark, show the bookmark menu
 					if( m_movieSelectionHandler->bookmarks.lastPlayStop != 0 ||
 						m_movieSelectionHandler->bookmarks.start != 0)
-						{
-							TRACE("[mb] stop: %d start:%d \r\n",m_movieSelectionHandler->bookmarks.lastPlayStop,m_movieSelectionHandler->bookmarks.start);
-							m_currentStartPos = showStartPosSelectionMenu(); // display start menu m_currentStartPos = 
-						}
+					{
+						TRACE("[mb] stop: %d start:%d \r\n",m_movieSelectionHandler->bookmarks.lastPlayStop,m_movieSelectionHandler->bookmarks.start);
+						m_currentStartPos = showStartPosSelectionMenu(); // display start menu m_currentStartPos = 
+					}
 				}
 				TRACE("[mb] start pos: %d s\r\n",m_currentStartPos);
-					res = true;
-					loop = false;
-				}
+				res = true;
+				loop = false;
+			}
 			else if (msg == CRCInput::RC_home)
 			{
 				loop = false;
@@ -1326,6 +1350,10 @@ void CMovieBrowser::refreshFilterList(void)
 		m_FilterLines.lineArray[0].push_back(string_item);
 		string_item = g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_SERIE);
 		m_FilterLines.lineArray[0].push_back(string_item);
+#ifdef MB_SEARCH_INFO2
+		string_item = g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_INFO2);
+		m_FilterLines.lineArray[0].push_back(string_item);
+#endif
 	}
 	else
 	{
@@ -1352,6 +1380,11 @@ void CMovieBrowser::refreshFilterList(void)
 				if(found == false)
 					m_FilterLines.lineArray[0].push_back(m_vMovieInfo[i].epgInfo1);
 			}
+		}
+		else if(m_settings.filter.item == MB_INFO_INFO2)
+		{
+			std::string tmp = "->Eingabe";
+			m_FilterLines.lineArray[0].push_back(tmp);
 		}
 		else if(m_settings.filter.item == MB_INFO_MAJOR_GENRE)
 		{
@@ -1774,6 +1807,46 @@ bool CMovieBrowser::onButtonPressMainFrame(neutrino_msg_t msg)
 		if(m_movieSelectionHandler != NULL);
 			showMenu(m_movieSelectionHandler);
 	}
+#ifdef MOVEMANAGER	
+	else if (msg == CRCInput::RC_1) 
+	{
+		std::string source;
+		static std::string dest =	"/hdd/Filme";
+		source = m_movieSelectionHandler->file.Name;
+		CDirChooser dir(&dest,"/mnt/","/hdd");
+		dir.exec(NULL,"");   
+		if(dest != "")
+		{
+				dest += "/";
+				dest += m_movieSelectionHandler->file.getFileName();
+				CMoveManager::getInstance()->newMove(dest,source,MOVE_TYPE_COPY);
+		
+				if(m_movieInfo.convertTs2XmlName(&source) == true)  
+					if(m_movieInfo.convertTs2XmlName(&dest) == true)  
+						CMoveManager::getInstance()->newMove(dest,source,MOVE_TYPE_COPY);
+		}
+		refresh();
+	}
+	else if (msg == CRCInput::RC_0) 
+	{
+		std::string source;
+		std::string dest =	"/hdd/Filme";
+		source = m_movieSelectionHandler->file.Name;
+		CDirChooser dir(&dest,"/mnt/","/hdd");
+		dir.exec(NULL,"");   
+		if(dest != "")
+		{
+				dest += "/";
+				dest += m_movieSelectionHandler->file.getFileName();
+				CMoveManager::getInstance()->newMove(dest,source,MOVE_STATE_MOVE);
+		
+				if(m_movieInfo.convertTs2XmlName(&source) == true)  
+					if(m_movieInfo.convertTs2XmlName(&dest) == true)  
+						CMoveManager::getInstance()->newMove(dest,source,MOVE_STATE_MOVE);
+		}
+		refresh();
+	}
+#endif //MOVEMANAGER	
 	else
 	{
 		//TRACE("[mb]->onButtonPressMainFrame none\r\n");
@@ -1938,6 +2011,7 @@ bool CMovieBrowser::onButtonPressFilterList(neutrino_msg_t msg)
 		{
 			if(selected_line == 0) m_settings.filter.item = MB_INFO_MAJOR_GENRE;
 			if(selected_line == 1) m_settings.filter.item = MB_INFO_INFO1;
+			if(selected_line == 4) m_settings.filter.item = MB_INFO_INFO2;
 			if(selected_line == 2) m_settings.filter.item = MB_INFO_FILEPATH;
 			if(selected_line == 3) m_settings.filter.item = MB_INFO_SERIE;
 			refreshFilterList();
@@ -2331,18 +2405,20 @@ void CMovieBrowser::updateDir(void)
         std::string name = g_settings.network_nfs_moviedir;
         addDir(name,&m_settings.storageDirMovieUsed);
     }
-    // check if there is a record dir and if we should use it
-    if(g_settings.network_nfs_recordingdir[0] != 0 )
-    {
-        std::string name = g_settings.network_nfs_recordingdir;
-        addDir(name,&m_settings.storageDirRecUsed);
-    }
-
-    for(int i = 0; i < MB_MAX_DIRS; i++)
-    {
-        if(!m_settings.storageDir[i].empty())
-            addDir(m_settings.storageDir[i],&m_settings.storageDirUsed[i]);
-    }
+	// check if there is a record dir and if we should use it
+	for(int i = 0; i < MAX_RECORDING_DIR; i++)
+	{
+		if(g_settings.recording_dir[i] != "" )
+		{
+			addDir(g_settings.recording_dir[i],&m_settings.storageDirRecUsed[i]);
+		}
+	}
+	
+	for(int i = 0; i < MB_MAX_DIRS; i++)
+	{
+		if(!m_settings.storageDir[i].empty())
+			addDir(m_settings.storageDir[i],&m_settings.storageDirUsed[i]);
+	}
 }
 /************************************************************************
 
@@ -2661,6 +2737,15 @@ void CMovieBrowser::updateFilterSelection(void)
 	{
 		m_settings.filter.optionString = m_FilterLines.lineArray[0][selected_line+1];
 	}
+	else if(m_settings.filter.item == MB_INFO_INFO2)
+	{
+		std::string text;
+		CStringInputSMS stringInputSMS(LOCALE_MOVIEBROWSER_INFO_INFO2,&text, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+		stringInputSMS.exec(NULL,"");
+		m_settings.filter.optionString = text;
+		refreshFilterList(); 
+		refreshTitle();   
+	}
 	else if(m_settings.filter.item == MB_INFO_MAJOR_GENRE)
 	{
 		m_settings.filter.optionString = g_Locale->getText(GENRE_ALL[selected_line].value);
@@ -2689,8 +2774,8 @@ void CMovieBrowser::updateFilterSelection(void)
 
 bool CMovieBrowser::addDir(std::string& dirname, int* used)
 {
-	if(dirname.empty()) return false;
-	if(dirname == "/") return false;
+    if(dirname.empty()) return false;
+    if(dirname == "/") return false;
 	
     MB_DIR newdir;
     newdir.name = dirname;
@@ -2698,27 +2783,27 @@ bool CMovieBrowser::addDir(std::string& dirname, int* used)
     if(newdir.name.rfind('/') != newdir.name.length()-1 ||
       newdir.name.length() == 0 ||
         newdir.name == VLC_URI)
-	{
+    {
         newdir.name += '/';
-	}
+    }
 
     int size = m_dir.size();
-	for(int i = 0; i < size; i++)
-	{
+    for(int i = 0; i < size; i++)
+    {
         if(strcmp(m_dir[i].name.c_str(),newdir.name.c_str()) == 0)
-		{
+        {
 			// string is identical to previous one
             TRACE("[mb] Dir already in list: %s\r\n",newdir.name.c_str());
 			return (false); 
-		}
-	}
+        }
+    }
     TRACE("[mb] new Dir: %s\r\n",newdir.name.c_str());
     newdir.used = used;
     m_dir.push_back(newdir);
     if(*used == true)
     {
-	m_file_info_stale = true; // we got a new Dir, search again for all movies next time
-	m_seriename_stale = true;
+        m_file_info_stale = true; // we got a new Dir, search again for all movies next time
+        m_seriename_stale = true;
     }
 	return (true);
 }
@@ -2799,7 +2884,7 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
 
     /********************************************************************/
     /**  bookmark ******************************************************/
-    CStringInput*       pBookNameInput[MAX_NUMBER_OF_BOOKMARK_ITEMS];
+    CStringInputSMS*    pBookNameInput[MAX_NUMBER_OF_BOOKMARK_ITEMS];
     CIntInput*          pBookPosIntInput[MAX_NUMBER_OF_BOOKMARK_ITEMS];
     CIntInput*          pBookTypeIntInput[MAX_NUMBER_OF_BOOKMARK_ITEMS];
     CMenuWidget*        pBookItemMenu[MAX_NUMBER_OF_BOOKMARK_ITEMS];
@@ -2820,7 +2905,7 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
 
     for(int i =0 ; i < MI_MOVIE_BOOK_USER_MAX && i < MAX_NUMBER_OF_BOOKMARK_ITEMS; i++ )
     {
-        pBookNameInput[i] =    new CStringInput (LOCALE_MOVIEBROWSER_EDIT_BOOK, &movie_info->bookmarks.user[i].name, 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_NAME_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_NAME_INFO2, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+        pBookNameInput[i] =    new CStringInputSMS (LOCALE_MOVIEBROWSER_EDIT_BOOK, &movie_info->bookmarks.user[i].name, 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_NAME_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_NAME_INFO2, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
         pBookPosIntInput[i] =  new CIntInput (LOCALE_MOVIEBROWSER_EDIT_BOOK, (long&) movie_info->bookmarks.user[i].pos, 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_POS_INFO2);
         pBookTypeIntInput[i] = new CIntInput (LOCALE_MOVIEBROWSER_EDIT_BOOK, (long&) movie_info->bookmarks.user[i].length, 20, LOCALE_MOVIEBROWSER_EDIT_BOOK_TYPE_INFO1, LOCALE_MOVIEBROWSER_EDIT_BOOK_TYPE_INFO2);
 
@@ -2835,7 +2920,7 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
 
 /********************************************************************/
 /**  serie******************************************************/
-    CStringInput serieUserInput(LOCALE_MOVIEBROWSER_EDIT_SERIE, &movie_info->serieName, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS serieUserInput(LOCALE_MOVIEBROWSER_EDIT_SERIE, &movie_info->serieName, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
 
     CMenuWidget serieMenu (LOCALE_MOVIEBROWSER_SERIE_HEAD, "streaming.raw");
     serieMenu.addItem(GenericMenuSeparator);
@@ -2878,13 +2963,13 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
         snprintf(size,BUFFER_SIZE,"%5llu",movie_info->file.Size>>20);
     }
 
-    CStringInput titelUserInput(LOCALE_MOVIEBROWSER_INFO_TITLE,            &movie_info->epgTitle, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-    CStringInput channelUserInput(LOCALE_MOVIEBROWSER_INFO_CHANNEL,        &movie_info->epgChannel, 15, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
-    CStringInput epgUserInput(LOCALE_MOVIEBROWSER_INFO_INFO1,              &movie_info->epgInfo1, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS titelUserInput(LOCALE_MOVIEBROWSER_INFO_TITLE,            &movie_info->epgTitle, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS channelUserInput(LOCALE_MOVIEBROWSER_INFO_CHANNEL,        &movie_info->epgChannel, 15, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS epgUserInput(LOCALE_MOVIEBROWSER_INFO_INFO1,              &movie_info->epgInfo1, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
     CDateInput   dateUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,        &movie_info->dateOfLastPlay, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
     CDateInput   recUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,         &movie_info->file.Time, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
     CIntInput    lengthUserIntInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,       (long&)movie_info->length, 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
-    CStringInput countryUserInput(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY,    &movie_info->productionCountry, 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
+    CStringInputSMS countryUserInput(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY,    &movie_info->productionCountry, 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
     CIntInput    yearUserIntInput(LOCALE_MOVIEBROWSER_INFO_PRODYEAR,       (long&)movie_info->productionDate, 4, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
 
     CMenuWidget movieInfoMenu (LOCALE_MOVIEBROWSER_INFO_HEAD, "streaming.raw",m_cBoxFrame.iWidth);
@@ -2922,8 +3007,6 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
     }
 }
 
-extern "C" int pinghost( const char *hostname );
-
 /************************************************************************
 
 ************************************************************************/
@@ -2955,27 +3038,40 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* movie_info)
 /**  optionsVerzeichnisse  **************************************************/
     CMenuWidget optionsMenuDir (LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD , "streaming.raw",450);
     optionsMenuDir.addItem(GenericMenuSeparator);
-    optionsMenuDir.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_USE_REC_DIR,       (int*)(&m_settings.storageDirRecUsed), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
-    optionsMenuDir.addItem( new CMenuForwarder( LOCALE_MOVIEBROWSER_DIR , false ,g_settings.network_nfs_recordingdir));
 
-    optionsMenuDir.addItem( new CMenuOptionChooser(LOCALE_MOVIEBROWSER_USE_MOVIE_DIR,     (int*)(&m_settings.storageDirMovieUsed), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
-    optionsMenuDir.addItem( new CMenuForwarder (LOCALE_MOVIEBROWSER_DIR, false , g_settings.network_nfs_moviedir));
-    optionsMenuDir.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MOVIEBROWSER_DIR_HEAD));
+    optionsMenuDir.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MOVIEBROWSER_USE_MOVIE_DIR));
+    optionsMenuDir.addItem( new CMenuOptionChooser(g_settings.network_nfs_moviedir,     (int*)(&m_settings.storageDirMovieUsed), MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true ));
     
-    CFileChooser*       dirInput[MB_MAX_DIRS];
+    optionsMenuDir.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_TIMERLIST_RECORDING_DIR));
+    CMenuOptionChooser* chooserRec[MAX_RECORDING_DIR];
+    for(i = 0; i < MAX_RECORDING_DIR; i++)
+    {
+        if(g_settings.recording_dir[i] != "" &&
+            g_settings.recording_dir[i] != g_settings.network_nfs_moviedir)
+        {
+            chooserRec[i] =   new CMenuOptionChooser(g_settings.recording_dir[i].c_str() , &m_settings.storageDirRecUsed[i]  , MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true);
+            optionsMenuDir.addItem(chooserRec[i] );
+        }
+    }
+    
+    CMenuWidget optionsMenuDirUser (LOCALE_MOVIEBROWSER_DIR_HEAD , "streaming.raw",450);
+    
+    CDirChooser*      dirInput[MB_MAX_DIRS];
     CMenuOptionChooser* chooser[MB_MAX_DIRS];
     COnOffNotifier*     notifier[MB_MAX_DIRS];
     CMenuForwarder*     forwarder[MB_MAX_DIRS];
     for(i=0; i<MB_MAX_DIRS ;i++)
     {
-        dirInput[i] =  new CFileChooser(&m_settings.storageDir[i]);
+        dirInput[i] =  new CDirChooser(&m_settings.storageDir[i],"/mnt/","/hdd");
         forwarder[i] = new CMenuForwarder(LOCALE_MOVIEBROWSER_DIR,        m_settings.storageDirUsed[i], m_settings.storageDir[i],      dirInput[i]);
         notifier[i] =  new COnOffNotifier(forwarder[i]);
         chooser[i] =   new CMenuOptionChooser(LOCALE_MOVIEBROWSER_USE_DIR , &m_settings.storageDirUsed[i]  , MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,notifier[i]);
-        optionsMenuDir.addItem(chooser[i] );
-        optionsMenuDir.addItem(forwarder[i] );
-        optionsMenuDir.addItem(GenericMenuSeparator);
+        optionsMenuDirUser.addItem(chooser[i] );
+        optionsMenuDirUser.addItem(forwarder[i] );
+        optionsMenuDirUser.addItem(GenericMenuSeparator);
     }
+    optionsMenuDir.addItem(GenericMenuSeparatorLine);
+    optionsMenuDir.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_DIR_HEAD, true, NULL, &optionsMenuDirUser));
 
 /********************************************************************/
 /**  optionsMenuBrowser  **************************************************/
@@ -3037,10 +3133,13 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* movie_info)
     mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_DIRECTORIES_HEAD, true, NULL, &dirMenu,    NULL,                                  CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
     mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_SCAN_FOR_MOVIES,       true, NULL, this,        "reload_movie_info",                   CRCInput::RC_blue,   NEUTRINO_ICON_BUTTON_BLUE));
     //mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_NFS_HEAD,       true, NULL, nfs,         NULL,                                  CRCInput::RC_setup,  NEUTRINO_ICON_BUTTON_DBOX_SMALL));
+#ifdef MOVEMANAGER
+    mainMenu.addItem(GenericMenuSeparatorLine);
+    mainMenu.addItem( new CMenuForwarderNonLocalized("Kopierwerk",        true, NULL,  CMoveManager::getInstance(),   NULL));
+#endif // MOVEMANAGER
     mainMenu.addItem(GenericMenuSeparatorLine);
     mainMenu.addItem( new CMenuForwarder(LOCALE_MOVIEBROWSER_MENU_HELP_HEAD,        true, NULL, movieHelp,   NULL,                                  CRCInput::RC_help,   NEUTRINO_ICON_BUTTON_HELP_SMALL));
     mainMenu.addItem(GenericMenuSeparator);
- 
     mainMenu.exec(NULL, " ");
 
     // post menu handling
@@ -3071,7 +3170,6 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* movie_info)
     refreshLastRecordList();
     refreshFilterList();
     refresh();
-
    for(i=0; i<MB_MAX_DIRS ;i++)
    {
         delete dirInput[i];
@@ -3186,6 +3284,10 @@ bool CMovieBrowser::isFiltered(MI_MOVIE_INFO& movie_info)
 			if(strcmp(m_settings.filter.optionString.c_str(),movie_info.epgInfo1.c_str()) == 0) 
 				result = false;
 			break;
+        case MB_INFO_INFO2:
+            if(movie_info.epgInfo2.find(m_settings.filter.optionString) != std::string::npos )
+                 result = false;
+            break;
 		case MB_INFO_MAJOR_GENRE:
 			if(m_settings.filter.optionVar == movie_info.genreMajor)
 				result = false;
@@ -3193,7 +3295,6 @@ bool CMovieBrowser::isFiltered(MI_MOVIE_INFO& movie_info)
 		case MB_INFO_SERIE:
 			if(strcmp(m_settings.filter.optionString.c_str(),movie_info.serieName.c_str()) == 0) 
 				result = false;
-			break;
 			break;
 		default:
 				result = false;
@@ -3526,13 +3627,15 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_YELLOW, "Aktives Fenster wechseln");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, "Filminfos neu laden");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DBOX, "Hauptmenü");
-	helpbox.addLine("+/-  Ansicht wechseln");
+	helpbox.addLine("+/- Ansicht wechseln");
+	helpbox.addLine(NEUTRINO_ICON_BUTTON_MUTE, "Film löschen");
 	helpbox.addLine("");
 	helpbox.addLine("Während der Filmwiedergabe:");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_BLUE, " Markierungsmenu ");
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.11 $");
+	helpbox.addLine("");
+	helpbox.addLine("MovieBrowser $Revision: 1.12 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
@@ -3542,25 +3645,10 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 /////////////////////////////////////////////////
 // MenuTargets
 ////////////////////////////////////////////////
-int CFileChooser::exec(CMenuTarget* parent, const std::string & actionKey)
-{
-    if(parent != NULL)
-    	parent->hide();
-    CFileBrowser browser;
-    browser.Dir_Mode=true;
-    if (browser.exec(dirPath->c_str()))
-    {
-        *dirPath = browser.getSelectedFile()->Name;
-        short a = dirPath->compare(0,5,"/mnt/");
-        short b = dirPath->compare(0,4,"/hdd");
-        if(a != 0 && b != 0)
-            *dirPath ="";   // We clear the  string if the selected folder is not at leaset /mnt/ or /hdd (There is no other possibility to clear this) 
-    }
 
-    return menu_return::RETURN_REPAINT;
-}
-
+/************************************************************************/
 CDirMenu::CDirMenu(std::vector<MB_DIR>* dir_list)
+/************************************************************************/
 {
     unsigned int i;
     changed = false;
@@ -3576,6 +3664,8 @@ CDirMenu::CDirMenu(std::vector<MB_DIR>* dir_list)
     {
         for(int nfs = 0; nfs < NETWORK_NFS_NR_OF_ENTRIES; nfs++)
         {
+            if(g_settings.network_nfs_local_dir[nfs][0] != 0)
+            {
             std::string tmp = g_settings.network_nfs_local_dir[nfs];
             int result = (*dirList)[i].name.compare( 0,tmp.size(),tmp) ;
             //printf("[CDirMenu] (nfs%d) %s == (mb%d) %s (%d)\n",nfs,g_settings.network_nfs_local_dir[nfs],i,(*dirList)[i].name.c_str(),result);
@@ -3587,9 +3677,12 @@ CDirMenu::CDirMenu(std::vector<MB_DIR>* dir_list)
             }
          }
     }
+    }
 };
 
+/************************************************************************/
 int CDirMenu::exec(CMenuTarget* parent, const std::string & actionKey)
+/************************************************************************/
 {
     int returnval = menu_return::RETURN_REPAINT;
 
@@ -3656,41 +3749,43 @@ int CDirMenu::exec(CMenuTarget* parent, const std::string & actionKey)
     return returnval;
 }
 
+/************************************************************************/
 void CDirMenu::updateDirState(void)
+/************************************************************************/
 {
     unsigned int drivefree = 0;
     struct statfs s;
 
     for(unsigned int i = 0; i < dirList->size() && i < MAX_DIR; i++)
     {
-         dirOptionText[i]="UNBEKANNT";
-         dirState[i]=DIR_STATE_UNKNOWN;
+         dirOptionText[i] = "UNKNOWN";
+         dirState[i] = DIR_STATE_UNKNOWN;
         // 1st ping server
         if(dirNfsMountNr[i] != -1)
         {
-            int retvalue = pinghost(g_settings.network_nfs_ip[dirNfsMountNr[i]].c_str());
+            int retvalue = pingthost(g_settings.network_nfs_ip[dirNfsMountNr[i]].c_str(),60); // get ping for 60ms
             if (retvalue == 0)//LOCALE_PING_UNREACHABLE
             {
-                dirOptionText[i]="SERVER AUS";
-                dirState[i]=DIR_STATE_SERVER_DOWN;
+                dirOptionText[i] = g_Locale->getText(LOCALE_RECDIRCHOOSER_SERVER_DOWN);
+                dirState[i] = DIR_STATE_SERVER_DOWN;
             }
             else if (retvalue == 1)//LOCALE_PING_OK
             {
                 if(CFSMounter::isMounted (g_settings.network_nfs_local_dir[dirNfsMountNr[i]]) == 0)
                 {
-                    dirOptionText[i]="NICHT VERB.";
-                    dirState[i]=DIR_STATE_NOT_MOUNTED;
+                    dirOptionText[i] = g_Locale->getText(LOCALE_RECDIRCHOOSER_NOT_MOUNTED);
+                    dirState[i] = DIR_STATE_NOT_MOUNTED;
                }
                 else
                 {
-                      dirState[i]=DIR_STATE_MOUNTED;
+                      dirState[i] = DIR_STATE_MOUNTED;
                 }
             }
         }
         else
         {
             // not a nfs dir, probably IDE? we accept this so far
-            dirState[i]=DIR_STATE_MOUNTED;
+            dirState[i] = DIR_STATE_MOUNTED;
         }
         if(dirState[i] == DIR_STATE_MOUNTED)
         {
@@ -3698,15 +3793,15 @@ void CDirMenu::updateDirState(void)
             {
                 if (statfs((*dirList)[i].name.c_str(), &s) >= 0 )
                 {
-                drivefree = (s.f_bfree * s.f_bsize)>>30;
-                char tmp[20];
-                snprintf(tmp, 19,"%3d GB frei",drivefree);
-                tmp[19]=0;
-                dirOptionText[i]=tmp;
+                    drivefree = (s.f_bfree * s.f_bsize)>>30;
+                    char tmp[20];
+                    snprintf(tmp, 19,g_Locale->getText(LOCALE_RECDIRCHOOSER_FREE),drivefree);
+                    tmp[19]=0;
+                    dirOptionText[i]=tmp;
                 }
                 else
                 {
-                    dirOptionText[i]="? GB frei";
+                    dirOptionText[i]="? GB";
                 }
             }
             else
@@ -3718,7 +3813,9 @@ void CDirMenu::updateDirState(void)
 }
 
 
+/************************************************************************/
 void CDirMenu::show(void)
+/************************************************************************/
 {
     if(dirList->empty())
         return;
@@ -3739,3 +3836,9 @@ void CDirMenu::show(void)
   return;
 
 }
+
+
+
+
+
+

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.80 2007/01/12 22:58:06 houdini Exp $
+ * $Id: locals_intern.h,v 1.81 2007/01/24 02:18:42 guenther Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -862,6 +862,10 @@ const char * locale_real_names[] =
 	"rclock.menueadd",
 	"rclock.title",
 	"rclock.unlockmsg",
+	"recdirchooser.free",
+	"recdirchooser.not_mounted",
+	"recdirchooser.server_down",
+	"recdirchooser.user_dir",
 	"recordingmenu.apids",
 	"recordingmenu.apids_ac3",
 	"recordingmenu.apids_alt",

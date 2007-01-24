@@ -1,4 +1,6 @@
-/*
+/* 
+  $Id: settings.h,v 1.171 2007/01/24 02:18:42 guenther Exp $
+ 
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -198,6 +200,8 @@ struct SNeutrinoSettings
 	char recording_dir_permissions[REC_FILENAME_TEMPLATE_NR_OF_ENTRIES][4];
 	int  recording_zap_on_announce;
 
+#define MAX_RECORDING_DIR 10	
+	std::string recording_dir[MAX_RECORDING_DIR];
 	//streaming
 	int  streaming_type;
 	std::string streaming_server_ip;

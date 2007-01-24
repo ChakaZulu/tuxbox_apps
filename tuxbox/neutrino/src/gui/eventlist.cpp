@@ -1,5 +1,10 @@
 /*
-	$Id: eventlist.cpp,v 1.101 2007/01/12 22:57:58 houdini Exp $
+<<<<<<< eventlist.cpp
+	$Id: eventlist.cpp,v 1.102 2007/01/24 02:21:16 guenther Exp $
+
+=======
+	$Id: eventlist.cpp,v 1.102 2007/01/24 02:21:16 guenther Exp $
+>>>>>>> 1.101
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -40,6 +45,7 @@
 #include <gui/widget/icons.h>
 #include <gui/widget/messagebox.h>
 #include <gui/widget/mountchooser.h>
+#include <gui/widget/dirchooser.h>
 
 
 #include <global.h>
@@ -343,28 +349,18 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				CTimerdClient timerdclient;
 				if(timerdclient.isTimerdAvailable())
 				{
-					char *recDir = g_settings.network_nfs_recordingdir;
+					std::string recDir = g_settings.recording_dir[0];
 					if (g_settings.recording_choose_direct_rec_dir)
 					{
-						int id = -1;
-						CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&id,NULL,g_settings.network_nfs_recordingdir);
-						if (recDirs.hasItem())
-						{
-							hide();
-							recDirs.exec(NULL,"");
-							paint();
-						} else
-						{
-							printf("[CEventList] no network devices available\n");
-						}
-						if (id != -1)
-							recDir = g_settings.network_nfs_local_dir[id];
-						else
-							recDir = NULL;
+						CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,&recDir);
+						hide();
+						recDirs.exec(NULL,"");
+						paint();
+						recDir = recDirs.get_selected_dir();
 					}
-					if (recDir != NULL)
+					
+					if (recDir != "")
 					{
-
 //						if (timerdclient.addRecordTimerEvent(channel_id,
 						if (timerdclient.addRecordTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID),
 										     evtlist[selected].startTime,
@@ -723,7 +719,7 @@ int EventList::findEvents(void)
 			int channel_nr = bouquetList->Bouquets[m_search_bouquet_id]->channelList->getSize();
 			for(int channel = 0; channel < channel_nr; channel++)
 			{
-				channel_id = bouquetList->Bouquets[m_search_bouquet_id]->channelList->getChannelFromIndex(channel)->channel_id;
+				channel_id = (*(bouquetList->Bouquets[m_search_bouquet_id]->channelList))[channel]->channel_id; 
 				g_Sectionsd->getEventsServiceKeySearchAdd(evtlist,channel_id,m_search_epg_item,m_search_keyword);
 			}
 		}
@@ -737,7 +733,7 @@ int EventList::findEvents(void)
 				int channel_nr = bouquetList->Bouquets[bouquet]->channelList->getSize();
 				for(int channel = 0; channel < channel_nr; channel++)
 				{
-				    channel_id = bouquetList->Bouquets[bouquet]->channelList->getChannelFromIndex(channel)->channel_id;
+					channel_id = (*(bouquetList->Bouquets[bouquet]->channelList))[channel]->channel_id; 
 					g_Sectionsd->getEventsServiceKeySearchAdd(evtlist,channel_id,m_search_epg_item,m_search_keyword);
 				}
 			}
