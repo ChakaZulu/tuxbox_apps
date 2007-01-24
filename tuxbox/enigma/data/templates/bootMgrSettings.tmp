@@ -10,7 +10,8 @@
 				var randomSkin = document.settings.randomSkin.value;
 				var selectedEntry = document.settings.selectedEntry.value;
 				var videoFormat = document.settings.videoFormat.value;
-				var skinPath = document.settings.skinPath.value;
+				var skinPath1 = document.settings.skinPath1.value;
+				var skinPath2 = document.settings.skinPath2.value;
 				var skinName = document.settings.skinName.value; 
 				var timeoutValue = document.settings.timeoutValue.value;
 				document.location = "/cgi-bin/setbootmanagersettings?skinName=" + skinName + "&mpoint=" + mpoint + "&randomSkin=" + randomSkin + "&selectedEntry=" + selectedEntry + "&videoFormat=" + videoFormat + "&skinPath1=" + skinPath1 + "&skinPath2=" + skinPath2 + "&timeoutValue=" + timeoutValue;
