@@ -1,10 +1,6 @@
 /*
-<<<<<<< eventlist.cpp
-	$Id: eventlist.cpp,v 1.102 2007/01/24 02:21:16 guenther Exp $
+	$Id: eventlist.cpp,v 1.103 2007/01/24 02:26:04 guenther Exp $
 
-=======
-	$Id: eventlist.cpp,v 1.102 2007/01/24 02:21:16 guenther Exp $
->>>>>>> 1.101
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
