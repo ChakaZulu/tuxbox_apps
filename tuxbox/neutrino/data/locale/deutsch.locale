@@ -835,6 +835,10 @@ rclock.lockmsg Die Fernbedienung der dbox2 wird gesperrt.\nUm die Sperre aufzuhe
 rclock.menueadd FB sperren
 rclock.title Fernbedienung sperren
 rclock.unlockmsg Fernbedienung reaktiviert...
+recdirchooser.free %3d GB frei
+recdirchooser.not_mounted NICHT VERB.
+recdirchooser.server_down SERVER AUS
+recdirchooser.user_dir Anderes Verzeichnis
 recordingmenu.apids Voreinstellung für Tonspuren
 recordingmenu.apids_ac3 AC3 Tonspuren aufnehmen
 recordingmenu.apids_alt Alternative Tonspuren aufn.

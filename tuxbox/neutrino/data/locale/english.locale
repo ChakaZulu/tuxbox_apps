@@ -835,6 +835,10 @@ rclock.lockmsg Your DBOX2 remote control will be locked.\nTo unlock it, press <R
 rclock.menueadd Lock RC
 rclock.title Lock Remote Control
 rclock.unlockmsg Remote control reactivated.
+recdirchooser.free %3d GB free
+recdirchooser.not_mounted NOT MOUNTED
+recdirchooser.server_down SERVER DOWN
+recdirchooser.user_dir other
 recordingmenu.apids default audio streams
 recordingmenu.apids_ac3 record AC3 streams
 recordingmenu.apids_alt record alternative streams
