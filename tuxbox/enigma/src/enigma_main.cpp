@@ -643,7 +643,10 @@ void AudioChannelSelectionChanged( eListBoxEntryText *e )
 		{
 			if (sp->dvb)
 			{
-				sp->dvb->set(eServiceDVB::cStereoMono,(int)e->getKey());
+				int val = (int)e->getKey();
+				if (val < 0 /* left */ || val > 2 /* right */ || val == 1 /* stereo is default */)
+					val = -1; // remove from cache
+				sp->dvb->set(eServiceDVB::cStereoMono, val);
 			}
 			eServiceInterface::getInstance()->removeRef(eServiceInterface::getInstance()->service);
 		}

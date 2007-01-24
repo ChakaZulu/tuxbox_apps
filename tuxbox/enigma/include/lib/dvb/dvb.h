@@ -358,7 +358,18 @@ class eServiceDVB: public eService
 public:
 	enum cacheID
 	{
-		cVPID, cAPID, cTPID, cPCRPID, cAC3PID, cStereoMono, cacheMax
+		cVPID, cAPID, cTPID, cPCRPID, cAC3PID,
+		cVideoType /* not used in e1.. but in e2 */,
+		cStereoMono,
+		/* 
+			cAc3Delay, not used in e1.. but in e2
+			cPcmDelay, not used in e1.. but in e2
+			cSubtitle, not used in e1.. but in e2
+		please do not simply add any other value to the service cache
+		this breaks binary compatibilty of enigma1 and enigma2 service format
+		(and settings editors)
+		*/
+		cacheMax
 	};
 	eServiceDVB(eDVBNamespace dvb_namespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number=-1);
 	eServiceDVB(eDVBNamespace dvb_namespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number=-1);

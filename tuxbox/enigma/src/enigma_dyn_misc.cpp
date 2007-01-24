@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_misc.cpp,v 1.11 2007/01/22 14:18:17 digi_casi Exp $
+ * $Id: enigma_dyn_misc.cpp,v 1.12 2007/01/24 23:16:35 ghostrider Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -592,6 +592,18 @@ struct addToString
 					int d=service->get((eServiceDVB::cacheID)i);
 					if (d != -1)
 						dest+=eString().sprintf(";%02d%04x", i, d);
+				}
+				int sid = service->service_id.get();
+				PAT *pat = eDVB::getInstance()->tPAT.getCurrent();
+				if (pat) // PAT avail
+				{
+					PATEntry *pe = pat->searchService(sid);
+					if (pe)
+					{
+						int pmtpid = pe->program_map_PID;
+						dest+=eString().sprintf(";99%04x", pmtpid);
+					}
+					pat->unlock();
 				}
 			}
 			dest += '\n';
