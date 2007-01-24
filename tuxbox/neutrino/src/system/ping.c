@@ -1,4 +1,5 @@
-/**
+/*
+ *  $Id: ping.c,v 1.8 2007/01/24 02:19:10 guenther Exp $
  * PING module
  *
  * Copyright (C) 2001 Jeffrey Fulmer <jdfulmer@armstrong.com>
@@ -18,6 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
+ * 15 Jan 2007   Guenther   Change pingthost timebase from seconds to milliseconds
  */
 
 #include <resolv.h>
@@ -38,7 +40,7 @@
 #define  DEF_TIMEOUT 5
 
 int   ident = 0;
-int   timo  = 2;
+int   timo  = 2000;   // time in ms
 int   rrt;
 int   sock;
 
@@ -215,6 +217,7 @@ elapsed_time( struct timeval *starttime ){
   return( elapsed );
 } 
 
+// time t in ms
 int 
 myping( const char *hostname, int t )
 {
@@ -225,7 +228,7 @@ myping( const char *hostname, int t )
   memset(&sa, 0, sizeof(struct sockaddr_in));
   ident = getpid() & 0xFFFF;
 
-  if( t == 0 ) timo = 2;
+  if( t == 0 ) timo = 2000;
   else         timo = t;
 
   (void) gettimeofday( &mytime, (struct timezone *)NULL);
@@ -233,7 +236,7 @@ myping( const char *hostname, int t )
     return err;
   }
   do{
-    if(( rrt = elapsed_time( &mytime )) > timo * 1000 ){
+    if(( rrt = elapsed_time( &mytime )) > timo  ){
       close( sock );
       return 0;
     }
@@ -249,6 +252,8 @@ pinghost( const char *hostname )
   return myping( hostname, 0 );
 }
 
+
+// time t in ms
 int
 pingthost( const char *hostname, int t )
 {
@@ -266,6 +271,7 @@ tpinghost( const char *hostname )
     return ret;
 }
 
+// time t in ms
 int
 tpingthost( const char *hostname, int t )
 {
