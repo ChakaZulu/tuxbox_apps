@@ -93,6 +93,14 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 			norezap = 0x100
 		};
 
+	enum
+		{
+			init_mode_unknown 	= -1,
+			init_mode_init 		= 1,
+			init_mode_record 	= 2,
+			init_mode_switch 	= 3,
+		};
+
 		CConfigFile			configfile;
 		CScanSettings			scanSettings;
 		int                             network_dhcp;
@@ -221,8 +229,8 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 
 		static CNeutrinoApp* getInstance();
 
-		void channelsInit(int mode = -1);
-		void channelsInit4Record();
+		void channelsInit(int init_mode, int mode = -1);
+//		void channelsInit4Record();
 		int run(int argc, char **argv);
 		//callback stuff only....
 		int exec(CMenuTarget* parent, const std::string & actionKey);

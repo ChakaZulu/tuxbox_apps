@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.839 2007/01/25 23:02:29 houdini Exp $
+	$Id: neutrino.cpp,v 1.840 2007/01/26 23:57:38 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1110,20 +1110,20 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "streaming_server_ip", g_settings.streaming_server_ip );
 	configfile.setString( "streaming_server_port", g_settings.streaming_server_port );
 	configfile.setString( "streaming_server_cddrive", g_settings.streaming_server_cddrive );
-	configfile.setString ( "streaming_videorate", g_settings.streaming_videorate );
-	configfile.setString ( "streaming_audiorate", g_settings.streaming_audiorate );
+	configfile.setString( "streaming_videorate", g_settings.streaming_videorate );
+	configfile.setString( "streaming_audiorate", g_settings.streaming_audiorate );
 	configfile.setString( "streaming_server_startdir", g_settings.streaming_server_startdir );
 	configfile.setInt32 ( "streaming_transcode_audio", g_settings.streaming_transcode_audio );
 	configfile.setInt32 ( "streaming_force_avi_rawaudio", g_settings.streaming_force_avi_rawaudio );
 	configfile.setInt32 ( "streaming_force_transcode_video", g_settings.streaming_force_transcode_video );
 	configfile.setInt32 ( "streaming_transcode_video_codec", g_settings.streaming_transcode_video_codec );
 	configfile.setInt32 ( "streaming_resolution", g_settings.streaming_resolution );
-	configfile.setInt32("streaming_use_buffer" , g_settings.streaming_use_buffer);
-    configfile.setInt32("streaming_buffer_segment_size" , g_settings.streaming_buffer_segment_size);
-    configfile.setInt32("streaming_show_tv_in_browser" , g_settings.streaming_show_tv_in_browser);
+	configfile.setInt32 ("streaming_use_buffer" , g_settings.streaming_use_buffer);
+	configfile.setInt32 ("streaming_buffer_segment_size" , g_settings.streaming_buffer_segment_size);
+	configfile.setInt32 ("streaming_show_tv_in_browser" , g_settings.streaming_show_tv_in_browser);
 
 	// default plugin for movieplayer
-	configfile.setString ( "movieplayer_plugin", g_settings.movieplayer_plugin );
+	configfile.setString( "movieplayer_plugin", g_settings.movieplayer_plugin );
 
 	//rc-key configuration
 	configfile.setInt32 ( "key_tvradio_mode", g_settings.key_tvradio_mode );
@@ -1253,27 +1253,37 @@ bool CNeutrinoApp::ucodes_available(void)
 *          CNeutrinoApp -  channelsInit, get the Channellist from daemon              *
 *                                                                                     *
 **************************************************************************************/
-void CNeutrinoApp::channelsInit(int mode)
+void CNeutrinoApp::channelsInit(int init_mode, int mode)
 {
 	dprintf(DEBUG_DEBUG, "doing channelsInit\n");
 
-	if (mode == mode_radio) {
-		if (channelListRADIO && bouquetListRADIO) {
-			channelList = channelListRADIO;
-			bouquetList = bouquetListRADIO;
-			// otherwise zapit will not tune to the new TP
-			channelList->clearTuned();
-			return;
-		} // else load
-	} 
-	else if (mode == mode_tv) {
-		if (channelListTV && bouquetListTV) {
-			channelList = channelListTV;
-			bouquetList = bouquetListTV;
-			// otherwise zapit will not tune to the new TP
-			channelList->clearTuned();
-			return;
-		} // else load
+	if (init_mode == init_mode_switch) {
+		if (mode_radio == mode) {
+			if (channelListRADIO && bouquetListRADIO) {
+				channelList = channelListRADIO;
+				bouquetList = bouquetListRADIO;
+				// otherwise zapit will not tune to the new TP
+				channelList->clearTuned();
+				return;
+			} // else load
+		} 
+		else if (mode_tv == mode) {
+			if (channelListTV && bouquetListTV) {
+				channelList = channelListTV;
+				bouquetList = bouquetListTV;
+				// otherwise zapit will not tune to the new TP
+				channelList->clearTuned();
+				return;
+			} // else load
+		}
+	}
+
+	if (mode_unknown == mode) { // stay in current TV/Radio mode
+		if (channelList == channelListTV) {
+			mode = mode_tv;
+		} else {
+			mode = mode_radio;
+		}
 	}
 
 	CZapitClient::BouquetChannelList zapitChannels;
@@ -1379,9 +1389,25 @@ void CNeutrinoApp::channelsInit(int mode)
 	}
 
 	dprintf(DEBUG_DEBUG, "\nAll bouquets-channels received\n");
+	if (mode == mode_radio) {
+		if (channelListRADIO && bouquetListRADIO) {
+			channelList = channelListRADIO;
+			bouquetList = bouquetListRADIO;
+			// otherwise zapit will not tune to the new TP
+			channelList->clearTuned();
+		}
+	} 
+	else if (mode == mode_tv) {
+		if (channelListTV && bouquetListTV) {
+			channelList = channelListTV;
+			bouquetList = bouquetListTV;
+			// otherwise zapit will not tune to the new TP
+			channelList->clearTuned();
+		}
+	}
 }
 
-
+#if 0
 void CNeutrinoApp::channelsInit4Record(void)
 {
 	dprintf(DEBUG_DEBUG, "doing channelsInit\n");
@@ -1441,6 +1467,7 @@ void CNeutrinoApp::channelsInit4Record(void)
 	bouquetList = bouquetListRecord;
 //	channelList->clearTuned();
 }
+#endif
 
 /**************************************************************************************
 *                                                                                     *
@@ -3501,13 +3528,14 @@ void CNeutrinoApp::InitZapper()
 			g_Zapit->PlaybackPES();
 	}
 
-	channelsInit();
 	if(firstchannel.mode == 't')
 	{
+		channelsInit(init_mode_init, mode_tv);
 		tvMode();
 	}
 	else
 	{
+		channelsInit(init_mode_init, mode_radio);
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
 		radioMode();
@@ -4161,7 +4189,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		t_channel_id old_id=g_Zapit->getCurrentServiceID();
 		if (data)
 			old_parent_id = channelList->getActiveChannel_ChannelID();
-		channelsInit();
+
+		channelsInit(init_mode_init);
 
 		// if a neutrino channel for current channel_id cannot be found (eg tuned to a sub service)
 		// adjust to old main channel
@@ -4175,7 +4204,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		t_channel_id old_id = channelList->getActiveChannel_ChannelID();
 
-		channelsInit();
+		channelsInit(init_mode_init);
 
 		if((old_id == 0) || (!(channelList->adjustToChannelID(old_id))))
 			channelList->zapTo(0);
@@ -4256,12 +4285,12 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			if ((!isTVMode) && (mode != mode_radio))
 			{
 				radioMode(false);
-				channelsInit(mode_tv);
+				channelsInit(init_mode_switch, mode_tv);
 			}
 			else if (isTVMode && (mode != mode_tv))
 			{
 				tvMode(false);
-				channelsInit(mode_radio);
+				channelsInit(init_mode_switch, mode_radio);
 			}
 			channelList->zapTo_ChannelID(eventinfo->channel_id);
 		}
@@ -4785,7 +4814,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 	if( rezap )
 	{
 		firstChannel();
-		channelsInit(mode_tv);
+		channelsInit(init_mode_switch, mode_tv);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
 }
@@ -4922,7 +4951,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 	if( rezap )
 	{
 		firstChannel();
-		channelsInit(mode_radio);
+		channelsInit(init_mode_switch, mode_radio);
 		channelList->zapTo( firstchannel.channelNumber -1 );
 	}
 }
