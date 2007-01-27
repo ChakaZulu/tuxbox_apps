@@ -9,14 +9,25 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
+/*
+ * eProgress skin widget
+ *
+ * Skin properties:
+ *   - 'start' defines offset for the progress position
+ *   - 'pixmap' parameter can be used to specify a png file as marker instead of the color bar
+ *   - 'direction' parameter switches between horizontal/vertical
+ *   - 'alphatest': with this parameter the 'leftColor' area can be made transparent
+ */
+
 eProgress::eProgress(eWidget *parent, int takefocus)
 	: eWidget(parent, takefocus)
 {
-	left=eSkin::getActive()->queryScheme("eProgress.left");
-	right=eSkin::getActive()->queryScheme("eProgress.right");
-	perc=start=0;
-	border=2;
-	direction=0;
+	left = eSkin::getActive()->queryScheme("eProgress.left");
+	right = eSkin::getActive()->queryScheme("eProgress.right");
+	perc = start = 0;
+	border = 2;
+	direction = 0;
+	alphatest = 0;
 	setForegroundColor(eSkin::getActive()->queryScheme("eProgress.border"));
 }
 
@@ -56,57 +67,94 @@ void eProgress::setStart(int p)
 
 void eProgress::redrawWidget(gPainter *target, const eRect &area)
 {
-	// border malen
-	target->setForegroundColor(getForegroundColor());
-	target->fill(eRect(0, 0, size.width(), border));
-	target->fill(eRect(0, border, border, size.height()-border));
-	target->fill(eRect(border, size.height()-border, size.width()-border, border));
-	target->fill(eRect(size.width()-border, border, border, size.height()-border));
+	if (border)
+	{
+		/* draw border */
+		target->setForegroundColor(getForegroundColor());
+		target->fill(eRect(0, 0, size.width(), border));
+		target->fill(eRect(0, border, border, size.height() - border));
+		target->fill(eRect(border, size.height() - border, size.width() - border, border));
+		target->fill(eRect(size.width() - border, border, border, size.height() - border));
+	}
 
 	switch (direction)
 	{
 	case 0:
 	{
-		int st=start*(size.width()-border*2)/100;
-		if (st<0)
-			st=0;
-		if (st>(size.width()-border*2))
-			st=size.width()-border*2;
+		int range = size.width() - border * 2;
+		if (pixmap) range -= pixmap->x;
 
-		int dh=perc*(size.width()-border*2)/100;
-		if (dh<0)
-			dh=0;
-		if ((dh+st)>(size.width()-border*2))
-			dh=size.width()-border*2-st;
+		int st = start * range / 100;
+		if (st < 0) st = 0;
+		if (st > range) st = range;
 
-		target->setForegroundColor(left);
-		target->fill(eRect(border+start, border, dh, size.height()-border*2));
-		target->setForegroundColor(right);
-		target->fill(eRect(border+dh+st, border, size.width()-border*2-dh-st, size.height()-border*2));
-		if (st)
-			target->fill(eRect(border, border, st, size.height()-border*2));
+		int dh = perc * range / 100;
+		if (dh < 0) dh = 0;
+		if ((dh + st) > range) dh = range - st;
+
+		if (pixmap)
+		{
+			int x = border + st + dh;
+			int y = (size.height() - pixmap->y) / 2;
+			if (x < 0) x = 0;
+			if (y < 0) y = 0;
+			if (x > size.width() - pixmap->x) x = size.width() - pixmap->x;
+			if (y > size.height() - pixmap->y) y = size.height() - pixmap->y;
+			target->blit(*pixmap, ePoint(x, y), area, gPixmap::blitAlphaTest);
+		}
+		else
+		{
+			if (!alphatest)
+			{
+				target->setForegroundColor(left);
+				target->fill(eRect(border + st, border, dh, size.height() - border * 2));
+			}
+			target->setForegroundColor(right);
+			target->fill(eRect(border + dh + st, border, size.width() - border * 2 - dh - st, size.height() - border * 2));
+			if (st)
+			{
+				target->fill(eRect(border, border, st, size.height() - border * 2));
+			}
+		}
 		break;
 	}
 	case 1:
 	{
-		int st=start*(size.height()-border*2)/100;
-		if (st<0)
-			st=0;
-		if (st>(size.height()-border*2))
-			st=size.height()-border*2;
+		int range = size.height() - border * 2;
+		if (pixmap) range -= pixmap->y;
 
-		int dh=perc*(size.height()-border*2)/100;
-		if (dh<0)
-			dh=0;
-		if ((dh+st)>(size.height()-border*2))
-			dh=size.height()-border*2-st;
+		int st = start * range / 100;
+		if (st < 0) st = 0;
+		if (st > range) st = range;
 
-		target->setForegroundColor(left);
-		target->fill(eRect(border, border+st, size.width()-border*2, dh));
-		target->setForegroundColor(right);
-		target->fill(eRect(border, border+dh+st, size.width()-border*2, size.height()-border*2-dh-st));
-		if (st)
-			target->fill(eRect(border, border, size.width()-border*2, st));
+		int dh = perc * range / 100;
+		if (dh < 0) dh = 0;
+		if ((dh + st) > range) dh = range - st;
+
+		if (pixmap)
+		{
+			int x = (size.width() - pixmap->x) / 2;
+			int y = border + st + dh;
+			if (x < 0) x = 0;
+			if (y < 0) y = 0;
+			if (x > size.width() - pixmap->x) x = size.width() - pixmap->x;
+			if (y > size.height() - pixmap->y) y = size.height() - pixmap->y;
+			target->blit(*pixmap, ePoint(x, y), area, gPixmap::blitAlphaTest);
+		}
+		else
+		{
+			if (!alphatest)
+			{
+				target->setForegroundColor(left);
+				target->fill(eRect(border, border+st, size.width() - border * 2, dh));
+			}
+			target->setForegroundColor(right);
+			target->fill(eRect(border, border+dh+st, size.width() - border * 2, size.height() - border * 2 - dh - st));
+			if (st)
+			{
+				target->fill(eRect(border, border, size.width() - border * 2, st));
+			}
+		}
 		break;
 	}
 	}
@@ -114,14 +162,18 @@ void eProgress::redrawWidget(gPainter *target, const eRect &area)
 
 int eProgress::setProperty(const eString &prop, const eString &value)
 {
-	if (prop=="leftColor")
-		left=eSkin::getActive()->queryColor(value);
-	else if (prop=="rightColor")
-		right=eSkin::getActive()->queryColor(value);
-	else if (prop=="border")
-		border=atoi(value.c_str());
-	else if (prop=="direction")
-		direction=atoi(value.c_str());
+	if (prop == "leftColor")
+		left = eSkin::getActive()->queryColor(value);
+	else if (prop == "rightColor")
+		right = eSkin::getActive()->queryColor(value);
+	else if (prop == "start")
+		start = atoi(value.c_str());
+	else if (prop == "border")
+		border = atoi(value.c_str());
+	else if (prop == "direction")
+		direction = atoi(value.c_str());
+	else if (prop == "alphatest" && value == "on")
+		alphatest = 1;
 	else
 		return eWidget::setProperty(prop, value);
 	return 0;

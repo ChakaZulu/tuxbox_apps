@@ -13,7 +13,7 @@ class eProgress: public eWidget
 {
 protected:
 	int perc, border, start;
-	int direction;
+	int direction, alphatest;
 	gColor left, right;
 public:
 	eProgress(eWidget *parent, int takeFocus=0);
