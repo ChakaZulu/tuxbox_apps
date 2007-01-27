@@ -11,6 +11,31 @@
 #include <lib/gdi/font.h>
 #include <lib/base/eptrlist.h>
 
+/*
+ * Notes on images/colors:
+ *
+ * When loading images, the colors they use are parsed, and added to our palette.
+ * Because we only have room for 256 colors in our 8bit palette, we cannot simply
+ * allocate all required colors for every image.
+ * Therefore, only colors that are farther apart than a certain 'maxcolordistance',
+ * are added to the palette.
+ *
+ * Colors defined in the skin are always added to the palette first, and the remaining
+ * free slots in the palette are used for image colors.
+ * Images are parsed in the order in which they appear in the skin file, until
+ * the palette is completely filled.
+ *
+ * Skinmakers can influence color allocation in the following ways:
+ *
+ * -change the order in which the images are placed in the skin file
+ * -define a 'maxcolordistance' per image. When omitted, the maximum color distance
+ * defaults to 15500
+ *
+ * or the hard way:
+ *
+ * -explicitly list all colors that need to be allocated
+ */
+
 std::map< eString,tWidgetCreator > eSkin::widget_creator;
 
 eSkin *eSkin::active;
@@ -23,6 +48,30 @@ eNamedColor *eSkin::searchColor(const eString &name)
 			return &*i;
 	}
 	return 0;
+}
+
+int eSkin::findColorDistance(const gRGB &rgb)
+{
+	int difference = 1 << 30;
+	for (int t = 0; t < maxcolors; t++)
+	{
+		if (!colorused[t]) break;
+		int ttd;
+		int td = (signed)(rgb.r - palette[t].r); td *= td; td *= (255 - palette[t].a);
+		ttd = td;
+		if (ttd >= difference) continue;
+		td = (signed)(rgb.g - palette[t].g); td *= td; td *= (255 - palette[t].a);
+		ttd += td;
+		if (ttd >= difference) continue;
+		td = (signed)(rgb.b - palette[t].b); td *= td; td *= (255 - palette[t].a);
+		ttd += td;
+		if (ttd >= difference) continue;
+		td = (signed)(rgb.a - palette[t].a); td *= td; td *= 255;
+		ttd += td;
+		if (ttd >= difference) continue;
+		difference = ttd;
+	}
+	return difference;
 }
 
 void eSkin::clear()
@@ -242,6 +291,12 @@ int eSkin::parseImages(XMLTreeNode *inode)
 	if (basepath[basepath.length()-1]!='/')
 		basepath+="/";
 
+	int d;
+	for (d = 0; d < maxcolors; d++)
+	{
+		if (!colorused[d]) break;
+	}
+
 	for (XMLTreeNode *node=inode->GetChild(); node; node=node->GetNext())
 	{
 		if (strcmp(node->GetType(), "img"))
@@ -285,14 +340,29 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			continue;
 		}
 
+		if (d < maxcolors)
+		{
+			int maxcolordistance = 15500;
+			char *distance = node->GetAttributeValue("maxcolordistance");
+			if (distance) maxcolordistance = atoi(distance);
+
+			/* add the image's colors to our palette, but only if they are not too close to colors we already have */
+			for (int i = 0; i < image->clut.colors; i++)
+			{
+				if (findColorDistance(image->clut.data[i]) > maxcolordistance)
+				{
+					colorused[d] = 1;
+					palette[d++] = image->clut.data[i];
+					if (d >= maxcolors) break;
+				}
+			}
+		}
 		if (paldummy && !node->GetAttributeValue("nomerge"))
 		{
 			gPixmapDC mydc(image);
 			gPainter p(mydc);
 			p.mergePalette(*paldummy);
 		}
-		if ( images.find(name) != images.end() )
-			eDebug("we already have the image %s", name );
 		images[name] = image;
 	}
 	return 0;
