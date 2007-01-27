@@ -131,14 +131,18 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, __u8 *mode, int len, i
 int eSectionReader::read(__u8 *buf)
 {
 	int rd = ::read(handle, buf, 4098);
-	if ( rd < 0 )
+	if (rd < 0)
 	{
-		if (errno==EAGAIN)
-			return errno;
+		/* backup errno, for instance eDebug could change it */
+		int error = errno;
+		if (error == EAGAIN)
+		{
+			return error;
+		}
 		eDebug("section read(%m)");
-		return errno;
+		return error;
 	}
-	if( (buf[0] & tableid_mask) != (tableid & tableid_mask) )
+	if (rd > 0 && (buf[0] & tableid_mask) != (tableid & tableid_mask))
 	{
 		eDebug("skip section data.. table_id isn't valid");
 		return -2;
