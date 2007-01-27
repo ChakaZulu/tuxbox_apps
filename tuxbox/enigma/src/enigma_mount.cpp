@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.61 2007/01/22 21:35:50 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.62 2007/01/27 21:46:42 digi_casi Exp $
  *
  * (C) 2005, 2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -39,6 +39,7 @@
 #include <enigma_dyn_utils.h>
 #include <enigma_mount.h>
 #include <configfile.h>
+#include <enigma_main.h>
 
 using namespace std;
 
@@ -236,7 +237,10 @@ int eMountPoint::mount()
 int eMountPoint::unmount()
 {
 	mp.mounted = false;
-	return umount2(mp.localDir.c_str(), MNT_FORCE);
+	int rc = umount2(mp.localDir.c_str(), MNT_FORCE);
+	if (mp.localDir == "/hdd")
+		eZapMain::getInstance()->loadRecordings();
+	return rc;
 }
 
 eMountMgr::eMountMgr()
