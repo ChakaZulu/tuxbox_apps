@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.62 2007/01/27 21:46:42 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.63 2007/01/27 22:39:31 digi_casi Exp $
  *
  * (C) 2005, 2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -239,7 +239,7 @@ int eMountPoint::unmount()
 	mp.mounted = false;
 	int rc = umount2(mp.localDir.c_str(), MNT_FORCE);
 	if (mp.localDir == "/hdd")
-		eZapMain::getInstance()->loadRecordings();
+		system("sleep 5 && wget -O /dev/null http://127.0.0.1/cgi-bin/reloadRecordings&");
 	return rc;
 }
 
