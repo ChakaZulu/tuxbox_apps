@@ -13,8 +13,9 @@ class eProgress: public eWidget
 {
 protected:
 	int perc, border, start;
-	int direction, alphatest;
+	int direction;
 	gColor left, right;
+	int alphatest;
 public:
 	eProgress(eWidget *parent, int takeFocus=0);
 	~eProgress();
