@@ -1213,8 +1213,16 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 void eZapMain::saveRecordings( bool destroy )
 {
 	// save and destroy recordingslist
+
+	/*
+	 * If the harddrive is asleep, it will wake up now.
+	 * That might take some time, and we don't want to receive
+	 * RC repeat events during that time.
+	 */
+	eRCInput::getInstance()->lock();
 	recordings->save();
 	::sync();
+	eRCInput::getInstance()->unlock();
 	if (destroy)
 	{
 		eServiceInterface::getInstance()->removeRef(recordingsref);
