@@ -1,7 +1,7 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.563 2007/01/06 14:03:20 ghostrider Exp $
+ * $Id: enigma_dyn.cpp,v 1.564 2007/01/27 22:12:58 digi_casi Exp $
  *
- * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
+ * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -422,7 +422,7 @@ eString getAudioChannels(void)
 static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 
 	eString audioChannels = getAudioChannels();
 
@@ -540,7 +540,7 @@ eString getSubChannels(void)
 static eString selectSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"] = "text/html; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	eString subChannels = getSubChannels();
 
 	eString result = readFile(TEMPLATE_DIR + "subChannelSelection.tmp");
@@ -1375,7 +1375,7 @@ bool rec_movies()
 				filen = namelist[i]->d_name;
 				// For every valid file
 				if ((filen.length() >= 3) &&
-				(filen.substr(filen.length()-3, 3).compare(".ts") == 0) &&
+					(filen.substr(filen.length()-3, 3).compare(".ts") == 0) &&
 					(it->service.path.length() >= 11) &&
 					!it->service.path.substr(11,it->service.path.length()-11).compare(filen))
 				{
@@ -2019,8 +2019,8 @@ static eString videom3u(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	eProcessUtils::killProcess("streamts");
 	
-	content->local_header["Content-Type"]="video/mpegfile";
-	content->local_header["Cache-Control"] = "no-cache";
+	content->local_header["Content-Type"] = "video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 
 	return getvideom3u();
 }
@@ -2035,8 +2035,8 @@ static eString moviem3u(eString request, eString dirpath, eString opts, eHTTPCon
 	
 	eProcessUtils::killProcess("streamts");
 	
-	content->local_header["Content-Type"]="video/mpegfile";
-	content->local_header["Cache-Control"] = "no-cache";
+	content->local_header["Content-Type"] = "video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 
 	return "http://" + getIP() + ":31342" + movieFile.strReplace(" ", "%20");
 }
@@ -2046,8 +2046,8 @@ static eString mPlayer(eString request, eString dirpath, eString opt, eHTTPConne
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
 	eString apid = eString().sprintf("%04x", Decoder::current.apid);
 
-	content->local_header["Content-Type"]="video/mpegfile";
-	content->local_header["Cache-Control"] = "no-cache";
+	content->local_header["Content-Type"] = "video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	content->local_header["vpid"] = vpid;
 	content->local_header["apid"] = apid;
 
