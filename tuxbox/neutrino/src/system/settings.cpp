@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.42 2006/06/08 20:19:46 houdini Exp $
+        $Id: settings.cpp,v 1.43 2007/01/31 22:05:07 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -110,7 +110,7 @@ char * CScanSettings::satOfDiseqc(int diseqc) const
 				return (char *)&satName[i];
 		}
 	}
-	return "Unknown Satellite";
+	return "Unknown";
 }
 
 char * CScanSettings::satOfMotorPos(int32_t motorPos) const
@@ -120,7 +120,7 @@ char * CScanSettings::satOfMotorPos(int32_t motorPos) const
 		if (motorPos == satMotorPos[i]) 
 			return (char *)&satName[i];
 	}	
-	return "Unknown Satellite";
+	return "Unknown";
 }
 
 void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
