@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.103 2007/01/24 02:26:04 guenther Exp $
+	$Id: eventlist.cpp,v 1.104 2007/01/31 21:42:03 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -50,8 +50,7 @@
 #include "widget/hintbox.h"
 #include "gui/bouquetlist.h"
 #include <gui/widget/stringinput.h>
-extern CBouquetList        * bouquetList;
-
+extern CBouquetList *bouquetList;
 
 #include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
 #include <driver/screen_max.h>
@@ -84,8 +83,8 @@ EventList::EventList()
 	current_event = 0;
 	
 	m_search_list = SEARCH_LIST_NONE;
-    m_search_epg_item = SEARCH_LIST_NONE;
-    m_search_epg_item = SEARCH_EPG_TITLE;
+	m_search_epg_item = SEARCH_LIST_NONE;
+	m_search_epg_item = SEARCH_EPG_TITLE;
 	m_search_channel_id = 1;
 	m_search_bouquet_id= 1;
 
@@ -94,7 +93,6 @@ EventList::EventList()
 	//height = 480;
 	width  = w_max (580, 20);
 	height = h_max (480, 20);
-
 
 	iheight = 30;	// info bar height (see below, hard coded at this time)
 	theight  = g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->getHeight();
@@ -229,16 +227,16 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 
 	int res = menu_return::RETURN_REPAINT;
 
-    if(m_search_list == SEARCH_LIST_NONE) // init globals once only
-    {
-        m_search_epg_item = SEARCH_EPG_TITLE;
-        //m_search_keyword = "";
-    	m_search_list = SEARCH_LIST_CHANNEL;
-    	m_search_channel_id = channel_id;
-    	m_search_bouquet_id= bouquetList->getActiveBouquetNumber();
-    	//m_search_source_text = "";
-    }
-    m_showChannel = false; // do not show the channel in normal mode, we just need it in search mode
+	if(m_search_list == SEARCH_LIST_NONE) // init globals once only
+	{
+		m_search_epg_item = SEARCH_EPG_TITLE;
+		//m_search_keyword = "";
+		m_search_list = SEARCH_LIST_CHANNEL;
+		m_search_channel_id = channel_id;
+		m_search_bouquet_id= bouquetList->getActiveBouquetNumber();
+		//m_search_source_text = "";
+	}
+	m_showChannel = false; // do not show the channel in normal mode, we just need it in search mode
 
 	name = channelname;
 	sort_mode=0;
@@ -355,7 +353,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 						recDir = recDirs.get_selected_dir();
 					}
 					
-					if (recDir != "")
+					if ((recDir != "") || (RECORDING_FILE != g_settings.recording_type))
 					{
 //						if (timerdclient.addRecordTimerEvent(channel_id,
 						if (timerdclient.addRecordTimerEvent(GET_CHANNEL_ID_FROM_EVENT_ID(evtlist[selected].eventID),
@@ -447,7 +445,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 		else if ( msg==CRCInput::RC_green )
 		{
 			findEvents();
-            timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 		}
 		else
 		{
@@ -503,25 +501,17 @@ void EventList::paintItem(unsigned int pos)
 			char tmpstr[256];
 			struct tm *tmStartZeit = localtime(&evtlist[liststart+pos].startTime);
 
-
-			datetime1_str = g_Locale->getText(CLocaleManager::getWeekday(tmStartZeit));
-
 			strftime(tmpstr, sizeof(tmpstr), ". %H:%M, ", tmStartZeit );
-			datetime1_str += tmpstr;
+			datetime1_str = (std::string)g_Locale->getText(CLocaleManager::getWeekday(tmStartZeit)) + tmpstr;
 
 			strftime(tmpstr, sizeof(tmpstr), " %d. ", tmStartZeit );
-			datetime2_str = tmpstr;
+			datetime2_str = (std::string)tmpstr + g_Locale->getText(CLocaleManager::getMonth(tmStartZeit)) + '.';
 
-			datetime2_str += g_Locale->getText(CLocaleManager::getMonth(tmStartZeit));
-
-			datetime2_str += '.';
-
-            if ( m_showChannel ) // show the channel if we made a event search only (which could be made through all channels ).
-            {
-                t_channel_id channel = evtlist[liststart+pos].get_channel_id();
-                datetime2_str += "      ";
-                datetime2_str += g_Zapit->getChannelName(channel);
-            }
+			if ( m_showChannel ) // show the channel if we made a event search only (which could be made through all channels ).
+			{
+				t_channel_id channel = evtlist[liststart+pos].get_channel_id();
+				datetime2_str += "      " + g_Zapit->getChannelName(channel);
+			}
 
 			sprintf(tmpstr, "[%d min]", evtlist[liststart+pos].duration / 60 );
 			duration_str = tmpstr;
@@ -708,7 +698,7 @@ int EventList::findEvents(void)
 		evtlist.clear();
 		if(m_search_list == SEARCH_LIST_CHANNEL)
 		{
-			g_Sectionsd->getEventsServiceKeySearchAdd(evtlist,m_search_channel_id,m_search_epg_item,m_search_keyword);
+			g_Sectionsd->getEventsServiceKeySearchAdd(evtlist, m_search_channel_id, m_search_epg_item, m_search_keyword);
 		}
 		else if(m_search_list == SEARCH_LIST_BOUQUET)
 		{
@@ -756,15 +746,12 @@ int EventList::findEvents(void)
 				evt.eventID = 0;
 				evtlist.push_back(evt);
 			}
-		}            
+		}
 		if (current_event == (unsigned int)-1)
 			current_event = 0;
 		selected= current_event;
 		
-		name = g_Locale->getText(LOCALE_EVENTFINDER_SEARCH);
-		name += ": '";
-		name += m_search_keyword;
-		name += "'";
+		name = (std::string)g_Locale->getText(LOCALE_EVENTFINDER_SEARCH) + ": '" + m_search_keyword + "'";
 	}
 	paintHead();
 	paint();
@@ -805,18 +792,18 @@ const CMenuOptionChooser::keyval SEARCH_LIST_OPTIONS[SEARCH_LIST_OPTION_COUNT] =
 //	{ EventList::SEARCH_LIST_NONE        , LOCALE_PICTUREVIEWER_RESIZE_NONE     },
 	{ EventList::SEARCH_LIST_CHANNEL     , LOCALE_TIMERLIST_CHANNEL    },
 	{ EventList::SEARCH_LIST_BOUQUET     , LOCALE_BOUQUETLIST_HEAD     },
-	{ EventList::SEARCH_LIST_ALL         , LOCALE_CHANNELLIST_HEAD    }
+	{ EventList::SEARCH_LIST_ALL         , LOCALE_CHANNELLIST_HEAD     }
 };
 
 
 #define SEARCH_EPG_OPTION_COUNT 3
 const CMenuOptionChooser::keyval SEARCH_EPG_OPTIONS[SEARCH_EPG_OPTION_COUNT] =
 {
-//	{ EventList::SEARCH_EPG_NONE     	, LOCALE_PICTUREVIEWER_RESIZE_NONE     },
-	{ EventList::SEARCH_EPG_TITLE       , LOCALE_FONTSIZE_EPG_TITLE    },
-	{ EventList::SEARCH_EPG_INFO1     	, LOCALE_FONTSIZE_EPG_INFO1     },
-	{ EventList::SEARCH_EPG_INFO2       , LOCALE_FONTSIZE_EPG_INFO2    }
-//	,{ EventList::SEARCH_EPG_GENRE  	, LOCALE_MOVIEBROWSER_INFO_GENRE_MAJOR }
+//	{ EventList::SEARCH_EPG_NONE, 	LOCALE_PICTUREVIEWER_RESIZE_NONE     },
+	{ EventList::SEARCH_EPG_TITLE, 	LOCALE_FONTSIZE_EPG_TITLE    },
+	{ EventList::SEARCH_EPG_INFO1, 	LOCALE_FONTSIZE_EPG_INFO1    },
+	{ EventList::SEARCH_EPG_INFO2, 	LOCALE_FONTSIZE_EPG_INFO2    }
+//	,{ EventList::SEARCH_EPG_GENRE, LOCALE_MOVIEBROWSER_INFO_GENRE_MAJOR }
 };
 
 
@@ -845,7 +832,6 @@ int CEventFinderMenu::exec(CMenuTarget* parent, const std::string &actionkey)
 {
 	int res = menu_return::RETURN_REPAINT;
 	
-	
 	if(actionkey =="")
 	{
 		if(parent != NULL)
@@ -858,7 +844,7 @@ int CEventFinderMenu::exec(CMenuTarget* parent, const std::string &actionkey)
 		//printf("1\n");
 		*m_event = true;
 		res = menu_return::RETURN_EXIT_ALL;
-	}	
+	}
 	else if(actionkey =="2")
 	{
 		//printf("2\n");
@@ -913,7 +899,7 @@ int CEventFinderMenu::exec(CMenuTarget* parent, const std::string &actionkey)
 				m_search_channelname = bouquetList->Bouquets[nNewBouquet]->channelList->getName();
 			}
 		}
-	}	
+	}
 	else if(actionkey =="4")
 	{
 		//printf("4\n");
@@ -939,7 +925,7 @@ int CEventFinderMenu::showMenu(void)
 	}
 	else if(*m_search_list == EventList::SEARCH_LIST_ALL)
 	{
-		m_search_channelname =="";
+		m_search_channelname = "";
 	}
 	
 	CStringInputSMS stringInput(LOCALE_EVENTFINDER_KEYWORD,m_search_keyword, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
