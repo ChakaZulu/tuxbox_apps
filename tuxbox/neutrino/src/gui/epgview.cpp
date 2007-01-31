@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.135 2007/01/24 02:21:16 guenther Exp $
+	$Id: epgview.cpp,v 1.136 2007/01/31 21:34:49 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -455,7 +455,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 	if (g_Font[SNeutrinoSettings::FONT_TYPE_EPG_TITLE]->getRenderWidth(text1) > 520)
 	{
 		do
-	    	{
+		{
 			pos = text1.find_last_of("[ .]+");
 			if ( pos!=-1 )
 				text1 = text1.substr( 0, pos );
@@ -681,21 +681,21 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 							std::string recDir = g_settings.recording_dir[0];
 							if (g_settings.recording_choose_direct_rec_dir)
 							{
-							    CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,&recDir);
+								CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,&recDir);
 								hide();
 								recDirs.exec(NULL,"");
 								show(channel_id,epgData.eventID,&epgData.epg_times.startzeit,false);
-							    recDir = recDirs.get_selected_dir();
+								recDir = recDirs.get_selected_dir();
 							}
 						
-							if (recDir != "")
+							if ((recDir != "") || (RECORDING_FILE != g_settings.recording_type))
 							{
 								if (timerdclient.addRecordTimerEvent(channel_id,
 												     epgData.epg_times.startzeit,
 												     epgData.epg_times.startzeit + epgData.epg_times.dauer,
 												     epgData.eventID, epgData.epg_times.startzeit,
 												     epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
-												     TIMERD_APIDS_CONF, true, recDir,false) == -1)
+												     TIMERD_APIDS_CONF, true, recDir, false) == -1)
 								{
 									if(askUserOnTimerConflict(epgData.epg_times.startzeit - (ANNOUNCETIME + 120),
 												  epgData.epg_times.startzeit + epgData.epg_times.dauer))
@@ -705,7 +705,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 														 epgData.epg_times.startzeit + epgData.epg_times.dauer,
 														 epgData.eventID, epgData.epg_times.startzeit,
 														 epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
-														 TIMERD_APIDS_CONF, true, recDir,true);
+														 TIMERD_APIDS_CONF, true, recDir, true);
 										ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 									}
 								} else {
