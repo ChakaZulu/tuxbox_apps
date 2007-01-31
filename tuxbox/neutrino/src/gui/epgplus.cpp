@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.33 2007/01/24 02:21:16 guenther Exp $
+	$Id: epgplus.cpp,v 1.34 2007/01/31 21:29:19 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2251,7 +2251,7 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 				epgPlus->paint();
 				recDir = recDirs.get_selected_dir();
 			}
-			if (recDir != "")
+			if ((recDir != "") || (RECORDING_FILE != g_settings.recording_type))
 			{
 				if (timerdclient.addRecordTimerEvent
 				    ( this->epgPlus->selectedChannelEntry->channel->channel_id
