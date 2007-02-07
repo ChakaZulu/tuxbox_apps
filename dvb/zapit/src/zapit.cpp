@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.391 2007/01/21 19:07:17 houdini Exp $
+ * $Id: zapit.cpp,v 1.392 2007/02/07 21:36:53 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1953,8 +1953,8 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo, const CZapitClient::c
 
 	for (uint i = 0; i < bouquetManager->Bouquets.size(); i++)
 	{
-		if ((!bouquetManager->Bouquets[i]->bHidden) &&
-			(emptyBouquetsToo ||
+		if (emptyBouquetsToo ||
+			((!bouquetManager->Bouquets[i]->bHidden) &&
 			(((wantedMode & RADIO_MODE) && !bouquetManager->Bouquets[i]->radioChannels.empty()) ||
 			((wantedMode & TV_MODE) && !bouquetManager->Bouquets[i]->tvChannels.empty()))))
 		{
@@ -2390,7 +2390,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.391 2007/01/21 19:07:17 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.392 2007/02/07 21:36:53 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
