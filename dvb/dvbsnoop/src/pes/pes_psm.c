@@ -1,5 +1,5 @@
 /*
-$Id: pes_psm.c,v 1.4 2006/01/02 18:24:12 rasc Exp $
+$Id: pes_psm.c,v 1.5 2007/02/08 19:17:41 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: pes_psm.c,v 1.4 2006/01/02 18:24:12 rasc Exp $
 
 
 $Log: pes_psm.c,v $
+Revision 1.5  2007/02/08 19:17:41  rasc
+Bugfix on PS Program Stream Map  - tnx to "jack" for reporting
+
 Revision 1.4  2006/01/02 18:24:12  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -63,8 +66,8 @@ void  PES_decodePSM (u_char *b, int len)
 
    // -- already processed:
    // --- packet_start_code_prefix 	24 bslbf
-   // --- stream_id 			8 uimsbf
-   // --- packet_length			24 uimsbf
+   // --- stream_id 			 8 uimsbf
+   // --- packet_length			16 uimsbf
 
 
    outBit_S2x_NL (4,"current_next_indicator: ",		b, 0, 1,
@@ -91,6 +94,7 @@ void  PES_decodePSM (u_char *b, int len)
 
 
    esm_len = outBit_Sx_NL  (5,"elementary_stream_map_length: ",	b, 0,16);
+   b += 2;
    out_nl (4,"Elementary stream Map:");
    indent (+1);
    while (esm_len > 0) {

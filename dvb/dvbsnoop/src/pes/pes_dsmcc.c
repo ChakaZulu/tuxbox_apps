@@ -1,5 +1,5 @@
 /*
-$Id: pes_dsmcc.c,v 1.12 2006/01/02 18:24:12 rasc Exp $
+$Id: pes_dsmcc.c,v 1.13 2007/02/08 19:17:41 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pes_dsmcc.c,v 1.12 2006/01/02 18:24:12 rasc Exp $
 
 
 $Log: pes_dsmcc.c,v $
+Revision 1.13  2007/02/08 19:17:41  rasc
+Bugfix on PS Program Stream Map  - tnx to "jack" for reporting
+
 Revision 1.12  2006/01/02 18:24:12  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -104,8 +107,8 @@ void  PES_decodeDSMCC (u_char *b, int len)
 
    // -- already processed:
    // --- packet_start_code_prefix 	24 bslbf
-   // --- stream_id 			8 uimsbf
-   // --- packet_length			24 uimsbf
+   // --- stream_id 			 8 uimsbf
+   // --- packet_length			16 uimsbf
 
 
 	commandID = outBit_S2x_NL (4,"Command_ID/dsmcc_discriminator: ",	b,0,8,
