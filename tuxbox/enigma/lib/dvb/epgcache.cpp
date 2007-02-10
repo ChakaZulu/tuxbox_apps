@@ -39,49 +39,69 @@ eventData::eventData(const eit_event_struct* e, int size, int type)
 	__u32 *pdescr=descr;
 
 	__u8 *data = (__u8*)e;
-	int ptr=10;
-	int descriptors_length = (data[ptr++]&0x0F) << 8;
-	descriptors_length |= data[ptr++];
-	while ( descriptors_length > 0 )
+	int ptr=12;
+	size -= 12;
+
+	while(size > 1)
 	{
 		__u8 *descr = data+ptr;
-		int descr_len = descr[1]+2;
-
-		__u32 crc = 0;
-		int cnt=0;
-		while(cnt++ < descr_len)
-			crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ data[ptr++]) & 0xFF];
-
-		descriptorMap::iterator it =
-			descriptors.find(crc);
-		if ( it == descriptors.end() )
+		int descr_len = descr[1];
+		descr_len += 2;
+		if (size >= descr_len)
 		{
-			CacheSize+=descr_len;
-			__u8 *d = new __u8[descr_len];
-			memcpy(d, descr, descr_len);
-			descriptors[crc] = descriptorPair(1, d);
+			switch (descr[0])
+			{
+				case DESCR_EXTENDED_EVENT:
+				case DESCR_SHORT_EVENT:
+				case DESCR_LINKAGE:
+				case DESCR_COMPONENT:
+				case DESCR_CONTENT:
+				case DESCR_TIME_SHIFTED_EVENT:
+				{
+					__u32 crc = 0;
+					int cnt=0;
+					while(cnt++ < descr_len)
+						crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ data[ptr++]) & 0xFF];
+
+					descriptorMap::iterator it =
+						descriptors.find(crc);
+					if ( it == descriptors.end() )
+					{
+						CacheSize+=descr_len;
+						__u8 *d = new __u8[descr_len];
+						memcpy(d, descr, descr_len);
+						descriptors[crc] = descriptorPair(1, d);
+					}
+					else
+						++it->second.first;
+					*pdescr++=crc;
+					break;
+				}
+				default: // do not cache all other descriptors
+					ptr += descr_len;
+					break;
+			}
+			size -= descr_len;
 		}
 		else
-			++it->second.first;
-
-		*pdescr++=crc;
-		descriptors_length -= descr_len;
+			break;
 	}
-	ByteSize = 12+((pdescr-descr)*4);
+	ASSERT(pdescr <= &descr[65]);
+	ByteSize = 10+((pdescr-descr)*4);
 	EITdata = new __u8[ByteSize];
 	CacheSize+=ByteSize;
-	memcpy(EITdata, (__u8*) e, 12);
-	memcpy(EITdata+12, descr, ByteSize-12);
+	memcpy(EITdata, (__u8*) e, 10);
+	memcpy(EITdata+10, descr, ByteSize-10);
 }
 
 const eit_event_struct* eventData::get() const
 {
 	int pos = 12;
-	int tmp = ByteSize-12;
-
-	memcpy(data, EITdata, 12);
-	__u32 *p = (__u32*)(EITdata+12);
-	while(tmp>0)
+	int tmp = ByteSize-10;
+	memcpy(data, EITdata, 10);
+	int descriptors_length=0;
+	__u32 *p = (__u32*)(EITdata+10);
+	while(tmp>3)
 	{
 		descriptorMap::iterator it =
 			descriptors.find(*p++);
@@ -90,21 +110,26 @@ const eit_event_struct* eventData::get() const
 			int b = it->second.second[1]+2;
 			memcpy(data+pos, it->second.second, b );
 			pos += b;
+			descriptors_length += b;
 		}
+		else
+			eFatal("LINE %d descriptor not found in descriptor cache %08x!!!!!!", __LINE__, *(p-1));
 		tmp-=4;
 	}
-
-	return (const eit_event_struct*)data;
+	ASSERT(pos <= 4108);
+	data[10] = (descriptors_length >> 8) & 0x0F;
+	data[11] = descriptors_length & 0xFF;
+	return (eit_event_struct*)data;
 }
 
 eventData::~eventData()
 {
 	if ( ByteSize )
 	{
-		CacheSize-=ByteSize;
-		ByteSize-=12;
-		__u32 *d = (__u32*)(EITdata+12);
-		while(ByteSize)
+		CacheSize -= ByteSize;
+		__u32 *d = (__u32*)(EITdata+10);
+		ByteSize -= 10;
+		while(ByteSize>3)
 		{
 			descriptorMap::iterator it =
 				descriptors.find(*d++);
@@ -118,7 +143,9 @@ eventData::~eventData()
 					descriptors.erase(it);	// remove entry from descriptor map
 				}
 			}
-			ByteSize-=4;
+			else
+				eFatal("LINE %d descriptor not found in descriptor cache %08x!!!!!!", __LINE__, *(d-1));
+			ByteSize -= 4;
 		}
 		delete [] EITdata;
 	}
@@ -128,18 +155,18 @@ void eventData::load(FILE *f)
 {
 	int size=0;
 	int id=0;
+	__u8 header[2];
 	descriptorPair p;
 	fread(&size, sizeof(int), 1, f);
-	eDebug("read %d descriptors", size );
-	__u8 tmp[2];
 	while(size)
 	{
 		fread(&id, sizeof(__u32), 1, f);
-		fread(&p.first, sizeof(__u16), 1, f);
-		fread(tmp, 2, 1, f);
-		int bytes = tmp[1]+2;
+		fread(&p.first, sizeof(int), 1, f);
+		fread(header, 2, 1, f);
+		int bytes = header[1]+2;
 		p.second = new __u8[bytes];
-		memcpy(p.second, tmp, 2);
+		p.second[0] = header[0];
+		p.second[1] = header[1];
 		fread(p.second+2, bytes-2, 1, f);
 		descriptors[id]=p;
 		--size;
@@ -150,13 +177,12 @@ void eventData::load(FILE *f)
 void eventData::save(FILE *f)
 {
 	int size=descriptors.size();
-	eDebug("save %d descriptors", size );
 	descriptorMap::iterator it(descriptors.begin());
 	fwrite(&size, sizeof(int), 1, f);
 	while(size)
 	{
 		fwrite(&it->first, sizeof(__u32), 1, f);
-		fwrite(&it->second.first, sizeof(__u16), 1, f);
+		fwrite(&it->second.first, sizeof(int), 1, f);
 		fwrite(it->second.second, it->second.second[1]+2, 1, f);
 		++it;
 		--size;
@@ -281,61 +307,70 @@ int ePrivateContent::sectionRead(__u8 *data)
 
 		int descriptors_length = (data[ptr++]&0x0F) << 8;
 		descriptors_length |= data[ptr++];
-		while ( descriptors_length > 0 )
+		while ( descriptors_length > 1 )
 		{
 			int descr_type = data[ptr];
 			int descr_len = data[ptr+1];
-			descriptors_length -= (descr_len+2);
-			if ( descr_type == 0xf2 )
+			descriptors_length -= 2;
+			if (descriptors_length >= descr_len)
 			{
-				ptr+=2;
-				int tsid = data[ptr++] << 8;
-				tsid |= data[ptr++];
-				int onid = data[ptr++] << 8;
-				onid |= data[ptr++];
-				int sid = data[ptr++] << 8;
-				sid |= data[ptr++];
+				descriptors_length -= descr_len;
+				if ( descr_type == 0xf2 && descr_len > 5)
+				{
+					ptr+=2;
+					int tsid = data[ptr++] << 8;
+					tsid |= data[ptr++];
+					int onid = data[ptr++] << 8;
+					onid |= data[ptr++];
+					int sid = data[ptr++] << 8;
+					sid |= data[ptr++];
 
 // WORKAROUND for wrong transmitted epg data (01.08.2006)
-				if ( onid == 0x85 )
-				{
-					switch( (tsid << 16) | sid )
+					if ( onid == 0x85 )
 					{
-						case 0x0300f0: sid = 0xe0; tsid = 2; break;
-						case 0x0300f1: sid = 0xe1; tsid = 2; break;
-						case 0x0300f5: sid = 0xdc; break;
-						case 0x0400d2: sid = 0xe2; tsid = 0x11; break;
-						case 0x1100d3: sid = 0xe3; break;
+						switch( (tsid << 16) | sid )
+						{
+							case 0x01030b: sid = 0x1b; tsid = 4; break;  // Premiere Win
+							case 0x0300f0: sid = 0xe0; tsid = 2; break;
+							case 0x0300f1: sid = 0xe1; tsid = 2; break;
+							case 0x0300f5: sid = 0xdc; break;
+							case 0x0400d2: sid = 0xe2; tsid = 0x11; break;
+							case 0x1100d3: sid = 0xe3; break;
+						}
 					}
-				}
 ////////////////////////////////////////////
 
-				uniqueEPGKey service( sid, onid, tsid );
-				descr_len -= 6;
-				while( descr_len > 0 )
-				{
-					__u8 datetime[5];
-					datetime[0] = data[ptr++];
-					datetime[1] = data[ptr++];
-					int tmp_len = data[ptr++];
-					descr_len -= 3;
-					while( tmp_len > 0 )
+					uniqueEPGKey service( sid, onid, tsid );
+					descr_len -= 6;
+					while( descr_len > 2 )
 					{
-						memcpy(datetime+2, data+ptr, 3);
-						ptr+=3;
+						__u8 datetime[5];
+						datetime[0] = data[ptr++];
+						datetime[1] = data[ptr++];
+						int tmp_len = data[ptr++];
 						descr_len -= 3;
-						tmp_len -= 3;
-						start_times[datetime].push_back(service);
+						if (descr_len >= tmp_len)
+						{
+							descr_len -= tmp_len;
+							while( tmp_len > 2 )
+							{
+								memcpy(datetime+2, data+ptr, 3);
+								ptr += 3;
+								tmp_len -= 3;
+								start_times[datetime].push_back(service);
+							}
+						}
 					}
 				}
-			}
-			else
-			{
-				*pdescr++=data+ptr;
-				ptr += 2;
-				ptr += descr_len;
+				else
+				{
+					*pdescr++=data+ptr;
+					ptr += 2;
+					ptr += descr_len;
+				}
 			}
 		}
+		ASSERT(pdescr <= &descriptors[65])
 		__u8 event[4098];
 		eit_event_struct *ev_struct = (eit_event_struct*) event;
 		ev_struct->running_status = 0;
@@ -349,13 +384,12 @@ int ePrivateContent::sectionRead(__u8 *data)
 			ptr+=(*d++)[1];
 			ptr+=2;
 		}
+		ASSERT(ptr <= 4098);
 		for ( std::map< date_time, std::list<uniqueEPGKey> >::iterator it(start_times.begin()); it != start_times.end(); ++it )
 		{
 			time_t now = time(0)+eDVB::getInstance()->time_difference;
-
 			if ( (it->first.tm + duration_sec) < now )
 				continue;
-
 			memcpy(event+2, it->first.data, 5);
 			int bptr = ptr;
 			int cnt=0;
@@ -387,9 +421,10 @@ int ePrivateContent::sectionRead(__u8 *data)
 			event[0] = (event_id & 0xFF00) >> 8;
 			event[1] = (event_id & 0xFF);
 			time_event_map[it->first.tm]=std::pair<time_t, __u16>(stime, event_id);
-			eventData *d = new eventData( ev_struct, bptr, eEPGCache::SCHEDULE );
+			eventData *d = new eventData( ev_struct, bptr, eEPGCache::PRIVATE );
 			evMap[event_id] = d;
 			tmMap[stime] = d;
+			ASSERT(bptr <= 4098);
 		}
 		seenSections.insert(data[6]);
 	}
@@ -413,6 +448,63 @@ int ePrivateContent::sectionRead(__u8 *data)
 }
 #endif // ENABLE_PRIVATE_EPG
 
+void eEPGCache::FixOverlapping(std::pair<eventMap,timeMap> &servicemap, time_t TM, int duration, const timeMap::iterator &tm_it, const uniqueEPGKey &service)
+{
+	timeMap::iterator tmp = tm_it;
+	while ((tmp->first+tmp->second->getDuration()-300) > TM)
+	{
+		if(tmp->first != TM
+#ifdef ENABLE_PRIVATE_EPG
+			&& tmp->second->type != PRIVATE
+#endif
+#ifdef ENABLE_MHW_EPG
+			&& tmp->second->type != SCHEDULE_MHW
+#endif
+			)
+		{
+			__u16 event_id = tmp->second->getEventID();
+			servicemap.first.erase(event_id);
+			delete tmp->second;
+			if (tmp == servicemap.second.begin())
+			{
+				servicemap.second.erase(tmp);
+				break;
+			}
+			else
+				servicemap.second.erase(tmp--);
+		}
+		else
+		{
+			if (tmp == servicemap.second.begin())
+				break;
+			--tmp;
+		}
+	}
+
+	tmp = tm_it;
+	while(tmp->first < (TM+duration-300))
+	{
+		if(tmp->first != TM
+#ifdef ENABLE_PRIVATE_EPG
+			&& tmp->second->type != PRIVATE
+#endif
+#ifdef ENABLE_MHW_EPG
+			&& tmp->second->type != SCHEDULE_MHW
+#endif
+			)
+		{
+			__u16 event_id = tmp->second->getEventID();
+			servicemap.first.erase(event_id);
+			delete tmp->second;
+			servicemap.second.erase(tmp++);
+		}
+		else
+			++tmp;
+		if (tmp == servicemap.second.end())
+			break;
+	}
+}
+
 int eEPGCache::sectionRead(__u8 *data, int source)
 {
 	if ( !data || state > 1 )
@@ -420,8 +512,8 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 
 	eit_t *eit = (eit_t*) data;
 	bool seen=false;
-	tidMap &seenSections = this->seenSections[source];
-	tidMap &calcedSections = this->calcedSections[source];
+	tidMap &seenSections = this->seenSections[source/2]; // source is 1,2,4 .. so index is 0,1,2
+	tidMap &calcedSections = this->calcedSections[source/2];
 
 #ifdef ENABLE_MHW_EPG
 	if ( source != SCHEDULE_MHW )
@@ -477,27 +569,14 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 		time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5);
 		time_t now = time(0)+eDVB::getInstance()->time_difference;
 
-		if ( TM != 3599 && TM > -1)
-		{
-			switch(source)
-			{
-			case NOWNEXT:
-				haveData |= 2;
-				break;
-			case SCHEDULE:
-				haveData |= 1;
-				break;
-			case SCHEDULE_OTHER:
-				haveData |= 4;
-				break;
-			}
-		}
+		if ( TM != 3599 && TM > -1 && source < 8)
+			haveData |= source;
 
 #ifdef ENABLE_MHW_EPG
-		if ( haveData & 5 && isRunning & 8 )
+		if ( haveData & (SCHEDULE|SCHEDULE_OTHER) && isRunning & SCHEDULE_MHW )
 		{
 			eDebug("[EPGC] si schedule data avail.. abort mhw reader");
-			isRunning &= ~8;
+			isRunning &= ~SCHEDULE_MHW;
 			scheduleMhwReader.abort();
 		}
 #endif
@@ -576,10 +655,11 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 						if ( tm_it_tmp->first == TM ) // correct eventData
 						{
 							// exempt memory
-							delete ev_it->second;
-							evt = new eventData(eit_event, eit_event_size, source);
-							ev_it->second=evt;
-							tm_it_tmp->second=evt;
+							eventData *tmp = ev_it->second;
+							ev_it->second = tm_it_tmp->second =
+								new eventData(eit_event, eit_event_size, source);
+							FixOverlapping(servicemap, TM, duration, tm_it_tmp, service);
+							delete tmp;
 							goto next;
 						}
 						else
@@ -646,9 +726,12 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 #if EPG_DEBUG
 					consistencyCheck=false;
 #endif
-					prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
-					prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
+					ev_it=prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
+					tm_it=prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
 				}
+
+				FixOverlapping(servicemap, TM, duration, tm_it, service);
+
 #if EPG_DEBUG
 				if ( consistencyCheck )
 				{
@@ -1149,18 +1232,18 @@ void eEPGCache::startEPG()
 		state=0;
 		haveData=0;
 		scheduleReader.start();
-		isRunning |= 1;
+		isRunning |= SCHEDULE;
 		nownextReader.start();
-		isRunning |= 2;
+		isRunning |= NOWNEXT;
 		scheduleOtherReader.start();
-		isRunning |= 4;
+		isRunning |= SCHEDULE_OTHER;
 #ifdef ENABLE_MHW_EPG
 		int mhwepg = 1;
 		eConfig::getInstance()->getKey("/extras/mhwepg", mhwepg);
 		if (mhwepg)
 		{
 			scheduleMhwReader.start();
-			isRunning |= 8;
+			isRunning |= SCHEDULE_MHW;
 		}
 #endif
 		abortTimer.start(7000,true);
@@ -1176,29 +1259,29 @@ void eEPGCache::abortNonAvail()
 {
 	if (!state)
 	{
-		if ( !(haveData&2) && (isRunning&2) )
+		if ( !(haveData&NOWNEXT) && (isRunning&NOWNEXT) )
 		{
 			eDebug("[EPGC] abort non avail nownext reading");
-			isRunning &= ~2;
+			isRunning &= ~NOWNEXT;
 			nownextReader.abort();
 		}
-		if ( !(haveData&1) && (isRunning&1) )
+		if ( !(haveData&SCHEDULE) && (isRunning&SCHEDULE) )
 		{
 			eDebug("[EPGC] abort non avail schedule reading");
-			isRunning &= ~1;
+			isRunning &= ~SCHEDULE;
 			scheduleReader.abort();
 		}
-		if ( !(haveData&4) && (isRunning&4) )
+		if ( !(haveData&SCHEDULE_OTHER) && (isRunning&SCHEDULE_OTHER) )
 		{
 			eDebug("[EPGC] abort non avail schedule_other reading");
-			isRunning &= ~4;
+			isRunning &= ~SCHEDULE_OTHER;
 			scheduleOtherReader.abort();
 		}
 #ifdef ENABLE_MHW_EPG
-		if ( !(haveData&8) && (isRunning&8) )
+		if ( !(haveData&SCHEDULE_MHW) && (isRunning&SCHEDULE_MHW) )
 		{
 			eDebug("[EPGC] abort non avail mhw schedule reading");
-			isRunning &= ~8;
+			isRunning &= ~SCHEDULE_MHW;
 			scheduleMhwReader.abort();
 		}
 #endif
@@ -1311,25 +1394,25 @@ void eEPGCache::abortEPG()
 	zapTimer.stop();
 	if (isRunning)
 	{
-		if (isRunning & 1)
+		if (isRunning & SCHEDULE)
 		{
-			isRunning &= ~1;
+			isRunning &= ~SCHEDULE;
 			scheduleReader.abort();
 		}
-		if (isRunning & 2)
+		if (isRunning & NOWNEXT)
 		{
-			isRunning &= ~2;
+			isRunning &= ~NOWNEXT;
 			nownextReader.abort();
 		}
-		if (isRunning & 4)
+		if (isRunning & SCHEDULE_OTHER)
 		{
-			isRunning &= ~4;
+			isRunning &= ~SCHEDULE_OTHER;
 			scheduleOtherReader.abort();
 		}
 #ifdef ENABLE_MHW_EPG
-		if (isRunning & 8)
+		if (isRunning & SCHEDULE_MHW)
 		{
-			isRunning &= ~8;
+			isRunning &= ~SCHEDULE_MHW;
 			scheduleMhwReader.abort();
 		}
 #endif
@@ -1429,7 +1512,7 @@ void eEPGCache::load()
 			}
 			char text1[13];
 			fread( text1, 13, 1, f);
-			if ( !strncmp( text1, "ENIGMA_EPG_V5", 13) )
+			if ( !strncmp( text1, "ENIGMA_EPG_V7", 13) )
 			{
 				fread( &size, sizeof(int), 1, f);
 				while(size--)
@@ -1471,6 +1554,7 @@ void eEPGCache::load()
 						int size=0;
 						uniqueEPGKey key;
 						fread( &key, sizeof(uniqueEPGKey), 1, f);
+						eventMap &evMap=eventDB[key].first;
 						fread( &size, sizeof(int), 1, f);
 						while(size--)
 						{
@@ -1486,6 +1570,10 @@ void eEPGCache::load()
 								fread( &time2, sizeof(time_t), 1, f);
 								fread( &event_id, sizeof(__u16), 1, f);
 								content_time_tables[key][content_id][time1]=std::pair<time_t, __u16>(time2, event_id);
+								eventMap::iterator it =
+									evMap.find(event_id);
+								if (it != evMap.end())
+									it->second->type = PRIVATE;
 							}
 						}
 					}
@@ -1527,7 +1615,7 @@ void eEPGCache::save()
 	{
 		unsigned int magic = 0x98765432;
 		fwrite( &magic, sizeof(int), 1, f);
-		const char *text = "ENIGMA_EPG_V5";
+		const char *text = "ENIGMA_EPG_V7";
 		fwrite( text, 13, 1, f );
 		int size = eventDB.size();
 		fwrite( &size, sizeof(int), 1, f );
@@ -1646,7 +1734,8 @@ void eScheduleMhw::timeMHW2DVB( u_char day, u_char hours, u_char minutes, u_char
 	tzset();
 	
 	time_t dt = time(0)+eDVB::getInstance()->time_difference;
-	tm *localnow = localtime( &dt );
+	tm localnow;
+	localtime_r( &dt, &localnow );
 	if (day == 7)
 		day = 0;
 	if ( day + 1 < localnow->tm_wday )		// day + 1 to prevent old events to show for next week.
@@ -1656,8 +1745,9 @@ void eScheduleMhw::timeMHW2DVB( u_char day, u_char hours, u_char minutes, u_char
 	
 	dt += 3600*24*(day - localnow->tm_wday);	// Shift dt to the recording date (local time zone).
 	dt += 3600*(local_hours - localnow->tm_hour);  // Shift dt to the recording hour.
-	
-	tm *recdate = gmtime( &dt );   // This will also take care of DST.
+
+	tm recdate;
+	gmtime_r( &dt, &recdate );   // This will also take care of DST.
 	
 	// Calculate MJD according to annex in ETSI EN 300 468
 	int l=0;
@@ -1825,7 +1915,7 @@ int eScheduleMhw::sectionRead(__u8 *data)
 			channels.push_back( *channel );
 		}
 
-		cache->haveData |= 8;
+		cache->haveData |= SCHEDULE_MHW;
 	}
 	else if ( ( pid == 0xD3 ) && ( tableid == 0x92 ) )
 	// Themes table
@@ -1922,7 +2012,7 @@ int eScheduleMhw::sectionRead(__u8 *data)
 void eScheduleMhw::sectionFinish(int err)
 {
 	eEPGCache *e = eEPGCache::getInstance();
-	if (e->isRunning & 8)
+	if (e->isRunning & SCHEDULE_MHW)
 	{
 		if ( ( pid == 0xD3 ) && ( tableid == 0x91 ) && ( err == -EAGAIN ) )
 		{
@@ -1955,7 +2045,7 @@ void eScheduleMhw::sectionFinish(int err)
 			}
 		}
 		eDebug("[EPGC] stop schedule mhw");
-		e->isRunning &= ~8;
+		e->isRunning &= ~SCHEDULE_MHW;
 		if (e->haveData)
 			e->finishEPG();
 	}

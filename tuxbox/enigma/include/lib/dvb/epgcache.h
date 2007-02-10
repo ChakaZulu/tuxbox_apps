@@ -239,17 +239,25 @@ class eEPGCache: public eMainloop, private eThread, public Object
 {
 public:
 #ifdef ENABLE_MHW_EPG
-	enum {NOWNEXT, SCHEDULE, SCHEDULE_OTHER, SCHEDULE_MHW};
 	friend class eScheduleMhw;
-#else
-	enum {NOWNEXT, SCHEDULE, SCHEDULE_OTHER};
 #endif
-	friend class eSchedule;
-	friend class eScheduleOther;
-	friend class eNowNext;
 #ifdef ENABLE_PRIVATE_EPG
 	friend class ePrivateContent;
 #endif
+	enum {
+#ifdef ENABLE_PRIVATE_EPG
+		PRIVATE=0,
+#endif
+		NOWNEXT=1,
+		SCHEDULE=2,
+		SCHEDULE_OTHER=4,
+#ifdef ENABLE_MHW_EPG
+		,SCHEDULE_MHW=8
+#endif
+	};
+	friend class eSchedule;
+	friend class eScheduleOther;
+	friend class eNowNext;
 	struct Message
 	{
 		enum
@@ -301,6 +309,7 @@ private:
 
 	int state;
 	__u8 isRunning, firstStart, haveData;
+	void FixOverlapping(std::pair<eventMap,timeMap> &, time_t, int, const timeMap::iterator &, const uniqueEPGKey &);
 	int sectionRead(__u8 *data, int source);
 	static eEPGCache *instance;
 
