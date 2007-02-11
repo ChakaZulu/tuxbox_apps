@@ -582,15 +582,21 @@ std::string  CyParser::YWeb_cgi_include_block(std::string filename, std::string 
 	}
 	else
 	{
-		std::fstream fin(filename.c_str(), std::fstream::in);
-		if(fin.good())
+		bool found = false;
+		for (unsigned int i=0;i<HTML_DIR_COUNT && !found;i++)
 		{
-			while (!fin.eof()) // read whole file into yfile
+			std::string ifilename = HTML_DIRS[i]+"/"+filename;
+			std::fstream fin(ifilename.c_str(), std::fstream::in);
+			if(fin.good())
 			{
-				getline(fin, ytmp);
-				yfile += ytmp+"\n";
+				found = true;
+				while (!fin.eof()) // read whole file into yfile
+				{
+					getline(fin, ytmp);
+					yfile += ytmp+"\n";
+				}
+				fin.close();
 			}
-			fin.close();
 		}
 		yCached_blocks_content = yfile;
 		yCached_blocks_attrib = attrib;
