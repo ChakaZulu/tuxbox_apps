@@ -110,19 +110,19 @@ CRCInput::CRCInput()
 	fd_event = 0;
 
 	//network-setup
-    struct sockaddr_un servaddr;
-    int    clilen;
-    memset(&servaddr, 0, sizeof(struct sockaddr_un));
-    servaddr.sun_family = AF_UNIX;
-    strcpy(servaddr.sun_path, NEUTRINO_UDS_NAME);
-    clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-    unlink(NEUTRINO_UDS_NAME);
+	struct sockaddr_un servaddr;
+	int    clilen;
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, NEUTRINO_UDS_NAME);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	unlink(NEUTRINO_UDS_NAME);
 
-    //network-setup
-    if ((fd_event = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-    {
-        perror("[neutrino] socket\n");
-    }
+	//network-setup
+	if ((fd_event = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+	{
+	perror("[neutrino] socket\n");
+	}
 
 	if ( bind(fd_event, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
@@ -130,8 +130,9 @@ CRCInput::CRCInput()
 		exit(-1);
 	}
 
+#define N_connection_requests_queued 10
 
-	if (listen(fd_event, 5) !=0)
+	if (listen(fd_event, N_connection_requests_queued) !=0)
 	{
 		perror("[neutrino] listen failed...\n");
 		exit( -1 );
