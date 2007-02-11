@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.11  2007/02/11 11:01:37  robspr1
+ * - bugfix for showing/hiding the clock
+ *
  * Revision 1.10  2007/01/07 11:51:22  robspr1
  * - execute tuxcal.notify on new events
  *
@@ -2142,7 +2145,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.10 $";
+	char cvs_revision[] = "$Revision: 1.11 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -2344,7 +2347,6 @@ int main(int argc, char **argv)
 				else 
 				{
 					show_clock = 'N';
-					ClearScreen();
 				}
 			}
 			
