@@ -1738,23 +1738,23 @@ void eScheduleMhw::timeMHW2DVB( u_char day, u_char hours, u_char minutes, u_char
 	localtime_r( &dt, &localnow );
 	if (day == 7)
 		day = 0;
-	if ( day + 1 < localnow->tm_wday )		// day + 1 to prevent old events to show for next week.
+	if ( day + 1 < localnow.tm_wday )		// day + 1 to prevent old events to show for next week.
 		day += 7;
 	if (local_hours <= 5)
 		day++;
 	
-	dt += 3600*24*(day - localnow->tm_wday);	// Shift dt to the recording date (local time zone).
-	dt += 3600*(local_hours - localnow->tm_hour);  // Shift dt to the recording hour.
+	dt += 3600*24*(day - localnow.tm_wday);	// Shift dt to the recording date (local time zone).
+	dt += 3600*(local_hours - localnow.tm_hour);  // Shift dt to the recording hour.
 
 	tm recdate;
 	gmtime_r( &dt, &recdate );   // This will also take care of DST.
 	
 	// Calculate MJD according to annex in ETSI EN 300 468
 	int l=0;
-	if ( recdate->tm_mon <= 1 )	// Jan or Feb
+	if ( recdate.tm_mon <= 1 )	// Jan or Feb
 		l=1;
-	int mjd = 14956 + recdate->tm_mday + int( (recdate->tm_year - l) * 365.25) + 
-		int( (recdate->tm_mon + 2 + l * 12) * 30.6001);
+	int mjd = 14956 + recdate.tm_mday + int( (recdate.tm_year - l) * 365.25) + 
+		int( (recdate.tm_mon + 2 + l * 12) * 30.6001);
 	
 	return_time[0] = (mjd & 0xFF00)>>8;
 	return_time[1] = mjd & 0xFF;
@@ -1766,7 +1766,7 @@ void eScheduleMhw::timeMHW2DVB( u_char day, u_char hours, u_char minutes, u_char
 		
 	tzset();
 
-	timeMHW2DVB( recdate->tm_hour, minutes, return_time+2 );
+	timeMHW2DVB( recdate.tm_hour, minutes, return_time+2 );
 }
 
 void eScheduleMhw::storeTitle(std::map<__u32, mhw_title_t>::iterator itTitle, eString sumText, __u8 *data)
@@ -1915,7 +1915,7 @@ int eScheduleMhw::sectionRead(__u8 *data)
 			channels.push_back( *channel );
 		}
 
-		cache->haveData |= SCHEDULE_MHW;
+		cache->haveData |= eEPGCache::SCHEDULE_MHW;
 	}
 	else if ( ( pid == 0xD3 ) && ( tableid == 0x92 ) )
 	// Themes table
@@ -2012,7 +2012,7 @@ int eScheduleMhw::sectionRead(__u8 *data)
 void eScheduleMhw::sectionFinish(int err)
 {
 	eEPGCache *e = eEPGCache::getInstance();
-	if (e->isRunning & SCHEDULE_MHW)
+	if (e->isRunning & eEPGCache::SCHEDULE_MHW)
 	{
 		if ( ( pid == 0xD3 ) && ( tableid == 0x91 ) && ( err == -EAGAIN ) )
 		{
@@ -2045,7 +2045,7 @@ void eScheduleMhw::sectionFinish(int err)
 			}
 		}
 		eDebug("[EPGC] stop schedule mhw");
-		e->isRunning &= ~SCHEDULE_MHW;
+		e->isRunning &= ~eEPGCache::SCHEDULE_MHW;
 		if (e->haveData)
 			e->finishEPG();
 	}

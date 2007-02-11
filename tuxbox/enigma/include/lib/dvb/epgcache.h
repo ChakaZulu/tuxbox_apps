@@ -250,7 +250,7 @@ public:
 #endif
 		NOWNEXT=1,
 		SCHEDULE=2,
-		SCHEDULE_OTHER=4,
+		SCHEDULE_OTHER=4
 #ifdef ENABLE_MHW_EPG
 		,SCHEDULE_MHW=8
 #endif
