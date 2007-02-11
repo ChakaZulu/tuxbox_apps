@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicsocket.cpp,v 1.3 2005/08/28 21:12:11 mogway Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicsocket.cpp,v 1.4 2007/02/11 12:03:36 houdini Exp $
  *
  * Basic Socket Class - The Tuxbox Project
  *
@@ -103,7 +103,7 @@ bool receive_data(int fd, void * data, const size_t size, const timeval timeout)
 
 		if (rc == 0)
 		{
-			printf("[basicsocket] receive timed out.\n");
+			printf("[basicsocket] receive timed out. waiting process %d\n", getpid());
 			return false;
 		}
 		if (rc == -1)
