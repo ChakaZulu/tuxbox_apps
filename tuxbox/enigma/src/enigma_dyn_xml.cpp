@@ -1,7 +1,7 @@
 /*
- * $Id: enigma_dyn_xml.cpp,v 1.37 2007/01/22 20:49:56 digi_casi Exp $
+ * $Id: enigma_dyn_xml.cpp,v 1.38 2007/02/16 09:09:34 ghostrider Exp $
  *
- * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
+ * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -215,6 +215,129 @@ static eString getXMLServiceEPG(eString request, eString dirpath, eString opts, 
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	return getServiceEPG("XML", opts);
+}
+
+eString getTag(int mode, int submode)
+{
+	eString tag;
+	switch(mode)
+	{
+		case 3: 
+			tag = "movie"; 
+			break;
+		case 4: 
+			tag = "file"; 
+			break;
+		default: 
+			switch(submode)
+			{
+				case 2: tag = "satellite"; break;
+				case 3: tag = "provider"; break;
+				case 4: tag = "bouquet"; break;
+				default: tag = "unknown"; break;
+			}
+	}
+	return tag;
+}
+
+struct getContent: public Object
+{
+	int mode;
+	int subm;
+	eString &result;
+	eServiceInterface *iface;
+	bool listCont;
+	getContent(int mode, int subm, const eServiceReference &service, eString &result, bool listCont)
+		:mode(mode), subm(subm), result(result), iface(eServiceInterface::getInstance()), listCont(listCont)
+	{
+		Signal1<void, const eServiceReference&> cbSignal;
+		CONNECT(cbSignal, getContent::addToString);
+		iface->enterDirectory(service, cbSignal);
+		iface->leaveDirectory(service);
+	}
+	void addToString(const eServiceReference& ref)
+	{
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
+
+		eService *service = iface ? iface->addRef(ref) : 0;
+		if (!(ref.data[0] == -1 && ref.data[2] != (int)0xFFFFFFFF))
+		{
+		
+			if (ref.flags & eServiceReference::isDirectory)
+				result += "\n<" + getTag(mode, subm) + ">";
+			else
+				result += "\n<service>";
+			
+			result += "<reference>" + ref.toString() + "</reference>";
+
+			if (ref.descr)
+				result += "<name>" + XMLify(filter_string(ref.descr), "XML") + "</name>";
+			else
+			if (service)
+			{
+				result += "<name>" + XMLify(filter_string(service->service_name), "XML") + "</name>";
+				if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
+					result += "<provider>" + XMLify(filter_string(((eServiceDVB*)service)->service_provider), "XML") + "</provider>";
+			}
+
+			if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
+			{
+				const eServiceReferenceDVB& dvb_ref = (const eServiceReferenceDVB&)ref;
+				eTransponder *tp = eTransponderList::getInstance()->searchTS(
+					dvb_ref.getDVBNamespace(),
+					dvb_ref.getTransportStreamID(),
+					dvb_ref.getOriginalNetworkID());
+				if (tp && tp->satellite.isValid())
+					result += "<orbital_position>" + eString().setNum(tp->satellite.orbital_position) + "</orbital_position>";
+			}
+		
+			if (service)
+				iface->removeRef(ref);
+			
+			if (listCont && ref.flags & eServiceReference::isDirectory)
+			{
+				getContent(mode, subm, ref, result, false);
+				result += "\n</" + getTag(mode, subm) + ">";
+			}
+			else
+				result += "</service>";
+		}
+	}
+};
+
+static eString getXMLServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	/* MODE: 0 = TV, 1 = Radio, 2 = Data, 3 = Movies, 4 = Root */
+	/* SUBMODE: 0 = n/a, 1 = All, 2 = Satellites, 2 = Providers, 4 = Bouquets */
+	
+	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
+	std::map<eString,eString> opts = getRequestOptions(opt, '&');
+	
+	eString mode = "0";
+	if (opts["mode"])
+		mode = opts["mode"];
+	int mod = atoi(mode.c_str());
+
+	eString submode = "2";
+	if (opts["submode"])
+		submode = opts["submode"];
+	int subm = atoi(submode.c_str());
+		
+	eString sref = zap[mod][subm];
+	eServiceReference ref(sref);
+
+	eString result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	result += "<" + getTag(mod, subm) + "s>";
+	getContent t(mod, subm, ref, result, true);
+	result += "\n</" + getTag(mod, subm) + "s>";
+	result.strReplace("&", "&amp;");
+//	result.strReplace("<", "&lt;");
+//	result.strReplace(">", "&gt;");
+//	result.strReplace("\'", "&apos;");
+//	result.strReplace("\"", "&quot;");
+	return result;
 }
 
 static eString getXSLStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -513,6 +636,7 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/boxinfo", getXMLBoxInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/serviceepg", getXMLServiceEPG, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/currentservicedata", getXMLCurrentServiceData, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/services", getXMLServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo", getXMLStreamInfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/timers", getXMLTimers, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getXSLStreamInfo, lockWeb);
