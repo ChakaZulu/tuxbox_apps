@@ -1514,6 +1514,7 @@ void eEPGCache::load()
 			fread( text1, 13, 1, f);
 			if ( !strncmp( text1, "ENIGMA_EPG_V7", 13) )
 			{
+				singleLock l(cache_lock);
 				fread( &size, sizeof(int), 1, f);
 				while(size--)
 				{
