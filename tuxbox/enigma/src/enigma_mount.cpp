@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_mount.cpp,v 1.63 2007/01/27 22:39:31 digi_casi Exp $
+ * $Id: enigma_mount.cpp,v 1.64 2007/02/18 18:00:57 digi_casi Exp $
  *
  * (C) 2005, 2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -114,20 +114,23 @@ bool eMountPoint::isIdentical(eString mountOn, eString mountDev)
 {
 	bool found = false;
 	
-	switch (mp.fstype)
+	if (mountOn == mp.localDir)
 	{
-		case 0: //NFS
-			found = (eString().sprintf("%d.%d.%d.%d:%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()) == mountDev);
-			break;
-		case 1: //CIFS
-		case 3: //SMBFS
-			found = (eString().sprintf("//%d.%d.%d.%d/%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()).upper() == mountDev.upper());
-			break;
-		case 2: //DEVICE
-			found = ((mountOn == mp.localDir) && (mountDev == mp.mountDir) && (mp.ip[0] == 0) && (mp.ip[1] == 0) && (mp.ip[2] == 0) && (mp.ip[3] == 0));
-			break;
-		default:
-			break;
+		switch (mp.fstype)
+		{
+			case 0: //NFS
+				found = (eString().sprintf("%d.%d.%d.%d:%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()) == mountDev);
+				break;
+			case 1: //CIFS
+			case 3: //SMBFS
+				found = (eString().sprintf("//%d.%d.%d.%d/%s", mp.ip[0], mp.ip[1], mp.ip[2], mp.ip[3], mp.mountDir.c_str()).upper() == mountDev.upper());
+				break;
+			case 2: //DEVICE
+				found = ((mountOn == mp.localDir) && (mountDev == mp.mountDir) && (mp.ip[0] == 0) && (mp.ip[1] == 0) && (mp.ip[2] == 0) && (mp.ip[3] == 0));
+				break;
+			default:
+				break;
+		}
 	}
 	return found;
 }
@@ -479,13 +482,16 @@ eString eMountMgr::listMovieSources()
 	if (mountPoints.size() > 0)
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		{
-			tmp = "<option #SEL# value=\"" + eString().sprintf("%d", mp_it->mp.id) + "\">" + ((mp_it->mp.description) ? mp_it->mp.description : mp_it->mp.mountDir) + "</option>";
-			if (mp_it->mp.mounted && (mp_it->mp.localDir == "/hdd"))
-				tmp.strReplace("#SEL#", "selected");
-			else
-				tmp.strReplace("#SEL#", "");
+			if (mp_it->mp.localDir == "/hdd")
+			{
+				tmp = "<option #SEL# value=\"" + eString().sprintf("%d", mp_it->mp.id) + "\">" + ((mp_it->mp.description) ? mp_it->mp.description : mp_it->mp.mountDir) + "</option>";
+				if (mp_it->mp.mounted)
+					tmp.strReplace("#SEL#", "selected");
+				else
+					tmp.strReplace("#SEL#", "");
 
-			result += tmp + "\n";
+				result += tmp + "\n";
+			}
 		}
 	else
 		result = "<option selected value=\"0\">No movie source available.</option>";
