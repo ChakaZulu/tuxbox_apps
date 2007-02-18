@@ -64,15 +64,19 @@ int ePlaylist::load(const char *filename)
 			line[strlen(line)-1]=0;
 		if (line[0]=='#')
 		{
-			if (!strncmp(line, "#SERVICE: ", 10))
+			if (!strncmp(line, "#SERVICE", 8))
 			{
-				eServicePath path(line+10);
+				int offs = line[8] == ':' ? 10 : 9;
+				eServicePath path(line+offs);
 				entries++;
 				list.push_back(path);
 				ignore_next=1;
 			}
-			else if (!strncmp(line, "#DESCRIPTION: ", 14))
-				list.back().service.descr=line+14;
+			else if (!strncmp(line, "#DESCRIPTION", 12))
+			{
+				int offs = line[12] == ':' ? 14 : 13;
+				list.back().service.descr=line+offs;
+			}
 			else if (!strcmp(line, "#CURRENT"))
 			{
 				current=list.end();
