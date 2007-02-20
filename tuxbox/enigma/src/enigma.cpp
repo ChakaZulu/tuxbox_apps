@@ -468,7 +468,66 @@ int main(int argc, char **argv)
 			eTimerManager::getInstance()->disableDeepstandbyWakeup();
 
 		if ( !res )  // only when shutdown disable pin8 voltage
-			eAVSwitch::getInstance()->setActive(0);
+		{
+			if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR)
+			{
+				__u8 data[720*576];
+				gPixmap pixmap;
+				pixmap.x=720;
+				pixmap.y=576;
+				pixmap.bpp=8;
+				pixmap.bypp=1;
+				pixmap.stride=720;
+				pixmap.data=data;
+				pixmap.clut.colors=256;
+				pixmap.clut.data=gFBDC::getInstance()->getPixmap().clut.data;
+				gPixmapDC outputDC(&pixmap);
+				eWidget virtualRoot;
+				virtualRoot.move(ePoint(0, 0));
+				virtualRoot.resize(eSize(720, 576));
+				virtualRoot.setTarget(&outputDC);
+				virtualRoot.makeRoot();
+				virtualRoot.setBackgroundColor(gColor(0));
+				virtualRoot.show();
+				{
+					eMessageBox mb(
+						_("It's now safe to unplug power!"),
+						_("Shutdown finished..."), eMessageBox::iconInfo);
+					mb.show();
+					{
+						while(gRC::getInstance().mustDraw())
+							usleep(1000);
+						int fd = open("/tmp/shutdown.raw", O_CREAT|O_WRONLY|O_TRUNC);
+						if ( fd >= 0 )
+						{
+							write(fd, pixmap.data, 720*576*pixmap.bpp/8);
+							::close(fd);
+						}
+						struct fb_cmap* cmap = fbClass::getInstance()->CMAP();
+						fd = open("/tmp/cmap", O_WRONLY|O_CREAT|O_TRUNC);
+						if ( fd >= 0 )
+						{
+							write(fd, &cmap->start, sizeof(cmap->start));
+							write(fd, &cmap->len, sizeof(cmap->len));
+							write(fd, cmap->red, cmap->len*sizeof(__u16));
+							write(fd, cmap->green, cmap->len*sizeof(__u16));
+							write(fd, cmap->blue, cmap->len*sizeof(__u16));
+							write(fd, cmap->transp, cmap->len*sizeof(__u16));
+							::close(fd);
+						}
+					}
+				}
+				eZap::getInstance()->getDesktop(eZap::desktopFB)->makeRoot();
+				eMessageBox mb(
+					_("Please wait until your Dreambox is shutting down!"),
+					_("Shutdown..."), eMessageBox::iconInfo);
+				mb.show();
+				fbClass::getInstance()->lock();
+				pixmap.clut.data=0;
+			}
+			else
+				eAVSwitch::getInstance()->setActive(0);
+		}
 	}
 
 	Decoder::Flush();

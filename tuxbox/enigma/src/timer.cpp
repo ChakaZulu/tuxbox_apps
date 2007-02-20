@@ -2185,7 +2185,12 @@ void eTimerEditView::createWidgets()
 	new eListBoxEntryText( *after_event, _("Nothing"), (void*) 0, 0, _("do nothing") );
 	new eListBoxEntryText( *after_event, _("Standby"), (void*) ePlaylistEntry::doGoSleep, 0, _("put box into standby") );
 	if ( eSystemInfo::getInstance()->canShutdown() )
-		new eListBoxEntryText( *after_event, _("Shutdown"), (void*) ePlaylistEntry::doShutdown, 0, _("put box into deep standby") );
+	{
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR)
+			new eListBoxEntryText( *after_event, _("Shutdown"), (void*) ePlaylistEntry::doShutdown, 0, _("shutdown the box") );
+		else
+			new eListBoxEntryText( *after_event, _("Shutdown"), (void*) ePlaylistEntry::doShutdown, 0, _("put box into deep standby") );
+	}
 
 	cTue = new eCheckbox(this, 0, takefocus);
 	cTue->setName("Tue");

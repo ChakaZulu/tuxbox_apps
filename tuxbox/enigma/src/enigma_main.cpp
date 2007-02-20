@@ -7434,6 +7434,7 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 		case eSystemInfo::TR_DVB272S:
 			new eListBoxEntryText(&list, _("reboot now"), (void*)4, 0, _("restart your receiver"));
 			break;
+		case eSystemInfo::DM600PVR:
 		case eSystemInfo::DM7000:
 		case eSystemInfo::DM7020:
 			new eListBoxEntryText(&list, _("shutdown now"), (void*)1, 0, _("shutdown your dreambox"));
