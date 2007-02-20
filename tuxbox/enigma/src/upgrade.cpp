@@ -664,6 +664,7 @@ void eUpgrade::flashImage(int checkmd5)
 							}
 						}
 					}
+					pixmap.clut.data=0;
 					int fd = open("/tmp/mtd.txt", O_WRONLY|O_CREAT|O_TRUNC);
 					if ( fd >= 0 )
 					{
