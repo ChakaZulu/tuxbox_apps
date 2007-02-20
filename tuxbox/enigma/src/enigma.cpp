@@ -492,7 +492,7 @@ int main(int argc, char **argv)
 				{
 					eMessageBox mb(
 						_("It's now safe to unplug power!"),
-						_("Shutdown finished..."), eMessageBox::iconInfo);
+						_("Shutdown finished"), eMessageBox::iconInfo);
 					mb.show();
 					{
 						while(gRC::getInstance().mustDraw())
@@ -519,7 +519,7 @@ int main(int argc, char **argv)
 				}
 				eZap::getInstance()->getDesktop(eZap::desktopFB)->makeRoot();
 				eMessageBox mb(
-					_("Please wait until your Dreambox is shutting down!"),
+					_("Please wait... your Dreambox is shutting down!"),
 					_("Shutdown..."), eMessageBox::iconInfo);
 				mb.show();
 				fbClass::getInstance()->lock();
