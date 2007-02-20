@@ -1543,9 +1543,9 @@ eZapMain::eZapMain()
 	,volume( eZap::getInstance()->getDesktop( eZap::desktopFB ) )
 	,VolumeBar( new eProgress(&volume) ), pMsg(0), pRotorMsg(0)
 	,message_notifier(eApp, 0)
-#ifndef DISABLE_CI
+//#ifndef DISABLE_CI
 	,mmi_messages(eApp, 1)
-#endif
+//#endif
 	,epg_messages(eApp, 1)
 	,timeout(eApp)
 	,clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)

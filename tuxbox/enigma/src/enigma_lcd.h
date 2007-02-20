@@ -1,9 +1,8 @@
-#ifndef DISABLE_LCD
-
 #ifndef __enigma_lcd_h
 #define __enigma_lcd_h
 
 #include <lib/gui/ewidget.h>
+#ifndef DISABLE_LCD
 #include <lib/gui/eprogress.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/multipage.h>
@@ -88,11 +87,8 @@ public:
 	eZapLCDSatfind(eWidget *parent);
 };
 
-#endif /* __enigma_lcd_h */
+#else  // DISABLE_LCD ... dummy class with the same size..
 
-#else  // dummy class with the same size..
-
-#include <lib/gui/ewidget.h>
 class eZapLCD: public eWidget
 {
 	static eZapLCD* instance;
@@ -101,3 +97,5 @@ public:
 };
 
 #endif // DISABLE_LCD
+
+#endif // __enigma_lcd_h

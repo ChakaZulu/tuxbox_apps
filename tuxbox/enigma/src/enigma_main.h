@@ -26,21 +26,27 @@
 
 class eProgress;
 
-#ifndef DISABLE_CI
 struct eMMIMessage
 {
+#ifndef DISABLE_LCD
 	eDVBCI *from;
+#else
+	int *from;
+#endif
 	char *data;
 	int len;
 	eMMIMessage()
 	{
 	}
+#ifndef DISABLE_LCD
 	eMMIMessage(eDVBCI *from, char* data, int len)
+#else
+	eMMIMessage(int *from, char* data, int len)
+#endif
 		: from(from), data(data), len(len)
 	{
 	}
 };
-#endif
 
 class eLabel;
 class EIT;
@@ -365,11 +371,9 @@ private:
 	eLock messagelock;
 	std::list<eZapMessage> messages;
 	eFixedMessagePump<int> message_notifier;
-#ifndef DISABLE_CI
+//#ifndef DISABLE_CI
 	eFixedMessagePump<eMMIMessage> mmi_messages;
-#else
-	eFixedMessagePump<int> mmi_messages; // dummy
-#endif
+//#endif
 	eFixedMessagePump<eEPGCache::Message> epg_messages;
 
 	eTimer timeout, clocktimer, messagetimeout,
