@@ -367,6 +367,8 @@ private:
 	eFixedMessagePump<int> message_notifier;
 #ifndef DISABLE_CI
 	eFixedMessagePump<eMMIMessage> mmi_messages;
+#else
+	eFixedMessagePump<int> mmi_messages; // dummy
 #endif
 	eFixedMessagePump<eEPGCache::Message> epg_messages;
 
@@ -427,9 +429,9 @@ private:
 	int showOSDOnEITUpdate;
 	int serviceFlags;
 	int isSeekable() const { return serviceFlags & eServiceHandler::flagIsSeekable; }
-#ifndef DISABLE_LCD
+//#ifndef DISABLE_LCD
 	eZapLCD lcdmain;
-#endif
+//#endif
 	void eraseBackground(gPainter *, const eRect &where);
 	void setEIT(EIT *);
 	void handleNVODService(SDTEntry *sdtentry);

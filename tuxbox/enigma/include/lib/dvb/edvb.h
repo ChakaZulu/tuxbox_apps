@@ -160,6 +160,8 @@ public:
 #ifndef DISABLE_CI
 	eDVBCI *DVBCI;
 	eDVBCI *DVBCI2;
+#else
+	int *dummy[2];
 #endif
 
 ///////////////////////////// State Handling ////////////////////////

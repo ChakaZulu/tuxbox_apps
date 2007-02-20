@@ -206,11 +206,11 @@ public:
 		return parent?parent->getNonTransparentBackground():this;
 	}
 
-#ifndef DISABLE_LCD
+//#ifndef DISABLE_LCD
 	eWidget *LCDTitle;
 	eWidget *LCDElement;
 	eWidget *LCDTmp;
-#endif
+//#endif
 
 	void recalcAbsolutePosition();
 

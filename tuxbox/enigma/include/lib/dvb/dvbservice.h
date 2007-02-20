@@ -169,6 +169,9 @@ public:
 	void handlePMT(const eServiceReferenceDVB &, PMT*);
 	void enterService( const eServiceReferenceDVB &service);
 	void leaveService( const eServiceReferenceDVB &service);
+#else
+	int *dummy[2];
+	std::map< eServiceReferenceDVB, int > dummy_map;
 #endif
 
 	// set pids... detect used ca systems

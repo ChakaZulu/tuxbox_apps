@@ -22,9 +22,9 @@ class eListBoxBase: public eDecoWidget
 	int removed_height_pixel;
 	eProgress *scrollbar;
 	const eWidget* descr;
-#ifndef DISABLE_LCD
+//#ifndef DISABLE_LCD
 	eLabel* tmpDescr; // used for description Label in LCD
-#endif
+//#endif
 	gColor colorActiveB, colorActiveF;
 	enum  { arNothing, arCurrentOld, arAll};
 	int movemode, MaxEntries, flags, item_height, columns, in_atomic, atomic_redraw, atomic_old, atomic_new;

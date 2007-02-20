@@ -153,9 +153,9 @@ class TransponderScan: public eWindow
 	eLabel *progress_text;
 	eStatusBar *statusbar;	
 	eWidget *current;
-#ifndef DISABLE_LCD
+//#ifndef DISABLE_LCD
 	eWidget *LCDElement, *LCDTitle;
-#endif
+//#endif
 	std::list<scanEntry> toScan;
 	eServiceReference service;
 	int ret;

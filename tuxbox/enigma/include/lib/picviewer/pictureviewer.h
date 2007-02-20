@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.h,v 1.20 2007/01/17 19:25:24 dbluelle Exp $
+ * $Id: pictureviewer.h,v 1.21 2007/02/20 21:57:04 ghostrider Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -58,9 +58,9 @@ class ePictureViewer: public eWidget
 	bool showBusySign;
 	bool switchto43;
 	int format169;
-#ifndef DISABLE_LCD
+//#ifndef DISABLE_LCD
 	eZapLCD* pLCD;
-#endif
+//#else
 public:
 	ePictureViewer(const eString &filename);
 	~ePictureViewer();

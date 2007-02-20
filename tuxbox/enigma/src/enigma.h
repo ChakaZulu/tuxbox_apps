@@ -27,9 +27,9 @@ class eZap: public eApplication, public Object
 	static eZap *instance;
 
 	eWidget *desktop_fb;
-#ifndef DISABLE_LCD
+//#ifndef DISABLE_LCD
 	eWidget *desktop_lcd;
-#endif
+//#endif
 
 	eHTTPD *httpd;
 	eHTTPConnection *serialhttpd;
@@ -50,9 +50,9 @@ class eZap: public eApplication, public Object
 public:
 	enum
 	{
-#ifndef DISABLE_LCD
+//#ifndef DISABLE_LCD
 		desktopLCD,
-#endif
+//#endif
 		desktopFB
 	};
 

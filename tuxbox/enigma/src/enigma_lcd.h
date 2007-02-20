@@ -90,4 +90,14 @@ public:
 
 #endif /* __enigma_lcd_h */
 
+#else  // dummy class with the same size..
+
+#include <lib/gui/ewidget.h>
+class eZapLCD: public eWidget
+{
+	static eZapLCD* instance;
+public:
+	int *dummy[6];
+};
+
 #endif // DISABLE_LCD
