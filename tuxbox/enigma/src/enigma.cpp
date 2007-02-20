@@ -523,6 +523,7 @@ int main(int argc, char **argv)
 					_("Shutdown..."), eMessageBox::iconInfo);
 				mb.show();
 				fbClass::getInstance()->lock();
+				fbClass::getInstance()->setAvailable(0);
 				pixmap.clut.data=0;
 			}
 			else

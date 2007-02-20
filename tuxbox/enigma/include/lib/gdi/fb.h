@@ -20,6 +20,7 @@ public:
 	int showConsole(int state);
 	int SetMode(unsigned int xRes, unsigned int yRes, unsigned int bpp);
 	int Available() { return available; }
+	void setAvailable(int val) { available=val; }
 	unsigned int Stride() { return stride; }
 	fb_cmap *CMAP() { return &cmap; }
 	struct fb_var_screeninfo *getScreenInfo() { return &screeninfo; }
