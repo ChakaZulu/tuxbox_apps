@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.70 2006/12/10 10:58:36 dbluelle Exp $
+ * $Id: setup_extra.cpp,v 1.71 2007/02/20 20:51:48 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -359,6 +359,7 @@ void eExpertSetup::factory_reset()
 	{
 		switch( eSystemInfo::getInstance()->getHwType() )
 		{
+			case eSystemInfo::DM600PVR:
 			case eSystemInfo::DM7020:
 				system("rm -R /etc/enigma && killall -9 enigma");
 				break;
