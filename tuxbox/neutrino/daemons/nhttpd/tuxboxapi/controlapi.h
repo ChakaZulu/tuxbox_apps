@@ -91,6 +91,7 @@ private:
 	void addBouquetCGI(CyhookHandler *hh);
 	void renameBouquetCGI(CyhookHandler *hh);
 	void changeBouquetCGI(CyhookHandler *hh);
+	void updateBouquetCGI(CyhookHandler *hh);
 	void build_live_url(CyhookHandler *hh);
 
 protected:
@@ -107,7 +108,7 @@ public:
 
 	// virtual functions for HookHandler/Hook
 	virtual std::string getHookName(void) {return std::string("mod_ControlAPI");}
-	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.3 $");}
+	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.4 $");}
 	virtual THandleStatus Hook_SendResponse(CyhookHandler *hh); 
 };
 

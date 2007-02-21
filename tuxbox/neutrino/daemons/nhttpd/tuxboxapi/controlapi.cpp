@@ -163,6 +163,7 @@ const CControlAPI::TyCgiCall CControlAPI::yCgiCallList[]=
 	{"addbouquet",		&CControlAPI::addBouquetCGI,	"text/plain"},
 	{"renamebouquet",	&CControlAPI::renameBouquetCGI,	"text/plain"},
 	{"changebouquet",	&CControlAPI::changeBouquetCGI,	"text/plain"},
+	{"updatebouquet",	&CControlAPI::updateBouquetCGI,	"text/plain"},
 	// utils
 	{"build_live_url",	&CControlAPI::build_live_url,	""},
 
@@ -2085,6 +2086,12 @@ void CControlAPI::changeBouquetCGI(CyhookHandler *hh)
 	}
 	else
 		hh->SendError();
+}
+//-------------------------------------------------------------------------
+void CControlAPI::updateBouquetCGI(CyhookHandler *hh)
+{
+	NeutrinoAPI->UpdateBouquets();
+	hh->SendOk();
 }
 //-------------------------------------------------------------------------
 // audio_no : (optional) audio channel
