@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_timer.cpp,v 1.19 2007/01/22 17:51:19 digi_casi Exp $
+ * $Id: enigma_dyn_timer.cpp,v 1.20 2007/02/21 17:18:26 digi_casi Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -772,6 +772,10 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 
 		eventStartTime = mktime(&start);
 		eventEndTime = mktime(&end);
+
+		if (timer == "repeating" && eventEndTime < eventStartTime)
+			eventEndTime += 24 * 60 * 60;
+
 		eventDuration = eventEndTime - eventStartTime;
 	}
 
