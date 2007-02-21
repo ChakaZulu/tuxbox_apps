@@ -28,7 +28,7 @@ class eProgress;
 
 struct eMMIMessage
 {
-#ifndef DISABLE_LCD
+#ifndef DISABLE_CI
 	eDVBCI *from;
 #else
 	int *from;
@@ -38,7 +38,7 @@ struct eMMIMessage
 	eMMIMessage()
 	{
 	}
-#ifndef DISABLE_LCD
+#ifndef DISABLE_CI
 	eMMIMessage(eDVBCI *from, char* data, int len)
 #else
 	eMMIMessage(int *from, char* data, int len)
