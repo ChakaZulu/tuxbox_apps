@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_timer.cpp,v 1.20 2007/02/21 17:18:26 digi_casi Exp $
+ * $Id: enigma_dyn_timer.cpp,v 1.21 2007/02/23 18:08:32 ghostrider Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -536,7 +536,8 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	int oldType = atoi(oldEventType.c_str());
 	eString oldStartTime = opt["old_stime"];
 	eString newEventType = opt["type"];
-	if (newEventType == "repeating")
+	bool repeating = newEventType == "repeating";
+	if (repeating)
 		oldType |= ePlaylistEntry::isRepeating;
 	else
 		oldType &= ~ePlaylistEntry::isRepeating;
@@ -568,21 +569,46 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
 	start.tm_isdst = -1;
-	start.tm_mday = atoi(sday.c_str());
-	start.tm_mon = atoi(smonth.c_str()) - 1;
-	start.tm_year = atoi(syear.c_str()) - 1900;
+	if (repeating)
+	{
+		start.tm_year = 70;  // 1.1.1970
+		start.tm_mon = 0;
+		start.tm_mday = 1;
+	}
+	else
+	{
+		start.tm_mday = atoi(sday.c_str());
+		start.tm_mon = atoi(smonth.c_str()) - 1;
+		start.tm_year = atoi(syear.c_str()) - 1900;
+	}
 	start.tm_hour = atoi(shour.c_str());
 	start.tm_min = atoi(smin.c_str());
 	start.tm_sec = 0;
 
 	tm end = *localtime(&now);
 	end.tm_isdst = -1;
-	end.tm_mday = atoi(eday.c_str());
-	end.tm_mon = atoi(emonth.c_str()) - 1;
-	end.tm_year = atoi(eyear.c_str()) - 1900;
+	if (repeating)
+	{
+		end.tm_year = 70;  // 1.1.1970
+		end.tm_mon = 0;
+		end.tm_mday = 1;
+	}
+	else
+	{
+		end.tm_mday = atoi(eday.c_str());
+		end.tm_mon = atoi(emonth.c_str()) - 1;
+		end.tm_year = atoi(eyear.c_str()) - 1900;
+	}
 	end.tm_hour = atoi(ehour.c_str());
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
+
+	if ( repeating &&   // endTime after 0:00
+		end.tm_hour*60+end.tm_min <
+		start.tm_hour*60+start.tm_min )
+	{
+		end.tm_mday++;
+	}
 
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
@@ -738,6 +764,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eString sa = opt["sa"];
 	eString su = opt["su"];
 	eString action = opt["action"];
+	bool repeating = timer == "repeating";
 	eDebug("[ENIGMA_DYN] addTimerEvent %s.%s.%s - %s:%s, %s.%s.%s - %s:%s", sday.c_str(), smonth.c_str(), syear.c_str(), shour.c_str(), smin.c_str(), eday.c_str(), emonth.c_str(), eyear.c_str(), ehour.c_str(), emin.c_str());
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
@@ -754,27 +781,49 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	{
 		tm start = *localtime(&now);
 		start.tm_isdst = -1;
-		start.tm_mday = atoi(sday.c_str());
-		start.tm_mon = atoi(smonth.c_str()) - 1;
-		start.tm_year = atoi(syear.c_str()) - 1900;
+		if (repeating)
+		{
+			start.tm_year = 70;  // 1.1.1970
+			start.tm_mon = 0;
+			start.tm_mday = 1;
+		}
+		else
+		{
+			start.tm_mday = atoi(sday.c_str());
+			start.tm_mon = atoi(smonth.c_str()) - 1;
+			start.tm_year = atoi(syear.c_str()) - 1900;
+		}
 		start.tm_hour = atoi(shour.c_str());
 		start.tm_min = atoi(smin.c_str());
 		start.tm_sec = 0;
 
 		tm end = *localtime(&now);
 		end.tm_isdst = -1;
-		end.tm_mday = atoi(eday.c_str());
-		end.tm_mon = atoi(emonth.c_str()) - 1;
-		end.tm_year = atoi(eyear.c_str()) - 1900;
+		if (repeating)
+		{
+			end.tm_year = 70;  // 1.1.1970
+			end.tm_mon = 0;
+			end.tm_mday = 1;
+		}
+		else
+		{
+			end.tm_mday = atoi(eday.c_str());
+			end.tm_mon = atoi(emonth.c_str()) - 1;
+			end.tm_year = atoi(eyear.c_str()) - 1900;
+		}
 		end.tm_hour = atoi(ehour.c_str());
 		end.tm_min = atoi(emin.c_str());
 		end.tm_sec = 0;
 
+		if ( repeating &&   // endTime after 0:00
+			end.tm_hour*60+end.tm_min <
+			start.tm_hour*60+start.tm_min )
+		{
+			end.tm_mday++;
+		}
+
 		eventStartTime = mktime(&start);
 		eventEndTime = mktime(&end);
-
-		if (timer == "repeating" && eventEndTime < eventStartTime)
-			eventEndTime += 24 * 60 * 60;
 
 		eventDuration = eventEndTime - eventStartTime;
 	}
@@ -803,7 +852,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 			type |= ePlaylistEntry::recDVR;
 	}
 
-	if (timer == "repeating")
+	if (repeating)
 	{
 		type |= ePlaylistEntry::isRepeating;
 		if (mo == "on")
