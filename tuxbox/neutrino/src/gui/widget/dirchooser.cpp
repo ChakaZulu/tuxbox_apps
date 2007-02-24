@@ -1,5 +1,5 @@
 /*  
-	$Id: dirchooser.cpp,v 1.1 2007/01/24 02:05:30 guenther Exp $
+	$Id: dirchooser.cpp,v 1.2 2007/02/24 15:19:00 guenther Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 	
@@ -78,41 +78,42 @@ int CDirChooser::exec(CMenuTarget* parent, const std::string & actionKey)
 /**********************************************************************/
 {
 	int result = menu_return::RETURN_REPAINT;
-   	new_path_selected = false;
+	new_path_selected = false;
 	
-    if(parent != NULL)
-    {
-    	parent->hide();
-    }
+	if(parent != NULL)
+	{
+		parent->hide();
+	}
     	
-    CFileBrowser browser;
-    browser.Dir_Mode = true;
+	CFileBrowser browser;
+	browser.Dir_Mode = true;
     
-    bool allowed = false;
-    bool test_allowed = false;
-    if (browser.exec(dirPath->c_str()))
-    {
-        *dirPath = browser.getSelectedFile()->Name;
-        
-        for(int i = 0;i < MAX_ALLOWED_PATHS; i++)
-        {
-        	if(allowedPath[i] != NULL)
-        	{
-        		test_allowed = true; // there is at least one allowed path, so check it
-	        	if(dirPath->compare(0,strlen(allowedPath[i]),allowedPath[i]) == 0)
-	        	{
-	        		allowed = true;
-	        		break;
-	        	}
-        	}
-        }
-        if(test_allowed == true && allowed == false)
-        {
-            *dirPath = "";   // We clear the  string if the selected folder is not at allowed
-        }
-   		new_path_selected = true;
-    }
-    return result;
+	bool allowed = false;
+	bool test_allowed = false;
+	if (browser.exec(dirPath->c_str()))
+	{
+		*dirPath = browser.getSelectedFile()->Name;
+	        
+		for(int i = 0;i < MAX_ALLOWED_PATHS; i++)
+		{
+			if(allowedPath[i] != NULL)
+			{
+				test_allowed = true; // there is at least one allowed path, so check it
+				if(dirPath->compare(0,strlen(allowedPath[i]),allowedPath[i]) == 0)
+				{
+					allowed = true;
+					break;
+				}
+			}
+		}
+		if( (test_allowed == true && allowed == false) ||
+		     *dirPath == "/")
+		{
+			*dirPath = "";   // We clear the  string if the selected folder is not at allowed
+		}
+		new_path_selected = true;
+	}
+	return result;
 }
 
 
@@ -235,7 +236,7 @@ int CRecDirChooser::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			dir = "/mnt/";
 		}
-		CDirChooser dirChooser(&dir, "/hdd","/mnt/");
+		CDirChooser dirChooser(&dir);
 		dirChooser.exec(NULL,"");
 		if(dirChooser.new_path_selected == false)
 		{
