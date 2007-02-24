@@ -75,6 +75,15 @@ seperated by semicolon (e.g "localhost;192.168.1.10")
 	</td>	
 </tr>
 </table>
+<h2>EPG cache path</h2>
+Specifies the path where the epg cache will be saved when shutting down the box<br>
+<table border=0 cellspacing=5 cellpadding=0>
+<tr>
+	<td>
+		<input style="color:#000000" name="epgcachepath" type="text" size="90" maxlength="256" value="#EPGCACHEPATH#">
+	</td>	
+</tr>
+</table>
 <br><br>
 <input style="color: #000000; width: 100px" type="submit" size="100px" value="Save">
 </form>
