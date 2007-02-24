@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.12 2007/01/24 02:20:56 guenther Exp $
+	$Id: moviebrowser.cpp,v 1.13 2007/02/24 15:21:38 guenther Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.13  2007/02/24 15:21:38  guenther
+	Allow all directories as movie dir, use root for non selection
+	
 	Revision 1.12  2007/01/24 02:20:56  guenther
 	update recording directory menu to support IDE and NFS
 	
@@ -402,7 +405,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.12 2007/01/24 02:20:56 guenther Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.13 2007/02/24 15:21:38 guenther Exp $\r\n");
 	init();
 }
 
@@ -3062,7 +3065,7 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* movie_info)
     CMenuForwarder*     forwarder[MB_MAX_DIRS];
     for(i=0; i<MB_MAX_DIRS ;i++)
     {
-        dirInput[i] =  new CDirChooser(&m_settings.storageDir[i],"/mnt/","/hdd");
+        dirInput[i] =  new CDirChooser(&m_settings.storageDir[i]);
         forwarder[i] = new CMenuForwarder(LOCALE_MOVIEBROWSER_DIR,        m_settings.storageDirUsed[i], m_settings.storageDir[i],      dirInput[i]);
         notifier[i] =  new COnOffNotifier(forwarder[i]);
         chooser[i] =   new CMenuOptionChooser(LOCALE_MOVIEBROWSER_USE_DIR , &m_settings.storageDirUsed[i]  , MESSAGEBOX_YES_NO_OPTIONS, MESSAGEBOX_YES_NO_OPTIONS_COUNT, true,notifier[i]);
@@ -3635,7 +3638,7 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.12 $");
+	helpbox.addLine("MovieBrowser $Revision: 1.13 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
