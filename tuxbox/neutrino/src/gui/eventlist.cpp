@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.104 2007/01/31 21:42:03 houdini Exp $
+	$Id: eventlist.cpp,v 1.105 2007/02/25 21:47:16 guenther Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -934,17 +934,17 @@ int CEventFinderMenu::showMenu(void)
 	CMenuOptionChooser* mo0 	= new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WITHIN_LIST , m_search_list, SEARCH_LIST_OPTIONS, SEARCH_LIST_OPTION_COUNT, true, NULL, CRCInput::RC_2);
 	CMenuForwarderNonLocalized* mf1	= new CMenuForwarderNonLocalized("", *m_search_list != EventList::SEARCH_LIST_ALL, m_search_channelname, this, "3", CRCInput::RC_3 );
 	CMenuOptionChooser* mo1 	= new CMenuOptionChooser(LOCALE_EVENTFINDER_SEARCH_WITHIN_EPG, m_search_epg_item, SEARCH_EPG_OPTIONS, SEARCH_EPG_OPTION_COUNT, true, NULL, CRCInput::RC_4);
-	CMenuForwarderNonLocalized* mf2	= new CMenuForwarderNonLocalized("",true, *m_search_keyword, &stringInput, NULL, CRCInput::RC_5 );
+	CMenuForwarder* mf2	= new CMenuForwarder(LOCALE_EVENTFINDER_KEYWORD ,true, *m_search_keyword, &stringInput, NULL, CRCInput::RC_5 );
 	
 	CMenuWidget searchMenu(LOCALE_EVENTFINDER_HEAD, "features.raw", 450);
 	searchMenu.addItem(GenericMenuSeparator);
-	searchMenu.addItem(mf0, false);
+	searchMenu.addItem(mf2, false);
 	searchMenu.addItem(GenericMenuSeparatorLine);
 	searchMenu.addItem(mo0, false);
 	searchMenu.addItem(mf1, false);
-	searchMenu.addItem(GenericMenuSeparatorLine);
 	searchMenu.addItem(mo1, false);
-	searchMenu.addItem(mf2, false);
+	searchMenu.addItem(GenericMenuSeparatorLine);
+	searchMenu.addItem(mf0, false);
 	
 	res = searchMenu.exec(NULL,"");
 	return(res);

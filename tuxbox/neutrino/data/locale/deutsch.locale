@@ -276,7 +276,7 @@ epgviewer.More_Screenings Weitere Termine auf diesem Kanal
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
 epgviewer.notfound keine Programminformationen (EPG) gefunden
 eventfinder.head Stichwortsuche im EPG
-eventfinder.keyword Stichwort
+eventfinder.keyword Suchbegriff
 eventfinder.search Suche
 eventfinder.search_within_epg Suche in
 eventfinder.search_within_list Suche in
