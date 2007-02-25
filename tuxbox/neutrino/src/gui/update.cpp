@@ -1,4 +1,6 @@
 /*
+	$Id: update.cpp,v 1.123 2007/02/25 21:29:38 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -360,6 +362,12 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 		hide();
 		return menu_return::RETURN_REPAINT;
 	}
+	
+#ifdef LCD_UPDATE
+	CLCD::getInstance()->showProgressBar2(0,"checking",0,"Update Neutrino");
+	CLCD::getInstance()->setMode(CLCD::MODE_PROGRESSBAR2);
+#endif // LCD_UPDATE
+
 	showGlobalStatus(19);
 	paint();
 	showGlobalStatus(20);
@@ -534,6 +542,11 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 
 	if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, message, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes) // UTF-8
 		return;
+
+#ifdef LCD_UPDATE
+	CLCD::getInstance()->showProgressBar2(0,"checking",0,"Update Neutrino");
+	CLCD::getInstance()->setMode(CLCD::MODE_PROGRESSBAR2);
+#endif // LCD_UPDATE
 
 	setTitle(LOCALE_FLASHUPDATE_TITLEWRITEFLASH);
 	paint();
