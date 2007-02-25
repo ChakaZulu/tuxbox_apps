@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.841 2007/02/24 15:22:41 guenther Exp $
+	$Id: neutrino.cpp,v 1.842 2007/02/25 21:03:35 guenther Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -71,6 +71,9 @@
 #include <driver/vcrcontrol.h>
 #include <driver/shutdown_count.h>
 #include <irsend/irsend.h>
+
+#include <gui/epgplus.h>
+#include <gui/streaminfo2.h>
 
 #include "gui/widget/colorchooser.h"
 #include "gui/widget/menue.h"
@@ -157,6 +160,9 @@ static CTimingSettingsNotifier timingsettingsnotifier;
 static CFontSizeNotifier fontsizenotifier;
 
 extern const char * locale_real_names[]; /* #include <system/locals_intern.h> */
+
+// USERMENU
+const char* usermenu_button_def[SNeutrinoSettings::BUTTON_MAX]={"red","green","yellow","blue"};
 
 CZapitClient::SatelliteList satList;
 
@@ -843,6 +849,49 @@ int CNeutrinoApp::loadSetup()
 		g_settings.filebrowser_sortmethod = 0;
 	g_settings.filebrowser_denydirectoryleave = configfile.getBool("filebrowser_denydirectoryleave", false);
 
+	// USERMENU
+	//-------------------------------------------
+	// this is as the current neutrino usermenü
+	const char* usermenu_default[SNeutrinoSettings::BUTTON_MAX]={
+		"2,3,4,16",			// RED
+		"6",				// GREEN
+		"7",				// YELLOW
+		"8,9,1,15,1,10,11,13,1,14,5"	// BLUE
+	};
+	char txt1[81];
+	std::string txt2;
+	const char* txt2ptr;
+	for(int button = 0; button < SNeutrinoSettings::BUTTON_MAX; button++)
+	{
+		snprintf(txt1,80,"usermenu_tv_%s_text",usermenu_button_def[button]);
+		txt1[80] = 0; // terminate for sure
+		g_settings.usermenu_text[button] = configfile.getString(txt1, "" );
+
+		snprintf(txt1,80,"usermenu_tv_%s",usermenu_button_def[button]);
+		txt2 = configfile.getString(txt1,usermenu_default[button]);
+		txt2ptr = txt2.c_str();
+		for( int pos = 0; pos < SNeutrinoSettings::ITEM_MAX; pos++)
+		{
+			// find next comma or end of string - if it's not the first round
+			if(pos != 0)
+			{
+				while(*txt2ptr != 0 && *txt2ptr != ',')
+					txt2ptr++;
+				if(*txt2ptr != 0)
+					txt2ptr++;
+			}    
+			if(*txt2ptr != 0)
+			{
+				g_settings.usermenu[button][pos] = atoi(txt2ptr);  // there is still a string
+				if(g_settings.usermenu[button][pos] >= SNeutrinoSettings::ITEM_MAX)
+					g_settings.usermenu[button][pos] = 0;
+			}
+			else
+				g_settings.usermenu[button][pos] = 0;     // string empty, fill up with 0
+            
+		}
+	}
+	
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
@@ -1199,6 +1248,30 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32("filebrowser_showrights", g_settings.filebrowser_showrights);
 	configfile.setInt32("filebrowser_sortmethod", g_settings.filebrowser_sortmethod);
 	configfile.setBool("filebrowser_denydirectoryleave", g_settings.filebrowser_denydirectoryleave);
+
+	// USERMENU
+	//---------------------------------------
+	char txt1[81];
+	char txt2[81];
+	for(int button = 0; button < SNeutrinoSettings::BUTTON_MAX; button++)
+	{
+		snprintf(txt1,80,"usermenu_tv_%s_text",usermenu_button_def[button]);
+		txt1[80] = 0; // terminate for sure
+		configfile.setString(txt1,g_settings.usermenu_text[button]);
+
+		char* txt2ptr = txt2;
+		snprintf(txt1,80,"usermenu_tv_%s",usermenu_button_def[button]);
+		for(int pos = 0; pos < SNeutrinoSettings::ITEM_MAX; pos++)
+		{
+			if( g_settings.usermenu[button][pos] != 0)
+			{   
+				if(pos != 0)
+					*txt2ptr++ = ',';
+				txt2ptr += snprintf(txt2ptr,80,"%d",g_settings.usermenu[button][pos]);
+			}
+		}
+		configfile.setString(txt1,txt2);
+	}
 
 	if (configfile.getModifiedFlag())
 	{
@@ -3173,6 +3246,12 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 {
 	keySettings.addItem(GenericMenuSeparator);
 	keySettings.addItem(GenericMenuBack);
+	// USERMENU
+	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_USERMENU_HEAD));
+	keySettings.addItem(new CMenuForwarder(LOCALE_USERMENU_BUTTON_RED, true, NULL, new CUserMenuMenu(LOCALE_USERMENU_BUTTON_RED,0)));
+	keySettings.addItem(new CMenuForwarder(LOCALE_USERMENU_BUTTON_GREEN, true, NULL, new CUserMenuMenu(LOCALE_USERMENU_BUTTON_GREEN,1)));
+	keySettings.addItem(new CMenuForwarder(LOCALE_USERMENU_BUTTON_YELLOW, true, NULL, new CUserMenuMenu(LOCALE_USERMENU_BUTTON_YELLOW,2)));
+	keySettings.addItem(new CMenuForwarder(LOCALE_USERMENU_BUTTON_BLUE, true, NULL, new CUserMenuMenu(LOCALE_USERMENU_BUTTON_BLUE,3)));
 
 	int * keyvalue_p[15] =
 		{
@@ -3219,70 +3298,83 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem(new CMenuForwarder(keydescription[KEY_LASTCHANNEL], true, NULL, keychooser[KEY_LASTCHANNEL]));
 }
 
+// USERMENU
+// leave this functions, somebody might want to use it in the future again
 void CNeutrinoApp::SelectNVOD()
 {
 	if (!(g_RemoteControl->subChannels.empty()))
 	{
 		// NVOD/SubService- Kanal!
 		CMenuWidget NVODSelector(g_RemoteControl->are_subchannels ? LOCALE_NVODSELECTOR_SUBSERVICE : LOCALE_NVODSELECTOR_HEAD, "video.raw", 350);
+		if(getNVODMenu(&NVODSelector))
+			NVODSelector.exec(NULL, "");
+	}
+}
 
-		NVODSelector.addItem(GenericMenuSeparator);
 
-		int count = 0;
-		char nvod_id[5];
+bool CNeutrinoApp::getNVODMenu(CMenuWidget* menu)
+{
+	if(menu == NULL) 
+		return false;
+	if (g_RemoteControl->subChannels.empty())
+		return false;
+		
+	menu->addItem(GenericMenuSeparator);
 
-		for( CSubServiceListSorted::iterator e=g_RemoteControl->subChannels.begin(); e!=g_RemoteControl->subChannels.end(); ++e)
+	int count = 0;
+	char nvod_id[5];
+
+	for( CSubServiceListSorted::iterator e=g_RemoteControl->subChannels.begin(); e!=g_RemoteControl->subChannels.end(); ++e)
+	{
+		sprintf(nvod_id, "%d", count);
+
+		if( !g_RemoteControl->are_subchannels )
 		{
-			sprintf(nvod_id, "%d", count);
+			char nvod_time_a[50], nvod_time_e[50], nvod_time_x[50];
+			char nvod_s[100];
+			struct  tm *tmZeit;
 
-			if( !g_RemoteControl->are_subchannels )
+			tmZeit= localtime(&e->startzeit);
+			sprintf(nvod_time_a, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
+
+			time_t endtime = e->startzeit+ e->dauer;
+			tmZeit= localtime(&endtime);
+			sprintf(nvod_time_e, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
+
+			time_t jetzt=time(NULL);
+			if(e->startzeit > jetzt)
 			{
-				char nvod_time_a[50], nvod_time_e[50], nvod_time_x[50];
-				char nvod_s[100];
-				struct  tm *tmZeit;
-
-				tmZeit= localtime(&e->startzeit);
-				sprintf(nvod_time_a, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
-
-				time_t endtime = e->startzeit+ e->dauer;
-				tmZeit= localtime(&endtime);
-				sprintf(nvod_time_e, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
-
-				time_t jetzt=time(NULL);
-				if(e->startzeit > jetzt)
-				{
-					int mins=(e->startzeit- jetzt)/ 60;
-					sprintf(nvod_time_x, g_Locale->getText(LOCALE_NVOD_STARTING), mins);
-				}
-				else
-					if( (e->startzeit<= jetzt) && (jetzt < endtime) )
-				{
-					int proz=(jetzt- e->startzeit)*100/ e->dauer;
-					sprintf(nvod_time_x, g_Locale->getText(LOCALE_NVOD_PERCENTAGE), proz);
-				}
-				else
-					nvod_time_x[0]= 0;
-
-				sprintf(nvod_s, "%s - %s %s", nvod_time_a, nvod_time_e, nvod_time_x);
-				NVODSelector.addItem(new CMenuForwarderNonLocalized(nvod_s, true, NULL, NVODChanger, nvod_id), (count == g_RemoteControl->selected_subchannel));
+				int mins=(e->startzeit- jetzt)/ 60;
+				sprintf(nvod_time_x, g_Locale->getText(LOCALE_NVOD_STARTING), mins);
 			}
 			else
+				if( (e->startzeit<= jetzt) && (jetzt < endtime) )
 			{
-				NVODSelector.addItem(new CMenuForwarderNonLocalized((Latin1_to_UTF8(e->subservice_name)).c_str(), true, NULL, NVODChanger, nvod_id, CRCInput::convertDigitToKey(count)), (count == g_RemoteControl->selected_subchannel));
+				int proz=(jetzt- e->startzeit)*100/ e->dauer;
+				sprintf(nvod_time_x, g_Locale->getText(LOCALE_NVOD_PERCENTAGE), proz);
 			}
+			else
+				nvod_time_x[0]= 0;
 
-			count++;
+			sprintf(nvod_s, "%s - %s %s", nvod_time_a, nvod_time_e, nvod_time_x);
+			menu->addItem(new CMenuForwarderNonLocalized(nvod_s, true, NULL, NVODChanger, nvod_id), (count == g_RemoteControl->selected_subchannel));
 		}
-
-		if( g_RemoteControl->are_subchannels )
+		else
 		{
-			NVODSelector.addItem(GenericMenuSeparatorLine);
-			CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NVODSELECTOR_DIRECTORMODE, &g_RemoteControl->director_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
-			NVODSelector.addItem(oj);
+			menu->addItem(new CMenuForwarderNonLocalized((Latin1_to_UTF8(e->subservice_name)).c_str(), true, NULL, NVODChanger, nvod_id, CRCInput::convertDigitToKey(count)), (count == g_RemoteControl->selected_subchannel));
 		}
 
-		NVODSelector.exec(NULL, "");
+		count++;
 	}
+
+	if( g_RemoteControl->are_subchannels )
+	{
+		menu->addItem(GenericMenuSeparatorLine);
+		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NVODSELECTOR_DIRECTORMODE, &g_RemoteControl->director_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW);
+		menu->addItem(oj);
+	}
+
+	return true;
 }
 
 
@@ -3294,6 +3386,369 @@ const CMenuOptionChooser::keyval MAINMENU_RECORDING_OPTIONS[MAINMENU_RECORDING_O
 	{ 1, LOCALE_MAINMENU_RECORDING_STOP  }
 };
 
+// USERMENU
+// This is just a quick helper for the usermenu only. I already made it a class for future use.
+#define BUTTONMAX 4
+const neutrino_msg_t key_helper_msg_def[BUTTONMAX]={CRCInput::RC_red,CRCInput::RC_green,CRCInput::RC_yellow,CRCInput::RC_blue};
+const char * key_helper_icon_def[BUTTONMAX]={NEUTRINO_ICON_BUTTON_RED,NEUTRINO_ICON_BUTTON_GREEN,NEUTRINO_ICON_BUTTON_YELLOW,NEUTRINO_ICON_BUTTON_BLUE};
+class CKeyHelper
+{
+	private:
+		int number_key;
+		bool color_key_used[BUTTONMAX];
+	public:
+		CKeyHelper(){reset();};
+		void reset(void)
+		{
+			number_key = 1;
+			for(int i= 0; i < BUTTONMAX; i++ )
+				color_key_used[i] = false;
+		};
+
+		/* Returns the next available button, to be used in menu as 'direct' keys. Appropriate
+		 * definitions are returnd in msp and icon
+		 * A color button could be requested as prefered button (other buttons are not supported yet). 
+		 * If the appropriate button is already in used, the next number_key button is returned instead 
+		 * (first 1-9 and than 0). */
+		bool get(neutrino_msg_t* msg, const char** icon, neutrino_msg_t prefered_key = CRCInput::RC_nokey)
+		{
+			bool result = false;
+			int button = -1;
+			if(prefered_key == CRCInput::RC_red) 	
+				button = 0;
+			if(prefered_key == CRCInput::RC_green) 	
+				button = 1;
+			if(prefered_key == CRCInput::RC_yellow) 
+				button = 2;
+			if(prefered_key == CRCInput::RC_blue) 	
+				button = 3;
+		
+			*msg = CRCInput::RC_nokey;
+			*icon = "";
+			if(button >= 0 && button < BUTTONMAX)
+			{ // try to get color button
+				if( color_key_used[button] == false) 
+				{
+					color_key_used[button] = true;
+					*msg = key_helper_msg_def[button];
+					*icon = key_helper_icon_def[button];
+					result = true;
+				}
+			}
+			
+			if( result == false && number_key < 10) // no key defined yet, at least try to get a numbered key
+			{
+				// there is still a available number_key
+				*msg = CRCInput::convertDigitToKey(number_key);
+				*icon = "";
+				if(number_key == 9)
+					number_key = 0;
+				else if(number_key == 0)
+					number_key = 10;
+				else 
+					number_key++;
+					
+				result = true;
+			}
+			return (result);
+		};
+};
+
+
+// USERMENU
+bool CNeutrinoApp::showUserMenu(int button)
+{
+	if(button < 0 || button >= SNeutrinoSettings::BUTTON_MAX) 
+		return false;
+		
+	CMenuItem* menu_item = NULL;
+	CKeyHelper keyhelper;
+	neutrino_msg_t key = CRCInput::RC_nokey;
+	const char * icon = NULL; 
+	
+	char id[5];
+	int menu_items = 0;
+	int menu_prev = -1;
+	int cnt = 0;
+
+	// define classes
+	CFavorites* tmpFavorites				= NULL;
+	CPauseSectionsdNotifier* tmpPauseSectionsdNotifier 	= NULL;
+	CAudioSelectMenuHandler* tmpAudioSelectMenuHandler 	= NULL;
+	CMenuWidget* tmpNVODSelector				= NULL;
+	CStreamInfo2Handler*	tmpStreamInfo2Handler 		= NULL;
+	CEventListHandler* tmpEventListHandler			= NULL;
+	CEPGplusHandler* tmpEPGplusHandler			= NULL;
+	CEPGDataHandler* tmpEPGDataHandler			= NULL;
+	
+	std::string txt = g_settings.usermenu_text[button];
+	if (button == SNeutrinoSettings::BUTTON_RED)
+	{
+		if( txt.empty() )
+			txt = g_Locale->getText(LOCALE_INFOVIEWER_EVENTLIST);
+	}
+	else if( button == SNeutrinoSettings::BUTTON_GREEN)
+	{
+		if( txt.empty() )
+			txt = g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES);
+	}
+	else if( button == SNeutrinoSettings::BUTTON_YELLOW)
+	{
+		if( txt.empty() ) 
+			txt = g_Locale->getText((g_RemoteControl->are_subchannels) ? LOCALE_INFOVIEWER_SUBSERVICE : LOCALE_INFOVIEWER_SELECTTIME);
+			//txt = g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE);
+	}
+	else if( button == SNeutrinoSettings::BUTTON_BLUE)
+	{	
+		if( txt.empty() )
+			txt = g_Locale->getText(LOCALE_INFOVIEWER_STREAMINFO);
+	}
+	CMenuWidget *menu = new CMenuWidget(txt.c_str() , "features.raw", 350);
+	if (menu == NULL) 
+		return 0;
+	menu->addItem(GenericMenuSeparator);
+	
+	// go through any postition number
+	for(int pos = 0; pos < SNeutrinoSettings::ITEM_MAX ; pos++)
+	{
+		// now compare pos with the position of any item. Add this item if position is the same 
+		switch(g_settings.usermenu[button][pos])  
+		{
+			case SNeutrinoSettings::ITEM_NONE: 
+				// do nothing 
+				break;
+
+			case SNeutrinoSettings::ITEM_BAR: 
+				if(menu_prev == -1 && menu_prev == SNeutrinoSettings::ITEM_BAR )
+					break;
+					
+				menu->addItem(GenericMenuSeparatorLine);
+				menu_prev = SNeutrinoSettings::ITEM_BAR;
+				break;
+
+			case SNeutrinoSettings::ITEM_PLUGIN: 
+				for(unsigned int count = 0; count < (unsigned int) g_PluginList->getNumberOfPlugins(); count++)
+				{
+					std::string tmp = g_PluginList->getName(count);
+					if (g_PluginList->getType(count)== CPlugins::P_TYPE_TOOL && !g_PluginList->isHidden(count) && tmp.find("Teletext") == std::string::npos)
+					{
+						sprintf(id, "%d", count);
+						menu_items++;
+						menu_prev = SNeutrinoSettings::ITEM_PLUGIN;
+						
+						keyhelper.get(&key,&icon,CRCInput::RC_blue);
+						menu_item = new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, key, icon);
+						menu->addItem(menu_item, (cnt == 0));
+						cnt++;
+					}
+				}
+				break;
+				
+			case SNeutrinoSettings::ITEM_VTXT: 
+				for(unsigned int count = 0; count < (unsigned int) g_PluginList->getNumberOfPlugins(); count++)
+				{
+					std::string tmp = g_PluginList->getName(count);
+					if (g_PluginList->getType(count)== CPlugins::P_TYPE_TOOL && !g_PluginList->isHidden(count) && tmp.find("Teletext") != std::string::npos)
+					{
+						sprintf(id, "%d", count);
+						menu_items++;
+						menu_prev = SNeutrinoSettings::ITEM_VTXT;
+						
+						keyhelper.get(&key,&icon,CRCInput::RC_blue);
+						menu_item = new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, key, icon);
+						menu->addItem(menu_item, 0);
+					}
+				}
+				break;
+
+			case SNeutrinoSettings::ITEM_FAVORITS: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_FAVORITS;
+				tmpFavorites = new CFavorites;
+				keyhelper.get(&key,&icon);
+				menu_item = new CMenuForwarder(LOCALE_FAVORITES_MENUEADD, true, NULL, tmpFavorites, "-1", key, icon);
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_RECORD: 
+				if(g_settings.recording_type == RECORDING_OFF) 
+					break;
+				
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_RECORD;
+				keyhelper.get(&key,&icon,CRCInput::RC_red);
+				menu_item = new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, MAINMENU_RECORDING_OPTIONS, MAINMENU_RECORDING_OPTION_COUNT, true, this, key, icon);
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_MOVIEPLAYER_TS: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_MOVIEPLAYER_TS;
+				keyhelper.get(&key,&icon,CRCInput::RC_green);
+				menu_item = new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, this->moviePlayerGui, "tsplayback", key, icon);
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_MOVIEPLAYER_MB: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_MOVIEPLAYER_MB;
+				keyhelper.get(&key,&icon,CRCInput::RC_green);
+				menu_item = new CMenuForwarder(LOCALE_MOVIEBROWSER_HEAD, true, NULL, this->moviePlayerGui, "tsmoviebrowser", key, icon);
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_TIMERLIST: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_TIMERLIST;
+				keyhelper.get(&key,&icon,CRCInput::RC_yellow);
+				menu_item = new CMenuForwarder(LOCALE_TIMERLIST_NAME, true, NULL, Timerlist, "-1", key, icon);
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_REMOTE: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_REMOTE;
+				keyhelper.get(&key,&icon);
+				menu_item = new CMenuForwarder(LOCALE_RCLOCK_MENUEADD, true, NULL, this->rcLock, "-1" , key, icon );
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_EPG_SUPER: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_EPG_SUPER;
+				tmpEPGplusHandler = new CEPGplusHandler();
+				keyhelper.get(&key,&icon,CRCInput::RC_green);
+				menu_item = new CMenuForwarder(LOCALE_EPGMENU_EPGPLUS   , true, NULL, tmpEPGplusHandler  ,  "-1", key, icon);
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_EPG_LIST: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_EPG_LIST;
+				tmpEventListHandler = new CEventListHandler();
+				keyhelper.get(&key,&icon,CRCInput::RC_red);
+				menu_item = new CMenuForwarder(LOCALE_EPGMENU_EVENTLIST , true, NULL, tmpEventListHandler,  "-1", key, icon);
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_EPG_INFO: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_EPG_INFO;
+				tmpEPGDataHandler = new CEPGDataHandler();
+				keyhelper.get(&key,&icon,CRCInput::RC_yellow);
+				menu_item = new CMenuForwarder(LOCALE_EPGMENU_EVENTINFO , true, NULL, tmpEPGDataHandler ,  "-1", key, icon);
+				menu->addItem(menu_item, false);
+				break;
+
+			case SNeutrinoSettings::ITEM_EPG_MISC: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_EPG_MISC;
+				int dummy = g_Sectionsd->getIsScanningActive();
+				tmpPauseSectionsdNotifier = new CPauseSectionsdNotifier;
+				keyhelper.get(&key,&icon);
+				menu_item = new CMenuOptionChooser(LOCALE_MAINMENU_PAUSESECTIONSD, &dummy, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, tmpPauseSectionsdNotifier , key, icon );
+				menu->addItem(menu_item, false);
+				menu_items++;
+				keyhelper.get(&key,&icon);
+				menu_item = new CMenuForwarder(LOCALE_MAINMENU_CLEARSECTIONSD, true, NULL, this, "clearSectionsd", key,icon);
+				menu->addItem(menu_item, false);
+				break;
+				
+			case SNeutrinoSettings::ITEM_AUDIO_SELECT: 
+				// -- new Audio Selector Menu (rasc 2005-08-30)
+				if (g_settings.audio_left_right_selectable ||
+				    g_RemoteControl->current_PIDs.APIDs.size() > 1)
+				{
+					menu_items++;
+					menu_prev = SNeutrinoSettings::ITEM_AUDIO_SELECT;
+					tmpAudioSelectMenuHandler = new CAudioSelectMenuHandler;
+					keyhelper.get(&key,&icon);
+					menu_item = new CMenuForwarder(LOCALE_AUDIOSELECTMENUE_HEAD, true, NULL, tmpAudioSelectMenuHandler, "-1", key,icon);
+					menu->addItem(menu_item, false);
+				}
+				break;
+				
+			case SNeutrinoSettings::ITEM_SUBCHANNEL: 
+				if (!(g_RemoteControl->subChannels.empty()))
+				{
+					// NVOD/SubService- Kanal!
+					tmpNVODSelector = new CMenuWidget(g_RemoteControl->are_subchannels ? LOCALE_NVODSELECTOR_SUBSERVICE : LOCALE_NVODSELECTOR_HEAD, "video.raw", 350);
+					if(getNVODMenu(tmpNVODSelector))
+					{
+						menu_items++;
+						menu_prev = SNeutrinoSettings::ITEM_SUBCHANNEL;
+						keyhelper.get(&key,&icon);
+						menu_item = new CMenuForwarder(g_RemoteControl->are_subchannels ? LOCALE_NVODSELECTOR_SUBSERVICE : LOCALE_NVODSELECTOR_HEAD, true, NULL, tmpNVODSelector, "-1", key,icon);
+						menu->addItem(menu_item, false);
+					}
+				}
+				break;
+				
+			case SNeutrinoSettings::ITEM_TECHINFO: 
+				menu_items++;
+				menu_prev = SNeutrinoSettings::ITEM_TECHINFO;
+				tmpStreamInfo2Handler = new CStreamInfo2Handler();
+				keyhelper.get(&key,&icon,CRCInput::RC_blue);
+				menu_item = new CMenuForwarder(LOCALE_EPGMENU_STREAMINFO, true, NULL, tmpStreamInfo2Handler    , "-1", key, icon );
+				menu->addItem(menu_item, false);
+				break;
+
+			default: 
+				printf("[neutrino] WARNING! menu wrong item!!\n");
+				break;
+		}
+	} 
+	
+	// Allow some tailoring for privat image bakers ;)
+	if (button == SNeutrinoSettings::BUTTON_RED)
+	{
+	}
+	else if( button == SNeutrinoSettings::BUTTON_GREEN)
+	{
+	}
+	else if( button == SNeutrinoSettings::BUTTON_YELLOW)
+	{
+	}
+	else if( button == SNeutrinoSettings::BUTTON_BLUE)
+	{	
+#ifdef _EXPERIMENTAL_SETTINGS_
+		//Experimental Settings
+		if(menu_prev != -1)
+			menu->addItem(GenericMenuSeparatorLine);
+		menu_items ++;
+		menu_key++;
+		// FYI: there is a memory leak with 'new CExperimentalSettingsMenuHandler()
+		menu_item = new CMenuForwarder(LOCALE_EXPERIMENTALSETTINGS, true, NULL, new CExperimentalSettingsMenuHandler(), "-1", CRCInput::convertDigitToKey(menu_key), "");
+		menu->addItem(menu_item, false);
+#endif
+	}
+	
+	if(menu_items >	1 ) 				// show menu if there are more than 2 items only
+	{
+		menu->exec(NULL,"");
+	}
+	else if (menu_item != NULL)			// otherwise, we start the item directly (must be the last one)
+	{
+		menu_item->exec( NULL );
+	}									// neither nor, we do nothing
+
+	// restore mute symbol
+	//AudioMute(current_muted, true);
+	
+	// clear the heap
+	if(menu)			delete menu;
+	if(tmpFavorites)		delete tmpFavorites;
+	if(tmpPauseSectionsdNotifier)	delete tmpPauseSectionsdNotifier;
+	if(tmpAudioSelectMenuHandler)	delete tmpAudioSelectMenuHandler;
+	if(tmpNVODSelector)		delete tmpNVODSelector;
+	if(tmpStreamInfo2Handler)	delete tmpStreamInfo2Handler;
+	if(tmpEventListHandler)		delete tmpEventListHandler;
+	if(tmpEPGplusHandler)		delete tmpEPGplusHandler;
+	if(tmpEPGDataHandler)		delete tmpEPGDataHandler;
+}
+
+
+// should be remove, now just for reference
 void CNeutrinoApp::ShowStreamFeatures()
 {
 	char id[5];
@@ -3663,6 +4118,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
 	rcLock                    = new CRCLock();
 	moviePlayerGui 						= new CMoviePlayerGui();
+	//USERMENU
+	Timerlist                 = new CTimerList;
 
 	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 
@@ -3935,34 +4392,19 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 			else if( msg == CRCInput::RC_red )
 			{	// eventlist
-				// -- !! obsolete (2004-03-06 rasc)
-				// g_EventList->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName()); // UTF-8
-
-				// -- new EPG Menu (rasc 2004-03-06)
-				CEPGMenuHandler  *epg_menu;
-				epg_menu = new CEPGMenuHandler;
-				epg_menu->doMenu();
-				delete epg_menu;
+				showUserMenu(SNeutrinoSettings::BUTTON_RED);  //USERMENU
 			}
 			else if( msg == CRCInput::RC_blue )
 			{	// streaminfo
-				ShowStreamFeatures();
+				showUserMenu(SNeutrinoSettings::BUTTON_BLUE);
 			}
 			else if( msg == CRCInput::RC_green )
 			{
-				// -- new Audio Selector Menu (rasc 2005-08-30)
-				if (g_settings.audio_left_right_selectable ||
-				    g_RemoteControl->current_PIDs.APIDs.size() > 1)
-				{
-					CAudioSelectMenuHandler  *audio_menu;
-					audio_menu = new CAudioSelectMenuHandler;
-					audio_menu-> doMenu();
-					delete audio_menu;
+				showUserMenu(SNeutrinoSettings::BUTTON_GREEN);
 				}
-			}
 			else if( msg == CRCInput::RC_yellow )
 			{       // NVODs
-				SelectNVOD();
+				showUserMenu(SNeutrinoSettings::BUTTON_YELLOW);
 			}
 			else if (CRCInput::isNumeric(msg) && g_RemoteControl->director_mode )
 			{
@@ -5283,6 +5725,11 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		MoviePluginSelector.exec(NULL, "");
  		return menu_return::RETURN_REPAINT;
 	}
+	else if(actionKey == "clearSectionsd")
+	{
+		g_Sectionsd->freeMemory();
+	}
+	
 	return returnval;
 }
 

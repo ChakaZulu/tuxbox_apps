@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.81 2007/01/24 02:18:42 guenther Exp $
+ * $Id: locals_intern.h,v 1.82 2007/02/25 21:05:13 guenther Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -520,6 +520,7 @@ const char * locale_real_names[] =
 	"lcdmenu.statusline.playtime",
 	"lcdmenu.statusline.volume",
 	"mainmenu.audioplayer",
+	"mainmenu.clearsectionsd",
 	"mainmenu.games",
 	"mainmenu.head",
 	"mainmenu.movieplayer",
@@ -1116,6 +1117,16 @@ const char * locale_real_names[] =
 	"ucodecheck.head",
 	"ucodecheck.ucode",
 	"ucodes.failure",
+	"usermenu.button_blue",
+	"usermenu.button_green",
+	"usermenu.button_red",
+	"usermenu.button_yellow",
+	"usermenu.head",
+	"usermenu.item_bar",
+	"usermenu.item_epg_misc",
+	"usermenu.item_none",
+	"usermenu.item_vtxt",
+	"usermenu.name",
 	"videomenu.csync",
 	"videomenu.head",
 	"videomenu.osd",

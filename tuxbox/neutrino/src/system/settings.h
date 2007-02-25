@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.171 2007/01/24 02:18:42 guenther Exp $
+  $Id: settings.h,v 1.172 2007/02/25 21:04:11 guenther Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -356,6 +356,39 @@ struct SNeutrinoSettings
 	int	uboot_lcd_contrast;
 	int	uboot_console;
 	int	uboot_console_bak;
+
+	// USERMENU
+	typedef enum
+	{
+		BUTTON_RED = 0,  // Do not change ordering of members, add new item just before BUTTON_MAX!!!
+		BUTTON_GREEN = 1,
+		BUTTON_YELLOW = 2,
+		BUTTON_BLUE = 3,
+		BUTTON_MAX   // MUST be always the last in the list
+	}USER_BUTTON;
+	typedef enum
+	{
+		ITEM_NONE = 0, // Do not change ordering of members, add new item just before ITEM_MAX!!!
+		ITEM_BAR = 1,
+		ITEM_EPG_LIST = 2,
+		ITEM_EPG_SUPER = 3,
+		ITEM_EPG_INFO = 4,
+		ITEM_EPG_MISC = 5,
+		ITEM_AUDIO_SELECT = 6,
+		ITEM_SUBCHANNEL = 7,
+		ITEM_PLUGIN = 8,  
+		ITEM_VTXT = 9,
+		ITEM_RECORD = 10, 
+		ITEM_MOVIEPLAYER_TS = 11,
+		ITEM_MOVIEPLAYER_MB = 12,
+		ITEM_TIMERLIST = 13,
+		ITEM_REMOTE = 14,
+		ITEM_FAVORITS = 15,
+		ITEM_TECHINFO = 16,
+		ITEM_MAX   // MUST be always the last in the list
+	}USER_ITEM;
+	std::string usermenu_text[BUTTON_MAX];
+	int usermenu[BUTTON_MAX][ITEM_MAX];  // (USER_ITEM)  [button][position in Menue] = feature item
 };
 
 /* some default Values */

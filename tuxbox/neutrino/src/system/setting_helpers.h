@@ -2,6 +2,8 @@
 #define __setting_helpers__
 
 /*
+	$Id: setting_helpers.h,v 1.85 2007/02/25 21:04:36 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -272,5 +274,15 @@ class CUCodeCheckExec : public CMenuTarget
 void testNetworkSettings(const char* ip, const char* netmask, const char* broadcast, const char* gateway, const char* nameserver, bool ip_static);
 void showCurrentNetworkSettings();
 
+// USERMENU
+ class CUserMenuMenu : public CMenuTarget
+{	
+	private:
+		int button;
+		neutrino_locale_t local;
+	public:
+		CUserMenuMenu(neutrino_locale_t _local, int _button){local = _local;button = _button;};
+		int exec(CMenuTarget* parent, const std::string & actionKey);
+};
 
 #endif

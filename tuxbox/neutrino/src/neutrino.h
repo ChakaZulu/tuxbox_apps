@@ -1,4 +1,6 @@
 /*
+	$Id: neutrino.h,v 1.185 2007/02/25 21:03:48 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -39,6 +41,7 @@
 #include <driver/framebuffer.h>
 #include <system/setting_helpers.h>
 #include <system/configure_network.h>
+#include <gui/timerlist.h>
 #include <timerdclient/timerdtypes.h>
 #include <gui/channellist.h>          /* CChannelList */
 #include <gui/rc_lock.h>
@@ -139,6 +142,11 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 		CRCLock                         *rcLock;
 		CMenuTarget* 			moviePlayerGui;
+
+		// USERMENU
+		CTimerList			*Timerlist;
+		bool showUserMenu(int button);
+		bool getNVODMenu(CMenuWidget* menu);
 
 		bool ucodes_available(void);
 		void firstChannel();

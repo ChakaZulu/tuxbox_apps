@@ -1,4 +1,6 @@
 /*
+	$Id: setting_helpers.cpp,v 1.160 2007/02/25 21:04:58 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -44,6 +46,7 @@
 
 #include <global.h>
 #include <neutrino.h>
+#include <gui/widget/stringinput.h>
 
 // obsolete #include <gui/streaminfo.h>
 
@@ -529,7 +532,8 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, const std::string & act
 	//printf("CStreamFeaturesChangeExec exec: %s\n", actionKey.c_str());
 	int sel= atoi(actionKey.c_str());
 
-	parent->hide();
+	if(parent != NULL)
+		parent->hide();
 	// -- obsolete (rasc 2004-06-10)
 	// if (sel==-1)
 	// {
@@ -665,4 +669,54 @@ unsigned long long getcurrenttime()
 	struct timeval tv;
 	gettimeofday( &tv, NULL );
 	return (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+}
+
+// USERMENU
+#define USERMENU_ITEM_OPTION_COUNT SNeutrinoSettings::ITEM_MAX
+const CMenuOptionChooser::keyval USERMENU_ITEM_OPTIONS[USERMENU_ITEM_OPTION_COUNT] =
+{
+	{SNeutrinoSettings::ITEM_NONE, LOCALE_USERMENU_ITEM_NONE} ,
+	{SNeutrinoSettings::ITEM_BAR, LOCALE_USERMENU_ITEM_BAR} ,
+	{SNeutrinoSettings::ITEM_EPG_LIST, LOCALE_EPGMENU_EVENTLIST} ,
+	{SNeutrinoSettings::ITEM_EPG_SUPER, LOCALE_EPGMENU_EPGPLUS} ,
+	{SNeutrinoSettings::ITEM_EPG_INFO, LOCALE_EPGMENU_EVENTINFO} ,
+	{SNeutrinoSettings::ITEM_EPG_MISC, LOCALE_USERMENU_ITEM_EPG_MISC} ,
+	{SNeutrinoSettings::ITEM_AUDIO_SELECT, LOCALE_AUDIOSELECTMENUE_HEAD} ,
+	{SNeutrinoSettings::ITEM_SUBCHANNEL, LOCALE_INFOVIEWER_SUBSERVICE} ,
+	{SNeutrinoSettings::ITEM_PLUGIN, LOCALE_TIMERLIST_PLUGIN} ,
+	{SNeutrinoSettings::ITEM_VTXT, LOCALE_USERMENU_ITEM_VTXT} ,
+	{SNeutrinoSettings::ITEM_RECORD, LOCALE_TIMERLIST_TYPE_RECORD} ,
+	{SNeutrinoSettings::ITEM_MOVIEPLAYER_TS, LOCALE_MAINMENU_MOVIEPLAYER} ,
+	{SNeutrinoSettings::ITEM_MOVIEPLAYER_MB, LOCALE_MOVIEBROWSER_HEAD} ,
+	{SNeutrinoSettings::ITEM_TIMERLIST, LOCALE_TIMERLIST_NAME} ,
+	{SNeutrinoSettings::ITEM_REMOTE, LOCALE_RCLOCK_MENUEADD} ,
+	{SNeutrinoSettings::ITEM_FAVORITS, LOCALE_FAVORITES_MENUEADD} ,
+	{SNeutrinoSettings::ITEM_TECHINFO, LOCALE_EPGMENU_STREAMINFO}
+};
+
+int CUserMenuMenu::exec(CMenuTarget* parent, const std::string & actionKey)
+{
+	if(parent != NULL)
+		parent->hide();
+
+	CMenuWidget menu (local , "keybinding.raw");
+	menu.addItem(GenericMenuSeparator);
+	menu.addItem(GenericMenuBack);
+	menu.addItem(GenericMenuSeparatorLine);
+	
+	CStringInputSMS name(LOCALE_USERMENU_NAME,    &g_settings.usermenu_text[button], 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzäöüß/- ");
+	menu.addItem(new CMenuForwarder(LOCALE_USERMENU_NAME,    true, g_settings.usermenu_text[button],&name));
+	menu.addItem(GenericMenuSeparatorLine);
+	
+	char text[10];
+	for(int item = 0; item < SNeutrinoSettings::ITEM_MAX && item <13; item++) // Do not show more than 13 items
+	{
+		snprintf(text,10,"%d:",item);
+		text[9]=0;// terminate for sure
+    		menu.addItem( new CMenuOptionChooser(text, &g_settings.usermenu[button][item], USERMENU_ITEM_OPTIONS, USERMENU_ITEM_OPTION_COUNT,true ));
+	}
+
+	menu.exec(NULL,"");
+	
+	return menu_return::RETURN_REPAINT;	
 }
