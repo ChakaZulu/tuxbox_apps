@@ -561,8 +561,8 @@ scants.numberoftvservices TV
 scants.provider Anbieter:
 scants.startnow Ofanga mim Senda suacha
 scants.transponders Transponder:
-screensetup.lowerright grün = Buidlrand untn, rechts
-screensetup.upperleft rot = Buidlrand om, links
+screensetup.lowerright Buidlrand untn, rechts
+screensetup.upperleft Buidlrand om, links
 servicemenu.head Service
 servicemenu.reload Sendalistn nei loan
 servicemenu.reload_hint Sendalistn wern nei glon,\noan Moment...

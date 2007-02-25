@@ -730,8 +730,8 @@ scants.numberoftvservices TV
 scants.provider Aabieter:
 scants.startnow Kanausuächi schtartä
 scants.transponders Transponder:
-screensetup.lowerright grün = Böudrand ungä, rächts
-screensetup.upperleft rot = Böudrand obä, links
+screensetup.lowerright Böudrand ungä, rächts
+screensetup.upperleft Böudrand obä, links
 servicemenu.head Service
 servicemenu.reload Kanaulischtä nöi lade
 servicemenu.reload_hint Kanaulischtä wärde nöi glade,\nbitte wartä...

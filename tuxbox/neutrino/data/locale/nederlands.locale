@@ -618,8 +618,8 @@ scants.numberoftvservices TV:
 scants.provider Provider:
 scants.startnow Start scan
 scants.transponders Transponders:
-screensetup.lowerright groen = setup lower right
-screensetup.upperleft rood = setup upper left
+screensetup.lowerright setup lower right
+screensetup.upperleft setup upper left
 servicemenu.head Service
 servicemenu.reload Herlaad Kanalenlijst
 servicemenu.reload_hint Even geduld, herladen van kanalenlijst

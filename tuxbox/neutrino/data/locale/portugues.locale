@@ -652,8 +652,8 @@ scants.numberoftvservices TV
 scants.provider Operador:
 scants.startnow Começar Busca
 scants.transponders Transpondedor:
-screensetup.lowerright verde = configurar baixo direita
-screensetup.upperleft vermelho = configurar cima esquerda
+screensetup.lowerright configurar baixo direita
+screensetup.upperleft configurar cima esquerda
 servicemenu.head Canais
 servicemenu.reload Actualizar lista de canais
 servicemenu.reload_hint A actualizar Lista de canais,\npor favor esperar...

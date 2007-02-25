@@ -571,8 +571,8 @@ scants.provider Gestore:
 scants.services Services:
 scants.startnow Start Ricerca Canali
 scants.transponders Transponder:
-screensetup.lowerright verde = Margine Basso, destro
-screensetup.upperleft rosso = Margine Alto, sinistro
+screensetup.lowerright Margine Basso, destro
+screensetup.upperleft Margine Alto, sinistro
 servicemenu.head Service
 servicemenu.reload Nuona lettura lista Canali
 servicemenu.reload_hint Nuona lettura lista Canali,\nPrego attendere

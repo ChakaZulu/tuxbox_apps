@@ -651,8 +651,8 @@ scants.numberoftvservices TV
 scants.provider Provider(Fournisseur):
 scants.startnow commencer le Balayage
 scants.transponders Transpondeurs:
-screensetup.lowerright Vert = réglage du bas à droite
-screensetup.upperleft Rouge = réglage du haut à gauche
+screensetup.lowerright réglage du bas à droite
+screensetup.upperleft réglage du haut à gauche
 servicemenu.head Service
 servicemenu.reload Recharger listes de chaines
 servicemenu.reload_hint Rechargement listes de chaines,\nPatientez SVP.

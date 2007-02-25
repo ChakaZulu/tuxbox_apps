@@ -925,8 +925,8 @@ scants.numberoftvservices TV
 scants.provider Anbieter:
 scants.startnow Kanalsuche starten
 scants.transponders Transponder:
-screensetup.lowerright grün = Bildrand unten, rechts
-screensetup.upperleft rot = Bildrand oben, links
+screensetup.lowerright Bildrand unten, rechts
+screensetup.upperleft Bildrand oben, links
 sectionsd.scanmode Sections Scan
 servicemenu.getplugins Plugins neu laden
 servicemenu.getplugins_hint Plugins werden neu geladen,\nbitte warten...

@@ -571,8 +571,8 @@ scants.provider snabdjevač:
 scants.services servisi:
 scants.startnow početi traženje kanala
 scants.transponders transponderi:
-screensetup.lowerright zeleno = ekran dole, desno
-screensetup.upperleft crveno = ekran gore, lijevo
+screensetup.lowerright ekran dole, desno
+screensetup.upperleft ekran gore, lijevo
 servicemenu.head servis
 servicemenu.reload liste kanale obnoviti
 servicemenu.reload_hint obnavljaju se liste kanala,\nčekajte molim ...

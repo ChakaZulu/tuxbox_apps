@@ -925,8 +925,8 @@ scants.numberoftvservices TV
 scants.provider Provider:
 scants.startnow start scan
 scants.transponders Transponders:
-screensetup.lowerright green = setup lower right
-screensetup.upperleft red = setup upper left
+screensetup.lowerright setup lower right
+screensetup.upperleft setup upper left
 sectionsd.scanmode Sections Scan
 servicemenu.getplugins Reload plugins
 servicemenu.getplugins_hint Reloading plugins,\nplease be patient.

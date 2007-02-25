@@ -892,8 +892,8 @@ scants.numberoftvservices TV
 scants.provider Palveluntarjoaja:
 scants.startnow Aloita haku
 scants.transponders lähettimet:
-screensetup.lowerright vihreä = säädä alakulmaa
-screensetup.upperleft punainen = säädä yläkulmaa
+screensetup.lowerright säädä alakulmaa
+screensetup.upperleft säädä yläkulmaa
 sectionsd.scanmode Autom. kanavapäivitys
 servicemenu.getplugins Lue laajennoslista uudelleen
 servicemenu.getplugins_hint Ladataan laajennoksia,\nodota hetki.

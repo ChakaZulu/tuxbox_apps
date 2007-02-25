@@ -582,8 +582,8 @@ scants.provider Dostawca
 scants.services Kanaly:
 scants.startnow Rozpocznij Strojenie
 scants.transponders Transpondery:
-screensetup.lowerright ziel = prawy-dól
-screensetup.upperleft czerw = lewy-góra
+screensetup.lowerright prawy-dól
+screensetup.upperleft lewy-góra
 servicemenu.head Ustawienia
 servicemenu.reload przeladuj liste kanalów
 servicemenu.reload_hint Przeladowje liste,\nprosze czekaj...

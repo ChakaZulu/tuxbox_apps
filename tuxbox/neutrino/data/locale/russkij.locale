@@ -652,8 +652,8 @@ scants.numberoftvservices ТВ
 scants.provider Провайдеры:
 scants.startnow Начать сканирование
 scants.transponders Транспондеры:
-screensetup.lowerright green = настроить снизу справа
-screensetup.upperleft red = настроить сверху слева
+screensetup.lowerright настроить снизу справа
+screensetup.upperleft настроить сверху слева
 servicemenu.head Сервисы
 servicemenu.reload Перегрузить список каналов
 servicemenu.reload_hint Перезагрузка списка каналов,\nвыполняется...

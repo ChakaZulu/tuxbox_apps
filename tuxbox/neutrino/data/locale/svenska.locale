@@ -772,8 +772,8 @@ scants.numberoftvservices TV
 scants.provider Operatör:
 scants.startnow starta sökning
 scants.transponders Transpondrar:
-screensetup.lowerright grön = inställning nedre höger
-screensetup.upperleft röd = inställning övre vänster
+screensetup.lowerright inställning nedre höger
+screensetup.upperleft inställning övre vänster
 sectionsd.scanmode sektionsscan
 servicemenu.getplugins Läs in plugins
 servicemenu.getplugins_hint Läser in plugins,\nvar god vänta.

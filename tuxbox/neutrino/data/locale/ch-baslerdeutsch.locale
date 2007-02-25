@@ -571,8 +571,8 @@ scants.provider Abieter:
 scants.services Services:
 scants.startnow Kanalsuechi starde
 scants.transponders Transponder:
-screensetup.lowerright grün = Bildrand unde, rechts
-screensetup.upperleft rot = Bildrand obe, links
+screensetup.lowerright Bildrand unde, rechts
+screensetup.upperleft Bildrand obe, links
 servicemenu.head Sörvis
 servicemenu.reload Kanallischde neu lade
 servicemenu.reload_hint Kannallischde wärde neu g'lade,\ne'Moment warde...
