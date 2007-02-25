@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.235 2007/01/23 20:23:47 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.236 2007/02/25 20:51:52 guenther Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -151,6 +151,9 @@ static long secondsToCache;
 //static long oldEventsAre = 60*60L; // 2h  (sometimes want to know something about current/last movie)
 static long oldEventsAre;
 static int scanning = 1;
+
+#define EPG_FILTER_PATH "/var/tuxbox/config/zapit/epgfilter.xml"
+std::string epg_filter_dir = EPG_FILTER_PATH;
 static bool epg_filter_is_whitelist = false;
 static bool epg_filter_except_current_next = false;
 
@@ -1664,7 +1667,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.235 2007/01/23 20:23:47 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.236 2007/02/25 20:51:52 guenther Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -6804,7 +6807,7 @@ static void *houseKeepingThread(void *)
 
 static void readEPGFilter(void)
 {
-	xmlDocPtr filter_parser = parseXmlFile("/var/tuxbox/config/epgfilter.xml");
+	xmlDocPtr filter_parser = parseXmlFile(epg_filter_dir.c_str());
 
 	t_original_network_id onid = 0;
 	t_transport_stream_id tsid = 0;
@@ -6859,7 +6862,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.235 2007/01/23 20:23:47 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.236 2007/02/25 20:51:52 guenther Exp $\n");
 
 	SIlanguage::loadLanguages();
 
