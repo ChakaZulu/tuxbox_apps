@@ -1,4 +1,6 @@
 /*
+	$Id: menue.cpp,v 1.138 2007/02/25 21:11:15 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -73,10 +75,33 @@ void CMenuItem::setActive(const bool Active)
 		paint();
 }
 
+CMenuWidget::CMenuWidget()
+{
+	nameString = g_Locale->getText(NONEXISTANT_LOCALE);
+	iconfile="";
+	selected=-1;
+	iconOffset= 0;
+}
+
+
 CMenuWidget::CMenuWidget(const neutrino_locale_t Name, const std::string & Icon, const int mwidth, const int mheight)
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	name = Name;
+	nameString = g_Locale->getText(Name);
+	iconfile = Icon;
+	selected = -1;
+	width = mwidth;
+	if(width > (g_settings.screen_EndX - g_settings.screen_StartX))
+		width = g_settings.screen_EndX - g_settings.screen_StartX;
+	height = mheight; // height(menu_title)+10+...
+	wanted_height=mheight;
+	current_page=0;
+}
+
+CMenuWidget::CMenuWidget(const char* Name, const std::string & Icon, const int mwidth, const int mheight)
+{
+	frameBuffer = CFrameBuffer::getInstance();
+	nameString = Name;
 	iconfile = Icon;
 	selected = -1;
 	width = mwidth;
@@ -285,7 +310,7 @@ void CMenuWidget::hide()
 
 void CMenuWidget::paint()
 {
-	const char * l_name = g_Locale->getText(name);
+	const char * l_name = nameString.c_str();
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, l_name);
 
@@ -949,7 +974,7 @@ int CMenuSeparator::paint(bool selected)
 
 			frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT_PLUS_0);
 
-			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENT_PLUS_0, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
 
 			if (selected)
 			{

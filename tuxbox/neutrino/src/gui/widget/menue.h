@@ -1,4 +1,6 @@
 /*
+	$Id: menue.h,v 1.72 2007/02/25 21:11:03 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -293,7 +295,7 @@ class CMenuOptionLanguageChooser : public CMenuItem
 class CMenuWidget : public CMenuTarget
 {
 	protected:
-		neutrino_locale_t 	name;
+		std::string		nameString;
 		CFrameBuffer		*frameBuffer;
 		std::vector<CMenuItem*>	items;
 		std::vector<unsigned int> page_start;
@@ -312,14 +314,9 @@ class CMenuWidget : public CMenuTarget
 		virtual void paintItems();
 
 	public:
-		CMenuWidget()
-		{
-			name = NONEXISTANT_LOCALE;
-			iconfile="";
-			selected=-1;
-			iconOffset= 0;
-		};
+		CMenuWidget();
 		CMenuWidget(const neutrino_locale_t Name, const std::string & Icon = "", const int mwidth = 400, const int mheight = 576);
+		CMenuWidget(const char* Name, const std::string & Icon = "", const int mwidth = 400, const int mheight = 576);
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, const bool defaultselected = false);
