@@ -1,4 +1,6 @@
 /*
+	$Id: lcdd.h,v 1.33 2007/02/25 21:25:03 guenther Exp $
+
 	LCD-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -26,6 +28,21 @@
 #ifndef __lcdd__
 #define __lcdd__
 
+#ifndef LCD_UPDATE
+#define LCD_UPDATE 1
+#endif
+
+#ifdef LCD_UPDATE
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+// TODO Why is USE_FILE_OFFSET64 not defined, if file.h is included here????
+#ifndef __USE_FILE_OFFSET64
+#define __USE_FILE_OFFSET64 1
+#endif
+#include "driver/file.h"
+#endif // LCD_UPDATE
+
 #include <configfile.h>
 #include <pthread.h>
 
@@ -46,6 +63,12 @@ class CLCD
 			MODE_STANDBY,
 			MODE_MENU_UTF8,
 			MODE_AUDIO
+#ifdef LCD_UPDATE
+		,	MODE_FILEBROWSER,
+			MODE_PROGRESSBAR,
+			MODE_PROGRESSBAR2,
+			MODE_INFOBOX
+#endif // LCD_UPDATE
 		};
 		enum AUDIOMODES
 		{
@@ -144,6 +167,30 @@ class CLCD
 
 		void resume();
 		void pause();
+#ifdef LCD_UPDATE
+	private:
+		CFileList* m_fileList;
+		int m_fileListPos;
+		std::string m_fileListHeader;
+
+		std::string m_infoBoxText;
+		std::string m_infoBoxTitle;
+		int m_infoBoxTimer;   // for later use
+		bool m_infoBoxAutoNewline;
+		
+		bool m_progressShowEscape;
+		std::string  m_progressHeaderGlobal;
+		std::string  m_progressHeaderLocal;
+		int m_progressGlobal;
+		int m_progressLocal;
+	public:
+		MODES getMode(void){return mode;};
+
+		void showFilelist(int flist_pos = -1,CFileList* flist = NULL,const char * const mainDir=NULL);
+		void showInfoBox(const char * const title = NULL,const char * const text = NULL,int autoNewline = -1,int timer = -1);
+		void showProgressBar(int global = -1,const char * const text = NULL,int show_escape = -1,int timer = -1);
+		void showProgressBar2(int local = -1,const char * const text_local = NULL,int global = -1,const char * const text_global = NULL,int show_escape = -1);
+#endif // LCD_UPDATE
 };
 
 

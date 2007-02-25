@@ -1,4 +1,6 @@
 /*
+	$Id: lcdd.cpp,v 1.51 2007/02/25 21:27:44 guenther Exp $
+
 	LCD-Daemon  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -47,6 +49,18 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 CLCD::CLCD()
 	: configfile('\t')
 {
+#ifdef LCD_UPDATE
+	m_fileList = NULL;
+	m_fileListPos = 0;
+	m_fileListHeader = "";
+	m_infoBoxText = "";
+	m_infoBoxAutoNewline = 0;
+	m_progressShowEscape = 0;
+	m_progressHeaderGlobal = "";
+	m_progressHeaderLocal = "";
+	m_progressGlobal = 0;
+	m_progressLocal = 0;
+#endif // LCD_UPDATE
 }
 
 CLCD* CLCD::getInstance()
@@ -98,7 +112,7 @@ void CLCD::init(const char * fontfile, const char * fontname,
 
 	if (!lcdInit(fontfile, fontname, fontfile2, fontname2, fontfile3, fontname3 ))
 	{
-		printf("LCD-Init failed!\n");
+		printf("[lcdd] LCD-Init failed!\n");
 		return;
 	}
 
@@ -164,7 +178,7 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname,
 
 	if (!display.isAvailable())
 	{
-		printf("exit...(no lcd-support)\n");
+		printf("[lcdd] exit...(no lcd-support)\n");
 		return false;
 	}
 
@@ -595,6 +609,27 @@ void CLCD::setMode(const MODES m, const char * const title)
 		showTime();      /* "showclock = true;" implies that "showTime();" does a "displayUpdate();" */
 		                 /* "showTime()" clears the whole lcd in MODE_STANDBY                         */
 		break;
+#ifdef LCD_UPDATE
+	case MODE_FILEBROWSER:
+		showclock = true;
+		display.draw_fill_rect(-1, -1, 120, 64, CLCDDisplay::PIXEL_OFF); // clear lcd
+		showFilelist();
+		break;
+	case MODE_PROGRESSBAR:
+		showclock = false;
+		display.load_screen(&(background[BACKGROUND_SETUP]));
+		showProgressBar();
+		break;
+	case MODE_PROGRESSBAR2:
+		showclock = false;
+		display.load_screen(&(background[BACKGROUND_SETUP]));
+		showProgressBar2();
+		break;
+	case MODE_INFOBOX:
+		showclock = false;
+		showInfoBox();
+		break;
+#endif // LCD_UPDATE
 	}
 	wake_up();
 }
@@ -704,3 +739,316 @@ void CLCD::pause()
 {
 	display.pause();
 }
+
+
+#ifdef LCD_UPDATE
+/*****************************************************************************************/
+// showInfoBox
+/*****************************************************************************************/
+#define LCD_WIDTH 120
+#define LCD_HEIGTH 64
+
+#define EPG_INFO_FONT_HEIGHT 9
+#define EPG_INFO_SHADOW_WIDTH 1
+#define EPG_INFO_LINE_WIDTH 1
+#define EPG_INFO_BORDER_WIDTH 2
+
+#define EPG_INFO_WINDOW_POS 4
+#define EPG_INFO_LINE_POS 	EPG_INFO_WINDOW_POS + EPG_INFO_SHADOW_WIDTH
+#define EPG_INFO_BORDER_POS EPG_INFO_WINDOW_POS + EPG_INFO_SHADOW_WIDTH + EPG_INFO_LINE_WIDTH
+#define EPG_INFO_TEXT_POS 	EPG_INFO_WINDOW_POS + EPG_INFO_SHADOW_WIDTH + EPG_INFO_LINE_WIDTH + EPG_INFO_BORDER_WIDTH
+
+#define EPG_INFO_TEXT_WIDTH LCD_WIDTH - (2*EPG_INFO_WINDOW_POS)
+
+// timer 0: OFF, timer>0 time to show in seconds,  timer>=999 endless
+void CLCD::showInfoBox(const char * const title, const char * const text ,int autoNewline,int timer)
+{
+	//printf("[lcdd] Info: \n");
+	if(text != NULL)
+		m_infoBoxText = text;
+	if(text != NULL)
+		m_infoBoxTitle = title;
+	if(timer != -1)
+		m_infoBoxTimer = timer;
+	if(autoNewline != -1)
+		m_infoBoxAutoNewline = autoNewline;
+
+	//printf("[lcdd] Info: %s,%s,%d,%d\n",m_infoBoxTitle.c_str(),m_infoBoxText.c_str(),m_infoBoxAutoNewline,m_infoBoxTimer);
+	if( mode == MODE_INFOBOX &&
+	    !m_infoBoxText.empty())
+	{
+		// paint empty box
+		display.draw_fill_rect (EPG_INFO_WINDOW_POS, EPG_INFO_WINDOW_POS, 	LCD_WIDTH-EPG_INFO_WINDOW_POS+1, 	  LCD_HEIGTH-EPG_INFO_WINDOW_POS+1,    CLCDDisplay::PIXEL_OFF);
+		display.draw_fill_rect (EPG_INFO_LINE_POS, 	 EPG_INFO_LINE_POS, 	LCD_WIDTH-EPG_INFO_LINE_POS-1, 	  LCD_HEIGTH-EPG_INFO_LINE_POS-1, 	 CLCDDisplay::PIXEL_ON);
+		display.draw_fill_rect (EPG_INFO_BORDER_POS, EPG_INFO_BORDER_POS, 	LCD_WIDTH-EPG_INFO_BORDER_POS-3,  LCD_HEIGTH-EPG_INFO_BORDER_POS-3, CLCDDisplay::PIXEL_OFF);
+	
+		// paint title
+		if(!m_infoBoxTitle.empty())
+		{
+			int width = fonts.menu->getRenderWidth(m_infoBoxTitle.c_str(),true);
+			if(width > 100)
+				width = 100;
+			int start_pos = (120-width) /2;
+			display.draw_fill_rect (start_pos, EPG_INFO_WINDOW_POS-4, 	start_pos+width+5, 	  EPG_INFO_WINDOW_POS+10,    CLCDDisplay::PIXEL_OFF);
+			fonts.menu->RenderString(start_pos+4,EPG_INFO_WINDOW_POS+5, width+5, m_infoBoxTitle.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+		}
+
+		// paint info 
+		std::string text_line;
+		int line;
+		int pos = 0;
+		int length = m_infoBoxText.size();
+		for(line = 0; line < 5; line++)
+		{
+			text_line.clear();
+			while ( m_infoBoxText[pos] != '\n' &&
+					((fonts.menu->getRenderWidth(text_line.c_str(), true) < EPG_INFO_TEXT_WIDTH-10) || !m_infoBoxAutoNewline )&& 
+					(pos < length)) // UTF-8
+			{
+				if ( m_infoBoxText[pos] >= ' ' && m_infoBoxText[pos] <= '~' )  // any char between ASCII(32) and ASCII (126)
+					text_line += m_infoBoxText[pos];
+				pos++;
+			} 
+			//printf("[lcdd] line %d:'%s'\r\n",line,text_line.c_str());
+			fonts.menu->RenderString(EPG_INFO_TEXT_POS+1,EPG_INFO_TEXT_POS+(line*EPG_INFO_FONT_HEIGHT)+EPG_INFO_FONT_HEIGHT+3, EPG_INFO_TEXT_WIDTH, text_line.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+			if ( m_infoBoxText[pos] == '\n' )
+				pos++; // remove new line
+		}
+		displayUpdate();
+	}
+}
+
+/*****************************************************************************************/
+//showFilelist
+/*****************************************************************************************/
+#define BAR_POS_X 		114
+#define BAR_POS_Y 		 10
+#define BAR_POS_WIDTH 	  6
+#define BAR_POS_HEIGTH 	 40
+
+void CLCD::showFilelist(int flist_pos,CFileList* flist,const char * const mainDir)
+{
+	//printf("[lcdd] FileList\n");
+	if(flist != NULL)
+		m_fileList = flist;
+	if(flist_pos != -1)
+		m_fileListPos = flist_pos;
+	if(mainDir != NULL)
+		m_fileListHeader = mainDir;
+		
+	if (mode == MODE_FILEBROWSER && 
+	    m_fileList != NULL &&
+	    m_fileList->size() > 0)
+	{    
+		
+		printf("[lcdd] FileList:OK\n");
+		int size = m_fileList->size();
+		
+		display.draw_fill_rect(-1, -1, 120, 52, CLCDDisplay::PIXEL_OFF); // clear lcd
+		
+		if(m_fileListPos > size)
+			m_fileListPos = size-1;
+		
+		int width = fonts.menu->getRenderWidth(m_fileListHeader.c_str(), true); 
+		if(width>110) 
+			width=110;
+		fonts.menu->RenderString((120-width)/2, 11, width+5, m_fileListHeader.c_str(), CLCDDisplay::PIXEL_ON);
+		
+		//printf("list%d,%d\r\n",m_fileListPos,(*m_fileList)[m_fileListPos].Marked);
+		std::string text;
+		int marked;
+		if(m_fileListPos >  0)
+		{
+			if ( (*m_fileList)[m_fileListPos-1].Marked == false )
+			{
+				text ="";
+				marked = CLCDDisplay::PIXEL_ON;
+			}
+			else
+			{
+				text ="*";
+				marked = CLCDDisplay::PIXEL_INV;
+			}
+			text += (*m_fileList)[m_fileListPos-1].getFileName();
+			fonts.menu->RenderString(1, 12+12, BAR_POS_X+5, text.c_str(), marked);
+		}
+		if(m_fileListPos <  size)
+		{
+			if ((*m_fileList)[m_fileListPos-0].Marked == false )
+			{
+				text ="";
+				marked = CLCDDisplay::PIXEL_ON;
+			}
+			else
+			{
+				text ="*";
+				marked = CLCDDisplay::PIXEL_INV;
+			}
+			text += (*m_fileList)[m_fileListPos-0].getFileName();
+			fonts.time->RenderString(1, 12+12+14, BAR_POS_X+5, text.c_str(), marked);
+		}
+		if(m_fileListPos <  size-1)
+		{
+			if ((*m_fileList)[m_fileListPos+1].Marked == false )
+			{
+				text ="";
+				marked = CLCDDisplay::PIXEL_ON;
+			}
+			else
+			{
+				text ="*";
+				marked = CLCDDisplay::PIXEL_INV;
+			}
+			text += (*m_fileList)[m_fileListPos+1].getFileName();
+			fonts.menu->RenderString(1, 12+12+14+12, BAR_POS_X+5, text.c_str(), marked);
+		}
+		// paint marker
+		int pages = (((size-1)/3 )+1);
+		int marker_length = (BAR_POS_HEIGTH-2) / pages;
+		if(marker_length <4)
+			marker_length=4;// not smaller than 4 pixel
+		int marker_offset = ((BAR_POS_HEIGTH-2-marker_length) * m_fileListPos) /size  ;
+		//printf("%d,%d,%d\r\n",pages,marker_length,marker_offset);
+		
+		display.draw_fill_rect (BAR_POS_X,   BAR_POS_Y,   BAR_POS_X+BAR_POS_WIDTH,   BAR_POS_Y+BAR_POS_HEIGTH,   CLCDDisplay::PIXEL_ON);
+		display.draw_fill_rect (BAR_POS_X+1, BAR_POS_Y+1, BAR_POS_X+BAR_POS_WIDTH-1, BAR_POS_Y+BAR_POS_HEIGTH-1, CLCDDisplay::PIXEL_OFF);
+		display.draw_fill_rect (BAR_POS_X+1, BAR_POS_Y+1+marker_offset, BAR_POS_X+BAR_POS_WIDTH-1, BAR_POS_Y+1+marker_offset+marker_length, CLCDDisplay::PIXEL_ON);
+	
+		displayUpdate();
+	}
+}
+
+/*****************************************************************************************/
+//showProgressBar
+/*****************************************************************************************/
+#define PROG_GLOB_POS_X 10
+#define PROG_GLOB_POS_Y 30
+#define PROG_GLOB_POS_WIDTH 100
+#define PROG_GLOB_POS_HEIGTH 20
+void CLCD::showProgressBar(int global, const char * const text,int show_escape,int timer)
+{
+	if(text != NULL)
+		m_progressHeaderGlobal = text;
+		
+	if(timer != -1)
+		m_infoBoxTimer = timer;
+		
+	if(global >= 0)
+	{
+		if(global > 100)
+			m_progressGlobal =100;
+		else
+			m_progressGlobal = global;
+	}
+	
+	if(show_escape != -1)
+		m_progressShowEscape = show_escape;
+
+	if (mode == MODE_PROGRESSBAR)
+	{
+		//printf("[lcdd] prog:%s,%d,%d\n",m_progressHeaderGlobal.c_str(),m_progressGlobal,m_progressShowEscape);
+		// Clear Display
+		display.draw_fill_rect (0,12,120,64, CLCDDisplay::PIXEL_OFF);
+	
+		// paint progress header 
+		int width = fonts.menu->getRenderWidth(m_progressHeaderGlobal.c_str(),true);
+		if(width > 100)
+			width = 100;
+		int start_pos = (120-width) /2;
+		fonts.menu->RenderString(start_pos, 12+12, width+10, m_progressHeaderGlobal.c_str(), CLCDDisplay::PIXEL_ON,0,true);
+	
+		// paint global bar 
+		int marker_length = (PROG_GLOB_POS_WIDTH * m_progressGlobal)/100;
+		
+		display.draw_fill_rect (PROG_GLOB_POS_X,   				 PROG_GLOB_POS_Y,   PROG_GLOB_POS_X+PROG_GLOB_POS_WIDTH,   PROG_GLOB_POS_Y+PROG_GLOB_POS_HEIGTH,   CLCDDisplay::PIXEL_ON);
+		display.draw_fill_rect (PROG_GLOB_POS_X+1+marker_length, PROG_GLOB_POS_Y+1, PROG_GLOB_POS_X+PROG_GLOB_POS_WIDTH-1, PROG_GLOB_POS_Y+PROG_GLOB_POS_HEIGTH-1, CLCDDisplay::PIXEL_OFF);
+	
+		// paint foot 
+		if(m_progressShowEscape  == true)
+		{
+			fonts.menu->RenderString(90, 64, 40, "Home", CLCDDisplay::PIXEL_ON);
+		}
+		displayUpdate();
+	}
+}
+
+/*****************************************************************************************/
+// showProgressBar2
+/*****************************************************************************************/
+#define PROG2_GLOB_POS_X 10
+#define PROG2_GLOB_POS_Y 24
+#define PROG2_GLOB_POS_WIDTH 100
+#define PROG2_GLOB_POS_HEIGTH 10
+
+#define PROG2_LOCAL_POS_X 10
+#define PROG2_LOCAL_POS_Y 37
+#define PROG2_LOCAL_POS_WIDTH PROG2_GLOB_POS_WIDTH
+#define PROG2_LOCAL_POS_HEIGTH PROG2_GLOB_POS_HEIGTH
+
+void CLCD::showProgressBar2(int local,const char * const text_local ,int global ,const char * const text_global ,int show_escape )
+{
+	//printf("[lcdd] prog2\n");
+	if(text_local != NULL)
+		m_progressHeaderLocal = text_local;
+		
+	if(text_global != NULL)
+		m_progressHeaderGlobal = text_global;
+		
+	if(global >= 0)
+	{
+		if(global > 100)
+			m_progressGlobal =100;
+		else
+			m_progressGlobal = global;
+	}
+	if(local >= 0)
+	{
+		if(local > 100)
+			m_progressLocal =100;
+		else
+			m_progressLocal = local;
+	}
+	if(show_escape != -1)
+		m_progressShowEscape = show_escape;
+
+	if (mode == MODE_PROGRESSBAR2)
+	{
+	
+		//printf("[lcdd] prog2:%s,%d,%d\n",m_progressHeaderGlobal.c_str(),m_progressGlobal,m_progressShowEscape);
+		// Clear Display
+		display.draw_fill_rect (0,12,120,64, CLCDDisplay::PIXEL_OFF);
+	
+		// paint  global header 
+		int width = fonts.menu->getRenderWidth(m_progressHeaderGlobal.c_str(),true);
+		if(width > 100)
+			width = 100;
+		int start_pos = (120-width) /2;
+		fonts.menu->RenderString(start_pos, PROG2_GLOB_POS_Y-3, width+10, m_progressHeaderGlobal.c_str(), CLCDDisplay::PIXEL_ON,0,true);
+	
+		// paint global bar 
+		int marker_length = (PROG2_GLOB_POS_WIDTH * m_progressGlobal)/100;
+		
+		display.draw_fill_rect (PROG2_GLOB_POS_X,   				PROG2_GLOB_POS_Y,   PROG2_GLOB_POS_X+PROG2_GLOB_POS_WIDTH,   PROG2_GLOB_POS_Y+PROG2_GLOB_POS_HEIGTH,   CLCDDisplay::PIXEL_ON);
+		display.draw_fill_rect (PROG2_GLOB_POS_X+1+marker_length, PROG2_GLOB_POS_Y+1, PROG2_GLOB_POS_X+PROG2_GLOB_POS_WIDTH-1, PROG2_GLOB_POS_Y+PROG2_GLOB_POS_HEIGTH-1, CLCDDisplay::PIXEL_OFF);
+	
+		// paint  local header 
+		width = fonts.menu->getRenderWidth(m_progressHeaderLocal.c_str(),true);
+		if(width > 100)
+			width = 100;
+		start_pos = (120-width) /2;
+		fonts.menu->RenderString(start_pos, PROG2_LOCAL_POS_Y + PROG2_LOCAL_POS_HEIGTH +10 , width+10, m_progressHeaderLocal.c_str(), CLCDDisplay::PIXEL_ON,0,true);
+		// paint local bar 
+		marker_length = (PROG2_LOCAL_POS_WIDTH * m_progressLocal)/100;
+		
+		display.draw_fill_rect (PROG2_LOCAL_POS_X,   				PROG2_LOCAL_POS_Y,   PROG2_LOCAL_POS_X+PROG2_LOCAL_POS_WIDTH,   PROG2_LOCAL_POS_Y+PROG2_LOCAL_POS_HEIGTH,   CLCDDisplay::PIXEL_ON);
+		display.draw_fill_rect (PROG2_LOCAL_POS_X+1+marker_length,   PROG2_LOCAL_POS_Y+1, PROG2_LOCAL_POS_X+PROG2_LOCAL_POS_WIDTH-1, PROG2_LOCAL_POS_Y+PROG2_LOCAL_POS_HEIGTH-1, CLCDDisplay::PIXEL_OFF);
+		// paint foot 
+		if(m_progressShowEscape  == true)
+		{
+			fonts.menu->RenderString(90, 64, 40, "Home", CLCDDisplay::PIXEL_ON);
+		}
+		displayUpdate();
+	}
+}
+/*****************************************************************************************/
+#endif // LCD_UPDATE
