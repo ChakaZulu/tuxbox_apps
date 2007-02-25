@@ -493,6 +493,7 @@ lcdmenu.statusline.both Lautstärke / Fortschritt
 lcdmenu.statusline.playtime Sendungsfortschritt
 lcdmenu.statusline.volume Lautstärke
 mainmenu.audioplayer Audioplayer
+mainmenu.clearsectionsd EPG neu laden
 mainmenu.games Spiele
 mainmenu.head Hauptmenü
 mainmenu.movieplayer Movieplayer
@@ -1089,6 +1090,16 @@ ucodecheck.cam-alpha Cam-Alpha
 ucodecheck.head UCode Überprüfung
 ucodecheck.ucode UCode
 ucodes.failure Achtung, die µCodes wurden NICHT gefunden!\n\nBitte per FTP (oder DBox-BootManager)\nuploaden, und die DBox neu starten!
+usermenu.button_blue Benutzermenü 'blau'
+usermenu.button_green Benutzermenü 'grün'
+usermenu.button_red Benutzermenü 'rot'
+usermenu.button_yellow Benutzermenü 'gelb'
+usermenu.head Benutzermenü
+usermenu.item_bar ---- Trennung ----
+usermenu.item_epg_misc EPG Funktionen
+usermenu.item_none  
+usermenu.item_vtxt Videotext
+usermenu.name Name
 videomenu.csync Sync.-Korrektur
 videomenu.head Video-Einstellungen
 videomenu.osd OSD

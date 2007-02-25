@@ -1,4 +1,6 @@
 /*
+	$Id: infoviewer.cpp,v 1.203 2007/02/25 21:11:41 guenther Exp $
+
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -46,6 +48,7 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #include <neutrino.h>
 
 #include <string>
+#include <system/settings.h>
 
 #include <sys/timeb.h>
 #include <time.h>
@@ -291,9 +294,19 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 
 		frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS_BACKGROUND);
 
-		// blau
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, BoxEndX- ICON_OFFSET- ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2 + 2), g_Locale->getText(LOCALE_INFOVIEWER_STREAMINFO), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+		// show blue button
+		// USERMENU
+		const char* txt = NULL;
+		if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_BLUE].empty() )
+			txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_BLUE].c_str();
+		else	
+			txt = g_Locale->getText(LOCALE_INFOVIEWER_STREAMINFO);
+
+		if ( txt != NULL )
+		{
+			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, BoxEndX- ICON_OFFSET- ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2 + 2), txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+		}
 
 		showButton_Audio();
 		showButton_SubServices();
@@ -617,10 +630,18 @@ void CInfoViewer::showSubchan()
 		frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT, 0, subChannelNameIsUTF); // UTF-8
 
-		if ( g_RemoteControl->director_mode )
+		// show yellow button
+		// USERMENU
+		const char* txt = NULL;
+		if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].empty() )
+			txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].c_str();
+		else if(g_RemoteControl->director_mode)	
+			txt = g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE);
+
+		if ( txt != NULL )
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+ 8, y+ dy- 20 );
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE), COL_MENUCONTENT, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, txt, COL_MENUCONTENT, 0, true); // UTF-8
 		}
 
 		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( 2 );
@@ -836,12 +857,19 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 void CInfoViewer::showButton_SubServices()
 {
-	if (!(g_RemoteControl->subChannels.empty()))
+	// show yellow button
+	// USERMENU
+	const char* txt = NULL;
+	if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].empty() )
+		txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].c_str();
+	else if( !(g_RemoteControl->subChannels.empty()) )	
+		txt = g_Locale->getText((g_RemoteControl->are_subchannels) ? LOCALE_INFOVIEWER_SUBSERVICE : LOCALE_INFOVIEWER_SELECTTIME);
+
+	if ( txt != NULL )
 	{
 		// yellow button for subservices / NVODs
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, BoxEndX- ICON_OFFSET- 2* ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2 + 2), g_Locale->getText((g_RemoteControl->are_subchannels) ? LOCALE_INFOVIEWER_SUBSERVICE : LOCALE_INFOVIEWER_SELECTTIME), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2 + 2), txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	}
 }
 
@@ -951,10 +979,18 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 		else
 			frameBuffer->paintBackgroundBoxRel(BoxEndX-114, posy,   2+100+2, height2);
 
-			if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_anything )
+			// show red button
+			// USERMENU
+			const char* txt = NULL;
+			if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_RED].empty() )
+				txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_RED].c_str();
+			else if( info_CurrentNext.flags & CSectionsdClient::epgflags::has_anything )	
+				txt = g_Locale->getText(LOCALE_INFOVIEWER_EVENTLIST);
+	
+			if ( txt != NULL )
 			{
 				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, BoxEndX- ICON_OFFSET- 4* ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2 + 2) + 8, g_Locale->getText(LOCALE_INFOVIEWER_EVENTLIST), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2 + 2) + 8, txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 			}
 		}
 
@@ -1051,10 +1087,19 @@ void CInfoViewer::showButton_Audio()
 	// green, in case of several APIDs
 	// -- always show Audio Option, due to audio option restructuring (2005-08-31 rasc)
 	uint count = g_RemoteControl->current_PIDs.APIDs.size();
-	if ( g_settings.audio_left_right_selectable || count > 1 )
+
+	// show green button
+	// USERMENU
+	const char* txt = NULL;
+	if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_GREEN].empty() )
+		txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_GREEN].c_str();
+	else if( g_settings.audio_left_right_selectable || count > 1 )	
+		txt = g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES);
+
+	if ( txt != NULL )
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, BoxEndX- ICON_OFFSET- 3* ButtonWidth + 2 + 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2) + 8, BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2 + 2), g_Locale->getText(LOCALE_INFOVIEWER_LANGUAGES), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2) + 8, BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2 + 2), txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	};
 
 	const char * dd_icon;

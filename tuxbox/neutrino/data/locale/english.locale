@@ -493,6 +493,7 @@ lcdmenu.statusline.both volume / playtime
 lcdmenu.statusline.playtime playtime
 lcdmenu.statusline.volume volume
 mainmenu.audioplayer Audioplayer
+mainmenu.clearsectionsd Clear EPG Cache
 mainmenu.games Games
 mainmenu.head Main Menu
 mainmenu.movieplayer Movieplayer
@@ -1089,6 +1090,16 @@ ucodecheck.cam-alpha Cam-Alpha
 ucodecheck.head UCode check
 ucodecheck.ucode UCode
 ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via FTP (or DBox-BootManager),\nthen restart your DBox!
+usermenu.button_blue User menu blue
+usermenu.button_green User menu green
+usermenu.button_red User menu red
+usermenu.button_yellow User menu yellow
+usermenu.head User menu 
+usermenu.item_bar ---- Boarder ----
+usermenu.item_epg_misc EPG functions
+usermenu.item_none   
+usermenu.item_vtxt Videotext
+usermenu.name Name
 videomenu.csync sync correction
 videomenu.head Video Settings
 videomenu.osd OSD
