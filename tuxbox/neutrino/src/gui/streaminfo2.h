@@ -38,6 +38,8 @@ class CStreamInfo2
 		CFrameBuffer	*frameBuffer;
 		int x;
 		int y;
+		int old_x;
+		int old_y;
 		int width;
 		int height;
 		int hheight,iheight,sheight; 	// head/info/small font height
@@ -72,29 +74,31 @@ class CStreamInfo2
 		BitrateCalculator *brc;
 
 		struct feSignal {
-			unsigned long	ber, old_ber;
-			unsigned long	sig, old_sig;
-			unsigned long	snr, old_snr;
+			unsigned long	ber, old_ber, max_ber, min_ber;
+			unsigned long	sig, old_sig, max_sig, min_sig;
+			unsigned long	snr, old_snr, max_snr, min_snr;
 			// int	has_lock;
 			// int	has_signal;
 		} signal;
-
+		
+		struct bitrate {
+            unsigned int short_average, max_short_average, min_short_average;
+        } rate;
 
 		int  doSignalStrengthLoop();
 		void paint(int mode);
 		void paint_pig(int x, int y, int w, int h);
 		void paint_techinfo(int x, int y);
-		void paint_bitrate(unsigned long bitrate);
+		void paint_bitrate(unsigned int bitrate);
 		void paint_signal_fe_box(int x, int y, int w, int h);
-		void paint_signal_fe(unsigned long bitrate, struct feSignal s);
+		void paint_signal_fe(struct bitrate rate, struct feSignal s);
 		int  y_signal_fe(unsigned long value, unsigned long max_range, int max_y);
-		void SignalRenderStr (unsigned long value, int x, int y);
+		void SignalRenderStr (unsigned int value, int x, int y);
 		void hide();
 	public:
 		CStreamInfo2();
 		 ~CStreamInfo2();
 		int exec();
-
 };
 class CStreamInfo2Handler : public CMenuTarget
 {

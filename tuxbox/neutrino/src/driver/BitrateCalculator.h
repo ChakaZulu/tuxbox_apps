@@ -50,6 +50,8 @@
 #define TS_SYNC_BYTE		0x47
 #define TS_BUF_SIZE		(TS_LEN * 2048)		/* fix dmx buffer size */
 
+#define AVERAGE_OVER_X_MEASUREMENTS   10
+
 #define DMXDEV	"/dev/dvb/adapter0/demux0"
 #define DVRDEV	"/dev/dvb/adapter0/dvr0"
 
@@ -61,22 +63,22 @@ class BitrateCalculator
 		struct pollfd			pfd;
 		struct dmx_pes_filter_params	flt;
 		int 				dmxfd;
-		struct timeval 			tv,last_tv, first_tv, last_avg_tv;
-		unsigned long long		b_total;
+		struct timeval 			tv,last_tv, first_tv;
 		long				b;
 		long				packets_bad;
-		long				packets_total;
+        unsigned int        buffer[AVERAGE_OVER_X_MEASUREMENTS];
+        unsigned int        buffer2[240];
+        int                 counter;
+        int                 counter2;
+        unsigned int        sum;
+        unsigned int        sum2;
 		u_char 	 			buf[TS_BUF_SIZE];
-
-		struct {				// simple struct for storing last average bandwidth
-			unsigned long  kb_sec;
-			unsigned long  b_sec;
-		} last_avg;
+		bool                first_round;
+		bool                first_round2;
 
 	public:
 		BitrateCalculator(int inPid);
-		unsigned long calc(void);
-		unsigned long getAverage(void);
+		unsigned int calc(unsigned int &long_average);
 		int sync_ts (u_char *buf, int len);
 		int ts_error_count (u_char *buf, int len);
 		~BitrateCalculator();

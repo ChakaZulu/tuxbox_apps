@@ -71,6 +71,9 @@ CStreamInfo2::CStreamInfo2()
 
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	
+	old_x = 0;
+	old_y = 0;
 
 	frameBuffer->paletteSetColor(COL_WHITE,   0x00FFFFFF, 0);
 	frameBuffer->paletteSetColor(COL_RED,     0x00FF0000, 0);
@@ -83,6 +86,18 @@ CStreamInfo2::CStreamInfo2()
 
 	sigBox_pos = 0;
 	paint_mode = 0;
+	
+	signal.max_sig = 0;
+	signal.max_snr = 0;
+    signal.max_ber = 0;
+    
+    signal.min_sig = 100000;
+	signal.min_snr = 100000;
+    signal.min_ber = 100000;
+    
+    rate.short_average = 0;
+    rate.max_short_average = 0;
+    rate.min_short_average = 20000;
 	
 	brc = 0;
 	int mode = g_Zapit->getMode();
@@ -136,7 +151,7 @@ int CStreamInfo2::exec()
 	return res;
 }
 
-void CStreamInfo2::paint_bitrate(unsigned long bitrate) {
+void CStreamInfo2::paint_bitrate(unsigned int bitrate) {
 	char buf[100];
 	int ypos = y+5;
 	int xpos = x+10;
@@ -146,8 +161,8 @@ void CStreamInfo2::paint_bitrate(unsigned long bitrate) {
 	ypos += (iheight >>1);
 	ypos += iheight;
 	ypos += iheight;
-	sprintf((char*) buf, "%s: %5lu kbit/s", g_Locale->getText(LOCALE_STREAMINFO_BITRATE), bitrate);
-	frameBuffer->paintBoxRel(xpos, ypos-iheight+1, 350, iheight-1, COL_MENUHEAD_PLUS_0);
+	sprintf((char*) buf, "%s: %5u kbit/s", g_Locale->getText(LOCALE_STREAMINFO_BITRATE), bitrate);
+	frameBuffer->paintBoxRel(xpos, ypos-iheight+1, 300, iheight-1, COL_MENUHEAD_PLUS_0);
 	g_Font[font_info]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
@@ -156,6 +171,7 @@ int CStreamInfo2::doSignalStrengthLoop ()
 	neutrino_msg_t      msg;
 	CZapitClient::responseFESignal s;
 	int i = 0;
+	unsigned int long_average = 0;
 
 	while (1) {
 		neutrino_msg_data_t data;
@@ -170,19 +186,46 @@ int CStreamInfo2::doSignalStrengthLoop ()
 		signal.snr = s.snr & 0xFFFF;
 		signal.ber = (s.ber < 0x3FFFF) ? s.ber : 0x3FFFF;  // max. Limit
 
-		if (brc) { 
-			if (paint_mode == 0) {
-				if (i++>=9) {
-					paint_bitrate(brc->getAverage());
-					i=0;
-				}
-			}
+		if (brc) {
+            rate.short_average = brc->calc(long_average);
+        }
+        if (paint_mode == 0 && i == AVERAGE_OVER_X_MEASUREMENTS + 5) {
+            paint_bitrate(long_average);
 		}
-		paint_signal_fe(brc->calc(), signal);
-
-		signal.old_sig = signal.sig;
-		signal.old_snr = signal.snr;
-		signal.old_ber = signal.ber;
+        if (i == AVERAGE_OVER_X_MEASUREMENTS + 5) {
+            if (rate.max_short_average < rate.short_average) {
+                rate.max_short_average = rate.short_average;
+            }
+            if (rate.min_short_average > rate.short_average) {
+                rate.min_short_average = rate.short_average;
+            }
+            paint_signal_fe(rate, signal);
+            signal.old_sig = signal.sig;
+            signal.old_snr = signal.snr;
+            signal.old_ber = signal.ber;
+        } else {
+            i++;
+        }
+		
+		if (signal.max_ber < signal.ber) {
+            signal.max_ber = signal.ber;
+        }
+        if (signal.max_sig < signal.sig) {
+            signal.max_sig = signal.sig;
+        }
+        if (signal.max_snr < signal.snr) {
+            signal.max_snr = signal.snr;
+        }
+		
+		if (signal.min_ber > signal.ber) {
+            signal.min_ber = signal.ber;
+        }
+        if (signal.min_sig > signal.sig) {
+            signal.min_sig = signal.sig;
+        }
+        if (signal.min_snr > signal.snr) {
+            signal.min_snr = signal.snr;
+        }
 
 		
 
@@ -232,7 +275,7 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	sigBox_h = h-iheight*3;
 	frameBuffer->paintBoxRel(sigBox_x,sigBox_y,sigBox_w,sigBox_h, COL_BLACK);
 
-	y1  = y + h;
+	y1  = y + h + iheight + iheight;
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+2+xd*0 , y1- 20 );
 	g_Font[font_small]->RenderString(x+25+xd*0, y1, 50, "BER", COL_MENUCONTENT, 0, true);
@@ -245,6 +288,9 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+2+xd*3  , y1- 20 );
 	g_Font[font_small]->RenderString(x+25+xd*3, y1, 50, "Bitrate", COL_MENUCONTENT, 0, true);
+	
+	g_Font[font_small]->RenderString(x+25+xd*3+45, y1 - iheight - iheight - iheight, 50, "max", COL_MENUCONTENT, 0, true);
+	g_Font[font_small]->RenderString(x+25+xd*3+45, y1 - iheight, 50, "min", COL_MENUCONTENT, 0, true);
 
 	sig_text_y = y1 - iheight;
 	sig_text_ber_x = x+05+xd*0;
@@ -261,12 +307,10 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 		signal.old_snr = 1;
 		signal.old_ber = 1;
 
-		struct feSignal s = {0,0,  0,0,   0,0 };
-		paint_signal_fe(0, s);
 	}
 }
 
-void CStreamInfo2::paint_signal_fe(unsigned long bitrate, struct feSignal  s)
+void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 {
 	int   x_now = sigBox_pos;
 	int   y = sig_text_y;
@@ -277,27 +321,41 @@ void CStreamInfo2::paint_signal_fe(unsigned long bitrate, struct feSignal  s)
 	frameBuffer->paintVLine(sigBox_x+sigBox_pos, sigBox_y, sigBox_y+sigBox_h, COL_WHITE);
 	frameBuffer->paintVLine(sigBox_x+x_now, sigBox_y, sigBox_y+sigBox_h+1, COL_BLACK);
 
-	SignalRenderStr (bitrate,sig_text_rate_x,y);
-	yd = y_signal_fe (bitrate, 10000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_YELLOW);
-	
+	SignalRenderStr (rate.short_average,sig_text_rate_x,y - iheight);
+	SignalRenderStr (rate.max_short_average,sig_text_rate_x,y - iheight - iheight);
+	SignalRenderStr (rate.min_short_average,sig_text_rate_x,y);
+	yd = y_signal_fe (rate.short_average, 12000, sigBox_h);
+    if ((old_x == 0 && old_y == 0) || sigBox_pos == 1) {
+        old_x = sigBox_x+x_now;
+        old_y = sigBox_y+sigBox_h-yd;
+    } else {
+        frameBuffer->paintLine(old_x, old_y, sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_YELLOW);
+        old_x = sigBox_x+x_now;
+        old_y = sigBox_y+sigBox_h-yd;
+    }
 	
 	if (s.ber != s.old_ber) {
-		SignalRenderStr (s.ber, sig_text_ber_x,y);
+		SignalRenderStr (s.ber, sig_text_ber_x,y - iheight);
+		SignalRenderStr (s.max_ber, sig_text_ber_x,y - iheight - iheight);
+		SignalRenderStr (s.min_ber, sig_text_ber_x,y);
 	}
 	yd = y_signal_fe (s.ber, 4000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_RED);
 
 
 	if (s.sig != s.old_sig) {
-		SignalRenderStr (s.sig, sig_text_sig_x,y);
+		SignalRenderStr (s.sig, sig_text_sig_x,y - iheight);
+        SignalRenderStr (s.max_sig, sig_text_sig_x,y - iheight - iheight);
+		SignalRenderStr (s.min_sig, sig_text_sig_x,y);
 	}
 	yd = y_signal_fe (s.sig, 65000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_GREEN);
 
 
 	if (s.snr != s.old_snr) {
-		SignalRenderStr (s.snr, sig_text_snr_x,y);
+		SignalRenderStr (s.snr, sig_text_snr_x,y - iheight);
+        SignalRenderStr (s.max_snr, sig_text_snr_x,y - iheight - iheight);
+        SignalRenderStr (s.min_snr, sig_text_snr_x,y);
 	}
 	yd = y_signal_fe (s.snr, 65000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_BLUE);
@@ -317,12 +375,12 @@ int CStreamInfo2::y_signal_fe(unsigned long value, unsigned long max_value, int 
 	return (int) l;
 }
 
-void CStreamInfo2::SignalRenderStr (unsigned long value, int x, int y)
+void CStreamInfo2::SignalRenderStr (unsigned int value, int x, int y)
 {
 	char str[30];
 
 	frameBuffer->paintBoxRel(x, y-iheight+1, 60, iheight-1, COL_MENUHEAD_PLUS_0);
-	sprintf(str,"%6lu",value);
+	sprintf(str,"%6u",value);
 	g_Font[font_small]->RenderString(x, y, 60, str, COL_MENUCONTENT, 0, true);
 }
 
@@ -362,7 +420,7 @@ void CStreamInfo2::paint(int mode)
 		frameBuffer->paintBoxRel(0, 0, max_width, max_height, COL_MENUHEAD_PLUS_0);
 
 		// -- paint large signal graph
-		paint_signal_fe_box ( x,  y, width, height);
+		paint_signal_fe_box ( x,  y, width, height - 60);
 	}
 
 }

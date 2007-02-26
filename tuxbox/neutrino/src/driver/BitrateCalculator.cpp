@@ -81,22 +81,17 @@ BitrateCalculator::BitrateCalculator(int inPid)
 	gettimeofday (&first_tv, NULL);
 	last_tv.tv_sec	=  first_tv.tv_sec;
 	last_tv.tv_usec	=  first_tv.tv_usec;
-	last_avg_tv	= first_tv;
-	b_total		= 0;
-	packets_total	= 0;
  	packets_bad	= 0;
+    counter = 0;
+    counter2 = 0;
+    sum = 0;
+    sum2 = 0;
+    first_round = true;
+    first_round2 = true;
 }
 
 BitrateCalculator::~BitrateCalculator(void)
 {
-	// -- packets stats
-	printf("PID: %u (0x%04x)\n", pid, pid);
-	printf("   bad/total packets: %ld/%ld (= %1.1Lf%%)\n",
-		packets_bad, packets_total,
-                (((long double) packets_bad)*100)/packets_total );
-	printf("   Avrg: %5lu.%03lu kbit/s\n",
-		last_avg.kb_sec, last_avg.b_sec);
-
 	if (ioctl(dmxfd, DMX_STOP) < 0) {
 		printf("error at DMX_STOP");
 	}
@@ -104,37 +99,13 @@ BitrateCalculator::~BitrateCalculator(void)
 	close(pfd.fd);
 }
 
-unsigned long BitrateCalculator::getAverage(void)
-{
-	unsigned long long avgbit_s = 0;
-	long  d_tim_ms;
-
-	gettimeofday (&tv, NULL);
-	// -- average bandwidth
-	d_tim_ms = delta_time_ms (&tv, &last_avg_tv);
-	if (d_tim_ms <= 0) d_tim_ms = 1;   //  ignore usecs 
-
-	avgbit_s = ((b_total * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL))
-		   / (unsigned long long)d_tim_ms;
-
-	last_avg.kb_sec = (unsigned long) (avgbit_s / 1000ULL);
-	last_avg.b_sec  = (unsigned long) (avgbit_s % 1000ULL);
-
-	dprintf("   (Avrg: %5lu.%03lu kbit/s)\n", last_avg.kb_sec, last_avg.b_sec);
-
-	b_total = 0; // restart average measurement
-	last_avg_tv.tv_sec  =  tv.tv_sec;
-	last_avg_tv.tv_usec =  tv.tv_usec;
-	return (unsigned long) (avgbit_s / 1000ULL);
-}
-
-unsigned long BitrateCalculator::calc(void)
+unsigned int BitrateCalculator::calc(unsigned int &long_average)
 {
 	int 			b_len, b_start;
 	unsigned long long 	bit_s = 0;
 	long  			d_tim_ms;
-	int   			packets;
 	int 			timeout = 100;
+	unsigned int    short_average = 0;
 
 	b_len = 0;
 	b_start = 0;
@@ -157,19 +128,10 @@ unsigned long BitrateCalculator::calc(void)
 			   return 0;
 			}
 
-			b_total += b;
-
-			// -- calc bandwidth
-			packets = b/TS_LEN;
-			packets_total += packets;
-
 			// output on different verbosity levels 
 			// -- current bandwidth
 			d_tim_ms = delta_time_ms (&tv, &last_tv);
 			if (d_tim_ms <= 0) d_tim_ms = 1;   //  ignore usecs 
-
-			dprintf("packets read: %3d/(%ld)   d_time: %2ld.%03ld s  = ",
-				packets, packets_total, d_tim_ms / 1000UL, d_tim_ms % 1000UL);
 
 			// -- current bandwidth in kbit/sec
 			// --- cast to unsigned long long so it doesn't overflow as
@@ -177,7 +139,38 @@ unsigned long BitrateCalculator::calc(void)
 			bit_s = (((unsigned long long)b * 8000ULL) + ((unsigned long long)d_tim_ms / 2ULL))
 				   / (unsigned long long)d_tim_ms;
 
-			dprintf("%5llu.%03llu kbit/s", bit_s / 1000ULL, bit_s % 1000ULL);
+            if (counter == AVERAGE_OVER_X_MEASUREMENTS) {
+                counter = 0;
+            }
+            sum -= buffer[counter];
+            buffer[counter] = (unsigned int) (bit_s / 1000ULL);
+            sum += buffer[counter];
+            if (first_round) {
+                if (counter == AVERAGE_OVER_X_MEASUREMENTS - 1) {
+                    first_round = false;
+                }
+                short_average = sum / (counter + 1);
+            } else {
+                short_average = sum / AVERAGE_OVER_X_MEASUREMENTS;
+            }
+            counter++;
+            
+            //Average over complete graph window
+            if (counter2 == 240) {
+                counter2 = 0;
+            }
+            sum2 -= buffer2[counter2];
+            buffer2[counter2] = (unsigned int) (bit_s / 1000ULL);
+            sum2 += buffer2[counter2];
+            if (first_round2) {
+                if (counter2 == 239) {
+                    first_round2 = false;
+                }
+                long_average = sum2 / (counter2 + 1);
+            } else {
+                long_average = sum2 / 240;
+            }
+            counter2++;
 
 			// -- bad packet(s) check in buffer
 			int bp = ts_error_count (buf+b_start, b);
@@ -188,7 +181,7 @@ unsigned long BitrateCalculator::calc(void)
 			last_tv.tv_usec =  tv.tv_usec;
 		}
 	}
-	return (unsigned long) (bit_s / 1000ULL);
+	return short_average;
 }
 
 
