@@ -173,6 +173,17 @@ class CZapitClient:public CBasicClient
 
 	typedef std::vector<responseGetAPIDs> APIDList;
 
+	struct responseGetSubPIDs
+	{
+		uint    pid;
+		char    desc[4];
+		uint	composition_page;
+		uint	ancillary_page;
+		bool	hearingImpaired;
+  	};
+
+	typedef std::vector<responseGetSubPIDs> SubPIDList;
+		
 	struct responseGetOtherPIDs
 	{
 		uint		vpid;
@@ -180,6 +191,7 @@ class CZapitClient:public CBasicClient
 		uint		vtxtpid;
 		uint		pcrpid;
 		uint		selected_apid;
+		uint		selected_sub;
 		uint		pmtpid;
 		uint		privatepid;
 	};
@@ -192,6 +204,8 @@ class CZapitClient:public CBasicClient
 			t_transport_stream_id tsid;
 			unsigned short	vpid;
 			unsigned short	apid;
+			unsigned short  spid;
+			unsigned short  spage;
 			unsigned short	pcrpid;
 			unsigned short	vtxtpid;
 			unsigned int	tsfrequency;
@@ -204,6 +218,7 @@ class CZapitClient:public CBasicClient
 	{
 		responseGetOtherPIDs	PIDs;
 		APIDList		APIDs;
+		SubPIDList  		SubPIDs;
 	};
 
 	struct responseGetSatelliteList

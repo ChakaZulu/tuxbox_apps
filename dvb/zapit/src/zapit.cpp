@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.392 2007/02/07 21:36:53 houdini Exp $
+ * $Id: zapit.cpp,v 1.393 2007/02/28 04:53:26 Arzka Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1009,6 +1009,13 @@ int change_audio_pid(uint8_t index)
 	return 0;
 }
 
+int change_subtitle(uint index)
+{
+	if (!channel) return -1;
+	channel->setChannelSub(index);
+	return 0;
+}
+
 void setRadioMode(void)
 {
 	currentMode |= RADIO_MODE;
@@ -1126,6 +1133,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			(rmsg.cmd != CZapitMessages::CMD_SET_AE_IEC_ON) &&
 			(rmsg.cmd != CZapitMessages::CMD_SET_AE_IEC_OFF) &&
 			(rmsg.cmd != CZapitMessages::CMD_GET_AE_IEC_STATE) &&
+			(rmsg.cmd != CZapitMessages::CMD_GETPIDS) &&
 			(rmsg.cmd != CZapitMessages::CMD_GET_AE_PLAYBACK_STATE))) {
 		WARN("cmd %d refused in standby mode", rmsg.cmd);
 		return true;
@@ -1194,6 +1202,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
+	case CZapitMessages::CMD_SET_SUBTITLE:
+	{
+		/* Zapit does NOT need this info. This is just a storage */
+		CZapitMessages::commandSetSubtitle msgSetSubtitle;
+		CBasicServer::receive_data(connfd, &msgSetSubtitle, sizeof(msgSetSubtitle));
+		change_subtitle(msgSetSubtitle.index);
+
+	}
 	case CZapitMessages::CMD_SET_MODE:
 	{
 		CZapitMessages::commandSetMode msgSetMode;
@@ -1229,6 +1245,24 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		msgCurrentServiceInfo.tsid = channel->getTransportStreamId();
 		msgCurrentServiceInfo.vpid = channel->getVideoPid();
 		msgCurrentServiceInfo.apid = channel->getAudioPid();
+		{
+			CZapitAbsSub* sub = channel->getChannelSub(-1);
+			if (sub) {
+				CZapitDVBSub* sd = reinterpret_cast<CZapitDVBSub*>(sub);
+				CZapitTTXSub* st = reinterpret_cast<CZapitTTXSub*>(sub);
+				if (sub->thisSubType == CZapitAbsSub::DVB) {
+					msgCurrentServiceInfo.spid = sd->pId;
+					msgCurrentServiceInfo.spage = sd->composition_page_id;
+				} else if (sub->thisSubType == CZapitAbsSub::TTX) {
+					msgCurrentServiceInfo.spid = channel->getTeletextPid();
+					msgCurrentServiceInfo.spage =
+						st->teletext_magazine_number * 100 + (st->teletext_page_number >> 4) * 10 + (st->teletext_page_number & 0xf);
+				}
+			} else {
+				msgCurrentServiceInfo.spid = 0;
+				msgCurrentServiceInfo.spage = 0;
+			}
+		}
 		msgCurrentServiceInfo.vtxtpid = channel->getTeletextPid();
 		msgCurrentServiceInfo.pmtpid = channel->getPmtPid();
 		msgCurrentServiceInfo.pcrpid = channel->getPcrPid();
@@ -1708,9 +1742,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			responseGetOtherPIDs.pcrpid = channel->getPcrPid();
 			responseGetOtherPIDs.pmtpid = channel->getPmtPid();
 			responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
+			responseGetOtherPIDs.selected_sub = channel->getChannelSubIndex();
 			responseGetOtherPIDs.privatepid = channel->getPrivatePid();
 			CBasicServer::send_data(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs));
 			sendAPIDs(connfd);
+			sendSubPIDs(connfd);
 		}
 		break;
 	}
@@ -2053,6 +2089,41 @@ void sendAPIDs(int connfd)
 	}
 }
 
+void sendSubPIDs(int connfd)
+{
+	if (!send_data_count(connfd, channel->getSubtitleCount()))
+		return;
+	for (int i = 0 ; i < (int)channel->getSubtitleCount() ; ++i) {
+		CZapitClient::responseGetSubPIDs response;
+		CZapitAbsSub* s = channel->getChannelSub(i);
+		CZapitDVBSub* sd = reinterpret_cast<CZapitDVBSub*>(s);
+		CZapitTTXSub* st = reinterpret_cast<CZapitTTXSub*>(s);
+
+		response.pid = sd->pId;
+		strncpy(response.desc, sd->ISO639_language_code.c_str(), 4);
+		if (s->thisSubType == CZapitAbsSub::DVB) {
+			response.composition_page = sd->composition_page_id;
+			response.ancillary_page = sd->ancillary_page_id;
+			if (sd->subtitling_type >= 0x20) {
+				response.hearingImpaired = true;
+			} else {
+				response.hearingImpaired = false;
+			}
+			if (CBasicServer::send_data(connfd, &response, sizeof(response)) == false) {
+				ERROR("could not send any return");
+	                        return;
+        	        }
+		} else if (s->thisSubType == CZapitAbsSub::TTX) {
+			response.composition_page = (st->teletext_magazine_number * 100) + ((st->teletext_page_number >> 4) * 10) + (st->teletext_page_number & 0xf);
+			response.ancillary_page = 0;
+			response.hearingImpaired = st->hearingImpaired;
+			if (CBasicServer::send_data(connfd, &response, sizeof(response)) == false) {
+				ERROR("could not send any return");
+	                        return;
+        	        }
+		}
+	}
+}
 
 void sendBouquetChannels(int connfd, const unsigned int bouquet, const CZapitClient::channelsMode mode)
 {
@@ -2108,17 +2179,22 @@ int startPlayBack(CZapitChannel *thisChannel)
 	if ((playbackStopForced == true) || (!thisChannel))
 		return -1;
 
-	if (thisChannel->getPcrPid() != 0)
+	if (thisChannel->getPcrPid() != 0) {
 		have_pcr = true;
-	if (thisChannel->getAudioPid() != NONE)
+	}
+	if (thisChannel->getAudioPid() != NONE) {
 		have_audio = true;
-	if ((thisChannel->getVideoPid() != NONE) && (currentMode & TV_MODE))
+	}
+	if ((thisChannel->getVideoPid() != NONE) && (currentMode & TV_MODE)) {
 		have_video = true;
-	if (thisChannel->getTeletextPid() != 0)
+	}
+	if (thisChannel->getTeletextPid() != 0) {
 		have_teletext = true;
+	}
 
-	if ((!have_audio) && (!have_video) && (!have_teletext))
+	if ((!have_audio) && (!have_video) && (!have_teletext)) {
 		return -1;
+	}
 
 	/* set demux filters */
 	if (have_pcr) {
@@ -2390,7 +2466,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.392 2007/02/07 21:36:53 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.393 2007/02/28 04:53:26 Arzka Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

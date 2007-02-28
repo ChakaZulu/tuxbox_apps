@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.29 2005/08/16 21:59:54 metallica Exp $
+ * $Id: channel.h,v 1.30 2007/02/28 04:53:25 Arzka Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -31,6 +31,51 @@
 #include "ci.h"
 #include "types.h"
 
+/* subtitling support */
+
+    
+class CZapitAbsSub{
+ public:
+    unsigned short pId;
+    std::string ISO639_language_code;
+    enum ZapitSubtitleType { 
+	TTX, 
+	DVB 
+    };
+    ZapitSubtitleType thisSubType;
+};
+
+class CZapitDVBSub:public CZapitAbsSub{
+ public:
+    unsigned short subtitling_type;
+    /*
+      possible values:
+      0x01 EBU Teletex subtitles
+      0x10 DVB subtitles (normal) with no monitor aspect ratio criticality
+      0x11 DVB subtitles (normal) for display on 4:3 aspect ratio monitor
+      0x12 DVB subtitles (normal) for display on 16:9 aspect ratio monitor
+      0x13 DVB subtitles (normal) for display on 2.21:1 aspect ratio monitor
+      0x20 DVB subtitles (for the hard of hearing) with no monitor aspect ratio criticality
+      0x21 DVB subtitles (for the hard of hearing) for display on 4:3 aspect ratio monitor
+      0x22 DVB subtitles (for the hard of hearing) for display on 16:9 aspect ratio monitor
+      0x23 DVB subtitles (for the hard of hearing) for display on 2.21:1 aspect ratio monitor	
+    */
+    unsigned int composition_page_id;
+    unsigned int ancillary_page_id;
+
+    CZapitDVBSub(){thisSubType=DVB;};
+};
+
+class CZapitTTXSub:public CZapitAbsSub{
+public:
+    unsigned short teletext_magazine_number;
+    unsigned short teletext_page_number; // <- the actual important stuff here
+    bool hearingImpaired; 
+
+    CZapitTTXSub(){thisSubType=TTX;};
+};
+
+
 class CZapitAudioChannel
 {
 	public:
@@ -47,6 +92,7 @@ class CZapitChannel
 		std::string name;
 
 		/* pids of this channel */
+		std::vector <CZapitAbsSub* > channelSubs;
 		std::vector <CZapitAudioChannel *> audioChannels;
 		unsigned short			pcrPid;
 		unsigned short			pmtPid;
@@ -59,6 +105,12 @@ class CZapitChannel
 
 		/* last selected audio channel */
 		unsigned char			currentAudioChannel;
+
+                /* chosen subtitle stream */
+                unsigned char                   currentSub;
+
+		/* set true when pids are updated */
+		bool pidsUpdated;
 
 		/* read only properties, set by constructor */
 		t_service_id			service_id;
@@ -102,6 +154,7 @@ class CZapitChannel
 		unsigned short		getVideoPid(void)		{ return videoPid; }
 		unsigned short		getPrivatePid(void)		{ return privatePid; }
 		bool			getPidsFlag(void)		{ return pidsFlag; }
+		bool			getPidsUpdated(void)		{ return pidsUpdated; }
 		CCaPmt *		getCaPmt(void)			{ return caPmt; }
 
 		CZapitAudioChannel * 	getAudioChannel(unsigned char index = 0xFF);
@@ -120,9 +173,23 @@ class CZapitChannel
 		void setVideoPid(unsigned short pVideoPid)		{ videoPid = pVideoPid; }
 		void setPrivatePid(unsigned short pPrivatePid)		{ privatePid = pPrivatePid; }
 		void setPidsFlag(void)					{ pidsFlag = true; }
+		void setPidsUpdated(void)				{ pidsUpdated = true; }
+		void unsetPidsUpdated(void)				{ pidsUpdated = false; }
 		void setCaPmt(CCaPmt *pCaPmt)				{ caPmt = pCaPmt; }
 		/* cleanup methods */
 		void resetPids(void);
+
+                /* subtitling related methods */ 
+		void addTTXSubtitle(const unsigned int pid, const std::string langCode, const unsigned char magazine_number, const unsigned char page_number, const bool impaired=false);
+
+		void addDVBSubtitle(const unsigned int pid, const std::string langCode, const unsigned char subtitling_type, const unsigned short composition_page_id, const unsigned short ancillary_page_id);
+
+		unsigned getSubtitleCount() const
+			{ return channelSubs.size(); };
+		CZapitAbsSub* getChannelSub(int index = -1);
+		int getChannelSubIndex(void);
+		void setChannelSub(int subIdx);
+
 };
 
 #endif /* __zapit_channel_h__ */

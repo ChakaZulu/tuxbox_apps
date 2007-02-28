@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.46 2006/01/22 12:31:41 carjay Exp $
+ * $Id: pmt.cpp,v 1.47 2007/02/28 04:53:27 Arzka Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -135,12 +135,45 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 				break;
 
 			case 0x56: /* teletext descriptor */
-				channel->setTeletextPid(esInfo->elementary_PID);
-				break;
+			    unsigned char fieldCount=descriptor_length/5;
+			    for (unsigned char fIdx=0;fIdx<fieldCount;fIdx++){
+				char tmpLang[4];
+				memcpy(tmpLang, &buffer[pos + 5*fIdx + 2], 3);
+				tmpLang[3] = '\0';
+				unsigned char teletext_type=buffer[pos + 5*fIdx + 5]>> 3;
+				unsigned char teletext_magazine_number = buffer[pos + 5*fIdx + 5] & 7;
+				unsigned char teletext_page_number=buffer[pos + 5*fIdx + 6];
+				if (teletext_type==0x02){
+				    // teletex subtitle page
+				    channel->addTTXSubtitle(esInfo->elementary_PID,tmpLang,teletext_magazine_number,teletext_page_number);
+				} else {
+				    if (teletext_type==0x05){
+					// teletex subtitle page for hearing impaired
+					channel->addTTXSubtitle(esInfo->elementary_PID,tmpLang,teletext_magazine_number,teletext_page_number,true);
+				    }
+				}
+			    } 
+			    channel->setTeletextPid(esInfo->elementary_PID);
+			    break;
 
 			case 0x59:
-				subtitling_descriptor(buffer + pos);
-				break;
+			    if (esInfo->stream_type==0x06){
+				// private data
+				unsigned char fieldCount=descriptor_length/8;
+				for (unsigned char fIdx=0;fIdx<fieldCount;fIdx++){
+                                    char tmpLang[4];
+                                    memcpy(tmpLang,&buffer[pos + 8*fIdx + 2],3);
+                                    tmpLang[3] = '\0'; 
+				    unsigned char subtitling_type=buffer[pos+8*fIdx+5];
+				    unsigned short composition_page_id=
+                                        *((unsigned short*)(&buffer[pos + 8*fIdx + 6]));
+				    unsigned short ancillary_page_id=
+                                        *((unsigned short*)(&buffer[pos + 8*fIdx + 8]));
+				    channel->addDVBSubtitle(esInfo->elementary_PID,tmpLang,subtitling_type,composition_page_id,ancillary_page_id);
+                                }
+			    }
+			    subtitling_descriptor(buffer + pos);
+			    break;
 
 			case 0x5F:
 				private_data_specifier_descriptor(buffer + pos);
@@ -366,6 +399,12 @@ int parse_pmt(CZapitChannel * const channel)
 
 	channel->setCaPmt(caPmt);
 	channel->setPidsFlag();
+	if (channel->getPidsUpdated()) {
+		channel->unsetPidsUpdated();
+		DBG("PIDs updated, notify clients");
+		// ARZKA: TODO Notify to zapitsocket
+	}
+            
 	return 0;
 }
 

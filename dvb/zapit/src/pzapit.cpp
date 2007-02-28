@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.54 2006/05/19 21:26:42 houdini Exp $
+ * $Id: pzapit.cpp,v 1.55 2007/02/28 04:53:26 Arzka Exp $
  *
  * simple commandline client for zapit
  *
@@ -664,6 +664,23 @@ getpids:
 			if (pids.APIDs[count].is_ac3)
 				std::cout << ", ac3";
 			std::cout << ")" << std::endl;
+		}
+
+		for (count = 0 ; count < pids.SubPIDs.size() ; count++)
+		{
+			if (pids.SubPIDs[count].pid != pids.PIDs.vtxtpid) {
+				std::cout << "DVB-Sub "
+					<< std::dec << count + 1 
+                                	<< ": 0x" << std::hex << pids.SubPIDs[count].pid
+                                	<< " (" << pids.SubPIDs[count].desc << ")"
+                                	<< std::endl;
+			} else {
+				std::cout << "TTX-Sub "
+					<< std::dec << count + 1
+					<< ": " << pids.SubPIDs[count].composition_page
+                                	<< " (" << pids.SubPIDs[count].desc << ")"
+                                	<< std::endl;
+			}
 		}
 	}
 

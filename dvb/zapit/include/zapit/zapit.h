@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.70 2007/01/20 20:12:37 houdini Exp $
+ * $Id: zapit.h,v 1.71 2007/02/28 04:53:25 Arzka Exp $
  */
 
 #ifndef __zapit_h__
@@ -29,6 +29,7 @@ unsigned int zapTo(const unsigned int channel);
 unsigned int zapTo(const unsigned int bouquet, const unsigned int channel);
 unsigned int zapTo_ChannelID(const t_channel_id channel_id, const bool isSubService);
 void sendAPIDs(int connfd);
+void sendSubPIDs(int connfd);
 void enterStandby(void);
 void leaveStandby(void);
 void setVideoSystem_t(int video_system);

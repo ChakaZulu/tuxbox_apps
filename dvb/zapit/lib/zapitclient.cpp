@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.111 2007/01/20 20:14:16 houdini Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.112 2007/02/28 04:53:26 Arzka Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -234,6 +234,7 @@ void CZapitClient::getPIDS(responseGetPIDs& pids)
 {
 	CZapitMessages::responseGeneralInteger responseInteger;
 	responseGetAPIDs                       responseAPID;
+	responseGetSubPIDs                     responseSubPID;
 
 	send(CZapitMessages::CMD_GETPIDS);
 
@@ -249,6 +250,18 @@ void CZapitClient::getPIDS(responseGetPIDs& pids)
 		{
 			CBasicClient::receive_data((char*)&responseAPID, sizeof(responseAPID));
 			pids.APIDs.push_back(responseAPID);
+		};
+	}
+
+	pids.SubPIDs.clear();
+	if (CBasicClient::receive_data((char* )&responseInteger, sizeof(responseInteger)))
+	{
+		pids.SubPIDs.reserve(responseInteger.number);
+
+		while (responseInteger.number-- > 0)
+		{
+			CBasicClient::receive_data((char*)&responseSubPID, sizeof(responseSubPID));
+			pids.SubPIDs.push_back(responseSubPID);
 		};
 	}
 
