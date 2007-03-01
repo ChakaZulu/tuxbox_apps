@@ -417,10 +417,10 @@ inline int eScheduleOther::sectionRead(__u8 *data)
 inline void eSchedule::sectionFinish(int err)
 {
 	eEPGCache *e = eEPGCache::getInstance();
-	if ( (e->isRunning & 1) && (err == -ETIMEDOUT || err == -ECANCELED ) )
+	if ( (e->isRunning & eEPGCache::SCHEDULE) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		eDebug("[EPGC] stop schedule");
-		e->isRunning &= ~1;
+		e->isRunning &= ~eEPGCache::SCHEDULE;
 		if (e->haveData)
 			e->finishEPG();
 	}
@@ -429,10 +429,10 @@ inline void eSchedule::sectionFinish(int err)
 inline void eScheduleOther::sectionFinish(int err)
 {
 	eEPGCache *e = eEPGCache::getInstance();
-	if ( (e->isRunning & 4) && (err == -ETIMEDOUT || err == -ECANCELED ) )
+	if ( (e->isRunning & eEPGCache::SCHEDULE_OTHER) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		eDebug("[EPGC] stop schedule other");
-		e->isRunning &= ~4;
+		e->isRunning &= ~eEPGCache::SCHEDULE_OTHER;
 		if (e->haveData)
 			e->finishEPG();
 	}
@@ -441,10 +441,10 @@ inline void eScheduleOther::sectionFinish(int err)
 inline void eNowNext::sectionFinish(int err)
 {
 	eEPGCache *e = eEPGCache::getInstance();
-	if ( (e->isRunning & 2) && (err == -ETIMEDOUT || err == -ECANCELED ) )
+	if ( (e->isRunning & eEPGCache::NOWNEXT) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		eDebug("[EPGC] stop nownext");
-		e->isRunning &= ~2;
+		e->isRunning &= ~eEPGCache::NOWNEXT;
 		if (e->haveData)
 			e->finishEPG();
 	}
