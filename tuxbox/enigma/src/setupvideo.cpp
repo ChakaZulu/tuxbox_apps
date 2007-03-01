@@ -161,7 +161,7 @@ void eZapVideoSetup::init_eZapVideoSetup()
 	ac3default->setHelpText(_("enable/disable ac3 default output (ok)"));
 	CONNECT( ac3default->checked, eZapVideoSetup::ac3defaultChanged );
 
-	if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500 )
+	if ( eSystemInfo::getInstance()->hasScartSwitch() )
 	{
 		VCRSwitching=new eCheckbox(this, v_VCRSwitching, 1);
 		VCRSwitching->setText(_("Auto VCR switching"));
