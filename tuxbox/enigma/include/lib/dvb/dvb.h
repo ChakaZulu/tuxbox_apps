@@ -620,6 +620,10 @@ struct eServiceReferenceDVB: public eServiceReference
 	eDVBNamespace getDVBNamespace() const { return eDVBNamespace(data[4]); }
 	void setDVBNamespace(eDVBNamespace dvbnamespace) { data[4]=dvbnamespace.get(); }
 
+	// I hope this doesn't break anything, but I don't think data[5] is used anywhere else...
+	int getFileLength() const { return data[5]; }
+	void setFileLength(int filelength) { data[5]=filelength; }
+
 	eServiceReferenceDVB(eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_type)
 		:eServiceReference(eServiceReference::idDVB, 0)
 	{

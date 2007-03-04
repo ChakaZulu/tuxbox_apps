@@ -73,6 +73,66 @@ eString getISO639Description(char *iso)
 	}
 	return eString()+iso[0]+iso[1]+iso[2];
 }
+#ifndef DISABLE_FILE
+void eDVBServiceController::FillPIDsFromFile(eService *sp)
+{
+	if (service.path)
+	{
+		eDebug("fill PIDs for %s", service.path.c_str());
+		int fd=open(service.path.c_str(), O_RDONLY|O_LARGEFILE);
+		if (fd >= 0)
+		{
+			__u8 packet[188];
+			do
+			{
+				if (::read(fd, packet, 188) != 188)
+					break;
+				// i know that THIS is not really a SIT parser :)
+				if ((packet[0] != 0x47) || (packet[1] != 0x40) || (packet[2] != 0x1f) || (packet[3] != 0x10))
+					break;
+				int nameoffset = 6;
+				if (memcmp(packet+0x15, "ENIGMA", 6))
+				{
+					//failed so check another
+					if (!memcmp(packet+0x15, "NEUTRINONG", 10))
+						nameoffset = 10;
+					else
+						break;
+				}
+				// we found our private descriptor:
+				__u8 *descriptor=packet+0x13;
+				int len=descriptor[1];
+				sp->dvb->service_id = eServiceID((packet[0xf]<<8)|packet[0x10]);
+				len-=nameoffset;
+				descriptor+=2+nameoffset; // skip tag, len, ENIGMA or NEUTRINONG
+				for (int i=0; i<len; i+=descriptor[i+1]+2)
+				{
+					int tag=descriptor[i];
+					switch (tag)
+					{
+						case eServiceDVB::cVPID:
+							sp->dvb->set(eServiceDVB::cVPID, (descriptor[i+2]<<8)|(descriptor[i+3]));
+							break;
+						case eServiceDVB::cAPID:
+							if (descriptor[i+4] == 0)
+								sp->dvb->set(eServiceDVB::cAPID, (descriptor[i+2]<<8)|(descriptor[i+3]));
+							else
+								sp->dvb->set(eServiceDVB::cAC3PID, (descriptor[i+2]<<8)|(descriptor[i+3]));
+							break;
+						case eServiceDVB::cTPID:
+							sp->dvb->set(eServiceDVB::cTPID, (descriptor[i+2]<<8)|(descriptor[i+3]));
+							break;
+						case eServiceDVB::cPCRPID:
+							sp->dvb->set(eServiceDVB::cPCRPID, (descriptor[i+2]<<8)|(descriptor[i+3]));
+							break;
+					}
+				}
+			} while (0);
+			close(fd);
+		}
+	}
+}
+#endif
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
 : eDVBController(dvb)
@@ -205,6 +265,9 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		{
 			if (sp->dvb)
 			{
+#ifndef DISABLE_FILE
+				FillPIDsFromFile(sp);
+#endif
 // VPID
 				Decoder::parms.vpid=sp->dvb->get(eServiceDVB::cVPID);
 // AC3PID
@@ -805,6 +868,9 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 	{
 		if (sp->dvb)
 		{
+#ifndef DISABLE_FILE
+			FillPIDsFromFile(sp);
+#endif
 			videopid=sp->dvb->get(eServiceDVB::cVPID);
 			audiopid=sp->dvb->get(eServiceDVB::cAPID);
 			ac3pid=sp->dvb->get(eServiceDVB::cAC3PID);

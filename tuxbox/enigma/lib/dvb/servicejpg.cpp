@@ -42,8 +42,8 @@ void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 		    filename.right(4).upper() == ".PNG" ||
 		    filename.right(4).upper() == ".BMP")
 		{
-			struct stat s;
-			if (!(::stat(filename.c_str(), &s)))
+//			struct stat s;
+//			if (!(::stat(filename.c_str(), &s)))
 			{
 				eServiceReference ref(id, 0, filename);
 				ref.descr = filename.substr(filename.find_last_of("/") + 1, filename.length() - 1);

@@ -1081,8 +1081,9 @@ void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 		eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id, 0, filename));
 	else
 	{
-		struct stat64 s;
-		if (::stat64(filename.c_str(), &s) || filename.right(7)=="epg.dat")
+//		struct stat64 s;
+//		if (::stat64(filename.c_str(), &s) || filename.right(7)=="epg.dat")
+		if (filename.right(7)=="epg.dat")
 			return;
 		if (filename.right(4).upper()==".MP3")
 		{

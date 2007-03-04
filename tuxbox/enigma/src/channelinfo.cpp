@@ -261,14 +261,17 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 		cname.setFlags(RS_WRAP);
 		cname.resize( eSize( clientrect.width()/8*7-4, clientrect.height() ));
 		// should be moved to eService
-		eString filename=service.path;
-		int slice=0;
-		struct stat64 s;
-		int filelength=0;
-		while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+		int filelength=service.getFileLength();
+		if (filelength <= 0)
 		{
-			filelength+=s.st_size/1024;
-			slice++;
+			eString filename=service.path;
+			int slice=0;
+			struct stat64 s;
+			while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+			{
+				filelength+=s.st_size/1024;
+				slice++;
+			}
 		}
 		int i = service.path.rfind("/");
 		i++;

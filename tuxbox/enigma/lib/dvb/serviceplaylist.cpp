@@ -70,6 +70,22 @@ int ePlaylist::load(const char *filename)
 				eServicePath path(line+offs);
 				entries++;
 				list.push_back(path);
+#ifndef DISABLE_FILE
+				int slice=0;
+				struct stat64 s;
+				int filelength = 0;
+				char* p = strchr(line+offs,'/');
+				if (p)
+				{
+					eString file(p);
+					while (!::stat64((file + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+					{
+						filelength+=s.st_size/1024;
+						slice++;
+					}
+					((eServiceReferenceDVB&)list.back().service).setFileLength(filelength);
+				}				
+#endif
 				ignore_next=1;
 			}
 			else if (!strncmp(line, "#DESCRIPTION", 12))

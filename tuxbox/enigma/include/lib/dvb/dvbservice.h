@@ -120,6 +120,9 @@ class eDVBServiceController
 	eServiceReferenceDVB parentservice,prevservice;
 	eTimer updateTDTTimer;
 	eTimer disableFrontendTimer;
+#ifndef DISABLE_FILE
+	void FillPIDsFromFile(eService *sp);
+#endif
 public:
 	int lastTpTimeDifference;
 	int service_state;
