@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.138 2006/12/31 13:51:16 houdini Exp $
+  $Id: movieplayer.cpp,v 1.139 2007/03/05 07:03:40 saruman Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -42,6 +42,7 @@
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #include <system/settings.h>
 #include <system/helper.h>
+#include <system/xmlinterface.h>
 #include <gui/plugins.h>
 extern CPlugins       * g_PluginList;
 
@@ -314,6 +315,7 @@ CMoviePlayerGui::CMoviePlayerGui()
 	vlcfilefilter.addFilter ("vob");
 	vlcfilefilter.addFilter ("wmv");
 	vlcfilefilter.addFilter ("m2v");
+	vlcfilefilter.addFilter ("mp4");
 
 	filebrowser->Filter = &tsfilefilter;
 }
@@ -380,7 +382,8 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	// if filebrowser or moviebrowser playback we check if we should disable the tv (other modes might be added later)
 	if (g_settings.streaming_show_tv_in_browser == false ||
     	    (actionKey != "tsmoviebrowser"   && 
-    	     actionKey != "tsplayback"       && 
+    	     actionKey != "tsplayback"       &&
+             actionKey != "fileplayback"     &&
     	     actionKey != "tsplayback_pc"    ) ) 
 	{
 	    // set zapit in standby mode
@@ -416,6 +419,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 
 	if(actionKey=="fileplayback")
 	{
+        filebrowser->Multi_Select = true;
 		PlayStream (STREAMTYPE_FILE);
 	}
 	else if(actionKey=="dvdplayback")
@@ -428,6 +432,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 	else if(actionKey=="tsplayback")
 	{
+        filebrowser->Multi_Select = false;
 		isTS=true;
 		PlayFile();
 	}
@@ -464,13 +469,13 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 			startfilename = theBookmark->getUrl();
 			sscanf (theBookmark->getTime(), "%lld", &g_startposition);
 			int vlcpos = startfilename.rfind("vlc://");
-			if(vlcpos==0)
+            CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
+            if(vlcpos==0)
 			{
 				PlayStream (STREAMTYPE_FILE);
 			}
 			else
 			{
-				CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
 				// TODO check if file is a TS. Not required right now as writing bookmarks is disabled for PES anyway
 				isTS = true;
 				isPES = false;
@@ -530,7 +535,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 }
 
 //------------------------------------------------------------------------
-CURLcode sendGetRequest (const std::string & url, std::string & response, bool useAuthorization) {
+CURLcode sendGetRequest (const std::string & url, std::string & response) {
 	CURL *curl;
 	CURLcode httpres;
 
@@ -538,7 +543,6 @@ CURLcode sendGetRequest (const std::string & url, std::string & response, bool u
 	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
 	curl_easy_setopt (curl, CURLOPT_FILE, (void *)&response);
-	if(useAuthorization)	curl_easy_setopt (curl, CURLOPT_USERPWD, "admin:admin");	/* !!! make me customizable */
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
 	httpres = curl_easy_perform (curl);
 	//printf ("[movieplayer.cpp] HTTP Result: %d\n", httpres);
@@ -546,47 +550,11 @@ CURLcode sendGetRequest (const std::string & url, std::string & response, bool u
 	return httpres;
 }
 
-//------------------------------------------------------------------------
-bool VlcSendPlaylist(char* mrl)
-{
-	CURLcode httpres;
-	std::string baseurl = "http://";
-	baseurl += g_settings.streaming_server_ip;
-	baseurl += ':';
-	baseurl += g_settings.streaming_server_port;
-	baseurl += '/';
-
-	// empty playlist
-	std::string response;
-	std::string emptyurl = baseurl;
-	emptyurl += "?control=empty";
-	httpres = sendGetRequest(emptyurl, response, false);
-	printf ("[movieplayer.cpp] HTTP Result (emptyurl): %d\n", httpres);
-	if(httpres != 0)
-	{
-		DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER));	// UTF-8
-		g_playstate = CMoviePlayerGui::STOPPED;
-		pthread_exit (NULL);
-		// Assume safely that all succeeding HTTP requests are successful
-	}
-
-	// add MRL
-	/* demo MRLs:
-		- DVD: dvdsimple:D:@1:1
-		- DemoMovie: c:\\TestMovies\\dolby.mpg
-		- SVCD: vcd:D:@1:1
-	*/
-	std::string addurl = baseurl;
-	addurl += "?control=add&mrl=";
-	addurl += mrl;
-	httpres = sendGetRequest(addurl, response, false);
-	return(httpres==0);
-}
 	#define TRANSCODE_VIDEO_OFF 0
 	#define TRANSCODE_VIDEO_MPEG1 1
 	#define TRANSCODE_VIDEO_MPEG2 2
 //------------------------------------------------------------------------
-bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
+bool VlcRequestStream(char* mrl, int  transcodeVideo, int transcodeAudio)
 {
 	CURLcode httpres;
 	std::string baseurl = "http://";
@@ -652,24 +620,21 @@ bool VlcRequestStream(int  transcodeVideo, int transcodeAudio)
 		}
 		souturl += "}:";
 	}
-	souturl += "duplicate{dst=std{access=http,mux=ts,url=:";
+	souturl += "std{access=http,mux=ts,dst=:";
 	souturl += g_settings.streaming_server_port;
-	souturl += "/dboxstream}}";
-
+	souturl += "/dboxstream}";
+	
 	char *tmp = curl_escape (souturl.c_str (), 0);
-	printf("[movieplayer.cpp] URL      : %s?sout=%s\n",baseurl.c_str(), souturl.c_str());
-	printf("[movieplayer.cpp] URL(enc) : %s?sout=%s\n",baseurl.c_str(), tmp);
+
 	std::string url = baseurl;
-	url += "?sout=";
+	url += "requests/status.xml?command=in_play&input=";
+	url += mrl;	
+	url += "%20%3Asout%3D";
 	url += tmp;
 	curl_free(tmp);
+	printf("[movieplayer.cpp] URL(enc) : %s\n", url.c_str());
 	std::string response;
-	httpres = sendGetRequest(url, response, false);
-
-	// play MRL
-	std::string playurl = baseurl;
-	playurl += "?control=play";
-	httpres = sendGetRequest(playurl, response, false);
+	httpres = sendGetRequest(url, response);
 
 	return true; // TODO error checking
 }
@@ -681,18 +646,30 @@ int VlcGetStreamTime()
 	positionurl += g_settings.streaming_server_ip;
 	positionurl += ':';
 	positionurl += g_settings.streaming_server_port;
-	positionurl += "/admin/dboxfiles.html?stream_time=true";
-	printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
+	positionurl += "/requests/status.xml";
+	//printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
 	std::string response = "";
-	CURLcode httpres = sendGetRequest(positionurl, response, true);
-	printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_time = %s\n",httpres,response.length(),response.c_str());
-	if(httpres== 0 && response.length() > 0)
-	{
-		return atoi(response.c_str());
+	CURLcode httpres = sendGetRequest(positionurl, response);
+	//printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_length = %s\n",httpres,response.length(),response.c_str());
+	if(httpres == 0 && response.length() > 0) {
+        xmlDocPtr answer_parser = parseXml(response.c_str());
+        if (answer_parser != NULL) {
+            xmlNodePtr element = xmlDocGetRootElement(answer_parser);
+            element = element->xmlChildrenNode;
+            while (element) {
+                  char* tmp = xmlGetName(element);
+                  if (strcmp(tmp, "time") == 0) {
+                     return atoi(xmlGetData(element));
+                  }
+                  element = element->xmlNextNode;
+            }
+        }
+        return -1;
 	}
 	else
 		return -1;
 }
+
 //------------------------------------------------------------------------
 int VlcGetStreamLength()
 {
@@ -701,14 +678,25 @@ int VlcGetStreamLength()
 	positionurl += g_settings.streaming_server_ip;
 	positionurl += ':';
 	positionurl += g_settings.streaming_server_port;
-	positionurl += "/admin/dboxfiles.html?stream_length=true";
-	printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
+	positionurl += "/requests/status.xml";
+	//printf("[movieplayer.cpp] positionurl=%s\n",positionurl.c_str());
 	std::string response = "";
-	CURLcode httpres = sendGetRequest(positionurl, response, true);
-	printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_length = %s\n",httpres,response.length(),response.c_str());
-	if(httpres== 0 && response.length() > 0)
-	{
-		return atoi(response.c_str());
+	CURLcode httpres = sendGetRequest(positionurl, response);
+	//printf("[movieplayer.cpp] httpres=%d, response.length()=%d, stream_length = %s\n",httpres,response.length(),response.c_str());
+	if(httpres == 0 && response.length() > 0) {
+        xmlDocPtr answer_parser = parseXml(response.c_str());
+        if (answer_parser != NULL) {
+            xmlNodePtr element = xmlDocGetRootElement(answer_parser);
+            element = element->xmlChildrenNode;
+            while (element) {
+                  char* tmp = xmlGetName(element);
+                  if (strcmp(tmp, "length") == 0) {
+                     return atoi(xmlGetData(element));
+                  }
+                  element = element->xmlNextNode;
+            }
+        }
+        return -1;
 	}
 	else
 		return -1;
@@ -723,8 +711,16 @@ ReceiveStreamThread (void *mrl)
 	int nothingreceived=0;
 
 	// Get Server and Port from Config
-
-	if(!VlcSendPlaylist((char*)mrl))
+	
+	std::string response;
+	std::string baseurl = "http://";
+	baseurl += g_settings.streaming_server_ip;
+	baseurl += ':';
+	baseurl += g_settings.streaming_server_port;
+	baseurl += '/';
+	baseurl += "requests/status.xml";
+	CURLcode httpres = sendGetRequest(baseurl, response);
+	if(httpres != 0)
 	{
 		DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER));	// UTF-8
 		g_playstate = CMoviePlayerGui::STOPPED;
@@ -758,7 +754,7 @@ ReceiveStreamThread (void *mrl)
 		else
 			transcodeAudio=1;
 	}
-	VlcRequestStream(transcodeVideo, transcodeAudio);
+	VlcRequestStream((char*)mrl, transcodeVideo, transcodeAudio);
 
 // TODO: Better way to detect if http://<server>:8080/dboxstream is already alive. For example repetitive checking for HTTP 404.
 // Unfortunately HTTP HEAD requests are not supported by VLC :(
@@ -779,6 +775,7 @@ ReceiveStreamThread (void *mrl)
 	printf ("[movieplayer.cpp] Port: %d\n", port);
 	int len;
 
+    //restart_after_pause:
 	while(true)
 	{
 		//printf ("[movieplayer.cpp] Trying to call socket\n");
@@ -794,6 +791,7 @@ ReceiveStreamThread (void *mrl)
 		fcntl (skt, O_NONBLOCK);
 		printf ("[movieplayer.cpp] Socket OK\n");
 
+        
 		// Skip HTTP header
 		const char * msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
 		int msglen = strlen (msg);
@@ -823,7 +821,7 @@ ReceiveStreamThread (void *mrl)
 				break;
 			}
 			if((((found & (~2)) == 0) && (buf[0] == '\r')) || /* found == 0 || found == 2 */
-				(((found & (~2)) == 1) && (buf[0] == '\n')))	  /* found == 1 || found == 3 */
+				(((found & (~2)) == 1) && (buf[0] == '\n')))  /*   found == 1 || found == 3 */
 			{
 				if(found == 3)
 					goto vlc_is_sending;
@@ -838,7 +836,7 @@ ReceiveStreamThread (void *mrl)
 		if(g_playstate == CMoviePlayerGui::STOPPED)
 		{
 			close(skt);
-			pthread_exit(NULL);
+            pthread_exit(NULL);
 		}
 	}
 	vlc_is_sending:
@@ -864,7 +862,7 @@ ReceiveStreamThread (void *mrl)
 			close(skt);
 			pthread_exit (NULL);
 		}
-
+		
 		ringbuffer_get_write_vector(ringbuf, &(vec[0]));
 		/* vec[0].len is not the total empty size of the buffer! */
 		/* but vec[0].len = 0 if and only if the buffer is full! */
@@ -961,6 +959,10 @@ ReceiveStreamThread (void *mrl)
 void *
 PlayStreamThread (void *mrl)
 {
+	//-- lcd stuff --
+	int cPercent   = 0;
+	int lPercent   = -1;
+	g_lcdSetting = g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]; 
 	CURLcode httpres;
 	struct dmx_pes_filter_params p;
 	ssize_t wr;
@@ -1007,13 +1009,14 @@ PlayStreamThread (void *mrl)
 	len = 0;
 	bool driverready = false;
 	std::string pauseurl   = baseurl;
-	pauseurl += "?control=pause";
+	pauseurl += "requests/status.xml?command=pl_pause";
 	std::string unpauseurl = pauseurl;
 	std::string skipurl;
 	std::string response;
 
 	checkAspectRatio(vdec, true);
-
+	int length = 0;
+	int counter = 120;
 	while(g_playstate > CMoviePlayerGui::STOPPED)
 	{
 		readsize = ringbuffer_read_space (ringbuf);
@@ -1088,7 +1091,6 @@ PlayStreamThread (void *mrl)
 				g_startposition = 0;
 				g_playstate = CMoviePlayerGui::SKIP;
 			}
-
 			switch(g_playstate)
 			{
 				case CMoviePlayerGui::PAUSE:
@@ -1096,7 +1098,7 @@ PlayStreamThread (void *mrl)
 					ioctl (dmxa, DMX_STOP);
 
 					// pause VLC
-					httpres = sendGetRequest(pauseurl, response, false);
+					httpres = sendGetRequest(pauseurl, response);
 
 					while(g_playstate == CMoviePlayerGui::PAUSE)
 					{
@@ -1105,20 +1107,21 @@ PlayStreamThread (void *mrl)
 						usleep(100000); // no busy wait
 					}
 					// unpause VLC
-					httpres = sendGetRequest(unpauseurl, response, false);
+					httpres = sendGetRequest(unpauseurl, response);
 					g_speed = 1;
 					break;
 				case CMoviePlayerGui::SKIP:
 					{
+						counter = 0;
 						skipurl = baseurl;
-						skipurl += "?control=seek&seek_value=";
+						skipurl += "requests/status.xml?command=seek&val=";
 						char * tmp = curl_escape(skipvalue.c_str(), 0);
 						skipurl += tmp;
 						curl_free(tmp);
 						printf("[movieplayer.cpp] skipping URL(enc) : %s\n",skipurl.c_str());
 						int bytes = (ringbuffer_read_space(ringbuf) / 188) * 188;
 						ringbuffer_read_advance(ringbuf, bytes);
-						httpres = sendGetRequest(skipurl, response, false);
+						httpres = sendGetRequest(skipurl, response);
 //				g_playstate = CMoviePlayerGui::RESYNC;
 						g_playstate = CMoviePlayerGui::PLAY;
 					}
@@ -1176,6 +1179,25 @@ PlayStreamThread (void *mrl)
 						//printf ("[movieplayer.cpp] [%d bytes written]\n", wr);
 						len -= wr;
 						done += wr;
+						
+						//-- lcd progress bar --
+						if (length == 0) {
+								length = VlcGetStreamLength();
+						}
+						if (g_lcdSetting != 1 && length != 0) {							
+							if (counter == 0 || counter == 120) {
+    					  		cPercent = (VlcGetStreamTime() * 100) / length;
+    					  		if (lPercent != cPercent)	{
+    						  		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] = g_lcdSetting;
+    						  		lPercent = cPercent;
+    						  		CLCD::getInstance()->showPercentOver(cPercent);
+    						  		g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] = 1;
+    						  	}
+						  	   counter = 119;
+							} else {
+								counter--;
+							}
+						}
 					}
 					break;
 				case CMoviePlayerGui::SOFTRESET:
@@ -1223,6 +1245,7 @@ PlayStreamThread (void *mrl)
 
 		checkAspectRatio(vdec, false);
 	}
+	g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME]=g_lcdSetting;
 
 	ioctl (vdec, VIDEO_STOP);
 	ioctl (adec, AUDIO_STOP);
@@ -1236,12 +1259,8 @@ PlayStreamThread (void *mrl)
 
 	// stop VLC
 	std::string stopurl = baseurl;
-	stopurl += "?control=stop";
-	httpres = sendGetRequest(stopurl, response, false);
-	// clean up playlist
-	std::string emptyurl = baseurl;
-	emptyurl += "?control=empty";
-	httpres = sendGetRequest(emptyurl, response, false);
+	stopurl += "requests/status.xml?command=pl_stop";
+	httpres = sendGetRequest(stopurl, response);
 	
 	printf ("[movieplayer.cpp] Waiting for RCST to stop\n");
 	pthread_join (rcst, NULL);
@@ -3874,30 +3893,31 @@ CMoviePlayerGui::PlayStream (int streamtype)
 
 	std::string sel_filename;
 	bool update_info = true, start_play = false, exit =
-	false, open_filebrowser = true;
+	false, open_filebrowser = true, cdDvd = false, aborted = false;
 	char mrl[200];
+    unsigned int selected = 0;
 	CTimeOSD StreamTime;
+	CFileList filelist;
 
 	if(streamtype == STREAMTYPE_DVD)
 	{
 		strcpy (mrl, "dvdsimple:");
 		strcat (mrl, g_settings.streaming_server_cddrive);
-		strcat (mrl, ":");
 		printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
 		sel_filename = "DVD";
 		open_filebrowser = false;
 		start_play = true;
+		cdDvd = true;
 	}
 	else if(streamtype == STREAMTYPE_SVCD)
 	{
 		strcpy (mrl, "vcd:");
 		strcat (mrl, g_settings.streaming_server_cddrive);
-		strcat (mrl, ":");
 		printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
 		sel_filename = "(S)VCD";
 		open_filebrowser = false;
 		start_play = true;
-
+		cdDvd = true;
 	}
 
 	g_playstate = CMoviePlayerGui::STOPPED;
@@ -3914,9 +3934,33 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	 */
 	do
 	{
+		if (g_playstate == CMoviePlayerGui::STOPPED && !cdDvd) {
+            if(selected + 1 < filelist.size() && !aborted) {
+                selected++;
+				filename = filelist[selected].Name.c_str();
+				sel_filename = filelist[selected].getFileName();
+				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
+				int namepos = filelist[selected].Name.rfind("vlc://");
+				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
+                char *tmp = curl_escape (mrl_str.c_str (), 0);
+                strncpy (mrl, tmp, sizeof (mrl) - 1);
+                curl_free (tmp);
+				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
+
+				update_info = true;
+				start_play = true;
+			} else {
+                open_filebrowser = true;
+                aborted = false;
+            }
+
+
+		}
+		
 		if(exit)
 		{
 			exit = false;
+			cdDvd = false;
 			if(g_playstate >= CMoviePlayerGui::PLAY)
 			{
 				g_playstate = CMoviePlayerGui::STOPPED;
@@ -3935,35 +3979,42 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			strncpy (mrl, tmp, sizeof (mrl) - 1);
 			curl_free (tmp);
 			printf ("[movieplayer.cpp] Generated Bookmark FILE MRL: %s\n", mrl);
-			// TODO: What to use for LCD? Bookmarkname? Filename?
-			sel_filename = "Bookmark Playback";
+			namepos = startfilename.rfind("/");
+			sel_filename = startfilename.substr(namepos + 1);
 			update_info=true;
 			start_play=true;
 		}
 
-		if(open_filebrowser)
+		if(open_filebrowser && !cdDvd)
 		{
+            if (g_settings.streaming_show_tv_in_browser == true &&
+                    g_ZapitsetStandbyState == true) {
+                usleep(ZAPIT_STAND_BY_WAIT_US);
+                g_Zapit->setStandby (false);
+                g_ZapitsetStandbyState = false;
+            }
 			open_filebrowser = false;
 			filename = NULL;
 			filebrowser->Filter = &vlcfilefilter;
 			if(filebrowser->exec(Path_vlc.c_str()))
 			{
 				Path_vlc = filebrowser->getCurrentDir ();
-				CFile * file;
-				if((file = filebrowser->getSelectedFile()) != NULL)
+				filelist = filebrowser->getSelectedFiles();
+				if(!filelist.empty())
 				{
-					filename = file->Name.c_str();
-					sel_filename = file->getFileName();
+					filename = filelist[0].Name.c_str();
+					sel_filename = filelist[0].getFileName();
 					//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-					int namepos = file->Name.rfind("vlc://");
-					std::string mrl_str = file->Name.substr(namepos + 6);
-					char *tmp = curl_escape (mrl_str.c_str (), 0);
-					strncpy (mrl, tmp, sizeof (mrl) - 1);
-					curl_free (tmp);
+					int namepos = filelist[0].Name.rfind("vlc://");
+					std::string mrl_str = filelist[0].Name.substr(namepos + 6);
+                    char *tmp = curl_escape (mrl_str.c_str (), 0);
+                    strncpy (mrl, tmp, sizeof (mrl) - 1);
+                    curl_free (tmp);
 					printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 
 					update_info = true;
 					start_play = true;
+					selected = 0;
 				}
 			}
 			else
@@ -3983,6 +4034,12 @@ CMoviePlayerGui::PlayStream (int streamtype)
 
 		if(start_play)
 		{
+            if (g_settings.streaming_show_tv_in_browser == true &&
+                            g_ZapitsetStandbyState == false) {
+                g_Zapit->setStandby (true);
+                g_ZapitsetStandbyState = true;
+                usleep(ZAPIT_STAND_BY_WAIT_US);
+            }
 			start_play = false;
 			bufferfilled = false;
 			avpids_found=false;
@@ -4010,8 +4067,19 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		}
 		if(msg == CRCInput::RC_home || msg == CRCInput::RC_red)
 		{
-			//exit play
-			exit = true;
+			if(g_playstate >= CMoviePlayerGui::PLAY)
+			{
+				g_playstate = CMoviePlayerGui::STOPPED;
+				aborted = true;
+				if (cdDvd) {
+					cdDvd = false;
+					break;
+				} else {
+					open_filebrowser = true;
+				}
+			} else {
+				break;
+			}
 		}
 		else if(msg == CRCInput::RC_yellow)
 		{
@@ -4133,6 +4201,46 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 			showHelpVLC();
 		}
+		else if(msg == CRCInput::RC_ok)
+		{
+			showFileInfoVLC();
+		}
+		else if(msg == CRCInput::RC_left)
+		{
+			if(!filelist.empty() && selected > 0 && g_playstate == CMoviePlayerGui::PLAY) {
+                selected--;
+				filename = filelist[selected].Name.c_str();
+				sel_filename = filelist[selected].getFileName();
+				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
+				int namepos = filelist[selected].Name.rfind("vlc://");
+				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
+                char *tmp = curl_escape (mrl_str.c_str (), 0);
+                strncpy (mrl, tmp, sizeof (mrl) - 1);
+                curl_free (tmp);
+				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
+
+				update_info = true;
+				start_play = true;
+			}
+		}
+		else if(msg == CRCInput::RC_right)
+		{
+			if(!filelist.empty() && selected + 1 < filelist.size() && g_playstate == CMoviePlayerGui::PLAY) {
+                selected++;
+				filename = filelist[selected].Name.c_str();
+				sel_filename = filelist[selected].getFileName();
+				//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
+				int namepos = filelist[selected].Name.rfind("vlc://");
+				std::string mrl_str = filelist[selected].Name.substr(namepos + 6);
+                char *tmp = curl_escape (mrl_str.c_str (), 0);
+                strncpy (mrl, tmp, sizeof (mrl) - 1);
+                curl_free (tmp);
+				printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
+
+				update_info = true;
+				start_play = true;
+			}
+		}
 		else
 			if(msg == NeutrinoMessages::RECORD_START
 				|| msg == NeutrinoMessages::ZAPTO
@@ -4150,7 +4258,8 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			exit = true;
 		}
 	}
-	while(g_playstate >= CMoviePlayerGui::PLAY);
+	while (true);
+	remove("/tmp/tmpts");
 	pthread_join (rct, NULL);
 }
 
@@ -4221,7 +4330,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.138 $");
+	helpbox.addLine("Version: $Revision: 1.139 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4243,8 +4352,53 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.138 $");
+	helpbox.addLine("Version: $Revision: 1.139 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
+}
+
+void CMoviePlayerGui::showFileInfoVLC() {
+    Helpbox helpbox;
+	std::string url = "http://";
+	url += g_settings.streaming_server_ip;
+	url += ':';
+	url += g_settings.streaming_server_port;
+	url += "/requests/status.xml";
+ 	std::string response = "";
+	CURLcode httpres = sendGetRequest(url, response);
+	
+	if(httpres == 0 && response.length() > 0) {
+        xmlDocPtr answer_parser = parseXml(response.c_str());
+        if (answer_parser != NULL) {
+            xmlNodePtr element = xmlDocGetRootElement(answer_parser);
+            element = element->xmlChildrenNode;
+            while (element) {
+                  if (strcmp(xmlGetName(element), "information") == 0) {
+                     element = element->xmlChildrenNode;
+                     break;
+                  }
+                  element = element->xmlNextNode;
+            }
+            while (element) {
+                helpbox.addLine(NEUTRINO_ICON_BUTTON_RED, xmlGetAttribute(element, "name") );
+                xmlNodePtr element1 = element->xmlChildrenNode;
+                while (element1) {
+                      char tmp[50] = "-- ";
+                      strcat(tmp, xmlGetAttribute(element1, "name"));
+                      strcat(tmp, " : ");
+                      char* data = xmlGetData(element1);
+                      if (data != NULL) {
+                          strcat(tmp, data);
+                      }
+                      helpbox.addLine(tmp);
+                      element1 = element1->xmlNextNode;
+                }
+                element = element->xmlNextNode;
+            }
+            xmlFreeDoc(answer_parser);
+            hide();
+            helpbox.show(LOCALE_MESSAGEBOX_INFO);
+        }
+	}
 }

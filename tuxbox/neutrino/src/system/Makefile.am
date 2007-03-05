@@ -5,7 +5,8 @@ INCLUDES = \
 	@FREETYPE_CFLAGS@ \
 	@NET_CFLAGS@ \
 	@ZAPIT_CFLAGS@ \
-	@TUXTXT_CFLAGS@
+	@TUXTXT_CFLAGS@ \
+	@XML_CFLAGS@
 
 noinst_LIBRARIES = libneutrino_system.a
 
@@ -13,4 +14,5 @@ libneutrino_system_a_SOURCES = \
 	localize.cpp setting_helpers.cpp debug.cpp \
 	ping.c flashtool.cpp httptool.cpp \
 	settings.cpp lastchannel.cpp \
-	configure_network.cpp fsmounter.cpp helper.cpp
+	configure_network.cpp fsmounter.cpp helper.cpp \
+	xmlinterface.cpp

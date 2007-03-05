@@ -60,6 +60,8 @@
 
 #include <driver/encoding.h>
 
+#include <system/xmlinterface.h>
+
 #ifdef __USE_FILE_OFFSET64
 typedef struct dirent64 dirent_struct;
 #define my_alphasort alphasort64
@@ -439,8 +441,7 @@ void CFileBrowser::ChangeDir(const std::string & filename, int selection)
 		newpath=filename;
 	}
 	if(newpath.rfind('/') != newpath.length()-1 ||
-      newpath.length() == 0 ||
-		newpath == VLC_URI)
+      newpath.length() == 0)
 	{
 		newpath += '/';
 	}
@@ -515,61 +516,67 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 	/* error handling */
 	char error[CURL_ERROR_SIZE];
 	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error);
-	curl_easy_setopt(curl_handle, CURLOPT_USERPWD, "admin:admin"); /* !!! make me customizable */
 	/* get it! */
 	httpres = curl_easy_perform(curl_handle);
 	/* cleanup curl stuff */
 	curl_easy_cleanup(curl_handle);
 
-	/* Convert \ to / */
-	std::replace(answer.begin(), answer.end(), '\\', '/');
-
 	// std::cout << "Answer:" << std::endl << "----------------" << std::endl << answer << std::endl;
 	/*!!! TODO check httpres and display error */
 	if (!answer.empty() && !httpres)
 	{
-		unsigned int start=0;
-		for (unsigned int pos=answer.find('\n',0) ; pos != std::string::npos ; pos=answer.find('\n',start))
-		{
-			CFile file;
-			std::string entry = answer.substr(start, pos-start);
-			//std::cout << "Entry" << entry << std::endl;
-			if (entry.find("DIR:")==0)
-				file.Mode = S_IFDIR + 0777 ;
-			else
-				file.Mode = S_IFREG + 0777 ;
-			unsigned int spos = entry.rfind('/');
-			if(spos!=std::string::npos)
-			{
-				file.Name = dirname;
-				file.Name += entry.substr(spos+1);
+        xmlDocPtr answer_parser = parseXml(answer.c_str());
+        
+        if (answer_parser != NULL) {
+            xmlNodePtr element = xmlDocGetRootElement(answer_parser);
+            element = element->xmlChildrenNode;
+            char *ptr;
+            if (element == NULL) {
+                printf("[FileBrowser] vlc: Drive is not readable. Possibly no disc inserted\n");
+                CFile file;
+                file.Mode = S_IFDIR + 0777 ;
+                file.Name = dirname + "..";
+                file.Size = 0;
+                file.Time = 0;
+                flist->push_back(file);
+            } else {
+                while (element) {
+                    CFile file;
+                    ptr = xmlGetAttribute(element, "type");
+                    if (strcmp(ptr, "directory")==0)
+    	           	    file.Mode = S_IFDIR + 0777 ;
+        			else
+    				    file.Mode = S_IFREG + 0777 ;
 
-				file.Size = 0;
-				file.Time = 0;
+                    file.Name = dirname + xmlGetAttribute(element, "name");
+                    ptr = xmlGetAttribute(element, "size");
+                    file.Size = atoi(ptr);
+                    file.Time = 0;
 
-				flist->push_back(file);
-			}
-			else
-				std::cout << "Error misformed path " << entry << std::endl;
-			start=pos+1;
-		}
-		return true;
+                    element = element->xmlNextNode;
+                    flist->push_back(file);
+                }
+            }
+            xmlFreeDoc(answer_parser);
+
+		    return true;
+        }
+        
 	}
-	else
-	{
-		std::cout << "Error reading vlc dir" << std::endl;
-		/* since all CURL error messages use only US-ASCII characters, when can safely print them as if they were UTF-8 encoded */
-		DisplayErrorMessage(error); // UTF-8
-		CFile file;
+	
+	std::cout << "Error reading vlc dir" << std::endl;
+	/* since all CURL error messages use only US-ASCII characters, when can safely print them as if they were UTF-8 encoded */
+	DisplayErrorMessage(error); // UTF-8
+	CFile file;
 
-		file.Name = dirname;
-		file.Name += "..";
+	file.Name = dirname;
+	file.Name += "..";
 
-		file.Mode = S_IFDIR + 0777;
-		file.Size = 0;
-		file.Time = 0;
-		flist->push_back(file);
-	}
+	file.Mode = S_IFDIR + 0777;
+	file.Size = 0;
+	file.Time = 0;
+	flist->push_back(file);
+
 	return false;
 }
 
@@ -622,8 +629,8 @@ bool CFileBrowser::exec(const char * const dirname)
 
 	bool res = false;
 
-	m_baseurl = "http://" + g_settings.streaming_server_ip + ':'
-		  + g_settings.streaming_server_port + "/admin/dboxfiles.html?dir=";
+    m_baseurl = "http://" + g_settings.streaming_server_ip + ':'
+		  + g_settings.streaming_server_port + "/requests/browse.xml?dir=";
 
 	name = dirname;
 	std::replace(name.begin(), name.end(), '\\', '/');

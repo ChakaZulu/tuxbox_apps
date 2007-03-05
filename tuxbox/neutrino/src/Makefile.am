@@ -50,6 +50,7 @@ neutrino_LDADD = \
 	@VORBISIDEC_LIBS@ \
 	@TUXTXT_LIBS@ \
 	-ljpeg \
-	-lpthread
+	-lpthread \
+	@XML_LIBS@
 
 #AM_CPPFLAGS = -DSKIP_CA_STATUS
