@@ -17,21 +17,25 @@
 
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#include <pthread.h>
+
+// __USE_GNU is needed for PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+
+#ifndef __USE_GNU
+    #define __USE_GNU
+    #include <pthread.h>
+    #undef __USE_GNU
+#else
+    #include <pthread.h>
+#endif
 
 #include "tuxtxt_common.h"
-
-
-
-
-
 
 /******************************************************************************
  * Initialize                                                                 *
  ******************************************************************************/
 
 static int tuxtxt_initialized=0;
-static pthread_mutex_t tuxtxt_control_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t tuxtxt_control_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 
 int tuxtxt_init()
 {
