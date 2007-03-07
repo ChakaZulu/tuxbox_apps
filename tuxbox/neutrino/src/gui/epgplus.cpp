@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.34 2007/01/31 21:29:19 houdini Exp $
+	$Id: epgplus.cpp,v 1.35 2007/03/07 18:27:56 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -448,7 +448,7 @@ void EpgPlus::TimeLine::paintMark
 			, this->y + this->fontTime->getHeight() + this->fontTime->getHeight()
 			, textWidth
 			, timeStr
-			, this->backMarkColor
+			, this->markColor
 			, 0
 			, true
 			); // UTF-8
@@ -2815,4 +2815,3 @@ int EpgPlus::MenuWidgetSizeSettings::MenuTargetEditSize::exec
 }
 
 */
-
