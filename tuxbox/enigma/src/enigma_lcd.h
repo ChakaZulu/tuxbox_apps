@@ -46,7 +46,6 @@ public:
 	eLabel *ServiceName;
 	eZapLCDMain(eWidget *parent);
 	void gotRDSText(eString);
-	RDSTextDecoder rdstext_decoder;
 };
 
 class eZapLCDMenu: public eWidget

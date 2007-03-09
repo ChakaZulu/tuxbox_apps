@@ -74,7 +74,6 @@ eZapLCDMain::eZapLCDMain(eWidget *parent)
 	
 	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapLCDMain::volumeUpdate);
 	CONNECT(eDVB::getInstance()->leaveService, eZapLCDMain::leaveService);
-	CONNECT(rdstext_decoder.textReady, eZapLCDMain::gotRDSText );
 }
 
 void eZapLCDMain::volumeUpdate(int mute_state, int vol)
