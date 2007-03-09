@@ -136,9 +136,7 @@ int eSectionReader::read(__u8 *buf)
 		/* backup errno, for instance eDebug could change it */
 		int error = errno;
 		if (error == EAGAIN)
-		{
 			return error;
-		}
 		eDebug("section read(%m)");
 		return error;
 	}
@@ -299,29 +297,38 @@ void eSection::data(int socket)
 			eDebug("eSection::data on locked section!");
 
 		int ret = reader.read(buf);
-		if ( ret != -2 && timer && section == -1 )
-		{
-			section=0;
-			timer->start(10000, true);
-		}
 
-		if (ret)
+		switch(ret)
 		{
-			if ( ret == -2 && timer && timer->isActive() )
-				timer->start(10000, true);
-			return;
+			case 0:
+				if (section == -1)
+				{
+					section=0;
+					if (timer)
+						timer->start(10000, true);
+				}
+				break;
+			default:
+				eDebug("section read error %d for pid %04x, tid %02x, tidmask %02x, tidext %04x... restart timeout\n",
+					ret, pid, tableid, tableidmask, tableidext);
+			case EAGAIN:
+			case -2: // internal error table id not correct
+				if (timer)
+					timer->start(10000, true);
+				return;
 		}
 
 		maxsec=buf[7];
 
 		//  printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
 
-		if ( flags&SECREAD_INORDER )
+		if (flags&SECREAD_INORDER)
 		{
 			if (section != buf[6])
 				break;
 			++section;
 		} 
+
 		version=buf[5];
 
 		// get new valid data restart timeout
@@ -338,10 +345,11 @@ void eSection::data(int socket)
 		if ( flags&SECREAD_INORDER && section > maxsec )
 			// last section?
 		{
-			closeFilter();										// stop feeding
+			closeFilter(); // stop feeding
 			sectionFinish(0);
 			break;
 		}
+
 		// when more data to read.. restart timeout..
 		if ( timer )
 			timer->start(10000,true);
