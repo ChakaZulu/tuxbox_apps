@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.51 2007/02/25 21:27:44 guenther Exp $
+	$Id: lcdd.cpp,v 1.52 2007/03/09 21:10:10 feynman Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -128,14 +128,16 @@ enum backgrounds {
 	BACKGROUND_POWER = 1,
 	BACKGROUND_LCD2  = 2,
 	BACKGROUND_LCD3  = 3,
-	BACKGROUND_LCD   = 4
+	BACKGROUND_LCD   = 4,
+    BACKGROUND_LCD4  = 5
 };
 const char * const background_name[LCD_NUMBER_OF_BACKGROUNDS] = {
 	"setup",
 	"power",
 	"lcd2",
 	"lcd3",
-	"lcd"
+	"lcd",
+    "lcd4"
 };
 #define NUMBER_OF_PATHS 2
 const char * const background_path[NUMBER_OF_PATHS] = {
@@ -409,7 +411,7 @@ void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 	percentOver = perc;
 	if (mode == MODE_TVRADIO)
 	{
-		if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 0)
+        if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 0)
 		{
 			display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
 			//strichlin
@@ -422,8 +424,6 @@ void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 				int dp = int( perc/100.0*61.0+12.0);
 				display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
 			}
-			if (perform_update)
-				displayUpdate();
 		}
 		else if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 2)
 		{
@@ -438,9 +438,38 @@ void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 				int dp = int( perc/100.0*105.0+12.0);
 				display.draw_fill_rect (11,2,dp,8, CLCDDisplay::PIXEL_ON);
 			}
-			if (perform_update)
-				displayUpdate();
 		}
+		else if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] == 3)
+		{
+			display.draw_fill_rect (11,2,97,8, CLCDDisplay::PIXEL_OFF);
+			//strichlin
+			if (perc==255)
+			{
+				display.draw_line (12,3,96,7, CLCDDisplay::PIXEL_ON);
+			}
+			else
+			{
+				int dp = int( perc/100.0*86.0+12.0);
+				display.draw_fill_rect (11,2,dp,8, CLCDDisplay::PIXEL_ON);
+			}
+
+            const char * icon;
+            
+            if( g_RemoteControl != NULL )
+            {
+                uint count = g_RemoteControl->current_PIDs.APIDs.size();
+                if ( ( g_RemoteControl->current_PIDs.PIDs.selected_apid < count ) &&
+                     ( g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3 ) )
+                    icon = DATADIR "/lcdd/icons/dd.raw";
+                else
+                    icon = DATADIR "/lcdd/icons/stereo.raw";
+
+                display.paintIcon( icon, 101, 1, false );
+            }
+		}
+
+		if (perform_update)
+            displayUpdate();
 	}
 }
 
@@ -571,6 +600,13 @@ void CLCD::setMode(const MODES m, const char * const title)
 			showVolume(volume, false);
 			showPercentOver(percentOver, false);
 			break;
+		case 3:
+			display.load_screen(&(background[BACKGROUND_LCD4]));
+			showVolume(volume, false);
+			showPercentOver(percentOver, false);
+			break;
+        default:
+            break;
 		}
 		showServicename(servicename);
 		showclock = true;

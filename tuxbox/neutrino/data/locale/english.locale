@@ -490,6 +490,7 @@ lcdmenu.lcdcontroler Contrast / Brightness
 lcdmenu.power Power
 lcdmenu.statusline status line
 lcdmenu.statusline.both volume / playtime
+lcdmenu.statusline.both_audio volume / playtime / audio
 lcdmenu.statusline.playtime playtime
 lcdmenu.statusline.volume volume
 mainmenu.audioplayer Audioplayer

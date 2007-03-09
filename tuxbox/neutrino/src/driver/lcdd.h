@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.h,v 1.33 2007/02/25 21:25:03 guenther Exp $
+	$Id: lcdd.h,v 1.34 2007/03/09 21:10:09 feynman Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -95,7 +95,7 @@ class CLCD
 		LcdFontRenderClass		*fontRenderer;
 		FontsDef			fonts;
 
-#define LCD_NUMBER_OF_BACKGROUNDS 5
+#define LCD_NUMBER_OF_BACKGROUNDS 6
 		raw_display_t                   background[LCD_NUMBER_OF_BACKGROUNDS];
 
 		MODES				mode;

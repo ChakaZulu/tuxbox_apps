@@ -490,6 +490,7 @@ lcdmenu.lcdcontroler Kontrast / Helligkeit
 lcdmenu.power Power
 lcdmenu.statusline Statuszeile
 lcdmenu.statusline.both Lautstärke / Fortschritt
+lcdmenu.statusline.both_audio Laut. / Fort. / Audio
 lcdmenu.statusline.playtime Sendungsfortschritt
 lcdmenu.statusline.volume Lautstärke
 mainmenu.audioplayer Audioplayer

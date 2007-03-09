@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.842 2007/02/25 21:03:35 guenther Exp $
+	$Id: neutrino.cpp,v 1.843 2007/03/09 21:08:45 feynman Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3130,12 +3130,13 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 	colorSettings_timing.addItem(new CMenuForwarder(LOCALE_OPTIONS_DEFAULT, true, NULL, this, "osd.def"));
 }
 
-#define LCDMENU_STATUSLINE_OPTION_COUNT 3
+#define LCDMENU_STATUSLINE_OPTION_COUNT 4
 const CMenuOptionChooser::keyval LCDMENU_STATUSLINE_OPTIONS[LCDMENU_STATUSLINE_OPTION_COUNT] =
 {
-	{ 0, LOCALE_LCDMENU_STATUSLINE_PLAYTIME },
-	{ 1, LOCALE_LCDMENU_STATUSLINE_VOLUME   },
-	{ 2, LOCALE_LCDMENU_STATUSLINE_BOTH     }
+	{ 0, LOCALE_LCDMENU_STATUSLINE_PLAYTIME   },
+	{ 1, LOCALE_LCDMENU_STATUSLINE_VOLUME     },
+	{ 2, LOCALE_LCDMENU_STATUSLINE_BOTH       },
+    { 3, LOCALE_LCDMENU_STATUSLINE_BOTH_AUDIO }
 };
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
