@@ -220,6 +220,8 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version, int f
 	this->version = version;
 	this->flags = flags;
 	this->tableidmask = tableidmask;
+	this->section = -1;
+	this->maxsec = 0;
 	closeFilter();
 	__u8 data[4], mask[4], mode[4];
 	memset(mode,0,4);

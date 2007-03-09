@@ -145,9 +145,11 @@ class eSchedule: public eSection
 	friend class eEPGCache;
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
-	eSchedule()  // 0x50 .. 0x5F
-			:eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
-	{
+	eSchedule()
+	{}
+	inline void start()
+	{ // 0x50 .. 0x5F
+		setFilter(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0);
 	}
 };
 
@@ -156,9 +158,11 @@ class eScheduleOther: public eSection
 	friend class eEPGCache;
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
-	eScheduleOther()  // 0x60 .. 0x6F
-			:eSection(0x12, 0x60, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
-	{
+	eScheduleOther()
+	{}
+	inline void start()
+	{ // 0x60 .. 0x6F
+		setFilter(0x12, 0x60, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0);
 	}
 };
 
@@ -194,9 +198,11 @@ class eNowNext: public eSection
 	friend class eEPGCache;
 	inline int sectionRead(__u8 *data);
 	inline void sectionFinish(int);
-	eNowNext()  // 0x4E, 0x4F
-		:eSection(0x12, 0x4E, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFE)
-	{
+	eNowNext()
+	{}
+	inline void start()
+	{  // 0x4E, 0x4F
+		setFilter(0x12, 0x4E, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xFE);
 	}
 };
 
