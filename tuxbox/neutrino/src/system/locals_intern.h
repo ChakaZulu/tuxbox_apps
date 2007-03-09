@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.82 2007/02/25 21:05:13 guenther Exp $
+ * $Id: locals_intern.h,v 1.83 2007/03/09 22:07:50 feynman Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -517,6 +517,7 @@ const char * locale_real_names[] =
 	"lcdmenu.power",
 	"lcdmenu.statusline",
 	"lcdmenu.statusline.both",
+	"lcdmenu.statusline.both_audio",
 	"lcdmenu.statusline.playtime",
 	"lcdmenu.statusline.volume",
 	"mainmenu.audioplayer",

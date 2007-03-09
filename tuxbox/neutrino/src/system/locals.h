@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.81 2007/02/25 21:05:25 guenther Exp $
+ * $Id: locals.h,v 1.82 2007/03/09 22:07:50 feynman Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -517,6 +517,7 @@ typedef enum
 	LOCALE_LCDMENU_POWER,
 	LOCALE_LCDMENU_STATUSLINE,
 	LOCALE_LCDMENU_STATUSLINE_BOTH,
+	LOCALE_LCDMENU_STATUSLINE_BOTH_AUDIO,
 	LOCALE_LCDMENU_STATUSLINE_PLAYTIME,
 	LOCALE_LCDMENU_STATUSLINE_VOLUME,
 	LOCALE_MAINMENU_AUDIOPLAYER,
