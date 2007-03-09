@@ -63,19 +63,7 @@ void eTimer::startLongTimer( int seconds )
 	nextActivation.tv_sec -= context.getTimerOffset();
 //	eDebug("this = %p\nnow sec = %d, usec = %d\nadd %d msec", this, nextActivation.tv_sec, nextActivation.tv_usec, msek);
 	if ( seconds > 0 )
-#if 0
-	{
-		while ( seconds > (LONG_MAX/1000) )
-		{
-			nextActivation += ((LONG_MAX/1000)*1000); 
-			// NO !!! LONG_MAX is not the same
-			seconds -= (LONG_MAX/1000);
-		}
-		nextActivation += seconds*1000;
-	}
-#else
 		nextActivation.tv_sec += seconds;
-#endif
 //	eDebug("next Activation sec = %d, usec = %d", nextActivation.tv_sec, nextActivation.tv_usec );
 	context.addTimer(this);
 }
@@ -167,6 +155,18 @@ void eMainloop::removeSocketNotifier(eSocketNotifier *sn)
 void eMainloop::processOneEvent()
 {
 	int ret;
+
+	/* process pending timers... */
+	long usec = 0;
+
+	if (TimerList)
+		doRecalcTimers();
+	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
+	{
+		TimerList.begin()->activate();
+		doRecalcTimers();
+	}
+
 	int fdAnz = notifiers.size();
 	pollfd pfd[fdAnz];
 
@@ -179,38 +179,11 @@ void eMainloop::processOneEvent()
 		pfd[i].events = it->second->getRequested();
 	}
 
-//	eDebug("usec = %d", usec);
-	while (1)
-	{
-		/* process pending timers... */
-		long usec = 0;
+	ret = poll(pfd, fdAnz, TimerList ? usec / 1000 : -1);  // milli .. not micro seks
 
-		if (TimerList)
-		{
-			doRecalcTimers();
-		}
-		while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
-		{
-			TimerList.begin()->activate();
-			doRecalcTimers();
-		}
-
-		ret = poll(pfd, fdAnz, TimerList ? usec / 1000 : -1);  // milli .. not micro seks
-		if (ret < 0 && errno == EINTR) continue;
-		break;
-	}
-
-	if (!ret) // timeouted leave poll .. immediate check all timers
-	{
-		if ( TimerList )
-			doRecalcTimers();
-		while (TimerList && timeout_usec(TimerList.begin()->getNextActivation()) <= 0 )
-		{
-			TimerList.begin()->activate();
-			doRecalcTimers();
-		}
-	}
-	else if (ret>0)
+	if (ret < 0 && errno != EINTR)
+		eDebug("poll made error");
+	else if (ret > 0) // leaved poll with revent fds
 	{
 	//		eDebug("bin aussem poll raus und da war was");
 		for (int i=0; i < fdAnz && ret; i++)
@@ -224,19 +197,7 @@ void eMainloop::processOneEvent()
 				{
 					int req = it->second->getRequested();
 					if (pfd[i].revents & req)
-					{
 						it->second->activate(pfd[i].revents & req);
-						if (ret)
-						{
-							if ( TimerList )
-								doRecalcTimers();
-							while(TimerList && timeout_usec(TimerList.begin()->getNextActivation()) <= 0)
-							{
-								TimerList.begin()->activate();
-								doRecalcTimers();
-							}
-						}
-					}
 					pfd[i].revents &= ~req;
 				}
 				if (pfd[i].revents & (POLLERR|POLLHUP|POLLNVAL))
@@ -244,9 +205,10 @@ void eMainloop::processOneEvent()
 			}
 		}
 	}
-	else if (ret<0)
+	else // timeouted leave poll
 	{
-		eDebug("poll made error");
+		// here we do nothing...
+		// timers are checked on next call of processOneEvent
 	}
 }
 
