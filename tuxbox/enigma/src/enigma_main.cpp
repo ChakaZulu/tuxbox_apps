@@ -3358,6 +3358,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 void eZapMain::startSkip(int dir)
 {
 	eServiceHandler *handler=NULL;
+	int firstskip = !skipping;
 
 	if(!skipping) // first call?
 	{ 
@@ -3457,7 +3458,8 @@ void eZapMain::startSkip(int dir)
 			s="(ts) "+s;
 		skipLabel1->setText(s);
 	}
-	showInfobar();
+	if (firstskip)
+		showInfobar();
 	if ( timeout.isActive() )
 		timeout.stop();
 }
