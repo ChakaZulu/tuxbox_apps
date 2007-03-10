@@ -75,7 +75,7 @@ int ePlaylist::load(const char *filename)
 				struct stat64 s;
 				int filelength = 0;
 				char* p = strchr(line+offs,'/');
-				if (p)
+				if (p && !strncmp(p,"/hdd",4))
 				{
 					eString file(p);
 					while (!::stat64((file + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
