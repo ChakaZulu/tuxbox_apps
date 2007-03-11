@@ -104,7 +104,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"	//TODO: delete every occurence
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
-#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain,img:application/octet-stream,ico:image/x-icon,m3u:application/octet-stream,tar:application/octet-stream"
 #define AUTHUSER			"test"
 #define AUTHPASSWORD			"test1"
 #define PRIVATEDOCUMENTROOT		"/home/y/nhttpd-y"
@@ -127,7 +127,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
-#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain,img:application/octet-stream,ico:image/x-icon,m3u:application/octet-stream,tar:application/octet-stream"
 
 #define AUTHUSER			"test"
 #define AUTHPASSWORD			"test1"
@@ -156,7 +156,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/nhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
-#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain,img:application/octet-stream,ico:image/x-icon,m3u:application/octet-stream"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain,img:application/octet-stream,ico:image/x-icon,m3u:application/octet-stream,tar:application/octet-stream"
 
 #define AUTHUSER			"root"
 #define AUTHPASSWORD			"dbox2"
@@ -187,7 +187,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
-#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain,img:application/octet-stream,ico:image/x-icon,m3u:application/octet-stream,tar:application/octet-stream"
 
 #define AUTHUSER			"root"
 #define AUTHPASSWORD			"oxmox"
@@ -212,7 +212,7 @@
 #define HTTPD_CONFIGFILE HTTPD_CONFIGDIR "/yhttpd.conf"
 #define HTTPD_REQUEST_LOG 		"/tmp/httpd_log"
 #define HTTPD_ERRORPAGE			"/Y_ErrorPage.yhtm"
-#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain"
+#define HTTPD_SENDFILE_EXT		"htm:text/html,html:text/html,xml:text/xml,txt:text/plain,jpg:image/jpeg,jpeg:image/jpeg,gif:image/gif,png:image/png,bmp:image/bmp,css:text/css,js:text/plain,img:application/octet-stream,ico:image/x-icon,m3u:application/octet-stream,tar:application/octet-stream"
 
 #define AUTHUSER			"root"
 #define AUTHPASSWORD			"oxmox"
