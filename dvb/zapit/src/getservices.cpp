@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.98 2005/12/10 11:27:54 barf Exp $
+ * $Id: getservices.cpp,v 1.99 2007/03/12 02:51:08 Arzka Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -274,6 +274,49 @@ int LoadSatellitePositions(void)
 
 	return 0;
 }
+
+/* This function is temporary only
+ * Deleting this needs lots of fixes in many places
+ */
+void parse_static_pids(CZapitChannel* channel)
+{
+	char id[32];
+	struct stat dummy;
+
+	snprintf(id, sizeof(id), "%012Lx", channel->getChannelID());
+	if (stat(STATICPIDS_XML, &dummy) == 0) {
+		xmlDocPtr parser = parseXmlFile(STATICPIDS_XML, false);
+		if (parser) {
+			xmlNodePtr node = xmlDocGetRootElement(parser);
+			while ((node = xmlGetNextOccurence(node, "subtitles")) != NULL) {
+				xmlNodePtr tmp = node->xmlChildrenNode;
+				while ((tmp = xmlGetNextOccurence(tmp, "channel")) != NULL) {
+					std::string curid = xmlGetAttribute(tmp, "id");
+					if (curid == id) {
+						std::string mode = xmlGetAttribute(tmp, "mode");
+						std::string lang = xmlGetAttribute(tmp, "lang");
+						int pid = xmlGetNumericAttribute(tmp, "pid", 16);
+						int page = xmlGetNumericAttribute(tmp, "page", 16);
+						
+						if (mode == "ttx") {
+							channel->addTTXSubtitle(pid, lang, page >> 8,
+																			page & 0xff, false);
+						} else if (mode == "dvb") {
+							channel->addDVBSubtitle(pid, lang, 0x10, page, 0);
+							/* TODO: subtitle type -> hardcoded to 0x10
+							 * TODO: ancillary page -> hardcoded to 0
+							 */
+						}
+					}
+					tmp = tmp->xmlNextNode;
+				}
+				node = node->xmlNextNode;				
+			}
+			xmlFreeDoc(parser);
+		}
+	}
+}
+
 
 int LoadServices(fe_type_t frontendType, diseqc_t diseqcType, bool only_current_services)
 {

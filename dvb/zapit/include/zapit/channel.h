@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.30 2007/02/28 04:53:25 Arzka Exp $
+ * $Id: channel.h,v 1.31 2007/03/12 02:51:08 Arzka Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -106,8 +106,8 @@ class CZapitChannel
 		/* last selected audio channel */
 		unsigned char			currentAudioChannel;
 
-                /* chosen subtitle stream */
-                unsigned char                   currentSub;
+		/* chosen subtitle stream */
+		unsigned char                   currentSub;
 
 		/* set true when pids are updated */
 		bool pidsUpdated;

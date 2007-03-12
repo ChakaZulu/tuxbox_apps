@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.63 2005/12/10 11:27:54 barf Exp $
+ * $Id: getservices.h,v 1.64 2007/03/12 02:51:08 Arzka Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,6 +31,7 @@
 #include "sdt.h"
 #include "types.h"
 #include "xmlinterface.h"
+#include "channel.h"
 
 #include <map>
 
@@ -39,6 +40,7 @@
 #define NONE 0x0000
 #define INVALID 0x1FFF
 
+void parse_static_pids(CZapitChannel* channel);
 void ParseTransponders(xmlNodePtr xmltransponder, const unsigned char DiSEqC, t_satellite_position satellitePosition);
 void ParseChannels    (xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, t_satellite_position satellitePosition, const uint32_t frequency);
 void FindTransponder  (xmlNodePtr root);

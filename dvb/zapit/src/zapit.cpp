@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.393 2007/02/28 04:53:26 Arzka Exp $
+ * $Id: zapit.cpp,v 1.394 2007/03/12 02:51:08 Arzka Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -910,6 +910,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 			WARN("pmt parsing failed");
 			failed = true;
 		}
+
+		parse_static_pids(thisChannel);
 
 		thisChannel->setAudioChannel(audioChannel);
 
@@ -2466,7 +2468,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.393 2007/02/28 04:53:26 Arzka Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.394 2007/03/12 02:51:08 Arzka Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
