@@ -77,14 +77,15 @@ int ePlaylist::load(const char *filename)
 				char* p = strchr(line+offs,'/');
 				if (p && !strncmp(p,"/hdd",4))
 				{
+					eDebug("Checking filesize:%s",p);
 					eString file(p);
 					while (!::stat64((file + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 					{
 						filelength+=s.st_size/1024;
 						slice++;
 					}
-					((eServiceReferenceDVB&)list.back().service).setFileLength(filelength);
 				}				
+				((eServiceReferenceDVB&)list.back().service).setFileLength(filelength);
 #endif
 				ignore_next=1;
 			}
