@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.2 2003/06/18 12:19:22 alexw Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.3 2007/03/14 21:27:42 houdini Exp $
  *
  * Sectionsd command line interface - The Tuxbox Project
  *
@@ -27,24 +27,60 @@
 
 CSectionsdClient client;
 
+void usage(void) {
+	printf("usage:  sectionsdcontrol --pause         stop sectionsd\n");
+	printf("        sectionsdcontrol --nopause       restart sectionsd\n");
+	printf("        sectionsdcontrol --state         get sectionsd runstate\n");
+	printf("        sectionsdcontrol --wepg <epgdir> write epgfiles to dir\n");
+	printf("        sectionsdcontrol --repg <epgdir> read epgfiles from dir\n");
+}
+
 int main(int argc, char** argv)
 {
+	if (argc<2) {
+		usage();
+	}
+
 	for (int i = 1; i < argc; i++)
 	{
-		if (!strcmp(argv[i], "--pause"))
+		if (!strcmp(argv[i], "--h") || !strcmp(argv[i], "-h"))
+		{
+			usage();
+		}
+		else if (!strcmp(argv[i], "--pause"))
 		{
 			printf("setPauseScanning true\n");
 			client.setPauseScanning(true);
 		}
-		else
-		if (!strcmp(argv[i], "--nopause"))
+		else if (!strcmp(argv[i], "--nopause"))
 		{
 			printf("setPauseScanning false\n");
 			client.setPauseScanning(false);
 		}
-		else
-		if (!strcmp(argv[i], "--state"))
+		else if (!strcmp(argv[i], "--state"))
+		{
 			printf("Scanning is active: %s\n", client.getIsScanningActive()?"true":"false");
+		}
+		else if (!strcmp(argv[i], "--wepg"))
+		{
+			if (i+1 < argc) {
+				printf("Writing epg files to %s...", argv[i+1]);
+				client.writeSI2XML(argv[i+1]);
+				printf("done!\n");
+			} else {
+				usage();
+			}
+		}
+		else if (!strcmp(argv[i], "--repg"))
+		{
+			if (i+1 < argc) {
+				printf("Reading epg files from %s...", argv[i+1]);
+				client.readSIfromXML(argv[i+1]);
+				printf("done!\n");
+			} else {
+				usage();
+			}
+		}
 	}
 
 	return 0;
