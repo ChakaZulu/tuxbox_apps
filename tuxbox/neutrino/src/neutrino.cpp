@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.843 2007/03/09 21:08:45 feynman Exp $
+	$Id: neutrino.cpp,v 1.844 2007/03/15 18:50:19 feynman Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -629,6 +629,7 @@ int CNeutrinoApp::loadSetup()
 
 	//widget settings
 	g_settings.widget_fade           = configfile.getBool("widget_fade"          , true );
+    g_settings.widget_osd            = configfile.getInt32("widget_osd"          , true );
 
 	//colors (neutrino defaultcolors)
 	g_settings.menu_Head_alpha = configfile.getInt32( "menu_Head_alpha", 0x00 );
@@ -851,7 +852,7 @@ int CNeutrinoApp::loadSetup()
 
 	// USERMENU
 	//-------------------------------------------
-	// this is as the current neutrino usermenü
+	// this is as the current neutrino usermenï¿½
 	const char* usermenu_default[SNeutrinoSettings::BUTTON_MAX]={
 		"2,3,4,16",			// RED
 		"6",				// GREEN
@@ -1034,6 +1035,7 @@ void CNeutrinoApp::saveSetup()
 
 	//widget settings
 	configfile.setBool("widget_fade"          , g_settings.widget_fade          );
+    configfile.setInt32("widget_osd"          , g_settings.widget_osd           );
 
 	//colors
 	configfile.setInt32( "menu_Head_alpha", g_settings.menu_Head_alpha );
@@ -1857,6 +1859,14 @@ const CMenuOptionChooser::keyval OPTIONS_OFF0_ON1_OPTIONS[OPTIONS_OFF0_ON1_OPTIO
 {
 	{ 0, LOCALE_OPTIONS_OFF },
 	{ 1, LOCALE_OPTIONS_ON  }
+};
+
+#define OSD_STATUS_OPTIONS_COUNT 3
+const CMenuOptionChooser::keyval OSD_STATUS_OPTIONS[OSD_STATUS_OPTIONS_COUNT] =
+{
+    { 0, LOCALE_COLORMENU_OSD_NORMAL },
+    { 1, LOCALE_COLORMENU_OSD_BOTTOM },
+    { 2, LOCALE_COLORMENU_OSD_OFF    }
 };
 
 #define SECTIONSD_SCAN_OPTIONS_COUNT 3
@@ -3034,6 +3044,9 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	CMenuWidget *colorSettings_timing = new CMenuWidget(LOCALE_COLORMENU_TIMING, NEUTRINO_ICON_SETTINGS);
 	InitColorSettingsTiming(*colorSettings_timing);
 	colorSettings.addItem(new CMenuForwarder(LOCALE_TIMING_HEAD, true, NULL, colorSettings_timing, NULL, CRCInput::RC_1));
+
+    CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_COLORMENU_OSD, &g_settings.widget_osd, OSD_STATUS_OPTIONS, OSD_STATUS_OPTIONS_COUNT, true );
+    colorSettings.addItem(oj);
 
 	colorSettings.addItem(GenericMenuSeparatorLine);
 	if ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) // eNX
@@ -4748,7 +4761,51 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			standbyMode( false );
 		}
 		if( mode != mode_scart )
-			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE));
+        {
+            CTimerd::TimerList tmpTimerList;
+            CTimerdClient tmpTimerdClient;
+            
+            tmpTimerList.clear();
+            tmpTimerdClient.getTimerList( tmpTimerList );
+            
+            sort( tmpTimerList.begin(), tmpTimerList.end() );
+            
+            CTimerd::responseGetTimer &timer = tmpTimerList[0];
+            
+            CZapitClient Zapit;
+            std::string name = g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE);
+            name += "\n";
+            
+            std::string zAddData = Zapit.getChannelName( timer.channel_id ); // UTF-8
+            if( zAddData.empty() )
+            {
+                zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
+            }
+            
+            if(timer.epgID!=0)
+            {
+                CEPGData epgdata;
+#warning fixme sectionsd should deliver data in UTF-8 format
+                zAddData += " :\n";
+                if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
+                {
+                    zAddData += Latin1_to_UTF8(epgdata.title);
+                }
+                else if(strlen(timer.epgTitle)!=0)
+                {
+                    zAddData += Latin1_to_UTF8(timer.epgTitle);
+                }
+            }
+            else if(strlen(timer.epgTitle)!=0)
+            {
+                zAddData += Latin1_to_UTF8(timer.epgTitle);
+            }
+
+            name += zAddData;
+            ShowHintUTF( LOCALE_MESSAGEBOX_INFO, name.c_str() );
+//			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE));
+        }
+        
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
@@ -5072,7 +5129,7 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
-   if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) //lirc
+   if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) // lirc
    { // bei LIRC wissen wir nicht wikrlich ob jetzt ge oder entmuted wird, deswegen nix zeigen---
 		if( !isEvent )
 			g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
@@ -5098,7 +5155,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
          }
       }
 
-      if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic))
+      if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic) && ( g_settings.widget_osd != 2 ) )
       {
 	      // anzeigen NUR, wenn es vom Event kommt
 	      if( current_muted )
@@ -5120,10 +5177,15 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	int dy = 40;
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
+    
+    if( g_settings.widget_osd == 1 )
+    {
+        y = y + 50;
+    }
 
 	fb_pixel_t * pixbuf = NULL;
 
-	if(bDoPaint)
+	if( (bDoPaint) && (g_settings.widget_osd != 2 ) ) 
 	{
 		pixbuf = new fb_pixel_t[dx * dy];
 		if(pixbuf!= NULL)
@@ -5194,7 +5256,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			break;
 		}
 
-		if (bDoPaint)
+		if( (bDoPaint) && (g_settings.widget_osd != 2 ) )
 		{
 			int vol = current_volume << 1;
 			frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR_PLUS_3);
@@ -5210,7 +5272,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		}
 	while (msg != CRCInput::RC_timeout);
 
-	if( (bDoPaint) && (pixbuf!= NULL) )
+	if( (bDoPaint) && (g_settings.widget_osd != 2 ) && (pixbuf!= NULL) )
 	{
 		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 		delete [] pixbuf;
