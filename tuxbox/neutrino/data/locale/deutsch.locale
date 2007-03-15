@@ -218,6 +218,10 @@ colormenu.font Schriftgröße
 colormenu.gtx_alpha Transparenz (GTX)
 colormenu.head Farb-Einstellungen
 colormenu.menucolors Menüfarben
+colormenu.osd OSD Audio-Status
+colormenu.osd_bottom unten
+colormenu.osd_normal normal
+colormenu.osd_off aus
 colormenu.statusbar Statusbalken
 colormenu.textcolor Textfarbe
 colormenu.textcolor_head Textfarbe

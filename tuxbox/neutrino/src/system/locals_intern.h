@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.83 2007/03/09 22:07:50 feynman Exp $
+ * $Id: locals_intern.h,v 1.84 2007/03/15 18:40:07 feynman Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -245,6 +245,10 @@ const char * locale_real_names[] =
 	"colormenu.gtx_alpha",
 	"colormenu.head",
 	"colormenu.menucolors",
+	"colormenu.osd",
+	"colormenu.osd_bottom",
+	"colormenu.osd_normal",
+	"colormenu.osd_off",
 	"colormenu.statusbar",
 	"colormenu.textcolor",
 	"colormenu.textcolor_head",
