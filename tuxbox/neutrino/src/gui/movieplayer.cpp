@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.139 2007/03/05 07:03:40 saruman Exp $
+  $Id: movieplayer.cpp,v 1.140 2007/03/16 14:22:23 papst Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -172,6 +172,8 @@ unsigned int   g_apidchanged = 0;
 bool  g_showaudioselectdialog = false;
 short g_lcdSetting = -1;
 bool  g_lcdUpdateTsMode = false;
+
+CFileList filelist;
 
 
 
@@ -432,7 +434,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 	else if(actionKey=="tsplayback")
 	{
-        filebrowser->Multi_Select = false;
+        filebrowser->Multi_Select = true;
 		isTS=true;
 		PlayFile();
 	}
@@ -775,7 +777,6 @@ ReceiveStreamThread (void *mrl)
 	printf ("[movieplayer.cpp] Port: %d\n", port);
 	int len;
 
-    //restart_after_pause:
 	while(true)
 	{
 		//printf ("[movieplayer.cpp] Trying to call socket\n");
@@ -2641,7 +2642,7 @@ static void mp_tcpClose(int fd)
 //=====================
 void *mp_playFileMain(void *filename)
 {
-	std::string   fname  = (const char *)filename;
+    std::string fname;
 	bool          failed = true;
 	struct pollfd pHandle;
 	int           rd, rSize;
@@ -2660,17 +2661,34 @@ void *mp_playFileMain(void *filename)
 	{
 		//-- check for valid filename --
 		//------------------------------
-		if(fname.length())
+		if(filename != NULL) //Only one file selected
 		{
-			//-- check for file type --
-			//-------------------------
-			if( mp_probe(fname.c_str(), ctx) )
-				failed = false;
-			else
-				fprintf(stderr,"[mp] couldn't open (%s) for probing\n", fname.c_str());
-		}
-		else
-			fprintf(stderr,"[mp] invalid filename (null)\n");
+            fname = (const char *)filename;
+            if (fname.length()) {
+    			//-- check for file type --
+    			//-------------------------
+    			if( mp_probe(fname.c_str(), ctx) )
+    				failed = false;
+    			else
+    				fprintf(stderr,"[mp] couldn't open (%s) for probing\n", fname.c_str());
+    		}
+    		else
+    			fprintf(stderr,"[mp] invalid filename (null)\n");
+        }
+        else {
+            ctx->isStream  = false;
+	        ctx->itChanged = false;
+	        ctx->lst_cnt   = 0;
+         	ctx->it        = 0;
+         	for (unsigned int i = 0; i < filelist.size(); i++) {
+             	ctx->lst[ctx->lst_cnt].pname = filelist[ctx->lst_cnt].Name.c_str();
+             	ctx->lst_cnt++;
+            }
+            if(ctx->lst_cnt) {
+                fprintf(stderr, "[mp] playlist with (%d) entries generated\n", ctx->lst_cnt);
+            }
+            failed = false;
+       }
 	}
 	else
 		fprintf(stderr,"[mp] error opening some DVB devices\n");
@@ -2991,8 +3009,10 @@ else
 			ctx->itChanged = false;
 			g_playstate    = CMoviePlayerGui::PLAY;
 
-			//updateLcd(ctx->lst[ctx->it].pname);
-		}
+            if (filename == NULL) {
+               updateLcd(filelist[ctx->it].getFileName());
+            }
+        }
 		else
 			break; // normal loop exit
 
@@ -3312,9 +3332,9 @@ void CMoviePlayerGui::PlayFile (int parental)
 				if(filebrowser->exec(Path_local.c_str()))
 				{
 					Path_local = filebrowser->getCurrentDir();
-					CFile *file;
+					filelist = filebrowser->getSelectedFiles();
 	
-					if((file = filebrowser->getSelectedFile()) != NULL)
+					if(!filelist.empty())
 					{
                         if (g_settings.streaming_show_tv_in_browser == true &&
                             g_ZapitsetStandbyState == false)
@@ -3323,9 +3343,9 @@ void CMoviePlayerGui::PlayFile (int parental)
                                 g_ZapitsetStandbyState = true;
                                 usleep(ZAPIT_STAND_BY_WAIT_US);
                         }
-
-						filename     = file->Name.c_str();
-						sel_filename = file->getFileName();
+                        
+						filename     = filelist[0].Name.c_str();
+		   				sel_filename = filelist[0].getFileName();
 	
 						update_lcd   = true;
 						start_play   = true;
@@ -3367,7 +3387,13 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 			//-- create player thread in PLAY mode --
 			g_playstate = CMoviePlayerGui::PLAY;  // !!!
-			if(pthread_create(&rct, 0, mp_playFileThread, (void *)filename) != 0)
+			int retval;
+			if (filelist.size() == 1 || isMovieBrowser) {
+                retval = pthread_create(&rct, 0, mp_playFileThread, (void *)filename);
+            } else {
+                retval = pthread_create(&rct, 0, mp_playFileThread, NULL);
+            }
+			if(retval != 0)
 			{
 				fprintf(stderr, "[mp] couldn't create player thread\n");
 
@@ -3486,7 +3512,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_yellow:
 				if(rc_blocked == false)	// prevent to fast repeats
 				{
-					update_lcd  = true;
 					g_playstate = (g_playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::PLAY : CMoviePlayerGui::PAUSE;
 					rc_blocked  = true;
 				}
@@ -3641,7 +3666,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- request for audio selector --
 			case CRCInput::RC_green:
-				update_lcd  = true;
 				g_playstate = CMoviePlayerGui::AUDIOSELECT;
 				break;
 
@@ -3662,7 +3686,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_left:
 				g_jumpseconds = -15;
 				g_playstate   = CMoviePlayerGui::JB;
-				update_lcd    = true;
 				FileTime.hide();
 				break;
 
@@ -3670,7 +3693,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_right:
 				g_jumpseconds = 15;
 				g_playstate   = CMoviePlayerGui::JF;
-				update_lcd    = true;
 				FileTime.hide();
 				break;
 
@@ -3699,7 +3721,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_1:
 				g_jumpseconds = -60;
 				g_playstate   = CMoviePlayerGui::JB;
-				update_lcd    = true;
 				FileTime.hide();
 				break;
 
@@ -3707,7 +3728,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_2:
 				g_jumpseconds = 0;
 				g_playstate   = CMoviePlayerGui::JPOS;
-				update_lcd    = true;
 				FileTime.hide();
 				break;
 
@@ -3715,7 +3735,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_3:
 				g_jumpseconds = 60;
 				g_playstate   = CMoviePlayerGui::JF;
-				update_lcd    = true;
 				FileTime.hide();
 				break;
 
@@ -3723,7 +3742,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_4:
 				g_jumpseconds = -5 * 60;
 				g_playstate = CMoviePlayerGui::JB;
-				update_lcd = true;
 				FileTime.hide();
 				break;
 
@@ -3756,7 +3774,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 							g_playstate = CMoviePlayerGui::JB;
                         }
                         printf("Jump %d\n",g_jumpseconds);
-						update_lcd = true;
 						FileTime.hide();
 					}
 				}
@@ -3765,7 +3782,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_6:
 				g_jumpseconds = 5 * 60;
 				g_playstate   = CMoviePlayerGui::JF;
-				update_lcd    = true;
 				FileTime.hide();
 				break;
 
@@ -3773,7 +3789,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_7:
 				g_jumpseconds = -10 * 60;
 				g_playstate   = CMoviePlayerGui::JB;
-				update_lcd    = true;
 				FileTime.hide();
 				break;
 
@@ -3781,7 +3796,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_8:
 				g_jumpseconds = PF_JMP_END;  // dirty hack 2
 				g_playstate = CMoviePlayerGui::JPOS;
-				update_lcd = true;
 				FileTime.hide();
 				break;
 
@@ -3789,7 +3803,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_9:
 				g_jumpseconds = 10 * 60;
 				g_playstate   = CMoviePlayerGui::JF;
-				update_lcd    = true;
 				FileTime.hide();
 				break;
 
@@ -3834,7 +3847,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			case CRCInput::RC_ok:
 				if(g_playstate > CMoviePlayerGui::PLAY)
 				{
-					update_lcd = true;
 					g_playstate = CMoviePlayerGui::SOFTRESET;
 				}
 				else
@@ -4330,7 +4342,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.139 $");
+	helpbox.addLine("Version: $Revision: 1.140 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4352,7 +4364,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.139 $");
+	helpbox.addLine("Version: $Revision: 1.140 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
