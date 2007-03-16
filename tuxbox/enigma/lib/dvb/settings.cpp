@@ -278,6 +278,47 @@ struct saveService
 		fprintf(f, "end\n");
 	}
 };
+struct saveSubService
+{
+	FILE *f;
+	saveSubService(FILE *out): f(out)
+	{
+	 	fprintf(f, "subservices\n");
+	}
+	void operator()(eServiceDVB& s)
+	{
+		bool bChanged = false;
+		for (int i=0; i<eServiceDVB::cacheMax; ++i)
+		{
+			if (s.cache[i] != -1)
+			{
+				bChanged = true;
+				break;
+			}
+		}
+		if (!bChanged) return;
+		fprintf(f, "%04x:%08x:%04x:%04x\n", s.service_id.get(), s.dvb_namespace.get(), s.transport_stream_id.get(), s.original_network_id.get());
+		fprintf(f, "%s\n", s.service_name.c_str());
+		if (s.dxflags)
+			fprintf(f, "f:%x,", s.dxflags);
+		for (int i=0; i<eServiceDVB::cacheMax; ++i)
+		{
+			if (s.cache[i] != -1)
+				fprintf(f, "c:%02d%04x,", i, s.cache[i]);
+		}
+		eString prov;
+		prov=s.service_provider;
+		for (eString::iterator i=prov.begin(); i != prov.end(); ++i)
+			if (*i == ',')
+				*i='_';
+		
+		fprintf(f, "p:%s\n", prov.c_str());
+	}
+	~saveSubService()
+	{
+		fprintf(f, "end\n");
+	}
+};
 
 struct saveTransponder
 {
@@ -324,6 +365,7 @@ void eDVBSettings::saveServices()
 
 	getTransponders()->forEachTransponder(saveTransponder(f));
 	getTransponders()->forEachService(saveService(f));
+	getTransponders()->forEachSubService(saveSubService(f));
 	fprintf(f, "Have a lot of fun!\n");
 	fclose(f);
 }
@@ -471,6 +513,81 @@ void eDVBSettings::loadServices()
 
 	eDebug("loaded %d services", count);
 	
+	if ((!fgets(line, 256, f)) || strcmp(line, "subservices\n"))
+	{
+		eDebug("subservices invalid, no subservices");
+		return;
+	}
+
+	if (transponderlist)
+		transponderlist->clearAllSubServices();
+
+	count=0;
+
+	while (!feof(f))
+	{
+		if (!fgets(line, 256, f))
+			break;
+		if (!strcmp(line, "end\n"))
+			break;
+
+		int service_id=-1, dvb_namespace, transport_stream_id=-1, original_network_id=-1;
+		sscanf(line, "%x:%x:%x:%x", &service_id, &dvb_namespace, &transport_stream_id, &original_network_id);
+		eServiceDVB &s=transponderlist->createSubService(
+					eServiceReferenceDVB(
+						eDVBNamespace(dvb_namespace),
+						eTransportStreamID(transport_stream_id),
+						eOriginalNetworkID(original_network_id),
+						eServiceID(service_id),7
+						));
+		count++;
+		s.service_type=7;
+		fgets(line, 256, f);
+		if (strlen(line))
+			line[strlen(line)-1]=0;
+		s.service_name=line;
+		fgets(line, 256, f);
+		if (strlen(line))
+			line[strlen(line)-1]=0;
+
+		eString str=line;
+
+		if (str[1]!=':')	// old ... (only service_provider)
+		{
+			s.service_provider=line;
+		} else
+			while ((!str.empty()) && str[1]==':') // new: p:, f:, c:%02d...
+			{
+				unsigned int c=str.find(',');
+				char p=str[0];
+				eString v;
+				if (c == eString::npos)
+				{
+					v=str.mid(2);
+					str="";
+				} else
+				{
+					v=str.mid(2, c-2);
+					str=str.mid(c+1);
+				}
+//				eDebug("%c ... %s", p, v.c_str());
+				if (p == 'p')
+					s.service_provider=v;
+				else if (p == 'f')
+				{
+					sscanf(v.c_str(), "%x", &s.dxflags);
+				} else if (p == 'c')
+				{
+					int cid, val;
+					sscanf(v.c_str(), "%02d%04x", &cid, &val);
+					if (cid < eServiceDVB::cacheMax)
+						s.cache[cid]=val;
+				}
+			}
+	}
+
+	eDebug("loaded %d subservices", count);
+
 	fclose(f);
 }
 

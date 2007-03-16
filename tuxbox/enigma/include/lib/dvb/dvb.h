@@ -842,6 +842,7 @@ private:
 	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
 	std::map<eServiceReferenceDVB,eServiceDVB> services;
+	std::map<eServiceReferenceDVB,eServiceDVB> subservices;
 	std::map<int,eSatellite*> satellites;
 	std::list<eLNB> lnbs;
 	std::map<int,eServiceReferenceDVB> channel_number;
@@ -867,6 +868,7 @@ public:
 	void writeTimeOffsetData( const char* filename );
 
 	void clearAllServices()	{	services.clear(); }
+	void clearAllSubServices()	{	subservices.clear(); }
 	void clearAllTransponders()	{	transponders.clear(); }
 	void removeService( const eServiceReferenceDVB& );
 	void removeOrbitalPosition(int orbital_position);
@@ -890,6 +892,7 @@ public:
 
 	eTransponder &createTransponder(eDVBNamespace dvb_namespace,eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eServiceDVB &createService(const eServiceReferenceDVB &service, int service_number=-1, bool *newService=0);
+	eServiceDVB &createSubService(const eServiceReferenceDVB &service, bool *newService=0);
 	void startHandleSDT(const SDT *sdt, eDVBNamespace dvb_namespace, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1, Signal0<void> *callback=0, int sdtscanstate=SDT_SCAN );
 	void handleSDT(const SDT *sdt, eDVBNamespace dvb_namespace, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1, Signal0<void> *callback=0 );
 	Signal1<void, eTransponder*> transponder_added;
@@ -899,6 +902,7 @@ public:
 	eTransponder *searchTransponder(const eTransponder &);
 	eTransponder *searchTS(eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eServiceDVB *searchService(const eServiceReference &service);
+	eServiceDVB *searchSubService(const eServiceReference &service);
 	eServiceReferenceDVB searchServiceByNumber(int channel_number);
 	int countServices( eDVBNamespace dvbnamespace, eTransportStreamID tsid, eOriginalNetworkID onid )
 	{
@@ -922,6 +926,12 @@ public:
 	void forEachService(T ob)
 	{
 		for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator i(services.begin()); i!=services.end(); ++i)
+			ob(i->second);
+	}
+	template <class T> 
+	void forEachSubService(T ob)
+	{
+		for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator i(subservices.begin()); i!=subservices.end(); ++i)
 			ob(i->second);
 	}
 	template <class T> 

@@ -1327,7 +1327,9 @@ eService *eServiceHandlerDVB::addRef(const eServiceReference &service)
 		eTransponderList *tl=eTransponderList::getInstance();
 		if (!tl)
 			return 0;
-		return tl->searchService(service);
+		eService *s = tl->searchService(service);
+		if (!s) s = tl->searchSubService(service);
+		return s;
 	}
 }
 

@@ -833,6 +833,29 @@ eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service
 
 	return i->second;
 }
+eServiceDVB &eTransponderList::createSubService(const eServiceReferenceDVB &service, bool *newService)
+{
+	std::map<eServiceReferenceDVB,eServiceDVB>::iterator i=subservices.find(service);
+
+	if ( newService )
+		*newService = (i == subservices.end());
+	if (i == subservices.end() )
+	{
+		eServiceDVB *n=&subservices.insert(
+					std::pair<eServiceReferenceDVB,eServiceDVB>
+						(service,
+							eServiceDVB(service.getDVBNamespace(),
+							service.getTransportStreamID(),
+							service.getOriginalNetworkID(),
+							service.getServiceID()))
+							).first->second;
+		n->service_name=service.descr;
+		n->service_type=7;//SubService
+		return *n;
+	}
+
+	return i->second;
+}
 
 void eTransponderList::leaveService( const eServiceReferenceDVB& )
 {
@@ -1192,6 +1215,16 @@ eServiceDVB *eTransponderList::searchService(const eServiceReference &service)
 	const eServiceReferenceDVB &dvbservice=(const eServiceReferenceDVB&)service;
 	std::map<eServiceReferenceDVB,eServiceDVB>::iterator i=services.find(dvbservice);
 	if (i==services.end())
+		return 0;
+	return &i->second;
+}
+eServiceDVB *eTransponderList::searchSubService(const eServiceReference &service)
+{
+	if (service.type != eServiceReference::idDVB)
+		return 0;
+	const eServiceReferenceDVB &dvbservice=(const eServiceReferenceDVB&)service;
+	std::map<eServiceReferenceDVB,eServiceDVB>::iterator i=subservices.find(dvbservice);
+	if (i==subservices.end())
 		return 0;
 	return &i->second;
 }

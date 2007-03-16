@@ -913,6 +913,7 @@ SubService::SubService(eListBox<SubService> *listbox, eDVBNamespace dvb_namespac
 			eServiceID(descr->service_id), 7)
 {
 	service.descr=text=convertDVBUTF8(descr->private_data, descr->priv_len);
+	eTransponderList::getInstance()->createSubService(service);
 }
 
 struct selectCurSubService
