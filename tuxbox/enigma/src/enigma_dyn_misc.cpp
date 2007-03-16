@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_misc.cpp,v 1.12 2007/01/24 23:16:35 ghostrider Exp $
+ * $Id: enigma_dyn_misc.cpp,v 1.13 2007/03/16 18:23:23 dbluelle Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -138,9 +138,12 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	apid = eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid);
 	pcrpid = eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid);
 	tpid = eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid);
-	tsid = eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
-	onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
-	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
+	if (sapi && sapi->service)
+	{
+		tsid = eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
+		onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
+		sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
+	}
 	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
 
 	vidform = getVidFormat();
@@ -821,9 +824,12 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 	apid = eString().sprintf("%04xh (%dd)", Decoder::current.apid, Decoder::current.apid);
 	pcrpid = eString().sprintf("%04xh (%dd)", Decoder::current.pcrpid, Decoder::current.pcrpid);
 	tpid = eString().sprintf("%04xh (%dd)", Decoder::current.tpid, Decoder::current.tpid);
-	tsid = eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
-	onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
-	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
+	if (sapi && sapi->service)
+	{
+		tsid = eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
+		onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
+		sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
+	}
 	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
 
 	vidform = getVidFormat();
