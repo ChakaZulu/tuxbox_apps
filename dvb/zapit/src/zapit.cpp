@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.394 2007/03/12 02:51:08 Arzka Exp $
+ * $Id: zapit.cpp,v 1.395 2007/03/17 21:34:22 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1988,6 +1988,7 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo, const CZapitClient::c
 	} 
 	else if (mode == CZapitClient::MODE_RADIO) 	wantedMode = RADIO_MODE;
 	else if (mode == CZapitClient::MODE_TV) 	wantedMode = TV_MODE;
+	else if (mode == CZapitClient::MODE_ALL) 	wantedMode = TV_MODE | RADIO_MODE;
 
 	for (uint i = 0; i < bouquetManager->Bouquets.size(); i++)
 	{
@@ -2057,6 +2058,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 		CZapitClient::responseGetBouquetChannels response;
 		strncpy(response.name, ((*channels)[i]->getName()).c_str(), 30);
+		response.name[29]   = '\0'; // so string is zero terminated
 		response.satellitePosition = (*channels)[i]->getSatellitePosition();
 		response.channel_id = (*channels)[i]->getChannelID();
 		response.nr = first_channel_nr + i;
@@ -2468,7 +2470,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.394 2007/03/12 02:51:08 Arzka Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.395 2007/03/17 21:34:22 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
