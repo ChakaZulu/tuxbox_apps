@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.53 2007/01/12 22:57:57 houdini Exp $
+  $Id: sectionsdclient.cpp,v 1.54 2007/03/17 22:49:16 houdini Exp $
 
   License: GPL
 
@@ -709,7 +709,7 @@ void CSectionsdClient::freeMemory()
 
 void CSectionsdClient::readSIfromXML(const char * epgxmlname)
 {
-	send(sectionsd::readSIfromXML, (char*) epgxmlname, strlen(epgxmlname));
+	send(sectionsd::readSIfromXML, (char*) epgxmlname, strlen(epgxmlname) + 1); // include '\0'
 
 	readResponse();
 	close_connection();
@@ -717,7 +717,7 @@ void CSectionsdClient::readSIfromXML(const char * epgxmlname)
 
 void CSectionsdClient::writeSI2XML(const char * epgxmlname)
 {
-	send(sectionsd::writeSI2XML, (char*) epgxmlname, strlen(epgxmlname));
+	send(sectionsd::writeSI2XML, (char*) epgxmlname, strlen(epgxmlname) + 1); // include '\0'
 
 	readResponse();
 	close_connection();
