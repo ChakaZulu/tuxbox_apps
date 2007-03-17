@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.844 2007/03/15 18:50:19 feynman Exp $
+	$Id: neutrino.cpp,v 1.845 2007/03/17 22:27:40 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -889,7 +889,6 @@ int CNeutrinoApp::loadSetup()
 			}
 			else
 				g_settings.usermenu[button][pos] = 0;     // string empty, fill up with 0
-            
 		}
 	}
 	
@@ -1367,8 +1366,8 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 	//deleting old channelList for mode-switching.
 	if (channelListTV)
 		delete channelListTV;
-
 	channelListTV = new CChannelList(g_Locale->getText(LOCALE_CHANNELLIST_HEAD));
+
 	g_Zapit->getChannels(zapitChannels, CZapitClient::MODE_TV, CZapitClient::SORT_BOUQUET, true); // UTF-8
 	for(uint i=0; i<zapitChannels.size(); i++)
 	{
@@ -1386,25 +1385,15 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 	{
 		CZapitClient::BouquetChannelList zapitChannels;
 
-#if 0
-// removed because '\0' always added in zapit
-		/* add terminating 0 to zapitBouquets[i].name */
-		char bouquetname[sizeof(zapitBouquets[i].name) + 1];
-		strncpy(bouquetname, zapitBouquets[i].name, sizeof(zapitBouquets[i].name));
-		bouquetname[sizeof(zapitBouquets[i].name)] = 0;
-
-		bouquetListTV->addBouquet(bouquetname, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
-#endif
 		bouquetListTV->addBouquet(zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
 		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_TV, true); // UTF-8
 
 		for (uint j = 0; j < zapitChannels.size(); j++)
 		{
-			CChannelList::CChannel* channel = channelListTV->getChannel(zapitChannels[j].nr);
-
+			CChannelList::CChannel* channel = new CChannelList::CChannel(zapitChannels[j].nr, zapitChannels[j].nr, zapitChannels[j].name, zapitChannels[j].satellitePosition, zapitChannels[j].channel_id); // UTF-8
+	
 			/* observe that "bouquetList->Bouquets[i]" refers to the bouquet we just created using bouquetList->addBouquet */
 			bouquetListTV->Bouquets[i]->channelList->addChannel(channel);
-
 			if (zapitBouquets[i].locked)
 			{
 				channel->bAlwaysLocked = true;
@@ -1437,21 +1426,12 @@ void CNeutrinoApp::channelsInit(int init_mode, int mode)
 	{
 		CZapitClient::BouquetChannelList zapitChannels;
 
-#if 0
-// removed because '\0' always added in zapit
-		/* add terminating 0 to zapitBouquets[i].name */
-		char bouquetname[sizeof(zapitBouquets[i].name) + 1];
-		strncpy(bouquetname, zapitBouquets[i].name, sizeof(zapitBouquets[i].name));
-		bouquetname[sizeof(zapitBouquets[i].name)] = 0;
-
-		bouquetListRADIO->addBouquet(bouquetname, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
-#endif
 		bouquetListRADIO->addBouquet(zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
 		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_RADIO, true); // UTF-8
 
 		for (uint j = 0; j < zapitChannels.size(); j++)
 		{
-			CChannelList::CChannel* channel = channelListRADIO->getChannel(zapitChannels[j].nr);
+			CChannelList::CChannel* channel = new CChannelList::CChannel(zapitChannels[j].nr, zapitChannels[j].nr, zapitChannels[j].name, zapitChannels[j].satellitePosition, zapitChannels[j].channel_id); // UTF-8
 
 			/* observe that "bouquetList->Bouquets[i]" refers to the bouquet we just created using bouquetList->addBouquet */
 			bouquetListRADIO->Bouquets[i]->channelList->addChannel(channel);
