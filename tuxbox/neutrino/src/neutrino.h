@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.185 2007/02/25 21:03:48 guenther Exp $
+	$Id: neutrino.h,v 1.186 2007/03/18 12:47:25 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -238,7 +238,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		static CNeutrinoApp* getInstance();
 
 		void channelsInit(int init_mode, int mode = -1);
-//		void channelsInit4Record();
+		void channelsInit4Record();
 		int run(int argc, char **argv);
 		//callback stuff only....
 		int exec(CMenuTarget* parent, const std::string & actionKey);
