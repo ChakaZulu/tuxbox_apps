@@ -16,7 +16,7 @@ private:
 	void check(int);
 	int getVCRActivity();
 public:
-	void reloadSettings();
+	void reloadSettings(int aspect=-1);
 	eStreamWatchdog();
 	~eStreamWatchdog();
 	static eStreamWatchdog *getInstance();

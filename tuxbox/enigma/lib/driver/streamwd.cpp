@@ -91,7 +91,7 @@ int eStreamWatchdog::getVCRActivity()
 	return val;
 }
 
-void eStreamWatchdog::reloadSettings()
+void eStreamWatchdog::reloadSettings(int override_aspect)
 {
 	static int prevVcrSlbVlt=-1;
 	int VcrSlbVlt = getVCRActivity();
@@ -118,6 +118,8 @@ void eStreamWatchdog::reloadSettings()
 				frate=atoi(buffer+8);
 		}
 		fclose(bitstream);
+		if (override_aspect != -1)
+			aspect = override_aspect;
 		switch (aspect)
 		{
 			case 1:
