@@ -509,10 +509,11 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 	/* specify URL to get */
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
 	/* send all data to this function  */
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION,
-						  CurlWriteToString);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, CurlWriteToString);
 	/* we pass our 'chunk' struct to the callback function */
 	curl_easy_setopt(curl_handle, CURLOPT_FILE, (void *)&answer);
+	/* Generate error if http error >= 400 occurs */
+	curl_easy_setopt(curl_handle, CURLOPT_FAILONERROR, 1);
 	/* error handling */
 	char error[CURL_ERROR_SIZE];
 	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error);
@@ -522,8 +523,8 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 	curl_easy_cleanup(curl_handle);
 
 	// std::cout << "Answer:" << std::endl << "----------------" << std::endl << answer << std::endl;
-	/*!!! TODO check httpres and display error */
-	if (!answer.empty() && !httpres)
+	
+	if (!answer.empty() && httpres == 0)
 	{
         xmlDocPtr answer_parser = parseXml(answer.c_str());
         
@@ -564,8 +565,10 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
         
 	}
 	
-	std::cout << "Error reading vlc dir" << std::endl;
 	/* since all CURL error messages use only US-ASCII characters, when can safely print them as if they were UTF-8 encoded */
+	if (httpres == 22) {
+	    strcat(error, "\nProbably wrong vlc version\nPlease use vlc 0.8.5 or higher");	
+	}
 	DisplayErrorMessage(error); // UTF-8
 	CFile file;
 
