@@ -67,7 +67,7 @@ bool canPlayService( const eServiceReference & ref )
 		return true;
 	if ( ref.type == eServiceReference::idDVB )
 	{
-		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR )
+		if ( 0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR )
 			return false;  // no service change during recording yet
 		if ( ref.path )
 			return eSystemInfo::getInstance()->canTimeshift();

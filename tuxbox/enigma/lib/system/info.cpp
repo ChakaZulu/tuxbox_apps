@@ -198,7 +198,7 @@ eSystemInfo::eSystemInfo()
 					midstr="11";
 					modelstr="DM600PVR";
 					cpustr="STBx25xx, 252MHz";
-					hashdd = canrecordts = 1;
+					hashdd = canrecordts = cantimeshift = 1;
 					hasscartswitch = 0;
 					hwtype = DM600PVR;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;

@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.564 2007/01/27 22:12:58 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.565 2007/03/22 16:02:20 ghostrider Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -374,7 +374,7 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 	eAVSwitch::getInstance()->selectAudioChannel(atoi(channel.c_str()));
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
-	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR &&
+	if (0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR &&
 		eDVB::getInstance()->recorder )
 		eDebug("no audio track selection possible");
 	else if (sapi)

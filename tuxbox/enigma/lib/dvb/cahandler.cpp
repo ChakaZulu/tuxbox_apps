@@ -219,16 +219,22 @@ void CAService::buildCAPMT( PMT *pmt )
 
 	capmt[23]=0x82;  // demuxer kram..
 	capmt[24]=0x02;
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 
-		|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020 )
+
+	switch(eSystemInfo::getInstance()->getHwType())
 	{
-		capmt[25]=0x03;  // descramble on demux0 and demux1
-		capmt[26]=0x01;  // get section data from demux1
-	}
-	else
-	{
-		capmt[25]=0x01;  // only descramble on demux0
-		capmt[26]=0x00;  // get section data from demux0
+		case eSystemInfo::DM7000:
+		case eSystemInfo::DM7020:
+			capmt[25]=0x03;  // descramble on demux0 and demux1
+			capmt[26]=0x01;  // get section data from demux1
+			break;
+		case eSystemInfo::DM600PVR:
+			capmt[25]=0x01;  // descramble on demux0 // demux 1 is just a fake demux 0
+			capmt[26]=0x01;  // get section data from demux1
+			break;
+		default:
+			capmt[25]=0x01;  // only descramble on demux0
+			capmt[26]=0x00;  // get section data from demux0
+			break;
 	}
 
 	capmt[27]=0x84;  // pmt pid

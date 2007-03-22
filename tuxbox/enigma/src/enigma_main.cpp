@@ -3038,7 +3038,8 @@ void eZapMain::pause()
 	{
 		if ( ref.type == eServiceReference::idDVB && !ref.path && !timeshift )
 		{
-			if (eSystemInfo::getInstance()->canTimeshift())
+			if (eSystemInfo::getInstance()->canTimeshift() &&
+				eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM600PVR)
 			{
 				if (!eDVB::getInstance()->recorder)
 				{
@@ -4847,7 +4848,7 @@ void eZapMain::showAudioMenu()
 		}
 		else
 		{
-			if ( !(eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR &&
+			if ( !(0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR &&
 				eDVB::getInstance()->recorder) )
 			{
 				audiosel.show();
