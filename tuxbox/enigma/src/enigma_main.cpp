@@ -7215,7 +7215,7 @@ void eZapMain::wakeUp()
 void eZapMain::gotRDSText(eString text)
 {
 //	eDebug("gotRDSText(%s)", text.c_str() );
-	dvbInfoBar->hide();
+//	dvbInfoBar->hide();
 //	fileInfoBar->show();
 //	fileinfos->setText(convertLatin1UTF8(text));
 #ifndef DISABLE_LCD
