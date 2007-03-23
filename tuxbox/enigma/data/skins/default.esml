@@ -27,6 +27,16 @@
 			<value name="volume.slider.pos.y" value="38" />
 			<value name="volume.slider.width" value="162" />
 			<value name="volume.slider.height" value="11" />
+			<value name="rds.pos.x" value="50" />
+			<value name="rds.pos.y" value="481" />
+			<value name="rds.pos.width" value="620" />
+			<value name="rds.pos.height" value="29" />
+			<value name="rds_plus.pos.x" value="50" />
+			<value name="rds_plus.pos.y" value="510" />
+			<value name="rds_plus.pos.width" value="620" />
+			<value name="rds_plus.pos.height" value="29" />
+			<value name="rass_logo.pos.x" value="50" />
+			<value name="rass_logo.pos.y" value="445" />
 	</values>
 
 	<fontalias>
@@ -80,6 +90,9 @@
 		<map name="textinputfield.helpwidget.bigger" font="lcd" size="90" />
 		<map name="textinputfield.helpwidget.normal" font="Replacement" size="30" />
 		<map name="textinputfield.helpwidget.small" font="Replacement" size="20" />
+
+		<map name="rass" font="Nimbus" size="20" />
+		<map name="rds" font="Nimbus" size="20" />
 	</fontalias>
 
 	<images basepath="" target="fb">
@@ -139,6 +152,11 @@
 		<img name="failed_symbol" src="event_failed-fs8.png" />
 		<img name="dreamlogo" src="dreamlogo-fs8.png" />
 		<img name="triaxlogo" src="triaxlogo-fs8.png" />
+		<img name="rass_logo" src="rass_logo.png" />
+		<img name="rass_page1" src="rass_page1.png" />
+		<img name="rass_page2" src="rass_page2.png" />
+		<img name="rass_page3" src="rass_page3.png" />
+		<img name="rass_page4" src="rass_page4.png" />
 		
 		<img name="diseqc_0" src="diseqc_0-fs8.png" />
 		<img name="diseqc_1" src="diseqc_1-fs8.png" />
@@ -258,6 +276,11 @@
 		<color name="eServiceSelector.entrySelectedToMove" color="#ff0303" />
 		<color name="eServiceSelector.entryHilited" color="#ff0303" />
 		<color name="epg.timeline.now" color="#A01010" />
+
+		<color name="rass_bg" color="#77ffffff" />
+		<color name="rass_fg" color="#000000" />
+		<color name="rds_bg" color="#88003258" />
+		<color name="rds_fg" color="#ffffff" />
 	</colors>
 
 	<colorscheme>

@@ -1527,7 +1527,7 @@ void eZapMain::reloadPaths(int reset)
 int eZapMain::doHideInfobar()
 {
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
-	if ( (ref.type == eServiceReference::idDVB && ref.data[0] != 2 )
+	if ( (ref.type == eServiceReference::idDVB /*&& ref.data[0] != 2*/ )
 #ifndef DISABLE_FILE
 		||
 			(ref.type == eServiceReference::idUser &&
@@ -4869,8 +4869,13 @@ extern eString getInfo(const char *file, const char *info);
 
 void eZapMain::runVTXT()
 {
-	eDebug("runVTXT");
-	if (isVT)
+	eDebug("runVTXT/RassInteractive");
+	if (rdstext_decoder.interactive_avail == 1)
+	{
+		hideInfobar();
+		rdstext_decoder.rass_interactive();
+	} 
+	else if (isVT)
 	{
 		eZapPlugins plugins(2);
 		if ( plugins.execPluginByName("tuxtxt.cfg") != "OK" )
@@ -5888,6 +5893,8 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		eServiceReference &ref = eServiceInterface::getInstance()->service;
 		startService(ref, err);
 
+		rdstext_decoder.clear_service();
+		
 // SHOW PICTURE
 		switch(mode)
 		{
@@ -7209,8 +7216,8 @@ void eZapMain::gotRDSText(eString text)
 {
 //	eDebug("gotRDSText(%s)", text.c_str() );
 	dvbInfoBar->hide();
-	fileInfoBar->show();
-	fileinfos->setText(convertLatin1UTF8(text));
+//	fileInfoBar->show();
+//	fileinfos->setText(convertLatin1UTF8(text));
 #ifndef DISABLE_LCD
 	lcdmain.lcdMain->gotRDSText(text);
 #endif
