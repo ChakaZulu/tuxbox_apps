@@ -607,7 +607,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
                                  g_RemoteControl->current_PIDs.SubPIDs[i].desc
                                 );
                         strncat(buf2, tmpbuf, sizeof(buf2));
-			if (++count == 3) {
+			if (++count == 2) {
 				strncat(buf, buf2, sizeof(buf));
 				g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 				ypos += sheight;
@@ -623,12 +623,12 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
                         g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE),
                         sizeof(buf));
         }
-        if (count != 3) {
+        if (count != 2) {
 		g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+        	ypos += sheight;
 	}
 
         // TTX subtitles
-        ypos += sheight;
         snprintf((char*)buf, sizeof(buf), "%s: ", "TTXsub page(s)");
         strcpy(buf2, "");
 	count = 0;
@@ -664,10 +664,11 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
         }
         if (count != 3) {
 		g_Font[font_small]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+		ypos+= sheight;
 	}
 
 	//satellite
-	ypos+= sheight+10;
+	ypos += 10;
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
 	g_Font[font_info]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
