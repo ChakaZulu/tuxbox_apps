@@ -722,11 +722,22 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		pids[numpids++] = si.vtxtpid;
 	}
 
-	if ((StreamPmtPid) && (si.pmtpid != 0))
-	{
-		pids[numpids++] = si.pmtpid;
+	if ((StreamSubtitlePid) && (allpids.SubPIDs.size() > 0)) {
+		// Add ttx-pid only once
+		unsigned txtdone = 0;
+		if (StreamVTxtPid) {
+			txtdone = si.vtxtpid;
+		}
+		for (unsigned ii = 0 ; ii < allpids.SubPIDs.size() ; ++ii) {
+			if (allpids.SubPIDs[ii].pid != txtdone) {
+				pids[numpids++] = allpids.SubPIDs[ii].pid;
+			}
+			if (allpids.SubPIDs[ii].pid == si.vtxtpid) {
+				txtdone = si.vtxtpid;
+			}
+		}
 	}
-
+	
 	char filename[512]; // UTF-8
 
 	// Create filename for recording
