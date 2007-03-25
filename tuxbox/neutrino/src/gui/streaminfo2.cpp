@@ -438,6 +438,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	long bitInfo[10];
 
 	char *key,*tmpptr,buf[100], buf2[100];
+	int count = 0;
 	long value;
 	int pos=0;
 	fgets(buf,35,fd);//dummy
@@ -580,16 +581,95 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//vtxtpid
+	ypos += sheight;
 	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid == 0 )
         	sprintf((char*) buf, "VTXTpid: %s", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
 	else
         	sprintf((char*) buf, "VTXTpid: 0x%04x", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
-	g_Font[font_small]->RenderString(xpos, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
-	ypos+= sheight+ 10;
-	
+	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+
+	// Subtitle pids
+        ypos+= sheight;
+        snprintf((char*)buf, sizeof(buf), "%s: ", "Sub pid(s)");
+        strcpy(buf2, "");
+        count=0;
+	for (unsigned i = 0 ;
+             i < g_RemoteControl->current_PIDs.SubPIDs.size() ; i++) {
+                if (g_RemoteControl->current_PIDs.SubPIDs[i].pid !=
+                    g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
+                        char tmpbuf[100];
+                        if (*buf2) {
+                                strncat(buf2, ", ", sizeof(buf2));
+                        }
+                        snprintf(tmpbuf, sizeof(tmpbuf),
+                                 "0x%04x %s",
+                                 g_RemoteControl->current_PIDs.SubPIDs[i].pid,
+                                 g_RemoteControl->current_PIDs.SubPIDs[i].desc
+                                );
+                        strncat(buf2, tmpbuf, sizeof(buf2));
+			if (++count == 3) {
+				strncat(buf, buf2, sizeof(buf));
+				g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+				ypos += sheight;
+				strcpy(buf, "          ");
+				strcpy(buf2, "");
+			}
+                }
+        }
+        if (count) {
+                strncat(buf, buf2, sizeof(buf));
+        } else {
+                strncat(buf,
+                        g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE),
+                        sizeof(buf));
+        }
+        if (count != 3) {
+		g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	}
+
+        // TTX subtitles
+        ypos += sheight;
+        snprintf((char*)buf, sizeof(buf), "%s: ", "TTXsub page(s)");
+        strcpy(buf2, "");
+	count = 0;
+	for (unsigned i = 0 ;
+             i < g_RemoteControl->current_PIDs.SubPIDs.size() ; i++) {
+                if (g_RemoteControl->current_PIDs.SubPIDs[i].pid ==
+                    g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
+                        char tmpbuf[100];
+                        if (*buf2) {
+                                strncat(buf2, ", ", sizeof(buf2));
+                        }
+                        snprintf(tmpbuf, sizeof(tmpbuf),
+                                 "%03d %s",
+                                 g_RemoteControl->current_PIDs.SubPIDs[i].composition_page,
+                                 g_RemoteControl->current_PIDs.SubPIDs[i].desc
+                                );
+                        strncat(buf2, tmpbuf, sizeof(buf2));
+			if (++count == 3) {
+				strncat(buf, buf2, sizeof(buf));
+                                g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+                                ypos += sheight;
+                                strcpy(buf, "          ");
+                                strcpy(buf2, "");
+                        }
+                }
+        }
+        if (count) {
+                strncat(buf, buf2, sizeof(buf));
+        } else {
+                strncat(buf,
+                        g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE),
+                        sizeof(buf));
+        }
+        if (count != 3) {
+		g_Font[font_small]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	}
+
 	//satellite
+	ypos+= sheight+10;
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
-	g_Font[font_info]->RenderString(xpos, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[font_info]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
