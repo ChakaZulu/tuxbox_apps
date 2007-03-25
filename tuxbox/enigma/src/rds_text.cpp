@@ -618,6 +618,7 @@ void RDSTextDecoder::process_data(int what)
 										if ( rtplus_osd[0] != 0 )
 										{
 											rtp_text->setText((const char*)rtplus_osd);
+											/*emit*/ textReady((const char*)rtplus_osd);
 											if (rass_imode_active != 1)
 											{
 												if (wasVisible & 8)
