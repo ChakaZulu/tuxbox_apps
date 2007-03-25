@@ -874,7 +874,7 @@ recordingmenu.setupnow Einstellungen jetzt übernehmen
 recordingmenu.splitsize Max. Dateigröße (MB)
 recordingmenu.stopplayback Playback anhalten
 recordingmenu.stopsectionsd Sectionsd anhalten
-recordingmenu.stream_subtitle_pid Subtitle aufzeichnen
+recordingmenu.stream_subtitle_pid Untertitel aufzeichnen
 recordingmenu.stream_vtxt_pid Videotext aufzeichnen
 recordingmenu.use_fdatasync Synchrones Schreiben (fdatasync)
 recordingmenu.use_o_sync Synchrones Schreiben (O_SYNC)
