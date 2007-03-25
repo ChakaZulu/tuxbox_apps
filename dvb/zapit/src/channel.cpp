@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.20 2007/02/28 04:53:26 Arzka Exp $
+ * $Id: channel.cpp,v 1.21 2007/03/25 15:06:04 Arzka Exp $
  *
  * (C) 2002 by Steffen Hehn <mcclean@berlios.de>
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
@@ -116,6 +116,8 @@ void CZapitChannel::addTTXSubtitle(const unsigned int pid, const std::string lan
 {
     CZapitTTXSub* oldSub = 0;
     CZapitTTXSub* tmpSub = 0;
+    unsigned char mag_nr = magazine_number ? magazine_number : 8;
+
     std::vector<CZapitAbsSub*>::iterator subI;
     // Check if it already exists
     for (subI=channelSubs.begin(); subI!=channelSubs.end();subI++){
@@ -124,7 +126,7 @@ void CZapitChannel::addTTXSubtitle(const unsigned int pid, const std::string lan
             if (tmpSub->ISO639_language_code == langCode) {
 	        oldSub = tmpSub;
                 if (tmpSub->pId==pid &&
-		    tmpSub->teletext_magazine_number==magazine_number &&
+		    tmpSub->teletext_magazine_number==mag_nr &&
 		    tmpSub->teletext_page_number==page_number &&
 		    tmpSub->hearingImpaired==impaired) {
                     // It is already there, do nothing
@@ -137,7 +139,7 @@ void CZapitChannel::addTTXSubtitle(const unsigned int pid, const std::string lan
     }
 
     DBG("TTXSub: PID=0x%04x, lang=%3.3s, page=%1X%02X", 
-        pid, langCode.c_str(), magazine_number, page_number);
+        pid, langCode.c_str(), mag_nr, page_number);
 
     if (oldSub) {
         tmpSub=oldSub;
@@ -147,7 +149,7 @@ void CZapitChannel::addTTXSubtitle(const unsigned int pid, const std::string lan
     }
     tmpSub->pId=pid;
     tmpSub->ISO639_language_code=langCode;
-    tmpSub->teletext_magazine_number=magazine_number;
+    tmpSub->teletext_magazine_number=mag_nr;
     tmpSub->teletext_page_number=page_number;
     tmpSub->hearingImpaired=impaired;
 
