@@ -26,7 +26,8 @@ private:
 	int base;
 	eWidget* descr;
 	eLabel* tmpDescr; // used for description Label in LCD
-  bool neg;
+	bool neg;
+	int saved_keyboard_mode;
 protected:
 	int getActive()	{ return active; }
 	int keyDown(int key);
