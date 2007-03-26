@@ -14,6 +14,7 @@
 #include "fb_display.h"
 #include <lib/picviewer/pictureviewer.h>
 #include <lib/gdi/fb.h>
+#include <lib/system/info.h>
 /*
  * FrameBuffer Image Display Function
  * (c) smoku/2000
@@ -39,6 +40,81 @@ unsigned short red_b[256], green_b[256], blue_b[256];
 struct fb_cmap map_back = {0, 256, red_b, green_b, blue_b, NULL};
 
 unsigned char *lfb = 0;
+
+//////////// YUV framebuffer support ///////////////////
+
+int yuv_initialized;
+unsigned short lut[3 * (NR_RED + NR_GREEN + NR_BLUE) ];
+
+void build_yuv_lut(void)
+{
+	int i;
+	for (i=0; i<NR_RED; ++i)
+	{
+		int r = i * 256 / NR_RED;
+		lut_r_y[i] = Y(r, 0, 0);
+		lut_r_u[i] = U(r, 0, 0);
+		lut_r_v[i] = V(r, 0, 0);
+	}
+
+	for (i=0; i<NR_GREEN; ++i)
+	{
+		int g = i * 256 / NR_GREEN;
+		lut_g_y[i] = Y(0, g, 0);
+		lut_g_u[i] = U(0, g, 0);
+		lut_g_v[i] = V(0, g, 0);
+	}
+
+	for (i=0; i<NR_BLUE; ++i)
+	{
+		int b = i * 256 / NR_BLUE;
+		lut_b_y[i] = Y(0, 0, b);
+		lut_b_u[i] = U(0, 0, b);
+		lut_b_v[i] = V(0, 0, b);
+	}
+}
+
+void clear_yuv_fb()
+{
+	unsigned char *dest = lfb;
+	for (int i=0; i < 720*576; ++i)
+	{
+		unsigned char r = 0;
+		unsigned char g = 0;
+		unsigned char b = 0;
+		dest[0] = (lut_r_y[r] + lut_g_y[g] + lut_b_y[b]) >> 8;
+		if (i & 1)
+			dest[720*576] = ((lut_r_u[r] + lut_g_u[g] + lut_b_u[b]) >> 8) + 128;
+		else
+			dest[720*576] = ((lut_r_v[r] + lut_g_v[g] + lut_b_v[b]) >> 8) + 128;
+		++dest;
+	}
+}
+
+void blit_to_yuv_fb(int x_pos, int y_pos, int x_size, int y_size, unsigned char *source)
+{
+	for (int y=y_pos; y < y_pos+y_size; ++y)
+	{
+		unsigned char *dest = lfb + y * 720 + x_pos;
+		int x=x_pos;
+		while(x < x_pos+x_size)
+		{
+			unsigned char r = *(source++);
+			unsigned char g = *(source++);
+			unsigned char b = *(source++);
+			dest[0] = (lut_r_y[r] + lut_g_y[g] + lut_b_y[b]) >> 8;
+			if (x & 1)
+				dest[720*576] = ((lut_r_v[r] + lut_g_v[g] + lut_b_v[b]) >> 8) + 128;
+			else
+				dest[720*576] = ((lut_r_u[r] + lut_g_u[g] + lut_b_u[b]) >> 8) + 128;
+			++dest;
+			++x;
+		}
+	}
+}
+
+/////////////////// YUV end /////////////////////////////
+
 
 int openFB(const char *name);
 //void closeFB(int fh);
@@ -78,15 +154,32 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
 	if (x_offs + x_size > (int)var->xres) x_offs = 0;
 	if (y_offs + y_size > (int)var->yres) y_offs = 0;
 
-	/* blit buffer 2 fb */
-	fbbuff = (unsigned short *) convertRGB2FB(rgbbuff, x_size * y_size, var->bits_per_pixel, &bp);
-	if (fbbuff == NULL)
-		return;
-	/* ClearFB if image is smaller */
-	if (x_size < (int)var->xres || y_size < (int)var->yres)
-		clearFB(var->bits_per_pixel, bp);
-	blit2FB(fbbuff, x_size, y_size, var->xres, var->yres, x_pan, y_pan, x_offs, y_offs, bp);
-	free(fbbuff);
+	if (eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM600PVR || var->bits_per_pixel < 16)
+	{
+		/* blit buffer 2 fb */
+		fbbuff = (unsigned short *) convertRGB2FB(rgbbuff, x_size * y_size, var->bits_per_pixel, &bp);
+		if (fbbuff == NULL)
+			return;
+		/* ClearFB if image is smaller */
+		if (x_size < (int)var->xres || y_size < (int)var->yres)
+			clearFB(var->bits_per_pixel, bp);
+		blit2FB(fbbuff, x_size, y_size, var->xres, var->yres, x_pan, y_pan, x_offs, y_offs, bp);
+		free(fbbuff);
+	}
+	else
+	{
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR && var->bits_per_pixel == 16)
+		{
+			if (!yuv_initialized)
+			{
+				build_yuv_lut();
+				yuv_initialized=1;
+			}
+			if (x_size < (int)var->xres || y_size < (int)var->yres)
+				clear_yuv_fb();
+			blit_to_yuv_fb(x_offs, y_offs, x_size, y_size, rgbbuff);
+		}
+	}
 }
 
 void getCurrentRes(int *x, int *y)

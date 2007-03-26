@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.cpp,v 1.44 2007/01/17 19:25:24 dbluelle Exp $
+ * $Id: pictureviewer.cpp,v 1.45 2007/03/26 19:02:53 ghostrider Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -21,6 +21,7 @@
  
 #include <config.h>
 #include <lib/driver/streamwd.h>
+#include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
@@ -688,22 +689,29 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 //	eDebug("Show Busy{");
 
 	unsigned char rgb_buffer[3];
-	unsigned char *fb_buffer;
+	unsigned char *fb_buffer=0;
 	unsigned char *busy_buffer_wrk;
 	int cpp;
-	struct fb_var_screeninfo *var;
-	var = fbClass::getInstance()->getScreenInfo();
+	struct fb_var_screeninfo *var = fbClass::getInstance()->getScreenInfo();
+
+	bool yuv_fb = eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR && var->bits_per_pixel == 16;
 
 	rgb_buffer[0] = r;
 	rgb_buffer[1] = g;
 	rgb_buffer[2] = b;
 
-	fb_buffer = (unsigned char *) convertRGB2FB(rgb_buffer, 1, var->bits_per_pixel, &cpp);
-	if (fb_buffer == NULL)
+	if (!yuv_fb)
 	{
-		eDebug("Error: malloc");
-		return;
+		fb_buffer = (unsigned char *) convertRGB2FB(rgb_buffer, 1, var->bits_per_pixel, &cpp);
+		if (fb_buffer == NULL)
+		{
+			eDebug("Error: malloc");
+			return;
+		}
 	}
+	else
+		cpp=2;
+
 	if (m_busy_buffer != NULL)
 	{
 		delete [] m_busy_buffer;
@@ -715,6 +723,7 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 		eDebug("Error: malloc");
 		return;
 	}
+
 	busy_buffer_wrk = m_busy_buffer;
 	unsigned char *fb = fbClass::getInstance()->lfb;
 	unsigned int stride = fbClass::getInstance()->Stride();
@@ -723,11 +732,26 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	{
 		for(int x = sx ; x < sx + width; x++)
 		{
-			memcpy(busy_buffer_wrk, fb + y * stride + x * cpp, cpp);
+			if (yuv_fb)
+			{
+				int offs = y * stride + x;
+				busy_buffer_wrk[0]=fb[offs];  // save old Y
+				busy_buffer_wrk[1]=fb[offs + 720 * 576]; // save old UV
+				fb[offs]=(lut_r_y[r] + lut_g_y[g] + lut_b_y[b]) >> 8;
+				if (x & 1)
+					fb[offs + 720 * 576]=((lut_r_v[r] + lut_g_v[g] + lut_b_v[b]) >> 8) + 128;
+				else
+					fb[offs + 720 * 576]=((lut_r_u[r] + lut_g_u[g] + lut_b_u[b]) >> 8) + 128;
+			}
+			else
+			{
+				memcpy(busy_buffer_wrk, fb + y * stride + x, cpp);
+				memcpy(fb + y * stride + x * cpp, fb_buffer, cpp);
+			}
 			busy_buffer_wrk += cpp;
-			memcpy(fb + y * stride + x * cpp, fb_buffer, cpp);
 		}
 	}
+
 	m_busy_x = sx;
 	m_busy_y = sy;
 	m_busy_width = width;
@@ -738,19 +762,31 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 
 void ePictureViewer::hideBusy()
 {
-//	eDebug("Hide Busy {");
+	//eDebug("Hide Busy {");
+
 	if (m_busy_buffer != NULL)
 	{
 		unsigned char *fb = fbClass::getInstance()->lfb;
 		unsigned int stride = fbClass::getInstance()->Stride();
 		unsigned char *busy_buffer_wrk = m_busy_buffer;
-
+		struct fb_var_screeninfo *var = fbClass::getInstance()->getScreenInfo();
+		bool yuv_fb = eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR && var->bits_per_pixel == 16;
+	
 		for (int y = m_busy_y; y < m_busy_y + m_busy_width; y++)
 		{
 			for (int x = m_busy_x; x < m_busy_x + m_busy_width; x++)
 			{
-				memcpy(fb + y * stride + x * m_busy_cpp, busy_buffer_wrk, m_busy_cpp);
-				busy_buffer_wrk += m_busy_cpp;
+				if (yuv_fb)
+				{
+					int offs = y * stride + x;
+					fb[offs]=*(busy_buffer_wrk++);
+					fb[offs + 720 * 576]=*(busy_buffer_wrk++);
+				}
+				else
+				{
+					memcpy(fb + y * stride + x, busy_buffer_wrk, m_busy_cpp);
+					busy_buffer_wrk += m_busy_cpp;
+				}
 			}
 		}
 		delete [] m_busy_buffer;
