@@ -212,7 +212,7 @@ eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, 
 	normalB(eSkin::getActive()->queryScheme("number.normal.background")),
 	normalF(eSkin::getActive()->queryScheme("number.normal.foreground")),
 	have_focus(0), digit(isactive), isactive(isactive), flags(0), descr(descr), tmpDescr(0),
-	neg(false)
+	neg(false), saved_keyboard_mode(0)
 {
 	setNumberOfFields(_len);
 	setLimits(_min, _max);
@@ -317,6 +317,8 @@ void eNumber::gotFocus()
 	else
 		invalidate(getNumberRect(active));
 
+	saved_keyboard_mode = eRCInput::getInstance()->getKeyboardMode();
+	eRCInput::getInstance()->setKeyboardMode(eRCInput::kmNone);
 #ifndef DISABLE_LCD
 	if (parent && parent->LCDElement)  // detect if LCD Avail
 	{
@@ -374,6 +376,7 @@ void eNumber::lostFocus()
 	else
 		invalidate(getNumberRect(active));
 	isactive=0;
+	eRCInput::getInstance()->setKeyboardMode(saved_keyboard_mode);
 }
 
 int eNumber::setProperty(const eString &prop, const eString &value)
