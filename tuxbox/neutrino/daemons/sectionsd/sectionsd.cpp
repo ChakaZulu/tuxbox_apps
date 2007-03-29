@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.236 2007/02/25 20:51:52 guenther Exp $
+//  $Id: sectionsd.cpp,v 1.237 2007/03/29 15:43:32 mws Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -156,6 +156,7 @@ static int scanning = 1;
 std::string epg_filter_dir = EPG_FILTER_PATH;
 static bool epg_filter_is_whitelist = false;
 static bool epg_filter_except_current_next = false;
+static bool bouquet_filter_is_whitelist = false;
 
 //NTP- Config
 #define CONF_FILE "/var/tuxbox/config/neutrino.conf"
@@ -409,6 +410,38 @@ static void addEPGFilter(t_original_network_id onid, t_transport_stream_id tsid,
 static void removeEPGFilter(t_original_network_id onid, t_transport_stream_id tsid, t_service_id sid)
 {
 
+}
+
+struct BouquetFilter
+{
+	t_bouquet_id bid;
+	BouquetFilter *next;
+};
+
+BouquetFilter *CurrentBouquetFilter = NULL;
+
+static bool checkBouquetFilter(t_bouquet_id bid)
+{
+	BouquetFilter *filterptr = CurrentBouquetFilter;
+	while (filterptr)
+	{
+		if ((filterptr->bid == bid) || (filterptr->bid == 0))
+			return true;
+		filterptr = filterptr->next;
+	}
+	return false;
+}
+
+static void addBouquetFilter(t_bouquet_id bid)
+{
+	if (!checkBouquetFilter(bid))
+	{
+		dprintf("Add Bouquet Filter for bouquet_id=\"%04x\"\n", bid);
+        	BouquetFilter *node = new BouquetFilter;
+		node->bid = bid;
+        	node->next = CurrentBouquetFilter;
+        	CurrentBouquetFilter = node;
+	}
 }
 
 // Loescht ein Event aus allen Mengen
@@ -1667,7 +1700,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.236 2007/02/25 20:51:52 guenther Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.237 2007/03/29 15:43:32 mws Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -5420,6 +5453,7 @@ static void *sdtThread(void *)
 	int i = 0;
 	int j = 0;
 	int is_actual = 0;
+	bool bouquet_filtered = false;
 
 	dmxSDT.addfilter(0x42, 0xf3 );		//SDT actual = 0x42 + SDT other = 0x46 + BAT = 0x4A
 
@@ -5595,6 +5629,11 @@ static void *sdtThread(void *)
 				else if (header.table_id == 0x4a) {
 					t_bouquet_id bid = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
 
+					bouquet_filtered = checkBouquetFilter(bid);
+
+					if (((!bouquet_filtered) && (!bouquet_filter_is_whitelist)) || 
+						((bouquet_filtered) && (bouquet_filter_is_whitelist))) {
+
 					// This is 0 .. MAX_BAT - 1 if already started or new and free or -1 if no free slot available.
 					int current_bouquet = get_bat_slot(bid, (int) header.last_section_number);
 
@@ -5637,7 +5676,7 @@ static void *sdtThread(void *)
 
 						//dprintf("current bouquet: %d, current section: %d code: %d\n", current_bouquet, header.section_number, messaging_bat_sections_so_far[current_bouquet][header.section_number]);
 					}
-
+					}
 				}
 				else {
 					delete[] buf;
@@ -6838,6 +6877,38 @@ static void readEPGFilter(void)
 	xmlFreeDoc(filter_parser);
 }
 
+static void readBouquetFilter(void)
+{
+	xmlDocPtr filter_parser = parseXmlFile("/var/tuxbox/config/mybouquets.xml");
+
+	t_bouquet_id bid = 0;
+
+	if (filter_parser != NULL)
+	{
+		dprintf("Reading Bouquet Filters\n");
+		
+		xmlNodePtr filter = xmlDocGetRootElement(filter_parser);
+		filter = filter->xmlChildrenNode;
+
+		while (xmlGetNextOccurence(filter, "filter") != NULL) {
+
+			if (xmlGetNumericAttribute(filter, "is_whitelist", 10) == 1)
+				bouquet_filter_is_whitelist = true;
+			filter = filter->xmlChildrenNode;
+
+			while (filter) {
+
+				bid  = xmlGetNumericAttribute(filter, "bouquet_id", 16);
+
+				addBouquetFilter(bid);
+
+				filter = filter->xmlNextNode;
+			}
+		}
+	}
+	xmlFreeDoc(filter_parser);
+}
+
 static void printHelp(void)
 {
 	printf("\nUsage: sectionsd [-d][-nu]\n\n");
@@ -6862,7 +6933,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.236 2007/02/25 20:51:52 guenther Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.237 2007/03/29 15:43:32 mws Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -6918,6 +6989,7 @@ int main(int argc, char **argv)
 		printf("[sectionsd] Events are old %ldmin after their end time\n", oldEventsAre / 60);
 
 		readEPGFilter();
+		readBouquetFilter();
 
 		if (!sectionsd_server.prepare(SECTIONSD_UDS_NAME))
 			return EXIT_FAILURE;
