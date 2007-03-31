@@ -46,8 +46,12 @@ ringbuffer_t * ringbuffer_create (int sz)
 	rb->read_ptr = 0;
 	rb->buf = malloc (rb->size);
 	rb->mlocked = 0;
+	
+	if( rb->buf ) 
+		return rb;
 
-	return rb;
+	free( rb );
+	return NULL;
 }
 
 
