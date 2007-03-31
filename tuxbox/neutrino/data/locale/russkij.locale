@@ -368,6 +368,24 @@ fontsize.menu_info Информация Меню
 fontsize.menu_title Заголовок меню
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
+imageinfo.chipset Ваш чипсета:
+imageinfo.creator Создатель:
+imageinfo.cvslevel CVS-Дата:
+imageinfo.date Дата:
+imageinfo.details изменения
+imageinfo.dokumentation Dokumentation:
+imageinfo.forum Форум:
+imageinfo.head информация
+imageinfo.homepage Homepage:
+imageinfo.image Image:
+imageinfo.imagetype Imagetype:
+imageinfo.info информация:
+imageinfo.license Лицензия
+imageinfo.noteflashtype рассмотреть нужные для Вашего flashtype d бокса (1x об 2x)
+imageinfo.partitions разделы
+imageinfo.support поддержка
+imageinfo.supporthere техническая поддержка и помощь, которую Вы можете найти здесь
+imageinfo.version Цикл:
 infoviewer.epgnotload EPG не загружено....
 infoviewer.epgwait попытка получить программу передач...
 infoviewer.eventlist Телегид

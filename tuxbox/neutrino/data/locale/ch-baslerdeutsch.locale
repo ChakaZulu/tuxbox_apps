@@ -303,6 +303,24 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menu Titel
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
+imageinfo.chipset Ihre Chip-Version:
+imageinfo.creator Ersteller:
+imageinfo.cvslevel CVS-Stand:
+imageinfo.date Datum:
+imageinfo.details Versionen
+imageinfo.dokumentation Anleitung:
+imageinfo.forum Forum:
+imageinfo.head Image Informationen
+imageinfo.homepage Homepage:
+imageinfo.image Image:
+imageinfo.imagetype Image-Typ:
+imageinfo.info Info:
+imageinfo.license Lizenz
+imageinfo.noteflashtype für Flashupdates beachten Sie bitte Ihren Chip-Typ (1x bzw. 2x)
+imageinfo.partitions Partitionen
+imageinfo.support Unterstützung
+imageinfo.supporthere technische Unterstützung und Hilfe finden Sie hier
+imageinfo.version Rel.-Zyklus:
 infoviewer.cantdecode Kanal ka nidd entschlüsselt werde
 infoviewer.epgnotload Informatione no'nidd g'lade...
 infoviewer.epgwait Wart' uf EPG-Informatione...

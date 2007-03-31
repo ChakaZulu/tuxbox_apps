@@ -1,7 +1,7 @@
 AUDIOSelectMenue.head  Audio Selection
 EPGMenu.epgplus Eventlist overview
 EPGMenu.eventinfo Details current program
-EPGMenu.eventlist Eventlist current programm
+EPGMenu.eventlist Eventlist current program
 EPGMenu.head EPG - Program Information
 EPGMenu.streaminfo technical information
 EPGPlus.actions Actions
@@ -408,15 +408,24 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menu Title
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
+imageinfo.chipset your chipset:
 imageinfo.creator Creator:
+imageinfo.cvslevel CVS-Level:
 imageinfo.date Date:
+imageinfo.details revisions
 imageinfo.dokumentation Dokumentation:
 imageinfo.forum Forum:
 imageinfo.head Image information
 imageinfo.homepage Homepage:
 imageinfo.image Image:
-imageinfo.license License:
-imageinfo.version Version:
+imageinfo.imagetype Imagetype:
+imageinfo.info Info:
+imageinfo.license License
+imageinfo.noteflashtype consider the nesessary flashtype for your d-box (1x or 2x)
+imageinfo.partitions partitions
+imageinfo.support support
+imageinfo.supporthere technical support and help you can find here
+imageinfo.version Cycle:
 infoviewer.epgnotload EPG not loaded....
 infoviewer.epgwait waiting for EPG...
 infoviewer.eventlist Event-List

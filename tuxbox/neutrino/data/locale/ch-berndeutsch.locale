@@ -374,6 +374,24 @@ fontsize.menu_info Menü Info
 fontsize.menu_title Menü Titu
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
+imageinfo.chipset Ihre Chip-Version:
+imageinfo.creator Ersteller:
+imageinfo.cvslevel CVS-Stand:
+imageinfo.date Datum:
+imageinfo.details Versionen
+imageinfo.dokumentation Anleitung:
+imageinfo.forum Forum:
+imageinfo.head Image Informationen
+imageinfo.homepage Homepage:
+imageinfo.image Image:
+imageinfo.imagetype Image-Typ:
+imageinfo.info Info:
+imageinfo.license Lizenz
+imageinfo.noteflashtype für Flashupdates beachten Sie bitte Ihren Chip-Typ (1x bzw. 2x)
+imageinfo.partitions Partitionen
+imageinfo.support Unterstützung
+imageinfo.supporthere technische Unterstützung und Hilfe finden Sie hier
+imageinfo.version Rel.-Zyklus:
 infoviewer.epgnotload Informatione no nid glade...
 infoviewer.epgwait Warte uf EPG-Informatione...
 infoviewer.eventlist Programm

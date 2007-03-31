@@ -301,6 +301,24 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menutitl
 gtxalpha.alpha1 tr1
 gtxalpha.alpha2 tr2
+imageinfo.chipset Ihre Chip-Version:
+imageinfo.creator Ersteller:
+imageinfo.cvslevel CVS-Stand:
+imageinfo.date Datum:
+imageinfo.details Versionen
+imageinfo.dokumentation Anleitung:
+imageinfo.forum Forum:
+imageinfo.head Image Informationen
+imageinfo.homepage Homepage:
+imageinfo.image Image:
+imageinfo.imagetype Image-Typ:
+imageinfo.info Info:
+imageinfo.license Lizenz
+imageinfo.noteflashtype für Flashupdates beachten's bitte Ihrn Chip-Typ (1x bzw. 2x)
+imageinfo.partitions Partitionen
+imageinfo.support Unterstützung
+imageinfo.supporthere technische Unterstützung und Hilfe finden Sie hier
+imageinfo.version Rel.-Zyklus:
 infoviewer.epgnotload Informationen no ned glon...
 infoviewer.epgwait Wart no aufs EPG...
 infoviewer.eventlist Programm
@@ -373,16 +391,20 @@ lcdmenu.statusline Statuszeiln
 lcdmenu.statusline.both change me
 lcdmenu.statusline.playtime Spuizeit
 lcdmenu.statusline.volume Lautstärkn
+mainmenu.audioplayer Musi spuia
 mainmenu.games Spuin
 mainmenu.head Hauptmenü
 mainmenu.movieplayer Fuimspuia
 mainmenu.pausesectionsd EPG aussalesn
 mainmenu.pictureviewer Buidlschauga
 mainmenu.radiomode Radio hern
+mainmenu.reboot Neu starten
+mainmenu.reboot Neu starten
 mainmenu.recording Streaming (aufnemma)
 mainmenu.recording_start ofanga
 mainmenu.recording_stop aufhearn
 mainmenu.scartmode Scart hernemma
+mainmenu.scripts Skripte
 mainmenu.service Service
 mainmenu.settings Eistellunga
 mainmenu.shutdown Ausmacha
@@ -563,9 +585,16 @@ scants.startnow Ofanga mim Senda suacha
 scants.transponders Transponder:
 screensetup.lowerright Buidlrand untn, rechts
 screensetup.upperleft Buidlrand om, links
+servicemenu.getplugins Plugins neu laden
+servicemenu.getplugins_hint Plugins werden neu geladen,\nbitte warten...
 servicemenu.head Service
+servicemenu.imageinfo Image Informationen
 servicemenu.reload Sendalistn nei loan
 servicemenu.reload_hint Sendalistn wern nei glon,\noan Moment...
+servicemenu.restart Neutrino neu starten
+servicemenu.restart_failed Neustart von Neutrino schlug fehl.
+servicemenu.restart_hint Neutrino wird neu gestartet...
+servicemenu.restart_refused_recording Aufnahme läuft. Restart nicht möglich.
 servicemenu.scants Senda suacha
 servicemenu.ucodecheck UCodes obcheckn
 servicemenu.update Software-aktualisiern

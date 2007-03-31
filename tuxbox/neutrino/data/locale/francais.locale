@@ -368,6 +368,24 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menu Titre
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
+imageinfo.chipset Votre version de chipset:
+imageinfo.creator Créateur:
+imageinfo.cvslevel CVS date:
+imageinfo.date Date:
+imageinfo.details Versions
+imageinfo.dokumentation Guide:
+imageinfo.forum Forum:
+imageinfo.head Image informations
+imageinfo.homepage Page Internet:
+imageinfo.image Image:
+imageinfo.imagetype Image-Typ:
+imageinfo.info Info:
+imageinfo.license Licence
+imageinfo.noteflashtype pour des Flashupdates, veuillez considérer votre type de copeaux (1x bzw. 2x)
+imageinfo.partitions Séparations
+imageinfo.support Soutien
+imageinfo.supporthere vous trouvez ici un soutien et une assistance techniques
+imageinfo.version Rel.-Cycle:
 infoviewer.epgnotload EPG non chargé....
 infoviewer.epgwait attente EPG...
 infoviewer.eventlist Liste d'évènements

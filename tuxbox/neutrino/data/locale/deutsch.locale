@@ -1,9 +1,9 @@
 AUDIOSelectMenue.head  Audio-Auswahl
-EPGMenu.epgplus Vorschau Übersicht
+EPGMenu.epgplus Vorschau Komplettübersicht
 EPGMenu.eventinfo Info zur Sendung
-EPGMenu.eventlist Vorschau aktuelles Programm
+EPGMenu.eventlist Vorschau
 EPGMenu.head EPG - Programm Information
-EPGMenu.streaminfo technische Information
+EPGMenu.streaminfo technische Informationen
 EPGPlus.actions Aktionen
 EPGPlus.bybouquet_mode bouquetweise
 EPGPlus.bypage_mode seitenweise
@@ -23,7 +23,7 @@ EPGPlus.footer_fontbouquetchannelname Selektierter Bouquet~/Kanalname
 EPGPlus.footer_fontbuttons Buttons
 EPGPlus.footer_fonteventdescription Titel 1 selekt. Sendung
 EPGPlus.footer_fonteventshortdescription Titel 2 selekt. Sendung
-EPGPlus.head Vorschau Übersicht (EPG Plus)
+EPGPlus.head EPG Plus Komplettvorschau
 EPGPlus.header_font Menütitel
 EPGPlus.horgap1_height Höhe hor. Lücke 1
 EPGPlus.horgap2_height Höhe hor. Lücke 2
@@ -324,6 +324,7 @@ flashupdate.actionreadflash lese flash
 flashupdate.cantopenfile kann Datei nicht öffnen
 flashupdate.cantopenmtd kann das MTD-Device nicht öffnen
 flashupdate.checkupdate nach neuer Version suchen
+flashupdate.currentdistribution Distribution
 flashupdate.currentreleasecycle Releasezyklus
 flashupdate.currentversion_sep Installierte Version
 flashupdate.currentversiondate Datum
@@ -408,15 +409,24 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menu Titel
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
+imageinfo.chipset Ihre Chip-Version:
 imageinfo.creator Ersteller:
+imageinfo.cvslevel CVS-Stand:
 imageinfo.date Datum:
+imageinfo.details Versionen
 imageinfo.dokumentation Anleitung:
 imageinfo.forum Forum:
 imageinfo.head Image Informationen
 imageinfo.homepage Homepage:
 imageinfo.image Image:
-imageinfo.license Lizenz:
-imageinfo.version Version:
+imageinfo.imagetype Image-Typ:
+imageinfo.info Info:
+imageinfo.license Lizenz
+imageinfo.noteflashtype für Flashupdates beachten Sie bitte Ihren Chip-Typ (1x bzw. 2x)
+imageinfo.partitions Partitionen
+imageinfo.support Unterstützung
+imageinfo.supporthere technische Unterstützung und Hilfe finden Sie hier
+imageinfo.version Rel.-Zyklus:
 infoviewer.epgnotload Informationen noch nicht geladen...
 infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.eventlist EPG/Vorschau
@@ -968,7 +978,7 @@ streaminfo.audiotype_unknown Audiotyp: unbekannt
 streaminfo.bitrate Bitrate
 streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: unbekannt
-streaminfo.head Tech. Information
+streaminfo.head Stream Information
 streaminfo.not_available nicht verfügbar
 streaminfo.resolution Auflösung
 streaminfo.signal Empfangssignal

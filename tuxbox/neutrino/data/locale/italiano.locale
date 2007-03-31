@@ -300,9 +300,27 @@ fontsize.infobar_number Numeri Infobar
 fontsize.infobar_small Infobar stretto
 fontsize.menu Caratteri Font del testo sul Menu
 fontsize.menu_info Menu Info
-fontsize.menu_title Titolo Menu
+fontsize.menu_title Titolo Men
 gtxalpha.alpha1 alpha1 
-gtxalpha.alpha2 alpha2 
+gtxalpha.alpha2 alpha2
+imageinfo.chipset il vostro chipset:
+imageinfo.creator creatore:
+imageinfo.cvslevel CVS-data:
+imageinfo.date data:
+imageinfo.details revisioni
+imageinfo.dokumentation dokumentation:
+imageinfo.forum tribuna:
+imageinfo.head Le informazioni di immagine
+imageinfo.homepage Homepage:
+imageinfo.image immagine:
+imageinfo.imagetype Imagetype:
+imageinfo.info Info:
+imageinfo.license Autorizzazione
+imageinfo.noteflashtype consider the nesessary flashtype for your d-box (1x or 2x)
+imageinfo.partitions divisorii
+imageinfo.support supporto
+imageinfo.supporthere il supporto tecnico e li aiuta può trovare qui
+imageinfo.version Ciclo
 infoviewer.cantdecode Canale non puo essere Decodificato
 infoviewer.epgnotload Informazioni non ancora Caricati...
 infoviewer.epgwait Aspetto Informazioni-EPG
