@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.21 2005/12/29 17:22:32 chakazulu Exp $
+ * $Id: stream2file.cpp,v 1.22 2007/03/31 19:17:34 munderl Exp $
  * 
  * streaming to file/disc
  * 
@@ -271,6 +271,11 @@ void * DMXThread(void * v_arg)
 
 	ringbuffer_t * ringbuf = ringbuffer_create(ringbuffersize);
 
+	if( !ringbuf )
+	{
+		exit_flag = STREAM2FILE_RECORDING_THREADS_FAILED;
+	}
+
 	filename_data.ringbuffer = ringbuf;
 
 	if (v_arg == &dvrfd)
@@ -466,9 +471,15 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	use_fdatasync = with_fdatasync;
 
 	if (ringbuffers < 20)
+	{
+		puts("[stream2file] using minimum ringbuffers (20)");
 		ringbuffersize = IN_SIZE * 20;
+	}
 	else
+	{
+		printf("[stream2file] using %i ringbuffers\n", ringbuffers);
 		ringbuffersize = IN_SIZE * ringbuffers;
+	}
 
 	for (unsigned int i = 0; i < numpids; i++)
 	{
@@ -500,7 +511,13 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			return STREAM2FILE_DVR_OPEN_FAILURE;
 		}
 		exit_flag = STREAM2FILE_STATUS_RUNNING;
-		pthread_create(&demux_thread[0], 0, DMXThread, &dvrfd);
+
+		if (pthread_create(&demux_thread[0], 0, DMXThread, &dvrfd) != 0)
+		{
+			DEC_BUSY_COUNT;
+			puts("[stream2file] error creating thread! (out of memory?)");
+			return STREAM2FILE_RECORDING_THREADS_FAILED; 
+		}
 	}
 	else
 	{
