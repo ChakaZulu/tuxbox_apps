@@ -1,7 +1,7 @@
 /*
  * Tool for printing some image information during bootup.
  *
- * $Id: cdkVcInfo.cpp,v 1.2 2006/07/06 17:38:31 barf Exp $
+ * $Id: cdkVcInfo.cpp,v 1.3 2007/03/31 13:46:24 feynman Exp $
  *
  * Copyright (C) 2006 the Tuxbox project http://www.tuxbox.org.
  *
@@ -67,8 +67,8 @@ int main()
       sscanf(buf, "version=%1d%1d%2d%4d%2d%2d%2d%2d", 
 	     &release_type, &imageversion, &imagesubver,
 	     &year, &month, &day, &hour, &minute);
-      sscanf(buf, "creator=%s", (char *) &creator);
-      sscanf(buf, "imagename=%s", (char *) &imagename);
+      sscanf(buf, "creator=%[^\n]", (char *) &creator);
+      sscanf(buf, "imagename=%[^\n]", (char *) &imagename);
     }
     fclose(fv);
   }
