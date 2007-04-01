@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.h,v 1.10 2005/01/12 20:40:22 chakazulu Exp $
+ * $Id: stream2file.h,v 1.11 2007/04/01 21:17:22 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -40,7 +40,8 @@ enum stream2file_status_t
 	STREAM2FILE_STATUS_BUFFER_OVERFLOW    = -1,
 	STREAM2FILE_STATUS_WRITE_OPEN_FAILURE = -2,
 	STREAM2FILE_STATUS_WRITE_FAILURE      = -3,
-	STREAM2FILE_STATUS_READ_FAILURE = -4
+	STREAM2FILE_STATUS_READ_FAILURE       = -4,
+	STREAM2FILE_STATUS_RECORDING_THREADS_FAILED = -6
 };
 
 struct stream2file_status2_t

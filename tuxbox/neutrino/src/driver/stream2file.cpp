@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.22 2007/03/31 19:17:34 munderl Exp $
+ * $Id: stream2file.cpp,v 1.23 2007/04/01 21:17:22 houdini Exp $
  * 
  * streaming to file/disc
  * 
@@ -273,7 +273,7 @@ void * DMXThread(void * v_arg)
 
 	if( !ringbuf )
 	{
-		exit_flag = STREAM2FILE_RECORDING_THREADS_FAILED;
+		exit_flag = STREAM2FILE_STATUS_RECORDING_THREADS_FAILED;
 	}
 
 	filename_data.ringbuffer = ringbuf;
