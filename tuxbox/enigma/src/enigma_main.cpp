@@ -6324,19 +6324,19 @@ void eZapMain::gotEIT()
 	}
 
 	EIT *eit=sapi->getEIT();
-	int old_event_id=cur_event_id;
+	int old_start=cur_start;
 	setEIT(eit);
 
 	if (eit)
 	{
 		int state=0;
-		if (old_event_id != cur_event_id)
+		if (old_start != cur_start)
 		{
 			eConfig::getInstance()->getKey("/ezap/osd/showOSDOnEITUpdate", state);
 
-			if (old_event_id == -1 || state)
+			if (old_start == -1 || state)
 			{
-				if (old_event_id != -1)
+				if (old_start != -1)
 					showInfobar(true);
 
 				if ( doHideInfobar() && isVisible() )
