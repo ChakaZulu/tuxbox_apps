@@ -13,41 +13,25 @@
 			<url>http://weather.nearperfect.com/weather/world.rss/016/c00059?type=plain</url>
 		</location>
 		<location>
-			<name>Brussels</name>
-			<url>http://weather.nearperfect.com/weather/world.rss/053/c00191?type=plain</url>
-		</location>
-		<location>
-			<name>Budapest</name>
-			<url>http://weather.nearperfect.com/weather/world.rss/017/c00060?type=plain</url>
-		</location>
-		<location>
 			<name>Cologne</name>
 			<url>http://weather.nearperfect.com/weather/world.rss/016/c00056?type=plain</url>
 		</location>
 		<location>
-			<name>Copenhagen</name>
-			<url>http://weather.nearperfect.com/weather/world.rss/173/c00190?type=plain</url>
+			<name>Brussels</name>
+			<url>http://weather.nearperfect.com/weather/world.rss/053/c00191?type=plain</url>
+			</location>
+		<location>
+			<name>Budapest</name>
+			<url>http://weather.nearperfect.com/weather/world.rss/017/c00060?type=plain</url>
 		</location>
 		<location>
 			<name>Dublin</name>
 			<url>http://weather.nearperfect.com/weather/world.rss/067/c00188?type=plain</url>
 		</location>
 		<location>
-			<name>Eilat</name>
-			<url>http://weather.nearperfect.com/weather/world.rss/013/c00046?type=plain</url>
+			<name>Copenhagen</name>
+			<url>http://weather.nearperfect.com/weather/world.rss/173/c00190?type=plain</url>
 		</location>
-		<location>
-			<name>Istanbul</name>
-			<url>http://weather.nearperfect.com/weather/world.rss/014/c00047?type=plain</url>
-		</location>
-		<location>
-			<name>Jerusalem</name>
-			<url>http://weather.nearperfect.com/weather/world.rss/013/c00043?type=plain</url>
-		</location>
-		<location>
-			<name>Las Palmas de Gran Canaria</name>
-			<url>http://weather.nearperfect.com/weather/world.rss/083/c01234?type=plain</url>
-		</location> 
 		<location>
 			<name>Lissabon</name>
 			<url>http://weather.nearperfect.com/weather/world.rss/003/c00002?type=plain</url>
@@ -91,6 +75,18 @@
 		<location>
 			<name>Buenos Aires</name>
 			<url>http://weather.nearperfect.com/weather/world.rss/050/c00294?type=plain</url>
+		</location>
+		<location>
+			<name>Eilat</name>
+			<url>http://weather.nearperfect.com/weather/world.rss/013/c00046?type=plain</url>
+		</location>
+		<location>
+			<name>Istanbul</name>
+			<url>http://weather.nearperfect.com/weather/world.rss/014/c00047?type=plain</url>
+		</location>
+		<location>
+			<name>Jerusalem</name>
+			<url>http://weather.nearperfect.com/weather/world.rss/013/c00043?type=plain</url>
 		</location>
 		<location>
 			<name>Johannesburg</name>
