@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.86 2007/03/31 00:15:53 dbt Exp $
+ * $Id: locals_intern.h,v 1.87 2007/04/06 11:01:43 munderl Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1011,6 +1011,7 @@ const char * locale_real_names[] =
 	"streaming.buffer_overflow",
 	"streaming.busy",
 	"streaming.dir_not_writable",
+	"streaming.out_of_memory",
 	"streaming.success",
 	"streaming.write_error",
 	"streaming.write_error_open",

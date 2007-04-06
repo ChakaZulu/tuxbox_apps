@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.85 2007/03/31 00:14:53 dbt Exp $
+ * $Id: locals.h,v 1.86 2007/04/06 11:01:43 munderl Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1011,6 +1011,7 @@ typedef enum
 	LOCALE_STREAMING_BUFFER_OVERFLOW,
 	LOCALE_STREAMING_BUSY,
 	LOCALE_STREAMING_DIR_NOT_WRITABLE,
+	LOCALE_STREAMING_OUT_OF_MEMORY,
 	LOCALE_STREAMING_SUCCESS,
 	LOCALE_STREAMING_WRITE_ERROR,
 	LOCALE_STREAMING_WRITE_ERROR_OPEN,

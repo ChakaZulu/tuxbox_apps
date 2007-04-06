@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.23 2007/04/01 21:17:22 houdini Exp $
+ * $Id: stream2file.cpp,v 1.24 2007/04/06 11:01:41 munderl Exp $
  * 
  * streaming to file/disc
  * 
@@ -271,9 +271,10 @@ void * DMXThread(void * v_arg)
 
 	ringbuffer_t * ringbuf = ringbuffer_create(ringbuffersize);
 
-	if( !ringbuf )
+	if (!ringbuf)
 	{
 		exit_flag = STREAM2FILE_STATUS_RECORDING_THREADS_FAILED;
+		puts("[stream2file]: error allocating ringbuffer! (out of memory?)"); 
 	}
 
 	filename_data.ringbuffer = ringbuf;
@@ -290,7 +291,11 @@ void * DMXThread(void * v_arg)
 		filename_data.extension = filename_extension;
 	}
 
-	pthread_create(&file_thread, 0, FileThread, &filename_data);
+	if (pthread_create(&file_thread, 0, FileThread, &filename_data) != 0)
+	{
+		exit_flag = STREAM2FILE_STATUS_RECORDING_THREADS_FAILED;
+		puts("[stream2file]: error creating file_thread! (out of memory?)"); 
+	}
 
 	if (v_arg == &dvrfd)
 		while (exit_flag == STREAM2FILE_STATUS_RUNNING)
@@ -299,7 +304,7 @@ void * DMXThread(void * v_arg)
 			{
 				if (!(pfd.revents&POLLIN))
 				{
-					printf ("PANIC: error reading from demux, bailing out\n");
+					printf ("[stream2file]: PANIC: error reading from demux, bailing out\n");
 					exit_flag = STREAM2FILE_STATUS_READ_FAILURE;
 				}
 				r = read(*(int *)v_arg, &(buf[0]), TS_SIZE);
@@ -318,13 +323,16 @@ void * DMXThread(void * v_arg)
 	else
 		offset = 0;
 
-	written = ringbuffer_write(ringbuf, (char *)&(buf[offset]), r - offset);
-	// TODO: Retry
-	if (written != r - offset) {
-		printf("PANIC: wrote less than requested to ringbuffer, written %d, requested %d\n", written, r - offset);
-		exit_flag = STREAM2FILE_STATUS_BUFFER_OVERFLOW;
+	if (exit_flag == STREAM2FILE_STATUS_RUNNING)
+	{
+		written = ringbuffer_write(ringbuf, (char *)&(buf[offset]), r - offset);
+		// TODO: Retry
+		if (written != r - offset) {
+			printf("PANIC: wrote less than requested to ringbuffer, written %d, requested %d\n", written, r - offset);
+			exit_flag = STREAM2FILE_STATUS_BUFFER_OVERFLOW;
+		}
+		todo = IN_SIZE - (r - offset);
 	}
-	todo = IN_SIZE - (r - offset);
 
 	/* IN_SIZE > TS_SIZE => todo > 0 */
 
@@ -392,7 +400,8 @@ void * DMXThread(void * v_arg)
 
 	pthread_join(file_thread, NULL);
 
-	ringbuffer_free(ringbuf);
+	if (ringbuf)
+		ringbuffer_free(ringbuf);
 
 	if (v_arg == &dvrfd)
 		while (demuxfd_count > 0)
@@ -409,7 +418,7 @@ void * DMXThread(void * v_arg)
 		strncpy(s.dir,dirname(myfilename),100);
 		s.dir[99] = '\0';
 		eventServer.sendEvent(NeutrinoMessages::EVT_RECORDING_ENDED, CEventServer::INITID_NEUTRINO, &s, sizeof(s));
-		printf("[stream2file] pthreads exit code: %u\n", exit_flag);
+		printf("[stream2file]: pthreads exit code: %i\n", exit_flag);
 	}
 
 	pthread_exit(NULL);
@@ -437,7 +446,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		/* give threads a second to exit */
 		sleep(1);
 
-		puts("[stream2file] recording attempt 2");
+		puts("[stream2file]: recording attempt 2");
 
 		if (busy_count != 0)
 			return STREAM2FILE_BUSY;
@@ -472,12 +481,12 @@ stream2file_error_msg_t start_recording(const char * const filename,
 
 	if (ringbuffers < 20)
 	{
-		puts("[stream2file] using minimum ringbuffers (20)");
+		puts("[stream2file]: using minimum ringbuffers (20)");
 		ringbuffersize = IN_SIZE * 20;
 	}
 	else
 	{
-		printf("[stream2file] using %i ringbuffers\n", ringbuffers);
+		printf("[stream2file]: using %i ringbuffers\n", ringbuffers);
 		ringbuffersize = IN_SIZE * ringbuffers;
 	}
 
@@ -515,7 +524,8 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		if (pthread_create(&demux_thread[0], 0, DMXThread, &dvrfd) != 0)
 		{
 			DEC_BUSY_COUNT;
-			puts("[stream2file] error creating thread! (out of memory?)");
+			exit_flag = STREAM2FILE_STATUS_RECORDING_THREADS_FAILED; 
+			puts("[stream2file]: error creating thread! (out of memory?)");
 			return STREAM2FILE_RECORDING_THREADS_FAILED; 
 		}
 	}
@@ -524,8 +534,15 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		exit_flag = STREAM2FILE_STATUS_RUNNING;
 		for (unsigned int i = 0; i < numpids; i++)
 		{
-			INC_BUSY_COUNT;
-			pthread_create(&demux_thread[i], 0, DMXThread, &demuxfd[i]);
+			if (pthread_create(&demux_thread[i], 0, DMXThread, &demuxfd[i]) == 0)
+				INC_BUSY_COUNT;
+			else
+			{
+				DEC_BUSY_COUNT;
+				exit_flag = STREAM2FILE_STATUS_RECORDING_THREADS_FAILED; 
+				puts("[stream2file]: error creating thread! (out of memory?)");
+				return STREAM2FILE_RECORDING_THREADS_FAILED; 
+			}
 		}
 		DEC_BUSY_COUNT;
 	}

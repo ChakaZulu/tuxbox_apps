@@ -984,6 +984,7 @@ streaminfo.signal reception signal
 streaming.buffer_overflow The recording was aborted,\nsince the data could not be written fast enough.
 streaming.busy One or several recording processes are active.\nIf you encounter this message and no recording is active, please restart Neutrino.
 streaming.dir_not_writable The recording directory is not writable.\nRecording will not work.
+streaming.out_of_memory The recording was aborted,\nbecause there is not enough free memory.
 streaming.success The recording has ended successfully.
 streaming.write_error The recording was aborted,\nsince an error occured during the writing process.
 streaming.write_error_open The recording was aborted,\nbecause the target file could not be opened.

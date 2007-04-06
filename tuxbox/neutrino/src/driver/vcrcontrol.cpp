@@ -859,6 +859,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		DisplayErrorMessage(g_Locale->getText(
 						      error_msg == STREAM2FILE_BUSY ? LOCALE_STREAMING_BUSY :
 						      error_msg == STREAM2FILE_INVALID_DIRECTORY ? LOCALE_STREAMING_DIR_NOT_WRITABLE :
+						      error_msg == STREAM2FILE_RECORDING_THREADS_FAILED ? LOCALE_STREAMING_OUT_OF_MEMORY :
 						      LOCALE_STREAMINGSERVER_NOCONNECT
 						      )); // UTF-8
 

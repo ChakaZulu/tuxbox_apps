@@ -985,9 +985,10 @@ streaminfo.signal Empfangssignal
 streaming.buffer_overflow Die Aufnahme wurde leider abgebrochen,\nda die Daten nicht schnell genug geschrieben werden konnten.
 streaming.busy Ein oder mehrere Aufnahmeprozesse sind aktiv.\nSollte die Aufnahme eigentlich beendet sein,\nschafft ein Neustart von Neutrino Abhilfe.
 streaming.dir_not_writable Das Aufnahmeverzeichnis ist nicht beschreibbar.\nAufnahmen sind daher nicht möglich.
+streaming.out_of_memory Die Aufnahme konnte nicht gestartet werden,\nda nicht genügend freier Speicher verfügbar ist.
 streaming.success Die Aufnahme wurde erfolgreich beendet.
 streaming.write_error Die Aufnahme wurde leider abgebrochen,\nda ein Fehler beim Schreiben der Daten auftrat.
-streaming.write_error_open Die Aufnahme wurde leider abgebrochen,\nda die entsprechende Datei nicht zum Schreiben geöffnet werden konnte.
+streaming.write_error_open Die Aufnahme wurde abgebrochen,da die Datei\nnicht zum Schreiben geöffnet werden konnte.
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576

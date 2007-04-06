@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.847 2007/03/25 04:33:59 Arzka Exp $
+	$Id: neutrino.cpp,v 1.848 2007/04/06 11:01:39 munderl Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3733,6 +3733,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 	if(tmpEventListHandler)		delete tmpEventListHandler;
 	if(tmpEPGplusHandler)		delete tmpEPGplusHandler;
 	if(tmpEPGDataHandler)		delete tmpEPGDataHandler;
+	return true;
 }
 
 
@@ -4919,6 +4920,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 				msgbody = LOCALE_STREAMING_WRITE_ERROR_OPEN;
 			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_WRITE_FAILURE)
 				msgbody = LOCALE_STREAMING_WRITE_ERROR;
+			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_RECORDING_THREADS_FAILED)
+				msgbody = LOCALE_STREAMING_OUT_OF_MEMORY;
 			else
 				goto skip_message;
 
@@ -4932,8 +4935,9 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		skip_message:
 			;
 		}
-		if ((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_IDLE)
+		if (((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_IDLE) && ((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_RECORDING_THREADS_FAILED))
 		{
+#warning TODO: count restart-rate to catch endless loops
 			/*
 			 * note that changeNotify does not distinguish between LOCALE_MAINMENU_RECORDING_START and LOCALE_MAINMENU_RECORDING_STOP
 			 * instead it checks the state of the variable recordingstatus
