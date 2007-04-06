@@ -57,6 +57,10 @@
 			<url>http://weather.nearperfect.com/weather/world.rss/062/c00194?type=plain</url>
 		</location>
 		<location>
+			<name>S/C de Tenerife</name>
+			<url>http://weather.nearperfect.com/weather/world.rss/186/c00304?type=plain</url>
+		</location> 
+		<location>
 			<name>Stockholm</name>
 			<url>http://weather.nearperfect.com/weather/world.rss/096/c00187?type=plain</url>
 		</location>
