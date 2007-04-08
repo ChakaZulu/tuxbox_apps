@@ -2,6 +2,11 @@ TuxCom:
 
 History:
 ---------
+08.04.2007 Version 1.16
+ - single window view selectable (toggle with info-button)
+ - show file sizes in "human readable" (MB/GB) form (can be set in main menu)
+ - filesize in bytes is shown in file properties (button "1")
+
 30.10.2006 Version 1.15
  - possibility to execute scripts depending on file extension
  - two small fixes (thanks to murks)
@@ -171,7 +176,7 @@ yellow			toggle sorting of entries in current window
 blue			refresh display
 mute			toggle transparency
 dream			main menu
-info			version info
+info			toggle single window view
 
 in messageboxes:
 

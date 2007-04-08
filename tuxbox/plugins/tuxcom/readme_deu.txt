@@ -2,6 +2,11 @@ TuxCom:
 
 Historie:
 ---------
+08.04.2007 Version 1.16
+ - Ein-Fenster-Anzeige auswählbar (per Info-Taste)
+ - Dateigrössen werden in Kurzform (MB/GB) angezeigt (abschaltbar im Hauptmenü)
+ - Dateigrösse in Bytes wird in Dateieigenschaften (Taste "1") angezeigt
+
 30.10.2006 Version 1.15
  - Möglichkeit, Skripte in Abhängigkeit von der Dateiendung auszuführen
  - zwei kleine Korrekturen (Dank an murks)
@@ -169,7 +174,7 @@ gelb			Sortierung der Einträge im aktuellen Fenster umkehren
 blau			Ansicht aktualisieren
 mute			Transparenzmodus wechseln
 dream			Hauptmenü aufrufen
-info			Versionsinformation
+info			Ein-Fenster-Ansicht an/ausschalten
 
 in Mitteilungsfenstern:
 

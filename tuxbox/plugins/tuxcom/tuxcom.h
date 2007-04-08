@@ -77,8 +77,8 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.15\n"
-#define MSG_COPYRIGHT  "© dbluelle 2004-2006"
+#define MSG_VERSION    "Tuxbox Commander Version 1.16"
+#define MSG_COPYRIGHT  "© dbluelle 2004-2007"
 
 #ifdef HAVE_DREAMBOX_HARDWARE
 
@@ -320,7 +320,7 @@ int avs, saa, fnc_old, saa_old, screenmode;
 int rc, fb, kb;
 int sx, ex, sy, ey;
 int PosX, PosY, StartX, StartY, FrameWidth, NameWidth, SizeWidth;
-int curframe, cursort, curvisibility;
+int curframe, cursort, curvisibility, singleview;
 int tool[MENUITEMS*2];
 int colortool[COLORBUTTONS];
 int overwriteall, skipall;
@@ -343,7 +343,7 @@ int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
 int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
 
 FILE *conf;
-int language, langselect, autosave;
+int language, langselect, autosave, filesize_in_byte;
 
 #define ACTION_NOACTION 0
 #define ACTION_PROPS    1
@@ -409,7 +409,7 @@ int language, langselect, autosave;
 
 #define NUM_LANG 5
 
-#define MAINMENU 7
+#define MAINMENU 8
 
 enum {MSG_EXEC              ,
       MSG_EXEC_NOT_POSSIBLE ,
@@ -598,6 +598,7 @@ char *mainmenu[] = { "search files"                       , "Dateien suchen"    
                      "taskmanager"                        , "Prozessübersicht"                          ,"Taskmanager"                               ,"Processöversikt"                     ,"List de processos"                  ,
                      "toggle 16:9 mode"                   , "16:9-Modus setzen"                         ,"Passa a modalità 16:9"                     ,"växla 16:9 läge"                     ,"Mudar para 16:9"                    ,
                      "set password"                       , "Passwort setzen"                           ,"Imposta password"                          ,"sätt lösenord"                       ,"Por password"                       ,
+                     "show filesizes in byte <%s>"        , "Dateigrössen in Byte anzeigen <%s>"        ,"show filesizes in byte <%s>"               ,"show filesizes in byte <%s>"         ,"show filesizes in byte <%s>"        ,
                      "language/Sprache/Lingua/Språk: <%s>", "Sprache/language/Lingua/Språk: <%s>"       ,"Lingua/language/Sprache/Språk: <%s>"       ,"Lingua/language/Sprache/Språk: <%s>" ,"Lingua/language/Sprache/Språk: <%s>",
                      "save settings on exit: <%s>"        , "Einstellungen beim Beenden speichern: <%s>","Salvare le impostazioni in uscita: <%s>"   ,"spara inställningar vid avslut: <%s>","Gravar e sair: <%s>"                ,
                      "save settings now"                  , "Einstellungen jetzt speichern"             ,"Salvare le impostazioni adesso"            ,"spara inställningar nu"              ,"Gravar configuracoes agora"         };
@@ -659,7 +660,7 @@ void 	          	RenderMenuLine(int highlight, int refresh);
 void 	          	FillDir(int frame, int selmode);
 struct fileentry* 	GetSelected(int frame);
 void 				SetSelected(int frame, const char* szFile);
-void 	          	GetSizeString(char* sizeString, unsigned long long size);
+void 	          	GetSizeString(char* sizeString, unsigned long long size, int forcebytes);
 int 	          	MessageBox(const char* msg1,const char* msg2, int mode);
 int 	          	GetInputString(int width, int maxchars, char* str, char * msg, int pass);
 void	          	ClearEntries(int frame);
