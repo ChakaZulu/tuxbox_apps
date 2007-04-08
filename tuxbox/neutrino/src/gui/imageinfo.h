@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: imageinfo.h,v 1.2 2007/03/31 09:00:20 dbt Exp $
+	$Id: imageinfo.h,v 1.3 2007/04/08 17:17:38 dbt Exp $
 
 	License: GPL
 
@@ -33,19 +33,6 @@
 #include <driver/framebuffer.h>
 #include <driver/pig.h>
 
-//Version InfoTypes
-#define VERSION_IMAGENAME 1
-#define VERSION_CREATOR 2
-#define VERSION_HOMEPAGE 3
-#define VERSION_REVISION 4
-#define VERSION_SUBVERSION	5
-#define VERSION_CVSLEVEL 6
-#define VERSION_DISTRIBUTION 7
-#define VERSION_RELCYCLE 8
-#define VERSION_TYPE 9
-#define VERSION_DATE 10
-#define VERSION_INFO 11
-
 class CImageInfo : public CMenuTarget
 {
 	private:
@@ -64,7 +51,7 @@ class CImageInfo : public CMenuTarget
 		int max_width;
 		
 		int pigw; //picbox dimensions
-	    int pigh;
+		int pigh;
 
 		int font_head;
 		int font_info;
@@ -72,14 +59,19 @@ class CImageInfo : public CMenuTarget
 	
 		int x_offset_large; //offsets(space) between caption and infostrings
 		int x_offset_small;
-						
-		std::string nversion;
-		std::string sysstr;
-		std::string revstr;
-		std::string chiptype;
-		
-		const char *i_info;
-	
+
+		std::string homepage;
+		std::string creator;
+		std::string imagename;
+		std::string version;
+		std::string subversion;
+		std::string cvstime;
+		std::string info;
+		std::string distribution;
+		std::string releaseCycle;
+		std::string imagedate;
+		std::string imagetype;
+		std::string partitions;
 		CPIG *pig;
 		
 		void paint();
@@ -92,6 +84,7 @@ class CImageInfo : public CMenuTarget
 		void paintPartitions(int y_startposition);
 		void clearContentBox();
 		std::string getRawInfos();
+		std::string readFile(std::string filename);
 
 	public:
 
@@ -104,7 +97,7 @@ class CImageInfo : public CMenuTarget
 		std::string getChipInfo();
 		std::string getImageInfoVersion();
 		std::string getSysInfo(std::string infotag, bool reverse);
-				
+		void LoadImageInfo(void);
 };
 
 #endif
