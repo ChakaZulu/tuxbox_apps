@@ -2,7 +2,7 @@
 #define __gui_widget_icons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.9 2006/01/05 21:38:01 chakazulu Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/icons.h,v 1.10 2007/04/11 20:46:44 papst Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -50,7 +50,7 @@
 #define NEUTRINO_ICON_BUTTON_8         "8.raw"
 #define NEUTRINO_ICON_BUTTON_9         "9.raw"
 
-#define NEUTRINO_ICON_BUTTON_TOP       "top.raw"
+#define NEUTRINO_ICON_BUTTON_TOP       "up.raw"
 #define NEUTRINO_ICON_BUTTON_RIGHT     "right.raw"
 #define NEUTRINO_ICON_BUTTON_DOWN      "down.raw"
 #define NEUTRINO_ICON_BUTTON_LEFT      "left.raw"
