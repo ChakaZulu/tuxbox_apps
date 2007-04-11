@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.140 2007/03/16 14:22:23 papst Exp $
+  $Id: movieplayer.cpp,v 1.141 2007/04/11 15:53:24 papst Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -302,7 +302,7 @@ CMoviePlayerGui::CMoviePlayerGui()
 		filebrowser = new CFileBrowser (Path_local.c_str());	// with filebrowser patch
 	else
 		filebrowser	= new CFileBrowser();
-	filebrowser->Multi_Select = false;
+	filebrowser->Multi_Select = true;
 	filebrowser->Dirs_Selectable = false;
 
 #ifdef MOVIEBROWSER  
@@ -421,7 +421,6 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 
 	if(actionKey=="fileplayback")
 	{
-        filebrowser->Multi_Select = true;
 		PlayStream (STREAMTYPE_FILE);
 	}
 	else if(actionKey=="dvdplayback")
@@ -434,7 +433,6 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 	else if(actionKey=="tsplayback")
 	{
-        filebrowser->Multi_Select = true;
 		isTS=true;
 		PlayFile();
 	}
@@ -3137,7 +3135,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			sel_filename     = startfilename;
 			update_lcd       = true;
 			start_play       = true;
-			isBookmark       = false;
 		}
 
 #ifdef MOVIEBROWSER  			
@@ -3388,7 +3385,8 @@ void CMoviePlayerGui::PlayFile (int parental)
 			//-- create player thread in PLAY mode --
 			g_playstate = CMoviePlayerGui::PLAY;  // !!!
 			int retval;
-			if (filelist.size() == 1 || isMovieBrowser) {
+			if (filelist.size() == 1 || isBookmark || isMovieBrowser) {
+                isBookmark = false;
                 retval = pthread_create(&rct, 0, mp_playFileThread, (void *)filename);
             } else {
                 retval = pthread_create(&rct, 0, mp_playFileThread, NULL);
@@ -4342,7 +4340,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.140 $");
+	helpbox.addLine("Version: $Revision: 1.141 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4364,7 +4362,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.140 $");
+	helpbox.addLine("Version: $Revision: 1.141 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
