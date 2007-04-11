@@ -709,7 +709,16 @@ movieplayer.tshelp10 approx. 10 minutes back
 movieplayer.tshelp11 skip approx. 10 minutes
 movieplayer.tshelp12 Help: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tshelp13 skip to ...
+movieplayer.tshelp14 skip to beginning
+movieplayer.tshelp15 skip to end
+movieplayer.tshelp16 resync
+movieplayer.tshelp17 Start plugin
+movieplayer.tshelp18 skip approx. 20 seconds
+movieplayer.tshelp19 approx. 20 seconds back
 movieplayer.tshelp2 Select audio track
+movieplayer.tshelp20 Open filebrowser
+movieplayer.tshelp21 Next item in playlist
+movieplayer.tshelp22 Previous item in playlist
 movieplayer.tshelp3 Pause/Continue
 movieplayer.tshelp4 Create bookmark
 movieplayer.tshelp5 Show progress
@@ -724,6 +733,10 @@ movieplayer.vlchelp1 Stop
 movieplayer.vlchelp10 approx. 10 minutes back
 movieplayer.vlchelp11 skip approx. 10 minutes
 movieplayer.vlchelp12 Help: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp13 skip to ...
+movieplayer.vlchelp14 Technical information
+movieplayer.vlchelp15 Next item in playlist
+movieplayer.vlchelp16 Previous item in playlist
 movieplayer.vlchelp2 Resync
 movieplayer.vlchelp3 Pause/Continue
 movieplayer.vlchelp4 Create bookmark

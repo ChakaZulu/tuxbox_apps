@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.87 2007/04/06 11:01:43 munderl Exp $
+ * $Id: locals_intern.h,v 1.88 2007/04/11 20:50:00 papst Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -736,7 +736,16 @@ const char * locale_real_names[] =
 	"movieplayer.tshelp11",
 	"movieplayer.tshelp12",
 	"movieplayer.tshelp13",
+	"movieplayer.tshelp14",
+	"movieplayer.tshelp15",
+	"movieplayer.tshelp16",
+	"movieplayer.tshelp17",
+	"movieplayer.tshelp18",
+	"movieplayer.tshelp19",
 	"movieplayer.tshelp2",
+	"movieplayer.tshelp20",
+	"movieplayer.tshelp21",
+	"movieplayer.tshelp22",
 	"movieplayer.tshelp3",
 	"movieplayer.tshelp4",
 	"movieplayer.tshelp5",
@@ -751,6 +760,10 @@ const char * locale_real_names[] =
 	"movieplayer.vlchelp10",
 	"movieplayer.vlchelp11",
 	"movieplayer.vlchelp12",
+	"movieplayer.vlchelp13",
+	"movieplayer.vlchelp14",
+	"movieplayer.vlchelp15",
+	"movieplayer.vlchelp16",
 	"movieplayer.vlchelp2",
 	"movieplayer.vlchelp3",
 	"movieplayer.vlchelp4",

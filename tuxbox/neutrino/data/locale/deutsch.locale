@@ -710,7 +710,16 @@ movieplayer.tshelp10 ca. 10 Minuten zurück
 movieplayer.tshelp11 ca. 10 Minuten vor
 movieplayer.tshelp12 Hilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tshelp13 Springe zu ...
+movieplayer.tshelp14 Springe zum Filmanfang
+movieplayer.tshelp15 Springe zum Filmende
+movieplayer.tshelp16 Resync
+movieplayer.tshelp17 Starte Plugin
+movieplayer.tshelp18 ca. 20 Sekunden vor
+movieplayer.tshelp19 ca. 20 Sekunden zurück
 movieplayer.tshelp2 Auswahl der Tonspur
+movieplayer.tshelp20 Öffne Filebrowser
+movieplayer.tshelp21 Nächste Datei in Playlist
+movieplayer.tshelp22 Vorherige Datei in Playlist
 movieplayer.tshelp3 Pause/Weiter
 movieplayer.tshelp4 Bookmark setzen
 movieplayer.tshelp5 Zeit einblenden
@@ -725,6 +734,10 @@ movieplayer.vlchelp1 Stop
 movieplayer.vlchelp10 ca. 10 Minuten zurück
 movieplayer.vlchelp11 ca. 10 Minuten vor
 movieplayer.vlchelp12 Hilfe: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp13 Springe zu ...
+movieplayer.vlchelp14 Technische Informationen
+movieplayer.vlchelp15 Nächste Datei in Playlist
+movieplayer.vlchelp16 Vorherige Datei in Playlist
 movieplayer.vlchelp2 Resync
 movieplayer.vlchelp3 Pause/Weiter
 movieplayer.vlchelp4 Bookmark setzen
