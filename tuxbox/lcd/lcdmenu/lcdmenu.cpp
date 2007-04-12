@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.28 2006/08/13 11:02:36 barf Exp $
+ * $Id: lcdmenu.cpp,v 1.29 2007/04/12 17:49:10 chakazulu Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -530,10 +530,7 @@ void CLCDMenu::exec()
       std::cout << "[lcdmenu] " << execfilename
 		<< " was not found, not exec-ing\n";
     }
-#ifdef DEBUG
-    std::cout << "Now I would have exec-ed " << execfilename << "\n";
-#else
+
     execl(execfilename.c_str(), execfilename.c_str(), NULL);
-#endif
   }
 }
