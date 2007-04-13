@@ -324,7 +324,6 @@ flashupdate.actionreadflash lese flash
 flashupdate.cantopenfile kann Datei nicht öffnen
 flashupdate.cantopenmtd kann das MTD-Device nicht öffnen
 flashupdate.checkupdate nach neuer Version suchen
-flashupdate.currentdistribution Distribution
 flashupdate.currentreleasecycle Releasezyklus
 flashupdate.currentversion_sep Installierte Version
 flashupdate.currentversiondate Datum
