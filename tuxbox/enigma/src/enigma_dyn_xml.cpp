@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_xml.cpp,v 1.38 2007/02/16 09:09:34 ghostrider Exp $
+ * $Id: enigma_dyn_xml.cpp,v 1.39 2007/04/14 07:29:26 gaxelsson Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -363,6 +363,16 @@ static eString getXSLStreamInfo(eString request, eString dirpath, eString opt, e
 	return result;
 }
 
+static eString getXSLServiceEPG(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result;
+	
+	content->local_header["Content-Type"] = "text/xml; charset=utf-8";
+	result = readFile(TEMPLATE_DIR + "serviceepg.xsl");
+	
+	return result;
+}
+
 static eString getXMLStreamInfo(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result = readFile(TEMPLATE_DIR + "XMLStreaminfo.tmp");
@@ -632,13 +642,15 @@ static eString getXMLTimers(eString request, eString dirpath, eString opt, eHTTP
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/xml/boxstatus", getXMLBoxStatus, lockWeb);
+
 	dyn_resolver->addDyn("GET", "/xml/boxinfo", getXMLBoxInfo, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/serviceepg", getXMLServiceEPG, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/boxstatus", getXMLBoxStatus, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/currentservicedata", getXMLCurrentServiceData, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/serviceepg", getXMLServiceEPG, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/serviceepg.xsl", getXSLServiceEPG, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/services", getXMLServices, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo", getXMLStreamInfo, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/timers", getXMLTimers, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/streaminfo.xsl", getXSLStreamInfo, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/timers", getXMLTimers, lockWeb);
 }
 
