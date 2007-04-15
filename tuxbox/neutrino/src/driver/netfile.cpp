@@ -1845,7 +1845,7 @@ int base64_encode(char *dest, const char *src)
 {
   int retval = 1;
   int src_len, src_pos;
-  char symbols[64];
+  char symbols[65];
   char mypart[3];
   char mybits[24];
   int part_pos;
