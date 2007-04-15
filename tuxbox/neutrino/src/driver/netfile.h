@@ -102,6 +102,7 @@ typedef struct
   char entity[2048];	/* data to send on POST requests */
   int 	fd;		/* filedescriptor of the file*/
   FILE	*stream;	/* streamdescriptor */
+  char  logindata[2048];/* base64 encoded auhtentication string of "username:password" */
 } URL;
 
 typedef struct

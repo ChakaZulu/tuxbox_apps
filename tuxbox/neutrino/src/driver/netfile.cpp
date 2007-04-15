@@ -56,11 +56,15 @@
 | shoutcast example:                                                           |
 |                                                                              |
 |	fd = fopen("icy://find.me:666/funky/station/", "r");                   |
+|       or                                                                     |
+|       fd = fopen("icy://username:password@find.me:666/station", "r");        |
 |	                                                                       |
 |	This is a low level mechanism that can be used for all                 |
 |	shoutcast servers, but it mainly is intended to be used for            |
 |	private radio stations which are not listed in the official            |
 |	shoutcast directory. The stream is opened read-only.                   |
+|       The second format contains a basic authentication string before '@'    |
+|       of username:passwort to be sent to the server.                         |
 |	                                                                       |
 | file access modes, selectable by the fopen 'access type':                    |
 |	                                                                       |
@@ -188,6 +192,8 @@ static void ShoutCAST_ParseMetaData(char *, CSTATE *);
 static void getOpts(void);
 
 static void parseURL_url(URL& url);
+
+static int  base64_encode(char *dest, const char *src);
 
 /***************************************/
 /* this is a simple options parser     */
@@ -381,9 +387,20 @@ int request_file(URL *url)
 		    send(url->fd, str, strlen(str), 0);
 		  }
 
-		  sprintf(str, "User-Agent: %s\r\n\r\n", "RealPlayer/4.0");
+		  sprintf(str, "User-Agent: %s\r\n", "RealPlayer/4.0");
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
+
+		  if (url->logindata[0])
+		  {
+		    sprintf(str, "Authorization: Basic %s\r\n", url->logindata);
+                    dprintf(stderr, "> %s", str);
+                    send(url->fd, str, strlen(str), 0);
+		  }
+
+		  sprintf(str, "\r\n"); /* end of headers to send */
+                  dprintf(stderr, "> %s", str);
+                  send(url->fd, str, strlen(str), 0);
 
 		  if( (meta_int = parse_response(url, &id3, &tmp)) < 0)
 		    return -1;
@@ -1758,6 +1775,7 @@ dprintf(stderr, "filter : meta_int : %d\n", filterdata->meta_int);
 void parseURL_url(URL& url) {
 
   /* now lets see what we have ... */
+  char buffer[2048];
 
   char *ptr = strstr(url.url, "://");
 
@@ -1767,6 +1785,7 @@ void parseURL_url(URL& url) {
     strcpy(url.file, url.url);
     url.host[0] = 0;
     url.port = 0;
+    url.logindata[0] = 0;
   }
   else
   {
@@ -1800,6 +1819,18 @@ void parseURL_url(URL& url) {
     ptr = strchr(url.host, '/');
     if(ptr) *ptr = 0;
 
+    if ((ptr = strchr(url.host, '@')))
+    {
+      *ptr = 0;
+      base64_encode(buffer, url.host);
+      strcpy(url.logindata, buffer);
+
+      strcpy(buffer, ptr + 1);
+      strcpy(url.host, buffer);
+    }
+    else
+      url.logindata[0] = 0;
+
     ptr = strrchr(url.host, ':');
 
     if(ptr)
@@ -1808,5 +1839,57 @@ void parseURL_url(URL& url) {
       *ptr = 0;
     }
   }
+}
+
+int base64_encode(char *dest, const char *src)
+{
+  int retval = 1;
+  int src_len, src_pos;
+  char symbols[64];
+  char mypart[3];
+  char mybits[24];
+  int part_pos;
+  int null_bytes = 0;
+
+  if (dest != NULL && src != NULL && (src_len = strlen(src)) > 0)
+  {
+    strcpy(symbols,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+    char buffer[src_len*2];
+    char *buf_ptr = buffer;
+
+    for (src_pos = 0; src_pos < src_len; src_pos +=3)
+    {
+      for (part_pos = 0; part_pos < 3; part_pos++)
+      {
+        if (src[src_pos+part_pos] != 0)
+          mypart[part_pos] = src[src_pos+part_pos];
+        else
+        {
+          null_bytes = 3 - part_pos;
+          mypart[part_pos] = 0;
+          if (part_pos < 2) /* here: part_pos == 1, cannot be 0 */
+            mypart[part_pos+1] = 0;
+          break;
+        }
+      }
+      for (part_pos = 0; part_pos < 24; part_pos++)
+        mybits[part_pos] = ( mypart[part_pos/8] >> (7 - (part_pos%8)) ) & 0x1;
+      for (part_pos = 0; part_pos < 24; part_pos+=6)
+      {
+        *buf_ptr = (mybits[part_pos] << 5) |
+          (mybits[part_pos+1] << 4) | (mybits[part_pos+2] << 3) | (mybits[part_pos+3] << 2) |
+          (mybits[part_pos+4] << 1) | mybits[part_pos+5];
+        buf_ptr++;
+      }
+    }
+    for (part_pos = 0 ; part_pos < buf_ptr - buffer - null_bytes; part_pos++)
+      dest[part_pos] = symbols[(int)buffer[part_pos]];
+    for (part_pos = buf_ptr - buffer - null_bytes ; part_pos < buf_ptr - buffer; part_pos++)
+      dest[part_pos] = '=';
+  }
+  else
+    retval = 0;
+
+  return retval;
 }
 
