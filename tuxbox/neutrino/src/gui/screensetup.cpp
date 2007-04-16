@@ -37,6 +37,7 @@
 
 #include <gui/color.h>
 #include <gui/widget/messagebox.h>
+#include <gui/widget/icons.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
@@ -201,8 +202,8 @@ void CScreenSetup::paintBorder( int selected )
 
 void CScreenSetup::paintIcons()
 {
-	frameBuffer->paintIcon("rot.raw", x+6, y+8);
-	frameBuffer->paintIcon("gruen.raw", x+6, y+36 );
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, x+6, y+8);
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, x+6, y+36 );
 }
 
 void CScreenSetup::paintBorderUL()

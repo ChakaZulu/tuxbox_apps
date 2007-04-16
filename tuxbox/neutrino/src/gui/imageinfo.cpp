@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.10 2007/04/08 17:18:00 dbt Exp $
+	$Id: imageinfo.cpp,v 1.11 2007/04/16 20:59:32 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -26,7 +26,7 @@
 #endif
 
 #include <gui/imageinfo.h>
-//#include <gui/movieplayer.h>
+#include <gui/widget/icons.h>
 
 #include <cstring>
 #include <iostream>
@@ -427,7 +427,7 @@ string CImageInfo::getImageInfoVersion()
 /* 	Note: revision (revstr) will change automaticly on cvs-commits, 
  * 	if you made some changes without cvs-commit, you must change it before by yourself
  */
-	string revstr = "$Revision: 1.10 $";
+	string revstr = "$Revision: 1.11 $";
 	while (revstr.find("$") !=string::npos)
 	{
 		revstr.replace(revstr.find("$"),1 ,""); //normalize output, remove "$"	
@@ -499,16 +499,16 @@ void CImageInfo::paint()
 	//paint icons and captions
 	int yIconPos = endY-26, xIconOffset = max_width/5;
 	
-	frameBuffer->paintIcon("rot.raw",xpos ,yIconPos+3); //License
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos ,yIconPos+3); //License
 	g_Font[font_small]->RenderString(xpos+20, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_IMAGEINFO_LICENSE), COL_MENUCONTENT, 0, true);
 	
-	frameBuffer->paintIcon("gruen.raw",(xpos + xIconOffset) ,yIconPos+3); //Support
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, (xpos + xIconOffset) ,yIconPos+3); //Support
 	g_Font[font_small]->RenderString(xpos+xIconOffset+20, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_IMAGEINFO_SUPPORT), COL_MENUCONTENT, 0, true);
 	
-	frameBuffer->paintIcon("gelb.raw",(xpos + xIconOffset*2) ,yIconPos+3); //Revision
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, (xpos + xIconOffset*2) ,yIconPos+3); //Revision
 	g_Font[font_small]->RenderString(xpos+(xIconOffset*2)+20, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_IMAGEINFO_DETAILS), COL_MENUCONTENT, 0, true);
 	
-	frameBuffer->paintIcon("blau.raw",(xpos + xIconOffset*3) ,yIconPos+3); //Partitions
+	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, (xpos + xIconOffset*3) ,yIconPos+3); //Partitions
 	g_Font[font_small]->RenderString(xpos+(xIconOffset*3)+20, yIconPos+22, xIconOffset, g_Locale->getText(LOCALE_IMAGEINFO_PARTITIONS), COL_MENUCONTENT, 0, true);
 
 	frameBuffer->paintIcon("home.raw",(xpos + xIconOffset*4) ,yIconPos-3); //Home 
