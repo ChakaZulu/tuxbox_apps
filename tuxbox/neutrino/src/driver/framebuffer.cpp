@@ -1,6 +1,8 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
+	$Id: framebuffer.cpp,v 1.55 2007/04/20 08:40:30 dbt Exp $
+	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
                       2003 thegoodguy
 
@@ -42,6 +44,7 @@
 #include <dbox/fb.h>
 
 #include <gui/color.h>
+#include <gui/widget/icons.h>
 
 #define BACKGROUNDIMAGEWIDTH 720
 
@@ -469,6 +472,19 @@ void CFrameBuffer::setIconBasePath(const std::string & iconPath)
 	iconBasePath = iconPath;
 }
 
+const char  *CFrameBuffer::getIconFilePath(const std::string & filename)
+{
+	std::string defaultIconPath = iconBasePath + filename,
+	alterIconPath = NEUTRINO_ICON_VARPATH + filename;
+
+	if ((access(alterIconPath.c_str(), 0 ) != -1))	{
+			return alterIconPath.c_str();
+		}
+		else	{
+			return defaultIconPath.c_str();
+		}		
+}	
+
 bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const int y, const unsigned char offset)
 {
 	if (!getActive())
@@ -477,15 +493,16 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 	struct rawHeader header;
 	uint16_t         width, height;
 	int              fd;
+	const char * iconfile = getIconFilePath(filename);
 
-	fd = open((iconBasePath + filename).c_str(), O_RDONLY);
+	fd = open(iconfile, O_RDONLY);
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s%s\n", iconBasePath.c_str(), filename.c_str());
+		printf("error while loading icon: %s\n", iconfile);
 		return false;
 	}
-
+	
 	read(fd, &header, sizeof(struct rawHeader));
 
 	width  = (header.width_hi  << 8) | header.width_lo;
@@ -514,7 +531,7 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 	}
 	close(fd);
 	return true;
-}
+}	
 
 bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const int y, const unsigned char offset)
 {
@@ -524,12 +541,13 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 	struct rawHeader header;
 	uint16_t         width, height;
 	int              fd;
+	const char * iconfile = getIconFilePath(filename);
 
-	fd = open((iconBasePath + filename).c_str(), O_RDONLY);
+	fd = open(iconfile, O_RDONLY);
 
 	if (fd == -1)
 	{
-		printf("error while loading icon: %s%s\n", iconBasePath.c_str(), filename.c_str());
+		printf("error while loading icon: %s\n", iconfile);
 		return false;
 	}
 
