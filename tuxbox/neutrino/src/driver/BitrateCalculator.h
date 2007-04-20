@@ -57,8 +57,7 @@
 
 class BitrateCalculator
 {
-	private:
-
+	protected:
 		int 				pid;
 		struct pollfd			pfd;
 		struct dmx_pes_filter_params	flt;
@@ -66,22 +65,30 @@ class BitrateCalculator
 		struct timeval 			tv,last_tv, first_tv;
 		long				b;
 		long				packets_bad;
-        unsigned int        buffer[AVERAGE_OVER_X_MEASUREMENTS];
-        unsigned int        buffer2[240];
-        int                 counter;
-        int                 counter2;
-        unsigned int        sum;
-        unsigned int        sum2;
+		unsigned int			buffer[AVERAGE_OVER_X_MEASUREMENTS];
+		unsigned int			buffer2[240];
+		int				counter;
+		int				counter2;
+		unsigned int			sum;
+		unsigned int			sum2;
 		u_char 	 			buf[TS_BUF_SIZE];
-		bool                first_round;
-		bool                first_round2;
+		bool				first_round;
+		bool				first_round2;
 
 	public:
-		BitrateCalculator(int inPid);
-		unsigned int calc(unsigned int &long_average);
+		BitrateCalculator(int inPid, dmx_output_t flt_output = DMX_OUT_TS_TAP);
+		virtual unsigned int calc(unsigned int &long_average);
 		int sync_ts (u_char *buf, int len);
 		int ts_error_count (u_char *buf, int len);
-		~BitrateCalculator();
+		virtual ~BitrateCalculator();
+};
+
+class BitrateCalculatorRadio : public BitrateCalculator
+{
+	public:
+		BitrateCalculatorRadio (int inPid);
+		virtual ~BitrateCalculatorRadio();
+		virtual unsigned int calc(unsigned int &long_average);
 };
 
 #endif
