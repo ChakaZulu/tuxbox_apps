@@ -89,41 +89,47 @@ CStreamInfo2::CStreamInfo2()
 	
 	signal.max_sig = 0;
 	signal.max_snr = 0;
-    signal.max_ber = 0;
-    
-    signal.min_sig = 100000;
+	signal.max_ber = 0;
+
+	signal.min_sig = 100000;
 	signal.min_snr = 100000;
-    signal.min_ber = 100000;
-    
-    rate.short_average = 0;
-    rate.max_short_average = 0;
-    rate.min_short_average = 20000;
+	signal.min_ber = 100000;
+
+	rate.short_average = 0;
+	rate.max_short_average = 0;
+	rate.min_short_average = 20000;
 	
 	brc = 0;
 	int mode = g_Zapit->getMode();
-	if (!g_Zapit->isRecordModeActive() && mode == 1) { 
-		current_apid = -1;		
-		actmode = g_Zapit->PlaybackState();
-		if (actmode == 0) { //PES Mode aktiv
-			CZapitClient::responseGetPIDs allpids;
-			g_Zapit->getPIDS(allpids);
-			for (unsigned int i = 0; i < allpids.APIDs.size(); i++) {
+	if (!g_Zapit->isRecordModeActive())
+		if (mode == 1) { 
+			current_apid = -1;		
+			actmode = g_Zapit->PlaybackState();
+			if (actmode == 0) { //PES Mode aktiv
+				CZapitClient::responseGetPIDs allpids;
+				g_Zapit->getPIDS(allpids);
+				for (unsigned int i = 0; i < allpids.APIDs.size(); i++) {
 					if (allpids.APIDs[i].is_ac3) { //Suche Ac3 Pid
 						if (i == allpids.PIDs.selected_apid) { //Aktuelle Pid ist ac3 pid
 							current_apid = allpids.PIDs.selected_apid; //Speichere aktuelle pid und switche auf Stereo
 							g_Zapit->setAudioChannel(0);
 							break;
+						}
 					}
-				}
-			}	
-			g_Zapit->PlaybackSPTS();
-		}
+				}	
+				g_Zapit->PlaybackSPTS();
+			}
 		
-		if ( g_RemoteControl->current_PIDs.PIDs.vpid != 0 )
-			brc = new BitrateCalculator(g_RemoteControl->current_PIDs.PIDs.vpid);
-		else if (!g_RemoteControl->current_PIDs.APIDs.empty())
-			brc = new BitrateCalculator(g_RemoteControl->current_PIDs.APIDs[0].pid);
-	}
+			if ( g_RemoteControl->current_PIDs.PIDs.vpid != 0 ) {
+				brc = new BitrateCalculator(g_RemoteControl->current_PIDs.PIDs.vpid);
+			} else if (!g_RemoteControl->current_PIDs.APIDs.empty()) {
+				brc = new BitrateCalculatorRadio(g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
+			}
+		} else {
+			if (!g_RemoteControl->current_PIDs.APIDs.empty()){
+				brc = new BitrateCalculatorRadio(g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].pid);
+			}
+		}
 }
 
 CStreamInfo2::~CStreamInfo2()
@@ -187,47 +193,47 @@ int CStreamInfo2::doSignalStrengthLoop ()
 		signal.ber = (s.ber < 0x3FFFF) ? s.ber : 0x3FFFF;  // max. Limit
 
 		if (brc) {
-            rate.short_average = brc->calc(long_average);
-        }
-        if (paint_mode == 0 && i == AVERAGE_OVER_X_MEASUREMENTS + 5) {
-            paint_bitrate(long_average);
+			rate.short_average = brc->calc(long_average);
 		}
-        if (i == AVERAGE_OVER_X_MEASUREMENTS + 5) {
-            if (rate.max_short_average < rate.short_average) {
-                rate.max_short_average = rate.short_average;
-            }
-            if (rate.min_short_average > rate.short_average) {
-                rate.min_short_average = rate.short_average;
-            }
-            paint_signal_fe(rate, signal);
-            signal.old_sig = signal.sig;
-            signal.old_snr = signal.snr;
-            signal.old_ber = signal.ber;
-        } else {
-            i++;
-        }
+		if (paint_mode == 0 && i == AVERAGE_OVER_X_MEASUREMENTS + 5) {
+			paint_bitrate(long_average);
+		}
+		if (i == AVERAGE_OVER_X_MEASUREMENTS + 5) {
+			if (rate.max_short_average < rate.short_average) {
+				rate.max_short_average = rate.short_average;
+			}
+			if (rate.min_short_average > rate.short_average) {
+				rate.min_short_average = rate.short_average;
+			}
+			paint_signal_fe(rate, signal);
+			signal.old_sig = signal.sig;
+			signal.old_snr = signal.snr;
+			signal.old_ber = signal.ber;
+		} else {
+			i++;
+		}
 		
 		if (signal.max_ber < signal.ber) {
-            signal.max_ber = signal.ber;
-        }
-        if (signal.max_sig < signal.sig) {
-            signal.max_sig = signal.sig;
-        }
-        if (signal.max_snr < signal.snr) {
-            signal.max_snr = signal.snr;
-        }
+			signal.max_ber = signal.ber;
+		}
+		if (signal.max_sig < signal.sig) {
+			signal.max_sig = signal.sig;
+		}
+		if (signal.max_snr < signal.snr) {
+			signal.max_snr = signal.snr;
+		}
 		
 		if (signal.min_ber > signal.ber) {
-            signal.min_ber = signal.ber;
-        }
-        if (signal.min_sig > signal.sig) {
-            signal.min_sig = signal.sig;
-        }
-        if (signal.min_snr > signal.snr) {
-            signal.min_snr = signal.snr;
-        }
+			signal.min_ber = signal.ber;
+		}
+		if (signal.min_sig > signal.sig) {
+			signal.min_sig = signal.sig;
+		}
+		if (signal.min_snr > signal.snr) {
+			signal.min_snr = signal.snr;
+		}
 
-		
+
 
 		// switch paint mode
 		if (msg == CRCInput::RC_red || msg == CRCInput::RC_blue || msg == CRCInput::RC_green || msg == CRCInput::RC_yellow ) {
@@ -258,7 +264,7 @@ void CStreamInfo2::hide()
 
 void CStreamInfo2::paint_pig(int x, int y, int w, int h)
 {
-  	frameBuffer->paintBoxRel(x,y,w,h, COL_BACKGROUND);
+	frameBuffer->paintBoxRel(x,y,w,h, COL_BACKGROUND);
 	pig->show (x,y,w,h);
 }
 
@@ -324,15 +330,19 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 	SignalRenderStr (rate.short_average,sig_text_rate_x,y - iheight);
 	SignalRenderStr (rate.max_short_average,sig_text_rate_x,y - iheight - iheight);
 	SignalRenderStr (rate.min_short_average,sig_text_rate_x,y);
-	yd = y_signal_fe (rate.short_average, 12000, sigBox_h);
-    if ((old_x == 0 && old_y == 0) || sigBox_pos == 1) {
-        old_x = sigBox_x+x_now;
-        old_y = sigBox_y+sigBox_h-yd;
-    } else {
-        frameBuffer->paintLine(old_x, old_y, sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_YELLOW);
-        old_x = sigBox_x+x_now;
-        old_y = sigBox_y+sigBox_h-yd;
-    }
+	if ( g_RemoteControl->current_PIDs.PIDs.vpid > 0 ){
+		yd = y_signal_fe (rate.short_average, 12000, sigBox_h); // Video + Audio
+	} else {
+		yd = y_signal_fe (rate.short_average, 512, sigBox_h); // Audio only
+	}
+	if ((old_x == 0 && old_y == 0) || sigBox_pos == 1) {
+		old_x = sigBox_x+x_now;
+		old_y = sigBox_y+sigBox_h-yd;
+	} else {
+		frameBuffer->paintLine(old_x, old_y, sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_YELLOW);
+		old_x = sigBox_x+x_now;
+		old_y = sigBox_y+sigBox_h-yd;
+	}
 	
 	if (s.ber != s.old_ber) {
 		SignalRenderStr (s.ber, sig_text_ber_x,y - iheight);
@@ -345,7 +355,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 
 	if (s.sig != s.old_sig) {
 		SignalRenderStr (s.sig, sig_text_sig_x,y - iheight);
-        SignalRenderStr (s.max_sig, sig_text_sig_x,y - iheight - iheight);
+		SignalRenderStr (s.max_sig, sig_text_sig_x,y - iheight - iheight);
 		SignalRenderStr (s.min_sig, sig_text_sig_x,y);
 	}
 	yd = y_signal_fe (s.sig, 65000, sigBox_h);
@@ -354,8 +364,8 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 
 	if (s.snr != s.old_snr) {
 		SignalRenderStr (s.snr, sig_text_snr_x,y - iheight);
-        SignalRenderStr (s.max_snr, sig_text_snr_x,y - iheight - iheight);
-        SignalRenderStr (s.min_snr, sig_text_snr_x,y);
+		SignalRenderStr (s.max_snr, sig_text_snr_x,y - iheight - iheight);
+		SignalRenderStr (s.min_snr, sig_text_snr_x,y);
 	}
 	yd = y_signal_fe (s.snr, 65000, sigBox_h);
 	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_BLUE);
@@ -469,17 +479,17 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	ypos += iheight;
 	switch (bitInfo[2])
 	{
-	case 2:
-		sprintf((char*) buf, "%s: 4:3", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
-		break;
-	case 3:
-		sprintf((char*) buf, "%s: 16:9", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
-		break;
-	case 4:
-		sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
-		break;
-	default:
-		strncpy(buf, g_Locale->getText(LOCALE_STREAMINFO_ARATIO_UNKNOWN), sizeof(buf));
+		case 2:
+			sprintf((char*) buf, "%s: 4:3", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
+			break;
+		case 3:
+			sprintf((char*) buf, "%s: 16:9", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
+			break;
+		case 4:
+			sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText(LOCALE_STREAMINFO_ARATIO));
+			break;
+		default:
+			strncpy(buf, g_Locale->getText(LOCALE_STREAMINFO_ARATIO_UNKNOWN), sizeof(buf));
 	}
 	g_Font[font_info]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
@@ -554,31 +564,45 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 
 	//vpid
 	ypos+= sheight;
-	if ( g_RemoteControl->current_PIDs.PIDs.vpid == 0 )
+	if ( g_RemoteControl->current_PIDs.PIDs.vpid > 0 ){
 		sprintf((char*) buf, "Vpid: %s", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
-	else
+	} else {
 		sprintf((char*) buf, "Vpid: 0x%04x", g_RemoteControl->current_PIDs.PIDs.vpid );
+	}
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//apid	
-	ypos+= sheight;
-	if (g_RemoteControl->current_PIDs.APIDs.empty())
+	if (g_RemoteControl->current_PIDs.APIDs.empty()){
+		ypos+= sheight;
 		sprintf((char*) buf, "Apid(s): %s", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
-	else
-	{
-		sprintf((char*) buf, "Apid(s)" );
-		for (unsigned int i= 0; i< g_RemoteControl->current_PIDs.APIDs.size(); i++)
+		g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	} else {
+		unsigned int i;
+		sprintf((char*) buf, "Apid(s):" );
+		for (i= 0; (i<g_RemoteControl->current_PIDs.APIDs.size()) && (i<10); i++)
 		{
-			sprintf((char*) buf2, " 0x%04x",  g_RemoteControl->current_PIDs.APIDs[i].pid );
-
-			if (i > 0)
+			if (i == g_RemoteControl->current_PIDs.PIDs.selected_apid)
+				sprintf((char*) buf2, " <0x%04x>",  g_RemoteControl->current_PIDs.APIDs[i].pid );
+			else	
+				sprintf((char*) buf2, " 0x%04x",  g_RemoteControl->current_PIDs.APIDs[i].pid );
+			if ((i > 0) && (i%4 != 0))
 			{
 				strcat((char*) buf, ",");
 			}
 			strcat((char*) buf, buf2);
+			if ((i+1)%4 == 0) // if we have lots of apids, put "intermediate" line with pids
+			{
+				ypos+= sheight;
+				g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+				sprintf((char*) buf, "           " );
+			}
+		}
+		if ((i)%4 != 0) // put finishing (and only?) line with apids if not ended with an intermediate line
+		{
+			ypos+= sheight;
+			g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 		}
 	}
-	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	//vtxtpid
 	ypos += sheight;
@@ -589,24 +613,22 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 	// Subtitle pids
-        ypos+= sheight;
-        snprintf((char*)buf, sizeof(buf), "%s: ", "Sub pid(s)");
-        strcpy(buf2, "");
-        count=0;
+	ypos+= sheight;
+	snprintf((char*)buf, sizeof(buf), "%s: ", "Sub pid(s)");
+	strcpy(buf2, "");
+	count=0;
 	for (unsigned i = 0 ;
-             i < g_RemoteControl->current_PIDs.SubPIDs.size() ; i++) {
-                if (g_RemoteControl->current_PIDs.SubPIDs[i].pid !=
-                    g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
-                        char tmpbuf[100];
-                        if (*buf2) {
-                                strncat(buf2, ", ", sizeof(buf2));
-                        }
-                        snprintf(tmpbuf, sizeof(tmpbuf),
-                                 "0x%04x %s",
-                                 g_RemoteControl->current_PIDs.SubPIDs[i].pid,
-                                 g_RemoteControl->current_PIDs.SubPIDs[i].desc
-                                );
-                        strncat(buf2, tmpbuf, sizeof(buf2));
+		i < g_RemoteControl->current_PIDs.SubPIDs.size() ; i++) {
+		if (g_RemoteControl->current_PIDs.SubPIDs[i].pid !=
+			g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
+			char tmpbuf[100];
+			if (*buf2) {
+				strncat(buf2, ", ", sizeof(buf2));
+			}
+			snprintf(tmpbuf, sizeof(tmpbuf), "0x%04x %s",
+				g_RemoteControl->current_PIDs.SubPIDs[i].pid,
+				g_RemoteControl->current_PIDs.SubPIDs[i].desc);
+			strncat(buf2, tmpbuf, sizeof(buf2));
 			if (++count == 2) {
 				strncat(buf, buf2, sizeof(buf));
 				g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
@@ -614,55 +636,51 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 				strcpy(buf, "          ");
 				strcpy(buf2, "");
 			}
-                }
-        }
-        if (count) {
-                strncat(buf, buf2, sizeof(buf));
-        } else {
-                strncat(buf,
-                        g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE),
-                        sizeof(buf));
-        }
-        if (count != 2) {
+		}
+	}
+	if (count) {
+		strncat(buf, buf2, sizeof(buf));
+	} else {
+		strncat(buf,
+			g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE),
+			sizeof(buf));
+	}
+	if (count != 2) {
 		g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
         	ypos += sheight;
 	}
 
-        // TTX subtitles
-        snprintf((char*)buf, sizeof(buf), "%s: ", "TTXsub page(s)");
-        strcpy(buf2, "");
+	// TTX subtitles
+	snprintf((char*)buf, sizeof(buf), "%s: ", "TTXsub page(s)");
+	strcpy(buf2, "");
 	count = 0;
-	for (unsigned i = 0 ;
-             i < g_RemoteControl->current_PIDs.SubPIDs.size() ; i++) {
-                if (g_RemoteControl->current_PIDs.SubPIDs[i].pid ==
-                    g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
-                        char tmpbuf[100];
-                        if (*buf2) {
-                                strncat(buf2, ", ", sizeof(buf2));
-                        }
-                        snprintf(tmpbuf, sizeof(tmpbuf),
-                                 "%03d %s",
-                                 g_RemoteControl->current_PIDs.SubPIDs[i].composition_page,
-                                 g_RemoteControl->current_PIDs.SubPIDs[i].desc
-                                );
-                        strncat(buf2, tmpbuf, sizeof(buf2));
+	for (unsigned i = 0; i < g_RemoteControl->current_PIDs.SubPIDs.size(); i++) {
+		if (g_RemoteControl->current_PIDs.SubPIDs[i].pid == g_RemoteControl->current_PIDs.PIDs.vtxtpid) {
+			char tmpbuf[100];
+			if (*buf2) {
+				strncat(buf2, ", ", sizeof(buf2));
+			}
+			snprintf(tmpbuf, sizeof(tmpbuf), "%03d %s",
+				g_RemoteControl->current_PIDs.SubPIDs[i].composition_page,
+				g_RemoteControl->current_PIDs.SubPIDs[i].desc);
+			strncat(buf2, tmpbuf, sizeof(buf2));
 			if (++count == 3) {
 				strncat(buf, buf2, sizeof(buf));
-                                g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
-                                ypos += sheight;
-                                strcpy(buf, "          ");
-                                strcpy(buf2, "");
-                        }
-                }
-        }
-        if (count) {
-                strncat(buf, buf2, sizeof(buf));
-        } else {
-                strncat(buf,
-                        g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE),
-                        sizeof(buf));
-        }
-        if (count != 3) {
+				g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+				ypos += sheight;
+				strcpy(buf, "          ");
+				strcpy(buf2, "");
+			}
+		}
+	}
+	if (count) {
+		strncat(buf, buf2, sizeof(buf));
+	} else {
+		strncat(buf,
+			g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE),
+			sizeof(buf));
+	}
+	if (count != 3) {
 		g_Font[font_small]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 		ypos+= sheight;
 	}
@@ -670,7 +688,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	//satellite
 	ypos += 10;
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
-	g_Font[font_info]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
