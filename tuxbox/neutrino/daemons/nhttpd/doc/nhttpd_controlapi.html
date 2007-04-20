@@ -190,6 +190,16 @@
 		http://dbox/control/changebouquet</a></td>
 	</tr>
 	<tr>
+		<td>41. <a href="#updatebouquet">Bouquet-Editor: Bouquet Channels aktualisieren</a></td>
+		<td><a href="http://dbox/control/updatebouquet">
+		http://dbox/control/updatebouquet</a></td>
+	</tr>
+	<tr>
+		<td>42. <a href="#build_live_url">Live-URL für Streamin erzeugen</a></td>
+		<td><a href="http://dbox/control/build_live_url">
+		http://dbox/control/build_live_url</a></td>
+	</tr>
+	<tr>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 	</tr>
@@ -339,17 +349,17 @@ Beispiel:<br>
 &gt;&gt;&gt;http://dbox/control/epg?ext<br>
 8716330 1025382300 6900 571233417784 Rocky 2<br>
 </div>
-<b>Parameter:</b> xml=true&amp;channelid=&lt;channel_id&gt;|channelname=&lt;channel 
+<b>Parameter:</b> xml=true&amp;channelid=&lt;channel_id&gt;|channelname=&lt;channel
 name&gt;[&amp;details=true][&amp;max=&lt;max items&gt;][&amp;stoptime=&lt;long:stop time&gt;]<br>
 <b>Rückgabe:</b><br>
-Liefert zum angegebenen channel (angegeben durch channel_id oder channel_name) 
+Liefert zum angegebenen channel (angegeben durch channel_id oder channel_name)
 das EPG als XML-Liste zurück.<br>
 channel_name=Ein oder mehrere durch Komma getrente Sendernamen.<br>
-Wird details=true angegeben, dann werden zusätzlich info1 and info2 mit 
+Wird details=true angegeben, dann werden zusätzlich info1 and info2 mit
 ausgegeben.<br>
-Zur Begrenzung der Menge der Listeneinträge kann max für die Anzahl der Elemente 
+Zur Begrenzung der Menge der Listeneinträge kann max für die Anzahl der Elemente
 oder <br>
-stoptime für die Uhrzeit bis zu der Angaben gemacht werden sollen, begrenzt 
+stoptime für die Uhrzeit bis zu der Angaben gemacht werden sollen, begrenzt
 werden.<br>
 <div class="example">
 Beispiel:<br>
@@ -369,7 +379,7 @@ Beispiel:<br>
 &lt;duration_min&gt;30&lt;/duration_min&gt;<br>
 &lt;description&gt;&lt;![CDATA[Marienhof]]&gt;&lt;/description&gt;<br>
 &lt;info1&gt;&lt;![CDATA[(Folge 2868)]]&gt;&lt;/info1&gt;<br>
-&lt;info2&gt;&lt;![CDATA[Sülo verachtet Constanze wegen ihrer Intrige. Luigi plündert das 
+&lt;info2&gt;&lt;![CDATA[Sülo verachtet Constanze wegen ihrer Intrige. Luigi plündert das
 Konto und haut ab. Jessy will Carlos über ihre Chats aufklären.]]&gt;&lt;/info2&gt;<br>
 &lt;/prog&gt;<br>
 &lt;prog&gt;<br>
@@ -384,9 +394,9 @@ Konto und haut ab. Jessy will Carlos über ihre Chats aufklären.]]&gt;&lt;/info2&
 &lt;duration_min&gt;60&lt;/duration_min&gt;<br>
 &lt;description&gt;&lt;![CDATA[Großstadtrevier]]&gt;&lt;/description&gt;<br>
 &lt;info1&gt;&lt;![CDATA[239. Fenstergespenster]]&gt;&lt;/info1&gt;<br>
-&lt;info2&gt;&lt;![CDATA[Pech für Dirk Matthies: Da steigt er auf eine Leiter, weil ihn 
-mal der Putzfimmel überkommt, und - knacks! - bricht eine Sprosse. Das Bein ist 
-gebrochen, mehrere Rippen geprellt. Katja Metz versorgt ihn mit dem 
+&lt;info2&gt;&lt;![CDATA[Pech für Dirk Matthies: Da steigt er auf eine Leiter, weil ihn
+mal der Putzfimmel überkommt, und - knacks! - bricht eine Sprosse. Das Bein ist
+gebrochen, mehrere Rippen geprellt. Katja Metz versorgt ihn mit dem
 Nötigsten.]]&gt;&lt;/info2&gt;<br>
 &lt;/prog&gt;<br>
 &lt;/epglist&gt;<br>
@@ -706,7 +716,7 @@ Beispiel:<br>
 ok <br>
 </div>
 
-<b>Parameter:</b> channel_name oder channel_names (Ein oder mehrere durch Komma 
+<b>Parameter:</b> channel_name oder channel_names (Ein oder mehrere durch Komma
 getrente Sendernamen; URI encoded)<br>
 <b>Rueckgabe:</b><br>
 <br>
@@ -996,7 +1006,7 @@ Beispiel:<br>
 <div class="title1"><a name="getbouquet"></a>16. Bouquet abfragen</div>
 <div class="URL">Handler: http://dbox/control/getbouquet</div>
 <br>
-<b>Parameter:</b> bouquet=Bouquet Nr. und mode=TV | RADIO oder actual und und 
+<b>Parameter:</b> bouquet=Bouquet Nr. und mode=TV | RADIO oder actual und und
 mode=TV | RADIO optional: xml=true<br>
 <b>Rueckgabe:</b><br>
 <br>
@@ -1188,7 +1198,7 @@ die Zeit des Timer-Starts stopTime ist die Stopzeit für den Timer<br>
 data ist der Name des Senders.<br>
 <br>
 <i>data</i> enthält weitere Angaben zum Timer. Bei RECORD z.B. den Sendernamen.<br>
-wurde format=id angegeben, so wird statt des Sendernames die channel-id 
+wurde format=id angegeben, so wird statt des Sendernames die channel-id
 ausgegeben.<div class="example">
 Beispiel:<br>
 <br>
@@ -1202,7 +1212,7 @@ kanal/daten die zeiten sind time_t (Unix Zeitstempel)<br>
 <b>Parameter:</b> get=pre | post<br>
 <b>Rückgabe:</b> <br>
 <br>
-Gibt die voreingestellte Vor- bzw. Nachlaufzeit für RecordingSafty in Sekunden 
+Gibt die voreingestellte Vor- bzw. Nachlaufzeit für RecordingSafty in Sekunden
 aus.<p><b>Rueckgabe-Format:</b> Sekunden</p>
 <div class="example">
 Beispiel:<br>
@@ -1368,9 +1378,9 @@ Neutrino wieder Zugriff auf das LCD erhält.<br>
 Beispiel: <br>
 ----------------------------------<br>
 <br>
-wget -O /tmp/nhttpd.res 
+wget -O /tmp/nhttpd.res
 'http://localhost/control/lcd?lock=1&amp;clear=1&amp;rect=10,10,110,50,1,0&amp;xpos=20&amp;ypos=27&amp;size=22&amp;font=2&amp;text=%20Hallo%20Welt%0A%C3%9Cbungstext&amp;update=1'<br>
-wget -O /tmp/nhttpd.res 
+wget -O /tmp/nhttpd.res
 'http://localhost/control/lcd?rect=10,10,110,50,1,2&amp;update=1' <br>
 <br>
 um das Display wieder freizugeben, sollte zum Schluß<br>
@@ -1652,7 +1662,7 @@ ok<br>
 <b>Parameter:</b> selected=&lt;id&gt;&amp;action=hide|show|lock|unlock<br>
 <b>Rückgabe</b>: ok / error<br>
 <br>
-Ändert für &quot;selected&quot; Bouquet das Sichtbarkeitsattribut (hide/show) oder 
+Ändert für &quot;selected&quot; Bouquet das Sichtbarkeitsattribut (hide/show) oder
 Zugriffsattribut<br>
 (lock/unlock). Die Funktion läuft im ZapIt-Bouqueteditor.
 <p>/control/savebouquet schreibt die Daten permanent in das Bouquet-File.</p>
@@ -1665,7 +1675,7 @@ ok<br>
 <br>
 
 <!-- ----------------------------------------------------------- -->
-<div class="title1"><a name="savebouquet"></a>35. Bouquet-Editor: Bouquet-Liste 
+<div class="title1"><a name="savebouquet"></a>35. Bouquet-Editor: Bouquet-Liste
 	speichern</div>
 <div class="URL">Handler: http://dbox/control/savebouquet</div>
 <br>
@@ -1686,7 +1696,7 @@ ok<br>
 <b>Parameter:</b> selected=&lt;id&gt;&amp;action=up|down<br>
 <b>Rückgabe</b>: ok / error<br>
 <br>
-Verschiebt &quot;selected&quot;-Bouquet um eine Zeile nach oben oder unten in der 
+Verschiebt &quot;selected&quot;-Bouquet um eine Zeile nach oben oder unten in der
 Bouquet-Liste. <br>
 Die Funktion läuft im ZapIt-Bouqueteditor.
 <p>/control/savebouquet schreibt die Daten permanent in das Bouquet-File.</p>
@@ -1705,7 +1715,7 @@ ok<br>
 <b>Parameter:</b> selected=&lt;id&gt;<br>
 <b>Rückgabe</b>: ok / error<br>
 <br>
-Löscht &quot;selected&quot;-Bouquet aus der 
+Löscht &quot;selected&quot;-Bouquet aus der
 Bouquet-Liste. <br>
 Die Funktion läuft im ZapIt-Bouqueteditor.
 <p>/control/savebouquet schreibt die Daten permanent in das Bouquet-File.</p>
@@ -1756,42 +1766,57 @@ Beispiel:<br>
 &gt;&gt;&gt;http://dbox/control/renamebouquet?selected=2&amp;nameto=Lieblingssender<br>
 ok<br>
 &nbsp;</div>
-
-
 <br>
 
 <!-- ----------------------------------------------------------- -->
-<div class="title1"><a name="changebouquet"></a>40. Bouquet-Editor: Bouquet Channels 
+<div class="title1"><a name="changebouquet"></a>40. Bouquet-Editor: Bouquet Channels
 	ändern</div>
 <div class="URL">Handler: http://dbox/control/changebouquet</div>
 <br>
 <b>Parameter:</b> selected=&lt;id&gt;&amp;bchannels=&lt;channel_id&gt;[,&lt;channel_id&gt;]*[&amp;redirect=url]<br>
 <b>Rückgabe</b>: ok / error<br>
 <br>
-Fügt die unter bchannels angegebenen Channels dem &quot;selected&quot;-Bouquet 
+Fügt die unter bchannels angegebenen Channels dem &quot;selected&quot;-Bouquet
 zu. <br>
 Die Funktion läuft im ZapIt-Bouqueteditor.
 <p>/control/savebouquet schreibt die Daten permanent in das Bouquet-File.</p>
 <div class="example">
 Beispiel:<br>
 <br>
-&gt;&gt;&gt;http://dbox/control/changebouquet?selected=2&amp;bchannels=2712f001d099, 
+&gt;&gt;&gt;http://dbox/control/changebouquet?selected=2&amp;bchannels=2712f001d099,
 43700016d66<br>
 ok<br>
 &nbsp;</div>
-&nbsp;&nbsp;</p>
+<br>
 
+<!-- ----------------------------------------------------------- -->
+<div class="title1"><a name="updatebouquet"></a>41. Bouquet-Editor: Bouquet Channels
+	aktualisieren</div>
+<div class="URL">Handler: http://dbox/control/updatebouquet</div>
+<br>
+<b>Parameter:</b><br>
+<b>Rückgabe</b>: ok<br>
+<br>
+&nbsp;</div>
+<br>
 
-&nbsp;</p>
+<!-- ----------------------------------------------------------- -->
+<div class="title1"><a name="build_live_url"></a>42. URL für Live-Streaming (VLC) erstellen
+	ändern</div>
+<div class="URL">Handler: http://dbox/control/build_live_url</div>
+<br>
+<b>Parameter:</b> [audio_no=&lt;audio-track&gt;][&host=&lt;dbox-ip&gt;][&vlc_link=true]<br>
+<b>Rückgabe</b>: live-URL oder redirection Link auf vlc.m3u-Datei<br>
+<br>
+Es wird für den aktuellen Sender eine Live-URL erzeugt. Sie dient für den Streaming-Aufruf von VLC. <br>
+<div class="example">
+Beispiel:<br>
+<br>
+&gt;&gt;&gt;http://dbox/control/build_live_url<br>
+http://192.168.0.15:31339/0,0x0069,0x03ff,0x0400<br>
+&nbsp;</div>
+<br>
 
-
-</p>
-
-
-</p>
-
-
-</p>
 
 
 </body>
