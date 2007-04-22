@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.11 2007/04/16 20:59:32 houdini Exp $
+	$Id: imageinfo.cpp,v 1.12 2007/04/22 20:37:04 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -377,8 +377,7 @@ string CImageInfo::getSysInfo(string infotag, bool reverse)
 }
 
 string CImageInfo::getChipInfo()
-{
-	string chiptype;	
+{		
 	string str = getSysInfo("D-Box 2 flash memory: Found ", false);
 	
 	string::size_type locx = str.find( "x16", 0 );
@@ -427,7 +426,7 @@ string CImageInfo::getImageInfoVersion()
 /* 	Note: revision (revstr) will change automaticly on cvs-commits, 
  * 	if you made some changes without cvs-commit, you must change it before by yourself
  */
-	string revstr = "$Revision: 1.11 $";
+	string revstr = "$Revision: 1.12 $";
 	while (revstr.find("$") !=string::npos)
 	{
 		revstr.replace(revstr.find("$"),1 ,""); //normalize output, remove "$"	

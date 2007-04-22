@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.123 2007/02/25 21:29:38 guenther Exp $
+	$Id: update.cpp,v 1.124 2007/04/22 20:37:59 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -47,6 +47,7 @@
 #include <gui/color.h>
 #include <gui/filebrowser.h>
 #include <system/fsmounter.h>
+#include <gui/imageinfo.h>
 
 #include <gui/widget/messagebox.h>
 #include <gui/widget/hintbox.h>
@@ -63,7 +64,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <dirent.h>
-
 #include <fstream>
 
 //#define TESTING
@@ -531,15 +531,29 @@ void CFlashExpert::readmtd(int readmtd)
 	}
 }
 
+
 void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 {
+	
 	char message[500];
+	static CImageInfo imageinfo;
+	const char* mtdtarget = CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str();
+	const char* imagefile = FILESYSTEM_ENCODING_TO_UTF8_STRING(filename).c_str();	
 
-	sprintf(message,
+	if (mtdNumber >3) 
+	{
+		sprintf(message,
+		g_Locale->getText(LOCALE_FLASHUPDATE_REALLYFLASHCHIPSET),
+		imageinfo.getChipInfo().c_str(),
+		imagefile, mtdtarget);
+	}
+	else
+	{	
+		sprintf(message,
 		g_Locale->getText(LOCALE_FLASHUPDATE_REALLYFLASHMTD),
-		FILESYSTEM_ENCODING_TO_UTF8_STRING(filename).c_str(),
-		CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
-
+		imagefile, mtdtarget);
+	}	
+		
 	if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, message, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes) // UTF-8
 		return;
 
@@ -632,6 +646,7 @@ void CFlashExpert::showFileSelector(const std::string & actionkey)
 
 int CFlashExpert::exec(CMenuTarget* parent, const std::string & actionKey)
 {
+	
 	if(parent)
 	{
 		parent->hide();

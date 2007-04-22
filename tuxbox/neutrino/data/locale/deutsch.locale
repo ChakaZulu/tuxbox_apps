@@ -361,10 +361,11 @@ flashupdate.proxyusername_hint2 Ein leerer Eintrag bedeutet keine Authentifizier
 flashupdate.readflash ganzes Flashimage auslesen
 flashupdate.readflashmtd einzelne Partition auslesen
 flashupdate.ready fertig
-flashupdate.reallyflashmtd Wollen Sie den Flashvorgang wirklich durchführen?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionfähig ist, wird Ihre DBox nicht mehr booten.\n\nImagename: %s\nZiel: %s
+flashupdate.reallyflashchipset Wollen Sie den Flashvorgang wirklich durchführen?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionsfähig ist, wird Ihre DBox nicht mehr booten.\nVerwenden Sie nur Images vom Typ: %s\ngewähltes Image: %s\nZiel: %s
+flashupdate.reallyflashmtd Wollen Sie den Flashvorgang wirklich durchführen?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionsfähig ist, wird Ihre DBox nicht mehr booten.\n\ngewähltes Image: %s\nZiel: %s
 flashupdate.savesuccess Das Image wurde erfolgreich unter dem\nDateinamen %s gespeichert.
 flashupdate.selectimage Verfügbare Updates
-flashupdate.squashfs.noversion Bei SquashFS Updates werden Versionsüberprüfungen\nderzeit nur bei Web-Updates unterstützt.\nWollen Sie das ausgewählt Image wirklich installieren?
+flashupdate.squashfs.noversion Bei SquashFS Updates werden Versionsüberprüfungen\nderzeit nur bei Online-Updates unterstützt.\nWollen Sie das ausgewählte Image wirklich installieren?
 flashupdate.titlereadflash Flash auslesen
 flashupdate.titlewriteflash Flash schreiben
 flashupdate.updatemode Updatemodus

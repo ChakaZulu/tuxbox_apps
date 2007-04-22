@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: imageinfo.h,v 1.3 2007/04/08 17:17:38 dbt Exp $
+	$Id: imageinfo.h,v 1.4 2007/04/22 20:36:40 dbt Exp $
 
 	License: GPL
 
@@ -72,6 +72,7 @@ class CImageInfo : public CMenuTarget
 		std::string imagedate;
 		std::string imagetype;
 		std::string partitions;
+		std::string chiptype;
 		CPIG *pig;
 		
 		void paint();
@@ -94,8 +95,8 @@ class CImageInfo : public CMenuTarget
 		void hide();
 		int exec(CMenuTarget* parent, const std::string& actionKey);
 		const char *ImageInfo( int InfoType );
-		std::string getChipInfo();
-		std::string getImageInfoVersion();
+		std::string getChipInfo(void);
+		std::string getImageInfoVersion(void);
 		std::string getSysInfo(std::string infotag, bool reverse);
 		void LoadImageInfo(void);
 };

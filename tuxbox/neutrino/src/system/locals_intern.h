@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.88 2007/04/11 20:50:00 papst Exp $
+ * $Id: locals_intern.h,v 1.89 2007/04/22 20:35:14 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -388,6 +388,7 @@ const char * locale_real_names[] =
 	"flashupdate.readflash",
 	"flashupdate.readflashmtd",
 	"flashupdate.ready",
+	"flashupdate.reallyflashchipset",
 	"flashupdate.reallyflashmtd",
 	"flashupdate.savesuccess",
 	"flashupdate.selectimage",
