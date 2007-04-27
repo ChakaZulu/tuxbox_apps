@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.47 2007/02/28 04:53:27 Arzka Exp $
+ * $Id: pmt.cpp,v 1.48 2007/04/27 21:50:15 houdini Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -392,6 +392,14 @@ int parse_pmt(CZapitChannel * const channel)
 				DBG("decriptor_tag: %02x", buffer[i]);
 				break;
 			}
+
+	//Quick&Dirty Hack to support Premiere's EPG not only on the portal but on the subchannels as well 
+	if (channel->getOriginalNetworkId() == 0x0085) {
+		if (channel->getTransportStreamId() ==0x0003)
+			channel->setPrivatePid(0x0b12);
+		if (channel->getTransportStreamId() ==0x0004)
+			channel->setPrivatePid(0x0b11);
+	}
 
 	/* pmt */
 	for (i = 12 + program_info_length; i < section_length - 1; i += ES_info_length + 5)
