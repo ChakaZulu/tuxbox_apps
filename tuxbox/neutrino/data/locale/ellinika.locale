@@ -149,7 +149,7 @@ audioplayer.defdir Εκκινήσει-καταλογή
 audioplayer.delete Διαγράφω
 audioplayer.deleteall Όλα τα διαγράφω
 audioplayer.display_Ένδειξη Φάκελου
-audioplayer.enable_sc_metadata Aktiviere Shoutcast Meta-Daten Parsing
+audioplayer.enable_sc_metadata Ενεργοποιώ Shoutcast Meta-Daten Parsing
 audioplayer.fastforward Γρήγορη Vorl.
 audioplayer.follow Ακολουθώ τα.τραγούδιa
 audioplayer.head Ήχος Play λίστα
@@ -409,14 +409,23 @@ fontsize.menu_info Πληροφορίες μενού
 fontsize.menu_title Τίτλος μενού
 gtxalpha.alpha1 Άλφα 1
 gtxalpha.alpha2 Άλφα 2
+imageinfo.chipset Η έκδοση τσιπ: 
 imageinfo.creator Κατασκευαστής:
+imageinfo.cvslevel CVS-Επίπεδο:
 imageinfo.date Ημερομηνία:
+imageinfo.details Έκδοση
 imageinfo.dokumentation Oδηγίες:
 imageinfo.forum Forum:
 imageinfo.head Λογισμικό πληροφορίες
 imageinfo.homepage Homepage:
 imageinfo.image Λογισμικό:
+imageinfo.imagetype Λειτουργικό-τύπο:
+imageinfo.info Πληροφορία:
 imageinfo.license Χορηγώ:
+imageinfo.noteflashtype Για αναβαθμίσει εξετάζετε παρακαλώ τον τύπο τσιπ της (1x ή/και. 2x)
+imageinfo.partitions Χωρίσματα
+imageinfo.support Υποστηρίξει
+imageinfo.supporthere η τεχνική υποστήριξη και η βοήθεια σας βρίσκουν εδώ
 imageinfo.version Έκδοση:
 infoviewer.epgnotload Πληροφορίες δεν φορτώθηκαν...
 infoviewer.epgwait Περιμένετε για EPG-πληροφορίες....
@@ -499,7 +508,7 @@ lcdmenu.statusline.both_Ήχος ένταση./κινήσει./Ήχο
 lcdmenu.statusline.playtime Πρόοδος μετάδοσης
 lcdmenu.statusline.Όγκος εντάσεις
 mainmenu.audioplayer Ήχος player
-mainmenu.clearsectionsd EPG neu laden
+mainmenu.clearsectionsd EPG Ανανέωση
 mainmenu.games Παιχνίδια
 mainmenu.head Κεντρικό Μενού
 mainmenu.movieplayer Movieplayer
@@ -529,6 +538,7 @@ mainsettings.network Κάρτα δικτύου
 mainsettings.recording Έγγραφη
 mainsettings.savesettingsnow Τις ρύθμισης τις αποθηκεύω
 mainsettings.savesettingsnow_hint Η ρύθμισης τώρα θα αποθηκευτούν\Παρακαλώ περιμένετε...
+mainmenu.scripts scripts
 mainsettings.streaming Movieplayer
 mainsettings.video Βίντεο
 menu.back Πίσω
@@ -699,7 +709,7 @@ movieplayer.toomanybookmarks Έχετε επιλέξει πολλά Bookmarks μ
 movieplayer.tshelp1 Στοπ
 movieplayer.tshelp10 ca. 10 Λεπτά πίσω
 movieplayer.tshelp11 ca. 10 Λεπτά μπροστά
-movieplayer.tshelp12 Hilfe: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.tshelp12 Βοήθεια:http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tshelp13 Άλμα στο...
 movieplayer.tshelp2 Επιλέγω τον ήχου
 movieplayer.tshelp3 Διάλειμμα/συνεχίζω
@@ -740,7 +750,7 @@ networkmenu.ntprefresh_hint2 Επανεκκίνηση/EPG-επιτυχείς
 networkmenu.ntpserver NTP-Υπηρεσίες
 networkmenu.ntpserver_hint1 NTP-Server z.b: ntp1.ptb.de
 networkmenu.ntpserver_hint2 Επανεκκίνηση /EPG-Reset επιτυχείς
-networkmenu.ntptitle Zeitsyncronisation
+networkmenu.ntptitle Ρυθμίσεις ώρας 
 networkmenu.setupnow Οι τοποθετήσεις δικτύων ορίζουν τώρα
 networkmenu.setuponstartup Καθορισμένο δίκτυο κατά την έναρξη
 networkmenu.show aktive Ένδειξη ρύθμισης κάρτας
@@ -973,12 +983,12 @@ streaminfo.head Τεχνικές πληροφορίες
 streaminfo.not_available Μη διαθέσιμες
 streaminfo.resolution Αναλύσει
 streaminfo.signal Σήμα
-streaming.buffer_overflow Die Aufnahme wurde leider abgebrochen,\nda die Daten nicht schnell genug geschrieben werden konnten.
-streaming.busy Ein oder mehrere Aufnahmeprozesse sind aktiv.\nSollte die Aufnahme eigentlich beendet sein,\nschafft ein Neustart von Neutrino Abhilfe.
-streaming.dir_not_writable Das Aufnahmeverzeichnis ist nicht beschreibbar.\nAufnahmen sind daher nicht möglich.
-streaming.success Die Aufnahme wurde erfolgreich beendet.
-streaming.write_error Die Aufnahme wurde leider abgebrochen,\nda ein Fehler beim Schreiben der Daten auftrat.
-streaming.write_error_open Die Aufnahme wurde leider abgebrochen,\nda die entsprechende Datei nicht zum Schreiben geöffnet werden konnte.
+streaming.buffer_overflow Η έγγραφη διακόπηκε δυστυχώς,\nδεδομένου ότι τα στοιχεία δεν μπόρεσαν να γραφτούν αρκετά γρήγορα.
+streaming.busy Οι διαδικασίες εγγραφείς είναι ενεργές.\nΗ αποδοχή πρέπει να ολοκληρωθεί πραγματικά, \nκάνει ένα καινούριο ξεκίνημα της neutrino. 
+streaming.dir_not_writable Η λίστα έγγραφη δεν είναι αντιγράφεται.\nΟι έγγραφες δεν είναι δυνατές επομένως.
+streaming.success Η έγγραφη ολοκληρώθηκε επιτυχώς.
+streaming.write_error Η έγγραφη διακόπηκε δυστυχώς,\nΔεδομένου ότι ένα λάθος προέκυψε κατά τη διάρκεια του γραψίματος των στοιχείων.
+streaming.write_error_open Η έγγραφη διακόπηκε δυστυχώς,\nΔεδομένου ότι το κατάλληλο αρχείο δεν μπόρεσε να ανοίξουν στην επιστολή.
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
@@ -991,11 +1001,11 @@ streamingmenu.on Ενεργό
 streamingmenu.server_ip Streamingserver IP
 streamingmenu.server_port Streamingserver Port
 streamingmenu.streaming_audiorate Ακουστικό ποσοστό
-streamingmenu.streaming_buffer_segment_size Anzahl Buffersegmente
+streamingmenu.streaming_buffer_segment_size Αριθμός τμήμα 
 streamingmenu.streaming_buffer_segment_size_hint1 Min: 6, Max: 124, optimal: 24
 streamingmenu.streaming_buffer_segment_size_hint2
-streamingmenu.streaming_force_avi_rawaudio Erzwinge AC3 bei avi
-streamingmenu.streaming_force_transcode_video Transcod. auch mpg/vcd Video
+streamingmenu.streaming_force_avi_rawaudio Δύναμη AC3 στο avi 
+streamingmenu.streaming_force_transcode_video Διακωδικοποιήστε.επίσης mpg/vcd Βίντεο 
 streamingmenu.streaming_resolution Αναλύσει
 streamingmenu.streaming_server_cddrive DVD Συνέλευση κίνησης 
 streamingmenu.streaming_server_startdir Λίστα (VLC)
@@ -1003,7 +1013,7 @@ streamingmenu.streaming_show_tv_in_browser TV Εικόνα στο Browser
 streamingmenu.streaming_transcode_audio Transcod. Ήχο (dvd/vcd/mpg)
 streamingmenu.streaming_transcode_video_codec MPEG Βίντεο Codec
 streamingmenu.streaming_type Streamingserver
-streamingmenu.streaming_use_buffer Verwende Buffer (WabberQueue)
+streamingmenu.streaming_use_buffer Χρήσης τμήμα (WabberQueue)
 streamingmenu.streaming_videorate Βίντεο ποσοστού στοιχείων
 streamingserver.noconnect Καμία σύνδεση στο Streamingserver.\εγγραφή θα διακοπή.
 stringinput.caps Μεγάλα-/μικρά γράμματα
