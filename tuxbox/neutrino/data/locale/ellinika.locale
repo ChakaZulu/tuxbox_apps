@@ -398,7 +398,7 @@ fontsize.filebrowser_item Αρχείο browser- εισάγετε
 fontsize.gamelist_itemlarge Μεγάλο
 fontsize.gamelist_itemsmall Μικρό
 fontsize.hint Font Θα εγκατασταθεί,\παρακαλώ περιμένετε...
-fontsize.imageinfo_Λογισμικό πληροφορία
+fontsize.imageinfo_info Λογισμικό πληροφορία
 fontsize.imageinfo_small Λογισμικά πληροφορίες άδειας
 fontsize.infobar_channame Πληροφορία στο Κανάλι
 fontsize.infobar_info Πληροφορίες
@@ -538,7 +538,6 @@ mainsettings.network Κάρτα δικτύου
 mainsettings.recording Έγγραφη
 mainsettings.savesettingsnow Τις ρύθμισης τις αποθηκεύω
 mainsettings.savesettingsnow_hint Η ρύθμισης τώρα θα αποθηκευτούν\Παρακαλώ περιμένετε...
-mainmenu.scripts scripts
 mainsettings.streaming Movieplayer
 mainsettings.video Βίντεο
 menu.back Πίσω
