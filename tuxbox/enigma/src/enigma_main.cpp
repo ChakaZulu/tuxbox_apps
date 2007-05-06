@@ -4321,6 +4321,36 @@ void eZapMain::copyProviderToBouquets(eServiceSelector *sel)
 	currentSelectedUserBouquetRef=oldref;
 	currentSelectedUserBouquet=oldBouquet;
 }
+struct eServiceHandlerDVB_removeNewFoundFlag
+{
+	int type;
+	int DVBNamespace;
+	eServiceHandlerDVB_removeNewFoundFlag(int type, int DVBNamespace)
+	: type(type), DVBNamespace(DVBNamespace)
+	{
+	}
+	void operator()(const eServiceReference &service)
+	{
+		eService *s = eTransponderList::getInstance()->searchService( service );
+		if ( !s )  // dont show "removed services"
+			return;
+		else if ( s->dvb && s->dvb->dxflags & eServiceDVB::dxDontshow )
+			return;
+		int t = ((eServiceReferenceDVB&)service).getServiceType();
+		int nspace = ((eServiceReferenceDVB&)service).getDVBNamespace().get()&0xFFFF0000;
+		if (t < 0)
+			t=0;
+		if (t >= 31)
+			t=31;
+		if ( type & (1<<t) && // right dvb service type
+				 ( (DVBNamespace==(int)0xFFFFFFFF) || // ignore namespace
+				 ( (DVBNamespace&(int)0xFFFF0000) == nspace ) // right satellite
+				 )
+			 )
+			s->dvb->dxflags &= ~eServiceDVB::dxNewFound;
+			
+	}
+};
 
 void eZapMain::showServiceMenu(eServiceSelector *sel)
 {
@@ -4468,6 +4498,10 @@ eDebug(str.c_str());
 		eConfig::getInstance()->setKey( eString().sprintf("/ezap/ui/startup/%d",mode).c_str(), startup );
 		break;
 	}
+	case 19:
+		eTransponderList::getInstance()->forEachServiceReference(eServiceHandlerDVB_removeNewFoundFlag(ref.data[1], ref.data[2]));
+		sel->invalidateCurrent();
+		break;
 	default:
 		break;
 	}
@@ -7247,7 +7281,14 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 	/* i think it is not so good to rename normal providers
 	if ( ref.data[0]==-3 ) // rename Provider
 		new eListBoxEntryText(&list, _("rename"), (void*)7);*/
-
+	
+	// remove newflag from satellite
+	if ( ref && (ref.flags & eServiceReference::isDirectory)
+		&& (ref.type == eServiceReference::idDVB)
+		&& (ref.data[0] == -5 ) )
+	{
+		prev = new eListBoxEntryText(&list, _("remove all 'new found' flags"), (void*)19, 0, _("select to remove all 'new found' flags from this satellite"));
+	}
 	// remove newflag from dvb service
 
 	eServiceDVB *service = eTransponderList::getInstance()->searchService(ref);
