@@ -224,6 +224,40 @@ void eListBoxEntryService::invalidateDescr()
 		descrPara=0;
 	}
 }
+struct eListBoxEntryService_countServices
+{
+	Signal1<void,const eServiceReference&> &callback;
+	int type;
+	int DVBNamespace;
+	int* count;
+	bool onlyNew;
+	eListBoxEntryService_countServices(int type, int DVBNamespace, int* count,bool onlyNew=false)
+	: callback(callback), type(type), DVBNamespace(DVBNamespace), count(count),onlyNew(onlyNew)
+	{
+	}
+	void operator()(const eServiceReference &service)
+	{
+		eService *s = eTransponderList::getInstance()->searchService( service );
+		if ( !s )  // dont show "removed services"
+			return;
+		else if ( s->dvb && s->dvb->dxflags & eServiceDVB::dxDontshow )
+			return;
+		if ( onlyNew && !(s->dvb && s->dvb->dxflags & eServiceDVB::dxNewFound ) )
+			return;
+		int t = ((eServiceReferenceDVB&)service).getServiceType();
+		int nspace = ((eServiceReferenceDVB&)service).getDVBNamespace().get()&0xFFFF0000;
+		if (t < 0)
+			t=0;
+		if (t >= 31)
+			t=31;
+		if ( type & (1<<t) && // right dvb service type
+				 ( (DVBNamespace==(int)0xFFFFFFFF) || // ignore namespace
+				 ( (DVBNamespace&(int)0xFFFF0000) == nspace ) // right satellite
+				 )
+			 )
+			 (*count)++;
+	}
+};
 
 const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
@@ -292,7 +326,31 @@ const eString &eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gCo
 		if (service.descr.length())
 			sname=service.descr;
 		else if (pservice)
-			sname=pservice->service_name;
+		{
+			int count = 0;
+			switch (service.type)
+			{
+			case eServiceReference::idDVB:
+				switch (service.data[0])
+				{
+				case -2:  // all TV or all Radio Services
+					eTransponderList::getInstance()->forEachServiceReference(eListBoxEntryService_countServices(service.data[1], service.data[2], &count));
+					sname= eString().sprintf("%s (%d)",pservice->service_name.c_str(),count);
+					break;
+				case -5:  // all TV or all Radio Services (only services marked as new)
+					eTransponderList::getInstance()->forEachServiceReference(eListBoxEntryService_countServices(service.data[1], service.data[2], &count, true ));
+					sname= eString().sprintf("%s (%d)",pservice->service_name.c_str(),count);
+					break;
+				default:
+					sname=pservice->service_name;
+					break;
+				}
+				break;
+			default:
+				sname=pservice->service_name;
+				break;
+			}
+		}
 		else if (flags & flagIsReturn)
 			sname=_("[GO UP]");
 		else
