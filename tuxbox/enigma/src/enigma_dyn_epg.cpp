@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_epg.cpp,v 1.8 2007/01/23 17:16:58 digi_casi Exp $
+ * $Id: enigma_dyn_epg.cpp,v 1.9 2007/05/08 18:51:10 dbluelle Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -166,6 +166,10 @@ eString getServiceEPG(eString format, eString opts)
 					result.strReplace("#DURATION#", eString().sprintf("%d", event.duration));
 					eString tmp = filter_string(description);
 					result.strReplace("#DESCRIPTION#", XMLify(tmp, format)); 
+					tmp.strReplace("\'", "\\\'");
+					tmp.strReplace("\"", "\\\"");
+					tmp.strReplace("&", "~");
+					result.strReplace("#DESCRIPTIONJS#", XMLify(tmp, format)); 
 					tmp = filter_string(ext_description);
 					result.strReplace("#DETAILS#", XMLify(tmp, format));
 					result.strReplace("#GENRE#", genre);
