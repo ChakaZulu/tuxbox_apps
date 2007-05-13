@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.395 2007/03/17 21:34:22 houdini Exp $
+ * $Id: zapit.cpp,v 1.396 2007/05/13 20:14:40 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1349,6 +1349,12 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		t_channel_id cid= channel ? channel->getChannelID() : 0; 
 
 		CZapitMessages::responseCmd response;
+
+		/* load configuration or set defaults if no configuration file exists */
+		if (!config.loadConfig(CONFIGFILE))
+			WARN("%s not found", CONFIGFILE);
+
+		diseqcType = (diseqc_t)config.getInt32("diseqcType", NO_DISEQC);
 		prepare_channels(frontend->getInfo()->type, diseqcType);
 
 		tallchans_iterator cit = allchans.find(cid);
@@ -2368,7 +2374,7 @@ void leaveStandby(void)
 		cam = new CCam();
 	}
 	if (!frontend) {
-		frontend = new CFrontend();
+		frontend = new CFrontend(config.getInt32("uncommitted_switch_mode", 0));
 	}
 	if (!videoDecoder) {
 		videoDecoder = new CVideo();
@@ -2470,7 +2476,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.395 2007/03/17 21:34:22 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.396 2007/05/13 20:14:40 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -2513,7 +2519,8 @@ int main(int argc, char **argv)
 				"traceNukes" ", "
 				"ChannelNamesFromBouquet" ", "
 				"lnb0_OffsetLow" ", ..., " "lnb63_OffsetLow" ", "
-				"lnb0_OffsetHigh" ", ..., " "lnb63_OffsetHigh" "."
+				"lnb0_OffsetHigh" ", ..., " "lnb63_OffsetHigh" ", "
+				"uncommitted_switch_mode (0..2)" "."
 				"\n", argv[0]);
 			return EXIT_FAILURE;
 		}
@@ -2539,7 +2546,7 @@ int main(int argc, char **argv)
 		setTVMode();
 
 	if (!frontend)
-		frontend = new CFrontend();
+		frontend = new CFrontend(config.getInt32("uncommitted_switch_mode", 0));
 
 	diseqcType = (diseqc_t)config.getInt32("diseqcType", NO_DISEQC);
 	if (prepare_channels(frontend->getInfo()->type, diseqcType) < 0)

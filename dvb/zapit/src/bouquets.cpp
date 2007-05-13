@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.109 2006/05/19 21:26:42 houdini Exp $
+ * $Id: bouquets.cpp,v 1.110 2007/05/13 20:14:40 houdini Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -514,8 +514,9 @@ void CBouquetManager::renumServices()
 	deleteBouquet(remainChannels);
 	remainChannels = NULL;
 	
-	if (config.getBool("makeRemainingChannelsBouquet", true))
+	if (config.getBool("makeRemainingChannelsBouquet", true)) {
 		makeRemainingChannelsBouquet();
+	}
 }
 
 CBouquet* CBouquetManager::addBouquet(const std::string & name)

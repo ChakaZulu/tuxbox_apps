@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.55 2004/04/20 14:47:15 derget Exp $
+ * $Id: frontend.cpp,v 1.56 2007/05/13 20:14:41 houdini Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,7 +35,7 @@
 #define min(x,y)	((x < y) ? x : y)
 #define max(x,y)	((x > y) ? x : y)
 
-CFrontend::CFrontend(void)
+CFrontend::CFrontend(int _uncommitted_switch_mode)
 {
 	tuned = false;
 	currentToneMode = SEC_TONE_OFF;
@@ -45,6 +45,10 @@ CFrontend::CFrontend(void)
 	diseqcType = NO_DISEQC;
 	last_inversion = INVERSION_OFF;
 	last_qam = QAM_64;
+
+	uncommitted_switch_mode = _uncommitted_switch_mode;
+	if ((uncommitted_switch_mode<0) || (uncommitted_switch_mode>2)) uncommitted_switch_mode = 0;
+	printf("[frontend] uncommitted_switch_mode %d\n", uncommitted_switch_mode);
 
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
 		ERROR(FRONTEND_DEVICE);
@@ -632,6 +636,25 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 	secSetTone(SEC_TONE_OFF, 15);
 	secSetVoltage(v, 15);
 
+	if ((diseqcType == DISEQC_1_1) && (uncommitted_switch_mode > 0))
+	{
+		static uint8_t prevSatNo = 255; // initialised with greater than max Satellites (64)
+		// because we only want to send uncommitted switch
+		// command if necessary to save zap time
+		DBG("new Sat %d previous Sat %d", sat_no, prevSatNo);
+		//DBG("new Sat/4 %d previous Sat/4 %d", sat_no/4, prevSatNo/4);
+
+		if ((prevSatNo/4 != sat_no/4) && (1 == uncommitted_switch_mode))
+		{
+			sendUncommittedSwitchesCommand(0xF0 + sat_no/4);
+		}
+		else if ((prevSatNo != sat_no) && (2 == uncommitted_switch_mode))
+		{
+			sendUncommittedSwitchesCommand(0xF0 + sat_no);
+		}
+		prevSatNo = sat_no;
+	}
+
 	if (diseqcType >= SMATV_REMOTE_TUNING) {
 
 		if (diseqcType >= DISEQC_2_0)
@@ -650,8 +673,10 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 
 			usleep(1000 * 100);	/* wait at least 100ms before retransmission */
 
-			cmd.msg[2] |= 0x01;	/* uncommitted switches */
-			sendDiseqcCommand(&cmd, 15);
+			if (0 == uncommitted_switch_mode) {
+				cmd.msg[2] |= 0x01;	/* uncommitted switches */
+				sendDiseqcCommand(&cmd, 15);
+			}
 
 			if (diseqcType >= DISEQC_2_0)
 				again += getDiseqcReply(50);
@@ -725,4 +750,26 @@ void CFrontend::sendDiseqcSmatvRemoteTuningCommand(const uint32_t frequency)
 	cmd.msg[5] = (((frequency / 1000) << 4) & 0xF0) | ((frequency / 100) & 0x0F);
 
 	sendDiseqcCommand(&cmd, 15);
+}
+
+void CFrontend::sendUncommittedSwitchesCommand(uint8_t usCommand)
+{
+	struct dvb_diseqc_master_cmd cmd = {{ 0xe0, 0x10, 0x39, 0x00, 0x00, 0x00 }, 4};
+
+	//command from master, no reply required, first transmission
+	//all families (don't care adress)
+	//write to port group 1 (uncommitted switches)
+	cmd.msg[3] = usCommand;
+	sendDiseqcCommand(&cmd, 15);
+
+	if (diseqcRepeats)
+	{
+		cmd.msg[0] = 0xe1; /* repeated transmission */
+		for (uint16_t i = 0; i < diseqcRepeats; i++)
+		{
+			usleep(1000 * 100); /* wait at least 100ms before retransmission */
+			sendDiseqcCommand(&cmd, 15);
+		}
+	}
+	//DBG"[frontend] uncommitted switches command (0x%x) sent", cmd.msg[3]);
 }
