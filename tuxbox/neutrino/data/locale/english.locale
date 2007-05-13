@@ -359,7 +359,7 @@ flashupdate.proxyusername Username
 flashupdate.proxyusername_hint1 enter the proxyserver username
 flashupdate.proxyusername_hint2 a empty entry means no proxy-auth
 flashupdate.readflash Read whole image
-flashupdate.readflashmtd Read one partition
+flashupdate.readflashmtd Backup One Partition
 flashupdate.ready ready
 flashupdate.reallyflashchipset Do you really want to flash?\n\nIf an error occurs or the image is not\nvalid, the box will not boot after flashing.\nUse only images of type: %s\nselected image: %s\nTarget: %s
 flashupdate.reallyflashmtd Do you really want to flash?\n\nIf an error occurs or the image is not\nvalid, the box will not boot after flashing.\n\nSelected image: %s\nTarget: %s
@@ -374,7 +374,7 @@ flashupdate.updatemode_manual manual (ftp)
 flashupdate.url_file config file
 flashupdate.versioncheck checking version
 flashupdate.writeflash Write whole image
-flashupdate.writeflashmtd Write one partition
+flashupdate.writeflashmtd Flash One Partition
 flashupdate.wrongbase Your Release cycle differs, unable to update\nwithout having installed the right version!
 fontmenu.channellist Channellist
 fontmenu.epg EPG
@@ -527,7 +527,7 @@ mainmenu.shutdown Shutdown
 mainmenu.sleeptimer SleepTimer
 mainmenu.tvmode TV-Mode
 mainsettings.audio Audio
-mainsettings.colors Colors / themes / font
+mainsettings.colors Colors / Themes / Font
 mainsettings.driver driver and boot options
 mainsettings.head Settings
 mainsettings.keybinding Key Setup
@@ -615,7 +615,7 @@ moviebrowser.info_channel Channel
 moviebrowser.info_filename Name
 moviebrowser.info_genre_major Genre
 moviebrowser.info_genre_minor Genre
-moviebrowser.info_head Film Informationen
+moviebrowser.info_head Film Informations
 moviebrowser.info_head_update Save changes in all movie info files
 moviebrowser.info_info1 Info 1
 moviebrowser.info_info2 Info 2
@@ -969,7 +969,7 @@ servicemenu.restart_hint Restarting Neutrino...
 servicemenu.restart_refused_recording Recording runs. Restart not possible.
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
-servicemenu.update Software Update
+servicemenu.update Image Upgrade / Backup
 settings.help Help
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 settings.noconffile No neutrino-settings found.\nUsing defaults.
@@ -1124,7 +1124,7 @@ usermenu.button_green User menu green
 usermenu.button_red User menu red
 usermenu.button_yellow User menu yellow
 usermenu.head User menu 
-usermenu.item_bar ---- Boarder ----
+usermenu.item_bar ---- Border ----
 usermenu.item_epg_misc EPG functions
 usermenu.item_none   
 usermenu.item_vtxt Videotext
