@@ -10,9 +10,3 @@ AM_CPPFLAGS = \
 	@FREETYPE_CFLAGS@ \
 	-I$(top_srcdir)/include
 
-
-if BOXTYPE_DREAMBOX
-tuxcald_CFLAGS = -DOLDFT
-endif
-
-

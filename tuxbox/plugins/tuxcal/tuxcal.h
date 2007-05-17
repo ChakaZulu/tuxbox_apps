@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.h,v $
+ * Revision 1.07  2007/05/17 16:19:47  dbluelle
+ * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
+ *
  * Revision 1.06  2006/03/05 15:59:37  robspr1
  * - use /tmp/keyboard.lck to signal decoding of the keyboard
  *
@@ -435,7 +438,7 @@ FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache		cache;
 FTC_SBit		sbit;
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 FTC_ImageDesc		desc;
 #else
 FTC_ImageTypeRec	desc;

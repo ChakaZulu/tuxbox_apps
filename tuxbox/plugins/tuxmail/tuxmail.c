@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.47  2007/05/17 16:19:47  dbluelle
+ * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
+ *
  * Revision 1.46  2007/01/01 21:22:20  robspr1
  * -delete tuxmail.new before leaving plugin, not when entering
  *
@@ -3733,7 +3736,7 @@ void SaveAndReloadDB(int iSave)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.46 $";
+	char cvs_revision[] = "$Revision: 1.47 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -3884,7 +3887,7 @@ void plugin_exec(PluginParam *par)
 		use_kerning = FT_HAS_KERNING(face);
 
 		desc.font.face_id = FONT;
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 		desc.type = ftc_image_mono;
 #else
 		desc.flags = FT_LOAD_MONOCHROME;

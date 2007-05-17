@@ -3,6 +3,9 @@
  *                (c) Robert "robspr1" Spreitzer 2006 (robert.spreitzer@inode.at)
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.h,v $
+ * Revision 1.09  2007/05/17 16:19:46  dbluelle
+ * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
+ *
  * Revision 1.08  2007/01/07 11:51:22  robspr1
  * - execute tuxcal.notify on new events
  *
@@ -235,7 +238,7 @@ FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache		cache;
 FTC_SBit		sbit;
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 FTC_ImageDesc		desc;
 #else
 FTC_ImageTypeRec	desc;

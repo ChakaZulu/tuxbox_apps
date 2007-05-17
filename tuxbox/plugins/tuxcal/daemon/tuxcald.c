@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcald.c,v $
+ * Revision 1.12  2007/05/17 16:19:46  dbluelle
+ * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
+ *
  * Revision 1.11  2007/02/11 11:01:37  robspr1
  * - bugfix for showing/hiding the clock
  *
@@ -434,7 +437,7 @@ int OpenFB(void)
 
 	desc.font.face_id = FONT;
 
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 		desc.type = ftc_image_mono;
 #else
 		desc.flags = FT_LOAD_MONOCHROME;
@@ -2145,7 +2148,7 @@ void SigHandler(int signal)
  ******************************************************************************/
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.11 $";
+	char cvs_revision[] = "$Revision: 1.12 $";
 	int param, nodelay = 0;
 	pthread_t thread_id;
 	void *thread_result = 0;

@@ -8,10 +8,6 @@ noinst_LTLIBRARIES = tuxcal.la
 
 tuxcal_la_SOURCES = tuxcal.c
 
-if BOXTYPE_DREAMBOX
-tuxcal_la_CFLAGS = -DOLDFT
-endif
-
 tuxcal_la_LIBADD = \
 	@FREETYPE_LIBS@
 

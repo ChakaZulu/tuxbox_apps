@@ -18,6 +18,9 @@
  *
  *-----------------------------------------------------------------------------
  * $Log: tuxcal.c,v $
+ * Revision 1.08  2007/05/17 16:19:47  dbluelle
+ * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
+ *
  * Revision 1.07  2006/03/05 15:59:37  robspr1
  * - use /tmp/keyboard.lck to signal decoding of the keyboard
  *
@@ -2630,7 +2633,7 @@ void SaveDatabase(void)
 */
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.07 $";
+	char cvs_revision[] = "$Revision: 1.08 $";
 	FILE *fd_run;
 	FT_Error error;
 
@@ -2749,7 +2752,7 @@ void plugin_exec(PluginParam *par)
 
 	desc.font.face_id = FONT;
 
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 		desc.type = ftc_image_mono;
 #else
 		desc.flags = FT_LOAD_MONOCHROME;

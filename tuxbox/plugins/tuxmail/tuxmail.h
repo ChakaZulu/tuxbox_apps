@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.35  2007/05/17 16:19:48  dbluelle
+ * Make plugins compile with freeetype 2.1.x on dreambox (as needed for Neutrino on Dreambox)
+ *
  * Revision 1.34  2006/03/05 16:02:13  robspr1
  * - use /tmp/keyboard.lck to signal decoding of the keyboard
  *
@@ -421,7 +424,7 @@ FT_Library		library;
 FTC_Manager		manager;
 FTC_SBitCache		cache;
 FTC_SBit		sbit;
-#ifdef OLDFT
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
 FTC_ImageDesc		desc;
 #else
 FTC_ImageTypeRec	desc;

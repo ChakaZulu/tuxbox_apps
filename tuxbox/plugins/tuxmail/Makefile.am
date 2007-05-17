@@ -8,10 +8,6 @@ noinst_LTLIBRARIES = tuxmail.la
 
 tuxmail_la_SOURCES = tuxmail.c
 
-if BOXTYPE_DREAMBOX
-tuxmail_la_CFLAGS = -DOLDFT
-endif
-
 tuxmail_la_LIBADD = \
 	@FREETYPE_LIBS@
 
