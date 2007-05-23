@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.89 2007/04/22 20:35:14 dbt Exp $
+ * $Id: locals_intern.h,v 1.90 2007/05/23 16:45:01 papst Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -579,6 +579,9 @@ const char * locale_real_names[] =
 	"miscsettings.epg_cache_hint1",
 	"miscsettings.epg_cache_hint2",
 	"miscsettings.epg_dir",
+	"miscsettings.epg_extendedcache",
+	"miscsettings.epg_extendedcache_hint1",
+	"miscsettings.epg_extendedcache_hint2",
 	"miscsettings.epg_head",
 	"miscsettings.epg_max_events",
 	"miscsettings.epg_max_events_hint1",

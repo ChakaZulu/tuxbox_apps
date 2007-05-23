@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.42 2007/01/12 22:57:57 houdini Exp $
+  $Id: sectionsdclient.h,v 1.43 2007/05/23 16:43:12 papst Exp $
 
   License: GPL
 
@@ -154,6 +154,7 @@ class CSectionsdClient : private CBasicClient
 	{
 		int scanMode;
 		int epg_cache;
+		int epg_extendedcache;
 		int epg_old_events;
 		int epg_max_events;
 		int network_ntprefresh;

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.237 2007/03/29 15:43:32 mws Exp $
+//  $Id: sectionsd.cpp,v 1.238 2007/05/23 16:39:55 papst Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -147,12 +147,14 @@ static unsigned int max_events = 6000;
 //static long secondsToCache=4*24*60L*60L; // 4 Tage - weniger Prozessorlast?!
 //static long secondsToCache = 14*24*60L*60L; // 14 Tage - Prozessorlast <3% (rasc)
 static long secondsToCache;
+static long secondsExtendedTextCache;
 // Ab wann ein Event als alt gilt (in Sekunden)
 //static long oldEventsAre = 60*60L; // 2h  (sometimes want to know something about current/last movie)
 static long oldEventsAre;
 static int scanning = 1;
 
 #define EPG_FILTER_PATH "/var/tuxbox/config/zapit/epgfilter.xml"
+#define EPGFILTER_FILE "/var/tuxbox/config/zapit/bouquets.xml"
 std::string epg_filter_dir = EPG_FILTER_PATH;
 static bool epg_filter_is_whitelist = false;
 static bool epg_filter_except_current_next = false;
@@ -474,7 +476,7 @@ static bool deleteEvent(const event_id_t uniqueKey)
 }
 
 // Fuegt ein Event in alle Mengen ein
-static void addEvent(const SIevent &evt, const unsigned table_id)
+static void addEvent(const SIevent &evt, const unsigned table_id, const time_t zeit)
 {
 	bool EPG_filtered = checkEPGFilter(evt.original_network_id, evt.transport_stream_id, evt.service_id);
 
@@ -482,6 +484,22 @@ static void addEvent(const SIevent &evt, const unsigned table_id)
 		((EPG_filtered) && (epg_filter_is_whitelist)) || 
 		(table_id == 0) || 
 		((epg_filter_except_current_next) && ((table_id == 0x4e) || (table_id == 0x4f)))) {
+
+	MySIeventsOrderUniqueKey::iterator si = mySIeventsOrderUniqueKey.find(evt.uniqueKey());
+	bool already_exists = (si != mySIeventsOrderUniqueKey.end());
+
+	if ((already_exists) && (SIlanguage::getMode() == CSectionsdClient::LANGUAGE_MODE_OFF)) {
+		si->second->setName("OFF",evt.getName().c_str());
+		si->second->contentClassification = evt.contentClassification;
+		si->second->userClassification = evt.userClassification;
+		if ((strlen(evt.getExtendedText().c_str()) > strlen(si->second->getExtendedText().c_str())) &&
+				(evt.times.begin()->startzeit < zeit + secondsExtendedTextCache))
+			si->second->setExtendedText("OFF",evt.getExtendedText().c_str());
+		if (strlen(evt.getText().c_str()) > strlen(si->second->getText().c_str()))
+			si->second->setText("OFF",evt.getText().c_str());
+		//FIXME Check how to update parental, times, linkage, components
+	}
+	else {
 
 	SIevent *eptr = new SIevent(evt);
 
@@ -492,15 +510,11 @@ static void addEvent(const SIevent &evt, const unsigned table_id)
 	}
 
 	SIeventPtr e(eptr);
-	/*
-	MySIeventsOrderUniqueKey::iterator si = mySIeventsOrderUniqueKey.find(evt.uniqueKey());
-	bool already_exists = (si != mySIeventsOrderUniqueKey.end());
-
-	if (already_exists) {
-
-
-	}
-*/
+	
+	//Strip ExtendedDescription if too far in the future
+	if ((e->times.begin()->startzeit > zeit + secondsExtendedTextCache) && (SIlanguage::getMode() == CSectionsdClient::LANGUAGE_MODE_OFF) && (zeit != 0))
+		e->setExtendedText("OFF","");
+	
 	// Damit in den nicht nach Event-ID sortierten Mengen
 	// Mehrere Events mit gleicher ID sind, diese vorher loeschen
 	deleteEvent(e->uniqueKey());
@@ -521,8 +535,6 @@ static void addEvent(const SIevent &evt, const unsigned table_id)
 
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
-
-
 
 	// Pruefen ob es ein Meta-Event ist
 	MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i = mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(e->get_channel_id());
@@ -569,6 +581,7 @@ static void addEvent(const SIevent &evt, const unsigned table_id)
 		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
 	}
 	}
+	}
 }
 
 // Fuegt zusaetzliche Zeiten in ein Event ein
@@ -601,7 +614,7 @@ static void addEventTimes(const SIevent &evt, const unsigned table_id)
 		else
 		{
 			// Event nicht vorhanden -> einfuegen
-			addEvent(evt, table_id);
+			addEvent(evt, table_id, 0);
 		}
 	}
 }
@@ -1468,6 +1481,25 @@ static void commandSetHoursToCache(int connfd, char *data, const unsigned dataLe
 
 	return ;
 }
+
+static void commandSetHoursExtendedCache(int connfd, char *data, const unsigned dataLength)
+{
+	if (dataLength != 2)
+		return ;
+
+	dprintf("Set hours to cache extended text: %hd\n", *((unsigned short*)data));
+
+	secondsExtendedTextCache = *((unsigned short*)data)*60L*60L;
+
+	struct sectionsd::msgResponseHeader responseHeader;
+
+	responseHeader.dataLength = 0;
+
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
+
+	return ;
+}
+
 #endif
 
 static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFormat = true, char search = 0, std::string search_text = "")
@@ -1700,9 +1732,10 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.237 2007/03/29 15:43:32 mws Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.238 2007/05/23 16:39:55 papst Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
+		"Hours to cache extended text: %ld\n"
 	        "Events are old %ldmin after their end time\n"
 	        "Number of cached services: %u\n"
 	        "Number of cached nvod-services: %u\n"
@@ -1713,7 +1746,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	        "Total size of memory occupied by chunks handed out by malloc: %d\n"
 	        "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
 	        ctime(&zeit),
-	        secondsToCache / (60*60L), oldEventsAre / 60, anzServices, anzNVODservices, anzEvents, anzNVODevents, anzMetaServices,
+		secondsToCache / (60*60L), secondsExtendedTextCache / (60*60L), oldEventsAre / 60, anzServices, anzNVODservices, anzEvents, anzNVODevents, anzMetaServices,
 	        //    resourceUsage.ru_maxrss, resourceUsage.ru_ixrss, resourceUsage.ru_idrss, resourceUsage.ru_isrss,
 	        speicherinfo.uordblks,
 	        speicherinfo.arena, speicherinfo.arena / 1024, (float)speicherinfo.arena / (1024.*1024.)
@@ -2024,13 +2057,13 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 
 	return ;
 }
-
+/*
 std::vector<long long>	messaging_skipped_sections_ID [0x22];			// 0x4e .. 0x6f
 static long long 	messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
 static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
-
-static unsigned char 	messaging_current_version_number = 0;
-static unsigned char 	messaging_current_section_number = 0;
+*/
+//static unsigned char 	messaging_current_version_number = 0;
+//static unsigned char 	messaging_current_section_number = 0;
 static bool		EITCheckAllFilters = true;
 
 //std::vector<long long>	messaging_sdt_skipped_sections_ID [2];			// 0x42, 0x46
@@ -2091,14 +2124,14 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 	        ( zeit > ( messaging_last_requested + 5 ) ) )
 	{
 		messaging_current_servicekey = *uniqueServiceKey;
-
+/*		printf("here1\n");
 		for ( int i = 0x4e; i <= 0x6f; i++)
 		{
 			messaging_skipped_sections_ID[i - 0x4e].clear();
 			messaging_sections_max_ID[i - 0x4e] = -1;
 			messaging_sections_got_all[i - 0x4e] = false;
 		}
-/*
+
 		for ( int i = 0; i <= 1; i++)
 		{
 			messaging_sdt_skipped_sections_ID[i].clear();
@@ -2129,7 +2162,7 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 	}
 
 
-	if ( ( !doWakeUp ) && ( messaging_sections_got_all[0] ) && ( *requestCN_Event ) && ( !messaging_WaitForServiceDesc ) )
+	if ( ( !doWakeUp )/* && ( messaging_sections_got_all[0] )*/ && ( *requestCN_Event ) && ( !messaging_WaitForServiceDesc ) )
 	{
 		messaging_wants_current_next_Event = false;
 		messaging_WaitForServiceDesc = false;
@@ -2153,12 +2186,13 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	showProfiling("[sectionsd] commandserviceChanged: before wakeup");
 	messaging_last_requested = zeit;
-	messaging_current_version_number = 0;
+//	messaging_current_version_number = 0;
 	EITCheckAllFilters = true;
 
 	if ( doWakeUp )
 	{
 		// nur wenn lange genug her, oder wenn anderer Service :)
+		dmxEIT.current_service = messaging_current_servicekey & 0xffff;
 		dmxEIT.change( 0 );
 //		dmxSDT.change( 0 );
 //		dmxNIT.change( 0 );
@@ -3314,7 +3348,12 @@ static void commandSetConfig(int connfd, char *data, const unsigned dataLength)
 		oldEventsAre = (long)(pmsg->epg_old_events)*60L*60L;
 		unlockEvents();
 	}
-
+	if (secondsExtendedTextCache != (long)(pmsg->epg_extendedcache)*60L*60L) {
+		dprintf("new epg_extendedcache = %d\n", pmsg->epg_extendedcache);
+		lockEvents();
+		secondsExtendedTextCache = (long)(pmsg->epg_extendedcache)*60L*60L;
+		unlockEvents();
+	}
 	if (max_events != pmsg->epg_max_events) {
 		dprintf("new epg_max_events = %d\n", pmsg->epg_max_events);
 		lockEvents();
@@ -3567,7 +3606,7 @@ static void *insertEventsfromFile(void *)
 							node = node->xmlNextNode;
 						}
 						lockEvents();
-						addEvent(e, 0);
+						addEvent(e, 0, 0);
 						unlockEvents();
 
 						event = event->xmlNextNode;
@@ -3962,6 +4001,7 @@ static s_cmd_table connectionCommands[sectionsd::numberOfCommands] = {
         //commandAllEventsChannelName,
 {	commandAllEventsChannelIDSearch,        "commandAllEventsChannelIDSearch"	},
 {	commandDummy2,				"commandSetHoursToCache"		},
+{	commandDummy2,				"commandSetHoursExtendedCache"		},
 {	commandDummy2,				"commandSetEventsAreOldInMinutes"	},
 {	commandDumpAllServices,                 "commandDumpAllServices"		},
 {	commandEventListRadio,                  "commandEventListRadio"			},
@@ -5913,7 +5953,7 @@ int eit_set_update_filter(int *fd)
 	dsfp.filter.filter[0] = 0x4e;	/* table_id */
 	dsfp.filter.filter[1] = (unsigned char)(messaging_current_servicekey >> 8);
 	dsfp.filter.filter[2] = (unsigned char)messaging_current_servicekey;
-	dsfp.filter.filter[3] = (messaging_current_version_number << 1) | 0x01;
+//	dsfp.filter.filter[3] = (messaging_current_version_number << 1) | 0x01;
 //	dsfp.filter.filter[4] = messaging_current_section_number;
 	dsfp.filter.mask[0] = 0xFF;
 	dsfp.filter.mask[1] = 0xFF;
@@ -5963,6 +6003,8 @@ static void *eitThread(void *)
 	bool sendToSleepNow = false;
 
 	// -- set EIT filter  0x4e-0x6F
+	dmxEIT.addfilter( 0x4e, 0xff );
+	dmxEIT.addfilter( 0x50, 0xff );
 	dmxEIT.addfilter( 0x4e, 0xfe );
 	dmxEIT.addfilter( 0x50, 0xf0 );
 	dmxEIT.addfilter( 0x60, 0xf0 );
@@ -5970,8 +6012,9 @@ static void *eitThread(void *)
 	{
 		dprintf("[%sThread] pid %d start\n", "eit", getpid());
 		int timeoutsDMX = 0;
-		time_t lastRestarted = time(NULL);
+//		time_t lastRestarted = time(NULL);
 		time_t lastChanged = time(NULL);
+//		dmxEIT.current_service = messaging_current_servicekey & 0xffff;
 		dmxEIT.start(); // -> unlock
 
 		for (;;)
@@ -5983,6 +6026,50 @@ static void *eitThread(void *)
 			} else {
 			unlockMessaging();*/
 			time_t zeit = time(NULL);
+
+			if (timeoutsDMX < 0)
+			{
+				lockMessaging();
+				if (update_eit){
+						
+					if (dmxEIT.filters[dmxEIT.filter_index].filter == 0x4e) { //&& 
+//							(((header.table_id_extension_hi << 8) | header.table_id_extension_lo) == (messaging_current_servicekey & 0xFFFF)) &&
+					//		(messaging_current_version_number != header.version_number)) {
+					//		dprintf("[eitThread] got new C/N EPG (table_id 0x%x, ext_hi=%x, ext_lo=%x, sn=%x, vn=%x)\n", header.table_id, header.table_id_extension_hi, header.table_id_extension_lo, header.section_number, header.version_number);
+					//		messaging_current_version_number = header.version_number;
+						messaging_wants_current_next_Event = false;
+						eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
+					}
+				} else {
+					if ( messaging_wants_current_next_Event ) //&& messaging_sections_got_all[0] )
+					{
+						dprintf("[eitThread] got all current_next - sending event!\n");
+						messaging_wants_current_next_Event = false;
+						eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
+					}
+				}
+				unlockMessaging();
+
+				if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
+				{
+					if (timeoutsDMX == -1)
+					dprintf("[eitThread] skipping to next filter(%d) (> DMX_HAS_ALL_SECTIONS_SKIPPING)\n", dmxEIT.filter_index+1 );
+					if (timeoutsDMX == -2)
+					dprintf("[eitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxEIT.filter_index+1 );
+					timeoutsDMX = 0;
+					if (dmxEIT.filter_index + 1 == 2)
+						dmxEIT.current_service = 0;
+					dmxEIT.change(dmxEIT.filter_index + 1);
+					lastChanged = time(NULL);
+				}
+				else {
+					sendToSleepNow = true;
+					timeoutsDMX = 0;
+				}
+			}
+
+
+			
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
 			{
@@ -6012,7 +6099,7 @@ static void *eitThread(void *)
 					else
 						if ( dmxEIT.filter_index > 1 )
 						{
-							bool dont_change = false;
+/*							bool dont_change = false;
 
 							for ( int i = (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i <= dmxEIT.filters[dmxEIT.filter_index].filter; i++)
 							{
@@ -6029,7 +6116,7 @@ static void *eitThread(void *)
 
 							if ( !dont_change )
 							{
-								if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
+*/								if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 								{
 									dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
 									dmxEIT.change(dmxEIT.filter_index + 1);
@@ -6043,7 +6130,7 @@ static void *eitThread(void *)
 									sendToSleepNow = true;
 									dputs("sendToSleepNow = true")
 								}
-							}
+//							}
 						}
 				}
 
@@ -6053,6 +6140,17 @@ static void *eitThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
+					if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
+					{
+						dprintf("[eitThread] skipping to next filter(%d) (> DMX_TIMEOUT_SKIPPING)\n", dmxEIT.filter_index+1 );
+						dmxEIT.change(dmxEIT.filter_index + 1);
+						lastChanged = time(NULL);
+					}
+					else
+						sendToSleepNow = true;
+
+
+/*
 				if ( (zeit > lastRestarted + 3) || (dmxEIT.real_pauseCounter != 0) ) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
 				{
 					dmxEIT.stop(); // -> lock
@@ -6064,7 +6162,7 @@ static void *eitThread(void *)
 
 					// sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
 					dmxEIT.stop(); // -> lock
-					/*                    lockEvents();
+					                    lockEvents();
 					                    if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000)
 					                    {
 					                        // kleiner als 1 Tag machen wir den Cache nicht,
@@ -6084,14 +6182,14 @@ static void *eitThread(void *)
 					                        dmxSDT.real_unpause();
 					                    }
 					                    unlockEvents();
-					*/
+					
 					dmxEIT.start(); // -> unlock
 					dputs("[eitThread] dmxEIT restarted");
 
 				}
 
 				lastRestarted = zeit;
-				timeoutsDMX = 0;
+*/				timeoutsDMX = 0;
 			}
 
 			if (waitForTimeset())
@@ -6134,8 +6232,9 @@ static void *eitThread(void *)
 #endif
 // must call dmxEIT.change after! unpause otherwise dev is not open,
 // dmxEIT.lastChanged will not be set, and filter is advanced the next iteration
-						dprintf("New Filterindex3: %d (ges. %d)\n", 0, (signed) dmxEIT.filters.size() );
-						dmxEIT.change( 0 ); // -> restart
+						dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxEIT.filters.size() );
+						dmxEIT.change( 2 ); // -> restart
+						lastChanged = time(NULL);
 					}
 					else if (rs == 0)
 					{
@@ -6229,7 +6328,7 @@ static void *eitThread(void *)
 							        ( ( e->times.begin()->startzeit + (long)e->times.begin()->dauer ) > zeit - oldEventsAre ) )
 							{
 								lockEvents();
-								addEvent(*e, header.table_id);
+								addEvent(*e, header.table_id, zeit);
 								unlockEvents();
 							}
 						}
@@ -6257,7 +6356,7 @@ static void *eitThread(void *)
 					//dprintf("[eitThread] added %d events (end)\n",  eit.events().size());
 
 				} // if
-
+/*
 				lockMessaging();
 
 				if ((header.table_id != 0x4e) ||
@@ -6274,11 +6373,11 @@ static void *eitThread(void *)
 						                (((unsigned long long)header.current_next_indicator));
 
 						if (messaging_sections_max_ID[header.table_id - 0x4e] == -1)
-						{
+//						{
 							messaging_sections_max_ID[header.table_id - 0x4e] = _id;
-						}
-						else
-						{
+//						}
+//						else
+//						{
 							if (!messaging_sections_got_all[header.table_id - 0x4e])
 							{
 								for ( std::vector<long long>::iterator i = messaging_skipped_sections_ID[header.table_id - 0x4e].begin();
@@ -6297,7 +6396,7 @@ static void *eitThread(void *)
 									messaging_sections_got_all[header.table_id - 0x4e] = true;
 								}
 							}
-						}
+//						}
 
 					if (update_eit){
 						if ((header.table_id == 0x4e) && messaging_sections_got_all[0] &&
@@ -6345,6 +6444,7 @@ static void *eitThread(void *)
 				}
 
 				unlockMessaging();
+*/
 // buf is deleted in destructor of SIsectionEIT
 //				delete[] buf;
 //				buf = NULL;
@@ -6352,7 +6452,7 @@ static void *eitThread(void *)
 			} // if
 			else
 			{
-				lockMessaging();
+/*				lockMessaging();
 				//SI_section_EIT_header* _header = (SI_section_EIT_header*) & header;
 
 				long long _id = (((unsigned long long)header.table_id) << 40) +
@@ -6366,13 +6466,12 @@ static void *eitThread(void *)
 					messaging_skipped_sections_ID[header.table_id - 0x4e].push_back(_id);
 
 				unlockMessaging();
-
+*/
 				delete[] buf;
 				buf = NULL;
 
-				dprintf("[eitThread] skipped sections for table 0x%x\n", header.table_id);
+//				dprintf("[eitThread] skipped sections for table 0x%x\n", header.table_id);
 			}
-			//}
 		} // for
 	} // try
 	catch (std::exception& e)
@@ -6620,7 +6719,7 @@ static void *pptThread(void *)
 									else
 									{
 										// Ein Event in alle Mengen einfuegen
-										addEvent(*e, header.table_id);
+										addEvent(*e, header.table_id, zeit);
 									}
 
 									unlockEvents();
@@ -6843,7 +6942,50 @@ static void *houseKeepingThread(void *)
 
 	pthread_exit(NULL);
 }
+/* 
+static void readEPGFilter(void) 
+{ 
+	xmlDocPtr filter_parser = parseXmlFile(EPGFILTER_FILE);
+	
+	t_original_network_id onid = 0; 
+	t_transport_stream_id tsid = 0; 
+	t_service_id sid = 0; 
 
+	epg_filter_is_whitelist = true; 
+	epg_filter_except_current_next = false; 
+
+	if (filter_parser != NULL) 
+	{ 
+		dprintf("Reading EPGFilter: bouquets.xml\n"); 
+
+		xmlNodePtr filter = xmlDocGetRootElement(filter_parser); 
+
+// 		if (xmlGetNumericAttribute(filter, "is_whitelist", 10) == 1) 
+// 		epg_filter_is_whitelist = true; 
+// 		if (xmlGetNumericAttribute(filter, "except_current_next", 10) == 1) 
+// 		epg_filter_except_current_next = true; 
+ 
+		filter = filter->xmlChildrenNode; 
+
+		while (filter) { 
+
+			xmlNodePtr filter1 = filter->xmlChildrenNode; 
+			while (filter1) { 
+
+				onid = xmlGetNumericAttribute(filter1, "onid", 16); 
+				tsid = xmlGetNumericAttribute(filter1, "tsid", 16); 
+				sid  = xmlGetNumericAttribute(filter1, "serviceID", 16); 
+
+				addEPGFilter(onid, tsid, sid); 
+				filter1 = filter1->xmlNextNode; 
+			} 
+
+			filter = filter->xmlNextNode; 
+		} 
+	} 
+	xmlFreeDoc(filter_parser); 
+} 
+*/
 static void readEPGFilter(void)
 {
 	xmlDocPtr filter_parser = parseXmlFile(epg_filter_dir.c_str());
@@ -6933,7 +7075,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.237 2007/03/29 15:43:32 mws Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.238 2007/05/23 16:39:55 papst Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -6981,11 +7123,13 @@ int main(int argc, char **argv)
 
 		//EPG Einstellungen laden
 		secondsToCache = (atoi(ntp_config.getString("epg_cache_time","14").c_str() ) *24*60L*60L); //Tage
+		secondsExtendedTextCache = (atoi(ntp_config.getString("epg_extendedcache_time","6").c_str() ) *60L*60L); //Stunden
 		oldEventsAre = (atoi(ntp_config.getString("epg_old_events","1").c_str() ) *60L*60L); //Stunden
 		max_events= atoi(ntp_config.getString("epg_max_events","6000").c_str() );
 
 		printf("[sectionsd] Caching max %d events\n", max_events);
 		printf("[sectionsd] Caching %ld days\n", secondsToCache / (24*60*60L));
+		printf("[sectionsd] Caching %ld hours Extended Text\n", secondsExtendedTextCache / (60*60L));
 		printf("[sectionsd] Events are old %ldmin after their end time\n", oldEventsAre / 60);
 
 		readEPGFilter();
@@ -7089,9 +7233,9 @@ int main(int argc, char **argv)
 						if (pfd.fd == eit_update_fd){
 							dprintf("EIT Update Filter: Activate EitThread\n");
 							lockMessaging();
-							messaging_skipped_sections_ID[0].clear();
-							messaging_sections_max_ID[0] = -1;
-							messaging_sections_got_all[0] = false;
+//							messaging_skipped_sections_ID[0].clear();
+//							messaging_sections_max_ID[0] = -1;
+//							messaging_sections_got_all[0] = false;
 							messaging_wants_current_next_Event = true;
 							messaging_last_requested = time(NULL);
 							dmxEIT.change( 0 );

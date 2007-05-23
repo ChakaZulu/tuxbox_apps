@@ -552,6 +552,9 @@ miscsettings.epg_cache EPG-Cache (Tage)
 miscsettings.epg_cache_hint1 EPG-Daten im Voraus cachen?
 miscsettings.epg_cache_hint2 Angabe in Tagen
 miscsettings.epg_dir EPG Speicherverzeichnis
+miscsettings.epg_extendedcache EPG Langtext (Stunden)
+miscsettings.epg_extendedcache_hint1 EPG Langtext im Voraus cachen?
+miscsettings.epg_extendedcache_hint2 Angabe in Stunden
 miscsettings.epg_head EPG-Einstellungen
 miscsettings.epg_max_events Max. Events
 miscsettings.epg_max_events_hint1 Wieviele Events sollen max. gespeichert werden?

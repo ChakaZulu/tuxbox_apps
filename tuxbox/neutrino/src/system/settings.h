@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.174 2007/03/25 04:34:02 Arzka Exp $
+  $Id: settings.h,v 1.175 2007/05/23 16:45:01 papst Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -65,6 +65,7 @@ struct SNeutrinoSettings
 
 	// EPG
 	std::string epg_cache;
+	std::string epg_extendedcache;
 	std::string epg_old_events;
 	std::string epg_max_events;
 	std::string epg_dir;

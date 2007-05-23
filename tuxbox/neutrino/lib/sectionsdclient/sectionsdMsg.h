@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.16 2007/01/07 23:34:55 guenther Exp $
+//  $Id: sectionsdMsg.h,v 1.17 2007/05/23 16:43:12 papst Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -62,6 +62,7 @@ struct sectionsd
 		//allEventsChannelName,
 		allEventsChannelIDSearch,
 		setHoursToCache,
+		setHoursExtendedCache,
 		setEventsAreOldInMinutes,
 		dumpAllServices,
 		actualEventListRadioshort,
@@ -124,6 +125,7 @@ struct sectionsd
 	{
 		int scanMode;
 		int epg_cache;
+		int epg_extendedcache;
 		int epg_old_events;
 		unsigned int epg_max_events;
 		int network_ntprefresh;

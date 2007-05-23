@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.849 2007/04/09 20:20:34 houdini Exp $
+	$Id: neutrino.cpp,v 1.850 2007/05/23 16:44:09 papst Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -595,6 +595,7 @@ int CNeutrinoApp::loadSetup()
 
 	// EPG-Config
 	g_settings.epg_cache 		= configfile.getString("epg_cache_time", "14");
+	g_settings.epg_extendedcache    = configfile.getString("epg_extendedcache_time", "6");
 	g_settings.epg_old_events 	= configfile.getString("epg_old_events", "1");
 	g_settings.epg_max_events 	= configfile.getString("epg_max_events", "6000");
 	g_settings.epg_dir 		= configfile.getString("epg_dir", "");
@@ -1004,6 +1005,7 @@ void CNeutrinoApp::saveSetup()
 
 	// EPG-Config
 	configfile.setString("epg_cache_time"           ,g_settings.epg_cache );
+	configfile.setString("epg_extendedcache_time"   ,g_settings.epg_extendedcache );
 	configfile.setString("epg_old_events"           ,g_settings.epg_old_events );
 	configfile.setString("epg_max_events"           ,g_settings.epg_max_events );
 	configfile.setString("epg_dir"                  ,g_settings.epg_dir);
@@ -2225,6 +2227,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_EPG_HEAD));
 	CStringInput * miscSettings_epg_cache = new CStringInput(LOCALE_MISCSETTINGS_EPG_CACHE, &g_settings.epg_cache, 2,LOCALE_MISCSETTINGS_EPG_CACHE_HINT1, LOCALE_MISCSETTINGS_EPG_CACHE_HINT2 , "0123456789 ", sectionsdConfigNotifier);
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_CACHE, true, g_settings.epg_cache, miscSettings_epg_cache));
+	CStringInput * miscSettings_epg_extendedcache = new CStringInput(LOCALE_MISCSETTINGS_EPG_EXTENDEDCACHE, &g_settings.epg_extendedcache, 2,LOCALE_MISCSETTINGS_EPG_EXTENDEDCACHE_HINT1, LOCALE_MISCSETTINGS_EPG_EXTENDEDCACHE_HINT2 , "0123456789 ", sectionsdConfigNotifier);
+	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_EXTENDEDCACHE, true, g_settings.epg_extendedcache, miscSettings_epg_extendedcache));
 	CStringInput * miscSettings_epg_old_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_OLD_EVENTS, &g_settings.epg_old_events, 2,LOCALE_MISCSETTINGS_EPG_OLD_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_OLD_EVENTS_HINT2 , "0123456789 ", sectionsdConfigNotifier);
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_EPG_OLD_EVENTS, true, g_settings.epg_old_events, miscSettings_epg_old_events));
 	CStringInput * miscSettings_epg_max_events = new CStringInput(LOCALE_MISCSETTINGS_EPG_MAX_EVENTS, &g_settings.epg_max_events, 5,LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT1, LOCALE_MISCSETTINGS_EPG_MAX_EVENTS_HINT2 , "0123456789 ", sectionsdConfigNotifier);
@@ -3937,6 +3941,7 @@ void CNeutrinoApp::SendSectionsdConfig(void)
 	CSectionsdClient::epg_config config;
 	config.scanMode 		= scanSettings.scanSectionsd;
 	config.epg_cache 		= atoi(g_settings.epg_cache.c_str());
+	config.epg_extendedcache        = atoi(g_settings.epg_extendedcache.c_str());
 	config.epg_old_events 		= atoi(g_settings.epg_old_events.c_str());
 	config.epg_max_events		= atoi(g_settings.epg_max_events.c_str());
 	config.epg_dir			= g_settings.epg_dir;

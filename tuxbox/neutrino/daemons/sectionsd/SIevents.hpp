@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.27 2006/05/19 21:28:08 houdini Exp $
+// $Id: SIevents.hpp,v 1.28 2007/05/23 16:39:55 papst Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -359,6 +359,7 @@ public:
 	// Aus dem Extended Descriptor
 	std::string getExtendedText() const;
 	void appendExtendedText(const std::string &lang, const std::string &text);
+	void setExtendedText(const std::string &lang, const std::string &text);
 
 	std::string contentClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen
 	std::string userClassification; // Aus dem Content Descriptor, als String, da mehrere vorkommen koennen

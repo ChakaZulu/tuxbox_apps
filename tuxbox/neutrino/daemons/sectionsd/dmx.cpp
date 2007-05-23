@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.27 2006/04/21 20:41:02 houdini Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.28 2007/05/23 16:39:55 papst Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -69,10 +69,21 @@ DMX::DMX(const unsigned short p, const unsigned short bufferSizeInKB)
 	pthread_cond_init (&change_cond, NULL);
 	pauseCounter = 0;
 	real_pauseCounter = 0;
+	current_service = 0;
+
+	first_section = NULL;
+	first_skipped_section.table_id = 0xff;
 }
 
 DMX::~DMX()
 {
+	first_skipped_section.table_id = 0xff;	
+	//delete list of read sections
+	while (first_section != NULL) {
+		first_skipped_section.next = first_section->next;
+		delete[] first_section;
+		first_section = first_skipped_section.next;
+	}
 	pthread_mutex_destroy(&pauselock);
 	pthread_mutex_destroy(&start_stop_mutex);
 	pthread_cond_destroy (&change_cond);
@@ -153,6 +164,45 @@ void DMX::unlock(void)
 #endif
 }
 
+bool DMX::check_complete(const unsigned char table_id, const unsigned short extension_id, const unsigned char last)
+{
+	section_id *current_section = NULL;
+	int last_section_number = -1;
+
+//	printf("current service: 0x%04x\n", current_service);
+	if (((table_id == 0x4e) || (table_id == 0x50)) && (current_service == extension_id) &&
+		(first_section != NULL)) {
+		if (last == 0) {
+			return true;
+		}
+		current_section = first_section;
+		while ((current_section != NULL) && (current_section->table_id < table_id)) {
+//				printf("here1! table: 0x%02x Ext: 0x%04x\n", current_section->table_id,
+//										current_section->table_extension_id);
+			current_section = current_section->next;
+		}
+		while ((current_section != NULL) && (current_section->table_id == table_id) &&
+			(current_section->table_extension_id < extension_id)) {
+//				printf("here2! table: 0x%02x Ext: 0x%04x\n", current_section->table_id,
+//										current_section->table_extension_id);
+			current_section = current_section->next;
+		}
+		while ((current_section != NULL) && (current_section->table_id == table_id) &&
+			(current_section->table_extension_id == extension_id) &&
+			((current_section->section_number == last_section_number + 1) || 
+			(current_section->section_number == last_section_number + 8))) {
+			if (current_section->section_number == last) {
+				return true;
+			} else {
+//				printf("current: 0x%02x, last: 0x%02x\n", current_section->section_number, last);
+				last_section_number = current_section->section_number;
+				current_section = current_section->next;
+			}
+		}
+	}
+	return false;
+}
+
 char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 {
 	struct minimal_section_header {
@@ -171,11 +221,42 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		unsigned section_length_lo        : 8;
 	} __attribute__ ((packed));  // 3 bytes total
 	
+	struct extended_section_header {
+		unsigned table_extension_id_hi    : 8;
+		unsigned table_extension_id_lo    : 8;
+#if __BYTE_ORDER == __BIG_ENDIAN
+		unsigned reserved		  : 2;
+		unsigned version_number		  : 5;
+		unsigned current_next_indicator	  : 1;
+#else
+		unsigned current_next_indicator	  : 1;
+		unsigned version_number		  : 5;
+		unsigned reserved		  : 2;
+#endif
+		unsigned section_number		  : 8;
+		unsigned last_section_number	  : 8;
+	} __attribute__ ((packed));  // 5 bytes total
+
+	struct eit_extended_section_header {
+		unsigned transport_stream_id_hi	  : 8;
+		unsigned transport_stream_id_lo	  : 8;
+		unsigned original_network_id_hi   : 8;
+		unsigned original_network_id_lo   : 8;
+		unsigned segment_last_section_number : 8;
+		unsigned last_table_id		  : 8;
+	} __attribute__ ((packed));  // 6 bytes total
+
 	minimal_section_header initial_header;
+	extended_section_header extended_header;
+	eit_extended_section_header eit_extended_header;
 	char * buf;
 	int    rc;
 	unsigned short section_length;
-	
+	bool new_section = false;
+	bool section_found = false;	 
+	section_id *current_section = NULL;
+	section_id *previous_section = NULL;
+
 	lock();
 	
 	rc = read((char *) &initial_header, 3, timeoutInMSeconds);
@@ -247,11 +328,220 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 	}
 
 	unlock();	
-
-	if (section_length < 5)  // skip sections which are too short
+	// skip sections which are too short
+	if ((section_length < 5) || ((initial_header.table_id >= 0x4e) && (initial_header.table_id <= 0x6f) && 
+		(section_length < 14)))
 	{
 		delete[] buf;
 		return NULL;
+	}
+
+	// check if it's extended syntax, e.g. NIT, BAT, SDT, EIT
+	if (initial_header.section_syntax_indicator != 0)
+	{
+		memcpy(&extended_header, buf+3, 5);
+		
+		// only current sections 
+		if (extended_header.current_next_indicator != 0) {
+/*
+			printf("[sectionsd] dmx: tid: 0x%02x ext_id: 0x%02x%02x version: 0x%02x section: 0x%02x last: 0x%02x\n",
+								initial_header.table_id,
+								extended_header.table_extension_id_hi,
+								extended_header.table_extension_id_lo,
+								extended_header.version_number,
+								extended_header.section_number,
+								extended_header.last_section_number);
+*/
+			// find section in list of read sections
+			current_section = first_section;
+			while ((current_section != NULL) && (current_section->table_id < initial_header.table_id)) {
+//				printf("here1! table: 0x%02x Ext: 0x%04x\n", current_section->table_id,
+//										current_section->table_extension_id);
+				previous_section = current_section;
+				current_section = current_section->next;
+			}
+			while ((current_section != NULL) && (current_section->table_id == initial_header.table_id) &&
+				(current_section->table_extension_id < extended_header.table_extension_id_hi * 256 +
+									extended_header.table_extension_id_lo)) {
+//				printf("here2! table: 0x%02x Ext: 0x%04x\n", current_section->table_id,
+//										current_section->table_extension_id);
+				previous_section = current_section;
+				current_section = current_section->next;
+			}	
+			while ((current_section != NULL) && (current_section->table_id == initial_header.table_id) &&
+				(current_section->table_extension_id == extended_header.table_extension_id_hi * 256
+								+ extended_header.table_extension_id_lo) &&
+				(current_section->section_number < extended_header.section_number)) {
+//				printf("here3! table: 0x%02x Ext: 0x%04x\n", current_section->table_id,
+//										current_section->table_extension_id);
+				previous_section = current_section;	
+				current_section = current_section->next;
+			}
+
+			if ((initial_header.table_id >= 0x4e) && (initial_header.table_id <= 0x6f)) {
+
+				memcpy(&eit_extended_header, buf+8, 6);
+
+				while ((current_section != NULL) && (current_section->table_id == 		initial_header.table_id) &&
+					(current_section->table_extension_id == extended_header.table_extension_id_hi
+					 * 256 + extended_header.table_extension_id_lo) &&
+					(current_section->section_number == extended_header.section_number) &&
+					(current_section->transport_stream_id <
+						eit_extended_header.transport_stream_id_hi * 256 +
+						eit_extended_header.transport_stream_id_lo)) {
+					previous_section = current_section;	
+					current_section = current_section->next;
+				}
+				while ((current_section != NULL) && (current_section->table_id == 		initial_header.table_id) &&
+					(current_section->table_extension_id == extended_header.table_extension_id_hi
+					 * 256 + extended_header.table_extension_id_lo) &&
+					(current_section->section_number == extended_header.section_number) &&
+					(current_section->transport_stream_id == eit_extended_header.transport_stream_id_hi * 256 +
+						eit_extended_header.transport_stream_id_lo) &&
+					(current_section->original_network_id <
+						eit_extended_header.original_network_id_hi * 256 +
+						eit_extended_header.original_network_id_lo)) {
+					previous_section = current_section;	
+					current_section = current_section->next;
+				}
+			}
+			
+			if (current_section == NULL) {
+				new_section = true;
+			} else {
+				//check if we've found the section
+				if ((initial_header.table_id >= 0x4e) && (initial_header.table_id <= 0x6f)) {
+					if ((current_section->table_id == initial_header.table_id) &&
+						(current_section->table_extension_id ==
+								extended_header.table_extension_id_hi * 256 +
+								extended_header.table_extension_id_lo) &&
+						(current_section->section_number == extended_header.section_number) &&
+						(current_section->transport_stream_id ==
+								eit_extended_header.transport_stream_id_hi * 256 +
+								eit_extended_header.transport_stream_id_lo) &&
+						(current_section->original_network_id ==
+								eit_extended_header.original_network_id_hi * 256 +
+								eit_extended_header.original_network_id_lo))
+						section_found = true;
+				} else {
+					if ((current_section->table_id == initial_header.table_id) &&
+						(current_section->table_extension_id ==
+								extended_header.table_extension_id_hi
+								* 256 + extended_header.table_extension_id_lo) &&
+						(current_section->section_number == extended_header.section_number))
+						section_found = true;
+				}
+				if (section_found) {
+					//check if the version is the current one 
+					if (current_section->version_number == extended_header.version_number) {
+						dprintf("[sectionsd] skipped duplicate section for table 0x%02x table_extension 0x%02x%02x section 0x%02x\n",
+								initial_header.table_id,
+								extended_header.table_extension_id_hi,
+								extended_header.table_extension_id_lo,
+								extended_header.section_number);
+						if (first_skipped_section.table_id == 0xff) {
+							first_skipped_section.table_id = current_section->table_id;
+							first_skipped_section.table_extension_id = 
+										current_section->table_extension_id;
+							first_skipped_section.section_number = 
+										current_section->section_number;
+							first_skipped_section.version_number =
+										current_section->version_number;
+							if ((initial_header.table_id >= 0x4e) &&
+								(initial_header.table_id <= 0x6f)) {
+								first_skipped_section.transport_stream_id =
+										current_section->transport_stream_id;
+								first_skipped_section.original_network_id =
+										current_section->original_network_id;
+							}
+						} else {
+							if ((initial_header.table_id >= 0x4e) &&
+								(initial_header.table_id <= 0x6f)) {
+								if ((first_skipped_section.table_id ==
+									current_section->table_id) &&
+									(first_skipped_section.table_extension_id ==
+									current_section->table_extension_id) &&
+									(first_skipped_section.section_number ==
+									current_section->section_number) &&
+									(first_skipped_section.version_number ==
+									current_section->version_number) &&
+									(first_skipped_section.transport_stream_id ==
+									current_section->transport_stream_id) &&
+									(first_skipped_section.original_network_id ==
+									current_section->original_network_id))
+									timeouts = -1;
+							} else {
+								if ((first_skipped_section.table_id ==
+									current_section->table_id) &&
+									(first_skipped_section.table_extension_id ==
+									current_section->table_extension_id) &&
+									(first_skipped_section.section_number ==
+									current_section->section_number) &&
+									(first_skipped_section.version_number ==
+									current_section->version_number))
+									timeouts = -1;
+							}
+							//if ((timeouts == -1)
+//								dprintf("[sectionsd] signals that it skipped the whole carousel of sections\n");
+						}
+						if (check_complete(initial_header.table_id,
+							current_section->table_extension_id,
+							extended_header.last_section_number))
+							timeouts = -2;
+						delete[] buf;
+						return NULL;
+					} else {
+						dprintf("[sectionsd] version update from 0x%02x to 0x%02x for table 0x%02x table_extension 0x%02x%02x section 0x%02x\n",
+								current_section->version_number,
+								extended_header.version_number,
+								initial_header.table_id,
+								extended_header.table_extension_id_hi,
+								extended_header.table_extension_id_lo,
+								extended_header.section_number);
+						current_section->version_number = extended_header.version_number;
+					}
+				} else new_section = true;
+			}
+			if (new_section) {
+				section_id *section = new section_id;
+				if (!section)
+				{
+					fprintf(stderr, "[sectionsd] FATAL: Not enough memory\n");
+					throw std::bad_alloc();
+					return NULL;
+				}
+				section->table_id = initial_header.table_id;
+				section->table_extension_id = extended_header.table_extension_id_hi * 256 +
+								extended_header.table_extension_id_lo;
+				section->section_number = extended_header.section_number;
+				section->version_number = extended_header.version_number;
+				section->next = current_section;
+				if ((initial_header.table_id >= 0x4e) && (initial_header.table_id <= 0x6f)) {
+					section->transport_stream_id = 		
+							eit_extended_header.transport_stream_id_hi *
+							256 + eit_extended_header.transport_stream_id_lo;
+					section->original_network_id =
+							eit_extended_header.original_network_id_hi *
+							256 + eit_extended_header.original_network_id_lo;
+				}	
+				if ((previous_section == NULL) || (previous_section == NULL))
+					first_section = section;
+				else
+					previous_section->next = section;
+				if (check_complete(initial_header.table_id, section->table_extension_id,
+							extended_header.last_section_number))
+					timeouts = -2;
+/*
+			if (section->table_extension_id == 0x2e)
+			printf("[sectionsd add2] dmx: tid: 0x%02x ext_id: 0x%04x version: 0x%02x section: 0x%02x\n",
+								section->table_id,
+								section->table_extension_id,
+								section->version_number,
+								section->section_number);
+*/
+			}			
+			first_skipped_section.table_id = 0xff;
+		}
 	}
 	
 	memcpy(buf, &initial_header, 3);
@@ -434,6 +724,7 @@ int DMX::change(const int new_filter_index)
 	showProfiling("changeDMX: after pthread_mutex_lock(&start_stop_mutex)");
 
 	filter_index = new_filter_index;
+	first_skipped_section.table_id = 0xff;
 
 	if (!isOpen())
 	{

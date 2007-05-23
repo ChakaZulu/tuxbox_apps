@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.33 2006/05/19 21:28:08 houdini Exp $
+// $Id: SIevents.cpp,v 1.34 2007/05/23 16:39:55 papst Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -261,6 +261,15 @@ void SIevent::appendExtendedText(const std::string &lang, const std::string &tex
 		langExtendedText[languangeOFF] += text;
 	} else {
 		langExtendedText[lang] += text;
+	}
+}
+
+void SIevent::setExtendedText(const std::string &lang, const std::string &text)
+{
+	if (CSectionsdClient::LANGUAGE_MODE_OFF == SIlanguage::getMode()){
+		langExtendedText[languangeOFF] = text;
+	} else {
+		langExtendedText[lang] = text;
 	}
 }
 

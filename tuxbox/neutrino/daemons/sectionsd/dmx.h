@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.7 2005/10/02 21:27:58 mogway Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.8 2007/05/23 16:39:55 papst Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -30,15 +30,29 @@
 class DMX
 {
  private:
+	struct section_id
+	{
+		unsigned char table_id;
+		unsigned short table_extension_id;
+		unsigned char section_number;
+		unsigned char version_number;
+		unsigned short transport_stream_id;
+		unsigned short original_network_id;
+		section_id *next;
+	};
+
 	int             fd;
 	pthread_mutex_t pauselock;
 	unsigned short  pID;
 	unsigned short  dmxBufferSizeInKB;
+	section_id *first_section;
+	section_id first_skipped_section;
 
 	inline bool isOpen(void) { return (fd != -1); }
 
 	int immediate_start(void); /* mutex must be locked before and unlocked after this method */
 	int immediate_stop(void);  /* mutex must be locked before and unlocked after this method */
+	bool check_complete(const unsigned char table_id, const unsigned short extension_id, const unsigned char);
 
  public:
 	struct s_filters
@@ -55,6 +69,7 @@ class DMX
 	int                    real_pauseCounter;
 	pthread_cond_t         change_cond;
 	pthread_mutex_t        start_stop_mutex;
+	int		       current_service;
 
 
 	DMX(const unsigned short p, const unsigned short bufferSizeInKB);
