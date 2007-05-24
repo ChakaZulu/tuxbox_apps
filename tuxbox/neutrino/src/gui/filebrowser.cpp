@@ -768,7 +768,7 @@ bool CFileBrowser::exec(const char * const dirname)
 		{
 			loop = false;
 		}
-		else if ( msg == CRCInput::RC_spkr )
+		else if ( msg == CRCInput::RC_spkr && strncmp(Path.c_str(), VLC_URI, strlen(VLC_URI)) != 0) //Not in vlc mode
 		{
 			if(".." !=(filelist[selected].getFileName().substr(0,2))) // das darf man nicht löschen
 			{
@@ -1152,8 +1152,10 @@ void CFileBrowser::paintFoot()
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, g_Locale->getText(sortByNames[(g_settings.filebrowser_sortmethod + 1) % FILEBROWSER_NUMBER_OF_SORT_VARIANTS]), COL_INFOBAR, 0, true); // UTF-8
 
 		//Mute-Button
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE_SMALL, x + (2 * dx), by2 - 3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (2 * dx), ty2, dx - 35, g_Locale->getText(LOCALE_FILEBROWSER_DELETE), COL_INFOBAR, 0, true); // UTF-8
+		if (strncmp(Path.c_str(), VLC_URI, strlen(VLC_URI)) != 0) { //Not in vlc mode
+		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE_SMALL, x + (2 * dx), by2 - 3);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (2 * dx), ty2, dx - 35, g_Locale->getText(LOCALE_FILEBROWSER_DELETE), COL_INFOBAR, 0, true); // UTF-8
+		}
 
 		if(m_SMSKeyInput.getOldKey()!=0)
 		{
