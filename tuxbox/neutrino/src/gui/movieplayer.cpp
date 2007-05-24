@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.142 2007/04/11 20:49:07 papst Exp $
+  $Id: movieplayer.cpp,v 1.143 2007/05/24 18:39:39 papst Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -302,7 +302,7 @@ CMoviePlayerGui::CMoviePlayerGui()
 		filebrowser = new CFileBrowser (Path_local.c_str());	// with filebrowser patch
 	else
 		filebrowser	= new CFileBrowser();
-	filebrowser->Multi_Select = true;
+		
 	filebrowser->Dirs_Selectable = false;
 
 #ifdef MOVIEBROWSER  
@@ -378,6 +378,12 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 			return menu_return::RETURN_REPAINT;
 		}
 	}
+	
+	if (g_settings.streaming_allow_multiselect) {
+        filebrowser->Multi_Select = true;
+    } else {
+        filebrowser->Multi_Select = false;
+    }
 
     g_ZapitsetStandbyState = false; // 'Init State
     
@@ -3329,8 +3335,13 @@ void CMoviePlayerGui::PlayFile (int parental)
 				if(filebrowser->exec(Path_local.c_str()))
 				{
 					Path_local = filebrowser->getCurrentDir();
-					filelist = filebrowser->getSelectedFiles();
-	
+					if (g_settings.streaming_allow_multiselect) {
+                        filelist = filebrowser->getSelectedFiles();
+                    } else {
+                        CFile *file = filebrowser->getSelectedFile();
+                        filelist.push_back(*file);
+                    }
+        
 					if(!filelist.empty())
 					{
                         if (g_settings.streaming_show_tv_in_browser == true &&
@@ -4009,7 +4020,13 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			if(filebrowser->exec(Path_vlc.c_str()))
 			{
 				Path_vlc = filebrowser->getCurrentDir ();
-				filelist = filebrowser->getSelectedFiles();
+				if (g_settings.streaming_allow_multiselect) {
+                    filelist = filebrowser->getSelectedFiles();
+                } else {
+                    CFile *file = filebrowser->getSelectedFile();
+                    filelist.push_back(*file);
+                }
+
 				if(!filelist.empty())
 				{
 					filename = filelist[0].Name.c_str();
@@ -4349,7 +4366,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP20));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.142 $");
+	helpbox.addLine("Version: $Revision: 1.143 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4375,7 +4392,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.142 $");
+	helpbox.addLine("Version: $Revision: 1.143 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);

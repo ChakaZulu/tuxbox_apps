@@ -1009,6 +1009,7 @@ streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.filebrowser_allow_multiselect Mehrfachauswahl im Browser
 streamingmenu.head Movieplayer Einstellungen
 streamingmenu.mpeg1 MPEG1
 streamingmenu.mpeg2 MPEG2

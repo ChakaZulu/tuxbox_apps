@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.175 2007/05/23 16:45:01 papst Exp $
+  $Id: settings.h,v 1.176 2007/05/24 18:38:47 papst Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -220,6 +220,7 @@ struct SNeutrinoSettings
 	int streaming_use_buffer;
 	int streaming_buffer_segment_size;
 	int streaming_show_tv_in_browser;
+	int streaming_allow_multiselect;
 
 	int filesystem_is_utf8;
 	// default plugin for ts-movieplayer (red button)

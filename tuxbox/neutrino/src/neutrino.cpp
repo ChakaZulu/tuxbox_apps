@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.850 2007/05/23 16:44:09 papst Exp $
+	$Id: neutrino.cpp,v 1.851 2007/05/24 18:37:59 papst Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -763,6 +763,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.streaming_use_buffer = configfile.getInt32("streaming_use_buffer", 1);
 	g_settings.streaming_buffer_segment_size = configfile.getInt32("streaming_buffer_segment_size", 24);
 	g_settings.streaming_show_tv_in_browser = configfile.getInt32("streaming_show_tv_in_browser", 0);
+	g_settings.streaming_allow_multiselect = configfile.getBool("streaming_allow_multiselect", false);
 
 	// default plugin for movieplayer
 	g_settings.movieplayer_plugin = configfile.getString( "movieplayer_plugin", "Teletext" );
@@ -1173,6 +1174,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "streaming_use_buffer", g_settings.streaming_use_buffer);
 	configfile.setInt32 ( "streaming_buffer_segment_size", g_settings.streaming_buffer_segment_size);
 	configfile.setInt32 ( "streaming_show_tv_in_browser", g_settings.streaming_show_tv_in_browser);
+	configfile.setBool ("streaming_allow_multiselect", g_settings.streaming_allow_multiselect);
 
 	// default plugin for movieplayer
 	configfile.setString( "movieplayer_plugin", g_settings.movieplayer_plugin );
@@ -2840,6 +2842,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	COnOffNotifier *bufferNotifier = new COnOffNotifier(mf9);
 	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_USE_BUFFER , &g_settings.streaming_use_buffer  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true,bufferNotifier);
 	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_SHOW_TV_IN_BROWSER , &g_settings.streaming_show_tv_in_browser  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
+	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_STREAMINGMENU_FILEBROWSER_ALLOW_MULTISELECT , &g_settings.streaming_allow_multiselect  , MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
 
 
 	streamingSettings.addItem(new CMenuOptionChooser(LOCALE_STREAMINGMENU_STREAMING_TYPE                  , &g_settings.streaming_type                 , STREAMINGMENU_STREAMING_TYPE_OPTIONS, STREAMINGMENU_STREAMING_TYPE_OPTION_COUNT, true, StreamingNotifier));
@@ -2864,6 +2867,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( oj6 );
 	streamingSettings.addItem( mf9 );
 	streamingSettings.addItem( oj7 );
+	streamingSettings.addItem( oj8 );
 }
 
 

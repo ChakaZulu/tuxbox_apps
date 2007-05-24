@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.90 2007/05/23 16:45:01 papst Exp $
+ * $Id: locals_intern.h,v 1.91 2007/05/24 18:40:33 papst Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1036,6 +1036,7 @@ const char * locale_real_names[] =
 	"streamingmenu.352x576",
 	"streamingmenu.480x576",
 	"streamingmenu.704x576",
+	"streamingmenu.filebrowser_allow_multiselect",
 	"streamingmenu.head",
 	"streamingmenu.mpeg1",
 	"streamingmenu.mpeg2",
