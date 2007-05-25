@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.204 2007/04/30 22:01:36 dbt Exp $
+	$Id: infoviewer.cpp,v 1.205 2007/05/25 22:42:19 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -130,7 +130,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 {
 	if ( gotTime )
 	{
-	    int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
+	    int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 
 		char timestr[10];
 		struct timeb tm;
