@@ -559,7 +559,7 @@ miscsettings.epg_head EPG-Settings
 miscsettings.epg_max_events Max. Events
 miscsettings.epg_max_events_hint1 How many events should be stored?
 miscsettings.epg_max_events_hint2 normaly 6000
-miscsettings.epg_old_events EPG remove after (std.)
+miscsettings.epg_old_events EPG remove after (hours)
 miscsettings.epg_old_events_hint1 How long will EPG-Data be stored after they timed out?
 miscsettings.epg_old_events_hint2 Set in hours
 miscsettings.general General
