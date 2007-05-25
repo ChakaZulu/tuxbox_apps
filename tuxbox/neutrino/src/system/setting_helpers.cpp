@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.160 2007/02/25 21:04:58 guenther Exp $
+	$Id: setting_helpers.cpp,v 1.161 2007/05/25 21:07:47 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -40,6 +40,13 @@
 #include <signal.h>
 #include "libnet.h"
 
+#include <sstream>
+#include <iomanip>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <linux/if.h>
+
 #include <libucodes.h>
 
 #include <config.h>
@@ -47,14 +54,11 @@
 #include <global.h>
 #include <neutrino.h>
 #include <gui/widget/stringinput.h>
-
-// obsolete #include <gui/streaminfo.h>
-
 #include <gui/widget/messagebox.h>
 #include <gui/widget/hintbox.h>
-
 #include <gui/plugins.h>
 #include <daemonc/remotecontrol.h>
+
 extern CPlugins       * g_PluginList;    /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
@@ -582,6 +586,70 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 	return 1;
 }
 
+
+long CNetAdapter::mac_addr_sys ( u_char *addr) //only for function getMacAddr()
+{
+    struct ifreq ifr;
+    struct ifreq *IFR;
+    struct ifconf ifc;
+    char buf[1024];
+    int s, i;
+    int ok = 0;
+    s = socket(AF_INET, SOCK_DGRAM, 0);
+    if (s==-1) 
+	{
+        return -1;
+    }
+    ifc.ifc_len = sizeof(buf);
+    ifc.ifc_buf = buf;
+    ioctl(s, SIOCGIFCONF, &ifc);
+    IFR = ifc.ifc_req;
+    for (i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; IFR++)
+	{
+        strcpy(ifr.ifr_name, IFR->ifr_name);
+        if (ioctl(s, SIOCGIFFLAGS, &ifr) == 0) 
+		{
+            	if (! (ifr.ifr_flags & IFF_LOOPBACK)) 
+				{
+                	if (ioctl(s, SIOCGIFHWADDR, &ifr) == 0) 
+					{
+                    ok = 1;
+                    break;
+                	}
+            	}
+        }
+    }
+    close(s);
+    if (ok)
+	{
+        bcopy( ifr.ifr_hwaddr.sa_data, addr, 6);
+    }
+    else
+	{
+        return -1;
+    }
+    return 0;
+}
+
+std::string CNetAdapter::getMacAddr(void)
+{
+	std::string mac_tmp;
+	long stat;
+    u_char addr[6];
+    stat = mac_addr_sys( addr);
+    if (0 == stat)
+	{
+		std::stringstream mac_tmp;
+		for(int i=0;i<6;++i)
+		mac_tmp<<std::hex<<std::setfill('0')<<std::setw(2)<<(int)addr[i]<<':';
+		return mac_tmp.str().substr(0,17);
+	}	
+    else 
+	{
+    	return "not found";
+    }
+}
+
 const char * mypinghost(const char * const host)
 {
 	int retvalue = pinghost(host);
@@ -602,7 +670,21 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	char our_broadcast[16];
 	char our_gateway[16];
 	char our_nameserver[16];
-	std::string text;
+	std::string text, ethID, testsite;
+	//set default testdomain and wiki-IP
+	std::string defaultsite = "www.google.de", wiki_IP = "88.198.50.98";
+	
+	//set physical adress
+	static CNetAdapter netadapter; ethID=netadapter.getMacAddr();
+	
+	//get www-domain testsite from /.version 	
+	CConfigFile config('\t');
+	config.loadConfig("/.version");
+	testsite = config.getString("homepage",defaultsite);	
+	testsite.replace( 0, testsite.find("www",0), "" );
+	
+	//use default testdomain if testsite missing
+	if (testsite.length()==0) testsite = defaultsite; 
 
 	if (ip_static) {
 		strcpy(our_ip, ip);
@@ -616,25 +698,28 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 		netGetDefaultRoute(our_gateway);
 		netGetNameserver(our_nameserver);
 	}
-
-	printf("testNw IP       : %s\n", our_ip);
-	printf("testNw Netmask  : %s\n", our_mask);
+	
+	printf("testNw IP: %s\n", our_ip);
+	printf("testNw MAC-address%s\n", ethID.c_str());
+	printf("testNw Netmask: %s\n", our_mask);
 	printf("testNw Broadcast: %s\n", our_broadcast);
 	printf("testNw Gateway: %s\n", our_gateway);
-	printf("testNw Nameserver: %s\n", our_nameserver);
-
+   	printf("testNw Nameserver: %s\n", our_nameserver);
+	printf("testNw Testsite %s\n", testsite.c_str());
+ 
 	text = (std::string)"dbox:\n"
 	     + "    " + our_ip + ": " + mypinghost(our_ip) + '\n'
+		 + "    " + "eth-ID: " + ethID + '\n'
 	     + g_Locale->getText(LOCALE_NETWORKMENU_GATEWAY) + ":\n"
 	     + "    " + our_gateway + ": " + ' ' + mypinghost(our_gateway) + '\n'
 	     + g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER) + ":\n"
 	     + "    " + our_nameserver + ": " + ' ' + mypinghost(our_nameserver) + '\n'
 	     + "wiki.tuxbox.org:\n"
-	     + "    via IP (217.172.187.46): " + mypinghost("217.172.187.46") + '\n';
+	     + "    via IP (" + wiki_IP + "): " + mypinghost(wiki_IP.c_str()) + '\n';
 	if (1 == pinghost(our_nameserver)) text += (std::string)
 	       "    via DNS: " + mypinghost("wiki.tuxbox.org") + '\n'
-	     + "www.google.de:\n"
-	     + "    via DNS: " + mypinghost("www.google.de") + '\n';
+	     + testsite + ":\n"
+	     + "    via DNS: " + mypinghost(testsite.c_str()) + '\n';
 
 	ShowMsgUTF(LOCALE_NETWORKMENU_TEST, text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 }
@@ -647,7 +732,7 @@ void showCurrentNetworkSettings()
 	char router[16];
 	char nameserver[16];
 	std::string text;
-
+	
 	netGetIP("eth0", ip, mask, broadcast);
 	if (ip[0] == 0) {
 		text = "Network inactive\n";

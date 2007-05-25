@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.85 2007/02/25 21:04:36 guenther Exp $
+	$Id: setting_helpers.h,v 1.86 2007/05/25 21:07:48 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -273,6 +273,14 @@ class CUCodeCheckExec : public CMenuTarget
 
 void testNetworkSettings(const char* ip, const char* netmask, const char* broadcast, const char* gateway, const char* nameserver, bool ip_static);
 void showCurrentNetworkSettings();
+
+class CNetAdapter
+{
+	private:
+		long mac_addr_sys ( u_char *addr);	
+	public:
+		std::string getMacAddr(void);
+};
 
 // USERMENU
  class CUserMenuMenu : public CMenuTarget
