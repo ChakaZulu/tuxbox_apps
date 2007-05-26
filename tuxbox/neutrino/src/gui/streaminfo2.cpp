@@ -565,9 +565,9 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	//vpid
 	ypos+= sheight;
 	if ( g_RemoteControl->current_PIDs.PIDs.vpid > 0 ){
-		sprintf((char*) buf, "Vpid: %s", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
-	} else {
 		sprintf((char*) buf, "Vpid: 0x%04x", g_RemoteControl->current_PIDs.PIDs.vpid );
+	} else {
+		sprintf((char*) buf, "Vpid: %s", g_Locale->getText(LOCALE_STREAMINFO_NOT_AVAILABLE));
 	}
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
