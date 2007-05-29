@@ -38,7 +38,7 @@ EPGPlus.remind Αλλαγή
 EPGPlus.reset_settings Ακυρώσει ρυθμίσεων
 EPGPlus.save_settings Αποθήκευση των ρυθμίσεων
 EPGPlus.scroll_mode Τρόπος κινήσεις
-EPGPlus.select_font_Όνομα γράφεις επιλέγω
+EPGPlus.select_font_name Όνομα γράφεις επιλέγω
 EPGPlus.settings Ρυθμίσεις
 EPGPlus.slider_width Πλάτος το Slider
 EPGPlus.stretch_mode Stretch Mode
@@ -148,7 +148,7 @@ audioplayer.button_select_title_by_name Αναζητώ για.όνομα
 audioplayer.defdir Εκκινήσει-καταλογή
 audioplayer.delete Διαγράφω
 audioplayer.deleteall Όλα τα διαγράφω
-audioplayer.display_Ένδειξη Φάκελου
+audioplayer.display_order Ένδειξη Φάκελου
 audioplayer.enable_sc_metadata Ενεργοποιώ Shoutcast Meta-Daten Parsing
 audioplayer.fastforward Γρήγορη Vorl.
 audioplayer.follow Ακολουθώ τα.τραγούδιa
@@ -166,9 +166,9 @@ audioplayer.pause Διάλειμμα
 audioplayer.play Αναπαραγωγή
 audioplayer.playing Τρέχον τραγούδι
 audioplayer.playlist_fileerror_msg Το αρχείο δεν μπορεί να εφαρμοστή:
-audioplayer.playlist_fileerror_Λάθος τίτλου
+audioplayer.playlist_fileerror_title Λάθος τίτλου
 audioplayer.playlist_fileoverwrite_msg θέλετε αυτό το αρχείο να αντιγραφή?:
-audioplayer.playlist_fileoverwrite_Τίτλο αντιγράφεις?
+audioplayer.playlist_fileoverwrite_title Τίτλο αντιγράφεις?
 audioplayer.playlist_name Όνομα αρχείου τις Play λίστα
 audioplayer.playlist_name_hint1 Εισάγετε το αρχείου στην λίστας μέσα
 audioplayer.playlist_name_hint2 Η επέκταση .m3u θα τοποθετηθεί αυτόματα
@@ -504,9 +504,9 @@ lcdmenu.lcdcontroler Αντίθεση/φωτεινότητα
 lcdmenu.power Ισχύς
 lcdmenu.statusline Νέα γραμμή
 lcdmenu.statusline.both Βήματα ένταση του ήχου
-lcdmenu.statusline.both_Ήχος ένταση./κινήσει./Ήχο
+lcdmenu.statusline.both_audio Ήχος ένταση./κινήσει./Ήχο
 lcdmenu.statusline.playtime Πρόοδος μετάδοσης
-lcdmenu.statusline.Όγκος εντάσεις
+lcdmenu.statusline.volume Όγκος εντάσεις
 mainmenu.audioplayer Ήχος player
 mainmenu.clearsectionsd EPG Ανανέωση
 mainmenu.games Παιχνίδια
