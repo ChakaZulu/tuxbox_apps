@@ -87,6 +87,9 @@ Installation:
 
   - unzip and untar the archive (if needed)
       gzip -d  dvbsnoop-<version>.tar.gz
+     or
+      bzip2 -d  dvbsnoop-<version>.tar.bz2
+
       tar xvf  dvbsnoop-<version>.tar
       cd dvbsnoop-<version>
 
@@ -174,7 +177,7 @@ Keywords:
    
 
 
-(c) 2001-2006   Rainer Scherg (Rainer.Scherg@gmx.de)
+(c) 2001-2007   Rainer Scherg (Rainer.Scherg@gmx.de)
 http://dvbsnoop.sourceforge.net
 
 
@@ -287,7 +290,6 @@ To make dvbsnoop run on cygwin platforms, you have to:
     (please read remark in header file)
 
 4.) Next: go on with standard procedure...:
-      ./autogen.sh
       ./configure
       make 
       etc.
