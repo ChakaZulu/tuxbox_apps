@@ -70,6 +70,18 @@ Installation:
   - install the DVB API driver from http://www.linuxtv.org
     (linux kernel 2.6.x and above are already providing the DVB API)
 
+  - Prerequistes of other software:
+    To compile dvbsnoop you may need:
+     - autoconf >= 2.57a
+     - automake >= 1.8
+     - libtool >= 1.4.2
+     - make >= 3.79
+     - tar
+     - bunzip2 (bzip2)
+     - gunzip (gzip)
+     - gcc 2.95 or >= 3.0
+
+
   - download the latest source from http://dvbsnoop.sourceforge.net
     (download a tarball or checkout from cvs)
 
@@ -98,7 +110,8 @@ Installation:
       If you see any problems during 'autoconf.sh' or 'configure' execution,
       please check if you have the latest versions of 'autoconf' and 'configure'
       installed. In cases, please update your system (check packages 
-      automake, autoconf and libtool).
+      automake, autoconf and libtool). Please see also mini FAQ at the end
+      of this file.
 
   - Special Platforms
       Cygwin:
@@ -175,6 +188,9 @@ Annex
 
 Install on Cygwin
 =================
+
+dvbsnoop <= version 1.4.0:
+==========================
 
 To make dvbsnoop run on cygwin platforms, you have to:
 
@@ -255,4 +271,52 @@ Now I am able to do offline analysis and decode the MPEG streams.
 
 Thanks & Regards
 Kamal
+
+
+
+dvbsnoop > version 1.4.0:
+==========================
+
+To make dvbsnoop run on cygwin platforms, you have to:
+
+1.) copy dvb-api include files to your cygwin installation.
+
+2.) maybe: you have tweak some cygwin header files.
+
+3.) see src/dvb_api/dvb_api.h: uncomment the IOCTL, etc. #defines
+    (please read remark in header file)
+
+4.) Next: go on with standard procedure...:
+      ./autogen.sh
+      ./configure
+      make 
+      etc.
+    
+      if you encounter some problems, try  "make distclean"
+      prior to autogen.sh
+
+
+
+
+Problems compiling dvbsnoop?
+============================
+
+Mini-FAQ from the tuxbox project (linux@dbox2):
+
+
+Q: Why is there no configure script?
+A: "autoconf" creates configure from "configure.ac". You can call
+   "./autogen.sh", which will call "autoconf" for you.
+
+Q: Why is there no "Makefile", neither in the root
+   directory nor in any subdirectory?
+A: "configure" creates "Makefile" from "Makefile.in". "./configure --help"
+   usually shows the available options.
+
+Q: Why is there no "Makefile.in"?
+A: "automake" creates "Makefile.in" from "Makefile.am". You can call
+   "./autogen.sh", which will call "automake" for you. If you call
+   "automake" manually, then make sure your working directory contains
+   "configure.ac".
+
 
