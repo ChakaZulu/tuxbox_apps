@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.238 2007/05/23 16:39:55 papst Exp $
+//  $Id: sectionsd.cpp,v 1.239 2007/06/03 14:34:19 dbluelle Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1732,7 +1732,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.238 2007/05/23 16:39:55 papst Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.239 2007/06/03 14:34:19 dbluelle Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -5959,7 +5959,9 @@ int eit_set_update_filter(int *fd)
 	dsfp.filter.mask[1] = 0xFF;
 	dsfp.filter.mask[2] = 0xFF;
 	dsfp.filter.mask[3] = (0x1F << 1) | 0x01;
+#if HAVE_DVB_API >= 3
 	dsfp.filter.mode[3] = 0x1F << 1;
+#endif
 //	dsfp.filter.mask[4] = 0xFF;
 	dsfp.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 	dsfp.pid = 0x12;
@@ -7075,7 +7077,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping, threadPPT, threadNIT;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.238 2007/05/23 16:39:55 papst Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.239 2007/06/03 14:34:19 dbluelle Exp $\n");
 
 	SIlanguage::loadLanguages();
 

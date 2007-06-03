@@ -630,9 +630,11 @@ bool CVCRControl::CFileDevice::Stop()
 
 	bool return_value = (::stop_recording() == STREAM2FILE_OK);
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
 	if ((actmode == 1) && (!g_settings.misc_spts)) // actual mode is SPTS and settings require PES
 		g_Zapit->PlaybackPES(); // restore PES mode
+#endif
 
 	RestoreNeutrino();
 
@@ -658,6 +660,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	CutBackNeutrino(channel_id, mode);
 
 	int repeatcount=0;
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
 	bool sptsmode=g_settings.misc_spts;   // take default from settings
 
@@ -685,7 +688,9 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	if (actmode == 1 && g_settings.recording_in_spts_mode && !sptsmode && mode == 1) {
 		sptsmode = true;
 	}
-
+#else
+	bool sptsmode = g_settings.recording_in_spts_mode;
+#endif
 #define MAXPIDS		64
 	unsigned short pids[MAXPIDS];
 	unsigned int numpids;
@@ -1022,6 +1027,7 @@ bool CVCRControl::CServerDevice::Stop()
 
 	bool return_value = sendCommand(CMD_VCR_STOP);
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
 	if ((actmode == 1) && (!g_settings.misc_spts)) // actual mode is SPTS and settings require PES
 	{
@@ -1031,6 +1037,7 @@ bool CVCRControl::CServerDevice::Stop()
 			sleep(1); 
 		}
 	}
+#endif
 
 	RestoreNeutrino();
 
@@ -1056,6 +1063,7 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 	CutBackNeutrino(channel_id, mode);
 
 	int repeatcount=0;
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int actmode=g_Zapit->PlaybackState() ; // get actual decoder mode
 
 	// aviaEXT is loaded, actual mode is not SPTS and switchoption is set , only in tvmode
@@ -1073,6 +1081,7 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 				sleep(1); 
 			}
 	}
+#endif
 
 	if(!sendCommand(CMD_VCR_RECORD, channel_id, epgid, epgTitle, apids))
 	{

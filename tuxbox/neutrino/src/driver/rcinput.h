@@ -32,6 +32,10 @@
 #ifndef __MOD_rcinput__
 #define __MOD_rcinput__
 
+#ifdef HAVE_DREAMBOX_HARDWARE
+#define OLD_RC_API
+#endif
+
 #include <linux/input.h>
 #include <string>
 #include <vector>

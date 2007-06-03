@@ -363,6 +363,7 @@ void CControlAPI::ExecCGI(CyhookHandler *hh)
 //-----------------------------------------------------------------------------
 void CControlAPI::SystemCGI(CyhookHandler *hh)
 {
+#ifndef HAVE_DREAMBOX_HARDWARE
 	if (!(hh->ParamList.empty()))
 	{
 
@@ -394,6 +395,7 @@ void CControlAPI::SystemCGI(CyhookHandler *hh)
 			hh->SendError();
 	}
 	else
+#endif
 		hh->SendError();
 }
 

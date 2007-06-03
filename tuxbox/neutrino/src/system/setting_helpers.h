@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.86 2007/05/25 21:07:48 dbt Exp $
+	$Id: setting_helpers.h,v 1.87 2007/06/03 14:37:07 dbluelle Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -154,11 +154,13 @@ class CPauseSectionsdNotifier : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void * Data);
 };
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 class CSPTSNotifier : public CChangeObserver
 {
 	public:
 		bool changeNotify(const neutrino_locale_t, void *);
 };
+#endif
 		
 class CSectionsdConfigNotifier : public CChangeObserver
 {

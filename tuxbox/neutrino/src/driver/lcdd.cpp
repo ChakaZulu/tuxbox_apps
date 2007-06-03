@@ -1,5 +1,5 @@
 /*
-	$Id: lcdd.cpp,v 1.52 2007/03/09 21:10:10 feynman Exp $
+	$Id: lcdd.cpp,v 1.53 2007/06/03 14:36:13 dbluelle Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -214,6 +214,9 @@ void CLCD::displayUpdate()
 
 void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const int inverse)
 {
+	if (!display.isAvailable())
+		return;
+
 	int fd;
 	if (power == 0)
 		dimm = 0;
@@ -737,6 +740,7 @@ int CLCD::getInverse()
 
 void CLCD::setAutoDimm(int autodimm)
 {
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int fd;
 	g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM] = autodimm;
 
@@ -753,6 +757,7 @@ void CLCD::setAutoDimm(int autodimm)
 
 		close(fd);
 	}
+#endif
 }
 
 int CLCD::getAutoDimm()

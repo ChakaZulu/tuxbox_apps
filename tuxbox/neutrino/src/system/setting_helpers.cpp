@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.161 2007/05/25 21:07:47 dbt Exp $
+	$Id: setting_helpers.cpp,v 1.162 2007/06/03 14:37:07 dbluelle Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -300,6 +300,7 @@ bool CPauseSectionsdNotifier::changeNotify(const neutrino_locale_t, void * Data)
 	return true;
 }
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 bool CSPTSNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	if (g_settings.misc_spts)
@@ -309,6 +310,7 @@ bool CSPTSNotifier::changeNotify(const neutrino_locale_t, void *)
 
 	return true;
 }
+#endif
 
 #ifndef TUXTXT_CFG_STANDALONE
 bool CTuxtxtCacheNotifier::changeNotify(const neutrino_locale_t, void *)
@@ -563,6 +565,7 @@ int CMoviePluginChangeExec::exec(CMenuTarget* parent, const std::string & action
 	return menu_return::RETURN_EXIT;
 }
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	std::string text;
@@ -585,6 +588,7 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 	ShowMsgUTF(LOCALE_UCODECHECK_HEAD, text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 	return 1;
 }
+#endif
 
 
 long CNetAdapter::mac_addr_sys ( u_char *addr) //only for function getMacAddr()

@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.24 2007/04/06 11:01:41 munderl Exp $
+ * $Id: stream2file.cpp,v 1.25 2007/06/03 14:36:13 dbluelle Exp $
  * 
  * streaming to file/disc
  * 
@@ -49,7 +49,14 @@
 #include <time.h>
 #include <unistd.h>
 
+#if HAVE_DVB_API < 3
+#include <ost/dmx.h>
+#define dmx_output_t		dmxOutput_t
+#define dmx_pes_filter_params	dmxPesFilterParams
+#define pes_type		pesType
+#else
 #include <linux/dvb/dmx.h>
+#endif
 
 //#define INC_BUSY_COUNT printf ("inc (%d): %s,%d\n",++busy_count,__FUNCTION__,__LINE__)
 //#define DEC_BUSY_COUNT printf ("dec (%d): %s,%d\n",--busy_count,__FUNCTION__,__LINE__)
@@ -83,8 +90,13 @@ extern "C" {
 #define MAXPIDS		64
 
 /* devices */
+#if HAVE_DVB_API < 3
+#define DMXDEV	"/dev/dvb/card0/demux0"
+#define DVRDEV	"/dev/dvb/card0/dvr0"
+#else
 #define DMXDEV	"/dev/dvb/adapter0/demux0"
 #define DVRDEV	"/dev/dvb/adapter0/dvr0"
+#endif
 
 #define FILENAMEBUFFERSIZE 512
 
