@@ -125,7 +125,7 @@ void CLCDDisplay::convert_data ()
 void CLCDDisplay::update()
 {
 	convert_data();
-	if(paused)
+	if(paused || !available)
 		return;
 	else
 		if ( write(fd, lcd, LCD_BUFFER_SIZE) < 0) {

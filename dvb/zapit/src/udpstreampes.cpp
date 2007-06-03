@@ -33,7 +33,14 @@
 #include <pthread.h>
 #include <errno.h>
 
+#if HAVE_DVB_API < 3
+#include <ost/dmx.h>
+#define DEVPATH "/dev/dvb/card0"
+#define pes_type	pesType
+#else
 #include <linux/dvb/dmx.h>
+#define DEVPATH "/dev/dvb/adapter0"
+#endif
 #include <zapit/client/zapitclient.h>
 
 #include "udpstreampes.h"
@@ -50,7 +57,11 @@ typedef struct {
    int Stopped;
    int fd;
    int fdvr;
+#if HAVE_DVB_API < 3
+   dmxPesFilterParams Filter;
+#else
    struct dmx_pes_filter_params Filter;
+#endif
    void *Ptr;
    pthread_t Thread;
    pid_t ProcessID;
@@ -197,7 +208,7 @@ void * DmxTSReader( void * Ptr )
    int fd_dvr;  
 	unsigned u;
 
-   fd_dvr = open("/dev/dvb/adapter0/dvr0", O_RDONLY);
+   fd_dvr = open(DEVPATH "/dvr0", O_RDONLY);
    if (-1 == fd_dvr) {
       perror("ERROR: main() - dvr0 open");
       fprintf(stderr, "EXIT\n");
@@ -206,7 +217,7 @@ void * DmxTSReader( void * Ptr )
    }
 	
 	for (u = 0; u < StreamNum; u++) {
-		Stream[u].fd = open("/dev/dvb/adapter0/demux0", O_RDWR);
+		Stream[u].fd = open(DEVPATH "/demux0", O_RDWR);
 		if (-1 == Stream[u].fd) {
 			perror("ERROR: main() - demux0 open");
 			fprintf(stderr, "EXIT\n");
@@ -329,7 +340,7 @@ void * DmxReader( void * Ptr )
    CurStream = (StreamType*)Ptr;
    BufSize = (CurStream->BufPacketNum) * NET_DATA_PER_PACKET;
    
-   CurStream->fd = open("/dev/dvb/adapter0/demux0", O_RDWR);
+   CurStream->fd = open(DEVPATH "/demux0", O_RDWR);
    if (-1 == CurStream->fd) {
       perror("ERROR: main() - demux0 open");
       fprintf(stderr, "EXIT\n");
@@ -514,7 +525,10 @@ int main ()
    //struct sched_param SchedParam;
    CZapitClient zapit;
 
-   int RetVal, i, avia_mode;
+   int RetVal, i;
+#ifndef HAVE_DREAMBOX_HARDWARE
+   int avia_mode;
+#endif
    unsigned u, v;
 
    mainProcessID = getpid();
@@ -569,11 +583,13 @@ int main ()
       exit(-1);
    }
 
+#ifndef HAVE_DREAMBOX_HARDWARE
    avia_mode = zapit.PlaybackState();
    if (avia_mode > -1 && avia_mode != TSMode) {
       TSMode = (avia_mode == 1 ? 1 : 0);
       printf("INFO: forced %s-Mode\n", (TSMode == 1 ? "TS" : "PES"));
    }
+#endif
 
    StreamNum = 0;
    if ( Bouquet != 0 ) {
@@ -751,7 +767,7 @@ int main ()
    if (TSMode) {
       if ( pthread_create(&(Stream[u].Thread), 0, //&ThreadAttr, 
                             DmxTSReader, 0 ) ) {
-         perror("ERROR: main() - DmxReader pthread_create");
+         perror("ERROR: main() - DmxTSReader pthread_create");
          fprintf(stderr, "EXIT\n");
          fflush(stderr);
          exit(-1);

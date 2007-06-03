@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.10 2003/12/19 23:35:47 derget Exp $
+ * $Id: video.cpp,v 1.11 2007/06/03 14:27:47 dbluelle Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -50,7 +50,11 @@ video_format_t CVideo::getAspectRatio(void)
 {
 	struct video_status status;
 	fop(ioctl, VIDEO_GET_STATUS, &status);
+#if HAVE_DVB_API < 3
+	return status.videoFormat;
+#else
 	return status.video_format;
+#endif
 }
 
 int CVideo::setCroppingMode(video_displayformat_t format)
@@ -62,7 +66,11 @@ video_displayformat_t CVideo::getCroppingMode(void)
 {
 	struct video_status status;
 	fop(ioctl, VIDEO_GET_STATUS, &status);
+#if HAVE_DVB_API < 3
+	return status.displayFormat;
+#else
 	return status.display_format;
+#endif
 }
 
 int CVideo::setSource(video_stream_source_t source)
@@ -74,7 +82,11 @@ video_stream_source_t CVideo::getSource(void)
 {
 	struct video_status status;
 	fop(ioctl, VIDEO_GET_STATUS, &status);
+#if HAVE_DVB_API < 3
+	return status.streamSource;
+#else
 	return status.stream_source;
+#endif
 }
 
 int CVideo::start(void)
@@ -96,14 +108,22 @@ int CVideo::getBlank(void)
 {
 	struct video_status status;
 	fop(ioctl, VIDEO_GET_STATUS, &status);
+#if HAVE_DVB_API < 3
+	return status.videoBlank;
+#else
 	return status.video_blank;
+#endif
 }
 
 video_play_state_t CVideo::getPlayState(void)
 {
 	struct video_status status;
 	fop(ioctl, VIDEO_GET_STATUS, &status);
+#if HAVE_DVB_API < 3
+	return status.playState;
+#else
 	return status.play_state;
+#endif
 }
 
 int CVideo::setVideoSystem(int video_system)

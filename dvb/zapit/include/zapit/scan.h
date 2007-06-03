@@ -1,11 +1,15 @@
 /*
- *  $Id: scan.h,v 1.29 2005/01/24 19:19:20 thegoodguy Exp $
+ *  $Id: scan.h,v 1.30 2007/06/03 14:27:45 dbluelle Exp $
  */
 
 #ifndef __scan_h__
 #define __scan_h__
 
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/frontend.h>
+#else
 #include <linux/dvb/frontend.h>
+#endif
 
 #include <inttypes.h>
 

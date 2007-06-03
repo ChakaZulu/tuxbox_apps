@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.64 2007/03/12 02:51:08 Arzka Exp $
+ * $Id: getservices.h,v 1.65 2007/06/03 14:27:45 dbluelle Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,7 +22,12 @@
 #ifndef __getservices_h__
 #define __getservices_h__
 
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/frontend.h>
+#define fe_type_t	FrontendType
+#else
 #include <linux/dvb/frontend.h>
+#endif
 
 #include <eventserver.h>
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.18 2007/03/12 02:51:08 Arzka Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.19 2007/06/03 14:27:45 dbluelle Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -50,10 +50,18 @@
 #define SATELLITES_XML  	DATADIR "/satellites.xml"
 #define TERRESTRIAL_XML 	DATADIR "/terrestrial.xml"
 
+#if HAVE_DVB_API < 3
+#define AUDIO_DEVICE    	"/dev/dvb/card0/audio0"
+#define DEMUX_DEVICE    	"/dev/dvb/card0/demux0"
+#define FRONTEND_DEVICE 	"/dev/dvb/card0/frontend0"
+#define VIDEO_DEVICE    	"/dev/dvb/card0/video0"
+#define SEC_DEVICE		"/dev/dvb/card0/sec0"
+#else
 #define AUDIO_DEVICE    	"/dev/dvb/adapter0/audio0"
 #define DEMUX_DEVICE    	"/dev/dvb/adapter0/demux0"
 #define FRONTEND_DEVICE 	"/dev/dvb/adapter0/frontend0"
 #define VIDEO_DEVICE    	"/dev/dvb/adapter0/video0"
+#endif
 
 #define CAMD_UDS_NAME  		"/tmp/camd.socket"
 

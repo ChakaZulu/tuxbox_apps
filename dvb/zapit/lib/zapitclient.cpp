@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.112 2007/02/28 04:53:26 Arzka Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.113 2007/06/03 14:27:46 dbluelle Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -896,6 +896,7 @@ bool CZapitClient::isRecordModeActive()
 	return response.activated;
 }
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 void CZapitClient::IecOn()
 {
 	send(CZapitMessages::CMD_SET_AE_IEC_ON);
@@ -941,6 +942,7 @@ int CZapitClient::PlaybackState()
         close_connection();
         return response.number;
 }
+#endif
 
 void CZapitClient::registerEvent(const unsigned int eventID, const unsigned int clientID, const char * const udsName)
 {
