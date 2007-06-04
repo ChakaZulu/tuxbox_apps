@@ -18,6 +18,10 @@
 */
 // Stand: 29.02.2004
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -33,7 +37,7 @@
 #include <pthread.h>
 #include <errno.h>
 
-#if HAVE_DVB_API < 3
+#if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
 #define DEVPATH "/dev/dvb/card0"
 #define pes_type	pesType
@@ -57,7 +61,7 @@ typedef struct {
    int Stopped;
    int fd;
    int fdvr;
-#if HAVE_DVB_API < 3
+#if HAVE_DVB_API_VERSION < 3
    dmxPesFilterParams Filter;
 #else
    struct dmx_pes_filter_params Filter;

@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.13 2003/03/14 07:31:51 obi Exp $
+ * $Id: audio.cpp,v 1.14 2007/06/04 17:06:43 dbluelle Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -19,6 +19,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <fcntl.h>
 #include <sys/ioctl.h>

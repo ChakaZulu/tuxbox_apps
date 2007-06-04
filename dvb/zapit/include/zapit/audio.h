@@ -1,5 +1,5 @@
 /*
- * $Id: audio.h,v 1.13 2007/06/03 14:27:45 dbluelle Exp $
+ * $Id: audio.h,v 1.14 2007/06/04 17:06:42 dbluelle Exp $
  *
  * (C) 2002-2003 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -23,7 +23,7 @@
 #ifndef __zapit_audio_h__
 #define __zapit_audio_h__
 
-#if HAVE_DVB_API < 3
+#if HAVE_DVB_API_VERSION < 3
 #include <ost/audio.h>
 #define audio_stream_source_t	audioStreamSource_t
 #define audio_play_state_t	audioPlayState_t

@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.25 2007/06/03 14:36:13 dbluelle Exp $
+ * $Id: stream2file.cpp,v 1.26 2007/06/04 17:06:47 dbluelle Exp $
  * 
  * streaming to file/disc
  * 
@@ -49,7 +49,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#if HAVE_DVB_API < 3
+#if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
 #define dmx_output_t		dmxOutput_t
 #define dmx_pes_filter_params	dmxPesFilterParams
@@ -90,7 +90,7 @@ extern "C" {
 #define MAXPIDS		64
 
 /* devices */
-#if HAVE_DVB_API < 3
+#if HAVE_DVB_API_VERSION < 3
 #define DMXDEV	"/dev/dvb/card0/demux0"
 #define DVRDEV	"/dev/dvb/card0/dvr0"
 #else

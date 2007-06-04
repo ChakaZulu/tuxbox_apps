@@ -672,7 +672,7 @@ void CPictureViewerGui::view(unsigned int index, bool unscaled)
 	if(m_state == MENU)
 	{
 		frameBuffer->setMode(720, 576, 16);
-#if HAVE_DVB_API >= 3
+#if HAVE_DVB_API_VERSION >= 3
 		frameBuffer->setTransparency(0);
 #endif
 	}
@@ -697,7 +697,7 @@ void CPictureViewerGui::endView()
 	if(m_state != MENU)
 	{
 		frameBuffer->setMode(720, 576, 8 * sizeof(fb_pixel_t));
-#if HAVE_DVB_API >= 3
+#if HAVE_DVB_API_VERSION >= 3
 		frameBuffer->setBlendLevel(g_settings.gtx_alpha1, g_settings.gtx_alpha2);
 #endif
 		frameBuffer->ClearFrameBuffer();
@@ -733,7 +733,7 @@ void CPictureViewerGui::showHelp()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_HOME, g_Locale->getText(LOCALE_PICTUREVIEWER_HELP22));
 
-	helpbox.addLine("Version: $Revision: 1.59 $");
+	helpbox.addLine("Version: $Revision: 1.60 $");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 }

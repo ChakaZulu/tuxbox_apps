@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.19 2007/06/03 14:27:45 dbluelle Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.20 2007/06/04 17:06:42 dbluelle Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -50,7 +50,7 @@
 #define SATELLITES_XML  	DATADIR "/satellites.xml"
 #define TERRESTRIAL_XML 	DATADIR "/terrestrial.xml"
 
-#if HAVE_DVB_API < 3
+#if HAVE_DVB_API_VERSION < 3
 #define AUDIO_DEVICE    	"/dev/dvb/card0/audio0"
 #define DEMUX_DEVICE    	"/dev/dvb/card0/demux0"
 #define FRONTEND_DEVICE 	"/dev/dvb/card0/frontend0"
