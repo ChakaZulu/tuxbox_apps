@@ -454,7 +454,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	fgets(buf,35,fd);//dummy
 	while(!feof(fd))
 	{
-		if(fgets(buf,35,fd)!=NULL)
+		if(fgets(buf,99,fd)!=NULL)
 		{
 			buf[strlen(buf)-1]=0;
 			tmpptr=buf;
@@ -511,7 +511,8 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 
 
 
-	if (!bitInfo[7]) strncpy(buf, g_Locale->getText(LOCALE_STREAMINFO_AUDIOTYPE_UNKNOWN), sizeof(buf));
+       if (!bitInfo[7])
+              strncpy(buf, g_Locale->getText(LOCALE_STREAMINFO_AUDIOTYPE_UNKNOWN), sizeof(buf));
 	else {
 		const char* layernames[4]	={"res", "III", "II", "I"};
 		const char* sampfreqnames[4]	={"44,1k", "48k", "32k", "res"};
