@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.396 2007/05/13 20:14:40 houdini Exp $
+ * $Id: zapit.cpp,v 1.397 2007/06/10 19:36:49 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1071,23 +1071,32 @@ int prepare_channels(fe_type_t frontendType, diseqc_t diseqcType)
 
 void parseScanInputXml(void)
 {
+	std::string filename;
+	std::string complete_filename;
+	struct stat buf;
+
 	switch (frontend->getInfo()->type) {
-	case FE_QPSK:
-		scanInputParser = parseXmlFile(SATELLITES_XML);
-		break;
+		case FE_QPSK:
+			filename = SATELLITES_XML;
+			break;
 
-	case FE_QAM:
-		scanInputParser = parseXmlFile(CABLES_XML);
-		break;
+		case FE_QAM:
+			filename = CABLES_XML;
+			break;
 
-	case FE_OFDM:
-		scanInputParser = parseXmlFile(TERRESTRIAL_XML);
-		break;
+		case FE_OFDM:
+			filename = TERRESTRIAL_XML;
+			break;
 
-	default:
-		WARN("Unknown type %d", frontend->getInfo()->type);
-		return;
+		default:
+			WARN("Unknown type %d", frontend->getInfo()->type);
+			return;
 	}
+
+	complete_filename = (std::string)ZAPITCONFIGDIR + "/" + filename;
+	if ((stat(complete_filename.c_str(), &buf) == -1) && (errno == ENOENT))
+		complete_filename = (std::string)DATADIR + "/" + SATELLITES_XML;
+	scanInputParser = parseXmlFile(complete_filename.c_str());
 }
 
 /*
@@ -2476,7 +2485,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.396 2007/05/13 20:14:40 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.397 2007/06/10 19:36:49 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

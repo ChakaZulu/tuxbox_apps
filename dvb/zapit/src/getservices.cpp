@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.99 2007/03/12 02:51:08 Arzka Exp $
+ * $Id: getservices.cpp,v 1.100 2007/06/10 19:36:49 houdini Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -248,11 +248,16 @@ int LoadMotorPositions(void)
 
 int LoadSatellitePositions(void)
 {
-	xmlDocPtr parser = parseXmlFile(SATELLITES_XML);
+	struct stat buf;
+	std::string filename = (std::string)ZAPITCONFIGDIR + "/" + SATELLITES_XML;
+	if ((stat(filename.c_str(), &buf) == -1) && (errno == ENOENT))
+		filename = (std::string)DATADIR + "/" + SATELLITES_XML;
+
+	xmlDocPtr parser = parseXmlFile(filename.c_str());
 
 	if (parser == NULL)
 	{
-		printf("[getservices] satellites.xml not found.\n");
+		printf("[getservices] satellites.xml\n");
 		return -1;
 	}
 
