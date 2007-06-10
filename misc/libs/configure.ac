@@ -8,6 +8,11 @@ AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 
+AC_ARG_ENABLE(upnp,
+	AS_HELP_STRING(--enable-upnp,include upnp support),
+	,[enable_upnp=no])
+AM_CONDITIONAL(ENABLE_UPNP,test "$enable_upnp" = "yes")
+
 AC_OUTPUT([
 Makefile
 libconfigfile/Makefile
@@ -28,4 +33,6 @@ libucodes/Makefile
 libucodes/tuxbox-ucodes.pc
 libxmltree/Makefile
 libxmltree/tuxbox-xmltree.pc
+libupnpclient/Makefile
+libupnpclient/tuxbox-upnpclient.pc
 ])

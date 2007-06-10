@@ -10,3 +10,7 @@ SUBDIRS = \
 	libnet \
 	libucodes \
 	libxmltree
+
+if ENABLE_UPNP
+SUBDIRS += libupnpclient
+endif
