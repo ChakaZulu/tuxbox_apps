@@ -24,6 +24,8 @@ libneutrino_gui_a_SOURCES = \
 	streaminfo2.cpp plugins.cpp imageinfo.cpp \
 	audio_select.cpp \
 	moviebrowser.cpp movieinfo.cpp
+
+	
 #	experimental_menu.cpp
 #	ch_mosaic.cpp
 
@@ -32,5 +34,14 @@ libneutrino_gui2_a_SOURCES = \
 
 libtimerlist_a_SOURCES = \
 	timerlist.cpp
+
+if ENABLE_UPNP
+INCLUDES += \
+	@XMLTREE_CFLAGS@ \
+	@UPNPCLIENT_CFLAGS@
+
+libneutrino_gui_a_SOURCES += \
+	upnpbrowser.cpp
+endif
 
 #AM_CPPFLAGS = -DSKIP_CA_STATUS
