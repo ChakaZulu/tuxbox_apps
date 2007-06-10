@@ -30,6 +30,8 @@ TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 TUXBOX_APPS_LIB_PKGCONFIG(TUXTXT,tuxbox-tuxtxt)
+TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
+TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
 
 AC_ARG_ENABLE(16-bit-mode,
          [  --enable-16-bit-mode                enable 16 bit graphics mode],
@@ -43,6 +45,11 @@ AC_ARG_ENABLE(keyboard-no-rc,
 AC_ARG_ENABLE(restore-prev-mode,
          [  --enable-restore-prev-mode          enable return from graphics mode],
          [AC_DEFINE(RETURN_FROM_GRAPHICS_MODE,1,[enable return from graphics mode])])
+
+AC_ARG_ENABLE(upnp,
+	AS_HELP_STRING(--enable-upnp,include upnp support),
+	,[enable_upnp=no])
+AM_CONDITIONAL(ENABLE_UPNP,test "$enable_upnp" = "yes")
 
 AC_ARG_ENABLE(use-libxml2,
    [  --enable-use-libxml2    use libxml2 instead of libxmltree],
