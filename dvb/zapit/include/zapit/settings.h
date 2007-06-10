@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.20 2007/06/04 17:06:42 dbluelle Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.21 2007/06/10 19:30:32 houdini Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -46,9 +46,9 @@
 #define CURRENTBOUQUETS_XML	"/tmp/currentbouquets.xml"
 #define CURRENTBOUQUETS_TMP	"/tmp/currentbouquets.tmp"
 
-#define CABLES_XML      	DATADIR "/cables.xml"
-#define SATELLITES_XML  	DATADIR "/satellites.xml"
-#define TERRESTRIAL_XML 	DATADIR "/terrestrial.xml"
+#define CABLES_XML      	"cables.xml"
+#define SATELLITES_XML  	"satellites.xml"
+#define TERRESTRIAL_XML 	"terrestrial.xml"
 
 #if HAVE_DVB_API_VERSION < 3
 #define AUDIO_DEVICE    	"/dev/dvb/card0/audio0"

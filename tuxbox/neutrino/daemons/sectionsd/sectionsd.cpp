@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.241 2007/06/08 00:17:36 dbt Exp $
+//  $Id: sectionsd.cpp,v 1.242 2007/06/10 19:28:48 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1888,7 +1888,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.241 2007/06/08 00:17:36 dbt Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.242 2007/06/10 19:28:48 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -4686,7 +4686,12 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const int scanTyp
 }
 
 xmlNodePtr getProviderFromSatellitesXML(xmlNodePtr node, const int position) {
-	xmlDocPtr satellites_parser = parseXmlFile(SATELLITES_XML);
+	struct stat buf;
+	std::string filename = (std::string)ZAPITCONFIGDIR + "/" + SATELLITES_XML;
+	if ((stat(filename.c_str(), &buf) == -1) && (errno == ENOENT))
+		filename = (std::string)DATADIR + "/" + SATELLITES_XML;
+
+	xmlDocPtr satellites_parser = parseXmlFile(filename.c_str());
 	if (satellites_parser == NULL)
 		return NULL;
 	xmlNodePtr satellite = xmlDocGetRootElement(satellites_parser)->xmlChildrenNode;
@@ -7216,7 +7221,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.241 2007/06/08 00:17:36 dbt Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.242 2007/06/10 19:28:48 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
