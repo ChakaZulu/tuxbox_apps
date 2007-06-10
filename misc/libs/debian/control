@@ -59,6 +59,12 @@ Depends: ${shlibs:Depends}
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
 
+Package: libtuxbox-upnpclient
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
 Package: libtuxbox-configfile-dev
 Section: devel
 Architecture: any
@@ -119,6 +125,13 @@ Package: libtuxbox-xmltree-dev
 Section: devel
 Architecture: any
 Depends: libtuxbox-xmltree (= ${Source-Version}), ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-upnpclient-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-upnpclient (= ${Source-Version}), ${shlibs:Depends}
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
 

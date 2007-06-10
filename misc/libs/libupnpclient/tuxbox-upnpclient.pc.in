@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: tuxbox-upnpclient
+Description: upnpclient
+Version: @VERSION@
+Libs: -L${libdir} -ltuxbox-upnpclient
+Cflags: -I${includedir}/tuxbox/upnpclient

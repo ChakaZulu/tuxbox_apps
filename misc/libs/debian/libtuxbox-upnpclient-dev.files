@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-upnpclient.so
+usr/lib/libtuxbox-upnpclient.la
+usr/lib/libtuxbox-upnpclient.a
+usr/lib/pkgconfig/tuxbox-upnpclient.pc
+usr/include/tuxbox/upnpclient
