@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.851 2007/05/24 18:37:59 papst Exp $
+	$Id: neutrino.cpp,v 1.852 2007/06/11 19:36:33 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -109,6 +109,9 @@
 #include "gui/timerlist.h"
 #include "gui/alphasetup.h"
 #include "gui/audioplayer.h"
+#if ENABLE_UPNP
+#include "gui/upnpbrowser.h"
+#endif
 #include "gui/imageinfo.h"
 
 #if HAVE_DVB_API_VERSION >= 3
@@ -1037,7 +1040,7 @@ void CNeutrinoApp::saveSetup()
 
 	//widget settings
 	configfile.setBool("widget_fade"          , g_settings.widget_fade          );
-    configfile.setInt32("widget_osd"          , g_settings.widget_osd           );
+	configfile.setInt32("widget_osd"          , g_settings.widget_osd           );
 
 	//colors
 	configfile.setInt32( "menu_Head_alpha", g_settings.menu_Head_alpha );
@@ -1713,7 +1716,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::RC_1));
 
-	#if HAVE_DVB_API_VERSION >= 3
+#if HAVE_DVB_API_VERSION >= 3
 	//mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, new CMoviePlayerGui()));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::RC_2));
 
@@ -1740,6 +1743,10 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, CRCInput::RC_3));
 	int shortcut = 4;
+#if ENABLE_UPNP
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_UPNPBROWSER, true, NULL, new CUpnpBrowserGui(), NULL, CRCInput::RC_4));
+	shortcut++;
+#endif
 	if (g_PluginList->hasPlugin(CPlugins::P_TYPE_SCRIPT))
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "",
 										CRCInput::convertDigitToKey(shortcut++)));
@@ -1775,6 +1782,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_COLORS    , true, NULL, &colorSettings    , NULL, CRCInput::RC_8));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD       , true, NULL, &lcdSettings      , NULL, CRCInput::RC_9));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, CRCInput::RC_0));
+
 	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_DRIVER    , true, NULL, &driverSettings   , NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW ));
@@ -3010,12 +3018,12 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
 	fontSettings.addItem(new CMenuForwarder(LOCALE_OPTIONS_DEFAULT, true, NULL, this, font_sizes_groups[5].actionkey));
 }
 
-void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings )
+void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings)
 {
 	colorSettings.addItem(GenericMenuSeparator);
 	colorSettings.addItem(GenericMenuBack);
 	colorSettings.addItem(GenericMenuSeparatorLine);
-
+	
 	CMenuWidget *colorSettings_Themes = new CMenuWidget(LOCALE_COLORTHEMEMENU_HEAD, NEUTRINO_ICON_SETTINGS);
 	InitColorThemesSettings(*colorSettings_Themes);
 

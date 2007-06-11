@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.91 2007/05/24 18:40:33 papst Exp $
+ * $Id: locals_intern.h,v 1.92 2007/06/11 19:40:14 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -553,6 +553,7 @@ const char * locale_real_names[] =
 	"mainmenu.shutdown",
 	"mainmenu.sleeptimer",
 	"mainmenu.tvmode",
+	"mainmenu.upnpbrowser",
 	"mainsettings.audio",
 	"mainsettings.colors",
 	"mainsettings.driver",
@@ -1150,6 +1151,10 @@ const char * locale_real_names[] =
 	"ucodecheck.head",
 	"ucodecheck.ucode",
 	"ucodes.failure",
+	"upnpbrowser.head",
+	"upnpbrowser.noservers",
+	"upnpbrowser.rescan",
+	"upnpbrowser.scanning",
 	"usermenu.button_blue",
 	"usermenu.button_green",
 	"usermenu.button_red",
