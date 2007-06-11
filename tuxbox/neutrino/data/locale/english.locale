@@ -526,6 +526,7 @@ mainmenu.settings Settings
 mainmenu.shutdown Shutdown
 mainmenu.sleeptimer SleepTimer
 mainmenu.tvmode TV-Mode
+mainmenu.upnpbrowser UPnP Browser
 mainsettings.audio Audio
 mainsettings.colors Colors / Themes / Font
 mainsettings.driver driver and boot options
@@ -1123,6 +1124,10 @@ ucodecheck.cam-alpha Cam-Alpha
 ucodecheck.head UCode check
 ucodecheck.ucode UCode
 ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via FTP (or DBox-BootManager),\nthen restart your DBox!
+upnpbrowser.head UPnP Browser
+upnpbrowser.noservers No UPnP servers found
+upnpbrowser.rescan Scan again
+upnpbrowser.scanning Scanning for UPnP servers
 usermenu.button_blue User menu blue
 usermenu.button_green User menu green
 usermenu.button_red User menu red
