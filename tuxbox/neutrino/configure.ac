@@ -31,7 +31,6 @@ TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 TUXBOX_APPS_LIB_PKGCONFIG(TUXTXT,tuxbox-tuxtxt)
 TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
-TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
 
 AC_ARG_ENABLE(16-bit-mode,
          [  --enable-16-bit-mode                enable 16 bit graphics mode],
@@ -56,6 +55,10 @@ AC_ARG_ENABLE(use-libxml2,
       [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
                TUXBOX_APPS_LIB_PKGCONFIG(XML,libxml-2.0)],
                        [TUXBOX_APPS_LIB_PKGCONFIG(XML,tuxbox-xmltree)])
+
+if test "$enable_upnp" = "yes"; then
+TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
+fi
 
 AC_OUTPUT([
 Makefile
