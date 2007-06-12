@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.72 2007/03/22 16:02:23 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.73 2007/06/12 15:30:43 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -60,9 +60,15 @@ void eExpertSetup::init_eExpertSetup()
 	{
 		CONNECT((new eListBoxEntryMenu(&list, _("Communication Setup"), eString().sprintf("(%d) %s", ++entry, _("open communication setup")) ))->selected, eExpertSetup::communication_setup);
 		CONNECT((new eListBoxEntryMenu(&list, _("Ngrab Streaming Setup"), eString().sprintf("(%d) %s", ++entry, _("open ngrab server setup")) ))->selected, eExpertSetup::ngrab_setup);
-		if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM7020 &&
-			eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM600PVR )  // no update for 7020 and dm600pvr yes
+		switch (eSystemInfo::getInstance()->getHwType())
+		{
+		case eSystemInfo::DM7020:
+		case eSystemInfo::DM600PVR:
+		case eSystemInfo::DM500PLUS:
+			break;
+		default:
 			CONNECT((new eListBoxEntryMenu(&list, _("Software Update"), eString().sprintf("(%d) %s", ++entry, _("open software update")) ))->selected, eExpertSetup::software_update);
+		}
 	}
 	int startSamba=1;
 	if ( eConfig::getInstance()->getKey("/elitedvb/network/samba", startSamba) )
@@ -360,6 +366,7 @@ void eExpertSetup::factory_reset()
 	{
 		switch( eSystemInfo::getInstance()->getHwType() )
 		{
+			case eSystemInfo::DM500PLUS:
 			case eSystemInfo::DM600PVR:
 			case eSystemInfo::DM7020:
 				system("rm -R /etc/enigma && killall -9 enigma");

@@ -28,7 +28,7 @@ class eSystemInfo
 public:
 	static eSystemInfo *getInstance() { return instance; }
 	eSystemInfo();
-	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM7020, DM5600, DM5620, DM500, DM600PVR, TR_DVB272S, Unknown };
+	enum { dbox2Nokia, dbox2Sagem, dbox2Philips, DM7000, DM7020, DM5600, DM5620, DM500, DM600PVR, TR_DVB272S, DM500PLUS, Unknown };
 	enum { feSatellite, feCable, feTerrestrial, feUnknown };
 
 	const char *getHelpStr() { return helpstr; }

@@ -3039,7 +3039,9 @@ void eZapMain::pause()
 		if ( ref.type == eServiceReference::idDVB && !ref.path && !timeshift )
 		{
 			if (eSystemInfo::getInstance()->canTimeshift() &&
-				eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM600PVR)
+				eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM600PVR &&
+				eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500PLUS
+				)
 			{
 				if (!eDVB::getInstance()->recorder)
 				{
@@ -4882,13 +4884,9 @@ void eZapMain::showAudioMenu()
 		}
 		else
 		{
-			if ( !(0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR &&
-				eDVB::getInstance()->recorder) )
-			{
-				audiosel.show();
-				audiosel.exec();
-				audiosel.hide();
-			}
+			audiosel.show();
+			audiosel.exec();
+			audiosel.hide();
 		}
 #ifndef DISABLE_LCD
 		lcdmain.lcdMenu->hide();
@@ -7468,6 +7466,7 @@ eSleepTimerContextMenu::eSleepTimerContextMenu( eWidget* lcdTitle, eWidget *lcdE
 		case eSystemInfo::TR_DVB272S:
 			new eListBoxEntryText(&list, _("reboot now"), (void*)4, 0, _("restart your receiver"));
 			break;
+		case eSystemInfo::DM500PLUS:
 		case eSystemInfo::DM600PVR:
 		case eSystemInfo::DM7000:
 		case eSystemInfo::DM7020:

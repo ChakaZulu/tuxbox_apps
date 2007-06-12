@@ -195,6 +195,7 @@ eSystemInfo::eSystemInfo()
 				}
 				case 11:
 				{
+					alphaincrement=25;
 					midstr="11";
 					modelstr="DM600PVR";
 					cpustr="STBx25xx, 252MHz";
@@ -202,6 +203,17 @@ eSystemInfo::eSystemInfo()
 					hasscartswitch = 0;
 					hwtype = DM600PVR;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
+					break;
+				}
+				case 12:
+				{
+					alphaincrement=25;
+					midstr="12";
+					modelstr="DM500PLUS";
+					cpustr="STBx25xx, 252MHz";
+					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
+					canrecordts=hasscartswitch=0;
+					hwtype = DM500PLUS;
 					break;
 				}
 			}

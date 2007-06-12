@@ -187,6 +187,7 @@ void eZap::init_eZap(int argc, char **argv)
 		case eSystemInfo::DM5600:
 		case eSystemInfo::DM5620:
 		case eSystemInfo::DM500:
+		case eSystemInfo::DM500PLUS:
 			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdm5xxx.xml") )
 				if ( eActionMapList::getInstance()->loadXML( TUXBOXDATADIR "/enigma/resources/rcdm5xxx.xml") )
 					eFatal("couldn't load RC Mapping file for DM5XXX");
@@ -469,7 +470,8 @@ int main(int argc, char **argv)
 
 		if ( !res )  // only when shutdown disable pin8 voltage
 		{
-			if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR)
+			if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR ||
+				eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500PLUS)
 			{
 				__u8 data[720*576];
 				gPixmap pixmap;

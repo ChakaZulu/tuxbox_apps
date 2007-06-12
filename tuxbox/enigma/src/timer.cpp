@@ -67,8 +67,6 @@ bool canPlayService( const eServiceReference & ref )
 		return true;
 	if ( ref.type == eServiceReference::idDVB )
 	{
-		if ( 0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR )
-			return false;  // no service change during recording yet
 		if ( ref.path )
 			return eSystemInfo::getInstance()->canTimeshift();
 		int canHandleTwoScrambledServices=0;
@@ -2186,7 +2184,8 @@ void eTimerEditView::createWidgets()
 	new eListBoxEntryText( *after_event, _("Standby"), (void*) ePlaylistEntry::doGoSleep, 0, _("put box into standby") );
 	if ( eSystemInfo::getInstance()->canShutdown() )
 	{
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR)
+		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR ||
+			eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500PLUS)
 			new eListBoxEntryText( *after_event, _("Shutdown"), (void*) ePlaylistEntry::doShutdown, 0, _("shutdown the box") );
 		else
 			new eListBoxEntryText( *after_event, _("Shutdown"), (void*) ePlaylistEntry::doShutdown, 0, _("put box into deep standby") );

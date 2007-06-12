@@ -154,7 +154,10 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
 	if (x_offs + x_size > (int)var->xres) x_offs = 0;
 	if (y_offs + y_size > (int)var->yres) y_offs = 0;
 
-	if (eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM600PVR || var->bits_per_pixel < 16)
+	bool yuv_fb = eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR ||
+		eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM500PLUS;
+
+	if (!yuv_fb || var->bits_per_pixel < 16)
 	{
 		/* blit buffer 2 fb */
 		fbbuff = (unsigned short *) convertRGB2FB(rgbbuff, x_size * y_size, var->bits_per_pixel, &bp);
@@ -168,7 +171,7 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
 	}
 	else
 	{
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM600PVR && var->bits_per_pixel == 16)
+		if (yuv_fb && var->bits_per_pixel == 16)
 		{
 			if (!yuv_initialized)
 			{

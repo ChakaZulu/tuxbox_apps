@@ -227,6 +227,7 @@ void CAService::buildCAPMT( PMT *pmt )
 			capmt[25]=0x03;  // descramble on demux0 and demux1
 			capmt[26]=0x01;  // get section data from demux1
 			break;
+		case eSystemInfo::DM500PLUS:
 		case eSystemInfo::DM600PVR:
 			capmt[25]=0x01;  // descramble on demux0 // demux 1 is just a fake demux 0
 			capmt[26]=0x01;  // get section data from demux1
