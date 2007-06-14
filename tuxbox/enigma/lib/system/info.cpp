@@ -112,6 +112,7 @@ eSystemInfo::eSystemInfo()
 		case 5 ... 7:
 		case 9:
 		case 11:
+		case 12:
 			manufactstr="Dream-Multimedia-TV";
 			helpstr="dreambox";
 			canupdateTransponder=haskeyboard=1;
