@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.242 2007/06/10 19:28:48 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.243 2007/06/14 21:20:00 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -94,7 +94,7 @@
 #define TIME_EIT_SKIPPING 30
 
 //#define MAX_EVENTS 6000
-static unsigned int max_events = 6000;
+static unsigned int max_events;
 // sleep 5 minutes
 #define HOUSEKEEPING_SLEEP (5 * 60)
 // meta housekeeping after XX housekeepings - every 24h -
@@ -154,7 +154,7 @@ static long oldEventsAre;
 static int scanning = 1;
 
 #define EPG_FILTER_PATH "/var/tuxbox/config/zapit/epgfilter.xml"
-// #define EPGFILTER_FILE "/var/tuxbox/config/zapit/bouquets.xml"
+
 std::string epg_filter_dir = EPG_FILTER_PATH;
 static bool epg_filter_is_whitelist = false;
 static bool epg_filter_except_current_next = false;
@@ -180,10 +180,10 @@ CEventServer *eventServer;
 //bool            timerd = false;
 
 static pthread_rwlock_t eventsLock = PTHREAD_RWLOCK_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
-static pthread_mutex_t servicesLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
-static pthread_mutex_t transpondersLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge transponders geschrieben und gelesen wird
-static pthread_mutex_t bouquetsLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge bouquets geschrieben und gelesen wird
-static pthread_mutex_t messagingLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_rwlock_t servicesLock = PTHREAD_RWLOCK_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
+static pthread_rwlock_t transpondersLock = PTHREAD_RWLOCK_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge transponders geschrieben und gelesen wird
+static pthread_rwlock_t bouquetsLock = PTHREAD_RWLOCK_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge bouquets geschrieben und gelesen wird
+static pthread_rwlock_t messagingLock = PTHREAD_RWLOCK_INITIALIZER;
 
 static pthread_cond_t timeThreadSleepCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t timeThreadSleepMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -205,24 +205,34 @@ static DMX dmxNIT(0x10, 128);
 static DMX dmxPPT(0x00, 256);
 unsigned int privatePid=0;
 
-inline void lockServices(void)
+inline void readLockServices(void)
 {
-	pthread_mutex_lock(&servicesLock);
+	pthread_rwlock_rdlock(&servicesLock);
+}
+
+inline void writeLockServices(void)
+{
+	pthread_rwlock_wrlock(&servicesLock);
 }
 
 inline void unlockServices(void)
 {
-	pthread_mutex_unlock(&servicesLock);
+	pthread_rwlock_unlock(&servicesLock);
 }
 
-inline void lockMessaging(void)
+inline void readLockMessaging(void)
 {
-	pthread_mutex_lock(&messagingLock);
+	pthread_rwlock_rdlock(&messagingLock);
+}
+
+inline void writeLockMessaging(void)
+{
+	pthread_rwlock_wrlock(&messagingLock);
 }
 
 inline void unlockMessaging(void)
 {
-	pthread_mutex_unlock(&messagingLock);
+	pthread_rwlock_unlock(&messagingLock);
 }
 
 inline void readLockEvents(void)
@@ -240,24 +250,34 @@ inline void unlockEvents(void)
 	pthread_rwlock_unlock(&eventsLock);
 }
 
-inline void lockTransponders(void)
+inline void readLockTransponders(void)
 {
-	pthread_mutex_lock(&transpondersLock);
+	pthread_rwlock_rdlock(&transpondersLock);
+}
+
+inline void writeLockTransponders(void)
+{
+	pthread_rwlock_wrlock(&transpondersLock);
 }
 
 inline void unlockTransponders(void)
 {
-	pthread_mutex_unlock(&transpondersLock);
+	pthread_rwlock_unlock(&transpondersLock);
 }
 
-inline void lockBouquets(void)
+inline void readLockBouquets(void)
 {
-	pthread_mutex_lock(&bouquetsLock);
+	pthread_rwlock_rdlock(&bouquetsLock);
+}
+
+inline void writeLockBouquets(void)
+{
+	pthread_rwlock_wrlock(&bouquetsLock);
 }
 
 inline void unlockBouquets(void)
 {
-	pthread_mutex_unlock(&bouquetsLock);
+	pthread_rwlock_unlock(&bouquetsLock);
 }
 
 inline int EITThreadsPause(void)
@@ -454,24 +474,33 @@ static void addBouquetFilter(t_bouquet_id bid)
 // Loescht ein Event aus allen Mengen
 static bool deleteEvent(const event_id_t uniqueKey)
 {
+	readLockEvents();
 	MySIeventsOrderUniqueKey::iterator e = mySIeventsOrderUniqueKey.find(uniqueKey);
 
 	if (e != mySIeventsOrderUniqueKey.end())
 	{
 		if (e->second->times.size())
 		{
+			unlockEvents();
+			writeLockEvents();
 			mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.erase(e->second);
 			mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.erase(e->second);
 		}
 
+		unlockEvents();
+		writeLockEvents();
 		mySIeventsOrderUniqueKey.erase(uniqueKey);
 		mySIeventsNVODorderUniqueKey.erase(uniqueKey);
 
 //		printf("Deleting: %04x\n", (int) uniqueKey);
+		unlockEvents();
 		return true;
 	}
 	else
+	{
+		unlockEvents();
 		return false;
+	}
 
 	/*
 	  for(MySIeventIDsMetaOrderServiceID::iterator i=mySIeventIDsMetaOrderServiceID.begin(); i!=mySIeventIDsMetaOrderServiceID.end(); i++)
@@ -524,9 +553,7 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 	// Damit in den nicht nach Event-ID sortierten Mengen
 	// Mehrere Events mit gleicher ID sind, diese vorher loeschen
 	unlockEvents();
-	writeLockEvents();
 	deleteEvent(e->uniqueKey());
-	unlockEvents();
 	readLockEvents();
 	if (mySIeventsOrderUniqueKey.size() >= max_events) {
 		//FIXME: Set Old Events to 0 if limit is reached...
@@ -535,14 +562,13 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 		lastEvent--;
 
 		//preserve events of current channel
-		lockMessaging();
+		readLockMessaging();
 		while ((lastEvent != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) &&
 			((*lastEvent)->get_channel_id() == messaging_current_servicekey)) {
 		  lastEvent--;
 		}
 		unlockMessaging();
 		unlockEvents();	
-		writeLockEvents();
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
 	unlockEvents();
@@ -652,18 +678,22 @@ static void addNVODevent(const SIevent &evt)
 
 	SIeventPtr e(eptr);
 
+	readLockEvents();
 	MySIeventsOrderUniqueKey::iterator e2 = mySIeventsOrderUniqueKey.find(e->uniqueKey());
 
 	if (e2 != mySIeventsOrderUniqueKey.end())
 	{
 		// bisher gespeicherte Zeiten retten
+		unlockEvents();
+		writeLockEvents();
 		e->times.insert(e2->second->times.begin(), e2->second->times.end());
 	}
+	unlockEvents();
 
 	// Damit in den nicht nach Event-ID sortierten Mengen
 	// mehrere Events mit gleicher ID sind, diese vorher loeschen
 	deleteEvent(e->uniqueKey());
-
+	readLockEvents();
 	if (mySIeventsOrderUniqueKey.size() >= max_events) {
 		//FIXME: Set Old Events to 0 if limit is reached...
 		MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator lastEvent =
@@ -671,26 +701,29 @@ static void addNVODevent(const SIevent &evt)
 		lastEvent--;
 
 		//preserve events of current channel
-		lockMessaging();
+		readLockMessaging();
 		while ((lastEvent != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin()) &&
 			((*lastEvent)->get_channel_id() == messaging_current_servicekey)) {
 		  lastEvent--;
 		}
 		unlockMessaging();
-
+		unlockEvents();
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
 
-
+	unlockEvents();
+	writeLockEvents();
 	mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
 
 	mySIeventsNVODorderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
-
+	unlockEvents();
 	if (e->times.size())
 	{
 		// diese beiden Mengen enthalten nur Events mit Zeiten
+		writeLockEvents();
 		mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(e);
 		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(e);
+		unlockEvents();
 	}
 }
 
@@ -799,6 +832,7 @@ static void removeOldEvents(const long seconds)
 	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin();
 
 	while (e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end()) {
+		unlockEvents();
 		goodtimefound = false;
 		for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); t++) {
 			if (t->startzeit + (long)t->dauer >= zeit - seconds) {
@@ -807,16 +841,14 @@ static void removeOldEvents(const long seconds)
 				break;
 			}
 		}
-		if (false == goodtimefound) {
-			unlockEvents();
-			writeLockEvents();
+
+		if (false == goodtimefound)
 			deleteEvent((*(e++))->uniqueKey());
-			unlockEvents();
-			readLockEvents();
-		}
 		else
 			++e;
+		readLockEvents();
 	}
+	
 	unlockEvents();
 	
 	return;
@@ -841,6 +873,7 @@ static void removeWasteEvents()
 	MySIeventsOrderUniqueKey::iterator e = mySIeventsOrderUniqueKey.begin();
 
 	while (e != mySIeventsOrderUniqueKey.end()) {
+		unlockEvents();
 		validevent = true;
 		haslinkage = false;
 		if ((last_original_network_id == e->second->original_network_id) && 
@@ -896,15 +929,11 @@ static void removeWasteEvents()
 			last_transport_stream_id = e->second->transport_stream_id;
 		}
 
-		if (!validevent) {
-			unlockEvents();
-			writeLockEvents();
+		if (!validevent)
 			deleteEvent((e++)->first);
-			unlockEvents();
-			readLockEvents();
-		}
 		else
 			++e;
+		readLockEvents();
 	}
 	unlockEvents();
 
@@ -943,13 +972,19 @@ static bool addService(const SIservice &s, const int is_actual)
 	bool is_new = false;
 
 	//if (mySIservicesNVODorderUniqueKey.find(s.uniqueKey()))
+	readLockServices();
 	MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.find(s.uniqueKey());
 	already_exists = (si != mySIservicesOrderUniqueKey.end());
-
+	unlockServices();
+	
 	if ( (!already_exists) || ((is_actual) && (!si->second->is_actual)) ) {
 
-		if (already_exists)
+		if (already_exists) 
+		{
+			writeLockServices();
 			mySIservicesOrderUniqueKey.erase(s.uniqueKey());
+			unlockServices();
+		}
 
 		SIservice *sp = new SIservice(s);
 
@@ -972,12 +1007,16 @@ static bool addService(const SIservice &s, const int is_actual)
 		}
 
 		sptr->is_actual = is_actual;
-
+		writeLockServices();
 		mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
+		unlockServices();
 
 		if (sptr->nvods.size())
+		{
+			writeLockServices();
 			mySIservicesNVODorderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
-
+			unlockServices();
+		}
 		//  if(sptr->serviceID==0x01 || sptr->serviceID==0x02 || sptr->serviceID==0x04)
 //		mySIservicesOrderServiceName.insert(sptr);
 		is_new = true;
@@ -1002,6 +1041,7 @@ static int addBouquetEntry(const SIbouquet &s/*, int section_nr, int count*/)
 	//s.position = (uint16_t) (((section_nr & 0x1f) << 11) + (count & 0x7ff));
 
 	//if (mySIservicesNVODorderUniqueKey.find(s.uniqueKey()))
+	readLockBouquets();
 	MySIbouquetsOrderUniqueKey::iterator si = mySIbouquetsOrderUniqueKey.find(s.uniqueKey());
 	already_exists = (si != mySIbouquetsOrderUniqueKey.end());
 
@@ -1021,6 +1061,8 @@ static int addBouquetEntry(const SIbouquet &s/*, int section_nr, int count*/)
 
 		printf("Section Number: %d Count: %d position: %04x\n", section_nr, number, bpptr->position);
 		*/
+		unlockBouquets();
+		writeLockBouquets();		
 		mySIbouquetsOrderUniqueKey.insert(std::make_pair(bpptr->uniqueKey(), bpptr));
 
 		//Because of Bouquet_Id misuse. see SIsections.cpp. IDs are introduced there
@@ -1030,7 +1072,7 @@ static int addBouquetEntry(const SIbouquet &s/*, int section_nr, int count*/)
 			bouquet_id = 0;
 
 	}
-
+	unlockBouquets();
 	return bouquet_id << 1 | (int) !already_exists;
 }
 
@@ -1050,6 +1092,7 @@ static MySItranspondersOrderUniqueKey mySItranspondersOrderUniqueKey;
 // Fuegt einen Tranponder in alle Mengen ein
 static bool addTransponder(const SInetwork &s, const bool is_actual)
 {
+	readLockTransponders();	
 	MySItranspondersOrderUniqueKey::iterator si = mySItranspondersOrderUniqueKey.find(s.uniqueKey());
 	bool already_exists = (si != mySItranspondersOrderUniqueKey.end());
 
@@ -1067,9 +1110,11 @@ static bool addTransponder(const SInetwork &s, const bool is_actual)
 
 		tpptr->is_actual = is_actual;
 
+		unlockTransponders();
+		writeLockTransponders();
 		mySItranspondersOrderUniqueKey.insert(std::make_pair(tpptr->uniqueKey(), tpptr));
 	}
-
+	unlockTransponders();
 	return !already_exists;
 }
 
@@ -1546,7 +1591,7 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 	}
 
 	*serviceList = 0;
-	lockServices();
+	readLockServices();
 #define MAX_SIZE_DATEN	200
 	char daten[MAX_SIZE_DATEN];
 
@@ -1868,7 +1913,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 
 	unlockEvents();
 
-	lockServices();
+	readLockServices();
 
 	unsigned anzServices = mySIservicesOrderUniqueKey.size();
 
@@ -1888,7 +1933,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.242 2007/06/10 19:28:48 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.243 2007/06/14 21:20:00 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2274,7 +2319,7 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	time_t zeit = time(NULL);
 
-	lockMessaging();
+	readLockMessaging();
 
 	if ( (messaging_current_servicekey >> 16) == (*uniqueServiceKey >> 16) )
 		transponderChanged = false;
@@ -2282,7 +2327,10 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 	if ( ( messaging_current_servicekey != *uniqueServiceKey ) ||
 	        ( zeit > ( messaging_last_requested + 5 ) ) )
 	{
+		unlockMessaging();
+		writeLockMessaging();
 		messaging_current_servicekey = *uniqueServiceKey;
+
 /*		printf("here1\n");
 		for ( int i = 0x4e; i <= 0x6f; i++)
 		{
@@ -2301,7 +2349,7 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 		doWakeUp = true;
 
-		lockServices();
+		readLockServices();
 
 		MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
 		si = mySIservicesOrderUniqueKey.find(*uniqueServiceKey);
@@ -2313,6 +2361,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		unlockServices();
 	}
 
+	unlockMessaging();
+	writeLockMessaging();
 	for ( int i = 0; i < MAX_BAT; i++) {
 		messaging_bat_bouquet_id[i] = 0;
 		messaging_bat_last_section[i] = 0;
@@ -2320,7 +2370,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 			messaging_bat_sections_so_far[i][j] = 0;
 	}
 
-
+	unlockMessaging();
+	writeLockMessaging();
 	if ( ( !doWakeUp )/* && ( messaging_sections_got_all[0] )*/ && ( *requestCN_Event ) && ( !messaging_WaitForServiceDesc ) )
 	{
 		messaging_wants_current_next_Event = false;
@@ -2342,27 +2393,32 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		if (messaging_wants_current_next_Event)
 			dprintf("[sectionsd] commandserviceChanged: requesting current_next event...\n");
 	}
-
+	unlockMessaging();
 	showProfiling("[sectionsd] commandserviceChanged: before wakeup");
+	writeLockMessaging();
 	messaging_last_requested = zeit;
+	unlockMessaging();
 //	messaging_current_version_number = 0;
 	EITCheckAllFilters = true;
 
 	if ( doWakeUp )
 	{
 		// nur wenn lange genug her, oder wenn anderer Service :)
-		if ( transponderChanged ) {
-			dmxSDT.stop();
-			dmxNIT.stop();
+//		if ( transponderChanged ) {
+//			dmxSDT.stop();
+//			dmxNIT.stop();
+//			dmxNIT.real_pause();
+//			pthread_mutex_lock( &dmxNIT.start_stop_mutex );
+//			dmxSDT.real_pause();
+//			pthread_mutex_lock( &dmxSDT.start_stop_mutex );
+			readLockMessaging();
 			dmxEIT.current_service = messaging_current_servicekey & 0xffff;
+			unlockMessaging();
 			dmxEIT.change( 0 );
-		}
-
+//		}
 	}
 	else
 		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
-
-	unlockMessaging();
 
 	showProfiling("[sectionsd] commandserviceChanged: after doWakeup");
 
@@ -2374,6 +2430,7 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	return ;
 }
+
 
 static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsigned dataLength)
 {
@@ -2390,8 +2447,6 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	if (EITThreadsPause()) // -> lock
 		return ;
 
-	lockServices();
-
 	readLockEvents();
 
 	SItime zeitEvt1(0, 0);
@@ -2405,6 +2460,8 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	}
 	if (evt.service_id == 0)
 	{
+		readLockServices();
+
 		MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
 		si = mySIservicesOrderUniqueKey.find(*uniqueServiceKey);
 
@@ -2418,11 +2475,10 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 				flag |= CSectionsdClient::epgflags::not_broadcast;
 			}
 		}
+		unlockServices();
 	}
 
 	//dprintf("[sectionsd] current flag %d\n", flag);
-
-	unlockServices();
 
 	SIevent nextEvt;
 
@@ -2929,7 +2985,6 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	}
 
 	char *liste = evtList;
-	lockServices();
 	readLockEvents();
 
 	t_channel_id uniqueNow = 0;
@@ -2946,7 +3001,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 		if ( uniqueNow != uniqueOld )
 		{
 			found_already = true;
-
+			readLockServices();
 			// new service, check service- type
 			MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.find(uniqueNow);
 
@@ -2964,10 +3019,11 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 				// im Zweifel mitnehmen
 				found_already = false;
 			}
+			unlockServices();
 
 			uniqueOld = uniqueNow;
 		}
-
+		
 		if ( !found_already )
 		{
 			std::string eName = (*e)->getName();
@@ -3055,7 +3111,6 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	}
 
 	unlockEvents();
-	unlockServices();
 
 	dmxSDT.unpause();
 	EITThreadsUnPause();
@@ -3308,7 +3363,7 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 	if (EITThreadsPause()) // -> lock
 		return ;
 
-	lockServices();
+	readLockServices();
 
 	readLockEvents();
 
@@ -3448,7 +3503,7 @@ static void commandSetPrivatePid(int connfd, char *data, const unsigned dataLeng
 	if (dataLength != 2)
 		return ;
 
-	lockMessaging();
+	writeLockMessaging();
 	pid = *((unsigned short*)data);
 //	if (privatePid != pid)
 	{
@@ -3471,13 +3526,12 @@ static void commandSetSectionsdScanMode(int connfd, char *data, const unsigned d
 	if (dataLength != 4)
 		return ;
 
-	lockMessaging();
+	writeLockMessaging();
 	auto_scanning = *((int*)data);
+	unlockMessaging();
 
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = 0;
-
-	unlockMessaging();
 
 	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 	return ;
@@ -3492,7 +3546,7 @@ static void commandSetConfig(int connfd, char *data, const unsigned dataLength)
 	pmsg = (struct sectionsd::commandSetConfig *)data;
 	if (pmsg->scanMode != auto_scanning) {
 		dprintf("new scanMode = %d\n", pmsg->scanMode);
-		lockMessaging();
+		writeLockMessaging();
 		auto_scanning = pmsg->scanMode;
 		unlockMessaging();
 	}
@@ -3567,26 +3621,26 @@ static void commandFreeMemory(int connfd, char *data, const unsigned dataLength)
 {
 	EITThreadsPause();
 	dmxSDT.pause();
-	lockTransponders();
+
+	writeLockTransponders();
 	mySItranspondersOrderUniqueKey.clear();
-
 	unlockTransponders();
-	lockServices();
+
+	writeLockServices();
 	mySIservicesOrderUniqueKey.clear();
-
 	unlockServices();
-	lockBouquets();
+
+	writeLockBouquets();
 	mySIbouquetsOrderUniqueKey.clear();
-
 	unlockBouquets();
-	writeLockEvents();
 
+	writeLockEvents();
 	mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.clear();
 	mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.clear();
 	mySIeventsOrderUniqueKey.clear();
 	mySIeventsNVODorderUniqueKey.clear();
-
 	unlockEvents();
+
 	dmxSDT.unpause();
 	EITThreadsUnPause();
 
@@ -3798,7 +3852,7 @@ static void commandReadSIfromXML(int connfd, char *data, const unsigned dataLeng
 	if (dataLength > 100)
 		return ;
 
-	lockMessaging();
+	writeLockMessaging();
 	epg_dir = (std::string)data;
 	unlockMessaging();
 
@@ -4540,11 +4594,10 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const int scanTyp
 	FILE * dst = NULL;
 	char buffer[256] = "";
 
-	//not necessary because new services can only be written from sdt-thread itself
-//	lockServices();
+	readLockServices();
 	for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s != mySIservicesOrderUniqueKey.end(); s++)
 	{
-
+		unlockServices();
 		if ( (s->second->transport_stream_id == xmlGetNumericAttribute(tp_node, "id", 16)) &&
 			(s->second->original_network_id == xmlGetNumericAttribute(tp_node, "onid", 16)) )
 		{
@@ -4604,10 +4657,13 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const int scanTyp
 
 			}
 		}
+		readLockServices();
 	}
+	unlockServices();
 	//Second loop to detect services which are not longer in SDT
 	//Only remove if Actual SDT. This could be changed, if all providers would send correct data
 	//It is pretty much the same as the first loop. Check there. Later: merge them together?
+	readLockServices();
 	MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin();
 	if (s->second->is_actual == 2) {
 		xmlNodePtr node = tp_node->xmlChildrenNode;
@@ -4656,7 +4712,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const int scanTyp
 		}
 	}
 
-//	unlockServices();
+	unlockServices();
 
 	//If we chnged some services write the closing tags.
 	if (is_needed) {
@@ -5440,7 +5496,7 @@ static void *nitThread(void *)
 		dprintf("[%sThread] pid %d start\n", "nit", getpid());
 
 		int timeoutsDMX = 0;
-		lockMessaging();
+		writeLockMessaging();
 		for ( i = 0; i < MAX_NIDs; i++)
 			messaging_nit_nid[i] = 0;
 		unlockMessaging();
@@ -5466,14 +5522,20 @@ static void *nitThread(void *)
 				pthread_mutex_lock( &dmxNIT.start_stop_mutex );
 				dprintf("dmxNIT: going to sleep...\n");
 
-				lockMessaging();
+				readLockMessaging();
 
 				if ((auto_scanning > 0) && (!startup)) {
 					 if (messaging_nit_nid[0] != 0)
 						updateNetwork();
+					pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
+#ifdef PAUSE_EQUALS_STOP
+					dmxSDT.real_unpause();
+#endif
 					dmxSDT.change( 0 );
 				}
-
+				unlockMessaging();
+		
+				writeLockMessaging();
 				for ( i = 0; i < MAX_NIDs; i++)
 					messaging_nit_nid[i] = 0;
 
@@ -5540,15 +5602,11 @@ static void *nitThread(void *)
 
 					is_new = false;
 
-					lockTransponders();
-
 					for (SInetworks::iterator s = nit.networks().begin(); s != nit.networks().end(); s++)
 						if (addTransponder(*s, is_actual))
 							is_new = true;
 
-					unlockTransponders();
-
-					lockMessaging();
+					readLockMessaging();
 
 					if (is_new) {
 						nid = (header.table_id_extension_hi) << 8 | header.table_id_extension_lo;
@@ -5558,6 +5616,10 @@ static void *nitThread(void *)
 						i = 0;
 						while ((i < MAX_NIDs) && (messaging_nit_nid[i] != 0) && (messaging_nit_nid[i] != nid))
 							i++;
+
+						unlockMessaging();
+						writeLockMessaging();
+
 						if (i < MAX_NIDs)
 							messaging_nit_nid[i] = nid;
 					}
@@ -5633,7 +5695,7 @@ static void *sdtThread(void *)
 		dprintf("[%sThread] pid %d start\n", "sdt", getpid());
 
 		int timeoutsDMX = 0;
-		lockMessaging();
+		writeLockMessaging();
 		for ( i = 0; i < MAX_SDTs; i++)
 			messaging_sdt_tid[i] = 0;
 		for ( i = 0; i < MAX_BAT; i++) {
@@ -5668,7 +5730,7 @@ static void *sdtThread(void *)
 				pthread_mutex_lock( &dmxSDT.start_stop_mutex );
 				dprintf("dmxSDT: going to sleep...\n");
 
-				lockMessaging();
+				readLockMessaging();
 
 				if ((auto_scanning > 0) && (!startup)) {
 					if ((auto_scanning == 1) || (auto_scanning == 3)) {
@@ -5694,6 +5756,8 @@ static void *sdtThread(void *)
 					}
 				}
 
+				unlockMessaging();
+				writeLockMessaging();
 				for ( i = 0; i < MAX_SDTs; i++)
 					messaging_sdt_tid[i] = 0;
 				for ( i = 0; i < MAX_BAT; i++) {
@@ -5769,8 +5833,6 @@ static void *sdtThread(void *)
 
 					is_new = false;
 
-					lockServices();
-
 					for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
 						if (addService(*s, is_actual)) {
 							is_new = true;
@@ -5778,9 +5840,7 @@ static void *sdtThread(void *)
 														 s->transport_stream_id);
 						}
 
-					unlockServices();
-
-					lockMessaging();
+					readLockMessaging();
 
 					if (is_new) {
 						lastData = time(NULL);
@@ -5791,6 +5851,9 @@ static void *sdtThread(void *)
 						i = 0;
 						while ((i < MAX_SDTs) && (messaging_sdt_tid[i] != 0) && (messaging_sdt_tid[i] != tid))
 							i++;
+
+						unlockMessaging();
+						writeLockMessaging();
 						if (i < MAX_SDTs)
 							messaging_sdt_tid[i] = tid;
 					}
@@ -5817,8 +5880,6 @@ static void *sdtThread(void *)
 
 						int new_bouquet_id = 0;
 
-						lockBouquets();
-
 						//int count = 0;
 						for (SIbouquets::iterator s = bat.bouquets().begin(); s != bat.bouquets().end(); s++) {
 							//(*s)->position = (uint16_t) (((header.section_number & 0x1f) << 11) + (count & 0x7ff));
@@ -5833,9 +5894,7 @@ static void *sdtThread(void *)
 							messaging_bat_bouquet_id[current_bouquet] = new_bouquet_id >> 1;
 						//printf("Bouquet ID: %04x\n", bid);
 
-						unlockBouquets();
-
-						lockMessaging();
+						writeLockMessaging();
 
 						if (is_new) {
 							lastData = time(NULL);
@@ -6145,36 +6204,24 @@ static void *eitThread(void *)
 	{
 		dprintf("[%sThread] pid %d start\n", "eit", getpid());
 		int timeoutsDMX = 0;
-//		time_t lastRestarted = time(NULL);
 		time_t lastChanged = time(NULL);
-//		dmxEIT.current_service = messaging_current_servicekey & 0xffff;
 		dmxEIT.start(); // -> unlock
 
 		for (;;)
-		{	/*
-			lockMessaging();
-			if (strcmp(epg_dir, "") != 0) {
-				insertEventsfromFile();
-				unlockMessaging();
-			} else {
-			unlockMessaging();*/
+		{
 			time_t zeit = time(NULL);
 
 			if (timeoutsDMX < 0)
 			{
-				lockMessaging();
+				writeLockMessaging();
 				if (update_eit){
 						
-					if (dmxEIT.filters[dmxEIT.filter_index].filter == 0x4e) { //&& 
-//							(((header.table_id_extension_hi << 8) | header.table_id_extension_lo) == (messaging_current_servicekey & 0xFFFF)) &&
-					//		(messaging_current_version_number != header.version_number)) {
-					//		dprintf("[eitThread] got new C/N EPG (table_id 0x%x, ext_hi=%x, ext_lo=%x, sn=%x, vn=%x)\n", header.table_id, header.table_id_extension_hi, header.table_id_extension_lo, header.section_number, header.version_number);
-					//		messaging_current_version_number = header.version_number;
+					if (dmxEIT.filters[dmxEIT.filter_index].filter == 0x4e) { 
 						messaging_wants_current_next_Event = false;
 						eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
 					}
 				} else {
-					if ( messaging_wants_current_next_Event ) //&& messaging_sections_got_all[0] )
+					if ( messaging_wants_current_next_Event )
 					{
 						dprintf("[eitThread] got all current_next - sending event!\n");
 						messaging_wants_current_next_Event = false;
@@ -6206,8 +6253,8 @@ static void *eitThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS - 1)
 			{
-				lockServices();
-				lockMessaging();
+				readLockServices();
+				readLockMessaging();
 
 				MySIservicesOrderUniqueKey::iterator si = mySIservicesOrderUniqueKey.end();
 				//dprintf("timeoutsDMX %x\n",currentServiceKey);
@@ -6232,41 +6279,21 @@ static void *eitThread(void *)
 					else
 						if ( dmxEIT.filter_index > 1 )
 						{
-/*							bool dont_change = false;
-
-							for ( int i = (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i <= dmxEIT.filters[dmxEIT.filter_index].filter; i++)
+							if (dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 							{
-								//dprintf("%x - %x |", i, messaging_sections_max_ID[i- 0x4e]);
-
-								if ( messaging_sections_max_ID[i - 0x4e] != -1 )
-								{
-									dont_change = true;
-									break;
-								}
+								dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
+								dmxEIT.change(dmxEIT.filter_index + 1);
+								lastChanged = time(NULL);
+								//dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n" );
+								timeoutsDMX = 0;
 							}
-
-							dprintf("dontchange %d\n", dont_change);
-
-							if ( !dont_change )
+							else
 							{
-*/								if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
-								{
-									dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
-									dmxEIT.change(dmxEIT.filter_index + 1);
-									lastChanged = time(NULL);
-									//dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n" );
-
-									timeoutsDMX = 0;
-								}
-								else
-								{
-									sendToSleepNow = true;
-									dputs("sendToSleepNow = true")
-								}
-//							}
+								sendToSleepNow = true;
+								dputs("sendToSleepNow = true")
+							}
 						}
 				}
-
 				unlockMessaging();
 				unlockServices();
 			}
@@ -6282,47 +6309,7 @@ static void *eitThread(void *)
 				else
 					sendToSleepNow = true;
 
-
-/*
-				if ( (zeit > lastRestarted + 3) || (dmxEIT.real_pauseCounter != 0) ) // letzter restart l�nger als 3secs her, daher cache NICHT verkleinern
-				{
-					dmxEIT.stop(); // -> lock
-					dmxEIT.start(); // -> unlock
-					dprintf("[eitThread] dmxEIT restarted, cache NOT decreased (dt=%ld)\n", (int)zeit - lastRestarted);
-				}
-				else
-				{
-
-					// sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
-					dmxEIT.stop(); // -> lock
-					                    lockEvents();
-					                    if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000)
-					                    {
-					                        // kleiner als 1 Tag machen wir den Cache nicht,
-					                        // da die timeouts ja auch von einem Sender ohne EPG kommen koennen
-					                        // Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
-					                        // Man koennte auch ab 3000 Events nur noch jedes 3 Event o.ae. einsortieren
-					                        dmxSDT.real_pause();
-					                        lockServices();
-					                        unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
-					                        secondsToCache-=5*60L*60L; // 5h weniger
-					                        dprintf("[eitThread] decreasing cache 5h (now %ldh)\n", secondsToCache/(60*60L));
-					                        removeNewEvents();
-					                        removeOldEvents(oldEventsAre);
-					                        if(anzEventsAlt>mySIeventsOrderUniqueKey.size())
-					                            dprintf("[eitThread] Removed %u Events (%u -> %u)\n", anzEventsAlt-mySIeventsOrderUniqueKey.size(), anzEventsAlt, mySIeventsOrderUniqueKey.size());
-					                        unlockServices();
-					                        dmxSDT.real_unpause();
-					                    }
-					                    unlockEvents();
-					
-					dmxEIT.start(); // -> unlock
-					dputs("[eitThread] dmxEIT restarted");
-
-				}
-
-				lastRestarted = zeit;
-*/				timeoutsDMX = 0;
+				timeoutsDMX = 0;
 			}
 
 			if (waitForTimeset())
@@ -6346,11 +6333,15 @@ static void *eitThread(void *)
 					pthread_mutex_lock( &dmxEIT.start_stop_mutex );
 					dprintf("dmxEIT: going to sleep...\n");
 
-					lockMessaging();
-					if (auto_scanning)
+					readLockMessaging();
+					if (auto_scanning) {
+						pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
+#ifdef PAUSE_EQUALS_STOP
+						dmxNIT.real_unpause();
+#endif
 						dmxNIT.change( 0 );
+					}
 					unlockMessaging();
-
 					if (update_eit) eit_set_update_filter(&eit_update_fd);
 					int rs = pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
 					if (update_eit) eit_stop_update_filter(&eit_update_fd);
@@ -6389,7 +6380,7 @@ static void *eitThread(void *)
 				}
 				else if (zeit > lastChanged + TIME_EIT_SKIPPING )
 				{
-					lockMessaging();
+					readLockMessaging();
 
 					if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
 					{
@@ -6419,27 +6410,6 @@ static void *eitThread(void *)
 			{
 				// Wir wollen nur aktuelle sections
 
-				/*                // Zum debuggen
-				        //        if(dmxEIT.isScheduled)
-				                {
-				                    printf("%hhx\n", header.section_number);
-				                    //if(header.section_number==0xb1)
-				                    {
-				                        printf("length: %hd\n", header.section_length);
-				                        dmxEIT.pause();
-				                        char    dn[100];
-				                        sprintf(dn, "eit.debug.%d", header.section_number);
-				                        FILE *file=fopen(dn, "wb");
-				                        if(file)
-				                        {
-				                            fwrite(buf, sizeof(header)+header.section_length-5, 1, file);
-				                            fclose(file);
-				                        }
-				                        dmxEIT.unpause();
-				                    }
-				                }
-				*/
-
 // Houdini: added new constructor where the buffer is given as a parameter and must be allocated outside
 // -> no allocation and copy of data into a 2nd buffer
 //				SIsectionEIT eit(SIsection(section_length + 3, buf));
@@ -6460,15 +6430,13 @@ static void *eitThread(void *)
 							if ( ( e->times.begin()->startzeit < zeit + secondsToCache ) &&
 							        ( ( e->times.begin()->startzeit + (long)e->times.begin()->dauer ) > zeit - oldEventsAre ) )
 							{
-								//lockEvents();
 								addEvent(*e, header.table_id, zeit);
-								//unlockEvents();
 							}
 						}
 						else
 						{
 							// pruefen ob nvod event
-							lockServices();
+							readLockServices();
 							MySIservicesNVODorderUniqueKey::iterator si = mySIservicesNVODorderUniqueKey.find(e->get_channel_id());
 
 							if (si != mySIservicesNVODorderUniqueKey.end())
@@ -6479,127 +6447,17 @@ static void *eitThread(void *)
 								for (SInvodReferences::iterator i = si->second->nvods.begin(); i != si->second->nvods.end(); i++)
 									mySIeventUniqueKeysMetaOrderServiceUniqueKey.insert(std::make_pair(i->uniqueKey(), e->uniqueKey()));
 
-								addNVODevent(*e);
 								unlockEvents();
+								addNVODevent(*e);
 							}
 							unlockServices();
 						}
 					} // for
-
 					//dprintf("[eitThread] added %d events (end)\n",  eit.events().size());
-
 				} // if
-/*
-				lockMessaging();
-
-				if ((header.table_id != 0x4e) ||
-				        (((header.table_id_extension_hi << 8) | header.table_id_extension_lo) ==
-					 (messaging_current_servicekey & 0xFFFF)))
-				{
-					if (!messaging_sections_got_all[header.table_id - 0x4e])
-					{
-						long long _id = (((unsigned long long)header.table_id) << 40) +
-						                (((unsigned long long)header.table_id_extension_hi) << 32) +
-						                (((unsigned long long)header.table_id_extension_lo) << 24) +
-						                (((unsigned long long)header.section_number) << 16) +
-						                (((unsigned long long)header.version_number) << 8) +
-						                (((unsigned long long)header.current_next_indicator));
-
-						if (messaging_sections_max_ID[header.table_id - 0x4e] == -1)
-//						{
-							messaging_sections_max_ID[header.table_id - 0x4e] = _id;
-//						}
-//						else
-//						{
-							if (!messaging_sections_got_all[header.table_id - 0x4e])
-							{
-								for ( std::vector<long long>::iterator i = messaging_skipped_sections_ID[header.table_id - 0x4e].begin();
-								        i != messaging_skipped_sections_ID[header.table_id - 0x4e].end(); ++i )
-									if ( *i == _id)
-									{
-										messaging_skipped_sections_ID[header.table_id - 0x4e].erase(i);
-										break;
-									}
-
-								if ((messaging_sections_max_ID[header.table_id - 0x4e] == _id) &&
-								    (messaging_skipped_sections_ID[header.table_id - 0x4e].empty()))
-								{
-									// alle pakete fr den ServiceKey da!
-									dprintf("[eitThread] got all packages for table_id 0x%x\n", header.table_id);
-									messaging_sections_got_all[header.table_id - 0x4e] = true;
-								}
-							}
-//						}
-
-					if (update_eit){
-						if ((header.table_id == 0x4e) && messaging_sections_got_all[0] &&
-//							(((header.table_id_extension_hi << 8) | header.table_id_extension_lo) == (messaging_current_servicekey & 0xFFFF)) &&
-							(messaging_current_version_number != header.version_number)) {
-							dprintf("[eitThread] got new C/N EPG (table_id 0x%x, ext_hi=%x, ext_lo=%x, sn=%x, vn=%x)\n", header.table_id, header.table_id_extension_hi, header.table_id_extension_lo, header.section_number, header.version_number);
-							messaging_current_version_number = header.version_number;
-							messaging_wants_current_next_Event = false;
-							eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
-						}
-					} else {
-						if ( messaging_wants_current_next_Event && messaging_sections_got_all[0] )
-						{
-							dprintf("[eitThread] got all current_next - sending event!\n");
-							messaging_wants_current_next_Event = false;
-							eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
-						}
-					}
-						// berprfen, ob n�hster Filter gewnscht :)
-						int	change_filter = 0;
-
-						for ( int i = (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i <= ( dmxEIT.filters[dmxEIT.filter_index].filter | ( !dmxEIT.filters[dmxEIT.filter_index].mask ) ); i++)
-						{
-							if ( messaging_sections_got_all[i - 0x4e] )
-								change_filter++;
-							else
-								if ( messaging_sections_max_ID[i - 0x4e] != -1 )
-								{
-									change_filter = -1;
-									break;
-								}
-						}
-
-						if ( change_filter > 0 )
-						{
-							if (( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() ) && EITCheckAllFilters){
-								dprintf("New Filterindex: %d (ges. %d)\n", dmxEIT.filter_index + 1, (signed) dmxEIT.filters.size() );
-								dmxEIT.change(dmxEIT.filter_index + 1);
-								lastChanged = time(NULL);
-							}
-							else
-								sendToSleepNow = true;
-						}
-					}
-				}
-
-				unlockMessaging();
-*/
-// buf is deleted in destructor of SIsectionEIT
-//				delete[] buf;
-//				buf = NULL;
-
 			} // if
 			else
 			{
-/*				lockMessaging();
-				//SI_section_EIT_header* _header = (SI_section_EIT_header*) & header;
-
-				long long _id = (((unsigned long long)header.table_id) << 40) +
-				                (((unsigned long long)header.table_id_extension_hi) << 32) +
-				                (((unsigned long long)header.table_id_extension_lo) << 24) +
-				                (((unsigned long long)header.section_number) << 16) +
-				                (((unsigned long long)header.version_number) << 8) +
-				                (((unsigned long long)header.current_next_indicator));
-
-				if (messaging_sections_max_ID[header.table_id - 0x4e] != -1)
-					messaging_skipped_sections_ID[header.table_id - 0x4e].push_back(_id);
-
-				unlockMessaging();
-*/
 				delete[] buf;
 				buf = NULL;
 
@@ -6872,7 +6730,7 @@ static void *pptThread(void *)
 						else
 						{
 							// pruefen ob nvod event
-							lockServices();
+							readLockServices();
 							MySIservicesNVODorderUniqueKey::iterator si = mySIservicesNVODorderUniqueKey.find(e->get_channel_id());
 
 							if (si != mySIservicesNVODorderUniqueKey.end())
@@ -6929,21 +6787,21 @@ static void *houseKeepingThread(void *)
 		{
 			if (count == META_HOUSEKEEPING) {
 				dprintf("meta housekeeping - deleting all transponders, services, bouquets.\n");
-				lockTransponders();
+				writeLockTransponders();
 				MySItranspondersOrderUniqueKey::iterator t = mySItranspondersOrderUniqueKey.begin();
 				while (t != mySItranspondersOrderUniqueKey.end()) {
 					mySItranspondersOrderUniqueKey.erase(t->first);
 					t = mySItranspondersOrderUniqueKey.begin();
 				}
 				unlockTransponders();
-				lockServices();
+				writeLockServices();
 				MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin();
 				while (s != mySIservicesOrderUniqueKey.end()) {
 					mySIservicesOrderUniqueKey.erase(s->first);
 					s = mySIservicesOrderUniqueKey.begin();
 				}
 				unlockServices();
-				lockBouquets();
+				writeLockBouquets();
 				MySIbouquetsOrderUniqueKey::iterator b = mySIbouquetsOrderUniqueKey.begin();
 				while (b != mySIbouquetsOrderUniqueKey.end()) {
 					mySIbouquetsOrderUniqueKey.erase(b->first);
@@ -7013,7 +6871,7 @@ static void *houseKeepingThread(void *)
 
 			if (debug)
 			{
-				lockServices();
+				readLockServices();
 				dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
 				//dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
 				dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
@@ -7090,44 +6948,6 @@ static void *houseKeepingThread(void *)
 
 	pthread_exit(NULL);
 }
-/*
-static void readEPGFilter(void) 
-{ 
-	xmlDocPtr filter_parser = parseXmlFile(EPGFILTER_FILE);
-	
-	t_original_network_id onid = 0; 
-	t_transport_stream_id tsid = 0; 
-	t_service_id sid = 0; 
-
-	epg_filter_is_whitelist = true; 
-	epg_filter_except_current_next = false; 
-
-	if (filter_parser != NULL) 
-	{ 
-		dprintf("Reading EPGFilter: bouquets.xml\n"); 
-
-		xmlNodePtr filter = xmlDocGetRootElement(filter_parser); 
-		filter = filter->xmlChildrenNode; 
-
-		while (filter) { 
-
-			xmlNodePtr filter1 = filter->xmlChildrenNode; 
-			while (filter1) { 
-
-				onid = xmlGetNumericAttribute(filter1, "onid", 16); 
-				tsid = xmlGetNumericAttribute(filter1, "tsid", 16); 
-				sid  = xmlGetNumericAttribute(filter1, "serviceID", 16); 
-
-				addEPGFilter(onid, tsid, sid); 
-				filter1 = filter1->xmlNextNode; 
-			} 
-
-			filter = filter->xmlNextNode; 
-		} 
-	} 
-	xmlFreeDoc(filter_parser); 
-} 
-*/
 
 static void readEPGFilter(void)
 {
@@ -7221,7 +7041,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.242 2007/06/10 19:28:48 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.243 2007/06/14 21:20:00 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -7388,15 +7208,15 @@ int main(int argc, char **argv)
 					if (poll(&pfd, 1, 0) > 0) {
 						if (pfd.fd == eit_update_fd){
 							dprintf("EIT Update Filter: Activate EitThread\n");
-							lockMessaging();
+							writeLockMessaging();
 //							messaging_skipped_sections_ID[0].clear();
 //							messaging_sections_max_ID[0] = -1;
 //							messaging_sections_got_all[0] = false;
 							messaging_wants_current_next_Event = true;
 							messaging_last_requested = time(NULL);
+							unlockMessaging();
 							dmxEIT.change( 0 );
 							EITCheckAllFilters = false;
-							unlockMessaging();
 						}
 					}
 				}
@@ -7421,3 +7241,4 @@ int main(int argc, char **argv)
 
 	return EXIT_SUCCESS;
 }
+
