@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.35 2007/03/07 18:27:56 dbt Exp $
+	$Id: epgplus.cpp,v 1.36 2007/06/14 09:04:22 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -81,7 +81,7 @@ int EpgPlus::sliderKnobColor = 0;
 
 static EpgPlus::FontSetting fontSettingDefaultTable[] =
 {
-	{ EpgPlus::EPGPlus_header_font                     , "EPGPlus.header_font"                           , LOCALE_EPGPLUS_HEADER_FONT                      , "micron.ttf", "Bold"   , 20, true},
+	{ EpgPlus::EPGPlus_header_font                     , "EPGPlus.header_font"                           , LOCALE_EPGPLUS_HEADER_FONT                      , "md_khmurabi_10.ttf", "Bold"   , 20, true},
 	{ EpgPlus::EPGPlus_timeline_fonttime               , "EPGPlus.timeline_fonttime"                     , LOCALE_EPGPLUS_TIMELINE_FONTTIME                , "micron.ttf", "Bold"   , 16, true},
 	{ EpgPlus::EPGPlus_timeline_fontdate               , "EPGPlus.timeline_fontdate"                     , LOCALE_EPGPLUS_TIMELINE_FONTDATE                , "micron.ttf", "Bold"   , 14, true},
 	{ EpgPlus::EPGPlus_channelentry_font               , "EPGPlus.channelentry_font"                     , LOCALE_EPGPLUS_CHANNELENTRY_FONT                , "micron.ttf", "Bold"   , 16, true},
@@ -89,7 +89,7 @@ static EpgPlus::FontSetting fontSettingDefaultTable[] =
 	{ EpgPlus::EPGPlus_footer_fontbouquetchannelname   , "EPGPlus.footer_fontbouquetchannelname"         , LOCALE_EPGPLUS_FOOTER_FONTBOUQUETCHANNELNAME    , "micron.ttf", "Bold"   , 24, true},
 	{ EpgPlus::EPGPlus_footer_fonteventdescription     , "EPGPlus.footer_fonteventdescription"           , LOCALE_EPGPLUS_FOOTER_FONTEVENTDESCRIPTION      , "micron.ttf", "Regular", 16, true},
 	{ EpgPlus::EPGPlus_footer_fonteventshortdescription, "EPGPlus.footer_fonteventshortdescription"      , LOCALE_EPGPLUS_FOOTER_FONTEVENTSHORTDESCRIPTION , "micron.ttf", "Regular", 16, true},
-	{ EpgPlus::EPGPlus_footer_fontbuttons              , "EPGPlus.footer_fontbuttons"                    , LOCALE_EPGPLUS_FOOTER_FONTBUTTONS               , "micron.ttf", "Regular", 16, true},
+	{ EpgPlus::EPGPlus_footer_fontbuttons              , "EPGPlus.footer_fontbuttons"                    , LOCALE_EPGPLUS_FOOTER_FONTBUTTONS               , "md_khmurabi_10.ttf", "Regular", 16, true},
 };
 
 static EpgPlus::ColorSetting colorSettingDefaultTable[] =
