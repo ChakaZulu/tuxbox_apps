@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.397 2007/06/10 19:36:49 houdini Exp $
+ * $Id: zapit.cpp,v 1.398 2007/06/16 10:05:27 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1095,7 +1095,7 @@ void parseScanInputXml(void)
 
 	complete_filename = (std::string)ZAPITCONFIGDIR + "/" + filename;
 	if ((stat(complete_filename.c_str(), &buf) == -1) && (errno == ENOENT))
-		complete_filename = (std::string)DATADIR + "/" + SATELLITES_XML;
+		complete_filename = (std::string)DATADIR + "/" + filename;
 	scanInputParser = parseXmlFile(complete_filename.c_str());
 }
 
@@ -2485,7 +2485,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.397 2007/06/10 19:36:49 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.398 2007/06/16 10:05:27 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
