@@ -22,14 +22,25 @@
 
 #include <eventserver.h>
 #include <controldclient/controldclient.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/video.h>
+#define VIDEO_DEVICE	"/dev/dvb/card0/video0"
+#define video_size_t	videoSize_t
+#define video_event	videoEvent
+#else
 #include <linux/dvb/video.h>
+#define VIDEO_DEVICE	"/dev/dvb/adapter0/video0"
+#endif
+
 #include <sys/poll.h>
 
 #include "eventwatchdog.h"
 
 #define SAA7126_DEVICE	"/dev/dbox/saa0"
-#define VIDEO_DEVICE	"/dev/dvb/adapter0/video0"
 
 CEventWatchDog::CEventWatchDog()
 {
@@ -54,6 +65,35 @@ void CEventWatchDog::startThread()
 
 int CEventWatchDog::getVideoMode()
 {
+#if HAVE_DVB_API_VERSION < 3
+	char buffer[100];
+	int aspect = 0;
+	static int warned = 0;
+
+	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
+	if (!bitstream) {
+		perror("[controld] fopen /proc/bus/bitstream");
+		return 0;
+	}
+	while (fgets(buffer, 100, bitstream)) {
+		if (!strncmp(buffer, "A_RATIO: ", 9)) {
+			aspect=atoi(buffer+9);
+			break;
+		}
+	}
+	fclose(bitstream);
+	if (aspect < 2) {
+		if (!warned) {
+			printf("[controld] WARNING! Aspect is %d, should be > 1!\n", aspect);
+			warned = 1;
+		}
+	} else {
+		aspect = aspect - 2;
+		warned = 0;
+	}
+
+	return aspect;
+#else
 	video_size_t size;
 	int fd = open(VIDEO_DEVICE, O_RDONLY);
 
@@ -68,6 +108,7 @@ int CEventWatchDog::getVideoMode()
 	}
 
 	return size.aspect_ratio;
+#endif
 }
 
 int CEventWatchDog::getVCRMode()
@@ -129,6 +170,7 @@ void *CEventWatchDog::watchdogThread(void *arg)
 			pthread_exit(NULL);
 		}
 
+#if HAVE_DVB_API_VERSION >= 3
 		struct pollfd pfd[2];
 		pfd[0].fd = fd_ev;
 		pfd[0].events = POLLIN;
@@ -136,6 +178,13 @@ void *CEventWatchDog::watchdogThread(void *arg)
 		pfd[1].events = POLLPRI;
 
 		while (poll(pfd, 2, -1) > 0) {
+#else
+		struct pollfd pfd[1];
+		pfd[0].fd = fd_ev;
+		pfd[0].events = POLLIN;
+		int pollret;
+		while ((pollret = poll(pfd, 1, 1000)) >= 0) {
+#endif
 			if (pfd[0].revents & POLLIN) {
 				struct event_t event;
 				while (read(fd_ev, &event, sizeof(event)) == sizeof(event)) {
@@ -160,6 +209,7 @@ void *CEventWatchDog::watchdogThread(void *arg)
 				}
 			}
 
+#if HAVE_DVB_API_VERSION >= 3
 			if (pfd[1].revents & POLLPRI) {
 				struct video_event event;
 				
@@ -182,6 +232,21 @@ void *CEventWatchDog::watchdogThread(void *arg)
 					}
 				}
 			}
+#else
+			if (!pollret) { /* timeout */
+				int aspect = WatchDog->getVideoMode();
+				if ((WatchDog->VideoMode & 0xFF) != aspect) {
+					printf("[controld] aspect ratio changed %u -> %u (%s -> %s)\n",
+							(WatchDog->VideoMode & 0xFF), aspect,
+							verb_aratio[WatchDog->VideoMode&3],
+							verb_aratio[aspect]);
+					pthread_mutex_lock(&WatchDog->wd_mutex);
+					WatchDog->VideoMode = (WatchDog->VideoMode & 0xFF00 ) | aspect;
+					WatchDog->videoModeChanged(WatchDog->VideoMode);
+					pthread_mutex_unlock(&WatchDog->wd_mutex);
+				}
+			}
+#endif
 		}
 
 		close(fd_video);

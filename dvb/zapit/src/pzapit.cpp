@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.55 2007/02/28 04:53:26 Arzka Exp $
+ * $Id: pzapit.cpp,v 1.56 2007/06/17 18:32:30 dbluelle Exp $
  *
  * simple commandline client for zapit
  *
@@ -104,12 +104,14 @@ int main (int argc, char** argv)
 	bool enterStandby = false;
 	bool leaveStandby = false;
 	bool sendMotorCommand = false;
+#ifndef HAVE_DREAMBOX_HARDWARE
 	bool Iecon = false;
 	bool Iecoff = false;
 	bool Iecstate = false;
 	bool pes = false;
 	bool spts = false;
 	bool decmode = false;
+#endif
 	bool getpids = false;
 	bool includeBouquetOthers = false;
 	uint8_t motorCmdType = 0;
@@ -282,6 +284,7 @@ int main (int argc, char** argv)
 			mute = 0;
 			continue;
 		}
+#ifndef HAVE_DREAMBOX_HARDWARE
                 else if (!strncmp(argv[i], "--iecon", 7))
                 {
                         Iecon = true;
@@ -312,6 +315,7 @@ int main (int argc, char** argv)
                         decmode = true;
                         continue;
                 }
+#endif
 		else if (!strncmp(argv[i], "-vol", 4))
 		{
 			if (i < argc - 1)
@@ -380,6 +384,7 @@ int main (int argc, char** argv)
 		return 0;
 	}
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	if (Iecon)
 	{
 		std::cout << "Iec on" << std::endl;
@@ -415,6 +420,7 @@ int main (int argc, char** argv)
 		std::cout << "decoder mode = " << zapit.PlaybackState() << std::endl;
 		return 0;
 	}
+#endif
 
 	/* reload services */
 	if (reload)

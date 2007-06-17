@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.186 2007/03/18 12:47:25 houdini Exp $
+	$Id: neutrino.h,v 1.187 2007/06/17 18:35:26 dbluelle Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -134,7 +134,9 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CShutdownCountNotifier		*shutdownCountNotifier;
 
 		CNVODChangeExec         	*NVODChanger;
+#ifndef HAVE_DREAMBOX_HARDWARE
 		CUCodeCheckExec			*UCodeChecker;
+#endif
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
 		CMoviePluginChangeExec 		*MoviePluginChanger;
 		CIPChangeNotifier		*MyIPChanger;
@@ -148,7 +150,9 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		bool showUserMenu(int button);
 		bool getNVODMenu(CMenuWidget* menu);
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 		bool ucodes_available(void);
+#endif
 		void firstChannel();
 		void setupColors_classic();
 		void setupColors_neutrino();

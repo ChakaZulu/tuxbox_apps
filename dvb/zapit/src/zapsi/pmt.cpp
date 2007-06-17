@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.48 2007/04/27 21:50:15 houdini Exp $
+ * $Id: pmt.cpp,v 1.49 2007/06/17 18:30:41 dbluelle Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -439,7 +439,9 @@ int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 	dsfp.filter.mask[2] = 0xFF;
 	dsfp.filter.mask[3] = (0x1F << 1) | 0x01;
 	dsfp.filter.mask[4] = 0xFF;
+#if HAVE_DVB_API_VERSION >= 3
 	dsfp.filter.mode[3] = 0x1F << 1;
+#endif
 	dsfp.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 	dsfp.pid = channel->getPmtPid();
 	dsfp.timeout = 0;

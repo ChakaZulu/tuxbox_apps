@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.852 2007/06/11 19:36:33 houdini Exp $
+	$Id: neutrino.cpp,v 1.853 2007/06/17 18:35:26 dbluelle Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -114,9 +114,7 @@
 #endif
 #include "gui/imageinfo.h"
 
-#if HAVE_DVB_API_VERSION >= 3
 #include "gui/movieplayer.h"
-#endif
 
 #include "gui/nfs.h"
 #include "gui/pictureviewer.h"
@@ -622,7 +620,11 @@ int CNeutrinoApp::loadSetup()
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
 	g_settings.audio_DolbyDigital    = configfile.getBool("audio_DolbyDigital"   , false);
+#ifndef HAVE_DREAMBOX_HARDWARE
 	g_settings.audio_avs_Control = configfile.getInt32( "audio_avs_Control", CControld::TYPE_AVS );
+#else
+	g_settings.audio_avs_Control = CControld::TYPE_OST;
+#endif
 	strcpy( g_settings.audio_PCMOffset, configfile.getString( "audio_PCMOffset", "0" ).c_str() );
 
 	//vcr
@@ -791,7 +793,12 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_lastchannel = configfile.getInt32( "key_lastchannel",  CRCInput::RC_0 );
 
 	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
+#ifndef HAVE_DREAMBOX_HARDWARE
 	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
+#else
+	// my dm500s needs this large setting - seife
+	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", "222").c_str());
+#endif
 	g_settings.audiochannel_up_down_enable = configfile.getBool("audiochannel_up_down_enable", false);
 	g_settings.audio_left_right_selectable = configfile.getBool("audio_left_right_selectable", false);
 
@@ -1299,6 +1306,7 @@ void CNeutrinoApp::firstChannel()
 	g_Zapit->getLastChannel(firstchannel.channelNumber, firstchannel.mode);
 }
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 /**************************************************************************************
 *                                                                                     *
 *          CNeutrinoApp -  ucodes_available, check if ucodes are available            *
@@ -1327,6 +1335,7 @@ bool CNeutrinoApp::ucodes_available(void)
 
 	return ucodes_ok;
 }
+#endif
 
 
 /**************************************************************************************
@@ -1716,7 +1725,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::RC_1));
 
-#if HAVE_DVB_API_VERSION >= 3
 	//mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, new CMoviePlayerGui()));
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::RC_2));
 
@@ -1739,7 +1747,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(GenericMenuSeparatorLine);
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &streamingSettings, NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_NFSMENU_HEAD, true, NULL, new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
-#endif
 
 	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, CRCInput::RC_3));
 	int shortcut = 4;
@@ -2053,7 +2060,9 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD    , true, NULL, this                  , "reloadchannels", CRCInput::RC_1));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this                  , "reloadplugins" , CRCInput::RC_2));
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RESTART   , true, NULL, this                  , "restart"       , CRCInput::RC_3));
+#ifndef HAVE_DREAMBOX_HARDWARE
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker          , NULL            , CRCInput::RC_4));
+#endif
 	service.addItem(GenericMenuSeparatorLine);
 	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_IMAGEINFO,  true, NULL, new CImageInfo()     , NULL, CRCInput::RC_yellow  , NEUTRINO_ICON_BUTTON_YELLOW  ), false);
 
@@ -2085,10 +2094,11 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_EXPERTFUNCTIONS, true, NULL, mtdexpert, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 		updateSettings->addItem(GenericMenuSeparatorLine);
 		CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_FLASHUPDATE_UPDATEMODE, &g_settings.softupdate_mode, FLASHUPDATE_UPDATEMODE_OPTIONS, FLASHUPDATE_UPDATEMODE_OPTION_COUNT, true);
 		updateSettings->addItem( oj );
-
+#endif
 
 		/* show current version */
 		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FLASHUPDATE_CURRENTVERSION_SEP));
@@ -2108,6 +2118,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		/* versionInfo.getType() returns const char * which is never deallocated */
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CURRENTVERSIONSNAPSHOT, false, versionInfo.getType()));
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 		updateSettings->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FLASHUPDATE_PROXYSERVER_SEP));
 
 		CStringInputSMS * updateSettings_proxy = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYSERVER, g_settings.softupdate_proxyserver, 23, LOCALE_FLASHUPDATE_PROXYSERVER_HINT1, LOCALE_FLASHUPDATE_PROXYSERVER_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
@@ -2118,6 +2129,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 		CStringInputSMS * updateSettings_proxypass = new CStringInputSMS(LOCALE_FLASHUPDATE_PROXYPASSWORD, g_settings.softupdate_proxypassword, 20, LOCALE_FLASHUPDATE_PROXYPASSWORD_HINT1, LOCALE_FLASHUPDATE_PROXYPASSWORD_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_PROXYPASSWORD, true, g_settings.softupdate_proxypassword, updateSettings_proxypass));
+#endif
 
 		updateSettings->addItem(GenericMenuSeparatorLine);
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CHECKUPDATE, true, NULL, new CFlashUpdate(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
@@ -2279,12 +2291,14 @@ typedef struct driver_setting_files_t
 const driver_setting_files_struct_t driver_setting_files[DRIVER_SETTING_FILES_COUNT] =
 {
 	{LOCALE_DRIVERSETTINGS_BOOTINFO      , "/var/etc/.boot_info"     , OPTIONS_OFF0_ON1_OPTIONS },
+#ifndef HAVE_DREAMBOX_HARDWARE
 #if HAVE_DVB_API_VERSION == 1
 	{LOCALE_DRIVERSETTINGS_STARTBHDRIVER , "/var/etc/.bh"            , OPTIONS_OFF0_ON1_OPTIONS },
 #endif
 	{LOCALE_DRIVERSETTINGS_HWSECTIONS    , "/var/etc/.hw_sections"   , OPTIONS_OFF1_ON0_OPTIONS },
 	{LOCALE_DRIVERSETTINGS_NOAVIAWATCHDOG, "/var/etc/.no_watchdog"   , OPTIONS_OFF1_ON0_OPTIONS },
 	{LOCALE_DRIVERSETTINGS_NOENXWATCHDOG , "/var/etc/.no_enxwatchdog", OPTIONS_OFF1_ON0_OPTIONS },
+#endif
 	{LOCALE_DRIVERSETTINGS_PMTUPDATE     , "/var/etc/.pmt_update"    , OPTIONS_OFF0_ON1_OPTIONS }
 };
 
@@ -2295,8 +2309,10 @@ void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
 	driverSettings.addItem(GenericMenuBack);
 	driverSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_DRIVERSETTINGS_DRIVER_BOOT));
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	CSPTSNotifier *sptsNotifier = new CSPTSNotifier;
 	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_SPTSMODE, &g_settings.misc_spts, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, sptsNotifier));
+#endif
 
 	for (int i = 0; i < DRIVER_SETTING_FILES_COUNT; i++)
 	{
@@ -2312,7 +2328,9 @@ void CNeutrinoApp::InitDriverSettings(CMenuWidget &driverSettings)
 		driverSettings.addItem(new CMenuOptionChooser(driver_setting_files[i].name, &(g_settings.misc_option[i]), driver_setting_files[i].options, 2, true, new CTouchFileNotifier(driver_setting_files[i].filename)));
 	}
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	driverSettings.addItem(new CMenuOptionChooser(LOCALE_DRIVERSETTINGS_FB_DESTINATION, &g_settings.uboot_console, DRIVERSETTINGS_FB_DESTINATION_OPTIONS, DRIVERSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
+#endif
 }
 
 void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
@@ -2363,6 +2381,7 @@ const CMenuOptionChooser::keyval AUDIOMENU_ANALOGOUT_OPTIONS[AUDIOMENU_ANALOGOUT
 	{ 2, LOCALE_AUDIOMENU_MONORIGHT }
 };
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 #define AUDIOMENU_AVS_CONTROL_OPTION_COUNT 3
 const CMenuOptionChooser::keyval AUDIOMENU_AVS_CONTROL_OPTIONS[AUDIOMENU_AVS_CONTROL_OPTION_COUNT] =
 {
@@ -2370,6 +2389,7 @@ const CMenuOptionChooser::keyval AUDIOMENU_AVS_CONTROL_OPTIONS[AUDIOMENU_AVS_CON
 	{ CControld::TYPE_AVS , LOCALE_AUDIOMENU_AVS  },
 	{ CControld::TYPE_LIRC, LOCALE_AUDIOMENU_LIRC }
 };
+#endif
 
 #define AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT 2
 const CMenuOptionChooser::keyval AUDIOMENU_LEFT_RIGHT_SELECTABEL_OPTIONS[AUDIOMENU_LEFT_RIGHT_SELECTABLE_OPTION_COUNT] =
@@ -2405,6 +2425,7 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_DOLBYDIGITAL, &g_settings.audio_DolbyDigital, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, audioSetupNotifier);
 	audioSettings.addItem(oj);
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	audioSettings.addItem(GenericMenuSeparatorLine);
 
 	CStringInput * audio_PCMOffset = new CStringInput(LOCALE_AUDIOMENU_PCMOFFSET, g_settings.audio_PCMOffset, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ", audioSetupNotifier);
@@ -2414,6 +2435,7 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AVS_CONTROL, &g_settings.audio_avs_Control, AUDIOMENU_AVS_CONTROL_OPTIONS, AUDIOMENU_AVS_CONTROL_OPTION_COUNT, true, audioSetupNotifier2);
 	audioSettings.addItem(oj);
 	audioSettings.addItem(mf);
+#endif
 }
 
 
@@ -3046,16 +3068,20 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
     colorSettings.addItem(oj);
 
 	colorSettings.addItem(GenericMenuSeparatorLine);
+#ifndef HAVE_DREAMBOX_HARDWARE
 	if ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) // eNX
+#endif
 	{
 		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_COLORMENU_FADE, &g_settings.widget_fade, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true );
 		colorSettings.addItem(oj);
 	}
+#ifndef HAVE_DREAMBOX_HARDWARE
 	else // GTX, ...
 	{
 		CAlphaSetup* chAlphaSetup = new CAlphaSetup(LOCALE_COLORMENU_GTX_ALPHA, &g_settings.gtx_alpha1, &g_settings.gtx_alpha2);
 		colorSettings.addItem( new CMenuForwarder(LOCALE_COLORMENU_GTX_ALPHA, true, NULL, chAlphaSetup, NULL, CRCInput::RC_2));
 	}
+#endif
 }
 
 
@@ -3987,6 +4013,7 @@ void CNeutrinoApp::InitZapper()
 	}
 #endif
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	// set initial PES/SPTS mode
 	if (g_settings.misc_spts != g_Zapit->PlaybackState())
 	{
@@ -3995,6 +4022,7 @@ void CNeutrinoApp::InitZapper()
 		else
 			g_Zapit->PlaybackPES();
 	}
+#endif
 
 	if(firstchannel.mode == 't')
 	{
@@ -4123,7 +4151,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	colorSetupNotifier        = new CColorSetupNotifier;
 	audioSetupNotifier        = new CAudioSetupNotifier;
 	APIDChanger               = new CAPIDChangeExec;
+#ifndef HAVE_DREAMBOX_HARDWARE
 	UCodeChecker              = new CUCodeCheckExec;
+#endif
 	NVODChanger               = new CNVODChangeExec;
 	StreamFeaturesChanger     = new CStreamFeaturesChangeExec;
 	MoviePluginChanger        = new CMoviePluginChangeExec;
@@ -4279,6 +4309,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	InitNetworkSettings(networkSettings);
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	if (!ucodes_available())
 	{
 		/* display error message */
@@ -4287,6 +4318,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 		/* show network settings dialog */
 		networkSettings.exec(NULL, "");
 	}
+#endif
 
 	//settins
 	if(loadSettingsErg==1)
@@ -5139,12 +5171,14 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
+#ifndef HAVE_DREAMBOX_HARDWARE
    if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) // lirc
    { // bei LIRC wissen wir nicht wikrlich ob jetzt ge oder entmuted wird, deswegen nix zeigen---
 		if( !isEvent )
 			g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
    }
    else
+#endif
    {
       int dx = 40;
       int dy = 40;
@@ -5215,6 +5249,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		{
 			if (msg == CRCInput::RC_plus)
 			{
+#ifndef HAVE_DREAMBOX_HARDWARE
 				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
 				{
 					current_volume = 60; //>50 is plus
@@ -5226,9 +5261,17 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 					else
 						current_volume = 100;
 				}
+#else
+				// The dreambox 500 has 32 steps, so 3% match much better than 5% steps - seife
+				if (current_volume < 100 - 3)
+					current_volume += 3;
+				else
+					current_volume = 100;
+#endif
 			}
 			else if (msg == CRCInput::RC_minus)
 			{
+#ifndef HAVE_DREAMBOX_HARDWARE
 				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
 				{
 					current_volume = 40; //<40 is minus
@@ -5240,6 +5283,12 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 					else
 						current_volume = 0;
 				}
+#else
+				if (current_volume > 3)
+					current_volume -= 3;
+				else
+					current_volume = 0;
+#endif
 			}
 			else
 			{
@@ -5249,10 +5298,12 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 			g_Controld->setVolume(current_volume, (CControld::volume_type)g_settings.audio_avs_Control);
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 			if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
 			{
 				current_volume = 50;
 			}
+#endif
 			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_INFOBAR] / 2);
 		}
 		else if (msg == NeutrinoMessages::EVT_VOLCHANGED)
@@ -5296,8 +5347,10 @@ void CNeutrinoApp::tvMode( bool rezap )
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_TV_MODE, false );
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 		if(g_settings.misc_spts==1)
 			g_Zapit->PlaybackSPTS();
+#endif
 	}
 
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
@@ -5433,9 +5486,10 @@ void CNeutrinoApp::radioMode( bool rezap)
 	{
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
-
+#ifndef HAVE_DREAMBOX_HARDWARE
 		if(g_settings.misc_spts==1)
 			g_Zapit->PlaybackPES();
+#endif
 	}
 
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);

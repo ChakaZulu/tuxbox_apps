@@ -39,7 +39,15 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
+#if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/dmx.h>
+#define DMXDEV	"/dev/dvb/adapter0/demux0"
+#define DVRDEV	"/dev/dvb/adapter0/dvr0"
+#else
+#include <ost/dmx.h>
+#define DMXDEV	"/dev/dvb/card0/demux0"
+#define DVRDEV	"/dev/dvb/card0/dvr0"
+#endif
 
 /*
  * some definition
@@ -52,15 +60,17 @@
 
 #define AVERAGE_OVER_X_MEASUREMENTS   10
 
-#define DMXDEV	"/dev/dvb/adapter0/demux0"
-#define DVRDEV	"/dev/dvb/adapter0/dvr0"
 
 class BitrateCalculator
 {
 	protected:
 		int 				pid;
 		struct pollfd			pfd;
+#if HAVE_DVB_API_VERSION >= 3
 		struct dmx_pes_filter_params	flt;
+#else
+		struct dmxPesFilterParams	flt;
+#endif
 		int 				dmxfd;
 		struct timeval 			tv,last_tv, first_tv;
 		long				b;
@@ -76,7 +86,11 @@ class BitrateCalculator
 		bool				first_round2;
 
 	public:
+#if HAVE_DVB_API_VERSION >= 3
 		BitrateCalculator(int inPid, dmx_output_t flt_output = DMX_OUT_TS_TAP);
+#else
+		BitrateCalculator(int inPid, dmxOutput_t flt_output = DMX_OUT_TS_TAP);
+#endif
 		virtual unsigned int calc(unsigned int &long_average);
 		int sync_ts (u_char *buf, int len);
 		int ts_error_count (u_char *buf, int len);

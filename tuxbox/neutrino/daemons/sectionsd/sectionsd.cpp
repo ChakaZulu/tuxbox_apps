@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.243 2007/06/14 21:20:00 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.244 2007/06/17 18:33:54 dbluelle Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1933,7 +1933,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.243 2007/06/14 21:20:00 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.244 2007/06/17 18:33:54 dbluelle Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -4922,7 +4922,12 @@ fe_modulation_t getModulation(const uint8_t modulation)
 	case 0x05:
 		return QAM_256;
 	default:
+#if HAVE_DVB_API_VERSION >= 3
 		return QAM_AUTO;
+#else
+		// i do not know how to do it correctly for old API -- seife
+		return QAM_256;
+#endif
 	}
 }
 
@@ -7041,7 +7046,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.243 2007/06/14 21:20:00 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.244 2007/06/17 18:33:54 dbluelle Exp $\n");
 
 	SIlanguage::loadLanguages();
 

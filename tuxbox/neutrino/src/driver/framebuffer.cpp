@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.55 2007/04/20 08:40:30 dbt Exp $
+	$Id: framebuffer.cpp,v 1.56 2007/06/17 18:34:37 dbluelle Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
                       2003 thegoodguy
@@ -41,7 +41,9 @@
 #include <linux/kd.h>
 
 #include <stdint.h>
+#ifndef HAVE_DREAMBOX_HARDWARE
 #include <dbox/fb.h>
+#endif
 
 #include <gui/color.h>
 #include <gui/widget/icons.h>
@@ -288,6 +290,7 @@ void CFrameBuffer::paletteFade(int i, __u32 rgb1, __u32 rgb2, int level)
 	*b+=((rgb1&0x0000FF)    )*(255-level);
 }
 
+#if HAVE_DVB_API_VERSION >= 3
 void CFrameBuffer::setTransparency( int tr )
 {
 	if (!active)
@@ -309,6 +312,7 @@ void CFrameBuffer::setBlendLevel(int blev1, int blev2)
 	if (ioctl(fd,AVIA_GT_GV_SET_BLEV, c) < 0)
 		perror("AVIA_GT_GV_SET_BLEV:");
 }
+#endif
 
 void CFrameBuffer::setAlphaFade(int in, int num, int tr)
 {

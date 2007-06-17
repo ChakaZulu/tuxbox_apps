@@ -37,6 +37,7 @@
 
 void audioControl::setVolume(const unsigned char volume)
 {
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int fd;
 
 	int i = volume;
@@ -45,14 +46,16 @@ void audioControl::setVolume(const unsigned char volume)
 		perror("[controld] " AVS_DEVICE);
 	else {
 		if (ioctl(fd, AVSIOSVOL, &i) < 0)
-			perror("[controld] AVSIOGVOL");
+			perror("[controld] AVSIOSVOL");
 
 		close(fd);
 	}
+#endif
 }
 
 void audioControl::setMute(const bool mute)
 {
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int fd, a;
 	
 	a = mute ? AVS_MUTE : AVS_UNMUTE;
@@ -66,5 +69,6 @@ void audioControl::setMute(const bool mute)
 
 		close(fd);
 	}
+#endif
 }
 

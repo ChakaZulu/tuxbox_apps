@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.398 2007/06/16 10:05:27 houdini Exp $
+ * $Id: zapit.cpp,v 1.399 2007/06/17 18:32:50 dbluelle Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -50,7 +50,9 @@
 
 /* zapit headers */
 #include <zapit/audio.h>
+#ifndef HAVE_DREAMBOX_HARDWARE
 #include <zapit/aviaext.h>
+#endif
 #include <zapit/cam.h>
 #include <zapit/client/msgtypes.h>
 #include <zapit/dmx.h>
@@ -73,8 +75,10 @@ CConfigFile config(',', false);
 CEventServer *eventServer = NULL;
 /* the dvb audio device */
 CAudio *audioDecoder = NULL;
+#ifndef HAVE_DREAMBOX_HARDWARE
 /* the aviaEXT device */
 CAViAext *aviaExtDriver = NULL;
+#endif
 /* the dvb frontend device */
 CFrontend *frontend = NULL;
 /* the dvb video device */
@@ -1141,11 +1145,18 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	if ((standby) && 
 			((rmsg.cmd != CZapitMessages::CMD_SET_STANDBY) &&
 			(rmsg.cmd != CZapitMessages::CMD_SHUTDOWN) &&
+#ifndef HAVE_DREAMBOX_HARDWARE
 			(rmsg.cmd != CZapitMessages::CMD_SET_AE_IEC_ON) &&
 			(rmsg.cmd != CZapitMessages::CMD_SET_AE_IEC_OFF) &&
 			(rmsg.cmd != CZapitMessages::CMD_GET_AE_IEC_STATE) &&
-			(rmsg.cmd != CZapitMessages::CMD_GETPIDS) &&
-			(rmsg.cmd != CZapitMessages::CMD_GET_AE_PLAYBACK_STATE))) {
+			(rmsg.cmd != CZapitMessages::CMD_GET_AE_PLAYBACK_STATE) &&
+#endif
+#ifdef HAVE_DREAMBOX_HARDWARE
+/* on the dreambox, we need zapit to set the volume also in movie- or audioplayer mode */
+			(rmsg.cmd != CZapitMessages::CMD_SET_VOLUME) &&
+			(rmsg.cmd != CZapitMessages::CMD_MUTE) &&
+#endif
+			(rmsg.cmd != CZapitMessages::CMD_GETPIDS))) {
 		WARN("cmd %d refused in standby mode", rmsg.cmd);
 		return true;
 	}
@@ -1335,7 +1346,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		TP_params TP;
 		get_transponder(&TP);
+#if HAVE_DVB_API_VERSION < 3
+		INFO("current frequency: %lu", (long unsigned int)TP.feparams.Frequency);
+#else
 		INFO("current frequency: %lu", (long unsigned int)TP.feparams.frequency);
+#endif
 		CBasicServer::send_data(connfd, &TP, sizeof(TP));
 		break;
 	}
@@ -1919,6 +1934,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	case CZapitMessages::CMD_SET_AE_IEC_ON:
 	{
 		setIec(1);
@@ -1958,6 +1974,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger));
 		break;
 	}
+#endif
 
 	default:
 		WARN("unknown command %d (version %d)", rmsg.cmd, CZapitMessages::ACTVERSION);
@@ -2246,7 +2263,11 @@ int startPlayBack(CZapitChannel *thisChannel)
 		if (teletextDemux->pesFilter(thisChannel->getTeletextPid(), DMX_OUT_DECODER, DMX_PES_TELETEXT) < 0)
 			return -1;
 		if (teletextDemux->start() < 0)
+#if HAVE_DVB_API_VERSION < 3
+			printf("[zapit] seems harmless - teletextDemux->start fails on dreambox\n");
+#else
 			return -1;
+#endif
 	}
 
 	/* start video */
@@ -2298,6 +2319,7 @@ void setVideoSystem_t(int video_system)
 		videoDecoder->setVideoSystem(NTSC);
 }
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 void setIec(int iec_active)
 {
 	if (iec_active == 0)
@@ -2322,6 +2344,7 @@ void setDemuxMode(int demux_mode)
 		startPlayBack(channel);
 	}
 }
+#endif
 
 void enterStandby(void)
 {
@@ -2388,9 +2411,11 @@ void leaveStandby(void)
 	if (!videoDecoder) {
 		videoDecoder = new CVideo();
 	}
+#ifndef HAVE_DREAMBOX_HARDWARE
 	if (!aviaExtDriver) {
 		aviaExtDriver = new CAViAext();
 	}
+#endif
 
 	frontend->setCurrentSatellitePosition(config.getInt32("lastSatellitePosition", 192));
 	frontend->setDiseqcRepeats(config.getInt32("diseqcRepeats", 0));
@@ -2485,7 +2510,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.398 2007/06/16 10:05:27 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.399 2007/06/17 18:32:50 dbluelle Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

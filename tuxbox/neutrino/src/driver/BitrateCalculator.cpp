@@ -46,7 +46,11 @@ long delta_time_ms (struct timeval *tv, struct timeval *last_tv)
 	return timeval_to_ms(tv) - timeval_to_ms(last_tv);
 }
 
+#if HAVE_DVB_API_VERSION >= 3
 BitrateCalculator::BitrateCalculator(int inPid, dmx_output_t flt_output)
+#else
+BitrateCalculator::BitrateCalculator(int inPid, dmxOutput_t flt_output)
+#endif
 {
 	pid = inPid;
 	printf("PID: %u (0x%04x)\n", pid, pid);
@@ -69,11 +73,16 @@ BitrateCalculator::BitrateCalculator(int inPid, dmx_output_t flt_output)
 	else 
 		ioctl (dmxfd, DMX_SET_BUFFER_SIZE, sizeof(buf));
 
+#if HAVE_DVB_API_VERSION >= 3
 	memset (&flt, 0, sizeof (struct dmx_pes_filter_params));
+	flt.pes_type = DMX_PES_OTHER;
+#else
+	memset (&flt, 0, sizeof (struct dmxPesFilterParams));
+	flt.pesType = DMX_PES_OTHER;
+#endif
 	flt.pid = pid;
 	flt.input = DMX_IN_FRONTEND;
 	flt.output = flt_output;
-	flt.pes_type = DMX_PES_OTHER;
 	flt.flags = DMX_IMMEDIATE_START;
 	if (ioctl(dmxfd, DMX_SET_PES_FILTER, &flt) < 0) {
 		printf("error on DMX_SET_PES_FILTER");
