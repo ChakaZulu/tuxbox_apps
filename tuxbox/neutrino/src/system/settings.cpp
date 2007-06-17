@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.43 2007/01/31 22:05:07 houdini Exp $
+        $Id: settings.cpp,v 1.44 2007/06/17 15:33:39 papst Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -99,7 +99,7 @@ int * CScanSettings::motorPosOfSat(char* satname)
 
 char * CScanSettings::satOfDiseqc(int diseqc) const
 {
-	if (0/*diseqcMode == NO_DISEQC*/) 
+	if (diseqcMode == NO_DISEQC) 
 		return (char *)&satNameNoDiseqc;
 		
 	if (diseqc >= 0 && diseqc < MAX_SATELLITES) 
