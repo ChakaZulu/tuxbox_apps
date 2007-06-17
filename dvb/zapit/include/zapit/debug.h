@@ -1,5 +1,5 @@
 /*
- * $Id: debug.h,v 1.7 2003/04/30 04:39:03 obi Exp $
+ * $Id: debug.h,v 1.8 2007/06/17 18:23:57 dbluelle Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -93,6 +93,20 @@ extern int debug;
 	else { _r = fd; } 					\
 	_r;							\
 })
+
+#if HAVE_DVB_API_VERSION < 3
+#define fop_sec(cmd, args...) ({					\
+	int _r;							\
+	if (secfd >= 0) { 						\
+		if ((_r = ::cmd(secfd, args)) < 0)			\
+			ERROR(#cmd"(secfd, "#args")");		\
+		else if (debug)					\
+			INFO(#cmd"(secfd, "#args")");		\
+	}							\
+	else { _r = secfd; } 					\
+	_r;							\
+})
+#endif
 
 #define quiet_fop(cmd, args...) ({				\
 	int _r;							\

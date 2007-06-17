@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.71 2007/02/28 04:53:25 Arzka Exp $
+ * $Id: zapit.h,v 1.72 2007/06/17 18:23:57 dbluelle Exp $
  */
 
 #ifndef __zapit_h__
@@ -33,8 +33,10 @@ void sendSubPIDs(int connfd);
 void enterStandby(void);
 void leaveStandby(void);
 void setVideoSystem_t(int video_system);
+#ifndef HAVE_DREAMBOX_HARDWARE
 void setIec(int);
 void setDemuxMode(int);
+#endif
 
 #define PAL	0
 #define NTSC	1

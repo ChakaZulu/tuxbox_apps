@@ -1,5 +1,5 @@
 /*
- * $Id: video.h,v 1.6 2003/12/19 23:35:45 derget Exp $
+ * $Id: video.h,v 1.7 2007/06/17 18:23:57 dbluelle Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,7 +22,16 @@
 #ifndef __zapit_video_h__
 #define __zapit_video_h__
 
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/video.h>
+#define video_format_t videoFormat_t
+#define video_displayformat_t	videoDisplayFormat_t
+#define video_stream_source_t	videoStreamSource_t
+#define video_play_state_t	videoPlayState_t
+#define video_status		videoStatus
+#else
 #include <linux/dvb/video.h>
+#endif
 
 class CVideo
 {
