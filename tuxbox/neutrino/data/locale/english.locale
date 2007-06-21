@@ -511,7 +511,7 @@ mainmenu.audioplayer Audioplayer
 mainmenu.clearsectionsd Clear EPG Cache
 mainmenu.games Games
 mainmenu.head Main Menu
-mainmenu.movieplayer Movieplayer
+mainmenu.movieplayer Movie Player
 mainmenu.pausesectionsd Read EPG
 mainmenu.pictureviewer Picture viewer
 mainmenu.radiomode Radio-Mode
@@ -705,7 +705,7 @@ movieplayer.fileplayback File via VLC
 movieplayer.goto Jump to...
 movieplayer.goto.h1 = -> absolute jump
 movieplayer.goto.h2 +,- -> relative jump
-movieplayer.head Movieplayer
+movieplayer.head Movie Player
 movieplayer.nostreamingserver The streaming server could not be reached.
 movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
 movieplayer.toomanybookmarks There are too many bookmarks.\nYou need to delete one of them first.
