@@ -1,4 +1,4 @@
-#include "config.h"
+#include "pictureviewer.h"
 #ifdef FBV_SUPPORT_CRW
 	#include <stdio.h>
 	#include <sys/types.h>
@@ -10,7 +10,6 @@ extern "C" {
 #include <jpeglib.h>
 }
 	#include <setjmp.h>
-	#include "pictureviewer.h"
 
 /*
    Get a 2-byte integer, making no assumptions about CPU byte order.

@@ -26,9 +26,16 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #include <string>
 #include <stdio.h>    /* printf       */
 #include <sys/time.h> /* gettimeofday */
+
+#define FBV_SUPPORT_PNG
+#define FBV_SUPPORT_BMP
+#define FBV_SUPPORT_JPEG
+//#define FBV_SUPPORT_GIF
+#define FBV_SUPPORT_CRW
 
 class CPictureViewer
 {

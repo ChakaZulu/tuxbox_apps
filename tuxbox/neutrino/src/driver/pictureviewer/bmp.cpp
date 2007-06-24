@@ -1,6 +1,5 @@
-#include "config.h"
-#ifdef FBV_SUPPORT_BMP
 #include "pictureviewer.h"
+#ifdef FBV_SUPPORT_BMP
 
 
 #include <sys/types.h>

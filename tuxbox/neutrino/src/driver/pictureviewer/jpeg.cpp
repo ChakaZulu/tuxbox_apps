@@ -1,4 +1,4 @@
-#include "config.h"
+#include "pictureviewer.h"
 #ifdef FBV_SUPPORT_JPEG
 	
 #include <stdio.h>
@@ -18,7 +18,6 @@ extern "C" {
 #include <setjmp.h>
 
 #include <global.h>
-#include "pictureviewer.h"
 #include "picv_client_server.h"
 
 #define MIN(a,b) ((a)>(b)?(b):(a))

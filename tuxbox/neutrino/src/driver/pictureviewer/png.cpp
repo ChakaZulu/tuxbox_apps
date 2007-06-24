@@ -1,4 +1,4 @@
-#include "config.h"
+#include "pictureviewer.h"
 
 #ifdef FBV_SUPPORT_PNG
 	#include <png.h>
@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-	#include "pictureviewer.h"
 
 	#define PNG_BYTES_TO_CHECK 4
 	#define min(x,y) ((x) < (y) ? (x) : (y))
