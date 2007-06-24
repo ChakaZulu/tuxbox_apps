@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.74 2006/11/10 22:29:29 houdini Exp $
+ * $Id: descriptors.cpp,v 1.75 2007/06/24 11:46:17 dbluelle Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -49,6 +49,14 @@ std::map <t_channel_id, uint8_t> service_types;
 
 extern CFrontend *frontend;
 extern CEventServer *eventServer;
+
+#if HAVE_DVB_API_VERSION < 3
+#define frequency Frequency
+#define symbol_rate SymbolRate
+#define inversion Inversion
+#define fec_inner FEC_inner
+#define modulation QAM
+#endif
 
 void generic_descriptor(const unsigned char * const)
 {

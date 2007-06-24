@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.56 2007/05/13 20:14:41 houdini Exp $
+ * $Id: frontend.cpp,v 1.57 2007/06/24 11:46:04 dbluelle Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,6 +35,12 @@
 #define min(x,y)	((x < y) ? x : y)
 #define max(x,y)	((x > y) ? x : y)
 
+#if HAVE_DVB_API_VERSION < 3
+#define frequency Frequency
+#define inversion Inversion
+#define modulation QAM
+#endif
+
 CFrontend::CFrontend(int _uncommitted_switch_mode)
 {
 	tuned = false;
@@ -53,6 +59,12 @@ CFrontend::CFrontend(int _uncommitted_switch_mode)
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
 		ERROR(FRONTEND_DEVICE);
 
+#if HAVE_DVB_API_VERSION < 3
+	if ((secfd = open(SEC_DEVICE, O_RDWR)) < 0)
+		ERROR(SEC_DEVICE);
+#else
+	secfd = fd;
+#endif
 	fop(ioctl, FE_GET_INFO, &info);
 }
 
@@ -70,6 +82,9 @@ void CFrontend::reset(void)
 
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK|O_SYNC)) < 0)
 		ERROR(FRONTEND_DEVICE);
+#if HAVE_DVB_API_VERSION < 3
+	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
+#endif
 }
 
 fe_code_rate_t CFrontend::getCodeRate(const uint8_t fec_inner)
@@ -108,7 +123,11 @@ fe_modulation_t CFrontend::getModulation(const uint8_t modulation)
 	case 0x05:
 		return QAM_256;
 	default:
+#if HAVE_DVB_API_VERSION < 3
+		return QAM_256;
+#else
 		return QAM_AUTO;
+#endif
 	}
 }
 
@@ -178,9 +197,9 @@ uint32_t CFrontend::getUncorrectedBlocks(void) const
 	return blocks;
 }
 
-void CFrontend::setFrontend(const struct dvb_frontend_parameters *feparams)
+void CFrontend::setFrontend(const dvb_frontend_parameters *feparams)
 {
-	struct dvb_frontend_event event;
+	dvb_frontend_event event;
 
 	if (fd == -1)
 		return;
@@ -191,29 +210,33 @@ void CFrontend::setFrontend(const struct dvb_frontend_parameters *feparams)
 	while ((errno == 0) || (errno == EOVERFLOW))
 		quiet_fop(ioctl, FE_GET_EVENT, &event);
 
+#if HAVE_DVB_API_VERSION < 3
+	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
+#endif
 	fop(ioctl, FE_SET_FRONTEND, feparams);
 }
 
 #define TIME_STEP 200
 #define TIMEOUT_MAX_MS (10*TIME_STEP)
 
-struct dvb_frontend_parameters CFrontend::getFrontend(void) const
+dvb_frontend_parameters CFrontend::getFrontend(void) const
 {
 	return currentTransponder.feparams;
 }
 
-struct dvb_frontend_event CFrontend::getEvent(void)
+dvb_frontend_event CFrontend::getEvent(void)
 {
-	struct dvb_frontend_event event;
+	dvb_frontend_event event;
 	struct pollfd pfd;
-
-	int msec = TIME_STEP;
 
 	pfd.fd = fd;
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 
-	memset(&event, 0, sizeof(struct dvb_frontend_event));
+	memset(&event, 0, sizeof(dvb_frontend_event));
+
+#if HAVE_DVB_API_VERSION >= 3
+ 	int msec = TIME_STEP;
 
 	while (msec <= TIMEOUT_MAX_MS )
 	{
@@ -221,7 +244,7 @@ struct dvb_frontend_event CFrontend::getEvent(void)
 
 		if (pfd.revents & POLLIN)
 		{
-			memset(&event, 0, sizeof(struct dvb_frontend_event));
+			memset(&event, 0, sizeof(dvb_frontend_event));
 			fop(ioctl, FE_GET_EVENT, &event);
 
 			if (event.status & FE_HAS_LOCK)
@@ -255,7 +278,35 @@ struct dvb_frontend_event CFrontend::getEvent(void)
 			reset();
 		msec += TIME_STEP;
 	}
+#else
+	int ret = poll(&pfd, 1, 10000);
+	if (ret == -1) ERROR("[CFrontend::getEvent] poll");
+	else if (ret == 0) ERROR("[CFrontend::getEvent] timeout");
+	else {
+		if (pfd.revents & POLLIN)
+		{
+			memset(&event, 0, sizeof(dvb_frontend_event));
+			fop(ioctl, FE_GET_EVENT, &event);
+                        switch (event.type)
+                        {
+                        case FE_UNEXPECTED_EV:
+                                printf("[CFrontend::getEvent] FE_UNEXPECTED_EV\n");
+                                break;
 
+                        case FE_FAILURE_EV:
+                                printf("[CFrontend::getEvent] FE_FAILURE_EV\n");
+                                break;
+
+                        case FE_COMPLETION_EV:
+                                currentTransponder.feparams.Frequency = event.u.completionEvent.Frequency;
+				printf("[CFrontend::getEvent] FE_COMPLETION_EV: freq %d\n", event.u.completionEvent.Frequency);
+                                tuned = true;
+                                break;
+                        }
+		}
+	}
+
+#endif
 	if (!tuned)
 		currentTransponder.feparams.frequency = 0;
 
@@ -288,7 +339,13 @@ void CFrontend::secSetTone(const fe_sec_tone_mode_t toneMode, const uint32_t ms)
 {
 	TIMER_START();
 
+#if HAVE_DVB_API_VERSION < 3
+	if (fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON) < 0)
+		perror("FE_SET_POWR_STATE");
+	if (fop_sec(ioctl, FE_SET_TONE, toneMode) == 0) {
+#else
 	if (fop(ioctl, FE_SET_TONE, toneMode) == 0) {
+#endif
 		currentToneMode = toneMode;
 		usleep(1000 * ms);
 	}
@@ -300,7 +357,11 @@ void CFrontend::secSetVoltage(const fe_sec_voltage_t voltage, const uint32_t ms)
 {
 	TIMER_START();
 
+#if HAVE_DVB_API_VERSION < 3
+	if (fop_sec(ioctl, SEC_SET_VOLTAGE, voltage) == 0) {
+#else
 	if (fop(ioctl, FE_SET_VOLTAGE, voltage) == 0) {
+#endif
 		currentTransponder.polarization = voltage;
 		usleep(1000 * ms);
 	}
@@ -312,8 +373,9 @@ void CFrontend::secResetOverload(void)
 {
 	TIMER_START();
 
+#if HAVE_DVB_API_VERSION >= 3
 	fop(ioctl, FE_DISEQC_RESET_OVERLOAD);
-
+#endif
 	TIMER_STOP();
 }
 
@@ -321,7 +383,28 @@ void CFrontend::sendDiseqcCommand(const struct dvb_diseqc_master_cmd *cmd, const
 {
 	TIMER_START();
 
+#if HAVE_DVB_API_VERSION >= 3
 	if (fop(ioctl, FE_DISEQC_SEND_MASTER_CMD, cmd) == 0)
+#else
+	secCmdSequence sequence;
+	secCommand command;
+
+	sequence.miniCommand = SEC_MINI_NONE;
+	sequence.continuousTone = currentToneMode;
+	sequence.voltage = currentTransponder.polarization;
+	command.type = SEC_CMDTYPE_DISEQC_RAW;
+	command.u.diseqc.cmdtype	= cmd->msg[0];
+	command.u.diseqc.addr	= cmd->msg[1];
+	command.u.diseqc.cmd	= cmd->msg[2];
+	command.u.diseqc.numParams	= cmd->msg_len - 3;
+	for (int i=0; i < (cmd->msg_len - 3); i++)
+		command.u.diseqc.params[i] = cmd->msg[3 + i];
+	sequence.commands = &command;
+	sequence.numCommands = 1;
+
+	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
+	if (fop_sec(ioctl, SEC_SEND_SEQUENCE, sequence) == 0)
+#endif
 		usleep(1000 * ms);
 
 	TIMER_STOP();
@@ -329,6 +412,7 @@ void CFrontend::sendDiseqcCommand(const struct dvb_diseqc_master_cmd *cmd, const
 
 uint32_t CFrontend::getDiseqcReply(const int timeout_ms) const
 {
+#if HAVE_DVB_API_VERSION >= 3
 	struct dvb_diseqc_slave_reply reply;
 
 	reply.timeout = timeout_ms;
@@ -356,13 +440,32 @@ uint32_t CFrontend::getDiseqcReply(const int timeout_ms) const
 	default:	/* unexpected reply */
 		return 0;
 	}
+#else
+	return 0;
+#endif
 }
 
 void CFrontend::sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms)
 {
 	TIMER_START();
-
+#if HAVE_DVB_API_VERSION >= 3
 	if (fop(ioctl, FE_DISEQC_SEND_BURST, burst) == 0)
+#else
+	secCmdSequence sequence;
+	secCommand command;
+	memset(&sequence, 0, sizeof(sequence));
+	memset(&command, 0, sizeof(command));
+
+	command.type = SEC_CMDTYPE_DISEQC_RAW;
+	sequence.miniCommand = burst;
+	sequence.continuousTone = currentToneMode;
+	sequence.voltage = currentTransponder.polarization;
+	sequence.commands = &command;
+	sequence.numCommands = 0;
+
+	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
+	if (fop_sec(ioctl, SEC_SEND_SEQUENCE, sequence) == 0)
+#endif
 		usleep(1000 * ms);
 
 	TIMER_STOP();
@@ -455,10 +558,10 @@ void CFrontend::positionMotor(uint8_t motorPosition)
 	}
 }
 
-int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uint8_t polarization, const uint8_t diseqc )
+int CFrontend::setParameters(dvb_frontend_parameters *feparams, const uint8_t polarization, const uint8_t diseqc )
 {
 	TP_params TP;
-	memcpy(&TP.feparams, feparams, sizeof(struct dvb_frontend_parameters));
+	memcpy(&TP.feparams, feparams, sizeof(dvb_frontend_parameters));
 	TP.polarization = polarization;
 	TP.diseqc = diseqc;
 	return setParameters(&TP);
@@ -468,10 +571,17 @@ int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uin
 int CFrontend::setParameters(TP_params *TP)
 {
 	int ret, freq_offset = 0;
+#if HAVE_DVB_API_VERSION >= 3
 	bool can_not_auto_qam = !(info.caps & FE_CAN_QAM_AUTO);
 	bool can_not_auto_inversion = !(info.caps & FE_CAN_INVERSION_AUTO);
 	bool do_auto_qam = TP->feparams.u.qam.modulation == QAM_AUTO;
 	bool do_auto_inversion = TP->feparams.inversion == INVERSION_AUTO;
+#else
+	bool can_not_auto_qam = true;
+	bool can_not_auto_inversion = true;
+	bool do_auto_qam = false;
+	bool do_auto_inversion = false;
+#endif
 
 	if (info.type == FE_QPSK)
 	{
@@ -506,7 +616,7 @@ int CFrontend::setParameters(TP_params *TP)
 	if (do_auto_qam && can_not_auto_qam)
 		TP->feparams.u.qam.modulation = last_qam;
 
-	struct dvb_frontend_event event;
+	dvb_frontend_event event;
 	int tryagain = 0; //flame on derget for this 
 
 	do
@@ -536,13 +646,14 @@ int CFrontend::setParameters(TP_params *TP)
 						TP->feparams.inversion = INVERSION_OFF;
 						break;
 				}
-				if (TP->feparams.inversion == last_inversion) /* can´t tune */
+				if (TP->feparams.inversion == last_inversion) /* canï¿½t tune */
 					break;
 			}
 			else
 				break; /* tuned */
 		} while(1);
 
+#if HAVE_DVB_API_VERSION >= 3
 		if (do_auto_qam && can_not_auto_qam && !tuned)
 		{
 			switch (TP->feparams.u.qam.modulation)
@@ -570,12 +681,28 @@ int CFrontend::setParameters(TP_params *TP)
 			continue; /* QAM changed, next try to tune */
 		}
 		else
+#else
+		if (tuned || tryagain)
+#endif
 			break; /* tuned */
 	} while (1);
 
 	if (tuned)
 	{
 		last_inversion = TP->feparams.inversion; /* store good value */
+#if HAVE_DVB_API_VERSION < 3
+		last_qam = TP->feparams.u.qam.QAM; /* store good value */
+		ret = diff(event.u.completionEvent.frequency, TP->feparams.frequency);
+#if 1
+		/*
+		 * if everything went ok, then it is a good idea to copy the real
+		 * frontend parameters, so we can update the service list, if it differs.
+		 *
+		 * TODO: set a flag to indicate a change in the service list
+		 */
+		memcpy(&currentTransponder.feparams, &event.u.completionEvent, sizeof(dvb_frontend_parameters));
+#endif
+#else
 		last_qam = TP->feparams.u.qam.modulation; /* store good value */
 		ret = diff(event.parameters.frequency, TP->feparams.frequency);
 #if 1
@@ -585,7 +712,8 @@ int CFrontend::setParameters(TP_params *TP)
 		 *
 		 * TODO: set a flag to indicate a change in the service list
 		 */
-		memcpy(&currentTransponder.feparams, &event.parameters, sizeof(struct dvb_frontend_parameters));
+		memcpy(&currentTransponder.feparams, &event.parameters, sizeof(dvb_frontend_parameters));
+#endif
 #endif
 	}
 	else

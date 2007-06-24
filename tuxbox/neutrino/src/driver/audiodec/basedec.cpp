@@ -48,6 +48,9 @@
 #include <neutrino.h>
 #include <zapit/client/zapittools.h> 
 
+#ifdef HAVE_DREAMBOX_HARDWARE
+#undef DBOX
+#endif
 unsigned int CBaseDec::mSamplerate=0;
 
 void ShoutcastCallback(void *arg)

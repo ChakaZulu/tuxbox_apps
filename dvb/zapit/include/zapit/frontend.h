@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.31 2007/05/13 20:14:40 houdini Exp $
+ * $Id: frontend.h,v 1.32 2007/06/24 11:46:01 dbluelle Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,10 +32,11 @@ class CFrontend
 	private:
 		/* frontend file descriptor */
 		int fd;
+		int secfd;
 		/* tuning finished flag */
 		bool tuned;
 		/* information about the used frontend type */
-		struct dvb_frontend_info info;
+		dvb_frontend_info info;
 		/* current 22kHz tone mode */
 		fe_sec_tone_mode_t currentToneMode;
 		/* current satellite position */
@@ -58,8 +59,8 @@ class CFrontend
 		int uncommitted_switch_mode;
 
 		uint32_t			getDiseqcReply(const int timeout_ms) const;
-		struct dvb_frontend_event	getEvent(void);
-		struct dvb_frontend_parameters	getFrontend(void) const;
+		dvb_frontend_event	getEvent(void);
+		dvb_frontend_parameters	getFrontend(void) const;
 
 		void				secResetOverload(void);
 		void				secSetTone(const fe_sec_tone_mode_t mode, const uint32_t ms);
@@ -72,7 +73,7 @@ class CFrontend
 		void				sendDiseqcZeroByteCommand(const uint8_t frm, const uint8_t addr, const uint8_t cmd);
 		void				sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms);
 		void				sendUncommittedSwitchesCommand(uint8_t usCommand);
-		void				setFrontend(const struct dvb_frontend_parameters *feparams);
+		void				setFrontend(const dvb_frontend_parameters *feparams);
 		void				setSec(const uint8_t sat_no, const uint8_t pol, const bool high_band, const uint32_t frequency);
 		void				reset(void);
 
@@ -88,7 +89,7 @@ class CFrontend
 		uint32_t			getFrequency(void) const;
 		static fe_modulation_t		getModulation(const uint8_t modulation);
 		uint8_t				getPolarization(void) const;
-		const struct dvb_frontend_info *getInfo(void) const			{ return &info; };
+		const dvb_frontend_info *getInfo(void) const			{ return &info; };
 
 		uint32_t			getBitErrorRate(void) const;
 		uint16_t			getSignalNoiseRatio(void) const;
@@ -103,9 +104,9 @@ class CFrontend
 		void				setDiseqcType(const diseqc_t type);
 		void				setLnbOffset(const bool high, const uint8_t index, const int offset);
 		int					setParameters(TP_params *TP);
-		int					setParameters(struct dvb_frontend_parameters *feparams, const uint8_t polarization = VERTICAL, const uint8_t diseqc = 0);
+		int					setParameters(dvb_frontend_parameters *feparams, const uint8_t polarization = VERTICAL, const uint8_t diseqc = 0);
 		const TP_params*	getParameters(void) const			{ return &currentTransponder; };
-		struct dvb_frontend_event*	setParametersResponse(TP_params *TP);
+		dvb_frontend_event*	setParametersResponse(TP_params *TP);
 		void 				setCurrentSatellitePosition(int32_t satellitePosition) {currentSatellitePosition = satellitePosition; }
 
 		void 				positionMotor(uint8_t motorPosition);

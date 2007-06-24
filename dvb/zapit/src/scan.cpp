@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.155 2006/06/08 20:17:58 houdini Exp $
+ * $Id: scan.cpp,v 1.156 2007/06/24 11:46:03 dbluelle Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,6 +35,21 @@
 #include <zapit/sdt.h>
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
+
+#if HAVE_DVB_API_VERSION < 3
+#define frequency Frequency
+#define symbol_rate SymbolRate
+#define inversion Inversion
+#define fec_inner FEC_inner
+#define modulation QAM
+#define bandwidth bandWidth
+#define code_rate_LP LP_CodeRate
+#define code_rate_HP HP_CodeRate
+#define constellation Constellation
+#define transmission_mode TransmissionMode
+#define guard_interval guardInterval
+#define hierarchy_information HierarchyInformation
+#endif
 
 short scan_runs;
 short curr_sat;
@@ -197,7 +212,7 @@ void get_transponder (TP_params *TP)
 	return;
 }
 
-int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(transponder_id_t transponder_id, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
+int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(transponder_id_t transponder_id, dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
 {
 	if (transponder_id == TRANSPONDER_ID_NOT_TUNED)
 		return 1;
@@ -237,7 +252,7 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(transponder_id_t transpon
 }
 uint32_t fake_tid, fake_nid;
 
-int get_nits(struct dvb_frontend_parameters *feparams, uint8_t polarization, const t_satellite_position satellite_position, uint8_t DiSEqC)
+int get_nits(dvb_frontend_parameters *feparams, uint8_t polarization, const t_satellite_position satellite_position, uint8_t DiSEqC)
 {
 	frequency_kHz_t zfrequency;
 	
@@ -507,8 +522,8 @@ bool write_provider(FILE *fd, const char * const frontendType, const char * cons
 int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellite_position, uint8_t diseqc_pos)
 {
 	uint8_t polarization = 0;
-	struct dvb_frontend_parameters feparams;
-	memset(&feparams, 0x00, sizeof(struct dvb_frontend_parameters));
+	dvb_frontend_parameters feparams;
+	memset(&feparams, 0x00, sizeof(dvb_frontend_parameters));
 
 	feparams.frequency = xmlGetNumericAttribute(transponder, "frequency", 0);
 	feparams.inversion = INVERSION_AUTO;
@@ -533,6 +548,16 @@ int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellit
 	/* terrestrial */
 	else if (frontend->getInfo()->type == FE_OFDM)
 	{
+#if HAVE_DVB_API_VERSION < 3
+		// those are not tested at all, since i have no terrestrial dreambox! -- seife
+		feparams.u.ofdm.bandWidth = (fe_bandwidth_t) xmlGetNumericAttribute(transponder, "bandwidth", 0);
+		feparams.u.ofdm.HP_CodeRate = FEC_AUTO;
+		feparams.u.ofdm.LP_CodeRate = FEC_AUTO;
+		feparams.u.ofdm.Constellation = QPSK;
+		feparams.u.ofdm.TransmissionMode = TRANSMISSION_MODE_2K;
+		feparams.u.ofdm.guardInterval = GUARD_INTERVAL_1_32;
+		feparams.u.ofdm.HierarchyInformation = HIERARCHY_NONE;
+#else
 		feparams.u.ofdm.bandwidth = (fe_bandwidth_t) xmlGetNumericAttribute(transponder, "bandwidth", 0);
 		feparams.u.ofdm.code_rate_HP = FEC_AUTO;
 		feparams.u.ofdm.code_rate_LP = FEC_AUTO;
@@ -540,6 +565,7 @@ int scan_transponder(xmlNodePtr transponder, const t_satellite_position satellit
 		feparams.u.ofdm.transmission_mode = TRANSMISSION_MODE_AUTO;
 		feparams.u.ofdm.guard_interval = GUARD_INTERVAL_AUTO;
 		feparams.u.ofdm.hierarchy_information = HIERARCHY_AUTO;
+#endif
 	}
 
 		/* read network information table */

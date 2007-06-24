@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.177 2007/06/03 14:37:07 dbluelle Exp $
+  $Id: settings.h,v 1.178 2007/06/24 11:51:16 dbluelle Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -429,8 +429,11 @@ const int PARENTALLOCK_PROMPT_ONSTART        = 1;
 const int PARENTALLOCK_PROMPT_CHANGETOLOCKED = 2;
 const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
 
+#ifdef HAVE_DREAMBOX_HARDWARE
+#define MAX_SATELLITES 100
+#else
 #define MAX_SATELLITES 64
-
+#endif
 class CScanSettings
 {
  public:

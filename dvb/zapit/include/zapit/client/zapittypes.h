@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.26 2006/05/19 21:25:51 houdini Exp $
+ * $Id: zapittypes.h,v 1.27 2007/06/24 11:46:01 dbluelle Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -29,7 +29,37 @@
 #include <inttypes.h>
 #include <string>
 #include <map>
+
+#include <config.h>
+
+#if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/frontend.h>
+#else
+#include <ost/frontend.h>
+#include <ost/sec.h>
+#define	dvb_frontend_parameters FrontendParameters
+#define	dvb_frontend_info	FrontendInfo
+#define	dvb_frontend_event	FrontendEvent
+#define	fe_code_rate_t		CodeRate
+#define	fe_spectral_inversion_t	SpectralInversion
+#define	fe_modulation_t		Modulation
+#define	fe_transmit_mode_t	TransmitMode
+#define	fe_bandwidth_t		BandWidth
+#define	fe_guard_interval_t	GuardInterval
+#define	fe_hierarchy_t		Hierarchy 
+#define	fe_sec_tone_mode_t	secToneMode
+#define	fe_sec_voltage_t	secVoltage
+#define	fe_sec_mini_cmd_t	secMiniCmd_t
+#define	fe_status_t		FrontendStatus
+#define	FE_SET_TONE		SEC_SET_TONE
+#define	FE_SET_VOLTAGE		SEC_SET_VOLTAGE
+#define FE_DISEQC_RESET_OVERLOAD	SEC_RESET_OVERLOAD
+
+struct dvb_diseqc_master_cmd {
+        __u8 msg [6];   /*  { framing, address, command, data [3] } */
+        __u8 msg_len;   /*  valid values are 3...6  */
+};
+#endif
 
 typedef uint16_t t_service_id;
 #define SCANF_SERVICE_ID_TYPE "%hx"
@@ -123,7 +153,7 @@ typedef enum {
 typedef struct TP_parameter
 {
 	uint32_t TP_id;					/* diseqc<<24 | feparams->frequency>>8 */
-	struct dvb_frontend_parameters feparams;
+	dvb_frontend_parameters feparams;
 	uint8_t polarization;
 	uint8_t diseqc;
 } TP_params;

@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.124 2007/04/22 20:37:59 dbt Exp $
+	$Id: update.cpp,v 1.125 2007/06/24 11:51:04 dbluelle Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -77,8 +77,12 @@
 #define FILEBROWSER_UPDATE_FILTER      "cramfs"
 #define FILEBROWSER_UPDATE_FILTER_ALT  "squashfs"
 //#define MTD_OF_WHOLE_IMAGE             4
+#ifdef HAVE_DREAMBOX_HARDWARE
+#define MTD_TEXT_OF_WHOLE_IMAGE		"DreamBOX cramfs+squashfs"
+#else
 #define MTD_TEXT_OF_WHOLE_IMAGE		"Flash without bootloader"
 #define MTD_DEVICE_OF_UPDATE_PART      "/dev/mtd/2"
+#endif
 
 
 CFlashUpdate::CFlashUpdate()
@@ -243,6 +247,7 @@ bool CFlashUpdate::checkVersion4Update()
 	CFlashVersionInfo * versionInfo=0;
 	neutrino_locale_t msg_body;
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
 		if(!selectHttpImage())
@@ -263,6 +268,7 @@ bool CFlashUpdate::checkVersion4Update()
 		msg_body = LOCALE_FLASHUPDATE_MSGBOX;
 	}
 	else
+#endif
 	{
 		CFileBrowser UpdatesBrowser;
 
@@ -389,6 +395,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	CFlashTool ft;
 	ft.setStatusViewer(this);
 
+#ifdef HAVE_DREAMBOX_HARDWARE
 	// This check was previously used only on squashfs-images
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
@@ -401,6 +408,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 			return menu_return::RETURN_REPAINT;
 		}
 	}
+#endif
 
 	// If the file name contains the string ".cramfs", check that it
 	// is a valid cramfs image
@@ -422,7 +430,11 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 
 	// Is the file size that of a full image? Then flash as such.
 	unsigned int mtd_of_whole_image = CMTDInfo::getInstance()->findMTDNumberFromDescription(MTD_TEXT_OF_WHOLE_IMAGE);
+#ifndef HAVE_DREAMBOX_HARDWARE
 	unsigned int mtd_of_update_image = CMTDInfo::getInstance()->findMTDNumber(MTD_DEVICE_OF_UPDATE_PART);
+#else
+	unsigned int mtd_of_update_image = mtd_of_whole_image;
+#endif
 	if (mtd_of_whole_image == (unsigned int) -1 || mtd_of_update_image == (unsigned int) -1)
 	{
 		printf("Cannot determine partition numbers, aborting flashing\n");
@@ -435,11 +447,13 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	{
 		ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(mtd_of_whole_image));
 		printf("full image %d %d\n", filesize,mtd_of_whole_image);
+#ifndef HAVE_DREAMBOX_HARDWARE
 	} else 
 	// Is filesize <= root partition? Then flash as update.
 	if (filesize <= CMTDInfo::getInstance()->getMTDSize(mtd_of_update_image)) {
 	  	ft.setMTDDevice(MTD_DEVICE_OF_UPDATE_PART);
 		printf("update image %d %d\n", filesize, mtd_of_update_image);
+#endif
 	} else {
 	// Otherwise reject
 		printf("NO update due to erroneous file size %d %d\n", filesize, CMTDInfo::getInstance()->getMTDSize(mtd_of_update_image));

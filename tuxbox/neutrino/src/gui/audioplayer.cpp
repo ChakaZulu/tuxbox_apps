@@ -44,7 +44,9 @@
 #include <driver/rcinput.h>
 #include <driver/audioplay.h>
 #include <driver/audiometadata.h>
+#ifndef HAVE_DREAMBOX_HARDWARE
 #define DBOX 1
+#endif
 
 #include <daemonc/remotecontrol.h>
 

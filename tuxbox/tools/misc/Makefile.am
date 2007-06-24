@@ -1,4 +1,8 @@
+if BOXTYPE_DREAMBOX
+bin_PROGRAMS = camd fbclear lcddump pluginx rcsim audioplay
+else
 bin_PROGRAMS = aviafbtool camd fbclear lcddump pluginx saa switch rcsim aviaext audioplay
+endif
 
 aviafbtool_SOURCES = aviafbtool.c
 aviaext_SOURCES = aviaext.c

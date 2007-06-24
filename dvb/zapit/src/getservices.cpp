@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.100 2007/06/10 19:36:49 houdini Exp $
+ * $Id: getservices.cpp,v 1.101 2007/06/24 11:46:03 dbluelle Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -29,6 +29,21 @@
 #include <configfile.h>
 #include <sys/stat.h>
 
+#if HAVE_DVB_API_VERSION < 3
+#define frequency Frequency
+#define symbol_rate SymbolRate
+#define inversion Inversion
+#define fec_inner FEC_inner
+#define modulation QAM
+#define bandwidth bandWidth
+#define code_rate_LP LP_CodeRate
+#define code_rate_HP HP_CodeRate
+#define constellation Constellation
+#define transmission_mode TransmissionMode
+#define guard_interval guardInterval
+#define hierarchy_information HierarchyInformation
+#endif
+
 extern transponder_list_t transponders;
 extern tallchans allchans;
 
@@ -41,11 +56,11 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_positi
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
-	struct dvb_frontend_parameters feparams;
+	dvb_frontend_parameters feparams;
 	uint8_t polarization = 0;
 	frequency_kHz_t frequency;
 	
-	memset(&feparams, 0, sizeof(struct dvb_frontend_parameters));
+	memset(&feparams, 0, sizeof(dvb_frontend_parameters));
 
 	/* read all transponders */
 	while ((node = xmlGetNextOccurence(node, "transponder")) != NULL)

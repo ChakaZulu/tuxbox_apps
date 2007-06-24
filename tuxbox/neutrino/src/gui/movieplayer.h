@@ -34,7 +34,6 @@
 
 #include <config.h>
 #include <configfile.h>
-#if HAVE_DVB_API_VERSION >= 3
 #include "driver/framebuffer.h"
 #include "gui/filebrowser.h"
 #include "gui/bookmarkmanager.h"
@@ -117,7 +116,5 @@ class CAPIDSelectExec : public CMenuTarget
     public:
         int exec(CMenuTarget* parent, const std::string & actionKey);
 };
-
-#endif
 
 #endif

@@ -350,6 +350,7 @@ void shutdownBox()
 
 void setRGBCsync(int val)
 {
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int fd;
 	settings.csync = val;
 	if ((fd = open(SAA7126_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
@@ -362,10 +363,12 @@ void setRGBCsync(int val)
 		close(fd);
 	}
 	config->setInt32("csync", settings.csync);
+#endif
 }
 
 char getRGBCsync()
 {
+#ifndef HAVE_DREAMBOX_HARDWARE
 	int fd, val=0;
 	if ((fd = open(SAA7126_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
 		perror("[controld] " SAA7126_DEVICE);
@@ -377,6 +380,9 @@ char getRGBCsync()
 		close(fd);
 	}
 	return val;
+#else
+	return 0;
+#endif
 }
 
 void setvcroutput(CControld::video_format format) {
@@ -419,12 +425,20 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings = true)
 	case CControld::FORMAT_SVIDEO:
 		arg = SAA_MODE_SVIDEO;
 		break;
+#ifdef HAVE_DREAMBOX_HARDWARE
+	case CControld::FORMAT_YUV_VBS:
+	case CControld::FORMAT_YUV_CVBS:
+		fprintf(stderr, "[controld] FORMAT_YUV_VBS/FORMAT_YUV_CVBS not supported on dreambox\n");
+		return;
+		break;
+#else
 	case CControld::FORMAT_YUV_VBS:
 		arg = SAA_MODE_YUV_V;
 		break;
 	case CControld::FORMAT_YUV_CVBS:
 		arg = SAA_MODE_YUV_C;
 		break;
+#endif
 	}
 
 	if ((fd = open(SAA7126_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
@@ -437,8 +451,10 @@ void setvideooutput(CControld::video_format format, bool bSaveSettings = true)
 		close(fd);
 	}
 	
+#ifndef HAVE_DREAMBOX_HARDWARE
 	if(format == CControld::FORMAT_RGB || format == CControld::FORMAT_YUV_VBS || format == CControld::FORMAT_YUV_VBS)
 		setRGBCsync(settings.csync);
+#endif
 }
 
 void execute_start_file(const char *filename)
@@ -845,6 +861,7 @@ void setBoxType()
 // output:  0 (min volume) <= map_volume(., false) <= 255 (max volume)
 const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 {
+#ifndef HAVE_DREAMBOX_HARDWARE
 	const unsigned char invlog63[101]={
 	 63, 61, 58, 56, 55, 53, 51, 50, 48, 47, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36,
 	 35, 34, 33, 32, 32, 31, 30, 29, 29, 28, 27, 27, 26, 25, 25, 24, 23, 23, 22, 22,
@@ -875,6 +892,15 @@ const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 		else
 			return (volume ? (settings.scale_logarithmic ? log255[volume] : ((((unsigned int)volume) * 255) / 100)) : 0);
 	}
+#else
+	unsigned char vol = volume;
+	if (vol > 100)
+		vol = 100;
+
+//	vol = (invlog63[volume] + 1) / 2;
+	vol = 32 - vol * 32 / 100;
+	return vol;
+#endif
 }
 
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
@@ -903,6 +929,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			config->setInt32("volume", settings.volume);
 			zapit.setVolume(map_volume(msg_commandVolume.volume, false), map_volume(msg_commandVolume.volume, false));
 		}
+#ifndef HAVE_DREAMBOX_HARDWARE
 		else if (msg_commandVolume.type == CControld::TYPE_AVS)
 		{
 			settings.volume_avs = msg_commandVolume.volume;
@@ -922,12 +949,17 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				irs.Send();
 			}
 		}
+#else
+		else
+			printf("[controld] msg_commandVolume.type == %d not supported on dreambox!\n", msg_commandVolume.type);
+#endif
 		eventServer->sendEvent(CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD);
 		break;
 
 	case CControldMsg::CMD_SETMUTE:
 		CControldMsg::commandMute msg_commandMute;
 		CBasicServer::receive_data(connfd, &msg_commandMute, sizeof(msg_commandMute));
+		//printf("[controld] CControldMsg::CMD_SETMUTE: %d\n", msg_commandMute.mute);
 		if (msg_commandMute.type == CControld::TYPE_UNKNOWN)
 			msg_commandMute.type = settings.volume_type;
 		else
@@ -939,6 +971,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			config->setBool("mute", settings.mute);
 			zapit.muteAudio(settings.mute);
 		}
+#ifndef HAVE_DREAMBOX_HARDWARE
 		else if (msg_commandMute.type == CControld::TYPE_AVS)
 		{
 			settings.mute_avs =  msg_commandMute.mute;
@@ -950,6 +983,10 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			CIRSend irs("mute");
 			irs.Send();
 		}
+#else
+		else
+			printf("[controld] msg_commandMute.type == %d not supported on dreambox.\n", msg_commandMute.type);
+#endif
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &msg_commandMute, sizeof(msg_commandMute));
 		break;
 
@@ -960,10 +997,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			msg_responseVolume.type = settings.volume_type;
 		if (msg_responseVolume.type == CControld::TYPE_OST)
 			msg_responseVolume.volume = settings.volume;
+#ifndef HAVE_DREAMBOX_HARDWARE
 		else if (msg_responseVolume.type == CControld::TYPE_AVS)
 			msg_responseVolume.volume = settings.volume_avs;
 		else if (msg_responseVolume.type == CControld::TYPE_LIRC)
 			msg_responseVolume.volume = 50; //we donnot really know...
+#else
+		else
+			printf("[controld] msg_responseVolume.type == %d not supported on dreambox.\n", msg_responseVolume.type);
+#endif
 		CBasicServer::send_data(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
 		break;
 
@@ -974,10 +1016,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			msg_responseMute.type = settings.volume_type;
 		if (msg_responseMute.type == CControld::TYPE_OST)
 			msg_responseMute.mute = settings.mute;
+#ifndef HAVE_DREAMBOX_HARDWARE
 		else if (msg_responseMute.type == CControld::TYPE_AVS)
 			msg_responseMute.mute = settings.mute_avs;
 		else if (msg_responseMute.type == CControld::TYPE_LIRC)
 			msg_responseMute.mute = false; //we donnot really know...
+#else
+		else
+			printf("[controld msg_responseMute.type == %d not supported on dreambox.\n", msg_responseMute.type);
+#endif
 		CBasicServer::send_data(connfd, &msg_responseMute, sizeof(msg_responseMute));
 		break;
 
@@ -1118,7 +1165,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.125 2006/09/24 09:17:10 barf Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.126 2007/06/24 11:51:03 dbluelle Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -1249,4 +1296,8 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 			printf("[controld] Unknown aspectRatio: %d", activeAspectRatio);
 		}
 	}
+#if HAVE_DVB_API < 3
+	else
+		setVideoFormat(settings.videoformat, false);
+#endif
 }

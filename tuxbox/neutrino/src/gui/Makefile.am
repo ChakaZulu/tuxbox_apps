@@ -29,8 +29,13 @@ libneutrino_gui_a_SOURCES = \
 #	experimental_menu.cpp
 #	ch_mosaic.cpp
 
+if BOXTYPE_DREAMBOX
+libneutrino_gui2_a_SOURCES = \
+	motorcontrol.cpp
+else
 libneutrino_gui2_a_SOURCES = \
 	alphasetup.cpp motorcontrol.cpp
+endif
 
 libtimerlist_a_SOURCES = \
 	timerlist.cpp
