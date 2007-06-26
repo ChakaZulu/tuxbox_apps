@@ -971,7 +971,7 @@ servicemenu.restart Restart Neutrino
 servicemenu.restart_failed Restarting Neutrino went wrong.
 servicemenu.restart_hint Restarting Neutrino...
 servicemenu.restart_refused_recording Recording runs. Restart not possible.
-servicemenu.scants Servicescan
+servicemenu.scants Service Scan
 servicemenu.ucodecheck Check ucodes
 servicemenu.update Image Upgrade / Backup
 settings.help Help
