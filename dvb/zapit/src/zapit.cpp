@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.400 2007/06/26 20:42:32 nitr8 Exp $
+ * $Id: zapit.cpp,v 1.401 2007/06/27 20:51:04 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -736,18 +736,16 @@ void saveSettings(bool write)
 		if (config.getModifiedFlag())
 			config.saveConfig(CONFIGFILE);
 		if (save_audioPIDs) {
-		  FILE *audio_config_file = fopen(AUDIO_CONFIG_FILE, "w");
-		  if (audio_config_file) {
-		    for (map<t_channel_id, unsigned short>::iterator audio_map_it = audio_map.begin(); 
-			 audio_map_it != audio_map.end();
-			 audio_map_it++) {
-		      fwrite(&(audio_map_it->first), sizeof(t_channel_id), 1,
-			     audio_config_file);
-		      fwrite(&(audio_map_it->second), sizeof(unsigned short), 1,
-			     audio_config_file);
-		    }
-		    fclose(audio_config_file);
-		  }
+			FILE *audio_config_file = fopen(AUDIO_CONFIG_FILE, "w");
+			if (audio_config_file) {
+				for (map<t_channel_id, unsigned short>::iterator audio_map_it = audio_map.begin();
+						audio_map_it != audio_map.end();
+						audio_map_it++) {
+					fwrite(&(audio_map_it->first), sizeof(t_channel_id), 1, audio_config_file);
+					fwrite(&(audio_map_it->second), sizeof(unsigned short), 1, audio_config_file);
+				}
+				fclose(audio_config_file);
+			}
 		}
 	}
 }
@@ -787,13 +785,13 @@ void
 remember_selected_audio()
 {
 	if (save_audioPIDs && channel) {
-	  if (channel->getAudioChannelCount() > 1) {
-		audio_map[channel->getServiceId()] = channel->getAudioPid();
-		DBG("*** Remembering apid = %d for channel (service-id) = %d",  channel->getAudioPid(), channel->getServiceId());
-	  } else {
-	    audio_map.erase(channel->getServiceId());
-	    DBG("*** Not Remembering apid = %d for channel (service-id) = %d",  channel->getAudioPid(), channel->getServiceId());
-	  }
+		if (channel->getAudioChannelCount() > 1) {
+			audio_map[channel->getServiceId()] = channel->getAudioPid();
+			DBG("*** Remembering apid = %d for channel (service-id) = %d",  channel->getAudioPid(), channel->getServiceId());
+		} else {
+			audio_map.erase(channel->getServiceId());
+			DBG("*** Not Remembering apid = %d for channel (service-id) = %d",  channel->getAudioPid(), channel->getServiceId());
+		}
 	}
 }
 
@@ -976,20 +974,20 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	else
 		thisChannel->getCaPmt()->ca_pmt_list_management = 0x04;
 	if (save_audioPIDs) {
-	  DBG("***Now trying to get audio right:  %d\t%d\t%d",
-	      thisChannel->getAudioChannelCount(),
-	      thisChannel->getAudioChannel(0)->pid,
-	      thisChannel->getServiceId());
-	  if (audio_map.find(thisChannel->getServiceId()) != audio_map.end()) {
-	    DBG("*************** Searching *** %d **** %d ******\n", thisChannel->getServiceId(), audio_map[thisChannel->getServiceId()]);
-	    for (int i = 0; i < thisChannel->getAudioChannelCount(); i++) {
-	      if (thisChannel->getAudioChannel(i)->pid == audio_map[thisChannel->getServiceId()]) {
-		//printf("[zapit-audiopids]: Restoring previous audiopid to %d\n", thisChannel->getAudioChannel(i)->pid);
-		thisChannel->setAudioChannel(i);
-	      }
-	    }
-	  } //else 
-	    //printf("[zapit-audiopids]: No previous audiopid for this channel stored\n");
+		DBG("***Now trying to get audio right:  %d\t%d\t%d",
+			thisChannel->getAudioChannelCount(),
+			thisChannel->getAudioChannel(0)->pid,
+			thisChannel->getServiceId());
+		if (audio_map.find(thisChannel->getServiceId()) != audio_map.end()) {
+			DBG("*************** Searching *** %d **** %d ******\n", thisChannel->getServiceId(), audio_map[thisChannel->getServiceId()]);
+			for (int i = 0; i < thisChannel->getAudioChannelCount(); i++) {
+				if (thisChannel->getAudioChannel(i)->pid == audio_map[thisChannel->getServiceId()]) {
+					//printf("[zapit-audiopids]: Restoring previous audiopid to %d\n", thisChannel->getAudioChannel(i)->pid);
+					thisChannel->setAudioChannel(i);
+				}
+			}
+		} //else 
+			//printf("[zapit-audiopids]: No previous audiopid for this channel stored\n");
 	}
 
 	startPlayBack(thisChannel);
@@ -2566,7 +2564,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.400 2007/06/26 20:42:32 nitr8 Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.401 2007/06/27 20:51:04 houdini Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -2669,20 +2667,20 @@ int main(int argc, char **argv)
 			return 0;
 		}
 
-	save_audioPIDs = config.getBool("saveAudioPIDs", true);
+	save_audioPIDs = config.getBool("saveAudioPIDs", false);
 	if (save_audioPIDs) {
-	  FILE *audio_config_file = fopen(AUDIO_CONFIG_FILE, "r");
-	  if (audio_config_file) {
-	    t_channel_id chan;
-	    unsigned short apid;
-	    while (! feof(audio_config_file)) {
-	      fread(&chan, sizeof(t_channel_id), 1, audio_config_file);
-	      fread(&apid, sizeof(unsigned short), 1, audio_config_file);
-	      DBG("**** Old channelinfo: %d %d\n", (int) chan, (int) apid);
-	      audio_map[chan] = apid;
-	    }
-	    fclose(audio_config_file);
-	  }	
+		FILE *audio_config_file = fopen(AUDIO_CONFIG_FILE, "r");
+		if (audio_config_file) {
+			t_channel_id chan;
+			unsigned short apid;
+			while (! feof(audio_config_file)) {
+				fread(&chan, sizeof(t_channel_id), 1, audio_config_file);
+				fread(&apid, sizeof(unsigned short), 1, audio_config_file);
+				DBG("**** Old channelinfo: %d %d\n", (int) chan, (int) apid);
+				audio_map[chan] = apid;
+			}
+			fclose(audio_config_file);
+		}
 	}
 
 	// create eventServer
