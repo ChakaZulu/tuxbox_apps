@@ -130,7 +130,7 @@ apidselector.head Select language
 audiomenu.PCMOffset Volume Decrease PCM
 audiomenu.analogout Analog Output
 audiomenu.audio_left_right_selectable Selectable in Audio
-audiomenu.audiochannel_up_down_enable Audio selection with L/R
+audiomenu.audiochannel_up_down_enable Audio Selection with L/R
 audiomenu.avs avs
 audiomenu.avs_control Volume Control
 audiomenu.dolbydigital Dolby Digital as Default
@@ -145,7 +145,7 @@ audioplayer.artist_title Artist, Title
 audioplayer.building_search_index building search index
 audioplayer.button_select_title_by_id search by ID
 audioplayer.button_select_title_by_name search by name
-audioplayer.defdir start dir.
+audioplayer.defdir Start Directory
 audioplayer.delete Delete
 audioplayer.deleteall delete all
 audioplayer.display_order display order
@@ -194,7 +194,7 @@ bouqueteditor.discardingchanges Discarding changes. Please be patient.
 bouqueteditor.hide Hide
 bouqueteditor.lock Lock
 bouqueteditor.move Move
-bouqueteditor.name bouquet editor
+bouqueteditor.name Bouquet Editor
 bouqueteditor.newbouquetname New name of bouquets
 bouqueteditor.rename Rename
 bouqueteditor.return ready
@@ -213,11 +213,11 @@ colorchooser.green green
 colorchooser.red red
 colormenu.background Background
 colormenu.background_head Background
-colormenu.fade Fade menus
-colormenu.font Font size
+colormenu.fade Fade Menus
+colormenu.font Font Size
 colormenu.gtx_alpha Transparency (GTX)
 colormenu.head Color Settings
-colormenu.menucolors Menucolor
+colormenu.menucolors Menu Colors
 colormenu.osd OSD Audio-Status
 colormenu.osd_bottom bottom
 colormenu.osd_normal default
@@ -225,7 +225,7 @@ colormenu.osd_off off
 colormenu.statusbar Infobar
 colormenu.textcolor Textcolor
 colormenu.textcolor_head Textcolor
-colormenu.themeselect select theme
+colormenu.themeselect Select Theme
 colormenu.timing OSD Timing
 colormenusetup.head Menu Colors
 colormenusetup.menucontent Window-Content
@@ -258,16 +258,16 @@ date.Sun  Sun
 date.Thu  Thu
 date.Tue  Tue
 date.Wed  Wed
-driversettings.bootinfo Show infos at start
-driversettings.driver_boot driver and boot options
+driversettings.bootinfo Show Boot Info
+driversettings.driver_boot Driver & Boot Options
 driversettings.fb_destination Expert! Boot-Console
-driversettings.head driver and boot options
-driversettings.hwsections use hardware sections
-driversettings.noaviawatchdog enable AVIA watchdog
-driversettings.noenxwatchdog enable eNX watchdog
-driversettings.pmtupdate enable pmt update
-driversettings.sptsmode use spts mode
-driversettings.startbhdriver load BH-Mode drivers
+driversettings.head Driver & Boot Options
+driversettings.hwsections Use hardware sections
+driversettings.noaviawatchdog Enable AVIA watchdog
+driversettings.noenxwatchdog Enable eNX watchdog
+driversettings.pmtupdate Enable pmt update
+driversettings.sptsmode Use spts mode
+driversettings.startbhdriver Load BH-Mode drivers
 epgextended.actors Actors
 epgextended.director Director
 epgextended.guests Guests
@@ -300,7 +300,7 @@ favorites.finalhint \nUse the bouqueteditor to modify your favorites.\n
 favorites.menueadd add channel to favorites
 favorites.nobouquets Favorites are available with activated Bouquets only.
 filebrowser.delete Delete
-filebrowser.denydirectoryleave Absolute start directory
+filebrowser.denydirectoryleave Absolute Start Directory
 filebrowser.dodelete1 Delete
 filebrowser.dodelete2 ?
 filebrowser.filter.active Filter on
@@ -311,7 +311,7 @@ filebrowser.nextpage Next Page
 filebrowser.prevpage Prev. Page
 filebrowser.scan Scanning folder
 filebrowser.select Select
-filebrowser.showrights Show file rights
+filebrowser.showrights Show File Permissions
 filebrowser.sort.date (date)
 filebrowser.sort.name (filename)
 filebrowser.sort.namedirsfirst (filename2)
@@ -394,7 +394,7 @@ fontsize.eventlist_datetime date / time
 fontsize.eventlist_itemlarge large
 fontsize.eventlist_itemsmall small
 fontsize.eventlist_title Title
-fontsize.filebrowser_item filebrowser item
+fontsize.filebrowser_item Filebrowser Item
 fontsize.gamelist_itemlarge large
 fontsize.gamelist_itemsmall small
 fontsize.hint Initialising font,\nplease wait...
@@ -404,28 +404,28 @@ fontsize.infobar_channame Channel name
 fontsize.infobar_info info
 fontsize.infobar_number Number
 fontsize.infobar_small small
-fontsize.menu Menutext
+fontsize.menu Menu Text
 fontsize.menu_info Menu Info
 fontsize.menu_title Menu Title
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
-imageinfo.chipset your chipset:
+imageinfo.chipset Chipset:
 imageinfo.creator Creator:
 imageinfo.cvslevel CVS-Level:
 imageinfo.date Date:
 imageinfo.details revisions
-imageinfo.dokumentation Dokumentation:
+imageinfo.dokumentation Documentation:
 imageinfo.forum Forum:
-imageinfo.head Image information
+imageinfo.head Image Information
 imageinfo.homepage Homepage:
 imageinfo.image Image:
 imageinfo.imagetype Imagetype:
 imageinfo.info Info:
-imageinfo.license License
-imageinfo.noteflashtype consider the nesessary flashtype for your d-box (1x or 2x)
+imageinfo.license license
+imageinfo.noteflashtype Consider the necessary flashtype for your d-box (1x or 2x)
 imageinfo.partitions partitions
 imageinfo.support support
-imageinfo.supporthere technical support and help you can find here
+imageinfo.supporthere You can find technical support and help here:
 imageinfo.version Cycle:
 infoviewer.epgnotload EPG not loaded....
 infoviewer.epgwait waiting for EPG...
@@ -437,7 +437,7 @@ infoviewer.noepg EPG not available
 infoviewer.notavailable Channel not available
 infoviewer.selecttime Timeselection
 infoviewer.streaminfo Features
-infoviewer.subchan_disp_pos Subchannel display
+infoviewer.subchan_disp_pos Subchannel Display
 infoviewer.subservice Subservices
 infoviewer.waittime Waiting for time...
 ipsetup.hint_1 Use 0..9, or use Up/Down,
@@ -471,8 +471,8 @@ keybindingmenu.pagedown_head Keysetup page down
 keybindingmenu.pageup page up
 keybindingmenu.pageup_head Keysetup page up
 keybindingmenu.quickzap Quickzap
-keybindingmenu.repeatblock repeat delay
-keybindingmenu.repeatblockgeneric generic delay
+keybindingmenu.repeatblock Repeat Delay
+keybindingmenu.repeatblockgeneric Generic Delay
 keybindingmenu.sort change sort order
 keybindingmenu.sort_head change sort order
 keybindingmenu.subchanneldown subchannel down
@@ -496,13 +496,13 @@ lcdcontroler.brightnessstandby Standby Brightness
 lcdcontroler.contrast Contrast
 lcdcontroler.head LCD Stettings
 lcdmenu.autodimm Auto dimm
-lcdmenu.dim_brightness Brightness after dim timeout
-lcdmenu.dim_time Dim timeout
+lcdmenu.dim_brightness Dim Brightness
+lcdmenu.dim_time Dim Timeout
 lcdmenu.head LCD Settings
 lcdmenu.inverse Invert
 lcdmenu.lcdcontroler Contrast / Brightness
 lcdmenu.power Power
-lcdmenu.statusline status line
+lcdmenu.statusline Status Line
 lcdmenu.statusline.both volume / playtime
 lcdmenu.statusline.both_audio volume / playtime / audio
 lcdmenu.statusline.playtime playtime
@@ -519,7 +519,7 @@ mainmenu.reboot Reboot
 mainmenu.recording Recording
 mainmenu.recording_start start
 mainmenu.recording_stop stop
-mainmenu.scartmode Scart-Mode
+mainmenu.scartmode SCART-Mode
 mainmenu.scripts Scripts
 mainmenu.service Service
 mainmenu.settings Settings
@@ -529,17 +529,17 @@ mainmenu.tvmode TV-Mode
 mainmenu.upnpbrowser UPnP Browser
 mainsettings.audio Audio
 mainsettings.colors Colors / Themes / Font
-mainsettings.driver driver and boot options
+mainsettings.driver Driver & Boot
 mainsettings.head Settings
-mainsettings.keybinding Key Setup
+mainsettings.keybinding Keybinding
 mainsettings.language Language
-mainsettings.lcd LC-Display
-mainsettings.misc Misc settings
+mainsettings.lcd LCD-Display
+mainsettings.misc Miscellaneous
 mainsettings.network Network
 mainsettings.recording Recording
 mainsettings.savesettingsnow save settings now
 mainsettings.savesettingsnow_hint Saving settings,\nplease wait...
-mainsettings.streaming Movieplayer
+mainsettings.streaming Movie Player
 mainsettings.video Video
 menu.back back
 messagebox.back Back
@@ -552,26 +552,26 @@ messagebox.yes Yes
 miscsettings.epg_cache EPG-Cache (Days)
 miscsettings.epg_cache_hint1 How long will EPG-Data in the future cached?
 miscsettings.epg_cache_hint2 Set in days.
-miscsettings.epg_dir EPG save path
-miscsettings.epg_extendedcache EPG long describtion (hours)
+miscsettings.epg_dir EPG Directory
+miscsettings.epg_extendedcache EPG Long Describtion (hours) Description
 miscsettings.epg_extendedcache_hint1 How long will EPG extended describtions in the future cached?
 miscsettings.epg_extendedcache_hint2 Set in hours
 miscsettings.epg_head EPG-Settings
 miscsettings.epg_max_events Max. Events
 miscsettings.epg_max_events_hint1 How many events should be stored?
 miscsettings.epg_max_events_hint2 normaly 6000
-miscsettings.epg_old_events EPG remove after (hours)
+miscsettings.epg_old_events EPG Remove After (hours)
 miscsettings.epg_old_events_hint1 How long will EPG-Data be stored after they timed out?
 miscsettings.epg_old_events_hint2 Set in hours
 miscsettings.general General
-miscsettings.head Misc settings
+miscsettings.head Miscellaneous Settings
 miscsettings.infobar_sat_display Satellite display on infobar
-miscsettings.shutdown_count switch off after
+miscsettings.shutdown_count Switch off After (minutes)
 miscsettings.shutdown_count_hint1 time (in minutes) to switch from standby
 miscsettings.shutdown_count_hint2 to deep standby (0 = off).
-miscsettings.shutdown_real Enable standby
-miscsettings.shutdown_real_rcdelay Delayed shutdown
-miscsettings.tuxtxt_cache videotext cache
+miscsettings.shutdown_real Standby
+miscsettings.shutdown_real_rcdelay Delayed Shutdown
+miscsettings.tuxtxt_cache EPG Cache (Days)
 miscsettings.virtual_zap_mode Virtual zap by infobar
 motorcontrol.head Motor-Setup
 moviebrowser.book_clear_all Clear all
@@ -755,7 +755,7 @@ networkmenu.broadcast Broadcast
 networkmenu.dhcp DHCP
 networkmenu.gateway Default Gateway
 networkmenu.head Network Settings
-networkmenu.ipaddress IP address
+networkmenu.ipaddress IP Address
 networkmenu.mount NFS/CIFS/FTPFS
 networkmenu.nameserver DNS Server
 networkmenu.netmask Subnet Mask
@@ -767,10 +767,10 @@ networkmenu.ntpserver NTP-Server
 networkmenu.ntpserver_hint1 NTP-Server example: ntp1.ptb.de
 networkmenu.ntpserver_hint2 need reboot or epg-reset
 networkmenu.ntptitle Time-Syncronisation
-networkmenu.setupnow Start/Restart network now
-networkmenu.setuponstartup Start network on Boot
-networkmenu.show Show active network settings
-networkmenu.test Test network now
+networkmenu.setupnow Start/Restart Network Now
+networkmenu.setuponstartup Start Network on Boot
+networkmenu.show Show Active Network Settings
+networkmenu.test Test Network Now
 nfs.alreadymounted Directory already mounted
 nfs.automount Mount on Startup
 nfs.dir Directory/Share
@@ -798,7 +798,7 @@ nvod.starting (starting in %d min)
 nvodselector.directormode Direct-Mode
 nvodselector.head Select starting-time
 nvodselector.subservice Select Subservice
-options.default Reset to defaults
+options.default Reset Defaults
 options.fb framebuffer
 options.ntp_off DVB
 options.ntp_on NTP
@@ -872,41 +872,41 @@ recdirchooser.free %3d GB free
 recdirchooser.not_mounted NOT MOUNTED
 recdirchooser.server_down SERVER DOWN
 recdirchooser.user_dir other
-recordingmenu.apids default audio streams
-recordingmenu.apids_ac3 record AC3 streams
-recordingmenu.apids_alt record alternative streams
-recordingmenu.apids_std record standard stream
-recordingmenu.choose_direct_rec_dir choose dir on imm. recording
+recordingmenu.apids Default Audio Streams
+recordingmenu.apids_ac3 Record AC3 Streams
+recordingmenu.apids_alt Record Alternative Streams
+recordingmenu.apids_std Record Standard Stream
+recordingmenu.choose_direct_rec_dir Choose Directory on Recording
 recordingmenu.defdir recording directory
-recordingmenu.dir_permissions directory permissions
+recordingmenu.dir_permissions Directory Permissions
 recordingmenu.dir_permissions_hint permissions in 'chmod' style
-recordingmenu.epg_for_filename long filenames (with EPG data)
+recordingmenu.epg_for_filename Long Filenames (EPG data)
 recordingmenu.file direct (file)
-recordingmenu.filename_template template for filename
+recordingmenu.filename_template Filename Template
 recordingmenu.filename_template_hint %C=channel, %T=title, %I=info, %d=date, %t=time
-recordingmenu.filesettings direct recording settings
+recordingmenu.filesettings Direct Recording Settings
 recordingmenu.head Recording Settings
 recordingmenu.help Recording devices:\n--------------------------\nserver:\nusing streaming software on a PC\n\n(analog) vcr:\nusing the vcr outlet\n\ndirect (file):\ndirectly into an NFS mounted directory\nor onto an internal hard drive\nTS: use spts mode\nPES: do not use spts mode\n\n\nMax. file size:\n---------------------\nNFS V2: 2 GB (2048 MB)\nNFS V3: almost unlimited (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
-recordingmenu.no_scart do not switch to scart mode
+recordingmenu.no_scart Switch to SCART
 recordingmenu.off off
-recordingmenu.record_in_spts_mode use spts mode while recording
-recordingmenu.recording_type recording device
-recordingmenu.ringbuffers no. of ringbuffers
+recordingmenu.record_in_spts_mode Use spts mode
+recordingmenu.recording_type Recording Device
+recordingmenu.ringbuffers Ringbuffers
 recordingmenu.server server
-recordingmenu.server_ip recording server IP
-recordingmenu.server_mac MAC address
-recordingmenu.server_port recording server port
-recordingmenu.server_wakeup recording server WOL
+recordingmenu.server_ip Recording Server IP
+recordingmenu.server_mac MAC Address
+recordingmenu.server_port Recording Server Port
+recordingmenu.server_wakeup Recording Server WOL
 recordingmenu.setupnow activate changes
-recordingmenu.splitsize Max. file size (MB)
-recordingmenu.stopplayback stop playback
-recordingmenu.stopsectionsd stop sectionsd
-recordingmenu.stream_subtitle_pid record subtitles
-recordingmenu.stream_vtxt_pid record videotext
-recordingmenu.use_fdatasync write synchronous (fdatasync)
-recordingmenu.use_o_sync write synchronous (O_SYNC)
+recordingmenu.splitsize Maximum File Size (MB)
+recordingmenu.stopplayback Stop playback
+recordingmenu.stopsectionsd Stop sectionsd
+recordingmenu.stream_subtitle_pid Record Subtitles
+recordingmenu.stream_vtxt_pid Record VideoText
+recordingmenu.use_fdatasync Write Synchronous (fdatasync)
+recordingmenu.use_o_sync Write Synchronous (O_SYNC)
 recordingmenu.vcr vcr
-recordingmenu.zap_on_announce zap on recording announce
+recordingmenu.zap_on_announce Announce zap
 recordtimer.announce Recording starts in a few minutes
 repeatblocker.hint_1 Shortest time (in ms) to recognize 2 keystrokes
 repeatblocker.hint_2 Enter 0 to switch of the blocker (red is space)
@@ -965,7 +965,7 @@ servicemenu.getplugins Reload plugins
 servicemenu.getplugins_hint Reloading plugins,\nplease be patient.
 servicemenu.head Service
 servicemenu.imageinfo Image information
-servicemenu.reload Reload channel lists
+servicemenu.reload Reload Channel Lists
 servicemenu.reload_hint Reloading channel lists,\nplease be patient.
 servicemenu.restart Restart Neutrino
 servicemenu.restart_failed Restarting Neutrino went wrong.
@@ -1010,16 +1010,16 @@ streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
-streamingmenu.filebrowser_allow_multiselect Multiselect in filebrowser
-streamingmenu.head Movieplayer Settings
+streamingmenu.filebrowser_allow_multiselect Multiselect in Filebrowser
+streamingmenu.head Movie Player Settings
 streamingmenu.mpeg1 MPEG1
 streamingmenu.mpeg2 MPEG2
 streamingmenu.off Off
 streamingmenu.on On
-streamingmenu.server_ip Streamingserver IP
-streamingmenu.server_port Streamingserver Port
+streamingmenu.server_ip Streaming Server IP
+streamingmenu.server_port Streaming Server Port
 streamingmenu.streaming_audiorate Datarate Audio
-streamingmenu.streaming_buffer_segment_size Number of buffer segments
+streamingmenu.streaming_buffer_segment_size Buffer Segments
 streamingmenu.streaming_buffer_segment_size_hint1 Min: 6, Max: 124, optimal: 24
 streamingmenu.streaming_buffer_segment_size_hint2
 streamingmenu.streaming_force_avi_rawaudio Force AC3 for AVI
@@ -1027,10 +1027,10 @@ streamingmenu.streaming_force_transcode_video Transcode MPG/VCD video
 streamingmenu.streaming_resolution Resolution
 streamingmenu.streaming_server_cddrive DVD Drive
 streamingmenu.streaming_server_startdir Directory (VLC)
-streamingmenu.streaming_show_tv_in_browser show TV in browser
+streamingmenu.streaming_show_tv_in_browser Show TV in Browser
 streamingmenu.streaming_transcode_audio Transcode audio (DVD/VCD/MPG)
 streamingmenu.streaming_transcode_video_codec MPEG video codec
-streamingmenu.streaming_type Streamingserver
+streamingmenu.streaming_type Streaming Server
 streamingmenu.streaming_use_buffer Use buffer (WabberQueue)
 streamingmenu.streaming_videorate Datarate Video
 streamingserver.noconnect No connection to streamingserver.\nRecording canceled.
@@ -1061,7 +1061,7 @@ timerlist.new New timer
 timerlist.overlapping_timer Timer conflict. Create the timer anyway?
 timerlist.plugin Plugin
 timerlist.program.unknown Program unknown
-timerlist.recording_dir recording directory
+timerlist.recording_dir Directory
 timerlist.reload Reload
 timerlist.repeat Repeat
 timerlist.repeat.biweekly biweekly
@@ -1101,10 +1101,10 @@ timerlist.type.zapto Zap to
 timerlist.weekdays Days of the week
 timerlist.weekdays.hint_1 Mo Tu We Th Fr Sa Su
 timerlist.weekdays.hint_2 'X'=timer '-' no timer
-timersettings.record_safety_time_after Record stop time correction
+timersettings.record_safety_time_after Stop Time Correction
 timersettings.record_safety_time_after.hint_1 Correction time in min. (00=off). This time
 timersettings.record_safety_time_after.hint_2 will added to stop time of every record timer.
-timersettings.record_safety_time_before Record start time correction
+timersettings.record_safety_time_before Start Time Correction
 timersettings.record_safety_time_before.hint_1 Correction time in min. (00=off). This time
 timersettings.record_safety_time_before.hint_2 will be deducted of every record timer.
 timersettings.separator Timer settings
@@ -1143,12 +1143,12 @@ videomenu.head Video Settings
 videomenu.osd OSD
 videomenu.rgb_centering RGB centering
 videomenu.screensetup OSD region
-videomenu.tv-scart TV Scart
-videomenu.vcr-scart VCR Scart
+videomenu.tv-scart TV SCART
+videomenu.vcr-scart VCR SCART
 videomenu.vcrsignal VCR Output Signal Type
 videomenu.vcrsignal_composite CVBS
 videomenu.vcrsignal_svideo S-Video
-videomenu.vcrswitch Switch Scart automatically
+videomenu.vcrswitch Switch SCART automatically
 videomenu.videoformat Format
 videomenu.videoformat_169 16:9
 videomenu.videoformat_43 4:3 (LB)
