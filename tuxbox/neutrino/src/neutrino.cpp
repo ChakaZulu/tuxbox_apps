@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.853 2007/06/17 18:35:26 dbluelle Exp $
+	$Id: neutrino.cpp,v 1.854 2007/06/29 20:31:28 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -74,6 +74,7 @@
 
 #include <gui/epgplus.h>
 #include <gui/streaminfo2.h>
+#include <gui/keyhelper.h>
 
 #include "gui/widget/colorchooser.h"
 #include "gui/widget/menue.h"
@@ -635,7 +636,7 @@ int CNeutrinoApp::loadSetup()
 
 	//widget settings
 	g_settings.widget_fade           = configfile.getBool("widget_fade"          , true );
-    g_settings.widget_osd            = configfile.getInt32("widget_osd"          , true );
+	g_settings.widget_osd            = configfile.getInt32("widget_osd"          , true );
 
 	//colors (neutrino defaultcolors)
 	g_settings.menu_Head_alpha = configfile.getInt32( "menu_Head_alpha", 0x00 );
@@ -782,6 +783,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_channelList_sort = configfile.getInt32( "key_channelList_sort",  CRCInput::RC_blue );
 	g_settings.key_channelList_addrecord = configfile.getInt32( "key_channelList_addrecord",  CRCInput::RC_nokey );
 	g_settings.key_channelList_addremind = configfile.getInt32( "key_channelList_addremind",  CRCInput::RC_nokey );
+	g_settings.key_channelList_reload = configfile.getInt32( "key_channelList_reload",  CRCInput::RC_nokey );
 
 	g_settings.key_quickzap_up = configfile.getInt32( "key_quickzap_up",  CRCInput::RC_up );
 	g_settings.key_quickzap_down = configfile.getInt32( "key_quickzap_down",  CRCInput::RC_down );
@@ -820,8 +822,8 @@ int CNeutrinoApp::loadSetup()
 
 	// parentallock
 	if (!parentallocked)
-  	{
-	  	g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
+	{
+		g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
 		g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
 	}
 	else
@@ -1198,6 +1200,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "key_channelList_sort", g_settings.key_channelList_sort );
 	configfile.setInt32( "key_channelList_addrecord", g_settings.key_channelList_addrecord );
 	configfile.setInt32( "key_channelList_addremind", g_settings.key_channelList_addremind );
+	configfile.setInt32( "key_channelList_reload",  g_settings.key_channelList_reload );
 
 	configfile.setInt32( "key_quickzap_up", g_settings.key_quickzap_up );
 	configfile.setInt32( "key_quickzap_down", g_settings.key_quickzap_down );
@@ -1279,7 +1282,7 @@ void CNeutrinoApp::saveSetup()
 		for(int pos = 0; pos < SNeutrinoSettings::ITEM_MAX; pos++)
 		{
 			if( g_settings.usermenu[button][pos] != 0)
-			{   
+			{
 				if(pos != 0)
 					*txt2ptr++ = ',';
 				txt2ptr += snprintf(txt2ptr,80,"%d",g_settings.usermenu[button][pos]);
@@ -2264,7 +2267,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_RC));
 	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCK, true, g_settings.repeat_blocker, keySettings_repeatBlocker));
- 	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, true, g_settings.repeat_genericblocker, keySettings_repeat_genericblocker));
+	miscSettings.addItem(new CMenuForwarder(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, true, g_settings.repeat_genericblocker, keySettings_repeat_genericblocker));
 	miscSettings.addItem(m1);
 
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
@@ -3231,6 +3234,7 @@ enum keynames {
 	KEY_SORT,
 	KEY_ADD_RECORD,
 	KEY_ADD_REMIND,
+	KEY_RELOAD,
 	KEY_CHANNEL_UP,
 	KEY_CHANNEL_DOWN,
 	KEY_BOUQUET_UP,
@@ -3238,10 +3242,12 @@ enum keynames {
 	KEY_SUBCHANNEL_UP,
 	KEY_SUBCHANNEL_DOWN,
 	KEY_ZAP_HISTORY,
-	KEY_LASTCHANNEL
+	KEY_LASTCHANNEL,
+
+	MAX_NUM_KEYNAMES
 };
 
-const neutrino_locale_t keydescription_head[15] =
+const neutrino_locale_t keydescription_head[] =
 {
 	LOCALE_KEYBINDINGMENU_TVRADIOMODE_HEAD,
 	LOCALE_KEYBINDINGMENU_PAGEUP_HEAD,
@@ -3260,7 +3266,7 @@ const neutrino_locale_t keydescription_head[15] =
 	LOCALE_KEYBINDINGMENU_LASTCHANNEL_HEAD
 };
 
-const neutrino_locale_t keydescription[15] =
+const neutrino_locale_t keydescription[] =
 {
 	LOCALE_KEYBINDINGMENU_TVRADIOMODE,
 	LOCALE_KEYBINDINGMENU_PAGEUP,
@@ -3269,6 +3275,7 @@ const neutrino_locale_t keydescription[15] =
 	LOCALE_KEYBINDINGMENU_SORT,
 	LOCALE_KEYBINDINGMENU_ADDRECORD,
 	LOCALE_KEYBINDINGMENU_ADDREMIND,
+	LOCALE_KEYBINDINGMENU_RELOAD,
 	LOCALE_KEYBINDINGMENU_CHANNELUP,
 	LOCALE_KEYBINDINGMENU_CHANNELDOWN,
 	LOCALE_KEYBINDINGMENU_BOUQUETUP,
@@ -3290,7 +3297,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem(new CMenuForwarder(LOCALE_USERMENU_BUTTON_YELLOW, true, NULL, new CUserMenuMenu(LOCALE_USERMENU_BUTTON_YELLOW,2)));
 	keySettings.addItem(new CMenuForwarder(LOCALE_USERMENU_BUTTON_BLUE, true, NULL, new CUserMenuMenu(LOCALE_USERMENU_BUTTON_BLUE,3)));
 
-	int * keyvalue_p[15] =
+	int * keyvalue_p[] =
 		{
 			&g_settings.key_tvradio_mode,
 			&g_settings.key_channelList_pageup,
@@ -3299,6 +3306,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 			&g_settings.key_channelList_sort,
 			&g_settings.key_channelList_addrecord,
 			&g_settings.key_channelList_addremind,
+			&g_settings.key_channelList_reload,
 			&g_settings.key_quickzap_up,
 			&g_settings.key_quickzap_down,
 			&g_settings.key_bouquet_up,
@@ -3309,9 +3317,9 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 			&g_settings.key_lastchannel
 		};
 
-	CKeyChooser * keychooser[15];
+	CKeyChooser * keychooser[MAX_NUM_KEYNAMES];
 
-	for (int i = 0; i < 15; i++)
+	for (int i = 0; i < MAX_NUM_KEYNAMES; i++)
 		keychooser[i] = new CKeyChooser(keyvalue_p[i], keydescription_head[i], NEUTRINO_ICON_SETTINGS);
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_MODECHANGE));
@@ -3322,7 +3330,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_KEYBINDINGMENU_BOUQUETHANDLING, &g_settings.bouquetlist_mode, KEYBINDINGMENU_BOUQUETHANDLING_OPTIONS, KEYBINDINGMENU_BOUQUETHANDLING_OPTION_COUNT, true );
 	keySettings.addItem(oj);
 
-	for (int i = KEY_PAGE_UP; i <= KEY_ADD_REMIND; i++)
+	for (int i = KEY_PAGE_UP; i <= KEY_RELOAD; i++)
 		keySettings.addItem(new CMenuForwarder(keydescription[i], true, NULL, keychooser[i]));
 
 	keySettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_KEYBINDINGMENU_QUICKZAP));
@@ -3421,74 +3429,6 @@ const CMenuOptionChooser::keyval MAINMENU_RECORDING_OPTIONS[MAINMENU_RECORDING_O
 {
 	{ 0, LOCALE_MAINMENU_RECORDING_START },
 	{ 1, LOCALE_MAINMENU_RECORDING_STOP  }
-};
-
-// USERMENU
-// This is just a quick helper for the usermenu only. I already made it a class for future use.
-#define BUTTONMAX 4
-const neutrino_msg_t key_helper_msg_def[BUTTONMAX]={CRCInput::RC_red,CRCInput::RC_green,CRCInput::RC_yellow,CRCInput::RC_blue};
-const char * key_helper_icon_def[BUTTONMAX]={NEUTRINO_ICON_BUTTON_RED,NEUTRINO_ICON_BUTTON_GREEN,NEUTRINO_ICON_BUTTON_YELLOW,NEUTRINO_ICON_BUTTON_BLUE};
-class CKeyHelper
-{
-	private:
-		int number_key;
-		bool color_key_used[BUTTONMAX];
-	public:
-		CKeyHelper(){reset();};
-		void reset(void)
-		{
-			number_key = 1;
-			for(int i= 0; i < BUTTONMAX; i++ )
-				color_key_used[i] = false;
-		};
-
-		/* Returns the next available button, to be used in menu as 'direct' keys. Appropriate
-		 * definitions are returnd in msp and icon
-		 * A color button could be requested as prefered button (other buttons are not supported yet). 
-		 * If the appropriate button is already in used, the next number_key button is returned instead 
-		 * (first 1-9 and than 0). */
-		bool get(neutrino_msg_t* msg, const char** icon, neutrino_msg_t prefered_key = CRCInput::RC_nokey)
-		{
-			bool result = false;
-			int button = -1;
-			if(prefered_key == CRCInput::RC_red) 	
-				button = 0;
-			if(prefered_key == CRCInput::RC_green) 	
-				button = 1;
-			if(prefered_key == CRCInput::RC_yellow) 
-				button = 2;
-			if(prefered_key == CRCInput::RC_blue) 	
-				button = 3;
-		
-			*msg = CRCInput::RC_nokey;
-			*icon = "";
-			if(button >= 0 && button < BUTTONMAX)
-			{ // try to get color button
-				if( color_key_used[button] == false) 
-				{
-					color_key_used[button] = true;
-					*msg = key_helper_msg_def[button];
-					*icon = key_helper_icon_def[button];
-					result = true;
-				}
-			}
-			
-			if( result == false && number_key < 10) // no key defined yet, at least try to get a numbered key
-			{
-				// there is still a available number_key
-				*msg = CRCInput::convertDigitToKey(number_key);
-				*icon = "";
-				if(number_key == 9)
-					number_key = 0;
-				else if(number_key == 0)
-					number_key = 10;
-				else 
-					number_key++;
-					
-				result = true;
-			}
-			return (result);
-		};
 };
 
 
@@ -3927,8 +3867,8 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 								}
 							}
 						}
-      				}
-      				else
+				}
+				else
 					{
 						doRecord = false;
 					}
@@ -3958,8 +3898,8 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 			{
 				time_t now = time(NULL);
 				recording_id = g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60,
-																						eventinfo.epgID, eventinfo.epg_starttime,
-																						eventinfo.apids);
+											eventinfo.epgID, eventinfo.epg_starttime,
+											eventinfo.apids);
 			}
 		}
 		else
@@ -4800,51 +4740,51 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			standbyMode( false );
 		}
 		if( mode != mode_scart )
-        {
-            CTimerd::TimerList tmpTimerList;
-            CTimerdClient tmpTimerdClient;
-            
-            tmpTimerList.clear();
-            tmpTimerdClient.getTimerList( tmpTimerList );
-            
-            sort( tmpTimerList.begin(), tmpTimerList.end() );
-            
-            CTimerd::responseGetTimer &timer = tmpTimerList[0];
-            
-            CZapitClient Zapit;
-            std::string name = g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE);
-            name += "\n";
-            
-            std::string zAddData = Zapit.getChannelName( timer.channel_id ); // UTF-8
-            if( zAddData.empty() )
-            {
-                zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
-            }
-            
-            if(timer.epgID!=0)
-            {
-                CEPGData epgdata;
-#warning fixme sectionsd should deliver data in UTF-8 format
-                zAddData += " :\n";
-                if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
-                {
-                    zAddData += Latin1_to_UTF8(epgdata.title);
-                }
-                else if(strlen(timer.epgTitle)!=0)
-                {
-                    zAddData += Latin1_to_UTF8(timer.epgTitle);
-                }
-            }
-            else if(strlen(timer.epgTitle)!=0)
-            {
-                zAddData += Latin1_to_UTF8(timer.epgTitle);
-            }
+		{
+			CTimerd::TimerList tmpTimerList;
+			CTimerdClient tmpTimerdClient;
 
-            name += zAddData;
-            ShowHintUTF( LOCALE_MESSAGEBOX_INFO, name.c_str() );
+			tmpTimerList.clear();
+			tmpTimerdClient.getTimerList( tmpTimerList );
+
+			sort( tmpTimerList.begin(), tmpTimerList.end() );
+
+			CTimerd::responseGetTimer &timer = tmpTimerList[0];
+
+			CZapitClient Zapit;
+			std::string name = g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE);
+			name += "\n";
+
+			std::string zAddData = Zapit.getChannelName( timer.channel_id ); // UTF-8
+			if( zAddData.empty() )
+			{
+				zAddData = g_Locale->getText(LOCALE_TIMERLIST_PROGRAM_UNKNOWN);
+			}
+
+			if(timer.epgID!=0)
+			{
+				CEPGData epgdata;
+#warning fixme sectionsd should deliver data in UTF-8 format
+				zAddData += " :\n";
+				if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
+				{
+					zAddData += Latin1_to_UTF8(epgdata.title);
+				}
+				else if(strlen(timer.epgTitle)!=0)
+				{
+					zAddData += Latin1_to_UTF8(timer.epgTitle);
+				}
+			}
+			else if(strlen(timer.epgTitle)!=0)
+			{
+				zAddData += Latin1_to_UTF8(timer.epgTitle);
+			}
+
+			name += zAddData;
+			ShowHintUTF( LOCALE_MESSAGEBOX_INFO, name.c_str() );
 //			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_ZAPTOTIMER_ANNOUNCE));
-        }
-        
+		}
+
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
@@ -5172,45 +5112,45 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
 #ifndef HAVE_DREAMBOX_HARDWARE
-   if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) // lirc
-   { // bei LIRC wissen wir nicht wikrlich ob jetzt ge oder entmuted wird, deswegen nix zeigen---
+	if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) // lirc
+	{ // bei LIRC wissen wir nicht wikrlich ob jetzt ge oder entmuted wird, deswegen nix zeigen---
 		if( !isEvent )
 			g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
-   }
-   else
+	}
+	else
 #endif
-   {
-      int dx = 40;
-      int dy = 40;
-      int x = g_settings.screen_EndX-dx;
-      int y = g_settings.screen_StartY;
+	{
+		int dx = 40;
+		int dy = 40;
+		int x = g_settings.screen_EndX-dx;
+		int y = g_settings.screen_StartY;
 
-      CLCD::getInstance()->setMuted(newValue);
-      if( newValue != current_muted )
-      {
-         current_muted = newValue;
+		CLCD::getInstance()->setMuted(newValue);
+		if( newValue != current_muted )
+		{
+			current_muted = newValue;
 
-         if( !isEvent )
-         {
-            if( current_muted )
-               g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
-            else
-               g_Controld->UnMute((CControld::volume_type)g_settings.audio_avs_Control);
-         }
-      }
+			if( !isEvent )
+			{
+				if( current_muted )
+					g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
+				else
+					g_Controld->UnMute((CControld::volume_type)g_settings.audio_avs_Control);
+			}
+		}
 
-      if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic) && ( g_settings.widget_osd != 2 ) )
-      {
-	      // anzeigen NUR, wenn es vom Event kommt
-	      if( current_muted )
-	      {
-		      frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0);
-		      frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+5, y+5);
-	      }
-	      else
-		      frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
-      }
-   }
+		if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic) && ( g_settings.widget_osd != 2 ) )
+		{
+		// anzeigen NUR, wenn es vom Event kommt
+			if( current_muted )
+			{
+				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0);
+				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+5, y+5);
+			}
+			else
+				frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+		}
+	}
 }
 
 void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
@@ -5221,11 +5161,11 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	int dy = 40;
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
-    
-    if( g_settings.widget_osd == 1 )
-    {
-        y = y + 50;
-    }
+
+	if( g_settings.widget_osd == 1 )
+	{
+		y = y + 50;
+	}
 
 	fb_pixel_t * pixbuf = NULL;
 
@@ -5754,7 +5694,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		if (recordingstatus)
 			DisplayErrorMessage(g_Locale->getText(LOCALE_SERVICEMENU_RESTART_REFUSED_RECORDING));
 		else {
-	 		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SERVICEMENU_RESTART_HINT));
+			CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SERVICEMENU_RESTART_HINT));
 			hintBox->paint();
 			execvp(global_argv[0], global_argv); // no return if successful
 			DisplayErrorMessage(g_Locale->getText(LOCALE_SERVICEMENU_RESTART_FAILED));

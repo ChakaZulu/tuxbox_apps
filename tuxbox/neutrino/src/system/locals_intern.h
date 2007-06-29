@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.92 2007/06/11 19:40:14 houdini Exp $
+ * $Id: locals_intern.h,v 1.93 2007/06/29 20:29:21 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -498,6 +498,8 @@ const char * locale_real_names[] =
 	"keybindingmenu.pageup",
 	"keybindingmenu.pageup_head",
 	"keybindingmenu.quickzap",
+	"keybindingmenu.reload",
+	"keybindingmenu.reload_head",
 	"keybindingmenu.repeatblock",
 	"keybindingmenu.repeatblockgeneric",
 	"keybindingmenu.sort",

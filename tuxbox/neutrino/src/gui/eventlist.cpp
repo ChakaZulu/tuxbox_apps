@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.105 2007/02/25 21:47:16 guenther Exp $
+	$Id: eventlist.cpp,v 1.106 2007/06/29 20:27:54 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -58,6 +58,7 @@ extern CBouquetList *bouquetList;
 #include <zapit/client/zapittools.h>
 
 #include <algorithm>
+#include "gui/keyhelper.h"
 
 // sort operators
 bool sortById (const CChannelEvent& a, const CChannelEvent& b)
@@ -324,7 +325,6 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			paintHead();
 			paint();
 			showFunctionBar(true);
-
 		}
 
 //  -- I commented out the following part (code is working)
@@ -402,6 +402,15 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 				printf("timerd not available\n");
 		}
 
+		else if (msg == (neutrino_msg_t)g_settings.key_channelList_reload)
+		{
+			hide();
+			paintHead();
+			readEvents(channel_id);
+			paint();
+			showFunctionBar(true);
+		}
+
 		else if ((msg == CRCInput::RC_timeout                             ) ||
 			 (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))
 		{
@@ -409,10 +418,11 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			loop=false;
 		}
 
-		else if ( msg==CRCInput::RC_left || msg==CRCInput::RC_red )
+		else if ( msg==CRCInput::RC_left || msg==CRCInput::RC_red || msg==CRCInput::RC_help)
 		{
 			loop= false;
 		}
+
 		else if (msg==CRCInput::RC_help || msg==CRCInput::RC_right || msg==CRCInput::RC_ok)
 		{
 			if ( evtlist[selected].eventID != 0 )
@@ -580,65 +590,75 @@ void EventList::paint()
 
 void  EventList::showFunctionBar (bool show)
 {
-  int  bx,by,bw,bh;
-  int  cellwidth;		// 4 cells
-  int  h_offset, pos;
-  int  bdx;
+	int  bx,by,bw,bh;
+	int  cellwidth;		// 4 cells
+	int  h_offset, pos;
+	int  bdx;
 
-  bw = width;
-  bh = iheight;
-  bx = x;
-  by = y + height-iheight;
-  h_offset = 5;
-  cellwidth = bw / 4;
-  bdx = iheight-1;
+	CKeyHelper keyhelper;
+	neutrino_msg_t key = CRCInput::RC_nokey;
+	const char * icon = NULL; 
 
+	bw = width;
+	bh = iheight;
+	bx = x;
+	by = y + height-iheight;
+	h_offset = 5;
+	cellwidth = bw / 4;
+	bdx = iheight-1;
 
-    frameBuffer->paintBackgroundBoxRel(bx,by,bw,bh);
-    // -- hide only?
-    if (! show) return;
+	frameBuffer->paintBackgroundBoxRel(bx,by,bw,bh);
+	// -- hide only?
+	if (!show) return;
 
-    // -- frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW_PLUS_1);
-    frameBuffer->paintBoxRel(bx,by,bw,bh, COL_MENUHEAD_PLUS_0);
+	// -- frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW_PLUS_1);
+	frameBuffer->paintBoxRel(bx,by,bw,bh, COL_MENUHEAD_PLUS_0);
 
-
-    // -- Button: Timer Record & Channelswitch
-    if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
-	(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
-    {
-	    pos = 0;
-#warning FIXME: display other icons depending on g_settings.key_channelList_addrecord
-	    if (g_settings.key_channelList_addrecord == CRCInput::RC_red)
-		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, bx+8+cellwidth*pos, by+h_offset);
-	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_RECORDEVENT), COL_INFOBAR, 0, true); // UTF-8
-    }
+	pos = 0;
+	// -- Button: Timer Record & Channelswitch
+	if ((g_settings.recording_type != CNeutrinoApp::RECORDING_OFF) &&
+		(g_settings.key_channelList_addrecord != (int)CRCInput::RC_nokey))
+	{
+		keyhelper.get(&key, &icon, g_settings.key_channelList_addrecord);
+		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_RECORDEVENT), COL_INFOBAR, 0, true); // UTF-8
+		pos++;
+	}
 
 	if (1)
 	{
-		pos = 1;
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, bx+8+cellwidth*pos, by+h_offset);
+		keyhelper.get(&key, &icon, CRCInput::RC_green);
+		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTFINDER_SEARCH), COL_INFOBAR, 0, true); // UTF-8
+		pos++;
 	}
 
-    // Button: Timer Channelswitch
-    if (g_settings.key_channelList_addremind != (int)CRCInput::RC_nokey)
-    {
-	    pos = 2;
-#warning FIXME: display other icons depending on g_settings.key_channelList_addremind
-	    if (g_settings.key_channelList_addremind == CRCInput::RC_yellow)
-		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, bx+8+cellwidth*pos, by+h_offset );
-	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_CHANNELSWITCH), COL_INFOBAR, 0, true); // UTF-8
-    }
+	// Button: Timer Channelswitch
+	if (g_settings.key_channelList_addremind != (int)CRCInput::RC_nokey)
+	{
+		keyhelper.get(&key, &icon, g_settings.key_channelList_addremind);
+		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_CHANNELSWITCH), COL_INFOBAR, 0, true); // UTF-8
+		pos++;
+	}
 
-    // Button: Event Re-Sort
-    if (g_settings.key_channelList_sort != (int)CRCInput::RC_nokey)
-    {
-	    pos = 3;
-#warning FIXME: display other icons depending on g_settings.key_channelList_sort value
-	    if (g_settings.key_channelList_sort == CRCInput::RC_blue)
-		    frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, bx+8+cellwidth*pos, by+h_offset );
-	    g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_EVENTSORT), COL_INFOBAR, 0, true); // UTF-8
-    }
+	// Button: Event Re-Sort
+	if (g_settings.key_channelList_sort != (int)CRCInput::RC_nokey)
+	{
+		keyhelper.get(&key, &icon, g_settings.key_channelList_sort);
+		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_EVENTLISTBAR_EVENTSORT), COL_INFOBAR, 0, true); // UTF-8
+		pos++;
+	}
+
+	// Button: Event Reload
+	if (g_settings.key_channelList_reload != (int)CRCInput::RC_nokey)
+	{
+		keyhelper.get(&key, &icon, g_settings.key_channelList_reload);
+		frameBuffer->paintIcon(icon, bx+8+cellwidth*pos, by+h_offset);
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(bx+bdx+cellwidth*pos, by+bh-h_offset, bw-30, g_Locale->getText(LOCALE_KEYBINDINGMENU_RELOAD), COL_INFOBAR, 0, true); // UTF-8
+	}
+
 }
 
 
@@ -683,12 +703,12 @@ int EventList::findEvents(void)
 	t_channel_id channel_id;  //g_Zapit->getCurrentServiceID()
 	
 	CEventFinderMenu menu(	&event,
-							&m_search_epg_item,
-							&m_search_keyword,
-							&m_search_list,
-							&m_search_channel_id,
-							&m_search_bouquet_id
-						  );
+				&m_search_epg_item,
+				&m_search_keyword,
+				&m_search_list,
+				&m_search_channel_id,
+				&m_search_bouquet_id
+				);
 	hide();
 	menu.exec(NULL,"");
 	
@@ -809,20 +829,20 @@ const CMenuOptionChooser::keyval SEARCH_EPG_OPTIONS[SEARCH_EPG_OPTION_COUNT] =
 
 
 /************************************************************************************************/
-CEventFinderMenu::CEventFinderMenu(	int* 			event,
-									int* 			search_epg_item,
-									std::string* 	search_keyword,
-									int* 			search_list,		
-									t_channel_id*	search_channel_id,
-									t_bouquet_id*	search_bouquet_id)
+CEventFinderMenu::CEventFinderMenu(	int* 		event,
+					int* 		search_epg_item,
+					std::string* 	search_keyword,
+					int* 		search_list,		
+					t_channel_id*	search_channel_id,
+					t_bouquet_id*	search_bouquet_id)
 /************************************************************************************************/
 {
-	m_event = event;
-	m_search_epg_item   = search_epg_item;
+	m_event			= event;
+	m_search_epg_item	= search_epg_item;
 	m_search_keyword	= search_keyword;
-	m_search_list       = search_list;
-	m_search_channel_id = search_channel_id;
-	m_search_bouquet_id = search_bouquet_id;
+	m_search_list		= search_list;
+	m_search_channel_id	= search_channel_id;
+	m_search_bouquet_id	= search_bouquet_id;
 }
 
 

@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.178 2007/06/24 11:51:16 dbluelle Exp $
+  $Id: settings.h,v 1.179 2007/06/29 20:29:21 houdini Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -102,7 +102,7 @@ struct SNeutrinoSettings
 
 	//widget settings
 	int widget_fade;
-    int widget_osd;
+	int widget_osd;
 
 	//colors
 	unsigned char gtx_alpha1;
@@ -235,6 +235,7 @@ struct SNeutrinoSettings
 	int key_channelList_sort;
 	int key_channelList_addrecord;
 	int key_channelList_addremind;
+	int key_channelList_reload;
 
 	int key_quickzap_up;
 	int key_quickzap_down;
