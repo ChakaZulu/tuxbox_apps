@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.93 2007/06/29 20:29:21 houdini Exp $
+ * $Id: locals_intern.h,v 1.94 2007/06/30 21:14:39 nitr8 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -595,6 +595,7 @@ const char * locale_real_names[] =
 	"miscsettings.general",
 	"miscsettings.head",
 	"miscsettings.infobar_sat_display",
+	"miscsettings.infobar_show",
 	"miscsettings.shutdown_count",
 	"miscsettings.shutdown_count_hint1",
 	"miscsettings.shutdown_count_hint2",

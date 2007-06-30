@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.855 2007/06/29 20:51:33 houdini Exp $
+	$Id: neutrino.cpp,v 1.856 2007/06/30 21:16:47 nitr8 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -617,6 +617,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.tuxtxt_cache                = configfile.getBool("tuxtxt_cache"                 , false );
 #endif
 	g_settings.virtual_zap_mode	    = configfile.getBool("virtual_zap_mode"          , false);
+	g_settings.infobar_show             = configfile.getBool("infobar_show"              , false);
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -1034,6 +1035,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool("tuxtxt_cache"                 , g_settings.tuxtxt_cache);
 #endif
 	configfile.setBool("virtual_zap_mode"          , g_settings.virtual_zap_mode);
+	configfile.setBool("infobar_show"              , g_settings.infobar_show);
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -2218,6 +2220,14 @@ const CMenuOptionChooser::keyval  INFOBAR_SUBCHAN_DISP_POS_OPTIONS[INFOBAR_SUBCH
 	{ 3 , LOCALE_SETTINGS_POS_BOTTOM_RIGHT }
 };
 
+#define INFOBAR_SHOW_OPTIONS_COUNT 3
+const CMenuOptionChooser::keyval  INFOBAR_SHOW_OPTIONS[INFOBAR_SHOW_OPTIONS_COUNT]=
+{
+	{ 0 , LOCALE_OPTIONS_OFF },
+	{ 1 , LOCALE_PICTUREVIEWER_RESIZE_SIMPLE },
+	{ 2 , LOCALE_PICTUREVIEWER_RESIZE_COLOR_AVERAGE }
+};
+
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
@@ -2247,6 +2257,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 #endif
 
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VIRTUAL_ZAP_MODE, &g_settings.virtual_zap_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SHOW, &g_settings.infobar_show, INFOBAR_SHOW_OPTIONS, INFOBAR_SHOW_OPTIONS_COUNT, true));
 
 	CSectionsdConfigNotifier* sectionsdConfigNotifier = new CSectionsdConfigNotifier;
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_EPG_HEAD));

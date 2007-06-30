@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.179 2007/06/29 20:29:21 houdini Exp $
+  $Id: settings.h,v 1.180 2007/06/30 21:14:50 nitr8 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -62,6 +62,7 @@ struct SNeutrinoSettings
 	int tuxtxt_cache;
 #endif
 	int virtual_zap_mode;
+	int infobar_show;
 
 	// EPG
 	std::string epg_cache;
