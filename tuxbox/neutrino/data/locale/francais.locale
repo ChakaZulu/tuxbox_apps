@@ -507,6 +507,7 @@ miscsettings.general Général
 miscsettings.head Réglages divers
 miscsettings.hwsections Utiliser les sections hardware
 miscsettings.infobar_sat_display Affichage du satellite dans la barre d'infos
+miscsettings.infobar_show EPG Info
 miscsettings.pmtupdate enable m.à.j pmt
 miscsettings.shutdown_real Permettre Veille
 miscsettings.shutdown_real_rcdelay Arrêt retardé

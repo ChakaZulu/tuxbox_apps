@@ -507,6 +507,7 @@ miscsettings.general Geral
 miscsettings.head Outras configurações
 miscsettings.hwsections Secções de hardware usado
 miscsettings.infobar_sat_display Mostrar satélite na barra de informações
+miscsettings.infobar_show EPG Info
 miscsettings.pmtupdate activar actualização do pmt
 miscsettings.shutdown_real Activar standby
 miscsettings.shutdown_real_rcdelay Desligar com telecomando

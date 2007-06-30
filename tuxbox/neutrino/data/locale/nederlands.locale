@@ -460,6 +460,7 @@ miscsettings.general Algemeen
 miscsettings.head Overige settings
 miscsettings.hwsections Gebruik hardware secties
 miscsettings.infobar_sat_display Satelliet display in infobar
+miscsettings.infobar_show EPG Info
 miscsettings.shutdown_real standby
 miscsettings.shutdown_real_rcdelay vertraagde shutdown
 miscsettings.sptsmode Gebruik spts-mode

@@ -438,6 +438,7 @@ miscsettings.fb_destination EXPERT! Boot-Chonsole
 miscsettings.general Allg'mein
 miscsettings.head Diverse Iischdellige
 miscsettings.infobar_sat_display Infobar Satellite-A'zeig
+miscsettings.infobar_show EPG Info
 miscsettings.shutdown_real Sdändbymodus
 miscsettings.shutdown_real_rcdelay V'rzögerede Shudown
 miscsettings.startbhdriver BH-Mode Triiber lade

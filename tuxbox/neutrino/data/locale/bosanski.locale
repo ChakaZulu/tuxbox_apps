@@ -415,6 +415,7 @@ messagebox.info informacija
 messagebox.no ne
 messagebox.yes ja
 miscsettings.bootinfo pokazati informacije pri startovanju
+miscsettings.infobar_show EPG Info
 miscsettings.boxtype proizvođač dbox2
 miscsettings.fb_destination majstori! boot konsola
 miscsettings.general generalno

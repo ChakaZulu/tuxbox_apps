@@ -427,6 +427,7 @@ miscsettings.general Glówne
 miscsettings.head Inne Ustawienia
 miscsettings.hwsections HW-Sekcje uzywac
 miscsettings.infobar_sat_display Nazwa satelity na pasku
+miscsettings.infobar_show EPG Info
 miscsettings.shutdown_real Zalacz Standby
 miscsettings.shutdown_real_rcdelay Opóznione wylaczenie
 miscsettings.sptsmode SPTS-Mode drivery ladowac

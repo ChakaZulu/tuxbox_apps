@@ -438,6 +438,7 @@ miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.general Generale
 miscsettings.head Altre Impostazioni
 miscsettings.infobar_sat_display Infobar Display Satellite
+miscsettings.infobar_show EPG Info
 miscsettings.shutdown_real Modo Standby
 miscsettings.shutdown_real_rcdelay shutdown ritardato
 miscsettings.startbhdriver Carica Driver BH-Mode

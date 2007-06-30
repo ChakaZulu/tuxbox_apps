@@ -540,6 +540,7 @@ miscsettings.epg_old_events_hint2 ohjelmatietoja säilytetään?
 miscsettings.general Yleiset
 miscsettings.head Sekalaiset asetukset
 miscsettings.infobar_sat_display Näytä satelliitin nimi
+miscsettings.infobar_show EPG Info
 miscsettings.shutdown_count Automaattinen sammutus
 miscsettings.shutdown_count_hint1 Aika minuutteina jonka jälkeen laite sammuu
 miscsettings.shutdown_count_hint2 automaattisesti valmiustilasta (0 = pois).

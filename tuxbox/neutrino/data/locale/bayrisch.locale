@@ -436,6 +436,7 @@ miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.general Allgemein
 miscsettings.head Diverse Eistellunga
 miscsettings.infobar_sat_display Satelitn Informationsleistn
+miscsettings.infobar_show EPG Info
 miscsettings.shutdown_real bissi ausmacha
 miscsettings.shutdown_real_rcdelay verzögats Ausschoitn
 miscsettings.startbhdriver BH-Mode Treiba lon
