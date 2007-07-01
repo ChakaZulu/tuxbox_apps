@@ -568,7 +568,7 @@ miscsettings.epg_old_events_hint2 Angabe in Stunden
 miscsettings.general Allgemein
 miscsettings.head Diverse Einstellungen
 miscsettings.infobar_sat_display Infobar Satellitenanzeige
-miscsettings.infobar_show Info bei EPG Ãnderung
+miscsettings.infobar_show Info bei EPG Änderung
 miscsettings.shutdown_count Komplett ausschalten nach
 miscsettings.shutdown_count_hint1 Zeit (in Minuten) nach dem vom Standbymodus
 miscsettings.shutdown_count_hint2 komplett ausgeschaltet wird (0 = aus).

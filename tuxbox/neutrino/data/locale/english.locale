@@ -535,7 +535,7 @@ mainsettings.driver Driver & Boot
 mainsettings.head Settings
 mainsettings.keybinding Keybinding
 mainsettings.language Language
-mainsettings.lcd LCD-Display
+mainsettings.lcd LC-Display
 mainsettings.misc Miscellaneous
 mainsettings.network Network
 mainsettings.recording Recording
