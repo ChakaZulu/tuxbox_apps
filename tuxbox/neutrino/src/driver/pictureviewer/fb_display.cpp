@@ -294,15 +294,18 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long x, unsigned long y, in
 	    break;
 	case 16:
 	    *cpp = 2;
-/*	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
+#ifdef HAVE_DREAMBOX_HARDWARE
+	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
 		 if(s_fbbuff==NULL)
 		 {
 			 printf("Error: malloc\n");
 			 return NULL;
 		 }
 	    for(i = 0; i < count ; i++)
-			 s_fbbuff[i]=make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2], rl, ro, gl, go, bl, bo, tl, to);*/
+			 s_fbbuff[i]=make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2], rl, ro, gl, go, bl, bo, tl, to);
+#else
 		 s_fbbuff = (unsigned short*) make15color_errdiff(rgbbuff, x, y);
+#endif
 		 fbbuff = (void *) s_fbbuff;
 	    break;
 	case 24:
