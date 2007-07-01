@@ -415,12 +415,12 @@ messagebox.info informacija
 messagebox.no ne
 messagebox.yes ja
 miscsettings.bootinfo pokazati informacije pri startovanju
-miscsettings.infobar_show EPG Info
 miscsettings.boxtype proizvođač dbox2
 miscsettings.fb_destination majstori! boot konsola
 miscsettings.general generalno
 miscsettings.head namjestiti razne stvari
 miscsettings.infobar_sat_display informativna traka sateliti
+miscsettings.infobar_show EPG Info
 miscsettings.shutdown_real pripravnost
 miscsettings.shutdown_real_rcdelay ugasiti sa zastojanjem
 miscsettings.startbhdriver startovati bh-mode driver
