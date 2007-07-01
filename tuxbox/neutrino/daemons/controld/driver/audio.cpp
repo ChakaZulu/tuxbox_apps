@@ -50,6 +50,8 @@ void audioControl::setVolume(const unsigned char volume)
 
 		close(fd);
 	}
+#else 
+	printf("controld: audioControl::setVolume does not work on dreamboxes\n"); 
 #endif
 }
 
@@ -69,6 +71,8 @@ void audioControl::setMute(const bool mute)
 
 		close(fd);
 	}
+#else 
+	printf("controld: audioControl::setMute does not work on dreamboxes\n"); 
 #endif
 }
 

@@ -363,6 +363,8 @@ void setRGBCsync(int val)
 		close(fd);
 	}
 	config->setInt32("csync", settings.csync);
+#else 
+	fprintf(stderr, "[controld] SAAIOSCSYNC not implemented in dreambox\n"); 
 #endif
 }
 
@@ -381,6 +383,7 @@ char getRGBCsync()
 	}
 	return val;
 #else
+	fprintf(stderr, "[controld] SAAIOGCSYNC not implemented in dreambox\n"); 
 	return 0;
 #endif
 }
@@ -1165,7 +1168,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.126 2007/06/24 11:51:03 dbluelle Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.127 2007/07/01 08:40:13 dbluelle Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -1296,7 +1299,7 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 			printf("[controld] Unknown aspectRatio: %d", activeAspectRatio);
 		}
 	}
-#if HAVE_DVB_API < 3
+#if HAVE_DVB_API_VERSION < 3
 	else
 		setVideoFormat(settings.videoformat, false);
 #endif
