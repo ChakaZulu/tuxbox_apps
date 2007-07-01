@@ -422,7 +422,7 @@ imageinfo.image Λογισμικό:
 imageinfo.imagetype Λειτουργικό-τύπο:
 imageinfo.info Πληροφορία:
 imageinfo.license Χορηγώ:
-imageinfo.noteflashtype Για αναβαθμίσει εξετάζετε παρακαλώ τον τύπο τσιπ της (1x ή/και. 2x)
+imageinfo.noteflashtype Για αναβαθμίσει εξετάζετε παρακαλώ τον τύπο τσιπ της!
 imageinfo.partitions Χωρίσματα
 imageinfo.support Υποστηρίξει
 imageinfo.supporthere η τεχνική υποστήριξη και η βοήθεια σας βρίσκουν εδώ
@@ -562,6 +562,7 @@ miscsettings.epg_old_events_hint2 Εισάγεται σε ώρες
 miscsettings.general Διάφορα
 miscsettings.head Διάφορες Ρυθμίσεις
 miscsettings.infobar_sat_display Ένδειξη δορυφόρους
+miscsettings.infobar_show EPG Πληροφορίες
 miscsettings.shutdown_count Εντελώς σβήστε κατόπιν
 miscsettings.shutdown_count_hint1 Χρονόμετρο σε λεπτά μετά από μερικό σβήσιμο
 miscsettings.shutdown_count_hint2 Τέλειος κλειστό σε (0=κλειστό).

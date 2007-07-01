@@ -507,7 +507,7 @@ miscsettings.general Основное
 miscsettings.head Прочие настройки
 miscsettings.hwsections HW-Sections использовать
 miscsettings.infobar_sat_display Название спутника на инфопанели
-miscsettings.infobar_show EPG Info
+miscsettings.infobar_show EPG информация
 miscsettings.pmtupdate enable pmt update
 miscsettings.shutdown_real Включить дежурный режим
 miscsettings.shutdown_real_rcdelay Задержка выключения
