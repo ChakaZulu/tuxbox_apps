@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.856 2007/06/30 21:16:47 nitr8 Exp $
+	$Id: neutrino.cpp,v 1.857 2007/07/04 21:56:00 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -895,7 +895,7 @@ int CNeutrinoApp::loadSetup()
 					txt2ptr++;
 				if(*txt2ptr != 0)
 					txt2ptr++;
-			}    
+			}
 			if(*txt2ptr != 0)
 			{
 				g_settings.usermenu[button][pos] = atoi(txt2ptr);  // there is still a string
@@ -3501,7 +3501,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 	for(int pos = 0; pos < SNeutrinoSettings::ITEM_MAX ; pos++)
 	{
 		// now compare pos with the position of any item. Add this item if position is the same 
-		switch(g_settings.usermenu[button][pos])  
+		switch(g_settings.usermenu[button][pos])
 		{
 			case SNeutrinoSettings::ITEM_NONE: 
 				// do nothing 
@@ -3515,25 +3515,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 				menu_prev = SNeutrinoSettings::ITEM_BAR;
 				break;
 
-			case SNeutrinoSettings::ITEM_PLUGIN: 
-				for(unsigned int count = 0; count < (unsigned int) g_PluginList->getNumberOfPlugins(); count++)
-				{
-					std::string tmp = g_PluginList->getName(count);
-					if (g_PluginList->getType(count)== CPlugins::P_TYPE_TOOL && !g_PluginList->isHidden(count) && tmp.find("Teletext") == std::string::npos)
-					{
-						sprintf(id, "%d", count);
-						menu_items++;
-						menu_prev = SNeutrinoSettings::ITEM_PLUGIN;
-						
-						keyhelper.get(&key,&icon,CRCInput::RC_blue);
-						menu_item = new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, key, icon);
-						menu->addItem(menu_item, (cnt == 0));
-						cnt++;
-					}
-				}
-				break;
-				
-			case SNeutrinoSettings::ITEM_VTXT: 
+			case SNeutrinoSettings::ITEM_VTXT:
 				for(unsigned int count = 0; count < (unsigned int) g_PluginList->getNumberOfPlugins(); count++)
 				{
 					std::string tmp = g_PluginList->getName(count);
@@ -3542,14 +3524,31 @@ bool CNeutrinoApp::showUserMenu(int button)
 						sprintf(id, "%d", count);
 						menu_items++;
 						menu_prev = SNeutrinoSettings::ITEM_VTXT;
-						
-						keyhelper.get(&key,&icon,CRCInput::RC_blue);
+						keyhelper.get(&key, &icon, cnt == 0 ? CRCInput::RC_blue : 0);
 						menu_item = new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, key, icon);
-						menu->addItem(menu_item, 0);
+						menu->addItem(menu_item, (cnt == 0));
+						cnt++;
 					}
 				}
 				break;
 
+			case SNeutrinoSettings::ITEM_PLUGIN:
+				for(unsigned int count = 0; count < (unsigned int) g_PluginList->getNumberOfPlugins(); count++)
+				{
+					std::string tmp = g_PluginList->getName(count);
+					if (g_PluginList->getType(count)== CPlugins::P_TYPE_TOOL && !g_PluginList->isHidden(count) && tmp.find("Teletext") == std::string::npos)
+					{
+						sprintf(id, "%d", count);
+						menu_items++;
+						menu_prev = SNeutrinoSettings::ITEM_PLUGIN;
+						keyhelper.get(&key, &icon, cnt == 0 ? CRCInput::RC_blue : 0);
+						menu_item = new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, key, icon);
+						menu->addItem(menu_item, (cnt == 0));
+						cnt++;
+					}
+				}
+				break;
+				
 			case SNeutrinoSettings::ITEM_FAVORITS: 
 				menu_items++;
 				menu_prev = SNeutrinoSettings::ITEM_FAVORITS;
