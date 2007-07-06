@@ -471,7 +471,7 @@ keybindingmenu.pagedown_head Keysetup page down
 keybindingmenu.pageup page up
 keybindingmenu.pageup_head Keysetup page up
 keybindingmenu.quickzap Quickzap
-keybindingmenu.reload reload EPG
+keybindingmenu.reload reload
 keybindingmenu.reload_head reload EPG
 keybindingmenu.repeatblock Repeat Delay
 keybindingmenu.repeatblockgeneric Generic Delay
