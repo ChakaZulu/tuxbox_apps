@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.106 2007/06/29 20:27:54 houdini Exp $
+	$Id: eventlist.cpp,v 1.107 2007/07/06 21:07:23 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -418,7 +418,7 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 			loop=false;
 		}
 
-		else if ( msg==CRCInput::RC_left || msg==CRCInput::RC_red || msg==CRCInput::RC_help)
+		else if ( msg==CRCInput::RC_left || msg==CRCInput::RC_red)
 		{
 			loop= false;
 		}
