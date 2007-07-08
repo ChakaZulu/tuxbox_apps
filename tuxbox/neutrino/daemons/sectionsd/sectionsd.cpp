@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.244 2007/06/17 18:33:54 dbluelle Exp $
+//  $Id: sectionsd.cpp,v 1.245 2007/07/08 16:08:59 dbluelle Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -541,6 +541,7 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 	if (!eptr)
 	{
 		printf("[sectionsd::addEvent] new SIevent failed.\n");
+		unlockEvents();
 		throw std::bad_alloc();
 	}
 
@@ -571,7 +572,8 @@ static void addEvent(const SIevent &evt, const unsigned table_id, const time_t z
 		unlockEvents();	
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
-	unlockEvents();
+	else
+		unlockEvents();
 	readLockEvents();
 	// Pruefen ob es ein Meta-Event ist
 	MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i = mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(e->get_channel_id());
@@ -645,7 +647,7 @@ static void addEventTimes(const SIevent &evt, const unsigned table_id)
 			{
 				mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.erase(e->second);
 				mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.erase(e->second);
-				unlockEvents();
+				//unlockEvents();
 			}
 
 			// Und die Zeiten im Event updaten
@@ -710,8 +712,8 @@ static void addNVODevent(const SIevent &evt)
 		unlockEvents();
 		deleteEvent((*lastEvent)->uniqueKey());
 	}
-
-	unlockEvents();
+	else
+		unlockEvents();
 	writeLockEvents();
 	mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
 
@@ -1052,6 +1054,7 @@ static int addBouquetEntry(const SIbouquet &s/*, int section_nr, int count*/)
 		if (!bp)
 		{
 			printf("[sectionsd::addBouquetEntry] new SIbouquet failed.\n");
+			unlockBouquets();
 			throw std::bad_alloc();
 		}
 
@@ -1103,6 +1106,7 @@ static bool addTransponder(const SInetwork &s, const bool is_actual)
 		if (!nw)
 		{
 			printf("[sectionsd::updateNetwork] new SInetwork failed.\n");
+			unlockTransponders();
 			throw std::bad_alloc();
 		}
 
@@ -1933,7 +1937,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.244 2007/06/17 18:33:54 dbluelle Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.245 2007/07/08 16:08:59 dbluelle Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -3970,7 +3974,10 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 			strncat(filename, eventname, 17);
 			fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n",eventname);
 			if (!(eventfile = fopen(filename, "w")))
+			{
+				unlockEvents();
 				return;
+			}
 			write_epg_xml_header(eventfile,onid,tsid,sid);
 
 			while (e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end()) {
@@ -3986,7 +3993,10 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 					strncat(filename, eventname, 17);
 					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
 					if (!(eventfile = fopen(filename, "w")))
+					{
+						unlockEvents();
 						return;
+					}
 					write_epg_xml_header(eventfile,onid,tsid,sid);
 				}
 				else if (tsid != (*e)->transport_stream_id) {
@@ -4000,7 +4010,10 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 					strncat(filename, eventname, 17);
 					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
 					if (!(eventfile = fopen(filename, "w")))
+					{
+						unlockEvents();
 						return;
+					}
 					write_epg_xml_header(eventfile,onid,tsid,sid);
 				}
 				else if (sid != (*e)->service_id) {
@@ -4013,7 +4026,10 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 					strncat(filename, eventname, 17);
 					fprintf(indexfile, "\t<eventfile name=\"%s\"/>\n", eventname);
 					if (!(eventfile = fopen(filename, "w")))
+					{
+						unlockEvents();
 						return;
+					}
 					write_epg_xml_header(eventfile,onid,tsid,sid);
 				}
 				(*e)->saveXML(eventfile);
@@ -4025,6 +4041,9 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 			fclose(eventfile);
 
 		}
+		else
+			unlockEvents();
+
 		write_indexxml_footer(indexfile);
 		fclose(indexfile);
 
@@ -4681,6 +4700,7 @@ bool updateCurrentXML(xmlNodePtr provider, xmlNodePtr tp_node, const int scanTyp
 					//create new currentservices
 					if (!(dst = fopen(CURRENTSERVICES_TMP, "w"))) {
 						dprintf("unable to open %s for writing", CURRENTSERVICES_TMP);
+						unlockServices();
 						return false;
 					}
 					if (!(src = fopen(CURRENTSERVICES_XML, "r"))) {
@@ -7046,7 +7066,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.244 2007/06/17 18:33:54 dbluelle Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.245 2007/07/08 16:08:59 dbluelle Exp $\n");
 
 	SIlanguage::loadLanguages();
 
