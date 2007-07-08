@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.57 2007/06/24 11:46:04 dbluelle Exp $
+ * $Id: frontend.cpp,v 1.58 2007/07/08 15:47:44 dbluelle Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -82,9 +82,6 @@ void CFrontend::reset(void)
 
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK|O_SYNC)) < 0)
 		ERROR(FRONTEND_DEVICE);
-#if HAVE_DVB_API_VERSION < 3
-	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
-#endif
 }
 
 fe_code_rate_t CFrontend::getCodeRate(const uint8_t fec_inner)
@@ -124,6 +121,7 @@ fe_modulation_t CFrontend::getModulation(const uint8_t modulation)
 		return QAM_256;
 	default:
 #if HAVE_DVB_API_VERSION < 3
+		// FIXME!
 		return QAM_256;
 #else
 		return QAM_AUTO;
@@ -210,9 +208,6 @@ void CFrontend::setFrontend(const dvb_frontend_parameters *feparams)
 	while ((errno == 0) || (errno == EOVERFLOW))
 		quiet_fop(ioctl, FE_GET_EVENT, &event);
 
-#if HAVE_DVB_API_VERSION < 3
-	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
-#endif
 	fop(ioctl, FE_SET_FRONTEND, feparams);
 }
 
@@ -340,8 +335,6 @@ void CFrontend::secSetTone(const fe_sec_tone_mode_t toneMode, const uint32_t ms)
 	TIMER_START();
 
 #if HAVE_DVB_API_VERSION < 3
-	if (fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON) < 0)
-		perror("FE_SET_POWR_STATE");
 	if (fop_sec(ioctl, FE_SET_TONE, toneMode) == 0) {
 #else
 	if (fop(ioctl, FE_SET_TONE, toneMode) == 0) {
@@ -375,6 +368,8 @@ void CFrontend::secResetOverload(void)
 
 #if HAVE_DVB_API_VERSION >= 3
 	fop(ioctl, FE_DISEQC_RESET_OVERLOAD);
+#else
+	printf("CFrontend::secResetOverload() not implemented in old API\n"); 
 #endif
 	TIMER_STOP();
 }
@@ -402,7 +397,6 @@ void CFrontend::sendDiseqcCommand(const struct dvb_diseqc_master_cmd *cmd, const
 	sequence.commands = &command;
 	sequence.numCommands = 1;
 
-	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
 	if (fop_sec(ioctl, SEC_SEND_SEQUENCE, sequence) == 0)
 #endif
 		usleep(1000 * ms);
@@ -463,7 +457,6 @@ void CFrontend::sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms)
 	sequence.commands = &command;
 	sequence.numCommands = 0;
 
-	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
 	if (fop_sec(ioctl, SEC_SEND_SEQUENCE, sequence) == 0)
 #endif
 		usleep(1000 * ms);
@@ -581,7 +574,10 @@ int CFrontend::setParameters(TP_params *TP)
 	bool can_not_auto_inversion = true;
 	bool do_auto_qam = false;
 	bool do_auto_inversion = false;
+	if (!tuned)
+		fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
 #endif
+	
 
 	if (info.type == FE_QPSK)
 	{
@@ -700,7 +696,7 @@ int CFrontend::setParameters(TP_params *TP)
 		 *
 		 * TODO: set a flag to indicate a change in the service list
 		 */
-		memcpy(&currentTransponder.feparams, &event.u.completionEvent, sizeof(dvb_frontend_parameters));
+		memcpy(&currentTransponder.feparams, &event.u.completionEvent, sizeof(FrontendParameters));
 #endif
 #else
 		last_qam = TP->feparams.u.qam.modulation; /* store good value */
