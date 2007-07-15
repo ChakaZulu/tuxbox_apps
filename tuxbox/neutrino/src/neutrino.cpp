@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.857 2007/07/04 21:56:00 houdini Exp $
+	$Id: neutrino.cpp,v 1.858 2007/07/15 13:08:40 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -597,7 +597,7 @@ int CNeutrinoApp::loadSetup()
 
 	// EPG-Config
 	g_settings.epg_cache 		= configfile.getString("epg_cache_time", "14");
-	g_settings.epg_extendedcache    = configfile.getString("epg_extendedcache_time", "6");
+	g_settings.epg_extendedcache	= configfile.getString("epg_extendedcache_time", "6");
 	g_settings.epg_old_events 	= configfile.getString("epg_old_events", "1");
 	g_settings.epg_max_events 	= configfile.getString("epg_max_events", "6000");
 	g_settings.epg_dir 		= configfile.getString("epg_dir", "");
@@ -4731,12 +4731,12 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			if ((!isTVMode) && (mode != mode_radio))
 			{
 				radioMode(false);
-				channelsInit(init_mode_switch, mode_tv);
+				channelsInit(init_mode_switch, mode_radio);
 			}
 			else if (isTVMode && (mode != mode_tv))
 			{
 				tvMode(false);
-				channelsInit(init_mode_switch, mode_radio);
+				channelsInit(init_mode_switch, mode_tv);
 			}
 			channelList->zapTo_ChannelID(eventinfo->channel_id);
 		}
