@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.8 2007/05/23 16:39:55 papst Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.9 2007/07/18 20:04:25 houdini Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -47,6 +47,7 @@ class DMX
 	unsigned short  dmxBufferSizeInKB;
 	section_id *first_section;
 	section_id first_skipped_section;
+	int		current_service;
 
 	inline bool isOpen(void) { return (fd != -1); }
 
@@ -69,7 +70,6 @@ class DMX
 	int                    real_pauseCounter;
 	pthread_cond_t         change_cond;
 	pthread_mutex_t        start_stop_mutex;
-	int		       current_service;
 
 
 	DMX(const unsigned short p, const unsigned short bufferSizeInKB);
@@ -98,6 +98,7 @@ class DMX
 	char * getSection(const unsigned timeoutInMSeconds, int &timeouts);
 	// section with size < 3 + 5 are skipped !
 	int setPid(const unsigned short new_pid);
+	int setCurrentService(int new_current_service);
 };
 
 #endif /* __sectionsd__dmx_h__ */

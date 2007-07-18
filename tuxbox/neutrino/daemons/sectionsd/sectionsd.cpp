@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.245 2007/07/08 16:08:59 dbluelle Exp $
+//  $Id: sectionsd.cpp,v 1.246 2007/07/18 20:04:25 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1937,7 +1937,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.245 2007/07/08 16:08:59 dbluelle Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.246 2007/07/18 20:04:25 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2367,15 +2367,6 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	unlockMessaging();
 	writeLockMessaging();
-	for ( int i = 0; i < MAX_BAT; i++) {
-		messaging_bat_bouquet_id[i] = 0;
-		messaging_bat_last_section[i] = 0;
-		for ( int j= 0; j < MAX_SECTIONS; j++)
-			messaging_bat_sections_so_far[i][j] = 0;
-	}
-
-	unlockMessaging();
-	writeLockMessaging();
 	if ( ( !doWakeUp )/* && ( messaging_sections_got_all[0] )*/ && ( *requestCN_Event ) && ( !messaging_WaitForServiceDesc ) )
 	{
 		messaging_wants_current_next_Event = false;
@@ -2415,8 +2406,17 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 //			pthread_mutex_lock( &dmxNIT.start_stop_mutex );
 //			dmxSDT.real_pause();
 //			pthread_mutex_lock( &dmxSDT.start_stop_mutex );
+		writeLockMessaging();
+		for ( int i = 0; i < MAX_BAT; i++) {
+			messaging_bat_bouquet_id[i] = 0;
+			messaging_bat_last_section[i] = 0;
+			for ( int j= 0; j < MAX_SECTIONS; j++)
+				messaging_bat_sections_so_far[i][j] = 0;
+		}
+		unlockMessaging();
+
 			readLockMessaging();
-			dmxEIT.current_service = messaging_current_servicekey & 0xffff;
+			dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
 			unlockMessaging();
 			dmxEIT.change( 0 );
 //		}
@@ -2458,10 +2458,6 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	unsigned flag = 0;
 
 	const SIevent &evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag);
-	if(evt.getName().empty() && flag !=0)
-	{
-		dmxEIT.change( 0 );
-	}
 	if (evt.service_id == 0)
 	{
 		readLockServices();
@@ -6263,7 +6259,7 @@ static void *eitThread(void *)
 					dprintf("[eitThread] skipping to next filter(%d) (> DMX_HAS_ALL_CURRENT_SECTIONS_SKIPPING)\n", dmxEIT.filter_index+1 );
 					timeoutsDMX = 0;
 					if (dmxEIT.filter_index + 1 == 2)
-						dmxEIT.current_service = 0;
+						dmxEIT.setCurrentService(0);
 					dmxEIT.change(dmxEIT.filter_index + 1);
 					lastChanged = time(NULL);
 				}
@@ -7066,7 +7062,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.245 2007/07/08 16:08:59 dbluelle Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.246 2007/07/18 20:04:25 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
