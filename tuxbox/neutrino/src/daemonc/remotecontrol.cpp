@@ -97,7 +97,12 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 		{
 			if ((*(t_channel_id *)data) != current_channel_id)
 			{
-				g_Zapit->zapTo_serviceID_NOWAIT(current_channel_id );
+#ifdef HAVE_DREAMBOX_HARDWARE
+				/* because of FASTZAP, we need to wait for zapTo */
+				g_Zapit->zapTo_serviceID(current_channel_id );
+#else
+ 				g_Zapit->zapTo_serviceID_NOWAIT(current_channel_id );
+#endif
 				g_Sectionsd->setServiceChanged(current_channel_id, false);
 
 				zap_completion_timeout = getcurrenttime() + 2 * (long long) 1000000;

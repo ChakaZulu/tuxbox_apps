@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.401 2007/06/27 20:51:04 houdini Exp $
+ * $Id: zapit.cpp,v 1.402 2007/07/22 14:36:42 dbluelle Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -39,6 +39,9 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#ifdef HAVE_DREAMBOX_HARDWARE
+#include <sys/ioctl.h>
+#endif
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -2312,14 +2315,14 @@ int startPlayBack(CZapitChannel *thisChannel)
 			return -1;
 	}
 	if (have_teletext) {
+#ifdef HAVE_DREAMBOX_HARDWARE
+		printf("[zapit] no teletextDemux on dreambox \n");
+#else
 		if (!teletextDemux)
 			teletextDemux = new CDemux();
 		if (teletextDemux->pesFilter(thisChannel->getTeletextPid(), DMX_OUT_DECODER, DMX_PES_TELETEXT) < 0)
 			return -1;
 		if (teletextDemux->start() < 0)
-#if HAVE_DVB_API_VERSION < 3
-			printf("[zapit] seems harmless - teletextDemux->start fails on dreambox\n");
-#else
 			return -1;
 #endif
 	}
@@ -2564,7 +2567,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.401 2007/06/27 20:51:04 houdini Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.402 2007/07/22 14:36:42 dbluelle Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -2693,6 +2696,18 @@ int main(int argc, char **argv)
 	CZapitClient::responseGetLastChannel lastchannel;
 	lastchannel=load_settings();
 	zapTo(lastchannel.channelNumber);
+#endif
+#ifdef HAVE_DREAMBOX_HARDWARE
+#define VIDEO_SET_FASTZAP       _IOW('o', 4, int)
+#define FASTZAP 1
+	int mpeg_fd = open("/dev/video", O_WRONLY);
+	if (mpeg_fd > -1) {
+		printf("zapit: set VIDEO_SET_FASTZAP %d\n", FASTZAP);
+		if (ioctl(mpeg_fd, VIDEO_SET_FASTZAP, FASTZAP) < 0)
+			perror("zapit: VIDEO_SET_FASTZAP");
+		close(mpeg_fd);
+	} else
+		perror("zapit: open /dev/video");
 #endif
 
 	if (update_pmt) {
