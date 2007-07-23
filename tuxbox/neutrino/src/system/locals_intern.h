@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.94 2007/06/30 21:14:39 nitr8 Exp $
+ * $Id: locals_intern.h,v 1.95 2007/07/23 20:34:38 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1023,10 +1023,13 @@ const char * locale_real_names[] =
 	"streaminfo.audiotype",
 	"streaminfo.audiotype_unknown",
 	"streaminfo.bitrate",
+	"streaminfo.close",
 	"streaminfo.framerate",
 	"streaminfo.framerate_unknown",
 	"streaminfo.head",
+	"streaminfo.maximize",
 	"streaminfo.not_available",
+	"streaminfo.resize",
 	"streaminfo.resolution",
 	"streaminfo.signal",
 	"streaming.buffer_overflow",

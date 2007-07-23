@@ -991,16 +991,19 @@ sleeptimerbox.hint1 Shutdown time in min. (000=off)
 sleeptimerbox.hint2 The dbox2 will shutdown after this time.
 sleeptimerbox.title Sleeptimer
 streamfeatures.head Features
-streaminfo.aratio Aspect Ratio
-streaminfo.aratio_unknown Aspect Ratio: unknown
-streaminfo.audiotype Audiotype
-streaminfo.audiotype_unknown Audiotype: unknown
-streaminfo.bitrate Bitrate
-streaminfo.framerate Framerate
-streaminfo.framerate_unknown Framerate: unknown
+streaminfo.aratio Aspect Ratio:
+streaminfo.aratio_unknown unknown
+streaminfo.audiotype Audiotype:
+streaminfo.audiotype_unknown unknown
+streaminfo.bitrate Bitrate:
+streaminfo.close Exit
+streaminfo.framerate Framerate:
+streaminfo.framerate_unknown unknown
 streaminfo.head Stream-Information
+streaminfo.maximize Maximize
 streaminfo.not_available not available
-streaminfo.resolution Resolution
+streaminfo.resize Default View
+streaminfo.resolution Resolution:
 streaminfo.signal reception signal
 streaming.buffer_overflow The recording was aborted,\nsince the data could not be written fast enough.
 streaming.busy One or several recording processes are active.\nIf you encounter this message and no recording is active, please restart Neutrino.

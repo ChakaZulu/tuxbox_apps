@@ -607,16 +607,20 @@ sleeptimerbox.hint1 Einschlofzeit in Min. (000=aus)
 sleeptimerbox.hint2 De Box schoit si noch der Zeid aus.
 sleeptimerbox.title Eischloftimer
 streamfeatures.head Features
-streaminfo.aratio Verhältnis
-streaminfo.aratio_unknown Verhältnis: ken i ned
-streaminfo.audiotype Audiotyp
-streaminfo.audiotype_unknown Audiotyp: ken i ned
-streaminfo.bitrate Bitrate
-streaminfo.framerate Bildrate
-streaminfo.framerate_unknown Bildrate: ken i ned
+streaminfo.aratio Verhältnis:
+streaminfo.aratio_unknown ken i ned
+streaminfo.audiotype Audiotyp:
+streaminfo.audiotype_unknown ken i ned
+streaminfo.bitrate Bitrate:
+streaminfo.close Zuamacha
+streaminfo.framerate Bildrate:
+streaminfo.framerate_unknown ken i ned
 streaminfo.head Informationen
+streaminfo.maximize Großansicht
 streaminfo.not_available kumt nix
+streaminfo.resize Normalansicht
 streaminfo.resolution Auflösung
+streaminfo.signal Empfangssignal
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576

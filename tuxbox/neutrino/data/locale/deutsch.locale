@@ -991,16 +991,19 @@ sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)
 sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
 sleeptimerbox.title Sleeptimer
 streamfeatures.head Features
-streaminfo.aratio Verhältnis
-streaminfo.aratio_unknown Verhältnis: unbekannt
-streaminfo.audiotype Audiotyp
-streaminfo.audiotype_unknown Audiotyp: unbekannt
-streaminfo.bitrate Bitrate
-streaminfo.framerate Bildrate
-streaminfo.framerate_unknown Bildrate: unbekannt
+streaminfo.aratio Verhältnis:
+streaminfo.aratio_unknown unbekannt
+streaminfo.audiotype Audiotyp:
+streaminfo.audiotype_unknown unbekannt
+streaminfo.bitrate Bitrate:
+streaminfo.close Schließen
+streaminfo.framerate Bildrate:
+streaminfo.framerate_unknown unbekannt
 streaminfo.head Stream Information
+streaminfo.maximize Großansicht
 streaminfo.not_available nicht verfügbar
-streaminfo.resolution Auflösung
+streaminfo.resize Normalansicht
+streaminfo.resolution Auflösung:
 streaminfo.signal Empfangssignal
 streaming.buffer_overflow Die Aufnahme wurde leider abgebrochen,\nda die Daten nicht schnell genug geschrieben werden konnten.
 streaming.busy Ein oder mehrere Aufnahmeprozesse sind aktiv.\nSollte die Aufnahme eigentlich beendet sein,\nschafft ein Neustart von Neutrino Abhilfe.
