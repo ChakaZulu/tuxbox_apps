@@ -73,7 +73,7 @@ eEPGStyleSelector::eEPGStyleSelector(int ssel)
 	sel[1] = new eListBoxEntryText(&list,_("Multi EPG"), (void*)2, 0, _("open EPG for next five channels") );
 
 	// only show external EPG Entry when it realy exist..
-	eZapPlugins plugins(2);
+	eZapPlugins plugins(eZapPlugins::StandardPlugin);
 	if ( plugins.execPluginByName("extepg.cfg",true) == "OK"
 		|| plugins.execPluginByName("_extepg.cfg",true) == "OK" )
 		sel[2] = new eListBoxEntryText(&list,_("External EPG"), (void*)3, 0, _("open external plugin EPG") );

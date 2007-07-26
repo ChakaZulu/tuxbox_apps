@@ -296,9 +296,9 @@ void eMainMenu::sel_setup()
 void eMainMenu::sel_plugins()
 {
 #ifndef DISABLE_LCD
-	eZapPlugins plugins(1, LCDTitle, LCDElement);
+	eZapPlugins plugins(eZapPlugins::GamePlugin, LCDTitle, LCDElement);
 #else
-	eZapPlugins plugins(1);
+	eZapPlugins plugins(eZapPlugins::GamePlugin);
 #endif
 	hide();
 	plugins.exec();

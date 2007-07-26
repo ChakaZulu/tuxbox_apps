@@ -4907,7 +4907,7 @@ void eZapMain::runVTXT()
 	} 
 	else if (isVT)
 	{
-		eZapPlugins plugins(2);
+		eZapPlugins plugins(eZapPlugins::StandardPlugin);
 		if ( plugins.execPluginByName("tuxtxt.cfg") != "OK" )
 			plugins.execPluginByName("_tuxtxt.cfg");
 	}
@@ -4916,7 +4916,7 @@ void eZapMain::runVTXT()
 void eZapMain::runPluginExt()
 {
 	hide();
-	eZapPlugins plugins(2);
+	eZapPlugins plugins(eZapPlugins::StandardPlugin);
 	plugins.exec();
 	if (!doHideInfobar())
 		showInfobar();
@@ -5016,7 +5016,7 @@ void eZapMain::showMultiEPG()
 
 void eZapMain::runPluginEPG()
 {
-	eZapPlugins plugins(2);
+	eZapPlugins plugins(eZapPlugins::StandardPlugin);
 	hide();
 	if ( plugins.execPluginByName("extepg.cfg") != "OK" )
 		plugins.execPluginByName("_extepg.cfg");

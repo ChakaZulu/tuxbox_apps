@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_misc.cpp,v 1.13 2007/03/16 18:23:23 dbluelle Exp $
+ * $Id: enigma_dyn_misc.cpp,v 1.14 2007/07/26 22:03:28 pieterg Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -748,7 +748,7 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 	if (opts.find("name") == opts.end())
 		return "E: no plugin name given";
 
-	eZapPlugins plugins(-1);
+	eZapPlugins plugins(eZapPlugins::AnyPlugin);
 	eString path;
 	if (opts.find("path") != opts.end())
 	{
