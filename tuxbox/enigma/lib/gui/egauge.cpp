@@ -14,7 +14,8 @@
  * eGauge skin widget. Uses same syntax as eProgress
  *   - start parameter indicates start and end offset in degrees for the marker.
  *   - The 'start' parameter can be set in skin file
- *   - The 'pixmap' parameter can be used to specify a png file as marker instead of the line.
+ *   - The 'pixmap' parameter can be used to specify a background pixmap
+ *   - The 'sliderpixmap' parameter can be used to specify a png file as marker instead of the line.
  *     It is drawn just against the border.
  *     Note: The pixmap itself will not be rotated. So it is best to use a circular picture.
  *   - the egauge background is set to transparent
@@ -31,6 +32,11 @@ eGauge::~eGauge()
 
 void eGauge::redrawWidget(gPainter *target, const eRect &area)
 {
+	if (pixmap)
+	{
+		target->blit(*pixmap, ePoint(0, 0), area, gPixmap::blitAlphaTest);
+	}
+
 	if (border)
 	{
 		/* draw border */
@@ -51,7 +57,7 @@ void eGauge::redrawWidget(gPainter *target, const eRect &area)
 	double angle = (double) start + (double) perc * (double)(360 - (start<<1)) / 100.0;
 	double rads  = Radians(angle);
 	
-	if (!pixmap)
+	if (!sliderPixmap)
 	{
 		if (direction)
 		{
@@ -70,16 +76,16 @@ void eGauge::redrawWidget(gPainter *target, const eRect &area)
 	{
 		if (direction)
 		{
-			endx = basex + (int) (SIN(rads) * (double)(size.width()  - (border<<1) - pixmap->x) / 2.0) - (pixmap->x >> 1);
-			endy = basey - (int) (COS(rads) * (double)(size.height() - (border<<1) - pixmap->y) / 2.0) - (pixmap->y >> 1);
+			endx = basex + (int) (SIN(rads) * (double)(size.width()  - (border<<1) - sliderPixmap->x) / 2.0) - (sliderPixmap->x >> 1);
+			endy = basey - (int) (COS(rads) * (double)(size.height() - (border<<1) - sliderPixmap->y) / 2.0) - (sliderPixmap->y >> 1);
 		}
 		else 
 		{
-			endx = basex - (int) (SIN(rads) * (double)(size.width()  - (border<<1) - pixmap->x) / 2.0) - (pixmap->x >> 1);
-			endy = basey + (int) (COS(rads) * (double)(size.height() - (border<<1) - pixmap->y) / 2.0) - (pixmap->y >> 1);
+			endx = basex - (int) (SIN(rads) * (double)(size.width()  - (border<<1) - sliderPixmap->x) / 2.0) - (sliderPixmap->x >> 1);
+			endy = basey + (int) (COS(rads) * (double)(size.height() - (border<<1) - sliderPixmap->y) / 2.0) - (sliderPixmap->y >> 1);
 		}
-		//eDebug("pixmap %d,%d at %d,%d  size=%d,%d border=%d offset=%d", basex, basey, endx, endy, pixmap->x, pixmap->y, border, pixmapoffset );
-		target->blit(*pixmap, ePoint(endx, endy), area, gPixmap::blitAlphaTest);
+		//eDebug("sliderPixmap %d,%d at %d,%d  size=%d,%d border=%d offset=%d", basex, basey, endx, endy, sliderPixmap->x, sliderPixmap->y, border, pixmapoffset );
+		target->blit(*sliderPixmap, ePoint(endx, endy), area, gPixmap::blitAlphaTest);
 	}
 }
 

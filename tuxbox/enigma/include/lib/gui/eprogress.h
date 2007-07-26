@@ -15,7 +15,7 @@ protected:
 	int perc, border, start;
 	int direction;
 	gColor left, right;
-	int alphatest;
+	gPixmap *sliderPixmap;
 public:
 	eProgress(eWidget *parent, int takeFocus=0);
 	~eProgress();
@@ -46,6 +46,7 @@ public:
 	void setBorder( int b ) { border = b; }
 	void setLeftColor( const gColor& c )	{ left = c; }
 	void setRightColor( const gColor& c )	{ right = c; }
+	void setSliderPixmap(gPixmap *pmap) { sliderPixmap = pmap; }
 };
 
 #endif
