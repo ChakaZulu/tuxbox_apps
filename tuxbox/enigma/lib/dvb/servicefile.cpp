@@ -101,6 +101,8 @@ void eServiceFileHandler::loadNode(eServiceCache<eServiceFileHandler>::eNode &no
 				
 			if (S_ISDIR(s.st_mode))
 			{
+				/* we allow a servicehandler to be registered to a directory */
+				directoryHandlers((void*)&node, filename);
 				eServiceReference service(eServiceReference::idFile, dirflags, filename);
 				service.data[0]=!!S_ISDIR(s.st_mode);
 				cache.addToNode(node, service);

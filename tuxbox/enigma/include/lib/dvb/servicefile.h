@@ -12,7 +12,7 @@ class eServiceFileHandler: public eServiceHandler
 	eServiceReference result;
 public:
 
-	Signal2<void,void*,const eString &> fileHandlers;
+	Signal2<void,void*,const eString &> fileHandlers, directoryHandlers;
 	void addReference(void *node, const eServiceReference &ref);
 	
 	static eServiceFileHandler *getInstance() { return instance; }

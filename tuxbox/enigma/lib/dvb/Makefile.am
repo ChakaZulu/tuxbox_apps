@@ -11,4 +11,4 @@ libenigma_dvb_a_SOURCES = \
 	settings.cpp dvbscan.cpp service.cpp servicecache.cpp servicedvb.cpp \
 	servicestructure.cpp cahandler.cpp servicefile.cpp servicemp3.cpp \
 	serviceplaylist.cpp dvbci.cpp subtitling.cpp subtitle.cpp \
-	servicejpg.cpp
+	servicejpg.cpp serviceexternal.cpp
