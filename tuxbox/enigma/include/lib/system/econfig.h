@@ -58,4 +58,14 @@ public:
 	~eConfig();
 };
 
+class eSimpleConfigFile
+{
+protected:
+	std::map<eString, eString> config;
+
+public:
+	eSimpleConfigFile(const char *filename);
+	eString getInfo(const char *info);
+};
+
 #endif

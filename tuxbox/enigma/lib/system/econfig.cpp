@@ -194,4 +194,37 @@ void eConfig::flush()
 	fclose(f);
 }
 
+eSimpleConfigFile::eSimpleConfigFile(const char *filename)
+{
+	FILE *f=fopen(filename, "rt");
+	if (f)
+	{
+		char buffer[256];
+
+		while (fgets(buffer, 255, f))
+		{
+			if (strlen(buffer) && buffer[strlen(buffer) - 1] == '\n')
+			{
+				buffer[strlen(buffer) - 1] = 0;
+			}
+
+			for (int i = 0; i < strlen(buffer); i++)
+			{
+				if (buffer[i] == '=')
+				{
+					buffer[i] = 0;
+					config[buffer] = &buffer[i + 1];
+					break;
+				}
+			}
+		}
+		fclose(f);
+	}
+}
+
+eString eSimpleConfigFile::getInfo(const char *info)
+{
+	return config[info];
+}
+
 eAutoInitP0<eConfig> init_eRCConfig(eAutoInitNumbers::configuration, "Configuration");
