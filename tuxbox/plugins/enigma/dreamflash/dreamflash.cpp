@@ -1,5 +1,5 @@
 /*
- * $Id: dreamflash.cpp,v 1.6 2006/02/05 23:45:09 pieterg Exp $
+ * $Id: dreamflash.cpp,v 1.7 2007/07/26 21:34:09 pieterg Exp $
  *
  * (C) 2005 by mechatron, digi_casi
  *
@@ -30,7 +30,6 @@
 //#define TMPFILE "/tmp/.dftemp"
 
 extern "C" int plugin_exec(PluginParam *par);
-extern eString getInfo(const char *file, const char *info);
 
 int fd;
 eListBox<eListBoxEntryText> *liste;
