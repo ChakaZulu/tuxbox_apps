@@ -78,8 +78,6 @@ void eZapKeyboardSetup::okPressed()
 	close(1);
 }
 
-extern eString getInfo(const char *file, const char *info);
-
 void eZapKeyboardSetup::loadMappings()
 {
 	eListBoxEntryText* selection=0;
@@ -123,8 +121,9 @@ void eZapKeyboardSetup::loadMappings()
 			fileName+=e->d_name;
 			if (fileName.find(".info") != eString::npos)
 			{
-				eString kmap=mapPaths[i] + getInfo(fileName.c_str(), "kmap");
-				eString name=getInfo(fileName.c_str(), "name");
+				eSimpleConfigFile config(fileName.c_str());
+				eString kmap = mapPaths[i] + config.getInfo("kmap");
+				eString name = config.getInfo("name");
 				eDebug("kmap = %s, name = %s", kmap.c_str(), name.c_str());
 				if (kmap.size() && name.size())
 				{

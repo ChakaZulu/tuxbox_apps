@@ -4897,8 +4897,6 @@ void eZapMain::showAudioMenu()
 	}
 }
 
-extern eString getInfo(const char *file, const char *info);
-
 void eZapMain::runVTXT()
 {
 	eDebug("runVTXT/RassInteractive");

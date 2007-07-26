@@ -1,7 +1,6 @@
 #include <enigma_plugins.h>
 
 #include <config.h>
-#include <plugin.h>
 
 #include <dlfcn.h>
 #include <dirent.h>
@@ -25,116 +24,116 @@
 #include <lib/gui/eprogress.h>
 #include <lib/system/info.h>
 
-ePluginThread *ePluginThread::instance=0;
+ePluginThread *ePluginThread::instance = NULL;
 
-eString getInfo(const char *file, const char *info)
-{
-	FILE *f=fopen(file, "rt");
-	if (!f)
-		return 0;
-
-	eString result;
-
-	char buffer[128];
-
-	while (fgets(buffer, 127, f))
-	{
-		if (strlen(buffer))
-			buffer[strlen(buffer)-1]=0;
-
-		if (strstr(buffer, info))
-		{
-  		result=eString(buffer).mid(strlen(info)+1, strlen(buffer)-strlen(info+1));
-			break;
-		}
-	}	
-	fclose(f);
-	return result;
-}
-
-PluginParam *first=0, *tmp=0;
-
-void MakeParam(const char * const id, int val)
-{
-	PluginParam* p = new PluginParam;
-
-	if (tmp)
-		tmp->next = p;
-
-	p->id = id;
-	char buf[10];
-	sprintf(buf, "%i", val);
-	p->val = new char[strlen(buf)+1];
-	strcpy(p->val, buf);
-
-	if (!first)
-		first = p;
-
-	p->next=0;
-	tmp = p;
-}
-
-ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, const char* descr)
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*)parent)
+ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, eSimpleConfigFile &config, const char* descr)
+	: eListBoxEntryText((eListBox<eListBoxEntryText>*)parent)
 {
 	eDebug(cfgfile);
-	name=text=getInfo(cfgfile, "name");
+
+	name = text = config.getInfo("name");
 
 	if (text.isNull())
 		text="(" + eString(cfgfile) + " is invalid)";
-		
-	desc=getInfo(cfgfile, "desc");
+
+	desc = config.getInfo("desc");
 
 	if (desc)
 	{
-		helptext+=" - "+desc;
-	} 
+		helptext += " - " + desc;
+	}
 
-	depend=getInfo(cfgfile, "depend");
-
-	eString atype=getInfo(cfgfile, "type"),
-					apluginVersion=getInfo(cfgfile, "pluginversion"),
-					aneedfb=getInfo(cfgfile, "needfb"),
-					aneedrc=getInfo(cfgfile, "needrc"),
-					aneedlcd=getInfo(cfgfile, "needlcd"),
-					aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
-					aneedoffsets=getInfo(cfgfile, "needoffsets"),
-					apigon=getInfo(cfgfile, "pigon"),
+	depend = config.getInfo("depend");
+	cfgname = cfgfile;
+	requires = config.getInfo("requires");
+	needfb = atoi(config.getInfo("needfb").c_str());
+	needlcd = atoi(config.getInfo("needlcd").c_str());
+	needrc = atoi(config.getInfo("needrc").c_str());
+	needvtxtpid = atoi(config.getInfo("needvtxtpid").c_str());
+	needoffsets = atoi(config.getInfo("needoffsets").c_str());
+	version = atoi(config.getInfo("pluginversion").c_str());
+	type = atoi(config.getInfo("type").c_str());
+	showpig = atoi(config.getInfo("pigon").c_str());
 	
-	cfgname=cfgfile;
-	requires=getInfo(cfgfile, "requires");
-	needfb=(aneedfb.isNull()?false:atoi(aneedfb.c_str()));
-	needlcd=(aneedlcd.isNull()?false:atoi(aneedlcd.c_str()));
-	needrc=(aneedrc.isNull()?false:atoi(aneedrc.c_str()));
-	needvtxtpid=(aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid.c_str()));
-	needoffsets=(aneedoffsets.isNull()?false:atoi(aneedoffsets.c_str()));
-	version=(apluginVersion.isNull()?0:atoi(apluginVersion.c_str()));
-	type=(atype.isNull()?0:atoi(atype.c_str()));
-	showpig=(apigon.isNull()?false:atoi(apigon.c_str()));
-	
-	if (type == 3)
-		sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".sh";	// uarg
+	if (type == eZapPlugins::ScriptPlugin)
+		sopath = eString(cfgfile).left(strlen(cfgfile) - 4) + ".sh";
 	else 
-		sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg	
+		sopath = eString(cfgfile).left(strlen(cfgfile) - 4) + ".so";
 
-	pluginname=eString(cfgfile).mid(eString(cfgfile).rfind('/')+1);
+	pluginname = eString(cfgfile).mid(eString(cfgfile).rfind('/') + 1);
 
-	pluginname=pluginname.left(pluginname.length()-4);
+	pluginname = pluginname.left(pluginname.length() - 4);
 }
 
-eZapPlugins::eZapPlugins(int type, eWidget* lcdTitle, eWidget* lcdElement)
-	:eListBoxWindow<ePlugin>(type==2?_("Plugins"):_("Games"), 8, 400), type(type)
+const char *eZapPlugins::PluginPath[] = { "/var/tuxbox/plugins/", PLUGINDIR "/", "" };
+
+eZapPlugins::eZapPlugins(Types type, eWidget* lcdTitle, eWidget* lcdElement)
+	:eListBoxWindow<ePlugin>(type == StandardPlugin ? _("Plugins") : _("Games"), 8, 400), type(type)
 {
-	
-	PluginPath[0] = "/var/tuxbox/plugins/";
-	PluginPath[1] = PLUGINDIR "/";
-	PluginPath[2] = "";
 	setHelpText(_("select plugin and press ok"));
 #ifndef DISABLE_LCD
 	setLCD(lcdTitle, lcdElement);
 #endif
 	CONNECT(list.selected, eZapPlugins::selected);
 	valign();
+}
+
+int eZapPlugins::listPlugins(Types type, std::vector<eString> &list)
+{
+	int cnt = 0;
+	for (int i = 0; i < 2; i++)
+	{
+		DIR *d = opendir(PluginPath[i]);
+		if (!d)
+		{
+			continue;
+		}
+		while (struct dirent *e = readdir(d))
+		{
+			eString FileName = e->d_name;
+			if (FileName.find(".cfg") == FileName.size() - 4)
+			{
+				eString cfgname = (eString(PluginPath[i]) + FileName).c_str();
+				eSimpleConfigFile config(cfgname.c_str());
+				if (atoi(config.getInfo("type").c_str()) == (int)type)
+				{
+					list.push_back(cfgname);
+					++cnt;
+				}
+			}
+		}
+		closedir(d);
+	}
+	return cnt;
+}
+
+int eZapPlugins::getAutostartPlugins(std::vector<eString> &list)
+{
+	int cnt = listPlugins(AutostartPlugin, list);
+	for (unsigned int i = 0; i < list.size(); i++)
+	{
+		list[i] = list[i].left(list[i].length() - 4) + ".so";
+	}
+	return cnt;
+}
+
+int eZapPlugins::getFileExtensionPlugins(std::vector<FileExtensionScriptInfo> &list)
+{
+	std::vector<eString> cfgfilelist;
+	int cnt = listPlugins(FileExtensionScriptPlugin, cfgfilelist);
+	for (unsigned int i = 0; i < cfgfilelist.size(); i++)
+	{
+		FileExtensionScriptInfo info;
+		eSimpleConfigFile config(cfgfilelist[i].c_str());
+		info.file_pattern = config.getInfo("pattern");
+		info.directory_pattern = config.getInfo("dirpattern");
+		info.needfb = atoi(config.getInfo("needfb").c_str());
+		info.needrc = atoi(config.getInfo("needrc").c_str());
+		info.needlcd = atoi(config.getInfo("needlcd").c_str());
+		info.command = config.getInfo("command");
+		list.push_back(info);
+	}
+	return cnt;
 }
 
 int eZapPlugins::find(bool ignore_requires)
@@ -145,15 +144,15 @@ int eZapPlugins::find(bool ignore_requires)
 	int connType=0;
 	eConfig::getInstance()->getKey("/elitedvb/network/connectionType", connType);
 	bool hasNetwork = eSystemInfo::getInstance()->hasNetwork();
-	
+
 
 	for ( int i = 0; i < 2; i++ )
 	{
-		DIR *d=opendir(PluginPath[i].c_str());
+		DIR *d=opendir(PluginPath[i]);
 		if (!d)
 		{
 			eString err;
-			err.sprintf(_("Couldn't read plugin directory %s"), PluginPath[i].c_str() );
+			err.sprintf(_("Couldn't read plugin directory %s"), PluginPath[i]);
 			eDebug(err.c_str());
 			if ( i )
 			{
@@ -168,30 +167,34 @@ int eZapPlugins::find(bool ignore_requires)
 		while (struct dirent *e=readdir(d))
 		{
 			eString FileName = e->d_name;
-			if ( FileName.find(".cfg") != eString::npos )
+			if (FileName.find(".cfg") == FileName.size() - 4)
 			{
-				eString cfgname=(PluginPath[i]+FileName).c_str();
-				int current_type=atoi(getInfo(cfgname.c_str(), "type").c_str());
+				eString cfgname = (eString(PluginPath[i]) + FileName).c_str();
+				eSimpleConfigFile config(cfgname.c_str());
+
+				int current_type = (Types)atoi(config.getInfo("type").c_str());
 				
 				//Scripts should be treated as normal plugins in this context
-				if (current_type == 3)
-					current_type = 2;
+				if (current_type == ScriptPlugin)
+					current_type = StandardPlugin;
 					
-				if ((type == -1) || (type == current_type))
+				if ((type == AnyPlugin) || (type == current_type))
 				{
 					// do not add existing plugins twice
-					if ( exist.find(FileName) != exist.end() )
+					if (exist.find(FileName) != exist.end())
 						continue;
+
 					exist.insert(FileName);
 					// check for required specifications
-					eString requires = getInfo(cfgname.c_str(), "requires");
-					if (!ignore_requires) {
+					eString requires = config.getInfo("requires");
+					if (!ignore_requires)
+					{
 						if ((!hasNetwork) && (requires.find("network") != eString::npos))
 							continue;
 						if ((!connType) && (requires.find("dsl") != eString::npos))
 							continue;
 					}
-					plg = new ePlugin(&list, cfgname.c_str());
+					plg = new ePlugin(&list, cfgname.c_str(), config);
 					++cnt;
 				}
 			}
@@ -202,16 +205,48 @@ int eZapPlugins::find(bool ignore_requires)
 	return cnt;
 }
 
+int eZapPlugins::execSelectPrevious(eString &previous)
+{
+	int cnt=0;
+	int res = 0;
+
+	previousPlugin = previous;
+
+	cnt = find();
+	if ((type == StandardPlugin) && (cnt == GamePlugin))
+	{
+		selected(list.getFirst());
+	}
+	else
+	{
+		ePlugin *it = list.getFirst();
+		list.setCurrent(it);
+		if (!it) return res;
+		while (it->pluginname != previous)
+		{
+			it = list.goNext();
+			if (it == list.getFirst()) break;
+		}
+		list.setCurrent(it);
+		show();
+		res=eListBoxWindow<ePlugin>::exec();
+		hide();
+	}
+	previous = previousPlugin;
+	return res;
+}
+
 int eZapPlugins::exec()
 {
 	int cnt=0;
 	int res = 0;
 
 	cnt = find();
-	if ((type == 2) && (cnt == 1))
+	if ((type == StandardPlugin) && (cnt == GamePlugin))
 	{
 		selected(list.getFirst());
 	} else {
+		list.setCurrent(list.getFirst());
 		show();
 		res=eListBoxWindow<ePlugin>::exec();
 		hide();
@@ -232,7 +267,8 @@ eString eZapPlugins::execPluginByName(const char* name, bool onlySearch)
 			if ( fp )
 			{
 				fclose(fp);
-				ePlugin p(0, Path.c_str());
+				eSimpleConfigFile config(Path.c_str());
+				ePlugin p(0, Path.c_str(), config);
 				if (ePluginThread::getInstance())
 				{
 					eDebug("currently one plugin is running.. dont start another one!!");
@@ -251,7 +287,7 @@ eString eZapPlugins::execPluginByName(const char* name, bool onlySearch)
 
 void eZapPlugins::execPlugin(ePlugin* plugin)
 {
-	if (plugin->type == 3)
+	if (plugin->type == ScriptPlugin)
 	{
 			//The current plugin is a script
 			if ((access(plugin->sopath.c_str(), X_OK) == 0))
@@ -287,6 +323,29 @@ void eZapPlugins::selected(ePlugin *plugin)
 		return;
 	}
 	execPlugin(plugin);
+	previousPlugin = plugin->pluginname;
+}
+
+PluginParam *ePluginThread::first = NULL, *ePluginThread::tmp = NULL;
+
+void ePluginThread::MakeParam(const char * const id, int val)
+{
+	PluginParam* p = new PluginParam;
+
+	if (tmp)
+		tmp->next = p;
+
+	p->id = id;
+	char buf[10];
+	sprintf(buf, "%i", val);
+	p->val = new char[strlen(buf)+1];
+	strcpy(p->val, buf);
+
+	if (!first)
+		first = p;
+
+	p->next=0;
+	tmp = p;
 }
 
 void ePluginThread::start()
@@ -322,11 +381,11 @@ void ePluginThread::start()
 					else
 						str.assign( p );
 
-					FILE *fp=fopen((PluginPath[i]+str).c_str(), "rb");
+					FILE *fp=fopen((eString(PluginPath[i])+str).c_str(), "rb");
 					if ( fp )
 					{
 						fclose(fp);
-						argv[argc++] = PluginPath[i]+str;
+						argv[argc++] = eString(PluginPath[i])+str;
 						break;
 					}
 				}
@@ -383,7 +442,7 @@ void ePluginThread::start()
 				close(fd);
 			}
 
-			eDebug("would exec (%s) plugin %s", 
+			eDebug("would exec (%s) plugin %s",
 				isEnigmaPlugin ? "ENIGMA" : "NORMAL",
 				sopath.c_str());
 
@@ -483,7 +542,7 @@ void ePluginThread::recv_msg(const int &)
 
 void ePluginThread::thread_finished()
 {
-	message.send(1); 
+	message.send(1);
 }
 
 void ePluginThread::finalize_plugin()
@@ -532,99 +591,99 @@ void ePluginThread::finalize_plugin()
 eScriptOutputWindow::eScriptOutputWindow(ePlugin *plugin):
 eWindow(1)
 {
-   cresize(eSize(580, 420));
+	cresize(eSize(580, 420));
 
-   setText(eString().sprintf(_("Output from %s"), plugin->sopath.c_str()));
+	setText(eString().sprintf(_("Output from %s"), plugin->sopath.c_str()));
 
-   scrollbar = new eProgress(this);
-   scrollbar->setName("scrollbar");
-   scrollbar->setStart(0);
-   scrollbar->setPerc(100);
-   scrollbar->move(ePoint(width() - 30, 5));
-   scrollbar->resize(eSize(20, height() - 100));
-   scrollbar->setProperty("direction", "1");
+	scrollbar = new eProgress(this);
+	scrollbar->setName("scrollbar");
+	scrollbar->setStart(0);
+	scrollbar->setPerc(100);
+	scrollbar->move(ePoint(width() - 30, 5));
+	scrollbar->resize(eSize(20, height() - 100));
+	scrollbar->setProperty("direction", "1");
 
-   visible = new eWidget(this);
-   visible->setName("visible");
-   visible->move(ePoint(10, 5));
-   visible->resize(eSize(width() - 40, height() - 100));
+	visible = new eWidget(this);
+	visible->setName("visible");
+	visible->move(ePoint(10, 5));
+	visible->resize(eSize(width() - 40, height() - 100));
 
-   label = new eLabel(visible);
-   label->setFlags(RS_WRAP);
-   float lineheight = fontRenderClass::getInstance()->getLineHeight(label->getFont());
-   int lines = (int) (visible->getSize().height() / lineheight);
-   pageHeight = (int) (lines * lineheight);
-   visible->resize(eSize(visible->getSize().width(), pageHeight + (int) (lineheight / 6)));
-   label->resize(eSize(visible->getSize().width(), pageHeight * 16));
+	label = new eLabel(visible);
+	label->setFlags(RS_WRAP);
+	float lineheight = fontRenderClass::getInstance()->getLineHeight(label->getFont());
+	int lines = (int) (visible->getSize().height() / lineheight);
+	pageHeight = (int) (lines * lineheight);
+	visible->resize(eSize(visible->getSize().width(), pageHeight + (int) (lineheight / 6)));
+	label->resize(eSize(visible->getSize().width(), pageHeight * 16));
 
-   label->hide();
-   label->move(ePoint(0, 0));
-   label->setText(eString().sprintf(_("Executing %s. Please wait..."), plugin->sopath.c_str()));
-   script = new eConsoleAppContainer(plugin->sopath);
-   if (!script->running())
-	label->setText(eString().sprintf(_("Could not execute %s"), plugin->sopath.c_str()));
-   else
-   {
-	eDebug("%s started", plugin->sopath.c_str());
-	CONNECT(script->dataAvail, eScriptOutputWindow::getData);
-	CONNECT(script->appClosed, eScriptOutputWindow::scriptClosed);
-   }
-   updateScrollbar();
-   label->show();
+	label->hide();
+	label->move(ePoint(0, 0));
+	label->setText(eString().sprintf(_("Executing %s. Please wait..."), plugin->sopath.c_str()));
+	script = new eConsoleAppContainer(plugin->sopath);
+	if (!script->running())
+		label->setText(eString().sprintf(_("Could not execute %s"), plugin->sopath.c_str()));
+	else
+	{
+		eDebug("%s started", plugin->sopath.c_str());
+		CONNECT(script->dataAvail, eScriptOutputWindow::getData);
+		CONNECT(script->appClosed, eScriptOutputWindow::scriptClosed);
+	}
+	updateScrollbar();
+	label->show();
 
-   valign();
+	valign();
 }
 
 int eScriptOutputWindow::eventHandler(const eWidgetEvent & event)
 {
-   switch (event.type)
-   {
-   case eWidgetEvent::evtAction:
-      if (total && event.action == &i_cursorActions->up)
-      {
-         ePoint curPos = label->getPosition();
-         if (curPos.y() < 0)
-         {
-            label->move(ePoint(curPos.x(), curPos.y() + pageHeight));
-            updateScrollbar();
-         }
-      }
-      else if (total && event.action == &i_cursorActions->down)
-      {
-         ePoint curPos = label->getPosition();
-         if ((total - pageHeight) >= abs(curPos.y() - pageHeight))
-         {
-            label->move(ePoint(curPos.x(), curPos.y() - pageHeight));
-            updateScrollbar();
-         }
-      }
-      else if (event.action == &i_cursorActions->cancel)
-         close(0);
-      else
-         break;
-      return 1;
-   default:
-      break;
-   }
-   return eWindow::eventHandler(event);
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (total && event.action == &i_cursorActions->up)
+		{
+			ePoint curPos = label->getPosition();
+			if (curPos.y() < 0)
+			{
+					label->move(ePoint(curPos.x(), curPos.y() + pageHeight));
+					updateScrollbar();
+			}
+		}
+		else if (total && event.action == &i_cursorActions->down)
+		{
+			ePoint curPos = label->getPosition();
+			if ((total - pageHeight) >= abs(curPos.y() - pageHeight))
+			{
+					label->move(ePoint(curPos.x(), curPos.y() - pageHeight));
+					updateScrollbar();
+			}
+		}
+		else if (event.action == &i_cursorActions->cancel)
+			close(0);
+		else
+			break;
+		return 1;
+	default:
+		break;
+	}
+	return eWindow::eventHandler(event);
 }
 
 void eScriptOutputWindow::updateScrollbar()
 {
-   total = pageHeight;
-   int pages = 1;
-   while (total < label->getExtend().height())
-   {
-      total += pageHeight;
-      pages++;
-   }
+	total = pageHeight;
+	int pages = 1;
+	while (total < label->getExtend().height())
+	{
+		total += pageHeight;
+		pages++;
+	}
 
-   int start = -label->getPosition().y() * 100 / total;
-   int vis = pageHeight * 100 / total;
-   scrollbar->setParams(start, vis);
-   scrollbar->show();
-   if (pages == 1)
-      total = 0;
+	int start = -label->getPosition().y() * 100 / total;
+	int vis = pageHeight * 100 / total;
+	scrollbar->setParams(start, vis);
+	scrollbar->show();
+	if (pages == 1)
+		total = 0;
 }
 
 

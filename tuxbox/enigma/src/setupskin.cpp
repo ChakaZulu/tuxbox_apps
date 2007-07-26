@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.20 2004/11/02 12:44:40 tmbinc Exp $
+ * $Id: setupskin.cpp,v 1.21 2007/07/26 21:29:35 pieterg Exp $
  */
 
 #include <setupskin.h>
@@ -26,8 +26,6 @@
 #include <lib/gui/ebutton.h>
 #include <lib/gui/emessage.h>
 #include <lib/system/econfig.h>
-
-extern eString getInfo(const char *file, const char *info);
 
 void eSkinSetup::loadSkins()
 {
@@ -72,8 +70,9 @@ void eSkinSetup::loadSkins()
 
 			if (fileName.find(".info") != eString::npos)
 			{
-				eString esml=skinPaths[i] + getInfo(fileName.c_str(), "esml");
-				eString name=getInfo(fileName.c_str(), "name");
+				eSimpleConfigFile config(fileName.c_str());
+				eString esml = skinPaths[i] + config.getInfo("esml");
+				eString name = config.getInfo("name");
 				eDebug("esml = %s, name = %s", esml.c_str(), name.c_str());
 				if (esml.size() && name.size())
 				{
