@@ -36,6 +36,7 @@
 #include <lib/driver/eavswitch.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/decoder.h>
+#include <lib/dvb/serviceexternal.h>
 
 #include <lib/system/xmlrpc.h>
 #include <enigma.h>
@@ -44,6 +45,7 @@
 #include <enigma_main.h>
 #include <timer.h>
 #include <enigma_mount.h>
+#include <enigma_plugins.h>
 
 // #include <mcheck.h>
 
@@ -144,10 +146,40 @@ void eZap::init_eZap(int argc, char **argv)
 		fclose(pluginlist);
 	}
 
+	{
+		std::vector<eString> plugin_list;
+		eZapPlugins::getAutostartPlugins(plugin_list);
+		for (unsigned int i = 0; i < plugin_list.size(); i++)
+		{
+			void *handle = dlopen(plugin_list[i].c_str(), RTLD_NOW);
+			if (!handle)
+				eWarning("[PLUGIN] load(%s) failed: %s", plugin_list[i].c_str(), dlerror());
+			else
+				plugins.push_back(handle);
+		}
+	}
+
 	init->setRunlevel(eAutoInitNumbers::configuration);
 	Decoder::Initialize();
 
 	init->setRunlevel(eAutoInitNumbers::osd);
+
+	if (eServiceHandlerExternal::getInstance())
+	{
+		std::vector<eZapPlugins::FileExtensionScriptInfo> plugin_list;
+		eZapPlugins::getFileExtensionPlugins(plugin_list);
+		for (unsigned int i = 0; i < plugin_list.size(); i++)
+		{
+			if (plugin_list[i].file_pattern.size())
+			{
+				eServiceHandlerExternal::getInstance()->addFileHandler(plugin_list[i].file_pattern, plugin_list[i].command, plugin_list[i].needfb, plugin_list[i].needrc, plugin_list[i].needlcd);
+			}
+			if (plugin_list[i].directory_pattern.size())
+			{
+				eServiceHandlerExternal::getInstance()->addDirectoryHandler(plugin_list[i].directory_pattern, plugin_list[i].command, plugin_list[i].needfb, plugin_list[i].needrc, plugin_list[i].needlcd);
+			}
+		}
+	}
 
 	CONNECT(eRCInput::getInstance()->keyEvent, eZap::keyEvent);
 
