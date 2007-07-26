@@ -13,6 +13,44 @@
 #include <lib/system/info.h>
 #include <lib/dvb/serviceexternal.h>
 
+/*
+ * In order to register an external (media)player to a file extension (e.g. ".xyz", place
+ * a .cfg file in the plugin directory, with contents:
+ *
+ *		type=5
+ *		pattern=.xyz
+ *		command=/usr/bin/xzyplay
+ *		needrc=1 (if your player needs the rc)
+ *		needlcd=1 (if your player needs the lcd)
+ *		needfb=1 (if your player needs the framebuffer)
+ *
+ * Now when a file "filename.xyz" is selected in filemode, the external player will be started:
+ *
+ * 		/usr/bin/xyzplay /path/to/file/filename.xyz
+ *
+ * In order to register an external (media)player to a directory, we need to match a certain
+ * file inside the directory (e.g. 'dirname/special.file'). Place a .cfg file in the plugin
+ * directory, with contents:
+ *
+ *		type=5
+ *		dirpattern=filename.xyz
+ *		command=/usr/bin/xyzplay
+ *		needrc=1 (if your player needs the rc)
+ *		needlcd=1 (if your player needs the lcd)
+ *		needfb=1 (if your player needs the framebuffer)
+ *
+ * Now at the same level as 'dirname', an entry 'Start player' will be shown in filemode.
+ * When this entry is selected, the player will be started with the command:
+ *
+ *		/usr/bin/xyzplay /path/to/dir/dirname
+ *
+ *
+ * Only one 'pattern' is allowed per type 5 plugin. Also, only one 'dirpattern' is allowed
+ * per type 5 plugin.
+ * However, it is allowed to have both a 'pattern' and a 'dirpattern' in the same cfg file.
+ *
+ */
+
 eServiceHandlerExternal *eServiceHandlerExternal::instance = NULL;
 
 eServiceHandlerExternal::eServiceHandlerExternal(): eServiceHandler(0x0fff)
