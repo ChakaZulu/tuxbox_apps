@@ -60,6 +60,11 @@
 #include <global.h>
 #include <neutrino.h>
 
+#ifdef HAVE_DREAMBOX_HARDWARE
+const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/rawir2"};
+#define RC_standby_release (KEY_MAX + 1)
+typedef struct { __u16 code; } t_input_event;
+#else
 #ifdef OLD_RC_API
 const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/dbox/rc0"};
 #define RC_standby_release (KEY_MAX + 1)
@@ -68,6 +73,7 @@ typedef struct { __u16 code; } t_input_event;
 const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/input/event0", "/dev/input/event1"};
 typedef struct input_event t_input_event;
 #endif /* OLD_RC_API */
+#endif /* HAVE_DREAMBOX_HARDWARE */
 
 
 #ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
@@ -1122,7 +1128,10 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 				if (read(fd_rc[i], &ev, sizeof(t_input_event)) == sizeof(t_input_event))
 				{
 					uint trkey = translate(ev.code);
-
+#ifdef HAVE_DREAMBOX_HARDWARE
+					if (ev.code == 0xff)
+						rc_last_key = 0;
+#endif /* HAVE_DREAMBOX_HARDWARE */
 					if (trkey != RC_nokey)
 					{
 #ifdef OLD_RC_API
@@ -1534,6 +1543,52 @@ std::string CRCInput::getKeyName(const unsigned int key)
 **************************************************************************/
 int CRCInput::translate(int code)
 {
+#ifdef HAVE_DREAMBOX_HARDWARE
+printf("translating code:%x\n",code);
+	if ((code&0xFF00)==0x8000)
+	{
+		switch (code&0xFF)
+		{
+			case 0x00: return RC_0;
+			case 0x01: return RC_1;
+			case 0x02: return RC_2;
+			case 0x03: return RC_3;
+			case 0x04: return RC_4;
+			case 0x05: return RC_5;
+			case 0x06: return RC_6;
+			case 0x07: return RC_7;
+			case 0x08: return RC_8;
+			case 0x09: return RC_9;
+			case 0x0a: return RC_plus;
+			case 0x0b: return RC_minus;
+			case 0x0c: return RC_tv;
+			case 0x0d: return RC_page_up;
+			case 0x0e: return RC_page_down;
+			case 0x0f: return RC_standby;
+			case 0x20: return RC_setup;
+			case 0x21: return RC_up;
+			case 0x22: return RC_down;
+			case 0x23: return RC_left;
+			case 0x24: return RC_right;
+			case 0x25: return RC_ok;
+			case 0x26: return RC_audio;
+			case 0x27: return RC_video;
+			case 0x28: return RC_help;
+			case 0x40: return RC_red;
+			case 0x41: return RC_green;
+			case 0x42: return RC_yellow;
+			case 0x43: return RC_blue;
+			case 0x44: return RC_spkr;
+			case 0x45: return RC_text;
+			case 0x50: return RC_prev;
+			case 0x51: return RC_next;
+			case 0x52: return RC_home;
+			case 0x53: return RC_radio;
+			case 0x54: return RC_help;
+		}
+	}
+	return RC_nokey;
+#else
 #ifdef OLD_RC_API
 	if ((code&0xFF00)==0x5C00)
 	{
@@ -1642,4 +1697,5 @@ int CRCInput::translate(int code)
 	else
 		return RC_nokey;
 #endif /* OLD_RC_API */
+#endif /* HAVE_DREAMBOX_HARDWARE */
 }

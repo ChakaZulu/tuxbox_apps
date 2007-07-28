@@ -169,7 +169,16 @@ class CRCInput
 			RC_top_right    = KEY_TOPRIGHT,     /* /include/linux/input.h: #define KEY_TOPRIGHT     0x1a3        */ /* in patched input.h */
 			RC_bottom_left  = KEY_BOTTOMLEFT,   /* /include/linux/input.h: #define KEY_BOTTOMLEFT   0x1a4        */ /* in patched input.h */
 			RC_bottom_right = KEY_BOTTOMRIGHT,  /* /include/linux/input.h: #define KEY_BOTTOMRIGHT  0x1a5        */ /* in patched input.h */
-
+#ifdef HAVE_DREAMBOX_HARDWARE
+			// definitions for additional buttons on Dreambox remote
+			RC_tv           = KEY_TV,           /* /include/linux/input.h: #define KEY_TV		0x179 */
+			RC_radio        = KEY_RADIO,        /* /include/linux/input.h: #define KEY_RADIO	0x181 */
+			RC_text         = KEY_TEXT,         /* /include/linux/input.h: #define KEY_TEXT		0x184 */
+			RC_audio        = KEY_AUDIO,        /* /include/linux/input.h: #define KEY_AUDIO	0x188 */
+			RC_video        = KEY_VIDEO,        /* /include/linux/input.h: #define KEY_VIDEO	0x189 */
+			RC_next         = KEY_NEXT,         /* /include/linux/input.h: #define KEY_NEXT		0x197 */
+			RC_prev         = KEY_PREVIOUS,     /* /include/linux/input.h: #define KEY_PREVIOUS	0x19c */
+#endif
 		        //////////////// Keys on the IR Keyboard, not the RC ////////////////
 			RC_esc		= KEY_ESC,		/* #define KEY_ESC		 	1  */
 
