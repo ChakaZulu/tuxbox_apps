@@ -1544,7 +1544,6 @@ std::string CRCInput::getKeyName(const unsigned int key)
 int CRCInput::translate(int code)
 {
 #ifdef HAVE_DREAMBOX_HARDWARE
-printf("translating code:%x\n",code);
 	if ((code&0xFF00)==0x8000)
 	{
 		switch (code&0xFF)
