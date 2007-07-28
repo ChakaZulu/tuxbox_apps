@@ -67,6 +67,10 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #define PLUGINDIR_VAR "/var/tuxbox/plugins"
 #define PLUGINDIR_MNT "/mnt/plugins"
 
+#ifndef TUXTXT_CFG_STANDALONE
+extern "C" void tuxtxt_start(int tpid);
+#endif
+
 bool CPlugins::plugin_exists(const std::string & filename)
 {
 	return (find_plugin(filename) >= 0);
@@ -516,8 +520,22 @@ void CPlugins::startPlugin(int number,int param)
 	}
 #ifdef HAVE_DREAMBOX_HARDWARE
 	if (rcfd > 0)
+	{
+		__u16 ev;
+		// remove all remaining events
+		while (read(rcfd, &ev, sizeof(__u16)) == sizeof(__u16));
 		close(rcfd);
+	}
 #endif
+#ifndef TUXTXT_CFG_STANDALONE
+	// Tuxtxt_caching is stopped when exiting tuxtxt_plugin, so we have to start caching again
+	if(g_settings.tuxtxt_cache && !CNeutrinoApp::getInstance ()->recordingstatus)
+	{
+		if(vtpid)
+			tuxtxt_start(vtpid);
+	}
+#endif
+
 	for(par = startparam ; par; )
 	{
 		/* we must not free par->id, since it is the original */
