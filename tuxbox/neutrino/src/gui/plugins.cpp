@@ -348,14 +348,27 @@ void CPlugins::startPlugin(int number,int param)
 	char *        error;
 	int           vtpid      =  0;
 	PluginParam * startparam =  0;
-
+#ifdef HAVE_DREAMBOX_HARDWARE
+	int rcfd = -1;
+#endif
 	if (plugin_list[number].fb)
 	{
 		startparam = makeParam(P_ID_FBUFFER  , frameBuffer->getFileHandle()    , startparam);
 	}
 	if (plugin_list[number].rc)
 	{
+#ifdef HAVE_DREAMBOX_HARDWARE
+		// use /dev/dbox/rc0 to keep compatibility with plugins
+		rcfd = open ("/dev/dbox/rc0",O_RDONLY);
+		__u16 ev;
+		fcntl(rcfd, F_SETFL, O_NONBLOCK);
+		// remove all remaining events
+		while (read(rcfd, &ev, sizeof(__u16)) == sizeof(__u16));
+
+		startparam = makeParam(P_ID_RCINPUT  , rcfd, startparam);
+#else
 		startparam = makeParam(P_ID_RCINPUT  , g_RCInput->getFileHandle()      , startparam);
+#endif
 		startparam = makeParam(P_ID_RCBLK_ANF, g_settings.repeat_genericblocker, startparam);
 		startparam = makeParam(P_ID_RCBLK_REP, g_settings.repeat_blocker       , startparam);
 	}
@@ -501,7 +514,10 @@ void CPlugins::startPlugin(int number,int param)
 		else
 			break;
 	}
-
+#ifdef HAVE_DREAMBOX_HARDWARE
+	if (rcfd > 0)
+		close(rcfd);
+#endif
 	for(par = startparam ; par; )
 	{
 		/* we must not free par->id, since it is the original */
