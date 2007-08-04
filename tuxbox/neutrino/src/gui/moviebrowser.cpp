@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.13 2007/02/24 15:21:38 guenther Exp $
+	$Id: moviebrowser.cpp,v 1.14 2007/08/04 21:54:59 guenther Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,10 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.14  2007/08/04 21:54:59  guenther
+	- Increase number of  chars to 30 for info1 and channel name
+	- Clear RC buffer when entering MB. Avoid starting of first movie if OK button is pressed to long.
+	
 	Revision 1.13  2007/02/24 15:21:38  guenther
 	Allow all directories as movie dir, use root for non selection
 	
@@ -405,7 +409,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.13 2007/02/24 15:21:38 guenther Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.14 2007/08/04 21:54:59 guenther Exp $\r\n");
 	init();
 }
 
@@ -1051,6 +1055,7 @@ int CMovieBrowser::exec(const char* path)
  
  	bool loop = true;
 	bool result;
+	g_RCInput->clearRCMsg();	//
 	while (loop)
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
@@ -2967,8 +2972,8 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
     }
 
     CStringInputSMS titelUserInput(LOCALE_MOVIEBROWSER_INFO_TITLE,            &movie_info->epgTitle, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
-    CStringInputSMS channelUserInput(LOCALE_MOVIEBROWSER_INFO_CHANNEL,        &movie_info->epgChannel, 15, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
-    CStringInputSMS epgUserInput(LOCALE_MOVIEBROWSER_INFO_INFO1,              &movie_info->epgInfo1, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS channelUserInput(LOCALE_MOVIEBROWSER_INFO_CHANNEL,        &movie_info->epgChannel, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS epgUserInput(LOCALE_MOVIEBROWSER_INFO_INFO1,              &movie_info->epgInfo1, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
     CDateInput   dateUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,        &movie_info->dateOfLastPlay, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
     CDateInput   recUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,         &movie_info->file.Time, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
     CIntInput    lengthUserIntInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,       (long&)movie_info->length, 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
@@ -3638,7 +3643,7 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.13 $");
+	helpbox.addLine("MovieBrowser $Revision: 1.14 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
