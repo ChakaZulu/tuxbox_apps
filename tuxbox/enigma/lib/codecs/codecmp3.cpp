@@ -30,62 +30,66 @@ eAudioDecoderMP3::~eAudioDecoderMP3()
 
 int eAudioDecoderMP3::decodeMore(int last, int maxsamples, Signal1<void, unsigned int> *)
 {
-	int written=0;
+	int written = 0;
 	while (last || (written < maxsamples))
 	{
-		const int OUTPUT_BUFFER_SIZE=1152*2;
-		int status=0;
+		const int OUTPUT_BUFFER_SIZE = 1152*2;
+		int status = 0;
 		
 		if ((!stream.buffer) || (stream.error == MAD_ERROR_BUFLEN))
 		{
 			size_t read_size, remaining;
 			unsigned char *read_start;
 			
+			if (!input.size())
+				break;
 			if (stream.next_frame)
 			{
-				remaining=stream.bufend-stream.next_frame;
-				memmove(input_buffer, stream.next_frame, remaining);
-				read_start=input_buffer+remaining;
-				read_size=INPUT_BUFFER_SIZE-remaining;
-			} else
-				read_size=INPUT_BUFFER_SIZE,
-				read_start=input_buffer,
-				remaining=0;
+				remaining = stream.bufend - stream.next_frame;
+				if (input_buffer != stream.next_frame)
+					memmove(input_buffer, stream.next_frame, remaining);
+				read_start = input_buffer + remaining;
+				read_size = INPUT_BUFFER_SIZE - remaining;
+			}
+			else  
+			{
+				read_size = INPUT_BUFFER_SIZE;
+				read_start = input_buffer;
+				remaining = 0;
+			}
 				
-			read_size=input.read(read_start, read_size);
+			read_size = input.read(read_start, read_size);
 			
-			if (!read_size)
-				break;
-		
-			mad_stream_buffer(&stream, input_buffer, read_size+remaining);
-			stream.error=(mad_error)0;
+			mad_stream_buffer(&stream, input_buffer, read_size + remaining);
+			stream.error = (mad_error)0;
 		}
 		
 		if (mad_frame_decode(&frame, &stream))
+		{
 			if (MAD_RECOVERABLE(stream.error))
 			{
 				eWarning("mp3: recoverable frame level error (%s)", mad_stream_errorstr(&stream));
 				continue;
-			} else
+			}
+			else
+			{
 				if (stream.error == MAD_ERROR_BUFLEN)
 				{
-//					eDebug("MAD_ERROR_BUFLEN");
-					continue;
-				} else
+					// eDebug("MAD_ERROR_BUFLEN");
+					continue; // lets see if adding more data to the buffer helps
+				}
+				else
 				{
 					eWarning("mp3: unrecoverable frame level error (%s)", mad_stream_errorstr(&stream));
-					status=2;
+					status = 2;
 					break;
 				}
+			}
+		}
 		
 		mad_timer_add(&timer, frame.header.duration);
 
-		{
-			if (avgbr==-1)
-				avgbr=frame.header.bitrate;
-			else
-				avgbr=(avgbr*255+frame.header.bitrate)>>8;
-		}
+		avgbr = (avgbr == -1)  ? frame.header.bitrate : (avgbr*255+frame.header.bitrate)>>8;
 
 		if (++framecnt < speed)
 		{
