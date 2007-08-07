@@ -86,15 +86,6 @@ CStreamInfo2::CStreamInfo2()
 	old_x = 0;
 	old_y = 0;
 
-	frameBuffer->paletteSetColor(COL_WHITE,   0x00FFFFFF, 0);
-	frameBuffer->paletteSetColor(COL_RED,     0x00FF0000, 0);
-	frameBuffer->paletteSetColor(COL_GREEN,   0x0000FF00, 0);
-	frameBuffer->paletteSetColor(COL_BLUE,    0x002020FF, 0);
-	frameBuffer->paletteSetColor(COL_YELLOW,  0x00FF9900, 0);
-	frameBuffer->paletteSetColor(COL_BLACK,   0x00000000, 0);
-
-	frameBuffer->paletteSet();
-
 	sigBox_pos = 0;
 	paint_mode = 0;
 	
@@ -111,7 +102,7 @@ CStreamInfo2::CStreamInfo2()
 	rate.min_short_average = 20000;
 	
 	brc = 0;
-	int mode = g_Zapit->getMode();
+	int mode = g_Zapit->getMode(); 
 	if (!g_Zapit->isRecordModeActive())
 		if (mode == 1) { 
 			current_apid = -1;		
@@ -157,8 +148,9 @@ CStreamInfo2::~CStreamInfo2()
 		}
 	}
 #endif
+
 	delete pig;
-	if (brc) delete brc;
+	if (brc) delete brc;			
 }
 
 int CStreamInfo2::exec()
@@ -281,7 +273,7 @@ void CStreamInfo2::hide()
 
 void CStreamInfo2::paint_pig(int x, int y, int w, int h)
 {
-	frameBuffer->paintBoxRel(x,y,w,h, COL_BLACK);
+	frameBuffer->paintBoxRel(x,y,w,h, 0x11);
 	pig->show (x,y,w,h);
 }
 
@@ -296,21 +288,21 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	sigBox_y = y+iheight+15;
 	sigBox_w = w;
 	sigBox_h = h-iheight*3;
-	frameBuffer->paintBoxRel(sigBox_x,sigBox_y,sigBox_w+2,sigBox_h, COL_BLACK);
+	frameBuffer->paintBoxRel(sigBox_x,sigBox_y,sigBox_w+2,sigBox_h, 0x11);
 
 	y1 = y + h + iheight + iheight+iheight-8;
 	y2 = y + h - sheight+8;
 	
-	frameBuffer->paintBoxRel(x+xd*0,y2- 12,16,2,COL_RED);
+	frameBuffer->paintBoxRel(x+xd*0,y2- 12,16,2, 0xA); //red
 	g_Font[font_small]->RenderString(x+20+xd*0, y2, 50, "BER", COL_MENUCONTENT, 0, true);
 
-	frameBuffer->paintBoxRel(x+xd*1,y2- 12,16,2,COL_BLUE);
+	frameBuffer->paintBoxRel(x+xd*1,y2- 12,16,2,0xD); //blue
 	g_Font[font_small]->RenderString(x+20+xd*1, y2, 50, "SNR", COL_MENUCONTENT, 0, true);
 
-	frameBuffer->paintBoxRel(x+8+xd*2,y2- 12,16,2,COL_GREEN);
+	frameBuffer->paintBoxRel(x+8+xd*2,y2- 12,16,2, 0xB); //green
 	g_Font[font_small]->RenderString(x+28+xd*2, y2, 50, "SIG", COL_MENUCONTENT, 0, true);
 	
-	frameBuffer->paintBoxRel(x+xd*3,y2- 12,16,2,COL_YELLOW);
+	frameBuffer->paintBoxRel(x+xd*3,y2- 12,16,2,0xC); //yellow
 	g_Font[font_small]->RenderString(x+20+xd*3, y2, 50, "Bitrate", COL_MENUCONTENT, 0, true);
 	
 	sig_text_y = y1 - iheight;
@@ -350,8 +342,8 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 
 	sigBox_pos = (++sigBox_pos) % sigBox_w;
 
-	frameBuffer->paintVLine(sigBox_x+sigBox_pos, sigBox_y, sigBox_y+sigBox_h, COL_WHITE);
-	frameBuffer->paintVLine(sigBox_x+x_now, sigBox_y, sigBox_y+sigBox_h+1, COL_BLACK);
+	frameBuffer->paintVLine(sigBox_x+sigBox_pos, sigBox_y, sigBox_y+sigBox_h, 0x10);
+	frameBuffer->paintVLine(sigBox_x+x_now, sigBox_y, sigBox_y+sigBox_h+1, 0x11);
 
 	SignalRenderStr (rate.short_average,sig_text_rate_x,y - sheight);
 	SignalRenderStr (rate.max_short_average,sig_text_rate_x,y - sheight - sheight);
@@ -365,7 +357,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 		old_x = sigBox_x+x_now;
 		old_y = sigBox_y+sigBox_h-yd;
 	} else {
-		frameBuffer->paintLine(old_x, old_y, sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_YELLOW);
+		frameBuffer->paintLine(old_x, old_y, sigBox_x+x_now, sigBox_y+sigBox_h-yd, 0xC); //yellow
 		old_x = sigBox_x+x_now;
 		old_y = sigBox_y+sigBox_h-yd;
 	}
@@ -376,7 +368,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 		SignalRenderStr (s.min_ber, sig_text_ber_x,y);
 	}
 	yd = y_signal_fe (s.ber, 4000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_RED);
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, 0xA); //red
 
 
 	if (s.sig != s.old_sig) {
@@ -385,7 +377,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 		SignalRenderStr (s.min_sig, sig_text_sig_x,y);
 	}
 	yd = y_signal_fe (s.sig, 65000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_GREEN);
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, 0xB); //green
 
 
 	if (s.snr != s.old_snr) {
@@ -394,7 +386,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 		SignalRenderStr (s.min_snr, sig_text_snr_x,y);
 	}
 	yd = y_signal_fe (s.snr, 65000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_BLUE);
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, 0xD); //blue
 }
 
 

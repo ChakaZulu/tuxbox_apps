@@ -49,10 +49,6 @@ class CStreamInfo2
 
 		CPIG *pig;
 
-		// -- color hack using evil knowledge from frambuffer.c
-		enum {	COL_WHITE=0x60, COL_RED, COL_GREEN,
-			COL_BLUE, COL_YELLOW, COL_BLACK };
-
 		int  paint_mode;
 
 		int  font_head;
@@ -110,4 +106,3 @@ class CStreamInfo2Handler : public CMenuTarget
 
 
 #endif
-
