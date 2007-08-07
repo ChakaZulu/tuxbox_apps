@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.148 2007/08/04 22:25:19 guenther Exp $
+  $Id: movieplayer.cpp,v 1.149 2007/08/07 18:41:47 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -3323,6 +3323,9 @@ void CMoviePlayerGui::PlayFile (int parental)
 						TRACE("[mp] start pos %llu, %d s Name: %s\r\n",g_startposition,moviebrowser->getCurrentStartPos(),filename);
 						// get the movie info handle (to be used for e.g. bookmark handling)
 						p_movie_info = moviebrowser->getCurrentMovieInfo();
+
+						if(FileTime.IsVisible()) // update time if visible
+							FileTime.show(g_startposition / SECONDOFFSET);
 	
 						update_lcd   = true;
 						start_play   = true;
@@ -3369,7 +3372,10 @@ void CMoviePlayerGui::PlayFile (int parental)
 						update_lcd   = true;
 						start_play   = true;
                         p_movie_info = NULL; // ew might get the movie info here some time
- 					}
+                        
+						if(FileTime.IsVisible()) // update time if visible
+							FileTime.show(0);
+					}
 				}
 			}// MOVIEBROWSER added
 
@@ -4382,7 +4388,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP20));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.148 $");
+	helpbox.addLine("Version: $Revision: 1.149 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4408,7 +4414,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.148 $");
+	helpbox.addLine("Version: $Revision: 1.149 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
