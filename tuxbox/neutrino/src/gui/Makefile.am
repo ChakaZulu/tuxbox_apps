@@ -23,7 +23,7 @@ libneutrino_gui_a_SOURCES = \
 	timeosd.cpp epgplus.cpp epg_menu.cpp \
 	streaminfo2.cpp plugins.cpp imageinfo.cpp \
 	audio_select.cpp \
-	moviebrowser.cpp movieinfo.cpp
+	moviebrowser.cpp movieinfo.cpp movieviewer.cpp
 
 	
 #	experimental_menu.cpp
