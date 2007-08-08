@@ -103,11 +103,13 @@ class CMoviePlayerGui : public CMenuTarget
     void showHelpTS(void);
     void showHelpVLC(void);
     void showFileInfoVLC(void);
+    void showMovieViewer(void);
 
  public:
     CMoviePlayerGui();
     ~CMoviePlayerGui();
     int exec(CMenuTarget* parent, const std::string & actionKey);
+    void fileInfoStale(){if(moviebrowser != NULL)moviebrowser->fileInfoStale();};
 };
 
 
