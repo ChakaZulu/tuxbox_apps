@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.9 2007/07/18 20:04:25 houdini Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.10 2007/08/08 22:17:06 dbt Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -27,33 +27,26 @@
 #include <pthread.h>
 #include <vector>
 
+typedef uint64_t sections_id_t;
+typedef unsigned char version_number_t;
+
 class DMX
 {
  private:
-	struct section_id
-	{
-		unsigned char table_id;
-		unsigned short table_extension_id;
-		unsigned char section_number;
-		unsigned char version_number;
-		unsigned short transport_stream_id;
-		unsigned short original_network_id;
-		section_id *next;
-	};
 
 	int             fd;
 	pthread_mutex_t pauselock;
 	unsigned short  pID;
 	unsigned short  dmxBufferSizeInKB;
-	section_id *first_section;
-	section_id first_skipped_section;
+	sections_id_t first_skipped;
 	int		current_service;
 
 	inline bool isOpen(void) { return (fd != -1); }
-
+	
 	int immediate_start(void); /* mutex must be locked before and unlocked after this method */
 	int immediate_stop(void);  /* mutex must be locked before and unlocked after this method */
-	bool check_complete(const unsigned char table_id, const unsigned short extension_id, const unsigned char);
+	bool check_complete(const unsigned char table_id, const unsigned short extension_id, const unsigned short onid, const unsigned short tsid, const unsigned char);
+	sections_id_t create_sections_id(const unsigned char table_id, const unsigned short extension_id, const unsigned char section_number, const unsigned short onid, const unsigned short tsid);
 
  public:
 	struct s_filters
@@ -99,6 +92,7 @@ class DMX
 	// section with size < 3 + 5 are skipped !
 	int setPid(const unsigned short new_pid);
 	int setCurrentService(int new_current_service);
+	int dropCachedSectionIDs();
 };
 
 #endif /* __sectionsd__dmx_h__ */

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.246 2007/07/18 20:04:25 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.247 2007/08/08 22:17:06 dbt Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -91,7 +91,7 @@
 // -- 5 Minutes max. pause should improve behavior  (rasc, 2005-05-02)
 #define TIME_EIT_SCHEDULED_PAUSE 5* 60
 // Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
-#define TIME_EIT_SKIPPING 30
+#define TIME_EIT_SKIPPING 60
 
 //#define MAX_EVENTS 6000
 static unsigned int max_events;
@@ -141,7 +141,7 @@ static unsigned int max_events;
 #define RESTART_DMX_AFTER_TIMEOUTS 5
 
 // Gibt die Anzahl Timeouts an, nach der berprft wird, ob die Timeouts von einem Sender ohne EIT kommen oder nicht
-#define CHECK_RESTART_DMX_AFTER_TIMEOUTS 3
+#define CHECK_RESTART_DMX_AFTER_TIMEOUTS 4
 
 // Wieviele Sekunden EPG gecached werden sollen
 //static long secondsToCache=4*24*60L*60L; // 4 Tage - weniger Prozessorlast?!
@@ -1236,6 +1236,27 @@ static const SIevent& findNextSIeventForServiceUniqueKey(const t_channel_id serv
 	return nullEvt;
 }
 
+static const bool ServiceUniqueKeyHasCurrentNext(const t_channel_id serviceUniqueKey)
+{
+	time_t azeit = time(NULL);
+
+	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); ++e)
+		if ((*e)->get_channel_id() == serviceUniqueKey)
+		{
+			for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); ++t) {
+				if (((long)(azeit) < (long)(t->startzeit + t->dauer)) && (t->startzeit <= (long)(azeit)))
+				{
+					//current is there; check if next is too
+					if ((++t != (*e)->times.end()) || 
+						((*++e)->get_channel_id() == serviceUniqueKey))
+						return true;
+				}
+			}
+		}
+
+	return false;
+}
+
 /*
 static const SIevent &findActualSIeventForServiceName(const char * const serviceName, SItime& zeit)
 {
@@ -1937,7 +1958,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.246 2007/07/18 20:04:25 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.247 2007/08/08 22:17:06 dbt Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2270,6 +2291,7 @@ static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
 //static unsigned char 	messaging_current_version_number = 0;
 //static unsigned char 	messaging_current_section_number = 0;
 static bool		EITCheckAllFilters = true;
+static bool		messaging_eit_is_busy = false;
 
 //std::vector<long long>	messaging_sdt_skipped_sections_ID [2];			// 0x42, 0x46
 //static long long 	messaging_sdt_sections_max_ID [2];			// 0x42, 0x46
@@ -2334,22 +2356,7 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		unlockMessaging();
 		writeLockMessaging();
 		messaging_current_servicekey = *uniqueServiceKey;
-
-/*		printf("here1\n");
-		for ( int i = 0x4e; i <= 0x6f; i++)
-		{
-			messaging_skipped_sections_ID[i - 0x4e].clear();
-			messaging_sections_max_ID[i - 0x4e] = -1;
-			messaging_sections_got_all[i - 0x4e] = false;
-		}
-
-		for ( int i = 0; i <= 1; i++)
-		{
-			messaging_sdt_skipped_sections_ID[i].clear();
-			messaging_sdt_sections_max_ID[i] = -1;
-			messaging_sdt_sections_got_all[i] = false;
-		}
-*/
+		dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
 
 		doWakeUp = true;
 
@@ -2398,14 +2405,6 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	if ( doWakeUp )
 	{
-		// nur wenn lange genug her, oder wenn anderer Service :)
-//		if ( transponderChanged ) {
-//			dmxSDT.stop();
-//			dmxNIT.stop();
-//			dmxNIT.real_pause();
-//			pthread_mutex_lock( &dmxNIT.start_stop_mutex );
-//			dmxSDT.real_pause();
-//			pthread_mutex_lock( &dmxSDT.start_stop_mutex );
 		writeLockMessaging();
 		for ( int i = 0; i < MAX_BAT; i++) {
 			messaging_bat_bouquet_id[i] = 0;
@@ -2415,11 +2414,17 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 		}
 		unlockMessaging();
 
+		if (ServiceUniqueKeyHasCurrentNext(*uniqueServiceKey))
+		{
 			readLockMessaging();
-			dmxEIT.setCurrentService(messaging_current_servicekey & 0xffff);
+			if ((transponderChanged) || (!messaging_eit_is_busy))
+				dmxEIT.change( 3 );
+			else
+				dprintf("[sectionsd] commandserviceChanged: tp not changed\n");
 			unlockMessaging();
+		}
+		else
 			dmxEIT.change( 0 );
-//		}
 	}
 	else
 		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
@@ -2458,6 +2463,12 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 	unsigned flag = 0;
 
 	const SIevent &evt = findActualSIeventForServiceUniqueKey(*uniqueServiceKey, zeitEvt1, 0, &flag);
+	readLockMessaging();
+	if(evt.getName().empty() && flag != 0 && !messaging_eit_is_busy)
+	{
+		dmxEIT.change( 0 );
+	}
+	unlockMessaging();
 	if (evt.service_id == 0)
 	{
 		readLockServices();
@@ -6227,6 +6238,9 @@ static void *eitThread(void *)
 		int timeoutsDMX = 0;
 		time_t lastChanged = time(NULL);
 		dmxEIT.start(); // -> unlock
+		writeLockMessaging();
+		messaging_eit_is_busy = true;
+		unlockMessaging();
 
 		for (;;)
 		{
@@ -6285,8 +6299,8 @@ static void *eitThread(void *)
 
 				if (si != mySIservicesOrderUniqueKey.end())
 				{
-					if ( ( ( dmxEIT.filter_index == 0 ) && ( !si->second->eitPresentFollowingFlag() ) ) ||
-					        ( ( dmxEIT.filter_index == 1 ) && ( !si->second->eitScheduleFlag() ) ) )
+					if ( ( (( dmxEIT.filter_index == 0 ) || (dmxEIT.filter_index == 2)) && ( !si->second->eitPresentFollowingFlag() ) ) ||
+					        ( ((dmxEIT.filter_index == 1) || (dmxEIT.filter_index == 3)) && ( !si->second->eitScheduleFlag() ) ) )
 					{
 						timeoutsDMX = 0;
 						dprintf("[eitThread] timeoutsDMX for 0x"
@@ -6317,6 +6331,10 @@ static void *eitThread(void *)
 				}
 				unlockMessaging();
 				unlockServices();
+			}
+			else {
+				if ( dmxEIT.filter_index < 2 )
+					usleep(timeoutsDMX*1000);
 			}
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
@@ -6353,6 +6371,9 @@ static void *eitThread(void *)
 					dmxEIT.real_pause();
 					pthread_mutex_lock( &dmxEIT.start_stop_mutex );
 					dprintf("dmxEIT: going to sleep...\n");
+					writeLockMessaging();
+					messaging_eit_is_busy = false;
+					unlockMessaging();
 
 					readLockMessaging();
 					if (auto_scanning) {
@@ -6380,6 +6401,9 @@ static void *eitThread(void *)
 						dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxEIT.filters.size() );
 						dmxEIT.change( 2 ); // -> restart
 						lastChanged = time(NULL);
+						writeLockMessaging();
+						messaging_eit_is_busy = true;
+						unlockMessaging();
 					}
 					else if (rs == 0)
 					{
@@ -6389,12 +6413,18 @@ static void *eitThread(void *)
 						dmxEIT.real_unpause();
 						lastChanged = time(NULL);
 #endif
+						writeLockMessaging();
+						messaging_eit_is_busy = true;
+						unlockMessaging();
 					}
 					else
 					{
 						dprintf("dmxEIT:  waking up again - unknown reason?!\n");
 						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
 						dmxEIT.real_unpause();
+						writeLockMessaging();
+						messaging_eit_is_busy = true;
+						unlockMessaging();
 					}
 					// update zeit after sleep
 					zeit = time(NULL);
@@ -6809,26 +6839,17 @@ static void *houseKeepingThread(void *)
 			if (count == META_HOUSEKEEPING) {
 				dprintf("meta housekeeping - deleting all transponders, services, bouquets.\n");
 				writeLockTransponders();
-				MySItranspondersOrderUniqueKey::iterator t = mySItranspondersOrderUniqueKey.begin();
-				while (t != mySItranspondersOrderUniqueKey.end()) {
-					mySItranspondersOrderUniqueKey.erase(t->first);
-					t = mySItranspondersOrderUniqueKey.begin();
-				}
+				mySItranspondersOrderUniqueKey.clear();
 				unlockTransponders();
 				writeLockServices();
-				MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin();
-				while (s != mySIservicesOrderUniqueKey.end()) {
-					mySIservicesOrderUniqueKey.erase(s->first);
-					s = mySIservicesOrderUniqueKey.begin();
-				}
+				mySIservicesOrderUniqueKey.clear();
 				unlockServices();
 				writeLockBouquets();
-				MySIbouquetsOrderUniqueKey::iterator b = mySIbouquetsOrderUniqueKey.begin();
-				while (b != mySIbouquetsOrderUniqueKey.end()) {
-					mySIbouquetsOrderUniqueKey.erase(b->first);
-					b = mySIbouquetsOrderUniqueKey.begin();
-				}
+				mySIbouquetsOrderUniqueKey.clear();
 				unlockBouquets();
+				dmxNIT.dropCachedSectionIDs();
+				dmxSDT.dropCachedSectionIDs();
+				dmxEIT.dropCachedSectionIDs();
 				count = 0;
 			}
 
@@ -7062,7 +7083,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.246 2007/07/18 20:04:25 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.247 2007/08/08 22:17:06 dbt Exp $\n");
 
 	SIlanguage::loadLanguages();
 
