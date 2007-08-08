@@ -175,6 +175,7 @@ class CMovieInfo
 		bool loadMovieInfo(MI_MOVIE_INFO* movie_info, CFile* file = NULL ); 	// load movie information for the given .xml filename. If there is no filename, the filename (ts) from movie_info is converted to xml and used instead
 		bool encodeMovieInfoXml(std::string* extMessage,MI_MOVIE_INFO& movie_info);   	// encode the movie_info structure to xml string
 		bool saveMovieInfo(MI_MOVIE_INFO& movie_info, CFile* file = NULL ); 	// encode the movie_info structure to xml and save it to the given .xml filename. If there is no filename, the filename (ts) from movie_info is converted to xml and used instead
+		void showMovieInfo(const char* filename);												// open a Hintbox and show the movie info
 		void showMovieInfo(MI_MOVIE_INFO& movie_info);									// open a Hintbox and show the movie info
 		void printDebugMovieInfo(MI_MOVIE_INFO& movie_info);							// print movie info on debug channel (RS232)
 		void clearMovieInfo(MI_MOVIE_INFO* movie_info);									// Set movie info structure to initial values

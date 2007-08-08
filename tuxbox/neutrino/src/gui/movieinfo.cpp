@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.7 2006/09/11 21:11:35 guenther Exp $
+	$Id: movieinfo.cpp,v 1.8 2007/08/08 20:38:16 guenther Exp $
 
 	Kommentar:
 
@@ -409,6 +409,19 @@ bool CMovieInfo::parseXmlTree (char* text, MI_MOVIE_INFO* movie_info)
 }
 
 
+/************************************************************************
+
+************************************************************************/
+void CMovieInfo::showMovieInfo(const char* filename)
+{
+	if(filename == NULL)
+		return;
+	
+	MI_MOVIE_INFO movie_info;
+	movie_info.file.Name = filename;
+	if(loadMovieInfo(&movie_info ) == true)
+		showMovieInfo(movie_info);
+}
 
 /************************************************************************
 
