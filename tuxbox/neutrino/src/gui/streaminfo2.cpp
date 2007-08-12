@@ -32,6 +32,7 @@
 #define SCREEN_X	720
 #define SCREEN_Y	572
 
+#include <iostream>
 
 #include <gui/streaminfo2.h>
 
@@ -47,6 +48,7 @@
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
+#include <zapit/client/zapittools.h>
 
 CStreamInfo2::CStreamInfo2()
 {
@@ -102,7 +104,8 @@ CStreamInfo2::CStreamInfo2()
 	rate.min_short_average = 20000;
 	
 	brc = 0;
-	int mode = g_Zapit->getMode(); 
+	int mode = g_Zapit->getMode();
+
 	if (!g_Zapit->isRecordModeActive())
 		if (mode == 1) { 
 			current_apid = -1;		
@@ -150,7 +153,8 @@ CStreamInfo2::~CStreamInfo2()
 #endif
 
 	delete pig;
-	if (brc) delete brc;			
+	if (brc) delete brc;
+			
 }
 
 int CStreamInfo2::exec()
@@ -273,7 +277,7 @@ void CStreamInfo2::hide()
 
 void CStreamInfo2::paint_pig(int x, int y, int w, int h)
 {
-	frameBuffer->paintBoxRel(x,y,w,h, 0x11);
+	frameBuffer->paintBoxRel(x,y,w,h, COL_BLACK); //black
 	pig->show (x,y,w,h);
 }
 
@@ -288,32 +292,32 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	sigBox_y = y+iheight+15;
 	sigBox_w = w;
 	sigBox_h = h-iheight*3;
-	frameBuffer->paintBoxRel(sigBox_x,sigBox_y,sigBox_w+2,sigBox_h, 0x11);
+	frameBuffer->paintBoxRel(sigBox_x,sigBox_y,sigBox_w+2,sigBox_h, COL_BLACK);
 
 	y1 = y + h + iheight + iheight+iheight-8;
 	y2 = y + h - sheight+8;
 	
-	frameBuffer->paintBoxRel(x+xd*0,y2- 12,16,2, 0xA); //red
+	frameBuffer->paintBoxRel(x+xd*0,y2- 12,16,2, COL_RED); //red
 	g_Font[font_small]->RenderString(x+20+xd*0, y2, 50, "BER", COL_MENUCONTENT, 0, true);
 
-	frameBuffer->paintBoxRel(x+xd*1,y2- 12,16,2,0xD); //blue
+	frameBuffer->paintBoxRel(x+xd*1,y2- 12,16,2,COL_BLUE); //blue
 	g_Font[font_small]->RenderString(x+20+xd*1, y2, 50, "SNR", COL_MENUCONTENT, 0, true);
 
-	frameBuffer->paintBoxRel(x+8+xd*2,y2- 12,16,2, 0xB); //green
+	frameBuffer->paintBoxRel(x+8+xd*2,y2- 12,16,2, COL_GREEN); //green
 	g_Font[font_small]->RenderString(x+28+xd*2, y2, 50, "SIG", COL_MENUCONTENT, 0, true);
 	
-	frameBuffer->paintBoxRel(x+xd*3,y2- 12,16,2,0xC); //yellow
+	frameBuffer->paintBoxRel(x+xd*3,y2- 12,16,2,COL_OLIVE); // near yellow
 	g_Font[font_small]->RenderString(x+20+xd*3, y2, 50, "Bitrate", COL_MENUCONTENT, 0, true);
 	
 	sig_text_y = y1 - iheight;
-	sig_text_ber_x = x+20+xd*0;
+	sig_text_ber_x = x+xd*0;
 	sig_text_snr_x = x+05+xd*1;
 	sig_text_sig_x = x+05+xd*2;
 	sig_text_rate_x = x+20+xd*3;
 		
 	int maxmin_x; // x-position of min and max
 	if (paint_mode ==0)	{
-		maxmin_x = sig_text_ber_x-50;
+		maxmin_x = sig_text_ber_x-40;
 		}
 		else	{
 		maxmin_x = x+40+xd*3+45;
@@ -342,8 +346,8 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 
 	sigBox_pos = (++sigBox_pos) % sigBox_w;
 
-	frameBuffer->paintVLine(sigBox_x+sigBox_pos, sigBox_y, sigBox_y+sigBox_h, 0x10);
-	frameBuffer->paintVLine(sigBox_x+x_now, sigBox_y, sigBox_y+sigBox_h+1, 0x11);
+	frameBuffer->paintVLine(sigBox_x+sigBox_pos, sigBox_y, sigBox_y+sigBox_h, COL_WHITE);
+	frameBuffer->paintVLine(sigBox_x+x_now, sigBox_y, sigBox_y+sigBox_h+1, COL_BLACK);
 
 	SignalRenderStr (rate.short_average,sig_text_rate_x,y - sheight);
 	SignalRenderStr (rate.max_short_average,sig_text_rate_x,y - sheight - sheight);
@@ -357,7 +361,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 		old_x = sigBox_x+x_now;
 		old_y = sigBox_y+sigBox_h-yd;
 	} else {
-		frameBuffer->paintLine(old_x, old_y, sigBox_x+x_now, sigBox_y+sigBox_h-yd, 0xC); //yellow
+		frameBuffer->paintLine(old_x, old_y, sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_OLIVE); //yellow
 		old_x = sigBox_x+x_now;
 		old_y = sigBox_y+sigBox_h-yd;
 	}
@@ -368,7 +372,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 		SignalRenderStr (s.min_ber, sig_text_ber_x,y);
 	}
 	yd = y_signal_fe (s.ber, 4000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, 0xA); //red
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_RED); //red
 
 
 	if (s.sig != s.old_sig) {
@@ -377,7 +381,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 		SignalRenderStr (s.min_sig, sig_text_sig_x,y);
 	}
 	yd = y_signal_fe (s.sig, 65000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, 0xB); //green
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_GREEN); //green
 
 
 	if (s.snr != s.old_snr) {
@@ -386,7 +390,7 @@ void CStreamInfo2::paint_signal_fe(struct bitrate rate, struct feSignal  s)
 		SignalRenderStr (s.min_snr, sig_text_snr_x,y);
 	}
 	yd = y_signal_fe (s.snr, 65000, sigBox_h);
-	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, 0xD); //blue
+	frameBuffer->paintPixel(sigBox_x+x_now, sigBox_y+sigBox_h-yd, COL_BLUE); //blue
 }
 
 
@@ -742,9 +746,13 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	}
 
 	//satellite
+	std::cout<<"[streaminfo] diseqc "<<si.diseqc<<std::endl;
+
 	ypos += 10;
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
+		std::cout<<"[streaminfo] "<< buf <<std::endl;
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+
 }
 
 int CStreamInfo2Handler::exec(CMenuTarget* parent, const std::string &actionkey)
