@@ -44,6 +44,23 @@
 
 #define COL_BACKGROUND 			255
 
+#define COL_BLACK		0x11
+#define COL_WHITE		0x10
+#define COL_CYAN 		0xF
+#define COL_MAGENTA		0xE
+#define COL_BLUE		0xD
+#define COL_YELLOW		0xC
+#define COL_LIME		0xB
+#define COL_RED		0xA
+#define COL_GRAY		0x9
+#define COL_SILVER		0x8
+#define COL_TEAL		0x7
+#define COL_PURPLE		0x6
+#define COL_NAVY		0x5
+#define COL_OLIVE		0x4
+#define COL_GREEN		0x3
+#define COL_MAROON		0x2
+
 #ifdef FB_USE_PALETTE
 #define COL_INFOBAR_SHADOW_PLUS_0       (COL_INFOBAR_SHADOW + 0)
 #define COL_INFOBAR_SHADOW_PLUS_1       (COL_INFOBAR_SHADOW + 1)

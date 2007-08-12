@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.56 2007/06/17 18:34:37 dbluelle Exp $
+	$Id: framebuffer.cpp,v 1.57 2007/08/12 14:50:25 dbt Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
                       2003 thegoodguy
@@ -1007,27 +1007,28 @@ void CFrameBuffer::ClearFrameBuffer()
 	paletteSetColor(COL_BACKGROUND, 0x000000, 0xffff);
 
 	//Windows Colors
-	paletteSetColor(0x1, 0x010101, 0);
-	paletteSetColor(0x2, 0x800000, 0);
-	paletteSetColor(0x3, 0x008000, 0);
-	paletteSetColor(0x4, 0x808000, 0);
-	paletteSetColor(0x5, 0x000080, 0);
-	paletteSetColor(0x6, 0x800080, 0);
-	paletteSetColor(0x7, 0x008080, 0);
-	//	frameBuffer.paletteSetColor(0x8, 0xC0C0C0, 0);
-	paletteSetColor(0x8, 0xA0A0A0, 0);
+	paletteSetColor(0x1, 0x010101, 0); 
+	paletteSetColor(COL_MAROON, 0x800000, 0); 
+	paletteSetColor(COL_GREEN, 0x008000, 0); 
+	paletteSetColor(COL_OLIVE, 0x808000, 0); 
+	paletteSetColor(COL_NAVY, 0x000080, 0); 
+	paletteSetColor(COL_PURPLE, 0x800080, 0); 
+	paletteSetColor(COL_TEAL, 0x008080, 0); 
+	
+	//paletteSetColor(COL_SILVER, 0xC0C0C0, 0); //silver --> 0xC0C0C0 is the original VGA colornumber
+	paletteSetColor(COL_SILVER, 0xA0A0A0, 0); //silver --> 0xA0A0A0 is only a compromise!
 
-	//	frameBuffer.paletteSetColor(0x9, 0x808080, 0);
-	paletteSetColor(0x9, 0x505050, 0);
+	//paletteSetColor(COL_GRAY, 0x808080, 0); //gray --> 0x808080 is is the original VGA colornumber
+	paletteSetColor(COL_GRAY, 0x505050, 0); //gray --> 0x505050 is only a compromise
 
-	paletteSetColor(0xA, 0xFF0000, 0);
-	paletteSetColor(0xB, 0x00FF00, 0);
-	paletteSetColor(0xC, 0xFFFF00, 0);
-	paletteSetColor(0xD, 0x0000FF, 0);
-	paletteSetColor(0xE, 0xFF00FF, 0);
-	paletteSetColor(0xF, 0x00FFFF, 0);
-	paletteSetColor(0x10, 0xFFFFFF, 0);
-	paletteSetColor(0x11, 0x000000, 0);
+	paletteSetColor(COL_RED, 0xFF0000, 0); 
+	paletteSetColor(COL_LIME, 0x00FF00, 0); 
+	paletteSetColor(COL_YELLOW, 0xFFFF00, 0); 
+	paletteSetColor(COL_BLUE, 0x0000FF, 0); 
+	paletteSetColor(COL_MAGENTA, 0xFF00FF, 0); 
+	paletteSetColor(COL_CYAN, 0x00FFFF, 0); 
+	paletteSetColor(COL_WHITE, 0xFFFFFF, 0); 
+	paletteSetColor(COL_BLACK, 0x000000, 0); 
 
 	paletteSet();
 }
