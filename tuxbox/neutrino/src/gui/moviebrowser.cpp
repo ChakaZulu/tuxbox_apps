@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.14 2007/08/04 21:54:59 guenther Exp $
+	$Id: moviebrowser.cpp,v 1.15 2007/08/16 20:25:29 guenther Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,9 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.15  2007/08/16 20:25:29  guenther
+	update some locals
+	
 	Revision 1.14  2007/08/04 21:54:59  guenther
 	- Increase number of  chars to 30 for info1 and channel name
 	- Clear RC buffer when entering MB. Avoid starting of first movie if OK button is pressed to long.
@@ -178,11 +181,12 @@ const CMenuOptionChooser::keyval MESSAGEBOX_PARENTAL_LOCK_OPTIONS[MESSAGEBOX_PAR
 	{ 2, LOCALE_MOVIEBROWSER_MENU_PARENTAL_LOCK_ACTIVATED_NO_TEMP   }
 };
 
-#define MESSAGEBOX_PARENTAL_LOCKAGE_OPTION_COUNT 6
+#define MESSAGEBOX_PARENTAL_LOCKAGE_OPTION_COUNT 7
 const CMenuOptionChooser::keyval MESSAGEBOX_PARENTAL_LOCKAGE_OPTIONS[MESSAGEBOX_PARENTAL_LOCKAGE_OPTION_COUNT] =
 {
 	{ 0,  LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE_0YEAR },
 	{ 6,  LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE_6YEAR },
+	{ 8,  LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE_8YEAR },
 	{ 12, LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE_12YEAR },
 	{ 16, LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE_16YEAR },
 	{ 18, LOCALE_MOVIEBROWSER_INFO_PARENTAL_LOCKAGE_18YEAR },
@@ -409,7 +413,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.14 2007/08/04 21:54:59 guenther Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.15 2007/08/16 20:25:29 guenther Exp $\r\n");
 	init();
 }
 
@@ -2748,7 +2752,7 @@ void CMovieBrowser::updateFilterSelection(void)
 	else if(m_settings.filter.item == MB_INFO_INFO2)
 	{
 		std::string text;
-		CStringInputSMS stringInputSMS(LOCALE_MOVIEBROWSER_INFO_INFO2,&text, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+		CStringInputSMS stringInputSMS(LOCALE_MOVIEBROWSER_INFO_INFO2,&text, 20, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
 		stringInputSMS.exec(NULL,"");
 		m_settings.filter.optionString = text;
 		refreshFilterList(); 
@@ -2928,7 +2932,7 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
 
 /********************************************************************/
 /**  serie******************************************************/
-    CStringInputSMS serieUserInput(LOCALE_MOVIEBROWSER_EDIT_SERIE, &movie_info->serieName, 20, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS serieUserInput(LOCALE_MOVIEBROWSER_EDIT_SERIE, &movie_info->serieName, 20, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
 
     CMenuWidget serieMenu (LOCALE_MOVIEBROWSER_SERIE_HEAD, "streaming.raw");
     serieMenu.addItem(GenericMenuSeparator);
@@ -2971,14 +2975,14 @@ void CMovieBrowser::showMovieInfoMenu(MI_MOVIE_INFO* movie_info)
         snprintf(size,BUFFER_SIZE,"%5llu",movie_info->file.Size>>20);
     }
 
-    CStringInputSMS titelUserInput(LOCALE_MOVIEBROWSER_INFO_TITLE,            &movie_info->epgTitle, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
-    CStringInputSMS channelUserInput(LOCALE_MOVIEBROWSER_INFO_CHANNEL,        &movie_info->epgChannel, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
-    CStringInputSMS epgUserInput(LOCALE_MOVIEBROWSER_INFO_INFO1,              &movie_info->epgInfo1, MAX_STRING, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
-    CDateInput   dateUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,        &movie_info->dateOfLastPlay, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
-    CDateInput   recUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,         &movie_info->file.Time, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
-    CIntInput    lengthUserIntInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,       (long&)movie_info->length, 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
-    CStringInputSMS countryUserInput(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY,    &movie_info->productionCountry, 11, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
-    CIntInput    yearUserIntInput(LOCALE_MOVIEBROWSER_INFO_PRODYEAR,       (long&)movie_info->productionDate, 4, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CStringInputSMS titelUserInput(LOCALE_MOVIEBROWSER_INFO_TITLE,            &movie_info->epgTitle, MAX_STRING, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS channelUserInput(LOCALE_MOVIEBROWSER_INFO_CHANNEL,        &movie_info->epgChannel, MAX_STRING, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CStringInputSMS epgUserInput(LOCALE_MOVIEBROWSER_INFO_INFO1,              &movie_info->epgInfo1, MAX_STRING, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.: ");
+    CDateInput   dateUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,        &movie_info->dateOfLastPlay, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
+    CDateInput   recUserDateInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,         &movie_info->file.Time, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
+    CIntInput    lengthUserIntInput(LOCALE_MOVIEBROWSER_INFO_LENGTH,       (long&)movie_info->length, 3, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
+    CStringInputSMS countryUserInput(LOCALE_MOVIEBROWSER_INFO_PRODCOUNTRY,    &movie_info->productionCountry, 11, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
+    CIntInput    yearUserIntInput(LOCALE_MOVIEBROWSER_INFO_PRODYEAR,       (long&)movie_info->productionDate, 4, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
 
     CMenuWidget movieInfoMenu (LOCALE_MOVIEBROWSER_INFO_HEAD, "streaming.raw",m_cBoxFrame.iWidth);
 
@@ -3083,13 +3087,13 @@ bool CMovieBrowser::showMenu(MI_MOVIE_INFO* movie_info)
 
 /********************************************************************/
 /**  optionsMenuBrowser  **************************************************/
-    CIntInput playMaxUserIntInput(LOCALE_MOVIEBROWSER_LAST_PLAY_MAX_ITEMS,      (long&) m_settings.lastPlayMaxItems,    3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
-    CIntInput recMaxUserIntInput(LOCALE_MOVIEBROWSER_LAST_RECORD_MAX_ITEMS,     (long&) m_settings.lastRecordMaxItems,  3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
-    CIntInput browserFrameUserIntInput(LOCALE_MOVIEBROWSER_BROWSER_FRAME_HIGH,  (long&) m_settings.browserFrameHeight,  4, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
-    CIntInput browserRowNrIntInput(LOCALE_MOVIEBROWSER_BROWSER_ROW_NR,          (long&) m_settings.browserRowNr,        1, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+    CIntInput playMaxUserIntInput(LOCALE_MOVIEBROWSER_LAST_PLAY_MAX_ITEMS,      (long&) m_settings.lastPlayMaxItems,    3, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
+    CIntInput recMaxUserIntInput(LOCALE_MOVIEBROWSER_LAST_RECORD_MAX_ITEMS,     (long&) m_settings.lastRecordMaxItems,  3, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
+    CIntInput browserFrameUserIntInput(LOCALE_MOVIEBROWSER_BROWSER_FRAME_HIGH,  (long&) m_settings.browserFrameHeight,  4, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
+    CIntInput browserRowNrIntInput(LOCALE_MOVIEBROWSER_BROWSER_ROW_NR,          (long&) m_settings.browserRowNr,        1, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
     CIntInput* browserRowWidthIntInput[MB_MAX_ROWS];
     for(i=0; i<MB_MAX_ROWS ;i++)
-        browserRowWidthIntInput[i] = new CIntInput(LOCALE_MOVIEBROWSER_BROWSER_ROW_WIDTH,(long&) m_settings.browserRowWidth[i], 3, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE);
+        browserRowWidthIntInput[i] = new CIntInput(LOCALE_MOVIEBROWSER_BROWSER_ROW_WIDTH,(long&) m_settings.browserRowWidth[i], 3, LOCALE_GENERIC_EMPTY, LOCALE_GENERIC_EMPTY);
 
     CMenuWidget optionsMenuBrowser (LOCALE_MOVIEBROWSER_OPTION_BROWSER , "streaming.raw",480);
     optionsMenuBrowser.addItem(GenericMenuSeparator);
@@ -3643,7 +3647,7 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.14 $");
+	helpbox.addLine("MovieBrowser $Revision: 1.15 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
