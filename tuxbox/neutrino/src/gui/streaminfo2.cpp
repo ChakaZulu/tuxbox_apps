@@ -1,6 +1,7 @@
 /*
+	$Id: streaminfo2.cpp,v 1.30 2007/08/16 18:47:38 dbt Exp $
+	
 	Neutrino-GUI  -   DBoxII-Project
-
 
 	License: GPL
 
@@ -48,8 +49,6 @@
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
-#include <zapit/client/zapittools.h>
-
 CStreamInfo2::CStreamInfo2()
 {
 	pig = new CPIG (0);
@@ -64,19 +63,8 @@ CStreamInfo2::CStreamInfo2()
 	iheight     = g_Font[font_info]->getHeight();
 	sheight     = g_Font[font_small]->getHeight();
 
-	if (w_max (710, 5) < 540)	{
-		width = 540;
-	}
-	else	{
-		width = w_max (710, 5);
-	}
-	
-	if (h_max (560, 5) < 485)	{
-		height = 486;
-	}
-	else	{
-		height = h_max (560, 5);
-	}
+	if (w_max (710, 5) < 540 ? width = 540 : width = w_max (710, 5));		
+	if (h_max (560, 5) < 485 ? height = 486 : height = h_max (560, 5));
 
 	max_height = SCREEN_Y-1;
 	max_width  = SCREEN_X-1;
@@ -154,7 +142,6 @@ CStreamInfo2::~CStreamInfo2()
 
 	delete pig;
 	if (brc) delete brc;
-			
 }
 
 int CStreamInfo2::exec()
@@ -313,7 +300,7 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	sig_text_ber_x = x+xd*0;
 	sig_text_snr_x = x+05+xd*1;
 	sig_text_sig_x = x+05+xd*2;
-	sig_text_rate_x = x+20+xd*3;
+	sig_text_rate_x = x+10+xd*3;
 		
 	int maxmin_x; // x-position of min and max
 	if (paint_mode ==0)	{
@@ -590,7 +577,9 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	
 	//tsfrequenz
 	ypos+= sheight-5; //blank line
-	int written = sprintf((char*) buf, "%d.%d MHz", si.tsfrequency/1000, si.tsfrequency%1000);
+	int q;
+	if (g_info.delivery_system==1 ? q = 1000 : q = 1000000);
+	int written = sprintf((char*) buf, "%d.%d MHz", si.tsfrequency/q, si.tsfrequency%1000);
 	if (si.polarisation != 2) /* only satellite has polarisation */
 		sprintf((char*) buf+written, " (%c)", (si.polarisation == HORIZONTAL) ? 'h' : 'v');
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, "Freq:" , COL_MENUCONTENT, 0, true); // UTF-8
@@ -746,11 +735,17 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	}
 
 	//satellite
-	std::cout<<"[streaminfo] diseqc "<<si.diseqc<<std::endl;
-
-	ypos += 10;
-	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
-		std::cout<<"[streaminfo] "<< buf <<std::endl;
+	ypos += 5;
+	const char* pr_sys;
+	if (g_info.delivery_system == 1? pr_sys= "Satellite: %s":pr_sys="Provider: %s")
+	sprintf((char*) buf, pr_sys ,CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
+	std::cout<<"[streaminfo] "<< buf <<std::endl;
+	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
+	
+	//channel
+	ypos += sheight;
+	sprintf((char*) buf, "Channel: %s" ,g_RemoteControl->getCurrentChannelName().c_str());
+	std::cout<<"[streaminfo] "<< buf<<std::endl;
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 }
