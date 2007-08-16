@@ -407,6 +407,7 @@ fontsize.infobar_small small
 fontsize.menu Menu Text
 fontsize.menu_info Menu Info
 fontsize.menu_title Menu Title
+generic.empty 
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
 imageinfo.chipset Chipset:
@@ -633,6 +634,7 @@ moviebrowser.info_parental_lockage_12year 12 years
 moviebrowser.info_parental_lockage_16year 16 years
 moviebrowser.info_parental_lockage_18year 18 years
 moviebrowser.info_parental_lockage_6year 6 years
+moviebrowser.info_parental_lockage_8year 8 years
 moviebrowser.info_parental_lockage_always never
 moviebrowser.info_path Path
 moviebrowser.info_prevplaydate Last play date
@@ -1121,6 +1123,7 @@ timing.head OSD Timeouts
 timing.hint_1 Time in sec. After this time the infobar will
 timing.hint_2 be faded out. (Use 0 to switch off fading.)
 timing.infobar Infobar
+timing.infobar_movieplayer Infobar/Movieplayer
 timing.infobar_radio Infobar/Radio
 timing.menu Menu
 timing.numericzap Numeric Zap

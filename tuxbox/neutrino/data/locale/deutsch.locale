@@ -407,6 +407,7 @@ fontsize.infobar_small Infobar klein
 fontsize.menu Menutext
 fontsize.menu_info Menu Info
 fontsize.menu_title Menu Titel
+generic.empty 
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
 imageinfo.chipset Ihre Chip-Version:
@@ -633,6 +634,7 @@ moviebrowser.info_parental_lockage_12year 12 Jahre
 moviebrowser.info_parental_lockage_16year 16 Jahre
 moviebrowser.info_parental_lockage_18year 18 Jahre
 moviebrowser.info_parental_lockage_6year 6 Jahre
+moviebrowser.info_parental_lockage_8year 8 Jahre
 moviebrowser.info_parental_lockage_always nie
 moviebrowser.info_path Verzeichnis
 moviebrowser.info_prevplaydate Letzte Wiedergabe
@@ -1121,6 +1123,7 @@ timing.head OSD Timeouts
 timing.hint_1 Einblendzeit in Sek., die das OSD auf dem TV
 timing.hint_2 angezeigt wird (permanentes Einblenden mit 0.)
 timing.infobar Infobar
+timing.infobar_movieplayer Infobar/Filmwiedergabe
 timing.infobar_radio Infobar/Radio
 timing.menu Menu
 timing.numericzap Umschalten mit Zifferntasten

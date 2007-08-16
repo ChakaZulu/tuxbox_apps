@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.95 2007/07/23 20:34:38 dbt Exp $
+ * $Id: locals_intern.h,v 1.96 2007/08/16 20:21:49 guenther Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -434,6 +434,7 @@ const char * locale_real_names[] =
 	"fontsize.menu",
 	"fontsize.menu_info",
 	"fontsize.menu_title",
+	"generic.empty",
 	"gtxalpha.alpha1",
 	"gtxalpha.alpha2",
 	"imageinfo.chipset",
@@ -660,6 +661,7 @@ const char * locale_real_names[] =
 	"moviebrowser.info_parental_lockage_16year",
 	"moviebrowser.info_parental_lockage_18year",
 	"moviebrowser.info_parental_lockage_6year",
+	"moviebrowser.info_parental_lockage_8year",
 	"moviebrowser.info_parental_lockage_always",
 	"moviebrowser.info_path",
 	"moviebrowser.info_prevplaydate",
@@ -1148,6 +1150,7 @@ const char * locale_real_names[] =
 	"timing.hint_1",
 	"timing.hint_2",
 	"timing.infobar",
+	"timing.infobar_movieplayer",
 	"timing.infobar_radio",
 	"timing.menu",
 	"timing.numericzap",
