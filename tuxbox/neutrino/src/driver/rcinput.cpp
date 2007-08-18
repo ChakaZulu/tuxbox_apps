@@ -1560,7 +1560,6 @@ int CRCInput::translate(int code)
 			case 0x09: return RC_9;
 			case 0x0a: return RC_plus;
 			case 0x0b: return RC_minus;
-			case 0x0c: return RC_tv;
 			case 0x0d: return RC_page_up;
 			case 0x0e: return RC_page_down;
 			case 0x0f: return RC_standby;
@@ -1577,13 +1576,23 @@ int CRCInput::translate(int code)
 			case 0x41: return RC_green;
 			case 0x42: return RC_yellow;
 			case 0x43: return RC_blue;
-			case 0x44: return RC_spkr;
 			case 0x45: return RC_text;
+			case 0x53: return RC_radio;
+#ifdef HAVE_DREAMBOX_DM500
+			case 0x0c: return RC_spkr;	// MUTE key
+			case 0x44: return RC_tv;	// TV   key
+			case 0x50: return RC_plus;	// ">"	key
+			case 0x51: return RC_minus;	// "<"  key
+			case 0x52: return RC_help;	// HELP key
+			case 0x54: return RC_home;	// EXIT key
+#else
+			case 0x0c: return RC_tv;
+			case 0x44: return RC_spkr;
 			case 0x50: return RC_prev;
 			case 0x51: return RC_next;
 			case 0x52: return RC_home;
-			case 0x53: return RC_radio;
 			case 0x54: return RC_help;
+#endif
 		}
 	}
 	return RC_nokey;

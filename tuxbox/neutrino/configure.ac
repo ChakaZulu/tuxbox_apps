@@ -67,7 +67,9 @@ AC_ARG_ENABLE(use-libxml2,
 if test "$enable_upnp" = "yes"; then
 TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
 fi
-
+if test "$BOXTYPE" = "dm500" ; then
+	CPPFLAGS="$CPPFLAGS -DHAVE_DREAMBOX_DM500"
+fi
 AC_OUTPUT([
 Makefile
 lib/Makefile
