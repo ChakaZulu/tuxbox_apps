@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.30 2007/08/16 18:47:38 dbt Exp $
+	$Id: streaminfo2.cpp,v 1.31 2007/08/21 08:04:17 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -63,8 +63,19 @@ CStreamInfo2::CStreamInfo2()
 	iheight     = g_Font[font_info]->getHeight();
 	sheight     = g_Font[font_small]->getHeight();
 
-	if (w_max (710, 5) < 540 ? width = 540 : width = w_max (710, 5));		
-	if (h_max (560, 5) < 485 ? height = 486 : height = h_max (560, 5));
+	if (w_max (710, 5) < 540)	{
+		width = 540;
+	}
+	else	{
+		width = w_max (710, 5);
+	}
+	
+	if (h_max (560, 5) < 485)	{
+		height = 486;
+	}
+	else	{
+		height = h_max (560, 5);
+	}
 
 	max_height = SCREEN_Y-1;
 	max_width  = SCREEN_X-1;
@@ -578,7 +589,12 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	//tsfrequenz
 	ypos+= sheight-5; //blank line
 	int q;
-	if (g_info.delivery_system==1 ? q = 1000 : q = 1000000);
+	if (g_info.delivery_system==1)		{
+		q = 1000; 
+		}
+	else		{
+		q = 1000000;
+		}
 	int written = sprintf((char*) buf, "%d.%d MHz", si.tsfrequency/q, si.tsfrequency%1000);
 	if (si.polarisation != 2) /* only satellite has polarisation */
 		sprintf((char*) buf+written, " (%c)", (si.polarisation == HORIZONTAL) ? 'h' : 'v');
