@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.860 2007/08/27 12:11:13 nitr8 Exp $
+	$Id: neutrino.cpp,v 1.861 2007/08/27 12:25:29 nitr8 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2255,6 +2255,8 @@ const CMenuOptionChooser::keyval FLASHUPDATE_UPDATEMODE_OPTIONS[FLASHUPDATE_UPDA
 void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSettings)
 {
 	dprintf(DEBUG_DEBUG, "init serviceSettings\n");
+
+	// Dynamic renumbering
 	int shortcut3 = 0;
 	service.addItem(GenericMenuSeparator);
 	service.addItem(GenericMenuBack);
