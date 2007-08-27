@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.181 2007/08/08 23:54:19 guenther Exp $
+  $Id: settings.h,v 1.182 2007/08/27 12:15:51 nitr8 Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -176,6 +176,49 @@ struct SNeutrinoSettings
 	char network_nfs_picturedir[100];
 	char network_nfs_moviedir[100];
 	char network_nfs_recordingdir[100];
+
+	//personalization
+	int personalize_pinstatus;
+	int personalize_bluebutton;
+	int personalize_redbutton;
+	char personalize_pincode[5];
+
+	int personalize_tvmode;
+	int personalize_radiomode;
+	int personalize_scartmode;
+	int personalize_games;
+	int personalize_audioplayer;
+	int personalize_movieplayer;
+	int personalize_pictureviewer;
+	int personalize_upnpbrowser;
+	int personalize_settings;
+	int personalize_service;
+	int personalize_sleeptimer;
+	int personalize_reboot;
+	int personalize_shutdown;
+
+	int personalize_bouqueteditor;
+	int personalize_scants;
+	int personalize_reload;
+	int personalize_getplugins;
+	int personalize_restart;
+	int personalize_ucodecheck;
+	int personalize_imageinfo;
+	int personalize_update;
+
+	int personalize_audio;
+	int personalize_video;
+	int personalize_youth;
+	int personalize_network;
+	int personalize_recording;
+	int personalize_streaming;
+	int personalize_keybinding;
+	int personalize_language;
+	int personalize_colors;
+	int personalize_lcd;
+	int personalize_audpic;
+	int personalize_driver;
+	int personalize_misc;
 
 	//recording
 	int  recording_type;

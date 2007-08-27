@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.187 2007/06/17 18:35:26 dbluelle Exp $
+	$Id: neutrino.h,v 1.188 2007/08/27 12:17:46 nitr8 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -78,6 +78,8 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 			RECORDING_VCR    = 2,
 			RECORDING_FILE   = 3
 		};
+		
+		void saveSetup();
 
  private:
 	CFrameBuffer * frameBuffer;
@@ -164,7 +166,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 
 		void startNextRecording();
 
-		void saveSetup();
 		int loadSetup();
 
 		void tvMode( bool rezap = true );
