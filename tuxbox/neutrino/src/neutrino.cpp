@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.859 2007/07/28 15:38:53 dbluelle Exp $
+	$Id: neutrino.cpp,v 1.860 2007/08/27 12:11:13 nitr8 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -134,6 +134,7 @@
 
 // external menus
 #include "gui/experimental_menu.h"
+#include "gui/personalize.h"
 
 #ifndef TUXTXT_CFG_STANDALONE
 extern "C" int  tuxtxt_init();
@@ -720,6 +721,48 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nfs_moviedir, configfile.getString( "network_nfs_moviedir", "" ).c_str() );
 	g_settings.filesystem_is_utf8              = configfile.getBool("filesystem_is_utf8"                 , true );
 
+	// Personalization
+	g_settings.personalize_pinstatus = configfile.getInt32("personalize_pinstatus", 0);
+	strcpy( g_settings.personalize_pincode, configfile.getString( "personalize_pincode", "0000" ).c_str() );
+	g_settings.personalize_bluebutton = configfile.getInt32("personalize_bluebutton", 1);
+	g_settings.personalize_redbutton = configfile.getInt32("personalize_redbutton", 1);
+
+	g_settings.personalize_tvmode = configfile.getInt32("personalize_tvmode", 1);
+	g_settings.personalize_radiomode = configfile.getInt32("personalize_radiomode", 1);
+	g_settings.personalize_scartmode = configfile.getInt32("personalize_scartmode", 1);
+	g_settings.personalize_games = configfile.getInt32("personalize_games", 1);
+	g_settings.personalize_audioplayer = configfile.getInt32("personalize_audioplayer", 1);
+	g_settings.personalize_movieplayer = configfile.getInt32("personalize_movieplayer", 1);
+	g_settings.personalize_pictureviewer = configfile.getInt32("personalize_pictureviewer", 1);
+	g_settings.personalize_upnpbrowser = configfile.getInt32("personalize_upnpbrowser", 1);
+	g_settings.personalize_settings = configfile.getInt32("personalize_settings", 1);
+	g_settings.personalize_service = configfile.getInt32("personalize_service", 1);
+	g_settings.personalize_sleeptimer = configfile.getInt32("personalize_sleeptimer", 1);
+	g_settings.personalize_reboot = configfile.getInt32("personalize_reboot", 1);
+	g_settings.personalize_shutdown = configfile.getInt32("personalize_shutdown", 1);
+
+	g_settings.personalize_bouqueteditor = configfile.getInt32("personalize_bouqueteditor", 1);
+	g_settings.personalize_scants = configfile.getInt32("personalize_scants", 1);
+	g_settings.personalize_reload = configfile.getInt32("personalize_reload", 1);
+	g_settings.personalize_getplugins = configfile.getInt32("personalize_getplugins", 1);
+	g_settings.personalize_restart = configfile.getInt32("personalize_restart", 1);
+	g_settings.personalize_ucodecheck = configfile.getInt32("personalize_ucodecheck", 1);
+	g_settings.personalize_imageinfo = configfile.getInt32("personalize_imageinfo", 1);
+	g_settings.personalize_update = configfile.getInt32("personalize_update", 1);
+
+	g_settings.personalize_audio = configfile.getInt32("personalize_audio", 1);
+	g_settings.personalize_video = configfile.getInt32("personalize_video", 1);
+	g_settings.personalize_youth = configfile.getInt32("personalize_youth", 1);
+	g_settings.personalize_network = configfile.getInt32("personalize_network", 1);
+	g_settings.personalize_recording = configfile.getInt32("personalize_recording", 1);
+	g_settings.personalize_streaming = configfile.getInt32("personalize_streaming", 1);
+	g_settings.personalize_keybinding = configfile.getInt32("personalize_keybinding", 1);
+	g_settings.personalize_colors = configfile.getInt32("personalize_colors", 1);
+	g_settings.personalize_lcd = configfile.getInt32("personalize_lcd", 1);
+	g_settings.personalize_audpic = configfile.getInt32("personalize_audpic", 1);
+	g_settings.personalize_driver = configfile.getInt32("personalize_driver", 1);
+	g_settings.personalize_misc = configfile.getInt32("personalize_misc", 1);
+
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32("recording_type", RECORDING_OFF);
 	g_settings.recording_stopplayback = configfile.getBool("recording_stopplayback", false);
@@ -1133,6 +1176,47 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_nfs_picturedir", g_settings.network_nfs_picturedir);
 	configfile.setString( "network_nfs_moviedir", g_settings.network_nfs_moviedir);
 	configfile.setBool  ("filesystem_is_utf8"                 , g_settings.filesystem_is_utf8             );
+
+	// Personalization
+	configfile.setInt32 ( "personalize_pinstatus", g_settings.personalize_pinstatus );
+	configfile.setInt32 ( "personalize_bluebutton", g_settings.personalize_bluebutton );
+	configfile.setInt32 ( "personalize_redbutton", g_settings.personalize_redbutton );
+
+	configfile.setInt32 ( "personalize_tvmode", g_settings.personalize_tvmode );
+	configfile.setInt32 ( "personalize_radiomode", g_settings.personalize_radiomode );
+	configfile.setInt32 ( "personalize_scartmode", g_settings.personalize_scartmode );
+	configfile.setInt32 ( "personalize_games", g_settings.personalize_games );
+	configfile.setInt32 ( "personalize_audioplayer", g_settings.personalize_audioplayer );
+	configfile.setInt32 ( "personalize_movieplayer", g_settings.personalize_movieplayer );
+	configfile.setInt32 ( "personalize_pictureviewer", g_settings.personalize_pictureviewer );
+	configfile.setInt32 ( "personalize_upnpbrowser", g_settings.personalize_upnpbrowser );
+	configfile.setInt32 ( "personalize_settings", g_settings.personalize_settings );
+	configfile.setInt32 ( "personalize_service", g_settings.personalize_service );
+	configfile.setInt32 ( "personalize_sleeptimer", g_settings.personalize_sleeptimer );
+	configfile.setInt32 ( "personalize_reboot", g_settings.personalize_reboot );
+	configfile.setInt32 ( "personalize_shutdown", g_settings.personalize_shutdown );
+
+	configfile.setInt32 ( "personalize_bouqueteditor", g_settings.personalize_bouqueteditor );
+	configfile.setInt32 ( "personalize_scants", g_settings.personalize_scants );
+	configfile.setInt32 ( "personalize_reload", g_settings.personalize_reload );
+	configfile.setInt32 ( "personalize_getplugins", g_settings.personalize_getplugins );
+	configfile.setInt32 ( "personalize_restart", g_settings.personalize_restart );
+	configfile.setInt32 ( "personalize_ucodecheck", g_settings.personalize_ucodecheck );
+	configfile.setInt32 ( "personalize_imageinfo", g_settings.personalize_imageinfo );
+	configfile.setInt32 ( "personalize_update", g_settings.personalize_update );
+
+	configfile.setInt32 ( "personalize_audio", g_settings.personalize_audio );
+	configfile.setInt32 ( "personalize_video", g_settings.personalize_video );
+	configfile.setInt32 ( "personalize_youth", g_settings.personalize_youth );
+	configfile.setInt32 ( "personalize_network", g_settings.personalize_network );
+	configfile.setInt32 ( "personalize_recording", g_settings.personalize_recording );
+	configfile.setInt32 ( "personalize_streaming", g_settings.personalize_streaming );
+	configfile.setInt32 ( "personalize_keybinding", g_settings.personalize_keybinding );
+	configfile.setInt32 ( "personalize_colors", g_settings.personalize_colors );
+	configfile.setInt32 ( "personalize_lcd", g_settings.personalize_lcd );
+	configfile.setInt32 ( "personalize_audpic", g_settings.personalize_audpic );
+	configfile.setInt32 ( "personalize_driver", g_settings.personalize_driver );
+	configfile.setInt32 ( "personalize_misc", g_settings.personalize_misc );
 
 	// NTP-Server for sectionsd
 	configfile.setString( "network_ntpserver", g_settings.network_ntpserver);
@@ -1721,22 +1805,53 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 								CMenuWidget &moviePlayer)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
+
+	// Dynamic renumbering
+	int shortcut = 0;
+	int shortcut2 = 0;
+
+	// Main Menu
 	mainMenu.addItem(GenericMenuSeparator);
 
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), firstchannel.mode != 'r');
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), firstchannel.mode == 'r');
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,CPlugins::P_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-	mainMenu.addItem(GenericMenuSeparatorLine);
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::RC_1));
+	if (g_settings.personalize_tvmode == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), firstchannel.mode != 'r');
+	if (g_settings.personalize_tvmode == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_TVMODE, g_settings.personalize_pincode, true, true, NULL, this, "tv", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), firstchannel.mode != 'r');
 
-	//mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, new CMoviePlayerGui()));
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::RC_2));
+	if (g_settings.personalize_radiomode == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), firstchannel.mode == 'r');
+	if (g_settings.personalize_radiomode == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_RADIOMODE, g_settings.personalize_pincode, true, true, NULL, this, "radio", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), firstchannel.mode == 'r');
+
+	if (g_settings.personalize_scartmode == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+	if (g_settings.personalize_scartmode == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SCARTMODE, g_settings.personalize_pincode, true, true, NULL, this, "scart", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+
+	if (g_settings.personalize_games == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,CPlugins::P_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	if (g_settings.personalize_games == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_GAMES, g_settings.personalize_pincode, true, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,CPlugins::P_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+
+	if (g_settings.personalize_tvmode==0 && g_settings.personalize_radiomode==0 && g_settings.personalize_scartmode==0 && g_settings.personalize_games==0) {
+		// Stop seperator from appearing when menu entries have been hidden	
+	} else {
+		mainMenu.addItem(GenericMenuSeparatorLine); }
+
+	if (g_settings.personalize_audioplayer == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+	if (g_settings.personalize_audioplayer == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, g_settings.personalize_pincode, true, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+
+	if (g_settings.personalize_movieplayer == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut++)));
+	if (g_settings.personalize_movieplayer == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, g_settings.personalize_pincode, true, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut++)));
+
 
 	moviePlayer.addItem(GenericMenuSeparator);
 	moviePlayer.addItem(GenericMenuBack);
 	moviePlayer.addItem(GenericMenuSeparatorLine);
-//	CMoviePlayerGui* moviePlayerGui = new CMoviePlayerGui();
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, moviePlayerGui, "tsplayback", CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK_PC, true, NULL, moviePlayerGui, "tsplayback_pc", CRCInput::RC_1));
 #ifdef MOVIEBROWSER
@@ -1753,51 +1868,136 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &streamingSettings, NULL, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_NFSMENU_HEAD, true, NULL, new CNFSSmallMenu(), NULL, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
 
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, CRCInput::RC_3));
-	int shortcut = 4;
+	if (g_settings.personalize_pictureviewer == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+	if (g_settings.personalize_pictureviewer == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, g_settings.personalize_pincode, true, true, NULL, new CPictureViewerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+
 #if ENABLE_UPNP
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_UPNPBROWSER, true, NULL, new CUpnpBrowserGui(), NULL, CRCInput::RC_4));
-	shortcut++;
+	if (g_settings.personalize_upnpbrowser == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_UPNPBROWSER, true, NULL, new CUpnpBrowserGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+	if (g_settings.personalize_upnpbrowser == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_UPNPBROWSER, g_settings.personalize_pincode, true, true, NULL, new CUpnpBrowserGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
 #endif
+
 	if (g_PluginList->hasPlugin(CPlugins::P_TYPE_SCRIPT))
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "",
 										CRCInput::convertDigitToKey(shortcut++)));
-	mainMenu.addItem(GenericMenuSeparatorLine);
 
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL,
-										CRCInput::convertDigitToKey(shortcut++)));
-	mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.parentallock_pincode, false, true, NULL, &service, NULL,
-										CRCInput::convertDigitToKey(shortcut++)));
-	mainMenu.addItem(GenericMenuSeparatorLine);
+	if (g_settings.personalize_audioplayer==0 && g_settings.personalize_movieplayer==0 && g_settings.personalize_pictureviewer==0 && g_settings.personalize_upnpbrowser==0) {
+		// Stop seperator from appearing when menu entries have been hidden
+	} else {
+		mainMenu.addItem(GenericMenuSeparatorLine); }
 
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL,
-										CRCInput::convertDigitToKey(shortcut++)));
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_REBOOT, true, NULL, this, "reboot",
-										CRCInput::convertDigitToKey(shortcut++)));
-	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SHUTDOWN, true, NULL, this, "shutdown", CRCInput::RC_standby, "power.raw"));
+	if (g_settings.personalize_settings == 0)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL, CRCInput::convertDigitToKey(shortcut++)));
+	else
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SETTINGS, g_settings.personalize_pincode, true, true, NULL, &mainSettings, NULL, CRCInput::convertDigitToKey(shortcut++)));
 
+	if (g_settings.personalize_service == 0)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SERVICE, true, NULL, &service, NULL, CRCInput::convertDigitToKey(shortcut++)));
+	else
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.personalize_pincode, true, true, NULL, &service, NULL, CRCInput::convertDigitToKey(shortcut++)));
+
+	if (g_settings.personalize_settings==0 && g_settings.personalize_service==0) {
+		 // Stop seperator from appearing when menu entries have been hidden
+	} else {
+	mainMenu.addItem(GenericMenuSeparatorLine); }
+
+	if (g_settings.personalize_sleeptimer == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL, CRCInput::convertDigitToKey(shortcut++)));
+	if (g_settings.personalize_sleeptimer == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, g_settings.personalize_pincode, true, true, NULL, new CSleepTimerWidget, NULL, CRCInput::convertDigitToKey(shortcut++)));
+
+	if (g_settings.personalize_reboot == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_REBOOT, true, NULL, this, "reboot", CRCInput::convertDigitToKey(shortcut++)));
+	if (g_settings.personalize_reboot == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_REBOOT, g_settings.personalize_pincode, true, true, NULL, this, "reboot", CRCInput::convertDigitToKey(shortcut++)));
+
+	if (g_settings.personalize_shutdown == 1)
+		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SHUTDOWN, true, NULL, this, "shutdown", CRCInput::RC_standby, "power.raw"));
+	if (g_settings.personalize_shutdown == 2)
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SHUTDOWN, g_settings.personalize_pincode, true, true, NULL, this, "shutdown", CRCInput::RC_standby, "power.raw"));
+
+	// Settings Menu
 	mainSettings.addItem(GenericMenuSeparator);
 	mainSettings.addItem(GenericMenuBack);
 	mainSettings.addItem(GenericMenuSeparatorLine);
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_SAVESETTINGSNOW, true, NULL, this, "savesettings", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	mainSettings.addItem(GenericMenuSeparatorLine);
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_VIDEO     , true, NULL, &videoSettings    , NULL, CRCInput::RC_1));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_AUDIO     , true, NULL, &audioSettings    , NULL, CRCInput::RC_2));
-	if(g_settings.parentallock_prompt)
-		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, CRCInput::RC_3));
-	else
-		mainSettings.addItem(new CMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, true, NULL, &parentallockSettings, NULL, CRCInput::RC_3));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_NETWORK   , true, NULL, &networkSettings  , NULL, CRCInput::RC_4));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_RECORDING , true, NULL, &recordingSettings, NULL, CRCInput::RC_5));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_STREAMING , true, NULL, &streamingSettings, NULL, CRCInput::RC_6));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LANGUAGE  , true, NULL, &languageSettings , NULL, CRCInput::RC_7));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_COLORS    , true, NULL, &colorSettings    , NULL, CRCInput::RC_8));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD       , true, NULL, &lcdSettings      , NULL, CRCInput::RC_9));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, CRCInput::RC_0));
 
-	mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL , true, NULL, &audiopl_picSettings   , NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_DRIVER    , true, NULL, &driverSettings   , NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW ));
+	if (g_settings.personalize_pinstatus == 0)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_PERSONALIZE_HEAD, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_pinstatus == 1)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PERSONALIZE_HEAD, g_settings.personalize_pincode, true, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_video == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_VIDEO, true, NULL, &videoSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_video == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_VIDEO, g_settings.personalize_pincode, true, true, NULL, &videoSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_audio == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_AUDIO, true, NULL, &audioSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_audio == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_AUDIO, g_settings.personalize_pincode, true, true, NULL, &audioSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_youth == 1)
+		if(g_settings.parentallock_prompt)
+			mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+		else
+			mainSettings.addItem(new CMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, true, NULL, &parentallockSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_youth == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PARENTALLOCK_PARENTALLOCK, g_settings.personalize_pincode, true, true, NULL, &parentallockSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_network == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_NETWORK, true, NULL, &networkSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_network == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_NETWORK, g_settings.personalize_pincode, true, true, NULL, &networkSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_recording == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_RECORDING, true, NULL, &recordingSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_recording == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_RECORDING, g_settings.personalize_pincode, true, true, NULL, &recordingSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_streaming == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_STREAMING, true, NULL, &streamingSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_streaming == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_STREAMING, g_settings.personalize_pincode, true, true, NULL, &streamingSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_language == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LANGUAGE, true, NULL, &languageSettings , NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_language == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_LANGUAGE, g_settings.personalize_pincode, true, true, NULL, &languageSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_colors == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_COLORS, true, NULL, &colorSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_colors == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_COLORS, g_settings.personalize_pincode, true, true, NULL, &colorSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_lcd == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD, true, NULL, &lcdSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_lcd == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_LCD, g_settings.personalize_pincode, true, true, NULL, &lcdSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_keybinding == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_keybinding == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, g_settings.personalize_pincode, true, true, NULL, &keySettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
+
+	if (g_settings.personalize_audpic == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	if (g_settings.personalize_audpic == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, g_settings.personalize_pincode, true, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+
+	if (g_settings.personalize_driver == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_DRIVER, true, NULL, &driverSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	if (g_settings.personalize_driver == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_DRIVER, g_settings.personalize_pincode, true, true, NULL, &driverSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+
+	if (g_settings.personalize_misc == 1)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC, true, NULL, &miscSettings, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW ));
+	if (g_settings.personalize_misc == 2)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_MISC, g_settings.personalize_pincode, true, true, NULL, &miscSettings, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 }
 
 #define SCANTS_BOUQUET_OPTION_COUNT 5
@@ -1972,7 +2172,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		settings.addItem( ojExtSatSettings );
 		settings.addItem( ojExtMotorSettings );
-		//settings.addItem(GenericMenuSeparatorLine);
 	}
 	else
 	{//kabel
@@ -2056,20 +2255,55 @@ const CMenuOptionChooser::keyval FLASHUPDATE_UPDATEMODE_OPTIONS[FLASHUPDATE_UPDA
 void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSettings)
 {
 	dprintf(DEBUG_DEBUG, "init serviceSettings\n");
+	int shortcut3 = 0;
 	service.addItem(GenericMenuSeparator);
 	service.addItem(GenericMenuBack);
 	service.addItem(GenericMenuSeparatorLine);
-	service.addItem(new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME    , true, NULL, new CBEBouquetWidget(), NULL            , CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS    , true, NULL, &scanSettings         , NULL            , CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-	service.addItem(GenericMenuSeparatorLine);
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD    , true, NULL, this                  , "reloadchannels", CRCInput::RC_1));
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this                  , "reloadplugins" , CRCInput::RC_2));
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RESTART   , true, NULL, this                  , "restart"       , CRCInput::RC_3));
+	if (g_settings.personalize_bouqueteditor == 1)
+		service.addItem(new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME, true, NULL, new CBEBouquetWidget(), NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+	if (g_settings.personalize_bouqueteditor == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_BOUQUETEDITOR_NAME, g_settings.personalize_pincode, true, true, NULL, new CBEBouquetWidget(), NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+
+	if (g_settings.personalize_scants == 1)
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS, true, NULL, &scanSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	if (g_settings.personalize_scants == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_SCANTS, g_settings.personalize_pincode, true, true, NULL, &scanSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+
+	if (g_settings.personalize_bouqueteditor==0 && g_settings.personalize_scants==0) {
+		// Stop seperator from appearing when menu entries have been hidden
+	} else {
+		service.addItem(GenericMenuSeparatorLine); }
+
+	if (g_settings.personalize_reload == 1)
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD, true, NULL, this, "reloadchannels", CRCInput::convertDigitToKey(shortcut3++)));
+	if (g_settings.personalize_reload == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_RELOAD, g_settings.personalize_pincode, true, true, NULL, this, "reloadchannels", CRCInput::convertDigitToKey(shortcut3++)));
+
+	if (g_settings.personalize_getplugins == 1)
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this, "reloadplugins" , CRCInput::convertDigitToKey(shortcut3++)));
+	if (g_settings.personalize_getplugins == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, g_settings.personalize_pincode, true, true, NULL, this, "reloadplugins", CRCInput::convertDigitToKey(shortcut3++)));
+
+	if (g_settings.personalize_restart == 1)
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RESTART, true, NULL, this, "restart", CRCInput::convertDigitToKey(shortcut3++)));
+	if (g_settings.personalize_restart == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_RESTART, g_settings.personalize_pincode, true, true, NULL, this, "restart", CRCInput::convertDigitToKey(shortcut3++)));
+
 #ifndef HAVE_DREAMBOX_HARDWARE
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker          , NULL            , CRCInput::RC_4));
+	if (g_settings.personalize_ucodecheck == 1)
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3++)));
+	if (g_settings.personalize_ucodecheck == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, g_settings.personalize_pincode, true, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3++)));
 #endif
-	service.addItem(GenericMenuSeparatorLine);
-	service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_IMAGEINFO,  true, NULL, new CImageInfo()     , NULL, CRCInput::RC_yellow  , NEUTRINO_ICON_BUTTON_YELLOW  ), false);
+	if (g_settings.personalize_reload==0 && g_settings.personalize_getplugins==0 && g_settings.personalize_restart==0 && g_settings.personalize_ucodecheck==0) {
+		// Stop seperator from appearing when menu entries have been hidden
+	} else {
+		service.addItem(GenericMenuSeparatorLine); }
+
+	if (g_settings.personalize_imageinfo == 1)
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_IMAGEINFO, true, NULL, new CImageInfo(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW  ), false);
+	if (g_settings.personalize_imageinfo == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_IMAGEINFO, g_settings.personalize_pincode, true, true, NULL, new CImageInfo(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
 	//softupdate
 	if(softupdate)
@@ -2139,7 +2373,12 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem(GenericMenuSeparatorLine);
 		updateSettings->addItem(new CMenuForwarder(LOCALE_FLASHUPDATE_CHECKUPDATE, true, NULL, new CFlashUpdate(), NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 
+
+	if (g_settings.personalize_update == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UPDATE, true, NULL, updateSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	if (g_settings.personalize_update == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_UPDATE, g_settings.personalize_pincode, true, true, NULL, updateSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+
 	}
 }
 
@@ -4419,11 +4658,23 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 #endif
 			else if( msg == CRCInput::RC_red )
 			{	// eventlist
-				showUserMenu(SNeutrinoSettings::BUTTON_RED);  //USERMENU
+				if (g_settings.personalize_redbutton == 0)
+				{
+					// EventList Menu - Personalization Check
+					ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_MENUDISABLEDHINT));
+				} else {
+					showUserMenu(SNeutrinoSettings::BUTTON_RED);  //USERMENU
+				}
 			}
 			else if( msg == CRCInput::RC_blue )
 			{	// streaminfo
-				showUserMenu(SNeutrinoSettings::BUTTON_BLUE);
+				if (g_settings.personalize_bluebutton == 0)
+				{
+					// Features Menu - Personalization Check
+					ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_MENUDISABLEDHINT));
+				} else {
+					showUserMenu(SNeutrinoSettings::BUTTON_BLUE);
+				}
 			}
 			else if( msg == CRCInput::RC_green )
 			{

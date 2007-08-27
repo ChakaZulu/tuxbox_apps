@@ -826,6 +826,20 @@ parentallock.never Nie
 parentallock.onsignal Bei gesendeter Vorsperre
 parentallock.parentallock Jugendschutz
 parentallock.prompt PIN-Eingabe
+personalize.disabled Deaktiviert
+personalize.enabled Aktiviert
+personalize.head Personalisierung
+personalize.menudisabledhint Das angeforderte Menu ist nicht aktiv
+personalize.notprotected Nicht gesichert
+personalize.notvisible Nicht sichtbar
+personalize.pincode PIN Code
+personalize.pinhint Personalisierungs PIN Code eingeben
+personalize.pinprotect gesichert
+personalize.pinstatus PIN benoetigt
+personalize.saverestart Neutrino muss neu starten. Jetzt neu starten?
+personalize.stprotect Sichere Einstellungen
+personalize.svprotect Sichere Service
+personalize.visible Sichtbar
 pictureviewer.decode_server_ip Decoding-Server IP
 pictureviewer.decode_server_port Decoding-Server Port
 pictureviewer.defdir Start-Verz.
