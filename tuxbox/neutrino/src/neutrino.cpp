@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.861 2007/08/27 12:25:29 nitr8 Exp $
+	$Id: neutrino.cpp,v 1.862 2007/08/28 08:53:51 nitr8 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1926,11 +1926,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_SAVESETTINGSNOW, true, NULL, this, "savesettings", CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	mainSettings.addItem(GenericMenuSeparatorLine);
 
-	if (g_settings.personalize_pinstatus == 0)
-		mainSettings.addItem(new CMenuForwarder(LOCALE_PERSONALIZE_HEAD, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
-	if (g_settings.personalize_pinstatus == 1)
-		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PERSONALIZE_HEAD, g_settings.personalize_pincode, true, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
-
 	if (g_settings.personalize_video == 1)
 		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_VIDEO, true, NULL, &videoSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
 	if (g_settings.personalize_video == 2)
@@ -1998,6 +1993,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC, true, NULL, &miscSettings, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW ));
 	if (g_settings.personalize_misc == 2)
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_MISC, g_settings.personalize_pincode, true, true, NULL, &miscSettings, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+
+	if (g_settings.personalize_pinstatus == 0)
+		mainSettings.addItem(new CMenuForwarder(LOCALE_PERSONALIZE_HEAD, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_pinstatus == 1)
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PERSONALIZE_HEAD, g_settings.personalize_pincode, true, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
 }
 
 #define SCANTS_BOUQUET_OPTION_COUNT 5
