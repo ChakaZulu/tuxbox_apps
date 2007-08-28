@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.862 2007/08/28 08:53:51 nitr8 Exp $
+	$Id: neutrino.cpp,v 1.863 2007/08/28 17:41:30 stdin Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -757,6 +757,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.personalize_recording = configfile.getInt32("personalize_recording", 1);
 	g_settings.personalize_streaming = configfile.getInt32("personalize_streaming", 1);
 	g_settings.personalize_keybinding = configfile.getInt32("personalize_keybinding", 1);
+	g_settings.personalize_language = configfile.getInt32("personalize_language", 1);
 	g_settings.personalize_colors = configfile.getInt32("personalize_colors", 1);
 	g_settings.personalize_lcd = configfile.getInt32("personalize_lcd", 1);
 	g_settings.personalize_audpic = configfile.getInt32("personalize_audpic", 1);
@@ -1212,6 +1213,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "personalize_recording", g_settings.personalize_recording );
 	configfile.setInt32 ( "personalize_streaming", g_settings.personalize_streaming );
 	configfile.setInt32 ( "personalize_keybinding", g_settings.personalize_keybinding );
+	configfile.setInt32 ( "personalize_language", g_settings.personalize_language );
 	configfile.setInt32 ( "personalize_colors", g_settings.personalize_colors );
 	configfile.setInt32 ( "personalize_lcd", g_settings.personalize_lcd );
 	configfile.setInt32 ( "personalize_audpic", g_settings.personalize_audpic );
