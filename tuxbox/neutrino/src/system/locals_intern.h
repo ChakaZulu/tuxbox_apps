@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.97 2007/08/27 12:16:25 nitr8 Exp $
+ * $Id: locals_intern.h,v 1.98 2007/08/30 21:29:31 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -853,17 +853,21 @@ const char * locale_real_names[] =
 	"parentallock.onsignal",
 	"parentallock.parentallock",
 	"parentallock.prompt",
+	"personalize.access",
 	"personalize.disabled",
 	"personalize.enabled",
 	"personalize.head",
+	"personalize.menuconfiguration",
 	"personalize.menudisabledhint",
 	"personalize.notprotected",
 	"personalize.notvisible",
+	"personalize.pin",
 	"personalize.pincode",
 	"personalize.pinhint",
 	"personalize.pinprotect",
 	"personalize.pinstatus",
 	"personalize.saverestart",
+	"personalize.setupmenuwithpin",
 	"personalize.stprotect",
 	"personalize.svprotect",
 	"personalize.visible",

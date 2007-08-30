@@ -826,18 +826,22 @@ parentallock.never never
 parentallock.onsignal on broadcasted lock
 parentallock.parentallock Youth protection
 parentallock.prompt prompt for PIN
+personalize.access Access
 personalize.disabled Disabled
 personalize.enabled Enabled
 personalize.head Personalization
+personalize.menuconfiguration Menu Configuration
 personalize.menudisabledhint The requested menu is currently disabled
 personalize.notprotected Unprotected
 personalize.notvisible Not Visible
+personalize.pin PIN
 personalize.pincode PIN Code
 personalize.pinhint Enter the Personalization PIN Code
-personalize.pinprotect Protected
+personalize.pinprotect Yes
 personalize.pinstatus Require PIN
 personalize.saverestart Neutrino needs to be restarted. Restart Now?
-personalize.stprotect Protect Settings
+personalize.setupmenuwithpin Setup Menu with PIN
+personalize.stprotect Menu Access with PIN
 personalize.svprotect Protect Service
 personalize.visible Visible
 pictureviewer.decode_server_ip decode server ip
