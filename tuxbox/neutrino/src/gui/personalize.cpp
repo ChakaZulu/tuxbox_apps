@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.1 2007/08/27 13:39:06 nitr8 Exp $
+        $Id: personalize.cpp,v 1.2 2007/08/30 21:31:39 dbt Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -40,6 +40,7 @@
 #include <neutrino.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+#include <driver/screen_max.h>
 #include <daemonc/remotecontrol.h>
 #include "widget/menue.h"
 #include "widget/messagebox.h"
@@ -60,13 +61,13 @@ const CMenuOptionChooser::keyval PERSONALIZE_STD_OPTIONS[PERSONALIZE_STD_OPTION_
 {
 { 0, LOCALE_PERSONALIZE_NOTVISIBLE      },                                      // The option is NOT visible on the menu's
 { 1, LOCALE_PERSONALIZE_VISIBLE         },                                      // The option is visible on the menu's
-{ 2, LOCALE_PERSONALIZE_PINPROTECT      },                                      // PIN Protect the item on the menu
+{ 2, LOCALE_PERSONALIZE_PIN      },                                      // PIN Protect the item on the menu
 };
 const CMenuOptionChooser::keyval PERSONALIZE_EDP_OPTIONS[PERSONALIZE_EDP_OPTION_COUNT] =
 {
 { 0, LOCALE_PERSONALIZE_DISABLED        },                                      // The menu is NOT enabled / accessible
 { 1, LOCALE_PERSONALIZE_ENABLED         },                                      // The menu is enabled / accessible
-{ 2, LOCALE_PERSONALIZE_PINPROTECT      },                                      // The menu is enabled and protected
+{ 2, LOCALE_PERSONALIZE_PIN      },                                      // The menu is enabled and protected with PIN
 };
 const CMenuOptionChooser::keyval PERSONALIZE_EOD_OPTIONS[PERSONALIZE_EOD_OPTION_COUNT] =
 {
@@ -85,12 +86,11 @@ CPersonalizeGui::CPersonalizeGui()
 : configfile('\t')
 {
         frameBuffer = CFrameBuffer::getInstance();
-        width = 600;
+        width = w_max (710, 100);
         hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
         mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
         height = hheight+13*mheight+ 10;
-        x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-        y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+
 }
 
 int CPersonalizeGui::exec(CMenuTarget* parent, const std::string & actionKey)
@@ -124,16 +124,17 @@ void CPersonalizeGui::ShowPersonalizationMenu()
                         /*      This is the main personalization menu. From here we can go to the other sub-menu's and enable/disable
                                 the PIN code feature, as well as determine whether or not the EPG menu/Features menu is accessible. */
 
-                        CMenuWidget* pMenu = new CMenuWidget(LOCALE_PERSONALIZE_HEAD,"settings.raw");
+                        CMenuWidget* pMenu = new CMenuWidget(LOCALE_PERSONALIZE_HEAD,NEUTRINO_ICON_PROTECTING, width);
                         CPINChangeWidget * pinChangeWidget = new CPINChangeWidget(LOCALE_PERSONALIZE_PINCODE, g_settings.personalize_pincode, 4, LOCALE_PERSONALIZE_PINHINT);
 
                         pMenu->addItem(GenericMenuSeparator);
                         pMenu->addItem(GenericMenuBack);
-                        pMenu->addItem(GenericMenuSeparatorLine);
+						pMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PERSONALIZE_ACCESS));
 
                         pMenu->addItem(new CMenuOptionChooser(LOCALE_PERSONALIZE_PINSTATUS, (int *)&g_settings.personalize_pinstatus, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
                         pMenu->addItem(new CMenuForwarder(LOCALE_PERSONALIZE_PINCODE, true, g_settings.personalize_pincode, pinChangeWidget, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-                        pMenu->addItem(GenericMenuSeparatorLine);
+						pMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, 	LOCALE_PERSONALIZE_MENUCONFIGURATION));
+
 
                         pMenu->addItem(new CMenuForwarder(LOCALE_MAINMENU_HEAD, true, NULL, this, "mainmenu_options", CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
                         pMenu->addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, this, "settings_options", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
@@ -159,39 +160,43 @@ void CPersonalizeGui::ShowMainMenuOptions()
                         int old_games                           = g_settings.personalize_games;
                         int old_audioplayer                     = g_settings.personalize_audioplayer;
                         int old_movieplayer                     = g_settings.personalize_movieplayer;
-                        int old_pictureviewer                   = g_settings.personalize_pictureviewer;
-                        int old_upnpbrowser                     = g_settings.personalize_upnpbrowser;
+                        int old_pictureviewer                   = g_settings.personalize_pictureviewer;	
+#ifdef ENABLE_UPNP
+						int old_upnpbrowser                     = g_settings.personalize_upnpbrowser;
+#endif
                         int old_settings                        = g_settings.personalize_settings;
                         int old_service                         = g_settings.personalize_service;
                         int old_sleeptimer                      = g_settings.personalize_sleeptimer;
                         int old_reboot                          = g_settings.personalize_reboot;
                         int old_shutdown                        = g_settings.personalize_shutdown;
 
-                        CMenuWidget* pMMMenu = new CMenuWidget(LOCALE_MAINMENU_HEAD,"settings.raw");
+                        CMenuWidget* pMMMenu = new CMenuWidget(LOCALE_MAINMENU_HEAD,NEUTRINO_ICON_PROTECTING, width);
 
                         pMMMenu->addItem(GenericMenuSeparator);
                         pMMMenu->addItem(GenericMenuBack);
-                        pMMMenu->addItem(GenericMenuSeparatorLine);
+						pMMMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PERSONALIZE_ACCESS));
 
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_TVMODE, (int *)&g_settings.personalize_tvmode, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RADIOMODE, (int *)&g_settings.personalize_radiomode, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SCARTMODE, (int *)&g_settings.personalize_scartmode, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_GAMES, (int *)&g_settings.personalize_games, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
                         pMMMenu->addItem(GenericMenuSeparator);
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_AUDIOPLAYER, (int *)&g_settings.personalize_audioplayer,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_0));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_MOVIEPLAYER, (int *)&g_settings.personalize_movieplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_1));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_PICTUREVIEWER, (int *)&g_settings.personalize_pictureviewer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_2));
-#if ENABLE_UPNP
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_UPNPBROWSER, (int *)&g_settings.personalize_upnpbrowser, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_AUDIOPLAYER, (int *)&g_settings.personalize_audioplayer,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_1));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_MOVIEPLAYER, (int *)&g_settings.personalize_movieplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_2));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_PICTUREVIEWER, (int *)&g_settings.personalize_pictureviewer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
+#ifdef ENABLE_UPNP
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_UPNPBROWSER, (int *)&g_settings.personalize_upnpbrowser, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_4));
 #endif
-                        pMMMenu->addItem(GenericMenuSeparator);
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SETTINGS, (int *)&g_settings.personalize_settings, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL, CRCInput::RC_4));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SERVICE, (int *)&g_settings.personalize_service, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL, CRCInput::RC_5));
-                        pMMMenu->addItem(GenericMenuSeparator);
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SLEEPTIMER, (int *)&g_settings.personalize_sleeptimer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_6));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_REBOOT, (int *)&g_settings.personalize_reboot, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_7));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SHUTDOWN, (int *)&g_settings.personalize_shutdown, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_standby, "power.raw"));
+						pMMMenu->addItem(GenericMenuSeparatorLine);
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SLEEPTIMER, (int *)&g_settings.personalize_sleeptimer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_5));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_REBOOT, (int *)&g_settings.personalize_reboot, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_6));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SHUTDOWN, (int *)&g_settings.personalize_shutdown, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_standby, NEUTRINO_ICON_BUTTON_POWER));
 
+  						pMMMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PERSONALIZE_STPROTECT));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SETTINGS, (int *)&g_settings.personalize_settings, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL, CRCInput::RC_6));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SERVICE, (int *)&g_settings.personalize_service, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL, CRCInput::RC_7));
+                        pMMMenu->addItem(GenericMenuSeparator);
+						
                         pMMMenu->exec (NULL, "");
                         pMMMenu->hide ();
                         delete pMMMenu;
@@ -203,14 +208,16 @@ void CPersonalizeGui::ShowMainMenuOptions()
                                                                                                                         || old_audioplayer != g_settings.personalize_audioplayer
                                                                                                                         || old_movieplayer != g_settings.personalize_movieplayer
                                                                                                                         || old_pictureviewer != g_settings.personalize_pictureviewer
-                                                                                                                        || old_upnpbrowser != g_settings.personalize_upnpbrowser
+																						#ifdef ENABLE_UPNP
+																														|| old_upnpbrowser != g_settings.personalize_upnpbrowser
+																											#endif
                                                                                                                         || old_settings != g_settings.personalize_settings
                                                                                                                         || old_service != g_settings.personalize_service
                                                                                                                         || old_sleeptimer != g_settings.personalize_sleeptimer
                                                                                                                         || old_reboot != g_settings.personalize_reboot
                                                                                                                         || old_shutdown != g_settings.personalize_shutdown) {
 
-                        if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_SAVERESTART), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "settings.raw") == CMessageBox::mbrYes)
+                        if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_SAVERESTART), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NEUTRINO_ICON_PROTECTING) == CMessageBox::mbrYes)
                                 { SaveAndRestart(); }
                         }
 
@@ -236,14 +243,14 @@ void CPersonalizeGui::ShowSettingsOptions()
                         int old_driver                                  = g_settings.personalize_driver;
                         int old_misc                                    = g_settings.personalize_misc;
 
-                        CMenuWidget* pSTMenu = new CMenuWidget(LOCALE_MAINMENU_SETTINGS,"settings.raw");
+                        CMenuWidget* pSTMenu = new CMenuWidget(LOCALE_MAINMENU_SETTINGS,NEUTRINO_ICON_PROTECTING, width);
 
                         pSTMenu->addItem(GenericMenuSeparator);
                         pSTMenu->addItem(GenericMenuBack);
                         pSTMenu->addItem(GenericMenuSeparatorLine);
 
-                        pSTMenu->addItem(new CMenuOptionChooser(LOCALE_PERSONALIZE_STPROTECT, (int *)&g_settings.personalize_settings, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL));
-                        pSTMenu->addItem(GenericMenuSeparatorLine);
+                        pSTMenu->addItem(new CMenuOptionChooser(LOCALE_PERSONALIZE_SETUPMENUWITHPIN, (int *)&g_settings.personalize_settings, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL));
+						pSTMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PERSONALIZE_ACCESS));
 
                         pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_VIDEO, (int *)&g_settings.personalize_video, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_1));
                         pSTMenu->addItem(new CMenuOptionChooser(LOCALE_MAINSETTINGS_AUDIO, (int *)&g_settings.personalize_audio, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_2));
@@ -279,7 +286,7 @@ void CPersonalizeGui::ShowSettingsOptions()
                                                                                                                                 || old_driver != g_settings.personalize_driver
                                                                                                                                 || old_misc != g_settings.personalize_misc) {
 
-                        if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_SAVERESTART), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "settings.raw") == CMessageBox::mbrYes)
+                        if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_SAVERESTART), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NEUTRINO_ICON_PROTECTING) == CMessageBox::mbrYes)
                                 { SaveAndRestart(); }
                         }
 }
@@ -299,24 +306,24 @@ void CPersonalizeGui::ShowServiceOptions()
                         int old_imageinfo                               = g_settings.personalize_imageinfo;
                         int old_update                                  = g_settings.personalize_update;
 
-                        CMenuWidget* pSMMenu = new CMenuWidget(LOCALE_MAINMENU_SERVICE,"settings.raw");
+                        CMenuWidget* pSMMenu = new CMenuWidget(LOCALE_MAINMENU_SERVICE,NEUTRINO_ICON_PROTECTING, width);
 
                         pSMMenu->addItem(GenericMenuSeparator);
                         pSMMenu->addItem(GenericMenuBack);
                         pSMMenu->addItem(GenericMenuSeparatorLine);
 
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_PERSONALIZE_SVPROTECT, (int *)&g_settings.personalize_service, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL));
-                        pSMMenu->addItem(GenericMenuSeparatorLine);
+						pSMMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PERSONALIZE_ACCESS));
 
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_BOUQUETEDITOR_NAME, (int *)&g_settings.personalize_bouqueteditor, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_SCANTS, (int *)&g_settings.personalize_scants, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-                        pSMMenu->addItem(GenericMenuSeparator);
+                        pSMMenu->addItem(GenericMenuSeparatorLine);
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_RELOAD, (int *)&g_settings.personalize_reload, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_1));
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_GETPLUGINS, (int *)&g_settings.personalize_getplugins, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_2));
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_RESTART, (int *)&g_settings.personalize_restart, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_UCODECHECK, (int *)&g_settings.personalize_ucodecheck, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_4));
 
-                        pSMMenu->addItem(GenericMenuSeparator);
+                        pSMMenu->addItem(GenericMenuSeparatorLine);
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_IMAGEINFO, (int *)&g_settings.personalize_imageinfo, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
                         pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_UPDATE, (int *)&g_settings.personalize_update, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 
@@ -335,7 +342,7 @@ void CPersonalizeGui::ShowServiceOptions()
                                                                                                                         || old_imageinfo != g_settings.personalize_imageinfo
                                                                                                                         || old_update != g_settings.personalize_update) {
 
-                        if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_SAVERESTART), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "settings.raw") == CMessageBox::mbrYes)
+                        if (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_PERSONALIZE_SAVERESTART), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NEUTRINO_ICON_PROTECTING) == CMessageBox::mbrYes)
                                 { SaveAndRestart(); }
                         }
 

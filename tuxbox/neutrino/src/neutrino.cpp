@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.863 2007/08/28 17:41:30 stdin Exp $
+	$Id: neutrino.cpp,v 1.864 2007/08/30 21:33:21 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -139,7 +139,6 @@
 #ifndef TUXTXT_CFG_STANDALONE
 extern "C" int  tuxtxt_init();
 #endif
-
 
 CBouquetList    	* bouquetList;
 CBouquetList    	* bouquetListTV;
@@ -734,7 +733,9 @@ int CNeutrinoApp::loadSetup()
 	g_settings.personalize_audioplayer = configfile.getInt32("personalize_audioplayer", 1);
 	g_settings.personalize_movieplayer = configfile.getInt32("personalize_movieplayer", 1);
 	g_settings.personalize_pictureviewer = configfile.getInt32("personalize_pictureviewer", 1);
-	g_settings.personalize_upnpbrowser = configfile.getInt32("personalize_upnpbrowser", 1);
+#if ENABLE_UPNP
+ 	g_settings.personalize_upnpbrowser = configfile.getInt32("personalize_upnpbrowser", 1);
+#endif
 	g_settings.personalize_settings = configfile.getInt32("personalize_settings", 1);
 	g_settings.personalize_service = configfile.getInt32("personalize_service", 1);
 	g_settings.personalize_sleeptimer = configfile.getInt32("personalize_sleeptimer", 1);
@@ -1190,7 +1191,9 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "personalize_audioplayer", g_settings.personalize_audioplayer );
 	configfile.setInt32 ( "personalize_movieplayer", g_settings.personalize_movieplayer );
 	configfile.setInt32 ( "personalize_pictureviewer", g_settings.personalize_pictureviewer );
-	configfile.setInt32 ( "personalize_upnpbrowser", g_settings.personalize_upnpbrowser );
+#if ENABLE_UPNP
+ 	configfile.setInt32 ( "personalize_upnpbrowser", g_settings.personalize_upnpbrowser );
+#endif
 	configfile.setInt32 ( "personalize_settings", g_settings.personalize_settings );
 	configfile.setInt32 ( "personalize_service", g_settings.personalize_service );
 	configfile.setInt32 ( "personalize_sleeptimer", g_settings.personalize_sleeptimer );
@@ -1809,8 +1812,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 
 	// Dynamic renumbering
-	int shortcut = 0;
-	int shortcut2 = 0;
+	int shortcut = 1;
+	int shortcut2 = 1;
 
 	// Main Menu
 	mainMenu.addItem(GenericMenuSeparator);
@@ -1901,10 +1904,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	else
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.personalize_pincode, true, true, NULL, &service, NULL, CRCInput::convertDigitToKey(shortcut++)));
 
-	if (g_settings.personalize_settings==0 && g_settings.personalize_service==0) {
+	if (g_settings.personalize_sleeptimer==0 && g_settings.personalize_reboot==0 && g_settings.personalize_shutdown==0) {
 		 // Stop seperator from appearing when menu entries have been hidden
 	} else {
-	mainMenu.addItem(GenericMenuSeparatorLine); }
+	mainMenu.addItem(GenericMenuSeparatorLine);
+	 }
 
 	if (g_settings.personalize_sleeptimer == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL, CRCInput::convertDigitToKey(shortcut++)));
@@ -2259,7 +2263,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	dprintf(DEBUG_DEBUG, "init serviceSettings\n");
 
 	// Dynamic renumbering
-	int shortcut3 = 0;
+	int shortcut3 = 1;
 	service.addItem(GenericMenuSeparator);
 	service.addItem(GenericMenuBack);
 	service.addItem(GenericMenuSeparatorLine);
