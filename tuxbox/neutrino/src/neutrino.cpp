@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.864 2007/08/30 21:33:21 dbt Exp $
+	$Id: neutrino.cpp,v 1.865 2007/08/31 11:27:16 nitr8 Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -331,6 +331,64 @@ void CNeutrinoApp::setupColors_neutrino()
 	g_settings.infobar_Text_red   = 0x64;
 	g_settings.infobar_Text_green = 0x64;
 	g_settings.infobar_Text_blue  = 0x64;
+}
+
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  setup Color Sheme (Virgin Media)                           *
+*                                                                                     *
+**************************************************************************************/
+void CNeutrinoApp::setupColors_virginmedia()
+{
+	g_settings.menu_Head_alpha = 0;
+	g_settings.menu_Head_red   = 0;
+	g_settings.menu_Head_green = 0;
+	g_settings.menu_Head_blue  = 0;
+
+	g_settings.menu_Head_Text_alpha = 0;
+	g_settings.menu_Head_Text_red   = 100;
+	g_settings.menu_Head_Text_green = 100;
+	g_settings.menu_Head_Text_blue  = 100;
+
+	g_settings.menu_Content_alpha = 0;
+	g_settings.menu_Content_red   = 0;
+	g_settings.menu_Content_green = 0;
+	g_settings.menu_Content_blue  = 0;
+
+	g_settings.menu_Content_Text_alpha = 0;
+	g_settings.menu_Content_Text_red   = 100;
+	g_settings.menu_Content_Text_green = 100;
+	g_settings.menu_Content_Text_blue  = 100;
+
+	g_settings.menu_Content_Selected_alpha = 20;
+	g_settings.menu_Content_Selected_red   = 100;
+	g_settings.menu_Content_Selected_green = 85;
+	g_settings.menu_Content_Selected_blue  = 0;
+
+	g_settings.menu_Content_Selected_Text_alpha  = 0;
+	g_settings.menu_Content_Selected_Text_red    = 0;
+	g_settings.menu_Content_Selected_Text_green  = 0;
+	g_settings.menu_Content_Selected_Text_blue   = 0;
+
+	g_settings.menu_Content_inactive_alpha = 20;
+	g_settings.menu_Content_inactive_red   = 0;
+	g_settings.menu_Content_inactive_green = 15;
+	g_settings.menu_Content_inactive_blue  = 35;
+
+	g_settings.menu_Content_inactive_Text_alpha  = 0;
+	g_settings.menu_Content_inactive_Text_red    = 100;
+	g_settings.menu_Content_inactive_Text_green  = 100;
+	g_settings.menu_Content_inactive_Text_blue   = 100;
+
+	g_settings.infobar_alpha = 20;
+	g_settings.infobar_red   = 0;
+	g_settings.infobar_green = 0;
+	g_settings.infobar_blue  = 0;
+
+	g_settings.infobar_Text_alpha = 0;
+	g_settings.infobar_Text_red   = 100;
+	g_settings.infobar_Text_green = 100;
+	g_settings.infobar_Text_blue  = 100;
 }
 
 /**************************************************************************************
@@ -3353,6 +3411,7 @@ void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 	colorSettings_Themes.addItem(GenericMenuSeparatorLine);
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_NEUTRINO_THEME, true, NULL, this, "theme_neutrino"));
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_CLASSIC_THEME, true, NULL, this, "theme_classic"));
+	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_VIRGINMEDIA, true, NULL, this, "theme_virgin"));
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_DBLUE_THEME, true, NULL, this, "theme_dblue"));
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_DVB2K_THEME, true, NULL, this, "theme_dvb2k"));
 
@@ -5926,6 +5985,11 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	else if (actionKey=="theme_dblue")
 	{
 		setupColors_dblue();
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
+	}
+	else if (actionKey=="theme_virgin")
+	{
+		setupColors_virginmedia();
 		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if (actionKey=="theme_dvb2k")

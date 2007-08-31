@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.188 2007/08/27 12:17:46 nitr8 Exp $
+	$Id: neutrino.h,v 1.189 2007/08/31 11:27:25 nitr8 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -160,6 +160,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void setupColors_neutrino();
 		void setupColors_dblue();
 		void setupColors_dvb2k();
+		void setupColors_virginmedia();
 		void setupNetwork( bool force= false );
 		void setupNFS();
 		void setupRecordingDevice(void);

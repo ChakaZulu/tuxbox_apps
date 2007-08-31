@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.97 2007/08/30 21:29:31 dbt Exp $
+ * $Id: locals.h,v 1.98 2007/08/31 11:23:42 nitr8 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -266,6 +266,7 @@ typedef enum
 	LOCALE_COLORTHEMEMENU_DVB2K_THEME,
 	LOCALE_COLORTHEMEMENU_HEAD,
 	LOCALE_COLORTHEMEMENU_NEUTRINO_THEME,
+	LOCALE_COLORTHEMEMENU_VIRGINMEDIA,
 	LOCALE_DATE_APR,
 	LOCALE_DATE_AUG,
 	LOCALE_DATE_DEC,
