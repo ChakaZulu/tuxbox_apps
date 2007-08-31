@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.866 2007/08/31 20:11:07 houdini Exp $
+	$Id: neutrino.cpp,v 1.867 2007/08/31 20:37:26 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3798,7 +3798,7 @@ bool CNeutrinoApp::showUserMenu(int button)
 		if( txt.empty() )
 			txt = g_Locale->getText(LOCALE_INFOVIEWER_STREAMINFO);
 	}
-	CMenuWidget *menu = new CMenuWidget(txt.c_str() , "features.raw", 350);
+	CMenuWidget *menu = new CMenuWidget(txt.c_str() , "features.raw", 400);
 	if (menu == NULL) 
 		return 0;
 	menu->addItem(GenericMenuSeparator);
