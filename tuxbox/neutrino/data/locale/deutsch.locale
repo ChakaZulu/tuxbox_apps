@@ -834,7 +834,7 @@ personalize.head Personalisierung
 personalize.menuconfiguration Menüeinstellungen
 personalize.menudisabledhint Das angeforderte Menu ist nicht aktiv
 personalize.notprotected nein
-personalize.notvisible aus
+personalize.notvisible nicht sichtbar
 personalize.pin PIN
 personalize.pincode PIN Code
 personalize.pinhint Personalisierungs PIN Code eingeben
@@ -844,7 +844,7 @@ personalize.saverestart Neutrino muss neu starten. Jetzt neu starten?
 personalize.setupmenuwithpin Einstellungen-Menü mit PIN
 personalize.stprotect Menüzugang mit PIN
 personalize.svprotect Service-Menü mit PIN
-personalize.visible an
+personalize.visible sichtbar
 pictureviewer.decode_server_ip Decoding-Server IP
 pictureviewer.decode_server_port Decoding-Server Port
 pictureviewer.defdir Start-Verz.
