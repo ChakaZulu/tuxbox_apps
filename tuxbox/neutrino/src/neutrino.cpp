@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.865 2007/08/31 11:27:16 nitr8 Exp $
+	$Id: neutrino.cpp,v 1.866 2007/08/31 20:11:07 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -665,30 +665,30 @@ int CNeutrinoApp::loadSetup()
 	g_settings.network_ntpenable 	= configfile.getBool("network_ntpenable", false);
 
 	//misc
-	g_settings.shutdown_real            = configfile.getBool("shutdown_real"             , true );
-	g_settings.shutdown_real_rcdelay    = configfile.getBool("shutdown_real_rcdelay"     , true );
+	g_settings.shutdown_real		= configfile.getBool("shutdown_real"             , true );
+	g_settings.shutdown_real_rcdelay	= configfile.getBool("shutdown_real_rcdelay"     , true );
 	strcpy(g_settings.shutdown_count, configfile.getString("shutdown_count","0").c_str());
-	g_settings.infobar_sat_display      = configfile.getBool("infobar_sat_display"       , true );
-	g_settings.infobar_subchan_disp_pos = configfile.getInt32("infobar_subchan_disp_pos" , 0 );
-	g_settings.misc_spts                = configfile.getBool("misc_spts"                 , false );
+	g_settings.infobar_sat_display		= configfile.getBool("infobar_sat_display"       , true );
+	g_settings.infobar_subchan_disp_pos	= configfile.getInt32("infobar_subchan_disp_pos" , 0 );
+	g_settings.misc_spts			= configfile.getBool("misc_spts"                 , false );
 #ifndef TUXTXT_CFG_STANDALONE
-	g_settings.tuxtxt_cache                = configfile.getBool("tuxtxt_cache"                 , false );
+	g_settings.tuxtxt_cache			= configfile.getBool("tuxtxt_cache"              , false );
 #endif
-	g_settings.virtual_zap_mode	    = configfile.getBool("virtual_zap_mode"          , false);
-	g_settings.infobar_show             = configfile.getBool("infobar_show"              , false);
+	g_settings.virtual_zap_mode		= configfile.getBool("virtual_zap_mode"          , false);
+	g_settings.infobar_show			= configfile.getInt32("infobar_show"             , 0);
 
 	//audio
-	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
-	g_settings.audio_DolbyDigital    = configfile.getBool("audio_DolbyDigital"   , false);
+	g_settings.audio_AnalogMode 		= configfile.getInt32( "audio_AnalogMode"        , 0 );
+	g_settings.audio_DolbyDigital		= configfile.getBool("audio_DolbyDigital"        , false);
 #ifndef HAVE_DREAMBOX_HARDWARE
-	g_settings.audio_avs_Control = configfile.getInt32( "audio_avs_Control", CControld::TYPE_AVS );
+	g_settings.audio_avs_Control 		= configfile.getInt32( "audio_avs_Control", CControld::TYPE_AVS );
 #else
-	g_settings.audio_avs_Control = CControld::TYPE_OST;
+	g_settings.audio_avs_Control 		= CControld::TYPE_OST;
 #endif
 	strcpy( g_settings.audio_PCMOffset, configfile.getString( "audio_PCMOffset", "0" ).c_str() );
 
 	//vcr
-	g_settings.vcr_AutoSwitch        = configfile.getBool("vcr_AutoSwitch"       , true );
+	g_settings.vcr_AutoSwitch		= configfile.getBool("vcr_AutoSwitch"            , true );
 
 	//language
 	strcpy(g_settings.language, configfile.getString("language", "").c_str());
@@ -1121,40 +1121,40 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "gtx_alpha2", g_settings.gtx_alpha2 );
 
 	// EPG-Config
-	configfile.setString("epg_cache_time"           ,g_settings.epg_cache );
-	configfile.setString("epg_extendedcache_time"   ,g_settings.epg_extendedcache );
-	configfile.setString("epg_old_events"           ,g_settings.epg_old_events );
-	configfile.setString("epg_max_events"           ,g_settings.epg_max_events );
-	configfile.setString("epg_dir"                  ,g_settings.epg_dir);
+	configfile.setString("epg_cache_time"          ,g_settings.epg_cache );
+	configfile.setString("epg_extendedcache_time"  ,g_settings.epg_extendedcache );
+	configfile.setString("epg_old_events"          ,g_settings.epg_old_events );
+	configfile.setString("epg_max_events"          ,g_settings.epg_max_events );
+	configfile.setString("epg_dir"                 ,g_settings.epg_dir);
 
 	//misc
 	configfile.setBool("shutdown_real"             , g_settings.shutdown_real);
 	configfile.setBool("shutdown_real_rcdelay"     , g_settings.shutdown_real_rcdelay);
-	configfile.setString("shutdown_count"           , g_settings.shutdown_count);
+	configfile.setString("shutdown_count"          , g_settings.shutdown_count);
 	configfile.setBool("infobar_sat_display"       , g_settings.infobar_sat_display);
 	configfile.setInt32("infobar_subchan_disp_pos" , g_settings.infobar_subchan_disp_pos);
 	configfile.setBool("misc_spts"                 , g_settings.misc_spts);
 #ifndef TUXTXT_CFG_STANDALONE
-	configfile.setBool("tuxtxt_cache"                 , g_settings.tuxtxt_cache);
+	configfile.setBool("tuxtxt_cache"              , g_settings.tuxtxt_cache);
 #endif
 	configfile.setBool("virtual_zap_mode"          , g_settings.virtual_zap_mode);
-	configfile.setBool("infobar_show"              , g_settings.infobar_show);
+	configfile.setInt32("infobar_show"             , g_settings.infobar_show);
 
 	//audio
-	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
-	configfile.setBool("audio_DolbyDigital"   , g_settings.audio_DolbyDigital   );
-	configfile.setInt32( "audio_avs_Control", g_settings.audio_avs_Control );
-	configfile.setString( "audio_PCMOffset", g_settings.audio_PCMOffset );
+	configfile.setInt32( "audio_AnalogMode" , g_settings.audio_AnalogMode);
+	configfile.setBool("audio_DolbyDigital" , g_settings.audio_DolbyDigital);
+	configfile.setInt32( "audio_avs_Control", g_settings.audio_avs_Control);
+	configfile.setString( "audio_PCMOffset" , g_settings.audio_PCMOffset);
 
 	//vcr
-	configfile.setBool("vcr_AutoSwitch"       , g_settings.vcr_AutoSwitch       );
+	configfile.setBool("vcr_AutoSwitch"     , g_settings.vcr_AutoSwitch);
 
 	//language
-	configfile.setString("language", g_settings.language);
+	configfile.setString("language"         , g_settings.language);
 
 	//widget settings
-	configfile.setBool("widget_fade"          , g_settings.widget_fade          );
-	configfile.setInt32("widget_osd"          , g_settings.widget_osd           );
+	configfile.setBool("widget_fade"        , g_settings.widget_fade);
+	configfile.setInt32("widget_osd"        , g_settings.widget_osd);
 
 	//colors
 	configfile.setInt32( "menu_Head_alpha", g_settings.menu_Head_alpha );
@@ -5786,6 +5786,7 @@ void CNeutrinoApp::radioMode( bool rezap)
 	{
 		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
 		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
+
 #ifndef HAVE_DREAMBOX_HARDWARE
 		if(g_settings.misc_spts==1)
 			g_Zapit->PlaybackPES();
@@ -5839,7 +5840,7 @@ void CNeutrinoApp::startNextRecording()
 				const char *recDir = strlen(nextRecordingInfo->recordingDir) > 0 ?
 					nextRecordingInfo->recordingDir : g_settings.recording_dir[0].c_str();
 
-               int free = getFreeDiscSpaceGB(recDir);
+				int free = getFreeDiscSpaceGB(recDir);
 				printf("[neutrino.cpp] getFreeDiscSpaceGB %d\n",free);
 				if (free < 2)
 				{
