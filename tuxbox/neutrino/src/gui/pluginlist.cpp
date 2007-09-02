@@ -75,11 +75,11 @@ CPluginList::CPluginList(const neutrino_locale_t Name, const uint listtype)
 	pluginlisttype = listtype;
 	selected = 0;
 	width = 500;
-   if(width>(g_settings.screen_EndX-g_settings.screen_StartX))
-      width=(g_settings.screen_EndX-g_settings.screen_StartX);
+	if(width>(g_settings.screen_EndX-g_settings.screen_StartX))
+		width=(g_settings.screen_EndX-g_settings.screen_StartX);
 	height = 526;
-   if((height+50)>(g_settings.screen_EndY-g_settings.screen_StartY))
-      height=(g_settings.screen_EndY-g_settings.screen_StartY) - 50; // 2*25 pixel frei
+	if((height+50)>(g_settings.screen_EndY-g_settings.screen_StartY))
+		height=(g_settings.screen_EndY-g_settings.screen_StartY) - 50; // 2*25 pixel frei
 	theight  = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	//
 	fheight1 = g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMLARGE]->getHeight();
