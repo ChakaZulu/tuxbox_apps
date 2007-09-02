@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.869 2007/09/02 19:05:51 houdini Exp $
+	$Id: neutrino.cpp,v 1.870 2007/09/02 20:40:59 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -82,10 +82,6 @@
 #include "gui/movieplayer.h"
 #include "gui/nfs.h"
 #include "gui/screensetup.h"
-
-#if ENABLE_UPNP
-#include "gui/upnpbrowser.h"
-#endif
 
 #include <system/setting_helpers.h>
 #include <system/settings.h>

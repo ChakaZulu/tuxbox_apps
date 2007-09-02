@@ -70,6 +70,9 @@
 #include "gui/streaminfo2.h"
 #include "gui/sleeptimer.h"
 #include "gui/update.h"
+#if ENABLE_UPNP
+#include "gui/upnpbrowser.h"
+#endif
 
 #ifdef _EXPERIMENTAL_SETTINGS_
 #include "gui/experimental_menu.h"
