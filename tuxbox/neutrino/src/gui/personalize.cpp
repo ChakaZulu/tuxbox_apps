@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.2 2007/08/30 21:31:39 dbt Exp $
+        $Id: personalize.cpp,v 1.3 2007/09/02 16:52:16 dbt Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -85,11 +85,13 @@ const CMenuOptionChooser::keyval PERSONALIZE_YON_OPTIONS[PERSONALIZE_YON_OPTION_
 CPersonalizeGui::CPersonalizeGui()
 : configfile('\t')
 {
-        frameBuffer = CFrameBuffer::getInstance();
-        width = w_max (710, 100);
-        hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
-        mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
-        height = hheight+13*mheight+ 10;
+		frameBuffer = CFrameBuffer::getInstance();
+		width = w_max (710, 100);
+		hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
+		mheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
+		height = hheight+13*mheight+ 10;
+		x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+		y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 
 }
 
