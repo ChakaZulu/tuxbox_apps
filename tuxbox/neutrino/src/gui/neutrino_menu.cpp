@@ -1531,11 +1531,12 @@ void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 	colorSettings_Themes.addItem(GenericMenuSeparatorLine);
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_NEUTRINO_THEME, true, NULL, this, "theme_neutrino"));
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_CLASSIC_THEME, true, NULL, this, "theme_classic"));
-	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_VIRGINMEDIA, true, NULL, this, "theme_virgin"));
+	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_VIRGINMEDIA_THEME, true, NULL, this, "theme_virgin"));
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_DBLUE_THEME, true, NULL, this, "theme_dblue"));
+	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_DBROWN_THEME, true, NULL, this, "theme_dbrown"));
 	colorSettings_Themes.addItem(new CMenuForwarder(LOCALE_COLORTHEMEMENU_DVB2K_THEME, true, NULL, this, "theme_dvb2k"));
-
 }
+	
 
 void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors)
 {
@@ -2528,3 +2529,60 @@ void CNeutrinoApp::setupColors_dvb2k()
 	g_settings.infobar_Text_blue  = 100;
 }
 
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  setup Color Sheme (darkbrown)                              *
+*                                                                                     *
+**************************************************************************************/
+void CNeutrinoApp::setupColors_dbrown()
+{
+	g_settings.menu_Head_alpha = 0;
+	g_settings.menu_Head_red   = 25;
+	g_settings.menu_Head_green = 10;
+	g_settings.menu_Head_blue  = 10;
+
+	g_settings.menu_Head_Text_alpha = 0;
+	g_settings.menu_Head_Text_red   = 65;
+	g_settings.menu_Head_Text_green = 65;
+	g_settings.menu_Head_Text_blue  = 65;
+
+	g_settings.menu_Content_alpha = 5;
+	g_settings.menu_Content_red   = 20;
+	g_settings.menu_Content_green = 20;
+	g_settings.menu_Content_blue  = 20;
+
+	g_settings.menu_Content_Text_alpha = 0;
+	g_settings.menu_Content_Text_red   = 100;
+	g_settings.menu_Content_Text_green = 100;
+	g_settings.menu_Content_Text_blue  = 100;
+
+	g_settings.menu_Content_Selected_alpha = 5;
+	g_settings.menu_Content_Selected_red   = 55;
+	g_settings.menu_Content_Selected_green = 55;
+	g_settings.menu_Content_Selected_blue  = 55;
+
+	g_settings.menu_Content_Selected_Text_alpha  = 0;
+	g_settings.menu_Content_Selected_Text_red    = 0;
+	g_settings.menu_Content_Selected_Text_green  = 0;
+	g_settings.menu_Content_Selected_Text_blue   = 0;
+
+	g_settings.menu_Content_inactive_alpha = 5;
+	g_settings.menu_Content_inactive_red   = 20;
+	g_settings.menu_Content_inactive_green = 20;
+	g_settings.menu_Content_inactive_blue  = 20;
+
+	g_settings.menu_Content_inactive_Text_alpha  = 0;
+	g_settings.menu_Content_inactive_Text_red    = 60;
+	g_settings.menu_Content_inactive_Text_green  = 60;
+	g_settings.menu_Content_inactive_Text_blue   = 60;
+
+	g_settings.infobar_alpha = 0;
+	g_settings.infobar_red   = 25;
+	g_settings.infobar_green = 10;
+	g_settings.infobar_blue  = 10;
+
+	g_settings.infobar_Text_alpha = 0;
+	g_settings.infobar_Text_red   = 100;
+	g_settings.infobar_Text_green = 100;
+	g_settings.infobar_Text_blue  = 100;
+}

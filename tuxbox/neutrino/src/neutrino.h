@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.190 2007/09/02 19:05:51 houdini Exp $
+	$Id: neutrino.h,v 1.191 2007/09/02 21:10:03 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -188,6 +188,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void setupColors_classic();
 		void setupColors_neutrino();
 		void setupColors_dblue();
+		void setupColors_dbrown();
 		void setupColors_dvb2k();
 		void setupColors_virginmedia();
 		void setupNetwork( bool force= false );

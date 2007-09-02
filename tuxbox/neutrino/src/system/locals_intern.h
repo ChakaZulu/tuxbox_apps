@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.99 2007/08/31 11:24:01 nitr8 Exp $
+ * $Id: locals_intern.h,v 1.100 2007/09/02 21:10:04 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -263,10 +263,11 @@ const char * locale_real_names[] =
 	"colorstatusbar.text",
 	"colorthememenu.classic_theme",
 	"colorthememenu.dblue_theme",
+	"colorthememenu.dbrown_theme",
 	"colorthememenu.dvb2k_theme",
 	"colorthememenu.head",
 	"colorthememenu.neutrino_theme",
-	"colorthememenu.virginmedia",
+	"colorthememenu.virginmedia_theme",
 	"date.Apr",
 	"date.Aug",
 	"date.Dec",

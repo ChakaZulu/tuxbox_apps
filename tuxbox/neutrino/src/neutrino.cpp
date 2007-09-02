@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.870 2007/09/02 20:40:59 houdini Exp $
+	$Id: neutrino.cpp,v 1.871 2007/09/02 21:10:03 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3470,6 +3470,11 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	else if (actionKey=="theme_dblue")
 	{
 		setupColors_dblue();
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
+	}
+	else if (actionKey=="theme_dbrown")
+	{
+		setupColors_dbrown();
 		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if (actionKey=="theme_virgin")
