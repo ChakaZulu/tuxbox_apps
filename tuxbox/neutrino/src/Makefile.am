@@ -18,9 +18,9 @@ neutrino_SOURCES = neutrino.cpp
 
 neutrino_LDADD = \
 	daemonc/libneutrino_daemonc.a \
-	gui/bedit/libneutrino_gui_bedit.a \
 	gui/libtimerlist.a \
 	gui/libneutrino_gui.a \
+	gui/bedit/libneutrino_gui_bedit.a \
 	gui/widget/libneutrino_gui_widget.a \
 	gui/widget/libneutrino_gui_widget2.a \
 	driver/pictureviewer/libneutrino_pictureviewer.a \

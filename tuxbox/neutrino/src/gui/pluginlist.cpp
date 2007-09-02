@@ -67,8 +67,6 @@
 #endif
 
 #include <daemonc/remotecontrol.h>
-extern CPlugins       * g_PluginList;    /* neutrino.cpp */
-extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 CPluginList::CPluginList(const neutrino_locale_t Name, const uint listtype)
 {

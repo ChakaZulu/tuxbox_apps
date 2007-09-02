@@ -15,6 +15,7 @@ INCLUDES = \
 noinst_LIBRARIES = libtimerlist.a libneutrino_gui.a libneutrino_gui2.a
 
 libneutrino_gui_a_SOURCES = \
+        neutrino_menu.cpp \
 	bouquetlist.cpp channellist.cpp eventlist.cpp pluginlist.cpp \
 	color.cpp favorites.cpp sleeptimer.cpp screensetup.cpp \
 	epgview.cpp infoviewer.cpp scan.cpp update.cpp \

@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.162 2007/06/03 14:37:07 dbluelle Exp $
+	$Id: setting_helpers.cpp,v 1.163 2007/09/02 19:05:53 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -58,9 +58,6 @@
 #include <gui/widget/hintbox.h>
 #include <gui/plugins.h>
 #include <daemonc/remotecontrol.h>
-
-extern CPlugins       * g_PluginList;    /* neutrino.cpp */
-extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 extern "C" int pinghost( const char *hostname );
 

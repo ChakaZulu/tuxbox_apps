@@ -37,6 +37,7 @@
 #include <controldclient/controldclient.h>
 #include <sectionsdclient/sectionsdclient.h>
 #include <timerdclient/timerdclient.h>
+#include <daemonc/remotecontrol.h>
 
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
@@ -48,6 +49,7 @@
 #include "gui/epgview.h"
 #include "gui/infoviewer.h"
 #include "gui/eventlist.h"
+#include "gui/plugins.h"
 
 #ifndef NEUTRINO_CPP
   #define NEUTRINO_CPP extern
@@ -73,5 +75,7 @@ NEUTRINO_CPP  CInfoViewer	*g_InfoViewer;
 NEUTRINO_CPP  EventList		*g_EventList;
 
 NEUTRINO_CPP  CLocaleManager	*g_Locale;
+NEUTRINO_CPP  CPlugins		*g_PluginList;
+NEUTRINO_CPP  CRemoteControl  	*g_RemoteControl;
 
 #endif /* __neutrino_global_h__ */
