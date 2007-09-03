@@ -42,6 +42,7 @@
 #include <system/flashtool.h>
 
 #include <driver/encoding.h>
+#include <driver/vcrcontrol.h>
 
 #include "gui/bedit/bouqueteditor_bouquets.h"
 #include "gui/widget/colorchooser.h"
@@ -1613,7 +1614,7 @@ const CMenuOptionChooser::keyval LCDMENU_STATUSLINE_OPTIONS[LCDMENU_STATUSLINE_O
 	{ 0, LOCALE_LCDMENU_STATUSLINE_PLAYTIME   },
 	{ 1, LOCALE_LCDMENU_STATUSLINE_VOLUME     },
 	{ 2, LOCALE_LCDMENU_STATUSLINE_BOTH       },
-    { 3, LOCALE_LCDMENU_STATUSLINE_BOTH_AUDIO }
+	{ 3, LOCALE_LCDMENU_STATUSLINE_BOTH_AUDIO }
 };
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
