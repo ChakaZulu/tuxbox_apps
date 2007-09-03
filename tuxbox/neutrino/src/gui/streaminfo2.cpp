@@ -1,5 +1,5 @@
 /*
-	$Id: streaminfo2.cpp,v 1.31 2007/08/21 08:04:17 dbt Exp $
+	$Id: streaminfo2.cpp,v 1.32 2007/09/03 08:41:06 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -258,11 +258,12 @@ int CStreamInfo2::doSignalStrengthLoop ()
 		if (msg <= CRCInput::RC_home) {
 			break;
 		}
-
+		
 		// -- push other events
 		if ( msg >  CRCInput::RC_home && msg != CRCInput::RC_timeout) {
 			CNeutrinoApp::getInstance()->handleMsg( msg, data );
 		}
+		
 	}
 	return msg;
 }
@@ -462,15 +463,15 @@ void CStreamInfo2::paint(int mode)
 		frameBuffer->paintBoxRel(0, 0, max_width, max_height, COL_MENUCONTENT_PLUS_0);
 
 		// -- paint large signal graph
-		paint_signal_fe_box ( x,  y, width, height - 60);
+		paint_signal_fe_box ( x,  y, width, height - 100);
 		
 		// -- buttons
-		int button_y = y+30;
+		int button_y = y+height;
 		
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, width-260 , y+10 );
-		g_Font[font_small]->RenderString(width-260+16+5, button_y, 120, g_Locale->getText(LOCALE_STREAMINFO_RESIZE), COL_MENUCONTENT_PLUS_0, 0, true); // UTF-8
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos , button_y-20 );
+		g_Font[font_small]->RenderString(xpos+25, button_y, 120, g_Locale->getText(LOCALE_STREAMINFO_RESIZE), COL_MENUCONTENT_PLUS_0, 0, true); // UTF-8
 		
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HOME,  width-110 , y+5 );
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HOME,  width-110 , button_y-25 );
 		g_Font[font_small]->RenderString(width-110+25+5, button_y, 120, g_Locale->getText(LOCALE_STREAMINFO_CLOSE), COL_MENUCONTENT_PLUS_0, 0, true); // UTF-8
 	}
 
@@ -600,7 +601,7 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 		sprintf((char*) buf+written, " (%c)", (si.polarisation == HORIZONTAL) ? 'h' : 'v');
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, "Freq:" , COL_MENUCONTENT, 0, true); // UTF-8
 	g_Font[font_small]->RenderString(xpos+spaceoffset, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8	
-	
+
 	//onid
 	ypos+= sheight;
 	sprintf((char*) buf, "0x%04x", si.onid);
