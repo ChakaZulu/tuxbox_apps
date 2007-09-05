@@ -1,4 +1,6 @@
 /*
+	$Id: neutrino_menu.cpp,v 1.5 2007/09/05 22:28:14 dbt Exp $
+	
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -278,11 +280,15 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	if (g_settings.personalize_lcd == 2)
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_LCD, g_settings.personalize_pincode, true, true, NULL, &lcdSettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
 
-	if (g_settings.personalize_keybinding == 1)
-		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
-	if (g_settings.personalize_keybinding == 2)
-		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, g_settings.personalize_pincode, true, true, NULL, &keySettings, NULL, CRCInput::convertDigitToKey(shortcut2++)));
-
+	if (g_settings.personalize_keybinding == 1){
+		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings, NULL, CRCInput::convertDigitToKey((shortcut2 == 10) ? 0 : shortcut2)));
+		if (shortcut==10) shortcut2++;
+		}
+	if (g_settings.personalize_keybinding == 2){
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, g_settings.personalize_pincode, true, true, NULL, &keySettings, NULL, CRCInput::convertDigitToKey((shortcut2 == 10) ? 0 : shortcut2)));
+		if (shortcut==10) shortcut2++;
+		}
+	
 	if (g_settings.personalize_audpic == 1)
 		mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	if (g_settings.personalize_audpic == 2)
@@ -298,10 +304,14 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	if (g_settings.personalize_misc == 2)
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_MISC, g_settings.personalize_pincode, true, true, NULL, &miscSettings, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 
-	if (g_settings.personalize_pinstatus == 0)
-		mainSettings.addItem(new CMenuForwarder(LOCALE_PERSONALIZE_HEAD, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
-	if (g_settings.personalize_pinstatus == 1)
-		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PERSONALIZE_HEAD, g_settings.personalize_pincode, true, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey(shortcut2++)));
+	if (g_settings.personalize_pinstatus == 0){
+		shortcut++;
+		mainSettings.addItem(new CMenuForwarder(LOCALE_PERSONALIZE_HEAD, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey((shortcut2 == 10) ? 0 : shortcut2)));
+		}
+	if (g_settings.personalize_pinstatus == 1){
+		shortcut++;
+		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PERSONALIZE_HEAD, g_settings.personalize_pincode, true, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey((shortcut2 == 10) ? 0 : shortcut2)));
+		}
 }
 
 #define SCANTS_BOUQUET_OPTION_COUNT 5
