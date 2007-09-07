@@ -1,5 +1,5 @@
 /*
-	$Id: movieviewer.cpp,v 1.2 2007/09/07 00:43:09 guenther Exp $
+	$Id: movieviewer.cpp,v 1.3 2007/09/07 07:11:34 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -359,10 +359,8 @@ void CMovieViewer::show()
 
 	///////////////////////////
 	// paint number box 
-	frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
+	frameBuffer->paintBoxRel(BoxStartX+SHADOW_OFFSET, BoxStartY+SHADOW_OFFSET, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
 	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, col_NumBox);
-
-	int ChanNumYPos = BoxStartY + ChanHeight;
 
 	//paint play state icon
 	bool res;
@@ -375,8 +373,8 @@ void CMovieViewer::show()
 
 	///////////////////////////
 	//paint infobox
-	int ChanNameX = BoxStartX + ChanWidth + 10;
-	int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
+	int ChanNameX = BoxStartX + ChanWidth + SHADOW_OFFSET;
+	int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 
 	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
 
@@ -384,10 +382,10 @@ void CMovieViewer::show()
 
 	///////////////////////////
 	// paint channel name
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, g_Locale->getText(LOCALE_MOVIEPLAYER_HEAD), COL_INFOBAR, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX + 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, g_Locale->getText(LOCALE_MOVIEPLAYER_HEAD), COL_INFOBAR, 0, true); // UTF-8
 
 	ChanInfoX = BoxStartX + (ChanWidth / 3);
-	int ChanInfoY = BoxStartY + ChanHeight+ 10;
+	int ChanInfoY = BoxStartY + ChanHeight + SHADOW_OFFSET;
 	ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
 
 	frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
@@ -498,7 +496,7 @@ void CMovieViewer::paintTime( bool show_dot, bool firstPaint )
 {
 	if ( gotTime )
 	{
-	    int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
+	    int ChanNameY = BoxStartY + (ChanHeight>>1)   + SHADOW_OFFSET; //oberkante schatten?
 
 		char timestr[10];
 		struct timeb tm;
@@ -700,4 +698,3 @@ void CMovieViewer::showButtonBarExtended()
 		}
 	}	
 }
-
