@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.26 2007/06/04 17:06:47 dbluelle Exp $
+ * $Id: stream2file.cpp,v 1.27 2007/09/07 01:42:30 guenther Exp $
  * 
  * streaming to file/disc
  * 
@@ -48,6 +48,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <gui/movieinfo.h>
 
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
@@ -113,6 +114,8 @@ static bool use_o_sync;
 static bool use_fdatasync;
 static unsigned long long limit;
 static unsigned int ringbuffersize;
+static time_t record_start_time = 0;
+static time_t record_end_time = 0;
 
 static char myfilename[512];
 
@@ -559,6 +562,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		DEC_BUSY_COUNT;
 	}
 
+	time(&record_start_time);
 	return STREAM2FILE_OK;
 }
 
@@ -566,6 +570,18 @@ stream2file_error_msg_t stop_recording(void)
 {
 	if (exit_flag == STREAM2FILE_STATUS_RUNNING)
 	{
+		CMovieInfo mi;
+		MI_MOVIE_INFO movieinfo; 
+
+		time(&record_end_time);
+		printf("record time: %d \n",(uint)record_end_time-record_start_time);
+		//load MovieInfo and set record time
+		movieinfo.file.Name = myfilename;
+		movieinfo.file.Name += ".ts";
+		mi.loadMovieInfo(&movieinfo);
+		movieinfo.rec_length = record_end_time-record_start_time;
+		mi.saveMovieInfo(movieinfo);
+
 		exit_flag = STREAM2FILE_STATUS_IDLE;
 		return STREAM2FILE_OK;
 	}
