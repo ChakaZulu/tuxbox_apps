@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.27 2007/09/07 01:42:30 guenther Exp $
+ * $Id: stream2file.cpp,v 1.28 2007/09/07 02:10:38 guenther Exp $
  * 
  * streaming to file/disc
  * 
@@ -572,6 +572,7 @@ stream2file_error_msg_t stop_recording(void)
 	{
 		CMovieInfo mi;
 		MI_MOVIE_INFO movieinfo; 
+		mi.clearMovieInfo(&movieinfo);
 
 		time(&record_end_time);
 		printf("record time: %d \n",(uint)record_end_time-record_start_time);
