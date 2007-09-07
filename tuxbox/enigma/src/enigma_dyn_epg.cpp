@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_epg.cpp,v 1.9 2007/05/08 18:51:10 dbluelle Exp $
+ * $Id: enigma_dyn_epg.cpp,v 1.10 2007/09/07 12:12:34 digi_casi Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -538,7 +538,8 @@ public:
 
 static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Content-Type"] = "text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	std::map<eString, eString>opt = getRequestOptions(opts, '&');
 	eString refs = opt["ref"];
 	eServiceReference bouquetRef = string2ref(refs);
@@ -559,13 +560,15 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 
 static eString getHTMLServiceEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Content-Type"] = "text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	return getServiceEPG("HTML", opts);
 }
 
 static eString getchannelinfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {   
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Content-Type"] = "text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	eString result = getEITC(readFile(TEMPLATE_DIR + "eit.tmp"), "HTML");
 	result.strReplace("#SERVICENAME#", getCurService());
     
