@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.154 2007/09/02 19:05:52 houdini Exp $
+  $Id: movieplayer.cpp,v 1.155 2007/09/07 00:44:02 guenther Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -3319,9 +3319,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 		if(open_filebrowser)
 		{
 			open_filebrowser    = false;
-			filename            = NULL;
-            p_movie_info = NULL;
-#ifdef MOVIEBROWSER  			
+ifdef MOVIEBROWSER  			
 			if(isMovieBrowser == true)
 			{
                 if (g_settings.streaming_show_tv_in_browser == true && 
@@ -3418,6 +3416,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			}
 
 			CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
+			update_lcd = true;
 		}
 
 		//-- LCD display --
@@ -3576,7 +3575,10 @@ void CMoviePlayerGui::PlayFile (int parental)
 					update_lcd  = true;
 					g_playstate = (g_playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::PLAY : CMoviePlayerGui::PAUSE;
 					if(g_show_movieviewer)
+					{
+						updateLcd(sel_filename);
 						showMovieViewer();
+					}
 					else
 						rc_blocked  = true;
 				}
@@ -3756,6 +3758,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = -15;
 				g_playstate   = CMoviePlayerGui::JB;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- jump 1/4 minute forward --
@@ -3763,6 +3766,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = 15;
 				g_playstate   = CMoviePlayerGui::JF;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- Resync A/V --
@@ -3791,6 +3795,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = -60;
 				g_playstate   = CMoviePlayerGui::JB;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- jump to start --
@@ -3798,6 +3803,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = 0;
 				g_playstate   = CMoviePlayerGui::JPOS;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- jump 1 minute forward --
@@ -3805,6 +3811,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = 60;
 				g_playstate   = CMoviePlayerGui::JF;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- jump 5 minutes back --
@@ -3812,6 +3819,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = -5 * 60;
 				g_playstate = CMoviePlayerGui::JB;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- jump via gui --
@@ -3846,12 +3854,14 @@ void CMoviePlayerGui::PlayFile (int parental)
 						FileTime.hide();
 					}
 				}
+				update_lcd = true;
 				break;
 				//-- jump 5 minutes forward --
 			case CRCInput::RC_6:
 				g_jumpseconds = 5 * 60;
 				g_playstate   = CMoviePlayerGui::JF;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- jump 10 minutes back -- 
@@ -3859,6 +3869,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = -10 * 60;
 				g_playstate   = CMoviePlayerGui::JB;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- jump to end --
@@ -3866,6 +3877,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = PF_JMP_END;  // dirty hack 2
 				g_playstate = CMoviePlayerGui::JPOS;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- jump 10 minutes back --
@@ -3873,6 +3885,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				g_jumpseconds = 10 * 60;
 				g_playstate   = CMoviePlayerGui::JF;
 				FileTime.hide();
+				update_lcd = true;
 				break;
 
 				//-- select previous item (in playlist) --
@@ -4437,7 +4450,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP20));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.154 $");
+	helpbox.addLine("Version: $Revision: 1.155 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4463,7 +4476,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.154 $");
+	helpbox.addLine("Version: $Revision: 1.155 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
