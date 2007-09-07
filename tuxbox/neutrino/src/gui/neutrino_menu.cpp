@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.5 2007/09/05 22:28:14 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.6 2007/09/07 21:16:48 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2345,15 +2345,15 @@ void CNeutrinoApp::setupColors_virginmedia()
 	g_settings.menu_Content_Selected_Text_green  = 0;
 	g_settings.menu_Content_Selected_Text_blue   = 0;
 
-	g_settings.menu_Content_inactive_alpha = 20;
+	g_settings.menu_Content_inactive_alpha = 0;
 	g_settings.menu_Content_inactive_red   = 0;
-	g_settings.menu_Content_inactive_green = 15;
-	g_settings.menu_Content_inactive_blue  = 35;
+	g_settings.menu_Content_inactive_green = 0;
+	g_settings.menu_Content_inactive_blue  = 0;
 
 	g_settings.menu_Content_inactive_Text_alpha  = 0;
-	g_settings.menu_Content_inactive_Text_red    = 100;
-	g_settings.menu_Content_inactive_Text_green  = 100;
-	g_settings.menu_Content_inactive_Text_blue   = 100;
+	g_settings.menu_Content_inactive_Text_red    = 60;
+	g_settings.menu_Content_inactive_Text_green  = 60;
+	g_settings.menu_Content_inactive_Text_blue   = 60;
 
 	g_settings.infobar_alpha = 20;
 	g_settings.infobar_red   = 0;
