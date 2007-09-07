@@ -3,7 +3,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: movieinfo.cpp,v 1.8 2007/08/08 20:38:16 guenther Exp $
+	$Id: movieinfo.cpp,v 1.9 2007/09/07 00:46:27 guenther Exp $
 
 	Kommentar:
 
@@ -112,7 +112,7 @@ bool CMovieInfo::convertTs2XmlName(std::string* filename)
 	}
 	else // not a TS file, return!!!!!
 	{
-		TRACE( " not a TS file ");
+		TRACE("not a TS file: %s\n ",filename->c_str());
 	}
 
 	return(result);
@@ -193,6 +193,7 @@ bool CMovieInfo::encodeMovieInfoXml(std::string* extMessage,MI_MOVIE_INFO &movie
 	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_GENRE_MINOR,		movie_info.genreMinor);
 	XML_ADD_TAG_STRING	(*extMessage, MI_XML_TAG_SERIE_NAME,		movie_info.serieName);
 	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_LENGTH,			movie_info.length);
+	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_RECLENGTH,			movie_info.rec_length);
 	XML_ADD_TAG_STRING	(*extMessage, MI_XML_TAG_PRODUCT_COUNTRY,	movie_info.productionCountry);
 	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_PRODUCT_DATE,		movie_info.productionDate);
 	XML_ADD_TAG_UNSIGNED(*extMessage, MI_XML_TAG_QUALITY,			movie_info.quality);
@@ -382,6 +383,7 @@ bool CMovieInfo::parseXmlTree (char* text, MI_MOVIE_INFO* movie_info)
 				XML_GET_DATA_INT	(xam1, MI_XML_TAG_GENRE_MINOR,		movie_info->genreMinor);
 				XML_GET_DATA_STRING	(xam1, MI_XML_TAG_SERIE_NAME,		movie_info->serieName);
 				XML_GET_DATA_INT	(xam1, MI_XML_TAG_LENGTH,			movie_info->length);
+				XML_GET_DATA_INT	(xam1, MI_XML_TAG_RECLENGTH,		movie_info->rec_length);
 				XML_GET_DATA_STRING	(xam1, MI_XML_TAG_PRODUCT_COUNTRY,	movie_info->productionCountry);
 				//if(!strcmp(xam1->GetType(), MI_XML_TAG_PRODUCT_COUNTRY)) if(xam1->GetData() != NULL)strncpy(movie_info->productionCountry, xam1->GetData(),4);	
 				XML_GET_DATA_INT	(xam1, MI_XML_TAG_PRODUCT_DATE,		movie_info->productionDate);
@@ -484,7 +486,15 @@ void CMovieInfo::showMovieInfo(MI_MOVIE_INFO& movie_info)
  	 	snprintf(date_char, 12,"%3d",movie_info.length);
     	print_buffer += date_char; 
     }
-     if(movie_info.audioPids.size() != 0 )
+     if(movie_info.rec_length != 0 )
+    {
+    	print_buffer += "\n"; 
+   		print_buffer += g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_LENGTH);
+      	print_buffer += " rec: "; 
+ 	 	snprintf(date_char, 12,"%3d",movie_info.rec_length);
+    	print_buffer += date_char; 
+    }
+    if(movie_info.audioPids.size() != 0 )
      {
 	    print_buffer += "\n"; 
    		print_buffer += g_Locale->getText(LOCALE_MOVIEBROWSER_INFO_AUDIO);
@@ -543,6 +553,7 @@ void CMovieInfo::printDebugMovieInfo(MI_MOVIE_INFO& movie_info)
     TRACE(" genreMajor: \t\t%d\r\n", movie_info.genreMajor );		//genreMajor;				
     TRACE(" genreMinor: \t\t%d\r\n", movie_info.genreMinor );		//genreMinor;				
 	TRACE(" length: \t\t%d\r\n", movie_info.length );				// (minutes)
+	TRACE(" length rec: \t\t%d\r\n", movie_info.rec_length );				// (minutes)
 	TRACE(" quality: \t\t%d\r\n", movie_info.quality ); 				// (3 stars: classics, 2 stars: very good, 1 star: good, 0 stars: OK)
 	TRACE(" productionCount:\t>%s<\r\n", movie_info.productionCountry.c_str() );
 	TRACE(" productionDate: \t%d\r\n", movie_info.productionDate ); 		// (Year)  years since 1900
@@ -663,6 +674,7 @@ bool CMovieInfo::parseXmlQuickFix(char* text, MI_MOVIE_INFO* movie_info)
 		GET_XML_DATA_INT   (text,	pos,	MI_XML_TAG_GENRE_MINOR,		movie_info->genreMinor)		
 		GET_XML_DATA_STRING(text,	pos,	MI_XML_TAG_SERIE_NAME,		movie_info->serieName)		
 		GET_XML_DATA_INT   (text,	pos,	MI_XML_TAG_LENGTH,			movie_info->length)		
+		GET_XML_DATA_INT   (text,	pos,	MI_XML_TAG_RECLENGTH,		movie_info->rec_length)		
 		GET_XML_DATA_STRING(text,	pos,	MI_XML_TAG_PRODUCT_COUNTRY,	movie_info->productionCountry)		
 		GET_XML_DATA_INT   (text,	pos,	MI_XML_TAG_PRODUCT_DATE,	movie_info->productionDate)		
 		GET_XML_DATA_INT   (text,	pos,	MI_XML_TAG_PARENTAL_LOCKAGE,	movie_info->parentalLockAge)		
@@ -821,6 +833,7 @@ void CMovieInfo::clearMovieInfo(MI_MOVIE_INFO* movie_info)
     movie_info->genreMajor = 0;		//genreMajor;				
     movie_info->genreMinor = 0;		//genreMinor;				
 	movie_info->length = 0;				// (minutes)
+	movie_info->rec_length = 0;				// (seconds)
 	movie_info->quality = 0; 				// (3 stars: classics, 2 stars: very good, 1 star: good, 0 stars: OK)
 	movie_info->productionDate = 0; 		// (Year)  years since 1900
 	movie_info->parentalLockAge = 0; 			// MI_PARENTAL_LOCKAGE (0,6,12,16,18)
