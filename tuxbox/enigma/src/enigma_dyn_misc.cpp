@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_misc.cpp,v 1.14 2007/07/26 22:03:28 pieterg Exp $
+ * $Id: enigma_dyn_misc.cpp,v 1.15 2007/09/07 13:17:04 digi_casi Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -86,6 +86,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	eString result;
 	time_t atime;
 	time(&atime);
@@ -169,6 +170,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 
 	int service_id = -1, dvb_namespace = -1, original_network_id = -1, transport_stream_id = -1, service_type = -1;
 	unsigned int optval = opt.find("=");
@@ -217,6 +219,7 @@ static eString videoChannels(eString request, eString dirpath, eString opts, eHT
 static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	//"x-application/PMT";
 	PMT *pmt = eDVB::getInstance()->getPMT();
 	if (!pmt)
@@ -244,6 +247,7 @@ static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnec
 static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	//"x-application/PMT";
 	EIT *eit = eDVB::getInstance()->getEIT();
 	if (!eit)
@@ -277,12 +281,14 @@ static eString version(eString request, eString dirpath, eString opt, eHTTPConne
                 versionFile = "/etc/image-version";
 
 	content->local_header["Content-Type"]="text/plain";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	return firmwareLevel(getAttribute(versionFile, "version"));
 }
 
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 
 	if (eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI())
 		if (eServiceDVB *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service))
@@ -421,6 +427,7 @@ static eString listDirectory(eString request, eString dirpath, eString opt, eHTT
 {
 	eString answer;
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	answer.sprintf(
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		"<directory path=\"%s\" dircount=\"\" filecount=\"\" linkcount=\"\">\n",
@@ -617,6 +624,7 @@ struct addToString
 static eString getTransponderServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	eServiceReferenceDVB cur = (eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
 	if (cur.type == eServiceReference::idDVB && !cur.path)
 	{
@@ -701,6 +709,7 @@ static eString getServices(eString request, eString dirpath, eString opt, eHTTPC
 {
 	eString result;
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	std::map<eString,eString> opts=getRequestOptions(opt, '&');
 	eServiceReference currentBouquetRef = eZap::getInstance()->getServiceSelector()->getPath().current();
 
@@ -765,6 +774,7 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString result;
 	eString volume = opt["volume"];
@@ -809,6 +819,7 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 		pmt;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
