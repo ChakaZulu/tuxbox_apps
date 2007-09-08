@@ -832,9 +832,18 @@ personalize.access Access
 personalize.disabled Disabled
 personalize.enabled Enabled
 personalize.head Personalization
+personalize.help Help
+personalize.help_line1 Personalization makes it possible to adapt the most
+personalize.help_line2 important menus you need. Menus
+personalize.help_line3 can be set to visible, not visible, activate, deactivate
+personalize.help_line4 or PIN-protected.
+personalize.help_line5 The access to personalization can be protected
+personalize.help_line6 with PIN. The PIN is identical for all protected menus
+personalize.help_line7 (not for youth protection).
+personalize.help_line8 Default PIN is: 0000
 personalize.menuconfiguration Menu Configuration
 personalize.menudisabledhint The requested menu is currently disabled
-personalize.notprotected Unprotected
+personalize.notprotected No
 personalize.notvisible Not Visible
 personalize.pin PIN
 personalize.pincode PIN Code
@@ -842,9 +851,9 @@ personalize.pinhint Enter the Personalization PIN Code
 personalize.pinprotect Yes
 personalize.pinstatus Require PIN
 personalize.saverestart Neutrino needs to be restarted. Restart Now?
-personalize.setupmenuwithpin Setup Menu with PIN
+personalize.setupmenuwithpin Settings Menu with PIN
 personalize.stprotect Menu Access with PIN
-personalize.svprotect Protect Service
+personalize.svprotect Service Menu with PIN
 personalize.visible Visible
 pictureviewer.decode_server_ip decode server ip
 pictureviewer.decode_server_port decode server port

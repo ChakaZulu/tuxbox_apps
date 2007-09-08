@@ -1,5 +1,5 @@
 /*
-$Id: personalize.h,v 1.1 2007/08/27 13:39:18 nitr8 Exp $
+$Id: personalize.h,v 1.2 2007/09/08 14:32:34 dbt Exp $
 
 Customization Menu - Neutrino-GUI
 
@@ -47,6 +47,7 @@ class CPersonalizeGui : public CMenuTarget
 private:
 CFrameBuffer *frameBuffer;
 int x, y, width, height, hheight, mheight;
+void ShowHelpPersonalize();
 
 public:
 CConfigFile                     configfile;

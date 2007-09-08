@@ -832,6 +832,15 @@ personalize.access Zugang
 personalize.disabled deaktiviert
 personalize.enabled aktiviert
 personalize.head Personalisierung
+personalize.help Hilfe zur Personalisierung
+personalize.help_line1 Die Personalisierung ermöglicht es, die wichtigsten
+personalize.help_line2 Menüs Ihren Bedürfnissen anzupassen. Menüs
+personalize.help_line3 können auf sichtbar, unsichtbar, aktiviert, deaktiviert
+personalize.help_line4 gestellt oder mit PIN gesichert werden.
+personalize.help_line5 Der Zugang zur Personalisierung selbst kann mit PIN
+personalize.help_line6 gesichert werden. Die PIN ist dann für alle anderen
+personalize.help_line7 Menüs identisch (nicht Jugendschutz-PIN).
+personalize.help_line8 Die Standard-PIN lautet 0000.
 personalize.menuconfiguration Menüeinstellungen
 personalize.menudisabledhint Das angeforderte Menu ist nicht aktiv
 personalize.notprotected nein

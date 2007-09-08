@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.3 2007/09/02 16:52:16 dbt Exp $
+        $Id: personalize.cpp,v 1.4 2007/09/08 14:32:34 dbt Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -42,6 +42,7 @@
 #include <driver/rcinput.h>
 #include <driver/screen_max.h>
 #include <daemonc/remotecontrol.h>
+#include <gui/widget/helpbox.h>
 #include "widget/menue.h"
 #include "widget/messagebox.h"
 #include "widget/hintbox.h"
@@ -110,6 +111,11 @@ int CPersonalizeGui::exec(CMenuTarget* parent, const std::string & actionKey)
         if (actionKey=="service_options") {                                     // Personalize the Service Menu
                 ShowServiceOptions();
                 return res; }
+				
+		if (actionKey=="personalize_help") {                                     // Personalize help
+                ShowHelpPersonalize();
+               return res; }
+
 
         if (parent)             {               parent->hide();         }
         ShowPersonalizationMenu();                                              // Show main Personalization Menu
@@ -146,6 +152,9 @@ void CPersonalizeGui::ShowPersonalizationMenu()
                         pMenu->addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_STREAMINFO, (int *)&g_settings.personalize_bluebutton, PERSONALIZE_EOD_OPTIONS, PERSONALIZE_EOD_OPTION_COUNT, true, NULL, CRCInput::RC_2));
                         pMenu->addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_EVENTLIST, (int *)&g_settings.personalize_redbutton, PERSONALIZE_EOD_OPTIONS, PERSONALIZE_EOD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
 
+						pMenu->addItem(GenericMenuSeparatorLine);
+                        pMenu->addItem(new CMenuForwarder(LOCALE_PERSONALIZE_HELP, true, NULL, this, "personalize_help", CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
+						
                         pMenu->exec (NULL, "");
                         pMenu->hide ();
                         delete pMenu;
@@ -182,7 +191,8 @@ void CPersonalizeGui::ShowMainMenuOptions()
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RADIOMODE, (int *)&g_settings.personalize_radiomode, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SCARTMODE, (int *)&g_settings.personalize_scartmode, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_GAMES, (int *)&g_settings.personalize_games, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-                        pMMMenu->addItem(GenericMenuSeparator);
+                        pMMMenu->addItem(GenericMenuSeparatorLine);
+						
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_AUDIOPLAYER, (int *)&g_settings.personalize_audioplayer,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_1));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_MOVIEPLAYER, (int *)&g_settings.personalize_movieplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_2));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_PICTUREVIEWER, (int *)&g_settings.personalize_pictureviewer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
@@ -194,9 +204,6 @@ void CPersonalizeGui::ShowMainMenuOptions()
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_REBOOT, (int *)&g_settings.personalize_reboot, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_6));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SHUTDOWN, (int *)&g_settings.personalize_shutdown, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_standby, NEUTRINO_ICON_BUTTON_POWER));
 
-  						pMMMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PERSONALIZE_STPROTECT));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SETTINGS, (int *)&g_settings.personalize_settings, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL, CRCInput::RC_6));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SERVICE, (int *)&g_settings.personalize_service, PERSONALIZE_YON_OPTIONS, PERSONALIZE_YON_OPTION_COUNT, true, NULL, CRCInput::RC_7));
                         pMMMenu->addItem(GenericMenuSeparator);
 						
                         pMMMenu->exec (NULL, "");
@@ -348,6 +355,21 @@ void CPersonalizeGui::ShowServiceOptions()
                                 { SaveAndRestart(); }
                         }
 
+}
+
+void CPersonalizeGui::ShowHelpPersonalize()
+{
+	Helpbox helpbox;	
+	helpbox.addLine(g_Locale->getText(LOCALE_PERSONALIZE_HELP_LINE1));
+	helpbox.addLine(g_Locale->getText(LOCALE_PERSONALIZE_HELP_LINE2));
+	helpbox.addLine(g_Locale->getText(LOCALE_PERSONALIZE_HELP_LINE3));
+	helpbox.addLine(g_Locale->getText(LOCALE_PERSONALIZE_HELP_LINE4));
+	helpbox.addLine(g_Locale->getText(LOCALE_PERSONALIZE_HELP_LINE5));
+	helpbox.addLine(g_Locale->getText(LOCALE_PERSONALIZE_HELP_LINE6));
+	helpbox.addLine(g_Locale->getText(LOCALE_PERSONALIZE_HELP_LINE7));
+	helpbox.addLine(g_Locale->getText(LOCALE_PERSONALIZE_HELP_LINE8));
+	hide();
+	helpbox.show(LOCALE_PERSONALIZE_HELP);
 }
 
 void CPersonalizeGui::SaveAndRestart()
