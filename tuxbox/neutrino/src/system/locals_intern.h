@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.100 2007/09/02 21:10:04 houdini Exp $
+ * $Id: locals_intern.h,v 1.101 2007/09/08 14:51:46 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -859,6 +859,15 @@ const char * locale_real_names[] =
 	"personalize.disabled",
 	"personalize.enabled",
 	"personalize.head",
+	"personalize.help",
+	"personalize.help_line1",
+	"personalize.help_line2",
+	"personalize.help_line3",
+	"personalize.help_line4",
+	"personalize.help_line5",
+	"personalize.help_line6",
+	"personalize.help_line7",
+	"personalize.help_line8",
 	"personalize.menuconfiguration",
 	"personalize.menudisabledhint",
 	"personalize.notprotected",
