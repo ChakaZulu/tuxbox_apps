@@ -431,9 +431,13 @@ imageinfo.support Unterstützung
 imageinfo.supporthere technische Unterstützung und Hilfe finden Sie hier
 imageinfo.version Rel.-Zyklus:
 infoviewer.epgnotload Informationen noch nicht geladen...
+infoviewer.epginfo_expensive_message aufwändig
+infoviewer.epginfo_simple_message einfach
 infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.eventlist EPG/Vorschau
 infoviewer.languages Tonwahl
+infoviewer.message_now jetzt läuft
+infoviewer.message_to \nbis: 
 infoviewer.motor_moving Antennenpositionierung
 infoviewer.nocurrent Keine Info zu laufendem Programm
 infoviewer.noepg Keine EPG-Information verfügbar
@@ -571,6 +575,7 @@ miscsettings.epg_old_events_hint2 Angabe in Stunden
 miscsettings.general Allgemein
 miscsettings.head Diverse Einstellungen
 miscsettings.infobar_sat_display Infobar Satellitenanzeige
+miscsettings.infobar Infobar
 miscsettings.infobar_show Info bei EPG Änderung
 miscsettings.shutdown_count Komplett ausschalten nach
 miscsettings.shutdown_count_hint1 Zeit (in Minuten) nach dem vom Standbymodus

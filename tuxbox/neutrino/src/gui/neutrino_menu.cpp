@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.7 2007/09/08 14:32:34 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.8 2007/09/22 00:24:25 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -782,8 +782,17 @@ const CMenuOptionChooser::keyval  INFOBAR_SHOW_OPTIONS[INFOBAR_SHOW_OPTIONS_COUN
 	{ 2 , LOCALE_PICTUREVIEWER_RESIZE_COLOR_AVERAGE }
 };
 
+#define INFOBAR_EPG_SHOW_OPTIONS_COUNT 3
+const CMenuOptionChooser::keyval  INFOBAR_EPG_SHOW_OPTIONS[INFOBAR_EPG_SHOW_OPTIONS_COUNT]=
+{
+   { 0 , LOCALE_OPTIONS_OFF },
+   { 1 , LOCALE_INFOVIEWER_EPGINFO_SIMPLE_MESSAGE },
+   { 2 , LOCALE_INFOVIEWER_EPGINFO_EXPENSIVE_MESSAGE }
+};
+
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
+	//general
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
 	miscSettings.addItem(GenericMenuSeparator);
 	miscSettings.addItem(GenericMenuBack);
@@ -801,18 +810,19 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 	miscSettings.addItem(new CMenuForwarder(LOCALE_MISCSETTINGS_SHUTDOWN_COUNT, true, g_settings.shutdown_count, miscSettings_shutdown_count));
 
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
-
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_SUBCHAN_DISP_POS, &g_settings.infobar_subchan_disp_pos, INFOBAR_SUBCHAN_DISP_POS_OPTIONS, INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT, true));
-
 #ifndef TUXTXT_CFG_STANDALONE
 	CTuxtxtCacheNotifier *tuxtxtcacheNotifier = new CTuxtxtCacheNotifier;
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_TUXTXT_CACHE, &g_settings.tuxtxt_cache, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, tuxtxtcacheNotifier));
 #endif
-
+	
+	//infobar settings
+	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_INFOBAR));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_SUBCHAN_DISP_POS, &g_settings.infobar_subchan_disp_pos, INFOBAR_SUBCHAN_DISP_POS_OPTIONS, INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT, true));
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VIRTUAL_ZAP_MODE, &g_settings.virtual_zap_mode, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SHOW, &g_settings.infobar_show, INFOBAR_SHOW_OPTIONS, INFOBAR_SHOW_OPTIONS_COUNT, true));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SHOW, &g_settings.infobar_show, INFOBAR_EPG_SHOW_OPTIONS, INFOBAR_EPG_SHOW_OPTIONS_COUNT, true));
 
+	//epg settings
 	CSectionsdConfigNotifier* sectionsdConfigNotifier = new CSectionsdConfigNotifier;
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_EPG_HEAD));
 	CStringInput * miscSettings_epg_cache = new CStringInput(LOCALE_MISCSETTINGS_EPG_CACHE, &g_settings.epg_cache, 2,LOCALE_MISCSETTINGS_EPG_CACHE_HINT1, LOCALE_MISCSETTINGS_EPG_CACHE_HINT2 , "0123456789 ", sectionsdConfigNotifier);
