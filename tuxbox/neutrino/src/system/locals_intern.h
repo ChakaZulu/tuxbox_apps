@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.101 2007/09/08 14:51:46 dbt Exp $
+ * $Id: locals_intern.h,v 1.102 2007/09/22 00:40:21 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -458,9 +458,13 @@ const char * locale_real_names[] =
 	"imageinfo.supporthere",
 	"imageinfo.version",
 	"infoviewer.epgnotload",
+	"infoviewer.epginfo_expensive_message",
+	"infoviewer.epginfo_simple_message",
 	"infoviewer.epgwait",
 	"infoviewer.eventlist",
 	"infoviewer.languages",
+	"infoviewer.message_now",
+	"infoviewer.message_to",
 	"infoviewer.motor_moving",
 	"infoviewer.nocurrent",
 	"infoviewer.noepg",
@@ -598,6 +602,7 @@ const char * locale_real_names[] =
 	"miscsettings.general",
 	"miscsettings.head",
 	"miscsettings.infobar_sat_display",
+	"miscsettings.infobar",
 	"miscsettings.infobar_show",
 	"miscsettings.shutdown_count",
 	"miscsettings.shutdown_count_hint1",
