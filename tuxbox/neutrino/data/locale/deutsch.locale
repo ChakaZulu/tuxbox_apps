@@ -573,6 +573,7 @@ miscsettings.epg_old_events EPG verwerfen nach (Std.)
 miscsettings.epg_old_events_hint1 Wie lange abgelaufene EPG-Daten aufheben?
 miscsettings.epg_old_events_hint2 Angabe in Stunden
 miscsettings.general Allgemein
+miscsettings.head Diverse Einstellungen
 miscsettings.infobar Infobar
 miscsettings.infobar_sat_display Infobar Satellitenanzeige
 miscsettings.infobar_show Info bei EPG Änderung
