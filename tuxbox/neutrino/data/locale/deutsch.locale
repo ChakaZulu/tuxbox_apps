@@ -437,7 +437,7 @@ infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.eventlist EPG/Vorschau
 infoviewer.languages Tonwahl
 infoviewer.message_now jetzt läuft
-infoviewer.message_to \nbis: 
+infoviewer.message_to bis: 
 infoviewer.motor_moving Antennenpositionierung
 infoviewer.nocurrent Keine Info zu laufendem Programm
 infoviewer.noepg Keine EPG-Information verfügbar

@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.206 2007/09/22 00:24:25 dbt Exp $
+	$Id: infoviewer.cpp,v 1.207 2007/09/28 14:17:33 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -49,7 +49,6 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 #include <string>
 #include <system/settings.h>
-#include <gui/widget/messagebox.h>
 
 #include <sys/timeb.h>
 #include <time.h>
@@ -308,7 +307,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_BLUE, BoxEndX- ICON_OFFSET- ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_BLUE_WIDTH + 2 + 2), txt, COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 		}
-
+		
 		showButton_Audio();
 		showButton_SubServices();
 #ifndef SKIP_CA_STATUS
@@ -469,7 +468,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 			else if ( ( msg == CRCInput::RC_ok ) ||
 					( msg == CRCInput::RC_home ) ||
 						( msg == CRCInput::RC_timeout ) )
-			{
+			{				
 				if ( fadeIn )
 				{
 					g_RCInput->killTimer(fadeTimer);
@@ -1163,22 +1162,18 @@ void CInfoViewer::showLcdPercentOver()
 
 void CInfoViewer::showEpgInfo()   //message on event change
 {
-	char runningStart[10];
 	char nextStart[10];
-	std::string eventname = info_CurrentNext.current_name;
-   
-	struct tm *pStartZeit = localtime(&info_CurrentNext.current_zeit.startzeit);
-	sprintf( (char*)&runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min );
-      
 	struct tm *pnStartZeit = localtime(&info_CurrentNext.next_zeit.startzeit);
-	sprintf( (char*)&nextStart, "%02d:%02d", pnStartZeit->tm_hour, pnStartZeit->tm_min);
-
-	if (eventname.length() !=0)
-		{
-		std::string message =  eventname + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;
-		ShowMsgUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, message, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 420, 6); // UTF-8
-		}		
-} 
+		sprintf( (char*)&nextStart, "%02d:%02d", pnStartZeit->tm_hour, pnStartZeit->tm_min);
+		std::string eventname = info_CurrentNext.current_name;
+	
+	 	if (eventname.length() !=0)
+ 		{
+		std::string event = eventname + "\n" + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;	
+		std::string event_message =  ZapitTools::Latin1_to_UTF8(event.c_str());
+		ShowHintUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, event_message.c_str(), 420 , 5, "epginfo.raw"); 
+		}	
+}
 
 //
 //  -- InfoViewer Menu Handler Class
