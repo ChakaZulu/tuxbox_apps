@@ -309,24 +309,23 @@ bool sortByType (const CFile& a, const CFile& b)
 		return sortByName(a, b);
 	else
 		return a.Mode < b.Mode;
-
 }
 
 bool sortByDate (const CFile& a, const CFile& b)
 {
-   if(a.getFileName()=="..")
-      return true;
-   if(b.getFileName()=="..")
-      return false;
+	if(a.getFileName()=="..")
+		return true;
+	if(b.getFileName()=="..")
+		return false;
 	return a.Time < b.Time ;
 }
 
 bool sortBySize (const CFile& a, const CFile& b)
 {
-   if(a.getFileName()=="..")
-      return true;
-   if(b.getFileName()=="..")
-      return false;
+	if(a.getFileName()=="..")
+		return true;
+	if(b.getFileName()=="..")
+		return false;
 	return a.Size < b.Size;
 }
 
@@ -440,8 +439,7 @@ void CFileBrowser::ChangeDir(const std::string & filename, int selection)
 	{
 		newpath=filename;
 	}
-	if(newpath.rfind('/') != newpath.length()-1 ||
-      newpath.length() == 0)
+	if(newpath.rfind('/') != newpath.length()-1 || newpath.length() == 0)
 	{
 		newpath += '/';
 	}
@@ -526,43 +524,41 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 	
 	if (!answer.empty() && httpres == 0)
 	{
-        xmlDocPtr answer_parser = parseXml(answer.c_str());
-        
-        if (answer_parser != NULL) {
-            xmlNodePtr element = xmlDocGetRootElement(answer_parser);
-            element = element->xmlChildrenNode;
-            char *ptr;
-            if (element == NULL) {
-                printf("[FileBrowser] vlc: Drive is not readable. Possibly no disc inserted\n");
-                CFile file;
-                file.Mode = S_IFDIR + 0777 ;
-                file.Name = dirname + "..";
-                file.Size = 0;
-                file.Time = 0;
-                flist->push_back(file);
-            } else {
-                while (element) {
-                    CFile file;
-                    ptr = xmlGetAttribute(element, "type");
-                    if (strcmp(ptr, "directory")==0)
-    	           	    file.Mode = S_IFDIR + 0777 ;
-        			else
-    				    file.Mode = S_IFREG + 0777 ;
+		xmlDocPtr answer_parser = parseXml(answer.c_str());
 
-                    file.Name = dirname + xmlGetAttribute(element, "name");
-                    ptr = xmlGetAttribute(element, "size");
-                    file.Size = atoi(ptr);
-                    file.Time = 0;
+		if (answer_parser != NULL) {
+			xmlNodePtr element = xmlDocGetRootElement(answer_parser);
+			element = element->xmlChildrenNode;
+			char *ptr;
+			if (element == NULL) {
+				printf("[FileBrowser] vlc: Drive is not readable. Possibly no disc inserted\n");
+				CFile file;
+				file.Mode = S_IFDIR + 0777 ;
+				file.Name = dirname + "..";
+				file.Size = 0;
+				file.Time = 0;
+				flist->push_back(file);
+			} else {
+				while (element) {
+					CFile file;
+					ptr = xmlGetAttribute(element, "type");
+					if (strcmp(ptr, "directory")==0)
+					file.Mode = S_IFDIR + 0777 ;
+					else
+					file.Mode = S_IFREG + 0777 ;
 
-                    element = element->xmlNextNode;
-                    flist->push_back(file);
-                }
-            }
-            xmlFreeDoc(answer_parser);
+					file.Name = dirname + xmlGetAttribute(element, "name");
+					ptr = xmlGetAttribute(element, "size");
+					file.Size = atoi(ptr);
+					file.Time = 0;
 
-		    return true;
-        }
-        
+					element = element->xmlNextNode;
+					flist->push_back(file);
+				}
+			}
+			xmlFreeDoc(answer_parser);
+			return true;
+		}
 	}
 	
 	/* since all CURL error messages use only US-ASCII characters, when can safely print them as if they were UTF-8 encoded */
@@ -572,9 +568,7 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 	DisplayErrorMessage(error); // UTF-8
 	CFile file;
 
-	file.Name = dirname;
-	file.Name += "..";
-
+	file.Name = dirname + "..";
 	file.Mode = S_IFDIR + 0777;
 	file.Size = 0;
 	file.Time = 0;
@@ -601,8 +595,7 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 		CFile file;
 		if(strcmp(namelist[i]->d_name,".") != 0)
 		{
-			file.Name = dirname;
-			file.Name += namelist[i]->d_name;
+			file.Name = dirname + namelist[i]->d_name;
 
 //			printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
 			if(my_stat((file.Name).c_str(),&statbuf) != 0)
@@ -632,7 +625,7 @@ bool CFileBrowser::exec(const char * const dirname)
 
 	bool res = false;
 
-    m_baseurl = "http://" + g_settings.streaming_server_ip + ':'
+	m_baseurl = "http://" + g_settings.streaming_server_ip + ':'
 		  + g_settings.streaming_server_port + "/requests/browse.xml?dir=";
 
 	name = dirname;
@@ -761,6 +754,7 @@ bool CFileBrowser::exec(const char * const dirname)
 			if(Filter != NULL)
 			{
 				use_filter = !use_filter;
+				paintFoot();
 				ChangeDir(Path);
 			}
 		}
@@ -772,17 +766,15 @@ bool CFileBrowser::exec(const char * const dirname)
 		{
 			if(".." !=(filelist[selected].getFileName().substr(0,2))) // das darf man nicht löschen
 			{
-				std::string msg = g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1);
-				msg += ' ';
+				std::string msg = g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1) + ' ';
 				if (filelist[selected].getFileName().length() > 10)
 				{
-					msg += filelist[selected].getFileName().substr(0,10);
-					msg += "...";
+					msg += filelist[selected].getFileName().substr(0,10) + "...";
 				}
 				else
 					msg += filelist[selected].getFileName();
-				msg += ' ';
-				msg += g_Locale->getText(LOCALE_FILEBROWSER_DODELETE2);
+
+				msg += ' ' + g_Locale->getText(LOCALE_FILEBROWSER_DODELETE2);
 				if (ShowMsgUTF(LOCALE_FILEBROWSER_DELETE, msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
 				{
 					recursiveDelete(filelist[selected].Name.c_str());
@@ -839,14 +831,13 @@ bool CFileBrowser::exec(const char * const dirname)
 		}
 		else if (msg==CRCInput::RC_help)
 		{
-			if (g_settings.filebrowser_sortmethod >= 4)
+			if (++g_settings.filebrowser_sortmethod >= FILEBROWSER_NUMBER_OF_SORT_VARIANTS)
 				g_settings.filebrowser_sortmethod = 0;
-			else
-				g_settings.filebrowser_sortmethod++;
 
 			sort(filelist.begin(), filelist.end(), sortBy[g_settings.filebrowser_sortmethod]);
 
 			paint();
+			paintFoot();
 		}
 		else if (CRCInput::isNumeric(msg))
 		{
@@ -895,7 +886,7 @@ void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, b
 
 	int n;
 
-	printf("addRecursiveDir %s\n",rpath.c_str());
+	//printf("addRecursiveDir %s\n",rpath.c_str());
 
 	if (bRootCall) bCancel=false;
 
@@ -1152,7 +1143,7 @@ void CFileBrowser::paintFoot()
 
 		//?-Button
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x + (1 * dx), by2 - 3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, g_Locale->getText(sortByNames[(g_settings.filebrowser_sortmethod + 1) % FILEBROWSER_NUMBER_OF_SORT_VARIANTS]), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (1 * dx), ty2, dx - 35, g_Locale->getText(sortByNames[g_settings.filebrowser_sortmethod]), COL_INFOBAR, 0, true); // UTF-8
 
 		//Mute-Button
 		if (strncmp(Path.c_str(), VLC_URI, strlen(VLC_URI)) != 0) { //Not in vlc mode
@@ -1234,9 +1225,7 @@ void CFileBrowser::recursiveDelete(const char* file)
 			{
 				if(strcmp(namelist[n]->d_name, ".")!=0 && strcmp(namelist[n]->d_name, "..")!=0)
 				{
-					std::string fullname = file;
-					fullname += "/";
-					fullname += namelist[n]->d_name;
+					std::string fullname = (std::string)file + "/" + namelist[n]->d_name;
 					recursiveDelete(fullname.c_str());
 				}
 				free(namelist[n]);
