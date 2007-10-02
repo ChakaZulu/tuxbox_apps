@@ -85,6 +85,9 @@ extern "C" {
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
+/* list all allowed chars in filenames */
+#define FILENAME_ALLOWED_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-"
+
 static CVCRControl vcrControl;
 
 CVCRControl * CVCRControl::getInstance()
@@ -892,19 +895,11 @@ void CVCRControl::CFileDevice::appendEPGInfo(char *buf, unsigned int size, const
 		strcpy(buf, epgInfo.c_str());
 		char * p_act = buf;
 		do {
-			p_act +=  strcspn(p_act, "/ \"%&-\t`'~<>!,:;?^°$\\=*#@¤|");
+			p_act += strspn(p_act, FILENAME_ALLOWED_CHARS);
 			if (*p_act) {
 				*p_act++ = '_';
 			}
 		} while (*p_act);
-		
-		p_act = buf;
-		do
-		{
-			if ((unsigned char) (*p_act) >= 128) {
-				*p_act = '_';
-			}
-		} while (*p_act++);
 	}
 }
 	
@@ -930,19 +925,11 @@ void CVCRControl::CFileDevice::appendEPGTitle(char *buf, unsigned int size, cons
 		strcpy(buf, epgTitle.c_str());
 		char * p_act = buf;
 		do {
-			p_act +=  strcspn(p_act, "/ \"%&-\t`'~<>!,:;?^°$\\=*#@¤|");
+			p_act += strspn(p_act, FILENAME_ALLOWED_CHARS);
 			if (*p_act) {
 				*p_act++ = '_';
 			}
 		} while (*p_act);
-		
-		p_act = buf;
-		do
-		{
-			if ((unsigned char) (*p_act) >= 128) {
-				*p_act = '_';
-			}
-		} while (*p_act++);
 	}
 }
 
@@ -957,7 +944,7 @@ void CVCRControl::CFileDevice::appendChannelName(char *buf, unsigned int size, c
 		
 		char * p_act = buf;
 		do {
-			p_act += strcspn(p_act, "/ \"%&-\t`'´!,:;");
+			p_act += strspn(p_act, FILENAME_ALLOWED_CHARS);
 			if (*p_act)
 			{
 				*p_act++ = '_';
