@@ -238,54 +238,22 @@ CFSMounter::MountRes CFSMounter::mount(const char * const ip, const char * const
 	
 	if(fstype == NFS)
 	{
-		cmd = "mount -t nfs ";
-		cmd += ip;
-		cmd += ':';
-		cmd += dir;
-		cmd += ' ';
-		cmd += local_dir;
-		cmd += " -o ";
-		cmd += options1;
+		cmd = (std::string)"mount -t nfs " + ip + ':' + dir	+ ' ' + local_dir + " -o " + options1;
 	}
 	else if(fstype == CIFS)
 	{
-		cmd = "mount -t cifs //";
-		cmd += ip;
-		cmd += '/';
-		cmd += dir;
-		cmd += ' ';
-		cmd += local_dir;
-		cmd += " -o username=";
-		cmd += username;
-		cmd += ",password=";
-		cmd += password;
-		cmd += ",unc=//";
-		cmd += ip;
-		cmd += '/';
-		cmd += dir;
-		cmd += ',';
-		cmd += options1;
+		cmd = (std::string)"mount -t cifs " + ip + '/' + dir + ' ' + local_dir + " -o username=" + username 
+		+ ",password=" + password + ",unc=//" + ip + '/' + dir + ',' + options1;
 	}
 	else
 	{
-		cmd = "lufsd none ";
-		cmd += local_dir;
-		cmd += " -o fs=ftpfs,username=";
-		cmd += username;
-		cmd += ",password=";
-		cmd += password;
-		cmd += ",host=";
-		cmd += ip;
-		cmd += ",root=/";
-		cmd += dir;
-		cmd += ',';
-		cmd += options1;
+		cmd = (std::string)"lufsd none " + local_dir + " -o fs=ftpfs,username=" + username 
+		+ ",password=" + password + ",host=" + ip + ",root=/" + dir + ',' + options1;
 	}
 	
 	if (options2[0] !='\0')
 	{
-		cmd += ',';
-		cmd += options2;
+		cmd += ',' + options2;
 	}
 	
 	pthread_create(&g_mnt, 0, mount_thread, (void *) cmd.c_str());
