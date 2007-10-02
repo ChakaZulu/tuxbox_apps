@@ -41,19 +41,19 @@
 /* ATTENTION: the array file_extension_list MUST BE SORTED ASCENDING (cf. sort, man bsearch) - otherwise bsearch will not work correctly! */
 const char * const file_extension_list[] =
 {
-	"bmp"                , "cdr"                , "crw"                , "gif"                , "imu"                ,
+	"bmp"                , "cdr"                , "crw"                , "flac"               , "gif"                , "imu"                ,
 	"jpeg"               , "jpg"                , "m2a"                , "m3u"                , "mp2"                ,
 	"mp3"                , "mpa"                , "ogg"                , "png"                , "sh"                 ,
-	"txt"                , "url"                , "wav"                ,
+	"txt"                , "url"                , "wav"                , 
 };
 /* ATTENTION: the array file_extension_list MUST BE SORTED ASCENDING (cf. sort, man bsearch) - otherwise bsearch will not work correctly! */
 
 const CFile::FileType file_type_list[] =
 {
-	CFile::FILE_PICTURE  , CFile::FILE_CDR      , CFile::FILE_PICTURE  , CFile::FILE_PICTURE  , CFile::STREAM_PICTURE,
+	CFile::FILE_PICTURE  , CFile::FILE_CDR      , CFile::FILE_PICTURE  , CFile::FILE_FLAC     , CFile::FILE_PICTURE  , CFile::STREAM_PICTURE,
 	CFile::FILE_PICTURE  , CFile::FILE_PICTURE  , CFile::FILE_MP3      , CFile::FILE_PLAYLIST , CFile::FILE_MP3      ,
 	CFile::FILE_MP3      , CFile::FILE_MP3      , CFile::FILE_OGG      , CFile::FILE_PICTURE  , CFile::FILE_TEXT     ,
-	CFile::FILE_TEXT     , CFile::STREAM_AUDIO    , CFile::FILE_WAV      ,
+	CFile::FILE_TEXT     , CFile::STREAM_AUDIO  , CFile::FILE_WAV      , 
 };
 
 int mycasecmp(const void * a, const void * b)

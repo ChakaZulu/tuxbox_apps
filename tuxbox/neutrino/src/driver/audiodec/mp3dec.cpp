@@ -430,7 +430,7 @@ CBaseDec::RetCode CMP3Dec::Decoder(FILE *InputFp, const int OutputFd,
 		 * the end of the buffer if those bytes forms an incomplete
 		 * frame. Before refilling, the remainign bytes must be moved
 		 * to the begining of the buffer and used for input for the
-q		 * next mad_frame_decode() invocation. (See the comments marked
+		 * next mad_frame_decode() invocation. (See the comments marked
 		 * {1} earlier for more details.)
 		 *
 		 * Recoverable errors are caused by malformed bit-streams, in

@@ -16,6 +16,15 @@ bin_PROGRAMS = neutrino
 
 neutrino_SOURCES = neutrino.cpp
 
+AM_CPPFLAGS =
+
+if ENABLE_FLAC
+FLAClib = -lFLAC
+AM_CPPFLAGS += -DENABLE_FLAC
+else
+FLAClib =
+endif
+
 neutrino_LDADD = \
 	daemonc/libneutrino_daemonc.a \
 	gui/libtimerlist.a \
@@ -51,16 +60,15 @@ neutrino_LDADD = \
 	@TUXTXT_LIBS@ \
 	@XMLTREE_LIBS@ \
 	@UPNPCLIENT_LIBS@ \
+	$(FLAClib) \
 	-lresolv \
 	-ljpeg \
 	-lpthread \
 	@XML_LIBS@
-
-AM_CPPFLAGS =
 
 if ENABLE_UPNP
 INCLUDES += @UPNPCLIENT_CFLAGS@
 AM_CPPFLAGS += -DENABLE_UPNP
 endif
 
-#AM_CPPFLAGS = -DSKIP_CA_STATUS
+#AM_CPPFLAGS += -DSKIP_CA_STATUS

@@ -149,6 +149,9 @@ CAudioPlayerGui::CAudioPlayerGui()
 	audiofilefilter.addFilter("ogg");
 	audiofilefilter.addFilter("url");
 	audiofilefilter.addFilter("wav");
+#ifdef ENABLE_FLAC
+	audiofilefilter.addFilter("flac");
+#endif
 	m_SMSKeyInput.setTimeout(AUDIOPLAYERGUI_SMSKEY_TIMEOUT);
 }
 
@@ -550,10 +553,14 @@ int CAudioPlayerGui::show()
 							progress.showGlobalStatus(100*currentProgress/maxProgress);
 							progress.showStatusMessageUTF(files->Name);
 						}
-						if ((files->getType() == CFile::FILE_CDR) ||
-						    (files->getType() == CFile::FILE_OGG) ||
-						    (files->getType() == CFile::FILE_MP3) ||
-						    (files->getType() == CFile::FILE_WAV))
+						if ((files->getType() == CFile::FILE_CDR)
+						||  (files->getType() == CFile::FILE_OGG)
+						||  (files->getType() == CFile::FILE_MP3)
+						||  (files->getType() == CFile::FILE_WAV)
+#ifdef ENABLE_FLAC
+						||  (files->getType() == CFile::FILE_FLAC)
+#endif
+						   )
 						{
 							CAudiofileExt audiofile(files->Name,
 												  files->getType());
@@ -583,10 +590,8 @@ int CAudioPlayerGui::show()
 									cLine[strlen(cLine)-1]=0;
 								if(strlen(cLine) > 0 && cLine[0]!='#') 
 								{
-									std::string filename = sPath;
-									filename += '/';
-									filename += cLine;
-                           
+									std::string filename = sPath + '/' + cLine;
+
 									unsigned int pos;
 									while((pos=filename.find('\\'))!=std::string::npos)
 										filename[pos]='/';
@@ -620,9 +625,13 @@ int CAudioPlayerGui::show()
 											playlistItem.Name = filename;											
 											CFile::FileType fileType = playlistItem.getType();
 											if (fileType == CFile::FILE_CDR
-												|| fileType == CFile::FILE_MP3 
+												|| fileType == CFile::FILE_MP3
 												|| fileType == CFile::FILE_OGG
-												|| fileType == CFile::FILE_WAV) 
+												|| fileType == CFile::FILE_WAV
+#ifdef ENABLE_FLAC
+												|| fileType == CFile::FILE_FLAC
+#endif
+											   )
 											{
 												CAudiofileExt audioFile(filename,fileType);
 												addToPlaylist(audioFile);

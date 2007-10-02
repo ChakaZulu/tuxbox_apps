@@ -58,6 +58,11 @@ AC_ARG_ENABLE(upnp,
 	,[enable_upnp=no])
 AM_CONDITIONAL(ENABLE_UPNP,test "$enable_upnp" = "yes")
 
+AC_ARG_ENABLE(flac,
+	AS_HELP_STRING(--enable-flac,include flac support),
+	,[enable_flac=no])
+AM_CONDITIONAL(ENABLE_FLAC,test "$enable_flac" = "yes")
+
 AC_ARG_ENABLE(use-libxml2,
    [  --enable-use-libxml2    use libxml2 instead of libxmltree],
       [AC_DEFINE(USE_LIBXML,1,[use libxml2 instead of libxmltree])
@@ -68,6 +73,11 @@ if test "$enable_upnp" = "yes"; then
 TUXBOX_APPS_LIB_PKGCONFIG(UPNPCLIENT,tuxbox-upnpclient)
 AC_DEFINE(ENABLE_UPNP,1,[include upnp support])
 fi
+
+if test "$enable_flac" = "yes"; then
+AC_DEFINE(ENABLE_FLAC,1,[include FLAC support])
+fi
+
 if test "$BOXTYPE" = "dm500" ; then
 	CPPFLAGS="$CPPFLAGS -DHAVE_DREAMBOX_DM500"
 fi
