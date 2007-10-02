@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.51 2006/12/25 20:13:33 houdini Exp $
+// $Id: SIsections.cpp,v 1.52 2007/10/02 21:47:41 houdini Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -186,9 +186,7 @@ void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
   unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
 
   std::string language;
-  language += evt->iso_639_2_language_code_hi;
-  language += evt->iso_639_2_language_code_mid;
-  language += evt->iso_639_2_language_code_lo;
+  language += evt->iso_639_2_language_code_hi + evt->iso_639_2_language_code_mid + evt->iso_639_2_language_code_lo;
 
   while(items < (unsigned char *)(buf + sizeof(struct descr_extended_event_header) + evt->length_of_items)) {
 
@@ -238,9 +236,7 @@ void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e, unsign
     return; // defekt
 
   std::string language;
-  language += evt->language_code_hi;
-  language += evt->language_code_mid;
-  language += evt->language_code_lo;
+  language += evt->language_code_hi + evt->language_code_mid + evt->language_code_lo;
 
   buf+=sizeof(struct descr_short_event_header);
   if(evt->event_name_length) {
@@ -380,9 +376,7 @@ void SIsectionPPT::parseExtendedEventDescriptor(const char *buf, SIevent &e, uns
     return; // defekt
 
   std::string language;
-  language += evt->iso_639_2_language_code_hi;
-  language += evt->iso_639_2_language_code_mid;
-  language += evt->iso_639_2_language_code_lo;
+  language += evt->iso_639_2_language_code_hi + evt->iso_639_2_language_code_mid + evt->iso_639_2_language_code_lo;
 
   unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
   while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
@@ -416,9 +410,7 @@ void SIsectionPPT::parseShortEventDescriptor(const char *buf, SIevent &e, unsign
     return; // defekt
 
   std::string language;
-  language += evt->language_code_hi;
-  language += evt->language_code_mid;
-  language += evt->language_code_lo;
+  language += evt->language_code_hi + evt->language_code_mid + evt->language_code_lo;
 
   buf+=sizeof(struct descr_short_event_header);
   if(evt->event_name_length) {
@@ -427,7 +419,7 @@ void SIsectionPPT::parseShortEventDescriptor(const char *buf, SIevent &e, unsign
     else
       e.setName(language, std::string(buf, evt->event_name_length));
   }
-  
+
   buf+=evt->event_name_length;
   unsigned char textlength=*((unsigned char *)buf);
   if(textlength > 2) {
@@ -499,7 +491,7 @@ void SIsectionPPT::parsePrivateContentTransmissionDescriptor(const char *buf, SI
 	if (sizeof(struct descr_generic_header)+3 <= maxlen) e.original_network_id = ((*(p+2))<<8) | (*(p+3));
 	if (sizeof(struct descr_generic_header)+5 <= maxlen) e.service_id = ((*(p+4))<<8) | (*(p+5));
 
-	// 1.8.2006 Premiere is still sending wrong epg data
+	// 1.10.2007 Premiere is still sending wrong epg data
 	if (e.original_network_id == 0x0085) {
 		if ((e.transport_stream_id == 0x0003) && (e.service_id == 0x00f0)) {
 			e.transport_stream_id = 0x0002;
@@ -521,8 +513,11 @@ void SIsectionPPT::parsePrivateContentTransmissionDescriptor(const char *buf, SI
 			e.transport_stream_id = 0x0011;
 			e.service_id = 0x00e3;
 		}
+		if ((e.transport_stream_id == 0x0001) && (e.service_id == 0x00d4)) {
+			e.transport_stream_id = 0x0004;
+			e.service_id = 0x00e4;
+		}
 	}
-
 	p += 6;
 	while(p+6 <= buf + evt->descriptor_length + sizeof(struct descr_generic_header)) {// at least one startdate/looplength/time entry
 		tm_buf[0] = *(p);

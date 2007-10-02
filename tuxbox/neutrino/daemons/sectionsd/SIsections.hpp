@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-//    $Id: SIsections.hpp,v 1.22 2006/05/19 21:28:08 houdini Exp $
+//    $Id: SIsections.hpp,v 1.23 2007/10/02 21:47:41 houdini Exp $
 //
 //    classes for SI sections (dbox-II-project)
 //
@@ -574,6 +574,7 @@ public:
 			return  ((((struct SI_section_PPT_header *)buffer)->duration_hi)>>4)*10*3600L + ((((struct SI_section_PPT_header *)buffer)->duration_hi)&0x0f)*3600L +
 				((((struct SI_section_PPT_header *)buffer)->duration_mid)>>4)*10*60L + ((((struct SI_section_PPT_header *)buffer)->duration_mid)&0x0f)*60L +
 				((((struct SI_section_PPT_header *)buffer)->duration_lo)>>4)*10 + ((((struct SI_section_PPT_header *)buffer)->duration_lo)&0x0f);
+		return(0);
 	}
 
 	short int descriptor_section_length(void) const {
