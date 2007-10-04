@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.566 2007/06/12 15:30:43 ghostrider Exp $
+ * $Id: enigma_dyn.cpp,v 1.567 2007/10/04 10:32:27 digi_casi Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -2630,6 +2630,7 @@ eString getBoxStatus(eString format)
 static eString data(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache,no-store,must-revalidate,max-age=1";
 	return getBoxStatus("HTML");
 }
 
