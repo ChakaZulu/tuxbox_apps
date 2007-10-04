@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
-#include <stropts.h>
 #include <malloc.h>
 #include <math.h>
 #include <linux/fb.h>

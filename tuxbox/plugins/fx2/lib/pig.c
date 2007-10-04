@@ -4,7 +4,6 @@
 
 #include <fcntl.h>
 #include <stdio.h>
-#include <stropts.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 
