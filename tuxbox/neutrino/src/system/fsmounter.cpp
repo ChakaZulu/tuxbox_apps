@@ -37,6 +37,7 @@
 #include <system/fsmounter.h>
 
 #include <fstream>
+#include <sstream>
 
 #include <global.h>
 
@@ -178,7 +179,7 @@ bool CFSMounter::isMounted(const char * const local_dir)
 		MountInfo mi;
 		in >> mi.device >> mi.mountPoint >> mi.type;
 		if (strcmp(mi.mountPoint.c_str(),mount_point) == 0)
-		{   
+		{
 			return true;
 		}
 		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -190,7 +191,7 @@ CFSMounter::MountRes CFSMounter::mount(const char * const ip, const char * const
 				       const FSType fstype, const char * const username, const char * const password, 
 				       char * options1, char * options2)
 {
-	std::string cmd;
+	std::stringstream cmd;
 	pthread_mutex_init(&g_mut, NULL);
 	pthread_cond_init(&g_cond, NULL);
 	g_mntstatus=-1;
@@ -238,25 +239,25 @@ CFSMounter::MountRes CFSMounter::mount(const char * const ip, const char * const
 	
 	if(fstype == NFS)
 	{
-		cmd = (std::string)"mount -t nfs " + ip + ':' + dir	+ ' ' + local_dir + " -o " + options1;
+		cmd << "mount -t nfs " << ip << ":" << dir << " " << local_dir << " -o " << options1;
 	}
 	else if(fstype == CIFS)
 	{
-		cmd = (std::string)"mount -t cifs " + ip + '/' + dir + ' ' + local_dir + " -o username=" + username 
-		+ ",password=" + password + ",unc=//" + ip + '/' + dir + ',' + options1;
+		cmd << "mount -t cifs " << ip << "/" << dir << " " << local_dir << " -o username=" << username
+		<< ",password=" << password << ",unc=//" << ip << "/" << dir << "," << options1;
 	}
 	else
 	{
-		cmd = (std::string)"lufsd none " + local_dir + " -o fs=ftpfs,username=" + username 
-		+ ",password=" + password + ",host=" + ip + ",root=/" + dir + ',' + options1;
+		cmd << "lufsd none " << local_dir << " -o fs=ftpfs,username=" << username 
+		<< ",password=" << password << ",host=" << ip << ",root=/" << dir << "," << options1;
 	}
 	
 	if (options2[0] !='\0')
 	{
-		cmd += ',' + options2;
+		cmd << "," << options2;
 	}
 	
-	pthread_create(&g_mnt, 0, mount_thread, (void *) cmd.c_str());
+	pthread_create(&g_mnt, 0, mount_thread, (void *) cmd.str().c_str());
 	
 	struct timespec timeout;
 	int retcode;
@@ -273,7 +274,7 @@ CFSMounter::MountRes CFSMounter::mount(const char * const ip, const char * const
 
 	if ( g_mntstatus != 0 )
 	{
-		printf("[CFSMounter] FS mount error: \"%s\"\n", cmd.c_str());
+		printf("[CFSMounter] FS mount error: \"%s\"\n", cmd.str().c_str());
 		return (retcode == ETIMEDOUT) ? MRES_TIMEOUT : MRES_UNKNOWN;
 	}
 	return MRES_OK;
