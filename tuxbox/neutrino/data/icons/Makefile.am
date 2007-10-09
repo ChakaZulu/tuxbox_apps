@@ -15,4 +15,5 @@ install_DATA = \
 	hidden.raw bookmarkmanager.raw mute_small.raw dbox_small.raw \
 	0.raw 1.raw 2.raw 3.raw 4.raw 5.raw 6.raw 7.raw 8.raw 9.raw \
 	up.raw right.raw down.raw left.raw fta.raw ca.raw \
-	pause.raw play.raw protecting.raw epginfo.raw
+	pause.raw play.raw protecting.raw epginfo.raw\
+	conflict.raw record.raw record_conflict.raw zapto.raw zapto_conflict.raw
