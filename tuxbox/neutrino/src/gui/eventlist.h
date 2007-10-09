@@ -34,6 +34,7 @@
 #define __EVENTLIST_HPP__
 
 #include <sectionsdclient/sectionsdclient.h>
+#include <timerdclient/timerdclient.h>
 
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
@@ -112,6 +113,26 @@ class EventList
 		void paintHead();
 		void hide();
 		void showFunctionBar(bool show);
+		
+		CTimerdClient Timer;
+		CTimerd::TimerList timerlist;             // List of timers		
+		int timerPre;
+		int timerPost;
+		void UpdateTimerList(void);
+
+		typedef enum
+		{
+			NO_CONFLICT = 0x00,
+			CONFLICT = 0x01
+		}CONFLICT_FLAG;
+		typedef enum
+		{
+			NO_TIMER = 0x00,
+			TIMER_RECORD = 0x01,
+			TIMER_ZAPTO = 0x02
+		}TIMER;
+		//unsigned char isTimer(time_t starttime,time_t endtime,event_id_t epgid,int* timerID);
+		unsigned char isTimer(time_t starttime,time_t endtime ,t_channel_id channelID,int* timerID);
 
 	public:
 		EventList();

@@ -1100,7 +1100,9 @@ timerlist.modetv TV channels
 timerlist.modify Modify
 timerlist.name Timer list
 timerlist.new New timer
-timerlist.overlapping_timer Timer conflict. Create the timer anyway?
+timerlist.overlapping_timer1 The selected timer
+timerlist.overlapping_timer2 is in conflict with these timers:
+timerlist.overlapping_timer3 Do you want to DELETE all conflict timers\n when adding the new one?
 timerlist.plugin Plugin
 timerlist.program.unknown Program unknown
 timerlist.recording_dir Directory

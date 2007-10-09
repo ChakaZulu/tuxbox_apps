@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.103 2007/09/22 20:42:56 nitr8 Exp $
+ * $Id: locals_intern.h,v 1.104 2007/10/09 20:43:26 guenther Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1127,7 +1127,9 @@ const char * locale_real_names[] =
 	"timerlist.modify",
 	"timerlist.name",
 	"timerlist.new",
-	"timerlist.overlapping_timer",
+	"timerlist.overlapping_timer1",
+	"timerlist.overlapping_timer2",
+	"timerlist.overlapping_timer3",
 	"timerlist.plugin",
 	"timerlist.program.unknown",
 	"timerlist.recording_dir",

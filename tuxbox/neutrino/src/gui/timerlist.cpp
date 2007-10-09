@@ -1,5 +1,5 @@
 /*
-	$Id: timerlist.cpp,v 1.92 2007/03/17 21:37:22 houdini Exp $
+	$Id: timerlist.cpp,v 1.93 2007/10/09 20:46:04 guenther Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1128,37 +1128,30 @@ int CTimerList::newTimer()
 bool askUserOnTimerConflict(time_t announceTime, time_t stopTime)
 {
 	CTimerdClient Timer;
+	int result = true;
 	CTimerd::TimerList overlappingTimers = Timer.getOverlappingTimers(announceTime,stopTime);
-	//printf("[CTimerdClient] attention\n%d\t%d\t%d conflicts with:\n",timerNew.announceTime,timerNew.alarmTime,timerNew.stopTime);
 
-	std::string timerbuf = g_Locale->getText(LOCALE_TIMERLIST_OVERLAPPING_TIMER);
+	std::string timerbuf = g_Locale->getText(LOCALE_TIMERLIST_OVERLAPPING_TIMER1); 
+	timerbuf += "\n";
+	char rec[25] = {0};
+	struct tm *recTime = localtime(&announceTime);
+	strftime(rec,20,"%d.%m. %H:%M",recTime);
+	timerbuf += rec;
+	recTime = localtime(&stopTime);
+	if(stopTime > announceTime)
+	{
+		strftime(rec,20,"- %d.%m. %H:%M",recTime);
+		timerbuf += rec;
+	}
+	
+	timerbuf += "\n \n";
+	timerbuf += g_Locale->getText(LOCALE_TIMERLIST_OVERLAPPING_TIMER2); 
 	timerbuf += "\n";
 	for (CTimerd::TimerList::iterator it = overlappingTimers.begin();
 	     it != overlappingTimers.end();it++)
 	{
-		timerbuf += CTimerList::convertTimerType2String(it->eventType);
-		timerbuf += " (";
-		timerbuf += CTimerList::convertChannelId2String(it->channel_id); // UTF-8
-		if(it->epgID != 0)
-		{
-			CEPGData epgdata;
-			if (g_Sectionsd->getEPGid(it->epgID, it->epg_starttime, &epgdata))
-			{
-#warning fixme sectionsd should deliver data in UTF-8 format
-				timerbuf += ":";
-				timerbuf += Latin1_to_UTF8(epgdata.title);
-			}
-			else if(strlen(it->epgTitle)!=0)
-			{
-				timerbuf += ":";
-				timerbuf += Latin1_to_UTF8(it->epgTitle);
-			}
-		}
-		timerbuf += ")";
-
-		timerbuf += ":\n";
 		char at[25] = {0};
-		struct tm *annTime = localtime(&(it->announceTime));
+		struct tm *annTime = localtime(&(it->alarmTime));
 		strftime(at,20,"%d.%m. %H:%M",annTime);
 		timerbuf += at;
 		timerbuf += " - ";
@@ -1167,12 +1160,44 @@ bool askUserOnTimerConflict(time_t announceTime, time_t stopTime)
 		struct tm *sTime = localtime(&(it->stopTime));
 		strftime(st,20,"%d.%m. %H:%M",sTime);
 		timerbuf += st;
-		timerbuf += "\n";
-		//printf("%d\t%d\t%d\n",it->announceTime,it->alarmTime,it->stopTime);
-	}
-	//printf("message:\n%s\n",timerbuf.c_str());
-	// todo: localize message
-	//g_Locale->getText(TIMERLIST_OVERLAPPING_MESSAGE);
+		timerbuf += " -> ";
+		timerbuf += CTimerList::convertTimerType2String(it->eventType);
+		timerbuf += "\n   ";
 
-	return (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO,timerbuf,CMessageBox::mbrNo,CMessageBox::mbNo|CMessageBox::mbYes) == CMessageBox::mbrYes);
+		timerbuf += CTimerList::convertChannelId2String(it->channel_id); // UTF-8
+		if(it->epgID != 0)
+		{
+			CEPGData epgdata;
+			timerbuf += ": ";
+			if (g_Sectionsd->getEPGid(it->epgID, it->epg_starttime, &epgdata))
+			{
+#warning fixme sectionsd should deliver data in UTF-8 format
+				timerbuf += Latin1_to_UTF8(epgdata.title);
+			}
+			else if(strlen(it->epgTitle)!=0)
+			{
+				timerbuf += Latin1_to_UTF8(it->epgTitle);
+			}
+		}
+		timerbuf += "\n";
+	}
+	timerbuf += " \n";
+	// todo: localize message
+	timerbuf += g_Locale->getText(LOCALE_TIMERLIST_OVERLAPPING_TIMER3); 
+	timerbuf += " \n";
+	result = ShowMsgUTF(LOCALE_MESSAGEBOX_INFO,timerbuf,CMessageBox::mbrCancel,CMessageBox::mbNo|CMessageBox::mbYes|CMessageBox::mbCancel);
+	if(result == CMessageBox::mbrYes)
+	{
+		printf("delete all conflict timers\n");
+		for (CTimerd::TimerList::iterator it = overlappingTimers.begin();
+		     it != overlappingTimers.end();it++)
+		{
+			Timer.removeTimerEvent(it->eventID);
+		}
+	}
+	return ( result == CMessageBox::mbrYes || result == CMessageBox::mbrNo);
 }
+
+
+
+

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.54 2006/02/14 22:38:28 zwen Exp $
+	$Id: timerdclient.cpp,v 1.55 2007/10/09 20:46:05 guenther Exp $
 
 	License: GPL
 
@@ -109,7 +109,7 @@ int CTimerdClient::getSleepTimerRemaining()
 	{
 		CTimerd::responseGetTimer timer;
 		getTimer( timer, timerID);
-		int min=(((timer.alarmTime + 1 - time(NULL)) / 60)+1); //aufrunden auf nächst größerere Min.
+		int min=(((timer.alarmTime + 1 - time(NULL)) / 60)+1); //aufrunden auf nï¿½chst grï¿½ï¿½erere Min.
 		if(min <1)
 			min=1;
 		return min;
@@ -245,7 +245,8 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 	if (!forceadd)
 	{
 		//printf("[CTimerdClient] checking for overlapping timers\n");
-		CTimerd::TimerList overlappingTimer = getOverlappingTimers(announcetime, stoptime);
+		CTimerd::TimerList overlappingTimer;
+		overlappingTimer = getOverlappingTimers(alarmtime, stoptime);
 		if (overlappingTimer.size() > 0)
 		{
 			// timerd starts eventID at 0 so we can return -1
@@ -345,17 +346,33 @@ bool CTimerdClient::isTimerdAvailable()
 }
 //-------------------------------------------------------------------------
 
-CTimerd::TimerList CTimerdClient::getOverlappingTimers(time_t& announcetime, time_t& stopTime)
+CTimerd::TimerList CTimerdClient::getOverlappingTimers(time_t& startTime, time_t& stopTime)
 {
-	CTimerd::TimerList timerlist;
+	CTimerd::TimerList timerlist; 
 	CTimerd::TimerList overlapping;
+	int timerPre;
+	int timerPost;
+
 	getTimerList(timerlist);
+	getRecordingSafety(timerPre,timerPost);
+
 	for (CTimerd::TimerList::iterator it = timerlist.begin();
 	     it != timerlist.end();it++)
 	{
-		if (!((stopTime < it->announceTime) || (announcetime > it->stopTime)))
+		if(it->stopTime != 0 && stopTime != 0)
 		{
-			overlapping.push_back(*it);
+			// Check if both timers have start and end. In this case do not show conflict, if endtime is the same than the starttime of the following timer
+			if ((stopTime+timerPost > it->alarmTime) && (startTime-timerPre < it->stopTime))
+			{
+				overlapping.push_back(*it);
+			}
+		}
+		else
+		{
+			if (!((stopTime < it->announceTime) || (startTime > it->stopTime)))
+			{
+				overlapping.push_back(*it);
+			}
 		}
 	}
 	return overlapping;

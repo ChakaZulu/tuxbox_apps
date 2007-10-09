@@ -1100,7 +1100,9 @@ timerlist.modetv TV Kanäle
 timerlist.modify Bearbeiten
 timerlist.name Timerliste
 timerlist.new Neuer Timer
-timerlist.overlapping_timer Timer überschneiden sich. Neuen Timer trotzdem anlegen?
+timerlist.overlapping_timer1 Die ausgewählte Ereigniszeit
+timerlist.overlapping_timer2 überschneidet sich mit folgenden Ereignissen:
+timerlist.overlapping_timer3 Sollen diese Ereignisse beim Erstellen \ndes neuen Ereignisses GELÖSCHT werden?
 timerlist.plugin Plugin
 timerlist.program.unknown Programm unbekannt
 timerlist.recording_dir Aufnahmeverzeichnis
