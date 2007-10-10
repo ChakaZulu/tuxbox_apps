@@ -769,9 +769,9 @@ bool CFileBrowser::exec(const char * const dirname)
 			{
 				std::stringstream msg;
 				msg << g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1) << " ";
-				if (filelist[selected].getFileName().length() > 10)
+				if (filelist[selected].getFileName().length() > 25)
 				{
-					msg << filelist[selected].getFileName().substr(0,10) << "...";
+					msg << filelist[selected].getFileName().substr(0, 25) << "...";
 				}
 				else
 					msg << filelist[selected].getFileName();
