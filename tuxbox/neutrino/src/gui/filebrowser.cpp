@@ -52,6 +52,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <sstream>
 
 #include <sys/stat.h>
 #include <curl/curl.h>
@@ -764,18 +765,19 @@ bool CFileBrowser::exec(const char * const dirname)
 		}
 		else if ( msg == CRCInput::RC_spkr && strncmp(Path.c_str(), VLC_URI, strlen(VLC_URI)) != 0) //Not in vlc mode
 		{
-			if(".." !=(filelist[selected].getFileName().substr(0,2))) // das darf man nicht löschen
+			if(".." !=(filelist[selected].getFileName().substr(0,2))) // do not delete that
 			{
-				std::string msg = g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1) + ' ';
+				std::stringstream msg;
+				msg << g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1) << " ";
 				if (filelist[selected].getFileName().length() > 10)
 				{
-					msg += filelist[selected].getFileName().substr(0,10) + "...";
+					msg << filelist[selected].getFileName().substr(0,10) << "...";
 				}
 				else
-					msg += filelist[selected].getFileName();
+					msg << filelist[selected].getFileName();
 
-				msg += ' ' + g_Locale->getText(LOCALE_FILEBROWSER_DODELETE2);
-				if (ShowMsgUTF(LOCALE_FILEBROWSER_DELETE, msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
+				msg << " " << g_Locale->getText(LOCALE_FILEBROWSER_DODELETE2);
+				if (ShowMsgUTF(LOCALE_FILEBROWSER_DELETE, msg.str(), CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
 				{
 					recursiveDelete(filelist[selected].Name.c_str());
 					if(".ts" ==(filelist[selected].getFileName().substr(filelist[selected].getFileName().length()-3,filelist[selected].getFileName().length())))//if bla.ts
