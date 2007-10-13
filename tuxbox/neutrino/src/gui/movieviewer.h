@@ -86,8 +86,8 @@ class CMovieViewer
 	uint runningPercent ;
 	std::string currentTitle;
 	std::string currentInfo1;
-	char current_name[100];
-	char next_name[100];
+	char current_name[150];
+	char next_name[150];
 
 	int time_left_width;
 	int time_dot_width;
