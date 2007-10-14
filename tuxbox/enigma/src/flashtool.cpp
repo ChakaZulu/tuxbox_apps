@@ -1,7 +1,7 @@
 #ifdef ENABLE_FLASHTOOL
 /**********************************************
 *
-*	$Revision: 1.10 $
+*	$Revision: 1.11 $
 *
 **********************************************/
 
@@ -22,7 +22,7 @@
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <linux/version.h>
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,7)
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,7)) && (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18))
 #include <linux/compiler.h>
 #endif
 #include <mtd/mtd-user.h>

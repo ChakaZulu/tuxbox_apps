@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_flash.cpp,v 1.11 2005/10/12 20:46:27 digi_casi Exp $
+ * $Id: enigma_dyn_flash.cpp,v 1.12 2007/10/14 23:30:08 carjay Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -55,7 +55,7 @@
 #include <enigma_dyn_flash.h>
 #include <configfile.h>
 #include <linux/version.h>
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,7)
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,7)) && (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18))
 #include <linux/compiler.h>
 #endif
 #include <mtd/mtd-user.h>
