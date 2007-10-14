@@ -1,6 +1,7 @@
 #ifndef __FB_H
 #define __FB_H
 
+#include <sys/types.h>
 #include <config.h>
 #include <linux/fb.h>
 #include <lib/base/eerror.h>
