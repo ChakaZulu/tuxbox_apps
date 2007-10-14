@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.40 2007/06/17 18:34:37 dbluelle Exp $
+	$Id: framebuffer.h,v 1.41 2007/10/14 23:43:43 carjay Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -27,6 +27,7 @@
 #ifndef __framebuffer__
 #define __framebuffer__
 
+#include <sys/types.h>
 
 #include <linux/fb.h>
 #include <linux/vt.h>
