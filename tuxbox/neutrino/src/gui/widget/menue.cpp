@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.138 2007/02/25 21:11:15 guenther Exp $
+	$Id: menue.cpp,v 1.139 2007/10/16 10:53:14 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -393,8 +393,7 @@ void CMenuWidget::paintItems()
 	if(total_pages>1)
 	{
 		frameBuffer->paintBoxRel(x+ width,item_start_y, 15, item_height, COL_MENUCONTENT_PLUS_1);
-		float sbh= ((item_height-4) / total_pages);
-		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ int(current_page* sbh), 11, int(sbh), COL_MENUCONTENT_PLUS_3);
+		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ current_page*(item_height-4)/total_pages, 11, (item_height-4)/total_pages, COL_MENUCONTENT_PLUS_3);
 	}
 	frameBuffer->paintBoxRel(x,item_start_y, width,item_height, COL_MENUCONTENT_PLUS_0);
 	int ypos=item_start_y;

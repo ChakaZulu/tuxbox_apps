@@ -1222,10 +1222,9 @@ void CAudioPlayerGui::paint()
 		m_frameBuffer->paintBoxRel(m_x + m_width - 15, ypos, 15, sb, COL_MENUCONTENT_PLUS_1);
 
 		int sbc = ((m_playlist.size() - 1) / m_listmaxshow) + 1;
-		float sbh = (sb - 4) / sbc;
 		int sbs = (m_selected / m_listmaxshow);
 
-		m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + int(sbs * sbh) , 11, int(sbh), COL_MENUCONTENT_PLUS_3);
+		m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + sbs*(sb-4)/sbc , 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
 	}
 
 	paintFoot();
@@ -1494,16 +1493,15 @@ void CAudioPlayerGui::updateMetaData()
 		{
 			info << " / ";
 			if ( meta.vbr )
-		{
+			{
 				info << "VBR ";
-		}
+			}
 			info << meta.bitrate/1000 << "kbps";
 		}
 
 		if ( meta.samplerate > 0 )
 		{
-			info << " / " << std::showpoint
-				 << static_cast<float>( meta.samplerate ) / 1000 << "kHz";
+			info << " / " << meta.samplerate/1000 << "." << (meta.samplerate/100)%10 <<"kHz";
 		}
 		
 		m_metainfo = meta.type_info + info.str();
@@ -1608,7 +1606,7 @@ void CAudioPlayerGui::updateTimes(const bool force)
 		}
 		if((updatePlayed || updateTotal) && m_time_total != 0)
 		{
-			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total), CNeutrinoApp::getInstance()->isMuted());
+			CLCD::getInstance()->showAudioProgress(100 * m_time_played / m_time_total, CNeutrinoApp::getInstance()->isMuted());
 		}
 	}
 }
@@ -1629,11 +1627,11 @@ void CAudioPlayerGui::paintLCD()
 		CLCD::getInstance()->showAudioTrack(m_curr_audiofile.MetaData.artist, m_curr_audiofile.MetaData.title,
 											m_curr_audiofile.MetaData.album);
 		if(m_curr_audiofile.FileType != CFile::STREAM_AUDIO)
-			CLCD::getInstance()->showAudioProgress((int)(100.0 * m_time_played / m_time_total), CNeutrinoApp::getInstance()->isMuted());
+			CLCD::getInstance()->showAudioProgress(100 * m_time_played / m_time_total, CNeutrinoApp::getInstance()->isMuted());
 
 #ifdef INCLUDE_UNUSED_STUFF
 		else
-			CLCD::getInstance()->showAudioProgress((int)(100.0 * CAudioPlayer::getInstance()->getScBuffered() / 65536), CNeutrinoApp::getInstance()->isMuted());
+			CLCD::getInstance()->showAudioProgress(100 * CAudioPlayer::getInstance()->getScBuffered() / 65536, CNeutrinoApp::getInstance()->isMuted());
 #endif /* INCLUDE_UNUSED_STUFF */
 		break;
 	case CAudioPlayerGui::PAUSE:

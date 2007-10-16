@@ -64,7 +64,7 @@ class CPictureViewer
 	void SetAspectRatio(float aspect_ratio) {m_aspect=aspect_ratio;}
 	void showBusy(int sx, int sy, int width, char r, char g, char b);
 	void hideBusy();
-	void Zoom(float factor);
+	void Zoom(int factor);
 	void Move(int dx, int dy);
 	void Cleanup();
 	void SetVisible(int startx, int endx, int starty, int endy);

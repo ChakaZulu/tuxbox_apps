@@ -1,5 +1,5 @@
 /*
-	$Id: epgplus.cpp,v 1.36 2007/06/14 09:04:22 dbt Exp $
+	$Id: epgplus.cpp,v 1.37 2007/10/16 10:53:13 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2127,14 +2127,13 @@ void EpgPlus::paint()
 	#endif
 
 	int tmp = ((this->channelList->getSize() - 1)/this->maxNumberOfDisplayableEntries) + 1;
-	float sliderKnobHeight = (sliderHeight - 4)/tmp;
 	int sliderKnobPosition = this->selectedChannelEntry == NULL ? 0 : (this->selectedChannelEntry->index / this->maxNumberOfDisplayableEntries);
 
 	this->frameBuffer->paintBoxRel
 		( this->sliderX + 2
-		, this->sliderY + int(sliderKnobPosition*sliderKnobHeight)
+		, this->sliderY + sliderKnobPosition*(sliderHeight-4)/tmp
 		, this->sliderWidth - 4
-		, int(sliderKnobHeight)
+		, (sliderHeight - 4)/tmp
 		, sliderKnobColor
 		);
 }

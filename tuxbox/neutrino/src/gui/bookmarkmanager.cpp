@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.12 2004/05/20 07:38:34 thegoodguy Exp $
+  $Id: bookmarkmanager.cpp,v 1.13 2007/10/16 10:53:13 seife Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -477,9 +477,8 @@ void CBookmarkManager::paint()
 		frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT_PLUS_1);
 
 		int sbc= ((bookmarks.size()- 1)/ listmaxshow)+ 1;
-		float sbh= (sb- 4)/ sbc;
 
-		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(page_nr * sbh) , 11, int(sbh),  COL_MENUCONTENT_PLUS_3);
+		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ page_nr*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
 	}
 
 	paintFoot();

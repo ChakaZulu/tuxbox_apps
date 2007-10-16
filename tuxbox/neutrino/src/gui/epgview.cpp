@@ -1,5 +1,5 @@
 /*
-	$Id: epgview.cpp,v 1.136 2007/01/31 21:34:49 houdini Exp $
+	$Id: epgview.cpp,v 1.137 2007/10/16 10:53:13 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -232,10 +232,9 @@ void CEpgData::showText( int startPos, int ypos )
 	frameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT_PLUS_1);
 
 	int sbc= ((textCount- 1)/ medlinecount)+ 1;
-	float sbh= (sb- 4)/ sbc;
 	int sbs= (startPos+ 1)/ medlinecount;
 
-	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT_PLUS_3);
+	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ sbs*(sb-4)/sbc , 11, (sb-4)/sbc,  COL_MENUCONTENT_PLUS_3);
 }
 
 #define GENRE_MOVIE_COUNT 9
@@ -739,12 +738,12 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 					bigFonts = bigFonts ? false : true;
 					if(bigFonts)
 					{
-						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->setSize((int)(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getSize() * BIG_FONT_FAKTOR));
-						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize((int)(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize() * BIG_FONT_FAKTOR));
+						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->setSize(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getSize() * BIG_FONT_FAKTOR / 10);
+						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize() * BIG_FONT_FAKTOR / 10);
 					}else
 					{
-						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->setSize((int)(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getSize() / BIG_FONT_FAKTOR));
-						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize((int)(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize() / BIG_FONT_FAKTOR));
+						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->setSize(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getSize() * 10 / BIG_FONT_FAKTOR);
+						g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize() * 10 / BIG_FONT_FAKTOR);
 					}
 					show(channel_id, id, &startzeit, false);
 					showPos=0;
@@ -779,8 +778,8 @@ void CEpgData::hide()
         // 2004-09-10 rasc  (bugfix, scale large font settings back to normal)
 	if (bigFonts) {
 		bigFonts = false;
-		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->setSize((int)(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getSize() / BIG_FONT_FAKTOR));
-		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize((int)(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize() / BIG_FONT_FAKTOR));
+		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->setSize(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getSize() * 10 / BIG_FONT_FAKTOR);
+		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize() * 10 / BIG_FONT_FAKTOR);
 	}
 
 	frameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
@@ -826,7 +825,7 @@ void CEpgData::GetEPGData(const t_channel_id channel_id, unsigned long long id, 
 		epg_done= -1;
 		if (( time(NULL)- (epgData.epg_times).startzeit )>= 0 )
 		{
-			unsigned nProcentagePassed=(unsigned)((float)(time(NULL)-(epgData.epg_times).startzeit)/(float)(epgData.epg_times).dauer*100.);
+			unsigned nProcentagePassed=((time(NULL)-(epgData.epg_times).startzeit) * 100 / (epgData.epg_times).dauer);
 			if (nProcentagePassed<= 100)
 				epg_done= nProcentagePassed;
 		}

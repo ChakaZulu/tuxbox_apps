@@ -46,8 +46,8 @@
 
 #include <math.h>
 
-
-#define CSYNCFACTOR 0.31
+/* in percent; will be divided through 100 */
+#define CSYNCFACTOR 31 
 
 
 CRGBCSyncControler::CRGBCSyncControler(const neutrino_locale_t Name, unsigned char* Csync, CChangeObserver* Observer)
@@ -169,14 +169,14 @@ void CRGBCSyncControler::paint()
 //	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT_PLUS_3);
 }
 
-void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, float factor, const neutrino_locale_t text, bool selected)
+void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, int factor, const neutrino_locale_t text, bool selected)
 {
 	int startx = 200;
 	char wert[5];
 
 	frameBuffer->paintBoxRel(x + startx, y, 120, mheight, COL_MENUCONTENT_PLUS_0);
 	frameBuffer->paintIcon("volumebody.raw", x + startx, y+2+mheight/4);
-	frameBuffer->paintIcon(selected ? "volumeslider2blue.raw" : "volumeslider2.raw", (int)(x + (startx+3)+(spos / factor)), y+mheight/4);
+	frameBuffer->paintIcon(selected ? "volumeslider2blue.raw" : "volumeslider2.raw", (int)(x + (startx+3)+(100*spos / factor)), y+mheight/4);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y+mheight, width, g_Locale->getText(text), COL_MENUCONTENT, 0, true); // UTF-8
 	sprintf(wert, "%3d", spos); // UTF-8 encoded

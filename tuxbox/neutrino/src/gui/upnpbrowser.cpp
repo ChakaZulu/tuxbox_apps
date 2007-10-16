@@ -944,10 +944,9 @@ void CUpnpBrowserGui::paintDevice()
 	m_frameBuffer->paintBoxRel(m_x + m_width - 15, ypos, 15, sb, COL_MENUCONTENT_PLUS_1);
 
 	int sbc = ((m_devices.size() - 1) / m_listmaxshow) + 1;
-	float sbh = (sb - 4) / sbc;
 	int sbs = ((m_selecteddevice) / m_listmaxshow);
 
-	m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + int(sbs * sbh) , 11, int(sbh), COL_MENUCONTENT_PLUS_3);
+	m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + sbs*(sb-4)/sbc, 11, (sb-4)/sbc, COL_MENUCONTENT_PLUS_3);
 
 	// Foot
 	top = m_y + (m_height - m_info_height - 2 * m_buttonHeight);
@@ -1066,11 +1065,12 @@ void CUpnpBrowserGui::paintItem(std::vector<UPnPEntry> *entry, unsigned int sele
 	m_frameBuffer->paintBoxRel(m_x + m_width - 15, ypos, 15, sb, COL_MENUCONTENT_PLUS_1);
 
 	int sbc = ((max + offset - 1) / m_listmaxshow) + 1;
-	float sbh = (sb - 4) / sbc;
-	if ((sbc > 0) && (int(sbh) == 0)) sbh = 2.0;
 	int sbs = ((selected + offset) / m_listmaxshow);
 
-	m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + int(sbs * sbh) , 11, int(sbh), COL_MENUCONTENT_PLUS_3);
+	int sbh = 0;
+	if ((sbc > 0) && (sbc > sb-4))
+		sbh = 2;
+	m_frameBuffer->paintBoxRel(m_x + m_width - 13, ypos + 2 + sbs*((sb-4)/sbc+sbh), 11, (sb-4)/sbc + sbh, COL_MENUCONTENT_PLUS_3);
 
 	// Foot buttons
 	top = m_y + (m_height - m_info_height - 2 * m_buttonHeight);

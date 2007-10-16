@@ -250,7 +250,7 @@ bool CPictureViewer::DisplayNextImage()
 	return true;
 }
 
-void CPictureViewer::Zoom(float factor)
+void CPictureViewer::Zoom(int factor)
 { 
 //	dbout("Zoom %f\n",factor);
    showBusy(m_startx+3,m_starty+3,10,0xff,0xff,00);
@@ -258,8 +258,8 @@ void CPictureViewer::Zoom(float factor)
    int oldx=m_CurrentPic_X;
 	int oldy=m_CurrentPic_Y;
    unsigned char *oldBuf=m_CurrentPic_Buffer;
-	m_CurrentPic_X=(int)(factor*m_CurrentPic_X);
-	m_CurrentPic_Y=(int)(factor*m_CurrentPic_Y);
+	m_CurrentPic_X=factor*m_CurrentPic_X/100;
+	m_CurrentPic_Y=factor*m_CurrentPic_Y/100;
 	 
 	if(m_scaling==COLOR)
 		m_CurrentPic_Buffer=color_average_resize(m_CurrentPic_Buffer, oldx, oldy, m_CurrentPic_X,m_CurrentPic_Y);

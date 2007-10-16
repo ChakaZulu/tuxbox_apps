@@ -1,5 +1,5 @@
 /*
-	$Id: progresswindow.cpp,v 1.16 2007/02/25 21:32:58 guenther Exp $
+	$Id: progresswindow.cpp,v 1.17 2007/10/16 10:53:15 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -79,7 +79,7 @@ void CProgressWindow::showGlobalStatus(const unsigned int prog)
 		if (global_progress > 100)
 			global_progress = 100;
 
-		pos += int( float(width-20)/100.0 * global_progress);
+		pos += (width-20) * global_progress / 100;
 		//vordergrund
 		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT_PLUS_7);
 	}
@@ -105,7 +105,7 @@ void CProgressWindow::showLocalStatus(const unsigned int prog)
 		if (local_progress > 100)
 			local_progress = 100;
 
-		pos += int( float(width-20)/100.0 * local_progress);
+		pos += (width-20) * local_progress / 100;
 		//vordergrund
 		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT_PLUS_7);
 	}

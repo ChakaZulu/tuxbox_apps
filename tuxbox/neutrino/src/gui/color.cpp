@@ -38,16 +38,16 @@
 
 int convertSetupColor2RGB(const unsigned char r, const unsigned char g, const unsigned char b)
 {
-	unsigned char red =  	int( float(255./100.)*float(r) );
-	unsigned char green =  	int( float(255./100.)*float(g) );
-	unsigned char blue =  	int( float(255./100.)*float(b) );
+	unsigned char red =  	(int)r * 255 / 100;
+	unsigned char green =  	(int)g * 255 / 100;
+	unsigned char blue =  	(int)b * 255 / 100;
 
 	return (red << 16) | (green << 8) | blue;
 }
 
 int convertSetupAlpha2Alpha(unsigned char alpha)
 {
-	return int( float(0x7777/100.)*float(alpha) );
+	return 0x7777 * (int)alpha / 100;
 }
 
 void recalcColor(unsigned char &orginal, int fade)
@@ -56,7 +56,7 @@ void recalcColor(unsigned char &orginal, int fade)
 	{
 		return;
 	}
-	int color =  int( float( float(orginal) * float( float(fade) / 100.0)) );
+	int color =  (int)orginal * fade / 100;
 	if(color>255)
 		color=255;
 	if(color<0)

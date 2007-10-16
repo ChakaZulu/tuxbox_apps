@@ -46,8 +46,8 @@
 #include <vector>
 #include <string>
 
-
-#define BIG_FONT_FAKTOR 1.5
+// will be divided by 10
+#define BIG_FONT_FAKTOR 15
 
 class CEpgData
 {
