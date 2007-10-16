@@ -1,5 +1,5 @@
 /*
-	$Id: eventlist.cpp,v 1.109 2007/10/16 10:53:13 seife Exp $
+	$Id: eventlist.cpp,v 1.110 2007/10/16 22:07:52 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -90,7 +90,6 @@ EventList::EventList()
 	m_search_bouquet_id= 1;
 
 	//width  = 580;
-	// //height = 440;
 	//height = 480;
 	width  = w_max (580, 20);
 	height = h_max (480, 20);
@@ -688,7 +687,7 @@ void EventList::paintHead()
 	snprintf(l_name, sizeof(l_name), g_Locale->getText(LOCALE_EPGLIST_HEAD), name.c_str()); // UTF-8
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
-	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-36, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
 
 void EventList::paint()
@@ -746,8 +745,8 @@ void  EventList::showFunctionBar (bool show)
 	// -- hide only?
 	if (!show) return;
 
-	// -- frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW_PLUS_1);
-	frameBuffer->paintBoxRel(bx,by,bw,bh, COL_MENUHEAD_PLUS_0);
+	//frameBuffer->paintBoxRel(bx,by-2,bw,bh+2, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(bx,by,bw,bh-3, COL_INFOBAR_SHADOW_PLUS_1);
 
 	pos = 0;
 //	unsigned char is_timer = isTimer(evtlist[selected].startTime,evtlist[selected].startTime + evtlist[selected].duration,evtlist[selected].eventID);
@@ -1078,4 +1077,3 @@ int CEventFinderMenu::showMenu(void)
 	res = searchMenu.exec(NULL,"");
 	return(res);
 }
-

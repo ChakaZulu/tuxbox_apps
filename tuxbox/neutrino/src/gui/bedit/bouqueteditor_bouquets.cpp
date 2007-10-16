@@ -154,7 +154,7 @@ void CBEBouquetWidget::paintFoot()
 	Button[2] = CBEBouquetWidgetButtons[2];
 	Button[3].button = NEUTRINO_ICON_BUTTON_BLUE;
 
-	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_INFOBAR_SHADOW_PLUS_1);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW_PLUS_0);
 
 	switch( blueFunction)

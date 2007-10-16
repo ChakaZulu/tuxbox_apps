@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.125 2007/06/24 11:51:04 dbluelle Exp $
+	$Id: update.cpp,v 1.126 2007/10/16 22:07:52 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,7 @@
 #include <driver/encoding.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+#include <driver/screen_max.h>
 
 #include <gui/color.h>
 #include <gui/filebrowser.h>
@@ -137,7 +138,7 @@ bool CFlashUpdate::selectHttpImage(void)
 	std::string name;
 	std::string version;
 	std::vector<std::string> updates_lists, urls, md5s, names, versions, descriptions;
-	int selected = -1;
+	int selected = -1, listWidth = w_max (710, 50);
 
 	// get default update url from .version
 	CConfigFile config('\t');
@@ -147,7 +148,7 @@ bool CFlashUpdate::selectHttpImage(void)
 	httpTool.setStatusViewer(this);
 	showStatusMessageUTF(g_Locale->getText(LOCALE_FLASHUPDATE_GETINFOFILE)); // UTF-8
 
-	CMenuWidget SelectionWidget(LOCALE_FLASHUPDATE_SELECTIMAGE, "softupdate.raw", 450);
+	CMenuWidget SelectionWidget(LOCALE_FLASHUPDATE_SELECTIMAGE, "softupdate.raw", listWidth);
 	SelectionWidget.addItem(GenericMenuSeparator);
 	SelectionWidget.addItem(GenericMenuBack);
 

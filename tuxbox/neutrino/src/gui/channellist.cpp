@@ -1103,7 +1103,8 @@ void CChannelList::paintHead()
 	int ButtonWidth = (width - 20) / 4;
 	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());
 	frameBuffer->paintHLineRel(x, width, y + (height - buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
-	frameBuffer->paintBoxRel(x, y + (height - buttonHeight) + 1, width, buttonHeight - 1, COL_MENUHEAD_PLUS_0);
+	//footbar
+	frameBuffer->paintBoxRel(x, y + (height - buttonHeight), width, buttonHeight - 1, COL_INFOBAR_SHADOW_PLUS_1);
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight) + 3, ButtonWidth, 1, CChannelListButtons);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
@@ -1134,7 +1135,7 @@ void CChannelList::paint()
 	{
 		paintItem(count);
 	}
-
+	//scrollbar
 	int ypos = y+ theight;
 	int sb = fheight* listmaxshow;
 	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT_PLUS_1);
