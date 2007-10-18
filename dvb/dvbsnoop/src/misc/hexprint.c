@@ -1,5 +1,5 @@
 /*
-$Id: hexprint.c,v 1.9 2006/01/02 18:24:04 rasc Exp $
+$Id: hexprint.c,v 1.10 2007/10/18 20:49:50 rasc Exp $
 
 
  DVBSNOOP
@@ -7,12 +7,15 @@ $Id: hexprint.c,v 1.9 2006/01/02 18:24:04 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2007   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 $Log: hexprint.c,v $
+Revision 1.10  2007/10/18 20:49:50  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.9  2006/01/02 18:24:04  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -217,6 +220,8 @@ void printasciiline_buf (int verbose, u_char *buf, int n)
 
 /*
  -- single line dump HEX+ASCII
+    0000:  40 f2 f4 00 01 c1 01 01  f0 00 f2 e7 04 31 00 01   @............1..
+
 */
 static void printhexdump2_buf (int verbose, u_char *buf, int n)
 {

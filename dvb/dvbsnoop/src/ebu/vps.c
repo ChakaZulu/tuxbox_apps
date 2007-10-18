@@ -1,5 +1,5 @@
 /*
-$Id: vps.c,v 1.4 2006/01/02 18:24:03 rasc Exp $
+$Id: vps.c,v 1.5 2007/10/18 20:49:50 rasc Exp $
 
 
 
@@ -8,17 +8,21 @@ $Id: vps.c,v 1.4 2006/01/02 18:24:03 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2007   Rainer.Scherg@gmx.de (rasc)
 
 
 
  -- misc routines for EBU Video Programming System
  -- EN 300 231  8.2.2 
-
+ -- TS 101 231
+ -- add. info: SAA4700 datasheet (Philips VPS dataline Processor)
 
 
 
 $Log: vps.c,v $
+Revision 1.5  2007/10/18 20:49:50  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.4  2006/01/02 18:24:03  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -108,8 +112,10 @@ int  print_vps_decode (int v, u_char *b, int len)
 	// -- Byte 3..15 , so byte 3 => [0]
 	// -- vps_data_block:
 
-	// -- Byte 3+4: not relevant
-   	outBit_Sx_NL (v,"(not relevant to PDC): ", 	b,    0, 16);
+	// -- Byte 3+4: not relevant to PDC
+	// -- Info from datasheet SAA4700 (Philips)
+   	outBit_Sx_NL (v,"(program source identification (binary coded)): ",  b,   0,  8);
+   	outBit_Sx_NL (v,"(program source identification (ASCII seq)): ",     b+1, 0,  8); 
 
 	// -- PCS
    	pcs = outBit_S2x_NL (v,"PCS audio: ",		b+2,  0,  2,
@@ -122,9 +128,12 @@ int  print_vps_decode (int v, u_char *b, int len)
 	else			out_nl (4, "  [= Enhanced VPS]");
 
 
-
-   	outBit_Sx_NL (v,"(not relevant to PDC): ", 	b+3,  0, 24);		// byte 6..10
-   	outBit_Sx_NL (v,"(not relevant to PDC): ", 	b+3, 24, 16);
+	// -- Byte 6..10: not relevant to PDC
+	// -- Info from datasheet SAA4700 (Philips)
+   	outBit_Sx_NL (v,"(program/test picture identification): ",        b+3,   0,  8);
+   	outBit_Sx_NL (v,"(internal information exchange): ",              b+4,   0,  8);
+   	outBit_Sx_NL (v,"(address assignment of signal distribution): ",  b+5,   0, 16);
+   	outBit_Sx_NL (v,"(messages/commands): ",                          b+7,   0,  8);
 
 
 	pil 		=  getBits (b,  8,  2, 20);

@@ -1,5 +1,5 @@
 /*
-$Id: pes_data_sync.c,v 1.3 2006/01/02 18:24:12 rasc Exp $
+$Id: pes_data_sync.c,v 1.4 2007/10/18 20:49:50 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: pes_data_sync.c,v 1.3 2006/01/02 18:24:12 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2007   Rainer.Scherg@gmx.de  (rasc)
 
 
 
@@ -16,6 +16,9 @@ $Id: pes_data_sync.c,v 1.3 2006/01/02 18:24:12 rasc Exp $
 
 
 $Log: pes_data_sync.c,v $
+Revision 1.4  2007/10/18 20:49:50  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.3  2006/01/02 18:24:12  rasc
 just update copyright and prepare for a new public tar ball
 

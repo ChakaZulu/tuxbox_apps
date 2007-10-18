@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.32 2005/09/06 23:13:50 rasc Exp $
+$Id: dvbsnoop.c,v 1.33 2007/10/18 20:49:49 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.32 2005/09/06 23:13:50 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.33  2007/10/18 20:49:49  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.32  2005/09/06 23:13:50  rasc
 catch OS signals (kill ...) for smooth program termination
 
@@ -163,8 +166,8 @@ int main(int argc, char **argv)
 
   if (! cmdline_options (argc,argv, &opt) ) return (-1);
 
-  setVerboseLevel (opt.printdecode);
-  setHexPrintMode (opt.printhex);
+  setMaxVerboseLevel (opt.printdecode);
+  setHexPrintMode    (opt.printhex);
 
 
 

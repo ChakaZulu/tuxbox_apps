@@ -1,5 +1,5 @@
 /*
-$Id: output.c,v 1.11 2006/01/02 18:24:04 rasc Exp $
+$Id: output.c,v 1.12 2007/10/18 20:49:50 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: output.c,v 1.11 2006/01/02 18:24:04 rasc Exp $
 
 
 $Log: output.c,v $
+Revision 1.12  2007/10/18 20:49:50  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.11  2006/01/02 18:24:04  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -71,7 +74,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
   -- Module Global Vars
 */
 
-static int  verbose_level = 0;
+static int  max_verbose_level = 0;
 static int  col0 = 0;		//2
 
 static int  indent_level = 0;
@@ -111,19 +114,19 @@ void indent (int v)
 
 
 /*
- -- set verbosity level
+ -- set max verbosity level
  -- 0 = highest, 9 = lowest level
  -- print message upto (including) this verbosity level
 */
 
-void setVerboseLevel (int v)
+void setMaxVerboseLevel (int v)
 {
-  verbose_level = v;
+  max_verbose_level = v;
 }
 
-int getVerboseLevel ()
+int getMaxVerboseLevel ()
 {
- return verbose_level;
+ return max_verbose_level;
 }
 
 
@@ -138,7 +141,7 @@ void out(int verbose, const char *msgfmt,...)
 {
   va_list args;
 
-  if (verbose <= verbose_level) {
+  if (verbose <= max_verbose_level) {
      print_indent(); //2
      va_start (args,msgfmt);
      vfprintf (stdout, msgfmt, args);
@@ -151,7 +154,7 @@ void out_nl(int verbose, const char *msgfmt,...)
 {
   va_list args;
 
-  if (verbose <= verbose_level) {
+  if (verbose <= max_verbose_level) {
      print_indent();  //2
      va_start (args,msgfmt);
      vfprintf (stdout, msgfmt, args);
@@ -168,7 +171,7 @@ void out_nl(int verbose, const char *msgfmt,...)
 
 void  out_nl2 (int verbose)
 {
-  if (verbose <= verbose_level) {
+  if (verbose <= max_verbose_level) {
      fputc ('\n',stdout);
      col0 = 1; //2
 //2     print_indent();

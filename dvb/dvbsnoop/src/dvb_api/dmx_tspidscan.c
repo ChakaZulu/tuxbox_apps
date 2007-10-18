@@ -1,12 +1,12 @@
 /*
-$Id: dmx_tspidscan.c,v 1.23 2006/01/02 18:23:59 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.24 2007/10/18 20:49:49 rasc Exp $
 
 
  DVBSNOOP
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2006   Rainer.Scherg@gmx.de (rasc)
+ (c) 2001-2007   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Brute force scan all pids on a transponder
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.23 2006/01/02 18:23:59 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.24  2007/10/18 20:49:49  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.23  2006/01/02 18:23:59  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -195,6 +198,9 @@ int ts_pidscan (OPTION *opt)
    out_nl (2,"---------------------------------------------------------");
    out_nl (2,"Transponder PID-Scan...");
    out_nl (2,"---------------------------------------------------------");
+
+
+   // $$$TODO   tsraw-scan
 
 
 

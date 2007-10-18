@@ -1,5 +1,5 @@
 /*
-$Id: output.h,v 1.13 2006/01/02 18:24:04 rasc Exp $
+$Id: output.h,v 1.14 2007/10/18 20:49:50 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: output.h,v 1.13 2006/01/02 18:24:04 rasc Exp $
 
 
 $Log: output.h,v $
+Revision 1.14  2007/10/18 20:49:50  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.13  2006/01/02 18:24:04  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -59,8 +62,8 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 void indent (int v);
-void setVerboseLevel (int v);
-int  getVerboseLevel ();
+void setMaxVerboseLevel (int v);
+int  getMaxVerboseLevel ();
 void out(int verbose, const char *msgfmt,...);
 void out_nl(int verbose, const char *msgfmt,...);
 void out_nl2(int verbose);

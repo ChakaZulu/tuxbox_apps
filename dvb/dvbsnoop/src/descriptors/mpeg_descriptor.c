@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.29 2006/02/12 23:17:11 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.30 2007/10/18 20:49:49 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.29 2006/02/12 23:17:11 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.30  2007/10/18 20:49:49  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.29  2006/02/12 23:17:11  rasc
 TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
 
@@ -1327,9 +1330,9 @@ void descriptorMPEG_NPT_reference (u_char *b)
    	out_nl  (4,"  [= ref/300 * 90 kHz]");
  
    outBit_Sx_NL (6,"reserved: ",		  	b,64,31);
-   outBit64_Sx_NL (4,"NPT_Reference: ",		  	b,75,33);
-   outBit_Sx_NL (4,"scaleNumerator: ",		  	b,108,16);
-   outBit_Sx_NL (4,"scaleDenominator: ",	  	b,124,16);
+   outBit64_Sx_NL (4,"NPT_Reference: ",		  	b,95,33);
+   outBit_Sx_NL (4,"scaleNumerator: ",		  	b,128,16);
+   outBit_Sx_NL (4,"scaleDenominator: ",	  	b,144,16);
 
 }
 

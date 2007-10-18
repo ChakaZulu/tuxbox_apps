@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.76 2006/07/19 20:05:45 rasc Exp $
+$Id: dvb_str.c,v 1.77 2007/10/18 20:49:53 rasc Exp $
 
 
  DVBSNOOP
@@ -20,6 +20,9 @@ $Id: dvb_str.c,v 1.76 2006/07/19 20:05:45 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.77  2007/10/18 20:49:53  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.76  2006/07/19 20:05:45  rasc
 Special handling for null packets
 
@@ -3081,15 +3084,18 @@ char *dvbstrTELETEXT_framingcode (u_int i)
 
 /*
   -- dvbstrTELETEXT_packetnr
-  -- EN 300 472  and EN 301 775.
+  -- EN 300 472  and EN 301 775  and EN 300 706
 */
 
 char *dvbstrTELETEXT_packetnr (u_int i)
 {
   STR_TABLE  Table[] = {
 	{ 0x00, 0x00,   "page header" },
-	{ 0x01, 0x19,   "normal packet intended for direct display" },
-	{ 0x1A, 0x1F,   "non-displayable packet (see: EN 300 706)" },
+	{ 0x01, 0x17,   "normal packet intended for direct display" },
+	{ 0x18, 0x18,   "navigational purpose in FLOF" },
+	{ 0x19, 0x19,   "displ. labels relating to data in page for keyword search" },
+	{ 0x1A, 0x1A,   "programming code VCR (EN 300 231) // character location addressing " },
+	{ 0x1B, 0x1F,   "non-displayable packet (see: EN 300 706)" },
      	{  0,0, NULL }
   };
 

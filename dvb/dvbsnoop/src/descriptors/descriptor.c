@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.31 2006/02/12 23:17:11 rasc Exp $
+$Id: descriptor.c,v 1.32 2007/10/18 20:49:49 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: descriptor.c,v 1.31 2006/02/12 23:17:11 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.32  2007/10/18 20:49:49  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.31  2006/02/12 23:17:11  rasc
 TS 101 191 MIP - Mega-Frame Initialization Packet for DVB-T/H  (TS Pid 0x15)
 
@@ -152,7 +155,7 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 
   // nothing to print here? 
   // well, I guess all descriptors need a verbosity >=4...
-  if (getVerboseLevel() < 4) return len;
+  if (getMaxVerboseLevel() < 4) return len;
 
   indent (+1);
 

@@ -1,5 +1,5 @@
 /*
-$Id: pes_data_ebu.c,v 1.5 2006/01/02 18:24:12 rasc Exp $
+$Id: pes_data_ebu.c,v 1.6 2007/10/18 20:49:50 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: pes_data_ebu.c,v 1.5 2006/01/02 18:24:12 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2006   Rainer.Scherg@gmx.de  (rasc)
+ (c) 2001-2007   Rainer.Scherg@gmx.de  (rasc)
 
 
 
@@ -17,6 +17,9 @@ $Id: pes_data_ebu.c,v 1.5 2006/01/02 18:24:12 rasc Exp $
 
 
 $Log: pes_data_ebu.c,v $
+Revision 1.6  2007/10/18 20:49:50  rasc
+Mpeg NTP descriptor bugfix, minor changes
+
 Revision 1.5  2006/01/02 18:24:12  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -83,8 +86,7 @@ void PES_decodeDATA_EBU_etc (u_char *b, int len)
    out_nl (4,"EBU data:");
    indent (+1);
 
-   data_identifier		= getBits (b, 0,  0,  8);
-   outBit_S2x_NL (4,"data_identifier: ",	b, 0, 8,
+   data_identifier = outBit_S2x_NL (4,"data_identifier: ",	b, 0, 8,
 			(char *(*)(u_long)) dvbstrPESDataIdentifier);
    b++;
    len--;
