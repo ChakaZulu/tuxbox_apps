@@ -817,7 +817,7 @@ void Decoder::flushClipBuffer()
 {
 	int wasOpen = fd.mpeg != -1;
 	if ( !wasOpen )
-		fd.mpeg = ::open("/dev/video", O_WRONLY);
+		fd.mpeg = ::open("/dev/video", O_RDONLY);
 	{
 		if (::ioctl(fd.mpeg, VIDEO_FLUSH_CLIP_BUFFER) < 0)
 			eDebug("VIDEO_FLUSH_BUFFER failed (%m)");
@@ -833,7 +833,7 @@ void Decoder::clearScreen()
 {
 	int wasOpen = fd.mpeg != -1;
 	if ( !wasOpen )
-		fd.mpeg=::open("/dev/video", O_WRONLY);
+		fd.mpeg=::open("/dev/video", O_RDONLY);
 	if ( fd.mpeg > -1 )
 	{
 		if ( ::ioctl(fd.mpeg, VIDEO_CLEAR_SCREEN) < 0 )
@@ -878,7 +878,7 @@ void Decoder::setFastZap(int val)
 {
 	int wasOpen = fd.mpeg != -1;
 	if ( !wasOpen )
-		fd.mpeg = ::open("/dev/video", O_WRONLY);
+		fd.mpeg = ::open("/dev/video", O_RDONLY);
 	if ( fd.mpeg > -1 )
 	{
 		if ( ::ioctl(fd.mpeg, VIDEO_SET_FASTZAP, val) < 0 )
@@ -895,7 +895,7 @@ void Decoder::setAutoFlushScreen( int on )
 {
 	int wasOpen = fd.mpeg != -1;
 	if ( !wasOpen )
-		fd.mpeg = ::open("/dev/video", O_WRONLY);
+		fd.mpeg = ::open("/dev/video", O_RDONLY);
 	if ( fd.mpeg > -1 )
 	{
 		if ( ::ioctl(fd.mpeg, VIDEO_SET_AUTOFLUSH, on) < 0 )
