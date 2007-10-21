@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.19 2006/01/21 22:23:51 digi_casi Exp $
+ * $Id: streamts.c,v 1.20 2007/10/21 13:58:38 digi_casi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -513,7 +513,7 @@ main (int argc, char ** argv) {
 			if (offset == -1)
 				continue;
 
-			packet_stdout(buf + offset, r - offset, NULL);
+			packet_stdout(buf + offset, pos - offset, NULL);
 		}
 	}
 
