@@ -1,5 +1,5 @@
 /*
-$Id: pes_data.c,v 1.4 2007/10/18 20:49:50 rasc Exp $
+$Id: pes_data.c,v 1.5 2007/10/22 19:37:08 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: pes_data.c,v 1.4 2007/10/18 20:49:50 rasc Exp $
 
 
 $Log: pes_data.c,v $
+Revision 1.5  2007/10/22 19:37:08  rasc
+revert unfinished code... (sorry)
+
 Revision 1.4  2007/10/18 20:49:50  rasc
 Mpeg NTP descriptor bugfix, minor changes
 
@@ -42,6 +45,7 @@ Revision 1.2  2004/02/02 23:34:08  rasc
 #include "pes_data.h"
 #include "pes_data_ebu.h"
 #include "pes_data_sync.h"
+// $$$ TODO #include "pes_dvb_subtitles.h"
 #include "strings/dvb_str.h"
 #include "misc/helper.h"
 #include "misc/hexprint.h"
@@ -78,7 +82,8 @@ void PES_decodeDATA_private_stream_1 (u_char *b, int len)
   } else if (data_identifier == 0x20) {
 
 	// DVB subtitling (see EN 300 743)
-	PES_decodeDATA_dvb_subtitles (b, len);
+	// $$$ TODO -- PES_decodeDATA_dvb_subtitles (b, len);
+	print_databytes (4,"TODO  dvb subtitles:", b, len);
 
 
   } else {
