@@ -3038,17 +3038,25 @@ void eZapMain::pause()
 	{
 		if ( ref.type == eServiceReference::idDVB && !ref.path && !timeshift )
 		{
-			if (eSystemInfo::getInstance()->canTimeshift() &&
-				eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM600PVR &&
-				eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500PLUS
-				)
+			if (eSystemInfo::getInstance()->canTimeshift())
 			{
 				if (!eDVB::getInstance()->recorder)
 				{
-					record();
+					switch(eSystemInfo::getInstance()->getHwType())
+					{
+					case eSystemInfo::DM600PVR:
+					case eSystemInfo::DM500PLUS:
+						Decoder::setAutoFlushScreen(0);
+						Decoder::Pause(2);  // freeze frame
+						record();
+						break;
+					default:
+						record();
+						Decoder::setAutoFlushScreen(0);
+						Decoder::Pause(2);  // freeze frame
+						break;
+					}
 					timeshift=1;
-					Decoder::Pause(2);  // freeze frame
-					Decoder::setAutoFlushScreen(0);
 					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, -1));
 					Decoder::setAutoFlushScreen(1);
 				}
