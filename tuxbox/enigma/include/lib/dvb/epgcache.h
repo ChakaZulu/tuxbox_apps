@@ -315,7 +315,7 @@ private:
 
 	int state;
 	__u8 isRunning, firstStart, haveData;
-	void FixOverlapping(std::pair<eventMap,timeMap> &, time_t, int, const timeMap::iterator &, const uniqueEPGKey &);
+	bool FixOverlapping(std::pair<eventMap,timeMap> &, time_t, int, const timeMap::iterator &, const uniqueEPGKey &);
 	int sectionRead(__u8 *data, int source);
 	static eEPGCache *instance;
 

@@ -449,8 +449,9 @@ int ePrivateContent::sectionRead(__u8 *data)
 }
 #endif // ENABLE_PRIVATE_EPG
 
-void eEPGCache::FixOverlapping(std::pair<eventMap,timeMap> &servicemap, time_t TM, int duration, const timeMap::iterator &tm_it, const uniqueEPGKey &service)
+bool eEPGCache::FixOverlapping(std::pair<eventMap,timeMap> &servicemap, time_t TM, int duration, const timeMap::iterator &tm_it, const uniqueEPGKey &service)
 {
+	bool ret = false;
 	timeMap::iterator tmp = tm_it;
 	while ((tmp->first+tmp->second->getDuration()-300) > TM)
 	{
@@ -465,6 +466,20 @@ void eEPGCache::FixOverlapping(std::pair<eventMap,timeMap> &servicemap, time_t T
 		{
 			__u16 event_id = tmp->second->getEventID();
 			servicemap.first.erase(event_id);
+#ifdef EPG_DEBUG  
+			{
+				EITEvent evt((eit_event_struct *)tmp->second->get(), service.tsid<<16|service.onid);
+				char tmp[255];
+				struct tm t;
+				localtime_r(&evt.start_time, &t);
+				snprintf(tmp, 255, "%08x(%d), %d seconds, %02d.%02d, %02d:%02d",
+					evt.event_id, evt.event_id,
+					evt.duration,
+					t.tm_mday, t.tm_mon+1,
+					t.tm_hour, t.tm_min);
+				eDebug("(1)erase no more used event %s", tmp);
+			}
+#endif
 			delete tmp->second;
 			if (tmp == servicemap.second.begin())
 			{
@@ -473,6 +488,7 @@ void eEPGCache::FixOverlapping(std::pair<eventMap,timeMap> &servicemap, time_t T
 			}
 			else
 				servicemap.second.erase(tmp--);
+			ret = true;
 		}
 		else
 		{
@@ -496,14 +512,30 @@ void eEPGCache::FixOverlapping(std::pair<eventMap,timeMap> &servicemap, time_t T
 		{
 			__u16 event_id = tmp->second->getEventID();
 			servicemap.first.erase(event_id);
+#ifdef EPG_DEBUG
+			{
+				EITEvent evt((eit_event_struct *)tmp->second->get(), service.tsid<<16|service.onid);
+				char tmp[255];
+				struct tm t;
+				localtime_r(&evt.start_time, &t);
+				snprintf(tmp, 255, "%08x(%d), %d seconds, %02d.%02d, %02d:%02d",
+					evt.event_id, evt.event_id,
+					evt.duration,
+					t.tm_mday, t.tm_mon+1,
+					t.tm_hour, t.tm_min);
+				eDebug("(2)erase no more used event %s", tmp);
+			}
+#endif
 			delete tmp->second;
 			servicemap.second.erase(tmp++);
+			ret = true;
 		}
 		else
 			++tmp;
 		if (tmp == servicemap.second.end())
 			break;
 	}
+	return ret;
 }
 
 int eEPGCache::sectionRead(__u8 *data, int source)
@@ -659,7 +691,11 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 							eventData *tmp = ev_it->second;
 							ev_it->second = tm_it_tmp->second =
 								new eventData(eit_event, eit_event_size, source);
-							FixOverlapping(servicemap, TM, duration, tm_it_tmp, service);
+							if (FixOverlapping(servicemap, TM, duration, tm_it_tmp, service))
+							{
+								prevEventIt = servicemap.first.end();
+								prevTimeIt = servicemap.second.end();
+							}
 							delete tmp;
 							goto next;
 						}
@@ -731,8 +767,6 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					tm_it=prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
 				}
 
-				FixOverlapping(servicemap, TM, duration, tm_it, service);
-
 #if EPG_DEBUG
 				if ( consistencyCheck )
 				{
@@ -752,6 +786,11 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 							ev_it->first, event_id );
 				}
 #endif
+				if (FixOverlapping(servicemap, TM, duration, tm_it, service))
+				{
+					prevEventIt = servicemap.first.end();
+					prevTimeIt = servicemap.second.end();
+				}
 			}
 next:
 #if EPG_DEBUG
