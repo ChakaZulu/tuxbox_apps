@@ -67,26 +67,26 @@ void eSubtitleWidget::processPESPacket(unsigned char *pkt, int len)
 	unsigned long long current = 0;
 	if (Decoder::getSTC(current))
 		eDebug("bloed, going unsyced");
-	eDebug("DEMUX STC: %08llx\n", current);
+	eDebug("DEMUX STC: %08llx", current);
 	
 	unsigned long long pts = 0;
 	
-	int enqueue = 0;
-	
-	if (!queue.empty())
-		enqueue = 1;
-	else if (!extractPTS(pts, pkt))
+	int enqueue = !queue.empty();
+
+	if (!extractPTS(pts, pkt))
 	{
-		eDebug("PES   STC: %08llx\n", pts);
+		eDebug("PES   STC: %08llx", pts);
 		signed long long int diff = pts - current;
-		eDebug("      STC: %lld\n", diff);
-		if (diff > 900000) // 10s
-		{
-			eDebug("rediculous high delay! showing now");
-		} else if (diff > 2000)
+		eDebug("     diff: %lld(%lldms)", diff, diff/90);
+		if (diff > 1800)
 			enqueue = 1;
+		else if (enqueue) // this should not happen !!
+		{
+			eDebug("showing instantly, diff small enough... but queue not empy!!!!");
+			enqueue = 0;
+		}
 		else
-			eDebug("showing instantly, diff small enough!");
+			eDebug("showing instantly, diff small enough...!");
 	}
 
 	if (enqueue)
@@ -98,11 +98,15 @@ void eSubtitleWidget::processPESPacket(unsigned char *pkt, int len)
 		memcpy(pes.pkt, pkt, len);
 		pes.len = len;
 		queue.push(pes);
+		eDebug("enqueue");
 		if (wasempty)
 		{
-			eDebug("setting timer to %d ms!\n", (pes.pts - current) / 90);
+			eDebug("setting timer to %lld ms!\n", (pes.pts - current) / 90);
 			timer.start((pes.pts - current) / 90, 1);
 		}
+		else
+			eDebug("");
+
 		return;
 	}
 	subtitle_process_pes(subtitle, pesbuffer, peslen);
@@ -155,13 +159,15 @@ void eSubtitleWidget::processNext()
 		return;
 	}
 	
-	eDebug("by the way, actual delay was %lld(%lld msek)\n", current - fpts, (current-fpts)/90 );
+	eDebug("by the way, actual delay was %lld(%lld msek)", current - fpts, (current-fpts)/90 );
 
-	if (queue.empty())
-		return;
-	
-	signed long long int diff = queue.front().pts - current;
-	timer.start(diff / 90, 1);
+	if (!queue.empty()) {
+		signed long long int diff = queue.front().pts - current;
+		timer.start(diff / 90, 1);
+		eDebug("setting timer to %lld ms!\n", diff / 90);
+	}
+	else
+		eDebug("");
 }
 
 void eSubtitleWidget::gotData(int what)

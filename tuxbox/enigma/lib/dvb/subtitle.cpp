@@ -337,6 +337,12 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 				delete page->page_regions;
 				page->page_regions = p;
 			}
+			while (page->regions)
+			{
+				struct subtitle_region *p = page->regions->next;
+				delete page->regions;
+				page->regions = p;
+			}
 		}
 
 //		eDebug("new page.. (%d)", page_state);
@@ -352,7 +358,14 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			// go to last entry
 		while (*r)
 			r = &(*r)->next;
-		
+
+		if (processed_length == segment_length && !page->page_regions)
+		{
+//			eDebug("no regions in page.. clear screen!!");
+			if (sub->screen_enabled)
+				subtitle_redraw_all(sub);
+		}
+
 		while (processed_length < segment_length)
 		{
 			struct subtitle_page_region *pr;
@@ -763,20 +776,16 @@ void subtitle_redraw_all(struct subtitle_ctx *sub)
 #if 1
 	struct subtitle_page *page = sub->pages;
 	if ( page )
-	{
-		struct subtitle_page_region *region = page->page_regions;
-		if ( region )
-			subtitle_clear_screen(sub);
-	}
+		subtitle_clear_screen(sub);
 	while(page)
 	{
 		subtitle_redraw(sub, page->page_id);
 		page = page->next;
 	}
 #else
-	subtitle_clear_screen(sub);
-
 	struct subtitle_page *page = sub->pages;
+	if ( page )
+		subtitle_clear_screen(sub);
 	//eDebug("----------- end of display set");
 	//eDebug("active pages:");
 	while (page)
@@ -878,7 +887,6 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 		return;
 	}
 	
-	
 	//eDebug("iterating regions..");
 		/* iterate all regions in this pcs */
 	struct subtitle_page_region *region = page->page_regions;
@@ -902,20 +910,19 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 			{
 				if (main_clut_id != clut_id)
 				{
-//					eDebug("MULTIPLE CLUTS IN USE! prepare for pixelmuell!");
+					eDebug("MULTIPLE CLUTS IN USE! prepare for pixelmuell!");
 //					exit(0);
 				}
 			}
 			main_clut_id = clut_id;
 				
-				
-			//eDebug("copy region %d to %d, %d", region->region_id, region->region_horizontal_address, region->region_vertical_address);
-				
 			int x0 = region->region_horizontal_address;
 			int y0 = region->region_vertical_address;
 			int x1 = x0 + reg->region_width;
 			int y1 = y0 + reg->region_height;
-				
+
+			//eDebug("copy region %d to %d, %d, size %d %d", region->region_id, x0, y0, x1, y1);
+
 			if ((x0 < 0) || (y0 < 0) || (x0 > sub->screen_width) || (x0 > sub->screen_height))
 				continue;
 
