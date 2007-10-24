@@ -99,6 +99,8 @@ class CInfoViewer
 	void showFailure();
 	void showMotorMoving(int duration);
    	void showLcdPercentOver();
+	
+	std::string eventname;
 
  public:
 	bool	is_visible;

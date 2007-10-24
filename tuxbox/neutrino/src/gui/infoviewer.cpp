@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.208 2007/10/16 10:53:13 seife Exp $
+	$Id: infoviewer.cpp,v 1.209 2007/10/24 18:09:15 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -117,7 +117,7 @@ void CInfoViewer::start()
 	ChanHeight = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_NUMBER]->getHeight()*9/8;
 
 	aspectRatio = g_Controld->getAspectRatio();
-
+	
 	time_height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getHeight()+5;
 	time_left_width = 2* g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(widest_number);
 	time_dot_width = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->getRenderWidth(":");
@@ -801,6 +801,7 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 				show_Data( true );
 		}
 		showLcdPercentOver();
+		eventname	= info_CurrentNext.current_name;
 		return messages_return::handled;
 	}
 	else if (msg == NeutrinoMessages::EVT_ZAP_FAILED)
@@ -1165,14 +1166,17 @@ void CInfoViewer::showEpgInfo()   //message on event change
 	char nextStart[10];
 	struct tm *pnStartZeit = localtime(&info_CurrentNext.next_zeit.startzeit);
 		sprintf( (char*)&nextStart, "%02d:%02d", pnStartZeit->tm_hour, pnStartZeit->tm_min);
-		std::string eventname = info_CurrentNext.current_name;
-	
-	 	if (eventname.length() !=0)
- 		{
-		std::string event = eventname + "\n" + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;	
-		std::string event_message =  ZapitTools::Latin1_to_UTF8(event.c_str());
-		ShowHintUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, event_message.c_str(), 420 , 5, "epginfo.raw"); 
-		}	
+
+		if (eventname != info_CurrentNext.current_name)  //TODO: correct eventnames for subchannels
+		{
+			eventname = info_CurrentNext.current_name;
+	 			if (eventname.length() !=0)
+ 					{
+					std::string event = eventname + "\n" + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;	
+					std::string event_message =  ZapitTools::Latin1_to_UTF8(event.c_str());
+					ShowHintUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, event_message.c_str(), 420 , 6, "epginfo.raw"); 
+					}
+		}			
 }
 
 //
