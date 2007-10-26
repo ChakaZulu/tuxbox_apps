@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.30 2007/08/08 22:17:04 dbt Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.31 2007/10/26 21:18:32 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -163,11 +163,11 @@ void DMX::unlock(void)
 
 sections_id_t DMX::create_sections_id(const unsigned char table_id, const unsigned short extension_id, const unsigned char section_number, const unsigned short onid, const unsigned short tsid)
 {
-	return 	(sections_id_t) table_id 	<< 56 |
-		(sections_id_t) extension_id 	<< 40 |
-		(sections_id_t) section_number 	<< 32 |
-		(sections_id_t) onid		<< 16 |
-		(sections_id_t) tsid;
+	return 	(sections_id_t) (	((sections_id_t) table_id 	<< 56) |
+					((sections_id_t) extension_id 	<< 40) |
+					((sections_id_t) section_number << 32) |
+					((sections_id_t) onid		<< 16) |
+					((sections_id_t) tsid));
 }
 
 bool DMX::check_complete(const unsigned char table_id, const unsigned short extension_id, const unsigned short onid, const unsigned short tsid, const unsigned char last)
@@ -183,20 +183,21 @@ bool DMX::check_complete(const unsigned char table_id, const unsigned short exte
 							current_section_number,
 							onid,
 							tsid));
-		if (di != myDMXOrderUniqueKey.end())
+		if (di != myDMXOrderUniqueKey.end()) {
 			di++;
-		while ((di != myDMXOrderUniqueKey.end()) && ((di->first >> 56 & 0xff) == table_id) &&
-			(di->first >> 40 & 0xffff == extension_id) &&
-			((di->first >> 32 & 0xff == current_section_number + 1) || 
-			(di->first >> 32 & 0xff == current_section_number + 8)) &&
-			(di->first >> 16 & 0xffff == onid) &&
-			(di->first & 0xffff == tsid))
+		}
+		while ((di != myDMXOrderUniqueKey.end()) && ((uint8_t) ((di->first >> 56) & 0xff) == table_id) &&
+			((uint16_t) ((di->first >> 40) & 0xffff) == extension_id) &&
+			(((uint8_t) ((di->first >> 32) & 0xff) == current_section_number + 1) || 
+			((uint8_t) ((di->first >> 32) & 0xff) == current_section_number + 8)) &&
+			((uint16_t) ((di->first >> 16) & 0xffff) == onid) &&
+			((uint16_t) (di->first & 0xffff) == tsid))
 		{
-			if (di->first >> 32 & 0xff == last) {
+			if ((uint8_t) ((di->first >> 32) & 0xff) == last) {
 				return true;
 			}
 			else {
-				current_section_number = di->first >> 32 & 0xff;
+				current_section_number = (uint8_t) (di->first >> 32) & 0xff;
 				di++;
 			}
 		}
@@ -279,7 +280,7 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 		return NULL;
 	}
 
-	section_length = (initial_header.section_length_hi << 8) | initial_header.section_length_lo;
+	section_length = (initial_header.section_length_hi * 256) | initial_header.section_length_lo;
 	
 	timeouts = 0;
 	buf = new char[section_length + 3];
@@ -403,9 +404,15 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 						current_tsid,
 						extended_header.last_section_number))
 						timeouts = -2;
-					//version was read before - do not read again
-					delete[] buf;
-					return NULL;
+					//next 2 lines enable preserve current channel again
+					//			extended_header.table_extension_id_hi * 256 +
+					//			extended_header.table_extension_id_lo) ||
+					//	(filter_index != 1))
+					//{
+						//version was read before - do not read again
+						delete[] buf;
+						return NULL;
+					//}
 				}
 				else {
 #ifdef DEBUG_CACHED_SECTIONS
