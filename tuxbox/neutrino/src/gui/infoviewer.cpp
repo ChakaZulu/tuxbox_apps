@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.209 2007/10/24 18:09:15 dbt Exp $
+	$Id: infoviewer.cpp,v 1.210 2007/10/27 12:47:21 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1170,12 +1170,19 @@ void CInfoViewer::showEpgInfo()   //message on event change
 		if (eventname != info_CurrentNext.current_name)  //TODO: correct eventnames for subchannels
 		{
 			eventname = info_CurrentNext.current_name;
-	 			if (eventname.length() !=0)
- 					{
-					std::string event = eventname + "\n" + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;	
-					std::string event_message =  ZapitTools::Latin1_to_UTF8(event.c_str());
-					ShowHintUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, event_message.c_str(), 420 , 6, "epginfo.raw"); 
-					}
+				if (g_settings.infobar_show == 1)
+						{
+	 					if (eventname.length() !=0)
+ 							{
+							std::string event = eventname + "\n" + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;	
+							std::string event_message =  ZapitTools::Latin1_to_UTF8(event.c_str());
+							ShowHintUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, event_message.c_str(), 420 , 6, "epginfo.raw"); 
+							}
+						}
+				else if (g_settings.infobar_show == 2)
+						{							
+						g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR , 0 );
+						}	
 		}			
 }
 

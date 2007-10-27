@@ -191,10 +191,7 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 			    	has_unresolved_ctags = true;
 
 					// infobar indicate on epg change 
-					if(g_settings.infobar_show == 1)
-						g_InfoViewer->showEpgInfo(); //simply                   
-					if(g_settings.infobar_show == 2)
-						g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR , 0 );  //complex               
+					g_InfoViewer->showEpgInfo();                            
                 }
 
 				current_EPGid= info_CN->current_uniqueKey;
