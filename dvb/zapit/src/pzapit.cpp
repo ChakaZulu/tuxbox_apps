@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.56 2007/06/17 18:32:30 dbluelle Exp $
+ * $Id: pzapit.cpp,v 1.57 2007/10/27 22:09:09 seife Exp $
  *
  * simple commandline client for zapit
  *
@@ -34,17 +34,20 @@ int usage (const char * basename)
 	std::cout << "channel list: " << basename << " [-ra] <bouquet-number>" << std::endl;
 	std::cout << "zap by number: " << basename << " [-ra] <bouquet-number> <channel-number>" << std::endl;
 	std::cout << "zap by name: " << basename << " [-ra] -n <channel-name>" << std::endl;
+	std::cout << "zap by channel id: " << basename << " [-ra] -zi <chanid (hex)>" << std::endl;
+	std::cout << "    (-ra for radio mode)" << std::endl;
+	std::cout << "get current channel id: " << basename << " -gi" << std::endl;
+	std::cout << "get current TV/Radio mode: " << basename << " -gm" << std:: endl
+		  << std::endl;
 	std::cout << "set diseqc type: " << basename << " -dt <type>" << std::endl;
 	std::cout << "set diseqc repeats: " << basename << " -dr <count>" << std::endl;
-	std::cout << "(-ra toggles radio mode)" << std::endl;
 	std::cout << "switch record mode on/off: " << basename << " -re" << std::endl;
 	std::cout << "start/stop playback: " << basename << " -p" << std::endl
 		  << std::endl;
 	std::cout << "change audio pid: " << basename << " -a <audio-number>" << std::endl
 		  << std::endl;
 	std::cout << "reload channels bouquets: " << basename << " -c" << std::endl;
-	std::cout << "save bouquets: " << basename << " -sb" << std::endl
-		  << std::endl;
+	std::cout << "save bouquets: " << basename << " -sb" << std::endl;
 	std::cout << "save bouquets including bouquet others: " << basename << " -sbo" << std::endl
 		  << std::endl;
 	std::cout << "show satellites: " << basename << " -sh" << std::endl;
@@ -60,14 +63,16 @@ int usage (const char * basename)
 	std::cout << "leave standby: " << basename << " -lsb" << std::endl;
         std::cout << "switch to ntsc mode: " << basename << " --ntsc" << std::endl;
         std::cout << "switch to pal mode: " << basename << " --pal" << std::endl;
-	std::cout << "send diseqc 1.2 motor command: " << basename << "-m <cmdtype> <addr> <cmd> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
-	std::cout << "activate Iec (requires aviaEXT driver): " << basename << " --iecon>" << std::endl;
-	std::cout << "deactivate Iec (requires aviaEXT driver): " << basename << " --iecoff>" << std::endl;
-	std::cout << "get Iec state (0=off, 1=on): " << basename << " --iecstate>" << std::endl;
-	std::cout << "set decoder to PES mode (requires aviaEXT driver): " << basename << " --pes>" << std::endl;
-	std::cout << "set decoder to SPTS mode (requires aviaEXT driver): " << basename << " --spts>" << std::endl;
-	std::cout << "get decoder mode (0=PES, 1=SPTS): " << basename << " --decmode>" << std::endl;
-	std::cout << "get current PIDs: " << basename << " --getpids>" << std::endl;
+	std::cout << "send diseqc 1.2 motor command: " << basename << " -m <cmdtype> <addr> <cmd> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
+#ifndef HAVE_DREAMBOX_HARDWARE
+	std::cout << "activate Iec (requires aviaEXT driver): " << basename << " --iecon" << std::endl;
+	std::cout << "deactivate Iec (requires aviaEXT driver): " << basename << " --iecoff" << std::endl;
+	std::cout << "get Iec state (0=off, 1=on): " << basename << " --iecstate" << std::endl;
+	std::cout << "set decoder to PES mode (requires aviaEXT driver): " << basename << " --pes" << std::endl;
+	std::cout << "set decoder to SPTS mode (requires aviaEXT driver): " << basename << " --spts" << std::endl;
+	std::cout << "get decoder mode (0=PES, 1=SPTS): " << basename << " --decmode" << std::endl;
+#endif
+	std::cout << "get current PIDs: " << basename << " --getpids" << std::endl;
 	return -1;
 }
 
@@ -87,6 +92,7 @@ int main (int argc, char** argv)
 	int mute = -1;
 	int volume = -1;
 	int nvod = -1;
+	t_channel_id zapsid = 0;
 	const char * channelName = NULL;
 
 	bool playback = false;
@@ -112,6 +118,8 @@ int main (int argc, char** argv)
 	bool spts = false;
 	bool decmode = false;
 #endif
+	bool getchannel = false;
+	bool getmode = false;
 	bool getpids = false;
 	bool includeBouquetOthers = false;
 	uint8_t motorCmdType = 0;
@@ -154,6 +162,24 @@ int main (int argc, char** argv)
 		{
 			reload = true;
 			continue;
+		}
+		else if (!strncmp(argv[i], "-gm", 3))
+		{
+			getmode = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-gi", 3))
+		{
+			getchannel = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-zi", 3))
+		{
+			if (i < argc - 1)
+			{
+				sscanf(argv[++i], "%llx", &zapsid);
+				continue;
+			}
 		}
 		else if (!strncmp(argv[i], "-esb", 4))
 		{
@@ -369,6 +395,26 @@ int main (int argc, char** argv)
 		return 0;
 	}
 
+	if (getmode)
+	{
+		int mode = zapit.getMode(); // 1 = TV, 2 = Radio
+		std::cout << "Mode: " << mode;
+		if (mode == CZapitClient::MODE_TV)
+			std::cout << " (TV)" << std::endl;
+		else if (mode == CZapitClient::MODE_RADIO)
+			std::cout << " (Radio)" << std::endl;
+		else
+			std::cout << " (unknown!)" << std::endl;
+		return mode;
+	}
+
+	if (getchannel)
+	{
+		t_channel_id channel = zapit.getCurrentServiceID();
+		printf("%llx (%s)\n", channel, (zapit.getChannelName(channel)).c_str());
+		return 0;
+	}
+
 	/* audio mute */
 	if (mute != -1)
 	{
@@ -553,10 +599,6 @@ int main (int argc, char** argv)
                 return 0;
         }
 
-
-	/* choose source mode */
-	zapit.setMode(radio ? CZapitClient::MODE_RADIO : CZapitClient::MODE_TV);
-
 	/* set audio channel */
 	if (audio)
 	{
@@ -569,74 +611,8 @@ int main (int argc, char** argv)
 		zapit.zaptoNvodSubService(nvod);
 		return 0;
 	}
-	else
-	{
-		std::vector<CZapitClient::responseGetBouquetChannels> channels;
 
-		if (zapByName)
-		{
-			zapit.getChannels(channels);
-
-			std::vector<CZapitClient::responseGetBouquetChannels>::const_iterator ch_resp;
-			for (ch_resp = channels.begin(), channel = 1; ch_resp != channels.end(); ch_resp++, channel++)
-			{
-				if (!strcasecmp(ch_resp->name, channelName))
-				{
-					std::cout << "found channel number: " << channel << std::endl;
-					goto channel_found;
-				}
-			}
-			
-			std::cout << "channel not found." << std::endl;
-			return 0;
-		}
-		else /* zap by bouquet number and channel number */
-		{
-			if (getpids && bouquet == -1) {
-				goto getpids;
-			}
-			/* read channel list */
-			if (bouquet != -1)
-				zapit.getBouquetChannels(bouquet - 1, channels);
-
-			/* display bouquet list */
-			else
-			{
-				std::vector<CZapitClient::responseGetBouquets> bouquets;
-				std::vector<CZapitClient::responseGetBouquets>::const_iterator b_resp;
-
-				zapit.getBouquets(bouquets, false);
-
-				for (b_resp = bouquets.begin(); b_resp != bouquets.end(); b_resp++)
-					std::cout << (b_resp->bouquet_nr + 1) << ": " << b_resp->name << std::endl;
-
-				return 0;
-			}
-
-			/* display channel list */
-			if (!channel)
-			{
-				std::vector<CZapitClient::responseGetBouquetChannels>::const_iterator ch_resp;
-				for (ch_resp = channels.begin(), channel = 1; ch_resp != channels.end(); ch_resp++, channel++)
-					std::cout << channel << ": " << ch_resp->name << std::endl;
-				return 0;
-			}
-		}
-
-		/* zap */
-		if (channel > channels.size())
-		{
-			std::cout << "Only " << channels.size() << " channels in bouquet " << bouquet << std::endl;
-			return 0;
-		}
-
-	channel_found:
-		zapit.zapTo(channels[channel-1].nr);
-		std::cout << "zapped to " << channels[channel-1].name << std::endl;
-	}
-
-	
-getpids:
+	if (getpids)
 	{	
 		CZapitClient::responseGetPIDs pids;
 		zapit.getPIDS(pids);
@@ -688,7 +664,82 @@ getpids:
                                 	<< std::endl;
 			}
 		}
+		return 0;
 	}
+
+	/* if we got here, we want to zap by name, bouquet / number or onidsid */
+
+	/* choose source mode */
+	zapit.setMode(radio ? CZapitClient::MODE_RADIO : CZapitClient::MODE_TV);
+
+	if (zapsid > 0)
+	{
+		printf("Zapping to: %llx (%s) ", zapsid, (zapit.getChannelName(zapsid)).c_str());
+		tmp = zapit.zapTo_serviceID(zapsid);
+		if (!tmp)
+			printf("failed");
+		printf("\n");
+		return tmp;
+	}
+
+	std::vector<CZapitClient::responseGetBouquetChannels> channels;
+
+	if (zapByName)
+	{
+		zapit.getChannels(channels);
+
+		std::vector<CZapitClient::responseGetBouquetChannels>::const_iterator ch_resp;
+		for (ch_resp = channels.begin(), channel = 1; ch_resp != channels.end(); ch_resp++, channel++)
+		{
+			if (!strcasecmp(ch_resp->name, channelName))
+			{
+				std::cout << "found channel number: " << channel << std::endl;
+				goto channel_found;
+			}
+		}
+		std::cout << "channel not found." << std::endl;
+		return 0;
+	}
+	else /* zap by bouquet number and channel number */
+	{
+		/* read channel list */
+		if (bouquet != -1)
+			zapit.getBouquetChannels(bouquet - 1, channels);
+
+		/* display bouquet list */
+		else
+		{
+			std::vector<CZapitClient::responseGetBouquets> bouquets;
+			std::vector<CZapitClient::responseGetBouquets>::const_iterator b_resp;
+
+			zapit.getBouquets(bouquets, false);
+
+			for (b_resp = bouquets.begin(); b_resp != bouquets.end(); b_resp++)
+				std::cout << (b_resp->bouquet_nr + 1) << ": " << b_resp->name << std::endl;
+
+			return 0;
+		}
+
+		/* display channel list */
+		if (!channel)
+		{
+			std::vector<CZapitClient::responseGetBouquetChannels>::const_iterator ch_resp;
+			for (ch_resp = channels.begin(), channel = 1; ch_resp != channels.end(); ch_resp++, channel++)
+				std::cout << channel << ": " << ch_resp->name << std::endl;
+			return 0;
+		}
+	}
+
+	/* zap */
+	if (channel > channels.size())
+	{
+		std::cout << "Only " << channels.size() << " channels in bouquet " << bouquet << std::endl;
+		return 0;
+	}
+
+channel_found:
+	zapit.zapTo(channels[channel-1].nr);
+	std::cout << "zapped to " << channels[channel-1].name << std::endl;
 
 	return 0;
 }
