@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.49 2007/06/17 18:30:41 dbluelle Exp $
+ * $Id: pmt.cpp,v 1.50 2007/10/29 12:44:03 seife Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -423,6 +423,8 @@ int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 	if (channel->getPmtPid() == 0)
 		return -1;
 
+	DBG("current PMT version number: %d", channel->getCaPmt()->version_number);
+
 	if ((*fd == -1) && ((*fd = open(DEMUX_DEVICE, O_RDWR)) < 0)) {
 		perror(DEMUX_DEVICE);
 		return -1;
@@ -432,16 +434,24 @@ int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 	dsfp.filter.filter[0] = 0x02;	/* table_id */
 	dsfp.filter.filter[1] = channel->getServiceId() >> 8;
 	dsfp.filter.filter[2] = channel->getServiceId();
+#if HAVE_DVB_API_VERSION >= 3
 	dsfp.filter.filter[3] = (channel->getCaPmt()->version_number << 1) | 0x01;
+	dsfp.filter.mask[3] = (0x1F << 1) | 0x01;
+	dsfp.filter.mode[3] = 0x1F << 1;
+#else
+	/* old API has no filter.mode, so i don't set a negative filter but instead only set
+	   a filter on the lowest bit of the version_number. This does of course not work
+	   well if the version number changes from e.g. 23 to 25... anybody with a better
+	   idea, please fix. See obi's explanation at
+	   http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=334659#334659 */
+	dsfp.filter.filter[3] = (((channel->getCaPmt()->version_number + 1)& 0x01) << 1) | 0x01;
+	dsfp.filter.mask[3] = (0x01 << 1) | 0x01;
+#endif
 	dsfp.filter.filter[4] = 0x00;	/* section_number */
 	dsfp.filter.mask[0] = 0xFF;
 	dsfp.filter.mask[1] = 0xFF;
 	dsfp.filter.mask[2] = 0xFF;
-	dsfp.filter.mask[3] = (0x1F << 1) | 0x01;
 	dsfp.filter.mask[4] = 0xFF;
-#if HAVE_DVB_API_VERSION >= 3
-	dsfp.filter.mode[3] = 0x1F << 1;
-#endif
 	dsfp.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 	dsfp.pid = channel->getPmtPid();
 	dsfp.timeout = 0;
