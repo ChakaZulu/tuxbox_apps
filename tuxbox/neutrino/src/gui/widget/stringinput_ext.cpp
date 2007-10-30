@@ -251,7 +251,7 @@ void CExtendedInput::hide()
 void CExtendedInput::paint()
 {
 	frameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD_PLUS_0);
-	frameBuffer->paintBoxRel(x, y + hheight, width, height - hheight, COL_INFOBAR_SHADOW_PLUS_1);
+	frameBuffer->paintBoxRel(x, y + hheight-3, width, height - hheight, COL_MENUCONTENT);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+ 10, y+ hheight, width- 10, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 

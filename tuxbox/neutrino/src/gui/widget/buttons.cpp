@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/buttons.cpp,v 1.2 2004/03/14 22:20:05 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/buttons.cpp,v 1.3 2007/10/30 07:47:06 dbt Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -32,6 +32,6 @@ void paintButtons(CFrameBuffer * const frameBuffer, Font * const font, const CLo
 	for (unsigned int i = 0; i < count; i++)
 	{
 		frameBuffer->paintIcon(content[i].button, x + i * buttonwidth, y);
-		font->RenderString(x + i * buttonwidth + 20, y + 19, buttonwidth - 20, localemanager->getText(content[i].locale), COL_INFOBAR, 0, true); // UTF-8
+		font->RenderString(x + i * buttonwidth + 20, y + 19, buttonwidth - 20, localemanager->getText(content[i].locale), COL_INFOBAR_SHADOW_PLUS_1, 0, true); // UTF-8
 	}
 }
