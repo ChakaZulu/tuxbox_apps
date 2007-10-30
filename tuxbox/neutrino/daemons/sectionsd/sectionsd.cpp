@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.248 2007/10/26 21:18:32 seife Exp $
+//  $Id: sectionsd.cpp,v 1.249 2007/10/30 08:48:23 seife Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1067,7 +1067,13 @@ static MySIservicesOrderServiceName mySIservicesOrderServiceName;
 
 xmlNodePtr findBouquetByName(xmlDocPtr parser,char *name)
 {
-	xmlNodePtr bouquet = xmlDocGetRootElement(parser)->xmlChildrenNode;
+	xmlNodePtr bouquet = NULL;
+	if (parser)
+		bouquet = xmlDocGetRootElement(parser)->xmlChildrenNode;
+	else {
+		dprintf("Bouquet parsing failed!\n");
+		return NULL;
+	}
 	while (xmlGetNextOccurence(bouquet, "Bouquet") != NULL) {
 		if ((xmlGetNumericAttribute(bouquet, "type", 8) == 2) && 
 			(strcmp(xmlGetAttribute(bouquet, "name"), name) == 0))
@@ -1195,18 +1201,12 @@ static void writebouquetwithoutend(FILE *fd, xmlNodePtr bouquet)
 
 	name = xmlGetAttribute(bouquet, "name");
 	
-//	if (xmlGetNumericAttribute(bouquet, "type", 16) == 1) {
-//		fprintf(fd, "\t<Bouquet type=\"1\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"0\" locked=\"0\">\n",
-//			xmlGetNumericAttribute(bouquet, "bouquet_id", 16),
-//			name.c_str());
-//	} else {
-		fprintf(fd, "\t<Bouquet type=\"%01x\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"%01x\" locked=\"%01x\">\n",
-			xmlGetNumericAttribute(bouquet, "type", 16),
-			xmlGetNumericAttribute(bouquet, "bouquet_id", 16),
-			UTF8_to_UTF8XML(name.c_str()).c_str(),
-			xmlGetNumericAttribute(bouquet, "hidden", 16),
-			xmlGetNumericAttribute(bouquet, "locked", 16));
-//	}
+	fprintf(fd, "\t<Bouquet type=\"%01x\" bouquet_id=\"%04x\" name=\"%s\" hidden=\"%01x\" locked=\"%01x\">\n",
+		xmlGetNumericAttribute(bouquet, "type", 16),
+		xmlGetNumericAttribute(bouquet, "bouquet_id", 16),
+		UTF8_to_UTF8XML(name.c_str()).c_str(),
+		xmlGetNumericAttribute(bouquet, "hidden", 16),
+		xmlGetNumericAttribute(bouquet, "locked", 16));
 	
 	xmlNodePtr channel = bouquet->xmlChildrenNode;
 	while (xmlGetNextOccurence(channel, "channel") != NULL) {
@@ -1234,14 +1234,13 @@ static void writebouquetwithoutend(FILE *fd, xmlNodePtr bouquet)
 }
 
 static bool AddServiceToAutoBouquets(const char *provname, const t_original_network_id onid,
-							const t_transport_stream_id tsid, const t_service_id sid)
+							const t_transport_stream_id tsid, const t_service_id sid,
+							const xmlDocPtr bouquet_parser, 
+							const xmlDocPtr current_parser)
 {
 	BouquetAdder *currentBouquet = CurrentBouquetAdder;
-	FILE * tmp;
 	FILE * dst;
 
-	xmlDocPtr bouquet_parser = NULL;
-	xmlDocPtr current_parser = NULL;
 	xmlNodePtr bouquet = NULL;
 	xmlNodePtr bouquet2 = NULL;
 
@@ -1250,13 +1249,8 @@ static bool AddServiceToAutoBouquets(const char *provname, const t_original_netw
 	bool bouquet_exists = false;
 	bool bouquet_found = false;
 
-	tmp = fopen(CURRENTBOUQUETS_XML, "r");
-	if (tmp) {
-		fclose(tmp);
-		current_parser= parseXmlFile(CURRENTBOUQUETS_XML);
+	if (current_parser)
 		current_exists=true;
-	}
-	bouquet_parser = parseXmlFile(BOUQUETS_XML);
 	if (bouquet_parser)
 		bouquet_exists = true;
 
@@ -1273,7 +1267,6 @@ static bool AddServiceToAutoBouquets(const char *provname, const t_original_netw
 
 		if (bouquet_exists)
 			bouquet = findBouquetByName(bouquet_parser, currentBouquet->BouquetName);
-
 		readLockMessaging();
 		if ((!bouquetContainsService(bouquet, onid, tsid, sid)) && (!messaging_zap_detected)) {
 			unlockMessaging();
@@ -1344,8 +1337,6 @@ static bool AddServiceToAutoBouquets(const char *provname, const t_original_netw
 		readLockMessaging();
 	}
 	unlockMessaging();
-	xmlFreeDoc(bouquet_parser);
-	xmlFreeDoc(current_parser);
 
 	return returnvalue;
 }
@@ -1362,7 +1353,7 @@ static bool addService(const SIservice &s, const int is_actual)
 	already_exists = (si != mySIservicesOrderUniqueKey.end());
 	unlockServices();
 	
-	if ( (!already_exists) || ((is_actual) && (!si->second->is_actual)) ) {
+	if ( (!already_exists) || ((is_actual & 7) && (!si->second->is_actual)) ) {
 
 		if (already_exists) 
 		{
@@ -1392,15 +1383,6 @@ static bool addService(const SIservice &s, const int is_actual)
 		}
 
 		sptr->is_actual = is_actual;
-
-		readLockMessaging();
-		if ((!already_exists) && (!messaging_zap_detected)) {
-			unlockMessaging();
-			snprintf(servicename, MAX_SIZE_SERVICENAME, sptr->providerName.c_str());
-			AddServiceToAutoBouquets(&servicename[0], sptr->original_network_id,
-						sptr->transport_stream_id, sptr->service_id);
-		} else
-			unlockMessaging();
 
 		writeLockServices();
 		mySIservicesOrderUniqueKey.insert(std::make_pair(sptr->uniqueKey(), sptr));
@@ -1632,20 +1614,48 @@ static const SIevent& findNextSIeventForServiceUniqueKey(const t_channel_id serv
 static const bool ServiceUniqueKeyHasCurrentNext(const t_channel_id serviceUniqueKey)
 {
 	time_t azeit = time(NULL);
+	time_t nextstart = time(NULL);
+	bool found = false;
+	SItimes::iterator t;
 
-	for (MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e = mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); ++e)
+	MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e =
+					mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin();
+
+	while ((e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end()) && (!found)) {
 		if ((*e)->get_channel_id() == serviceUniqueKey)
 		{
-			for (SItimes::iterator t = (*e)->times.begin(); t != (*e)->times.end(); ++t) {
-				if (((long)(azeit) < (long)(t->startzeit + t->dauer)) && (t->startzeit <= (long)(azeit)))
-				{
-					//current is there; check if next is too
-					if ((++t != (*e)->times.end()) || 
-						((*++e)->get_channel_id() == serviceUniqueKey))
-						return true;
+			t = (*e)->times.begin();
+			while ((t != (*e)->times.end()) && (!found)) {
+				if (((long)(azeit) < (long)(t->startzeit + t->dauer)) && (t->startzeit <= (long)(azeit))) {
+					nextstart = t->startzeit + t->dauer;
+					found = true;
 				}
+				else
+					t++;
 			}
 		}
+		if (!found)
+			e++;
+	}
+	if (found) {
+		dprintf("Current Event: %s\n",(*e)->getName().c_str());
+					//current is there; check if next is too
+		if (++t != (*e)->times.end())
+			return true;
+		while (e != mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end()) {
+			if ((*e)->get_channel_id() == serviceUniqueKey) {
+				t = (*e)->times.begin();
+				while (t != (*e)->times.end()) {
+					if (t->startzeit >= nextstart) {
+						dprintf("Next Event: %s\n",(*e)->getName().c_str());
+						return true;
+					}
+					t++;
+				}
+			}
+			e++;
+		}
+	}
 
 	return false;
 }
@@ -2351,7 +2361,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.248 2007/10/26 21:18:32 seife Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.249 2007/10/30 08:48:23 seife Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -4939,7 +4949,7 @@ static int get_action(const xmlNodePtr tp_node, const MySIservicesOrderUniqueKey
 					return 0;	//service okay
 				}
 				else {
-					if (s->second->is_actual) {
+					if (s->second->is_actual & 7) {
 						dprintf("[sectionsd] Replacing Service %s\n", name.c_str());
 						return 2; //replace
 					}
@@ -5610,7 +5620,7 @@ static bool updateNetwork()
 
 					} else {
 						dprintf("[sectionsd::updateNetwork] Transponder ONID: %04x TSID: %04x found.\n", onid, tsid);
-						if ( (s->second->is_actual) && (needs_fix) ) {
+						if ( (s->second->is_actual & 7) && (needs_fix) ) {
 							//if(!(tmp = fopen(CURRENTSERVICES_XML, "r"))) {
 							if (current_parser == NULL) {
 								dprintf("[sectionsd::updateNetwork] services.xml provider needs update\n");
@@ -6235,6 +6245,7 @@ static void *sdtThread(void *)
 						is_actual = 2;
 
 					is_new = false;
+					is_actual = (is_actual | 8);
 
 					for (SIservices::iterator s = sdt.services().begin(); s != sdt.services().end(); s++)
 						if (addService(*s, is_actual)) {
@@ -7194,7 +7205,6 @@ static void *pptThread(void *)
 	pthread_exit(NULL);
 }
 
-
 //---------------------------------------------------------------------
 //			housekeeping-thread
 // does cleaning on fetched datas
@@ -7203,7 +7213,9 @@ static void *houseKeepingThread(void *)
 {
 	try
 	{
+		FILE * tmp;
 		int count = 0;
+		char servicename[MAX_SIZE_SERVICENAME];
 		dprintf("housekeeping-thread started.\n");
 
 		for (;;)
@@ -7264,7 +7276,7 @@ static void *houseKeepingThread(void *)
 				dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n", speicherinfo1.arena, speicherinfo1.arena / 1024, (float)speicherinfo1.arena / (1024.*1024));
 				dprintf("Removed %d waste events.\n", anzEventsAlt - mySIeventsOrderUniqueKey.size());
 			}
-			
+
 			dprintf("Number of sptr events (event-ID): %u\n", mySIeventsOrderUniqueKey.size());
 			dprintf("Number of sptr events (service-id, start time, event-id): %u\n", mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.size());
 			dprintf("Number of sptr events (end time, service-id, event-id): %u\n", mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.size());
@@ -7280,6 +7292,9 @@ static void *houseKeepingThread(void *)
 				//dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
 				dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
 
+				xmlDocPtr bouquet_parser = NULL;
+				xmlDocPtr current_parser = NULL;
+
 				for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s !=  mySIservicesOrderUniqueKey.end(); s++) {
 					printf("ONID: %04x TSID: %04x SID: %04x Prov: %s Name: %s actual: %d\n",
 						s->second->original_network_id,
@@ -7288,9 +7303,52 @@ static void *houseKeepingThread(void *)
 						s->second->providerName.c_str(),
 						s->second->serviceName.c_str(),
 						(int) s->second->is_actual);
+					readLockMessaging();
+					if (((s->second->is_actual & 8) == 8) && (!messaging_zap_detected)) {
+						unlockMessaging();
+					
+						if (!bouquet_parser) {
+							tmp = fopen(CURRENTBOUQUETS_XML, "r");
+							if (tmp) {
+								fclose(tmp);
+								current_parser =
+									parseXmlFile(CURRENTBOUQUETS_XML);
+							}
+							bouquet_parser = parseXmlFile(BOUQUETS_XML);
+						}
+						snprintf(servicename, MAX_SIZE_SERVICENAME, 
+									s->second->providerName.c_str());
+						if (AddServiceToAutoBouquets(&servicename[0],
+									s->second->original_network_id,
+									s->second->transport_stream_id,
+									s->second->service_id,
+									bouquet_parser,
+									current_parser)) {
+							readLockMessaging();
+							if (!messaging_zap_detected) {
+								unlockMessaging();
+								current_parser =
+									parseXmlFile(CURRENTBOUQUETS_XML);
+							}
+							else
+								unlockMessaging();
+						}
+						unlockServices();
+						writeLockServices();
+						s->second->is_actual = (s->second->is_actual & 7);
+						unlockServices();
+						readLockServices();
+					}
+					else
+						unlockMessaging();
+
 				}
 
 				unlockServices();
+				if (bouquet_parser)
+					xmlFreeDoc(bouquet_parser);
+				if (current_parser)
+					xmlFreeDoc(current_parser);
 				/*
 				lockTransponders();
 				for (MySItranspondersOrderUniqueKey::iterator s = mySItranspondersOrderUniqueKey.begin(); s != mySItranspondersOrderUniqueKey.end(); s++)
@@ -7507,7 +7565,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.248 2007/10/26 21:18:32 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.249 2007/10/30 08:48:23 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
