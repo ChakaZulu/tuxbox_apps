@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.12 2007/04/22 20:37:04 dbt Exp $
+	$Id: imageinfo.cpp,v 1.13 2007/11/01 21:04:09 ecosys Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -165,7 +165,7 @@ void CImageInfo::hide()
 
 void CImageInfo::clearContentBox()
 {
-	frameBuffer->paintBoxRel(xpos, iheight*10+6, width-10, endY-(iheight*10+6)-32, COL_MENUCONTENT_PLUS_0 );
+	frameBuffer->paintBoxRel(xpos, iheight*10+6, max_width-10, endY-(iheight*10+6)-32, COL_MENUCONTENT_PLUS_0 );
 }
 
 void CImageInfo::paint_pig(int x, int y, int w, int h)
@@ -426,7 +426,7 @@ string CImageInfo::getImageInfoVersion()
 /* 	Note: revision (revstr) will change automaticly on cvs-commits, 
  * 	if you made some changes without cvs-commit, you must change it before by yourself
  */
-	string revstr = "$Revision: 1.12 $";
+	string revstr = "$Revision: 1.13 $";
 	while (revstr.find("$") !=string::npos)
 	{
 		revstr.replace(revstr.find("$"),1 ,""); //normalize output, remove "$"	
