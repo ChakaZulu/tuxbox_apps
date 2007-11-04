@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.55 2007/05/23 16:43:12 papst Exp $
+  $Id: sectionsdclient.cpp,v 1.56 2007/11/04 12:25:06 seife Exp $
 
   License: GPL
 
@@ -192,7 +192,13 @@ bool CSectionsdClient::getComponentTagsUniqueKey(const event_id_t uniqueKey, CSe
 		int nBufSize = readResponse();
 
 		char* pData = new char[nBufSize];
-		receive_data(pData, nBufSize);
+		if (!receive_data(pData, nBufSize))
+		{
+			/* receive_data might have timed out etc. */
+			delete[] pData;
+			close_connection();
+			return false;
+		}
 		char* dp = pData;
 
 		int	count= *(int *) pData;
@@ -233,7 +239,13 @@ bool CSectionsdClient::getLinkageDescriptorsUniqueKey(const event_id_t uniqueKey
 		int nBufSize = readResponse();
 
 		char* pData = new char[nBufSize];
-		receive_data(pData, nBufSize);
+		if (!receive_data(pData, nBufSize))
+		{
+			/* receive_data might have timed out etc. */
+			delete[] pData;
+			close_connection();
+			return false;
+		}
 		char* dp = pData;
 
 		int count= *(int *) pData;
@@ -273,7 +285,13 @@ bool CSectionsdClient::getNVODTimesServiceKey(const t_channel_id channel_id, CSe
 		int nBufSize = readResponse();
 
 		char* pData = new char[nBufSize];
-		receive_data(pData, nBufSize);
+		if (!receive_data(pData, nBufSize))
+		{
+			/* receive_data might have timed out etc. */
+			delete[] pData;
+			close_connection();
+			return false;
+		}
 		char* dp = pData;
 
 		CSectionsdClient::responseGetNVODTimes response;
@@ -306,7 +324,15 @@ bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, C
 		int nBufSize = readResponse();
 
 		char* pData = new char[nBufSize];
-		receive_data(pData, nBufSize);
+		if (!receive_data(pData, nBufSize))
+		{
+			/* if receive_data() fails, pData is undefined
+			   -> bail out, otherwise we might segfault */
+			delete[] pData;
+			close_connection();
+			return false;
+		}
+			
 		char* dp = pData;
 
 		// current
@@ -355,7 +381,12 @@ CChannelEventList CSectionsdClient::getChannelEvents(const bool tv_mode, t_chann
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive_data(pData, nBufSize);
+			if (!receive_data(pData, nBufSize)) 
+			{
+				delete[] pData;
+				close_connection();
+				return eList;
+			}
 
 			char* dp = pData;
 
@@ -420,7 +451,11 @@ bool CSectionsdClient::getEventsServiceKeySearchAdd(CChannelEventList& eList,con
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive_data(pData, nBufSize);
+			if (!receive_data(pData, nBufSize))
+			{
+				/* receive_data might have timed out etc. */
+				goto out_pData;
+			}
 
 			char* dp = pData;
 
@@ -448,6 +483,7 @@ bool CSectionsdClient::getEventsServiceKeySearchAdd(CChannelEventList& eList,con
 				eList.push_back(aEvent);
 			}
 //			int b = eList.size() -a;
+ out_pData:
 			delete[] pData;
 		}
 	}
@@ -468,7 +504,13 @@ CChannelEventList CSectionsdClient::getEventsServiceKey(const t_channel_id chann
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive_data(pData, nBufSize);
+			if (!receive_data(pData, nBufSize))
+			{
+				/* receive_data might have timed out etc. */
+				delete[] pData;
+				close_connection();
+				return eList;
+			}
 
 			char* dp = pData;
 
@@ -543,7 +585,13 @@ bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEP
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive_data(pData, nBufSize);
+			if (!receive_data(pData, nBufSize))
+			{
+				/* receive_data might have timed out etc. */
+				delete[] pData;
+				close_connection();
+				return false;
+			}
 			close_connection();
 
 			char* dp = pData;
@@ -599,7 +647,13 @@ bool CSectionsdClient::getEPGid(const event_id_t eventid, const time_t starttime
 		if (nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive_data(pData, nBufSize);
+			if (!receive_data(pData, nBufSize))
+			{
+				/* receive_data might have timed out etc. */
+				delete[] pData;
+				close_connection();
+				return false;
+			}
 			close_connection();
 
 			char* dp = pData;
@@ -650,7 +704,13 @@ bool CSectionsdClient::getEPGidShort(const event_id_t eventid, CShortEPGData * e
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive_data(pData, nBufSize);
+			if (!receive_data(pData, nBufSize))
+			{
+				/* receive_data might have timed out etc. */
+				delete[] pData;
+				close_connection();
+				return false;
+			}
 
 			close_connection();
 
