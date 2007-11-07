@@ -4,7 +4,7 @@
 
  	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: listframe.cpp,v 1.2 2006/02/20 01:10:36 guenther Exp $
+	$Id: listframe.cpp,v 1.3 2007/11/07 15:31:10 seife Exp $
 
 	Kommentar:
 
@@ -43,6 +43,10 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: listframe.cpp,v $
+	Revision 1.3  2007/11/07 15:31:10  seife
+	fix fileselector colors in moviebrowser
+	(http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?t=46718)
+	
 	Revision 1.2  2006/02/20 01:10:36  guenther
 	- temporary parental lock updated - remove 1s debug prints in movieplayer- Delete file without rescan of movies- Crash if try to scroll in list with 2 movies only- UTF8XML to UTF8 conversion in preview- Last file selection recovered- use of standard folders adjustable in config- reload and remount option in config
 	
@@ -71,12 +75,12 @@
 #define TITLE_BACKGROUND_COLOR ((CFBWindow::color_t)COL_MENUHEAD_PLUS_0)
 #define HEADER_LIST_BACKGROUND_COLOR ((CFBWindow::color_t)COL_MENUCONTENT_PLUS_0)
 #define LIST_BACKGROUND_COLOR ((CFBWindow::color_t)COL_MENUCONTENT_PLUS_0)
-#define LIST_BACKGROUND_COLOR_SELECTED ((CFBWindow::color_t)COL_MENUCONTENT_PLUS_1)
+#define LIST_BACKGROUND_COLOR_SELECTED ((CFBWindow::color_t)COL_MENUCONTENTSELECTED_PLUS_0)
 
 #define TITLE_FONT_COLOR ((CFBWindow::color_t)COL_MENUHEAD)
 #define HEADER_LIST_FONT_COLOR COL_MENUCONTENT
 #define LIST_FONT_COLOR COL_MENUCONTENT
-#define LIST_FONT_COLOR_SELECTED COL_MENUCONTENT 
+#define LIST_FONT_COLOR_SELECTED COL_MENUCONTENTSELECTED
 
 #define FONT_LIST g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]
 #define FONT_HEADER_LIST g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]
