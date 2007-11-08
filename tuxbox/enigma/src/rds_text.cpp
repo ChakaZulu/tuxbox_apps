@@ -586,13 +586,19 @@ void RDSTextDecoder::process_data(int what)
 										
 										unsigned char rtplus_osd_tmp[64];
 										
-										memcpy(rtp_item[rtp_typ[0]],lastmessage+rtp_start[0],rtp_len[0]+1);
-										rtp_item[rtp_typ[0]][rtp_len[0]+1]=0;
+										if (rtp_start[0] < 66 && (rtp_len[0]+rtp_start[0]) < 66)
+										{
+											memcpy(rtp_item[rtp_typ[0]],lastmessage+rtp_start[0],rtp_len[0]+1);
+											rtp_item[rtp_typ[0]][rtp_len[0]+1]=0;
+										}
 										
 										if (rtp_typ[0] != rtp_typ[1])
 										{
-											memcpy(rtp_item[rtp_typ[1]],lastmessage+rtp_start[1],rtp_len[1]+1);
-											rtp_item[rtp_typ[1]][rtp_len[1]+1]=0;
+											if (rtp_start[1] < 66 && (rtp_len[1]+rtp_start[1]) < 66)
+											{
+												memcpy(rtp_item[rtp_typ[1]],lastmessage+rtp_start[1],rtp_len[1]+1);
+												rtp_item[rtp_typ[1]][rtp_len[1]+1]=0;
+											}
 										}
 
 										// main RTPlus item_types used by the radio stations:
