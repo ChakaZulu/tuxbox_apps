@@ -467,14 +467,14 @@ void CMsgBox::refreshBorder(void)
 							m_cBoxFrame.iHeight - m_nWindowFrameBorderWidth, 
 							m_cBoxFrame.iWidth - m_nWindowFrameBorderWidth, 
 							m_nWindowFrameBorderWidth,  
-							COL_BACKGROUND_PLUS_0);
+							COL_INFOBAR_SHADOW);
 
 	//draw right shadow
 	m_pcWindow->paintBoxRel(	m_cBoxFrame.iWidth - m_nWindowFrameBorderWidth, 
 							m_nWindowFrameBorderWidth, 
 							m_nWindowFrameBorderWidth, 
 							m_cBoxFrame.iHeight - m_nWindowFrameBorderWidth,  
-							COL_BACKGROUND_PLUS_0);
+							COL_INFOBAR_SHADOW);
 }
 
 //////////////////////////////////////////////////////////////////////

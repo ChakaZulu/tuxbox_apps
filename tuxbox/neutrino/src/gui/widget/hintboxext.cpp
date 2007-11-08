@@ -217,9 +217,9 @@ void CHintBoxExt::refresh(void)
 		return;
 	}
 	// bottom shadow
-	m_window->paintBoxRel(borderwidth, m_height, m_width, borderwidth, COL_BACKGROUND_PLUS_0);
+	m_window->paintBoxRel(borderwidth, m_height, m_width, borderwidth, COL_INFOBAR_SHADOW);
 	// right shadow
-	m_window->paintBoxRel(m_width, borderwidth, borderwidth, m_height - borderwidth, COL_BACKGROUND_PLUS_0);
+	m_window->paintBoxRel(m_width, borderwidth, borderwidth, m_height - borderwidth, COL_INFOBAR_SHADOW);
 	
 	// title
 	m_window->paintBoxRel(0, 0, m_width, m_theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0);

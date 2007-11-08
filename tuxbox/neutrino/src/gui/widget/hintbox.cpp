@@ -147,8 +147,8 @@ void CHintBox::refresh(void)
 		return;
 	}
 
-	window->paintBoxRel(borderwidth, height, width, borderwidth, COL_BACKGROUND_PLUS_0);
-	window->paintBoxRel(width, borderwidth, borderwidth, height - borderwidth, COL_BACKGROUND_PLUS_0);
+	window->paintBoxRel(borderwidth, height, width, borderwidth, COL_INFOBAR_SHADOW);
+	window->paintBoxRel(width, borderwidth, borderwidth, height - borderwidth, COL_INFOBAR_SHADOW);
 
 	window->paintBoxRel(0, 0, width, theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
 
@@ -263,4 +263,3 @@ int ShowLocalizedHint(const neutrino_locale_t Caption, const neutrino_locale_t T
 {
 	return ShowHintUTF(Caption, g_Locale->getText(Text),Width,timeout,Icon);
 }
-
