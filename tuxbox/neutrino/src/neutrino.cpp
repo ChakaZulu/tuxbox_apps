@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.873 2007/10/02 21:24:18 houdini Exp $
+	$Id: neutrino.cpp,v 1.874 2007/11/08 11:32:45 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3001,7 +3001,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 {
 	neutrino_msg_t msg = key;
 
-	int dx = 256;
+	int dx = 310;
 	int dy = 40;
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
@@ -3018,7 +3018,6 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		pixbuf = new fb_pixel_t[dx * dy];
 		if(pixbuf!= NULL)
 			frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
-		frameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 	}
 
 	neutrino_msg_data_t data;
@@ -3104,8 +3103,15 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		if( (bDoPaint) && (g_settings.widget_osd != 2 ) )
 		{
 			int vol = current_volume << 1;
-			frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR_PLUS_3);
-			frameBuffer->paintBoxRel(x + 40 + vol, y + 12, 200 - vol, 15, COL_INFOBAR_PLUS_1);
+			int shadow_offset = 6;
+			char p[2];
+			sprintf(p, "%03d", vol / 2);
+				frameBuffer->paintBoxRel(x + 16, y + 4, 230+36, 28, COL_INFOBAR_SHADOW_PLUS_1);
+				frameBuffer->paintBoxRel(x + 38, y + 8, 204, 20, COL_SILVER);	
+				frameBuffer->paintBoxRel(x + 40, y + 10, vol , 16, COL_GREEN);
+				frameBuffer->paintBoxRel(x + 40 + vol, y + 10, 200 - vol, 16, COL_INFOBAR_SHADOW_PLUS_1);
+				frameBuffer->paintIcon("volume.raw",x+18 ,y+10, COL_INFOBAR);
+				g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x + 246, y + 32, 40, p , COL_INFOBAR);
 		}
 
 		CLCD::getInstance()->showVolume(current_volume);
