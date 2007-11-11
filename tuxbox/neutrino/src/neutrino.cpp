@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.875 2007/11/11 04:22:53 ecosys Exp $
+	$Id: neutrino.cpp,v 1.876 2007/11/11 15:47:33 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3001,8 +3001,8 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 {
 	neutrino_msg_t msg = key;
 
-	int dx = 310;
-	int dy = 40;
+	int dx = 200 + 8 + 36 + 24;
+	int dy = 28;
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
 
@@ -3018,6 +3018,9 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		pixbuf = new fb_pixel_t[dx * dy];
 		if(pixbuf!= NULL)
 			frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
+		frameBuffer->paintBoxRel(     x,     y,      dx, dy        , COL_INFOBAR_PLUS_1);
+		frameBuffer->paintBoxRel(x + 24, y + 4, 200 + 4, dy - 2 * 4, COL_SILVER);	
+		frameBuffer->paintIcon("volume.raw",x + 4, y + 6, COL_INFOBAR);
 	}
 
 	neutrino_msg_data_t data;
@@ -3104,14 +3107,14 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		{
 			int vol = current_volume << 1;
 			int shadow_offset = 6;
-			char p[2];
-			sprintf(p, "%03d", vol / 2);
-				frameBuffer->paintBoxRel(x + 16, y + 4, 230+36, 28, COL_INFOBAR_SHADOW_PLUS_1);
-				frameBuffer->paintBoxRel(x + 38, y + 8, 204, 20, COL_SILVER);	
-				frameBuffer->paintBoxRel(x + 40, y + 10, vol , 16, COL_GREEN);
-				frameBuffer->paintBoxRel(x + 40 + vol, y + 10, 200 - vol, 16, COL_INFOBAR_SHADOW_PLUS_1);
-				frameBuffer->paintIcon("volume.raw",x+18 ,y+10, COL_INFOBAR);
-				g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x + 246, y + 32, 40, p , COL_INFOBAR);
+			char p[4]; /* 3 digits + '\0' */
+			sprintf(p, "%3d", vol / 2);
+			/* draw the volume bar */
+			frameBuffer->paintBoxRel(x + 26,       y + 6, vol      , dy - 2*6, COL_INFOBAR_PLUS_3);
+			frameBuffer->paintBoxRel(x + 26 + vol, y + 6, 200 - vol, dy - 2*6, COL_INFOBAR_PLUS_1);
+			/* erase the numbers... */
+			frameBuffer->paintBoxRel(x + dx - 40,  y + 4,        36, dy - 2*4, COL_INFOBAR_PLUS_1);
+			g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x + dx - 36, y + dy, 36, p , COL_INFOBAR);
 		}
 
 		CLCD::getInstance()->showVolume(current_volume);
