@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.191 2007/09/02 21:10:03 houdini Exp $
+	$Id: neutrino.h,v 1.192 2007/11/11 04:22:53 ecosys Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -141,8 +141,8 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 
 		int				mode;
 		int				lastMode;
-		bool				softupdate;
-		bool				fromflash;
+		bool			softupdate;
+		bool			fromflash;
 		int				recording_id;
 		CTimerd::RecordingInfo* nextRecordingInfo;
 		//bool				record_mode;
@@ -185,12 +185,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		bool ucodes_available(void);
 #endif
 		void firstChannel();
-		void setupColors_classic();
 		void setupColors_neutrino();
-		void setupColors_dblue();
-		void setupColors_dbrown();
-		void setupColors_dvb2k();
-		void setupColors_virginmedia();
 		void setupNetwork( bool force= false );
 		void setupNFS();
 		void setupRecordingDevice(void);

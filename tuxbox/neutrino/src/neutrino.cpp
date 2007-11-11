@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.874 2007/11/08 11:32:45 dbt Exp $
+	$Id: neutrino.cpp,v 1.875 2007/11/11 04:22:53 ecosys Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3466,31 +3466,6 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	else if (actionKey=="theme_neutrino")
 	{
 		setupColors_neutrino();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-	}
-	else if (actionKey=="theme_classic")
-	{
-		setupColors_classic();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-	}
-	else if (actionKey=="theme_dblue")
-	{
-		setupColors_dblue();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-	}
-	else if (actionKey=="theme_dbrown")
-	{
-		setupColors_dbrown();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-	}
-	else if (actionKey=="theme_virgin")
-	{
-		setupColors_virginmedia();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-	}
-	else if (actionKey=="theme_dvb2k")
-	{
-		setupColors_dvb2k();
 		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if(actionKey=="savesettings")

@@ -234,13 +234,12 @@ colormenusetup.menucontent_selected Window-Content selected
 colormenusetup.menuhead Menu Header
 colorstatusbar.head Infobar
 colorstatusbar.text Infobar
-colorthememenu.classic_theme Classic Theme
-colorthememenu.dblue_theme DarkBlue Theme
-colorthememenu.dbrown_theme DarkBrown Theme
-colorthememenu.dvb2k_theme DVB2000 Theme
 colorthememenu.head Theme Selector
-colorthememenu.neutrino_theme Neutrino Theme
-colorthememenu.virginmedia_theme Virgin Media Theme
+colorthememenu.head2 User Themes
+colorthememenu.load Load Theme
+colorthememenu.name Set Theme-Name
+colorthememenu.neutrino_theme Neutrino Default Theme
+colorthememenu.save Save Theme
 date.Apr  Apr
 date.Aug  Aug
 date.Dec  Dec

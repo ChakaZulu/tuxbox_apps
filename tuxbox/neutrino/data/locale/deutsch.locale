@@ -234,13 +234,12 @@ colormenusetup.menucontent_selected Fensterinhalt selektiert
 colormenusetup.menuhead Titelleiste
 colorstatusbar.head Statusbalken-Farben
 colorstatusbar.text Statusbalken
-colorthememenu.classic_theme Klassik
-colorthememenu.dblue_theme DarkBlue Theme
-colorthememenu.dbrown_theme DarkBrown Theme
-colorthememenu.dvb2k_theme DVB2000 Theme
 colorthememenu.head Theme auswählen
-colorthememenu.neutrino_theme Neutrino Theme
-colorthememenu.virginmedia_theme Virgin Media Theme
+colorthememenu.head2 Benutzer Themes
+colorthememenu.load Theme laden
+colorthememenu.name Themename
+colorthememenu.neutrino_theme Neutrino Default Theme
+colorthememenu.save Theme speichern
 date.Apr  Apr
 date.Aug  Aug
 date.Dec  Dez
