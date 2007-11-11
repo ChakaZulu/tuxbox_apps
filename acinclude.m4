@@ -2,8 +2,6 @@ AC_DEFUN([TUXBOX_APPS],[
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
-INSTALL="$INSTALL -p"
-
 AC_GNU_SOURCE
 AC_SYS_LARGEFILE
 
@@ -130,6 +128,9 @@ TUXBOX_APPS_DIRECTORY_ONE(plugindir,PLUGINDIR,libdir,/lib,/tuxbox/plugins,
 
 TUXBOX_APPS_DIRECTORY_ONE(ucodedir,UCODEDIR,localstatedir,/var,/tuxbox/ucodes,
 	[--with-ucodedir=PATH    ],[where to find the ucodes])
+
+TUXBOX_APPS_DIRECTORY_ONE(themesdir,THEMESDIR,localstatedir,/var,/tuxbox/config/themes,
+	[--with-themedir=PATH    ],[where to find the themes])
 ])
 
 dnl automake <= 1.6 needs this specifications
@@ -140,6 +141,7 @@ AC_SUBST(GAMESDIR)
 AC_SUBST(LIBDIR)
 AC_SUBST(PLUGINDIR)
 AC_SUBST(UCODEDIR)
+AC_SUBST(THEMESDIR)
 dnl end workaround
 
 AC_DEFUN([TUXBOX_APPS_ENDIAN],[
