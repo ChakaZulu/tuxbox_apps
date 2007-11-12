@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.105 2007/11/11 04:23:05 ecosys Exp $
+ * $Id: locals_intern.h,v 1.106 2007/11/12 08:54:43 ecosys Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -263,10 +263,11 @@ const char * locale_real_names[] =
 	"colorstatusbar.text",
 	"colorthememenu.head",
 	"colorthememenu.head2",
-	"colorthememenu.load",
 	"colorthememenu.name",
 	"colorthememenu.neutrino_theme",
 	"colorthememenu.save",
+	"colorthememenu.select1",
+	"colorthememenu.select2",
 	"date.Apr",
 	"date.Aug",
 	"date.Dec",

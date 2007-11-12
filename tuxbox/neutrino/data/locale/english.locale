@@ -235,11 +235,12 @@ colormenusetup.menuhead Menu Header
 colorstatusbar.head Infobar
 colorstatusbar.text Infobar
 colorthememenu.head Theme Selector
-colorthememenu.head2 User Themes
-colorthememenu.load Load Theme
+colorthememenu.head2 Load Themes
 colorthememenu.name Set Theme-Name
 colorthememenu.neutrino_theme Neutrino Default Theme
-colorthememenu.save Save Theme
+colorthememenu.save Save current theme
+colorthememenu.select1 Load User Themes
+colorthememenu.select2 Load Standard Themes
 date.Apr  Apr
 date.Aug  Aug
 date.Dec  Dec

@@ -129,8 +129,8 @@ TUXBOX_APPS_DIRECTORY_ONE(plugindir,PLUGINDIR,libdir,/lib,/tuxbox/plugins,
 TUXBOX_APPS_DIRECTORY_ONE(ucodedir,UCODEDIR,localstatedir,/var,/tuxbox/ucodes,
 	[--with-ucodedir=PATH    ],[where to find the ucodes])
 
-TUXBOX_APPS_DIRECTORY_ONE(themesdir,THEMESDIR,localstatedir,/var,/tuxbox/config/themes,
-	[--with-themedir=PATH    ],[where to find the themes])
+TUXBOX_APPS_DIRECTORY_ONE(themesdir,THEMESDIR,datadir,/share,/tuxbox/neutrino/themes,
+	[--with-themesdir=PATH     ],[where to find the themes (don't change)])
 ])
 
 dnl automake <= 1.6 needs this specifications

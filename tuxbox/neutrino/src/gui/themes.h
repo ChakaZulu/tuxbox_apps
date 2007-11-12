@@ -1,8 +1,6 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	Timerliste by Zwen
-	
 	License: GPL
 
 	This program is free software; you can redistribute it and/or modify
@@ -19,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.h,v 1.1 2007/11/11 04:24:22 ecosys Exp $ 
+	$Id: themes.h,v 1.2 2007/11/12 08:54:43 ecosys Exp $ 
 
 */
 

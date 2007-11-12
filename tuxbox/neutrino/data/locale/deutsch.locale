@@ -235,11 +235,12 @@ colormenusetup.menuhead Titelleiste
 colorstatusbar.head Statusbalken-Farben
 colorstatusbar.text Statusbalken
 colorthememenu.head Theme auswählen
-colorthememenu.head2 Benutzer Themes
-colorthememenu.load Theme laden
+colorthememenu.head2 Themes laden
 colorthememenu.name Themename
 colorthememenu.neutrino_theme Neutrino Default Theme
-colorthememenu.save Theme speichern
+colorthememenu.save aktuelles Theme speichern
+colorthememenu.select1 Benutzer-Theme laden
+colorthememenu.select2 Standard-Theme laden
 date.Apr  Apr
 date.Aug  Aug
 date.Dec  Dez
