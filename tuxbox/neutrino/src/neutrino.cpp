@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.876 2007/11/11 15:47:33 seife Exp $
+	$Id: neutrino.cpp,v 1.877 2007/11/13 21:40:13 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -313,7 +313,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real_rcdelay	= configfile.getBool("shutdown_real_rcdelay"     , true );
 	strcpy(g_settings.shutdown_count, configfile.getString("shutdown_count","0").c_str());
 	g_settings.infobar_sat_display		= configfile.getBool("infobar_sat_display"       , true );
-	g_settings.infobar_subchan_disp_pos	= configfile.getInt32("infobar_subchan_disp_pos" , 0 );
+	g_settings.infobar_subchan_disp_pos	= configfile.getInt32("infobar_subchan_disp_pos" , 4 );
 	g_settings.misc_spts			= configfile.getBool("misc_spts"                 , false );
 #ifndef TUXTXT_CFG_STANDALONE
 	g_settings.tuxtxt_cache			= configfile.getBool("tuxtxt_cache"              , false );
@@ -3106,7 +3106,6 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		if( (bDoPaint) && (g_settings.widget_osd != 2 ) )
 		{
 			int vol = current_volume << 1;
-			int shadow_offset = 6;
 			char p[4]; /* 3 digits + '\0' */
 			sprintf(p, "%3d", vol / 2);
 			/* draw the volume bar */

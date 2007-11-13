@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.106 2007/11/12 08:54:43 ecosys Exp $
+ * $Id: locals_intern.h,v 1.107 2007/11/13 21:39:19 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1045,6 +1045,7 @@ const char * locale_real_names[] =
 	"settings.noconffile",
 	"settings.pos_bottom_left",
 	"settings.pos_bottom_right",
+	"settings.pos_infobar",
 	"settings.pos_top_left",
 	"settings.pos_top_right",
 	"shutdown.recoding_query",

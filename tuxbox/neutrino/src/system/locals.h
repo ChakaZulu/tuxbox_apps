@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.105 2007/11/12 08:54:43 ecosys Exp $
+ * $Id: locals.h,v 1.106 2007/11/13 21:39:19 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1045,6 +1045,7 @@ typedef enum
 	LOCALE_SETTINGS_NOCONFFILE,
 	LOCALE_SETTINGS_POS_BOTTOM_LEFT,
 	LOCALE_SETTINGS_POS_BOTTOM_RIGHT,
+	LOCALE_SETTINGS_POS_INFOBAR,
 	LOCALE_SETTINGS_POS_TOP_LEFT,
 	LOCALE_SETTINGS_POS_TOP_RIGHT,
 	LOCALE_SHUTDOWN_RECODING_QUERY,

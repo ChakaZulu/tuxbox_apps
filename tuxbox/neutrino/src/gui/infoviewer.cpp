@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.210 2007/10/27 12:47:21 dbt Exp $
+	$Id: infoviewer.cpp,v 1.211 2007/11/13 21:39:53 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -186,6 +186,21 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	showButtonBar = !calledFromNumZap;
 	std::string ChannelName = Channel;
 	bool new_chan = false;
+	bool subChannelNameIsUTF = true;
+	
+	// get channel-id
+	// ...subchannel is selected
+	if (! calledFromNumZap && !(g_RemoteControl->subChannels.empty()) && (g_RemoteControl->selected_subchannel > 0)) 
+	{
+		channel_id = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].getChannelID();
+		ChannelName = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].subservice_name;
+		subChannelNameIsUTF = false;
+	}
+	else
+	// ...channel is selected
+	{
+		channel_id = new_channel_id;
+	}
 
 	bool fadeIn = ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
 		g_settings.widget_fade &&
@@ -238,7 +253,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		col_NumBoxText = COL_INFOBAR;
 		col_NumBox = COL_INFOBAR_PLUS_0;
 	}
-	channel_id = new_channel_id;
 
 	//number box
 	frameBuffer->paintBoxRel(BoxStartX+SHADOW_OFFSET, BoxStartY+SHADOW_OFFSET, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
@@ -277,7 +291,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	paintTime( false, true );
 
 	// ... with channel name
-	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, ChannelName, COL_INFOBAR, 0, true); // UTF-8
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, ChannelName, COL_INFOBAR, 0, subChannelNameIsUTF); // UTF-8
 
 	ChanInfoX = BoxStartX + (ChanWidth / 3);
 	int ChanInfoY = BoxStartY + ChanHeight+ SHADOW_OFFSET;
@@ -581,98 +595,108 @@ void CInfoViewer::showSubchan()
 
 		int dx = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getRenderWidth(text, subChannelNameIsUTF) + 20;
 		int dy = 25;
-
-		if ( g_RemoteControl->director_mode )
+		
+		if( g_settings.infobar_subchan_disp_pos == 4 )				
 		{
-			int w= 20+ g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE), true) + 20; // UTF-8
-			if ( w> dx )
-				dx= w;
-			dy= dy* 2;
+			// show full infobar for subschannel 
+			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR , 0 );
 		}
 		else
-			dy= dy +5;
-
-		int x=0,y=0;
-		if( g_settings.infobar_subchan_disp_pos == 0 )
-		{
-			// Rechts-Oben
-			x = g_settings.screen_EndX - dx - 10;
-			y = g_settings.screen_StartY + 10;
-		}
-		else if( g_settings.infobar_subchan_disp_pos == 1 )
-		{
-			// Links-Oben
-			x = g_settings.screen_StartX + 10;
-			y = g_settings.screen_StartY + 10;
-		}
-		else if( g_settings.infobar_subchan_disp_pos == 2 )
-		{
-			// Links-Unten
-			x = g_settings.screen_StartX + 10;
-			y = g_settings.screen_EndY - dy - 10;
-		}
-		else if( g_settings.infobar_subchan_disp_pos == 3 )
-		{
-			// Rechts-Unten
-			x = g_settings.screen_EndX - dx - 10;
-			y = g_settings.screen_EndY - dy - 10;
-		}
-
-		fb_pixel_t pixbuf[(dx+ 2* borderwidth) * (dy+ 2* borderwidth)];
-		frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, dy+ 2* borderwidth, pixbuf);
-
-		// clear border
-		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, borderwidth);
-		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ dy, dx+ 2* borderwidth, borderwidth);
-		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, dy);
-		frameBuffer->paintBackgroundBoxRel(x+ dx, y, borderwidth, dy);
-
-		frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT, 0, subChannelNameIsUTF); // UTF-8
-
-		// show yellow button
-		// USERMENU
-		const char* txt = NULL;
-		if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].empty() )
-			txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].c_str();
-		else if(g_RemoteControl->director_mode)	
-			txt = g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE);
-
-		if ( txt != NULL )
-		{
-			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+ 8, y+ dy- 20 );
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, txt, COL_MENUCONTENT, 0, true); // UTF-8
-		}
-
-		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( 2 );
-		int res = messages_return::none;
-
-		neutrino_msg_t      msg;
-		neutrino_msg_data_t data;
-
-		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
-		{
-			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
-
-			if ( msg == CRCInput::RC_timeout )
+		{	
+			if ( g_RemoteControl->director_mode )
 			{
-				res = messages_return::cancel_info;
+				int w= 20+ g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE), true) + 20; // UTF-8
+				if ( w> dx )
+					dx= w;
+				dy= dy* 2;
 			}
 			else
+				dy= dy +5;
+	
+			int x=0,y=0;
+			if( g_settings.infobar_subchan_disp_pos == 0 )
 			{
-				res = neutrino->handleMsg(msg, data);
-
-				if ( res & messages_return::unhandled )
+				// Rechts-Oben
+				x = g_settings.screen_EndX - dx - 10;
+				y = g_settings.screen_StartY + 10;
+			}
+			else if( g_settings.infobar_subchan_disp_pos == 1 )
+			{
+				// Links-Oben
+				x = g_settings.screen_StartX + 10;
+				y = g_settings.screen_StartY + 10;
+			}
+			else if( g_settings.infobar_subchan_disp_pos == 2 )
+			{
+				// Links-Unten
+				x = g_settings.screen_StartX + 10;
+				y = g_settings.screen_EndY - dy - 10;
+			}
+			else if( g_settings.infobar_subchan_disp_pos == 3 )
+			{
+				// Rechts-Unten
+				x = g_settings.screen_EndX - dx - 10;
+				y = g_settings.screen_EndY - dy - 10;
+			}
+	
+			fb_pixel_t pixbuf[(dx+ 2* borderwidth) * (dy+ 2* borderwidth)];
+			frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, dy+ 2* borderwidth, pixbuf);
+	
+			// clear border
+			frameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, borderwidth);
+			frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ dy, dx+ 2* borderwidth, borderwidth);
+			frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, dy);
+			frameBuffer->paintBackgroundBoxRel(x+ dx, y, borderwidth, dy);
+			
+			{			
+			// show default small infobar for subchannel
+			frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0);
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT, 0, subChannelNameIsUTF); // UTF-8
+			
+			// show yellow button
+			// USERMENU
+			const char* txt = NULL;
+			if( !g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].empty() )
+				txt = g_settings.usermenu_text[SNeutrinoSettings::BUTTON_YELLOW].c_str();
+			else if(g_RemoteControl->director_mode)	
+				txt = g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE);
+	
+			if ( txt != NULL )
+			{
+				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+ 8, y+ dy- 20 );
+				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, txt, COL_MENUCONTENT, 0, true); // UTF-8
+			}
+			
+			unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( 2 );
+			int res = messages_return::none;
+	
+			neutrino_msg_t      msg;
+			neutrino_msg_data_t data;
+	
+				while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 				{
-					// raus hier und im Hauptfenster behandeln...
-					g_RCInput->postMsg(  msg, data );
-					res = messages_return::cancel_info;
+					g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		
+					if ( msg == CRCInput::RC_timeout )
+					{
+						res = messages_return::cancel_info;
+					}
+					else
+					{
+						res = neutrino->handleMsg(msg, data);
+		
+						if ( res & messages_return::unhandled )
+						{
+							// raus hier und im Hauptfenster behandeln...
+							g_RCInput->postMsg(  msg, data );
+							res = messages_return::cancel_info;
+						}
+					}
 				}
+		
+			frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, dy+ 2* borderwidth, pixbuf);
 			}
 		}
-
-		frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, dy+ 2* borderwidth, pixbuf);
-
 	}
 	else
 	{
@@ -1167,19 +1191,19 @@ void CInfoViewer::showEpgInfo()   //message on event change
 	struct tm *pnStartZeit = localtime(&info_CurrentNext.next_zeit.startzeit);
 		sprintf( (char*)&nextStart, "%02d:%02d", pnStartZeit->tm_hour, pnStartZeit->tm_min);
 
-		if (eventname != info_CurrentNext.current_name)  //TODO: correct eventnames for subchannels
+		if (eventname != info_CurrentNext.current_name) // should not happen, but if so, then only if message is different
 		{
 			eventname = info_CurrentNext.current_name;
 				if (g_settings.infobar_show == 1)
 						{
-	 					if (eventname.length() !=0)
+	 					if (eventname.length() !=0) // simple message
  							{
 							std::string event = eventname + "\n" + g_Locale->getText(LOCALE_INFOVIEWER_MESSAGE_TO) + nextStart;	
 							std::string event_message =  ZapitTools::Latin1_to_UTF8(event.c_str());
 							ShowHintUTF(LOCALE_INFOVIEWER_MESSAGE_NOW, event_message.c_str(), 420 , 6, "epginfo.raw"); 
 							}
 						}
-				else if (g_settings.infobar_show == 2)
+				else if (g_settings.infobar_show == 2) // complex message, show infobar
 						{							
 						g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR , 0 );
 						}	

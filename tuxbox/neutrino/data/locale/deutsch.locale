@@ -1018,6 +1018,7 @@ settings.missingoptionsconffile Die Neutrino-Einstellungen wurden erweitert.\nDi
 settings.noconffile Die Neutrino-Einstellungen wurden nicht\ngefunden. Es werden Standardwerte benutzt.
 settings.pos_bottom_left unten links
 settings.pos_bottom_right unten rechts
+settings.pos_infobar in Infobar
 settings.pos_top_left oben links
 settings.pos_top_right oben rechts
 shutdown.recoding_query Aufnahme läuft. Trotzdem runterfahren?
