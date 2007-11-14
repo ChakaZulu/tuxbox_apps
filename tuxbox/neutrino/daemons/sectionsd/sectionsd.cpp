@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.249 2007/10/30 08:48:23 seife Exp $
+//  $Id: sectionsd.cpp,v 1.250 2007/11/14 20:03:54 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1573,7 +1573,7 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const t_channel_id se
 				if ((long)(azeit + plusminus) < (long)(t->startzeit + t->dauer))
 				{
 					if (flag != 0)
-						*flag |= CSectionsdClient::epgflags::has_later; // sp�ere events da...
+						*flag |= CSectionsdClient::epgflags::has_later; // later events are present...
 
 					if (t->startzeit <= (long)(azeit + plusminus))
 					{
@@ -2361,7 +2361,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.249 2007/10/30 08:48:23 seife Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.250 2007/11/14 20:03:54 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2744,7 +2744,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	dprintf("[sectionsd] commandserviceChanged: Service changed to " PRINTF_CHANNEL_ID_TYPE "\n", *uniqueServiceKey);
 
-	showProfiling("[sectionsd] commandserviceChanged: before messaging lock");
+	if (debug)
+		showProfiling("[sectionsd] commandserviceChanged: before messaging lock");
 
 	time_t zeit = time(NULL);
 
@@ -2800,7 +2801,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 			dprintf("[sectionsd] commandserviceChanged: requesting current_next event...\n");
 	}
 	unlockMessaging();
-	showProfiling("[sectionsd] commandserviceChanged: before wakeup");
+	if (debug)
+		showProfiling("[sectionsd] commandserviceChanged: before wakeup");
 	writeLockMessaging();
 	messaging_last_requested = zeit;
 	unlockMessaging();
@@ -2833,7 +2835,8 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 	else
 		dprintf("[sectionsd] commandserviceChanged: ignoring wakeup request...\n");
 
-	showProfiling("[sectionsd] commandserviceChanged: after doWakeup");
+	if (debug)
+		showProfiling("[sectionsd] commandserviceChanged: after doWakeup");
 
 	struct sectionsd::msgResponseHeader msgResponse;
 
@@ -3408,7 +3411,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	time_t azeit = time(NULL);
 	std::string sname;
 
-	/* !!! FIX ME: wenn die Box mit einem Sender startet, wo die EPG nicht gesendet wird, h�gt sich die Box auf !!!	*/
+	/* !!! FIX ME: if the box starts on a channel where there is no EPG sent, it hangs!!!	*/
 	for (MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e = mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e != mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); ++e)
 	{
 		uniqueNow = (*e)->get_channel_id();
@@ -6077,7 +6080,7 @@ static int get_bat_slot( t_bouquet_id bouquet_id, int last_section)
 	return -1;
 }
 //---------------------------------------------------------------------
-//			sdt-thread
+// sdt-thread
 // reads sdt for service list
 //---------------------------------------------------------------------
 static void *sdtThread(void *)
@@ -6950,7 +6953,7 @@ static void *pptThread(void *)
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
 			{
-				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // letzter restart l�ger als 3secs her, daher cache NICHT verkleinern
+				if ( (zeit > lastRestarted + 3) || (dmxPPT.real_pauseCounter != 0) ) // last restart older than 3secs, therefore do NOT decrease cache
 				{
 					dmxPPT.stop(); // -> lock
 					dmxPPT.start(); // -> unlock
@@ -7565,7 +7568,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.249 2007/10/30 08:48:23 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.250 2007/11/14 20:03:54 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
