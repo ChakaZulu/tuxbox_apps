@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.4 2007/09/08 14:32:34 dbt Exp $
+        $Id: personalize.cpp,v 1.5 2007/11/14 17:05:17 dbt Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -181,34 +181,37 @@ void CPersonalizeGui::ShowMainMenuOptions()
                         int old_reboot                          = g_settings.personalize_reboot;
                         int old_shutdown                        = g_settings.personalize_shutdown;
 
+						int shortcut = 1;
+
                         CMenuWidget* pMMMenu = new CMenuWidget(LOCALE_MAINMENU_HEAD,NEUTRINO_ICON_PROTECTING, width);
 
                         pMMMenu->addItem(GenericMenuSeparator);
                         pMMMenu->addItem(GenericMenuBack);
-						pMMMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PERSONALIZE_ACCESS));
+                  		pMMMenu->addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_PERSONALIZE_ACCESS));
 
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_TVMODE, (int *)&g_settings.personalize_tvmode, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RADIOMODE, (int *)&g_settings.personalize_radiomode, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SCARTMODE, (int *)&g_settings.personalize_scartmode, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_GAMES, (int *)&g_settings.personalize_games, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
                         pMMMenu->addItem(GenericMenuSeparatorLine);
-						
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_AUDIOPLAYER, (int *)&g_settings.personalize_audioplayer,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_1));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_MOVIEPLAYER, (int *)&g_settings.personalize_movieplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_2));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_PICTUREVIEWER, (int *)&g_settings.personalize_pictureviewer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
+                  
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_AUDIOPLAYER, (int *)&g_settings.personalize_audioplayer,PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_MOVIEPLAYER, (int *)&g_settings.personalize_movieplayer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_PICTUREVIEWER, (int *)&g_settings.personalize_pictureviewer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 #ifdef ENABLE_UPNP
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_UPNPBROWSER, (int *)&g_settings.personalize_upnpbrowser, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_4));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_UPNPBROWSER, (int *)&g_settings.personalize_upnpbrowser, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
 #endif
-						pMMMenu->addItem(GenericMenuSeparatorLine);
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SLEEPTIMER, (int *)&g_settings.personalize_sleeptimer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_5));
-                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_REBOOT, (int *)&g_settings.personalize_reboot, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_6));
+                  		pMMMenu->addItem(GenericMenuSeparatorLine);
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SLEEPTIMER, (int *)&g_settings.personalize_sleeptimer, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
+                        pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_REBOOT, (int *)&g_settings.personalize_reboot, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::convertDigitToKey(shortcut++)));
                         pMMMenu->addItem(new CMenuOptionChooser(LOCALE_MAINMENU_SHUTDOWN, (int *)&g_settings.personalize_shutdown, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_standby, NEUTRINO_ICON_BUTTON_POWER));
 
                         pMMMenu->addItem(GenericMenuSeparator);
-						
+                  
                         pMMMenu->exec (NULL, "");
                         pMMMenu->hide ();
                         delete pMMMenu;
+
 
                         // Check for changes
                         if (old_tvmode != g_settings.personalize_tvmode || old_radiomode != g_settings.personalize_radiomode
