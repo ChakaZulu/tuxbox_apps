@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.cpp,v 1.2 2007/11/12 08:54:43 ecosys Exp $ 
+	$Id: themes.cpp,v 1.3 2007/11/15 22:19:49 houdini Exp $ 
 
 */
 
@@ -132,19 +132,28 @@ void CThemes::Show()
 
 	themes->addItem(m2);
 	// Don't show User-Theme if Userdir does'nt exist
-	if ( access(USERDIR, 0) == 0 ) {
+
+	if ( access(USERDIR, F_OK) != 0 ) { // check for existance
+// mkdir must be called for each subdir which does not exist 
+//		mkdir (USERDIR, S_IRUSR | S_IREAD | S_IWUSR | S_IWRITE | S_IXUSR | S_IEXEC) == 0) {
+		if (system (((std::string)"mkdir -p " + USERDIR).c_str()) != 0) {
+			printf("[neutrino theme] error creating %s\n", USERDIR);
+		}
+	}
+	if (access(USERDIR, F_OK) == 0 ) {
 		themes->addItem(m1);
 		themes->addItem(GenericMenuSeparatorLine);
 		themes->addItem(m3);
+	} else {
+		printf("[neutrino theme] error accessing %s\n", USERDIR);
 	}
 
 	themes->exec(NULL, "");
 	themes->hide();
 	delete themes;
 
-	if (strlen(file_name.c_str()) > 1) {
-		std::string userfile = USERDIR + file_name + FILE_PREFIX;
-		saveFile((char*)userfile.c_str());
+	if (file_name.length() > 1) {
+		saveFile((char*)((std::string)USERDIR + file_name + FILE_PREFIX).c_str());
 	}
 }
 
