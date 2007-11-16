@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.cpp,v 1.4 2007/11/16 05:43:00 ecosys Exp $ 
+	$Id: themes.cpp,v 1.5 2007/11/16 10:50:39 ecosys Exp $ 
 
 */
 
@@ -34,6 +34,7 @@
 #include <system/setting_helpers.h>
 #include <gui/widget/stringinput.h>
 #include <gui/widget/stringinput_ext.h>
+#include <gui/widget/messagebox.h>
 
 #include <sys/stat.h>
 #include <sys/time.h>
