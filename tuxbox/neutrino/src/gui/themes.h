@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.h,v 1.3 2007/11/16 05:43:00 ecosys Exp $ 
+	$Id: themes.h,v 1.4 2007/11/16 05:47:15 ecosys Exp $ 
 
 */
 
@@ -44,7 +44,7 @@ class CThemes : public CMenuTarget, CChangeObserver
 		void readFile(char* themename);
 		void saveFile(char* themename);
 		void readThemes(CMenuWidget &);
-		void rememberOldTheme(bool writeBack);
+		void rememberOldTheme(bool remember);
 
 	public:
 		CThemes();
