@@ -238,9 +238,10 @@ colorthememenu.head Theme auswählen
 colorthememenu.head2 Themes laden
 colorthememenu.name Themename
 colorthememenu.neutrino_theme Neutrino Default Theme
+colorthememenu.question Aktuelles Theme beibehalten?
 colorthememenu.save aktuelles Theme speichern
-colorthememenu.select1 Benutzer-Theme laden
-colorthememenu.select2 Standard-Theme laden
+colorthememenu.select1 Benutzer Theme
+colorthememenu.select2 Standard Theme
 date.Apr  Apr
 date.Aug  Aug
 date.Dec  Dez

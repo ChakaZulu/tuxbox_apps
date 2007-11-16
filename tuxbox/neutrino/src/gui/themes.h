@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.h,v 1.2 2007/11/12 08:54:43 ecosys Exp $ 
+	$Id: themes.h,v 1.3 2007/11/16 05:43:00 ecosys Exp $ 
 
 */
 
@@ -26,17 +26,7 @@
 #include <string>
 #include <configfile.h>
 #include <driver/framebuffer.h>
-#include <gui/filebrowser.h>
 #include <system/setting_helpers.h>
-
-class CThemeFile
-{
-public:
-	std::string Filename;
-	std::string Path;
-};
-
-typedef std::vector<CThemeFile> CFileViewList;
 
 class CThemes : public CMenuTarget, CChangeObserver
 {
@@ -44,18 +34,17 @@ class CThemes : public CMenuTarget, CChangeObserver
 		CFrameBuffer *frameBuffer;
 		CConfigFile themefile;
 		CColorSetupNotifier *notifier;
-		CFileFilter themeFilter;
-		CThemeFile tf;
-
-		std::string Path;
 
 		int x, y, width, height, hheight, mheight;
-		std::string file_name;
+		int oldThemeValues[40];
+
+		bool hasThemeChanged;
 
 		void Show();
 		void readFile(char* themename);
 		void saveFile(char* themename);
-		void fileChooser();
+		void readThemes(CMenuWidget &);
+		void rememberOldTheme(bool writeBack);
 
 	public:
 		CThemes();
