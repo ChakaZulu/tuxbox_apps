@@ -1,5 +1,5 @@
 /***************************************************************************
-	$Id: moviebrowser.cpp,v 1.15 2007/08/16 20:25:29 guenther Exp $
+	$Id: moviebrowser.cpp,v 1.16 2007/11/16 16:54:55 ecosys Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -43,6 +43,10 @@
 		based on code of Steffen Hehn 'McClean'
 
 	$Log: moviebrowser.cpp,v $
+	Revision 1.16  2007/11/16 16:54:55  ecosys
+	changed cursor focus, thx to ingrid
+	http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=346678#346678
+	
 	Revision 1.15  2007/08/16 20:25:29  guenther
 	update some locals
 	
@@ -413,7 +417,7 @@ CMovieBrowser::CMovieBrowser(const char* path): configfile ('\t')
 ************************************************************************/
 CMovieBrowser::CMovieBrowser(): configfile ('\t')
 {
-	TRACE("$Id: moviebrowser.cpp,v 1.15 2007/08/16 20:25:29 guenther Exp $\r\n");
+	TRACE("$Id: moviebrowser.cpp,v 1.16 2007/11/16 16:54:55 ecosys Exp $\r\n");
 	init();
 }
 
@@ -3221,8 +3225,6 @@ int CMovieBrowser::showStartPosSelectionMenu(void) // P2
 			
 	startPosSelectionMenu.addItem(GenericMenuSeparator);
 	
-	startPosSelectionMenu.addItem(new CMenuForwarder(LOCALE_MOVIEBROWSER_START_RECORD_START, true,NULL));
-	position[menu_nr++] = 0;
 	if( m_movieSelectionHandler->bookmarks.start != 0)
 	{
 		startPosSelectionMenu.addItem(new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_MOVIESTART, true, start_pos));
@@ -3233,6 +3235,8 @@ int CMovieBrowser::showStartPosSelectionMenu(void) // P2
 		startPosSelectionMenu.addItem(new CMenuForwarder(LOCALE_MOVIEBROWSER_BOOK_LASTMOVIESTOP, true, play_pos));
 		position[menu_nr++] = m_movieSelectionHandler->bookmarks.lastPlayStop;
 	}
+	startPosSelectionMenu.addItem(new CMenuForwarder(LOCALE_MOVIEBROWSER_START_RECORD_START, true,NULL));
+	position[menu_nr++] = 0;
 	startPosSelectionMenu.addItem(GenericMenuSeparatorLine);
 
 	for(int i =0 ; i < MI_MOVIE_BOOK_USER_MAX && menu_nr < MAX_NUMBER_OF_BOOKMARK_ITEMS; i++ )
@@ -3647,7 +3651,7 @@ int CMovieHelp::exec(CMenuTarget* parent, const std::string & actionKey)
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_0,    " Markierungsaktion nicht ausführen");
 	helpbox.addLine("");
 	helpbox.addLine("");
-	helpbox.addLine("MovieBrowser $Revision: 1.15 $");
+	helpbox.addLine("MovieBrowser $Revision: 1.16 $");
 	helpbox.addLine("by Günther");
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
 	return(0);
