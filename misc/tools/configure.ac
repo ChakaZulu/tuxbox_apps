@@ -14,4 +14,5 @@ mtd/Makefile
 rtc/Makefile
 devinit/Makefile
 dboxshot/Makefile
+makedevices/Makefile
 ])
