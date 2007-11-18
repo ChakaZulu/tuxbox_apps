@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.877 2007/11/13 21:40:13 dbt Exp $
+	$Id: neutrino.cpp,v 1.878 2007/11/18 20:07:27 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -312,6 +312,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real		= configfile.getBool("shutdown_real"             , true );
 	g_settings.shutdown_real_rcdelay	= configfile.getBool("shutdown_real_rcdelay"     , true );
 	strcpy(g_settings.shutdown_count, configfile.getString("shutdown_count","0").c_str());
+	g_settings.volumebar_disp_pos	= configfile.getInt32("volumebar_disp_pos" , 4 );
 	g_settings.infobar_sat_display		= configfile.getBool("infobar_sat_display"       , true );
 	g_settings.infobar_subchan_disp_pos	= configfile.getInt32("infobar_subchan_disp_pos" , 4 );
 	g_settings.misc_spts			= configfile.getBool("misc_spts"                 , false );
@@ -326,7 +327,10 @@ int CNeutrinoApp::loadSetup()
 	g_settings.audio_DolbyDigital		= configfile.getBool("audio_DolbyDigital"        , false);
 #ifndef HAVE_DREAMBOX_HARDWARE
 	g_settings.audio_avs_Control 		= configfile.getInt32( "audio_avs_Control", CControld::TYPE_AVS );
+	strcpy( g_settings.audio_step,		configfile.getString( "audio_step" , "5" ).c_str() );
 #else
+	// the dreambox 500 has 32 volume steps, so a stepwidth of 3 matches the hardware better
+	strcpy( g_settings.audio_step,		configfile.getString( "audio_step" , "3" ).c_str() );
 	g_settings.audio_avs_Control 		= CControld::TYPE_OST;
 #endif
 	strcpy( g_settings.audio_PCMOffset, configfile.getString( "audio_PCMOffset", "0" ).c_str() );
@@ -775,6 +779,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool("shutdown_real"             , g_settings.shutdown_real);
 	configfile.setBool("shutdown_real_rcdelay"     , g_settings.shutdown_real_rcdelay);
 	configfile.setString("shutdown_count"          , g_settings.shutdown_count);
+	configfile.setInt32("volumebar_disp_pos" , g_settings.volumebar_disp_pos);
 	configfile.setBool("infobar_sat_display"       , g_settings.infobar_sat_display);
 	configfile.setInt32("infobar_subchan_disp_pos" , g_settings.infobar_subchan_disp_pos);
 	configfile.setBool("misc_spts"                 , g_settings.misc_spts);
@@ -789,6 +794,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool("audio_DolbyDigital" , g_settings.audio_DolbyDigital);
 	configfile.setInt32( "audio_avs_Control", g_settings.audio_avs_Control);
 	configfile.setString( "audio_PCMOffset" , g_settings.audio_PCMOffset);
+	configfile.setString( "audio_step"	, g_settings.audio_step);
 
 	//vcr
 	configfile.setBool("vcr_AutoSwitch"     , g_settings.vcr_AutoSwitch);
@@ -1917,7 +1923,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    mainSettings        (LOCALE_MAINSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    languageSettings    (LOCALE_LANGUAGESETUP_HEAD            , "language.raw"        );
 	CVideoSettings videoSettings                                                                      ;
-	CMenuWidget    audioSettings       (LOCALE_AUDIOMENU_HEAD                , "audio.raw"           );
+	CMenuWidget    audioSettings       (LOCALE_AUDIOMENU_HEAD                , "audio.raw"           ,420);
 	CMenuWidget    parentallockSettings(LOCALE_PARENTALLOCK_PARENTALLOCK     , "lock.raw"            , 500);
 	CMenuWidget    networkSettings     (LOCALE_NETWORKMENU_HEAD              , "network.raw"         , 430);
 	CMenuWidget    recordingSettings   (LOCALE_RECORDINGMENU_HEAD            , "recording.raw"       );
@@ -1925,8 +1931,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    colorSettings       (LOCALE_COLORMENU_HEAD                , "colors.raw"          );
 	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 420);
-	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 400);
-	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 420);
+	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 450);
+	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 450);
 	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
@@ -2437,7 +2443,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			//mute
 			AudioMute( !current_muted );
 		}
-		return messages_return::handled;
+		return messages_return::handled;	
 	}
 	else if( msg == NeutrinoMessages::EVT_MUTECHANGED )
 	{
@@ -2953,6 +2959,23 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 	}
 }
 
+void CNeutrinoApp::paintMuteIcon( bool is_visible)
+{
+	int dx = 40;
+	int dy = 40;
+	int x = g_settings.screen_EndX-dx;
+	int y = g_settings.screen_StartY;
+	
+	if( is_visible )
+			{
+				frameBuffer->paintBoxRel(x, y, dx, dy, COL_LIME);
+				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+4, y+4);
+			}
+			else
+				frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+
+}
+
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
 #ifndef HAVE_DREAMBOX_HARDWARE
@@ -2964,11 +2987,6 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 	else
 #endif
 	{
-		int dx = 40;
-		int dy = 40;
-		int x = g_settings.screen_EndX-dx;
-		int y = g_settings.screen_StartY;
-
 		CLCD::getInstance()->setMuted(newValue);
 		if( newValue != current_muted )
 		{
@@ -2985,14 +3003,11 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 
 		if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic) && ( g_settings.widget_osd != 2 ) )
 		{
-		// anzeigen NUR, wenn es vom Event kommt
-			if( current_muted )
-			{
-				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0);
-				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+5, y+5);
-			}
+		// show mute icon ONLY on event or current volume value is 0
+			if (( current_muted ) || (g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control) == 0))
+				paintMuteIcon();
 			else
-				frameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+				paintMuteIcon(false);
 		}
 	}
 }
@@ -3003,8 +3018,43 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 	int dx = 200 + 8 + 36 + 24;
 	int dy = 28;
-	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
-	int y = g_settings.screen_EndY- 100;
+	int bwx = 20; 	// boarder width x from left and right
+	int bwtop = 60; 	// boarder width y from top
+	int bwbot = 100; 		// boarder width y from bottom
+	int x, y;
+	int a_step = atoi(g_settings.audio_step);
+	
+	if( g_settings.volumebar_disp_pos == 0 )
+			{
+				// upper right
+				x = g_settings.screen_EndX - dx - bwx - 40;
+				y = g_settings.screen_StartY + dy - bwtop;
+			}
+			else if( g_settings.volumebar_disp_pos == 1 )
+			{
+				// upper left
+				x = g_settings.screen_StartX + bwx;
+				y = g_settings.screen_StartY + dy - bwtop;
+			}
+			else if( g_settings.volumebar_disp_pos == 2 )
+			{
+				// bottom left
+				x = g_settings.screen_StartX + bwx;
+				y = g_settings.screen_EndY- bwbot;
+			}
+			else if( g_settings.volumebar_disp_pos == 3 )
+			{
+				// bottom right
+				x = g_settings.screen_EndX - dx - bwx;
+				y = g_settings.screen_EndY- bwbot;
+			}
+			else if( g_settings.volumebar_disp_pos == 4 )
+			{
+				// center default
+				x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
+				y = g_settings.screen_EndY- bwbot;
+			}
+				
 
 	if( g_settings.widget_osd == 1 )
 	{
@@ -3013,7 +3063,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 	fb_pixel_t * pixbuf = NULL;
 
-	if( (bDoPaint) && (g_settings.widget_osd != 2 ) ) 
+	if( (bDoPaint) && (g_settings.widget_osd != 2 ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) // not visible if lirc in use 
 	{
 		pixbuf = new fb_pixel_t[dx * dy];
 		if(pixbuf!= NULL)
@@ -3035,46 +3085,40 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		{
 			if (msg == CRCInput::RC_plus)
 			{
+				
+				if (current_muted)
+				AudioMute( !current_muted ); // switch off mute on pressing the plus button 	
+				
 #ifndef HAVE_DREAMBOX_HARDWARE
 				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
 				{
 					current_volume = 60; //>50 is plus
 				}
 				else
+#endif
 				{
-					if (current_volume < 100 - 5)
-						current_volume += 5;
+					if (current_volume < 100 - a_step)
+						current_volume += a_step;
 					else
 						current_volume = 100;
 				}
-#else
-				// The dreambox 500 has 32 steps, so 3% match much better than 5% steps - seife
-				if (current_volume < 100 - 3)
-					current_volume += 3;
-				else
-					current_volume = 100;
-#endif
 			}
 			else if (msg == CRCInput::RC_minus)
 			{
+				
 #ifndef HAVE_DREAMBOX_HARDWARE
 				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
 				{
 					current_volume = 40; //<40 is minus
 				}
 				else
+#endif
 				{
-					if (current_volume > 5)
-						current_volume -= 5;
+					if (current_volume > a_step)
+						current_volume -= a_step;
 					else
 						current_volume = 0;
 				}
-#else
-				if (current_volume > 3)
-					current_volume -= 3;
-				else
-					current_volume = 0;
-#endif
 			}
 			else
 			{
@@ -3103,7 +3147,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			break;
 		}
 
-		if( (bDoPaint) && (g_settings.widget_osd != 2 ) )
+		if( (bDoPaint) && (g_settings.widget_osd != 2 ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) //not visible if lirc in use
 		{
 			int vol = current_volume << 1;
 			char p[4]; /* 3 digits + '\0' */
@@ -3113,7 +3157,12 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			frameBuffer->paintBoxRel(x + 26 + vol, y + 6, 200 - vol, dy - 2*6, COL_INFOBAR_PLUS_1);
 			/* erase the numbers... */
 			frameBuffer->paintBoxRel(x + dx - 40,  y + 4,        36, dy - 2*4, COL_INFOBAR_PLUS_1);
-			g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x + dx - 36, y + dy, 36, p , COL_INFOBAR);
+			g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x + dx - 36, y + dy, 36, p , COL_INFOBAR_PLUS_1);
+			// paint/hide mute icon
+			if ((current_volume == 0) || (current_muted))
+				paintMuteIcon();
+			else
+				paintMuteIcon(false);				
 		}
 
 		CLCD::getInstance()->showVolume(current_volume);
@@ -3125,7 +3174,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		}
 	while (msg != CRCInput::RC_timeout);
 
-	if( (bDoPaint) && (g_settings.widget_osd != 2 ) && (pixbuf!= NULL) )
+	if( (bDoPaint) && (g_settings.widget_osd != 2 ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC) && (pixbuf!= NULL))
 	{
 		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 		delete [] pixbuf;

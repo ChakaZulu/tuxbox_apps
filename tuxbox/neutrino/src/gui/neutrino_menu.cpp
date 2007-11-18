@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.10 2007/11/13 21:39:53 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.11 2007/11/18 20:08:26 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -793,12 +793,23 @@ const CMenuOptionChooser::keyval  INFOBAR_EPG_SHOW_OPTIONS[INFOBAR_EPG_SHOW_OPTI
    { 2 , LOCALE_INFOVIEWER_EPGINFO_EXPENSIVE_MESSAGE }
 };
 
+#define VOLUMEBAR_DISP_POS_OPTIONS_COUNT 5
+const CMenuOptionChooser::keyval  VOLUMEBAR_DISP_POS_OPTIONS[VOLUMEBAR_DISP_POS_OPTIONS_COUNT]=
+{
+	{ 0 , LOCALE_SETTINGS_POS_TOP_RIGHT },
+	{ 1 , LOCALE_SETTINGS_POS_TOP_LEFT },
+	{ 2 , LOCALE_SETTINGS_POS_BOTTOM_LEFT },
+	{ 3 , LOCALE_SETTINGS_POS_BOTTOM_RIGHT },
+	{ 4 , LOCALE_SETTINGS_POS_DEFAULT_CENTER }
+};
+
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
-	//general
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
 	miscSettings.addItem(GenericMenuSeparator);
 	miscSettings.addItem(GenericMenuBack);
+	
+	//general
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_GENERAL));
 
 	CMenuOptionChooser *m1 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL_RCDELAY, &g_settings.shutdown_real_rcdelay, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, !g_settings.shutdown_real);
@@ -817,6 +828,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	CTuxtxtCacheNotifier *tuxtxtcacheNotifier = new CTuxtxtCacheNotifier;
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_TUXTXT_CACHE, &g_settings.tuxtxt_cache, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, tuxtxtcacheNotifier));
 #endif
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VOLUMEBAR_DISP_POS, &g_settings.volumebar_disp_pos, VOLUMEBAR_DISP_POS_OPTIONS, VOLUMEBAR_DISP_POS_OPTIONS_COUNT, true));
 	
 	//infobar settings
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_INFOBAR));
@@ -986,6 +998,7 @@ const CMenuOptionChooser::keyval AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_OPTIONS[A
         { false, LOCALE_OPTIONS_OFF }
 };
 
+
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier)
 {
 	audioSettings.addItem(GenericMenuSeparator);
@@ -1001,11 +1014,11 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem(GenericMenuSeparatorLine);
 
 	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE, &g_settings.audiochannel_up_down_enable, AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_OPTIONS, AUDIOMENU_AUDIOCHANNEL_UP_DOWN_ENABLE_COUNT, true, audioSetupNotifier);
-        audioSettings.addItem( oj );
+	audioSettings.addItem( oj );
 
 	oj = new CMenuOptionChooser(LOCALE_AUDIOMENU_DOLBYDIGITAL, &g_settings.audio_DolbyDigital, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, audioSetupNotifier);
 	audioSettings.addItem(oj);
-
+	
 #ifndef HAVE_DREAMBOX_HARDWARE
 	audioSettings.addItem(GenericMenuSeparatorLine);
 
@@ -1017,6 +1030,11 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem(oj);
 	audioSettings.addItem(mf);
 #endif
+	
+	// volume bar steps
+	CStringInput * audio_step = new CStringInput(LOCALE_AUDIOMENU_VOLUMEBAR_AUDIOSTEPS,g_settings.audio_step, 2, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "0123456789 ", audioSetupNotifier);
+	CMenuForwarder *as = new CMenuForwarder(LOCALE_AUDIOMENU_VOLUMEBAR_AUDIOSTEPS, true, g_settings.audio_step, audio_step );
+	audioSettings.addItem(as);
 }
 
 #if 1

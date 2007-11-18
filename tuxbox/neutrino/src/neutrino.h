@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.192 2007/11/11 04:22:53 ecosys Exp $
+	$Id: neutrino.h,v 1.193 2007/11/18 20:07:27 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -200,7 +200,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void standbyMode( bool bOnOff );
 		void setVolume(const neutrino_msg_t key, const bool bDoPaint = true);
 		void AudioMute( bool newValue, bool isEvent= false );
-
+		void paintMuteIcon( bool is_visible = true );
 
 		void ExitRun(const bool write_si);
 		void RealRun(CMenuWidget &mainSettings);

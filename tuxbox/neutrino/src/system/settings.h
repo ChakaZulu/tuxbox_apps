@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.182 2007/08/27 12:15:51 nitr8 Exp $
+  $Id: settings.h,v 1.183 2007/11/18 20:09:11 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -53,6 +53,7 @@ struct SNeutrinoSettings
 	int shutdown_real;
 	int shutdown_real_rcdelay;
 	char shutdown_count[4];
+	int volumebar_disp_pos;
 	char record_safety_time_before[3];
 	char record_safety_time_after[3];
 	int infobar_sat_display;
@@ -78,6 +79,7 @@ struct SNeutrinoSettings
 	int audio_AnalogMode;
 	int audio_DolbyDigital;
 	int audio_avs_Control;
+	char audio_step[3];
 	char audio_PCMOffset[3];
 
 	//vcr

@@ -140,6 +140,7 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rechts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audiomenu.volumebar_audiosteps Lautstärke Schrittweite
 audioplayer.add Hinzufügen
 audioplayer.artist_title Interpret, Titel
 audioplayer.building_search_index Erstelle Suchindex
@@ -585,6 +586,7 @@ miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.tuxtxt_cache Videotext zwischenspeichern
 miscsettings.virtual_zap_mode Virtual zap bei Infobar
+miscsettings.volumebar_disp_pos Position Lautstärkeanzeige
 motorcontrol.head Motor-Setup
 moviebrowser.book_clear_all Lösche alle
 moviebrowser.book_head Markierungen
@@ -1019,6 +1021,7 @@ settings.missingoptionsconffile Die Neutrino-Einstellungen wurden erweitert.\nDi
 settings.noconffile Die Neutrino-Einstellungen wurden nicht\ngefunden. Es werden Standardwerte benutzt.
 settings.pos_bottom_left unten links
 settings.pos_bottom_right unten rechts
+settings.pos_default_center unten Mitte
 settings.pos_infobar in Infobar
 settings.pos_top_left oben links
 settings.pos_top_right oben rechts

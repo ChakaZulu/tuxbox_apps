@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.108 2007/11/16 05:43:00 ecosys Exp $
+ * $Id: locals_intern.h,v 1.109 2007/11/18 20:09:11 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -167,6 +167,7 @@ const char * locale_real_names[] =
 	"audiomenu.monoright",
 	"audiomenu.ost",
 	"audiomenu.stereo",
+	"audiomenu.volumebar_audiosteps",
 	"audioplayer.add",
 	"audioplayer.artist_title",
 	"audioplayer.building_search_index",
@@ -612,6 +613,7 @@ const char * locale_real_names[] =
 	"miscsettings.shutdown_real_rcdelay",
 	"miscsettings.tuxtxt_cache",
 	"miscsettings.virtual_zap_mode",
+	"miscsettings.volumebar_disp_pos",
 	"motorcontrol.head",
 	"moviebrowser.book_clear_all",
 	"moviebrowser.book_head",
@@ -1046,6 +1048,7 @@ const char * locale_real_names[] =
 	"settings.noconffile",
 	"settings.pos_bottom_left",
 	"settings.pos_bottom_right",
+	"settings.pos_default_center",
 	"settings.pos_infobar",
 	"settings.pos_top_left",
 	"settings.pos_top_right",

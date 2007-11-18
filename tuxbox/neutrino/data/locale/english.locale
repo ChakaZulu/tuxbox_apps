@@ -140,6 +140,7 @@ audiomenu.monoleft mono left
 audiomenu.monoright mono right
 audiomenu.ost ost
 audiomenu.stereo stereo
+audiomenu.volumebar_audiosteps Volume Step Size
 audioplayer.add Add
 audioplayer.artist_title Artist, Title
 audioplayer.building_search_index building search index
@@ -585,6 +586,7 @@ miscsettings.shutdown_real Standby
 miscsettings.shutdown_real_rcdelay Delayed Shutdown
 miscsettings.tuxtxt_cache EPG Cache (Days)
 miscsettings.virtual_zap_mode Virtual zap by infobar
+miscsettings.volumebar_disp_pos Position Volumebar
 motorcontrol.head Motor-Setup
 moviebrowser.book_clear_all Clear all
 moviebrowser.book_head Bookmarks
@@ -1019,6 +1021,7 @@ settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Op
 settings.noconffile No neutrino-settings found.\nUsing defaults.
 settings.pos_bottom_left bottom left
 settings.pos_bottom_right bottom right
+settings.pos_default_center bottom center
 settings.pos_infobar in Infobar
 settings.pos_top_left top left
 settings.pos_top_right top right
