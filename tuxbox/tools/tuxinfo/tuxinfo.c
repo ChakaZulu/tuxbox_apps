@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: tuxinfo.c,v 1.4 2003/02/19 17:13:32 waldi Exp $
+ * $Id: tuxinfo.c,v 1.5 2007/11/20 17:00:52 seife Exp $
  */
 
 #include <stdio.h>
@@ -38,19 +38,29 @@ int main(int argc, char **argv)
 	unsigned char show_submodel_str = 0;
 	unsigned char show_vendor = 0;
 	unsigned char show_vendor_str = 0;
+	unsigned char show_eval = 0;
 	char *digit_format_str = "%d\n";
 
 	while (1) {
 	
 		int c;
 		
-		if ((c = getopt(argc, argv, "cmMnNsSvV")) < 0)
+		if ((c = getopt(argc, argv, "cmMnNsSvVe")) < 0)
 			break;
 			
 		switch (c) {
 		
 			case 'c':
 				show_capabilities++;
+				break;
+			case 'e':
+				show_eval++;
+				show_model++;
+				show_model_str++;
+				show_submodel++;
+				show_submodel_str++;
+				show_vendor++;
+				show_vendor_str++;
 				break;
 			case 'm':
 				show_model++;
@@ -80,26 +90,44 @@ int main(int argc, char **argv)
 	if (show_capabilities)
 		printf (digit_format_str, tuxbox_get_capabilities ());
 
-	if (show_vendor)
+	if (show_vendor) {
+		if (show_eval)
+			printf("VENDOR_ID=");
 		printf (digit_format_str, tuxbox_get_vendor ());
+	}
 
-	if (show_vendor_str)
+	if (show_vendor_str) {
+		if (show_eval)
+			printf("VENDOR=");
 		printf ("%s\n", tuxbox_get_vendor_str ());
+	}
 
 	if (show_model_complete_str)
 		printf ("%s %s\n", tuxbox_get_model_str (), tuxbox_get_submodel_str ());
 
-	if (show_model)
+	if (show_model) {
+		if (show_eval)
+			printf("MODEL_ID=");
 		printf (digit_format_str, tuxbox_get_model ());
+	}
 
-	if (show_model_str)
+	if (show_model_str) {
+		if (show_eval)
+			printf("MODEL=");
 		printf ("%s\n", tuxbox_get_model_str ());
+	}
 
-	if (show_submodel)
+	if (show_submodel) {
+		if (show_eval)
+			printf("SUBMODEL_ID=");
 		printf (digit_format_str, tuxbox_get_submodel ());
+	}
 
-	if (show_submodel_str)
+	if (show_submodel_str) {
+		if (show_eval)
+			printf("SUBMODEL=");
 		printf ("%s\n", tuxbox_get_submodel_str ());
+	}
 
 	return 0;
 }
