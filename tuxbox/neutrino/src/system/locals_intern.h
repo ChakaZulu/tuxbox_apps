@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.109 2007/11/18 20:09:11 dbt Exp $
+ * $Id: locals_intern.h,v 1.110 2007/11/21 21:39:27 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -246,10 +246,6 @@ const char * locale_real_names[] =
 	"colormenu.gtx_alpha",
 	"colormenu.head",
 	"colormenu.menucolors",
-	"colormenu.osd",
-	"colormenu.osd_bottom",
-	"colormenu.osd_normal",
-	"colormenu.osd_off",
 	"colormenu.statusbar",
 	"colormenu.textcolor",
 	"colormenu.textcolor_head",
@@ -1049,7 +1045,9 @@ const char * locale_real_names[] =
 	"settings.pos_bottom_left",
 	"settings.pos_bottom_right",
 	"settings.pos_default_center",
+	"settings.pos_higher_center",
 	"settings.pos_infobar",
+	"settings.pos_off",
 	"settings.pos_top_left",
 	"settings.pos_top_right",
 	"shutdown.recoding_query",

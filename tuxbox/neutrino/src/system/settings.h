@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.183 2007/11/18 20:09:11 dbt Exp $
+  $Id: settings.h,v 1.184 2007/11/21 21:39:27 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -106,7 +106,6 @@ struct SNeutrinoSettings
 
 	//widget settings
 	int widget_fade;
-	int widget_osd;
 
 	//colors
 	unsigned char gtx_alpha1;

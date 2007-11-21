@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.878 2007/11/18 20:07:27 dbt Exp $
+	$Id: neutrino.cpp,v 1.879 2007/11/21 21:40:30 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -185,6 +185,7 @@ CNeutrinoApp::CNeutrinoApp()
 	skipShutdownTimer = false;
 	parentallocked    = false;
 	waitforshutdown   = false;
+	volumeBarIsVisible	= true;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -343,7 +344,6 @@ int CNeutrinoApp::loadSetup()
 
 	//widget settings
 	g_settings.widget_fade           = configfile.getBool("widget_fade"          , true );
-	g_settings.widget_osd            = configfile.getInt32("widget_osd"          , true );
 
 	//colors (neutrino defaultcolors)
 	g_settings.menu_Head_alpha = configfile.getInt32( "menu_Head_alpha", 0x00 );
@@ -804,7 +804,6 @@ void CNeutrinoApp::saveSetup()
 
 	//widget settings
 	configfile.setBool("widget_fade"        , g_settings.widget_fade);
-	configfile.setInt32("widget_osd"        , g_settings.widget_osd);
 
 	//colors
 	configfile.setInt32( "menu_Head_alpha", g_settings.menu_Head_alpha );
@@ -3001,7 +3000,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 			}
 		}
 
-		if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic) && ( g_settings.widget_osd != 2 ) )
+		if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic) && ( volumeBarIsVisible ) )
 		{
 		// show mute icon ONLY on event or current volume value is 0
 			if (( current_muted ) || (g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control) == 0))
@@ -3016,31 +3015,32 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 {
 	neutrino_msg_t msg = key;
 
-	int dx = 200 + 8 + 36 + 24;
-	int dy = 28;
+	int dx = 200 + 8 + 36 + 24; 	// width
+	int dy = 27; 	// height
 	int bwx = 20; 	// boarder width x from left and right
-	int bwtop = 60; 	// boarder width y from top
-	int bwbot = 100; 		// boarder width y from bottom
+	int bwtop = 47; 	// boarder width y from top
+	int bwbot = 47; 		// boarder width y from bottom
 	int x, y;
 	int a_step = atoi(g_settings.audio_step);
+	volumeBarIsVisible = ((g_settings.volumebar_disp_pos != 6) ? true : false);
 	
 	if( g_settings.volumebar_disp_pos == 0 )
 			{
 				// upper right
 				x = g_settings.screen_EndX - dx - bwx - 40;
-				y = g_settings.screen_StartY + dy - bwtop;
+				y = g_settings.screen_StartY + dy + bwtop;
 			}
 			else if( g_settings.volumebar_disp_pos == 1 )
 			{
 				// upper left
 				x = g_settings.screen_StartX + bwx;
-				y = g_settings.screen_StartY + dy - bwtop;
+				y = g_settings.screen_StartY + dy + bwtop;
 			}
 			else if( g_settings.volumebar_disp_pos == 2 )
 			{
 				// bottom left
 				x = g_settings.screen_StartX + bwx;
-				y = g_settings.screen_EndY- bwbot;
+				y = g_settings.screen_EndY - bwbot;
 			}
 			else if( g_settings.volumebar_disp_pos == 3 )
 			{
@@ -3052,18 +3052,18 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			{
 				// center default
 				x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
-				y = g_settings.screen_EndY- bwbot;
+				y = g_settings.screen_EndY - bwbot;
 			}
-				
-
-	if( g_settings.widget_osd == 1 )
-	{
-		y = y + 50;
-	}
+			else if( g_settings.volumebar_disp_pos == 5 )
+			{
+				// center higher
+				x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
+				y = g_settings.screen_EndY - bwbot-140;
+			}
 
 	fb_pixel_t * pixbuf = NULL;
 
-	if( (bDoPaint) && (g_settings.widget_osd != 2 ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) // not visible if lirc in use 
+	if( (bDoPaint) && ( volumeBarIsVisible ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) // not visible if lirc in use 
 	{
 		pixbuf = new fb_pixel_t[dx * dy];
 		if(pixbuf!= NULL)
@@ -3147,7 +3147,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			break;
 		}
 
-		if( (bDoPaint) && (g_settings.widget_osd != 2 ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) //not visible if lirc in use
+		if( (bDoPaint) && (volumeBarIsVisible ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC)) //not visible if lirc in use
 		{
 			int vol = current_volume << 1;
 			char p[4]; /* 3 digits + '\0' */
@@ -3174,7 +3174,7 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		}
 	while (msg != CRCInput::RC_timeout);
 
-	if( (bDoPaint) && (g_settings.widget_osd != 2 ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC) && (pixbuf!= NULL))
+	if( (bDoPaint) && ( volumeBarIsVisible ) && ((CControld::volume_type)g_settings.audio_avs_Control != CControld::TYPE_LIRC) && (pixbuf!= NULL))
 	{
 		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 		delete [] pixbuf;

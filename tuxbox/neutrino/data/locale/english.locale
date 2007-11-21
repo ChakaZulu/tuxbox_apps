@@ -219,10 +219,6 @@ colormenu.font Font Size
 colormenu.gtx_alpha Transparency (GTX)
 colormenu.head Color Settings
 colormenu.menucolors Menu Colors
-colormenu.osd OSD Audio-Status
-colormenu.osd_bottom bottom
-colormenu.osd_normal default
-colormenu.osd_off off
 colormenu.statusbar Infobar
 colormenu.textcolor Textcolor
 colormenu.textcolor_head Textcolor
@@ -586,7 +582,7 @@ miscsettings.shutdown_real Standby
 miscsettings.shutdown_real_rcdelay Delayed Shutdown
 miscsettings.tuxtxt_cache EPG Cache (Days)
 miscsettings.virtual_zap_mode Virtual zap by infobar
-miscsettings.volumebar_disp_pos Position Volumebar
+miscsettings.volumebar_disp_pos Volumebar
 motorcontrol.head Motor-Setup
 moviebrowser.book_clear_all Clear all
 moviebrowser.book_head Bookmarks
@@ -1022,7 +1018,9 @@ settings.noconffile No neutrino-settings found.\nUsing defaults.
 settings.pos_bottom_left bottom left
 settings.pos_bottom_right bottom right
 settings.pos_default_center bottom center
+settings.pos_higher_center higher center
 settings.pos_infobar in Infobar
+settings.pos_off off
 settings.pos_top_left top left
 settings.pos_top_right top right
 shutdown.recoding_query dBox is currently recording. Really shutdown?

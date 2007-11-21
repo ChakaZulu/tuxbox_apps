@@ -219,10 +219,6 @@ colormenu.font Schriftgröße
 colormenu.gtx_alpha Transparenz (GTX)
 colormenu.head Farb-Einstellungen
 colormenu.menucolors Menüfarben
-colormenu.osd OSD Audio-Status
-colormenu.osd_bottom unten
-colormenu.osd_normal normal
-colormenu.osd_off aus
 colormenu.statusbar Statusbalken
 colormenu.textcolor Textfarbe
 colormenu.textcolor_head Textfarbe
@@ -586,7 +582,7 @@ miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.tuxtxt_cache Videotext zwischenspeichern
 miscsettings.virtual_zap_mode Virtual zap bei Infobar
-miscsettings.volumebar_disp_pos Position Lautstärkeanzeige
+miscsettings.volumebar_disp_pos Lautstärkeanzeige
 motorcontrol.head Motor-Setup
 moviebrowser.book_clear_all Lösche alle
 moviebrowser.book_head Markierungen
@@ -1022,7 +1018,9 @@ settings.noconffile Die Neutrino-Einstellungen wurden nicht\ngefunden. Es werden
 settings.pos_bottom_left unten links
 settings.pos_bottom_right unten rechts
 settings.pos_default_center unten Mitte
+settings.pos_higher_center erhöht Mitte
 settings.pos_infobar in Infobar
+settings.pos_off aus
 settings.pos_top_left oben links
 settings.pos_top_right oben rechts
 shutdown.recoding_query Aufnahme läuft. Trotzdem runterfahren?

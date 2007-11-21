@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.11 2007/11/18 20:08:26 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.12 2007/11/21 21:40:58 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -373,14 +373,6 @@ const CMenuOptionChooser::keyval SATSETUP_SCANTP_POL[SATSETUP_SCANTP_POL_COUNT] 
 {
 	{ 0, LOCALE_SCANTP_POL_H },
 	{ 1, LOCALE_SCANTP_POL_V }
-};
-
-#define OSD_STATUS_OPTIONS_COUNT 3
-const CMenuOptionChooser::keyval OSD_STATUS_OPTIONS[OSD_STATUS_OPTIONS_COUNT] =
-{
-    { 0, LOCALE_COLORMENU_OSD_NORMAL },
-    { 1, LOCALE_COLORMENU_OSD_BOTTOM },
-    { 2, LOCALE_COLORMENU_OSD_OFF    }
 };
 
 #define SECTIONSD_SCAN_OPTIONS_COUNT 3
@@ -793,14 +785,16 @@ const CMenuOptionChooser::keyval  INFOBAR_EPG_SHOW_OPTIONS[INFOBAR_EPG_SHOW_OPTI
    { 2 , LOCALE_INFOVIEWER_EPGINFO_EXPENSIVE_MESSAGE }
 };
 
-#define VOLUMEBAR_DISP_POS_OPTIONS_COUNT 5
+#define VOLUMEBAR_DISP_POS_OPTIONS_COUNT 7
 const CMenuOptionChooser::keyval  VOLUMEBAR_DISP_POS_OPTIONS[VOLUMEBAR_DISP_POS_OPTIONS_COUNT]=
 {
 	{ 0 , LOCALE_SETTINGS_POS_TOP_RIGHT },
 	{ 1 , LOCALE_SETTINGS_POS_TOP_LEFT },
 	{ 2 , LOCALE_SETTINGS_POS_BOTTOM_LEFT },
 	{ 3 , LOCALE_SETTINGS_POS_BOTTOM_RIGHT },
-	{ 4 , LOCALE_SETTINGS_POS_DEFAULT_CENTER }
+	{ 4 , LOCALE_SETTINGS_POS_DEFAULT_CENTER },
+	{ 5 , LOCALE_SETTTING_POS_HIGHER_CENTER },
+	{ 6 , LOCALE_SETTINGS_POS_OFF }
 };
 
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
@@ -1544,9 +1538,6 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	CMenuWidget *colorSettings_timing = new CMenuWidget(LOCALE_COLORMENU_TIMING, NEUTRINO_ICON_SETTINGS);
 	InitColorSettingsTiming(*colorSettings_timing);
 	colorSettings.addItem(new CMenuForwarder(LOCALE_TIMING_HEAD, true, NULL, colorSettings_timing, NULL, CRCInput::RC_1));
-
-	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_COLORMENU_OSD, &g_settings.widget_osd, OSD_STATUS_OPTIONS, OSD_STATUS_OPTIONS_COUNT, true );
-	colorSettings.addItem(oj);
 
 	colorSettings.addItem(GenericMenuSeparatorLine);
 #ifndef HAVE_DREAMBOX_HARDWARE

@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.193 2007/11/18 20:07:27 dbt Exp $
+	$Id: neutrino.h,v 1.194 2007/11/21 21:40:30 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -175,6 +175,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		bool 				parentallocked;
 		CFontSizeNotifier 		*fontsizenotifier;
 		bool 				waitforshutdown;
+		bool				volumeBarIsVisible;
 
 		// USERMENU
 		CTimerList			*Timerlist;
