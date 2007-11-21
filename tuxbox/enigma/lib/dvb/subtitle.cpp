@@ -340,6 +340,13 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			while (page->regions)
 			{
 				struct subtitle_region *p = page->regions->next;
+				while(page->regions->region_objects)
+				{
+					subtitle_region_object *ob = page->regions->region_objects->next;
+					delete page->regions->region_objects;
+					page->regions->region_objects = ob;
+				}
+				delete [] page->regions->region_buffer;
 				delete page->regions;
 				page->regions = p;
 			}

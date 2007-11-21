@@ -383,7 +383,7 @@ eSubtitleWidget::~eSubtitleWidget()
 	while (!queue.empty())
 	{
 		pes_packet_s pkt = queue.front();
-		queue.front();
+		queue.pop();
 		delete [] pkt.pkt;
 	}
 	delete subtitle;
