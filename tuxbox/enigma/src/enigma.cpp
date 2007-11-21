@@ -455,6 +455,8 @@ eZap::~eZap()
 
 	delete init;
 
+	delete desktop_fb;
+
 	instance = 0;
 }
 
