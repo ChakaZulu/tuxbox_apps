@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.250 2007/11/14 20:03:54 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.251 2007/11/22 20:53:14 houdini Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -2046,7 +2046,7 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 			strcat(serviceList, s->second->providerName.c_str());
 			strcat(serviceList, "\n");
 		} else {
-			dprintf("warning: commandDumpAllServices: serviceList cut\n")
+			dprintf("warning: commandDumpAllServices: serviceList cut\n");
 			break;
 		}
 	}
@@ -2216,7 +2216,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 								strcat(liste, (*e)->getName().c_str());
 								strcat(liste, "\n");
 							} else {
-								dprintf("warning: sendAllEvents eventlist cut\n")
+								dprintf("warning: sendAllEvents eventlist cut\n");
 								break;
 							}
 						}
@@ -2256,7 +2256,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 								}
 								liste++;
 							} else {
-								dprintf("warning: sendAllEvents eventlist cut\n")
+								dprintf("warning: sendAllEvents eventlist cut\n");
 								break;
 							}
 						}
@@ -2361,7 +2361,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.250 2007/11/14 20:03:54 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.251 2007/11/22 20:53:14 houdini Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -3467,7 +3467,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 							*liste = '\n';
 							liste++;
 						} else {
-							dprintf("warning: sendEventList - eventlist cut\n")
+							dprintf("warning: sendEventList - eventlist cut\n");
 							break;
 						}
 
@@ -3508,7 +3508,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 							}
 							liste++;
 						} else {
-							dprintf("warning: sendEventList - eventlist cut\n")
+							dprintf("warning: sendEventList - eventlist cut\n");
 							break;
 						}
 					} // else !sendServiceName
@@ -6710,7 +6710,7 @@ static void *eitThread(void *)
 							else
 							{
 								sendToSleepNow = true;
-								dputs("sendToSleepNow = true")
+								dputs("sendToSleepNow = true");
 							}
 						}
 				}
@@ -7568,7 +7568,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.250 2007/11/14 20:03:54 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.251 2007/11/22 20:53:14 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
