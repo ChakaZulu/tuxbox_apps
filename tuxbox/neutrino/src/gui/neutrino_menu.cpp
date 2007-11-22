@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.12 2007/11/21 21:40:58 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.13 2007/11/22 16:17:06 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -793,7 +793,7 @@ const CMenuOptionChooser::keyval  VOLUMEBAR_DISP_POS_OPTIONS[VOLUMEBAR_DISP_POS_
 	{ 2 , LOCALE_SETTINGS_POS_BOTTOM_LEFT },
 	{ 3 , LOCALE_SETTINGS_POS_BOTTOM_RIGHT },
 	{ 4 , LOCALE_SETTINGS_POS_DEFAULT_CENTER },
-	{ 5 , LOCALE_SETTTING_POS_HIGHER_CENTER },
+	{ 5 , LOCALE_SETTINGS_POS_HIGHER_CENTER },
 	{ 6 , LOCALE_SETTINGS_POS_OFF }
 };
 
