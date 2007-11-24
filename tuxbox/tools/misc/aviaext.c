@@ -1,7 +1,7 @@
 /*
  * Tool for testing the infamous Avia extension device
  *
- * $Id: aviaext.c,v 1.2 2005/01/05 06:02:59 carjay Exp $
+ * $Id: aviaext.c,v 1.3 2007/11/24 14:31:26 seife Exp $
  *
  * Copyright (C) 2004,2005 Carsten Juttner <carjay@gmx.met>
  *
@@ -31,6 +31,9 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <dbox/aviaEXT.h>
+#ifdef AVIA_EXT_AVIA_AVSYNC_GET
+#define HAVE_AVSYNC_IOCTL
+#endif
 
 #define AVIAEXT_DEV "/dev/dbox/aviaEXT"
 const char *digon = "Digital audio output turned on\n";
@@ -39,9 +42,10 @@ const char *digset = "Digital audio output state (0=off,1=on):\n";
 const char *spts = "Avia playback mode set to SPTS\n";
 const char *dualpes = "Avia playback mode set to DualPES\n";
 
+
 void usage(const char *s)
 {
-	printf ("%s version 1.1\n"
+	printf ("%s version 1.2\n"
 			"commandline tool for the aviaEXT-module\n\n"
 			"Usage: %s <command>\n"
 			"Commands:\n"
@@ -52,6 +56,10 @@ void usage(const char *s)
 			"    --avia-dualpes             : sets Avia to DualPES mode\n"
 			"    --avia-spts                : sets Avia to SPTS mode\n"
 			"    --avia-playback-mode-state : returns current Avia playback mode\n"
+#ifdef HAVE_AVSYNC_IOCTL
+			"    --avia-avsync <num>        : sets avsync mode (see avia_av.h),\n"
+			"                                 without argument returns current mode\n"
+#endif
 			"\n",s,s);
 	exit(0);
 }
@@ -101,6 +109,17 @@ int main (int argc, char **argv)
 		} else if (!strncmp(argv[i],"--avia-playback-mode-state",26)){
 			cmd = AVIA_EXT_AVIA_PLAYBACK_MODE_GET;
 			ptr = (void*)&param;
+#ifdef HAVE_AVSYNC_IOCTL
+		} else if (!strncmp(argv[i],"--avia-avsync",12)){
+			i++;
+			if (i < argc) {
+				cmd = AVIA_EXT_AVIA_AVSYNC_SET;
+				param = atoi(argv[i]);
+			} else {
+				cmd = AVIA_EXT_AVIA_AVSYNC_GET;
+				ptr = (void*)&param;
+			}		
+#endif
 		} else {
 			printf ("unknown command: %s\n",argv[i]);
 		}
@@ -117,13 +136,25 @@ int main (int argc, char **argv)
 		};
 		if (msg)
 			printf (msg);
-		if (ptr&&(cmd==AVIA_EXT_IEC_GET)){
-			printf ("%d\n",*(int *)ptr);
-		} else if (ptr&&(cmd==AVIA_EXT_AVIA_PLAYBACK_MODE_GET)){
-			if (*((int*)ptr))
-				printf ("%s\n",spts);
-			else
-				printf ("%s\n",dualpes);
+		if (ptr) {
+			switch (cmd) {
+			case AVIA_EXT_IEC_GET:
+				printf ("%d\n",*(int *)ptr);
+				break;
+			case AVIA_EXT_AVIA_PLAYBACK_MODE_GET:
+				if (*((int*)ptr))
+					printf ("%s\n",spts);
+				else
+					printf ("%s\n",dualpes);
+				break;
+#ifdef HAVE_AVSYNC_IOCTL
+			case AVIA_EXT_AVIA_AVSYNC_GET:
+				printf("%d\n", *(int *)ptr);
+				break;
+#endif
+			default:
+				break;
+			}
 		}
 	}
 	close (fd);
