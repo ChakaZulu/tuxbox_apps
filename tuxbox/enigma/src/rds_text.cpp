@@ -36,7 +36,9 @@ RDSTextDecoder::RDSTextDecoder()
 		sn = new eSocketNotifier(eApp, fd, eSocketNotifier::Read);
 		CONNECT(sn->activated, RDSTextDecoder::process_data);
 	}
-	
+
+	memset(rtp_item, 0, sizeof(rtp_item));
+
 	int x = eSkin::getActive()->queryValue("rds.pos.x", 0);
 	int y = eSkin::getActive()->queryValue("rds.pos.y", 0);
 	int width = eSkin::getActive()->queryValue("rds.pos.width", 0);
