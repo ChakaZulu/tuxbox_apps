@@ -113,7 +113,7 @@ public:
 	// virtual functions for BaseClass
 	virtual std::string 	YWeb_cgi_func(CyhookHandler *hh, std::string ycmd);
 	// virtual functions for HookHandler/Hook
-	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.2 $");}
+	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.3 $");}
 	virtual std::string 	getHookName(void) {return "mod_yparser";}
 	virtual THandleStatus 	Hook_SendResponse(CyhookHandler *hh); 	
 };

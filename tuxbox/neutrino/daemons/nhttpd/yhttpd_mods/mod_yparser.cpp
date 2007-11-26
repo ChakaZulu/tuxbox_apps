@@ -80,7 +80,7 @@ THandleStatus CyParser::Hook_SendResponse(CyhookHandler *hh)
 {
 	hh->status = HANDLED_NONE;
 
-//	log_level_printf(4,"yparser hook start url:%s\n",hh->UrlData["url"].c_str());	
+//	log_level_printf(4,"yparser hook start url:%s\n",hh->UrlData["url"].c_str());
 	init(hh);
 
 	CyParser *yP = new CyParser();		// create a Session
@@ -94,9 +94,9 @@ THandleStatus CyParser::Hook_SendResponse(CyhookHandler *hh)
 	}
 	delete yP;
 
-//	log_level_printf(4,"yparser hook end status:%d\n",(int)hh->status);	
-//	log_level_printf(5,"yparser hook result:%s\n",hh->yresult.c_str());	
-	
+//	log_level_printf(4,"yparser hook end status:%d\n",(int)hh->status);
+//	log_level_printf(5,"yparser hook result:%s\n",hh->yresult.c_str());
+
 	return hh->status;
 }
 
@@ -108,7 +108,7 @@ void CyParser::Execute(CyhookHandler *hh)
 	int index = -1;
 	std::string filename = hh->UrlData["filename"];
 
-	log_level_printf(4,"yParser.Execute filename%s\n",filename.c_str());	
+	log_level_printf(4,"yParser.Execute filename%s\n",filename.c_str());
 	filename = string_tolower(filename);
 
 	// debugging informations
@@ -151,7 +151,7 @@ void CyParser::Execute(CyhookHandler *hh)
 	{
 		(this->*yCgiCallList[index].pfunc)(hh);
 		return;
-	}	
+	}
 }
 
 //=============================================================================
@@ -364,6 +364,7 @@ std::string  CyParser::cgi_cmd_parsing(CyhookHandler *hh, std::string html_templ
 //	var-set:<varname>=<varvalue>
 //	global-var-get:<varname>
 //	global-var-set:<varname>=<varvalue>
+//	file-action:<filename>;<action=add|addend|delete>[;<content>]
 //-----------------------------------------------------------------------------
 
 std::string  CyParser::YWeb_cgi_cmd(CyhookHandler *hh, std::string ycmd)
@@ -523,7 +524,12 @@ std::string  CyParser::YWeb_cgi_cmd(CyhookHandler *hh, std::string ycmd)
 			yresult = "ycgi-type unknown";
 	}
 	else if (hh->ParamList[ycmd] != "")
-		yresult = hh->ParamList[ycmd];
+	{
+		if((hh->ParamList[ycmd]).find("script") == std::string::npos)
+			yresult = hh->ParamList[ycmd];
+		else
+			yresult = "<!--Not Allowed script in "+ycmd+" -->";
+	}
 
 	return yresult;
 }
@@ -573,7 +579,7 @@ std::string  CyParser::YWeb_cgi_include_block(std::string filename, std::string 
 	yresult = ydefault;
 
 	stat(filename.c_str(), &attrib);
-	
+
 	pthread_mutex_lock( &yParser_mutex );
 	if( (attrib.st_mtime == yCached_blocks_attrib.st_mtime) && (filename == yCached_blocks_filename) )
 	{
@@ -681,7 +687,7 @@ std::string CyParser::YexecuteScript(CyhookHandler *hh, std::string cmd)
 
 //=============================================================================
 // y-func : Dispatching
-// TODO: new functions for 
+// TODO: new functions for
 //	- Compiler-Time Settings like *httpd.conf etc
 //	- Versions of httpd, yParser, Hooks,
 //=============================================================================

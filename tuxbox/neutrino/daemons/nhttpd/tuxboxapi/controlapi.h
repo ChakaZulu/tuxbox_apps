@@ -43,7 +43,7 @@ private:
 	friend class CNeutrinoWebserver; // for timer /fb/ compatibility
 	void doModifyTimer(CyhookHandler *hh);
 	void doNewTimer(CyhookHandler *hh);
-	
+
 	//yweb
 	void YWeb_SendVideoStreamingPids(CyhookHandler *hh, int apid_no);
 	void YWeb_SendRadioStreamingPid(CyhookHandler *hh);
@@ -97,7 +97,7 @@ private:
 protected:
 	static const unsigned int PLUGIN_DIR_COUNT = 5;
 	static std::string PLUGIN_DIRS[PLUGIN_DIR_COUNT];
-	CNeutrinoAPI	*NeutrinoAPI;	
+	CNeutrinoAPI	*NeutrinoAPI;
 
 	void init(CyhookHandler *hh);
 	void Execute(CyhookHandler *hh);
@@ -108,8 +108,9 @@ public:
 
 	// virtual functions for HookHandler/Hook
 	virtual std::string getHookName(void) {return std::string("mod_ControlAPI");}
-	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.4 $");}
-	virtual THandleStatus Hook_SendResponse(CyhookHandler *hh); 
+	virtual std::string 	getHookVersion(void) {return std::string("$Revision: 1.5 $");}
+	virtual THandleStatus Hook_SendResponse(CyhookHandler *hh);
+	virtual THandleStatus Hook_PrepareResponse(CyhookHandler *hh);
 };
 
 #endif /* __nhttpd_neutrinocontrolapi_hpp__ */

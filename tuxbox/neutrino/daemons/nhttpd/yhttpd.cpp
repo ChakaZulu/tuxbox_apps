@@ -14,7 +14,7 @@
 #include "ylogging.h"
 #include "yhook.h"
 
-#ifdef Y_CONFIG_USE_YPARSER	
+#ifdef Y_CONFIG_USE_YPARSER
 #include "mod_yparser.h"
 static CyParser yParser;
 #endif
@@ -44,12 +44,12 @@ static CTesthook *testhook = NULL;
 static CmWebLog *weblog = NULL;
 #endif
 
-#ifdef Y_CONFIG_USE_SENDFILE	
+#ifdef Y_CONFIG_USE_SENDFILE
 #include "mod_sendfile.h"
 static CmodSendfile *mod_sendfile = NULL;
 #endif
 
-#ifdef Y_CONFIG_USE_CACHE	
+#ifdef Y_CONFIG_USE_CACHE
 #include "mod_cache.h"
 static CmodCache mod_cache; // static instance
 #endif
@@ -73,7 +73,7 @@ static void sig_catch(int msignal)
 	switch (msignal) {
 //	case SIGTERM:
 //	case SIGINT:
-		
+
 	case SIGPIPE:
 		aprintf("got signal PIPE, nice!\n");
 		break;
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 			default:
 				return EXIT_SUCCESS;
 			}
-	
+
 			if (setsid() == -1)
 			{
 				dperror("Error setsid");
@@ -179,11 +179,11 @@ int main(int argc, char **argv)
 			}
 		}
 		dprintf("Start in Debug-Mode\n"); // non forked debugging loop
-		
+
 		yhttpd->run();
 	}
 	delete yhttpd;
-	
+
 	aprintf("Main end\n");
 	return EXIT_SUCCESS;
 }
@@ -218,7 +218,7 @@ bool Cyhttpd::Configure()
 		struct group *grp = NULL;
 		std::string username = ConfigList["server.user_name"];
 		std::string groupname= ConfigList["server.group_name"];
-		
+
 		// get user data
 		if(username != "")
 		{
@@ -237,7 +237,7 @@ bool Cyhttpd::Configure()
 				return false;
 			}
 		}
-#endif		
+#endif
 // change root directory
 #ifdef Y_CONFIG_FEATURE_CHROOT
 		if(!ConfigList["server.chroot"].empty())
@@ -256,12 +256,12 @@ bool Cyhttpd::Configure()
 				return false;
 			}
 		}
-#endif		
+#endif
 #ifdef Y_CONFIG_FEATURE_HTTPD_USER
 		if(username != "" && pwd != NULL && grp != NULL)
 		{
 			log_level_printf(2, "set user and groups\n");
-	
+
 			// drop root privileges
 			setgid(grp->gr_gid);
 			setgroups(0, NULL);
@@ -294,7 +294,7 @@ void Cyhttpd::run()
 	else
 		aprintf("Error initializing WebServer\n");
 }
-		
+
 //-----------------------------------------------------------------------------
 // Show Version Text and Number
 //-----------------------------------------------------------------------------
@@ -319,7 +319,7 @@ void Cyhttpd::usage(FILE *dest)
 }
 
 //-----------------------------------------------------------------------------
-// Stop WebServer 
+// Stop WebServer
 //-----------------------------------------------------------------------------
 void Cyhttpd::stop_webserver()
 {
@@ -350,12 +350,12 @@ void Cyhttpd::hooks_attach()
 	CyhookHandler::attach(NeutrinoAPI->NeutrinoYParser);
 	CyhookHandler::attach(NeutrinoAPI->ControlAPI);
 #else
-#ifdef Y_CONFIG_USE_YPARSER	
+#ifdef Y_CONFIG_USE_YPARSER
 	CyhookHandler::attach(&yParser);
 #endif
 #endif
 
-#ifdef Y_CONFIG_USE_CACHE	
+#ifdef Y_CONFIG_USE_CACHE
 	CyhookHandler::attach(&mod_cache);
 #endif
 
@@ -363,14 +363,14 @@ void Cyhttpd::hooks_attach()
 	mod_sendfile = new CmodSendfile();
 	CyhookHandler::attach(mod_sendfile);
 #endif
-#ifdef Y_CONFIG_USE_WEBLOG	
+#ifdef Y_CONFIG_USE_WEBLOG
 	weblog = new CmWebLog();
 	CyhookHandler::attach(weblog);
 #endif
 }
 
 //-----------------------------------------------------------------------------
-// Detach hooks & Destroy 
+// Detach hooks & Destroy
 //-----------------------------------------------------------------------------
 void Cyhttpd::hooks_detach()
 {
@@ -387,12 +387,12 @@ void Cyhttpd::hooks_detach()
 #ifdef CONFIG_SYSTEM_TUXBOX
 	CyhookHandler::detach(NeutrinoAPI->NeutrinoYParser);
 #else
-#ifdef Y_CONFIG_USE_YPARSER	
+#ifdef Y_CONFIG_USE_YPARSER
 	CyhookHandler::detach(&yParser);
 #endif
 #endif
 
-#ifdef Y_CONFIG_USE_CACHE	
+#ifdef Y_CONFIG_USE_CACHE
 	CyhookHandler::detach(&mod_cache);
 #endif
 
@@ -400,7 +400,7 @@ void Cyhttpd::hooks_detach()
 	CyhookHandler::detach(mod_sendfile);
 #endif
 
-#ifdef Y_CONFIG_USE_WEBLOG	
+#ifdef Y_CONFIG_USE_WEBLOG
 	CyhookHandler::detach(weblog);
 	delete weblog;
 #endif
@@ -410,9 +410,10 @@ void Cyhttpd::hooks_detach()
 // Read Webserver Configurationfile
 // Call "Hooks_ReadConfig" so Hooks can read/write own Configuration Values
 //-----------------------------------------------------------------------------
+#define CONF_VERSION 2
 void Cyhttpd::ReadConfig(void)
 {
-	log_level_printf(3,"ReadConfig Start\n");	
+	log_level_printf(3,"ReadConfig Start\n");
 	CConfigFile *Config = new CConfigFile(',');
 	bool have_config = false;
 	if(access(HTTPD_CONFIGFILE,4) == 0)
@@ -420,13 +421,14 @@ void Cyhttpd::ReadConfig(void)
 	Config->loadConfig(HTTPD_CONFIGFILE);
 	// convert old config files
 	if(have_config)
-		if(Config->getInt32("Port", 0) != 0)
+	{
+		if(Config->getInt32("configfile.version",0) == 0)
 		{
 			CConfigFile OrgConfig = *Config;
 			Config->clear();
-			
+
 			Config->setInt32("server.log.loglevel", OrgConfig.getInt32("LogLevel", 0));
-			Config->setString("configfile.version", "1");
+			Config->setInt32("configfile.version", CONF_VERSION);
 			Config->setString("webserver.websites", "WebsiteMain");
 			Config->setBool("webserver.threading", OrgConfig.getBool("THREADS", true));
 			Config->setInt32("WebsiteMain.port",OrgConfig.getInt32("Port", HTTPD_STANDARD_PORT));
@@ -442,12 +444,20 @@ void Cyhttpd::ReadConfig(void)
 			Config->setString("mod_auth.password", OrgConfig.getString("AuthPassword", AUTHPASSWORD));
 			Config->setString("mod_auth.no_auth_client", OrgConfig.getString("NoAuthClient", ""));
 			Config->setString("mod_auth.authenticate", OrgConfig.getString("Authenticate", "false"));
-	
+
 			Config->setString("mod_sendfile.mime_types", HTTPD_SENDFILE_EXT);
-	
+
 			Config->saveConfig(HTTPD_CONFIGFILE);
-				
+
 		}
+		if (Config->getInt32("configfile.version") < 2)
+		{
+			Config->setString("mod_sendfile.mime_types", HTTPD_SENDFILE_EXT);
+			Config->setInt32("configfile.version", CONF_VERSION);
+			Config->setString("mod_sendfile.sendAll","false");
+			Config->saveConfig(HTTPD_CONFIGFILE);
+		}
+	}
 	// configure debugging & logging
 	if(CLogging::getInstance()->LogLevel == 0)
 		CLogging::getInstance()->LogLevel = Config->getInt32("server.log.loglevel", 0);
@@ -457,7 +467,7 @@ void Cyhttpd::ReadConfig(void)
 	// informational use
 	ConfigList["WebsiteMain.port"]= itoa(Config->getInt32("WebsiteMain.port", HTTPD_STANDARD_PORT));
 	ConfigList["webserver.threading"]= Config->getString("webserver.threading", "true");
-	ConfigList["configfile.version"]= Config->getString("configfile.version", "1");
+	ConfigList["configfile.version"]= Config->getInt32("configfile.version", CONF_VERSION);
 	ConfigList["server.log.loglevel"]= itoa(Config->getInt32("server.log.loglevel", 0));
 	ConfigList["server.no_keep-alive_ips"]= Config->getString("server.no_keep-alive_ips", "");
 	webserver->conf_no_keep_alive_ips = Config->getStringVector("server.no_keep-alive_ips");
@@ -470,7 +480,7 @@ void Cyhttpd::ReadConfig(void)
 	ConfigList["SSL"]		= Config->getString("WebsiteMain.ssl", "false");
 	ConfigList["SSL_pemfile"]	= Config->getString("WebsiteMain.ssl_pemfile", SSL_PEMFILE);
 	ConfigList["SSL_CA_file"]	= Config->getString("WebsiteMain.ssl_ca_file", SSL_CA_FILE);
-	
+
 	CySocket::SSL_pemfile 		= ConfigList["SSL_pemfile"];
 	CySocket::SSL_CA_file 		= ConfigList["SSL_CA_file"];
 	if(ConfigList["SSL"] == "true")
@@ -483,10 +493,10 @@ void Cyhttpd::ReadConfig(void)
 
 	// Read App specifig settings by Hook
 	CyhookHandler::Hooks_ReadConfig(Config, ConfigList);
-	
+
 	// Save if new defaults are set
 	if (!have_config)
 		Config->saveConfig(HTTPD_CONFIGFILE);
-	log_level_printf(3,"ReadConfig End\n");	
+	log_level_printf(3,"ReadConfig End\n");
 	delete Config;
 }

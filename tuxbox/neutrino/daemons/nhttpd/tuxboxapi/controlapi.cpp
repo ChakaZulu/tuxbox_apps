@@ -67,6 +67,19 @@ void CControlAPI::init(CyhookHandler *hh)
 // Hooks!
 //=============================================================================
 //-----------------------------------------------------------------------------
+THandleStatus CControlAPI::Hook_PrepareResponse(CyhookHandler *hh)
+{
+	init(hh);
+
+	if(hh->UrlData["path"] == "/control/"
+		|| hh->UrlData["path"] == "/cgi-bin/"
+		|| hh->UrlData["path"] == "/fb/"
+		)
+		return HANDLED_READY;
+	else
+		return HANDLED_NONE;
+}
+//-----------------------------------------------------------------------------
 // HOOK: response_hook Handler
 // This is the main dispatcher for this module
 //-----------------------------------------------------------------------------
@@ -1935,7 +1948,7 @@ void CControlAPI::doNewTimer(CyhookHandler *hh)
 			// get Default Recordingdir
 			CConfigFile *Config = new CConfigFile(',');
 			Config->loadConfig(NEUTRINO_CONFIGFILE);
-			_rec_dir = Config->getString("network_nfs_recordingdir", "/mnt/filme");
+			_rec_dir = Config->getString("recording_dir_0", "/mnt/filme");
 		}
 		if(changeApids)
 			eventinfo.apids = apids;

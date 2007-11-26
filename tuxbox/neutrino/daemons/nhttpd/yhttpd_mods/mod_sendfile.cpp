@@ -36,8 +36,8 @@
 //      c) If the variant has not been modified since a valid If-
 //         Modified-Since date, the server SHOULD return a 304 (Not
 //         Modified) response.
-//         
-//  yjogol: ASSUMPTION Date-Format is ONLY RFC 1123 compatible!       
+//
+//  yjogol: ASSUMPTION Date-Format is ONLY RFC 1123 compatible!
 //=============================================================================
 
 // system
@@ -69,15 +69,15 @@ THandleStatus CmodSendfile::Hook_PrepareResponse(CyhookHandler *hh)
 	hh->status = HANDLED_NONE;
 
 	int filed;
-	log_level_printf(4,"mod_sendfile prepare hook start url:%s\n",hh->UrlData["fullurl"].c_str());	
+	log_level_printf(4,"mod_sendfile prepare hook start url:%s\n",hh->UrlData["fullurl"].c_str());
 	std::string mime = sendfileTypes[hh->UrlData["fileext"]];
-	if(mime != "")
+	if(mime != "" || (hh->WebserverConfigList["mod_sendfile.sendAll"] == "true") && hh->UrlData["fileext"] != "yhtm")
 	{
 		//TODO: Check allowed directories / actually in GetFileName
 		// build filename
 		std::string fullfilename = GetFileName(hh, hh->UrlData["path"], hh->UrlData["filename"]);
-		
-		if( (filed = OpenFile(hh, fullfilename) ) != -1 ) //can access file?
+		filed = OpenFile(hh, fullfilename);
+		if( filed != -1 ) //can access file?
 		{
 			struct stat statbuf;
 			hh->LastModified = (time_t)0;
@@ -98,16 +98,16 @@ THandleStatus CmodSendfile::Hook_PrepareResponse(CyhookHandler *hh)
 				struct tm mod;
 				if(strptime(hh->HeaderList["If-Modified-Since"].c_str(), RFC1123FMT, &mod) != NULL)
 				{
-					mod.tm_isdst = 0; // daylight saving flag! 
+					mod.tm_isdst = 0; // daylight saving flag!
 					if_modified_since = mktime(&mod);
 				}
 			}
-	
+
 			// normalize obj_last_modified to GMT
 			struct tm *tmp = gmtime(&(hh->LastModified));
 			time_t LastModifiedGMT = mktime(tmp);
 			bool modified = (if_modified_since == (time_t)-1) || (if_modified_since < LastModifiedGMT);
-	
+
 			// Send normal or not-modified header
 			if(modified)
 			{
@@ -123,19 +123,20 @@ THandleStatus CmodSendfile::Hook_PrepareResponse(CyhookHandler *hh)
 			hh->SetError(HTTP_NOT_FOUND);
 		}
 	}
-	log_level_printf(4,"mod_sendfile prepare hook end status:%d\n",(int)hh->status);	
-	
+	log_level_printf(4,"mod_sendfile prepare hook end status:%d\n",(int)hh->status);
+
 	return hh->status;
 }
 
 //-----------------------------------------------------------------------------
-// HOOK: Hook_ReadConfig 
+// HOOK: Hook_ReadConfig
 // This hook ist called from ReadConfig
 //-----------------------------------------------------------------------------
 THandleStatus CmodSendfile::Hook_ReadConfig(CConfigFile *Config, CStringList &ConfigList)
 {
 	std::string exttypes = Config->getString("mod_sendfile.mime_types", HTTPD_SENDFILE_EXT);
 	ConfigList["mod_sendfile.mime_types"] = exttypes;
+	ConfigList["mod_sendfile.sendAll"] = Config->getString("mod_sendfile.sendAll", HTTPD_SENDFILE_ALL);
 
 	bool ende = false;
 	std::string item, ext, mime;
@@ -169,6 +170,10 @@ std::string CmodSendfile::GetFileName(CyhookHandler *hh, std::string path, std::
 		tmpfilename = hh->WebserverConfigList["PublicDocumentRoot"] + tmpfilename;
 	else if(access(std::string(hh->WebserverConfigList["PrivatDocumentRoot"] + tmpfilename).c_str(),4) == 0)
 		tmpfilename = hh->WebserverConfigList["PrivatDocumentRoot"] + tmpfilename;
+	else if( access(std::string(hh->WebserverConfigList["PublicDocumentRoot"] + tmpfilename + ".gz").c_str(),4) == 0)
+		tmpfilename = hh->WebserverConfigList["PublicDocumentRoot"] + tmpfilename + ".gz";
+	else if(access(std::string(hh->WebserverConfigList["PrivatDocumentRoot"] + tmpfilename + ".gz").c_str(),4) == 0)
+		tmpfilename = hh->WebserverConfigList["PrivatDocumentRoot"] + tmpfilename + ".gz";
 #ifdef Y_CONFIG_FEATUE_SENDFILE_CAN_ACCESS_ALL
 	else if(access(tmpfilename.c_str(),4) == 0)
 		;
@@ -209,6 +214,6 @@ std::string CmodSendfile::GetContentType(std::string ext)
 		{
 			ctype = MimeFileExtensions[i].mime;
 			break;
-		}	
+		}
 	return ctype;
 }
