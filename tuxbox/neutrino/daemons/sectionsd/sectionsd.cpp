@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.251 2007/11/22 20:53:14 houdini Exp $
+//  $Id: sectionsd.cpp,v 1.252 2007/11/30 19:20:21 seife Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -2361,7 +2361,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.251 2007/11/22 20:53:14 houdini Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.252 2007/11/30 19:20:21 seife Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -7288,102 +7288,99 @@ static void *houseKeepingThread(void *)
 
 			unlockEvents();
 
-			if (debug)
-			{
-				readLockServices();
-				dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
-				//dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
-				dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
+			readLockServices();
+			dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
+			//dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
+			dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
 
-				xmlDocPtr bouquet_parser = NULL;
-				xmlDocPtr current_parser = NULL;
+			xmlDocPtr bouquet_parser = NULL;
+			xmlDocPtr current_parser = NULL;
 
-				for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s !=  mySIservicesOrderUniqueKey.end(); s++) {
-					printf("ONID: %04x TSID: %04x SID: %04x Prov: %s Name: %s actual: %d\n",
-						s->second->original_network_id,
-						s->second->transport_stream_id,
-						s->second->service_id,
-						s->second->providerName.c_str(),
-						s->second->serviceName.c_str(),
-						(int) s->second->is_actual);
-					readLockMessaging();
-					if (((s->second->is_actual & 8) == 8) && (!messaging_zap_detected)) {
-						unlockMessaging();
-					
-						if (!bouquet_parser) {
-							tmp = fopen(CURRENTBOUQUETS_XML, "r");
-							if (tmp) {
-								fclose(tmp);
-								current_parser =
-									parseXmlFile(CURRENTBOUQUETS_XML);
-							}
-							bouquet_parser = parseXmlFile(BOUQUETS_XML);
+			for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s !=  mySIservicesOrderUniqueKey.end(); s++) {
+				printf("ONID: %04x TSID: %04x SID: %04x Prov: %s Name: %s actual: %d\n",
+					s->second->original_network_id,
+					s->second->transport_stream_id,
+					s->second->service_id,
+					s->second->providerName.c_str(),
+					s->second->serviceName.c_str(),
+					(int) s->second->is_actual);
+				readLockMessaging();
+				if (((s->second->is_actual & 8) == 8) && (!messaging_zap_detected)) {
+					unlockMessaging();
+				
+					if (!bouquet_parser) {
+						tmp = fopen(CURRENTBOUQUETS_XML, "r");
+						if (tmp) {
+							fclose(tmp);
+							current_parser =
+								parseXmlFile(CURRENTBOUQUETS_XML);
 						}
-						snprintf(servicename, MAX_SIZE_SERVICENAME, 
-									s->second->providerName.c_str());
-						if (AddServiceToAutoBouquets(&servicename[0],
-									s->second->original_network_id,
-									s->second->transport_stream_id,
-									s->second->service_id,
-									bouquet_parser,
-									current_parser)) {
-							readLockMessaging();
-							if (!messaging_zap_detected) {
-								unlockMessaging();
-								current_parser =
-									parseXmlFile(CURRENTBOUQUETS_XML);
-							}
-							else
-								unlockMessaging();
-						}
-						unlockServices();
-						writeLockServices();
-						s->second->is_actual = (s->second->is_actual & 7);
-						unlockServices();
-						readLockServices();
+						bouquet_parser = parseXmlFile(BOUQUETS_XML);
 					}
-					else
-						unlockMessaging();
-
-				}
-
-				unlockServices();
-				if (bouquet_parser)
-					xmlFreeDoc(bouquet_parser);
-				if (current_parser)
-					xmlFreeDoc(current_parser);
-				/*
-				lockTransponders();
-				for (MySItranspondersOrderUniqueKey::iterator s = mySItranspondersOrderUniqueKey.begin(); s != mySItranspondersOrderUniqueKey.end(); s++)
-				{
-//					tsid = s->second->transport_stream_id;
-//					onid = s->second->original_network_id;
-					const char *ddp = &s->second->delivery_descriptor[0];
-
-					//printf("Descriptor_type: %02x\n", s->second->delivery_type);
-
-					switch (s->second->delivery_type) {
-						case 0x43:
-							struct satellite_delivery_descriptor *sdd = (struct satellite_delivery_descriptor *)ddp;
-							printf("Sat TP - Orbital %04x ONID: %04x TSID: %04x\n",
-								(sdd->orbital_pos_hi << 8) | sdd->orbital_pos_lo,
+					snprintf(servicename, MAX_SIZE_SERVICENAME, 
+								s->second->providerName.c_str());
+					if (AddServiceToAutoBouquets(&servicename[0],
 								s->second->original_network_id,
-								s->second->transport_stream_id);
-
-						//	if (!sdd->west_east_flag)
-						//		position = -position;
-						//	provider = getProvbyPosition(xmlDocGetRootElement(service_parser)->xmlChildrenNode, //position);
-							break;
-						case 0x44:
-							//provider = xmlDocGetRootElement(service_parser)->xmlChildrenNode;
-							break;
-						default:
-							break;
+								s->second->transport_stream_id,
+								s->second->service_id,
+								bouquet_parser,
+								current_parser)) {
+						readLockMessaging();
+						if (!messaging_zap_detected) {
+							unlockMessaging();
+							current_parser =
+								parseXmlFile(CURRENTBOUQUETS_XML);
+						}
+						else
+							unlockMessaging();
 					}
+					unlockServices();
+					writeLockServices();
+					s->second->is_actual = (s->second->is_actual & 7);
+					unlockServices();
+					readLockServices();
 				}
-				unlockTransponders();
-				*/
+				else
+					unlockMessaging();
+
 			}
+
+			unlockServices();
+			if (bouquet_parser)
+				xmlFreeDoc(bouquet_parser);
+			if (current_parser)
+				xmlFreeDoc(current_parser);
+			/*
+			lockTransponders();
+			for (MySItranspondersOrderUniqueKey::iterator s = mySItranspondersOrderUniqueKey.begin(); s != mySItranspondersOrderUniqueKey.end(); s++)
+			{
+//				tsid = s->second->transport_stream_id;
+//				onid = s->second->original_network_id;
+				const char *ddp = &s->second->delivery_descriptor[0];
+
+				//printf("Descriptor_type: %02x\n", s->second->delivery_type);
+
+				switch (s->second->delivery_type) {
+					case 0x43:
+						struct satellite_delivery_descriptor *sdd = (struct satellite_delivery_descriptor *)ddp;
+						printf("Sat TP - Orbital %04x ONID: %04x TSID: %04x\n",
+							(sdd->orbital_pos_hi << 8) | sdd->orbital_pos_lo,
+							s->second->original_network_id,
+							s->second->transport_stream_id);
+
+					//	if (!sdd->west_east_flag)
+					//		position = -position;
+					//	provider = getProvbyPosition(xmlDocGetRootElement(service_parser)->xmlChildrenNode, //position);
+						break;
+					case 0x44:
+						//provider = xmlDocGetRootElement(service_parser)->xmlChildrenNode;
+						break;
+					default:
+						break;
+				}
+			}
+			unlockTransponders();
+			*/
 
 			if (debug)
 			{
@@ -7568,7 +7565,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.251 2007/11/22 20:53:14 houdini Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.252 2007/11/30 19:20:21 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
