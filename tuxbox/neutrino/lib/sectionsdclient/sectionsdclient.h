@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.43 2007/05/23 16:43:12 papst Exp $
+  $Id: sectionsdclient.h,v 1.44 2007/12/01 13:36:34 houdini Exp $
 
   License: GPL
 
@@ -216,7 +216,8 @@ class CSectionsdClient : private CBasicClient
 	void unRegisterEvent(const unsigned int eventID, const unsigned int clientID);
 
 	void setConfig(const epg_config config);
-	
+
+	std::string getStatusinformation(void);
 };
 
 class CEPGData

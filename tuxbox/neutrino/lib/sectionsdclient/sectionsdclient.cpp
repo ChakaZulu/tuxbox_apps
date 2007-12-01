@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.56 2007/11/04 12:25:06 seife Exp $
+  $Id: sectionsdclient.cpp,v 1.57 2007/12/01 13:36:34 houdini Exp $
 
   License: GPL
 
@@ -67,13 +67,13 @@ bool CSectionsdClient::send(const unsigned char command, const char* data, const
 
 	open_connection(); // if the return value is false, the next send_data call will return false, too
 
-        if (!send_data((char*)&msgHead, sizeof(msgHead)))
-            return false;
+	if (!send_data((char*)&msgHead, sizeof(msgHead)))
+		return false;
 
-        if (size != 0)
-            return send_data(data, size);
+	if (size != 0)
+		return send_data(data, size);
 
-        return true;
+	return true;
 }
 
 void CSectionsdClient::registerEvent(const unsigned int eventID, const unsigned int clientID, const char * const udsName)
@@ -807,3 +807,32 @@ void CSectionsdClient::setConfig(const epg_config config)
 	delete[] pData;
 }
 
+std::string CSectionsdClient::getStatusinformation(void)
+{
+	std::string ret = "";
+
+	if (send(sectionsd::dumpStatusinformation))
+	{
+		int nBufSize = readResponse();
+		if( nBufSize > 0)
+		{
+			char* pData = new char[nBufSize];
+			if (!receive_data(pData, nBufSize))
+			{
+				/* receive_data might have timed out etc. */
+				delete[] pData;
+				close_connection();
+				return false;
+			}
+
+			ret = pData; 
+			delete[] pData;
+		}
+		else
+			printf("no response from sectionsd\n");
+	}
+
+	close_connection();
+	
+	return ret;
+}
