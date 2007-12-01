@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.cpp,v 1.5 2007/11/16 10:50:39 ecosys Exp $ 
+	$Id: themes.cpp,v 1.6 2007/12/01 13:22:21 houdini Exp $ 
 
 */
 
@@ -179,43 +179,87 @@ void CThemes::Show()
 void CThemes::rememberOldTheme(bool remember)
 {
 	if ( remember ) {
-		int tmpTheme[] = {g_settings.menu_Head_alpha,g_settings.menu_Head_red,g_settings.menu_Head_green,
-		g_settings.menu_Head_blue,g_settings.menu_Head_Text_alpha,g_settings.menu_Head_Text_red,
-		g_settings.menu_Head_Text_green,g_settings.menu_Head_Text_blue,g_settings.menu_Content_alpha,
-		g_settings.menu_Content_red,g_settings.menu_Content_green,g_settings.menu_Content_blue,
-		g_settings.menu_Content_Text_alpha,g_settings.menu_Content_Text_red,g_settings.menu_Content_Text_green,
-		g_settings.menu_Content_Text_blue,g_settings.menu_Content_Selected_alpha,g_settings.menu_Content_Selected_red,
-		g_settings.menu_Content_Selected_green,g_settings.menu_Content_Selected_blue,g_settings.menu_Content_Selected_Text_alpha,
-		g_settings.menu_Content_Selected_Text_red,g_settings.menu_Content_Selected_Text_green,g_settings.menu_Content_Selected_Text_blue,
-		g_settings.menu_Content_inactive_alpha,g_settings.menu_Content_inactive_red,g_settings.menu_Content_inactive_green,
-		g_settings.menu_Content_inactive_blue,g_settings.menu_Content_inactive_Text_alpha,g_settings.menu_Content_inactive_Text_red,
-		g_settings.menu_Content_inactive_Text_green,g_settings.menu_Content_inactive_Text_blue,g_settings.infobar_alpha,
-		g_settings.infobar_red,g_settings.infobar_green,g_settings.infobar_blue,
-		g_settings.infobar_Text_alpha,g_settings.infobar_Text_red,g_settings.infobar_Text_green,g_settings.infobar_Text_blue};
-		for ( int i = 0; i < 40; i++ ) {
-			oldThemeValues[i] = tmpTheme[i];
-		}
+		oldThemeValues[0]  = g_settings.menu_Head_alpha;
+		oldThemeValues[1]  = g_settings.menu_Head_red;
+		oldThemeValues[2]  = g_settings.menu_Head_green;
+		oldThemeValues[3]  = g_settings.menu_Head_blue;
+		oldThemeValues[4]  = g_settings.menu_Head_Text_alpha;
+		oldThemeValues[5]  = g_settings.menu_Head_Text_red;
+		oldThemeValues[6]  = g_settings.menu_Head_Text_green;
+		oldThemeValues[7]  = g_settings.menu_Head_Text_blue;
+		oldThemeValues[8]  = g_settings.menu_Content_alpha;
+		oldThemeValues[9]  = g_settings.menu_Content_red;
+		oldThemeValues[10] = g_settings.menu_Content_green;
+		oldThemeValues[11] = g_settings.menu_Content_blue;
+		oldThemeValues[12] = g_settings.menu_Content_Text_alpha;
+		oldThemeValues[13] = g_settings.menu_Content_Text_red;
+		oldThemeValues[14] = g_settings.menu_Content_Text_green;
+		oldThemeValues[15] = g_settings.menu_Content_Text_blue;
+		oldThemeValues[16] = g_settings.menu_Content_Selected_alpha;
+		oldThemeValues[17] = g_settings.menu_Content_Selected_red;
+		oldThemeValues[18] = g_settings.menu_Content_Selected_green;
+		oldThemeValues[19] = g_settings.menu_Content_Selected_blue;
+		oldThemeValues[20] = g_settings.menu_Content_Selected_Text_alpha;
+		oldThemeValues[21] = g_settings.menu_Content_Selected_Text_red;
+		oldThemeValues[22] = g_settings.menu_Content_Selected_Text_green;
+		oldThemeValues[23] = g_settings.menu_Content_Selected_Text_blue;
+		oldThemeValues[24] = g_settings.menu_Content_inactive_alpha;
+		oldThemeValues[25] = g_settings.menu_Content_inactive_red;
+		oldThemeValues[26] = g_settings.menu_Content_inactive_green;
+		oldThemeValues[27] = g_settings.menu_Content_inactive_blue;
+		oldThemeValues[28] = g_settings.menu_Content_inactive_Text_alpha;
+		oldThemeValues[29] = g_settings.menu_Content_inactive_Text_red;
+		oldThemeValues[30] = g_settings.menu_Content_inactive_Text_green;
+		oldThemeValues[31] = g_settings.menu_Content_inactive_Text_blue;
+		oldThemeValues[32] = g_settings.infobar_alpha;
+		oldThemeValues[33] = g_settings.infobar_red;
+		oldThemeValues[34] = g_settings.infobar_green;
+		oldThemeValues[35] = g_settings.infobar_blue;
+		oldThemeValues[36] = g_settings.infobar_Text_alpha;
+		oldThemeValues[37] = g_settings.infobar_Text_red;
+		oldThemeValues[38] = g_settings.infobar_Text_green;
+		oldThemeValues[39] = g_settings.infobar_Text_blue;
 	} else {
-		g_settings.menu_Head_alpha = oldThemeValues[0]; g_settings.menu_Head_red = oldThemeValues[1];
-		g_settings.menu_Head_green = oldThemeValues[2]; g_settings.menu_Head_blue = oldThemeValues[3];
-		g_settings.menu_Head_Text_alpha = oldThemeValues[4]; g_settings.menu_Head_Text_red = oldThemeValues[5];
-		g_settings.menu_Head_Text_green = oldThemeValues[6]; g_settings.menu_Head_Text_blue = oldThemeValues[7];
-		g_settings.menu_Content_alpha = oldThemeValues[8]; g_settings.menu_Content_red = oldThemeValues[9];
-		g_settings.menu_Content_green = oldThemeValues[10]; g_settings.menu_Content_blue = oldThemeValues[11];
-		g_settings.menu_Content_Text_alpha = oldThemeValues[12]; g_settings.menu_Content_Text_red = oldThemeValues[13];
-		g_settings.menu_Content_Text_green = oldThemeValues[14]; g_settings.menu_Content_Text_blue = oldThemeValues[15];
-		g_settings.menu_Content_Selected_alpha = oldThemeValues[16]; g_settings.menu_Content_Selected_red = oldThemeValues[17];
-		g_settings.menu_Content_Selected_green = oldThemeValues[18]; g_settings.menu_Content_Selected_blue = oldThemeValues[19];
-		g_settings.menu_Content_Selected_Text_alpha = oldThemeValues[20]; g_settings.menu_Content_Selected_Text_red = oldThemeValues[21];
-		g_settings.menu_Content_Selected_Text_green = oldThemeValues[22]; g_settings.menu_Content_Selected_Text_blue = oldThemeValues[23];
-		g_settings.menu_Content_inactive_alpha = oldThemeValues[24]; g_settings.menu_Content_inactive_red = oldThemeValues[25];
-		g_settings.menu_Content_inactive_green = oldThemeValues[26]; g_settings.menu_Content_inactive_blue = oldThemeValues[27];
-		g_settings.menu_Content_inactive_Text_alpha = oldThemeValues[28]; g_settings.menu_Content_inactive_Text_red = oldThemeValues[29];
-		g_settings.menu_Content_inactive_Text_green = oldThemeValues[30]; g_settings.menu_Content_inactive_Text_blue = oldThemeValues[31];
-		g_settings.infobar_alpha = oldThemeValues[32]; g_settings.infobar_red = oldThemeValues[33];
-		g_settings.infobar_green = oldThemeValues[34]; g_settings.infobar_blue = oldThemeValues[35];
-		g_settings.infobar_Text_alpha = oldThemeValues[36]; g_settings.infobar_Text_red = oldThemeValues[37];
-		g_settings.infobar_Text_green = oldThemeValues[38]; g_settings.infobar_Text_blue = oldThemeValues[39];
+		g_settings.menu_Head_alpha 			= oldThemeValues[0];
+		g_settings.menu_Head_red 			= oldThemeValues[1];
+		g_settings.menu_Head_green 			= oldThemeValues[2];
+		g_settings.menu_Head_blue 			= oldThemeValues[3];
+		g_settings.menu_Head_Text_alpha 		= oldThemeValues[4];
+		g_settings.menu_Head_Text_red 			= oldThemeValues[5];
+		g_settings.menu_Head_Text_green 		= oldThemeValues[6];
+		g_settings.menu_Head_Text_blue 			= oldThemeValues[7];
+		g_settings.menu_Content_alpha 			= oldThemeValues[8];
+		g_settings.menu_Content_red 			= oldThemeValues[9];
+		g_settings.menu_Content_green 			= oldThemeValues[10];
+		g_settings.menu_Content_blue 			= oldThemeValues[11];
+		g_settings.menu_Content_Text_alpha 		= oldThemeValues[12];
+		g_settings.menu_Content_Text_red 		= oldThemeValues[13];
+		g_settings.menu_Content_Text_green 		= oldThemeValues[14];
+		g_settings.menu_Content_Text_blue 		= oldThemeValues[15];
+		g_settings.menu_Content_Selected_alpha 		= oldThemeValues[16];
+		g_settings.menu_Content_Selected_red 		= oldThemeValues[17];
+		g_settings.menu_Content_Selected_green 		= oldThemeValues[18];
+		g_settings.menu_Content_Selected_blue 		= oldThemeValues[19];
+		g_settings.menu_Content_Selected_Text_alpha 	= oldThemeValues[20];
+		g_settings.menu_Content_Selected_Text_red 	= oldThemeValues[21];
+		g_settings.menu_Content_Selected_Text_green 	= oldThemeValues[22];
+		g_settings.menu_Content_Selected_Text_blue 	= oldThemeValues[23];
+		g_settings.menu_Content_inactive_alpha 		= oldThemeValues[24];
+		g_settings.menu_Content_inactive_red 		= oldThemeValues[25];
+		g_settings.menu_Content_inactive_green 		= oldThemeValues[26];
+		g_settings.menu_Content_inactive_blue		= oldThemeValues[27];
+		g_settings.menu_Content_inactive_Text_alpha 	= oldThemeValues[28];
+		g_settings.menu_Content_inactive_Text_red 	= oldThemeValues[29];
+		g_settings.menu_Content_inactive_Text_green 	= oldThemeValues[30];
+		g_settings.menu_Content_inactive_Text_blue 	= oldThemeValues[31];
+		g_settings.infobar_alpha 			= oldThemeValues[32];
+		g_settings.infobar_red 				= oldThemeValues[33];
+		g_settings.infobar_green 			= oldThemeValues[34];
+		g_settings.infobar_blue 			= oldThemeValues[35];
+		g_settings.infobar_Text_alpha 			= oldThemeValues[36];
+		g_settings.infobar_Text_red 			= oldThemeValues[37];
+		g_settings.infobar_Text_green 			= oldThemeValues[38];
+		g_settings.infobar_Text_blue 			= oldThemeValues[39];
 
 		notifier = new CColorSetupNotifier;
 		notifier->changeNotify(NONEXISTANT_LOCALE, NULL);
