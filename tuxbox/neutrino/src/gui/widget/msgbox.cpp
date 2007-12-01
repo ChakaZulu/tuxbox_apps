@@ -29,19 +29,19 @@
 
 	***********************************************************
 
-    Module Name: msgbox.cpp: .
+	Module Name: msgbox.cpp: .
 
 	Description: Implementation of the CMsgBox class
-				 This class provides a  message box using CTextBox.
+	 This class provides a  message box using CTextBox.
 
-  	Date:	Nov 2005
+	Date:	Nov 2005
 
 	Author: Gnther@tuxbox.berlios.org
 		based on code of Steffen Hehn 'McClean'
 
 	Revision History:
-	Date			Author		Change Description
-	   Nov 2005		Gnther	initial implementation
+	Date		Author	Change Description
+	Nov 2005	Gnther	initial implementation
 */
 
 #ifdef HAVE_CONFIG_H
@@ -53,19 +53,19 @@
 #include <gui/widget/icons.h>
 #include <neutrino.h>
 
-#define WINDOW_FRAME_BORDER_WIDTH	 4
-#define ADD_FOOT_HEIGHT	 			20
-#define	TEXT_BORDER_WIDTH			 8
-#define	TITLE_ICON_WIDTH			(40 - TEXT_BORDER_WIDTH)
+#define WINDOW_FRAME_BORDER_WIDTH	4
+#define ADD_FOOT_HEIGHT	 		20
+#define	TEXT_BORDER_WIDTH		8
+#define	TITLE_ICON_WIDTH		(40 - TEXT_BORDER_WIDTH)
 
-#define MAX_WINDOW_WIDTH  (g_settings.screen_EndX - g_settings.screen_StartX )
-#define MAX_WINDOW_HEIGHT (g_settings.screen_EndY - g_settings.screen_StartY - 40)	
+#define MAX_WINDOW_WIDTH  		(g_settings.screen_EndX - g_settings.screen_StartX )
+#define MAX_WINDOW_HEIGHT 		(g_settings.screen_EndY - g_settings.screen_StartY - 40)	
 
-#define MIN_WINDOW_WIDTH  (MAX_WINDOW_WIDTH>>1)
-#define MIN_WINDOW_HEIGHT 40	
+#define MIN_WINDOW_WIDTH  		(MAX_WINDOW_WIDTH>>1)
+#define MIN_WINDOW_HEIGHT 		40	
 
-#define DEFAULT_TITLE_FONT	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]
-#define DEFAULT_FOOT_FONT	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]
+#define DEFAULT_TITLE_FONT		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]
+#define DEFAULT_FOOT_FONT		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -79,22 +79,22 @@
 // Return:		
 // Notes:		
 //////////////////////////////////////////////////////////////////////
-CMsgBox::CMsgBox(  const char * text, 
-				   Font* fontText,
-				   const int mode, 
-				   const CBox* position, 
-				   const char * title,
-				   Font* fontTitle,
-				   const char * icon,
-				   int return_button , 
-				   const result_ default_result)
+CMsgBox::CMsgBox(	const char * text,
+			Font* fontText,
+			const int mode,
+			const CBox* position,
+			const char * title,
+			Font* fontTitle,
+			const char * icon,
+			int return_button,
+			const result_ default_result)
 {
 	//TRACE("->CMsgBox::CMsgBox\r\n");
 	initVar();
 
-	if(title != NULL)		m_cTitle = title;
-	if(fontTitle != NULL)	m_pcFontTitle = fontTitle;
-	if(icon != NULL)		m_cIcon = icon;
+	if(title != NULL)	m_cTitle 	= title;
+	if(fontTitle != NULL)	m_pcFontTitle 	= fontTitle;
+	if(icon != NULL)	m_cIcon 	= icon;
 	if(position != NULL)	m_cBoxFrame	= *position;
 	m_nMode	= mode;
 	//TRACE(" CMsgBox::cText: %d ,m_cTitle %d,m_nMode %d\t\r\n",strlen(text),m_cTitle.size(),m_nMode);
@@ -118,25 +118,25 @@ CMsgBox::CMsgBox(  const char * text,
 	initFramesRel();
 
 	m_pcTextBox = new CTextBox(	text,
-								fontText,
-								mode, 
-								&m_cBoxFrameText);
+					fontText,
+					mode,
+					&m_cBoxFrameText);
 
-	if(mode & AUTO_WIDTH || mode & AUTO_HIGH)
+	if((mode & AUTO_WIDTH) || (mode & AUTO_HIGH))
 	{
 		/* window might changed in size ...*/
-		m_cBoxFrameText = m_pcTextBox->getWindowsPos();
+		m_cBoxFrameText		= m_pcTextBox->getWindowsPos();
 
-		m_cBoxFrame.iWidth = m_cBoxFrameText.iWidth + m_nWindowFrameBorderWidth;
-		m_cBoxFrame.iHeight = m_cBoxFrameText.iHeight + m_cBoxFrameFootRel.iHeight +  m_cBoxFrameTitleRel.iHeight + m_nWindowFrameBorderWidth;
+		m_cBoxFrame.iWidth	= m_cBoxFrameText.iWidth + m_nWindowFrameBorderWidth;
+		m_cBoxFrame.iHeight	= m_cBoxFrameText.iHeight + m_cBoxFrameFootRel.iHeight +  m_cBoxFrameTitleRel.iHeight + m_nWindowFrameBorderWidth;
 
 		initFramesRel();
 	}
 
 	if(mode & CENTER)
 	{
-		m_cBoxFrame.iX		= g_settings.screen_StartX + ((g_settings.screen_EndX - g_settings.screen_StartX - m_cBoxFrame.iWidth) >>1);
-		m_cBoxFrame.iY		= g_settings.screen_StartY + ((g_settings.screen_EndY - g_settings.screen_StartY - m_cBoxFrame.iHeight) >>2);
+		m_cBoxFrame.iX	= g_settings.screen_StartX + ((g_settings.screen_EndX - g_settings.screen_StartX - m_cBoxFrame.iWidth) >>1);
+		m_cBoxFrame.iY	= g_settings.screen_StartY + ((g_settings.screen_EndY - g_settings.screen_StartY - m_cBoxFrame.iHeight) >>2);
 	}
 
 	m_nResult = default_result;
@@ -280,13 +280,13 @@ void CMsgBox::initFramesRel(void)
 	{
 		m_cBoxFrameFootRel.iX		= 0;
 		m_cBoxFrameFootRel.iY		= 0;
-		m_cBoxFrameFootRel.iHeight   = 0;
-		m_cBoxFrameFootRel.iWidth    = 0;
+		m_cBoxFrameFootRel.iHeight	= 0;
+		m_cBoxFrameFootRel.iWidth	= 0;
 	}
 
 	// init the text frame
-	m_cBoxFrameText.iY		= m_cBoxFrame.iY + m_cBoxFrameTitleRel.iY + m_cBoxFrameTitleRel.iHeight;
-	m_cBoxFrameText.iX		= m_cBoxFrame.iX + m_cBoxFrameTitleRel.iX;
+	m_cBoxFrameText.iY	= m_cBoxFrame.iY + m_cBoxFrameTitleRel.iY + m_cBoxFrameTitleRel.iHeight;
+	m_cBoxFrameText.iX	= m_cBoxFrame.iX + m_cBoxFrameTitleRel.iX;
 	m_cBoxFrameText.iHeight	= m_cBoxFrame.iHeight - m_cBoxFrameTitleRel.iHeight - m_cBoxFrameFootRel.iHeight - m_nWindowFrameBorderWidth;
 	m_cBoxFrameText.iWidth	= m_cBoxFrame.iWidth  - m_nWindowFrameBorderWidth;
 #if 0
@@ -329,11 +329,11 @@ void CMsgBox::refreshFoot(void)
 	if(	!(m_nMode & FOOT)) return;
 
 	// draw the background first
-	m_pcWindow->paintBoxRel(	m_cBoxFrameFootRel.iX, 
-								m_cBoxFrameFootRel.iY, 
-								m_cBoxFrameFootRel.iWidth, 
-								m_cBoxFrameFootRel.iHeight,  
-								(CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
+	m_pcWindow->paintBoxRel(	m_cBoxFrameFootRel.iX,
+					m_cBoxFrameFootRel.iY,
+					m_cBoxFrameFootRel.iWidth,
+					m_cBoxFrameFootRel.iHeight,
+					(CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
 
 	// 	const char* text;//unused variable
 
@@ -417,36 +417,36 @@ void CMsgBox::refreshTitle(void)
 	if(	!(m_nMode & TITLE)) return;
 
 	// draw the background
-	m_pcWindow->paintBoxRel(	m_cBoxFrameTitleRel.iX, 
-							m_cBoxFrameTitleRel.iY, 
-							m_cBoxFrameTitleRel.iWidth, 
-							m_cBoxFrameTitleRel.iHeight, 
-							(CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
+	m_pcWindow->paintBoxRel(	m_cBoxFrameTitleRel.iX,
+					m_cBoxFrameTitleRel.iY,
+					m_cBoxFrameTitleRel.iWidth,
+					m_cBoxFrameTitleRel.iHeight,
+					(CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
 
 	if (!m_cIcon.empty())
 	{
 		// draw icon and title text
 		m_pcWindow->paintIcon(m_cIcon.c_str(), m_cBoxFrameTitleRel.iX + 8, m_cBoxFrameTitleRel.iY + 5);
 		m_pcWindow->RenderString(	m_pcFontTitle,
-								m_cBoxFrameTitleRel.iX + TITLE_ICON_WIDTH + TEXT_BORDER_WIDTH, 
-								m_cBoxFrameTitleRel.iHeight+3, 
-								m_cBoxFrameTitleRel.iWidth - TITLE_ICON_WIDTH + TEXT_BORDER_WIDTH, 
-								m_cTitle.c_str(), 
-								(CFBWindow::color_t)COL_MENUHEAD, 
-								0, 
-								true); // UTF-8
+						m_cBoxFrameTitleRel.iX + TITLE_ICON_WIDTH + TEXT_BORDER_WIDTH,
+						m_cBoxFrameTitleRel.iHeight+3,
+						m_cBoxFrameTitleRel.iWidth - TITLE_ICON_WIDTH + TEXT_BORDER_WIDTH,
+						m_cTitle.c_str(),
+						(CFBWindow::color_t)COL_MENUHEAD,
+						0,
+						true); // UTF-8
 	}
 	else
 	{
 		// no icon available, just draw the title text
 		m_pcWindow->RenderString(	m_pcFontTitle, 
-								m_cBoxFrameTitleRel.iX + TEXT_BORDER_WIDTH, 
-								m_cBoxFrameTitleRel.iHeight+3, 
-								m_cBoxFrameTitleRel.iWidth - TEXT_BORDER_WIDTH, 
-								m_cTitle.c_str(), 
-								(CFBWindow::color_t)COL_MENUHEAD, 
-								0, 
-								true); // UTF-8
+						m_cBoxFrameTitleRel.iX + TEXT_BORDER_WIDTH, 
+						m_cBoxFrameTitleRel.iHeight+3, 
+						m_cBoxFrameTitleRel.iWidth - TEXT_BORDER_WIDTH, 
+						m_cTitle.c_str(), 
+						(CFBWindow::color_t)COL_MENUHEAD, 
+						0, 
+						true); // UTF-8
 	}
 }
 
@@ -463,18 +463,18 @@ void CMsgBox::refreshBorder(void)
 	if(	!(m_nMode & BORDER && m_nWindowFrameBorderWidth > 0)) return;
 
 	//draw bottom shadow
-	m_pcWindow->paintBoxRel(	m_nWindowFrameBorderWidth, 
-							m_cBoxFrame.iHeight - m_nWindowFrameBorderWidth, 
-							m_cBoxFrame.iWidth - m_nWindowFrameBorderWidth, 
-							m_nWindowFrameBorderWidth,  
-							COL_INFOBAR_SHADOW);
+	m_pcWindow->paintBoxRel(	m_nWindowFrameBorderWidth,
+					m_cBoxFrame.iHeight - m_nWindowFrameBorderWidth,
+					m_cBoxFrame.iWidth - m_nWindowFrameBorderWidth,
+					m_nWindowFrameBorderWidth,
+					COL_INFOBAR_SHADOW);
 
 	//draw right shadow
-	m_pcWindow->paintBoxRel(	m_cBoxFrame.iWidth - m_nWindowFrameBorderWidth, 
-							m_nWindowFrameBorderWidth, 
-							m_nWindowFrameBorderWidth, 
-							m_cBoxFrame.iHeight - m_nWindowFrameBorderWidth,  
-							COL_INFOBAR_SHADOW);
+	m_pcWindow->paintBoxRel(	m_cBoxFrame.iWidth - m_nWindowFrameBorderWidth,
+					m_nWindowFrameBorderWidth,
+					m_nWindowFrameBorderWidth,
+					m_cBoxFrame.iHeight - m_nWindowFrameBorderWidth,
+					COL_INFOBAR_SHADOW);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -570,10 +570,10 @@ bool CMsgBox::paint(void)
 	}
 
 	// create new window
-	m_pcWindow = new CFBWindow( m_cBoxFrame.iX,
-								m_cBoxFrame.iY,
-								m_cBoxFrame.iWidth,
-								m_cBoxFrame.iHeight);
+	m_pcWindow = new CFBWindow( 	m_cBoxFrame.iX,
+					m_cBoxFrame.iY,
+					m_cBoxFrame.iWidth,
+					m_cBoxFrame.iHeight);
 	if(m_pcTextBox != NULL)
 	{
 		m_pcTextBox->paint();
@@ -734,7 +734,7 @@ bool CMsgBox::setText(const std::string* newText)
 	if(m_pcTextBox != NULL && newText != NULL)
 	{
 		result = m_pcTextBox->setText(newText);
-		if(m_nMode & AUTO_WIDTH || m_nMode & AUTO_HIGH)
+		if((m_nMode & AUTO_WIDTH) || (m_nMode & AUTO_HIGH))
 		{
 			/* window might changed in size ...*/
 			m_cBoxFrameText = m_pcTextBox->getWindowsPos();
@@ -779,24 +779,24 @@ int CMsgBox::result(void)
 // Notes:		
 //////////////////////////////////////////////////////////////////////
 int ShowMsg2UTF(	const neutrino_locale_t Caption,
-					const char * const Text, 
-					const CMsgBox::result_ Default, 
-					const uint ShowButtons, 
-					const char * const Icon, 
-					const int Width, 
-					const int timeout, 
-					bool returnDefaultOnTimeout)
+			const char * const Text,
+			const CMsgBox::result_ Default,
+			const uint ShowButtons,
+			const char * const Icon,
+			const int Width,
+			const int timeout,
+			bool returnDefaultOnTimeout)
 {
 	//TRACE("->CMsgBox::ShowTextUTF \r\n");
 
 	int result = ShowMsg2UTF(	g_Locale->getText(Caption),
-								Text, 
-								Default, 
-								ShowButtons, 
-								Icon, 
-								Width, 
-								timeout, 
-								returnDefaultOnTimeout);
+					Text,
+					Default,
+					ShowButtons,
+					Icon,
+					Width,
+					timeout,
+					returnDefaultOnTimeout);
 
 	return (result);
 
@@ -811,13 +811,13 @@ int ShowMsg2UTF(	const neutrino_locale_t Caption,
 // Notes:		
 //////////////////////////////////////////////////////////////////////
 int ShowMsg2UTF(	const char * const Title,
-					const char * const Text, 
-					const CMsgBox::result_ Default, 
-					const uint ShowButtons, 
-					const char * const Icon, 
-					const int Width, 
-					const int timeout, 
-					bool returnDefaultOnTimeout)
+			const char * const Text,
+			const CMsgBox::result_ Default,
+			const uint ShowButtons,
+			const char * const Icon,
+			const int Width,
+			const int timeout,
+			bool returnDefaultOnTimeout)
 {
 	int mode =  CMsgBox::SCROLL | 
 				CMsgBox::TITLE | 
@@ -827,21 +827,21 @@ int ShowMsg2UTF(	const char * const Title,
 				//CMsgBox::CENTER | 
 				//CMsgBox::AUTO_WIDTH | 
 				//CMsgBox::AUTO_HIGH;
-	CBox position (	g_settings.screen_StartX+30,
+	CBox position (			g_settings.screen_StartX+30,
 					g_settings.screen_StartY+30,
 					g_settings.screen_EndX - g_settings.screen_StartX-60,
-					g_settings.screen_EndY - g_settings.screen_StartY-60); 
+					g_settings.screen_EndY - g_settings.screen_StartY-60);
 	
 	//TRACE("\r\n->ShowTextUTF %s\r\n",Text);
-   	CMsgBox* msgBox = new CMsgBox(		Text, 
-                                           g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2],
-   										mode, 
-   										&position, 
-   										Title,
-   										g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE],
-   										Icon,
-										ShowButtons,
-										Default);
+	CMsgBox* msgBox = new CMsgBox(	Text,
+					g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2],
+					mode,
+					&position,
+					Title,
+					g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE],
+					Icon,
+					ShowButtons,
+					Default);
 
 	msgBox->exec( timeout, returnDefaultOnTimeout);
 
