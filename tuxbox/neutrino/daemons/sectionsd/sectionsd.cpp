@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.252 2007/11/30 19:20:21 seife Exp $
+//  $Id: sectionsd.cpp,v 1.253 2007/12/02 14:46:36 seife Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -317,8 +317,8 @@ void showProfiling( std::string text )
 	gettimeofday( &tv, NULL );
 	long long now = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 
-
-	dprintf("--> '%s' %f\n", text.c_str(), (now - last_profile_call) / 1000.);
+	long long tmp = now - last_profile_call;
+	dprintf("--> '%s' %lld.%03lld\n", text.c_str(), tmp / 1000LL, tmp % 1000LL);
 	last_profile_call = now;
 }
 
@@ -1150,14 +1150,6 @@ static void write_bouquet_xml_footer(FILE *fd)
 	fprintf(fd, "</zapit>\n");
 }
 
-//stolen from scan.cpp
-void cp(char * from, char * to)
-{
-	char cmd[256];
-	snprintf(cmd, 256, "cp -f %s %s", from, to);
-	system(cmd);
-}
-
 //stolen from zapitools.cpp
 std::string UTF8_to_UTF8XML(const char * s)
 {
@@ -1323,8 +1315,7 @@ static bool AddServiceToAutoBouquets(const char *provname, const t_original_netw
 					write_bouquet_xml_footer(dst);
 					returnvalue = true;
 					fclose(dst);
-					cp(CURRENTBOUQUETS_TMP, CURRENTBOUQUETS_XML);
-					unlink(CURRENTBOUQUETS_TMP);
+					rename(CURRENTBOUQUETS_TMP, CURRENTBOUQUETS_XML);
 				}
 			}
 			else
@@ -2361,7 +2352,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.252 2007/11/30 19:20:21 seife Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.253 2007/12/02 14:46:36 seife Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -2373,12 +2364,12 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	        "Number of cached meta-services: %u\n"
 	        //    "Resource-usage: maxrss: %ld ixrss: %ld idrss: %ld isrss: %ld\n"
 	        "Total size of memory occupied by chunks handed out by malloc: %d\n"
-	        "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
+	        "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkB)\n",
 	        ctime(&zeit),
 		secondsToCache / (60*60L), secondsExtendedTextCache / (60*60L), oldEventsAre / 60, anzServices, anzNVODservices, anzEvents, anzNVODevents, anzMetaServices,
 	        //    resourceUsage.ru_maxrss, resourceUsage.ru_ixrss, resourceUsage.ru_idrss, resourceUsage.ru_isrss,
 	        speicherinfo.uordblks,
-	        speicherinfo.arena, speicherinfo.arena / 1024, (float)speicherinfo.arena / (1024.*1024.)
+	        speicherinfo.arena, speicherinfo.arena / 1024
 	       );
 
 	struct sectionsd::msgResponseHeader responseHeader;
@@ -4466,8 +4457,7 @@ static void commandWriteSI2XML(int connfd, char *data, const unsigned dataLength
 	filename[dataLength] = '\0';
 	strncat(filename, "index.xml", 10);
 
-	cp(tmpname, filename);
-	unlink(tmpname);
+	rename(tmpname, filename);
 	eventServer->sendEvent(CSectionsdClient::EVT_WRITE_SI_FINISHED, CEventServer::INITID_SECTIONSD);
 	return ;
 }
@@ -5288,8 +5278,7 @@ static bool updateTP(const int scanType)
 
 	if (need_update)
 	{
-		cp(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
-		unlink(CURRENTSERVICES_TMP);
+		rename(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
 
 		dprintf("[sectionsd] We updated at least one Transponder in currentservices.xml!\n");
 
@@ -5481,8 +5470,7 @@ static void updateXMLnet(xmlNodePtr provider, const t_original_network_id onid, 
 	}
 	fclose(dst);
 
-	cp(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
-	unlink(CURRENTSERVICES_TMP);
+	rename(CURRENTSERVICES_TMP, CURRENTSERVICES_XML);
 
 	return;
 }
@@ -5834,8 +5822,7 @@ static bool updateBouquets()
 					else
 						addBouquetToCurrentXML(NULL, bouquet_id);
 					xmlFreeDoc(current_parser);
-					cp(CURRENTBOUQUETS_TMP, CURRENTBOUQUETS_XML);
-					unlink(CURRENTBOUQUETS_TMP);
+					rename(CURRENTBOUQUETS_TMP, CURRENTBOUQUETS_XML);
 					current_parser= parseXmlFile(CURRENTBOUQUETS_XML);
 				}
 			}
@@ -5912,9 +5899,10 @@ static void *nitThread(void *)
 
 		bool startup = true;
 
+		waitForTimeset();
+
 		for (;;)
 		{
-			if (waitForTimeset()) {
 			zeit = time(NULL);
 
 			readLockMessaging();
@@ -5954,11 +5942,11 @@ static void *nitThread(void *)
 				unlockMessaging();
 
 				rs = pthread_cond_timedwait( &dmxNIT.change_cond, &dmxNIT.start_stop_mutex, &abs_wait );
+				pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
 
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxNIT: waking up again - looking for new transponders :)\n");
-					pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
 #ifdef PAUSE_EQUALS_STOP
 					dmxNIT.real_unpause();
 #endif
@@ -5967,7 +5955,6 @@ static void *nitThread(void *)
 				else if (rs == 0)
 				{
 					dprintf("dmxNIT: waking up again - requested from .change()\n");
-					pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
 #ifdef PAUSE_EQUALS_STOP
 					dmxNIT.real_unpause();
 #endif
@@ -5975,7 +5962,6 @@ static void *nitThread(void *)
 				else
 				{
 					dprintf("dmxNIT:  waking up again - unknown reason?!\n");
-					pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
 					dmxNIT.real_unpause();
 				}
 				// update zeit after sleep
@@ -6047,7 +6033,6 @@ static void *nitThread(void *)
 			{
 				delete[] buf;
 				buf = NULL;
-			}
 			}
 		} // for
 
@@ -6122,10 +6107,10 @@ static void *sdtThread(void *)
 
 		bool startup = true;
 
+		waitForTimeset();
+
 		for (;;)
 		{
-
-			if (waitForTimeset()) {
 			zeit = time(NULL);
 
 			readLockMessaging();
@@ -6135,7 +6120,6 @@ static void *sdtThread(void *)
 			if ((zeit > lastData + TIME_SDT_NONEWDATA) || (startup))
 			{
 				struct timespec abs_wait;
-
 				struct timeval now;
 
 				gettimeofday(&now, NULL);
@@ -6186,11 +6170,11 @@ static void *sdtThread(void *)
 				unlockMessaging();
 
 				rs = pthread_cond_timedwait( &dmxSDT.change_cond, &dmxSDT.start_stop_mutex, &abs_wait );
+				pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
 
 				if (rs == ETIMEDOUT)
 				{
 					dprintf("dmxSDT: waking up again - looking for new services :)\n");
-					pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
 #ifdef PAUSE_EQUALS_STOP
 					dmxSDT.real_unpause();
 #endif
@@ -6199,7 +6183,6 @@ static void *sdtThread(void *)
 				else if (rs == 0)
 				{
 					dprintf("dmxSDT: waking up again - requested from .change()\n");
-					pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
 #ifdef PAUSE_EQUALS_STOP
 					dmxSDT.real_unpause();
 #endif
@@ -6207,7 +6190,6 @@ static void *sdtThread(void *)
 				else
 				{
 					dprintf("dmxSDT:  waking up again - unknown reason?!\n");
-					pthread_mutex_unlock( &dmxSDT.start_stop_mutex );
 					dmxSDT.real_unpause();
 				}
 				// update zeit after sleep
@@ -6334,7 +6316,6 @@ static void *sdtThread(void *)
 			{
 				delete[] buf;
 				buf = NULL;
-			}
 			}
 		} // for
 
@@ -6627,6 +6608,8 @@ static void *eitThread(void *)
 		messaging_eit_is_busy = true;
 		unlockMessaging();
 
+		waitForTimeset();
+
 		for (;;)
 		{
 			time_t zeit = time(NULL);
@@ -6736,101 +6719,93 @@ static void *eitThread(void *)
 				timeoutsDMX = 0;
 			}
 
-			if (waitForTimeset())
+			if (sendToSleepNow)
 			{
+				sendToSleepNow = false;
 
-				// Nur wenn ne richtige Uhrzeit da ist
+				struct timespec abs_wait;
 
-				if ( (sendToSleepNow) )
-				{
-					sendToSleepNow = false;
+				struct timeval now;
 
-					struct timespec abs_wait;
+				gettimeofday(&now, NULL);
+				TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+				abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
 
-					struct timeval now;
+				dmxEIT.real_pause();
+				pthread_mutex_lock( &dmxEIT.start_stop_mutex );
+				dprintf("dmxEIT: going to sleep...\n");
+				writeLockMessaging();
+				messaging_eit_is_busy = false;
+				messaging_zap_detected = false;
+				unlockMessaging();
 
-					gettimeofday(&now, NULL);
-					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-					abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
-
-					dmxEIT.real_pause();
-					pthread_mutex_lock( &dmxEIT.start_stop_mutex );
-					dprintf("dmxEIT: going to sleep...\n");
-					writeLockMessaging();
-					messaging_eit_is_busy = false;
-					messaging_zap_detected = false;
-					unlockMessaging();
-
-					readLockMessaging();
-					if (auto_scanning) {
-						pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
+				readLockMessaging();
+				if (auto_scanning) {
+					pthread_mutex_unlock( &dmxNIT.start_stop_mutex );
 #ifdef PAUSE_EQUALS_STOP
-						dmxNIT.real_unpause();
+					dmxNIT.real_unpause();
 #endif
-						dmxNIT.change( 0 );
-					}
-					unlockMessaging();
-					if (update_eit) eit_set_update_filter(&eit_update_fd);
-					int rs = pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
-					if (update_eit) eit_stop_update_filter(&eit_update_fd);
+					dmxNIT.change( 0 );
+				}
+				unlockMessaging();
+				if (update_eit) eit_set_update_filter(&eit_update_fd);
+				int rs = pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
+				if (update_eit) eit_stop_update_filter(&eit_update_fd);
+				pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
 
-					if (rs == ETIMEDOUT)
-					{
-						dprintf("dmxEIT: waking up again - looking for new events :)\n");
-						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
+				if (rs == ETIMEDOUT)
+				{
+					dprintf("dmxEIT: waking up again - looking for new events :)\n");
 
 #ifdef PAUSE_EQUALS_STOP
-						dmxEIT.real_unpause();
+					dmxEIT.real_unpause();
 #endif
 // must call dmxEIT.change after! unpause otherwise dev is not open,
 // dmxEIT.lastChanged will not be set, and filter is advanced the next iteration
-						dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxEIT.filters.size() );
-						dmxEIT.change( 2 ); // -> restart
-						lastChanged = time(NULL);
-						writeLockMessaging();
-						messaging_eit_is_busy = true;
-						unlockMessaging();
-					}
-					else if (rs == 0)
-					{
-						dprintf("dmxEIT: waking up again - requested from .change()\n");
-						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
-#ifdef PAUSE_EQUALS_STOP
-						dmxEIT.real_unpause();
-						lastChanged = time(NULL);
-#endif
-						writeLockMessaging();
-						messaging_eit_is_busy = true;
-						unlockMessaging();
-					}
-					else
-					{
-						dprintf("dmxEIT:  waking up again - unknown reason?!\n");
-						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
-						dmxEIT.real_unpause();
-						writeLockMessaging();
-						messaging_eit_is_busy = true;
-						unlockMessaging();
-					}
-					// update zeit after sleep
-					zeit = time(NULL);
-				}
-				else if (zeit > lastChanged + TIME_EIT_SKIPPING )
-				{
-					readLockMessaging();
-
-					if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
-					{
-						dprintf("[eitThread] skipping to next filter(%d) (> TIME_EIT_SKIPPING)\n", dmxEIT.filter_index+1 );
-						dmxEIT.change(dmxEIT.filter_index + 1);
-						lastChanged = time(NULL);
-					}
-					else
-						sendToSleepNow = true;
-
+					dprintf("New Filterindex: %d (ges. %d)\n", 2, (signed) dmxEIT.filters.size() );
+					dmxEIT.change( 2 ); // -> restart
+					lastChanged = time(NULL);
+					writeLockMessaging();
+					messaging_eit_is_busy = true;
 					unlockMessaging();
-				};
+				}
+				else if (rs == 0)
+				{
+					dprintf("dmxEIT: waking up again - requested from .change()\n");
+#ifdef PAUSE_EQUALS_STOP
+					dmxEIT.real_unpause();
+					lastChanged = time(NULL);
+#endif
+					writeLockMessaging();
+					messaging_eit_is_busy = true;
+					unlockMessaging();
+				}
+				else
+				{
+					dprintf("dmxEIT:  waking up again - unknown reason?!\n");
+					dmxEIT.real_unpause();
+					writeLockMessaging();
+					messaging_eit_is_busy = true;
+					unlockMessaging();
+				}
+				// update zeit after sleep
+				zeit = time(NULL);
 			}
+			else if (zeit > lastChanged + TIME_EIT_SKIPPING )
+			{
+				readLockMessaging();
+
+				if ( dmxEIT.filter_index + 1 < (signed) dmxEIT.filters.size() )
+				{
+					dprintf("[eitThread] skipping to next filter(%d) (> TIME_EIT_SKIPPING)\n", dmxEIT.filter_index+1 );
+					dmxEIT.change(dmxEIT.filter_index + 1);
+					lastChanged = time(NULL);
+				}
+				else
+					sendToSleepNow = true;
+
+				unlockMessaging();
+			};
 
 			buf = dmxEIT.getSection(timeoutInMSeconds, timeoutsDMX);
 
@@ -6946,9 +6921,10 @@ static void *pptThread(void *)
 
 		dmxPPT.start(); // -> unlock
 
+		waitForTimeset();
+
 		for (;;)
 		{
-
 			time_t zeit = time(NULL);
 
 			if (timeoutsDMX >= CHECK_RESTART_DMX_AFTER_TIMEOUTS && scanning)
@@ -6995,58 +6971,51 @@ static void *pptThread(void *)
 				lastData = zeit;
 			}
 
-			if (waitForTimeset())
+			if (sendToSleepNow)
 			{
-				// Nur wenn ne richtige Uhrzeit da ist
-				if ( (sendToSleepNow) )
+				sendToSleepNow = false;
+
+				struct timespec abs_wait;
+				struct timeval now;
+
+				gettimeofday(&now, NULL);
+				TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+				abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
+
+				dmxPPT.real_pause();
+				pthread_mutex_lock( &dmxPPT.start_stop_mutex );
+				dprintf("[pptThread] going to sleep...\n");
+
+				int rs = pthread_cond_timedwait( &dmxPPT.change_cond, &dmxPPT.start_stop_mutex, &abs_wait );
+				pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
+
+				if (rs == ETIMEDOUT)
 				{
-					sendToSleepNow = false;
-
-					struct timespec abs_wait;
-
-					struct timeval now;
-
-					gettimeofday(&now, NULL);
-					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-					abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
-
-					dmxPPT.real_pause();
-					pthread_mutex_lock( &dmxPPT.start_stop_mutex );
-					dprintf("[pptThread] going to sleep...\n");
-
-					int rs = pthread_cond_timedwait( &dmxPPT.change_cond, &dmxPPT.start_stop_mutex, &abs_wait );
-
-					if (rs == ETIMEDOUT)
-					{
-						dprintf("dmxPPT: waking up again - looking for new events :)\n");
-						pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
+					dprintf("dmxPPT: waking up again - looking for new events :)\n");
 #ifdef PAUSE_EQUALS_STOP
-						dmxPPT.real_unpause();
+					dmxPPT.real_unpause();
 #endif
-						dmxPPT.change( 0 ); // -> restart
-					}
-					else if (rs == 0)
-					{
-						dprintf("dmxPPT: waking up again - requested from .change()\n");
-						pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
-#ifdef PAUSE_EQUALS_STOP
-						dmxPPT.real_unpause();
-#endif
-					}
-					else
-					{
-						dprintf("dmxPPT: waking up again - unknown reason?!\n");
-						pthread_mutex_unlock( &dmxPPT.start_stop_mutex );
-						dmxPPT.real_unpause();
-					}
-					// after sleeping get actual time
-					zeit = time(NULL);
-					start_section = 0; // fetch new? events
-					lastData = zeit; // restart timer
-					first_content_id = 0;
-					previous_content_id = 0;
-					current_content_id = 0;
+					dmxPPT.change( 0 ); // -> restart
 				}
+				else if (rs == 0)
+				{
+					dprintf("dmxPPT: waking up again - requested from .change()\n");
+#ifdef PAUSE_EQUALS_STOP
+					dmxPPT.real_unpause();
+#endif
+				}
+				else
+				{
+					dprintf("dmxPPT: waking up again - unknown reason?!\n");
+					dmxPPT.real_unpause();
+				}
+				// after sleeping get actual time
+				zeit = time(NULL);
+				start_section = 0; // fetch new? events
+				lastData = zeit; // restart timer
+				first_content_id = 0;
+				previous_content_id = 0;
+				current_content_id = 0;
 			}
 
 			if (0 == privatePid)
@@ -7208,6 +7177,18 @@ static void *pptThread(void *)
 	pthread_exit(NULL);
 }
 
+/* helper function for the housekeeping-thread */
+static void print_meminfo(void)
+{
+	if (!debug)
+		return;
+
+	struct mallinfo meminfo = mallinfo();
+	dprintf("total size of memory occupied by chunks handed out by malloc: %d\n"
+		"total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkB)\n",
+		meminfo.uordblks, meminfo.arena, meminfo.arena / 1024);
+}
+	
 //---------------------------------------------------------------------
 //			housekeeping-thread
 // does cleaning on fetched datas
@@ -7216,7 +7197,6 @@ static void *houseKeepingThread(void *)
 {
 	try
 	{
-		FILE * tmp;
 		int count = 0;
 		char servicename[MAX_SIZE_SERVICENAME];
 		dprintf("housekeeping-thread started.\n");
@@ -7243,14 +7223,6 @@ static void *houseKeepingThread(void *)
 
 			dmxSDT.pause();
 
-			struct mallinfo speicherinfo1;
-
-			if (debug)
-			{
-				// Speicher-Info abfragen
-				speicherinfo1 = mallinfo();
-			}
-
 			readLockEvents();
 
 			unsigned anzEventsAlt = mySIeventsOrderUniqueKey.size();
@@ -7261,8 +7233,7 @@ static void *houseKeepingThread(void *)
 			readLockEvents();
 			if (mySIeventsOrderUniqueKey.size() != anzEventsAlt)
 			{
-				dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo1.uordblks);
-				dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n", speicherinfo1.arena, speicherinfo1.arena / 1024, (float)speicherinfo1.arena / (1024.*1024));
+				print_meminfo();
 				dprintf("Removed %d old events.\n", anzEventsAlt - mySIeventsOrderUniqueKey.size());
 			}
 			unlockEvents();
@@ -7275,8 +7246,7 @@ static void *houseKeepingThread(void *)
 			readLockEvents();
 			if (mySIeventsOrderUniqueKey.size() != anzEventsAlt)
 			{
-				dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo1.uordblks);
-				dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n", speicherinfo1.arena, speicherinfo1.arena / 1024, (float)speicherinfo1.arena / (1024.*1024));
+				print_meminfo();
 				dprintf("Removed %d waste events.\n", anzEventsAlt - mySIeventsOrderUniqueKey.size());
 			}
 
@@ -7297,7 +7267,7 @@ static void *houseKeepingThread(void *)
 			xmlDocPtr current_parser = NULL;
 
 			for (MySIservicesOrderUniqueKey::iterator s = mySIservicesOrderUniqueKey.begin(); s !=  mySIservicesOrderUniqueKey.end(); s++) {
-				printf("ONID: %04x TSID: %04x SID: %04x Prov: %s Name: %s actual: %d\n",
+				dprintf("ONID: %04x TSID: %04x SID: %04x Prov: %s Name: %s actual: %d\n",
 					s->second->original_network_id,
 					s->second->transport_stream_id,
 					s->second->service_id,
@@ -7309,9 +7279,7 @@ static void *houseKeepingThread(void *)
 					unlockMessaging();
 				
 					if (!bouquet_parser) {
-						tmp = fopen(CURRENTBOUQUETS_XML, "r");
-						if (tmp) {
-							fclose(tmp);
+						if (!access(CURRENTBOUQUETS_XML, R_OK)) {
 							current_parser =
 								parseXmlFile(CURRENTBOUQUETS_XML);
 						}
@@ -7382,14 +7350,7 @@ static void *houseKeepingThread(void *)
 			unlockTransponders();
 			*/
 
-			if (debug)
-			{
-				// Speicher-Info abfragen
-
-				struct mallinfo speicherinfo = mallinfo();
-				dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
-				dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n", speicherinfo.arena, speicherinfo.arena / 1024, (float)speicherinfo.arena / (1024.*1024));
-			}
+			print_meminfo();
 
 			dmxSDT.unpause();
 			EITThreadsUnPause();
@@ -7565,7 +7526,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.252 2007/11/30 19:20:21 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.253 2007/12/02 14:46:36 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
