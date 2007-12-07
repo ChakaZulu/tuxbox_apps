@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.211 2007/11/13 21:39:53 dbt Exp $
+	$Id: infoviewer.cpp,v 1.212 2007/12/07 19:38:48 ecosys Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -188,20 +188,6 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	bool new_chan = false;
 	bool subChannelNameIsUTF = true;
 	
-	// get channel-id
-	// ...subchannel is selected
-	if (! calledFromNumZap && !(g_RemoteControl->subChannels.empty()) && (g_RemoteControl->selected_subchannel > 0)) 
-	{
-		channel_id = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].getChannelID();
-		ChannelName = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].subservice_name;
-		subChannelNameIsUTF = false;
-	}
-	else
-	// ...channel is selected
-	{
-		channel_id = new_channel_id;
-	}
-
 	bool fadeIn = ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
 		g_settings.widget_fade &&
 		(!is_visible) &&
@@ -239,19 +225,36 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 
 	int col_NumBoxText;
 	int col_NumBox;
-	if (virtual_zap_mode) {
+	if (virtual_zap_mode)
+	{
 		col_NumBoxText = COL_MENUHEAD;
 		col_NumBox = COL_MENUHEAD_PLUS_0;
-		if ((channel_id != new_channel_id) || (evtlist.empty())) {
+		if ((channel_id != new_channel_id) || (evtlist.empty()))
+		{
 			evtlist.clear();
 			evtlist = g_Sectionsd->getEventsServiceKey(new_channel_id);
 			if (!evtlist.empty())
 				sort(evtlist.begin(),evtlist.end(), sortByDateTime);
 			new_chan = true;
 		}
-	} else {
+	}
+	else
+	{
 		col_NumBoxText = COL_INFOBAR;
 		col_NumBox = COL_INFOBAR_PLUS_0;
+	}
+
+	// get channel-id
+	// ...subchannel is selected
+	if (! calledFromNumZap && !(g_RemoteControl->subChannels.empty()) && (g_RemoteControl->selected_subchannel > 0)) 
+	{
+		channel_id = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].getChannelID();
+		ChannelName = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].subservice_name;
+		subChannelNameIsUTF = false;
+	}
+	else // ...channel is selected
+	{
+		channel_id = new_channel_id;
 	}
 
 	//number box
