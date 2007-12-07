@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.57 2007/10/27 22:09:09 seife Exp $
+ * $Id: pzapit.cpp,v 1.58 2007/12/07 23:25:53 seife Exp $
  *
  * simple commandline client for zapit
  *
@@ -30,49 +30,51 @@
 
 int usage (const char * basename)
 {
-	std::cout << "bouquet list: " << basename << " [-ra]" << std::endl;
-	std::cout << "channel list: " << basename << " [-ra] <bouquet-number>" << std::endl;
-	std::cout << "zap by number: " << basename << " [-ra] <bouquet-number> <channel-number>" << std::endl;
-	std::cout << "zap by name: " << basename << " [-ra] -n <channel-name>" << std::endl;
-	std::cout << "zap by channel id: " << basename << " [-ra] -zi <chanid (hex)>" << std::endl;
-	std::cout << "    (-ra for radio mode)" << std::endl;
-	std::cout << "get current channel id: " << basename << " -gi" << std::endl;
-	std::cout << "get current TV/Radio mode: " << basename << " -gm" << std:: endl
-		  << std::endl;
-	std::cout << "set diseqc type: " << basename << " -dt <type>" << std::endl;
-	std::cout << "set diseqc repeats: " << basename << " -dr <count>" << std::endl;
-	std::cout << "switch record mode on/off: " << basename << " -re" << std::endl;
-	std::cout << "start/stop playback: " << basename << " -p" << std::endl
-		  << std::endl;
-	std::cout << "change audio pid: " << basename << " -a <audio-number>" << std::endl
-		  << std::endl;
-	std::cout << "reload channels bouquets: " << basename << " -c" << std::endl;
-	std::cout << "save bouquets: " << basename << " -sb" << std::endl;
-	std::cout << "save bouquets including bouquet others: " << basename << " -sbo" << std::endl
-		  << std::endl;
-	std::cout << "show satellites: " << basename << " -sh" << std::endl;
-	std::cout << "select satellites: " << basename << " -se <satmask> <diseqc order>" << std::endl;
-	std::cout << "start transponderscan: " << basename << " -st" << std::endl
-		  << std::endl;
-	std::cout << "mute audio: " << basename << " -mute" << std::endl;
-	std::cout << "unmute audio: " << basename << " -unmute" << std::endl;
-	std::cout << "set volume: " << basename << " -vol <0..64>" << std::endl;
-	std::cout << "register neutrino as event client: " << basename << " -rn" << std::endl;
-	std::cout << "shutdown zapit: " << basename << " -kill" << std::endl;
-	std::cout << "enter standby: " << basename << " -esb" << std::endl;
-	std::cout << "leave standby: " << basename << " -lsb" << std::endl;
-        std::cout << "switch to ntsc mode: " << basename << " --ntsc" << std::endl;
-        std::cout << "switch to pal mode: " << basename << " --pal" << std::endl;
-	std::cout << "send diseqc 1.2 motor command: " << basename << " -m <cmdtype> <addr> <cmd> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
+	std::cout << "Usage:" << std::endl 
+		  << basename << " <options>" << std::endl
+		  << "   options:" << std::endl
+		  << "\t-ra\t\t\tswitch to radio mode (applies to all other commands)" << std::endl
+		  << "\t<bouquet nr>\t\tlist bouquet channels" << std::endl
+		  << "\t<bouquet> <channel>\tzap by bouquet and channel nr." << std::endl
+		  << "\t-zi <channelid>\t\tzap by channel ID" << std::endl
+		  << "\t-n <channel-name>\tzap by channel name" << std::endl
+		  << "\t-gi\t\t\tget current channel ID" << std::endl
+		  << "\t-gm\t\t\tget current TV/Radio mode" << std::endl
+		  << std::endl
+		  << "\t-dt <type>\t\tset DiSEqC type" << std::endl
+		  << "\t-dr <count>\t\tset DiSEqC repeats" << std::endl
+		  << "\t-re\t\t\ttoggle record mode" << std::endl
+		  << "\t-p\t\t\ttoggle playback" << std::endl
+		  << "\t-a <audio-number>\tchange audio track" << std::endl
+		  << "\t--getpids\t\tget PIDs" << std::endl
+		  << std::endl
+		  << "\t-c\t\t\treload channel bouquets" << std::endl
+		  << "\t-sb\t\t\tsave bouquets" << std::endl
+		  << "\t-sbo\t\t\tsave bouquets including bouquet 'others'" << std::endl
+		  << "\t-sh\t\t\tshow satellites" << std::endl
+		  << "\t-se <satmask> <diseqc order> select satellites"<< std::endl
+		  << "\t-st\t\t\tstart transponderscan" << std::endl
+		  << "\t-mute\t\t\tmute audio" << std::endl
+		  << "\t-unmute\t\t\tunmute audio" << std::endl
+		  << "\t-vol <0..64>\t\tset volume" << std::endl
+		  << "\t-rn\t\t\tregister neutrino as event client" << std::endl
+		  << "\t-kill\t\t\tshutdown zapit" << std::endl
+		  << "\t-esb\t\t\tenter standby" << std::endl
+		  << "\t-lsb\t\t\tleave standby" << std::endl
+		  << "\t--ntsc\t\t\tswitch to NTSC mode" << std::endl
+		  << "\t--pal\t\t\tswitch to PAL mode" << std::endl
+		  << "\t-m <cmdtype> <addr> <cmd> <number or params> <param1> <param2>" << std::endl
+		  << "\t\t\t\tsend DiSEqC 1.2 motor command" << std::endl
 #ifndef HAVE_DREAMBOX_HARDWARE
-	std::cout << "activate Iec (requires aviaEXT driver): " << basename << " --iecon" << std::endl;
-	std::cout << "deactivate Iec (requires aviaEXT driver): " << basename << " --iecoff" << std::endl;
-	std::cout << "get Iec state (0=off, 1=on): " << basename << " --iecstate" << std::endl;
-	std::cout << "set decoder to PES mode (requires aviaEXT driver): " << basename << " --pes" << std::endl;
-	std::cout << "set decoder to SPTS mode (requires aviaEXT driver): " << basename << " --spts" << std::endl;
-	std::cout << "get decoder mode (0=PES, 1=SPTS): " << basename << " --decmode" << std::endl;
+		  << "    those require the aviaEXT driver:" << std::endl
+		  << "\t--iecon\t\t\tactivate IEC" << std::endl
+		  << "\t--iecoff\t\tdeactivate IEC" << std::endl
+		  << "\t--iecstate\t\tget IEC state (0=off, 1=on)" << std::endl
+		  << "\t--pes\t\t\tset decoder to PES mode" << std::endl
+		  << "\t--spts\t\t\tset decoder to SPTS mode" << std::endl
+		  << "\t--decmode\t\tget decoder mode (0=PES, 1=SPTS)" << std::endl
 #endif
-	std::cout << "get current PIDs: " << basename << " --getpids" << std::endl;
+		;
 	return -1;
 }
 
