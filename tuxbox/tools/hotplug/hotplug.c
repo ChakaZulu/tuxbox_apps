@@ -1,4 +1,4 @@
-/* $Id: hotplug.c,v 1.2 2005/12/18 14:40:41 carjay Exp $
+/* $Id: hotplug.c,v 1.3 2007/12/08 15:12:16 seife Exp $
 
    Hotplug written in C to speed things up
    
@@ -6,7 +6,11 @@
    takes about 2.2 seconds using hotplug.sh and 0.7 secs in C.
    That's 3 times faster.
 
+   Also creates the device nodes for misc devices with dynamic
+   minor numbers, to avoid the dependency on module load order.
+
    Copyright (C) 2005 Carsten Juttner <carjay@gmx.net>
+   Copyright (C) 2007 Stefan Seyfried <seife@tuxbox.slipkontur.de>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 2, as 
@@ -58,6 +62,24 @@ static void output_debug(char *msg, ...)
 #define fini_debug()
 #define output_debug(...)
 #endif
+
+struct dev_trans
+{
+	const char *kname;
+	const char *devname;
+};
+
+/* this is the translation table from kernel name to device name */
+static struct dev_trans name_trans [] = {
+	{ "/saa0",		"/dev/dbox/saa0" },
+	{ "/tuxboxevent",	"/dev/dbox/event0" },
+	{ "/avswitch",		"/dev/dbox/avs0" },
+	{ "/lcd",		"/dev/dbox/lcd0" },
+	{ "/frontprocessor",	"/dev/dbox/fp0" },
+	{ "/lirc",		"/dev/lirc" },
+	{ "/avia extensions",	"/dev/dbox/aviaEXT" },
+	{ NULL, NULL }
+};
 
 static int filecopy(int out, int in)
 {
@@ -181,18 +203,48 @@ hfin_out:
 	return ret;
 }
 
+static int misc_dev_add(void)
+{
+	int ret = 0;
+	int i;
+	char *devpath = getenv("DEVPATH");
+	/* actually we do not really need to check this. If devpath is NULL, we
+	   might as well just segfault - might even be faster :-) */
+	if (!devpath || !*devpath) {
+		output_debug("hotplug: misc_dev_add error, DEVPATH or MINOR not set\n");
+		return -1;
+	}
+
+	for (i = 0; name_trans[i].kname; i++) {
+		/* search the last "/" in devpath, compare kname from there */
+		if (!strcmp(strrchr(devpath, '/'), name_trans[i].kname)) {
+			int minor = atoi(getenv("MINOR"));
+			ret = mknod(name_trans[i].devname, S_IFCHR | 0600, makedev(10, minor));
+			output_debug("hotplug: misc_dev_add mknod(%s, 10, %d) returns %d\n",
+				name_trans[i].devname, minor, ret);
+			break;
+		}
+	}
+	return ret;
+}
+
 int main( int argc, char **argv )
 {
 	int ret = 0;
 	char *action_env = getenv("ACTION");
 	init_debug();
 	if (action_env && !strncmp( action_env,"add", 3)) {
+		char *major = getenv("MAJOR");
+		if (major && *major++ == '1' && *major++ == '0' && *major++ == '\0') {
+			ret = misc_dev_add();
+			goto out;
+		}
 		char *firmware_env = getenv("FIRMWARE");
 		if (firmware_env && *firmware_env != 0x00) {
 			ret = action_add(firmware_env);
 		}
 	}
-
+out:
 	fini_debug();
 	return ret;
 }
