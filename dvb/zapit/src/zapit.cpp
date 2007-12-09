@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.402 2007/07/22 14:36:42 dbluelle Exp $
+ * $Id: zapit.cpp,v 1.403 2007/12/09 23:27:44 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1933,12 +1933,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_SET_STANDBY:
 	{
+		CZapitMessages::responseCmd response;
 		CZapitMessages::commandBoolean msgBoolean;
 		CBasicServer::receive_data(connfd, &msgBoolean, sizeof(msgBoolean));
 		if (msgBoolean.truefalse)
 			enterStandby();
 		else
 			leaveStandby();
+		response.cmd = CZapitMessages::CMD_READY;
+		CBasicServer::send_data(connfd, &response, sizeof(response));
 		break;
 	}
 
@@ -2567,7 +2570,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.402 2007/07/22 14:36:42 dbluelle Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.403 2007/12/09 23:27:44 seife Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.113 2007/06/03 14:27:46 dbluelle Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.114 2007/12/09 23:27:44 seife Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -825,6 +825,9 @@ void CZapitClient::setStandby(const bool enable)
 	CZapitMessages::commandBoolean msg;
 	msg.truefalse = enable;
 	send(CZapitMessages::CMD_SET_STANDBY, (char*)&msg, sizeof(msg));
+	CZapitMessages::responseCmd response;
+	CBasicClient::receive_data((char* )&response, sizeof(response));
+
 	close_connection();
 }
 
