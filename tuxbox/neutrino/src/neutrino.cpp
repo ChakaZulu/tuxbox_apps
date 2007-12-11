@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.879 2007/11/21 21:40:30 dbt Exp $
+	$Id: neutrino.cpp,v 1.880 2007/12/11 19:38:02 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2967,7 +2967,7 @@ void CNeutrinoApp::paintMuteIcon( bool is_visible)
 	
 	if( is_visible )
 			{
-				frameBuffer->paintBoxRel(x, y, dx, dy, COL_LIME);
+				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0);
 				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+4, y+4);
 			}
 			else
