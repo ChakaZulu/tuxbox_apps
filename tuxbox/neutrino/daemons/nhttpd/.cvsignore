@@ -2,3 +2,6 @@
 Makefile
 Makefile.in
 nhttpd
+.deps
+.project
+.cproject
