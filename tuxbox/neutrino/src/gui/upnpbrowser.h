@@ -90,6 +90,9 @@ class CUpnpBrowserGui : public CMenuTarget
 	int            m_buttonHeight;
 	int            m_title_height;
 	int            m_info_height;
+	bool           m_folderplay;
+	std::string    m_playfolder;
+	int            m_playid;
 	time_t         m_time_played;
 	bool           m_playing_entry_is_shown;
 
@@ -98,6 +101,7 @@ class CUpnpBrowserGui : public CMenuTarget
 	void paintItem(std::vector<UPnPEntry> *entry, unsigned int selected, unsigned int max, unsigned int offset);
 	void paintDevice();
 	std::vector<UPnPEntry> *decodeResult(std::string);
+	void playnext();
 	void splitProtocol(std::string &protocol, std::string &prot, std::string &network, std::string &mime, std::string &additional);
 	void paintItemPos  (std::vector<UPnPEntry> *entry, unsigned int pos, unsigned int selected);
 	void paintDevicePos(unsigned int pos);

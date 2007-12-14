@@ -448,6 +448,7 @@ void CUpnpBrowserGui::selectDevice()
 
 		else if( msg == CRCInput::RC_right || msg == CRCInput::RC_ok)
 		{
+			m_folderplay = false;
 			selectItem("0");
 			changed=true;
 		}
@@ -497,6 +498,91 @@ void CUpnpBrowserGui::selectDevice()
 		}
 	}
 	delete scanBox;
+}
+
+//------------------------------------------------------------------------
+
+void CUpnpBrowserGui::playnext(void)
+{
+	while (true)
+	{
+		std::list<UPnPAttribute>attribs;
+		std::list<UPnPAttribute>results;
+		std::list<UPnPAttribute>::iterator i;
+		std::stringstream sindex;
+		std::vector<UPnPEntry> *entries;
+		bool rfound = false;
+		bool nfound = false;
+		bool tfound = false;
+
+		sindex << m_playid;
+
+		attribs.push_back(UPnPAttribute("ObjectID", m_playfolder));
+		attribs.push_back(UPnPAttribute("BrowseFlag", "BrowseDirectChildren"));
+		attribs.push_back(UPnPAttribute("Filter", "*"));
+		attribs.push_back(UPnPAttribute("StartingIndex", sindex.str()));
+		attribs.push_back(UPnPAttribute("RequestedCount", "1"));
+		attribs.push_back(UPnPAttribute("SortCriteria", ""));
+
+		try
+		{
+			results=m_devices[m_selecteddevice].SendSOAP("urn:schemas-upnp-org:service:ContentDirectory:1", "Browse", attribs);
+		}
+		catch (std::runtime_error error)
+		{
+			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, error.what(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+			m_folderplay = false;
+			return;
+		}
+		for (i=results.begin(); i!=results.end(); i++)
+		{
+			if (i->first=="NumberReturned")
+			{
+				if (atoi(i->second.c_str()) != 1)
+				{
+					m_folderplay = false;
+					return;
+				}
+				nfound=true;
+			}
+			if (i->first=="TotalMatches")
+			{
+				tfound=true;
+			}
+			if (i->first=="Result")
+			{
+				entries=decodeResult(i->second);
+				rfound=true;
+			}
+		}
+		m_playid++;
+		if (!(*entries)[0].isdir)
+		{
+			int preferred=(*entries)[0].preferred;
+			if (preferred != -1)
+			{
+				std::string protocol, prot, network, mime, additional;
+				protocol=(*entries)[0].resources[preferred].protocol;
+				splitProtocol(protocol, prot, network, mime, additional);
+				if (mime == "audio/mpeg")
+				{
+					m_playing_entry = (*entries)[0];
+					m_playing_entry_is_shown = false;
+					CAudiofile mp3((*entries)[0].resources[preferred].url, CFile::FILE_MP3);
+					CAudioPlayer::getInstance()->play(&mp3, g_settings.audioplayer_highprio == 1);
+					return;
+				}
+				else if (mime == "audio/x-vorbis+ogg")
+				{
+					m_playing_entry = (*entries)[0];
+					m_playing_entry_is_shown = false;
+					CAudiofile mp3((*entries)[0].resources[preferred].url, CFile::FILE_OGG);
+					CAudioPlayer::getInstance()->play(&mp3, g_settings.audioplayer_highprio == 1);
+					return;
+				}
+			}	
+		}
+	}
 }
 
 //------------------------------------------------------------------------
@@ -684,6 +770,7 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 		{
 			if (!(*entries)[selected - index].isdir)
 			{
+				m_folderplay = false;
 				int preferred=(*entries)[selected - index].preferred;
 				if (preferred != -1)
 				{
@@ -737,6 +824,12 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 					}
 #endif
 				}
+
+			} else {
+				m_folderplay = true;
+				m_playfolder = (*entries)[selected - index].id;
+				m_playid = 0;
+				playnext();
 			}
 			changed=true;
 		}
@@ -744,6 +837,7 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 		{
 			if(CAudioPlayer::getInstance()->getState() != CBaseDec::STOP)
 				CAudioPlayer::getInstance()->stop();
+			m_folderplay = false;
 		}
 
 		else if(msg == NeutrinoMessages::RECORD_START ||
@@ -768,6 +862,8 @@ bool CUpnpBrowserGui::selectItem(std::string id)
 			changed=true;
 		}
 
+		if (m_folderplay && (CAudioPlayer::getInstance()->getState() == CBaseDec::STOP))
+			playnext();
 	}
 	if (entries)
 		delete entries;
