@@ -330,8 +330,14 @@ void eZap::init_eZap(int argc, char **argv)
 	if(signal(SIGPIPE, handle_sig_pipe) == SIG_ERR)
 		eFatal("couldn't install SIGPIPE handler");
 
+	/*
+	 * Don't install a SIGCHLD handler, our handler will call 'waitpid' on all children,
+	 * causing a race with users that call waitpid on their own child processes (e.g. 'system()' calls)
+	 */
+	/*
 	if(signal(SIGCHLD, handle_sig_chld) == SIG_ERR)
 		eFatal("couldn't install SIGCHLD handler");
+	*/
 
 	init->setRunlevel(eAutoInitNumbers::main);
 }
@@ -566,7 +572,7 @@ int main(int argc, char **argv)
 	}
 
 	Decoder::Flush();
-	signal(SIGCHLD, SIG_DFL);
+	//signal(SIGCHLD, SIG_DFL);
 	exit(res);
 //	mcheck_check_all();
 //	muntrace();
