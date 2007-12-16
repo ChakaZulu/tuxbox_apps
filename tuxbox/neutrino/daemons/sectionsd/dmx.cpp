@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.32 2007/11/14 19:52:22 houdini Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.33 2007/12/16 11:53:31 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -135,6 +135,7 @@ int DMX::stop(void)
 
 void DMX::lock(void)
 {
+	//dprintf("DMX::lock, thread %lu\n", pthread_self());
 #ifdef DEBUG_MUTEX
 	int rc = pthread_mutex_lock(&start_stop_mutex);
 	if (rc != 0)
@@ -149,6 +150,7 @@ void DMX::lock(void)
 
 void DMX::unlock(void)
 {
+	//dprintf("DMX::unlock, thread %lu\n", pthread_self());
 #ifdef DEBUG_MUTEX
 	int rc = pthread_mutex_unlock(&start_stop_mutex);
 	if (rc != 0)
@@ -159,6 +161,7 @@ void DMX::unlock(void)
 #else
 	pthread_mutex_unlock(&start_stop_mutex);
 #endif
+	sched_yield();
 }
 
 sections_id_t DMX::create_sections_id(const unsigned char table_id, const unsigned short extension_id, const unsigned char section_number, const unsigned short onid, const unsigned short tsid)

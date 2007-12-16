@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.254 2007/12/14 22:33:10 seife Exp $
+//  $Id: sectionsd.cpp,v 1.255 2007/12/16 11:53:31 seife Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -2352,7 +2352,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.254 2007/12/14 22:33:10 seife Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.255 2007/12/16 11:53:31 seife Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -6598,6 +6598,14 @@ static void *eitThread(void *)
 	dmxEIT.addfilter( 0x4e, 0xfe );
 	dmxEIT.addfilter( 0x50, 0xf0 );
 	dmxEIT.addfilter( 0x60, 0xf0 );
+
+	if (debug) {
+		int policy;
+		struct sched_param parm;
+		int rc = pthread_getschedparam(pthread_self(), &policy, &parm);
+		dprintf("eitThread getschedparam: %d pol %d, prio %d\n", rc, policy, parm.sched_priority);
+	}
+
 	try
 	{
 		dprintf("[%sThread] pid %d start\n", "eit", getpid());
@@ -7526,7 +7534,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.254 2007/12/14 22:33:10 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.255 2007/12/16 11:53:31 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -7629,29 +7637,8 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 
-		/* i'm creating all threads with SCHED_RR policy. Not because i want them
-		   to have real-time properties, but because, citing the pthread_attr_getschedpolicy(3p)
-		   man page:
-		    "When threads executing with the scheduling  policy SCHED_FIFO, SCHED_RR, or
-		     SCHED_SPORADIC are waiting on a mutex, they shall acquire the mutex in priority
-		     order when the mutex is unlocked."
-		   This is what we need, to make sure that the main loop (which handles the connection
-		   with the GUI) gets the lock in a predictable time frame. SCHED_RR looks like the
-		   best suited of the different choices to me.
-		   TODO: i consider this a gross hack, somebody who knows more about phtreads and the
-			 differences wrt. 2.4 and 2.6 kernels should clean this mess up and fix it.
-		 */
-		pthread_attr_init(&attr);
-		pthread_attr_setschedpolicy(&attr,SCHED_RR);
-		/* "For the SCHED_FIFO and SCHED_RR policies, the only required member of param
-		    is sched_priority."
-		   create all threads with a priority below the main loop, the main loop gets -5
-		 */
-		parm.sched_priority = -10;
-		pthread_attr_setschedparam(&attr,&parm);
-
 		// EIT-Thread starten
-		rc = pthread_create(&threadEIT, &attr, eitThread, 0);
+		rc = pthread_create(&threadEIT, 0, eitThread, 0);
 
 		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create eit-thread (rc=%d)\n", rc);
@@ -7659,7 +7646,7 @@ int main(int argc, char **argv)
 		}
 
 		// premiere private epg -Thread starten
-		rc = pthread_create(&threadPPT, &attr, pptThread, 0);
+		rc = pthread_create(&threadPPT, 0, pptThread, 0);
 
 		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create ppt-thread (rc=%d)\n", rc);
@@ -7667,7 +7654,7 @@ int main(int argc, char **argv)
 		}
 
 		// NIT-Thread starten
-		rc = pthread_create(&threadNIT, &attr, nitThread, 0);
+		rc = pthread_create(&threadNIT, 0, nitThread, 0);
 
 		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create nit-thread (rc=%d)\n", rc);
@@ -7675,7 +7662,7 @@ int main(int argc, char **argv)
 		}
 
 		// SDT-Thread starten
-		rc = pthread_create(&threadSDT, &attr, sdtThread, 0);
+		rc = pthread_create(&threadSDT, 0, sdtThread, 0);
 
 		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create sdt-thread (rc=%d)\n", rc);
@@ -7683,7 +7670,7 @@ int main(int argc, char **argv)
 		}
 
 		// housekeeping-Thread starten
-		rc = pthread_create(&threadHouseKeeping, &attr, houseKeepingThread, 0);
+		rc = pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
 
 		if (rc) {
 			fprintf(stderr, "[sectionsd] failed to create houskeeping-thread (rc=%d)\n", rc);
@@ -7691,13 +7678,22 @@ int main(int argc, char **argv)
 		}
 
 		/* now set the priority for the mainloop */
-		parm.sched_priority = -5;
-		pthread_setschedparam(pthread_self(), SCHED_RR, &parm);
+		memset(&parm, 0, sizeof(parm));
+		parm.sched_priority = 1;
+		rc = pthread_setschedparam(pthread_self(), SCHED_RR, &parm);
+		if (rc)
+			printf("pthread_setschedparam: %d\n", rc);
+
+		if (debug) {
+			int policy;
+        	        rc = pthread_getschedparam(pthread_self(), &policy, &parm);
+	                dprintf("mainloop getschedparam %d policy %d prio %d\n", rc, policy, parm.sched_priority);
+		}
 
 		if (update_eit) {
 			struct pollfd pfd;
 			while (sectionsd_server.run(parse_command, sectionsd::ACTVERSION, true)) {
-
+				sched_yield();
 				if (eit_update_fd != -1) {
 					pfd.fd = eit_update_fd;
 					pfd.events = (POLLIN | POLLPRI);
@@ -7716,8 +7712,10 @@ int main(int argc, char **argv)
 						}
 					}
 				}
-				/* yuck, don't waste that much cpu time :) */
-				usleep(100);
+				sched_yield();
+				/* 10 ms is the minimal timeslice anyway (HZ = 100), so let's
+				   wait 20 ms at least to lower the CPU load */
+				usleep(20000);
 			}
 		} else {
 			sectionsd_server.run(parse_command, sectionsd::ACTVERSION);
