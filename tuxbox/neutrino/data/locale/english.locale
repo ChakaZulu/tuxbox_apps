@@ -578,7 +578,7 @@ miscsettings.infobar_show EPG Info
 miscsettings.osd_specials OSD-Specials
 miscsettings.show_mute_icon Mute-Icon on volume 0
 miscsettings.show_mute_icon_no no
-miscsettings.show_mute_icon_not_in_ac3mode nicht bei AC3
+miscsettings.show_mute_icon_not_in_ac3mode not in AC3 mode
 miscsettings.show_mute_icon_yes yes
 miscsettings.shutdown_count Switch off After (minutes)
 miscsettings.shutdown_count_hint1 time (in minutes) to switch from standby
