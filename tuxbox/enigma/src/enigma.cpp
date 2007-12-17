@@ -115,9 +115,6 @@ eZap::eZap(int argc, char **argv)
 
 void eZap::init_eZap(int argc, char **argv)
 {
-struct timeval tvtemp;
-gettimeofday(&tvtemp,NULL);
-printf("startup:%d,%d\n",tvtemp.tv_sec,tvtemp.tv_usec);
 	int bootcount;
 
 #ifndef DISABLE_LCD
@@ -161,19 +158,10 @@ printf("startup:%d,%d\n",tvtemp.tv_sec,tvtemp.tv_usec);
 				plugins.push_back(handle);
 		}
 	}
-gettimeofday(&tvtemp,NULL);
-printf("plugins geladen:%d\n",tvtemp.tv_sec);
-
 	init->setRunlevel(eAutoInitNumbers::configuration);
-gettimeofday(&tvtemp,NULL);
-printf("runlevel set 1:%d\n",tvtemp.tv_sec);
 	Decoder::Initialize();
-gettimeofday(&tvtemp,NULL);
-printf("Decoder intialized:%d\n",tvtemp.tv_sec);
 
 	init->setRunlevel(eAutoInitNumbers::osd);
-gettimeofday(&tvtemp,NULL);
-printf("runlevel set 2:%d\n",tvtemp.tv_sec);
 
 	if (eServiceHandlerExternal::getInstance())
 	{
@@ -211,6 +199,7 @@ printf("runlevel set 2:%d\n",tvtemp.tv_sec);
 	desktop_lcd->setBackgroundColor(gColor(0));
 	desktop_lcd->show();
 #endif
+ 	eDebug("[ENIGMA] loading default keymaps...");
 
 #if HAVE_DVB_API_VERSION < 3
 #ifndef DISABLE_DREAMBOX_RC
@@ -350,8 +339,6 @@ printf("runlevel set 2:%d\n",tvtemp.tv_sec);
 	*/
 
 	init->setRunlevel(eAutoInitNumbers::main);
-gettimeofday(&tvtemp,NULL);
-printf("startup done:%d,%d\n",tvtemp.tv_sec,tvtemp.tv_usec);
 }
 
 void eZap::reconfigureHTTPServer()
@@ -472,8 +459,6 @@ eZap::~eZap()
 	delete httpd;
 
 	delete init;
-
-	delete desktop_fb;
 
 	instance = 0;
 }
