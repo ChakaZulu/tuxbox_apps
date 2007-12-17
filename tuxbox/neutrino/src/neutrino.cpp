@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.880 2007/12/11 19:38:02 dbt Exp $
+	$Id: neutrino.cpp,v 1.881 2007/12/17 19:23:58 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -322,6 +322,7 @@ int CNeutrinoApp::loadSetup()
 #endif
 	g_settings.virtual_zap_mode		= configfile.getBool("virtual_zap_mode"          , false);
 	g_settings.infobar_show			= configfile.getInt32("infobar_show"             , 0);
+	g_settings.show_mute_icon		= configfile.getInt32("show_mute_icon"		,1);
 
 	//audio
 	g_settings.audio_AnalogMode 		= configfile.getInt32( "audio_AnalogMode"        , 0 );
@@ -788,6 +789,7 @@ void CNeutrinoApp::saveSetup()
 #endif
 	configfile.setBool("virtual_zap_mode"          , g_settings.virtual_zap_mode);
 	configfile.setInt32("infobar_show"             , g_settings.infobar_show);
+	configfile.setInt32("show_mute_icon"			, g_settings.show_mute_icon);
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode" , g_settings.audio_AnalogMode);
@@ -1931,7 +1933,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    fontSettings        (LOCALE_FONTMENU_HEAD                 , "colors.raw"          );
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 420);
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 450);
-	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 450);
+	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
 	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
@@ -2958,14 +2960,32 @@ void CNeutrinoApp::ExitRun(const bool write_si)
 	}
 }
 
-void CNeutrinoApp::paintMuteIcon( bool is_visible)
+bool CNeutrinoApp::doShowMuteIcon()
+{
+	char current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
+	
+	if ( current_volume == 0 )	// show mute icon if volume = 0
+	{		
+		if ( g_settings.show_mute_icon == 1 )		// show_mute_icon sets to "yes"
+			return true;
+		else if (( g_settings.show_mute_icon == 2 ) && ( g_settings.audio_DolbyDigital == false ))	// show mute icon if volume = 0 in dependence of enabled or disabled AC3-Mode
+			return true;
+		else
+			return false;
+	}	
+	else
+		return false;
+		
+}
+
+void CNeutrinoApp::paintMuteIcon( bool is_visible )
 {
 	int dx = 40;
 	int dy = 40;
 	int x = g_settings.screen_EndX-dx;
 	int y = g_settings.screen_StartY;
-	
-	if( is_visible )
+
+	if ( is_visible )
 			{
 				frameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR_PLUS_0);
 				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE, x+4, y+4);
@@ -3002,9 +3022,9 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 
 		if( isEvent && ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic) && ( volumeBarIsVisible ) )
 		{
-		// show mute icon ONLY on event or current volume value is 0
-			if (( current_muted ) || (g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control) == 0))
-				paintMuteIcon();
+			// show mute icon ONLY on event or current volume value is 0
+			if (( current_muted ) || (doShowMuteIcon()))
+				paintMuteIcon();			
 			else
 				paintMuteIcon(false);
 		}
@@ -3158,13 +3178,14 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			/* erase the numbers... */
 			frameBuffer->paintBoxRel(x + dx - 40,  y + 4,        36, dy - 2*4, COL_INFOBAR_PLUS_1);
 			g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x + dx - 36, y + dy, 36, p , COL_INFOBAR_PLUS_1);
-			// paint/hide mute icon
-			if ((current_volume == 0) || (current_muted))
-				paintMuteIcon();
-			else
-				paintMuteIcon(false);				
+		
+			if ( ( current_muted ) || ( doShowMuteIcon() )) 	
+				paintMuteIcon();				
+			else	
+				paintMuteIcon(false);
+					
 		}
-
+						
 		CLCD::getInstance()->showVolume(current_volume);
 		if (msg != CRCInput::RC_timeout)
 		{

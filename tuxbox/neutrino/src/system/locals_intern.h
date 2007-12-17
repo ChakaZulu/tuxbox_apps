@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.110 2007/11/21 21:39:27 dbt Exp $
+ * $Id: locals_intern.h,v 1.111 2007/12/17 19:24:19 dbt Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -602,6 +602,11 @@ const char * locale_real_names[] =
 	"miscsettings.infobar",
 	"miscsettings.infobar_sat_display",
 	"miscsettings.infobar_show",
+	"miscsettings.osd_specials",
+	"miscsettings.show_mute_icon",
+	"miscsettings.show_mute_icon_no",
+	"miscsettings.show_mute_icon_not_in_ac3mode",
+	"miscsettings.show_mute_icon_yes",
 	"miscsettings.shutdown_count",
 	"miscsettings.shutdown_count_hint1",
 	"miscsettings.shutdown_count_hint2",

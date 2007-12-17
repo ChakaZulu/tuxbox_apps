@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.184 2007/11/21 21:39:27 dbt Exp $
+  $Id: settings.h,v 1.185 2007/12/17 19:24:19 dbt Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -64,6 +64,7 @@ struct SNeutrinoSettings
 #endif
 	int virtual_zap_mode;
 	int infobar_show;
+	int show_mute_icon;
 
 	// EPG
 	std::string epg_cache;

@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.194 2007/11/21 21:40:30 dbt Exp $
+	$Id: neutrino.h,v 1.195 2007/12/17 19:23:58 dbt Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -202,7 +202,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void setVolume(const neutrino_msg_t key, const bool bDoPaint = true);
 		void AudioMute( bool newValue, bool isEvent= false );
 		void paintMuteIcon( bool is_visible = true );
-
+		
 		void ExitRun(const bool write_si);
 		void RealRun(CMenuWidget &mainSettings);
 		void InitZapper();
@@ -253,6 +253,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		void CmdParser(int argc, char **argv);
 		void ShowStreamFeatures();
 		bool doGuiRecord(char * preselectedDir, bool addTimer = false);
+		bool doShowMuteIcon(void);
 		CNeutrinoApp();
 
 	public:

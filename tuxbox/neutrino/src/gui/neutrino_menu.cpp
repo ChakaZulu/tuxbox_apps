@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.13 2007/11/22 16:17:06 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.14 2007/12/17 19:24:45 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -797,6 +797,14 @@ const CMenuOptionChooser::keyval  VOLUMEBAR_DISP_POS_OPTIONS[VOLUMEBAR_DISP_POS_
 	{ 6 , LOCALE_SETTINGS_POS_OFF }
 };
 
+#define SHOW_MUTE_ICON_OPTIONS_COUNT 3
+const CMenuOptionChooser::keyval  SHOW_MUTE_ICON_OPTIONS[SHOW_MUTE_ICON_OPTIONS_COUNT]=
+{
+	{ 0 , LOCALE_MISCSETTINGS_SHOW_MUTE_ICON_NO },
+	{ 1 , LOCALE_MISCSETTINGS_SHOW_MUTE_ICON_YES },
+	{ 2 , LOCALE_MISCSETTINGS_SHOW_MUTE_ICON_NOT_IN_AC3MODE }
+};
+
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
@@ -822,8 +830,12 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	CTuxtxtCacheNotifier *tuxtxtcacheNotifier = new CTuxtxtCacheNotifier;
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_TUXTXT_CACHE, &g_settings.tuxtxt_cache, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, tuxtxtcacheNotifier));
 #endif
-	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VOLUMEBAR_DISP_POS, &g_settings.volumebar_disp_pos, VOLUMEBAR_DISP_POS_OPTIONS, VOLUMEBAR_DISP_POS_OPTIONS_COUNT, true));
 	
+	// OSD - specials
+	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_OSD_SPECIALS));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_VOLUMEBAR_DISP_POS, &g_settings.volumebar_disp_pos, VOLUMEBAR_DISP_POS_OPTIONS, VOLUMEBAR_DISP_POS_OPTIONS_COUNT, true));
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHOW_MUTE_ICON, &g_settings.show_mute_icon, SHOW_MUTE_ICON_OPTIONS, SHOW_MUTE_ICON_OPTIONS_COUNT, true));
+
 	//infobar settings
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_INFOBAR));
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
