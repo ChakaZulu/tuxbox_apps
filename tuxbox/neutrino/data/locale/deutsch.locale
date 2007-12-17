@@ -575,6 +575,11 @@ miscsettings.head Diverse Einstellungen
 miscsettings.infobar Infobar
 miscsettings.infobar_sat_display Infobar Satellitenanzeige
 miscsettings.infobar_show Info bei EPG Änderung
+miscsettings.osd_specials OSD-Extras
+miscsettings.show_mute_icon Mute-Icon bei Lautstärke 0
+miscsettings.show_mute_icon_no nein
+miscsettings.show_mute_icon_not_in_ac3mode nicht bei AC3
+miscsettings.show_mute_icon_yes ja 
 miscsettings.shutdown_count Komplett ausschalten nach
 miscsettings.shutdown_count_hint1 Zeit (in Minuten) nach dem vom Standbymodus
 miscsettings.shutdown_count_hint2 komplett ausgeschaltet wird (0 = aus).
