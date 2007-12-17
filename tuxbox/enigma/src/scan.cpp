@@ -2124,7 +2124,7 @@ void ManualPIDWindow::store()
 	sscanf( vpid->getText().c_str(), hex?"%x":"%d", &tmpval);
 	if (tmpval)
 	{
-		s.cache[eServiceDVB::cVPID]=tmpval;
+		s.set(eServiceDVB::cVPID,tmpval);
 		tmpval=0;
 	}
 
@@ -2132,7 +2132,7 @@ void ManualPIDWindow::store()
 	sscanf( apid->getText().c_str(), hex?"%x":"%d", &tmpval);
 	if (tmpval)
 	{
-		s.cache[isAC3Pid->isChecked()?eServiceDVB::cAC3PID:eServiceDVB::cAPID] = tmpval;
+		s.set(isAC3Pid->isChecked()?eServiceDVB::cAC3PID:eServiceDVB::cAPID,tmpval);
 		tmpval=0;
 	}
 
@@ -2140,14 +2140,14 @@ void ManualPIDWindow::store()
 	sscanf( tpid->getText().c_str(), hex?"%x":"%d", &tmpval);
 	if (tmpval)
 	{
-		s.cache[eServiceDVB::cTPID]=tmpval;
+		s.set(eServiceDVB::cTPID,tmpval);
 		tmpval=0;
 	}
 
 	// pcr pid
 	sscanf( pcrpid->getText().c_str(), hex?"%x":"%d", &tmpval);
 	if (tmpval)
-		s.cache[eServiceDVB::cPCRPID]=tmpval;
+		s.set(eServiceDVB::cPCRPID,tmpval);
 
 	// DX Flags
 	s.dxflags=eServiceDVB::dxNewFound;

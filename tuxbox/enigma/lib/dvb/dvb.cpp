@@ -117,21 +117,24 @@ eServiceDVB::eServiceDVB(eDVBNamespace dvb_namespace, eTransportStreamID transpo
 		eService(""), dvb_namespace(dvb_namespace), transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_number(service_number), dxflags(0)
 {
 	dvb=this;
-	clearCache();
+	cachevalues=NULL;
+//	clearCache();
 }
 
 eServiceDVB::eServiceDVB(eServiceID service_id, const char *name)
 	: eService(name), service_id(service_id), service_number(-1), dxflags(0)
 {
 	dvb=this;
-	clearCache();
+	cachevalues=NULL;
+//	clearCache();
 }
 
 eServiceDVB::eServiceDVB(eDVBNamespace dvb_namespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number):
 		eService(""), dvb_namespace(dvb_namespace), transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_number(service_number), dxflags(0)
 {
 	dvb=this;
-	clearCache();
+	cachevalues=NULL;
+//	clearCache();
 	service_id=sdtentry->service_id;
 	update(sdtentry);
 }
@@ -147,8 +150,61 @@ eServiceDVB::eServiceDVB(const eServiceDVB &c):
 	service_provider=c.service_provider;
 	service_number=c.service_number;
 	dxflags=c.dxflags;
-	memcpy(cache, c.cache, sizeof(cache));
+	cachevalues=NULL;
+	if (c.cachevalues != NULL)
+	{
+		cachevalues=new short[c.cachevalues[0]];
+		memcpy(cachevalues, c.cachevalues, (c.cachevalues[0])*sizeof(short));
+	}
 	dvb=this;
+}
+eServiceDVB::~eServiceDVB()
+{
+	if (cachevalues) 
+		delete cachevalues;
+}
+
+void eServiceDVB::set(cacheID c, short v)
+{
+	if (!cachevalues)
+	{
+		if (v == -1)
+			return;
+		/* most common case is 5 values (up to cAC3PID) */
+		makeCache(c > cAC3PID ? c : cAC3PID);
+	}
+	else if (c > cachevalues[0]-2)
+	{
+		/* setting is higher than cAC3PID, so we "realloc" the settings */
+		short* p = cachevalues;
+		makeCache(c);
+		memcpy(cachevalues,p, p[0]);
+		cachevalues[0]=c+2;
+
+		delete p;
+	}
+	cachevalues[c+1]=v;
+}
+
+short eServiceDVB::get(cacheID c)
+{
+	if (!cachevalues || cachevalues[0] < c+2)
+		return -1;
+	return cachevalues[c+1];
+}
+void eServiceDVB::makeCache(short maxCacheID)
+{
+	cachevalues= new short[maxCacheID+2];
+	cachevalues[0] = maxCacheID+2;
+	clearCache();
+}
+void eServiceDVB::clearCache()
+{
+	if (cachevalues)
+	{		
+		for (int i=cachevalues[0]-1; i; i--)
+			cachevalues[i]=-1;
+	}
 }
 
 void eBouquet::add(const eServiceReferenceDVB &service)

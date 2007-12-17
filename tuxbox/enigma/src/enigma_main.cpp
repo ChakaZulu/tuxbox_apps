@@ -743,6 +743,16 @@ void eAudioSelector::subtitleSelected(eListBoxEntryText *entry)
 		eSubtitleWidget *i = eSubtitleWidget::getInstance();
 		if (!i)
 			return;
+		eService *sp=eServiceInterface::getInstance()->addRef(eServiceInterface::getInstance()->service);
+		if (sp)
+		{
+			if (sp->dvb)
+			{
+				int val = (pe ? pe->elementary_PID : -1);
+				sp->dvb->set(eServiceDVB::cSubtitle, val);
+			}
+			eServiceInterface::getInstance()->removeRef(eServiceInterface::getInstance()->service);
+		}
 		if (pe)
 		{
 			std::set<int> pages; pages.insert(-1);
@@ -6126,6 +6136,16 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 			tmp = sp->dvb->get(eServiceDVB::cStereoMono);
 			if ( tmp != -1)
 				eAVSwitch::getInstance()->selectAudioChannel(tmp);
+			int tmp2 = sp->dvb->get(eServiceDVB::cSubtitle);
+			if ( tmp2 != -1)
+			{
+				eSubtitleWidget *i = eSubtitleWidget::getInstance();
+				if (i)
+				{
+					std::set<int> pages; pages.insert(-1);
+					i->start(tmp2, pages);
+				}
+			}
 		}
 		eServiceInterface::getInstance()->removeRef(_serviceref);
 	}

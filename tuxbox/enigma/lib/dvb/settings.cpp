@@ -262,8 +262,9 @@ struct saveService
 			fprintf(f, "f:%x,", s.dxflags);
 		for (int i=0; i<eServiceDVB::cacheMax; ++i)
 		{
-			if (s.cache[i] != -1)
-				fprintf(f, "c:%02d%04x,", i, s.cache[i]);
+			short val = s.get((eServiceDVB::cacheID)i);
+			if (val != -1)
+				fprintf(f, "c:%02d%04x,", i, val);
 		}
 		eString prov;
 		prov=s.service_provider;
@@ -290,7 +291,7 @@ struct saveSubService
 		bool bChanged = false;
 		for (int i=0; i<eServiceDVB::cacheMax; ++i)
 		{
-			if (s.cache[i] != -1)
+			if (s.get((eServiceDVB::cacheID)i) != -1)
 			{
 				bChanged = true;
 				break;
@@ -303,8 +304,9 @@ struct saveSubService
 			fprintf(f, "f:%x,", s.dxflags);
 		for (int i=0; i<eServiceDVB::cacheMax; ++i)
 		{
-			if (s.cache[i] != -1)
-				fprintf(f, "c:%02d%04x,", i, s.cache[i]);
+			short val = s.get((eServiceDVB::cacheID)i);
+			if (val != -1)
+				fprintf(f, "c:%02d%04x,", i, val);
 		}
 		eString prov;
 		prov=s.service_provider;
@@ -506,7 +508,7 @@ void eDVBSettings::loadServices()
 					int cid, val;
 					sscanf(v.c_str(), "%02d%04x", &cid, &val);
 					if (cid < eServiceDVB::cacheMax)
-						s.cache[cid]=val;
+						s.set((eServiceDVB::cacheID)cid,val);
 				}
 			}
 	}
@@ -581,7 +583,7 @@ void eDVBSettings::loadServices()
 					int cid, val;
 					sscanf(v.c_str(), "%02d%04x", &cid, &val);
 					if (cid < eServiceDVB::cacheMax)
-						s.cache[cid]=val;
+						s.set((eServiceDVB::cacheID)cid,val);
 				}
 			}
 	}
