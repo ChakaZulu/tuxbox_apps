@@ -312,6 +312,7 @@ private:
 	static pthread_mutex_t cache_lock;
 	uniqueEPGKey current_service;
 	int paused;
+	int isLoading;
 
 	int state;
 	__u8 isRunning, firstStart, haveData;

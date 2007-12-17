@@ -195,6 +195,7 @@ eEPGCache::eEPGCache()
 {
 	eDebug("[EPGC] Initialized EPGCache");
 	isRunning=0;
+	isLoading=0;
 	scheduleReader.setContext(this);
 	scheduleOtherReader.setContext(this);
 #ifdef ENABLE_MHW_EPG
@@ -1096,6 +1097,8 @@ eEPGCache::~eEPGCache()
 
 EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_id, bool plain)
 {
+	if (isLoading)
+		return 0;
 	singleLock s(cache_lock);
 	uniqueEPGKey key( service );
 
@@ -1126,6 +1129,8 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_
 EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, bool plain )
 // if t == 0 we search the current event...
 {
+	if (isLoading)
+		return 0;
 	singleLock s(cache_lock);
 	uniqueEPGKey key(service);
 
@@ -1562,6 +1567,7 @@ void eEPGCache::load()
 			fread( text1, 13, 1, f);
 			if ( !strncmp( text1, "ENIGMA_EPG_V7", 13) )
 			{
+				isLoading = 1;
 				singleLock l(cache_lock);
 				fread( &size, sizeof(int), 1, f);
 				while(size--)
@@ -1628,6 +1634,7 @@ void eEPGCache::load()
 					}
 				}
 #endif // ENABLE_PRIVATE_EPG
+				isLoading=0;
 			}
 			else
 				eDebug("[EPGC] don't read old epg database");
