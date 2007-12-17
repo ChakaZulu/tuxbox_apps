@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.403 2007/12/09 23:27:44 seife Exp $
+ * $Id: zapit.cpp,v 1.404 2007/12/17 09:53:04 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2484,7 +2484,7 @@ void leaveStandby(void)
 	frontend->setDiseqcType(diseqcType);
 
 	for (unsigned int i = 0; i < MAX_LNBS; i++) {
-		char tmp[16];
+		char tmp[17]; // "lnb63_OffsetHigh\0"
 		sprintf(tmp, "lnb%d_OffsetLow", i);
 		frontend->setLnbOffset(false, i, config.getInt32(tmp, 9750000));
 		sprintf(tmp, "lnb%d_OffsetHigh", i);
@@ -2570,7 +2570,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.403 2007/12/09 23:27:44 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.404 2007/12/17 09:53:04 seife Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
