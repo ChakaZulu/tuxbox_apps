@@ -1,10 +1,10 @@
 //
-//  $Id: sectionsd.cpp,v 1.255 2007/12/16 11:53:31 seife Exp $
+//  $Id: sectionsd.cpp,v 1.256 2007/12/21 16:26:59 houdini Exp $
 //
-//	sectionsd.cpp (network daemon for SI-sections)
-//	(dbox-II-project)
+//    sectionsd.cpp (network daemon for SI-sections)
+//    (dbox-II-project)
 //
-//	Copyright (C) 2001 by fnbrd
+//    Copyright (C) 2001 by fnbrd
 //
 //    Homepage: http://dbox2.elxsi.de
 //
@@ -2352,25 +2352,27 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-	        "$Id: sectionsd.cpp,v 1.255 2007/12/16 11:53:31 seife Exp $\n"
-	        "Current time: %s"
-	        "Hours to cache: %ld\n"
+		"$Id: sectionsd.cpp,v 1.256 2007/12/21 16:26:59 houdini Exp $\n"
+		"Current time: %s"
+		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
-	        "Events are old %ldmin after their end time\n"
-	        "Number of cached services: %u\n"
-	        "Number of cached nvod-services: %u\n"
-	        "Number of cached events: %u\n"
-	        "Number of cached nvod-events: %u\n"
-	        "Number of cached meta-services: %u\n"
-	        //    "Resource-usage: maxrss: %ld ixrss: %ld idrss: %ld isrss: %ld\n"
-	        "Total size of memory occupied by chunks handed out by malloc: %d\n"
-	        "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkB)\n",
-	        ctime(&zeit),
+		"Events are old %ldmin after their end time\n"
+		"Number of cached services: %u\n"
+		"Number of cached nvod-services: %u\n"
+		"Number of cached events: %u\n"
+		"Number of cached nvod-events: %u\n"
+		"Number of cached meta-services: %u\n"
+		//    "Resource-usage: maxrss: %ld ixrss: %ld idrss: %ld isrss: %ld\n"
+		"Total size of memory occupied by chunks\n"
+		"handed out by malloc: %d (%dkb)\n"
+		"Total bytes memory allocated with `sbrk' by malloc,\n"
+		"in bytes: %d (%dkb)\n",
+		ctime(&zeit),
 		secondsToCache / (60*60L), secondsExtendedTextCache / (60*60L), oldEventsAre / 60, anzServices, anzNVODservices, anzEvents, anzNVODevents, anzMetaServices,
-	        //    resourceUsage.ru_maxrss, resourceUsage.ru_ixrss, resourceUsage.ru_idrss, resourceUsage.ru_isrss,
-	        speicherinfo.uordblks,
-	        speicherinfo.arena, speicherinfo.arena / 1024
-	       );
+		//    resourceUsage.ru_maxrss, resourceUsage.ru_ixrss, resourceUsage.ru_idrss, resourceUsage.ru_isrss,
+		speicherinfo.uordblks, speicherinfo.uordblks / 1024,
+		speicherinfo.arena, speicherinfo.arena / 1024
+		);
 
 	struct sectionsd::msgResponseHeader responseHeader;
 
@@ -5353,13 +5355,13 @@ static void writeTransponderFromDescriptor(FILE *dst, const t_original_network_i
 		((sdd->frequency_4 & 0x0F)	* 10),
 //		sdd->modulation,
 		INVERSION_AUTO,
-		((sdd->symbol_rate_1 >> 4)		* 100000000) +
+		((sdd->symbol_rate_1 >> 4)	* 100000000) +
 		((sdd->symbol_rate_1 & 0x0F)	* 10000000) +
-		((sdd->symbol_rate_2 >> 4)		* 1000000) +
+		((sdd->symbol_rate_2 >> 4)	* 1000000) +
 		((sdd->symbol_rate_2 & 0x0F)	* 100000) +
-		((sdd->symbol_rate_3 >> 4)		* 10000) +
+		((sdd->symbol_rate_3 >> 4)	* 10000) +
 		((sdd->symbol_rate_3 & 0x0F)	* 1000) +
-		((sdd->symbol_rate_4 >> 4)		* 100),
+		((sdd->symbol_rate_4 >> 4)	* 100),
 		(fe_code_rate_t) getCodeRate(sdd->fec_inner & 0x0F),
 		sdd->polarization);
 	}
@@ -5378,13 +5380,13 @@ static void writeTransponderFromDescriptor(FILE *dst, const t_original_network_i
 		((cdd->frequency_4 & 0x0F)	* 100),
 //		cdd->fec_outer,
 		INVERSION_AUTO,
-		((cdd->symbol_rate_1 >> 4)		* 100000000) +
+		((cdd->symbol_rate_1 >> 4)	* 100000000) +
 		((cdd->symbol_rate_1 & 0x0F)	* 10000000) +
-		((cdd->symbol_rate_2 >> 4)		* 1000000) +
+		((cdd->symbol_rate_2 >> 4)	* 1000000) +
 		((cdd->symbol_rate_2 & 0x0F)	* 100000) +
-		((cdd->symbol_rate_3 >> 4)		* 10000) +
+		((cdd->symbol_rate_3 >> 4)	* 10000) +
 		((cdd->symbol_rate_3 & 0x0F)	* 1000) +
-		((cdd->symbol_rate_4 >> 4)		* 100),
+		((cdd->symbol_rate_4 >> 4)	* 100),
 		(fe_code_rate_t) getCodeRate(cdd->fec_inner & 0x0F),
 		(fe_modulation_t) getModulation(cdd->modulation));
 	}
@@ -7198,7 +7200,7 @@ static void print_meminfo(void)
 }
 	
 //---------------------------------------------------------------------
-//			housekeeping-thread
+// housekeeping-thread
 // does cleaning on fetched datas
 //---------------------------------------------------------------------
 static void *houseKeepingThread(void *)
@@ -7534,7 +7536,7 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.255 2007/12/16 11:53:31 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.256 2007/12/21 16:26:59 houdini Exp $\n");
 
 	SIlanguage::loadLanguages();
 
