@@ -358,6 +358,18 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 
 		page->page_version_number = page_version_number;
 
+		/* 
+			only display regions mentioned in this segment
+			=> remove all previous region references from this page
+			(at least if I understand ETSI EN 300 743 V1.2.1 (2002-10) Chapter 5.1.3 correctly)
+		*/
+		while (page->page_regions)
+		{
+			struct subtitle_page_region *p = page->page_regions->next;
+			delete page->page_regions;
+			page->page_regions = p;
+		}
+
 		struct subtitle_page_region **r = &page->page_regions;
 		
 		//eDebug("%d  / %d data left", processed_length, segment_length);
