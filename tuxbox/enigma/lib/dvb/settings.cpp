@@ -502,7 +502,9 @@ void eDVBSettings::loadServices()
 					s.service_provider=v;
 				else if (p == 'f')
 				{
-					sscanf(v.c_str(), "%x", &s.dxflags);
+					int dummyval= 0;
+					sscanf(v.c_str(), "%x", &dummyval);
+					s.dxflags = dummyval;
 				} else if (p == 'c')
 				{
 					int cid, val;
