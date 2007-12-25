@@ -428,8 +428,8 @@ imageinfo.partitions partitions
 imageinfo.support support
 imageinfo.supporthere You can find technical support and help here:
 imageinfo.version Cycle:
-infoviewer.epginfo_expensive_message expensive
-infoviewer.epginfo_simple_message short
+infoviewer.epginfo_expensive_message Expanded
+infoviewer.epginfo_simple_message Short
 infoviewer.epgnotload EPG not loaded....
 infoviewer.epgwait waiting for EPG...
 infoviewer.eventlist Event-List
@@ -585,7 +585,7 @@ miscsettings.shutdown_count_hint1 time (in minutes) to switch from standby
 miscsettings.shutdown_count_hint2 to deep standby (0 = off).
 miscsettings.shutdown_real Standby
 miscsettings.shutdown_real_rcdelay Delayed Shutdown
-miscsettings.tuxtxt_cache EPG Cache (Days)
+miscsettings.tuxtxt_cache TuxText Cache
 miscsettings.virtual_zap_mode Virtual zap by infobar
 miscsettings.volumebar_disp_pos Volumebar
 motorcontrol.head Motor-Setup
@@ -826,7 +826,7 @@ options.serial serial
 parentallock.changepin change PIN code
 parentallock.changepin_hint1 Enter your new youth protection pin code here!
 parentallock.changetolocked on locked bouquets
-parentallock.head Enter Parental Lock PIN code
+parentallock.head Enter PIN code
 parentallock.lockage lock program
 parentallock.lockage12 from 12 years up
 parentallock.lockage16 from 16 years up
