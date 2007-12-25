@@ -86,6 +86,7 @@ if(get_set.TP_scan)
 	TP.feparams.u.qpsk.SymbolRate = atoi(get_set.TP_rate);
 	TP.feparams.u.qpsk.FEC_inner = (CodeRate)get_set.TP_fec;
 	TP.polarization = get_set.TP_pol;
+	TP.diseqc = (uint8_t)get_set.TP_diseqc;
 
 //printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.Frequency, TP.feparams.u.qpsk.SymbolRate, TP.feparams.u.qpsk.FEC_inner, TP.polarization);
 #else
