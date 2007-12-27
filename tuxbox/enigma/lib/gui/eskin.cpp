@@ -364,6 +364,8 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			p.mergePalette(*paldummy);
 		}
 		images[name] = image;
+		image->cancompress = true;
+		image->compressdata();
 	}
 	return 0;
 }

@@ -110,6 +110,12 @@ struct gPixmap
 	
 	eLock contentlock;
 	int final;
+	bool cancompress;
+	int compressedsize;
+
+	void compressdata();
+	void uncompressdata();
+	__u8* uncompressdatanoreplace() const;
 	
 	gPixmap *lock();
 	void unlock();

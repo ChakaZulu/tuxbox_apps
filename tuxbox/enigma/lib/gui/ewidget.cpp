@@ -45,6 +45,8 @@ eWidget::eWidget(eWidget *_parent, int takefocus)
 
 eWidget::~eWidget()
 {
+	if (pixmap)
+		pixmap->compressdata();
 	hide();
 	if (takefocus)
 	{
@@ -1076,7 +1078,12 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 	else if (prop=="name")
 		name=value;
 	else if (prop=="pixmap")
+	{
 		setPixmap(eSkin::getActive()->queryImage(value));
+		if (pixmap)
+			pixmap->uncompressdata();
+
+	}
 	else if (prop=="foregroundColor")
 		setForegroundColor(eSkin::getActive()->queryColor(value));
 	else if (prop=="backgroundColor")

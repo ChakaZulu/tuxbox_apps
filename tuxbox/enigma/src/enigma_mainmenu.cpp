@@ -173,6 +173,8 @@ eMainMenu::eMainMenu()
 				eFatal("error, mainmenu bug, mainmenu.%s not defined", pixmap_name[i]);
 			if (!pixmaps[i][1])
 				eFatal("error, mainmenu bug, mainmenu.%s.sel not defined", pixmap_name[i]);
+			pixmaps[i][0]->uncompressdata();
+			pixmaps[i][1]->uncompressdata();
 		}
 
 		setActive(active=eZapMain::getInstance()->getMode());
@@ -207,7 +209,25 @@ eMainMenu::eMainMenu()
 	}
 	setHelpID(10);
 }
+eMainMenu::~eMainMenu()
+{
+	simpleMainmenu=0;
+	eConfig::getInstance()->getKey("/ezap/osd/simpleMainMenu", simpleMainmenu);
 
+	if ( !simpleMainmenu )
+	{
+		int count = MENU_ENTRIES;
+		if (!eSystemInfo::getInstance()->hasScartSwitch())
+			--count;
+		for (int i=0; i<count; i++)
+		{
+			if (pixmaps[i][0])
+				pixmaps[i][0]->compressdata();
+			if (pixmaps[i][1])
+				pixmaps[i][1]->compressdata();
+		}
+	}
+}
 #ifndef DISABLE_LCD
 void eMainMenu::setLCD( eWidget *LCDTitle, eWidget *LCDElement )
 {

@@ -44,6 +44,7 @@ public:
 	void setLCD(eWidget*,eWidget*);
 #endif
 	eMainMenu();
+	~eMainMenu();
 };
 
 #endif
