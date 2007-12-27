@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.881 2007/12/17 19:23:58 dbt Exp $
+	$Id: neutrino.cpp,v 1.882 2007/12/27 18:47:42 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -675,6 +675,7 @@ int CNeutrinoApp::loadSetup()
 		g_settings.uboot_console	= 0;
 		g_settings.uboot_lcd_inverse	= -1;
 		g_settings.uboot_lcd_contrast	= -1;
+		g_settings.uboot_baudrate	= 9600;
 
 		FILE* fd = fopen("/var/tuxbox/boot/boot.conf", "r");
 		if(fd)
@@ -692,6 +693,10 @@ int CNeutrinoApp::loadSetup()
 					else if(strncmp(&buffer[8], "tty", 3)==0)
 						g_settings.uboot_console = 2;
 				}
+				else if(strncmp(buffer,"baudrate=", 9) == 0)
+				{
+					g_settings.uboot_baudrate = atoi(&buffer[9]);
+				}
 				else if(strncmp(buffer,"lcd_inverse=", 12) == 0)
 				{
 					g_settings.uboot_lcd_inverse = atoi(&buffer[12]);
@@ -701,7 +706,7 @@ int CNeutrinoApp::loadSetup()
 					g_settings.uboot_lcd_contrast = atoi(&buffer[13]);
 				}
 				else
-					printf("unknown entry found in boot.conf\n");
+					printf("[neutrino] unknown entry '%s' found in boot.conf\n", buffer);
 			}
 
 			fclose(fd);
@@ -746,7 +751,9 @@ void CNeutrinoApp::saveSetup()
 				buffer = "null";
 				break;
 			}
-			fprintf(fd, "console=%s\n" "lcd_inverse=%d\n" "lcd_contrast=%d\n", buffer, g_settings.uboot_lcd_inverse, g_settings.uboot_lcd_contrast);
+			fprintf(fd, "console=%s\n" "baudrate=%d\n" "lcd_inverse=%d\n" "lcd_contrast=%d\n",
+				    buffer, g_settings.uboot_baudrate, g_settings.uboot_lcd_inverse,
+				    g_settings.uboot_lcd_contrast);
 			fclose(fd);
 		}
 		else

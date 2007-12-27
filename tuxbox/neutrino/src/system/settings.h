@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.185 2007/12/17 19:24:19 dbt Exp $
+  $Id: settings.h,v 1.186 2007/12/27 18:47:44 seife Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -410,6 +410,7 @@ struct SNeutrinoSettings
 	int	uboot_lcd_contrast;
 	int	uboot_console;
 	int	uboot_console_bak;
+	int	uboot_baudrate;
 
 	// USERMENU
 	typedef enum
