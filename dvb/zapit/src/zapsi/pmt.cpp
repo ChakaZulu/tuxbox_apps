@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.50 2007/10/29 12:44:03 seife Exp $
+ * $Id: pmt.cpp,v 1.51 2007/12/29 23:59:24 seife Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -68,7 +68,9 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 	bool descramble = false;
 	std::string description = "";
 	unsigned char componentTag = 0xFF;
-
+#ifndef SKIP_CA_STATUS					
+	bool CaStatusSent = false;
+#endif
 	/* elementary stream info for ca pmt */
 	CEsInfo *esInfo = new CEsInfo();
 
@@ -101,7 +103,9 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 			case 0x09:
 				esInfo->addCaDescriptor(buffer + pos);
 #ifndef SKIP_CA_STATUS					
-				eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_LOCK, CEventServer::INITID_ZAPIT);
+				if (!CaStatusSent)
+					eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_LOCK, CEventServer::INITID_ZAPIT);
+				CaStatusSent = true;
 //				INFO("Event_ESINFO: CA_LOCK send");
 #endif
 				break;
@@ -273,7 +277,7 @@ unsigned short parse_ES_info(const unsigned char * const buffer, CZapitChannel *
 		}
 		if ( tmp == 3 ) {
 			channel->setPrivatePid(esInfo->elementary_PID);
-			DBG("channel->setPrivatePid(%x)\n", esInfo->elementary_PID);
+			DBG("channel->setPrivatePid(%x)", esInfo->elementary_PID);
 		}
 		break;
 	}
