@@ -2,7 +2,8 @@
   Control-Daemon  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean',
-  2002 dboxII-team
+  2002 dboxII-team,
+  Copyright (C) 2007 Stefan Seyfried
 	
   License: GPL
 
@@ -479,6 +480,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	int avsiosfncFormat;
 	int wss;
 
+	const char *format_string[] = { "auto", "16:9", "4:3(LB)", "4:3(PS)" };
 	/*
 	  16:9 : fnc 1
 	  4:3  : fnc 2
@@ -519,6 +521,8 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 			// damits nicht ausgeht beim starten :)
 		}
 	}
+
+	printf("[controld] format: %s\n",format_string[format]);
 
 	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
 		perror("[controld] " AVS_DEVICE);
@@ -740,7 +744,9 @@ void setScartMode(bool onoff)
 {
 	if(onoff)
 	{
+#ifndef HAVE_DREAMBOX_HARDWARE
 		audioControl::setMute(settings.mute_avs); // unmute AVS
+#endif
 		//lcdd.setMode(CLcddTypes::MODE_SCART);
 	}
 	else
@@ -752,11 +758,12 @@ void setScartMode(bool onoff)
 
 void disableVideoOutput(bool disable)
 {
-	int arg=disable?1:0;
 	videoOutputDisabled=disable;
-	int fd;
 	printf("[controld] videoOutput %s\n", disable?"off":"on");
 
+#ifndef HAVE_DREAMBOX_HARDWARE
+	int arg=disable?1:0;
+	int fd;
 	if ((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
 		perror("[controld] " SAA7126_DEVICE);
 
@@ -767,6 +774,7 @@ void disableVideoOutput(bool disable)
 
 		close(fd);
 	}
+#endif
 
 	/*
 	  arg=disable?0:0xf;
@@ -789,7 +797,11 @@ void disableVideoOutput(bool disable)
 	{
 		//zapit.setStandby(false);
 		zapit.muteAudio(false);
+#ifdef HAVE_DREAMBOX_HARDWARE
+		zapit.startPlayBack();
+#else
 		audioControl::setMute(settings.mute_avs);
+#endif
 		setvideooutput(settings.videooutput, false);
 		setVideoFormat(settings.videoformat, false);
 	}
@@ -799,7 +811,11 @@ void disableVideoOutput(bool disable)
 		setVideoFormat(-1, false);
 		//zapit.setStandby(true);
 		zapit.muteAudio(true);
+#ifdef HAVE_DREAMBOX_HARDWARE
+		zapit.stopPlayBack();
+#else
 		audioControl::setMute(true);
+#endif
 	}
 }
 
@@ -1168,7 +1184,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.127 2007/07/01 08:40:13 dbluelle Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.128 2007/12/30 13:04:17 seife Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -1251,7 +1267,9 @@ int main(int argc, char **argv)
 	zapit.setVolume(map_volume(settings.volume, false), map_volume(settings.volume, false));
 	//lcdd.setVolume(settings.volume_avs);    // we could also display settings.volume at startup
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	audioControl::setMute(settings.mute_avs);
+#endif
 	zapit.muteAudio(settings.mute);
 	//lcdd.setMute(settings.mute || settings.mute_avs);
 
