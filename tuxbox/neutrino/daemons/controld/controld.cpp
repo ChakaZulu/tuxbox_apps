@@ -522,7 +522,11 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		}
 	}
 
-	printf("[controld] format: %s\n",format_string[format]);
+	printf("[controld] format: ");
+	if (format >= 0 && format <= 3)
+		printf("%s\n", format_string[format]);
+	else
+		printf("unknown (%d)\n", format);
 
 	if ((fd = open(AVS_DEVICE, O_RDWR)) < 0)
 		perror("[controld] " AVS_DEVICE);
@@ -1184,7 +1188,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.128 2007/12/30 13:04:17 seife Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.129 2007/12/30 15:09:01 seife Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
