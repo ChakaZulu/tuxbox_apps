@@ -1,6 +1,6 @@
 /*
- * $Id: saa.c,v 1.15 2006/07/02 12:20:15 barf Exp $
- * 
+ * $Id: saa.c,v 1.16 2008/01/01 15:49:31 houdini Exp $
+ *
  * Test tool for the SAA 7126H/7127H-driver
  *
  * Copyright (C) 2000-2001 Gillem <htoa@gmx.net>
@@ -37,9 +37,9 @@
 
 #define VERSION "0.3"
 void help(char *prog_name) {
- 	printf("Version %s\n",VERSION);
- 	printf("Usage: %s <options>\n\n",prog_name);
- 	printf("Switches:\n"
+	printf("Version %s\n",VERSION);
+	printf("Usage: %s <options>\n\n",prog_name);
+	printf("Switches:\n"
 		"-h, --help            help\n"
 		"-o, --power-save <X>  power save mode\n"
 		"                      none get power save state\n"
@@ -74,7 +74,12 @@ void help(char *prog_name) {
 		" -t, --ttx <x>        teletext VBI reinsertion\n"
 		"                      none get teletext reinsertion state\n"
 		"                      0    turned off\n"
-		"                      1    turned on\n");
+		"                      1    turned on\n"
+		"\n"
+		"Expert Options:\n"
+		"-rd <X>               read register 0x<X>\n"
+		"-wr <X> <D>           write 0x<D> to register 0x<X>\n"
+	);
 }
 
 int read_powersave()
@@ -199,6 +204,48 @@ static int read_mode(void)
 	return 0;
 }
 
+static int read_reg(int reg)
+{
+	int fd;
+	int out = reg;
+
+	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0){
+		perror("SAA DEVICE: ");
+		return -1;
+	}
+
+	if ( (ioctl(fd, SAA_READREG, &out) < 0)){
+		perror("IOCTL: ");
+		close(fd);
+		return -1;
+	}
+	close(fd);
+
+	printf("SAA7126 Read Register 0x%02x = 0x%02x\n", reg, out);
+	return 0;
+}
+
+static int write_reg(int reg, int val)
+{
+	int fd;
+	int out = (reg << 8) | val;
+
+	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0){
+		perror("SAA DEVICE: ");
+		return -1;
+	}
+
+	if ( (ioctl(fd, SAA_WRITEREG, &out) < 0)){
+		perror("IOCTL: ");
+		close(fd);
+		return -1;
+	}
+	close(fd);
+
+	printf("SAA7126 Writing 0x%02x to Register 0x%02x\n", val, reg);
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int fd;
@@ -215,9 +262,31 @@ int main(int argc, char **argv)
 		help(argv[0]);
 		return 0;
 	} 
+	else if (strcmp("-rd", argv[1]) == 0) {
+		if(argc<3){
+			help(argv[0]);
+			return 0;
+		} else {
+			sscanf(argv[2],"%x", &arg);
+			read_reg(arg);
+			return 0;
+		}
+	}
+	else if (strcmp("-wr", argv[1]) == 0) {
+		if(argc<4){
+			help(argv[0]);
+			return 0;
+		} else {
+			int reg, val;
+			sscanf(argv[2],"%x", &reg);
+			sscanf(argv[3],"%x", &val );
+			write_reg(reg, val);
+			return 0;
+		}
+	}
 	else if ((strcmp("-r",argv[count]) == 0) || (strcmp("--rgb",argv[count]) == 0)) {
-	  arg = SAA_MODE_RGB;
-	  mode = SAAIOSMODE;
+		arg = SAA_MODE_RGB;
+		mode = SAAIOSMODE;
 	}
 	else if ((strcmp("-c",argv[count]) == 0) || (strcmp("--cvbs",argv[count]) == 0) || (strcmp("-f",argv[count]) == 0) || (strcmp("--fbas",argv[count]) == 0)) {
 		arg = SAA_MODE_FBAS;
@@ -251,7 +320,7 @@ int main(int argc, char **argv)
 		if(argc<3){
 			help(argv[0]);
 			return 0;
-	 	}
+		}
 		arg = atoi(argv[count+1]);
 		mode = SAAIOSINP;
 	}
