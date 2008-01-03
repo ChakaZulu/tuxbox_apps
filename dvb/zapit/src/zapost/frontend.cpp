@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.59 2008/01/03 11:05:32 seife Exp $
+ * $Id: frontend.cpp,v 1.60 2008/01/03 17:25:10 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -230,14 +230,14 @@ void CFrontend::setFrontend(const dvb_frontend_parameters *feparams)
 	while ((errno == 0) || (errno == EOVERFLOW))
 		quiet_fop(ioctl, FE_GET_EVENT, &event);
 #ifdef HAVE_DREAMBOX_HARDWARE
-	dvb_frontend_parameters *feparams2;
-	memcpy(feparams2, feparams, sizeof(dvb_frontend_parameters));
+	dvb_frontend_parameters feparams2;
+	memcpy(&feparams2, feparams, sizeof(dvb_frontend_parameters));
 	/* the dreambox cable driver likes to get the frequency in kHz */
 	if (info.type == FE_QAM) {
-		feparams2->Frequency /= 1000;
-		DBG("cable box: setting frequency to %d khz\n", feparams2->Frequency);
+		feparams2.Frequency /= 1000;
+		DBG("cable box: setting frequency to %d khz\n", feparams2.Frequency);
 	}
-	fop(ioctl, FE_SET_FRONTEND, feparams2);
+	fop(ioctl, FE_SET_FRONTEND, &feparams2);
 #else
 	fop(ioctl, FE_SET_FRONTEND, feparams);
 #endif
