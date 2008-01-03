@@ -806,7 +806,7 @@ nfs.type_cifs CIFS
 nfs.type_lufs FTPFS
 nfs.type_nfs NFS
 nfs.umount Unmount Network volume
-nfs.umounterror Error umounting volume
+nfs.umounterror Error unmounting volume
 nfs.username Username
 nfsmenu.head NFS/CIFS/FTPFS settings
 nvod.percentage (%d%% over)
