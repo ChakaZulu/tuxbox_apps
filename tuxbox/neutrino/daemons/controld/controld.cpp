@@ -22,7 +22,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 #define USE_LIBTUXBOX 1
+#endif
 #define CONFIG_FILE
 //#define TRACE
 #include <config.h>
@@ -860,14 +862,23 @@ void setBoxType()
 
 			switch (mID)
 			{
+			case 5 ... 9:	// Dreambox
+			case 11:
+			case 12:
+				settings.boxtype= CControld::TUXBOX_MAKER_DREAM_MM;
+				break;
 			case 3:	
 				settings.boxtype= CControld::TUXBOX_MAKER_SAGEM;
 				break;
 			case 2:	
 				settings.boxtype= CControld::TUXBOX_MAKER_PHILIPS;
 				break;
-			default:
+			case 1:
 				settings.boxtype= CControld::TUXBOX_MAKER_NOKIA;
+				break;
+			default:
+				settings.boxtype = CControld::TUXBOX_MAKER_UNKNOWN;
+				printf("[controld] ERROR: unknown mID %d (%s)\n", mID, strmID);
 			}
 		}
 		printf("[controld] Boxtype detected: (%d)\n", settings.boxtype);
@@ -1188,7 +1199,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.129 2007/12/30 15:09:01 seife Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.130 2008/01/03 11:09:27 seife Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{

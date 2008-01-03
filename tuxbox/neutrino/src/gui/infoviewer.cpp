@@ -1,5 +1,5 @@
 /*
-	$Id: infoviewer.cpp,v 1.212 2007/12/07 19:38:48 ecosys Exp $
+	$Id: infoviewer.cpp,v 1.213 2008/01/03 11:09:33 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -188,7 +188,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	bool new_chan = false;
 	bool subChannelNameIsUTF = true;
 	
-	bool fadeIn = ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
+	bool fadeIn = (g_info.box_Type != CControld::TUXBOX_MAKER_NOKIA) && // dreambox and eNX only 
 		g_settings.widget_fade &&
 		(!is_visible) &&
 		showButtonBar;
@@ -214,6 +214,9 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		frameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
 		frameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
 		frameBuffer->paletteSet();
+#ifdef HAVE_DREAMBOX_HARDWARE
+		usleep(100000);	// otherwise, the fade-in-effect is flashing on the dreambox :-(
+#endif
 	}
 	else
 		fadeValue= g_settings.infobar_alpha;
@@ -491,7 +494,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 					g_RCInput->killTimer(fadeTimer);
 					fadeIn = false;
 				}
-				if (((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
+				if ((g_info.box_Type != CControld::TUXBOX_MAKER_NOKIA) && // dreambox and eNX only
 					(!fadeOut) && g_settings.widget_fade )
 				{
 					fadeOut = true;

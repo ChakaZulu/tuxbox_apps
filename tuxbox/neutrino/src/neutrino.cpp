@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.882 2007/12/27 18:47:42 seife Exp $
+	$Id: neutrino.cpp,v 1.883 2008/01/03 11:09:28 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -547,12 +547,13 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_zaphistory = configfile.getInt32( "key_zaphistory",  CRCInput::RC_home );
 	g_settings.key_lastchannel = configfile.getInt32( "key_lastchannel",  CRCInput::RC_0 );
 
-	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
 #ifndef HAVE_DREAMBOX_HARDWARE
+	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
 	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
 #else
-	// my dm500s needs this large setting - seife
-	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", "222").c_str());
+	// my dm500s works good with those - seife
+	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", "300").c_str());
+	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", "100").c_str());
 #endif
 	g_settings.audiochannel_up_down_enable = configfile.getBool("audiochannel_up_down_enable", false);
 	g_settings.audio_left_right_selectable = configfile.getBool("audio_left_right_selectable", false);
@@ -3297,6 +3298,14 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 void CNeutrinoApp::standbyMode( bool bOnOff )
 {
 	//printf( ( bOnOff ) ? "mode: standby on\n" : "mode: standby off\n" );
+#ifdef HAVE_DREAMBOX_DM500
+	int fd = open("/dev/dbox/fp0", O_RDWR);
+	if (fd != -1) {
+		int standby = bOnOff?1:0;
+		ioctl(fd, 11, &standby);
+		close(fd);
+	}
+#endif
 
 	if( bOnOff )
 	{
