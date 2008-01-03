@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.58 2007/07/08 15:47:44 dbluelle Exp $
+ * $Id: frontend.cpp,v 1.59 2008/01/03 11:05:32 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -51,6 +51,7 @@ CFrontend::CFrontend(int _uncommitted_switch_mode)
 	diseqcType = NO_DISEQC;
 	last_inversion = INVERSION_OFF;
 	last_qam = QAM_64;
+	secfd = -1;
 
 	uncommitted_switch_mode = _uncommitted_switch_mode;
 	if ((uncommitted_switch_mode<0) || (uncommitted_switch_mode>2)) uncommitted_switch_mode = 0;
@@ -59,13 +60,26 @@ CFrontend::CFrontend(int _uncommitted_switch_mode)
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
 		ERROR(FRONTEND_DEVICE);
 
+	fop(ioctl, FE_GET_INFO, &info);
+
 #if HAVE_DVB_API_VERSION < 3
-	if ((secfd = open(SEC_DEVICE, O_RDWR)) < 0)
-		ERROR(SEC_DEVICE);
+	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
+	usleep(150000);	/* taken from enigma source code, all FE_SET_POWER_STATE ioctls are
+			   accompanied by such a usleep there */
+	if (info.type != FE_QAM) {
+		printf("[frontend] non-cable box detected\n");
+		/* on cable-dreamboxen, opening the sec-device apparently
+		   kills the box. See:
+		   http://tuxbox-forum.dreambox-fan.de/forum/viewtopic.php?p=340296#340296
+		 */
+		if ((secfd = open(SEC_DEVICE, O_RDWR)) < 0)
+			ERROR(SEC_DEVICE);
+	} else {
+		printf("[frontend] cable box detected\n");
+	}
 #else
 	secfd = fd;
 #endif
-	fop(ioctl, FE_GET_INFO, &info);
 }
 
 CFrontend::~CFrontend(void)
@@ -74,6 +88,10 @@ CFrontend::~CFrontend(void)
 		sendDiseqcStandby();
 
 	close(fd);
+#if HAVE_DVB_API_VERSION < 3
+	if (secfd >= 0)
+		close(secfd);
+#endif
 }
 
 void CFrontend::reset(void)
@@ -82,6 +100,10 @@ void CFrontend::reset(void)
 
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK|O_SYNC)) < 0)
 		ERROR(FRONTEND_DEVICE);
+#if HAVE_DVB_API_VERSION < 3
+	fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
+	usleep(150000);
+#endif
 }
 
 fe_code_rate_t CFrontend::getCodeRate(const uint8_t fec_inner)
@@ -120,11 +142,11 @@ fe_modulation_t CFrontend::getModulation(const uint8_t modulation)
 	case 0x05:
 		return QAM_256;
 	default:
-#if HAVE_DVB_API_VERSION < 3
-		// FIXME!
-		return QAM_256;
-#else
+#if HAVE_DVB_API_VERSION >= 3
 		return QAM_AUTO;
+#else
+		/* peeking at the enigma code suggests that QAM_64 might be correct */
+		return QAM_64;
 #endif
 	}
 }
@@ -207,8 +229,18 @@ void CFrontend::setFrontend(const dvb_frontend_parameters *feparams)
 
 	while ((errno == 0) || (errno == EOVERFLOW))
 		quiet_fop(ioctl, FE_GET_EVENT, &event);
-
+#ifdef HAVE_DREAMBOX_HARDWARE
+	dvb_frontend_parameters *feparams2;
+	memcpy(feparams2, feparams, sizeof(dvb_frontend_parameters));
+	/* the dreambox cable driver likes to get the frequency in kHz */
+	if (info.type == FE_QAM) {
+		feparams2->Frequency /= 1000;
+		DBG("cable box: setting frequency to %d khz\n", feparams2->Frequency);
+	}
+	fop(ioctl, FE_SET_FRONTEND, feparams2);
+#else
 	fop(ioctl, FE_SET_FRONTEND, feparams);
+#endif
 }
 
 #define TIME_STEP 200
@@ -564,6 +596,7 @@ int CFrontend::setParameters(dvb_frontend_parameters *feparams, const uint8_t po
 int CFrontend::setParameters(TP_params *TP)
 {
 	int ret, freq_offset = 0;
+	bool high_band = false;
 #if HAVE_DVB_API_VERSION >= 3
 	bool can_not_auto_qam = !(info.caps & FE_CAN_QAM_AUTO);
 	bool can_not_auto_inversion = !(info.caps & FE_CAN_INVERSION_AUTO);
@@ -574,15 +607,11 @@ int CFrontend::setParameters(TP_params *TP)
 	bool can_not_auto_inversion = true;
 	bool do_auto_qam = false;
 	bool do_auto_inversion = false;
-	if (!tuned)
-		fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
 #endif
 	
 
 	if (info.type == FE_QPSK)
 	{
-		bool high_band;
-
 		if (TP->feparams.frequency < 11700000)
 		{
 			high_band = false;
@@ -595,7 +624,10 @@ int CFrontend::setParameters(TP_params *TP)
 		}
 
 		TP->feparams.frequency -= freq_offset;
+#if HAVE_DVB_API_VERSION >= 3
+		// for the dreambox, we do this further down...
 		setSec(TP->diseqc, TP->polarization, high_band, TP->feparams.frequency);
+#endif
 	}
 
 	/*
@@ -619,6 +651,21 @@ int CFrontend::setParameters(TP_params *TP)
 	{
 		do
 		{
+#if HAVE_DVB_API_VERSION < 3
+			/* i have no idea why, but dreamboxen seem to like this ioctl
+			   very much and refuse to work without it... */
+			if (!tuned) {
+				fop(ioctl, FE_SET_POWER_STATE, FE_POWER_ON);
+				// usleep(150000);
+				/* after returning from standby, i need two tries, regardless
+				   of the usleep, so i can as well just skip it :-( */
+			}
+			/* setSec again for each retry, just to make sure, my dreambox needs this
+			   since dreamdriver_dm500_20071022.tar.bz2 */
+			if (info.type == FE_QPSK)
+				setSec(TP->diseqc, TP->polarization, high_band, TP->feparams.frequency);
+#endif
+
 			tuned = false;
 			setFrontend (&TP->feparams);
 			event = getEvent();	/* check if tuned */

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.404 2007/12/17 09:53:04 seife Exp $
+ * $Id: zapit.cpp,v 1.405 2008/01/03 11:05:31 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1155,8 +1155,11 @@ void parseScanInputXml(void)
 	}
 
 	complete_filename = (std::string)ZAPITCONFIGDIR + "/" + filename;
-	if ((stat(complete_filename.c_str(), &buf) == -1) && (errno == ENOENT))
+	if ((stat(complete_filename.c_str(), &buf) == -1) && (errno == ENOENT)) {
+		DBG("file %s does not exist", complete_filename.c_str());
 		complete_filename = (std::string)DATADIR + "/" + filename;
+	}
+	DBG("complete_filename: %s", complete_filename.c_str());
 	scanInputParser = parseXmlFile(complete_filename.c_str());
 }
 
@@ -1212,9 +1215,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 /* on the dreambox, we need zapit to set the volume also in movie- or audioplayer mode */
 			(rmsg.cmd != CZapitMessages::CMD_SET_VOLUME) &&
 			(rmsg.cmd != CZapitMessages::CMD_MUTE) &&
+/* without SET_DISPLAY_FORMAT, controld cannot correct the aspect ratio in movieplayer */
+			(rmsg.cmd != CZapitMessages::CMD_SET_DISPLAY_FORMAT) &&
 #endif
 			(rmsg.cmd != CZapitMessages::CMD_GETPIDS))) {
-		WARN("cmd %d refused in standby mode", rmsg.cmd);
+		fprintf(stderr, "[zapit] cmd %d refused in standby mode\n", rmsg.cmd);
 		return true;
 	}
 
@@ -2436,10 +2441,13 @@ void enterStandby(void)
 		delete videoDemux;
 		videoDemux = NULL;
 	}
+#ifndef HAVE_DREAMBOX_HARDWARE
+	// we need the audiodecoder in standby, to be able to set volume...
 	if (audioDecoder) {
 		delete audioDecoder;
 		audioDecoder = NULL;
 	}
+#endif
 	if (cam) {
 		delete cam;
 		cam = NULL;
@@ -2448,10 +2456,13 @@ void enterStandby(void)
 		delete frontend;
 		frontend = NULL;
 	}
+#ifndef HAVE_DREAMBOX_HARDWARE
+	// needed in standby to correct aspect ration in movieplayer...
 	if (videoDecoder) {
 		delete videoDecoder;
 		videoDecoder = NULL;
 	}
+#endif
 
 	tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 }
@@ -2570,7 +2581,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.404 2007/12/17 09:53:04 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.405 2008/01/03 11:05:31 seife Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
