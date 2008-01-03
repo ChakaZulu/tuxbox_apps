@@ -983,6 +983,25 @@ void eListBoxBase::sort()
 		setCurrent(cur);
 }
 
+int eListBoxBase::getShortcut(eListBoxEntry* e)
+{
+	int i = 0;
+	for (ePtrList<eListBoxEntry>::iterator it(childs.begin());
+		it != childs.end(); ++it )
+	{
+		if ( it->isSelectable()&2)
+		{
+			i++;
+			if ( it == e )
+			{
+				if (i > 9)
+					i = 0;
+				return i;
+			}
+		}
+	}
+	return -1;	
+}
 eListBoxBaseExt::eListBoxBaseExt(eWidget* parent, const eWidget* descr, int takefocus, int item_height, const char *deco)
 	:eListBoxBase(parent, descr, takefocus, item_height, deco), browseTimer(eApp)
 {
@@ -1204,16 +1223,44 @@ const eString& eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor
 
 	drawEntryRect( rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, state );
 
+	int lft = rect.left();
+	if (listbox->getFlags() & eListBoxBase::flagHasShortcuts)
+	{
+		int hideshortcuts=0;
+		eConfig::getInstance()->getKey("/ezap/osd/hideshortcuts", hideshortcuts);
+		if (!hideshortcuts)
+		{
+			int shortcut = listbox->getShortcut(this);
+			if (shortcut >= 0)
+			{
+				gPixmap* pm = eSkin::getActive()->queryImage(eString().sprintf("shortcut.%d",shortcut));
+				eRect left = rect;
+				lft = pm->x + 10;
+				left.setRight( lft );
+				left.setLeft(rect.left()+5);
+				rc->clip(left);
+	
+				eSize psize = pm->getSize(),
+				esize = rect.size();
+	
+				int yOffs = rect.top()+((esize.height() - psize.height()) / 2);
+	
+				rc->blit(*pm, ePoint(left.left(), yOffs), left, gPixmap::blitAlphaTest );
+	
+				rc->clippop();
+			}
+		}
+	}
 	if (!para)
 	{
-		para = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
+		para = new eTextPara( eRect( 0, 0, rect.width()-lft, rect.height() ) );
 		para->setFont( font );
 		para->renderString(text);
 		para->realign(align);
 //		yOffs = ((rect.height() - para->getBoundBox().height()) / 2 + 0) - para->getBoundBox().top() ;
 		yOffs=0;
 	}
-	rc->renderPara(*para, ePoint( rect.left(), rect.top()+yOffs ) );
+	rc->renderPara(*para, ePoint( lft, rect.top()+yOffs ) );
 
 	if (b)
 		drawEntryBorder( rc, rect, coActiveB, coActiveF, coNormalB, coNormalF );

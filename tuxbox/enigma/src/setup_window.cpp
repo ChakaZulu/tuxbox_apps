@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_window.cpp,v 1.2 2003/09/07 00:03:58 ghostrider Exp $
+ * $Id: setup_window.cpp,v 1.3 2008/01/03 15:47:32 dbluelle Exp $
  */
 
 #include <setup_window.h>
@@ -44,6 +44,7 @@ eSetupWindow::eSetupWindow( const char *title, int entries, int width )
 	:eListBoxWindow<eListBoxEntryMenu>(title, entries, width, true)
 {
 	addActionMap(&i_shortcutActions->map);
+	list.setFlags(eListBoxBase::flagHasShortcuts);
 }
 
 void eSetupWindow::sel_num(int n)
