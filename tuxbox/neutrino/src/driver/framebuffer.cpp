@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.57 2007/08/12 14:50:25 dbt Exp $
+	$Id: framebuffer.cpp,v 1.58 2008/01/04 13:03:57 seife Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
                       2003 thegoodguy
@@ -393,10 +393,18 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 
 	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
 
+#ifdef FB_USE_PALETTE
+	int dxx;
+	if (dx < 0) {
+		fprintf(stderr, "ERROR: CFrameBuffer::paintBoxRel called with dx < 0 (%d)\n", dx);
+		dxx = 0;
+	} else
+		dxx = dx;
+#endif
 	for (int count = 0; count < dy; count++)
 	{
 #ifdef FB_USE_PALETTE
-		memset(pos, col, dx);
+		memset(pos, col, dxx);
 //		memset(pos, col, dx * sizeof(fb_pixel_t));
 #else
 		fb_pixel_t * dest = (fb_pixel_t *)pos;
