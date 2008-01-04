@@ -1,5 +1,5 @@
 /*
- * $Id: streamts.c,v 1.20 2007/10/21 13:58:38 digi_casi Exp $
+ * $Id: streamts.c,v 1.21 2008/01/04 15:39:49 obi Exp $
  * 
  * inetd style daemon for streaming avpes, ps and ts
  * 
@@ -47,7 +47,9 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 #include <ctype.h>
 
 #if HAVE_DVB_API_VERSION < 3
@@ -60,7 +62,7 @@
 	#undef TRANSFORM
     #else
 	#define DMXDEV "/dev/dvb/card0/demux0"
-	#define DMXDEV "/dev/dvb/card0/dvr0"
+	#define DVRDEV "/dev/dvb/card0/dvr0"
     #endif
 #else
     #define DMXDEV "/dev/dvb/adapter0/demux0"
@@ -99,6 +101,7 @@ unsigned char exit_flag = 0;
 unsigned int writebuf_size = 0;
 unsigned char writebuf[PACKET_SIZE];
 
+#ifdef TRANSFORM
 static int
 sync_byte_offset (const unsigned char * buf, const unsigned int len) {
 
@@ -111,7 +114,6 @@ sync_byte_offset (const unsigned char * buf, const unsigned int len) {
 	return -1;
 }
 
-#ifdef TRANSFORM
 static ssize_t
 safe_read (const int fd, void * buf, const size_t count) {
 
@@ -468,52 +470,32 @@ main (int argc, char ** argv) {
 	else 
 #endif	
 	if (mode == 2 || mode == 3) {
-		int offset;
-
-		ssize_t pos;
-		ssize_t r = 0;
-		ssize_t todo;
+		size_t pos;
+		ssize_t r;
 
 		while (!exit_flag) {
-			pos = 0;
-			todo = IN_SIZE;
-
-			while (todo) 
-			{
-				r = read(dvrfd, buf + pos, todo);
-				if (r > 0) {
-					pos += r;
-					todo -= r;
-				}
-				else
-				{
-					if (mode == 3)
-					{
-						if (r == -1)
-						{
-							free(buf);
-							return EXIT_FAILURE;
-						}
-						else
-						{
-							close(dvrfd);
-							sprintf(&tsfile[tsfilelen], ".%03d", ++fileslice);
-							if ((dvrfd = open(tsfile, O_RDONLY)) < 0) {
-								free(buf);
-								return EXIT_SUCCESS;
-							}
-						}
+			/* always read IN_SIZE bytes */
+			for (pos = 0; pos < IN_SIZE; pos += r) {
+				r = read(dvrfd, buf + pos, IN_SIZE - pos);
+				if (r == -1) {
+					/* Error */
+					exit_flag = 1;
+					break;
+				} else if (r == 0) {
+					/* End of file */
+					if (mode == 3) {
+						close(dvrfd);
+						sprintf(&tsfile[tsfilelen], ".%03d", ++fileslice);
+						dvrfd = open(tsfile, O_RDONLY);
+					}
+					if ((dvrfd == -1) || (mode != 3)) {
+						exit_flag = 1;
+						break;
 					}
 				}
 			}
 
-			/* make sure to start with a ts header */
-			offset = sync_byte_offset(buf, TS_SIZE);
-			
-			if (offset == -1)
-				continue;
-
-			packet_stdout(buf + offset, pos - offset, NULL);
+			packet_stdout(buf, pos, NULL);
 		}
 	}
 
