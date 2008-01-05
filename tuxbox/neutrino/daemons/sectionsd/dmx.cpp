@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.33 2007/12/16 11:53:31 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.34 2008/01/05 18:05:13 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -48,7 +48,6 @@
 typedef std::map<sections_id_t, version_number_t, std::less<sections_id_t> > MyDMXOrderUniqueKey;
 static MyDMXOrderUniqueKey myDMXOrderUniqueKey;
 
-ssize_t readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSeconds);
 extern void showProfiling(std::string text);
 extern bool timeset;
 
@@ -65,7 +64,7 @@ DMX::DMX(const unsigned short p, const unsigned short bufferSizeInKB)
 	pthread_mutexattr_t start_stop_mutex_attr;
 	pthread_mutexattr_init(&start_stop_mutex_attr);
 	pthread_mutexattr_settype(&start_stop_mutex_attr, PTHREAD_MUTEX_ERRORCHECK_NP);
-	pthread_mutex_init(&start_stop_mutex, &start_stop_mutex_attr));
+	pthread_mutex_init(&start_stop_mutex, &start_stop_mutex_attr);
 #else
 	pthread_mutex_init(&start_stop_mutex, NULL); // default = fast mutex
 #endif
@@ -357,11 +356,21 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 				current_onid = 0;
 				current_tsid = 0;
 			}
+
+			int eh_tbl_extension_id = extended_header.table_extension_id_hi * 256
+						  + extended_header.table_extension_id_lo;
+
+			if (initial_header.table_id == 0x4e &&
+			    eh_tbl_extension_id == current_service &&
+			    extended_header.version_number != eit_version) {
+				dprintf("EIT old: %d new version: %d\n",eit_version,extended_header.version_number);
+				eit_version = extended_header.version_number;
+			}
+
 			//find current section in list
 			MyDMXOrderUniqueKey::iterator di = myDMXOrderUniqueKey.find(create_sections_id(
 							initial_header.table_id,
-							extended_header.table_extension_id_hi * 256 +
-							extended_header.table_extension_id_lo,
+							eh_tbl_extension_id,
 							extended_header.section_number,
 							current_onid,
 							current_tsid));
@@ -413,8 +422,8 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 					//	(filter_index != 1))
 					//{
 						//version was read before - do not read again
-						delete[] buf;
-						return NULL;
+					delete[] buf;
+					return NULL;
 					//}
 				}
 				else {
@@ -501,11 +510,11 @@ int DMX::start(void)
 {
 	int rc;
 	
-	pthread_mutex_lock(&start_stop_mutex);
+	lock();
 
 	rc = immediate_start();
 
-	pthread_mutex_unlock(&start_stop_mutex);
+	unlock();
 
 	return rc;
 }
@@ -556,7 +565,7 @@ int DMX::real_unpause(void)
 		{
 			closefd();
 			perror("[sectionsd] DMX: DMX_START");
-			pthread_mutex_unlock(&start_stop_mutex);
+			unlock();
 			return 2;
 		}
 #endif
@@ -635,6 +644,18 @@ int DMX::unpause(void)
 	return 0;
 }
 
+const char *dmx_filter_types [] = {
+			"actual transport stream, now/next",
+			"actual transport stream, scheduled",
+			"actual + other transport stream, now/next",
+			"actual transport stream, scheduled",
+			"actual transport stream, now/next",
+			"other transport stream, scheduled",
+//			"other transport stream, scheduled 1/2",
+//			"actual transport stream, now/next",
+//			"other transport stream, scheduled 2/2",
+			"actual transport stream, now/next (collect EIT version)" };
+
 int DMX::change(const int new_filter_index)
 {
 	if (debug)
@@ -653,18 +674,24 @@ int DMX::change(const int new_filter_index)
 		pthread_cond_signal(&change_cond);
 #endif
 		unlock();
+		dprintf("DMX::change(%d): not open!\n",new_filter_index);
 		return 1;
 	}
 
 	if (real_pauseCounter > 0)
 	{
-		dprintf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", filters[new_filter_index].filter);
+		printf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", filters[new_filter_index].filter);
 		unlock();
-		return 0;	// läuft nicht (zB streaming)
+		return 0;	// not running (e.g. streaming)
 	}
 
-	//	if(pID==0x12) // Nur bei EIT
-	dprintf("changeDMX [%x]-> %s (0x%x)\n", pID, (new_filter_index == 0) ? "current/next" : "scheduled", filters[new_filter_index].filter);
+	if(pID==0x12) // Nur bei EIT
+		dprintf("changeDMX [EIT]-> %d (0x%x/0x%x) %s (%ld seconds)\n",
+			new_filter_index, filters[new_filter_index].filter,
+			filters[new_filter_index].mask, dmx_filter_types[new_filter_index],
+			time(NULL)-lastChanged);
+	else
+		dprintf("changeDMX [%x]-> %d\n", pID, new_filter_index);
 
 /*	if (ioctl(fd, DMX_STOP, 0) == -1)
 	{
@@ -715,13 +742,12 @@ int DMX::change(const int new_filter_index)
 	return 0;
 }
 
-
 // Liest n Bytes aus einem Socket per read
 // Liefert 0 bei timeout
 // und -1 bei Fehler
 // ansonsten die Anzahl gelesener Bytes
 /* inline */
-ssize_t readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSeconds)
+ssize_t DMX::readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSeconds)
 {
 	size_t j;
 
@@ -739,14 +765,17 @@ ssize_t readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSecond
 			continue; // interuppted
 		else if (rc < 0)
 		{
-			perror ("[sectionsd] poll");
+			perror ("[sectionsd] DMX::readNbytes poll");
 			//printf("errno: %d\n", errno);
 			return -1;
 		}
 #ifdef PAUSE_EQUALS_STOP
 		if ((ufds.revents & POLLERR) != 0) /* POLLERR means buffer error, i.e. buffer overflow */
 		{
-			puts("[sectionsd] readNbytes: received POLLERR");
+			printdate_ms(stderr);
+			fprintf(stderr, "[sectionsd] DMX::readNbytes received POLLERR, pid 0x%x, filter[%d] "
+			       "filter 0x%02x mask 0x%02x\n", pID, filter_index,
+			       filters[filter_index].filter, filters[filter_index].mask);
 			return -1;
 		}
 #endif
@@ -775,8 +804,7 @@ ssize_t readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSecond
 		}
 		else if (r <= 0 && errno != EINTR)
 		{
-			//printf("errno: %d\n", errno);
-			perror ("[sectionsd] read");
+			perror ("[sectionsd] DMX::readNbytes read");
 			return -1;
 		}
 	}
@@ -803,7 +831,7 @@ int DMX::setPid(const unsigned short new_pid)
 	{
 		dprintf("changeDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", new_pid);
 		unlock();
-		return 0;	// läuft nicht (zB streaming)
+		return 0;	// not running (e.g. streaming)
 	}
 	closefd();
 
@@ -828,26 +856,29 @@ int DMX::setPid(const unsigned short new_pid)
 
 int DMX::setCurrentService(int new_current_service)
 {
-        lock();
+	lock();
+
+	/* there might be occurences of setCurrentService with the devcice stopped */
+	current_service = new_current_service;
 
 	if (!isOpen())
 	{
 #ifdef PAUSE_EQUALS_STOP
 		pthread_cond_signal(&change_cond);
 #endif
+		dprintf("DMX::setCurrentService(0x%x) not open!\n",new_current_service);
 		unlock();
 		return 1;
 	}
 
 	if (real_pauseCounter > 0)
 	{
-		dprintf("currentDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", new_current_service);
+		/*d*/printf("currentDMX: for 0x%x ignored! because of real_pauseCounter> 0\n", new_current_service);
 		unlock();
-		return 0;	// läuft nicht (zB streaming)
+		return 0;	// not running (e.g. streaming)
 	}
 	closefd();
 
-	current_service = new_current_service;
 	int rc = immediate_start();
 
 	if (rc != 0)
@@ -879,7 +910,7 @@ int DMX::dropCachedSectionIDs()
 	if (real_pauseCounter > 0)
 	{
 		unlock();
-		return 0;	// läuft nicht (zB streaming)
+		return 0;	// not running (e.g. streaming)
 	}
 	closefd();
 
@@ -898,4 +929,19 @@ int DMX::dropCachedSectionIDs()
 	unlock();
 
 	return 0;
+}
+
+void DMX::reset_eit_version()
+{
+	eit_version = 0xff;
+}
+
+unsigned char DMX::get_eit_version()
+{
+	return eit_version;
+}
+
+unsigned int DMX::get_current_service()
+{
+	return current_service;
 }

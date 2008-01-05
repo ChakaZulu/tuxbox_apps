@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.17 2007/05/23 16:43:12 papst Exp $
+//  $Id: sectionsdMsg.h,v 1.18 2008/01/05 18:05:14 seife Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -100,6 +100,7 @@ struct sectionsd
 		SetLanguageMode,
 		GetLanguageMode,
 		setConfig,
+		Restart,
 
 		numberOfCommands        // <- no actual command, end of command marker
 	};

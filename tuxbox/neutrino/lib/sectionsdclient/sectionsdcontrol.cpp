@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.4 2007/03/17 22:35:09 houdini Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.5 2008/01/05 18:05:14 seife Exp $
  *
  * Sectionsd command line interface - The Tuxbox Project
  *
@@ -34,6 +34,7 @@ void usage(void) {
 	printf("        sectionsdcontrol --wepg <epgdir> write epgfiles to dir\n");
 	printf("        sectionsdcontrol --repg <epgdir> read epgfiles from dir\n");
 	printf("        sectionsdcontrol --freemem       unloads all events\n");
+	printf("        sectionsdcontrol --restart       restart sectionsd\n");
 }
 
 int main(int argc, char** argv)
@@ -86,6 +87,11 @@ int main(int argc, char** argv)
 		{
 			printf("freeMemory\n");
 			client.freeMemory();
+		}
+		else if (!strcmp(argv[i], "--restart"))
+		{
+			printf("restarting sectionsd\n");
+			client.Restart();
 		}
 	}
 

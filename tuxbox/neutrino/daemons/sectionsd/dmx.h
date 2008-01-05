@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.10 2007/08/08 22:17:06 dbt Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.h,v 1.11 2008/01/05 18:05:13 seife Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -40,6 +40,7 @@ class DMX
 	unsigned short  dmxBufferSizeInKB;
 	sections_id_t first_skipped;
 	int		current_service;
+	unsigned char	eit_version;
 
 	inline bool isOpen(void) { return (fd != -1); }
 	
@@ -47,6 +48,7 @@ class DMX
 	int immediate_stop(void);  /* mutex must be locked before and unlocked after this method */
 	bool check_complete(const unsigned char table_id, const unsigned short extension_id, const unsigned short onid, const unsigned short tsid, const unsigned char);
 	sections_id_t create_sections_id(const unsigned char table_id, const unsigned short extension_id, const unsigned char section_number, const unsigned short onid, const unsigned short tsid);
+	ssize_t readNbytes(int fd, char * buf, const size_t n, unsigned timeoutInMSeconds);
 
  public:
 	struct s_filters
@@ -93,6 +95,11 @@ class DMX
 	int setPid(const unsigned short new_pid);
 	int setCurrentService(int new_current_service);
 	int dropCachedSectionIDs();
+
+	void reset_eit_version(void);
+	unsigned char get_eit_version(void);
+	// was useful for debugging...
+	unsigned int get_current_service(void);
 };
 
 #endif /* __sectionsd__dmx_h__ */

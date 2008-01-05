@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.44 2007/12/01 13:36:34 houdini Exp $
+  $Id: sectionsdclient.h,v 1.45 2008/01/05 18:05:14 seife Exp $
 
   License: GPL
 
@@ -200,6 +200,8 @@ class CSectionsdClient : private CBasicClient
 //	void setSectionsdScanMode(const int scanMode);
 	
 	void freeMemory();
+
+	void Restart();
 	
 	void readSIfromXML(const char * epgxmlname);
 	
