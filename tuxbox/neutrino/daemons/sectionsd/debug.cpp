@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/debug.cpp,v 1.1 2003/03/02 12:20:14 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/debug.cpp,v 1.2 2008/01/05 18:02:11 seife Exp $
  *
  * Debug tools (sectionsd) - d-box2 linux project
  *
@@ -20,5 +20,16 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
 
 bool debug = false;
+
+void printdate_ms(FILE *f) {
+	timeval now;
+	gettimeofday(&now, NULL);
+	struct tm *tm = gmtime(&now.tv_sec);
+	/* use strftime for that? */
+	fprintf(f, "%02d:%02d:%02d.%03ld ", tm->tm_hour, tm->tm_min, tm->tm_sec, now.tv_usec/1000);
+}
