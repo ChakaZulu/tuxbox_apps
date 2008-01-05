@@ -40,7 +40,7 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, eSimpleConfigFi
 
 	if (desc)
 	{
-		helptext += " - " + desc;
+		helptext = desc;
 	}
 
 	depend = config.getInfo("depend");
@@ -63,17 +63,22 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, eSimpleConfigFi
 	pluginname = eString(cfgfile).mid(eString(cfgfile).rfind('/') + 1);
 
 	pluginname = pluginname.left(pluginname.length() - 4);
+	sortpos = 10000;
+	eConfig::getInstance()->getKey(eString().sprintf("/enigma/plugins/sortpos/%s",pluginname.c_str()).c_str(), sortpos);
+
 }
 
 const char *eZapPlugins::PluginPath[] = { "/var/tuxbox/plugins/", PLUGINDIR "/", "" };
 
 eZapPlugins::eZapPlugins(Types type, eWidget* lcdTitle, eWidget* lcdElement)
-	:eListBoxWindow<ePlugin>(type == StandardPlugin ? _("Plugins") : _("Games"), 8, 400), type(type)
+	:eListBoxWindow<ePlugin>(type == StandardPlugin ? _("Plugins") : _("Games"), 8, 400,true), type(type),reordering(0)
 {
 	setHelpText(_("select plugin and press ok"));
 #ifndef DISABLE_LCD
 	setLCD(lcdTitle, lcdElement);
 #endif
+	addActionMap(&i_shortcutActions->map);
+	list.setFlags(eListBoxBase::flagHasShortcuts);
 	CONNECT(list.selected, eZapPlugins::selected);
 	valign();
 }
@@ -317,6 +322,12 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 
 void eZapPlugins::selected(ePlugin *plugin)
 {
+	if (reordering)
+	{
+		toggleMoveMode();
+		return;
+	}
+
 	if (!plugin || !plugin->pluginname )
 	{
 		close(0);
@@ -325,6 +336,48 @@ void eZapPlugins::selected(ePlugin *plugin)
 	execPlugin(plugin);
 	previousPlugin = plugin->pluginname;
 }
+class eSetPluginSortOrder
+{
+	int n;
+public:
+	eSetPluginSortOrder(): n(0) { }
+	bool operator()(ePlugin &e)
+	{
+		e.sortpos = ++n;
+		eConfig::getInstance()->setKey(eString().sprintf("/enigma/plugins/sortpos/%s",e.pluginname.c_str()).c_str(), e.sortpos);
+		return 0;
+	}
+};
+void eZapPlugins::toggleMoveMode()
+{
+	if (reordering)
+		list.forEachEntry(eSetPluginSortOrder());
+	else
+		selectedBackColor = list.getActiveBackColor();
+	reordering= 1-reordering;
+	list.setMoveMode(reordering);
+	list.setActiveColor(reordering ? eSkin::getActive()->queryColor("eServiceSelector.entrySelectedToMove"): selectedBackColor,gColor(0));
+}
+int eZapPlugins::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (list.eventHandlerShortcuts(event))
+			return 1;
+		else if (event.action == &i_cursorActions->cancel)
+			close(0);
+		else if (event.action == &i_shortcutActions->red)
+			toggleMoveMode();
+		else
+			break;
+		return 1;
+	default:
+		break;
+	}
+	return eWindow::eventHandler(event);
+}
+
 
 PluginParam *ePluginThread::first = NULL, *ePluginThread::tmp = NULL;
 

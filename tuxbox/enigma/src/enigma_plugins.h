@@ -15,7 +15,7 @@ class ePlugin: public eListBoxEntryText
 	friend class eListBox<ePlugin>;
 
 public:
-	int version, type;
+	int version, type, sortpos;
 	eString depend, sopath, pluginname, requires, cfgname, desc, name;
 	bool needfb, needrc, needlcd, needvtxtpid, needoffsets, showpig;
 	int posx, posy, sizex, sizey;
@@ -23,9 +23,12 @@ public:
 public:
 	ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, eSimpleConfigFile &config, const char* descr = NULL);
 
-	bool operator < ( const ePlugin & e ) const 
+	bool operator < ( const eListBoxEntry& e ) const 
 	{
-		return cfgname < e.cfgname;
+		if (sortpos == ((ePlugin&)e).sortpos)
+			return cfgname < ((ePlugin&)e).cfgname;
+		else
+			return sortpos < ((ePlugin&)e).sortpos;
 	}
 };
 
@@ -49,6 +52,11 @@ private:
 	static const char *PluginPath[3];
 	void selected(ePlugin *);
 	int type;
+	int reordering;
+	void toggleMoveMode();
+	gColor selectedBackColor;
+protected:
+	int eventHandler(const eWidgetEvent &event);
 public:
 	eZapPlugins(Types type, eWidget* lcdTitle=0, eWidget* lcdElement=0);
 	eString execPluginByName(const char* name, bool onlySearch=false);
@@ -80,7 +88,6 @@ private:
 	void thread_finished();
 	void finalize_plugin();
 	void recv_msg(const int &);
-
 public:
 	ePluginThread( ePlugin *p, const char *PluginPath[3], eZapPlugins *wnd )
 		:message(eApp,1), depend(p->depend), sopath(p->sopath), pluginname(p->pluginname),
