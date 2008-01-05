@@ -7463,7 +7463,7 @@ void eServiceContextMenu::init_eServiceContextMenu(const eServiceReference &ref,
 
 	if ( sel )
 		list.setCurrent( sel );
-
+	list.setFlags( eListBoxBase::flagHasShortcuts );
 	CONNECT(list.selected, eServiceContextMenu::entrySelected);
 }
 
