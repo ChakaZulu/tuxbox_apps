@@ -52,12 +52,16 @@ eListBoxBase::~eListBoxBase()
 
 void eListBoxBase::setFlags(int _flags)	
 {
-	flags |= _flags;	
+	flags |= _flags;
+	if (_flags == flagHasShortcuts)
+		addActionMap(&i_shortcutActions->map);
 }
 
 void eListBoxBase::removeFlags(int _flags)	
 {
 	flags &= ~_flags;	
+	if (_flags == flagHasShortcuts)
+		removeActionMap(&i_shortcutActions->map);
 }
 
 void eListBoxBase::recalcMaxEntries()
@@ -219,7 +223,9 @@ int eListBoxBase::eventHandler(const eWidgetEvent &event)
 			return 1;
 		break;
 		case eWidgetEvent::evtAction:
-			if ((event.action == &i_listActions->pageup) && !(flags & flagNoPageMovement))
+			if ((flags & flagHasShortcuts) && eventHandlerShortcuts(event))
+				return 1;
+			else if ((event.action == &i_listActions->pageup) && !(flags & flagNoPageMovement))
 				moveSelection(dirPageUp);
 			else if ((event.action == &i_listActions->pagedown) && !(flags & flagNoPageMovement))
 				moveSelection(dirPageDown);
@@ -992,6 +998,7 @@ int eListBoxBase::getShortcut(eListBoxEntry* e)
 		if ( it->isSelectable()&2)
 		{
 			i++;
+			if (i > 10) break;
 			if ( it == e )
 			{
 				if (i > 9)
@@ -1002,6 +1009,50 @@ int eListBoxBase::getShortcut(eListBoxEntry* e)
 	}
 	return -1;	
 }
+
+int eListBoxBase::eventHandlerShortcuts(const eWidgetEvent &event)
+{
+	int num=-1;
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_shortcutActions->number0)
+			num=9;
+		else if (event.action == &i_shortcutActions->number1)
+			num=0;
+		else if (event.action == &i_shortcutActions->number2)
+			num=1;
+		else if (event.action == &i_shortcutActions->number3)
+			num=2;
+		else if (event.action == &i_shortcutActions->number4)
+			num=3;
+		else if (event.action == &i_shortcutActions->number5)
+			num=4;
+		else if (event.action == &i_shortcutActions->number6)
+			num=5;
+		else if (event.action == &i_shortcutActions->number7)
+			num=6;
+		else if (event.action == &i_shortcutActions->number8)
+			num=7;
+		else if (event.action == &i_shortcutActions->number9)
+			num=8;
+		else
+			break;
+		if (num != -1)
+		{
+			for (ePtrList<eListBoxEntry>::iterator i(childs.begin()); i!=childs.end(); ++i)
+				if (i->isSelectable()&2 && !num--)
+				{
+					SendSelected(i);
+					return 1;
+				}
+		}
+	default:
+		break;
+	}
+	return 0;
+}
+
 eListBoxBaseExt::eListBoxBaseExt(eWidget* parent, const eWidget* descr, int takefocus, int item_height, const char *deco)
 	:eListBoxBase(parent, descr, takefocus, item_height, deco), browseTimer(eApp)
 {

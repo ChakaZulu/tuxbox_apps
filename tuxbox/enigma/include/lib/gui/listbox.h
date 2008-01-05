@@ -78,11 +78,13 @@ public:
 	void sort();
 	int moveSelection(int dir, bool sendSelected=false);
 	void setActiveColor(gColor back, gColor front);
+	gColor getActiveBackColor() { return colorActiveB; }
 	void beginAtomic();
 	void endAtomic();
 	void FakeFocus( int i ) { have_focus=i; }
 	void invalidateCurrent();
 	int getShortcut(eListBoxEntry* e);
+	int eventHandlerShortcuts(const eWidgetEvent &event);
 };
 
 template <class T>
@@ -288,7 +290,7 @@ public:
 
 	~eListBoxEntryText();
 
-	bool operator < ( const eListBoxEntry& e) const
+	virtual bool operator < ( const eListBoxEntry& e) const
 	{
 		if (key == ((eListBoxEntryText&)e).key || keytype == ptr)
 			return text < ((eListBoxEntryText&)e).text;
