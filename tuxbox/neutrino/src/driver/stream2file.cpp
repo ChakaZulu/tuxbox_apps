@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.28 2007/09/07 02:10:38 guenther Exp $
+ * $Id: stream2file.cpp,v 1.29 2008/01/05 21:04:53 seife Exp $
  * 
  * streaming to file/disc
  * 
@@ -58,6 +58,9 @@
 #else
 #include <linux/dvb/dmx.h>
 #endif
+
+// default file permissions: 0666, will be modified by umask anyway...
+#define REC_FILE_PERMISSIONS S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH
 
 //#define INC_BUSY_COUNT printf ("inc (%d): %s,%d\n",++busy_count,__FUNCTION__,__LINE__)
 //#define DEC_BUSY_COUNT printf ("dec (%d): %s,%d\n",--busy_count,__FUNCTION__,__LINE__)
@@ -186,11 +189,15 @@ void * FileThread(void * v_arg)
 			if (remfile == 0)
 			{
 				char filename[FILENAMEBUFFERSIZE];
+				int flags = O_WRONLY|O_CREAT|O_TRUNC|O_LARGEFILE;
+				if (use_o_sync)
+					flags |= O_SYNC;
 
 				sprintf(filename, "%s.%3.3d.%s", myfilename, ++filecount, ((struct filenames_t *)v_arg)->extension);
 				if (fd2 != -1)
 					close(fd2);
-				if ((fd2 = open(filename, use_o_sync ? O_WRONLY | O_CREAT | O_SYNC | O_TRUNC | O_LARGEFILE : O_WRONLY | O_CREAT | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
+
+				if ((fd2 = open(filename, flags, REC_FILE_PERMISSIONS)) < 0)
 				{
 					perror("[stream2file]: error opening outfile");
 					exit_flag = STREAM2FILE_STATUS_WRITE_OPEN_FAILURE;
@@ -276,7 +283,7 @@ void * DMXThread(void * v_arg)
 	char filename_extension[3];
 	ringbuffer_data_t vec[2];
 	ssize_t written;
-	ssize_t todo;
+	ssize_t todo = 0;
 	ssize_t todo2;
 	unsigned char buf[TS_SIZE];
 	int     offset = 0;
@@ -472,7 +479,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 
 	// write stream information (should wakeup the disk from standby, too)
 	sprintf(buf, "%s.xml", filename);
-	if ((fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) >= 0)
+	if ((fd = open(buf, O_SYNC|O_WRONLY|O_CREAT|O_TRUNC, REC_FILE_PERMISSIONS)) >= 0)
 	{
 		write(fd, info, strlen(info));
 		fdatasync(fd);
@@ -575,7 +582,7 @@ stream2file_error_msg_t stop_recording(void)
 		mi.clearMovieInfo(&movieinfo);
 
 		time(&record_end_time);
-		printf("record time: %d \n",(uint)record_end_time-record_start_time);
+		printf("record time: %lu \n",record_end_time-record_start_time);
 		//load MovieInfo and set record time
 		movieinfo.file.Name = myfilename;
 		movieinfo.file.Name += ".ts";
