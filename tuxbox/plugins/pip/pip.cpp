@@ -1154,7 +1154,7 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 	}
 
 #if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
-	if(FTC_SBit_Cache_Lookup(cache, &desc, glyphindex, &sbit)
+	if(FTC_SBit_Cache_Lookup(cache, &desc, glyphindex, &sbit))
 #else
 	if(FTC_SBitCache_Lookup(cache, &desc, glyphindex, &sbit, NULL))
 #endif
