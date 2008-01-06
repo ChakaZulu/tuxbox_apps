@@ -1999,7 +1999,6 @@ int last = -1;
 				break;
 
 			    case STATE_SEQUENCE_REPEATED:
-			    case STATE_SEQUENCE_MODIFIED:
 			    case STATE_GOP:
 			    case STATE_SLICE_1ST:
 			    case STATE_PICTURE_2ND:
