@@ -2422,11 +2422,6 @@ else
 
 		    break;
 
-		case STATE_SEQUENCE_MODIFIED:
-//Log2File("STATE_SEQUENCE_MODIFIED");
-
-		    break;
-
 		case STATE_GOP:
 //Log2File("STATE_GOP");
 
