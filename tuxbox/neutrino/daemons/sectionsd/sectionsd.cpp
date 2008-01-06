@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.257 2008/01/05 18:05:13 seife Exp $
+//  $Id: sectionsd.cpp,v 1.258 2008/01/06 21:35:30 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2364,7 +2364,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.257 2008/01/05 18:05:13 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.258 2008/01/06 21:35:30 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -5928,6 +5928,7 @@ static int getscanType()
 				break;
 			}
 		}
+		fclose(scanconf);
 	}
 
 	return ret;
@@ -7738,7 +7739,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.257 2008/01/05 18:05:13 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.258 2008/01/06 21:35:30 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
