@@ -885,7 +885,6 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 {
     int row, pitch, bit, x = 0, y = 0;
     FT_UInt glyphindex;
-    FTC_Node anode;
     FTC_SBit sbit;
     FT_Vector kerning;
 
@@ -896,7 +895,11 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 	    return FAILURE;
 	}
 
-	if(FTC_SBitCache_Lookup(cache, &desc, glyphindex, &sbit, &anode))
+#if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
+	if(FTC_SBit_Cache_Lookup(cache, &desc, glyphindex, &sbit)
+#else
+	if(FTC_SBitCache_Lookup(cache, &desc, glyphindex, &sbit, NULL))
+#endif
 	{
 	    return FAILURE;
 	}
