@@ -215,7 +215,7 @@ FT_Library	library = 0;
 FTC_Manager	manager = 0;
 FTC_SBitCache	cache;
 #if FREETYPE_MAJOR  == 2 && FREETYPE_MINOR == 0
-FTC_ImageDesc	desc;
+FTC_Image_Desc	desc;
 #else
 FTC_ImageTypeRec desc;
 #endif
