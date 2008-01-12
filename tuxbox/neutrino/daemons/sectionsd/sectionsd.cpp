@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.258 2008/01/06 21:35:30 seife Exp $
+//  $Id: sectionsd.cpp,v 1.259 2008/01/12 16:57:22 seife Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2364,7 +2364,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.258 2008/01/06 21:35:30 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.259 2008/01/12 16:57:22 seife Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -4669,8 +4669,12 @@ static void commandRestart(int /*connfd*/, char * /*data*/, const unsigned /*dat
 		fprintf(stderr, "[sectionsd] commandRestart: cannot determine who i am\n");
 		return;
 	}
+	/* if we close filedescriptors here, the 2.4 kernel hangs hard when we
+	   close the two pipe fds probably created by the old threading
+	   implementation. We close them instead at startup.
 	for (int i = 3; i < 256; i++)
 		close(i);
+	 */
 	char *val = (char*)malloc(32);	// needed for SETENV?-macros
 	unlink(SECTIONSD_UDS_NAME);
 	SETENVI(auto_scanning);
@@ -7739,7 +7743,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.258 2008/01/06 21:35:30 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.259 2008/01/12 16:57:22 seife Exp $\n");
 
 	SIlanguage::loadLanguages();
 
@@ -7789,6 +7793,11 @@ int main(int argc, char **argv)
 				return EXIT_FAILURE;
 			}
 		}
+
+		/* close filedescriptors from stderr upwards */
+		for (i = 3; i < 256; i++)
+			close(i);
+
 		tzset(); // TZ auswerten
 
 		CBasicServer sectionsd_server;
