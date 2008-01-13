@@ -1449,6 +1449,12 @@ void ShowMenu()
     usleep(100000);
 
     SetPalette(TRUE, TRUE);
+	if (var_screeninfo.yoffset)
+	{
+		var_screeninfo.yoffset= 0;
+		if (ioctl(fb, FBIOPAN_DISPLAY, &var_screeninfo)  == -1)
+			printf("ioctl() \"FBIOPAN_DISPLAY\" failed: %s", strerror(errno));
+	}
 
     for(y = 0; y < 25; y++)
     {
@@ -1758,13 +1764,19 @@ void ShowMessage(int message)
     char *msg[][8] =
     {
 	{"Box-Type unknown!",	"Access to WebServer failed!",			"Check Network / Port",		"Access to WebServer denied!",		"Check User / Password",		"No Transponder-Services found!",	"Decode-Thread failed!",		"PiP-Plugin Version "VERSION" / "BUILD},
-	{"Box-Typ unbekannt!",	"Zugriff auf WebServer fehlgeschlagen!",	"Netzwerk / Port ï¿½berprï¿½fen",	"Zugriff auf WebServer verweigert!",	"Benutzer / Passwort ï¿½berprï¿½fen",	"Keine Transponder-Kanï¿½le gefunden!",	"Decoder-Thread fehlgeschlagen!",	"PiP-Plugin Version "VERSION" / "BUILD}
+	{"Box-Typ unbekannt!",	"Zugriff auf WebServer fehlgeschlagen!",	"Netzwerk / Port überprüfen",	"Zugriff auf WebServer verweigert!",	"Benutzer / Passwort überprüfen",	"Keine Transponder-Kanäle gefunden!",	"Decoder-Thread fehlgeschlagen!",	"PiP-Plugin Version "VERSION" / "BUILD}
     };
 
     lock_framebuffer = TRUE;
     usleep(100000);
 
     SetPalette(TRUE, TRUE);
+	if (var_screeninfo.yoffset)
+	{
+		var_screeninfo.yoffset= 0;
+		if (ioctl(fb, FBIOPAN_DISPLAY, &var_screeninfo)  == -1)
+			printf("ioctl() \"FBIOPAN_DISPLAY\" failed: %s", strerror(errno));
+	}
 
     for(y = 0; y < 25; y++)
     {
@@ -1878,6 +1890,12 @@ void ShowHelp()
     usleep(100000);
 
     SetPalette(TRUE, TRUE);
+	if (var_screeninfo.yoffset)
+	{
+		var_screeninfo.yoffset= 0;
+		if (ioctl(fb, FBIOPAN_DISPLAY, &var_screeninfo)  == -1)
+			printf("ioctl() \"FBIOPAN_DISPLAY\" failed: %s", strerror(errno));
+	}
 
     for(y = 0; y < 25; y++)
     {
@@ -2403,10 +2421,10 @@ else
 				}
 			    }
 */
-			    for(y = 0; y < ymax ; y++)
+			    for(y = ymax; --y;)
 			    {
 				bufp += yfactor;
-				for(x = 0; x < xmax; x++)
+				for(x = xmax; --x;)
 				{
 				    *(pfb +x) = *(bufp + x_scaler[x]) ? *(bufp + x_scaler[x]) : 0x01;
 				}
