@@ -1,5 +1,5 @@
 /*
-	$Id: imageinfo.cpp,v 1.14 2008/01/03 11:09:33 seife Exp $
+	$Id: imageinfo.cpp,v 1.15 2008/01/13 11:54:04 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -272,11 +272,13 @@ void CImageInfo::paintLicense(int y_startposition)
 
 void CImageInfo::paintRevisionInfos(int y_startposition)
 {
+	struct utsname u;
+
 	clearContentBox();
 	
 	paintContent(font_info, xpos, y_startposition, "Kernel:" );
-	paintContent(font_info, xpos+x_offset_large, y_startposition, getSysInfo("-dbox2", true).c_str());
-//	paintContent(font_info, xpos+x_offset_large, y_startposition, readFile("/proc/version").c_str());
+	if (!uname(&u))	// no idea what could go wrong here, but u would be uninitialized.
+		paintContent(font_info, xpos+x_offset_large, y_startposition, u.release);
 	
 	y_startposition += iheight;
 	paintContent(font_info, xpos, y_startposition, "BusyBox:" );
@@ -379,26 +381,36 @@ string CImageInfo::getSysInfo(string infotag, bool reverse)
 }
 
 string CImageInfo::getChipInfo()
-{		
-	string str = getSysInfo("D-Box 2 flash memory: Found ", false);
-	
-	string::size_type locx = str.find( "x16", 0 );
-		if( locx != string::npos )
-			{
-			string::size_type loc = str.find( "1 x16", 0 );
-			if( loc != string::npos )
-				{
-					chiptype = "1xI";
-				}
+{
+	unsigned int spos, rpos;
+	string line;
+
+	chiptype=g_Locale->getText(LOCALE_FLASHUPDATE_GETINFOFILEERROR);
+	spos = 0;
+	while (spos < partitions.length())
+	{
+		rpos = partitions.find("\n",spos);
+		if (rpos == string::npos) // must not happen!
+			break;
+		line = partitions.substr(spos, rpos - spos);
+		string::size_type n = line.find("BR bootloader" ,0);
+		if (n != string::npos) {
+			// printf("Bootloader found: %s\n", line.c_str());
+			// printf("character at n-6: %s\n", line.substr(n-6, 1).c_str());
+			/* the 1xI boxen have mtd0: 00020000 00020000 "BR bootloader"
+			   the 2xI boxen have mtd0: 00020000 00004000 "BR bootloader"
+			                                  (n-6)--^     ^--(n)
+			   This is at least as reliable as the old method of grepping
+			   through dmesg output... */
+			if (line.substr(n - 6, 1) == "4")
+				chiptype = "2xI";
 			else
-				{
-					chiptype = "2xI";
-				}
-			}
-		else
-		{
-			chiptype=g_Locale->getText(LOCALE_FLASHUPDATE_GETINFOFILEERROR);
+				chiptype = "1xI";
+			break;
 		}
+		spos = rpos + 1;
+	}
+
 	return chiptype;
 }
 
@@ -428,7 +440,7 @@ string CImageInfo::getImageInfoVersion()
 /* 	Note: revision (revstr) will change automaticly on cvs-commits, 
  * 	if you made some changes without cvs-commit, you must change it before by yourself
  */
-	string revstr = "$Revision: 1.14 $";
+	string revstr = "$Revision: 1.15 $";
 	while (revstr.find("$") !=string::npos)
 	{
 		revstr.replace(revstr.find("$"),1 ,""); //normalize output, remove "$"	

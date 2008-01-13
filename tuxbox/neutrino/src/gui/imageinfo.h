@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 	
-	$Id: imageinfo.h,v 1.4 2007/04/22 20:36:40 dbt Exp $
+	$Id: imageinfo.h,v 1.5 2008/01/13 11:54:04 seife Exp $
 
 	License: GPL
 
@@ -24,6 +24,8 @@
 #ifndef __imageinfo__
 #define __imageinfo__
 
+/* for uname(2) */
+#include <sys/utsname.h>
 #include <string>
 
 #include <configfile.h>
