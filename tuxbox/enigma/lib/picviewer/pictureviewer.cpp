@@ -1,5 +1,5 @@
 /*
- * $Id: pictureviewer.cpp,v 1.45 2007/03/26 19:02:53 ghostrider Exp $
+ * $Id: pictureviewer.cpp,v 1.46 2008/01/19 16:46:53 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -111,6 +111,18 @@ ePictureViewer::ePictureViewer(const eString &filename)
 
 	addActionMap(&i_cursorActions->map);
 	addActionMap(&i_shortcutActions->map);
+	addActionToHelpList(i_shortcutActions->blue.setDescription(_("display next picture")));
+	addActionToHelpList(i_shortcutActions->red.setDescription(_("display previous picture")));
+	addActionToHelpList(i_shortcutActions->green.setDescription(_("start slideshow")));
+	addActionToHelpList(i_shortcutActions->yellow.setDescription(_("stop slideshow")));
+	addActionToHelpList(i_shortcutActions->number0.setDescription(_("toggle fit to screen width/fit to screen")));
+	addActionToHelpList(i_shortcutActions->number1.setDescription(_("zoom out")));
+	addActionToHelpList(i_shortcutActions->number3.setDescription(_("zoom in")));
+	addActionToHelpList(i_shortcutActions->number5.setDescription(_("toggle 16/9 mode")));
+	addActionToHelpList(i_shortcutActions->number2.setDescription(_("move picture up")));
+	addActionToHelpList(i_shortcutActions->number4.setDescription(_("move picture left")));
+	addActionToHelpList(i_shortcutActions->number6.setDescription(_("move picture right")));
+	addActionToHelpList(i_shortcutActions->number8.setDescription(_("move picture down")));
 
 	move(ePoint(70, 50));
 	resize(eSize(590, 470));
@@ -430,6 +442,27 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			if (evt.action == &i_cursorActions->cancel)
 				close(0);
 			else
+			if (evt.action == &i_cursorActions->help)
+			{
+				fbClass::getInstance()->SetMode(720, 576, 8);
+				fbClass::getInstance()->PutCMAP();
+				fbClass::getInstance()->unlock();
+				eWidget::eventHandler(evt);
+				struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
+				if (screenInfo->bits_per_pixel != 16)
+				{
+					fbClass::getInstance()->lock();
+					fbClass::getInstance()->SetMode(720, 576, 16);
+#if HAVE_DVB_API_VERSION == 3
+					fbClass::getInstance()->setTransparency(0);
+#endif
+				}
+				DecodeImage(*myIt, false);
+				showNameOnLCD(*myIt);
+				DisplayNextImage();
+				return 1;
+			}
+			else
 			if (evt.action == &i_shortcutActions->yellow)
 			{
 				slideshowTimer.stop();
@@ -468,6 +501,22 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			if (evt.action == &i_shortcutActions->number4)
 			{
 				Move(-50,0);
+			}
+			else
+			if (evt.action == &i_shortcutActions->number5)
+			{
+				format169 = 1-format169;
+				eConfig::getInstance()->setKey("/picviewer/format169", format169);
+				if (format169)
+				{
+					m_aspect = 16.0 / 9;
+					eAVSwitch::getInstance()->setAspectRatio(r169);
+				}
+				else
+				{
+					m_aspect = 4.0 / 3;
+					eAVSwitch::getInstance()->setAspectRatio(r43);
+				}
 			}
 			else
 			if (evt.action == &i_shortcutActions->number6)
