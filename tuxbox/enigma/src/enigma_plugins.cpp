@@ -77,7 +77,7 @@ eZapPlugins::eZapPlugins(Types type, eWidget* lcdTitle, eWidget* lcdElement)
 #ifndef DISABLE_LCD
 	setLCD(lcdTitle, lcdElement);
 #endif
-	addActionMap(&i_shortcutActions->map);
+	addActionToHelpList(i_shortcutActions->red.setDescription(_("enable move mode")));
 	list.setFlags(eListBoxBase::flagHasShortcuts);
 	CONNECT(list.selected, eZapPlugins::selected);
 	valign();

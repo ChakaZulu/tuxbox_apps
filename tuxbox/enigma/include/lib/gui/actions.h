@@ -61,7 +61,7 @@ public:
 	{
 		keys[style].insert(key);
 	}
-
+	eAction* setDescription(char *desc) { description = desc; return this;}
 	Signal0<void> handler;
 
 //	keylist &getKeyList();
