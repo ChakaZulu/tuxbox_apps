@@ -76,6 +76,7 @@
 ./lib/gui/statusbar.cpp
 ./lib/gui/testpicture.cpp
 ./lib/gui/textinput.cpp
+./lib/picviewer/pictureviewer.cpp
 ./lib/socket/serversocket.cpp
 ./lib/socket/socket.cpp
 ./lib/system/econfig.cpp
