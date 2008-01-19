@@ -2011,6 +2011,15 @@ void eZapMain::prepareDVRHelp()
 	addActionToHelpList(&i_enigmaMainActions->playlistNextService);
 	addActionToHelpList(&i_enigmaMainActions->playlistPrevService);
 
+	addActionToHelpList(i_numberActions->key1.setDescription(_("rewind one minute")));
+	addActionToHelpList(i_numberActions->key4.setDescription(_("rewind six minutes")));
+	addActionToHelpList(i_numberActions->key7.setDescription(_("rewind nine minutes")));
+	addActionToHelpList(i_numberActions->key2.setDescription(_("enter number of minutes to rewind")));
+	addActionToHelpList(i_numberActions->key3.setDescription(_("fast forward one minute")));
+	addActionToHelpList(i_numberActions->key6.setDescription(_("fast forward six minutes")));
+	addActionToHelpList(i_numberActions->key9.setDescription(_("fast forward nine minutes")));
+	addActionToHelpList(i_numberActions->key8.setDescription(_("enter number of minutes to fast forward")));
+
 /*	addActionToHelpList(&i_enigmaMainActions->standby_press);
 	addActionToHelpList(&i_enigmaMainActions->showInfobar);
 	addActionToHelpList(&i_enigmaMainActions->hideInfobar);
@@ -5734,6 +5743,106 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		startMessages();
 #ifndef DISABLE_FILE
+		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+		if (handler)
+		{
+			eServiceReference &myref = eServiceInterface::getInstance()->service;
+			
+			if ( num && ( (myref.type == eServiceReference::idDVB && myref.path)
+				|| (myref.type == eServiceReference::idUser
+				&& myref.data[0] == eMP3Decoder::codecMPG ) || (myref.type == eServiceReference::idUser
+				&& myref.data[0] == eMP3Decoder::codecMP3 ) || timeshift ) && (handler->getState() == eServiceHandler::statePlaying)) // nur, wenn ts, mpg oder mp3 ausgewählt ist und vor allem, wenn es abgespielt wird! :-)
+			{
+				int time=0;
+				switch (num)
+				{
+					case 2:
+					{
+						SkipEditWindow dlg( "<< Min:" );
+						if(myref.type == eServiceReference::idUser && myref.data[0] == eMP3Decoder::codecMP3)
+							dlg.setEditText("1");
+						else
+							dlg.setEditText("6");
+
+						dlg.show();
+						int ret=dlg.exec();
+						dlg.hide();
+
+						if(!ret)
+						{
+							time=atoi(dlg.getEditText().c_str())*60;
+							time = -time;
+						}
+						else
+							time = 0;
+						break;
+					}
+					case 8:
+					{
+						SkipEditWindow dlg( ">> Min:" );
+						if(myref.type == eServiceReference::idUser && myref.data[0] == eMP3Decoder::codecMP3)
+							dlg.setEditText("1");
+						else
+							dlg.setEditText("6");
+
+						dlg.show();
+						int ret=dlg.exec();
+						dlg.hide();
+
+						if(!ret)
+							time=atoi(dlg.getEditText().c_str())*60;
+						else
+							time = 0;
+						break;
+					}
+					case 1:
+						time = -60;
+						break;
+					case 4:
+						time = -360;
+						break;
+					case 7:
+						time = -540;
+						break;
+					case 3:
+						time = 60;
+						break;
+					case 6:
+						time = 360;
+						break;
+					case 9:
+						time = 540;
+						break;
+				}
+				if (time)
+				{
+					if (skipping) 
+						endSkip();
+					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekBegin));
+					if (myref.type == eServiceReference::idUser)
+					{
+						switch(myref.data[0])
+						{
+							case eMP3Decoder::codecMPG:
+								handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*2000));
+								break;
+							case eMP3Decoder::codecMP3:
+								handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*3800));
+								break;
+						}
+					}
+					else if (Decoder::current.vpid==-1) // Radio
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*24));
+					else
+						handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,time*376)); // ca in TS
+					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekEnd));
+					updateProgress();
+					showInfobar(true);
+
+				}
+				return 1;
+			}
+		}
 		if ( num && (!eDVB::getInstance()->recorder || handleState() ) )
 #else
 		if ( num && handleState() )
