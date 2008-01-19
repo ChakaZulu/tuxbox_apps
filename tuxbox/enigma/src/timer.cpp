@@ -2120,6 +2120,8 @@ void eTimerListView::entrySelected(eListBoxEntryTimer *entry)
 	}
 }
 
+int ExpectedMoviesDuration;
+
 struct addToView
 {
 	eListBox<eListBoxEntryTimer> *listbox;
@@ -2131,6 +2133,10 @@ struct addToView
 	void operator()(ePlaylistEntry* se)
 	{
 		new eListBoxEntryTimer(listbox, se);
+		if ( (se->type & se->recDVR) && ((se->type & se->stateWaiting) || (se->type & se->stateRunning) || (se->type & se->isRepeating)))
+		{
+			ExpectedMoviesDuration += (se->duration / 60); // in minutes
+		}
 	}
 };
 
@@ -2138,9 +2144,29 @@ void eTimerListView::fillTimerList()
 {
 	events->beginAtomic();
 	events->clearList();
+	ExpectedMoviesDuration = 0;
 	eTimerManager::getInstance()->forEachEntry( addToView(events) );
 	events->sort();
 	events->endAtomic();
+#ifndef DISABLE_FILE
+	int fds = freeRecordSpace();
+	if (fds != -1)
+	{
+		eString Caption = "";
+		eString Caption2 = "";
+		int min = (fds / 33); 
+		if (min < 60)
+			Caption = eString().sprintf(", %s: ~%d min",_("free space"), min);
+		else
+			Caption = eString().sprintf(", %s: ~%d h, %02d min",_("free space"), min/60, min%60);
+		if (ExpectedMoviesDuration < 60)
+			Caption2 = eString().sprintf(": %d min", ExpectedMoviesDuration);
+		else
+			Caption2 = eString().sprintf(": %d h, %02d min", ExpectedMoviesDuration/60, ExpectedMoviesDuration%60);
+		eString sTitle = (_("Timerlist"));
+		setText(sTitle + Caption2 + Caption);
+	}
+#endif	
 }
 
 struct TimerEditActions
