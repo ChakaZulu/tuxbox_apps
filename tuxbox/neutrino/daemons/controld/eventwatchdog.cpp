@@ -145,6 +145,10 @@ void CEventWatchDog::vcrModeChanged( int nNewVCRMode )
 	eventServer->sendEvent(CControldClient::EVT_VCRCHANGED, CEventServer::INITID_CONTROLD, &nNewVCRMode, sizeof(nNewVCRMode));
 }
 
+/* too many subtle differences between old and new API, so i just have this
+   code twice - much more readable than putting #ifdefs all over the place
+ */
+#if HAVE_DVB_API_VERSION >= 3
 void *CEventWatchDog::watchdogThread(void *arg)
 {
 	char *verb_aratio[] = { "4:3", "16:9", "2.21:1" };
@@ -170,7 +174,6 @@ void *CEventWatchDog::watchdogThread(void *arg)
 			pthread_exit(NULL);
 		}
 
-#if HAVE_DVB_API_VERSION >= 3
 		struct pollfd pfd[2];
 		pfd[0].fd = fd_ev;
 		pfd[0].events = POLLIN;
@@ -178,13 +181,6 @@ void *CEventWatchDog::watchdogThread(void *arg)
 		pfd[1].events = POLLPRI;
 
 		while (poll(pfd, 2, -1) > 0) {
-#else
-		struct pollfd pfd[1];
-		pfd[0].fd = fd_ev;
-		pfd[0].events = POLLIN;
-		int pollret;
-		while ((pollret = poll(pfd, 1, 1000)) >= 0) {
-#endif
 			if (pfd[0].revents & POLLIN) {
 				struct event_t event;
 				while (read(fd_ev, &event, sizeof(event)) == sizeof(event)) {
@@ -209,7 +205,6 @@ void *CEventWatchDog::watchdogThread(void *arg)
 				}
 			}
 
-#if HAVE_DVB_API_VERSION >= 3
 			if (pfd[1].revents & POLLPRI) {
 				struct video_event event;
 				
@@ -232,21 +227,6 @@ void *CEventWatchDog::watchdogThread(void *arg)
 					}
 				}
 			}
-#else
-			if (!pollret) { /* timeout */
-				int aspect = WatchDog->getVideoMode();
-				if ((WatchDog->VideoMode & 0xFF) != aspect) {
-					printf("[controld] aspect ratio changed %u -> %u (%s -> %s)\n",
-							(WatchDog->VideoMode & 0xFF), aspect,
-							verb_aratio[WatchDog->VideoMode&3],
-							verb_aratio[aspect]);
-					pthread_mutex_lock(&WatchDog->wd_mutex);
-					WatchDog->VideoMode = (WatchDog->VideoMode & 0xFF00 ) | aspect;
-					WatchDog->videoModeChanged(WatchDog->VideoMode);
-					pthread_mutex_unlock(&WatchDog->wd_mutex);
-				}
-			}
-#endif
 		}
 
 		close(fd_video);
@@ -263,6 +243,82 @@ void *CEventWatchDog::watchdogThread(void *arg)
 
 	pthread_exit(NULL);
 }
+#else	/* old API -> dreambox */
+void *CEventWatchDog::watchdogThread(void *arg)
+{
+	char *verb_aratio[] = { "4:3", "16:9", "2.21:1" };
+
+	try {
+		CEventWatchDog *WatchDog = (CEventWatchDog *)arg;
+		int fd_ev;
+
+		if ((fd_ev = open(EVENT_DEVICE, O_RDWR | O_NONBLOCK)) < 0) {
+			perror("[controld] " EVENT_DEVICE);
+			pthread_exit(NULL);
+		}
+
+		if (ioctl(fd_ev, EVENT_SET_FILTER, EVENT_VCR_CHANGED | EVENT_ARATIO_CHANGE) < 0) {
+			perror("[controld] EVENT_SET_FILTER");
+			close(fd_ev);
+			pthread_exit(NULL);
+		}
+
+		struct pollfd pfd[1];
+		pfd[0].fd = fd_ev;
+		pfd[0].events = POLLIN;
+		int pollret;
+		while ((pollret = poll(pfd, 1, -1)) > 0) {
+			if (!(pfd[0].revents & POLLIN))
+				continue;
+			struct event_t event;
+			while (read(fd_ev, &event, sizeof(event)) == sizeof(event)) {
+				if (event.event == EVENT_VCR_CHANGED) {
+					int newVCRMode = WatchDog->getVCRMode();
+					if (newVCRMode == WatchDog->VCRMode)
+						continue;
+					pthread_mutex_lock( &WatchDog->wd_mutex );
+					WatchDog->VCRMode = newVCRMode;
+					WatchDog->vcrModeChanged( newVCRMode );
+
+					if(newVCRMode > 0) {
+						//Set Aspect ratio of scart input signal (1->4:3 / 2->16:9)
+						// vcr AR is saved in Bit 8-15, DVB AR is saved in bits 0-7
+						WatchDog->VideoMode = (WatchDog->VideoMode & 0xFF) | ((newVCRMode-1) << 8);
+						WatchDog->videoModeChanged(WatchDog->VideoMode);
+					}
+					pthread_mutex_unlock( &WatchDog->wd_mutex );
+				} else if (event.event == EVENT_ARATIO_CHANGE) {
+					int aspect = WatchDog->getVideoMode();
+					if ((WatchDog->VideoMode & 0xFF) != aspect) {
+						printf("[controld] aspect ratio changed %u -> %u (%s -> %s)\n",
+							(WatchDog->VideoMode & 0xFF), aspect,
+							verb_aratio[WatchDog->VideoMode&3],
+							verb_aratio[aspect]);
+						pthread_mutex_lock(&WatchDog->wd_mutex);
+						WatchDog->VideoMode = (WatchDog->VideoMode & 0xFF00) | aspect;
+						WatchDog->videoModeChanged(WatchDog->VideoMode);
+						pthread_mutex_unlock(&WatchDog->wd_mutex);
+					}
+				} else {
+					printf("[controld] unknown event: 0x%02x\n", event.event);
+				}
+			}
+		}
+
+		close(fd_ev);
+	}
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "[controld] caught std-exception ineventwatchdog %s!\n", e.what());
+	}
+	catch (...)
+	{
+	    fprintf(stderr, "[controld] caught exception in eventwatchdog!\n");
+  	}
+
+	pthread_exit(NULL);
+}
+#endif
 
 void CEventWatchDog::registerNotifier( uint watchdogEvent, CEventWatchdogNotifier* notifier )
 {
