@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.24 2007/10/18 20:49:49 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.25 2008/01/24 05:07:25 obi Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.24 2007/10/18 20:49:49 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.25  2008/01/24 05:07:25  obi
+Implemented "-tsraw" option in combination with "-s pidscan". Reads full TS for 10 seconds.
+
 Revision 1.24  2007/10/18 20:49:49  rasc
 Mpeg NTP descriptor bugfix, minor changes
 
@@ -188,6 +191,8 @@ int ts_pidscan (OPTION *opt)
   int		max_pid_filter;
   int		pid_found;
   int		rescan;
+  int		ts_raw_min_seconds = 10;
+  time_t	start;
 
 
 
@@ -207,6 +212,7 @@ int ts_pidscan (OPTION *opt)
    //  -- max demux filters to use...
    max_pid_filter = MAX_PID_FILTER;
    if (opt->max_dmx_filter > 0) max_pid_filter = opt->max_dmx_filter;	// -maxdmx opt
+   if (opt->ts_raw_mode) max_pid_filter = 1;
 
 
    // alloc pids
@@ -274,6 +280,8 @@ int ts_pidscan (OPTION *opt)
 			// -- skip already scanned pids (rescan-mode)
 			while ( ((pidArray+pid)->type != TS_NOPID) && (pid < MAX_PID) ) pid++;
 	
+			if (opt->ts_raw_mode)
+				pid = PID_FULL_TS;
 			flt.pid = pid;
 			flt.input = DMX_IN_FRONTEND;
 			flt.output = DMX_OUT_TS_TAP;
@@ -316,15 +324,22 @@ int ts_pidscan (OPTION *opt)
 			// give read a chance to collect _some_ pids
 			usleep ((unsigned long) PID_TIME_WAIT * 1000);
 
-			pid_found = 0;
-			if (poll(&pfd, 1, timeout) > 0) {
-				if (pfd.revents & POLLIN) {
-					int len; 
-					len = read(pfd.fd, buf, sizeof(buf));
-					if (len >= TS_LEN) {
-						pid_found = analyze_ts_pid (buf, len);
+			start = time(NULL);
+			for (;;) {
+				pid_found = 0;
+				if (poll(&pfd, 1, timeout) > 0) {
+					if (pfd.revents & POLLIN) {
+						int len; 
+						len = read(pfd.fd, buf, sizeof(buf));
+						if (len >= TS_LEN) {
+							pid_found = analyze_ts_pid (buf, len);
+						}
 					}
 				}
+				if (!opt->ts_raw_mode)
+					break;
+				if (!pid_found && (time(NULL) >= start + ts_raw_min_seconds))
+					break;
 			}
 	
 
