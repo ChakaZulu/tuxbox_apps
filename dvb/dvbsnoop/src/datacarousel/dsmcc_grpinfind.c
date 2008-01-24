@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_grpinfind.c,v 1.3 2006/01/02 18:23:47 rasc Exp $
+$Id: dsmcc_grpinfind.c,v 1.4 2008/01/24 07:32:37 obi Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_grpinfind.c,v 1.3 2006/01/02 18:23:47 rasc Exp $
 
 
 $Log: dsmcc_grpinfind.c,v $
+Revision 1.4  2008/01/24 07:32:37  obi
+fix segfault. this doesn't match EN 301 192 1.4.1, but rather what's being broadcasted.
+
 Revision 1.3  2006/01/02 18:23:47  rasc
 just update copyright and prepare for a new public tar ball
 
@@ -104,15 +107,13 @@ int dsmcc_GroupInfoIndication (int v, u_char *b, u_int len_org)
 			b += 2+len2;
 			len -= 2+len2;
 
+			len2 = outBit_Sx_NL (v,"PrivateDataLength: ",	b,  0, 16);
+			print_private_data (v, b+2, len2);   // $$$ What to do here?
+			b += 2+len2;
+			len -= 2+len2;
 
 			indent (-1);
 		}
-
-		// $$$ passt das hier?
-		len2 = outBit_Sx_NL (v,"PrivateDataLength: ",	b,  0, 16);
-		print_private_data (v, b+2, len2);   // $$$ What to do here?
-		// b += 2+len2;
-		// len -= 2+len2;
 
 	indent (-1);
 	out_NL (v);
