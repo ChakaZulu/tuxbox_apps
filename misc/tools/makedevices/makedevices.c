@@ -35,7 +35,7 @@ struct deventry devices[] = {
 	{ "random",	C, 1, 8 },
 	{ "urandom",	C, 1, 9 },
 	{ "tty0",	C, 4, 0 },
-	{ "tty1",	C, 4, 2 },
+	{ "tty1",	C, 4, 1 },
 	{ "tty2",	C, 4, 2 },
 	{ "tty3",	C, 4, 3 },
 	{ "tts/0",	C, 4, 64 },
