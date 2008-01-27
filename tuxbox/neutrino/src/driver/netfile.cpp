@@ -301,151 +301,149 @@ int ConnectToServer(char *hostname, int port)
 
 int request_file(URL *url)
 {
-  char str[255], *ptr;
-  int slot, rval;
-  ID3 id3;
+	char str[255], *ptr;
+	int slot, rval;
+	ID3 id3;
 
-  /* get the cache slot for this stream. A negative return value */
-  /* indicates that no cache has been set up for this stream */
-  slot = getCacheSlot(url->stream);
+	/* get the cache slot for this stream. A negative return value */
+	/* indicates that no cache has been set up for this stream */
+	slot = getCacheSlot(url->stream);
 
-  /* if the filename contains a line break, then use everything */
-  /* up to the line break as file name and everything beyond as */
-  /* entity to be sent with the request */
-  ptr = strchr(url->file, '\n');
-  if(ptr)
-  {
-    strcpy(url->entity, ptr + 1);
-    *ptr = 0;
-  }
-  switch(url->proto_version)
-  {
-  /* send a HTTP/1.0 request */
-  case HTTP10:	{
-  		  sprintf(str, "GET http://%s:%d%s\n", url->host, url->port, url->file);
-		  dprintf(stderr, "> %s", str);
-		  send(url->fd, str, strlen(str), 0);
-		 }
-		 break;
+	/* if the filename contains a line break, then use everything */
+	/* up to the line break as file name and everything beyond as */
+	/* entity to be sent with the request */
+	ptr = strchr(url->file, '\n');
+	if(ptr)
+	{
+		strcpy(url->entity, ptr + 1);
+		*ptr = 0;
+	}
+	switch(url->proto_version)
+	{
+		/* send a HTTP/1.0 request */
+		case HTTP10:	{
+				sprintf(str, "GET http://%s:%d%s\n", url->host, url->port, url->file);
+				dprintf(stderr, "> %s", str);
+				send(url->fd, str, strlen(str), 0);
+			}
+			break;
 
-  /* send a HTTP/1.1 request */
-  case HTTP11:	{
-  		  sprintf(str, "%s %s HTTP/1.1\r\n", (url->entity[0]) ? "POST" : "GET", url->file);
-		  dprintf(stderr, "> %s", str);
-		  send(url->fd, str, strlen(str), 0);
-		  sprintf(str, "Host: %s\r\n", url->host);
-		  dprintf(stderr, "> %s", str);
-		  send(url->fd, str, strlen(str), 0);
+		/* send a HTTP/1.1 request */
+		case HTTP11:	{
+				sprintf(str, "%s %s HTTP/1.1\r\n", (url->entity[0]) ? "POST" : "GET", url->file);
+				dprintf(stderr, "> %s", str);
+				send(url->fd, str, strlen(str), 0);
+				sprintf(str, "Host: %s\r\n", url->host);
+				dprintf(stderr, "> %s", str);
+				send(url->fd, str, strlen(str), 0);
 
-		  sprintf(str, "Connection: close\r\n");
-		  dprintf(stderr, "> %s", str);
-		  send(url->fd, str, strlen(str), 0);
+				sprintf(str, "Connection: close\r\n");
+				dprintf(stderr, "> %s", str);
+				send(url->fd, str, strlen(str), 0);
 
-		  /* if we have a entity, announce it to the server */
-		  if(url->entity[0])
-		  {
-		    sprintf(str, "Content-Length: %d\r\n", strlen(url->entity));
-		    dprintf(stderr, "> %s", str);
-		    send(url->fd, str, strlen(str), 0);
-		  }
+				/* if we have a entity, announce it to the server */
+				if(url->entity[0])
+				{
+					sprintf(str, "Content-Length: %d\r\n", strlen(url->entity));
+					dprintf(stderr, "> %s", str);
+					send(url->fd, str, strlen(str), 0);
+				}
 
-		  sprintf(str, "User-Agent: %s\r\n\r\n%s", "Mozilla/4.0", url->entity);
-		  dprintf(stderr, "> %s", str);
-		  send(url->fd, str, strlen(str), 0);
+				sprintf(str, "User-Agent: %s\r\n\r\n%s", "Mozilla/4.0", url->entity);
+				dprintf(stderr, "> %s", str);
+				send(url->fd, str, strlen(str), 0);
 
-		  rval = parse_response(url, NULL, NULL);
-		  dprintf(stderr, "server response parser: return value = %d\n", rval);
+				rval = parse_response(url, NULL, NULL);
+				dprintf(stderr, "server response parser: return value = %d\n", rval);
 
-		  /* if the header indicated a zero length document or an */
-		  /* error, then close the cache, if there is any */
-		  /* 25.04.05 ChakaZulu: zero length can be a stream so let's try playing */
-		  if((slot >= 0) && (rval < 0))
-		    cache[slot].closed = 1;
+				/* if the header indicated a zero length document or an */
+				/* error, then close the cache, if there is any */
+				/* 25.04.05 ChakaZulu: zero length can be a stream so let's try playing */
+				if((slot >= 0) && (rval < 0))
+					cache[slot].closed = 1;
 
-		  /* return on error */
-		  if( rval < 0 )
-		    return rval;
-		  }
-		  break;
+				/* return on error */
+				if( rval < 0 )
+					return rval;
+			}
+			break;
 
-  /* send a SHOUTCAST request */
-  case SHOUTCAST:{
-  		    int meta_int;
-		  CSTATE tmp;
+		/* send a SHOUTCAST request */
+		case SHOUTCAST:{
+			int meta_int;
+			CSTATE tmp;
 
-  		  sprintf(str, "GET %s HTTP/1.0\r\n", url->file);
-		  dprintf(stderr, "> %s", str);
-		  send(url->fd, str, strlen(str), 0);
-		  sprintf(str, "Host: %s\r\n", url->host);
-		  dprintf(stderr, "> %s", str);
-		  send(url->fd, str, strlen(str), 0);
+			sprintf(str, "GET %s HTTP/1.0\r\n", url->file);
+			dprintf(stderr, "> %s", str);
+			send(url->fd, str, strlen(str), 0);
+			sprintf(str, "Host: %s\r\n", url->host);
+			dprintf(stderr, "> %s", str);
+			send(url->fd, str, strlen(str), 0);
 
-		  if(enable_metadata)
-		  {
-		    sprintf(str, "icy-metadata: 1\r\n");
-		    dprintf(stderr, "> %s", str);
-		    send(url->fd, str, strlen(str), 0);
-		  }
+			if(enable_metadata)
+			{
+				sprintf(str, "icy-metadata: 1\r\n");
+				dprintf(stderr, "> %s", str);
+				send(url->fd, str, strlen(str), 0);
+			}
 
-		  sprintf(str, "User-Agent: %s\r\n", "RealPlayer/4.0");
-		  dprintf(stderr, "> %s", str);
-		  send(url->fd, str, strlen(str), 0);
+			sprintf(str, "User-Agent: %s\r\n", "RealPlayer/4.0");
+			dprintf(stderr, "> %s", str);
+			send(url->fd, str, strlen(str), 0);
 
-		  if (url->logindata[0])
-		  {
-		    sprintf(str, "Authorization: Basic %s\r\n", url->logindata);
-                    dprintf(stderr, "> %s", str);
-                    send(url->fd, str, strlen(str), 0);
-		  }
+			if (url->logindata[0])
+			{
+				sprintf(str, "Authorization: Basic %s\r\n", url->logindata);
+				dprintf(stderr, "> %s", str);
+				send(url->fd, str, strlen(str), 0);
+			}
 
-		  sprintf(str, "\r\n"); /* end of headers to send */
-                  dprintf(stderr, "> %s", str);
-                  send(url->fd, str, strlen(str), 0);
+			sprintf(str, "\r\n"); /* end of headers to send */
+			dprintf(stderr, "> %s", str);
+			send(url->fd, str, strlen(str), 0);
 
-		  if( (meta_int = parse_response(url, &id3, &tmp)) < 0)
-		    return -1;
+			if( (meta_int = parse_response(url, &id3, &tmp)) < 0)
+				return -1;
 
-		  if(meta_int)
-		  {
-		     /* hook in the filter function if there is meta */
-		     /* data present in the stream */
-		     cache[slot].filter_arg = ShoutCAST_InitFilter(meta_int);
-		     cache[slot].filter = ShoutCAST_MetaFilter;
+			if(meta_int)
+			{
+				/* hook in the filter function if there is meta */
+				/* data present in the stream */
+				cache[slot].filter_arg = ShoutCAST_InitFilter(meta_int);
+				cache[slot].filter = ShoutCAST_MetaFilter;
 
-		      /* this is a *really bad* way to pass along the argument, */
-		      /* since we convert the integer into a pointer instead of */
-		      /* passing along a pointer/reference !*/
-		     if(cache[slot].filter_arg->state)
-		       bcopy(&tmp, cache[slot].filter_arg->state, sizeof(CSTATE));
-		  }
+				/* this is a *really bad* way to pass along the argument, */
+				/* since we convert the integer into a pointer instead of */
+				/* passing along a pointer/reference !*/
+				if(cache[slot].filter_arg->state)
+					bcopy(&tmp, cache[slot].filter_arg->state, sizeof(CSTATE));
+			}
 
-		  /* push the created ID3 header into the stream cache */
-		  push(url->stream, (char*)&id3, id3.len);
+			/* push the created ID3 header into the stream cache */
+			push(url->stream, (char*)&id3, id3.len);
+		}
+		break;
+	} /* end switch(url->proto_version) */
 
-		  }
-		  break;
-  }
+	/* now it get's nasty ;) */
+	/* create a thread that continously feeds the cache */
+	/* with the data it fetches from the network stream */
+	/* but *ONLY* if there is a cache slot for this stream at all ! */
+	/* HINT: in compatibility mode no cache is configured */
 
-  /* now it get's nasty ;) */
-  /* create a thread that continously feeds the cache */
-  /* with the data it fetches from the network stream */
-  /* but *ONLY* if there is a cache slot for this stream at all ! */
-  /* HINT: in compatibility mode no cache is configured */
+	if(slot >= 0)
+	{
+		pthread_attr_init(&cache[slot].attr);
+		pthread_create(
+			&cache[slot].fill_thread,
+			&cache[slot].attr,
+			(void *(*)(void*))&CacheFillThread, (void*)&cache[slot]);
+	}
 
-  if(slot >= 0)
-  {
-    pthread_attr_init(&cache[slot].attr);
-    pthread_create(
-  	&cache[slot].fill_thread,
-	&cache[slot].attr,
-	(void *(*)(void*))&CacheFillThread, (void*)&cache[slot]);
-  }
-
-  /* now we do not care any longer about fetching new data,*/
-  /* but we can not be shure that the cache is filled with */
-  /* enough stuff ! */
-
-  return 0;
+	/* now we do not care any longer about fetching new data,*/
+	/* but we can not be shure that the cache is filled with */
+	/* enough stuff ! */
+	return 0;
 }
 
 /***************************************/
@@ -477,8 +475,8 @@ int request_file(URL *url)
 
 void readln(int fd, char *buf)
 {
-  for(recv(fd, buf, 1, 0); (buf && isalnum(*buf)); recv(fd, ++buf, 1, 0));
-  if(buf) *buf = 0;
+	for(recv(fd, buf, 1, 0); (buf && isalnum(*buf)); recv(fd, ++buf, 1, 0));
+	if(buf) *buf = 0;
 }
 
 int parse_response(URL *url, void *opt, CSTATE *state)
@@ -527,12 +525,12 @@ int parse_response(URL *url, void *opt, CSTATE *state)
   switch(response)
   {
   case 200:	errno = 0;
-  		  break;
+		  break;
 
   case 301:	/* 'file moved' error */
   case 302:	/* 'file not found' error */
-  		  errno = ENOENT;
-  		  strcpy(err_txt, ptr);
+		  errno = ENOENT;
+		  strcpy(err_txt, ptr);
 		  getHeaderStr("Location",redirect_url);
 		  return -1 * response;
 		  break;
@@ -568,16 +566,17 @@ int parse_response(URL *url, void *opt, CSTATE *state)
     sscanf(str, "%x", &rval);
     return rval;
   }
-  /* no content length indication from the server ? Then treat it as stream */
-  getHeaderVal("icy-metaint:", meta_interval);
-  if(meta_interval < 0) meta_interval = 0;
+	/* no content length indication from the server ? Then treat it as stream */
+	getHeaderVal("icy-metaint:", meta_interval);
+	if(meta_interval < 0) 
+		meta_interval = 0;
 
-  getHeaderStr("icy-genre:", state->genre);
-  getHeaderStr("icy-name:", state->station);
-  getHeaderStr("icy-url:", state->station_url);
-  if (state != NULL)
-	  getHeaderVal("icy-br:", state->bitrate);
-
+	if (state != NULL) {
+		getHeaderStr("icy-genre:", state->genre);
+		getHeaderStr("icy-name:", state->station);
+		getHeaderStr("icy-url:", state->station_url);
+		getHeaderVal("icy-br:", state->bitrate);
+	}
   /********************* dirty hack ***********************/
   /* we parse the stream header sent by the server and    */
   /* build based on this information an arteficial id3    */
@@ -745,7 +744,7 @@ FILE *f_open(const char *filename, const char *acctype)
   parseURL_url(url);
 
   dprintf(stderr, "URL  to open: %s, access mode %s%s\n",
-  	url.url,
+	url.url,
 	(url.access_mode == MODE_HTTP)  ? "HTTP" :
 	(url.access_mode == MODE_SCAST) ? "SHOUTCAST" :
 	(url.access_mode == MODE_ICAST) ? "ICECAST" :
@@ -778,7 +777,7 @@ FILE *f_open(const char *filename, const char *acctype)
 
 			   /* if the stream could not be opened, then indicate */
 			   /* an 'No such device or address' error */
-  			   if(url.fd < 0)
+ 			   if(url.fd < 0)
 			   {
 			     fd = NULL;
 			     errno = ENXIO;
