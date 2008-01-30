@@ -133,6 +133,7 @@
 ./src/software_update.cpp
 ./src/sselect.cpp
 ./src/streaminfo.cpp
+./src/swapmanager.cpp
 ./src/timer.cpp
 ./src/tpeditwindow.cpp
 ./src/upgrade.cpp
