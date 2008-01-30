@@ -850,17 +850,23 @@
 	<object name="eHarddiskMenu">
 		<eHarddiskMenu text="Harddisk" cposition="90:150" csize="550:270">
 			<eLabel text="model:" position="10:10" size="150:30" />
-			<eLabel name="model" position="160:10" size="e:30" />
+			<eLabel name="model" position="160:10" size="e-150:30" />
 			<eLabel text="capacity:" position="10:40" size="150:30" />
-			<eLabel name="capacity" position="160:40" size="e:30" />
-			<eLabel text="connected:" position="10:70" size="150:30" />
-			<eLabel name="bus" position="160:70" size="e:30" />
+			<eLabel name="capacity" position="160:40" size="e-150:30" />
+			<eLabel text="connected:" position="10:70" size="e-150:30" />
+			<eLabel name="bus" position="160:70" size="e-150:30" />
 			<eLabel text="status:" position="10:110" size="70:30" />
 			<eLabel name="status" position="80:110" size="e:30" />
+			<eButton name="standby" text="standby  " position="e-150:30" size="e-10:40" loadDeco="" helptext="send harddisk to standby immediately" shortcut="blue" />
 			<eButton name="format" text="format" position="10:170" size="225:40" loadDeco="" helptext="initialize the disk for use with the dreambox" shortcut="red" />
 			<eButton name="check" text="check" position="245:170" size="225:40" loadDeco="" helptext="do a filesystem check" shortcut="yellow" />
 			<eButton name="ext" position="480:170" size="60:40" loadDeco="" helptext="show extended configuration" />
+			<eLabel name="lbltimeout" text="standby timeout (min):" position="10:220" size="230:30" />
+			<eNumber name="timeout" position="240:220" size="60:35" helptext="set harddisk standby timeout (0 - 20; 0 = disabled)" loadDeco="" />
+			<eLabel name="lblacoustic" text="acoustic management:" position="10:260" size="230:30" />
+			<eNumber name="acoustic" position="240:260" size="60:35" helptext="set automatic acoustic management (0 - 254)" loadDeco="" />
 			<eCombobox name="fs" position="e-210:220" size="e-10:35" loadDeco="" helptext="select filsystem to format" />
+			<eButton name="store" text="store" position="e-210:260" size="e-10:35" loadDeco="" helptext="save settings" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</eHarddiskMenu>
 	</object>

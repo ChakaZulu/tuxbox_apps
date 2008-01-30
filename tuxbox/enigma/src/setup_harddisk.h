@@ -7,6 +7,7 @@
 #include <lib/dvb/edvb.h>
 #include <lib/gui/listbox.h>
 #include <lib/base/console.h>
+#include <lib/gui/enumber.h>
 
 class eButton;
 class eComboBox;
@@ -25,12 +26,18 @@ class eHarddiskMenu: public eWindow
 {
 	eButton *ext, *format, *bcheck;
 	eLabel *status, *model, *capacity, *bus, *lfs;
+	eLabel *lbltimeout, *lblacoustic;
+	eNumber *timeout, *acoustic;
+	eButton *store, *standby;
 	eComboBox *fs;
 	eStatusBar *sbar;
 	int dev;
 	bool restartNet;
 	int numpart;
 	int visible;
+
+	void storevalues();
+	void hddstandby();
 	void s_format();
 	void extPressed();
 	void check();

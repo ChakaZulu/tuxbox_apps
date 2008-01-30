@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.24 2006/11/13 22:38:48 coronas Exp $
+ * $Id: setup_harddisk.cpp,v 1.25 2008/01/30 19:05:50 dbluelle Exp $
  */
 
 #include <setup_harddisk.h>
@@ -272,11 +272,16 @@ void eHarddiskMenu::extPressed()
 		if (pm)
 			ext->setPixmap( pm );
 		fs->hide();
+		lbltimeout->hide();
+		lblacoustic->hide();
+		timeout->hide();
+		acoustic->hide();
+		store->hide();
 		sbar->hide();
-		resize( getSize()-eSize( 0, 45) );
-		sbar->move( sbar->getPosition()-ePoint(0,45) );
+		resize( getSize()-eSize( 0, 80) );
+		sbar->move( sbar->getPosition()-ePoint(0,80) );
 		sbar->show();
-		eZap::getInstance()->getDesktop(eZap::desktopFB)->invalidate( eRect( getAbsolutePosition()+ePoint( 0, height() ), eSize( width(), 45 ) ));
+		eZap::getInstance()->getDesktop(eZap::desktopFB)->invalidate( eRect( getAbsolutePosition()+ePoint( 0, height() ), eSize( width(), 80 ) ));
 		visible=0;
 	}
 	else
@@ -285,10 +290,16 @@ void eHarddiskMenu::extPressed()
 		if (pm)
 			ext->setPixmap( pm );
 		sbar->hide();
-		sbar->move( sbar->getPosition()+ePoint(0,45) );
-		resize( getSize()+eSize( 0, 45) );
+		sbar->move( sbar->getPosition()+ePoint(0,80) );
+		resize( getSize()+eSize( 0, 80) );
 		sbar->show();
 		fs->show();
+		lbltimeout->show();
+		lblacoustic->show();
+		timeout->show();
+		acoustic->show();
+		store->show();
+		
 		visible=1;
 	}
 }
@@ -476,6 +487,23 @@ void eHarddiskMenu::readStatus()
 	else
 		status->setText(_("initialized, but unknown filesystem"));
 }
+// Function to store settings
+void eHarddiskMenu::storevalues()
+{
+	eConfig::getInstance()->setKey("/extras/hdparm-s", timeout->getNumber()*12);
+	eConfig::getInstance()->setKey("/extras/hdparm-m", acoustic->getNumber());
+
+	eMessageBox msgok(_("The settings have been saved successfully"), _("Harddisk"),eMessageBox::btOK);
+		msgok.show();
+		msgok.exec();
+		msgok.hide();
+}
+
+// Function to send HDD to standby immediately
+void eHarddiskMenu::hddstandby()
+{
+	system(eString().sprintf("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc").c_str());
+} 
 
 eHarddiskMenu::eHarddiskMenu(int dev): dev(dev), restartNet(false)
 {
@@ -485,11 +513,19 @@ eHarddiskMenu::eHarddiskMenu(int dev): dev(dev), restartNet(false)
 	capacity=new eLabel(this); capacity->setName("capacity");
 	bus=new eLabel(this); bus->setName("bus");
 	
+	standby=new eButton(this); standby->setName("standby");
 	format=new eButton(this); format->setName("format");
 	bcheck=new eButton(this); bcheck->setName("check");
 	ext=new eButton(this); ext->setName("ext");
 
 	fs=new eComboBox(this,2); fs->setName("fs"); fs->hide();
+
+	lbltimeout=new eLabel(this); lbltimeout->setName("lbltimeout");lbltimeout->hide();
+	lblacoustic=new eLabel(this); lblacoustic->setName("lblacoustic");lblacoustic->hide();
+	timeout=new eNumber(this,1,0, 20, 3, 0, 0); timeout->setName("timeout");timeout->hide();
+	acoustic=new eNumber(this,1,0,254, 3, 0, 0); acoustic->setName("acoustic");acoustic->hide();
+	store=new eButton(this); store->setName("store");store->hide();
+
 
 	sbar = new eStatusBar(this); sbar->setName("statusbar");
 
@@ -512,9 +548,23 @@ eHarddiskMenu::eHarddiskMenu(int dev): dev(dev), restartNet(false)
 
 	readStatus();
 
+	int hddstandby = 60;
+	if( (eConfig::getInstance()->getKey("/extras/hdparm-s", hddstandby)) )
+		timeout->setNumber(hddstandby/12);
+	else
+		timeout->setNumber(hddstandby/12);
+
+	int hddacoustic=128;
+	if( (eConfig::getInstance()->getKey("/extras/hdparm-m", hddacoustic)) )
+		acoustic->setNumber(hddacoustic);
+	else
+		acoustic->setNumber(hddacoustic);
+
 	CONNECT(ext->selected, eHarddiskMenu::extPressed);
 	CONNECT(format->selected, eHarddiskMenu::s_format);
 	CONNECT(bcheck->selected, eHarddiskMenu::check);
+	CONNECT(standby->selected, eHarddiskMenu::hddstandby);
+	CONNECT(store->selected, eHarddiskMenu::storevalues);
 }
 
 ePartitionCheck::ePartitionCheck( int dev )
