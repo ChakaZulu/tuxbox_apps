@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-01-20 13:10+0000\n"
+"POT-Creation-Date: 2008-01-30 20:38+0000\n"
 "PO-Revision-Date: 2005-08-13 07:34+0100\n"
 "Last-Translator: \n"
 "Language-Team: Spanish / J.M. Degen <info@comant.tv>\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "FF "
 msgstr "FF"
 
-#: default.esml:899
+#: default.esml:905
 msgid "&#53;"
 msgstr "&#53;"
 
@@ -79,7 +79,7 @@ msgstr "LOF/L:"
 msgid "Wednesday"
 msgstr "Miercoles"
 
-#: default.esml:869
+#: default.esml:875
 msgid "Partition Check"
 msgstr "Verificar partición"
 
@@ -148,6 +148,10 @@ msgstr "MHz"
 msgid "services scanned     :"
 msgstr "Servicios encontrados:"
 
+#: default.esml:864
+msgid "standby timeout (min):"
+msgstr "Standby despues (min):"
+
 #: default.esml:600 src/parentallock.cpp:101 src/setup_lcd.cpp:118
 #: src/setup_keyboard.cpp:55 src/setup_osd.cpp:269 src/setup_rc.cpp:127
 #: src/setup_timezone.cpp:47 src/setupengrab.cpp:102 src/setupnetwork.cpp:648
@@ -160,7 +164,7 @@ msgstr "Guardar cambios y volver"
 msgid "aborts the transponder scan"
 msgstr "Cancalar la búsqueda de canales"
 
-#: default.esml:491 default.esml:760 default.esml:920 default.esml:957
+#: default.esml:491 default.esml:760 default.esml:926 default.esml:963
 msgid "remove"
 msgstr "borrar"
 
@@ -172,11 +176,11 @@ msgstr "Configuración motor"
 msgid "remove selected entry"
 msgstr "borrar elemento elegido"
 
-#: default.esml:915
+#: default.esml:921
 msgid "abc &lt;-&gt; ABC"
 msgstr "abc &lt;-&gt; ABC"
 
-#: default.esml:909
+#: default.esml:915
 msgid "&lt;"
 msgstr "&lt;"
 
@@ -204,15 +208,15 @@ msgstr "Elige la memoria del motor para guardar esta posición orbital"
 msgid "add only unscrambled services"
 msgstr "Añadir sólo canales libres"
 
-#: default.esml:559 default.esml:884
+#: default.esml:559 default.esml:890
 msgid "abort"
 msgstr "Cancelar"
 
-#: default.esml:863
+#: default.esml:868
 msgid "select filsystem to format"
 msgstr "Elige sistema ficheros a formatear"
 
-#: default.esml:872
+#: default.esml:878
 msgid "close window"
 msgstr "Cerrar ventana"
 
@@ -228,7 +232,11 @@ msgstr "Recalcular parámetros:"
 msgid "enter transponder frequeny (0..9, left, right)"
 msgstr "Frecuencia transpondedor (0..9, izquierda, derecha)"
 
-#: default.esml:490 default.esml:761 default.esml:955
+#: default.esml:869
+msgid "save settings"
+msgstr "Guardar cambios"
+
+#: default.esml:490 default.esml:761 default.esml:961
 msgid "add"
 msgstr "añadir"
 
@@ -240,20 +248,24 @@ msgstr "Lanzar la búsqueda de canales"
 msgid "start scan"
 msgstr "Lanzar búsqueda"
 
-#: default.esml:861
+#: default.esml:862
 msgid "check"
 msgstr "Comprobar"
+
+#: default.esml:860
+msgid "send harddisk to standby immediately"
+msgstr "Mandar disco duro al modo de espera ya"
 
 #: default.esml:690 default.esml:697 default.esml:704 default.esml:712
 #: default.esml:723 default.esml:734
 msgid "Services"
 msgstr "Servicios"
 
-#: default.esml:901
+#: default.esml:907
 msgid "&#54;"
 msgstr "&#54;"
 
-#: default.esml:895
+#: default.esml:901
 msgid "&#51;"
 msgstr "&#51;"
 
@@ -269,7 +281,11 @@ msgstr "Subservicios"
 msgid "choose the bandwidth (left, right)"
 msgstr "Elige banda de ancha (izquierda, derecha)"
 
-#: default.esml:913
+#: default.esml:866
+msgid "acoustic management:"
+msgstr "Ajustes acústicos:"
+
+#: default.esml:919
 msgid "&gt;"
 msgstr "&gt;"
 
@@ -333,7 +349,7 @@ msgstr "Ir a página anterior (LNB)"
 msgid "Use gotoXX Function"
 msgstr "Utilizar funcion gotoXX"
 
-#: default.esml:917
+#: default.esml:923
 msgid "vol+"
 msgstr "vol+"
 
@@ -369,7 +385,7 @@ msgstr "horas"
 msgid "LOF/H:"
 msgstr "LOF/H:"
 
-#: default.esml:893
+#: default.esml:899
 msgid "&#50;"
 msgstr "&#50;"
 
@@ -385,7 +401,7 @@ msgstr "Añadir temporizador nuevo (ok)"
 msgid "to change service press ok"
 msgstr "Elegir otro servicio (ok)"
 
-#: default.esml:903
+#: default.esml:909
 msgid "&#55;"
 msgstr "&#55;"
 
@@ -477,7 +493,7 @@ msgstr "Borrar temporizador pasado (ok)"
 msgid "choose the Transponder you wish to find"
 msgstr "Elige transpondedor buscado"
 
-#: default.esml:955
+#: default.esml:961
 msgid "add new Transponder to selected sat (ok)"
 msgstr "Añadir transpondedor al satélite elegido (ok)"
 
@@ -513,7 +529,7 @@ msgstr "Abrir ajustes motor avancados"
 msgid "Monday"
 msgstr "Lunes"
 
-#: default.esml:860
+#: default.esml:861
 msgid "format"
 msgstr "Formatear"
 
@@ -521,7 +537,7 @@ msgstr "Formatear"
 msgid "starts the transponder scan"
 msgstr "Lanca la búsqueda de canales"
 
-#: default.esml:954
+#: default.esml:960
 msgid "sat"
 msgstr "sa"
 
@@ -537,7 +553,7 @@ msgstr "Seleccione modo transmissión (izquierda, derecha)"
 msgid "Help"
 msgstr "Ayuda"
 
-#: default.esml:918
+#: default.esml:924
 msgid "insert"
 msgstr "insertar"
 
@@ -579,7 +595,7 @@ msgstr "Processador:"
 msgid "Endtime"
 msgstr "Parada"
 
-#: default.esml:897
+#: default.esml:903
 msgid "&#52;"
 msgstr "&#52;"
 
@@ -591,7 +607,7 @@ msgstr "Añadir a la lista/existentes se borran"
 msgid "frontend: "
 msgstr "frontend:"
 
-#: default.esml:907
+#: default.esml:913
 msgid "&#57;"
 msgstr "&#57;"
 
@@ -607,7 +623,7 @@ msgstr "Editar PIDs manualmente"
 msgid "Toneburst:"
 msgstr "Toneburst:"
 
-#: default.esml:820 default.esml:832 default.esml:844
+#: default.esml:820 default.esml:832 default.esml:844 default.esml:860
 msgid "standby  "
 msgstr "Standby"
 
@@ -659,7 +675,7 @@ msgstr "Elige mudulación (izquierda, derecha)"
 msgid "Friday"
 msgstr "Viernes"
 
-#: default.esml:891
+#: default.esml:897
 msgid "&#49;"
 msgstr "&#49;"
 
@@ -683,7 +699,7 @@ msgstr "Frecuencia LNB banda alta (0..9, OK)"
 msgid "shutdown the box after recording (ok)"
 msgstr "Apagar receptor después la grabación (ok)"
 
-#: default.esml:943
+#: default.esml:949
 msgid "Please choose your DiSEqC-Configuration:"
 msgstr "Elige la configuración DiSEqC"
 
@@ -702,6 +718,10 @@ msgstr "Modo:"
 #: default.esml:622 default.esml:640
 msgid "KSymb/s"
 msgstr "KSymb/s"
+
+#: default.esml:865
+msgid "set harddisk standby timeout (0 - 20; 0 = disabled)"
+msgstr "Temporizador modo espera del disco duro (0 - 20; 0 = desactivado)"
 
 #: default.esml:580
 msgid "Progress:"
@@ -731,7 +751,7 @@ msgstr "Guardar cambios"
 msgid "plugins"
 msgstr "Plugins"
 
-#: default.esml:956
+#: default.esml:962
 msgid "edit selected transponder (ok)"
 msgstr "Editar transpondedor elegido (ok)"
 
@@ -739,7 +759,7 @@ msgstr "Editar transpondedor elegido (ok)"
 msgid "save in motor"
 msgstr "Guardar en motor"
 
-#: default.esml:957
+#: default.esml:963
 msgid "remove selected transponder"
 msgstr "Borrar transpondedor elegido"
 
@@ -747,11 +767,11 @@ msgstr "Borrar transpondedor elegido"
 msgid "Polarity:"
 msgstr "Polarización"
 
-#: default.esml:861
+#: default.esml:862
 msgid "do a filesystem check"
 msgstr "Comprobar el sistema de ficheros"
 
-#: default.esml:860
+#: default.esml:861
 msgid "initialize the disk for use with the dreambox"
 msgstr "Formatear el disco para usarlo en el dreambox"
 
@@ -767,7 +787,7 @@ msgstr "Lu"
 msgid "select DiSEqC parameter (ok)"
 msgstr "Elige parámetros DiSEqC (ok)"
 
-#: default.esml:872
+#: default.esml:878
 msgid "close"
 msgstr "Acceptar"
 
@@ -779,7 +799,12 @@ msgstr "Frecuencia:"
 msgid "enter symbol rate (0..9, left, right)"
 msgstr "Velocidad símbolos (0..9, izquierda, derecha)"
 
-#: default.esml:927
+#: default.esml:869 src/rotorconfig.cpp:508 src/rotorconfig.cpp:524
+#: src/rotorconfig.cpp:528 src/rotorconfig.cpp:853
+msgid "store"
+msgstr "Guardar"
+
+#: default.esml:933
 msgid "press ok to enter the name"
 msgstr "Pulse OK para editar el nombre"
 
@@ -803,7 +828,7 @@ msgstr "Versión software:"
 msgid "enter your longitude (0..9, +, -, ok)"
 msgstr "Entre su longituda (0..9, +, -, ok)"
 
-#: default.esml:916
+#: default.esml:922
 msgid "abc2 &lt;-&gt; 2abc"
 msgstr "abc2 &lt;-&gt; 2abc"
 
@@ -819,7 +844,7 @@ msgstr "Ir al modo espera (ok)"
 msgid "choose wished satellite (ok)"
 msgstr "Elige satélite deseado (ok)"
 
-#: default.esml:862
+#: default.esml:863
 msgid "show extended configuration"
 msgstr "Mostrar parámetros adicionales"
 
@@ -903,7 +928,7 @@ msgstr "Activar Sleep Timer"
 msgid "press ok to change"
 msgstr "Pulse OK para cambiar"
 
-#: default.esml:951
+#: default.esml:957
 msgid "Transponders"
 msgstr "Transpondedores"
 
@@ -923,7 +948,7 @@ msgstr "Cerrar configuración satélite"
 msgid "EPG"
 msgstr "EPG"
 
-#: default.esml:956
+#: default.esml:962
 msgid "edit"
 msgstr "Editar"
 
@@ -991,7 +1016,7 @@ msgstr "Stop"
 msgid "select your configuration here"
 msgstr "Elige su preferencia"
 
-#: default.esml:905
+#: default.esml:911
 msgid "&#56;"
 msgstr "&#56;"
 
@@ -1003,15 +1028,15 @@ msgstr "Elige repeticiones DiSEqC (ok)"
 msgid "choose the FEC (left, right)"
 msgstr "Seleccione FEC (izquierda, derecha)"
 
-#: default.esml:934 src/system_settings.cpp:60
+#: default.esml:940 src/system_settings.cpp:60
 msgid "OSD Language"
 msgstr "Configuración Idioma"
 
-#: default.esml:878
+#: default.esml:884
 msgid "Software upgrade..."
 msgstr "Actualización firmware..."
 
-#: default.esml:942
+#: default.esml:948
 msgid "DiSEqC..."
 msgstr "DiSEqC..."
 
@@ -1031,9 +1056,13 @@ msgstr "Cambiar polarisación circular a linear"
 msgid "goto next page (DiSEqC)"
 msgstr "Proxima página (DiSEqC)"
 
-#: default.esml:954
+#: default.esml:960
 msgid "select sat(up/down), ok(edit), green(add new), red(delete)"
 msgstr "Elige sat(arriba/abajo), ok(editar), verde(añadir nuevo), rojo(borrar)"
+
+#: default.esml:917
+msgid "&#48;"
+msgstr "&#48;"
 
 #: default.esml:768
 msgid "Timer Edit"
@@ -1042,10 +1071,6 @@ msgstr "Editar temporizador"
 #: default.esml:791
 msgid "apply"
 msgstr "Aplicar"
-
-#: default.esml:911
-msgid "&#48;"
-msgstr "&#48;"
 
 #: default.esml:778
 msgid "Fr"
@@ -1067,11 +1092,11 @@ msgstr "Elige pos. satélite guardada"
 msgid "Sequence repeat"
 msgstr "Repetición secuencia"
 
-#: default.esml:870
+#: default.esml:876
 msgid "status output:"
 msgstr "Estado:"
 
-#: default.esml:851
+#: default.esml:851 src/setup_harddisk.cpp:496
 msgid "Harddisk"
 msgstr "Disco duro"
 
@@ -1091,6 +1116,10 @@ msgstr "Sólo libres"
 msgid "Constellation:"
 msgstr "Constelación:"
 
+#: default.esml:867
+msgid "set automatic acoustic management (0 - 254)"
+msgstr "Nivel de los ajustes acústicos (0 - 254)"
+
 #: default.esml:779 src/timer.cpp:2723
 msgid "Saturday"
 msgstr "Sábado"
@@ -1099,13 +1128,13 @@ msgstr "Sábado"
 msgid "(0..9, left, right, ok)"
 msgstr "(0..9, izquierda, derecha, ok)"
 
+#: default.esml:925
+msgid "vol-"
+msgstr "vol-"
+
 #: default.esml:433
 msgid "swaps committed and uncommitted DiSEqC Commands"
 msgstr "Conmuta committed/uncommitted DiSEqC commands"
-
-#: default.esml:919
-msgid "vol-"
-msgstr "vol-"
 
 #: default.esml:537
 msgid "network search"
@@ -1686,7 +1715,9 @@ msgstr ""
 "\n"
 "Tamaño: %d MB"
 
-#: src/channelinfo.cpp:280
+#: src/channelinfo.cpp:280 src/swapmanager.cpp:61 src/swapmanager.cpp:71
+#: src/swapmanager.cpp:72 src/swapmanager.cpp:73 src/swapmanager.cpp:95
+#, c-format
 msgid "Filename: "
 msgstr "Nombre de fichero:"
 
@@ -3015,7 +3046,7 @@ msgstr "Bloqueo parterno"
 msgid "open parental setup"
 msgstr "Abrir configuración bloqueos paternos"
 
-#: src/enigma_setup.cpp:51 src/setup_extra.cpp:40
+#: src/enigma_setup.cpp:51 src/setup_extra.cpp:41
 msgid "Expert Setup"
 msgstr "Ajustes avanzadas"
 
@@ -3291,11 +3322,6 @@ msgstr "Activar límites software"
 #: src/rotorconfig.cpp:507
 msgid "store current pos in motor"
 msgstr "Memorizar posicion actual en el motor"
-
-#: src/rotorconfig.cpp:508 src/rotorconfig.cpp:524 src/rotorconfig.cpp:528
-#: src/rotorconfig.cpp:853
-msgid "store"
-msgstr "Guardar"
 
 #: src/rotorconfig.cpp:511
 msgid "drive motor to stored pos"
@@ -4117,282 +4143,292 @@ msgstr "Usar numeración hexadecimal"
 msgid "show/enter values as decimal"
 msgstr "Usar numeración decimal"
 
-#: src/setup_extra.cpp:61
+#: src/setup_extra.cpp:62
 msgid "Communication Setup"
 msgstr "Ajustes tarjeta red"
 
-#: src/setup_extra.cpp:61
+#: src/setup_extra.cpp:62
 msgid "open communication setup"
 msgstr "Abrir configuración de la tarjeta red"
 
-#: src/setup_extra.cpp:62
+#: src/setup_extra.cpp:63
 msgid "Ngrab Streaming Setup"
 msgstr "Ajustes Ngrab"
 
-#: src/setup_extra.cpp:62
+#: src/setup_extra.cpp:63
 msgid "open ngrab server setup"
 msgstr "Abrir configuración del servidor ngrab"
 
-#: src/setup_extra.cpp:70 src/software_update.cpp:29
+#: src/setup_extra.cpp:71 src/software_update.cpp:29
 msgid "Software Update"
 msgstr "Actualización firmware"
 
-#: src/setup_extra.cpp:70
+#: src/setup_extra.cpp:71
 msgid "open software update"
 msgstr "Abrir actualización firmware"
 
-#: src/setup_extra.cpp:77
+#: src/setup_extra.cpp:78
 msgid "Remote Control"
 msgstr "Mando a distancia"
 
-#: src/setup_extra.cpp:77
+#: src/setup_extra.cpp:78
 msgid "open remote control setup"
 msgstr "Abrir configuración de la mando a distancia"
 
-#: src/setup_extra.cpp:79 src/setup_extra.cpp:360
+#: src/setup_extra.cpp:81 src/swapmanager.cpp:34 src/swapmanager.cpp:401
+#: src/swapmanager.cpp:436 src/swapmanager.cpp:457 src/swapmanager.cpp:495
+#: src/swapmanager.cpp:518 src/swapmanager.cpp:540
+msgid "Swap Manager"
+msgstr "Ajustes memoria swap"
+
+#: src/setup_extra.cpp:81
+msgid "open swapspace setup"
+msgstr "Abrir configuración memoria virtual swap"
+
+#: src/setup_extra.cpp:85 src/setup_extra.cpp:382
 msgid "Factory reset"
 msgstr "Valores fábrica"
 
-#: src/setup_extra.cpp:79
+#: src/setup_extra.cpp:85
 msgid "all settings will set to factory defaults"
 msgstr "Borrar ajustes personales y reiniciar receptor"
 
-#: src/setup_extra.cpp:85
+#: src/setup_extra.cpp:91
 msgid "record split size (left, right)"
 msgstr "Tamaño máximo de cada fichero grabado (izquierda, derecha)"
 
-#: src/setup_extra.cpp:102
+#: src/setup_extra.cpp:108
 msgid "infobar timeout (left, right)"
 msgstr "Visibilidad del Infobar (izquierda, derecha)"
 
-#: src/setup_extra.cpp:103 src/setup_extra.cpp:104 src/setup_extra.cpp:105
-#: src/setup_extra.cpp:106 src/setup_extra.cpp:107 src/setup_extra.cpp:108
 #: src/setup_extra.cpp:109 src/setup_extra.cpp:110 src/setup_extra.cpp:111
-#: src/setup_extra.cpp:112 src/setup_extra.cpp:113
+#: src/setup_extra.cpp:112 src/setup_extra.cpp:113 src/setup_extra.cpp:114
+#: src/setup_extra.cpp:115 src/setup_extra.cpp:116 src/setup_extra.cpp:117
+#: src/setup_extra.cpp:118 src/setup_extra.cpp:119
 #, c-format
 msgid "Infobar timeout %d sec"
 msgstr "Infobar timeout %d sec"
 
-#: src/setup_extra.cpp:119
+#: src/setup_extra.cpp:125
 msgid "Serviceselector help buttons"
 msgstr "Teclas de ayuda"
 
-#: src/setup_extra.cpp:119
+#: src/setup_extra.cpp:125
 msgid "show colored help buttons in service selector"
 msgstr "Activar teclas de ayuda en la lista de canales"
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:127
 msgid "Show Sat position"
 msgstr "Mostrar posición satélite"
 
-#: src/setup_extra.cpp:121
+#: src/setup_extra.cpp:127
 msgid "show sat position in the infobar"
 msgstr "Mostrar la posición del satélite en la Infobar"
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:129
 msgid "Enable fast zapping"
 msgstr "Cambio canal rapido"
 
-#: src/setup_extra.cpp:123
+#: src/setup_extra.cpp:129
 msgid "enables faster zapping.. but with visible sync"
 msgstr "Cambiar el canal mas rapido.. sincronización visible"
 
-#: src/setup_extra.cpp:124
+#: src/setup_extra.cpp:130
 msgid "Skip confirmations"
 msgstr "Saltar confirmaciones"
 
-#: src/setup_extra.cpp:124
+#: src/setup_extra.cpp:130
 msgid "enable/disable confirmations"
 msgstr "Activar/desactivar confirmaciones"
 
-#: src/setup_extra.cpp:125
+#: src/setup_extra.cpp:131
 msgid "Hide error windows"
 msgstr "Ocultar errores"
 
-#: src/setup_extra.cpp:125
+#: src/setup_extra.cpp:131
 msgid "don't show zap error messages"
 msgstr "Ocultar errores al cambiar el canal"
 
-#: src/setup_extra.cpp:126
+#: src/setup_extra.cpp:132
 msgid "Auto show Infobar"
 msgstr "Infobar automático"
 
-#: src/setup_extra.cpp:126
+#: src/setup_extra.cpp:132
 msgid "always show infobar when new event info is avail"
 msgstr "Mostrar infobar cuando se actualiza el EPG"
 
-#: src/setup_extra.cpp:127
+#: src/setup_extra.cpp:133
 msgid "Show remaining Time"
 msgstr "Mostrar tiempo restante"
 
-#: src/setup_extra.cpp:127
+#: src/setup_extra.cpp:133
 msgid "show event remaining time in the infobar"
 msgstr "Mostrar tiempo del evento restante en la Infobar"
 
-#: src/setup_extra.cpp:128
+#: src/setup_extra.cpp:134
 msgid "Hide shortcut icons"
 msgstr "Ocultar iconos abreviación"
 
-#: src/setup_extra.cpp:128
+#: src/setup_extra.cpp:134
 msgid "hide shortcut icons in menus"
 msgstr "Ocultar iconos de abreviación en los menus"
 
-#: src/setup_extra.cpp:129
+#: src/setup_extra.cpp:135
 msgid "Use http authentification"
 msgstr "Autenticación http"
 
-#: src/setup_extra.cpp:129
+#: src/setup_extra.cpp:135
 msgid "enables the http (user/password) authentification"
 msgstr "Activar autenticación (usuario/contraseña) http"
 
-#: src/setup_extra.cpp:130
+#: src/setup_extra.cpp:136
 msgid "Don't open serial port"
 msgstr "Cerrar puerto serie"
 
-#: src/setup_extra.cpp:130
+#: src/setup_extra.cpp:136
 msgid "don't write debug messages to /dev/tts/0"
 msgstr "No enviar mensajes debug a /dev/tts/0"
 
-#: src/setup_extra.cpp:131
+#: src/setup_extra.cpp:137
 msgid "Auto bouquet change"
 msgstr "Cambio bouquete automático"
 
-#: src/setup_extra.cpp:131
+#: src/setup_extra.cpp:137
 msgid "change into next bouquet when end of current bouquet is reached"
 msgstr ""
 "Ir al bouquete siguiente cuando ha llegado al último canal del bouquete "
 "actual"
 
-#: src/setup_extra.cpp:132
+#: src/setup_extra.cpp:138
 msgid "Auto reconnect cahandler"
 msgstr "Reconectar cahandler"
 
-#: src/setup_extra.cpp:132
+#: src/setup_extra.cpp:138
 msgid "try to reconnect when an external cahandler connection was lost"
 msgstr "Intentar de reconectar cahandler externo al perder la conexión"
 
-#: src/setup_extra.cpp:136
+#: src/setup_extra.cpp:142
 msgid "Enable file sharing"
 msgstr "Compartir ficheros"
 
-#: src/setup_extra.cpp:136
+#: src/setup_extra.cpp:142
 msgid "start file sharing(samba) on startup"
 msgstr "Compartir ficheros (samba) al iniciar"
 
-#: src/setup_extra.cpp:139
+#: src/setup_extra.cpp:145
 msgid "Disable teletext caching"
 msgstr "Desactivar caché teletexto"
 
-#: src/setup_extra.cpp:139
+#: src/setup_extra.cpp:145
 msgid "don't cache teletext pages in background"
 msgstr "No usar memoria caché para teletexto"
 
-#: src/setup_extra.cpp:141
+#: src/setup_extra.cpp:147
 msgid "Enable Zapping History"
 msgstr "Historial zapping"
 
-#: src/setup_extra.cpp:141
+#: src/setup_extra.cpp:147
 msgid "don't care about actual mode when zapping in history list"
 msgstr "Ignorar modo actual al zapping en el historial"
 
-#: src/setup_extra.cpp:143
+#: src/setup_extra.cpp:149
 msgid "Disable Standby"
 msgstr "Desactivar Standby"
 
-#: src/setup_extra.cpp:143
+#: src/setup_extra.cpp:149
 msgid "Box goes directly into Deep-Standby"
 msgstr "El receptor se apaga directamente"
 
-#: src/setup_extra.cpp:148
+#: src/setup_extra.cpp:154
 msgid "Enable MHW EPG"
 msgstr "Activar EPG MHW"
 
-#: src/setup_extra.cpp:148
+#: src/setup_extra.cpp:154
 msgid ""
 "Mediahighway EPG, activate swap space when using with multiple operators"
 msgstr "EPG Mediahighway, memoria swap recommendable"
 
-#: src/setup_extra.cpp:158
+#: src/setup_extra.cpp:164
 msgid "Disable CoreFiles"
 msgstr "Desactivar ficheros core"
 
-#: src/setup_extra.cpp:158
+#: src/setup_extra.cpp:164
 msgid "don't create 'Corefiles' after an Enigma crash"
 msgstr "No generar ficheros core cuando se produce un crash."
 
-#: src/setup_extra.cpp:164
+#: src/setup_extra.cpp:170
 msgid "Disable HDD mount"
 msgstr "Desactivar montar disco"
 
-#: src/setup_extra.cpp:164
+#: src/setup_extra.cpp:170
 msgid "don't mount the HDD via 'rcS'"
 msgstr "No montar el disco duro por 'rcS'"
 
-#: src/setup_extra.cpp:172
+#: src/setup_extra.cpp:178
 msgid "Enable Filemode Autoplay"
 msgstr "Activar autoreproducción"
 
-#: src/setup_extra.cpp:172
+#: src/setup_extra.cpp:178
 msgid "continue playing last selected movie when entering Filemode"
 msgstr "Seguir con la pelicula vista previamente al entrar en el modo fichero"
 
-#: src/setup_extra.cpp:181
+#: src/setup_extra.cpp:187
 msgid "Show Boot-Info"
 msgstr "Mostrar Boot-Info"
 
-#: src/setup_extra.cpp:181
+#: src/setup_extra.cpp:187
 msgid "Show Boot-Infos (IP, etc.)"
 msgstr "Mostrar informaciones al iniciar (IP, etc.)"
 
-#: src/setup_extra.cpp:187
+#: src/setup_extra.cpp:193
 msgid "Disable HW_Sections"
 msgstr "Desactivar HW_Sections"
 
-#: src/setup_extra.cpp:187
+#: src/setup_extra.cpp:193
 msgid "don't use hardware section filtering"
 msgstr "No usar hardware sections filtering"
 
-#: src/setup_extra.cpp:193
+#: src/setup_extra.cpp:199
 msgid "Disable Watchdog"
 msgstr "Desactivar Watchdog"
 
-#: src/setup_extra.cpp:193
+#: src/setup_extra.cpp:199
 msgid "don't use the Watchdog"
 msgstr "Desactivar el uso del Watchdog"
 
-#: src/setup_extra.cpp:201
+#: src/setup_extra.cpp:207
 msgid "Disable ENX-Watchdog"
 msgstr "Desactivar Watchdog ENX"
 
-#: src/setup_extra.cpp:201
+#: src/setup_extra.cpp:207
 msgid "don't use the ENX-Watchdog"
 msgstr "Desactivar el uso del Watchdog ENX"
 
-#: src/setup_extra.cpp:208
+#: src/setup_extra.cpp:214
 msgid "Enable SPTS-Mode"
 msgstr "Activar modo SPTS"
 
-#: src/setup_extra.cpp:208
+#: src/setup_extra.cpp:214
 msgid "use SPTS-Mode (enables TS-recording)"
 msgstr "Usar mono SPTS (para grabaciones TS)"
 
-#: src/setup_extra.cpp:214
+#: src/setup_extra.cpp:220
 msgid "Disable O_SYNC"
 msgstr "Desactivar O_SYNC"
 
-#: src/setup_extra.cpp:214
+#: src/setup_extra.cpp:220
 msgid "The file/recording is not opened for synchronous I/O"
 msgstr "El fichero/grabación no se abre para E/S síncrona"
 
-#: src/setup_extra.cpp:222
+#: src/setup_extra.cpp:228
 msgid "New Philips driver"
 msgstr "Controlador Philips nuevo"
 
-#: src/setup_extra.cpp:222
+#: src/setup_extra.cpp:228
 msgid "use tda80xx driver for Philips boxes"
 msgstr "Usar controlador tda80xx para Philips"
 
-#: src/setup_extra.cpp:356
+#: src/setup_extra.cpp:378
 msgid ""
 "When you do a factory reset, you will lose ALL your configuration data\n"
 "(including bouquets, services, satellite data ...)\n"
@@ -4407,7 +4443,7 @@ msgstr ""
 "\n"
 "Seguro de activar valores fábrica?"
 
-#: src/setup_extra.cpp:380
+#: src/setup_extra.cpp:402
 msgid "Factory reset..."
 msgstr "Valores fábrica..."
 
@@ -4415,17 +4451,17 @@ msgstr "Valores fábrica..."
 msgid "Harddisk Setup"
 msgstr "Configuración disco duro"
 
-#: src/setup_harddisk.cpp:303
+#: src/setup_harddisk.cpp:314
 msgid "Are you SURE that you want to format this disk?\n"
 msgstr "SEGURO que deseen formatear el disco duro?\n"
 
-#: src/setup_harddisk.cpp:304 src/setup_harddisk.cpp:317
-#: src/setup_harddisk.cpp:347 src/setup_harddisk.cpp:357
-#: src/setup_harddisk.cpp:429 src/setup_harddisk.cpp:441
+#: src/setup_harddisk.cpp:315 src/setup_harddisk.cpp:328
+#: src/setup_harddisk.cpp:358 src/setup_harddisk.cpp:368
+#: src/setup_harddisk.cpp:440 src/setup_harddisk.cpp:452
 msgid "formatting harddisk..."
 msgstr "Formateando disco duro..."
 
-#: src/setup_harddisk.cpp:315
+#: src/setup_harddisk.cpp:326
 msgid ""
 "There's data on this harddisk.\n"
 "You will lose that data. Proceed?"
@@ -4433,7 +4469,7 @@ msgstr ""
 "Hay datos en el disco duro.\n"
 "Vd. lo va a perder. Seguir?"
 
-#: src/setup_harddisk.cpp:346
+#: src/setup_harddisk.cpp:357
 msgid ""
 "please wait while initializing harddisk.\n"
 "This might take some minutes.\n"
@@ -4441,59 +4477,63 @@ msgstr ""
 "Espere mientras se prepara el disco duro.\n"
 "Eso puede tardar unos minutos.\n"
 
-#: src/setup_harddisk.cpp:356
+#: src/setup_harddisk.cpp:367
 msgid "sorry, couldn't find sfdisk utility to partition harddisk."
 msgstr "No fue encontrado sfdisk para particionar el disco duro."
 
-#: src/setup_harddisk.cpp:428
+#: src/setup_harddisk.cpp:439
 msgid "creating filesystem failed."
 msgstr "Creación del sistema ficheros erronea."
 
-#: src/setup_harddisk.cpp:440
+#: src/setup_harddisk.cpp:451
 msgid "successfully formatted your disk!"
 msgstr "Disco duro formateado con exito!"
 
-#: src/setup_harddisk.cpp:471
+#: src/setup_harddisk.cpp:482
 msgid "(error reading information)"
 msgstr "(error leyendo información)"
 
-#: src/setup_harddisk.cpp:473
+#: src/setup_harddisk.cpp:484
 msgid "uninitialized - format it to use!"
 msgstr "No inicializado - formatear para usarlo!"
 
-#: src/setup_harddisk.cpp:475
+#: src/setup_harddisk.cpp:486
 #, c-format
 msgid "in use, %d.%03d GB (~%d minutes) free"
 msgstr "en uso, %d.%03d GB (~ %d minutos) libres"
 
-#: src/setup_harddisk.cpp:477
+#: src/setup_harddisk.cpp:488
 msgid "initialized, but unknown filesystem"
 msgstr "inicializado, sistema ficheros desconocido"
 
-#: src/setup_harddisk.cpp:559
+#: src/setup_harddisk.cpp:496
+msgid "The settings have been saved successfully"
+msgstr "Los ajustes fueron memorizados con éxito."
+
+#: src/setup_harddisk.cpp:609
 msgid "could not unmount the filesystem... "
 msgstr "No se puede desmontar sistema de ficheros..."
 
-#: src/setup_harddisk.cpp:560 src/setup_harddisk.cpp:573
-#: src/setup_harddisk.cpp:596 src/setup_harddisk.cpp:619
-#: src/setup_harddisk.cpp:638
+#: src/setup_harddisk.cpp:610 src/setup_harddisk.cpp:623
+#: src/setup_harddisk.cpp:646 src/setup_harddisk.cpp:669
+#: src/setup_harddisk.cpp:688
 msgid "check filesystem..."
 msgstr "Comprobar el sistema de ficheros..."
 
-#: src/setup_harddisk.cpp:572
+#: src/setup_harddisk.cpp:622
 msgid "sorry, couldn't find fsck.ext3 utility to check the ext3 filesystem."
 msgstr "No he encontrado fsck.ext3 para comprobar el disco duro."
 
-#: src/setup_harddisk.cpp:595
+#: src/setup_harddisk.cpp:645
 msgid "sorry, couldn't find fsck.ext2 utility to check the ext2 filesystem."
 msgstr "No he encontrado fsck.ext2 para comprobar el disco duro."
 
-#: src/setup_harddisk.cpp:618
+#: src/setup_harddisk.cpp:668
 msgid ""
 "sorry, couldn't find reiserfsck utility to check the reiserfs filesystem."
 msgstr "No he encontrado reiserfsck para comprobar el disco duro."
 
-#: src/setup_harddisk.cpp:637
+#: src/setup_harddisk.cpp:687
 msgid "not supported filesystem for check."
 msgstr "Comprobación no soportada para este sistema ficheros."
 
@@ -5331,6 +5371,114 @@ msgstr "Información sistema codificación (izquierda, derecha)"
 msgid "Transponder information (left)"
 msgstr "Información transpondedor (izquierda)"
 
+#: src/swapmanager.cpp:69
+msgid "Push OK to select Filename"
+msgstr "Pulse OK para elegir el nombre del fichero"
+
+#: src/swapmanager.cpp:106 src/swapmanager.cpp:116 src/swapmanager.cpp:117
+#: src/swapmanager.cpp:118 src/swapmanager.cpp:135
+#, c-format
+msgid "Directory:"
+msgstr "Directorio:"
+
+#: src/swapmanager.cpp:114
+msgid "Push OK to select directory"
+msgstr "Pulse OK para elegir directorio"
+
+#: src/swapmanager.cpp:145
+msgid "Filesize:"
+msgstr "Tamaño:"
+
+#: src/swapmanager.cpp:153
+msgid "Push OK to select Filesize"
+msgstr "Pulse OK para elegir el tamaño"
+
+#: src/swapmanager.cpp:155 src/swapmanager.cpp:156 src/swapmanager.cpp:157
+#: src/swapmanager.cpp:158 src/swapmanager.cpp:159 src/swapmanager.cpp:160
+#: src/swapmanager.cpp:161 src/swapmanager.cpp:162 src/swapmanager.cpp:163
+#: src/swapmanager.cpp:315
+#, c-format
+msgid "Filesize: %d MB"
+msgstr "Tamaño fichero: %d MB"
+
+#: src/swapmanager.cpp:174 src/swapmanager.cpp:175
+msgid "Delete Swap-File"
+msgstr "Borrar fichero swap"
+
+#: src/swapmanager.cpp:187 src/swapmanager.cpp:188
+msgid "Stop Swap"
+msgstr "Para swap"
+
+#: src/swapmanager.cpp:200 src/swapmanager.cpp:201
+msgid "Create Swap-File"
+msgstr "Crear fichero swap"
+
+#: src/swapmanager.cpp:213 src/swapmanager.cpp:214
+msgid "Start Swap"
+msgstr "Iniciar swap"
+
+#: src/swapmanager.cpp:329
+msgid "Not found"
+msgstr "No encontrado"
+
+#: src/swapmanager.cpp:330 src/swapmanager.cpp:339
+msgid "Inactive"
+msgstr "Inactivo"
+
+#: src/swapmanager.cpp:338 src/swapmanager.cpp:347
+msgid "Found"
+msgstr "Encontrado"
+
+#: src/swapmanager.cpp:348
+msgid "Active"
+msgstr "Activado"
+
+#: src/swapmanager.cpp:351 src/swapmanager.cpp:443
+#, c-format
+msgid "Swap-File: %s"
+msgstr "Fichero swap: %s"
+
+#: src/swapmanager.cpp:352
+#, c-format
+msgid "Swap-Status: %s"
+msgstr "Estado swap: %s"
+
+#: src/swapmanager.cpp:401
+msgid ""
+"The swapfile will now be created. This may take some time depending on the "
+"size of your swapfile"
+msgstr ""
+"El fichero swap va a ser creado ahora. Eso puede tardar un momento "
+"dependiendo del tamaño del fichero"
+
+#: src/swapmanager.cpp:436
+msgid "The swapfile has been created!"
+msgstr "Fichero swap ha sido creado!"
+
+#: src/swapmanager.cpp:457
+#, c-format
+msgid "There has been an error during creation!"
+msgstr "Ha sido un error al crear"
+
+#: src/swapmanager.cpp:495
+#, c-format
+msgid "Error during activation!"
+msgstr "Error al activar!"
+
+#: src/swapmanager.cpp:518
+#, c-format
+msgid "Error during inactivation!"
+msgstr "Error al desactivar!"
+
+#: src/swapmanager.cpp:531
+msgid "Swapfile has been deleted!"
+msgstr "Fichero swap borrado!"
+
+#: src/swapmanager.cpp:540
+#, c-format
+msgid "File has not been deleted due to an error!"
+msgstr "El fichero no ha sido borrado debido a un error!"
+
 #: src/timer.cpp:284 src/timer.cpp:2166
 msgid "Timerlist"
 msgstr "Temporizadores"
@@ -5410,6 +5558,7 @@ msgid "Timer list"
 msgstr "Lista temporizadores"
 
 #: src/timer.cpp:2159 src/timer.cpp:2161
+#, c-format
 msgid "free space"
 msgstr "espacio libre"
 
