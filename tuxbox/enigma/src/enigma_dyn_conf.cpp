@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_conf.cpp,v 1.22 2007/02/24 16:03:13 dbluelle Exp $
+ * $Id: enigma_dyn_conf.cpp,v 1.23 2008/01/30 19:01:42 dbluelle Exp $
  *
  * (C) 2005 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -134,6 +134,7 @@ void activateSwapFile(eString swapFile)
 		cmd = "swapon " + swapFile;
 		system(cmd.c_str());
 	}
+	system("echo 0 > /proc/sys/vm/swappiness");
 }
 
 void setSwapFile(int nextswapfile, eString nextswapfilename)

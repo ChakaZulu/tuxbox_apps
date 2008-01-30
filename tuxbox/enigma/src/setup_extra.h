@@ -17,6 +17,12 @@ class eExpertSetup: public eSetupWindow
 #endif
 	void factory_reset();
 	void rc_setup();
+#ifndef DISABLE_HDD
+#ifndef DISABLE_FILE
+	void swapmanager();
+#endif
+#endif
+
 #ifndef TUXTXT_CFG_STANDALONE
 	void tuxtxtCachingChanged(bool);
 #endif
