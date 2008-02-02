@@ -1,7 +1,7 @@
 /* 
 $Id: swapmanager.cpp, V1.00 2008/01/08 21:23:00 Dre
 Swap Manager for Enigma 1
-Copyright (C) 2007 - 2008 Dre (dre@drecomx.net)
+Copyright (C) 2007 - 2008 Dre
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
