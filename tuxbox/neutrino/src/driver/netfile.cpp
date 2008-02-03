@@ -323,7 +323,7 @@ int request_file(URL *url)
 	{
 		/* send a HTTP/1.0 request */
 		case HTTP10:	{
-				sprintf(str, "GET http://%s:%d%s\n", url->host, url->port, url->file);
+				snprintf(str, sizeof(str)-1, "GET http://%s:%d%s\n", url->host, url->port, url->file);
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 			}
@@ -331,36 +331,40 @@ int request_file(URL *url)
 
 		/* send a HTTP/1.1 request */
 		case HTTP11:	{
-				sprintf(str, "%s %s HTTP/1.1\r\n", (url->entity[0]) ? "POST" : "GET", url->file);
+				snprintf(str, sizeof(str)-1, "%s %s HTTP/1.1\r\n", (url->entity[0]) ? "POST" : "GET", url->file);
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
-				sprintf(str, "Host: %s\r\n", url->host);
+				snprintf(str, sizeof(str)-1, "Host: %s:%d\r\n", url->host, url->port);
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
-//				sprintf(str, "User-Agent: %s\r\n\r\n%s", "Mozilla/4.0", url->entity);
-				sprintf(str, "User-Agent: %s\r\n\r\n%s", "WinampMPEG/5.51", url->entity);
+//				snprintf(str, sizeof(str)-1, "User-Agent: %s\r\n\r\n%s", "WinampMPEG/5.52", url->entity);
+				snprintf(str, sizeof(str)-1, "User-Agent: %s\r\n\r\n", "WinampMPEG/5.52");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
-				sprintf(str, "Accept: %s\r\n", "/*/");
+				snprintf(str, sizeof(str)-1, "Accept: %s\r\n", "*/*");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
-				sprintf(str, "IcyMetaData:%s\r\n", "1");
+				snprintf(str, sizeof(str)-1, "Icy-MetaData: %s\r\n", "1");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
 				/* if we have a entity, announce it to the server */
 				if(url->entity[0])
 				{
-					sprintf(str, "Content-Length: %d\r\n", strlen(url->entity));
+					snprintf(str, sizeof(str)-1, "Content-Length: %d\r\n", strlen(url->entity));
 					dprintf(stderr, "> %s", str);
 					send(url->fd, str, strlen(str), 0);
 				}
 
-				sprintf(str, "Connection: close\r\n");
+				snprintf(str, sizeof(str)-1, "Connection: close\r\n");
+				dprintf(stderr, "> %s", str);
+				send(url->fd, str, strlen(str), 0);
+
+				snprintf(str, sizeof(str)-1, "\r\n");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
@@ -477,17 +481,18 @@ int request_file(URL *url)
   ptr = strstr(header, a); \
   if(ptr) \
   { \
+    unsigned int i; \
     ptr = strchr(ptr, ':'); \
     for(ptr++;isspace(*ptr);ptr++); \
-    strcpy(b, ptr); \
-    ptr = strchr(b, '\n'); \
-    if(ptr) *ptr = 0; \
+    for (i=0; (ptr[i]!='\n') && (ptr[i]!='\r') && (ptr[i]!='\0') && (i<sizeof(b)); i++) b[i] = ptr[i]; \
+    b[i] = 0; \
   } }
 
 void readln(int fd, char *buf)
 {
 	for(recv(fd, buf, 1, 0); (buf && isalnum(*buf)); recv(fd, ++buf, 1, 0));
-	if(buf) *buf = 0;
+	if(buf)
+		*buf = 0;
 }
 
 int parse_response(URL *url, void *opt, CSTATE *state)
@@ -529,7 +534,8 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 		ptr = strstr(header, "ICY");
 
 	/* no valid HTTP/1.1 or SHOUTCAST response */
-	if(!ptr) return -1;
+	if(!ptr)
+		return -1;
 
 	response = atoi(strchr(ptr, ' ') + 1);
 
@@ -542,7 +548,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 		case 302:	/* 'file not found' error */
 				errno = ENOENT;
 				strcpy(err_txt, ptr);
-				getHeaderStr("Location",redirect_url);
+				getHeaderStr("Location", redirect_url);
 				return -1 * response;
 				break;
 
@@ -561,7 +567,7 @@ int parse_response(URL *url, void *opt, CSTATE *state)
 	strcpy(str, "audio/mpeg");
 	getHeaderStr("Content-Type:", str);
 	f_type(url->stream, str);
-	dprintf(stderr,"type %s\n",str);
+	dprintf(stderr, "type %s\n", str);
 
 	/* if we got a content length from the server, i.e. rval >= 0 */
 	/* then return now with the content length as return value */
