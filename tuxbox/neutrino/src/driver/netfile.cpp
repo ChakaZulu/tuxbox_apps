@@ -339,19 +339,21 @@ int request_file(URL *url)
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
-//				snprintf(str, sizeof(str)-1, "User-Agent: %s\r\n\r\n%s", "WinampMPEG/5.52", url->entity);
-				snprintf(str, sizeof(str)-1, "User-Agent: %s\r\n\r\n", "WinampMPEG/5.52");
+				snprintf(str, sizeof(str)-1, "User-Agent: WinampMPEG/5.52\r\n");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
-				snprintf(str, sizeof(str)-1, "Accept: %s\r\n", "*/*");
+				snprintf(str, sizeof(str)-1, "Accept: */*\r\n");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
-				snprintf(str, sizeof(str)-1, "Icy-MetaData: %s\r\n", "1");
+#if 0
+				// don't request MetaData as we are not processing them -> sound blibs
+				// http://www.smackfu.com/stuff/programming/shoutcast.html
+				snprintf(str, sizeof(str)-1, "Icy-MetaData: 1\r\n");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
-
+#endif
 				/* if we have a entity, announce it to the server */
 				if(url->entity[0])
 				{
@@ -364,6 +366,7 @@ int request_file(URL *url)
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
+				// empty line -> end of HTTP request
 				snprintf(str, sizeof(str)-1, "\r\n");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
