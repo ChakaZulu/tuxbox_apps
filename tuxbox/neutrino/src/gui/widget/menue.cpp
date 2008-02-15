@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.139 2007/10/16 10:53:14 seife Exp $
+	$Id: menue.cpp,v 1.140 2008/02/15 22:31:14 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -286,7 +286,7 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 
 			if ( msg <= CRCInput::RC_MaxRC )
 			{
-				// recalculate timeout für RC-Tasten
+				// recalculate timeout for RC-keys
 				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_MENU]);
 			}
 		}
@@ -547,8 +547,9 @@ int CMenuOptionChooser::getOptionValue(void) const
 int CMenuOptionChooser::exec(CMenuTarget*)
 {
 	bool wantsRepaint = false;
+	unsigned int count;
 
-	for(unsigned int count = 0; count < number_of_options; count++)
+	for(count = 0; count < number_of_options; count++)
 	{
 		if (options[count].key == (*optionValue))
 		{
@@ -556,6 +557,11 @@ int CMenuOptionChooser::exec(CMenuTarget*)
 			break;
 		}
 	}
+	// if options are removed optionValue may not exist anymore -> use 1st available option
+	if ((count == number_of_options) && number_of_options) {
+		*optionValue = options[0].key;
+	}
+
 	paint(true);
 	if(observ)
 	{
@@ -661,7 +667,7 @@ int CMenuOptionStringChooser::exec(CMenuTarget*)
 	//select next value
 	for(unsigned int count = 0; count < options.size(); count++)
 	{
-		if (strcmp(options[count].c_str(), optionValue) == 0)
+		if ((strcmp(options[count].c_str(), optionValue) == 0) || (optionValue[0] == '\0'))
 		{
 			strcpy(optionValue, options[(count + 1) % options.size()].c_str());
 			break;
