@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.h,v 1.195 2007/12/17 19:23:58 dbt Exp $
+	$Id: neutrino.h,v 1.196 2008/02/15 22:34:02 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -132,53 +132,55 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 			init_mode_switch 	= 3,
 		};
 
-		CConfigFile			configfile;
+		CConfigFile				configfile;
 		CScanSettings			scanSettings;
-		int                             network_dhcp;
-		int                             network_automatic_start;
+		int					network_dhcp;
+		int					network_automatic_start;
 
-		neutrino_font_descr_struct      font;
+		neutrino_font_descr_struct	font;
 
-		int				mode;
-		int				lastMode;
-		bool			softupdate;
-		bool			fromflash;
-		int				recording_id;
-		CTimerd::RecordingInfo* nextRecordingInfo;
-		//bool				record_mode;
+		int					mode;
+		int					lastMode;
+		bool					softupdate;
+		bool					fromflash;
+		int					recording_id;
+		CTimerd::RecordingInfo* 	nextRecordingInfo;
+		//bool		record_mode;
 
-		struct timeval                  standby_pressed_at;
+		struct timeval			standby_pressed_at;
 
 		CZapitClient::responseGetLastChannel    firstchannel;
 		st_rmsg				sendmessage;
 
-		bool				current_muted;
+		bool					current_muted;
 
-		bool				skipShutdownTimer;
+		bool					skipShutdownTimer;
 
 		CColorSetupNotifier		*colorSetupNotifier;
 
 		CKeySetupNotifier       	*keySetupNotifier;
-		CShutdownCountNotifier		*shutdownCountNotifier;
+		CShutdownCountNotifier	*shutdownCountNotifier;
 
 		CNVODChangeExec         	*NVODChanger;
 #ifndef HAVE_DREAMBOX_HARDWARE
-		CUCodeCheckExec			*UCodeChecker;
+		CUCodeCheckExec		*UCodeChecker;
 #endif
+		CDVBInfoExec			*DVBInfo;
 		CStreamFeaturesChangeExec	*StreamFeaturesChanger;
-		CMoviePluginChangeExec 		*MoviePluginChanger;
+		CMoviePluginChangeExec 	*MoviePluginChanger;
 		CIPChangeNotifier		*MyIPChanger;
 //		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
-		CRCLock                         *rcLock;
+		CRCLock				*rcLock;
 		CMenuTarget* 			moviePlayerGui;
-		bool 				parentallocked;
+		bool 					parentallocked;
 		CFontSizeNotifier 		*fontsizenotifier;
-		bool 				waitforshutdown;
-		bool				volumeBarIsVisible;
+		bool 					waitforshutdown;
+		bool					volumeBarIsVisible;
 
 		// USERMENU
-		CTimerList			*Timerlist;
+		CTimerList				*Timerlist;
+
 		bool showUserMenu(int button);
 		bool getNVODMenu(CMenuWidget* menu);
 

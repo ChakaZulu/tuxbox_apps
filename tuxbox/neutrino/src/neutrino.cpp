@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.883 2008/01/03 11:09:28 seife Exp $
+	$Id: neutrino.cpp,v 1.884 2008/02/15 22:36:29 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -438,6 +438,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.personalize_scartmode = configfile.getInt32("personalize_scartmode", 1);
 	g_settings.personalize_games = configfile.getInt32("personalize_games", 1);
 	g_settings.personalize_audioplayer = configfile.getInt32("personalize_audioplayer", 1);
+	g_settings.personalize_inetradio = configfile.getInt32("personalize_inetradio", 0);
 	g_settings.personalize_movieplayer = configfile.getInt32("personalize_movieplayer", 1);
 	g_settings.personalize_pictureviewer = configfile.getInt32("personalize_pictureviewer", 1);
 #if ENABLE_UPNP
@@ -457,6 +458,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.personalize_ucodecheck = configfile.getInt32("personalize_ucodecheck", 1);
 	g_settings.personalize_imageinfo = configfile.getInt32("personalize_imageinfo", 1);
 	g_settings.personalize_update = configfile.getInt32("personalize_update", 1);
+	g_settings.personalize_chan_epg_stat = configfile.getInt32("personalize_chan_epg_stat", 0);
 
 	g_settings.personalize_audio = configfile.getInt32("personalize_audio", 1);
 	g_settings.personalize_video = configfile.getInt32("personalize_video", 1);
@@ -576,8 +578,8 @@ int CNeutrinoApp::loadSetup()
 
 	// parentallock
 	if (!parentallocked)
-	{
-		g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
+  	{
+	  	g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
 		g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
 	}
 	else
@@ -907,6 +909,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "personalize_scartmode", g_settings.personalize_scartmode );
 	configfile.setInt32 ( "personalize_games", g_settings.personalize_games );
 	configfile.setInt32 ( "personalize_audioplayer", g_settings.personalize_audioplayer );
+	configfile.setInt32 ( "personalize_inetradio", g_settings.personalize_inetradio );
 	configfile.setInt32 ( "personalize_movieplayer", g_settings.personalize_movieplayer );
 	configfile.setInt32 ( "personalize_pictureviewer", g_settings.personalize_pictureviewer );
 #if ENABLE_UPNP
@@ -926,6 +929,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "personalize_ucodecheck", g_settings.personalize_ucodecheck );
 	configfile.setInt32 ( "personalize_imageinfo", g_settings.personalize_imageinfo );
 	configfile.setInt32 ( "personalize_update", g_settings.personalize_update );
+	configfile.setInt32 ( "personalize_chan_epg_stat", g_settings.personalize_chan_epg_stat );
 
 	configfile.setInt32 ( "personalize_audio", g_settings.personalize_audio );
 	configfile.setInt32 ( "personalize_video", g_settings.personalize_video );
@@ -1681,8 +1685,8 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 								}
 							}
 						}
-				}
-				else
+      				}
+      				else
 					{
 						doRecord = false;
 					}
@@ -1881,17 +1885,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	frameBuffer->ClearFrameBuffer();
 
-	g_RCInput = new CRCInput;
-
-	g_Sectionsd = new CSectionsdClient;
-	g_Timerd = new CTimerdClient;
-
+	g_RCInput 	= new CRCInput;
+	g_Sectionsd 	= new CSectionsdClient;
+	g_Timerd 	= new CTimerdClient;
 	g_RemoteControl = new CRemoteControl;
-	g_EpgData = new CEpgData;
-	g_InfoViewer = new CInfoViewer;
-	g_EventList = new EventList;
-
-	g_PluginList = new CPlugins;
+	g_EpgData 	= new CEpgData;
+	g_InfoViewer 	= new CInfoViewer;
+	g_EventList 	= new EventList;
+	g_PluginList 	= new CPlugins;
 	g_PluginList->setPluginDir(PLUGINDIR);
 
 	// mount shares before scanning for plugins
@@ -1908,6 +1909,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 #ifndef HAVE_DREAMBOX_HARDWARE
 	UCodeChecker              = new CUCodeCheckExec;
 #endif
+	DVBInfo                   = new CDVBInfoExec;
 	NVODChanger               = new CNVODChangeExec;
 	StreamFeaturesChanger     = new CStreamFeaturesChangeExec;
 	MoviePluginChanger        = new CMoviePluginChangeExec;
@@ -1942,7 +1944,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    lcdSettings         (LOCALE_LCDMENU_HEAD                  , "lcd.raw"             , 420);
 	CMenuWidget    keySettings         (LOCALE_KEYBINDINGMENU_HEAD           , "keybinding.raw"      , 450);
 	CMenuWidget    miscSettings        (LOCALE_MISCSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS, 500);
-	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD             , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget    driverSettings      (LOCALE_DRIVERSETTINGS_HEAD           , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    audioplPicSettings  (LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
@@ -3618,7 +3620,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		if (recordingstatus)
 			DisplayErrorMessage(g_Locale->getText(LOCALE_SERVICEMENU_RESTART_REFUSED_RECORDING));
 		else {
-			CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SERVICEMENU_RESTART_HINT));
+	 		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SERVICEMENU_RESTART_HINT));
 			hintBox->paint();
 			execvp(global_argv[0], global_argv); // no return if successful
 			DisplayErrorMessage(g_Locale->getText(LOCALE_SERVICEMENU_RESTART_FAILED));
