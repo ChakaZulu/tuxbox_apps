@@ -119,5 +119,6 @@ data/lcd/icons/Makefile
 data/lcd/clock/Makefile
 data/locale/Makefile
 data/themes/Makefile
+data/inetradio/Makefile
 ])
 
