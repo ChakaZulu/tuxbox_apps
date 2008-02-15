@@ -380,12 +380,7 @@ eSubtitleWidget::eSubtitleWidget()
 
 eSubtitleWidget::~eSubtitleWidget()
 {
-	while (!queue.empty())
-	{
-		pes_packet_s pkt = queue.front();
-		queue.pop();
-		delete [] pkt.pkt;
-	}
+	stop();
 	delete subtitle;
 }
 
@@ -396,6 +391,13 @@ int eSubtitleWidget::getCurPid()
 
 void eSubtitleWidget::stop()
 {
+	//eDebug("stopping subtitling, queue size:%d",queue.size());
+	while (!queue.empty())
+	{
+		pes_packet_s pkt = queue.front();
+		queue.pop();
+		delete [] pkt.pkt;
+	}
 	if ( sn )
 	{
 		pid=-1;
