@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.h,v 1.16 2007/10/22 21:56:08 guenther Exp $
+  $Id: audioplayer.h,v 1.17 2008/02/15 22:32:21 houdini Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -41,10 +41,8 @@
 
 
 #include <string>
-
 #include <set>
 #include <map>
-
 #include <cstdlib>
 #include <ctime>
 
@@ -112,7 +110,7 @@ class CAudioPlayerGui : public CMenuTarget
 	int            m_title_height;
 	int            m_info_height;
 	int            m_key_level;
-	bool           m_visible;			
+	bool           m_visible;
 	State          m_state;
 	time_t         m_time_total;
 	time_t         m_time_played;
@@ -135,8 +133,9 @@ class CAudioPlayerGui : public CMenuTarget
 
 	int            m_LastMode;
 	int            m_idletime;
-	bool           m_screensaver;
-	bool           m_vol_ost;
+	bool          m_screensaver;
+	bool          m_vol_ost;
+	bool          m_inetmode;
 
 	SMSKeyInput    m_SMSKeyInput;
 
@@ -168,6 +167,21 @@ class CAudioPlayerGui : public CMenuTarget
 
 	void addToPlaylist(CAudiofileExt &file);
 	void removeFromPlaylist(long pos);
+
+	/**
+	 * Adds an url (shoutcast, ...) to the to the audioplayer playlist
+	 */
+	void addUrl2Playlist(const char *url, const char *name = NULL);
+
+	/**
+	 * Adds a url which points to an .m3u format (playlist, ...) to the audioplayer playlist
+	 */
+	void processPlaylistUrl(const char *url, const char *name = NULL);
+
+	/**
+	 * Loads a given XML file of internet audiostreams or playlists and processes them
+	 */
+	void CAudioPlayerGui::scanXmlFile(std::string filename);
 
 	void selectTitle(unsigned char selectionChar);
 	/**
@@ -220,7 +234,7 @@ class CAudioPlayerGui : public CMenuTarget
 	bool playPrev(bool allow_rotate = false);
 	
  public:
-	CAudioPlayerGui();
+	CAudioPlayerGui(bool inetmode = false);
 	~CAudioPlayerGui();
 	int show();
 	int exec(CMenuTarget* parent, const std::string & actionKey);

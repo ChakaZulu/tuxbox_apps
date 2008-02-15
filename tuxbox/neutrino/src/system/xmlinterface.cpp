@@ -42,7 +42,7 @@ xmlDocPtr parseXml(const char * data)
 
 	if (doc == NULL)
 	{
-		WARN("Error parsing VLC Answer");
+		WARN("Error parsing XML Data");
 		return NULL;
 	}
 	else
@@ -67,7 +67,7 @@ xmlDocPtr parseXml(const char * data)
 
 	if (!tree_parser->Parse(data, strlen(data), true))
 	{
-			printf("Error parsing \"VLC Answer\": %s at line %d\n",
+			printf("Error parsing XML Data: %s at line %d\n",
 			       tree_parser->ErrorString(tree_parser->GetErrorCode()),
 			       tree_parser->GetCurrentLineNumber());
 
@@ -83,5 +83,54 @@ xmlDocPtr parseXml(const char * data)
 	}
 	return tree_parser;
 }
+
+xmlDocPtr parseXmlFile(const char * filename, bool warning_by_nonexistence /* = true */)
+{
+	char buffer[2048];
+	XMLTreeParser* tree_parser;
+	size_t done;
+	size_t length;
+	FILE* xml_file;
+
+	xml_file = fopen(filename, "r");
+
+	if (xml_file == NULL)
+	{
+	        if (warning_by_nonexistence)
+			perror(filename);
+		return NULL;
+	}
+
+	tree_parser = new XMLTreeParser(NULL);
+
+	do
+	{
+		length = fread(buffer, 1, sizeof(buffer), xml_file);
+		done = length < sizeof(buffer);
+
+		if (!tree_parser->Parse(buffer, length, done))
+		{
+			printf("Error parsing \"%s\": %s at line %d",
+			       filename,
+			       tree_parser->ErrorString(tree_parser->GetErrorCode()),
+			       tree_parser->GetCurrentLineNumber());
+
+			fclose(xml_file);
+			delete tree_parser;
+			return NULL;
+		}
+	}
+	while (!done);
+
+	fclose(xml_file);
+
+	if (!tree_parser->RootNode())
+	{
+		delete tree_parser;
+		return NULL;
+	}
+	return tree_parser;
+}
+
 #endif /* USE_LIBXML */
 

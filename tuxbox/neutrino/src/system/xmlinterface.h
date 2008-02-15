@@ -32,22 +32,23 @@
 #ifdef USE_LIBXML
 #include <libxml/parser.h>
 #define xmlNextNode next
-inline char*      xmlGetAttribute     (xmlNodePtr cur, const char * s) { return (char *)xmlGetProp(cur, (const xmlChar *)s); };
-inline char*      xmlGetName          (xmlNodePtr cur)                 { return (char *)(cur->name); };
+inline char*	xmlGetAttribute 	(xmlNodePtr cur, const char * s)	{ return (char *)xmlGetProp(cur, (const xmlChar *)s); };
+inline char*	xmlGetName	(xmlNodePtr cur)			{ return (char *)(cur->name); };
 
 #else  /* use libxmltree */
 #include <xmltree/xmltree.h>
-typedef XMLTreeParser* xmlDocPtr;
-typedef XMLTreeNode*   xmlNodePtr;
-#define xmlChildrenNode GetChild()
-#define xmlNextNode     GetNext()
-inline xmlNodePtr xmlDocGetRootElement(xmlDocPtr  doc)                 { return doc->RootNode(); };
-inline void       xmlFreeDoc          (xmlDocPtr  doc)                 { delete doc; };
-inline char*      xmlGetAttribute     (xmlNodePtr cur, char * s)       { return cur->GetAttributeValue(s); };
-inline char*      xmlGetName          (xmlNodePtr cur)                 { return cur->GetType();  };
-inline char*      xmlGetData          (xmlNodePtr cur)                 { return cur->GetData();  };
+typedef XMLTreeParser*	xmlDocPtr;
+typedef XMLTreeNode*	xmlNodePtr;
+#define xmlChildrenNode	GetChild()
+#define xmlNextNode		GetNext()
+inline xmlNodePtr	xmlDocGetRootElement	(xmlDocPtr  doc)			{ return doc->RootNode(); };
+inline void			xmlFreeDoc			(xmlDocPtr  doc)			{ delete doc; };
+inline char*		xmlGetAttribute			(xmlNodePtr cur, char * s)	{ return cur->GetAttributeValue(s); };
+inline char*		xmlGetName			(xmlNodePtr cur)		{ return cur->GetType();  };
+inline char*		xmlGetData			(xmlNodePtr cur)		{ return cur->GetData();  };
 #endif /* USE_LIBXML */
 
-xmlDocPtr parseXml(const char * filename);
+xmlDocPtr parseXml		(const char * filename);
+xmlDocPtr parseXmlFile	(const char * filename, bool warning_by_nonexistence = true);
 
 #endif /* __xmlinterface_h__ */

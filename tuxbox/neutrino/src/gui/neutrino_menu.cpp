@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.15 2007/12/29 16:35:16 houdini Exp $
+	$Id: neutrino_menu.cpp,v 1.16 2008/02/15 22:32:21 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -137,7 +137,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 
 	if (g_settings.personalize_games == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,CPlugins::P_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-	if (g_settings.personalize_games == 2)
+	else if (g_settings.personalize_games == 2)
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_GAMES, g_settings.personalize_pincode, true, true, NULL, new CPluginList(LOCALE_MAINMENU_GAMES,CPlugins::P_TYPE_GAME), "", CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 
 	if (g_settings.personalize_tvmode==0 && g_settings.personalize_radiomode==0 && g_settings.personalize_scartmode==0 && g_settings.personalize_games==0) {
@@ -145,14 +145,23 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	} else {
 		mainMenu.addItem(GenericMenuSeparatorLine); }
 
-	if (g_settings.personalize_audioplayer == 1)
+	if (g_settings.personalize_audioplayer == 1) {
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
-	if (g_settings.personalize_audioplayer == 2)
+	}
+	else if (g_settings.personalize_audioplayer == 2) {
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_AUDIOPLAYER, g_settings.personalize_pincode, true, true, NULL, new CAudioPlayerGui(), NULL, CRCInput::convertDigitToKey(shortcut++)));
+	}
+
+	if (g_settings.personalize_inetradio == 1) {
+		mainMenu.addItem(new CMenuForwarder(LOCALE_INETRADIO_NAME, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut++)));
+	}
+	else if (g_settings.personalize_inetradio == 2) {
+		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_INETRADIO_NAME, g_settings.personalize_pincode, true, true, NULL, new CAudioPlayerGui(true), NULL, CRCInput::convertDigitToKey(shortcut++)));
+	}
 
 	if (g_settings.personalize_movieplayer == 1)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut++)));
-	if (g_settings.personalize_movieplayer == 2)
+	else if (g_settings.personalize_movieplayer == 2)
 		mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, g_settings.personalize_pincode, true, true, NULL, &moviePlayer, NULL, CRCInput::convertDigitToKey(shortcut++)));
 
 
@@ -191,10 +200,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCRIPTS, true, NULL, new CPluginList(LOCALE_MAINMENU_SCRIPTS,CPlugins::P_TYPE_SCRIPT), "",
 										CRCInput::convertDigitToKey(shortcut++)));
 
-	if (g_settings.personalize_audioplayer==0 && g_settings.personalize_movieplayer==0 && g_settings.personalize_pictureviewer==0 && g_settings.personalize_upnpbrowser==0) {
+	if (g_settings.personalize_audioplayer==0 && g_settings.personalize_inetradio==0 && g_settings.personalize_movieplayer==0 && g_settings.personalize_pictureviewer==0 && g_settings.personalize_upnpbrowser==0) {
 		// Stop seperator from appearing when menu entries have been hidden
 	} else {
-		mainMenu.addItem(GenericMenuSeparatorLine); }
+		mainMenu.addItem(GenericMenuSeparatorLine); 
+	}
 
 	if (g_settings.personalize_settings == 0)
 		mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL, CRCInput::convertDigitToKey(shortcut++)));
@@ -284,12 +294,14 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 
 	if (g_settings.personalize_keybinding == 1){
 		mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings, NULL, CRCInput::convertDigitToKey((shortcut2 == 10) ? 0 : shortcut2)));
-		if (shortcut==10) shortcut2++;
-		}
+		if (shortcut==10) 
+			shortcut2++;
+	}
 	if (g_settings.personalize_keybinding == 2){
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, g_settings.personalize_pincode, true, true, NULL, &keySettings, NULL, CRCInput::convertDigitToKey((shortcut2 == 10) ? 0 : shortcut2)));
-		if (shortcut==10) shortcut2++;
-		}
+		if (shortcut==10) 
+			shortcut2++;
+	}
 	
 	if (g_settings.personalize_audpic == 1)
 		mainSettings.addItem(new CMenuForwarder(LOCALE_AUDIOPLAYERPICSETTINGS_GENERAL, true, NULL, &audiopl_picSettings, NULL, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
@@ -309,11 +321,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu,
 	if (g_settings.personalize_pinstatus == 0){
 		shortcut2++;
 		mainSettings.addItem(new CMenuForwarder(LOCALE_PERSONALIZE_HEAD, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey((shortcut2 == 10) ? 0 : shortcut2)));
-		}
+	}
 	if (g_settings.personalize_pinstatus == 1){
 		shortcut2++;
 		mainSettings.addItem(new CLockedMenuForwarder(LOCALE_PERSONALIZE_HEAD, g_settings.personalize_pincode, true, true, NULL, new CPersonalizeGui(), NULL, CRCInput::convertDigitToKey((shortcut2 == 10) ? 0 : shortcut2)));
-		}
+	}
 }
 
 #define SCANTS_BOUQUET_OPTION_COUNT 5
@@ -570,12 +582,12 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	service.addItem(GenericMenuSeparatorLine);
 	if (g_settings.personalize_bouqueteditor == 1)
 		service.addItem(new CMenuForwarder(LOCALE_BOUQUETEDITOR_NAME, true, NULL, new CBEBouquetWidget(), NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
-	if (g_settings.personalize_bouqueteditor == 2)
+	else if (g_settings.personalize_bouqueteditor == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_BOUQUETEDITOR_NAME, g_settings.personalize_pincode, true, true, NULL, new CBEBouquetWidget(), NULL, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 
 	if (g_settings.personalize_scants == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_SCANTS, true, NULL, &scanSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-	if (g_settings.personalize_scants == 2)
+	else if (g_settings.personalize_scants == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_SCANTS, g_settings.personalize_pincode, true, true, NULL, &scanSettings, NULL, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 
 	if (g_settings.personalize_bouqueteditor==0 && g_settings.personalize_scants==0) {
@@ -585,33 +597,39 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 	if (g_settings.personalize_reload == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RELOAD, true, NULL, this, "reloadchannels", CRCInput::convertDigitToKey(shortcut3++)));
-	if (g_settings.personalize_reload == 2)
+	else if (g_settings.personalize_reload == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_RELOAD, g_settings.personalize_pincode, true, true, NULL, this, "reloadchannels", CRCInput::convertDigitToKey(shortcut3++)));
 
 	if (g_settings.personalize_getplugins == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, true, NULL, this, "reloadplugins" , CRCInput::convertDigitToKey(shortcut3++)));
-	if (g_settings.personalize_getplugins == 2)
+	else if (g_settings.personalize_getplugins == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_GETPLUGINS, g_settings.personalize_pincode, true, true, NULL, this, "reloadplugins", CRCInput::convertDigitToKey(shortcut3++)));
 
 	if (g_settings.personalize_restart == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_RESTART, true, NULL, this, "restart", CRCInput::convertDigitToKey(shortcut3++)));
-	if (g_settings.personalize_restart == 2)
+	else if (g_settings.personalize_restart == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_RESTART, g_settings.personalize_pincode, true, true, NULL, this, "restart", CRCInput::convertDigitToKey(shortcut3++)));
 
 #ifndef HAVE_DREAMBOX_HARDWARE
 	if (g_settings.personalize_ucodecheck == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3++)));
-	if (g_settings.personalize_ucodecheck == 2)
+	else if (g_settings.personalize_ucodecheck == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, g_settings.personalize_pincode, true, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3++)));
 #endif
-	if (g_settings.personalize_reload==0 && g_settings.personalize_getplugins==0 && g_settings.personalize_restart==0 && g_settings.personalize_ucodecheck==0) {
+
+	if (g_settings.personalize_chan_epg_stat == 1)
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_CHAN_EPG_STAT, true, NULL, DVBInfo, NULL, CRCInput::convertDigitToKey(shortcut3++)));
+	else if (g_settings.personalize_chan_epg_stat == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_CHAN_EPG_STAT, g_settings.personalize_pincode, true, true, NULL, DVBInfo, NULL, CRCInput::convertDigitToKey(shortcut3++)));
+
+	if (g_settings.personalize_reload==0 && g_settings.personalize_getplugins==0 && g_settings.personalize_restart==0 && g_settings.personalize_ucodecheck==0 && g_settings.personalize_chan_epg_stat==0) {
 		// Stop seperator from appearing when menu entries have been hidden
 	} else {
 		service.addItem(GenericMenuSeparatorLine); }
 
 	if (g_settings.personalize_imageinfo == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_IMAGEINFO, true, NULL, new CImageInfo(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW  ), false);
-	if (g_settings.personalize_imageinfo == 2)
+	else if (g_settings.personalize_imageinfo == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_IMAGEINFO, g_settings.personalize_pincode, true, true, NULL, new CImageInfo(), NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
 	//softupdate

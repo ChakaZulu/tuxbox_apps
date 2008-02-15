@@ -1,5 +1,5 @@
 /*
-	$Id: setting_helpers.cpp,v 1.163 2007/09/02 19:05:53 houdini Exp $
+	$Id: setting_helpers.cpp,v 1.164 2008/02/15 22:33:28 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -109,12 +109,12 @@ bool CTP_scanNotifier::changeNotify(const neutrino_locale_t, void *)
 	bool set_true_false=CNeutrinoApp::getInstance()->getScanSettings().TP_scan;
 	for (int i=0; i<2; i++)
 	{
-		toDisable1[i]->setActive(set_true_false);
-		toDisable2[i]->setActive(set_true_false);
+		if (toDisable1[i]) toDisable1[i]->setActive(set_true_false);
+		if (toDisable2[i]) toDisable2[i]->setActive(set_true_false);
 	}
-	toDisable3[0]->setActive(set_true_false);
-	return true;
 
+	if (toDisable3[0]) toDisable3[0]->setActive(set_true_false);
+	return true;
 }
 
 bool CScanSettingsSatManNotifier::changeNotify(const neutrino_locale_t, void *Data)
@@ -144,32 +144,32 @@ bool CDHCPNotifier::changeNotify(const neutrino_locale_t, void * data)
 
 CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, CMenuItem* i7, CMenuItem* i8, CMenuItem* i9, CMenuItem* i10, CMenuItem* i11)
 {
-   toDisable[0]=i1;
-   toDisable[1]=i2;
-   toDisable[2]=i3;
-   toDisable[3]=i4;
-   toDisable[4]=i5;
-   toDisable[5]=i6;
-   toDisable[6]=i7;
-   toDisable[7]=i8;
-   toDisable[8]=i9;
-   toDisable[9]=i10;
-   toDisable[10]=i11;
+	toDisable[0]=i1;
+	toDisable[1]=i2;
+	toDisable[2]=i3;
+	toDisable[3]=i4;
+	toDisable[4]=i5;
+	toDisable[5]=i6;
+	toDisable[6]=i7;
+	toDisable[7]=i8;
+	toDisable[8]=i9;
+	toDisable[9]=i10;
+	toDisable[10]=i11;
 }
 
 bool CStreamingNotifier::changeNotify(const neutrino_locale_t, void *)
 {
-   if(g_settings.streaming_type==0)
-   {
-      for (int i=0; i<=10; i++)
-        toDisable[i]->setActive(false);
-   }
-   else if(g_settings.streaming_type==1)
-   {
-      for (int i=0; i<=10; i++)
-        toDisable[i]->setActive(true);
-   }
-   return true;
+	if(g_settings.streaming_type==0)
+	{
+		for (int i=0; i<=10; i++)
+			toDisable[i]->setActive(false);
+	}
+	else if(g_settings.streaming_type==1)
+	{
+		for (int i=0; i<=10; i++)
+			toDisable[i]->setActive(true);
+	}
+	return true;
 }
 
 COnOffNotifier::COnOffNotifier( CMenuItem* a1,CMenuItem* a2,CMenuItem* a3,CMenuItem* a4,CMenuItem* a5)
@@ -184,17 +184,17 @@ COnOffNotifier::COnOffNotifier( CMenuItem* a1,CMenuItem* a2,CMenuItem* a3,CMenuI
 
 bool COnOffNotifier::changeNotify(const neutrino_locale_t, void *Data)
 {
-   if(*(int*)(Data) == 0)
-   {
-      for (int i=0; i<number ; i++)
-        toDisable[i]->setActive(false);
-   }
-   else
-   {
-      for (int i=0; i<number ; i++)
-        toDisable[i]->setActive(true);
-   }
-   return true;
+	if(*(int*)(Data) == 0)
+	{
+		for (int i=0; i<number ; i++)
+			toDisable[i]->setActive(false);
+	}
+	else
+	{
+		for (int i=0; i<number ; i++)
+			toDisable[i]->setActive(true);
+	}
+	return true;
 }
 
 CRecordingNotifier::CRecordingNotifier(CMenuItem* i1 , CMenuItem* i2 , CMenuItem* i3 ,
@@ -213,47 +213,46 @@ CRecordingNotifier::CRecordingNotifier(CMenuItem* i1 , CMenuItem* i2 , CMenuItem
 }
 bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 {
-   if ((g_settings.recording_type == CNeutrinoApp::RECORDING_OFF) ||
-       (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE))
-   {
-	   for(int i = 0; i < 9; i++)
-		   toDisable[i]->setActive(false);
+	if ((g_settings.recording_type == CNeutrinoApp::RECORDING_OFF) ||
+		(g_settings.recording_type == CNeutrinoApp::RECORDING_FILE))
+	{
+		for(int i = 0; i < 9; i++)
+			toDisable[i]->setActive(false);
 
-	   if (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE)
-	   {
-		   toDisable[4]->setActive(true);
-		   toDisable[5]->setActive(true);
-		   toDisable[7]->setActive(true);
-		   toDisable[8]->setActive(true);
-	   }
-   }
-   else if (g_settings.recording_type == CNeutrinoApp::RECORDING_SERVER)
-   {
-	   toDisable[0]->setActive(true);
-	   toDisable[1]->setActive(true);
-	   toDisable[2]->setActive(true);
-	   toDisable[3]->setActive(g_settings.recording_server_wakeup==1);
-	   toDisable[4]->setActive(true);
-	   toDisable[5]->setActive(true);
-	   toDisable[6]->setActive(false);
-	   toDisable[7]->setActive(false);
-	   toDisable[8]->setActive(true);
-   }
-   else if (g_settings.recording_type == CNeutrinoApp::RECORDING_VCR)
-   {
+		if (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE)
+		{
+			   toDisable[4]->setActive(true);
+			   toDisable[5]->setActive(true);
+			   toDisable[7]->setActive(true);
+			   toDisable[8]->setActive(true);
+		}
+	}
+	else if (g_settings.recording_type == CNeutrinoApp::RECORDING_SERVER)
+	{
+		toDisable[0]->setActive(true);
+		toDisable[1]->setActive(true);
+		toDisable[2]->setActive(true);
+		toDisable[3]->setActive(g_settings.recording_server_wakeup==1);
+		toDisable[4]->setActive(true);
+		toDisable[5]->setActive(true);
+		toDisable[6]->setActive(false);
+		toDisable[7]->setActive(false);
+		toDisable[8]->setActive(true);
+	}
+	else if (g_settings.recording_type == CNeutrinoApp::RECORDING_VCR)
+	{
+		toDisable[0]->setActive(false);
+		toDisable[1]->setActive(false);
+		toDisable[2]->setActive(false);
+		toDisable[3]->setActive(false);
+		toDisable[4]->setActive(false);
+		toDisable[5]->setActive(false);
+		toDisable[6]->setActive(true);
+		toDisable[7]->setActive(false);
+		toDisable[8]->setActive(false);
+	}
 
-	   toDisable[0]->setActive(false);
-	   toDisable[1]->setActive(false);
-	   toDisable[2]->setActive(false);
-	   toDisable[3]->setActive(false);
-	   toDisable[4]->setActive(false);
-	   toDisable[5]->setActive(false);
-	   toDisable[6]->setActive(true);
-	   toDisable[7]->setActive(false);
-	   toDisable[8]->setActive(false);
-   }
-
-   return true;
+	return true;
 }
 
 CRecordingNotifier2::CRecordingNotifier2( CMenuItem* i)
@@ -319,13 +318,11 @@ bool CTuxtxtCacheNotifier::changeNotify(const neutrino_locale_t, void *)
 		tuxtxt_init();
 		if (vtpid)
 			tuxtxt_start(vtpid);
-
 	}
 	else
 	{
 		tuxtxt_stop();
 		tuxtxt_close();
-
 	}
 
 	return true;
@@ -502,8 +499,8 @@ bool CFontSizeNotifier::changeNotify(const neutrino_locale_t, void *)
 bool CRecAPIDSettingsNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	g_settings.recording_audio_pids_default = ( (g_settings.recording_audio_pids_std ? TIMERD_APIDS_STD : 0) |
-															  (g_settings.recording_audio_pids_alt ? TIMERD_APIDS_ALT : 0) |
-															  (g_settings.recording_audio_pids_ac3 ? TIMERD_APIDS_AC3 : 0));
+						  (g_settings.recording_audio_pids_alt ? TIMERD_APIDS_ALT : 0) |
+						  (g_settings.recording_audio_pids_ac3 ? TIMERD_APIDS_AC3 : 0));
 	return true;
 }
 
@@ -565,90 +562,102 @@ int CMoviePluginChangeExec::exec(CMenuTarget* parent, const std::string & action
 #ifndef HAVE_DREAMBOX_HARDWARE
 int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string & actionKey)
 {
-	std::string text;
+	std::stringstream text;
 	char res[60];
 
-	text = (std::string)g_Locale->getText(LOCALE_UCODECHECK_AVIA500) += ": ";
+	text << g_Locale->getText(LOCALE_UCODECHECK_AVIA500) << ": ";
 	checkFile(UCODEDIR "/avia500.ux", (char*) &res);
-	text += (std::string)res + '\n' + g_Locale->getText(LOCALE_UCODECHECK_AVIA600) + ": ";
+	text << (std::string)res + '\n' + g_Locale->getText(LOCALE_UCODECHECK_AVIA600) << ": ";
 	checkFile(UCODEDIR "/avia600.ux", (char*) &res);
-	text += (std::string)res + '\n' + g_Locale->getText(LOCALE_UCODECHECK_UCODE) + ": ";
+	text << (std::string)res + '\n' + g_Locale->getText(LOCALE_UCODECHECK_UCODE) << ": ";
 	checkFile(UCODEDIR "/ucode.bin", (char*) &res);
 	if (strcmp("not found", res) == 0)
-		text += "ucode_0014 (built-in)";
+		text << "ucode_0014 (built-in)";
 	else
-		text += res;
-	text += (std::string)"\n" + g_Locale->getText(LOCALE_UCODECHECK_CAM_ALPHA) + ": ";
+		text << res;
+	text << (std::string)"\n" + g_Locale->getText(LOCALE_UCODECHECK_CAM_ALPHA) << ": ";
 	checkFile(UCODEDIR "/cam-alpha.bin", (char*) &res);
-	text += res;
+	text << res;
 
-	ShowMsgUTF(LOCALE_UCODECHECK_HEAD, text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
+	ShowMsgUTF(LOCALE_UCODECHECK_HEAD, text.str(), CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 	return 1;
 }
 #endif
 
+int CDVBInfoExec::exec(CMenuTarget* parent, const std::string & actionKey)
+{
+	std::stringstream text;
+
+//	text<<std::hex<<std::setfill('0')<<std::setw(2)<<(int)addr[i]<<':';
+	text << g_Locale->getText(LOCALE_TIMERLIST_MODETV) << ": " << CNeutrinoApp::getInstance()->channelListTV->getSize() << "\n";
+	text << g_Locale->getText(LOCALE_TIMERLIST_MODERADIO) << ": " << CNeutrinoApp::getInstance()->channelListRADIO->getSize() << "\n \n";
+	text << g_Locale->getText(LOCALE_SERVICEMENU_CHAN_EPG_STAT_EPG_STAT) << ":\n" << g_Sectionsd->getStatusinformation() << "\n";
+
+	ShowMsgUTF(LOCALE_SERVICEMENU_CHAN_EPG_STAT, text.str(), CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
+	return 1;
+}
 
 long CNetAdapter::mac_addr_sys ( u_char *addr) //only for function getMacAddr()
 {
-    struct ifreq ifr;
-    struct ifreq *IFR;
-    struct ifconf ifc;
-    char buf[1024];
-    int s, i;
-    int ok = 0;
-    s = socket(AF_INET, SOCK_DGRAM, 0);
-    if (s==-1) 
+	struct ifreq ifr;
+	struct ifreq *IFR;
+	struct ifconf ifc;
+	char buf[1024];
+	int s, i;
+	int ok = 0;
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	if (s==-1) 
 	{
-        return -1;
-    }
-    ifc.ifc_len = sizeof(buf);
-    ifc.ifc_buf = buf;
-    ioctl(s, SIOCGIFCONF, &ifc);
-    IFR = ifc.ifc_req;
-    for (i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; IFR++)
+		return -1;
+	}
+
+	ifc.ifc_len = sizeof(buf);
+	ifc.ifc_buf = buf;
+	ioctl(s, SIOCGIFCONF, &ifc);
+	IFR = ifc.ifc_req;
+	for (i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; IFR++)
 	{
-        strcpy(ifr.ifr_name, IFR->ifr_name);
-        if (ioctl(s, SIOCGIFFLAGS, &ifr) == 0) 
+		strcpy(ifr.ifr_name, IFR->ifr_name);
+		if (ioctl(s, SIOCGIFFLAGS, &ifr) == 0) 
 		{
-            	if (! (ifr.ifr_flags & IFF_LOOPBACK)) 
+			if (! (ifr.ifr_flags & IFF_LOOPBACK)) 
+			{
+				if (ioctl(s, SIOCGIFHWADDR, &ifr) == 0) 
 				{
-                	if (ioctl(s, SIOCGIFHWADDR, &ifr) == 0) 
-					{
-                    ok = 1;
-                    break;
-                	}
-            	}
-        }
-    }
-    close(s);
-    if (ok)
+					ok = 1;
+					break;
+				}
+			}
+		}
+	}
+	close(s);
+	if (ok)
 	{
-        bcopy( ifr.ifr_hwaddr.sa_data, addr, 6);
-    }
-    else
+		bcopy( ifr.ifr_hwaddr.sa_data, addr, 6);
+	}
+	else
 	{
-        return -1;
-    }
-    return 0;
+		return -1;
+	}
+	return 0;
 }
 
 std::string CNetAdapter::getMacAddr(void)
 {
-	std::string mac_tmp;
 	long stat;
-    u_char addr[6];
-    stat = mac_addr_sys( addr);
-    if (0 == stat)
+	u_char addr[6];
+	stat = mac_addr_sys( addr);
+	if (0 == stat)
 	{
 		std::stringstream mac_tmp;
 		for(int i=0;i<6;++i)
 		mac_tmp<<std::hex<<std::setfill('0')<<std::setw(2)<<(int)addr[i]<<':';
 		return mac_tmp.str().substr(0,17);
-	}	
-    else 
+	}
+	else
 	{
-    	return "not found";
-    }
+		return "not found";
+	}
 }
 
 const char * mypinghost(const char * const host)
@@ -705,7 +714,7 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	printf("testNw Netmask: %s\n", our_mask);
 	printf("testNw Broadcast: %s\n", our_broadcast);
 	printf("testNw Gateway: %s\n", our_gateway);
-   	printf("testNw Nameserver: %s\n", our_nameserver);
+	printf("testNw Nameserver: %s\n", our_nameserver);
 	printf("testNw Testsite %s\n", testsite.c_str());
  
 	text = (std::string)"dbox:\n"
@@ -799,10 +808,10 @@ int CUserMenuMenu::exec(CMenuTarget* parent, const std::string & actionKey)
 	{
 		snprintf(text,10,"%d:",item);
 		text[9]=0;// terminate for sure
-    		menu.addItem( new CMenuOptionChooser(text, &g_settings.usermenu[button][item], USERMENU_ITEM_OPTIONS, USERMENU_ITEM_OPTION_COUNT,true ));
+		menu.addItem( new CMenuOptionChooser(text, &g_settings.usermenu[button][item], USERMENU_ITEM_OPTIONS, USERMENU_ITEM_OPTION_COUNT,true ));
 	}
 
 	menu.exec(NULL,"");
-	
+
 	return menu_return::RETURN_REPAINT;	
 }

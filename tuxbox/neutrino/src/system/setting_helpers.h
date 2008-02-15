@@ -2,7 +2,7 @@
 #define __setting_helpers__
 
 /*
-	$Id: setting_helpers.h,v 1.87 2007/06/03 14:37:07 dbluelle Exp $
+	$Id: setting_helpers.h,v 1.88 2008/02/15 22:33:28 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -268,6 +268,13 @@ class CMoviePluginChangeExec : public CMenuTarget
 };
 
 class CUCodeCheckExec : public CMenuTarget
+{
+	public:
+		int exec(CMenuTarget* parent, const std::string & actionKey);
+};
+
+
+class CDVBInfoExec : public CMenuTarget
 {
 	public:
 		int exec(CMenuTarget* parent, const std::string & actionKey);

@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.186 2007/12/27 18:47:44 seife Exp $
+  $Id: settings.h,v 1.187 2008/02/15 22:33:28 houdini Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -190,6 +190,7 @@ struct SNeutrinoSettings
 	int personalize_scartmode;
 	int personalize_games;
 	int personalize_audioplayer;
+	int personalize_inetradio;
 	int personalize_movieplayer;
 	int personalize_pictureviewer;
 	int personalize_upnpbrowser;
@@ -207,6 +208,7 @@ struct SNeutrinoSettings
 	int personalize_ucodecheck;
 	int personalize_imageinfo;
 	int personalize_update;
+	int personalize_chan_epg_stat;
 
 	int personalize_audio;
 	int personalize_video;
@@ -505,7 +507,7 @@ class CScanSettings
 	int		TP_scan;
 	int		TP_fec;
 	int		TP_pol;
-	char		TP_freq[9];
+	char		TP_freq[10];
 	char		TP_rate[9];
 	char		TP_satname[30];
 	int		TP_diseqc;

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.111 2007/12/17 19:24:19 dbt Exp $
+ * $Id: locals_intern.h,v 1.112 2008/02/15 22:33:28 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -189,6 +189,7 @@ const char * locale_real_names[] =
 	"audioplayer.jump_dialog_title",
 	"audioplayer.jump_forwards",
 	"audioplayer.keylevel",
+	"audioplayer.load_radio_stations",
 	"audioplayer.name",
 	"audioplayer.pause",
 	"audioplayer.play",
@@ -455,6 +456,7 @@ const char * locale_real_names[] =
 	"imageinfo.support",
 	"imageinfo.supporthere",
 	"imageinfo.version",
+	"inetradio.name",
 	"infoviewer.epginfo_expensive_message",
 	"infoviewer.epginfo_simple_message",
 	"infoviewer.epgnotload",
@@ -464,9 +466,11 @@ const char * locale_real_names[] =
 	"infoviewer.message_now",
 	"infoviewer.message_to",
 	"infoviewer.motor_moving",
+	"infoviewer.next",
 	"infoviewer.nocurrent",
 	"infoviewer.noepg",
 	"infoviewer.notavailable",
+	"infoviewer.now",
 	"infoviewer.selecttime",
 	"infoviewer.streaminfo",
 	"infoviewer.subchan_disp_pos",
@@ -1031,6 +1035,8 @@ const char * locale_real_names[] =
 	"screensetup.lowerright",
 	"screensetup.upperleft",
 	"sectionsd.scanmode",
+	"servicemenu.chan_epg_stat",
+	"servicemenu.chan_epg_stat_epg_stat",
 	"servicemenu.getplugins",
 	"servicemenu.getplugins_hint",
 	"servicemenu.head",

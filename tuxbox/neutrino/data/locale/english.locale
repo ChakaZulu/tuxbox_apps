@@ -162,6 +162,7 @@ audioplayer.jump_dialog_hint2 (relative, in seconds)
 audioplayer.jump_dialog_title Enter jump target
 audioplayer.jump_forwards jump forwards
 audioplayer.keylevel key level
+audioplayer.load_radio_stations Load internet radios
 audioplayer.name Audioplayer
 audioplayer.pause pause
 audioplayer.play Play
@@ -428,6 +429,7 @@ imageinfo.partitions partitions
 imageinfo.support support
 imageinfo.supporthere You can find technical support and help here:
 imageinfo.version Cycle:
+inetradio.name Internetradio
 infoviewer.epginfo_expensive_message Expanded
 infoviewer.epginfo_simple_message Short
 infoviewer.epgnotload EPG not loaded....
@@ -437,9 +439,11 @@ infoviewer.languages Audio
 infoviewer.message_now Now
 infoviewer.message_to to: 
 infoviewer.motor_moving Antenna positioning
+infoviewer.next next
 infoviewer.nocurrent No info for current program available
 infoviewer.noepg EPG not available
 infoviewer.notavailable Channel not available
+infoviewer.now now
 infoviewer.selecttime Timeselection
 infoviewer.streaminfo Features
 infoviewer.subchan_disp_pos Subchannel Display
@@ -1004,6 +1008,8 @@ scants.transponders Transponders:
 screensetup.lowerright setup lower right
 screensetup.upperleft setup upper left
 sectionsd.scanmode Sections Scan
+servicemenu.chan_epg_stat Channel/EPG Statistics
+servicemenu.chan_epg_stat_epg_stat EPG Statistics
 servicemenu.getplugins Reload plugins
 servicemenu.getplugins_hint Reloading plugins,\nplease be patient.
 servicemenu.head Service

@@ -123,33 +123,67 @@ int CChannelList::exec()
 
 void CChannelList::updateEvents(void)
 {
-	t_channel_id *p_requested_channels = NULL;
-	int size_requested_channels = 0;
-	if (listmaxshow) {
-		size_requested_channels = listmaxshow*sizeof(t_channel_id);
-		p_requested_channels 	= (t_channel_id*)malloc(size_requested_channels);
-		if (p_requested_channels != NULL) {
-			for (uint count=0; count<listmaxshow; count++){
-				if (liststart+count<chanlist.size()) p_requested_channels[count] = chanlist[liststart+count]->channel_id;
+	time_t atime = time(NULL);
+	int cnt=0;
+
+	if (displayNext) {
+		if (listmaxshow) {
+			for (uint count=0; (count<listmaxshow) && (liststart+count<chanlist.size()); count++){
+				// search only for channels whose current event is over
+				if (1 || /*(chanlist[liststart+count]->nextEvent.text.length() == 0) ||*/
+					((long)(chanlist[liststart+count]->nextEvent.startTime) < atime))
+				{
+					CChannelEventList events = g_Sectionsd->getEventsServiceKey(chanlist[liststart+count]->channel_id);
+					chanlist[liststart+count]->nextEvent.startTime = (long)0x7fffffff;
+					for ( CChannelEventList::iterator e= events.begin(); e != events.end(); ++e ) {
+						if (((long)(e->startTime) > atime) && 
+							((e->startTime) < (long)(chanlist[liststart+count]->nextEvent.startTime)))
+						{
+							chanlist[liststart+count]->nextEvent= *e;
+						}
+					}
+				}
 			}
 		}
-	}
+	} else {
+		t_channel_id *p_requested_channels = NULL;
+		int size_requested_channels = 0;
 
-	/* request tv channel list if current mode is not radio mode */
-	/* request only the events of the channel of the list */
-	CChannelEventList events = g_Sectionsd->getChannelEvents((CNeutrinoApp::getInstance()->getMode()) != NeutrinoMessages::mode_radio, p_requested_channels, size_requested_channels);
-
-	for (uint count=0; count<chanlist.size(); count++){
-		chanlist[count]->currentEvent= CChannelEvent();
-		for ( CChannelEventList::iterator e= events.begin(); e != events.end(); ++e )
-			if (chanlist[count]->channel_id == e->get_channel_id())
-			{
-				chanlist[count]->currentEvent= *e;
-				break;
+		if (listmaxshow) {
+			size_requested_channels = listmaxshow*sizeof(t_channel_id);
+			p_requested_channels 	= (t_channel_id*)malloc(size_requested_channels);
+			if (p_requested_channels != NULL) {
+				for (uint count=0; (count<listmaxshow) && (liststart+count<chanlist.size()); count++){
+					// search only for channels whose current event is over
+					if ((chanlist[liststart+count]->currentEvent.text.length() == 0) ||
+						((long)(chanlist[liststart+count]->currentEvent.startTime + chanlist[liststart+count]->currentEvent.duration) < atime))
+					{
+						p_requested_channels[cnt++] = chanlist[liststart+count]->channel_id;
+					}
+				}
 			}
+		}
+		size_requested_channels = cnt * sizeof(t_channel_id); // update to real size
+
+		if (size_requested_channels) {
+			/* request tv channel list if current mode is not radio mode */
+			/* request only the events of the channel of the list */
+			CChannelEventList events = g_Sectionsd->getChannelEvents((CNeutrinoApp::getInstance()->getMode()) != NeutrinoMessages::mode_radio, p_requested_channels, size_requested_channels);
+
+			for ( CChannelEventList::iterator e= events.begin(); e != events.end(); ++e ) {
+				for (uint count=0; (count<listmaxshow) && (liststart+count<chanlist.size()); count++){
+					if (chanlist[liststart+count]->channel_id == e->get_channel_id())
+					{
+						chanlist[liststart+count]->currentEvent= *e;
+						break;
+					}
+				}
+			}
+		}
+		if (p_requested_channels != NULL) free(p_requested_channels);
 	}
-	if (p_requested_channels != NULL) free(p_requested_channels);
 }
+
 
 void CChannelList::addChannel(int key, int number, const std::string& name, const t_satellite_position satellitePosition, t_channel_id ids)
 {
@@ -235,6 +269,7 @@ int CChannelList::show()
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 
+	displayNext = false;
 	paintHead();
 //	updateEvents();
 	paint();
@@ -329,26 +364,26 @@ int CChannelList::show()
 		}
 		else if (this->historyMode && CRCInput::isNumeric(msg))
 		{ //numeric zap
-		      switch (msg)
-      			{
-			        case CRCInput::RC_0:selected = 0;break;
-			        case CRCInput::RC_1:selected = 1;break;
-			        case CRCInput::RC_2:selected = 2;break;
-			        case CRCInput::RC_3:selected = 3;break;
-			        case CRCInput::RC_4:selected = 4;break;
-			        case CRCInput::RC_5:selected = 5;break;
-			        case CRCInput::RC_6:selected = 6;break;
-			        case CRCInput::RC_7:selected = 7;break;
-			        case CRCInput::RC_8:selected = 8;break;
-			        case CRCInput::RC_9:selected = 9;break;
-		        };
-		      zapOnExit = true;
-		      loop = false;
-    		}
+			switch (msg)
+			{
+				case CRCInput::RC_0:selected = 0; break;
+				case CRCInput::RC_1:selected = 1; break;
+				case CRCInput::RC_2:selected = 2; break;
+				case CRCInput::RC_3:selected = 3; break;
+				case CRCInput::RC_4:selected = 4; break;
+				case CRCInput::RC_5:selected = 5; break;
+				case CRCInput::RC_6:selected = 6; break;
+				case CRCInput::RC_7:selected = 7; break;
+				case CRCInput::RC_8:selected = 8; break;
+				case CRCInput::RC_9:selected = 9; break;
+			};
+			zapOnExit = true;
+			loop = false;
+		}
 		else if( (msg==CRCInput::RC_green) ||
 			 (msg==CRCInput::RC_yellow) ||
-			 (msg==CRCInput::RC_blue) ||
-		         (CRCInput::isNumeric(msg)) )
+//			 (msg==CRCInput::RC_blue) ||
+			 (CRCInput::isNumeric(msg)) )
 		{
 			//pushback key if...
 			selected = oldselected;
@@ -379,6 +414,12 @@ int CChannelList::show()
 			paintHead();
 			paint();
 
+		}
+		else if ( msg == CRCInput::RC_blue )
+		{
+			displayNext = !displayNext;
+			paintHead(); // update button bar
+			paint();
 		}
 		else if ( msg == CRCInput::RC_help )
 		{
@@ -421,7 +462,8 @@ int CChannelList::show()
 void CChannelList::hide()
 {
 	frameBuffer->paintBackgroundBoxRel(x, y, width, height+ info_height+ 5);
-        clearItem2DetailsLine ();
+	clearItem2DetailsLine ();
+	displayNext = 0; // always start with current events
 }
 
 bool CChannelList::showInfo(int pos, int epgpos)
@@ -594,33 +636,29 @@ int CChannelList::numericZap(int key)
 	// -- but shows a menue of last channels
 	if (key == g_settings.key_zaphistory) {
 
-	    if (this->lastChList.size() > 1) {
-		CChannelList channelList("Channel history", true);
+		if (this->lastChList.size() > 1) {
+			CChannelList channelList("Channel history", true);
 
-		for ( unsigned int i = 1 ; i < this->lastChList.size() ; ++i) {
-		        int channelnr = this->lastChList.getlast(i);
-		        if (channelnr < int(this->chanlist.size())) {
-		          CChannel* channel = new CChannel(*this->chanlist[channelnr]);
-		          channelList.addChannel(channel);
-        		}
-      		}
+			for ( unsigned int i = 1 ; i < this->lastChList.size() ; ++i) {
+				int channelnr = this->lastChList.getlast(i);
+				if (channelnr < int(this->chanlist.size())) {
+					CChannel* channel = new CChannel(*this->chanlist[channelnr]);
+					channelList.addChannel(channel);
+        			}
+			}
 
-		if (channelList.getSize() != 0) {
-			this->frameBuffer->paintBackground();
-			int newChannel = channelList.show() ;
+			if (channelList.getSize() != 0) {
+				this->frameBuffer->paintBackground();
+				int newChannel = channelList.show() ;
 
-			if (newChannel > -1) {
-				int lastChannel(this->lastChList.getlast(newChannel + 1));
-				if (lastChannel > -1) this->zapTo(lastChannel, true);
+				if (newChannel > -1) {
+					int lastChannel(this->lastChList.getlast(newChannel + 1));
+					if (lastChannel > -1) this->zapTo(lastChannel, true);
+				}
 			}
 		}
-	    }
-
-	    return res;
+		return res;
 	}
-
-
-
 
 	int ox=300;
 	int oy=200;
@@ -901,7 +939,14 @@ void CChannelList::setSelected( int nChannelNr)
 
 void CChannelList::paintDetails(unsigned int index)
 {
-  	if (index >= chanlist.size() || chanlist[index]->currentEvent.description.empty())
+	CChannelEvent *p_event;
+	if (displayNext) {
+		p_event = &chanlist[index]->nextEvent;
+	} else {
+		p_event = &chanlist[index]->currentEvent;
+	}
+
+	if (index >= chanlist.size() || p_event->description.empty())
 	{
 		frameBuffer->paintBackgroundBoxRel(x, y+ height, width, info_height);
 	}
@@ -913,33 +958,33 @@ void CChannelList::paintDetails(unsigned int index)
 		char cNoch[50]; // UTF-8
 		char cSeit[50]; // UTF-8
 
-		struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startTime);
-		unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startTime ) / 60;
+		struct		tm *pStartZeit = localtime(&p_event->startTime);
+		unsigned 	seit = ( time(NULL) - p_event->startTime ) / 60;
 		sprintf( cSeit, g_Locale->getText(LOCALE_CHANNELLIST_SINCE), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
 		int seit_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(cSeit, true); // UTF-8
 
-		int noch = ( chanlist[index]->currentEvent.startTime + chanlist[index]->currentEvent.duration - time(NULL)   ) / 60;
+		int noch = ( p_event->startTime + p_event->duration - time(NULL)   ) / 60;
 		if ( (noch< 0) || (noch>=10000) )
 			noch= 0;
 		sprintf( cNoch, "(%d / %d min)", seit, noch );
 		int noch_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth(cNoch, true); // UTF-8
 
-		std::string text1= chanlist[index]->currentEvent.description;
-		std::string text2= chanlist[index]->currentEvent.text;
+		std::string text1= p_event->description;
+		std::string text2= p_event->text;
 
 		int xstart = 10;
 		if (g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text1) > (width - 30 - seit_len) )
 		{
 			// zu breit, Umbruch versuchen...
-		    int pos;
-		    do
-		    {
+			int pos;
+			do
+			{
 				pos = text1.find_last_of("[ -.]+");
 				if ( pos!=-1 )
 					text1 = text1.substr( 0, pos );
 			} while ( ( pos != -1 ) && (g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(text1) > (width - 30 - seit_len) ) );
 
-			std::string text3= chanlist[index]->currentEvent.description.substr(text1.length()+ 1);
+			std::string text3 = p_event->description.substr(text1.length()+ 1);
 			if (!(text2.empty()))
 				text3 += " · ";
 
@@ -968,15 +1013,13 @@ void CChannelList::paintDetails(unsigned int index)
 //
 
 void CChannelList::clearItem2DetailsLine ()
-
 {
- paintItem2DetailsLine (-1, 0);
+	paintItem2DetailsLine (-1, 0);
 }
 
 void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 {
 	#define ConnectLineBox_Width	16
-
 	int xpos  = x - ConnectLineBox_Width;
 	int ypos1 = y + theight+0 + pos*fheight;
 	int ypos2 = y + height;
@@ -985,11 +1028,18 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 	fb_pixel_t col1 = COL_MENUCONTENT_PLUS_6;
 	fb_pixel_t col2 = COL_MENUCONTENT_PLUS_1;
 
+	CChannelEvent *p_event;
+	if (displayNext) {
+		p_event = &chanlist[ch_index]->nextEvent;
+	} else {
+		p_event = &chanlist[ch_index]->currentEvent;
+	}
+
 	// Clear
 	frameBuffer->paintBackgroundBoxRel(xpos,y, ConnectLineBox_Width, height+info_height);
 
 	// paint Line if detail info (and not valid list pos)
-	if (pos >= 0 &&  ch_index < chanlist.size() && chanlist[ch_index]->currentEvent.description != "")
+	if (pos >= 0 &&  ch_index < chanlist.size() && p_event->description != "")
 	{
 		// 1. col thick line
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-4, ypos1, 4,fheight,     col1);
@@ -1010,10 +1060,10 @@ void CChannelList::paintItem2DetailsLine (int pos,unsigned  int ch_index)
 		frameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2);
 
 		// -- small Frame around infobox
-                frameBuffer->paintBoxRel(x,         ypos2, 			2,		info_height, 	col1);
-                frameBuffer->paintBoxRel(x+width-2, ypos2, 			2,		info_height, 	col1);
-                frameBuffer->paintBoxRel(x        , ypos2, 			width-2,	2,     		col1);
-                frameBuffer->paintBoxRel(x        , ypos2+info_height-2, 	width-2,	2, 		col1);
+		frameBuffer->paintBoxRel(x,         ypos2, 			2,		info_height, 	col1);
+		frameBuffer->paintBoxRel(x+width-2, ypos2, 			2,		info_height, 	col1);
+		frameBuffer->paintBoxRel(x        , ypos2, 			width-2,	2,     		col1);
+		frameBuffer->paintBoxRel(x        , ypos2+info_height-2, 	width-2,	2, 		col1);
 
 	}
 
@@ -1049,10 +1099,17 @@ void CChannelList::paintItem(int pos)
 		char tmp[10];
 		sprintf((char*) tmp, "%d", this->historyMode ? pos:CNeutrinoApp::getInstance ()->recordingstatus ? liststart+pos+1 : chan->number);
 
+		CChannelEvent *p_event;
+		if (displayNext) {
+			p_event = &chan->nextEvent;
+		} else {
+			p_event = &chan->currentEvent;
+		}
+
 		if (liststart+pos==selected)
 		{
 			CLCD::getInstance()->showMenuText(0, chan->name.c_str(), -1, true); // UTF-8
-			CLCD::getInstance()->showMenuText(1, chan->currentEvent.description.c_str());
+			CLCD::getInstance()->showMenuText(1, p_event->description.c_str());
 		}
 
 		int numpos = x+5+numwidth- g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth(tmp);
@@ -1069,7 +1126,7 @@ void CChannelList::paintItem(int pos)
 			// add " · " separator between name and description
 			strncat(nameAndDescription, " · ", sizeof(nameAndDescription) - (strlen(nameAndDescription) + 1));
 			unsigned int ch_name_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->getRenderWidth(nameAndDescription);
-			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(chan->currentEvent.description);
+			unsigned int ch_desc_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(p_event->description);
 
 			if ( (width- numwidth- 20- 15- ch_name_len)< ch_desc_len )
 				ch_desc_len = (width- numwidth- 20- 15- ch_name_len);
@@ -1082,7 +1139,7 @@ void CChannelList::paintItem(int pos)
 			// g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ width- 15- ch_desc_len, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
 
 			// align left
-			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, chan->currentEvent.description, color);
+			g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->RenderString(x+ 5+ numwidth+ 10+ ch_name_len+ 5, ypos+ fheight, ch_desc_len, p_event->description, color);
 		}
 		else
 			//name
@@ -1090,9 +1147,10 @@ void CChannelList::paintItem(int pos)
 	}
 }
 
-const struct button_label CChannelListButtons[1] =
+struct button_label CChannelListButtons[] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED, LOCALE_INFOVIEWER_EVENTLIST}
+	{ NEUTRINO_ICON_BUTTON_RED, LOCALE_INFOVIEWER_EVENTLIST},
+	{ NEUTRINO_ICON_BUTTON_BLUE, LOCALE_INFOVIEWER_NEXT}
 };
 
 void CChannelList::paintHead()
@@ -1104,8 +1162,13 @@ void CChannelList::paintHead()
 	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());
 	frameBuffer->paintHLineRel(x, width, y + (height - buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
 	//footbar
+	if (displayNext) {
+		CChannelListButtons[1].locale = LOCALE_INFOVIEWER_NOW;
+	} else {
+		CChannelListButtons[1].locale = LOCALE_INFOVIEWER_NEXT;
+	}
 	frameBuffer->paintBoxRel(x, y + (height - buttonHeight), width, buttonHeight - 1, COL_INFOBAR_SHADOW_PLUS_1);
-	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight) + 3, ButtonWidth, 1, CChannelListButtons);
+	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight) + 3, ButtonWidth, sizeof(CChannelListButtons)/sizeof(CChannelListButtons[0]), CChannelListButtons);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
 	if (bouquetList != NULL)

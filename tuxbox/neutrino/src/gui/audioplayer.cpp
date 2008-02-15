@@ -1,9 +1,9 @@
 /*
-  $Id: audioplayer.cpp,v 1.48 2007/11/18 20:11:10 dbt Exp $
+  $Id: audioplayer.cpp,v 1.49 2008/02/15 22:32:21 houdini Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
-	
+
   Homepage: http://dbox.cyberphoria.org/
 
   Kommentar:
@@ -65,6 +65,7 @@
 #include <gui/widget/stringinput_ext.h>
 
 #include <system/settings.h>
+#include <system/xmlinterface.h>
 
 #include <irsend/irsend.h>
 
@@ -100,6 +101,9 @@
 #define AUDIOPLAYER_START_SCRIPT CONFIGDIR "/audioplayer.start"
 #define AUDIOPLAYER_END_SCRIPT CONFIGDIR "/audioplayer.end"
 
+const long int GET_PLAYLIST_TIMEOUT = 10;
+const char RADIO_STATION_XML_FILE[] = CONFIGDIR "/radio-stations.xml";
+
 CAudiofileExt::CAudiofileExt()
 : CAudiofile(), firstChar('\0')
 {
@@ -120,16 +124,54 @@ void CAudiofileExt::operator=(const CAudiofileExt& src)
 	if (&src == this)
 		return;
 	CAudiofile::operator=(src);
-	firstChar = src.firstChar;	
+	firstChar = src.firstChar;
 }
 
 
 //------------------------------------------------------------------------
 
-CAudioPlayerGui::CAudioPlayerGui()
+
+
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
+
+struct MemoryStruct {
+	char *memory;
+	size_t size;
+};
+
+static void *myrealloc(void *ptr, size_t size)
+{
+	/* There might be a realloc() out there that doesn't like reallocing
+	NULL pointers, so we take care of it here */
+	if(ptr)
+		return realloc(ptr, size);
+	else
+		return malloc(size);
+}
+
+static size_t
+WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
+{
+	size_t realsize = size * nmemb;
+	struct MemoryStruct *mem = (struct MemoryStruct *)data;
+
+	mem->memory = (char *)myrealloc(mem->memory, mem->size + realsize + 1);
+	if (mem->memory) {
+		memcpy(&(mem->memory[mem->size]), ptr, realsize);
+		mem->size += realsize;
+		mem->memory[mem->size] = 0;
+	}
+	return realsize;
+}
+
+
+CAudioPlayerGui::CAudioPlayerGui(bool inetmode)
 {
 	m_frameBuffer = CFrameBuffer::getInstance();
 
+	m_inetmode = inetmode;
 	m_visible = false;
 	m_selected = 0;
 	m_metainfo.clear();
@@ -141,18 +183,23 @@ CAudioPlayerGui::CAudioPlayerGui()
 	else
 		m_Path = "/";
 
-	audiofilefilter.addFilter("cdr");
-	audiofilefilter.addFilter("mp3");
-	audiofilefilter.addFilter("m2a");
-	audiofilefilter.addFilter("mpa");
-	audiofilefilter.addFilter("mp2");
-	audiofilefilter.addFilter("m3u");
-	audiofilefilter.addFilter("ogg");
-	audiofilefilter.addFilter("url");
-	audiofilefilter.addFilter("wav");
+	if (m_inetmode) {
+		audiofilefilter.addFilter("url");
+		audiofilefilter.addFilter("xml");
+		audiofilefilter.addFilter("m3u");
+	} else {
+		audiofilefilter.addFilter("cdr");
+		audiofilefilter.addFilter("mp3");
+		audiofilefilter.addFilter("m2a");
+		audiofilefilter.addFilter("mpa");
+		audiofilefilter.addFilter("mp2");
+		audiofilefilter.addFilter("m3u");
+		audiofilefilter.addFilter("ogg");
+		audiofilefilter.addFilter("wav");
 #ifdef ENABLE_FLAC
-	audiofilefilter.addFilter("flac");
+		audiofilefilter.addFilter("flac");
 #endif
+	}
 	m_SMSKeyInput.setTimeout(AUDIOPLAYERGUI_SMSKEY_TIMEOUT);
 }
 
@@ -336,7 +383,8 @@ int CAudioPlayerGui::show()
 				(CAudioPlayer::getInstance()->getState() == CBaseDec::STOP) && 
 				(!m_playlist.empty()))
 		{
-			playNext();
+			if(m_curr_audiofile.FileType != CFile::STREAM_AUDIO)
+				playNext();
 		}
 
 		if (update)
@@ -374,7 +422,7 @@ int CAudioPlayerGui::show()
 		else if( msg == CRCInput::RC_home)
 		{ 
 			if (m_state != CAudioPlayerGui::STOP)
-				stop();        
+				stop();
 			else
 				loop=false;
 		}
@@ -499,6 +547,11 @@ int CAudioPlayerGui::show()
 					if(m_selected >= m_playlist.size())
 						m_selected = m_playlist.size() == 0 ? m_playlist.size() : m_playlist.size() - 1;
 						update = true;
+				}
+				else
+				{
+					scanXmlFile(RADIO_STATION_XML_FILE);
+					update=true;
 				}
 			}
 			else if(m_key_level == 1)
@@ -817,6 +870,156 @@ bool CAudioPlayerGui::shuffelPlaylist(void)
 	return(result);
 }
 
+void CAudioPlayerGui::addUrl2Playlist(const char *url, const char *name) {
+	CAudiofileExt mp3( url, CFile::STREAM_AUDIO );
+	mp3.MetaData.artist = "Shoutcast";
+//	tmp = tmp.substr(0,tmp.length()-4);	//remove .url
+	if (name != NULL) {
+		mp3.MetaData.title = name;
+	} else {
+		std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
+		mp3.MetaData.title = tmp;
+	}
+	mp3.MetaData.total_time = 0;
+	if (url[0] != '#') {
+		addToPlaylist(mp3);
+	}
+}
+
+void CAudioPlayerGui::processPlaylistUrl(const char *url, const char *name) {
+	CURL *curl_handle;
+	struct MemoryStruct chunk;
+
+	chunk.memory=NULL; /* we expect realloc(NULL, size) to work */
+	chunk.size = 0;    /* no data at this point */
+
+	curl_global_init(CURL_GLOBAL_ALL);
+
+	/* init the curl session */
+	curl_handle = curl_easy_init();
+
+	/* specify URL to get */
+	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+
+	/* send all data to this function  */
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+	/* we pass our 'chunk' struct to the callback function */
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+	/* some servers don't like requests that are made without a user-agent
+	field, so we provide one */
+	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+
+	/* don't use signal for timeout */
+	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, (long)1);
+	/* set timeout to 10 seconds */
+	curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, GET_PLAYLIST_TIMEOUT);
+
+	/* get it! */
+	curl_easy_perform(curl_handle);
+
+	/* cleanup curl stuff */
+	curl_easy_cleanup(curl_handle);
+
+	/*
+	* Now, our chunk.memory points to a memory block that is chunk.size
+	* bytes big and contains the remote file.
+	*
+	* Do something nice with it!
+	*
+	* You should be aware of the fact that at this point we might have an
+	* allocated data block, and nothing has yet deallocated that data. So when
+	* you're done with it, you should free() it as a nice application.
+	*/
+
+	long res_code;
+	if (curl_easy_getinfo(curl_handle, CURLINFO_HTTP_CODE/*CURLINFO_RESPONSE_CODE*/, &res_code ) ==  CURLE_OK) {
+		if (200 == res_code) {
+			//printf("\nchunk = %s\n", chunk.memory);
+			std::istringstream iss;
+			iss.str (std::string(chunk.memory, chunk.size));
+			char line[512];
+			char *ptr;
+			while (iss.rdstate() == std::ifstream::goodbit) {
+				iss.getline(line, 512);
+				if (line[0] != '#') {
+					//printf("chunk: line = %s\n", line);
+					ptr = strstr(line, "http://");
+					if (ptr != NULL) {
+						char *tmp;
+						// strip \n and \r characters from url
+						tmp = strchr(line, '\r');
+						if (tmp != NULL)
+							*tmp = '\0';
+						tmp = strchr(line, '\n');
+						if (tmp != NULL)
+							*tmp = '\0';
+						addUrl2Playlist(ptr, name);
+					}
+				}
+			}
+		}
+	}
+
+	if(chunk.memory)
+		free(chunk.memory);
+ 
+	/* we're done with libcurl, so clean it up */
+	curl_global_cleanup();
+}
+
+
+void CAudioPlayerGui::scanXmlFile(std::string filename)
+{
+	xmlDocPtr answer_parser = parseXmlFile(filename.c_str());
+
+	if (answer_parser != NULL) {
+		char *name;
+		char *url;
+		xmlNodePtr element = xmlDocGetRootElement(answer_parser);
+		element = element->xmlChildrenNode;
+		xmlNodePtr element_tmp = element;
+		if (element == NULL) {
+			printf("[openFilebrowser] No valid XML File.\n");
+		} else {
+			CProgressWindow progress;
+			long maxProgress = 0;
+			// count # of entries
+			while (element) {
+				maxProgress++;
+				element = element->xmlNextNode;
+			}
+			element = element_tmp;
+			long listPos = -1;
+
+			progress.setTitle(LOCALE_AUDIOPLAYER_LOAD_RADIO_STATIONS);
+			progress.exec(this, "");
+			neutrino_msg_t      msg;
+			neutrino_msg_data_t data;
+			g_RCInput->getMsg(&msg, &data, 0);
+			while (element && msg != CRCInput::RC_home) {
+				listPos++;
+				progress.showGlobalStatus(100*listPos / maxProgress);
+				url = xmlGetAttribute(element, "url");
+				name = xmlGetAttribute(element, "name");
+				if (url != NULL) {
+					progress.showStatusMessageUTF(url);
+					//printf("Processing %s, %s\n", url, name);
+					if (strstr(url, ".m3u") || strstr(url, ".pls"))
+						processPlaylistUrl(url, name);
+					else 
+						addUrl2Playlist(url, name);
+				}
+				element = element->xmlNextNode;
+				g_RCInput->getMsg(&msg, &data, 0);
+
+			}
+		progress.hide();
+		}
+		xmlFreeDoc(answer_parser);
+	}
+}
 
 bool CAudioPlayerGui::openFilebrowser(void)
 {
@@ -870,13 +1073,25 @@ bool CAudioPlayerGui::openFilebrowser(void)
 			}
 			if(files->getType() == CFile::STREAM_AUDIO)
 			{
-				CAudiofileExt mp3( files->Name, CFile::STREAM_AUDIO );
-				mp3.MetaData.artist = "Shoutcast";
-				std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
-				tmp = tmp.substr(0,tmp.length()-4);	//remove .url
-				mp3.MetaData.title = tmp;
-				mp3.MetaData.total_time = 0;
-				addToPlaylist(mp3);
+				std::string filename = files->Name;
+				FILE *fd = fopen(filename.c_str(), "r");
+				if(fd)
+				{
+					char buf[512];
+					unsigned int len = fread(buf, sizeof(char), 512, fd);
+					fclose(fd);
+
+					if (len && (strstr(buf, ".m3u") || strstr(buf, ".pls")))
+					{
+						printf("m3u/pls Playlist found: %s\n", buf);
+						filename = buf;
+						processPlaylistUrl(buf);
+					}
+					else
+					{
+						addUrl2Playlist(filename.c_str());
+					}
+				}
 			}
 			else if(files->getType() == CFile::FILE_PLAYLIST)
 			{
@@ -890,64 +1105,77 @@ bool CAudioPlayerGui::openFilebrowser(void)
 					// remove CR
 					if(cLine[strlen(cLine)-1]=='\r')
 						cLine[strlen(cLine)-1]=0;
-					if(strlen(cLine) > 0 && cLine[0]!='#') 
+					if(strlen(cLine) > 0 && cLine[0]!='#')
 					{
-						std::string filename = sPath + '/' + cLine;
-
-						unsigned int pos;
-						while((pos=filename.find('\\'))!=std::string::npos)
-							filename[pos]='/';
-
-						std::ifstream testfile;
-						testfile.open(filename.c_str(), std::ifstream::in);
-						if(testfile.good())
+						char *url = strstr(cLine, "http://");
+						if (url != NULL) {
+							if (strstr(url, ".m3u") || strstr(url, ".pls"))
+								processPlaylistUrl(url);
+						} else if ((url = strstr(cLine, "icy://")) != NULL) {
+							addUrl2Playlist(url);
+						} else if ((url = strstr(cLine, "scast:://")) != NULL) {
+							addUrl2Playlist(url);
+						}
+						else
 						{
+							std::string filename = sPath + '/' + cLine;
+
+							unsigned int pos;
+							while((pos=filename.find('\\'))!=std::string::npos)
+								filename[pos]='/';
+
+							std::ifstream testfile;
+							testfile.open(filename.c_str(), std::ifstream::in);
+							if(testfile.good())
+							{
 #ifdef AUDIOPLAYER_CHECK_FOR_DUPLICATES
-							// Check for duplicates and remove (new entry has higher prio)
-							// this really needs some time :(
-							for (unsigned long i=0;i<m_playlist.size();i++)
-							{
-								if(m_playlist[i].Filename == filename)
-									removeFromPlaylist(i);
-							}
+								// Check for duplicates and remove (new entry has higher prio)
+								// this really needs some time :(
+								for (unsigned long i=0;i<m_playlist.size();i++)
+								{
+									if(m_playlist[i].Filename == filename)
+										removeFromPlaylist(i);
+								}
 #endif
-							if(strcasecmp(filename.substr(filename.length()-3,3).c_str(), "url")==0)
-							{
-								CAudiofileExt mp3( filename, CFile::STREAM_AUDIO );
-								mp3.MetaData.artist = "Shoutcast";
-								std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
-								tmp = tmp.substr(0,tmp.length()-4);	//remove .url
-								mp3.MetaData.title = tmp;
-								mp3.MetaData.total_time = 0;												
-								addToPlaylist(mp3);
-							}
-							else
-							{
-								CFile playlistItem;
-								playlistItem.Name = filename;											
-								CFile::FileType fileType = playlistItem.getType();
-								if (fileType == CFile::FILE_CDR
-										|| fileType == CFile::FILE_MP3
-										|| fileType == CFile::FILE_OGG
-										|| fileType == CFile::FILE_WAV
+								if(strcasecmp(filename.substr(filename.length()-3,3).c_str(), "url")==0)
+								{
+									addUrl2Playlist(filename.c_str());
+								}
+								else
+								{
+									CFile playlistItem;
+									playlistItem.Name = filename;
+									CFile::FileType fileType = playlistItem.getType();
+									if (fileType == CFile::FILE_CDR
+											|| fileType == CFile::FILE_MP3
+											|| fileType == CFile::FILE_OGG
+											|| fileType == CFile::FILE_WAV
 #ifdef ENABLE_FLAC
-										|| fileType == CFile::FILE_FLAC
+											|| fileType == CFile::FILE_FLAC
 #endif
-								)
-								{
-									CAudiofileExt audioFile(filename,fileType);
-									addToPlaylist(audioFile);
-								} else
-								{
-									printf("Audioplayer: file type (%d) is *not* supported in playlists\n(%s)\n",
-											fileType, filename.c_str()); 
+									)
+									{
+										CAudiofileExt audioFile(filename,fileType);
+										addToPlaylist(audioFile);
+									} else
+									{
+										printf("Audioplayer: file type (%d) is *not* supported in playlists\n(%s)\n",
+												fileType, filename.c_str());
+									}
 								}
 							}
+							testfile.close();
 						}
-						testfile.close();
 					}
 				}
 				infile.close();
+			}
+			else if(files->getType() == CFile::FILE_XML)
+			{
+				if (!files->Name.empty())
+				{
+					scanXmlFile(files->Name);
+				}
 			}
 		}
 		if (m_select_title_by_name)
@@ -1104,40 +1332,44 @@ void CAudioPlayerGui::paintHead()
 }
 
 //------------------------------------------------------------------------
-const struct button_label AudioPlayerButtons[7][4] =
+const struct button_label AudioPlayerButtons[][4] =
 {
-{
-	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_STOP                        },
-	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_REWIND                      },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_PAUSE                       },
-	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_FASTFORWARD                 },
-},
-{
-	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_DELETE                      },
-	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_ADD                         },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_DELETEALL                   },
-	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_SHUFFLE                     }
-},
-{
-	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
-	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
-},
-{
-	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
-	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
-},
-{
-	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_ID   },			
-},
-{
-	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_NAME },			
-},
-{
-	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_STOP                        },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_PAUSE                       },
-},
+	{
+		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_STOP                        },
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_REWIND                      },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_PAUSE                       },
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_FASTFORWARD                 },
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_DELETE                      },
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_ADD                         },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_DELETEALL                   },
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_SHUFFLE                     }
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_JUMP_BACKWARDS              },
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_AUDIOPLAYER_JUMP_FORWARDS               }
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_ID  },	
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_SAVE_PLAYLIST               },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_BUTTON_SELECT_TITLE_BY_NAME },
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_STOP                        },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_AUDIOPLAYER_PAUSE                       },
+	},
+	{
+		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_AUDIOPLAYER_LOAD_RADIO_STATIONS},
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_AUDIOPLAYER_ADD                         },
+	},
 };
 //------------------------------------------------------------------------
 
@@ -1171,10 +1403,14 @@ void CAudioPlayerGui::paintFoot()
 
 	if (m_key_level == 0)
 	{
-		if (m_playlist.empty())
-			::paintButtons(m_frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, 
-					m_x + ButtonWidth + 10, top + 4, ButtonWidth, 1, &(AudioPlayerButtons[1][1]));
-		else
+		if (m_playlist.empty()) {
+			if (m_inetmode)
+				::paintButtons(m_frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, 
+					m_x + ButtonWidth + 10, top + 4, ButtonWidth2, 2, AudioPlayerButtons[7]);
+			else
+				::paintButtons(m_frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, 
+					m_x + ButtonWidth + 10, top + 4, ButtonWidth, 1, &(AudioPlayerButtons[7][1]));
+		} else
 			::paintButtons(m_frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale,
 					m_x + 10, top + 4, ButtonWidth, 4, AudioPlayerButtons[1]);
 	}
@@ -1760,11 +1996,14 @@ void CAudioPlayerGui::screensaver(bool on)
 void CAudioPlayerGui::GetMetaData(CAudiofileExt &File)
 {
 	//	printf("GetMetaData\n");
-	bool ret = CAudioPlayer::getInstance()->readMetaData(  &File,
+	bool ret = 1;
+
+	if (CFile::STREAM_AUDIO != File.FileType)
+		ret = CAudioPlayer::getInstance()->readMetaData(  &File,
 								m_state != CAudioPlayerGui::STOP &&
-								!g_settings.audioplayer_highprio);	
-	if (!ret ||
-	    (File.MetaData.artist.empty() && File.MetaData.title.empty() ) )
+								!g_settings.audioplayer_highprio);
+
+	if (!ret || File.MetaData.artist.empty() && File.MetaData.title.empty() )
 	{
 		//Set from Filename
 		std::string tmp = File.Filename.substr(File.Filename.rfind('/') + 1);
@@ -1787,7 +2026,7 @@ void CAudioPlayerGui::GetMetaData(CAudiofileExt &File)
 				File.MetaData.title = tmp;
 		}
 		File.MetaData.artist = FILESYSTEM_ENCODING_TO_UTF8_STRING(File.MetaData.artist);
-		File.MetaData.title  = FILESYSTEM_ENCODING_TO_UTF8_STRING(File.MetaData.title );
+	File.MetaData.title  = FILESYSTEM_ENCODING_TO_UTF8_STRING(File.MetaData.title );
 	}
 }
 //------------------------------------------------------------------------
@@ -1862,6 +2101,7 @@ void CAudioPlayerGui::getFileInfoToDisplay(std::string &info, CAudiofileExt &fil
 
 void CAudioPlayerGui::addToPlaylist(CAudiofileExt &file)
 {	
+	//printf("add2Playlist: %s\n", file.Filename.c_str());
 	if (m_select_title_by_name)
 	{	
 		if (!file.MetaData.bitrate)
