@@ -960,13 +960,18 @@ void CChannelList::paintDetails(unsigned int index)
 
 		struct		tm *pStartZeit = localtime(&p_event->startTime);
 		unsigned 	seit = ( time(NULL) - p_event->startTime ) / 60;
-		sprintf( cSeit, g_Locale->getText(LOCALE_CHANNELLIST_SINCE), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
-		int seit_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(cSeit, true); // UTF-8
 
-		int noch = ( p_event->startTime + p_event->duration - time(NULL)   ) / 60;
-		if ( (noch< 0) || (noch>=10000) )
-			noch= 0;
-		sprintf( cNoch, "(%d / %d min)", seit, noch );
+		if (displayNext) {
+			sprintf(cNoch, "(%d min)", p_event->duration / 60);
+			sprintf(cSeit, g_Locale->getText(LOCALE_CHANNELLIST_START), pStartZeit->tm_hour, pStartZeit->tm_min);
+		} else {
+			sprintf(cSeit, g_Locale->getText(LOCALE_CHANNELLIST_SINCE), pStartZeit->tm_hour, pStartZeit->tm_min);
+			int noch = (p_event->startTime + p_event->duration - time(NULL)) / 60;
+			if ((noch< 0) || (noch>=10000))
+				noch= 0;
+			sprintf(cNoch, "(%d / %d min)", seit, noch);
+		}
+		int seit_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_DESCR]->getRenderWidth(cSeit, true); // UTF-8
 		int noch_len = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth(cNoch, true); // UTF-8
 
 		std::string text1= p_event->description;

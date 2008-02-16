@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.112 2008/02/15 22:33:28 houdini Exp $
+ * $Id: locals_intern.h,v 1.113 2008/02/16 20:36:05 seife Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -236,6 +236,7 @@ const char * locale_real_names[] =
 	"channellist.head",
 	"channellist.nonefound",
 	"channellist.since",
+	"channellist.start",
 	"colorchooser.alpha",
 	"colorchooser.blue",
 	"colorchooser.green",

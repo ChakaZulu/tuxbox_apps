@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.112 2008/02/15 22:33:28 houdini Exp $
+ * $Id: locals.h,v 1.113 2008/02/16 20:36:05 seife Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -236,6 +236,7 @@ typedef enum
 	LOCALE_CHANNELLIST_HEAD,
 	LOCALE_CHANNELLIST_NONEFOUND,
 	LOCALE_CHANNELLIST_SINCE,
+	LOCALE_CHANNELLIST_START,
 	LOCALE_COLORCHOOSER_ALPHA,
 	LOCALE_COLORCHOOSER_BLUE,
 	LOCALE_COLORCHOOSER_GREEN,

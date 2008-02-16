@@ -209,6 +209,7 @@ cablesetup.provider cable provider
 channellist.head All Services
 channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
 channellist.since since %02d:%02d
+channellist.start starts %02d:%02d
 colorchooser.alpha alpha
 colorchooser.blue blue
 colorchooser.green green

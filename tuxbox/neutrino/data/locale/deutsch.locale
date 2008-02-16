@@ -209,6 +209,7 @@ cablesetup.provider Kabelanbieter
 channellist.head Alle Kanäle
 channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte eine Kanalsuche durch\n(dbox-Taste -> Service)
 channellist.since seit %02d:%02d
+channellist.start ab %02d:%02d
 colorchooser.alpha alpha
 colorchooser.blue blau
 colorchooser.green grün
