@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.41 2007/10/14 23:43:43 carjay Exp $
+	$Id: framebuffer.h,v 1.42 2008/02/19 15:35:15 ecosys Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -43,7 +43,7 @@
 
 typedef struct fb_var_screeninfo t_fb_var_screeninfo;
 
-/** Ausführung als Singleton */
+/** Ausfï¿½hrung als Singleton */
 class CFrameBuffer
 {
 	private:
@@ -142,6 +142,8 @@ class CFrameBuffer
 		void paintHLine(int xa, int xb, int y, const fb_pixel_t col);
 		void paintHLineRel(int x, int dx, int y, const fb_pixel_t col);
 
+		void paintCircle(int sx, int sy, int radius, const fb_pixel_t col, int type);
+		void paintCircleFilled(int sx, int sy, int radius, const fb_pixel_t col, int type);
 
 		void setIconBasePath(const std::string & iconPath);
 
