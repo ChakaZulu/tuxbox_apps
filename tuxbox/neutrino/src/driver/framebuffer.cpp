@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.59 2008/02/19 15:35:15 ecosys Exp $
+	$Id: framebuffer.cpp,v 1.60 2008/02/21 18:23:27 ecosys Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -649,106 +649,119 @@ void CFrameBuffer::paintPixel(const int x, const int y, const fb_pixel_t col)
 	*pos = col;
 }
 
-void CFrameBuffer::paintCircleFilled(int sx, int sy, int radius, const fb_pixel_t col, int type)
+void CFrameBuffer::paintBoxRelSmooth(const int x, const int y, const int dx, const int dy, const int rad, const fb_pixel_t col)
 {
-	if (!getActive())
-		return;
+    int F,R=rad,sx,sy,dxx=dx,dyy=dy,rx,ry,wx,wy;
 
-	int F = 1 - radius;
-	int ddF_x = 0;
-	int ddF_y = -2*radius;
-	int x = 0;
-	int y = radius;
-	bool paint_extraline = true;
+    if (!getActive())
+        return;
 
-	while ( x < y ) {
-		if (F >= 0) {
-			y     -= 1;
-			ddF_y += 2;
-			F     += ddF_y;
-		}
+    uint8_t *pos=((uint8_t *)getFrameBufferPointer())+x*sizeof(fb_pixel_t)+stride*y;
+    uint8_t *pos0, *pos1, *pos2, *pos3;
 
-		x     += 1;
-		ddF_x += 2;
-		F     += ddF_x + 1;
+#ifdef FB_USE_PALETTE
+    if (dxx<0) {
+        fprintf(stderr, "ERROR: CFrameBuffer::paintBoxRelSmooth called with dx < 0 (%d)\n", dxx);
+        dxx=0;
+    }
+#else
+    fb_pixel_t *dest0, *dest1;
+#endif
 
-		switch (type)
-		{
-			case 0: // Full Circle
-				paintHLineRel(sx - x, (sx - (sx - x)) * 2, sy - y, col);
-				paintHLineRel(sx - y, (sx - (sx - y)) * 2, sy - x, col);
-				if (paint_extraline) {
-					paintHLineRel(sx - y, (sx - (sx - y)) * 2, sy + x - 1, col);
-					paint_extraline = false;
-				}
-				paintHLineRel(sx - x, (sx - (sx - x)) * 2, sy + y, col);
-				paintHLineRel(sx - y, (sx - (sx - y)) * 2, sy + x, col);
-			break;
-			case 1: // Left Upper Corner
-				paintHLineRel(sx - x, sx - (sx - x), sy - y, col);
-				paintHLineRel(sx - y, sx - (sx - y), sy - x, col);
-			break;
-			case 2: // Right Upper Corner
-				paintHLineRel(sx, (sx + x) - sx, sy - y, col);
-				paintHLineRel(sx, (sx + y) - sx, sy - x, col);
-			break;
-			case 3: // Left Lower Corner
-				paintHLineRel(sx - x, sx - (sx - x), sy + y, col);
-				paintHLineRel(sx - y, sx - (sx - y), sy + x, col);
-			break;
-			case 4: // Right Lower Corner
-				paintHLineRel(sx, (sx + x) - sx, sy + y, col);
-				paintHLineRel(sx, (sx + y) - sx, sy + x, col);
-			break;
-			default: ; /* nothing to do for default */
-		}
-	}
-}
+    if(R)
+    {
+        if(--dyy<=0)
+        {
+            dyy=1;
+        }
 
-void CFrameBuffer::paintCircle(int sx, int sy, int radius, const fb_pixel_t col, int type)
-{
-	if (!getActive())
-		return;
+        if(R==1 || R>(dxx/2) || R>(dyy/2))
+        {
+            R=dxx/10;
+            F=dyy/10;    
+            if(R>F)
+            {
+                if(R>(dyy/3))
+                {
+                    R=dyy/3;
+                }
+            }
+            else
+            {
+                R=F;
+                if(R>(dxx/3))
+                {
+                    R=dxx/3;
+                }
+            }
+        }
+        sx=0;
+        sy=R;
+        F=1-R;
 
-	int F = 1 - radius;
-	int ddF_x = 0;
-	int ddF_y = -2*radius;
-	int x = 0;
-	int y = radius;
+        rx=R-sx;
+        ry=R-sy;
 
-	while ( x < y ) {
-		if (F >= 0) {
-			y     -= 1;
-			ddF_y += 2;
-			F     += ddF_y;
-		}
-		x     += 1;
-		ddF_x += 2;
-		F     += ddF_x + 1;
+        pos0=pos+((dyy-ry)*stride);
+        pos1=pos+(ry*stride);
+        pos2=pos+(rx*stride);
+        pos3=pos+((dyy-rx)*stride);
+        while (sx <= sy)
+        {
+            rx=R-sx;
+            ry=R-sy;
+            wx=rx<<1;
+            wy=ry<<1;
+#ifdef FB_USE_PALETTE
+            memset(pos0+rx, col, dxx-wx);
+            memset(pos1+rx, col, dxx-wx);
+            memset(pos2+ry, col, dxx-wy);
+            memset(pos3+ry, col, dxx-wy);
+#else
+            dest0=(fb_pixel_t *)(pos0+rx);
+            dest1=(fb_pixel_t *)(pos1+rx);
+            for (int i=0; i<(dxx-wx); i++)
+            {
+                *(dest0++)=col;
+                *(dest1++)=col;
+            }
+            dest0=(fb_pixel_t *)(pos2+ry);
+            dest1=(fb_pixel_t *)(pos3+ry);
+            for (int i=0; i<(dxx-wy); i++)
+            {
+                *(dest0++)=col;
+                *(dest1++)=col;
+            }
+#endif
+            sx++;
+            pos2-=stride;
+            pos3+=stride;
+            if (F<0)
+            {
+                F+=(sx<<1)-1;
+            }
+            else  
+            {
+                F+=((sx-sy)<<1);
+                sy--;
+                pos0-=stride;
+                pos1+=stride;
+            }
+        }
+        pos+=R*stride;
+    }
 
-		switch (type)
-		{
-			case 0: // Full Circle
-				paintPixel(sx + x, sy + y, col); paintPixel(sx - x, sy + y, col);
-				paintPixel(sx + x, sy - y, col); paintPixel(sx - x, sy - y, col);
-				paintPixel(sx + y, sy + x, col); paintPixel(sx - y, sy + x, col);
-				paintPixel(sx + y, sy - x, col); paintPixel(sx - y, sy - x, col);
-			break;
-			case 1: // Left Upper Corner
-				paintPixel(sx - x, sy - y, col); paintPixel(sx - y, sy - x, col);
-			break;
-			case 2: // Right Upper Corner
-				paintPixel(sx + x, sy - y, col); paintPixel(sx + y, sy - x, col);
-			break;
-			case 3: // Left Lower Corner
-				paintPixel(sx - x, sy + y, col); paintPixel(sx - y, sy + x, col);
-			break;
-			case 4: // Right Lower Corner
-				paintPixel(sx + x, sy + y, col); paintPixel(sx + y, sy + x, col);
-			break;
-			default: ; /* nothing to do for default */
-    	}
-  	}
+    for (int count=R; count<(dyy-R); count++)
+    {
+#ifdef FB_USE_PALETTE
+        memset(pos, col, dxx);
+#else
+        dest0=(fb_pixel_t *)pos;
+        for (int i=0; i<dxx; i++)
+            *(dest0++)=col;
+#endif
+        pos+=stride;
+    }
 }
 
 void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, const fb_pixel_t col)

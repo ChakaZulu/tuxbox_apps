@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.h,v 1.42 2008/02/19 15:35:15 ecosys Exp $
+	$Id: framebuffer.h,v 1.43 2008/02/21 18:23:27 ecosys Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
@@ -43,7 +43,7 @@
 
 typedef struct fb_var_screeninfo t_fb_var_screeninfo;
 
-/** Ausf�hrung als Singleton */
+/** Ausfuehrung als Singleton */
 class CFrameBuffer
 {
 	private:
@@ -131,6 +131,7 @@ class CFrameBuffer
 			};
 		void paintPixel(int x, int y, const fb_pixel_t col);
 
+		void paintBoxRelSmooth(const int x, const int y, const int dx, const int dy, const int rad, const fb_pixel_t col); // rounded Corners
 		void paintBoxRel(const int x, const int y, const int dx, const int dy, const fb_pixel_t col);
 		inline void paintBox(int xa, int ya, int xb, int yb, const fb_pixel_t col) { paintBoxRel(xa, ya, xb - xa, yb - ya, col); }
 
