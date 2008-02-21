@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.60 2008/02/21 18:23:27 ecosys Exp $
+	$Id: framebuffer.cpp,v 1.61 2008/02/21 18:39:31 ecosys Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -649,7 +649,7 @@ void CFrameBuffer::paintPixel(const int x, const int y, const fb_pixel_t col)
 	*pos = col;
 }
 
-void CFrameBuffer::paintBoxRelSmooth(const int x, const int y, const int dx, const int dy, const int rad, const fb_pixel_t col)
+void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const int rad, const fb_pixel_t col)
 {
     int F,R=rad,sx,sy,dxx=dx,dyy=dy,rx,ry,wx,wy;
 
