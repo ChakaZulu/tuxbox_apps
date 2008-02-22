@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.884 2008/02/15 22:36:29 houdini Exp $
+	$Id: neutrino.cpp,v 1.885 2008/02/22 23:24:26 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3034,7 +3034,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		{
 			// show mute icon ONLY on event or current volume value is 0
 			if (( current_muted ) || (doShowMuteIcon()))
-				paintMuteIcon();			
+				paintMuteIcon();
 			else
 				paintMuteIcon(false);
 		}
@@ -3049,47 +3049,47 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 	int dy = 27; 	// height
 	int bwx = 20; 	// boarder width x from left and right
 	int bwtop = 47; 	// boarder width y from top
-	int bwbot = 47; 		// boarder width y from bottom
+	int bwbot = 47; 	// boarder width y from bottom
 	int x, y;
 	int a_step = atoi(g_settings.audio_step);
 	volumeBarIsVisible = ((g_settings.volumebar_disp_pos != 6) ? true : false);
 	
 	if( g_settings.volumebar_disp_pos == 0 )
-			{
-				// upper right
-				x = g_settings.screen_EndX - dx - bwx - 40;
-				y = g_settings.screen_StartY + dy + bwtop;
-			}
-			else if( g_settings.volumebar_disp_pos == 1 )
-			{
-				// upper left
-				x = g_settings.screen_StartX + bwx;
-				y = g_settings.screen_StartY + dy + bwtop;
-			}
-			else if( g_settings.volumebar_disp_pos == 2 )
-			{
-				// bottom left
-				x = g_settings.screen_StartX + bwx;
-				y = g_settings.screen_EndY - bwbot;
-			}
-			else if( g_settings.volumebar_disp_pos == 3 )
-			{
-				// bottom right
-				x = g_settings.screen_EndX - dx - bwx;
-				y = g_settings.screen_EndY- bwbot;
-			}
-			else if( g_settings.volumebar_disp_pos == 4 )
-			{
-				// center default
-				x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
-				y = g_settings.screen_EndY - bwbot;
-			}
-			else if( g_settings.volumebar_disp_pos == 5 )
-			{
-				// center higher
-				x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
-				y = g_settings.screen_EndY - bwbot-140;
-			}
+	{
+		// upper right
+		x = g_settings.screen_EndX - dx - bwx - 40;
+		y = g_settings.screen_StartY + dy + bwtop;
+	}
+	else if( g_settings.volumebar_disp_pos == 1 )
+	{
+		// upper left
+		x = g_settings.screen_StartX + bwx;
+		y = g_settings.screen_StartY + dy + bwtop;
+	}
+	else if( g_settings.volumebar_disp_pos == 2 )
+	{
+		// bottom left
+		x = g_settings.screen_StartX + bwx;
+		y = g_settings.screen_EndY - bwbot;
+	}
+	else if( g_settings.volumebar_disp_pos == 3 )
+	{
+		// bottom right
+		x = g_settings.screen_EndX - dx - bwx;
+		y = g_settings.screen_EndY- bwbot;
+	}
+	else if( g_settings.volumebar_disp_pos == 4 )
+	{
+		// center default
+		x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
+		y = g_settings.screen_EndY - bwbot;
+	}
+	else if( g_settings.volumebar_disp_pos == 5 )
+	{
+		// center higher
+		x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
+		y = g_settings.screen_EndY - bwbot-140;
+	}
 
 	fb_pixel_t * pixbuf = NULL;
 
@@ -3189,11 +3189,12 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			frameBuffer->paintBoxRel(x + dx - 40,  y + 4,        36, dy - 2*4, COL_INFOBAR_PLUS_1);
 			g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x + dx - 36, y + dy, 36, p , COL_INFOBAR_PLUS_1);
 		
-			if ( ( current_muted ) || ( doShowMuteIcon() )) 	
-				paintMuteIcon();				
-			else	
-				paintMuteIcon(false);
-					
+ 			if ( ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic))  {
+				if ( ( current_muted ) || ( doShowMuteIcon() ))
+					paintMuteIcon();				
+				else	
+					paintMuteIcon(false);
+			}
 		}
 						
 		CLCD::getInstance()->showVolume(current_volume);
