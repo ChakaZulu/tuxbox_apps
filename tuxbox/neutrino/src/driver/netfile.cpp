@@ -331,6 +331,9 @@ int request_file(URL *url)
 
 		/* send a HTTP/1.1 request */
 		case HTTP11:	{
+				int meta_int;
+				CSTATE tmp;
+
 				snprintf(str, sizeof(str)-1, "%s %s HTTP/1.1\r\n", (url->entity[0]) ? "POST" : "GET", url->file);
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
@@ -343,17 +346,24 @@ int request_file(URL *url)
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
+				if (url->logindata[0])
+				{
+					sprintf(str, "Authorization: Basic %s\r\n", url->logindata);
+					dprintf(stderr, "> %s", str);
+					send(url->fd, str, strlen(str), 0);
+				}
+
 				snprintf(str, sizeof(str)-1, "Accept: */*\r\n");
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
-#if 0
-				// don't request MetaData as we are not processing them -> sound blibs
-				// http://www.smackfu.com/stuff/programming/shoutcast.html
-				snprintf(str, sizeof(str)-1, "Icy-MetaData: 1\r\n");
-				dprintf(stderr, "> %s", str);
-				send(url->fd, str, strlen(str), 0);
-#endif
+				if(enable_metadata)
+				{
+					snprintf(str, sizeof(str)-1, "Icy-MetaData: 1\r\n");
+					dprintf(stderr, "> %s", str);
+					send(url->fd, str, strlen(str), 0);
+				}
+
 				/* if we have a entity, announce it to the server */
 				if(url->entity[0])
 				{
@@ -371,6 +381,26 @@ int request_file(URL *url)
 				dprintf(stderr, "> %s", str);
 				send(url->fd, str, strlen(str), 0);
 
+				if( (meta_int = parse_response(url, &id3, &tmp)) < 0)
+					return -1;
+
+				if(meta_int)
+				{
+					/* hook in the filter function if there is meta */
+					/* data present in the stream */
+					cache[slot].filter_arg = ShoutCAST_InitFilter(meta_int);
+					cache[slot].filter = ShoutCAST_MetaFilter;
+
+					/* this is a *really bad* way to pass along the argument, */
+					/* since we convert the integer into a pointer instead of */
+					/* passing along a pointer/reference !*/
+					if(cache[slot].filter_arg->state)
+						bcopy(&tmp, cache[slot].filter_arg->state, sizeof(CSTATE));
+				}
+
+				/* push the created ID3 header into the stream cache */
+				push(url->stream, (char*)&id3, id3.len);
+#if 0
 				rval = parse_response(url, NULL, NULL);
 				dprintf(stderr, "server response parser: return value = %d\n", rval);
 
@@ -383,6 +413,7 @@ int request_file(URL *url)
 				/* return on error */
 				if( rval < 0 )
 					return rval;
+#endif
 			}
 			break;
 
@@ -1691,7 +1722,6 @@ void ShoutCAST_MetaFilter(STREAM_FILTER *arg)
 	dprintf(stderr, "filter : cnt + len: %d\n", filterdata->cnt + len);
 	dprintf(stderr, "filter : meta_int : %d\n", filterdata->meta_int);
 #endif
-
 	/* not yet all meta data has been processed */
 	if(filterdata->stored < filterdata->len)
 	{
