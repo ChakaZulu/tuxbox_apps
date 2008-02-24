@@ -180,6 +180,19 @@ std::string trim(std::string const& source, char const* delims)
 	return result;
 }
 //-------------------------------------------------------------------------
+// replace all occurrences find_what
+//-------------------------------------------------------------------------
+void replace(std::string &str, const std::string &find_what, const std::string &replace_with)
+{
+	std::string::size_type pos=0;
+	while((pos=str.find(find_what, pos))!=std::string::npos)
+	{
+		str.erase(pos, find_what.length());
+		str.insert(pos, replace_with);
+		pos+=replace_with.length();
+	}
+}
+//-------------------------------------------------------------------------
 // equal-function for case insensitive compare
 //-------------------------------------------------------------------------
 bool nocase_compare (char c1, char c2)
