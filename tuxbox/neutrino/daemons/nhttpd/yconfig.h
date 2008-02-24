@@ -32,12 +32,13 @@
 //-----------------------------------------------------------------------------
 // General central Definitions <configure!>
 //-----------------------------------------------------------------------------
-#define HTTPD_VERSION 		"3.1.6"				// Webserver version  (can be overloaded)
+#define HTTPD_VERSION 		"3.1.8"				// Webserver version  (can be overloaded)
 #define YHTTPD_VERSION 		"1.2.0"				// Webserver version  (Version of yhttpd-core!)
 #define IADDR_LOCAL 		"127.0.0.1"			// local IP
 #define HTTPD_NAME 		"yhttpd"			// Webserver name (can be overloaded)
 #define YHTTPD_NAME 		"yhttpd_core"			// Webserver name (Name of yhttpd-core!)
 #define AUTH_NAME_MSG		"yhhtpd"			// Name in Authentication Dialogue
+#define CONF_VERSION            3                               // Version of yhttpd-conf file
 
 #define HTTPD_KEEPALIVE_TIMEOUT	500000				// Timeout for Keep-Alive in mircoseconds
 //=============================================================================
@@ -180,6 +181,9 @@
 
 #define UPLOAD_TMP_FILE 		"/tmp/upload.tmp"
 #define CACHE_DIR			"/tmp/.cache"
+
+#define TUXBOX_LOGOS_URL                ""
+
 #endif
 //-----------------------------------------------------------------------------
 // Configurations for AVM FritzBox

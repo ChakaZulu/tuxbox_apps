@@ -72,6 +72,15 @@ THandleStatus CNeutrinoYParser::Hook_ReadConfig(CConfigFile *Config, CStringList
 	ConfigList["ExtrasDocumentURL"]	= Config->getString("ExtrasDocURL", EXTRASDOCUMENTURL);
 //	ConfigList["NewGui"]		= Config->getString("NewGui", "true");
 	ConfigList["Zapit_XML_Path"]	= Config->getString("Zapit_XML_Path", ZAPITXMLPATH);
+        ConfigList["TUXBOX_LOGOS_URL"]= Config->getString("Tuxbox.LogosURL", TUXBOX_LOGOS_URL);
+        
+        if (Config->getInt32("configfile.version") < 3)
+        {
+                Config->setString("Tuxbox.LogosURL", Config->getString("ExtrasDocURL", EXTRASDOCUMENTURL) +"/logos");
+                Config->setInt32("configfile.version", CONF_VERSION);
+                Config->saveConfig(HTTPD_CONFIGFILE);
+        }
+
 	return HANDLED_CONTINUE;
 }
 
@@ -306,7 +315,7 @@ std::string CNeutrinoYParser::func_get_bouquets_with_epg(CyhookHandler *hh, std:
 	std::string timestr;
 	bool have_logos = false;
 	
-	if(hh->WebserverConfigList["ExtrasDocumentRoot"] == "web" || (access((hh->WebserverConfigList["ExtrasDocumentRoot"]+"/logos").c_str(),4)==0) )
+	if(hh->WebserverConfigList["TUXBOX_LOGOS_URL"] != "")
 		have_logos = true;
 	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
 	for (; channel != channellist->end();channel++)
@@ -323,10 +332,10 @@ std::string CNeutrinoYParser::func_get_bouquets_with_epg(CyhookHandler *hh, std:
 		if(have_logos)
 			yresult += string_printf("<td class=\"%c\" width=\"44\" rowspan=\"2\"><a href=\"javascript:do_zap('"
 					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-					"')\"><img class=\"channel_logo\" src=\"%s/logos/"
+					"')\"><img class=\"channel_logo\" src=\"%s/"
 					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
 					".gif\" alt=\"%s\"/></a></td>", classname, channel->channel_id, 
-					(hh->WebserverConfigList["ExtrasDocumentURL"]).c_str(),
+					(hh->WebserverConfigList["TUXBOX_LOGOS_URL"]).c_str(),
 					channel->channel_id, channel->name);
 		
 		/* timer slider */

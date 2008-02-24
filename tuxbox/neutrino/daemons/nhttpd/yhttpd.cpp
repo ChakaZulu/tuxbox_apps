@@ -410,7 +410,6 @@ void Cyhttpd::hooks_detach()
 // Read Webserver Configurationfile
 // Call "Hooks_ReadConfig" so Hooks can read/write own Configuration Values
 //-----------------------------------------------------------------------------
-#define CONF_VERSION 2
 void Cyhttpd::ReadConfig(void)
 {
 	log_level_printf(3,"ReadConfig Start\n");

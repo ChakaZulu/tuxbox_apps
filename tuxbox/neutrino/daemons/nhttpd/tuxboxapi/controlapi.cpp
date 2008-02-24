@@ -1807,6 +1807,7 @@ void CControlAPI::doNewTimer(CyhookHandler *hh)
 		// Alarm Time - Format exact! HH:MM
 		if(hh->ParamList["alTime"] != "")
 			sscanf(hh->ParamList["alTime"].c_str(),"%2d.%2d",&(alarmTime->tm_hour), &(alarmTime->tm_min));
+		alHour = alarmTime->tm_hour;
 		correctTime(alarmTime);
 		alarmTimeT = mktime(alarmTime);
 		announceTimeT = alarmTimeT;
@@ -1825,7 +1826,6 @@ void CControlAPI::doNewTimer(CyhookHandler *hh)
 			}
 		correctTime(stopTime);
 		stopTimeT = mktime(stopTime);
-		alHour = alarmTime->tm_hour;
 		if(hh->ParamList["stDate"] == "" && alHour > stopTime->tm_hour)
 			stopTimeT += 24* 60 * 60; // add 1 Day
 	}
