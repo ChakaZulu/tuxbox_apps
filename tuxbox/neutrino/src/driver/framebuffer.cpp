@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.61 2008/02/21 18:39:31 ecosys Exp $
+	$Id: framebuffer.cpp,v 1.62 2008/02/25 20:35:21 ecosys Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -55,21 +55,23 @@ static uint8_t * virtual_fb = NULL;
 CFrameBuffer::CFrameBuffer()
 : active ( true )
 {
-	iconBasePath = "";
-	available  = 0;
-	cmap.start = 0;
-	cmap.len = 256;
-	cmap.red = red;
-	cmap.green = green;
-	cmap.blue  = blue;
-	cmap.transp = trans;
-	backgroundColor = 0;
-	useBackgroundPaint = false;
-	background = NULL;
-	backupBackground = NULL;
-	backgroundFilename = "";
-	fd  = 0;
-	tty = 0;
+	iconBasePath	= "";
+	available		= 0;
+	cmap.start		= 0;
+	cmap.len		= 256;
+	cmap.red		= red;
+	cmap.green		= green;
+	cmap.blue		= blue;
+	cmap.transp		= trans;
+	backgroundColor	= 0;
+	background		= NULL;
+
+	useBackgroundPaint	= false;
+	backupBackground	= NULL;
+	backgroundFilename	= "";
+
+	fd	= 0;
+	tty	= 0;
 }
 
 CFrameBuffer* CFrameBuffer::getInstance()
@@ -81,10 +83,7 @@ CFrameBuffer* CFrameBuffer::getInstance()
 		frameBuffer = new CFrameBuffer();
 		printf("[neutrino] frameBuffer Instance created\n");
 	}
-	else
-	{
-		//printf("[neutrino] frameBuffer Instace requested\n");
-	}
+
 	return frameBuffer;
 }
 
@@ -144,12 +143,12 @@ void CFrameBuffer::init(const char * const fbDevice)
 	}
 
 	if (-1 == ioctl(tty,VT_GETMODE, &vt_mode)) {
-      		perror("ioctl VT_GETMODE");
+			perror("ioctl VT_GETMODE");
 		goto nolfb;
 	}
 
 	if (-1 == ioctl(tty,VT_GETMODE, &mode)) {
-      		perror("ioctl VT_GETMODE");
+			perror("ioctl VT_GETMODE");
 		goto nolfb;
 	}
 
@@ -383,35 +382,6 @@ void CFrameBuffer::paletteSet(struct fb_cmap *map)
 					   rl, ro, gl, go, bl, bo, tl, to);
 	}
 #endif
-}
-
-void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const fb_pixel_t col)
-{
-	if (!getActive())
-		return;
-
-	uint8_t * pos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
-
-#ifdef FB_USE_PALETTE
-	int dxx;
-	if (dx < 0) {
-		fprintf(stderr, "ERROR: CFrameBuffer::paintBoxRel called with dx < 0 (%d)\n", dx);
-		dxx = 0;
-	} else
-		dxx = dx;
-#endif
-	for (int count = 0; count < dy; count++)
-	{
-#ifdef FB_USE_PALETTE
-		memset(pos, col, dxx);
-//		memset(pos, col, dx * sizeof(fb_pixel_t));
-#else
-		fb_pixel_t * dest = (fb_pixel_t *)pos;
-		for (int i = 0; i < dx; i++)
-			*(dest++) = col;
-#endif
-		pos += stride;
-	}
 }
 
 void CFrameBuffer::paintVLine(int x, int ya, int yb, const fb_pixel_t col)
@@ -649,119 +619,119 @@ void CFrameBuffer::paintPixel(const int x, const int y, const fb_pixel_t col)
 	*pos = col;
 }
 
-void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const int rad, const fb_pixel_t col)
+void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const fb_pixel_t col, const int radius)
 {
-    int F,R=rad,sx,sy,dxx=dx,dyy=dy,rx,ry,wx,wy;
+	int F,R=rad,sx,sy,dxx=dx,dyy=dy,rx,ry,wx,wy;
 
-    if (!getActive())
-        return;
+	if (!getActive())
+		return;
 
-    uint8_t *pos=((uint8_t *)getFrameBufferPointer())+x*sizeof(fb_pixel_t)+stride*y;
-    uint8_t *pos0, *pos1, *pos2, *pos3;
+	uint8_t *pos=((uint8_t *)getFrameBufferPointer())+x*sizeof(fb_pixel_t)+stride*y;
+	uint8_t *pos0, *pos1, *pos2, *pos3;
 
 #ifdef FB_USE_PALETTE
-    if (dxx<0) {
-        fprintf(stderr, "ERROR: CFrameBuffer::paintBoxRelSmooth called with dx < 0 (%d)\n", dxx);
-        dxx=0;
-    }
+	if (dxx<0) {
+		fprintf(stderr, "ERROR: CFrameBuffer::paintBoxRel called with dx < 0 (%d)\n", dxx);
+		dxx=0;
+	}
 #else
-    fb_pixel_t *dest0, *dest1;
+	fb_pixel_t *dest0, *dest1;
 #endif
 
-    if(R)
-    {
-        if(--dyy<=0)
-        {
-            dyy=1;
-        }
+	if(R)
+	{
+		if(--dyy<=0)
+		{
+			dyy=1;
+		}
 
-        if(R==1 || R>(dxx/2) || R>(dyy/2))
-        {
-            R=dxx/10;
-            F=dyy/10;    
-            if(R>F)
-            {
-                if(R>(dyy/3))
-                {
-                    R=dyy/3;
-                }
-            }
-            else
-            {
-                R=F;
-                if(R>(dxx/3))
-                {
-                    R=dxx/3;
-                }
-            }
-        }
-        sx=0;
-        sy=R;
-        F=1-R;
+		if(R==1 || R>(dxx/2) || R>(dyy/2))
+		{
+			R=dxx/10;
+			F=dyy/10;    
+			if(R>F)
+			{
+				if(R>(dyy/3))
+				{
+					R=dyy/3;
+				}
+			}
+			else
+			{
+				R=F;
+				if(R>(dxx/3))
+				{
+					R=dxx/3;
+				}
+			}
+		}
 
-        rx=R-sx;
-        ry=R-sy;
+		sx=0;
+		sy=R;
+		F=1-R;
+		rx=R-sx;
+		ry=R-sy;
+		pos0=pos+((dyy-ry)*stride);
+		pos1=pos+(ry*stride);
+		pos2=pos+(rx*stride);
+		pos3=pos+((dyy-rx)*stride);
 
-        pos0=pos+((dyy-ry)*stride);
-        pos1=pos+(ry*stride);
-        pos2=pos+(rx*stride);
-        pos3=pos+((dyy-rx)*stride);
-        while (sx <= sy)
-        {
-            rx=R-sx;
-            ry=R-sy;
-            wx=rx<<1;
-            wy=ry<<1;
+		while (sx <= sy)
+		{
+			rx=R-sx;
+			ry=R-sy;
+			wx=rx<<1;
+			wy=ry<<1;
 #ifdef FB_USE_PALETTE
-            memset(pos0+rx, col, dxx-wx);
-            memset(pos1+rx, col, dxx-wx);
-            memset(pos2+ry, col, dxx-wy);
-            memset(pos3+ry, col, dxx-wy);
+			memset(pos0+rx, col, dxx-wx);
+			memset(pos1+rx, col, dxx-wx);
+			memset(pos2+ry, col, dxx-wy);
+			memset(pos3+ry, col, dxx-wy);
 #else
-            dest0=(fb_pixel_t *)(pos0+rx);
-            dest1=(fb_pixel_t *)(pos1+rx);
-            for (int i=0; i<(dxx-wx); i++)
-            {
-                *(dest0++)=col;
-                *(dest1++)=col;
-            }
-            dest0=(fb_pixel_t *)(pos2+ry);
-            dest1=(fb_pixel_t *)(pos3+ry);
-            for (int i=0; i<(dxx-wy); i++)
-            {
-                *(dest0++)=col;
-                *(dest1++)=col;
-            }
+			dest0=(fb_pixel_t *)(pos0+rx);
+			dest1=(fb_pixel_t *)(pos1+rx);
+			for (int i=0; i<(dxx-wx); i++)
+			{
+				*(dest0++)=col;
+				*(dest1++)=col;
+			}
+			dest0=(fb_pixel_t *)(pos2+ry);
+			dest1=(fb_pixel_t *)(pos3+ry);
+			for (int i=0; i<(dxx-wy); i++)
+			{
+				*(dest0++)=col;
+				*(dest1++)=col;
+			}
 #endif
-            sx++;
-            pos2-=stride;
-            pos3+=stride;
-            if (F<0)
-            {
-                F+=(sx<<1)-1;
-            }
-            else  
-            {
-                F+=((sx-sy)<<1);
-                sy--;
-                pos0-=stride;
-                pos1+=stride;
-            }
-        }
-        pos+=R*stride;
-    }
+			sx++;
+			pos2-=stride;
+			pos3+=stride;
+			if (F<0)
+			{
+				F+=(sx<<1)-1;
+			}
+			else
+			{
+				F+=((sx-sy)<<1);
+				sy--;
+				pos0-=stride;
+				pos1+=stride;
+			}
+		}
+		pos+=R*stride;
+	}
 
-    for (int count=R; count<(dyy-R); count++)
-    {
+	for (int count=R; count<(dyy-R); count++)
+	{
 #ifdef FB_USE_PALETTE
-        memset(pos, col, dxx);
+		memset(pos, col, dxx);
 #else
-        dest0=(fb_pixel_t *)pos;
-        for (int i=0; i<dxx; i++)
-            *(dest0++)=col;
+		dest0=(fb_pixel_t *)pos;
+		for (int i=0; i<dxx; i++)
+			*(dest0++)=col;
 #endif
-        pos+=stride;
-    }
+		pos+=stride;
+	}
 }
 
 void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, const fb_pixel_t col)
