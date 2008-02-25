@@ -1,5 +1,5 @@
 /*
-	$Id: timerlist.cpp,v 1.94 2007/10/16 10:53:13 seife Exp $
+	$Id: timerlist.cpp,v 1.95 2008/02/25 21:27:58 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -958,7 +958,7 @@ int CTimerList::modifyTimer()
 
 	CRecDirChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timer->recordingDir);
 	bool recDirEnabled = (timer->eventType == CTimerd::TIMER_RECORD) && (g_settings.recording_type == RECORDING_FILE);
-	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,recDirEnabled,timer->recordingDir, &recDirs);
+	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,recDirEnabled,recDirEnabled ? timer->recordingDir : "", &recDirs);
 
 	timerSettings.addItem(GenericMenuSeparatorLine);
 	timerSettings.addItem(m3);
