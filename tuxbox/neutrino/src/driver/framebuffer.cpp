@@ -1,7 +1,7 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
 
-	$Id: framebuffer.cpp,v 1.63 2008/02/25 20:50:02 ecosys Exp $
+	$Id: framebuffer.cpp,v 1.64 2008/02/29 11:14:06 ecosys Exp $
 	
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 				  2003 thegoodguy
@@ -619,9 +619,13 @@ void CFrameBuffer::paintPixel(const int x, const int y, const fb_pixel_t col)
 	*pos = col;
 }
 
-void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const fb_pixel_t col, const int radius)
+void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const fb_pixel_t col, const int radius, const int corners)
 {
 	int F,R=radius,sx,sy,dxx=dx,dyy=dy,rx,ry,wx,wy;
+	int corner1 =  corners     & 1;	// upper left
+	int corner2 = (corners>>1) & 1;	// upper right
+	int corner3 = (corners>>2) & 1;	// lower right
+	int corner4 = (corners>>3) & 1;	// lower left
 
 	if (!getActive())
 		return;
@@ -683,25 +687,27 @@ void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int
 			wx=rx<<1;
 			wy=ry<<1;
 #ifdef FB_USE_PALETTE
-			memset(pos0+rx, col, dxx-wx);
-			memset(pos1+rx, col, dxx-wx);
-			memset(pos2+ry, col, dxx-wy);
-			memset(pos3+ry, col, dxx-wy);
+			memset(pos0+(rx*corner4), col, dxx-(wx*corner3)-(rx*(1-corner3))+(rx*(1-corner4)));
+			memset(pos1+(rx*corner1), col, dxx-(wx*corner2)-(rx*(1-corner2))+(rx*(1-corner1)));
+			memset(pos2+(ry*corner1), col, dxx-(wy*corner2)-(ry*(1-corner2))+(ry*(1-corner1)));
+			memset(pos3+(ry*corner4), col, dxx-(wy*corner3)-(ry*(1-corner3))+(ry*(1-corner4)));
 #else
-			dest0=(fb_pixel_t *)(pos0+rx);
-			dest1=(fb_pixel_t *)(pos1+rx);
-			for (int i=0; i<(dxx-wx); i++)
-			{
+			dest0=(fb_pixel_t *)(pos0+(rx*corner4));
+			for (int i=0; i<(dxx-(wx*corner3)-(rx*(1-corner3))+(rx*(1-corner4))); i++)
 				*(dest0++)=col;
+
+			dest1=(fb_pixel_t *)(pos1+(rx*corner1));
+			for (int i=0; i<(dxx-(wx*corner2)-(rx*(1-corner2))+(rx*(1-corner1))); i++)
 				*(dest1++)=col;
-			}
-			dest0=(fb_pixel_t *)(pos2+ry);
-			dest1=(fb_pixel_t *)(pos3+ry);
-			for (int i=0; i<(dxx-wy); i++)
-			{
+
+			dest0=(fb_pixel_t *)(pos2+(ry*corner1));
+			for (int i=0; i<(dxx-(wy*corner2)-(ry*(1-corner2))+(ry*(1-corner1))); i++)
 				*(dest0++)=col;
+
+			dest1=(fb_pixel_t *)(pos3+(ry*corner4));
+			for (int i=0; i<(dxx-(wy*corner3)-(ry*(1-corner3))+(ry*(1-corner4))); i++)
 				*(dest1++)=col;
-			}
+
 #endif
 			sx++;
 			pos2-=stride;
