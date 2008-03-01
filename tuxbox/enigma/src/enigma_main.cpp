@@ -60,15 +60,12 @@
 #include <src/time_correction.h>
 #include <lib/driver/audiodynamic.h>
 
-		// bis waldi das in nen .h tut
-#define MOVIEDIR "/hdd/movie"
-
 struct enigmaMainActions
 {
 	eActionMap map;
 	eAction showMainMenu, standby_press, standby_nomenu_press, standby_repeat, standby_release,
 		showInfobar, hideInfobar, showInfobarEPG, showServiceSelector,
-		showSubservices, showAudio, pluginVTXT, pluginExt, showEPGList, showEPG,
+		showSubservices, showAudioOrPause, showAudio, pluginVTXT, pluginExt, showEPGList, showEPG,
 		nextSubService, prevSubService, nextService, prevService,
 		playlistNextService, playlistPrevService, serviceListDown,
 		serviceListUp, volumeUp, volumeDown, toggleMute,
@@ -94,6 +91,7 @@ struct enigmaMainActions
 		showInfobarEPG(map, "showInfobarEPG", _("show infobar or EPG"), eAction::prioDialog),
 		showServiceSelector(map, "showServiceSelector", _("show service selector"), eAction::prioDialog),
 		showSubservices(map, "showSubservices", _("show subservices/NVOD"), eAction::prioDialog),
+		showAudioOrPause(map, "showAudioOrPause", _("show audio selector"), eAction::prioDialog),
 		showAudio(map, "showAudio", _("show audio selector"), eAction::prioDialog),
 		pluginVTXT(map, "pluginVTXT", _("show Videotext"), eAction::prioDialog),
 		pluginExt(map, "pluginExt", _("show extension Plugins"), eAction::prioDialog),
@@ -1561,7 +1559,7 @@ eZapMain::eZapMain()
 	,timeout(eApp)
 	,clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)
 	,volumeTimer(eApp), recStatusBlink(eApp), doubleklickTimer(eApp)
-	,unusedTimer(eApp), currentSelectedUserBouquet(0), timeshift(0)
+	,unusedTimer(eApp), permanentTimeshiftTimer(eApp), currentSelectedUserBouquet(0), timeshift(0)
 	,skipping(0)
 	,state(0)
 	,wasSleeping(0)
@@ -1727,6 +1725,7 @@ void eZapMain::init_main()
 	ASSIGN(ButtonGreenDis, eLabel, "button_green_disabled");
 	ASSIGN(ButtonYellowDis, eLabel, "button_yellow_disabled");
 	ASSIGN(ButtonBlueDis, eLabel, "button_blue_disabled");
+	ASSIGN(AudioOrPause,eLabel, "AudioOrPause");
 
 	ASSIGN(DolbyOn, eLabel, "osd_dolby_on");
 	ASSIGN(CryptOn, eLabel, "osd_crypt_on");
@@ -1778,6 +1777,7 @@ void eZapMain::init_main()
 	CONNECT(volumeTimer.timeout, eZapMain::hideVolumeSlider );
 #ifndef DISABLE_FILE
 	CONNECT(recStatusBlink.timeout, eZapMain::blinkRecord);
+	CONNECT(permanentTimeshiftTimer.timeout, eZapMain::startPermanentTimeshift);
 #endif
 
 	CONNECT( eFrontend::getInstance()->s_RotorRunning, eZapMain::onRotorStart );
@@ -2964,6 +2964,12 @@ void eZapMain::showSNR()
 
 void eZapMain::showInfobar(bool startTimeout)
 {
+	int tmp = 0;
+	eConfig::getInstance()->getKey("/enigma/timeshift/activatepausebutton", tmp );
+	unsigned char pause = (unsigned char) tmp;
+	AudioOrPause->setText(pause ? _("Pause") : _("audio track"));
+		
+
 	if ( !isVisible() && eApp->looplevel() == 1 &&
 		( !currentFocus || currentFocus == this ) )
 		show();
@@ -3088,6 +3094,13 @@ void eZapMain::pause()
 				}
 			}
 		}
+		else if (timeshift == 2) // permanent timeshift
+		{
+			Decoder::Pause(2);  // freeze frame
+			Decoder::setAutoFlushScreen(0);
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
+			Decoder::setAutoFlushScreen(1);
+		}
 		else
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 	}
@@ -3129,6 +3142,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 
 	if (onoff) //  start recording
 	{
+		stopPermanentTimeshift();
 		if ( freeRecordSpace() < 10) // less than 10MB free (or directory not found)
 		{
 			handleServiceEvent(eServiceEvent(eServiceEvent::evtRecordFailed));
@@ -3400,7 +3414,9 @@ void eZapMain::startSkip(int dir)
 		{
 			switch (handler->getState())
 			{
-				case eServiceHandler::statePause:
+				case eServiceHandler::statePause: 
+					pause();// continue playing in preparation for skipping
+					break;
 				case eServiceHandler::stateStopped:
 					return;
 				default:
@@ -3735,9 +3751,12 @@ int eZapMain::handleStandby(int i)
 			int ret = mb.exec();
 			mb.hide();
 			if (ret == eMessageBox::btYes)
+			{
+				stopPermanentTimeshift();
 		// we do hardly shutdown the box..
 		// any pending timers are ignored
 				eZap::getInstance()->quit();
+			}
 			break;
 		}
 		case 6: // force .. ( Sleeptimer )
@@ -3755,9 +3774,12 @@ int eZapMain::handleStandby(int i)
 				int ret = mb.exec();
 				mb.hide();
 				if (ret == eMessageBox::btYes)
+				{
+					stopPermanentTimeshift();
 					// use message_notifier to goto sleep...
 					// we will not block the mainloop...
 					gotoStandby();
+				}
 			}
 			else
 				eZapStandby::getInstance()->renewSleep();
@@ -4604,6 +4626,62 @@ void eZapMain::addServiceToCurUserBouquet(const eServiceReference& service)
 	currentSelectedUserBouquet->getList().push_back(service);
 }
 
+#ifndef DISABLE_FILE
+void eZapMain::startPermanentTimeshift()
+{
+	
+	if ( state & stateRecording ) // no timeshift when recording
+		return;
+	if ( freeRecordSpace() < 10) // less than 10MB free
+		return;
+	eDebug("starting permanent timeshift ...");
+
+	state |= recPermanentTimeshift;
+	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+	if (handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordOpenPermanentTimeshift)))
+	{
+		state &= ~(recPermanentTimeshift);
+		eDebug("couldn't start permanent timeshift ... :/");
+	} else
+	{
+		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordStart));
+		timeshift = 2;
+	}
+}
+void eZapMain::stopPermanentTimeshift()
+{
+	eDebug("stopping permanent timeshift ...");
+	permanentTimeshiftTimer.stop();
+	eServiceHandler *handler=eServiceInterface::getInstance()->getServiceHandler(eServiceReference::idDVB);
+	timeshift = 0;
+	if (state & recPermanentTimeshift)
+	{
+		if (!handler)
+			return;
+		eDebug("stopping permanent timeshift with handler...");
+		state &= ~(recPermanentTimeshift);
+		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordStop));
+		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordClose));
+	}
+}
+
+void eZapMain::beginPermanentTimeshift()
+{
+	if ( !(state & stateRecording) && !(state & recPermanentTimeshift) && (mode == modeTV || mode == modeRadio))
+	{
+		int permanentOn = 0;
+		eConfig::getInstance()->getKey("/enigma/timeshift/permanent", permanentOn );
+		if (permanentOn)
+		{
+			// start timer for permanent timeshift
+			int permanentdelay = 0;
+			eConfig::getInstance()->getKey("/enigma/timeshift/permanentdelay", permanentdelay );
+			eDebug("starting timeout for permanent timeshift:%d",permanentdelay);
+			permanentTimeshiftTimer.start(permanentdelay*1000, 1);
+		}
+	}
+}
+#endif
 void eZapMain::playService(const eServiceReference &service, int flags)
 {
 	int first=0;
@@ -4615,6 +4693,7 @@ void eZapMain::playService(const eServiceReference &service, int flags)
 		goto zap;
 
 #ifndef DISABLE_FILE
+	stopPermanentTimeshift();
 	if ( !canPlayService(service) )
 	{
 		if ( handleState() )
@@ -4649,6 +4728,9 @@ zap:
 
 //		eDebug("play");
 		eServiceInterface::getInstance()->play(service);
+#ifndef DISABLE_FILE
+		beginPermanentTimeshift();
+#endif
 		if ( flags&psSeekPos )
 		{
 			std::list<ePlaylistEntry>::iterator i =
@@ -4709,6 +4791,9 @@ zap:
 		{
 			eServiceReference ref=(eServiceReference&)(*playlist->current);
 			eServiceInterface::getInstance()->play(ref);
+#ifndef DISABLE_FILE
+			beginPermanentTimeshift();
+#endif
 		}
 		else
 		{
@@ -5429,6 +5514,15 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #endif
 				showSubserviceMenu();
 		}
+		else if (event.action == &i_enigmaMainActions->showAudioOrPause)
+		{
+			int activatepausebutton = 0;
+			eConfig::getInstance()->getKey("/enigma/timeshift/activatepausebutton", activatepausebutton );
+			if (activatepausebutton)
+				pause();
+			else
+				showAudioMenu();
+		}
 		else if (event.action == &i_enigmaMainActions->showAudio)
 			showAudioMenu();
 		else if (event.action == &i_enigmaMainActions->pluginVTXT)
@@ -5747,12 +5841,14 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		if (handler)
 		{
 			eServiceReference &myref = eServiceInterface::getInstance()->service;
-			
+
 			if ( num && ( (myref.type == eServiceReference::idDVB && myref.path)
 				|| (myref.type == eServiceReference::idUser
 				&& myref.data[0] == eMP3Decoder::codecMPG ) || (myref.type == eServiceReference::idUser
-				&& myref.data[0] == eMP3Decoder::codecMP3 ) || timeshift ) && (handler->getState() == eServiceHandler::statePlaying)) // nur, wenn ts, mpg oder mp3 ausgewählt ist und vor allem, wenn es abgespielt wird! :-)
+				&& myref.data[0] == eMP3Decoder::codecMP3 ) || timeshift ) && (handler->getState() == eServiceHandler::statePlaying || handler->getState() == eServiceHandler::statePause)) // nur, wenn ts, mpg oder mp3 ausgewählt ist und vor allem, wenn es abgespielt wird oder im Standbild ist! :-)
 			{
+				if (handler->getState() == eServiceHandler::statePause)
+					pause();// continue playing in preparation for skipping
 				int time=0;
 				switch (num)
 				{
@@ -6608,6 +6704,7 @@ void eZapMain::leaveService()
 	// disable skipping
 	if(skipping)
 		endSkip();
+	stopPermanentTimeshift();
 #endif
 
 	cur_start=cur_duration=cur_event_id=-1;

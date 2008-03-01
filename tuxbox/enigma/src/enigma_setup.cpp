@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.43 2006/07/15 13:22:49 ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.44 2008/03/01 17:40:17 dbluelle Exp $
  */
 
 #include <enigma_setup.h>
@@ -26,6 +26,7 @@
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
 #include <system_settings.h>
+#include <setup_timeshift.h>
 #include <enigma_bouquet.h>
 #include <enigma_ci.h>
 #include <enigma_scan.h>
@@ -49,6 +50,12 @@ eZapSetup::eZapSetup()
 	CONNECT((new eListBoxEntryMenu(&list, _("Parental Lock"), eString().sprintf("(%d) %s", ++entry, _("open parental setup")) ))->selected, eZapSetup::parental_lock );
 	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	CONNECT((new eListBoxEntryMenu(&list, _("Expert Setup"), eString().sprintf("(%d) %s", ++entry, _("open expert setup")) ))->selected, eZapSetup::expert_setup);
+#ifndef DISABLE_HDD
+#ifndef DISABLE_FILE
+	new eListBoxEntryMenuSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	CONNECT((new eListBoxEntryMenu(&list, _("Timeshift"), eString().sprintf("(%d) %s", ++entry, _("open timeshift setup")) ))->selected, eZapSetup::timeshift_setup);
+#endif
+#endif
 	/* emit */ setupHook(this, &entry);
 }
 
@@ -133,3 +140,19 @@ void eZapSetup::parental_lock()
 	show();
 }
 
+#ifndef DISABLE_HDD
+#ifndef DISABLE_FILE
+void eZapSetup::timeshift_setup()
+{
+	hide();
+	eZapTimeshiftSetup setup;
+#ifndef DISABLE_LCD
+	setup.setLCD(LCDTitle, LCDElement);
+#endif
+	setup.show();
+	setup.exec();
+	setup.hide();
+	show();
+}
+#endif
+#endif

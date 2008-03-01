@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <lib/dvb/dvbservice.h>
+#include <lib/dvb/servicedvb.h>
 #include <lib/system/file_eraser.h>
 #include <lib/system/econfig.h>
 #include <signal.h>
@@ -29,6 +30,8 @@
 		#define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
 	#endif
 #endif
+
+extern ePermanentTimeshift permanentTimeshift;
 
 static pthread_mutex_t PMTLock =
 	PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
@@ -101,6 +104,7 @@ int eDVBRecorder::flushBuffer()
 
 	int retrycount=5; // 5 write retrys..
 	int written=0;
+	int dosplit = 0;
 	while( written < towrite )
 	{
 		int wr = ::write(outfd, buf+written, towrite-written);
@@ -118,12 +122,31 @@ int eDVBRecorder::flushBuffer()
 		size += wr;
 		written_since_last_sync += wr;
 	}
-
-	if (size >= splitsize)
+	permanentTimeshift.lock.lock();
+	if (permanentTimeshift.IsTimeshifting)
 	{
-		if ( openFile(++splits) ) // file creation failed?
-			goto Error;
-
+		int minutes = 30;
+		eConfig::getInstance()->getKey("/enigma/timeshift/permanentminutes", minutes );
+		if (permanentTimeshift.CheckSlice(minutes))
+		{
+			if ( openFile(permanentTimeshift.getCurrentRecordingSlice()) ) 
+				goto Error;
+			dosplit = 1;
+		}
+		permanentTimeshift.lock.unlock();
+	}
+	else
+	{
+		permanentTimeshift.lock.unlock();
+		if (size >= splitsize)
+		{
+			if ( openFile(++splits) ) // file creation failed?
+				goto Error;
+			dosplit = 1;
+		}
+	}
+	if (dosplit)
+	{
 		retrycount=5; // 5 write retrys..
 		while ( written < bufptr )  // must flush remaining bytes from buffer..
 		{
@@ -160,6 +183,7 @@ int eDVBRecorder::flushBuffer()
 	return 0;
 
 Error:
+	permanentTimeshift.lock.unlock();
 	eDebug("recording write error, maybe disk full");
 	state = stateError;
 	rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));

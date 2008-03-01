@@ -61,7 +61,9 @@ public:
 		cmdSetSpeed,		// parm : ratio.. 1 normal, 0 pause, >1 fast forward, <0 reverse (if supported)
 		cmdSkip,				// parm : in ms (~)
 		cmdSeekAbsolute,	// parm : percentage ~
-		cmdSeekReal			// parm : service specific, as given by queryRealPosition
+		cmdSeekReal,			// parm : service specific, as given by queryRealPosition
+
+		cmdRecordOpenPermanentTimeshift
 	};
 	int type;
 	int parm;

@@ -14,6 +14,11 @@ private:
 #endif
 	void expert_setup();
 	void parental_lock();
+#ifndef DISABLE_HDD
+#ifndef DISABLE_FILE
+	void timeshift_setup();
+#endif
+#endif
 public:
 	eZapSetup();
 };

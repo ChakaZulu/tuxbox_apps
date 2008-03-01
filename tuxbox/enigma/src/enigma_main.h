@@ -331,7 +331,7 @@ class eZapMain: public eWidget
 	friend class eSubServiceSelector;
 public:
 	enum { modeTV, modeRadio, modeFile, modeEnd };
-	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32, recNgrab=64, statePaused=128 };
+	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32, recNgrab=64, statePaused=128, recPermanentTimeshift=256 };
 	enum { messageGoSleep=2, messageShutdown, messageNoRecordSpaceLeft, messageWakeUp, messageCheckVCR };
 	enum { pathBouquets=1, pathProvider=2, pathRecordings=4, pathPlaylist=8, pathAll=16, pathRoot=32, pathSatellites=64 };
 	enum { listAll, listSatellites, listProvider, listBouquets };
@@ -346,7 +346,7 @@ private:
 		*ButtonBlueEn, *ButtonBlueDis,
 		*DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff, *recstatus,
 		mute, volume,
-		*DVRSpaceLeft;
+		*DVRSpaceLeft,*AudioOrPause;
 
 	eWidget *dvrInfoBar, *dvbInfoBar, *fileInfoBar;
 	
@@ -378,7 +378,7 @@ private:
 
 	eTimer timeout, clocktimer, messagetimeout,
 					progresstimer, volumeTimer, recStatusBlink,
-					doubleklickTimer, unusedTimer;
+					doubleklickTimer, unusedTimer, permanentTimeshiftTimer;
 /* SNR,AGC,BER DISPLAY */
 	eTimer *snrTimer;
 /* SNR,AGC,BER DISPLAY */
@@ -457,6 +457,7 @@ public:
 	void skipLoop();
 	enum { skipForward, skipReverse };
 	int isRecording() {return state & stateRecording;}
+	int isRecordingPermanentTimeshift() {return state & recPermanentTimeshift;}
 	int dvrActive(void) {return dvrfunctions;}
 #endif
 	int isSleeping() {return state & stateSleeping;}
@@ -564,6 +565,7 @@ private:
 	void deleteFile(eServiceSelector *);
 	void renameFile(eServiceSelector *);
 	void showHDDSpaceLeft(eLabel *);
+	void startPermanentTimeshift();
 #endif // DISABLE_FILE
 
 // both called from other context.. 	
@@ -615,6 +617,8 @@ public:
 	void saveRecordings( bool destory = false );
 	void clearRecordings();
 	int isSkipping() { return skipping; }
+	void stopPermanentTimeshift();
+	void beginPermanentTimeshift();
 #endif
 	int get16_9Logo() {return is16_9;}
 	int getSmartcardLogo() {return isCrypted;}

@@ -582,7 +582,7 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 		serviceentryflags|=eListBoxEntryService::flagSameTransponder;
 	}
 	if ( eZap::getInstance()->getServiceSelector() == this
-		&& (eDVB::getInstance()->recorder || ref.data[0] == -6) 
+		&& (eDVB::getInstance()->recorder || ref.data[0] == -6)  && !eZapMain::getInstance()->isRecordingPermanentTimeshift()
 		&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 	{
 		int mask = eZapMain::getInstance()->getMode() == eZapMain::modeTV ? (1<<4)|(1<<1) : ( 1<<2 );
@@ -906,7 +906,7 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 		{
 			// dont change path in radio and tv mode when recording is running
 			if ( eZap::getInstance()->getServiceSelector() == this
-				&& eDVB::getInstance()->recorder
+				&& eDVB::getInstance()->recorder  && !eZapMain::getInstance()->isRecordingPermanentTimeshift()
 				&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 				return;
 			pathUp();
@@ -1149,7 +1149,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				// dont change path in radio and tv mode when recording is running
 				if ( eZap::getInstance()->getServiceSelector() == this
-					&& eDVB::getInstance()->recorder
+					&& eDVB::getInstance()->recorder && !eZapMain::getInstance()->isRecordingPermanentTimeshift()
 					&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 					return 1;
 				ci->clear();
@@ -1185,7 +1185,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				// dont change path in radio and tv mode when recording is running
 				if ( eZap::getInstance()->getServiceSelector() == this
-					&& eDVB::getInstance()->recorder
+					&& eDVB::getInstance()->recorder  && !eZapMain::getInstance()->isRecordingPermanentTimeshift()
 					&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 					return 1;
 				ci->clear();
@@ -1267,7 +1267,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				// dont change path in radio and tv mode when recording is running
 				if ( eZap::getInstance()->getServiceSelector() == this
-					&& eDVB::getInstance()->recorder
+					&& eDVB::getInstance()->recorder  && !eZapMain::getInstance()->isRecordingPermanentTimeshift()
 					&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 					return 1;
 				pathUp();
@@ -1492,7 +1492,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				// dont change path in radio and tv mode when recording is running
 				if ( eZap::getInstance()->getServiceSelector() == this
-					&& eDVB::getInstance()->recorder
+					&& eDVB::getInstance()->recorder  && !eZapMain::getInstance()->isRecordingPermanentTimeshift()
 					&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 					return 1;
 				ci->clear();

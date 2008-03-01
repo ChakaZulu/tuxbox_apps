@@ -13,6 +13,32 @@ class eServiceHandlerDVB;
 
 #ifndef DISABLE_FILE
 
+#define MOVIEDIR "/hdd/movie"
+#define MAX_PERMANENT_TIMESHIFT_MINUTES 240
+#define PERMANENT_TIMESHIFT_FILE MOVIEDIR "/timeshift"
+
+class ePermanentTimeshift
+{
+	std::list<std::pair<int,off64_t> > slicelist;
+	std::list<std::pair<int,off64_t> >::iterator current_slice_playing;
+	timeval last_split;
+public:
+	int IsTimeshifting;
+	eLock lock;
+	ePermanentTimeshift()
+	: IsTimeshifting(0)
+	{
+	}
+	void Start();
+	void Stop();
+	bool CheckSlice(unsigned int minutes);
+	off64_t getCurrentLength(int slice);
+	int getCurrentRecordingSlice() { return slicelist.back().first;	}
+	int setNextPlayingSlice();
+	int getCurrentPlayingSlice(); 
+	 off64_t seekTo(off64_t offset);
+};
+
 class eDVRPlayerThread: public eThread, public eMainloop, public Object
 {
 	eServiceHandlerDVB *handler;
@@ -29,6 +55,7 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	int audiotracks;    // num of audiotracks in file
 
 	int livemode; 		// used in timeshift where end-of-file is only temporary
+	int playingPermanentTimeshift;
 	eTimer liveupdatetimer;
 	void updatePosition();
 
@@ -73,7 +100,7 @@ public:
 	
 	void gotMessage(const eDVRPlayerThreadMessage &message);
 	
-	eDVRPlayerThread(const char *filename, eServiceHandlerDVB *handler, int livemode);
+	eDVRPlayerThread(const char *filename, eServiceHandlerDVB *handler, int livemode, int playingPermanentTimeshift);
 	~eDVRPlayerThread();
 
 	int getPosition(int);
@@ -107,6 +134,7 @@ class eServiceHandlerDVB: public eServiceHandler
 	eFixedMessagePump<eDVRPlayerThreadMessage> messages;
 	eDVRPlayerThread *decoder;
 	eString current_filename;
+	int playingPermanentTimeshift;
 
 			// (u.a.) timeshift:
 	void startPlayback(const eString &file, int livemode, bool startpaused = false);

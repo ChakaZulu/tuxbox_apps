@@ -965,4 +965,17 @@
 		</TransponderWindow>
 	</object>
 
+	<object name="SetupTimeshift">
+		<SetupTimeshift text="setup timeshifting" cposition="160:150" csize="370:280">
+			<eLabel text="delay (seconds):" position="10:10" size="290:30" />
+			<eLabel text="max. recording time (minutes):" position="10:60" size="290:30" />
+			<eNumber name="delay" position="300:10" size="60:35" helptext="set number of seconds recording is delayed after switching channel" loadDeco="" />
+			<eNumber name="minutes" position="300:60" size="60:35" helptext="set maximum number of recorded minutes" loadDeco="" />
+			<eCheckbox name="active" text="activate timeshift" position="10:100" size="350:30" helptext="activate permanent timeshift" loadDeco="" />
+			<eCheckbox name="pause" text="activate pause button" position="10:140" size="350:30" helptext="use yellow button as pause button" loadDeco="" />
+			<eButton name="store" text="store" position="10:180" size="150:40" loadDeco="" helptext="store timeshift settings and leave" shortcut="green" />
+			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+		</SetupTimeshift>
+	</object>
+
 </eskin>
