@@ -308,7 +308,7 @@
 
 			<eLabel text="EPG" position="82:452" font="Nimbus;12" size="50:15" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 			<eLabel text="subservices" position="144:452" font="Nimbus;12" size="70:15" backgroundColor="dunkel" foregroundColor="dunkel+15" />
-			<eLabel text="audio track" position="226:452" font="Nimbus;12" size="70:15" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel text="audio track" position="226:452" font="Nimbus;12" size="70:15" backgroundColor="dunkel" foregroundColor="dunkel+15"  name="AudioOrPause"/>
 			<eLabel text="plugins" position="308:452" font="Nimbus;12" size="70:15" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 			
 			<eProgress position="388:454" size="150:11" name="progress_bar" foregroundColor="mittel" border="1" />
