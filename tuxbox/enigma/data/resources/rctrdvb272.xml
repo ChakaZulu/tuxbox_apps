@@ -114,7 +114,7 @@
 			<action name="standby_press" key="discrete_off" flags="m"/>
 			<action name="standby_release" key="discrete_off" flags="b"/>
 			<action name="showSubservices" key="green" flags="m" />
-			<action name="showAudio" key="yellow" flags="m" />
+			<action name="showAudioOrPause" key="yellow" flags="m" />
 			<action name="showAudio" key="audio" flags="m" />
 			<action name="pluginExt" key="blue" flags="m" />
 			<action name="pluginVTXT" key="text" flags="m" />
