@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.885 2008/02/22 23:24:26 houdini Exp $
+	$Id: neutrino.cpp,v 1.886 2008/03/02 09:53:15 seife Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -3045,11 +3045,17 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 {
 	neutrino_msg_t msg = key;
 
-	int dx = 200 + 8 + 36 + 24; 	// width
-	int dy = 27; 	// height
-	int bwx = 20; 	// boarder width x from left and right
-	int bwtop = 47; 	// boarder width y from top
-	int bwbot = 47; 	// boarder width y from bottom
+	const int dy = 28; 	// height
+	// if you want a non-rounded volumebar, set r=0 here...
+	const int r = 12;	// radius, (about dy/2, but should be an even number)
+	const int b = 4;	// border
+	const int w = 200;	// volume bar width
+	const int nw = 36;	// numbers width
+	const int iw = 24;	// icon width
+	const int dx = w + b*2 + iw + nw + r; 	// width + 2*border + icon + numbers + round
+	const int bwx = 20;	// border width x from left and right
+	const int bwtop = 47; 	// border width y from top
+	const int bwbot = 47; 	// border width y from bottom
 	int x, y;
 	int a_step = atoi(g_settings.audio_step);
 	volumeBarIsVisible = ((g_settings.volumebar_disp_pos != 6) ? true : false);
@@ -3098,9 +3104,9 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 		pixbuf = new fb_pixel_t[dx * dy];
 		if(pixbuf!= NULL)
 			frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
-		frameBuffer->paintBoxRel(     x,     y,      dx, dy        , COL_INFOBAR_PLUS_1);
-		frameBuffer->paintBoxRel(x + 24, y + 4, 200 + 4, dy - 2 * 4, COL_SILVER);	
-		frameBuffer->paintIcon("volume.raw",x + 4, y + 6, COL_INFOBAR);
+		frameBuffer->paintBoxRel(           x,   y,  dx,     dy, COL_INFOBAR_PLUS_1, r);
+		frameBuffer->paintBoxRel(x+iw+r/2-b/2, y+b, w+b, dy-2*b, COL_SILVER);	
+		frameBuffer->paintIcon("volume.raw", x+b+r/2, y+6, COL_INFOBAR);
 	}
 
 	neutrino_msg_data_t data;
@@ -3183,11 +3189,11 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 			char p[4]; /* 3 digits + '\0' */
 			sprintf(p, "%3d", vol / 2);
 			/* draw the volume bar */
-			frameBuffer->paintBoxRel(x + 26,       y + 6, vol      , dy - 2*6, COL_INFOBAR_PLUS_3);
-			frameBuffer->paintBoxRel(x + 26 + vol, y + 6, 200 - vol, dy - 2*6, COL_INFOBAR_PLUS_1);
+			frameBuffer->paintBoxRel(x+iw+r/2,     y+b+2, vol  , dy-2*(b+2), COL_INFOBAR_PLUS_3);
+			frameBuffer->paintBoxRel(x+iw+vol+r/2, y+b+2, w-vol, dy-2*(b+2), COL_INFOBAR_PLUS_1);
 			/* erase the numbers... */
-			frameBuffer->paintBoxRel(x + dx - 40,  y + 4,        36, dy - 2*4, COL_INFOBAR_PLUS_1);
-			g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x + dx - 36, y + dy, 36, p , COL_INFOBAR_PLUS_1);
+			frameBuffer->paintBoxRel(x+dx-nw-b-r/2, y+b,     nw, dy-2*b,     COL_INFOBAR_PLUS_1);
+			g_Font[SNeutrinoSettings::FONT_TYPE_IMAGEINFO_INFO]->RenderString(x+dx-nw-r/2, y+dy, nw, p, COL_INFOBAR_PLUS_1);
 		
  			if ( ( mode != mode_scart ) && ( mode != mode_audio) && ( mode != mode_pic))  {
 				if ( ( current_muted ) || ( doShowMuteIcon() ))
