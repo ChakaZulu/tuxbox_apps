@@ -1,5 +1,5 @@
 /*
-	$Id: update.cpp,v 1.126 2007/10/16 22:07:52 dbt Exp $
+	$Id: update.cpp,v 1.127 2008/03/02 17:57:55 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -55,6 +55,8 @@
 
 #include <system/flashtool.h>
 #include <system/httptool.h>
+
+#include <sectionsdclient/sectionsdclient.h>
 
 #include <curl/curl.h>
 #include <curl/types.h>
@@ -463,6 +465,12 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 		return menu_return::RETURN_REPAINT;
 	}
 
+	CSectionsdClient sd;
+	bool sd_scan = sd.getIsScanningActive();
+	// restart sectionsd, this frees up memory
+	printf("[flashtool] restarting sectionsd to free memory\n");
+	sd.Restart();
+
 	CNeutrinoApp::getInstance()->exec(NULL, "savesettings");
 	sleep(2);
 	showGlobalStatus(60);
@@ -471,6 +479,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	printf("+++++++++++++++++++ NOT flashing, just testing\n");
 	hide();
 	unlink(filename.c_str());
+	sd.setPauseScanning(!sd_scan);
 	return menu_return::RETURN_REPAINT;
 #endif
 
@@ -479,6 +488,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	{
 		hide();
 		ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, ft.getErrorMessage().c_str()); // UTF-8
+		sd.setPauseScanning(!sd_scan);
 		return menu_return::RETURN_REPAINT;
 	}
 
@@ -583,15 +593,24 @@ void CFlashExpert::writemtd(const std::string & filename, int mtdNumber)
 	CFlashTool ft;
 	ft.setStatusViewer( this );
 	ft.setMTDDevice( CMTDInfo::getInstance()->getMTDFileName(mtdNumber) );
+
+	CSectionsdClient sd;
+	bool sd_scan = sd.getIsScanningActive();
+	// restart sectionsd, this frees up memory
+	printf("[flashtool] restarting sectionsd to free memory\n");
+	sd.Restart();
+
 #ifdef TESTING
 	printf("+++++++++++++++++++ NOT flashing, just testing\n");
 	hide();
+	sd.setPauseScanning(!sd_scan);
 	unlink(filename.c_str());
 	return;
 #endif
 	if(!ft.program( "/tmp/" + filename, 50, 100))
 	{
 		showStatusMessageUTF(ft.getErrorMessage()); // UTF-8
+		sd.setPauseScanning(!sd_scan);
 		sleep(10);
 	}
 	else
