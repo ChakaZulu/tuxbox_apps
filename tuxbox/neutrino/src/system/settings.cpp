@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.46 2007/08/16 20:23:58 guenther Exp $
+        $Id: settings.cpp,v 1.47 2008/03/02 13:12:56 seife Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -104,24 +104,22 @@ char * CScanSettings::satOfDiseqc(int diseqc) const
 	if (diseqcMode == NO_DISEQC || diseqc == 0 )
 	{
 		//get satname from scan.conf if diseqc is disabled or diseqc for current  satellite is not used
-		return (char *)&satNameNoDiseqc; 
-	}			
-	else if (diseqc >= 0 && diseqc < MAX_SATELLITES) 
+		return (char *)&satNameNoDiseqc;
+	}
+	else if (diseqc >= 0 && diseqc < MAX_SATELLITES)
 	{
 		//get satname from satlist if diseqc is enabled and diseqc is in use with current satellite
-		for (int i = 0; i < MAX_SATELLITES; i++) 
-		{		
+		for (int i = 0; i < MAX_SATELLITES; i++)
+		{
 			if(diseqc == satDiseqc[i])
-			{				
+			{
 				return (char *)&satName[i];
 			}
-		}	
+		}
 	}
-	else
-	{
-		//can't find a current satellite in all modes
-		return "Unknown";
-	}
+
+	//can't find a current satellite in all modes
+	return "Unknown";
 }
 
 char * CScanSettings::satOfMotorPos(int32_t motorPos) const
