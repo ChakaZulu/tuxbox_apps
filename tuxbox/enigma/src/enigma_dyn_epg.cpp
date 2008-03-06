@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn_epg.cpp,v 1.10 2007/09/07 12:12:34 digi_casi Exp $
+ * $Id: enigma_dyn_epg.cpp,v 1.11 2008/03/06 21:02:17 pieterg Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -331,7 +331,7 @@ public:
 					int tablePos = 0;
 					time_t tableTime = start;
 					result  << "<tr>"
-						<< "<td id=\"channel\" width=" << eString().sprintf("%d", channelWidth) << ">"
+						<< "<td id=\"channel\" width=\"" << eString().sprintf("%d", channelWidth) << "\">"
 						<< "<span class=\"channel\">"
 						<< filter_string(current->service_name)
 						<< "</span>"
@@ -405,7 +405,7 @@ public:
 							}
 							else
 							{
-								result << "<td colspan=" << colUnits << ">&nbsp;</td>";
+								result << "<td colspan=\"" << colUnits << "\">&#160;</td>";
 								tableTime = eventStart;
 								tablePos += colUnits * 15 * d_min;
 								eventDuration = adjust2FifteenMinutes(event.duration);
@@ -423,7 +423,7 @@ public:
 						{
 							result  << "<td class=\"genre"
 								<< eString().sprintf("%02d", genreCategory)
-								<< "\" colspan=" << colUnits << "\">";
+								<< "\" colspan=\"" << colUnits << "\">";
 #ifndef DISABLE_FILE
 							result  << "<a href=\"javascript:record('"
 								<< ref2string(ref) << "','"
@@ -435,8 +435,8 @@ public:
 							tmp.strReplace("&", "~");
 							result  << tmp << "','"
 								<< filter_string(current->service_name)
-								<< "')\"><img src=\"timer.gif\" border=0></a>"
-								<< "&nbsp;&nbsp;";
+								<< "')\"><img src=\"timer.gif\" border=\"0\" /></a>"
+								<< "&#160;&#160;";
 #endif
 							tm* t = localtime(&event.start_time);
 							result  << std::setfill('0')
@@ -449,18 +449,18 @@ public:
 								<< "<span class=\"duration\">"
 								<< " (" << event.duration / 60 << " min)"
 								<< "</span>"
-								<< "<br>";
+								<< "<br />";
 							if ((eventStart <= now) && (eventEnd >= now))
-								result << "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\", \"0\", \"-1\")\'>";
+								result << "<a href=\"javascript:switchChannel('" << ref2string(ref) << "', '0', '-1')\">";
 							result  << "<span class=\"event\">"
 								<< "<b>" << short_description << "</b>"
 								<< "</span>";
 							if ((eventStart <= now) && (eventEnd >= now))
 								result << "</a>";
 
-							result	<< "<br>"
+							result	<< "<br />"
 								<< "Genre: " << genre
-								<< "<br>";
+								<< "<br />";
 
 							if ((eventDuration >= 15 * 60) && (pdaScreen == 0))
 							{
@@ -475,7 +475,7 @@ public:
 						}
 					}
 					if (tablePos < tableWidth)
-						result << "<td colspan=" << (tableWidth - tablePos) / d_min / 15 << ">&nbsp;</td>";
+						result << "<td colspan=\"" << (tableWidth - tablePos) / d_min / 15 << "\">&#160;</td>";
 
 					result << "</tr>\n";
 				}
@@ -510,24 +510,24 @@ public:
 		std::stringstream result;
 
 		result << "<tr>"
-			<< "<th width=" << eString().sprintf("%d", channelWidth) << ">"
+			<< "<th width=\"" << eString().sprintf("%d", channelWidth) << "\">"
 			<< "CHANNEL"
-			<< "<br>"
-			<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", channelWidth) << "\">"
+			<< "<br />"
+			<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", channelWidth) << "\" />"
 			<< "</th>";
 
 		for (time_t i = start; i < end; i += 15 * 60)
 		{
 			tm* t = localtime(&i);
-			result << "<th width=" << d_min * 15 << ">"
+			result << "<th width=\"" << d_min * 15 << "\">"
 				<< std::setfill('0')
 				<< std::setw(2) << t->tm_mday << '.'
 				<< std::setw(2) << t->tm_mon+1 << "."
-				<< "<br>"
+				<< "<br />"
 				<< std::setw(2) << t->tm_hour << ':'
 				<< std::setw(2) << t->tm_min << ' '
-				<< "<br>"
-				<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", 15 * d_min) << "\">"
+				<< "<br />"
+				<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", 15 * d_min) << "\" />"
 				<< "</th>";
 		}
 		result << "</tr>";
