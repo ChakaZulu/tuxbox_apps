@@ -10,7 +10,12 @@ AC_PROG_CXX
 
 TUXBOX_APPS_DVB
 
-AM_CONDITIONAL(BOXTYPE_DREAMBOX, 0)
+AC_ARG_WITH(boxtype,
+	[  --with-boxtype=NAME dreambox/dbox2 [[dbox2,dreambox]]],
+	[BOXTYPE="$withval"],[BOXTYPE="dbox2"])
+AC_SUBST(BOXTYPE)
+AM_CONDITIONAL(BOXTYPE_DREAMBOX,test "$BOXTYPE" != "dbox2")
+AM_CONDITIONAL(BOXTYPE_DBOX2,test "$BOXTYPE" = "dbox2")
 
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 
