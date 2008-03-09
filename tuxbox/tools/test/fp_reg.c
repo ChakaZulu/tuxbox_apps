@@ -1,5 +1,5 @@
 /*
- * $Id: fp_reg.c,v 1.2 2006/03/03 23:09:02 zwen Exp $
+ * $Id: fp_reg.c,v 1.3 2008/03/09 14:12:59 seife Exp $
  *
  * (C) 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -62,6 +62,7 @@ int main(int argc, char **argv)
 		}
 	}
 
+#ifndef HAVE_DREAMBOX_HARDWARE
 	else {
 		val = strtoul(argv[2], NULL, 0) & 0xff;
 
@@ -70,7 +71,8 @@ int main(int argc, char **argv)
 		if (ioctl(fd, FP_IOCTL_SET_REGISTER, &foo) == -1)
 			perror("FP_IOCTL_SET_REGISTER");
 	}
-	
+#endif	
+
 	close(fd);
 	
 	return EXIT_SUCCESS;
