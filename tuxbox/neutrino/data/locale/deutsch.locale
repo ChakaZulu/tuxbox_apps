@@ -223,7 +223,7 @@ colormenu.head Farb-Einstellungen
 colormenu.menucolors Menüfarben
 colormenu.rounded_corners Eckendarstellung
 colormenu.rounded_corners_off standard
-colormenu.rounded_corners_on rund
+colormenu.rounded_corners_on abgerundet
 colormenu.statusbar Statusbalken
 colormenu.textcolor Textfarbe
 colormenu.textcolor_head Textfarbe
