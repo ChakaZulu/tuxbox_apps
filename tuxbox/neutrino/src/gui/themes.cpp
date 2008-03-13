@@ -17,7 +17,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	$Id: themes.cpp,v 1.6 2007/12/01 13:22:21 houdini Exp $ 
+	$Id: themes.cpp,v 1.7 2008/03/13 09:18:39 dbt Exp $ 
 
 */
 
@@ -312,6 +312,7 @@ void CThemes::readFile(char* themename)
 		g_settings.infobar_Text_red = themefile.getInt32( "infobar_Text_red", 0x64 );
 		g_settings.infobar_Text_green = themefile.getInt32( "infobar_Text_green", 0x64 );
 		g_settings.infobar_Text_blue = themefile.getInt32( "infobar_Text_blue", 0x64 );
+		g_settings.rounded_corners = themefile.getBool("rounded_corners", false);
 
 		notifier = new CColorSetupNotifier;
 		notifier->changeNotify(NONEXISTANT_LOCALE, NULL);
@@ -364,6 +365,7 @@ void CThemes::saveFile(char * themename)
 	themefile.setInt32( "infobar_Text_red", g_settings.infobar_Text_red );
 	themefile.setInt32( "infobar_Text_green", g_settings.infobar_Text_green );
 	themefile.setInt32( "infobar_Text_blue", g_settings.infobar_Text_blue );
+	themefile.setBool( "rounded_corners", g_settings.rounded_corners );
 
 	if (!themefile.saveConfig(themename))
 		printf("[neutrino theme] %s write error\n", themename);

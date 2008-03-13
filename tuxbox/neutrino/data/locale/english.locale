@@ -221,6 +221,9 @@ colormenu.font Font Size
 colormenu.gtx_alpha Transparency (GTX)
 colormenu.head Color Settings
 colormenu.menucolors Menu Colors
+colormenu.rounded_corners Shape of corners
+colormenu.rounded_corners_off default
+colormenu.rounded_corners_on rounded
 colormenu.statusbar Infobar
 colormenu.textcolor Textcolor
 colormenu.textcolor_head Textcolor

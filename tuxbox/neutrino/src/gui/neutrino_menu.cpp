@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.17 2008/02/25 21:30:10 houdini Exp $
+	$Id: neutrino_menu.cpp,v 1.19 2008/03/13 09:19:52 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1540,6 +1540,14 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings)
 	fontSettings.addItem(new CMenuForwarder(LOCALE_OPTIONS_DEFAULT, true, NULL, this, font_sizes_groups[5].actionkey));
 }
 
+// color menu
+#define COLORMENU_CORNERSETTINGS_TYPE_OPTION_COUNT 2
+const CMenuOptionChooser::keyval COLORMENU_CORNERSETTINGS_TYPE_OPTIONS[COLORMENU_CORNERSETTINGS_TYPE_OPTION_COUNT] =
+{
+	{ 0, LOCALE_COLORMENU_ROUNDED_CORNERS_OFF },
+	{ 1, LOCALE_COLORMENU_ROUNDED_CORNERS_ON  }
+};
+
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings)
 {
 	colorSettings.addItem(GenericMenuSeparator);
@@ -1579,6 +1587,12 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 		colorSettings.addItem( new CMenuForwarder(LOCALE_COLORMENU_GTX_ALPHA, true, NULL, chAlphaSetup, NULL, CRCInput::RC_2));
 	}
 #endif
+ 	bool mn_corner; // for testing	
+ 	if (mn_corner ==  true)
+ 	{
+	CMenuOptionChooser* ojc = new CMenuOptionChooser(LOCALE_COLORMENU_ROUNDED_CORNERS, &g_settings.rounded_corners, COLORMENU_CORNERSETTINGS_TYPE_OPTIONS, COLORMENU_CORNERSETTINGS_TYPE_OPTION_COUNT, true );
+	colorSettings.addItem(ojc);
+ 	}
 }
 
 

@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.886 2008/03/02 09:53:15 seife Exp $
+	$Id: neutrino.cpp,v 1.887 2008/03/13 09:22:06 dbt Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -396,6 +396,9 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_Text_red = configfile.getInt32( "infobar_Text_red", 0x64 );
 	g_settings.infobar_Text_green = configfile.getInt32( "infobar_Text_green", 0x64 );
 	g_settings.infobar_Text_blue = configfile.getInt32( "infobar_Text_blue", 0x64 );
+	
+	//corners
+	g_settings.rounded_corners = configfile.getBool("rounded_corners", false);
 
 	//network
 	char cfg_key[81];
@@ -568,7 +571,7 @@ int CNeutrinoApp::loadSetup()
 
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
-	strcpy(g_settings.softupdate_url_file, configfile.getString("softupdate_url_file", "/etc/cramfs.urls").c_str());
+	strcpy(g_settings.softupdate_url_file, configfile.getString("softupdate_url_file", "/etc/squashfs.urls").c_str());
 	strcpy(g_settings.softupdate_proxyserver, configfile.getString("softupdate_proxyserver", "" ).c_str());
 	strcpy(g_settings.softupdate_proxyusername, configfile.getString("softupdate_proxyusername", "" ).c_str());
 	strcpy(g_settings.softupdate_proxypassword, configfile.getString("softupdate_proxypassword", "" ).c_str());
@@ -867,6 +870,9 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "infobar_Text_red", g_settings.infobar_Text_red );
 	configfile.setInt32( "infobar_Text_green", g_settings.infobar_Text_green );
 	configfile.setInt32( "infobar_Text_blue", g_settings.infobar_Text_blue );
+	
+	//corners
+	configfile.setBool( "rounded_corners", g_settings.rounded_corners );
 
 	//network
 	char cfg_key[81];
