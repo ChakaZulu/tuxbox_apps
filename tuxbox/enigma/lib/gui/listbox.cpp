@@ -568,7 +568,6 @@ void eListBoxBase::gotFocus()
 	}
 	if (flags & flagShowEntryHelp)
 		setHelpText( current != childs.end() ? current->getHelpText(): eString(" ")); // eString(_("no description available")));
-	eRCInput::getInstance()->setKeyboardMode(eRCInput::kmAscii);
 }
 
 void eListBoxBase::lostFocus()
@@ -601,7 +600,6 @@ void eListBoxBase::lostFocus()
 	if (parent && parent->LCDElement)
 		parent->LCDElement->setText("");
 #endif
-	eRCInput::getInstance()->setKeyboardMode(eRCInput::kmNone);
 }
 
 void eListBoxBase::invalidateCurrent()
@@ -998,13 +996,8 @@ int eListBoxBase::getShortcut(eListBoxEntry* e)
 		if ( it->isSelectable()&2)
 		{
 			i++;
-			if (i > 10) break;
 			if ( it == e )
-			{
-				if (i > 9)
-					i = 0;
 				return i;
-			}
 		}
 	}
 	return -1;	
@@ -1036,6 +1029,14 @@ int eListBoxBase::eventHandlerShortcuts(const eWidgetEvent &event)
 			num=7;
 		else if (event.action == &i_shortcutActions->number9)
 			num=8;
+		else if (event.action == &i_shortcutActions->red)
+			num=10;
+		else if (event.action == &i_shortcutActions->green)
+			num=11;
+		else if (event.action == &i_shortcutActions->yellow)
+			num=12;
+		else if (event.action == &i_shortcutActions->blue)
+			num=13;
 		else
 			break;
 		if (num != -1)
@@ -1058,6 +1059,12 @@ eListBoxBaseExt::eListBoxBaseExt(eWidget* parent, const eWidget* descr, int take
 {
 	CONNECT(browseTimer.timeout, eListBoxBaseExt::browseTimeout);
 	addActionMap(&i_numberActions->map);
+}
+
+void eListBoxBaseExt::gotFocus()
+{
+	eListBoxBase::gotFocus();
+	eRCInput::getInstance()->setKeyboardMode(eRCInput::kmAscii);
 }
 
 int eListBoxBaseExt::eventHandler(const eWidgetEvent &event)
@@ -1190,6 +1197,7 @@ void eListBoxBaseExt::clearList()
 void eListBoxBaseExt::lostFocus()
 {
 	eListBoxBase::lostFocus();
+	eRCInput::getInstance()->setKeyboardMode(eRCInput::kmNone);
 	browseText="";
 	browseHistory.clear();
 }
@@ -1282,9 +1290,40 @@ const eString& eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor
 		if (!hideshortcuts)
 		{
 			int shortcut = listbox->getShortcut(this);
+			eString strShortcut;
+			switch (shortcut)
+			{
+				case 10: shortcut = 0;
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+				case 9:
+					strShortcut = eString().sprintf("shortcut.%d",shortcut);
+					break;
+				case 11:
+					strShortcut = eString().sprintf("shortcut.red");
+					break;
+				case 12:
+					strShortcut = eString().sprintf("shortcut.green");
+					break;
+				case 13:
+					strShortcut = eString().sprintf("shortcut.yellow");
+					break;
+				case 14:
+					strShortcut = eString().sprintf("shortcut.blue");
+					break;
+				default:
+					shortcut=-1;
+			}
 			if (shortcut >= 0)
 			{
-				gPixmap* pm = eSkin::getActive()->queryImage(eString().sprintf("shortcut.%d",shortcut));
+					
+				gPixmap* pm = eSkin::getActive()->queryImage(strShortcut);
 				eRect left = rect;
 				lft = pm->x + 10;
 				left.setRight( lft );

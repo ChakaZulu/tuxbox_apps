@@ -44,6 +44,7 @@ protected:
 	int setProperty(const eString &prop, const eString &value);
 	int eventHandler(const eWidgetEvent &event);
 	void lostFocus();
+	void gotFocus();
 private:
 	eRect getEntryRect(int n);
 	void eraseBackground() {};
@@ -52,7 +53,6 @@ private:
 	void recalcScrollBar();
 	int newFocus();
 	void redrawWidget(gPainter *target, const eRect &area);
-	void gotFocus();
 	void init();
 	virtual void SendSelected( eListBoxEntry* entry )=0;
 	virtual void SendSelChanged( eListBoxEntry* entry )=0;
@@ -144,6 +144,7 @@ class eListBoxBaseExt: public eListBoxBase
 	void browseTimeout() { browseText=""; }
 	int eventHandler( const eWidgetEvent &e );
 protected:
+	void gotFocus();
 	eListBoxBaseExt(eWidget* parent, const eWidget* descr=0, int takefocus=1, int item_height=0, const char *deco="eListBox" );
 public:
 // for text browsing via keyboard	
