@@ -467,7 +467,7 @@ void eServiceSelector::addService(const eServiceReference &ref)
 		eServiceReferenceDVB temp;
 		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
 		eServiceReferenceDVB &rec =
-			eDVB::getInstance()->recorder ? eDVB::getInstance()->recorder->recRef :
+			eDVB::getInstance()->recorder && !eZapMain::getInstance()->isRecordingPermanentTimeshift() ? eDVB::getInstance()->recorder->recRef :
 			streaming ? (eServiceReferenceDVB&) streamingRef :
 			temp;
 		if ( rec && !onSameTP(Ref,rec) )
