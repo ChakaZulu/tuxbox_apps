@@ -1,5 +1,5 @@
 /*
- * $Id: enigma_dyn.cpp,v 1.567 2007/10/04 10:32:27 digi_casi Exp $
+ * $Id: enigma_dyn.cpp,v 1.568 2008/03/15 09:55:04 dbluelle Exp $
  *
  * (C) 2005,2007 by digi_casi <digi_casi@tuxbox.org>
  *
@@ -970,7 +970,7 @@ public:
 #ifndef DISABLE_FILE
 		if (!forceAll)
 		{
-			if (eDVB::getInstance()->recorder && !e.path && !e.flags)
+			if (eDVB::getInstance()->recorder && !eZapMain::getInstance()->isRecordingPermanentTimeshift() && !e.path && !e.flags)
 			{
 				if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
 					return;
