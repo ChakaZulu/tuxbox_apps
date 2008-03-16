@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.27 2007/06/24 11:46:01 dbluelle Exp $
+ * $Id: zapittypes.h,v 1.28 2008/03/16 12:20:10 seife Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -106,10 +106,13 @@ typedef enum {
 	SMATV_REMOTE_TUNING,
 	DISEQC_1_0,
 	DISEQC_1_1,
-	DISEQC_1_2,
+	DISEQC_1_2
+#if HAVE_DVB_API_VERSION >= 3
+	,
 	DISEQC_2_0,
 	DISEQC_2_1,
 	DISEQC_2_2
+#endif
 } diseqc_t;
 
 /* dvb transmission types */

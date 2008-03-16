@@ -1,5 +1,5 @@
 /*
- * $Id: debug.h,v 1.8 2007/06/17 18:23:57 dbluelle Exp $
+ * $Id: debug.h,v 1.9 2008/03/16 12:20:09 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -106,6 +106,8 @@ extern int debug;
 	else { _r = secfd; } 					\
 	_r;							\
 })
+#else
+#define fop_sec fop
 #endif
 
 #define quiet_fop(cmd, args...) ({				\

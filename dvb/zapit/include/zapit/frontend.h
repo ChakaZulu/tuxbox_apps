@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.32 2007/06/24 11:46:01 dbluelle Exp $
+ * $Id: frontend.h,v 1.33 2008/03/16 12:20:09 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -58,7 +58,9 @@ class CFrontend
 		/* selects different software control modes for uncommitted switch */
 		int uncommitted_switch_mode;
 
+#if HAVE_DVB_API_VERSION >= 3
 		uint32_t			getDiseqcReply(const int timeout_ms) const;
+#endif
 		dvb_frontend_event	getEvent(void);
 		dvb_frontend_parameters	getFrontend(void) const;
 

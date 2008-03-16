@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.60 2008/01/03 17:25:10 seife Exp $
+ * $Id: frontend.cpp,v 1.61 2008/03/16 12:20:10 seife Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -39,6 +39,7 @@
 #define frequency Frequency
 #define inversion Inversion
 #define modulation QAM
+#define FE_SET_VOLTAGE SEC_SET_VOLTAGE
 #endif
 
 CFrontend::CFrontend(int _uncommitted_switch_mode)
@@ -366,11 +367,7 @@ void CFrontend::secSetTone(const fe_sec_tone_mode_t toneMode, const uint32_t ms)
 {
 	TIMER_START();
 
-#if HAVE_DVB_API_VERSION < 3
 	if (fop_sec(ioctl, FE_SET_TONE, toneMode) == 0) {
-#else
-	if (fop(ioctl, FE_SET_TONE, toneMode) == 0) {
-#endif
 		currentToneMode = toneMode;
 		usleep(1000 * ms);
 	}
@@ -382,11 +379,7 @@ void CFrontend::secSetVoltage(const fe_sec_voltage_t voltage, const uint32_t ms)
 {
 	TIMER_START();
 
-#if HAVE_DVB_API_VERSION < 3
-	if (fop_sec(ioctl, SEC_SET_VOLTAGE, voltage) == 0) {
-#else
-	if (fop(ioctl, FE_SET_VOLTAGE, voltage) == 0) {
-#endif
+	if (fop_sec(ioctl, FE_SET_VOLTAGE, voltage) == 0) {
 		currentTransponder.polarization = voltage;
 		usleep(1000 * ms);
 	}
@@ -436,9 +429,9 @@ void CFrontend::sendDiseqcCommand(const struct dvb_diseqc_master_cmd *cmd, const
 	TIMER_STOP();
 }
 
+#if HAVE_DVB_API_VERSION >= 3
 uint32_t CFrontend::getDiseqcReply(const int timeout_ms) const
 {
-#if HAVE_DVB_API_VERSION >= 3
 	struct dvb_diseqc_slave_reply reply;
 
 	reply.timeout = timeout_ms;
@@ -466,10 +459,8 @@ uint32_t CFrontend::getDiseqcReply(const int timeout_ms) const
 	default:	/* unexpected reply */
 		return 0;
 	}
-#else
-	return 0;
-#endif
 }
+#endif
 
 void CFrontend::sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms)
 {
@@ -517,6 +508,7 @@ void CFrontend::setDiseqcType(const diseqc_t newDiseqcType)
 	case DISEQC_1_2:
 		INFO("DISEQC_1_2");
 		break;
+#if HAVE_DVB_API_VERSION >= 3
 	case DISEQC_2_0:
 		INFO("DISEQC_2_0");
 		break;
@@ -526,6 +518,7 @@ void CFrontend::setDiseqcType(const diseqc_t newDiseqcType)
 	case DISEQC_2_2:
 		INFO("DISEQC_2_2");
 		break;
+#endif
 	default:
 		WARN("Invalid DiSEqC type");
 		return;
@@ -827,7 +820,7 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 	}
 
 	if (diseqcType >= SMATV_REMOTE_TUNING) {
-
+#if HAVE_DVB_API_VERSION >= 3
 		if (diseqcType >= DISEQC_2_0)
 			cmd.msg[0] |= 0x02;	/* reply required */
 
@@ -835,12 +828,13 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 
 		if (diseqcType >= DISEQC_2_0)
 			repeats += getDiseqcReply(50);
-
+#else
+		sendDiseqcCommand(&cmd, 15);
+#endif
 	}
 
 	if ((diseqcType >= DISEQC_1_1) && (repeats)) {
 		for (uint16_t i = 0; i < repeats; i++) {
-			uint8_t again = 0;
 
 			usleep(1000 * 100);	/* wait at least 100ms before retransmission */
 
@@ -849,6 +843,8 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 				sendDiseqcCommand(&cmd, 15);
 			}
 
+#if HAVE_DVB_API_VERSION >= 3
+			uint8_t again = 0;
 			if (diseqcType >= DISEQC_2_0)
 				again += getDiseqcReply(50);
 
@@ -861,6 +857,11 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 
 			if (again == 2)
 				repeats++;
+#else
+			cmd.msg[0] |= 0x01;	/* repeated transmission */
+			cmd.msg[2] &= 0xFE;	/* committed switches */
+			sendDiseqcCommand(&cmd, 15);
+#endif
 		}
 	}
 
