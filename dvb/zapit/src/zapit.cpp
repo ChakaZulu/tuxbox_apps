@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.405 2008/01/03 11:05:31 seife Exp $
+ * $Id: zapit.cpp,v 1.406 2008/03/16 12:42:24 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -157,6 +157,8 @@ extern std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 extern std::map<string, t_satellite_position> satellitePositions;
 
 bool standby = true;
+/* on dreambox: use FASTZAP ioctl? */
+int fastzap = 1;
 
 uint32_t lastChannelRadio;
 uint32_t lastChannelTV;
@@ -875,8 +877,10 @@ int zapit(const t_channel_id channel_id, bool in_nvod, transponder_id_t transpon
 	/* if channel's transponder does not match the transponder tuned before ... */
 	if (current_transponder_id != tuned_transponder_id) {
 
-		/* ... tune to it if not in record mode ... */
-		if (currentMode & RECORD_MODE)
+		/* ... tune to it if not in record mode ...
+		   if tuned_transponder_id == 0, we are not tuned
+		   => recording will not work anyway, let's retune at least... */
+		if (tuned_transponder_id && (currentMode & RECORD_MODE))
 			return -1;
 
 		transponder_list_t::iterator t;
@@ -1249,19 +1253,28 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::commandZaptoServiceID msgZaptoServiceID;
 		CZapitMessages::responseZapComplete msgResponseZapComplete;
 		CBasicServer::receive_data(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
+		/* if nonblocking, send reply before zapping... */
+		if (msgZaptoServiceID.nowait && !fastzap)
+			CBasicServer::send_data(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete));
 		msgResponseZapComplete.zapStatus = zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID));
-		CBasicServer::send_data(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete));
+		/* else send it after zapping... */
+		if (!msgZaptoServiceID.nowait || fastzap)
+			CBasicServer::send_data(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete));
 		break;
 	}
 
+#ifndef NO_DEPRECATED_ZAPTO_NOWAIT
 	case CZapitMessages::CMD_ZAPTO_SERVICEID_NOWAIT:
 	case CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT:
 	{
+		// will be deprecated once everything is in place
+		//ERROR("CMD_ZAPTO_SERVICEID_NOWAIT and CMD_ZAPTO_SUBSERVICEID_NOWAIT are deprecated!");
 		CZapitMessages::commandZaptoServiceID msgZaptoServiceID;
 		CBasicServer::receive_data(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
 		zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
 		break;
 	}
+#endif
 
 	case CZapitMessages::CMD_GET_LAST_CHANNEL:
 	{
@@ -2039,6 +2052,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger));
 		break;
 	}
+#else
+	case CZapitMessages::CMD_SET_FASTZAP:
+	{
+		CZapitMessages::commandBoolean msgBoolean;
+		CBasicServer::receive_data(connfd, &msgBoolean, sizeof(msgBoolean));
+		setFastZap(msgBoolean.truefalse);
+		break;
+	}
 #endif
 
 	default:
@@ -2409,6 +2430,22 @@ void setDemuxMode(int demux_mode)
 		startPlayBack(channel);
 	}
 }
+#else
+
+void setFastZap(int mode)
+{
+#define VIDEO_SET_FASTZAP       _IOW('o', 4, int)
+	int mpeg_fd = open("/dev/video", O_WRONLY);
+	if (mpeg_fd > -1) {
+		printf("[zapit] set VIDEO_SET_FASTZAP %d\n", mode);
+		if (ioctl(mpeg_fd, VIDEO_SET_FASTZAP, mode) < 0)
+			perror("zapit: VIDEO_SET_FASTZAP");
+		close(mpeg_fd);
+	} else
+		perror("zapit: open /dev/video");
+
+	fastzap = mode;
+}
 #endif
 
 void enterStandby(void)
@@ -2581,7 +2618,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.405 2008/01/03 11:05:31 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.406 2008/03/16 12:42:24 seife Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -2603,12 +2640,18 @@ int main(int argc, char **argv)
 			update_pmt=true;
 			printf("[zapit] PMT update enabled\n");
 		}
+		else if (!strcmp(argv[i], "-n")) {
+			fastzap=0;
+		}
 		else {
 			fprintf(stderr,
 				"Usage: %s [-d] [-q]\n"
 				"-d : debug mode\n"
 				"-q : quiet mode\n"
 				"-u : enable update on PMT change\n"
+#ifdef HAVE_DREAMBOX_HARDWARE
+				"-n : disable FASTZAP\n"
+#endif
 				"\n"
 				"Keys in config file "	CONFIGFILE ":\n"
 				"saveLastChannel" ", "
@@ -2712,16 +2755,7 @@ int main(int argc, char **argv)
 	zapTo(lastchannel.channelNumber);
 #endif
 #ifdef HAVE_DREAMBOX_HARDWARE
-#define VIDEO_SET_FASTZAP       _IOW('o', 4, int)
-#define FASTZAP 1
-	int mpeg_fd = open("/dev/video", O_WRONLY);
-	if (mpeg_fd > -1) {
-		printf("zapit: set VIDEO_SET_FASTZAP %d\n", FASTZAP);
-		if (ioctl(mpeg_fd, VIDEO_SET_FASTZAP, FASTZAP) < 0)
-			perror("zapit: VIDEO_SET_FASTZAP");
-		close(mpeg_fd);
-	} else
-		perror("zapit: open /dev/video");
+	setFastZap(fastzap);
 #endif
 
 	if (update_pmt) {

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.72 2007/06/17 18:23:57 dbluelle Exp $
+ * $Id: zapit.h,v 1.73 2008/03/16 12:42:23 seife Exp $
  */
 
 #ifndef __zapit_h__
@@ -37,6 +37,7 @@ void setVideoSystem_t(int video_system);
 void setIec(int);
 void setDemuxMode(int);
 #endif
+void setFastZap(int);
 
 #define PAL	0
 #define NTSC	1

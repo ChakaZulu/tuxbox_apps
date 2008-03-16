@@ -268,10 +268,10 @@ class CZapitClient:public CBasicClient
 	void zapTo(const unsigned int channel);
 
 	/* zaps to channel, returns the "zap-status" */
-	unsigned int zapTo_serviceID(const t_channel_id channel_id);
+	unsigned int zapTo_serviceID(const t_channel_id channel_id, bool nowait=false);
 
 	/* zaps to subservice, returns the "zap-status" */
-	unsigned int zapTo_subServiceID(const t_channel_id channel_id);
+	unsigned int zapTo_subServiceID(const t_channel_id channel_id, bool nowait=false);
 
 	/* zaps to channel, does NOT wait for completion (uses event) */
 	void zapTo_serviceID_NOWAIT(const t_channel_id channel_id);
@@ -470,6 +470,7 @@ class CZapitClient:public CBasicClient
 	/****************************************/
 
 	void setStandby(const bool enable);
+	void setFastZap(const bool enable);
 	void startPlayBack();
 	void stopPlayBack();
 	bool isPlayBackActive();

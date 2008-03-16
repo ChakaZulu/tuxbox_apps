@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.114 2007/12/09 23:27:44 seife Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.115 2008/03/16 12:42:23 seife Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -139,11 +139,12 @@ void CZapitClient::setAudioChannel(const unsigned int channel)
 }
 
 /* zaps to onid_sid, returns the "zap-status" */
-unsigned int CZapitClient::zapTo_serviceID(const t_channel_id channel_id)
+unsigned int CZapitClient::zapTo_serviceID(const t_channel_id channel_id, bool nowait)
 {
 	CZapitMessages::commandZaptoServiceID msg;
 
 	msg.channel_id = channel_id;
+	msg.nowait = nowait;
 
 	send(CZapitMessages::CMD_ZAPTO_SERVICEID, (const char *) & msg, sizeof(msg));
 
@@ -155,11 +156,12 @@ unsigned int CZapitClient::zapTo_serviceID(const t_channel_id channel_id)
 	return response.zapStatus;
 }
 
-unsigned int CZapitClient::zapTo_subServiceID(const t_channel_id channel_id)
+unsigned int CZapitClient::zapTo_subServiceID(const t_channel_id channel_id, bool nowait)
 {
 	CZapitMessages::commandZaptoServiceID msg;
 
 	msg.channel_id = channel_id;
+	msg.nowait = nowait;
 
 	send(CZapitMessages::CMD_ZAPTO_SUBSERVICEID, (const char *) & msg, sizeof(msg));
 
@@ -174,25 +176,13 @@ unsigned int CZapitClient::zapTo_subServiceID(const t_channel_id channel_id)
 /* zaps to channel, does NOT wait for completion (uses event) */
 void CZapitClient::zapTo_serviceID_NOWAIT(const t_channel_id channel_id)
 {
-	CZapitMessages::commandZaptoServiceID msg;
-
-	msg.channel_id = channel_id;
-
-	send(CZapitMessages::CMD_ZAPTO_SERVICEID_NOWAIT, (const char *) & msg, sizeof(msg));
-
-	close_connection();
+	(void)zapTo_serviceID(channel_id, false);
 }
 
 /* zaps to subservice, does NOT wait for completion (uses event) */
 void CZapitClient::zapTo_subServiceID_NOWAIT(const t_channel_id channel_id)
 {
-	CZapitMessages::commandZaptoServiceID msg;
-
-	msg.channel_id = channel_id;
-
-	send(CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT, (const char *) & msg, sizeof(msg));
-
-	close_connection();
+	(void)zapTo_subServiceID(channel_id, false);
 }
 
 
@@ -817,6 +807,14 @@ void CZapitClient::saveBouquets(const bool includeBouquetOthers)
 	CZapitMessages::responseCmd response;
 	CBasicClient::receive_data((char* )&response, sizeof(response));
 
+	close_connection();
+}
+
+void CZapitClient::setFastZap(const bool enable)
+{
+	CZapitMessages::commandBoolean msg;
+	msg.truefalse = enable;
+	send(CZapitMessages::CMD_SET_FASTZAP, (char*)&msg, sizeof(msg));
 	close_connection();
 }
 

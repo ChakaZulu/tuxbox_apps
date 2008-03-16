@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.58 2007/12/07 23:25:53 seife Exp $
+ * $Id: pzapit.cpp,v 1.59 2008/03/16 12:42:23 seife Exp $
  *
  * simple commandline client for zapit
  *
@@ -94,6 +94,7 @@ int main (int argc, char** argv)
 	int mute = -1;
 	int volume = -1;
 	int nvod = -1;
+	int fastzap = -1;
 	t_channel_id zapsid = 0;
 	const char * channelName = NULL;
 
@@ -352,6 +353,14 @@ int main (int argc, char** argv)
 				continue;
 			}
 		}
+		else if (!strncmp(argv[i], "--fastzap", 9))
+		{
+			if (i < argc - 1)
+			{
+				sscanf(argv[++i], "%d", &fastzap);
+				continue;
+			}
+		}
 		else if (!strncmp(argv[i], "--getpids", 9)) 
 		{
 			getpids = true;
@@ -394,6 +403,12 @@ int main (int argc, char** argv)
 	if (leaveStandby)
 	{
 		zapit.setStandby(false);
+		return 0;
+	}
+
+	if (fastzap > -1)
+	{
+		zapit.setFastZap(fastzap != 0);
 		return 0;
 	}
 
