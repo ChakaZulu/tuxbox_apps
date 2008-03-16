@@ -158,6 +158,7 @@ void CChannelList::updateEvents(void)
 					if ((chanlist[liststart+count]->currentEvent.text.length() == 0) ||
 						((long)(chanlist[liststart+count]->currentEvent.startTime + chanlist[liststart+count]->currentEvent.duration) < atime))
 					{
+						chanlist[liststart+count]->currentEvent = CChannelEvent(); // clear old event
 						p_requested_channels[cnt++] = chanlist[liststart+count]->channel_id;
 					}
 				}
