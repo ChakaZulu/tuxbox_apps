@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.406 2008/03/16 12:42:24 seife Exp $
+ * $Id: zapit.cpp,v 1.407 2008/03/16 13:11:23 seife Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -2618,7 +2618,9 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.406 2008/03/16 12:42:24 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.407 2008/03/16 13:11:23 seife Exp $\n");
+
+	bool check_lock = true;
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -2643,12 +2645,17 @@ int main(int argc, char **argv)
 		else if (!strcmp(argv[i], "-n")) {
 			fastzap=0;
 		}
+		else if (!strcmp(argv[i], "-l")) {
+			printf("[zapit] lock loss check disabled\n");
+			check_lock=false;
+		}
 		else {
 			fprintf(stderr,
-				"Usage: %s [-d] [-q]\n"
+				"Usage: %s [-d] [-q] [-u] [-l]\n"
 				"-d : debug mode\n"
 				"-q : quiet mode\n"
 				"-u : enable update on PMT change\n"
+				"-l : disable checking for lost lock\n"
 #ifdef HAVE_DREAMBOX_HARDWARE
 				"-n : disable FASTZAP\n"
 #endif
@@ -2758,10 +2765,20 @@ int main(int argc, char **argv)
 	setFastZap(fastzap);
 #endif
 
+	time_t lastlockcheck = 0;
+
 	if (update_pmt) {
 		while (zapit_server.run(parse_command, CZapitMessages::ACTVERSION, true)) {
 			struct pollfd pfd;
-
+		 	if (check_lock && !standby && channel && time(NULL) > lastlockcheck) {
+				DBG("checking for lock...");
+				if ((frontend->getStatus() & FE_HAS_LOCK) == 0) {
+					printf("[zapit] LOCK LOST! trying rezap...\n");
+					tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
+					zapit(channel->getChannelID(), current_is_nvod, 0);
+				}
+				lastlockcheck = time(NULL);
+			}
 			if (pmt_update_fd != -1) {
 				pfd.fd = pmt_update_fd;
 				pfd.events = (POLLIN | POLLPRI);
