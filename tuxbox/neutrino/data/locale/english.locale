@@ -142,6 +142,7 @@ audiomenu.ost ost
 audiomenu.stereo stereo
 audiomenu.volumebar_audiosteps Volume Step Size
 audioplayer.add Add
+audioplayer.add_sc Shoutcast
 audioplayer.artist_title Artist, Title
 audioplayer.building_search_index building search index
 audioplayer.button_select_title_by_id search by ID

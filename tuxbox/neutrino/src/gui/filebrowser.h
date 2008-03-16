@@ -140,12 +140,13 @@ public:
 class CFileBrowser
 {
 	private:
-		CFrameBuffer	*frameBuffer;
+		CFrameBuffer		*frameBuffer;
 
 		CFileList		selected_filelist;
 		bool			readDir(const std::string & dirname, CFileList* flist);
 		bool			readDir_vlc(const std::string & dirname, CFileList* flist);
 		bool			readDir_std(const std::string & dirname, CFileList* flist);
+		bool			readDir_sc(const std::string & dirname, CFileList* flist);
 		void			addRecursiveDir(CFileList * re_filelist, std::string path, bool bRootCall, CProgressWindow * progress = NULL);
 		void SMSInput(const neutrino_msg_t msg);
 
@@ -182,6 +183,12 @@ class CFileBrowser
 	public:
 		CFileList		filelist;
 
+		typedef enum {
+			ModeFile,
+			ModeVLC,
+			ModeSC
+		} tFileBrowserMode;
+
 		/**
 		 * @param selection select the specified entry, ignored if selection == -1
 		 */
@@ -191,11 +198,11 @@ class CFileBrowser
 		std::string		Path;
 		bool			Multi_Select;
 		bool			Dirs_Selectable;
-		bool        Dir_Mode;
+		bool			Dir_Mode;
 		CFileFilter *	Filter;
 
 		CFileBrowser();
-		CFileBrowser(const char * const _base);
+		CFileBrowser(const char * const _base, const tFileBrowserMode mode = ModeFile);
 		~CFileBrowser();
 
 		bool		exec(const char * const dirname);
@@ -212,9 +219,8 @@ class CFileBrowser
 			}
 
 //		size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data);
+	private:
+		tFileBrowserMode 	m_Mode;
 };
-
-
-
 
 #endif

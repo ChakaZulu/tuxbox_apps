@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.h,v 1.17 2008/02/15 22:32:21 houdini Exp $
+  $Id: audioplayer.h,v 1.18 2008/03/16 15:51:22 houdini Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -228,6 +228,7 @@ class CAudioPlayerGui : public CMenuTarget
 	 */
 	bool askToOverwriteFile(const std::string& filename);
 	bool openFilebrowser(void);
+	bool openSCbrowser(void);
 	bool clearPlaylist(void);
 	bool shuffelPlaylist(void);	
 	bool playNext(bool allow_rotate = false);

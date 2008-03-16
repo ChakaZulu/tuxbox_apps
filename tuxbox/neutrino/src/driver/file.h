@@ -73,6 +73,7 @@ public:
 	CFile();
 	off_t Size;
 	std::string Name;
+	std::string Url;
 	mode_t Mode;
 	bool Marked;
 	time_t Time;

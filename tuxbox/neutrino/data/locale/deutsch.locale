@@ -142,6 +142,7 @@ audiomenu.ost ost
 audiomenu.stereo stereo
 audiomenu.volumebar_audiosteps Lautstärke Schrittweite
 audioplayer.add Hinzufügen
+audioplayer.add_sc Shoutcast
 audioplayer.artist_title Interpret, Titel
 audioplayer.building_search_index Erstelle Suchindex
 audioplayer.button_select_title_by_id Suche n. ID
