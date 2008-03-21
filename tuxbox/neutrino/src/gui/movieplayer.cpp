@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.160 2008/03/21 18:25:08 seife Exp $
+  $Id: movieplayer.cpp,v 1.161 2008/03/21 18:28:05 seife Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -3344,15 +3344,16 @@ void CMoviePlayerGui::PlayFile (int parental)
 		if(open_filebrowser)
 		{
 			open_filebrowser    = false;
+			if (g_settings.streaming_show_tv_in_browser == true && 
+			    g_ZapitsetStandbyState == true &&
+			    g_playstate == CMoviePlayerGui::STOPPED)
+			{
+				g_Zapit->setStandby (false);
+				g_ZapitsetStandbyState = false;
+			}
 #ifdef MOVIEBROWSER  			
 			if(isMovieBrowser == true)
 			{
-				if (g_settings.streaming_show_tv_in_browser == true && 
-				    g_ZapitsetStandbyState == true)
-				{
-					g_Zapit->setStandby (false);
-					g_ZapitsetStandbyState = false;
-				}
 				// start the moviebrowser instead of the filebrowser
 				if(moviebrowser->exec(Path_local.c_str()))
 				{
@@ -3388,13 +3389,6 @@ void CMoviePlayerGui::PlayFile (int parental)
 			else
 #endif /* MOVIEBROWSER */
 			{ // MOVIEBROWSER added
-				if (g_settings.streaming_show_tv_in_browser == true && 
-				    g_ZapitsetStandbyState == true)
-				{
-					g_Zapit->setStandby (false);
-					g_ZapitsetStandbyState = false;
-				}
-
 				filebrowser->Filter = &tsfilefilter;
 				//-- play selected file or ... --
 				if(filebrowser->exec(Path_local.c_str()))
@@ -4471,7 +4465,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP20));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.160 $");
+	helpbox.addLine("Version: $Revision: 1.161 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4497,7 +4491,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.160 $");
+	helpbox.addLine("Version: $Revision: 1.161 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
