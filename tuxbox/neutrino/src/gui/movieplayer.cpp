@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.158 2007/12/09 23:30:53 seife Exp $
+  $Id: movieplayer.cpp,v 1.159 2008/03/21 12:23:20 houdini Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -91,7 +91,7 @@
 
 #include <poll.h>
 
-#ifdef MOVIEBROWSER  			
+#ifdef MOVIEBROWSER
 #include <sys/timeb.h>
 #define MOVIE_HINT_BOX_TIMER 5 // time to show bookmark hints in seconds
 #endif /* MOVIEBROWSER */
@@ -138,7 +138,7 @@ bool g_ZapitsetStandbyState = false;
 
 static bool isTS, isPES, isBookmark;
 
-#ifdef MOVIEBROWSER  			
+#ifdef MOVIEBROWSER
 static bool isMovieBrowser = false;
 static bool movieBrowserDelOnExit = false;
 #endif /* MOVIEBROWSER */
@@ -218,7 +218,7 @@ bool get_movie_info_apid_name(int apid,MI_MOVIE_INFO* movie_info,std::string* ap
 //------------------------------------------------------------------------
 int get_next_movie_info_bookmark_pos_sec(MI_MOVIE_INFO* movie_info, int pos_sec, bool direction)
 {
-    if(movie_info == NULL)    
+    if(movie_info == NULL)
         return -1;
 
     int new_pos_sec ; // init below
@@ -313,12 +313,12 @@ CMoviePlayerGui::CMoviePlayerGui()
 	if(g_settings.filebrowser_denydirectoryleave)
 		filebrowser = new CFileBrowser (Path_local.c_str());	// with filebrowser patch
 	else
-		filebrowser	= new CFileBrowser();
-		
+		filebrowser = new CFileBrowser();
+
 	filebrowser->Dirs_Selectable = false;
 
-#ifdef MOVIEBROWSER  
-	moviebrowser = NULL;			
+#ifdef MOVIEBROWSER
+	moviebrowser = NULL;
 #endif /* MOVIEBROWSER */
 
 	tsfilefilter.addFilter ("ts");
@@ -339,7 +339,7 @@ CMoviePlayerGui::CMoviePlayerGui()
 CMoviePlayerGui::~CMoviePlayerGui ()
 {
 	delete filebrowser;
-#ifdef MOVIEBROWSER  
+#ifdef MOVIEBROWSER
 	if(moviebrowser != NULL)
 	{	
 		delete moviebrowser;
@@ -392,19 +392,19 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	}
 	
 	if (g_settings.streaming_allow_multiselect) {
-        filebrowser->Multi_Select = true;
-    } else {
-        filebrowser->Multi_Select = false;
-    }
+		filebrowser->Multi_Select = true;
+	} else {
+		filebrowser->Multi_Select = false;
+	}
 
-    g_ZapitsetStandbyState = false; // 'Init State
-    
+	g_ZapitsetStandbyState = false; // 'Init State
+
 	// if filebrowser or moviebrowser playback we check if we should disable the tv (other modes might be added later)
 	if (g_settings.streaming_show_tv_in_browser == false ||
-    	    (actionKey != "tsmoviebrowser"   && 
-    	     actionKey != "tsplayback"       &&
-             actionKey != "fileplayback"     &&
-    	     actionKey != "tsplayback_pc"    ) ) 
+		(actionKey != "tsmoviebrowser"   && 
+		actionKey != "tsplayback"       &&
+		actionKey != "fileplayback"     &&
+		actionKey != "tsplayback_pc"    ) ) 
 	{
 		// set zapit in standby mode
 		g_ZapitsetStandbyState = true; 
@@ -417,8 +417,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	perror("Datei " MOVIEPLAYER_START_SCRIPT " fehlt. Bitte erstellen, wenn gebraucht.\nFile " MOVIEPLAYER_START_SCRIPT " not found. Please create if needed.\n");
 
 	// tell neutrino we're in ts_mode
-	CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE,
-														  NeutrinoMessages::mode_ts);
+	CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE, NeutrinoMessages::mode_ts);
 	// remember last mode
 	m_LastMode =
 	(CNeutrinoApp::getInstance ()->
@@ -433,7 +432,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	isTS=false;
 	isPES=false;
 
-#ifdef MOVIEBROWSER  			
+#ifdef MOVIEBROWSER
 	isMovieBrowser = false;
 #endif /* MOVIEBROWSER */
 
@@ -454,7 +453,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		isTS=true;
 		PlayFile();
 	}
-#ifdef MOVIEBROWSER  			
+#ifdef MOVIEBROWSER
 	else if(actionKey=="tsmoviebrowser")
 	{
 		if(moviebrowser == NULL)
@@ -487,8 +486,8 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 			startfilename = theBookmark->getUrl();
 			sscanf (theBookmark->getTime(), "%lld", &g_startposition);
 			int vlcpos = startfilename.rfind("vlc://");
-            CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
-            if(vlcpos==0)
+			CLCD::getInstance()->setMode (CLCD::MODE_TVRADIO);
+			if(vlcpos==0)
 			{
 				PlayStream (STREAMTYPE_FILE);
 			}
@@ -528,8 +527,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 	g_Sectionsd->setPauseScanning (false);
 
 	// Restore last mode
-	CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE,
-														  m_LastMode);
+	CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE, m_LastMode);
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
 	CLCD::getInstance()->showServicename(g_RemoteControl->getCurrentChannelName());
@@ -540,7 +538,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 		bookmarkmanager=0;
 	}
 	
-	if(moviebrowser != NULL && movieBrowserDelOnExit == TRUE)
+	if(moviebrowser != NULL && movieBrowserDelOnExit == true)
 	{
 		//moviebrowser->fileInfoStale();
 		TRACE("[mp] delete MovieBrowser");
@@ -3141,7 +3139,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 	std::string sel_filename;
 	std::string hlpstr;
 
-#ifdef MOVIEBROWSER  			
+#ifdef MOVIEBROWSER
 	timeb current_time;
 	CMovieInfo cMovieInfo;				// funktions to save and load movie info
 	MI_MOVIE_INFO* p_movie_info = NULL;	// movie info handle which comes from the MovieBrowser, if not NULL MoviePlayer is able to save new bookmarks
@@ -3210,7 +3208,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 			start_play       = true;
 		}
 
-#ifdef MOVIEBROWSER  			
+#ifdef MOVIEBROWSER
 		if(isMovieBrowser == true) 
 		{
 			// do all moviebrowser stuff here ( like commercial jump ect.)
@@ -3407,7 +3405,7 @@ void CMoviePlayerGui::PlayFile (int parental)
                         filelist.clear();
                         filelist.push_back(*file);
                     }
-        
+
 					if(!filelist.empty())
 					{
 						if (g_settings.streaming_show_tv_in_browser == true &&
@@ -3423,7 +3421,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 						update_lcd   = true;
 						start_play   = true;
                         p_movie_info = NULL; // ew might get the movie info here some time
-                        
+
 						if(FileTime.IsVisible()) // update time if visible
 							FileTime.show(0);
 					}
@@ -3571,7 +3569,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- stop playback + start filebrowser --
 			case CRCInput::RC_home:
-#ifdef MOVIEBROWSER  			
+#ifdef MOVIEBROWSER
 				if(isMovieBrowser == true && p_movie_info != NULL)
 				{ 
 					// if we have a movie information, try to save the stop position
@@ -3608,7 +3606,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- invoke bookmark manager --
 			case CRCInput::RC_blue:
-#ifdef MOVIEBROWSER  	
+#ifdef MOVIEBROWSER
 					// is there already a bookmark activity?
 				if(isMovieBrowser != true)
 				{
@@ -3792,8 +3790,8 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 				//-- Resync A/V --
 			case CRCInput::RC_0:
-            
-#ifdef MOVIEBROWSER  		
+
+#ifdef MOVIEBROWSER
 				if(isMovieBrowser == true)
 				{
 					if(new_bookmark.pos != 0)
@@ -3981,7 +3979,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 	}
 	while(requestStop==false);
 
-#ifdef MOVIEBROWSER  			
+#ifdef MOVIEBROWSER
 	isMovieBrowser = false;
 #endif /* MOVIEBROWSER */
 
@@ -4471,7 +4469,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_DOWN, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP21));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP20));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.158 $");
+	helpbox.addLine("Version: $Revision: 1.159 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	helpbox.addLine("wabber-edition: v1.2 (c) 2005 by gmo18t");
 	hide();
@@ -4497,7 +4495,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_LEFT, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP16));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_OKAY, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP14));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.158 $");
+	helpbox.addLine("Version: $Revision: 1.159 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
