@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.32 2008/03/16 12:42:23 seife Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.33 2008/03/21 12:21:04 houdini Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -338,6 +338,11 @@ class CZapitMessages
 		uint8_t param2;
 	};
 
+	struct startScan
+	{
+		bool    scan_mode;
+		int8_t  diseqc;
+	};
 
 };
 

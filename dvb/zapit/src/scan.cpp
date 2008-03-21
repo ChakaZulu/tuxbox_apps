@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.156 2007/06/24 11:46:03 dbluelle Exp $
+ * $Id: scan.cpp,v 1.157 2008/03/21 12:21:35 houdini Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -27,6 +27,7 @@
 
 #include <zapit/bouquets.h>
 #include <zapit/client/zapitclient.h>
+#include <zapit/client/msgtypes.h>
 #include <zapit/debug.h>
 #include <zapit/frontend.h>
 #include <zapit/getservices.h>
@@ -257,13 +258,14 @@ int get_nits(dvb_frontend_parameters *feparams, uint8_t polarization, const t_sa
 	frequency_kHz_t zfrequency;
 	
 	zfrequency = FREQUENCY_IN_KHZ(feparams->frequency);
+
 	if(scan_mode)
 	{
 		fake_tid++; fake_nid++;
 		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(CREATE_TRANSPONDER_ID_FROM_FREQUENCY_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(zfrequency, satellite_position,fake_nid,fake_tid), feparams, polarization, DiSEqC);
 		return status;
 	}
- 	eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &(feparams->frequency),sizeof(feparams->frequency));
+	eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &(feparams->frequency),sizeof(feparams->frequency));
 
 	if (frontend->setParameters(feparams, polarization, DiSEqC) < 0)
 		return -1;
@@ -648,26 +650,27 @@ void scan_provider(xmlNodePtr search, const char * const providerName, uint8_t d
 			if (scI->second.getServiceType() != stI->second)
 			{
 				switch (scI->second.getServiceType()) {
-				case ST_DIGITAL_TELEVISION_SERVICE:
-				case ST_DIGITAL_RADIO_SOUND_SERVICE:
-				case ST_NVOD_REFERENCE_SERVICE:
-				case ST_NVOD_TIME_SHIFTED_SERVICE:
-					break;
-				default:
-					INFO("setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x",
-						stI->first,
-						scI->second.getServiceType(),
-						stI->second);
-					scI->second.setServiceType(stI->second);
-					break;
+					case ST_DIGITAL_TELEVISION_SERVICE:
+					case ST_DIGITAL_RADIO_SOUND_SERVICE:
+					case ST_NVOD_REFERENCE_SERVICE:
+					case ST_NVOD_TIME_SHIFTED_SERVICE:
+						break;
+					default:
+						INFO("setting service_type of channel_id " PRINTF_CHANNEL_ID_TYPE " from %02x to %02x",
+							stI->first,
+							scI->second.getServiceType(),
+							stI->second);
+						scI->second.setServiceType(stI->second);
+						break;
 				}
 			}
 		}
 	}
 }
 
-void *start_scanthread(void *scanmode)
+void *start_scanthread(void *imsg)
 {
+	CZapitMessages::startScan *msg = (CZapitMessages::startScan*)imsg;
 	FILE * fd;
 	char providerName[32] = "";
 	const char * frontendType;
@@ -690,11 +693,7 @@ void *start_scanthread(void *scanmode)
 		stop_scan(false);
 		pthread_exit(0);
 	}
-	if(scanmode)
-		scan_mode = true;
-	else
-		scan_mode = false;
-	printf("[zapit] scan mode %s\n", scan_mode ? "fast" : "full");
+	scan_mode = msg->scan_mode;
 	fake_tid = fake_nid = 0;
 
 	/* get first child */
@@ -705,23 +704,29 @@ void *start_scanthread(void *scanmode)
 		/* get name of current satellite oder cable provider */
 		strcpy(providerName, xmlGetAttribute(search, "name"));
 
-		for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++)
+		for (spI = scanProviders.begin(); spI != scanProviders.end(); spI++) {
 			if (!strcmp(spI->second.c_str(), providerName))
 			{
 				/* increase sat counter */
 				curr_sat++;
 
 				/* satellite receivers might need diseqc */
-				if (frontend->getInfo()->type == FE_QPSK)
+				if (frontend->getInfo()->type == FE_QPSK) {
 					diseqc_pos = spI->first;
+//printf("providerName = %s, msg->diseqc = %d, diseqc_pos = %d\n", providerName, msg->diseqc, diseqc_pos);
+					if ((msg->diseqc != -1) && (msg->diseqc != diseqc_pos)) {
+						// skip if sat not wanted
+						continue;
+					}
+				}
 				if (diseqc_pos == 255 /* = -1 */)
 					diseqc_pos = 0;
 
+				INFO("scanning providerName = %s, msg->diseqc = %d, diseqc_pos = %d\n", providerName, msg->diseqc, diseqc_pos);
 				scan_provider(search, providerName, diseqc_pos, frontendType);
-
 				break;
 			}
-
+		}
 		/* go to next satellite */
 		search = search->xmlNextNode;
 	}
@@ -763,7 +768,7 @@ void *start_scanthread(void *scanmode)
 			write_bouquets(providerName);
 	}
 
- abort_scan:
+abort_scan:
 	/* report status */
 	INFO("found %d transponders and %d channels", found_transponders, found_channels);
 
@@ -774,10 +779,12 @@ void *start_scanthread(void *scanmode)
 	stop_scan(true);
 	pthread_exit(0);
 }
+
 void scan_clean(void)
 {
 	scan_should_be_aborted = true;
 }
+
 int copy_to_satellite_inc(TP_params * TP, FILE * fd, FILE * fd1, char * providerName)
 {
 	//copies services from previous services.xml file from start up to the sat that is being scanned...
@@ -824,6 +831,8 @@ int copy_to_satellite_inc(TP_params * TP, FILE * fd, FILE * fd1, char * provider
 
 	return found;
 }
+
+
 int scan_transponder(TP_params *TP)
 {
 /* only for testing, please remove <- wtf? */
@@ -838,12 +847,12 @@ int scan_transponder(TP_params *TP)
 	int prov_found = 0;
 
 	one_flag = false;
-        found_transponders = 0;
-        found_channels = 0;
-        processed_transponders = 0;
-        found_tv_chans = 0;
-        found_radio_chans = 0;
-        found_data_chans = 0;
+	found_transponders = 0;
+	found_channels = 0;
+	processed_transponders = 0;
+	found_tv_chans = 0;
+	found_radio_chans = 0;
+	found_data_chans = 0;
 	fake_tid = fake_nid = 0;
 
 	transponders.clear();
@@ -858,6 +867,7 @@ int scan_transponder(TP_params *TP)
 		}
 	printf("[scan_transponder] scanning sat %s diseqc %d\n", providerName, diseqc_pos);
 	printf("[scan_transponder] freq %d rate %d fec %d pol %d\n", TP->feparams.frequency, TP->feparams.u.qpsk.symbol_rate, TP->feparams.u.qpsk.fec_inner, TP->polarization);
+	printf("[scan_transponder] freq %d rate %d fec %d pol %d mod %d\n", TP->feparams.frequency, TP->feparams.u.qam.symbol_rate, TP->feparams.u.qam.fec_inner, TP->polarization, TP->feparams.u.qam.modulation);
 
 	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, providerName, strlen(providerName) + 1);
 
@@ -885,7 +895,7 @@ int scan_transponder(TP_params *TP)
 	/* copy services.xml to /tmp directory */
 	if(stat(SERVICES_XML, &buffer) == 0)
 	{
-  		if (buffer.st_size > 0)
+		if (buffer.st_size > 0)
 		{
 			cp(SERVICES_XML, SERVICES_TMP);
 		}

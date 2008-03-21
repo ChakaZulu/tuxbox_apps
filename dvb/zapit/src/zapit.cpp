@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.407 2008/03/16 13:11:23 seife Exp $
+ * $Id: zapit.cpp,v 1.408 2008/03/21 12:21:35 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1171,7 +1171,7 @@ void parseScanInputXml(void)
  * return 0 on success
  * return -1 otherwise
  */
-int start_scan(bool scan_mode)
+int start_scan(CZapitMessages::startScan msg)
 {
 	if (!scanInputParser) {
 		parseScanInputXml();
@@ -1192,7 +1192,7 @@ int start_scan(bool scan_mode)
 	found_channels = 0;
 	scan_runs = 1;
 
-	if ((errno=pthread_create(&scan_thread, 0, start_scanthread,  (void*)scan_mode))) {
+	if ((errno=pthread_create(&scan_thread, 0, start_scanthread,  (void*)&msg))) {
 		ERROR("pthread_create");
 		scan_runs = 0;
 		return -1;
@@ -1389,6 +1389,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		default:
 			break;
 		}
+
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		break;
 	}
@@ -1487,10 +1488,10 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_SCANSTART:
 	{
-		bool scan_mode;
-		CBasicServer::receive_data(connfd, &scan_mode, sizeof(scan_mode));
+		CZapitMessages::startScan msg;
+		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
 
-		if (start_scan(scan_mode) == -1)
+		if (start_scan(msg) == -1)
 			eventServer->sendEvent(CZapitClient::EVT_SCAN_FAILED, CEventServer::INITID_ZAPIT);
 		break;
 	}
@@ -1561,7 +1562,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		const char * frontendname = getFrontendName();
 		CZapitClient::responseGetSatelliteList sat;
 
-		if (frontendname != NULL)
+		if (frontendname != NULL) {
 			while ((search = xmlGetNextOccurence(search, frontendname)) != NULL)
 			{
 				satname = xmlGetAttribute(search, "name");
@@ -1575,6 +1576,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				CBasicServer::send_data(connfd, (char *)&sat, satlength);
 				search = search->xmlNextNode;
 			}
+		}
 		satlength = SATNAMES_END_MARKER;
 		CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
 		break;
@@ -2618,7 +2620,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.407 2008/03/16 13:11:23 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.408 2008/03/21 12:21:35 houdini Exp $\n");
 
 	bool check_lock = true;
 
