@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.47 2008/03/02 13:12:56 seife Exp $
+        $Id: settings.cpp,v 1.48 2008/03/21 12:15:32 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -268,6 +268,7 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 	TP_scan = configfile.getInt32("TP_scan", 0);
 	TP_fec = configfile.getInt32("TP_fec", 1);
 	TP_pol = configfile.getInt32("TP_pol", 0);
+	TP_mod = configfile.getInt32("TP_mod", 3); // default qam64
 	strcpy(TP_freq, configfile.getString("TP_freq", "10100000").c_str());
 	strcpy(TP_rate, configfile.getString("TP_rate", "27500000").c_str());
 	strncpy(TP_satname, configfile.getString("TP_satname", "Astra 19.2E").c_str(), 30);
@@ -320,33 +321,41 @@ bool CScanSettings::saveSettings(const char * const fileName)
 	configfile.setInt32("TP_scan", TP_scan);
 	configfile.setInt32("TP_fec", TP_fec);
 	configfile.setInt32("TP_pol", TP_pol);
+	configfile.setInt32("TP_mod", TP_mod);
 	configfile.setString("TP_freq", TP_freq);
 	configfile.setString("TP_rate", TP_rate);
 	configfile.setString("TP_satname", TP_satname);
 
 	configfile.setInt32("scanSectionsd",scanSectionsd );
 
-	if(configfile.getModifiedFlag())
-		configfile.saveConfig(fileName);
-
-	std::vector<std::string> tmpsatNameList;
-	tmpsatNameList.clear();
-	for (int i = 0; i < satCount; i++)
-	{
-		if (0 <= satDiseqc[i])
+	// check if sat is used
+	if(TP_SatSelectMenu) {
+		std::vector<std::string> tmpsatNameList;
+		tmpsatNameList.clear();
+		bool satfound = false;
+		// scan the new available sat configurations and change update TP_SatSelectMenu
+		for (int i = 0; i < satCount; i++)
 		{
-			tmpsatNameList.push_back(satName[i]);
-//			printf("settings: satName = %s, diseqscOfSat(%d) = %d\n", satName[i], i, satDiseqc[i]);
+			if (((0 <= satDiseqc[i])   && (diseqcMode != DISEQC_1_2)) ||
+			    ((0 != satMotorPos[i]) && (diseqcMode == DISEQC_1_2)))
+			{
+				if (strcmp(satName[i], TP_satname) == 0) satfound = true;
+				tmpsatNameList.push_back(satName[i]);
+//				printf("scan settings: (%d) Name = %s, DiseqC = %d, MotorPos = %d\n", i, satName[i], satDiseqc[i], satMotorPos[i]);
+			}
+		}
+	
+		if (!satfound && !tmpsatNameList.empty())
+			strcpy(TP_satname, tmpsatNameList[0].c_str());
+
+		TP_SatSelectMenu->removeOptions();
+		for (uint i=0; i < tmpsatNameList.size(); i++)
+		{
+			TP_SatSelectMenu->addOption(tmpsatNameList[i].c_str());
 		}
 	}
-	
-	TP_SatSelectMenu->removeOptions();
-	for (uint i=0; i < tmpsatNameList.size(); i++)
-	{
-		TP_SatSelectMenu->addOption(tmpsatNameList[i].c_str());
-//		printf("settings: got scanprovider (sat): %s\n", tmpsatNameList[i].c_str());
-	}
-
+	if(configfile.getModifiedFlag())
+		configfile.saveConfig(fileName);
 	return true;
 }
 

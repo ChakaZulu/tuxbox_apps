@@ -982,11 +982,22 @@ scantp.fec_3_4 3/4
 scantp.fec_5_6 5/6
 scantp.fec_7_8 7/8
 scantp.freq Frequenz
+scantp.mod Modulation
+scantp.mod_qam_128 QAM_128
+scantp.mod_qam_16 QAM_16
+scantp.mod_qam_256 QAM_256
+scantp.mod_qam_32 QAM_32
+scantp.mod_qam_64 QAM_64
+scantp.mod_qam_auto QAM_AUTO
 scantp.pol Polarisation
 scantp.pol_h H
 scantp.pol_v V
 scantp.rate Symbol rate
-scantp.scan Manual Scan
+scantp.scan Scan Mode
+scantp.scan_all_sats Alle Sats
+scantp.scan_complete Komplett
+scantp.scan_one_sat Einen Sat
+scantp.scan_one_tp Einen Transponder
 scantp.scanmode Schnell Scan
 scants.abort_body Soll die Suche wirklich abgebrochen werden?
 scants.abort_header Abbruch der Kanalsuche

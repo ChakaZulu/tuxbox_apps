@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.188 2008/03/13 09:17:57 dbt Exp $
+  $Id: settings.h,v 1.189 2008/03/21 12:14:54 houdini Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -515,6 +515,7 @@ class CScanSettings
 	int		TP_scan;
 	int		TP_fec;
 	int		TP_pol;
+	int		TP_mod;
 	char		TP_freq[10];
 	char		TP_rate[9];
 	char		TP_satname[30];

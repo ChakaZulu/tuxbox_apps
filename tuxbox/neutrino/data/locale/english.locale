@@ -982,11 +982,22 @@ scantp.fec_3_4 3/4
 scantp.fec_5_6 5/6
 scantp.fec_7_8 7/8
 scantp.freq Frequency
+scantp.mod Modulation
+scantp.mod_qam_128 QAM_128
+scantp.mod_qam_16 QAM_16
+scantp.mod_qam_256 QAM_256
+scantp.mod_qam_32 QAM_32
+scantp.mod_qam_64 QAM_64
+scantp.mod_qam_auto QAM_AUTO
 scantp.pol Polarization
 scantp.pol_h H
 scantp.pol_v V
 scantp.rate Symbol rate
-scantp.scan Manual Scan
+scantp.scan Scan Mode
+scantp.scan_all_sats All Sat
+scantp.scan_complete Complete
+scantp.scan_one_sat One Sat
+scantp.scan_one_tp One Transponder
 scantp.scanmode Fast Scan
 scants.abort_body Should the search really be aborted?
 scants.abort_header Abortion of canal scan

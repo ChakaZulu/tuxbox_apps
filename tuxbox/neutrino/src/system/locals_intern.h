@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.115 2008/03/16 15:49:03 houdini Exp $
+ * $Id: locals_intern.h,v 1.116 2008/03/21 12:14:23 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1009,11 +1009,22 @@ const char * locale_real_names[] =
 	"scantp.fec_5_6",
 	"scantp.fec_7_8",
 	"scantp.freq",
+	"scantp.mod",
+	"scantp.mod_qam_128",
+	"scantp.mod_qam_16",
+	"scantp.mod_qam_256",
+	"scantp.mod_qam_32",
+	"scantp.mod_qam_64",
+	"scantp.mod_qam_auto",
 	"scantp.pol",
 	"scantp.pol_h",
 	"scantp.pol_v",
 	"scantp.rate",
 	"scantp.scan",
+	"scantp.scan_all_sats",
+	"scantp.scan_complete",
+	"scantp.scan_one_sat",
+	"scantp.scan_one_tp",
 	"scantp.scanmode",
 	"scants.abort_body",
 	"scants.abort_header",

@@ -77,31 +77,35 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 	neutrino_msg_data_t	data;
 	TP_params		TP;
 
-// printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d\n", get_set.TP_scan, get_set.TP_freq, get_set.TP_rate, get_set.TP_fec, get_set.TP_pol);
+printf("[neutrino] TP_scan %d TP_freq %s TP_rate %s TP_fec %d TP_pol %d TP_mod %d TP_diseqc %d\n", get_set.TP_scan, get_set.TP_freq, get_set.TP_rate, get_set.TP_fec, get_set.TP_pol, get_set.TP_mod, (uint8_t)get_set.TP_diseqc);
 
-if(get_set.TP_scan)
-{
+	// manual TP scan
+	if(get_set.TP_scan == 1)
+	{
 #if HAVE_DVB_API_VERSION < 3
-	TP.feparams.Frequency = atoi(get_set.TP_freq);
-	TP.feparams.u.qpsk.SymbolRate = atoi(get_set.TP_rate);
-	TP.feparams.u.qpsk.FEC_inner = (CodeRate)get_set.TP_fec;
-	TP.polarization = get_set.TP_pol;
-	TP.diseqc = (uint8_t)get_set.TP_diseqc;
-
+		TP.feparams.Frequency = atoi(get_set.TP_freq);
+		TP.feparams.u.qpsk.SymbolRate = atoi(get_set.TP_rate);
+		TP.feparams.u.qpsk.FEC_inner = (CodeRate)get_set.TP_fec;
+		TP.polarization = get_set.TP_pol;
+		TP.diseqc = (uint8_t)get_set.TP_diseqc;
 //printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.Frequency, TP.feparams.u.qpsk.SymbolRate, TP.feparams.u.qpsk.FEC_inner, TP.polarization);
 #else
-	TP.feparams.frequency = atoi(get_set.TP_freq);
-	TP.feparams.u.qpsk.symbol_rate = atoi(get_set.TP_rate);
-	TP.feparams.u.qpsk.fec_inner = (fe_code_rate_t) get_set.TP_fec;
-	TP.polarization = get_set.TP_pol;
-	TP.diseqc = (uint8_t)get_set.TP_diseqc;
+		TP.feparams.frequency = atoi(get_set.TP_freq);
+		if(g_info.delivery_system == DVB_S) {
+			TP.feparams.u.qpsk.symbol_rate = atoi(get_set.TP_rate);
+			TP.feparams.u.qpsk.fec_inner = (fe_code_rate_t) get_set.TP_fec;
+		} else {
+			TP.feparams.u.qam.symbol_rate = atoi(get_set.TP_rate);
+			TP.feparams.u.qam.fec_inner = (fe_code_rate_t) get_set.TP_fec;
+			TP.feparams.u.qam.modulation = (fe_modulation_t) get_set.TP_mod;
+		}
+		TP.polarization = get_set.TP_pol;
+		TP.diseqc = (uint8_t)get_set.TP_diseqc;
 
 // printf("[neutrino] freq %d rate %d fec %d pol %d\n", TP.feparams.frequency, TP.feparams.u.qpsk.symbol_rate, TP.feparams.u.qpsk.fec_inner, TP.polarization);
 #endif
-
 	//return menu_return::RETURN_REPAINT;
-
-}
+	}
 	success = false;
 
 	if (!frameBuffer->getActive())
@@ -140,9 +144,13 @@ if(get_set.TP_scan)
 	}
 
 	/* go */
-	if(get_set.TP_scan)
+	if(get_set.TP_scan == 1)
 	{
 		success = g_Zapit->scan_TP(TP);
+	}
+	else if(get_set.TP_scan == 2)
+	{
+		success = g_Zapit->startScan(get_set.scan_mode, (uint8_t)get_set.TP_diseqc);
 	}
 	else
 	{
