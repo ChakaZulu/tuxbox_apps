@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.259 2008/01/12 16:57:22 seife Exp $
+//  $Id: sectionsd.cpp,v 1.260 2008/03/24 19:14:50 dbt Exp $
 //
 //    sectionsd.cpp (network daemon for SI-sections)
 //    (dbox-II-project)
@@ -2228,7 +2228,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 							count += sizeof(event_id_t) + 4 + 4 + (*e)->getName().length() + 1;
 							if (((*e)->getText()).empty())
 							{
-								count += (*e)->getExtendedText().substr(0, 40).length();
+								count += (*e)->getExtendedText().substr(0, 50).length();
 							}
 							else
 							{
@@ -2249,7 +2249,7 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 	
 								if (((*e)->getText()).empty())
 								{
-									strcpy(liste, (*e)->getExtendedText().substr(0, 40).c_str());
+									strcpy(liste, (*e)->getExtendedText().substr(0, 50).c_str());
 									liste += strlen(liste);
 								}
 								else
@@ -2364,7 +2364,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[MAX_SIZE_STATI];
 
 	snprintf(stati, MAX_SIZE_STATI,
-		"$Id: sectionsd.cpp,v 1.259 2008/01/12 16:57:22 seife Exp $\n"
+		"$Id: sectionsd.cpp,v 1.260 2008/03/24 19:14:50 dbt Exp $\n"
 		"Current time: %s"
 		"Hours to cache: %ld\n"
 		"Hours to cache extended text: %ld\n"
@@ -3493,7 +3493,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 						count += sizeof(event_id_t) + 4 + 4 + eName.length() + 1;
 						if (eText.empty())
 						{
-							count += eExtendedText.substr(0, 40).length();
+							count += eExtendedText.substr(0, 50).length();
 						}
 						else
 						{
@@ -3514,7 +3514,7 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 
 							if (eText.empty())
 							{
-								strcpy(liste, eExtendedText.substr(0, 40).c_str());
+								strcpy(liste, eExtendedText.substr(0, 50).c_str());
 								liste += strlen(liste);
 							}
 							else
@@ -7743,7 +7743,7 @@ int main(int argc, char **argv)
 	
 	struct sched_param parm;
 
-	printf("$Id: sectionsd.cpp,v 1.259 2008/01/12 16:57:22 seife Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.260 2008/03/24 19:14:50 dbt Exp $\n");
 
 	SIlanguage::loadLanguages();
 
