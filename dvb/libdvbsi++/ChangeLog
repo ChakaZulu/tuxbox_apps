@@ -1,3 +1,214 @@
+2008-03-25  Andreas Oberritter <obi@saftware.de>
+
+	* debian/.cvsignore (1.1):
+
+	ignore Makefile
+
+2008-03-25  Andreas Oberritter <obi@saftware.de>
+
+	* include/dvbsi++/Makefile.am (1.6):
+
+	regenerated Makefile.am to include running_status_section.h
+
+2008-03-25  Andreas Oberritter <obi@saftware.de>
+
+	* genmakefileam (1.2):
+
+	use printf for compatibility to dash
+
+2008-03-25  Andreas Oberritter <obi@saftware.de>
+
+	* Makefile.am (1.8):
+
+	include autogen.sh in distribution tarball
+
+2008-03-25  Andreas Oberritter <obi@saftware.de>
+
+	* Makefile.am (1.7), configure.ac (1.10), debian/Makefile.am (1.1):
+
+	include debian files in distribution tarballs
+
+2008-03-25  Andreas Oberritter <obi@saftware.de>
+
+	* debian/changelog (1.1), debian/compat (1.1), debian/control
+	(1.1), debian/copyright (1.1), debian/docs (1.1),
+	debian/libdvbsi++-dev.dirs (1.1), debian/libdvbsi++-dev.install
+	(1.1), debian/libdvbsi++1.dirs (1.1), debian/libdvbsi++1.install
+	(1.1), debian/rules (1.1):
+
+	debianized
+
+2006-11-17  pieterg
+
+	* include/dvbsi++/ca_program_map_section.h (1.7),
+	src/ca_program_map_section.cpp (1.13):
+
+	allow list management field to be modified (list management might
+	not be known till multiple objects are put in a list together)
+
+2006-09-26  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/running_status_section.h (1.2),
+	src/running_status_section.cpp (1.2):
+
+	fix - tuxbox is pointer not reference;
+
+2006-09-26  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/running_status_section.h (1.1), src/Makefile.am
+	(1.12), src/running_status_section.cpp (1.1):
+
+	add running status section - even if i never received one :)
+	adjusted Makefile.am
+
+2006-09-26  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/bouquet_association_section.h (1.5),
+	src/bouquet_association_section.cpp (1.7):
+
+	add 2 missing bouquet association member functions;
+
+2006-09-26  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/bouquet_association_section.h (1.4),
+	src/bouquet_association_section.cpp (1.6),
+	src/service_description_section.cpp (1.7):
+
+	whitespace cleanups; add getBouquets member function that was
+	missing;
+
+2006-09-26  Marcel Siegert <mws@twisted-brains.org>
+
+	* src/adaptation_field_data_descriptor.cpp (1.2):
+
+	add missing dtor
+
+2006-09-25  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/Makefile.am (1.5),
+	include/dvbsi++/ca_system_descriptor.h (1.3),
+	src/ca_system_descriptor.cpp (1.4):
+
+	remove obsolete ca_system_descriptor; was replaced by scrambling
+	descriptor (same tag 0x65) ETSI 300468 1.6.1
+
+2006-09-25  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/Makefile.am (1.4),
+	include/dvbsi++/adaptation_field_data_descriptor.h (1.1),
+	src/Makefile.am (1.11), src/adaptation_field_data_descriptor.cpp
+	(1.1), src/descriptor_container.cpp (1.10):
+
+	add missing adaptation field data descriptor; adjust Makefile.am
+	for src & include
+
+2006-05-27  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/service_type.h (1.5):
+
+	final adjustments for being etsi 300468 1.7.1 compliant
+
+2006-05-27  Marcel Siegert <mws@twisted-brains.org>
+
+	* include/dvbsi++/service_type.h (1.4):
+
+	adjusted servies types to match etsi 300468 1.7.1 specs
+
+2006-03-28  Andreas Monzner <andreas.monzner@multimedia-labs.de>
+
+	* configure.ac (1.9), include/dvbsi++/ca_descriptor.h (1.5),
+	include/dvbsi++/descriptor.h (1.7),
+	include/dvbsi++/descriptor_container.h (1.6),
+	include/dvbsi++/unknown_descriptor.h (1.3), src/aac_descriptor.cpp
+	(1.2), src/ac3_descriptor.cpp (1.5),
+	src/ancillary_data_descriptor.cpp (1.3),
+	src/announcement_support_descriptor.cpp (1.5),
+	src/application_descriptor.cpp (1.4),
+	src/application_icons_descriptor.cpp (1.3),
+	src/application_identifier.cpp (1.3),
+	src/application_information_section.cpp (1.6),
+	src/application_name_descriptor.cpp (1.4),
+	src/application_signalling_descriptor.cpp (1.5),
+	src/application_storage_descriptor.cpp (1.3),
+	src/audio_stream_descriptor.cpp (1.3),
+	src/bouquet_association_section.cpp (1.5), src/ca_descriptor.cpp
+	(1.6), src/ca_message_section.cpp (1.3),
+	src/ca_program_map_section.cpp (1.12), src/ca_section.cpp (1.4),
+	src/ca_system_descriptor.cpp (1.3),
+	src/cable_delivery_system_descriptor.cpp (1.3),
+	src/caching_priority_descriptor.cpp (1.3),
+	src/carousel_identifier_descriptor.cpp (1.6),
+	src/cell_frequency_link_descriptor.cpp (1.5),
+	src/component_descriptor.cpp (1.3),
+	src/compressed_module_descriptor.cpp (1.3),
+	src/content_descriptor.cpp (1.4),
+	src/content_identifier_descriptor.cpp (1.2),
+	src/content_identifier_section.cpp (1.4),
+	src/country_availability_descriptor.cpp (1.4),
+	src/crc32_descriptor.cpp (1.3), src/data_broadcast_descriptor.cpp
+	(1.5), src/data_broadcast_id_descriptor.cpp (1.5),
+	src/default_authority_descriptor.cpp (1.2),
+	src/delegated_application_descriptor.cpp (1.4), src/descriptor.cpp
+	(1.3), src/descriptor_container.cpp (1.9),
+	src/dii_location_descriptor.cpp (1.4), src/dsng_descriptor.cpp
+	(1.2), src/dts_descriptor.cpp (1.2),
+	src/dvb_html_application_boundary_descriptor.cpp (1.3),
+	src/dvb_html_application_descriptor.cpp (1.4),
+	src/dvb_html_application_location_descriptor.cpp (1.3),
+	src/dvb_j_application_location_descriptor.cpp (1.3),
+	src/ecm_repetition_rate_descriptor.cpp (1.3),
+	src/enhanced_ac3_descriptor.cpp (1.2),
+	src/est_download_time_descriptor.cpp (1.3),
+	src/event_information_section.cpp (1.6),
+	src/extended_event_descriptor.cpp (1.4),
+	src/extension_descriptor.cpp (1.2),
+	src/external_application_authorisation_descriptor.cpp (1.4),
+	src/frequency_list_descriptor.cpp (1.5),
+	src/group_link_descriptor.cpp (1.3), src/info_descriptor.cpp (1.3),
+	src/ip_signaling_descriptor.cpp (1.3),
+	src/iso639_language_descriptor.cpp (1.4),
+	src/linkage_descriptor.cpp (1.9),
+	src/local_time_offset_descriptor.cpp (1.5),
+	src/location_descriptor.cpp (1.3), src/module_link_descriptor.cpp
+	(1.3), src/mosaic_descriptor.cpp (1.6), src/mpe_fec_section.cpp
+	(1.3), src/network_information_section.cpp (1.6),
+	src/nvod_reference_descriptor.cpp (1.5),
+	src/parental_rating_descriptor.cpp (1.4), src/pdc_descriptor.cpp
+	(1.4), src/plugin_descriptor.cpp (1.4), src/prefetch_descriptor.cpp
+	(1.4), src/private_data_specifier_descriptor.cpp (1.4),
+	src/program_association_section.cpp (1.5),
+	src/program_map_section.cpp (1.8),
+	src/related_content_descriptor.cpp (1.2),
+	src/s2_satellite_delivery_system_descriptor.cpp (1.2),
+	src/satellite_delivery_system_descriptor.cpp (1.6),
+	src/scrambling_descriptor.cpp (1.2),
+	src/service_description_section.cpp (1.6),
+	src/service_descriptor.cpp (1.3), src/service_list_descriptor.cpp
+	(1.5), src/service_move_descriptor.cpp (1.4),
+	src/short_event_descriptor.cpp (1.3),
+	src/stream_identifier_descriptor.cpp (1.3),
+	src/subtitling_descriptor.cpp (1.5), src/telephone_descriptor.cpp
+	(1.3), src/terrestrial_delivery_system_descriptor.cpp (1.4),
+	src/time_date_section.cpp (1.4), src/time_offset_section.cpp (1.5),
+	src/time_shifted_service_descriptor.cpp (1.4),
+	src/time_slice_fec_identifier_descriptor.cpp (1.2),
+	src/transport_protocol_descriptor.cpp (1.4),
+	src/transport_stream_description_section.cpp (1.2),
+	src/transport_stream_descriptor.cpp (1.2),
+	src/tva_id_descriptor.cpp (1.2), src/unknown_descriptor.cpp (1.4),
+	src/vbi_teletext_descriptor.cpp (1.4),
+	src/video_stream_descriptor.cpp (1.3),
+	src/video_window_descriptor.cpp (1.4):
+
+	add some checks to avoid segfaults on corrupted descriptor or
+	corrupted section data
+
+2006-03-06  Andreas Oberritter <obi@saftware.de>
+
+	* ChangeLog (1.3), configure.ac (1.8):
+
+	increased version number
+
 2006-03-06  Andreas Oberritter <obi@saftware.de>
 
 	* ChangeLog (1.2):
