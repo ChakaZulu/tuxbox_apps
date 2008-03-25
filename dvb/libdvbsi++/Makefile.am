@@ -3,6 +3,8 @@ SUBDIRS = debian include qa src
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libdvbsi++.pc
 
+EXTRA_DIST = autogen.sh
+
 if HAVE_GNUPG
 if HAVE_MD5SUM
 DIST_HASHES = $(addsuffix .md5,$(DIST_ARCHIVES))
