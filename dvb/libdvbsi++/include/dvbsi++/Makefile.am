@@ -89,6 +89,7 @@ pkginclude_HEADERS = \
 	program_association_section.h \
 	program_map_section.h \
 	related_content_descriptor.h \
+	running_status_section.h \
 	s2_satellite_delivery_system_descriptor.h \
 	satellite_delivery_system_descriptor.h \
 	scrambling_descriptor.h \
@@ -115,8 +116,8 @@ pkginclude_HEADERS = \
 	time_shifted_service_descriptor.h \
 	time_slice_fec_identifier_descriptor.h \
 	transport_protocol_descriptor.h \
-	transport_stream_descriptor.h \
 	transport_stream_description_section.h \
+	transport_stream_descriptor.h \
 	tva_id_descriptor.h \
 	type_descriptor.h \
 	unknown_descriptor.h \
