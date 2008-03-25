@@ -1,4 +1,4 @@
-SUBDIRS = include src qa
+SUBDIRS = debian include qa src
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libdvbsi++.pc

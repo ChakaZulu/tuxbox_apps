@@ -30,9 +30,10 @@ AC_SUBST([LT_AGE])
 
 AC_OUTPUT([
 Makefile
+debian/Makefile
 include/Makefile
 include/dvbsi++/Makefile
-src/Makefile
 qa/Makefile
+src/Makefile
 libdvbsi++.pc
 ])
