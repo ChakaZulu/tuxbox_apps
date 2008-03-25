@@ -1,0 +1,20 @@
+Source: libdvbsi++
+Priority: extra
+Maintainer: Andreas Oberritter <obi@saftware.de>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+Section: libs
+
+Package: libdvbsi++-dev
+Section: libdevel
+Architecture: any
+Depends: libdvbsi++1 (= ${Source-Version})
+Description: A free DVB SI parser library written in C++
+ A free DVB SI parser library written in C++
+
+Package: libdvbsi++1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: A free DVB SI parser library written in C++
+ A free DVB SI parser library written in C++

@@ -1,0 +1,22 @@
+This package was debianized by Andreas Oberritter <obi@saftware.de> on
+Mon, 24 Mar 2008 15:24:35 +0100.
+
+It was downloaded from http://www.saftware.de/
+
+Upstream Author(s):
+
+    Andreas Oberritter <obi@saftware.de>
+    Stéphane Esté-Gracias <sestegra@free.fr>
+    Andreas Monzner <andreas.monzner@multimedia-labs.de>
+    Marcel Siegert <mws@twisted-brains.org>
+
+Copyright:
+
+    Copyright 2004-2008 by the upstream authors.
+
+License:
+
+    LGPL-2.1, see `/usr/share/common-licenses/LGPL-2.1'.
+
+The Debian packaging is (C) 2008, Andreas Oberritter <obi@saftware.de> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
