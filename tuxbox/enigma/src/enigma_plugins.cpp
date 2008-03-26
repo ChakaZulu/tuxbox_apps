@@ -12,6 +12,7 @@
 
 #include <enigma.h>
 #include <enigma_lcd.h>
+#include <enigma_main.h>
 #include <lib/base/eerror.h>
 #include <lib/gdi/lcd.h>
 #include <lib/gdi/font.h>
@@ -68,6 +69,37 @@ ePlugin::ePlugin(eListBox<ePlugin> *parent, const char *cfgfile, eSimpleConfigFi
 
 }
 
+ePluginContextMenu::ePluginContextMenu(ePlugin* current_plugin, int reordering)
+: eListBoxWindow<eListBoxEntryText>(_("Plugin Menu"), 6, 400, true)
+{
+	init_ePluginContextMenu(current_plugin, reordering);
+}
+void ePluginContextMenu::init_ePluginContextMenu(ePlugin* current_plugin, int reordering)
+{
+	eListBoxEntry *prev=0;
+
+	move(ePoint(150, 80));
+	if ( reordering )
+		prev = new eListBoxEntryText(&list, _("disable move mode"), (void*)1, 0, _("switch move mode off"));
+	else
+		prev = new eListBoxEntryText(&list, _("enable move mode"), (void*)1, 0, _("activate mode to simply change the entry order"));
+	struct stat64 s;
+	if (!::stat64(current_plugin->cfgname.c_str(),&s) && ((s.st_mode & S_IWUSR) == S_IWUSR))
+	{
+		prev = new eListBoxEntryText(&list, _("rename"), (void*)2, 0, _("rename the selected plugin"));
+	}
+	list.setFlags(eListBoxBase::flagHasShortcuts);
+	CONNECT(list.selected, ePluginContextMenu::entrySelected);
+}
+
+void ePluginContextMenu::entrySelected(eListBoxEntryText *test)
+{
+	if (!test)
+		close(0);
+	else
+		close((int)test->getKey());
+}
+
 const char *eZapPlugins::PluginPath[] = { "/var/tuxbox/plugins/", PLUGINDIR "/", "" };
 
 eZapPlugins::eZapPlugins(Types type, eWidget* lcdTitle, eWidget* lcdElement)
@@ -77,7 +109,6 @@ eZapPlugins::eZapPlugins(Types type, eWidget* lcdTitle, eWidget* lcdElement)
 #ifndef DISABLE_LCD
 	setLCD(lcdTitle, lcdElement);
 #endif
-	addActionToHelpList(i_shortcutActions->red.setDescription(_("enable move mode")));
 	list.setFlags(eListBoxBase::flagHasShortcuts);
 	CONNECT(list.selected, eZapPlugins::selected);
 	valign();
@@ -319,23 +350,6 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 			p->start();
 	}
 }
-
-void eZapPlugins::selected(ePlugin *plugin)
-{
-	if (reordering)
-	{
-		toggleMoveMode();
-		return;
-	}
-
-	if (!plugin || !plugin->pluginname )
-	{
-		close(0);
-		return;
-	}
-	execPlugin(plugin);
-	previousPlugin = plugin->pluginname;
-}
 class eSetPluginSortOrder
 {
 	int n;
@@ -348,16 +362,81 @@ public:
 		return 0;
 	}
 };
+
+void eZapPlugins::selected(ePlugin *plugin)
+{
+	switch (reordering)
+	{
+		case 1:
+			list.setMoveMode(1);
+			list.setActiveColor(eSkin::getActive()->queryColor("eServiceSelector.entrySelectedToMove"),gColor(0));
+			reordering = 2;	
+			return;
+		case 2:
+			list.setMoveMode(0);
+			list.setActiveColor(selectedBackColor,gColor(0));
+			reordering = 1;	
+			list.forEachEntry(eSetPluginSortOrder());
+			return;
+	}
+
+	if (!plugin || !plugin->pluginname )
+	{
+		close(0);
+		return;
+	}
+	execPlugin(plugin);
+	previousPlugin = plugin->pluginname;
+}
 void eZapPlugins::toggleMoveMode()
 {
-	if (reordering)
-		list.forEachEntry(eSetPluginSortOrder());
-	else
+	if (!reordering)
+	{
 		selectedBackColor = list.getActiveBackColor();
-	reordering= 1-reordering;
-	list.setMoveMode(reordering);
-	list.setActiveColor(reordering ? eSkin::getActive()->queryColor("eServiceSelector.entrySelectedToMove"): selectedBackColor,gColor(0));
+		reordering = 1;
+	}
+	else
+		reordering= 0;
 }
+void eZapPlugins::renamePlugin()
+{
+	ePlugin* plugin = (ePlugin*)list.getCurrent();
+	eSimpleConfigFile config(plugin->cfgname.c_str());
+	TextEditWindow wnd(_("Enter new name for the plugin:"));
+	wnd.setText(_("Rename plugin"));
+	wnd.show();
+	wnd.setEditText(config.getInfo("name"));
+	int ret = wnd.exec();
+	wnd.hide();
+	if ( !ret && config.getInfo("name") != wnd.getEditText())
+	{
+		config.setInfo("name",wnd.getEditText().c_str());
+		config.Save(plugin->cfgname.c_str());
+		plugin->SetText(wnd.getEditText());
+	}
+}
+
+void eZapPlugins::showContextMenu()
+{
+	ePluginContextMenu m((ePlugin*)list.getCurrent(), reordering);
+	hide();
+	m.show();
+	int res=m.exec();
+	m.hide();
+	switch (res)
+	{
+	case 1: // enable/disable movemode
+		toggleMoveMode();
+		break;
+	case 2: // rename plugin
+		renamePlugin();
+		break;
+	default:
+		break;
+	}
+	show();
+}
+
 int eZapPlugins::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
@@ -367,8 +446,8 @@ int eZapPlugins::eventHandler(const eWidgetEvent &event)
 			return 1;
 		else if (event.action == &i_cursorActions->cancel)
 			close(0);
-		else if (event.action == &i_shortcutActions->red)
-			toggleMoveMode();
+		else if (event.action == &i_shortcutActions->menu)
+			showContextMenu();
 		else
 			break;
 		return 1;

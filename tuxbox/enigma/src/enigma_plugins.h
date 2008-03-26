@@ -31,6 +31,13 @@ public:
 			return sortpos < ((ePlugin&)e).sortpos;
 	}
 };
+class ePluginContextMenu: public eListBoxWindow<eListBoxEntryText>
+{
+	void entrySelected(eListBoxEntryText *s);
+	void init_ePluginContextMenu(ePlugin* current_plugin, int reordering);
+public:
+	ePluginContextMenu(ePlugin* current_plugin, int reordering);
+};
 
 class eZapPlugins: public eListBoxWindow<ePlugin>
 {
@@ -54,6 +61,8 @@ private:
 	int type;
 	int reordering;
 	void toggleMoveMode();
+	void renamePlugin();
+	void showContextMenu();
 	gColor selectedBackColor;
 protected:
 	int eventHandler(const eWidgetEvent &event);
