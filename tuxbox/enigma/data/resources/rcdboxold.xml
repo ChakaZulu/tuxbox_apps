@@ -175,6 +175,7 @@
 			<action name="green" key="green" flags="m" />
 			<action name="yellow" key="yellow" flags="m" />
 			<action name="blue" key="blue" flags="m" />
+			<action name="menu" key="d-box" flags="m" />
 			<action name="escape" key="home" flags="mr" />
 		</actionmap>
 

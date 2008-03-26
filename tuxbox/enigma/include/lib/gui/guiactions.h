@@ -62,7 +62,7 @@ struct shortcutActions
 	eActionMap map;
 	eAction number0, number1, number2, number3, number4,
 			number5, number6, number7, number8, number9, 
-			red, green, yellow, blue, escape;
+			red, green, yellow, blue, menu, escape;
 	shortcutActions():
 		map("shortcut", "Shortcuts"),
 		number0(map, "0", "0", eAction::prioGlobal),
@@ -79,6 +79,7 @@ struct shortcutActions
 		green(map, "green", _("green"), eAction::prioGlobal),
 		yellow(map, "yellow", _("yellow"), eAction::prioGlobal),
 		blue(map, "blue", _("blue"), eAction::prioGlobal),
+		menu(map, "menu", _("menu"), eAction::prioGlobal),
 		escape(map, "escape", _("escape"), eAction::prioGlobal)
 	{
 	}
