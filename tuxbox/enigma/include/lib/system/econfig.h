@@ -66,6 +66,8 @@ protected:
 public:
 	eSimpleConfigFile(const char *filename);
 	eString getInfo(const char *info);
+	void setInfo(const char *info, const char* value);
+	void Save(const char *filename);
 };
 
 #endif

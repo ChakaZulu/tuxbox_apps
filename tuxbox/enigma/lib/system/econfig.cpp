@@ -226,5 +226,21 @@ eString eSimpleConfigFile::getInfo(const char *info)
 {
 	return config[info];
 }
+void eSimpleConfigFile::setInfo(const char *info, const char* value)
+{
+	config[info] = value;
+}
+void eSimpleConfigFile::Save(const char *filename)
+{
+	FILE *f = fopen(filename, "w");
+	if (!f)
+	{
+		eWarning("couldn't write config!");
+		return;
+	}
+	for (std::map<eString, eString>::iterator i(config.begin()); i != config.end(); ++i)
+		fprintf(f, "%s=%s\n", i->first.c_str(), i->second.c_str());
+	fclose(f);
+}
 
 eAutoInitP0<eConfig> init_eRCConfig(eAutoInitNumbers::configuration, "Configuration");
