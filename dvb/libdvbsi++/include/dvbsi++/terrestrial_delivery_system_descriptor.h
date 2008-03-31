@@ -1,5 +1,5 @@
 /*
- * $Id: terrestrial_delivery_system_descriptor.h,v 1.2 2005/10/29 00:10:08 obi Exp $
+ * $Id: terrestrial_delivery_system_descriptor.h,v 1.3 2008/03/31 07:49:43 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,9 +19,12 @@ class TerrestrialDeliverySystemDescriptor : public Descriptor
 {
 	protected:
 		unsigned centreFrequency			: 32;
-		unsigned bandwidth				: 3;
+		unsigned bandwidth					: 3;
+		unsigned priority					: 1;
+		unsigned timeSlicingIndicator		: 1;
+		unsigned mpeFecIndicator			: 1;
 		unsigned constellation				: 2;
-		unsigned hierarchyInformation			: 3;
+		unsigned hierarchyInformation		: 3;
 		unsigned codeRateHpStream			: 3;
 		unsigned codeRateLpStream			: 3;
 		unsigned guardInterval				: 2;
@@ -33,6 +36,9 @@ class TerrestrialDeliverySystemDescriptor : public Descriptor
 
 		uint32_t getCentreFrequency(void) const;
 		uint8_t getBandwidth(void) const;
+		uint8_t getPriority(void) const;
+		uint8_t getTimeSlicingIndicator(void) const;
+		uint8_t getMpeFecIndicator(void) const;
 		uint8_t getConstellation(void) const;
 		uint8_t getHierarchyInformation(void) const;
 		uint8_t getCodeRateHpStream(void) const;

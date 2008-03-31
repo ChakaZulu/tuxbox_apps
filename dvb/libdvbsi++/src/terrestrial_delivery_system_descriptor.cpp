@@ -1,5 +1,5 @@
 /*
- * $Id: terrestrial_delivery_system_descriptor.cpp,v 1.4 2006/03/28 17:22:00 ghostrider Exp $
+ * $Id: terrestrial_delivery_system_descriptor.cpp,v 1.5 2008/03/31 07:49:43 mws Exp $
  *
  * Copyright (C) 2002-2005 Andreas Oberritter <obi@saftware.de>
  *
@@ -19,6 +19,9 @@ TerrestrialDeliverySystemDescriptor::TerrestrialDeliverySystemDescriptor(const u
 
 	centreFrequency = UINT32(&buffer[2]);
 	bandwidth = (buffer[6] >> 5) & 0x07;
+	priority = (buffer[6] >> 4) & 0x01;
+	timeSlicingIndicator = (buffer[6] >> 3) & 0x01;
+	mpeFecIndicator = (buffer[6] >> 2) & 0x01;
 	constellation = (buffer[7] >> 6) & 0x03;
 	hierarchyInformation = (buffer[7] >> 3) & 0x07;
 	codeRateHpStream = buffer[7] & 0x07;
@@ -36,6 +39,21 @@ uint32_t TerrestrialDeliverySystemDescriptor::getCentreFrequency(void) const
 uint8_t TerrestrialDeliverySystemDescriptor::getBandwidth(void) const
 {
 	return bandwidth;
+}
+
+uint8_t TerrestrialDeliverySystemDescriptor::getPriority(void) const
+{
+	return priority;
+}
+
+uint8_t TerrestrialDeliverySystemDescriptor::getTimeSlicingIndicator(void) const
+{
+	return timeSlicingIndicator;
+}
+
+uint8_t TerrestrialDeliverySystemDescriptor::getMpeFecIndicator(void) const
+{
+	return mpeFecIndicator;
 }
 
 uint8_t TerrestrialDeliverySystemDescriptor::getConstellation(void) const
@@ -72,4 +90,3 @@ uint8_t TerrestrialDeliverySystemDescriptor::getOtherFrequencyFlag(void) const
 {
 	return otherFrequencyFlag;
 }
-
