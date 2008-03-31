@@ -104,6 +104,7 @@ libdvbsi___la_SOURCES = \
 	short_crc_section.cpp \
 	short_event_descriptor.cpp \
 	short_section.cpp \
+	short_smoothing_buffer_descriptor.cpp \
 	stream_identifier_descriptor.cpp \
 	stuffing_descriptor.cpp \
 	subtitling_descriptor.cpp \
