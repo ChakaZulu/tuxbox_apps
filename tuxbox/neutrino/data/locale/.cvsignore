@@ -1,1 +1,3 @@
 Makefile
+locals.h
+locals_intern.h
