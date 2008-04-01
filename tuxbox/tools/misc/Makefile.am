@@ -1,7 +1,7 @@
 if BOXTYPE_DREAMBOX
 bin_PROGRAMS = camd fbclear lcddump pluginx rcsim audioplay
 else
-bin_PROGRAMS = aviafbtool camd fbclear lcddump pluginx saa switch rcsim aviaext audioplay showptsdiff
+bin_PROGRAMS = aviafbtool camd fbclear lcddump pluginx saa switch rcsim aviaext audioplay showptsdiff avswitch
 endif
 
 aviafbtool_SOURCES = aviafbtool.c
@@ -15,6 +15,7 @@ switch_SOURCES = switch.c
 rcsim_SOURCES = rcsim.c
 audioplay_SOURCES = audioplay.c
 showptsdiff_SOURCES = showptsdiff.c
+avswitch_SOURCES = avswitch.cpp
 
 pluginx_LDADD = -ldl -lpthread
 
