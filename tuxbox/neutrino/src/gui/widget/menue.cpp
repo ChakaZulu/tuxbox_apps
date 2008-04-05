@@ -1,5 +1,5 @@
 /*
-	$Id: menue.cpp,v 1.140 2008/02/15 22:31:14 houdini Exp $
+	$Id: menue.cpp,v 1.141 2008/04/05 21:05:51 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1043,4 +1043,15 @@ int CLockedMenuForwarder::exec(CMenuTarget* parent)
 
 	Parent = NULL;
 	return CMenuForwarder::exec(parent);
+}
+
+
+int CMenuSelectorTarget::exec(CMenuTarget* parent, const std::string & actionKey)
+{
+//	printf("CMenuSelector: %s\n", actionKey.c_str());
+	if (actionKey != "")
+		*m_select = atoi(actionKey.c_str());
+	else
+		*m_select = -1;
+	return menu_return::RETURN_EXIT;
 }
