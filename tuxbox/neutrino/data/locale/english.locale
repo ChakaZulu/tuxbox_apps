@@ -142,6 +142,8 @@ audiomenu.ost ost
 audiomenu.stereo stereo
 audiomenu.volumebar_audiosteps Volume Step Size
 audioplayer.add Add
+audioplayer.add_ic Icecast
+audioplayer.add_loc Local radio list
 audioplayer.add_sc Shoutcast
 audioplayer.artist_title Artist, Title
 audioplayer.building_search_index building search index
@@ -176,6 +178,7 @@ audioplayer.playlist_name filename of the play list
 audioplayer.playlist_name_hint1 Please enter the filename of the playlist
 audioplayer.playlist_name_hint2 The extension .m3u will be added automatically
 audioplayer.reading_files reading meta data
+audioplayer.receiving_list Receiving list, please wait
 audioplayer.repeat_on enable repeat mode
 audioplayer.rewind rewind
 audioplayer.save_playlist save play list

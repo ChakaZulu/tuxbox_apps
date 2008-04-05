@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.h,v 1.18 2008/03/16 15:51:22 houdini Exp $
+  $Id: audioplayer.h,v 1.19 2008/04/05 21:22:47 houdini Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -39,6 +39,7 @@
 #include "gui/filebrowser.h"
 #include "gui/widget/menue.h"
 
+#include <system/xmlinterface.h>
 
 #include <string>
 #include <set>
@@ -88,14 +89,15 @@ class CAudioPlayerGui : public CMenuTarget
 {
  public:
 	enum State
-		{
-			PLAY=0,
-			STOP,
-			PAUSE,
-			FF,
-			REV
-		};
-   enum DisplayOrder {ARTIST_TITLE = 0, TITLE_ARTIST=1};
+	{
+		PLAY=0,
+		STOP,
+		PAUSE,
+		FF,
+		REV
+	};
+
+	enum DisplayOrder {ARTIST_TITLE = 0, TITLE_ARTIST=1};
 
  private:
 	CFrameBuffer * m_frameBuffer;
@@ -171,17 +173,27 @@ class CAudioPlayerGui : public CMenuTarget
 	/**
 	 * Adds an url (shoutcast, ...) to the to the audioplayer playlist
 	 */
-	void addUrl2Playlist(const char *url, const char *name = NULL);
+	void addUrl2Playlist(const char *url, const char *name = NULL, const time_t bitrate = 0);
 
 	/**
 	 * Adds a url which points to an .m3u format (playlist, ...) to the audioplayer playlist
 	 */
-	void processPlaylistUrl(const char *url, const char *name = NULL);
+	void processPlaylistUrl(const char *url, const char *name = NULL, const time_t bitrate = 0);
 
 	/**
 	 * Loads a given XML file of internet audiostreams or playlists and processes them
 	 */
-	void CAudioPlayerGui::scanXmlFile(std::string filename);
+	void scanXmlFile(std::string filename);
+
+	/**
+	 * Processes a loaded XML file/data of internet audiostreams or playlists
+	 */
+	void scanXmlData(xmlDocPtr answer_parser, char *nametag, char *urltag, char *bitratetag = NULL, bool usechild = false);
+
+	/**
+	 * Reads the icecast directory (XML file) and calls scanXmlData
+	 */
+	void readDir_ic(void);
 
 	void selectTitle(unsigned char selectionChar);
 	/**

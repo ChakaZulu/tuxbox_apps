@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.116 2008/03/21 12:14:23 houdini Exp $
+ * $Id: locals_intern.h,v 1.117 2008/04/05 21:23:09 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -169,6 +169,8 @@ const char * locale_real_names[] =
 	"audiomenu.stereo",
 	"audiomenu.volumebar_audiosteps",
 	"audioplayer.add",
+	"audioplayer.add_ic",
+	"audioplayer.add_loc",
 	"audioplayer.add_sc",
 	"audioplayer.artist_title",
 	"audioplayer.building_search_index",
@@ -203,6 +205,7 @@ const char * locale_real_names[] =
 	"audioplayer.playlist_name_hint1",
 	"audioplayer.playlist_name_hint2",
 	"audioplayer.reading_files",
+	"audioplayer.receiving_list",
 	"audioplayer.repeat_on",
 	"audioplayer.rewind",
 	"audioplayer.save_playlist",

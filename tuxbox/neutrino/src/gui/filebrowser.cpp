@@ -555,7 +555,10 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 
 					file.Name = dirname + xmlGetAttribute(element, "name");
 					ptr = xmlGetAttribute(element, "size");
-					file.Size = atoi(ptr);
+					if (ptr) 
+						file.Size = atoi(ptr);
+					else 
+						file.Size = 0;
 					file.Time = 0;
 
 					element = element->xmlNextNode;
@@ -703,8 +706,14 @@ and add to neutrino playlist
 									file.Name = xmlGetAttribute(element, "name");
 									file.Url = base + tunein_base + (std::string)"?id=" + xmlGetAttribute(element, "id");
 									//printf("adding %s (%s)\n", file.Name.c_str(), file.Url.c_str());
-									file.Size = atoi(xmlGetAttribute(element, "br"));
-									file.Time = 0;
+									ptr = xmlGetAttribute(element, "br");
+									if (ptr) {
+										file.Size = atoi(ptr);
+										file.Time = atoi(ptr);
+									} else {
+										file.Size = 0;
+										file.Time = 0;
+									}
 									flist->push_back(file);
 								}
 							}
@@ -1280,8 +1289,10 @@ void CFileBrowser::paintHead()
 	char l_name[100];
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
-
-	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_FILEBROWSER_HEAD), FILESYSTEM_ENCODING_TO_UTF8_STRING(name).c_str()); // UTF-8
+	if(m_Mode == ModeSC)
+		snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_AUDIOPLAYER_ADD_SC), FILESYSTEM_ENCODING_TO_UTF8_STRING(name).c_str()); // UTF-8
+	else
+		snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_FILEBROWSER_HEAD), FILESYSTEM_ENCODING_TO_UTF8_STRING(name).c_str()); // UTF-8
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
