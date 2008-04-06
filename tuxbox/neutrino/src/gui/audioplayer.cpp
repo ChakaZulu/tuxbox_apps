@@ -1,5 +1,5 @@
 /*
-  $Id: audioplayer.cpp,v 1.51 2008/04/05 21:22:47 houdini Exp $
+  $Id: audioplayer.cpp,v 1.52 2008/04/06 19:17:57 houdini Exp $
   Neutrino-GUI  -   DBoxII-Project
 
   AudioPlayer by Dirch,Zwen
@@ -661,9 +661,16 @@ int CAudioPlayerGui::show()
 					hide();
 					InputSelector.exec(NULL, "");
 					switch (select) {
-						case 0:	scanXmlFile(RADIO_STATION_XML_FILE); break;
-						case 1:	openSCbrowser(); break;
-						case 2:	readDir_ic(); break;
+						case 0:	scanXmlFile(RADIO_STATION_XML_FILE); 
+							CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
+							paintLCD();
+							break;
+						case 1:	openSCbrowser();
+							break;
+						case 2:	readDir_ic();
+							CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
+							paintLCD();
+							break;
 						default: break;
 					}
 					update=true;
@@ -1616,10 +1623,10 @@ void CAudioPlayerGui::paintFoot()
 		if (m_playlist.empty()) {
 			if (m_inetmode)
 				::paintButtons(m_frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, 
-					m_x + 10, top + 4, ButtonWidth*2, 2, AudioPlayerButtons[7]);
+					m_x + 10, top + 4, ButtonWidth, 2, AudioPlayerButtons[7]);
 			else
 				::paintButtons(m_frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, 
-					m_x + ButtonWidth + 10, top + 4, ButtonWidth, 1, &(AudioPlayerButtons[7][1]));
+					m_x + 10, top + 4, ButtonWidth, 1, &(AudioPlayerButtons[7][0]));
 		} else
 			if (m_inetmode)
 				::paintButtons(m_frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale,
