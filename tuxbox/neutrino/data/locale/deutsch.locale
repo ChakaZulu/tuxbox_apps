@@ -992,6 +992,7 @@ scantp.mod_qam_256 QAM_256
 scantp.mod_qam_32 QAM_32
 scantp.mod_qam_64 QAM_64
 scantp.mod_qam_auto QAM_AUTO
+scantp.mod_qpsk QPSK
 scantp.pol Polarisation
 scantp.pol_h H
 scantp.pol_v V

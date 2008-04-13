@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.117 2008/04/05 21:23:09 houdini Exp $
+ * $Id: locals.h,v 1.118 2008/04/13 14:52:13 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1019,6 +1019,7 @@ typedef enum
 	LOCALE_SCANTP_MOD_QAM_32,
 	LOCALE_SCANTP_MOD_QAM_64,
 	LOCALE_SCANTP_MOD_QAM_AUTO,
+	LOCALE_SCANTP_MOD_QPSK,
 	LOCALE_SCANTP_POL,
 	LOCALE_SCANTP_POL_H,
 	LOCALE_SCANTP_POL_V,
