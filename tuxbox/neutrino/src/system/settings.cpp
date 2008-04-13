@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.48 2008/03/21 12:15:32 houdini Exp $
+        $Id: settings.cpp,v 1.49 2008/04/13 14:53:31 houdini Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -205,23 +205,29 @@ void CScanSettings::toMotorPosList(CZapitClient::ScanMotorPosList& motorPosList)
 
 void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 {
-	delivery_system = _delivery_system;
-	bouquetMode     = CZapitClient::BM_UPDATEBOUQUETS;
-	scanType = CZapitClient::ST_ALL;
-	diseqcMode      = NO_DISEQC;
-	diseqcRepeat    = 0;
+	delivery_system	= _delivery_system;
+	bouquetMode	= CZapitClient::BM_UPDATEBOUQUETS;
+	scanType	= CZapitClient::ST_ALL;
+	diseqcMode	= NO_DISEQC;
+	diseqcRepeat	= 0;
+#if HAVE_DVB_API_VERSION >= 3
+	TP_mod		= QAM_AUTO;
+#else
+	// i do not know how to do it correctly for old API -- seife
+	TP_mod		= QAM_256;
+#endif
 
 	switch (delivery_system)
 	{
-	case DVB_C:
-		strcpy(satNameNoDiseqc, "Kabel Deutschland");
-		break;
-	case DVB_S:
-		strcpy(satNameNoDiseqc, "Astra 19.2E");
-		break;
-	case DVB_T:
-		strcpy(satNameNoDiseqc, "");
-		break;
+		case DVB_C:
+			strcpy(satNameNoDiseqc, "Kabel Deutschland");
+			break;
+		case DVB_S:
+			strcpy(satNameNoDiseqc, "Astra 19.2E");
+			break;
+		case DVB_T:
+			strcpy(satNameNoDiseqc, "");
+			break;
 	}
 }
 
@@ -268,7 +274,12 @@ bool CScanSettings::loadSettings(const char * const fileName, const delivery_sys
 	TP_scan = configfile.getInt32("TP_scan", 0);
 	TP_fec = configfile.getInt32("TP_fec", 1);
 	TP_pol = configfile.getInt32("TP_pol", 0);
-	TP_mod = configfile.getInt32("TP_mod", 3); // default qam64
+#if HAVE_DVB_API_VERSION >= 3
+	TP_mod = configfile.getInt32("TP_mod", QAM_AUTO); // default qam auto
+#else
+	// i do not know how to do it correctly for old API -- seife
+	TP_mod = configfile.getInt32("TP_mod", QAM_256); // default qam 256
+#endif
 	strcpy(TP_freq, configfile.getString("TP_freq", "10100000").c_str());
 	strcpy(TP_rate, configfile.getString("TP_rate", "27500000").c_str());
 	strncpy(TP_satname, configfile.getString("TP_satname", "Astra 19.2E").c_str(), 30);
