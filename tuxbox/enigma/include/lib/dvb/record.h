@@ -85,6 +85,7 @@ class eDVBRecorder: private eThread, public Object
 	eAUTable<PMT> tPMT;
 	bool writePatPmt;
 	void PMTready(int error);
+	eLock splitlock;
 public:
 		/// the constructor
 	eDVBRecorder(PMT *, PAT*);
@@ -169,6 +170,7 @@ public:
 	Signal1<void,int> recMessage;
 	eServiceReferenceDVB recRef;
 	bool scrambled;
+	void SetSlice(int slice);
 };
 
 #endif

@@ -63,7 +63,8 @@ public:
 		cmdSeekAbsolute,	// parm : percentage ~
 		cmdSeekReal,			// parm : service specific, as given by queryRealPosition
 
-		cmdRecordOpenPermanentTimeshift
+		cmdRecordOpenPermanentTimeshift,
+		cmdAddPermanentTimeshiftToRecording
 	};
 	int type;
 	int parm;

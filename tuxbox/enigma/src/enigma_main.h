@@ -619,6 +619,7 @@ public:
 	int isSkipping() { return skipping; }
 	void stopPermanentTimeshift();
 	void beginPermanentTimeshift();
+	void addTimeshiftToRecording();
 #endif
 	int get16_9Logo() {return is16_9;}
 	int getSmartcardLogo() {return isCrypted;}

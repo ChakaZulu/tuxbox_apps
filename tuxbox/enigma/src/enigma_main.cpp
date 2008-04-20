@@ -3367,6 +3367,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		recStatusBlink.stop();
 		recstatus->hide();
 
+		beginPermanentTimeshift();
 #ifndef DISABLE_LCD
 		// if standby disable lcdMain
 		if(state & stateSleeping)
@@ -4645,7 +4646,7 @@ void eZapMain::startPermanentTimeshift()
 	} else
 	{
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdRecordStart));
-		timeshift = 2;
+		//timeshift = 2;
 	}
 }
 void eZapMain::stopPermanentTimeshift()
@@ -4653,7 +4654,7 @@ void eZapMain::stopPermanentTimeshift()
 	eDebug("stopping permanent timeshift ...");
 	permanentTimeshiftTimer.stop();
 	eServiceHandler *handler=eServiceInterface::getInstance()->getServiceHandler(eServiceReference::idDVB);
-	timeshift = 0;
+	//timeshift = 0;
 	if (state & recPermanentTimeshift)
 	{
 		if (!handler)
@@ -4678,6 +4679,23 @@ void eZapMain::beginPermanentTimeshift()
 			eConfig::getInstance()->getKey("/enigma/timeshift/permanentdelay", permanentdelay );
 			eDebug("starting timeout for permanent timeshift:%d",permanentdelay);
 			permanentTimeshiftTimer.start(permanentdelay*1000, 1);
+		}
+	}
+}
+void eZapMain::addTimeshiftToRecording()
+{
+	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+	if (handler)
+	{
+		if(!eServiceInterface::getInstance()->service.path)
+		{
+			if ( !eSystemInfo::getInstance()->canTimeshift() )
+				return;
+			if (state & stateRecording && eDVB::getInstance()->recorder
+				&& eDVB::getInstance()->recorder->recRef == eServiceInterface::getInstance()->service )
+			{
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdAddPermanentTimeshiftToRecording));
+			}
 		}
 	}
 }
@@ -5673,6 +5691,9 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 					}
 					break;
 
+					case 4: // add timeshifted minutes
+						addTimeshiftToRecording();
+					break;
 					case 0:
 					default:
 						;
@@ -5845,7 +5866,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			if ( num && ( (myref.type == eServiceReference::idDVB && myref.path)
 				|| (myref.type == eServiceReference::idUser
 				&& myref.data[0] == eMP3Decoder::codecMPG ) || (myref.type == eServiceReference::idUser
-				&& myref.data[0] == eMP3Decoder::codecMP3 ) || timeshift ) && (handler->getState() == eServiceHandler::statePlaying || handler->getState() == eServiceHandler::statePause)) // nur, wenn ts, mpg oder mp3 ausgewählt ist und vor allem, wenn es abgespielt wird oder im Standbild ist! :-)
+				&& myref.data[0] == eMP3Decoder::codecMP3 ) || timeshift) && (handler->getState() == eServiceHandler::statePlaying || handler->getState() == eServiceHandler::statePause)) // nur, wenn ts, mpg oder mp3 ausgewählt ist und vor allem, wenn es abgespielt wird oder im Standbild ist! :-)
 			{
 				if (handler->getState() == eServiceHandler::statePause)
 					pause();// continue playing in preparation for skipping
@@ -7830,9 +7851,10 @@ void eTimerInput::setPressed()
 	evt->running_status = -1;
 	close((int)evt);
 }
+extern ePermanentTimeshift permanentTimeshift;
 
 eRecordContextMenu::eRecordContextMenu( eWidget *LCDTitle, eWidget *LCDElement )
-	: eListBoxWindow<eListBoxEntryText>(_("Record Menu"), 6, 400, true)
+	: eListBoxWindow<eListBoxEntryText>(_("Record Menu"), 6, 500, true)
 {
 #ifndef DISABLE_LCD
 	setLCD(LCDTitle, LCDElement);
@@ -7842,6 +7864,15 @@ eRecordContextMenu::eRecordContextMenu( eWidget *LCDTitle, eWidget *LCDElement )
 	new eListBoxEntryTextSeparator(&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	new eListBoxEntryText(&list, _("set record duration"), (void*)2, 0, _("set the recording time (in minutes)"));
 	new eListBoxEntryText(&list, _("set record stop time"), (void*)3, 0, _("set the recording end time") );
+	int permanentOn = 0;
+	eConfig::getInstance()->getKey("/enigma/timeshift/permanent", permanentOn );
+	if (permanentOn && permanentTimeshift.getRecordedMinutes() > 0)
+	{
+		eString str;
+		str.sprintf(_("add timeshift to recording (%d min) "),permanentTimeshift.getRecordedMinutes());
+		new eListBoxEntryText(&list, str.c_str(), (void*)4, 0, _("add recorded timeshift at beginning of this recording") );
+
+	}
 	CONNECT(list.selected, eRecordContextMenu::entrySelected);
 }
 

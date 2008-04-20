@@ -49,6 +49,14 @@ void ePermanentTimeshift::Stop()
 	lock.lock();
 	eDebug("[PERM] stopping permanent timeshift");
 	IsTimeshifting = 0;
+	int slice = slicelist.back().first;
+	struct stat64 s;
+	eString filename = (slice ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, slice) : eString(PERMANENT_TIMESHIFT_FILE));
+	if (!stat64(filename.c_str(), &s))
+	{
+		slicelist.back().second=s.st_size;
+		eDebug("[PERM] remember slice:%d,%d",slicelist.back().first,s.st_size);
+	}
 	lock.unlock();
 
 }
@@ -80,6 +88,26 @@ bool ePermanentTimeshift::CheckSlice(unsigned int minutes)
 		return true;
 	}
 	return false;
+}
+int ePermanentTimeshift::getRecordedMinutes()
+{
+	return slicelist.size();
+}
+void ePermanentTimeshift::renameAllSlices(const char* filename)
+{
+	eDebug("renameAllSlices:%s",filename);
+	int slice = 0;
+	for (std::list<std::pair<int,off64_t> >::iterator x(slicelist.begin()); x != slicelist.end(); ++x)
+	{
+		eString oldfilename = (x->first ? eString().sprintf("%s.%03d", PERMANENT_TIMESHIFT_FILE, x->first) : eString(PERMANENT_TIMESHIFT_FILE));
+		eString newfilename=filename;
+		if (slice)
+			newfilename += eString().sprintf(".%03d", slice);
+//eDebug("rename timeshift:%s|%s",oldfilename.c_str(),newfilename.c_str());
+		::rename(oldfilename.c_str(),newfilename.c_str());
+		slice++;
+	}
+	slicelist.clear();
 }
 off64_t ePermanentTimeshift::getCurrentLength(int slice)
 {
@@ -214,13 +242,7 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	}
 	else
 	{
-		struct stat64 s;
-		filelength=0;
-		while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
-		{
-			filelength+=s.st_size/1880;
-			slice++;
-		}
+		filelength = FillSliceSizes();
 	}
 
 	if (openFile(0))
@@ -266,7 +288,21 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 		fclose(bitstream);
 	}
 }
-
+int eDVRPlayerThread::FillSliceSizes()
+{
+	slicesizes.clear();
+	struct stat64 s;
+	int filelength=0;
+	int slice = 0;
+	while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+	{
+		filelength+=s.st_size/1880;
+		slicesizes.push_back(s.st_size);
+		slice++;
+	}
+	//eDebug("FillSliceSizes:%s,%d",filename.c_str(),filelength);
+	return filelength;
+}
 int eDVRPlayerThread::openFile(int slice)
 {
 	eString tfilename=filename;
@@ -532,16 +568,8 @@ int eDVRPlayerThread::getPosition(int real)
 
 	bufferFullness += curBufferFullness; // add enigma buffer fullness
 
-	if (playingPermanentTimeshift)
-	{
-		off64_t filelength = 0;
-		filelength = permanentTimeshift.getCurrentLength (slice);
-		ret = ((position-bufferFullness)/1880) + filelength/1880;
-	}
-	else
-	{
-		ret = ((position-bufferFullness)/1880) + slice * (slicesize/1880);
-	}
+	off64_t filelength = getCurrentSliceLength();
+	ret = ((position-bufferFullness)/1880) + (filelength/1880);
 	if (!real)
 	{
 		if (Decoder::current.vpid==-1) //Radiorecording
@@ -550,6 +578,23 @@ int eDVRPlayerThread::getPosition(int real)
 			ret /= 250;
 	}
 	return ret;
+}
+// returns sum of length of all files up to the current slice
+off64_t eDVRPlayerThread::getCurrentSliceLength()
+{
+	off64_t filelength = 0;
+	if (playingPermanentTimeshift)
+	{
+		filelength = permanentTimeshift.getCurrentLength (slice);
+	}
+	else
+	{
+		for (int i = 0; i < slice; i++)
+		{
+			filelength += slicesizes[i];
+		}			
+	}
+	return filelength;
 }
 
 int eDVRPlayerThread::getLength(int real)
@@ -584,15 +629,27 @@ void eDVRPlayerThread::seekTo(off64_t offset)
 	}
 	else
 	{
-		if ((offset / slicesize) != slice)
+		off64_t sliceoffset = 0;
+		uint newslice = 0;
+		while  (newslice < slicesizes.size())
 		{
-			if (openFile(offset/slicesize))
+			if (offset > (sliceoffset + slicesizes[newslice]))
+			{
+				sliceoffset += slicesizes[newslice];
+				newslice++;
+			}
+			else
+				break;
+		}			
+		if (slice != newslice)
+		{
+			if (openFile(newslice))
 			{
 				eDebug("open slice %d failed\n", slice);
 				state=stateError;
 			}
 		}
-		newoffset = offset%slicesize;
+		newoffset = offset-sliceoffset;
 	}
 
 	if (state != stateError)
@@ -688,10 +745,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		{
 			off64_t offset=0;
 //			eDebug("%d bytes in buffer", buffsize);
-			if (playingPermanentTimeshift)
-				offset+=position+permanentTimeshift.getCurrentLength (slice);
-			else
-				offset+=position+slice*slicesize;
+			offset += position + getCurrentSliceLength();
 			offset-=pauseBufferFullness;	// calc buffersize ( of driver and enigma buffer )
 			buffer.clear();  	// clear enigma dvr buffer
 			dvrFlush();			// clear audio and video rate buffer
@@ -745,10 +799,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			offset-=1000*1000; // account for pvr buffer
 			if (message.type == eDVRPlayerThreadMessage::skip)
 			{
-				if (playingPermanentTimeshift)
-					offset+=position+permanentTimeshift.getCurrentLength (slice);
-				else
-					offset+=position+slice*slicesize;
+				offset += position + getCurrentSliceLength();
 			}
 			if (offset<0)
 				offset=0;
@@ -772,6 +823,14 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		}
 		break;
 	}
+	case eDVRPlayerThreadMessage::addPermanentTimeshiftToRecording:
+		if (playingPermanentTimeshift)
+			playingPermanentTimeshift = 0;
+		else
+			slice += message.parm;
+		filename=handler->current_filename;
+		filelength = FillSliceSizes();
+		break;
 	}
 }
 
@@ -1160,6 +1219,21 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 		decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::seekmode, 0));
 		/* jumping to the current position after leaving seekmode avoids audio/video sync problems */
 		decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::seekreal, decoder->getPosition(1)));
+		break;
+	case eServiceCommand::cmdAddPermanentTimeshiftToRecording:
+		if (recording)
+		{
+			permanentTimeshift.lock.lock();
+			int slices = permanentTimeshift.getRecordedMinutes();
+			eDVB::getInstance()->recSetSlice(slices);
+			permanentTimeshift.renameAllSlices(current_filename.c_str());
+			if (decoder)
+			{
+				// currently playing timeshift file
+				decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::addPermanentTimeshiftToRecording, slices));
+			}
+			permanentTimeshift.lock.unlock();
+		}
 		break;
 #endif // DISABLE_FILE
 	default:

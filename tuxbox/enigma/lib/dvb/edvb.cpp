@@ -418,6 +418,12 @@ void eDVB::recEnd()
 	if ( controller && controllertype == controllerService )
 		((eDVBServiceController*)controller)->disableFrontend();
 }
+void eDVB::recSetSlice(int slice)
+{
+	if (!recorder)
+		return;
+	recorder->SetSlice(slice);
+}
 #endif //DISABLE_FILE
 
 void eDVB::setMode(int mode)

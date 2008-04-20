@@ -140,8 +140,10 @@ int eDVBRecorder::flushBuffer()
 		permanentTimeshift.lock.unlock();
 		if (size >= splitsize)
 		{
+			splitlock.lock();
 			if ( openFile(++splits) ) // file creation failed?
 				goto Error;
+			splitlock.unlock();
 			dosplit = 1;
 		}
 	}
@@ -183,6 +185,7 @@ int eDVBRecorder::flushBuffer()
 	return 0;
 
 Error:
+	splitlock.unlock();
 	permanentTimeshift.lock.unlock();
 	eDebug("recording write error, maybe disk full");
 	state = stateError;
@@ -678,6 +681,20 @@ void eDVBRecorder::PatPmtWrite()
 	pthread_cleanup_pop(1);
 
 	alarm(2);  
+}
+void eDVBRecorder::SetSlice(int slice)
+{
+	splitlock.lock();
+	eString oldfilename=filename;
+	if (splits)
+		oldfilename+=eString().sprintf(".%03d", splits);
+	splits = slice;
+	splitlock.unlock();
+	eString newfilename=filename;
+	if (slice)
+		newfilename+=eString().sprintf(".%03d", slice);
+eDebug("rename current recording:%s|%s",oldfilename.c_str(),newfilename.c_str());
+	::rename(oldfilename.c_str(),newfilename.c_str());
 }
 
 #endif //DISABLE_FILE

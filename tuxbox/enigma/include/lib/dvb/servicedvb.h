@@ -32,11 +32,13 @@ public:
 	void Start();
 	void Stop();
 	bool CheckSlice(unsigned int minutes);
+	int getRecordedMinutes();
+	void renameAllSlices(const char* filename);
 	off64_t getCurrentLength(int slice);
 	int getCurrentRecordingSlice() { return slicelist.back().first;	}
 	int setNextPlayingSlice();
 	int getCurrentPlayingSlice(); 
-	 off64_t seekTo(off64_t offset);
+	off64_t seekTo(off64_t offset);
 };
 
 class eDVRPlayerThread: public eThread, public eMainloop, public Object
@@ -72,11 +74,14 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	void outputReady(int what);
 	int maxBufferFullness;
 	int seekbusy, seeking;
+	std::vector<off64_t> slicesizes;
 
 	void dvrFlush();
 	int openFile(int slice=0);
 	void seekTo(off64_t offset);
 	int getDriverBufferFullness();
+	int FillSliceSizes();
+	off64_t getCurrentSliceLength();
 public:
 	struct eDVRPlayerThreadMessage
 	{
@@ -89,6 +94,7 @@ public:
 			seekreal,
 			seekmode,
 			updateAudioTracks,
+			addPermanentTimeshiftToRecording
 		};
 		int type;
 		int parm;

@@ -154,6 +154,9 @@ public:
 	void recResume();
 		/// closes a recording
 	void recEnd();
+		/// sets current slice
+	void recSetSlice(int slice);
+
 #endif //DISABLE_FILE
 
 ///////////////////////////// CI Instances //////////////////////////
