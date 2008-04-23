@@ -3063,7 +3063,14 @@ void eZapMain::pause()
 	{
 		if ( ref.type == eServiceReference::idDVB && !ref.path && !timeshift )
 		{
-			if (eSystemInfo::getInstance()->canTimeshift())
+			if (state & recPermanentTimeshift) // permanent timeshift
+			{
+				Decoder::Pause(2);  // freeze frame
+				Decoder::setAutoFlushScreen(0);
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, -1));
+				Decoder::setAutoFlushScreen(1);
+			}
+			else if (eSystemInfo::getInstance()->canTimeshift())
 			{
 				if (!eDVB::getInstance()->recorder)
 				{
@@ -3093,13 +3100,6 @@ void eZapMain::pause()
 					Decoder::setAutoFlushScreen(1);
 				}
 			}
-		}
-		else if (timeshift == 2) // permanent timeshift
-		{
-			Decoder::Pause(2);  // freeze frame
-			Decoder::setAutoFlushScreen(0);
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
-			Decoder::setAutoFlushScreen(1);
 		}
 		else
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
