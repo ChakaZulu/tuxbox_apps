@@ -1,0 +1,60 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:547: checking for gcc
+configure:660: checking whether the C compiler (gcc  ) works
+configure:676: gcc -o conftest    conftest.c  1>&5
+configure:702: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:707: checking whether we are using GNU C
+configure:716: gcc -E conftest.c
+configure:735: checking whether gcc accepts -g
+configure:767: checking how to run the C preprocessor
+configure:788: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:877: checking for a BSD compatible install
+configure:932: checking whether byte ordering is bigendian
+configure:950: gcc -c   conftest.c 1>&5
+configure:965: gcc -c   conftest.c 1>&5
+configure: In function `main':
+configure:960: `not' undeclared (first use in this function)
+configure:960: (Each undeclared identifier is reported only once
+configure:960: for each function it appears in.)
+configure:960: parse error before `big'
+configure: failed program was:
+#line 954 "configure"
+#include "confdefs.h"
+#include <sys/types.h>
+#include <sys/param.h>
+int main() {
+
+#if BYTE_ORDER != BIG_ENDIAN
+ not big endian
+#endif
+; return 0; }
+configure:1028: checking for usleep
+configure:1056: gcc -o conftest    conftest.c  1>&5
+configure:1186: checking for sys/soundcard.h
+configure:1196: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1226: checking for linux/joystick.h
+configure:1236: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1266: checking for linux/fb.h
+configure:1276: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1406: checking for vga_init in -lvga
+configure:1425: gcc -o conftest    conftest.c -lvga   -L/usr/local/lib -L/usr/X11R6/lib 1>&5
+configure:1445: checking for vga.h
+configure:1455: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1445: checking for vgakeyboard.h
+configure:1455: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1495: checking for sdl-config
+configure:1527: checking for SDL_Init in -lSDL
+configure:1546: gcc -o conftest    conftest.c -lSDL -L/usr/lib -lSDL -lpthread  -L/usr/local/lib -L/usr/X11R6/lib 1>&5
+configure:1566: checking for SDL/SDL.h
+configure:1576: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1621: checking for X
+configure:1854: checking for XShmCreateImage in -lXext
+configure:1873: gcc -o conftest    conftest.c -lXext   -L/usr/local/lib -L/usr/X11R6/lib 1>&5
+configure:1904: checking for sys/ipc.h
+configure:1914: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1904: checking for sys/shm.h
+configure:1914: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1904: checking for X11/extensions/XShm.h
+configure:1914: gcc -E  conftest.c >/dev/null 2>conftest.out
