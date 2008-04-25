@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.116 2008/03/21 12:21:19 houdini Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.117 2008/04/25 21:23:01 houdini Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -176,13 +176,13 @@ unsigned int CZapitClient::zapTo_subServiceID(const t_channel_id channel_id, boo
 /* zaps to channel, does NOT wait for completion (uses event) */
 void CZapitClient::zapTo_serviceID_NOWAIT(const t_channel_id channel_id)
 {
-	(void)zapTo_serviceID(channel_id, false);
+	(void)zapTo_serviceID(channel_id, true);
 }
 
 /* zaps to subservice, does NOT wait for completion (uses event) */
 void CZapitClient::zapTo_subServiceID_NOWAIT(const t_channel_id channel_id)
 {
-	(void)zapTo_subServiceID(channel_id, false);
+	(void)zapTo_subServiceID(channel_id, true);
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.409 2008/03/21 19:17:15 seife Exp $
+ * $Id: zapit.cpp,v 1.410 2008/04/25 21:23:23 houdini Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -157,8 +157,13 @@ extern std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 extern std::map<string, t_satellite_position> satellitePositions;
 
 bool standby = true;
+
+#ifdef HAVE_DREAMBOX_HARDWARE
 /* on dreambox: use FASTZAP ioctl? */
 int fastzap = 1;
+#else
+int fastzap = 0;
+#endif
 
 uint32_t lastChannelRadio;
 uint32_t lastChannelTV;
@@ -2620,7 +2625,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.409 2008/03/21 19:17:15 seife Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.410 2008/04/25 21:23:23 houdini Exp $\n");
 
 	bool check_lock = true;
 
