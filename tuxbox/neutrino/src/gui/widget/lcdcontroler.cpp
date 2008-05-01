@@ -171,13 +171,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 					case 0:
 						if (contrast < 63)
 						{
-							int val = lrint(::log(contrast+1));
-
-							if (contrast + val < 63)
-								contrast += val;
-							else
-								contrast = 63;
-
+							contrast++;
 							paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, LOCALE_LCDCONTROLER_CONTRAST, true);
 							setLcd();
 						}
@@ -215,8 +209,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 					case 0:
 						if (contrast > 0)
 						{
-							contrast -= lrint(::log(contrast));
-
+							contrast--;
 							paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, LOCALE_LCDCONTROLER_CONTRAST, true);
 							setLcd();
 						}
