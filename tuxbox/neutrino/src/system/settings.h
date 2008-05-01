@@ -1,5 +1,5 @@
 /* 
-  $Id: settings.h,v 1.190 2008/05/01 00:08:49 dbt Exp $
+  $Id: settings.h,v 1.191 2008/05/01 21:53:30 houdini Exp $
  
   Neutrino-GUI  -   DBoxII-Project
 
@@ -209,6 +209,7 @@ struct SNeutrinoSettings
 	int personalize_reload;
 	int personalize_getplugins;
 	int personalize_restart;
+	int personalize_epgrestart;
 	int personalize_ucodecheck;
 	int personalize_imageinfo;
 	int personalize_update;

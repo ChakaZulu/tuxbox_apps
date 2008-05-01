@@ -1,5 +1,5 @@
 /*
-        $Id: personalize.cpp,v 1.6 2008/02/15 22:32:21 houdini Exp $
+        $Id: personalize.cpp,v 1.7 2008/05/01 21:53:12 houdini Exp $
 
         Customization Menu - Neutrino-GUI
 
@@ -323,12 +323,13 @@ void CPersonalizeGui::ShowServiceOptions()
 /*      Here we give the user the option to enable, disable, or PIN protect items on the Service Menu.
         We also provide a means of PIN protecting the menu itself. */
 
-	int old_svprotect		= g_settings.personalize_service;
+	int old_svprotect	= g_settings.personalize_service;
 	int old_bouqueteditor	= g_settings.personalize_bouqueteditor;
 	int old_scants		= g_settings.personalize_scants;
 	int old_reload		= g_settings.personalize_reload;
 	int old_getplugins	= g_settings.personalize_getplugins;
 	int old_restart		= g_settings.personalize_restart;
+	int old_epgrestart	= g_settings.personalize_epgrestart;
 	int old_ucodecheck	= g_settings.personalize_ucodecheck;
 	int old_imageinfo	= g_settings.personalize_imageinfo;
 	int old_update		= g_settings.personalize_update;
@@ -349,8 +350,9 @@ void CPersonalizeGui::ShowServiceOptions()
 	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_RELOAD, (int *)&g_settings.personalize_reload, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_1));
 	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_GETPLUGINS, (int *)&g_settings.personalize_getplugins, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_2));
 	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_RESTART, (int *)&g_settings.personalize_restart, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_3));
-	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_UCODECHECK, (int *)&g_settings.personalize_ucodecheck, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_4));
-	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_CHAN_EPG_STAT, (int *)&g_settings.personalize_chan_epg_stat, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_5));
+	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_EPGRESTART, (int *)&g_settings.personalize_epgrestart, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_4));
+	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_UCODECHECK, (int *)&g_settings.personalize_ucodecheck, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_5));
+	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_CHAN_EPG_STAT, (int *)&g_settings.personalize_chan_epg_stat, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_6));
 
 	pSMMenu->addItem(GenericMenuSeparatorLine);
 	pSMMenu->addItem(new CMenuOptionChooser(LOCALE_SERVICEMENU_IMAGEINFO, (int *)&g_settings.personalize_imageinfo, PERSONALIZE_STD_OPTIONS, PERSONALIZE_STD_OPTION_COUNT, true, NULL, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
@@ -367,6 +369,7 @@ void CPersonalizeGui::ShowServiceOptions()
 		|| old_reload != g_settings.personalize_reload
 		|| old_getplugins != g_settings.personalize_getplugins
 		|| old_restart != g_settings.personalize_restart
+		|| old_epgrestart != g_settings.personalize_epgrestart
 		|| old_ucodecheck != g_settings.personalize_ucodecheck
 		|| old_imageinfo != g_settings.personalize_imageinfo
 		|| old_update != g_settings.personalize_update

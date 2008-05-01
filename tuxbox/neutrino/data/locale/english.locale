@@ -1065,6 +1065,7 @@ screensetup.upperleft setup upper left
 sectionsd.scanmode Sections Scan
 servicemenu.chan_epg_stat Channel/EPG Statistics
 servicemenu.chan_epg_stat_epg_stat EPG Statistics
+servicemenu.epgrestart Restart EPG
 servicemenu.getplugins Reload plugins
 servicemenu.getplugins_hint Reloading plugins,\nplease be patient.
 servicemenu.head Service

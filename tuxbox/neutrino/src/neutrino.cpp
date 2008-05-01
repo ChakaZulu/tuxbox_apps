@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino.cpp,v 1.890 2008/05/01 19:57:28 seife Exp $
+	$Id: neutrino.cpp,v 1.891 2008/05/01 21:55:27 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -460,6 +460,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.personalize_reload = configfile.getInt32("personalize_reload", 1);
 	g_settings.personalize_getplugins = configfile.getInt32("personalize_getplugins", 1);
 	g_settings.personalize_restart = configfile.getInt32("personalize_restart", 1);
+	g_settings.personalize_epgrestart = configfile.getInt32("personalize_epgrestart", 1);
 	g_settings.personalize_ucodecheck = configfile.getInt32("personalize_ucodecheck", 1);
 	g_settings.personalize_imageinfo = configfile.getInt32("personalize_imageinfo", 1);
 	g_settings.personalize_update = configfile.getInt32("personalize_update", 1);
@@ -936,6 +937,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "personalize_reload", g_settings.personalize_reload );
 	configfile.setInt32 ( "personalize_getplugins", g_settings.personalize_getplugins );
 	configfile.setInt32 ( "personalize_restart", g_settings.personalize_restart );
+	configfile.setInt32 ( "personalize_epgrestart", g_settings.personalize_epgrestart );
 	configfile.setInt32 ( "personalize_ucodecheck", g_settings.personalize_ucodecheck );
 	configfile.setInt32 ( "personalize_imageinfo", g_settings.personalize_imageinfo );
 	configfile.setInt32 ( "personalize_update", g_settings.personalize_update );

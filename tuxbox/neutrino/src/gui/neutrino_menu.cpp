@@ -1,5 +1,5 @@
 /*
-	$Id: neutrino_menu.cpp,v 1.22 2008/05/01 00:08:25 dbt Exp $
+	$Id: neutrino_menu.cpp,v 1.23 2008/05/01 21:53:12 houdini Exp $
 	
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -658,6 +658,11 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	else if (g_settings.personalize_restart == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_RESTART, g_settings.personalize_pincode, true, true, NULL, this, "restart", CRCInput::convertDigitToKey(shortcut3++)));
 
+	if (g_settings.personalize_epgrestart == 1)
+		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_EPGRESTART, true, NULL, this, "EPGrestart", CRCInput::convertDigitToKey(shortcut3++)));
+	else if (g_settings.personalize_epgrestart == 2)
+		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_EPGRESTART, g_settings.personalize_pincode, true, true, NULL, this, "EPGrestart", CRCInput::convertDigitToKey(shortcut3++)));
+
 #ifndef HAVE_DREAMBOX_HARDWARE
 	if (g_settings.personalize_ucodecheck == 1)
 		service.addItem(new CMenuForwarder(LOCALE_SERVICEMENU_UCODECHECK, true, NULL, UCodeChecker, NULL, CRCInput::convertDigitToKey(shortcut3++)));
@@ -670,7 +675,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	else if (g_settings.personalize_chan_epg_stat == 2)
 		service.addItem(new CLockedMenuForwarder(LOCALE_SERVICEMENU_CHAN_EPG_STAT, g_settings.personalize_pincode, true, true, NULL, DVBInfo, NULL, CRCInput::convertDigitToKey(shortcut3++)));
 
-	if (g_settings.personalize_reload==0 && g_settings.personalize_getplugins==0 && g_settings.personalize_restart==0 && g_settings.personalize_ucodecheck==0 && g_settings.personalize_chan_epg_stat==0) {
+	if (g_settings.personalize_reload==0 && g_settings.personalize_getplugins==0 && g_settings.personalize_restart==0 && g_settings.personalize_epgrestart==0 && g_settings.personalize_ucodecheck==0 && g_settings.personalize_chan_epg_stat==0) {
 		// Stop seperator from appearing when menu entries have been hidden
 	} else {
 		service.addItem(GenericMenuSeparatorLine); }

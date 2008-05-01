@@ -1065,6 +1065,7 @@ screensetup.upperleft Bildrand oben, links
 sectionsd.scanmode Sections Scan
 servicemenu.chan_epg_stat Sender/EPG Statistik
 servicemenu.chan_epg_stat_epg_stat EPG Statistik
+servicemenu.epgrestart EPG neu starten
 servicemenu.getplugins Plugins neu laden
 servicemenu.getplugins_hint Plugins werden neu geladen,\nbitte warten...
 servicemenu.head Service

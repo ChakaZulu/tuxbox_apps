@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.119 2008/05/01 00:08:49 dbt Exp $
+ * $Id: locals_intern.h,v 1.120 2008/05/01 21:53:30 houdini Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -1092,6 +1092,7 @@ const char * locale_real_names[] =
 	"sectionsd.scanmode",
 	"servicemenu.chan_epg_stat",
 	"servicemenu.chan_epg_stat_epg_stat",
+	"servicemenu.epgrestart",
 	"servicemenu.getplugins",
 	"servicemenu.getplugins_hint",
 	"servicemenu.head",
