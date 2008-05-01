@@ -251,16 +251,17 @@ void CPluginList::paintItem(int pos)
 {
 	int ypos = (y+theight) + pos*fheight;
 	int itemheight = fheight;
-	int c_rad_small;
 
+	int c_rad_small    = 0;
 	uint8_t    color   = COL_MENUCONTENT;
 	fb_pixel_t bgcolor = COL_MENUCONTENT_PLUS_0;
+
 	if (liststart+pos==selected)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 	}
-	c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 
 	if(liststart+pos==0)
 	{	//back is half-height...
