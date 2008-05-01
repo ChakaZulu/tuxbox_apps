@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.45 2008/01/05 18:05:14 seife Exp $
+  $Id: sectionsdclient.h,v 1.46 2008/05/01 18:06:46 seife Exp $
 
   License: GPL
 
@@ -172,6 +172,8 @@ class CSectionsdClient : private CBasicClient
 	bool getCurrentNextServiceKey(const t_channel_id channel_id, CSectionsdClient::responseGetCurrentNextInfoChannelID& current_next);
 
 	bool getIsTimeSet();
+
+	bool ping();
 
 //	void setEventsAreOldInMinutes(const unsigned short minutes);
 	

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.5 2008/01/05 18:05:14 seife Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/sectionsdclient/sectionsdcontrol.cpp,v 1.6 2008/05/01 18:06:46 seife Exp $
  *
  * Sectionsd command line interface - The Tuxbox Project
  *
@@ -35,6 +35,7 @@ void usage(void) {
 	printf("        sectionsdcontrol --repg <epgdir> read epgfiles from dir\n");
 	printf("        sectionsdcontrol --freemem       unloads all events\n");
 	printf("        sectionsdcontrol --restart       restart sectionsd\n");
+	printf("        sectionsdcontrol --ping          ping sectionsd\n");
 }
 
 int main(int argc, char** argv)
@@ -93,6 +94,8 @@ int main(int argc, char** argv)
 			printf("restarting sectionsd\n");
 			client.Restart();
 		}
+		else if (!strcmp(argv[i], "--ping"))
+			printf("sectionsd %s\n", client.ping() ? "running" : "dead");
 	}
 
 	return 0;
