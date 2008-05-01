@@ -259,8 +259,8 @@ void CPluginList::paintItem(int pos)
 	{
 		color   = COL_MENUCONTENTSELECTED;
 		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
-		c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 	}
+	c_rad_small = g_settings.rounded_corners ? CORNER_RADIUS_SMALL : 0;
 
 	if(liststart+pos==0)
 	{	//back is half-height...
